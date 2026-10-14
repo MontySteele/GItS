@@ -231,6 +231,10 @@ public static class KleeMod
                     Powers.KokomiRefounding.ReservesPromptText,
                 [Powers.KokomiRefounding.GrandDesignPromptKey] =
                     Powers.KokomiRefounding.GrandDesignPromptText,
+                // THE KOKOMI POOL OVERHAUL (2026-10-13): Read the Field's
+                // Plan line, a pick from the Draw Pile, on the same terms.
+                [Powers.KokomiPlan.DrawPilePromptKey] =
+                    Powers.KokomiPlan.DrawPilePromptText,
                 // R276, the Klee pool expansion's two discard-pile picks
                 // (Treasure Map, Come Back and Play!), on the same terms.
                 [Powers.KleeExpansion.SetOffPromptKey] =

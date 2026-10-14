@@ -76,7 +76,7 @@ def test_a_written_ethereal_card_is_not_exhausted_at_the_end_of_the_turn():
     wrote it, so it goes where a played card goes, and the one she held burns.
     """
     st = kokomi_state()
-    written = card("proto_kk_riptide_guard")
+    written = card("proto_kk_steady_tide")
     held = card("proto_kk_tidal_surge")
     assert written.is_ethereal and held.is_ethereal
     st.player.draw_pile = [written, held]
@@ -195,7 +195,7 @@ def test_the_casket_gains_3_block_while_a_plan_is_waiting():
     st.player.block = 0
     kokomi_plan.casket_block(st)
     assert st.player.block == 0                 # nothing waiting
-    write(st, card("proto_kk_riptide_guard"))
+    write(st, card("proto_kk_steady_tide"))
     st.player.block = 0
     kokomi_plan.casket_block(st)
     assert st.player.block == C.KOKOMI_OVERHAUL_CASKET_BLOCK == 3
@@ -220,7 +220,7 @@ def test_the_casket_pays_at_the_start_of_the_turn_before_the_plans_resolve():
 def test_grand_design_writes_up_to_3_writable_cards_for_free():
     st = kokomi_state()
     gd = card("proto_kk_grand_design")
-    writable = [card("proto_kk_riptide_guard"), card("proto_kk_tidal_surge"),
+    writable = [card("proto_kk_steady_tide"), card("proto_kk_tidal_surge"),
                 card("proto_mi_shinobu_thundergrust"),
                 card("proto_kk_undertide_lance")]
     plain = card("proto_kk_evening_watch")
@@ -290,7 +290,7 @@ def test_watchful_shoal_pays_nothing_for_writing_an_ethereal_card():
     st = kokomi_state()
     st.player.powers[kokomi_plan.WATCHFUL_SHOAL] = 3
     st.player.block = 0
-    write(st, card("proto_kk_riptide_guard"))
+    write(st, card("proto_kk_steady_tide"))
     assert st.player.block == 0
 
 

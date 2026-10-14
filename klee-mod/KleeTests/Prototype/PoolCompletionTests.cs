@@ -110,7 +110,8 @@ public class PoolCompletionTests : IDisposable
         Assert.Equal(1, UpCost<ProtoKkSeasReproach>());
         Assert.Equal(5, new ProtoKkSeasReproach().DynamicVars["PowerAmount"].IntValue);
         Assert.Equal(7, Upgraded<ProtoKkSeasReproach>().DynamicVars["PowerAmount"].IntValue);
-        Assert.Equal(0, UpCost<ProtoKkWatatsumiResistance>());
+        // (Watatsumi Resistance left with the Kokomi pool overhaul,
+        // 2026-10-13.)
         Assert.Equal(8, new ProtoKkKuragesMercy().DynamicVars["KkAmount"].IntValue);
         Assert.Equal(12, Upgraded<ProtoKkKuragesMercy>().DynamicVars["KkAmount"].IntValue);
         Assert.True(Exhausts(new ProtoKkKuragesMercy()));

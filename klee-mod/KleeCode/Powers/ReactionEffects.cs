@@ -462,7 +462,8 @@ internal static class ReactionEffects
             // `effects.companion_overhaul_reaction`, called from
             // `reactions._react` at the site that already counts.
             await CompanionOverhaulReactions.Note(
-                choiceContext, reaction, target, dealer, consumedAura);
+                choiceContext, reaction, target, dealer, consumedAura,
+                cardSource);
             // At Water's Edge left this site in the Kokomi card pass
             // (2026-10-11): it now reads her first Hydro damage each turn
             // (`KokomiExpansion.OnHydroDamage`), not a reaction.

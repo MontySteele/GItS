@@ -93,28 +93,38 @@ def test_the_batch_cuts_seven_and_its_five_survivors(overhaul):
 # --- Kelp Wall: the count is the hand it was written from ---------------------
 
 def test_kelp_wall_pays_the_flat_block_on_a_clean_hand(overhaul):
-    """The Kokomi level pass (2026-10-12): the status count went; the Plan is
-    a flat 12 [15]."""
-    assert _row("proto_kk_kelp_wall").plan == [{"op": "block", "amount": 12}]
+    """The Kokomi level pass (2026-10-12): the status count went. The pool
+    overhaul (2026-10-13): the Plan is a Counter line -- Hydro damage equal
+    to the damage she blocked since she planned it (was a flat 12 [15]
+    Block). With nothing blocked, it gives no Block and deals nothing."""
+    assert _row("proto_kk_kelp_wall").plan == [
+        {"op": "damage_blocked_since", "target": "front_enemy"}]
     st = _quiet_state()
     st.player.hand = _filler(3)
+    hp = st.enemies[0].hp
     _carry_out(st, _row("proto_kk_kelp_wall"))
-    assert st.player.block == 12
+    assert st.player.block == 0
+    assert st.enemies[0].hp == hp
 
 
 def test_kelp_wall_ignores_statuses_in_hand(overhaul):
     st = _quiet_state()
     st.player.hand = [statuses.make_status("dazed"),
                       statuses.make_status("dazed")]
-    _carry_out(st, _row("proto_kk_kelp_wall"))
-    assert st.player.block == 12
+    kokomi_plan.schedule(st, _row("proto_kk_kelp_wall"))
+    kokomi_plan.note_enemy_hit(st, st.enemies[0], blocked=9, incoming=12)
+    hp = st.enemies[0].hp
+    kokomi_plan.resolve_all(st)
+    assert st.player.block == 0
+    assert hp - st.enemies[0].hp == 9
 
 
 def test_kelp_wall_upgrades_the_flat_block_only(overhaul):
-    st = _quiet_state()
-    st.player.hand = [statuses.make_status("wound")]
-    _carry_out(st, _up("proto_kk_kelp_wall"))
-    assert st.player.block == 12 + 3
+    """Its upgrade moves the now-line's Block alone (5 -> 7); the Plan line
+    prints no number."""
+    up = _up("proto_kk_kelp_wall")
+    assert up.effects[0]["amount"] == 7
+    assert up.plan == _row("proto_kk_kelp_wall").plan
 
 
 # --- Tidecleanse -------------------------------------------------------------------

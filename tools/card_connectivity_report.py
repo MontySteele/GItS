@@ -635,6 +635,18 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "gain_strength": [_hook("private", "kurage", "use")],
     "juuga_guard": [_hook("shared", "block_held", "write")],
     "play_companion": [_hook("private", "kurage", "use")],
+    # THE KOKOMI POOL OVERHAUL (2026-10-13). Chain reads the carry-outs this
+    # turn; Counter reads the enemy turn the Plan sat through (Block held,
+    # damage taken, who attacked); Intent reads the intents and takes
+    # Strength; Read the Field's fetch moves a card from the draw pile.
+    "damage_per_plan_this_turn": [_hook("private", "kurage", "read")],
+    "damage_blocked_since": [_hook("private", "kurage", "read"),
+                             _hook("shared", "block_held", "read")],
+    "damage_taken_since": [_hook("private", "kurage", "read")],
+    "energy_if_attacked_since": [_hook("private", "kurage", "read")],
+    "lose_strength_this_turn": [],
+    "draw_pile_to_hand": [_hook("shared", "draw_pile", "read"),
+                          _hook("shared", "hand_contents", "write")],
     # FURINA, THE POOL TO 75 (2026-10-09): the `furina` op's guest verbs
     # (Encore!, Tutti!, Final Bow, Casting Call, Gentle Current) act on, or
     # fetch for, her guest stage, filed on the stage channel the
@@ -931,13 +943,19 @@ POWER_HOOKS: dict[str, list[tuple[str, str, str]]] = {
                                _hook("shared", "ethereal", "write")],
     "kk_kurage_bloom": [_hook("shared", "hand_contents", "write")],
     "kk_watchful_shoal": [_hook("shared", "card_identity", "write")],
-    "kk_coordinated_tide": [_hook("private", "kurage", "read"),
-                            _hook("shared", "ethereal", "read")],
+    "kk_coordinated_tide": [_hook("shared", "aura_reaction", "read"),
+                            _hook("shared", "hand_contents", "write")],
     "kk_grand_strategist": [_hook("private", "kurage", "read"),
                             _hook("shared", "aura_reaction", "read"),
                             _hook("shared", "enemy_count", "read")],
     "kk_endless_shoal": [_hook("private", "kurage", "read"),
                          _hook("shared", "hand_contents", "write")],
+    # THE POOL OVERHAUL (2026-10-13): a Sting's reaction makes a Sting; the
+    # third Plan a turn pays Energy and cards.
+    "kk_jellyfish_current": [_hook("shared", "aura_reaction", "read"),
+                             _hook("shared", "hand_contents", "write")],
+    "kk_battle_formation": [_hook("private", "kurage", "read"),
+                            _hook("shared", "hand_contents", "write")],
     "kk_dawn_tide": [_hook("private", "kurage", "read"),
                      _hook("shared", "aura_reaction", "write"),
                      _hook("shared", "enemy_count", "read")],
@@ -1058,6 +1076,8 @@ COUNT_HOOKS: dict[str, list[tuple[str, str, str]]] = {
                                 _hook("shared", "card_identity", "read")],
     "stings_played_this_combat": [_hook("shared", "plays_this_turn", "read"),
                                   _hook("shared", "card_identity", "read")],
+    "reactions_triggered_this_combat": [_hook("shared", "aura_reaction",
+                                              "read")],
     # Weak and Vulnerable carry no hook (the `weak` power row): EMPTY.
     "weak_vuln_stacks_on_target": [],
     "stage_fanfare": [_hook("private", "stage", "read")],

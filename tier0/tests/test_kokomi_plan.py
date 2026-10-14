@@ -138,7 +138,9 @@ def test_every_shipped_plan_line_passes_the_shape_check():
     # THIRTY-SEVEN with the re-founding (2026-10-12): Dusk retired (Breakwater,
     # Evening Watch and Brace for the Tide are now-lines), Tidecleanse's Plan
     # line gone, cut rows out, Kurage's Wake and Gorou's three Plan lines in.
-    assert len(planned) == 37
+    # THIRTY-NINE with the pool overhaul (2026-10-13): Turning Tide, Prepared
+    # Retreat and Turnabout in, Riptide Guard out.
+    assert len(planned) == 39
     for card in planned:
         assert kokomi_plan.plan_shape_reason(card.plan) is None, card.id
 
@@ -1082,8 +1084,9 @@ def test_planned_block_and_energy_survive_the_turn_setup(overhaul):
     """
     # Riptide since the Casket pass (2026-09-28) cut Ripple; War Council
     # since the re-founding (2026-10-12) made Riptide's Plan a draw: its Plan
-    # line is 2 Energy.
-    ids = ["proto_kk_read_the_field"] * 4 + ["proto_kk_war_council"] * 4
+    # line is 2 Energy. Tide Wall since the pool overhaul (2026-10-13) moved
+    # Read the Field's Plan to a fetch: its Plan line is 6 Block and more.
+    ids = ["proto_kk_tide_wall"] * 4 + ["proto_kk_war_council"] * 4
     player = loader.build_player_from_ids("kokomi", ids)
     seen = {}
 
@@ -1096,12 +1099,12 @@ def test_planned_block_and_energy_survive_the_turn_setup(overhaul):
 
     run_fight(player, [make_enemy(hp=400, intents=BLOCKER)], pilot, seed=3)
     # Turn 2 opens with BOTH: the Block turn 1's Read the Field Plans wrote
-    # (8 apiece, past a block clear that would have zeroed it) and the Energy
+    # (6 or more apiece, past a block clear that would have zeroed it) and the Energy
     # its War Council Plans wrote (2 apiece, past an energy reset that would
     # have overwritten it). Under the pre-draw hook the slice's prose asks for,
     # both of these read exactly the turn's own defaults.
     block, energy = seen[2]
-    assert block >= 8
+    assert block >= 6
     assert energy > C.BASE_ENERGY_PER_TURN
 
 
@@ -2037,15 +2040,16 @@ def test_the_new_clauses_are_plan_only_from_a_body(overhaul):
 
 def test_feint_pays_three_per_plan_waiting(overhaul):
     """THE RE-FOUNDING (2026-10-12, card paper sec.2): "Deal 6 damage, plus 3
-    for each Plan waiting. Plan: Apply 1 Vulnerable." (Per Plan carried out
-    this turn before.) The count is Breakwater's, the queue's depth."""
+    for each Plan waiting." (Per Plan carried out this turn before.) The
+    count is Breakwater's, the queue's depth. Its Plan line is the pool
+    overhaul's Chain (2026-10-13): 5 per Plan carried out this turn."""
     row = _row("proto_kk_feint")
     assert row.effects == [{"op": "damage", "target": "enemy",
                             "amount_formula": {
                                 "base": 6, "per": 3,
                                 "count": "plans_held"}}]
-    assert row.plan == [{"op": "apply_power", "power": "vulnerable",
-                         "amount": 1, "target": "front_enemy"}]
+    assert row.plan == [{"op": "damage_per_plan_this_turn", "amount": 5,
+                         "target": "front_enemy"}]
     enemy = make_enemy(hp=100)
     st = kokomi_state(enemies=[enemy])
     effects.resolve_card(st, row)
@@ -2058,22 +2062,24 @@ def test_feint_pays_three_per_plan_waiting(overhaul):
     assert before - enemy.hp == 6 + 3 * 2
 
 def test_feints_upgrade_moves_the_base_and_the_plans_vulnerable(overhaul):
-    """Base 6 -> 9 (the cleanup pass, 2026-09-29), 3 per carry-out
-    unchanged, the Plan's Vulnerable 1 -> 2. Read off the SMITHED card."""
+    """Base 6 -> 9 (the cleanup pass, 2026-09-29), 3 per Plan waiting
+    unchanged; the Plan's rate 5 -> 7 since the pool overhaul (2026-10-13;
+    was its Vulnerable 1 -> 2). Read off the SMITHED card."""
     from tier0.content import upgrades
 
     row = _row("proto_kk_feint")
-    assert row.upgrade == {"formula_base": 3, "plan_power_amount": 1}
+    assert row.upgrade == {"formula_base": 3, "plan_damage": 2}
     up = upgrades.apply_upgrade(_row("proto_kk_feint"))
     assert up.effects[0]["amount_formula"]["base"] == 9
     assert up.effects[0]["amount_formula"]["per"] == 3
-    assert up.plan[0]["amount"] == 2
+    assert up.plan[0]["amount"] == 7
 
 def test_feints_face_prints_the_plan_line_it_can_write(overhaul):
-    """`EB-660`: the face prints its Plan line. Since R276 pick 1 the line is
-    a debuff ready before the enemy's next swing, not the hit made bigger."""
+    """`EB-660`: the face prints its Plan line. Since the pool overhaul
+    (2026-10-13) the line is a Chain: it pays for the Plans landed with it."""
     faces = _faces()
-    assert "[gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold]." in \
+    assert ("[gold]Plan[/gold]: Deal 5 [gold]Hydro[/gold] damage for each "
+            "[gold]Plan[/gold] carried out this turn.") in \
         faces["proto_kk_feint"]
 
 
@@ -2152,16 +2158,18 @@ def test_scry_take_reads_a_short_pile_short(overhaul):
 
 def test_read_the_field_is_a_selection_and_a_planned_wall(overhaul):
     """`EB-679`. The 5 Block face-up is gone -- r26 read it as a dead slot
-    beside a Dusk Plan -- and both remaining numbers upgrade, one per half."""
+    beside a Dusk Plan. Since the pool overhaul (2026-10-13) the Plan is a
+    fetch from the Draw Pile (was 10 [12] Block), so the scry is the one
+    number that upgrades."""
     from tier0.content import upgrades
 
     row = _row("proto_kk_read_the_field")
     assert row.effects == [{"op": "scry_take", "amount": 3}]
-    assert row.plan == [{"op": "block", "amount": 10}]
-    assert row.upgrade == {"scry": 1, "plan_block": 2}
+    assert row.plan == [{"op": "draw_pile_to_hand"}]
+    assert row.upgrade == {"scry": 1}
     up = upgrades.apply_upgrade(_row("proto_kk_read_the_field"))
     assert up.effects[0]["amount"] == 4
-    assert up.plan[0]["amount"] == 12
+    assert up.plan == [{"op": "draw_pile_to_hand"}]
 
 
 def test_night_watch_is_off_the_sheet_and_out_of_the_pool(overhaul):

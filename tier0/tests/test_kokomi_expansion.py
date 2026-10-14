@@ -36,21 +36,23 @@ from tier0.tests.conftest import make_enemy
 from tier0.tests.test_kokomi_plan import (  # noqa: F401
     carry_out, kokomi_state, overhaul, plan_card, plan_line)
 
-#: The batch's rows still in her pool after the re-founding (2026-10-12)
-#: and the jellyfish build (2026-10-12), which cut Measured Breath.
+#: The batch's rows still in her pool after the re-founding (2026-10-12),
+#: the jellyfish build (2026-10-12), which cut Measured Breath, and the pool
+#: overhaul (2026-10-13), which cut Ceremonial Garment and Brace for the Tide.
 NEW = (
     "proto_kk_undertide_lance",
     "proto_kk_grand_design", "proto_kk_masterstroke",
     "proto_kk_drowning_pressure", "proto_kk_undercurrent_snare",
-    "proto_kk_at_waters_edge", "proto_kk_ceremonial_garment",
+    "proto_kk_at_waters_edge",
     "proto_kk_suffocating_deep", "proto_kk_coral_crash",
-    "proto_kk_evening_watch", "proto_kk_brace_for_the_tide",
+    "proto_kk_evening_watch",
     "proto_kk_watatsumis_grace", "proto_kk_tidal_riposte",
     "proto_kk_shoal_call",
 )
 CUT = ("proto_kk_weight_of_the_plan", "proto_kk_lull",
        "proto_kk_the_long_game", "proto_kk_salt_in_the_wound",
-       "proto_kk_tidal_resonance", "proto_kk_kurage_swarm")
+       "proto_kk_tidal_resonance", "proto_kk_kurage_swarm",
+       "proto_kk_ceremonial_garment", "proto_kk_brace_for_the_tide")
 QUIET = [{"kind": "block", "amount": 5}]
 
 
@@ -167,11 +169,17 @@ def test_drowning_pressures_floor_is_its_own_debuffs(overhaul):
 
 
 def test_undercurrent_snare_plans_vulnerable_on_all(overhaul):
-    a, b = make_enemy(hp=100, name="a"), make_enemy(hp=100, name="b")
+    """The pool overhaul (2026-10-13): the Plan line is an Intent read --
+    each enemy that intends to attack when it lands loses 3 Strength this
+    turn (Piercing Wail's `temp_strength_down`); no Vulnerable any more."""
+    a, b = make_enemy(hp=100, name="a"), make_enemy(hp=100, name="b",
+                                                     intents=QUIET)
     st = kokomi_state(enemies=[a, b])
     kokomi_plan.schedule(st, _row("proto_kk_undercurrent_snare"))
     kokomi_plan.resolve_all(st)
-    assert a.powers.get("vulnerable") == 1 and b.powers.get("vulnerable") == 1
+    assert a.powers.get("temp_strength_down") == 3
+    assert b.powers.get("temp_strength_down") is None
+    assert a.powers.get("vulnerable") is None
 
 
 def test_at_waters_edge_fires_once_per_turn_on_hydro_damage(overhaul):
@@ -263,15 +271,13 @@ def test_evening_watch_blocks_per_enemy_intending_to_attack(overhaul):
 
 
 def test_brace_for_the_tide_doubles_block_now(overhaul):
-    """The re-founding (2026-10-12): the base game's Entrench, 2 [1], no
-    Exhaust."""
+    """The re-founding (2026-10-12): the base game's Entrench. The card left
+    with the pool overhaul (2026-10-13); its `double_block` kind stays
+    registered with no row spelling it, and still doubles."""
     st = kokomi_state()
     st.player.block = 13
-    _write(st, "proto_kk_brace_for_the_tide")
+    kokomi_plan.kind(st, {"op": "kokomi", "kind": "double_block"}, None, None)
     assert st.player.block == 26
-    row = _row("proto_kk_brace_for_the_tide")
-    assert not row.exhaust and row.cost == 2
-    assert _up("proto_kk_brace_for_the_tide").cost == 1
 
 
 def test_watatsumis_grace_keeps_up_to_the_cap(overhaul):

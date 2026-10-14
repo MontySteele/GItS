@@ -71,11 +71,7 @@ def test_the_moved_numbers(overhaul):
     assert _up("proto_kk_pincer").effects[0]["amount"] == 6
     assert _row("proto_kk_opening_gambit").effects[0]["amount"] == 7
     assert _up("proto_kk_opening_gambit").effects[0]["amount"] == 9
-    # Ceremonial Garment costs 1; the Kokomi card pass (2026-10-11): 1 [2]
-    # per stack of Weak and Vulnerable (was 2 [3] per debuff).
-    garment = _row("proto_kk_ceremonial_garment")
-    assert (garment.cost, garment.effects[0]["amount"]) == (1, 1)
-    assert _up("proto_kk_ceremonial_garment").effects[0]["amount"] == 2
+    # (Ceremonial Garment left with the Kokomi pool overhaul, 2026-10-13.)
     rip = _row("proto_kk_riptide")
     assert (rip.effects[0]["amount"], rip.effects[0]["bonus_vs_debuff"]) == \
         (11, 3)

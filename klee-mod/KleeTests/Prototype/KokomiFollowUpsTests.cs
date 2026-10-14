@@ -37,7 +37,9 @@ public class KokomiFollowUpsTests : IDisposable
     public void A_moons_reflection_plan_gives_back_moons_reflection()
     {
         var found = new ProtoKkAmbush();
-        var moon = new ProtoKkMoonsReflection();
+        // Moon's Reflection left with the Kokomi pool overhaul (2026-10-13);
+        // the writer rule stands, read here off any other card.
+        var moon = new ProtoKkTidecleanse();
         var clauses = Array.Empty<KokomiPlan.Planned>();
         Assert.Same(moon,
             new KokomiPlan.Entry(found, clauses, Writer: moon).Returns);

@@ -2111,6 +2111,10 @@ def negated_predicate_text(name: str) -> str | None:
     return PREDICATE_TEXT_NEGATED.get(name or "")
 
 
+#: THE KOKOMI POOL OVERHAUL (2026-10-13): the kinds legal inside a
+#: conditional branch (`BRANCH_OPS`): Brine Spray's add-N-Stings.
+KOKOMI_BRANCH_KINDS = frozenset(("shoal_call",))
+
 CONDITIONAL_FIELDS = {"op", "if", "then", "else"}
 
 # Ops legal inside a conditional branch: plain resolvers with literal (or
@@ -2200,6 +2204,12 @@ BRANCH_OPS = {"damage", "block", "draw", "gain_spark", "gain_encore",
               # it copies is a single awaited call with no locals, which is the
               # whole branch-legality criterion.
               "mend",
+              # THE KOKOMI POOL OVERHAUL (2026-10-13): Brine Spray's "If it
+              # triggers an Elemental Reaction, add 2 Stings to your Hand" --
+              # the `shoal_call` kind alone (`KOKOMI_BRANCH_KINDS`), one
+              # awaited `KokomiCards` call with no locals, which is the whole
+              # branch-legality criterion.
+              "kokomi",
               # THE KOKOMI OVERHAUL. Sango Isshin's redesigned
               # payoff, "...deal a quarter of your Max HP to ALL enemies
               # instead". ALL-ENEMIES ONLY, and `_branch_op_reason` blocks the
@@ -2241,6 +2251,8 @@ BRANCH_FIELDS = {
     "spend_charge": {"op", "amount"},
     # VARKA: a numberless kind only (Knightly Guard's gain_current_oath).
     "varka": {"op", "kind"},
+    # THE KOKOMI POOL OVERHAUL: an add-N-Stings kind and its literal N.
+    "kokomi": {"op", "kind", "amount"},
     "spend_spark": {"op", "amount"},
     # Same key set the top-level `mend` validator enforces, so the two cannot
     # disagree about what a Mend is.
@@ -2359,6 +2371,14 @@ def _branch_op_reason(eff: dict, where: str) -> str | None:
             return f"branch apply_aura element {eff.get('element')!r}"
         if eff.get("target", "enemy") not in ("enemy", "all_enemies"):
             return f"branch apply_aura target {eff.get('target')!r}"
+        return None
+    if eff["op"] == "kokomi":
+        # THE KOKOMI POOL OVERHAUL (2026-10-13): the add-N-Stings kind, a
+        # literal N, read back off the card's `KkAmount` var.
+        if eff.get("kind") not in KOKOMI_BRANCH_KINDS:
+            return f"branch kokomi kind {eff.get('kind')!r}"
+        if not isinstance(eff.get("amount"), int) or eff["amount"] <= 0:
+            return "branch kokomi amount must be a positive literal int"
         return None
     if eff["op"] == "varka":
         # VARKA (the Oath rework): only a NUMBERLESS kind, whose one call
@@ -2947,6 +2967,19 @@ PLAN_CLAUSE_KINDS = {
     "add_stings": "AddStings",
     "gain_strength": "GainStrength",
     "juuga_guard": "JuugaGuard",
+    # THE POOL OVERHAUL (2026-10-13, review/active/kokomi-pool-overhaul-
+    # 2026-10-13.md sec.2-4). Chain: Feint's and Turning Tide's "for each Plan
+    # carried out this turn". Counter: Kelp Wall's "the damage you blocked",
+    # Turnabout's "all the damage enemies dealt you" and Prepared Retreat's
+    # "if an enemy attacked you", each "since you planned this". Intent:
+    # Undercurrent Snare's Strength loss this turn. And Read the Field's
+    # fetch from the Draw Pile. Sim twins: `kokomi_plan`, the same names.
+    "damage_per_plan_this_turn": "DamagePerPlanThisTurn",
+    "damage_blocked_since": "DamageBlockedSince",
+    "damage_taken_since": "DamageTakenSince",
+    "energy_if_attacked_since": "EnergyIfAttackedSince",
+    "lose_strength_this_turn": "LoseStrengthThisTurn",
+    "draw_pile_to_hand": "DrawPileToHand",
     "apply_power": None,
 }
 
@@ -2963,7 +2996,11 @@ PLAN_AMOUNTLESS_OPS = {"damage_quarter_max_hp", "play_copy_of_companion",
                        "first_attack_twice",
                        # THE STATUS BATCH: "every status and curse" prints
                        # no size.
-                       "transform_statuses_in_draw_pile"}
+                       "transform_statuses_in_draw_pile",
+                       # THE POOL OVERHAUL (2026-10-13): a size read off the
+                       # ledger at carry-out, and one card.
+                       "damage_blocked_since", "damage_taken_since",
+                       "draw_pile_to_hand"}
 
 #: The two debuffs a Plan may apply. A CLOSED map on purpose: the jellyfish
 #: carries out what the card wrote, and "any power" would let a row schedule a
@@ -2982,9 +3019,16 @@ PLAN_AIM_CS = {
     # `KokomiPlan.Schedule` captured off the intents on screen, and the
     # carry-out lands on those of them still alive.
     "enemies_intending_attack": "KokomiPlan.Aim.EnemiesIntendingAttack",
+    # THE POOL OVERHAUL (2026-10-13), Brine Sting: "each enemy that attacked
+    # you since you planned this", read off the Plan's own window at
+    # carry-out (`KokomiPlan.Entry.Since`).
+    "enemies_attacked_since": "KokomiPlan.Aim.EnemiesAttackedSince",
 }
 PLAN_AIMED_OPS = {"damage", "damage_quarter_max_hp",
-                  "apply_power"}
+                  "apply_power",
+                  # THE POOL OVERHAUL (2026-10-13).
+                  "damage_per_plan_this_turn", "damage_blocked_since",
+                  "damage_taken_since", "lose_strength_this_turn"}
 #: The clauses a `times:` may repeat -- the flat hit, and nothing else
 #: (`EB-492`, Pincer). The twin of `kokomi_plan.PLAN_TIMES_OPS`.
 PLAN_TIMES_OPS = {"damage"}
@@ -3015,7 +3059,12 @@ PLAN_ONLY_OPS = {
                  "transform_statuses_in_draw_pile",
                  # THE RE-FOUNDING (2026-10-12): Kurage's Wake's Stings and
                  # Gorou's two Plan lines name the carry-out turn.
-                 "add_stings", "gain_strength", "juuga_guard"}
+                 "add_stings", "gain_strength", "juuga_guard",
+                 # THE POOL OVERHAUL (2026-10-13): each reads the turn it
+                 # lands on or the enemy turn it sat through.
+                 "damage_per_plan_this_turn", "damage_blocked_since",
+                 "damage_taken_since", "energy_if_attacked_since",
+                 "lose_strength_this_turn", "draw_pile_to_hand"}
 
 #: R276. The clauses whose `amount` may be ZERO: Tide Wall's is a flat bonus
 #: on top of a number read off the board, and the base card prints none.
@@ -3111,6 +3160,9 @@ PLAN_UPGRADE_VARS = {
     "plan_draw": "PlanCards",
     # R276, Battle Plan's per-Attack bonus.
     "plan_attack_bonus": "PlanAttackBonus",
+    # The Kokomi pool overhaul (2026-10-13), Prepared Retreat's Energy. An
+    # `EnergyVar` under this name, so the face prints the base game's icon.
+    "plan_energy": "PlanEnergy",
 }
 
 
@@ -3508,13 +3560,21 @@ APPLY_POWERS = {
     "kk_watchful_shoal": ("WatchfulShoalPower", None,
         "Your [gold]Stings[/gold] deal {X} additional damage. Your "
         "[gold]Wards[/gold] gain {X} additional [gold]Block[/gold]."),
+    # THE POOL OVERHAUL (2026-10-13): Coordinated Tide reads a Companion's
+    # reaction and Grand Strategist any of hers; Jellyfish Current and Battle
+    # Formation are new. Classes in KokomiRefounding.cs.
     "kk_coordinated_tide": ("CoordinatedTidePower", None,
-        "Whenever the [gold]Bake-Kurage[/gold] carries out an "
-        "[gold]Ethereal[/gold] card, deal {X} [gold]Hydro[/gold] damage to "
-        "the front enemy."),
+        "Whenever a [gold]Companion[/gold] triggers an [gold]Elemental "
+        "Reaction[/gold], add a [gold]Sting[/gold] to your hand."),
     "kk_grand_strategist": ("GrandStrategistPower", None,
-        "Whenever a [gold]Plan[/gold] causes an [gold]Elemental "
-        "Reaction[/gold], deal {X} damage to ALL enemies."),
+        "Whenever you trigger an [gold]Elemental Reaction[/gold], deal {X} "
+        "damage to ALL enemies."),
+    "kk_jellyfish_current": ("JellyfishCurrentPower", None,
+        "Whenever a [gold]Sting[/gold] triggers an [gold]Elemental "
+        "Reaction[/gold], add a [gold]Sting[/gold] to your hand."),
+    "kk_battle_formation": ("BattleFormationPower", None,
+        "Whenever 3 or more [gold]Plans[/gold] are carried out in one turn, "
+        "gain 1 Energy and draw 2 cards."),
     "kk_endless_shoal": ("EndlessShoalPower", None,
         "Whenever the [gold]Bake-Kurage[/gold] carries out a "
         "[gold]Plan[/gold], add a [gold]Sting[/gold] to your hand."),
@@ -6320,6 +6380,11 @@ KOKOMI_CASKET_COUNTS = {
     "stings_played_this_turn":
         "static (card, _) => KokomiOverhaulLedger.For("
         "card.Owner.Creature).StingsPlayedThisTurn",
+    # The pool overhaul (2026-10-13): All Streams Flow to the Sea, the
+    # Elemental Reactions she triggered this combat.
+    "reactions_triggered_this_combat":
+        "static (card, _) => KokomiOverhaulLedger.For("
+        "card.Owner.Creature).ReactionsThisCombat",
     "plans_held": "static (card, _) => KokomiPlan.PlansHeld("
                   "card.Owner.Creature)",
 }
@@ -7937,6 +8002,14 @@ def build_vars(card: dict) -> list[str]:
             # THE KOKOMI EXPANSION: the kind's printed number, read back by
             # `KokomiCards` off the card.
             out.append(f'new DynamicVar("KkAmount", {int(eff["amount"])}m)')
+        elif op == "conditional" and any(
+                e.get("op") == "kokomi" and "amount" in e
+                for e in eff.get("then", []) + eff.get("else", [])):
+            # THE KOKOMI POOL OVERHAUL (2026-10-13): Brine Spray's branch
+            # Stings, the same var a top-level kind declares.
+            branch = next(e for e in eff.get("then", []) + eff.get("else", [])
+                          if e.get("op") == "kokomi" and "amount" in e)
+            out.append(f'new DynamicVar("KkAmount", {int(branch["amount"])}m)')
         elif op == "furina" and "amount" in eff:
             # THE POOL TO 75: the kind's printed number, read back by
             # `FurinaCards` off the card.
@@ -8170,6 +8243,12 @@ def build_vars(card: dict) -> list[str]:
                 "block", "block_max_intent"):
             out.append(
                 f'new UnsourcedBlockVar("{var}", {amount}m, ValueProp.Move)')
+        # The Kokomi pool overhaul (2026-10-13): the game's
+        # `EnergyIconsFormatter` reads an `EnergyVar` (a plain `DynamicVar`
+        # throws), so `{PlanEnergy:energyIcons()}` takes the base game's type
+        # under its own name.
+        elif key == "plan_energy":
+            out.append(f'new EnergyVar("{var}", {amount})')
         else:
             out.append(f'new DynamicVar("{var}", {amount}m)')
     # Kokomi round 3 review, change 4: Kelp Wall's `{InCombat:...}` line
@@ -10623,6 +10702,11 @@ def _emit_branch_op(
     elif op == "varka":
         # VARKA (the Oath rework): the top-level arm's one awaited call.
         lines.append(f"await VarkaCards.{VARKA_KINDS[eff['kind']]}("
+                     "choiceContext, this, cardPlay);")
+    elif op == "kokomi":
+        # THE KOKOMI POOL OVERHAUL (2026-10-13): the top-level arm's one
+        # awaited call; the kind reads its N off `KkAmount`.
+        lines.append(f"await KokomiCards.{KOKOMI_KINDS[eff['kind']]}("
                      "choiceContext, this, cardPlay);")
     elif op == "spend_charge":
         # R213 E1. Byte-for-byte the call build_body's top-level
@@ -13302,6 +13386,13 @@ def _branch_text(card: dict, branch: list[dict], in_then: bool,
             tail = "" if n == 1 else f", {n} times"
             bits.append("the leftmost member of your [gold]Salon[/gold] "
                         f"performs now{tail}")
+        elif op == "kokomi":
+            # THE KOKOMI POOL OVERHAUL (2026-10-13): the add-N-Stings kind.
+            n = int(e["amount"])
+            bits.append("add a [gold]Sting[/gold] to your [gold]Hand[/gold]"
+                        if n == 1 else
+                        f"add {n} [gold]Stings[/gold] to your "
+                        "[gold]Hand[/gold]")
         else:
             # A branch op with no text arm renders an EMPTY clause -- which is
             # how Chevreuse first generated "If a reaction triggered: ."

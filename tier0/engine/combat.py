@@ -561,6 +561,9 @@ _FREE_PLAY_CONTEXT = (
     # auto-play that discards or gains block in the middle of an outer card
     # would otherwise leave its numbers behind for the outer card to read.
     "block_gained_this_card", "discards_this_card", "last_drawn_type",
+    # The Kokomi pool overhaul (2026-10-13): the card whose own hit is
+    # resolving. A free play inside an outer card hands it back after.
+    "kk_hit_card",
     # (R213 B). The drain op's per-play total, saved for its
     # neighbours' reason: a free play that drained inside an outer card would
     # otherwise hand the outer card its number.
@@ -1247,6 +1250,10 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             # a hit Block absorbed whole answers back, once per hit.
             kokomi_plan.tidal_riposte(state, enemy, blocked,
                                       dmg - blocked)
+            # THE KOKOMI POOL OVERHAUL (2026-10-13): the running totals a
+            # "since you planned this" Plan reads -- this hit, blocked or
+            # not, and who dealt it.
+            kokomi_plan.note_enemy_hit(state, enemy, blocked, dmg)
             if not state.player.alive:
                 # Fairy in a Bottle (dead branch on the battery: potions
                 # empty). Passive revive at the lethal hit; if it saves the
