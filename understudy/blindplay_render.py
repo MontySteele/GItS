@@ -72,6 +72,8 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         RESOLUTION_FANG_DEFAULT,
                                         RESOLUTION_WOLFPACK,
                                         RESOLUTION_STOKED,
+                                        RESOLUTION_DISCARDED,
+                                        RESOLUTION_DISCARDED_FOR_YOU,
                                         RESOLUTION_NO_AURA,
                                         RESOLUTION_NO_AURA_HIT,
                                         RESOLUTION_HIT_BY,
@@ -1850,6 +1852,13 @@ def _resolution_lines(rows: list[dict[str, Any]],
         stoked = int(row.get("stoked") or 0)
         if stoked > 0:
             oath_lines.append(RESOLUTION_STOKED.format(n=stoked))
+        # Varka round 5 (2026-10-13): what the card made you discard.
+        discarded = row.get("discarded") or []
+        if discarded:
+            oath_lines.append((RESOLUTION_DISCARDED_FOR_YOU
+                               if row.get("discard_picked_for_you")
+                               else RESOLUTION_DISCARDED).format(
+                cards=_and_list([f"**{c}**" for c in discarded])))
         killed = row.get("killed") or []
         applied = row.get("applied") or []
         if not row["hits"] and not killed and not applied and oath_lines:

@@ -3640,6 +3640,12 @@ RESOLUTION_WOLFPACK = ("  Wolfpack: shuffled {n} of Four Winds' Ascension "
 #: took it. A seat "never saw the number change in the log, and could not tell
 #: if Four Winds' Pyro half qualified" (it does).
 RESOLUTION_STOKED = ("  Stoke the Flames: its Pyro damage was {n} higher.")
+#: Varka round 5 (2026-10-13, "What to change" 2): what the card made you
+#: discard (Chain Lightning, Short Circuit), on its own play line, and when
+#: the game picked them because the hand held no more than it asked for.
+RESOLUTION_DISCARDED = "  Discarded: {cards}."
+RESOLUTION_DISCARDED_FOR_YOU = ("  Discarded: {cards} (the only cards in "
+                                "hand).")
 #: The Varka payoff round (2026-10-10): a card whose every Anemo application
 #: found no aura (Sucrose on a bare board) said "Nothing this page can count
 #: landed off it", and the seat could not tell it had needed an aura.

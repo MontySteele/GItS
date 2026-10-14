@@ -51,10 +51,20 @@ public sealed class ProtoVkKnightlyStrike : CustomCardModel, IElementalCard, ICh
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Knightly Strike"),
-        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If you played a [gold]Knight[/gold] this turn, deal {BranchDamage:diff()} additional damage."),
+        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If you played a [gold]Knight[/gold] this turn, deal {BranchDamage:diff()} additional damage.{InCombat:{VarkaSwirl}|}"),
     };
 
     protected override HashSet<CardTag> CanonicalTags => new() { CardTag.Strike };
+
+    /// <summary>This card's in-combat Oath and Swirl lines
+    /// (`VarkaOath.SwitchLine`, `VarkaOath.WildfireLine`,
+    /// `VarkaOath.SwirlLine`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("VarkaSwirl", VarkaOath.SwirlLine(this));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

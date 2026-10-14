@@ -12590,15 +12590,27 @@ def build_body(
                 # Braced so a card carrying two selections (or a chosen
                 # discard beside `discard_for_sparks`) cannot redeclare
                 # `picked` -- the same scoping the exhaust_from emission uses.
+                # Varka round 5 (2026-10-13, "What to change" 2): a Varka
+                # row's chosen discard (Chain Lightning, Short Circuit) names
+                # what it discarded on the play's line, and says when the
+                # game picked them because the hand held no more than it
+                # asked for (`ResolutionLedger.NoteDiscards`). Log only.
+                varka_note = card.get("character") == "varka"
                 lines.append(
                     "{\n"
-                    "            var picked = (await CardSelectCmd.FromHandForDiscard(\n"
+                    + ("            var handBefore = CardPile.Get(PileType.Hand, "
+                       "Owner)?.Cards.Count ?? 0;\n" if varka_note else "")
+                    + "            var picked = (await CardSelectCmd.FromHandForDiscard(\n"
                     "                choiceContext, Owner,\n"
                     "                new CardSelectorPrefs("
                     f"CardSelectorPrefs.DiscardSelectionPrompt, {n}),\n"
                     "                null, this)).ToList();\n"
                     "            await CardCmd.Discard(choiceContext, picked);\n"
-                    "        }"
+                    + (f"            ResolutionLedger.NoteDiscards(Title, "
+                       "picked.Select(c => c.Title).ToList(),\n"
+                       f"                ResolutionLedger.DiscardPickedForYou("
+                       f"handBefore, {n}));\n" if varka_note else "")
+                    + "        }"
                 )
             else:
                 # Random discard, kit-exempt pool (tier0 _op_discard: re-pool
@@ -16455,6 +16467,36 @@ def varka_wildfire_face_arg(card: dict, profile: "CharacterProfile"
     return (VARKA_WILDFIRE_TOKEN, "VarkaOath.WildfireLine(this)")
 
 
+#: The token of a Varka Swirl card's in-combat "(No aura to Swirl)" line
+#: (`VarkaOath.SwirlLine`).
+VARKA_SWIRL_TOKEN = "VarkaSwirl"
+
+#: A `varka` kind that Swirls without the row's own Anemo hit.
+VARKA_SWIRL_KINDS = frozenset({"crosscurrent", "swirl_fresh_auras"})
+
+
+def varka_swirl_face_arg(card: dict, profile: "CharacterProfile",
+                         aura_elements: list[str]) -> tuple[str, str] | None:
+    """`(token, C#)` for a Varka Swirl card's "(No aura to Swirl)" line, or
+    None.
+
+    Varka round 5 (2026-10-13, "What to change" 1): "Swirl cards whose target
+    has lost its aura read 'No aura'." Every Varka row that Swirls (it
+    declares Anemo, or a `varka` kind in `VARKA_SWIRL_KINDS`) ends its face
+    in `{InCombat:{VarkaSwirl}|}`; the line prints only while the enemy it is
+    aimed at, or with no aim every enemy, has no aura. Shared Companion rows
+    carry none.
+    """
+    if profile.character_id != "varka" or card.get("character") != "varka":
+        return None
+    swirls = "anemo" in aura_elements or any(
+        e.get("op") == "varka" and e.get("kind") in VARKA_SWIRL_KINDS
+        for e in _effects_everywhere(card))
+    if not swirls:
+        return None
+    return (VARKA_SWIRL_TOKEN, "VarkaOath.SwirlLine(this)")
+
+
 #: THE ARCHAIC TOOTH (Varka review, ruled 2026-10-12: "Dandelion Gale could be
 #: the Replace version"). Orobas's relic transforms a starter card into its
 #: Ancient through the private `ArchaicTooth.TranscendenceUpgrades` map;
@@ -16776,6 +16818,9 @@ def emit(
     wildfire_arg = varka_wildfire_face_arg(card, profile)
     if wildfire_arg is not None:
         face_args.append(wildfire_arg)
+    swirl_arg = varka_swirl_face_arg(card, profile, aura_elements)
+    if swirl_arg is not None:
+        face_args.append(swirl_arg)
     desc = stage_lines_face(desc, face_args)
     desc_cs = desc.replace("\n", "\\n")
     desc_expr = f'"{desc_cs}"'
@@ -17789,6 +17834,11 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             "This card's in-combat Oath lines\n"
             "    /// (`VarkaOath.SwitchLine`, `VarkaOath.WildfireLine`)."
             if set(tokens) <= {VARKA_SWITCH_TOKEN, VARKA_WILDFIRE_TOKEN} else
+            "This card's in-combat Oath and Swirl lines\n"
+            "    /// (`VarkaOath.SwitchLine`, `VarkaOath.WildfireLine`,\n"
+            "    /// `VarkaOath.SwirlLine`)."
+            if set(tokens) <= {VARKA_SWITCH_TOKEN, VARKA_WILDFIRE_TOKEN,
+                               VARKA_SWIRL_TOKEN} else
             "This card's in-combat Stage line\n"
             "    /// (`FurinaStageFacePreview`).")
         adds = "".join(f'        description.Add("{token}", {call});\n'

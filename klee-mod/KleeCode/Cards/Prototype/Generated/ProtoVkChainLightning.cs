@@ -82,11 +82,14 @@ public sealed class ProtoVkChainLightning : CustomCardModel, IElementalCard, ICh
     {
         await VarkaCards.ElectroAll(choiceContext, this, cardPlay);
         {
+            var handBefore = CardPile.Get(PileType.Hand, Owner)?.Cards.Count ?? 0;
             var picked = (await CardSelectCmd.FromHandForDiscard(
                 choiceContext, Owner,
                 new CardSelectorPrefs(CardSelectorPrefs.DiscardSelectionPrompt, 2),
                 null, this)).ToList();
             await CardCmd.Discard(choiceContext, picked);
+            ResolutionLedger.NoteDiscards(Title, picked.Select(c => c.Title).ToList(),
+                ResolutionLedger.DiscardPickedForYou(handBefore, 2));
         }
     }
 

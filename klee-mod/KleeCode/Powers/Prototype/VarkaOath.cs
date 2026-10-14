@@ -1031,14 +1031,79 @@ public static class VarkaOath
     /// the card would change his current element to
     /// <paramref name="element"/> (<see cref="WouldSwitchTo"/>, the hover
     /// tip's question), else empty.
+    ///
+    /// Varka round 5 (2026-10-13, "What to change" 1): the line also says
+    /// what the switch costs, "(Makes Cryo current: 2 Oath)": the Oath he
+    /// holds in <paramref name="element"/> when it becomes current
+    /// (<see cref="OathOnSwitch"/>), so Kaeya, Barbara and Short Circuit no
+    /// longer lower Four Winds' Ascension silently. Display only.
     /// </summary>
     public static string SwitchLine(CardModel? card, Element element) =>
-        WouldSwitchTo(card, element) ? SwitchWords(element) : "";
+        WouldSwitchTo(card, element)
+            ? SwitchWords(element, OathOnSwitch(card!.Owner!.Creature, element))
+            : "";
 
-    /// <summary>The line itself, a line break then "(Makes Pyro current)".
-    /// PURE.</summary>
-    public static string SwitchWords(Element element) =>
-        $"\n(Makes {element} current)";
+    /// <summary>The Oath he holds in <paramref name="element"/> the moment it
+    /// becomes current: its own count, plus the old element's when Banner of
+    /// the West Wind carries it over (<see cref="SetCurrent"/> pays the
+    /// Banner at the switch). The play's own gain is not in it; that prints
+    /// on the play's Oath line as it always has.</summary>
+    public static int OathOnSwitch(Creature? varka, Element element)
+    {
+        if (varka == null || !Live(varka)) return 0;
+        var current = Current(varka);
+        var banner = current != element && IsOathElement(current)
+            && Relics.VarkaArmRelics.Held<Relics.BannerOfTheWestWind>(varka) > 0;
+        return SwitchOath(Count(varka, element),
+                          banner ? Count(varka, current) : 0);
+    }
+
+    /// <summary>The count the line prints: the new element's Oath plus what
+    /// the Banner carries over. PURE.</summary>
+    public static int SwitchOath(int newElementOath, int carried) =>
+        Math.Max(0, newElementOath) + Math.Max(0, carried);
+
+    /// <summary>The line itself, a line break then "(Makes Pyro current:
+    /// 3 Oath)". PURE.</summary>
+    public static string SwitchWords(Element element, int oath) =>
+        $"\n(Makes {element} current: {oath} Oath)";
+
+    /// <summary>
+    /// THE SWIRL LINE (Varka round 5, 2026-10-13, "What to change" 1: "Swirl
+    /// cards whose target has lost its aura read 'No aura'"). A reaction that
+    /// used up an aura left a later Swirl card with nothing to Swirl, and the
+    /// hand did not say so. A Swirl card of his ends its face in
+    /// <c>{InCombat:{VarkaSwirl}|}</c> and the line reads "(No aura to
+    /// Swirl)" while the enemy it is aimed at has no aura
+    /// (<see cref="DescribedTarget"/>), or, not aimed, while no enemy has
+    /// one. Empty otherwise, off a combat and for anyone but a live Varka.
+    /// Display only.
+    /// </summary>
+    public static string SwirlLine(CardModel? card)
+    {
+        if (card is not { IsMutable: true }) return "";
+        Creature? owner;
+        try
+        {
+            owner = card.Owner?.Creature;
+        }
+        catch (Exception)
+        {
+            return "";
+        }
+        if (owner?.CombatState == null || !Live(owner)) return "";
+        var target = DescribedTarget.For(card);
+        if (target != null) return SwirlWords(AuraCmd.Find(target) != null);
+        return SwirlWords(owner.CombatState.HittableEnemies
+            .Any(e => AuraCmd.Find(e) != null));
+    }
+
+    /// <summary>The words: "(No aura to Swirl)" when there is no aura, else
+    /// empty. PURE.</summary>
+    public static string SwirlWords(bool aura) => aura ? "" : NoAuraToSwirl;
+
+    /// <summary><see cref="SwirlWords"/>' line.</summary>
+    public const string NoAuraToSwirl = "\n(No aura to Swirl)";
 
     /// <summary>
     /// WILDFIRE OATH'S PREVIEW (BACKLOG: "Wildfire Oath's damage has no

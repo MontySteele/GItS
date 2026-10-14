@@ -51,8 +51,18 @@ public sealed class ProtoVkGaleSweep : CustomCardModel, IElementalCard, ICharact
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Gale Sweep"),
-        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage to each enemy with an aura. Each hit [gold]Swirls[/gold]."),
+        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage to each enemy with an aura. Each hit [gold]Swirls[/gold].{InCombat:{VarkaSwirl}|}"),
     };
+
+    /// <summary>This card's in-combat Oath and Swirl lines
+    /// (`VarkaOath.SwitchLine`, `VarkaOath.WildfireLine`,
+    /// `VarkaOath.SwirlLine`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("VarkaSwirl", VarkaOath.SwirlLine(this));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
