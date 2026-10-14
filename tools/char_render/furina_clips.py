@@ -541,10 +541,13 @@ def _hand(side, k, off, pole, curl=(25, 10), anchor=CH, aim=None):
     return ops
 
 
-def _neuvillette(k):    # hands clasped behind his back, upright
+def _neuvillette(k):    # upright, the near hand at his chest, on his lapel; the far arm easy at his side
+    # ([USER], 2026-10-13: "where are Siegwinne and Neuvillette's arms?" --
+    # his hands clasped behind his back hid both arms from the front)
     return (_gbody(k, lean=-2, head=(10, 14), nod=-3)
-            + _hand("R", k, _v((0.10, BK), (0.02, LT), (-0.30, Z)), _v((1, RT), (0.6, BK)), curl=(40, 15))
-            + _hand("L", k, _v((0.10, BK), (0.02, RT), (-0.28, Z)), _v((1, LT), (0.6, BK)), curl=(40, 15)),
+            + _hand("R", k, _v((0.13, FW), (0.03, LT), (-0.02, Z)), _v((1, RT), (0.3, BK), (-0.8, Z)), curl=(30, 10),
+                    aim=(_v((1, LT), (0.4, Z), (0.2, FW)), 0))
+            + _rest("L", k, curl=(30, 12)),
             {"真面目": 0.4})
 
 
@@ -555,9 +558,13 @@ def _wriothesley(k):    # arms crossed
             {"にやり": 0.4})
 
 
-def _clorinde(k):       # the near hand across to her left hip, resting as on a hilt
-    return (_gbody(k, lean=0, head=(12, 18))
-            + _hand("R", k, _v((0.08, FW), (0.06, LT), (-0.29, Z)), _v((1, RT), (0.4, BK)), curl=(55, 20))
+def _clorinde(k):       # upright and poised, shoulders back, chin up, the near hand on her hip
+    # ([USER], 2026-10-13: "Clorinde looks weird as though she's hunched
+    # over" -- the hand reached across to her far hip, rounding her near
+    # shoulder, and her head was bowed under the hat)
+    return (_gbody(k, lean=-6, head=(12, 18), nod=-14)
+            + [("rot", "首", X, -10)]
+            + _hand("R", k, _v((0.10, RT), (0.04, BK), (-0.22, Z)), _v((1, RT), (0.3, BK), (0.2, Z)), curl=(55, 20))
             + _rest("L", k),
             {"怒り目": 0.2})
 
@@ -605,10 +612,12 @@ def _chevreuse(k):      # weight settled on the rear leg, the far hand on her hi
             {"真面目": 0.5})
 
 
-def _sigewinne(k):      # hands clasped in front of her, cheerful
+def _sigewinne(k):      # hands clasped in front of her at the waist, held clear of her body, cheerful
+    # ([USER], 2026-10-13: "where are Siegwinne and Neuvillette's arms?" --
+    # her hands sat against her front and her forearms sank behind it)
     return (_gbody(k, lean=-2, head=(12, 18), tilt=-10, nod=-4)
-            + _hand("R", k, _v((0.12, FW), (0.02, LT), (-0.22, Z)), _v((1, RT), (0.3, BK)), curl=(40, 15))
-            + _hand("L", k, _v((0.13, FW), (0.02, RT), (-0.21, Z)), _v((1, LT), (0.3, BK)), curl=(40, 15)),
+            + _hand("R", k, _v((0.20, FW), (0.015, LT), (-0.20, Z)), _v((1, RT), (0.2, BK), (-0.4, Z)), curl=(40, 15))
+            + _hand("L", k, _v((0.21, FW), (0.015, RT), (-0.19, Z)), _v((1, LT), (0.2, BK), (-0.4, Z)), curl=(40, 15)),
             {"笑い": 0.7, "にこり": 0.5})
 
 

@@ -4194,7 +4194,11 @@
    ],
    "head_px": 168.5,
    "full_px": 210.8,
-   "width_px": 68.0
+   "width_px": 68.0,
+   "forearms_visible": {
+    "L": 0.997,
+    "R": 0.991
+   }
   },
   "chevreuse": {
    "file": "guest_chevreuse.png",
@@ -4210,23 +4214,31 @@
    ],
    "head_px": 168.3,
    "full_px": 212.1,
-   "width_px": 111.0
+   "width_px": 111.0,
+   "forearms_visible": {
+    "L": 0.168,
+    "R": 0.385
+   }
   },
   "clorinde": {
    "file": "guest_clorinde.png",
    "size": [
-    170,
-    483
+    185,
+    466
    ],
    "ppu": 245.8884,
    "height_in": 69.2,
    "feet": [
-    68,
-    476
+    73,
+    459
    ],
-   "head_px": 184.6,
-   "full_px": 237.1,
-   "width_px": 85.0
+   "head_px": 184.3,
+   "full_px": 229.1,
+   "width_px": 92.5,
+   "forearms_visible": {
+    "L": 0.263,
+    "R": 0.434
+   }
   },
   "escoffier": {
    "file": "guest_escoffier.png",
@@ -4242,7 +4254,11 @@
    ],
    "head_px": 168.0,
    "full_px": 213.5,
-   "width_px": 105.0
+   "width_px": 105.0,
+   "forearms_visible": {
+    "L": 1.0,
+    "R": 0.304
+   }
   },
   "freminet": {
    "file": "guest_freminet.png",
@@ -4258,7 +4274,11 @@
    ],
    "head_px": 176.1,
    "full_px": 208.3,
-   "width_px": 56.0
+   "width_px": 56.0,
+   "forearms_visible": {
+    "L": 0.797,
+    "R": 0.513
+   }
   },
   "lynette": {
    "file": "guest_lynette.png",
@@ -4274,7 +4294,11 @@
    ],
    "head_px": 168.8,
    "full_px": 202.5,
-   "width_px": 98.0
+   "width_px": 98.0,
+   "forearms_visible": {
+    "L": 0.023,
+    "R": 0.251
+   }
   },
   "lyney": {
    "file": "guest_lyney.png",
@@ -4290,7 +4314,11 @@
    ],
    "head_px": 177.2,
    "full_px": 222.5,
-   "width_px": 67.5
+   "width_px": 67.5,
+   "forearms_visible": {
+    "L": 0.47,
+    "R": 0.444
+   }
   },
   "navia": {
    "file": "guest_navia.png",
@@ -4306,12 +4334,16 @@
    ],
    "head_px": 186.8,
    "full_px": 228.7,
-   "width_px": 90.5
+   "width_px": 90.5,
+   "forearms_visible": {
+    "L": 0.058,
+    "R": 0.199
+   }
   },
   "neuvillette": {
    "file": "guest_neuvillette.png",
    "size": [
-    176,
+    180,
     483
    ],
    "ppu": 248.5606,
@@ -4322,12 +4354,16 @@
    ],
    "head_px": 204.6,
    "full_px": 237.8,
-   "width_px": 88.0
+   "width_px": 90.0,
+   "forearms_visible": {
+    "L": 0.269,
+    "R": 0.744
+   }
   },
   "sigewinne": {
    "file": "guest_sigewinne.png",
    "size": [
-    159,
+    158,
     387
    ],
    "ppu": 290.0183,
@@ -4338,7 +4374,11 @@
    ],
    "head_px": 138.7,
    "full_px": 189.3,
-   "width_px": 79.5
+   "width_px": 79.0,
+   "forearms_visible": {
+    "L": 0.878,
+    "R": 0.737
+   }
   },
   "wriothesley": {
    "file": "guest_wriothesley.png",
@@ -4354,7 +4394,11 @@
    ],
    "head_px": 204.0,
    "full_px": 236.4,
-   "width_px": 114.0
+   "width_px": 114.0,
+   "forearms_visible": {
+    "L": 0.981,
+    "R": 0.876
+   }
   }
  }
 }

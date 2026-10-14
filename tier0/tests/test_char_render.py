@@ -553,6 +553,28 @@ def test_every_guest_star_stands_in_a_pose_of_their_own():
     assert "肌2" in chars.GUESTS["escoffier"]["hide"], "her thigh layer rendered as two black patches"
 
 
+def test_every_guest_shows_both_forearms_to_the_camera():
+    # [USER], 2026-10-13: "where are Siegwinne and Neuvillette's arms? And
+    # Clorinde looks weird as though she's hnched over." render.py
+    # forearms_visible casts a ray from every forearm and hand vertex toward
+    # the camera: the share that meets nothing but that forearm. No guest's
+    # forearm may be hidden whole; the three re-posed guests show both well.
+    m = json.loads(pack.manifest_path("furina").read_text(encoding="utf-8"))
+    for g, rec in m["guests"].items():
+        seen = rec["forearms_visible"]
+        assert set(seen) == {"L", "R"}, g
+        for side, v in seen.items():
+            assert v is not None and v >= 0.02, ("a forearm hidden whole", g, side, v)
+    for g in ("neuvillette", "sigewinne", "clorinde"):
+        assert min(m["guests"][g]["forearms_visible"].values()) >= 0.25, (g, m["guests"][g]["forearms_visible"])
+    # Neuvillette's hands are no longer behind his back; Clorinde holds her head up
+    neuv = {op[1]: op for op in fc.guest_pose(1.0, "neuvillette")["ops"] if op[0] == "hand"}
+    assert set(neuv) == {"L", "R"} and neuv["R"][2] == fc.CH, "the near hand at his chest"
+    clor = fc.guest_pose(1.0, "clorinde")["ops"]
+    assert next(op for op in clor if op[:2] == ("rot", "頭"))[3] <= -10, "chin up"
+    assert next(op for op in clor if op[:2] == ("rotw", "上半身"))[3] <= -4, "leaning back, not hunched"
+
+
 def test_the_thrust_streak_runs_along_the_blade_from_the_hand():
     m = {**_meta(), "trails": [], "bursts": [{"t": 0.4, "blade": "L", "kind": "thrust", "scale": 1.0}]}
     frames, first, pad = fx.clip_fx(m)
