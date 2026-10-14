@@ -597,6 +597,18 @@ def needs_an_exhausted_card(card: Card) -> bool:
     return any(fx.get("op") == "plan_from_exhaust" for fx in card.effects)
 
 
+def needs_a_played_companion(card: Card) -> bool:
+    """Is this row unplayable while no Companion has been played this combat?
+    (Kokomi wording pass, 2026-10-14: Crystal Collapse, whose Plan with none
+    played was written and carried out as nothing.) A PLAN-ONLY row with a
+    `play_copy_of_companion` clause; a now-line would gate only its Plan.
+    `gen_klee_cards.card_needs_a_played_companion`'s twin."""
+    if card.effects:
+        return False
+    return any(clause.get("op") == PLAY_COPY_OF_COMPANION
+               for clause in (card.plan or []))
+
+
 def refuses_for_no_plan(state: CombatState, card: Card) -> bool:
     """`card_playable`'s Plan clause (`EB-455`, the Kokomi review 2026-10-13):
     a card with a carry-out is unplayable while the Bake-Kurage holds no Plan,
@@ -623,6 +635,10 @@ def refuses_for_no_plan(state: CombatState, card: Card) -> bool:
     # is empty ("your Exhaust Pile is empty").
     if needs_an_exhausted_card(card):
         return not any(c is not card for c in state.player.exhaust_pile)
+    # Kokomi wording pass (2026-10-14): Crystal Collapse, until a Companion
+    # has been played this combat (`KokomiRefounding.AnyCompanionPlayed`).
+    if needs_a_played_companion(card):
+        return last_other_companion(state, card) is None
     return False
 
 
@@ -2771,8 +2787,9 @@ def attacked_since(state: CombatState, entry: Optional[PlanEntry]) -> bool:
 
 def battle_formation(state: CombatState) -> None:
     """BATTLE FORMATION (the pool overhaul, 2026-10-13; kokomi-review-r5-2026-10-14
-    numbers pass): "Whenever 2 or more Plans are carried out in one turn, gain
-    1 Energy and draw 1 card." Once a turn, when the second carry-out of the turn finishes (the tail of
+    numbers pass; worded once a turn by the Kokomi wording pass, 2026-10-14):
+    "The first time each turn 2 or more Plans are carried out, gain 1 Energy
+    and draw 1 card." Once a turn, when the second carry-out of the turn finishes (the tail of
     `_resolve_entry`, through `_note_plan_resolved`). The stack is the
     Energy (a second copy adds 1); the draw is 1 however many.
     `BattleFormationPower` is the twin."""

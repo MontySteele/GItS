@@ -110,6 +110,18 @@ public static partial class KokomiCards
         yield return HoverTipFactory.FromCard<ProtoKkSting>(false);
     }
 
+    /// <summary>Crystal Collapse previews the Companion it copies (Kokomi
+    /// wording pass, 2026-10-14): the card a waiting Plan caught, or, in
+    /// hand, the card it would catch now. Nothing to preview, no box. A
+    /// read on every hover, so it never throws.</summary>
+    public static IEnumerable<IHoverTip> WithCopiedCompanionPreview(
+        IEnumerable<IHoverTip> tips, CardModel card)
+    {
+        foreach (var tip in tips) yield return tip;
+        var held = KokomiRefounding.CompanionToCopy(card);
+        if (held != null) yield return HoverTipFactory.FromCard(held);
+    }
+
     /// <summary>A face that names a Ward previews one.</summary>
     public static IEnumerable<IHoverTip> WithWardPreview(
         IEnumerable<IHoverTip> tips)
@@ -530,6 +542,64 @@ public static class KokomiRefounding
         }
     }
 
+    /// <summary>Crystal Collapse's gate (Kokomi wording pass, 2026-10-14,
+    /// [USER]: "Yep, please proceed"): has a Companion been played this
+    /// combat? With none, its Plan was written and carried out as nothing,
+    /// so the card is unplayable until one has. A canonical copy, a card
+    /// with no owner and a throw all answer true (fails open,
+    /// <see cref="AnyToPlan"/>'s rule). Sim twin:
+    /// <c>kokomi_plan.refuses_for_no_plan</c>.</summary>
+    public static bool AnyCompanionPlayed(CardModel card)
+    {
+        try
+        {
+            if (!card.IsMutable) return true;
+            var kokomi = card.Owner?.Creature;
+            if (kokomi?.CombatState == null) return true;
+            return CompanionPlayed(KokomiOverhaulLedger.Peek(kokomi));
+        }
+        catch (System.Exception e)
+        {
+            WarnOnce(ref _warnedCompanion,
+                     $"Crystal Collapse read of the ledger threw: {e}");
+            return true;
+        }
+    }
+
+    /// <summary><see cref="AnyCompanionPlayed"/>'s read, PURE: a ledger
+    /// that holds a last Companion. No ledger yet is none played.</summary>
+    public static bool CompanionPlayed(KokomiOverhaulLedger? ledger) =>
+        ledger?.LastCompanionPlayed != null;
+
+    /// <summary>The Companion Crystal Collapse copies, for its hover: the
+    /// card a waiting Plan of THIS card caught when it was written, else the
+    /// last Companion played this combat (what writing it now would catch).
+    /// Null outside combat or with none. Never throws.</summary>
+    public static CardModel? CompanionToCopy(CardModel card)
+    {
+        try
+        {
+            var owner = card.Owner;
+            var kokomi = owner?.Creature;
+            if (kokomi?.CombatState == null) return null;
+            foreach (var entry in KokomiPlan.Showing(owner))
+            {
+                if (!ReferenceEquals(entry.Source, card)) continue;
+                foreach (var clause in entry.Clauses)
+                {
+                    if (clause.Kind == KokomiPlan.Kind.PlayCopyOfCompanion)
+                        return clause.Card;
+                }
+            }
+            return KokomiOverhaulLedger.Peek(kokomi)?.LastCompanionPlayed;
+        }
+        catch (System.Exception)
+        {
+            return null;
+        }
+    }
+
+    private static bool _warnedCompanion;
     private static bool _warnedHand;
     private static bool _warnedCard;
     private static bool _warnedExhaust;
@@ -1006,8 +1076,9 @@ public sealed class BattleFormationPower : PowerModel, ILocalizationProvider
     {
         ("title", "Battle Formation"),
         ("description",
-            $"Whenever {Threshold} or more [gold]Plans[/gold] are carried "
-          + "out in one turn, gain {Amount:energyIcons()} and draw "
+            $"The first time each turn {Threshold} or more "
+          + "[gold]Plans[/gold] are carried out, gain "
+          + "{Amount:energyIcons()} and draw "
           + $"{Draw} card{(Draw == 1 ? "" : "s")}."),
     };
 
