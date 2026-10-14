@@ -70,6 +70,40 @@ GUEST_HEIGHTS_IN = {
 }
 
 
+#: The guest stars' packs (scratch models/<guest>/unpacked/, all 观海
+#: adaptations on the shared bone set, probed 2026-10-13: every bone chars.py
+#: and toon.py pose is present in all eleven; none has a 手先 bone). `head`
+#: is the 頭 bone's height over the lowest vertex in raw PMX units, the
+#: measure each guest is scaled by (hats, ears and Sigewinne's antennae left
+#: out); `face` and `hide` add to FACE_MATS / the hidden overlays.
+FURINA_HEAD = 16.763
+GUESTS = {
+    "charlotte": {"pmx": "charlotte/unpacked/夏洛蒂.pmx", "head": 16.638},
+    "chevreuse": {"pmx": "chevreuse/unpacked/夏沃蕾.pmx", "head": 16.639},
+    "clorinde": {"pmx": "clorinde/unpacked/克洛琳德.pmx", "head": 18.931},
+    # 肌2 is a skin layer over her stocking tops whose lace cut-outs rendered
+    # as two solid black patches on her thighs; without it the white lace
+    # stocking tops (体2) and the skin above them read (probed 2026-10-13)
+    "escoffier": {"pmx": "escoffier/unpacked/爱可菲.pmx", "head": 17.134, "hide": {"肌2"}},
+    # his pack wears the diving helmet; the guest still shows his face
+    "freminet": {"pmx": "freminet/unpacked/菲米尼.pmx", "head": 17.567,
+                 "hide": {"头盔", "头盔表情1", "头盔表情2", "头盔表情3", "头盔表情4"}},
+    "lynette": {"pmx": "lynette/unpacked/【琳妮特】.pmx", "head": 16.630},
+    "lyney": {"pmx": "lyney/unpacked/林尼.pmx", "head": 17.541},
+    "navia": {"pmx": "navia/unpacked/娜维娅.pmx", "head": 19.067},
+    "neuvillette": {"pmx": "neuvillette/unpacked/那维莱特.pmx", "head": 20.676, "face": {"眉影"}},
+    "sigewinne": {"pmx": "sigewinne/unpacked/希格雯.pmx", "head": 12.061},
+    "wriothesley": {"pmx": "wriothesley/unpacked/莱欧斯利.pmx", "head": 20.327, "face": {"眉影"}},
+}
+
+
+def guest_ppu(guest: str, furina_ppu: float) -> float:
+    """A guest's texture px per unit: Furina's, times the guest's height over
+    hers (GUEST_HEIGHTS_IN over 63 in), over the guest's head-bone height
+    over hers -- so every guest stands at the same px per inch as Furina."""
+    return furina_ppu * (GUEST_HEIGHTS_IN[guest] / CHARS["furina"]["height_in"]) * (FURINA_HEAD / GUESTS[guest]["head"])
+
+
 def body_px(height_in: float) -> float:
     return height_in / ADULT_IN * BASE_ADULT_PX
 
@@ -123,13 +157,14 @@ def pose(ops, morphs=None, yaw=14.0, prop=None):
 REST = pose([], {}, yaw=0.0)
 
 # ------------------------------------------------------------------ Furina
-# Theatrical: weight on the front foot, rear heel up, the far arm swept out
-# toward the enemy palm-open like a bow to the house, the near hand at her hip.
+# Theatrical: weight on the front foot, rear heel up, the near hand on her hip
+# and the far hand low and open at her waist (the first look's sketch of
+# furina_clips stance A, without its palm-up wrist turn).
 FURINA_STANCE = pose(
     stance(drop=0.035, lean=-2.0, twist=-18, head_turn=38, head_nod=-3, head_tilt=-4,
            front=0.10, back=0.10, back_lift=0.035)
-    + arms((-0.12, 0.00, -0.30), (0.46, -0.12, 0.30), near_anchor="上半身2",
-           near_pole=(-1.0, 0.3, 0.0), far_pole=(0.0, 0.4, -1.0), near_curl=(30, 10), far_curl=(8, 0)),
+    + arms((-0.13, -0.06, -0.15), (0.24, -0.20, -0.08), near_anchor="上半身2",
+           near_pole=(-1.0, 0.3, 0.0), far_pole=(0.2, 0.6, -1.0), near_curl=(30, 10), far_curl=(14, 0)),
     {"にやり": 0.7, "口角上げ": 0.3}, yaw=16)
 
 # ------------------------------------------------------------------ Kokomi
@@ -167,6 +202,13 @@ CHARS = {
                         "wince": ("まばたき", "困る"), "sad": "悲しむ", "shock": "びっくり"},
         "stance": FURINA_STANCE,
         "prop": None,
+        # the full clip set (render.py --clips): her pose library. Her pack
+        # has no sword, so she has no blades; her attack's trail follows a
+        # phantom rapier off her far hand (furina_clips.PHANTOM).
+        "clips": "furina_clips",
+        "blades": {},
+        "hide_mats": set(),
+        "camera_height": 0.8,
     },
     "kokomi": {
         "pmx": "kokomi/unpacked/珊瑚宫心海.pmx",

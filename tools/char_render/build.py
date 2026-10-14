@@ -1,6 +1,6 @@
 """Render every surface of one kit from its official model, paint it and pack it: one command.
 
-    python tools/char_render/build.py --char varka --models <scratch>/models --work <scratch dir> \
+    python tools/char_render/build.py --char varka|furina --models <scratch>/models --work <scratch dir> \
         [--blender <blender.exe>] [--art-root <dir>] [--only-render]
 
 The kit twin of tools/klee_render/build.py. The packs stay under the
@@ -36,8 +36,11 @@ _spec.loader.exec_module(CH)
 BLENDER = r"C:\Users\Monty\AppData\Local\Programs\Blender\blender-5.2.2-windows-x64\blender.exe"
 #: The rest-pose height of each kit's model in units (import 0.08), measured
 #: by render.py's SCALE line (bounding box of the body mesh), 2026-10-13.
-REST_HEIGHT = {"varka": 2.0468}
-SELECT_PPU = {"varka": 1100.0}
+REST_HEIGHT = {"varka": 2.0468, "furina": 1.7224}
+SELECT_PPU = {"varka": 1100.0, "furina": 1300.0}
+#: each kit's combat clips (pack.py packs the same set) and its extra job
+COMBAT_CLIPS = {"varka": "idle,idle_low,attack,cast,hurt,death,ascension",
+                "furina": "idle,idle_low,attack,cast,hurt,death,rejoice"}
 SELECT_OUTLINE = 7.0
 
 
@@ -50,13 +53,17 @@ def jobs(char: str) -> list[dict]:
     shop = ppu * 1.7 * 0.75
     rest = ppu * (0.38 / 0.285)
     o = CH.OUTLINE_PX
-    return [
-        {"clips": "idle,idle_low,attack,cast,hurt,death,ascension", "stills": "stance_a,stand", "ppu": ppu,
-         "outline": o},
+    out = [
+        {"clips": COMBAT_CLIPS[char], "stills": "stance_a,stand", "ppu": ppu, "outline": o},
         {"clips": "merchant", "stills": "", "ppu": shop, "outline": o * shop / ppu},
         {"clips": "", "stills": "rest", "ppu": rest, "outline": o * rest / ppu},
         {"clips": "", "stills": "select,portrait", "ppu": SELECT_PPU[char], "outline": SELECT_OUTLINE},
     ]
+    if char == "furina":
+        # her eleven guest stars, one still each, at her px per inch
+        # (chars.guest_ppu; the outline stays OUTLINE_PX texture px)
+        out.append({"clips": "", "stills": "", "guests": ",".join(sorted(CH.GUESTS)), "ppu": ppu, "outline": o})
+    return out
 
 
 def main(argv=None) -> int:
@@ -68,10 +75,14 @@ def main(argv=None) -> int:
     ap.add_argument("--art-root", default=str(ROOT))
     ap.add_argument("--only-render", action="store_true", help="render and paint; do not pack")
     ap.add_argument("--skip-render", action="store_true", help="paint and pack what --work already holds")
+    ap.add_argument("--jobs", default="", help="render only these jobs (indices into jobs(), e.g. 0,4)")
     args = ap.parse_args(argv)
     work = Path(args.work)
     work.mkdir(parents=True, exist_ok=True)
-    for job in ([] if args.skip_render else jobs(args.char)):
+    pick = {int(j) for j in args.jobs.split(",") if j}
+    for n, job in enumerate([] if args.skip_render else jobs(args.char)):
+        if pick and n not in pick:
+            continue
         cmd = [args.blender, "-b", "--factory-startup", "-P", str(HERE / "render.py"), "--",
                "--char", args.char, "--models", args.models, "--out", str(work),
                "--ppu", f"{job['ppu']:.4f}", "--outline-px", f"{job['outline']:.3f}"]
@@ -79,7 +90,9 @@ def main(argv=None) -> int:
             cmd += ["--clips", job["clips"]]
         if job["stills"]:
             cmd += ["--stills", job["stills"]]
-        print(">", job["clips"] or "-", job["stills"] or "-", f"ppu {job['ppu']:.1f}", flush=True)
+        if job.get("guests"):
+            cmd += ["--guests", job["guests"]]
+        print(">", job["clips"] or "-", job["stills"] or job.get("guests") or "-", f"ppu {job['ppu']:.1f}", flush=True)
         res = subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace")
         for line in res.stdout.splitlines():
             if line.startswith(("CLIP", "STILL", "WARN", "SCALE", "Traceback", "Error")):
