@@ -982,11 +982,12 @@ public sealed class JellyfishCurrentPower : PowerModel, ILocalizationProvider
 /// <summary>
 /// Battle Formation (the pool overhaul, 2026-10-13): "Whenever 3 or more
 /// Plans are carried out in one turn, gain 1 Energy and draw 2 cards." Fires
-/// ONCE a turn, when the third carry-out of the turn finishes
+/// ONCE a turn, when the second carry-out of the turn finishes
 /// (<see cref="KokomiRefounding.OnCarriedOut"/>, the tail of
 /// <c>KokomiPlan.ResolveEntry</c>), on the ledger's once-per-turn latch.
 /// The stack is the Energy (a second copy adds 1, the face's
-/// <c>{Amount:energyIcons()}</c>); the draw is 2 however many. Sim twin:
+/// <c>{Amount:energyIcons()}</c>); the draw is 1 however many
+/// (kokomi-review-r5-2026-10-14 numbers pass: 3 -> 2 Plans, draw 2 -> 1). Sim twin:
 /// <c>kokomi_plan.battle_formation</c>.
 /// </summary>
 public sealed class BattleFormationPower : PowerModel, ILocalizationProvider
@@ -994,10 +995,10 @@ public sealed class BattleFormationPower : PowerModel, ILocalizationProvider
     public const string ClaimKey = "kk_battle_formation";
 
     /// <summary>The cards drawn per copy.</summary>
-    public const int Draw = 2;
+    public const int Draw = 1;
 
     /// <summary>The Plans carried out in one turn it waits for.</summary>
-    public const int Threshold = 3;
+    public const int Threshold = 2;
 
     public List<(string, string)>? Localization => new()
     {
@@ -1005,7 +1006,7 @@ public sealed class BattleFormationPower : PowerModel, ILocalizationProvider
         ("description",
             $"Whenever {Threshold} or more [gold]Plans[/gold] are carried "
           + "out in one turn, gain {Amount:energyIcons()} and draw "
-          + $"{Draw} cards."),
+          + $"{Draw} card{(Draw == 1 ? "" : "s")}."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -1031,7 +1032,7 @@ public sealed class BattleFormationPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>Undercurrent Snare's Plan line (the pool overhaul, 2026-10-13):
-/// "Each enemy that intends to attack loses 3 Strength this turn." The base
+/// "Each enemy that intends to attack loses 4 Strength this turn." The base
 /// game's temporary Strength loss, returned at the end of the turn, Cover
 /// Your Ears!'s shape. Sim twin: <c>temp_strength_down</c>.</summary>
 public sealed class UndercurrentSnarePower : TemporaryStrengthPower,

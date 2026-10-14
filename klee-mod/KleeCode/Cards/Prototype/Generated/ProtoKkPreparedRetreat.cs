@@ -60,7 +60,7 @@ public sealed class ProtoKkPreparedRetreat : CustomCardModel, ICharacterCard, IP
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(7m, ValueProp.Move),
+            new BlockVar(8m, ValueProp.Move),
             new EnergyVar("PlanEnergy", 1)
         };
 

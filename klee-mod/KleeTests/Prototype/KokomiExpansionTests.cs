@@ -173,12 +173,13 @@ public class KokomiExpansionTests : IDisposable
     public void The_tide_control_faces_and_clauses()
     {
         // The pool overhaul (2026-10-13): an Intent line, 3 [4] Strength off
-        // each enemy that intends to attack when it lands.
+        // each enemy that intends to attack when it lands; 4 [5] since the
+        // numbers pass (kokomi-review-r5-2026-10-14).
         var snare = Assert.Single(new ProtoKkUndercurrentSnare().PlanClauses);
-        Assert.Equal((KokomiPlan.Kind.LoseStrengthThisTurn, 3,
+        Assert.Equal((KokomiPlan.Kind.LoseStrengthThisTurn, 4,
                       KokomiPlan.Aim.EnemiesIntendingAttack),
                      (snare.Kind, snare.Amount, snare.Aim));
-        Assert.Equal(4, Upgraded<ProtoKkUndercurrentSnare>().PlanClauses
+        Assert.Equal(5, Upgraded<ProtoKkUndercurrentSnare>().PlanClauses
                             .Single().Amount);
         // The re-founding (2026-10-12): Undercurrent Snare costs 1.
         Assert.Equal(1, new ProtoKkUndercurrentSnare().EnergyCost.Canonical);

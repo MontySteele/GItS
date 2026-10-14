@@ -120,10 +120,10 @@ def test_kelp_wall_ignores_statuses_in_hand(overhaul):
 
 
 def test_kelp_wall_upgrades_the_flat_block_only(overhaul):
-    """Its upgrade moves the now-line's Block alone (5 -> 7); the Plan line
-    prints no number."""
+    """Its upgrade moves the now-line's Block alone (7 -> 9 since the
+    numbers pass, kokomi-review-r5-2026-10-14); the Plan line prints no number."""
     up = _up("proto_kk_kelp_wall")
-    assert up.effects[0]["amount"] == 7
+    assert up.effects[0]["amount"] == 9
     assert up.plan == _row("proto_kk_kelp_wall").plan
 
 

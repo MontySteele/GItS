@@ -2042,43 +2042,45 @@ def test_feint_pays_three_per_plan_waiting(overhaul):
     """THE RE-FOUNDING (2026-10-12, card paper sec.2): "Deal 6 damage, plus 3
     for each Plan waiting." (Per Plan carried out this turn before.) The
     count is Breakwater's, the queue's depth. Its Plan line is the pool
-    overhaul's Chain (2026-10-13): 5 per Plan carried out this turn."""
+    overhaul's Chain (2026-10-13): 5 per Plan carried out this turn. The
+    numbers pass (kokomi-review-r5-2026-10-14): base 6 -> 8, Plan 5 -> 6."""
     row = _row("proto_kk_feint")
     assert row.effects == [{"op": "damage", "target": "enemy",
                             "amount_formula": {
-                                "base": 6, "per": 3,
+                                "base": 8, "per": 3,
                                 "count": "plans_held"}}]
-    assert row.plan == [{"op": "damage_per_plan_this_turn", "amount": 5,
+    assert row.plan == [{"op": "damage_per_plan_this_turn", "amount": 6,
                          "target": "front_enemy"}]
     enemy = make_enemy(hp=100)
     st = kokomi_state(enemies=[enemy])
     effects.resolve_card(st, row)
-    assert 100 - enemy.hp == 6
+    assert 100 - enemy.hp == 8
     for i in range(2):
         kokomi_plan.schedule(st, plan_card([{"op": "draw", "amount": 1}],
                                            cid=f"proto_kk_p{i}"))
     before = enemy.hp
     effects.resolve_card(st, row)
-    assert before - enemy.hp == 6 + 3 * 2
+    assert before - enemy.hp == 8 + 3 * 2
 
 def test_feints_upgrade_moves_the_base_and_the_plans_vulnerable(overhaul):
     """Base 6 -> 9 (the cleanup pass, 2026-09-29), 3 per Plan waiting
     unchanged; the Plan's rate 5 -> 7 since the pool overhaul (2026-10-13;
-    was its Vulnerable 1 -> 2). Read off the SMITHED card."""
+    was its Vulnerable 1 -> 2). Numbers pass (kokomi-review-r5-2026-10-14):
+    base 8 [11], Plan 6 [8]. Read off the SMITHED card."""
     from tier0.content import upgrades
 
     row = _row("proto_kk_feint")
     assert row.upgrade == {"formula_base": 3, "plan_damage": 2}
     up = upgrades.apply_upgrade(_row("proto_kk_feint"))
-    assert up.effects[0]["amount_formula"]["base"] == 9
+    assert up.effects[0]["amount_formula"]["base"] == 11
     assert up.effects[0]["amount_formula"]["per"] == 3
-    assert up.plan[0]["amount"] == 7
+    assert up.plan[0]["amount"] == 8
 
 def test_feints_face_prints_the_plan_line_it_can_write(overhaul):
     """`EB-660`: the face prints its Plan line. Since the pool overhaul
     (2026-10-13) the line is a Chain: it pays for the Plans landed with it."""
     faces = _faces()
-    assert ("[gold]Plan[/gold]: Deal 5 [gold]Hydro[/gold] damage for each "
+    assert ("[gold]Plan[/gold]: Deal 6 [gold]Hydro[/gold] damage for each "
             "[gold]Plan[/gold] carried out this turn.") in \
         faces["proto_kk_feint"]
 

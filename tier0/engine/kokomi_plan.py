@@ -367,10 +367,10 @@ ENDLESS_SHOAL = "kk_endless_shoal"               # a Plan carried out: N Stings
 DAWN_TIDE = "kk_dawn_tide"                       # turn start: Hydro to ALL
 #: THE POOL OVERHAUL (2026-10-13, sec.4). Jellyfish Current: "Whenever a Sting
 #: triggers an Elemental Reaction, add a Sting to your Hand." Battle
-#: Formation: "Whenever 3 or more Plans are carried out in one turn, gain 1
-#: Energy and draw 2 cards." `JellyfishCurrentPower`, `BattleFormationPower`.
+#: Formation: "Whenever 2 or more Plans are carried out in one turn, gain 1
+#: Energy and draw 1 card." `JellyfishCurrentPower`, `BattleFormationPower`.
 JELLYFISH_CURRENT = "kk_jellyfish_current"       # a Sting's reaction: N Stings
-BATTLE_FORMATION = "kk_battle_formation"         # third Plan a turn: N Energy, 2N cards
+BATTLE_FORMATION = "kk_battle_formation"         # second Plan a turn: N Energy, 1 card
 #: Nereid's Ascension (`EB-492`). A MARKER AND NOT A WINDOW: the Rare is a
 #: Power costing 2 that lasts the fight, so there is no duration to tick and
 #: `carry_out_times` reads only whether it is worn. It replaced a `plan_twice`
@@ -2726,11 +2726,11 @@ def attacked_since(state: CombatState, entry: Optional[PlanEntry]) -> bool:
 
 
 def battle_formation(state: CombatState) -> None:
-    """BATTLE FORMATION (the pool overhaul, 2026-10-13): "Whenever 3 or more
-    Plans are carried out in one turn, gain 1 Energy and draw 2 cards." Once a
-    turn, when the third carry-out of the turn finishes (the tail of
+    """BATTLE FORMATION (the pool overhaul, 2026-10-13; kokomi-review-r5-2026-10-14
+    numbers pass): "Whenever 2 or more Plans are carried out in one turn, gain
+    1 Energy and draw 1 card." Once a turn, when the second carry-out of the turn finishes (the tail of
     `_resolve_entry`, through `_note_plan_resolved`). The stack is the
-    Energy (a second copy adds 1); the draw is 2 however many.
+    Energy (a second copy adds 1); the draw is 1 however many.
     `BattleFormationPower` is the twin."""
     if not live(state):
         return

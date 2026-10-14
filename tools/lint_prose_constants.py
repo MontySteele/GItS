@@ -207,6 +207,23 @@ PATHISH_RE = re.compile(r"res://|[/\\]|\.png|\.tres|\.ogg")
 # list stays as short as the code makes it.
 # --------------------------------------------------------------------------
 ALLOWED: dict[tuple[str, str, str], str] = {
+    # KOKOMI NUMBERS PASS (kokomi-review-r5-2026-10-14): Battle Formation's
+    # draw went 2 -> 1, so every other "draw 1 card" face joins it.
+    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoFsFinalBow.cs",
+     "BattleFormationPower.Draw", "1"):
+        "the card's own base-game draw, not Battle Formation's",
+    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoFsTutti.cs",
+     "BattleFormationPower.Draw", "1"):
+        "the card's own base-game draw, not Battle Formation's",
+    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoKoBlazingDelight.cs",
+     "BattleFormationPower.Draw", "1"):
+        "the card's own draw, not Battle Formation's",
+    ("klee-mod/KleeCode/Powers/Prototype/LionsFangPower.cs",
+     "BattleFormationPower.Draw", "1"):
+        "the power's own draw, not Battle Formation's",
+    ("klee-mod/KleeCode/Powers/Prototype/YaeAnnotations.cs",
+     "BattleFormationPower.Draw", "1"):
+        "Footnote's own draw 1, not Battle Formation's",
     # YAE MIKO (2026-10-13): Footnote's own draw, the Annotation's rule.
     ("klee-mod/KleeCode/Powers/Prototype/YaeAnnotations.cs",
      "AbyssNumbers.ResonanceDraw", "1"):

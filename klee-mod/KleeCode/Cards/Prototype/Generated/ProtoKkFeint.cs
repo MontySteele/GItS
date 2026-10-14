@@ -66,10 +66,10 @@ public sealed class ProtoKkFeint : CustomCardModel, IElementalCard, ICharacterCa
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(6m),
+            new CalculationBaseVar(8m),
             new ExtraDamageVar(3m),
             new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => KokomiPlan.PlansHeld(card.Owner.Creature)),
-            new DynamicVar("PlanDamage", 5m)
+            new DynamicVar("PlanDamage", 6m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
