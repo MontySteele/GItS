@@ -85,7 +85,7 @@ SCALING = "level"
 #: or one starter number. Module constants of `yae_shrine`, and two starter
 #: riders patched onto the staged rows in this process only.
 KNOBS = {"base": "SAKURA_BASE", "turns": "SAKURA_TURNS",
-         "plant_level": "PLANT_LEVEL", "cap": "LEVEL_CAP",
+         "plant_level": "PLANT_LEVEL",
          "proofread_block": None, "yakan_block": None}
 
 

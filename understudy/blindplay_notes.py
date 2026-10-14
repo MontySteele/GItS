@@ -1689,8 +1689,9 @@ ARM_KEYWORDS: dict[str, str] = {
     # `YaeEditTip`, markup folded out and the numbers written out (`YaeLaw`).
     "Sakura": ("Up to 3 stand beside you. At the end of your turn each "
                "strikes under the shrine's Rite (Thunder at the start of "
-               "combat), oldest first. Each lasts 3 turns. Planting one raises the "
-               "others' Level by 1 (up to 3). Tenko: every Sakura strikes now "
+               "combat), oldest first. Each lasts 3 turns; when it withers, "
+               "it strikes once more. Planting one raises the others' Level "
+               "by 1. Tenko: every Sakura strikes now "
                "and lasts 3 turns again."),
     "Edit": ("Give a card in your hand an Annotation for this combat, "
              "replacing any it had: Red Ink (+3 damage and Block), Footnote "

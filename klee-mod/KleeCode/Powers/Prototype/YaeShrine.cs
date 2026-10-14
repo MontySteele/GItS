@@ -133,23 +133,26 @@ public sealed class YaeShrineLedger
     public int PendingWithers { get; internal set; }
 
     /// <summary>
-    /// PLANT ONE (pick 1 (a), ruled): every standing Sakura gains a Level (to
-    /// <paramref name="levelCap"/>), then a new one is added at
+    /// PLANT ONE (pick 1 (a), ruled): every standing Sakura gains a Level (no
+    /// cap: Yae review r1, pick 2), then a new one is added at
     /// <paramref name="plantLevel"/> with <see cref="YaeLaw.SakuraTurns"/>
     /// strikes left -- unless three stand, in which case the three are
     /// levelled and none is added. Returns whether one was added.
     /// </summary>
-    public bool Plant(int plantLevel, int levelCap) => Plant(plantLevel, levelCap, null);
+    public bool Plant(int plantLevel) => Plant(plantLevel, null);
 
     /// <summary>Plant one, the new Sakura starting at <paramref name="startLevel"/>
-    /// where a card says so (Grafted Branch): never below the plant Level,
-    /// capped.</summary>
-    public bool Plant(int plantLevel, int levelCap, int? startLevel)
+    /// where a card says so (Grafted Branch), raised as every plant is by
+    /// Fox's Mooncall (its bonus is <paramref name="plantLevel"/> over
+    /// <see cref="YaeLaw.PlantLevel"/>); never below the plant Level.
+    /// </summary>
+    public bool Plant(int plantLevel, int? startLevel)
     {
-        if (startLevel is { } at) plantLevel = Math.Min(levelCap, Math.Max(plantLevel, at));
+        if (startLevel is { } at)
+            plantLevel = Math.Max(plantLevel, at + plantLevel - YaeLaw.PlantLevel);
         foreach (var s in _sakura)
         {
-            s.Level = Math.Min(levelCap, s.Level + 1);
+            s.Level++;
         }
         if (_sakura.Count >= YaeLaw.SakuraCap) return false;
         Seq++;
@@ -175,25 +178,47 @@ public sealed class YaeShrineLedger
         foreach (var s in _sakura) s.TurnsLeft += n;
     }
 
-    /// <summary>"Each Sakura gains a Level": +n each, capped.</summary>
-    public void LevelUp(int n, int levelCap)
+    /// <summary>"Each Sakura gains a Level": +n each, no cap.</summary>
+    public void LevelUp(int n)
     {
-        foreach (var s in _sakura) s.Level = Math.Min(levelCap, s.Level + n);
+        foreach (var s in _sakura) s.Level += n;
     }
 
-    /// <summary>After the end-of-turn strikes every timer ticks; a Sakura at
-    /// 0 withers. A Deadline Extension Sakura's timer does not tick, so it
-    /// never withers. Returns how many withered, and banks them for Fallen
-    /// Petals.</summary>
-    public int TickAndWither()
+    /// <summary>Sakura Grove: "your newest Sakura gains a Level" (+n). No-op
+    /// with none standing.</summary>
+    public void LevelUpNewest(int n)
+    {
+        if (_sakura.Count > 0) _sakura[^1].Level += n;
+    }
+
+    /// <summary>After the end-of-turn strikes every timer ticks. A Deadline
+    /// Extension Sakura's timer does not tick, so it never withers. Returns
+    /// the Sakura whose timers ran out, oldest first, STILL STANDING: each
+    /// blooms (Last Bloom), then <see cref="Wither"/> removes it.</summary>
+    public IReadOnlyList<YaeSakura> Tick()
     {
         foreach (var s in _sakura)
         {
             if (s.Annotation != YaeAnnotation.DeadlineExtension) s.TurnsLeft--;
         }
-        var withered = _sakura.RemoveAll(s => s.TurnsLeft <= 0);
-        PendingWithers += withered;
-        return withered;
+        return _sakura.Where(s => s.TurnsLeft <= 0).ToList();
+    }
+
+    /// <summary>One Sakura withers: it leaves, and Fallen Petals banks it.
+    /// </summary>
+    public void Wither(YaeSakura sakura)
+    {
+        if (_sakura.Remove(sakura)) PendingWithers++;
+    }
+
+    /// <summary>Tick, then wither the run-out ones without their bloom (the
+    /// pure read; the door blooms each first). Returns how many withered.
+    /// </summary>
+    public int TickAndWither()
+    {
+        var withered = Tick();
+        foreach (var s in withered) Wither(s);
+        return withered.Count;
     }
 
     /// <summary>"Edit your newest / oldest Sakura" (<paramref name="n"/>
@@ -241,28 +266,28 @@ public sealed class YaeShrineLedger
     internal void NoteEdit() => Edits++;
 
     /// <summary>
-    /// A Thunder strike's printed amount (sec.2): 2 + its Level, Sakura
-    /// Grove's bonus, and Edict of Cleansing's on an enemy it applies to.
-    /// The enemy's Vulnerable and Block apply later, in the hit. PURE.
+    /// A Thunder strike's printed amount (sec.2): 2 + its Level, and Edict
+    /// of Cleansing's on an enemy it applies to. The enemy's Vulnerable and
+    /// Block apply later, in the hit. PURE.
     /// </summary>
-    public static int StrikeDamage(int level, int grove, bool reacts, int edict) =>
-        StrikeSize(YaeRite.Thunder, level, grove, 0, YaeAnnotation.None)
+    public static int StrikeDamage(int level, bool reacts, int edict) =>
+        StrikeSize(YaeRite.Thunder, level, YaeAnnotation.None)
         + (reacts ? edict : 0);
 
     /// <summary>
     /// ONE STRIKE'S SIZE UNDER A RITE (ruled 2026-10-14), before Edict:
-    /// Thunder and Warding 2 + Level, Wildfire Level, Offering 1 card. Sakura
-    /// Grove and Mikage Thunder add to all but Offering, and so does a Red
-    /// Ink Sakura's 3 (Claude, 2026-10-14: Red Ink skips Offering). PURE.
+    /// Thunder and Warding 2 + Level, Wildfire Level, Offering 1 card. A Red
+    /// Ink Sakura's 3 adds to all but Offering (Claude, 2026-10-14). Sakura
+    /// Grove and Mikage Thunder raise Levels now (Yae review r1, pick 2), so
+    /// no global bonus sizes a strike. PURE.
     /// </summary>
-    public static int StrikeSize(YaeRite rite, int level, int grove, int mikage,
-                                 YaeAnnotation annotation)
+    public static int StrikeSize(YaeRite rite, int level, YaeAnnotation annotation)
     {
         var size = rite switch
         {
             YaeRite.Offering => YaeLaw.OfferingPerStrike,
-            YaeRite.Wildfire => level + grove + mikage,
-            _ => YaeLaw.SakuraBase + level + grove + mikage,
+            YaeRite.Wildfire => level,
+            _ => YaeLaw.SakuraBase + level,
         };
         if (annotation == YaeAnnotation.RedInk && rite != YaeRite.Offering)
             size += YaeLaw.RedInkAmount;
@@ -289,15 +314,10 @@ public static class YaeShrine
     public static int Count(Creature? yae) =>
         yae == null || !Live(yae) ? 0 : YaeShrineLedger.For(yae).Count;
 
-    /// <summary>The Level a Sakura is planted at: 1, or 2 under Fox's
-    /// Mooncall.</summary>
+    /// <summary>The Level a Sakura is planted at: 1, plus 1 for each Fox's
+    /// Mooncall (Yae review r1: "planted 1 Level higher", per copy).</summary>
     public static int PlantLevel(Creature yae) =>
-        yae.HasPower<FoxsMooncallPower>() ? YaeLaw.MooncallPlantLevel : YaeLaw.PlantLevel;
-
-    /// <summary>The Level a Sakura can reach: 3, or 4 under Fox's Mooncall.
-    /// </summary>
-    public static int LevelCap(Creature yae) =>
-        yae.HasPower<FoxsMooncallPower>() ? YaeLaw.MooncallLevelCap : YaeLaw.LevelCap;
+        YaeLaw.PlantLevel + yae.GetPowerAmount<FoxsMooncallPower>();
 
     /// <summary>Do Pyro, Hydro or Cryo sit on this enemy, so an Electro strike
     /// reacts (Edict of Cleansing's read)?</summary>
@@ -317,7 +337,7 @@ public static class YaeShrine
         var ledger = YaeShrineLedger.For(yae);
         for (var i = 0; i < n; i++)
         {
-            ledger.Plant(PlantLevel(yae), LevelCap(yae), startLevel);
+            ledger.Plant(PlantLevel(yae), startLevel);
         }
         await SakuraBadge.Sync(choiceContext, yae);
     }
@@ -332,9 +352,7 @@ public static class YaeShrine
     /// </summary>
     public static int Size(Creature yae, YaeSakura sakura, YaeRite? rite = null) =>
         YaeShrineLedger.StrikeSize(
-            rite ?? YaeShrineLedger.For(yae).Rite, sakura.Level,
-            yae.GetPowerAmount<SakuraGrovePower>(),
-            yae.GetPowerAmount<MikageThunderPower>(), sakura.Annotation);
+            rite ?? YaeShrineLedger.For(yae).Rite, sakura.Level, sakura.Annotation);
 
     /// <summary>The enemy a single-target strike lands on: the card's aim
     /// (Kitsune Pounce), else this turn's Lure while it lives, else one
@@ -452,7 +470,7 @@ public static class YaeShrine
     /// <summary>
     /// Her turn start, after the draw (<c>KleeElementalHooks.AfterPlayerTurnStart</c>,
     /// the sim's <c>yae_shrine.turn_start</c> site): the Lure expires, then
-    /// Yakan Offering plants.
+    /// Yakan Offering plants, then Sakura Grove levels the newest.
     /// </summary>
     public static async Task TurnStart(PlayerChoiceContext choiceContext, Player player)
     {
@@ -482,20 +500,41 @@ public static class YaeShrine
             yae.Powers.OfType<YakanOfferingPower>().FirstOrDefault()?.Pulse();
             await Plant(choiceContext, yae, offering);
         }
+        var grove = yae.GetPowerAmount<SakuraGrovePower>();
+        if (grove > 0 && ledger.Count > 0)
+        {
+            yae.Powers.OfType<SakuraGrovePower>().FirstOrDefault()?.Pulse();
+            ledger.LevelUpNewest(grove);
+        }
         await SakuraBadge.Sync(choiceContext, yae);
     }
 
     /// <summary>
     /// Her turn end (<c>KleeElementalHooks.BeforeSideTurnEnd</c>, the sim's
-    /// <c>yae_shrine.turn_end</c> site): the strikes, then every timer ticks
-    /// and the withered leave.
+    /// <c>yae_shrine.turn_end</c> site): the strikes, then every timer ticks.
+    /// LAST BLOOM (Yae review r1, pick 1 (a), ruled 2026-10-14): each Sakura
+    /// whose timer ran out, oldest first, strikes once more under the current
+    /// Rite (a normal strike), THEN withers -- so Fallen Petals banks it after
+    /// the bloom.
     /// </summary>
     public static async Task TurnEnd(PlayerChoiceContext choiceContext, Creature yae)
     {
         if (!Live(yae)) return;
         await StrikeAll(choiceContext, yae);
-        YaeShrineLedger.For(yae).TickAndWither();
+        await TickAndBloom(choiceContext, yae);
         await SakuraBadge.Sync(choiceContext, yae);
+    }
+
+    /// <summary>The timers tick; each run-out Sakura blooms, then withers.
+    /// </summary>
+    public static async Task TickAndBloom(PlayerChoiceContext choiceContext, Creature yae)
+    {
+        var ledger = YaeShrineLedger.For(yae);
+        foreach (var sakura in ledger.Tick())
+        {
+            await Strike(choiceContext, yae, sakura);
+            ledger.Wither(sakura);
+        }
     }
 
     /// <summary>
@@ -570,10 +609,8 @@ public static class YaeShrineFace
         YaeShrineLedger.For(yae).Standing.Sum(s => YaeShrine.Size(yae, s, rite));
 
     /// <summary>The same sum off the numbers alone. PURE.</summary>
-    public static int Total(IEnumerable<YaeSakura> standing, YaeRite rite,
-                            int grove, int mikage) =>
-        standing.Sum(s => YaeShrineLedger.StrikeSize(rite, s.Level, grove, mikage,
-                                                     s.Annotation));
+    public static int Total(IEnumerable<YaeSakura> standing, YaeRite rite) =>
+        standing.Sum(s => YaeShrineLedger.StrikeSize(rite, s.Level, s.Annotation));
 
     /// <summary>The clause for a total, " (your Sakura: 5 Block)"; empty at
     /// 0, which is no Sakura standing. PURE.</summary>
@@ -641,13 +678,14 @@ public static class YaeCards
         await SakuraBadge.Sync(choiceContext, yae);
     }
 
-    /// <summary>Rooted Shrine: "Each Sakura gains a Level."</summary>
+    /// <summary>Rooted Shrine, Mikage Thunder: "Each Sakura gains a Level"
+    /// (YmAmount Levels; no cap).</summary>
     public static async Task LevelUp(PlayerChoiceContext choiceContext,
                                      CardModel card, CardPlay cardPlay)
     {
         var yae = card.Owner?.Creature;
         if (yae == null || !YaeShrine.Live(yae)) return;
-        YaeShrineLedger.For(yae).LevelUp(Var(card, "YmAmount"), YaeShrine.LevelCap(yae));
+        YaeShrineLedger.For(yae).LevelUp(Var(card, "YmAmount"));
         await SakuraBadge.Sync(choiceContext, yae);
     }
 

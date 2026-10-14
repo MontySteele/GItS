@@ -51,7 +51,7 @@ public sealed class ProtoYmMikageThunder : CustomCardModel, IElementalCard, ICha
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Mikage Thunder"),
-        ("description", "[gold]Tenko[/gold]{InCombat:{YaeTenko}|}. For the rest of this combat, your [gold]Sakura[/gold] strike for {PowerAmount:diff()} more."),
+        ("description", "Each [gold]Sakura[/gold] gains {IfUpgraded:show:2 Levels|a Level}. [gold]Tenko[/gold]{InCombat:{YaeTenko}|}."),
     };
 
     /// <summary>This card's in-combat shrine clauses
@@ -66,7 +66,7 @@ public sealed class ProtoYmMikageThunder : CustomCardModel, IElementalCard, ICha
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 1m)
+            new DynamicVar("YmAmount", 1m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -78,12 +78,12 @@ public sealed class ProtoYmMikageThunder : CustomCardModel, IElementalCard, ICha
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        await YaeCards.LevelUp(choiceContext, this, cardPlay);
         await YaeCards.Tenko(choiceContext, this, cardPlay);
-        await PowerCmd.Apply<MikageThunderPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
+        DynamicVars["YmAmount"].UpgradeValueBy(1m);
     }
 }

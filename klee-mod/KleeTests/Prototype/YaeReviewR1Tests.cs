@@ -54,15 +54,16 @@ public class YaeReviewR1Tests : IDisposable
     public void The_sum_is_each_sakuras_strike_under_that_rite()
     {
         var ledger = YaeShrineLedger.For(Seat.Yae().Creature);
-        for (var i = 0; i < 3; i++) ledger.Plant(YaeLaw.PlantLevel, YaeLaw.LevelCap);
+        for (var i = 0; i < 3; i++) ledger.Plant(YaeLaw.PlantLevel);
         // Levels 3, 2, 1.
-        Assert.Equal(12, YaeShrineFace.Total(ledger.Standing, YaeRite.Thunder, 0, 0));
-        Assert.Equal(12, YaeShrineFace.Total(ledger.Standing, YaeRite.Warding, 0, 0));
-        Assert.Equal(6, YaeShrineFace.Total(ledger.Standing, YaeRite.Wildfire, 0, 0));
-        Assert.Equal(3, YaeShrineFace.Total(ledger.Standing, YaeRite.Offering, 0, 0));
-        // Grove sizes three Rites and not Offering, as the strike does.
-        Assert.Equal(12 + 3 * 2, YaeShrineFace.Total(ledger.Standing, YaeRite.Thunder, 2, 0));
-        Assert.Equal(3, YaeShrineFace.Total(ledger.Standing, YaeRite.Offering, 2, 1));
+        Assert.Equal(12, YaeShrineFace.Total(ledger.Standing, YaeRite.Thunder));
+        Assert.Equal(12, YaeShrineFace.Total(ledger.Standing, YaeRite.Warding));
+        Assert.Equal(6, YaeShrineFace.Total(ledger.Standing, YaeRite.Wildfire));
+        Assert.Equal(3, YaeShrineFace.Total(ledger.Standing, YaeRite.Offering));
+        // Levels past 3 count in full (review r1, pick 2: no cap).
+        ledger.LevelUp(3);                    // 6, 5, 4
+        Assert.Equal(12 + 3 * 3, YaeShrineFace.Total(ledger.Standing, YaeRite.Thunder));
+        Assert.Equal(3, YaeShrineFace.Total(ledger.Standing, YaeRite.Offering));
     }
 
     [Fact]

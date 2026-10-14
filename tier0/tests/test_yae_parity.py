@@ -50,8 +50,6 @@ def test_the_law_numbers_mirror_the_sim():
     assert {k: int(v) for k, v in law.items()} == {
         "SakuraCap": Y.SAKURA_CAP, "SakuraTurns": Y.SAKURA_TURNS,
         "SakuraBase": Y.SAKURA_BASE, "PlantLevel": Y.PLANT_LEVEL,
-        "LevelCap": Y.LEVEL_CAP, "MooncallPlantLevel": Y.MOONCALL_PLANT_LEVEL,
-        "MooncallLevelCap": Y.MOONCALL_LEVEL_CAP,
         "RedInkAmount": Y.RED_INK_AMOUNT, "FoxFireDamage": Y.FOX_FIRE_DAMAGE,
         "OfferingPerStrike": Y.OFFERING_DRAW,
         "RoyaltiesPayout": Y.ROYALTIES_ENERGY,
@@ -95,7 +93,7 @@ def test_every_power_her_rows_apply_is_a_class():
         encoding="utf-8")
     for name in (Y.SAKURA_GROVE, Y.EDICT, Y.SERIALIZATION, Y.MOONCALL,
                  Y.YAKAN_OFFERING, Y.CHANNELING, Y.EDITOR_IN_CHIEF,
-                 Y.MIKAGE_THUNDER, Y.FALLEN_PETALS, Y.FALLEN_PETALS_PLUS):
+                 Y.FALLEN_PETALS, Y.FALLEN_PETALS_PLUS):
         cls = gen.APPLY_POWERS[name][0]
         assert f"class {cls} " in text, cls
 

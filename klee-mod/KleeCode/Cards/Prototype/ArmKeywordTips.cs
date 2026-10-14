@@ -651,8 +651,8 @@ public static class ArmKeywordTips
         $"Up to {Powers.YaeLaw.SakuraCap} stand beside you. At the end of your "
       + "turn each strikes under the shrine's [gold]Rite[/gold] (Thunder at "
       + "the start of combat), oldest first. Each lasts "
-      + $"{Powers.YaeLaw.SakuraTurns} turns. Planting one raises the others' "
-      + $"Level by 1 (up to {Powers.YaeLaw.LevelCap}). [gold]Tenko[/gold]: "
+      + $"{Powers.YaeLaw.SakuraTurns} turns; when it withers, it strikes once "
+      + "more. Planting one raises the others' Level by 1. [gold]Tenko[/gold]: "
       + $"every Sakura strikes now and lasts {Powers.YaeLaw.SakuraTurns} turns "
       + "again.";
 

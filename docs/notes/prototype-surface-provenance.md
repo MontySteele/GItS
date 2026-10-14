@@ -8437,6 +8437,25 @@ upgrade was the cost cut. Faces: every "Rite: X" row carries
 over the Sakura standing, before Edict, Channeling's extra strike and Fox
 Fire.
 
+## Yae Miko, review r1 picks, 2026-10-14
+
+Ruled by [USER] (`review/active/yae-design-axes-2026-10-14.md`, "Review r1,
+ruled 2026-10-14"), pick 1 (a) and pick 2. Rules: Last Bloom (a Sakura whose
+timer runs out strikes once more under the current Rite, then withers;
+Fallen Petals banks it after) and no Level cap (`YaeLaw.LevelCap`,
+`MooncallPlantLevel` and `MooncallLevelCap` removed with their sim twins).
+Rows: `proto_ym_foxs_mooncall` "Your Sakura are planted 1 Level higher."
+(power amount 1 per copy, read as `PlantLevel + amount`; upgrade still the
+cost cut); `proto_ym_sakura_grove` "At the start of your turn, your newest
+Sakura gains a Level.", amount 1, upgrade Innate (was 2 [3] to three Rites'
+strikes); `proto_ym_mikage_thunder` `level_up` 1 then `tenko`, upgrade
+`yae_amount: 1` (2 Levels), its face "Each Sakura gains {IfUpgraded:show:2
+Levels|a Level}. Tenko."; `MikageThunderPower` and `ym_mikage_thunder`
+removed. Readings: Grove pays at her turn start after Yakan Offering's plant;
+Fox's Mooncall raises Grafted Branch's Level too (3 [4] under one copy).
+The old "Mikage Thunder: the paper prints no upgrade" note above is
+superseded.
+
 ## Kokomi pool overhaul, 2026-10-13
 
 `review/active/kokomi-pool-overhaul-2026-10-13.md`, picks 1 (a) and 2 (a).

@@ -20,7 +20,8 @@ public interface IYaeCharacter
 ///   * SAKURA (<see cref="YaeShrineLedger"/>, <see cref="YaeShrine"/>): up to
 ///     3 beside her, each with a Level and a 3-strike timer. At the end of
 ///     her turn each strikes, oldest first, for 2 + its Level Electro as a
-///     pet's hit, then the timers tick. Planting levels the standing ones;
+///     pet's hit, then the timers tick; a Sakura that withers strikes once
+///     more (Last Bloom). Planting levels the standing ones, without cap;
 ///     Tenko strikes now and resets every timer.
 ///   * EDIT (<see cref="YaeEditing"/>): a card in hand gains one of five
 ///     Annotations (her Enchantments, <see cref="YaeAnnotationModel"/>) for
@@ -62,17 +63,11 @@ public static class YaeLaw
     /// <summary>A strike deals this plus the Sakura's Level.</summary>
     public const int SakuraBase = 2;
 
-    /// <summary>A Sakura is planted at Level 1.</summary>
+    /// <summary>A Sakura is planted at Level 1, plus 1 for each Fox's
+    /// Mooncall. Levels have no cap (Yae review r1, pick 2, ruled
+    /// 2026-10-14): they stack without limit and leave with the Sakura.
+    /// </summary>
     public const int PlantLevel = 1;
-
-    /// <summary>The Level a Sakura can reach.</summary>
-    public const int LevelCap = 3;
-
-    /// <summary>Fox's Mooncall: planted at Level 2.</summary>
-    public const int MooncallPlantLevel = 2;
-
-    /// <summary>Fox's Mooncall: can reach Level 4.</summary>
-    public const int MooncallLevelCap = 4;
 
     /// <summary>Red Ink: this much more damage per hit and Block per gain.
     /// </summary>

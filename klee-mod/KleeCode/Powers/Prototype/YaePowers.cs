@@ -306,21 +306,24 @@ public sealed class FoxfireLurePower : PowerModel, ILocalizationProvider
 //  tier0/engine/yae_shrine.py.
 // ---------------------------------------------------------------------------
 
-/// <summary>Sakura Grove: "Your Sakura strike for 2 [3] more in Thunder,
-/// Warding and Wildfire."</summary>
+/// <summary>Sakura Grove (Yae review r1, pick 2, ruled 2026-10-14): "At the
+/// start of your turn, your newest Sakura gains a Level." Paid by
+/// <see cref="YaeShrine.TurnStart"/>, one Level per stack.</summary>
 public sealed class SakuraGrovePower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
         ("title", "Sakura Grove"),
         ("description",
-            "Your [gold]Sakura[/gold] strikes are [blue]{Amount}[/blue] bigger "
-          + "in Thunder, Warding and Wildfire."),
+            "At the start of your turn, your newest [gold]Sakura[/gold] gains "
+          + "[blue]{Amount}[/blue] Level."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
+
+    internal void Pulse() => Flash();
 }
 
 /// <summary>Edict of Cleansing: "Your Sakura strikes deal 3 [5] more to an
@@ -368,22 +371,22 @@ public sealed class SerializationPower : PowerModel, ILocalizationProvider
     }
 }
 
-/// <summary>Fox's Mooncall: "Your Sakura are planted at Level 2 and can reach
-/// Level 4." A marker <see cref="YaeShrine.PlantLevel"/> and
-/// <see cref="YaeShrine.LevelCap"/> read.</summary>
+/// <summary>Fox's Mooncall (Yae review r1, pick 2, ruled 2026-10-14): "Your
+/// Sakura are planted 1 Level higher", per copy (two copies plant at Level
+/// 3). <see cref="YaeShrine.PlantLevel"/> reads the amount.</summary>
 public sealed class FoxsMooncallPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
         ("title", "Fox's Mooncall"),
         ("description",
-            $"Your [gold]Sakura[/gold] are planted at Level {YaeLaw.MooncallPlantLevel} "
-          + $"and can reach Level {YaeLaw.MooncallLevelCap}."),
+            "Your [gold]Sakura[/gold] are planted [blue]{Amount}[/blue] Level "
+          + "higher."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
-    public override PowerStackType StackType => PowerStackType.Single;
+    public override PowerStackType StackType => PowerStackType.Counter;
 }
 
 /// <summary>Yakan Offering: "At the start of your turn, plant a Sakura."
@@ -421,24 +424,6 @@ public sealed class SakuraChannelingPower : PowerModel, ILocalizationProvider
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Single;
-}
-
-/// <summary>Mikage Thunder (batch two): "For the rest of this combat, your
-/// Sakura strike for 1 more." Stacks per play; sized as Sakura Grove is
-/// (not in Offering).</summary>
-public sealed class MikageThunderPower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Mikage Thunder"),
-        ("description",
-            "Your [gold]Sakura[/gold] strikes are [blue]{Amount}[/blue] bigger "
-          + "in Thunder, Warding and Wildfire."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
 }
 
 /// <summary>Fallen Petals (batch two): "Whenever a Sakura withers, gain 1

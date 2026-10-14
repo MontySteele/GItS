@@ -102,14 +102,14 @@ def test_the_rite_clause_sums_the_sakura_standing_under_that_rite():
     assert Y.rite_line(st, Y.OFFERING) == " (your Sakura: draw 3)"
 
 
-def test_the_clause_reads_grove_and_red_ink_as_the_strike_does():
+def test_the_clause_reads_levels_and_red_ink_as_the_strike_does():
     st = _state()
     _play(st, _ym("yakan_evocation"))            # Level 1
-    st.player.powers[Y.SAKURA_GROVE] = 2
+    Y.level_up(st, 3)                            # Level 4: no cap
     Y.edit_sakura(st, "every", 1, Y.RED_INK)
-    assert Y.rite_total(st, Y.THUNDER) == 2 + 1 + 2 + Y.RED_INK_AMOUNT
-    assert Y.rite_total(st, Y.WILDFIRE) == 1 + 2 + Y.RED_INK_AMOUNT
-    assert Y.rite_total(st, Y.OFFERING) == 1     # neither sizes Offering
+    assert Y.rite_total(st, Y.THUNDER) == 2 + 4 + Y.RED_INK_AMOUNT
+    assert Y.rite_total(st, Y.WILDFIRE) == 4 + Y.RED_INK_AMOUNT
+    assert Y.rite_total(st, Y.OFFERING) == 1     # Red Ink skips Offering
 
 
 def test_the_clause_is_what_the_strikes_then_do():

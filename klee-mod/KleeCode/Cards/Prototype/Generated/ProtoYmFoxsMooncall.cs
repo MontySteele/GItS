@@ -45,7 +45,7 @@ public sealed class ProtoYmFoxsMooncall : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Fox's Mooncall"),
-        ("description", "Your [gold]Sakura[/gold] are planted at Level 2 and can reach Level 4."),
+        ("description", "Your [gold]Sakura[/gold] are planted 1 Level higher."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -324,3 +324,43 @@ Four changes, built in both engines:
    takes Footnote's: "Edit 2 cards in your hand: Sakura Seal."
 4. **Kitsune Rite: "Tenko. Draw 1 card."**, 1 [0], Exhaust, as before;
    with no Sakura it reads "Tenko (no Sakura). Draw 1 card."
+
+## Review r1, ruled 2026-10-14
+
+[USER]'s words: "1) agreed on a) 2) How about we uncap the level entirely
+and just let anything that raises the cap stick cumulatively. Level becomes
+Yae's version of Focus where most bonuses are transitory or per-Sakura,
+except for specific Rare effects that are global. 3) Agreed here, unless the
+Yae changes finish before the current seats, in which case I'd rather you do
+3 Kokomi and 2 Yae to have time for an extra Yae round before I'm back."
+
+Pick 1 (a) was "Last Bloom: when a Sakura withers, it strikes once more
+under the current Rite."
+
+Built in both engines (C# `YaeShrine.cs`, sim `tier0/engine/yae_shrine.py`):
+1. **Last Bloom.** When a Sakura's timer runs out it strikes once more under
+   the current Rite, a normal strike (Level, Red Ink, Fox Fire, Edict,
+   Channeling all pay), then leaves. Fallen Petals counts it after the
+   bloom. Deadline Extension never runs out, so it never blooms. The Sakura
+   tip adds "when it withers, it strikes once more."
+2. **No Level cap.** Every "gains a Level" and every full-shrine plant
+   stacks without limit. Levels stay on their Sakura and leave with it.
+   The "(up to 3)" in the Sakura tip is gone, and so is Fox's Mooncall's
+   "can reach Level 4".
+3. **Global Level only from a Rare.**
+   - Fox's Mooncall (R, Power 2 [1]): "Your Sakura are planted 1 Level
+     higher." Each copy adds 1, so two copies plant at Level 3. Its upgrade
+     was already the cost cut and stays.
+   - Sakura Grove (U, Power 1): "At the start of your turn, your newest
+     Sakura gains a Level." Upgrade: Innate (was a global "strike for 2 [3]
+     more"). Each copy raises once. It runs after Yakan Offering's plant.
+   - Mikage Thunder (U, Attack 2): "Each Sakura gains a Level. Tenko."
+     Upgrade: 2 Levels (was "Tenko. For the rest of this combat, your
+     Sakura strike for 1 more"). Its power is gone.
+   - Red Ink stays +3 per Sakura, not in Offering. The other Rares are
+     unchanged.
+4. The Rite clause, the Rite badge and the seat page sum the uncapped
+   Levels; each Sakura badge shows its Level with no cap.
+
+Fox's Mooncall raises Grafted Branch too (confirmed 2026-10-14): under one
+Mooncall it starts at Level 3 [4], under two at 4 [5].

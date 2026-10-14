@@ -4211,8 +4211,8 @@ APPLY_POWERS = {
     # klee-mod/KleeCode/Powers/Prototype/YaePowers.cs; each row carries its
     # own `description:`. Sim twins: tier0/engine/yae_shrine.py.
     "ym_sakura_grove": ("SakuraGrovePower", None,
-        "Your [gold]Sakura[/gold] strikes are {X} bigger in Thunder, Warding "
-        "and Wildfire."),
+        "At the start of your turn, your newest [gold]Sakura[/gold] gains {X} "
+        "Level."),
     "ym_edict_of_cleansing": ("EdictOfCleansingPower", None,
         "Your [gold]Sakura[/gold] strikes deal {X} additional damage to an "
         "enemy that is "
@@ -4221,17 +4221,13 @@ APPLY_POWERS = {
     "ym_serialization": ("SerializationPower", None,
         "Whenever you [gold]Edit[/gold] a card, gain {X} [gold]Block[/gold]."),
     "ym_foxs_mooncall": ("FoxsMooncallPower", None,
-        "Your [gold]Sakura[/gold] are planted at Level 2 and can reach "
-        "Level 4."),
+        "Your [gold]Sakura[/gold] are planted {X} Level higher."),
     "ym_yakan_offering": ("YakanOfferingPower", None,
         "At the start of your turn, plant {X} [gold]Sakura[/gold]."),
     "ym_sakura_channeling": ("SakuraChannelingPower", None,
         "Your [gold]Sakura[/gold] also strike as Thunder, whatever the "
         "[gold]Rite[/gold]."),
     # The design axes, batch two (2026-10-14).
-    "ym_mikage_thunder": ("MikageThunderPower", None,
-        "Your [gold]Sakura[/gold] strikes are {X} bigger in Thunder, Warding "
-        "and Wildfire."),
     "ym_fallen_petals": ("FallenPetalsPower", None,
         "Whenever a [gold]Sakura[/gold] withers, gain {X} Energy on your "
         "next turn."),

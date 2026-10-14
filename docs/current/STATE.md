@@ -53,8 +53,12 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   shrine's Rite (Thunder, Warding, Wildfire, Offering) sets what every strike
   does, a Sakura may carry Red Ink, Fox Fire or Deadline Extension, the 30
   realigned and ten new cards. A staged pool of 40 (15 / 16 / 9, no
-  Ancients or co-op cards yet), official card art. Next: two Yae seats, then
-  [USER]'s play.
+  Ancients or co-op cards yet), official card art. **Review r1 ruled and
+  built** (2026-10-14, same doc): Last Bloom (a withering Sakura strikes once
+  more), no Level cap, global Levels only from Fox's Mooncall (+1 per copy);
+  Sakura Grove levels the newest Sakura each turn, Mikage Thunder levels
+  every Sakura then Tenko. Next: Yae seats (3 Kokomi and 2 Yae if this lands
+  before the current seats finish), then [USER]'s play.
 
 ## The kits
 
