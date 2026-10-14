@@ -1699,22 +1699,29 @@ ARM_KEYWORDS: dict[str, str] = {
                         "Vulnerable, Electro 3 to ALL."),
     "Knight": ("One of Varka's Companions. Playing one makes its element "
                "your current element. Geo does not."),
-    # YAE MIKO (2026-10-13), in step with `ArmKeywordTips.YaeSakuraTip` and
-    # `YaeEditTip`, markup folded out and the numbers written out (`YaeLaw`).
-    "Sakura": ("Up to 3 stand beside you. At the end of your turn each "
-               "strikes under the shrine's Rite (Thunder at the start of "
-               "combat), oldest first. Each lasts 3 turns; when it withers, "
-               "it strikes once more. Planting one raises the others' Level "
-               "by 1. Tenko: every Sakura strikes now "
-               "and lasts 3 turns again."),
-    "Edit": ("Give a card in your hand an Annotation for this combat, "
-             "replacing any it had: Red Ink (+3 damage and Block), Footnote "
-             "(draw 1), Deadline Extension (Retain), Fox Fire (4 Electro "
-             "damage to a random enemy), Sakura Seal (plant a Sakura), "
-             "Royalties (gain 1 Energy). On a Sakura: Red Ink makes its "
-             "strike 3 bigger (not in Offering), Fox Fire adds 4 damage, "
-             "Deadline Extension "
-             "stops it withering. A Published Annotation lasts the run."),
+    # YAE MIKO (2026-10-13), in step with `ArmKeywordTips.YaeSakuraTip`,
+    # `YaeTenkoTip` and `YaeEditTip`, markup folded out and the numbers
+    # written out (`YaeLaw`). [USER] (2026-10-14): "Sakura and Tenko should
+    # be cut into separate tips", and "no need to show the text for every
+    # possible edit if the card can only apply one": each Annotation is its
+    # own row (`YaeAnnotationText.Rule`, and `.SakuraRule` where it has one),
+    # printed only where a face names it.
+    "Sakura": ("Strikes at the end of your turn under the current Rite. "
+               "Lasts 3 turns, then strikes once more. Up to 3; planting "
+               "another gives the rest a Level (even when full)."),
+    "Tenko": "Every Sakura strikes now and lasts 3 turns again.",
+    "Edit": ("Give a card an Annotation for this combat, replacing any it "
+             "had. A Published one lasts the run."),
+    "Red Ink": ("This card deals 3 more damage and gives 3 more Block. On a "
+                "Sakura: the Sakura's strike is 3 bigger (not in Offering)."),
+    "Footnote": "When this card is played, draw 1 card.",
+    "Deadline Extension": ("This card has Retain. On a Sakura: the Sakura "
+                           "does not wither."),
+    "Fox Fire": ("When this card is played, deal 4 Electro damage to a "
+                 "random enemy. On a Sakura: when the Sakura strikes, it "
+                 "also deals 4 Electro damage to a random enemy."),
+    "Sakura Seal": "When this card is played, plant a Sakura.",
+    "Royalties": "When this card is played, gain 1 Energy.",
     # YAE MIKO, THE DESIGN AXES (ruled 2026-10-14), in step with
     # `ArmKeywordTips.YaeRiteTip`.
     "Rite": ("Sets what Sakura strikes do. Thunder: damage. Warding: Block. "
@@ -2080,6 +2087,10 @@ _ARM_KEYWORD_ARM: dict[str, str] = {
     # her row prints only on her runs. (The wire names her by her title,
     # "Yae Miko", which `_fold`s to the two words.)
     "Sakura": "yae miko", "Edit": "yae miko", "Rite": "yae miko",
+    # 2026-10-14: Tenko and the six Annotations, split out of those two.
+    "Tenko": "yae miko", "Red Ink": "yae miko", "Footnote": "yae miko",
+    "Deadline Extension": "yae miko", "Fox Fire": "yae miko",
+    "Sakura Seal": "yae miko", "Royalties": "yae miko",
     # THE SALON'S TAB (2026-10-05): the summon and the four guests.
     "Summon": "furina", "Guest Star": "furina", "oldest guest": "furina",
     "Clorinde": "furina",
@@ -2165,14 +2176,19 @@ _ARM_KEYWORD_RE = {
     "Oath": re.compile(r"\bOath\b"),
     "current element": re.compile(r"\bcurrent element\b"),
     "Knight": re.compile(r"\bKnights?\b"),
-    # YAE MIKO: `Sakura` takes no plural, and its row carries Tenko (pick 6
-    # (a)); `Edit` conjugates ("Edited") and its row carries the five
-    # Annotations, "Annotated" and "Publish".
-    "Sakura": re.compile(r"\bSakura\b|\bTenko\b"),
+    # YAE MIKO: `Sakura` takes no plural; `Edit` conjugates ("Edited") and
+    # its row carries "Annotated" and "Publish". Tenko and each Annotation
+    # are their own rows (2026-10-14).
+    "Sakura": re.compile(r"\bSakura\b"),
+    "Tenko": re.compile(r"\bTenko\b"),
     "Edit": re.compile(r"\bEdit(?:ed|s)?\b|\bAnnotat(?:ed|ions?)\b"
-                       r"|\bPublish(?:ed)?\b|\bRed Ink\b|\bFootnote\b"
-                       r"|\bDeadline Extension\b|\bFox Fire\b"
-                       r"|\bRoyalties\b"),
+                       r"|\bPublish(?:ed)?\b"),
+    "Red Ink": re.compile(r"\bRed Ink\b"),
+    "Footnote": re.compile(r"\bFootnote\b"),
+    "Deadline Extension": re.compile(r"\bDeadline Extension\b"),
+    "Fox Fire": re.compile(r"\bFox Fire\b"),
+    "Sakura Seal": re.compile(r"\bSakura Seal\b"),
+    "Royalties": re.compile(r"\bRoyalties\b"),
     "Rite": re.compile(r"\bRite\b"),
     # `EB-446`. NO PLURAL: there is one raven. It fires on Nightrider's face,
     # which names him and cannot grant him, and on the Power card that does --

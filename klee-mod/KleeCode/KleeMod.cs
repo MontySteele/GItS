@@ -272,6 +272,13 @@ public static class KleeMod
                     Powers.YaeEditing.AnnotationPromptText,
             });
 
+            // YAE MIKO (2026-10-14): each Annotation's Edit prompt, which
+            // names it and what it does (`YaeEditing.EditPromptTextFor`).
+            LocManager.Instance.GetTable("cards").MergeWith(
+                Powers.YaeAnnotationText.All.ToDictionary(
+                    Powers.YaeEditing.EditPromptKeyFor,
+                    Powers.YaeEditing.EditPromptTextFor));
+
             // YAE MIKO (2026-10-14, Publish after elites and bosses):
             // Meditations of a Yako's reward-screen row. A Reward's
             // Description is a table lookup, so its row is merged into
@@ -563,6 +570,8 @@ public static class KleeMod
                     [Cards.ArmKeywordTips.SakuraKey + ".title"] = "Sakura",
                     // YAE MIKO (2026-10-13): her second word.
                     [Cards.ArmKeywordTips.EditKey + ".title"] = "Edit",
+                    // 2026-10-14: Tenko, split out of her Sakura tip.
+                    [Cards.ArmKeywordTips.TenkoKey + ".title"] = "Tenko",
                     // The design axes (2026-10-14): the shrine's Rite.
                     [Cards.ArmKeywordTips.RiteKey + ".title"] = "Rite",
                     [Cards.ArmKeywordTips.LightfallSwordKey + ".title"] =
@@ -632,6 +641,13 @@ public static class KleeMod
                     [Cards.BaseKeywordTips.EtherealKey + ".title"] =
                         "Ethereal",
                 };
+            // YAE MIKO (2026-10-14): each Annotation's own tip, titled by
+            // its name (`ArmKeywordTips.ForAnnotation`).
+            foreach (var annotation in Powers.YaeAnnotationText.All)
+            {
+                keywordFallback[Cards.ArmKeywordTips.KeyOf(annotation) + ".title"] =
+                    Powers.YaeAnnotationText.Name(annotation);
+            }
             keywordTable.MergeWith(keywordFallback
                 .Where(pair => !keywordTable.HasEntry(pair.Key))
                 .ToDictionary(pair => pair.Key, pair => pair.Value));

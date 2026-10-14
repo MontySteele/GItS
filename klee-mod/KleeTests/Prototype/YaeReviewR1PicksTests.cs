@@ -97,8 +97,7 @@ public class YaeReviewR1PicksTests : IDisposable
     [Fact]
     public void The_sakura_tip_says_it_strikes_once_more()
     {
-        Assert.Contains("when it withers, it strikes once more",
-                        ArmKeywordTips.YaeSakuraTip);
+        Assert.Contains("then strikes once more", ArmKeywordTips.YaeSakuraTip);
         Assert.DoesNotContain("(up to", ArmKeywordTips.YaeSakuraTip);
     }
 

@@ -133,17 +133,58 @@ public static class YaeAnnotationText
     };
 
     /// <summary>What an Annotation does on a SAKURA (ruled 2026-10-14);
-    /// empty for the ones with no Sakura reading.</summary>
+    /// empty for the ones with no Sakura reading. Each sentence names the
+    /// Sakura, so it reads alone as the Annotation's own tip.</summary>
     public static string SakuraRule(YaeAnnotation annotation) => annotation switch
     {
         YaeAnnotation.RedInk =>
-            $"Its strike is {YaeLaw.RedInkAmount} bigger (not in Offering).",
+            $"The [gold]Sakura[/gold]'s strike is {YaeLaw.RedInkAmount} "
+          + "bigger (not in Offering).",
         YaeAnnotation.FoxFire =>
-            $"When it strikes, it also deals {YaeLaw.FoxFireDamage} "
-          + "[gold]Electro[/gold] damage to a random enemy.",
-        YaeAnnotation.DeadlineExtension => "It does not wither.",
+            "When the [gold]Sakura[/gold] strikes, it also deals "
+          + $"{YaeLaw.FoxFireDamage} [gold]Electro[/gold] damage to a random "
+          + "enemy.",
+        YaeAnnotation.DeadlineExtension =>
+            "The [gold]Sakura[/gold] does not wither.",
         _ => "",
     };
+
+    /// <summary>The six, in the sheet's order.</summary>
+    public static readonly YaeAnnotation[] All =
+    {
+        YaeAnnotation.RedInk, YaeAnnotation.Footnote,
+        YaeAnnotation.DeadlineExtension, YaeAnnotation.FoxFire,
+        YaeAnnotation.SakuraSeal, YaeAnnotation.Royalties,
+    };
+
+    /// <summary>
+    /// The one Annotation's tip on the card that applies it ([USER],
+    /// 2026-10-14: "no need to show the text for every possible edit if the
+    /// card can only apply one"): its card reading, or its Sakura reading on
+    /// a card that Edits a Sakura. PURE.
+    /// </summary>
+    public static string TipBody(YaeAnnotation annotation, bool onSakura) =>
+        onSakura && SakuraRule(annotation).Length > 0
+            ? SakuraRule(annotation)
+            : Rule(annotation);
+
+    /// <summary>Markup folded out, for a selection prompt. PURE.</summary>
+    public static string Plain(string text) =>
+        text.Replace("[gold]", "").Replace("[/gold]", "");
+
+    /// <summary>
+    /// The card reading as a clause about the card being picked: "This card
+    /// deals ..." becomes "it deals ...", "When this card is played, ..."
+    /// becomes "when it is played, ...". The same sentence as
+    /// <see cref="Rule"/>, so the prompt never quotes its own number. PURE.
+    /// </summary>
+    public static string PromptClause(YaeAnnotation annotation)
+    {
+        var rule = Plain(Rule(annotation)).TrimEnd('.');
+        rule = rule.Replace("This card", "It").Replace("this card", "it");
+        return rule.Length == 0 ? rule
+            : char.ToLowerInvariant(rule[0]) + rule.Substring(1);
+    }
 }
 
 /// <summary>Red Ink: "this card deals 3 more damage (per hit) and gives 3 more
@@ -265,6 +306,29 @@ public static class YaeEditing
     public const string EditPromptKey = "KLEEMOD-YAE_EDIT.selectionScreenPrompt";
 
     public const string EditPromptText = "Choose a card to Edit.";
+
+    /// <summary>
+    /// [USER] (2026-10-14): "We could move the actual Edit's effect text into
+    /// the selection screen, since AFAIK we only ever apply one type of edit
+    /// in a given screen." Every hand screen an Edit opens applies the one
+    /// Annotation its card names (<see cref="Edit"/>); Reborn as Guuji Yae
+    /// chooses the Annotation on its own screen and opens no hand screen, and
+    /// the Sakura Edits open none. So each Annotation has its own prompt row,
+    /// and <see cref="YaeAnnotation.None"/> keeps the generic one.
+    /// </summary>
+    public static string EditPromptKeyFor(YaeAnnotation annotation) =>
+        annotation == YaeAnnotation.None
+            ? EditPromptKey
+            : "KLEEMOD-YAE_EDIT_" + annotation.ToString().ToUpperInvariant()
+              + ".selectionScreenPrompt";
+
+    /// <summary>"Choose a card to Edit: Red Ink (it deals 3 more damage and
+    /// gives 3 more Block)." PURE.</summary>
+    public static string EditPromptTextFor(YaeAnnotation annotation) =>
+        annotation == YaeAnnotation.None
+            ? EditPromptText
+            : $"Choose a card to Edit: {YaeAnnotationText.Name(annotation)} "
+              + $"({YaeAnnotationText.PromptClause(annotation)}).";
 
     /// <summary>The Seven Glamours' prompt.</summary>
     public const string PublishPromptKey = "KLEEMOD-YAE_PUBLISH.selectionScreenPrompt";
@@ -410,7 +474,8 @@ public static class YaeEditing
         {
             var picked = (await CardSelectCmd.FromHand(
                 choiceContext, owner,
-                new CardSelectorPrefs(new LocString(Table, EditPromptKey), 1),
+                new CardSelectorPrefs(
+                    new LocString(Table, EditPromptKeyFor(annotation)), 1),
                 c => Editable(c, editor), editor)).FirstOrDefault();
             if (picked == null) return;
             if (!Annotate(picked, annotation)) continue;
