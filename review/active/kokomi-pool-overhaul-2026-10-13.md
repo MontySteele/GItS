@@ -108,3 +108,12 @@ at 78 (20 / 38 / 20).
 3. **What follows.** **(a) Default:** build, then a two-seat round on the new
    pool (a new card batch), then your next Kokomi run. (b) Five seats instead
    of two.
+
+## Ruled 2026-10-13
+
+[USER]: "On Kokomi, I'm good with default on 1 and 2. We'll want a 5 seat run on
+this, but I'll likely be back after the Varka run concludes to do the Furina test
+first."
+
+Pick 1 (a), pick 2 (a), pick 3 (b): five seats on the built pool, after
+[USER]'s Furina run.
