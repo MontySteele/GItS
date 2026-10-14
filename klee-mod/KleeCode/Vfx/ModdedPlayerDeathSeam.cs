@@ -91,7 +91,7 @@ internal static class ModdedPlayerDeathSeam
     /// The length reported for a spine-less player body that has no death clip
     /// to measure -- a flat portrait with no %AnimationTree at all. One second:
     /// Klee's death clip until 2026-10-12 and still shorter than every death
-    /// clip this mod ships (Klee 2.0 since her model frames, Furina 1.2,
+    /// clip this mod ships (Klee 2.0 since her model frames, Furina 2.2 since hers,
     /// Varka 2.2 since his model frames, Kokomi 1.3), so the fallback can
     /// never out-wait a real clip.
     /// </summary>

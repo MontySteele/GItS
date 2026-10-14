@@ -834,6 +834,15 @@ UNMIRRORED: dict[str, str] = {
     # cast delay, so the card's hit waits only Varka.AttackAnimDelay.
     "CardPlayMotion.AscensionDelay":
         "presentation: wait after the Ascension clip's trigger, in seconds.",
+    # Furina's Let the People Rejoice clip (2026-10-13): with her
+    # AttackAnimDelay (0.4 s) it lands the card's hit on the flourish.
+    "CardPlayMotion.RejoiceDelay":
+        "presentation: wait after the Rejoice clip's trigger, in seconds.",
+    # Her Drain and Repay effects stretch to the nearest guest (2026-10-13).
+    "FurinaStageFx.MinStretch":
+        "presentation: narrowest x stretch of a Drain/Repay effect.",
+    "FurinaStageFx.MaxStretch":
+        "presentation: widest x stretch of a Drain/Repay effect.",
     "ThrownProjectile.FlightSeconds":
         "presentation: hand-to-target flight of the thrown bomb in seconds.",
     "ThrownProjectile.ArcLift":

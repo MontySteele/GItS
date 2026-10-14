@@ -228,7 +228,6 @@ BUILD_ARTIFACTS = ("klee/build_id.tres", "klee/localization/")
 # test_pck_source_map_rules_are_still_in_the_build_script.
 PCK_SOURCE_RULES = [
     ("klee/model/layers/", "ImageGen/images/model/layers/combat/"),
-    ("furina/model/layers/", "ImageGen/images/furina/model/layers/combat/"),
     ("kokomi/model/layers/", "ImageGen/images/kokomi/model/layers/combat/"),
     ("varka/model/layers/", "ImageGen/images/varka/model/layers/combat/"),
     ("furina/salon/", "ImageGen/images/furina/salon/"),
@@ -252,7 +251,6 @@ PCK_SOURCE_RULES = [
 # `foreach ($d in 'ui','powers','relics','model')` loops.
 PCK_SOURCE_RULE_EVIDENCE = {
     "klee/model/layers/": r"model\layers\combat",
-    "furina/model/layers/": r"furina\model\layers\combat",
     "kokomi/model/layers/": r"$rigChar\model\layers\combat",
     "varka/model/layers/": r"$rigChar\model\layers\combat",
     "furina/salon/": r"furina\salon",

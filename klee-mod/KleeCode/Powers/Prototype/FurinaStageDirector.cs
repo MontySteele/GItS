@@ -6,6 +6,21 @@ using MegaCrit.Sts2.Core.Models;
 
 namespace KleeMod.Powers;
 
+/// <summary>The three stage beats that have a look of their own on her body
+/// (her model art, phase B, 2026-10-13; <c>KleeMod.Vfx.FurinaStageFx</c>).
+/// </summary>
+public enum StageEffect
+{
+    /// <summary>A Spend: a golden burst thrown up from her.</summary>
+    Spend,
+
+    /// <summary>A Drain: Hydro drawn out of her to the stage.</summary>
+    Drain,
+
+    /// <summary>A Repay: the droplets come back into her.</summary>
+    Repay,
+}
+
 /// <summary>Where a hit lands.</summary>
 public enum StageTarget
 {
@@ -88,6 +103,11 @@ public interface IStageBoard
 
     /// <summary>The bodies catch up with the seats.</summary>
     Task Sync();
+
+    /// <summary>A Spend, a Drain or a Repay happened: its effect plays on her
+    /// body. Display only and never awaited, so it never holds the rules up.
+    /// </summary>
+    void Effect(StageEffect effect);
 }
 
 /// <summary>What a guest summon did (rule 5).</summary>
@@ -185,6 +205,7 @@ public sealed class StageDirector
         var navia = _stage.NaviaDiscount > 0 && price > 0
             ? _stage.SeatOf(StagePerformer.Navia) : null;
         if (!_stage.Spend(price)) return 0;
+        _board.Effect(StageEffect.Spend);
         if (navia != null) await _board.LineCue(navia);
         await AfterSpend();
         return price;
@@ -200,6 +221,7 @@ public sealed class StageDirector
         var spent = _stage.SpendAll();
         if (spent > 0)
         {
+            _board.Effect(StageEffect.Spend);
             if (navia != null) await _board.LineCue(navia);
             await AfterSpend();
             var sro = _stage.Mods.StandingRoomOnly;
@@ -228,6 +250,7 @@ public sealed class StageDirector
             spent = _stage.SpendUpTo(cap, forPlay);
         }
         if (spent <= 0) return 0;
+        _board.Effect(StageEffect.Spend);
         if (navia != null) await _board.LineCue(navia);
         await AfterSpend();
         return spent;
@@ -400,6 +423,7 @@ public sealed class StageDirector
             _stage.Draining = false;
         }
         if (lost <= 0) return true;
+        _board.Effect(StageEffect.Drain);
         _stage.NoteDrain(lost, hpBefore);
         _stage.Note(new StageBeat(FurinaStageLedger.DrainEvent, default, -1,
                                   _stage.Fanfare, lost, ""));
@@ -456,6 +480,7 @@ public sealed class StageDirector
         if (room <= 0 || _board.Over) return 0;
         var back = await _board.Heal(room);
         if (back <= 0) return 0;
+        _board.Effect(StageEffect.Repay);
         _stage.NoteRepay(back);
         _stage.Note(new StageBeat(FurinaStageLedger.RepayEvent, default, -1,
                                   _stage.Fanfare, back, ""));

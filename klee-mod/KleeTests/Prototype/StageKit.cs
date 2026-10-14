@@ -19,6 +19,10 @@ internal sealed class RecordingBoard : IStageBoard
 {
     internal readonly List<string> Log = new();
 
+    /// <summary>The stage effects asked for, in order: kept apart from
+    /// <see cref="Log"/>, whose sequences the rule pins read.</summary>
+    internal readonly List<StageEffect> Effects = new();
+
     internal int Dealt;
 
     internal int Drawn;
@@ -122,6 +126,8 @@ internal sealed class RecordingBoard : IStageBoard
     }
 
     public Task Sync() => Task.CompletedTask;
+
+    public void Effect(StageEffect effect) => Effects.Add(effect);
 
     /// <summary>The damage events, in order.</summary>
     internal IEnumerable<string> Hits =>
