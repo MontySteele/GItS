@@ -22,6 +22,11 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
+- **Kokomi review r6** (`kokomi-review-r6-2026-10-14.md`, four picks,
+  defaults b/b/a/b): Mend heals to Max HP; two Hydro-only Powers replace
+  Jellyfish Current and Coordinated Tide; Read the Field's Plan; another
+  overnight seat round before your run.
+
 - **Distribution readiness** (`distribution-readiness-2026-10-12.md`, two picks,
   defaults (a)): a closed beta now, public early access once Varka and Furina
   reach Balance; a GitHub release first. (The `LAW.md` art line, #1145, is
