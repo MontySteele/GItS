@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcDurinBinaryForm : CustomCardModel, IElementalCard, ICompanionCard, IWritableCompanion, IModalCard
+public sealed class ProtoMcDurinBinaryForm : CustomCardModel, IElementalCard, ICompanionCard, IWritableCompanion, IVarkaSwitchCard, IModalCard
 {
     /// <summary>Sheet applies_element: this companion attack applies its element.</summary>
     public Element Element => Element.Pyro;
@@ -79,6 +79,10 @@ public sealed class ProtoMcDurinBinaryForm : CustomCardModel, IElementalCard, IC
         description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Pyro));
         description.Add("VarkaWildfire", VarkaOath.WildfireLine(this));
     }
+
+    /// <summary>The element this card makes Varka's current element
+    /// (`VarkaOathDial` previews it).</summary>
+    public Element VarkaSwitchElement => Element.Pyro;
 
     // EB-184: what each mode does about AIMING, in sheet order.
     // The card's own TargetType is fixed before a mode is chosen (the

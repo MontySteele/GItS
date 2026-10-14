@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoVkStokeTheFlames : CustomCardModel, ICharacterCard
+public sealed class ProtoVkStokeTheFlames : CustomCardModel, ICharacterCard, IVarkaSwitchCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "varka";
@@ -47,6 +47,10 @@ public sealed class ProtoVkStokeTheFlames : CustomCardModel, ICharacterCard
         ("title", "Stoke the Flames"),
         ("description", "[gold]Pyro[/gold] becomes your [gold]current element[/gold]. Gain {VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold]. Your next [gold]Pyro[/gold] Attack this turn deals {VkBase:diff()} additional damage."),
     };
+
+    /// <summary>The element this card makes Varka's current element
+    /// (`VarkaOathDial` previews it).</summary>
+    public Element VarkaSwitchElement => Element.Pyro;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

@@ -156,6 +156,13 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
   - **Current element:** that of his last Knight, or of the last Pyro, Hydro,
     Cryo or Electro any card of his applied. His cards read only its Oath; a
     card that would change it says "(Makes X current)" in combat.
+  - **Display:** the Oath dial by the Energy orb, where Regent shows his
+    Stars (`Vfx/Prototype/VarkaOathDial.cs`; 2026-10-14, [USER]: "Agreed on
+    2! It's definitely the cleanest option!"): four element pips with their
+    Oath, the current one large and lit; a pip pulses when its Oath rises; a
+    card in hand that would switch elements rings the pip it would make
+    current. His Oath badge stays on the model (the seat page reads it) but
+    is hidden on his own status strip.
   - **Swirl:** a Swirl he makes gains 1 Oath of the element Swirled, and
     while he holds Boreas's Fang it pays his current element (Pyro 3
     damage, Hydro 3 Block, Cryo 1 Vulnerable, Electro 3 to ALL).

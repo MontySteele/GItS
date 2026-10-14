@@ -17179,6 +17179,20 @@ def emit(
     # same figure `WillReplace` is asked with.
     if salon_deploy_card(card):
         interfaces += ", ISalonDeployCard"
+    # THE OATH DIAL (Varka, 2026-10-14). A row whose play makes an element
+    # his current one says WHICH on the class, the same element its switch
+    # line and switch tip are emitted with (`varka_switch_element`), so the
+    # dial by the Energy orb can preview the switch for the card in hand.
+    # Display only; `VarkaOath.WouldSwitchTo` still asks whether it would.
+    varka_switch_member = ""
+    varka_switch = varka_switch_element(card, profile)
+    if varka_switch is not None:
+        interfaces += ", IVarkaSwitchCard"
+        varka_switch_member = (
+            "\n\n    /// <summary>The element this card makes Varka's current "
+            "element\n    /// (`VarkaOathDial` previews it).</summary>\n"
+            "    public Element VarkaSwitchElement => "
+            f"{ELEMENT_CS[varka_switch]};")
     # (R276, Where Did I Put It?). A row that prints a Set off
     # declares it on the class: `ISetOffCard` is a MARKER with no members, and
     # the one question it answers is "is this a Set off card", which the look
@@ -18723,7 +18737,7 @@ public sealed class {cls} : {interfaces}
     {{
         ("title", "{title_cs}"),
         ("description", {desc_expr}),
-    }};{tags_member}{wide_target_member}{flip_member}{discard_discount_member}{stage_bow_member}{transcendence_member}{return_to_hand_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{plan_gate_member}{plan_reason_member}{stage_gate_member}{stage_reason_member}{playable_gate_member}{playable_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}{homework_member}
+    }};{tags_member}{wide_target_member}{flip_member}{discard_discount_member}{stage_bow_member}{transcendence_member}{varka_switch_member}{return_to_hand_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{plan_gate_member}{plan_reason_member}{stage_gate_member}{stage_reason_member}{playable_gate_member}{playable_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}{homework_member}
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

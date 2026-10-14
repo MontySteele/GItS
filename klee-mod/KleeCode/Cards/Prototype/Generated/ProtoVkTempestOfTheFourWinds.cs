@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoVkTempestOfTheFourWinds : CustomCardModel, IElementalCard, ICharacterCard
+public sealed class ProtoVkTempestOfTheFourWinds : CustomCardModel, IElementalCard, ICharacterCard, IVarkaSwitchCard
 {
     /// <summary>Its hits carry their own element (a `varka` kind),
     /// not the cadence's Anemo; the card says so rather than leave
@@ -65,6 +65,10 @@ public sealed class ProtoVkTempestOfTheFourWinds : CustomCardModel, IElementalCa
         description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Electro));
         description.Add("VarkaWildfire", VarkaOath.WildfireLine(this));
     }
+
+    /// <summary>The element this card makes Varka's current element
+    /// (`VarkaOathDial` previews it).</summary>
+    public Element VarkaSwitchElement => Element.Electro;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
