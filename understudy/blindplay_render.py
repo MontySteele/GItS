@@ -2913,11 +2913,72 @@ OATH_NO_PAYOUT_LINE = ("- Your Swirls pay nothing until you apply Pyro, "
                        "Hydro, Cryo or Electro.")
 AURA_LINE = "{element}: an Anemo hit Swirls it."
 AURA_NONE = "no aura."
+#: Varka round 5 (2026-10-13, review/records/varka-round-5-2026-10-13.md):
+#: "A reaction that uses up an aura leaves a later Swirl card with nothing
+#: to Swirl, and the screen does not say the aura is gone." Where a reaction
+#: this turn's log names used the body's aura and a Swirl card is in hand.
+AURA_USED_UP = "no aura to Swirl ({reaction} used it up)."
+#: And the switch itself: "Kaeya, Barbara and Short Circuit switch the
+#: current element and silently lower Ascension's Oath." Under each hand
+#: card whose play would make another element current. The page layer only:
+#: [USER] ruled no more text on the cards themselves. The new count is the
+#: Oath that element holds NOW; the play's own Oath gain comes on top.
+OATH_SWITCH_NOTE = ("    - Switches you to {element} "
+                    "(Oath {old} → {new}, plus what it gains).")
+UNWAVERING_BANNER_TITLE = "Unwavering Banner"
+ALL_FOUR_WINDS_TITLE = "All Four Winds"
+_SWIRL_WORD = re.compile(r"Swirl")
 
 
-def _render_oath(oath: dict[str, Any]) -> list[str]:
+def _holds_a_swirl(hand: list[dict[str, Any]]) -> bool:
+    """Is a card in hand a Swirl card: an Anemo face, or one that says
+    Swirl (not "Swirls", a payout power's word)."""
+    return any(card.get("element") == "Anemo"
+               or _SWIRL_WORD.search(str(card.get("text") or ""))
+               for card in hand)
+
+
+def _has_power(you: dict[str, Any], title: str) -> bool:
+    return any(_fold(pw.get("name")) == _fold(title)
+               for pw in you.get("powers") or [])
+
+
+def _oath_switch(card: dict[str, Any], oath: dict[str, Any] | None,
+                 you: dict[str, Any]) -> str:
+    """The note under a hand card whose play makes another element his
+    current one, or `""`.
+
+    A Knight sets its printed element when played (`VarkaOath.BeginPlay`);
+    any other card makes current the Oath element it applies (the open Oath,
+    `VarkaOath.NoteApplication`) -- the element indicator, which follows an
+    override row -- unless Unwavering Banner holds the element. Under All
+    Four Winds every card reads all four Oaths, so a switch moves nothing.
+    """
+    if not oath or _has_power(you, ALL_FOUR_WINDS_TITLE):
+        return ""
+    knight = bool(_KNIGHT_HEAD.match(str(card.get("text") or "")))
+    element = ((card.get("printed_element") or card.get("element")) if knight
+               else card.get("element"))
+    if element not in oath["counts"] or element == oath["element"]:
+        return ""
+    if not knight and _has_power(you, UNWAVERING_BANNER_TITLE):
+        return ""
+    old = oath["counts"].get(oath["element"], 0) if oath["element"] else 0
+    return OATH_SWITCH_NOTE.format(element=element, old=old,
+                                   new=oath["counts"][element])
+
+
+def _render_oath(oath: dict[str, Any],
+                 reactions: list[dict[str, Any]] | None = None,
+                 swirl_in_hand: bool = False) -> list[str]:
     """His block: current element, the four Oath counts, what a Swirl pays,
-    and each enemy's aura, one fact a line."""
+    and each enemy's aura, one fact a line. With a Swirl card in hand, a
+    bare body whose aura a logged reaction used up says so."""
+    used_up: dict[str, str] = {}
+    if swirl_in_hand:
+        for row in reactions or []:
+            if row.get("target") and row.get("reaction"):
+                used_up[row["target"]] = row["reaction"]
     element = oath["element"]
     out = [OATH_ELEMENT_LINE.format(element=element) if element
            else OATH_NO_ELEMENT_LINE]
@@ -2927,7 +2988,8 @@ def _render_oath(oath: dict[str, Any]) -> list[str]:
                else OATH_NO_PAYOUT_LINE)
     for row in oath["auras"]:
         if row["element"] is None:
-            clause = AURA_NONE
+            clause = (AURA_USED_UP.format(reaction=used_up[row["name"]])
+                      if row["name"] in used_up else AURA_NONE)
         else:
             clause = AURA_LINE.format(element=row["element"])
         out.append(f"- **{row['name']}**: {clause}")
@@ -4444,7 +4506,8 @@ def render(obs: dict[str, Any]) -> str:
         # (2026-10-10) moved it here from under the stage, where it sat after
         # the powers, the receipts and the potions, far from the hand.
         if c.get("oath") is not None:
-            out += ["", OATH_HEADING, ""] + _render_oath(c["oath"])
+            out += ["", OATH_HEADING, ""] + _render_oath(
+                c["oath"], c.get("reactions"), _holds_a_swirl(c["hand"]))
         # YAE MIKO (2026-10-13): her shrine, above the hand, Varka's place.
         if c.get("shrine") is not None:
             out += ["", SHRINE_HEADING, ""] + _render_shrine(c["shrine"])
@@ -4464,6 +4527,9 @@ def render(obs: dict[str, Any]) -> str:
                                 if i in exhausting else "", you=you)
             if wildfire is not None and _applies_pyro(card):
                 out.append(WILDFIRE_NOTE.format(n=wildfire))
+            switch = _oath_switch(card, c.get("oath"), you)
+            if switch:
+                out.append(switch)
             # The Varka payoff round (2026-10-10): where Four Winds'
             # Ascension came from, and that it comes once a combat (a seat
             # tried to play a second one that never came).
