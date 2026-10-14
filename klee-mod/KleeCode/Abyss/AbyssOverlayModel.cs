@@ -49,12 +49,11 @@ public sealed class AbyssOverlayContent
 
     public const string ThisActTag = "This act";
 
-    /// <summary>The label over each card's lower band; the view prints it in
-    /// capitals. Owner, 2026-10-12: "IF PASSED" renamed "SHADOW". Co-op
-    /// Abyss run, 2026-10-14: "SHADOW" beside a Blessing read as the Shadow
-    /// that comes with it, three acts running, so the band keeps the word
-    /// and says when it applies.</summary>
-    public const string ShadowBandLabel = "Shadow if you pass this";
+    /// <summary>The label over each card's lower band (owner, 2026-10-12:
+    /// "IF PASSED" renamed "SHADOW"; the view prints it in capitals). The
+    /// whisper line and the result line say where the enemies' Shadow comes
+    /// from (co-op Abyss run, 2026-10-14).</summary>
+    public const string ShadowBandLabel = "Shadow";
 
     public const string BlessingsLabel = "Blessings";
 

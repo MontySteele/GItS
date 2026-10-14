@@ -289,13 +289,10 @@ public class AbyssOverlayTests
     // ---- The SHADOW label and the X ---------------------------------------------
 
     [Fact]
-    public void The_lower_band_is_labelled_SHADOW_IF_YOU_PASS_THIS()
+    public void The_lower_band_is_labelled_SHADOW()
     {
-        // Owner, 2026-10-12: "IF PASSED" renamed "SHADOW". Co-op Abyss run,
-        // 2026-10-14: "SHADOW" alone read as the Shadow that comes with the
-        // Blessing, so the band keeps the word and says when it applies.
-        Assert.Equal("Shadow if you pass this", AbyssOverlayContent.ShadowBandLabel);
-        Assert.Equal("SHADOW IF YOU PASS THIS", AbyssOverlayView.BandLabel(AbyssOverlayContent.ShadowBandLabel));
+        Assert.Equal("Shadow", AbyssOverlayContent.ShadowBandLabel);
+        Assert.Equal("SHADOW", AbyssOverlayView.BandLabel(AbyssOverlayContent.ShadowBandLabel));
         Assert.Contains("AbyssOverlayView.BandLabel", Il.Calls(Il.Method("AbyssOverlayView", "BuildCard")));
     }
 

@@ -152,10 +152,9 @@ def test_the_render_rig_prints_the_models_words():
         return m.group(1) + m.group(2)
 
     assert whisper(rig) == whisper(model) == WHISPER
-    # The band label (owner, 2026-10-12: "IF PASSED" renamed "SHADOW";
-    # co-op Abyss run, 2026-10-14: "SHADOW IF YOU PASS THIS").
-    assert 'ShadowBandLabel = "Shadow if you pass this"' in rig
-    assert 'ShadowBandLabel = "Shadow if you pass this"' in model
+    # The band label (owner, 2026-10-12: "IF PASSED" renamed "SHADOW").
+    assert 'ShadowBandLabel = "Shadow"' in rig
+    assert 'ShadowBandLabel = "Shadow"' in model
     for path in re.findall(r'"(abyss/(?:relics|powers)/[a-z_]+\.png)"', model):
         assert f'"{path}"' in rig
 

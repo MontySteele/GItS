@@ -78,7 +78,7 @@ public partial class RigMain : Node
                 Title = $"{AbyssOverlayContentRig.Heading} · Act {state.Act + 1}",
                 Whisper = AbyssOverlayContentRig.Whisper,
                 WholeRunTag = "Whole run",
-                ShadowBandLabel = "Shadow if you pass this",
+                ShadowBandLabel = "Shadow",
                 BlessingsLabel = "Blessings",
                 ShadowsLabel = "Shadows",
             };
