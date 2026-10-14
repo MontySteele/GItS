@@ -18,25 +18,25 @@ The body is `【芙宁娜】.pmx`, not the 荒 variant. The packs stay in the sc
 - Character Details 3, frames 24 and 48: the thrust. The sword arm is locked out level at the target, she is side-on, and the rear foot is lifted, with a long golden line along the blade. This set the attack.
 - Let the People Rejoice preview, frames 24 to 30: up on one toe, back arched, one arm flung high and the other wide. This set the signature clip.
 - Salon Solitaire preview: the raised calling hand. This set the cast.
-- Menu idles: a heel lifted and her weight on one leg. This set the idle.
+- Menu idles: upright and poised, a heel lifted and her weight on one leg. With her splash art's hand on the hip, this set the idle.
 
 **Clips** (`furina_clips.py`). Every combat clip starts and ends in stance A.
 
 | Clip | What it does | Length | Frames |
 |---|---|---|---|
-| idle | Stance A: the far arm swept out toward the enemy, palm open; the near hand at her hip; the rear heel up. The chest and the raised hand breathe, she blinks, and the coat tails sway. | 2.8 s loop | 34 at 12 fps |
+| idle | Stance A, a diva at ease: the near hand on her hip, elbow out; the far hand held low and loose at her waist, palm up, presenting; the rear heel up. The chest and the open hand breathe, her weight drifts onto the front foot, she blinks, and the coat tails sway. No arm rises above the chest. | 2.8 s loop | 34 at 12 fps |
 | idle_low | The performance flags: head and shoulders low, the far hand fallen to her chest, a sad brow. | 3.0 s loop | 30 at 10 fps |
-| attack | The empty-handed thrust. The far hand draws back to her shoulder and flicks a small circle (the flourish). Then it drives straight out at the enemy as she lunges onto the front foot, with the near arm flung back and up. The hit lands at full extension (frame 8). | 1.0 s | 20 |
+| attack | The empty-handed thrust. From the idle's low open hand, the far hand draws up to her shoulder and flicks a small circle (the flourish). Then it drives straight out at the enemy as she lunges onto the front foot, with the near arm flung back and up. The hit lands at full extension (frame 8). On the recovery the arm sweeps down and in, the palm turning up, straight back to her waist. | 1.0 s | 20 |
 | cast | Salon Solitaire's call. She rises onto her toes with the far hand lifted high, palm up, and the near hand to her heart. | 1.0 s | 20 |
 | hurt | She flinches back, hands to her chest, wincing. | 0.8 s | 16 |
 | death | A swoon played to the house: the back of her hand to her brow, a sway back, then she sinks to her knees and folds forward. Holds from 1.6 s. | 2.2 s | 25 |
 | rejoice | Let the People Rejoice. She gathers, spins once on the spot with her arms drawn in, and opens into the flourish (frame 12): up on the front toe, rear leg lifted, both arms flung up and wide, delighted. She holds it, then settles. | 1.5 s | 30 |
-| merchant | Stance B: upright and pleased with herself, the near hand on her hip, the far hand turned up as if presenting the wares. It breathes. | 3.0 s loop | 30 at 10 fps |
+| merchant | Stance B: upright and pleased with herself, the near hand on her hip, the far hand turned palm up below her chest as if presenting the wares. It breathes. | 3.0 s loop | 30 at 10 fps |
 
 **Stills:**
 - rest site: sitting on the ground facing the fire, knees drawn up, hands on them;
-- select close-up: stance B, waist-up;
-- roster tile and the locked tile;
+- select close-up: confident and theatrical, waist-up. Chin up, shoulders open, a small open smile, the near hand on her hip and the far hand open at hip height, palm up;
+- roster tile and the locked tile, cut from the same pose;
 - the ground shadow;
 - `stand`, used only for the height measure.
 
@@ -56,26 +56,40 @@ The chest anchor is recorded as `stance_a.chest_px` (an offset from her feet).
 
 ## The guest stars
 
-Each of the eleven is rendered in one neutral resting pose: standing easy, facing right like Furina, arms at the sides, a small smile. They get her shading and outline, and each is trimmed to a single still (`model/guests/guest_<name>.png`). Attacks are left out until their abilities settle.
+Each of the eleven is rendered in one calm rest, standing easy and facing right like Furina. Each has a small variation of their own (`furina_clips.GUEST_POSES`), so no two stand alike, and no arm is held out at shoulder height. They get her shading and outline, and each is trimmed to a single still (`model/guests/guest_<name>.png`). Attacks are left out until their abilities settle.
+
+| Guest | Pose |
+|---|---|
+| Neuvillette | Upright, hands clasped behind his back. |
+| Wriothesley | Arms crossed, a slight smirk. |
+| Clorinde | The near hand across to her left hip, resting as on a hilt. |
+| Navia | Hand on hip, leaning back, smiling. |
+| Lyney | The far hand raised to his hat brim. |
+| Lynette | Arms loose, head tilted, half-lidded and deadpan. |
+| Freminet | Shy: head down, hands together low in front. |
+| Charlotte | Both hands up before her face, framing a photo, a wink. |
+| Chevreuse | Weight settled on the rear leg, the far hand on her hip, stern. |
+| Sigewinne | Hands clasped in front, head tilted, beaming. |
+| Escoffier | The far hand lifted at waist height, palm up, as if presenting a dish. |
 
 **Scale.** Every guest is drawn at Furina's px per inch (`chars.guest_ppu`). A guest's head bone stands at (its `GUEST_HEIGHTS_IN` over 63 in) times Furina's head-bone height. The head bone is measured from the lowest vertex, so hats, ears and Sigewinne's antennae do not count. The packs are not at one common scale, so each is solved from its own measured head height (research packet, sec. 8).
 
-The manifest records each guest's file, size, feet anchor, ppu and px. A test holds every guest's head px to its height over 63 in times Furina's neck px, within 4%. The px column below is head to foot with hats at 1080p. Today every guest is a flat 224 px sprite. Bounds today are 71 to 96 px wide; the new widths run 57.5 to 114.
+The manifest records each guest's file, size, feet anchor, ppu and px. A test holds every guest's head px to its height over 63 in times Furina's neck px, within 4%. The px column below is head to foot with hats at 1080p. Today every guest is a flat 224 px sprite. Bounds today are 71 to 96 px wide; the new widths run 56 to 114.
 
 | Guest | Height (in) | Full px at 1080p | Head-bone px | Width px |
 |---|---|---|---|---|
 | Furina (for scale) | 63.0 | 220.2 | 169.9 | 93.5 |
-| Sigewinne | 52.0 | 184.6 | 138.8 | 79.0 |
-| Escoffier | 62.9 | 213.5 | 168.0 | 95.0 |
-| Chevreuse | 63.0 | 211.8 | 168.4 | 110.0 |
-| Charlotte | 63.1 | 210.6 | 168.5 | 57.5 |
-| Lynette | 63.3 | 202.6 | 168.7 | 85.0 |
-| Freminet | 66.0 | 208.8 | 176.2 | 61.0 |
-| Lyney | 66.7 | 222.6 | 177.2 | 60.5 |
-| Clorinde | 69.2 | 237.1 | 184.6 | 86.5 |
-| Navia | 70.0 | 227.1 | 186.9 | 90.5 |
-| Wriothesley | 76.1 | 235.8 | 204.0 | 114.0 |
-| Neuvillette | 76.4 | 238.1 | 204.6 | 92.5 |
+| Sigewinne | 52.0 | 189.3 | 138.7 | 79.5 |
+| Escoffier | 62.9 | 213.5 | 168.0 | 105.0 |
+| Chevreuse | 63.0 | 212.1 | 168.3 | 111.0 |
+| Charlotte | 63.1 | 210.8 | 168.5 | 68.0 |
+| Lynette | 63.3 | 202.5 | 168.8 | 98.0 |
+| Freminet | 66.0 | 208.3 | 176.1 | 56.0 |
+| Lyney | 66.7 | 222.5 | 177.2 | 67.5 |
+| Clorinde | 69.2 | 237.1 | 184.6 | 85.0 |
+| Navia | 70.0 | 228.7 | 186.8 | 90.5 |
+| Wriothesley | 76.1 | 236.4 | 204.0 | 114.0 |
+| Neuvillette | 76.4 | 237.8 | 204.6 | 88.0 |
 
 The lineup sheet (`f_guest_lineup.png`) lays them out as `FurinaStagePlacement` does: from her hitbox edge, a 20 px gap, then each body by its own width with 20 px between. It shows a three-seat line and two four-seat lines (Ensemble Cast).
 
@@ -86,22 +100,22 @@ The lineup sheet (`f_guest_lineup.png`) lays them out as `FurinaStagePlacement` 
 - **Freminet** wears his diving helmet in the pack (four overlapping 头盔表情 face-screen materials). The guest still hides the helmet (`GUESTS["freminet"]["hide"]`), which shows his face and cap.
 - **Sigewinne's** tail and fin ears are mesh, not chains. In a still they need nothing; her antennae are left out of the height measure.
 - Wriothesley and Neuvillette have a 眉影 brow-shadow material, added to their face (unlit, unlined) set.
-- Escoffier's black band at the thighs is her outfit, not a defect: forcing her sheer skin layers opaque changed nothing.
+- **Escoffier's black thighs (fixed).** The two solid black patches on her thighs were the `肌2` material: a skin layer over her stocking tops, whose lace cut-outs rendered black. It is now hidden (`GUESTS["escoffier"]["hide"]`), and her white lace stocking tops and the skin above them read. Every guest was checked at full size for other black patches; none remain.
 
 ## Measured
 
-- **Height.** Standing (`stand`), she is 213.2 px from hat to boot and 220.2 px in full at 1080p. The target is 217.7 (63 in over a 68 in adult, times 235 px; her model's rest height with the hat is 1.72 units). In stance A her neck sits at 164.4 px against 169.9 standing, and the figure is 128.5 px wide.
+- **Height.** Standing (`stand`), she is 213.2 px from hat to boot and 220.2 px in full at 1080p. The target is 217.7 (63 in over a 68 in adult, times 235 px; her model's rest height with the hat is 1.72 units). In stance A her neck sits at 164.4 px against 169.9 standing, and the figure is 110.5 px wide.
 - **Style** (L* p90 / C* p90, opaque pixels at 1080p):
 
 | Figure | L* p90 | C* p90 |
 |---|---|---|
-| Furina idle f0 | 76.3 | 31.4 |
-| Furina attack f8 | 76.0 | 32.1 |
+| Furina idle f0 | 76.2 | 31.6 |
+| Furina attack f8 | 75.9 | 32.0 |
 | Ironclad | 71.4 | 41.4 |
 | Silent | 68.9 | 24.9 |
 
   Her white hair and shorts sit her lighter than the base pair. Her chroma is between them. H3 lite is the ruled fixed squeeze and was not retuned.
-- **Cost.** 13 frame sheets, 30.5 Mpx, 20.1 MB of PNG (Varka's are 92.1 Mpx). That is about 31 MB VRAM-compressed. The guest stills add 0.8 Mpx.
+- **Cost.** 13 frame sheets, 29.7 Mpx, 20.1 MB of PNG (Varka's are 92.1 Mpx). That is about 30 MB VRAM-compressed. The guest stills add 0.9 Mpx.
 
 ## Where her graphics appear (the surface list for phase B)
 
@@ -119,6 +133,13 @@ The lineup sheet (`f_guest_lineup.png`) lays them out as `FurinaStagePlacement` 
 - **The death clip's last frames** fold her forward on her knees, and her long back hair swings out level with the head's tilt. It reads as a collapse at game scale, but it is the weakest clip.
 - **The roster tile** frames her head small, because her tall hat sets the tile's top line. Klee's tile frames hers larger.
 - **The coat tails** swing on three chains (HB2 to HB4). There is no cloth simulation.
+
+## Revised after [USER]'s first look (2026-10-13)
+
+[USER]: "Uhh, ok, I don't want to be mean, but Furina's idle looks like she's doing a Nazi salute. Her character select pose is also a little weird, as though she's scared of something. The rest of her animations look good, though! The guest stars are all in the exact same poise (arms to the side) - they could use slightly more differentiated poses so they don't look like they're all doing the exact same stance, but the models look good!"
+- **The idle.** The far arm held straight out at shoulder height, palm down, is gone from every frame of idle and idle_low. It is also gone from the stance every clip starts and ends on, so from the attack's wind-up, hurt, death frame 0 and the stage-effect sheets. The new stance A has her near hand on her hip and the far hand low and open at her waist, palm up, with a breathing sway. The attack's recovery used to pass the arm forward at shoulder height; it now sweeps the arm straight down to her waist. The thrust, cast, Let the People Rejoice, hurt and the effects are otherwise unchanged. The test `test_her_idle_never_holds_an_arm_out_and_her_open_hand_is_low` fails on the old pose.
+- **The select close-up.** It is now confident: chin up, shoulders open, a small open smile, the near hand on her hip and the far hand open at hip height. The roster tile and the locked tile are cut from the same pose.
+- **The guest stars.** Each has a pose of their own (the table above). The test `test_every_guest_star_stands_in_a_pose_of_their_own` holds that no two hold their hands alike and none holds an arm out. Escoffier's black thighs are fixed (rig notes).
 
 ## For [USER]
 

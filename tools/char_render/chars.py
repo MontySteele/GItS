@@ -81,7 +81,10 @@ GUESTS = {
     "charlotte": {"pmx": "charlotte/unpacked/夏洛蒂.pmx", "head": 16.638},
     "chevreuse": {"pmx": "chevreuse/unpacked/夏沃蕾.pmx", "head": 16.639},
     "clorinde": {"pmx": "clorinde/unpacked/克洛琳德.pmx", "head": 18.931},
-    "escoffier": {"pmx": "escoffier/unpacked/爱可菲.pmx", "head": 17.134},
+    # 肌2 is a skin layer over her stocking tops whose lace cut-outs rendered
+    # as two solid black patches on her thighs; without it the white lace
+    # stocking tops (体2) and the skin above them read (probed 2026-10-13)
+    "escoffier": {"pmx": "escoffier/unpacked/爱可菲.pmx", "head": 17.134, "hide": {"肌2"}},
     # his pack wears the diving helmet; the guest still shows his face
     "freminet": {"pmx": "freminet/unpacked/菲米尼.pmx", "head": 17.567,
                  "hide": {"头盔", "头盔表情1", "头盔表情2", "头盔表情3", "头盔表情4"}},
@@ -154,13 +157,14 @@ def pose(ops, morphs=None, yaw=14.0, prop=None):
 REST = pose([], {}, yaw=0.0)
 
 # ------------------------------------------------------------------ Furina
-# Theatrical: weight on the front foot, rear heel up, the far arm swept out
-# toward the enemy palm-open like a bow to the house, the near hand at her hip.
+# Theatrical: weight on the front foot, rear heel up, the near hand on her hip
+# and the far hand low and open at her waist (the first look's sketch of
+# furina_clips stance A, without its palm-up wrist turn).
 FURINA_STANCE = pose(
     stance(drop=0.035, lean=-2.0, twist=-18, head_turn=38, head_nod=-3, head_tilt=-4,
            front=0.10, back=0.10, back_lift=0.035)
-    + arms((-0.12, 0.00, -0.30), (0.46, -0.12, 0.30), near_anchor="上半身2",
-           near_pole=(-1.0, 0.3, 0.0), far_pole=(0.0, 0.4, -1.0), near_curl=(30, 10), far_curl=(8, 0)),
+    + arms((-0.13, -0.06, -0.15), (0.24, -0.20, -0.08), near_anchor="上半身2",
+           near_pole=(-1.0, 0.3, 0.0), far_pole=(0.2, 0.6, -1.0), near_curl=(30, 10), far_curl=(14, 0)),
     {"にやり": 0.7, "口角上げ": 0.3}, yaw=16)
 
 # ------------------------------------------------------------------ Kokomi

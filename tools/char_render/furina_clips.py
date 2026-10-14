@@ -46,12 +46,22 @@ PHANTOM = {"L": 0.72}
 A_DROP, A_LEAN, A_TWIST = 0.035, -2.0, -18.0
 A_FRONT, A_BACK = 0.10, 0.10
 SMUG = {"にやり": 0.7, "口角上げ": 0.3}
-#: the far hand swept out toward the enemy, palm open, a little raised
-FAR = (0.46, -0.12, 0.30)
+#: the far hand held low and loose at her waist, forward of her, palm turned
+#: up in an open "presenting" gesture ([USER], 2026-10-13: the old far arm,
+#: straight out at shoulder height palm down, read as a salute; no arm above
+#: the shoulder, none straight out palm down, in any frame of idle)
+FAR = (0.24, -0.20, -0.08)
+IDLE_FAR_POLE = (0.2, 0.6, -1.0)
+#: the wrist turned palm up (aimw: the hand along this world direction,
+#: rolled -90 degrees about it)
+FAR_AIM = ((0.8, -0.2, 0.0), -90.0)
+#: the attack's own elbow pole (the thrust, kept as ruled)
 FAR_POLE = (0.0, 0.4, -1.0)
-#: the near hand at her hip
-NEAR = (-0.12, 0.00, -0.30)
+#: the near hand on her hip, akimbo: the elbow out behind her, the hand
+#: turned in on her waist
+NEAR = (-0.13, -0.06, -0.15)
 NEAR_POLE = (-1.0, 0.3, 0.0)
+NEAR_AIM = ((0.6, 0.0, -1.0), 0.0)
 
 
 def add(v, dv):
@@ -81,13 +91,16 @@ def stance(drop=A_DROP, lean=A_LEAN, twist=A_TWIST, head_turn=38.0, head_nod=-3.
 
 
 def hands(far=FAR, near=NEAR, far_pole=FAR_POLE, near_pole=NEAR_POLE, far_curl=(8, 0), near_curl=(30, 10),
-          far_anchor=CH, near_anchor=CH):
-    return [
-        ("hand", "R", near_anchor, near, near_pole),
-        ("curl", "R", near_curl[0], near_curl[1]),
-        ("hand", "L", far_anchor, far, far_pole),
-        ("curl", "L", far_curl[0], far_curl[1]),
-    ]
+          far_anchor=CH, near_anchor=CH, far_aim=None, near_aim=None):
+    """Both hands by IK; `*_aim` (world direction, roll) then turns that
+    wrist, e.g. palm up."""
+    ops = [("hand", "R", near_anchor, near, near_pole), ("curl", "R", near_curl[0], near_curl[1])]
+    if near_aim:
+        ops.append(("aimw", "手首.R", near_aim[0], near_aim[1]))
+    ops += [("hand", "L", far_anchor, far, far_pole), ("curl", "L", far_curl[0], far_curl[1])]
+    if far_aim:
+        ops.append(("aimw", "手首.L", far_aim[0], far_aim[1]))
+    return ops
 
 
 def cloth(swing=0.0):
@@ -121,13 +134,17 @@ def turned(p, deg):
 
 
 def idle_pose(breath=0.0, swing=0.0, blink=0.0):
-    """breath 0..1: the in-breath lifts the chest and the far hand a hair."""
+    """Stance A, a diva at ease: the near hand on her hip, the far hand low and
+    open, palm up. breath 0..1: the in-breath lifts the chest and the open
+    hand a hair, and her weight drifts onto the front foot (the hips sway)."""
     b = breath
     m = dict(SMUG)
     if blink:
         m["まばたき"] = blink
-    return pose(stance(drop=A_DROP + 0.008 * (1 - b), lean=A_LEAN - 1.0 * b, head_nod=-3 - 1.5 * b)
-                + hands(far=add(FAR, (0.0, 0.0, 0.025 * b - 0.01)), near=add(NEAR, (0, 0, 0.006 * b)))
+    return pose(stance(drop=A_DROP + 0.008 * (1 - b), lean=A_LEAN - 1.0 * b, head_nod=-3 - 1.5 * b,
+                       head_tilt=-4 - 1.5 * b, sway=0.008 * b)
+                + hands(far=add(FAR, (0.006 * b, 0.0, 0.014 * b)), near=add(NEAR, (0, 0, 0.006 * b)),
+                        far_pole=IDLE_FAR_POLE, far_curl=(14 - 4 * b, 0), far_aim=FAR_AIM, near_aim=NEAR_AIM)
                 + cloth(swing), m)
 
 
@@ -179,11 +196,11 @@ IDLE_LOW = {
 
 def atk(far, near, far_pole=FAR_POLE, near_pole=(0.0, 0.4, -1.0), drop=A_DROP, lean=A_LEAN, twist=A_TWIST,
         front=A_FRONT, back=A_BACK, back_lift=0.035, head_turn=38.0, head_nod=-3.0, swing=0.0, morphs=None,
-        yaw=YAW):
+        yaw=YAW, far_aim=None):
     return pose(stance(drop=drop, lean=lean, twist=twist, front=front, back=back, back_lift=back_lift,
                        head_turn=head_turn, head_nod=head_nod)
                 + hands(far=far, near=near, far_pole=far_pole, near_pole=near_pole, far_curl=(4, 0),
-                        near_curl=(12, 4))
+                        near_curl=(12, 4), far_aim=far_aim)
                 + cloth(swing),
                 morphs or {"にやり": 0.5, "怒り目": 0.3}, yaw=yaw)
 
@@ -210,9 +227,10 @@ ATTACK = {
         (0.40, atk(THRUST, BALANCE, far_pole=(0.0, 0.5, -1.0), swing=4, **LUNGE), "in"),
         (0.52, atk(add(THRUST, (0.0, 0.0, 0.01)), add(BALANCE, (0, 0, 0.03)), far_pole=(0.0, 0.5, -1.0),
                    swing=2, **{**LUNGE, "drop": 0.12}), "out"),
-        # recover: back to the stance
-        (0.74, atk((0.36, -0.12, 0.22), (-0.16, 0.0, -0.20), drop=0.05, lean=0, twist=-16, back_lift=0.02,
-                   swing=-1, yaw=22), "io"),
+        # recover: the arm sweeps down and in, the palm turning up, back to
+        # the stance's low open hand (never held out at shoulder height)
+        (0.70, atk((0.32, -0.16, -0.02), (-0.16, 0.0, -0.20), far_pole=IDLE_FAR_POLE, drop=0.05, lean=0, twist=-16,
+                   back_lift=0.02, swing=-1, yaw=22, far_aim=FAR_AIM), "io"),
         (0.88, idle_pose(0.5), "out"),
         (1.0, idle_pose(0.5), "io"),
     ],
@@ -389,8 +407,9 @@ def regal(breath=0.0, swing=0.0, head_turn=30.0):
                  ("rotw", "頭", Z, head_turn * 0.6),
                  ("rot", "頭", X, -4 + 1.5 * (1 - b)),
                  ("rotw", "頭", Y, -5)]
-                + hands(far=(0.30, -0.18, 0.02 + 0.01 * b), near=(-0.13, 0.02, -0.22),
-                        far_pole=(0.4, 0.3, -1.0), near_pole=(-1.0, 0.2, 0.3), far_curl=(12, 0), near_curl=(45, 20))
+                + hands(far=(0.28, -0.18, -0.04 + 0.01 * b), near=(-0.13, 0.02, -0.22),
+                        far_pole=(0.3, 0.6, -1.0), near_pole=(-1.0, 0.2, 0.3), far_curl=(12, 0), near_curl=(45, 20),
+                        far_aim=((0.8, -0.3, 0.1), -90.0))
                 + cloth(swing),
                 {"にやり": 0.6, "にこり": 0.3})
 
@@ -423,16 +442,33 @@ REST = pose(
     {"にこり": 0.5}, yaw=40)
 
 # ------------------------------------------------------------------ character select
-SELECT = regal(1.0, head_turn=14.0)
-SELECT["morphs"] = {"にやり": 0.5, "にこり": 0.4}
+# Confident and theatrical ([USER], 2026-10-13: the old close-up, a clenched
+# raised hand and the head bowed, looked "scared"): chin up, shoulders open,
+# a self-assured smirk, the near hand on her hip and the far hand open in a
+# small flourish at hip height, palm up.
+
+
+def select_pose(head_turn=16.0):
+    return pose([("move", "センター", (0, 0, -0.01)),
+                 ("movew", "足ＩＫ.L", (0.07, 0.02, 0)),
+                 ("movew", "足ＩＫ.R", (-0.06, -0.02, 0.02)),
+                 ("rotw", "上半身", Y, -4.0),
+                 ("rotw", "上半身", Z, -16),
+                 ("rotw", "首", Z, head_turn * 0.4),
+                 ("rotw", "頭", Z, head_turn * 0.6),
+                 ("rot", "頭", X, -12),
+                 ("rotw", "頭", Y, -6)]
+                + hands(far=(0.30, -0.10, -0.20), near=NEAR, far_pole=(0.3, 0.6, -1.0), near_pole=NEAR_POLE,
+                        far_curl=(10, 0), near_curl=(30, 10), far_aim=((0.8, -0.3, -0.2), -90.0), near_aim=NEAR_AIM)
+                + cloth(0),
+                {"あ": 0.3, "口角上げ": 1.0, "にやり２": 0.5, "眼角上": 0.2})
+
+
+SELECT = select_pose()
 
 # ------------------------------------------------------------------ roster tile
-PORTRAIT = pose(
-    stance(drop=0.0, lean=0.0, twist=-18, head_turn=18, head_nod=-4, head_tilt=-5, front=0.06, back=0.05,
-           back_lift=0.0)
-    + [("hand", "R", "足.R", (-0.06, -0.04, -0.08), (-1.0, 0.5, 0.0)),
-       ("hand", "L", "足.L", (0.06, -0.03, -0.08), (1.0, 0.5, 0.0))],
-    {"にやり": 0.5, "にこり": 0.4})
+# The face close-up is cut from the same confident pose.
+PORTRAIT = select_pose(head_turn=18.0)
 
 # ------------------------------------------------------------------ scale reference
 STAND = pose(
@@ -460,22 +496,141 @@ STILLS = {"stance_a": IDLE["keys"][0][1], "stand": STAND, "rest": REST, "select"
 
 
 # ------------------------------------------------------------------ the guest stars
-def guest_pose(k=1.0):
-    """A guest star's one still ([USER]'s phase A: a neutral resting pose, no
-    attacks yet): standing easy, facing right like Furina, weight on the rear
-    leg, arms relaxed at the sides, a small smile. `k` scales every offset to
-    the guest's own size (head-bone height over Furina's)."""
-    return pose(
-        [("move", "センター", (0, 0, -0.01 * k)),
-         ("movew", "足ＩＫ.L", (0.06 * k, 0.02 * k, 0)),
-         ("movew", "足ＩＫ.R", (-0.05 * k, -0.02 * k, 0)),
-         ("rotw", "上半身", Y, -1.0),
-         ("rotw", "上半身", Z, -14),
-         ("rotw", "首", Z, 12),
-         ("rotw", "頭", Z, 18),
-         ("rot", "頭", X, 0),
-         ("hand", "R", "足.R", (-0.07 * k, -0.03 * k, -0.24 * k), (-1.0, 0.5, 0.0)),
-         ("curl", "R", 25, 10),
-         ("hand", "L", "足.L", (0.07 * k, -0.02 * k, -0.24 * k), (1.0, 0.5, 0.0)),
-         ("curl", "L", 25, 10)],
-        {"にこり": 0.35}, yaw=24)
+# Each guest star's one still: a calm rest at the same scale, each with a
+# small lore-flavoured variation so no two stand alike ([USER], 2026-10-13:
+# "they could use slightly more differentiated poses"). No arm is held out
+# at shoulder height. Offsets are in Furina's units and scaled by `k`, the
+# guest's head-bone height over hers; FW, BK, RT and LT are the guest's own
+# front, back, right (near) and left (far) at the guest yaw.
+GUEST_YAW = 24
+_g = math.radians(GUEST_YAW)
+FW = (math.sin(_g), -math.cos(_g), 0.0)
+BK = tuple(-c for c in FW)
+RT = (FW[1], -FW[0], 0.0)
+LT = tuple(-c for c in RT)
+
+
+def _v(*terms):
+    return tuple(sum(s * vec[i] for s, vec in terms) for i in range(3))
+
+
+def _sc(t, k):
+    return tuple(c * k for c in t)
+
+
+def _gbody(k, lean=-1.0, twist=-14, head=(12, 18), nod=0.0, tilt=0.0, sway=0.0, front=0.06, back=0.05):
+    return [("move", "センター", (sway * k, 0, -0.01 * k)),
+            ("movew", "足ＩＫ.L", (front * k, 0.02 * k, 0)),
+            ("movew", "足ＩＫ.R", (-back * k, -0.02 * k, 0)),
+            ("rotw", "上半身", Y, lean), ("rotw", "上半身", Z, twist),
+            ("rotw", "首", Z, head[0]), ("rotw", "頭", Z, head[1]),
+            ("rot", "頭", X, nod), ("rotw", "頭", Y, tilt)]
+
+
+def _rest(side, k, curl=(25, 10), out=0.0):
+    """An arm hanging easy at the side (the old neutral still)."""
+    if side == "R":
+        return [("hand", "R", "足.R", (-0.07 * k - out * k, -0.03 * k, -0.24 * k), (-1.0, 0.5, 0.0)), ("curl", "R", *curl)]
+    return [("hand", "L", "足.L", (0.07 * k + out * k, -0.02 * k, -0.24 * k), (1.0, 0.5, 0.0)), ("curl", "L", *curl)]
+
+
+def _hand(side, k, off, pole, curl=(25, 10), anchor=CH, aim=None):
+    ops = [("hand", side, anchor, _sc(off, k), pole), ("curl", side, *curl)]
+    if aim:
+        ops.append(("aimw", f"手首.{side}", aim[0], aim[1]))
+    return ops
+
+
+def _neuvillette(k):    # hands clasped behind his back, upright
+    return (_gbody(k, lean=-2, head=(10, 14), nod=-3)
+            + _hand("R", k, _v((0.10, BK), (0.02, LT), (-0.30, Z)), _v((1, RT), (0.6, BK)), curl=(40, 15))
+            + _hand("L", k, _v((0.10, BK), (0.02, RT), (-0.28, Z)), _v((1, LT), (0.6, BK)), curl=(40, 15)),
+            {"真面目": 0.4})
+
+
+def _wriothesley(k):    # arms crossed
+    return (_gbody(k, lean=-1, head=(12, 16))
+            + _hand("R", k, _v((0.12, FW), (0.09, LT), (-0.05, Z)), _v((1, RT), (0.4, FW), (-0.6, Z)), curl=(30, 10))
+            + _hand("L", k, _v((0.14, FW), (0.09, RT), (-0.02, Z)), _v((1, LT), (0.4, FW), (-0.6, Z)), curl=(30, 10)),
+            {"にやり": 0.4})
+
+
+def _clorinde(k):       # the near hand across to her left hip, resting as on a hilt
+    return (_gbody(k, lean=0, head=(12, 18))
+            + _hand("R", k, _v((0.08, FW), (0.06, LT), (-0.29, Z)), _v((1, RT), (0.4, BK)), curl=(55, 20))
+            + _rest("L", k),
+            {"怒り目": 0.2})
+
+
+def _navia(k):          # the near hand on her hip, a confident lean back
+    return (_gbody(k, lean=-4, twist=-16, head=(12, 20), tilt=-6, sway=0.012)
+            + _hand("R", k, NEAR, NEAR_POLE, curl=(30, 10), aim=NEAR_AIM)
+            + _rest("L", k, out=0.01),
+            {"にこり": 0.6, "笑い": 0.3})
+
+
+def _lyney(k):          # the far hand raised to his hat brim
+    return (_gbody(k, lean=-1, head=(12, 16), nod=4)
+            + _rest("R", k)
+            + _hand("L", k, _v((0.07, FW), (0.08, LT), (0.15, Z)), _v((1, LT), (-0.5, Z)), anchor="頭", curl=(30, 10)),
+            {"にやり": 0.6})
+
+
+def _lynette(k):        # arms loose, head tilted, deadpan
+    return (_gbody(k, lean=1, head=(10, 12), tilt=12, nod=2)
+            + _rest("R", k, curl=(15, 5), out=-0.01) + _rest("L", k, curl=(15, 5), out=-0.01),
+            {"じと目": 0.5})
+
+
+def _freminet(k):       # shy: head down, hands together low in front
+    return (_gbody(k, lean=3, head=(8, 10), nod=10, tilt=4)
+            + _hand("R", k, _v((0.14, FW), (0.01, LT), (-0.28, Z)), _v((1, RT), (0.3, BK)), curl=(35, 15))
+            + _hand("L", k, _v((0.15, FW), (0.01, RT), (-0.27, Z)), _v((1, LT), (0.3, BK)), curl=(35, 15)),
+            {"困る": 0.4})
+
+
+def _charlotte(k):      # both hands up before her face, framing a photo
+    return (_gbody(k, lean=-1, head=(12, 16))
+            + _hand("R", k, _v((0.22, FW), (-0.16, Z)), _v((1, RT), (-1.0, Z)), anchor="頭", curl=(8, 0),
+                    aim=(_v((0.3, FW), (1.0, Z)), 90))
+            + _hand("L", k, _v((0.24, FW), (0.12, LT), (0.02, Z)), _v((1, LT), (-1.0, Z)), anchor="頭", curl=(8, 0),
+                    aim=(_v((0.3, FW), (1.0, Z)), -90)),
+            {"にこり": 0.6, "ウィンク": 1.0})
+
+
+def _chevreuse(k):      # weight settled on the rear leg, the far hand on her hip
+    return (_gbody(k, lean=-1, twist=-12, head=(12, 18), sway=-0.015, front=0.09)
+            + _rest("R", k)
+            + _hand("L", k, _v((0.12, LT), (0.02, BK), (-0.17, Z)), _v((1, LT), (0.4, BK)), curl=(30, 10)),
+            {"真面目": 0.5})
+
+
+def _sigewinne(k):      # hands clasped in front of her, cheerful
+    return (_gbody(k, lean=-2, head=(12, 18), tilt=-10, nod=-4)
+            + _hand("R", k, _v((0.12, FW), (0.02, LT), (-0.22, Z)), _v((1, RT), (0.3, BK)), curl=(40, 15))
+            + _hand("L", k, _v((0.13, FW), (0.02, RT), (-0.21, Z)), _v((1, LT), (0.3, BK)), curl=(40, 15)),
+            {"笑い": 0.7, "にこり": 0.5})
+
+
+def _escoffier(k):      # the far hand lifted at waist height, palm up, presenting a dish
+    return (_gbody(k, lean=-1, head=(12, 18))
+            + _rest("R", k)
+            + _hand("L", k, FAR, IDLE_FAR_POLE, curl=(14, 0), aim=FAR_AIM),
+            {"にこり": 0.5})
+
+
+def _neutral(k):
+    return (_gbody(k) + _rest("R", k) + _rest("L", k), {"にこり": 0.35})
+
+
+GUEST_POSES = {"neuvillette": _neuvillette, "wriothesley": _wriothesley, "clorinde": _clorinde, "navia": _navia,
+               "lyney": _lyney, "lynette": _lynette, "freminet": _freminet, "charlotte": _charlotte,
+               "chevreuse": _chevreuse, "sigewinne": _sigewinne, "escoffier": _escoffier}
+
+
+def guest_pose(k=1.0, name=None):
+    """A guest star's one still: standing easy, facing right like Furina, in
+    that guest's own variation (GUEST_POSES; `name` None is the plain rest).
+    `k` scales every offset to the guest's own size."""
+    ops, morphs = GUEST_POSES.get(name, _neutral)(k)
+    return pose(ops, morphs, yaw=GUEST_YAW)

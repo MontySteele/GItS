@@ -517,6 +517,42 @@ def test_every_guest_star_is_scaled_at_furinas_px_per_inch():
     assert {op[0] for op in p["ops"]} <= OPS and p["yaw"] > 0, "standing, facing right"
 
 
+def _held_out(pose):
+    """A hand IK'd off the chest that is held up and out: at or above the
+    chest bone and more than 0.35 units out from it (the old idle's far arm,
+    straight out at shoulder height, palm down: (0.46, -0.12, 0.30))."""
+    return [op for op in pose["ops"] if op[0] == "hand" and op[2] == "上半身2"
+            and op[3][2] > 0.05 and (op[3][0] ** 2 + op[3][1] ** 2) ** 0.5 > 0.35]
+
+
+def test_her_idle_never_holds_an_arm_out_and_her_open_hand_is_low():
+    # [USER], 2026-10-13: "Furina's idle looks like she's doing a Nazi
+    # salute." No arm up and out in idle or idle_low, nor in the stance every
+    # other clip starts and ends on, the shop loop or the select close-up.
+    stills = [k[1] for name in ("idle", "idle_low", "merchant") for k in fc.CLIPS[name]["keys"]]
+    stills += [fc.CLIPS[name]["keys"][i][1] for name in (*fc.FROM_IDLE, "death") for i in (0, -1)]
+    stills += [fc.SELECT, fc.PORTRAIT]
+    for p in stills:
+        assert not _held_out(p), _held_out(p)
+    a = fc.idle_pose(0.0)
+    far, near = _op(a, "hand", "L")[3], _op(a, "hand", "R")[3]
+    assert far[2] < 0 and near[2] < 0, "the open hand at her waist, the near one on her hip"
+    assert _op(a, "aimw", "手首.L")[3] == fc.FAR_AIM[1], "palm up"
+
+
+def test_every_guest_star_stands_in_a_pose_of_their_own():
+    # [USER], 2026-10-13: "The guest stars are all in the exact same poise
+    # (arms to the side) - they could use slightly more differentiated poses"
+    assert set(fc.GUEST_POSES) == set(chars.GUESTS)
+    poses = {g: fc.guest_pose(1.0, g) for g in chars.GUESTS}
+    hands = {g: tuple(op for op in p["ops"] if op[0] in ("hand", "aimw")) for g, p in poses.items()}
+    assert len(set(hands.values())) == len(hands), "no two guests hold their hands alike"
+    for g, p in poses.items():
+        assert {op[0] for op in p["ops"]} <= OPS and p["yaw"] == fc.GUEST_YAW, g
+        assert not _held_out(p), g
+    assert "肌2" in chars.GUESTS["escoffier"]["hide"], "her thigh layer rendered as two black patches"
+
+
 def test_the_thrust_streak_runs_along_the_blade_from_the_hand():
     m = {**_meta(), "trails": [], "bursts": [{"t": 0.4, "blade": "L", "kind": "thrust", "scale": 1.0}]}
     frames, first, pad = fx.clip_fx(m)

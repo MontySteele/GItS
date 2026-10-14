@@ -338,7 +338,7 @@ def render_guests(names, furina_ppu):
         drop_overlays(mesh, CFG)
         shade(mesh).thickness = args.outline_px / ppu
         k = g["head"] / CH.FURINA_HEAD
-        p = LIB.guest_pose(k)
+        p = LIB.guest_pose(k, name)
         cap = capture(root, arm, mesh, p)
         set_frame(root, arm, mesh, {}, [cap], [(0.0, p, "io")], 0.0)
         T.reset_camera(cam_ob, args.pitch, CFG.get("camera_height", 0.8) * k)
