@@ -698,6 +698,24 @@ if (-not (Test-Path $furinaGuests)) { Note-Skip 'furina\model\guests' $furinaGue
     }
 }
 
+# Kokomi's model frames (phase A, 2026-10-14): one sheet per combat clip, the
+# shop loop, the attack's element layer (the water jet off her open hand) and
+# her shadow, packed by tools/char_render/pack.py (the one producer).
+# pck-src/kokomi/model/combat.tscn and merchant_character.tscn, once generated
+# by tools/kokomi_rig, draw them; their cells, pages and anchors are
+# tools/char_render/kokomi_frames.json, whose `texture_import` is
+# vram_compressed, as Varka's and Furina's. Until her first render the
+# directory does not exist and this block skips.
+$kokomiFrames = Join-Path $src 'kokomi\model\frames'
+if (-not (Test-Path $kokomiFrames)) { Note-Skip 'kokomi\model\frames' $kokomiFrames } else {
+    $to = Join-Path $work 'kokomi\model\frames'
+    New-Item -ItemType Directory -Force -Path $to | Out-Null
+    foreach ($f in (Get-ChildItem $kokomiFrames -Filter *.png)) {
+        Copy-Item $f.FullName -Destination $to
+        Write-TextureImport (Join-Path $to "$($f.Name).import")
+    }
+}
+
 # Kokomi's combat rig (2026-10-02): the same treatment, cut by
 # tools/cut_combat_layers.py kokomi. Her model\ loop below is non-recursive, so
 # the layers\combat subdirectory needs its own block. Varka's layer-cut rig
@@ -1000,8 +1018,11 @@ stretch_mode = 6
 # tint is KEPT rather than retired: it is the same Watatsumi pearl-blue her
 # CardPool, map marker and name colour use, and multiplying it over her
 # namecard pushes the reef back so the figure separates from it. Furina's
-# scene keeps its tint over her own namecard for the same reason.
-[IO.File]::WriteAllText((Join-Path $work 'kokomi\ui\char_select_bg_kokomi.tscn'), @'
+# scene keeps its tint over her own namecard for the same reason. The art over
+# it is the close-up rendered from her model (tools/char_render pack.py, phase
+# A, 2026-10-14) when it exists, else the cut-out splash.
+$kokomiSelectArt = if (Test-Path (Join-Path $src 'kokomi\ui\select_closeup.png')) { 'select_closeup.png' } else { 'selection_splash.png' }
+[IO.File]::WriteAllText((Join-Path $work 'kokomi\ui\char_select_bg_kokomi.tscn'), (@'
 [gd_scene load_steps=3 format=3]
 
 [ext_resource type="Texture2D" path="res://kokomi/ui/selection_splash.png" id="1_art"]
@@ -1038,7 +1059,7 @@ offset_bottom = 1080.0
 texture = ExtResource("1_art")
 expand_mode = 1
 stretch_mode = 6
-'@)
+'@).Replace('res://kokomi/ui/selection_splash.png', "res://kokomi/ui/$kokomiSelectArt"))
 
 # Character.Icon returns a Control that the game parents into its own slot --
 # the box next to HP in the top-left player panel. These were authored at a
@@ -1193,15 +1214,24 @@ texture = ExtResource("1_tex")
 texture = ExtResource("1_tex")
 '@)
 
-[IO.File]::WriteAllText((Join-Path $work 'kokomi\model\rest_character.tscn'), @'
+# Her rest pose: sitting on the ground facing the fire, knees drawn up,
+# rendered from her model (tools/char_render pack.py, phase A, 2026-10-14:
+# padded so her seat lands on BaseLib's anchor, Klee's rule) when it exists,
+# else the combat still.
+$kokomiRestArt = if (Test-Path (Join-Path $src 'kokomi\model\kokomi_rest.png')) { 'kokomi_rest.png' } else { 'combat_model.png' }
+[IO.File]::WriteAllText((Join-Path $work 'kokomi\model\rest_character.tscn'), (@'
 [gd_scene load_steps=2 format=3]
 
 [ext_resource type="Texture2D" path="res://kokomi/model/combat_model.png" id="1_tex"]
 
 [node name="KokomiRestSprite" type="Sprite2D"]
 texture = ExtResource("1_tex")
-'@)
+'@).Replace('res://kokomi/model/combat_model.png', "res://kokomi/model/$kokomiRestArt"))
 
+# Her merchant scene: this static sprite until tools/kokomi_rig generates
+# pck-src/kokomi/model/merchant_character.tscn (stance B breathing on a loop,
+# phase A, 2026-10-14); the pck-src overlay below then replaces it at this
+# path. Delete this block in the commit that generates it, as Furina's was.
 [IO.File]::WriteAllText((Join-Path $work 'kokomi\model\merchant_character.tscn'), @'
 [gd_scene load_steps=2 format=3]
 

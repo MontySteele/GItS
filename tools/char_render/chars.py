@@ -220,6 +220,14 @@ CHARS = {
                         "wince": ("まばたき", "困る"), "sad": "悲しむ", "shock": "びっくり", "star_eyes": "星目"},
         "stance": KOKOMI_STANCE,
         "prop": None,
+        # the phase A clip set (render.py --clips, 2026-10-14): her pose
+        # library. Her pack has no catalyst, so she has no blades; her
+        # attack's jet follows a phantom line off her far hand
+        # (kokomi_clips.PHANTOM), as Furina's rapier does.
+        "clips": "kokomi_clips",
+        "blades": {},
+        "hide_mats": set(),
+        "camera_height": 0.8,
     },
     "varka": {
         "pmx": "varka/unpacked/法尔伽.pmx",

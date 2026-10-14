@@ -559,8 +559,6 @@ GENERATOR_OWNED = {
     "ImageGen/images/furina/ui/selection_splash.png":       "gen_furina_stills.py",
     "ImageGen/images/furina/ui/map_marker.png":             "gen_furina_stills.py",
     "ImageGen/images/kokomi/model/combat_model.png":        "gen_kokomi_stills.py",
-    "ImageGen/images/kokomi/ui/select_portrait.png":        "gen_kokomi_stills.py",
-    "ImageGen/images/kokomi/ui/select_portrait_locked.png": "gen_kokomi_stills.py",
     "ImageGen/images/kokomi/ui/selection_splash.png":       "gen_kokomi_stills.py",
     "ImageGen/images/kokomi/ui/map_marker.png":             "gen_kokomi_stills.py",
     # Varka (prototype, 2026-09-29): same six surfaces from his own render,
@@ -667,6 +665,24 @@ GENERATOR_OWNED = {
     "ImageGen/images/furina/model/guests/guest_neuvillette.png": "char_render/pack.py",
     "ImageGen/images/furina/model/guests/guest_sigewinne.png": "char_render/pack.py",
     "ImageGen/images/furina/model/guests/guest_wriothesley.png": "char_render/pack.py",
+    # Kokomi's model art (phase A, 2026-10-14): her frame sheets, the
+    # attack's element layer (the water jet), shadow, rest still, select
+    # close-up and roster tile, rendered from the official model (which never
+    # enters the repo) and packed by one script;
+    # tools/char_render/kokomi_frames.json is the committed manifest.
+    "ImageGen/images/kokomi/model/frames/kokomi_idle.png": "char_render/pack.py",
+    "ImageGen/images/kokomi/model/frames/kokomi_idle_low.png": "char_render/pack.py",
+    "ImageGen/images/kokomi/model/frames/kokomi_attack.png": "char_render/pack.py",
+    "ImageGen/images/kokomi/model/frames/kokomi_cast.png": "char_render/pack.py",
+    "ImageGen/images/kokomi/model/frames/kokomi_hurt.png": "char_render/pack.py",
+    "ImageGen/images/kokomi/model/frames/kokomi_death.png": "char_render/pack.py",
+    "ImageGen/images/kokomi/model/frames/kokomi_merchant.png": "char_render/pack.py",
+    "ImageGen/images/kokomi/model/frames/kokomi_attack_fx.png": "char_render/pack.py",
+    "ImageGen/images/kokomi/model/frames/kokomi_shadow.png": "char_render/pack.py",
+    "ImageGen/images/kokomi/model/kokomi_rest.png":         "char_render/pack.py",
+    "ImageGen/images/kokomi/ui/select_closeup.png":         "char_render/pack.py",
+    "ImageGen/images/kokomi/ui/select_portrait.png":        "char_render/pack.py",
+    "ImageGen/images/kokomi/ui/select_portrait_locked.png": "char_render/pack.py",
     "ImageGen/images/ui/transition_wipe.png":               "gen_transition_wipe.py",
     "ImageGen/images/kokomi/ui/transition_wipe.png":        "gen_transition_wipe.py",
     "ImageGen/images/varka/ui/transition_wipe.png":         "gen_transition_wipe.py",
