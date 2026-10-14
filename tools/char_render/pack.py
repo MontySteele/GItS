@@ -418,7 +418,9 @@ def main(argv=None) -> int:
                 "file": file, "size": list(still.size), "ppu": gm["ppu"], "height_in": gm["height_in"],
                 "feet": [round(gm["origin_px"][0] - b[0]), round(gm["origin_px"][1] - b[1])],
                 "head_px": round((gm["origin_px"][1] - gm["head_px"][1]) * COMBAT_SCALE, 1),
-                "full_px": metrics["full_px"], "width_px": round(still.width * COMBAT_SCALE, 1)}
+                "full_px": metrics["full_px"], "width_px": round(still.width * COMBAT_SCALE, 1),
+                # the share of each forearm and hand the camera sees (render.py forearms_visible)
+                "forearms_visible": gm.get("forearms_visible")}
             print(f"guest {g:12s} {gm['height_in']:5.1f} in  full {metrics['full_px']:6.1f} px  "
                   f"head {manifest['guests'][g]['head_px']:6.1f} px  width {manifest['guests'][g]['width_px']} px")
 

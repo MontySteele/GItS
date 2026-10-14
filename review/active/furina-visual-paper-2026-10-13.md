@@ -60,16 +60,16 @@ Each of the eleven is rendered in one calm rest, standing easy and facing right 
 
 | Guest | Pose |
 |---|---|
-| Neuvillette | Upright, hands clasped behind his back. |
+| Neuvillette | Upright, the near hand at his chest on his lapel, the far arm easy at his side. |
 | Wriothesley | Arms crossed, a slight smirk. |
-| Clorinde | The near hand across to her left hip, resting as on a hilt. |
+| Clorinde | Upright and poised: leaning back a little, chin up, the near hand on her hip with the elbow out. |
 | Navia | Hand on hip, leaning back, smiling. |
 | Lyney | The far hand raised to his hat brim. |
 | Lynette | Arms loose, head tilted, half-lidded and deadpan. |
 | Freminet | Shy: head down, hands together low in front. |
 | Charlotte | Both hands up before her face, framing a photo, a wink. |
 | Chevreuse | Weight settled on the rear leg, the far hand on her hip, stern. |
-| Sigewinne | Hands clasped in front, head tilted, beaming. |
+| Sigewinne | Hands clasped in front at the waist, held clear of her body, head tilted, beaming. |
 | Escoffier | The far hand lifted at waist height, palm up, as if presenting a dish. |
 
 **Scale.** Every guest is drawn at Furina's px per inch (`chars.guest_ppu`). A guest's head bone stands at (its `GUEST_HEIGHTS_IN` over 63 in) times Furina's head-bone height. The head bone is measured from the lowest vertex, so hats, ears and Sigewinne's antennae do not count. The packs are not at one common scale, so each is solved from its own measured head height (research packet, sec. 8).
@@ -79,17 +79,17 @@ The manifest records each guest's file, size, feet anchor, ppu and px. A test ho
 | Guest | Height (in) | Full px at 1080p | Head-bone px | Width px |
 |---|---|---|---|---|
 | Furina (for scale) | 63.0 | 220.2 | 169.9 | 93.5 |
-| Sigewinne | 52.0 | 189.3 | 138.7 | 79.5 |
+| Sigewinne | 52.0 | 189.3 | 138.7 | 79.0 |
 | Escoffier | 62.9 | 213.5 | 168.0 | 105.0 |
 | Chevreuse | 63.0 | 212.1 | 168.3 | 111.0 |
 | Charlotte | 63.1 | 210.8 | 168.5 | 68.0 |
 | Lynette | 63.3 | 202.5 | 168.8 | 98.0 |
 | Freminet | 66.0 | 208.3 | 176.1 | 56.0 |
 | Lyney | 66.7 | 222.5 | 177.2 | 67.5 |
-| Clorinde | 69.2 | 237.1 | 184.6 | 85.0 |
+| Clorinde | 69.2 | 229.1 | 184.3 | 92.5 |
 | Navia | 70.0 | 228.7 | 186.8 | 90.5 |
 | Wriothesley | 76.1 | 236.4 | 204.0 | 114.0 |
-| Neuvillette | 76.4 | 237.8 | 204.6 | 88.0 |
+| Neuvillette | 76.4 | 237.8 | 204.6 | 90.0 |
 
 The lineup sheet (`f_guest_lineup.png`) lays them out as `FurinaStagePlacement` does: from her hitbox edge, a 20 px gap, then each body by its own width with 20 px between. It shows a three-seat line and two four-seat lines (Ensemble Cast).
 
@@ -155,3 +155,18 @@ Sheets: `scratchpad/furina-art/sheets/`.
    - **(a) Default:** wire it into the game as it is: her scenes, the Rejoice trigger, the guests' stills and the three stage effects.
    - (b) Change the motion first: the stance, the thrust, the swoon, or the flourish.
    - (c) Change the guests first: their pose, their scale, or Freminet's helmet.
+
+## Three guests re-posed (2026-10-13)
+
+[USER]: "Furina looks good! For the guest stars - where are Siegwinne and Neuvillette's arms? And Clorinde looks weird as though she's hnched over. But the rest are good!"
+
+- **Neuvillette.** His hands were clasped behind his back, which hid both arms from the front. His near hand now rests at his chest on his lapel, and his far arm hangs easy at his side.
+- **Sigewinne.** Her clasped hands sat against her front, and her forearms sank behind it. Her hands are now clasped at waist height, about twice as far in front of her, with the elbows a little out.
+- **Clorinde.** Her near hand reached across to her far hip, which rounded her near shoulder, and her head was bowed under the hat. She now leans back 6 degrees, her neck and head are lifted (10 and 14 degrees), and her near hand rests on her own hip with the elbow out.
+- The other eight are unchanged: re-rendered, their manifest entries differ only by the new measure below.
+
+**How it is held.** `render.py` `forearms_visible` casts a ray toward the camera from every forearm and hand vertex. It counts the share that meets nothing, or only that same forearm, on the way. The manifest keeps the share per side for every guest (`forearms_visible`). `test_every_guest_shows_both_forearms_to_the_camera` requires every guest's forearms to show at least 2%, so none is hidden whole. It requires both of Neuvillette's, Sigewinne's and Clorinde's to show at least 25%, and it holds the new poses. Measured: Neuvillette 74% near, 27% far; Sigewinne 74% and 88%; Clorinde 43% and 26%. The lowest shares are the far arms that hang behind the body at this camera angle: Lynette 2%, Navia 6%, Chevreuse 17%. You called those guests good, so they are unchanged.
+
+**Black patches.** Every guest was checked again: no 9 by 9 px block of near-black (all channels under 28) appears on any of the eleven, before or after.
+
+Sheet: `scratchpad/furina-art/sheets/f_guest_lineup.png`.
