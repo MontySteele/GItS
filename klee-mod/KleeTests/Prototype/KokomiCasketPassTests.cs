@@ -82,9 +82,11 @@ public class KokomiCasketPassTests : IDisposable
         var up = Upgraded<ProtoKkFeint>();
         Assert.Equal(9m, Var(up, "CalculationBase"));
         Assert.Equal(3m, Var(up, "ExtraDamage"));
-        Assert.Equal((KokomiPlan.Kind.ApplyVulnerable, 1),
+        // The pool overhaul (2026-10-13): the Plan is a Chain line, 5 [7]
+        // per Plan carried out this turn (was Apply 1 [2] Vulnerable).
+        Assert.Equal((KokomiPlan.Kind.DamagePerPlanThisTurn, 5),
                      (card.PlanClauses.Single().Kind, card.PlanClauses.Single().Amount));
-        Assert.Equal(2, up.PlanClauses.Single().Amount);
+        Assert.Equal(7, up.PlanClauses.Single().Amount);
     }
 
     [Fact]
@@ -113,12 +115,8 @@ public class KokomiCasketPassTests : IDisposable
         Assert.Equal(6m, Upgraded<ProtoKkPincer>().DynamicVars.Damage.BaseValue);
         Assert.Equal(7m, new ProtoKkOpeningGambit().DynamicVars.Damage.BaseValue);
         Assert.Equal(9m, Upgraded<ProtoKkOpeningGambit>().DynamicVars.Damage.BaseValue);
-        // The Kokomi kit review (2026-10-05): Ceremonial Garment costs 1; the
-        // Kokomi card pass (2026-10-11): 1 [2] per stack of Weak and
-        // Vulnerable. (Deep Current left in the re-founding, 2026-10-12.)
-        Assert.Equal(1, new ProtoKkCeremonialGarment().EnergyCost.Canonical);
-        Assert.Equal(1m, Var(new ProtoKkCeremonialGarment(), "PowerAmount"));
-        Assert.Equal(2m, Var(Upgraded<ProtoKkCeremonialGarment>(), "PowerAmount"));
+        // (Ceremonial Garment left with the Kokomi pool overhaul, 2026-10-13;
+        // Deep Current in the re-founding, 2026-10-12.)
         var riptide = new ProtoKkRiptide();
         Assert.Equal(11m, riptide.DynamicVars.Damage.BaseValue);
         Assert.Equal(3m, riptide.DynamicVars.ExtraDamage.BaseValue);

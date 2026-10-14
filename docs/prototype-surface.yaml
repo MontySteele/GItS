@@ -62,7 +62,7 @@
 - {id: proto_ko_big_badda_boom, name: "Big Badda Boom", character: klee,
    authored_by: [claude],
    cost: 2, type: attack, rarity: uncommon,
-   description: "[gold]Set off[/gold] the enemy. Deal 12 [gold]Pyro[/gold] damage, then damage equal to what your [gold]Bombs[/gold] dealt.",
+   description: "[gold]Set off[/gold] the enemy. Deal 12 [gold]Pyro[/gold] damage, then damage equal to what your [gold]Bombs[/gold] dealt.{InCombat:\n(Then deals {BombEcho:diff()} damage)|}",
    upgrade: {damage: +4},
    effects: [{op: set_off, target: enemy, damage: 12},
              {op: damage_set_off_total, target: enemy}]}
@@ -70,7 +70,7 @@
 - {id: proto_ko_the_big_one, name: "The Big One", character: klee,
    authored_by: [claude],
    cost: 3, type: attack, rarity: rare,
-   description: "[gold]Set off[/gold] the enemy. Your [gold]Bombs[/gold] deal quadruple damage.",
+   description: "[gold]Set off[/gold] the enemy. Your [gold]Bombs[/gold] deal quadruple damage.{InCombat:\n([gold]Bombs[/gold]: {SetOffBombs} damage)|}",
    upgrade: {cost: -1},
    effects: [{op: multiply_set_off, multiplier: 4},
              {op: set_off, target: enemy}]}
@@ -499,7 +499,7 @@
    cost: 1, type: attack, rarity: uncommon,
    # AoE trim, 2026-10-03 (sec.2): the Companion pays 6 more damage on the
    # aimed enemy instead of widening the Set off to ALL.
-   description: "[gold]Set off[/gold] the enemy. Deal 6 [gold]Pyro[/gold] damage, 6 additional damage if you played a [gold]Companion[/gold] card this turn.",
+   description: "[gold]Set off[/gold] the enemy. Deal 6 [gold]Pyro[/gold] damage, 6 additional damage if you played a [gold]Companion[/gold] card this turn.{InCombat:\n(Deals {BonusHit:diff()} damage)|}",
    upgrade: {damage: +3},
    effects: [{op: set_off, target: enemy},
              {op: damage, amount: 6, target: enemy,
@@ -646,7 +646,7 @@
 - {id: proto_ko_fireworks_finale, name: "Fireworks Finale", character: klee,
    authored_by: [claude],
    cost: 0, type: attack, rarity: rare,
-   description: "Spend all your [gold]Sparks[/gold]. Deal 5 [gold]Pyro[/gold] damage to ALL enemies for each [gold]Spark[/gold] spent.",
+   description: "Spend all your [gold]Sparks[/gold]. Deal 5 [gold]Pyro[/gold] damage to ALL enemies for each [gold]Spark[/gold] spent.{InCombat:\n(Deals {TotalDamage:diff()} damage)|}",
    upgrade: {damage: +2},
    effects: [{op: spend_spark, amount: all},
              {op: damage, amount: 5, target: all_enemies, times: sparks_spent}]}
@@ -801,7 +801,7 @@
 - {id: proto_ko_simmer, name: "Simmer", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal 6 [gold]Pyro[/gold] damage, plus your largest [gold]Bomb[/gold]'s size on any enemy. It does not go off. Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].",
+   description: "Deal 6 [gold]Pyro[/gold] damage, plus your largest [gold]Bomb[/gold]'s size on any enemy. It does not go off. Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].{InCombat:\n(Deals {BombHit:diff()} damage)|}",
    upgrade: {damage: +3},
    effects: [{op: damage_from_bombs, read: largest, amount: 6, target: enemy},
              {op: add_card, card: status_dazed, zone: discard, amount: 1}]}
@@ -809,7 +809,7 @@
 - {id: proto_ko_taste_test, name: "Taste Test", character: klee,
    authored_by: [claude],
    cost: 2, type: attack, rarity: uncommon,
-   description: "Deal [gold]Pyro[/gold] damage equal to twice your [gold]Bombs[/gold] on the enemy. They do not go off. Add 2 [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold].",
+   description: "Deal [gold]Pyro[/gold] damage equal to twice your [gold]Bombs[/gold] on the enemy. They do not go off. Add 2 [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold].{InCombat:\n(Deals {BombHit:diff()} damage)|}",
    upgrade: {cards: -1},
    effects: [{op: damage_from_bombs, read: target_total_double, target: enemy},
              {op: add_card, card: confiscated, zone: discard, amount: 2}]}
@@ -1056,7 +1056,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: trigger, element: geo,
    cost: 2, type: attack,
-   description: "Deal [gold]Geo[/gold] damage equal to your [gold]Block[/gold] to ALL enemies.",
+   description: "Deal [gold]Geo[/gold] damage equal to your [gold]Block[/gold] to ALL enemies.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: all_enemies, applies_element: true,
               amount_formula: {base: 0, per: 1, count: player_block}}],
    # POOL COMPLETION (2026-10-01, paper sec.6, the Body Slam note): cost 2 [1].
@@ -1170,7 +1170,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: cryo,
    cost: 1, type: attack,
-   description: "Deal 5 [gold]Cryo[/gold] damage to ALL enemies. Your next Attack costs 1 less.",
+   description: "Deal 5 [gold]Cryo[/gold] damage to ALL enemies. Your next Attack this turn costs 1 less.",
    effects: [{op: damage, amount: 5, target: all_enemies, applies_element: true},
              {op: apply_power, power: mc_starfrost_discount, amount: 1, target: self}]}
 
@@ -1242,14 +1242,15 @@
 - {id: proto_kk_feint, name: "Feint", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   # The re-founding (2026-10-12, card paper sec.2): per Plan waiting (was
-   # per Plan carried out this turn); the Plan line is unchanged.
-   description: "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus {ExtraDamage:diff()} for each [gold]Plan[/gold] waiting. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   # The re-founding (2026-10-12): per Plan waiting. The pool overhaul
+   # (2026-10-13): a Chain Plan, 5 [7] per Plan carried out this turn
+   # (was Apply 1 [2] Vulnerable). Provenance note.
+   description: "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus {ExtraDamage:diff()} for each [gold]Plan[/gold] waiting. [gold]Plan[/gold]: Deal 5 [gold]Hydro[/gold] damage for each [gold]Plan[/gold] carried out this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: enemy,
               amount_formula: {base: 6, per: 3, count: plans_held}}],
-   plan: [{op: apply_power, power: vulnerable, amount: 1, target: front_enemy}],
-   # 9, plus 3 each / Plan 2 Vulnerable.
-   upgrade: {formula_base: 3, plan_power_amount: 1}}
+   plan: [{op: damage_per_plan_this_turn, amount: 5, target: front_enemy}],
+   # 9, plus 3 each / Plan 7 per Plan.
+   upgrade: {formula_base: 3, plan_damage: 2}}
 
 - {id: proto_kk_ambush, name: "Ambush", character: kokomi,
    authored_by: [claude],
@@ -1272,11 +1273,14 @@
    # THE FEED PASS (2026-09-29): Common -> Uncommon, no other change. A
    # card that does a thing now AND writes a Plan sits at a higher rarity.
    cost: 1, type: skill, rarity: uncommon,
-   description: "Look at the top {Scry:diff()} card{Scry:plural:|s} of your [gold]Draw Pile[/gold]. Put 1 into your [gold]Hand[/gold] and the rest on the bottom. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold].",
+   # The pool overhaul (2026-10-13): the Plan fetches a card from the Draw
+   # Pile (was Gain 10 [12] Block); the now-line is reworded to fit the
+   # card ceiling, same effect. Provenance note.
+   description: "Look at your top {Scry:diff()} card{Scry:plural:|s}. Take 1; put the rest on the bottom. [gold]Plan[/gold]: Put a card from your [gold]Draw Pile[/gold] into your [gold]Hand[/gold].",
    effects: [{op: scry_take, amount: 3}],
-   plan: [{op: block, amount: 10}],
-   # 4 seen / Plan 12: both halves move, one number each.
-   upgrade: {scry: 1, plan_block: 2}}
+   plan: [{op: draw_pile_to_hand}],
+   # 4 seen; the Plan line prints no number.
+   upgrade: {scry: 1}}
 
 # EXPOSED FLANK IS CUT (THE FEED PASS, 2026-09-29): a now-and-Plan Common.
 # Tombstoned in docs/retired-card-ids.yaml; provenance note, "the feed pass".
@@ -1411,13 +1415,20 @@
 # review/active/kokomi-status-batch-2026-10-01.md sec.2). Provenance
 # note, "Kokomi status batch, 2026-10-01".
 
-- {id: proto_kk_moons_reflection, name: "Moon's Reflection", character: kokomi,
+# MOON'S REFLECTION IS CUT (the pool overhaul, 2026-10-13, sec.4): Prepared
+# Retreat takes its slot; `plan_from_exhaust` stays registered. Provenance
+# note, "Kokomi pool overhaul, 2026-10-13".
+
+# THE POOL OVERHAUL (2026-10-13, sec.4), a Counter line: "since you planned
+# this" is the enemy turn the Plan sat through, read per Plan.
+- {id: proto_kk_prepared_retreat, name: "Prepared Retreat", character: kokomi,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "Choose a card in your [gold]Exhaust Pile[/gold]. Next turn, carry out its [gold]Plan[/gold], or play it if it has none.",
-   effects: [{op: plan_from_exhaust}],
-   # card audit 2026-09-02: review/active/kokomi-card-audit-2026-09-02.md
-   upgrade: {cost: -1}}
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Gain 7 [gold]Block[/gold]. [gold]Plan[/gold]: If an enemy attacked you since you planned this, gain {PlanEnergy:energyIcons()}.",
+   effects: [{op: block, amount: 7}],
+   plan: [{op: energy_if_attacked_since, amount: 1}],
+   # 10 Block / Plan 2 Energy.
+   upgrade: {block: 3, plan_energy: 1}}
 
 # --- the tempo shelf (Kokomi round 9 pick 1, default applied 2026-09-04):
 # Tide Chart and Ripple; both were cut by the Casket pass (2026-09-28). ---
@@ -1618,15 +1629,15 @@
 
 - {id: proto_kk_brine_sting, name: "Brine Sting", character: kokomi,
    authored_by: [claude],
-   # The re-founding (2026-10-12): cost 1, a hit now, Vulnerable to ALL as
-   # the Plan line. Kokomi review 2026-10-13: Uncommon, swapped with Shoal
-   # Call. Provenance note.
+   # Kokomi review 2026-10-13: Uncommon. The pool overhaul (2026-10-13): a
+   # Counter Plan, each enemy that attacked her since it was written (was
+   # Apply 1 Vulnerable to ALL enemies). Provenance note.
    cost: 1, type: attack, rarity: uncommon,
-   description: "Deal 8 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold] to ALL enemies.",
+   description: "Deal 8 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 8 [gold]Hydro[/gold] damage to each enemy that attacked you since you planned this.",
    effects: [{op: damage, amount: 8, target: enemy}],
-   plan: [{op: apply_power, power: vulnerable, amount: 1, target: all_enemies}],
-   # 11 damage; the Plan line does not upgrade.
-   upgrade: {damage: 3}}
+   plan: [{op: damage, amount: 8, target: enemies_attacked_since}],
+   # 11 damage / Plan 11.
+   upgrade: {damage: 3, plan_damage: 3}}
 
 # --- THE EXPANSION, BATCH ONE (2026-09-29, review/active/kokomi-expansion-
 # 2026-09-29.md, ruled): 22 rows, LAST in the sheet's order. Readings and the
@@ -1678,9 +1689,9 @@
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
    # STACKS of Weak plus Vulnerable on the enemy. Kokomi level pass
-   # (2026-10-12): brings its own 1 and 1 first, a floor of 6 [8]; no
-   # in-combat preview (it would read before the debuffs). Provenance note.
-   description: "Apply 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold]. Deal {ExtraDamage:diff()} [gold]Hydro[/gold] damage for each [gold]Weak[/gold] and [gold]Vulnerable[/gold] on the enemy.",
+   # (2026-10-12): brings its own 1 and 1 first, a floor of 6 [8]; its
+   # in-combat line counts them (damage previews, 2026-10-13). Provenance note.
+   description: "Apply 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold]. Deal {ExtraDamage:diff()} [gold]Hydro[/gold] damage for each [gold]Weak[/gold] and [gold]Vulnerable[/gold] on the enemy.{InCombat:\n(Deals {PressureHit:diff()} damage)|}",
    effects: [{op: apply_power, power: weak, amount: 1, target: enemy},
              {op: apply_power, power: vulnerable, amount: 1, target: enemy},
              {op: damage, target: enemy,
@@ -1690,12 +1701,14 @@
 
 - {id: proto_kk_undercurrent_snare, name: "Undercurrent Snare", character: kokomi,
    authored_by: [claude],
-   # The re-founding (2026-10-12): cost 0 -> 1 (no Plan card costs 0).
+   # The pool overhaul (2026-10-13): an Intent Plan, read when it lands;
+   # Piercing Wail's this-turn loss (was Apply 1 [2] Vulnerable to ALL
+   # enemies). Provenance note.
    cost: 1, type: skill, rarity: uncommon,
-   description: "Apply 2 [gold]Weak[/gold]. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold] to ALL enemies.",
+   description: "Apply 2 [gold]Weak[/gold]. [gold]Plan[/gold]: Each enemy that intends to attack loses 3 [gold]Strength[/gold] this turn.",
    effects: [{op: apply_power, power: weak, amount: 2, target: enemy}],
-   plan: [{op: apply_power, power: vulnerable, amount: 1, target: all_enemies}],
-   # Plan 2 Vulnerable to ALL; the now-line does not upgrade.
+   plan: [{op: lose_strength_this_turn, amount: 3, target: enemies_intending_attack}],
+   # Plan 4 Strength; the now-line does not upgrade.
    upgrade: {plan_power_amount: 1}}
 
 - {id: proto_kk_at_waters_edge, name: "At Water's Edge", character: kokomi,
@@ -1707,16 +1720,18 @@
    effects: [{op: apply_power, power: kk_at_waters_edge, amount: 1, target: self}],
    upgrade: {cost: -1}}
 
-- {id: proto_kk_ceremonial_garment, name: "Ceremonial Garment", character: kokomi,
+# CEREMONIAL GARMENT IS CUT (the pool overhaul, 2026-10-13, sec.4): Battle
+# Formation takes its Rare slot. Provenance note, "Kokomi pool overhaul,
+# 2026-10-13".
+
+# THE POOL OVERHAUL (2026-10-13, sec.4): the Rare Chain payoff. Fires once a
+# turn, when the third Plan of the turn finishes.
+- {id: proto_kk_battle_formation, name: "Battle Formation", character: kokomi,
    authored_by: [claude],
-   # THE KIT REVIEW (2026-10-05): cost 2 -> 1, 1 -> 2 per debuff (3
-   # upgraded). A 2-cost Rare at +1 per debuff sat under an Uncommon Inflame.
    cost: 1, type: power, rarity: rare,
-   description: "Your Attacks deal {PowerAmount:diff()} additional damage for each [gold]Weak[/gold] and [gold]Vulnerable[/gold] on their target.",
-   effects: [{op: apply_power, power: kk_ceremonial_garment, amount: 1, target: self}],
-   # 2 per stack. 2026-10-11 Kokomi card pass: stacks of Weak and
-   # Vulnerable, 2 [3] per debuff -> 1 [2] per stack.
-   upgrade: {power_amount: 1}}
+   description: "Whenever 3 or more [gold]Plans[/gold] are carried out in one turn, gain {energyPrefix:energyIcons(1)} and draw 2 cards.",
+   effects: [{op: apply_power, power: kk_battle_formation, amount: 1, target: self}],
+   upgrade: {innate: true}}
 
 - {id: proto_kk_suffocating_deep, name: "Suffocating Deep", character: kokomi,
    authored_by: [claude],
@@ -1754,14 +1769,18 @@
    # 6 each.
    upgrade: {kokomi_amount: 2}}
 
-- {id: proto_kk_brace_for_the_tide, name: "Brace for the Tide", character: kokomi,
+# BRACE FOR THE TIDE IS CUT (the pool overhaul, 2026-10-13, sec.4): Jellyfish
+# Current takes its Uncommon slot. Its `double_block` kind stays registered
+# with no row spelling it. Provenance note, "Kokomi pool overhaul, 2026-10-13".
+
+# THE POOL OVERHAUL (2026-10-13, sec.4): a Sting's own hit reacting makes
+# another. Bounded: each reaction consumes the aura it reacted with.
+- {id: proto_kk_jellyfish_current, name: "Jellyfish Current", character: kokomi,
    authored_by: [claude],
-   # The re-founding (2026-10-12): the base game's Entrench, cost 2 [1], no
-   # Exhaust; Dusk is retired.
-   cost: 2, type: skill, rarity: uncommon,
-   description: "Double your [gold]Block[/gold].",
-   effects: [{op: kokomi, kind: double_block}],
-   upgrade: {cost: -1}}
+   cost: 1, type: power, rarity: uncommon,
+   description: "Whenever a [gold]Sting[/gold] triggers an [gold]Elemental Reaction[/gold], add a [gold]Sting[/gold] to your [gold]Hand[/gold].",
+   effects: [{op: apply_power, power: kk_jellyfish_current, amount: 1, target: self}],
+   upgrade: {innate: true}}
 
 - {id: proto_kk_watatsumis_grace, name: "Watatsumi's Grace", character: kokomi,
    authored_by: [claude],
@@ -1833,7 +1852,7 @@
    # The re-founding (2026-10-12): one hit per Plan waiting (was per Plan
    # written this turn).
    # Kokomi level pass (2026-10-12, sec.2): always hits at least once.
-   description: "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies, plus once more for each [gold]Plan[/gold] waiting.",
+   description: "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies, plus once more for each [gold]Plan[/gold] waiting.{InCombat:\n(Deals {TotalDamage:diff()} damage)|}",
    effects: [{op: damage, amount: 5, target: all_enemies,
               times: plans_held_plus_one}],
    # 6 a hit. Kokomi round 2 (2026-10-12): 4 [5] -> 5 [6].
@@ -1859,13 +1878,21 @@
               amount_formula: {base: 0, per: 1, count: player_block}}],
    upgrade: {cost: -1}}
 
-- {id: proto_kk_watatsumi_resistance, name: "Watatsumi Resistance", character: kokomi,
+# WATATSUMI RESISTANCE IS CUT (the pool overhaul, 2026-10-13, sec.4):
+# Turnabout takes its Rare slot. Its power stays registered with no row
+# applying it. Provenance note, "Kokomi pool overhaul, 2026-10-13".
+
+# THE POOL OVERHAUL (2026-10-13, sec.4), the Rare Counter: every point of
+# damage enemies dealt her while it waited, blocked or not. Plan-only; the
+# upgrade is the Prototype-stage rule (cost 2 with no number: 1 less).
+- {id: proto_kk_turnabout, name: "Turnabout", character: kokomi,
    authored_by: [claude],
-   cost: 1, type: power, rarity: rare,
-   # The re-founding (2026-10-12): pays for WRITING a Companion, in Stings.
-   # One Sting per Companion written; copies add.
-   description: "Whenever you plan a [gold]Companion[/gold] card, add a [gold]Sting[/gold] to your [gold]Hand[/gold].",
-   effects: [{op: apply_power, power: kk_watatsumi_resistance, amount: 1, target: self}],
+   cost: 2, type: skill, rarity: rare, exhaust: true,
+   # The paper's "Deal damage equal to all the damage enemies dealt you
+   # ..." in the 120-character card ceiling: the same sentence, shorter.
+   description: "[gold]Plan[/gold]: Deal the damage enemies dealt you since you planned this, blocked or not, to ALL enemies.",
+   effects: [],
+   plan: [{op: damage_taken_since, target: all_enemies}],
    upgrade: {cost: -1}}
 
 # --- THE STATUS BATCH (2026-10-01, ruled), LAST in the sheet's order; seven
@@ -1875,13 +1902,14 @@
 - {id: proto_kk_kelp_wall, name: "Kelp Wall", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   # Kokomi level pass (2026-10-12): the status count goes; the Plan is a
-   # flat 12 [15]. Provenance note.
-   description: "Gain {Block:diff()} [gold]Block[/gold]. Draw 1 card. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold].",
+   # The pool overhaul (2026-10-13): a Counter Plan, the damage she blocked
+   # since it was written, at the front enemy (was Gain 12 [15] Block).
+   # Provenance note.
+   description: "Gain {Block:diff()} [gold]Block[/gold]. Draw 1 card. [gold]Plan[/gold]: Deal [gold]Hydro[/gold] damage equal to the damage you blocked since you planned this.",
    effects: [{op: block, amount: 5}, {op: draw, amount: 1}],
-   plan: [{op: block, amount: 12}],
-   # now 7 Block; Plan 15. 2026-10-11 Kokomi card pass: 7 [10] -> 9 [12].
-   upgrade: {block: 2, plan_block: 3}}
+   plan: [{op: damage_blocked_since, target: front_enemy}],
+   # now 7 Block; the Plan line prints no number.
+   upgrade: {block: 2}}
 
 - {id: proto_kk_tidecleanse, name: "Tidecleanse", character: kokomi,
    authored_by: [claude],
@@ -1953,14 +1981,21 @@
    # 14 / Plan 10.
    upgrade: {damage: 3, plan_damage: 2}}
 
-- {id: proto_kk_riptide_guard, name: "Riptide Guard", character: kokomi,
+# RIPTIDE GUARD IS CUT (the pool overhaul, 2026-10-13, sec.4; it repeated
+# Tidal Screen): Turning Tide takes its Common slot. Provenance note, "Kokomi
+# pool overhaul, 2026-10-13".
+
+# THE POOL OVERHAUL (2026-10-13, sec.4): the Common Chain hit. Each Chain
+# line counts itself. A new id: the re-founding's cut card of the same name
+# (`proto_kk_turning_tide`) stays cut and pinned absent.
+- {id: proto_kk_turning_tide_chain, name: "Turning Tide", character: kokomi,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: common, ethereal: true,
-   description: "Gain 10 [gold]Block[/gold]. [gold]Plan[/gold]: Draw 2 cards.",
-   effects: [{op: block, amount: 10}],
-   plan: [{op: draw, amount: 2}],
-   # 13 Block; the Plan line does not upgrade.
-   upgrade: {block: 3}}
+   cost: 1, type: attack, rarity: common,
+   description: "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 4 [gold]Hydro[/gold] damage to ALL enemies for each [gold]Plan[/gold] carried out this turn.",
+   effects: [{op: damage, amount: 7, target: enemy}],
+   plan: [{op: damage_per_plan_this_turn, amount: 4, target: all_enemies}],
+   # 10 / Plan 5 per Plan.
+   upgrade: {damage: 3, plan_damage: 1}}
 
 - {id: proto_kk_watatsumi_drill, name: "Watatsumi Drill", character: kokomi,
    authored_by: [claude],
@@ -2038,17 +2073,28 @@
 - {id: proto_kk_coordinated_tide, name: "Coordinated Tide", character: kokomi,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "Whenever the [gold]Bake-Kurage[/gold] carries out an [gold]Ethereal[/gold] card, deal {PowerAmount:diff()} [gold]Hydro[/gold] damage to the front enemy.",
-   effects: [{op: apply_power, power: kk_coordinated_tide, amount: 6, target: self}],
-   # 9 damage. Kokomi round 2 (2026-10-12): 4 [6] -> 6 [9].
-   upgrade: {power_amount: 3}}
+   # The pool overhaul (2026-10-13): a Companion's own hit reacting adds a
+   # Sting (was a hit per Ethereal carry-out). The upgrade is Innate, the
+   # jellyfish generators'. Provenance note.
+   description: "Whenever a [gold]Companion[/gold] triggers an [gold]Elemental Reaction[/gold], add a [gold]Sting[/gold] to your [gold]Hand[/gold].",
+   effects: [{op: apply_power, power: kk_coordinated_tide, amount: 1, target: self}],
+   upgrade: {innate: true}}
 
-- {id: proto_kk_reserves, name: "Reserves", character: kokomi,
+# RESERVES IS CUT (the pool overhaul, 2026-10-13, sec.4): Brine Spray takes
+# its Uncommon slot. Its `reserves` kind stays registered with no row
+# spelling it. Provenance note, "Kokomi pool overhaul, 2026-10-13".
+
+# THE POOL OVERHAUL (2026-10-13, sec.4): "if it triggers" is this card's own
+# hit reacting (`reaction_triggered_by_this`, Diluc's read).
+- {id: proto_kk_brine_spray, name: "Brine Spray", character: kokomi,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: uncommon,
-   description: "Put a card from your [gold]Exhaust Pile[/gold] into your [gold]Hand[/gold]. It is [gold]Ethereal[/gold].",
-   effects: [{op: kokomi, kind: reserves}],
-   upgrade: {cost: -1}}
+   cost: 1, type: attack, rarity: uncommon,
+   description: "Deal 5 [gold]Hydro[/gold] damage. If it triggers an [gold]Elemental Reaction[/gold], add {KkAmount} [gold]Stings[/gold] to your [gold]Hand[/gold].",
+   effects: [{op: damage, amount: 5, target: enemy, applies_element: true},
+             {op: conditional, if: reaction_triggered_by_this,
+              then: [{op: kokomi, kind: shoal_call, amount: 2}]}],
+   # 7 damage; the Stings do not upgrade.
+   upgrade: {damage: 2}}
 
 - {id: proto_kk_spearhead, name: "Spearhead", character: kokomi,
    authored_by: [claude],
@@ -2081,10 +2127,13 @@
 - {id: proto_kk_grand_strategist, name: "Grand Strategist", character: kokomi,
    authored_by: [claude],
    cost: 1, type: power, rarity: rare,
-   description: "Whenever a [gold]Plan[/gold] triggers an [gold]Elemental Reaction[/gold], deal {PowerAmount:diff()} damage to ALL enemies.",
-   effects: [{op: apply_power, power: kk_grand_strategist, amount: 7, target: self}],
-   # 10 damage. Kokomi round 2 (2026-10-12): 5 [8] -> 7 [10].
-   upgrade: {power_amount: 3}}
+   # The pool overhaul (2026-10-13, sec.3): any reaction she triggers, her
+   # cards, her Companions and the Bake-Kurage's Plans alike, 4 [6] (was a
+   # Plan's reaction alone, 7 [10]). Provenance note.
+   description: "Whenever you trigger an [gold]Elemental Reaction[/gold], deal {PowerAmount:diff()} damage to ALL enemies.",
+   effects: [{op: apply_power, power: kk_grand_strategist, amount: 4, target: self}],
+   # 6 damage.
+   upgrade: {power_amount: 2}}
 
 - {id: proto_kk_call_the_generals, name: "Call the Generals", character: kokomi,
    authored_by: [claude],
@@ -2127,26 +2176,29 @@
 
 - {id: proto_kk_all_streams_flow, name: "All Streams Flow to the Sea", character: kokomi,
    authored_by: [claude],
-   # Sango Isshin's jellyfish twin: one card per half that grows over a fight.
+   # The pool overhaul (2026-10-13): it counts the Elemental Reactions she
+   # triggered this combat, 5 [7] plus 5 each (was 4 [8] plus 2 per Sting
+   # played). Provenance note.
    cost: 1, type: attack, rarity: rare,
-   description: "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus {ExtraDamage:diff()} for each [gold]Sting[/gold] you played this combat.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   description: "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus {ExtraDamage:diff()} for each [gold]Elemental Reaction[/gold] you triggered this combat.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: enemy,
-              amount_formula: {base: 4, per: 2,
-                               count: stings_played_this_combat}}],
-   # 8, plus 2 per Sting.
-   upgrade: {formula_base: 4}}
+              amount_formula: {base: 5, per: 5,
+                               count: reactions_triggered_this_combat}}],
+   # 7, plus 5 per reaction.
+   upgrade: {formula_base: 2}}
 
 - {id: proto_kk_the_shape_of_water, name: "The Shape of Water", character: kokomi,
    authored_by: [claude],
    # Her normal attack's last hit, the Silent's Finisher: one hit, so a
-   # damage-cutting boss takes it whole.
+   # damage-cutting boss takes it whole. Kokomi review (2026-10-13), pick
+   # (a): a base hit, 5 [7] (was 0 with no Sting, 6 [8] each).
    cost: 1, type: attack, rarity: uncommon,
-   description: "Deal {ExtraDamage:diff()} [gold]Hydro[/gold] damage for each [gold]Sting[/gold] you played this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   description: "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus {ExtraDamage:diff()} for each [gold]Sting[/gold] you played this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: enemy,
-              amount_formula: {base: 0, per: 6,
+              amount_formula: {base: 5, per: 5,
                                count: stings_played_this_turn}}],
-   # 8 each.
-   upgrade: {formula_per: 2}}
+   # 7, plus 7 each.
+   upgrade: {formula_base: 2, formula_per: 2}}
 
 # The jellyfish cards (card paper sec.1 rule 4): generated, in no pool
 # (`C.KOKOMI_OFF_POOL_ROW_IDS`), Ethereal, Exhaust when played or carried out.
@@ -2842,7 +2894,7 @@
    upgrade: {damage: +2},
    authored_by: [claude],
    register: salon, cost: 1, type: attack, rarity: uncommon,
-   description: "[gold]Spend[/gold] all your [gold]Fanfare[/gold]. Deal {Damage:diff()} [gold]Hydro[/gold] damage for every 3 spent.",
+   description: "[gold]Spend[/gold] all your [gold]Fanfare[/gold]. Deal {Damage:diff()} [gold]Hydro[/gold] damage for every 3 spent.{InCombat:\n(Deals {TotalDamage:diff()} damage)|}",
    effects: [{op: stage_spend_all},
              {op: damage, amount: 7, target: enemy, applies_element: true,
               times_formula: {base: 0, per: 1, count: stage_spent_threes}}]}
@@ -3574,32 +3626,66 @@
    # Mend 12.
    upgrade: {kokomi_amount: 4}}
 
+# --- Varka (VarkaRoster.MultiplayerSlice) ---
+# His co-op five (ruled 2026-10-13). "Each player" includes Varka. Rules:
+# CoopSet.cs, "VARKA"; provenance: "The co-op set", "Varka (2026-10-13)".
+
+- {id: proto_vk_escort_duty, name: "Escort Duty", character: varka,
+   authored_by: [claude], multiplayer: true,
+   # 5 [7] on paper; 6 [9] at the ruling ("a little low").
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Each player gains {Block:diff()} [gold]Block[/gold]. [gold]Swirl[/gold] a random enemy with an aura.",
+   effects: [{op: block, amount: 6},
+             {op: varka, kind: escort_duty}],
+   upgrade: {block: 3}}
+
+- {id: proto_vk_marching_orders, name: "Marching Orders", character: varka,
+   authored_by: [claude], multiplayer: true,
+   # The bonus is read once, when it is played, and holds for their turn.
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Choose another player. Their Attacks this turn deal additional damage equal to your [gold]Oath[/gold] of your [gold]current element[/gold].{InCombat:\n(+{VkOath} damage)|}",
+   effects: [{op: varka, kind: marching_orders, target: ally}],
+   upgrade: {cost: -1}}
+
+- {id: proto_vk_windward_flank, name: "Windward Flank", character: varka,
+   authored_by: [claude], multiplayer: true,
+   # Flanking's shape, weaker: x1.5 for this turn, Swirled or not.
+   cost: 1, type: skill, rarity: uncommon,
+   description: "[gold]Swirl[/gold] the enemy. This turn, other players' Attacks deal 50% more damage to it.",
+   effects: [{op: swirl, target: enemy},
+             {op: apply_power, power: vk_windward_flank, amount: 1, target: enemy}],
+   upgrade: {cost: -1}}
+
+- {id: proto_vk_comrades_of_the_expedition, name: "Comrades of the Expedition", character: varka,
+   authored_by: [claude], multiplayer: true,
+   cost: 2, type: power, rarity: rare,
+   description: "Whenever another player plays an Attack, gain 1 [gold]Oath[/gold] of your [gold]current element[/gold].",
+   effects: [{op: apply_power, power: vk_comrades_of_the_expedition, amount: 1, target: self}],
+   upgrade: {cost: -1}}
+
+- {id: proto_vk_west_winds_blessing, name: "West Wind's Blessing", character: varka,
+   authored_by: [claude], multiplayer: true,
+   cost: 2, type: power, rarity: rare,
+   description: "The first time each turn you [gold]Swirl[/gold], each other player gains {energyPrefix:energyIcons(1)}.",
+   effects: [{op: apply_power, power: vk_west_winds_blessing, amount: 1, target: self}],
+   upgrade: {innate: true}}
+
 # VARKA, THE OATH REWORK (review/active/varka-paper-kit-2026-09-28.md, ruled
 # 2026-09-29). Rules: Powers/Prototype/VarkaOath.cs, tier0/engine/varka_oath.py.
 # Per-row reasoning: docs/notes/prototype-surface-provenance.md, "Varka".
 
-# --- created by Boreas's Fang (sec.4), and the starter (sec.5) ---
+# --- the starter (sec.5) ---
 
 - {id: proto_vk_four_winds_ascension, name: "Four Winds' Ascension", character: varka,
    authored_by: [claude],
-   # Created in combat, never in the deck; played, it goes to the discard
-   # pile. Starter ruling 2026-10-03; upgrade cost 2 to 1 since the combo
-   # pass. Provenance note, "Varka review, 2026-10-12" (no `dusty_tome`).
+   # In his starter deck since Starter (a), 2026-10-13; the Fang no longer
+   # makes it. Archaic Tooth: Dandelion Gale. Provenance notes, "Varka
+   # review, 2026-10-12" and "Varka starter, Fang and Tooth, 2026-10-13".
    cost: 2, type: attack, rarity: basic, retain: true,
-   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkPer:diff()} for each [gold]Oath[/gold] of your [gold]current element[/gold], as that element, in one hit.",
+   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkPer:diff()} damage per [gold]Oath[/gold] of your [gold]current element[/gold], as that element.{InCombat:\n(Deals {VkHit:diff()} damage)|}",
    effects: [{op: damage, amount: 10, target: enemy},
              {op: varka, kind: ascension_hit, per: 3}],
    upgrade: {cost: -1}}
-
-- {id: proto_vk_windbound_execution, name: "Windbound Execution", character: varka,
-   authored_by: [claude],
-   # Starter ruling 2026-10-03 ([USER]: "single target but 0 energy ... we
-   # print too many AoE cards"): cost 0, one enemy; still Swirls. Archaic
-   # Tooth: Dandelion Gale (provenance note, "Varka review, 2026-10-12").
-   cost: 0, type: attack, rarity: basic,
-   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage.",
-   effects: [{op: damage, amount: 4, target: enemy}],
-   upgrade: {damage: 2}}
 
 # The four starter-only Knights: one joins the starter at random each run.
 
@@ -3708,7 +3794,7 @@
    cost: 1, type: skill, personal_pool: varka,
    # The rebalance (sec.3): Block that scales with reactions. Varka co-op
    # fixes (2026-10-11): 6 [8] + 2 [3], was 4 [6] + 3 [4] (provenance).
-   description: "Apply [gold]Hydro[/gold] to ALL enemies. Gain {VkBase:diff()} [gold]Block[/gold], plus {VkPer:diff()} for each enemy it reacts on.",
+   description: "Apply [gold]Hydro[/gold] to ALL enemies. Gain {VkBase:diff()} [gold]Block[/gold], plus {VkPer:diff()} for each enemy the [gold]Hydro[/gold] reacts on.",
    effects: [{op: varka, kind: gleeful_songs, target: all_enemies, base: 6, per: 2}],
    upgrade: {varka_base: 2, varka_per: 1}}
 
@@ -3740,10 +3826,11 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: electro,
    cost: 1, type: attack, personal_pool: varka,
-   # The AoE trim: one enemy. 5 [7], +4: provenance, "Varka Electro
+   # The AoE trim: one enemy. 6 [8], +3 (was 5 [7], +4; user 2026-10-13:
+   # "9 damage with its rider effect is fine for a common"). Provenance, "Varka Electro
    # Knights, 2026-10-03". An Attack since the combo pass (2026-10-04).
    description: "Deal {VkBase:diff()} [gold]Electro[/gold] damage to an enemy. If it already has [gold]Electro[/gold], deal {VkAmount:diff()} additional damage.",
-   effects: [{op: varka, kind: awakening, target: enemy, base: 5, amount: 4}],
+   effects: [{op: varka, kind: awakening, target: enemy, base: 6, amount: 3}],
    upgrade: {varka_base: 2}}
 
 - {id: proto_vk_mika_starfrost_swirl, name: "Mika: Suppressive Barrage", character: varka,
@@ -3831,12 +3918,12 @@
 
 - {id: proto_vk_tailwind_stride, name: "Tailwind Stride", character: varka,
    authored_by: [claude],
+   # Unconditional 3 [4] (user 2026-10-13: "When do you not have an
+   # element outside turn 1?"); was 2, +1 [2] with a current element.
    cost: 1, type: skill, rarity: uncommon,
-   description: "Draw 2 cards. If you have a [gold]current element[/gold], draw {DrawThen:diff()} additional card{DrawThen:plural:|s}.",
-   effects: [{op: draw, amount: 2},
-             {op: conditional, if: has_current_element,
-              then: [{op: draw, amount: 1}]}],
-   upgrade: {conditional_draw: 1}}
+   description: "Draw {Cards:diff()} card{Cards:plural:|s}.",
+   effects: [{op: draw, amount: 3}],
+   upgrade: {draw: 1}}
 
 - {id: proto_vk_eye_of_the_storm, name: "Eye of the Storm", character: varka,
    authored_by: [claude],
@@ -3876,11 +3963,13 @@
 - {id: proto_vk_eula_icetide_vortex, name: "Eula: Icetide Vortex", character: varka,
    authored_by: [claude],
    nation: mondstadt, star: 5, rarity: uncommon, role_c: applier, element: cryo,
-   cost: 2, type: skill, personal_pool: varka,
+   # Varka pool audit (2026-10-13), ruled (a): costs 1, was 2; 8 [11], was
+   # 10 [14].
+   cost: 1, type: skill, personal_pool: varka,
    description: "Deal {CalculatedDamage:diff()} [gold]Cryo[/gold] damage. Gain 1 [gold]Cryo[/gold] [gold]Oath[/gold] for each enemy with a [gold]Cryo[/gold] aura.",
-   effects: [{op: damage, amount: 10, target: enemy, applies_element: true},
+   effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
              {op: varka, kind: oath_per_cryo_enemy}],
-   upgrade: {damage: 4}}
+   upgrade: {damage: 3}}
 
 - {id: proto_vk_barbara_whisper_of_water, name: "Barbara: Whisper of Water", character: varka,
    authored_by: [claude],
@@ -3916,7 +4005,9 @@
 
 - {id: proto_vk_storm_surge, name: "Storm Surge", character: varka,
    authored_by: [claude],
-   cost: 2, type: attack, rarity: uncommon,
+   # Costs 1, was 2 (user 2026-10-13: "It basically reads "deal 5 or 10
+   # AoE" as a 2 cost Uncommon").
+   cost: 1, type: attack, rarity: uncommon,
    description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage to ALL enemies. Each enemy it [gold]Swirls[/gold] takes {VkAmount:diff()} additional damage.",
    effects: [{op: damage, amount: 5, target: all_enemies},
              {op: varka, kind: swirled_take_more, amount: 5}],
@@ -3925,13 +4016,13 @@
 # Element identities (sec.3): Chain Lightning replaces Unfurled Banner.
 - {id: proto_vk_chain_lightning, name: "Chain Lightning", character: varka,
    authored_by: [claude],
-   # Eviscerate's discount, spelled the way Stomp's and Pinpoint's are: a
-   # card-level rate the cost line reads (`Card.cost_reduction_per_
-   # discard_this_turn`, C# `EnergyCost.AddThisTurn`).
-   cost: 2, type: attack, rarity: uncommon,
-   cost_reduction_per_discard_this_turn: 1,
-   description: "Deal {VkBase:diff()} [gold]Electro[/gold] damage to ALL enemies. Costs 1 less for each card you discarded this turn.",
-   effects: [{op: varka, kind: electro_all, target: all_enemies, base: 8}],
+   # Varka pool audit (2026-10-13): costs 0 and discards 2 (Short Circuit's
+   # chosen discard), was 2 with Eviscerate's discount. Provenance, "Varka
+   # pool audit, 2026-10-13".
+   cost: 0, type: attack, rarity: uncommon,
+   description: "Deal {VkBase:diff()} [gold]Electro[/gold] damage to ALL enemies. Discard 2 cards.",
+   effects: [{op: varka, kind: electro_all, target: all_enemies, base: 8},
+             {op: discard, amount: 2, select: chosen}],
    upgrade: {varka_base: 3}}
 
 # --- Rare (8; 23 since the expansion) ---
@@ -3987,7 +4078,7 @@
    # Pick 4 (ruled): cost 2, 10 [14] and 10 [14], plus 2 per Oath.
    # Varka last pass (2026-10-12), pick 1: the second hit 8 [12].
    cost: 2, type: attack, rarity: rare,
-   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkBase:diff()}, plus {VkPer:diff()} for each [gold]Oath[/gold] of your [gold]current element[/gold], as that element.",
+   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkBase:diff()}, plus {VkPer:diff()} per [gold]Oath[/gold] of your [gold]current element[/gold], as that element.{InCombat:\n(Deals {VkHit:diff()} damage)|}",
    effects: [{op: damage, amount: 10, target: enemy},
              {op: varka, kind: avatar_hit, base: 8, per: 2}],
    upgrade: {damage: 4, varka_base: 4}}
@@ -4029,9 +4120,11 @@
    # "more" is a second, element-less hit on the same enemy.
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. If it triggers an [gold]Elemental Reaction[/gold], deal {VkBase:diff()} additional damage.",
-   effects: [{op: varka, kind: kindled_edge, target: enemy, base: 7}],
-   upgrade: {varka_base: 3}}
+   # Varka pool audit (2026-10-13), ruled (a): the reaction bonus is 5 [7],
+   # was 7 [10] (the base hit's number).
+   description: "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. If it triggers an [gold]Elemental Reaction[/gold], deal {VkAgain:diff()} additional damage.",
+   effects: [{op: varka, kind: kindled_edge, target: enemy, base: 7, amount: 5}],
+   upgrade: {varka_base: 3, varka_amount: 2}}
 
 - {id: proto_vk_knightly_strike, name: "Knightly Strike", character: varka,
    authored_by: [claude],
@@ -4058,24 +4151,21 @@
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
    # The Pyro pass (2026-10-11, review/ruled/varka-pyro-pass-2026-10-11.md):
-   # base 5 [7] to 8 [11], the floor every new card is held to.
-   description: "Deal {VkBase:diff()} [gold]Pyro[/gold] damage, plus {VkPer:diff()} for each [gold]Pyro[/gold] [gold]Oath[/gold].",
-   effects: [{op: varka, kind: blazing_charge, target: enemy, base: 8, per: 2}],
+   # base 5 [7] to 8 [11], the floor every new card is held to. Varka pool
+   # audit (2026-10-13), ruled (b): plus 1 per Pyro Oath, was 2.
+   description: "Deal {VkBase:diff()} [gold]Pyro[/gold] damage, plus {VkPer:diff()} for each [gold]Pyro[/gold] [gold]Oath[/gold].{InCombat:\n(Deals {VkHit:diff()} damage)|}",
+   effects: [{op: varka, kind: blazing_charge, target: enemy, base: 8, per: 1}],
    upgrade: {varka_base: 3}}
 
 - {id: proto_vk_tidal_bulwark, name: "Tidal Bulwark", character: varka,
    authored_by: [claude],
-   # The Hydro paper (2026-10-10): Hydro's Body Slam, was a Skill. Varka
-   # last pass (2026-10-12): gains 6 [8] Block first. Provenance, "Varka
-   # last pass, 2026-10-12".
+   # The Hydro paper (2026-10-10): Hydro's Body Slam. Varka text pass
+   # (2026-10-13), ruled (a): no Block, the hit itself is Hydro. Provenance,
+   # "Varka text pass, 2026-10-13".
    cost: 1, type: attack, rarity: uncommon,
-   description: "Gain {Block:diff()} [gold]Block[/gold]. Deal damage equal to your [gold]Block[/gold], plus {CalculationExtra:diff()} for each [gold]Hydro[/gold] [gold]Oath[/gold]. Apply [gold]Hydro[/gold] to an enemy.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
-   effects: [{op: block, amount: 6},
-             {op: damage, target: enemy, applies_element: false,
-              amount_formula: {base: 0, per: 2, count: hydro_oath,
-                               plus: player_block}},
-             {op: apply_aura, element: hydro, target: enemy}],
-   upgrade: {block: 2, formula_per: 1}}
+   description: "Deal [gold]Hydro[/gold] damage equal to your [gold]Block[/gold], plus {VkPer:diff()} for each [gold]Hydro[/gold] [gold]Oath[/gold].{InCombat:\n(Deals {VkHit:diff()} damage)|}",
+   effects: [{op: varka, kind: tidal_bulwark, target: enemy, per: 2}],
+   upgrade: {varka_per: 1}}
 
 - {id: proto_vk_glacial_edict, name: "Glacial Edict", character: varka,
    authored_by: [claude],
@@ -4166,7 +4256,7 @@
    authored_by: [claude],
    # Varka last pass (2026-10-12): Retain, so it can wait for a full Hand.
    cost: 1, type: attack, rarity: uncommon, retain: true,
-   description: "Deal {VkPer:diff()} [gold]Electro[/gold] damage to ALL enemies for each other card in your [gold]Hand[/gold].",
+   description: "Deal {VkPer:diff()} [gold]Electro[/gold] damage to ALL enemies for each other card in your [gold]Hand[/gold].{InCombat:\n(Deals {VkHit:diff()} damage)|}",
    effects: [{op: varka, kind: storm_battery, target: all_enemies, per: 2}],
    upgrade: {varka_per: 1}}
 
@@ -4296,16 +4386,17 @@
    authored_by: [claude],
    # Varka last pass (2026-10-12): costs 1, was 2.
    cost: 1, type: power, rarity: rare,
-   description: "At the start of your turn, you may make an element you have [gold]Oath[/gold] in your [gold]current element[/gold].",
+   description: "At the start of your turn, you may choose an element you have [gold]Oath[/gold] in. It becomes your [gold]current element[/gold].",
    effects: [{op: apply_power, power: vk_weathervane, amount: 1, target: self}],
    upgrade: {innate: true}}
 
 - {id: proto_vk_tempest_of_the_four_winds, name: "Tempest of the Four Winds", character: varka,
    authored_by: [claude],
+   # Varka pool audit (2026-10-13), ruled (a): 6 [8] per hit, was 4 [5].
    cost: 2, type: attack, rarity: rare,
    description: "Deal {VkBase:diff()} damage four times, as [gold]Pyro[/gold], [gold]Hydro[/gold], [gold]Cryo[/gold] and [gold]Electro[/gold].",
-   effects: [{op: varka, kind: tempest, target: enemy, base: 4}],
-   upgrade: {varka_base: 1}}
+   effects: [{op: varka, kind: tempest, target: enemy, base: 6}],
+   upgrade: {varka_base: 2}}
 
 - {id: proto_vk_twin_gales, name: "Twin Gales", character: varka,
    authored_by: [claude],
@@ -4316,12 +4407,14 @@
 
 - {id: proto_vk_downburst, name: "Downburst", character: varka,
    authored_by: [claude],
-   # 2026-10-04: new rider after spent auras were removed (#882).
+   # 2026-10-04: new rider after spent auras were removed (#882). Varka pool
+   # audit (2026-10-13), ruled (a) amended: 18 [24], was 12 [16]; 2 Oath of
+   # EACH element (Pyro, Hydro, Cryo, Electro), was of the element Swirled.
    cost: 2, type: attack, rarity: rare,
-   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If it [gold]Swirls[/gold], gain {VkAmount:diff()} [gold]Oath[/gold] of that element.",
-   effects: [{op: damage, amount: 12, target: enemy},
+   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If it [gold]Swirls[/gold], gain {VkAmount:diff()} [gold]Oath[/gold] of each element.",
+   effects: [{op: damage, amount: 18, target: enemy},
              {op: varka, kind: swirled_oath, amount: 2}],
-   upgrade: {damage: 4}}
+   upgrade: {damage: 6}}
 
 - {id: proto_vk_eye_of_stormterror, name: "Eye of Stormterror", character: varka,
    authored_by: [claude],
@@ -4401,13 +4494,261 @@
 
 - {id: proto_vk_deep_freeze, name: "Deep Freeze", character: varka,
    authored_by: [claude],
-   # Upgrade cost 1 to 0 (2026-10-04). Payoff fix (2026-10-08): 1 Vulnerable;
-   # last pass (2026-10-12): 1 Weak too, both landing before the doubling, so
-   # a clean enemy ends on 2 of each. Provenance, "Varka last pass".
-   cost: 1, type: skill, rarity: uncommon, retain: true,
+   # Upgrade cost 1 to 0 (2026-10-04). Payoff fix: 1 Vulnerable; last pass:
+   # 1 Weak too, before the doubling. Retain dropped 2026-10-13. Provenance,
+   # "Varka last pass" and "Varka starter, Fang and Tooth, 2026-10-13".
+   cost: 1, type: skill, rarity: uncommon,
    description: "Apply [gold]Cryo[/gold], 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold] to an enemy. Double its [gold]Weak[/gold] and [gold]Vulnerable[/gold].",
    effects: [{op: apply_aura, element: cryo, target: enemy},
              {op: apply_power, power: weak, amount: 1, target: enemy},
              {op: apply_power, power: vulnerable, amount: 1, target: enemy},
              {op: varka, kind: deep_freeze, target: enemy}],
+   upgrade: {cost: -1}}
+
+# YAE MIKO, BATCH ONE (review/active/yae-card-paper-2026-10-13.md, ruled
+# 2026-10-13). Rules: Powers/Prototype/YaeShrine.cs, tier0/engine/yae_shrine.py.
+# Per-row reasoning: docs/notes/prototype-surface-provenance.md, "Yae Miko".
+
+# --- the starter (paper sec.3): base Strike x4 + Defend x4 have no row ---
+
+- {id: proto_ym_yakan_evocation, name: "Yakan Evocation", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: basic,
+   description: "Plant a [gold]Sakura[/gold].",
+   effects: [{op: yae, kind: plant, amount: 1}],
+   upgrade: {cost: -1}}
+
+- {id: proto_ym_proofread, name: "Proofread", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: basic,
+   # [USER] 2026-10-13, pick 3: "proofread by itself and having the upgrade
+   # make the effect 0 cost, like a Defect starter."
+   description: "[gold]Edit[/gold] a card in your hand: [gold]Red Ink[/gold].",
+   effects: [{op: yae, kind: edit, annotation: red_ink, amount: 1}],
+   upgrade: {cost: -1}}
+
+# --- Common (9) ---
+
+- {id: proto_ym_kitsune_flash, name: "Kitsune Flash", character: yae,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: common,
+   description: "Deal 6 [gold]Electro[/gold] damage. If this card is [gold]Annotated[/gold], deal 3 more.",
+   effects: [{op: yae, kind: annotated_strike, base: 6, amount: 3, target: enemy}],
+   upgrade: {yae_base: 2, yae_amount: 1}}
+
+- {id: proto_ym_thunder_rite, name: "Thunder Rite", character: yae,
+   authored_by: [claude],
+   cost: 2, type: attack, rarity: common,
+   description: "Deal 8 [gold]Electro[/gold] damage. [gold]Tenko[/gold].",
+   effects: [{op: damage, amount: 8, target: enemy},
+             {op: yae, kind: tenko}],
+   upgrade: {damage: 3}}
+
+- {id: proto_ym_shrine_offering, name: "Shrine Offering", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "Gain 6 [gold]Block[/gold]. Each [gold]Sakura[/gold] lasts 1 more turn.",
+   effects: [{op: block, amount: 6},
+             {op: yae, kind: extend, amount: 1}],
+   upgrade: {block: 3}}
+
+- {id: proto_ym_twin_sakura, name: "Twin Sakura", character: yae,
+   authored_by: [claude],
+   cost: 2, type: skill, rarity: common,
+   description: "Plant {YmAmount:diff()} [gold]Sakura[/gold].",
+   effects: [{op: yae, kind: plant, amount: 2}],
+   upgrade: {cost: -1}}
+
+- {id: proto_ym_deadline, name: "Deadline", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "Gain 4 [gold]Block[/gold]. [gold]Edit[/gold] a card in your hand: [gold]Deadline Extension[/gold].",
+   effects: [{op: block, amount: 4},
+             {op: yae, kind: edit, annotation: deadline, amount: 1}],
+   upgrade: {block: 2}}
+
+- {id: proto_ym_fox_fire_draft, name: "Fox Fire Draft", character: yae,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: common, exhaust: true,
+   description: "[gold]Edit[/gold] {IfUpgraded:show:2 cards|a card} in your hand: [gold]Fox Fire[/gold].",
+   effects: [{op: yae, kind: edit, annotation: fox_fire, amount: 1}],
+   upgrade: {yae_amount: 1}}
+
+- {id: proto_ym_sly_strike, name: "Sly Strike", character: yae,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: common,
+   description: "Deal 5 [gold]Electro[/gold] damage. Apply 1 [gold]Weak[/gold].",
+   effects: [{op: damage, amount: 5, target: enemy},
+             {op: apply_power, power: weak, amount: 1, target: enemy}],
+   upgrade: {damage: 2, power_amount: 1}}
+
+- {id: proto_ym_fox_trick, name: "Fox Trick", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "Apply 2 [gold]Weak[/gold] to an enemy. Draw 1 card.",
+   effects: [{op: apply_power, power: weak, amount: 2, target: enemy},
+             {op: draw, amount: 1}],
+   upgrade: {power_amount: 1}}
+
+- {id: proto_ym_shrine_maidens_guard, name: "Shrine Maiden's Guard", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "Gain 4 [gold]Block[/gold], plus 2 for each [gold]Sakura[/gold] standing.",
+   effects: [{op: yae, kind: block_per_sakura, base: 4, per: 2}],
+   upgrade: {yae_base: 2, yae_per: 1}}
+
+# --- Uncommon (13) ---
+
+- {id: proto_ym_sakura_grove, name: "Sakura Grove", character: yae,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   description: "Your [gold]Sakura[/gold] strike for 1 more.",
+   effects: [{op: apply_power, power: ym_sakura_grove, amount: 1, target: self}],
+   upgrade: {power_amount: 1}}
+
+- {id: proto_ym_kitsune_rite, name: "Kitsune Rite", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon, exhaust: true,
+   description: "[gold]Tenko[/gold].",
+   effects: [{op: yae, kind: tenko}],
+   upgrade: {cost: -1}}
+
+- {id: proto_ym_thunderbolt_tithe, name: "Thunderbolt Tithe", character: yae,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: uncommon,
+   description: "Deal 4 [gold]Electro[/gold] damage for each [gold]Sakura[/gold] standing.",
+   effects: [{op: yae, kind: damage_per_sakura, base: 0, per: 4, target: enemy}],
+   upgrade: {yae_per: 2}}
+
+- {id: proto_ym_rooted_shrine, name: "Rooted Shrine", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Each [gold]Sakura[/gold] gains a Level. Gain 3 [gold]Block[/gold].",
+   effects: [{op: yae, kind: level_up, amount: 1},
+             {op: block, amount: 3}],
+   upgrade: {block: 2}}
+
+- {id: proto_ym_edict_of_cleansing, name: "Edict of Cleansing", character: yae,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   description: "Your [gold]Sakura[/gold] strikes deal 4 more to an enemy with a [gold]Pyro[/gold], [gold]Hydro[/gold] or [gold]Cryo[/gold] aura.",
+   effects: [{op: apply_power, power: ym_edict_of_cleansing, amount: 4, target: self}],
+   upgrade: {power_amount: 2}}
+
+- {id: proto_ym_bestseller, name: "Bestseller", character: yae,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: uncommon,
+   description: "Deal 5 [gold]Electro[/gold] damage, plus 3 for each [gold]Annotated[/gold] card in your hand.",
+   effects: [{op: yae, kind: damage_per_annotated, base: 5, per: 3, target: enemy}],
+   upgrade: {yae_base: 2, yae_per: 1}}
+
+- {id: proto_ym_print_run, name: "Print Run", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Gain 4 [gold]Block[/gold], plus 2 for each [gold]Annotated[/gold] card in your hand.",
+   effects: [{op: yae, kind: block_per_annotated, base: 4, per: 2}],
+   upgrade: {yae_base: 1, yae_per: 1}}
+
+- {id: proto_ym_footnote, name: "Footnote", character: yae,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: uncommon, exhaust: true,
+   description: "[gold]Edit[/gold] {IfUpgraded:show:2 cards|a card} in your hand: [gold]Footnote[/gold].",
+   effects: [{op: yae, kind: edit, annotation: footnote, amount: 1}],
+   upgrade: {yae_amount: 1}}
+
+- {id: proto_ym_sakura_seal, name: "Sakura Seal", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   description: "[gold]Edit[/gold] a card in your hand: [gold]Sakura Seal[/gold].",
+   effects: [{op: yae, kind: edit, annotation: sakura_seal, amount: 1}],
+   upgrade: {cost: -1}}
+
+- {id: proto_ym_serialization, name: "Serialization", character: yae,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   description: "Whenever you [gold]Edit[/gold] a card, gain 3 [gold]Block[/gold].",
+   effects: [{op: apply_power, power: ym_serialization, amount: 3, target: self}],
+   upgrade: {power_amount: 1}}
+
+- {id: proto_ym_manuscript_pile, name: "Manuscript Pile", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Draw {Cards:diff()} cards. [gold]Edit[/gold] a card in your hand: [gold]Deadline Extension[/gold].",
+   effects: [{op: draw, amount: 2},
+             {op: yae, kind: edit, annotation: deadline, amount: 1}],
+   upgrade: {draw: 1}}
+
+- {id: proto_ym_kitsune_guile, name: "Kitsune Guile", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Apply 2 [gold]Weak[/gold] to ALL enemies.",
+   effects: [{op: apply_power, power: weak, amount: 2, target: all_enemies}],
+   upgrade: {power_amount: 1}}
+
+- {id: proto_ym_foxfire_lure, name: "Foxfire Lure", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Apply 1 [gold]Weak[/gold] to an enemy. This turn, your [gold]Sakura[/gold] strike it.",
+   effects: [{op: apply_power, power: weak, amount: 1, target: enemy},
+             {op: yae, kind: lure, target: enemy}],
+   upgrade: {power_amount: 1}}
+
+# --- Rare (8) ---
+
+- {id: proto_ym_tenko_kenshin, name: "Great Secret Art: Tenko Kenshin", character: yae,
+   authored_by: [claude],
+   cost: 2, type: attack, rarity: rare,
+   description: "Deal 12 [gold]Electro[/gold] damage to ALL enemies. [gold]Tenko[/gold].",
+   effects: [{op: damage, amount: 12, target: all_enemies},
+             {op: yae, kind: tenko}],
+   upgrade: {damage: 4}}
+
+- {id: proto_ym_foxs_mooncall, name: "Fox's Mooncall", character: yae,
+   authored_by: [claude],
+   cost: 2, type: power, rarity: rare,
+   description: "Your [gold]Sakura[/gold] are planted at Level 2 and can reach Level 4.",
+   effects: [{op: apply_power, power: ym_foxs_mooncall, amount: 1, target: self}],
+   upgrade: {cost: -1}}
+
+- {id: proto_ym_yakan_offering, name: "Yakan Offering", character: yae,
+   authored_by: [claude],
+   cost: 2, type: power, rarity: rare,
+   description: "At the start of your turn, plant a [gold]Sakura[/gold].",
+   effects: [{op: apply_power, power: ym_yakan_offering, amount: 1, target: self}],
+   upgrade: {cost: -1}}
+
+- {id: proto_ym_the_seven_glamours, name: "The Seven Glamours", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: rare, exhaust: true,
+   description: "[gold]Publish[/gold] an [gold]Annotated[/gold] card in your hand: its Annotation lasts the rest of the run.",
+   effects: [{op: yae, kind: publish}],
+   upgrade: {cost: -1}}
+
+- {id: proto_ym_sakura_channeling, name: "Sakura Channeling", character: yae,
+   authored_by: [claude],
+   cost: 2, type: power, rarity: rare,
+   description: "Whenever a [gold]Sakura[/gold] strikes, gain 2 [gold]Block[/gold].",
+   effects: [{op: apply_power, power: ym_sakura_channeling, amount: 2, target: self}],
+   upgrade: {power_amount: 1}}
+
+- {id: proto_ym_mischievous_teasing, name: "Mischievous Teasing", character: yae,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: rare, exhaust: true,
+   description: "Apply 2 [gold]Weak[/gold] to ALL enemies. Draw {Cards:diff()} cards.",
+   effects: [{op: apply_power, power: weak, amount: 2, target: all_enemies},
+             {op: draw, amount: 2}],
+   upgrade: {draw: 1}}
+
+- {id: proto_ym_reborn_as_guuji_yae, name: "Reborn as Guuji Yae", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: rare, exhaust: true,
+   description: "Choose an Annotation. [gold]Edit[/gold] every other card in your hand with it.",
+   effects: [{op: yae, kind: edit_all, annotation: sakura_seal}],
+   upgrade: {cost: -1}}
+
+- {id: proto_ym_editor_in_chief, name: "Editor-in-Chief", character: yae,
+   authored_by: [claude],
+   cost: 2, type: power, rarity: rare,
+   description: "Whenever you play an [gold]Annotated[/gold] card, a [gold]Sakura[/gold] strikes.",
+   effects: [{op: apply_power, power: ym_editor_in_chief, amount: 1, target: self}],
    upgrade: {cost: -1}}

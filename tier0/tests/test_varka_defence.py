@@ -70,8 +70,10 @@ GONE = ("squall", "four_banners", "favonian_standard")
 
 
 def test_the_pool_stays_78_with_the_three_swaps(varka):
+    # His co-op five (2026-10-13) sit outside the pool count.
     pool = {c.id: c for c in loader.prototype_cards()
-            if c.id.startswith(V.ID_PREFIX) and c.rarity != "basic"}
+            if c.id.startswith(V.ID_PREFIX) and c.rarity != "basic"
+            and c.id not in loader.multiplayer_ids()}
     assert len(pool) == 78
     by = {r: sum(1 for c in pool.values() if c.rarity == r)
           for r in ("common", "uncommon", "rare")}
@@ -137,7 +139,7 @@ def test_the_fang_makes_the_starter_element_current_on_turn_one(varka,
     V.turn_start(st)
     assert led.current == element
     assert sum(led.oath.values()) == 0                # no Oath gained
-    assert not led.fang_fired                         # Ascension still waits
+    assert not led.fang_fired                         # no gain, no Gravestone
 
 
 def test_the_fang_is_a_change_and_only_on_turn_one(varka):

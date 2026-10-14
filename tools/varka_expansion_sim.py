@@ -313,6 +313,12 @@ def _translate(state, fx):
     elif kind == "blazing_charge":
         yield {"op": "damage", "amount": base + per * oath["pyro"],
                "target": "enemy"}
+    elif kind == "tidal_bulwark":
+        # Varka text pass (2026-10-13): one Hydro hit, Block + per x Oath.
+        yield {"op": "damage",
+               "amount": state.player.block + per * oath["hydro"],
+               "target": "enemy"}
+        yield oath_proxy
     elif kind == "thundering_verdict":
         # Element identities: X times (`_est` prices "X" as the bank).
         yield {"op": "damage", "amount": base + per * oath["electro"],
@@ -341,7 +347,7 @@ def _translate(state, fx):
         # The "more" if any enemy wears an aura Pyro reacts with.
         react = any(e.aura in ("hydro", "cryo", "electro")
                     for e in state.living_enemies)
-        yield {"op": "damage", "amount": base * (2 if react else 1),
+        yield {"op": "damage", "amount": base + (amt if react else 0),
                "target": "enemy"}
         yield oath_proxy
     elif kind == "storm_battery":
@@ -391,10 +397,11 @@ def _translate(state, fx):
                    "amount": max(1, cur_oath if kind == "double_current_oath"
                                  else fx.get("amount", 1)), "target": "self"}
     elif kind == "swirled_oath":
-        # Downburst: its Oath when the hit can Swirl (any enemy wears an aura).
+        # Downburst: its Oath when the hit can Swirl (any enemy wears an
+        # aura), of each of the four elements (Varka pool audit, 2026-10-13).
         if any(e.aura for e in state.living_enemies):
             yield {"op": "apply_power", "power": "vk_oath_proxy",
-                   "amount": amt, "target": "self"}
+                   "amount": 4 * amt, "target": "self"}
     # --- the combo pass's kinds (2026-10-04) ---
     elif kind in ("gain_pyro_oath", "pyro_oath"):
         # `pyro_oath`: Ashen Oath's gain (the Pyro pass, 2026-10-11). The
@@ -574,8 +581,11 @@ def make_pilot():
 def pool():
     from tier0.content import loader
     out = {"common": [], "uncommon": [], "rare": []}
+    # Varka's co-op five (2026-10-13) are offered only in co-op: never dealt
+    # here, as `GetUnlockedCards` drops them from a one-player run.
+    coop_only = loader.multiplayer_ids()
     for c in loader.prototype_cards():
-        if c.id.startswith(P) and c.rarity in out:
+        if c.id.startswith(P) and c.rarity in out and c.id not in coop_only:
             out[c.rarity].append(c.id)
     return out
 
@@ -635,7 +645,7 @@ def _draft_ops(fx):
         return [{"op": "apply_power", "power": "weak", "amount": 1,
                  "target": "enemy"}, {"op": "block", "amount": base + per}]
     if kind == "kindled_edge":
-        return [{"op": "damage", "amount": base + base // 2,
+        return [{"op": "damage", "amount": base + amt // 2,
                  "target": "enemy"}]
     if kind == "storm_battery":
         return [{"op": "damage", "amount": 4 * per,
@@ -643,6 +653,9 @@ def _draft_ops(fx):
     if kind == "awakening":
         return [{"op": "damage", "amount": base + amt // 2,
                  "target": "enemy"}]
+    if kind == "tidal_bulwark":
+        # Body Slam's pricing: a deck's typical Block (6), plus one Oath.
+        return [{"op": "damage", "amount": 6 + per, "target": "enemy"}]
     return None
 
 

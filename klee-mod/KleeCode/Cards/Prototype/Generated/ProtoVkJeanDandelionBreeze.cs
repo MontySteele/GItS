@@ -48,8 +48,18 @@ public sealed class ProtoVkJeanDandelionBreeze : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Jean — Wind Companion"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Swirl[/gold] the enemy."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Swirl[/gold] the enemy.{InCombat:{VarkaSwirl}|}"),
     };
+
+    /// <summary>This card's in-combat Oath and Swirl lines
+    /// (`VarkaOath.SwitchLine`, `VarkaOath.WildfireLine`,
+    /// `VarkaOath.SwirlLine`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("VarkaSwirl", VarkaOath.SwirlLine(this));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

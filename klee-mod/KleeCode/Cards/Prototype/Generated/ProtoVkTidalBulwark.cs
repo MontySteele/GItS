@@ -34,10 +34,9 @@ namespace KleeMod.Cards.Prototype.Generated;
 
 public sealed class ProtoVkTidalBulwark : CustomCardModel, IElementalCard, ICharacterCard
 {
-    /// <summary>Sheet `applies_element: false` on this row's own
-    /// damage: this hit applies NOTHING, whatever the cadence says.
-    /// Declared so the card states its own element
-    /// (<see cref="CatalystCadence.PrintedElement"/>).</summary>
+    /// <summary>Its hits carry their own element (a `varka` kind),
+    /// not the cadence's Anemo; the card says so rather than leave
+    /// it unsaid (<see cref="CatalystCadence.PrintedElement"/>).</summary>
     public Element Element => Element.None;
 
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
@@ -47,14 +46,14 @@ public sealed class ProtoVkTidalBulwark : CustomCardModel, IElementalCard, IChar
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForOath(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro, appliesWithoutHit: true), this, Element.Hydro), this);
+        ArmKeywordTips.ForOath(ArmKeywordTips.ForElementSwitch(base.ExtraHoverTips, this, Element.Hydro), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_tidal_bulwark");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tidal Bulwark"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Deal damage equal to your [gold]Block[/gold], plus {CalculationExtra:diff()} for each [gold]Hydro[/gold] [gold]Oath[/gold]. Apply [gold]Hydro[/gold] to an enemy.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}{InCombat:{VarkaSwitch}|}"),
+        ("description", "Deal [gold]Hydro[/gold] damage equal to your [gold]Block[/gold], plus {VkPer:diff()} for each [gold]Hydro[/gold] [gold]Oath[/gold].{InCombat:\n(Deals {VkHit:diff()} damage)|}{InCombat:{VarkaSwitch}|}"),
     };
 
     /// <summary>The element this card makes current, on its in-combat line
@@ -69,11 +68,8 @@ public sealed class ProtoVkTidalBulwark : CustomCardModel, IElementalCard, IChar
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(6m, ValueProp.Move),
-            new CalculationBaseVar(0m),
-            new ExtraDamageVar(1m),
-            new CalculationExtraVar(2m),
-            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => (int)card.Owner.Creature.Block + PendingOwnBlock.For(card, (int)card.DynamicVars.Block.BaseValue) + card.DynamicVars.CalculationExtra.BaseValue * VarkaOath.Count(card.Owner.Creature, Element.Hydro))
+            new DynamicVar("VkPer", 2m),
+            new VarkaTidalBulwarkDamageVar()
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -85,19 +81,11 @@ public sealed class ProtoVkTidalBulwark : CustomCardModel, IElementalCard, IChar
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
-        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
-            .FromCard(this, cardPlay)
-            .Targeting(cardPlay.Target)
-            .WithElementHitFx(this)
-            .Execute(choiceContext);
-        await ElementalHit.ApplyOnly(choiceContext, cardPlay.Target, Element.Hydro, Owner.Creature);
+        await VarkaCards.TidalBulwark(choiceContext, this, cardPlay);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Block.UpgradeValueBy(2m);
-        DynamicVars.CalculationExtra.UpgradeValueBy(1m);
+        DynamicVars["VkPer"].UpgradeValueBy(1m);
     }
 }

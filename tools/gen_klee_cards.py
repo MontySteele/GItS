@@ -364,10 +364,30 @@ VARKA_PROFILE = CharacterProfile(
     emit_character_identity=True,
 )
 
+#: YAE MIKO, THE FIFTH CHARACTER (review/active/yae-card-paper-2026-10-13.md,
+#: ruled 2026-10-13). Varka's arrangement: a prototype-only owner, reached
+#: only through `PROTOTYPE_OWNERS`. CATALYST: her Attacks deal Electro (sec.1,
+#: "her Attack cards deal Electro damage, as Klee's deal Pyro"); the base
+#: game's Strike and Defend apply nothing.
+YAE_PROFILE = CharacterProfile(
+    character_id="yae",
+    sheet=REPO / "docs" / "prototype-surface.yaml",
+    out_dir=REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype" / "Generated",
+    manifest=(REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
+              / "Generated" / "manifest.json"),
+    namespace="KleeMod.Cards.Prototype.Generated",
+    native_element="electro",
+    cadence="catalyst_attack",
+    generator_script="tools/gen_prototype_cards.py",
+    art_loader="RosterArt",
+    emit_character_identity=True,
+)
+
 #: Every character a PROTOTYPE row may name: the shipped roster plus the
 #: prototype-only owners above. `gen_prototype_cards` reads this and nothing
 #: else reads it.
-PROTOTYPE_OWNERS = {**PROFILES, VARKA_PROFILE.character_id: VARKA_PROFILE}
+PROTOTYPE_OWNERS = {**PROFILES, VARKA_PROFILE.character_id: VARKA_PROFILE,
+                    YAE_PROFILE.character_id: YAE_PROFILE}
 
 # Ops this generator can express with verified Cmd APIs. Anything else blocks
 # the card. Keep this set honest -- widening it without a verified call site is
@@ -606,6 +626,10 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # awaited `VarkaCards.<Kind>` call per `kind:`
                   # (`VARKA_KINDS`).
                   "varka", "add_knight",
+                  # YAE MIKO (2026-10-13): her one verb, one awaited
+                  # `YaeCards.<Kind>` call per `kind:` (`YAE_KINDS`),
+                  # Varka's shape.
+                  "yae",
                   # THE KOKOMI EXPANSION, BATCH ONE (2026-09-29): her
                   # now-line verbs, one awaited `KokomiCards.<Kind>` call per
                   # `kind:` (`KOKOMI_KINDS`), Varka's shape.
@@ -895,7 +919,16 @@ ARM_KEYWORDS = (
     # shape `Bomb` and `Mine` have.
     ArmKeyword("Elemental Reaction", ("Elemental Reaction", "Elemental Reactions"),
                "ArmKeywordTips.ForElementalReaction"),
-    ArmKeyword("Sakura", ("Sakura",), "ArmKeywordTips.ForSakura"),
+    # YAE MIKO (2026-10-13), pick 6 (a): "two tips, Sakura and Edit; Tenko
+    # lives in the Sakura tip and the five Annotation names in the Edit tip".
+    # So a face printing Tenko hovers the Sakura tip, and one printing an
+    # Annotation's name, "Annotated" or "Publish" hovers the Edit tip.
+    # `Sakura` is the companion Sesshou Sakura's word too; `ForSakura` prints
+    # her tip on her own cards.
+    ArmKeyword("Sakura", ("Sakura", "Tenko"), "ArmKeywordTips.ForSakura"),
+    ArmKeyword("Edit", ("Edit", "Edited", "Annotated", "Publish", "Red Ink",
+                        "Footnote", "Deadline Extension", "Fox Fire",
+                        "Sakura Seal"), "ArmKeywordTips.ForEdit"),
     ArmKeyword("Lightfall Sword", ("Lightfall Sword",),
                "ArmKeywordTips.ForLightfallSword"),
 )
@@ -1566,6 +1599,15 @@ def card_needs_a_waiting_plan(card: dict) -> bool:
                for eff in card.get("effects", []))
 
 
+def card_needs_an_exhausted_card(card: dict) -> bool:
+    """Is this row unplayable while the Exhaust Pile is empty? (Kokomi round
+    4, 2026-10-13.) Moon's Reflection played into an empty pile spent its
+    cost, exhausted and did nothing (lane 1 F17, NEVER AGAIN). Derived from
+    the row's `plan_from_exhaust`. Twin: `kokomi_plan.needs_an_exhausted_card`."""
+    return any(eff.get("op") == "plan_from_exhaust"
+               for eff in card.get("effects", []))
+
+
 def card_needs_a_plannable_card(card: dict) -> bool:
     """Is this row unplayable while no OTHER card in hand can be planned?
     (Kokomi review 2026-10-13.) Grand Design: "Plan up to 3 cards from your
@@ -2102,6 +2144,10 @@ def negated_predicate_text(name: str) -> str | None:
     return PREDICATE_TEXT_NEGATED.get(name or "")
 
 
+#: THE KOKOMI POOL OVERHAUL (2026-10-13): the kinds legal inside a
+#: conditional branch (`BRANCH_OPS`): Brine Spray's add-N-Stings.
+KOKOMI_BRANCH_KINDS = frozenset(("shoal_call",))
+
 CONDITIONAL_FIELDS = {"op", "if", "then", "else"}
 
 # Ops legal inside a conditional branch: plain resolvers with literal (or
@@ -2191,6 +2237,12 @@ BRANCH_OPS = {"damage", "block", "draw", "gain_spark", "gain_encore",
               # it copies is a single awaited call with no locals, which is the
               # whole branch-legality criterion.
               "mend",
+              # THE KOKOMI POOL OVERHAUL (2026-10-13): Brine Spray's "If it
+              # triggers an Elemental Reaction, add 2 Stings to your Hand" --
+              # the `shoal_call` kind alone (`KOKOMI_BRANCH_KINDS`), one
+              # awaited `KokomiCards` call with no locals, which is the whole
+              # branch-legality criterion.
+              "kokomi",
               # THE KOKOMI OVERHAUL. Sango Isshin's redesigned
               # payoff, "...deal a quarter of your Max HP to ALL enemies
               # instead". ALL-ENEMIES ONLY, and `_branch_op_reason` blocks the
@@ -2232,6 +2284,8 @@ BRANCH_FIELDS = {
     "spend_charge": {"op", "amount"},
     # VARKA: a numberless kind only (Knightly Guard's gain_current_oath).
     "varka": {"op", "kind"},
+    # THE KOKOMI POOL OVERHAUL: an add-N-Stings kind and its literal N.
+    "kokomi": {"op", "kind", "amount"},
     "spend_spark": {"op", "amount"},
     # Same key set the top-level `mend` validator enforces, so the two cannot
     # disagree about what a Mend is.
@@ -2350,6 +2404,14 @@ def _branch_op_reason(eff: dict, where: str) -> str | None:
             return f"branch apply_aura element {eff.get('element')!r}"
         if eff.get("target", "enemy") not in ("enemy", "all_enemies"):
             return f"branch apply_aura target {eff.get('target')!r}"
+        return None
+    if eff["op"] == "kokomi":
+        # THE KOKOMI POOL OVERHAUL (2026-10-13): the add-N-Stings kind, a
+        # literal N, read back off the card's `KkAmount` var.
+        if eff.get("kind") not in KOKOMI_BRANCH_KINDS:
+            return f"branch kokomi kind {eff.get('kind')!r}"
+        if not isinstance(eff.get("amount"), int) or eff["amount"] <= 0:
+            return "branch kokomi amount must be a positive literal int"
         return None
     if eff["op"] == "varka":
         # VARKA (the Oath rework): only a NUMBERLESS kind, whose one call
@@ -2601,6 +2663,14 @@ VARKA_KINDS = {
     # "Your next Pyro Attack this turn deals 5 additional damage".
     "temp_strength": "TemporaryStrength",
     "next_pyro_attack": "NextPyroAttack",
+    # VARKA TEXT PASS (2026-10-13): Tidal Bulwark, "Deal Hydro damage equal
+    # to your Block, plus 2 [3] for each Hydro Oath." One Hydro hit.
+    "tidal_bulwark": "TidalBulwark",
+    # VARKA'S CO-OP FIVE (2026-10-13): Escort Duty's other players' Block and
+    # random Swirl, and Marching Orders' snapshot on another player
+    # (Powers/Prototype/CoopSet.cs, "VARKA").
+    "escort_duty": "EscortDuty",
+    "marching_orders": "MarchingOrders",
 }
 #: The numeric fields each kind prints, in call order.
 VARKA_KIND_FIELDS = {
@@ -2616,7 +2686,8 @@ VARKA_KIND_FIELDS = {
     "electro_strike": ("base",),
     "electro_all": ("base",),
     "violet_storm": ("base",),
-    "kindled_edge": ("base",),
+    # Varka pool audit (2026-10-13): the reaction bonus is its own number.
+    "kindled_edge": ("base", "amount"),
     "storm_battery": ("per",),
     "frost_ward": ("base", "per"),
     "gleeful_songs": ("base", "per"),
@@ -2630,6 +2701,8 @@ VARKA_KIND_FIELDS = {
     # Pyro paper 2 (2026-10-12).
     "temp_strength": ("amount",),
     "next_pyro_attack": ("base",),
+    # Varka text pass (2026-10-13).
+    "tidal_bulwark": ("per",),
 }
 #: A field a kind MAY print; absent, the rule's own default holds (Vow of the
 #: Blade's `amount: 2`, Varka co-op fixes 2026-10-11; absent means 1).
@@ -2653,7 +2726,13 @@ VARKA_AIMED_KINDS = {"apply_current_element", "ascension_hit", "avatar_hit",
                      # The AoE trim (sec.4): Razor: Awakening at one enemy.
                      "awakening", "kindled_edge",
                      # The combo pass (2026-10-04).
-                     "pyro_strike", "shatter", "deep_freeze"}
+                     "pyro_strike", "shatter", "deep_freeze",
+                     # Varka text pass (2026-10-13).
+                     "tidal_bulwark"}
+#: A kind that aims at ANOTHER PLAYER (the co-op set's `target: ally`,
+#: `TargetType.AnyAlly`): Marching Orders. Only a `multiplayer: true` row may
+#: print one (`card_level_reason`).
+VARKA_ALLY_KINDS = {"marching_orders"}
 #: A kind that reaches ALL enemies (the expansion): the row says
 #: `target: all_enemies`, which makes the card's TargetType AllEnemies.
 VARKA_ALL_KINDS = {"thundering_verdict", "electro_all",
@@ -2685,6 +2764,8 @@ VARKA_KIND_ELEMENTS = {
     # `apply_aura`.
     "pyro_strike": ("pyro",),
     "shatter": ("cryo",),
+    # Varka text pass (2026-10-13).
+    "tidal_bulwark": ("hydro",),
 }
 #: A kind that makes an element current without a hit of its own
 #: (`VarkaCards.GainPyroOath`'s `CardMakesCurrent`), for the switch tip.
@@ -2700,12 +2781,47 @@ VARKA_VAR_FIELDS = {"per": "VkPer", "base": "VkBase", "amount": "VkAmount"}
 #: element identities round, 2026-10-01: Thundering Verdict printed no per-hit
 #: number). The value is the element whose Oath the hit adds; the var is
 #: `VarkaHitDamageVar` (Powers/Prototype/VarkaOath.cs), display only.
-VARKA_HIT_PREVIEW_KINDS = {"thundering_verdict": "Electro"}
+VARKA_HIT_PREVIEW_KINDS = {"thundering_verdict": "Electro",
+                           # Varka text pass (2026-10-13): Blazing Charge's
+                           # live total, "(Deals N damage)".
+                           "blazing_charge": "Pyro"}
 #: A kind whose face prints its total against the enemy it previews on, the
 #: same `{VkHit}` token (the combo pass, 2026-10-04: Shatter's "plus 2 for
 #: each Weak and Vulnerable on the enemy"). The value is the C# var class
 #: (Powers/Prototype/VarkaOath.cs), display only.
-VARKA_TARGET_PREVIEW_KINDS = {"shatter": "VarkaShatterDamageVar"}
+VARKA_TARGET_PREVIEW_KINDS = {"shatter": "VarkaShatterDamageVar",
+                              # Varka text pass (2026-10-13): Tidal
+                              # Bulwark's Block plus its Hydro Oath slope.
+                              "tidal_bulwark": "VarkaTidalBulwarkDamageVar",
+                              # and Storm Battery's VkPer per other card.
+                              "storm_battery": "VarkaStormBatteryDamageVar"}
+#: A kind whose printed `VkBase` IS one hit's number, so it folds like a
+#: damage var: Strength, Weak and the body's Vulnerable, the kind's element
+#: carried (Varka text pass, 2026-10-13, the damage-preview census: a plain
+#: `DynamicVar` printed the sheet number whatever the modifiers). The value is
+#: the C# `Element` member the hit carries ("None" for Tempest's four).
+#: Display only: the play reads the var's `BaseValue`, which a fold never moves.
+VARKA_FOLDED_BASE_KINDS = {
+    "electro_strike": "Electro", "electro_all": "Electro",
+    "violet_storm": "Electro", "pyro_strike": "Pyro", "tempest": "None",
+    "kindled_edge": "Pyro", "awakening": "Electro",
+}
+#: A kind whose `amount` is a bonus inside the same hit as its `VkBase`
+#: (Razor: Awakening's Electro bonus): `VarkaBonusDamageVar` prints the folded
+#: hit with it less the folded hit without it, so Strength counts once.
+VARKA_BONUS_FOLD_KINDS = {"awakening": "Electro"}
+#: A kind whose face prints a follow-up hit repeating `VkBase` under a token of
+#: its own, folded as a follow-up leg (`VarkaFollowUpDamageVar`, the Sizzle
+#: idiom): Kindled Edge's "deal {VkAgain} additional damage". The value is
+#: (face token, source var): since the Varka pool audit (2026-10-13) Kindled
+#: Edge's bonus is its own `VkAmount`, 5 [7], not a repeat of `VkBase`.
+VARKA_FOLLOW_UP_KINDS = {"kindled_edge": ("VkAgain", "VkAmount")}
+#: A kind whose face prints its second hit's live total, the same `{VkHit}`
+#: token: `VkBase` (if printed) plus `VkPer` per Oath of his current element,
+#: folded against the previewed body with that element carried (text pass
+#: 2026-10-13: Four Winds' Ascension and Northwind Avatar's second line "doesn't
+#: actually say how much it's going to hit for"). Display only.
+VARKA_CURRENT_HIT_PREVIEW_KINDS = {"ascension_hit", "avatar_hit"}
 #: A kind whose `base` is the card's own flat Block, paid powered with the
 #: card play (`VarkaCards.GainCardBlock`): its `VkBase` is a
 #: `CardBlockNumberVar`, the game's `BlockVar` preview under that token, so the
@@ -2715,6 +2831,80 @@ VARKA_TARGET_PREVIEW_KINDS = {"shatter": "VarkaShatterDamageVar"}
 #: is a number no card pays.
 VARKA_BLOCK_BASE_KINDS = {"frost_ward", "gleeful_songs"}
 VARKA_FIELDS = {"op", "kind", "target", "per", "base", "amount"}
+
+#: YAE MIKO (review/active/yae-card-paper-2026-10-13.md, ruled 2026-10-13):
+#: her one verb, `{op: yae, kind: ...}`, each kind ONE awaited
+#: `YaeCards.<method>` call (Powers/Prototype/YaeShrine.cs). The kinds and the
+#: numeric fields each prints are the sim twin's (`tier0/engine/yae_shrine.py`
+#: `KIND_FIELDS`); the fields are the card's DynamicVars `Ym<Field>`
+#: (`YAE_VAR_FIELDS`), moved by the upgrade keys `yae_<field>`.
+YAE_KINDS = {
+    "plant": "Plant",
+    "tenko": "Tenko",
+    "extend": "Extend",
+    "level_up": "LevelUp",
+    "edit": "Edit",
+    "edit_all": "EditAll",
+    "publish": "Publish",
+    "lure": "Lure",
+    "damage_per_sakura": "DamagePerSakura",
+    "block_per_sakura": "BlockPerSakura",
+    "damage_per_annotated": "DamagePerAnnotated",
+    "block_per_annotated": "BlockPerAnnotated",
+    "annotated_strike": "AnnotatedStrike",
+    "fox_fire": "FoxFire",
+}
+YAE_KIND_FIELDS = {
+    "plant": ("amount",),
+    "tenko": (),
+    "extend": ("amount",),
+    "level_up": ("amount",),
+    "edit": ("amount",),
+    "edit_all": (),
+    "publish": (),
+    "lure": (),
+    "damage_per_sakura": ("base", "per"),
+    "block_per_sakura": ("base", "per"),
+    "damage_per_annotated": ("base", "per"),
+    "block_per_annotated": ("base", "per"),
+    "annotated_strike": ("base", "amount"),
+    "fox_fire": (),
+}
+#: The kinds that aim at the enemy the player picks (`target: enemy`).
+YAE_AIMED_KINDS = {"lure", "damage_per_sakura", "damage_per_annotated",
+                   "annotated_strike"}
+#: The kinds that name an Annotation (`annotation:`), and the C#
+#: `YaeAnnotation` member each sheet name is.
+YAE_ANNOTATION_KINDS = {"edit", "edit_all"}
+YAE_ANNOTATIONS = {
+    "red_ink": "RedInk",
+    "footnote": "Footnote",
+    "deadline": "DeadlineExtension",
+    "fox_fire": "FoxFire",
+    "sakura_seal": "SakuraSeal",
+}
+YAE_VAR_FIELDS = {"per": "YmPer", "base": "YmBase", "amount": "YmAmount"}
+#: The value `YaeCards` reads for a field the card declares no var for: a
+#: count of 1 ("Plant a Sakura") and a base of 0 (Thunderbolt Tithe) print
+#: nothing and move with no upgrade, so they carry no var
+#: (`lint_generated_structure` L2) and the reader defaults them.
+YAE_FIELD_DEFAULTS = {"amount": 1, "base": 0, "per": 0}
+
+
+def yae_needs_var(card: dict, eff: dict, field: str) -> bool:
+    """Does this `yae` op's field need its `Ym<Field>` var?"""
+    if f"yae_{field}" in upgrade_plan(card)[0]:
+        return True
+    return int(eff[field]) != YAE_FIELD_DEFAULTS[field]
+YAE_FIELDS = {"op", "kind", "target", "per", "base", "amount", "annotation"}
+
+
+def yae_call(eff: dict) -> str:
+    """The one awaited call a `yae` op emits."""
+    args = "choiceContext, this, cardPlay"
+    if eff.get("kind") in YAE_ANNOTATION_KINDS:
+        args += f", YaeAnnotation.{YAE_ANNOTATIONS[eff['annotation']]}"
+    return f"await YaeCards.{YAE_KINDS[eff['kind']]}({args});"
 #: `kokomi` (THE KOKOMI EXPANSION, BATCH ONE, 2026-09-29): one kind per
 #: now-line verb, each ONE awaited `KokomiCards.<method>` call
 #: (Powers/Prototype/KokomiExpansion.cs). A kind that prints a number carries
@@ -2884,6 +3074,19 @@ PLAN_CLAUSE_KINDS = {
     "add_stings": "AddStings",
     "gain_strength": "GainStrength",
     "juuga_guard": "JuugaGuard",
+    # THE POOL OVERHAUL (2026-10-13, review/active/kokomi-pool-overhaul-
+    # 2026-10-13.md sec.2-4). Chain: Feint's and Turning Tide's "for each Plan
+    # carried out this turn". Counter: Kelp Wall's "the damage you blocked",
+    # Turnabout's "all the damage enemies dealt you" and Prepared Retreat's
+    # "if an enemy attacked you", each "since you planned this". Intent:
+    # Undercurrent Snare's Strength loss this turn. And Read the Field's
+    # fetch from the Draw Pile. Sim twins: `kokomi_plan`, the same names.
+    "damage_per_plan_this_turn": "DamagePerPlanThisTurn",
+    "damage_blocked_since": "DamageBlockedSince",
+    "damage_taken_since": "DamageTakenSince",
+    "energy_if_attacked_since": "EnergyIfAttackedSince",
+    "lose_strength_this_turn": "LoseStrengthThisTurn",
+    "draw_pile_to_hand": "DrawPileToHand",
     "apply_power": None,
 }
 
@@ -2900,7 +3103,11 @@ PLAN_AMOUNTLESS_OPS = {"damage_quarter_max_hp", "play_copy_of_companion",
                        "first_attack_twice",
                        # THE STATUS BATCH: "every status and curse" prints
                        # no size.
-                       "transform_statuses_in_draw_pile"}
+                       "transform_statuses_in_draw_pile",
+                       # THE POOL OVERHAUL (2026-10-13): a size read off the
+                       # ledger at carry-out, and one card.
+                       "damage_blocked_since", "damage_taken_since",
+                       "draw_pile_to_hand"}
 
 #: The two debuffs a Plan may apply. A CLOSED map on purpose: the jellyfish
 #: carries out what the card wrote, and "any power" would let a row schedule a
@@ -2919,9 +3126,16 @@ PLAN_AIM_CS = {
     # `KokomiPlan.Schedule` captured off the intents on screen, and the
     # carry-out lands on those of them still alive.
     "enemies_intending_attack": "KokomiPlan.Aim.EnemiesIntendingAttack",
+    # THE POOL OVERHAUL (2026-10-13), Brine Sting: "each enemy that attacked
+    # you since you planned this", read off the Plan's own window at
+    # carry-out (`KokomiPlan.Entry.Since`).
+    "enemies_attacked_since": "KokomiPlan.Aim.EnemiesAttackedSince",
 }
 PLAN_AIMED_OPS = {"damage", "damage_quarter_max_hp",
-                  "apply_power"}
+                  "apply_power",
+                  # THE POOL OVERHAUL (2026-10-13).
+                  "damage_per_plan_this_turn", "damage_blocked_since",
+                  "damage_taken_since", "lose_strength_this_turn"}
 #: The clauses a `times:` may repeat -- the flat hit, and nothing else
 #: (`EB-492`, Pincer). The twin of `kokomi_plan.PLAN_TIMES_OPS`.
 PLAN_TIMES_OPS = {"damage"}
@@ -2952,7 +3166,12 @@ PLAN_ONLY_OPS = {
                  "transform_statuses_in_draw_pile",
                  # THE RE-FOUNDING (2026-10-12): Kurage's Wake's Stings and
                  # Gorou's two Plan lines name the carry-out turn.
-                 "add_stings", "gain_strength", "juuga_guard"}
+                 "add_stings", "gain_strength", "juuga_guard",
+                 # THE POOL OVERHAUL (2026-10-13): each reads the turn it
+                 # lands on or the enemy turn it sat through.
+                 "damage_per_plan_this_turn", "damage_blocked_since",
+                 "damage_taken_since", "energy_if_attacked_since",
+                 "lose_strength_this_turn", "draw_pile_to_hand"}
 
 #: R276. The clauses whose `amount` may be ZERO: Tide Wall's is a flat bonus
 #: on top of a number read off the board, and the base card prints none.
@@ -3048,6 +3267,9 @@ PLAN_UPGRADE_VARS = {
     "plan_draw": "PlanCards",
     # R276, Battle Plan's per-Attack bonus.
     "plan_attack_bonus": "PlanAttackBonus",
+    # The Kokomi pool overhaul (2026-10-13), Prepared Retreat's Energy. An
+    # `EnergyVar` under this name, so the face prints the base game's icon.
+    "plan_energy": "PlanEnergy",
 }
 
 
@@ -3360,6 +3582,18 @@ APPLY_POWERS = {
     "ko_sparks_for_everyone": ("SparksForEveryonePower", None,
         "The first time each turn one of your [gold]Bombs[/gold] goes off, "
         "each other player gains {X} [gold]Energy[/gold]."),
+    # VARKA'S CO-OP FIVE (2026-10-13). Same file, same terms.
+    # `vk_windward_flank` goes on the ENEMY Swirled (`ENEMY_APPLY_POWERS`),
+    # placed by Varka; the other two sit on him and watch the other players.
+    "vk_windward_flank": ("WindwardFlankPower", None,
+        "This turn, other players' Attacks deal 50% more damage to this "
+        "enemy."),
+    "vk_comrades_of_the_expedition": ("ComradesOfTheExpeditionPower", None,
+        "Whenever another player plays an Attack, gain {X} "
+        "[gold]Oath[/gold] of your [gold]current element[/gold]."),
+    "vk_west_winds_blessing": ("WestWindsBlessingPower", None,
+        "The first time each turn you [gold]Swirl[/gold], each other player "
+        "gains {X} [gold]Energy[/gold]."),
     "mc_sinful_hex": ("SinfulHexPower", None,
         "Whenever an [gold]Electro[/gold] [gold]Elemental Reaction[/gold] "
         "happens this turn, deal {X} [gold]Electro[/gold] damage to a random "
@@ -3433,13 +3667,21 @@ APPLY_POWERS = {
     "kk_watchful_shoal": ("WatchfulShoalPower", None,
         "Your [gold]Stings[/gold] deal {X} additional damage. Your "
         "[gold]Wards[/gold] gain {X} additional [gold]Block[/gold]."),
+    # THE POOL OVERHAUL (2026-10-13): Coordinated Tide reads a Companion's
+    # reaction and Grand Strategist any of hers; Jellyfish Current and Battle
+    # Formation are new. Classes in KokomiRefounding.cs.
     "kk_coordinated_tide": ("CoordinatedTidePower", None,
-        "Whenever the [gold]Bake-Kurage[/gold] carries out an "
-        "[gold]Ethereal[/gold] card, deal {X} [gold]Hydro[/gold] damage to "
-        "the front enemy."),
+        "Whenever a [gold]Companion[/gold] triggers an [gold]Elemental "
+        "Reaction[/gold], add a [gold]Sting[/gold] to your hand."),
     "kk_grand_strategist": ("GrandStrategistPower", None,
-        "Whenever a [gold]Plan[/gold] causes an [gold]Elemental "
-        "Reaction[/gold], deal {X} damage to ALL enemies."),
+        "Whenever you trigger an [gold]Elemental Reaction[/gold], deal {X} "
+        "damage to ALL enemies."),
+    "kk_jellyfish_current": ("JellyfishCurrentPower", None,
+        "Whenever a [gold]Sting[/gold] triggers an [gold]Elemental "
+        "Reaction[/gold], add a [gold]Sting[/gold] to your hand."),
+    "kk_battle_formation": ("BattleFormationPower", None,
+        "Whenever 3 or more [gold]Plans[/gold] are carried out in one turn, "
+        "gain 1 Energy and draw 2 cards."),
     "kk_endless_shoal": ("EndlessShoalPower", None,
         "Whenever the [gold]Bake-Kurage[/gold] carries out a "
         "[gold]Plan[/gold], add a [gold]Sting[/gold] to your hand."),
@@ -3585,7 +3827,7 @@ APPLY_POWERS = {
         "Counts its owner's [gold]Attacks[/gold]. When it falls, deals 8 "
         "damage plus 5 per [gold]Attack[/gold] counted. Falls in {X} turn(s)."),
     "mc_starfrost_discount": ("StarfrostDiscountPower", None,
-        "Your next [gold]Attack[/gold] costs {X} less."),
+        "Your next [gold]Attack[/gold] this turn costs {X} less."),
     # THE INAZUMA COMPANION OVERHAUL (R213 B), on the SAME flag
     # pair as the Mondstadt rows above. Every class lives in
     # klee-mod/KleeCode/Powers/Prototype/CompanionOverhaulInazuma.cs and is
@@ -3735,8 +3977,28 @@ APPLY_POWERS = {
         "Whenever your [gold]current element[/gold] changes, gain {X} "
         "[gold]Block[/gold]."),
     "vk_weathervane": ("WeathervanePower", None,
-        "At the start of your turn, you may make an element you have "
-        "[gold]Oath[/gold] in your [gold]current element[/gold]."),
+        "At the start of your turn, you may choose an element you have "
+        "[gold]Oath[/gold] in. It becomes your [gold]current element[/gold]."),
+    # YAE MIKO (2026-10-13). Every class lives in
+    # klee-mod/KleeCode/Powers/Prototype/YaePowers.cs; each row carries its
+    # own `description:`. Sim twins: tier0/engine/yae_shrine.py.
+    "ym_sakura_grove": ("SakuraGrovePower", None,
+        "Your [gold]Sakura[/gold] strike for {X} more."),
+    "ym_edict_of_cleansing": ("EdictOfCleansingPower", None,
+        "Your [gold]Sakura[/gold] strikes deal {X} more to an enemy with a "
+        "[gold]Pyro[/gold], [gold]Hydro[/gold] or [gold]Cryo[/gold] aura."),
+    "ym_serialization": ("SerializationPower", None,
+        "Whenever you [gold]Edit[/gold] a card, gain {X} [gold]Block[/gold]."),
+    "ym_foxs_mooncall": ("FoxsMooncallPower", None,
+        "Your [gold]Sakura[/gold] are planted at Level 2 and can reach "
+        "Level 4."),
+    "ym_yakan_offering": ("YakanOfferingPower", None,
+        "At the start of your turn, plant {X} [gold]Sakura[/gold]."),
+    "ym_sakura_channeling": ("SakuraChannelingPower", None,
+        "Whenever a [gold]Sakura[/gold] strikes, gain {X} [gold]Block[/gold]."),
+    "ym_editor_in_chief": ("EditorInChiefPower", None,
+        "Whenever you play an [gold]Annotated[/gold] card, a "
+        "[gold]Sakura[/gold] strikes."),
     "vk_twin_gales": ("TwinGalesPower", None,
         "Your [gold]Swirls[/gold] pay both your [gold]current element[/gold] "
         "and the element they [gold]Swirl[/gold]."),
@@ -3885,7 +4147,9 @@ ENEMY_APPLY_POWERS = {"weak", "vulnerable",
                       "mi_aurous_blaze",
                       # THE CO-OP SET, SECOND BATCH: Shrapnel's shred, on the
                       # enemy its Mine went on.
-                      "ko_shrapnel"}
+                      "ko_shrapnel",
+                      # Varka's co-op five: Windward Flank's, on the enemy.
+                      "vk_windward_flank"}
 
 # Sheet fields apply_power may carry. Anything else encodes a mechanic this
 # generator does not understand -- fail loudly (UNPARSEABLE discipline).
@@ -4160,6 +4424,9 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark",
                        # VARKA (the Oath rework): a `varka` op's own number,
                        # its `Vk<Field>` var.
                        "varka_per", "varka_base", "varka_amount",
+                       # YAE MIKO: a `yae` op's own number, its `Ym<Field>`
+                       # var.
+                       "yae_per", "yae_base", "yae_amount",
                        # VARKA (the expansion, Pathfinder's Mark+): the row's
                        # `varka` op reads `IsUpgraded` at play time, and the
                        # face carries its own `{IfUpgraded:show:...}` swap.
@@ -4301,14 +4568,17 @@ TARGET_CS = {
 # other player" takes no target and lives in the POWER or the Plan clause that
 # prints it (`KleeMod.Powers.CoopSet.OtherPlayers`). The ops that may aim at
 # an ally, and nothing else may:
-COOP_ALLY_OPS = frozenset(("apply_power", "block", "block_largest_bomb"))
+COOP_ALLY_OPS = frozenset(("apply_power", "block", "block_largest_bomb",
+                           # Varka's co-op five: Marching Orders' kind
+                           # (`VARKA_ALLY_KINDS`, which the `varka` check holds).
+                           "varka"))
 #: The powers a card may place ON another player. Each is placed by the card's
 #: owner (`applier: Owner.Creature`) and reads its applier back: Pass the
 #: Match sets off the APPLIER's Bombs, Guest of Honor spends the APPLIER's lead.
 COOP_ALLY_POWERS = frozenset(("ko_pass_the_match",))
 #: The three arms with a multiplayer tier -- the only rows `multiplayer:` may
 #: sit on (`card_level_reason`).
-COOP_ARM_PREFIXES = ("proto_ko_", "proto_fs_", "proto_kk_")
+COOP_ARM_PREFIXES = ("proto_ko_", "proto_fs_", "proto_kk_", "proto_vk_")
 
 
 def _aims_at_ally(card: dict) -> bool:
@@ -4356,6 +4626,9 @@ AIMING_OPS = ("damage", "place_bomb", "detonate", "move_bombs",
               # VARKA: `apply_current_element` (Favonius Drill) lands on
               # `cardPlay.Target`; `_aims_at_chosen_enemy` asks its target.
               "varka",
+              # YAE: her aimed kinds (`YAE_AIMED_KINDS`) read
+              # `cardPlay.Target`; only they say `target: enemy`.
+              "yae",
               # THE KOKOMI EXPANSION: Salt in the Wound's "if the enemy has
               # Weak" reads `cardPlay.Target`.
               "kokomi",
@@ -5288,6 +5561,7 @@ def blocked_reason(
             # `target: all_enemies`, and no other kind takes a target.
             want_target = ("enemy" if kind in VARKA_AIMED_KINDS
                            and kind not in VARKA_IMPLIED_AIM_KINDS
+                           else "ally" if kind in VARKA_ALLY_KINDS
                            else "all_enemies" if kind in VARKA_ALL_KINDS
                            else "random_enemy" if kind in VARKA_RANDOM_KINDS
                            else None)
@@ -5304,6 +5578,33 @@ def blocked_reason(
                 if not isinstance(value, int) or isinstance(value, bool) \
                         or value < 0:
                     return f"varka {field} must be a literal int >= 0"
+        if op == "yae":
+            # YAE MIKO: a known kind, exactly the numeric fields it prints,
+            # the target only an aimed kind takes, and an Annotation only
+            # where the kind names one (`yae_shrine.validate_op`'s checks).
+            unknown = set(eff) - YAE_FIELDS
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
+            kind = eff.get("kind")
+            if kind not in YAE_KINDS:
+                return f"yae kind {kind!r}"
+            want_target = "enemy" if kind in YAE_AIMED_KINDS else None
+            if eff.get("target") != want_target:
+                return (f"yae {kind} takes target {want_target!r}, "
+                        f"row gives {eff.get('target')!r}")
+            wanted = set(YAE_KIND_FIELDS[kind])
+            given = set(eff) & set(YAE_VAR_FIELDS)
+            if given != wanted:
+                return (f"yae {kind} prints {sorted(wanted)}, "
+                        f"row gives {sorted(given)}")
+            for field in given:
+                value = eff[field]
+                if not isinstance(value, int) or isinstance(value, bool)                         or value < 0:
+                    return f"yae {field} must be a literal int >= 0"
+            if (kind in YAE_ANNOTATION_KINDS) != ("annotation" in eff):
+                return f"yae {kind} annotation mismatch"
+            if "annotation" in eff and eff["annotation"] not in YAE_ANNOTATIONS:
+                return f"yae annotation {eff['annotation']!r}"
         if op == "add_knight":
             unknown = set(eff) - ADD_KNIGHT_FIELDS
             if unknown:
@@ -6239,6 +6540,11 @@ KOKOMI_CASKET_COUNTS = {
     "stings_played_this_turn":
         "static (card, _) => KokomiOverhaulLedger.For("
         "card.Owner.Creature).StingsPlayedThisTurn",
+    # The pool overhaul (2026-10-13): All Streams Flow to the Sea, the
+    # Elemental Reactions she triggered this combat.
+    "reactions_triggered_this_combat":
+        "static (card, _) => KokomiOverhaulLedger.For("
+        "card.Owner.Creature).ReactionsThisCombat",
     "plans_held": "static (card, _) => KokomiPlan.PlansHeld("
                   "card.Owner.Creature)",
 }
@@ -7514,6 +7820,84 @@ def calculated_block_var_type(card: dict) -> str:
             else "CalculatedBlockVar")
 
 
+#: THE DAMAGE PREVIEWS PASS (2026-10-13, [USER]: "Are there any other cards,
+#: in any pool, that don't show how much damage they actually do when
+#: accounting for conditional modifiers?"). A hit count a `HitsTotalDamageVar`
+#: multiplies one folded hit by, as a C# expression over `card`: the count the
+#: play takes, read before the play (Sparks banked, Plans waiting, Fanfare
+#: that Spend all would spend). Display only (Powers/Prototype/DamagePreviewVars.cs).
+PREVIEW_HIT_COUNTS = {
+    "sparks_spent": "SparkPower.SparksAtPlay(card.Owner!.Creature!)",
+    "plans_held_plus_one": "KokomiPlan.PlansHeld(card.Owner!.Creature!) + 1",
+    "stage_spent_threes": ("FurinaStage.SpentOrFanfare(card) / "
+                           "FurinaStageLaw.BravuraSpentPer"),
+}
+
+
+def _preview_hit_count(card: dict) -> str:
+    """The `HitsTotalDamageVar` count for the card's first counted hit."""
+    for eff in card.get("effects") or []:
+        if eff.get("op") != "damage":
+            continue
+        times = eff.get("times")
+        formula = eff.get("times_formula")
+        if isinstance(times, str) and times in PREVIEW_HIT_COUNTS:
+            return PREVIEW_HIT_COUNTS[times]
+        if isinstance(formula, dict) and str(
+                formula.get("count")) in PREVIEW_HIT_COUNTS:
+            base = int(formula.get("base", 0))
+            per = int(formula.get("per", 1))
+            return (f"{base} + {per} * "
+                    f"({PREVIEW_HIT_COUNTS[str(formula['count'])]})")
+    raise SystemExit(
+        f"gen_klee_cards: {card['id']}: the face prints {{TotalDamage}} but "
+        "no damage op has a hit count PREVIEW_HIT_COUNTS can read")
+
+
+def preview_token_vars(card: dict) -> list[str]:
+    """The damage previews pass (2026-10-13): the display-only in-combat
+    vars, each emitted ONLY where the face prints its token (the `{Shower`
+    rule). Nothing in the play reads them."""
+    text = str(card.get("description") or "")
+    effects = card.get("effects") or []
+    out: list[str] = []
+    if "{TotalDamage" in text:
+        out.append("new HitsTotalDamageVar(static card => "
+                   f"{_preview_hit_count(card)})")
+    if "{BombHit" in text:
+        read = next((DAMAGE_FROM_BOMBS_READS[e["read"]] for e in effects
+                     if e.get("op") == "damage_from_bombs"), None)
+        if read is None:
+            raise SystemExit(f"gen_klee_cards: {card['id']}: {{BombHit}} "
+                             "needs a damage_from_bombs op")
+        out.append(f"new BombReadDamageVar(ProtoBombPower.BombRead.{read})")
+    if "{BombEcho" in text:
+        if not any(e.get("op") == "damage_set_off_total" for e in effects):
+            raise SystemExit(f"gen_klee_cards: {card['id']}: {{BombEcho}} "
+                             "needs a damage_set_off_total op")
+        out.append("new SetOffEchoDamageVar()")
+    if "{SetOffBombs" in text:
+        mult = next((int(e["multiplier"]) for e in effects
+                     if e.get("op") == "multiply_set_off"), 1)
+        out.append(f"new SetOffBombsVar({mult})")
+    if "{PressureHit" in text:
+        out.append("new DebuffsAfterDamageVar()")
+    if "{VkOath" in text:
+        # Varka's co-op five (2026-10-13): Marching Orders' "(+N damage)",
+        # his current element's Oath, read live (`VarkaCurrentOathVar`).
+        out.append("new VarkaCurrentOathVar()")
+    if "{BonusHit" in text:
+        bonus = next((int(e["bonus_if"]["amount"]) for e in effects
+                      if e.get("op") == "damage" and e.get("bonus_if")
+                      and e["bonus_if"].get("if")
+                      == "companion_played_this_turn"), None)
+        if bonus is None:
+            raise SystemExit(f"gen_klee_cards: {card['id']}: {{BonusHit}} "
+                             "needs a companion bonus_if on a damage op")
+        out.append(f"new CompanionBonusDamageVar({bonus})")
+    return out
+
+
 def build_vars(card: dict) -> list[str]:
     """DynamicVar declarations, in the order the effects use them."""
     out = []
@@ -7778,10 +8162,26 @@ def build_vars(card: dict) -> list[str]:
             # THE KOKOMI EXPANSION: the kind's printed number, read back by
             # `KokomiCards` off the card.
             out.append(f'new DynamicVar("KkAmount", {int(eff["amount"])}m)')
+        elif op == "conditional" and any(
+                e.get("op") == "kokomi" and "amount" in e
+                for e in eff.get("then", []) + eff.get("else", [])):
+            # THE KOKOMI POOL OVERHAUL (2026-10-13): Brine Spray's branch
+            # Stings, the same var a top-level kind declares.
+            branch = next(e for e in eff.get("then", []) + eff.get("else", [])
+                          if e.get("op") == "kokomi" and "amount" in e)
+            out.append(f'new DynamicVar("KkAmount", {int(branch["amount"])}m)')
         elif op == "furina" and "amount" in eff:
             # THE POOL TO 75: the kind's printed number, read back by
             # `FurinaCards` off the card.
             out.append(f'new DynamicVar("FsAmount", {int(eff["amount"])}m)')
+        elif op == "yae":
+            # YAE MIKO: each printed number is its own var, read back by
+            # `YaeCards` off the card.
+            for field in YAE_KIND_FIELDS[eff["kind"]]:
+                if not yae_needs_var(card, eff, field):
+                    continue
+                out.append(f'new DynamicVar("{YAE_VAR_FIELDS[field]}", '
+                           f'{int(eff[field])}m)')
         elif op == "varka":
             # VARKA (the Oath rework): each printed number is its own var,
             # read back by `VarkaCards` off the card.
@@ -7791,6 +8191,18 @@ def build_vars(card: dict) -> list[str]:
                         f'new CardBlockNumberVar("{VARKA_VAR_FIELDS[field]}", '
                         f'{int(eff[field])}m)')
                     continue
+                if field == "base" and eff["kind"] in VARKA_FOLDED_BASE_KINDS:
+                    out.append(
+                        f'new FoldedDamageVar("{VARKA_VAR_FIELDS[field]}", '
+                        f'{int(eff[field])}m, ValueProp.Move, carries: '
+                        f'Element.{VARKA_FOLDED_BASE_KINDS[eff["kind"]]})')
+                    continue
+                if field == "amount" and eff["kind"] in VARKA_BONUS_FOLD_KINDS:
+                    out.append(
+                        f'new VarkaBonusDamageVar("{VARKA_VAR_FIELDS[field]}", '
+                        f'{int(eff[field])}m, "VkBase", '
+                        f'Element.{VARKA_BONUS_FOLD_KINDS[eff["kind"]]})')
+                    continue
                 out.append(f'new DynamicVar("{VARKA_VAR_FIELDS[field]}", '
                            f'{int(eff[field])}m)')
             if eff["kind"] in VARKA_HIT_PREVIEW_KINDS:
@@ -7799,6 +8211,12 @@ def build_vars(card: dict) -> list[str]:
             elif eff["kind"] in VARKA_TARGET_PREVIEW_KINDS:
                 out.append(
                     f'new {VARKA_TARGET_PREVIEW_KINDS[eff["kind"]]}()')
+            elif eff["kind"] in VARKA_CURRENT_HIT_PREVIEW_KINDS:
+                out.append('new VarkaCurrentElementHitVar()')
+            if eff["kind"] in VARKA_FOLLOW_UP_KINDS:
+                token, source = VARKA_FOLLOW_UP_KINDS[eff["kind"]]
+                out.append('new VarkaFollowUpDamageVar('
+                           f'"{token}", "{source}")')
         elif op == "crash_fanfare":
             # Always a var: the Hyperbeam's upgrade IS this number (the
             # floor_drop delta), so the upgraded face has to render it.
@@ -7993,6 +8411,12 @@ def build_vars(card: dict) -> list[str]:
                 "block", "block_max_intent"):
             out.append(
                 f'new UnsourcedBlockVar("{var}", {amount}m, ValueProp.Move)')
+        # The Kokomi pool overhaul (2026-10-13): the game's
+        # `EnergyIconsFormatter` reads an `EnergyVar` (a plain `DynamicVar`
+        # throws), so `{PlanEnergy:energyIcons()}` takes the base game's type
+        # under its own name.
+        elif key == "plan_energy":
+            out.append(f'new EnergyVar("{var}", {amount})')
         else:
             out.append(f'new DynamicVar("{var}", {amount}m)')
     # Kokomi round 3 review, change 4: Kelp Wall's `{InCombat:...}` line
@@ -8035,6 +8459,7 @@ def build_vars(card: dict) -> list[str]:
             'new CalculatedVar("Encore").WithMultiplier(static (card, _) => '
             f'SalonMemberPower.ReplacementDelta(card, {deploys}, '
             'SalonConstants.ReplacementNumericMultiplier))')
+    out.extend(preview_token_vars(card))
     # The arm's Block upgrade (`arm_block`): the branch Block it moves takes a
     # real var so the face renders `{Block:diff()}` and the Smith shows it.
     arm_block = arm_block_effect(card) if arm_block_upgrade(card) else None
@@ -8291,6 +8716,10 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         **{f"varka_{field}": any(e["op"] == "varka" and field in e
                                  for e in effects)
            for field in VARKA_VAR_FIELDS},
+        # YAE MIKO: each binds to the `yae` op that prints that field.
+        **{f"yae_{field}": any(e["op"] == "yae" and field in e
+                               for e in effects)
+           for field in YAE_VAR_FIELDS},
         "payload_mine": any(e["op"] == "plant_bomb"
                             and int(e.get("payload_mine_all", 0)) > 0
                             for e in effects),
@@ -10446,6 +10875,14 @@ def _emit_branch_op(
         # VARKA (the Oath rework): the top-level arm's one awaited call.
         lines.append(f"await VarkaCards.{VARKA_KINDS[eff['kind']]}("
                      "choiceContext, this, cardPlay);")
+    elif op == "yae":
+        # YAE MIKO: the top-level arm's one awaited call.
+        lines.append(yae_call(eff))
+    elif op == "kokomi":
+        # THE KOKOMI POOL OVERHAUL (2026-10-13): the top-level arm's one
+        # awaited call; the kind reads its N off `KkAmount`.
+        lines.append(f"await KokomiCards.{KOKOMI_KINDS[eff['kind']]}("
+                     "choiceContext, this, cardPlay);")
     elif op == "spend_charge":
         # R213 E1. Byte-for-byte the call build_body's top-level
         # arm makes. The GUARD is the point: a mode body has no IsPlayable to
@@ -12004,6 +12441,11 @@ def build_body(
             lines.append(
                 f"await VarkaCards.{method}(choiceContext, this, cardPlay);")
 
+        elif op == "yae":
+            # YAE MIKO: one awaited call per kind; the card and the play ride
+            # along so a kind reads its own `Ym*` vars and its target.
+            lines.append(yae_call(eff))
+
         elif op == "add_knight":
             # VARKA's Knights' Roll Call (Varka last pass, 2026-10-12): choose
             # 1 of 3 random Knights, into the hand at 0 this turn; with the
@@ -12148,15 +12590,27 @@ def build_body(
                 # Braced so a card carrying two selections (or a chosen
                 # discard beside `discard_for_sparks`) cannot redeclare
                 # `picked` -- the same scoping the exhaust_from emission uses.
+                # Varka round 5 (2026-10-13, "What to change" 2): a Varka
+                # row's chosen discard (Chain Lightning, Short Circuit) names
+                # what it discarded on the play's line, and says when the
+                # game picked them because the hand held no more than it
+                # asked for (`ResolutionLedger.NoteDiscards`). Log only.
+                varka_note = card.get("character") == "varka"
                 lines.append(
                     "{\n"
-                    "            var picked = (await CardSelectCmd.FromHandForDiscard(\n"
+                    + ("            var handBefore = CardPile.Get(PileType.Hand, "
+                       "Owner)?.Cards.Count ?? 0;\n" if varka_note else "")
+                    + "            var picked = (await CardSelectCmd.FromHandForDiscard(\n"
                     "                choiceContext, Owner,\n"
                     "                new CardSelectorPrefs("
                     f"CardSelectorPrefs.DiscardSelectionPrompt, {n}),\n"
                     "                null, this)).ToList();\n"
                     "            await CardCmd.Discard(choiceContext, picked);\n"
-                    "        }"
+                    + (f"            ResolutionLedger.NoteDiscards(Title, "
+                       "picked.Select(c => c.Title).ToList(),\n"
+                       f"                ResolutionLedger.DiscardPickedForYou("
+                       f"handBefore, {n}));\n" if varka_note else "")
+                    + "        }"
                 )
             else:
                 # Random discard, kit-exempt pool (tier0 _op_discard: re-pool
@@ -13124,6 +13578,13 @@ def _branch_text(card: dict, branch: list[dict], in_then: bool,
             tail = "" if n == 1 else f", {n} times"
             bits.append("the leftmost member of your [gold]Salon[/gold] "
                         f"performs now{tail}")
+        elif op == "kokomi":
+            # THE KOKOMI POOL OVERHAUL (2026-10-13): the add-N-Stings kind.
+            n = int(e["amount"])
+            bits.append("add a [gold]Sting[/gold] to your [gold]Hand[/gold]"
+                        if n == 1 else
+                        f"add {n} [gold]Stings[/gold] to your "
+                        "[gold]Hand[/gold]")
         else:
             # A branch op with no text arm renders an EMPTY clause -- which is
             # how Chevreuse first generated "If a reaction triggered: ."
@@ -13400,6 +13861,20 @@ def _authored_face_numbers(card: dict):
                 else (None, None, eff["amount"])
         elif op == "draw" and isinstance(eff.get("amount"), int):
             yield None, None, eff["amount"]
+        elif op == "yae":
+            # YAE MIKO: her kinds' numbers in the order her faces print them
+            # (base before per or amount). A 0 base prints nothing
+            # (Thunderbolt Tithe), and a count of 1 prints "a" (Plant a
+            # Sakura); neither is yielded.
+            for field in YAE_KIND_FIELDS.get(eff.get("kind"), ()):
+                value = eff.get(field)
+                if not isinstance(value, int) or value == 0:
+                    continue
+                if field == "amount" and value == 1 and eff["kind"] !=                         "annotated_strike":
+                    continue
+                key = f"yae_{field}"
+                owns = key in upgrade_plan(card)[0]
+                yield (key, YAE_VAR_FIELDS[field], value) if owns                     else (None, None, value)
         # The Klee tempo paper (2026-10-07): Tinkering's "Gain 2 Sparks" and
         # Taste Test's "Add 2 Confiscated", each the number its delta moves.
         # A count of one prints "a" and no digit, so it is not yielded.
@@ -15344,6 +15819,12 @@ def build_upgrade(card: dict) -> list[str]:
             done.add(key)
             lines.append(f'DynamicVars["{var}"].UpgradeValueBy('
                          f'{int(deltas[key])}m);')
+    for field, var in YAE_VAR_FIELDS.items():
+        key = f"yae_{field}"
+        if key in deltas:
+            done.add(key)
+            lines.append(f'DynamicVars["{var}"].UpgradeValueBy('
+                         f'{int(deltas[key])}m);')
     if "conditional_bonus" in deltas:
         # tier0: bump the then-branch's first damage (the ExtraDamage var;
         # expressibility gated in upgrade_plan/conditional_bonus_upgrade).
@@ -15986,6 +16467,36 @@ def varka_wildfire_face_arg(card: dict, profile: "CharacterProfile"
     return (VARKA_WILDFIRE_TOKEN, "VarkaOath.WildfireLine(this)")
 
 
+#: The token of a Varka Swirl card's in-combat "(No aura to Swirl)" line
+#: (`VarkaOath.SwirlLine`).
+VARKA_SWIRL_TOKEN = "VarkaSwirl"
+
+#: A `varka` kind that Swirls without the row's own Anemo hit.
+VARKA_SWIRL_KINDS = frozenset({"crosscurrent", "swirl_fresh_auras"})
+
+
+def varka_swirl_face_arg(card: dict, profile: "CharacterProfile",
+                         aura_elements: list[str]) -> tuple[str, str] | None:
+    """`(token, C#)` for a Varka Swirl card's "(No aura to Swirl)" line, or
+    None.
+
+    Varka round 5 (2026-10-13, "What to change" 1): "Swirl cards whose target
+    has lost its aura read 'No aura'." Every Varka row that Swirls (it
+    declares Anemo, or a `varka` kind in `VARKA_SWIRL_KINDS`) ends its face
+    in `{InCombat:{VarkaSwirl}|}`; the line prints only while the enemy it is
+    aimed at, or with no aim every enemy, has no aura. Shared Companion rows
+    carry none.
+    """
+    if profile.character_id != "varka" or card.get("character") != "varka":
+        return None
+    swirls = "anemo" in aura_elements or any(
+        e.get("op") == "varka" and e.get("kind") in VARKA_SWIRL_KINDS
+        for e in _effects_everywhere(card))
+    if not swirls:
+        return None
+    return (VARKA_SWIRL_TOKEN, "VarkaOath.SwirlLine(this)")
+
+
 #: THE ARCHAIC TOOTH (Varka review, ruled 2026-10-12: "Dandelion Gale could be
 #: the Replace version"). Orobas's relic transforms a starter card into its
 #: Ancient through the private `ArchaicTooth.TranscendenceUpgrades` map;
@@ -15998,7 +16509,9 @@ def varka_wildfire_face_arg(card: dict, profile: "CharacterProfile"
 #: 2026-10-12: "Otherwise agreed.- let's fix them all") wires every kit's
 #: Tooth card the same way, and each kit's Tome then draws its other Ancient.
 TRANSCENDENCE = {
-    "proto_vk_windbound_execution": "global::KleeMod.Cards.Varka.DandelionGale",
+    # Varka starter (a), 2026-10-13: the Tooth moves to Four Winds' Ascension,
+    # his starter card now that Windbound Execution has left the deck.
+    "proto_vk_four_winds_ascension": "global::KleeMod.Cards.Varka.DandelionGale",
     "proto_ko_jumpy_dumpty": "global::KleeMod.Cards.JumpyDumptyMkOmega",
     "proto_kk_kurages_oath":
         "global::KleeMod.Cards.Kokomi.PrincessOfWatatsumi",
@@ -16305,6 +16818,9 @@ def emit(
     wildfire_arg = varka_wildfire_face_arg(card, profile)
     if wildfire_arg is not None:
         face_args.append(wildfire_arg)
+    swirl_arg = varka_swirl_face_arg(card, profile, aura_elements)
+    if swirl_arg is not None:
+        face_args.append(swirl_arg)
     desc = stage_lines_face(desc, face_args)
     desc_cs = desc.replace("\n", "\\n")
     desc_expr = f'"{desc_cs}"'
@@ -16480,6 +16996,7 @@ def emit(
     # into `BlockedByCardLogic` and has no slot for what the reason was.
     if (card_is_set_off_only(card) or card_needs_a_waiting_plan(card)
             or card_needs_a_plannable_card(card)
+            or card_needs_an_exhausted_card(card)
             or stage_fixed_price(card) is not None):
         interfaces += ", IUnplayableReasonCard"
 
@@ -17317,6 +17834,11 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             "This card's in-combat Oath lines\n"
             "    /// (`VarkaOath.SwitchLine`, `VarkaOath.WildfireLine`)."
             if set(tokens) <= {VARKA_SWITCH_TOKEN, VARKA_WILDFIRE_TOKEN} else
+            "This card's in-combat Oath and Swirl lines\n"
+            "    /// (`VarkaOath.SwitchLine`, `VarkaOath.WildfireLine`,\n"
+            "    /// `VarkaOath.SwirlLine`)."
+            if set(tokens) <= {VARKA_SWITCH_TOKEN, VARKA_WILDFIRE_TOKEN,
+                               VARKA_SWIRL_TOKEN} else
             "This card's in-combat Stage line\n"
             "    /// (`FurinaStageFacePreview`).")
         adds = "".join(f'        description.Add("{token}", {call});\n'
@@ -17498,9 +18020,18 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     # (Change of Plans: "Can only be played if a Plan is waiting.") and gave
     # Grand Design its own gate one read over: no other card in hand that can
     # be planned. One IsPlayable member, so the two never share a card.
+    # Kokomi round 4 (2026-10-13) added Moon's Reflection's: unplayable
+    # while the Exhaust Pile is empty.
     plan_gated = (card_needs_a_waiting_plan(card)
-                  or card_needs_a_plannable_card(card))
-    if card_needs_a_waiting_plan(card):
+                  or card_needs_a_plannable_card(card)
+                  or card_needs_an_exhausted_card(card))
+    if card_needs_an_exhausted_card(card):
+        plan_gate_expr = "KokomiRefounding.AnyExhausted(this)"
+        plan_gate_why = "your Exhaust Pile is empty"
+        plan_gate_note = (
+            "    // Kokomi round 4 (2026-10-13): unplayable while the Exhaust\n"
+            "    // Pile is empty, rather than spending itself on nothing.\n")
+    elif card_needs_a_waiting_plan(card):
         plan_gate_expr = (
             "KokomiPlan.PlansHeld(SparkCost.OwnerCreatureOf(this)) > 0")
         plan_gate_why = "no Plan is waiting"

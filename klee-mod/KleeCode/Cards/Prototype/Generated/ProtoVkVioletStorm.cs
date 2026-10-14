@@ -68,7 +68,7 @@ public sealed class ProtoVkVioletStorm : CustomCardModel, IElementalCard, IChara
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("VkBase", 6m)
+            new FoldedDamageVar("VkBase", 6m, ValueProp.Move, carries: Element.Electro)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

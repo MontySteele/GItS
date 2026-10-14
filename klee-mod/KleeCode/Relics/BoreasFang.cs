@@ -19,9 +19,21 @@ using MegaCrit.Sts2.Core.Runs;
 namespace KleeMod.Relics;
 
 /// <summary>
-/// BOREAS'S FANG -- Varka's starting relic (the Oath rework, sec.4): "The
-/// first time each combat you gain Oath, add Four Winds' Ascension to your
-/// hand." Regent's Forge is the model: <c>ForgeCmd.Forge</c> "adds Sovereign
+/// BOREAS'S FANG -- Varka's starting relic. Since Starter (a), 2026-10-13
+/// ([USER]: "we gave Varka a bonus effect where he gets bonuses from swirling
+/// things, tied to what element he is. I'm fine with that being a power, but
+/// it's basically a second starter relic untied to his actual relic"; then
+/// "Starter - (a)"): "At the start of each combat, your starting Knight's
+/// element becomes current. Your Swirls also pay your current element." The
+/// Swirl payout, which was a character rule, is the Fang's:
+/// <see cref="VarkaOath.OnSwirl"/> pays his current element only while he
+/// holds one (<see cref="PaysSwirls"/>). The Oath a Swirl gains stays a
+/// character rule, said by the Oath tip. Four Winds' Ascension is in his
+/// starter deck now, so the Fang no longer adds it; Wolf's Gravestone, the
+/// Orobas upgrade, still does (<see cref="AddsAscension"/>).
+///
+/// WAS (the Oath rework, sec.4): "The first time each combat you gain Oath,
+/// add Four Winds' Ascension to your hand." Regent's Forge is the model: <c>ForgeCmd.Forge</c> "adds Sovereign
 /// Blade to their hand if they haven't forged this combat" -- a card created
 /// in combat (<c>CombatState.CreateCard</c>) and added through
 /// <c>CardPileCmd.AddGeneratedCardToCombat</c>, never in the deck (0.111.0
@@ -86,6 +98,17 @@ public class BoreasFang : CustomRelicModel
     /// turn? The Fang no; <see cref="WolfsGravestone"/> yes.</summary>
     public virtual bool AscensionUpgraded => false;
 
+    /// <summary>Does this relic add Four Winds' Ascension the first time
+    /// each combat he gains Oath? The Fang no longer (Starter (a),
+    /// 2026-10-13: the card is in his deck); <see cref="WolfsGravestone"/>
+    /// yes.</summary>
+    public virtual bool AddsAscension => false;
+
+    /// <summary>Do his Swirls pay his current element? While he holds a Fang
+    /// (or the Gravestone, which is one): the payout is the relic's since
+    /// Starter (a), 2026-10-13. PURE.</summary>
+    public static bool PaysSwirls(Player? player) => HeldBy(player) != null;
+
     public override RelicRarity Rarity => RelicRarity.Starter;
 
     public override List<(string, string)>? Localization => new()
@@ -93,9 +116,8 @@ public class BoreasFang : CustomRelicModel
         ("title", "Boreas's Fang"),
         ("description",
             "At the start of each combat, your starting [gold]Knight[/gold]'s "
-          + "element becomes current. The first time each combat you gain "
-          + "[gold]Oath[/gold], add [gold]Four Winds' Ascension[/gold] to "
-          + "your [gold]Hand[/gold]."),
+          + "element becomes current. Your [gold]Swirls[/gold] also pay your "
+          + "[gold]current element[/gold]."),
     };
 
     /// <summary>The words the face leans on. Knight joined with the co-op
@@ -103,13 +125,17 @@ public class BoreasFang : CustomRelicModel
     /// card text pass (2026-10-12) moved "It returns after a reshuffle." off
     /// the face and into the Ascension's own hover here.
     /// </summary>
+    /// Starter (a), 2026-10-13: the Swirl tip joins (the current-element tip
+    /// carries the payout table), and the Ascension's return hover is the
+    /// Gravestone's only.
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForAscensionReturn(
-            ArmKeywordTips.ForKnight(
-                ArmKeywordTips.ForCurrentElement(
+        ArmKeywordTips.ForKnight(
+            ArmKeywordTips.ForCurrentElement(
+                ArmKeywordTips.ForSwirl(
                     ArmKeywordTips.ForOath(System.Array.Empty<IHoverTip>(), null),
-                    null),
-                null));
+                    null!),
+                null),
+            null);
 
     /// <summary>The element the Fang makes current at combat start: the run's
     /// recorded starter Knight element, else the starter Knight in the deck
@@ -221,7 +247,11 @@ public class BoreasFang : CustomRelicModel
 }
 
 /// <summary>
-/// WOLF'S GRAVESTONE -- Boreas's Fang upgraded, Touch of Orobas's hand-over
+/// WOLF'S GRAVESTONE -- Boreas's Fang upgraded. Since Starter (a)
+/// (2026-10-13) it mirrors the Fang (the starting element, the Swirl payout)
+/// and keeps the bonus that made it the upgrade: the first Oath gain each
+/// combat adds an upgraded Ascension that costs 0 this turn, a copy beside
+/// the one in his deck. Before: Touch of Orobas's hand-over
 /// (main-session design, 2026-09-30, from [USER]'s co-op playtest: "Varka and
 /// Kokomi need Ancient relics for Orobas"). "The first time each combat you
 /// gain Oath, add an upgraded Four Winds' Ascension to your hand. It costs 0
@@ -247,12 +277,21 @@ public sealed class WolfsGravestone : BoreasFang
         ("title", "Wolf's Gravestone"),
         ("description",
             "At the start of each combat, your starting [gold]Knight[/gold]'s "
-          + "element becomes current. The first time each combat you gain "
-          + "[gold]Oath[/gold], add [gold]Four Winds' Ascension[/gold] to "
-          + "your [gold]Hand[/gold]. It is upgraded and costs 0 this turn."),
+          + "element becomes current. Your [gold]Swirls[/gold] also pay your "
+          + "[gold]current element[/gold]. The first time each combat you "
+          + "gain [gold]Oath[/gold], add an upgraded [gold]Four Winds' "
+          + "Ascension[/gold] to your [gold]Hand[/gold]. It costs 0 this "
+          + "turn."),
     };
 
+    /// <summary>The Fang's words plus the Ascension's return hover: the
+    /// Gravestone still makes a copy in combat.</summary>
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        ArmKeywordTips.ForAscensionReturn(base.ExtraHoverTips);
+
     public override bool AscensionUpgraded => true;
+
+    public override bool AddsAscension => true;
 
     public override string RelicName => "Wolf's Gravestone";
 

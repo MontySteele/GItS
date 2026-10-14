@@ -51,14 +51,14 @@ public sealed class ProtoKkTheShapeOfWater : CustomCardModel, IElementalCard, IC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "The Shape of Water"),
-        ("description", "Deal {ExtraDamage:diff()} [gold]Hydro[/gold] damage for each [gold]Sting[/gold] you played this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("description", "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus {ExtraDamage:diff()} for each [gold]Sting[/gold] you played this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(0m),
-            new ExtraDamageVar(6m),
+            new CalculationBaseVar(5m),
+            new ExtraDamageVar(5m),
             new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => KokomiOverhaulLedger.For(card.Owner.Creature).StingsPlayedThisTurn)
         };
 
@@ -82,5 +82,6 @@ public sealed class ProtoKkTheShapeOfWater : CustomCardModel, IElementalCard, IC
     protected override void OnUpgrade()
     {
         DynamicVars.ExtraDamage.UpgradeValueBy(2m);
+        DynamicVars.CalculationBase.UpgradeValueBy(2m);
     }
 }

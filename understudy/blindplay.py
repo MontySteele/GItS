@@ -134,6 +134,7 @@ from understudy.blindplay_shape import (   # noqa: E402,F401  (re-export)
     count_action, FIGHT_OVERLAYS, forget_budget, LANE_ENV, lane_tag,
     clear_refusal_streak, count_refusal, MAX_REFUSALS, refusal_streak,
     clear_refusal, mark_refusal, pending_refusal,
+    clear_sent, mark_sent, room_of, screen_changed_after,
     card_skips, clear_card_skips, mark_card_skip,
     read_shown_hand, remember_shown_hand,
     MAX_ACTIONS_ENV, read_budget, set_budget,
@@ -368,7 +369,8 @@ def cmd_observe(args) -> int:
         if word:
             print(blindplay_brief.define(
                 observe(state), word,
-                blindplay_shape.bomb_growth(observation(state))).rstrip("\n"))
+                blindplay_shape.bomb_growth(observation(state)),
+                blindplay_brief.screen_powers(state)).rstrip("\n"))
         else:
             print(_page(screen_page(state, full=not _brief_on(args)),
                         args))
@@ -377,6 +379,9 @@ def cmd_observe(args) -> int:
             # this page showed (`resolve_shown_card`).
             if not getattr(args, "raw_file", ""):
                 remember_shown_hand(shown_hand(state))
+                # Varka round (2026-10-13): a look ends the stale batch
+                # (`blindplay_shape.screen_changed_after`).
+                clear_sent()
             # 2026-10-08: the lane's cap on every page, which is where the
             # seat brief now tells the seat to read it.
             count, cap = budget_spent()
@@ -579,6 +584,10 @@ ROOM_CLOSED_REFUSALS = {
 }
 ROOM_CLOSED_TAIL = ": nothing was sent. This is the screen now."
 
+#: What a command gets when an earlier one in its batch left the room.
+SCREEN_CHANGED_SKIP = ("Skipped: the screen changed after {command}; look "
+                       "again.")
+
 
 def room_closed(why: str, prev_screen: str) -> str:
     """The sentence for a refusal whose room closed since the last page,
@@ -611,7 +620,10 @@ def cmd_act(args) -> int:
     # Co-op paired round 2026-10-09: a fight that ended partway through a
     # batch left the rest of the batch refused past three with no stop. The
     # streak is the lane's (`blindplay_shape.MAX_REFUSALS`), and every
-    # refusal below counts toward it, "The fight is over" included.
+    # refusal below counts toward it, "The fight is over" included. A command
+    # skipped because an earlier one of its batch left the room is not a
+    # refusal (Varka round 2026-10-13, below). The stop is sticky; the
+    # coordinator lifts it with `reset-refusals --lane N`.
     if live and refusal_streak() >= MAX_REFUSALS:
         print(refusal_stop_line(refusal_streak()))
         return 2
@@ -629,6 +641,16 @@ def cmd_act(args) -> int:
     except LaneSlow as slow:
         print(slow)
         return 1
+    # Varka round (2026-10-13): an earlier command of this batch left the
+    # room (a lethal Chain Lightning with its discard picks queued), so this
+    # one was typed against a screen the seat has not seen. Not sent, and not
+    # a refusal: it does not count toward the stop
+    # (`blindplay_shape.screen_changed_after`).
+    if live:
+        after = screen_changed_after(room_of(_screen(state)))
+        if after is not None:
+            print(SCREEN_CHANGED_SKIP.format(command=after))
+            return 1
     # The screen the lane's last page was rendered on, read BEFORE `act`
     # (whose observation rolls the run ledger onto this screen).
     prev_screen = _text((_held_run().get("here") or {}).get("screen"))
@@ -729,6 +751,7 @@ def cmd_act(args) -> int:
     # `EB-341`: the row that was taken, then the game's answer -- the same two
     # lines, in the same order, the session hands its seat.
     clear_refusal()
+    mark_sent(args.command, room_of(_screen(state)))
     # Kokomi round 2 (2026-10-13, lane 5): a sent `skip` on a card reward is
     # the deliberate skip, so the reward screen's `proceed` hold no longer
     # holds for that card row (`card_skips`); a sent `proceed` leaves the
@@ -774,6 +797,7 @@ def _cmd_wait(state: dict[str, Any], seconds: int, live: bool,
         except (qa_packet.PacketLeak, BlindPlayError) as exc:
             print(f"REFUSED: {exc}", file=_refusal_stream(args))
             return 1
+        clear_sent()
         return 0
     try:
         latest, waited, moved = blindplay_coop.wait_for_partner(
@@ -794,6 +818,7 @@ def _cmd_wait(state: dict[str, Any], seconds: int, live: bool,
     except (qa_packet.PacketLeak, BlindPlayError) as exc:
         print(f"REFUSED: {exc}", file=_refusal_stream(args))
         return 1
+    clear_sent()
     return 0
 
 
@@ -985,6 +1010,31 @@ def cmd_new_seat(args) -> int:
     return 0
 
 
+def cmd_reset_refusals(args) -> int:
+    """The coordinator's lift of a lane's REFUSAL STOP (Varka round
+    2026-10-13). The stop is sticky: every later seat on the lane is refused
+    until the streak is cleared. Clears the streak, the end-turn refusal mark
+    and the screen-change mark; the action budget is left alone."""
+    lane = args.lane
+    tag = lane_tag(lane)
+
+    def held() -> str:
+        mark = blindplay_shape.read_state_json(
+            blindplay_shape.refusal_mark_path(lane))
+        sent = blindplay_shape.read_state_json(
+            blindplay_shape.sent_mark_path(lane))
+        return (f"streak {refusal_streak(lane)} of {MAX_REFUSALS}, "
+                f"refusal mark {'set' if mark else 'none'}, "
+                f"screen-change mark {'set' if sent else 'none'}")
+
+    print(f"lane {tag} before: {held()}")
+    clear_refusal_streak(lane)
+    clear_refusal(lane)
+    clear_sent(lane)
+    print(f"lane {tag} after:  {held()}")
+    return 0
+
+
 BRIEF_HELP = ("the compact page: no word definitions or standing notes, and "
               "every refusal on stdout. Intents, HP/Block/Energy, the hand "
               "and the verbs are never cut. Use this instead of filtering "
@@ -1061,6 +1111,14 @@ def main(argv: list[str] | None = None) -> int:
                                         "--brief defines them again; the "
                                         "action budget is untouched")
     w.set_defaults(func=cmd_new_seat)
+
+    r = sub.add_parser("reset-refusals", help="coordinator: lift a lane's "
+                                              "sticky REFUSAL STOP (clears "
+                                              "the streak and the refusal "
+                                              "marks); the action budget is "
+                                              "untouched")
+    r.add_argument("--lane", required=True, help="the lane, e.g. 2 or lane2")
+    r.set_defaults(func=cmd_reset_refusals)
 
     args = ap.parse_args(argv)
     try:

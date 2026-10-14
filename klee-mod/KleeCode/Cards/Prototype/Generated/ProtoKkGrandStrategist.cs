@@ -38,20 +38,20 @@ public sealed class ProtoKkGrandStrategist : CustomCardModel, ICharacterCard
     public string CharacterId => "kokomi";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForElementalReaction(ArmKeywordTips.ForPlanNoLine(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForElementalReaction(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_grand_strategist");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Grand Strategist"),
-        ("description", "Whenever a [gold]Plan[/gold] triggers an [gold]Elemental Reaction[/gold], deal {PowerAmount:diff()} damage to ALL enemies."),
+        ("description", "Whenever you trigger an [gold]Elemental Reaction[/gold], deal {PowerAmount:diff()} damage to ALL enemies."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 7m)
+            new DynamicVar("PowerAmount", 4m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -68,6 +68,6 @@ public sealed class ProtoKkGrandStrategist : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PowerAmount"].UpgradeValueBy(3m);
+        DynamicVars["PowerAmount"].UpgradeValueBy(2m);
     }
 }

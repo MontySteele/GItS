@@ -1368,6 +1368,11 @@ PLAN_INTO_DEFEND_CLAUSE = " (into the Block it gains on its turn)"
 # `block_now`, Frail and Dexterity folded), and says the read is repeated.
 PLAN_BLOCK_NOW_CLAUSE = (" ({block} Block against the attacks intended now; "
                          "it reads them again on the turn it lands)")
+# THE KOKOMI POOL OVERHAUL (2026-10-13): a waiting Counter or Chain Plan's
+# number as it stands -- the strip's caption ("Deals 14", "2 attackers",
+# "Energy 1", "No attack yet"; the wire's `live`). A Chain Plan's is what it
+# deals if the queue lands as written.
+PLAN_LIVE_CLAUSE = " (as it stands: {live})"
 # And which Plan is first, after Change of Plans moved the front (B2: "I
 # could not tell which Plan was first").
 PLAN_FIRST_CLAUSE = " (first)"
@@ -1636,6 +1641,18 @@ ARM_KEYWORDS: dict[str, str] = {
                         "Vulnerable, Electro 3 to ALL."),
     "Knight": ("One of Varka's Companions. Playing one makes its element "
                "your current element. Geo does not."),
+    # YAE MIKO (2026-10-13), in step with `ArmKeywordTips.YaeSakuraTip` and
+    # `YaeEditTip`, markup folded out and the numbers written out (`YaeLaw`).
+    "Sakura": ("Up to 3 stand beside you. At the end of your turn each "
+               "strikes a random enemy for 2 plus its Level Electro damage, "
+               "oldest first. Each lasts 3 turns. Planting one raises the "
+               "others' Level by 1 (up to 3). Tenko: every Sakura strikes now "
+               "and lasts 3 turns again."),
+    "Edit": ("Give a card in your hand an Annotation for this combat, "
+             "replacing any it had: Red Ink (+3 damage and Block), Footnote "
+             "(draw 1), Deadline Extension (Retain), Fox Fire (4 Electro "
+             "damage to a random enemy), Sakura Seal (plant a Sakura). A "
+             "Published Annotation lasts the run."),
     # `EB-625`. THE RELIC A FACE IS WRITTEN AGAINST. Shell Guard says
     # "whenever the Tamakushi Casket strikes" and nothing on the page said
     # what the Casket is or what makes it strike -- [USER]'s act-1 run read
@@ -1990,6 +2007,11 @@ _ARM_KEYWORD_ARM: dict[str, str] = {
     "Encore": "furina", "Spotlighted": "furina",
     # VARKA (the Oath rework): his three words are his alone.
     "Oath": "varka", "current element": "varka", "Knight": "varka",
+    # YAE MIKO (2026-10-13): her two words. `Sakura` is also printed by the
+    # Inazuma Universal "Yae Miko -- Sesshou Sakura", a different object, so
+    # her row prints only on her runs. (The wire names her by her title,
+    # "Yae Miko", which `_fold`s to the two words.)
+    "Sakura": "yae miko", "Edit": "yae miko",
     # THE SALON'S TAB (2026-10-05): the summon and the four guests.
     "Summon": "furina", "Guest Star": "furina", "oldest guest": "furina",
     "Clorinde": "furina",
@@ -2075,6 +2097,13 @@ _ARM_KEYWORD_RE = {
     "Oath": re.compile(r"\bOath\b"),
     "current element": re.compile(r"\bcurrent element\b"),
     "Knight": re.compile(r"\bKnights?\b"),
+    # YAE MIKO: `Sakura` takes no plural, and its row carries Tenko (pick 6
+    # (a)); `Edit` conjugates ("Edited") and its row carries the five
+    # Annotations, "Annotated" and "Publish".
+    "Sakura": re.compile(r"\bSakura\b|\bTenko\b"),
+    "Edit": re.compile(r"\bEdit(?:ed|s)?\b|\bAnnotat(?:ed|ions?)\b"
+                       r"|\bPublish(?:ed)?\b|\bRed Ink\b|\bFootnote\b"
+                       r"|\bDeadline Extension\b|\bFox Fire\b"),
     # `EB-446`. NO PLURAL: there is one raven. It fires on Nightrider's face,
     # which names him and cannot grant him, and on the Power card that does --
     # every screen a reader can meet the word on, whether or not the run holds
@@ -3611,6 +3640,12 @@ RESOLUTION_WOLFPACK = ("  Wolfpack: shuffled {n} of Four Winds' Ascension "
 #: took it. A seat "never saw the number change in the log, and could not tell
 #: if Four Winds' Pyro half qualified" (it does).
 RESOLUTION_STOKED = ("  Stoke the Flames: its Pyro damage was {n} higher.")
+#: Varka round 5 (2026-10-13, "What to change" 2): what the card made you
+#: discard (Chain Lightning, Short Circuit), on its own play line, and when
+#: the game picked them because the hand held no more than it asked for.
+RESOLUTION_DISCARDED = "  Discarded: {cards}."
+RESOLUTION_DISCARDED_FOR_YOU = ("  Discarded: {cards} (the only cards in "
+                                "hand).")
 #: The Varka payoff round (2026-10-10): a card whose every Anemo application
 #: found no aura (Sucrose on a bare board) said "Nothing this page can count
 #: landed off it", and the seat could not tell it had needed an aura.

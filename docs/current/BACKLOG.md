@@ -15,7 +15,8 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 
 ## Kits and display (the mod)
 
-- Moon's Reflection with an empty Exhaust pile does nothing and nothing says so; a seat played it twice for nothing (Kokomi round 4, lane 1).
+- Bennett's Passion Overload and Kujou Sara's Crowfeather Cover do not say that an Attack carries one element, or that Sara's Electro lands when both are up (`CompanionOverhaulRiders.ElementFor`, fixed order, not newest); the sentence does not fit the 125-character power ceiling (116 and 119 now). Kokomi review r4, item 4.
+- Kokomi has no loop probe (Furina's is `tier0/harness/furina_loop_probe.py`). Its known set, when one is built: Shoal Call x2 + Watchful Shoal+ + The Shape of Water (review r3), Kurage Canopy + a planned Ward, a 0-cost Weak and 3 Block a turn (review r4), and Jellyfish Current + Stings, bounded because each reaction consumes the aura (pool overhaul 2026-10-13).
 - Kokomi round 3 (2026-10-11): check whether Thieving Hopper's Flutter ("50% less damage from Attacks") should halve Opening Gambit's doubled Plan (a Skill); lane 5, fight 11.
 - Kokomi round 3: Iron Club ("every 4 cards you play, draw 1") never visibly drew in lane 4; read `cards_drawn_by_turn` in her next round, or check the relic in game.
 - Off-character kit cards, base-game faithful (resources work for anyone and their gauge appears on first gain, like the Regent's Stars and Osty): Furina's Drain, Repay and Fanfare, Kokomi's Plans and Kurage, Varka's Oath. Each is done when its kit reaches Balance; Klee is done.
@@ -25,7 +26,7 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - Art owed, Klee: Forbidden Fun, Lisa's Treats, Red Knight, Finders Keepers, Klee Can Explain!, Damage Report, Albedo — Dust of Purification (its plan row is re-pointed from Tectonic Tide's Albedo Wish splash, not yet fetched), Up in Smoke!, Behind Jean's Desk, Kitchen Alchemy, Cover Your Ears!; the two status-package Powers borrow Party Poppers' and Spark Knight's badges.
 - Varka's model art (`tools/varka_rig`, phase B, 2026-10-13) is wired but not yet seen in a game: on the next deploy check combat (idle, attack spin-to-slam with its element trail in each of the five colours, hurt, death, cast, low-HP idle, facing flip, shadow), Four Winds' Ascension (the clip, both ground bursts, the target copy under each enemy shape and its draw order), the 0.6 s hit timing on multi-hit cards, the merchant loop, the rest seat, the select close-up and the roster tile; and confirm in the build log that his sheets import VRAM-compressed.
 - Klee's rest-site pose is a still: BaseLib rebuilds the rest sprite from the texture alone, so an idle loop there needs code.
-- Art owed, Kokomi: Kelp Wall, Tidecleanse, Sea Glass Harvest, Flotsam Surge and the Sea Glass token.
+- Art owed, Kokomi: Kelp Wall, Tidecleanse, Sea Glass Harvest, Flotsam Surge and the Sea Glass token; and the pool overhaul's six (Turning Tide, Brine Spray, Jellyfish Current, Prepared Retreat, Battle Formation, Turnabout; `art_coverage.KNOWN_MISSING`).
 - Art owed, Spiral Abyss mode (2026-10-12): the menu emblem and The Ley Line are 64px wiki sources upscaled 4x, and seven are nearest-official stand-ins (Abyssal Moon = Iridescent Moon, Moonlit Rest = Sweet Madame, First Strike = Sword Unaligned, Elemental Burst = Battle-Line Detonation, Crystallize = Crystallize Shield Hydro, Sheer Cold = Element Cryo, Elemental Mark = Element Pyro).
 - Art owed, Spiral Abyss round two (2026-10-12): the ten new entries borrow the first eight's icons until their own are fetched (Overflow = Elemental Burst, Vigor of the Abyss = First Strike, Moonlit Spring = Moonlit Rest, Battle Rhythm = Resonance, Wavering Moon = Abyssal Moon, Starfell Draft = Fateful Fortune; Thorny Ground = Abyss Herald, Bulwark = Fatui Skirmishers, Frenzy = Rally, Withering = Sheer Cold), so two cards on one page can share an icon.
 - Art owed, pool completion: the 14 new rows and the three new Ancients (Alice's Masterpiece, Divine Strategy, Center of Attention).
@@ -35,7 +36,7 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - Klee finish-line batch, pinned headless only; watch in game and through the bridge: Dodoco Tales' opening Sparks (and the Spark row naming the relic), Finders Keepers' draw trigger, Confiscated playing as a Status (drag-to-play, frame, Klee Can Explain! / Kitchen Alchemy taking it), Mine, All Mine!'s Mine landing on the enemy its hit killed.
 - Pool completion: Divine Strategy's now-line, Center of Attention's free Spend and the two co-op cards (Tactical Relay, Kurage's Mercy) are pinned headless only; watch them in game and through the bridge.
 - Varka Hydro cards (Tidal Bulwark, Whisper of Water) went ungraded in two seats (each offered once, passed); they are read in [USER]'s run.
-- Varka's Ancients (All Four Winds from Darv's Tome, Dandelion Gale from Orobas's Archaic Tooth on Windbound Execution) and his "(Makes Pyro current)" line are pinned headless only; watch them in game and through the bridge.
+- Varka's Ancients (All Four Winds from Darv's Tome, Dandelion Gale from Orobas's Archaic Tooth on Four Winds' Ascension) and his "(Makes Pyro current)" line are pinned headless only; watch them in game and through the bridge.
 - Verify Boreas's Fang saved starter element survives save/reload (`Relics/VarkaStarterKnight.cs`, a BaseLib `SavedSpireField`; no test exercises a real serialize/deserialize, so the Fang and Knight's Commission keep their deck fallback until then).
 - Varka's Architect finale lines in `tools/build_pck.ps1` are placeholders for a writing pass, like the other three characters'.
 - Varka's element-switch hover, the left-element icon (`OathLeftPower`), the Fang's turn-one element, Windborne Resolve and Weathervane's start-of-turn grid (also in co-op) are still unconfirmed in game and through the bridge; the next Varka seat record says whether each was seen.
@@ -109,7 +110,6 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - Bridge `ModeLabels`/`RecordChoice` still carry the sheet's literal numbers for mode faces; read them from the card's vars instead.
 - Co-op dev grant: `give_card` is refused in multiplayer because the pile add bypasses the action-queue synchronizer; a synced grant would let a co-op seat round be dressed with named co-op cards.
 - An embark was never reverted (all its ledger rows APPLIED, the game still up at `game_over`) although the seat's teardown was run; find why before relying on `seat.py` teardown. `embark` now refuses a lane with a live un-reverted launch.
-- `test_local_tester` is flaky: it failed once and passed on re-run with no change; 82 more runs on 2026-10-13 never failed (two failures seen while `McpMod.cs` was being edited and built).
 - The seat harness sometimes sends end-turn twice in a row (seat rounds); find which path repeats it.
 - `EB-391` the `rest` verb sometimes fails its first call on an open rest site ("Rest site room is not open"); game-side race.
 - `EB-208` the seed ledger ships empty: run the Klee three-body seed hunt and record the first entries.
@@ -128,8 +128,10 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 ## Parked: start only when the named trigger fires
 
 - `EB-70` the starter-offer retune (`EB-27p`); wakes when a kit's design sweep reaches the Wings / Little Hexenzirkul class (R134).
+- Yae's Ancient gap: design her two Ancient cards (one Darv's Dusty Tome adds, one Orobas's Archaic Tooth makes from a starter, as Varka's do) in the next Yae card pass. Until then a stopgap guard (`Patches/YaeDustyTomeGuardPatch.cs`: Darv offers her no Dusty Tome while her pool holds no Ancient) stands against LAW's "real content" line, ruled by [USER] 2026-10-13: "(a). Yeah, I think that's fine." Delete the guard in the commit that lands her two Ancients, with a `RosterAncientCards.Yae` ledger and a `lint_ancient_coverage.py` row.
 - `EB-80` Kokomi prevention-on-curve review; wakes if a Kokomi playtest shows she needs more warding.
 - `EB-651` a doubled `The other side` heading seen once and not reproduced; wakes on a sighting carrying the page sha.
 - `EB-12` `bridge_unreachable` with the game alive, seen once; wakes on a second observation (`hangwatch` now classifies it).
 - `EB-15` the seed's `lobby` route is unreachable in standard singleplayer; wakes with a Custom run or a hosted lobby.
 - `SKIP-10.9` mechanics the sim does not model, promoted only on demand. Enemy: Back Attack, untargetable Burrow, Ethereal/Hex auras, pick-your-poison curses, damage caps (Hard to Kill, Plating, Hardened Shell), Artifact, Thorns, on-hit status injection, every-N-cards intents, buff-all-enemies, block-an-ally, random-no-repeat AI, self-stun, Slimed self-exhaust, the minor powers, Soul Siphon stat theft, Blessed Antler, Philosopher's Stone. C# with no sim twin: the deferred-settle machinery (`SpotlightSystem`, `FurinaResources`) and per-dealer reaction windows (R1).
+- Yae pool expansion: several Tenko cards that carry their own scaling (paper pick 1 (b): +1 a strike per Tenko; (c): a bonus when a strike reacts), per [USER] 2026-10-13.

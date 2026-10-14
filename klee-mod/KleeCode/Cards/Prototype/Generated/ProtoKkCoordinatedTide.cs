@@ -38,20 +38,20 @@ public sealed class ProtoKkCoordinatedTide : CustomCardModel, ICharacterCard
     public string CharacterId => "kokomi";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForEthereal(base.ExtraHoverTips, this);
+        KokomiCards.WithStingPreview(ArmKeywordTips.ForElementalReaction(ArmKeywordTips.ForCompanion(base.ExtraHoverTips, this), this));
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_coordinated_tide");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Coordinated Tide"),
-        ("description", "Whenever the [gold]Bake-Kurage[/gold] carries out an [gold]Ethereal[/gold] card, deal {PowerAmount:diff()} [gold]Hydro[/gold] damage to the front enemy."),
+        ("description", "Whenever a [gold]Companion[/gold] triggers an [gold]Elemental Reaction[/gold], add a [gold]Sting[/gold] to your [gold]Hand[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 6m)
+
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -63,11 +63,11 @@ public sealed class ProtoKkCoordinatedTide : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<CoordinatedTidePower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<CoordinatedTidePower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PowerAmount"].UpgradeValueBy(3m);
+        AddKeyword(CardKeyword.Innate);
     }
 }

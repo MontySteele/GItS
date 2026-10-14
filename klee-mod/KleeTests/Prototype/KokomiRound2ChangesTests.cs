@@ -47,12 +47,14 @@ public class KokomiRound2ChangesTests
     {
         // Watchful Shoal was rewritten in the Kokomi round-3 changes
         // (`KokomiRound3ChangesTests`).
-        Assert.Equal((6, 9), (Var<ProtoKkCoordinatedTide>("PowerAmount"),
-                              Var<ProtoKkCoordinatedTide>("PowerAmount", true)));
-        // Kurage Canopy makes Wards since the Kokomi round 3 A-list
-        // (2026-10-13; `KokomiPayoffPassTests`).
-        Assert.Equal((7, 10), (Var<ProtoKkGrandStrategist>("PowerAmount"),
-                               Var<ProtoKkGrandStrategist>("PowerAmount", true)));
+        // The pool overhaul (2026-10-13): Coordinated Tide adds 1 Sting (the
+        // upgrade is Innate) and Grand Strategist is 4 [6]
+        // (`KokomiPoolOverhaulTests`). Kurage Canopy makes Wards since the
+        // Kokomi round 3 A-list (2026-10-13; `KokomiPayoffPassTests`).
+        Assert.False(new ProtoKkCoordinatedTide().DynamicVars
+                         .ContainsKey("PowerAmount"));
+        Assert.Equal((4, 6), (Var<ProtoKkGrandStrategist>("PowerAmount"),
+                              Var<ProtoKkGrandStrategist>("PowerAmount", true)));
         Assert.Equal((5, 6), (Var<ProtoKkShoalOfSpears>("Damage"),
                               Var<ProtoKkShoalOfSpears>("Damage", true)));
     }

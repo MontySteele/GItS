@@ -270,6 +270,50 @@ public static class ResolutionLedger
         NoteEvent(ToDiscard, card, string.Empty, string.Empty,
                   onPlayer: true);
 
+    /// <summary>Varka round 5 (2026-10-13, "What to change" 2): a card the
+    /// played card made you discard, filed on that play's line; `Power` is
+    /// <see cref="PickedForYou"/> when the game picked it because the hand
+    /// held no more cards than the discard asked for. Chain Lightning's
+    /// discard printed nothing, and two seats could not tell what went.
+    /// </summary>
+    public const string PlayDiscarded = "play_discard";
+
+    /// <summary>The `Power` of a <see cref="PlayDiscarded"/> event the game
+    /// picked for you.</summary>
+    public const string PickedForYou = "only cards in hand";
+
+    /// <summary>Did the game pick the discard? <c>CardSelectCmd.FromHand</c>
+    /// takes the whole hand without asking when it holds no more than
+    /// <paramref name="asked"/> cards. PURE.</summary>
+    public static bool DiscardPickedForYou(int handBefore, int asked) =>
+        handBefore <= asked;
+
+    /// <summary>File what <paramref name="played"/> discarded, one event a
+    /// card, on its play line, and write it to the log.</summary>
+    public static void NoteDiscards(string? played,
+                                    IReadOnlyList<string?> discarded,
+                                    bool pickedForYou)
+    {
+        if (discarded.Count == 0) return;
+        foreach (var card in discarded)
+        {
+            NoteEventOnPlay(PlayDiscarded, played ?? string.Empty,
+                            card ?? string.Empty,
+                            pickedForYou ? PickedForYou : string.Empty);
+        }
+        try
+        {
+            MegaCrit.Sts2.Core.Logging.Log.Info(
+                $"[{KleeMod.ModId}] {played} discarded "
+                + string.Join(", ", discarded)
+                + (pickedForYou ? $" ({PickedForYou})" : ""));
+        }
+        catch (System.Exception)
+        {
+            // A log line must never be the thing that ends a play.
+        }
+    }
+
     /// <summary>"<paramref name="card"/> Exhausted (Ethereal)." Filed
     /// between plays, past the player-turn-end mark, so it is carried to
     /// the next turn's page.</summary>

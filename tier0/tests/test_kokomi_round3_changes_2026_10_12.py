@@ -74,7 +74,10 @@ def test_kelp_wall_now_line_blocks_and_draws():
     assert row.effects[1] == {"op": "draw", "amount": 1}
     up = upgrades.apply_upgrade(loader.get_card("proto_kk_kelp_wall"))
     assert up.effects[0]["amount"] == 7
-    assert up.plan[0]["amount"] == 15        # the Kokomi level pass
+    # The pool overhaul (2026-10-13): the Plan is a Counter line with no
+    # printed number (was the level pass's flat 12 [15] Block).
+    assert up.plan == [{"op": "damage_blocked_since",
+                        "target": "front_enemy"}]
     st = kokomi_state()
     _attacking(st)
     st.player.draw_pile = [card("proto_kk_evening_watch")]
@@ -167,16 +170,17 @@ def test_a_flipped_ward_carries_out_its_now_line_with_the_bonus():
 # --- Coordinated Tide: before the plan bus -----------------------------------
 
 def test_coordinated_tide_lands_before_the_plan_bus():
-    """The C# moved the Tide's hit inside the carry-out's results line, which
-    puts it before the plan bus (Kurage Canopy); the sim keeps that order."""
+    """The pool overhaul (2026-10-13): Coordinated Tide no longer hits on a
+    carry-out (it adds a Sting when a Companion's own hit reacts), so a
+    written Sting carried out pays it nothing; the plan bus still pays."""
     st = kokomi_state()
-    st.player.powers[kokomi_plan.COORDINATED_TIDE] = 6
+    st.player.powers[kokomi_plan.COORDINATED_TIDE] = 1
     st.player.powers[kokomi_plan.KURAGE_CANOPY] = 3
     write(st, card(kokomi_plan.STING_ID))
     carry_out(st)
     events = [e["event"] for e in st.log]
-    assert (events.index("plan_coordinated_tide")
-            < events.index("plan_kurage_canopy"))
+    assert "plan_coordinated_tide" not in events
+    assert "plan_kurage_canopy" in events
 
 
 def test_the_page_prints_the_tide_rider_the_bridge_now_sends():

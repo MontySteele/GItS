@@ -52,8 +52,10 @@ public class KokomiOpenPlanTests : IDisposable
             typeof(ProtoKkKuragesOath)));
         Assert.False(typeof(INowLineCard).IsAssignableFrom(typeof(ProtoKkMasterstroke)));
         // Thirty-one two-line ProtoKk rows since the re-founding (2026-10-12),
-        // Sting and Ward and the co-op rows included.
-        Assert.Equal(31, types.Count(t =>
+        // Sting and Ward and the co-op rows included; thirty-two since the
+        // pool overhaul (2026-10-13): Turning Tide and Prepared Retreat in,
+        // Riptide Guard out (Turnabout is Plan-only).
+        Assert.Equal(32, types.Count(t =>
             typeof(INowLineCard).IsAssignableFrom(t)));
     }
 

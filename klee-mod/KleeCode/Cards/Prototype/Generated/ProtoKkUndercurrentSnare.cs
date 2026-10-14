@@ -38,14 +38,14 @@ public sealed class ProtoKkUndercurrentSnare : CustomCardModel, ICharacterCard, 
     public string CharacterId => "kokomi";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForWeak(BaseKeywordTips.ForVulnerable(ArmKeywordTips.ForPlan(base.ExtraHoverTips, this), this), this);
+        BaseKeywordTips.ForStrength(BaseKeywordTips.ForWeak(ArmKeywordTips.ForPlan(base.ExtraHoverTips, this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_undercurrent_snare");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Undercurrent Snare"),
-        ("description", "Apply 2 [gold]Weak[/gold].\nOr [gold]plan[/gold]: Apply {PlanPowerAmount:diff()} [gold]Vulnerable[/gold] to ALL enemies."),
+        ("description", "Apply 2 [gold]Weak[/gold].\nOr [gold]plan[/gold]: Each enemy that intends to attack loses {PlanPowerAmount:diff()} [gold]Strength[/gold] this turn."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -54,13 +54,13 @@ public sealed class ProtoKkUndercurrentSnare : CustomCardModel, ICharacterCard, 
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.ApplyVulnerable, DynamicVars["PlanPowerAmount"].IntValue, KokomiPlan.Aim.AllEnemies),
+            new KokomiPlan.Planned(KokomiPlan.Kind.LoseStrengthThisTurn, DynamicVars["PlanPowerAmount"].IntValue, KokomiPlan.Aim.EnemiesIntendingAttack),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PlanPowerAmount", 1m)
+            new DynamicVar("PlanPowerAmount", 3m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

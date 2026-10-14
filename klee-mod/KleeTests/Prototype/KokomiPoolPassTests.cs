@@ -51,8 +51,11 @@ public class KokomiPoolPassTests
         // `enemies_intending_attack` onto this member BY NAME, so a rename
         // here is a codegen break rather than a silent approximation -- the
         // same contract `Kind` is under.
+        // The Kokomi pool overhaul (2026-10-13) appended Brine Sting's
+        // `EnemiesAttackedSince`, read off the Plan's own window.
         Assert.Equal(new[] { "Self", "FrontEnemy", "AllEnemies",
-                             "EnemiesIntendingAttack" },
+                             "EnemiesIntendingAttack",
+                             "EnemiesAttackedSince" },
                      System.Enum.GetNames(typeof(KokomiPlan.Aim)));
     }
 

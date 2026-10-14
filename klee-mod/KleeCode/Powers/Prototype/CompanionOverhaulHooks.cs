@@ -305,9 +305,13 @@ public static class CompanionOverhaulReactions
     /// aura power is removed before this runs, exactly as the sim clears
     /// `enemy.aura` before `_react`.
     /// </summary>
+    /// <param name="cardSource">The card whose hit set the reaction off,
+    /// where the damage carried one (the Kokomi pool overhaul, 2026-10-13:
+    /// Coordinated Tide's Companion and Jellyfish Current's Sting).</param>
     internal static async Task Note(
         PlayerChoiceContext choiceContext, Reaction reaction,
-        Creature target, Creature? dealer, Element consumedAura)
+        Creature target, Creature? dealer, Element consumedAura,
+        CardModel? cardSource = null)
     {
         if (reaction == Reaction.None) return;
 
@@ -339,10 +343,11 @@ public static class CompanionOverhaulReactions
         await CompanionHexerei.OnReaction(
             choiceContext, reaction, target, dealer, consumedAura);
 
-        // THE KOKOMI RE-FOUNDING (2026-10-12): Grand Strategist, "Whenever a
-        // Plan causes an Elemental Reaction". Sim twin: the same read in
+        // THE KOKOMI POOL OVERHAUL (2026-10-13): a reaction she triggered --
+        // All Streams' count, Grand Strategist, Coordinated Tide and
+        // Jellyfish Current. Sim twin: `kokomi_plan.note_reaction`, from
         // `effects.companion_overhaul_reaction`.
-        await KokomiRefounding.OnReaction(choiceContext, dealer);
+        await KokomiRefounding.OnReaction(choiceContext, dealer, cardSource);
 
         if (reaction != Reaction.Swirl) return;
 
@@ -873,10 +878,13 @@ public sealed class SwirlChargePower : NextAttackRiderPower, ILocalizationProvid
 }
 
 /// <summary>
-/// Mika, Starfrost Swirl: "Your next Attack costs 1 less."
+/// Mika, Starfrost Swirl: "Your next Attack this turn costs 1 less."
 ///
-/// NO TURN LIMIT, because the card prints none -- it is spent by the next
-/// Attack whenever that is. <c>TryModifyEnergyCostInCombat</c> is the hook, and
+/// "THIS TURN" is the removal in <c>AfterSideTurnEnd</c>, mirrored exactly from
+/// <see cref="PassionOverloadPower"/> (the user's ruling, 2026-10-13: a
+/// discount that banked across turns was too much at Common). The unused
+/// discount is gone at the end of the player's turn; the sim pops it on the
+/// same line as Bennett's. <c>TryModifyEnergyCostInCombat</c> is the hook, and
 /// it is PURE: the consumption is the rider latch, so the cost query may be
 /// asked as often as the screen likes.
 /// </summary>
@@ -885,9 +893,18 @@ public sealed class StarfrostDiscountPower : NextAttackRiderPower, ILocalization
     public List<(string, string)>? Localization => new()
     {
         ("title", "Starfrost Swirl"),
-        ("description", "Your next Attack costs [blue]{Amount}[/blue] less."
-                      + CardTypeClause),
+        ("description",
+            "Your next Attack this turn costs [blue]{Amount}[/blue] less."
+          + CardTypeClause),
     };
+
+    public override async Task AfterSideTurnEnd(
+        PlayerChoiceContext choiceContext, CombatSide side,
+        IEnumerable<Creature> participants)
+    {
+        if (side != CombatSide.Player) return;
+        await PowerCmd.Remove(this);
+    }
 
     public override bool TryModifyEnergyCostInCombat(
         CardModel card, decimal originalCost, out decimal modifiedCost)

@@ -51,8 +51,18 @@ public sealed class ProtoVkGrandMastersVerdict : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Grand Master's Verdict"),
-        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Double your [gold]Oath[/gold] of your [gold]current element[/gold]."),
+        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Double your [gold]Oath[/gold] of your [gold]current element[/gold].{InCombat:{VarkaSwirl}|}"),
     };
+
+    /// <summary>This card's in-combat Oath and Swirl lines
+    /// (`VarkaOath.SwitchLine`, `VarkaOath.WildfireLine`,
+    /// `VarkaOath.SwirlLine`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("VarkaSwirl", VarkaOath.SwirlLine(this));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

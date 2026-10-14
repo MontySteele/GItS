@@ -72,6 +72,8 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         RESOLUTION_FANG_DEFAULT,
                                         RESOLUTION_WOLFPACK,
                                         RESOLUTION_STOKED,
+                                        RESOLUTION_DISCARDED,
+                                        RESOLUTION_DISCARDED_FOR_YOU,
                                         RESOLUTION_NO_AURA,
                                         RESOLUTION_NO_AURA_HIT,
                                         RESOLUTION_HIT_BY,
@@ -118,6 +120,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         PLAN_INTO_BLOCK_AND_DEFEND_CLAUSE,
                                         PLAN_INTO_DEFEND_CLAUSE,
                                         PLAN_BLOCK_NOW_CLAUSE,
+                                        PLAN_LIVE_CLAUSE,
                                         PLAN_FIRST_CLAUSE,
                                         BLOCK_KEEPING_POWERS,
                                         POWER_NOTE, SELECTION_NOTE,
@@ -229,6 +232,24 @@ WRITTEN_FACE_NOTE = ("    (the line above this one is what the board is "
                      "its sheet")
 
 
+_CLAUSE_SPLIT = re.compile(r"(?<=[.,])\s+|\s+and\s+|\s+then\s+")
+
+
+def _moved_clauses(c: dict[str, Any]) -> list[str] | None:
+    """The written face's clauses whose printed number differs from the
+    board's face, or None where the two do not split alike (then every clause
+    counts, the old reading)."""
+    written = str(c.get("written_face") or "")
+    board = str(c.get("text") or "")
+    if not written or not board:
+        return None
+    a = _CLAUSE_SPLIT.split(written)
+    b = _CLAUSE_SPLIT.split(board)
+    if len(a) != len(b):
+        return None
+    return [x for x, y in zip(a, b) if x != y]
+
+
 def _face_movers(c: dict[str, Any], you: dict[str, Any] | None) -> list[str]:
     """The powers on you that could have moved this face's number, by their
     printed names: a damage face takes Strength, Weak, Shrink and Vigor, a
@@ -237,6 +258,13 @@ def _face_movers(c: dict[str, Any], you: dict[str, Any] | None) -> list[str]:
     if not you:
         return []
     text = str(c.get("written_face") or c.get("text") or "")
+    # Kokomi round 4 (2026-10-13, lane 2 F10): only the clauses whose number
+    # MOVED. Itto prints Block and damage; Weak cut the damage and the line
+    # named Dexterity beside it, which read as a cut. Where the two faces
+    # split into the same clauses, a clause both print alike moves nothing.
+    moved = _moved_clauses(c)
+    if moved is not None:
+        text = " ".join(moved)
     words: tuple[str, ...] = ()
     if re.search(r"\bdamage\b", text, re.I):
         words += FACE_DAMAGE_MOVERS
@@ -1824,6 +1852,13 @@ def _resolution_lines(rows: list[dict[str, Any]],
         stoked = int(row.get("stoked") or 0)
         if stoked > 0:
             oath_lines.append(RESOLUTION_STOKED.format(n=stoked))
+        # Varka round 5 (2026-10-13): what the card made you discard.
+        discarded = row.get("discarded") or []
+        if discarded:
+            oath_lines.append((RESOLUTION_DISCARDED_FOR_YOU
+                               if row.get("discard_picked_for_you")
+                               else RESOLUTION_DISCARDED).format(
+                cards=_and_list([f"**{c}**" for c in discarded])))
         killed = row.get("killed") or []
         applied = row.get("applied") or []
         if not row["hits"] and not killed and not applied and oath_lines:
@@ -2459,12 +2494,13 @@ def _render_board_behind(c: dict[str, Any]) -> list[str]:
 
 #: The Varka payoff round (2026-10-10): Four Winds' Ascension's once-per-
 #: combat rule, under the card in the hand, in the base game's words for a
-#: relic that adds a card. Printed while Boreas's Fang (or Wolf's Gravestone)
-#: is held; Darv's Tome hands the same card with no such rule.
+#: relic that adds a card. Since Starter (a), 2026-10-13, the Ascension is in
+#: his starter deck and Boreas's Fang adds none; only Wolf's Gravestone still
+#: adds a copy, so the note says that copy is the extra one.
 ASCENSION_TITLE = "Four Winds' Ascension"
-ASCENSION_ONCE_NOTE = ("    - Added by {relic} the first time each combat you "
-                       "gain Oath. It is not in your deck.")
-ASCENSION_RELICS = ("Boreas's Fang", "Wolf's Gravestone")
+ASCENSION_ONCE_NOTE = ("    - {relic} adds a copy the first time each combat "
+                       "you gain Oath. That copy is not in your deck.")
+ASCENSION_RELICS = ("Wolf's Gravestone",)
 
 
 #: The Varka forced-Amber round (2026-10-10): Wildfire Oath's payout, under
@@ -2541,6 +2577,33 @@ def _render_oath(oath: dict[str, Any]) -> list[str]:
         else:
             clause = AURA_LINE.format(element=row["element"])
         out.append(f"- **{row['name']}**: {clause}")
+    return out
+
+
+SHRINE_HEADING = "## Your shrine"
+SHRINE_COUNT_LINE = ("- Sakura: {n} of 3. At the end of your turn each "
+                     "strikes a random enemy, oldest first.")
+SHRINE_NONE_LINE = "- Sakura: none. Plant one to start your shrine."
+SHRINE_ROW = ("- Sakura {slot}: Level {level}, strikes for {strike}"
+              "{turns}.")
+SHRINE_LURE_LINE = "- Foxfire Lure: your Sakura strike **{name}** this turn."
+SHRINE_ANNOTATED_LINE = "- Annotated cards in your hand: {n}."
+
+
+def _render_shrine(shrine: dict[str, Any]) -> list[str]:
+    """Her block: each Sakura's Level, strike and strikes left, the Lure's
+    enemy, the Annotated count, one fact a line."""
+    rows = shrine["sakura"]
+    out = [SHRINE_COUNT_LINE.format(n=len(rows)) if rows else SHRINE_NONE_LINE]
+    for row in rows:
+        turns = row.get("turns")
+        tail = ("" if turns is None else
+                f", {turns} strike{'s' if turns != 1 else ''} left")
+        out.append(SHRINE_ROW.format(slot=row["slot"], level=row["level"],
+                                     strike=row["strike"], turns=tail))
+    if shrine.get("lure"):
+        out.append(SHRINE_LURE_LINE.format(name=shrine["lure"]))
+    out.append(SHRINE_ANNOTATED_LINE.format(n=shrine.get("annotated", 0)))
     return out
 
 
@@ -3716,6 +3779,10 @@ def render(obs: dict[str, Any]) -> str:
                                + (PLAN_BLOCK_NOW_CLAUSE.format(
                                    block=e["block_now"])
                                   if e.get("block_now") is not None else "")
+                               # The Kokomi pool overhaul (2026-10-13): a
+                               # Counter or Chain Plan's number as it stands.
+                               + (PLAN_LIVE_CLAUSE.format(live=e["live"])
+                                  if e.get("live") else "")
                                + into_block.get(i - 1, "")
                                + past_lethal.get(i - 1, ""))
                     # A PLAN STAYS OPEN (2026-10-01), pick 5 (a): both
@@ -3855,6 +3922,9 @@ def render(obs: dict[str, Any]) -> str:
         # the powers, the receipts and the potions, far from the hand.
         if c.get("oath") is not None:
             out += ["", OATH_HEADING, ""] + _render_oath(c["oath"])
+        # YAE MIKO (2026-10-13): her shrine, above the hand, Varka's place.
+        if c.get("shrine") is not None:
+            out += ["", SHRINE_HEADING, ""] + _render_shrine(c["shrine"])
         out += ["", "## Your hand", ""]
         if c.get("spark_note"):
             out += [c["spark_note"], ""]

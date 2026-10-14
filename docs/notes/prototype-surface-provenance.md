@@ -3681,6 +3681,63 @@ trigger, so the next explosion on the players' turn still pays
 (`SparksForEveryonePower.Counts`, asked before the latch). With nobody else
 alive the latch is not spent either. The upgrade is Innate; the cost stays 2.
 
+### Varka (2026-10-13)
+
+[USER], 2026-10-13: "On the gap - I think that now is actually a great time
+to design 5 co-op cards for Varka". On the paper's five: "Escort Duty - Sounds
+fine if a little low. Marching Orders needs a buff. Let's make it 'their
+attacks this turn." From what I recall a base-game multiplayer card just gives
+5 strength for the turn, so this one is weaker in act 1 and scaler better in
+act 3. Venerer's Gale - not a fan. How about something modeled off of
+Flanking, but weaker (as this is a lower rarity). A skill that says "Swirled
+enemies take 50% more damage from other players this turn" or something like
+that. Comrades of the Expedition - sounds good! West Wind's Blessing - sounds
+good to me!" Escort Duty went from 5 [7] to 6 [9] for "a little low";
+Venerer's Gale became Windward Flank. Five `multiplayer: true` rows on the
+first set's terms, three Uncommons and two Rares: `VarkaRoster
+.MultiplayerSlice`, offered beside his pool and outside its count, mirrored by
+`C.VARKA_MULTIPLAYER_IDS` (`tools/lint_arm_pool_parity.py` holds the three
+together). The runtime is `CoopSet.cs`, "VARKA". `proto_vk_` joined the
+multiplayer prefixes (`gen_klee_cards.COOP_ARM_PREFIXES`,
+`loader.MULTIPLAYER_ARM_PREFIXES`). No art yet: the five sit on
+`art_coverage.KNOWN_MISSING` until their sources are picked.
+
+**`proto_vk_escort_duty`**: "Each player" includes Varka (Kokomi's
+convention). His Block is the row's `block` op; the new `varka` kind
+`escort_duty` gives each other player the same `Block` var through Joint
+Orders' call, then Swirls one enemy wearing an aura, picked on the shared
+`CombatTargets` stream (Violet Storm's roll), with Jean's damage-less Anemo
+hit. No enemy with an aura, no Swirl. 6 [9].
+
+**`proto_vk_marching_orders`**: the `varka` kind `marching_orders`, the first
+kind that aims at another player (`target: ally`, `VARKA_ALLY_KINDS`, so
+`varka` joined `COOP_ALLY_OPS`). His current element's Oath is read once, at
+the play, and placed on the chosen player as `AttackUpThisTurnPower`
+(Coordinated Strike's power), which adds it to each of their Attacks and
+leaves at the end of the turn; later Oath does not move it. No current
+element or 0 Oath places nothing. The face prints the live number,
+"(+N damage)", through `VarkaCurrentOathVar` (`{VkOath}`), unfolded because
+the bonus lands on someone else's Attacks. 1 [0].
+
+**`proto_vk_windward_flank`**: Jean's `swirl`, then `WindwardFlankPower` on
+the same enemy, placed by Varka, whether or not the Swirl happened.
+Shrapnel's shred without the Mine: Flanking's dealer check at x1.5, Single and
+instanced per applier, Debuff, removed at the end of the players' turn.
+1 [0].
+
+**`proto_vk_comrades_of_the_expedition`**: `ComradesOfTheExpeditionPower` on
+Varka. Each play of another player's Attack (`CoopSet.IsAnotherPlayersAttack`,
+Knights of Favonius' trigger) gains the stack (1) of his current element's
+Oath at `AfterCardPlayed`, through `VarkaOath.Gain`, so Oath Unto Death and
+Dawn Wind's March see it. No current element, nothing. 2 [1].
+
+**`proto_vk_west_winds_blessing`**: `WestWindsBlessingPower` on Varka, paid
+from `VarkaOath.OnSwirl` for every Swirl he makes. On Sparks for Everyone's
+terms: only on the players' turn (a Swirl while the enemies act gives nothing
+and leaves the trigger), once per round on the power's own latch, each other
+living player gains the stack (1) in energy through `PlayerCmd.GainEnergy`.
+The upgrade is Innate; the cost stays 2.
+
 ## Kokomi core pass: eight cards (2026-09-27)
 
 Design: `review/ruled/kokomi-core-pass-2026-09-27.md` (ruled at its defaults).
@@ -7853,10 +7910,16 @@ now pins the two tokens as the only 0-cost Plan rows.
   (`proto_kk_all_streams_flow_to_the_sea`) stays cut and pinned absent. It
   takes Endless Shoal's old Rare slot.
 - **The Shape of Water (`proto_kk_the_shape_of_water`):** new Uncommon Attack,
-  cost 1, "Deal 6 [8] Hydro damage for each Sting you played this turn.", with
-  the in-combat line (Tideturn's form). Count `stings_played_this_turn`
-  (`KokomiOverhaulLedger.StingsPlayedThisTurn`, cleared on the turn roll,
-  `kokomi_plan.roll_turn`). It takes Spring Tide's slot.
+  cost 1, "Deal 5 [7] Hydro damage, plus 5 [7] for each Sting you played this
+  turn.", with the in-combat line (Tideturn's form). Count
+  `stings_played_this_turn` (`KokomiOverhaulLedger.StingsPlayedThisTurn`,
+  cleared on the turn roll, `kokomi_plan.roll_turn`). It takes Spring Tide's
+  slot. Built as "Deal 6 [8] Hydro damage for each Sting you played this
+  turn."; the base hit came 2026-10-13 (Kokomi review). [USER]: "On Kokomi -
+  The Shape of Water is probably too situational?", then, ruling option (a),
+  "add a base hit: 'Deal 5 [7] Hydro damage, plus 5 [7] for each Sting you
+  played this turn.'": "Let's go with (a)". Still one Hydro hit, cost 1,
+  Uncommon.
 - **What "played" means.** A Sting played face-up: from her hand, or any
   other face-up play of one. Writing it on the Bake-Kurage is not a play, and
   neither is a carry-out (a flipped Sting's now-line included): Treatise's
@@ -8054,6 +8117,9 @@ golded.
   damage for each Weak and Vulnerable on the enemy." The two debuffs land
   first, so the floor is 6 [8] before Vulnerable's multiplier. The in-combat
   damage line is dropped: it would read the enemy before the debuffs land.
+  The damage previews pass (2026-10-13) brought it back over a display var
+  that counts the card's own 1 and 1 (less any Artifact would negate) and
+  folds the Vulnerable they bring (`DebuffsAfterDamageVar`).
 - **Sea's Reproach:** 3 -> **5 [7]** per Weak or Vulnerable applied. The
   upgrade now moves the number (`power_amount: 2`) and the cost stays 1 on
   both faces (was 1 [0]); "5 [7]" is the paper's number, one upgrade axis.
@@ -8185,4 +8251,238 @@ with one text held:
 
 Pins: `tier0/tests/test_kokomi_round3_alist_2026_10_13.py`,
 `klee-mod/KleeTests/Prototype/KokomiRound3AListTests.cs`. Untested in game
+until a deploy.
+
+## Varka text pass, 2026-10-13
+
+- `proto_vk_tidal_bulwark`: the user, "'Tidal Bulwark' does a lot. It gives
+  block and it's a better body slam. It's also not using standardized
+  language. Instead of saying "Apply hydro", it should say "Deal hydro
+  damage"", then "Tidal Bulwark - let's do (a)". Now "Deal Hydro damage equal
+  to your Block, plus 2 [3] for each Hydro Oath." The 6 [8] Block is gone and
+  the separate Apply sentence with it: the hit itself carries Hydro (the
+  `tidal_bulwark` kind, `VarkaCards.TidalBulwark`), so it reacts with an aura
+  already there and credits the Hydro Oath like any Hydro hit. The Block and
+  the Oath are read before the hit. The upgrade is the one the row had before
+  the last pass added the Block: 2 [3] per Hydro Oath (cost stays 1). The
+  in-combat line prints the live total (`VarkaTidalBulwarkDamageVar`).
+- **Wording, text only:** Weathervane (card and power) "you may choose an
+  element you have Oath in. It becomes your current element." (was "make ...
+  your current element"); Barbara: Gleeful Songs "for each enemy the Hydro
+  reacts on" (was "it"). Amber: Baron Bunny keeps "Next turn": Varka's
+  `VarkaBaronBunnyPower` fires at the start of his next turn.
+- **Live damage previews, display only** (the damage-preview census): Blazing
+  Charge and Storm Battery print "(Deals N damage)" in combat; Charged Lunge,
+  Ember Cleave, Chain Lightning, Tempest of the Four Winds, Violet Storm (per
+  hit), Kindled Edge and Razor: Awakening print `VkBase` as a folding damage
+  var (`VARKA_FOLDED_BASE_KINDS`); Kindled Edge's follow-up is its own token
+  `{VkAgain}`, a follow-up leg; Razor's Electro bonus is the folded hit with
+  it less the folded hit without it (`VarkaBonusDamageVar`). Stoke the
+  Flames' 5 [7] is a rider on a later Attack, not a hit, and is not folded.
+
+## Varka starter, Fang and Tooth, 2026-10-13
+
+[USER]'s picks: "On Varka's starter - I don't want to give him two starting
+effects, so if we do (a), then I'd want to knock Windbound Execution out of
+his starting deck and make Four Winds' Ascension his second starter
+instead"; "Starter - (a)". The Tooth: "Archaic Tooth - let's have the
+upgrade make it AoE and also reduce the cost to 1 when upgraded", then "Not
+exactly. I meant that the ancient starts at 2, and upgrading it at a
+campfire (or replacing an already-upgraded Ascension) takes it to 1." Deep
+Freeze: "I think we should drop Retain."
+
+- `proto_vk_four_winds_ascension`: in his starter deck, in Windbound
+  Execution's slot (Strike x4, Defend x4, Ascension, the rolled starter
+  Knight). Numbers unchanged: 2 [1], Retain, 10 Anemo then 3 per current
+  Oath. It carries the Tooth's `TRANSCENDENCE` mark now.
+- `proto_vk_windbound_execution`: retired. Nothing else made or named it
+  (the Tooth moved to the Ascension); row, generated class and its tests are
+  gone.
+- Dandelion Gale (`Cards/Varka/DandelionGale.cs`, hand-written, Ancient):
+  the Ascension made bigger. Attack, 2 [1], Retain: "Deal 10 Anemo damage to
+  ALL enemies. Then deal 3 damage per Oath of your current element to each,
+  as that element." with the Ascension's live "(Deals X damage)" line. The
+  second hit is `VarkaCards.GaleHit`, gaining no Oath, as the Ascension's.
+  The vanilla Tooth upgrades the card it makes when the starter card was
+  upgraded, so an upgraded Ascension becomes a 1-cost Gale.
+- `proto_vk_deep_freeze`: Retain dropped, base and upgraded.
+- Boreas's Fang (`Relics/BoreasFang.cs`, hand-written): "At the start of
+  each combat, your starting Knight's element becomes current. Your Swirls
+  also pay your current element." The current-element payout in
+  `VarkaOath.OnSwirl` (sim `varka_oath.on_swirl`) is gated on holding a Fang
+  (`BoreasFang.PaysSwirls`, sim `pays_swirls`); the Swirl's 1 Oath stays a
+  character rule, said by the Oath tip. The Fang adds no Ascension
+  (`AddsAscension` false). Wolf's Gravestone mirrors the Fang's words and
+  keeps its old bonus: the first Oath gain each combat adds an upgraded
+  Ascension that costs 0 that turn.
+
+## Varka pool audit, 2026-10-13
+
+[USER]'s rulings: "On Blazing Charge - let's go with (b) - worse scaling.
+Kindled Edge - agreed on (a). Chain Lightning - let's make it cost 0, "Deal
+8 [11] Electro damage to ALL enemies, discard 2" - so it's a draw-deck combo
+piece with what would be good damage for a 1 energy card that otherwise
+probably bricks your hand. Tempest of the Four Winds - agreed on (a)", then
+"Downburst - let's amend it to "If it Swirls, gain 2 oath of each element"
+to befit a Rare's payoff, but otherwise agreed on (a). Eula: Icetide Vortex
+- agreed on (a)".
+
+- `proto_vk_blazing_charge`: (b), "worse scaling". Now "Deal 8 [11] Pyro
+  damage, plus 1 for each Pyro Oath." (was plus 2). Cost stays 1; the live
+  "(Deals N damage)" line reads the new `VkPer`.
+- `proto_vk_kindled_edge`: (a). The reaction bonus is 5 [7], was 7 [10]; the
+  base hit stays 7 [10]. The bonus is the kind's own `amount` (`VkAmount`,
+  upgrade `varka_amount: 2`), and the face token `{VkAgain}` folds it
+  (`VarkaFollowUpDamageVar` now reads `VkAmount`).
+- `proto_vk_chain_lightning`: costs 0, was 2 with "Costs 1 less for each card
+  you discarded this turn". Now "Deal 8 [11] Electro damage to ALL enemies.
+  Discard 2 cards." The discount and its cost hook are gone; the discard is
+  the player's choice from hand, Short Circuit's `discard` op with `select:
+  chosen`, after the hit. `VkBase` stays a folding AoE preview.
+- `proto_vk_tempest_of_the_four_winds`: (a). 6 [8] per hit, was 4 [5].
+- `proto_vk_downburst`: (a), amended. "Deal 18 [24] Anemo damage. If it
+  Swirls, gain 2 Oath of each element." Was 12 [16] and 2 Oath of the element
+  Swirled. Each element is Pyro, Hydro, Cryo and Electro, 2 each, through
+  `VarkaOath.Gain` (sim `gain`); the Swirl's own 1 Oath of the Swirled
+  element still happens as a rule.
+- `proto_vk_eula_icetide_vortex`: (a). Costs 1, was 2; "Deal 8 [11] Cryo
+  damage", was 10 [14]. The Oath line is unchanged.
+
+## Yae Miko, batch one, 2026-10-13
+
+Her card paper (`review/active/yae-card-paper-2026-10-13.md`) was ruled the
+same day and her 32 rows moved here from the sim-only staging sheet
+(`docs/yae-staging.yaml`, retired) with her C# build, unchanged in grammar.
+Her verb is `{op: yae, kind: ...}` with the fields `yae_shrine.KIND_FIELDS`
+names; `yae_amount` / `yae_base` / `yae_per` are its upgrade keys, applied by
+both engines since this move. Annotation names: red_ink, footnote, deadline,
+fox_fire, sakura_seal.
+
+What the move changed on the faces, and only on the faces:
+- Every upgradable number prints its token (the codegen places most; Twin
+  Sakura prints `{YmAmount:diff()}` itself, and Manuscript Pile and
+  Mischievous Teasing `{Cards:diff()}`).
+- Fox Fire Draft and Footnote: "Edit 2 cards" upgraded, the face's own
+  `{IfUpgraded:show:2 cards|a card}` swap (the `yae_amount: 1` delta).
+- The "Exhaust." the staging faces printed went: the keyword prints it.
+- `proto_ym_proofread`: pick 3, ruled. "Edit a card in your hand: Red Ink."
+  at 1 [0], no Block.
+- `proto_ym_reborn_as_guuji_yae`: the row's `annotation: sakura_seal` is the
+  sim pilot's choice; in game the player chooses from the five
+  (`YaeModalOptions`).
+
+## Kokomi pool overhaul, 2026-10-13
+
+`review/active/kokomi-pool-overhaul-2026-10-13.md`, picks 1 (a) and 2 (a).
+[USER]: "On Kokomi, I'm good with default on 1 and 2. We'll want a 5 seat run
+on this, but I'll likely be back after the Varka run concludes to do the
+Furina test first." Built as written, with the readings the paper lists.
+
+**The readings, in both engines.**
+
+- **Chain** ("for each Plan carried out this turn"): a per-turn count the
+  carry-out raises before its clauses run, so each Chain line counts itself
+  and a doubled carry-out (Nereid's Ascension, Second Wave) counts twice.
+  Change of Plans' carry-out counts too. `KokomiOverhaulLedger
+  .PlansCarriedOutThisTurn` / `kk_plans_carried_out_this_turn`, rolled with
+  the turn.
+- **Counter** ("since you planned this"): from the moment the Plan is written
+  until it is carried out, per Plan. The ledger keeps three running totals
+  per combat (Block that absorbed enemy Attack damage; all the damage enemies
+  dealt her, blocked or not; one entry per enemy Attack hit aimed at her, by
+  the attacker), written where an enemy hit lands on her
+  (`ProtoBakeKuragePower.AfterDamageReceived`, sim `note_enemy_hit` beside
+  Tidal Riposte). The Plan stamps the totals when written
+  (`KokomiPlan.Entry.Window`, sim `PlanEntry.since_*`) and reads the
+  difference. In the mod, Turnabout's total counts every enemy hit, Attack or
+  not; the sim's enemies deal damage only by Attack.
+- **Intent** (Undercurrent Snare): each enemy that intends to attack when the
+  Plan lands, Flank's read. "Loses 3 [4] Strength this turn" is the base
+  game's temporary loss (`UndercurrentSnarePower`, a `TemporaryStrengthPower`,
+  Cover Your Ears!'s shape; sim `temp_strength_down`).
+- **"Triggers an Elemental Reaction"**: the card's or the Companion's own hit.
+  The mod hands the reaction's `cardSource` to `KokomiRefounding.OnReaction`;
+  a Plan line's hit carries no card through `ElementalHit.Deal`, so
+  `KokomiPlan.Hit` credits it to the card that wrote the Plan
+  (`KokomiRefounding.CreditHits`). The sim's twin is `kk_hit_card`. The
+  Bake-Kurage's Hydro before a written Companion is the pet's, never the
+  Companion's. A reaction is "hers" when she or her Plans dealt it; All
+  Streams counts them per combat (`ReactionsThisCombat`).
+
+**Rewrites (sec.3).**
+
+- `proto_kk_kelp_wall`: Plan "Deal Hydro damage equal to the damage you
+  blocked since you planned this.", front enemy (was Gain 12 [15] Block). The
+  upgrade is the now-line's Block alone (5 [7]).
+- `proto_kk_feint`: Plan "Deal 5 [7] Hydro damage for each Plan carried out
+  this turn." (was Apply 1 [2] Vulnerable).
+- `proto_kk_brine_sting`: Plan "Deal 8 [11] Hydro damage to each enemy that
+  attacked you since you planned this." (was Apply 1 Vulnerable to ALL), the
+  `enemies_attacked_since` aim, once per attacker.
+- `proto_kk_undercurrent_snare`: Plan "Each enemy that intends to attack
+  loses 3 [4] Strength this turn." (was Apply 1 [2] Vulnerable to ALL).
+- `proto_kk_read_the_field`: Plan "Put a card from your Draw Pile into your
+  Hand." (was Gain 10 [12] Block), her choice from the whole pile; the
+  upgrade is the scry alone. The now-line, unchanged in effect, is reworded
+  to fit the 120-character card ceiling beside the new Plan line: "Look at
+  your top 3 [4] cards. Take 1; put the rest on the bottom." (was "Look at
+  the top 3 cards of your Draw Pile. Put 1 into your Hand and the rest on the
+  bottom.").
+- `proto_kk_coordinated_tide`: "Whenever a Companion triggers an Elemental
+  Reaction, add a Sting to your Hand." A Companion card's own hit, played or
+  carried out as a Plan (was 6 [9] Hydro whenever an Ethereal card was
+  carried out). The paper names no upgrade; it takes Innate, the jellyfish
+  generators' upgrade (Kurage Bloom, Endless Shoal, Jellyfish Current).
+- `proto_kk_grand_strategist`: "Whenever you trigger an Elemental Reaction,
+  deal 4 [6] damage to ALL enemies." Any reaction credited to her (was a
+  Plan's reaction, 7 [10]).
+- `proto_kk_all_streams_flow`: "Deal 5 [7] Hydro damage, plus 5 for each
+  Elemental Reaction you triggered this combat." (was 4 [8] plus 2 per Sting
+  played), count `reactions_triggered_this_combat`.
+
+**Cuts and the six new cards (sec.4),** each in the cut card's slot of its
+rarity, so the pool stays 78 (20 / 38 / 20):
+
+- Riptide Guard out; **Turning Tide** (`proto_kk_turning_tide_chain`, Common
+  Attack, 1): "Deal 7 [10] Hydro damage. Plan: Deal 4 [5] Hydro damage to ALL
+  enemies for each Plan carried out this turn." A new id: the re-founding's
+  cut card of the same name (`proto_kk_turning_tide`) stays cut and pinned
+  absent.
+- Reserves out; **Brine Spray** (Uncommon Attack, 1): "Deal 5 [7] Hydro
+  damage. If it triggers an Elemental Reaction, add 2 Stings to your Hand."
+  `reaction_triggered_by_this` (Diluc's read) and the `shoal_call` kind, now
+  legal inside a conditional branch.
+- Brace for the Tide out; **Jellyfish Current** (Uncommon Power, 1):
+  "Whenever a Sting triggers an Elemental Reaction, add a Sting to your
+  Hand." Upgrade Innate. A Sting played, flipped or carried out as its Plan
+  line. Bounded: each reaction consumes the aura (BACKLOG's loop-probe known
+  set).
+- Moon's Reflection out; **Prepared Retreat** (Uncommon Skill, 1): "Gain 7
+  [10] Block. Plan: If an enemy attacked you since you planned this, gain 1
+  [2] Energy." New upgrade key `plan_energy` (`EnergyVar` "PlanEnergy").
+- Ceremonial Garment out; **Battle Formation** (Rare Power, 1): "Whenever 3
+  or more Plans are carried out in one turn, gain 1 Energy and draw 2 cards."
+  Upgrade Innate. Once a turn, when the third carry-out finishes, on the
+  once-per-turn latch. A second copy adds 1 Energy (the stack is the Energy,
+  the face's icon); the draw stays 2.
+- Watatsumi Resistance out; **Turnabout** (Rare Skill, 2, Exhaust): "Plan:
+  Deal the damage enemies dealt you since you planned this, blocked or not,
+  to ALL enemies." The paper's "Deal damage equal to all the damage enemies
+  dealt you ..." in the 120-character card ceiling. Upgrade cost 1, the
+  Prototype-stage rule for a 2-cost card with no number.
+
+The cut cards' engine verbs stay registered with no row spelling them
+(`plan_from_exhaust`, the `reserves` and `double_block` kinds, the Ceremonial
+Garment and Watatsumi Resistance powers); their paintings are `KNOWN_STALE`
+and the six new rows `KNOWN_MISSING`.
+
+**Live lines.** A waiting Counter or Chain Plan prints its number as it
+stands on the strip's caption and the page ("Deals 14", "2 attackers",
+"Energy 1", "No attack yet"; `KokomiPlan.LiveLine`, the wire's `live`). A
+Chain forecast is the rate times its place in the queue. No card face prints
+one: in hand a Counter Plan has no window yet and a Chain Plan's count
+depends on Plans not yet written.
+
+Pins: `tier0/tests/test_kokomi_pool_overhaul_2026_10_13.py`,
+`klee-mod/KleeTests/Prototype/KokomiPoolOverhaulTests.cs`. Untested in game
 until a deploy.

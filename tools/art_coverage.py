@@ -118,6 +118,24 @@ CARD_DIRS = tuple(IMAGES / name for name in CARD_DIR_NAMES)
 # KNOWN-set pattern (as in tools/art_lint.py): a stale file with a reason on
 # record is a NOTE, not a failure. Never prune an entry without a new reason.
 KNOWN_STALE = {
+    "proto_kk_riptide_guard": (
+        "The Kokomi pool overhaul (2026-10-13, review/active/kokomi-pool-overhaul-2026-10-13.md sec.4) cut this row: Turning Tide takes its slot. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_reserves": (
+        "The Kokomi pool overhaul (2026-10-13, review/active/kokomi-pool-overhaul-2026-10-13.md sec.4) cut this row: Brine Spray takes its slot. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_brace_for_the_tide": (
+        "The Kokomi pool overhaul (2026-10-13, review/active/kokomi-pool-overhaul-2026-10-13.md sec.4) cut this row: Jellyfish Current takes its slot. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_moons_reflection": (
+        "The Kokomi pool overhaul (2026-10-13, review/active/kokomi-pool-overhaul-2026-10-13.md sec.4) cut this row: Prepared Retreat takes its slot. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_ceremonial_garment": (
+        "The Kokomi pool overhaul (2026-10-13, review/active/kokomi-pool-overhaul-2026-10-13.md sec.4) cut this row: Battle Formation takes its slot. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_watatsumi_resistance": (
+        "The Kokomi pool overhaul (2026-10-13, review/active/kokomi-pool-overhaul-2026-10-13.md sec.4) cut this row: Turnabout takes its slot. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
     "proto_kk_measured_breath": (
         "The Kokomi jellyfish build (2026-10-12, review/ruled/kokomi-jellyfish-growth-2026-10-12.md) cut this row: Endless Shoal takes its Uncommon slot. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
@@ -565,12 +583,117 @@ KNOWN_STALE = {
 # on record. `tools/shipped_card_art.py` and its test fail on a missing key NOT
 # listed here, and on an entry here that has since been painted or cut.
 KNOWN_MISSING = {
-    # Empty since 2026-10-12: the 32 keys listed here (24 Kokomi re-founding
+    # Emptied 2026-10-12: the 32 keys listed here (24 Kokomi re-founding
     # and jellyfish rows, Sting and Ward among them, and 8 Furina block-gap
     # and diversity-pass rows) were painted by the missing-art census, whose
     # plan rows are in art/plan.tsv under "Art bill 2026-10-12". An entry here
     # is a card the player sees BLANK; tools/deploy_round.py now names every
     # one in its summary, so adding one is a visible choice.
+    # YAE MIKO, batch one (2026-10-13): the 32 rows of her C# prototype,
+    # built before her art pass. Placeholders by choice: the art census
+    # paints them once the kit survives its first play.
+    "proto_ym_yakan_evocation": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_proofread": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_kitsune_flash": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_thunder_rite": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_shrine_offering": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_twin_sakura": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_deadline": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_fox_fire_draft": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_sly_strike": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_fox_trick": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_shrine_maidens_guard": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_sakura_grove": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_kitsune_rite": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_thunderbolt_tithe": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_rooted_shrine": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_edict_of_cleansing": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_bestseller": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_print_run": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_footnote": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_sakura_seal": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_serialization": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_manuscript_pile": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_kitsune_guile": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_foxfire_lure": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_tenko_kenshin": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_foxs_mooncall": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_yakan_offering": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_the_seven_glamours": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_sakura_channeling": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_mischievous_teasing": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_reborn_as_guuji_yae": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_editor_in_chief": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_kk_turning_tide_chain": "The Kokomi pool overhaul (review/active/kokomi-pool-overhaul-2026-10-13.md, ruled 2026-10-13); no painting yet. The re-founding's cut `proto_kk_turning_tide.png` (a card of the same name) is a candidate, unseen.",
+    "proto_kk_brine_spray": "The Kokomi pool overhaul (review/active/kokomi-pool-overhaul-2026-10-13.md, ruled 2026-10-13); no painting yet.",
+    "proto_kk_jellyfish_current": "The Kokomi pool overhaul (review/active/kokomi-pool-overhaul-2026-10-13.md, ruled 2026-10-13); no painting yet.",
+    "proto_kk_prepared_retreat": "The Kokomi pool overhaul (review/active/kokomi-pool-overhaul-2026-10-13.md, ruled 2026-10-13); no painting yet.",
+    "proto_kk_battle_formation": "The Kokomi pool overhaul (review/active/kokomi-pool-overhaul-2026-10-13.md, ruled 2026-10-13); no painting yet.",
+    "proto_kk_turnabout": "The Kokomi pool overhaul (review/active/kokomi-pool-overhaul-2026-10-13.md, ruled 2026-10-13); no painting yet.",
 }
 
 

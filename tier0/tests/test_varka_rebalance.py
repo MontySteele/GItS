@@ -242,7 +242,7 @@ def test_awakening_hits_one_enemy_more_if_electro(rebalance):
                               _enemy(name="b", aura="electro")])
     _play(st, _vk("razor_claw_and_thunder"))
     lost = sorted(100 - e.hp for e in st.enemies)
-    assert lost == [0, 5 + 4]                   # the Electro Knights pass
+    assert lost == [0, 6 + 3]                   # Razor 6, +3 (2026-10-13)
 
 
 # ---------------------------------------------------------------------------
@@ -279,7 +279,8 @@ def test_kaeya_blocks_and_weakens(rebalance):
 
 # ---------------------------------------------------------------------------
 # 5b. The starter ruling, 2026-10-03: Ascension costs 2 with Retain (Regent's
-#     Sovereign Blade), 10 [13]; Windbound Execution costs 0, one enemy.
+#     Sovereign Blade), 10 [13]. (Windbound Execution, then 0-cost, left the
+#     starter 2026-10-13.)
 # ---------------------------------------------------------------------------
 
 def test_ascension_costs_2_retains_and_hits_10(rebalance):
@@ -296,15 +297,6 @@ def test_ascension_costs_2_retains_and_hits_10(rebalance):
     V._add_ascension(st, upgraded=False)
     made = [c for c in st.player.hand if c.id == _vk("four_winds_ascension")]
     assert made and made[0].retain is True
-
-
-def test_windbound_costs_0_and_hits_one_enemy(rebalance):
-    card = loader.get_card(_vk("windbound_execution"))
-    assert card.cost == 0
-    assert [e.get("target") for e in card.effects] == ["enemy"]
-    st = _state(n=3)
-    _play(st, card)
-    assert sorted(e.hp for e in st.enemies) == [96, 100, 100]
 
 
 # ---------------------------------------------------------------------------

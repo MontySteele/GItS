@@ -48,7 +48,7 @@ public sealed class ProtoKoFireworksFinale : CustomCardModel, IElementalCard, IS
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Fireworks Finale"),
-        ("description", "Spend all your [gold]Sparks[/gold]. Deal {Damage:diff()} [gold]Pyro[/gold] damage to ALL enemies for each [gold]Spark[/gold] spent."),
+        ("description", "Spend all your [gold]Sparks[/gold]. Deal {Damage:diff()} [gold]Pyro[/gold] damage to ALL enemies for each [gold]Spark[/gold] spent.{InCombat:\n(Deals {TotalDamage:diff()} damage)|}"),
     };
 
     // The Spark cost line (EB-118): unplayable below the price,
@@ -68,7 +68,8 @@ public sealed class ProtoKoFireworksFinale : CustomCardModel, IElementalCard, IS
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(5m, ValueProp.Move)
+            new DamageVar(5m, ValueProp.Move),
+            new HitsTotalDamageVar(static card => SparkPower.SparksAtPlay(card.Owner!.Creature!))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

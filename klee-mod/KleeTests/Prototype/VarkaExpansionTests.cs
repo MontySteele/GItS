@@ -177,10 +177,10 @@ public class VarkaExpansionTests : IDisposable
         Assert.Equal(3m, Var(Upgraded<ProtoVkMikaStarfrostSwirl>(), "PowerAmount"));
         var razor = new ProtoVkRazorClawAndThunder();
         Assert.Equal(TargetType.AnyEnemy, razor.TargetType);      // the AoE trim
-        // The Electro Knights pass (2026-10-03): 5 [7], +4.
-        Assert.Equal(5m, Var(razor, "VkBase"));
-        Assert.Equal(4m, Var(razor, "VkAmount"));
-        Assert.Equal(7m, Var(Upgraded<ProtoVkRazorClawAndThunder>(), "VkBase"));
+        // 6 [8], +3 (user, 2026-10-13; the Electro Knights pass had 5 [7], +4).
+        Assert.Equal(6m, Var(razor, "VkBase"));
+        Assert.Equal(3m, Var(razor, "VkAmount"));
+        Assert.Equal(8m, Var(Upgraded<ProtoVkRazorClawAndThunder>(), "VkBase"));
         Assert.Equal(0, new ProtoVkLisaPulsatingWitch().EnergyCost.Canonical);
         Assert.Contains("VarkaCards.Awakening",
                         Calls("ProtoVkRazorClawAndThunder", "OnPlay"));
@@ -344,10 +344,10 @@ public class VarkaExpansionTests : IDisposable
     }
 
     [Fact]
-    public void Downburst_swirling_pyro_gains_two_pyro_oath_beyond_the_credit()
+    public void Downburst_swirling_gains_two_oath_of_each_element_beyond_the_credit()
     {
-        // 2026-10-04 (after #882): "If it Swirls, gain 2 Oath of the element
-        // Swirled", on top of the Swirl's own per-card credit.
+        // Varka pool audit (2026-10-13): "If it Swirls, gain 2 oath of each
+        // element", on top of the Swirl's own per-card credit.
         var ledger = FreshLedger();
         var body = Seat.Klee(30).Creature;
         ledger.OpenScope();
@@ -356,13 +356,15 @@ public class VarkaExpansionTests : IDisposable
         var gains = VarkaCards.SwirledOathGains(
             ledger.SwirledElementsThisPlay,
             (int)Var(new ProtoVkDownburst(), "VkAmount"));
-        Assert.Equal(new[] { (Element.Pyro, 2) }, gains);
+        Assert.Equal(new[] { (Element.Pyro, 2), (Element.Hydro, 2),
+                             (Element.Cryo, 2), (Element.Electro, 2) }, gains);
         ledger.CloseScope();
         // The card calls it after its hit, and it gains through the one door.
         Assert.Contains("VarkaCards.SwirledOath",
                         Calls("ProtoVkDownburst", "OnPlay"));
         Assert.Contains("VarkaOath.Gain", Calls("VarkaCards", "SwirledOath"));
-        Assert.Equal(16m, Var(Upgraded<ProtoVkDownburst>(), "Damage"));
+        Assert.Equal(18m, Var(new ProtoVkDownburst(), "Damage"));
+        Assert.Equal(24m, Var(Upgraded<ProtoVkDownburst>(), "Damage"));
         Assert.Equal(2m, Var(Upgraded<ProtoVkDownburst>(), "VkAmount"));
     }
 

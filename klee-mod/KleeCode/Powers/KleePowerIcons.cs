@@ -167,6 +167,14 @@ internal static class KleePowerIcons
         GrandStrategistPower => KleePck.Path(
             "klee/powers/amp_reaction_up.png"),
         EndlessShoalPower => KleePck.Path("kokomi/powers/bake_kurage.png"),
+        // THE POOL OVERHAUL (2026-10-13): the two new Powers borrow the
+        // nearest shipped shape, the block above's rule, and Undercurrent
+        // Snare's this-turn loss wears Cover Your Ears!'s borrowed badge.
+        JellyfishCurrentPower => KleePck.Path("kokomi/powers/bake_kurage.png"),
+        BattleFormationPower => KleePck.Path(
+            "kokomi/powers/before_sun_and_moon.png"),
+        UndercurrentSnarePower =>
+            KleePck.Path("klee/powers/detonation_vuln.png"),
         DawnTidePower => KleePck.Path("kokomi/powers/bake_kurage.png"),
         JuugaGuardPower => KleePck.Path("klee/powers/oz_summon.png"),
         NereidsAscensionPower => KleePck.Path(
@@ -409,6 +417,15 @@ internal static class KleePowerIcons
         ShrapnelPower => KleePck.Path("klee/powers/detonation_vuln.png"),
         SparksForEveryonePower =>
             KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
+        // Varka's co-op five (2026-10-13), on the same borrowing terms:
+        // Windward Flank's shred wears Shrapnel's, West Wind's Blessing's
+        // energy gift Sparks for Everyone's, and Comrades' Oath gain
+        // Stormward Stance's (the Oath badge the expansion borrows).
+        WindwardFlankPower => KleePck.Path("klee/powers/detonation_vuln.png"),
+        WestWindsBlessingPower =>
+            KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
+        ComradesOfTheExpeditionPower =>
+            KleePck.Path("varka/powers/stormward_stance.png"),
         // Klee final pass (2026-10-02): Cover Your Ears!'s this-turn Strength
         // loss on an enemy borrows the Bomb's Vulnerable sigil, the badge
         // Shrapnel's enemy debuff already wears. Its own art stays owed.
@@ -451,6 +468,20 @@ internal static class KleePowerIcons
         // Oath Power Stormward Stance's, an element-change Power Boreas
         // Unbound's, a Knight Power Study Buddy's (Grand Master's Order's).
         StaticFieldPower => KleePck.Path("varka/powers/electro_wind.png"),
+        // YAE MIKO (2026-10-13): placeholders, every one borrowed. The
+        // Sakura badges wear the companion Sakura's (Sesshou Sakura) icon;
+        // her powers borrow the nearest shipped badge until her art pass.
+        SakuraBadgePower => KleePck.Path("yae/powers/sakura.png")
+            ?? KleePck.Path("klee/powers/oz_summon.png"),
+        FoxfireLurePower => KleePck.Path("klee/powers/detonation_vuln.png"),
+        SakuraGrovePower => KleePck.Path("klee/powers/bomb_damage_up.png"),
+        EdictOfCleansingPower =>
+            KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
+        SerializationPower => KleePck.Path("klee/powers/passion_overload.png"),
+        FoxsMooncallPower => KleePck.Path("klee/powers/oz_summon.png"),
+        YakanOfferingPower => KleePck.Path("klee/powers/oz_summon.png"),
+        SakuraChannelingPower => KleePck.Path("klee/powers/passion_overload.png"),
+        EditorInChiefPower => KleePck.Path("varka/powers/electro_wind.png"),
         UnwaveringBannerPower =>
             KleePck.Path("varka/powers/stormward_stance.png"),
         CycleOfSeasonsPower => KleePck.Path("varka/powers/boreas_unbound.png"),

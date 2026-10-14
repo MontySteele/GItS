@@ -246,10 +246,11 @@ public class VarkaComboTests : IDisposable
     }
 
     [Fact]
-    public void Deep_freeze_retains_and_doubles_weak_and_vulnerable()
+    public void Deep_freeze_doubles_weak_and_vulnerable_without_retain()
     {
         var card = new ProtoVkDeepFreeze();
-        Assert.Contains(CardKeyword.Retain, card.CanonicalKeywords);
+        // Retain dropped 2026-10-13 ([USER]: "I think we should drop Retain").
+        Assert.DoesNotContain(CardKeyword.Retain, card.CanonicalKeywords);
         Assert.Equal(0, UpgradedCost<ProtoVkDeepFreeze>());
         var play = Calls("ProtoVkDeepFreeze", "OnPlay");
         Assert.True(play.IndexOf("ElementalHit.ApplyOnly")
@@ -347,5 +348,46 @@ public class VarkaComboTests : IDisposable
         Assert.Equal("Your [gold]Swirls[/gold] deal [blue]{Amount}[/blue] "
                      + "additional damage to ALL enemies.",
                      Face(new ConvergingWindsPower()));
+    }
+
+    // ---- text pass 2026-10-13: the second hit's in-combat total ---------------
+
+    [Fact]
+    public void Ascension_and_avatar_print_the_second_hits_live_total()
+    {
+        // [USER]: "the second line doesn't actually say how much it's going
+        // to hit for". The face prints {VkHit}; the hit itself is unchanged.
+        var ascension = new ProtoVkFourWindsAscension();
+        var avatar = new ProtoVkNorthwindAvatar();
+        foreach (var card in new CardModel[] { ascension, avatar })
+        {
+            Assert.Contains(card.DynamicVars.Values,
+                            v => v is VarkaCurrentElementHitVar);
+            Assert.Contains("as that element.{InCombat:\n(Deals "
+                            + "{VkHit:diff()} damage)|}", Face(card));
+            Assert.DoesNotContain("in one hit", Face(card));
+        }
+        Assert.Equal("VkHit", VarkaCurrentElementHitVar.Token);
+
+        // Ascension: 3 per Oath of the current element, nothing without one.
+        Assert.Equal(0, VarkaCurrentElementHitVar.Raw(0m, 3m, Element.Pyro, 0));
+        Assert.Equal(12, VarkaCurrentElementHitVar.Raw(0m, 3m, Element.Pyro, 4));
+        Assert.Equal(0, VarkaCurrentElementHitVar.Raw(0m, 3m, Element.None, 4));
+        // Avatar: 8 [12], plus 2 per Oath.
+        Assert.Equal(8, VarkaCurrentElementHitVar.Raw(
+            Var(avatar, "VkBase"), Var(avatar, "VkPer"), Element.Cryo, 0));
+        Assert.Equal(14, VarkaCurrentElementHitVar.Raw(
+            Var(avatar, "VkBase"), Var(avatar, "VkPer"), Element.Cryo, 3));
+        var upgraded = Upgraded<ProtoVkNorthwindAvatar>();
+        Assert.Equal(18, VarkaCurrentElementHitVar.Raw(
+            Var(upgraded, "VkBase"), Var(upgraded, "VkPer"), Element.Hydro, 3));
+        Assert.Equal(0, VarkaCurrentElementHitVar.Raw(
+            Var(avatar, "VkBase"), Var(avatar, "VkPer"), Element.None, 3));
+
+        // Still one hit each: both go through the one shared hit.
+        Assert.Contains("VarkaCards.CurrentElementHit",
+                        Calls("VarkaCards", "AscensionHit"));
+        Assert.Contains("VarkaCards.CurrentElementHit",
+                        Calls("VarkaCards", "AvatarHit"));
     }
 }

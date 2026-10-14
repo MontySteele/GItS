@@ -1150,6 +1150,11 @@ CO_TENANCY_LEDGER = {
             "expiring at the end of the player turn, Playdate's shape below. "
             "Removes itself and touches nothing a co-tenant reads. No sim "
             "twin: tier 0 seats one player (engine/coop.py)",
+        ("Powers/Prototype/CoopSet.cs", "WindwardFlankPower"):
+            "(Varka's co-op five, 2026-10-13). Windward Flank's 'this turn' "
+            "on the enemy, expiring at the end of the player turn, Pass the "
+            "Match's boundary. Removes itself and touches nothing a co-tenant "
+            "reads. No sim twin: tier 0 seats one player (engine/coop.py)",
         ("Powers/Prototype/KleeExpansionPowers.cs", "PlaydatePower"):
             "(the Klee overhaul, R276). Playdate's discount "
             "expiring at the end of the turn that wrote it, "
@@ -1210,6 +1215,11 @@ CO_TENANCY_LEDGER = {
             "QUESTION, answered: a removal reads nothing and writes only its "
             "own existence, so it has no position to defend. It is NOT in "
             "CompanionOverhaulTurnEnd's walk for that reason",
+        ("Powers/Prototype/CompanionOverhaulHooks.cs", "StarfrostDiscountPower"):
+            "(Mika's discount made 'this turn', the user's ruling "
+            "2026-10-13). PassionOverloadPower's own this-turn EXPIRY, line "
+            "for line: it removes itself and reads nothing, so it has no "
+            "position to defend and is NOT in CompanionOverhaulTurnEnd's walk",
         ("Powers/Prototype/CompanionOverhaulHooks.cs", "FavonianFavorPower"):
             "(the Mondstadt companion overhaul, second wave). The "
             "same this-turn expiry, one card over: the Block it pays is paid "

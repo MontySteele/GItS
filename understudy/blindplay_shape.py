@@ -449,6 +449,69 @@ def clear_refusal(lane: object = None) -> None:
     drop_state(refusal_mark_path(lane))
 
 
+# VARKA ROUND (2026-10-13, lanes 1 and 2). A BATCH THAT CROSSES A SCREEN
+# CHANGE STOPS CLEANLY. A seat played Chain Lightning ("Discard 2 cards") into
+# the last enemy with `choose`, `choose`, `confirm` already queued for the
+# discard prompt; the fight ended, the three were refused against the reward
+# screen, and the third tripped the sticky REFUSAL STOP. A command typed
+# before the seat could see the screen it lands on is not a refusal, it is a
+# stale order. So every SENT act leaves the room it was sent from, and an act
+# that finds the lane in a different room before any `observe` is skipped:
+# not sent, not counted toward the streak. `observe` (a look) clears the mark.
+# A room is coarser than `state_type`: a fight's overlays (`FIGHT_OVERLAYS`)
+# inherit the room they opened in, and a card offer is part of the reward
+# screen, so a discard prompt or a reward's card pick is never a "change".
+SCREEN_ROOMS = {"card_reward": "rewards"}
+
+
+def room_of(screen: str) -> str:
+    """The room a screen belongs to; `""` for an overlay, which inherits."""
+    if screen in FIGHT_OVERLAYS:
+        return ""
+    if screen in COMBAT_SCREENS:
+        return "fight"
+    return SCREEN_ROOMS.get(screen, screen)
+
+
+def sent_mark_path(lane: object = None) -> Path:
+    return lane_state_dir(lane) / f"_blindplay-last-sent-lane{lane_tag(lane)}.json"
+
+
+def mark_sent(command: str, room: str, lane: object = None,
+              now: float | None = None) -> None:
+    """Remember the last sent command and the room it was sent from. An
+    overlay's `""` keeps the room the last mark held."""
+    if not room:
+        held = read_state_json(sent_mark_path(lane))
+        room = str(held.get("room") or "") if isinstance(held, dict) else ""
+    row = {"command": command, "room": room,
+           "at": time.time() if now is None else now}
+    write_atomic(sent_mark_path(lane), json.dumps(row))
+
+
+def clear_sent(lane: object = None) -> None:
+    drop_state(sent_mark_path(lane))
+
+
+def screen_changed_after(room: str, lane: object = None,
+                         now: float | None = None) -> str | None:
+    """The sent command after which the lane left its room, if no look has
+    happened since (fresh within `REFUSAL_MARK_TTL_S`); else `None`."""
+    row = read_state_json(sent_mark_path(lane))
+    if not isinstance(row, dict) or not room:
+        return None
+    held = str(row.get("room") or "")
+    if not held or held == room:
+        return None
+    now = time.time() if now is None else now
+    try:
+        if now - float(row.get("at") or 0) > REFUSAL_MARK_TTL_S:
+            return None
+    except (TypeError, ValueError):
+        return None
+    return str(row.get("command") or "the last command")
+
+
 # KOKOMI ROUND 2 (2026-10-13, lane 5). A DELIBERATE `skip` IS THE SKIP. The
 # Furina wave's hold (#1202) holds `proceed` once past a card offer on a
 # reward screen, and a card reward the seat opened and skipped is still a row

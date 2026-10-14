@@ -130,8 +130,8 @@ public abstract class VarkaArmRelic : CustomRelicModel
 
 /// <summary>Common. "At the start of each combat, gain 2 Oath in your
 /// starting Knight's element." On his first turn, after the draw (Fresh
-/// Catch's hook), so the Fang's Ascension lands in the opening hand (the
-/// paper: "intended"). It sets no element: Boreas's Fang makes that element
+/// Catch's hook), so Wolf's Gravestone's Ascension lands in the opening hand
+/// (the paper: "intended"). It sets no element: Boreas's Fang makes that element
 /// current on turn one (Varka defence sec.4), which left the Commission's old
 /// face ("becomes your current element, with 1 Oath") redundant; re-aimed to
 /// 2 Oath (main session, 2026-10-01). The starting Knight's element is the

@@ -107,6 +107,13 @@ coordinator runs:
 GITS_LANE=1 python -m understudy.blindplay new-seat   # forgets the lane's seen words; budget untouched
 ```
 
+**A lane stuck at `REFUSAL STOP`** (the stop is sticky; every later seat on the
+lane is refused) is lifted by the coordinator, which prints the streak before and after:
+
+```sh
+python -m understudy.blindplay reset-refusals --lane 1   # clears the streak and refusal marks; budget untouched
+```
+
 A seat can also ask for one word at any time: `observe --define "<Word>"`
 prints the screen's definition, or the glossary's own row marked
 "(not on this screen)".

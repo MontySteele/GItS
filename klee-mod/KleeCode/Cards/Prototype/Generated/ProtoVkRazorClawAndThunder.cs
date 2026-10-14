@@ -79,8 +79,8 @@ public sealed class ProtoVkRazorClawAndThunder : CustomCardModel, ICompanionCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("VkBase", 5m),
-            new DynamicVar("VkAmount", 4m)
+            new FoldedDamageVar("VkBase", 6m, ValueProp.Move, carries: Element.Electro),
+            new VarkaBonusDamageVar("VkAmount", 3m, "VkBase", Element.Electro)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

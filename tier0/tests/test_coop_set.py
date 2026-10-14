@@ -31,8 +31,10 @@ from tier0.tests.conftest import make_state
 from tools import gen_klee_cards as gen
 from tier05 import rewards
 
-# THE SALON'S TAB (2026-10-05): Furina's five left with v2.
-TIERS = C.KLEE_OVERHAUL_MULTIPLAYER_IDS + C.KOKOMI_OVERHAUL_MULTIPLAYER_IDS
+# THE SALON'S TAB (2026-10-05): Furina's five left with v2. Varka's five
+# (2026-10-13) joined.
+TIERS = (C.KLEE_OVERHAUL_MULTIPLAYER_IDS + C.KOKOMI_OVERHAUL_MULTIPLAYER_IDS
+         + C.VARKA_MULTIPLAYER_IDS)
 
 
 def _row(cid):
@@ -51,10 +53,10 @@ def arms(monkeypatch):
 
 # ---- the rows ---------------------------------------------------------------
 
-def test_the_ten_load_and_are_the_two_tiers():
+def test_the_fifteen_load_and_are_the_three_tiers():
     # Pool completion (2026-10-01): Kokomi's fourth and fifth. The Salon's
-    # Tab (2026-10-05): Furina's five left.
-    assert len(TIERS) == 10
+    # Tab (2026-10-05): Furina's five left. Varka's five (2026-10-13).
+    assert len(TIERS) == 15
     assert not any(cid.startswith("proto_fs_") for cid in TIERS)
     assert loader.multiplayer_ids() == frozenset(TIERS)
     ids = {c.id for c in loader.prototype_cards()}
@@ -70,6 +72,9 @@ def test_the_rarities_per_character():
             ["rare", "rare", "uncommon", "uncommon", "uncommon"],
         # Pool completion (2026-10-01): Tactical Relay and Kurage's Mercy.
         C.KOKOMI_OVERHAUL_MULTIPLAYER_IDS:
+            ["rare", "rare", "uncommon", "uncommon", "uncommon"],
+        # Varka's five (2026-10-13): the same shape.
+        C.VARKA_MULTIPLAYER_IDS:
             ["rare", "rare", "uncommon", "uncommon", "uncommon"],
     }
     for tier, rarities in expected.items():
@@ -87,7 +92,7 @@ def test_the_multiplayer_tier_is_outside_every_pool_count():
 def test_no_sim_pool_deals_one(arms):
     """The single-player guard, sim side: the one door every offer surface
     reads (`rewards.character_pool`) holds none of them under any arm."""
-    for character in ("klee", "furina", "kokomi"):
+    for character in ("klee", "furina", "kokomi", "varka"):
         pool = rewards.character_pool(character)
         offered = {c.id for cards in pool.values() for c in cards} \
             if isinstance(pool, dict) else {getattr(c, "id", c) for c in pool}
@@ -129,7 +134,7 @@ def test_multiplayer_is_a_ruling_and_an_arms(tmp_path):
         loader.prototype_cards(_sheet(tmp_path, dict(
             BASE, effects=fx, multiplayer=False)))
     outside = dict(BASE, id="proto_mc_probe", effects=fx, multiplayer=True)
-    with pytest.raises(ValueError, match="outside the three overhaul arms"):
+    with pytest.raises(ValueError, match="outside the overhaul arms"):
         loader.prototype_cards(_sheet(tmp_path, outside))
     assert "only an overhaul arm" in gen.card_level_reason(_card(outside))
 
@@ -242,15 +247,90 @@ def test_the_second_batch_upgrades_are_the_ruled_ones():
     assert _row("proto_ko_sparks_for_everyone").upgrade == {"innate": True}
 
 
-def test_every_op_the_ten_print_is_registered():
+def test_every_op_the_fifteen_print_is_registered():
     for cid in TIERS:
         row = _row(cid)
         for fx in list(row.effects) + list(row.plan or []):
             assert fx["op"] in effects.OPS, (cid, fx["op"])
 
 
-def test_the_sheet_marks_all_ten_and_nothing_else():
+def test_the_sheet_marks_all_fifteen_and_nothing_else():
     raw = yaml.safe_load(
         (Path(loader.PROTOTYPE_SHEET)).read_text(encoding="utf-8"))
     marked = [d["id"] for d in raw if d.get("multiplayer")]
     assert marked == list(TIERS)
+
+
+# ---- Varka's co-op five (2026-10-13) -----------------------------------------
+
+
+def _varka():
+    from tier0.engine import varka_oath
+    st = make_state()
+    st.player.character_id = "varka"
+    st.in_player_turn = True
+    varka_oath.open_combat(st.player)
+    return st
+
+
+def test_varkas_five_are_ruled_at_their_costs_and_upgrades():
+    """The ruled numbers: Escort Duty 6 [9] ("a little low" lifted the
+    paper's 5 [7]), Marching Orders and Windward Flank 1 [0], Comrades 2 [1],
+    West Wind's Blessing 2 and Innate."""
+    rows = {cid: _row(cid) for cid in C.VARKA_MULTIPLAYER_IDS}
+    assert [(r.cost, r.type, r.rarity) for r in rows.values()] == [
+        (1, "skill", "uncommon"), (1, "skill", "uncommon"),
+        (1, "skill", "uncommon"), (2, "power", "rare"), (2, "power", "rare")]
+    assert rows["proto_vk_escort_duty"].upgrade == {"block": 3}
+    for cid in ("proto_vk_marching_orders", "proto_vk_windward_flank",
+                "proto_vk_comrades_of_the_expedition"):
+        assert rows[cid].upgrade == {"cost": -1}, cid
+    assert rows["proto_vk_west_winds_blessing"].upgrade == {"innate": True}
+    assert [e["target"] for e in rows["proto_vk_marching_orders"].effects]         == [coop.ALLY]
+
+
+def test_escort_duty_blocks_him_and_swirls_one_aura(arms):
+    """His own Block lands; the other players' lands on no one; the Swirl
+    takes an aura off one enemy that wears one."""
+    st = _varka()
+    st.enemies[0].aura = "hydro"
+    effects.resolve_card(st, _row("proto_vk_escort_duty"))
+    assert st.player.block == 6
+    assert any(e["event"] == "coop_no_other_player"
+               and e["op"] == "escort_duty" for e in st.log)
+    assert any(e["event"] == "varka_swirl" for e in st.log)
+
+
+def test_escort_duty_with_no_aura_swirls_nothing(arms):
+    st = _varka()
+    for enemy in st.enemies:
+        enemy.aura = None
+    effects.resolve_card(st, _row("proto_vk_escort_duty"))
+    assert st.player.block == 6
+    assert not any(e["event"] == "varka_swirl" for e in st.log)
+
+
+def test_marching_orders_lands_on_no_one(arms):
+    st = _varka()
+    effects.resolve_card(st, _row("proto_vk_marching_orders"))
+    assert any(e["event"] == "coop_no_other_player"
+               and e["op"] == "marching_orders" for e in st.log)
+    assert not st.player.powers.get("attack_up_this_turn")
+
+
+def test_windward_flank_swirls_and_shreds_the_enemy(arms):
+    st = _varka()
+    st.enemies[0].aura = "pyro"
+    st.card_aim = st.enemies[0]
+    effects.resolve_card(st, _row("proto_vk_windward_flank"))
+    assert st.enemies[0].powers.get("vk_windward_flank") == 1
+
+
+def test_varkas_two_powers_apply_and_never_fire(arms):
+    for cid, power in (
+            ("proto_vk_comrades_of_the_expedition",
+             "vk_comrades_of_the_expedition"),
+            ("proto_vk_west_winds_blessing", "vk_west_winds_blessing")):
+        st = _varka()
+        effects.resolve_card(st, _row(cid))
+        assert st.player.powers.get(power), cid

@@ -51,12 +51,13 @@ def test_the_carrier_set_is_exactly_what_was_ruled():
     discount. Phase 2B ruled ONE draftable carrier, the shipped
     `big_badda_boom`, which left with the shipped sheets (legacy cleanup stage
     6). The Kokomi re-founding (review/ruled/kokomi-card-paper-2026-10-12.md,
-    ruled 2026-10-12) prints Ethereal on five of her rows, and this fails the
-    moment another appears without a ruling to point at."""
+    ruled 2026-10-12) prints Ethereal on five of her rows (four since the pool
+    overhaul, 2026-10-13, cut Riptide Guard), and this fails the moment
+    another appears without a ruling to point at."""
     offerable = [c for c in loader.prototype_cards()
                  if c.rarity in C.RARITY_ODDS]
     assert offerable, "no offerable cards loaded -- the test would be vacuous"
     assert sorted(c.id for c in offerable if c.is_ethereal) == [
-        "proto_kk_riptide_guard", "proto_kk_spearhead",
+        "proto_kk_spearhead",
         "proto_kk_steady_tide", "proto_kk_tamakushis_wrath",
         "proto_kk_tidal_surge"]

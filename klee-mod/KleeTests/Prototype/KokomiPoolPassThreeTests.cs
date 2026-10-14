@@ -72,28 +72,31 @@ public class KokomiPoolPassThreeTests
         Assert.Contains("new CalculationBaseVar(6m)", source);
         Assert.Contains("new ExtraDamageVar(3m)", source);
         Assert.Contains("DynamicVars.CalculationBase.UpgradeValueBy(3m);", source);
-        Assert.Contains("DynamicVars[\"PlanPowerAmount\"].UpgradeValueBy(1m);",
+        // The pool overhaul (2026-10-13): the Plan's rate upgrades, 5 -> 7.
+        Assert.Contains("DynamicVars[\"PlanDamage\"].UpgradeValueBy(2m);",
                         source);
     }
 
     [Fact]
     public void Feints_plan_applies_vulnerable_and_upgrades_to_two()
     {
-        // R276 pick 1: the Plan line is a debuff ready before the enemy's
-        // next swing, not the now-line's hit made bigger.
+        // The pool overhaul (2026-10-13): the Plan line is a Chain -- 5 [7]
+        // for each Plan carried out this turn, itself included (was R276's
+        // Vulnerable).
         var card = new ProtoKkFeint();
         Assert.Equal(1, card.EnergyCost.Canonical);
         Assert.Equal(CardType.Attack, card.Type);
         Assert.Equal(CardRarity.Common, card.Rarity);
         var clause = Assert.Single(card.PlanClauses);
-        Assert.Equal(KokomiPlan.Kind.ApplyVulnerable, clause.Kind);
-        Assert.Equal(1, clause.Amount);
+        Assert.Equal(KokomiPlan.Kind.DamagePerPlanThisTurn, clause.Kind);
+        Assert.Equal(5, clause.Amount);
         Assert.Equal(KokomiPlan.Aim.FrontEnemy, clause.Aim);
-        Assert.Contains("PlanPowerAmount\"].UpgradeValueBy(1m)",
+        Assert.Contains("PlanDamage\"].UpgradeValueBy(2m)",
                         Source("ProtoKkFeint"));
         // `EB-660`: AND THE FACE SAYS SO, live off the Plan's own var.
-        Assert.Contains("Or [gold]plan[/gold]: Apply {PlanPowerAmount:diff()} "
-                      + "[gold]Vulnerable[/gold].",
+        Assert.Contains("Or [gold]plan[/gold]: Deal {PlanDamage:diff()} "
+                      + "[gold]Hydro[/gold] damage for each [gold]Plan[/gold] "
+                      + "carried out this turn.",
                         Face(new ProtoKkFeint()));
     }
 
@@ -146,12 +149,13 @@ public class KokomiPoolPassThreeTests
         // WHAT SURVIVED POOL PASS FOUR: the Plan half, unchanged. The now-line
         // half moved (`EB-679` took the 5 Block off and made the look a take),
         // and its numbers are pinned in `KokomiPoolPassFourTests`.
+        // The pool overhaul (2026-10-13): the Plan half is a fetch from the
+        // Draw Pile now (was 10 [12] Block), and prints no number.
         var card = new ProtoKkReadTheField();
         Assert.Equal(1, card.EnergyCost.Canonical);
         var clause = Assert.Single(card.PlanClauses);
-        Assert.Equal(10, clause.Amount);
-        Assert.Contains("PlanBlock\"].UpgradeValueBy(2m)",
-                        Source("ProtoKkReadTheField"));
+        Assert.Equal(KokomiPlan.Kind.DrawPileToHand, clause.Kind);
+        Assert.DoesNotContain("PlanBlock", Source("ProtoKkReadTheField"));
     }
 
     // ======================================================================

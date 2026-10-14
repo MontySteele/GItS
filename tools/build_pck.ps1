@@ -833,6 +833,37 @@ foreach ($relative in @(
     Copy-VarkaFallback $relative
 }
 
+# Yae Miko (2026-10-13, prototype batch one), Varka's first arrangement for
+# the same reason: her Custom*Path overrides return KleePck.Path(...), and a
+# null override is the R9 preload crash. Her art pass ships her own files at
+# these paths; until then Klee's ship at HER paths (placeholders, known
+# missing art). A real Yae file at the canonical path always wins.
+function Copy-YaeFallback([string]$relative) {
+    $target = Join-Path (Join-Path $work 'yae') $relative
+    if (Test-Path $target) { return }
+
+    $fallback = Join-Path (Join-Path $work 'klee') $relative
+    if (-not (Test-Path $fallback)) {
+        throw "Neither Yae nor Klee provides required PCK asset: $relative"
+    }
+    New-Item -ItemType Directory -Force -Path (Split-Path -Parent $target) | Out-Null
+    Copy-Item $fallback -Destination $target
+    Write-Host "Yae fallback: $relative <- Klee" -ForegroundColor DarkYellow
+}
+
+foreach ($relative in @(
+        'ui\select_portrait.png',
+        'ui\select_portrait_locked.png',
+        'ui\char_icon.png',
+        'ui\char_icon_outline.png',
+        'ui\map_marker.png',
+        'ui\selection_splash.png',
+        'ui\select_bg.png',
+        'ui\transition_wipe.png',
+        'model\combat_model.png')) {
+    Copy-YaeFallback $relative
+}
+
 # Text resources authored here, not in ImageGen: the character-select bg scene
 # (a Control the game instantiates into its AnimatedBg container -- structure
 # mirrors the base game's char_select_bg_ironclad.tscn, minus spine/particles),
@@ -846,6 +877,7 @@ New-Item -ItemType Directory -Force -Path (Join-Path $work 'klee\materials') | O
 New-Item -ItemType Directory -Force -Path (Join-Path $work 'furina\materials') | Out-Null
 New-Item -ItemType Directory -Force -Path (Join-Path $work 'kokomi\materials') | Out-Null
 New-Item -ItemType Directory -Force -Path (Join-Path $work 'varka\materials') | Out-Null
+New-Item -ItemType Directory -Force -Path (Join-Path $work 'yae\materials') | Out-Null
 
 # Klee's select art: the close-up rendered from her model (tools/klee_render
 # pack.py, 2026-10-12) when it exists, else the older full-body splash.
@@ -1234,6 +1266,94 @@ texture = ExtResource("1_tex")
 # His roster tile keeps its path (varka/ui/select_portrait.png and _locked);
 # its producer is tools/char_render/pack.py now, a face close-up of the model.
 
+# Yae Miko (2026-10-13, prototype batch one): her select backdrop, her
+# top-left icon and her three model paths, Varka's first shapes exactly --
+# three DISTINCT model paths for the campfire reason above. The backdrop tint
+# is her Electro violet, the colour her name, pool and map marker use.
+[IO.File]::WriteAllText((Join-Path $work 'yae\ui\char_select_bg_yae.tscn'), @'
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://yae/ui/selection_splash.png" id="1_art"]
+[ext_resource type="Texture2D" path="res://yae/ui/select_bg.png" id="2_bg"]
+
+[node name="YaeBg" type="Control"]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -960.0
+offset_top = -540.0
+offset_right = 960.0
+offset_bottom = 540.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(960, 540)
+
+[node name="Backdrop" type="TextureRect" parent="."]
+layout_mode = 0
+offset_right = 1920.0
+offset_bottom = 1080.0
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 6
+self_modulate = Color(0.69, 0.5, 0.88, 1)
+
+[node name="Splash" type="TextureRect" parent="."]
+layout_mode = 0
+offset_right = 1920.0
+offset_bottom = 1080.0
+texture = ExtResource("1_art")
+expand_mode = 1
+stretch_mode = 6
+'@)
+
+[IO.File]::WriteAllText((Join-Path $work 'yae\ui\character_icon.tscn'), @'
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://yae/ui/char_icon.png" id="1_tex"]
+
+[node name="YaeIcon" type="TextureRect"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+custom_minimum_size = Vector2(88, 88)
+texture = ExtResource("1_tex")
+expand_mode = 1
+stretch_mode = 5
+mouse_filter = 2
+'@)
+
+[IO.File]::WriteAllText((Join-Path $work 'yae\model\combat_visuals.tscn'), @'
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://yae/model/combat_model.png" id="1_tex"]
+
+[node name="YaeCombatSprite" type="Sprite2D"]
+texture = ExtResource("1_tex")
+'@)
+
+[IO.File]::WriteAllText((Join-Path $work 'yae\model\rest_character.tscn'), @'
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://yae/model/combat_model.png" id="1_tex"]
+
+[node name="YaeRestSprite" type="Sprite2D"]
+texture = ExtResource("1_tex")
+'@)
+
+[IO.File]::WriteAllText((Join-Path $work 'yae\model\merchant_character.tscn'), @'
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Texture2D" path="res://yae/model/combat_model.png" id="1_tex"]
+
+[node name="YaeMerchantSprite" type="Sprite2D"]
+texture = ExtResource("1_tex")
+'@)
+
 # THE CUSTOM-KEYWORD LOC ROWS ARE NOT TYPED HERE ANY MORE (2026-09-02).
 #
 # They used to be a heredoc right here, hand-typed, WITH THE NUMERALS AS
@@ -1275,21 +1395,26 @@ if (-not (Test-Path $keywordSrc)) {
 # survive the fallback, so a non-repeating-only set crashes on the SECOND
 # win. No -attack rows: BaseLib's default EndAttackers=Both is the base
 # game's own finale (character VFX barrage + Architect's counter).
-# PLACEHOLDER dialogue text -- naming/writing pass, user red-pen.
+# Klee and Varka: dialogue cleanup, review/active/klee-varka-dialogue-review-2026-10-13.md.
+# Yae Miko (2026-10-13): placeholder lines with her prototype; outside that pass.
+# Furina and Kokomi remain outside that pass.
 [IO.File]::WriteAllText((Join-Path $locDir 'ancients.json'), @'
 {
   "THE_ARCHITECT.talk.KLEEMOD-KLEE.0-0r.ancient": "You have climbed far, little spark. Show me what you carried up my Spire.",
   "THE_ARCHITECT.talk.KLEEMOD-KLEE.0-0r.next": "Respond",
-  "THE_ARCHITECT.talk.KLEEMOD-KLEE.0-1r.char": "Klee brought the BIGGEST boom! Ready? Da-da-da!",
+  "THE_ARCHITECT.talk.KLEEMOD-KLEE.0-1r.char": "I saved this one for the top! You might wanna cover your ears!",
   "THE_ARCHITECT.talk.KLEEMOD-FURINA.0-0r.ancient": "The curtain falls at last, Regina of All Waters. Was it a performance, or was it real?",
   "THE_ARCHITECT.talk.KLEEMOD-FURINA.0-0r.next": "Respond",
   "THE_ARCHITECT.talk.KLEEMOD-FURINA.0-1r.char": "Both. It was always both. Now - the people rejoice, and their Regina takes her bow.",
   "THE_ARCHITECT.talk.KLEEMOD-KOKOMI.0-0r.ancient": "Priestess. You spent no blood on my stairs, only paper and patience. Tell me what that bought you.",
   "THE_ARCHITECT.talk.KLEEMOD-KOKOMI.0-0r.next": "Respond",
   "THE_ARCHITECT.talk.KLEEMOD-KOKOMI.0-1r.char": "Every plan I burned on the way up. Read them, and you will find the last one already written.",
-  "THE_ARCHITECT.talk.KLEEMOD-VARKA.0-0r.ancient": "Grand Master. Every wind in your city climbed my Spire behind you. Which of them carried you here?",
+  "THE_ARCHITECT.talk.KLEEMOD-VARKA.0-0r.ancient": "Grand Master. You have brought your people far. Will you turn back now?",
   "THE_ARCHITECT.talk.KLEEMOD-VARKA.0-0r.next": "Respond",
-  "THE_ARCHITECT.talk.KLEEMOD-VARKA.0-1r.char": "All four. A knight never rides alone, and Mondstadt's wind was never mine to keep."
+  "THE_ARCHITECT.talk.KLEEMOD-VARKA.0-1r.char": "After all those stairs? Come on, let's finish this. My people are waiting.",
+  "THE_ARCHITECT.talk.KLEEMOD-YAE.0-0r.ancient": "Guuji. You climbed my Spire as if you were reading it. How does it end?",
+  "THE_ARCHITECT.talk.KLEEMOD-YAE.0-0r.next": "Respond",
+  "THE_ARCHITECT.talk.KLEEMOD-YAE.0-1r.char": "With a twist, naturally. Do keep up. I would hate to edit you out."
 }
 '@)
 
@@ -1401,6 +1526,34 @@ void fragment() {
 [resource]
 resource_local_to_scene = true
 shader = SubResource("Shader_varka")
+shader_parameter/threshold = 0.332
+shader_parameter/transitionTex = ExtResource("1_wipe")
+'@)
+
+[IO.File]::WriteAllText((Join-Path $work 'yae\materials\yae_transition_mat.tres'), @'
+[gd_resource type="ShaderMaterial" load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://yae/ui/transition_wipe.png" id="1_wipe"]
+
+[sub_resource type="Shader" id="Shader_yae"]
+code = "shader_type canvas_item;
+
+uniform sampler2D transitionTex;
+uniform float threshold : hint_range(0,1);
+
+void fragment() {
+    float falloff = 1.0 - texture(transitionTex, UV).r;
+
+    // helps with falloff artifacts issues towards the transition extremes
+    float remap  = mix(-0.1, 1.1, threshold);
+    falloff = step(falloff, remap);
+    COLOR.a = falloff;
+}
+"
+
+[resource]
+resource_local_to_scene = true
+shader = SubResource("Shader_yae")
 shader_parameter/threshold = 0.332
 shader_parameter/transitionTex = ExtResource("1_wipe")
 '@)

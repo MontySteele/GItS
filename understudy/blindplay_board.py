@@ -862,6 +862,16 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
             if not _OATH_LEFT.match(_text(pw.get("name")))
             and not (_OATH_NAME.match(_text(pw.get("name")))
                      and _int(pw.get("stacks")) == 0)]
+    # YAE MIKO (2026-10-13): her shrine -- each Sakura's Level, what it
+    # strikes for and the strikes it has left, the Lure's enemy, and how many
+    # Annotated cards she holds. Her Sakura badges' lines go: the block says
+    # them in words.
+    shrine = yae_shrine(p, combat)
+    if shrine is not None:
+        combat["shrine"] = shrine
+        combat["you"]["powers"] = [
+            pw for pw in combat["you"]["powers"]
+            if not _SAKURA_NAME.match(_text(pw.get("name")))]
     # 2026-09-26 (control seat, Necrobinder): Osty, and any pet no kit block
     # prints, with its HP.
     allies = _allies(p, (plans or {}).get("pet_entity_id"))
@@ -935,6 +945,65 @@ def varka_oath(player: dict[str, Any],
     return {"element": element, "counts": counts,
             "payout": VARKA_SWIRL_PAYOUT.get(element) if element else None,
             "auras": auras}
+
+
+#: YAE MIKO (review/active/yae-card-paper-2026-10-13.md, built 2026-10-13).
+#: Her Sakura badges are titled "Sakura 1" (the oldest) to "Sakura 3", and the
+#: badge sentence (`SakuraBadgePower`'s smart description) reads "Level L. At
+#: the end of your turn it strikes a random enemy for S Electro damage.
+#: Strikes left: T." The five Annotations are her Enchantments' names.
+_SAKURA_NAME = re.compile(r"^Sakura (\d)$")
+_SAKURA_LEVEL = re.compile(r"Level (\d+)")
+_SAKURA_STRIKE = re.compile(r"for (\d+) Electro damage")
+_SAKURA_TURNS = re.compile(r"Strikes left: (\d+)")
+_LURE_NAME = "Foxfire Lure"
+YAE_ANNOTATIONS = ("Red Ink", "Footnote", "Deadline Extension", "Fox Fire",
+                   "Sakura Seal")
+
+
+def yae_shrine(player: dict[str, Any],
+               combat: dict[str, Any]) -> dict[str, Any] | None:
+    """YAE's block: `{sakura, lure, annotated}`, or None on a board that is
+    not hers (no Sakura badge and a wire that does not name her).
+
+    `sakura` is one row per badge, oldest first: `{slot, level, strike,
+    turns}` read off the badge sentence (the badge amount is the Level where
+    the sentence is missing); `lure` is the name of the enemy wearing
+    Foxfire Lure, or None; `annotated` counts the hand's cards carrying one
+    of her five Annotations (the hand face's `enchantment`).
+    """
+    you = combat["you"]
+    badges = []
+    for pw in you["powers"]:
+        m = _SAKURA_NAME.match(_text(pw.get("name")))
+        if m:
+            badges.append((int(m.group(1)), pw))
+    character = _fold(_text(player.get("character")))
+    hers = character in ("yae", "yae miko") or "yae" in character.split()
+    if not (hers or badges):
+        return None
+    sakura = []
+    for slot, pw in sorted(badges, key=lambda b: b[0]):
+        text = _text(pw.get("text"))
+        level = _SAKURA_LEVEL.search(text)
+        strike = _SAKURA_STRIKE.search(text)
+        turns = _SAKURA_TURNS.search(text)
+        lv = int(level.group(1)) if level else _int(pw.get("stacks"))
+        sakura.append({"slot": slot, "level": lv,
+                       "strike": int(strike.group(1)) if strike else 2 + lv,
+                       "turns": int(turns.group(1)) if turns else None})
+    lure = None
+    for enemy in combat["enemies"]:
+        if any(_text(pw.get("name")) == _LURE_NAME
+               for pw in enemy.get("powers") or []):
+            lure = enemy["name"]
+            break
+    annotated = 0
+    for face in combat.get("hand") or []:
+        ench = face.get("enchantment")
+        if isinstance(ench, dict) and _text(ench.get("name")) in YAE_ANNOTATIONS:
+            annotated += 1
+    return {"sakura": sakura, "lure": lure, "annotated": annotated}
 
 
 #: A performer's SHORT name -- the word the glossary rows and the faces use
@@ -1506,6 +1575,20 @@ def resolutions(player: dict[str, Any]) -> list[dict[str, Any]] | None:
                         for ev in (row.get("events") or [])
                         if isinstance(ev, dict)
                         and _text(ev.get("kind")) == "stoked"),
+                    # Varka round 5 (2026-10-13): the cards this play made
+                    # you discard, and whether the game picked them (the hand
+                    # held no more than it asked for).
+                    "discarded": [
+                        _text(ev.get("card"))
+                        for ev in (row.get("events") or [])
+                        if isinstance(ev, dict)
+                        and _text(ev.get("kind")) == "play_discard"
+                        and _text(ev.get("card"))],
+                    "discard_picked_for_you": any(
+                        _text(ev.get("power"))
+                        for ev in (row.get("events") or [])
+                        if isinstance(ev, dict)
+                        and _text(ev.get("kind")) == "play_discard"),
                     "swirl_no_aura": _int(row.get("swirl_no_aura")),
                     "swirl_on_aura": _int(row.get("swirl_on_aura")),
                     "applied": applied,
@@ -1777,7 +1860,11 @@ def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
               "block_now": (row.get("block_now")
                             if isinstance(row.get("block_now"), int)
                             and not isinstance(row.get("block_now"), bool)
-                            else None)}
+                            else None),
+              # The Kokomi pool overhaul (2026-10-13): a Counter or Chain
+              # Plan's number as it stands, in the strip's words. Absent or
+              # null on every other entry and on an older bridge.
+              "live": _text(row.get("live")) or None}
              for row in (raw.get("queue") or []) if isinstance(row, dict)]
     pet_id = raw.get("pet_entity_id")
     pet_name = _text(raw.get("pet_name")) or "Bake-Kurage"

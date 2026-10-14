@@ -59,7 +59,7 @@ public sealed class ProtoMcNoelleSweepingTime : CustomCardModel, IElementalCard,
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Noelle — Sweeping Time"),
-        ("description", "Deal [gold]Geo[/gold] damage equal to your [gold]Block[/gold] to ALL enemies."),
+        ("description", "Deal [gold]Geo[/gold] damage equal to your [gold]Block[/gold] to ALL enemies.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on

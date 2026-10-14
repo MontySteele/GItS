@@ -116,30 +116,31 @@ def _with_ascension(state, relic="Boreas's Fang"):
     card.update({"id": "KLEEMOD-PROTO_VK_FOUR_WINDS_ASCENSION",
                  "name": "Four Winds' Ascension", "type": "Attack",
                  "cost": "2", "keywords": [],
-                 "description": "Deal 10 Anemo damage. Then deal 3 for each "
-                                "Oath of your current element, as that "
-                                "element, in one hit."})
+                 "description": "Deal 10 Anemo damage. Then deal 3 damage "
+                                "per Oath of your current element, as "
+                                "that element."})
     hand.append(card)
     state["player"]["relics"][0]["name"] = relic
     return state
 
 
-def test_the_ascension_in_hand_says_where_it_came_from():
-    page = blindplay.observe(_with_ascension(varka_state()))
-    head = page.index("**Four Winds' Ascension**")
-    note = page.index("    - Added by Boreas's Fang the first time each "
-                      "combat you gain Oath.")
-    assert note > head
-    gravestone = blindplay.observe(
+def test_the_ascension_in_hand_says_where_the_gravestone_copy_came_from():
+    # Starter (a), 2026-10-13: the Ascension is in his deck; only Wolf's
+    # Gravestone still adds a copy, so only it gets the note.
+    page = blindplay.observe(
         _with_ascension(varka_state(), "Wolf's Gravestone"))
-    assert ("Added by Wolf's Gravestone the first time each combat"
-            in gravestone)
+    head = page.index("**Four Winds' Ascension**")
+    note = page.index("    - Wolf's Gravestone adds a copy the first time "
+                      "each combat you gain Oath.")
+    assert note > head
+    fang = blindplay.observe(_with_ascension(varka_state()))
+    assert "adds a copy the first time" not in fang
 
 
 def test_no_note_without_the_relic():
-    state = _with_ascension(varka_state())
+    state = _with_ascension(varka_state(), "Wolf's Gravestone")
     state["player"]["relics"] = []
-    assert "Added by" not in blindplay.observe(state)
+    assert "adds a copy the first time" not in blindplay.observe(state)
 
 
 def test_wolfpack_and_twin_gales_are_said_since_last_page():
@@ -148,7 +149,7 @@ def test_wolfpack_and_twin_gales_are_said_since_last_page():
         _row("Four Winds' Ascension", hits=True, events=[
             _ev("wolfpack", 9001, card="Four Winds' Ascension",
                 power="Wolfpack", amount=1)]),
-        _row("Windbound Execution", hits=True, events=[
+        _row("Storm Surge", hits=True, events=[
             _ev("paid", 9002, card="Cryo", target="Hilichurl 1",
                 power="Pyro (3 damage) and Cryo (1 Vulnerable)")]),
     ]

@@ -138,6 +138,9 @@ public static class ArmKeywordTips
     // Mine already have.
     public const string ElementalReactionKey = "KLEEMOD-ARM_ELEMENTAL_REACTION";
     public const string SakuraKey = "KLEEMOD-ARM_SAKURA";
+    /// <summary>YAE MIKO (2026-10-13): her two words, Sakura (on
+    /// <see cref="SakuraKey"/>, read for her cards) and Edit.</summary>
+    public const string EditKey = "KLEEMOD-ARM_YAE_EDIT";
     public const string LightfallSwordKey = "KLEEMOD-ARM_LIGHTFALL_SWORD";
 
     // THE TEXT PASS OF 2026-10-08, and NOT A KEYWORD ROW: the Plan tip a
@@ -622,11 +625,47 @@ public static class ArmKeywordTips
     /// <summary>The text pass of 2026-10-08: Yae's placed totem, which has a
     /// badge (<c>SesshouSakuraPower</c>) and no tip. "Up to 3" is read at
     /// the fire, not the placing.</summary>
+    ///
+    /// YAE MIKO (2026-10-13): the same word on her own cards is her shrine,
+    /// a different object (it levels and withers), so her cards and her
+    /// Sakura badge carry her tip (<see cref="YaeSakuraTip"/>). Pick 6 (a):
+    /// Tenko lives in this tip.
     public static IEnumerable<IHoverTip> ForSakura(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, SakuraKey,
-            "A totem that stays at your side all combat. At most 3 fire "
-          + "each turn.");
+            card is ICharacterCard { CharacterId: Powers.YaePrototype.CharacterId }
+                ? YaeSakuraTip
+                : "A totem that stays at your side all combat. At most 3 fire "
+                + "each turn.");
+
+    /// <summary>Yae's Sakura, plant, Level, the timer and Tenko, one tip
+    /// (paper sec.2; the numbers are <see cref="Powers.YaeLaw"/>'s).</summary>
+    public static readonly string YaeSakuraTip =
+        $"Up to {Powers.YaeLaw.SakuraCap} stand beside you. At the end of your "
+      + $"turn each strikes a random enemy for {Powers.YaeLaw.SakuraBase} plus "
+      + "its Level [gold]Electro[/gold] damage, oldest first. Each lasts "
+      + $"{Powers.YaeLaw.SakuraTurns} turns. Planting one raises the others' "
+      + $"Level by 1 (up to {Powers.YaeLaw.LevelCap}). [gold]Tenko[/gold]: "
+      + $"every Sakura strikes now and lasts {Powers.YaeLaw.SakuraTurns} turns "
+      + "again.";
+
+    /// <summary>
+    /// YAE MIKO (2026-10-13), pick 6 (a): the Edit tip lists the five
+    /// Annotations; Publish is the relic's word, said here once.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForEdit(
+        IEnumerable<IHoverTip> inherited, CardModel? card) =>
+        With(inherited, EditKey, YaeEditTip);
+
+    public static readonly string YaeEditTip =
+        "Give a card in your hand an Annotation for this combat, replacing "
+      + "any it had: [gold]Red Ink[/gold] (+"
+      + Powers.YaeLaw.RedInkAmount + " damage and [gold]Block[/gold]), "
+      + "[gold]Footnote[/gold] (draw 1), [gold]Deadline Extension[/gold] "
+      + "([gold]Retain[/gold]), [gold]Fox Fire[/gold] ("
+      + Powers.YaeLaw.FoxFireDamage + " [gold]Electro[/gold] damage to a random "
+      + "enemy), [gold]Sakura Seal[/gold] (plant a [gold]Sakura[/gold]). "
+      + "A Published Annotation lasts the run.";
 
     /// <summary>The text pass of 2026-10-08: Eula's blade, a counter on the
     /// enemy (<c>LightfallSwordPower</c>) with a badge and no tip.</summary>
@@ -653,8 +692,9 @@ public static class ArmKeywordTips
     // ---------------------------------------------------- Varka -----------
 
     /// <summary>
-    /// Boreas's Fang's Four Winds' Ascension goes to the discard pile when
-    /// played and comes back when he draws it. The card text pass
+    /// Wolf's Gravestone's Four Winds' Ascension (the Fang's until Starter
+    /// (a), 2026-10-13) goes to the discard pile when played and comes back
+    /// when he draws it. The card text pass
     /// (2026-10-12) moved the clause off the relic's face into this hover.
     /// </summary>
     public static IEnumerable<IHoverTip> ForAscensionReturn(

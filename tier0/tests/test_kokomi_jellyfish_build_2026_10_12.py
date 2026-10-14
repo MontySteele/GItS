@@ -178,41 +178,47 @@ def test_the_turn_count_rolls_and_the_combat_count_does_not():
 # --- All Streams Flow to the Sea ------------------------------------------------------
 
 def test_all_streams_is_a_rare_attack_at_1():
+    """The Kokomi pool overhaul (2026-10-13): 5 [7], plus 5 for each
+    Elemental Reaction she triggered this combat (was 4 [8] plus 2 per Sting
+    played)."""
     row = loader.get_card("proto_kk_all_streams_flow")
     assert (row.type, row.cost, row.rarity) == ("attack", 1, "rare")
     assert row.effects[0]["amount_formula"] == {
-        "base": 4, "per": 2, "count": "stings_played_this_combat"}
+        "base": 5, "per": 5, "count": "reactions_triggered_this_combat"}
     assert _up("proto_kk_all_streams_flow").effects[0]["amount_formula"][
-        "base"] == 8
+        "base"] == 7
 
 
 def test_all_streams_counts_every_sting_played_this_combat():
+    """Stings played no longer feed it (the pool overhaul, 2026-10-13): the
+    count is the reactions she triggered this combat, which a turn roll
+    keeps. Sting plays on a bare body react with nothing."""
     st = kokomi_state()
     _attacking(st)
     st.enemies[0].hp = st.enemies[0].max_hp = 500
     for _ in range(3):
         _play(st, card(kokomi_plan.STING_ID))
+    assert st.kk_stings_played_this_combat == 3
+    assert st.kk_reactions_this_combat == 0
+    st.kk_reactions_this_combat = 2
     kokomi_plan.roll_turn(st)           # a new turn: the combat count stays
-    _play(st, card(kokomi_plan.STING_ID))
-    write_target = card(kokomi_plan.STING_ID)
-    st.enemies[0].intents = [{"kind": "block", "amount": 5}]
-    write(st, write_target)             # written: not counted
-    _attacking(st)
-    assert st.kk_stings_played_this_combat == 4
+    assert st.kk_reactions_this_combat == 2
     hp = st.enemies[0].hp
     _play(st, card("proto_kk_all_streams_flow"))
-    assert hp - st.enemies[0].hp == 4 + 2 * 4
+    assert hp - st.enemies[0].hp == 5 + 5 * 2
 
 
 # --- The Shape of Water ------------------------------------------------------------------
+# Kokomi review (2026-10-13), pick (a): a base hit. "Deal 5 [7] Hydro damage,
+# plus 5 [7] for each Sting you played this turn." (was 0 + 6 [8] each).
 
 def test_the_shape_of_water_is_an_uncommon_attack_at_1():
     row = loader.get_card("proto_kk_the_shape_of_water")
     assert (row.type, row.cost, row.rarity) == ("attack", 1, "uncommon")
     assert row.effects[0]["amount_formula"] == {
-        "base": 0, "per": 6, "count": "stings_played_this_turn"}
-    assert _up("proto_kk_the_shape_of_water").effects[0]["amount_formula"][
-        "per"] == 8
+        "base": 5, "per": 5, "count": "stings_played_this_turn"}
+    up = _up("proto_kk_the_shape_of_water").effects[0]["amount_formula"]
+    assert (up["base"], up["per"]) == (7, 7)
 
 
 def test_the_shape_of_water_counts_this_turn_only():
@@ -225,15 +231,28 @@ def test_the_shape_of_water_counts_this_turn_only():
     _play(st, card(kokomi_plan.STING_ID))
     hp = st.enemies[0].hp
     _play(st, card("proto_kk_the_shape_of_water"))
-    assert hp - st.enemies[0].hp == 6 * 2
+    assert hp - st.enemies[0].hp == 5 + 5 * 2 == 15
 
 
-def test_the_shape_of_water_with_no_stings_deals_nothing():
+def test_the_shape_of_water_with_no_stings_deals_its_base():
     st = kokomi_state()
     _attacking(st)
+    st.enemies[0].hp = st.enemies[0].max_hp = 500
     hp = st.enemies[0].hp
     _play(st, card("proto_kk_the_shape_of_water"))
-    assert st.enemies[0].hp == hp
+    assert hp - st.enemies[0].hp == 5
+
+
+@pytest.mark.parametrize("stings, dealt", [(0, 7), (2, 21)])
+def test_the_shape_of_water_upgraded(stings, dealt):
+    st = kokomi_state()
+    _attacking(st)
+    st.enemies[0].hp = st.enemies[0].max_hp = 500
+    for _ in range(stings):
+        _play(st, card(kokomi_plan.STING_ID))
+    hp = st.enemies[0].hp
+    _play(st, _up("proto_kk_the_shape_of_water"))
+    assert hp - st.enemies[0].hp == dealt
 
 
 # --- the pool ------------------------------------------------------------------------

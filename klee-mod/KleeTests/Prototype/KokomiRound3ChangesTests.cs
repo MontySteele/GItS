@@ -80,18 +80,15 @@ public class KokomiRound3ChangesTests
     [Fact]
     public void Coordinated_tide_hits_inside_the_carry_out_and_is_a_rider()
     {
+        // The pool overhaul (2026-10-13): Coordinated Tide no longer hits on
+        // a carry-out; it adds a Sting when a Companion's own hit reacts
+        // (`KokomiRefounding.OnReaction`). Its carry-out hit and rider are
+        // gone.
         var entry = string.Join(" ", Seq("KokomiPlan", "ResolveEntry"));
-        var tide = entry.IndexOf("KokomiRefounding.CoordinatedTide",
-                                 StringComparison.Ordinal);
-        var announce = entry.IndexOf("KokomiPlan.Announce",
-                                     StringComparison.Ordinal);
-        Assert.True(tide >= 0 && announce > tide, entry);
-        Assert.Contains("Rider..ctor", entry);
-        Assert.Contains(Il.Strings(Il.Method("KokomiPlan", "ResolveEntry")),
-                        s => s == "Coordinated Tide");
-        // The hit itself, and nowhere else.
-        Assert.Contains(Seq("KokomiRefounding", "CoordinatedTide"),
-                        c => c.Contains("ElementalHit.Deal"));
+        Assert.DoesNotContain("KokomiRefounding.CoordinatedTide", entry);
+        Assert.DoesNotContain(Il.Strings(Il.Method("KokomiPlan", "ResolveEntry")),
+                              s => s == "Coordinated Tide");
+        Assert.Null(typeof(KokomiRefounding).GetMethod("CoordinatedTide"));
         Assert.DoesNotContain(Seq("KokomiRefounding", "OnCarriedOut"),
                               c => c.Contains("ElementalHit.Deal"));
     }
@@ -121,9 +118,9 @@ public class KokomiRound3ChangesTests
             Face(new ProtoKkKelpWall()));
         Assert.Equal((5, 7), (Var<ProtoKkKelpWall>("Block"),
                               Var<ProtoKkKelpWall>("Block", true)));
-        // The Kokomi level pass (2026-10-12): a flat 12 [15].
-        Assert.Equal((12, 15), (Var<ProtoKkKelpWall>("PlanBlock"),
-                                Var<ProtoKkKelpWall>("PlanBlock", true)));
+        // The pool overhaul (2026-10-13): the Plan prints no number (was the
+        // level pass's flat 12 [15]).
+        Assert.False(new ProtoKkKelpWall().DynamicVars.ContainsKey("PlanBlock"));
     }
 
     // ---- 6. Watchful Shoal, the jellyfish's Accuracy -------------------------
