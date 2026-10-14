@@ -268,7 +268,8 @@ def test_a_play_after_the_fight_ended_prints_the_next_page(
                         lambda args, **kw: map_state())
     assert blindplay.cmd_act(_live_args('play "Strike"')) == 1
     out = capsys.readouterr().out
-    assert out.startswith("The fight is over: nothing was sent.")
+    assert out.startswith("Skipped: the fight ended since your last look: "
+                          "nothing was sent")
     assert "REFUSED" not in out
     assert "## What you can say" in out
     # On a screen that was not a fight, the refusal stays a refusal.
@@ -281,10 +282,10 @@ def test_a_play_after_the_fight_ended_prints_the_next_page(
 
 def test_room_closed_names_the_shop_too():
     assert blindplay.room_closed("you are not in a shop", "shop") \
-        .startswith("The shop is closed")
+        .startswith("Skipped: the shop closed")
     assert blindplay.room_closed("you are not in a battle", "map") == ""
     assert blindplay.room_closed("you are not in a battle. Say: x", "elite") \
-        .startswith("The fight is over")
+        .startswith("Skipped: the fight ended")
 
 
 # ---- 8. the brief page's relic and price trims -----------------------------

@@ -707,6 +707,48 @@ def _living_enemy_names(state: dict[str, Any]) -> list[str]:
     return [names[i] for i, e in enumerate(enemies) if _int(e.get("hp")) > 0]
 
 
+def living_targets(state: dict[str, Any]) -> list[str]:
+    """What a look leaves for `stale_target`: every living enemy's printed
+    name and its letter, folded. Empty off a fight."""
+    if _screen(state) not in COMBAT_SCREENS:
+        return []
+    enemies = _enemies(state)
+    names = _enemy_names(enemies, _fight_round(state))
+    handles = _enemy_handles(enemies)
+    out: list[str] = []
+    for i, e in enumerate(enemies):
+        if _int(e.get("hp")) > 0:
+            out.append(_fold(names[i]))
+            if handles[i]:
+                out.append(_fold(handles[i]))
+    return [n for n in out if n]
+
+
+def stale_target(state: dict[str, Any], command: str,
+                 looked: list[str]) -> str:
+    """CO-OP SPIRAL ABYSS (2026-10-14): the enemy a refused command aimed at
+    that was alive on the seat's last look (`looked`, `living_targets`) and
+    is not now -- the partner, or an earlier command of the batch, killed it.
+    `""` where the command named no target, named one the look never showed
+    alive (a bad name stays a refusal), or names one still standing."""
+    try:
+        cmd = parse_command(command)
+    except BlindPlayError:
+        return ""
+    target = cmd.target
+    want = _fold(target)
+    if not want or not looked:
+        return ""
+    if _is_enemy_handle(target):
+        seen = want in looked
+    else:
+        seen = any(want == n or (len(n) > 1 and want in n) for n in looked)
+    if not seen:
+        return ""
+    eid, _why = _resolve_enemy(state, target)
+    return "" if eid else target
+
+
 # `EB-519`: A LETTER IS A BODY ON THE OTHER SIDE, AND NEVER THE PET.
 #
 # THE DEFECT (Kokomi r18, both lanes). `EB-496` minted the per-fight letter and
