@@ -129,7 +129,7 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 ## Parked: start only when the named trigger fires
 
 - `EB-70` the starter-offer retune (`EB-27p`); wakes when a kit's design sweep reaches the Wings / Little Hexenzirkul class (R134).
-- Yae's `yae` op upgrade keys (`yae_amount` / `yae_base` / `yae_per`) are declared on `docs/yae-staging.yaml` and applied by neither engine yet; wire them with her C# build once the card paper's picks are ruled, and move her rows onto the surface then.
+- Yae's Ancient gap: design her two Ancient cards (one Darv's Dusty Tome adds, one Orobas's Archaic Tooth makes from a starter, as Varka's do) in the next Yae card pass. Until then a stopgap guard (`Patches/YaeDustyTomeGuardPatch.cs`: Darv offers her no Dusty Tome while her pool holds no Ancient) stands against LAW's "real content" line, ruled by [USER] 2026-10-13: "(a). Yeah, I think that's fine." Delete the guard in the commit that lands her two Ancients, with a `RosterAncientCards.Yae` ledger and a `lint_ancient_coverage.py` row.
 - `EB-80` Kokomi prevention-on-curve review; wakes if a Kokomi playtest shows she needs more warding.
 - `EB-651` a doubled `The other side` heading seen once and not reproduced; wakes on a sighting carrying the page sha.
 - `EB-12` `bridge_unreachable` with the game alive, seen once; wakes on a second observation (`hangwatch` now classifies it).

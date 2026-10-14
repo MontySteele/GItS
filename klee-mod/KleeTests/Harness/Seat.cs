@@ -54,6 +54,9 @@ internal sealed class Seat
     /// <summary>A Varka seat (prototype batch one) at his printed 80.</summary>
     internal static Seat Varka(int maxHp = 80) => Build(new global::KleeMod.Varka(), maxHp);
 
+    /// <summary>A Yae Miko seat (batch one) at her printed 72.</summary>
+    internal static Seat Yae(int maxHp = 72) => Build(new global::KleeMod.Yae(), maxHp);
+
     /// <summary>A seat on any character, base game's included.</summary>
     internal static Seat Of(CharacterModel character, int maxHp = 80) => Build(character, maxHp);
 

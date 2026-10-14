@@ -66,6 +66,13 @@ def _varka(name: str):
     return getattr(_vo, name)
 
 
+def _yae(name: str):
+    """A number out of YAE MIKO's shrine module, Varka's case one character
+    over (`tier0/engine/yae_shrine.py`; the C# `YaeLaw`)."""
+    from tier0.engine import yae_shrine as _ys
+    return getattr(_ys, name)
+
+
 # --------------------------------------------------------------------------
 # MIRRORED: C# constant -> the tier0 value it copies.
 #
@@ -328,6 +335,17 @@ MIRRORED: dict[str, object] = {
     # ruled 2026-09-29): the Swirl payout of each current element. (Stormward
     # Stance's Oath bar left in Varka round 3, 2026-10-10.) Sim twins in
     # `tier0/engine/varka_oath.py`.
+    # YAE MIKO (review/active/yae-card-paper-2026-10-13.md sec.2, ruled
+    # 2026-10-13). Sim twins in `tier0/engine/yae_shrine.py`.
+    "YaeLaw.SakuraCap": _yae("SAKURA_CAP"),
+    "YaeLaw.SakuraTurns": _yae("SAKURA_TURNS"),
+    "YaeLaw.SakuraBase": _yae("SAKURA_BASE"),
+    "YaeLaw.PlantLevel": _yae("PLANT_LEVEL"),
+    "YaeLaw.LevelCap": _yae("LEVEL_CAP"),
+    "YaeLaw.MooncallPlantLevel": _yae("MOONCALL_PLANT_LEVEL"),
+    "YaeLaw.MooncallLevelCap": _yae("MOONCALL_LEVEL_CAP"),
+    "YaeLaw.RedInkAmount": _yae("RED_INK_AMOUNT"),
+    "YaeLaw.FoxFireDamage": _yae("FOX_FIRE_DAMAGE"),
     "VarkaLaw.SwirlPyroDamage": _varka("SWIRL_PYRO_DAMAGE"),
     "VarkaLaw.SwirlHydroBlock": _varka("SWIRL_HYDRO_BLOCK"),
     "VarkaLaw.SwirlCryoVulnerable": _varka("SWIRL_CRYO_VULNERABLE"),

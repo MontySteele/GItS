@@ -7,7 +7,7 @@ stage exploration; nothing here is a balance claim).
     .venv/Scripts/python.exe -m tools.yae_expansion_sim --scaling count ...   # pick 1 (b)
     .venv/Scripts/python.exe -m tools.yae_expansion_sim --starter --seeds 300   # the starter alone
 
-Reads the staging rows (`docs/yae-staging.yaml`, `loader._staging_index`) and
+Reads her surface rows (`docs/prototype-surface.yaml`, `proto_ym_`) and
 the rules twin (`tier0/engine/yae_shrine.py`). Three readings, all smoke:
 
   STARTER -- the ten-card starter and Meditations of a Yako against every
@@ -112,7 +112,7 @@ def enable(scaling=None, knobs=None):
             setattr(Y, KNOBS[k], v)
     if knobs and (knobs.get("proofread_block") or knobs.get("yakan_block")):
         loader.reset_arm_caches()
-        idx = loader._staging_index()
+        idx = loader._prototype_index()
         if knobs.get("proofread_block"):
             row = idx[P + "proofread"]
             row.effects = [{"op": "block", "amount": knobs["proofread_block"]}
@@ -233,7 +233,7 @@ def make_pilot():
 def pool():
     from tier0.content import loader
     out = {"common": [], "uncommon": [], "rare": []}
-    for c in loader._staging_index().values():
+    for c in loader._prototype_index().values():
         if c.id.startswith(P) and c.rarity in out:
             out[c.rarity].append(c.id)
     return out

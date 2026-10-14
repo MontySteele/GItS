@@ -18,7 +18,7 @@ from functools import lru_cache
 
 from tier0 import constants as C
 from tier0.content import loader
-from tier0.engine import combat
+from tier0.engine import combat, yae_shrine
 from tier0.engine.state import Card
 
 # The calibration references draft only from their own pool. For
@@ -494,7 +494,8 @@ def roll_rewards(rng: random.Random, character_id: str,
         # a second one exists (Prune must not show up in Furina's rewards).
         comps = {r: cs for r, cs in
                  ((r, [c for c in _banner_filtered(cs, banner)
-                       if c.personal_pool in (None, character_id)])
+                       if c.personal_pool in (None, character_id)
+                       and not yae_shrine.hidden_from(c.id, character_id)])
                   for r, cs in companion_pool().items()) if cs}
         home = loader.character_nation(character_id)
         for _ in range(companion_offers):

@@ -911,7 +911,14 @@ CONJUGATIONS = {"Exhausted": "Exhaust",
                 "plan": "Plan",
                 # High Stakes (the Spend round, 2026-10-10): "HP you have
                 # Drained and not Repaid" (the page's Repay row matches it).
-                "Repaid": "Repay"}
+                "Repaid": "Repay",
+                # YAE MIKO (2026-10-13), pick 6 (a): her two rows carry the
+                # words her faces gold (Tenko in Sakura; the five
+                # Annotations, Annotated and Publish in Edit).
+                "Tenko": "Sakura", "Edited": "Edit", "Annotated": "Edit",
+                "Publish": "Edit", "Red Ink": "Edit", "Footnote": "Edit",
+                "Deadline Extension": "Edit", "Fox Fire": "Edit",
+                "Sakura Seal": "Edit"}
 
 
 def _word_owner(word: str) -> str:
