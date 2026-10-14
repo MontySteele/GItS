@@ -2389,7 +2389,8 @@ def test_a_board_that_stages_one_body_is_unreached_on_its_enemy_count_slot(
 
     # (3) The board is still read, graded and REPLAYED -- only the counting
     # slot is excluded.
-    assert steps.replayed == ["eb208-t01", "eb208-t02"]
+    # Both boards replay; the pipeline does not promise an order.
+    assert sorted(steps.replayed) == ["eb208-t01", "eb208-t02"]
     assert (qa / "eb208-t01" / f"verdict-{_EB208_GRADER}.json").is_file()
 
     ids = [r["turn_id"] for r in rows]
