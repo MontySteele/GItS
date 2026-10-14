@@ -214,13 +214,36 @@ public class KokomiJellyfishBuildTests
         var card = new ProtoKkTheShapeOfWater();
         Assert.Equal((CardType.Attack, CardRarity.Uncommon, 1),
                      (card.Type, card.Rarity, card.EnergyCost.Canonical));
-        Assert.Equal(0m, card.DynamicVars.CalculationBase.BaseValue);
-        Assert.Equal(6m, card.DynamicVars.ExtraDamage.BaseValue);
-        Assert.Equal(8m, Upgraded<ProtoKkTheShapeOfWater>()
-                             .DynamicVars.ExtraDamage.BaseValue);
+        Assert.Equal(5m, card.DynamicVars.CalculationBase.BaseValue);
+        Assert.Equal(5m, card.DynamicVars.ExtraDamage.BaseValue);
+        var up = Upgraded<ProtoKkTheShapeOfWater>();
+        Assert.Equal(7m, up.DynamicVars.CalculationBase.BaseValue);
+        Assert.Equal(7m, up.DynamicVars.ExtraDamage.BaseValue);
         var vars = VarCalls(typeof(ProtoKkTheShapeOfWater));
         Assert.Contains(vars, c => c.Contains("get_StingsPlayedThisTurn"));
         Assert.Contains("{InCombat:", Face(card));
+    }
+
+    /// <summary>Kokomi review (2026-10-13), pick (a): a base hit, "Deal 5 [7]
+    /// Hydro damage, plus 5 [7] for each Sting you played this turn." Both
+    /// numbers print with diff(); the hit is base + per x Stings (0 Stings: 5,
+    /// 2 Stings: 15; upgraded 7 and 21). The sim twin plays it.</summary>
+    [Theory]
+    [InlineData(false, 0, 5)]
+    [InlineData(false, 2, 15)]
+    [InlineData(true, 0, 7)]
+    [InlineData(true, 2, 21)]
+    public void The_shape_of_water_has_a_base_hit(bool upgraded, int stings, int dealt)
+    {
+        var card = upgraded ? Upgraded<ProtoKkTheShapeOfWater>() : new ProtoKkTheShapeOfWater();
+        Assert.Equal(
+            "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus {ExtraDamage:diff()} "
+            + "for each [gold]Sting[/gold] you played this turn."
+            + "{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+            Face(card));
+        Assert.Equal(dealt,
+            card.DynamicVars.CalculationBase.IntValue
+            + card.DynamicVars.ExtraDamage.IntValue * stings);
     }
 
     // ---- the pool ---------------------------------------------------------------------

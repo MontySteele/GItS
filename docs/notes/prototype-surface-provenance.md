@@ -7910,10 +7910,16 @@ now pins the two tokens as the only 0-cost Plan rows.
   (`proto_kk_all_streams_flow_to_the_sea`) stays cut and pinned absent. It
   takes Endless Shoal's old Rare slot.
 - **The Shape of Water (`proto_kk_the_shape_of_water`):** new Uncommon Attack,
-  cost 1, "Deal 6 [8] Hydro damage for each Sting you played this turn.", with
-  the in-combat line (Tideturn's form). Count `stings_played_this_turn`
-  (`KokomiOverhaulLedger.StingsPlayedThisTurn`, cleared on the turn roll,
-  `kokomi_plan.roll_turn`). It takes Spring Tide's slot.
+  cost 1, "Deal 5 [7] Hydro damage, plus 5 [7] for each Sting you played this
+  turn.", with the in-combat line (Tideturn's form). Count
+  `stings_played_this_turn` (`KokomiOverhaulLedger.StingsPlayedThisTurn`,
+  cleared on the turn roll, `kokomi_plan.roll_turn`). It takes Spring Tide's
+  slot. Built as "Deal 6 [8] Hydro damage for each Sting you played this
+  turn."; the base hit came 2026-10-13 (Kokomi review). [USER]: "On Kokomi -
+  The Shape of Water is probably too situational?", then, ruling option (a),
+  "add a base hit: 'Deal 5 [7] Hydro damage, plus 5 [7] for each Sting you
+  played this turn.'": "Let's go with (a)". Still one Hydro hit, cost 1,
+  Uncommon.
 - **What "played" means.** A Sting played face-up: from her hand, or any
   other face-up play of one. Writing it on the Bake-Kurage is not a play, and
   neither is a carry-out (a flipped Sting's now-line included): Treatise's
