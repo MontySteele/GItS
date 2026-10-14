@@ -268,8 +268,9 @@ def test_blazing_charge_reads_pyro_oath_by_name(varka):
     led = _led(st)
     led.current, led.oath["pyro"], led.oath["cryo"] = "cryo", 3, 9
     _play(st, _vk("blazing_charge"))
-    # The Pyro pass (2026-10-11): base 8, was 5.
-    assert st.enemies[0].hp == 100 - (8 + 2 * 3)
+    # The Pyro pass (2026-10-11): base 8, was 5. Varka pool audit
+    # (2026-10-13), ruled (b): plus 1 per Pyro Oath, was 2.
+    assert st.enemies[0].hp == 100 - (8 + 1 * 3)
     assert led.current == "pyro" and led.oath["pyro"] == 4
 
 

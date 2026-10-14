@@ -51,13 +51,13 @@ public sealed class ProtoVkDownburst : CustomCardModel, IElementalCard, ICharact
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Downburst"),
-        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If it [gold]Swirls[/gold], gain {VkAmount:diff()} [gold]Oath[/gold] of that element."),
+        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If it [gold]Swirls[/gold], gain {VkAmount:diff()} [gold]Oath[/gold] of each element."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(12m, ValueProp.Move),
+            new DamageVar(18m, ValueProp.Move),
             new DynamicVar("VkAmount", 2m)
         };
 
@@ -81,6 +81,6 @@ public sealed class ProtoVkDownburst : CustomCardModel, IElementalCard, ICharact
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(4m);
+        DynamicVars.Damage.UpgradeValueBy(6m);
     }
 }

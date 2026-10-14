@@ -67,7 +67,7 @@ public class VarkaTextPassTests : IDisposable
             (new ProtoVkChargedLunge(), 6m, Element.Electro),
             (new ProtoVkEmberCleave(), 9m, Element.Pyro),
             (new ProtoVkChainLightning(), 8m, Element.Electro),
-            (new ProtoVkTempestOfTheFourWinds(), 4m, Element.None),
+            (new ProtoVkTempestOfTheFourWinds(), 6m, Element.None),
             (new ProtoVkVioletStorm(), 6m, Element.Electro),
             (new ProtoVkKindledEdge(), 7m, Element.Pyro),
             (new ProtoVkRazorClawAndThunder(), 6m, Element.Electro),
@@ -83,14 +83,18 @@ public class VarkaTextPassTests : IDisposable
     }
 
     [Fact]
-    public void Kindled_edges_follow_up_repeats_vkbase_as_a_folded_leg()
+    public void Kindled_edges_follow_up_prints_its_bonus_as_a_folded_leg()
     {
+        // Varka pool audit (2026-10-13), ruled (a): the bonus is 5 [7], its
+        // own VkAmount; the base hit stays 7 [10].
         var edge = new ProtoVkKindledEdge();
-        Assert.IsType<VarkaFollowUpDamageVar>(edge.DynamicVars["VkAgain"]);
+        var again = Assert.IsType<VarkaFollowUpDamageVar>(edge.DynamicVars["VkAgain"]);
+        Assert.Equal("VkAmount", again.Source);
         Assert.Contains("deal {VkAgain:diff()} additional damage", Face(edge));
-        Assert.Equal(7m, Preview(edge.DynamicVars["VkAgain"], edge));
+        Assert.Equal(5m, Preview(edge.DynamicVars["VkAgain"], edge));
         var up = Upgraded<ProtoVkKindledEdge>();
-        Assert.Equal(10m, Preview(up.DynamicVars["VkAgain"], up));
+        Assert.Equal(7m, Preview(up.DynamicVars["VkAgain"], up));
+        Assert.Equal(10m, Var(up, "VkBase"));
     }
 
     [Fact]

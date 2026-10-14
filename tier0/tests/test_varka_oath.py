@@ -778,21 +778,25 @@ def test_a_varka_fight_runs_to_the_end(varka):
     assert any(e["event"] == "varka_oath" for e in st.log)
 
 
-def test_downburst_swirl_gains_two_more_oath_of_the_element_swirled(varka):
-    # 2026-10-04 (after #882): "If it Swirls, gain 2 Oath of the element
-    # Swirled", on top of the Swirl's own per-card credit. Tempest Charge is
+def test_downburst_swirl_gains_two_oath_of_each_element(varka):
+    # Varka pool audit (2026-10-13): "If it Swirls, gain 2 oath of each
+    # element", on top of the Swirl's own per-card credit. Tempest Charge is
     # the same Swirl with no rider: the baseline.
-    def pyro_oath_after(card):
+    def oath_after(card):
         st = _state(element="hydro", enemies=[_enemy(name="a", aura="pyro")],
                     fang=False)
         before = dict(_led(st).oath)
         _play(st, _vk(card))
         assert _led(st).swirls_made == 1
-        return _led(st).oath["pyro"] - before["pyro"]
+        return {el: _led(st).oath[el] - before[el] for el in V.ELEMENTS}
 
-    base = pyro_oath_after("tempest_charge")
-    assert base == 1                            # the Swirl's credit
-    assert pyro_oath_after("downburst") == base + 2
+    base = oath_after("tempest_charge")
+    assert base["pyro"] == 1                    # the Swirl's credit
+    gained = oath_after("downburst")
+    assert gained == {el: base[el] + 2 for el in V.ELEMENTS}
+    st = _state(enemies=[_enemy(name="a", hp=100)], fang=False)
+    _play(st, _vk("downburst"))
+    assert st.enemies[0].hp == 100 - 18
 
 
 def test_downburst_without_an_aura_gains_nothing(varka):

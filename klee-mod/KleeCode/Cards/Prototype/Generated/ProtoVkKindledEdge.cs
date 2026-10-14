@@ -70,7 +70,8 @@ public sealed class ProtoVkKindledEdge : CustomCardModel, IElementalCard, IChara
         new List<DynamicVar>
         {
             new FoldedDamageVar("VkBase", 7m, ValueProp.Move, carries: Element.Pyro),
-            new VarkaFollowUpDamageVar("VkAgain", "VkBase")
+            new DynamicVar("VkAmount", 5m),
+            new VarkaFollowUpDamageVar("VkAgain", "VkAmount")
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -88,5 +89,6 @@ public sealed class ProtoVkKindledEdge : CustomCardModel, IElementalCard, IChara
     protected override void OnUpgrade()
     {
         DynamicVars["VkBase"].UpgradeValueBy(3m);
+        DynamicVars["VkAmount"].UpgradeValueBy(2m);
     }
 }

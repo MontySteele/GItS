@@ -2628,7 +2628,8 @@ VARKA_KIND_FIELDS = {
     "electro_strike": ("base",),
     "electro_all": ("base",),
     "violet_storm": ("base",),
-    "kindled_edge": ("base",),
+    # Varka pool audit (2026-10-13): the reaction bonus is its own number.
+    "kindled_edge": ("base", "amount"),
     "storm_battery": ("per",),
     "frost_ward": ("base", "per"),
     "gleeful_songs": ("base", "per"),
@@ -2749,8 +2750,10 @@ VARKA_FOLDED_BASE_KINDS = {
 VARKA_BONUS_FOLD_KINDS = {"awakening": "Electro"}
 #: A kind whose face prints a follow-up hit repeating `VkBase` under a token of
 #: its own, folded as a follow-up leg (`VarkaFollowUpDamageVar`, the Sizzle
-#: idiom): Kindled Edge's "deal {VkAgain} additional damage".
-VARKA_FOLLOW_UP_KINDS = {"kindled_edge": "VkAgain"}
+#: idiom): Kindled Edge's "deal {VkAgain} additional damage". The value is
+#: (face token, source var): since the Varka pool audit (2026-10-13) Kindled
+#: Edge's bonus is its own `VkAmount`, 5 [7], not a repeat of `VkBase`.
+VARKA_FOLLOW_UP_KINDS = {"kindled_edge": ("VkAgain", "VkAmount")}
 #: A kind whose face prints its second hit's live total, the same `{VkHit}`
 #: token: `VkBase` (if printed) plus `VkPer` per Oath of his current element,
 #: folded against the previewed body with that element carried (text pass
@@ -7939,8 +7942,9 @@ def build_vars(card: dict) -> list[str]:
             elif eff["kind"] in VARKA_CURRENT_HIT_PREVIEW_KINDS:
                 out.append('new VarkaCurrentElementHitVar()')
             if eff["kind"] in VARKA_FOLLOW_UP_KINDS:
+                token, source = VARKA_FOLLOW_UP_KINDS[eff["kind"]]
                 out.append('new VarkaFollowUpDamageVar('
-                           f'"{VARKA_FOLLOW_UP_KINDS[eff["kind"]]}", "VkBase")')
+                           f'"{token}", "{source}")')
         elif op == "crash_fanfare":
             # Always a var: the Hyperbeam's upgrade IS this number (the
             # floor_drop delta), so the upgraded face has to render it.

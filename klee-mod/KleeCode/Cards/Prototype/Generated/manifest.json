@@ -2041,14 +2041,14 @@
       "damage": 2
     },
     "proto_vk_downburst": {
-      "damage": 4
+      "damage": 6
     },
     "proto_vk_ember_cleave": {
       "varka_base": 2,
       "varka_amount": 1
     },
     "proto_vk_eula_icetide_vortex": {
-      "damage": 4
+      "damage": 3
     },
     "proto_vk_eye_of_stormterror": {
       "innate": true
@@ -2091,7 +2091,8 @@
       "block": 2
     },
     "proto_vk_kindled_edge": {
-      "varka_base": 3
+      "varka_base": 3,
+      "varka_amount": 2
     },
     "proto_vk_knightly_strike": {
       "damage": 3
@@ -2187,7 +2188,7 @@
       "damage": 3
     },
     "proto_vk_tempest_of_the_four_winds": {
-      "varka_base": 1
+      "varka_base": 2
     },
     "proto_vk_the_order_answers": {
       "cost": -1

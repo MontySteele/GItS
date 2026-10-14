@@ -70,7 +70,7 @@ public sealed class ProtoVkBlazingCharge : CustomCardModel, IElementalCard, ICha
         new List<DynamicVar>
         {
             new DynamicVar("VkBase", 8m),
-            new DynamicVar("VkPer", 2m),
+            new DynamicVar("VkPer", 1m),
             new VarkaHitDamageVar(Element.Pyro)
         };
 

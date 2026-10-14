@@ -69,7 +69,7 @@ public sealed class ProtoVkTempestOfTheFourWinds : CustomCardModel, IElementalCa
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new FoldedDamageVar("VkBase", 4m, ValueProp.Move, carries: Element.None)
+            new FoldedDamageVar("VkBase", 6m, ValueProp.Move, carries: Element.None)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -86,6 +86,6 @@ public sealed class ProtoVkTempestOfTheFourWinds : CustomCardModel, IElementalCa
 
     protected override void OnUpgrade()
     {
-        DynamicVars["VkBase"].UpgradeValueBy(1m);
+        DynamicVars["VkBase"].UpgradeValueBy(2m);
     }
 }

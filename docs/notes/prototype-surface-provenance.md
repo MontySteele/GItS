@@ -8252,3 +8252,35 @@ Freeze: "I think we should drop Retain."
   (`AddsAscension` false). Wolf's Gravestone mirrors the Fang's words and
   keeps its old bonus: the first Oath gain each combat adds an upgraded
   Ascension that costs 0 that turn.
+
+## Varka pool audit, 2026-10-13
+
+[USER]'s rulings: "On Blazing Charge - let's go with (b) - worse scaling.
+Kindled Edge - agreed on (a). Chain Lightning - let's make it cost 0, "Deal
+8 [11] Electro damage to ALL enemies, discard 2" - so it's a draw-deck combo
+piece with what would be good damage for a 1 energy card that otherwise
+probably bricks your hand. Tempest of the Four Winds - agreed on (a)", then
+"Downburst - let's amend it to "If it Swirls, gain 2 oath of each element"
+to befit a Rare's payoff, but otherwise agreed on (a). Eula: Icetide Vortex
+- agreed on (a)".
+
+- `proto_vk_blazing_charge`: (b), "worse scaling". Now "Deal 8 [11] Pyro
+  damage, plus 1 for each Pyro Oath." (was plus 2). Cost stays 1; the live
+  "(Deals N damage)" line reads the new `VkPer`.
+- `proto_vk_kindled_edge`: (a). The reaction bonus is 5 [7], was 7 [10]; the
+  base hit stays 7 [10]. The bonus is the kind's own `amount` (`VkAmount`,
+  upgrade `varka_amount: 2`), and the face token `{VkAgain}` folds it
+  (`VarkaFollowUpDamageVar` now reads `VkAmount`).
+- `proto_vk_chain_lightning`: costs 0, was 2 with "Costs 1 less for each card
+  you discarded this turn". Now "Deal 8 [11] Electro damage to ALL enemies.
+  Discard 2 cards." The discount and its cost hook are gone; the discard is
+  the player's choice from hand, Short Circuit's `discard` op with `select:
+  chosen`, after the hit. `VkBase` stays a folding AoE preview.
+- `proto_vk_tempest_of_the_four_winds`: (a). 6 [8] per hit, was 4 [5].
+- `proto_vk_downburst`: (a), amended. "Deal 18 [24] Anemo damage. If it
+  Swirls, gain 2 Oath of each element." Was 12 [16] and 2 Oath of the element
+  Swirled. Each element is Pyro, Hydro, Cryo and Electro, 2 each, through
+  `VarkaOath.Gain` (sim `gain`); the Swirl's own 1 Oath of the Swirled
+  element still happens as a rule.
+- `proto_vk_eula_icetide_vortex`: (a). Costs 1, was 2; "Deal 8 [11] Cryo
+  damage", was 10 [14]. The Oath line is unchanged.

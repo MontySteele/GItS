@@ -1306,10 +1306,10 @@ public static class VarkaCards
         }
     }
 
-    /// <summary>Downburst (2026-10-04): "If it Swirls, gain 2 Oath of the
-    /// element Swirled." One gain per element Swirled, on top of the Swirl's
-    /// own credit, through <see cref="VarkaOath.Gain"/> so Oath Unto Death,
-    /// Dawn Wind's March and Boreas's Fang see it.</summary>
+    /// <summary>Downburst (Varka pool audit, 2026-10-13): "If it Swirls,
+    /// gain 2 Oath of each element." One gain per Oath element, on top of the
+    /// Swirl's own credit, through <see cref="VarkaOath.Gain"/> so Oath Unto
+    /// Death, Dawn Wind's March and Boreas's Fang see it.</summary>
     public static async Task SwirledOath(
         PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
     {
@@ -1325,14 +1325,16 @@ public static class VarkaCards
         }
     }
 
-    /// <summary>Downburst's gains: <paramref name="amount"/> of each Oath
-    /// element the play Swirled, once per element, in order. Empty when it
-    /// Swirled nothing. PURE.</summary>
+    /// <summary>Downburst's gains: <paramref name="amount"/> of each of the
+    /// four Oath elements (Pyro, Hydro, Cryo, Electro, the printed order) when
+    /// the play Swirled any Oath element. Empty when it Swirled nothing.
+    /// PURE.</summary>
     public static List<(Element Element, int Amount)> SwirledOathGains(
         IReadOnlyList<Element> swirled, int amount) =>
-        amount <= 0
+        amount <= 0 || !swirled.Any(VarkaOath.IsOathElement)
             ? new List<(Element, int)>()
-            : swirled.Where(VarkaOath.IsOathElement).Distinct()
+            : new[] { Element.Pyro, Element.Hydro, Element.Cryo,
+                      Element.Electro }
                 .Select(e => (e, amount)).ToList();
 
     /// <summary>Wall of Gales: "Swirl every aura." The aura'd bodies are
@@ -1461,8 +1463,9 @@ public static class VarkaCards
                           element == Element.None ? Element.Anemo : element);
     }
 
-    /// <summary>Blazing Charge: "Deal 5 [7] Pyro damage, plus 2 for each
-    /// Pyro Oath." Its own element's Oath, read before the hit.</summary>
+    /// <summary>Blazing Charge: "Deal 8 [11] Pyro damage, plus 1 for each
+    /// Pyro Oath." (Varka pool audit, 2026-10-13: was plus 2.) Its own
+    /// element's Oath, read before the hit.</summary>
     public static Task BlazingCharge(
         PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay) =>
         ElementHit(choiceContext, card, cardPlay, cardPlay.Target,
@@ -1544,9 +1547,9 @@ public static class VarkaCards
         ElementHit(choiceContext, card, cardPlay, cardPlay.Target,
                    Var(card, "VkBase"), Element.Electro);
 
-    /// <summary>Chain Lightning (element identities sec.3): "Deal 8 [11]
-    /// Electro damage to ALL enemies." Its discount is the card's own cost
-    /// hook.</summary>
+    /// <summary>Chain Lightning (Varka pool audit, 2026-10-13): "Deal 8 [11]
+    /// Electro damage to ALL enemies. Discard 2 cards." Costs 0; the discard
+    /// is the row's own chosen-discard op after this hit.</summary>
     public static async Task ElectroAll(
         PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
     {
@@ -1605,9 +1608,11 @@ public static class VarkaCards
     // ---- THE REBALANCE (2026-10-03, review/active/varka-rebalance-2026-10-03.md
     // secs.3-4). Sim twins: varka_oath._rebalance_kind.
 
-    /// <summary>Kindled Edge: "Deal 7 [10] Pyro damage. If it sets off an
-    /// Elemental Reaction, deal 7 [10] more." The more is a second hit on the
-    /// same enemy with no element (a second application is not printed).
+    /// <summary>Kindled Edge: "Deal 7 [10] Pyro damage. If it triggers an
+    /// Elemental Reaction, deal 5 [7] additional damage." (Varka pool audit,
+    /// 2026-10-13: the bonus is its own <c>VkAmount</c>, was the base hit's.)
+    /// The more is a second hit on the same enemy with no element (a second
+    /// application is not printed).
     /// The reaction is read off the target's aura: it wore one Pyro reacts
     /// with, and the hit consumed it.</summary>
     public static async Task KindledEdge(
@@ -1621,7 +1626,7 @@ public static class VarkaCards
                          Element.Pyro);
         if (ReactionEffects.TotalResolved > before && target.IsAlive)
         {
-            await DamageCmd.Attack(amount)
+            await DamageCmd.Attack(Var(card, "VkAmount"))
                 .FromCard(card, cardPlay)
                 .Targeting(target)
                 .Execute(choiceContext);
@@ -1769,7 +1774,7 @@ public static class VarkaCards
         Element.Pyro, Element.Hydro, Element.Cryo, Element.Electro,
     };
 
-    /// <summary>Tempest of the Four Winds: "Deal 4 [5] damage four times, as
+    /// <summary>Tempest of the Four Winds: "Deal 6 [8] damage four times, as
     /// Pyro, Hydro, Cryo and Electro." Each hit credits its own element.
     /// </summary>
     public static async Task Tempest(
@@ -2126,7 +2131,8 @@ public sealed class VarkaCurrentElementHitVar : DamageVar
 /// <summary>
 /// KINDLED EDGE'S "ADDITIONAL" HIT, FOLDED (Varka text pass, 2026-10-13, the
 /// damage-preview census). Display only: the face's second number is the
-/// card's <c>VkBase</c> (read live, so the upgrade moves it with the first),
+/// card's <c>VkAmount</c> since the Varka pool audit (2026-10-13; was
+/// <c>VkBase</c>), read live so the upgrade moves it,
 /// folded the way <see cref="FoldedDamageVar"/> folds a follow-up leg: the
 /// body's Vulnerable and his Strength, no reaction (the first hit consumed
 /// the aura) and no element (<see cref="VarkaCards.KindledEdge"/>'s second

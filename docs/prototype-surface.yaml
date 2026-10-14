@@ -3867,11 +3867,13 @@
 - {id: proto_vk_eula_icetide_vortex, name: "Eula: Icetide Vortex", character: varka,
    authored_by: [claude],
    nation: mondstadt, star: 5, rarity: uncommon, role_c: applier, element: cryo,
-   cost: 2, type: skill, personal_pool: varka,
+   # Varka pool audit (2026-10-13), ruled (a): costs 1, was 2; 8 [11], was
+   # 10 [14].
+   cost: 1, type: skill, personal_pool: varka,
    description: "Deal {CalculatedDamage:diff()} [gold]Cryo[/gold] damage. Gain 1 [gold]Cryo[/gold] [gold]Oath[/gold] for each enemy with a [gold]Cryo[/gold] aura.",
-   effects: [{op: damage, amount: 10, target: enemy, applies_element: true},
+   effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
              {op: varka, kind: oath_per_cryo_enemy}],
-   upgrade: {damage: 4}}
+   upgrade: {damage: 3}}
 
 - {id: proto_vk_barbara_whisper_of_water, name: "Barbara: Whisper of Water", character: varka,
    authored_by: [claude],
@@ -3918,13 +3920,13 @@
 # Element identities (sec.3): Chain Lightning replaces Unfurled Banner.
 - {id: proto_vk_chain_lightning, name: "Chain Lightning", character: varka,
    authored_by: [claude],
-   # Eviscerate's discount, spelled the way Stomp's and Pinpoint's are: a
-   # card-level rate the cost line reads (`Card.cost_reduction_per_
-   # discard_this_turn`, C# `EnergyCost.AddThisTurn`).
-   cost: 2, type: attack, rarity: uncommon,
-   cost_reduction_per_discard_this_turn: 1,
-   description: "Deal {VkBase:diff()} [gold]Electro[/gold] damage to ALL enemies. Costs 1 less for each card you discarded this turn.",
-   effects: [{op: varka, kind: electro_all, target: all_enemies, base: 8}],
+   # Varka pool audit (2026-10-13): costs 0 and discards 2 (Short Circuit's
+   # chosen discard), was 2 with Eviscerate's discount. Provenance, "Varka
+   # pool audit, 2026-10-13".
+   cost: 0, type: attack, rarity: uncommon,
+   description: "Deal {VkBase:diff()} [gold]Electro[/gold] damage to ALL enemies. Discard 2 cards.",
+   effects: [{op: varka, kind: electro_all, target: all_enemies, base: 8},
+             {op: discard, amount: 2, select: chosen}],
    upgrade: {varka_base: 3}}
 
 # --- Rare (8; 23 since the expansion) ---
@@ -4022,9 +4024,11 @@
    # "more" is a second, element-less hit on the same enemy.
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
+   # Varka pool audit (2026-10-13), ruled (a): the reaction bonus is 5 [7],
+   # was 7 [10] (the base hit's number).
    description: "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. If it triggers an [gold]Elemental Reaction[/gold], deal {VkAgain:diff()} additional damage.",
-   effects: [{op: varka, kind: kindled_edge, target: enemy, base: 7}],
-   upgrade: {varka_base: 3}}
+   effects: [{op: varka, kind: kindled_edge, target: enemy, base: 7, amount: 5}],
+   upgrade: {varka_base: 3, varka_amount: 2}}
 
 - {id: proto_vk_knightly_strike, name: "Knightly Strike", character: varka,
    authored_by: [claude],
@@ -4051,9 +4055,10 @@
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
    # The Pyro pass (2026-10-11, review/ruled/varka-pyro-pass-2026-10-11.md):
-   # base 5 [7] to 8 [11], the floor every new card is held to.
+   # base 5 [7] to 8 [11], the floor every new card is held to. Varka pool
+   # audit (2026-10-13), ruled (b): plus 1 per Pyro Oath, was 2.
    description: "Deal {VkBase:diff()} [gold]Pyro[/gold] damage, plus {VkPer:diff()} for each [gold]Pyro[/gold] [gold]Oath[/gold].{InCombat:\n(Deals {VkHit:diff()} damage)|}",
-   effects: [{op: varka, kind: blazing_charge, target: enemy, base: 8, per: 2}],
+   effects: [{op: varka, kind: blazing_charge, target: enemy, base: 8, per: 1}],
    upgrade: {varka_base: 3}}
 
 - {id: proto_vk_tidal_bulwark, name: "Tidal Bulwark", character: varka,
@@ -4291,10 +4296,11 @@
 
 - {id: proto_vk_tempest_of_the_four_winds, name: "Tempest of the Four Winds", character: varka,
    authored_by: [claude],
+   # Varka pool audit (2026-10-13), ruled (a): 6 [8] per hit, was 4 [5].
    cost: 2, type: attack, rarity: rare,
    description: "Deal {VkBase:diff()} damage four times, as [gold]Pyro[/gold], [gold]Hydro[/gold], [gold]Cryo[/gold] and [gold]Electro[/gold].",
-   effects: [{op: varka, kind: tempest, target: enemy, base: 4}],
-   upgrade: {varka_base: 1}}
+   effects: [{op: varka, kind: tempest, target: enemy, base: 6}],
+   upgrade: {varka_base: 2}}
 
 - {id: proto_vk_twin_gales, name: "Twin Gales", character: varka,
    authored_by: [claude],
@@ -4305,12 +4311,14 @@
 
 - {id: proto_vk_downburst, name: "Downburst", character: varka,
    authored_by: [claude],
-   # 2026-10-04: new rider after spent auras were removed (#882).
+   # 2026-10-04: new rider after spent auras were removed (#882). Varka pool
+   # audit (2026-10-13), ruled (a) amended: 18 [24], was 12 [16]; 2 Oath of
+   # EACH element (Pyro, Hydro, Cryo, Electro), was of the element Swirled.
    cost: 2, type: attack, rarity: rare,
-   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If it [gold]Swirls[/gold], gain {VkAmount:diff()} [gold]Oath[/gold] of that element.",
-   effects: [{op: damage, amount: 12, target: enemy},
+   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If it [gold]Swirls[/gold], gain {VkAmount:diff()} [gold]Oath[/gold] of each element.",
+   effects: [{op: damage, amount: 18, target: enemy},
              {op: varka, kind: swirled_oath, amount: 2}],
-   upgrade: {damage: 4}}
+   upgrade: {damage: 6}}
 
 - {id: proto_vk_eye_of_stormterror, name: "Eye of Stormterror", character: varka,
    authored_by: [claude],
