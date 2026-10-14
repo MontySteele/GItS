@@ -717,7 +717,8 @@ public class YaePrototypeTests : IDisposable
     public void An_annotation_tip_is_its_card_reading_or_its_sakura_reading()
     {
         Assert.Equal("This card deals 3 more damage and gives 3 more "
-                     + "[gold]Block[/gold].",
+                     + "[gold]Block[/gold]. If it only plants, the "
+                     + "[gold]Sakura[/gold] gets it.",
                      YaeAnnotationText.TipBody(YaeAnnotation.RedInk, false));
         Assert.Equal("The [gold]Sakura[/gold]'s strike is 3 bigger (not in "
                      + "Offering).",

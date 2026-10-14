@@ -145,8 +145,13 @@ public sealed class YaeShrineLedger
     /// where a card says so (Grafted Branch), raised as every plant is by
     /// Fox's Mooncall (its bonus is <paramref name="plantLevel"/> over
     /// <see cref="YaeLaw.PlantLevel"/>); never below the plant Level.
+    /// <paramref name="inherited"/>: the Annotation the new Sakura carries
+    /// from the card that planted it (Red Ink on a card that only plants,
+    /// ruled 2026-10-14, <see cref="YaeAnnotationReach"/>); none is added
+    /// when three stand, so nothing inherits then.
     /// </summary>
-    public bool Plant(int plantLevel, int? startLevel)
+    public bool Plant(int plantLevel, int? startLevel,
+                      YaeAnnotation inherited = YaeAnnotation.None)
     {
         if (startLevel is { } at)
             plantLevel = Math.Max(plantLevel, at + plantLevel - YaeLaw.PlantLevel);
@@ -161,6 +166,7 @@ public sealed class YaeShrineLedger
             Level = plantLevel,
             TurnsLeft = YaeLaw.SakuraTurns,
             Seq = Seq,
+            Annotation = HasSakuraReading(inherited) ? inherited : YaeAnnotation.None,
         });
         return true;
     }
@@ -329,15 +335,18 @@ public static class YaeShrine
 
     /// <summary>Plant <paramref name="n"/> Sakura, one at a time (each levels
     /// the ones standing). <paramref name="startLevel"/>: Grafted Branch.
+    /// <paramref name="inherited"/>: the planting card's Red Ink, given to
+    /// each Sakura this plants (<see cref="YaeAnnotationReach.Inherited"/>).
     /// </summary>
     public static async Task Plant(PlayerChoiceContext choiceContext,
-                                   Creature? yae, int n, int? startLevel = null)
+                                   Creature? yae, int n, int? startLevel = null,
+                                   YaeAnnotation inherited = YaeAnnotation.None)
     {
         if (yae == null || !Live(yae) || n <= 0) return;
         var ledger = YaeShrineLedger.For(yae);
         for (var i = 0; i < n; i++)
         {
-            ledger.Plant(PlantLevel(yae), startLevel);
+            ledger.Plant(PlantLevel(yae), startLevel, inherited);
         }
         await SakuraBadge.Sync(choiceContext, yae);
     }
@@ -658,10 +667,12 @@ public static class YaeCards
         card.DynamicVars.TryGetValue(name, out var v) ? (int)v.BaseValue
             : name == "YmAmount" ? 1 : 0;
 
-    /// <summary>"Plant a Sakura" / "Plant 2 Sakura".</summary>
+    /// <summary>"Plant a Sakura" / "Plant 2 Sakura". Red Ink on a card that
+    /// only plants passes to each Sakura planted (ruled 2026-10-14).</summary>
     public static Task Plant(PlayerChoiceContext choiceContext, CardModel card,
                              CardPlay cardPlay) =>
-        YaeShrine.Plant(choiceContext, card.Owner?.Creature, Var(card, "YmAmount"));
+        YaeShrine.Plant(choiceContext, card.Owner?.Creature, Var(card, "YmAmount"),
+                        null, YaeAnnotationReach.Inherited(card));
 
     /// <summary>"Tenko."</summary>
     public static Task Tenko(PlayerChoiceContext choiceContext, CardModel card,
@@ -780,7 +791,8 @@ public static class YaeCards
     /// </summary>
     public static Task PlantLevel(PlayerChoiceContext choiceContext, CardModel card,
                                   CardPlay cardPlay) =>
-        YaeShrine.Plant(choiceContext, card.Owner?.Creature, 1, Var(card, "YmAmount"));
+        YaeShrine.Plant(choiceContext, card.Owner?.Creature, 1, Var(card, "YmAmount"),
+                        YaeAnnotationReach.Inherited(card));
 
     /// <summary>Kitsune Pounce's rider.</summary>
     public static Task StrikeIfWeak(PlayerChoiceContext choiceContext, CardModel card,
