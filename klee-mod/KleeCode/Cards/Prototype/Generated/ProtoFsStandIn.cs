@@ -41,7 +41,7 @@ public sealed class ProtoFsStandIn : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Stand-In"),
-        ("description", "Choose a card in your [gold]Hand[/gold]. Add a copy of it to your [gold]Hand[/gold]. The copy [gold]Exhausts[/gold]."),
+        ("description", "Choose a card in your [gold]Hand[/gold] other than Stand-In. Add a copy of it to your [gold]Hand[/gold]. The copy [gold]Exhausts[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

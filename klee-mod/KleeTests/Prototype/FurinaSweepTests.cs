@@ -125,6 +125,9 @@ public class FurinaSweepTests
         Assert.Contains("CardModel.CreateClone", copy);                  // Dual Wield
         Assert.Contains("CardModel.AddKeyword", copy);
         Assert.Contains("CardPileCmd.AddGeneratedCardToCombat", copy);
+        // Never a Stand-In (design call 2026-10-14).
+        Assert.False(FurinaCards.CanStandIn(new ProtoFsStandIn()));
+        Assert.True(FurinaCards.CanStandIn(new ProtoFsPirouette()));
     }
 
     [Fact]
@@ -164,7 +167,8 @@ public class FurinaSweepTests
     {
         Assert.Equal("Discard your [gold]Hand[/gold], then draw that many "
                      + "cards{IfUpgraded:show: plus 1|}.", Face(new ProtoFsQuickChange()));
-        Assert.Equal("Choose a card in your [gold]Hand[/gold]. Add a copy of it "
+        Assert.Equal("Choose a card in your [gold]Hand[/gold] other than Stand-In. "
+                     + "Add a copy of it "
                      + "to your [gold]Hand[/gold]. The copy [gold]Exhausts[/gold].",
                      Face(new ProtoFsStandIn()));
         Assert.Contains("X times", Face(new ProtoFsSoloRecital()));

@@ -66,10 +66,8 @@ def test_the_tab_costs_energy_so_a_guest_and_two_tabs_stop():
 #: grow without end; the main session's ruling (2026-10-09) took its floor
 #: off, and it is inert again.
 #: Tutti!+ (0: each guest acts, draw 1) alone cycles inert too. The sweep
-#: (2026-10-14) cut Interval Bell and Soothing Waters, and two Stand-In+
-#: (0: copy a card in hand, the copy Exhausts) copy each other forever,
-#: inert with no Power (see `STAND_IN_LOOP`).
-KNOWN_INERT = {("proto_fs_tutti+",), ("proto_fs_stand_in+",)}
+#: (2026-10-14) cut Interval Bell and Soothing Waters.
+KNOWN_INERT = {("proto_fs_tutti+",)}
 
 #: ACCEPTED LOOPS: productive cycles the sweep finds and [USER] has accepted,
 #: by base card set, each with its reason. A productive cycle not listed here
@@ -89,11 +87,14 @@ _TUTTI_THIN_DECK = ("[USER], 2026-10-11: a theoretical loop in a thin deck "
 #: in the no-Power sweep.
 ACCEPTED_LOOPS: dict = {}
 
-#: OPEN, NOT ACCEPTED (found building the sweep, 2026-10-14). Two Stand-In+
-#: in hand play forever at 0 Energy: each copies the other, and the copy is
-#: a Stand-In+ too. Inert alone; with Pneuma and Ousia each play is a Skill
-#: that hits, so it grows damage without end. Flagged for the main session.
-STAND_IN_LOOP = ("proto_fs_stand_in+",)
+#: CLOSED LOOPS: found, then fixed by a design call, each with its reason.
+#: The probe must no longer find them.
+CLOSED_LOOPS = {
+    ("proto_fs_stand_in+",): (
+        "Design call 2026-10-14: Stand-In may not copy a Stand-In -- two "
+        "upgraded Stand-Ins copied each other forever at 0 Energy; with "
+        "Pneuma and Ousia that is unlimited damage"),
+}
 
 #: THE POOL TO 75 (2026-10-09). The ruled batch, built as written, gave the
 #: sweep 81 productive cycles over 16 thin-deck card sets, every set but one
@@ -140,9 +141,10 @@ ACCEPTED_NAMED = {"tutti_showstopper_house": _TUTTI_THIN_DECK}
 
 
 @pytest.mark.battery
-def test_two_stand_in_plus_with_pneuma_and_ousia_is_an_open_loop():
-    """The sweep's finding (2026-10-14), pinned so a fix shows here: the
-    screen sees Stand-In's copy (`HAND_ADD_KINDS`) and the run grows
-    damage under Pneuma and Ousia+."""
-    found = P.search_env(False, "proto_fs_pneuma_and_ousia+")
-    assert {f.cards for f in found if f.productive} >= {STAND_IN_LOOP}
+def test_two_stand_in_plus_no_longer_loop_under_pneuma_and_ousia():
+    """The sweep's finding (2026-10-14), closed: Stand-In may not copy a
+    Stand-In, so the screen (`HAND_ADD_KINDS`) still passes the pair and the
+    run finds nothing, under Pneuma and Ousia+ or with no Power."""
+    for power in ("proto_fs_pneuma_and_ousia+", None):
+        found = P.search_env(False, power)
+        assert not {f.cards for f in found} & set(CLOSED_LOOPS), power

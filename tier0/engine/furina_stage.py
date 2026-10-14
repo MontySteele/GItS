@@ -720,12 +720,15 @@ def _generic_kind(state, fx: dict, card) -> None:
         p.hand.append(pick)
         state.emit("discard_to_hand", card=pick.id)
     elif k == "copy_in_hand":
-        # Dual Wield, any type: a copy of the best card in hand, which
-        # Exhausts.
-        if not p.hand or len(p.hand) >= C.MAX_HAND_SIZE:
+        # Dual Wield, any type but a Stand-In (design call 2026-10-14: two
+        # Stand-In+ copied each other forever): a copy of the best card in
+        # hand, which Exhausts.
+        pool = [c for c in p.hand
+                if c.id.split("+")[0] != "proto_fs_stand_in"]
+        if not pool or len(p.hand) >= C.MAX_HAND_SIZE:
             return
         import copy as _copy
-        pick = effects._best_card(p.hand)
+        pick = effects._best_card(pool)
         twin = _copy.copy(pick)
         twin.exhaust = True
         p.hand.append(twin)

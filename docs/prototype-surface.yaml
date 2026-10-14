@@ -3509,12 +3509,13 @@
               target: self}]}
 
 # Stand-In: a Dual Wield bend at Rare (`copy_in_hand`; the copy Exhausts).
+# Never a Stand-In (design call 2026-10-14: two Stand-In+ looped forever).
 # Rare (the paper's pick 3 default).
 - {id: proto_fs_stand_in, name: "Stand-In", character: furina,
    upgrade: {cost: -1},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: rare,
-   description: "Choose a card in your [gold]Hand[/gold]. Add a copy of it to your [gold]Hand[/gold]. The copy [gold]Exhausts[/gold].",
+   description: "Choose a card in your [gold]Hand[/gold] other than Stand-In. Add a copy of it to your [gold]Hand[/gold]. The copy [gold]Exhausts[/gold].",
    effects: [{op: furina, kind: copy_in_hand}]}
 
 # --- THE CO-OP SET (review/records/coop-set-2026-09-25.md): multiplayer-only,

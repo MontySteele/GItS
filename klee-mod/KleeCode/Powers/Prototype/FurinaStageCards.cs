@@ -153,6 +153,9 @@ public static class FurinaCards
 
     public const string CopyPromptText = "Choose a card to copy.";
 
+    /// <summary>Stand-In's filter: any card but a Stand-In. PURE.</summary>
+    public static bool CanStandIn(CardModel c) => c is not ProtoFsStandIn;
+
     private static List<CardModel> HandOf(Player owner) =>
         CardPile.Get(PileType.Hand, owner)?.Cards.ToList()
         ?? new List<CardModel>();
@@ -266,9 +269,11 @@ public static class FurinaCards
         if (pick != null) await CardPileCmd.Add(pick, PileType.Hand);
     }
 
-    /// <summary>Stand-In: "Choose a card in your Hand. Add a copy of it to
-    /// your Hand. The copy Exhausts." Dual Wield's clone, any card type, with
-    /// Exhaust added to the copy (Wolfpack's <c>AddKeyword</c>).</summary>
+    /// <summary>Stand-In: "Choose a card in your Hand other than Stand-In.
+    /// Add a copy of it to your Hand. The copy Exhausts." Dual Wield's clone,
+    /// any type but another Stand-In (two Stand-In+ copied each other forever
+    /// at 0 Energy; design call 2026-10-14), with Exhaust added to the copy
+    /// (Wolfpack's <c>AddKeyword</c>).</summary>
     public static async Task CopyInHand(PlayerChoiceContext choiceContext,
                                         CardModel card, CardPlay cardPlay)
     {
@@ -276,7 +281,7 @@ public static class FurinaCards
         var pick = (await CardSelectCmd.FromHand(
             choiceContext, owner,
             new CardSelectorPrefs(new LocString(Table, CopyPromptKey), 1),
-            null, card)).FirstOrDefault();
+            CanStandIn, card)).FirstOrDefault();
         if (pick == null) return;
         var copy = pick.CreateClone();
         copy.AddKeyword(CardKeyword.Exhaust);

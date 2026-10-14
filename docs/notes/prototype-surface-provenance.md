@@ -8539,3 +8539,4 @@ Silence in the Court! is `lose_strength` with `this_turn`
 - Costume Fitting prints "for this combat", Armaments' combat-only upgrade.
 - The sim's pilot picks with `_best_card` (Costume Fitting, Read the Script,
   Second Act, Stand-In) and the costliest card (Mise en Scène).
+- Stand-In may not copy a Stand-In (design call, 2026-10-14): two upgraded Stand-Ins copied each other forever at 0 Energy; with Pneuma and Ousia that is unlimited damage. `FurinaCards.CanStandIn`; sim the same.

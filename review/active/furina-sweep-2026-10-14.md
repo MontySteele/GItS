@@ -93,7 +93,9 @@ Numbers are set against the base card named in brackets.
 | Card | Type, cost | Text | Job |
 |---|---|---|---|
 | Pneuma and Ousia | Power 1 | Whenever you play an Attack, gain 2 [3] Block. Whenever you play a Skill, deal 2 [3] damage to a random enemy. | Her two arkhe as a Power that pays for mixing card types, not for a resource |
-| Stand-In | Skill 1 [0] | Choose a card in your Hand. Add a copy of it to your Hand. The copy Exhausts. | Doubles a Guest Star or a payoff (a Dual Wield bend at Rare) |
+| Stand-In | Skill 1 [0] | Choose a card in your Hand other than Stand-In. Add a copy of it to your Hand. The copy Exhausts. | Doubles a Guest Star or a payoff (a Dual Wield bend at Rare) |
+
+Stand-In may not copy a Stand-In (design call, 2026-10-14): two upgraded Stand-Ins copied each other forever at 0 Energy; with Pneuma and Ousia that is unlimited damage.
 
 ## 4. What the pool looks like after
 

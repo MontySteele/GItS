@@ -230,3 +230,12 @@ def test_pneuma_and_ousia_blocks_on_attacks_and_hits_on_skills():
     st = _furina()
     _play(st, _card("proto_fs_pneuma_and_ousia+"))
     assert st.player.powers[FS.PNEUMA_AND_OUSIA] == 3
+
+
+def test_stand_in_never_copies_a_stand_in():
+    """Design call (2026-10-14): two Stand-In+ copied each other forever at
+    0 Energy; with Pneuma and Ousia that is unlimited damage."""
+    st = _furina()
+    st.player.hand = [_card("proto_fs_stand_in+")]
+    _play(st, _card("proto_fs_stand_in+"))
+    assert [c.id for c in st.player.hand] == ["proto_fs_stand_in+"]
