@@ -1,6 +1,6 @@
 """Klee's combat scene: generate, check, verify, render.
 
-    python -m tools.klee_rig gen                    # write combat.tscn + merchant_character.tscn
+    python -m tools.klee_rig gen                    # write combat, merchant + select scenes
     python -m tools.klee_rig gen --check            # exit 1 if either scene is stale
     python -m tools.klee_rig verify [--art-root <main checkout>] [--godot]
     python -m tools.klee_rig render --out <dir> [--art-root <main checkout>]
@@ -36,7 +36,8 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.cmd == "gen":
         stale = 0
-        for path, text in ((rig.SCENE, rig.render_scene()), (rig.MERCHANT_SCENE, rig.render_merchant_scene())):
+        for path, text in ((rig.SCENE, rig.render_scene()), (rig.MERCHANT_SCENE, rig.render_merchant_scene()),
+                               (rig.SELECT_SCENE, rig.render_select_scene())):
             if args.check:
                 current = path.read_text(encoding="utf-8") if path.exists() else ""
                 if current != text:
@@ -45,6 +46,7 @@ def main(argv: list[str] | None = None) -> int:
                 else:
                     print(f"{path.name} is current.")
                 continue
+            path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(text, encoding="utf-8", newline="\n")
             print(f"wrote {path.relative_to(rig.ROOT)} ({len(text)} bytes)")
         return stale
