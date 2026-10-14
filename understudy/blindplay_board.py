@@ -961,11 +961,9 @@ def varka_oath(player: dict[str, Any],
 #: Strikes left: T." The five Annotations are her Enchantments' names.
 _SAKURA_NAME = re.compile(r"^Sakura (\d)$")
 _SAKURA_LEVEL = re.compile(r"Level (\d+)")
-_SAKURA_STRIKE = re.compile(r"(?:for|gives you|draws you) (\d+)")
-#: The design axes (ruled 2026-10-14): the shrine's Rite is one badge,
-#: "Rite: Thunder" (`YaeRiteBadgePower`), and a Sakura's Annotation is named
-#: in its badge sentence.
-_RITE_NAME = re.compile(r"^Rite: (Thunder|Warding|Wildfire|Offering)$")
+_SAKURA_STRIKE = re.compile(r"for (\d+)")
+#: The design axes (ruled 2026-10-14): a Sakura's Annotation is named in its
+#: badge sentence. (Shrine r2 took the Rite badge away.)
 YAE_SAKURA_ANNOTATIONS = ("Red Ink", "Deadline Extension", "Fox Fire")
 _SAKURA_TURNS = re.compile(r"Strikes left: (\d+)")
 _LURE_NAME = "Foxfire Lure"
@@ -994,11 +992,6 @@ def yae_shrine(player: dict[str, Any],
     hers = character in ("yae", "yae miko") or "yae" in character.split()
     if not (hers or badges):
         return None
-    rite = None
-    for pw in you["powers"]:
-        m = _RITE_NAME.match(_text(pw.get("name")))
-        if m:
-            rite = m.group(1)
     sakura = []
     for slot, pw in sorted(badges, key=lambda b: b[0]):
         text = _text(pw.get("text"))
@@ -1022,8 +1015,7 @@ def yae_shrine(player: dict[str, Any],
         ench = face.get("enchantment")
         if isinstance(ench, dict) and _text(ench.get("name")) in YAE_ANNOTATIONS:
             annotated += 1
-    return {"sakura": sakura, "lure": lure, "annotated": annotated,
-            "rite": rite}
+    return {"sakura": sakura, "lure": lure, "annotated": annotated}
 
 
 #: A performer's SHORT name -- the word the glossary rows and the faces use

@@ -4537,18 +4537,18 @@
              {op: varka, kind: deep_freeze, target: enemy}],
    upgrade: {cost: -1}}
 
-# YAE MIKO: review/active/yae-card-paper-2026-10-13.md and
-# review/active/yae-design-axes-2026-10-14.md (Rites, Sakura Annotations).
-# Rules: YaeShrine.cs, yae_shrine.py; reasoning: provenance note "Yae Miko".
+# YAE MIKO: review/active/yae-card-paper-2026-10-13.md, yae-design-axes-2026-10-14.md
+# (Annotations; shrine r2: no Rite, typed Tenko). Rules: YaeShrine.cs,
+# yae_shrine.py; reasoning: provenance note "Yae Miko".
 
 # --- the starter (paper sec.3): base Strike x4 + Defend x4 have no row ---
 
 - {id: proto_ym_yakan_evocation, name: "Yakan Evocation", character: yae,
    authored_by: [claude],
    cost: 1, type: skill, rarity: basic,
-   # Design axes sec.4 (2026-10-14): the full-shrine reading printed; the
-   # behaviour is unchanged.
-   description: "Plant a [gold]Sakura[/gold] (with 3 standing, each gains a Level instead).",
+   # Shrine r2 (ruled 2026-10-14): planted at Level 1, the others are not
+   # levelled; with 3 standing the oldest refreshes and gains a Level.
+   description: "Plant a [gold]Sakura[/gold] (with 3 standing, your oldest refreshes and gains a Level).",
    effects: [{op: yae, kind: plant, amount: 1}],
    upgrade: {cost: -1}}
 
@@ -4574,10 +4574,9 @@
 - {id: proto_ym_thunder_rite, name: "Thunder Rite", character: yae,
    authored_by: [claude],
    cost: 2, type: attack, rarity: common,
-   # Design axes sec.4: carries Rite: Thunder, the way back to damage.
-   description: "Deal 8 [gold]Electro[/gold] damage. [gold]Rite[/gold]: Thunder. [gold]Tenko[/gold].",
+   # Shrine r2 (ruled 2026-10-14): "Rite: Thunder" went with the Rite.
+   description: "Deal 8 [gold]Electro[/gold] damage. [gold]Tenko[/gold].",
    effects: [{op: damage, amount: 8, target: enemy},
-             {op: yae, kind: rite, rite: thunder},
              {op: yae, kind: tenko}],
    upgrade: {damage: 3}}
 
@@ -4592,8 +4591,10 @@
 - {id: proto_ym_twin_sakura, name: "Twin Sakura", character: yae,
    authored_by: [claude],
    # Design axes sec.4: costs 1 (was 2 [1]); the upgrade adds Gain 4 Block.
+   # Shrine r2: both at Level 1; with 2 standing the second plant refreshes
+   # and levels the then-oldest.
    cost: 1, type: skill, rarity: common,
-   description: "Plant {YmAmount:diff()} [gold]Sakura[/gold] (with 3 standing, each gains a Level instead).",
+   description: "Plant {YmAmount:diff()} [gold]Sakura[/gold] (with 3 standing, your oldest refreshes and gains a Level).",
    effects: [{op: yae, kind: plant, amount: 2}],
    upgrade: {add: {op: block, amount: 4}}}
 
@@ -4635,10 +4636,10 @@
 - {id: proto_ym_shrine_maidens_guard, name: "Shrine Maiden's Guard", character: yae,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   # Design axes sec.4: the per-Sakura Block is now the Rite's job.
-   description: "Gain 6 [gold]Block[/gold]. [gold]Rite[/gold]: Warding.",
+   # Shrine r2 (ruled 2026-10-14): Tenko (Warding) replaces Rite: Warding.
+   description: "Gain 6 [gold]Block[/gold]. [gold]Tenko[/gold] (Warding).",
    effects: [{op: block, amount: 6},
-             {op: yae, kind: rite, rite: warding}],
+             {op: yae, kind: tenko, as: warding}],
    upgrade: {block: 3}}
 
 # Batch two (design axes sec.5 and the Ruled section).
@@ -4677,9 +4678,10 @@
 - {id: proto_ym_foxfire_sweep, name: "Foxfire Sweep", character: yae,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal 4 [gold]Electro[/gold] damage to ALL enemies. [gold]Rite[/gold]: Wildfire.",
+   # Shrine r2 (ruled 2026-10-14): Tenko (Wildfire) replaces Rite: Wildfire.
+   description: "Deal 4 [gold]Electro[/gold] damage to ALL enemies. [gold]Tenko[/gold] (Wildfire).",
    effects: [{op: damage, amount: 4, target: all_enemies},
-             {op: yae, kind: rite, rite: wildfire}],
+             {op: yae, kind: tenko, as: wildfire}],
    upgrade: {damage: 2}}
 
 - {id: proto_ym_evergreen_charm, name: "Evergreen Charm", character: yae,
@@ -4695,10 +4697,9 @@
 - {id: proto_ym_sakura_grove, name: "Sakura Grove", character: yae,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   # Yae review r1, pick 2 (ruled 2026-10-14): per-Sakura, not global (was
-   # "strike for 2 [3] more in Thunder, Warding and Wildfire"). Each copy
-   # raises once.
-   description: "At the start of your turn, your newest [gold]Sakura[/gold] gains a Level.",
+   # Shrine r2 (ruled 2026-10-14): each Sakura (was the newest; before that,
+   # "strike for 2 [3] more"). Each copy raises once.
+   description: "At the start of your turn, each [gold]Sakura[/gold] gains a Level.",
    effects: [{op: apply_power, power: ym_sakura_grove, amount: 1, target: self}],
    upgrade: {innate: true}}
 
@@ -4772,26 +4773,29 @@
 - {id: proto_ym_serialization, name: "Serialization", character: yae,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "Whenever you [gold]Edit[/gold] a card, gain 3 [gold]Block[/gold].",
+   # Shrine r2, (b) (ruled 2026-10-14): per Annotated card played (was per
+   # Edit).
+   description: "Whenever you play an [gold]Annotated[/gold] card, gain 3 [gold]Block[/gold].",
    effects: [{op: apply_power, power: ym_serialization, amount: 3, target: self}],
    upgrade: {power_amount: 1}}
 
 - {id: proto_ym_manuscript_pile, name: "Manuscript Pile", character: yae,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   # Design axes sec.4: carries Rite: Offering; its Retain Edit went.
-   description: "Draw {Cards:diff()} cards. [gold]Rite[/gold]: Offering.",
+   # Design axes sec.4: its Retain Edit went. Shrine r2 (ruled 2026-10-14):
+   # Tenko (Offering) replaces Rite: Offering.
+   description: "Draw {Cards:diff()} cards. [gold]Tenko[/gold] (Offering).",
    effects: [{op: draw, amount: 2},
-             {op: yae, kind: rite, rite: offering}],
+             {op: yae, kind: tenko, as: offering}],
    upgrade: {draw: 1}}
 
 - {id: proto_ym_kitsune_guile, name: "Kitsune Guile", character: yae,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   # Design axes sec.4: carries Rite: Wildfire.
-   description: "Apply 2 [gold]Weak[/gold] to ALL enemies. [gold]Rite[/gold]: Wildfire.",
+   # Shrine r2 (ruled 2026-10-14): Tenko (Wildfire) replaces Rite: Wildfire.
+   description: "Apply 2 [gold]Weak[/gold] to ALL enemies. [gold]Tenko[/gold] (Wildfire).",
    effects: [{op: apply_power, power: weak, amount: 2, target: all_enemies},
-             {op: yae, kind: rite, rite: wildfire}],
+             {op: yae, kind: tenko, as: wildfire}],
    upgrade: {power_amount: 1}}
 
 - {id: proto_ym_foxfire_lure, name: "Foxfire Lure", character: yae,
@@ -4867,9 +4871,10 @@
 - {id: proto_ym_sakura_channeling, name: "Sakura Channeling", character: yae,
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
-   # Design axes sec.4, the bend: the shrine does two jobs (was 2 [3] Block
-   # per strike).
-   description: "Your [gold]Sakura[/gold] also strike as Thunder, whatever the [gold]Rite[/gold].",
+   # Design axes sec.4, the bend (was 2 [3] Block per strike). SHRINE R2
+   # (2026-10-14): its job went with the Rite and every end-of-turn strike is
+   # Thunder, so it does nothing now. REPLACEMENT PENDING (design session).
+   description: "Your [gold]Sakura[/gold] strike as Thunder at the end of your turn.",
    effects: [{op: apply_power, power: ym_sakura_channeling, amount: 1, target: self}],
    upgrade: {cost: -1}}
 

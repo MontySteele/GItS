@@ -45,7 +45,7 @@ public sealed class ProtoYmSakuraGrove : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sakura Grove"),
-        ("description", "At the start of your turn, your newest [gold]Sakura[/gold] gains a Level."),
+        ("description", "At the start of your turn, each [gold]Sakura[/gold] gains a Level."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -1706,10 +1706,14 @@ ARM_KEYWORDS: dict[str, str] = {
     # possible edit if the card can only apply one": each Annotation is its
     # own row (`YaeAnnotationText.Rule`, and `.SakuraRule` where it has one),
     # printed only where a face names it.
-    "Sakura": ("Strikes at the end of your turn under the current Rite. "
-               "Lasts 3 turns, then strikes once more. Up to 3; planting "
-               "another gives the rest a Level (even when full)."),
-    "Tenko": "Every Sakura strikes now and lasts 3 turns again.",
+    # Shrine r2 (ruled 2026-10-14): no Rite; a full-shrine plant feeds the
+    # oldest; Tenko names its three kinds.
+    "Sakura": ("Strikes a random enemy for 2 plus its Level at the end of "
+               "your turn. Lasts 3 turns, then strikes once more. Up to 3; "
+               "planting when full refreshes the oldest and gives it a "
+               "Level."),
+    "Tenko": ("All Sakura strike now, reset to 3 turns. Warding: Block. "
+              "Wildfire: Level to ALL. Offering: draw 1."),
     "Edit": ("Give a card an Annotation for this combat, replacing any it "
              "had. A Published one lasts the run."),
     "Red Ink": ("This card deals 3 more damage and gives 3 more Block. On a "
@@ -1724,10 +1728,6 @@ ARM_KEYWORDS: dict[str, str] = {
     "Royalties": "When this card is played, gain 1 Energy.",
     "Reprint": ("The first time this card is played each combat, play it "
                 "twice."),
-    # YAE MIKO, THE DESIGN AXES (ruled 2026-10-14), in step with
-    # `ArmKeywordTips.YaeRiteTip`.
-    "Rite": ("Sets what Sakura strikes do. Thunder: damage. Warding: Block. "
-             "Wildfire: ALL enemies. Offering: draw."),
     # `EB-625`. THE RELIC A FACE IS WRITTEN AGAINST. Shell Guard says
     # "whenever the Tamakushi Casket strikes" and nothing on the page said
     # what the Casket is or what makes it strike -- [USER]'s act-1 run read
@@ -2088,7 +2088,7 @@ _ARM_KEYWORD_ARM: dict[str, str] = {
     # Inazuma Universal "Yae Miko -- Sesshou Sakura", a different object, so
     # her row prints only on her runs. (The wire names her by her title,
     # "Yae Miko", which `_fold`s to the two words.)
-    "Sakura": "yae miko", "Edit": "yae miko", "Rite": "yae miko",
+    "Sakura": "yae miko", "Edit": "yae miko",
     # 2026-10-14: Tenko and the six Annotations, split out of those two.
     "Tenko": "yae miko", "Red Ink": "yae miko", "Footnote": "yae miko",
     "Deadline Extension": "yae miko", "Fox Fire": "yae miko",
@@ -2192,7 +2192,6 @@ _ARM_KEYWORD_RE = {
     "Sakura Seal": re.compile(r"\bSakura Seal\b"),
     "Royalties": re.compile(r"\bRoyalties\b"),
     "Reprint": re.compile(r"\bReprint\b"),
-    "Rite": re.compile(r"\bRite\b"),
     # `EB-446`. NO PLURAL: there is one raven. It fires on Nightrider's face,
     # which names him and cannot grant him, and on the Power card that does --
     # every screen a reader can meet the word on, whether or not the run holds

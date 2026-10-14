@@ -44,14 +44,14 @@ public sealed class ProtoYmFoxfireSweep : CustomCardModel, IElementalCard, IChar
         new[] { KleeKeywords.AppliesElectro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForRite(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this);
+        ArmKeywordTips.ForTenko(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_foxfire_sweep");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Foxfire Sweep"),
-        ("description", "Deal {Damage:diff()} [gold]Electro[/gold] damage to ALL enemies. [gold]Rite[/gold]: Wildfire{InCombat:{YaeRite}|}."),
+        ("description", "Deal {Damage:diff()} [gold]Electro[/gold] damage to ALL enemies. [gold]Tenko[/gold] (Wildfire{InCombat:{YaeTenko}|})."),
     };
 
     /// <summary>This card's in-combat shrine clauses
@@ -60,7 +60,7 @@ public sealed class ProtoYmFoxfireSweep : CustomCardModel, IElementalCard, IChar
         MegaCrit.Sts2.Core.Localization.LocString description)
     {
         base.AddExtraArgsToDescription(description);
-        description.Add("YaeRite", YaeShrineFace.RiteLine(this, YaeRite.Wildfire));
+        description.Add("YaeTenko", YaeShrineFace.TenkoLine(this, YaeTenkoKind.Wildfire));
     }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -84,7 +84,7 @@ public sealed class ProtoYmFoxfireSweep : CustomCardModel, IElementalCard, IChar
             .WithElementHitFx(this)
             .SpawningHitVfxOnEachCreature()
             .Execute(choiceContext);
-        await YaeCards.Rite(choiceContext, this, cardPlay, YaeRite.Wildfire);
+        await YaeCards.Tenko(choiceContext, this, cardPlay, YaeTenkoKind.Wildfire);
     }
 
     protected override void OnUpgrade()

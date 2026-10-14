@@ -48,15 +48,19 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   `docs/prototype-surface.yaml`; rules `Powers/Prototype/YaeShrine.cs` and
   `YaeAnnotations.cs`, sim twin `tier0/engine/yae_shrine.py`, harness
   `tools/yae_expansion_sim.py`. **Rites plus Sakura Annotations built**
-  (2026-10-14, `review/active/yae-design-axes-2026-10-14.md`, ruled): the
-  shrine's Rite (Thunder, Warding, Wildfire, Offering) sets what every strike
-  does, a Sakura may carry Red Ink, Fox Fire or Deadline Extension, the 30
-  realigned and ten new cards. A staged pool of 40 (15 / 16 / 9, no
+  (2026-10-14, `review/active/yae-design-axes-2026-10-14.md`, ruled): a
+  Sakura may carry Red Ink, Fox Fire or Deadline Extension, the 30
+  realigned and ten new cards. **Shrine r2** (2026-10-14, same doc, ruled):
+  the Rite is gone, every strike is Thunder and typed Tenko (Warding,
+  Wildfire, Offering) replaces "Rite: X"; a plant comes in at its card's
+  Level and no longer levels the others, a full-shrine plant refreshes and
+  levels the oldest; Tenko still resets timers; Grove levels every Sakura;
+  Serialization pays per Annotated card played; Sakura Channeling is blank
+  (replacement pending). A staged pool of 40 (15 / 16 / 9, no
   Ancients or co-op cards yet), official card art. **Review r1 ruled and
   built** (2026-10-14, same doc): Last Bloom (a withering Sakura strikes once
   more), no Level cap, global Levels only from Fox's Mooncall (+1 per copy);
-  Sakura Grove levels the newest Sakura each turn, Mikage Thunder levels
-  every Sakura then Tenko. **Publish after elites and bosses** (2026-10-14,
+  Mikage Thunder levels every Sakura then Tenko. **Publish after elites and bosses** (2026-10-14,
   ruled, same doc): her starter relic no longer adds a rest-site option;
   "After an elite or boss fight, you may Publish an Annotation." It is a row
   on the combat reward screen offering the cards that fight left Annotated

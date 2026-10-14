@@ -19,9 +19,8 @@ namespace KleeMod.Powers;
 /// <summary>
 /// ONE SAKURA ON HER STATUS BAR (the paper's display: "two numbers per
 /// Sakura on the display (Level and turns left)"). The icon's number is the
-/// Sakura's LEVEL, the number the player raises by planting; the tooltip
-/// says the Level, what it does under the shrine's Rite and for how much,
-/// the Annotation it carries (ruled 2026-10-14) and the strikes it has
+/// Sakura's LEVEL; the tooltip says the Level, its Thunder strike's size
+/// (shrine r2: there is no Rite), the Annotation it carries (ruled 2026-10-14) and the strikes it has
 /// left, and the seat page reads them off that sentence. Badge 1 is the oldest, the one
 /// that strikes first and withers first. A view of
 /// <see cref="YaeShrineLedger"/>, kept in step by <see cref="SakuraBadge.Sync"/>.
@@ -36,16 +35,12 @@ public abstract class SakuraBadgePower : PowerModel, ILocalizationProvider
         ("title", $"Sakura {Slot + 1}"),
         ("description",
             "A [gold]Sakura[/gold] beside you. At the end of your turn it "
-          + "strikes under the shrine's [gold]Rite[/gold]."),
-        // The Rite and the Annotation are numbers (YaeRite, YaeAnnotation)
-        // read by the game's own `cond:` formatter, the shape SHRINK_POWER's
-        // shipped row uses.
+          + "strikes a random enemy."),
+        // The Annotation is a number (YaeAnnotation) read by the game's own
+        // `cond:` formatter, the shape SHRINK_POWER's shipped row uses.
         ("smartDescription",
-            "Level {Level}. At the end of your turn it "
-          + "{Rite:cond:==1?gives you|==2?strikes ALL enemies for|==3?draws you|strikes a random enemy for}"
-          + " {Strike}"
-          + "{Rite:cond:==1? [gold]Block[/gold]|==3? more card next turn| [gold]Electro[/gold] damage}"
-          + "."
+            "Level {Level}. At the end of your turn it strikes a random enemy "
+          + "for {Strike} [gold]Electro[/gold] damage."
           + $"{{Ann:cond:==1? [gold]Red Ink[/gold] makes its strike {YaeLaw.RedInkAmount} bigger (not in Offering).|==3? [gold]Deadline Extension[/gold] keeps it from withering.|==4? [gold]Fox Fire[/gold] adds {YaeLaw.FoxFireDamage} [gold]Electro[/gold] damage to a random enemy.|}}"
           + " Strikes left: {Turns}."),
     };
@@ -57,7 +52,7 @@ public abstract class SakuraBadgePower : PowerModel, ILocalizationProvider
     protected override IEnumerable<DynamicVar> CanonicalVars => new List<DynamicVar>
     {
         new("Level", 1m), new("Turns", 3m), new("Strike", 3m),
-        new("Rite", 0m), new("Ann", 0m),
+        new("Ann", 0m),
     };
 
     private YaeSakura? Mine()
@@ -78,7 +73,6 @@ public abstract class SakuraBadgePower : PowerModel, ILocalizationProvider
         DynamicVars["Level"].BaseValue = sakura.Level;
         DynamicVars["Turns"].BaseValue = sakura.TurnsLeft;
         DynamicVars["Strike"].BaseValue = YaeShrine.Size(Owner, sakura);
-        DynamicVars["Rite"].BaseValue = (int)YaeShrineLedger.For(Owner).Rite;
         DynamicVars["Ann"].BaseValue = (int)sakura.Annotation;
         InvokeDisplayAmountChanged();
     }
@@ -109,38 +103,12 @@ public static class SakuraBadge
             .Take(System.Math.Max(0, System.Math.Min(YaeLaw.SakuraCap, count)))
             .ToList();
 
-    /// <summary>The Rite badge the shrine's Rite wants. PURE.</summary>
-    public static System.Type RiteBadge(YaeRite rite) => rite switch
-    {
-        YaeRite.Warding => typeof(WardingRitePower),
-        YaeRite.Wildfire => typeof(WildfireRitePower),
-        YaeRite.Offering => typeof(OfferingRitePower),
-        _ => typeof(ThunderRitePower),
-    };
-
     /// <summary>Add or remove badges to match the ledger, then refresh them.
-    /// The shrine's Rite shows as one badge beside them. Headless (no
-    /// combat) it does nothing.</summary>
+    /// Headless (no combat) it does nothing. (The Rite badge left with the
+    /// Rite, shrine r2, 2026-10-14.)</summary>
     public static async Task Sync(PlayerChoiceContext choiceContext, Creature yae)
     {
         if (yae.CombatState == null || !YaeShrine.Live(yae)) return;
-        var riteType = RiteBadge(YaeShrineLedger.For(yae).Rite);
-        foreach (var stale in yae.Powers.OfType<YaeRiteBadgePower>()
-                     .Where(b => b.GetType() != riteType).ToList())
-        {
-            await PowerCmd.Remove(stale);
-        }
-        if (!yae.Powers.Any(p => p.GetType() == riteType))
-        {
-            if (riteType == typeof(WardingRitePower))
-                await PowerCmd.Apply<WardingRitePower>(choiceContext, yae, 1, yae, null, silent: true);
-            else if (riteType == typeof(WildfireRitePower))
-                await PowerCmd.Apply<WildfireRitePower>(choiceContext, yae, 1, yae, null, silent: true);
-            else if (riteType == typeof(OfferingRitePower))
-                await PowerCmd.Apply<OfferingRitePower>(choiceContext, yae, 1, yae, null, silent: true);
-            else
-                await PowerCmd.Apply<ThunderRitePower>(choiceContext, yae, 1, yae, null, silent: true);
-        }
         var wanted = Wanted(YaeShrineLedger.For(yae).Count);
         foreach (var stale in yae.Powers.OfType<SakuraBadgePower>()
                      .Where(b => !wanted.Contains(b.GetType())).ToList())
@@ -161,105 +129,7 @@ public static class SakuraBadge
         {
             badge.Refresh();
         }
-        foreach (var badge in yae.Powers.OfType<YaeRiteBadgePower>())
-        {
-            badge.Refresh();
-        }
     }
-}
-
-/// <summary>
-/// THE SHRINE'S RITE ON HER STATUS BAR (ruled 2026-10-14): one badge, the
-/// current Rite's, titled "Rite: X"; <see cref="SakuraBadge.Sync"/> swaps
-/// it. Display only: <see cref="YaeShrineLedger.Rite"/> is the rule.
-/// </summary>
-public abstract class YaeRiteBadgePower : PowerModel, ILocalizationProvider
-{
-    public abstract YaeRite Rite { get; }
-
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Rite: " + Rite),
-        ("description", YaeRiteText.Rule(Rite)),
-        // Yae review r1 (Claude, 2026-10-14): with a Sakura standing, the
-        // badge adds what they would do now under this Rite, the sum the
-        // "Rite: X" cards print (`YaeShrineFace`).
-        ("smartDescription", YaeRiteText.Rule(Rite)),
-        (LiveKey, YaeRiteText.Rule(Rite) + YaeRiteText.Now(Rite)),
-    };
-
-    /// <summary>The smart face read while a Sakura stands.</summary>
-    public const string LiveKey = "smartDescriptionLive";
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Single;
-
-    protected override IEnumerable<DynamicVar> CanonicalVars => new List<DynamicVar>
-    {
-        new("Total", 0m),
-    };
-
-    /// <summary>The live face while the total is above 0 (a Sakura stands).
-    /// </summary>
-    protected override string SmartDescriptionLocKey =>
-        Id.Entry + "." + (DynamicVars["Total"].BaseValue > 0 ? LiveKey : "smartDescription");
-
-    /// <summary>Copy the shrine's total under this Rite into the tooltip.
-    /// </summary>
-    internal void Refresh()
-    {
-        if (!IsMutable || Owner == null) return;
-        DynamicVars["Total"].BaseValue = YaeShrineFace.Total(Owner, Rite);
-        InvokeDisplayAmountChanged();
-    }
-}
-
-public sealed class ThunderRitePower : YaeRiteBadgePower
-{
-    public override YaeRite Rite => YaeRite.Thunder;
-}
-
-public sealed class WardingRitePower : YaeRiteBadgePower
-{
-    public override YaeRite Rite => YaeRite.Warding;
-}
-
-public sealed class WildfireRitePower : YaeRiteBadgePower
-{
-    public override YaeRite Rite => YaeRite.Wildfire;
-}
-
-public sealed class OfferingRitePower : YaeRiteBadgePower
-{
-    public override YaeRite Rite => YaeRite.Offering;
-}
-
-/// <summary>What each Rite makes a strike do, one sentence (the badges).
-/// </summary>
-public static class YaeRiteText
-{
-    /// <summary>The badge's live sentence, the cards' clause as a sentence:
-    /// " Your Sakura now: {Total} Block." (Yae review r1, 2026-10-14).
-    /// </summary>
-    public static string Now(YaeRite rite) =>
-        " Your Sakura now: " + YaeShrineFace.RiteAmount(rite, "{Total}") + ".";
-
-    public static string Rule(YaeRite rite) => rite switch
-    {
-        YaeRite.Warding =>
-            $"Each [gold]Sakura[/gold] strike gives you {YaeLaw.SakuraBase} plus "
-          + "its Level [gold]Block[/gold].",
-        YaeRite.Wildfire =>
-            "Each [gold]Sakura[/gold] strike deals its Level "
-          + "[gold]Electro[/gold] damage to ALL enemies.",
-        YaeRite.Offering =>
-            $"Each [gold]Sakura[/gold] strike draws you {YaeLaw.OfferingPerStrike} "
-          + "more card at the start of your next turn.",
-        _ =>
-            $"Each [gold]Sakura[/gold] strike deals {YaeLaw.SakuraBase} plus its "
-          + "Level [gold]Electro[/gold] damage to a random enemy.",
-    };
 }
 
 /// <summary>Foxfire Lure's mark on the enemy her Sakura strike this turn.
@@ -306,8 +176,8 @@ public sealed class FoxfireLurePower : PowerModel, ILocalizationProvider
 //  tier0/engine/yae_shrine.py.
 // ---------------------------------------------------------------------------
 
-/// <summary>Sakura Grove (Yae review r1, pick 2, ruled 2026-10-14): "At the
-/// start of your turn, your newest Sakura gains a Level." Paid by
+/// <summary>Sakura Grove (shrine r2, ruled 2026-10-14): "At the start of
+/// your turn, each Sakura gains a Level." Paid by
 /// <see cref="YaeShrine.TurnStart"/>, one Level per stack.</summary>
 public sealed class SakuraGrovePower : PowerModel, ILocalizationProvider
 {
@@ -315,7 +185,7 @@ public sealed class SakuraGrovePower : PowerModel, ILocalizationProvider
     {
         ("title", "Sakura Grove"),
         ("description",
-            "At the start of your turn, your newest [gold]Sakura[/gold] gains "
+            "At the start of your turn, each [gold]Sakura[/gold] gains "
           + "[blue]{Amount}[/blue] Level."),
     };
 
@@ -345,29 +215,31 @@ public sealed class EdictOfCleansingPower : PowerModel, ILocalizationProvider
     public override PowerStackType StackType => PowerStackType.Counter;
 }
 
-/// <summary>Serialization: "Whenever you Edit a card, gain 3 [4] Block."
-/// Unpowered (the sim's `_block`, the Powers' door).</summary>
+/// <summary>Serialization (shrine r2, ruled 2026-10-14): "Whenever you play
+/// an Annotated card, gain 3 [4] Block." Paid by
+/// <see cref="YaeShrine.AfterCardPlayed"/>. Unpowered (the sim's `_block`,
+/// the Powers' door).</summary>
 public sealed class SerializationPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
         ("title", "Serialization"),
         ("description",
-            "Whenever you [gold]Edit[/gold] a card, gain [blue]{Amount}[/blue] "
-          + "[gold]Block[/gold]."),
+            "Whenever you play an [gold]Annotated[/gold] card, gain "
+          + "[blue]{Amount}[/blue] [gold]Block[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    /// <summary>Pay <paramref name="edits"/> Edits' Block.</summary>
-    internal static async Task Pay(Creature yae, int edits)
+    /// <summary>Pay <paramref name="plays"/> Annotated plays' Block.</summary>
+    internal static async Task Pay(Creature yae, int plays)
     {
         var per = yae.GetPowerAmount<SerializationPower>();
-        if (per <= 0 || edits <= 0) return;
+        if (per <= 0 || plays <= 0) return;
         yae.Powers.OfType<SerializationPower>().FirstOrDefault()?.Flash();
-        await CreatureCmd.GainBlock(yae, per * edits, ValueProp.Unpowered, null);
+        await CreatureCmd.GainBlock(yae, per * plays, ValueProp.Unpowered, null);
     }
 }
 
@@ -408,17 +280,18 @@ public sealed class YakanOfferingPower : PowerModel, ILocalizationProvider
     internal void Pulse() => Flash();
 }
 
-/// <summary>Sakura Channeling (design axes sec.4, the bend): "Your Sakura
-/// also strike as Thunder, whatever the Rite." A marker
-/// <see cref="YaeShrine.Strike"/> reads.</summary>
+/// <summary>Sakura Channeling (design axes sec.4, the bend). SHRINE R2
+/// (2026-10-14): its job ("also strike as Thunder, whatever the Rite") went
+/// with the Rite, and every end-of-turn strike is Thunder now, so it is a
+/// marker nothing reads: REPLACEMENT PENDING (design session).</summary>
 public sealed class SakuraChannelingPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
         ("title", "Sakura Channeling"),
         ("description",
-            "Your [gold]Sakura[/gold] also strike as Thunder, whatever the "
-          + "[gold]Rite[/gold]."),
+            "Your [gold]Sakura[/gold] strike as Thunder at the end of your "
+          + "turn."),
     };
 
     public override PowerType Type => PowerType.Buff;

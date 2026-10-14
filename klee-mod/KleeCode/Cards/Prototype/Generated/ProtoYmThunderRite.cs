@@ -44,14 +44,14 @@ public sealed class ProtoYmThunderRite : CustomCardModel, IElementalCard, IChara
         new[] { KleeKeywords.AppliesElectro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForRite(ArmKeywordTips.ForTenko(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this), this);
+        ArmKeywordTips.ForTenko(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_thunder_rite");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Thunder Rite"),
-        ("description", "Deal {Damage:diff()} [gold]Electro[/gold] damage. [gold]Rite[/gold]: Thunder{InCombat:{YaeRite}|}. [gold]Tenko[/gold]{InCombat:{YaeTenko}|}."),
+        ("description", "Deal {Damage:diff()} [gold]Electro[/gold] damage. [gold]Tenko[/gold]{InCombat:{YaeTenko}|}."),
     };
 
     /// <summary>This card's in-combat shrine clauses
@@ -60,7 +60,6 @@ public sealed class ProtoYmThunderRite : CustomCardModel, IElementalCard, IChara
         MegaCrit.Sts2.Core.Localization.LocString description)
     {
         base.AddExtraArgsToDescription(description);
-        description.Add("YaeRite", YaeShrineFace.RiteLine(this, YaeRite.Thunder));
         description.Add("YaeTenko", YaeShrineFace.TenkoLine(this));
     }
 
@@ -85,7 +84,6 @@ public sealed class ProtoYmThunderRite : CustomCardModel, IElementalCard, IChara
             .Targeting(cardPlay.Target)
             .WithElementHitFx(this)
             .Execute(choiceContext);
-        await YaeCards.Rite(choiceContext, this, cardPlay, YaeRite.Thunder);
         await YaeCards.Tenko(choiceContext, this, cardPlay);
     }
 

@@ -8481,6 +8481,42 @@ as a combat-reward row (`Relics.YaePublishReward`, added by
 - The harness (`tools/yae_expansion_sim`) rests at every R and Publishes
   after E and B.
 
+## Yae Miko, shrine r2, 2026-10-14
+
+Ruled by [USER] (`review/active/yae-design-axes-2026-10-14.md`, "Shrine r2,
+ruled 2026-10-14"). Built in both engines (`YaeShrine.cs`,
+`tier0/engine/yae_shrine.py`). The Rite is gone; typed Tenko replaces each
+"Rite: X".
+- Planting: a plant creates a Sakura at the Level the card prints (1;
+  Grafted Branch 2 [3]), +1 per Fox's Mooncall, and no longer levels the
+  others. With 3 standing a plant makes the oldest refresh (3 turns) and gain
+  1 Level instead; a two-plant does this one plant at a time. Reading:
+  Mooncall raises a planted Level only, not the full-shrine Level.
+  Yakan Evocation and Twin Sakura print "(with 3 standing, your oldest
+  refreshes and gains a Level)".
+- Every end-of-turn strike, Last Bloom, Editor-in-Chief and Kitsune Pounce
+  strike as Thunder. Tenko (every Sakura strikes now) still resets every
+  timer to 3 ([USER]: "make Tenko keep resetting the duration"). Typed:
+  Tenko (Warding) Block 2 + Level, Tenko (Wildfire) Level to ALL, Tenko
+  (Offering) a card next turn; Red Ink +3 except Offering; Fox Fire rides
+  every strike; Edict on damage strikes. Op: `{op: yae, kind: tenko, as:
+  warding}` (C# `YaeTenkoKind`).
+- Rows: Shrine Maiden's Guard "Tenko (Warding)", Foxfire Sweep and Kitsune
+  Guile "Tenko (Wildfire)", Manuscript Pile "Tenko (Offering)", Thunder Rite
+  "Deal 8 [11] Electro damage. Tenko." Numbers unchanged.
+- Sakura Grove: "each Sakura gains a Level" (was the newest), upgrade
+  Innate. Serialization: "Whenever you play an Annotated card, gain 3 [4]
+  Block" (was per Edit).
+- Sakura Channeling has no job left: its text reads "Your Sakura strike as
+  Thunder at the end of your turn." and the power is a marker nothing
+  reads. Replacement pending (design session).
+- Faces: the Rite clause, the Rite badge and the seat page's Rite line are
+  gone. A Tenko row's live clause is "Tenko (12 damage)" / "Tenko (Warding:
+  12 Block)", and "(no Sakura)" / "(Warding, no Sakura)" with none standing
+  (`YaeShrineFace.TenkoLine`, sim `tenko_line`). The Tenko tip
+  (`ArmKeywordTips.YaeTenkoTip`) names the three kinds; the Rite tip is
+  gone.
+
 ## Kokomi pool overhaul, 2026-10-13
 
 `review/active/kokomi-pool-overhaul-2026-10-13.md`, picks 1 (a) and 2 (a).

@@ -129,23 +129,41 @@ public class YaePrototypeTests : IDisposable
     }
 
     [Fact]
-    public void Planting_levels_every_standing_sakura_and_three_plants_are_3_2_1()
+    public void Planting_no_longer_levels_the_others_so_three_plants_are_1_1_1()
     {
+        // Shrine r2 (ruled 2026-10-14).
         var ledger = Fresh();
         PlantN(ledger, 3);
-        Assert.Equal(new[] { 3, 2, 1 }, ledger.Standing.Select(s => s.Level));
+        Assert.Equal(new[] { 1, 1, 1 }, ledger.Standing.Select(s => s.Level));
     }
 
     [Fact]
-    public void Planting_into_a_full_shrine_levels_the_three_and_adds_none()
+    public void Planting_into_a_full_shrine_refreshes_and_levels_only_the_oldest()
     {
         var ledger = Fresh();
         PlantN(ledger, 3);
+        var oldest = ledger.Standing[0];
+        ledger.TickAndWither();
         Assert.False(ledger.Plant(YaeLaw.PlantLevel));
         Assert.Equal(3, ledger.Count);
-        Assert.Equal(new[] { 4, 3, 2 }, ledger.Standing.Select(s => s.Level));
+        Assert.Same(oldest, ledger.Standing[0]);
+        Assert.Equal(new[] { 2, 1, 1 }, ledger.Standing.Select(s => s.Level));
+        Assert.Equal(new[] { 3, 2, 2 }, ledger.Standing.Select(s => s.TurnsLeft));
         PlantN(ledger, 1);                    // no cap (review r1, pick 2)
-        Assert.Equal(new[] { 5, 4, 3 }, ledger.Standing.Select(s => s.Level));
+        Assert.Equal(new[] { 3, 1, 1 }, ledger.Standing.Select(s => s.Level));
+    }
+
+    [Fact]
+    public void A_two_plant_with_two_standing_plants_one_then_feeds_the_oldest()
+    {
+        // Twin Sakura with 2 standing: the first plants, the second
+        // refreshes and levels the then-oldest.
+        var ledger = Fresh();
+        PlantN(ledger, 2);
+        ledger.TickAndWither();
+        PlantN(ledger, 2);
+        Assert.Equal(new[] { 2, 1, 1 }, ledger.Standing.Select(s => s.Level));
+        Assert.Equal(new[] { 3, 2, 3 }, ledger.Standing.Select(s => s.TurnsLeft));
     }
 
     [Fact]
@@ -167,34 +185,49 @@ public class YaePrototypeTests : IDisposable
         Assert.False(YaeShrineLedger.EdictApplies(weak: false, reacts: false));
     }
 
-    // ---- the Rites (design axes, ruled 2026-10-14) ---------------------------
+    // ---- the Tenko kinds (shrine r2, ruled 2026-10-14) -----------------------
 
     [Fact]
-    public void Every_combat_opens_in_thunder()
+    public void The_shrine_has_no_rite_any_more()
     {
-        Assert.Equal(YaeRite.Thunder, Fresh().Rite);
-        Assert.Equal(0, (int)YaeRite.Thunder);
+        Assert.Null(typeof(YaeShrineLedger).GetProperty("Rite"));
+        Assert.Equal(0, (int)YaeTenkoKind.Thunder);
+        Assert.Null(typeof(YaeCards).GetMethod("Rite"));
     }
 
     [Fact]
-    public void Each_rites_strike_size()
+    public void Each_tenko_kinds_strike_size()
     {
         // Thunder and Warding 2 + Level; Wildfire Level; Offering 1 card.
-        Assert.Equal(5, YaeShrineLedger.StrikeSize(YaeRite.Thunder, 3, YaeAnnotation.None));
-        Assert.Equal(5, YaeShrineLedger.StrikeSize(YaeRite.Warding, 3, YaeAnnotation.None));
-        Assert.Equal(3, YaeShrineLedger.StrikeSize(YaeRite.Wildfire, 3, YaeAnnotation.None));
-        Assert.Equal(1, YaeShrineLedger.StrikeSize(YaeRite.Offering, 3, YaeAnnotation.None));
+        Assert.Equal(5, YaeShrineLedger.StrikeSize(YaeTenkoKind.Thunder, 3, YaeAnnotation.None));
+        Assert.Equal(5, YaeShrineLedger.StrikeSize(YaeTenkoKind.Warding, 3, YaeAnnotation.None));
+        Assert.Equal(3, YaeShrineLedger.StrikeSize(YaeTenkoKind.Wildfire, 3, YaeAnnotation.None));
+        Assert.Equal(1, YaeShrineLedger.StrikeSize(YaeTenkoKind.Offering, 3, YaeAnnotation.None));
     }
 
     [Fact]
-    public void Each_rite_does_its_own_job_in_the_strike()
+    public void Each_kind_does_its_own_job_in_the_strike_and_channeling_is_blank()
     {
         var calls = Il.CallSequence(typeof(YaeShrine).GetMethod(nameof(YaeShrine.Strike))!).ToList();
         Assert.Contains(calls, c => c.Contains("CreatureCmd.GainBlock"));      // Warding
         Assert.Contains(calls, c => c.Contains("set_PendingDraw"));            // Offering
         Assert.Contains(calls, c => c.Contains("HittableEnemies"));            // Wildfire
-        Assert.Contains(calls, c => c.Contains("SakuraChannelingPower"));      // the bend
         Assert.Contains(calls, c => c.Contains(nameof(YaeShrine.FoxFire)));    // Fox Fire
+        // Sakura Channeling's job went with the Rite: replacement pending.
+        Assert.DoesNotContain(calls, c => c.Contains("SakuraChannelingPower"));
+        Assert.DoesNotContain(calls, c => c.Contains("get_Rite"));
+    }
+
+    [Fact]
+    public void Serialization_pays_per_annotated_play_not_per_edit()
+    {
+        // Shrine r2, (b) (ruled 2026-10-14).
+        Assert.Contains(Il.CallSequence(typeof(YaeShrine).GetMethod(nameof(YaeShrine.AfterCardPlayed))!),
+                        c => c.Contains("SerializationPower.Pay"));
+        Assert.DoesNotContain(Il.CallSequence(typeof(YaeEditing).GetMethod(nameof(YaeEditing.Edit))!),
+                              c => c.Contains("SerializationPower.Pay"));
+        Assert.DoesNotContain(Il.CallSequence(typeof(YaeEditing).GetMethod(nameof(YaeEditing.EditAll))!),
+                              c => c.Contains("SerializationPower.Pay"));
     }
 
     [Fact]
@@ -219,23 +252,24 @@ public class YaePrototypeTests : IDisposable
     }
 
     [Fact]
-    public void The_rite_badge_follows_the_rite()
+    public void The_rite_badges_are_gone()
     {
-        Assert.Equal(typeof(ThunderRitePower), SakuraBadge.RiteBadge(YaeRite.Thunder));
-        Assert.Equal(typeof(WardingRitePower), SakuraBadge.RiteBadge(YaeRite.Warding));
-        Assert.Equal(typeof(WildfireRitePower), SakuraBadge.RiteBadge(YaeRite.Wildfire));
-        Assert.Equal(typeof(OfferingRitePower), SakuraBadge.RiteBadge(YaeRite.Offering));
-        Assert.Contains("Block", YaeRiteText.Rule(YaeRite.Warding));
-        Assert.Contains("ALL", YaeRiteText.Rule(YaeRite.Wildfire));
+        Assert.Null(typeof(SakuraBadge).Assembly.GetType("KleeMod.Powers.WardingRitePower"));
+        Assert.Null(typeof(SakuraBadge).Assembly.GetType("KleeMod.Powers.YaeRiteBadgePower"));
+        Assert.Null(typeof(SakuraBadge).GetMethod("RiteBadge"));
     }
 
     [Fact]
-    public void Rite_cards_set_the_rite()
+    public void Typed_tenko_cards_tenko_as_their_kind()
     {
         Assert.Contains(Il.CallSequence(typeof(ProtoYmShrineMaidensGuard).GetMethod(
-            "OnPlay", HeadlessGame.All)!), c => c.Contains("YaeCards.Rite"));
+            "OnPlay", HeadlessGame.All)!), c => c.Contains("YaeCards.Tenko"));
         Assert.Contains(Il.CallSequence(typeof(ProtoYmFoxfireSweep).GetMethod(
-            "OnPlay", HeadlessGame.All)!), c => c.Contains("YaeCards.Rite"));
+            "OnPlay", HeadlessGame.All)!), c => c.Contains("YaeCards.Tenko"));
+        Assert.Contains(Il.CallSequence(typeof(ProtoYmManuscriptPile).GetMethod(
+            "OnPlay", HeadlessGame.All)!), c => c.Contains("YaeCards.Tenko"));
+        Assert.Contains(Il.CallSequence(typeof(ProtoYmKitsuneGuile).GetMethod(
+            "OnPlay", HeadlessGame.All)!), c => c.Contains("YaeCards.Tenko"));
     }
 
     // ---- Sakura Annotations (ruled 2026-10-14) -------------------------------
@@ -244,16 +278,16 @@ public class YaePrototypeTests : IDisposable
     public void Red_ink_makes_a_sakuras_strike_three_bigger_but_not_in_offering()
     {
         // Claude, 2026-10-14: Red Ink skips Offering, like Sakura Grove.
-        Assert.Equal(YaeShrineLedger.StrikeSize(YaeRite.Offering, 2, YaeAnnotation.None),
-                     YaeShrineLedger.StrikeSize(YaeRite.Offering, 2, YaeAnnotation.RedInk));
-        foreach (var rite in new[] { YaeRite.Thunder, YaeRite.Warding, YaeRite.Wildfire })
+        Assert.Equal(YaeShrineLedger.StrikeSize(YaeTenkoKind.Offering, 2, YaeAnnotation.None),
+                     YaeShrineLedger.StrikeSize(YaeTenkoKind.Offering, 2, YaeAnnotation.RedInk));
+        foreach (var rite in new[] { YaeTenkoKind.Thunder, YaeTenkoKind.Warding, YaeTenkoKind.Wildfire })
         {
             Assert.Equal(
                 YaeShrineLedger.StrikeSize(rite, 2, YaeAnnotation.None) + YaeLaw.RedInkAmount,
                 YaeShrineLedger.StrikeSize(rite, 2, YaeAnnotation.RedInk));
         }
-        Assert.Equal(YaeShrineLedger.StrikeSize(YaeRite.Thunder, 2, YaeAnnotation.None),
-                     YaeShrineLedger.StrikeSize(YaeRite.Thunder, 2, YaeAnnotation.FoxFire));
+        Assert.Equal(YaeShrineLedger.StrikeSize(YaeTenkoKind.Thunder, 2, YaeAnnotation.None),
+                     YaeShrineLedger.StrikeSize(YaeTenkoKind.Thunder, 2, YaeAnnotation.FoxFire));
     }
 
     [Fact]
@@ -434,8 +468,8 @@ public class YaePrototypeTests : IDisposable
     {
         // "Her Strength and Weak do not apply; the enemy's Vulnerable and
         // Block do; it applies Electro": ElementalHit.DealWithoutDealerMods,
-        // in the one hit every damage strike goes through (the Rites,
-        // 2026-10-14).
+        // in the one hit every damage strike goes through (Thunder and
+        // Wildfire, shrine r2).
         var calls = Il.CallSequence(typeof(YaeShrine).GetMethod(
             "Hit", HeadlessGame.All)!).ToList();
         Assert.Contains(calls, c => c.Contains("DealWithoutDealerMods"));
@@ -457,7 +491,8 @@ public class YaePrototypeTests : IDisposable
         var ledger = Fresh();
         PlantN(ledger, 3);
         ledger.LevelUp(1);
-        Assert.Equal(new[] { 4, 3, 2 }, ledger.Standing.Select(s => s.Level));
+        ledger.LevelUp(4);
+        Assert.Equal(new[] { 6, 6, 6 }, ledger.Standing.Select(s => s.Level));
     }
 
     [Fact]
@@ -718,19 +753,23 @@ public class YaePrototypeTests : IDisposable
         // [USER] (2026-10-14): "Sakura and Tenko should be cut into separate
         // tips", and "I don't think we need to say 'Combat starts in
         // Thunder'".
-        Assert.Contains("Level (even when full)", ArmKeywordTips.YaeSakuraTip);
-        Assert.Contains("current [gold]Rite[/gold]", ArmKeywordTips.YaeSakuraTip);
+        // Shrine r2 (2026-10-14): no Rite, and a full-shrine plant feeds the
+        // oldest; the Tenko tip names its three kinds.
+        Assert.Contains("refreshes the oldest and gives it a Level",
+                        ArmKeywordTips.YaeSakuraTip);
+        Assert.DoesNotContain("Rite", ArmKeywordTips.YaeSakuraTip);
         Assert.DoesNotContain("Tenko", ArmKeywordTips.YaeSakuraTip);
         Assert.DoesNotContain("Thunder", ArmKeywordTips.YaeSakuraTip);
-        Assert.Equal("Every [gold]Sakura[/gold] strikes now and lasts 3 turns again.",
+        Assert.Equal("All [gold]Sakura[/gold] strike now, reset to 3 turns. "
+                     + "Warding: [gold]Block[/gold]. Wildfire: Level to ALL. "
+                     + "Offering: draw 1.",
                      ArmKeywordTips.YaeTenkoTip);
-        Assert.DoesNotContain("starts in Thunder", ArmKeywordTips.YaeRiteTip);
     }
 
     [Fact]
     public void The_sakura_tips_plant_clause_is_the_ledgers_rule()
     {
-        // "planting another gives the rest a Level (even when full)".
+        // "planting when full refreshes the oldest and gives it a Level".
         var ledger = YaeShrineLedger.For(Seat.Yae().Creature);
         Assert.True(ledger.Plant(YaeLaw.PlantLevel));
         Assert.True(ledger.Plant(YaeLaw.PlantLevel));
@@ -738,7 +777,8 @@ public class YaePrototypeTests : IDisposable
         var before = ledger.Standing.Select(s => s.Level).ToList();
         Assert.False(ledger.Plant(YaeLaw.PlantLevel));
         Assert.Equal(YaeLaw.SakuraCap, ledger.Standing.Count);
-        Assert.Equal(before.Select(l => l + 1), ledger.Standing.Select(s => s.Level));
+        Assert.Equal(new[] { before[0] + 1, before[1], before[2] },
+                     ledger.Standing.Select(s => s.Level));
     }
 
     // ---- the Edit tip and each Annotation's own (2026-10-14) ----------------
