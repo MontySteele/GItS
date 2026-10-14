@@ -41,8 +41,17 @@ public sealed class ProtoFsCrowdFavorite : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Crowd Favorite"),
-        ("description", "At the start of your turn, if your HP is below half, gain {energyPrefix:energyIcons(1)}."),
+        ("description", "At the start of your turn, if your HP is below half{InCombat:{HalfHp}|}, gain {energyPrefix:energyIcons(1)}."),
     };
+
+    /// <summary>The HP this card's "below half" means, in combat
+    /// (`HalfHpFace`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("HalfHp", HalfHpFace.Line(this));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

@@ -161,7 +161,13 @@ public static class VarkaStory
                 FallbackPortraitPath: "res://images/events/the_legends_were_true.png"),
         },
 
-        SignatureCard = typeof(ProtoVkFourWindsAscension),
+        // Orobas's Archaic Tooth replaces the Ascension with Dandelion Gale,
+        // which speaks the same line.
+        SignatureCards = new[]
+        {
+            typeof(ProtoVkFourWindsAscension),
+            typeof(global::KleeMod.Cards.Varka.DandelionGale),
+        },
         ChoicePool = VarkaRules.PoolKnights,
     };
 }

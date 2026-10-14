@@ -59,10 +59,11 @@ public sealed class CharacterStory
     /// Bomb" draws from. Mine-only cards are not in it.</summary>
     public IReadOnlyCollection<string> BombPlacers { get; init; } = Array.Empty<string>();
 
-    /// <summary>The card whose play speaks the signature line (Varka: Four
-    /// Winds' Ascension), once a combat. Null: the line has its own trigger
-    /// (Klee: her biggest Bomb, called from the Bomb's explosion).</summary>
-    public Type? SignatureCard { get; init; }
+    /// <summary>The cards whose play speaks the signature line, once a
+    /// combat (Varka: Four Winds' Ascension and Dandelion Gale, the Ancient
+    /// that replaces it). Empty: the line has its own trigger (Klee: her
+    /// biggest Bomb, called from the Bomb's explosion).</summary>
+    public IReadOnlyCollection<Type> SignatureCards { get; init; } = Array.Empty<Type>();
 
     /// <summary>What "Choose 1 of 3 random ..." draws from (Varka: his pool
     /// Knights, the pool Knights' Roll Call offers). Null: none.</summary>

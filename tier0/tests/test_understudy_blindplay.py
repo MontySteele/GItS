@@ -12198,10 +12198,12 @@ def test_a_branch_clause_un_folds_too_and_not_only_the_first_one():
          "name": "Noelle — Breastplate", "type": "Skill", "cost": "1",
          "can_play": True, "index": 0, "target_type": "Self",
          "is_upgraded": False, "keywords": [],
-         "description": ("Gain 10 Block. If you are below half HP, gain 6 "
-                         "additional Block.")}]
+         # In combat "below half" prints its number (release fixes,
+         # 2026-10-14, `HalfHpFace`).
+         "description": ("Gain 10 Block. If you are below half (35 HP), "
+                         "gain 6 additional Block.")}]
     page = blindplay.observe(state)
-    assert ("Unmodified: Gain 8 Block. If you are below half HP, gain 4 "
+    assert ("Unmodified: Gain 8 Block. If you are below half (35 HP), gain 4 "
             "additional Block.") in page
 
 

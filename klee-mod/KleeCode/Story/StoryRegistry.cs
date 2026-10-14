@@ -104,9 +104,10 @@ public static class StoryRules
         combatsServed >= StoryCurseCombats;
 
     /// <summary>Whether this card's play is the character's signature
-    /// moment (Varka: Four Winds' Ascension), by her table.</summary>
+    /// moment (Varka: Four Winds' Ascension or Dandelion Gale), by her
+    /// table.</summary>
     public static bool IsSignaturePlay(CharacterStory story, Type? card) =>
-        card != null && story.SignatureCard == card;
+        card != null && story.SignatureCards.Contains(card);
 
     /// <summary>
     /// WHO SPEAKS AT A BOSS'S ENTRY, by seat. Each story character speaks

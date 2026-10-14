@@ -735,8 +735,12 @@ UNMIRRORED: dict[str, str] = {
     "KokomiPlanStrip.MaxDrawn":
         "presentation: how many pending Plans get a picture before the column "
         "runs off the band. Not a cap on the queue -- nothing limits how many "
-        "Plans she may write -- and the overflow is printed as `+N`, so the "
-        "sim has nothing to compare and no rule is hiding here.",
+        "Plans she may write -- and the overflow is paged behind `+N` "
+        "(release fixes, 2026-10-14), so the sim has nothing to compare and "
+        "no rule is hiding here.",
+    "KokomiPlanPages.PerPage":
+        "presentation: Plans on one page of the strip, `MaxDrawn`'s source; "
+        "`+N` turns to the next page.",
     # The Spark counter in the energy area (`EB-621`), on the same terms. Its
     # A POSITION is deliberately not here: the element derives its placement
     # from `%EnergyCounterContainer`'s own rect at runtime rather than writing

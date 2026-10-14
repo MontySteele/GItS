@@ -42,8 +42,8 @@ namespace KleeMod.Story;
 ///   * the signature moment, once a combat: Klee's biggest Bomb, one Bomb
 ///     (not a Mine) explosion landing 30 or more (<see
 ///     cref="AfterBombWentOff"/>, called from <c>ProtoBombPower.Explode</c>);
-///     Varka's Four Winds' Ascension, the moment his table's
-///     <see cref="CharacterStory.SignatureCard"/> is played
+///     Varka's Four Winds' Ascension (or Dandelion Gale), the moment one of
+///     his table's <see cref="CharacterStory.SignatureCards"/> is played
 ///     (<see cref="StoryCombatHooks.AfterCardPlayed"/>).
 ///   * killing a boss: a boss room's combat won, while she stands.
 ///   * losing / winning the run: the game-over screen's quote line

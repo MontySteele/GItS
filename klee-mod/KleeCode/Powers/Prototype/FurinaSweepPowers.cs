@@ -14,6 +14,7 @@ using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.ValueProps;
@@ -411,7 +412,31 @@ public sealed class CrowdFavoritePower : PowerModel, ILocalizationProvider
         ("description",
             "At the start of your turn, if your HP is below half, gain "
           + "{Amount:energyIcons()}."),
+        // Release fixes (2026-10-14): in combat the tip prints the number
+        // half is (`HalfHpFace`); a face takes no parentheses.
+        ("smartDescription",
+            "At the start of your turn, if your HP is below {HalfHp}, gain "
+          + "{Amount:energyIcons()}."),
     };
+
+    /// <summary>{HalfHp} in the smart tip: the HP "below half" is below.
+    /// Synced when applied and at each turn start.</summary>
+    protected override IEnumerable<DynamicVar> CanonicalVars =>
+        new[] { new DynamicVar("HalfHp", 0m) };
+
+    private void SyncHalfHp()
+    {
+        if (Owner == null) return;
+        var half = DynamicVars["HalfHp"];
+        half.BaseValue = global::KleeMod.Cards.HalfHpFace.Threshold(Owner.MaxHp);
+        half.ResetToBase();
+    }
+
+    public override Task AfterApplied(Creature? applier, CardModel? cardSource)
+    {
+        SyncHalfHp();
+        return Task.CompletedTask;
+    }
 
     public override PowerType Type => PowerType.Buff;
 
@@ -420,6 +445,7 @@ public sealed class CrowdFavoritePower : PowerModel, ILocalizationProvider
     public override async Task AfterEnergyReset(Player player)
     {
         if (Owner == null || player != Owner.Player || Amount <= 0) return;
+        SyncHalfHp();
         if (Owner.CurrentHp * 2 >= Owner.MaxHp) return;
         Flash();
         await PlayerCmd.GainEnergy(Amount, player);

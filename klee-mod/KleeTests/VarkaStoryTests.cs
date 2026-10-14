@@ -80,7 +80,7 @@ public class VarkaStoryTests
         Assert.Contains($"| Losing the run | \"{l.RunLoss}\" |", paper);
         Assert.Contains($"| Winning the run | \"{l.RunWin}\" |", paper);
         // The signature moment is that card.
-        Assert.Equal(typeof(ProtoVkFourWindsAscension), V.SignatureCard);
+        Assert.Contains(typeof(ProtoVkFourWindsAscension), V.SignatureCards);
         Assert.Equal("Four Winds' Ascension", Title(new ProtoVkFourWindsAscension()));
     }
 
@@ -411,6 +411,19 @@ public class VarkaStoryTests
     // ---- Combat lines ---------------------------------------------------------
 
     [Fact]
+    public void Dandelion_Gale_speaks_the_signature_line_too()
+    {
+        // Orobas's Archaic Tooth replaces the Ascension with the Gale; the
+        // bark follows it (release fix, 2026-10-14).
+        Assert.True(StoryRules.IsSignaturePlay(V, typeof(global::KleeMod.Cards.Varka.DandelionGale)));
+        Assert.Equal(2, V.SignatureCards.Count);
+        // Data on the table, not a special case in the rule.
+        Assert.DoesNotContain(
+            Il.Calls(Il.Method(nameof(StoryRules), nameof(StoryRules.IsSignaturePlay))),
+            c => c.Contains("DandelionGale"));
+    }
+
+    [Fact]
     public void Four_Winds_Ascension_is_his_signature_once_a_combat()
     {
         Assert.True(StoryRules.IsSignaturePlay(V, typeof(ProtoVkFourWindsAscension)));
@@ -418,7 +431,7 @@ public class VarkaStoryTests
         Assert.False(StoryRules.IsSignaturePlay(V, null));
         // Klee's signature is her Bomb's, never a card play.
         Assert.False(StoryRules.IsSignaturePlay(KleeStory.Table, typeof(ProtoVkFourWindsAscension)));
-        Assert.Null(KleeStory.Table.SignatureCard);
+        Assert.Empty(KleeStory.Table.SignatureCards);
 
         // Structural: the card-play hook asks the rule and speaks once a combat.
         var hook = Il.Calls(Il.Method(nameof(StoryCombatHooks), "AfterCardPlayed"));
