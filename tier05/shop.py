@@ -36,6 +36,7 @@ from typing import Callable, Optional
 
 from tier0 import constants as C
 from tier0.content import loader, upgrades
+from tier0.engine import yae_shrine
 from tier0.engine.state import Card
 from tier05 import rewards
 
@@ -153,6 +154,7 @@ def companion_shop_offer(
         cards = rewards._banner_filtered(pool.get(rarity, []), banner)
         return [c for c in cards
                 if c.personal_pool in (None, character)
+                and not yae_shrine.hidden_from(c.id, character)
                 and c.id not in taken_ids
                 and (nation is None or c.nation == nation)]
 

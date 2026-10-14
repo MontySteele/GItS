@@ -4504,3 +4504,251 @@
              {op: apply_power, power: vulnerable, amount: 1, target: enemy},
              {op: varka, kind: deep_freeze, target: enemy}],
    upgrade: {cost: -1}}
+
+# YAE MIKO, BATCH ONE (review/active/yae-card-paper-2026-10-13.md, ruled
+# 2026-10-13). Rules: Powers/Prototype/YaeShrine.cs, tier0/engine/yae_shrine.py.
+# Per-row reasoning: docs/notes/prototype-surface-provenance.md, "Yae Miko".
+
+# --- the starter (paper sec.3): base Strike x4 + Defend x4 have no row ---
+
+- {id: proto_ym_yakan_evocation, name: "Yakan Evocation", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: basic,
+   description: "Plant a [gold]Sakura[/gold].",
+   effects: [{op: yae, kind: plant, amount: 1}],
+   upgrade: {cost: -1}}
+
+- {id: proto_ym_proofread, name: "Proofread", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: basic,
+   # [USER] 2026-10-13, pick 3: "proofread by itself and having the upgrade
+   # make the effect 0 cost, like a Defect starter."
+   description: "[gold]Edit[/gold] a card in your hand: [gold]Red Ink[/gold].",
+   effects: [{op: yae, kind: edit, annotation: red_ink, amount: 1}],
+   upgrade: {cost: -1}}
+
+# --- Common (9) ---
+
+- {id: proto_ym_kitsune_flash, name: "Kitsune Flash", character: yae,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: common,
+   description: "Deal 6 [gold]Electro[/gold] damage. If this card is [gold]Annotated[/gold], deal 3 more.",
+   effects: [{op: yae, kind: annotated_strike, base: 6, amount: 3, target: enemy}],
+   upgrade: {yae_base: 2, yae_amount: 1}}
+
+- {id: proto_ym_thunder_rite, name: "Thunder Rite", character: yae,
+   authored_by: [claude],
+   cost: 2, type: attack, rarity: common,
+   description: "Deal 8 [gold]Electro[/gold] damage. [gold]Tenko[/gold].",
+   effects: [{op: damage, amount: 8, target: enemy},
+             {op: yae, kind: tenko}],
+   upgrade: {damage: 3}}
+
+- {id: proto_ym_shrine_offering, name: "Shrine Offering", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "Gain 6 [gold]Block[/gold]. Each [gold]Sakura[/gold] lasts 1 more turn.",
+   effects: [{op: block, amount: 6},
+             {op: yae, kind: extend, amount: 1}],
+   upgrade: {block: 3}}
+
+- {id: proto_ym_twin_sakura, name: "Twin Sakura", character: yae,
+   authored_by: [claude],
+   cost: 2, type: skill, rarity: common,
+   description: "Plant {YmAmount:diff()} [gold]Sakura[/gold].",
+   effects: [{op: yae, kind: plant, amount: 2}],
+   upgrade: {cost: -1}}
+
+- {id: proto_ym_deadline, name: "Deadline", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "Gain 4 [gold]Block[/gold]. [gold]Edit[/gold] a card in your hand: [gold]Deadline Extension[/gold].",
+   effects: [{op: block, amount: 4},
+             {op: yae, kind: edit, annotation: deadline, amount: 1}],
+   upgrade: {block: 2}}
+
+- {id: proto_ym_fox_fire_draft, name: "Fox Fire Draft", character: yae,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: common, exhaust: true,
+   description: "[gold]Edit[/gold] {IfUpgraded:show:2 cards|a card} in your hand: [gold]Fox Fire[/gold].",
+   effects: [{op: yae, kind: edit, annotation: fox_fire, amount: 1}],
+   upgrade: {yae_amount: 1}}
+
+- {id: proto_ym_sly_strike, name: "Sly Strike", character: yae,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: common,
+   description: "Deal 5 [gold]Electro[/gold] damage. Apply 1 [gold]Weak[/gold].",
+   effects: [{op: damage, amount: 5, target: enemy},
+             {op: apply_power, power: weak, amount: 1, target: enemy}],
+   upgrade: {damage: 2, power_amount: 1}}
+
+- {id: proto_ym_fox_trick, name: "Fox Trick", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "Apply 2 [gold]Weak[/gold] to an enemy. Draw 1 card.",
+   effects: [{op: apply_power, power: weak, amount: 2, target: enemy},
+             {op: draw, amount: 1}],
+   upgrade: {power_amount: 1}}
+
+- {id: proto_ym_shrine_maidens_guard, name: "Shrine Maiden's Guard", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "Gain 4 [gold]Block[/gold], plus 2 for each [gold]Sakura[/gold] standing.",
+   effects: [{op: yae, kind: block_per_sakura, base: 4, per: 2}],
+   upgrade: {yae_base: 2, yae_per: 1}}
+
+# --- Uncommon (13) ---
+
+- {id: proto_ym_sakura_grove, name: "Sakura Grove", character: yae,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   description: "Your [gold]Sakura[/gold] strike for 1 more.",
+   effects: [{op: apply_power, power: ym_sakura_grove, amount: 1, target: self}],
+   upgrade: {power_amount: 1}}
+
+- {id: proto_ym_kitsune_rite, name: "Kitsune Rite", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon, exhaust: true,
+   description: "[gold]Tenko[/gold].",
+   effects: [{op: yae, kind: tenko}],
+   upgrade: {cost: -1}}
+
+- {id: proto_ym_thunderbolt_tithe, name: "Thunderbolt Tithe", character: yae,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: uncommon,
+   description: "Deal 4 [gold]Electro[/gold] damage for each [gold]Sakura[/gold] standing.",
+   effects: [{op: yae, kind: damage_per_sakura, base: 0, per: 4, target: enemy}],
+   upgrade: {yae_per: 2}}
+
+- {id: proto_ym_rooted_shrine, name: "Rooted Shrine", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Each [gold]Sakura[/gold] gains a Level. Gain 3 [gold]Block[/gold].",
+   effects: [{op: yae, kind: level_up, amount: 1},
+             {op: block, amount: 3}],
+   upgrade: {block: 2}}
+
+- {id: proto_ym_edict_of_cleansing, name: "Edict of Cleansing", character: yae,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   description: "Your [gold]Sakura[/gold] strikes deal 4 more to an enemy with a [gold]Pyro[/gold], [gold]Hydro[/gold] or [gold]Cryo[/gold] aura.",
+   effects: [{op: apply_power, power: ym_edict_of_cleansing, amount: 4, target: self}],
+   upgrade: {power_amount: 2}}
+
+- {id: proto_ym_bestseller, name: "Bestseller", character: yae,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: uncommon,
+   description: "Deal 5 [gold]Electro[/gold] damage, plus 3 for each [gold]Annotated[/gold] card in your hand.",
+   effects: [{op: yae, kind: damage_per_annotated, base: 5, per: 3, target: enemy}],
+   upgrade: {yae_base: 2, yae_per: 1}}
+
+- {id: proto_ym_print_run, name: "Print Run", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Gain 4 [gold]Block[/gold], plus 2 for each [gold]Annotated[/gold] card in your hand.",
+   effects: [{op: yae, kind: block_per_annotated, base: 4, per: 2}],
+   upgrade: {yae_base: 1, yae_per: 1}}
+
+- {id: proto_ym_footnote, name: "Footnote", character: yae,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: uncommon, exhaust: true,
+   description: "[gold]Edit[/gold] {IfUpgraded:show:2 cards|a card} in your hand: [gold]Footnote[/gold].",
+   effects: [{op: yae, kind: edit, annotation: footnote, amount: 1}],
+   upgrade: {yae_amount: 1}}
+
+- {id: proto_ym_sakura_seal, name: "Sakura Seal", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   description: "[gold]Edit[/gold] a card in your hand: [gold]Sakura Seal[/gold].",
+   effects: [{op: yae, kind: edit, annotation: sakura_seal, amount: 1}],
+   upgrade: {cost: -1}}
+
+- {id: proto_ym_serialization, name: "Serialization", character: yae,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   description: "Whenever you [gold]Edit[/gold] a card, gain 3 [gold]Block[/gold].",
+   effects: [{op: apply_power, power: ym_serialization, amount: 3, target: self}],
+   upgrade: {power_amount: 1}}
+
+- {id: proto_ym_manuscript_pile, name: "Manuscript Pile", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Draw {Cards:diff()} cards. [gold]Edit[/gold] a card in your hand: [gold]Deadline Extension[/gold].",
+   effects: [{op: draw, amount: 2},
+             {op: yae, kind: edit, annotation: deadline, amount: 1}],
+   upgrade: {draw: 1}}
+
+- {id: proto_ym_kitsune_guile, name: "Kitsune Guile", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Apply 2 [gold]Weak[/gold] to ALL enemies.",
+   effects: [{op: apply_power, power: weak, amount: 2, target: all_enemies}],
+   upgrade: {power_amount: 1}}
+
+- {id: proto_ym_foxfire_lure, name: "Foxfire Lure", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Apply 1 [gold]Weak[/gold] to an enemy. This turn, your [gold]Sakura[/gold] strike it.",
+   effects: [{op: apply_power, power: weak, amount: 1, target: enemy},
+             {op: yae, kind: lure, target: enemy}],
+   upgrade: {power_amount: 1}}
+
+# --- Rare (8) ---
+
+- {id: proto_ym_tenko_kenshin, name: "Great Secret Art: Tenko Kenshin", character: yae,
+   authored_by: [claude],
+   cost: 2, type: attack, rarity: rare,
+   description: "Deal 12 [gold]Electro[/gold] damage to ALL enemies. [gold]Tenko[/gold].",
+   effects: [{op: damage, amount: 12, target: all_enemies},
+             {op: yae, kind: tenko}],
+   upgrade: {damage: 4}}
+
+- {id: proto_ym_foxs_mooncall, name: "Fox's Mooncall", character: yae,
+   authored_by: [claude],
+   cost: 2, type: power, rarity: rare,
+   description: "Your [gold]Sakura[/gold] are planted at Level 2 and can reach Level 4.",
+   effects: [{op: apply_power, power: ym_foxs_mooncall, amount: 1, target: self}],
+   upgrade: {cost: -1}}
+
+- {id: proto_ym_yakan_offering, name: "Yakan Offering", character: yae,
+   authored_by: [claude],
+   cost: 2, type: power, rarity: rare,
+   description: "At the start of your turn, plant a [gold]Sakura[/gold].",
+   effects: [{op: apply_power, power: ym_yakan_offering, amount: 1, target: self}],
+   upgrade: {cost: -1}}
+
+- {id: proto_ym_the_seven_glamours, name: "The Seven Glamours", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: rare, exhaust: true,
+   description: "[gold]Publish[/gold] an [gold]Annotated[/gold] card in your hand: its Annotation lasts the rest of the run.",
+   effects: [{op: yae, kind: publish}],
+   upgrade: {cost: -1}}
+
+- {id: proto_ym_sakura_channeling, name: "Sakura Channeling", character: yae,
+   authored_by: [claude],
+   cost: 2, type: power, rarity: rare,
+   description: "Whenever a [gold]Sakura[/gold] strikes, gain 2 [gold]Block[/gold].",
+   effects: [{op: apply_power, power: ym_sakura_channeling, amount: 2, target: self}],
+   upgrade: {power_amount: 1}}
+
+- {id: proto_ym_mischievous_teasing, name: "Mischievous Teasing", character: yae,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: rare, exhaust: true,
+   description: "Apply 2 [gold]Weak[/gold] to ALL enemies. Draw {Cards:diff()} cards.",
+   effects: [{op: apply_power, power: weak, amount: 2, target: all_enemies},
+             {op: draw, amount: 2}],
+   upgrade: {draw: 1}}
+
+- {id: proto_ym_reborn_as_guuji_yae, name: "Reborn as Guuji Yae", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: rare, exhaust: true,
+   description: "Choose an Annotation. [gold]Edit[/gold] every other card in your hand with it.",
+   effects: [{op: yae, kind: edit_all, annotation: sakura_seal}],
+   upgrade: {cost: -1}}
+
+- {id: proto_ym_editor_in_chief, name: "Editor-in-Chief", character: yae,
+   authored_by: [claude],
+   cost: 2, type: power, rarity: rare,
+   description: "Whenever you play an [gold]Annotated[/gold] card, a [gold]Sakura[/gold] strikes.",
+   effects: [{op: apply_power, power: ym_editor_in_chief, amount: 1, target: self}],
+   upgrade: {cost: -1}}

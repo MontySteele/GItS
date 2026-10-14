@@ -2580,6 +2580,33 @@ def _render_oath(oath: dict[str, Any]) -> list[str]:
     return out
 
 
+SHRINE_HEADING = "## Your shrine"
+SHRINE_COUNT_LINE = ("- Sakura: {n} of 3. At the end of your turn each "
+                     "strikes a random enemy, oldest first.")
+SHRINE_NONE_LINE = "- Sakura: none. Plant one to start your shrine."
+SHRINE_ROW = ("- Sakura {slot}: Level {level}, strikes for {strike}"
+              "{turns}.")
+SHRINE_LURE_LINE = "- Foxfire Lure: your Sakura strike **{name}** this turn."
+SHRINE_ANNOTATED_LINE = "- Annotated cards in your hand: {n}."
+
+
+def _render_shrine(shrine: dict[str, Any]) -> list[str]:
+    """Her block: each Sakura's Level, strike and strikes left, the Lure's
+    enemy, the Annotated count, one fact a line."""
+    rows = shrine["sakura"]
+    out = [SHRINE_COUNT_LINE.format(n=len(rows)) if rows else SHRINE_NONE_LINE]
+    for row in rows:
+        turns = row.get("turns")
+        tail = ("" if turns is None else
+                f", {turns} strike{'s' if turns != 1 else ''} left")
+        out.append(SHRINE_ROW.format(slot=row["slot"], level=row["level"],
+                                     strike=row["strike"], turns=tail))
+    if shrine.get("lure"):
+        out.append(SHRINE_LURE_LINE.format(name=shrine["lure"]))
+    out.append(SHRINE_ANNOTATED_LINE.format(n=shrine.get("annotated", 0)))
+    return out
+
+
 def _render_stage(stage: dict[str, Any], you: dict[str, Any]) -> list[str]:
     """The stage (`EB-735`; the re-founding, 2026-10-04).
 
@@ -3895,6 +3922,9 @@ def render(obs: dict[str, Any]) -> str:
         # the powers, the receipts and the potions, far from the hand.
         if c.get("oath") is not None:
             out += ["", OATH_HEADING, ""] + _render_oath(c["oath"])
+        # YAE MIKO (2026-10-13): her shrine, above the hand, Varka's place.
+        if c.get("shrine") is not None:
+            out += ["", SHRINE_HEADING, ""] + _render_shrine(c["shrine"])
         out += ["", "## Your hand", ""]
         if c.get("spark_note"):
             out += [c["spark_note"], ""]

@@ -6580,6 +6580,13 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         "current element": [" you applied. Swirls pay it: "],
         "Knight": ["One of Varka's Companions. Playing one makes its element "
                    "your ", "current element. ", " does not."],
+        # YAE MIKO (2026-10-13): `ArmKeywordTips.YaeSakuraTip` and
+        # `YaeEditTip`, the prose between the interpolated `YaeLaw` numbers.
+        "Sakura": [" stand beside you. At the end of your ",
+                   "each strikes a random enemy for ",
+                   "every Sakura strikes now and lasts "],
+        "Edit": ["Give a card in your hand an Annotation for this combat, "
+                 "replacing ", "A Published Annotation lasts the run."],
     }
     # `Spotlighted` (2026-09-06) is a row with NO tooltip to be held in step
     # with, `Companion`'s old kind (see above) -- named for its own reason: five Furina surfaces

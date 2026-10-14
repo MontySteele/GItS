@@ -2,7 +2,8 @@
 the engine's pins.
 
 Design: `review/active/yae-card-paper-2026-10-13.md` (sec.2 readings);
-rows: `docs/yae-staging.yaml`, sim only (`loader.STAGING_SHEETS`). No
+rows: `docs/prototype-surface.yaml` (`proto_ym_`), built in both engines
+since 2026-10-13 (C#: `Powers/Prototype/YaeShrine.cs`). No
 switch: every hook is dead for anyone who is not Yae.
 """
 
@@ -73,21 +74,20 @@ def _strikes(st):
 # 0. The sheet and the seams
 # ---------------------------------------------------------------------------
 
-def test_the_staging_sheet_loads_with_the_paper_counts(yae):
-    idx = loader._staging_index()
+def test_her_surface_rows_load_with_the_paper_counts(yae):
     by = {}
-    for c in idx.values():
-        assert c.id.startswith(Y.ID_PREFIX)
+    for c in loader.prototype_cards():
+        if not c.id.startswith(Y.ID_PREFIX):
+            continue
         assert c.character == Y.CHARACTER
         by[c.rarity] = by.get(c.rarity, 0) + 1
     assert by == {"basic": 2, "common": 9, "uncommon": 13, "rare": 8}
 
 
-def test_the_staging_rows_resolve_through_get_card_and_stay_off_the_surface(yae):
+def test_her_rows_resolve_through_get_card_and_the_staging_sheet_is_gone(yae):
     c = loader.get_card(_ym("twin_sakura"))
     assert c.name == "Twin Sakura"
-    assert not any(c.id.startswith(Y.ID_PREFIX)
-                   for c in loader.prototype_cards())
+    assert loader.STAGING_SHEETS == ()
 
 
 def test_her_starter_is_the_base_eight_and_two_of_her_own(yae):

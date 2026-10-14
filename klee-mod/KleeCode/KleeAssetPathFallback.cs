@@ -156,6 +156,8 @@ internal static class KleeAssetPathFallback
         "furina" => "silent",
         "kokomi" => "necrobinder",
         "varka" => "regent",
+        // Yae Miko (2026-10-13): the Defect, whose frame she wears.
+        "yae" => "defect",
         _ => null,
     };
 
@@ -204,6 +206,7 @@ internal static class KleeAssetPathFallback
             Furina => SfxDonorFor("furina"),
             Kokomi => SfxDonorFor("kokomi"),
             Varka => SfxDonorFor("varka"),
+            Yae => SfxDonorFor("yae"),
             _ => null,
         };
         var property = __originalMethod.Name.StartsWith("get_")
