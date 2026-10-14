@@ -1289,7 +1289,10 @@ PLAN_WRITTEN_NUMBER_NOTE = ("- Your Strength when you write it counts, a loss "
                             "(Tender) as much as a gain; Weak or Shrink on "
                             "you never does. A Plan that reads an intent "
                             "(Tide Wall, Flank, Undercurrent Snare) reads it "
-                            "when it lands.")
+                            "when it lands. A planned Block is yours, so "
+                            "Frail cuts it. A written Companion is played as "
+                            "a card next turn, so your Strength and Weak "
+                            "then count.")
 #: Kokomi review r5 (2026-10-14, A2): so Spearhead before Masterstroke is
 #: visible.
 PLAN_ORDER_NOTE = "- Plans carry out in the order written."

@@ -10810,7 +10810,10 @@ def test_the_plan_panel_says_the_written_number_does_not_move():
     assert said == ("- Your Strength when you write it counts, a loss "
                     "(Tender) as much as a gain; Weak or Shrink on you never "
                     "does. A Plan that reads an intent (Tide Wall, Flank, "
-                    "Undercurrent Snare) reads it when it lands.")
+                    "Undercurrent Snare) reads it when it lands. A planned "
+                    "Block is yours, so Frail cuts it. A written Companion "
+                    "is played as a card next turn, so your Strength and "
+                    "Weak then count.")
     assert "afterwards" not in said
     # Beside the count rule, which is the one it qualifies.
     assert lines.index(blindplay.PLAN_COUNT_NOTE) + 1 == \
