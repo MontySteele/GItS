@@ -16779,6 +16779,51 @@ def varka_swirl_face_arg(card: dict, profile: "CharacterProfile",
     return (VARKA_SWIRL_TOKEN, "VarkaOath.SwirlLine(this)")
 
 
+#: YAE REVIEW R1 (Claude, 2026-10-14, no pick): the tokens of her two live
+#: clauses (`YaeShrineFace.RiteToken`, `YaeShrineFace.TenkoToken`).
+YAE_RITE_TOKEN = "YaeRite"
+YAE_TENKO_TOKEN = "YaeTenko"
+
+
+def yae_face_lines(card: dict, profile: "CharacterProfile",
+                   desc: str) -> tuple[str, list[tuple[str, str]]]:
+    """A Yae row's face with its live clauses placed, and their (token, C#).
+
+    A "Rite: X" row says in combat what the shrine would do under X, summed
+    over the Sakura standing: "Rite: Warding (your Sakura: 5 Block)", the
+    `{InCombat:{YaeRite}|}` right after the Rite's name. A row that Tenkos
+    says "Tenko (no Sakura)" while none stands. DERIVED FROM THE OPS, so a
+    new Rite or Tenko row carries its clause the day it exists. Sim twins:
+    `yae_shrine.rite_line`, `yae_shrine.tenko_line`.
+    """
+    if profile.character_id != "yae" or card.get("character") != "yae":
+        return desc, []
+    ops = [e for e in card.get("effects") or [] if e.get("op") == "yae"]
+    args: list[tuple[str, str]] = []
+    rites = [e for e in ops if e.get("kind") == "rite"]
+    if rites:
+        if len(rites) != 1:
+            raise ValueError(f"{card['id']}: a face reads one Rite")
+        name = YAE_RITES[rites[0]["rite"]]
+        clause = f"[gold]Rite[/gold]: {name}"
+        if desc.count(clause) != 1:
+            raise ValueError(f"{card['id']}: a Rite row prints {clause!r} "
+                             "once")
+        desc = desc.replace(clause,
+                            clause + "{InCombat:{" + YAE_RITE_TOKEN + "}|}")
+        args.append((YAE_RITE_TOKEN,
+                     f"YaeShrineFace.RiteLine(this, YaeRite.{name})"))
+    if any(e.get("kind") == "tenko" for e in ops):
+        clause = "[gold]Tenko[/gold]"
+        if desc.count(clause) != 1:
+            raise ValueError(f"{card['id']}: a Tenko row prints {clause!r} "
+                             "once")
+        desc = desc.replace(clause,
+                            clause + "{InCombat:{" + YAE_TENKO_TOKEN + "}|}")
+        args.append((YAE_TENKO_TOKEN, "YaeShrineFace.TenkoLine(this)"))
+    return desc, args
+
+
 #: THE ARCHAIC TOOTH (Varka review, ruled 2026-10-12: "Dandelion Gale could be
 #: the Replace version"). Orobas's relic transforms a starter card into its
 #: Ancient through the private `ArchaicTooth.TranscendenceUpgrades` map;
@@ -17104,6 +17149,10 @@ def emit(
     if swirl_arg is not None:
         face_args.append(swirl_arg)
     desc = stage_lines_face(desc, face_args)
+    # Yae review r1 (2026-10-14): her live clauses sit INSIDE the face, right
+    # after the words they qualify, so they are placed here, not appended.
+    desc, yae_args = yae_face_lines(card, profile, desc)
+    face_args.extend(yae_args)
     desc_cs = desc.replace("\n", "\\n")
     desc_expr = f'"{desc_cs}"'
     if blanks_burst:
@@ -18139,6 +18188,9 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             "    /// `VarkaOath.SwirlLine`)."
             if set(tokens) <= {VARKA_SWITCH_TOKEN, VARKA_WILDFIRE_TOKEN,
                                VARKA_SWIRL_TOKEN} else
+            "This card's in-combat shrine clauses\n"
+            "    /// (`YaeShrineFace`)."
+            if set(tokens) <= {YAE_RITE_TOKEN, YAE_TENKO_TOKEN} else
             "This card's in-combat Stage line\n"
             "    /// (`FurinaStageFacePreview`).")
         adds = "".join(f'        description.Add("{token}", {call});\n'

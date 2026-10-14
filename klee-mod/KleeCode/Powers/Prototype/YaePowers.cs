@@ -161,6 +161,10 @@ public static class SakuraBadge
         {
             badge.Refresh();
         }
+        foreach (var badge in yae.Powers.OfType<YaeRiteBadgePower>())
+        {
+            badge.Refresh();
+        }
     }
 }
 
@@ -177,11 +181,38 @@ public abstract class YaeRiteBadgePower : PowerModel, ILocalizationProvider
     {
         ("title", "Rite: " + Rite),
         ("description", YaeRiteText.Rule(Rite)),
+        // Yae review r1 (Claude, 2026-10-14): with a Sakura standing, the
+        // badge adds what they would do now under this Rite, the sum the
+        // "Rite: X" cards print (`YaeShrineFace`).
+        ("smartDescription", YaeRiteText.Rule(Rite)),
+        (LiveKey, YaeRiteText.Rule(Rite) + YaeRiteText.Now(Rite)),
     };
+
+    /// <summary>The smart face read while a Sakura stands.</summary>
+    public const string LiveKey = "smartDescriptionLive";
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Single;
+
+    protected override IEnumerable<DynamicVar> CanonicalVars => new List<DynamicVar>
+    {
+        new("Total", 0m),
+    };
+
+    /// <summary>The live face while the total is above 0 (a Sakura stands).
+    /// </summary>
+    protected override string SmartDescriptionLocKey =>
+        Id.Entry + "." + (DynamicVars["Total"].BaseValue > 0 ? LiveKey : "smartDescription");
+
+    /// <summary>Copy the shrine's total under this Rite into the tooltip.
+    /// </summary>
+    internal void Refresh()
+    {
+        if (!IsMutable || Owner == null) return;
+        DynamicVars["Total"].BaseValue = YaeShrineFace.Total(Owner, Rite);
+        InvokeDisplayAmountChanged();
+    }
 }
 
 public sealed class ThunderRitePower : YaeRiteBadgePower
@@ -208,6 +239,12 @@ public sealed class OfferingRitePower : YaeRiteBadgePower
 /// </summary>
 public static class YaeRiteText
 {
+    /// <summary>The badge's live sentence, the cards' clause as a sentence:
+    /// " Your Sakura now: {Total} Block." (Yae review r1, 2026-10-14).
+    /// </summary>
+    public static string Now(YaeRite rite) =>
+        " Your Sakura now: " + YaeShrineFace.RiteAmount(rite, "{Total}") + ".";
+
     public static string Rule(YaeRite rite) => rite switch
     {
         YaeRite.Warding =>

@@ -48,13 +48,22 @@ public sealed class ProtoYmKitsuneRite : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kitsune Rite"),
-        ("description", "[gold]Tenko[/gold]."),
+        ("description", "[gold]Tenko[/gold]{InCombat:{YaeTenko}|}. Draw 1 card."),
     };
+
+    /// <summary>This card's in-combat shrine clauses
+    /// (`YaeShrineFace`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("YaeTenko", YaeShrineFace.TenkoLine(this));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new CardsVar(1)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -67,6 +76,7 @@ public sealed class ProtoYmKitsuneRite : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await YaeCards.Tenko(choiceContext, this, cardPlay);
+        await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
     }
 
     protected override void OnUpgrade()

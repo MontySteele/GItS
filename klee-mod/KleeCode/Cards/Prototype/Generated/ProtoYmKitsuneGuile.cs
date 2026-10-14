@@ -45,8 +45,17 @@ public sealed class ProtoYmKitsuneGuile : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kitsune Guile"),
-        ("description", "Apply {PowerAmount:diff()} [gold]Weak[/gold] to ALL enemies. [gold]Rite[/gold]: Wildfire."),
+        ("description", "Apply {PowerAmount:diff()} [gold]Weak[/gold] to ALL enemies. [gold]Rite[/gold]: Wildfire{InCombat:{YaeRite}|}."),
     };
+
+    /// <summary>This card's in-combat shrine clauses
+    /// (`YaeShrineFace`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("YaeRite", YaeShrineFace.RiteLine(this, YaeRite.Wildfire));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

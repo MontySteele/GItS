@@ -45,8 +45,17 @@ public sealed class ProtoYmShrineMaidensGuard : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Shrine Maiden's Guard"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Rite[/gold]: Warding."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Rite[/gold]: Warding{InCombat:{YaeRite}|}."),
     };
+
+    /// <summary>This card's in-combat shrine clauses
+    /// (`YaeShrineFace`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("YaeRite", YaeShrineFace.RiteLine(this, YaeRite.Warding));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
