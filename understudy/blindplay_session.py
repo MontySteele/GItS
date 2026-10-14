@@ -19,7 +19,7 @@ from understudy import authorship, bridge, offer_log, qa_packet, seat
 from understudy.blindplay_coop import (WAIT_POLL_S, blocked_on_partner,
                                        is_coop, not_waiting_line,
                                        wait_for_partner, wait_line)
-from understudy.blindplay_faces import hand_card_left
+from understudy.blindplay_faces import hand_card_left, hand_card_picked
 from understudy.blindplay_grammar import act
 from understudy.blindplay_observe import observation
 from understudy.blindplay_read import _int, settle, settle_board, _text
@@ -905,9 +905,15 @@ def refused(result: Any) -> bool:
 def card_played(state: dict[str, Any], action: str, post: dict[str, Any],
                 result: Any) -> None:
     """A sent play the bridge did not refuse: that card has left the hand,
-    so its number goes with it (`blindplay_faces.hand_card_left`)."""
-    if action == "play_card" and not refused(result)             and isinstance(post.get("card_index"), int):
+    so its number goes with it (`blindplay_faces.hand_card_left`). A sent
+    hand-chooser pick: that card keeps its number wherever the pick leaves
+    it (`blindplay_faces.hand_card_picked`)."""
+    if refused(result) or not isinstance(post.get("card_index"), int):
+        return
+    if action == "play_card":
         hand_card_left(state, post["card_index"])
+    elif action == "combat_select_card":
+        hand_card_picked(state, post["card_index"])
 
 
 def answer_lines(res: dict[str, Any], state: dict[str, Any] | None,
