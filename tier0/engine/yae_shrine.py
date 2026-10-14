@@ -15,9 +15,10 @@ constant census nor the world stamp.
 THE RULES AS MODELLED:
   * SAKURA: up to `SAKURA_CAP` on a per-fight ledger (`YaeLedger.sakura`),
     each with a LEVEL and a TIMER (strikes left). Planted at `PLANT_LEVEL`
-    (2 under Fox's Mooncall) with 3 strikes left. Planting while others stand
-    raises every standing Sakura's Level by 1, to `LEVEL_CAP` (4 under
-    Mooncall); planting a fourth levels the three and adds none (`SCALING ==
+    (+1 per Fox's Mooncall) with 3 strikes left. Planting while others stand
+    raises every standing Sakura's Level by 1, WITHOUT CAP (Yae review r1,
+    pick 2, ruled 2026-10-14: Levels stack and leave with their Sakura);
+    planting a fourth levels the three and adds none (`SCALING ==
     "level"`, the paper's pick 1 (a)). Under `SCALING == "count"` (pick 1 (b),
     the proposal's placeholder) Levels are off: a Sakura strikes for the
     count-table value, a fourth plant replaces the oldest, and each Tenko
@@ -28,8 +29,10 @@ THE RULES AS MODELLED:
     `SAKURA_BASE + Level` Electro to one random living enemy (the Lure's
     enemy this turn, while it lives), unpowered (a pet's hit: no Strength, no
     Weak; Vulnerable and Block apply), source "card" (a Power's hit in the
-    EB-495 matrix). Then its timer ticks; at 0 it withers. A strike that
-    kills ends nothing else early.
+    EB-495 matrix). Then its timer ticks; at 0 it withers. LAST BLOOM (Yae
+    review r1, pick 1 (a)): a Sakura that withers first strikes once more
+    under the current Rite (a normal strike), then leaves; Fallen Petals
+    banks it after the bloom. A strike that kills ends nothing else early.
   * TENKO: every Sakura strikes now, oldest first, then every timer is set
     back to 3. The strikes are the same strikes (Grove, Edict, Channeling
     all pay). Tenko with no Sakura does nothing.
@@ -47,13 +50,14 @@ THE RULES AS MODELLED:
     carries a Published Annotation into the next fight by deck slot, and
     Meditations of a Yako's rest-site Publish reads the DRAFTS the fight
     left (`YaeLedger.drafts`, slot -> last Annotation).
-  * POWERS (self, by name): Sakura Grove (+n per strike), Edict of Cleansing
+  * POWERS (self, by name): Sakura Grove (at her turn start, after Yakan
+    Offering, the newest Sakura gains n Levels), Edict of Cleansing
     (+n on a damage strike at an enemy that is Weak or wears Pyro, Hydro or
     Cryo), Serialization (Block per Edit, unpowered), Fox's Mooncall (plant
-    at Level 2, cap 4), Yakan Offering (plant at the start of her turn, after
+    n Levels higher), Yakan Offering (plant at the start of her turn, after
     the draw), Sakura Channeling (every strike also strikes as Thunder),
     Editor-in-Chief (after an Annotated card's play, the highest-Level Sakura
-    strikes), Mikage Thunder (+n per strike, as Grove), Fallen Petals
+    strikes), Fallen Petals
     (Energy per wither; its upgrade's power also draws).
 
   * RITES (`review/active/yae-design-axes-2026-10-14.md`, ruled
@@ -61,8 +65,7 @@ THE RULES AS MODELLED:
     every combat start; a "Rite: X" card switches it and it holds. Every
     strike works under it: Thunder 2 + Level Electro to a random enemy;
     Warding 2 + Level Block (unpowered); Wildfire Level Electro to ALL;
-    Offering, 1 more card drawn at the start of her next turn. Grove and
-    Mikage Thunder size Thunder, Warding and Wildfire, not Offering. Edict
+    Offering, 1 more card drawn at the start of her next turn. Edict
     pays on damage strikes at an enemy that is Weak or will react. The Lure
     aims single-target damage strikes. Sakura Channeling: a strike in any
     other Rite also strikes as Thunder.
@@ -98,10 +101,7 @@ CADENCE = "catalyst"
 SAKURA_CAP = 3
 SAKURA_TURNS = 3            # strikes a Sakura has when planted or refreshed
 SAKURA_BASE = 2             # a strike deals this plus the Sakura's Level
-PLANT_LEVEL = 1
-LEVEL_CAP = 3
-MOONCALL_PLANT_LEVEL = 2    # Fox's Mooncall: planted at 2, cap 4
-MOONCALL_LEVEL_CAP = 4
+PLANT_LEVEL = 1             # +1 per Fox's Mooncall; Levels have no cap
 #: Pick 1 (b): the proposal's placeholder, a strike by the COUNT standing.
 COUNT_TABLE = {1: 3, 2: 4, 3: 5}   # the same ceiling as (a), paired
 COUNT_TENKO_BONUS = 1       # (b): each Tenko adds 1 to every later strike
@@ -144,7 +144,6 @@ OFFERING_DRAW = 1
 #: The Annotations a Sakura can carry (`edit_sakura`).
 SAKURA_ANNOTATIONS = (RED_INK, FOX_FIRE, DEADLINE)
 SAKURA_EDIT_ENDS = ("newest", "oldest", "every")
-MIKAGE_THUNDER = "ym_mikage_thunder"
 FALLEN_PETALS = "ym_fallen_petals"
 FALLEN_PETALS_PLUS = "ym_fallen_petals_plus"
 
@@ -264,27 +263,23 @@ def sakura_count(player) -> int:
     return 0 if led is None else len(led.sakura)
 
 
-def _level_cap(player) -> int:
-    return MOONCALL_LEVEL_CAP if _power(player, MOONCALL) else LEVEL_CAP
-
-
 def _plant_level(player) -> int:
-    return MOONCALL_PLANT_LEVEL if _power(player, MOONCALL) else PLANT_LEVEL
+    """1, plus 1 for each Fox's Mooncall ("planted 1 Level higher")."""
+    return PLANT_LEVEL + _power(player, MOONCALL)
 
 
 def plant(state, n: int = 1, reason: str = "plant",
           level: Optional[int] = None) -> None:
     """Plant `n` Sakura, one at a time (each levels the ones standing).
     `level` (Grafted Branch) starts the new one higher, never lower than the
-    plant Level, capped."""
+    plant Level. No Level cap."""
     led = ledger(state.player)
     if led is None:
         return
     for _ in range(n):
-        cap = _level_cap(state.player)
         if SCALING == "level":
             for s in led.sakura:
-                s.level = min(cap, s.level + 1)
+                s.level += 1
             if len(led.sakura) >= SAKURA_CAP:
                 state.emit("yae_level", reason=reason,
                            levels=[s.level for s in led.sakura])
@@ -294,7 +289,7 @@ def plant(state, n: int = 1, reason: str = "plant",
         led.seq += 1
         start = _plant_level(state.player)
         if level is not None:
-            start = min(cap, max(start, level))
+            start = max(start, level)
         led.sakura.append(Sakura(level=start,
                                  turns_left=SAKURA_TURNS, seq=led.seq))
         state.emit("yae_plant", reason=reason, count=len(led.sakura),
@@ -303,9 +298,9 @@ def plant(state, n: int = 1, reason: str = "plant",
 
 def strike_size(state, s: Sakura, rite: Optional[str] = None) -> int:
     """One strike's size under `rite` (the shrine's, by default), before
-    Edict: Thunder and Warding 2 + Level, Wildfire Level, Offering 1; Grove
-    and Mikage Thunder add to all but Offering, and so does a Red Ink
-    Sakura's 3 (Claude, 2026-10-14: Red Ink skips Offering)."""
+    Edict: Thunder and Warding 2 + Level, Wildfire Level, Offering 1; a Red
+    Ink Sakura's 3 adds to all but Offering (Claude, 2026-10-14). No global
+    bonus: Grove and Mikage Thunder raise Levels (Yae review r1, pick 2)."""
     p = state.player
     led = ledger(p)
     rite = rite or led.rite
@@ -319,7 +314,6 @@ def strike_size(state, s: Sakura, rite: Optional[str] = None) -> int:
                     + led.shrine_bonus)
         if rite == WILDFIRE:
             size -= SAKURA_BASE
-        size += _power(p, SAKURA_GROVE) + _power(p, MIKAGE_THUNDER)
         if s.annotation == RED_INK:
             size += RED_INK_AMOUNT
     return size
@@ -509,15 +503,24 @@ def extend(state, n: int) -> None:
 
 
 def level_up(state, n: int) -> None:
+    """"Each Sakura gains a Level" (n Levels), no cap."""
     led = ledger(state.player)
-    cap = _level_cap(state.player)
     for s in led.sakura:
-        s.level = min(cap, s.level + n)
+        s.level += n
+
+
+def level_up_newest(state, n: int) -> None:
+    """Sakura Grove: "your newest Sakura gains a Level" (n Levels)."""
+    led = ledger(state.player)
+    if led.sakura:
+        led.sakura[-1].level += n
+        state.emit("yae_level", reason="sakura_grove",
+                   levels=[s.level for s in led.sakura])
 
 
 def turn_start(state) -> None:
     """`combat._player_turn`, post-draw: the Lure expires; Yakan Offering
-    plants."""
+    plants; then Sakura Grove levels the newest."""
     led = ledger(state.player)
     if led is None:
         return
@@ -536,11 +539,16 @@ def turn_start(state) -> None:
         state.draw(draw)
     for _ in range(_power(state.player, YAKAN_OFFERING)):
         plant(state, 1, "yakan_offering")
+    grove = _power(state.player, SAKURA_GROVE)
+    if grove:
+        level_up_newest(state, grove)
 
 
 def turn_end(state) -> None:
-    """`combat`'s player turn end: the strikes, then the timers tick and
-    the withered leave."""
+    """`combat`'s player turn end: the strikes, then the timers tick. LAST
+    BLOOM (Yae review r1, pick 1 (a), ruled 2026-10-14): each Sakura whose
+    timer ran out, oldest first, strikes once more under the current Rite,
+    then withers (and Fallen Petals banks it)."""
     led = ledger(state.player)
     if led is None:
         return
@@ -549,11 +557,11 @@ def turn_end(state) -> None:
         if s.annotation != DEADLINE:          # Deadline Extension: no wither
             s.turns_left -= 1
     withered = [s for s in led.sakura if s.turns_left <= 0]
-    led.pending_withers += len(withered)
-    if withered:
-        led.sakura = [s for s in led.sakura if s.turns_left > 0]
-        state.emit("yae_wither", count=len(withered),
-                   standing=len(led.sakura))
+    for s in withered:
+        strike(state, s, "bloom")             # still standing as it blooms
+        led.sakura.remove(s)
+        led.pending_withers += 1
+        state.emit("yae_wither", count=1, standing=len(led.sakura))
     _record_drafts(state)
 
 

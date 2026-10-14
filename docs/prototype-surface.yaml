@@ -4690,10 +4690,12 @@
 - {id: proto_ym_sakura_grove, name: "Sakura Grove", character: yae,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   # Design axes sec.4: 2 [3] (was 1 [2]), in Thunder, Warding and Wildfire.
-   description: "Your [gold]Sakura[/gold] strike for 2 more in Thunder, Warding and Wildfire.",
-   effects: [{op: apply_power, power: ym_sakura_grove, amount: 2, target: self}],
-   upgrade: {power_amount: 1}}
+   # Yae review r1, pick 2 (ruled 2026-10-14): per-Sakura, not global (was
+   # "strike for 2 [3] more in Thunder, Warding and Wildfire"). Each copy
+   # raises once.
+   description: "At the start of your turn, your newest [gold]Sakura[/gold] gains a Level.",
+   effects: [{op: apply_power, power: ym_sakura_grove, amount: 1, target: self}],
+   upgrade: {innate: true}}
 
 - {id: proto_ym_kitsune_rite, name: "Kitsune Rite", character: yae,
    authored_by: [claude],
@@ -4810,12 +4812,12 @@
 - {id: proto_ym_mikage_thunder, name: "Mikage Thunder", character: yae,
    authored_by: [claude],
    cost: 2, type: attack, rarity: uncommon,
-   # The paper prints no upgrade and the Prototype-stage rule reaches none;
-   # the upgrade moves the printed number, Sakura Grove's way (1 to 2).
-   description: "[gold]Tenko[/gold]. For the rest of this combat, your [gold]Sakura[/gold] strike for 1 more.",
-   effects: [{op: yae, kind: tenko},
-             {op: apply_power, power: ym_mikage_thunder, amount: 1, target: self}],
-   upgrade: {power_amount: 1}}
+   # Yae review r1, pick 2 (ruled 2026-10-14): Levels, then Tenko (was
+   # "Tenko. For the rest of this combat, your Sakura strike for 1 more").
+   description: "Each [gold]Sakura[/gold] gains {IfUpgraded:show:2 Levels|a Level}. [gold]Tenko[/gold].",
+   effects: [{op: yae, kind: level_up, amount: 1},
+             {op: yae, kind: tenko}],
+   upgrade: {yae_amount: 1}}
 
 - {id: proto_ym_inked_branches, name: "Inked Branches", character: yae,
    authored_by: [claude],
@@ -4837,7 +4839,9 @@
 - {id: proto_ym_foxs_mooncall, name: "Fox's Mooncall", character: yae,
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
-   description: "Your [gold]Sakura[/gold] are planted at Level 2 and can reach Level 4.",
+   # Yae review r1, pick 2 (ruled 2026-10-14): Levels have no cap; each copy
+   # plants 1 Level higher (was "planted at Level 2 and can reach Level 4").
+   description: "Your [gold]Sakura[/gold] are planted 1 Level higher.",
    effects: [{op: apply_power, power: ym_foxs_mooncall, amount: 1, target: self}],
    upgrade: {cost: -1}}
 

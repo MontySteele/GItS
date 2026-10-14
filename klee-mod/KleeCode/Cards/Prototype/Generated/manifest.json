@@ -2398,7 +2398,7 @@
       "damage": 3
     },
     "proto_ym_mikage_thunder": {
-      "power_amount": 1
+      "yae_amount": 1
     },
     "proto_ym_mischievous_teasing": {
       "draw": 1
@@ -2423,7 +2423,7 @@
       "cost": -1
     },
     "proto_ym_sakura_grove": {
-      "power_amount": 1
+      "innate": true
     },
     "proto_ym_sakura_seal": {
       "yae_amount": 1

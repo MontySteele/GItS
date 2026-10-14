@@ -518,8 +518,6 @@ internal static class KleePowerIcons
             ?? KleePck.Path("klee/powers/detonation_vuln.png"),
         OfferingRitePower => KleePck.Path("yae/powers/yakan_offering.png")
             ?? KleePck.Path("klee/powers/oz_summon.png"),
-        MikageThunderPower => KleePck.Path("yae/powers/sakura_grove.png")
-            ?? KleePck.Path("klee/powers/bomb_damage_up.png"),
         FallenPetalsPower => KleePck.Path("yae/powers/sakura.png")
             ?? KleePck.Path("klee/powers/oz_summon.png"),
         FallenPetalsPlusPower => KleePck.Path("yae/powers/sakura.png")

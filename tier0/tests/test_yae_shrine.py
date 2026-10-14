@@ -143,11 +143,11 @@ def test_planting_levels_the_standing_sakura_and_a_fourth_only_levels(yae):
         _play(st, _ym("yakan_evocation"))
     assert [s.level for s in _led(st).sakura] == [3, 2, 1]
     _play(st, _ym("yakan_evocation"))
-    assert [s.level for s in _led(st).sakura] == [3, 3, 2]
-    _play(st, _ym("yakan_evocation"))
-    assert [s.level for s in _led(st).sakura] == [3, 3, 3]
+    assert [s.level for s in _led(st).sakura] == [4, 3, 2]
+    _play(st, _ym("yakan_evocation"))            # no cap (review r1, pick 2)
+    assert [s.level for s in _led(st).sakura] == [5, 4, 3]
     Y.turn_end(st)
-    assert sum(r["amount"] for r in _strikes(st)) == 15
+    assert sum(r["amount"] for r in _strikes(st)) == 7 + 6 + 5
 
 
 def test_a_sakura_withers_after_three_strikes_and_tenko_refreshes(yae):
@@ -156,7 +156,8 @@ def test_a_sakura_withers_after_three_strikes_and_tenko_refreshes(yae):
     for _ in range(3):
         Y.turn_end(st)
     assert _led(st).sakura == []
-    assert len(_strikes(st)) == 3
+    assert len(_strikes(st)) == 3 + 1                # and its Last Bloom
+    assert _strikes(st)[-1]["reason"] == "bloom"
     _play(st, _ym("yakan_evocation"))
     Y.turn_end(st)
     Y.turn_end(st)
@@ -201,12 +202,12 @@ def test_sakura_readers_count_the_standing(yae):
     assert st.player.block == 6 and _led(st).rite == Y.WARDING
 
 
-def test_mooncall_plants_at_two_and_caps_at_four(yae):
+def test_mooncall_plants_one_higher_and_levels_have_no_cap(yae):
     st = _state()
     _play(st, _ym("foxs_mooncall"))
     for _ in range(5):
         _play(st, _ym("yakan_evocation"))
-    assert [s.level for s in _led(st).sakura] == [4, 4, 4]
+    assert [s.level for s in _led(st).sakura] == [6, 5, 4]
 
 
 def _hits(st):
@@ -215,12 +216,11 @@ def _hits(st):
 
 def test_the_powers_pay_on_a_strike(yae):
     st = _state(enemies=[_enemy(name="e0", aura="hydro")])
-    _play(st, _ym("sakura_grove"))               # +2
     _play(st, _ym("edict_of_cleansing"))         # +3 on a reacting aura
     _play(st, _ym("yakan_evocation"))
     Y.turn_end(st)
-    assert _strikes(st)[0]["amount"] == 3 + 2
-    assert _hits(st)[0]["amount"] == 3 + 2 + 3
+    assert _strikes(st)[0]["amount"] == 3
+    assert _hits(st)[0]["amount"] == 3 + 3
     assert st.enemies[0].aura is None            # the reaction consumed it
 
 
@@ -300,27 +300,6 @@ def test_a_rite_holds_until_another_replaces_it(yae):
     assert _strikes(st)[-1]["rite"] == Y.THUNDER
 
 
-def test_grove_and_mikage_size_three_rites_but_not_offering(yae):
-    st = _state()
-    _play(st, _ym("sakura_grove"))               # +2
-    _play(st, _ym("mikage_thunder"))             # +1 (after its own Tenko)
-    _play(st, _ym("yakan_evocation"))
-    s = _led(st).sakura[0]
-    assert Y.strike_size(st, s, Y.THUNDER) == 3 + 3
-    assert Y.strike_size(st, s, Y.WARDING) == 3 + 3
-    assert Y.strike_size(st, s, Y.WILDFIRE) == 1 + 3
-    assert Y.strike_size(st, s, Y.OFFERING) == 1
-
-
-def test_mikage_thunder_tenkos_then_stacks_per_play(yae):
-    st = _state()
-    _play(st, _ym("yakan_evocation"))
-    _play(st, _ym("mikage_thunder"))
-    assert _strikes(st)[-1]["reason"] == "tenko"
-    assert _strikes(st)[-1]["amount"] == 3       # the Tenko came first
-    _play(st, _ym("mikage_thunder"))
-    assert st.player.powers[Y.MIKAGE_THUNDER] == 2
-    assert _strikes(st)[-1]["amount"] == 3 + 1
 
 
 def test_channeling_adds_a_thunder_strike_in_any_other_rite(yae):

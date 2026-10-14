@@ -49,10 +49,9 @@ public class YaePrototypeTests : IDisposable
     private static YaeShrineLedger Fresh() => YaeShrineLedger.For(Seat.Yae().Creature);
 
     private static void PlantN(YaeShrineLedger ledger, int n,
-                               int plantLevel = YaeLaw.PlantLevel,
-                               int cap = YaeLaw.LevelCap)
+                               int plantLevel = YaeLaw.PlantLevel)
     {
-        for (var i = 0; i < n; i++) ledger.Plant(plantLevel, cap);
+        for (var i = 0; i < n; i++) ledger.Plant(plantLevel);
     }
 
     /// <summary>A model allocated uninitialised: a CustomRelicModel's or
@@ -113,9 +112,6 @@ public class YaePrototypeTests : IDisposable
         Assert.Equal(3, YaeLaw.SakuraTurns);
         Assert.Equal(2, YaeLaw.SakuraBase);
         Assert.Equal(1, YaeLaw.PlantLevel);
-        Assert.Equal(3, YaeLaw.LevelCap);
-        Assert.Equal(2, YaeLaw.MooncallPlantLevel);
-        Assert.Equal(4, YaeLaw.MooncallLevelCap);
         Assert.Equal(3, YaeLaw.RedInkAmount);
         Assert.Equal(4, YaeLaw.FoxFireDamage);
         Assert.Equal(1, YaeLaw.OfferingPerStrike);
@@ -126,7 +122,7 @@ public class YaePrototypeTests : IDisposable
     public void A_plant_is_level_one_with_three_strikes()
     {
         var ledger = Fresh();
-        Assert.True(ledger.Plant(YaeLaw.PlantLevel, YaeLaw.LevelCap));
+        Assert.True(ledger.Plant(YaeLaw.PlantLevel));
         var s = Assert.Single(ledger.Standing);
         Assert.Equal(1, s.Level);
         Assert.Equal(3, s.TurnsLeft);
@@ -145,26 +141,26 @@ public class YaePrototypeTests : IDisposable
     {
         var ledger = Fresh();
         PlantN(ledger, 3);
-        Assert.False(ledger.Plant(YaeLaw.PlantLevel, YaeLaw.LevelCap));
+        Assert.False(ledger.Plant(YaeLaw.PlantLevel));
         Assert.Equal(3, ledger.Count);
-        Assert.Equal(new[] { 3, 3, 2 }, ledger.Standing.Select(s => s.Level));
-        PlantN(ledger, 1);
-        Assert.Equal(new[] { 3, 3, 3 }, ledger.Standing.Select(s => s.Level));
+        Assert.Equal(new[] { 4, 3, 2 }, ledger.Standing.Select(s => s.Level));
+        PlantN(ledger, 1);                    // no cap (review r1, pick 2)
+        Assert.Equal(new[] { 5, 4, 3 }, ledger.Standing.Select(s => s.Level));
     }
 
     [Fact]
     public void A_strike_is_two_plus_level_so_a_mature_shrine_is_fifteen()
     {
-        Assert.Equal(3, YaeShrineLedger.StrikeDamage(1, 0, false, 0));
-        Assert.Equal(5, YaeShrineLedger.StrikeDamage(3, 0, false, 0));
-        Assert.Equal(15, 3 * YaeShrineLedger.StrikeDamage(3, 0, false, 0));
+        Assert.Equal(3, YaeShrineLedger.StrikeDamage(1, false, 0));
+        Assert.Equal(5, YaeShrineLedger.StrikeDamage(3, false, 0));
+        Assert.Equal(15, 3 * YaeShrineLedger.StrikeDamage(3, false, 0));
     }
 
     [Fact]
-    public void Sakura_grove_adds_to_every_strike_and_edict_only_when_it_applies()
+    public void Edict_adds_only_when_it_applies()
     {
-        Assert.Equal(4, YaeShrineLedger.StrikeDamage(1, 1, false, 4));
-        Assert.Equal(8, YaeShrineLedger.StrikeDamage(1, 1, true, 4));
+        Assert.Equal(3, YaeShrineLedger.StrikeDamage(1, false, 4));
+        Assert.Equal(7, YaeShrineLedger.StrikeDamage(1, true, 4));
         // Edict works solo (design axes sec.4): Weak, or an aura it reacts with.
         Assert.True(YaeShrineLedger.EdictApplies(weak: true, reacts: false));
         Assert.True(YaeShrineLedger.EdictApplies(weak: false, reacts: true));
@@ -184,19 +180,10 @@ public class YaePrototypeTests : IDisposable
     public void Each_rites_strike_size()
     {
         // Thunder and Warding 2 + Level; Wildfire Level; Offering 1 card.
-        Assert.Equal(5, YaeShrineLedger.StrikeSize(YaeRite.Thunder, 3, 0, 0, YaeAnnotation.None));
-        Assert.Equal(5, YaeShrineLedger.StrikeSize(YaeRite.Warding, 3, 0, 0, YaeAnnotation.None));
-        Assert.Equal(3, YaeShrineLedger.StrikeSize(YaeRite.Wildfire, 3, 0, 0, YaeAnnotation.None));
-        Assert.Equal(1, YaeShrineLedger.StrikeSize(YaeRite.Offering, 3, 0, 0, YaeAnnotation.None));
-    }
-
-    [Fact]
-    public void Grove_and_mikage_size_three_rites_and_not_offering()
-    {
-        Assert.Equal(3 + 2 + 1, YaeShrineLedger.StrikeSize(YaeRite.Thunder, 1, 2, 1, YaeAnnotation.None));
-        Assert.Equal(3 + 2 + 1, YaeShrineLedger.StrikeSize(YaeRite.Warding, 1, 2, 1, YaeAnnotation.None));
-        Assert.Equal(1 + 2 + 1, YaeShrineLedger.StrikeSize(YaeRite.Wildfire, 1, 2, 1, YaeAnnotation.None));
-        Assert.Equal(1, YaeShrineLedger.StrikeSize(YaeRite.Offering, 1, 2, 1, YaeAnnotation.None));
+        Assert.Equal(5, YaeShrineLedger.StrikeSize(YaeRite.Thunder, 3, YaeAnnotation.None));
+        Assert.Equal(5, YaeShrineLedger.StrikeSize(YaeRite.Warding, 3, YaeAnnotation.None));
+        Assert.Equal(3, YaeShrineLedger.StrikeSize(YaeRite.Wildfire, 3, YaeAnnotation.None));
+        Assert.Equal(1, YaeShrineLedger.StrikeSize(YaeRite.Offering, 3, YaeAnnotation.None));
     }
 
     [Fact]
@@ -257,16 +244,16 @@ public class YaePrototypeTests : IDisposable
     public void Red_ink_makes_a_sakuras_strike_three_bigger_but_not_in_offering()
     {
         // Claude, 2026-10-14: Red Ink skips Offering, like Sakura Grove.
-        Assert.Equal(YaeShrineLedger.StrikeSize(YaeRite.Offering, 2, 0, 0, YaeAnnotation.None),
-                     YaeShrineLedger.StrikeSize(YaeRite.Offering, 2, 0, 0, YaeAnnotation.RedInk));
+        Assert.Equal(YaeShrineLedger.StrikeSize(YaeRite.Offering, 2, YaeAnnotation.None),
+                     YaeShrineLedger.StrikeSize(YaeRite.Offering, 2, YaeAnnotation.RedInk));
         foreach (var rite in new[] { YaeRite.Thunder, YaeRite.Warding, YaeRite.Wildfire })
         {
             Assert.Equal(
-                YaeShrineLedger.StrikeSize(rite, 2, 0, 0, YaeAnnotation.None) + YaeLaw.RedInkAmount,
-                YaeShrineLedger.StrikeSize(rite, 2, 0, 0, YaeAnnotation.RedInk));
+                YaeShrineLedger.StrikeSize(rite, 2, YaeAnnotation.None) + YaeLaw.RedInkAmount,
+                YaeShrineLedger.StrikeSize(rite, 2, YaeAnnotation.RedInk));
         }
-        Assert.Equal(YaeShrineLedger.StrikeSize(YaeRite.Thunder, 2, 0, 0, YaeAnnotation.None),
-                     YaeShrineLedger.StrikeSize(YaeRite.Thunder, 2, 0, 0, YaeAnnotation.FoxFire));
+        Assert.Equal(YaeShrineLedger.StrikeSize(YaeRite.Thunder, 2, YaeAnnotation.None),
+                     YaeShrineLedger.StrikeSize(YaeRite.Thunder, 2, YaeAnnotation.FoxFire));
     }
 
     [Fact]
@@ -312,12 +299,12 @@ public class YaePrototypeTests : IDisposable
     public void Grafted_branch_plants_at_its_level_never_below_the_plant_level()
     {
         var ledger = Fresh();
-        Assert.True(ledger.Plant(YaeLaw.PlantLevel, YaeLaw.LevelCap, 2));
+        Assert.True(ledger.Plant(YaeLaw.PlantLevel, 2));
         Assert.Equal(2, ledger.Standing[0].Level);
-        Assert.True(ledger.Plant(YaeLaw.MooncallPlantLevel, YaeLaw.LevelCap, 1));
+        Assert.True(ledger.Plant(YaeLaw.PlantLevel + 1, 1));
         Assert.Equal(2, ledger.Standing[1].Level);
-        Assert.True(ledger.Plant(YaeLaw.PlantLevel, YaeLaw.LevelCap, 9));
-        Assert.Equal(YaeLaw.LevelCap, ledger.Standing[2].Level);
+        Assert.True(ledger.Plant(YaeLaw.PlantLevel, 9));
+        Assert.Equal(9, ledger.Standing[2].Level);   // no cap
     }
 
     [Fact]
@@ -326,16 +313,6 @@ public class YaePrototypeTests : IDisposable
         var calls = Il.CallSequence(typeof(YaeShrine).GetMethod(nameof(YaeShrine.StrikeIfWeak))!).ToList();
         Assert.Contains(calls, c => c.Contains(nameof(YaeShrine.IsWeak)));
         Assert.Contains(calls, c => c.Contains(nameof(YaeShrineLedger.Highest)));
-    }
-
-    [Fact]
-    public void Mikage_thunder_tenkos_then_applies_its_power()
-    {
-        var calls = Il.CallSequence(typeof(ProtoYmMikageThunder).GetMethod(
-            "OnPlay", HeadlessGame.All)!).ToList();
-        var tenko = calls.FindIndex(c => c.Contains("YaeCards.Tenko"));
-        var power = calls.FindIndex(c => c.Contains("MikageThunderPower"));
-        Assert.True(tenko >= 0 && power > tenko, string.Join(", ", calls));
     }
 
     [Fact]
@@ -401,11 +378,11 @@ public class YaePrototypeTests : IDisposable
     }
 
     [Fact]
-    public void The_turn_end_strikes_then_ticks()
+    public void The_turn_end_strikes_then_ticks_and_blooms()
     {
         var calls = Il.CallSequence(typeof(YaeShrine).GetMethod(nameof(YaeShrine.TurnEnd))!).ToList();
         var strike = calls.FindIndex(c => c.Contains(nameof(YaeShrine.StrikeAll)));
-        var tick = calls.FindIndex(c => c.Contains(nameof(YaeShrineLedger.TickAndWither)));
+        var tick = calls.FindIndex(c => c.Contains(nameof(YaeShrine.TickAndBloom)));
         Assert.True(strike >= 0 && tick > strike, string.Join(", ", calls));
     }
 
@@ -432,23 +409,12 @@ public class YaePrototypeTests : IDisposable
     }
 
     [Fact]
-    public void Each_sakura_gains_a_level_is_capped()
+    public void Each_sakura_gains_a_level_has_no_cap()
     {
         var ledger = Fresh();
         PlantN(ledger, 3);
-        ledger.LevelUp(1, YaeLaw.LevelCap);
-        Assert.Equal(new[] { 3, 3, 2 }, ledger.Standing.Select(s => s.Level));
-    }
-
-    [Fact]
-    public void Foxs_mooncall_plants_at_two_and_reaches_four()
-    {
-        var ledger = Fresh();
-        PlantN(ledger, 3, YaeLaw.MooncallPlantLevel, YaeLaw.MooncallLevelCap);
+        ledger.LevelUp(1);
         Assert.Equal(new[] { 4, 3, 2 }, ledger.Standing.Select(s => s.Level));
-        PlantN(ledger, 2, YaeLaw.MooncallPlantLevel, YaeLaw.MooncallLevelCap);
-        Assert.Equal(new[] { 4, 4, 4 }, ledger.Standing.Select(s => s.Level));
-        Assert.Equal(18, 3 * YaeShrineLedger.StrikeDamage(4, 0, false, 0));
     }
 
     [Fact]
