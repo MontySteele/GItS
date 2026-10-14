@@ -41,7 +41,9 @@ public sealed class ProtoFsGuestStarEscoffier : CustomCardModel, ICharacterCard
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForEscoffier(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this);
+        TipAudience.Seat
+            ? ArmKeywordTips.ForEscoffier(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this)
+            : ArmKeywordTips.ForEscoffier(ArmKeywordTips.ForGuestStar(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_guest_star_escoffier");
 

@@ -839,6 +839,16 @@ def post_when_the_room_is_open(wire: Any, action: str,
     return result
 
 
+#: 2026-10-14 (a seat's refused `choose` at Neow). The bridge's refusal names
+#: its own action -- "use advance_dialogue until it ends, then choose" -- and
+#: the redaction below turned the action into "[an internal id]", so the seat
+#: was told to use a thing it could not see. The page's word for that action
+#: is `proceed` (`blindplay_grammar._proceed`), so the sentence says that.
+BRIDGE_VERBS_IN_PAGE_WORDS = (
+    ("use advance_dialogue until it ends", "type `proceed` until it ends"),
+)
+
+
 def _result_line(result: Any) -> str:
     """The wire's answer to a POST, in the tester's vocabulary.
 
@@ -860,6 +870,8 @@ def _result_line(result: Any) -> str:
     text = " ".join(x for x in (_text(result.get("status")),
                                 _text(result.get("message")),
                                 _text(result.get("error"))) if x)
+    for wire_words, page_words in BRIDGE_VERBS_IN_PAGE_WORDS:
+        text = text.replace(wire_words, page_words)
     leaks = qa_packet.leaks(text)
     if leaks:
         # `EB-393`. THE REDACTION NAMES WHAT IT WITHHELD. One leaking token

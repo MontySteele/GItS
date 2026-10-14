@@ -309,18 +309,21 @@ public static class KleeMod
                     // keywords golded and numerals blue. No number, no
                     // constant and no rule moved -- the interpolations are
                     // the same interpolations.
+                    // THE TOOLTIP TRIM (2026-10-14): one sentence each, about
+                    // 80 characters. "No aura:" left (the card applies it
+                    // either way), Anemo's Swirl damage stays on its box.
                     ["KLEEMOD-APPLIES_PYRO.title"] = "Applies Pyro",
                     ["KLEEMOD-APPLIES_PYRO.description"] =
-                        $"No aura: applies [gold]Pyro[/gold] for [blue]{Elements.ReactionConstants.AuraDurationTurns}[/blue] turns. Another aura: consumed, and an [gold]Elemental Reaction[/gold] triggers.",
+                        $"Applies [gold]Pyro[/gold] for [blue]{Elements.ReactionConstants.AuraDurationTurns}[/blue] turns. Another aura is consumed in an [gold]Elemental Reaction[/gold].",
                     ["KLEEMOD-APPLIES_HYDRO.title"] = "Applies Hydro",
                     ["KLEEMOD-APPLIES_HYDRO.description"] =
-                        $"No aura: applies [gold]Hydro[/gold] for [blue]{Elements.ReactionConstants.AuraDurationTurns}[/blue] turns. Another aura: consumed, and an [gold]Elemental Reaction[/gold] triggers.",
+                        $"Applies [gold]Hydro[/gold] for [blue]{Elements.ReactionConstants.AuraDurationTurns}[/blue] turns. Another aura is consumed in an [gold]Elemental Reaction[/gold].",
                     ["KLEEMOD-APPLIES_ELECTRO.title"] = "Applies Electro",
                     ["KLEEMOD-APPLIES_ELECTRO.description"] =
-                        $"No aura: applies [gold]Electro[/gold] for [blue]{Elements.ReactionConstants.AuraDurationTurns}[/blue] turns. Another aura: consumed, and an [gold]Elemental Reaction[/gold] triggers.",
+                        $"Applies [gold]Electro[/gold] for [blue]{Elements.ReactionConstants.AuraDurationTurns}[/blue] turns. Another aura is consumed in an [gold]Elemental Reaction[/gold].",
                     ["KLEEMOD-APPLIES_CRYO.title"] = "Applies Cryo",
                     ["KLEEMOD-APPLIES_CRYO.description"] =
-                        $"No aura: applies [gold]Cryo[/gold] for [blue]{Elements.ReactionConstants.AuraDurationTurns}[/blue] turns. Another aura: consumed, and an [gold]Elemental Reaction[/gold] triggers.",
+                        $"Applies [gold]Cryo[/gold] for [blue]{Elements.ReactionConstants.AuraDurationTurns}[/blue] turns. Another aura is consumed in an [gold]Elemental Reaction[/gold].",
                     // `EB-454`. The two that TRIGGER: a reaction happens and
                     // no aura is left, so the sentence is the four above with
                     // the duration clause replaced by the reason there is none.
@@ -329,10 +332,10 @@ public static class KleeMod
                     // face never said a Swirl hits ALL enemies, so the tip
                     // every Anemo card hovers names the Swirl and its 2.
                     ["KLEEMOD-APPLIES_ANEMO.description"] =
-                        $"No aura: nothing happens. Another aura: it [gold]Swirls[/gold], dealing [blue]{Elements.ReactionConstants.SwirlDamage}[/blue] unblockable damage to ALL enemies and spreading that element.",
+                        $"Leaves no aura. Another aura [gold]Swirls[/gold]: [blue]{Elements.ReactionConstants.SwirlDamage}[/blue] unblockable damage to ALL enemies, and the aura spreads.",
                     ["KLEEMOD-APPLIES_GEO.title"] = "Applies Geo",
                     ["KLEEMOD-APPLIES_GEO.description"] =
-                        "No aura: nothing happens. Another aura: consumed, and an [gold]Elemental Reaction[/gold] triggers. [gold]Geo[/gold] never stays on an enemy.",
+                        "Never stays on an enemy. Another aura is consumed in an [gold]Elemental Reaction[/gold].",
                     ["KLEEMOD-CONFISCATED.title"] = "Confiscated",
                     ["KLEEMOD-CONFISCATED.description"] =
                         "A 1-cost Status card that does nothing. [gold]Exhaust[/gold].",

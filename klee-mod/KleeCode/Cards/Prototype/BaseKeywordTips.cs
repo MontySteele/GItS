@@ -1,7 +1,9 @@
 using System.Collections.Generic;
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.Powers;
 
 namespace KleeMod.Cards;
 
@@ -211,10 +213,35 @@ public static class BaseKeywordTips
     /// a word the arm invented is the one a player has never met, and a base
     /// word restated is the thing you read third.
     /// </summary>
+    ///
+    /// THE TOOLTIP TRIM (2026-10-14, pick 1 (a)): "never restate a base
+    /// word". A PLAYER's hover carries the base game's own tip for the word
+    /// (<see cref="BaseTip"/>); the restated sentence above stays the blind
+    /// seat's (<see cref="TipAudience.Seat"/>), word for word, because the
+    /// seats are who misread "Attacks" in the base line (`EB-469`, `EB-377`).
     private static IEnumerable<IHoverTip> With(
         IEnumerable<IHoverTip> inherited, string key, string body)
     {
         foreach (var tip in inherited) yield return tip;
+        if (!TipAudience.Seat && BaseTip(key) is { } own)
+        {
+            yield return own;
+            yield break;
+        }
         yield return new HoverTip(new LocString(Table, key + ".title"), body);
     }
+
+    /// <summary>The base game's own tip for a restated word, or null.
+    /// </summary>
+    internal static IHoverTip? BaseTip(string key) => key switch
+    {
+        VulnerableKey => HoverTipFactory.FromPower<VulnerablePower>(),
+        WeakKey => HoverTipFactory.FromPower<WeakPower>(),
+        FrailKey => HoverTipFactory.FromPower<FrailPower>(),
+        StrengthKey => HoverTipFactory.FromPower<StrengthPower>(),
+        DexterityKey => HoverTipFactory.FromPower<DexterityPower>(),
+        VigorKey => HoverTipFactory.FromPower<VigorPower>(),
+        EtherealKey => HoverTipFactory.FromKeyword(CardKeyword.Ethereal),
+        _ => null,
+    };
 }

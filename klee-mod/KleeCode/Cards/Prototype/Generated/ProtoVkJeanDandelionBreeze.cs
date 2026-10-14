@@ -41,7 +41,9 @@ public sealed class ProtoVkJeanDandelionBreeze : CustomCardModel, ICharacterCard
         new[] { KleeKeywords.AppliesAnemo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, appliesWithoutHit: true), this);
+        TipAudience.Seat
+            ? ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, appliesWithoutHit: true), this)
+            : KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, appliesWithoutHit: true);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_jean_dandelion_breeze");
 

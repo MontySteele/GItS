@@ -49,7 +49,9 @@ public sealed class ProtoMiMizukiAnraku : CustomCardModel, ICompanionCard, IWrit
         new[] { CardKeyword.Exhaust, KleeKeywords.AppliesAnemo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSwirl(ArmKeywordTips.ForMend(ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, appliesWithoutHit: true), this), this), this);
+        TipAudience.Seat
+            ? ArmKeywordTips.ForSwirl(ArmKeywordTips.ForMend(ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, appliesWithoutHit: true), this), this), this)
+            : ArmKeywordTips.ForMend(ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, appliesWithoutHit: true), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mi_mizuki_anraku");
 

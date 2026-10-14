@@ -41,7 +41,9 @@ public sealed class ProtoKoBigBaddaBoom : CustomCardModel, IElementalCard, ISetO
         new[] { KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSetOff(ArmKeywordTips.ForBomb(ArmKeywordTips.ForEmptyField(ArmKeywordTips.ForBigBaddaBoomTotal(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro), this), this, true), this), this);
+        TipAudience.Seat
+            ? ArmKeywordTips.ForSetOff(ArmKeywordTips.ForBomb(ArmKeywordTips.ForEmptyField(ArmKeywordTips.ForBigBaddaBoomTotal(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro), this), this, true), this), this)
+            : ArmKeywordTips.ForSetOff(ArmKeywordTips.ForBomb(ArmKeywordTips.ForEmptyField(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro), this, true), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_big_badda_boom");
 

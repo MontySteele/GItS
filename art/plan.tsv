@@ -2570,12 +2570,8 @@ proto_kk_coral_tithe	ImageGen/images/cards/kokomi/proto_kk_coral_tithe.png	500	3
 proto_kk_drowning_pressure	ImageGen/images/cards/kokomi/proto_kk_drowning_pressure.png	500	380	cover	x0.45,y0.45@1.3	shortlist	1	png	World Quest Orobashi's Legacy Part III.png		splash	kokomi_pool
 # proto_kk_evening_watch <- night on the rock, Kokomi framed
 proto_kk_evening_watch	ImageGen/images/cards/kokomi/proto_kk_evening_watch.png	500	380	cover	x0.55,y0.42@1.5	shortlist	1	png	Sangonomiya Kokomi TPRGT 2024 - Aether.png		splash	kokomi_pool
-# proto_kk_flotsam_surge <- the Hydro Hypostasis cubes
-proto_kk_flotsam_surge	ImageGen/images/cards/kokomi/proto_kk_flotsam_surge.png	500	380	cover	x0.45,y0.52@1.1	shortlist	1	png	Enemy Hydro Hypostasis.png		splash	kokomi_pool
 # proto_kk_grand_design <- sticker: Kokomi reading
 proto_kk_grand_design	ImageGen/images/cards/kokomi/proto_kk_grand_design.png	500	380	cover	y0.55	shortlist	1	png	Paimon's Paintings Set Migration to the Coral Sea 3.png		sticker	kokomi_pool
-# proto_kk_kelp_wall <- the glowing coral forest
-proto_kk_kelp_wall	ImageGen/images/cards/kokomi/proto_kk_kelp_wall.png	500	380	cover	center	shortlist	1	png	Watatsumi Island Concept Art.png		splash	kokomi_pool
 # proto_kk_kurage_canopy <- the Bake-Kurage, bell and trailing tentacles
 proto_kk_kurage_canopy	ImageGen/images/cards/kokomi/proto_kk_kurage_canopy.png	500	380	cover	y0.42	shortlist	1	png	Bake-Kurage Summon.png		splash	kokomi_pool
 # proto_kk_kurage_school <- chibi Kokomi by the shore, Kokomi framed
@@ -2596,8 +2592,6 @@ proto_kk_patient_tide	ImageGen/images/cards/kokomi/proto_kk_patient_tide.png	500
 proto_kk_riptide_ruin	ImageGen/images/cards/kokomi/proto_kk_riptide_ruin.png	500	380	cover	x0.45	shortlist	1	png	Seirai Island Concept Art.png		splash	kokomi_pool
 # proto_kk_salt_in_the_wound <- sticker: Kokomi, arms crossed
 proto_kk_salt_in_the_wound	ImageGen/images/cards/kokomi/proto_kk_salt_in_the_wound.png	500	380	cover	y0.52	shortlist	1	png	Paimon's Paintings Set Migration to the Coral Sea 7.png		sticker	kokomi_pool
-# proto_kk_sea_glass_harvest <- the glowing crystal on the altar
-proto_kk_sea_glass_harvest	ImageGen/images/cards/kokomi/proto_kk_sea_glass_harvest.png	500	380	cover	x0.50,y0.45@1.2	shortlist	1	png	Watatsumi Altar.png		splash	kokomi_pool
 # proto_kk_seas_reproach <- Kokomi and the fish, face in frame
 proto_kk_seas_reproach	ImageGen/images/cards/kokomi/proto_kk_seas_reproach.png	500	380	cover	x0.40,y0.45@1.4	shortlist	1	png	Sangonomiya Kokomi Birthday 2024.png		splash	kokomi_pool
 # proto_kk_shoal_call <- sprite: Kokomi waving
@@ -2620,8 +2614,6 @@ proto_kk_tidal_resonance	ImageGen/images/cards/kokomi/proto_kk_tidal_resonance.p
 proto_kk_tidal_riposte	ImageGen/images/cards/kokomi/proto_kk_tidal_riposte.png	500	380	cover	x0.58,y0.38@1.4	shortlist	1	png	Gorou Birthday 2022.png		splash	kokomi_pool
 # proto_kk_tidal_screen <- the shell shrine
 proto_kk_tidal_screen	ImageGen/images/cards/kokomi/proto_kk_tidal_screen.png	500	380	cover	center	shortlist	1	png	Watatsumi Island Sangonomiya Shrine.png		splash	kokomi_pool
-# proto_kk_tidecleanse <- Kokomi and the butterfly, face in frame
-proto_kk_tidecleanse	ImageGen/images/cards/kokomi/proto_kk_tidecleanse.png	500	380	cover	x0.43,y0.36@1.3	shortlist	1	png	Sangonomiya Kokomi Birthday 2025.png		splash	kokomi_pool
 # proto_kk_turning_tide <- the harbour at sunset
 proto_kk_turning_tide	ImageGen/images/cards/kokomi/proto_kk_turning_tide.png	500	380	cover	x0.45	shortlist	1	png	Archon Quest Setting Sail.png		splash	kokomi_pool
 # proto_kk_undercurrent_snare <- the purple pillar in the water
@@ -2791,7 +2783,6 @@ proto_vk_comrades_of_the_expedition	ImageGen/images/cards/varka/proto_vk_comrade
 proto_vk_west_winds_blessing	ImageGen/images/cards/varka/proto_vk_west_winds_blessing.png	500	380	cover	y0.55@1.2	shortlist	1	png	Facts About Varka II 4.png		splash	
 divine_strategy	ImageGen/images/cards/kokomi/divine_strategy.png	500	380	contain	center	shortlist	1	png	Talent Divine Maiden's Deliverance.png		item	kokomi_pool
 kk_open_the_casket	ImageGen/images/cards/kokomi/kk_open_the_casket.png	500	380	contain	center	shortlist	1	png	Talent Tamakushi Casket.png		item	kokomi_pool
-kk_sea_glass	ImageGen/images/cards/kokomi/kk_sea_glass.png	500	380	contain	center	shortlist	1	png	Item Crystal Marrow.png		item	kokomi_pool
 # Furina card-art picks, 38 rows ([USER] 2026-10-09: "all of the art picks are good enough for now")
 center_of_attention	ImageGen/images/cards/furina/center_of_attention.png	500	380	cover	center	shortlist	1	png	Version 4.2 Wallpaper 1.jpg		splash	
 # The Varka review (2026-10-12): his two Ancients. all_four_winds <- Venti, the god of the winds
@@ -3039,3 +3030,31 @@ power_yae_yakan_offering	ImageGen/images/yae/powers/yakan_offering.png	256	256	c
 power_yae_sakura_channeling	ImageGen/images/yae/powers/sakura_channeling.png	256	256	contain	center	shortlist	1	png	Constellation Sakura Channeling.png		icon
 # power_yae_editor_in_chief <- her own light novel
 power_yae_editor_in_chief	ImageGen/images/yae/powers/editor_in_chief.png	256	256	contain	center	shortlist	1	png	Item Pretty Please, Kitsune Guuji.png		icon
+# ---------- Kokomi art pass (2026-10-14): the pool overhaul's six and the five owed rows ----------
+# Every row is OFFICIAL wiki art, each title checked against the API's imageinfo
+# before it was written, and no title is worn by any other plan row (blank
+# source_group, strict L1). Kelp Wall, Tidecleanse, Sea Glass Harvest, Flotsam
+# Surge and Sea Glass are re-picked: their old sources were shared with Watchful
+# Shoal and two cut cards, or were an enemy render.
+# proto_kk_turning_tide_chain <- the Sangonomiya crest in a turning swirl of water (her own namecard family)
+proto_kk_turning_tide_chain	ImageGen/images/cards/kokomi/proto_kk_turning_tide_chain.png	500	380	cover	x0.62	shortlist	1	png	Namecard Background Inazuma Sangonomiya Crest.png		splash	
+# proto_kk_brine_spray <- Kokomi with the water fish leaping from her hand, the announcement text cropped out
+proto_kk_brine_spray	ImageGen/images/cards/kokomi/proto_kk_brine_spray.png	500	380	cover	x0.30,y0.36@1.4	shortlist	1	png	Sangonomiya Kokomi VA Announcement.png		splash	
+# proto_kk_jellyfish_current <- bubbles carried on a blue current
+proto_kk_jellyfish_current	ImageGen/images/cards/kokomi/proto_kk_jellyfish_current.png	500	380	cover	center	shortlist	1	png	Namecard Background Travel Notes Azure Main.png		splash	
+# proto_kk_prepared_retreat <- the dark island of Tokoyo under the moon: falling back to Watatsumi's own ground
+proto_kk_prepared_retreat	ImageGen/images/cards/kokomi/proto_kk_prepared_retreat.png	500	380	cover	center	shortlist	1	png	Namecard Background Inazuma Tokoyo.png		splash	
+# proto_kk_battle_formation <- the Inazuma cast drawn up against the Shogun, Kokomi at the left, wordmark cropped out
+proto_kk_battle_formation	ImageGen/images/cards/kokomi/proto_kk_battle_formation.png	500	380	cover	x0.51,y0.39@1.27	shortlist	1	png	Version 2.1 Full Wallpaper 1.png		splash	
+# proto_kk_turnabout <- her signature set's card: the Ocean-Hued Clam stores what it takes and bursts it back out
+proto_kk_turnabout	ImageGen/images/cards/kokomi/proto_kk_turnabout.png	500	380	cover	y0.62	shortlist	1	png	Ocean-Hued Clam Equipment Card.png		tcg	
+# proto_kk_kelp_wall <- a sea wall standing in the waves
+proto_kk_kelp_wall	ImageGen/images/cards/kokomi/proto_kk_kelp_wall.png	500	380	cover	x0.70	shortlist	1	png	Namecard Background Achievement Mariner.png		splash	
+# proto_kk_tidecleanse <- the clean sea off Watatsumi, wordmark cropped out
+proto_kk_tidecleanse	ImageGen/images/cards/kokomi/proto_kk_tidecleanse.png	500	380	cover	x0.40,y0.45@1.2	shortlist	1	png	Sumeru Coastline from Watatsumi - New.png		splash	
+# proto_kk_sea_glass_harvest <- the pearl in its shell, the Crown of Watatsumi
+proto_kk_sea_glass_harvest	ImageGen/images/cards/kokomi/proto_kk_sea_glass_harvest.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Crown of Watatsumi.png		item	
+# proto_kk_flotsam_surge <- the Hydro Hypostasis cubes tumbling in a surge (its TCG card; the enemy render it wore before is no longer used)
+proto_kk_flotsam_surge	ImageGen/images/cards/kokomi/proto_kk_flotsam_surge.png	500	380	cover	y0.42	shortlist	1	png	Hydro Hypostasis Character Card.png		tcg	
+# kk_sea_glass <- the glowing blue Sea Ganoderma: a thing the tide leaves behind
+kk_sea_glass	ImageGen/images/cards/kokomi/kk_sea_glass.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Sea Ganoderma.png		item	

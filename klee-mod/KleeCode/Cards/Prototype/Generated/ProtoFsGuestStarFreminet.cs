@@ -41,7 +41,9 @@ public sealed class ProtoFsGuestStarFreminet : CustomCardModel, ICharacterCard
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFanfare(ArmKeywordTips.ForFreminet(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this), this);
+        TipAudience.Seat
+            ? ArmKeywordTips.ForFanfare(ArmKeywordTips.ForFreminet(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this), this)
+            : ArmKeywordTips.ForFanfare(ArmKeywordTips.ForFreminet(ArmKeywordTips.ForGuestStar(base.ExtraHoverTips, this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_guest_star_freminet");
 

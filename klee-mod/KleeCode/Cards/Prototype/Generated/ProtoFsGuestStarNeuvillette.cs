@@ -41,7 +41,9 @@ public sealed class ProtoFsGuestStarNeuvillette : CustomCardModel, ICharacterCar
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForNeuvillette(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this);
+        TipAudience.Seat
+            ? ArmKeywordTips.ForNeuvillette(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this)
+            : ArmKeywordTips.ForNeuvillette(ArmKeywordTips.ForGuestStar(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_guest_star_neuvillette");
 

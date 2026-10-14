@@ -377,7 +377,10 @@ plain `observe` prints it on every round-1 page; `observe --define
 "<enemy>"` prints it again); **Incoming this turn** sums the attack
 telegraphs against your Block, naming as unknown a part whose figure may not
 count Weak or Vulnerable (on Furina's stage too, where guests cannot be
-targeted; not in co-op, where a telegraph names no target); **Since last
+targeted; not in co-op, where a telegraph names no target), counts a Death
+Blow telegraph, and names a "when killed" power's damage (Waterfall Giant's
+Steam Eruption) as "Killing it now: N" before the kill and "Not this turn"
+after it; **Since last
 page** names what the mod's `ResolutionLedger` filed that the after-state
 does not show (a card drawn by an effect, a debuff Artifact negated, a
 one-off enemy trigger, a stolen card given back, an attack that Shattered
