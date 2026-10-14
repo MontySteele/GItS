@@ -1669,7 +1669,8 @@ ARM_KEYWORDS: dict[str, str] = {
              "(draw 1), Deadline Extension (Retain), Fox Fire (4 Electro "
              "damage to a random enemy), Sakura Seal (plant a Sakura), "
              "Royalties (gain 1 Energy). On a Sakura: Red Ink makes its "
-             "strike 3 bigger, Fox Fire adds 4 damage, Deadline Extension "
+             "strike 3 bigger (not in Offering), Fox Fire adds 4 damage, "
+             "Deadline Extension "
              "stops it withering. A Published Annotation lasts the run."),
     # YAE MIKO, THE DESIGN AXES (ruled 2026-10-14), in step with
     # `ArmKeywordTips.YaeRiteTip`.

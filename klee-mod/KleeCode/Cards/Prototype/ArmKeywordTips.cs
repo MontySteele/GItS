@@ -674,7 +674,7 @@ public static class ArmKeywordTips
       + "enemy), [gold]Sakura Seal[/gold] (plant a [gold]Sakura[/gold]), "
       + "[gold]Royalties[/gold] (gain " + Powers.YaeLaw.RoyaltiesPayout
       + " Energy). On a [gold]Sakura[/gold]: Red Ink makes its strike "
-      + Powers.YaeLaw.RedInkAmount + " bigger, Fox Fire adds "
+      + Powers.YaeLaw.RedInkAmount + " bigger (not in Offering), Fox Fire adds "
       + Powers.YaeLaw.FoxFireDamage + " damage, Deadline Extension stops it "
       + "withering. A Published Annotation lasts the run.";
 

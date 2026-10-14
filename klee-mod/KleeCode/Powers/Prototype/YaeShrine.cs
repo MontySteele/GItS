@@ -252,8 +252,8 @@ public sealed class YaeShrineLedger
     /// <summary>
     /// ONE STRIKE'S SIZE UNDER A RITE (ruled 2026-10-14), before Edict:
     /// Thunder and Warding 2 + Level, Wildfire Level, Offering 1 card. Sakura
-    /// Grove and Mikage Thunder add to all but Offering; a Red Ink Sakura's
-    /// strike is 3 bigger in whatever Rite. PURE.
+    /// Grove and Mikage Thunder add to all but Offering, and so does a Red
+    /// Ink Sakura's 3 (Claude, 2026-10-14: Red Ink skips Offering). PURE.
     /// </summary>
     public static int StrikeSize(YaeRite rite, int level, int grove, int mikage,
                                  YaeAnnotation annotation)
@@ -264,7 +264,8 @@ public sealed class YaeShrineLedger
             YaeRite.Wildfire => level + grove + mikage,
             _ => YaeLaw.SakuraBase + level + grove + mikage,
         };
-        if (annotation == YaeAnnotation.RedInk) size += YaeLaw.RedInkAmount;
+        if (annotation == YaeAnnotation.RedInk && rite != YaeRite.Offering)
+            size += YaeLaw.RedInkAmount;
         return size;
     }
 

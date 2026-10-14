@@ -135,7 +135,8 @@ public static class YaeAnnotationText
     /// empty for the ones with no Sakura reading.</summary>
     public static string SakuraRule(YaeAnnotation annotation) => annotation switch
     {
-        YaeAnnotation.RedInk => $"Its strike is {YaeLaw.RedInkAmount} bigger.",
+        YaeAnnotation.RedInk =>
+            $"Its strike is {YaeLaw.RedInkAmount} bigger (not in Offering).",
         YaeAnnotation.FoxFire =>
             $"When it strikes, it also deals {YaeLaw.FoxFireDamage} "
           + "[gold]Electro[/gold] damage to a random enemy.",

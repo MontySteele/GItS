@@ -254,9 +254,12 @@ public class YaePrototypeTests : IDisposable
     // ---- Sakura Annotations (ruled 2026-10-14) -------------------------------
 
     [Fact]
-    public void Red_ink_makes_a_sakuras_strike_three_bigger_in_whatever_rite()
+    public void Red_ink_makes_a_sakuras_strike_three_bigger_but_not_in_offering()
     {
-        foreach (var rite in new[] { YaeRite.Thunder, YaeRite.Warding, YaeRite.Wildfire, YaeRite.Offering })
+        // Claude, 2026-10-14: Red Ink skips Offering, like Sakura Grove.
+        Assert.Equal(YaeShrineLedger.StrikeSize(YaeRite.Offering, 2, 0, 0, YaeAnnotation.None),
+                     YaeShrineLedger.StrikeSize(YaeRite.Offering, 2, 0, 0, YaeAnnotation.RedInk));
+        foreach (var rite in new[] { YaeRite.Thunder, YaeRite.Warding, YaeRite.Wildfire })
         {
             Assert.Equal(
                 YaeShrineLedger.StrikeSize(rite, 2, 0, 0, YaeAnnotation.None) + YaeLaw.RedInkAmount,

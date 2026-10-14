@@ -345,7 +345,9 @@ def test_sakura_annotations_each_reading(yae):
     s = _led(st).sakura[0]
     assert s.annotation == Y.RED_INK
     assert Y.strike_size(st, s, Y.THUNDER) == 3 + 3
-    assert Y.strike_size(st, s, Y.OFFERING) == 1 + 3   # in whatever Rite
+    assert Y.strike_size(st, s, Y.WARDING) == 3 + 3
+    assert Y.strike_size(st, s, Y.WILDFIRE) == 1 + 3
+    assert Y.strike_size(st, s, Y.OFFERING) == 1       # not in Offering
     _play(st, _ym("fox_fire_draft"))             # Fox Fire on the newest
     assert s.annotation == Y.FOX_FIRE            # replaces the Red Ink
     hp = st.enemies[0].hp

@@ -46,7 +46,7 @@ public abstract class SakuraBadgePower : PowerModel, ILocalizationProvider
           + " {Strike}"
           + "{Rite:cond:==1? [gold]Block[/gold]|==3? more card next turn| [gold]Electro[/gold] damage}"
           + "."
-          + $"{{Ann:cond:==1? [gold]Red Ink[/gold] makes its strike {YaeLaw.RedInkAmount} bigger.|==3? [gold]Deadline Extension[/gold] keeps it from withering.|==4? [gold]Fox Fire[/gold] adds {YaeLaw.FoxFireDamage} [gold]Electro[/gold] damage to a random enemy.|}}"
+          + $"{{Ann:cond:==1? [gold]Red Ink[/gold] makes its strike {YaeLaw.RedInkAmount} bigger (not in Offering).|==3? [gold]Deadline Extension[/gold] keeps it from withering.|==4? [gold]Fox Fire[/gold] adds {YaeLaw.FoxFireDamage} [gold]Electro[/gold] damage to a random enemy.|}}"
           + " Strikes left: {Turns}."),
     };
 

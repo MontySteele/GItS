@@ -8388,9 +8388,9 @@ plant_level` (Grafted Branch, `amount` the Level), `kind: strike_if_weak`
 (Kitsune Pounce); the sixth Annotation `royalties`.
 
 Readings taken where the paper leaves room:
-- Red Ink on a Sakura is 3 bigger "in whatever Rite", so under Offering a
-  Red Ink Sakura draws 4 (the ruling's words; Sakura Grove's bonus alone
-  skips Offering).
+- Red Ink on a Sakura is 3 bigger in Thunder, Warding and Wildfire, not in
+  Offering, as Sakura Grove (Claude, 2026-10-14: "+3 cards a strike was too
+  much draw"; the paper's "in whatever Rite" is amended).
 - Fallen Petals pays its Energy (and its upgrade's card) at the start of her
   next turn, beside Offering's draw: a Sakura withers at the end of her turn,
   when Energy is lost. The face says "on your next turn".

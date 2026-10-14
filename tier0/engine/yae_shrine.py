@@ -67,7 +67,7 @@ THE RULES AS MODELLED:
     aims single-target damage strikes. Sakura Channeling: a strike in any
     other Rite also strikes as Thunder.
   * SAKURA ANNOTATIONS: a Sakura may carry one of Red Ink (its strike is 3
-    bigger in whatever Rite, Offering's draw included), Fox Fire (4 Electro
+    bigger, not in Offering, as Sakura Grove), Fox Fire (4 Electro
     to a random enemy whenever it strikes) or Deadline Extension (its timer
     never ticks, so it never withers), written by "Edit your newest /
     oldest / every Sakura" (`edit_sakura`). A new one replaces the old; it
@@ -304,8 +304,8 @@ def plant(state, n: int = 1, reason: str = "plant",
 def strike_size(state, s: Sakura, rite: Optional[str] = None) -> int:
     """One strike's size under `rite` (the shrine's, by default), before
     Edict: Thunder and Warding 2 + Level, Wildfire Level, Offering 1; Grove
-    and Mikage Thunder add to all but Offering; a Red Ink Sakura's is 3
-    bigger in every Rite."""
+    and Mikage Thunder add to all but Offering, and so does a Red Ink
+    Sakura's 3 (Claude, 2026-10-14: Red Ink skips Offering)."""
     p = state.player
     led = ledger(p)
     rite = rite or led.rite
@@ -320,8 +320,8 @@ def strike_size(state, s: Sakura, rite: Optional[str] = None) -> int:
         if rite == WILDFIRE:
             size -= SAKURA_BASE
         size += _power(p, SAKURA_GROVE) + _power(p, MIKAGE_THUNDER)
-    if s.annotation == RED_INK:
-        size += RED_INK_AMOUNT
+        if s.annotation == RED_INK:
+            size += RED_INK_AMOUNT
     return size
 
 
