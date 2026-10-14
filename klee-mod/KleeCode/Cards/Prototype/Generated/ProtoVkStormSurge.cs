@@ -44,7 +44,9 @@ public sealed class ProtoVkStormSurge : CustomCardModel, IElementalCard, ICharac
         new[] { KleeKeywords.AppliesAnemo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo), this);
+        TipAudience.Seat
+            ? ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo), this)
+            : KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_storm_surge");
 

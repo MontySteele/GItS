@@ -1262,17 +1262,17 @@ def test_the_summon_and_performer_tips_state_the_ruled_sentences():
             '"acts once and leaves; its card goes to your [gold]Discard "',
             '"Exhausts. Acts at the end of your turn. When it leaves, this "',
             '"card goes to your [gold]Discard Pile[/gold]."',
-            "ActText(StagePerformer.Charlotte, card.IsUpgraded));",
-            "ActText(StagePerformer.Wriothesley, card.IsUpgraded));",
-            "ActText(StagePerformer.Lynette, card.IsUpgraded));",
-            "ActText(StagePerformer.Clorinde, card.IsUpgraded));",
-            "ActText(StagePerformer.Lyney, card.IsUpgraded));",
-            "ActText(StagePerformer.Sigewinne, card.IsUpgraded));",
-            "ActText(StagePerformer.Chevreuse, card.IsUpgraded));",
-            "ActText(StagePerformer.Freminet, card.IsUpgraded));",
-            "ActText(StagePerformer.Navia, card.IsUpgraded));",
-            "ActText(StagePerformer.Neuvillette, card.IsUpgraded));",
-            "ActText(StagePerformer.Escoffier, card.IsUpgraded));"):
+            "ActText(StagePerformer.Charlotte, card.IsUpgraded)));",
+            "ActText(StagePerformer.Wriothesley, card.IsUpgraded)));",
+            "ActText(StagePerformer.Lynette, card.IsUpgraded)));",
+            "ActText(StagePerformer.Clorinde, card.IsUpgraded)));",
+            "ActText(StagePerformer.Lyney, card.IsUpgraded)));",
+            "ActText(StagePerformer.Sigewinne, card.IsUpgraded)));",
+            "ActText(StagePerformer.Chevreuse, card.IsUpgraded)));",
+            "ActText(StagePerformer.Freminet, card.IsUpgraded)));",
+            "ActText(StagePerformer.Navia, card.IsUpgraded)));",
+            "ActText(StagePerformer.Neuvillette, card.IsUpgraded)));",
+            "ActText(StagePerformer.Escoffier, card.IsUpgraded)));"):
         assert clause in tips, clause
     for gone in ("StagePerformer.Usher", "StagePerformer.Chevalmarin",
                  "StagePerformer.Crabaletta", "[gold]Bow[/gold]"):

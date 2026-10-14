@@ -185,14 +185,19 @@ public static partial class McpMod
         tcs.Task.ContinueWith(_ => cts.Dispose(), TaskScheduler.Default);
     }
 
+    // GItS LOCAL EDIT (the tooltip trim, 2026-10-14) - every main-thread job
+    // reads hover tips as a blind seat (`gits/GitsSeatTips.cs`): the klee
+    // mod's player hovers are trimmed, and the seat keeps every sentence.
     internal static Task<T> RunOnMainThread<T>(Func<T> func)
     {
         var tcs = new TaskCompletionSource<T>(TaskCreationOptions.RunContinuationsAsynchronously);
         _mainThreadQueue.Enqueue(() =>
         {
             if (tcs.Task.IsCompleted) return;
+            GitsSeatTipsEnter();
             try { tcs.TrySetResult(func()); }
             catch (Exception ex) { tcs.TrySetException(ex); }
+            finally { GitsSeatTipsExit(); }
         });
         BoundMainThreadTask(tcs);
         return tcs.Task;
@@ -204,8 +209,10 @@ public static partial class McpMod
         _mainThreadQueue.Enqueue(() =>
         {
             if (tcs.Task.IsCompleted) return;
+            GitsSeatTipsEnter();
             try { action(); tcs.TrySetResult(true); }
             catch (Exception ex) { tcs.TrySetException(ex); }
+            finally { GitsSeatTipsExit(); }
         });
         BoundMainThreadTask(tcs);
         return tcs.Task;

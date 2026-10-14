@@ -41,7 +41,9 @@ public sealed class ProtoFsGuestStarNavia : CustomCardModel, ICharacterCard
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSpend(ArmKeywordTips.ForNavia(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this), this);
+        TipAudience.Seat
+            ? ArmKeywordTips.ForSpend(ArmKeywordTips.ForNavia(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this), this)
+            : ArmKeywordTips.ForSpend(ArmKeywordTips.ForNavia(ArmKeywordTips.ForGuestStar(base.ExtraHoverTips, this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_guest_star_navia");
 

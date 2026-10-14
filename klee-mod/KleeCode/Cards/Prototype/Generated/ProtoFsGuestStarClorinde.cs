@@ -41,7 +41,9 @@ public sealed class ProtoFsGuestStarClorinde : CustomCardModel, ICharacterCard
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForClorinde(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this);
+        TipAudience.Seat
+            ? ArmKeywordTips.ForClorinde(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this)
+            : ArmKeywordTips.ForClorinde(ArmKeywordTips.ForGuestStar(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_guest_star_clorinde");
 
