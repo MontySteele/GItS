@@ -49,14 +49,15 @@ public class KokomiFeedPassTests : IDisposable
         // Uncommon since the Kokomi review (2026-10-13).
         Assert.Equal((CardType.Attack, CardRarity.Uncommon, 1),
                      (card.Type, card.Rarity, card.EnergyCost.Canonical));
-        Assert.Equal(8m, card.DynamicVars.Damage.BaseValue);
-        Assert.Equal(11m, Upgraded<ProtoKkBrineSting>().DynamicVars.Damage.BaseValue);
+        // The numbers pass (kokomi-review-r5-2026-10-14): 10 [13], Plan 10 [13].
+        Assert.Equal(10m, card.DynamicVars.Damage.BaseValue);
+        Assert.Equal(13m, Upgraded<ProtoKkBrineSting>().DynamicVars.Damage.BaseValue);
         // The pool overhaul (2026-10-13): a Counter line, 8 [11] to each
         // enemy that attacked her since she planned it.
         var clause = Assert.Single(card.PlanClauses);
-        Assert.Equal((KokomiPlan.Kind.Damage, 8, KokomiPlan.Aim.EnemiesAttackedSince),
+        Assert.Equal((KokomiPlan.Kind.Damage, 10, KokomiPlan.Aim.EnemiesAttackedSince),
                      (clause.Kind, clause.Amount, clause.Aim));
-        Assert.Equal(11, Assert.Single(
+        Assert.Equal(13, Assert.Single(
             Upgraded<ProtoKkBrineSting>().PlanClauses).Amount);
     }
 

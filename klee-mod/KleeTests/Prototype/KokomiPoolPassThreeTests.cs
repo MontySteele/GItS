@@ -62,14 +62,15 @@ public class KokomiPoolPassThreeTests
         // carried out this turn. Plan: Apply 1 Vulnerable." Upgraded: base 6,
         // Plan 2 Vulnerable. Both printed numbers are live vars (`EB-657`),
         // and the in-combat line prints the total. The cleanup pass
-        // (2026-09-29) moved the base to 6, upgraded 9.
+        // (2026-09-29) moved the base to 6, upgraded 9; the numbers pass
+        // (kokomi-review-r5-2026-10-14) to 8 [11].
         var face = Face(new ProtoKkFeint());
         Assert.Contains("{CalculationBase:diff()}", face);
         Assert.Contains("{ExtraDamage:diff()}", face);
         Assert.Contains("{CalculatedDamage:diff()}", face);
         Assert.DoesNotContain("{IfUpgraded:show:", face);
         var source = Source("ProtoKkFeint");
-        Assert.Contains("new CalculationBaseVar(6m)", source);
+        Assert.Contains("new CalculationBaseVar(8m)", source);
         Assert.Contains("new ExtraDamageVar(3m)", source);
         Assert.Contains("DynamicVars.CalculationBase.UpgradeValueBy(3m);", source);
         // The pool overhaul (2026-10-13): the Plan's rate upgrades, 5 -> 7.
@@ -82,14 +83,14 @@ public class KokomiPoolPassThreeTests
     {
         // The pool overhaul (2026-10-13): the Plan line is a Chain -- 5 [7]
         // for each Plan carried out this turn, itself included (was R276's
-        // Vulnerable).
+        // Vulnerable). 6 [8] since the numbers pass (kokomi-review-r5-2026-10-14).
         var card = new ProtoKkFeint();
         Assert.Equal(1, card.EnergyCost.Canonical);
         Assert.Equal(CardType.Attack, card.Type);
         Assert.Equal(CardRarity.Common, card.Rarity);
         var clause = Assert.Single(card.PlanClauses);
         Assert.Equal(KokomiPlan.Kind.DamagePerPlanThisTurn, clause.Kind);
-        Assert.Equal(5, clause.Amount);
+        Assert.Equal(6, clause.Amount);
         Assert.Equal(KokomiPlan.Aim.FrontEnemy, clause.Aim);
         Assert.Contains("PlanDamage\"].UpgradeValueBy(2m)",
                         Source("ProtoKkFeint"));

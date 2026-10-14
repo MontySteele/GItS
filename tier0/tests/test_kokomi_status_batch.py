@@ -120,10 +120,10 @@ def test_kelp_wall_ignores_statuses_in_hand(overhaul):
 
 
 def test_kelp_wall_upgrades_the_flat_block_only(overhaul):
-    """Its upgrade moves the now-line's Block alone (5 -> 7); the Plan line
-    prints no number."""
+    """Its upgrade moves the now-line's Block alone (7 -> 9 since the
+    numbers pass, kokomi-review-r5-2026-10-14); the Plan line prints no number."""
     up = _up("proto_kk_kelp_wall")
-    assert up.effects[0]["amount"] == 7
+    assert up.effects[0]["amount"] == 9
     assert up.plan == _row("proto_kk_kelp_wall").plan
 
 
@@ -176,10 +176,11 @@ def test_tidecleanse_draws_nothing(overhaul):
 
 # --- Sea Glass Harvest ---------------------------------------------------------------
 
-def test_sea_glass_harvest_transforms_the_draw_piles_statuses_and_curses(
+def test_sea_glass_harvest_transforms_the_hand_and_draw_piles_statuses(
         overhaul):
-    """Kokomi round-1 fixes (2026-10-12): the DRAW PILE, in place; the hand
-    is left alone."""
+    """Kokomi round-1 fixes (2026-10-12): the DRAW PILE, in place; and the
+    HAND too since the round-5 review (2026-10-14, A8), so a Status drawn
+    that morning becomes Sea Glass the same turn."""
     st = _quiet_state()
     curse = plan_card([], cid="proto_kk_curse_probe")
     curse.type, curse.rarity = "curse", "curse"
@@ -190,7 +191,8 @@ def test_sea_glass_harvest_transforms_the_draw_piles_statuses_and_curses(
     _carry_out(st, _row("proto_kk_sea_glass_harvest"))
     ids = [c.id for c in st.player.draw_pile]
     assert ids == [kokomi_plan.SEA_GLASS, keep.id, kokomi_plan.SEA_GLASS]
-    assert st.player.hand == [held]
+    assert [c.id for c in st.player.hand] == [kokomi_plan.SEA_GLASS]
+    assert held not in st.player.hand
     glass = st.player.draw_pile[0]
     assert glass.cost == 0 and glass.exhaust
     assert glass.effects == [{"op": "energy", "amount": 1}]
@@ -198,7 +200,7 @@ def test_sea_glass_harvest_transforms_the_draw_piles_statuses_and_curses(
 
 def test_sea_glass_harvest_upgraded_makes_sea_glass_plus(overhaul):
     up = _up("proto_kk_sea_glass_harvest")
-    assert up.plan == [{"op": "transform_statuses_in_draw_pile",
+    assert up.plan == [{"op": "transform_statuses_in_hand_and_draw_pile",
                         "upgraded": True}]
     st = _quiet_state()
     st.player.draw_pile = [statuses.make_status("wound")]
@@ -245,7 +247,7 @@ def test_riptide_ruin_hits_all_twice_and_adds_no_dazed(overhaul):
 # --- the shape check -------------------------------------------------------------------------
 
 @pytest.mark.parametrize("op", ["block_per_status_in_hand",
-                                "transform_statuses_in_draw_pile"])
+                                "transform_statuses_in_hand_and_draw_pile"])
 def test_the_two_surviving_clauses_are_plan_only(op):
     assert op in kokomi_plan.PLAN_KINDS
     assert op in kokomi_plan.PLAN_ONLY_OPS

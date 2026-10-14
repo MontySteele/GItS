@@ -55,7 +55,7 @@ def _short(card: dict) -> dict:
 def test_the_star_total_prints_beside_energy():
     """"The battle screen never printed my star count", all run."""
     page = blindplay.observe(_combat(stars=3))
-    assert "- Energy 3/3\n- Stars 3\n" in page
+    assert "- Energy 3 left of 3\n- Stars 3\n" in page
 
 
 def test_a_zero_star_total_still_prints_when_the_wire_sends_it():

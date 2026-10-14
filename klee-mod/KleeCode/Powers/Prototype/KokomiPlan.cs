@@ -162,7 +162,7 @@ public static class KokomiPlan
         // <see cref="KokomiStatusBatch"/>; sim twins `kokomi_plan`, the same
         // names.
         BlockPerStatusInHand,
-        TransformStatusesInDrawPile,
+        TransformStatusesInHandAndDrawPile,
         // THE RE-FOUNDING (2026-10-12, review/active/kokomi-card-paper-
         // 2026-10-12.md). Kurage's Wake's "Add 2 Stings to your hand";
         // Gorou's War Banner "Gain 1 Strength" (permanent since the Kokomi
@@ -312,7 +312,8 @@ public static class KokomiPlan
                               string? AimOverride = null,
                               int Extra = 0, CardModel? Writer = null,
                               bool Now = false,
-                              KokomiOverhaulLedger.Since? Window = null)
+                              KokomiOverhaulLedger.Since? Window = null,
+                              int? WrittenStrength = null)
     {
         /// <summary>A PLAN STAYS OPEN: does this Plan offer the choice? A
         /// two-line card's own line (Moon's Reflection's found card
@@ -960,7 +961,16 @@ public static class KokomiPlan
                               Writer: writer,
                               // THE POOL OVERHAUL (2026-10-13): the Plan's
                               // own "since you planned this" opens now.
-                              Window: ledger.OpenWindow());
+                              Window: ledger.OpenWindow(),
+                              // KOKOMI REVIEW R5 (2026-10-14, A2): her
+                              // Strength as the hit was written, which `Hers`
+                              // folded in above; the page names it beside
+                              // what the Plan will land. Null for a Plan
+                              // with no flat hit.
+                              WrittenStrength: body.Any(c => c.Kind == Kind.Damage)
+                                  ? (int)(kokomi?.Powers.OfType<StrengthPower>()
+                                              .FirstOrDefault()?.Amount ?? 0)
+                                  : null);
         int before = queue.Count;
         queue.Add(entry);
         // The whole-run telemetry's count of Plans written (Moon's
@@ -2247,7 +2257,7 @@ public static class KokomiPlan
             case Kind.BlockPerStatusInHand:
                 return await KokomiStatusBatch.BlockPerStatus(
                     kokomi, plan.Amount, plan.WrittenCount);
-            case Kind.TransformStatusesInDrawPile:
+            case Kind.TransformStatusesInHandAndDrawPile:
                 return await KokomiStatusBatch.TransformStatuses(
                     player, entry?.Source?.IsUpgraded ?? false);
 
@@ -2346,7 +2356,7 @@ public static class KokomiPlan
         // The two riders produce no number at all and fall to the default.
         // THE STATUS BATCH (2026-10-01).
         Kind.BlockPerStatusInHand => "Block",
-        Kind.TransformStatusesInDrawPile => "cards transformed",
+        Kind.TransformStatusesInHandAndDrawPile => "cards transformed",
         // THE RE-FOUNDING (2026-10-12).
         Kind.AddStings => "cards added",
         Kind.GainStrength => "Strength",
@@ -2972,17 +2982,33 @@ public static class KokomiPlan
                 // number as it stands, the strip's caption ("Deals 14",
                 // "2 attackers", "Energy 1"); null for every other entry.
                 ["live"] = LiveLine(entry, kokomi, index),
+                // KOKOMI REVIEW R5 (2026-10-14, A2): what the Plan will land
+                // per body, every flat hit summed whatever its aim, and her
+                // Strength when it was written. Zero and null on a Plan with
+                // no flat hit, and on a flipped one.
+                ["written"] = entry.Now && entry.TwoLine
+                    ? 0 : WrittenDamage(entry),
+                ["written_strength"] = entry.Now && entry.TwoLine
+                    ? null : entry.WrittenStrength,
             };
     }
+
+    /// <summary>KOKOMI REVIEW R5 (2026-10-14, A2): the flat hits this entry
+    /// has written, per body, whatever their aim -- the number a page prints
+    /// as what the Plan will land. Display only.</summary>
+    public static int WrittenDamage(Entry entry) =>
+        entry.Clauses
+            .Where(clause => clause.Kind == Kind.Damage)
+            .Sum(clause => clause.Amount * System.Math.Max(1, clause.Times));
 
     /// <summary>
     /// THE POOL OVERHAUL (2026-10-13): a waiting Counter or Chain Plan's
     /// number as it stands, in the strip's words, or null for any other
     /// entry, a flipped one, or no combat. Display only.
     ///
-    /// COUNTER: its window so far -- Kelp Wall "Deals N" (the damage she has
-    /// blocked since it was written), Turnabout "Deals N" (all the damage
-    /// enemies have dealt her), Brine Sting "N attackers", Prepared Retreat
+    /// COUNTER: its window so far -- Kelp Wall "N blocked so far" (the damage
+    /// she has blocked since it was written), Turnabout "N taken so far" (all
+    /// the damage enemies have dealt her), Brine Sting "N attackers", Prepared Retreat
     /// "Energy N" or "No attack yet".
     ///
     /// CHAIN: what it deals if the queue lands as it stands at the start of
@@ -3008,10 +3034,13 @@ public static class KokomiPlan
                                     .Any();
                         return LiveDeals(clause.Amount
                             * (index + 1 + (twice ? 1 : 0)));
+                    // KOKOMI REVIEW R5 (2026-10-14, A3): a Counter's running
+                    // count in its own words ("7 blocked so far"); the hit
+                    // is that count.
                     case Kind.DamageBlockedSince:
-                        return LiveDeals(ledger.BlockedSince(entry.Window));
+                        return LiveBlocked(ledger.BlockedSince(entry.Window));
                     case Kind.DamageTakenSince:
-                        return LiveDeals(ledger.TakenSince(entry.Window));
+                        return LiveTaken(ledger.TakenSince(entry.Window));
                     case Kind.EnergyIfAttackedSince:
                         return ledger.AttackedSince(entry.Window)
                             ? $"Energy {clause.Amount}" : NoAttackYet;
@@ -3031,6 +3060,13 @@ public static class KokomiPlan
 
     /// <summary>The strip's damage caption, "Deals N".</summary>
     public static string LiveDeals(int amount) => $"Deals {amount}";
+
+    /// <summary>Kelp Wall's running count, "N blocked so far" (Kokomi
+    /// review r5, 2026-10-14, A3).</summary>
+    public static string LiveBlocked(int amount) => $"{amount} blocked so far";
+
+    /// <summary>Turnabout's running count, "N taken so far".</summary>
+    public static string LiveTaken(int amount) => $"{amount} taken so far";
 
     /// <summary>A Counter Plan no enemy has attacked into yet.</summary>
     public const string NoAttackYet = "No attack yet";

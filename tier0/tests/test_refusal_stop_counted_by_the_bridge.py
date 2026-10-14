@@ -34,25 +34,45 @@ def _live(command):
                               command=command)
 
 
-def test_plays_chained_after_the_fight_ended_reach_the_stop(
+def test_plays_chained_after_the_fight_ended_are_skipped_uncounted(
         lanes, monkeypatch, capsys):
+    # Co-op Spiral Abyss 2026-10-14 reverses the 10-09 ruling for this case:
+    # a play refused because the fight ended under it is a skip, so a client
+    # whose partner won the fight mid-batch is not stopped.
     blindplay.forget_run()
     blindplay.screen_page(combat_state())        # the last page was a fight
+    blindplay_shape.remember_look("fight", ["a"])
     monkeypatch.setattr(blindplay, "_lane_guard", lambda args: "")
     monkeypatch.setattr(blindplay, "_live_load",
                         lambda args, **kw: map_state())
     posted = []
     monkeypatch.setattr(blindplay, "post_when_the_room_is_open",
                         lambda *a, **kw: posted.append(a) or {})
-    # Two "The fight is over" lines: counted, no stop yet.
+    for _ in range(4):
+        assert blindplay.cmd_act(_live('play "Strike"')) == 1
+        out = capsys.readouterr().out
+        assert out.startswith("Skipped: the fight ended since your last look")
+        assert "REFUSAL STOP" not in out
+    assert blindplay_shape.refusal_streak() == 0
+    assert posted == []
+    blindplay.forget_run()
+
+
+def test_genuine_refusals_still_reach_the_stop(lanes, monkeypatch, capsys):
+    blindplay.forget_run()
+    blindplay.screen_page(map_state())
+    monkeypatch.setattr(blindplay, "_lane_guard", lambda args: "")
+    monkeypatch.setattr(blindplay, "_live_load",
+                        lambda args, **kw: map_state())
+    posted = []
+    monkeypatch.setattr(blindplay, "post_when_the_room_is_open",
+                        lambda *a, **kw: posted.append(a) or {})
     for _ in range(2):
         assert blindplay.cmd_act(_live('play "Strike"')) == 1
         assert "REFUSAL STOP" not in capsys.readouterr().out
     assert blindplay_shape.refusal_streak() == 2
-    # The third is the stop, said on that line.
     assert blindplay.cmd_act(_live('play "Strike"')) == 1
     assert "REFUSAL STOP: 3 commands in a row" in capsys.readouterr().out
-    # And every command after it is held at the stop, sent or not.
     assert blindplay.cmd_act(_live("proceed")) == 2
     assert capsys.readouterr().out.startswith("REFUSAL STOP")
     assert posted == []

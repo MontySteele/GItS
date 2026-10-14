@@ -36,9 +36,8 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
 
 - Every kit: 78 draftable cards, plus two Ancient cards (one from Darv's
   Dusty Tome, one from Orobas's Archaic Tooth replacing a starter card).
-  Klee and Kokomi have co-op cards; Varka's five are being designed
-  ([USER]: "now is actually a great time to design 5 co-op cards for
-  Varka"); Furina has none since the Stage rework.
+  Klee, Kokomi and Varka have co-op cards (Varka's five are built); Furina
+  has none since the Stage rework.
 - Every starter is the base Strike x4 and Defend x4 plus two cards of its own.
   Starter basics change only on [USER]'s pick. No kit starts with a Companion.
 - **Character five is Yae Miko** (`review/active/yae-proposal-2026-10-12.md`,
@@ -126,8 +125,13 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
   #1211) and the Guest Star package
   (`review/active/furina-guest-package-2026-10-13.md`, #1214) are built and
   deployed.
-- **Next:** [USER]'s playtest of that build. Her new model (#1241) is wired in
-  once the guest pose fixes are approved. Parked: Wriothesley's rarity.
+- **Design final** ([USER], 2026-10-14, after his run died mid act 3:
+  "Overall, very fun! I definitely like Furina's current design!"). Her model
+  is in ("new model looks good!").
+- **Next:** the sweep he asked for in the same message ("a cleanup / dedupe
+  pass on the cards to make space to add a wider variety of non guest star
+  effects"): `review/active/furina-sweep-2026-10-14.md`, fifteen cuts and
+  fifteen adds, built on #1271, picks open. Parked: Wriothesley's rarity.
 
 **Varka: Balance.**
 - **Rules** (`review/active/varka-paper-kit-2026-09-28.md` sec.3;

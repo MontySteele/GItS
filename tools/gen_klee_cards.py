@@ -3080,7 +3080,8 @@ PLAN_CLAUSE_KINDS = {
     # Kelp Wall's Block per status or curse, Tidecleanse's exhaust,
     # Sea Glass Harvest's transform, Turning Tide's discard-and-draw.
     "block_per_status_in_hand": "BlockPerStatusInHand",
-    "transform_statuses_in_draw_pile": "TransformStatusesInDrawPile",
+    "transform_statuses_in_hand_and_draw_pile":
+        "TransformStatusesInHandAndDrawPile",
     # THE RE-FOUNDING (2026-10-12). Kurage's Wake's "Add 2 Stings to your
     # hand", and Gorou's Plan lines (card paper sec.3): War Banner's "Gain 3
     # Strength this turn" and Juuga's "For 3 turns, at the end of your turn
@@ -3118,7 +3119,7 @@ PLAN_AMOUNTLESS_OPS = {"damage_quarter_max_hp", "play_copy_of_companion",
                        "first_attack_twice",
                        # THE STATUS BATCH: "every status and curse" prints
                        # no size.
-                       "transform_statuses_in_draw_pile",
+                       "transform_statuses_in_hand_and_draw_pile",
                        # THE POOL OVERHAUL (2026-10-13): a size read off the
                        # ledger at carry-out, and one card.
                        "damage_blocked_since", "damage_taken_since",
@@ -3178,7 +3179,7 @@ PLAN_ONLY_OPS = {
                  "each_player_energy", "each_player_draw",
                  # THE STATUS BATCH: each reads the hand just drawn.
                  "block_per_status_in_hand",
-                 "transform_statuses_in_draw_pile",
+                 "transform_statuses_in_hand_and_draw_pile",
                  # THE RE-FOUNDING (2026-10-12): Kurage's Wake's Stings and
                  # Gorou's two Plan lines name the carry-out turn.
                  "add_stings", "gain_strength", "juuga_guard",
@@ -8719,7 +8720,7 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
                               for e in effects)
         # THE STATUS BATCH: Sea Glass Harvest's Sea Glass+ is read off the
         # writing card's IsUpgraded when the Plan is carried out.
-        or any(e.get("op") == "transform_statuses_in_draw_pile"
+        or any(e.get("op") == "transform_statuses_in_hand_and_draw_pile"
                for e in plan_line),
         # VARKA (Knights' Roll Call+): the chosen Knight arrives upgraded,
         # read at play time off `IsUpgraded`; the face carries its own

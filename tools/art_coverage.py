@@ -624,13 +624,9 @@ KNOWN_MISSING = {
     # and diversity-pass rows) were painted by the missing-art census, whose
     # plan rows are in art/plan.tsv under "Art bill 2026-10-12". An entry here
     # is a card the player sees BLANK; tools/deploy_round.py now names every
-    # one in its summary, so adding one is a visible choice.
-    "proto_kk_turning_tide_chain": "The Kokomi pool overhaul (review/active/kokomi-pool-overhaul-2026-10-13.md, ruled 2026-10-13); no painting yet. The re-founding's cut `proto_kk_turning_tide.png` (a card of the same name) is a candidate, unseen.",
-    "proto_kk_brine_spray": "The Kokomi pool overhaul (review/active/kokomi-pool-overhaul-2026-10-13.md, ruled 2026-10-13); no painting yet.",
-    "proto_kk_jellyfish_current": "The Kokomi pool overhaul (review/active/kokomi-pool-overhaul-2026-10-13.md, ruled 2026-10-13); no painting yet.",
-    "proto_kk_prepared_retreat": "The Kokomi pool overhaul (review/active/kokomi-pool-overhaul-2026-10-13.md, ruled 2026-10-13); no painting yet.",
-    "proto_kk_battle_formation": "The Kokomi pool overhaul (review/active/kokomi-pool-overhaul-2026-10-13.md, ruled 2026-10-13); no painting yet.",
-    "proto_kk_turnabout": "The Kokomi pool overhaul (review/active/kokomi-pool-overhaul-2026-10-13.md, ruled 2026-10-13); no painting yet.",
+    # one in its summary, so adding one is a visible choice. Emptied again
+    # 2026-10-14: the Kokomi pool overhaul's six keys, painted under "Kokomi
+    # art pass (2026-10-14)" in art/plan.tsv.
 }
 
 
