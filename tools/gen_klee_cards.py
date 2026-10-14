@@ -3824,7 +3824,8 @@ APPLY_POWERS = {
     # Casket and the cards, the re-founding, 2026-10-12.)
     "kk_at_waters_edge": ("AtWatersEdgePower", None,
         "The first time each turn you deal [gold]Hydro[/gold] damage to an "
-        "enemy, apply {X} Weak and {X} Vulnerable to it."),
+        "enemy, apply {X} Weak and {X} Vulnerable to it. [gold]Plans[/gold] "
+        "count."),
     "kk_ceremonial_garment": ("ProtoCeremonialGarmentPower", None,
         "Your Attacks deal {X} additional damage for each Weak and "
         "Vulnerable on their target."),

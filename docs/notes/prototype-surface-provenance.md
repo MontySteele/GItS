@@ -8618,6 +8618,10 @@ defaults, other than the first question." Then, on pick 1: "Let's go with
   `free_this_turn`). To fit the 120-character card ceiling the now-line
   reads "Take 1 of your top 3 [4] cards. Bury the rest." (same effect: the
   others go to the bottom). Treatise unchanged.
+- **At Water's Edge** (item 8): the face and badge end "Plans count." A
+  Plan's hit is hers (`AtWatersEdgePower.AfterDamageGiven`, dealer her). The
+  review's "(a Plan counts)" is said without parentheses, which the text
+  conventions lint refuses.
 - **Kelp Wall** (item 12): only Block that absorbed an enemy Attack counts
   (`KokomiOverhaulLedger.NoteEnemyHit`), so Disintegration's damage does not.
   The face says "the Attack damage you blocked since you planned this."
