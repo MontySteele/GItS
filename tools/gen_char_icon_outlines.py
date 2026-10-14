@@ -33,7 +33,8 @@ The dilation runs on the GRAYSCALE alpha (max over a circular neighbourhood),
 not on a binarised mask, which keeps the source's antialiased edge instead of
 manufacturing a hard one.
 
-INPUTS are the shipped fills (Varka joined 2026-09-29). Klee's historical layout is
+INPUTS are the shipped fills (Varka joined 2026-09-29), which
+tools/gen_char_icons.py draws; run this after it. Klee's historical layout is
 ImageGen/images/ui/; Furina and Kokomi use ImageGen/images/<character>/ui/,
 the same split `build_pck.ps1` and `art_lint.GENERATOR_OWNED` already carry.
 

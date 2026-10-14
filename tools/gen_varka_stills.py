@@ -9,7 +9,6 @@ Outputs (all gitignored Tier F, ledgered in art/SOURCES.tsv):
                                                          (the fallback; the game
                                                          draws his model frames)
     ImageGen/images/varka/ui/selection_splash.png      1920x1200
-    ImageGen/images/varka/ui/char_icon.png               88x88
     ImageGen/images/varka/ui/map_marker.png              49x64
 
 SOURCE. `Varka Portrait.png` (1376x1776, official, fetched by the Varka block
@@ -26,7 +25,9 @@ Kokomi's is.
 
 The roster tile (ui/select_portrait.png and its locked twin) left this script on
 2026-10-13: tools/char_render/pack.py draws it from his model, a face close-up
-like the base cast's, and one out-path has one producer.
+like the base cast's, and one out-path has one producer. The top-bar icon
+(ui/char_icon.png) followed the same day: tools/gen_char_icons.py draws it
+from his select close-up.
 
 Usage: .venv/Scripts/python tools/gen_varka_stills.py [--art-root <checkout>] [--check]
 
@@ -49,7 +50,6 @@ UI_REL = Path("ImageGen") / "images" / "varka" / "ui"
 MODEL_REL = Path("ImageGen") / "images" / "varka" / "model"
 
 # Set by eye against rendered crops. Larger fraction = wider shot.
-ICON_HEAD_FRAC = 0.17
 MARKER_HEAD_FRAC = 0.21
 
 # Selection splash: measured against the VISIBLE 1080 band of the 1920x1200
@@ -78,8 +78,6 @@ def render(cutout):
     out = {}
     out[MODEL_REL / "combat_model.png"] = fit(cutout, 240, 280)
 
-    out[UI_REL / "char_icon.png"] = head_crop(
-        cutout, 88, 88, head_frac=ICON_HEAD_FRAC, centre_on="head")
     out[UI_REL / "map_marker.png"] = head_crop(
         cutout, 49, 64, head_frac=MARKER_HEAD_FRAC, centre_on="head")
 
