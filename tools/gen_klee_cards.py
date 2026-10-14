@@ -1970,9 +1970,6 @@ PREDICATES_CS = {
     "pneuma_face": "FurinaFlip.OnPneuma(this)",
     "hp_lost_last_turn": "FurinaSweep.LostHpLastTurn(Owner.Creature)",
     "first_turn_of_combat": "FurinaSweep.FirstTurnOfCombat(Owner.Creature)",
-    # Yae review r1 (2026-10-14): "Can only be played if a Sakura is
-    # standing" (Kitsune Rite). Sim twin: `yae_shrine.sakura_count`.
-    "sakura_standing": "YaeShrine.Count(Owner.Creature) > 0",
 }
 
 # The if-clause each predicate renders on the card.
@@ -2021,7 +2018,6 @@ PREDICATE_TEXT = {
     "pneuma_face": "On Pneuma",
     "hp_lost_last_turn": "If you lost HP last turn",
     "first_turn_of_combat": "On your first turn",
-    "sakura_standing": "If a [gold]Sakura[/gold] is standing",
 }
 
 _FANFARE_BAR = re.compile(r"^fanfare_at_least_(\d+)$")
@@ -16796,10 +16792,8 @@ def yae_face_lines(card: dict, profile: "CharacterProfile",
     A "Rite: X" row says in combat what the shrine would do under X, summed
     over the Sakura standing: "Rite: Warding (your Sakura: 5 Block)", the
     `{InCombat:{YaeRite}|}` right after the Rite's name. A row that Tenkos
-    and does something else says "Tenko (no Sakura)" while none stands; a row
-    gated on a Sakura standing (`playable_if: sakura_standing`, Kitsune Rite)
-    says it in its own sentence instead. DERIVED FROM THE OPS, so a new Rite
-    or Tenko row carries its clause the day it exists. Sim twins:
+    says "Tenko (no Sakura)" while none stands. DERIVED FROM THE OPS, so a
+    new Rite or Tenko row carries its clause the day it exists. Sim twins:
     `yae_shrine.rite_line`, `yae_shrine.tenko_line`.
     """
     if profile.character_id != "yae" or card.get("character") != "yae":
@@ -16819,8 +16813,7 @@ def yae_face_lines(card: dict, profile: "CharacterProfile",
                             clause + "{InCombat:{" + YAE_RITE_TOKEN + "}|}")
         args.append((YAE_RITE_TOKEN,
                      f"YaeShrineFace.RiteLine(this, YaeRite.{name})"))
-    if (any(e.get("kind") == "tenko" for e in ops)
-            and card.get("playable_if") != "sakura_standing"):
+    if any(e.get("kind") == "tenko" for e in ops):
         clause = "[gold]Tenko[/gold]"
         if desc.count(clause) != 1:
             raise ValueError(f"{card['id']}: a Tenko row prints {clause!r} "
@@ -18485,7 +18478,6 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         playable_why = {
             "hp_lost_this_turn": "you have not lost HP this turn",
             "enemy_intends_attack": "no enemy intends to attack",
-            "sakura_standing": "no Sakura is standing",
         }.get(playable_if, "its condition is not met")
         playable_gate_member = (
             "\n\n    // Furina's sweep (2026-10-14): \"Can be played only"

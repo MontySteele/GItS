@@ -3231,9 +3231,6 @@ PREDICATE_NAMES = frozenset({
     # `_op_conditional`, off the card).
     "hp_lost_last_turn",
     "first_turn_of_combat",
-    # Yae review r1 (2026-10-14): Kitsune Rite's "Can only be played if a
-    # Sakura is standing" (`playable_if`).
-    "sakura_standing",
     "ousia_face",
     "pneuma_face",
     "enemy_intends_attack",
@@ -3690,8 +3687,6 @@ def _predicate(state: CombatState, name: str) -> bool:
         return state.hp_lost_last_turn > 0
     if name == "first_turn_of_combat":
         return state.turn == 1
-    if name == "sakura_standing":
-        return yae_shrine.sakura_count(state.player) > 0
     # Ousia / Pneuma's faces are the CARD's, read in `_op_conditional`.
     if name == "ousia_face" or name == "pneuma_face":   # pragma: no cover
         raise ValueError(f"{name} is read off the card (_op_conditional)")

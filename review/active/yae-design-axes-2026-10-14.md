@@ -316,9 +316,11 @@ Four changes, built in both engines:
    or with no Sakura standing. The Rite badge and the seat page add "Your
    Sakura now: 5 Block." for the current Rite. The sum is the Rite's own job:
    Edict, Sakura Channeling's extra Thunder strike and Fox Fire are not in it.
-2. **Kitsune Rite cannot be played with no Sakura standing** and says so:
-   "Can only be played if a Sakura is standing." Thunder Rite, Mikage
-   Thunder and Tenko Kenshin print "Tenko (no Sakura)" while none stands.
+2. **Every Tenko card prints "Tenko (no Sakura)" while none stands**:
+   Kitsune Rite, Thunder Rite, Mikage Thunder and Tenko Kenshin. None is
+   gated: Kitsune Rite was first made unplayable with no Sakura, then the
+   gate was dropped once it drew a card, so it still draws.
 3. **Sakura Seal costs 0** (was 1 [0]). Its upgrade was the cost cut, so it
    takes Footnote's: "Edit 2 cards in your hand: Sakura Seal."
-4. **Kitsune Rite: "Tenko. Draw 1 card."**, 1 [0], Exhaust, as before.
+4. **Kitsune Rite: "Tenko. Draw 1 card."**, 1 [0], Exhaust, as before;
+   with no Sakura it reads "Tenko (no Sakura). Draw 1 card."

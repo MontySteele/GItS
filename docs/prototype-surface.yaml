@@ -4698,10 +4698,9 @@
 - {id: proto_ym_kitsune_rite, name: "Kitsune Rite", character: yae,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   # Claude, 2026-10-14 (Yae review r1, no pick): "Tenko. Draw 1 card.", and
-   # unplayable with no Sakura standing (a Tenko into nothing).
-   playable_if: sakura_standing,
-   description: "Can only be played if a [gold]Sakura[/gold] is standing. [gold]Tenko[/gold]. Draw 1 card.",
+   # Claude, 2026-10-14 (Yae review r1, no pick): "Tenko. Draw 1 card." With
+   # no Sakura standing it still draws, and its face says "Tenko (no Sakura)".
+   description: "[gold]Tenko[/gold]. Draw 1 card.",
    effects: [{op: yae, kind: tenko},
              {op: draw, amount: 1}],
    upgrade: {cost: -1}}

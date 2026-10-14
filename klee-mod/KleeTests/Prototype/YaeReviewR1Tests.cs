@@ -14,9 +14,8 @@ namespace KleeMod.Tests.Prototype;
 /// YAE REVIEW R1 (Claude, 2026-10-14, no pick;
 /// <c>review/active/yae-design-axes-2026-10-14.md</c>, the dated note):
 /// a "Rite: X" card says what the shrine would do under X, summed over the
-/// Sakura standing, and the Rite badge says it for the current Rite; Kitsune
-/// Rite is unplayable with no Sakura standing and the other Tenko cards say
-/// "(no Sakura)"; Sakura Seal costs 0 (upgrade: Edit 2 cards); Kitsune Rite
+/// Sakura standing, and the Rite badge says it for the current Rite; every
+/// Tenko card says "(no Sakura)" while none stands; Sakura Seal costs 0 (upgrade: Edit 2 cards); Kitsune Rite
 /// is "Tenko. Draw 1 card." The suite is headless, so the words and sums
 /// are pinned by value and the wiring off the compiled members. The sim half
 /// is <c>tier0/tests/test_yae_review_r1.py</c>.
@@ -125,24 +124,14 @@ public class YaeReviewR1Tests : IDisposable
     // ==== 2. Tenko with no Sakura ===========================================
 
     [Fact]
-    public void Kitsune_rite_is_unplayable_with_no_sakura_and_says_why()
+    public void Every_tenko_card_says_no_sakura_and_none_is_gated()
     {
-        Assert.True(typeof(IUnplayableReasonCard).IsAssignableFrom(typeof(ProtoYmKitsuneRite)));
-        Assert.Contains(Il.Calls(Il.Method("ProtoYmKitsuneRite", "get_IsPlayable")),
-                        c => c.Contains("YaeShrine.Count"));
-        Assert.StartsWith("Can only be played if a [gold]Sakura[/gold] is standing.",
-                          Face(new ProtoYmKitsuneRite()));
-        Assert.DoesNotContain(YaeShrineFace.TenkoToken, Face(new ProtoYmKitsuneRite()));
-        Assert.Equal(0, YaeShrine.Count(null));
-    }
-
-    [Fact]
-    public void The_other_tenko_cards_say_no_sakura()
-    {
+        // The coordinator dropped Kitsune Rite's gate (2026-10-14): it is
+        // playable with no Sakura and says "Tenko (no Sakura)" like the rest.
         foreach (var card in new CardModel[]
                  {
-                     new ProtoYmThunderRite(), new ProtoYmMikageThunder(),
-                     new ProtoYmTenkoKenshin(),
+                     new ProtoYmKitsuneRite(), new ProtoYmThunderRite(),
+                     new ProtoYmMikageThunder(), new ProtoYmTenkoKenshin(),
                  })
         {
             Assert.Contains($"[gold]Tenko[/gold]{{InCombat:{{{YaeShrineFace.TenkoToken}}}|}}",
@@ -174,7 +163,7 @@ public class YaeReviewR1Tests : IDisposable
     {
         var rite = new ProtoYmKitsuneRite();
         Assert.Equal(1, rite.EnergyCost.Canonical);
-        Assert.EndsWith("[gold]Tenko[/gold]. Draw 1 card.", Face(rite));
+        Assert.EndsWith("|}. Draw 1 card.", Face(rite));
         var calls = Il.CallSequence(Il.Method("ProtoYmKitsuneRite", "OnPlay")).ToList();
         var tenko = calls.FindIndex(c => c.Contains("YaeCards.Tenko"));
         var draw = calls.FindIndex(c => c.Contains("CardPileCmd.Draw"));

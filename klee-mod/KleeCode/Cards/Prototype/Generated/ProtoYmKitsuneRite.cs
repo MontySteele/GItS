@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoYmKitsuneRite : CustomCardModel, ICharacterCard, IUnplayableReasonCard
+public sealed class ProtoYmKitsuneRite : CustomCardModel, ICharacterCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "yae";
@@ -48,18 +48,17 @@ public sealed class ProtoYmKitsuneRite : CustomCardModel, ICharacterCard, IUnpla
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kitsune Rite"),
-        ("description", "Can only be played if a [gold]Sakura[/gold] is standing. [gold]Tenko[/gold]. Draw 1 card."),
+        ("description", "[gold]Tenko[/gold]{InCombat:{YaeTenko}|}. Draw 1 card."),
     };
 
-    // Furina's sweep (2026-10-14): "Can be played only if" -- the
-    // row's `playable_if`.
-    protected override bool IsPlayable =>
-        YaeShrine.Count(Owner.Creature) > 0;
-
-    public string? UnplayableReason =>
-        YaeShrine.Count(Owner.Creature) > 0
-            ? null
-            : "no Sakura is standing";
+    /// <summary>This card's in-combat shrine clauses
+    /// (`YaeShrineFace`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("YaeTenko", YaeShrineFace.TenkoLine(this));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

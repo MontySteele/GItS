@@ -5,8 +5,8 @@
      summed over the Sakura standing ("Rite: Warding (your Sakura: 5
      Block)"); nothing with no Sakura. The Rite badge and the seat page say
      the same for the current Rite.
-  2. Kitsune Rite cannot be played with no Sakura standing, and says why on
-     its face; the other Tenko cards say "Tenko (no Sakura)".
+  2. Every Tenko card says "Tenko (no Sakura)" while none stands; none is
+     gated (the coordinator dropped Kitsune Rite's gate, 2026-10-14).
   3. Sakura Seal costs 0; its upgrade (the cost cut before) is Footnote's,
      Edit 2 cards.
   4. Kitsune Rite: "Tenko. Draw 1 card." (upgrade as before, 1 [0]).
@@ -172,38 +172,35 @@ def test_the_seat_page_prints_the_sum_on_the_rite_line():
 # 2. Tenko with no Sakura
 # ---------------------------------------------------------------------------
 
-def test_kitsune_rite_is_unplayable_with_no_sakura_standing():
+def test_kitsune_rite_is_playable_with_no_sakura_and_still_draws():
     st = _state()
     card = loader.get_card(_ym("kitsune_rite"))
-    assert card.playable_if == "sakura_standing"
+    assert card.playable_if is None
     st.player.hand.append(card)
     st.player.energy = 3
-    assert not combat.card_playable(st, card)
-    assert not effects._predicate(st, "sakura_standing")
-    _play(st, _ym("yakan_evocation"))
-    assert effects._predicate(st, "sakura_standing")
     assert combat.card_playable(st, card)
+    hand = len(st.player.hand)
+    combat.play_card(st, card)
+    assert len(st.player.hand) == hand            # -1 played, +1 drawn
+    assert not any(r["event"] == "yae_sakura_strike" for r in st.log)
 
 
-def test_kitsune_rites_face_says_why_and_carries_no_tenko_clause():
-    face = _face(_ym("kitsune_rite"))
-    assert face.startswith("Can only be played if a [gold]Sakura[/gold] is "
-                           "standing.")
-    assert "YaeTenko" not in face
-    text = (GENERATED / "ProtoYmKitsuneRite.cs").read_text(encoding="utf-8")
-    assert "IsPlayable =>\n        YaeShrine.Count(Owner.Creature) > 0" in text
-    assert '"no Sakura is standing"' in text
-
-
-@pytest.mark.parametrize("card_id", [_ym("thunder_rite"),
+@pytest.mark.parametrize("card_id", [_ym("kitsune_rite"),
+                                     _ym("thunder_rite"),
                                      _ym("mikage_thunder"),
                                      _ym("tenko_kenshin")])
-def test_the_other_tenko_cards_say_no_sakura(card_id):
+def test_every_tenko_card_says_no_sakura(card_id):
     face = _face(card_id)
     assert "[gold]Tenko[/gold]{InCombat:{YaeTenko}|}" in face
     text = (GENERATED / f"{gen.pascal(card_id)}.cs").read_text(encoding="utf-8")
     assert 'description.Add("YaeTenko", YaeShrineFace.TenkoLine(this));' in text
     assert "IsPlayable" not in text
+
+
+def test_the_gate_predicate_is_gone():
+    assert "sakura_standing" not in gen.PREDICATES_CS
+    assert "sakura_standing" not in Path(effects.__file__).read_text(
+        encoding="utf-8")
 
 
 def test_the_tenko_clause_reads_the_shrine():
