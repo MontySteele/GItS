@@ -407,7 +407,7 @@ _ABYSS_SCREEN_REASON = (
     "no game rule reads it, so no sim twin exists.")
 
 UNMIRRORED: dict[str, str] = {
-    "AbyssOverlayFlow.CoopResultSeconds": _ABYSS_SCREEN_REASON,
+    "AbyssOverlayFlow.ResultSeconds": _ABYSS_SCREEN_REASON,
     "AbyssOverlayFlow.FadeSeconds": _ABYSS_SCREEN_REASON,
     "AbyssOverlayView.CardWidth": _ABYSS_SCREEN_REASON,
     "AbyssOverlayView.CardGap": _ABYSS_SCREEN_REASON,

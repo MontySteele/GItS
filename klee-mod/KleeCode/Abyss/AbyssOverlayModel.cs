@@ -38,17 +38,23 @@ public sealed class AbyssOverlayContent
 {
     public const string Heading = "The Spiral Abyss";
 
+    /// <summary>Co-op Abyss run, 2026-10-14: in all three acts both seats
+    /// read the Shadow beside a Blessing as the one that came with it. The
+    /// line now says where the enemies' Shadow comes from.</summary>
     public const string Whisper =
-        "The Abyss whispers, urging you deeper. Take one Blessing; "
-      + "the enemies take one of the Shadows you pass.";
+        "The Abyss whispers, urging you deeper. Take one Blessing. "
+      + "The enemies take one Shadow, at random, from the Blessings you pass.";
 
     public const string WholeRunTag = "Whole run";
 
     public const string ThisActTag = "This act";
 
-    /// <summary>The label over each card's lower band (owner, 2026-10-12:
-    /// "IF PASSED" renamed "SHADOW"; the view prints it in capitals).</summary>
-    public const string ShadowBandLabel = "Shadow";
+    /// <summary>The label over each card's lower band; the view prints it in
+    /// capitals. Owner, 2026-10-12: "IF PASSED" renamed "SHADOW". Co-op
+    /// Abyss run, 2026-10-14: "SHADOW" beside a Blessing read as the Shadow
+    /// that comes with it, three acts running, so the band keeps the word
+    /// and says when it applies.</summary>
+    public const string ShadowBandLabel = "Shadow if you pass this";
 
     public const string BlessingsLabel = "Blessings";
 
@@ -109,7 +115,8 @@ public sealed class AbyssOverlayContent
     /// <summary>The seat bridge's option text for a card: the Blessing's
     /// text, then the card's Shadow under the screen's own label.</summary>
     public static string BridgeDescription(AbyssOverlayCard card) =>
-        $"{card.BlessingText}\n{ShadowBandLabel}: {card.ShadowName} — {card.ShadowText}";
+        $"{card.BlessingText}\nIf you pass this, the enemies may take its Shadow: "
+        + $"{card.ShadowName} — {card.ShadowText}";
 
     /// <summary>The Blessing's icon in the pack: the same file its display
     /// relic wears (<c>Relics/AbyssRelics.cs</c>).</summary>
@@ -161,7 +168,7 @@ public enum AbyssOverlayPhase
     /// <summary>Up and taking a pick (solo) or votes (co-op).</summary>
     Open,
 
-    /// <summary>The pick has landed; co-op shows its result line.</summary>
+    /// <summary>The pick has landed; the result line shows.</summary>
     Resolving,
 
     /// <summary>Fading out. The dialogue is released when the fade ends.</summary>
@@ -171,14 +178,18 @@ public enum AbyssOverlayPhase
 /// <summary>
 /// THE SCREEN'S SEQUENCE, as a pure state machine, so the headless suite
 /// pins it: it opens before the Ancient's dialogue, holds the dialogue while
-/// it is up, takes a vote only while open, shows a co-op result line for
-/// <see cref="CoopResultSeconds"/> and then fades for
+/// it is up, takes a vote only while open, shows its result line for
+/// <see cref="ResultSeconds"/> and then fades for
 /// <see cref="FadeSeconds"/>, and only then lets the Ancient speak. The game
 /// glue (<c>AbyssOverlay</c>) does what each step says.
 /// </summary>
 public sealed class AbyssOverlayFlow
 {
-    public const double CoopResultSeconds = 1.5;
+    /// <summary>How long the result line stays up. Co-op Abyss run,
+    /// 2026-10-14: the seats said the page never said which Shadow the
+    /// enemies took, so the line now names it, solo too, and stays long
+    /// enough to read.</summary>
+    public const double ResultSeconds = 2.5;
     public const double FadeSeconds = 0.3;
 
     public AbyssOverlayPhase Phase { get; private set; } = AbyssOverlayPhase.Closed;
@@ -186,7 +197,8 @@ public sealed class AbyssOverlayFlow
     /// <summary>The card this machine's player last voted for.</summary>
     public int? LocalVote { get; private set; }
 
-    /// <summary>The co-op result line, once the vote resolves.</summary>
+    /// <summary>The result line, once the pick resolves: what was chosen
+    /// and the Shadow the enemies took.</summary>
     public string? ResultLine { get; private set; }
 
     public int? Chosen { get; private set; }
@@ -219,21 +231,16 @@ public sealed class AbyssOverlayFlow
         return true;
     }
 
-    /// <summary>The pick landed. Returns how long to hold before fading:
-    /// the result line's time in co-op, none solo. A second call (the other
-    /// copy of the shared event) changes nothing and answers null.</summary>
-    public double? Resolve(int chosen, string chosenName, bool coop, bool split)
+    /// <summary>The pick landed. Returns how long to hold the result line
+    /// before fading. A second call (the other copy of the shared event)
+    /// changes nothing and answers null.</summary>
+    public double? Resolve(int chosen, string chosenName, string? shadowName, bool coop, bool split)
     {
         if (Phase != AbyssOverlayPhase.Open) return null;
         Chosen = chosen;
-        if (coop)
-        {
-            ResultLine = ResultLineFor(chosenName, split);
-            Phase = AbyssOverlayPhase.Resolving;
-            return CoopResultSeconds;
-        }
-        Phase = AbyssOverlayPhase.Closing;
-        return 0;
+        ResultLine = ResultLineFor(chosenName, shadowName, coop, split);
+        Phase = AbyssOverlayPhase.Resolving;
+        return ResultSeconds;
     }
 
     /// <summary>The result line's time is up: start the fade.</summary>
@@ -256,11 +263,15 @@ public sealed class AbyssOverlayFlow
         return true;
     }
 
-    /// <summary>The co-op result line.</summary>
-    public static string ResultLineFor(string chosenName, bool split) =>
-        split
-            ? $"The vote split; the draw gave {chosenName}."
+    /// <summary>The result line: who chose what, then the Shadow the
+    /// enemies took (none named when the offer had no Shadow to give).</summary>
+    public static string ResultLineFor(string chosenName, string? shadowName, bool coop, bool split)
+    {
+        var chose = !coop ? $"You chose {chosenName}."
+            : split ? $"The vote split; the draw gave {chosenName}."
             : $"The party chose {chosenName}.";
+        return string.IsNullOrEmpty(shadowName) ? chose : $"{chose} The enemies took {shadowName}.";
+    }
 }
 
 /// <summary>

@@ -42,7 +42,11 @@ public class AbyssOverlayTests
     {
         Assert.Equal("The Spiral Abyss · Act 1", AbyssOverlayContent.TitleFor(0));
         Assert.Equal("The Spiral Abyss · Act 3", AbyssOverlayContent.TitleFor(2));
-        Assert.Equal("The Abyss whispers, urging you deeper. Take one Blessing; the enemies take one of the Shadows you pass.",
+        // Co-op Abyss run, 2026-10-14: the page says where the enemies'
+        // Shadow comes from, so a Shadow beside a Blessing is not read as
+        // the one that comes with it.
+        Assert.Equal("The Abyss whispers, urging you deeper. Take one Blessing. "
+                     + "The enemies take one Shadow, at random, from the Blessings you pass.",
                      AbyssOverlayContent.Whisper);
     }
 
@@ -57,7 +61,7 @@ public class AbyssOverlayTests
         Assert.Equal("Abyss Mage Shield", card.ShadowName);
         Assert.Equal(AbyssText.Text(AbyssShadow.MageShield), card.ShadowText);
         Assert.Equal(new[] { 0, 1, 2 }, content.Cards.Select(c => c.Index));
-        Assert.Equal("The Ley Line text\nShadow: Rally — Rally text",
+        Assert.Equal("The Ley Line text\nIf you pass this, the enemies may take its Shadow: Rally — Rally text",
             AbyssOverlayContent.BridgeDescription(card with
             {
                 BlessingText = "The Ley Line text", ShadowName = "Rally", ShadowText = "Rally text",
@@ -122,9 +126,11 @@ public class AbyssOverlayTests
         Assert.True(flow.Vote(1, 3));
         Assert.False(flow.Vote(1, 3));
 
-        Assert.Equal(0, flow.Resolve(1, "Moonlit Rest", coop: false, split: false));
-        Assert.Null(flow.ResultLine);
-        Assert.Equal(AbyssOverlayPhase.Closing, flow.Phase);
+        // Solo shows its result line too (co-op Abyss run, 2026-10-14: the
+        // page never said which Shadow the enemies took).
+        Assert.Equal(AbyssOverlayFlow.ResultSeconds, flow.Resolve(1, "Moonlit Rest", "Riptide", coop: false, split: false));
+        Assert.Equal("You chose Moonlit Rest. The enemies took Riptide.", flow.ResultLine);
+        Assert.Equal(AbyssOverlayPhase.Resolving, flow.Phase);
         Assert.True(flow.HoldsDialogue);
         Assert.False(flow.Vote(0, 3));
 
@@ -145,13 +151,13 @@ public class AbyssOverlayTests
         Assert.True(flow.Vote(2, 3));
         Assert.Equal(2, flow.LocalVote);
 
-        Assert.Equal(AbyssOverlayFlow.CoopResultSeconds, flow.Resolve(0, "The Ley Line", coop: true, split: true));
-        Assert.Equal(1.5, AbyssOverlayFlow.CoopResultSeconds);
+        Assert.Equal(AbyssOverlayFlow.ResultSeconds, flow.Resolve(0, "The Ley Line", "Sheer Cold", coop: true, split: true));
+        Assert.Equal(2.5, AbyssOverlayFlow.ResultSeconds);
         Assert.Equal(AbyssOverlayPhase.Resolving, flow.Phase);
-        Assert.Equal("The vote split; the draw gave The Ley Line.", flow.ResultLine);
+        Assert.Equal("The vote split; the draw gave The Ley Line. The enemies took Sheer Cold.", flow.ResultLine);
         Assert.True(flow.HoldsDialogue);
         // The other copy of the shared event resolves too: nothing more.
-        Assert.Null(flow.Resolve(0, "The Ley Line", coop: true, split: true));
+        Assert.Null(flow.Resolve(0, "The Ley Line", "Sheer Cold", coop: true, split: true));
         Assert.False(flow.FinishFade());
         Assert.True(flow.BeginFade());
         Assert.True(flow.FinishFade());
@@ -160,8 +166,15 @@ public class AbyssOverlayTests
     [Fact]
     public void The_result_line_says_whether_the_vote_split()
     {
-        Assert.Equal("The party chose Moonlit Rest.", AbyssOverlayFlow.ResultLineFor("Moonlit Rest", split: false));
-        Assert.Equal("The vote split; the draw gave Moonlit Rest.", AbyssOverlayFlow.ResultLineFor("Moonlit Rest", split: true));
+        Assert.Equal("The party chose Moonlit Rest. The enemies took Riptide.",
+                     AbyssOverlayFlow.ResultLineFor("Moonlit Rest", "Riptide", coop: true, split: false));
+        Assert.Equal("The vote split; the draw gave Moonlit Rest. The enemies took Riptide.",
+                     AbyssOverlayFlow.ResultLineFor("Moonlit Rest", "Riptide", coop: true, split: true));
+        Assert.Equal("You chose Moonlit Rest. The enemies took Riptide.",
+                     AbyssOverlayFlow.ResultLineFor("Moonlit Rest", "Riptide", coop: false, split: false));
+        // An offer with no Shadow to give names none.
+        Assert.Equal("You chose Moonlit Rest.",
+                     AbyssOverlayFlow.ResultLineFor("Moonlit Rest", null, coop: false, split: false));
 
         Assert.False(AbyssVoteOutcome.Split(new int?[] { 1, 1 }, 1));
         Assert.True(AbyssVoteOutcome.Split(new int?[] { 0, 2 }, 2));
@@ -276,10 +289,13 @@ public class AbyssOverlayTests
     // ---- The SHADOW label and the X ---------------------------------------------
 
     [Fact]
-    public void The_lower_band_is_labelled_SHADOW()
+    public void The_lower_band_is_labelled_SHADOW_IF_YOU_PASS_THIS()
     {
-        Assert.Equal("Shadow", AbyssOverlayContent.ShadowBandLabel);
-        Assert.Equal("SHADOW", AbyssOverlayView.BandLabel(AbyssOverlayContent.ShadowBandLabel));
+        // Owner, 2026-10-12: "IF PASSED" renamed "SHADOW". Co-op Abyss run,
+        // 2026-10-14: "SHADOW" alone read as the Shadow that comes with the
+        // Blessing, so the band keeps the word and says when it applies.
+        Assert.Equal("Shadow if you pass this", AbyssOverlayContent.ShadowBandLabel);
+        Assert.Equal("SHADOW IF YOU PASS THIS", AbyssOverlayView.BandLabel(AbyssOverlayContent.ShadowBandLabel));
         Assert.Contains("AbyssOverlayView.BandLabel", Il.Calls(Il.Method("AbyssOverlayView", "BuildCard")));
     }
 
@@ -345,7 +361,7 @@ public class AbyssOverlayTests
         var options = (List<Dictionary<string, object?>>)state["options"]!;
         Assert.Equal(new[] { "The Ley Line", "Moonlit Rest", "First Strike" }, options.Select(o => o["title"]));
         Assert.Equal(new object?[] { 0, 1, 2 }, options.Select(o => o["index"]));
-        Assert.Equal(AbyssText.Text(AbyssBlessing.MoonlitRest) + "\nShadow: Sheer Cold — "
+        Assert.Equal(AbyssText.Text(AbyssBlessing.MoonlitRest) + "\nIf you pass this, the enemies may take its Shadow: Sheer Cold — "
                      + AbyssText.Text(AbyssShadow.SheerCold), options[1]["description"]);
         var screen = (Dictionary<string, object?>)state["abyss_screen"]!;
         Assert.Equal("The Spiral Abyss · Act 1", screen["subtitle"]);
@@ -359,7 +375,7 @@ public class AbyssOverlayTests
         var flow = new AbyssOverlayFlow();
         flow.Open();
         flow.Vote(1, 3);
-        flow.Resolve(1, "Moonlit Rest", coop: true, split: false);
+        flow.Resolve(1, "Moonlit Rest", "Abyss Mage Shield", coop: true, split: false);
         var json = AbyssOverlay.PageJson(content, flow);
         Assert.False(GitsAbyssPage.IsOpen(json));
 
@@ -369,7 +385,32 @@ public class AbyssOverlayTests
         var screen = (Dictionary<string, object?>)state["abyss_screen"]!;
         Assert.Equal(true, screen["resolved"]);
         Assert.Equal("Moonlit Rest", screen["chosen"]);
-        Assert.Equal("The party chose Moonlit Rest.", screen["result"]);
+        Assert.Equal("The party chose Moonlit Rest. The enemies took Abyss Mage Shield.", screen["result"]);
+        Assert.Equal(screen["result"], state["abyss_result"]);
+    }
+
+    [Fact]
+    public void After_the_screen_the_room_still_says_which_Shadow_the_enemies_took()
+    {
+        // Co-op Abyss run, 2026-10-14: "the page does not say which Shadow
+        // lands on the enemies". The screen is up for seconds; the room
+        // carries the result line for as long as it lasts.
+        Assert.Equal(GitsAbyssPage.ResultMetaKey, AbyssOverlay.ResultMeta);
+
+        var state = new Dictionary<string, object?> { ["event_name"] = "Neow" };
+        GitsAbyssPage.ApplyResult(state, "You chose Overflow. The enemies took Fatui Skirmishers.");
+        Assert.Equal("You chose Overflow. The enemies took Fatui Skirmishers.", state["abyss_result"]);
+        Assert.Equal("Neow", state["event_name"]);
+        var empty = new Dictionary<string, object?>();
+        GitsAbyssPage.ApplyResult(empty, null);
+        GitsAbyssPage.ApplyResult(empty, " ");
+        Assert.Empty(empty);
+
+        // STRUCTURAL: the glue names the Shadow the record takes (the same
+        // ShadowIfChosen roll) and puts the line on the room.
+        var chosen = Il.Calls(typeof(AbyssOverlay).GetMethod("OnChosen", BindingFlags.NonPublic | BindingFlags.Static)!);
+        Assert.Contains("AbyssOffer.ShadowIfChosen", chosen);
+        Assert.Contains("GodotObject.SetMeta", chosen);
     }
 
     [Fact]

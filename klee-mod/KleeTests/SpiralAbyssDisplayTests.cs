@@ -273,6 +273,30 @@ public class SpiralAbyssDisplayTests
     }
 
     [Fact]
+    public void A_room_filtered_Shadow_wears_its_badge_only_where_it_acts()
+    {
+        // Co-op Abyss run, 2026-10-14: Fatui Skirmishers' badge sat on every
+        // hallway enemy and both seats read it as 3 Plated Armor on every
+        // enemy. The paper (review/active/spiral-abyss-pools-2026-10-12.md):
+        // "Elites and bosses enter combat with 3 Plated Armor." The effect
+        // already followed it; the badge now does too.
+        Assert.Equal("Elites and bosses enter combat with 3 Plated Armor.",
+                     AbyssText.Text(AbyssShadow.FatuiSkirmishers));
+        var inForce = new[] { AbyssShadow.Bulwark, AbyssShadow.FatuiSkirmishers, AbyssShadow.MageShield };
+        Assert.Equal(new[] { AbyssShadow.Bulwark },
+                     AbyssRules.BadgesFor(inForce, isElite: false, isBoss: false));
+        Assert.Equal(inForce, AbyssRules.BadgesFor(inForce, isElite: true, isBoss: false));
+        Assert.Equal(new[] { AbyssShadow.Bulwark, AbyssShadow.FatuiSkirmishers },
+                     AbyssRules.BadgesFor(inForce, isElite: false, isBoss: true));
+
+        // STRUCTURAL: both badge moments go through the filter.
+        var start = Il.Calls(typeof(SpiralAbyss).GetMethod(nameof(SpiralAbyss.AfterRoomEntered))!);
+        Assert.Contains("AbyssRules.BadgesFor", start);
+        var summon = Il.Calls(typeof(SpiralAbyss).GetMethod(nameof(SpiralAbyss.AfterCreatureAddedToCombat))!);
+        Assert.Contains("AbyssRules.BadgesFor", summon);
+    }
+
+    [Fact]
     public void Badges_go_on_at_combat_start_and_on_every_later_summon()
     {
         // STRUCTURAL: both moments need a live combat.

@@ -78,7 +78,7 @@ public partial class RigMain : Node
                 Title = $"{AbyssOverlayContentRig.Heading} · Act {state.Act + 1}",
                 Whisper = AbyssOverlayContentRig.Whisper,
                 WholeRunTag = "Whole run",
-                ShadowBandLabel = "Shadow",
+                ShadowBandLabel = "Shadow if you pass this",
                 BlessingsLabel = "Blessings",
                 ShadowsLabel = "Shadows",
             };
@@ -183,8 +183,8 @@ internal static class AbyssOverlayContentRig
     public const string Heading = "The Spiral Abyss";
 
     public const string Whisper =
-        "The Abyss whispers, urging you deeper. Take one Blessing; "
-      + "the enemies take one of the Shadows you pass.";
+        "The Abyss whispers, urging you deeper. Take one Blessing. "
+      + "The enemies take one Shadow, at random, from the Blessings you pass.";
 
     public static string BlessingIcon(AbyssBlessing b) => b switch
     {
