@@ -185,3 +185,23 @@ def test_boot_telemetry_names_the_scene_and_all_five_nodes():
         assert f'("furina/ui/energy_counter.tscn", "{name}")' in TELEMETRY, (
             f"{name} is not in KleeSceneTelemetry's RequiredNodes; these five "
             "throw rather than no-op, so a miss must be loud at boot")
+
+
+def test_the_orb_draws_inside_the_counters_own_rect():
+    """2026-10-14 check lane: every layer stack sat at -64..64, centred on the
+    root's top-left corner, so her orb drew 64 px up-left of where the base
+    (Ironclad) orb draws for Klee, Kokomi, Varka and Yae -- inside the column
+    `SparkCounter.Place` keeps 12 px above the energy panel, under the Fanfare
+    badge -- and the root's 0..128 hover rect missed half of it. The orb is
+    the root's rect: every drawn child stays within 0..128."""
+    parsed = scene()
+    root = next(n for n in parsed.nodes if n.parent is None)
+    side = float(root.props["offset_right"])
+    assert side == float(root.props["offset_bottom"]) == 128.0
+    for node in parsed.nodes:
+        if node.parent != ".":
+            continue
+        box = [float(node.props.get(k, "0")) for k in
+               ("offset_left", "offset_top", "offset_right", "offset_bottom")]
+        assert 0.0 <= box[0] <= box[2] <= side, f"{node.path} x span {box}"
+        assert 0.0 <= box[1] <= box[3] <= side, f"{node.path} y span {box}"

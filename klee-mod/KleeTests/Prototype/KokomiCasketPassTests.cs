@@ -75,18 +75,19 @@ public class KokomiCasketPassTests : IDisposable
     [Fact]
     public void Feint_is_six_plus_three_per_carry_out_and_plans_vulnerable()
     {
-        // The cleanup pass (2026-09-29): a base of 6, upgraded 9.
+        // The cleanup pass (2026-09-29): a base of 6, upgraded 9; the
+        // numbers pass (kokomi-review-r5-2026-10-14): 8 [11], Plan 6 [8].
         var card = new ProtoKkFeint();
-        Assert.Equal(6m, Var(card, "CalculationBase"));
+        Assert.Equal(8m, Var(card, "CalculationBase"));
         Assert.Equal(3m, Var(card, "ExtraDamage"));
         var up = Upgraded<ProtoKkFeint>();
-        Assert.Equal(9m, Var(up, "CalculationBase"));
+        Assert.Equal(11m, Var(up, "CalculationBase"));
         Assert.Equal(3m, Var(up, "ExtraDamage"));
         // The pool overhaul (2026-10-13): the Plan is a Chain line, 5 [7]
         // per Plan carried out this turn (was Apply 1 [2] Vulnerable).
-        Assert.Equal((KokomiPlan.Kind.DamagePerPlanThisTurn, 5),
+        Assert.Equal((KokomiPlan.Kind.DamagePerPlanThisTurn, 6),
                      (card.PlanClauses.Single().Kind, card.PlanClauses.Single().Amount));
-        Assert.Equal(7, up.PlanClauses.Single().Amount);
+        Assert.Equal(8, up.PlanClauses.Single().Amount);
     }
 
     [Fact]

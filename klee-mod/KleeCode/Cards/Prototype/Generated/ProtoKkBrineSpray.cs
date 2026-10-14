@@ -59,7 +59,7 @@ public sealed class ProtoKkBrineSpray : CustomCardModel, IElementalCard, ICharac
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(5m, ValueProp.Move),
+            new DamageVar(8m, ValueProp.Move),
             new DynamicVar("KkAmount", 2m)
         };
 

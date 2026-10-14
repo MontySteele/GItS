@@ -197,9 +197,10 @@ def test_shoal_call_common_and_brine_sting_uncommon():
     rows = _rows()
     assert rows["proto_kk_shoal_call"].rarity == "common"
     assert rows["proto_kk_brine_sting"].rarity == "uncommon"
-    # The pool overhaul (2026-10-13): a Counter Plan line.
+    # The pool overhaul (2026-10-13): a Counter Plan line; 8 -> 10 in the
+    # numbers pass (kokomi-review-r5-2026-10-14).
     assert _face("proto_kk_brine_sting") == (
-        "Deal 8 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 8 "
+        "Deal 10 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 10 "
         "[gold]Hydro[/gold] damage to each enemy that attacked you since "
         "you planned this.")
     assert _face("proto_kk_shoal_call") == (

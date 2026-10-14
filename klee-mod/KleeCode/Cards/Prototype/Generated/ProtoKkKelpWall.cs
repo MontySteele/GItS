@@ -60,7 +60,7 @@ public sealed class ProtoKkKelpWall : CustomCardModel, ICharacterCard, IPlannedC
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(5m, ValueProp.Move),
+            new BlockVar(7m, ValueProp.Move),
             new CardsVar(1)
         };
 

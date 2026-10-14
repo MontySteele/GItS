@@ -46,8 +46,9 @@ namespace KleeMod.Abyss;
 /// the Abyss page is up that call is held here (the lines are kept, nothing is
 /// shown), so the layout sets up as a page with no dialogue, and this screen
 /// opens from <c>OnSetupComplete</c>. When the pick lands, the page goes back
-/// to the Ancient's own (<c>AbyssChoicePage.OnChosen</c>), co-op shows its
-/// result line for 1.5 s, the screen fades, and then the held lines are given
+/// to the Ancient's own (<c>AbyssChoicePage.OnChosen</c>), the screen shows
+/// its result line (the pick and the Shadow the enemies took) for
+/// <see cref="AbyssOverlayFlow.ResultSeconds"/>, fades, and then the held lines are given
 /// to the layout and <c>OnSetupComplete</c> runs again: the greeting plays
 /// and the Ancient's options follow it, exactly as in a normal run.
 ///
@@ -55,7 +56,12 @@ namespace KleeMod.Abyss;
 /// <see cref="PageMeta"/>, a JSON page (title, body, options), and each card's
 /// clickable is a game <c>NClickableControl</c> named
 /// <see cref="AbyssOverlayView.CardNodeName"/>, so the bridge's
-/// <c>ForceClick</c> runs the same handler a mouse release does.
+/// <c>ForceClick</c> runs the same handler a mouse release does. Once the
+/// pick lands, the room itself carries <see cref="ResultMeta"/>, the result
+/// line, for as long as the room lasts: the screen is up for seconds, and a
+/// seat that looks after it has gone still reads which Shadow the enemies
+/// took (co-op Abyss run, 2026-10-14: "the page does not say which Shadow
+/// lands on the enemies").
 ///
 /// Normal runs: every patch asks <see cref="AbyssChoicePage.IsShowing"/>
 /// first, which is only ever true in a run carrying the Abyss.
@@ -64,6 +70,10 @@ public static class AbyssOverlay
 {
     /// <summary>The bridge's contract: the root's JSON page.</summary>
     public const string PageMeta = "gits_abyss_page";
+
+    /// <summary>The bridge's contract: the room's result line, after the
+    /// pick (the bridge's <c>GitsAbyssPage.ResultMetaKey</c>).</summary>
+    public const string ResultMeta = "gits_abyss_result";
 
     public static readonly FieldInfo? LayoutEventField = AccessTools.Field(typeof(NEventLayout), "_event");
     internal static readonly FieldInfo? RoomEventField = AccessTools.Field(typeof(NEventRoom), "_event");
@@ -205,8 +215,14 @@ public static class AbyssOverlay
         {
             split = AbyssVoteOutcome.Split(last.Votes, last.Chosen);
         }
-        var hold = session.Flow.Resolve(index, name, session.Coop, split);
+        var shadow = offer.ShadowIfChosen(index);
+        var shadowName = shadow == AbyssShadow.None ? null : AbyssText.Name(shadow);
+        var hold = session.Flow.Resolve(index, name, shadowName, session.Coop, split);
         if (hold == null) return;
+        if (session.Flow.ResultLine is { } said && GodotObject.IsInstanceValid(room))
+        {
+            room.SetMeta(ResultMeta, said);
+        }
 
         session.View.Root.SetMeta(PageMeta, PageJson(session));
         session.View.SetCardChosen(index);

@@ -76,7 +76,7 @@ PLAN_KINDS = frozenset((
     "each_player_energy", "each_player_draw",
     # THE STATUS BATCH (2026-10-01): clauses that read the hand just drawn.
     # See `BLOCK_PER_STATUS_IN_HAND`.
-    "block_per_status_in_hand", "transform_statuses_in_draw_pile",
+    "block_per_status_in_hand", "transform_statuses_in_hand_and_draw_pile",
     # THE RE-FOUNDING (2026-10-12): Kurage's Wake's Stings and Gorou's two
     # Plan lines. See `ADD_STINGS` and the two beside it.
     "add_stings", "gain_strength", "juuga_guard",
@@ -104,7 +104,7 @@ PLAN_AMOUNTLESS_OPS = frozenset((
     # R276. A switch: "your first Attack" has no size to print.
     "first_attack_twice",
     # THE STATUS BATCH: "every status and curse".
-    "transform_statuses_in_draw_pile",
+    "transform_statuses_in_hand_and_draw_pile",
     # THE POOL OVERHAUL (2026-10-13): Kelp Wall's and Turnabout's size is read
     # off the ledger at carry-out; Read the Field's is one card.
     "damage_blocked_since", "damage_taken_since", "draw_pile_to_hand",
@@ -188,7 +188,7 @@ PLAN_ONLY_OPS = frozenset((
                            # THE STATUS BATCH: each reads the hand just
                            # drawn, which only a Plan can see.
                            "block_per_status_in_hand",
-                           "transform_statuses_in_draw_pile",
+                           "transform_statuses_in_hand_and_draw_pile",
                            # THE RE-FOUNDING: each names the carry-out turn.
                            "add_stings", "gain_strength",
                            "juuga_guard",
@@ -253,7 +253,8 @@ ENEMIES_ATTACKED_SINCE = "enemies_attacked_since"
 #: `KokomiPlan.Kind.BlockPerStatusInHand` and the one beside it are the twins;
 #: the bodies are `KokomiStatusBatch`.
 BLOCK_PER_STATUS_IN_HAND = "block_per_status_in_hand"
-TRANSFORM_STATUSES_IN_DRAW_PILE = "transform_statuses_in_draw_pile"
+TRANSFORM_STATUSES_IN_HAND_AND_DRAW_PILE = (
+    "transform_statuses_in_hand_and_draw_pile")
 #: Sea Glass Harvest's token, in no pool. `SeaGlass.cs` is the twin.
 SEA_GLASS = "kk_sea_glass"
 
@@ -366,10 +367,10 @@ ENDLESS_SHOAL = "kk_endless_shoal"               # a Plan carried out: N Stings
 DAWN_TIDE = "kk_dawn_tide"                       # turn start: Hydro to ALL
 #: THE POOL OVERHAUL (2026-10-13, sec.4). Jellyfish Current: "Whenever a Sting
 #: triggers an Elemental Reaction, add a Sting to your Hand." Battle
-#: Formation: "Whenever 3 or more Plans are carried out in one turn, gain 1
-#: Energy and draw 2 cards." `JellyfishCurrentPower`, `BattleFormationPower`.
+#: Formation: "Whenever 2 or more Plans are carried out in one turn, gain 1
+#: Energy and draw 1 card." `JellyfishCurrentPower`, `BattleFormationPower`.
 JELLYFISH_CURRENT = "kk_jellyfish_current"       # a Sting's reaction: N Stings
-BATTLE_FORMATION = "kk_battle_formation"         # third Plan a turn: N Energy, 2N cards
+BATTLE_FORMATION = "kk_battle_formation"         # second Plan a turn: N Energy, 1 card
 #: Nereid's Ascension (`EB-492`). A MARKER AND NOT A WINDOW: the Rare is a
 #: Power costing 2 that lasts the fight, so there is no duration to tick and
 #: `carry_out_times` reads only whether it is worn. It replaced a `plan_twice`
@@ -447,7 +448,7 @@ def plan_shape_reason(clauses: Sequence[dict]) -> Optional[str]:
         # times", on the flat hit only.
         if op == "damage":
             allowed.add("strength_times")
-        if op == TRANSFORM_STATUSES_IN_DRAW_PILE:
+        if op == TRANSFORM_STATUSES_IN_HAND_AND_DRAW_PILE:
             allowed.add("upgraded")      # the `upgraded_grant` key's flag
         unknown = set(eff) - allowed
         if unknown:
@@ -1625,7 +1626,7 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
         _play_copy(state, entry.card)
     elif op == BLOCK_PER_STATUS_IN_HAND:
         block_per_status(state, amount, clause.get("written_count"))
-    elif op == TRANSFORM_STATUSES_IN_DRAW_PILE:
+    elif op == TRANSFORM_STATUSES_IN_HAND_AND_DRAW_PILE:
         transform_statuses(state, bool(clause.get("upgraded")))
     else:                                   # unreachable: shape-checked at load
         raise ValueError(f"unknown plan clause {op!r}")
@@ -1690,17 +1691,18 @@ def sea_glass_card(upgraded: bool = False) -> Card:
 
 
 def transform_statuses(state: CombatState, upgraded: bool) -> int:
-    """SEA GLASS HARVEST: "Transform every status and curse in your draw
-    pile into Sea Glass [Sea Glass+]." The DRAW PILE since the Kokomi round-1
-    fixes (2026-10-12): the carry-out found the hand empty of what the Plan
-    was written for, so it converts the dead draws still to come. In place,
-    as `CardCmd.Transform` swaps a card where it stands."""
-    pile = state.player.draw_pile
+    """SEA GLASS HARVEST: "Transform every Status and Curse in your Hand and
+    Draw Pile into Sea Glass [Sea Glass+]." The DRAW PILE since the Kokomi
+    round-1 fixes (2026-10-12), and the HAND as well since the round-5 review
+    (2026-10-14, A8): a Status drawn that morning becomes Sea Glass the same
+    turn. In place, as `CardCmd.Transform` swaps a card where it stands; the
+    hand first, then the draw pile (`KokomiStatusBatch.TransformStatuses`)."""
     n = 0
-    for i, card in enumerate(list(pile)):
-        if is_status_or_curse(card):
-            pile[i] = sea_glass_card(upgraded)
-            n += 1
+    for pile in (state.player.hand, state.player.draw_pile):
+        for i, card in enumerate(list(pile)):
+            if is_status_or_curse(card):
+                pile[i] = sea_glass_card(upgraded)
+                n += 1
     state.emit("plan_sea_glass", transformed=n, upgraded=upgraded)
     return n
 
@@ -2724,11 +2726,11 @@ def attacked_since(state: CombatState, entry: Optional[PlanEntry]) -> bool:
 
 
 def battle_formation(state: CombatState) -> None:
-    """BATTLE FORMATION (the pool overhaul, 2026-10-13): "Whenever 3 or more
-    Plans are carried out in one turn, gain 1 Energy and draw 2 cards." Once a
-    turn, when the third carry-out of the turn finishes (the tail of
+    """BATTLE FORMATION (the pool overhaul, 2026-10-13; kokomi-review-r5-2026-10-14
+    numbers pass): "Whenever 2 or more Plans are carried out in one turn, gain
+    1 Energy and draw 1 card." Once a turn, when the second carry-out of the turn finishes (the tail of
     `_resolve_entry`, through `_note_plan_resolved`). The stack is the
-    Energy (a second copy adds 1); the draw is 2 however many.
+    Energy (a second copy adds 1); the draw is 1 however many.
     `BattleFormationPower` is the twin."""
     if not live(state):
         return

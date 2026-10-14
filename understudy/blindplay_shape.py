@@ -512,6 +512,44 @@ def screen_changed_after(room: str, lane: object = None,
     return str(row.get("command") or "the last command")
 
 
+# CO-OP SPIRAL ABYSS (2026-10-14, lanes 4/5). THE SEAT'S LAST LOOK. The
+# client seat chained `play` commands; the host's Bombs killed the last enemy
+# in between, the rest were refused against a fight that had ended (or a
+# target that had died), and three of those tripped the sticky stop. The look
+# each `observe` (and each page `wait` prints) leaves here is what a refused
+# command is checked against: a refusal whose room or target changed since
+# that look is a skip, not a refusal (`blindplay.changed_under`).
+def look_path(lane: object = None) -> Path:
+    return lane_state_dir(lane) / f"_blindplay-last-look-lane{lane_tag(lane)}.json"
+
+
+def remember_look(room: str, living: list[str], lane: object = None,
+                  now: float | None = None) -> None:
+    """Remember the room the seat last looked at and the enemies alive on
+    it (printed names and letters, folded)."""
+    row = {"room": room, "living": list(living),
+           "at": time.time() if now is None else now}
+    write_atomic(look_path(lane), json.dumps(row))
+
+
+def read_look(lane: object = None, now: float | None = None) -> dict | None:
+    """The seat's last look, if it is fresh (`REFUSAL_MARK_TTL_S`)."""
+    row = read_state_json(look_path(lane))
+    if not isinstance(row, dict):
+        return None
+    now = time.time() if now is None else now
+    try:
+        if now - float(row.get("at") or 0) > REFUSAL_MARK_TTL_S:
+            return None
+    except (TypeError, ValueError):
+        return None
+    return row
+
+
+def clear_look(lane: object = None) -> None:
+    drop_state(look_path(lane))
+
+
 # KOKOMI ROUND 2 (2026-10-13, lane 5). A DELIBERATE `skip` IS THE SKIP. The
 # Furina wave's hold (#1202) holds `proceed` once past a card offer on a
 # reward screen, and a card reward the seat opened and skipped is still a row

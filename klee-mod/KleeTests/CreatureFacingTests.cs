@@ -75,6 +75,7 @@ public class CreatureFacingTests
     [InlineData("Hook_AfterDeath_Facing", "AfterDeath")]
     [InlineData("Hook_AfterPlayerTurnStart_Facing", "AfterPlayerTurnStart")]
     [InlineData("CreatureCmd_Damage_Facing", "Damage")]
+    [InlineData("SurroundedPower_FaceDirection_Facing", "FaceDirection")]
     public void Every_facing_patch_is_a_prefix_on_a_real_method(string patchName, string method)
     {
         var patch = Facing().Assembly.GetTypes().Single(t => t.Name == patchName);
@@ -95,6 +96,38 @@ public class CreatureFacingTests
             Assert.True(p.Name == "__instance" || names.Contains(p.Name),
                 $"{patchName}.Prefix binds '{p.Name}', which {method} does not declare");
         }
+    }
+
+    private static float? Local(float? decided, bool gameOwns)
+        => (float?)Facing().GetMethod("LocalSign", All)!
+            .Invoke(null, new object[] { decided!, gameOwns });
+
+    [Fact]
+    public void Where_the_game_mirrors_the_body_our_mirror_holds_authored()
+    {
+        // SurroundedPower (the Kaiser Crab) flips %Visuals, the PARENT of
+        // %Facing: a second flip of ours would cancel it (the 2026-10-14
+        // live check: no model ever turned). So with the game owning the
+        // facing, %Facing stays at the authored sign whatever we decided.
+        Assert.Equal(1f, Local(-1f, true));
+        Assert.Equal(1f, Local(null, true));
+        Assert.Equal(-1f, Local(-1f, false));
+        Assert.Null(Local(null, false));
+    }
+
+    [Fact]
+    public void The_game_facing_the_hold_reads_is_the_surrounded_body_flip()
+    {
+        // Pins the base-game facts the hold rests on (decompile, v0.111.0):
+        // SurroundedPower keeps a Facing and flips the creature node's Body,
+        // which NCreatureVisuals reads from %Visuals, our %Facing's parent.
+        var patch = Facing().Assembly.GetTypes()
+            .Single(t => t.Name == "SurroundedPower_FaceDirection_Facing");
+        var power = patch.GetCustomAttribute<HarmonyPatch>()!.info.declaringType!;
+        Assert.Equal("SurroundedPower", power.Name);
+        Assert.NotNull(power.GetProperty("Facing", All));
+        var flip = AccessTools.Method(power, "FaceDirection");
+        Assert.Single(flip!.GetParameters());
     }
 
     [Fact]

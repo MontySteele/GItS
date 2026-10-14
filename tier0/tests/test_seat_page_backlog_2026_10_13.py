@@ -44,11 +44,18 @@ def _row(card_type: str, carried: bool = False) -> dict:
 
 # ---- Ripple Basin ---------------------------------------------------------
 
-def test_ripple_basin_folds_on_a_turn_with_no_attack():
+# Kokomi review r5 (2026-10-14, A7): the relic's Block is printed beside the
+# total, never inside it, until an Attack has been played (run 2 attacked
+# after the page counted it).
+CONDITIONAL = "Ripple Basin: +4 Block if you play no Attack (not in the total)."
+
+
+def test_ripple_basin_prints_outside_the_total_with_no_attack_yet():
     got = line([_hit(12)], _you([RIPPLE]), [], [],
                [_row("Skill"), _row("Power")])
-    assert "you would take 8" in got
-    assert "Ripple Basin adds 4" in got
+    assert "you would take 12" in got
+    assert CONDITIONAL in got
+    assert "Ripple Basin adds 4" not in got
     assert "Not counted" not in got
 
 
@@ -62,15 +69,15 @@ def test_ripple_basin_adds_nothing_once_an_attack_is_played():
 def test_a_carried_attack_from_last_turn_does_not_count():
     got = line([_hit(12)], _you([RIPPLE]), [], [],
                [_row("Attack", carried=True)])
-    assert "you would take 8" in got
+    assert CONDITIONAL in got
 
 
-def test_an_empty_turn_counts_and_an_older_mod_stays_unknown():
-    assert "you would take 8" in line([_hit(12)], _you([RIPPLE]), [], [], [])
-    for rows in (None, [_row("")]):
+def test_an_empty_turn_and_an_older_mod_print_it_beside_the_total():
+    for rows in ([], None, [_row("")]):
         got = line([_hit(12)], _you([RIPPLE]), [], [], rows)
         assert "you would take 12" in got
-        assert "Not counted: Ripple Basin." in got
+        assert CONDITIONAL in got
+        assert "Not counted: Ripple Basin." not in got
 
 
 def test_the_board_carries_the_card_type():

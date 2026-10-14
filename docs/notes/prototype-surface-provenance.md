@@ -8486,3 +8486,28 @@ depends on Plans not yet written.
 Pins: `tier0/tests/test_kokomi_pool_overhaul_2026_10_13.py`,
 `klee-mod/KleeTests/Prototype/KokomiPoolOverhaulTests.cs`. Untested in game
 until a deploy.
+
+## Kokomi review r5 A-list, 2026-10-14
+
+Built without a pick from `kokomi-review-r5-2026-10-14.md` section A (five
+blind Sonnet seats, build 0.2.5414).
+
+- **Sea Glass Harvest** (A8): "Gain 10 [13] Block. Or plan: Transform every
+  Status and Curse in your Hand and Draw Pile into Sea Glass [Sea Glass+]."
+  (was the Draw Pile only), so a Status drawn that morning becomes Sea Glass
+  the same turn. The verb is renamed `transform_statuses_in_hand_and_draw_pile`
+  (`Kind.TransformStatusesInHandAndDrawPile`); the hand is transformed first,
+  then the draw pile, in both engines. Upgrade unchanged.
+- **Watchful Shoal** (A9): the card face already previewed a Sting and a
+  Ward; the Power's badge now does too (`WatchfulShoalPower.ExtraHoverTips`),
+  two boxes, inside the three-tip cap.
+- **Live lines** (A3): a waiting Kelp Wall reads "N blocked so far" and a
+  Turnabout "N taken so far" on the strip and the page (was "Deals N"). Card
+  text unchanged. The Chain's "Deals N" stays.
+- The wire's waiting-Plan row carries `written` (the flat hits per body,
+  whatever their aim) and `written_strength` (her Strength when it was
+  written), for the page's "Lands 10 to ALL next turn; your Strength was -2
+  when written" (A2).
+
+Pins: `tier0/tests/test_kokomi_review_r5_2026_10_14.py`,
+`klee-mod/KleeTests/Prototype/KokomiReviewR5Tests.cs`.
