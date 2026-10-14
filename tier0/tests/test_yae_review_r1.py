@@ -1,10 +1,9 @@
 """YAE REVIEW R1 (Claude, 2026-10-14, no pick;
 `review/active/yae-design-axes-2026-10-14.md`, the dated note):
 
-  1. A "Rite: X" card says in combat what the shrine would do under X,
-     summed over the Sakura standing ("Rite: Warding (your Sakura: 5
-     Block)"); nothing with no Sakura. The Rite badge and the seat page say
-     the same for the current Rite.
+  1. (Shrine r2, 2026-10-14, replaced the Rite clause.) A Tenko card says
+     in combat what its Tenko would do, summed over the Sakura standing:
+     "Tenko (12 damage)", "Tenko (Warding: 5 Block)".
   2. Every Tenko card says "Tenko (no Sakura)" while none stands; none is
      gated (the coordinator dropped Kitsune Rite's gate, 2026-10-14).
   3. Sakura Seal costs 0; its upgrade (the cost cut before) is Footnote's,
@@ -82,24 +81,25 @@ def _face(card_id: str) -> str:
 
 
 # ---------------------------------------------------------------------------
-# 1. The Rite clause
+# 1. The Tenko clause (shrine r2 replaced review r1's Rite clause)
 # ---------------------------------------------------------------------------
 
-def test_no_sakura_no_rite_clause():
+def test_no_sakura_says_so_in_each_kind():
     st = _state()
-    for rite in Y.RITES:
-        assert Y.rite_total(st, rite) == 0
-        assert Y.rite_line(st, rite) == ""
+    for kind in Y.TENKO_KINDS:
+        assert Y.tenko_total(st, kind) == 0
+    assert Y.tenko_line(st) == " (no Sakura)"
+    assert Y.tenko_line(st, Y.WARDING) == ", no Sakura"
 
 
-def test_the_rite_clause_sums_the_sakura_standing_under_that_rite():
+def test_the_tenko_clause_sums_the_sakura_standing_as_that_kind():
     st = _state()
     for _ in range(3):
-        _play(st, _ym("yakan_evocation"))        # Levels 3, 2, 1
-    assert Y.rite_line(st, Y.THUNDER) == " (your Sakura: 12 damage)"
-    assert Y.rite_line(st, Y.WARDING) == " (your Sakura: 12 Block)"
-    assert Y.rite_line(st, Y.WILDFIRE) == " (your Sakura: 6 to ALL)"
-    assert Y.rite_line(st, Y.OFFERING) == " (your Sakura: draw 3)"
+        _play(st, _ym("yakan_evocation"))        # Levels 1, 1, 1
+    assert Y.tenko_line(st, Y.THUNDER) == " (9 damage)"
+    assert Y.tenko_line(st, Y.WARDING) == ": 9 Block"
+    assert Y.tenko_line(st, Y.WILDFIRE) == ": 3 to ALL"
+    assert Y.tenko_line(st, Y.OFFERING) == ": draw 3"
 
 
 def test_the_clause_reads_levels_and_red_ink_as_the_strike_does():
@@ -107,65 +107,59 @@ def test_the_clause_reads_levels_and_red_ink_as_the_strike_does():
     _play(st, _ym("yakan_evocation"))            # Level 1
     Y.level_up(st, 3)                            # Level 4: no cap
     Y.edit_sakura(st, "every", 1, Y.RED_INK)
-    assert Y.rite_total(st, Y.THUNDER) == 2 + 4 + Y.RED_INK_AMOUNT
-    assert Y.rite_total(st, Y.WILDFIRE) == 4 + Y.RED_INK_AMOUNT
-    assert Y.rite_total(st, Y.OFFERING) == 1     # Red Ink skips Offering
+    assert Y.tenko_total(st, Y.THUNDER) == 2 + 4 + Y.RED_INK_AMOUNT
+    assert Y.tenko_total(st, Y.WILDFIRE) == 4 + Y.RED_INK_AMOUNT
+    assert Y.tenko_total(st, Y.OFFERING) == 1    # Red Ink skips Offering
 
 
-def test_the_clause_is_what_the_strikes_then_do():
+def test_the_clause_is_what_the_tenko_then_does():
     st = _state()
     _play(st, _ym("yakan_evocation"))
-    _play(st, _ym("yakan_evocation"))
-    promised = Y.rite_total(st, Y.WARDING)
-    _play(st, _ym("shrine_maidens_guard"))       # 6 Block, Rite: Warding
-    block = st.player.block
-    Y.turn_end(st)
-    assert st.player.block - block == promised
+    _play(st, _ym("grafted_branch"))
+    promised = Y.tenko_total(st, Y.WARDING)
+    _play(st, _ym("shrine_maidens_guard"))       # 6 Block, Tenko (Warding)
+    assert st.player.block == 6 + promised
 
 
 def test_the_words_are_one_table_in_both_engines():
     cs = SHRINE_CS.read_text(encoding="utf-8")
-    for rite, cs_name in gen.YAE_RITES.items():
-        words = Y.RITE_FACE[rite].replace("{n}", "{n}")
-        if rite == Y.THUNDER:
+    for kind in Y.TENKO_KINDS:
+        words = Y.TENKO_FACE[kind]
+        if kind == Y.THUNDER:
             assert '_ => $"' + words + '"' in cs, words
         else:
-            assert f'YaeRite.{cs_name} => $"{words}"' in cs, words
+            name = gen.YAE_TENKO_KINDS[kind]
+            assert Y.TENKO_NAME[kind] == name
+            assert f'YaeTenkoKind.{name} => $"{words}"' in cs, words
     assert f'NoSakura = "{Y.NO_SAKURA}"' in cs
-    assert '" (your Sakura: {' in cs and Y.RITE_LINE.startswith(" (your Sakura: ")
+    assert f'NoSakuraTyped = "{Y.NO_SAKURA_TYPED}"' in cs
 
 
-@pytest.mark.parametrize("card_id,rite", [
-    (_ym("thunder_rite"), "Thunder"),
+@pytest.mark.parametrize("card_id,kind", [
     (_ym("shrine_maidens_guard"), "Warding"),
     (_ym("foxfire_sweep"), "Wildfire"),
     (_ym("kitsune_guile"), "Wildfire"),
     (_ym("manuscript_pile"), "Offering"),
 ])
-def test_every_rite_card_carries_the_clause_after_the_rites_name(card_id, rite):
+def test_every_typed_tenko_card_carries_the_clause_inside_its_brackets(
+        card_id, kind):
     face = _face(card_id)
-    assert f"[gold]Rite[/gold]: {rite}{{InCombat:{{YaeRite}}|}}" in face
+    assert f"[gold]Tenko[/gold] ({kind}{{InCombat:{{YaeTenko}}|}})" in face
+    assert "Rite" not in face
     text = (GENERATED / f"{gen.pascal(card_id)}.cs").read_text(encoding="utf-8")
-    assert (f'description.Add("YaeRite", YaeShrineFace.RiteLine(this, '
-            f'YaeRite.{rite}));') in text
+    assert (f'description.Add("YaeTenko", YaeShrineFace.TenkoLine(this, '
+            f'YaeTenkoKind.{kind}));') in text
+    assert f"YaeCards.Tenko(choiceContext, this, cardPlay, YaeTenkoKind.{kind})" in text
 
 
-def test_the_seat_page_prints_the_sum_on_the_rite_line():
+def test_the_seat_page_has_no_rite_line():
     from understudy import blindplay_render as R
     shrine = {"sakura": [{"slot": 1, "level": 2, "strike": 4, "turns": 2,
-                          "annotation": None},
-                         {"slot": 2, "level": 1, "strike": 3, "turns": 3,
                           "annotation": None}],
-              "lure": None, "annotated": 0, "rite": "Warding"}
+              "lure": None, "annotated": 0}
     lines = R._render_shrine(shrine)
-    assert lines[1] == ("- Rite: Warding. Each strike gives you its number "
-                        "in Block. Your Sakura now: 7 Block.")
-    empty = dict(shrine, sakura=[], rite="Offering")
-    assert R._render_shrine(empty)[1] == (
-        "- Rite: Offering. Each strike draws you its number of cards next "
-        "turn.")
-    for rite, words in R.SHRINE_RITE_AMOUNTS.items():
-        assert words == Y.RITE_FACE[rite.lower()]
+    assert not any("Rite" in line for line in lines)
+    assert not hasattr(R, "SHRINE_RITE_LINE")
 
 
 # ---------------------------------------------------------------------------
@@ -207,7 +201,7 @@ def test_the_tenko_clause_reads_the_shrine():
     st = _state()
     assert Y.tenko_line(st) == Y.NO_SAKURA == " (no Sakura)"
     _play(st, _ym("yakan_evocation"))
-    assert Y.tenko_line(st) == ""
+    assert Y.tenko_line(st) == " (3 damage)"
 
 
 # ---------------------------------------------------------------------------

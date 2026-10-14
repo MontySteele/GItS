@@ -38,14 +38,14 @@ public sealed class ProtoYmKitsuneGuile : CustomCardModel, ICharacterCard
     public string CharacterId => "yae";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForWeak(ArmKeywordTips.ForRite(base.ExtraHoverTips, this), this);
+        BaseKeywordTips.ForWeak(ArmKeywordTips.ForTenko(ArmKeywordTips.ForSakura(base.ExtraHoverTips, this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_kitsune_guile");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kitsune Guile"),
-        ("description", "Apply {PowerAmount:diff()} [gold]Weak[/gold] to ALL enemies. [gold]Rite[/gold]: Wildfire{InCombat:{YaeRite}|}."),
+        ("description", "Apply {PowerAmount:diff()} [gold]Weak[/gold] to ALL enemies. [gold]Tenko[/gold] (Wildfire{InCombat:{YaeTenko}|})."),
     };
 
     /// <summary>This card's in-combat shrine clauses
@@ -54,7 +54,7 @@ public sealed class ProtoYmKitsuneGuile : CustomCardModel, ICharacterCard
         MegaCrit.Sts2.Core.Localization.LocString description)
     {
         base.AddExtraArgsToDescription(description);
-        description.Add("YaeRite", YaeShrineFace.RiteLine(this, YaeRite.Wildfire));
+        description.Add("YaeTenko", YaeShrineFace.TenkoLine(this, YaeTenkoKind.Wildfire));
     }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -76,7 +76,7 @@ public sealed class ProtoYmKitsuneGuile : CustomCardModel, ICharacterCard
         {
             await PowerCmd.Apply<WeakPower>(choiceContext, debuffTarget, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
         }
-        await YaeCards.Rite(choiceContext, this, cardPlay, YaeRite.Wildfire);
+        await YaeCards.Tenko(choiceContext, this, cardPlay, YaeTenkoKind.Wildfire);
     }
 
     protected override void OnUpgrade()

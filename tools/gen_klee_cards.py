@@ -931,9 +931,9 @@ ARM_KEYWORDS = (
     ArmKeyword("Edit", ("Edit", "Edited", "Annotated", "Publish", "Red Ink",
                         "Footnote", "Deadline Extension", "Fox Fire",
                         "Sakura Seal", "Royalties"), "ArmKeywordTips.ForEdit"),
-    # YAE MIKO, THE DESIGN AXES (ruled 2026-10-14): the shrine's Rite, one
-    # tip naming the four.
-    ArmKeyword("Rite", ("Rite",), "ArmKeywordTips.ForRite"),
+    # YAE MIKO, SHRINE R2 (ruled 2026-10-14): Tenko and its three kinds, one
+    # tip (it replaced the Rite's). A Tenko face hovers the Sakura tip too.
+    ArmKeyword("Tenko", ("Tenko",), "ArmKeywordTips.ForTenko"),
     ArmKeyword("Lightfall Sword", ("Lightfall Sword",),
                "ArmKeywordTips.ForLightfallSword"),
 )
@@ -3032,7 +3032,6 @@ YAE_KINDS = {
     "annotated_strike": "AnnotatedStrike",
     "fox_fire": "FoxFire",
     # The design axes (ruled 2026-10-14).
-    "rite": "Rite",
     "edit_sakura": "EditSakura",
     "plant_level": "PlantLevel",
     "strike_if_weak": "StrikeIfWeak",
@@ -3052,7 +3051,6 @@ YAE_KIND_FIELDS = {
     "block_per_annotated": ("base", "per"),
     "annotated_strike": ("base", "amount"),
     "fox_fire": (),
-    "rite": (),
     "edit_sakura": ("amount",),
     "plant_level": ("amount",),
     "strike_if_weak": (),
@@ -3071,11 +3069,12 @@ YAE_ANNOTATIONS = {
     "sakura_seal": "SakuraSeal",
     "royalties": "Royalties",
 }
-#: The design axes (ruled 2026-10-14): the shrine's four Rites (`rite:`,
-#: the C# `YaeRite` member), the Annotations a Sakura can carry, and the end
-#: an `edit_sakura` counts from (`which:`, the C# `YaeSakuraEnd`).
-YAE_RITES = {"thunder": "Thunder", "warding": "Warding",
-             "wildfire": "Wildfire", "offering": "Offering"}
+#: Shrine r2 (ruled 2026-10-14): a typed Tenko's kind (`as:` on a `tenko`
+#: op, the C# `YaeTenkoKind` member; absent, it is Thunder). The design axes
+#: (ruled 2026-10-14): the Annotations a Sakura can carry, and the end an
+#: `edit_sakura` counts from (`which:`, the C# `YaeSakuraEnd`).
+YAE_TENKO_KINDS = {"warding": "Warding", "wildfire": "Wildfire",
+                   "offering": "Offering"}
 YAE_SAKURA_ANNOTATIONS = {"red_ink", "fox_fire", "deadline"}
 YAE_SAKURA_ENDS = {"newest": "Newest", "oldest": "Oldest", "every": "Every"}
 YAE_VAR_FIELDS = {"per": "YmPer", "base": "YmBase", "amount": "YmAmount"}
@@ -3092,7 +3091,7 @@ def yae_needs_var(card: dict, eff: dict, field: str) -> bool:
         return True
     return int(eff[field]) != YAE_FIELD_DEFAULTS[field]
 YAE_FIELDS = {"op", "kind", "target", "per", "base", "amount", "annotation",
-              "rite", "which"}
+              "as", "which"}
 
 
 def yae_call(eff: dict) -> str:
@@ -3102,8 +3101,8 @@ def yae_call(eff: dict) -> str:
         args += f", YaeSakuraEnd.{YAE_SAKURA_ENDS[eff['which']]}"
     if eff.get("kind") in YAE_ANNOTATION_KINDS:
         args += f", YaeAnnotation.{YAE_ANNOTATIONS[eff['annotation']]}"
-    if eff.get("kind") == "rite":
-        args += f", YaeRite.{YAE_RITES[eff['rite']]}"
+    if eff.get("kind") == "tenko" and "as" in eff:
+        args += f", YaeTenkoKind.{YAE_TENKO_KINDS[eff['as']]}"
     return f"await YaeCards.{YAE_KINDS[eff['kind']]}({args});"
 #: `kokomi` (THE KOKOMI EXPANSION, BATCH ONE, 2026-09-29): one kind per
 #: now-line verb, each ONE awaited `KokomiCards.<method>` call
@@ -4228,7 +4227,7 @@ APPLY_POWERS = {
     # klee-mod/KleeCode/Powers/Prototype/YaePowers.cs; each row carries its
     # own `description:`. Sim twins: tier0/engine/yae_shrine.py.
     "ym_sakura_grove": ("SakuraGrovePower", None,
-        "At the start of your turn, your newest [gold]Sakura[/gold] gains {X} "
+        "At the start of your turn, each [gold]Sakura[/gold] gains {X} "
         "Level."),
     "ym_edict_of_cleansing": ("EdictOfCleansingPower", None,
         "Your [gold]Sakura[/gold] strikes deal {X} additional damage to an "
@@ -4236,14 +4235,15 @@ APPLY_POWERS = {
         "[gold]Weak[/gold] or has a [gold]Pyro[/gold], [gold]Hydro[/gold] "
         "or [gold]Cryo[/gold] aura."),
     "ym_serialization": ("SerializationPower", None,
-        "Whenever you [gold]Edit[/gold] a card, gain {X} [gold]Block[/gold]."),
+        "Whenever you play an [gold]Annotated[/gold] card, gain {X} "
+        "[gold]Block[/gold]."),
     "ym_foxs_mooncall": ("FoxsMooncallPower", None,
         "Your [gold]Sakura[/gold] are planted {X} Level higher."),
     "ym_yakan_offering": ("YakanOfferingPower", None,
         "At the start of your turn, plant {X} [gold]Sakura[/gold]."),
     "ym_sakura_channeling": ("SakuraChannelingPower", None,
-        "Your [gold]Sakura[/gold] also strike as Thunder, whatever the "
-        "[gold]Rite[/gold]."),
+        "Your [gold]Sakura[/gold] strike as Thunder at the end of your "
+        "turn."),
     # The design axes, batch two (2026-10-14).
     "ym_fallen_petals": ("FallenPetalsPower", None,
         "Whenever a [gold]Sakura[/gold] withers, gain {X} Energy on your "
@@ -5874,10 +5874,10 @@ def blocked_reason(
                 return f"yae {kind} annotation mismatch"
             if "annotation" in eff and eff["annotation"] not in YAE_ANNOTATIONS:
                 return f"yae annotation {eff['annotation']!r}"
-            if (kind == "rite") != ("rite" in eff):
-                return f"yae {kind} rite mismatch"
-            if "rite" in eff and eff["rite"] not in YAE_RITES:
-                return f"yae rite {eff['rite']!r}"
+            if "as" in eff and kind != "tenko":
+                return f"yae {kind} takes no as:"
+            if "as" in eff and eff["as"] not in YAE_TENKO_KINDS:
+                return f"yae Tenko kind {eff['as']!r}"
             if (kind == "edit_sakura") != ("which" in eff):
                 return f"yae {kind} which mismatch"
             if "which" in eff and eff["which"] not in YAE_SAKURA_ENDS:
@@ -16792,49 +16792,48 @@ def varka_swirl_face_arg(card: dict, profile: "CharacterProfile",
     return (VARKA_SWIRL_TOKEN, "VarkaOath.SwirlLine(this)")
 
 
-#: YAE REVIEW R1 (Claude, 2026-10-14, no pick): the tokens of her two live
-#: clauses (`YaeShrineFace.RiteToken`, `YaeShrineFace.TenkoToken`).
-YAE_RITE_TOKEN = "YaeRite"
+#: SHRINE R2 (2026-10-14): the token of her live Tenko clause
+#: (`YaeShrineFace.TenkoToken`); the Rite's left with the Rite.
 YAE_TENKO_TOKEN = "YaeTenko"
 
 
 def yae_face_lines(card: dict, profile: "CharacterProfile",
                    desc: str) -> tuple[str, list[tuple[str, str]]]:
-    """A Yae row's face with its live clauses placed, and their (token, C#).
+    """A Yae row's face with its live Tenko clause placed, and (token, C#).
 
-    A "Rite: X" row says in combat what the shrine would do under X, summed
-    over the Sakura standing: "Rite: Warding (your Sakura: 5 Block)", the
-    `{InCombat:{YaeRite}|}` right after the Rite's name. A row that Tenkos
-    says "Tenko (no Sakura)" while none stands. DERIVED FROM THE OPS, so a
-    new Rite or Tenko row carries its clause the day it exists. Sim twins:
-    `yae_shrine.rite_line`, `yae_shrine.tenko_line`.
+    A row that Tenkos says in combat what its Tenko would do now, summed
+    over the Sakura standing: "Tenko (12 damage)", "Tenko (Warding: 12
+    Block)"; with none standing "Tenko (no Sakura)", "Tenko (Warding, no
+    Sakura)". The `{InCombat:{YaeTenko}|}` goes right after "Tenko" on a
+    plain row and inside the kind's brackets on a typed one. DERIVED FROM
+    THE OPS, so a new Tenko row carries its clause the day it exists. Sim
+    twin: `yae_shrine.tenko_line`.
     """
     if profile.character_id != "yae" or card.get("character") != "yae":
         return desc, []
     ops = [e for e in card.get("effects") or [] if e.get("op") == "yae"]
-    args: list[tuple[str, str]] = []
-    rites = [e for e in ops if e.get("kind") == "rite"]
-    if rites:
-        if len(rites) != 1:
-            raise ValueError(f"{card['id']}: a face reads one Rite")
-        name = YAE_RITES[rites[0]["rite"]]
-        clause = f"[gold]Rite[/gold]: {name}"
-        if desc.count(clause) != 1:
-            raise ValueError(f"{card['id']}: a Rite row prints {clause!r} "
-                             "once")
-        desc = desc.replace(clause,
-                            clause + "{InCombat:{" + YAE_RITE_TOKEN + "}|}")
-        args.append((YAE_RITE_TOKEN,
-                     f"YaeShrineFace.RiteLine(this, YaeRite.{name})"))
-    if any(e.get("kind") == "tenko" for e in ops):
+    tenkos = [e for e in ops if e.get("kind") == "tenko"]
+    if not tenkos:
+        return desc, []
+    if len(tenkos) != 1:
+        raise ValueError(f"{card['id']}: a face reads one Tenko")
+    token = "{InCombat:{" + YAE_TENKO_TOKEN + "}|}"
+    kind = tenkos[0].get("as")
+    if kind is None:
         clause = "[gold]Tenko[/gold]"
-        if desc.count(clause) != 1:
+        if desc.count(clause) != 1 or desc.count(clause + " (") != 0:
             raise ValueError(f"{card['id']}: a Tenko row prints {clause!r} "
-                             "once")
-        desc = desc.replace(clause,
-                            clause + "{InCombat:{" + YAE_TENKO_TOKEN + "}|}")
-        args.append((YAE_TENKO_TOKEN, "YaeShrineFace.TenkoLine(this)"))
-    return desc, args
+                             "once, unbracketed")
+        return (desc.replace(clause, clause + token),
+                [(YAE_TENKO_TOKEN, "YaeShrineFace.TenkoLine(this)")])
+    name = YAE_TENKO_KINDS[kind]
+    clause = f"[gold]Tenko[/gold] ({name})"
+    if desc.count(clause) != 1:
+        raise ValueError(f"{card['id']}: a typed Tenko row prints "
+                         f"{clause!r} once")
+    return (desc.replace(clause, f"[gold]Tenko[/gold] ({name}{token})"),
+            [(YAE_TENKO_TOKEN,
+              f"YaeShrineFace.TenkoLine(this, YaeTenkoKind.{name})")])
 
 
 #: THE RELEASE FIXES (2026-10-14): the token of a "below half" face's
@@ -18255,7 +18254,7 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
                                VARKA_SWIRL_TOKEN} else
             "This card's in-combat shrine clauses\n"
             "    /// (`YaeShrineFace`)."
-            if set(tokens) <= {YAE_RITE_TOKEN, YAE_TENKO_TOKEN} else
+            if set(tokens) <= {YAE_TENKO_TOKEN} else
             "The HP this card's \"below half\" means, in combat\n"
             "    /// (`HalfHpFace`)."
             if tokens == [HALF_HP_TOKEN] else

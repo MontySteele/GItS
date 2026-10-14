@@ -1702,11 +1702,10 @@ ARM_KEYWORDS: dict[str, str] = {
     # YAE MIKO (2026-10-13), in step with `ArmKeywordTips.YaeSakuraTip` and
     # `YaeEditTip`, markup folded out and the numbers written out (`YaeLaw`).
     "Sakura": ("Up to 3 stand beside you. At the end of your turn each "
-               "strikes under the shrine's Rite (Thunder at the start of "
-               "combat), oldest first. Each lasts 3 turns; when it withers, "
-               "it strikes once more. Planting one raises the others' Level "
-               "by 1. Tenko: every Sakura strikes now "
-               "and lasts 3 turns again."),
+               "deals 2 plus its Level Electro damage to a random enemy. "
+               "Each lasts 3 turns; when it withers, it strikes once more. "
+               "With 3 standing, planting makes your oldest last 3 turns "
+               "again and gain a Level."),
     "Edit": ("Give a card in your hand an Annotation for this combat, "
              "replacing any it had: Red Ink (+3 damage and Block), Footnote "
              "(draw 1), Deadline Extension (Retain), Fox Fire (4 Electro "
@@ -1715,10 +1714,11 @@ ARM_KEYWORDS: dict[str, str] = {
              "strike 3 bigger (not in Offering), Fox Fire adds 4 damage, "
              "Deadline Extension "
              "stops it withering. A Published Annotation lasts the run."),
-    # YAE MIKO, THE DESIGN AXES (ruled 2026-10-14), in step with
-    # `ArmKeywordTips.YaeRiteTip`.
-    "Rite": ("Sets what Sakura strikes do. Thunder: damage. Warding: Block. "
-             "Wildfire: ALL enemies. Offering: draw."),
+    # YAE MIKO, SHRINE R2 (ruled 2026-10-14), in step with
+    # `ArmKeywordTips.YaeTenkoTip`.
+    "Tenko": ("Every Sakura strikes now and lasts 3 turns again. Warding: "
+              "as Block. Wildfire: its Level to ALL enemies. Offering: draw "
+              "1 card next turn."),
     # `EB-625`. THE RELIC A FACE IS WRITTEN AGAINST. Shell Guard says
     # "whenever the Tamakushi Casket strikes" and nothing on the page said
     # what the Casket is or what makes it strike -- [USER]'s act-1 run read
@@ -2079,7 +2079,7 @@ _ARM_KEYWORD_ARM: dict[str, str] = {
     # Inazuma Universal "Yae Miko -- Sesshou Sakura", a different object, so
     # her row prints only on her runs. (The wire names her by her title,
     # "Yae Miko", which `_fold`s to the two words.)
-    "Sakura": "yae miko", "Edit": "yae miko", "Rite": "yae miko",
+    "Sakura": "yae miko", "Edit": "yae miko", "Tenko": "yae miko",
     # THE SALON'S TAB (2026-10-05): the summon and the four guests.
     "Summon": "furina", "Guest Star": "furina", "oldest guest": "furina",
     "Clorinde": "furina",
@@ -2173,7 +2173,7 @@ _ARM_KEYWORD_RE = {
                        r"|\bPublish(?:ed)?\b|\bRed Ink\b|\bFootnote\b"
                        r"|\bDeadline Extension\b|\bFox Fire\b"
                        r"|\bRoyalties\b"),
-    "Rite": re.compile(r"\bRite\b"),
+    "Tenko": re.compile(r"\bTenko\b"),
     # `EB-446`. NO PLURAL: there is one raven. It fires on Nightrider's face,
     # which names him and cannot grant him, and on the Power card that does --
     # every screen a reader can meet the word on, whether or not the run holds

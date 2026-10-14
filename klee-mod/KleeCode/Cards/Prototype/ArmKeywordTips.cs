@@ -143,9 +143,9 @@ public static class ArmKeywordTips
     /// <summary>YAE MIKO (2026-10-13): her two words, Sakura (on
     /// <see cref="SakuraKey"/>, read for her cards) and Edit.</summary>
     public const string EditKey = "KLEEMOD-ARM_YAE_EDIT";
-    /// <summary>YAE MIKO, THE DESIGN AXES (ruled 2026-10-14): the shrine's
-    /// Rite.</summary>
-    public const string RiteKey = "KLEEMOD-ARM_YAE_RITE";
+    /// <summary>YAE MIKO, SHRINE R2 (ruled 2026-10-14): Tenko and its three
+    /// kinds, one tip (it replaced the Rite's).</summary>
+    public const string TenkoKey = "KLEEMOD-ARM_YAE_TENKO";
     public const string LightfallSwordKey = "KLEEMOD-ARM_LIGHTFALL_SWORD";
 
     // THE TEXT PASS OF 2026-10-08, and NOT A KEYWORD ROW: the Plan tip a
@@ -645,16 +645,16 @@ public static class ArmKeywordTips
                 : "A totem that stays at your side all combat. At most 3 fire "
                 + "each turn.");
 
-    /// <summary>Yae's Sakura, plant, Level, the timer and Tenko, one tip
-    /// (paper sec.2; the numbers are <see cref="Powers.YaeLaw"/>'s).</summary>
+    /// <summary>Yae's Sakura, plant, Level and the timer, one tip (paper
+    /// sec.2, shrine r2; the numbers are <see cref="Powers.YaeLaw"/>'s).
+    /// Tenko has its own tip now (<see cref="YaeTenkoTip"/>).</summary>
     public static readonly string YaeSakuraTip =
         $"Up to {Powers.YaeLaw.SakuraCap} stand beside you. At the end of your "
-      + "turn each strikes under the shrine's [gold]Rite[/gold] (Thunder at "
-      + "the start of combat), oldest first. Each lasts "
+      + $"turn each deals {Powers.YaeLaw.SakuraBase} plus its Level "
+      + "[gold]Electro[/gold] damage to a random enemy. Each lasts "
       + $"{Powers.YaeLaw.SakuraTurns} turns; when it withers, it strikes once "
-      + "more. Planting one raises the others' Level by 1. [gold]Tenko[/gold]: "
-      + $"every Sakura strikes now and lasts {Powers.YaeLaw.SakuraTurns} turns "
-      + "again.";
+      + $"more. With {Powers.YaeLaw.SakuraCap} standing, planting makes your "
+      + $"oldest last {Powers.YaeLaw.SakuraTurns} turns again and gain a Level.";
 
     /// <summary>
     /// YAE MIKO (2026-10-13), pick 6 (a): the Edit tip lists the five
@@ -679,16 +679,18 @@ public static class ArmKeywordTips
       + "withering. A Published Annotation lasts the run.";
 
     /// <summary>
-    /// YAE MIKO, THE DESIGN AXES (ruled 2026-10-14): the shrine's Rite, what
-    /// every Sakura strike does. One sentence, the four named.
+    /// YAE MIKO, SHRINE R2 (ruled 2026-10-14): Tenko and its three kinds,
+    /// the fewest words. It replaced the Rite's tip.
     /// </summary>
-    public static IEnumerable<IHoverTip> ForRite(
+    public static IEnumerable<IHoverTip> ForTenko(
         IEnumerable<IHoverTip> inherited, CardModel? card) =>
-        With(inherited, RiteKey, YaeRiteTip);
+        With(inherited, TenkoKey, YaeTenkoTip);
 
-    public static readonly string YaeRiteTip =
-        "Sets what [gold]Sakura[/gold] strikes do. Thunder: damage. Warding: "
-      + "[gold]Block[/gold]. Wildfire: ALL enemies. Offering: draw.";
+    public static readonly string YaeTenkoTip =
+        "Every [gold]Sakura[/gold] strikes now and lasts "
+      + $"{Powers.YaeLaw.SakuraTurns} turns again. Warding: as "
+      + "[gold]Block[/gold]. Wildfire: its Level to ALL enemies. Offering: "
+      + "draw 1 card next turn.";
 
     /// <summary>The text pass of 2026-10-08: Eula's blade, a counter on the
     /// enemy (<c>LightfallSwordPower</c>) with a badge and no tip.</summary>

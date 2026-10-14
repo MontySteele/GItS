@@ -418,9 +418,10 @@ public class ArmKeywordTipTests
         // 52 with the Furina sweep (2026-10-14): `ForFlip`, Ousia / Pneuma's
         // word.
         // 53 with Yae's design axes (2026-10-14): `ForRite`, the shrine's
-        // Rite.
+        // Rite; shrine r2 (2026-10-14) swapped it for `ForTenko`.
         Assert.Equal(53, attaches.Count);
-        Assert.Contains(attaches, m => m.Name == "ForRite");
+        Assert.Contains(attaches, m => m.Name == "ForTenko");
+        Assert.DoesNotContain(attaches, m => m.Name == "ForRite");
         Assert.Contains(attaches, m => m.Name == "ForFlip");
         Assert.Contains(attaches, m => m.Name == "ForEdit");
         Assert.Contains(attaches, m => m.Name == "ForBigBaddaBoomTotal");

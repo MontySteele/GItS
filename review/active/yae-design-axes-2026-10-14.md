@@ -397,3 +397,62 @@ Built in both engines:
    elite or boss fight, you may Publish up to 2 Annotations." Open to
    change.
 4. Sakura Annotations are still never Published.
+
+## Shrine r2, ruled 2026-10-14
+
+[USER], on Serialization: "I'd go with (b) for now."
+
+[USER], on the Sakura: "On the Sakura themselves - just checking, but if you
+play one with 3 already out, what happens? I'm hoping it's 'the oldest one
+refreshes and gains a level'. We probably should revisit the level scaling
+and have each Sakura appear at some specific level, not giving existing ones
+another level. ... it makes more Sakura less quadratic and punishes the early
+start less. I think we probably need to edit Tenko - rather than converting
+what the Sakura do, it should be a temporary effect. In other words, playing
+a Warding Tenko gives you block based on the Sakura level. That way you
+don't brick by blocking once and then become unkillable with no damage."
+
+[USER], on Claude's rule set: "Yeah, I think this is good now that planting
+a Sakura refreshes existing ones."
+
+[USER], on Tenko's timers: "I think we should probably make Tenko keep
+resetting the duration. That way it's relatively easy to keep it all fed."
+
+Built in both engines (C# `YaeShrine.cs`, sim `tier0/engine/yae_shrine.py`):
+1. **Planting.** A plant creates a Sakura at the Level its card prints
+   (Yakan Evocation, Twin Sakura, Sakura Seal and Yakan Offering 1; Grafted
+   Branch 2 [3]), +1 per Fox's Mooncall. It no longer levels the others.
+   With 3 standing, a plant instead makes the oldest last 3 turns again and
+   gain 1 Level; a two-plant does this one plant at a time. Yakan Evocation
+   and Twin Sakura read "(with 3 standing, your oldest refreshes and gains a
+   Level)".
+2. **The Rite is gone; Tenko has kinds.** Every end-of-turn strike, Last
+   Bloom, Editor-in-Chief and Kitsune Pounce strike as Thunder (2 + Level
+   Electro to a random enemy; Foxfire Lure aims it; Red Ink +3, Fox Fire +4
+   to a random enemy, Edict as before). Tenko: every Sakura strikes now as
+   Thunder. Tenko (Warding): each gives Block equal to its strike (2 + Level,
+   Red Ink +3). Tenko (Wildfire): each deals its Level (Red Ink +3) to ALL
+   enemies. Tenko (Offering): draw 1 more card next turn per Sakura (no Red
+   Ink).
+   - Shrine Maiden's Guard: "Gain 6 [9] Block. Tenko (Warding)."
+   - Foxfire Sweep: "Deal 4 [6] Electro damage to ALL enemies. Tenko
+     (Wildfire)."
+   - Kitsune Guile: "Apply 2 [3] Weak to ALL enemies. Tenko (Wildfire)."
+   - Manuscript Pile: "Draw 2 [3] cards. Tenko (Offering)."
+   - Thunder Rite: "Deal 8 [11] Electro damage. Tenko."
+   Numbers unchanged; a numbers pass follows.
+3. **Tenko still resets every timer to 3**, every kind.
+4. **Sakura Grove:** "At the start of your turn, each Sakura gains a
+   Level." Upgrade Innate.
+5. **Serialization:** "Whenever you play an Annotated card, gain 3 [4]
+   Block."
+6. **Sakura Channeling** has lost its job. Its text now reads "Your Sakura
+   strike as Thunder at the end of your turn." and it does nothing extra.
+   Replacement pending (design session).
+7. **Words.** One Tenko tip replaces the Rite tip: "Every Sakura strikes
+   now and lasts 3 turns again. Warding: as Block. Wildfire: its Level to
+   ALL enemies. Offering: draw 1 card next turn." The Sakura tip drops the
+   Rite and says the full-shrine rule. In combat a Tenko card says what its
+   Tenko would do now: "Tenko (12 damage)", "Tenko (Warding: 12 Block)",
+   and "(no Sakura)" / "(Warding, no Sakura)" with none standing. The Rite
+   badge and the seat page's Rite line are gone.

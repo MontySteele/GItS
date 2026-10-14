@@ -13,8 +13,8 @@ namespace KleeMod.Tests.Prototype;
 /// <summary>
 /// YAE REVIEW R1 (Claude, 2026-10-14, no pick;
 /// <c>review/active/yae-design-axes-2026-10-14.md</c>, the dated note):
-/// a "Rite: X" card says what the shrine would do under X, summed over the
-/// Sakura standing, and the Rite badge says it for the current Rite; every
+/// (shrine r2 replaced the "Rite: X" clause with a Tenko clause: "Tenko
+/// (12 damage)", "Tenko (Warding: 5 Block)"); every
 /// Tenko card says "(no Sakura)" while none stands; Sakura Seal costs 0 (upgrade: Edit 2 cards); Kitsune Rite
 /// is "Tenko. Draw 1 card." The suite is headless, so the words and sums
 /// are pinned by value and the wiring off the compiled members. The sim half
@@ -37,89 +37,81 @@ public class YaeReviewR1Tests : IDisposable
     private static string Face(CardModel card) =>
         ((CustomCardModel)card).Localization!.First(r => r.Item1 == "description").Item2;
 
-    // ==== 1. the Rite clause ================================================
+    // ==== 1. the Tenko clause (shrine r2 replaced the Rite clause) ========
 
     [Fact]
-    public void The_rite_clause_names_the_sum_in_each_rites_words()
+    public void The_tenko_clause_names_the_sum_in_each_kinds_words()
     {
-        Assert.Equal(" (your Sakura: 12 damage)", YaeShrineFace.RiteWords(YaeRite.Thunder, 12));
-        Assert.Equal(" (your Sakura: 5 Block)", YaeShrineFace.RiteWords(YaeRite.Warding, 5));
-        Assert.Equal(" (your Sakura: 2 to ALL)", YaeShrineFace.RiteWords(YaeRite.Wildfire, 2));
-        Assert.Equal(" (your Sakura: draw 3)", YaeShrineFace.RiteWords(YaeRite.Offering, 3));
-        // No Sakura standing: no clause.
-        Assert.Equal("", YaeShrineFace.RiteWords(YaeRite.Warding, 0));
+        Assert.Equal(" (12 damage)", YaeShrineFace.TenkoWords(YaeTenkoKind.Thunder, 12));
+        Assert.Equal(": 5 Block", YaeShrineFace.TenkoWords(YaeTenkoKind.Warding, 5));
+        Assert.Equal(": 2 to ALL", YaeShrineFace.TenkoWords(YaeTenkoKind.Wildfire, 2));
+        Assert.Equal(": draw 3", YaeShrineFace.TenkoWords(YaeTenkoKind.Offering, 3));
+        // No Sakura standing.
+        Assert.Equal(" (no Sakura)", YaeShrineFace.TenkoWords(YaeTenkoKind.Thunder, 0));
+        Assert.Equal(", no Sakura", YaeShrineFace.TenkoWords(YaeTenkoKind.Warding, 0));
     }
 
     [Fact]
-    public void The_sum_is_each_sakuras_strike_under_that_rite()
+    public void The_sum_is_each_sakuras_strike_as_that_kind()
     {
         var ledger = YaeShrineLedger.For(Seat.Yae().Creature);
         for (var i = 0; i < 3; i++) ledger.Plant(YaeLaw.PlantLevel);
-        // Levels 3, 2, 1.
-        Assert.Equal(12, YaeShrineFace.Total(ledger.Standing, YaeRite.Thunder));
-        Assert.Equal(12, YaeShrineFace.Total(ledger.Standing, YaeRite.Warding));
-        Assert.Equal(6, YaeShrineFace.Total(ledger.Standing, YaeRite.Wildfire));
-        Assert.Equal(3, YaeShrineFace.Total(ledger.Standing, YaeRite.Offering));
-        // Levels past 3 count in full (review r1, pick 2: no cap).
-        ledger.LevelUp(3);                    // 6, 5, 4
-        Assert.Equal(12 + 3 * 3, YaeShrineFace.Total(ledger.Standing, YaeRite.Thunder));
-        Assert.Equal(3, YaeShrineFace.Total(ledger.Standing, YaeRite.Offering));
+        // Levels 1, 1, 1 (shrine r2: a plant levels nothing).
+        Assert.Equal(9, YaeShrineFace.Total(ledger.Standing, YaeTenkoKind.Thunder));
+        Assert.Equal(9, YaeShrineFace.Total(ledger.Standing, YaeTenkoKind.Warding));
+        Assert.Equal(3, YaeShrineFace.Total(ledger.Standing, YaeTenkoKind.Wildfire));
+        Assert.Equal(3, YaeShrineFace.Total(ledger.Standing, YaeTenkoKind.Offering));
+        ledger.LevelUp(3);                    // 4, 4, 4: no cap
+        Assert.Equal(9 + 3 * 3, YaeShrineFace.Total(ledger.Standing, YaeTenkoKind.Thunder));
+        ledger.EditSakura(YaeSakuraEnd.Every, 1, YaeAnnotation.RedInk);
+        Assert.Equal(18 + 3 * 3, YaeShrineFace.Total(ledger.Standing, YaeTenkoKind.Warding));
+        Assert.Equal(3, YaeShrineFace.Total(ledger.Standing, YaeTenkoKind.Offering));
     }
 
     [Fact]
-    public void Off_a_fight_the_clauses_are_empty()
+    public void Off_a_fight_the_clause_is_empty()
     {
-        Assert.Equal("", YaeShrineFace.RiteLine(new ProtoYmShrineMaidensGuard(), YaeRite.Warding));
-        Assert.Equal("", YaeShrineFace.RiteLine(null, YaeRite.Thunder));
+        Assert.Equal("", YaeShrineFace.TenkoLine(new ProtoYmShrineMaidensGuard(), YaeTenkoKind.Warding));
         Assert.Equal("", YaeShrineFace.TenkoLine(new ProtoYmThunderRite()));
         Assert.Equal("", YaeShrineFace.TenkoLine(null));
     }
 
     [Fact]
-    public void The_clauses_read_the_strike_size_and_the_shrine()
+    public void The_clause_reads_the_strike_size()
     {
-        Assert.Contains(Il.Calls(Il.Method("YaeShrineFace", "RiteLine")),
-                        c => c.Contains("YaeShrineFace.Total"));
         Assert.Contains(Il.Calls(Il.Method("YaeShrineFace", "TenkoLine")),
-                        c => c.Contains("YaeShrine.Count"));
+                        c => c.Contains("YaeShrineFace.Total"));
         Assert.Equal(" (no Sakura)", YaeShrineFace.NoSakura);
     }
 
     [Fact]
-    public void Every_rite_card_carries_the_clause_after_the_rites_name()
+    public void Every_typed_tenko_card_carries_the_clause_inside_its_brackets()
     {
-        foreach (var (card, rite) in new (CardModel, string)[]
+        foreach (var (card, kind) in new (CardModel, string)[]
                  {
-                     (new ProtoYmThunderRite(), "Thunder"),
                      (new ProtoYmShrineMaidensGuard(), "Warding"),
                      (new ProtoYmFoxfireSweep(), "Wildfire"),
                      (new ProtoYmKitsuneGuile(), "Wildfire"),
                      (new ProtoYmManuscriptPile(), "Offering"),
                  })
         {
-            Assert.Contains($"[gold]Rite[/gold]: {rite}{{InCombat:{{{YaeShrineFace.RiteToken}}}|}}",
+            Assert.Contains($"[gold]Tenko[/gold] ({kind}{{InCombat:{{{YaeShrineFace.TenkoToken}}}|}})",
                             Face(card));
+            Assert.DoesNotContain("Rite", Face(card));
             Assert.Contains(Il.Calls(Il.Method(card.GetType().Name, "AddExtraArgsToDescription")),
-                            c => c.Contains("YaeShrineFace.RiteLine"));
+                            c => c.Contains("YaeShrineFace.TenkoLine"));
         }
     }
 
     [Fact]
-    public void The_rite_badge_says_the_same_for_the_current_rite()
+    public void The_tenko_tip_names_the_kinds_and_the_sakura_tip_the_full_shrine()
     {
-        Assert.Equal(" Your Sakura now: {Total} Block.", YaeRiteText.Now(YaeRite.Warding));
-        Assert.Equal(" Your Sakura now: {Total} damage.", YaeRiteText.Now(YaeRite.Thunder));
-        Assert.Equal(" Your Sakura now: {Total} to ALL.", YaeRiteText.Now(YaeRite.Wildfire));
-        Assert.Equal(" Your Sakura now: draw {Total}.", YaeRiteText.Now(YaeRite.Offering));
-        var loc = ((WardingRitePower)System.Runtime.CompilerServices.RuntimeHelpers
-            .GetUninitializedObject(typeof(WardingRitePower))).Localization!;
-        Assert.Contains(loc, r => r.Item1 == YaeRiteBadgePower.LiveKey
-                                  && r.Item2.EndsWith("Your Sakura now: {Total} Block.",
-                                                      StringComparison.Ordinal));
-        Assert.Contains(loc, r => r.Item1 == "smartDescription"
-                                  && !r.Item2.Contains("{Total}"));
-        Assert.Contains(Il.Calls(Il.Method("SakuraBadge", "Sync")),
-                        c => c.Contains("YaeRiteBadgePower.Refresh"));
+        Assert.Contains("Warding", ArmKeywordTips.YaeTenkoTip);
+        Assert.Contains("Wildfire", ArmKeywordTips.YaeTenkoTip);
+        Assert.Contains("Offering", ArmKeywordTips.YaeTenkoTip);
+        Assert.Contains("3 turns again", ArmKeywordTips.YaeTenkoTip);
+        Assert.Contains("oldest", ArmKeywordTips.YaeSakuraTip);
+        Assert.DoesNotContain("Rite", ArmKeywordTips.YaeSakuraTip);
     }
 
     // ==== 2. Tenko with no Sakura ===========================================

@@ -41,7 +41,7 @@ public sealed class ProtoYmKitsuneRite : CustomCardModel, ICharacterCard
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSakura(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForTenko(ArmKeywordTips.ForSakura(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_kitsune_rite");
 

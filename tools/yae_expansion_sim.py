@@ -153,7 +153,8 @@ def _translate(state, fx, card=None):
     n_sak = len(led.sakura)
     base, per, amt = fx.get("base", 0), fx.get("per", 0), fx.get("amount", 0)
     if kind == "plant":
-        # A plant is three strikes to come (more when it levels the shrine);
+        # A plant is three strikes to come (shrine r2: a full shrine refreshes
+        # and levels its oldest instead);
         # priced as a hit at a random enemy so a plant competes with a Strike.
         value = 0
         standing = n_sak
@@ -164,10 +165,20 @@ def _translate(state, fx, card=None):
         yield {"op": "damage", "amount": value, "target": "random_enemy"}
     elif kind == "tenko":
         if n_sak:
-            now = sum(Y.strike_damage(state, s, None) for s in led.sakura)
+            how = fx.get("as", Y.THUNDER)
             kept = sum(2 for s in led.sakura if s.turns_left <= 1)
-            yield {"op": "damage", "amount": now + kept,
-                   "target": "random_enemy"}
+            if how == Y.WARDING:
+                yield {"op": "block", "amount": Y.tenko_total(state, how)}
+            elif how == Y.OFFERING:
+                yield {"op": "draw", "amount": n_sak}
+            elif how == Y.WILDFIRE:
+                yield {"op": "damage",
+                       "amount": Y.tenko_total(state, how) + kept,
+                       "target": "all_enemies"}
+            else:
+                now = sum(Y.strike_damage(state, s, None) for s in led.sakura)
+                yield {"op": "damage", "amount": now + kept,
+                       "target": "random_enemy"}
     elif kind == "extend":
         if n_sak:
             yield {"op": "block", "amount": 2 * n_sak * amt}
@@ -260,6 +271,11 @@ def _draft_ops(fx):
     if kind == "plant":
         return [{"op": "damage", "amount": 6 * amt, "target": "random_enemy"}]
     if kind == "tenko":
+        # Shrine r2: a typed Tenko's Block or sweep at the nominal board.
+        if fx.get("as") == "warding":
+            return [{"op": "block", "amount": 7}]
+        if fx.get("as") == "offering":
+            return [{"op": "draw", "amount": 2}]
         return [{"op": "damage", "amount": 7, "target": "random_enemy"}]
     if kind == "extend":
         return [{"op": "block", "amount": 3 * amt}]
@@ -284,8 +300,6 @@ def _draft_ops(fx):
     if kind == "annotated_strike":
         return [{"op": "damage", "amount": base + amt // 2, "target": "enemy"}]
     # The design axes (2026-10-14), at the same nominal board.
-    if kind == "rite":
-        return [{"op": "block", "amount": 3}]
     if kind == "edit_sakura":
         return [{"op": "damage", "amount": 3 * min(amt, 2), "target": "random_enemy"}]
     if kind == "plant_level":

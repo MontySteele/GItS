@@ -71,8 +71,10 @@ def test_the_op_grammar_is_one_table_in_each_engine():
                                    if t == "enemy"}
     assert gen.YAE_ANNOTATION_KINDS == set(Y.ANNOTATION_KINDS)
     assert set(gen.YAE_ANNOTATIONS) == set(Y.ANNOTATIONS)
-    # The design axes (2026-10-14): the Rites, the Sakura readings, the ends.
-    assert set(gen.YAE_RITES) == set(Y.RITES)
+    # Shrine r2 (2026-10-14): the typed Tenko kinds; the design axes: the
+    # Sakura readings, the ends.
+    assert set(gen.YAE_TENKO_KINDS) == set(Y.TENKO_NAME)
+    assert set(Y.TENKO_NAME) == set(Y.TENKO_KINDS) - {Y.THUNDER}
     assert gen.YAE_SAKURA_ANNOTATIONS == set(Y.SAKURA_ANNOTATIONS)
     assert set(gen.YAE_SAKURA_ENDS) == set(Y.SAKURA_EDIT_ENDS)
 
@@ -84,7 +86,7 @@ def test_every_kind_is_a_yaecards_method_and_every_annotation_a_member():
     members = ANNOTATIONS_CS.read_text(encoding="utf-8")
     for member in gen.YAE_ANNOTATIONS.values():
         assert re.search(rf"\b{member} = \d+,", members), member
-    for member in list(gen.YAE_RITES.values()) + list(gen.YAE_SAKURA_ENDS.values()):
+    for member in list(gen.YAE_TENKO_KINDS.values()) + list(gen.YAE_SAKURA_ENDS.values()):
         assert re.search(rf"\b{member} = \d+,", shrine), member
 
 
