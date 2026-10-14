@@ -8508,38 +8508,51 @@ above stays as the record. The five cut Powers' classes (`SalonsEncorePower`,
 `HymnOfRenewalPower`) and their sim readers stay in the code, applied by no
 row.
 
-**Fifteen new** (6 / 7 / 2), each the base card named in brackets:
-Rain of Tears, Rehearsal, Silence in the Court! (Piercing Wail), Pirouette,
-Spotlight Grab (Headbutt), Costume Fitting (Armaments); Quick Change
-(Calculated Gamble), Read the Script, Practiced Grace (Footwork), Mise en
-Scène, Intermission (Equilibrium), Second Act (Hologram), Solo Recital
-(Skewer); Pneuma and Ousia, Stand-In (Dual Wield). The pool stays 78 at
-23 / 35 / 20.
+**Fifteen new, the second set** (6 / 7 / 2; sec.3 as revised and ruled
+2026-10-14). [USER] on the first set: "most of them are duplicates of another
+character's. Can we come up with distinct ideas for Furina, instead?" The
+first set (Rain of Tears ... Stand-In) left with its rows, its `furina` kinds
+(`upgrade_in_hand` ... `copy_in_hand`), the `furina_upgraded` key,
+`retain_hand` and Silence in the Court!'s power; its Stand-In loop note goes
+with it. The second set: Ousia / Pneuma, Objection!, Tearful Monologue,
+Stage Directions, Opening Number, Facade; Trial by Water, Rainfall Overture,
+Encore Performance, Arkhe in Balance, Crowd Favorite, The Show's Not Over,
+Understudy's Debut; Verdict of the Oratrice, Plot Twist. The pool stays 78 at
+23 / 35 / 20, 17 Powers.
 
-**How they are built.** Seven verbs are new `furina` kinds, each the base
-card's command calls (`FurinaCards`; sim `furina_stage._generic_kind`), and
-none is gated on her stage: `upgrade_in_hand`, `discard_hand_redraw`,
-`look_take_discard` (amount 4), `free_in_hand`, `retain_hand` (the base
-game's `RetainHandPower`), `discard_to_hand`, `copy_in_hand`. Costume
-Fitting, Quick Change and Mise en Scène upgrade through a new key,
-`furina_upgraded` (the kind reads `IsUpgraded`, `varka_upgraded`'s shape).
-Silence in the Court! is `lose_strength` with `this_turn`
-(`ProtoFsSilenceInTheCourtPower`, Cover Your Ears!' shape). Spotlight Grab is
-`recall_to_draw` from the discard pile. Pneuma and Ousia is
-`PneumaAndOusiaPower` (`AfterCardPlayed`; sim
-`furina_stage.pneuma_and_ousia`); the Block and the hit are unpowered.
+**How they are built.** Five new `furina` kinds (`FurinaCards`; sim
+`furina_stage._sweep_kind`): `flip` (Ousia / Pneuma; the face lives beside
+the card instance, `FurinaFlip`, so each combat's clone starts on Ousia),
+`stage_directions`, `facade` (its cap the `FsAmount`), `encore_performance`
+(Havoc's body off the Discard Pile) and `verdict` (the one aimed kind). Six
+Powers in `Powers/Prototype/FurinaSweepPowers.cs`: Arkhe in Balance (the
+first set's Pneuma and Ousia, renamed), Objection! (Flame Barrier's window),
+Trial by Water and Plot Twist (on the enemy), Rainfall Overture, Crowd
+Favorite. Two Harmony seams: `AttackCommand.Targeting` (a widened Attack's
+single-target hit aims at every enemy) and `AttackCommand.FromMonster` (a
+marked enemy's attack aims at itself). New predicates `ousia_face`,
+`pneuma_face`, `hp_lost_last_turn`, `first_turn_of_combat`; a new card field
+`playable_if`; the keyword `Flip`.
 
 **Readings.**
 
-- Intermission prints "Retain your Hand this turn." with Retain not golded:
-  the page has no Retain definition to hover.
-- Mise en Scène: the paper's "Draw 1 card [and it costs 0 until played]" is
-  printed "It costs 0 {until played | this turn}. Draw 1 card." The sim
-  reads the upgrade as this turn (the turn the pilot plays it).
-- Costume Fitting prints "for this combat", Armaments' combat-only upgrade.
-- The sim's pilot picks with `_best_card` (Costume Fitting, Read the Script,
-  Second Act, Stand-In) and the costliest card (Mise en Scène).
-- Stand-In may not copy a Stand-In (design call, 2026-10-14): two upgraded Stand-Ins copied each other forever at 0 Energy; with Pneuma and Ousia that is unlimited damage. `FurinaCards.CanStandIn`; sim the same.
+- Ousia / Pneuma shows the face it is on in combat (title and text); off the
+  board it prints both faces. Built as two one-armed conditionals and a
+  flip, so both numbers are live vars.
+- Tearful Monologue's "last turn" is the round before this one: her last
+  turn and the enemies' turn after it, any HP loss (a Drain included).
+- Text to the conventions lint: Opening Number and Understudy's Debut say
+  "deal N additional damage" (paper: "N more"); Stage Directions says "Next
+  turn, it costs 0." (paper: "It costs 0 next turn."); Verdict says
+  "Otherwise, deal". The cost lasts through her next turn or until played
+  (the base game's "this turn").
+- Verdict executes with `CreatureCmd.Kill`, Doom's call, so it can execute a
+  boss; its damage is a Skill's card damage (Strength counts).
+- Plot Twist is playable only while some enemy intends to attack; the game
+  cannot restrict which enemy is chosen, so a non-attacker chosen wastes it.
+- The Show's Not Over+ (no Exhaust) loops in thin decks with an HP-losing
+  draw card, bounded by HP; recorded in the loop probe's accepted set under
+  [USER]'s thin-deck ruling (2026-10-11).
 
 ## Kokomi review r5 A-list, 2026-10-14
 

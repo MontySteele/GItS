@@ -114,6 +114,8 @@ public static class ArmKeywordTips
     public const string FanfareKey = "KLEEMOD-ARM_STAGE_FANFARE";
     public const string DrainKey = "KLEEMOD-ARM_STAGE_DRAIN";
     public const string RepayKey = "KLEEMOD-ARM_STAGE_REPAY";
+    // FURINA, THE SWEEP (2026-10-14): Ousia / Pneuma's two faces.
+    public const string FlipKey = "KLEEMOD-ARM_STAGE_FLIP";
     // THE SPEND OUTLET PAPER (2026-10-12), and NOT A KEYWORD ROW: a rider on
     // her starter spend-all, the card two seats played for 0 to 4 damage.
     public const string BankDamageKey = "KLEEMOD-ARM_STAGE_BANK_DAMAGE";
@@ -1007,6 +1009,16 @@ public static class ArmKeywordTips
     internal const string FanfareBody =
         "Gain 1 for each HP you lose or [gold]Repay[/gold]. "
       + "[gold]Spend[/gold] uses it. Resets after each combat.";
+
+    /// <summary>Furina's sweep (2026-10-14): Ousia / Pneuma's "Flip", one
+    /// sentence in the base game's style (`FurinaFlip`).</summary>
+    internal const string FlipBody =
+        "Turn this card to its other face; it starts each combat on Ousia.";
+
+    /// <summary>Ousia / Pneuma: what "Flip" does.</summary>
+    public static IEnumerable<IHoverTip> ForFlip(
+        IEnumerable<IHoverTip> inherited, CardModel card) =>
+        With(inherited, FlipKey, FlipBody);
 
     /// <summary>Rule 3: Fanfare is one number on Furina.</summary>
     public static IEnumerable<IHoverTip> ForFanfare(

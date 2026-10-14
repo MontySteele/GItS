@@ -169,10 +169,6 @@ class Profile:
     repays: bool     # can it Repay (Charlotte's line draws on one)?
 
 
-#: The sweep's `furina` kinds that add one card to the hand.
-HAND_ADD_KINDS = ("copy_in_hand", "look_take_discard", "discard_to_hand")
-
-
 def profile(card) -> Profile:
     draw = energy = 0
     guest = repays = False
@@ -182,11 +178,6 @@ def profile(card) -> Profile:
         amount = amount if isinstance(amount, int) else 3
         if op in ("draw", "draw_to_hand_size"):
             draw += amount
-        elif op == "furina" and fx.get("kind") in HAND_ADD_KINDS:
-            # The sweep (2026-10-14): a kind that puts one card in hand is a
-            # draw of 1 to the screen (Stand-In's copy, Read the Script's
-            # take, Second Act's return).
-            draw += 1
         elif op == "energy":
             energy += amount
         if op == "stage_guest":

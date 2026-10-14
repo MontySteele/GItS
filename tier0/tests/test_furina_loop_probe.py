@@ -83,18 +83,49 @@ KNOWN_INERT = {("proto_fs_tutti+",)}
 _TUTTI_THIN_DECK = ("[USER], 2026-10-11: a theoretical loop in a thin deck "
                     "is not a problem unless trivial to assemble; this one "
                     "needs a deck thinned to Tutti!+ and the draw card")
-#: The sweep (2026-10-14) cut both partners, so no accepted loop is left
-#: in the no-Power sweep.
-ACCEPTED_LOOPS: dict = {}
+#: THE SWEEP, SECOND SET (2026-10-14). The Show's Not Over+ (0: if you
+#: lost HP this turn, gain 2 Energy; no Exhaust) with a card that loses HP
+#: and draws (Ousia Pledge's or Salon's Tab's Drain), in a deck thinned to
+#: those two or three cards, gains Energy every cycle. Each cycle Drains, so
+#: the loop is bounded by her HP; it needs the deck thinned to the set, so
+#: it is the thin-deck class [USER] ruled on 2026-10-11.
+_SHOWS_NOT_OVER_THIN_DECK = (
+    "[USER], 2026-10-11: a theoretical loop in a thin deck is not a problem "
+    "unless trivial to assemble; this one needs a deck thinned to The Show's "
+    "Not Over+ and an HP-losing draw card, and each cycle costs HP")
+ACCEPTED_LOOPS: dict = {
+    frozenset({"proto_fs_bubble_aria", "proto_fs_ousia_pledge", "proto_fs_the_shows_not_over"}):
+        _SHOWS_NOT_OVER_THIN_DECK,
+    frozenset({"proto_fs_bubble_aria", "proto_fs_the_shows_not_over", "proto_fs_tutti"}):
+        _SHOWS_NOT_OVER_THIN_DECK,
+    frozenset({"proto_fs_casting_call", "proto_fs_ousia_pledge", "proto_fs_the_shows_not_over"}):
+        _SHOWS_NOT_OVER_THIN_DECK,
+    frozenset({"proto_fs_clean_slate", "proto_fs_ousia_pledge", "proto_fs_the_shows_not_over"}):
+        _SHOWS_NOT_OVER_THIN_DECK,
+    frozenset({"proto_fs_clean_slate", "proto_fs_the_shows_not_over", "proto_fs_tutti"}):
+        _SHOWS_NOT_OVER_THIN_DECK,
+    frozenset({"proto_fs_cleansing_torrent", "proto_fs_ousia_pledge", "proto_fs_the_shows_not_over"}):
+        _SHOWS_NOT_OVER_THIN_DECK,
+    frozenset({"proto_fs_final_bow", "proto_fs_ousia_pledge", "proto_fs_the_shows_not_over"}):
+        _SHOWS_NOT_OVER_THIN_DECK,
+    frozenset({"proto_fs_hymn_of_many_waters", "proto_fs_ousia_pledge", "proto_fs_the_shows_not_over"}):
+        _SHOWS_NOT_OVER_THIN_DECK,
+    frozenset({"proto_fs_ousia_pledge", "proto_fs_pneuma_refrain", "proto_fs_the_shows_not_over"}):
+        _SHOWS_NOT_OVER_THIN_DECK,
+    frozenset({"proto_fs_ousia_pledge", "proto_fs_the_shows_not_over"}):
+        _SHOWS_NOT_OVER_THIN_DECK,
+    frozenset({"proto_fs_ousia_pledge", "proto_fs_the_shows_not_over", "proto_fs_tutti"}):
+        _SHOWS_NOT_OVER_THIN_DECK,
+    frozenset({"proto_fs_pneuma_refrain", "proto_fs_the_shows_not_over", "proto_fs_tutti"}):
+        _SHOWS_NOT_OVER_THIN_DECK,
+    frozenset({"proto_fs_salons_tab", "proto_fs_the_shows_not_over"}):
+        _SHOWS_NOT_OVER_THIN_DECK,
+}
 
 #: CLOSED LOOPS: found, then fixed by a design call, each with its reason.
 #: The probe must no longer find them.
-CLOSED_LOOPS = {
-    ("proto_fs_stand_in+",): (
-        "Design call 2026-10-14: Stand-In may not copy a Stand-In -- two "
-        "upgraded Stand-Ins copied each other forever at 0 Energy; with "
-        "Pneuma and Ousia that is unlimited damage"),
-}
+#: (Stand-In's, 2026-10-14, left with the first set's cards.)
+CLOSED_LOOPS: dict = {}
 
 #: THE POOL TO 75 (2026-10-09). The ruled batch, built as written, gave the
 #: sweep 81 productive cycles over 16 thin-deck card sets, every set but one
@@ -138,13 +169,3 @@ def test_no_named_combination_is_a_productive_loop(name):
 #: Charlotte's draw on stage cycle in a deck thinned to them; the same
 #: thin-deck loop as ACCEPTED_LOOPS, under the same ruling.
 ACCEPTED_NAMED = {"tutti_showstopper_house": _TUTTI_THIN_DECK}
-
-
-@pytest.mark.battery
-def test_two_stand_in_plus_no_longer_loop_under_pneuma_and_ousia():
-    """The sweep's finding (2026-10-14), closed: Stand-In may not copy a
-    Stand-In, so the screen (`HAND_ADD_KINDS`) still passes the pair and the
-    run finds nothing, under Pneuma and Ousia+ or with no Power."""
-    for power in ("proto_fs_pneuma_and_ousia+", None):
-        found = P.search_env(False, power)
-        assert not {f.cards for f in found} & set(CLOSED_LOOPS), power

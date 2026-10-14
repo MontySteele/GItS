@@ -1,15 +1,12 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using BaseLib.Abstracts;
-using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
-using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Powers;
@@ -394,78 +391,4 @@ public sealed class FullHousePower : PowerModel, ILocalizationProvider
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
-}
-
-// ======================================================================
-// THE SWEEP (review/active/furina-sweep-2026-10-14.md sec.3).
-// ======================================================================
-
-/// <summary><i>Pneuma and Ousia</i>: "Whenever you play an Attack, gain 2
-/// Block. Whenever you play a Skill, deal 2 damage to a random enemy." [3]
-/// Her two arkhe as a Power that pays for mixing card types, not for a
-/// resource. Her own plays only (the card's owner is this power's owner);
-/// the Block and the hit are unpowered, as every Furina Power's are
-/// (<c>FurinaStage</c>'s <c>Block</c> and <c>PowerHit</c>). Copies add.
-/// Sim twin: <c>furina_stage.pneuma_and_ousia</c>.</summary>
-public sealed class PneumaAndOusiaPower : PowerModel, ILocalizationProvider
-{
-    public const string Title = "Pneuma and Ousia";
-
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", Title),
-        ("description",
-            "Whenever you play an Attack, gain [blue]{Amount}[/blue] "
-          + "[gold]Block[/gold]. Whenever you play a Skill, deal "
-          + "[blue]{Amount}[/blue] damage to a random enemy."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-
-    public override async Task AfterCardPlayed(
-        PlayerChoiceContext choiceContext, CardPlay cardPlay)
-    {
-        if (Owner == null || Owner.IsDead || Amount <= 0) return;
-        if (cardPlay.Card?.Owner?.Creature != Owner) return;
-        var type = cardPlay.Card.Type;
-        if (type == CardType.Attack)
-        {
-            Flash();
-            await CreatureCmd.GainBlock(Owner, Amount, ValueProp.Unpowered,
-                                        null, fast: true);
-        }
-        else if (type == CardType.Skill)
-        {
-            var enemies = FurinaStage.Enemies(Owner).ToList();
-            if (FurinaStage.RandomOf(Owner, enemies) is not { } body) return;
-            Flash();
-            using var credit = Diagnostics.DamageCredit.Open(
-                Owner, Diagnostics.DamageCredit.Power, Title);
-            await ElementalHit.DealUnelemented(
-                choiceContext, body, Amount, Owner, powered: false);
-        }
-    }
-}
-
-/// <summary><i>Silence in the Court!</i>'s "ALL enemies lose 6 Strength this
-/// turn." [8] (the sweep, 2026-10-14). Piercing Wail's power exactly,
-/// <see cref="ProtoKoCoverYourEarsPower"/>'s shape: a
-/// <c>TemporaryStrengthPower</c> with <c>IsPositive</c> false, emitted by the
-/// codegen's <c>lose_strength</c> with <c>this_turn: true</c>
-/// (<c>{CardClass}Power</c>). Sim twin: <c>temp_strength_down</c>.</summary>
-public sealed class ProtoFsSilenceInTheCourtPower : TemporaryStrengthPower, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Silence in the Court!"),
-        ("description",
-            "Lose [blue]{Amount}[/blue] [gold]Strength[/gold] this turn."),
-    };
-
-    public override AbstractModel OriginModel =>
-        ModelDb.Card<global::KleeMod.Cards.Prototype.Generated.ProtoFsSilenceInTheCourt>();
-
-    protected override bool IsPositive => false;
 }

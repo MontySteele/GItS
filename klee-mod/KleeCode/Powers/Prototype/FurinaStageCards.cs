@@ -9,7 +9,6 @@ using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Models;
-using MegaCrit.Sts2.Core.Models.Powers;
 
 namespace KleeMod.Powers;
 
@@ -120,172 +119,109 @@ public static class FurinaCards
         await CardPileCmd.Add(pick, PileType.Hand, CardPilePosition.Top);
     }
 
-    // ---- THE SWEEP (review/active/furina-sweep-2026-10-14.md sec.3) -----
-    // Seven base-game verbs, each one base card's command calls (decompiled
-    // sts2.dll). None needs her stage, so none is gated on it: a card of
-    // hers played by anyone does what it prints. The three that change when
-    // upgraded read IsUpgraded (`furina_upgraded`). Sim twin:
+    // ---- THE SWEEP, SECOND SET (review/active/furina-sweep-2026-10-14.md
+    // sec.3) -------------------------------------------------------------
+    // Five verbs the grammar cannot spell. None needs her stage except
+    // Verdict, which reads her Fanfare (zero for anyone else). Sim twin:
     // `furina_stage.kind`.
 
-    /// <summary>Read the Script's grid prompt.</summary>
-    public const string LookPromptKey =
-        "KLEEMOD-FURINA_READ_THE_SCRIPT.selectionScreenPrompt";
+    /// <summary>Stage Directions' hand prompt.</summary>
+    public const string DirectionsPromptKey =
+        "KLEEMOD-FURINA_STAGE_DIRECTIONS.selectionScreenPrompt";
 
-    public const string LookPromptText =
-        "Choose a card to put into your [gold]Hand[/gold]. The rest are discarded.";
+    public const string DirectionsPromptText =
+        "Choose a card to put on top of your [gold]Draw Pile[/gold].";
 
-    /// <summary>Mise en Scene's hand prompt.</summary>
-    public const string FreePromptKey =
-        "KLEEMOD-FURINA_MISE_EN_SCENE.selectionScreenPrompt";
-
-    public const string FreePromptText = "Choose a card to cost 0.";
-
-    /// <summary>Second Act's discard-pile prompt.</summary>
-    public const string ReturnPromptKey =
-        "KLEEMOD-FURINA_SECOND_ACT.selectionScreenPrompt";
-
-    public const string ReturnPromptText =
-        "Choose a card to put into your [gold]Hand[/gold].";
-
-    /// <summary>Stand-In's hand prompt.</summary>
-    public const string CopyPromptKey =
-        "KLEEMOD-FURINA_STAND_IN.selectionScreenPrompt";
-
-    public const string CopyPromptText = "Choose a card to copy.";
-
-    /// <summary>Stand-In's filter: any card but a Stand-In. PURE.</summary>
-    public static bool CanStandIn(CardModel c) => c is not ProtoFsStandIn;
-
-    private static List<CardModel> HandOf(Player owner) =>
-        CardPile.Get(PileType.Hand, owner)?.Cards.ToList()
-        ?? new List<CardModel>();
-
-    /// <summary>Costume Fitting: "Upgrade a card in your Hand for this
-    /// combat." [ALL cards] Armaments' body: <c>FromHandForUpgrade</c>, or
-    /// every upgradable hand card upgraded.</summary>
-    public static async Task UpgradeInHand(PlayerChoiceContext choiceContext,
-                                           CardModel card, CardPlay cardPlay)
+    /// <summary>Ousia / Pneuma: "Flip." The card turns to its other face
+    /// (<see cref="FurinaFlip"/>), after the face it was played on has
+    /// resolved.</summary>
+    public static Task Flip(PlayerChoiceContext choiceContext,
+                            CardModel card, CardPlay cardPlay)
     {
-        if (card.Owner is not { } owner) return;
-        if (card.IsUpgraded)
-        {
-            foreach (var c in HandOf(owner).Where(c => c.IsUpgradable))
-            {
-                CardCmd.Upgrade(c);
-            }
-            return;
-        }
-        var pick = await CardSelectCmd.FromHandForUpgrade(
-            choiceContext, owner, card);
-        if (pick != null) CardCmd.Upgrade(pick);
+        FurinaFlip.Turn(card);
+        return Task.CompletedTask;
     }
 
-    /// <summary>Quick Change: "Discard your Hand, then draw that many
-    /// cards." [plus 1] Calculated Gamble's body.</summary>
-    public static async Task DiscardHandRedraw(
+    /// <summary>Stage Directions: "Put a card from your Hand on top of your
+    /// Draw Pile. It costs 0 next turn." Headbutt's move, from the hand; the
+    /// cost is set at the start of her next turn
+    /// (<see cref="FurinaSweep.CostZeroNextTurn"/>), as the base game's
+    /// "this turn" (this turn or until played). One card is taken without a
+    /// screen.</summary>
+    public static async Task StageDirections(
         PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
     {
         if (card.Owner is not { } owner) return;
-        var hand = HandOf(owner);
-        var count = hand.Count + (card.IsUpgraded ? 1 : 0);
-        if (hand.Count == 0)
-        {
-            if (count > 0) await CardPileCmd.Draw(choiceContext, count, owner);
-            return;
-        }
-        await CardCmd.DiscardAndDraw(choiceContext, hand, count);
-    }
-
-    /// <summary>Read the Script: "Look at the top 4 cards of your Draw Pile.
-    /// Put 1 into your Hand; discard the rest." One seen card is taken
-    /// without a screen (<see cref="ScryTake"/>'s rule).</summary>
-    public static async Task LookTakeDiscard(
-        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
-    {
-        if (card.Owner is not { } owner) return;
-        var top = CardPile.Get(PileType.Draw, owner)?.Cards
-                      .Take(Amount(card)).ToList()
-                  ?? new List<CardModel>();
-        if (top.Count == 0) return;
-        CardModel? pick = top.Count == 1
-            ? top[0]
-            : (await CardSelectCmd.FromSimpleGrid(
-                choiceContext, top, owner,
-                new CardSelectorPrefs(new LocString(Table, LookPromptKey), 1)))
-                .FirstOrDefault();
-        if (pick != null)
-        {
-            await CardPileCmd.Add(pick, PileType.Hand, CardPilePosition.Top);
-        }
-        var rest = top.Where(c => !ReferenceEquals(c, pick)).ToList();
-        if (rest.Count > 0) await CardCmd.Discard(choiceContext, rest);
-    }
-
-    /// <summary>Mise en Scene: "Choose a card in your Hand. It costs 0 this
-    /// turn." [until played] Enlightenment's cost calls, reduce-only, on one
-    /// chosen card that costs Energy.</summary>
-    public static async Task FreeInHand(PlayerChoiceContext choiceContext,
-                                        CardModel card, CardPlay cardPlay)
-    {
-        if (card.Owner is not { } owner) return;
-        var pick = (await CardSelectCmd.FromHand(
-            choiceContext, owner,
-            new CardSelectorPrefs(new LocString(Table, FreePromptKey), 1),
-            c => !c.EnergyCost.CostsX && c.EnergyCost.GetResolved() > 0,
-            card)).FirstOrDefault();
+        var hand = CardPile.Get(PileType.Hand, owner)?.Cards
+                       .Where(c => !ReferenceEquals(c, card)).ToList()
+                   ?? new List<CardModel>();
+        if (hand.Count == 0) return;
+        var pick = hand.Count == 1
+            ? hand[0]
+            : (await CardSelectCmd.FromHand(
+                choiceContext, owner,
+                new CardSelectorPrefs(new LocString(Table, DirectionsPromptKey), 1),
+                c => !ReferenceEquals(c, card), card)).FirstOrDefault();
         if (pick == null) return;
-        if (card.IsUpgraded)
-        {
-            pick.EnergyCost.SetUntilPlayed(0, reduceOnly: true);
-        }
-        else
-        {
-            pick.EnergyCost.SetThisTurn(0, reduceOnly: true);
-        }
+        await CardPileCmd.Add(pick, PileType.Draw, CardPilePosition.Top);
+        FurinaSweep.CostZeroNextTurn(owner.Creature, pick);
     }
 
-    /// <summary>Intermission: "Retain your Hand this turn." Equilibrium's
-    /// call: the base game's <c>RetainHandPower</c>, 1.</summary>
-    public static async Task RetainHand(PlayerChoiceContext choiceContext,
-                                        CardModel card, CardPlay cardPlay)
+    /// <summary>Facade: "Gain Block equal to the HP you have lost this
+    /// combat, up to 12." [16] Any HP loss, a Drain included
+    /// (<see cref="FurinaSweep.LostThisCombat"/>); card Block, so Dexterity
+    /// and Frail fold it.</summary>
+    public static async Task Facade(PlayerChoiceContext choiceContext,
+                                    CardModel card, CardPlay cardPlay)
     {
         if (card.Owner?.Creature is not { } creature) return;
-        await PowerCmd.Apply<RetainHandPower>(
-            choiceContext, creature, 1m, creature, card);
+        var amount = System.Math.Min(FurinaSweep.LostThisCombat(creature),
+                                     Amount(card));
+        if (amount <= 0) return;
+        await CreatureCmd.GainBlock(
+            creature,
+            new MegaCrit.Sts2.Core.Localization.DynamicVars.BlockVar(
+                amount, MegaCrit.Sts2.Core.ValueProps.ValueProp.Move),
+            cardPlay);
     }
 
-    /// <summary>Second Act: "Put a card from your Discard Pile into your
-    /// Hand." Hologram's body.</summary>
-    public static async Task DiscardToHand(PlayerChoiceContext choiceContext,
-                                           CardModel card, CardPlay cardPlay)
+    /// <summary>Encore Performance: "Play the top card of your Discard Pile
+    /// for free. Exhaust it." Havoc's body off the Discard Pile
+    /// (<c>CardPileCmd.AutoPlayFromDrawPile</c>: to the play pile, then
+    /// <c>CardCmd.AutoPlay</c> with <c>ExhaustOnNextPlay</c>). The top card
+    /// is the last one discarded.</summary>
+    public static async Task EncorePerformance(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
     {
         if (card.Owner is not { } owner) return;
-        var pile = CardPile.Get(PileType.Discard, owner);
-        if (pile == null || pile.Cards.Count == 0) return;
-        var pick = (await CardSelectCmd.FromCombatPile(
-            choiceContext, pile, owner,
-            new CardSelectorPrefs(new LocString(Table, ReturnPromptKey), 1)))
-            .FirstOrDefault();
-        if (pick != null) await CardPileCmd.Add(pick, PileType.Hand);
+        var top = CardPile.Get(PileType.Discard, owner)?.Cards.LastOrDefault();
+        if (top == null || ReferenceEquals(top, card)) return;
+        await CardPileCmd.Add(top, PileType.Play);
+        top.ExhaustOnNextPlay = true;
+        await CardCmd.AutoPlay(choiceContext, top, null);
     }
 
-    /// <summary>Stand-In: "Choose a card in your Hand other than Stand-In.
-    /// Add a copy of it to your Hand. The copy Exhausts." Dual Wield's clone,
-    /// any type but another Stand-In (two Stand-In+ copied each other forever
-    /// at 0 Energy; design call 2026-10-14), with Exhaust added to the copy
-    /// (Wolfpack's <c>AddKeyword</c>).</summary>
-    public static async Task CopyInHand(PlayerChoiceContext choiceContext,
-                                        CardModel card, CardPlay cardPlay)
+    /// <summary>Verdict of the Oratrice: "Choose an enemy. If its HP is no
+    /// higher than your Fanfare, it dies. Otherwise deal damage equal to your
+    /// Fanfare." It does not spend her Fanfare. The death is
+    /// <c>CreatureCmd.Kill</c>, the base game's Doom execute, so it reaches a
+    /// boss as Doom does. The damage is a Skill's card damage
+    /// (<c>ValueProp.Move</c>: her Strength counts), not an Attack.</summary>
+    public static async Task Verdict(PlayerChoiceContext choiceContext,
+                                     CardModel card, CardPlay cardPlay)
     {
-        if (card.Owner is not { } owner) return;
-        var pick = (await CardSelectCmd.FromHand(
-            choiceContext, owner,
-            new CardSelectorPrefs(new LocString(Table, CopyPromptKey), 1),
-            CanStandIn, card)).FirstOrDefault();
-        if (pick == null) return;
-        var copy = pick.CreateClone();
-        copy.AddKeyword(CardKeyword.Exhaust);
-        await CardPileCmd.AddGeneratedCardToCombat(copy, PileType.Hand, owner);
+        if (card.Owner?.Creature is not { } creature) return;
+        if (cardPlay.Target is not { IsAlive: true } target) return;
+        var fanfare = FurinaStage.FanfareOf(creature);
+        if (fanfare <= 0) return;
+        if (target.CurrentHp <= fanfare)
+        {
+            await CreatureCmd.Kill(target);
+            return;
+        }
+        await CreatureCmd.Damage(choiceContext, target, fanfare,
+                                 MegaCrit.Sts2.Core.ValueProps.ValueProp.Move,
+                                 creature, card, cardPlay);
     }
 
     /// <summary>Final Bow's pick: the seat whose guest the player chose off a

@@ -236,6 +236,12 @@ _ENGINE_LIVE_PREDICATES = frozenset({
     "hp_pct_below_50",
     "nth_attack_this_turn_3",
     "self_has_power_mc_oz",
+    # THE FURINA SWEEP (2026-10-14): Tearful Monologue's last turn
+    # (`state.hp_lost_last_turn`) and Opening Number's first turn
+    # (`state.turn == 1`), pure current-state reads; printed only by
+    # `proto_fs_` rows, so no published number moves.
+    "hp_lost_last_turn",
+    "first_turn_of_combat",
 })
 _ENGINE_LIVE_PREFIXES: tuple[str, ...] = ()
 
@@ -260,6 +266,12 @@ SCORABLE_PREDICATE_PREFIXES = (
 ) + _ENGINE_LIVE_PREFIXES
 
 BLIND_PREDICATES = frozenset({
+    # THE FURINA SWEEP (2026-10-14): Ousia / Pneuma's two faces are the
+    # CARD's (`Card.flipped`), read in `effects._op_conditional` where the
+    # card is; `_predicate` has no card to ask, so there is no score-time
+    # answer it could delegate. Printed only by a `proto_fs_` row.
+    "ousia_face",
+    "pneuma_face",
     # THE FURINA RULES PASS (2026-10-01), Opening Number: "If this is the
     # first card you played this turn". The engine counts the play before it
     # resolves (`cards_played_this_turn == 1`), so a read at score time,

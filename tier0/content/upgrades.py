@@ -1445,17 +1445,6 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             ok = hit is not None
             if hit:
                 hit["upgraded"] = True
-        elif key == "furina_upgraded":
-            # FURINA (the sweep, 2026-10-14: Costume Fitting, Quick Change,
-            # Mise en Scene): the row's `furina` op reads its upgrade at play
-            # time (`IsUpgraded` in C#). Boolean, only True is a ruling.
-            if val is not True:
-                raise ValueError(
-                    f"furina_upgraded delta on {base_id!r} must be true")
-            hit = next((fx for fx in top if fx.get("op") == "furina"), None)
-            ok = hit is not None
-            if hit:
-                hit["upgraded"] = True
         elif key == "upgraded_knight":
             # VARKA's Knights' Roll Call (Varka last pass, 2026-10-12):
             # upgraded, the chosen Knight arrives upgraded. Boolean, only

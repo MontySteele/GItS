@@ -575,16 +575,13 @@ KNOWN_STALE = {
     "proto_fs_hold_your_places": (
         "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
+    "proto_fs_intermission": (
+        "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
     "proto_fs_interposition": (
         "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_fs_one_woman_show": (
-        "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
-    ),
-    "proto_fs_opening_number": (
-        "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
-    ),
-    "proto_fs_plot_twist": (
         "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_fs_raise_a_toast": (

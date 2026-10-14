@@ -3008,35 +3008,33 @@ power_yae_yakan_offering	ImageGen/images/yae/powers/yakan_offering.png	256	256	c
 power_yae_sakura_channeling	ImageGen/images/yae/powers/sakura_channeling.png	256	256	contain	center	shortlist	1	png	Constellation Sakura Channeling.png		icon
 # power_yae_editor_in_chief <- her own light novel
 power_yae_editor_in_chief	ImageGen/images/yae/powers/editor_in_chief.png	256	256	contain	center	shortlist	1	png	Item Pretty Please, Kitsune Guuji.png		icon
-# ---------- Furina, the sweep (review/active/furina-sweep-2026-10-14.md): 14 new card portraits. Intermission keeps its row above (VIP Ace Detective 3, Furina resting in the grass). Seven take official art the sweep's cuts freed; the fifteen cut rows leave this plan and their pngs are KNOWN_STALE.
-# proto_fs_rain_of_tears <- the Archon Quest's flood (freed by The Deluge)
-proto_fs_rain_of_tears	ImageGen/images/cards/furina/proto_fs_rain_of_tears.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Archon Quest When All Return to the Waters.png		splash	
-# proto_fs_rehearsal <- chibi Furina with her Salon, 2025 birthday short (freed by Salon's Encore)
-proto_fs_rehearsal	ImageGen/images/cards/furina/proto_fs_rehearsal.png	500	380	cover	y0.55	shortlist	1	png	Furina Birthday 2025 - Shorts.png		splash	
-# proto_fs_silence_in_the_court <- the Oratrice (freed by Balance the Books)
-proto_fs_silence_in_the_court	ImageGen/images/cards/furina/proto_fs_silence_in_the_court.png	500	380	cover	y0.42	shortlist	1	png	Oratrice Mecanique d'Analyse Cardinale.png		splash	
-# proto_fs_pirouette <- Furina mid-twirl, the left of the Version 4.0 wallpaper
-proto_fs_pirouette	ImageGen/images/cards/furina/proto_fs_pirouette.png	500	380	cover	x0.13,y0.45@1.6	shortlist	1	png	Version 4.0 Full Wallpaper 1.png		splash	
-# proto_fs_spotlight_grab <- Furina in the stage light, the Version 4.2 wallpaper
-proto_fs_spotlight_grab	ImageGen/images/cards/furina/proto_fs_spotlight_grab.png	500	380	cover	x0.45,y0.62@1.4	shortlist	1	png	Version 4.2 Full Wallpaper 1.png		splash	
-# proto_fs_costume_fitting <- the Royal Masque TCG card
-proto_fs_costume_fitting	ImageGen/images/cards/furina/proto_fs_costume_fitting.png	500	380	cover	y0.38	shortlist	1	png	Royal Masque Equipment Card.png		tcg	
-# proto_fs_quick_change <- Lyney and Lynette's magic act (chibi short)
-proto_fs_quick_change	ImageGen/images/cards/furina/proto_fs_quick_change.png	500	380	cover	x0.50,y0.55@1.3	shortlist	1	png	Conjuring Chiaroscuro 2023-08-16, Discerner of Enigmas 2023-08-16 - Lyney & Lynette Shorts.png		splash	
-# proto_fs_read_the_script <- Fables de Fontaine, a book
-proto_fs_read_the_script	ImageGen/images/cards/furina/proto_fs_read_the_script.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Book Fables de Fontaine.png		item	
-# proto_fs_practiced_grace <- Furina's 2024 birthday art (freed by Hymn of Renewal)
-proto_fs_practiced_grace	ImageGen/images/cards/furina/proto_fs_practiced_grace.png	500	380	cover	y0.55	shortlist	1	png	Furina Birthday 2024.png		splash	
-# proto_fs_mise_en_scene <- chibi Furina staging the clock shop (freed by Interval Bell)
-proto_fs_mise_en_scene	ImageGen/images/cards/furina/proto_fs_mise_en_scene.png	500	380	cover	x0.55,y0.55@1.2	shortlist	1	png	VIP Ace Detective 1.png		splash	
-# proto_fs_second_act <- Furina's curtain call, her voice-cast card (freed by Spirited Aria)
-proto_fs_second_act	ImageGen/images/cards/furina/proto_fs_second_act.png	500	380	cover	x0.22,y0.45@1.5	shortlist	1	png	Furina VA Announcement.png		splash	
-# proto_fs_solo_recital <- Furina alone on the stage, Starlight Reverie
-proto_fs_solo_recital	ImageGen/images/cards/furina/proto_fs_solo_recital.png	500	380	cover	x0.40,y0.86@1.6	shortlist	1	png	Starlight Reverie Wallpaper Furina Vertical.png		splash	
-# proto_fs_pneuma_and_ousia <- Furina in her Pneuma arkhe (freed by Pneuma Tides)
-proto_fs_pneuma_and_ousia	ImageGen/images/cards/furina/proto_fs_pneuma_and_ousia.png	500	380	cover	y0.22	shortlist	1	png	Furina NPC Pneuma.png		splash	
-# proto_fs_stand_in <- Yelan dressed as the Hydro Archon, a stand-in
-proto_fs_stand_in	ImageGen/images/cards/furina/proto_fs_stand_in.png	500	380	cover	y0.30	shortlist	1	png	Yelan as Hydro Archon.png		splash	
+# ---------- Furina, the sweep (review/active/furina-sweep-2026-10-14.md sec.3): 13 new card portraits; Opening Number and Plot Twist keep their rows above. Every row is OFFICIAL wiki art and no title is worn by any other plan row (blank source_group, strict L1); six reuse art the first set's cut rows freed.
+# proto_fs_ousia_pneuma 'Ousia / Pneuma' <- her Pneuma TCG card: Furina in one of her two arkhe
+proto_fs_ousia_pneuma	ImageGen/images/cards/furina/proto_fs_ousia_pneuma.png	500	380	cover	y0.25	shortlist	1	png	Furina Pneuma Character Card.png		tcg	
+# proto_fs_objection 'Objection!' <- the Iudex's 2025 birthday art: his hand thrust out, a wave flung back
+proto_fs_objection	ImageGen/images/cards/furina/proto_fs_objection.png	500	380	cover	x0.55,y0.45@1.3	shortlist	1	png	Neuvillette Birthday 2025.png		splash	
+# proto_fs_tearful_monologue <- her 2026 birthday art: an arm over her eyes, the swoon of a tragic aria
+proto_fs_tearful_monologue	ImageGen/images/cards/furina/proto_fs_tearful_monologue.png	500	380	cover	x0.50,y0.38@1.3	shortlist	1	png	Furina Birthday 2026.png		splash	
+# proto_fs_stage_directions <- chibi Furina directing her Salon, 2025 birthday short
+proto_fs_stage_directions	ImageGen/images/cards/furina/proto_fs_stage_directions.png	500	380	cover	y0.55	shortlist	1	png	Furina Birthday 2025 - Shorts.png		splash	
+# proto_fs_facade 'Facade' <- the Royal Masque TCG card: the mask she keeps up
+proto_fs_facade	ImageGen/images/cards/furina/proto_fs_facade.png	500	380	cover	y0.38	shortlist	1	png	Royal Masque Equipment Card.png		tcg	
+# proto_fs_trial_by_water <- the Iudex in the rain: Fontaine's judgment and its water
+proto_fs_trial_by_water	ImageGen/images/cards/furina/proto_fs_trial_by_water.png	500	380	cover	x0.55	shortlist	1	png	Suddenly the Rain Stops Wallpaper.png		splash	
+# proto_fs_rainfall_overture <- rain falling over Fontaine under a rainbow (Neuvillette's chibi short)
+proto_fs_rainfall_overture	ImageGen/images/cards/furina/proto_fs_rainfall_overture.png	500	380	cover	center	shortlist	1	png	Decree of the Deeps 2024-04-02 - Neuvillette Shorts.png		splash	
+# proto_fs_encore_performance <- Furina's curtain call, her voice-cast card
+proto_fs_encore_performance	ImageGen/images/cards/furina/proto_fs_encore_performance.png	500	380	cover	x0.22,y0.45@1.5	shortlist	1	png	Furina VA Announcement.png		splash	
+# proto_fs_arkhe_in_balance <- the Arkhe article art: Pneuma and Ousia side by side
+proto_fs_arkhe_in_balance	ImageGen/images/cards/furina/proto_fs_arkhe_in_balance.png	500	380	cover	center	shortlist	1	png	Arkhe.png		splash	
+# proto_fs_crowd_favorite <- Furina at the front of Fontaine's whole cast, the Version 4.0 wallpaper
+proto_fs_crowd_favorite	ImageGen/images/cards/furina/proto_fs_crowd_favorite.png	500	380	cover	x0.13,y0.45@1.6	shortlist	1	png	Version 4.0 Full Wallpaper 1.png		splash	
+# proto_fs_the_shows_not_over "The Show's Not Over" <- Furina alone on the stage, still performing, Starlight Reverie
+proto_fs_the_shows_not_over	ImageGen/images/cards/furina/proto_fs_the_shows_not_over.png	500	380	cover	x0.40,y0.86@1.6	shortlist	1	png	Starlight Reverie Wallpaper Furina Vertical.png		splash	
+# proto_fs_understudys_debut "Understudy's Debut" <- Yelan dressed as the Hydro Archon: the stand-in takes the stage
+proto_fs_understudys_debut	ImageGen/images/cards/furina/proto_fs_understudys_debut.png	500	380	cover	y0.22	shortlist	1	png	Yelan as Hydro Archon.png		splash	
+# proto_fs_verdict_of_the_oratrice <- the Oratrice Mecanique d'Analyse Cardinale itself
+proto_fs_verdict_of_the_oratrice	ImageGen/images/cards/furina/proto_fs_verdict_of_the_oratrice.png	500	380	cover	y0.42	shortlist	1	png	Oratrice Mecanique d'Analyse Cardinale.png		splash	
 # ---------- Kokomi art pass (2026-10-14): the pool overhaul's six and the five owed rows ----------
 # Every row is OFFICIAL wiki art, each title checked against the API's imageinfo
 # before it was written, and no title is worn by any other plan row (blank

@@ -1204,12 +1204,6 @@ def retain_at_flush(state: CombatState, flushing: list[Card]) -> list[Card]:
     Returns the subset to keep in hand; the caller flushes the rest.
     """
     keep: list[Card] = []
-    # RetainHandPower (Equilibrium; Furina's Intermission, the sweep,
-    # 2026-10-14): the whole hand stays this turn, then the power is spent.
-    if state.player.powers.pop("retain_hand", 0):
-        if flushing:
-            state.emit("retain_hand", kept=[c.id for c in flushing])
-        return list(flushing)
     if not flushing:
         return keep
 
@@ -1775,6 +1769,8 @@ def reset_turn_counters(state: CombatState) -> None:
     state.block_gain_card_plays_this_turn = 0     # Unmovable's allowance
     state.cards_exhausted_this_turn = 0           # EvilEye / ForgottenRitual
     state.exhausts_this_turn = 0                  # `exhausts_this_turn` count
+    # Tearful Monologue (the Furina sweep): the round that just ended.
+    state.hp_lost_last_turn = state.hp_lost_this_turn
     state.hp_lost_this_turn = 0                   # Spite
     state.discards_this_turn = 0                  # MementoMori
     state.tag_plays_this_turn = {}                # PhantomBlades

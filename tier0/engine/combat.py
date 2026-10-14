@@ -151,6 +151,10 @@ def card_playable(state: CombatState, card: Card) -> bool:
                    if c.status_play_cap), default=0)
         if cap and state.cards_played_this_turn >= cap:
             return False
+    # FURINA, THE SWEEP (2026-10-14): "Can be played only if ..." (The
+    # Show's Not Over, Plot Twist), the C# generated `IsPlayable`.
+    if card.playable_if and not effects._predicate(state, card.playable_if):
+        return False
     if card.requires == "draw_pile_empty":
         # GrandFinale's `IsPlayable => Draw.GetPile(Owner).Cards.Count == 0`.
         # A real playability GATE, not a cost: the card sits in hand, dead,
@@ -444,11 +448,16 @@ def _finish_play(state: CombatState, card: Card,
     replays += varka_oath.gmo_replays(state, card)
     for replay_index in range(replays):
         snap = refpowers.before_card_played(state, card)
+        # Rainfall Overture (the Furina sweep): `BeforeCardPlayed` marks the
+        # next Attack, which `effects._op_damage` widens.
+        furina_stage.rainfall_arm(state, card)
         effects.resolve_card(state, card)
+        if state.rainfall_wide_card is card:
+            state.rainfall_wide_card = None
         refpowers.after_card_played(state, card, snap)
-        # Furina's Pneuma and Ousia (the sweep, 2026-10-14), on the same
-        # broadcast (`AfterCardPlayed`), each play index.
-        furina_stage.pneuma_and_ousia(state, card)
+        # Arkhe in Balance (the Furina sweep), on the same broadcast
+        # (`AfterCardPlayed`), each play index.
+        furina_stage.arkhe_in_balance(state, card)
         # (C.COMPANION_OVERHAUL). Thoma's Crimson Ooyoroi, on the
         # broadcast the mod gives it (`AfterCardPlayed`) and beside the site
         # this engine already counts an Attack at. INSIDE the replay loop and
@@ -700,6 +709,10 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     refpowers.reset_enemy_damage_caps(state)
     state.in_player_turn = True              # StS2 CombatState.CurrentSide
     refpowers.reset_turn_counters(state)
+    # FURINA, THE SWEEP (`furina_stage.turn_start`): Stage Directions' cards
+    # free, Objection! and Plot Twist lapse. After the sweep above, which
+    # clears every `free_this_turn`.
+    furina_stage.turn_start(state)
     # Fanfare decay, HERE at the true top of the turn -- before the block
     # clear, the draw, Salon upkeep and every other turn-start generator.
     # Order is a design choice, not an accident: decay eats what was CARRIED
@@ -788,6 +801,8 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # THE FURINA RESEARCH SLICE (`furina_tide`, sim only): Salon's Tab's
     # Energy arrives next turn. 0 for anyone else.
     p.energy += furina_tide.energy_kept(state)
+    # Crowd Favorite (the Furina sweep): AfterEnergyReset.
+    p.energy += furina_stage.crowd_favorite(state)
     # site D, with Hook.ModifyHandDraw folded in (ToolsOfTheTrade and
     # DrawCardsNextTurn). Relic-driven opening-hand bonuses are a different
     # hook and stay where they are.
@@ -954,6 +969,8 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # THE FURINA RESEARCH SLICE (`furina_tide`): guests act, then Salon
     # Solitaire's Restore 2. A no-op for anyone else.
     furina_tide.end_of_turn(state)
+    # The Furina sweep: Trial by Water's mark and Rainfall Overture lapse.
+    furina_stage.turn_end(state)
     _settle_phases(state)        # turn-end burst (Sparks 'n' Splash) can
     #                              drop a phased boss
     # Injected Burn/Wither (§10.2): end-of-turn damage while in hand,
@@ -1159,6 +1176,14 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             # lands on its owner).
             dmg = powers.modify_damage_taken(state.player, dmg, enemy)
             dmg = int(dmg)
+            # Plot Twist (the Furina sweep): the marked enemy's hit lands on
+            # itself, priced off its own body, and never reaches her.
+            if furina_stage.plot_twist(
+                    state, enemy, powers.modify_damage_dealt(enemy, amount)
+                    * (C.FROZEN_DAMAGE_MULT if frozen else 1)):
+                if not enemy.alive:
+                    break
+                continue
             # (C.COMPANION_OVERHAUL). The two TRAPS -- Dahlia's
             # Sacramental Shower and Amber's Baron Bunny -- fire HERE, after
             # the hit's number is settled and before Block is spent, which is
@@ -1249,6 +1274,8 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             refpowers.on_damage_received(state, state.player,
                                          unblocked=dmg - blocked, dealer=enemy,
                                          powered_attack=True)
+            # Objection! (the Furina sweep): twice the HP this hit cost.
+            furina_stage.objection(state, enemy, hp_loss)
             # (C.KOKOMI_OVERHAUL). THE EXPANSION's Tidal Riposte:
             # a hit Block absorbed whole answers back, once per hit.
             kokomi_plan.tidal_riposte(state, enemy, blocked,

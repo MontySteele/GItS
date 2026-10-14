@@ -3385,147 +3385,165 @@
    effects: [{op: apply_power, power: fs_full_house, amount: 4,
               target: self}]}
 
-# --- THE SWEEP (review/active/furina-sweep-2026-10-14.md, 2026-10-14): fifteen
-# cut, fifteen new, none a resource verb plus a number; 6 / 7 / 2, pool 78.
+# --- THE SWEEP (review/active/furina-sweep-2026-10-14.md sec.3, the second
+# set, ruled 2026-10-14): fifteen cut, fifteen new; 6 / 7 / 2, pool 78.
 # Provenance note, "Furina: the sweep, 2026-10-14". ---
 
-# Rain of Tears: sets up the guests' reactions (sec.3).
-- {id: proto_fs_rain_of_tears, name: "Rain of Tears", character: furina,
+# Ousia / Pneuma: two faces, starts each combat on Ousia; playing a face does
+# it, then the card turns over (`furina` kind `flip`, `FurinaFlip`).
+- {id: proto_fs_ousia_pneuma, name: "Ousia / Pneuma", character: furina,
+   upgrade: {conditional_damage: +3, conditional_block: +3},
+   authored_by: [claude],
+   register: salon, cost: 1, type: attack, rarity: common,
+   description: "{Pneuma:Gain {BranchBlock:diff()} [gold]Block[/gold].|{InCombat:Deal {BranchDamage:diff()} damage.|Ousia: Deal {BranchDamage:diff()} damage.\nPneuma: Gain {BranchBlock:diff()} [gold]Block[/gold].}}\n[gold]Flip[/gold].",
+   effects: [{op: conditional, if: ousia_face,
+              then: [{op: damage, amount: 8, target: enemy}]},
+             {op: conditional, if: pneuma_face,
+              then: [{op: block, amount: 7}]},
+             {op: furina, kind: flip}]}
+
+# Objection!: Flame Barrier's window, once, for twice the HP the hit cost.
+- {id: proto_fs_objection, name: "Objection!", character: furina,
    upgrade: {block: +3},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: common,
-   description: "Gain {Block:diff()} [gold]Block[/gold]. Apply [gold]Hydro[/gold] to ALL enemies.",
+   description: "Gain {Block:diff()} [gold]Block[/gold]. The next time an enemy's attack makes you lose HP this turn, it takes twice that much.",
    effects: [{op: block, amount: 5},
-             {op: apply_aura, element: hydro, target: all_enemies}]}
+             {op: apply_power, power: fs_objection, amount: 1, target: self}]}
 
-# Rehearsal: a Block card she can hold for the hit she sees coming.
-- {id: proto_fs_rehearsal, name: "Rehearsal", character: furina,
+# Tearful Monologue: "last turn" is the round before this one (your last
+# turn and the enemies' turn after it), any HP loss, a Drain included.
+- {id: proto_fs_tearful_monologue, name: "Tearful Monologue", character: furina,
    upgrade: {block: +3},
    authored_by: [claude],
-   register: salon, cost: 1, type: skill, rarity: common, retain: true,
-   description: "Gain {Block:diff()} [gold]Block[/gold].",
-   effects: [{op: block, amount: 7}]}
+   register: salon, cost: 1, type: skill, rarity: common,
+   description: "Gain {Block:diff()} [gold]Block[/gold]. If you lost HP last turn, draw 2 cards.",
+   effects: [{op: block, amount: 6},
+             {op: conditional, if: hp_lost_last_turn,
+              then: [{op: draw, amount: 2}]}]}
 
-# Silence in the Court!: defence that is not Block (Piercing Wail). Common
-# (the paper's pick 2 default).
-- {id: proto_fs_silence_in_the_court, name: "Silence in the Court!", character: furina,
-   upgrade: {strength_loss: +2},
-   authored_by: [claude],
-   register: salon, cost: 1, type: skill, rarity: common, exhaust: true,
-   description: "ALL enemies lose 6 [gold]Strength[/gold] this turn.",
-   effects: [{op: lose_strength, amount: 6, target: all_enemies,
-              this_turn: true}]}
-
-# Pirouette: multi-hit; each hit takes Neuvillette's Hydro bonus.
-- {id: proto_fs_pirouette, name: "Pirouette", character: furina,
-   upgrade: {damage: +1},
-   authored_by: [claude],
-   register: salon, cost: 1, type: attack, rarity: common,
-   description: "Deal {Damage:diff()} [gold]Hydro[/gold] damage 3 times.",
-   effects: [{op: damage, amount: 4, target: enemy, times: 3,
-              applies_element: true}]}
-
-# Spotlight Grab: Headbutt's shape (`recall_to_draw`, discard source).
-- {id: proto_fs_spotlight_grab, name: "Spotlight Grab", character: furina,
-   upgrade: {damage: +3},
-   authored_by: [claude],
-   register: salon, cost: 1, type: attack, rarity: common,
-   description: "Deal {Damage:diff()} damage. Put a card from your [gold]Discard Pile[/gold] on top of your [gold]Draw Pile[/gold].",
-   effects: [{op: damage, amount: 9, target: enemy},
-             {op: recall_to_draw, from: discard}]}
-
-# Costume Fitting: Armaments' shape (`furina` kind `upgrade_in_hand`; the
-# upgrade upgrades every card in the hand).
-- {id: proto_fs_costume_fitting, name: "Costume Fitting", character: furina,
-   upgrade: {furina_upgraded: true},
+# Stage Directions: the chosen card goes on top and costs 0 through the end
+# of next turn (`furina` kind `stage_directions`).
+- {id: proto_fs_stage_directions, name: "Stage Directions", character: furina,
+   upgrade: {block: +3},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: common,
-   description: "Gain 5 [gold]Block[/gold]. Upgrade {IfUpgraded:show:ALL cards|a card} in your [gold]Hand[/gold] for this combat.",
+   description: "Gain {Block:diff()} [gold]Block[/gold]. Put a card from your [gold]Hand[/gold] on top of your [gold]Draw Pile[/gold]. Next turn, it costs 0.",
    effects: [{op: block, amount: 5},
-             {op: furina, kind: upgrade_in_hand}]}
+             {op: furina, kind: stage_directions}]}
 
-# Quick Change: Calculated Gamble's shape (`discard_hand_redraw`); the
-# upgrade draws 1 more.
-- {id: proto_fs_quick_change, name: "Quick Change", character: furina,
-   upgrade: {furina_upgraded: true},
+# Opening Number: Innate; on the combat's first turn a second hit.
+- {id: proto_fs_opening_number, name: "Opening Number", character: furina,
+   upgrade: {conditional_damage: +3},
    authored_by: [claude],
-   register: salon, cost: 0, type: skill, rarity: uncommon, exhaust: true,
-   description: "Discard your [gold]Hand[/gold], then draw that many cards{IfUpgraded:show: plus 1|}.",
-   effects: [{op: furina, kind: discard_hand_redraw}]}
+   register: salon, cost: 1, type: attack, rarity: common, innate: true,
+   description: "Deal {Damage:diff()} damage. On your first turn, deal {BranchDamage:diff()} additional damage.",
+   effects: [{op: damage, amount: 7, target: enemy},
+             {op: conditional, if: first_turn_of_combat,
+              then: [{op: damage, amount: 7, target: enemy}]}]}
 
-# Read the Script: selection (`look_take_discard`: the top 4, one to the
-# hand, the rest to the Discard Pile).
-- {id: proto_fs_read_the_script, name: "Read the Script", character: furina,
+# Facade: Block off every HP she has lost this combat, any source, capped
+# (`furina` kind `facade`, its cap the card's FsAmount).
+- {id: proto_fs_facade, name: "Façade", character: furina,
+   upgrade: {furina_amount: +4},
+   authored_by: [claude],
+   register: salon, cost: 1, type: skill, rarity: common,
+   description: "Gain [gold]Block[/gold] equal to the HP you have lost this combat, up to {FsAmount:diff()}.",
+   effects: [{op: furina, kind: facade, amount: 12}]}
+
+# Trial by Water: Vulnerable, and a this-turn mark that pays 2 Fanfare each
+# time the enemy takes damage (`TrialByWaterPower`).
+- {id: proto_fs_trial_by_water, name: "Trial by Water", character: furina,
+   upgrade: {power_amount: +1},
+   authored_by: [claude],
+   register: salon, cost: 1, type: skill, rarity: uncommon,
+   description: "Apply {PowerAmount:diff()} [gold]Vulnerable[/gold]. Until end of turn, whenever that enemy takes damage, gain 2 [gold]Fanfare[/gold].",
+   effects: [{op: apply_power, power: vulnerable, amount: 2, target: enemy},
+             {op: apply_power, power: fs_trial_by_water, amount: 2,
+              target: enemy}]}
+
+# Rainfall Overture: the next Attack this turn hits ALL enemies
+# (`RainfallOverturePower`: a single-target hit is aimed at every enemy).
+- {id: proto_fs_rainfall_overture, name: "Rainfall Overture", character: furina,
    upgrade: {cost: -1},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Look at the top {FsAmount:diff()} cards of your [gold]Draw Pile[/gold]. Put 1 into your [gold]Hand[/gold]; discard the rest.",
-   effects: [{op: furina, kind: look_take_discard, amount: 4}]}
+   description: "Apply [gold]Hydro[/gold] to ALL enemies. Your next Attack this turn hits ALL enemies.",
+   effects: [{op: apply_aura, element: hydro, target: all_enemies},
+             {op: apply_power, power: fs_rainfall_overture, amount: 1,
+              target: self}]}
 
-# Practiced Grace: Footwork (the base game's Dexterity).
-- {id: proto_fs_practiced_grace, name: "Practiced Grace", character: furina,
+# Encore Performance: Havoc off the Discard Pile (`furina` kind
+# `encore_performance`).
+- {id: proto_fs_encore_performance, name: "Encore Performance", character: furina,
+   upgrade: {cost: -1},
+   authored_by: [claude],
+   register: salon, cost: 1, type: skill, rarity: uncommon,
+   description: "Play the top card of your [gold]Discard Pile[/gold] for free. [gold]Exhaust[/gold] it.",
+   effects: [{op: furina, kind: encore_performance}]}
+
+# Arkhe in Balance: her two arkhe as a Power that pays for mixing card types
+# (the first set's Pneuma and Ousia, renamed: [USER] read the first set's
+# Water Ballet as the Necrobinder's Danse Macabre).
+- {id: proto_fs_arkhe_in_balance, name: "Arkhe in Balance", character: furina,
    upgrade: {power_amount: +1},
    authored_by: [claude],
    register: salon, cost: 1, type: power, rarity: uncommon,
-   description: "Gain {PowerAmount:diff()} [gold]Dexterity[/gold].",
-   effects: [{op: apply_power, power: dexterity, amount: 2, target: self}]}
-
-# Mise en Scene: cost cheating for her 2-cost payoffs (`free_in_hand`; the
-# upgrade keeps the card at 0 until it is played).
-- {id: proto_fs_mise_en_scene, name: "Mise en Scène", character: furina,
-   upgrade: {furina_upgraded: true},
-   authored_by: [claude],
-   register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Choose a card in your [gold]Hand[/gold]. It costs 0 {IfUpgraded:show:until played|this turn}. Draw 1 card.",
-   effects: [{op: furina, kind: free_in_hand},
-             {op: draw, amount: 1}]}
-
-# Intermission: Equilibrium's shape (`retain_hand`, the base game's
-# RetainHandPower).
-- {id: proto_fs_intermission, name: "Intermission", character: furina,
-   upgrade: {block: +3},
-   authored_by: [claude],
-   register: salon, cost: 2, type: skill, rarity: uncommon,
-   description: "Gain {Block:diff()} [gold]Block[/gold]. Retain your [gold]Hand[/gold] this turn.",
-   effects: [{op: block, amount: 11},
-             {op: furina, kind: retain_hand}]}
-
-# Second Act: Hologram's shape (`discard_to_hand`).
-- {id: proto_fs_second_act, name: "Second Act", character: furina,
-   upgrade: {block: +3},
-   authored_by: [claude],
-   register: salon, cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "Gain {Block:diff()} [gold]Block[/gold]. Put a card from your [gold]Discard Pile[/gold] into your [gold]Hand[/gold].",
-   effects: [{op: block, amount: 4},
-             {op: furina, kind: discard_to_hand}]}
-
-# Solo Recital: Skewer's shape, an Energy sink and a single-target finisher.
-- {id: proto_fs_solo_recital, name: "Solo Recital", character: furina,
-   upgrade: {damage: +2},
-   authored_by: [claude],
-   register: salon, cost: X, type: attack, rarity: uncommon,
-   description: "Deal {Damage:diff()} damage X times.",
-   effects: [{op: damage, amount: 7, target: enemy, times: X}]}
-
-# Pneuma and Ousia: her two arkhe as a Power that pays for mixing card
-# types, not for a resource.
-- {id: proto_fs_pneuma_and_ousia, name: "Pneuma and Ousia", character: furina,
-   upgrade: {power_amount: +1},
-   authored_by: [claude],
-   register: salon, cost: 1, type: power, rarity: rare,
    description: "Whenever you play an Attack, gain {PowerAmount:diff()} [gold]Block[/gold]. Whenever you play a Skill, deal {PowerAmount:diff()} damage to a random enemy.",
-   effects: [{op: apply_power, power: fs_pneuma_and_ousia, amount: 2,
+   effects: [{op: apply_power, power: fs_arkhe_in_balance, amount: 2,
               target: self}]}
 
-# Stand-In: a Dual Wield bend at Rare (`copy_in_hand`; the copy Exhausts).
-# Never a Stand-In (design call 2026-10-14: two Stand-In+ looped forever).
-# Rare (the paper's pick 3 default).
-- {id: proto_fs_stand_in, name: "Stand-In", character: furina,
+# Crowd Favorite: below half HP at the start of her turn, 1 Energy.
+- {id: proto_fs_crowd_favorite, name: "Crowd Favorite", character: furina,
+   upgrade: {innate: true},
+   authored_by: [claude],
+   register: salon, cost: 1, type: power, rarity: uncommon,
+   description: "At the start of your turn, if your HP is below half, gain {energyPrefix:energyIcons(1)}.",
+   effects: [{op: apply_power, power: fs_crowd_favorite, amount: 1,
+              target: self}]}
+
+# The Show's Not Over: playable only once she has lost HP this turn
+# (`playable_if`).
+- {id: proto_fs_the_shows_not_over, name: "The Show's Not Over", character: furina,
+   upgrade: {remove: exhaust},
+   authored_by: [claude],
+   register: salon, cost: 0, type: skill, rarity: uncommon, exhaust: true,
+   playable_if: hp_lost_this_turn,
+   description: "Can be played only if you lost HP this turn. Gain {energyPrefix:energyIcons(2)}.",
+   effects: [{op: energy, amount: 2}]}
+
+# Understudy's Debut: below half HP, a second hit and Block.
+- {id: proto_fs_understudys_debut, name: "Understudy's Debut", character: furina,
+   upgrade: {conditional_damage: +2, conditional_block: +2},
+   authored_by: [claude],
+   register: salon, cost: 1, type: attack, rarity: uncommon,
+   description: "Deal {Damage:diff()} damage. If your HP is below half, deal {BranchDamage:diff()} additional damage and gain {BranchBlock:diff()} [gold]Block[/gold].",
+   effects: [{op: damage, amount: 6, target: enemy},
+             {op: conditional, if: hp_pct_below_50,
+              then: [{op: damage, amount: 6, target: enemy}]},
+             {op: conditional, if: hp_pct_below_50,
+              then: [{op: block, amount: 6}]}]}
+
+# Verdict of the Oratrice: an execute off her Fanfare, which it does not
+# spend; any enemy, a boss included, as Doom kills one (`furina` kind
+# `verdict`).
+- {id: proto_fs_verdict_of_the_oratrice, name: "Verdict of the Oratrice", character: furina,
    upgrade: {cost: -1},
    authored_by: [claude],
-   register: salon, cost: 1, type: skill, rarity: rare,
-   description: "Choose a card in your [gold]Hand[/gold] other than Stand-In. Add a copy of it to your [gold]Hand[/gold]. The copy [gold]Exhausts[/gold].",
-   effects: [{op: furina, kind: copy_in_hand}]}
+   register: salon, cost: 2, type: skill, rarity: rare, exhaust: true,
+   description: "Choose an enemy. If its HP is no higher than your [gold]Fanfare[/gold], it dies. Otherwise, deal damage equal to your [gold]Fanfare[/gold].",
+   effects: [{op: furina, kind: verdict, target: enemy}]}
+
+# Plot Twist: this turn the chosen enemy's attack hits itself
+# (`PlotTwistPower`). Playable only while an enemy intends to attack.
+- {id: proto_fs_plot_twist, name: "Plot Twist", character: furina,
+   upgrade: {cost: -1},
+   authored_by: [claude],
+   register: salon, cost: 1, type: skill, rarity: rare, exhaust: true,
+   playable_if: enemy_intends_attack,
+   description: "Choose an enemy that intends to attack. This turn its attack hits itself instead of you.",
+   effects: [{op: apply_power, power: fs_plot_twist, amount: 1,
+              target: enemy}]}
 
 # --- THE CO-OP SET (review/records/coop-set-2026-09-25.md): multiplayer-only,
 # outside every pool count. Why each row reads as it does:

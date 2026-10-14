@@ -273,23 +273,23 @@ POOL_IDS: tuple[str, ...] = (
     "proto_fs_headliner",
     "proto_fs_the_leading_lady",          # Leading Lady
     "proto_fs_the_full_house",            # Full House
-    # The sweep (review/active/furina-sweep-2026-10-14.md sec.3): 6
-    # Common, 7 Uncommon, 2 Rare, for the fifteen cut.
-    "proto_fs_rain_of_tears",
-    "proto_fs_rehearsal",
-    "proto_fs_silence_in_the_court",
-    "proto_fs_pirouette",
-    "proto_fs_spotlight_grab",
-    "proto_fs_costume_fitting",
-    "proto_fs_quick_change",
-    "proto_fs_read_the_script",
-    "proto_fs_practiced_grace",
-    "proto_fs_mise_en_scene",
-    "proto_fs_intermission",
-    "proto_fs_second_act",
-    "proto_fs_solo_recital",
-    "proto_fs_pneuma_and_ousia",
-    "proto_fs_stand_in",
+    # The sweep, second set (review/active/furina-sweep-2026-10-14.md
+    # sec.3): 6 Common, 7 Uncommon, 2 Rare, for the fifteen cut.
+    "proto_fs_ousia_pneuma",
+    "proto_fs_objection",
+    "proto_fs_tearful_monologue",
+    "proto_fs_stage_directions",
+    "proto_fs_opening_number",
+    "proto_fs_facade",
+    "proto_fs_trial_by_water",
+    "proto_fs_rainfall_overture",
+    "proto_fs_encore_performance",
+    "proto_fs_arkhe_in_balance",
+    "proto_fs_crowd_favorite",
+    "proto_fs_the_shows_not_over",
+    "proto_fs_understudys_debut",
+    "proto_fs_verdict_of_the_oratrice",
+    "proto_fs_plot_twist",
 )
 
 #: The loader's older seams, empty since the slice: nothing is substituted
@@ -584,30 +584,24 @@ KINDS = ("act_oldest", "act_all", "final_bow", "tutor_guest",
          # The diversity pass (2026-10-11): Ensemble Cast's "Summon a random
          # guest".
          "summon_random",
-         # The sweep (review/active/furina-sweep-2026-10-14.md sec.3): seven
-         # base-game verbs (`GENERIC_KINDS`), the C# `FurinaCards` twins.
-         "upgrade_in_hand", "discard_hand_redraw", "look_take_discard",
-         "free_in_hand", "retain_hand", "discard_to_hand", "copy_in_hand")
+         # The sweep, second set (review/active/furina-sweep-2026-10-14.md
+         # sec.3; `SWEEP_KINDS`), the C# `FurinaCards` twins.
+         "flip", "stage_directions", "facade", "encore_performance",
+         "verdict")
 #: Casting Call's `tutor_guest` carries its floor's draw ("If you can't,
-#: draw 2 cards"; the diversity pass, 2026-10-11). Read the Script's look
-#: carries its 4.
-KIND_AMOUNT = ("final_bow", "gain_fanfare", "tutor_guest",
-               "look_take_discard")
-#: The sweep's kinds need no stage: a card of hers played by anyone does
-#: what it prints (the C# methods are ungated too). `upgraded` is the
-#: `furina_upgraded` delta's mark (Costume Fitting, Quick Change, Mise en
-#: Scene).
-GENERIC_KINDS = ("upgrade_in_hand", "discard_hand_redraw",
-                 "look_take_discard", "free_in_hand", "retain_hand",
-                 "discard_to_hand", "copy_in_hand")
-#: The base game's RetainHandPower (Equilibrium), read at the hand flush
-#: (`refpowers.retain_at_flush`).
-RETAIN_HAND = "retain_hand"
+#: draw 2 cards"; the diversity pass, 2026-10-11). Facade carries its cap.
+KIND_AMOUNT = ("final_bow", "gain_fanfare", "tutor_guest", "facade")
+#: The one kind that aims (`target: enemy`): Verdict of the Oratrice.
+AIMED_KINDS = ("verdict",)
+#: The sweep's kinds need no stage, except Verdict, which reads her Fanfare
+#: (0 for anyone else): a card of hers played by anyone does what it prints.
+SWEEP_KINDS = ("flip", "stage_directions", "facade", "encore_performance",
+               "verdict")
 
 
 def validate_op(card_id: str, fx: dict) -> None:
     """The loader's check, the codegen's `FURINA_KINDS` taken here too."""
-    unknown = set(fx) - {"op", "kind", "amount", "upgraded"}
+    unknown = set(fx) - {"op", "kind", "amount", "target"}
     if unknown:
         raise ValueError(f"card {card_id!r}: furina field(s) "
                          f"{sorted(unknown)} not understood")
@@ -616,6 +610,10 @@ def validate_op(card_id: str, fx: dict) -> None:
         raise ValueError(f"card {card_id!r}: furina kind {kind!r}")
     if ("amount" in fx) != (kind in KIND_AMOUNT):
         raise ValueError(f"card {card_id!r}: furina {kind} amount mismatch")
+    want = "enemy" if kind in AIMED_KINDS else None
+    if fx.get("target") != want:
+        raise ValueError(f"card {card_id!r}: furina {kind} takes target "
+                         f"{want!r}")
     amount = fx.get("amount", 1)
     if (not isinstance(amount, int) or isinstance(amount, bool)
             or amount <= 0):
@@ -625,10 +623,10 @@ def validate_op(card_id: str, fx: dict) -> None:
 
 def kind(state, fx: dict, card) -> None:
     """One `furina` kind. Inert for anyone who is not Furina, except the
-    sweep's base-game verbs (`GENERIC_KINDS`)."""
+    sweep's (`SWEEP_KINDS`)."""
     k = fx["kind"]
-    if k in GENERIC_KINDS:
-        _generic_kind(state, fx, card)
+    if k in SWEEP_KINDS:
+        _sweep_kind(state, fx, card)
         return
     if not active(state.player):
         return
@@ -652,100 +650,79 @@ def kind(state, fx: dict, card) -> None:
         raise ValueError(f"unknown furina kind {k!r}")
 
 
-def _generic_kind(state, fx: dict, card) -> None:
-    """The sweep's seven verbs (review/active/furina-sweep-2026-10-14.md
-    sec.3), each the base card's body; the C# is `FurinaCards`. THE PILOT
-    CHOOSES with `effects._best_card` / `_worst_card`, this engine's stand-in
-    for the player's screen."""
-    from tier0 import constants as C
-    from tier0.engine import effects, refpowers
+def _sweep_kind(state, fx: dict, card) -> None:
+    """The sweep's five verbs (review/active/furina-sweep-2026-10-14.md
+    sec.3); the C# is `FurinaCards`. THE PILOT CHOOSES with
+    `effects._worst_card`, this engine's stand-in for the player's screen."""
+    from tier0.engine import effects
     from tier0.engine.state import remove_instance
     p = state.player
     k = fx["kind"]
-    upgraded = bool(fx.get("upgraded", False))
-    if k == "upgrade_in_hand":
-        # Armaments: one card (the best one), or every card upgraded.
-        pool = [c for c in p.hand if not c.id.endswith("+")]
+    if k == "flip":
+        # Ousia / Pneuma: the card turns to its other face (`FurinaFlip`).
+        card.flipped = not card.flipped
+        state.emit("fs_flip", card=card.id, pneuma=card.flipped)
+    elif k == "stage_directions":
+        # A hand card (the pilot's least wanted now) to the top of the draw
+        # pile, free next turn (`turn_start`).
+        pool = [c for c in p.hand if c is not card]
         if not pool:
             return
-        picks = pool if upgraded else [effects._best_card(pool)]
-        for c in picks:
-            i = next((n for n, h in enumerate(p.hand) if h is c), None)
-            if i is not None:
-                p.hand[i] = refpowers._upgraded(state, c)
-        state.emit("upgrade_in_hand", amount=len(picks))
-    elif k == "discard_hand_redraw":
-        # Calculated Gamble: discard the hand, draw that many [plus 1].
-        n = len(p.hand)
-        if n:
-            effects._op_discard(state, {"op": "discard", "amount": n}, card)
-        draw = n + (1 if upgraded else 0)
-        if draw and not state.over:
-            state.draw(draw)
-    elif k == "look_take_discard":
-        # Read the Script: the top N, the best one to the hand, the rest to
-        # the discard pile.
-        top = p.draw_pile[:int(fx["amount"])]
-        if not top:
+        pick = effects._worst_card(pool)
+        remove_instance(p.hand, pick)
+        p.draw_pile.insert(0, pick)
+        pick.free_next_turn = True
+        state.emit("fs_stage_directions", card=pick.id)
+    elif k == "facade":
+        # Block equal to the HP lost this combat, capped; card Block.
+        amount = min(state.hp_lost_this_combat, int(fx["amount"]))
+        if amount > 0:
+            effects._op_block(state, {"op": "block", "amount": amount}, card)
+    elif k == "encore_performance":
+        # Havoc off the Discard Pile: its top card (the last discarded),
+        # played free, then Exhausted.
+        if not p.discard_pile:
             return
-        pick = effects._best_card(top)
-        for seen in top:
-            remove_instance(p.draw_pile, seen)
-        if len(p.hand) < C.MAX_HAND_SIZE:
-            p.hand.append(pick)
-        else:
-            p.discard_pile.append(pick)
-        p.discard_pile.extend(c for c in top if c is not pick)
-        state.emit("look_take_discard", card=pick.id, seen=len(top))
-    elif k == "free_in_hand":
-        # Mise en Scene: the costliest card in hand costs 0 this turn. The
-        # upgrade's "until played" is read as this turn here, the turn the
-        # pilot plays it (the C# keeps it at 0 until played).
-        pool = [c for c in p.hand if isinstance(c.cost, int) and c.cost > 0]
-        if not pool:
+        top = p.discard_pile.pop()
+        from tier0.engine import combat
+        combat.resolve_free_play(state, top, force_exhaust=True)
+    elif k == "verdict":
+        # Execute at HP <= Fanfare, else damage equal to it; no spend. Any
+        # enemy, a boss included (the C# `CreatureCmd.Kill`).
+        fanfare = T._f(state).fanfare if active(p) else 0
+        targets = effects._pick_targets(state, "enemy")
+        if fanfare <= 0 or not targets:
             return
-        pick = max(pool, key=lambda c: c.cost)
-        pick.free_this_turn = True
-        state.emit("free_in_hand", card=pick.id)
-    elif k == "retain_hand":
-        # Equilibrium: the base game's RetainHandPower, read and spent at
-        # this turn's hand flush (`refpowers.retain_at_flush`).
-        p.powers[RETAIN_HAND] = p.powers.get(RETAIN_HAND, 0) + 1
-    elif k == "discard_to_hand":
-        # Hologram: the best card of the discard pile into the hand.
-        if not p.discard_pile or len(p.hand) >= C.MAX_HAND_SIZE:
+        enemy = targets[0]
+        if enemy.hp <= fanfare:
+            enemy.hp = 0
+            state.emit("fs_verdict", target=enemy.name, executed=True)
             return
-        pick = effects._best_card(p.discard_pile)
-        remove_instance(p.discard_pile, pick)
-        p.hand.append(pick)
-        state.emit("discard_to_hand", card=pick.id)
-    elif k == "copy_in_hand":
-        # Dual Wield, any type but a Stand-In (design call 2026-10-14: two
-        # Stand-In+ copied each other forever): a copy of the best card in
-        # hand, which Exhausts.
-        pool = [c for c in p.hand
-                if c.id.split("+")[0] != "proto_fs_stand_in"]
-        if not pool or len(p.hand) >= C.MAX_HAND_SIZE:
-            return
-        import copy as _copy
-        pick = effects._best_card(pool)
-        twin = _copy.copy(pick)
-        twin.exhaust = True
-        p.hand.append(twin)
-        state.emit("copy_in_hand", card=pick.id)
+        # The card's own damage op (its terms, her Strength), so this module
+        # keeps no damage door of its own.
+        effects._op_damage(state, {"op": "damage", "amount": fanfare,
+                                   "target": "enemy"}, card)
+        state.emit("fs_verdict", target=enemy.name, executed=False)
+    else:                                            # pragma: no cover
+        raise ValueError(f"unknown furina kind {k!r}")
 
 
-#: Pneuma and Ousia (the sweep, 2026-10-14): "Whenever you play an Attack,
-#: gain 2 Block. Whenever you play a Skill, deal 2 damage to a random
-#: enemy." [3] Its amount is both numbers; copies add.
-PNEUMA_AND_OUSIA = "fs_pneuma_and_ousia"
+#: The sweep's Powers (the C# `FurinaSweepPowers.cs`). Arkhe in Balance's
+#: amount is both numbers; Objection!, Rainfall Overture and Crowd Favorite
+#: count stacks; Trial by Water and Plot Twist sit on the enemy.
+ARKHE_IN_BALANCE = "fs_arkhe_in_balance"
+OBJECTION = "fs_objection"
+TRIAL_BY_WATER = "fs_trial_by_water"
+RAINFALL_OVERTURE = "fs_rainfall_overture"
+CROWD_FAVORITE = "fs_crowd_favorite"
+PLOT_TWIST = "fs_plot_twist"
 
 
-def pneuma_and_ousia(state, card) -> None:
-    """Pneuma and Ousia's trigger after each card play (the C#
-    `PneumaAndOusiaPower.AfterCardPlayed`): unpowered Block on an Attack,
-    an unpowered hit on a random enemy on a Skill."""
-    n = state.player.powers.get(PNEUMA_AND_OUSIA, 0)
+def arkhe_in_balance(state, card) -> None:
+    """Arkhe in Balance's trigger after each card play (the C#
+    `ArkheInBalancePower.AfterCardPlayed`): unpowered Block on an Attack, an
+    unpowered hit on a random enemy on a Skill."""
+    n = state.player.powers.get(ARKHE_IN_BALANCE, 0)
     if n <= 0 or state.over:
         return
     from tier0.engine import refpowers
@@ -753,6 +730,104 @@ def pneuma_and_ousia(state, card) -> None:
         refpowers.gain_block(state, state.player, n)
     elif card.type == "skill" and state.living_enemies:
         T._hit(state, state.rng.choice(state.living_enemies), n, None)
+
+
+def turn_start(state) -> None:
+    """The top of the player's turn (the C# `FurinaSweepHooks`
+    `BeforeSideTurnStart`): Stage Directions' cards cost 0 this turn, and
+    the windows that lasted through the enemies' turn close (Objection!,
+    Plot Twist)."""
+    p = state.player
+    if state.turn == 1:
+        # A new combat: every Ousia / Pneuma starts on Ousia, and nothing
+        # set aside last fight is free (the C# keeps both per card instance,
+        # and every combat's cards are fresh clones).
+        for pile in (p.hand, p.draw_pile, p.discard_pile, p.exhaust_pile):
+            for held in pile:
+                held.flipped = False
+                held.free_next_turn = False
+    for pile in (p.hand, p.draw_pile, p.discard_pile):
+        for held in pile:
+            if held.free_next_turn:
+                held.free_next_turn = False
+                held.free_this_turn = True
+    p.powers.pop(OBJECTION, None)
+    for enemy in state.enemies:
+        enemy.powers.pop(PLOT_TWIST, None)
+
+
+def turn_end(state) -> None:
+    """The end of the player's turn: Trial by Water's mark and Rainfall
+    Overture's next Attack lapse ("until end of turn", "this turn")."""
+    state.player.powers.pop(RAINFALL_OVERTURE, None)
+    state.rainfall_wide_card = None
+    for enemy in state.enemies:
+        enemy.powers.pop(TRIAL_BY_WATER, None)
+
+
+def crowd_favorite(state) -> int:
+    """Crowd Favorite's Energy at the start of her turn: its stacks while
+    her HP is below half (`hp * 2 < max`), else 0."""
+    p = state.player
+    n = p.powers.get(CROWD_FAVORITE, 0)
+    if n <= 0 or p.hp * 2 >= p.max_hp:
+        return 0
+    state.emit("fs_crowd_favorite", energy=n)
+    return n
+
+
+def objection(state, enemy, hp_loss: int) -> None:
+    """Objection!: an enemy's attack hit that cost HP is answered with twice
+    that, unpowered, once per stack (the C# `ObjectionPower`)."""
+    p = state.player
+    n = p.powers.get(OBJECTION, 0)
+    if n <= 0 or hp_loss <= 0 or not enemy.alive:
+        return
+    if n <= 1:
+        p.powers.pop(OBJECTION, None)
+    else:
+        p.powers[OBJECTION] = n - 1
+    from tier0.engine import refpowers
+    refpowers.unpowered_damage(state, enemy, 2 * hp_loss)
+    state.emit("fs_objection", enemy=enemy.name, amount=2 * hp_loss)
+
+
+def trial_by_water(state, enemy, hp_dmg: int) -> None:
+    """Trial by Water: each time the marked enemy takes damage, she gains
+    its Fanfare (the C# `TrialByWaterPower`, the ledger's gain)."""
+    n = enemy.powers.get(TRIAL_BY_WATER, 0)
+    if n <= 0 or hp_dmg <= 0:
+        return
+    T.gain(state, n, "trial_by_water")
+
+
+def rainfall_arm(state, card) -> None:
+    """Rainfall Overture: the next Attack she plays this turn is widened
+    (`effects._op_damage` reads `state.rainfall_wide_card`), one per
+    stack."""
+    p = state.player
+    n = p.powers.get(RAINFALL_OVERTURE, 0)
+    if n <= 0 or card.type != "attack":
+        return
+    if n <= 1:
+        p.powers.pop(RAINFALL_OVERTURE, None)
+    else:
+        p.powers[RAINFALL_OVERTURE] = n - 1
+    state.rainfall_wide_card = card
+
+
+def plot_twist(state, enemy, dmg: float) -> bool:
+    """Plot Twist: the marked enemy's attack hit lands on itself (its own
+    Vulnerable and Block count). True when the hit was redirected."""
+    if not enemy.powers.get(PLOT_TWIST, 0):
+        return False
+    from tier0.engine import powers
+    hit = int(powers.modify_damage_taken(enemy, dmg, enemy))
+    blocked = min(enemy.block, hit)
+    enemy.block -= blocked
+    enemy.hp -= hit - blocked
+    state.emit("fs_plot_twist", enemy=enemy.name, amount=hit - blocked)
+    return True
 
 
 # ---- the pool to 75's reads (count tokens and predicates) -------------
