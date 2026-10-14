@@ -9,10 +9,12 @@ using KleeMod.Elements;
 using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
+using MegaCrit.Sts2.Core.Entities.Enchantments;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization;
+using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Rooms;
 using MegaCrit.Sts2.Core.ValueProps;
@@ -32,6 +34,7 @@ public enum YaeAnnotation
     FoxFire = 4,
     SakuraSeal = 5,
     Royalties = 6,
+    Reprint = 7,
 }
 
 /// <summary>
@@ -112,6 +115,7 @@ public static class YaeAnnotationText
         YaeAnnotation.FoxFire => "Fox Fire",
         YaeAnnotation.SakuraSeal => "Sakura Seal",
         YaeAnnotation.Royalties => "Royalties",
+        YaeAnnotation.Reprint => "Reprint",
         _ => "",
     };
 
@@ -129,6 +133,8 @@ public static class YaeAnnotationText
             "When this card is played, plant a [gold]Sakura[/gold].",
         YaeAnnotation.Royalties =>
             $"When this card is played, gain {YaeLaw.RoyaltiesPayout} Energy.",
+        YaeAnnotation.Reprint =>
+            "The first time this card is played each combat, play it twice.",
         _ => "",
     };
 
@@ -149,12 +155,13 @@ public static class YaeAnnotationText
         _ => "",
     };
 
-    /// <summary>The six, in the sheet's order.</summary>
+    /// <summary>The seven, in the sheet's order.</summary>
     public static readonly YaeAnnotation[] All =
     {
         YaeAnnotation.RedInk, YaeAnnotation.Footnote,
         YaeAnnotation.DeadlineExtension, YaeAnnotation.FoxFire,
         YaeAnnotation.SakuraSeal, YaeAnnotation.Royalties,
+        YaeAnnotation.Reprint,
     };
 
     /// <summary>
@@ -190,7 +197,8 @@ public static class YaeAnnotationText
     public static string PromptClause(YaeAnnotation annotation)
     {
         var rule = Plain(Rule(annotation)).TrimEnd('.');
-        rule = rule.Replace("This card", "It").Replace("this card", "it");
+        rule = rule.Replace("This card", "It").Replace("this card", "it")
+                   .Replace("play it twice", "it is played twice");
         return rule.Length == 0 ? rule
             : char.ToLowerInvariant(rule[0]) + rule.Substring(1);
     }
@@ -298,6 +306,54 @@ public sealed class RoyaltiesAnnotation : YaeAnnotationModel
     {
         if (Card.Owner is not { } owner) return;
         await PlayerCmd.GainEnergy(YaeLaw.RoyaltiesPayout, owner);
+    }
+}
+
+/// <summary>
+/// Reprint ([USER], 2026-10-14, on Proofread: "Let's bump it to 'Play it
+/// twice.' AKA the card gets repeated (I think this is a base game
+/// enchant?)"): the base game's Glam, whole. The first play each combat
+/// adds one to the play count (<see cref="EnchantPlayCount"/>, the Replay
+/// mechanism), then it goes inert for the rest of the combat. The flag is
+/// not saved, so a Published Reprint is fresh on every combat's copy.
+/// Sim twin: <c>yae_shrine.reprint_replays</c>.
+/// </summary>
+public sealed class ReprintAnnotation : YaeAnnotationModel
+{
+    private const string TimesKey = "Times";
+
+    private bool _usedThisCombat;
+
+    public override YaeAnnotation Annotation => YaeAnnotation.Reprint;
+
+    protected override IEnumerable<string> IconCandidates => Borrow("glam");
+
+    protected override IEnumerable<DynamicVar> CanonicalVars =>
+        new[] { new DynamicVar(TimesKey, 1m) };
+
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        new[] { HoverTipFactory.Static(StaticHoverTip.ReplayDynamic, DynamicVars[TimesKey]) };
+
+    private bool UsedThisCombat
+    {
+        get => _usedThisCombat;
+        set
+        {
+            AssertMutable();
+            _usedThisCombat = value;
+        }
+    }
+
+    public override int EnchantPlayCount(int originalPlayCount) =>
+        UsedThisCombat ? originalPlayCount
+                       : originalPlayCount + DynamicVars[TimesKey].IntValue;
+
+    public override Task AfterCardPlayed(PlayerChoiceContext choiceContext, CardPlay cardPlay)
+    {
+        if (UsedThisCombat || cardPlay.Card != Card) return Task.CompletedTask;
+        UsedThisCombat = true;
+        Status = EnchantmentStatus.Disabled;
+        return Task.CompletedTask;
     }
 }
 
@@ -425,6 +481,7 @@ public static class YaeEditing
         YaeAnnotation.FoxFire => (YaeAnnotationModel)ModelDb.Enchantment<FoxFireAnnotation>().ToMutable(),
         YaeAnnotation.SakuraSeal => (YaeAnnotationModel)ModelDb.Enchantment<SakuraSealAnnotation>().ToMutable(),
         YaeAnnotation.Royalties => (YaeAnnotationModel)ModelDb.Enchantment<RoyaltiesAnnotation>().ToMutable(),
+        YaeAnnotation.Reprint => (YaeAnnotationModel)ModelDb.Enchantment<ReprintAnnotation>().ToMutable(),
         _ => null,
     };
 

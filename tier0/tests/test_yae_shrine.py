@@ -66,6 +66,16 @@ def _ym(name):
     return "proto_ym_" + name
 
 
+def _red_ink_edit():
+    """A bare "Edit a card in your hand: Red Ink" (Proofread's face until
+    2026-10-14, when it became Reprint): the Red Ink Edit with nothing else
+    on the card, so a test reads Red Ink alone."""
+    card = loader.get_card(_ym("proofread"))
+    card.effects = [{"op": "yae", "kind": "edit", "annotation": Y.RED_INK,
+                     "amount": 1}]
+    return card
+
+
 def _strikes(st):
     return [r for r in st.log if r["event"] == "yae_sakura_strike"]
 
@@ -413,6 +423,52 @@ def test_kitsune_pounce_strikes_a_weak_enemy(yae):
     assert _strikes(st)[-1]["target"] == "e0"
 
 
+def test_proofread_edits_reprint_and_the_first_play_each_combat_is_twice(yae):
+    """[USER] 2026-10-14: "Let's bump it to 'Play it twice.'" Proofread
+    Edits Reprint; the card's first play this combat resolves twice (Glam's
+    rule), every later play once."""
+    st = _state()
+    strike = loader.get_card("strike")
+    st.player.hand.append(strike)
+    _play(st, _ym("proofread"))
+    assert strike.ym_annotation == Y.REPRINT
+    assert st.player.block == 0
+    _play(st, strike)
+    assert st.enemies[0].hp == 100 - 6 - 6
+    _play(st, strike)
+    assert st.enemies[0].hp == 100 - 6 - 6 - 6
+    assert [r["card"] for r in st.log
+            if r["event"] == "yae_reprint"] == ["strike"]
+
+
+def test_a_fresh_reprint_edit_plays_twice_again(yae):
+    st = _state()
+    strike = loader.get_card("strike")
+    st.player.hand.append(strike)
+    Y.annotate(st, strike, Y.REPRINT)
+    _play(st, strike)
+    Y.annotate(st, strike, Y.REPRINT)            # a new Edit, a new Reprint
+    _play(st, strike)
+    assert st.enemies[0].hp == 100 - 4 * 6
+
+
+def test_a_published_reprint_plays_twice_once_every_combat(yae):
+    c = Y.build_player(published={0: Y.REPRINT}).draw_pile[0]
+    assert c.ym_annotation == Y.REPRINT and c.ym_published
+    for _ in range(2):                           # two fights, the same card
+        st = _state()
+        _play(st, c)
+        _play(st, c)
+        assert st.enemies[0].hp == 100 - 3 * 6
+
+
+def test_reprint_reaches_any_playable_card_never_junk(yae):
+    lure = loader.get_card(_ym("foxfire_lure"))
+    assert Y.affects(lure, Y.REPRINT)
+    from tier0.engine import statuses
+    assert not Y.affects(statuses.make_status("dazed"), Y.REPRINT)
+
+
 def test_royalties_annotation_gains_energy(yae):
     st = _state()
     a = loader.get_card("strike")
@@ -453,14 +509,14 @@ def test_red_ink_rides_the_edited_cards_hits_and_block(yae):
     st = _state()
     strike = loader.get_card("strike")
     st.player.hand.append(strike)
-    _play(st, _ym("proofread"))
+    _play(st, _red_ink_edit())
     assert strike.ym_annotation == Y.RED_INK and Y.is_annotated(strike)
     assert st.player.block == 0                  # Proofread gives no Block (pick 3)
     _play(st, strike)
     assert st.enemies[0].hp == 100 - 6 - 3
     defend = loader.get_card("defend")
     st.player.hand.append(defend)
-    _play(st, _ym("proofread"))
+    _play(st, _red_ink_edit())
     _play(st, defend)
     assert st.player.block == 5 + 3
 
@@ -469,8 +525,8 @@ def test_an_edit_never_targets_itself_a_status_or_an_annotated_card_first(yae):
     st = _state()
     a, b = loader.get_card("strike"), loader.get_card("strike")
     st.player.hand += [a, b]
-    _play(st, _ym("proofread"))
-    _play(st, _ym("proofread"))
+    _play(st, _red_ink_edit())
+    _play(st, _red_ink_edit())
     assert Y.is_annotated(a) and Y.is_annotated(b)
     assert _led(st).edits == 2
 
@@ -479,11 +535,11 @@ def test_an_edit_overwrites_and_deadline_retains(yae):
     st = _state()
     c = loader.get_card("strike")
     st.player.hand.append(c)
-    _play(st, _ym("proofread"))
+    _play(st, _red_ink_edit())
     _play(st, _ym("deadline"))
     assert c.ym_annotation == Y.DEADLINE and c.retain
     assert c.enchant_damage == 0
-    _play(st, _ym("proofread"))
+    _play(st, _red_ink_edit())
     assert c.ym_annotation == Y.RED_INK and not c.retain
 
 
@@ -514,14 +570,14 @@ def test_annotated_readers_count_the_hand_and_the_card_itself(yae):
     st = _state()
     a = loader.get_card("strike")
     st.player.hand.append(a)
-    _play(st, _ym("proofread"))
+    _play(st, _red_ink_edit())
     _play(st, _ym("bestseller"))                 # 5 + 3 x 1
     assert st.enemies[0].hp == 100 - 8
     _play(st, _ym("print_run"))                  # 6 + 2 x 1
     assert st.player.block == 8
     flash = loader.get_card(_ym("kitsune_flash"))
     st.player.hand.append(flash)
-    _play(st, _ym("proofread"))                  # Red Ink on the Flash
+    _play(st, _red_ink_edit())                  # Red Ink on the Flash
     assert flash.ym_annotation == Y.RED_INK
     _play(st, flash)                             # 6 + 3 (annotated) + 3 ink
     assert st.enemies[0].hp == 100 - 8 - 12
@@ -542,7 +598,7 @@ def test_editor_in_chief_strikes_on_an_annotated_play(yae):
     _play(st, _ym("twin_sakura"))
     a = loader.get_card("strike")
     st.player.hand.append(a)
-    _play(st, _ym("proofread"))
+    _play(st, _red_ink_edit())
     _play(st, a)
     hits = _strikes(st)
     assert len(hits) == 1 and hits[0]["reason"] == "editor_in_chief"
@@ -554,7 +610,7 @@ def test_publish_marks_the_best_annotated_card_and_drafts_are_recorded(yae):
     a, b = loader.get_card("strike"), loader.get_card("strike")
     a.ym_slot, b.ym_slot = 10, 11
     st.player.hand += [a, b]
-    _play(st, _ym("proofread"))                  # a: Red Ink
+    _play(st, _red_ink_edit())                  # a: Red Ink
     _play(st, _ym("sakura_seal"))                # b: Sakura Seal
     _play(st, _ym("the_seven_glamours"))
     assert getattr(b, "ym_published", False) and not getattr(

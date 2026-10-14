@@ -970,7 +970,7 @@ YAE_SAKURA_ANNOTATIONS = ("Red Ink", "Deadline Extension", "Fox Fire")
 _SAKURA_TURNS = re.compile(r"Strikes left: (\d+)")
 _LURE_NAME = "Foxfire Lure"
 YAE_ANNOTATIONS = ("Red Ink", "Footnote", "Deadline Extension", "Fox Fire",
-                   "Sakura Seal")
+                   "Sakura Seal", "Royalties", "Reprint")
 
 
 def yae_shrine(player: dict[str, Any],

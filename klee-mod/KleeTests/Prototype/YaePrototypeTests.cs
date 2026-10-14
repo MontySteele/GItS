@@ -315,6 +315,49 @@ public class YaePrototypeTests : IDisposable
         Assert.Contains(calls, c => c.Contains(nameof(YaeShrineLedger.Highest)));
     }
 
+    // ---- Reprint ([USER], 2026-10-14, on Proofread: "Let's bump it to
+    // 'Play it twice.'") ----------------------------------------------------
+
+    [Fact]
+    public void Proofread_edits_reprint_at_its_old_cost()
+    {
+        var proofread = new ProtoYmProofread();
+        Assert.Equal(1, proofread.EnergyCost.Canonical);
+        Assert.Contains(Il.CallSequence(typeof(ProtoYmProofread).GetMethod(
+            "OnPlay", HeadlessGame.All)!), c => c.Contains("YaeCards.Edit"));
+        Assert.Equal(YaeAnnotation.Reprint, YaeEditing.ParseDraft("Reprint"));
+        Assert.Equal("The first time this card is played each combat, play it "
+                     + "twice.", YaeAnnotationText.Rule(YaeAnnotation.Reprint));
+        Assert.Contains(YaeAnnotation.Reprint, YaeAnnotationText.All);
+        // Reborn as Guuji Yae's faces are unchanged.
+        Assert.DoesNotContain(YaeAnnotation.Reprint, YaeModalOptions.Order);
+    }
+
+    [Fact]
+    public void Reprint_is_glam_a_play_count_hook_spent_after_the_first_play()
+    {
+        var t = typeof(ReprintAnnotation);
+        Assert.Equal(t, t.GetMethod("EnchantPlayCount")!.DeclaringType);
+        Assert.Equal(t, t.GetMethod("AfterCardPlayed")!.DeclaringType);
+        // No OnPlay rider: the extra play is the engine's own Replay.
+        Assert.NotEqual(t, t.GetMethod("OnPlay")!.DeclaringType);
+        var after = Il.CallSequence(t.GetMethod("AfterCardPlayed")!);
+        Assert.Contains(after, c => c.Contains("set_UsedThisCombat"));
+        Assert.Contains(after, c => c.Contains("set_Status"));
+        Assert.Contains(Il.CallSequence(t.GetMethod("EnchantPlayCount")!),
+                        c => c.Contains("get_UsedThisCombat"));
+    }
+
+    [Fact]
+    public void Reprint_reaches_any_playable_card()
+    {
+        Assert.True(YaeAnnotationReach.Affects(YaeAnnotation.Reprint, false, false, false));
+        Assert.False(YaeAnnotationReach.Affects(YaeAnnotation.Reprint, true, true, true,
+                                                playable: false));
+        // Red Ink's filter is unchanged by the new argument.
+        Assert.False(YaeAnnotationReach.Affects(YaeAnnotation.RedInk, false, false, false));
+    }
+
     [Fact]
     public void Royalties_gains_energy_after_the_cards_own_effects()
     {
@@ -480,6 +523,7 @@ public class YaePrototypeTests : IDisposable
         Assert.Equal(4, (int)YaeAnnotation.FoxFire);
         Assert.Equal(5, (int)YaeAnnotation.SakuraSeal);
         Assert.Equal(6, (int)YaeAnnotation.Royalties);
+        Assert.Equal(7, (int)YaeAnnotation.Reprint);
     }
 
     [Fact]
@@ -740,7 +784,7 @@ public class YaePrototypeTests : IDisposable
             System.IO.Path.Combine(Round17Tests.Repo(), "klee-mod", "KleeCode", "Cards",
                                    "Prototype", "Generated", t.Name + ".cs"));
         var proofread = Chain(typeof(ProtoYmProofread));
-        Assert.Contains("ForAnnotation(base.ExtraHoverTips, this, YaeAnnotation.RedInk, false)", proofread);
+        Assert.Contains("ForAnnotation(base.ExtraHoverTips, this, YaeAnnotation.Reprint, false)", proofread);
         Assert.DoesNotContain("YaeAnnotation.Footnote, ", proofread);
         var branches = Chain(typeof(ProtoYmInkedBranches));
         Assert.Contains("YaeAnnotation.RedInk, true)", branches);
@@ -763,6 +807,9 @@ public class YaePrototypeTests : IDisposable
         Assert.Equal("Choose a card to Edit: Royalties (when it is played, "
                      + "gain 1 Energy).",
                      YaeEditing.EditPromptTextFor(YaeAnnotation.Royalties));
+        Assert.Equal("Choose a card to Edit: Reprint (the first time it is "
+                     + "played each combat, it is played twice).",
+                     YaeEditing.EditPromptTextFor(YaeAnnotation.Reprint));
         Assert.Equal(YaeEditing.EditPromptText,
                      YaeEditing.EditPromptTextFor(YaeAnnotation.None));
         Assert.Equal("KLEEMOD-YAE_EDIT_SAKURASEAL.selectionScreenPrompt",

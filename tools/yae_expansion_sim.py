@@ -176,8 +176,11 @@ def _translate(state, fx, card=None):
             yield {"op": "damage", "amount": 2 * n_sak * amt,
                    "target": "random_enemy"}
     elif kind == "edit":
+        # Reprint (2026-10-14): a second play of a card in hand, about a
+        # Strike's worth.
         value = {Y.RED_INK: 3, Y.FOOTNOTE: 3, Y.DEADLINE: 1, Y.FOX_FIRE: 4,
-                 Y.SAKURA_SEAL: 6}[fx["annotation"]]
+                 Y.SAKURA_SEAL: 6, Y.ROYALTIES: 4,
+                 Y.REPRINT: 6}.get(fx["annotation"], 3)
         others = len([c for c in state.player.hand if c is not card])
         if others:
             yield {"op": "damage", "amount": value * min(amt, others),

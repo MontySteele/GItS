@@ -56,7 +56,7 @@ def test_every_hand_edit_screen_applies_exactly_one_annotation():
 
 
 @pytest.mark.parametrize("stem, member, on_sakura", [
-    ("ProtoYmProofread", "RedInk", "false"),
+    ("ProtoYmProofread", "Reprint", "false"),
     ("ProtoYmMarginNote", "RedInk", "false"),
     ("ProtoYmFootnote", "Footnote", "false"),
     ("ProtoYmDeadline", "DeadlineExtension", "false"),

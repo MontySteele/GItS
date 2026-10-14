@@ -4557,8 +4557,9 @@
    cost: 1, type: skill, rarity: basic,
    # [USER] 2026-10-13, pick 3: "proofread by itself and having the upgrade
    # make the effect 0 cost, like a Defect starter."
-   description: "[gold]Edit[/gold] a card in your hand: [gold]Red Ink[/gold].",
-   effects: [{op: yae, kind: edit, annotation: red_ink, amount: 1}],
+   # 2026-10-14: Red Ink -> Reprint, "Let's bump it to 'Play it twice.'"
+   description: "[gold]Edit[/gold] a card in your hand: [gold]Reprint[/gold].",
+   effects: [{op: yae, kind: edit, annotation: reprint, amount: 1}],
    upgrade: {cost: -1}}
 
 # --- Common (15) ---

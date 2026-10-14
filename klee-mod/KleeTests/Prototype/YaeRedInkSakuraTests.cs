@@ -141,7 +141,7 @@ public class YaeRedInkSakuraTests : IDisposable
         Assert.False(YaeAnnotationReach.Affects(lure, YaeAnnotation.RedInk));
         foreach (var a in new[] { YaeAnnotation.Footnote, YaeAnnotation.DeadlineExtension,
                                   YaeAnnotation.FoxFire, YaeAnnotation.SakuraSeal,
-                                  YaeAnnotation.Royalties })
+                                  YaeAnnotation.Royalties, YaeAnnotation.Reprint })
         {
             Assert.True(YaeAnnotationReach.Affects(lure, a), a.ToString());
         }

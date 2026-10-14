@@ -8366,7 +8366,9 @@ What the move changed on the faces, and only on the faces:
   `{IfUpgraded:show:2 cards|a card}` swap (the `yae_amount: 1` delta).
 - The "Exhaust." the staging faces printed went: the keyword prints it.
 - `proto_ym_proofread`: pick 3, ruled. "Edit a card in your hand: Red Ink."
-  at 1 [0], no Block.
+  at 1 [0], no Block. 2026-10-14, [USER]: "Let's bump it to 'Play it
+  twice.'" The Annotation is now Reprint (the base game's Glam: the first
+  play each combat is played twice); cost and upgrade unchanged.
 - `proto_ym_reborn_as_guuji_yae`: the row's `annotation: sakura_seal` is the
   sim pilot's choice; in game the player chooses from the five
   (`YaeModalOptions`).

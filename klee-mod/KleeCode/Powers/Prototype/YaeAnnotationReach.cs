@@ -38,8 +38,9 @@ public interface IYaeBlockCard
 ///    play plants (a full-shrine plant that only levels plants nothing).
 /// 2. THE DEAD-EDIT FILTER: an Edit's chooser, Reborn as Guuji Yae and the
 ///    after-elite Publish offer skip a card the Annotation would do nothing
-///    on. Only Red Ink can be dead: it needs a card that deals damage, gives
-///    Block or plants. Every other Annotation does something on any card.
+///    on. Red Ink needs a card that deals damage, gives Block or plants;
+///    Reprint (2026-10-14) needs a card that can be played (no Unplayable).
+///    Every other Annotation does something on any card.
 ///
 /// The card facts are the engine's own, never the text: an Attack, or a
 /// card declaring a damage var, deals damage (the Sharp door, widened so a
@@ -66,8 +67,15 @@ public static class YaeAnnotationReach
     /// <summary>Would <paramref name="annotation"/> do anything on a card
     /// with these facts? PURE.</summary>
     public static bool Affects(YaeAnnotation annotation, bool damage, bool block,
-                               bool plants) =>
-        annotation != YaeAnnotation.RedInk || damage || block || plants;
+                               bool plants, bool playable = true) =>
+        annotation == YaeAnnotation.Reprint
+            ? playable
+            : annotation != YaeAnnotation.RedInk || damage || block || plants;
+
+    /// <summary>Can the card be played at all? An Unplayable card never is,
+    /// so Reprint on it is dead.</summary>
+    public static bool Playable(CardModel card) =>
+        !card.Keywords.Contains(CardKeyword.Unplayable);
 
     /// <summary>Does <paramref name="annotation"/> on a card with these
     /// facts pass to the Sakura it plants? PURE.</summary>
@@ -78,8 +86,10 @@ public static class YaeAnnotationReach
     /// <summary>Would <paramref name="annotation"/> do anything on
     /// <paramref name="card"/>?</summary>
     public static bool Affects(CardModel card, YaeAnnotation annotation) =>
-        annotation != YaeAnnotation.RedInk
-        || Affects(annotation, DealsDamage(card), GivesBlock(card), Plants(card));
+        annotation == YaeAnnotation.Reprint
+            ? Playable(card)
+            : annotation != YaeAnnotation.RedInk
+              || Affects(annotation, DealsDamage(card), GivesBlock(card), Plants(card));
 
     /// <summary>The Annotation the Sakura this card plants inherit: Red Ink
     /// when the card carries it and only plants, else none.</summary>

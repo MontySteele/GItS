@@ -446,6 +446,9 @@ def _finish_play(state: CombatState, card: Card,
     # scope and the current-element step open per resolution, in
     # `effects.resolve_card`). 0 for anyone who is not Varka.
     replays += varka_oath.gmo_replays(state, card)
+    # YAE's Reprint (Glam's rule): the first play each combat is played
+    # twice. 0 for any card not carrying it.
+    replays += yae_shrine.reprint_replays(state, card)
     for replay_index in range(replays):
         snap = refpowers.before_card_played(state, card)
         # Rainfall Overture (the Furina sweep): `BeforeCardPlayed` marks the

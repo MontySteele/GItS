@@ -6606,6 +6606,8 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                      " damage to a random enemy.", " strikes, it also deals "],
         "Sakura Seal": ["When this card is played, plant a "],
         "Royalties": ["When this card is played, gain ", " Energy."],
+        "Reprint": ["The first time this card is played each combat, play "
+                    "it twice."],
         # The design axes (ruled 2026-10-14): the shrine's Rite.
         "Rite": ["Sets what ", " strikes do. Thunder: damage. Warding: "],
     }

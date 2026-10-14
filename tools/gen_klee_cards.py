@@ -937,7 +937,8 @@ ARM_KEYWORDS = (
     ArmKeyword("Sakura", ("Sakura",), "ArmKeywordTips.ForSakura"),
     ArmKeyword("Tenko", ("Tenko",), "ArmKeywordTips.ForTenko"),
     ArmKeyword("Annotation", ("Red Ink", "Footnote", "Deadline Extension",
-                              "Fox Fire", "Sakura Seal", "Royalties"),
+                              "Fox Fire", "Sakura Seal", "Royalties",
+                              "Reprint"),
                "ArmKeywordTips.ForAnnotation"),
     ArmKeyword("Edit", ("Edit", "Edited", "Annotated", "Publish"),
                "ArmKeywordTips.ForEdit"),
@@ -3080,6 +3081,7 @@ YAE_ANNOTATIONS = {
     "fox_fire": "FoxFire",
     "sakura_seal": "SakuraSeal",
     "royalties": "Royalties",
+    "reprint": "Reprint",
 }
 #: The design axes (ruled 2026-10-14): the shrine's four Rites (`rite:`,
 #: the C# `YaeRite` member), the Annotations a Sakura can carry, and the end
@@ -3096,6 +3098,7 @@ YAE_ANNOTATION_NAMES = {
     "FoxFire": "Fox Fire",
     "SakuraSeal": "Sakura Seal",
     "Royalties": "Royalties",
+    "Reprint": "Reprint",
 }
 
 
