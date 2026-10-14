@@ -41,14 +41,6 @@ line leaves this file. Closed picks are in git
   All defaults. Yae is character five (`yae-proposal-2026-10-12.md`, ruled
   2026-10-12); these two stay as the alternatives.
 
-- **Yae Miko, card paper** (`yae-card-paper-2026-10-13.md`, six picks,
-  defaults marked): (1) how the Sakura scale, Levels by planting (a); (2)
-  what the rest-site Publish keeps, the fight's last Annotation (a); (3) the
-  starter's second card, Proofread with 4 Block (a); (4) the Sakura timer
-  under the sim's reading, 3 turns kept (a); (5) her universal Companion
-  card stays for the others and is hidden from her own offers (a); (6) the
-  keyword budget, Sakura and Edit as her two (a). The C# build waits on them.
-
 ## Parked (they come back when their trigger fires)
 
 - **Globe Head** (the Teyvat frame's enemy reskins; returns with the frame or

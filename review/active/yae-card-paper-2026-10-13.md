@@ -104,12 +104,10 @@ five Annotations; Publish is the relic's word). Pick 6.
 Strike x4, Defend x4 (base game), and:
 - **Yakan Evocation** (Skill, 1): Plant a Sakura. Upgrade: cost 0. Her E;
   the shrine's teaching card.
-- **Proofread** (Skill, 1): Gain 4 Block. Edit a card in your hand: Red
-  Ink. Upgrade: 6 Block. The publishing house's teaching card. The Block is
-  pick 3: on the plain version ("Edit a card: Red Ink", nothing else) the
-  starter loses 15.2 HP a normal fight in the sim against Varka's 8 to 10;
-  with 4 Block, 11.9 (sec.7). Varka's starter Knights took the same lift
-  ([USER], 2026-09-29: "Starter cards can be a little better than that").
+- **Proofread** (Skill, 1 [0]): Edit a card in your hand: Red Ink. Ruled
+  2026-10-13 (pick 3): no Block, and the upgrade makes it cost 0, like a
+  Defect starter. The sim's plain-Proofread battery read 15.2 HP lost a fight
+  (sec.7); that gap is read again once the pool is built.
 - **Meditations of a Yako** (starting relic, her utility passive's name):
   "At a rest site you may Publish: a card you Edited this run keeps its last
   Annotation for the rest of the run." In place of Rest or Smith, the way
@@ -310,7 +308,7 @@ Numbers in brackets are the upgrade. "Electro" on an Attack is her cadence.
 
 **Starter**
 - **Yakan Evocation** (Skill, 1 [0]): Plant a Sakura. The shrine, from fight one.
-- **Proofread** (Skill, 1): Gain 4 [6] Block. Edit a card in your hand: Red Ink. The house, from fight one; pick 3.
+- **Proofread** (Skill, 1 [0]): Edit a card in your hand: Red Ink. The house, from fight one; ruled pick 3 (no Block, the upgrade costs 0).
 
 **Common (9)**
 - **Kitsune Flash** (Attack, 1): Deal 6 [8] Electro damage. If this card is Annotated, deal 3 [4] more. The Common that asks to be Edited.
@@ -352,3 +350,20 @@ Held back, named: Lightning Lash (5 Electro to ALL, 1), Forbidden Art:
 Daisesshou (strikes ignore Block, C6), Tengu Taunt (Weak and Vulnerable), a
 Common "Sakura Bloom" (0-cost plant, Exhaust) if pick 4 keeps 3 turns and the
 shrine still starves.
+
+## Ruled 2026-10-13
+
+[USER]: "1) ideas b and c are actually quite interesting (we'll probably want
+multiple Tenko effects, and building scaling into them makes a lot of sense to
+me) but we can leave that for a pool expansion. A is fine. 2) agreed on a 3) I
+lean towards proofread by itself and having the upgrade make the effect 0 cost,
+like a Defect starter. 4, 5, 6) agreed on your picks, a) We might decide that
+we need more that 2 keywords as we go, the way Furina ended up with a billion
+of them, but let's start simple and see what design space these two enable."
+
+- Pick 1 (a): Levels by planting. (b) and (c) (Tenko-built scaling, reaction
+  bonus) return in the pool expansion as Tenko cards (BACKLOG).
+- Pick 2 (a). Pick 4 (a): 3 turns. Pick 5 (a). Pick 6 (a): two tips to start.
+- Pick 3: **Proofread** (Skill, 1 [0]): "Edit a card in your hand: Red Ink."
+  No Block; the upgrade makes it cost 0. The starter battery's HP-loss gap is
+  read again once the pool is built.

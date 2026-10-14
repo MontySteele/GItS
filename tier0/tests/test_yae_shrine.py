@@ -253,14 +253,14 @@ def test_red_ink_rides_the_edited_cards_hits_and_block(yae):
     st.player.hand.append(strike)
     _play(st, _ym("proofread"))
     assert strike.ym_annotation == Y.RED_INK and Y.is_annotated(strike)
-    assert st.player.block == 4                  # Proofread's own Block
+    assert st.player.block == 0                  # Proofread gives no Block (pick 3)
     _play(st, strike)
     assert st.enemies[0].hp == 100 - 6 - 3
     defend = loader.get_card("defend")
     st.player.hand.append(defend)
     _play(st, _ym("proofread"))
     _play(st, defend)
-    assert st.player.block == 4 + 4 + 5 + 3
+    assert st.player.block == 5 + 3
 
 
 def test_an_edit_never_targets_itself_a_status_or_an_annotated_card_first(yae):
@@ -315,8 +315,8 @@ def test_annotated_readers_count_the_hand_and_the_card_itself(yae):
     _play(st, _ym("proofread"))
     _play(st, _ym("bestseller"))                 # 5 + 3 x 1
     assert st.enemies[0].hp == 100 - 8
-    _play(st, _ym("print_run"))                  # 4 + 2 x 1, on Proofread's 4
-    assert st.player.block == 4 + 6
+    _play(st, _ym("print_run"))                  # 4 + 2 x 1
+    assert st.player.block == 6
     flash = loader.get_card(_ym("kitsune_flash"))
     st.player.hand.append(flash)
     _play(st, _ym("proofread"))                  # Red Ink on the Flash

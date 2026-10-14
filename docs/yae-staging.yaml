@@ -21,10 +21,11 @@
 - {id: proto_ym_proofread, name: "Proofread", character: yae,
    authored_by: [claude],
    cost: 1, type: skill, rarity: basic,
-   description: "Gain 4 [gold]Block[/gold]. [gold]Edit[/gold] a card in your hand: [gold]Red Ink[/gold].",
-   effects: [{op: block, amount: 4},
-             {op: yae, kind: edit, annotation: red_ink, amount: 1}],
-   upgrade: {block: 2}}
+   # [USER] 2026-10-13, pick 3: "proofread by itself and having the upgrade
+   # make the effect 0 cost, like a Defect starter."
+   description: "[gold]Edit[/gold] a card in your hand: [gold]Red Ink[/gold].",
+   effects: [{op: yae, kind: edit, annotation: red_ink, amount: 1}],
+   upgrade: {cost: -1}}
 
 # --- Common (9) ---
 
