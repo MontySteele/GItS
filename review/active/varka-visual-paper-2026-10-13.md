@@ -239,3 +239,7 @@ The face, the smirk and the crossed arms are unchanged. What changed:
 - **Tests.** `test_his_crossed_arms_clear_each_other_and_the_blades_hide_neither_face_nor_arms` now also requires each hilt to sit off his outline (at most 25 px) on both frames, both crossguards to sit whole inside the select frame, and his chin to sit in its upper third. `test_stance_b_crosses_his_arms_with_both_blades_planted_beside_him` requires the pommel tops at 1.35 to 1.65 units up and each blade at least 0.45 units to one side.
 
 Sheet: `scratchpad/varka-art/sheets/e_shop_rest_select_roster.png`.
+
+## Ruled: ship
+
+Varka's swords (beside his legs, crossguards in the select frame) approved. [USER], 2026-10-14: "On Varka and Furina - ship it! The new renders look great!"
