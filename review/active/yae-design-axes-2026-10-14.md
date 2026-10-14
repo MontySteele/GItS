@@ -69,7 +69,7 @@ it.
 |---|---|---|---|---|
 | **Ironclad** | Free: big Attacks, Strength | Earned: highest printed Block (106), Exhaust engines | Strength, Exhaust payoffs | Weak: pays HP for Energy |
 | **Silent** | Earned: Shivs (many small hits) or Poison (ticks, ignores Block) | Weak printed (61), so Dexterity and Weak carry it | Poison stacks, Accuracy | **Free:** draw and discard, Sly |
-| **Defect** | Earned: Lightning orbs, Claw | **Free: Frost orbs Block every turn** | Focus | Earned: Energy from Plasma and cost cuts |
+| **Defect** | **Free:** Lightning from the starter (Zap) | Earned: Frost orbs, drafted | Focus, Dark | Earned: Plasma and cost cuts |
 | **Regent** | Earned: Sovereign Blade grows into one big hit | Earned (95) | Forge, Stars | Free: Stars, a second resource |
 | **Necrobinder** | Earned: Osty attacks, Doom executes | Osty takes hits | Doom, Osty's growth | Weak: draw is the fewest of the five (4) |
 | **Klee** | **Free and fast:** Bombs grow on their own | Weak by ruling ("fast and fragile") | Bomb growth, Sparks | Sparks spend as a currency |
@@ -79,90 +79,136 @@ it.
 | **Yae, today** | Free but tiny: about 4 a turn from the shrine | Weak | Levels (capped), Publish | Weak: no Energy, little draw |
 
 What the table says:
-- **Every other kit has at least one strong free axis.** Klee and Varka are
-  free on damage, Kokomi and Defect on Block, Silent and Furina on velocity.
+- **Every other kit has at least one strong free axis.** Klee, Varka and
+  Defect are free on damage, Kokomi on Block, Silent and Furina on
+  velocity. Defect's other solves are drafted orbs, so that is the shape
+  Yae should copy without copying the orbs.
 - **Yae is free on nothing that matters in act 1.** Her free damage is too
   small to end fights, so she pays for it twice: in HP while fights drag, and
   in turns spent planting instead of blocking. That is the six act-1 deaths.
 - **She has two scaling axes no one else has.** A board that levels itself
   as she tends it, and a deck that improves across the run.
 
-## 3. Proposed profile
+## 3. What the Sakura do (revised)
 
-| | Role | Feel |
-|---|---|---|
-| **Scaling (strength)** | **Two axes, both free to start:** the shrine within a fight, Publishing across the run | She plays worse than everyone at floor 1 and better at floor 40 |
-| **Damage (strength, late)** | Passive and spread across enemies, then one Tenko spike | You set up the board and ration its cash-ins; you seldom aim a big Attack |
-| **Velocity (her own kind)** | **Hand quality, not hand size:** Retain, 0-cost Edits, Footnote, and Energy from Sakura that wither | An editor with a short deadline, not a flood of cards |
-| **Block (the challenge)** | A floor at a Defend's rate, then Weak as mitigation; real Block from the shrine only late (Sakura Channeling) | Survive the setup turns by blunting attacks, not by out-blocking them |
+[USER], on the first draft of this section: "Defect has 5 types of orbs
+(Lighting - the free starter that does single target damage; Frost for
+defense; Glass for AoE; Dark for scaling; Plasma for energy). Currently, the
+Sakura is only offering the equivalent of Lightning, which I actually
+consider to be a problem ... Defect also start with just a damage source
+(lightning) and has to draft the rest ... we're going for 'Defect-like, but
+not literally defect' with this one; the Sakura need to also offer solves for
+other issues in some way even if they look like a simple damage source on the
+surface."
 
-How she reads differently from the rest:
-- **Against Defect** (the itch she scratches): Defect's board is free Block
-  from turn one; hers is free damage that grows. Her defence is Weak and
-  timing, not Frost.
-- **Against Klee:** Klee ends fights early and is fragile. Yae ends them
-  late and is fragile early. The two are opposite curves.
-- **Against Kokomi:** Kokomi's defence is free and her damage is the run's
-  problem. Yae is the reverse.
-- **Against Furina:** both have a weak Block pool. Furina buys tempo with HP;
-  Yae buys it with time (the shrine's Levels and Retain).
+The first draft made Block her permanent weakness. That was the wrong
+lesson, and section 2's Defect row was wrong too: Defect starts with only
+Lightning and drafts his Frost. The row now reads "Earned".
 
-The one new mechanic here is **Energy from withering.** Today a Sakura that
-withers is a pure loss, which is why Tenko's refresh is the only play.
-Paying a little when a Sakura withers creates a real choice each turn:
-refresh the elders for damage, or let them lapse for Energy and replant.
-Tenko keeps the board; withering spends it.
+### The proposal: Rites
+
+**The shrine does one job at a time, and Yae chooses which.**
+- The shrine has a **Rite**. Every combat starts in **Thunder**.
+- A card that says "Rite: Warding" switches it. A Rite holds until another
+  replaces it.
+- Every strike, at the end of turn or from a Tenko, works under the current
+  Rite.
+- A Sakura's Level sets the size of its strike in every Rite.
+
+| Rite | Each strike | Solves | Defect's nearest |
+|---|---|---|---|
+| **Thunder** (start) | 2 + Level Electro damage to a random enemy | damage | Lightning |
+| **Warding** | Yae gains 2 + Level Block | Block | Frost |
+| **Wildfire** | Level Electro damage to ALL enemies | groups | Glass |
+| **Offering** | Next turn, draw 1 more card | velocity | Plasma |
+
+**Scaling** is the Levels and Publishing, and it works under every Rite.
+Levels play the role Dark plays for Defect.
+
+**Why this is not orb types.**
+- Defect owns several orbs at once, each fixed when it is channelled. Yae's
+  board is one object that does one thing at a time.
+- Her question each turn is "what does my shrine do this turn?"
+- Tenko becomes "do it now": under Warding it is a Block spike, under
+  Wildfire a sweep.
+- Switching rides on ordinary cards (a Block card that says "Rite:
+  Warding"), so it costs a card's slot but not an extra card.
+- One Rare bends the rule (Sakura Channeling, below) and lets the shrine do
+  two jobs.
+
+**How the three halves feed the shrine.**
+- **Tenko** fires it now.
+- **Kitsune Mischief** cards carry the cheap Rite switches and aim it
+  (Foxfire Lure).
+- **Publishing** plants through Sakura Seal. Pick 1 (b) is the other
+  answer, where an Annotation written on a Sakura changes what that one
+  Sakura does.
+
+### Profile
+
+| Axis | Free (starter) | Drafted | Feel |
+|---|---|---|---|
+| Damage | Thunder, small early | Levels, Tenko, Attacks | a board that grows |
+| Block | Defend | **Warding**, card floors | the shrine guards her, but then it is not killing |
+| Groups | none | **Wildfire**, Tenko Kenshin | sweep a hallway |
+| Velocity | none | **Offering**, Footnote, Retain, Energy when a Sakura withers | a slower hand that is all good cards |
+| Scaling | Levels | Grove, Mooncall, Mikage Thunder, Publish | worse than everyone on floor 1, better on floor 40 |
+
+Her weakness is that the shrine does one job a turn, and switching costs
+tempo. A turn that needs both Block and damage asks the hand to cover one of
+them.
 
 ## 4. Realigning the 30 (numbers pass included)
 
-The starter is not touched: Yakan Evocation and Proofread.
+The starter is not touched: Yakan Evocation and Proofread. The game always
+opens in Thunder, so there is no free setup.
+
+**Cards that carry a Rite:**
+- **Shrine Maiden's Guard** (C): "Gain 6 [9] Block. Rite: Warding." The
+  per-Sakura Block it printed is now the Rite's job.
+- **Thunder Rite** (C): "Deal 8 [11] Electro damage. Rite: Thunder.
+  Tenko." This is the way back to damage.
+- **Kitsune Guile** (U): "Apply 2 [3] Weak to ALL enemies. Rite: Wildfire."
+- **Manuscript Pile** (U): "Draw 2 [3] cards. Rite: Offering." Its Retain
+  Edit goes, since Deadline carries that.
+- **Sakura Channeling** (R, 2 [1]), the bend: "Your Sakura also strike as
+  Thunder, whatever the Rite."
 
 **Block floor.** Each card gets a Defend-rate base, and its condition
 becomes the bonus.
-- **Shrine Maiden's Guard:** 4 + 2 per Sakura becomes **6 [8] + 2 [3] per
-  Sakura**.
-- **Print Run:** 4 + 2 per Annotated card becomes **6 [8] + 2 [3] per
-  Annotated card**.
-- **Deadline:** 4 [6] becomes **5 [8]**.
-- **Rooted Shrine:** "Each Sakura gains a Level. Gain 3 Block." becomes
-  **"Gain 6 [9] Block. Each Sakura gains a Level."**
+- **Print Run:** 6 [8] + 2 [3] per Annotated card (was 4 + 2).
+- **Deadline:** 5 [8] (was 4 [6]).
+- **Rooted Shrine:** "Gain 6 [9] Block. Each Sakura gains a Level." (was 3
+  Block)
 
-**Planting into a full shrine says what it does.** Yakan Evocation and Twin
-Sakura read "Plant a Sakura (with 3 standing, each gains a Level instead)."
-**Twin Sakura** goes from cost 2 [1] to **1, and its upgrade adds "Gain 4
-Block."** One plant a card at 2 Energy is why the shrine starved.
+**The shrine:**
+- Yakan Evocation and Twin Sakura read "Plant a Sakura (with 3 standing,
+  each gains a Level instead)."
+- **Twin Sakura** goes from 2 [1] to **1**, and its upgrade adds "Gain 4
+  Block."
+- **Sakura Grove:** each strike is 2 [3] bigger, in Thunder, Warding and
+  Wildfire (was +1 [2]).
+- **Edict of Cleansing:** "Your Sakura strikes deal 3 [5] more to an enemy
+  that is Weak or has a Pyro, Hydro or Cryo aura." It works solo now.
+- **Foxfire Lure:** 0 Energy (was 1).
 
-**Damage numbers:**
-- **Sly Strike:** 5 [7] with 1 [2] Weak becomes **7 [9]**, Weak unchanged.
-- **Thunderbolt Tithe:** "4 [6] per Sakura" becomes **"3 [4], plus 4 [6]
-  per Sakura"**, so it is not blank on an empty shrine.
-- **Sakura Grove:** +1 [2] a strike becomes **+2 [3]**. At the shrine's
-  average of 1.7 Sakura, +1 was worth under 2 a turn.
+**Damage:**
+- **Sly Strike:** 7 [9] (was 5 [7]).
+- **Thunderbolt Tithe:** 3 [4] plus 4 [6] per Sakura (was 4 [6] per
+  Sakura).
 
-**Weak joins the shrine.** Edict of Cleansing is blank solo. It becomes
-**"Your Sakura strikes deal 3 [5] more to an enemy that is Weak or has a
-Pyro, Hydro or Cryo aura."** That is one card bridging Mischief to the
-shrine, and it keeps the reaction nod for co-op.
-
-**Two smaller changes:**
-- **Foxfire Lure** goes from 1 to **0** Energy. Aiming the shrine is a rider,
-  and a 1-Energy rider is never played.
-- **Sakura Channeling:** 2 [3] Block a strike becomes **3 [4]**, about 9 a
-  turn on a full shrine for 2 Energy. This is her late defence.
-
-Unchanged: Kitsune Flash, Thunder Rite, Shrine Offering, Fox Fire Draft, Fox
-Trick, Kitsune Rite, Bestseller, Footnote, Sakura Seal, Serialization,
-Manuscript Pile, Kitsune Guile, and every Rare not named above.
+Unchanged: Kitsune Flash, Shrine Offering, Fox Fire Draft, Fox Trick, Kitsune
+Rite, Bestseller, Footnote, Sakura Seal, Serialization, and every Rare not
+named above.
 
 ## 5. Batch two, Yae's own
 
 These eight start her pool's road to 78. They fill the gaps from section 1:
-Attacks, Energy, Common plant sources, and Tenko cards that scale (you asked
-for that on 2026-10-13: "we'll probably want multiple Tenko effects, and
-building scaling into them makes a lot of sense"). Each was checked against base cards. Three first drafts were dropped as
-near-copies: an AoE plus Weak Attack (Ironclad's Thunderclap), plant plus
-draw (Defect's Coolheaded), and "every Sakura strikes then withers, gain
-Energy" (Defect's Fission). Names are first drafts.
+Attacks, Energy, Common plant sources, and Tenko cards that scale ([USER],
+2026-10-13: "we'll probably want multiple Tenko effects, and building scaling
+into them makes a lot of sense"). Each was checked against base cards. Three
+earlier drafts were dropped as near-copies of Ironclad's Thunderclap and
+Defect's Coolheaded and Fission.
 
 | Card | Rarity, type, cost | Text |
 |---|---|---|
@@ -170,44 +216,36 @@ Energy" (Defect's Fission). Names are first drafts.
 | Grafted Branch | C, Skill 1 | Plant a Sakura. It starts at Level 2 [3]. |
 | Margin Note | C, Attack 1 | Deal 5 [8] Electro damage. Edit a card in your hand: Red Ink. |
 | Kitsune Pounce | C, Attack 1 | Deal 8 [11] Electro damage. If the enemy is Weak, a Sakura strikes it. |
+| Foxfire Sweep | C, Attack 1 | Deal 4 [6] Electro damage to ALL enemies. Rite: Wildfire. |
 | Fallen Petals | U, Power 1 | Whenever a Sakura withers, gain 1 Energy. [Also draw 1 card.] |
-| Last Petal | U, Skill 1 [0] | Your oldest Sakura strikes 3 times, then withers. |
 | Mikage Thunder | U, Attack 2 | Tenko. For the rest of this combat, your Sakura strike for 1 more. |
 | Royalties | R, Skill 1 [0] | Edit a card in your hand: Royalties (when played, gain 1 Energy). Exhaust. |
 
-How these fit together:
-- **Fallen Petals and Last Petal** are the withering half. Last Petal is
-  a single-target spike from the oldest Sakura, and Petals pays for the
-  Sakura it spends. Together they are the counterweight to Tenko keeping
-  the board.
-- **Kitsune Pounce** links Weak to the shrine, and **Grafted Branch** gives
-  Common a plant that starts high.
-- **Mikage Thunder** is the scaling Tenko: each play leaves the shrine one
-  stronger, and it repeats.
-- **Royalties** is a sixth Annotation, Rare. Published, it makes one card
-  refund its Energy for the rest of the run: the run-long scaling axis
-  reaching velocity.
-
-That brings the pool to 38 (13 / 17 / 8). The rest of the road to 78 comes
-after these are played.
+The pool would be 38 (14 / 16 / 8). Rites are a rule change, so you play her
+before the next batch.
 
 ## Picks
 
-1. **Her profile (section 3): strong on scaling (shrine and Publish), damage
-   late, velocity as hand quality, Block as the challenge.**
-   - **(a) Default:** as written.
-   - (b) Defect-like: make the shrine her free defence too (Sakura Channeling
-     at Common) and her damage the challenge.
-   - (c) A profile you name.
-2. **Energy from withering** (Fallen Petals, with Last Petal), a second
-   cash-in beside Tenko.
+1. **How the Sakura solve more than damage.**
+   - **(a) Default: Rites.** The whole shrine does one job at a time, and
+     cards switch it (section 3).
+   - (b) Per Sakura, through Publishing: Edit can target a Sakura, and each
+     Annotation has a shrine reading (Red Ink: bigger; Fox Fire: hits ALL;
+     Deadline Extension: does not wither). A defence reading would need a
+     new Annotation. This is a third number on every Sakura.
+   - (c) Tenko only: each Tenko card fires the shrine once as Block, a
+     sweep, or draw. The shrine itself stays Thunder.
+2. **The Rite list.**
+   - **(a) Default:** four Rites: Thunder, Warding, Wildfire and Offering.
+   - (b) Add a fifth, Mischief: each strike applies 1 Weak and deals Level
+     damage.
+3. **Energy when a Sakura withers** (Fallen Petals).
    - **(a) Default:** yes, in batch two.
-   - (b) No; Tenko stays the only cash-in.
-3. **Batch two (section 5).**
-   - **(a) Default:** all eight as written.
+   - (b) No.
+4. **Batch two (section 5).**
+   - **(a) Default:** all eight.
    - (b) The ones you name.
-4. **Order.** The section 4 changes are numbers and text at Prototype, so
-   Claude builds them without a pick once today's lanes are down.
-   - **(a) Default:** build section 4 now, batch two after your picks, then
-     two Yae seats on the next free night.
-   - (b) Hold everything for your own first Yae run.
+5. **Order.**
+   - **(a) Default:** Claude builds sections 4 and 5 after your picks, while
+     no lanes are running, then you play her.
+   - (b) Two seats first, then you play.
