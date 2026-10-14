@@ -80,4 +80,12 @@ public static class YaeLaw
 
     /// <summary>Fox Fire: this much Electro to a random enemy.</summary>
     public const int FoxFireDamage = 4;
+
+    /// <summary>Offering: each strike, this many more cards at the start of
+    /// her next turn (design axes, ruled 2026-10-14).</summary>
+    public const int OfferingPerStrike = 1;
+
+    /// <summary>Royalties: this much Energy when the card is played.
+    /// </summary>
+    public const int RoyaltiesPayout = 1;
 }

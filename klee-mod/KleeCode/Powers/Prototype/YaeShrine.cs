@@ -9,12 +9,38 @@ using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Powers;
 
-/// <summary>One Sesshou Sakura: its Level, the strikes it has left, and its
-/// place in planting order (the ledger's clock).</summary>
+/// <summary>
+/// THE SHRINE'S RITE (<c>review/active/yae-design-axes-2026-10-14.md</c>,
+/// ruled 2026-10-14): what every Sakura strike does. Thunder at every combat
+/// start; a "Rite: X" card switches it and it holds until replaced. Sim
+/// twin: <c>yae_shrine.RITES</c>.
+/// </summary>
+public enum YaeRite
+{
+    Thunder = 0,
+    Warding = 1,
+    Wildfire = 2,
+    Offering = 3,
+}
+
+/// <summary>The end an "Edit your newest / oldest Sakura" counts from, or
+/// "Edit every Sakura".</summary>
+public enum YaeSakuraEnd
+{
+    Newest = 0,
+    Oldest = 1,
+    Every = 2,
+}
+
+/// <summary>One Sesshou Sakura: its Level, the strikes it has left, its
+/// place in planting order (the ledger's clock), and the one Annotation it
+/// may carry (Red Ink, Fox Fire or Deadline Extension; ruled
+/// 2026-10-14).</summary>
 public sealed class YaeSakura
 {
     public int Level { get; internal set; }
@@ -22,6 +48,8 @@ public sealed class YaeSakura
     public int TurnsLeft { get; internal set; }
 
     public int Seq { get; internal set; }
+
+    public YaeAnnotation Annotation { get; internal set; }
 }
 
 /// <summary>
@@ -92,6 +120,18 @@ public sealed class YaeShrineLedger
     /// <summary>Edits made this combat.</summary>
     public int Edits { get; private set; }
 
+    /// <summary>The shrine's Rite; every combat opens in Thunder.</summary>
+    public YaeRite Rite { get; set; } = YaeRite.Thunder;
+
+    /// <summary>Offering: cards she draws at the start of her next turn.
+    /// </summary>
+    public int PendingDraw { get; internal set; }
+
+    /// <summary>Withers since her last turn start (Fallen Petals pays them
+    /// then: a Sakura withers at her turn's end, when Energy is lost).
+    /// </summary>
+    public int PendingWithers { get; internal set; }
+
     /// <summary>
     /// PLANT ONE (pick 1 (a), ruled): every standing Sakura gains a Level (to
     /// <paramref name="levelCap"/>), then a new one is added at
@@ -99,8 +139,14 @@ public sealed class YaeShrineLedger
     /// strikes left -- unless three stand, in which case the three are
     /// levelled and none is added. Returns whether one was added.
     /// </summary>
-    public bool Plant(int plantLevel, int levelCap)
+    public bool Plant(int plantLevel, int levelCap) => Plant(plantLevel, levelCap, null);
+
+    /// <summary>Plant one, the new Sakura starting at <paramref name="startLevel"/>
+    /// where a card says so (Grafted Branch): never below the plant Level,
+    /// capped.</summary>
+    public bool Plant(int plantLevel, int levelCap, int? startLevel)
     {
+        if (startLevel is { } at) plantLevel = Math.Min(levelCap, Math.Max(plantLevel, at));
         foreach (var s in _sakura)
         {
             s.Level = Math.Min(levelCap, s.Level + 1);
@@ -136,12 +182,54 @@ public sealed class YaeShrineLedger
     }
 
     /// <summary>After the end-of-turn strikes every timer ticks; a Sakura at
-    /// 0 withers. Returns how many withered.</summary>
+    /// 0 withers. A Deadline Extension Sakura's timer does not tick, so it
+    /// never withers. Returns how many withered, and banks them for Fallen
+    /// Petals.</summary>
     public int TickAndWither()
     {
-        foreach (var s in _sakura) s.TurnsLeft--;
-        return _sakura.RemoveAll(s => s.TurnsLeft <= 0);
+        foreach (var s in _sakura)
+        {
+            if (s.Annotation != YaeAnnotation.DeadlineExtension) s.TurnsLeft--;
+        }
+        var withered = _sakura.RemoveAll(s => s.TurnsLeft <= 0);
+        PendingWithers += withered;
+        return withered;
     }
+
+    /// <summary>"Edit your newest / oldest Sakura" (<paramref name="n"/>
+    /// from that end) or "Edit every Sakura" (<see cref="YaeSakuraEnd.Every"/>):
+    /// the Annotation replaces any each carried. Returns how many were
+    /// Edited.</summary>
+    public int EditSakura(YaeSakuraEnd end, int n, YaeAnnotation annotation)
+    {
+        if (!YaeShrineLedger.HasSakuraReading(annotation)) return 0;
+        var ordered = end == YaeSakuraEnd.Oldest
+            ? _sakura.ToList()
+            : Enumerable.Reverse(_sakura).ToList();
+        var edited = 0;
+        if (end == YaeSakuraEnd.Every) n = ordered.Count;
+        foreach (var s in ordered.Take(Math.Max(0, n)))
+        {
+            s.Annotation = annotation;
+            edited++;
+        }
+        return edited;
+    }
+
+    /// <summary>Offering's cards and the withers, taken at her turn start.
+    /// </summary>
+    internal (int Draw, int Withers) TakePending()
+    {
+        var owed = (PendingDraw, PendingWithers);
+        PendingDraw = 0;
+        PendingWithers = 0;
+        return owed;
+    }
+
+    /// <summary>The three Annotations a Sakura can carry.</summary>
+    public static bool HasSakuraReading(YaeAnnotation annotation) =>
+        annotation is YaeAnnotation.RedInk or YaeAnnotation.FoxFire
+            or YaeAnnotation.DeadlineExtension;
 
     /// <summary>Editor-in-Chief's Sakura: the highest Level, the oldest on a
     /// tie. Null with none standing.</summary>
@@ -153,13 +241,36 @@ public sealed class YaeShrineLedger
     internal void NoteEdit() => Edits++;
 
     /// <summary>
-    /// One strike's printed amount (sec.2): 2 + its Level, Sakura Grove's
-    /// bonus, and Edict of Cleansing's on an enemy whose aura the strike will
-    /// react with. The enemy's Vulnerable and Block apply later, in the hit.
-    /// PURE.
+    /// A Thunder strike's printed amount (sec.2): 2 + its Level, Sakura
+    /// Grove's bonus, and Edict of Cleansing's on an enemy it applies to.
+    /// The enemy's Vulnerable and Block apply later, in the hit. PURE.
     /// </summary>
     public static int StrikeDamage(int level, int grove, bool reacts, int edict) =>
-        YaeLaw.SakuraBase + level + grove + (reacts ? edict : 0);
+        StrikeSize(YaeRite.Thunder, level, grove, 0, YaeAnnotation.None)
+        + (reacts ? edict : 0);
+
+    /// <summary>
+    /// ONE STRIKE'S SIZE UNDER A RITE (ruled 2026-10-14), before Edict:
+    /// Thunder and Warding 2 + Level, Wildfire Level, Offering 1 card. Sakura
+    /// Grove and Mikage Thunder add to all but Offering; a Red Ink Sakura's
+    /// strike is 3 bigger in whatever Rite. PURE.
+    /// </summary>
+    public static int StrikeSize(YaeRite rite, int level, int grove, int mikage,
+                                 YaeAnnotation annotation)
+    {
+        var size = rite switch
+        {
+            YaeRite.Offering => YaeLaw.OfferingPerStrike,
+            YaeRite.Wildfire => level + grove + mikage,
+            _ => YaeLaw.SakuraBase + level + grove + mikage,
+        };
+        if (annotation == YaeAnnotation.RedInk) size += YaeLaw.RedInkAmount;
+        return size;
+    }
+
+    /// <summary>Edict of Cleansing's read: the enemy is Weak, or wears an
+    /// aura an Electro strike reacts with. PURE.</summary>
+    public static bool EdictApplies(bool weak, bool reacts) => weak || reacts;
 }
 
 /// <summary>
@@ -196,24 +307,40 @@ public static class YaeShrine
     }
 
     /// <summary>Plant <paramref name="n"/> Sakura, one at a time (each levels
-    /// the ones standing).</summary>
+    /// the ones standing). <paramref name="startLevel"/>: Grafted Branch.
+    /// </summary>
     public static async Task Plant(PlayerChoiceContext choiceContext,
-                                   Creature? yae, int n)
+                                   Creature? yae, int n, int? startLevel = null)
     {
         if (yae == null || !Live(yae) || n <= 0) return;
         var ledger = YaeShrineLedger.For(yae);
         for (var i = 0; i < n; i++)
         {
-            ledger.Plant(PlantLevel(yae), LevelCap(yae));
+            ledger.Plant(PlantLevel(yae), LevelCap(yae), startLevel);
         }
         await SakuraBadge.Sync(choiceContext, yae);
     }
 
-    /// <summary>The enemy a strike lands on: this turn's Lure while it
-    /// lives, else one random living enemy off the combat target stream.
+    /// <summary>Is this enemy Weak (Edict's and Kitsune Pounce's read)?
     /// </summary>
-    private static Creature? Aim(Creature yae)
+    public static bool IsWeak(Creature? target) =>
+        target != null && target.Powers.OfType<WeakPower>().Any(p => p.Amount > 0);
+
+    /// <summary>The size of <paramref name="sakura"/>'s strike under
+    /// <paramref name="rite"/> (the shrine's, by default), before Edict.
+    /// </summary>
+    public static int Size(Creature yae, YaeSakura sakura, YaeRite? rite = null) =>
+        YaeShrineLedger.StrikeSize(
+            rite ?? YaeShrineLedger.For(yae).Rite, sakura.Level,
+            yae.GetPowerAmount<SakuraGrovePower>(),
+            yae.GetPowerAmount<MikageThunderPower>(), sakura.Annotation);
+
+    /// <summary>The enemy a single-target strike lands on: the card's aim
+    /// (Kitsune Pounce), else this turn's Lure while it lives, else one
+    /// random living enemy off the combat target stream.</summary>
+    private static Creature? Aim(Creature yae, Creature? aim = null)
     {
+        if (aim is { IsAlive: true }) return aim;
         var ledger = YaeShrineLedger.For(yae);
         if (ledger.Lure is { IsAlive: true } lured) return lured;
         var living = yae.CombatState?.HittableEnemies.Where(e => e.IsAlive).ToList();
@@ -222,24 +349,63 @@ public static class YaeShrine
         return rng == null ? living[0] : rng.NextItem(living);
     }
 
-    /// <summary>
-    /// One Sakura's strike: 2 + its Level Electro on one enemy, a PET'S HIT
-    /// (her Strength and Weak do not apply; the enemy's Vulnerable and Block
-    /// do), reacting with whatever aura it lands on, credited to Yae. Sakura
-    /// Channeling pays after.
+    /// <summary>One damage strike's hit: Electro, a PET'S HIT (her Strength
+    /// and Weak do not apply; the enemy's Vulnerable and Block do), reacting
+    /// with whatever aura it lands on, credited to Yae; Edict on top.
     /// </summary>
-    public static async Task Strike(PlayerChoiceContext choiceContext,
-                                    Creature yae, YaeSakura sakura)
+    private static async Task Hit(PlayerChoiceContext choiceContext, Creature yae,
+                                  Creature target, int size)
     {
-        var target = Aim(yae);
-        if (target == null) return;
-        var damage = YaeShrineLedger.StrikeDamage(
-            sakura.Level, yae.GetPowerAmount<SakuraGrovePower>(),
-            Reacts(target), yae.GetPowerAmount<EdictOfCleansingPower>());
-        YaeShrineLedger.For(yae).NoteStrike();
+        var damage = size + (YaeShrineLedger.EdictApplies(IsWeak(target), Reacts(target))
+            ? yae.GetPowerAmount<EdictOfCleansingPower>() : 0);
+        if (damage <= 0) return;
         await ElementalHit.DealWithoutDealerMods(
             choiceContext, target, Element.Electro, damage, yae);
-        await SakuraChannelingPower.Pay(yae);
+    }
+
+    /// <summary>
+    /// ONE SAKURA'S STRIKE, UNDER THE SHRINE'S RITE (ruled 2026-10-14):
+    /// Thunder hits one enemy (the aim, the Lure, else random); Warding gives
+    /// her Block (unpowered); Wildfire hits ALL; Offering banks a card for
+    /// her next turn. Then Sakura Channeling's Thunder strike (in any other
+    /// Rite) and the Sakura's own Fox Fire.
+    /// </summary>
+    public static async Task Strike(PlayerChoiceContext choiceContext,
+                                    Creature yae, YaeSakura sakura,
+                                    Creature? aim = null)
+    {
+        if (yae.CombatState?.HittableEnemies.Any(e => e.IsAlive) != true) return;
+        var ledger = YaeShrineLedger.For(yae);
+        var rite = ledger.Rite;
+        var size = Size(yae, sakura, rite);
+        ledger.NoteStrike();
+        switch (rite)
+        {
+            case YaeRite.Thunder:
+                if (Aim(yae, aim) is { } target) await Hit(choiceContext, yae, target, size);
+                break;
+            case YaeRite.Warding:
+                if (size > 0) await CreatureCmd.GainBlock(yae, size, ValueProp.Unpowered, null);
+                break;
+            case YaeRite.Wildfire:
+                foreach (var enemy in yae.CombatState!.HittableEnemies.Where(e => e.IsAlive).ToList())
+                {
+                    await Hit(choiceContext, yae, enemy, size);
+                }
+                break;
+            case YaeRite.Offering:
+                ledger.PendingDraw += size;
+                break;
+        }
+        if (rite != YaeRite.Thunder && yae.HasPower<SakuraChannelingPower>()
+            && Aim(yae, aim) is { } thunderTarget)
+        {
+            await Hit(choiceContext, yae, thunderTarget, Size(yae, sakura, YaeRite.Thunder));
+        }
+        if (sakura.Annotation == YaeAnnotation.FoxFire)
+        {
+            await FoxFire(choiceContext, yae);
+        }
     }
 
     /// <summary>Every Sakura strikes, oldest first, while an enemy lives.
@@ -294,6 +460,21 @@ public static class YaeShrine
         var ledger = YaeShrineLedger.For(yae);
         ledger.Lure = null;
         await FoxfireLurePower.ClearAll(yae);
+        // Offering's cards and Fallen Petals' Energy (and draw), owed since
+        // the end of her last turn.
+        var (draw, withers) = ledger.TakePending();
+        var petals = yae.GetPowerAmount<FallenPetalsPower>();
+        var petalsPlus = yae.GetPowerAmount<FallenPetalsPlusPower>();
+        var energy = withers * (petals + petalsPlus);
+        draw += withers * petalsPlus;
+        if (energy > 0)
+        {
+            await PlayerCmd.GainEnergy(energy, player);
+        }
+        if (draw > 0)
+        {
+            await CardPileCmd.Draw(choiceContext, draw, player);
+        }
         var offering = yae.GetPowerAmount<YakanOfferingPower>();
         if (offering > 0)
         {
@@ -336,6 +517,18 @@ public static class YaeShrine
             if (sakura == null) return;
             await Strike(choiceContext, yae, sakura);
         }
+    }
+
+    /// <summary>Kitsune Pounce: "If the enemy is Weak, a Sakura strikes it"
+    /// -- the highest Level, under the shrine's Rite, aimed at it.</summary>
+    public static async Task StrikeIfWeak(PlayerChoiceContext choiceContext,
+                                          Creature? yae, Creature? target)
+    {
+        if (yae == null || !Live(yae)) return;
+        if (target is not { IsAlive: true } || !IsWeak(target)) return;
+        var sakura = YaeShrineLedger.For(yae).Highest();
+        if (sakura == null) return;
+        await Strike(choiceContext, yae, sakura, target);
     }
 }
 
@@ -446,6 +639,41 @@ public static class YaeCards
         CardHit(choiceContext, card, cardPlay,
                 Var(card, "YmBase")
                 + (YaeEditing.IsAnnotated(card) ? Var(card, "YmAmount") : 0));
+
+    /// <summary>"Rite: X": the shrine's Rite until another replaces it.
+    /// </summary>
+    public static async Task Rite(PlayerChoiceContext choiceContext, CardModel card,
+                                  CardPlay cardPlay, YaeRite rite)
+    {
+        var yae = card.Owner?.Creature;
+        if (yae == null || !YaeShrine.Live(yae)) return;
+        YaeShrineLedger.For(yae).Rite = rite;
+        await SakuraBadge.Sync(choiceContext, yae);
+    }
+
+    /// <summary>"Edit your newest / oldest Sakura: X" (YmAmount from that
+    /// end; Fox Fire Draft's upgrade takes the newest three, every Sakura),
+    /// "Edit every Sakura: X".</summary>
+    public static async Task EditSakura(PlayerChoiceContext choiceContext, CardModel card,
+                                        CardPlay cardPlay, YaeSakuraEnd end,
+                                        YaeAnnotation annotation)
+    {
+        var yae = card.Owner?.Creature;
+        if (yae == null || !YaeShrine.Live(yae)) return;
+        YaeShrineLedger.For(yae).EditSakura(end, Var(card, "YmAmount"), annotation);
+        await SakuraBadge.Sync(choiceContext, yae);
+    }
+
+    /// <summary>Grafted Branch: "Plant a Sakura. It starts at Level 2 [3]."
+    /// </summary>
+    public static Task PlantLevel(PlayerChoiceContext choiceContext, CardModel card,
+                                  CardPlay cardPlay) =>
+        YaeShrine.Plant(choiceContext, card.Owner?.Creature, 1, Var(card, "YmAmount"));
+
+    /// <summary>Kitsune Pounce's rider.</summary>
+    public static Task StrikeIfWeak(PlayerChoiceContext choiceContext, CardModel card,
+                                    CardPlay cardPlay) =>
+        YaeShrine.StrikeIfWeak(choiceContext, card.Owner?.Creature, cardPlay.Target);
 
     /// <summary>The `fox_fire` kind (Fox Fire's rider as a verb).</summary>
     public static Task FoxFire(PlayerChoiceContext choiceContext, CardModel card,

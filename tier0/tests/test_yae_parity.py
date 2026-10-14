@@ -53,6 +53,8 @@ def test_the_law_numbers_mirror_the_sim():
         "LevelCap": Y.LEVEL_CAP, "MooncallPlantLevel": Y.MOONCALL_PLANT_LEVEL,
         "MooncallLevelCap": Y.MOONCALL_LEVEL_CAP,
         "RedInkAmount": Y.RED_INK_AMOUNT, "FoxFireDamage": Y.FOX_FIRE_DAMAGE,
+        "OfferingPerStrike": Y.OFFERING_DRAW,
+        "RoyaltiesPayout": Y.ROYALTIES_ENERGY,
     }
 
 
@@ -71,6 +73,10 @@ def test_the_op_grammar_is_one_table_in_each_engine():
                                    if t == "enemy"}
     assert gen.YAE_ANNOTATION_KINDS == set(Y.ANNOTATION_KINDS)
     assert set(gen.YAE_ANNOTATIONS) == set(Y.ANNOTATIONS)
+    # The design axes (2026-10-14): the Rites, the Sakura readings, the ends.
+    assert set(gen.YAE_RITES) == set(Y.RITES)
+    assert gen.YAE_SAKURA_ANNOTATIONS == set(Y.SAKURA_ANNOTATIONS)
+    assert set(gen.YAE_SAKURA_ENDS) == set(Y.SAKURA_EDIT_ENDS)
 
 
 def test_every_kind_is_a_yaecards_method_and_every_annotation_a_member():
@@ -80,13 +86,16 @@ def test_every_kind_is_a_yaecards_method_and_every_annotation_a_member():
     members = ANNOTATIONS_CS.read_text(encoding="utf-8")
     for member in gen.YAE_ANNOTATIONS.values():
         assert re.search(rf"\b{member} = \d+,", members), member
+    for member in list(gen.YAE_RITES.values()) + list(gen.YAE_SAKURA_ENDS.values()):
+        assert re.search(rf"\b{member} = \d+,", shrine), member
 
 
 def test_every_power_her_rows_apply_is_a_class():
     text = (CODE / "Powers" / "Prototype" / "YaePowers.cs").read_text(
         encoding="utf-8")
     for name in (Y.SAKURA_GROVE, Y.EDICT, Y.SERIALIZATION, Y.MOONCALL,
-                 Y.YAKAN_OFFERING, Y.CHANNELING, Y.EDITOR_IN_CHIEF):
+                 Y.YAKAN_OFFERING, Y.CHANNELING, Y.EDITOR_IN_CHIEF,
+                 Y.MIKAGE_THUNDER, Y.FALLEN_PETALS, Y.FALLEN_PETALS_PLUS):
         cls = gen.APPLY_POWERS[name][0]
         assert f"class {cls} " in text, cls
 
@@ -120,14 +129,14 @@ def test_each_row_carries_its_numbers_and_upgrade_into_the_class(card):
                         in text), (card.id, var, delta)
 
 
-def test_the_roster_lists_the_sims_starter_and_the_thirty():
+def test_the_roster_lists_the_sims_starter_and_the_forty():
     text = ROSTER_CS.read_text(encoding="utf-8")
     pool = re.search(r"Pool\(\) => new CardModel\[\]\s*\{(.*?)\n\s*\};",
                      text, re.S).group(1)
     listed = [gen.pascal(c.id) for c in _rows() if c.rarity != "basic"]
     named = re.findall(r"ModelDb\.Card<(\w+)>", pool)
     assert named == listed
-    assert len(named) == 30
+    assert len(named) == 40
     starter = re.search(r"StartingDeck\(\) => new CardModel\[\]\s*\{(.*?)\n\s*\};",
                         text, re.S).group(1)
     own = [n for n in re.findall(r"ModelDb\.Card<(\w+)>", starter)

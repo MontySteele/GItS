@@ -51,12 +51,13 @@ public sealed class ProtoYmThunderboltTithe : CustomCardModel, IElementalCard, I
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Thunderbolt Tithe"),
-        ("description", "Deal {YmPer:diff()} [gold]Electro[/gold] damage for each [gold]Sakura[/gold] standing."),
+        ("description", "Deal {YmBase:diff()} [gold]Electro[/gold] damage, plus {YmPer:diff()} for each [gold]Sakura[/gold] standing."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
+            new DynamicVar("YmBase", 3m),
             new DynamicVar("YmPer", 4m)
         };
 
@@ -75,5 +76,6 @@ public sealed class ProtoYmThunderboltTithe : CustomCardModel, IElementalCard, I
     protected override void OnUpgrade()
     {
         DynamicVars["YmPer"].UpgradeValueBy(2m);
+        DynamicVars["YmBase"].UpgradeValueBy(1m);
     }
 }

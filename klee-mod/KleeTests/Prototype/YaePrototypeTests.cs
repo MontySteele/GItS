@@ -118,6 +118,8 @@ public class YaePrototypeTests : IDisposable
         Assert.Equal(4, YaeLaw.MooncallLevelCap);
         Assert.Equal(3, YaeLaw.RedInkAmount);
         Assert.Equal(4, YaeLaw.FoxFireDamage);
+        Assert.Equal(1, YaeLaw.OfferingPerStrike);
+        Assert.Equal(1, YaeLaw.RoyaltiesPayout);
     }
 
     [Fact]
@@ -159,10 +161,189 @@ public class YaePrototypeTests : IDisposable
     }
 
     [Fact]
-    public void Sakura_grove_adds_to_every_strike_and_edict_only_when_it_reacts()
+    public void Sakura_grove_adds_to_every_strike_and_edict_only_when_it_applies()
     {
         Assert.Equal(4, YaeShrineLedger.StrikeDamage(1, 1, false, 4));
         Assert.Equal(8, YaeShrineLedger.StrikeDamage(1, 1, true, 4));
+        // Edict works solo (design axes sec.4): Weak, or an aura it reacts with.
+        Assert.True(YaeShrineLedger.EdictApplies(weak: true, reacts: false));
+        Assert.True(YaeShrineLedger.EdictApplies(weak: false, reacts: true));
+        Assert.False(YaeShrineLedger.EdictApplies(weak: false, reacts: false));
+    }
+
+    // ---- the Rites (design axes, ruled 2026-10-14) ---------------------------
+
+    [Fact]
+    public void Every_combat_opens_in_thunder()
+    {
+        Assert.Equal(YaeRite.Thunder, Fresh().Rite);
+        Assert.Equal(0, (int)YaeRite.Thunder);
+    }
+
+    [Fact]
+    public void Each_rites_strike_size()
+    {
+        // Thunder and Warding 2 + Level; Wildfire Level; Offering 1 card.
+        Assert.Equal(5, YaeShrineLedger.StrikeSize(YaeRite.Thunder, 3, 0, 0, YaeAnnotation.None));
+        Assert.Equal(5, YaeShrineLedger.StrikeSize(YaeRite.Warding, 3, 0, 0, YaeAnnotation.None));
+        Assert.Equal(3, YaeShrineLedger.StrikeSize(YaeRite.Wildfire, 3, 0, 0, YaeAnnotation.None));
+        Assert.Equal(1, YaeShrineLedger.StrikeSize(YaeRite.Offering, 3, 0, 0, YaeAnnotation.None));
+    }
+
+    [Fact]
+    public void Grove_and_mikage_size_three_rites_and_not_offering()
+    {
+        Assert.Equal(3 + 2 + 1, YaeShrineLedger.StrikeSize(YaeRite.Thunder, 1, 2, 1, YaeAnnotation.None));
+        Assert.Equal(3 + 2 + 1, YaeShrineLedger.StrikeSize(YaeRite.Warding, 1, 2, 1, YaeAnnotation.None));
+        Assert.Equal(1 + 2 + 1, YaeShrineLedger.StrikeSize(YaeRite.Wildfire, 1, 2, 1, YaeAnnotation.None));
+        Assert.Equal(1, YaeShrineLedger.StrikeSize(YaeRite.Offering, 1, 2, 1, YaeAnnotation.None));
+    }
+
+    [Fact]
+    public void Each_rite_does_its_own_job_in_the_strike()
+    {
+        var calls = Il.CallSequence(typeof(YaeShrine).GetMethod(nameof(YaeShrine.Strike))!).ToList();
+        Assert.Contains(calls, c => c.Contains("CreatureCmd.GainBlock"));      // Warding
+        Assert.Contains(calls, c => c.Contains("set_PendingDraw"));            // Offering
+        Assert.Contains(calls, c => c.Contains("HittableEnemies"));            // Wildfire
+        Assert.Contains(calls, c => c.Contains("SakuraChannelingPower"));      // the bend
+        Assert.Contains(calls, c => c.Contains(nameof(YaeShrine.FoxFire)));    // Fox Fire
+    }
+
+    [Fact]
+    public void Offering_and_fallen_petals_pay_at_her_next_turn_start()
+    {
+        var calls = Il.CallSequence(typeof(YaeShrine).GetMethod(nameof(YaeShrine.TurnStart))!).ToList();
+        Assert.Contains(calls, c => c.Contains("TakePending"));
+        Assert.Contains(calls, c => c.Contains("FallenPetalsPower"));
+        Assert.Contains(calls, c => c.Contains("FallenPetalsPlusPower"));
+        Assert.Contains(calls, c => c.Contains("PlayerCmd.GainEnergy"));
+        Assert.Contains(calls, c => c.Contains("CardPileCmd.Draw"));
+    }
+
+    [Fact]
+    public void A_wither_is_banked_for_fallen_petals()
+    {
+        var ledger = Fresh();
+        PlantN(ledger, 1);
+        for (var i = 0; i < 3; i++) ledger.TickAndWither();
+        Assert.Equal(0, ledger.Count);
+        Assert.Equal(1, ledger.PendingWithers);
+    }
+
+    [Fact]
+    public void The_rite_badge_follows_the_rite()
+    {
+        Assert.Equal(typeof(ThunderRitePower), SakuraBadge.RiteBadge(YaeRite.Thunder));
+        Assert.Equal(typeof(WardingRitePower), SakuraBadge.RiteBadge(YaeRite.Warding));
+        Assert.Equal(typeof(WildfireRitePower), SakuraBadge.RiteBadge(YaeRite.Wildfire));
+        Assert.Equal(typeof(OfferingRitePower), SakuraBadge.RiteBadge(YaeRite.Offering));
+        Assert.Contains("Block", YaeRiteText.Rule(YaeRite.Warding));
+        Assert.Contains("ALL", YaeRiteText.Rule(YaeRite.Wildfire));
+    }
+
+    [Fact]
+    public void Rite_cards_set_the_rite()
+    {
+        Assert.Contains(Il.CallSequence(typeof(ProtoYmShrineMaidensGuard).GetMethod(
+            "OnPlay", HeadlessGame.All)!), c => c.Contains("YaeCards.Rite"));
+        Assert.Contains(Il.CallSequence(typeof(ProtoYmFoxfireSweep).GetMethod(
+            "OnPlay", HeadlessGame.All)!), c => c.Contains("YaeCards.Rite"));
+    }
+
+    // ---- Sakura Annotations (ruled 2026-10-14) -------------------------------
+
+    [Fact]
+    public void Red_ink_makes_a_sakuras_strike_three_bigger_in_whatever_rite()
+    {
+        foreach (var rite in new[] { YaeRite.Thunder, YaeRite.Warding, YaeRite.Wildfire, YaeRite.Offering })
+        {
+            Assert.Equal(
+                YaeShrineLedger.StrikeSize(rite, 2, 0, 0, YaeAnnotation.None) + YaeLaw.RedInkAmount,
+                YaeShrineLedger.StrikeSize(rite, 2, 0, 0, YaeAnnotation.RedInk));
+        }
+        Assert.Equal(YaeShrineLedger.StrikeSize(YaeRite.Thunder, 2, 0, 0, YaeAnnotation.None),
+                     YaeShrineLedger.StrikeSize(YaeRite.Thunder, 2, 0, 0, YaeAnnotation.FoxFire));
+    }
+
+    [Fact]
+    public void Sakura_edits_reach_newest_oldest_and_every_and_replace()
+    {
+        var ledger = Fresh();
+        PlantN(ledger, 3);
+        Assert.Equal(1, ledger.EditSakura(YaeSakuraEnd.Newest, 1, YaeAnnotation.FoxFire));
+        Assert.Equal(new[] { YaeAnnotation.None, YaeAnnotation.None, YaeAnnotation.FoxFire },
+                     ledger.Standing.Select(s => s.Annotation));
+        ledger.EditSakura(YaeSakuraEnd.Oldest, 1, YaeAnnotation.DeadlineExtension);
+        Assert.Equal(YaeAnnotation.DeadlineExtension, ledger.Standing[0].Annotation);
+        Assert.Equal(3, ledger.EditSakura(YaeSakuraEnd.Every, 1, YaeAnnotation.RedInk));
+        Assert.All(ledger.Standing, s => Assert.Equal(YaeAnnotation.RedInk, s.Annotation));
+        // Only three Annotations have a Sakura reading.
+        Assert.Equal(0, ledger.EditSakura(YaeSakuraEnd.Every, 1, YaeAnnotation.Footnote));
+        Assert.All(ledger.Standing, s => Assert.Equal(YaeAnnotation.RedInk, s.Annotation));
+    }
+
+    [Fact]
+    public void A_deadline_extension_sakura_never_withers()
+    {
+        var ledger = Fresh();
+        PlantN(ledger, 2);
+        ledger.EditSakura(YaeSakuraEnd.Oldest, 1, YaeAnnotation.DeadlineExtension);
+        for (var i = 0; i < 10; i++) ledger.TickAndWither();
+        var kept = Assert.Single(ledger.Standing);
+        Assert.Equal(YaeAnnotation.DeadlineExtension, kept.Annotation);
+        Assert.Equal(YaeLaw.SakuraTurns, kept.TurnsLeft);
+    }
+
+    [Fact]
+    public void An_unannotated_sakura_carries_none()
+    {
+        var ledger = Fresh();
+        PlantN(ledger, 1);
+        Assert.Equal(YaeAnnotation.None, ledger.Standing[0].Annotation);
+    }
+
+    // ---- batch two -----------------------------------------------------------
+
+    [Fact]
+    public void Grafted_branch_plants_at_its_level_never_below_the_plant_level()
+    {
+        var ledger = Fresh();
+        Assert.True(ledger.Plant(YaeLaw.PlantLevel, YaeLaw.LevelCap, 2));
+        Assert.Equal(2, ledger.Standing[0].Level);
+        Assert.True(ledger.Plant(YaeLaw.MooncallPlantLevel, YaeLaw.LevelCap, 1));
+        Assert.Equal(2, ledger.Standing[1].Level);
+        Assert.True(ledger.Plant(YaeLaw.PlantLevel, YaeLaw.LevelCap, 9));
+        Assert.Equal(YaeLaw.LevelCap, ledger.Standing[2].Level);
+    }
+
+    [Fact]
+    public void Kitsune_pounce_strikes_only_a_weak_enemy()
+    {
+        var calls = Il.CallSequence(typeof(YaeShrine).GetMethod(nameof(YaeShrine.StrikeIfWeak))!).ToList();
+        Assert.Contains(calls, c => c.Contains(nameof(YaeShrine.IsWeak)));
+        Assert.Contains(calls, c => c.Contains(nameof(YaeShrineLedger.Highest)));
+    }
+
+    [Fact]
+    public void Mikage_thunder_tenkos_then_applies_its_power()
+    {
+        var calls = Il.CallSequence(typeof(ProtoYmMikageThunder).GetMethod(
+            "OnPlay", HeadlessGame.All)!).ToList();
+        var tenko = calls.FindIndex(c => c.Contains("YaeCards.Tenko"));
+        var power = calls.FindIndex(c => c.Contains("MikageThunderPower"));
+        Assert.True(tenko >= 0 && power > tenko, string.Join(", ", calls));
+    }
+
+    [Fact]
+    public void Royalties_gains_energy_after_the_cards_own_effects()
+    {
+        Assert.Equal(typeof(RoyaltiesAnnotation),
+                     typeof(RoyaltiesAnnotation).GetMethod("OnPlay")!.DeclaringType);
+        Assert.Contains(Il.CallSequence(typeof(RoyaltiesAnnotation).GetMethod("OnPlay")!),
+                        c => c.Contains("PlayerCmd.GainEnergy"));
+        Assert.Equal(6, (int)YaeAnnotation.Royalties);
+        Assert.Equal(YaeAnnotation.Royalties, YaeEditing.ParseDraft("Royalties"));
     }
 
     [Fact]
@@ -229,8 +410,11 @@ public class YaePrototypeTests : IDisposable
     public void A_strike_is_a_pets_hit_through_the_dealer_free_door()
     {
         // "Her Strength and Weak do not apply; the enemy's Vulnerable and
-        // Block do; it applies Electro": ElementalHit.DealWithoutDealerMods.
-        var calls = Il.CallSequence(typeof(YaeShrine).GetMethod(nameof(YaeShrine.Strike))!).ToList();
+        // Block do; it applies Electro": ElementalHit.DealWithoutDealerMods,
+        // in the one hit every damage strike goes through (the Rites,
+        // 2026-10-14).
+        var calls = Il.CallSequence(typeof(YaeShrine).GetMethod(
+            "Hit", HeadlessGame.All)!).ToList();
         Assert.Contains(calls, c => c.Contains("DealWithoutDealerMods"));
         Assert.DoesNotContain(calls, c => c.Contains("DamageCmd.Attack"));
     }
@@ -326,6 +510,7 @@ public class YaePrototypeTests : IDisposable
         Assert.Equal(3, (int)YaeAnnotation.DeadlineExtension);
         Assert.Equal(4, (int)YaeAnnotation.FoxFire);
         Assert.Equal(5, (int)YaeAnnotation.SakuraSeal);
+        Assert.Equal(6, (int)YaeAnnotation.Royalties);
     }
 
     [Fact]

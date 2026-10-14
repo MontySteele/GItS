@@ -51,15 +51,17 @@ internal static class YaeRoster
         };
 
     /// <summary>
-    /// The pool: batch one's THIRTY (sec.5), nine Commons, thirteen
-    /// Uncommons and eight Rares, in the sheet's order. A STAGED KIT BELOW 78:
+    /// The pool: batch one's thirty (sec.5) realigned, and batch two's ten
+    /// (<c>review/active/yae-design-axes-2026-10-14.md</c> sec.5 and its
+    /// Ruled section): FORTY, fifteen Commons, sixteen Uncommons and nine
+    /// Rares, in the sheet's order. A STAGED KIT BELOW 78:
     /// the second half of the pool waits on [USER]'s first play and the audit
     /// that follows it (the paper's "Not in this batch, said so"), as
     /// Furina's 24-row slice and Varka's 41 waited before theirs.
     /// </summary>
     internal static IReadOnlyList<CardModel> Pool() => new CardModel[]
     {
-        // Common (9)
+        // Common (15)
         ModelDb.Card<ProtoYmKitsuneFlash>(),
         ModelDb.Card<ProtoYmThunderRite>(),
         ModelDb.Card<ProtoYmShrineOffering>(),
@@ -69,7 +71,13 @@ internal static class YaeRoster
         ModelDb.Card<ProtoYmSlyStrike>(),
         ModelDb.Card<ProtoYmFoxTrick>(),
         ModelDb.Card<ProtoYmShrineMaidensGuard>(),
-        // Uncommon (13)
+        ModelDb.Card<ProtoYmShrineBell>(),
+        ModelDb.Card<ProtoYmGraftedBranch>(),
+        ModelDb.Card<ProtoYmMarginNote>(),
+        ModelDb.Card<ProtoYmKitsunePounce>(),
+        ModelDb.Card<ProtoYmFoxfireSweep>(),
+        ModelDb.Card<ProtoYmEvergreenCharm>(),
+        // Uncommon (16)
         ModelDb.Card<ProtoYmSakuraGrove>(),
         ModelDb.Card<ProtoYmKitsuneRite>(),
         ModelDb.Card<ProtoYmThunderboltTithe>(),
@@ -83,7 +91,10 @@ internal static class YaeRoster
         ModelDb.Card<ProtoYmManuscriptPile>(),
         ModelDb.Card<ProtoYmKitsuneGuile>(),
         ModelDb.Card<ProtoYmFoxfireLure>(),
-        // Rare (8)
+        ModelDb.Card<ProtoYmFallenPetals>(),
+        ModelDb.Card<ProtoYmMikageThunder>(),
+        ModelDb.Card<ProtoYmInkedBranches>(),
+        // Rare (9)
         ModelDb.Card<ProtoYmTenkoKenshin>(),
         ModelDb.Card<ProtoYmFoxsMooncall>(),
         ModelDb.Card<ProtoYmYakanOffering>(),
@@ -92,6 +103,7 @@ internal static class YaeRoster
         ModelDb.Card<ProtoYmMischievousTeasing>(),
         ModelDb.Card<ProtoYmRebornAsGuujiYae>(),
         ModelDb.Card<ProtoYmEditorInChief>(),
+        ModelDb.Card<ProtoYmRoyalties>(),
     };
 
     /// <summary>THE OFFER (<c>YaeCardPool.FilterThroughEpochs</c>): the pool.

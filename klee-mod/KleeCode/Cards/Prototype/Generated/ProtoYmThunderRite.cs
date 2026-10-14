@@ -44,14 +44,14 @@ public sealed class ProtoYmThunderRite : CustomCardModel, IElementalCard, IChara
         new[] { KleeKeywords.AppliesElectro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSakura(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this);
+        ArmKeywordTips.ForRite(ArmKeywordTips.ForSakura(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_thunder_rite");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Thunder Rite"),
-        ("description", "Deal {Damage:diff()} [gold]Electro[/gold] damage. [gold]Tenko[/gold]."),
+        ("description", "Deal {Damage:diff()} [gold]Electro[/gold] damage. [gold]Rite[/gold]: Thunder. [gold]Tenko[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -75,6 +75,7 @@ public sealed class ProtoYmThunderRite : CustomCardModel, IElementalCard, IChara
             .Targeting(cardPlay.Target)
             .WithElementHitFx(this)
             .Execute(choiceContext);
+        await YaeCards.Rite(choiceContext, this, cardPlay, YaeRite.Thunder);
         await YaeCards.Tenko(choiceContext, this, cardPlay);
     }
 

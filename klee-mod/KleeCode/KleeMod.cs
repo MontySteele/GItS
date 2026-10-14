@@ -569,6 +569,8 @@ public static class KleeMod
                     [Cards.ArmKeywordTips.SakuraKey + ".title"] = "Sakura",
                     // YAE MIKO (2026-10-13): her second word.
                     [Cards.ArmKeywordTips.EditKey + ".title"] = "Edit",
+                    // The design axes (2026-10-14): the shrine's Rite.
+                    [Cards.ArmKeywordTips.RiteKey + ".title"] = "Rite",
                     [Cards.ArmKeywordTips.LightfallSwordKey + ".title"] =
                         "Lightfall Sword",
                     [Cards.ArmKeywordTips.PlanOnlyKey + ".title"] = "Plan",

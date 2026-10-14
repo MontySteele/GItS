@@ -41,14 +41,14 @@ public sealed class ProtoYmFoxFireDraft : CustomCardModel, ICharacterCard
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForEdit(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForEdit(ArmKeywordTips.ForSakura(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_fox_fire_draft");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Fox Fire Draft"),
-        ("description", "[gold]Edit[/gold] {IfUpgraded:show:2 cards|a card} in your hand: [gold]Fox Fire[/gold]."),
+        ("description", "[gold]Edit[/gold] {IfUpgraded:show:every|your newest} [gold]Sakura[/gold]: [gold]Fox Fire[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -66,11 +66,11 @@ public sealed class ProtoYmFoxFireDraft : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await YaeCards.Edit(choiceContext, this, cardPlay, YaeAnnotation.FoxFire);
+        await YaeCards.EditSakura(choiceContext, this, cardPlay, YaeSakuraEnd.Newest, YaeAnnotation.FoxFire);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["YmAmount"].UpgradeValueBy(1m);
+        DynamicVars["YmAmount"].UpgradeValueBy(2m);
     }
 }

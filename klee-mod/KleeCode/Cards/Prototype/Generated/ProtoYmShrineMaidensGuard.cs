@@ -38,21 +38,20 @@ public sealed class ProtoYmShrineMaidensGuard : CustomCardModel, ICharacterCard
     public string CharacterId => "yae";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSakura(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForRite(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_shrine_maidens_guard");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Shrine Maiden's Guard"),
-        ("description", "Gain {YmBase:diff()} [gold]Block[/gold], plus {YmPer:diff()} for each [gold]Sakura[/gold] standing."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Rite[/gold]: Warding."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("YmBase", 4m),
-            new DynamicVar("YmPer", 2m)
+            new BlockVar(6m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -64,12 +63,12 @@ public sealed class ProtoYmShrineMaidensGuard : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await YaeCards.BlockPerSakura(choiceContext, this, cardPlay);
+        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
+        await YaeCards.Rite(choiceContext, this, cardPlay, YaeRite.Warding);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["YmPer"].UpgradeValueBy(1m);
-        DynamicVars["YmBase"].UpgradeValueBy(2m);
+        DynamicVars.Block.UpgradeValueBy(3m);
     }
 }

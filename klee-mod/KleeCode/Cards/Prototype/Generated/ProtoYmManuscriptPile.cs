@@ -38,14 +38,14 @@ public sealed class ProtoYmManuscriptPile : CustomCardModel, ICharacterCard
     public string CharacterId => "yae";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForEdit(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForRite(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_manuscript_pile");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Manuscript Pile"),
-        ("description", "Draw {Cards:diff()} cards. [gold]Edit[/gold] a card in your hand: [gold]Deadline Extension[/gold]."),
+        ("description", "Draw {Cards:diff()} cards. [gold]Rite[/gold]: Offering."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -64,7 +64,7 @@ public sealed class ProtoYmManuscriptPile : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
-        await YaeCards.Edit(choiceContext, this, cardPlay, YaeAnnotation.DeadlineExtension);
+        await YaeCards.Rite(choiceContext, this, cardPlay, YaeRite.Offering);
     }
 
     protected override void OnUpgrade()

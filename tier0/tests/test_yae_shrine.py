@@ -81,7 +81,7 @@ def test_her_surface_rows_load_with_the_paper_counts(yae):
             continue
         assert c.character == Y.CHARACTER
         by[c.rarity] = by.get(c.rarity, 0) + 1
-    assert by == {"basic": 2, "common": 9, "uncommon": 13, "rare": 8}
+    assert by == {"basic": 2, "common": 15, "uncommon": 16, "rare": 9}
 
 
 def test_her_rows_resolve_through_get_card_and_the_staging_sheet_is_gone(yae):
@@ -177,8 +177,8 @@ def test_shrine_offering_extends_and_rooted_shrine_levels(yae):
     _play(st, _ym("yakan_evocation"))
     _play(st, _ym("shrine_offering"))
     assert _led(st).sakura[0].turns_left == 4 and st.player.block == 6
-    _play(st, _ym("rooted_shrine"))
-    assert _led(st).sakura[0].level == 2 and st.player.block == 9
+    _play(st, _ym("rooted_shrine"))              # 6 Block, then the Level
+    assert _led(st).sakura[0].level == 2 and st.player.block == 12
 
 
 def test_the_lure_aims_every_strike_this_turn_and_expires(yae):
@@ -195,10 +195,10 @@ def test_the_lure_aims_every_strike_this_turn_and_expires(yae):
 def test_sakura_readers_count_the_standing(yae):
     st = _state()
     _play(st, _ym("twin_sakura"))
-    _play(st, _ym("thunderbolt_tithe"))
-    assert st.enemies[0].hp == 100 - 8
-    _play(st, _ym("shrine_maidens_guard"))
-    assert st.player.block == 4 + 2 * 2
+    _play(st, _ym("thunderbolt_tithe"))          # 3 + 4 x 2
+    assert st.enemies[0].hp == 100 - 11
+    _play(st, _ym("shrine_maidens_guard"))       # 6, and Rite: Warding
+    assert st.player.block == 6 and _led(st).rite == Y.WARDING
 
 
 def test_mooncall_plants_at_two_and_caps_at_four(yae):
@@ -209,17 +209,238 @@ def test_mooncall_plants_at_two_and_caps_at_four(yae):
     assert [s.level for s in _led(st).sakura] == [4, 4, 4]
 
 
+def _hits(st):
+    return [r for r in st.log if r["event"] == "yae_sakura_hit"]
+
+
 def test_the_powers_pay_on_a_strike(yae):
     st = _state(enemies=[_enemy(name="e0", aura="hydro")])
-    _play(st, _ym("sakura_grove"))               # +1
-    _play(st, _ym("edict_of_cleansing"))         # +4 on a reacting aura
-    _play(st, _ym("sakura_channeling"))          # 2 Block a strike
+    _play(st, _ym("sakura_grove"))               # +2
+    _play(st, _ym("edict_of_cleansing"))         # +3 on a reacting aura
     _play(st, _ym("yakan_evocation"))
     Y.turn_end(st)
-    hit = _strikes(st)[0]
-    assert hit["amount"] == 3 + 1 + 4
-    assert st.player.block == 2
+    assert _strikes(st)[0]["amount"] == 3 + 2
+    assert _hits(st)[0]["amount"] == 3 + 2 + 3
     assert st.enemies[0].aura is None            # the reaction consumed it
+
+
+def test_edict_pays_on_a_weak_enemy_solo(yae):
+    st = _state()
+    _play(st, _ym("edict_of_cleansing"))
+    _play(st, _ym("yakan_evocation"))
+    st.enemies[0].powers["weak"] = 1
+    Y.turn_end(st)
+    assert _hits(st)[0]["amount"] == 3 + 3
+
+
+# ---------------------------------------------------------------------------
+# The design axes (ruled 2026-10-14): Rites, Sakura Annotations, batch two
+# ---------------------------------------------------------------------------
+
+def test_every_combat_opens_in_thunder(yae):
+    st = _state()
+    assert _led(st).rite == Y.THUNDER
+    Y.open_combat(st.player)
+    assert Y.ledger(st.player).rite == Y.THUNDER
+
+
+def test_thunder_strikes_one_enemy_for_two_plus_level(yae):
+    st = _state(n=2)
+    _play(st, _ym("yakan_evocation"))
+    Y.turn_end(st)
+    hits = _hits(st)
+    assert len(hits) == 1 and hits[0]["amount"] == 3 and hits[0]["rite"] == Y.THUNDER
+    assert sum(e.hp for e in st.enemies) == 200 - 3
+
+
+def test_warding_gives_two_plus_level_block_and_no_damage(yae):
+    st = _state()
+    _play(st, _ym("yakan_evocation"))
+    _play(st, _ym("yakan_evocation"))            # levels 2 / 1
+    _play(st, _ym("shrine_maidens_guard"))       # 6 Block, Rite: Warding
+    st.player.block = 0
+    Y.turn_end(st)
+    assert st.player.block == (2 + 2) + (2 + 1)
+    assert st.enemies[0].hp == 100 and not _hits(st)
+
+
+def test_wildfire_strikes_all_for_level(yae):
+    st = _state(n=3)
+    _play(st, _ym("yakan_evocation"))
+    _play(st, _ym("yakan_evocation"))            # levels 2 / 1
+    _play(st, _ym("kitsune_guile"))              # Rite: Wildfire
+    hp = [e.hp for e in st.enemies]
+    Y.turn_end(st)
+    assert [h - e.hp for h, e in zip(hp, st.enemies)] == [3, 3, 3]
+    assert len(_strikes(st)) == 2 and len(_hits(st)) == 6
+
+
+def test_offering_draws_one_a_strike_at_the_next_turn_start(yae):
+    st = _state()
+    _play(st, _ym("twin_sakura"))
+    _play(st, _ym("manuscript_pile"))            # Rite: Offering
+    assert _led(st).rite == Y.OFFERING
+    st.player.draw_pile = [loader.get_card("defend") for _ in range(5)]
+    st.player.hand = []
+    Y.turn_end(st)
+    assert _led(st).pending_draw == 2 and not _hits(st)
+    Y.turn_start(st)
+    assert len(st.player.hand) == 2 and _led(st).pending_draw == 0
+
+
+def test_a_rite_holds_until_another_replaces_it(yae):
+    st = _state()
+    _play(st, _ym("foxfire_sweep"))              # Rite: Wildfire
+    _play(st, _ym("yakan_evocation"))
+    Y.turn_end(st)
+    Y.turn_start(st)
+    assert _led(st).rite == Y.WILDFIRE
+    _play(st, _ym("thunder_rite"))               # Rite: Thunder, then Tenko
+    assert _led(st).rite == Y.THUNDER
+    assert _strikes(st)[-1]["rite"] == Y.THUNDER
+
+
+def test_grove_and_mikage_size_three_rites_but_not_offering(yae):
+    st = _state()
+    _play(st, _ym("sakura_grove"))               # +2
+    _play(st, _ym("mikage_thunder"))             # +1 (after its own Tenko)
+    _play(st, _ym("yakan_evocation"))
+    s = _led(st).sakura[0]
+    assert Y.strike_size(st, s, Y.THUNDER) == 3 + 3
+    assert Y.strike_size(st, s, Y.WARDING) == 3 + 3
+    assert Y.strike_size(st, s, Y.WILDFIRE) == 1 + 3
+    assert Y.strike_size(st, s, Y.OFFERING) == 1
+
+
+def test_mikage_thunder_tenkos_then_stacks_per_play(yae):
+    st = _state()
+    _play(st, _ym("yakan_evocation"))
+    _play(st, _ym("mikage_thunder"))
+    assert _strikes(st)[-1]["reason"] == "tenko"
+    assert _strikes(st)[-1]["amount"] == 3       # the Tenko came first
+    _play(st, _ym("mikage_thunder"))
+    assert st.player.powers[Y.MIKAGE_THUNDER] == 2
+    assert _strikes(st)[-1]["amount"] == 3 + 1
+
+
+def test_channeling_adds_a_thunder_strike_in_any_other_rite(yae):
+    st = _state()
+    _play(st, _ym("sakura_channeling"))
+    _play(st, _ym("yakan_evocation"))
+    Y.turn_end(st)                               # Thunder: nothing more
+    assert len(_hits(st)) == 1
+    _play(st, _ym("shrine_maidens_guard"))       # Warding
+    st.player.block = 0
+    hp = st.enemies[0].hp
+    Y.tenko(st)
+    assert st.player.block == 3                  # Warding, 2 + 1
+    assert hp - st.enemies[0].hp == 3            # and Thunder, 2 + 1
+    assert _hits(st)[-1]["reason"] == "channeling"
+
+
+def test_sakura_annotations_each_reading(yae):
+    st = _state()
+    _play(st, _ym("yakan_evocation"))
+    _play(st, _ym("inked_branches"))             # Red Ink on every Sakura
+    s = _led(st).sakura[0]
+    assert s.annotation == Y.RED_INK
+    assert Y.strike_size(st, s, Y.THUNDER) == 3 + 3
+    assert Y.strike_size(st, s, Y.OFFERING) == 1 + 3   # in whatever Rite
+    _play(st, _ym("fox_fire_draft"))             # Fox Fire on the newest
+    assert s.annotation == Y.FOX_FIRE            # replaces the Red Ink
+    hp = st.enemies[0].hp
+    Y.turn_end(st)
+    assert hp - st.enemies[0].hp == 3 + Y.FOX_FIRE_DAMAGE
+    assert any(r["event"] == "yae_fox_fire" for r in st.log)
+
+
+def test_an_unannotated_sakura_does_only_the_rite(yae):
+    st = _state()
+    _play(st, _ym("yakan_evocation"))
+    assert _led(st).sakura[0].annotation is None
+    Y.turn_end(st)
+    assert not any(r["event"] == "yae_fox_fire" for r in st.log)
+
+
+def test_newest_oldest_and_every(yae):
+    st = _state()
+    for _ in range(3):
+        _play(st, _ym("yakan_evocation"))
+    _play(st, _ym("fox_fire_draft"))
+    assert [s.annotation for s in _led(st).sakura] == [None, None, Y.FOX_FIRE]
+    _play(st, _ym("evergreen_charm"))
+    assert [s.annotation for s in _led(st).sakura] == [Y.DEADLINE, None, Y.FOX_FIRE]
+    up = loader.get_card(_ym("fox_fire_draft") + "+")
+    _play(st, up)                                # upgraded: every Sakura
+    assert [s.annotation for s in _led(st).sakura] == [Y.FOX_FIRE] * 3
+
+
+def test_deadline_extension_never_withers(yae):
+    st = _state()
+    _play(st, _ym("yakan_evocation"))
+    _play(st, _ym("evergreen_charm"))
+    assert st.player.block == 5
+    for _ in range(6):
+        Y.turn_end(st)
+        Y.turn_start(st)
+    assert len(_led(st).sakura) == 1
+    assert _led(st).sakura[0].turns_left == Y.SAKURA_TURNS
+
+
+def test_a_sakura_edit_needs_a_sakura_reading(yae):
+    with pytest.raises(ValueError):
+        Y.validate_op("x", {"op": "yae", "kind": "edit_sakura", "which": "newest",
+                            "annotation": "footnote", "amount": 1})
+    with pytest.raises(ValueError):
+        Y.validate_op("x", {"op": "yae", "kind": "rite", "rite": "storm"})
+
+
+def test_fallen_petals_pays_energy_next_turn_and_its_upgrade_draws(yae):
+    st = _state()
+    _play(st, _ym("fallen_petals"))
+    _play(st, loader.get_card(_ym("fallen_petals") + "+"))
+    _play(st, _ym("yakan_evocation"))
+    for _ in range(2):
+        Y.turn_end(st)
+        Y.turn_start(st)
+    st.player.energy = 0
+    st.player.hand = []
+    st.player.draw_pile = [loader.get_card("defend") for _ in range(3)]
+    Y.turn_end(st)                               # the third strike: withers
+    assert not _led(st).sakura and _led(st).pending_withers == 1
+    Y.turn_start(st)
+    assert st.player.energy == 2                 # 1 + 1 (both powers)
+    assert len(st.player.hand) == 1              # the upgrade's card
+
+
+def test_grafted_branch_plants_at_its_level(yae):
+    st = _state()
+    _play(st, _ym("grafted_branch"))
+    assert [s.level for s in _led(st).sakura] == [2]
+    _play(st, loader.get_card(_ym("grafted_branch") + "+"))
+    assert [s.level for s in _led(st).sakura] == [3, 3]
+
+
+def test_kitsune_pounce_strikes_a_weak_enemy(yae):
+    st = _state(n=2)
+    _play(st, _ym("yakan_evocation"))
+    _play(st, _ym("kitsune_pounce"))             # e0 not Weak: no strike
+    assert not _strikes(st)
+    st.enemies[0].powers["weak"] = 1
+    _play(st, _ym("kitsune_pounce"))
+    assert _strikes(st)[-1]["reason"] == "pounce"
+    assert _strikes(st)[-1]["target"] == "e0"
+
+
+def test_royalties_annotation_gains_energy(yae):
+    st = _state()
+    a = loader.get_card("strike")
+    st.player.hand.append(a)
+    _play(st, _ym("royalties"))
+    assert a.ym_annotation == Y.ROYALTIES
+    st.player.energy = 5
+    combat.play_card(st, a)
+    assert st.player.energy == 5 - 1 + 1
 
 
 def test_yakan_offering_plants_at_the_start_of_the_turn(yae):
@@ -296,7 +517,7 @@ def test_footnote_fox_fire_and_sakura_seal_fire_after_the_cards_own_effects(yae)
     st.player.hand = [c for c in st.player.hand if c.id != "defend"]
     b = loader.get_card("strike")
     st.player.hand.append(b)
-    _play(st, _ym("fox_fire_draft"))
+    Y.annotate(st, b, Y.FOX_FIRE)                # (Fox Fire Draft edits Sakura now)
     hp_before = sum(e.hp for e in st.enemies)
     _play(st, b)
     assert sum(e.hp for e in st.enemies) == hp_before - 6 - Y.FOX_FIRE_DAMAGE
@@ -315,8 +536,8 @@ def test_annotated_readers_count_the_hand_and_the_card_itself(yae):
     _play(st, _ym("proofread"))
     _play(st, _ym("bestseller"))                 # 5 + 3 x 1
     assert st.enemies[0].hp == 100 - 8
-    _play(st, _ym("print_run"))                  # 4 + 2 x 1
-    assert st.player.block == 6
+    _play(st, _ym("print_run"))                  # 6 + 2 x 1
+    assert st.player.block == 8
     flash = loader.get_card(_ym("kitsune_flash"))
     st.player.hand.append(flash)
     _play(st, _ym("proofread"))                  # Red Ink on the Flash
@@ -388,7 +609,7 @@ def test_the_harness_pool_is_the_staged_pool(yae):
     from tools import yae_expansion_sim as S
     pl = S.pool()
     assert {k: len(v) for k, v in pl.items()} == {
-        "common": 9, "uncommon": 13, "rare": 8}
+        "common": 15, "uncommon": 16, "rare": 9}
     for d in S.DECKS.values():
         for cid in d["core"] + d["support"]:
             loader.get_card(cid)
