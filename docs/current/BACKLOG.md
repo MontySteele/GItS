@@ -130,8 +130,10 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 ## Parked: start only when the named trigger fires
 
 - `EB-70` the starter-offer retune (`EB-27p`); wakes when a kit's design sweep reaches the Wings / Little Hexenzirkul class (R134).
+- Yae's `yae` op upgrade keys (`yae_amount` / `yae_base` / `yae_per`) are declared on `docs/yae-staging.yaml` and applied by neither engine yet; wire them with her C# build once the card paper's picks are ruled, and move her rows onto the surface then.
 - `EB-80` Kokomi prevention-on-curve review; wakes if a Kokomi playtest shows she needs more warding.
 - `EB-651` a doubled `The other side` heading seen once and not reproduced; wakes on a sighting carrying the page sha.
 - `EB-12` `bridge_unreachable` with the game alive, seen once; wakes on a second observation (`hangwatch` now classifies it).
 - `EB-15` the seed's `lobby` route is unreachable in standard singleplayer; wakes with a Custom run or a hosted lobby.
 - `SKIP-10.9` mechanics the sim does not model, promoted only on demand. Enemy: Back Attack, untargetable Burrow, Ethereal/Hex auras, pick-your-poison curses, damage caps (Hard to Kill, Plating, Hardened Shell), Artifact, Thorns, on-hit status injection, every-N-cards intents, buff-all-enemies, block-an-ally, random-no-repeat AI, self-stun, Slimed self-exhaust, the minor powers, Soul Siphon stat theft, Blessed Antler, Philosopher's Stone. C# with no sim twin: the deferred-settle machinery (`SpotlightSystem`, `FurinaResources`) and per-dealer reaction windows (R1).
+- Yae pool expansion: several Tenko cards that carry their own scaling (paper pick 1 (b): +1 a strike per Tenko; (c): a bonus when a strike reacts), per [USER] 2026-10-13.

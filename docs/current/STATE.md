@@ -41,8 +41,13 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
 - Every starter is the base Strike x4 and Defend x4 plus two cards of its own.
   Starter basics change only on [USER]'s pick. No kit starts with a Companion.
 - **Character five is Yae Miko** (`review/active/yae-proposal-2026-10-12.md`,
-  ruled; the Stellar-Conduct nod is parked). Her card stage starts once Varka
-  reaches Balance.
+  ruled; the Stellar-Conduct nod is parked). **Card stage, Paper:** the card
+  paper `review/active/yae-card-paper-2026-10-13.md` (readings, starter,
+  relic, a 30-card first batch, three answers to the Sakura scaling
+  question, picks open in `QUEUE.md`). Her rows are a sim-only staging sheet
+  (`docs/yae-staging.yaml`, `loader.STAGING_SHEETS`), her rules twin is
+  `tier0/engine/yae_shrine.py`, and `tools/yae_expansion_sim.py` is the
+  smoke harness. No C# until the picks are ruled.
 
 ## The kits
 

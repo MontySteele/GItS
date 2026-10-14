@@ -353,6 +353,13 @@ SIM_CALL_SITES = {
     # Storm Surge's "each enemy it Swirls takes 5 more": element-less, powered.
     ('varka_oath.py', 11): ("'attack' if card.type == 'attack' else 'card'",
                            None, 'None'),
+    # YAE MIKO (`yae_shrine`, sim only, 2026-10-13): a Sakura's strike, a
+    # pet's Electro hit under a Power's source, unpowered; the card-carried
+    # hits of Thunderbolt Tithe, Bestseller and Kitsune Flash, powered and
+    # Electro; Fox Fire's rider, 4 Electro to a random enemy, unpowered.
+    ('yae_shrine.py', 1): ("'card'", 'False', 'ELEMENT'),
+    ('yae_shrine.py', 2): ('source', None, 'ELEMENT'),
+    ('yae_shrine.py', 3): ("'card'", 'False', 'ELEMENT'),
 }
 
 
