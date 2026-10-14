@@ -51,7 +51,7 @@ public sealed class ProtoKkDrowningPressure : CustomCardModel, IElementalCard, I
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Drowning Pressure"),
-        ("description", "Apply 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold]. Deal {ExtraDamage:diff()} [gold]Hydro[/gold] damage for each [gold]Weak[/gold] and [gold]Vulnerable[/gold] on the enemy."),
+        ("description", "Apply 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold]. Deal {ExtraDamage:diff()} [gold]Hydro[/gold] damage for each [gold]Weak[/gold] and [gold]Vulnerable[/gold] on the enemy.{InCombat:\n(Deals {PressureHit:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -59,7 +59,8 @@ public sealed class ProtoKkDrowningPressure : CustomCardModel, IElementalCard, I
         {
             new CalculationBaseVar(0m),
             new ExtraDamageVar(3m),
-            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (_, target) => KokomiOverhaulKit.WeakVulnStacks(target))
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (_, target) => KokomiOverhaulKit.WeakVulnStacks(target)),
+            new DebuffsAfterDamageVar()
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

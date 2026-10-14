@@ -66,6 +66,13 @@ def _varka(name: str):
     return getattr(_vo, name)
 
 
+def _yae(name: str):
+    """A number out of YAE MIKO's shrine module, Varka's case one character
+    over (`tier0/engine/yae_shrine.py`; the C# `YaeLaw`)."""
+    from tier0.engine import yae_shrine as _ys
+    return getattr(_ys, name)
+
+
 # --------------------------------------------------------------------------
 # MIRRORED: C# constant -> the tier0 value it copies.
 #
@@ -245,6 +252,9 @@ MIRRORED: dict[str, object] = {
     # Call the Generals' "1 of 3".
     "CompanionOverhaulLaw.JuugaGuardBlock": C.MI_JUUGA_GUARD_BLOCK,
     "KokomiCompanionPlan.GeneralsOffered": C.KOKOMI_GENERALS_OFFERED,
+    # THE POOL OVERHAUL (2026-10-13): Battle Formation's three numbers.
+    "BattleFormationPower.Threshold": C.KOKOMI_BATTLE_FORMATION_THRESHOLD,
+    "BattleFormationPower.Draw": C.KOKOMI_BATTLE_FORMATION_DRAW,
     # THE FURINA STAGE (`furina_stage.FURINA_STAGE`; `EB-723` /
     # `EB-724` / `EB-725`, R269). Same terms as every arm above and for the
     # same reason -- quarantined is not exempt. These NINE numbers ARE the
@@ -325,6 +335,17 @@ MIRRORED: dict[str, object] = {
     # ruled 2026-09-29): the Swirl payout of each current element. (Stormward
     # Stance's Oath bar left in Varka round 3, 2026-10-10.) Sim twins in
     # `tier0/engine/varka_oath.py`.
+    # YAE MIKO (review/active/yae-card-paper-2026-10-13.md sec.2, ruled
+    # 2026-10-13). Sim twins in `tier0/engine/yae_shrine.py`.
+    "YaeLaw.SakuraCap": _yae("SAKURA_CAP"),
+    "YaeLaw.SakuraTurns": _yae("SAKURA_TURNS"),
+    "YaeLaw.SakuraBase": _yae("SAKURA_BASE"),
+    "YaeLaw.PlantLevel": _yae("PLANT_LEVEL"),
+    "YaeLaw.LevelCap": _yae("LEVEL_CAP"),
+    "YaeLaw.MooncallPlantLevel": _yae("MOONCALL_PLANT_LEVEL"),
+    "YaeLaw.MooncallLevelCap": _yae("MOONCALL_LEVEL_CAP"),
+    "YaeLaw.RedInkAmount": _yae("RED_INK_AMOUNT"),
+    "YaeLaw.FoxFireDamage": _yae("FOX_FIRE_DAMAGE"),
     "VarkaLaw.SwirlPyroDamage": _varka("SWIRL_PYRO_DAMAGE"),
     "VarkaLaw.SwirlHydroBlock": _varka("SWIRL_HYDRO_BLOCK"),
     "VarkaLaw.SwirlCryoVulnerable": _varka("SWIRL_CRYO_VULNERABLE"),
@@ -469,6 +490,12 @@ UNMIRRORED: dict[str, str] = {
         "takes on an enemy holding Klee's Mine. Only ANOTHER player's hit can "
         "take it, and tier 0 seats one player (`tier0/engine/coop.py`), so the "
         "sim has no hit this number could ever apply to and no counterpart.",
+    "WindwardFlankPower.Shred":
+        "VARKA'S CO-OP FIVE (2026-10-13). Windward Flank's printed '50% "
+        "more': the multiplier another player's Attack takes on the enemy "
+        "this turn. Only ANOTHER player's hit can take it, and tier 0 seats "
+        "one player (`tier0/engine/coop.py`), so the sim has no counterpart "
+        "(ShrapnelPower.Shred's reason).",
     "PunchOffMirror.MaxHitSparksPerVisit":
         "`EB-769`. AN ALLOCATION BOUND on a decoration, not balance: how many "
         "`NHitSparkVfx` nodes one visit to the Punch-Off may add to the combat "

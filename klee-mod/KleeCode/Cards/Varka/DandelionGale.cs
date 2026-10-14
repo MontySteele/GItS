@@ -15,19 +15,31 @@ using MegaCrit.Sts2.Core.ValueProps;
 namespace KleeMod.Cards.Varka;
 
 /// <summary>
-/// Varka's Archaic Tooth Ancient (the Varka review,
-/// review/ruled/varka-review-2026-10-12.md sec.6, ruled 2026-10-12:
-/// "Dandelion Gale could be the Replace version"): Orobas's Archaic Tooth
-/// turns his starter Windbound Execution into it, as it turns Bash into Break.
-/// "Deal 7 [10] Anemo damage to ALL enemies. Swirl every aura. These Swirls
-/// pay twice." Cost 1, "like a starter-slot card should". The big Swirl turn
-/// the Anemo half builds toward.
+/// Varka's Archaic Tooth Ancient: Four Winds' Ascension made bigger.
+/// Orobas's Archaic Tooth turns his starter Four Winds' Ascension into it, as
+/// it turns Bash into Break.
 ///
-/// The Anemo hit Swirls each enemy's aura it lands on, inside Crosscurrent's
-/// pays-twice window (<see cref="VarkaOathLedger.PaysTwice"/>), so every
-/// Swirl this play makes pays his current element twice.
+/// THE REDESIGN (2026-10-13, [USER]: "Archaic Tooth - let's have the upgrade
+/// make it AoE and also reduce the cost to 1 when upgraded. That should make
+/// it Ancient-worthy for sure, equivalent to Necrobinder's Osty attack
+/// getting both a better effect and a better energy rate after upgrading";
+/// then "Not exactly. I meant that the ancient starts at 2, and upgrading it
+/// at a campfire (or replacing an already-upgraded Ascension) takes it to
+/// 1."): cost 2 [1], Retain, "Deal 10 Anemo damage to ALL enemies. Then deal
+/// 3 damage per Oath of your current element to each, as that element." The
+/// Ascension's numbers on every enemy; the upgrade is the Ascension's, the
+/// cost. An upgraded Ascension becomes an upgraded Gale: the vanilla Tooth's
+/// <c>GetTranscendenceTransformedCard</c> upgrades the made card when the
+/// starter card was upgraded (sts2.dll, read by decompile 2026-10-13), as it
+/// does for Jumpy Dumpty Mk. Omega.
 ///
-/// THE DOOR: Windbound Execution's generated class implements BaseLib's
+/// The second hit is <see cref="VarkaCards.GaleHit"/>: the Ascension's, on
+/// ALL enemies, read after the Anemo hit and crediting no Oath. The face's
+/// live total is the Ascension's <see cref="VarkaCurrentElementHitVar"/>.
+/// (Was, 2026-10-12: cost 1, "Deal 7 [10] Anemo damage to ALL enemies. Swirl
+/// every aura. These Swirls pay twice.", off Windbound Execution.)
+///
+/// THE DOOR: Four Winds' Ascension's generated class implements BaseLib's
 /// <c>ITranscendenceCard</c> and names this card
 /// (<c>gen_klee_cards.TRANSCENDENCE</c>); BaseLib's postfix adds the pair to
 /// <c>ArchaicTooth.TranscendenceUpgrades</c>, which also keeps the vanilla
@@ -43,11 +55,15 @@ public sealed class DandelionGale : CustomCardModel, IElementalCard, ICharacterC
     public string CharacterId => "varka";
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { KleeKeywords.AppliesAnemo };
+        new[] { CardKeyword.Retain, KleeKeywords.AppliesAnemo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSwirl(
-            KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo),
+        ArmKeywordTips.ForCurrentElement(
+            ArmKeywordTips.ForOath(
+                ArmKeywordTips.ForAscensionNoOath(
+                    KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo),
+                    this),
+                this),
             this);
 
     public override Texture2D? CustomPortrait =>
@@ -58,19 +74,22 @@ public sealed class DandelionGale : CustomCardModel, IElementalCard, ICharacterC
         ("title", "Dandelion Gale"),
         ("description",
             "Deal {Damage:diff()} [gold]Anemo[/gold] damage to ALL enemies. "
-          + "[gold]Swirl[/gold] every aura. These [gold]Swirls[/gold] pay "
-          + "twice."),
+          + "Then deal {VkPer:diff()} damage per [gold]Oath[/gold] of your "
+          + "[gold]current element[/gold] to each, as that element."
+          + "{InCombat:\n(Deals {VkHit:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(7m, ValueProp.Move),
+            new DamageVar(10m, ValueProp.Move),
+            new DynamicVar("VkPer", 3m),
+            new VarkaCurrentElementHitVar(),
         };
 
     // autoAdd: false -- RosterAncientCards.Varka owns membership.
     public DandelionGale()
-        : base(1, CardType.Attack, CardRarity.Ancient, TargetType.AllEnemies,
+        : base(2, CardType.Attack, CardRarity.Ancient, TargetType.AllEnemies,
                autoAdd: false)
     {
     }
@@ -78,26 +97,17 @@ public sealed class DandelionGale : CustomCardModel, IElementalCard, ICharacterC
     protected override async Task OnPlay(
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        var owner = Owner.Creature;
-        var ledger = VarkaOath.Live(owner) ? VarkaOathLedger.For(owner) : null;
-        if (ledger != null) ledger.PaysTwice++;
-        try
-        {
-            await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
-                .FromCard(this, cardPlay)
-                .TargetingAllOpponents(CombatState!)
-                .WithElementHitFx(this)
-                .SpawningHitVfxOnEachCreature()
-                .Execute(choiceContext);
-        }
-        finally
-        {
-            if (ledger != null) ledger.PaysTwice--;
-        }
+        await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
+            .FromCard(this, cardPlay)
+            .TargetingAllOpponents(CombatState!)
+            .WithElementHitFx(this)
+            .SpawningHitVfxOnEachCreature()
+            .Execute(choiceContext);
+        await VarkaCards.GaleHit(choiceContext, this, cardPlay);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(3m);
+        EnergyCost.UpgradeBy(-1);
     }
 }

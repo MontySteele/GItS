@@ -53,7 +53,7 @@ public sealed class ProtoVkKindledEdge : CustomCardModel, IElementalCard, IChara
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kindled Edge"),
-        ("description", "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. If it triggers an [gold]Elemental Reaction[/gold], deal {VkBase:diff()} additional damage.{InCombat:{VarkaSwitch}|}{InCombat:{VarkaWildfire}|}"),
+        ("description", "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. If it triggers an [gold]Elemental Reaction[/gold], deal {VkAgain:diff()} additional damage.{InCombat:{VarkaSwitch}|}{InCombat:{VarkaWildfire}|}"),
     };
 
     /// <summary>This card's in-combat Oath lines
@@ -69,7 +69,9 @@ public sealed class ProtoVkKindledEdge : CustomCardModel, IElementalCard, IChara
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("VkBase", 7m)
+            new FoldedDamageVar("VkBase", 7m, ValueProp.Move, carries: Element.Pyro),
+            new DynamicVar("VkAmount", 5m),
+            new VarkaFollowUpDamageVar("VkAgain", "VkAmount")
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -87,5 +89,6 @@ public sealed class ProtoVkKindledEdge : CustomCardModel, IElementalCard, IChara
     protected override void OnUpgrade()
     {
         DynamicVars["VkBase"].UpgradeValueBy(3m);
+        DynamicVars["VkAmount"].UpgradeValueBy(2m);
     }
 }

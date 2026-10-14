@@ -51,15 +51,26 @@ public sealed class ProtoVkNorthwindAvatar : CustomCardModel, IElementalCard, IC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Northwind Avatar"),
-        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkBase:diff()}, plus {VkPer:diff()} for each [gold]Oath[/gold] of your [gold]current element[/gold], as that element."),
+        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkBase:diff()}, plus {VkPer:diff()} per [gold]Oath[/gold] of your [gold]current element[/gold], as that element.{InCombat:\n(Deals {VkHit:diff()} damage)|}{InCombat:{VarkaSwirl}|}"),
     };
+
+    /// <summary>This card's in-combat Oath and Swirl lines
+    /// (`VarkaOath.SwitchLine`, `VarkaOath.WildfireLine`,
+    /// `VarkaOath.SwirlLine`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("VarkaSwirl", VarkaOath.SwirlLine(this));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new DamageVar(10m, ValueProp.Move),
             new DynamicVar("VkBase", 8m),
-            new DynamicVar("VkPer", 2m)
+            new DynamicVar("VkPer", 2m),
+            new VarkaCurrentElementHitVar()
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

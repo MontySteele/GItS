@@ -182,7 +182,7 @@ def test_embark_names_him_and_the_run_check_knows_him():
 def test_the_page_glossary_defines_his_three_words():
     state = varka_state()
     state["player"]["hand"] = [{
-        "name": "Windbound Execution", "type": "Attack", "cost": "1",
+        "name": "Storm Surge", "type": "Attack", "cost": "1",
         "can_play": True, "index": 0, "target_type": "AnyEnemy",
         "is_upgraded": False, "keywords": [],
         "description": "Deal 6 damage. Gain 1 Oath of your current element. "
@@ -284,13 +284,13 @@ def test_each_oath_gain_prints_under_the_card_that_made_it():
         _oath_row("Amber: Precise Shot",
                   [{"element": "Pyro", "amount": 1, "source": "applied"}],
                   fang=True),
-        _oath_row("Windbound Execution",
+        _oath_row("Storm Surge",
                   [{"element": "Pyro", "amount": 1, "source": "Swirl"},
                    {"element": "Pyro", "amount": 1, "source": ""}]),
     ]
     page = blindplay.observe(state)
     precise = page.index("- **Amber: Precise Shot**")
-    windbound = page.index("- **Windbound Execution**")
+    windbound = page.index("- **Storm Surge**")
     applied = page.index("  +1 Pyro Oath (applied)")
     fang = page.index("  That gain made **Boreas's Fang** add **Four Winds' "
                       "Ascension** to your hand.")

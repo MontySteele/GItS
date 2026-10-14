@@ -507,8 +507,32 @@ public static class KokomiRefounding
         hand.ToList().Any(other => !ReferenceEquals(other, self)
                                    && CanBeWrittenSafely(other));
 
+    /// <summary>Kokomi round 4 (2026-10-13): does the owner's Exhaust Pile
+    /// hold a card? Moon's Reflection is unplayable while it does not, rather
+    /// than spending its cost and exhausting on nothing (lane 1 F17). A
+    /// canonical copy has no owner and answers true, and a throw answers true
+    /// (fails open, <see cref="AnyToPlan"/>'s rule). Sim twin:
+    /// <c>kokomi_plan.refuses_for_no_plan</c>.</summary>
+    public static bool AnyExhausted(CardModel card)
+    {
+        try
+        {
+            if (!card.IsMutable) return true;
+            var owner = card.Owner;
+            if (owner == null) return true;
+            return PileType.Exhaust.GetPile(owner).Cards.Count > 0;
+        }
+        catch (System.Exception e)
+        {
+            WarnOnce(ref _warnedExhaust,
+                     $"Moon's Reflection read of the Exhaust Pile threw: {e}");
+            return true;
+        }
+    }
+
     private static bool _warnedHand;
     private static bool _warnedCard;
+    private static bool _warnedExhaust;
 
     private static bool CanBeWrittenSafely(CardModel card)
     {
@@ -606,32 +630,6 @@ public static class KokomiRefounding
     }
 
     /// <summary>
-    /// Coordinated Tide: a Plan written by an Ethereal
-    /// <paramref name="card"/> is being carried out, so hit the front enemy.
-    /// Returns the body and what the hit delivered, or null when nothing was
-    /// dealt. Called INSIDE the carry-out's window
-    /// (<c>KokomiPlan.ResolveEntry</c>, Kokomi round-3 changes, 2026-10-12),
-    /// so the Plan results line names it as a rider and its HP loss is
-    /// measured with the Plan's; before, it landed after the line was
-    /// written and the page never printed it. Sim twin:
-    /// <c>kokomi_plan.note_carried_out</c>.
-    /// </summary>
-    public static async Task<(Creature Target, int Amount)?> CoordinatedTide(
-        PlayerChoiceContext choiceContext, Creature kokomi, CardModel? card)
-    {
-        if (card == null || !KokomiOverhaul.LiveFor(kokomi)) return null;
-        if (!IsEthereal(card)) return null;
-        var hit = (int)kokomi.Powers.OfType<CoordinatedTidePower>()
-            .Sum(p => p.Amount);
-        var front = KokomiPlan.FrontEnemy(kokomi);
-        if (hit <= 0 || front == null) return null;
-        var dealt = await ElementalHit.Deal(choiceContext, front,
-                                            Element.Hydro, hit, kokomi,
-                                            powered: false);
-        return (front, dealt);
-    }
-
-    /// <summary>
     /// A Plan was just carried out; <paramref name="card"/> is the card that
     /// wrote it. Endless Shoal (the jellyfish build, 2026-10-12): "Whenever
     /// the Bake-Kurage carries out a Plan, add a Sting to your hand." Any
@@ -647,9 +645,14 @@ public static class KokomiRefounding
         if (!KokomiOverhaul.LiveFor(kokomi)) return;
         var stings = (int)kokomi.Powers.OfType<EndlessShoalPower>()
             .Sum(p => p.Amount);
-        if (stings <= 0) return;
-        await KokomiCards.AddJellyfish(kokomi.Player,
-            KokomiCards.Jellyfish.Sting, stings, upgraded: false);
+        if (stings > 0)
+        {
+            await KokomiCards.AddJellyfish(kokomi.Player,
+                KokomiCards.Jellyfish.Sting, stings, upgraded: false);
+        }
+        // THE POOL OVERHAUL (2026-10-13): Battle Formation, when the third
+        // Plan of the turn finishes.
+        await BattleFormationPower.OnCarriedOut(choiceContext, kokomi);
     }
 
     /// <summary>Gorou, General's War Banner's Plan line: "Gain 1 Strength."
@@ -663,24 +666,112 @@ public static class KokomiRefounding
                 choiceContext, kokomi, amount, applier: kokomi,
                 cardSource: null);
 
-    /// <summary>Grand Strategist: "Whenever a Plan causes an Elemental
-    /// Reaction, deal 5 damage to ALL enemies." Called from the one place the
-    /// mod resolves a reaction (<c>CompanionOverhaulReactions.Note</c>); a
-    /// reaction inside a carry-out's window is the Plan's.</summary>
+    /// <summary>
+    /// THE POOL OVERHAUL (2026-10-13): an Elemental Reaction she triggered.
+    /// Called from the one place the mod resolves a reaction
+    /// (<c>CompanionOverhaulReactions.Note</c>), whose dealer is her for her
+    /// cards, her Companions and the Bake-Kurage's Plans alike (a Plan's hit
+    /// passes her as the applier, `EB-334`).
+    ///   * All Streams Flow to the Sea's per-combat count
+    ///     (<see cref="KokomiOverhaulLedger.ReactionsThisCombat"/>);
+    ///   * Grand Strategist: "Whenever you trigger an Elemental Reaction,
+    ///     deal 4 damage to ALL enemies" -- any reaction credited to her (was
+    ///     a Plan's alone);
+    ///   * Coordinated Tide: a Companion card's own hit reacted, played or
+    ///     carried out as a Plan -- add a Sting;
+    ///   * Jellyfish Current: a Sting's own hit reacted -- add a Sting.
+    /// "Its own hit" is <paramref name="cardSource"/>, the card the game's
+    /// damage carried, or, for a Plan line's hit (which goes out through
+    /// <c>ElementalHit.Deal</c> with no card), the card that wrote the Plan
+    /// (<see cref="CreditHits"/>, opened by <c>KokomiPlan.Hit</c>). The
+    /// Bake-Kurage's Hydro before a written Companion credits no card.
+    /// JELLYFISH CURRENT IS BOUNDED: each reaction consumes the aura it
+    /// reacted with (the thin-deck loop rule's known set). Sim twin:
+    /// <c>kokomi_plan.note_reaction</c>.
+    /// </summary>
     public static async Task OnReaction(PlayerChoiceContext choiceContext,
-                                        Creature? dealer)
+                                        Creature? dealer,
+                                        CardModel? cardSource = null)
     {
         if (dealer == null || !KokomiOverhaul.LiveFor(dealer)) return;
-        if (!KokomiPlan.IsCarryingOut(dealer.Player)) return;
+        KokomiOverhaulLedger.For(dealer).NoteReaction();
         var amount = (int)dealer.Powers.OfType<GrandStrategistPower>()
             .Sum(p => p.Amount);
-        if (amount <= 0 || dealer.CombatState is not { } combat) return;
-        foreach (var enemy in combat.HittableEnemies.Where(e => !e.IsDead)
-                                    .ToList())
+        if (amount > 0 && dealer.CombatState is { } combat)
         {
-            await ElementalHit.DealUnelemented(choiceContext, enemy, amount,
-                                               dealer, powered: false);
+            foreach (var enemy in combat.HittableEnemies.Where(e => !e.IsDead)
+                                        .ToList())
+            {
+                await ElementalHit.DealUnelemented(choiceContext, enemy,
+                                                   amount, dealer,
+                                                   powered: false);
+            }
         }
+        var card = cardSource ?? _creditedHit;
+        if (card == null) return;
+        var tide = (int)dealer.Powers.OfType<CoordinatedTidePower>()
+            .Sum(p => p.Amount);
+        if (tide > 0 && IsCompanionHit(card))
+        {
+            await KokomiCards.AddJellyfish(dealer.Player,
+                KokomiCards.Jellyfish.Sting, tide, upgraded: false);
+        }
+        var current = (int)dealer.Powers.OfType<JellyfishCurrentPower>()
+            .Sum(p => p.Amount);
+        if (current > 0 && card is ProtoKkSting)
+        {
+            await KokomiCards.AddJellyfish(dealer.Player,
+                KokomiCards.Jellyfish.Sting, current, upgraded: false);
+        }
+    }
+
+    /// <summary>Coordinated Tide's "a Companion": the arm's one definition
+    /// (<see cref="CompanionHexerei.CountsAsCompanion"/>, the sim's
+    /// <c>companion_hexerei.counts_as_companion</c>). PURE.</summary>
+    public static bool IsCompanionHit(CardModel? card)
+    {
+        if (card == null) return false;
+        if (card is ICompanionCard) return true;
+        // Alice's Introduction Magic reads the owner, which a canonical copy
+        // has none of (its getter asserts): such a card is not a Companion.
+        try
+        {
+            return card.IsMutable && CompanionHexerei.CountsAsCompanion(card);
+        }
+        catch (System.Exception)
+        {
+            return false;
+        }
+    }
+
+    private static CardModel? _creditedHit;
+
+    /// <summary>The card a Plan line's hit is credited to right now, or
+    /// null. Read by <see cref="OnReaction"/>.</summary>
+    public static CardModel? CreditedHit => _creditedHit;
+
+    /// <summary>
+    /// THE POOL OVERHAUL (2026-10-13): credit the hits inside this scope to
+    /// <paramref name="card"/> -- a Plan line's hit is the writing card's own
+    /// hit. Opened by <c>KokomiPlan.Hit</c> around its
+    /// <c>ElementalHit.Deal</c> calls, which carry no card; the previous
+    /// credit comes back on dispose, so a scope opened inside another (a
+    /// Grand Strategist volley inside a Plan's reaction) cannot leak.
+    /// </summary>
+    public static HitCredit CreditHits(CardModel? card) => new(card);
+
+    /// <summary><see cref="CreditHits"/>' scope.</summary>
+    public readonly struct HitCredit : System.IDisposable
+    {
+        private readonly CardModel? _was;
+
+        internal HitCredit(CardModel? card)
+        {
+            _was = _creditedHit;
+            _creditedHit = card;
+        }
+
+        public void Dispose() => _creditedHit = _was;
     }
 }
 
@@ -816,19 +907,21 @@ public sealed class WatchfulShoalPower : PowerModel, ILocalizationProvider
     }
 }
 
-/// <summary>Coordinated Tide: "Whenever the Bake-Kurage carries out an
-/// Ethereal card, deal 4 Hydro damage to the front enemy." Paid from
-/// <see cref="KokomiRefounding.OnCarriedOut"/>; unpowered Hydro, Tidal
-/// Riposte's hit.</summary>
+/// <summary>Coordinated Tide (the pool overhaul, 2026-10-13, the bridge):
+/// "Whenever a Companion triggers an Elemental Reaction, add a Sting to your
+/// Hand." A Companion card's own hit, played or carried out as a Plan; copies
+/// add one each. Paid from <see cref="KokomiRefounding.OnReaction"/>. (Was
+/// a hit whenever the Bake-Kurage carried out an Ethereal card.)</summary>
 public sealed class CoordinatedTidePower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
         ("title", "Coordinated Tide"),
         ("description",
-            "Whenever the [gold]Bake-Kurage[/gold] carries out an "
-          + "[gold]Ethereal[/gold] card, deal [blue]{Amount}[/blue] "
-          + "[gold]Hydro[/gold] damage to the front enemy."),
+            "Whenever a [gold]Companion[/gold] triggers an [gold]Elemental "
+          + "Reaction[/gold], add [blue]{Amount}[/blue] "
+          + "{Amount:plural:[gold]Sting[/gold]|[gold]Stings[/gold]} to your "
+          + "[gold]Hand[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -836,8 +929,9 @@ public sealed class CoordinatedTidePower : PowerModel, ILocalizationProvider
     public override PowerStackType StackType => PowerStackType.Counter;
 }
 
-/// <summary>Grand Strategist: "Whenever a Plan causes an Elemental Reaction,
-/// deal 5 damage to ALL enemies." Paid from
+/// <summary>Grand Strategist (the pool overhaul, 2026-10-13): "Whenever you
+/// trigger an Elemental Reaction, deal 4 damage to ALL enemies." Any
+/// reaction credited to her. Paid from
 /// <see cref="KokomiRefounding.OnReaction"/>.</summary>
 public sealed class GrandStrategistPower : PowerModel, ILocalizationProvider
 {
@@ -845,14 +939,107 @@ public sealed class GrandStrategistPower : PowerModel, ILocalizationProvider
     {
         ("title", "Grand Strategist"),
         ("description",
-            "Whenever a [gold]Plan[/gold] triggers an [gold]Elemental "
-          + "Reaction[/gold], deal [blue]{Amount}[/blue] damage to ALL "
-          + "enemies."),
+            "Whenever you trigger an [gold]Elemental Reaction[/gold], deal "
+          + "[blue]{Amount}[/blue] damage to ALL enemies."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
+}
+
+/// <summary>Jellyfish Current (the pool overhaul, 2026-10-13): "Whenever a
+/// Sting triggers an Elemental Reaction, add a Sting to your Hand." A Sting's
+/// own hit -- played, flipped or carried out as its Plan line. Bounded: each
+/// reaction consumes the aura it reacted with. Copies add one each. Paid
+/// from <see cref="KokomiRefounding.OnReaction"/>. Sim twin:
+/// <c>kokomi_plan.note_reaction</c>.</summary>
+public sealed class JellyfishCurrentPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Jellyfish Current"),
+        ("description",
+            "Whenever a [gold]Sting[/gold] triggers an [gold]Elemental "
+          + "Reaction[/gold], add [blue]{Amount}[/blue] "
+          + "{Amount:plural:[gold]Sting[/gold]|[gold]Stings[/gold]} to your "
+          + "[gold]Hand[/gold]."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+}
+
+/// <summary>
+/// Battle Formation (the pool overhaul, 2026-10-13): "Whenever 3 or more
+/// Plans are carried out in one turn, gain 1 Energy and draw 2 cards." Fires
+/// ONCE a turn, when the third carry-out of the turn finishes
+/// (<see cref="KokomiRefounding.OnCarriedOut"/>, the tail of
+/// <c>KokomiPlan.ResolveEntry</c>), on the ledger's once-per-turn latch.
+/// The stack is the Energy (a second copy adds 1, the face's
+/// <c>{Amount:energyIcons()}</c>); the draw is 2 however many. Sim twin:
+/// <c>kokomi_plan.battle_formation</c>.
+/// </summary>
+public sealed class BattleFormationPower : PowerModel, ILocalizationProvider
+{
+    public const string ClaimKey = "kk_battle_formation";
+
+    /// <summary>The cards drawn per copy.</summary>
+    public const int Draw = 2;
+
+    /// <summary>The Plans carried out in one turn it waits for.</summary>
+    public const int Threshold = 3;
+
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Battle Formation"),
+        ("description",
+            $"Whenever {Threshold} or more [gold]Plans[/gold] are carried "
+          + "out in one turn, gain {Amount:energyIcons()} and draw "
+          + $"{Draw} cards."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    /// <summary>Does this turn's count pay? PURE over its inputs.</summary>
+    public static bool Pays(int carriedOutThisTurn) =>
+        carriedOutThisTurn >= Threshold;
+
+    public static async Task OnCarriedOut(PlayerChoiceContext choiceContext,
+                                          Creature kokomi)
+    {
+        var copies = (int)kokomi.Powers.OfType<BattleFormationPower>()
+            .Sum(p => p.Amount);
+        if (copies <= 0 || kokomi.Player is not { } player) return;
+        var ledger = KokomiOverhaulLedger.For(kokomi);
+        if (!Pays(ledger.PlansCarriedOutThisTurn)) return;
+        if (!ledger.Claim(ClaimKey)) return;
+        await PlayerCmd.GainEnergy(copies, player);
+        await CardPileCmd.Draw(choiceContext, Draw, player);
+    }
+}
+
+/// <summary>Undercurrent Snare's Plan line (the pool overhaul, 2026-10-13):
+/// "Each enemy that intends to attack loses 3 Strength this turn." The base
+/// game's temporary Strength loss, returned at the end of the turn, Cover
+/// Your Ears!'s shape. Sim twin: <c>temp_strength_down</c>.</summary>
+public sealed class UndercurrentSnarePower : TemporaryStrengthPower,
+                                             ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Undercurrent Snare"),
+        ("description",
+            "Lose [blue]{Amount}[/blue] [gold]Strength[/gold] this turn."),
+    };
+
+    public override AbstractModel OriginModel =>
+        ModelDb.Card<ProtoKkUndercurrentSnare>();
+
+    protected override bool IsPositive => false;
 }
 
 /// <summary>Endless Shoal (the jellyfish build, 2026-10-12): "Whenever the

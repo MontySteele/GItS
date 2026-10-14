@@ -64,8 +64,10 @@ public class OrobasArmUpgradeTests
     }
 }
 
-/// <summary>Wolf's Gravestone: "The first time each combat you gain Oath, add
-/// an upgraded Four Winds' Ascension to your hand. It costs 0 this turn."
+/// <summary>Wolf's Gravestone: the Fang's words, then "The first time each
+/// combat you gain Oath, add an upgraded Four Winds' Ascension to your Hand.
+/// It costs 0 this turn." (Starter (a), 2026-10-13: only the Gravestone still
+/// adds it.)
 /// </summary>
 [Collection(VarkaArm.Name)]
 public class WolfsGravestoneTests : IDisposable
@@ -115,7 +117,7 @@ public class WolfsGravestoneTests : IDisposable
         // the Gravestone (which IS a Fang) fires once as the Fang does.
         Assert.False(VarkaOathLedger.For(Seat.Varka().Creature).FangFired);
         var gain = Il.CallSequence(Il.Method("VarkaOath", "Gain")).ToList();
-        var held = gain.IndexOf("BoreasFang.HeldBy");
+        var held = gain.IndexOf("BoreasFang.get_AddsAscension");
         var latch = gain.IndexOf("VarkaOathLedger.set_FangFired");
         var add = gain.IndexOf("BoreasFang.AddAscension");
         Assert.True(gain.Contains("VarkaOathLedger.get_FangFired")

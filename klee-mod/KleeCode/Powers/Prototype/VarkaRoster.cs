@@ -17,8 +17,11 @@ internal static class VarkaRoster
 {
     /// <summary>
     /// The starter (sec.5): "Strike x4, Defend x4 (base game), and: One
-    /// starting Knight, at random each run ... Windbound Execution". The deck
-    /// lists Amber: Precise Shot; Boreas's Fang rolls the run's Knight when the
+    /// starting Knight, at random each run", and Four Winds' Ascension
+    /// (Starter (a), 2026-10-13, [USER]: "knock Windbound Execution out of his
+    /// starting deck and make Four Winds' Ascension his second starter
+    /// instead"; it takes Windbound Execution's slot). The deck lists Amber:
+    /// Precise Shot; Boreas's Fang rolls the run's Knight when the
     /// run begins (<c>BoreasFang.AfterObtained</c>). The base pair is the
     /// Silent's, because his pool borrows her green frame.
     /// </summary>
@@ -32,7 +35,7 @@ internal static class VarkaRoster
         ModelDb.Card<DefendSilent>(),
         ModelDb.Card<DefendSilent>(),
         ModelDb.Card<DefendSilent>(),
-        ModelDb.Card<ProtoVkWindboundExecution>(),
+        ModelDb.Card<ProtoVkFourWindsAscension>(),
         ModelDb.Card<ProtoVkAmberFieryRain>(),
     };
 
@@ -162,7 +165,24 @@ internal static class VarkaRoster
     /// on an empty draw; Ancient rarity never rolls anywhere else.
     /// </summary>
     internal static IEnumerable<CardModel> OfferablePool() =>
-        Pool().Concat(RosterAncientCards.Varka);
+        Pool().Concat(RosterAncientCards.Varka).Concat(MultiplayerSlice());
+
+    /// <summary>
+    /// THE MULTIPLAYER TIER (Varka's co-op five, ruled 2026-10-13): five cards
+    /// offered only in co-op, outside the pool's count, on
+    /// <c>KleeOverhaulRoster.MultiplayerSlice</c>'s terms -- each declares
+    /// <c>CardMultiplayerConstraint.MultiplayerOnly</c>, and
+    /// <c>GetUnlockedCards</c> drops it from a one-player run. Three
+    /// Uncommons and two Rares. Sim mirror: <c>C.VARKA_MULTIPLAYER_IDS</c>.
+    /// </summary>
+    internal static CardModel[] MultiplayerSlice() => new CardModel[]
+    {
+        ModelDb.Card<ProtoVkEscortDuty>(),
+        ModelDb.Card<ProtoVkMarchingOrders>(),
+        ModelDb.Card<ProtoVkWindwardFlank>(),
+        ModelDb.Card<ProtoVkComradesOfTheExpedition>(),
+        ModelDb.Card<ProtoVkWestWindsBlessing>(),
+    };
 
     /// <summary>
     /// Every card of his that must resolve <c>CardModel.Pool</c> to his pool:

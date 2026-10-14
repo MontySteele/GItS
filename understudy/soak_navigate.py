@@ -59,6 +59,12 @@ def _wire():
 
 _CHARACTER_PREFIX = "kleemod-"
 
+#: Prototype characters whose display name is not their id and who are not in
+#: `tier0.roster` (it holds the sheet-backed three). Varka's display name IS
+#: his id, so he needs no row; Yae Miko's option id is `KLEEMOD-YAE` and the
+#: wire reads her back as "Yae Miko" (2026-10-13).
+PROTOTYPE_DISPLAY_NAMES = {"yae miko": "yae"}
+
 
 def canonical_character(name: str) -> str:
     """Fold an option id or a display name onto one comparable key.
@@ -79,6 +85,8 @@ def canonical_character(name: str) -> str:
         key = key[4:]
     if not key:
         return ""
+    if key in PROTOTYPE_DISPLAY_NAMES:
+        return PROTOTYPE_DISPLAY_NAMES[key]
     from tier0 import roster
     for ch in roster.ROSTER:
         if key in (ch.id.casefold(), ch.display.casefold()):

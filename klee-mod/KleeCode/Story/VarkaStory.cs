@@ -16,10 +16,10 @@ namespace KleeMod.Story;
 public static class VarkaStory
 {
     /// <summary>Varka's answer when one of the three steps out (sec.5).</summary>
-    public const string HomeAnswer = "Good. Then we climb together, and we all go home.";
+    public const string HomeAnswer = "Ha, good to have you here! Come on, we're nearly there.";
 
     /// <summary>Varka's line on the skip (sec.5, "Wave them back to the column.").</summary>
-    public const string WaveBackLine = "Save it for the tavern. We've still got a Spire to finish.";
+    public const string WaveBackLine = "Stay with the others. I'll meet you all at the foot of the stairs.";
 
     private static string HomeResult(string knight, string line) =>
         knight + ": \"" + line + "\"\n" + "Varka: \"" + HomeAnswer + "\"";
@@ -31,7 +31,7 @@ public static class VarkaStory
 
         IntroTitle = "The Grand Master of the Knights of Favonius.",
         IntroLine =
-            "He marched most of the Knights north to fight the Abyss and left Jean the paperwork. The Spire is the expedition's next front.",
+            "He led the Knights north against the Abyss, leaving Mondstadt in Jean's care. The Abyss's trail runs up the Spire, so up he goes. Then he's getting his people home.",
 
         Ancients = new[]
         {
@@ -43,7 +43,7 @@ public static class VarkaStory
                 "Teach it a drinking song and we have a deal."),
             new AncientExchange("Pael", "PAEL",
                 "You have bitten off more than you can chew.",
-                "Every expedition starts that way."),
+                "Ha! I've had worse odds. Let's see what we're dealing with."),
             new AncientExchange("Tezcatara", "TEZCATARA",
                 "Warm yourself by my light.",
                 "Gladly. It's been a long winter up north."),
@@ -52,18 +52,18 @@ public static class VarkaStory
                 "And Lord Barbatos behind them."),
             new AncientExchange("Tanx", "TANX",
                 "Do you fight for glory?",
-                "I fight so my knights get home. Glory can find its own way."),
+                "A good story never hurts. But first, I've got people to bring home."),
             new AncientExchange("Vakuu", "VAKUU",
                 "Trade with me.",
                 "I have a stack of unsigned reports. I'll pay you to take them."),
             new AncientExchange("Darv", "DARV",
                 "I collect what others leave behind.",
-                "Then you'll want my desk. I left it to Jean."),
+                "Found a whetstone, by any chance? Mine's about worn through."),
         },
 
         Lines = new CombatLines(
-            BossEntry: "Knights, with me! ...Right. Just me, then.",
-            LowHp: "Still standing. That's the job.",
+            BossEntry: "Well, you're a big one! Let's make some room.",
+            LowHp: "Easy now. I've got another round in me.",
             Signature: "By Lord Barbatos!",
             BossKill: "Someone write that down. Not me!",
             RunLoss: "Tell Jean... we're running a little late.",
@@ -72,8 +72,8 @@ public static class VarkaStory
         Pairs = new[]
         {
             new PairExchange(typeof(Kokomi), "Kokomi",
-                "Only if you take the left flank.",
-                "You've got your planning face on. Mind if I borrow it?",
+                "I see it. Go ahead; I'll cover you.",
+                "See that gap on the left? Bet I can get us through.",
                 OwnFirst: true),
             new PairExchange(typeof(Furina), "Furina",
                 "The Grand Master himself! Do try not to upstage me.",
@@ -110,10 +110,10 @@ public static class VarkaStory
                 EventType: typeof(VarkaWolfOfTheNorth),
                 Title: "The Wolf of the North",
                 Body:
-                    "Frost creeps across the landing, and a great grey wolf pads out of it. "
-                  + "Boreas, Varka's partner, a fragment of Andrius, the old Wolf of the North, "
-                  + "has come to see whether the Knight of Boreas still deserves the name.\n\n"
-                  + "[i]\"You've gone soft, Knight.\"[/i] — [i]\"Soft? Come over here and say that.\"[/i]",
+                    "Frost spreads across the landing. Boreas takes shape beside Varka, stretches, and bares "
+                  + "his teeth. The wolf carries a fragment of Andrius's spirit, but Varka knows that look "
+                  + "well enough: his old partner wants a spar.\n\n[i]\"You've gone soft, Knight.\"[/i] — "
+                  + "[i]\"Soft? Come over here and say that.\"[/i]",
                 Options: new[]
                 {
                     new StoryOption("SPAR", "Spar with him.",
@@ -134,10 +134,10 @@ public static class VarkaStory
                 EventType: typeof(VarkaLongWayHome),
                 Title: "The Long Way Home",
                 Body:
-                    "Campfires on the stairs below, and banners in Favonius blue. After five years "
-                  + "away, most of the expedition has come the long way round to walk him home. "
-                  + "Jean is at the head of the column. \"You owe me five years of reports, Grand "
-                  + "Master.\" Three faces step out of the ranks behind her.",
+                    "Favonius banners come into view on the stairs below. His expedition has caught up, with "
+                  + "familiar faces from Mondstadt among them. After five years away, Varka has quite a "
+                  + "welcome waiting. Jean folds her arms. \"You owe me five years of reports, Grand Master.\" "
+                  + "Eula, Noelle, and Diluc step forward.",
                 Options: new[]
                 {
                     new StoryOption("EULA", "Eula",

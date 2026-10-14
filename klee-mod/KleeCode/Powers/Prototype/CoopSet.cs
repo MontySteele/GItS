@@ -9,6 +9,8 @@ using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using KleeMod.Cards.Prototype.Generated;
+using KleeMod.Elements;
+using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.ValueProps;
@@ -529,3 +531,281 @@ public sealed class SparksForEveryonePower
     }
 }
 
+
+// ======================================================================
+// VARKA'S CO-OP FIVE ([USER], 2026-10-13: "now is actually a great time to
+// design 5 co-op cards for Varka"). Escort Duty, Marching Orders, Windward
+// Flank, Comrades of the Expedition and West Wind's Blessing: the same terms
+// as the sets above -- multiplayer only, outside his pool count
+// (`VarkaRoster.MultiplayerSlice`), quarantined with this folder. Two of the
+// five are `varka` kinds (<see cref="VarkaCards.EscortDuty"/>,
+// <see cref="VarkaCards.MarchingOrders"/>); three are powers below.
+// ======================================================================
+
+// ---------------------------------------------------------------------------
+// VARKA
+// ---------------------------------------------------------------------------
+
+public static partial class VarkaCards
+{
+    /// <summary>
+    /// <i>Escort Duty</i>: "Each player gains 6 [9] Block. Swirl a random
+    /// enemy with an aura." "Each player" is every player in the fight, Varka
+    /// included (Kokomi's convention): his own Block is the row's
+    /// <c>block</c> op, and this is the rest of it.
+    ///
+    /// THE OTHER PLAYERS' BLOCK IS THE CARD'S OWN <c>Block</c> VAR, through
+    /// Joint Orders' call (<c>CreatureCmd.GainBlock(ally, DynamicVars.Block,
+    /// cardPlay)</c>), so each player gets the number his face prints.
+    ///
+    /// THE SWIRL is Jean's damage-less Anemo hit on ONE enemy wearing an aura,
+    /// picked at random on the shared <c>CombatTargets</c> stream (Violet
+    /// Storm's roll), so every seat picks the same body. With no enemy wearing
+    /// an aura it does nothing.
+    /// </summary>
+    public static async Task EscortDuty(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
+    {
+        var owner = card.Owner?.Creature;
+        if (owner == null) return;
+        foreach (var ally in CoopSet.OtherPlayers(owner))
+        {
+            await CreatureCmd.GainBlock(ally, card.DynamicVars.Block, cardPlay);
+        }
+        var auras = EscortDutyBodies(owner);
+        if (auras.Count == 0) return;
+        var rng = card.Owner?.RunState?.Rng?.CombatTargets;
+        var target = rng != null ? rng.NextItem(auras) : auras[0];
+        if (target == null) return;
+        await ElementalHit.ApplyOnly(choiceContext, target, Element.Anemo,
+                                     owner);
+    }
+
+    /// <summary>The bodies Escort Duty may Swirl: every living, hittable
+    /// enemy wearing an aura, in enemy order. PURE.</summary>
+    public static List<Creature> EscortDutyBodies(Creature? owner) =>
+        owner?.CombatState is not { } combat
+            ? new List<Creature>()
+            : VarkaRules.FreshAuraBodies(
+                combat.HittableEnemies.Where(e => e.IsAlive));
+
+    /// <summary>
+    /// <i>Marching Orders</i>: "Choose another player. Their Attacks this turn
+    /// deal additional damage equal to your Oath of your current element."
+    ///
+    /// A SNAPSHOT: his current element's Oath is read ONCE, when the card is
+    /// played, and placed on the chosen player as Battle Plan's
+    /// <see cref="AttackUpThisTurnPower"/> (Coordinated Strike's power), which
+    /// adds to each of their Attacks and leaves at the end of the turn. Oath
+    /// he gains or spends afterwards does not move it. With no current
+    /// element, or 0 Oath of it, nothing is placed.
+    /// </summary>
+    public static async Task MarchingOrders(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
+    {
+        var owner = card.Owner?.Creature;
+        if (owner == null || cardPlay.Target is not { IsAlive: true } ally)
+        {
+            return;
+        }
+        var bonus = MarchingOrdersBonus(owner);
+        if (bonus <= 0) return;
+        await PowerCmd.Apply<AttackUpThisTurnPower>(
+            choiceContext, ally, bonus, applier: owner, cardSource: card);
+    }
+
+    /// <summary>What Marching Orders gives now: his current element's Oath,
+    /// 0 with none. PURE.</summary>
+    public static int MarchingOrdersBonus(Creature? owner) =>
+        VarkaOath.HasCurrent(owner) ? VarkaOath.CurrentOath(owner) : 0;
+}
+
+/// <summary>
+/// MARCHING ORDERS' "(+N damage)": his current element's Oath, read live, the
+/// number the play would place (<see cref="VarkaCards.MarchingOrdersBonus"/>).
+/// Display only and unfolded -- the bonus lands on another player's Attacks,
+/// so none of his own modifiers belong on it. Out of combat, 0 and hidden by
+/// the face's <c>InCombat</c> switch.
+/// </summary>
+public sealed class VarkaCurrentOathVar : DynamicVar
+{
+    /// <summary>The face's token.</summary>
+    public const string Token = "VkOath";
+
+    public VarkaCurrentOathVar() : base(Token, 0m)
+    {
+    }
+
+    public override void UpdateCardPreview(
+        CardModel card, CardPreviewMode previewMode, Creature? target,
+        bool runGlobalHooks)
+    {
+        PreviewValue = BaseValue;
+        if (!DamagePreview.Live(card, runGlobalHooks)) return;
+        PreviewValue = VarkaCards.MarchingOrdersBonus(card.Owner!.Creature);
+    }
+}
+
+/// <summary>
+/// <i>Windward Flank</i>: "Swirl the enemy. This turn, other players'
+/// Attacks deal 50% more damage to it." ON THE ENEMY, placed by Varka, whether
+/// or not the Swirl happened.
+///
+/// <see cref="ShrapnelPower"/>'s shred without its Mine: the base game's
+/// <c>FlankingPower</c> tests -- the hit is on this power's owner, it is a
+/// powered attack, and its dealer is not the applier -- so Varka's own hits
+/// never take it. MULTIPLICATIVE, x1.5, where Flanking is x2. ONE PER VARKA:
+/// <see cref="PowerStackType.Single"/> and
+/// <see cref="PowerInstanceType.InstancedPerApplier"/>, so a second Windward
+/// Flank on the same enemy the same turn adds nothing, and two Varkas' are two.
+/// Gone at the end of the players' turn ("This turn").
+/// </summary>
+public sealed class WindwardFlankPower : PowerModel, ILocalizationProvider
+{
+    /// <summary>The printed 50% more.</summary>
+    public const decimal Shred = 1.5m;
+
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Windward Flank"),
+        ("description",
+            "This turn, other players' Attacks deal 50% more damage to this "
+          + "enemy."),
+    };
+
+    public override PowerType Type => PowerType.Debuff;
+
+    public override PowerStackType StackType => PowerStackType.Single;
+
+    public override PowerInstanceType InstanceType =>
+        PowerInstanceType.InstancedPerApplier;
+
+    /// <summary>The multiplier a hit takes. PURE, so a headless pin can ask
+    /// it.</summary>
+    public override decimal ModifyDamageMultiplicative(
+        Creature? target, decimal amount, ValueProp props, Creature? dealer,
+        CardModel? cardSource, CardPlay? cardPlay)
+    {
+        if (target == null || target != Owner) return 1m;
+        if (!props.IsPoweredAttack()) return 1m;
+        if (Applier is not { } varka || dealer == varka) return 1m;
+        return Shred;
+    }
+
+    public override async Task AfterSideTurnEnd(
+        PlayerChoiceContext choiceContext, CombatSide side,
+        IEnumerable<Creature> participants)
+    {
+        if (side != CombatSide.Player) return;
+        await PowerCmd.Remove(this);
+    }
+}
+
+/// <summary>
+/// <i>Comrades of the Expedition</i>: "Whenever another player plays an
+/// Attack, gain 1 Oath of your current element." On Varka. Each PLAY of
+/// another player's Attack (<see cref="CoopSet.IsAnotherPlayersAttack"/>,
+/// Knights of Favonius' trigger) gains, after it resolves, through
+/// <see cref="VarkaOath.Gain"/> so Oath Unto Death and Dawn Wind's March see
+/// it. With no current element, nothing. The stack is the Oath, so a second
+/// copy gains 2.
+/// </summary>
+public sealed class ComradesOfTheExpeditionPower
+    : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Comrades of the Expedition"),
+        ("description",
+            "Whenever another player plays an Attack, gain "
+          + "[blue]{Amount}[/blue] [gold]Oath[/gold] of your "
+          + "[gold]current element[/gold]."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    public override async Task AfterCardPlayed(
+        PlayerChoiceContext choiceContext, CardPlay cardPlay)
+    {
+        if (Owner == null || Amount <= 0) return;
+        if (!CoopSet.IsAnotherPlayersAttack(cardPlay, Owner)) return;
+        var element = VarkaOath.Current(Owner);
+        if (element == Element.None) return;
+        await VarkaOath.Gain(choiceContext, Owner, element, (int)Amount);
+    }
+}
+
+/// <summary>
+/// <i>West Wind's Blessing</i>: "The first time each turn you Swirl, each
+/// other player gains 1 energy." On Varka, paid by
+/// <see cref="VarkaOath.OnSwirl"/> for every Swirl he makes, however it was
+/// made: a card, a Knight's hit, Gale Sweep or Wall of Gales.
+///
+/// SPARKS FOR EVERYONE'S TERMS (<see cref="SparksForEveryonePower"/>): only
+/// on the players' turn -- a Swirl while the enemies act gives nothing and does
+/// NOT use up the turn's trigger -- and once per turn, on this power's own
+/// latch (the round it last paid). "Each other player" is
+/// <see cref="CoopSet.OtherPlayers"/>; the energy is
+/// <c>PlayerCmd.GainEnergy</c>. The stack is the energy, so a second copy
+/// gives 2.
+/// </summary>
+public sealed class WestWindsBlessingPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "West Wind's Blessing"),
+        ("description",
+            "The first time each turn you [gold]Swirl[/gold], each other "
+          + "player gains {Amount:energyIcons()}."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    /// <summary>The round this power last paid, or -1.</summary>
+    private sealed class Latch
+    {
+        public int PaidRound = -1;
+    }
+
+    protected override object? InitInternalData() => new Latch();
+
+    private Latch PaidLatch => GetInternalData<Latch>();
+
+    /// <summary>Does a Swirl now count? PURE: on the players' turn.</summary>
+    public static bool Counts(Creature? owner) =>
+        owner?.CombatState?.CurrentSide == CombatSide.Player;
+
+    /// <summary>Take the turn's trigger: true once per round.</summary>
+    public bool Take(int round)
+    {
+        if (PaidLatch.PaidRound == round) return false;
+        PaidLatch.PaidRound = round;
+        return true;
+    }
+
+    /// <summary>A Swirl <paramref name="varka"/> made: pay each copy he
+    /// holds.</summary>
+    public static async Task OnSwirl(Creature varka)
+    {
+        if (!Counts(varka)) return;
+        var others = CoopSet.OtherPlayers(varka);
+        if (others.Count == 0) return;
+        var round = varka.CombatState?.RoundNumber ?? 0;
+        foreach (var blessing in varka.Powers.OfType<WestWindsBlessingPower>()
+                     .ToList())
+        {
+            if (blessing.Amount <= 0 || !blessing.Take(round)) continue;
+            foreach (var ally in others)
+            {
+                if (ally.Player is { } player)
+                {
+                    await PlayerCmd.GainEnergy((int)blessing.Amount, player);
+                }
+            }
+        }
+    }
+}

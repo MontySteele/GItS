@@ -103,8 +103,20 @@ public static class CompanionPool
     public static bool IsOfferable(CardModel card, Player player)
     {
         if (card is not ICompanionCard comp) return false;
+        if (IsHiddenFrom(card, CharacterId(player))) return false;
         return comp.PersonalPool is null || comp.PersonalPool == CharacterId(player);
     }
+
+    /// <summary>
+    /// A Universal that is never offered to one character: the Inazuma
+    /// roster's "Yae Miko -- Sesshou Sakura" stays for the others and is
+    /// hidden from Yae's own offers (her card paper, pick 5 (a), ruled
+    /// 2026-10-13: "her Sakura are her kit's"). Sim twin:
+    /// <c>yae_shrine.hidden_from</c>. PURE.
+    /// </summary>
+    public static bool IsHiddenFrom(CardModel card, string? characterId) =>
+        characterId == Powers.YaePrototype.CharacterId
+        && card is Cards.Prototype.Generated.ProtoMiYaeSesshouSakura;
 
     /// <summary>
     /// The eligible set for one shop slot. <paramref name="nation"/> null means
@@ -150,6 +162,8 @@ public static class CompanionPool
             // know him. Matched on the identity interface, which compiles
             // with the surface, as the class does.
             Powers.IVarkaCharacter => Powers.VarkaPrototype.CharacterId,
+            // YAE MIKO (2026-10-13): a roster character, Varka's terms.
+            Powers.IYaeCharacter => Powers.YaePrototype.CharacterId,
             _ => null,
         };
 
@@ -161,6 +175,7 @@ public static class CompanionPool
             Furina => "fontaine",
             Kokomi => "inazuma",
             Powers.IVarkaCharacter => "mondstadt",
+            Powers.IYaeCharacter => "inazuma",
             _ => null,
         };
 }

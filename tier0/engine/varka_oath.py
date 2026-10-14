@@ -34,10 +34,14 @@ THE RULES AS MODELLED:
     Four Winds' Ascension's elemental hit credit nothing. Outside a card play a scope is opened around the event (Baron
     Bunny's burst); an event with no scope open is its own scope.
   * GAIN EVENTS (any +n): Dawn Wind's March pays Block on a gain of the
-    current element; the first gain of the combat has Boreas's Fang add Four
-    Winds' Ascension to the hand (the discard pile if the hand is full).
+    current element; the first gain of the combat has Wolf's Gravestone add
+    an upgraded Four Winds' Ascension to the hand (the discard pile if the
+    hand is full). The plain Fang no longer adds one: since Starter (a),
+    2026-10-13, the Ascension is in his starter deck.
   * SWIRL PAYOUT: every Swirl he makes, after the shared Swirl (spread and the
-    flat 2), credits first and then pays his current element.
+    flat 2), credits first and then, while he holds Boreas's Fang (the
+    payout is the relic's since Starter (a), 2026-10-13), pays his current
+    element.
 
 READINGS TAKEN WHERE THE SPEC LEAVES ROOM (each also in the builder's report):
   * Tier 0 seats one player, so "dealt by Varka" is "the player is Varka":
@@ -94,7 +98,7 @@ VARKA DEFENCE (review/active/varka-defence-2026-10-01.md, ruled 2026-10-01):
     the starter Knight's element becomes current (`set_current`, not a
     Knight, so a change, as the C# Fang's is). The element is
     `Player.varka_starter_element` (`build_player`), else the first starter
-    Knight among his cards. No Oath, so the Ascension still waits.
+    Knight among his cards. No Oath.
 
 THE REBALANCE (review/active/varka-rebalance-2026-10-03.md secs.2-5, and the
 Varka part of review/active/aoe-trim-2026-10-03.md sec.4; simmed in PR #863,
@@ -229,7 +233,7 @@ STARTER_KNIGHT_IDS = {
 STARTER_BASE_IDS: tuple[str, ...] = (
     "strike", "strike", "strike", "strike",
     "defend", "defend", "defend", "defend",
-    "proto_vk_windbound_execution",
+    "proto_vk_four_winds_ascension",
 )
 
 #: The `varka` op's kinds (C# `VarkaCards.<Method>`, the codegen's
@@ -254,6 +258,12 @@ KINDS = frozenset({
     "pyro_oath",
     # PYRO PAPER 2 (2026-10-12).
     "temp_strength", "next_pyro_attack",
+    # VARKA TEXT PASS (2026-10-13).
+    "tidal_bulwark",
+    # VARKA'S CO-OP FIVE (2026-10-13): multiplayer rows the sim never deals
+    # (`tier0/engine/coop.py`); resolved anyway, their other-player halves
+    # land on no one.
+    "escort_duty", "marching_orders",
 })
 KIND_FIELDS = {
     "ascension_hit": ("per",),
@@ -268,7 +278,7 @@ KIND_FIELDS = {
     "electro_strike": ("base",),
     "electro_all": ("base",),
     "violet_storm": ("base",),
-    "kindled_edge": ("base",),
+    "kindled_edge": ("base", "amount"),
     "storm_battery": ("per",),
     "frost_ward": ("base", "per"),
     "gleeful_songs": ("base", "per"),
@@ -282,6 +292,8 @@ KIND_FIELDS = {
     # Pyro paper 2 (2026-10-12).
     "temp_strength": ("amount",),
     "next_pyro_attack": ("base",),
+    # Varka text pass (2026-10-13).
+    "tidal_bulwark": ("per",),
 }
 #: A field a kind MAY print (codegen's `VARKA_OPTIONAL_FIELDS`): Vow of the
 #: Blade's `amount: 2` (Varka co-op fixes, 2026-10-11); absent means 1.
@@ -301,6 +313,10 @@ KIND_TARGETS = {
     "frost_ward": "all_enemies", "gleeful_songs": "all_enemies",
     # The combo pass (2026-10-04).
     "pyro_strike": "enemy", "shatter": "enemy", "deep_freeze": "enemy",
+    # Varka text pass (2026-10-13).
+    "tidal_bulwark": "enemy",
+    # Varka's co-op five (2026-10-13): "Choose another player."
+    "marching_orders": "ally",
 }
 #: `upgraded` is the `varka_upgraded` delta's mark (Pathfinder's Mark+).
 OP_FIELDS = frozenset({"op", "kind", "target", "per", "base", "amount",
@@ -441,8 +457,10 @@ def gain(state, element: str, n: int = 1, source: str = "gain") -> None:
     p = state.player
     if element == led.current:
         _block(state, _power(p, DAWN_WINDS_MARCH), "dawn_winds_march")
-    if not led.fang_fired and (FANG in p.relic_hooks
-                               or FANG_UPGRADED in p.relic_hooks):
+    # Starter (a), 2026-10-13: the Ascension is in his deck, so only Wolf's
+    # Gravestone (the Fang upgraded) still adds one. C# twin:
+    # `BoreasFang.AddsAscension`.
+    if not led.fang_fired and FANG_UPGRADED in p.relic_hooks:
         led.fang_fired = True
         _add_ascension(state, upgraded=FANG_UPGRADED in p.relic_hooks)
 
@@ -732,8 +750,11 @@ def on_swirl(state, enemy, aura: str) -> None:
     state.emit("varka_swirl", element=aura, target=enemy.name,
                current=led.current)
     credit(state, "swirl", aura)
-    cur = led.current
     p = state.player
+    # Starter (a), 2026-10-13: the current element's payout is Boreas's
+    # Fang's ("Your Swirls also pay your current element"); no Fang, no
+    # payout. C# twin: `BoreasFang.PaysSwirls`.
+    cur = led.current if pays_swirls(p) else None
     # Crosscurrent: "This Swirl pays twice." Twin Gales: the element Swirled
     # pays too, once, when it is not already the current one.
     for _ in range(2 if led.pays_twice else 1):
@@ -747,6 +768,13 @@ def on_swirl(state, enemy, aura: str) -> None:
     eye = _power(p, EYE_OF_STORMTERROR)
     if eye and led.swirls_this_turn <= EYE_OF_STORMTERROR_SWIRLS:
         state.draw(eye)
+
+
+def pays_swirls(player) -> bool:
+    """Do his Swirls pay his current element? While he holds Boreas's Fang
+    or Wolf's Gravestone (Starter (a), 2026-10-13)."""
+    hooks = getattr(player, "relic_hooks", ()) or ()
+    return FANG in hooks or FANG_UPGRADED in hooks
 
 
 def _pay(state, enemy, element: str) -> None:
@@ -1156,6 +1184,12 @@ def _expansion_kind(state, fx: dict, card, led: VarkaLedger) -> bool:
     elif kind == "blazing_charge":
         _card_hit(state, card, aim, fx["base"] + fx["per"] * led.oath["pyro"],
                   "pyro")
+    elif kind == "tidal_bulwark":
+        # Varka text pass (2026-10-13, ruled (a)): "Deal Hydro damage equal
+        # to your Block, plus 2 [3] for each Hydro Oath." One Hydro hit (it
+        # reacts, it credits); the Block and the Oath read before it.
+        _card_hit(state, card, aim,
+                  max(0, p.block) + fx["per"] * led.oath["hydro"], "hydro")
     elif kind == "glacial_edict":
         # "1 Weak and 1 Vulnerable, plus 1 of each for every 3 Cryo Oath",
         # read after the row's own Cryo landed.
@@ -1240,14 +1274,16 @@ def _rebalance_kind(state, fx: dict, card, led: VarkaLedger) -> bool:
     p = state.player
     aim = state.card_aim
     if kind == "kindled_edge":
-        # "Deal 7 Pyro damage. If it sets off an Elemental Reaction, deal 7
-        # more." The more is element-less (a second application is not
-        # printed), a powered hit of the card on the same enemy.
+        # "Deal 7 Pyro damage. If it sets off an Elemental Reaction, deal 5
+        # additional damage." (Varka pool audit, 2026-10-13: the bonus is its
+        # own `amount`, was the base hit's.) The more is element-less (a
+        # second application is not printed), a powered hit of the card on
+        # the same enemy.
         before = state.reactions_this_card
         _card_hit(state, card, aim, fx["base"], "pyro")
         if (state.reactions_this_card > before and aim is not None
                 and aim.alive):
-            _card_hit(state, card, aim, fx["base"], None)
+            _card_hit(state, card, aim, fx["amount"], None)
     elif kind == "storm_battery":
         # "Deal 2 Electro damage to ALL enemies for each other card in your
         # Hand." The card has left the hand, so the hand is the others.
@@ -1346,6 +1382,25 @@ def op_varka(state, fx: dict, card) -> None:
     p = state.player
     if _expansion_kind(state, fx, card, led):
         return
+    if kind == "escort_duty":
+        # Varka's co-op five: "Each player gains 6 Block. Swirl a random
+        # enemy with an aura." His own Block is the row's `block` op; the
+        # other players' lands on no one. The Swirl is a damage-less Anemo
+        # hit on one aura'd enemy picked at random (C# `Rng.CombatTargets`);
+        # with none, nothing.
+        from tier0.engine import coop               # late: cycle
+        coop.no_other_player(state, "escort_duty", card)
+        auras = [e for e in state.living_enemies if e.aura]
+        if auras:
+            reactions.resolve_hit(state, state.rng.choice(auras), ELEMENT, 0,
+                                  "swirl_op")
+        return
+    if kind == "marching_orders":
+        # Varka's co-op five: the Oath snapshot goes ON another player, and
+        # a one-seat fight has none.
+        from tier0.engine import coop               # late: cycle
+        coop.no_other_player(state, "marching_orders", card)
+        return
     if kind == "apply_current_element":
         if led.current is None:
             return
@@ -1376,13 +1431,15 @@ def op_varka(state, fx: dict, card) -> None:
                     state, e, fx["amount"], element=None,
                     source="attack" if card.type == "attack" else "card")
     elif kind == "swirled_oath":
-        # Downburst (2026-10-04): "If it Swirls, gain 2 Oath of the element
-        # Swirled." One gain event per element Swirled, on top of the Swirl's
-        # own credit; through `gain`, so Oath Unto Death, Dawn Wind's March
-        # and Boreas's Fang all see it.
+        # Downburst (Varka pool audit, 2026-10-13): "If it Swirls, gain 2
+        # Oath of each element." One gain event per Oath element (Pyro, Hydro,
+        # Cryo, Electro, the printed order) when the play Swirled anything,
+        # on top of the Swirl's own credit; through `gain`, so Oath Unto
+        # Death, Dawn Wind's March and Boreas's Fang all see it.
         swirled = led.play_swirl_elements[-1] if led.play_swirl_elements else []
-        for el in dict.fromkeys(swirled):
-            gain(state, el, fx["amount"], "swirled_oath")
+        if any(el in ELEMENTS for el in swirled):
+            for el in ("pyro", "hydro", "cryo", "electro"):
+                gain(state, el, fx["amount"], "swirled_oath")
     elif kind == "swirl_fresh_auras":
         for e, aura, turns in _fresh_snapshot(state):
             if not e.alive:
@@ -1458,7 +1515,8 @@ def op_add_knight(state, fx: dict, card) -> None:
 # --------------------------------------------------------------------------
 
 def starter_ids(element: str) -> list[str]:
-    """The starter: base Strike x4, Defend x4, Windbound Execution, and the
+    """The starter: base Strike x4, Defend x4, Four Winds' Ascension
+    (Starter (a), 2026-10-13: Windbound Execution's slot), and the
     starter Knight of `element`."""
     return list(STARTER_BASE_IDS) + [STARTER_KNIGHT_IDS[element]]
 

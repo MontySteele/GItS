@@ -89,8 +89,13 @@ PCK = "klee-mod/assets/klee.pck"
 FRAME_PCK = "klee-mod/assets/klee-teyvat.pck"
 #: What the pck is BUILT FROM. `ImageGen/images` is gitignored Tier F art and
 #: `klee-mod/pck-src` is the git-tracked scene-source overlay; the build reads
-#: both, so either moving makes the pck stale.
-PCK_SOURCES = ("ImageGen/images", "klee-mod/pck-src")
+#: both, so either moving makes the pck stale. `tools/build_pck.ps1` is the
+#: third (2026-10-13, Yae Miko's arrival): it AUTHORS scenes inline (each
+#: prototype character's select backdrop, icon, model shapes, transition
+#: material and Architect lines), so a new character's first deploy must
+#: rebuild the pck or her Custom*Path overrides read null -- the R9 preload
+#: crash (`KleeSelfCheck`).
+PCK_SOURCES = ("ImageGen/images", "klee-mod/pck-src", "tools/build_pck.ps1")
 
 
 def _git(args: list[str], cwd: Path = REPO) -> subprocess.CompletedProcess:
@@ -205,7 +210,7 @@ def pck_decision(root: Path = REPO, pck_rel: str = PCK) -> tuple[bool, str]:
     if absent:
         return False, (f"pck is present and {', '.join(absent)} is not in this "
                        f"checkout -- nothing to compare it against")
-    return False, "pck is newer than both source trees"
+    return False, "pck is newer than every source"
 
 
 def art_debt(root: Path = REPO) -> str:

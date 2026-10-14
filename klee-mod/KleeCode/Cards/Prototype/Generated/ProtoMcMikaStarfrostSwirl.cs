@@ -59,7 +59,7 @@ public sealed class ProtoMcMikaStarfrostSwirl : CustomCardModel, IElementalCard,
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Mika — Starfrost Swirl"),
-        ("description", "Deal {CalculatedDamage:diff()} [gold]Cryo[/gold] damage to ALL enemies. Your next Attack costs 1 less.{InCombat:{VarkaSwitch}|}"),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Cryo[/gold] damage to ALL enemies. Your next Attack this turn costs 1 less.{InCombat:{VarkaSwitch}|}"),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on

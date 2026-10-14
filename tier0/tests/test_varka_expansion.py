@@ -41,7 +41,9 @@ def _enemy(hp=100, name="e", aura=None):
 def _state(n=1, element="pyro", **kw):
     enemies = kw.pop("enemies", None) or [_enemy(name=f"e{i}")
                                           for i in range(n)]
-    p = V.build_player(element, fang=False)
+    # The Fang held, as in every run: since Starter (a), 2026-10-13 it pays
+    # his Swirls and adds no Ascension.
+    p = V.build_player(element)
     p.draw_pile = [loader.get_card("strike") for _ in range(10)]
     st = CombatState(player=p, enemies=enemies, rng=random.Random(0))
     st.turn = 1
@@ -69,8 +71,10 @@ def _play(st, card, target=None):
 
 
 def _rows():
+    # His co-op five (2026-10-13) sit outside the pool count.
+    coop_only = loader.multiplayer_ids()
     return [c for c in loader.prototype_cards()
-            if c.id.startswith(V.ID_PREFIX)]
+            if c.id.startswith(V.ID_PREFIX) and c.id not in coop_only]
 
 
 # ---------------------------------------------------------------------------
@@ -122,12 +126,18 @@ def test_the_paper_numbers_and_upgrades(varka):
     # Gleeful Songs' numbers moved with the rebalance (test_varka_rebalance).
     assert fx(_vk("mika_starfrost_swirl"), "apply_power")["amount"] == 2
     assert fx(_vk("mika_starfrost_swirl") + "+", "apply_power")["amount"] == 3
-    # The Electro Knights pass (2026-10-03): Razor 5 [7], +4; Pulsating
-    # Witch costs 0.
-    assert fx(_vk("razor_claw_and_thunder"), "varka")["base"] == 5
-    assert fx(_vk("razor_claw_and_thunder"), "varka")["amount"] == 4
-    assert fx(_vk("razor_claw_and_thunder") + "+", "varka")["base"] == 7
+    # Razor 6 [8], +3 (user, 2026-10-13; was 5 [7], +4 from the Electro
+    # Knights pass); Pulsating Witch costs 0.
+    assert fx(_vk("razor_claw_and_thunder"), "varka")["base"] == 6
+    assert fx(_vk("razor_claw_and_thunder"), "varka")["amount"] == 3
+    assert fx(_vk("razor_claw_and_thunder") + "+", "varka")["base"] == 8
     assert loader.get_card(_vk("lisa_pulsating_witch")).cost == 0
+    # The user's 2026-10-13 picks: Tailwind Stride draws 3 [4] with no
+    # condition; Storm Surge costs 1.
+    assert fx(_vk("tailwind_stride"), "draw")["amount"] == 3
+    assert fx(_vk("tailwind_stride") + "+", "draw")["amount"] == 4
+    assert [f["op"] for f in loader.get_card(_vk("tailwind_stride")).effects] == ["draw"]
+    assert loader.get_card(_vk("storm_surge")).cost == 1
     # Varka payoff fix (2026-10-08): every 3 [2] Cryo Oath, was 4 [3].
     assert fx(_vk("glacial_edict"), "varka")["amount"] == 3
     assert fx(_vk("glacial_edict") + "+", "varka")["amount"] == 2
@@ -196,7 +206,7 @@ def test_razor_hits_one_enemy_and_more_on_electro(varka):
     assert _led(st).current == "electro"
     st = _state(enemies=[_enemy(name="c")])
     _play(st, _vk("razor_claw_and_thunder"))
-    assert st.enemies[0].hp == 100 - 5 and st.enemies[0].aura == "electro"
+    assert st.enemies[0].hp == 100 - 6 and st.enemies[0].aura == "electro"
 
 
 def test_sharpshooter_shoots_again_only_on_pyro(varka):
@@ -260,43 +270,53 @@ def test_blazing_charge_reads_pyro_oath_by_name(varka):
     led = _led(st)
     led.current, led.oath["pyro"], led.oath["cryo"] = "cryo", 3, 9
     _play(st, _vk("blazing_charge"))
-    # The Pyro pass (2026-10-11): base 8, was 5.
-    assert st.enemies[0].hp == 100 - (8 + 2 * 3)
+    # The Pyro pass (2026-10-11): base 8, was 5. Varka pool audit
+    # (2026-10-13), ruled (b): plus 1 per Pyro Oath, was 2.
+    assert st.enemies[0].hp == 100 - (8 + 1 * 3)
     assert led.current == "pyro" and led.oath["pyro"] == 4
 
 
 def test_tidal_bulwark_is_hydros_body_slam(varka):
-    # The Hydro paper (2026-10-10): "Deal damage equal to your Block, plus
-    # 2 [3] for each Hydro Oath. Apply Hydro to an enemy." The hit reads the
-    # Oath before its own application credits. Varka last pass
-    # (2026-10-12): "Gain 6 [8] Block" first, which the hit counts.
+    # The Hydro paper (2026-10-10): Hydro's Body Slam. Varka text pass
+    # (2026-10-13), ruled (a): "Deal Hydro damage equal to your Block, plus
+    # 2 [3] for each Hydro Oath." No Block of its own; the hit is Hydro. The
+    # hit reads the Oath before its own application credits.
     st = _state()
     led = _led(st)
     led.oath["hydro"] = 2
     st.player.block = 10
     _play(st, _vk("tidal_bulwark"))
     e = st.enemies[0]
-    assert e.hp == 100 - (10 + 6 + 2 * 2)
+    assert e.hp == 100 - (10 + 2 * 2)
     assert e.aura == "hydro" and led.oath["hydro"] == 3
-    assert st.player.block == 16                        # Body Slam keeps it
+    assert led.current == "hydro"
+    assert st.player.block == 10                        # Body Slam keeps it
     st = _state()
     _led(st).oath["hydro"] = 2
     st.player.block = 10
     _play(st, _vk("tidal_bulwark") + "+")
-    assert st.enemies[0].hp == 100 - (10 + 8 + 3 * 2)
-    st = _state()                                       # no Block, no Oath
+    assert st.enemies[0].hp == 100 - (10 + 3 * 2)
+
+
+def test_tidal_bulwarks_hit_reacts_like_any_hydro_hit(varka):
+    # The text pass's rule change: the Hydro rides the hit, so a Pyro aura
+    # already on the enemy reacts with it (Vaporize), where the old
+    # element-less hit then a separate Apply left the reaction off the damage.
+    st = _state(enemies=[_enemy(aura="pyro")])
+    st.player.block = 10
     _play(st, _vk("tidal_bulwark"))
-    assert st.enemies[0].hp == 100 - 6
+    e = st.enemies[0]
+    assert e.aura is None                               # consumed
+    assert e.hp < 100 - 10                              # amplified
 
 
 def test_tidal_bulwark_is_an_attack_on_the_sheet(varka):
     from tier0.content import loader
     c = loader.get_card(_vk("tidal_bulwark"))
     assert c.type == "attack" and c.cost == 1
-    assert c.effects[0] == {"op": "block", "amount": 6}
-    fx = c.effects[1]
-    assert fx["amount_formula"] == {"base": 0, "per": 2, "count": "hydro_oath",
-                                    "plus": "player_block"}
+    assert c.effects == [{"op": "varka", "kind": "tidal_bulwark",
+                          "target": "enemy", "per": 2}]
+    assert not any(fx["op"] in ("block", "apply_aura") for fx in c.effects)
 
 
 def test_glacial_edict_stacks_every_three_cryo(varka):

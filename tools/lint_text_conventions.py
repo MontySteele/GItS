@@ -120,14 +120,13 @@ EXCEPTIONS = {
         "prints nowhere is not a rule a round can read. The 2026-09-25 Kokomi "
         "text pass took the default face to 61 of 125 and the capped one to "
         "134; what is left over is the cap's own sentence"),
-    "BoreasFang.description": (
-        "the card text pass (2026-10-12, `review/active/card-text-pass-"
-        "2026-10-12.md`) gives this face word for word: the starting element "
-        "and the first-Oath Ascension are two rules of the one starting "
-        "relic, and the reshuffle clause already moved into the hover"),
+    # `BoreasFang.description` left this list with Starter (a), 2026-10-13:
+    # its new face is under the ceiling.
     "WolfsGravestone.description": (
-        "Boreas's Fang's face, worded by the same paper, plus 'It is upgraded "
-        "and costs 0 this turn.'"),
+        "Boreas's Fang's face (Starter (a), 2026-10-13: the starting element "
+        "and the Swirl payout) plus the Gravestone's own first-Oath "
+        "Ascension, upgraded and free that turn: three rules of the one "
+        "Ancient relic"),
     # `TamakushiCasket.description` left this list with `EB-346`: the shared
     # Companion-slot sentence is gone from every relic, and the Casket's own
     # two rules were always under the ceiling.

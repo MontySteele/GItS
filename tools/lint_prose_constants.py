@@ -207,6 +207,13 @@ PATHISH_RE = re.compile(r"res://|[/\\]|\.png|\.tres|\.ogg")
 # list stays as short as the code makes it.
 # --------------------------------------------------------------------------
 ALLOWED: dict[tuple[str, str, str], str] = {
+    # YAE MIKO (2026-10-13): Footnote's own draw, the Annotation's rule.
+    ("klee-mod/KleeCode/Powers/Prototype/YaeAnnotations.cs",
+     "AbyssNumbers.ResonanceDraw", "1"):
+        "Footnote's own draw 1, not the Abyss Blessing's",
+    ("klee-mod/KleeCode/Powers/Prototype/YaeAnnotations.cs",
+     "FurinaStageLaw.CharlotteLineDraw", "1"):
+        "Footnote's own draw 1, not Charlotte's line",
     # The guest package (2026-10-13): Navia's act now Spends a third.
     ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoFsBubbleAria.cs",
      "FurinaStageLaw.NaviaSpendDivisor", "3"):

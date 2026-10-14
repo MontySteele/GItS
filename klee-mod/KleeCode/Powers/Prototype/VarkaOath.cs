@@ -655,8 +655,9 @@ public static class VarkaOath
 
     /// <summary>
     /// Every Oath gain: add it, pay Dawn Wind's March when it is the current
-    /// element's, and let Boreas's Fang add Four Winds' Ascension the first
-    /// time each combat (sec.4). One call is one gain event.
+    /// element's, and let Wolf's Gravestone add Four Winds' Ascension the
+    /// first time each combat (sec.4; the plain Fang no longer does since
+    /// Starter (a), 2026-10-13). One call is one gain event.
     /// </summary>
     public static async Task Gain(
         PlayerChoiceContext choiceContext, Creature varka, Element element,
@@ -692,8 +693,10 @@ public static class VarkaOath
         ResolutionLedger.NoteOath(element.ToString(), n, SourceWord(source));
         if (ledger.Scoped) ledger.NoteGainClause(clause);
         else global::KleeMod.Vfx.KurageBeat.Say(varka, clause);
+        // Starter (a), 2026-10-13: only Wolf's Gravestone still adds it;
+        // the Fang's Ascension is in his deck.
         if (!ledger.FangFired && varka.Player is { } player
-            && Relics.BoreasFang.HeldBy(player) is { } fang)
+            && Relics.BoreasFang.HeldBy(player) is { AddsAscension: true } fang)
         {
             ledger.FangFired = true;
             ResolutionLedger.NoteFangAscension(fang.RelicName);
@@ -856,7 +859,12 @@ public static class VarkaOath
         {
             await Gain(choiceContext, dealer, swirled, 1, OathSource.Swirl);
         }
-        var current = ledger.Current;
+        // Starter (a), 2026-10-13 ([USER]: "it's basically a second starter
+        // relic untied to his actual relic"): the current element's payout is
+        // Boreas's Fang's ("Your Swirls also pay your current element"). With
+        // no Fang held, nothing current is paid.
+        var current = Relics.BoreasFang.PaysSwirls(dealer.Player)
+            ? ledger.Current : Element.None;
         // Stormterror's Scale: "Your Swirls pay twice." The expansion:
         // Crosscurrent's Swirl pays twice too (the two multiply); Twin Gales
         // pays the element Swirled as well, once, when it is not the current
@@ -897,6 +905,9 @@ public static class VarkaOath
                 await eye.Draw(choiceContext);
             }
         }
+        // West Wind's Blessing (Varka's co-op five, 2026-10-13): the first
+        // Swirl each turn gives each other player energy.
+        await WestWindsBlessingPower.OnSwirl(dealer);
         if (current != Element.None)
         {
             Log.Info($"[{KleeMod.ModId}] VARKA Swirl on {target.Name}: "
@@ -1020,14 +1031,79 @@ public static class VarkaOath
     /// the card would change his current element to
     /// <paramref name="element"/> (<see cref="WouldSwitchTo"/>, the hover
     /// tip's question), else empty.
+    ///
+    /// Varka round 5 (2026-10-13, "What to change" 1): the line also says
+    /// what the switch costs, "(Makes Cryo current: 2 Oath)": the Oath he
+    /// holds in <paramref name="element"/> when it becomes current
+    /// (<see cref="OathOnSwitch"/>), so Kaeya, Barbara and Short Circuit no
+    /// longer lower Four Winds' Ascension silently. Display only.
     /// </summary>
     public static string SwitchLine(CardModel? card, Element element) =>
-        WouldSwitchTo(card, element) ? SwitchWords(element) : "";
+        WouldSwitchTo(card, element)
+            ? SwitchWords(element, OathOnSwitch(card!.Owner!.Creature, element))
+            : "";
 
-    /// <summary>The line itself, a line break then "(Makes Pyro current)".
-    /// PURE.</summary>
-    public static string SwitchWords(Element element) =>
-        $"\n(Makes {element} current)";
+    /// <summary>The Oath he holds in <paramref name="element"/> the moment it
+    /// becomes current: its own count, plus the old element's when Banner of
+    /// the West Wind carries it over (<see cref="SetCurrent"/> pays the
+    /// Banner at the switch). The play's own gain is not in it; that prints
+    /// on the play's Oath line as it always has.</summary>
+    public static int OathOnSwitch(Creature? varka, Element element)
+    {
+        if (varka == null || !Live(varka)) return 0;
+        var current = Current(varka);
+        var banner = current != element && IsOathElement(current)
+            && Relics.VarkaArmRelics.Held<Relics.BannerOfTheWestWind>(varka) > 0;
+        return SwitchOath(Count(varka, element),
+                          banner ? Count(varka, current) : 0);
+    }
+
+    /// <summary>The count the line prints: the new element's Oath plus what
+    /// the Banner carries over. PURE.</summary>
+    public static int SwitchOath(int newElementOath, int carried) =>
+        Math.Max(0, newElementOath) + Math.Max(0, carried);
+
+    /// <summary>The line itself, a line break then "(Makes Pyro current:
+    /// 3 Oath)". PURE.</summary>
+    public static string SwitchWords(Element element, int oath) =>
+        $"\n(Makes {element} current: {oath} Oath)";
+
+    /// <summary>
+    /// THE SWIRL LINE (Varka round 5, 2026-10-13, "What to change" 1: "Swirl
+    /// cards whose target has lost its aura read 'No aura'"). A reaction that
+    /// used up an aura left a later Swirl card with nothing to Swirl, and the
+    /// hand did not say so. A Swirl card of his ends its face in
+    /// <c>{InCombat:{VarkaSwirl}|}</c> and the line reads "(No aura to
+    /// Swirl)" while the enemy it is aimed at has no aura
+    /// (<see cref="DescribedTarget"/>), or, not aimed, while no enemy has
+    /// one. Empty otherwise, off a combat and for anyone but a live Varka.
+    /// Display only.
+    /// </summary>
+    public static string SwirlLine(CardModel? card)
+    {
+        if (card is not { IsMutable: true }) return "";
+        Creature? owner;
+        try
+        {
+            owner = card.Owner?.Creature;
+        }
+        catch (Exception)
+        {
+            return "";
+        }
+        if (owner?.CombatState == null || !Live(owner)) return "";
+        var target = DescribedTarget.For(card);
+        if (target != null) return SwirlWords(AuraCmd.Find(target) != null);
+        return SwirlWords(owner.CombatState.HittableEnemies
+            .Any(e => AuraCmd.Find(e) != null));
+    }
+
+    /// <summary>The words: "(No aura to Swirl)" when there is no aura, else
+    /// empty. PURE.</summary>
+    public static string SwirlWords(bool aura) => aura ? "" : NoAuraToSwirl;
+
+    /// <summary><see cref="SwirlWords"/>' line.</summary>
+    public const string NoAuraToSwirl = "\n(No aura to Swirl)";
 
     /// <summary>
     /// WILDFIRE OATH'S PREVIEW (BACKLOG: "Wildfire Oath's damage has no
@@ -1167,7 +1243,7 @@ public static class VarkaOath
 /// the generated card, reading its own numbers off the card's `Vk*` vars.
 /// Sim twins: the `varka` op kinds in <c>tier0/engine/varka_oath.py</c>.
 /// </summary>
-public static class VarkaCards
+public static partial class VarkaCards
 {
     private static decimal Var(CardModel card, string name) =>
         card.DynamicVars[name].BaseValue;
@@ -1206,7 +1282,7 @@ public static class VarkaCards
             ? (int)amount.BaseValue : 1;
 
     /// <summary>
-    /// Four Winds' Ascension's second hit: "Then deal 3 damage for each Oath
+    /// Four Winds' Ascension's second hit: "Then deal 3 damage per Oath
     /// of your current element, as that element." (The upgrade cuts the cost,
     /// not this number.) The Oath is read after
     /// the Anemo hit, and this hit credits no Oath (sec.4).
@@ -1216,8 +1292,36 @@ public static class VarkaCards
         CurrentElementHit(choiceContext, card, cardPlay, 0m,
                           Var(card, "VkPer"), credit: false);
 
-    /// <summary>Northwind Avatar's second hit: "Then deal 10 [14], plus 2 for
-    /// each Oath, as your current element." It credits like any card.</summary>
+    /// <summary>
+    /// Dandelion Gale's second hit (the Archaic Tooth redesign, 2026-10-13):
+    /// the Ascension's, "to each" enemy. One hit on ALL enemies carrying his
+    /// current element, read after the Anemo hit, crediting no Oath. Nothing
+    /// without a current element, or at 0 damage.
+    /// </summary>
+    public static async Task GaleHit(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
+    {
+        var owner = card.Owner?.Creature;
+        var element = VarkaOath.Current(owner);
+        if (owner == null || element == Element.None) return;
+        if (card.CombatState is not { } combat) return;
+        var damage = CurrentElementDamage(0m, Var(card, "VkPer"),
+                                          VarkaOath.CurrentOath(owner));
+        if (damage <= 0) return;
+        using (HitElement.Carry(card, element))
+        using (VarkaOath.NoApplyCredit(owner))
+        {
+            await DamageCmd.Attack(damage)
+                .FromCard(card, cardPlay)
+                .TargetingAllOpponents(combat)
+                .WithElementHitFx(element)
+                .SpawningHitVfxOnEachCreature()
+                .Execute(choiceContext);
+        }
+    }
+
+    /// <summary>Northwind Avatar's second hit: "Then deal 8 [12], plus 2 per
+    /// Oath, as your current element." It credits like any card.</summary>
     public static Task AvatarHit(
         PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay) =>
         CurrentElementHit(choiceContext, card, cardPlay, Var(card, "VkBase"),
@@ -1270,10 +1374,10 @@ public static class VarkaCards
         }
     }
 
-    /// <summary>Downburst (2026-10-04): "If it Swirls, gain 2 Oath of the
-    /// element Swirled." One gain per element Swirled, on top of the Swirl's
-    /// own credit, through <see cref="VarkaOath.Gain"/> so Oath Unto Death,
-    /// Dawn Wind's March and Boreas's Fang see it.</summary>
+    /// <summary>Downburst (Varka pool audit, 2026-10-13): "If it Swirls,
+    /// gain 2 Oath of each element." One gain per Oath element, on top of the
+    /// Swirl's own credit, through <see cref="VarkaOath.Gain"/> so Oath Unto
+    /// Death, Dawn Wind's March and Boreas's Fang see it.</summary>
     public static async Task SwirledOath(
         PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
     {
@@ -1289,14 +1393,16 @@ public static class VarkaCards
         }
     }
 
-    /// <summary>Downburst's gains: <paramref name="amount"/> of each Oath
-    /// element the play Swirled, once per element, in order. Empty when it
-    /// Swirled nothing. PURE.</summary>
+    /// <summary>Downburst's gains: <paramref name="amount"/> of each of the
+    /// four Oath elements (Pyro, Hydro, Cryo, Electro, the printed order) when
+    /// the play Swirled any Oath element. Empty when it Swirled nothing.
+    /// PURE.</summary>
     public static List<(Element Element, int Amount)> SwirledOathGains(
         IReadOnlyList<Element> swirled, int amount) =>
-        amount <= 0
+        amount <= 0 || !swirled.Any(VarkaOath.IsOathElement)
             ? new List<(Element, int)>()
-            : swirled.Where(VarkaOath.IsOathElement).Distinct()
+            : new[] { Element.Pyro, Element.Hydro, Element.Cryo,
+                      Element.Electro }
                 .Select(e => (e, amount)).ToList();
 
     /// <summary>Wall of Gales: "Swirl every aura." The aura'd bodies are
@@ -1425,14 +1531,38 @@ public static class VarkaCards
                           element == Element.None ? Element.Anemo : element);
     }
 
-    /// <summary>Blazing Charge: "Deal 5 [7] Pyro damage, plus 2 for each
-    /// Pyro Oath." Its own element's Oath, read before the hit.</summary>
+    /// <summary>Blazing Charge: "Deal 8 [11] Pyro damage, plus 1 for each
+    /// Pyro Oath." (Varka pool audit, 2026-10-13: was plus 2.) Its own
+    /// element's Oath, read before the hit.</summary>
     public static Task BlazingCharge(
         PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay) =>
         ElementHit(choiceContext, card, cardPlay, cardPlay.Target,
                    CurrentElementDamage(Var(card, "VkBase"), Var(card, "VkPer"),
                        VarkaOath.Count(card.Owner?.Creature, Element.Pyro)),
                    Element.Pyro);
+
+    /// <summary>Tidal Bulwark's hit before the damage hooks: his Block, plus
+    /// <paramref name="per"/> for each Hydro Oath. PURE.</summary>
+    public static int TidalBulwarkDamage(int block, decimal per,
+                                         int hydroOath) =>
+        System.Math.Max(0, block) + (int)(per * System.Math.Max(0, hydroOath));
+
+    /// <summary>Tidal Bulwark (Varka text pass, 2026-10-13, [USER]: "Instead
+    /// of saying "Apply hydro", it should say "Deal hydro damage"", ruled
+    /// (a)): "Deal Hydro damage equal to your Block, plus 2 [3] for each Hydro
+    /// Oath." No Block of its own; one Hydro hit, so it reacts with an aura
+    /// already there and credits the Hydro Oath like any Hydro hit. The Block
+    /// and the Oath are read before the hit (its own credit comes after).
+    /// Sim twin: <c>varka_oath</c>'s <c>tidal_bulwark</c> kind.</summary>
+    public static Task TidalBulwark(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
+    {
+        var owner = card.Owner?.Creature;
+        return ElementHit(choiceContext, card, cardPlay, cardPlay.Target,
+                   TidalBulwarkDamage(owner == null ? 0 : (int)owner.Block,
+                       Var(card, "VkPer"), VarkaOath.Count(owner, Element.Hydro)),
+                   Element.Hydro);
+    }
 
     /// <summary>Glacial Edict's stacks: 1, plus 1 for every
     /// <paramref name="per"/> Cryo Oath. PURE.</summary>
@@ -1485,9 +1615,9 @@ public static class VarkaCards
         ElementHit(choiceContext, card, cardPlay, cardPlay.Target,
                    Var(card, "VkBase"), Element.Electro);
 
-    /// <summary>Chain Lightning (element identities sec.3): "Deal 8 [11]
-    /// Electro damage to ALL enemies." Its discount is the card's own cost
-    /// hook.</summary>
+    /// <summary>Chain Lightning (Varka pool audit, 2026-10-13): "Deal 8 [11]
+    /// Electro damage to ALL enemies. Discard 2 cards." Costs 0; the discard
+    /// is the row's own chosen-discard op after this hit.</summary>
     public static async Task ElectroAll(
         PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
     {
@@ -1546,9 +1676,11 @@ public static class VarkaCards
     // ---- THE REBALANCE (2026-10-03, review/active/varka-rebalance-2026-10-03.md
     // secs.3-4). Sim twins: varka_oath._rebalance_kind.
 
-    /// <summary>Kindled Edge: "Deal 7 [10] Pyro damage. If it sets off an
-    /// Elemental Reaction, deal 7 [10] more." The more is a second hit on the
-    /// same enemy with no element (a second application is not printed).
+    /// <summary>Kindled Edge: "Deal 7 [10] Pyro damage. If it triggers an
+    /// Elemental Reaction, deal 5 [7] additional damage." (Varka pool audit,
+    /// 2026-10-13: the bonus is its own <c>VkAmount</c>, was the base hit's.)
+    /// The more is a second hit on the same enemy with no element (a second
+    /// application is not printed).
     /// The reaction is read off the target's aura: it wore one Pyro reacts
     /// with, and the hit consumed it.</summary>
     public static async Task KindledEdge(
@@ -1562,7 +1694,7 @@ public static class VarkaCards
                          Element.Pyro);
         if (ReactionEffects.TotalResolved > before && target.IsAlive)
         {
-            await DamageCmd.Attack(amount)
+            await DamageCmd.Attack(Var(card, "VkAmount"))
                 .FromCard(card, cardPlay)
                 .Targeting(target)
                 .Execute(choiceContext);
@@ -1710,7 +1842,7 @@ public static class VarkaCards
         Element.Pyro, Element.Hydro, Element.Cryo, Element.Electro,
     };
 
-    /// <summary>Tempest of the Four Winds: "Deal 4 [5] damage four times, as
+    /// <summary>Tempest of the Four Winds: "Deal 6 [8] damage four times, as
     /// Pyro, Hydro, Cryo and Electro." Each hit credits its own element.
     /// </summary>
     public static async Task Tempest(
@@ -1894,6 +2026,55 @@ public sealed class VarkaShatterDamageVar : DamageVar
 }
 
 /// <summary>
+/// TIDAL BULWARK'S LIVE TOTAL (Varka text pass, 2026-10-13). Display only,
+/// Shatter's shape: the face's <c>{VkHit}</c> is his Block plus <c>VkPer</c>
+/// for each Hydro Oath, folded through the game's damage hooks against the
+/// body <see cref="FrontFoldedDamageVar"/> picks with Hydro carried, as
+/// <see cref="VarkaCards.TidalBulwark"/> deals it. Emitted by codegen for the
+/// kinds in <c>VARKA_TARGET_PREVIEW_KINDS</c>.
+/// </summary>
+public sealed class VarkaTidalBulwarkDamageVar : DamageVar
+{
+    /// <summary>The face's token, Shatter's.</summary>
+    public const string Token = "VkHit";
+
+    public VarkaTidalBulwarkDamageVar()
+        : base(Token, 0m, ValueProp.Move)
+    {
+    }
+
+    public override void UpdateCardPreview(
+        CardModel card, CardPreviewMode previewMode, Creature? target,
+        bool runGlobalHooks)
+    {
+        if (!runGlobalHooks || !card.IsMutable)
+        {
+            BaseValue = 0m;
+            base.UpdateCardPreview(card, previewMode, target, runGlobalHooks);
+            return;
+        }
+        var owner = card.Owner?.Creature;
+        BaseValue = VarkaCards.TidalBulwarkDamage(
+            owner == null ? 0 : (int)owner.Block,
+            card.DynamicVars["VkPer"].BaseValue,
+            VarkaOath.Count(owner, Element.Hydro));
+        if (BaseValue <= 0)
+        {
+            // The play deals nothing here, so no Strength is folded onto it.
+            PreviewValue = 0m;
+            return;
+        }
+        var body = FoldedPreview.Body(
+            FurinaStage.LiveFor(owner), card, previewMode, target,
+            KokomiPlan.FrontEnemy(owner));
+        using (HitElement.Carry(card, Element.Hydro))
+        {
+            base.UpdateCardPreview(card, previewMode, body, runGlobalHooks);
+        }
+    }
+}
+
+/// <summary>
 /// THE PER-HIT NUMBER OF A VARKA KIND THAT READS AN ELEMENT'S OATH (the
 /// element identities round, 2026-10-01: "Thundering Verdict prints no per-hit
 /// number"; X=4 landed 27 a hit where the seat had seen 10 earlier). Display
@@ -1945,6 +2126,227 @@ public sealed class VarkaHitDamageVar : DamageVar
         using (HitElement.Carry(card, OathElement))
         {
             base.UpdateCardPreview(card, previewMode, target, runGlobalHooks);
+        }
+    }
+}
+
+/// <summary>
+/// THE SECOND HIT'S LIVE TOTAL ON FOUR WINDS' ASCENSION AND NORTHWIND AVATAR
+/// (text pass 2026-10-13, [USER]: "Currently the second line doesn't actually
+/// say how much it's going to hit for"). Display only, Shatter's shape: the
+/// face's <c>{VkHit}</c> is <c>VkBase</c> (0 on a card that prints none) plus
+/// <c>VkPer</c> for each Oath of his current element, folded through the
+/// game's damage hooks against the body <see cref="FrontFoldedDamageVar"/>
+/// picks (the aimed enemy, else the front one) with the current element
+/// carried, as <see cref="VarkaCards.AscensionHit"/> and
+/// <see cref="VarkaCards.AvatarHit"/> deal it. With no current element, or a
+/// total of 0, the play deals nothing and the face prints 0. Emitted by
+/// codegen for the kinds in <c>VARKA_CURRENT_HIT_PREVIEW_KINDS</c>.
+/// </summary>
+public sealed class VarkaCurrentElementHitVar : DamageVar
+{
+    /// <summary>The face's token, Thundering Verdict's and Shatter's.</summary>
+    public const string Token = "VkHit";
+
+    public VarkaCurrentElementHitVar()
+        : base(Token, 0m, ValueProp.Move)
+    {
+    }
+
+    /// <summary>The second hit before the hooks, as
+    /// <c>VarkaCards.CurrentElementHit</c> computes it: 0 with no current
+    /// element (the play skips the hit). PURE.</summary>
+    public static int Raw(decimal baseDamage, decimal per, Element current,
+                          int oath) =>
+        current == Element.None
+            ? 0
+            : Math.Max(0, VarkaCards.CurrentElementDamage(baseDamage, per, oath));
+
+    private static decimal BaseOf(CardModel card) =>
+        card.DynamicVars.TryGetValue("VkBase", out var v) ? v.BaseValue : 0m;
+
+    public override void UpdateCardPreview(
+        CardModel card, CardPreviewMode previewMode, Creature? target,
+        bool runGlobalHooks)
+    {
+        if (!runGlobalHooks || !card.IsMutable)
+        {
+            BaseValue = VarkaCards.CurrentElementDamage(
+                BaseOf(card), card.DynamicVars["VkPer"].BaseValue, 0);
+            base.UpdateCardPreview(card, previewMode, target, runGlobalHooks);
+            return;
+        }
+        var owner = card.Owner?.Creature;
+        var element = VarkaOath.Current(owner);
+        BaseValue = Raw(BaseOf(card), card.DynamicVars["VkPer"].BaseValue,
+                        element, VarkaOath.CurrentOath(owner));
+        if (BaseValue <= 0)
+        {
+            // The play deals nothing here, so no Strength is folded onto it.
+            PreviewValue = 0m;
+            return;
+        }
+        var body = FoldedPreview.Body(
+            FurinaStage.LiveFor(owner), card, previewMode, target,
+            KokomiPlan.FrontEnemy(owner));
+        using (HitElement.Carry(card, element))
+        {
+            base.UpdateCardPreview(card, previewMode, body, runGlobalHooks);
+        }
+    }
+}
+
+/// <summary>
+/// KINDLED EDGE'S "ADDITIONAL" HIT, FOLDED (Varka text pass, 2026-10-13, the
+/// damage-preview census). Display only: the face's second number is the
+/// card's <c>VkAmount</c> since the Varka pool audit (2026-10-13; was
+/// <c>VkBase</c>), read live so the upgrade moves it,
+/// folded the way <see cref="FoldedDamageVar"/> folds a follow-up leg: the
+/// body's Vulnerable and his Strength, no reaction (the first hit consumed
+/// the aura) and no element (<see cref="VarkaCards.KindledEdge"/>'s second
+/// hit carries none). Emitted by codegen for <c>VARKA_FOLLOW_UP_KINDS</c>.
+/// </summary>
+public sealed class VarkaFollowUpDamageVar : DamageVar
+{
+    /// <summary>The var whose number the follow-up repeats.</summary>
+    public string Source { get; }
+
+    public VarkaFollowUpDamageVar(string name, string source)
+        : base(name, 0m, ValueProp.Move)
+    {
+        Source = source;
+    }
+
+    public override void UpdateCardPreview(
+        CardModel card, CardPreviewMode previewMode, Creature? target,
+        bool runGlobalHooks)
+    {
+        BaseValue = card.DynamicVars[Source].BaseValue;
+        using var reaction = AuraPower.PreviewWithoutReaction();
+        if (!runGlobalHooks || !card.IsMutable)
+        {
+            base.UpdateCardPreview(card, previewMode, target, runGlobalHooks);
+            return;
+        }
+        var owner = card.Owner?.Creature;
+        var body = FoldedPreview.Body(
+            FurinaStage.LiveFor(owner), card, previewMode, target,
+            KokomiPlan.FrontEnemy(owner));
+        base.UpdateCardPreview(card, previewMode, body, runGlobalHooks);
+    }
+}
+
+/// <summary>
+/// A BONUS INSIDE ONE HIT, FOLDED (Varka text pass, 2026-10-13: Razor:
+/// Awakening's "If it already has Electro, deal 3 additional damage").
+/// Display only. The bonus rides the same hit as <c>VkBase</c>
+/// (<see cref="VarkaCards.AwakeningDamage"/>), so his Strength counts once and
+/// the body's Weak and Vulnerable multiply the sum: the printed bonus is the
+/// folded hit with it less the folded hit without it, so the two printed
+/// numbers add up to what the hit deals. Out of combat, the sheet number.
+/// Emitted by codegen for <c>VARKA_BONUS_FOLD_KINDS</c>; the play reads the
+/// var's <c>BaseValue</c>, which this never leaves changed.
+/// </summary>
+public sealed class VarkaBonusDamageVar : DamageVar
+{
+    /// <summary>The hit's own number, which the bonus is added to.</summary>
+    public string Source { get; }
+
+    /// <summary>The element the hit carries.</summary>
+    public Element Carries { get; }
+
+    public VarkaBonusDamageVar(string name, decimal amount, string source,
+                               Element carries)
+        : base(name, amount, ValueProp.Move)
+    {
+        Source = source;
+        Carries = carries;
+    }
+
+    public override void UpdateCardPreview(
+        CardModel card, CardPreviewMode previewMode, Creature? target,
+        bool runGlobalHooks)
+    {
+        if (!runGlobalHooks || !card.IsMutable)
+        {
+            base.UpdateCardPreview(card, previewMode, target, runGlobalHooks);
+            return;
+        }
+        var owner = card.Owner?.Creature;
+        var body = FoldedPreview.Body(
+            FurinaStage.LiveFor(owner), card, previewMode, target,
+            KokomiPlan.FrontEnemy(owner));
+        var bonus = BaseValue;
+        var hit = card.DynamicVars[Source].BaseValue;
+        try
+        {
+            using (HitElement.Carry(card, Carries))
+            {
+                BaseValue = hit + bonus;
+                base.UpdateCardPreview(card, previewMode, body, runGlobalHooks);
+                var with = PreviewValue;
+                BaseValue = hit;
+                base.UpdateCardPreview(card, previewMode, body, runGlobalHooks);
+                var without = PreviewValue;
+                PreviewValue = Math.Max(0m, with - without);
+            }
+        }
+        finally
+        {
+            BaseValue = bonus;
+        }
+    }
+}
+
+/// <summary>
+/// STORM BATTERY'S LIVE TOTAL (Varka text pass, 2026-10-13). Display only:
+/// the face's <c>{VkHit}</c> is <c>VkPer</c> for each other card in his Hand,
+/// folded through the game's damage hooks with Electro carried, as
+/// <see cref="VarkaCards.StormBattery"/> deals it to each enemy. An
+/// all-enemies face, so the body is the game's own
+/// (<see cref="FoldedPreview.Body"/>). Emitted by codegen for
+/// <c>VARKA_TARGET_PREVIEW_KINDS</c>.
+/// </summary>
+public sealed class VarkaStormBatteryDamageVar : DamageVar
+{
+    /// <summary>The face's token, Shatter's.</summary>
+    public const string Token = "VkHit";
+
+    public VarkaStormBatteryDamageVar()
+        : base(Token, 0m, ValueProp.Move)
+    {
+    }
+
+    /// <summary>The other cards in the owner's Hand (the card leaves the Hand
+    /// when it resolves, so the play's count is the same).</summary>
+    public static int OthersInHand(CardModel card) =>
+        card.IsMutable && card.Owner is { } player
+            ? PileType.Hand.GetPile(player).Cards.Count(c => c != card)
+            : 0;
+
+    public override void UpdateCardPreview(
+        CardModel card, CardPreviewMode previewMode, Creature? target,
+        bool runGlobalHooks)
+    {
+        if (!runGlobalHooks || !card.IsMutable)
+        {
+            BaseValue = 0m;
+            base.UpdateCardPreview(card, previewMode, target, runGlobalHooks);
+            return;
+        }
+        var owner = card.Owner?.Creature;
+        BaseValue = card.DynamicVars["VkPer"].BaseValue * OthersInHand(card);
+        if (BaseValue <= 0)
+        {
+            PreviewValue = 0m;
+            return;
+        }
+        var body = FoldedPreview.Body(
+            FurinaStage.LiveFor(owner), card, previewMode, target,
+            KokomiPlan.FrontEnemy(owner));
+        using (HitElement.Carry(card, Element.Electro))
+        {
+            base.UpdateCardPreview(card, previewMode, body, runGlobalHooks);
         }
     }
 }

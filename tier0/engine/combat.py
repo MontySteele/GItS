@@ -19,7 +19,7 @@ from tier0.engine import (companion_hexerei, effects,
                           klee_overhaul,
                           kokomi_plan,
                           potions, powers, reactions, refpowers, relics,
-                          resources, varka_oath)
+                          resources, varka_oath, yae_shrine)
 from tier0.engine.state import (Card, CombatState, Enemy, Player,
                                 remove_instance, sync_fanfare_cap_to_max_hp)
 
@@ -561,6 +561,9 @@ _FREE_PLAY_CONTEXT = (
     # auto-play that discards or gains block in the middle of an outer card
     # would otherwise leave its numbers behind for the outer card to read.
     "block_gained_this_card", "discards_this_card", "last_drawn_type",
+    # The Kokomi pool overhaul (2026-10-13): the card whose own hit is
+    # resolving. A free play inside an outer card hands it back after.
+    "kk_hit_card",
     # (R213 B). The drain op's per-play total, saved for its
     # neighbours' reason: a free play that drained inside an outer card would
     # otherwise hand the outer card its number.
@@ -814,6 +817,10 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
         _settle_phases(state)
         if not p.alive or state.over:
             return
+    # YAE (`yae_shrine.turn_start`): the Lure expires and Yakan Offering
+    # plants, at the same post-draw site. A no-op for anyone else.
+    if yae_shrine.live(state.player):
+        yae_shrine.turn_start(state)
 
     # FURINA (the Salon's Tab; the pool to 39): Fountain of Lucine's Repays,
     # after her draw, the C# `FurinaStage.TurnStart` site. A no-op for
@@ -938,6 +945,9 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # VARKA (`varka_oath.turn_end`): Oathbound Aegis's end-of-turn Block,
     # at the same `BeforeSideTurnEnd` site. A no-op for anyone else.
     varka_oath.turn_end(state)
+    # YAE (`yae_shrine.turn_end`): the Sakura strike, then their timers
+    # tick, at the same site. A no-op for anyone else.
+    yae_shrine.turn_end(state)
     # THE FURINA RESEARCH SLICE (`furina_tide`): guests act, then Salon
     # Solitaire's Restore 2. A no-op for anyone else.
     furina_tide.end_of_turn(state)
@@ -1240,6 +1250,10 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             # a hit Block absorbed whole answers back, once per hit.
             kokomi_plan.tidal_riposte(state, enemy, blocked,
                                       dmg - blocked)
+            # THE KOKOMI POOL OVERHAUL (2026-10-13): the running totals a
+            # "since you planned this" Plan reads -- this hit, blocked or
+            # not, and who dealt it.
+            kokomi_plan.note_enemy_hit(state, enemy, blocked, dmg)
             if not state.player.alive:
                 # Fairy in a Bottle (dead branch on the battery: potions
                 # empty). Passive revive at the lethal hit; if it saves the
@@ -1529,6 +1543,8 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
     # VARKA, THE OATH REWORK (`varka_oath.open_combat`): his Oath, current
     # element and Fang are per-combat too. A no-op for anyone else.
     varka_oath.open_combat(player)
+    # YAE (`yae_shrine.open_combat`): a fresh shrine per fight.
+    yae_shrine.open_combat(player)
     # FURINA (the Salon's Tab). Same line, same reason: every fight opens
     # with an empty stage, no Fanfare, nothing drained, and the Drain line
     # read from the HP she enters with. A no-op for anyone else.

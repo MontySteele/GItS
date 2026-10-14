@@ -48,13 +48,14 @@ public sealed class ProtoKoSimmer : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Simmer"),
-        ("description", "Deal {Damage:diff()} [gold]Pyro[/gold] damage, plus your largest [gold]Bomb[/gold]'s size on any enemy. It does not go off. Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold]."),
+        ("description", "Deal {Damage:diff()} [gold]Pyro[/gold] damage, plus your largest [gold]Bomb[/gold]'s size on any enemy. It does not go off. Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].{InCombat:\n(Deals {BombHit:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(6m, ValueProp.Move)
+            new DamageVar(6m, ValueProp.Move),
+            new BombReadDamageVar(ProtoBombPower.BombRead.Largest)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

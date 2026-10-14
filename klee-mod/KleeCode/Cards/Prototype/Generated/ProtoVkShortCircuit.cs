@@ -76,11 +76,14 @@ public sealed class ProtoVkShortCircuit : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         {
+            var handBefore = CardPile.Get(PileType.Hand, Owner)?.Cards.Count ?? 0;
             var picked = (await CardSelectCmd.FromHandForDiscard(
                 choiceContext, Owner,
                 new CardSelectorPrefs(CardSelectorPrefs.DiscardSelectionPrompt, 2),
                 null, this)).ToList();
             await CardCmd.Discard(choiceContext, picked);
+            ResolutionLedger.NoteDiscards(Title, picked.Select(c => c.Title).ToList(),
+                ResolutionLedger.DiscardPickedForYou(handBefore, 2));
         }
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
         await PlayerCmd.GainEnergy(1, Owner);

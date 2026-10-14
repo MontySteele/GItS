@@ -103,6 +103,10 @@ MULTIPLAYER_ARMS: tuple[tuple[str, Path, str, str, str], ...] = (
      "proto_ko_", "KLEE_OVERHAUL_MULTIPLAYER_IDS"),
     ("kokomi_overhaul", ARM_DIR / "KokomiOverhaulRoster.cs",
      "MultiplayerSlice", "proto_kk_", "KOKOMI_OVERHAUL_MULTIPLAYER_IDS"),
+    # Varka's co-op five (2026-10-13). His pool is `Pool()`, not a `Slice()`,
+    # so only his tier is held here.
+    ("varka", ARM_DIR / "VarkaRoster.cs",
+     "MultiplayerSlice", "proto_vk_", "VARKA_MULTIPLAYER_IDS"),
 )
 
 

@@ -413,7 +413,10 @@ public class ArmKeywordTipTests
         // `ForBigBaddaBoomTotal`, `ForBoomBadgeTurn`, `ForLionsFangLastTurn`
         // and `ForPassTheMatchActing`, and `ForGrounded` left with its cut
         // Power.
-        Assert.Equal(50, attaches.Count);
+        // 51 with Yae Miko (2026-10-13): `ForEdit`, her second word (pick
+        // 6 (a); `ForSakura` already stood and now prints her tip on hers).
+        Assert.Equal(51, attaches.Count);
+        Assert.Contains(attaches, m => m.Name == "ForEdit");
         Assert.Contains(attaches, m => m.Name == "ForBigBaddaBoomTotal");
         Assert.Contains(attaches, m => m.Name == "ForBoomBadgeTurn");
         Assert.Contains(attaches, m => m.Name == "ForLionsFangLastTurn");

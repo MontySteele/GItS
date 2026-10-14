@@ -69,8 +69,11 @@ def _burn():
 
 
 def _pool():
+    # His co-op five (2026-10-13) sit outside the pool count.
+    coop_only = loader.multiplayer_ids()
     return {c.id: c for c in loader.prototype_cards()
-            if c.id.startswith(V.ID_PREFIX) and c.rarity != "basic"}
+            if c.id.startswith(V.ID_PREFIX) and c.rarity != "basic"
+            and c.id not in coop_only}
 
 
 CUT = ("gale_mantle", "west_wind_shield", "knightly_guard", "tailwind_guard",
@@ -111,7 +114,8 @@ def test_the_new_rows_and_their_upgrades(varka):
     shatter = loader.get_card(_vk("shatter"))
     assert (shatter.cost, shatter.type) == (1, "attack")
     freeze = loader.get_card(_vk("deep_freeze"))
-    assert (freeze.cost, freeze.type, freeze.retain) == (1, "skill", True)
+    # Retain dropped 2026-10-13 ([USER]: "I think we should drop Retain").
+    assert (freeze.cost, freeze.type, freeze.retain) == (1, "skill", False)
     assert loader.get_card(_vk("deep_freeze") + "+").cost == 0
 
 

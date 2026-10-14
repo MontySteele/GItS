@@ -44,14 +44,14 @@ public sealed class ProtoKkBrineSting : CustomCardModel, IElementalCard, ICharac
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForVulnerable(ArmKeywordTips.ForPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro), this), this);
+        ArmKeywordTips.ForPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_brine_sting");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Brine Sting"),
-        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage.\nOr [gold]plan[/gold]: Apply 1 [gold]Vulnerable[/gold] to ALL enemies."),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage.\nOr [gold]plan[/gold]: Deal {PlanDamage:diff()} [gold]Hydro[/gold] damage to each enemy that attacked you since you planned this."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -60,13 +60,14 @@ public sealed class ProtoKkBrineSting : CustomCardModel, IElementalCard, ICharac
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.ApplyVulnerable, 1, KokomiPlan.Aim.AllEnemies),
+            new KokomiPlan.Planned(KokomiPlan.Kind.Damage, DynamicVars["PlanDamage"].IntValue, KokomiPlan.Aim.EnemiesAttackedSince),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(8m, ValueProp.Move)
+            new DamageVar(8m, ValueProp.Move),
+            new KokomiPlan.PlanDamageVar(8m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -107,5 +108,6 @@ public sealed class ProtoKkBrineSting : CustomCardModel, IElementalCard, ICharac
     protected override void OnUpgrade()
     {
         DynamicVars.Damage.UpgradeValueBy(3m);
+        DynamicVars["PlanDamage"].UpgradeValueBy(3m);
     }
 }

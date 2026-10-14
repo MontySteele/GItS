@@ -315,12 +315,11 @@ SIM_CALL_SITES = {
     ('kokomi_plan.py', 2): ("'plan'", 'False', "'hydro'"),
     # Expansion batch one: Tidal Riposte's answer, dealt as a planned hit is.
     ('kokomi_plan.py', 3): ("'plan'", 'False', "'hydro'"),
-    # THE RE-FOUNDING (2026-10-12): Coordinated Tide's Hydro hit on the
-    # front enemy when an Ethereal Plan is carried out, and Grand
-    # Strategist's unelemented hit to ALL when a Plan causes a reaction --
-    # both dealt as a planned hit is, unpowered.
-    ('kokomi_plan.py', 4): ("'plan'", 'False', "'hydro'"),
-    ('kokomi_plan.py', 5): ("'plan'", 'False', 'None'),
+    # THE RE-FOUNDING (2026-10-12): Grand Strategist's unelemented hit to
+    # ALL, on any reaction she triggers since the pool overhaul (2026-10-13),
+    # dealt as a planned hit is, unpowered. (Coordinated Tide's Hydro hit
+    # left with the pool overhaul: it adds a Sting now.)
+    ('kokomi_plan.py', 4): ("'plan'", 'False', 'None'),
     # VARKA, THE OATH REWORK (`varka_oath`, no switch). The expansion's
     # (2026-10-01) Cycle of Seasons and Assembly at the Cathedral: a Power's
     # damage, element-less and unpowered.
@@ -353,6 +352,13 @@ SIM_CALL_SITES = {
     # Storm Surge's "each enemy it Swirls takes 5 more": element-less, powered.
     ('varka_oath.py', 11): ("'attack' if card.type == 'attack' else 'card'",
                            None, 'None'),
+    # YAE MIKO (`yae_shrine`, sim only, 2026-10-13): a Sakura's strike, a
+    # pet's Electro hit under a Power's source, unpowered; the card-carried
+    # hits of Thunderbolt Tithe, Bestseller and Kitsune Flash, powered and
+    # Electro; Fox Fire's rider, 4 Electro to a random enemy, unpowered.
+    ('yae_shrine.py', 1): ("'card'", 'False', 'ELEMENT'),
+    ('yae_shrine.py', 2): ('source', None, 'ELEMENT'),
+    ('yae_shrine.py', 3): ("'card'", 'False', 'ELEMENT'),
 }
 
 
@@ -553,6 +559,12 @@ def test_only_the_set_off_cards_own_hit_is_an_attack():
     # carrying the element the card names (Blazing Charge, Thundering
     # Verdict, Razor, Tempest). The rebalance (2026-10-03) adds Kindled
     # Edge's "deal 7 more": the card's own second hit, with no element.
+    # Starter (a), 2026-10-13 adds `VarkaCards.GaleHit`: Dandelion Gale's
+    # second hit, the Ascension's on ALL enemies, the card's own hit.
+    # YAE MIKO (2026-10-13) adds `YaeCards.CardHit`: Kitsune Flash's,
+    # Thunderbolt Tithe's and Bestseller's one hit, the card's own Electro
+    # hit (the sim's reading: "ONE powered hit of the card"). Her Sakura and
+    # Fox Fire are pets' hits through `ElementalHit` and are not here.
     assert [path for path, _line in sites] == [
         "Powers/Prototype/ProtoBakeKuragePower.cs",
         "Powers/Prototype/ProtoBakeKuragePower.cs",
@@ -560,7 +572,9 @@ def test_only_the_set_off_cards_own_hit_is_an_attack():
         "Powers/Prototype/VarkaOath.cs",
         "Powers/Prototype/VarkaOath.cs",
         "Powers/Prototype/VarkaOath.cs",
-        "Powers/Prototype/VarkaRules.cs"]
+        "Powers/Prototype/VarkaOath.cs",
+        "Powers/Prototype/VarkaRules.cs",
+        "Powers/Prototype/YaeShrine.cs"]
 
 
 # ==========================================================================

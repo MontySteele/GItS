@@ -101,6 +101,18 @@ twin `tier0/engine/varka_oath.py`. His cards speak one verb,
 are the card's `Vk*` vars and the upgrade keys `varka_per` / `varka_base` /
 `varka_amount` move them.
 
+**YAE MIKO** has no switch, Varka's arrangement. Her rows are `proto_ym_`,
+owner `yae`; the C# rules are `Powers/Prototype/YaeShrine.cs` (the Sakura
+ledger, the strikes, Tenko, `YaeCards`), `YaeAnnotations.cs` (the five
+Annotations as `CustomEnchantmentModel`s, Edit, Publish and the per-card
+draft, a BaseLib saved field on the deck card) and `YaePowers.cs`; the sim
+twin is `tier0/engine/yae_shrine.py`. Her cards speak one verb,
+`{op: yae, kind: ...}`, each kind one `YaeCards.<Kind>` call; its numbers are
+the card's `Ym*` vars and the upgrade keys `yae_per` / `yae_base` /
+`yae_amount` move them. Meditations of a Yako adds the rest-site Publish
+(`Relics/MeditationsOfAYako.cs`, Shovel's Dig shape). Her pool is a staged 30
+(`PoolCountTests`' `size:` argument). Parity: `tier0/tests/test_yae_parity.py`.
+
 **KOKOMI'S PLAN.** The **Bake-Kurage** is a real pet
 (`Powers/Prototype/BakeKuragePet.cs`) enemies cannot target. A card with a
 Plan line is played ON it, and at the start of her next turn the jellyfish
@@ -122,6 +134,6 @@ must never read different rosters (R64). The per-row reasoning is in
 **POOL WIRING** (legacy cleanup stage 4): each character's pool lists its
 `proto_` rows in `GenerateAllCards` and offers its roster
 (`*Roster.OfferablePool`, `FurinaStageRoster.Pool`, `VarkaRoster.Pool`).
-Counts are pinned by `KleeTests/Prototype/PoolCountTests.cs`: 78 per kit. Still checked:
+Counts are pinned by `KleeTests/Prototype/PoolCountTests.cs`: 78 per kit (Yae a staged 30 until her second half). Still checked:
 the tier0 schema validators, the codegen, `lint_generated_structure` and
 `lint_pool_membership`. Depth: `docs/current/atlas/klee-mod-cards.md` §7.

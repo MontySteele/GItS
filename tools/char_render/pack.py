@@ -260,17 +260,41 @@ def rest_still(R: Path):
     return canvas, {"size": list(canvas.size), "ppu": meta["ppu"], "seat_px": [half_w, round(0.6 * H)]}
 
 
+#: the select close-up's frame: the figure's top this far down, and anything
+#: the still marks to keep in frame (stance B's crossguards) at least
+#: SELECT_KEEP px above the bottom and SELECT_SIDE px in from the right
+SELECT_TOP, SELECT_KEEP, SELECT_SIDE = 36, 48, 24
+
+
 def select_closeup(R: Path, target_h: int = 2150):
-    """1920x1080, the figure right of centre, bleeding off the bottom (Klee's framing)."""
+    """1920x1080, the figure right of centre, bleeding off the bottom (Klee's
+    framing). When the still records its blades' crossguards (render.py
+    arms_crossed, stance B), the figure is drawn smaller if it must be, so
+    both crossguards sit inside the frame, and moved left if its right edge
+    would leave it. The manifest gets where the crossguards and the chin land."""
     meta = json.loads((R / "select.json").read_text(encoding="utf-8"))
     sel = Image.open(R / "select.png").convert("RGBA")
     sel = ground_clip(sel, meta["origin_px"][1], float(meta["ppu"]) / FX.REF_PPU)
-    sel = sel.crop(KP.alpha_box([sel]))
+    bx, by, bx1, by1 = KP.alpha_box([sel])
+    sel = sel.crop((bx, by, bx1, by1))
+    guards = {s: g["guard_box_px"] for s, g in ((meta.get("arms_crossed") or {}).get("hilts") or {}).items()}
+    if guards:
+        low = max(g[3] for g in guards.values()) - by
+        target_h = min(target_h, math.floor((1080 - SELECT_KEEP - SELECT_TOP) * sel.height / low))
     k = target_h / sel.height
     sel = sel.resize((round(sel.width * k), target_h), Image.LANCZOS)
+    cx = min(1260, 1920 - SELECT_SIDE - (sel.width - sel.width // 2))
+    x0 = cx - sel.width // 2
     canvas = Image.new("RGBA", (1920, 1080), (0, 0, 0, 0))
-    canvas.paste(sel, (1260 - sel.width // 2, 36), sel)
-    return canvas, {"size": [1920, 1080], "figure_h": target_h}
+    canvas.paste(sel, (x0, SELECT_TOP), sel)
+    rec = {"size": [1920, 1080], "figure_h": target_h}
+
+    def to_canvas(x, y):
+        return [round((x - bx) * k + x0, 1), round((y - by) * k + SELECT_TOP, 1)]
+    if guards:
+        rec["guards_px"] = {s: to_canvas(g[0], g[1]) + to_canvas(g[2], g[3]) for s, g in sorted(guards.items())}
+        rec["chin_px"] = to_canvas(0, meta["arms_crossed"]["chin_px"])[1]
+    return canvas, rec
 
 
 def main(argv=None) -> int:
@@ -389,6 +413,16 @@ def main(argv=None) -> int:
     writes.append((art / "model" / REST_FILES[char], rest))
     manifest["rest"] = {"file": REST_FILES[char], **rrec}
     print("rest      ", rrec)
+
+    # stance B's crossed arms (render.py arms_crossed), as measured on the
+    # deformed mesh: the merchant loop's first frame and the select still
+    crossed = {}
+    for name in ("merchant", "select"):
+        g = json.loads((R / f"{name}.json").read_text(encoding="utf-8")).get("arms_crossed")
+        if g:
+            crossed[name] = g
+    if crossed:
+        manifest["arms_crossed"] = crossed
 
     sel, srec = select_closeup(R)
     writes.append((art / "ui" / "select_closeup.png", sel))

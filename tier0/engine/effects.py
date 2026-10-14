@@ -17,7 +17,7 @@ from tier0 import constants as C
 from tier0.engine import (companion_coven, companion_hexerei, coop,
                           furina_stage, klee_overhaul, kokomi_plan,
                           lions_fang, powers, reactions, resources, statuses,
-                          varka_oath)
+                          varka_oath, yae_shrine)
 from tier0.engine.state import (SLY_AUTOPLAY_THIS_TURN, Bomb, Card,
                                 CombatState, Enemy,
                                 grant_sly_autoplay,
@@ -341,6 +341,12 @@ def _runtime_count(state: CombatState, token: str,
         # played this turn". Cleared by `kokomi_plan.roll_turn`. C# twin:
         # `KokomiOverhaulLedger.StingsPlayedThisTurn`.
         return state.kk_stings_played_this_turn
+    if token == "reactions_triggered_this_combat":
+        # The Kokomi pool overhaul (2026-10-13) -- All Streams Flow to the
+        # Sea, "plus 5 for each Elemental Reaction you triggered this
+        # combat" (`kokomi_plan.note_reaction`). C# twin:
+        # `KokomiOverhaulLedger.ReactionsThisCombat`.
+        return state.kk_reactions_this_combat
     if token == "debuffs_on_target":
         # CURRENT-KIT USE ONLY (R276) -- Well Laid, "plus 3 for each debuff on
         # the enemy". The AIMED enemy, `_power_amount_formula`'s read: the
@@ -749,6 +755,9 @@ def owner_identity(owner: Optional[str]) -> tuple[str, str]:
 def _owner_identity_cached(owner: str) -> tuple[str, str]:
     if owner == varka_oath.CHARACTER:
         return (varka_oath.ELEMENT, "catalyst")
+    # YAE has no character yaml either (`yae_shrine.build_player`).
+    if owner == yae_shrine.CHARACTER:
+        return (yae_shrine.ELEMENT, yae_shrine.CADENCE)
     from tier0.content import loader                # late import (cycle)
     spec = loader._character_index().get(owner)
     if not spec:
@@ -3401,6 +3410,9 @@ RUNTIME_COUNT_NAMES = frozenset({
     # Shape of Water, Stings played face-up. Same registry reason.
     "stings_played_this_combat",
     "stings_played_this_turn",
+    # The Kokomi pool overhaul (2026-10-13): All Streams Flow to the Sea, the
+    # Elemental Reactions she triggered this combat. Same registry reason.
+    "reactions_triggered_this_combat",
     # CURRENT-KIT USE ONLY (R213 B) -- the drain op's count. Same
     # reason as the two above: the loader validates every count token at LOAD
     # off this set.
@@ -4950,6 +4962,12 @@ def _op_kokomi(state: CombatState, fx: dict, card: Card) -> None:
     kokomi_plan.kind(state, fx, card, target)
 
 
+def _op_yae(state: CombatState, fx: dict, card: Card) -> None:
+    """YAE's shrine and publishing verbs, one `kind` per rule
+    (`yae_shrine.op_yae`)."""
+    yae_shrine.op_yae(state, fx, card)
+
+
 def _op_varka(state: CombatState, fx: dict, card: Card) -> None:
     """VARKA's Oath verbs, one `kind` per rule (`varka_oath.op_varka`).
     Refused by name for anyone who is not Varka, or with the switch off."""
@@ -4976,6 +4994,9 @@ OPS = {
     # VARKA, THE OATH REWORK (`varka_oath`): his rules' one op, and
     # Knights' Roll Call.
     "varka": _op_varka,
+    # YAE MIKO (`yae_shrine`, sim only until her picks are ruled): her
+    # rules' one op, one `kind:` per verb (Varka's shape).
+    "yae": _op_yae,
     # THE KOKOMI EXPANSION, BATCH ONE (2026-09-29): the now-line verbs, one
     # op with a `kind:` (Varka's shape).
     "kokomi": _op_kokomi,
@@ -5136,6 +5157,15 @@ OPS = {
     "gain_strength": _op_kokomi_plan_only,
     "juuga_guard": _op_kokomi_plan_only,
     "play_companion": _op_kokomi_plan_only,
+    # THE KOKOMI POOL OVERHAUL (2026-10-13): the Chain, Counter and Intent
+    # lines and Read the Field's fetch, each naming the carry-out turn or the
+    # enemy turn the Plan sat through.
+    "damage_per_plan_this_turn": _op_kokomi_plan_only,
+    "damage_blocked_since": _op_kokomi_plan_only,
+    "damage_taken_since": _op_kokomi_plan_only,
+    "energy_if_attacked_since": _op_kokomi_plan_only,
+    "lose_strength_this_turn": _op_kokomi_plan_only,
+    "draw_pile_to_hand": _op_kokomi_plan_only,
     # --- base-game parity ops (the real Ironclad pool) ---
     "upgrade_in_hand": _op_upgrade_in_hand,
     "gain_max_hp": _op_gain_max_hp,
@@ -5186,6 +5216,9 @@ def resolve_card(state: CombatState, card: Card) -> None:
         # Varka's Sturm und Drang rider, after the Attack (C#'s
         # `AfterCardPlayed`): a no-op unless a charge was spent on it.
         companion_overhaul_card_end(state, card, state.card_aim)
+        # YAE (`yae_shrine.after_play`): Editor-in-Chief's strike after an
+        # Annotated card's play. A no-op for anyone else.
+        yae_shrine.after_play(state, card)
     finally:
         if varka:
             varka_oath.end_play(state, card)
@@ -5193,12 +5226,22 @@ def resolve_card(state: CombatState, card: Card) -> None:
         furina_stage.end_play(state)
         state.card_aim = None
         state.card_aim_bound = False
+        # THE KOKOMI POOL OVERHAUL (2026-10-13): no card's hit is resolving
+        # once the play is over, so a reaction after it (Dawn Tide at turn
+        # start) is credited to no card. A free play restores the outer
+        # card's (`combat._FREE_PLAY_CONTEXT`).
+        state.kk_hit_card = None
 
 
 def _resolve_card_bound(state: CombatState, card: Card) -> None:
     # Control provenance (§2.2a): a companion's control counts toward
     # SUPPORT_CARRY.
     state.current_card_companion = card.is_companion
+    # THE KOKOMI POOL OVERHAUL (2026-10-13): this card's own hits, for
+    # Jellyfish Current (a Sting's) and Coordinated Tide (a Companion's).
+    # `kokomi_plan.note_reaction` reads it; the C# twin is the reaction's
+    # `cardSource`.
+    state.kk_hit_card = card
     state.reactions_this_card = 0
     state.kills_this_card = 0
     state.fatal_kills_this_card = 0
@@ -5930,13 +5973,15 @@ def companion_overhaul_turn_end(state: CombatState) -> None:
             + C.MC_LIGHTFALL_PER_ATTACK * enemy.mc_lightfall_tally,
             element=None, source="companion")
         enemy.mc_lightfall_tally = 0
-    # Dahlia, Favonian Favor and Bennett, Passion Overload -- both say THIS
-    # TURN, and both are therefore popped whole here whether or not they ever
-    # paid. Bennett's is the one that can also be spent early: an Attack
-    # consumes it at `companion_overhaul_card_start`, and this is the other
-    # end of the same promise.
+    # Dahlia, Favonian Favor, Bennett, Passion Overload and Mika, Starfrost
+    # Swirl -- all three say THIS TURN, and all three are therefore popped
+    # whole here whether or not they ever paid. Bennett's and Mika's can also
+    # be spent early: an Attack consumes each at
+    # `companion_overhaul_card_start`, and this is the other end of the same
+    # promise.
     p.powers.pop("mc_favonian_favor", None)
     p.powers.pop("mc_passion_overload", None)
+    p.powers.pop("mc_starfrost_discount", None)
     # The Hexerei stand-ins' two this-turn windows close on the same line and
     # for the same reading. `tier0.engine.companion_hexerei`.
     companion_hexerei.roll_turn_end(state)
@@ -6234,7 +6279,8 @@ def companion_overhaul_card_start(state: CombatState, card: Card) -> str:
     for enemy in state.living_enemies:
         if enemy.powers.get("mc_lightfall_sword", 0):
             enemy.mc_lightfall_tally += 1
-    # Mika, Starfrost Swirl -- "your next Attack costs 1 less". The DISCOUNT is
+    # Mika, Starfrost Swirl -- "your next Attack this turn costs 1 less" (the
+    # unused discount is popped at turn end, beside Bennett's). The DISCOUNT is
     # read in `combat.card_cost`, which is pure and is called by the playability
     # gate as well; the CONSUMPTION is here, at the one site both play paths
     # reach, so a card cannot be priced twice or refunded.
@@ -6472,9 +6518,10 @@ def companion_overhaul_reaction(state: CombatState, enemy: Enemy,
     # `tier0.engine.companion_hexerei` argues both, and why a volley that can
     # react again is safe to fire from inside this site.
     companion_hexerei.note_reaction(state, enemy, name, aura)
-    # THE KOKOMI RE-FOUNDING (2026-10-12): Grand Strategist, "Whenever a Plan
-    # causes an Elemental Reaction". `KokomiRefounding.OnReaction` is the twin.
-    kokomi_plan.grand_strategist(state)
+    # THE KOKOMI POOL OVERHAUL (2026-10-13): a reaction she triggered --
+    # All Streams' count, Grand Strategist, Coordinated Tide and Jellyfish
+    # Current. `KokomiRefounding.OnReaction` is the twin.
+    kokomi_plan.note_reaction(state)
     if name == "swirl":
         # THE INAZUMA ARM'S Swirl WINDOW. Heizou's Heartstopper
         # Strike prints "deals 4 more for each Swirl this turn", so the count

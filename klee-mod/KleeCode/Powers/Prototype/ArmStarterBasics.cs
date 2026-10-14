@@ -177,6 +177,13 @@ internal static class ArmStarterBasics
             return VarkaRoster.StarterStrike();
         }
 
+        // YAE MIKO (2026-10-13): the Defect's pair, as her pool borrows his
+        // frame; Varka's reason.
+        if (character is IYaeCharacter)
+        {
+            return YaeRoster.StarterStrike();
+        }
+
         return null;
     }
 
@@ -201,6 +208,11 @@ internal static class ArmStarterBasics
         if (character is IVarkaCharacter)
         {
             return VarkaRoster.StarterDefend();
+        }
+
+        if (character is IYaeCharacter)
+        {
+            return YaeRoster.StarterDefend();
         }
 
         return null;

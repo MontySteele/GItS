@@ -406,6 +406,29 @@ public class CompanionOverhaulHookTests
         Assert.False(power.TryModifyEnergyCostInCombat(attack, 0m, out _));
     }
 
+    // "THIS TURN" (the user's ruling, 2026-10-13): the discount no longer
+    // banks across turns. The removal is Passion Overload's own, so the two
+    // riders' AfterSideTurnEnd bodies are asserted identical in shape: the
+    // player's side ends, the power is removed, used or not.
+    [Fact]
+    public void The_discount_is_removed_at_the_end_of_the_players_turn()
+    {
+        var mika = typeof(StarfrostDiscountPower)
+            .GetMethod("AfterSideTurnEnd", All)!;
+        var bennett = typeof(PassionOverloadPower)
+            .GetMethod("AfterSideTurnEnd", All)!;
+        Assert.Equal(typeof(StarfrostDiscountPower), mika.DeclaringType);
+        Assert.Contains(Il.Calls(mika), c => c.Contains("PowerCmd.Remove"));
+        // The compiler names each state machine by ordinal; skip those.
+        static List<string> Shape(MethodInfo m) => Il.Calls(m)
+            .Where(c => !c.StartsWith("<")).OrderBy(c => c).ToList();
+        Assert.Equal(Shape(bennett), Shape(mika));
+
+        var face = ((ILocalizationProvider)new StarfrostDiscountPower())
+            .Localization!.First(r => r.Item1 == "description").Item2;
+        Assert.StartsWith("Your next Attack this turn costs", face);
+    }
+
     [Fact]
     public void The_white_multiplier_is_the_purity_percentage()
     {
@@ -557,10 +580,12 @@ public class CompanionOverhaulHookTests
         Assert.DoesNotContain(calls, c => c.Contains("FavonianFavorPower"));
         Assert.DoesNotContain(calls, c => c.Contains("PassionOverloadPower"));
         Assert.DoesNotContain(calls, c => c.Contains("LightningFangPower"));
+        Assert.DoesNotContain(calls, c => c.Contains("StarfrostDiscountPower"));
 
         foreach (var type in new[] { typeof(FavonianFavorPower),
                                      typeof(PassionOverloadPower),
-                                     typeof(LightningFangPower) })
+                                     typeof(LightningFangPower),
+                                     typeof(StarfrostDiscountPower) })
         {
             Assert.NotNull(type.GetMethod("AfterSideTurnEnd", All));
         }

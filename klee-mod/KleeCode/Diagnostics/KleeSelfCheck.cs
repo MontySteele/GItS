@@ -95,6 +95,8 @@ internal static class KleeSelfCheck
                          // his loc (R8) and his Architect lines (R12) are
                          // checked at boot like everyone's.
                          ModelDb.Character<Varka>(),
+                         // Yae Miko (2026-10-13), on the same terms.
+                         ModelDb.Character<Yae>(),
                      })
             {
                 CheckCharacterInvariants(character);
@@ -444,7 +446,8 @@ internal static class KleeSelfCheck
             // starter's base pair is Silent's -- and his answer is the seam
             // above, `ArmStarterBasics`, which Large Capsule and Fasten are
             // patched to ask BEFORE their unguarded First().
-            if (character is Powers.IVarkaCharacter
+            if ((character is Powers.IVarkaCharacter
+                 || character is Powers.IYaeCharacter)
                 && Powers.ArmStarterBasics.StrikeFor(character) != null)
             {
                 break;

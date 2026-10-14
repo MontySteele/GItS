@@ -53,7 +53,7 @@ public sealed class ProtoVkBlazingCharge : CustomCardModel, IElementalCard, ICha
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Blazing Charge"),
-        ("description", "Deal {VkBase:diff()} [gold]Pyro[/gold] damage, plus {VkPer:diff()} for each [gold]Pyro[/gold] [gold]Oath[/gold].{InCombat:{VarkaSwitch}|}{InCombat:{VarkaWildfire}|}"),
+        ("description", "Deal {VkBase:diff()} [gold]Pyro[/gold] damage, plus {VkPer:diff()} for each [gold]Pyro[/gold] [gold]Oath[/gold].{InCombat:\n(Deals {VkHit:diff()} damage)|}{InCombat:{VarkaSwitch}|}{InCombat:{VarkaWildfire}|}"),
     };
 
     /// <summary>This card's in-combat Oath lines
@@ -70,7 +70,8 @@ public sealed class ProtoVkBlazingCharge : CustomCardModel, IElementalCard, ICha
         new List<DynamicVar>
         {
             new DynamicVar("VkBase", 8m),
-            new DynamicVar("VkPer", 2m)
+            new DynamicVar("VkPer", 1m),
+            new VarkaHitDamageVar(Element.Pyro)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

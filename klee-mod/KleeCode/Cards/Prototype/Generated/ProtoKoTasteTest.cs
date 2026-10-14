@@ -48,13 +48,14 @@ public sealed class ProtoKoTasteTest : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Taste Test"),
-        ("description", "Deal [gold]Pyro[/gold] damage equal to twice your [gold]Bombs[/gold] on the enemy. They do not go off. Add {Stash:diff()} [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold]."),
+        ("description", "Deal [gold]Pyro[/gold] damage equal to twice your [gold]Bombs[/gold] on the enemy. They do not go off. Add {Stash:diff()} [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold].{InCombat:\n(Deals {BombHit:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("Stash", 2m)
+            new DynamicVar("Stash", 2m),
+            new BombReadDamageVar(ProtoBombPower.BombRead.TargetTotalDouble)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

@@ -453,6 +453,9 @@ def _fake_tree(tmp_path: Path, pck_newer: bool) -> Path:
     (root / "ImageGen" / "images").mkdir(parents=True)
     (root / "ImageGen" / "images" / "a.png").write_bytes(b"x")
     (root / "klee-mod" / "pck-src" / "a.tscn").write_text("s", encoding="utf-8")
+    # Since 2026-10-13 the script that authors scenes inline is a source too.
+    (root / "tools").mkdir(parents=True)
+    (root / "tools" / "build_pck.ps1").write_text("s", encoding="utf-8")
     pck = root / "klee-mod" / "assets" / "klee.pck"
     pck.write_bytes(b"p")
     when = time.time() + (600 if pck_newer else -600)
@@ -465,7 +468,7 @@ def test_deploy_round_rebuilds_the_pck_when_a_source_tree_is_newer(tmp_path):
     rebuild, why = deploy.pck_decision(_fake_tree(tmp_path / "a", False))
     assert rebuild and "changed since" in why
     rebuild, why = deploy.pck_decision(_fake_tree(tmp_path / "b", True))
-    assert not rebuild and "newer than both" in why
+    assert not rebuild and "newer than every source" in why
 
 
 def test_deploy_round_rebuilds_when_there_is_no_pck_at_all(tmp_path):

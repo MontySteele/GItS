@@ -235,7 +235,10 @@ def _proto_power(effects: list[dict]) -> dict | None:
 #: `gen_klee_cards.PLAN_UPGRADE_VARS`; the three move together or a smithed
 #: prototype is two different cards.
 PLAN_DELTA_OPS: dict[str, tuple[str, ...]] = {
-    "plan_damage": ("damage",),
+    "plan_damage": ("damage",
+                    # The Kokomi pool overhaul (2026-10-13): Feint's and
+                    # Turning Tide's per-Plan rate.
+                    "damage_per_plan_this_turn"),
     # `EB-335`. Tide Wall's per-Plan scaler is a BLOCK clause wearing a count,
     # so it takes `plan_block`'s key rather than a sixth key of its own --
     # one printed Block number per row is still the rule, and the flat `block`
@@ -247,7 +250,13 @@ PLAN_DELTA_OPS: dict[str, tuple[str, ...]] = {
                    # R276, Tide Wall: the flat bonus on top of the intent.
                    "block_max_intent"),
     "plan_mend": ("mend",),
-    "plan_power_amount": ("apply_power",),
+    "plan_power_amount": ("apply_power",
+                          # The Kokomi pool overhaul (2026-10-13): Undercurrent
+                          # Snare's Strength loss.
+                          "lose_strength_this_turn"),
+    # The Kokomi pool overhaul (2026-10-13): Prepared Retreat's "gain 1 [2]
+    # Energy".
+    "plan_energy": ("energy", "energy_if_attacked_since"),
     # The Kokomi level pass (2026-10-12), Gorou's War Banner: "Plan: Gain 1
     # [2] Strength."
     "plan_strength": ("gain_strength",),
@@ -549,6 +558,10 @@ def _prototype_deltas(merged: dict[str, dict]) -> dict[str, dict]:
     from tier0.engine import varka_oath        # late: loader imports us
     reachable |= {c.id for c in loader.prototype_cards()
                   if c.id.startswith(varka_oath.ID_PREFIX)}
+    # YAE MIKO (2026-10-13), on Varka's terms: every `proto_ym_` row.
+    from tier0.engine import yae_shrine        # late: loader imports us
+    reachable |= {c.id for c in loader.prototype_cards()
+                  if c.id.startswith(yae_shrine.ID_PREFIX)}
     deltas: dict[str, dict] = {}
     for card in loader.prototype_cards():
         if card.id not in reachable:
@@ -1415,6 +1428,12 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             ok = _bump_first((fx for fx in everywhere
                               if fx.get("op") == "varka"),
                              key[len("varka_"):], val)
+        elif key in ("yae_per", "yae_base", "yae_amount"):
+            # YAE MIKO: one numeric field of the row's `yae` op (its C#
+            # DynamicVar `YmPer` / `YmBase` / `YmAmount`).
+            ok = _bump_first((fx for fx in everywhere
+                              if fx.get("op") == "yae"),
+                             key[len("yae_"):], val)
         elif key == "varka_upgraded":
             # VARKA (the expansion, Pathfinder's Mark+): the row's `varka`
             # op reads its upgrade at play time (`IsUpgraded` in C#).

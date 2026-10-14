@@ -64,6 +64,8 @@ def test_copies_that_agree_are_not_marked():
 
 
 def test_the_relic_ascension_says_it_is_not_in_the_deck():
-    page = blindplay.observe(_with_ascension(varka_state()))
-    assert ("    - Added by Boreas's Fang the first time each combat you "
-            "gain Oath. It is not in your deck.") in page
+    # Starter (a), 2026-10-13: only Wolf's Gravestone's copy is extra.
+    page = blindplay.observe(_with_ascension(varka_state(),
+                                             "Wolf's Gravestone"))
+    assert ("    - Wolf's Gravestone adds a copy the first time each combat "
+            "you gain Oath. That copy is not in your deck.") in page

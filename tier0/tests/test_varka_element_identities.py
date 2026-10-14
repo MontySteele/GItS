@@ -43,7 +43,9 @@ def _enemy(hp=100, name="e", aura=None):
 
 def _state(n=1, element="pyro", enemies=None):
     enemies = enemies or [_enemy(name=f"e{i}") for i in range(n)]
-    p = V.build_player(element, fang=False)
+    # The Fang held, as in every run: since Starter (a), 2026-10-13 it pays
+    # his Swirls and adds no Ascension.
+    p = V.build_player(element)
     p.draw_pile = [loader.get_card("strike") for _ in range(10)]
     st = CombatState(player=p, enemies=enemies, rng=random.Random(0))
     st.turn = 1
@@ -79,8 +81,10 @@ GONE = ("updraft", "pressure_front", "unfurled_banner", "four_winds_accord",
 
 
 def test_the_pool_stays_78_with_the_five_swaps(varka):
+    # His co-op five (2026-10-13) sit outside the pool count.
     pool = {c.id: c for c in loader.prototype_cards()
-            if c.id.startswith(V.ID_PREFIX) and c.rarity != "basic"}
+            if c.id.startswith(V.ID_PREFIX) and c.rarity != "basic"
+            and c.id not in loader.multiplayer_ids()}
     assert len(pool) == 78
     by = {r: sum(1 for c in pool.values() if c.rarity == r)
           for r in ("common", "uncommon", "rare")}
@@ -105,7 +109,10 @@ def test_the_paper_numbers(varka):
     assert _fx(_vk("short_circuit"), "energy")["amount"] == 1
     assert loader.get_card(_vk("short_circuit")).exhaust is not True
     assert loader.get_card(_vk("short_circuit")).cost == 0
-    assert loader.get_card(_vk("chain_lightning")).cost == 2
+    # Varka pool audit (2026-10-13): costs 0, discards 2.
+    assert loader.get_card(_vk("chain_lightning")).cost == 0
+    assert _fx(_vk("chain_lightning"), "discard") == {
+        "op": "discard", "amount": 2, "select": "chosen"}
     assert _fx(_vk("chain_lightning") + "+", "varka")["base"] == 11
     verdict = loader.get_card(_vk("thundering_verdict"))
     assert verdict.cost == "X" and verdict.rarity == "rare"
@@ -159,18 +166,20 @@ def test_short_circuit_discards_two_draws_two_for_one_energy(varka):
     assert len(st.player.hand) == 5 and st.discards_this_turn == 2
 
 
-def test_chain_lightning_costs_one_less_per_discard(varka):
+def test_chain_lightning_costs_zero_and_discards_two(varka):
+    # Varka pool audit (2026-10-13): "Deal 8 [11] Electro damage to ALL
+    # enemies. Discard 2 cards." No discount: 0 whatever was discarded.
     st = _state(n=2)
     chain = loader.get_card(_vk("chain_lightning"))
-    assert combat.card_cost(st, chain) == 2
-    st.discards_this_turn = 1
-    assert combat.card_cost(st, chain) == 1
-    st.discards_this_turn = 5
+    assert combat.card_cost(st, chain) == 0
+    st.discards_this_turn = 3
     assert combat.card_cost(st, chain) == 0
     st.discards_this_turn = 0
+    st.player.hand = [loader.get_card("strike") for _ in range(3)]
     _play(st, chain)
     assert [e.hp for e in st.enemies] == [100 - 8] * 2
     assert all(e.aura == "electro" for e in st.enemies)
+    assert len(st.player.hand) == 1 and st.discards_this_turn == 2
 
 
 def test_chain_lightning_after_short_circuit_is_free(varka):
@@ -183,7 +192,7 @@ def test_chain_lightning_after_short_circuit_is_free(varka):
     st.player.energy = 0
     combat.play_card(st, circuit)
     # The pilot's discard pick may take Chain Lightning itself; a copy left
-    # in hand costs 2 - 2 discards = 0, and the Energy is there for more.
+    # in hand costs 0 (its printed cost since the pool audit, 2026-10-13).
     if chain in st.player.hand:
         assert combat.card_cost(st, chain) == 0
     assert st.player.energy == 1
@@ -419,8 +428,9 @@ def test_the_generated_faces():
     assert "ArmKeywordTips.ForElementSwitch(" in blazing
     assert "Element.Pyro)" in blazing
     chain = (gen_dir / "ProtoVkChainLightning.cs").read_text(encoding="utf-8")
-    assert "TryModifyEnergyCostInCombat" in chain
-    assert "KokomiResources.DiscardsThisTurn(this)" in chain
+    # Varka pool audit (2026-10-13): no discount, a chosen discard of 2.
+    assert "TryModifyEnergyCostInCombat" not in chain
+    assert "CardSelectCmd.FromHandForDiscard" in chain
     verdict = (gen_dir / "ProtoVkThunderingVerdict.cs").read_text(
         encoding="utf-8")
     assert "HasEnergyCostX => true" in verdict

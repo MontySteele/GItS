@@ -151,6 +151,7 @@ def test_every_owned_word_is_a_word_the_glossary_can_raise():
 
 
 def test_every_owner_is_a_character_on_the_roster():
-    # VARKA (prototype batch one) owns his three words.
+    # VARKA (prototype batch one) owns his three words; YAE MIKO (batch
+    # one, 2026-10-13) her two, under the name the wire reads her back by.
     assert set(blindplay_notes._ARM_KEYWORD_ARM.values()) == {
-        "klee", "kokomi", "furina", "varka"}
+        "klee", "kokomi", "furina", "varka", "yae miko"}
