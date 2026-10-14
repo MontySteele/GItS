@@ -184,6 +184,10 @@ REGISTRY: tuple[Lint, ...] = (
     # `docs/current/text-conventions.md` fixes. Carries a curated exception
     # list with a reason per entry and rot semantics, so it can only shrink.
     _ci("text-conventions",     "tools/lint_text_conventions.py"),
+    # The tooltip trim (2026-10-14): a player's card hover raises at most 3
+    # boxes of at most 100 characters ("about 90"). The seat's full chain is
+    # not measured; it keeps every rider for the blind page.
+    _ci("hover-tips",           "tools/lint_hover_tips.py"),
     # 2026-10-02, the co-op run: "Unify the language across all cards - say
     # if it does an element and also apply the symbol to the card". Every
     # prototype face whose hit, aura or Plan applies an element names it in

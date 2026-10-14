@@ -38,7 +38,9 @@ public sealed class ProtoKkNereidsAscension : CustomCardModel, ICharacterCard
     public string CharacterId => "kokomi";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForPlanNoLine(ArmKeywordTips.ForNereidsTwice(base.ExtraHoverTips, this), this);
+        TipAudience.Seat
+            ? ArmKeywordTips.ForPlanNoLine(ArmKeywordTips.ForNereidsTwice(base.ExtraHoverTips, this), this)
+            : ArmKeywordTips.ForPlanNoLine(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_nereids_ascension");
 

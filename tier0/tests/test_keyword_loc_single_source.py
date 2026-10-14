@@ -75,7 +75,8 @@ def test_the_generated_rows_carry_numbers_not_placeholders():
     # `EB-345` golded the keyword and blued the numeral (R249); the assertion
     # is still that a NUMBER reached the row, not that the markup did not move.
     pyro = table["KLEEMOD-APPLIES_PYRO.description"]
-    assert re.search(r"applies \[gold\]Pyro\[/gold\] for \[blue\]\d+\[/blue\] "
+    # The tooltip trim (2026-10-14) opens the row with "Applies".
+    assert re.search(r"(?i)applies \[gold\]Pyro\[/gold\] for \[blue\]\d+\[/blue\] "
                      r"turns", pyro), pyro
 
 

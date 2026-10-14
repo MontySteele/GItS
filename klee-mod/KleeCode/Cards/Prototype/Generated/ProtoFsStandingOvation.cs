@@ -44,7 +44,9 @@ public sealed class ProtoFsStandingOvation : CustomCardModel, IElementalCard, IC
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFanfare(ArmKeywordTips.ForSpend(ArmKeywordTips.ForBankDamage(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro), this), this), this);
+        TipAudience.Seat
+            ? ArmKeywordTips.ForFanfare(ArmKeywordTips.ForSpend(ArmKeywordTips.ForBankDamage(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro), this), this), this)
+            : ArmKeywordTips.ForFanfare(ArmKeywordTips.ForSpend(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_standing_ovation");
 

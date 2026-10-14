@@ -38,7 +38,9 @@ public sealed class ProtoFsEncore : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForOldestGuest(base.ExtraHoverTips, this);
+        TipAudience.Seat
+            ? ArmKeywordTips.ForOldestGuest(base.ExtraHoverTips, this)
+            : base.ExtraHoverTips;
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_encore");
 
