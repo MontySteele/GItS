@@ -216,6 +216,11 @@ public static partial class McpMod
                            + $"'{SafeGetText(() => target.Name) ?? anyId}'");
         }
 
+        // GItS LOCAL EDIT (Furina sweep round, 2026-10-14). The title is read
+        // BEFORE the play: a two-faced card (Ousia / Pneuma) turns over as it
+        // resolves, and a title read afterwards names the face it flipped to.
+        string playedTitle = card.Title;
+
         // Play the card via the action queue (same path as the game UI)
         RunManager.Instance.ActionQueueSynchronizer.RequestEnqueue(new PlayCardAction(card, target));
 
@@ -226,7 +231,7 @@ public static partial class McpMod
         return new Dictionary<string, object?>
         {
             ["status"] = "ok",
-            ["message"] = $"Playing '{card.Title}'" + aimText
+            ["message"] = $"Playing '{playedTitle}'" + aimText
         };
     }
 
