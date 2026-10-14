@@ -103,7 +103,7 @@ px per inch: `chars.guest_ppu`), and Spend, Drain and Repay as stage effect
 clips (`fx.STAGE_EFFECTS`).
 
 ```sh
-.venv/Scripts/python tools/char_render/build.py --char varka|furina --models <scratch>/models --work <scratch dir> --art-root <scratch art root>
+.venv/Scripts/python tools/char_render/build.py --char varka|furina|kokomi --models <scratch>/models --work <scratch dir> --art-root <scratch art root>
 .venv/Scripts/python tools/char_render/pack.py --char varka --renders <scratch dir> --art-root <dir> [--check]
 ```
 
@@ -159,6 +159,27 @@ them and of her roster tile. Never hand-edit the scenes:
 
 ```sh
 .venv/Scripts/python -m tools.furina_rig gen [--check]          # write / check her two scenes and the eleven guests (no art)
+```
+
+**Kokomi's model art (`kokomi_clips.py`, `tools/kokomi_rig/`, phase A,
+2026-10-14).** Built without a render (the game was in use): her pose library
+on the body PMX `珊瑚宫心海.pmx` (the same bone set and proportions as
+Furina's), 63 in, rest height 1.6261 units read off the PMX's vertices.
+Phase A is the surfaces every kit needs: idle, low-HP idle, attack (a push
+of water whose jet is a phantom off her far hand, Furina's mechanism), cast,
+hurt, death (the router needs it), the shop loop, the rest seat, the select
+close-up, the roster tile (its producer moved here from
+`gen_kokomi_stills.py`) and the shadow. Card clips wait until her build is
+final. Her long sleeves and skirt tails are physics chains, so every pose
+hangs the sleeves from the elbows (`cloth`). `tools/kokomi_rig` generates
+her two scenes the moment `kokomi_frames.json` exists (tested now against a
+synthetic manifest); `build_pck.ps1` already copies her frames and switches
+her rest and select art when they exist. To finish, on a free machine:
+
+```sh
+.venv/Scripts/python tools/char_render/build.py --char kokomi --models <scratch>/models --work <scratch dir> --art-root <scratch art root>
+# review the sheets; copy <scratch art root>/ImageGen/images/kokomi into the main checkout's ImageGen
+.venv/Scripts/python -m tools.kokomi_rig gen                    # writes pck-src/kokomi/model/combat.tscn + merchant_character.tscn
 ```
 
 **The edge lint (L13, `art_lint.py --edges`).** `cover` is the wrong default for

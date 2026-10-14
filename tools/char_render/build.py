@@ -1,6 +1,6 @@
 """Render every surface of one kit from its official model, paint it and pack it: one command.
 
-    python tools/char_render/build.py --char varka|furina --models <scratch>/models --work <scratch dir> \
+    python tools/char_render/build.py --char varka|furina|kokomi --models <scratch>/models --work <scratch dir> \
         [--blender <blender.exe>] [--art-root <dir>] [--only-render]
 
 The kit twin of tools/klee_render/build.py. The packs stay under the
@@ -36,11 +36,15 @@ _spec.loader.exec_module(CH)
 BLENDER = r"C:\Users\Monty\AppData\Local\Programs\Blender\blender-5.2.2-windows-x64\blender.exe"
 #: The rest-pose height of each kit's model in units (import 0.08), measured
 #: by render.py's SCALE line (bounding box of the body mesh), 2026-10-13.
-REST_HEIGHT = {"varka": 2.0468, "furina": 1.7224}
-SELECT_PPU = {"varka": 1100.0, "furina": 1300.0}
+#: Kokomi's (2026-10-14) was read off the PMX's vertices without Blender
+#: (max - min of the rest-pose heights x IMPORT_SCALE), the same box: the
+#: method gives Varka's and Furina's figures to four places.
+REST_HEIGHT = {"varka": 2.0468, "furina": 1.7224, "kokomi": 1.6261}
+SELECT_PPU = {"varka": 1100.0, "furina": 1300.0, "kokomi": 1300.0}
 #: each kit's combat clips (pack.py packs the same set) and its extra job
 COMBAT_CLIPS = {"varka": "idle,idle_low,attack,cast,hurt,death,ascension",
-                "furina": "idle,idle_low,attack,cast,hurt,death,rejoice"}
+                "furina": "idle,idle_low,attack,cast,hurt,death,rejoice",
+                "kokomi": "idle,idle_low,attack,cast,hurt,death"}
 SELECT_OUTLINE = 7.0
 
 

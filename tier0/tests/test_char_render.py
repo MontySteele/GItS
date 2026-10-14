@@ -706,3 +706,112 @@ def test_furinas_manifest_was_packed_at_her_ruled_height():
         want = neck * chars.GUEST_HEIGHTS_IN[g] / chars.CHARS["furina"]["height_in"]
         assert abs(rec["head_px"] / want - 1) < 0.04, (g, rec["head_px"], want)
         assert rec["size"][0] <= pack.MAX_SHEET and 0 < rec["feet"][1] <= rec["size"][1]
+
+
+# ------------------------------------------------------------------ Kokomi (phase A, 2026-10-14)
+kc = _load("kokomi_clips")
+
+
+def test_every_kokomi_clip_runs_forward_and_every_loop_closes():
+    assert set(kc.CLIPS) == {*pack.COMBAT_CLIPS["kokomi"], "merchant"}
+    for name, clip in kc.CLIPS.items():
+        times = [k[0] for k in clip["keys"]]
+        assert times == sorted(times) and times[0] == 0.0, name
+        assert times[-1] <= clip["length"] + 1e-9, name
+        for _t, pose, ease in clip["keys"]:
+            assert ease in EASES, name
+            assert {"yaw", "morphs", "ops", "root"} <= set(pose), name
+            assert {op[0] for op in pose["ops"]} <= OPS, name
+        if clip["loop"]:
+            assert times[-1] == clip["length"], name
+            assert clip["keys"][0][1] == clip["keys"][-1][1], f"{name}: loop does not close"
+
+
+def test_kokomi_starts_and_ends_her_clips_in_stance_a_with_her_feet_planted():
+    a = kc.idle_pose(0.5)
+    for name in kc.FROM_IDLE:
+        keys = kc.CLIPS[name]["keys"]
+        assert keys[0][1] == a and keys[-1][1] == a, name
+    feet = [("movew", "足ＩＫ.L"), ("movew", "足ＩＫ.R")]
+    for name in ("idle", "idle_low", "cast", "hurt"):
+        for _t, pose, _e in kc.CLIPS[name]["keys"]:
+            for kind, bone in feet:
+                got, want = _op(pose, kind, bone)[2], _op(a, kind, bone)[2]
+                assert got[:2] == want[:2], (name, _t, bone)
+
+
+def test_her_pack_has_no_catalyst_so_her_water_jet_is_a_phantom():
+    cfg = chars.CHARS["kokomi"]
+    assert cfg["clips"] == "kokomi_clips" and cfg["blades"] == {} and cfg["prop"] is None
+    assert set(kc.PHANTOM) == {"L"} and 0.3 < kc.PHANTOM["L"] < kc.PHANTOM["L"] + 1 and kc.PHANTOM["L"] < 0.72, \
+        "the far hand, shorter than Furina's rapier"
+    atk = kc.CLIPS["attack"]
+    (imp,) = atk["events"]["impact"]
+    assert atk["events"]["main"] == imp and any(abs(k[0] - imp) < 1e-9 for k in atk["keys"])
+    assert abs(imp * atk["fps"] - round(imp * atk["fps"])) < 1e-6, "the impact lands on a frame"
+    assert all(w["blade"] in kc.PHANTOM and w["from"] < imp <= w["to"] for w in atk["trails"])
+    assert any(abs(b["t"] - imp) < 1e-9 and b["kind"] == "thrust" for b in atk["bursts"]), "the jet at the hit"
+    hit = next(k[1] for k in atk["keys"] if abs(k[0] - imp) < 1e-9)
+    far = _op(hit, "hand", "L")[3]
+    assert far[0] >= 0.45 and abs(far[2]) < 0.2, far
+    # the jet runs along the hand (render.py phantom_points): the hand points at the enemy
+    aim = _op(hit, "aimw", "手首.L")[2]
+    assert aim[0] > 0.9 and abs(aim[2]) < 0.2, aim
+    # no lunge: she does not close the distance
+    lead = _op(hit, "movew", "足ＩＫ.L")[2][0] - _op(kc.idle_pose(0.5), "movew", "足ＩＫ.L")[2][0]
+    assert 0 <= lead <= 0.05, lead
+
+
+def test_her_idle_never_holds_an_arm_out_and_her_open_hand_is_palm_up():
+    # Furina's "salute" lesson (2026-10-13) holds for every kit: no arm up and
+    # out in idle, idle_low, the shop loop, the select still, or the stance
+    # every clip starts and ends on.
+    stills = [k[1] for name in ("idle", "idle_low", "merchant") for k in kc.CLIPS[name]["keys"]]
+    stills += [kc.CLIPS[name]["keys"][i][1] for name in (*kc.FROM_IDLE, "death") for i in (0, -1)]
+    stills += [kc.SELECT, kc.PORTRAIT, kc.STAND]
+    for p in stills:
+        assert not _held_out(p), _held_out(p)
+    a = kc.idle_pose(0.0)
+    assert _op(a, "aimw", "手首.L")[3] == kc.FAR_AIM[1], "palm up"
+
+
+def test_her_sleeves_hang_from_the_elbows_in_every_pose():
+    # her long sleeves are physics chains nothing simulates headless: every
+    # pose re-aims each one after the arms are placed
+    poses = [k[1] for clip in kc.CLIPS.values() for k in clip["keys"]] + list(kc.STILLS.values())
+    for p in poses:
+        aimed = [op for op in p["ops"] if op[0] == "aimw" and op[1] in kc.SLEEVES.values()]
+        assert {op[1] for op in aimed} == set(kc.SLEEVES.values()), p
+        last_hand = max(i for i, op in enumerate(p["ops"]) if op[0] == "hand")
+        assert all(p["ops"].index(op) > last_hand for op in aimed), "the sleeves hang from where the arms ended"
+        for op in aimed:
+            assert op[2][2] < 0, "down"
+
+
+def test_kokomis_jobs_and_sheets():
+    job = build.jobs("kokomi")
+    assert set(job[0]["clips"].split(",")) == set(pack.COMBAT_CLIPS["kokomi"])
+    assert {"stance_a", "stand"} <= set(job[0]["stills"].split(","))
+    assert [j["clips"] or j["stills"] for j in job[1:]] == ["merchant", "rest", "select,portrait"]
+    assert set(pack.SHEET_FILES["kokomi"]) == {*pack.COMBAT_CLIPS["kokomi"], "merchant"}
+    assert set(pack.FX_FILES["kokomi"]) == {"attack"}
+    assert "kokomi" not in pack.STAGE_FILES and "kokomi" not in pack.EFFECT_FILES
+    # her rest height was read off the PMX (no hat): 63 in over a 68 in adult
+    # at 235 px is ~217.7 px, the same body px as Furina at the same height
+    assert build.REST_HEIGHT["kokomi"] == 1.6261
+    assert abs(build.combat_ppu("kokomi") * build.REST_HEIGHT["kokomi"] * chars.COMBAT_SCALE - 217.7) < 0.5
+    stills = set(kc.STILLS)
+    assert {"stance_a", "stand", "rest", "select", "portrait"} <= stills
+
+
+def test_every_kokomi_out_path_has_one_producer():
+    from tools import art_lint
+    files = [*pack.SHEET_FILES["kokomi"].values(), *pack.FX_FILES["kokomi"].values(),
+             pack.SHADOW_FILES["kokomi"]]
+    for f in files:
+        assert art_lint.GENERATOR_OWNED[f"ImageGen/images/kokomi/model/frames/{f}"] == "char_render/pack.py", f
+    for out in ("model/kokomi_rest.png", "ui/select_closeup.png", "ui/select_portrait.png",
+                "ui/select_portrait_locked.png"):
+        assert art_lint.GENERATOR_OWNED[f"ImageGen/images/kokomi/{out}"] == "char_render/pack.py", out
+    text = (ROOT / "tools" / "gen_kokomi_stills.py").read_text(encoding="utf-8")
+    assert '"select_portrait.png"' not in text and '"select_portrait_locked.png"' not in text
