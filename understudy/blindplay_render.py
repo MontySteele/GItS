@@ -3237,6 +3237,24 @@ def _attack_part_total(intent: dict[str, Any], weak: int,
 INCOMING_FOLDS = " ({folds})"
 INCOMING_NOT_COUNTED = " Not counted: {names}."
 FOLD_BLOCK = "{who} {verb} {n} Block first"
+#: THE DEATH BLOW (2026-10-14, Yae and Klee seats at Waterfall Giant). The
+#: boss's Steam Eruption reads "When killed, deals N damage at the end of
+#: your next turn", and both seats killed it and then died to it: the line
+#: summed this turn's telegraphs only, and after the kill the body's HP is
+#: the phase sentinel, whose telegraph the sum skips. Any power whose own
+#: sentence says it deals damage when its holder is killed is named here --
+#: before the kill as what killing it costs, after it as what is coming.
+#: The number is the power's printed one (its stacks where the text has
+#: none). The Explode turn's Death Blow telegraph is an attack and counts.
+_DEATH_BLOW_TEXT = re.compile(r"\bwhen (?:[\w-]+ ){0,3}killed\b[^.]*?"
+                              r"\bdeals? (?:(\d+) )?damage", re.I)
+DEATH_BLOW_IF_KILLED = (" Killing {name} now: {n} damage at the end of "
+                        "your next turn ({power}).")
+DEATH_BLOW_PENDING = (" Not this turn: {name} deals {n} damage at the end "
+                      "of your next turn ({power}).")
+#: The game's intent kinds that are a hit on you: an Attack, and the Death
+#: Blow a dying body throws (`DeathBlowIntent : SingleAttackIntent`).
+ATTACK_KINDS = ("attack", "deathblow")
 #: FURINA ROUND 3 (2026-10-11, review change 3): "first" meant "before the
 #: enemies act", and a seat read it as "before Block" and called Wither
 #: unblockable. The words say which; the arithmetic is unchanged.
@@ -3437,6 +3455,34 @@ def _turn_end_facts(you: dict[str, Any], hand: list[dict[str, Any]],
             "conditional": conditional}
 
 
+def _is_down(e: dict[str, Any]) -> bool:
+    """A body killed or on its phase sentinel this turn."""
+    return bool(e.get("phase_flip")) or (isinstance(e.get("hp"), int)
+                                         and e["hp"] <= 0)
+
+
+def _death_blow_clauses(enemies: list[dict[str, Any]]) -> str:
+    """What a "when killed" power will deal, said beside the incoming sum.
+
+    A living holder: what killing it now costs. A downed one (the kill has
+    landed, the blow has not): what is coming. Never folded into the take,
+    which is this turn's."""
+    out = ""
+    for e in enemies:
+        for pw in e.get("powers") or []:
+            m = _DEATH_BLOW_TEXT.search(str(pw.get("text") or ""))
+            if not m:
+                continue
+            n = int(m.group(1)) if m.group(1) else int(pw.get("stacks") or 0)
+            if n <= 0:
+                continue
+            template = (DEATH_BLOW_PENDING if _is_down(e)
+                        else DEATH_BLOW_IF_KILLED)
+            out += template.format(name=str(e.get("name") or "it"), n=n,
+                                   power=str(pw.get("name") or ""))
+    return out
+
+
 def _fold_clauses(facts: dict[str, Any], absorbs: bool) -> list[str]:
     """The few words for each fact folded into the take."""
     out = []
@@ -3471,12 +3517,15 @@ def _incoming_line(enemies: list[dict[str, Any]], you: dict[str, Any],
     total, unknown, any_attack = 0, [], False
     vulnerable = _stacks_of(you, "vulnerable")
     for e in enemies:
-        if e.get("phase_flip") or (isinstance(e.get("hp"), int)
-                                   and e["hp"] <= 0):
-            continue
+        down = _is_down(e)
         weak = _stacks_of(e, "weak")
         for intent in e.get("intents") or []:
-            if _fold(intent.get("type")) != "attack":
+            kind = _fold(intent.get("type"))
+            if kind not in ATTACK_KINDS:
+                continue
+            # A downed body's telegraph is skipped -- except the Death Blow,
+            # which is the one thing a killed body still does.
+            if down and kind != "deathblow":
                 continue
             any_attack = True
             part = _attack_part_total(intent, weak, vulnerable)
@@ -3491,6 +3540,7 @@ def _incoming_line(enemies: list[dict[str, Any]], you: dict[str, Any],
         names=_and_list(facts["unknown"])) if facts["unknown"] else "")
     not_counted += "".join(INCOMING_CONDITIONAL_BLOCK.format(name=name, n=n)
                            for name, n in facts["conditional"])
+    not_counted += _death_blow_clauses(enemies)
     if not any_attack and not (facts["hit"] or facts["hp"]):
         return INCOMING_NONE + not_counted
     block = int(you.get("block") or 0)
