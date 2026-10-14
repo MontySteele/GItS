@@ -1009,10 +1009,6 @@ $pckDeferred = @{
     # Yae Miko's Sakura badge left on 2026-10-14, when her art pass placed
     # yae/powers/sakura.png and her eight other badges.
 
-    # Yae.cs asks for her model scene first and keeps Klee's still when it is
-    # absent (#1263); the scene arrives with her Blender render and
-    # `tools.yae_rig gen`. Drop this line in that commit.
-    'yae/model/combat.tscn' = 'Yae model phase A rendered but not yet generated (#1263); Yae.cs falls back to the still'
 }
 
 $stagedContractS12 = Get-ChildItem $StageDir -Filter *.pck.contract.txt -ErrorAction SilentlyContinue |
