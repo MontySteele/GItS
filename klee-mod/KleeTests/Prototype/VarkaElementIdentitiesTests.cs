@@ -97,22 +97,27 @@ public class VarkaElementIdentitiesTests : IDisposable
     }
 
     [Fact]
-    public void Chain_lightning_costs_one_less_per_discard_this_turn()
+    public void Chain_lightning_costs_zero_hits_all_then_discards_two()
     {
+        // Varka pool audit (2026-10-13): "let's make it cost 0, "Deal 8 [11]
+        // Electro damage to ALL enemies, discard 2"". The discount is gone.
         var chain = new ProtoVkChainLightning();
-        Assert.Equal(2, chain.EnergyCost.Canonical);
+        Assert.Equal(0, chain.EnergyCost.Canonical);
+        Assert.Equal(CardRarity.Uncommon, chain.Rarity);
         Assert.Equal(8m, Var(chain, "VkBase"));
         Assert.Equal(11m, Var(Upgraded<ProtoVkChainLightning>(), "VkBase"));
-        Assert.Contains("VarkaCards.ElectroAll", Calls("ProtoVkChainLightning", "OnPlay"));
-        // The discount reads MementoMori's count and prices only itself.
-        Assert.Contains("KokomiResources.DiscardsThisTurn",
-                        Calls("ProtoVkChainLightning", "TryModifyEnergyCostInCombat"));
-        Assert.False(chain.TryModifyEnergyCostInCombat(new ProtoVkFavoniusCut(), 1m,
-                                                      out var other));
-        Assert.Equal(1m, other);
-        // Out of combat no discard has happened: the printed 2.
-        Assert.True(chain.TryModifyEnergyCostInCombat(chain, 2m, out var own));
-        Assert.Equal(2m, own);
+        Assert.Null(typeof(ProtoVkChainLightning).GetMethod(
+            "TryModifyEnergyCostInCombat",
+            System.Reflection.BindingFlags.Instance
+            | System.Reflection.BindingFlags.Public
+            | System.Reflection.BindingFlags.DeclaredOnly));
+        // The hit first, then Short Circuit's chosen discard.
+        var play = Il.CallSequence(Il.Method("ProtoVkChainLightning", "OnPlay")).ToList();
+        var hit = play.IndexOf("VarkaCards.ElectroAll");
+        var pick = play.IndexOf("CardSelectCmd.FromHandForDiscard");
+        var discard = play.IndexOf("CardCmd.Discard");
+        Assert.True(hit >= 0 && pick > hit && discard > pick,
+                    string.Join(", ", play));
     }
 
     [Fact]

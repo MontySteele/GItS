@@ -34,8 +34,10 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
 | `varka` | Varka | 80 | Mondstadt | Anemo | Balance | 78 |
 
 - Every kit: 78 draftable cards, plus two Ancient cards (one from Darv's
-  Dusty Tome, one from Orobas's Archaic Tooth replacing a starter card) and
-  its co-op cards.
+  Dusty Tome, one from Orobas's Archaic Tooth replacing a starter card).
+  Klee and Kokomi have co-op cards; Varka's five are being designed
+  ([USER]: "now is actually a great time to design 5 co-op cards for
+  Varka"); Furina has none since the Stage rework.
 - Every starter is the base Strike x4 and Defend x4 plus two cards of its own.
   Starter basics change only on [USER]'s pick. No kit starts with a Companion.
 - **Character five is Yae Miko** (`review/active/yae-proposal-2026-10-12.md`,
@@ -151,7 +153,9 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
   Varka! Not too hard, but also not a total cakewalk. I think he's ready to
   move to Balance, officially."). The starter, Fang, Gale and Deep Freeze
   change (`varka-starter-fang-2026-10-13`) is the last change before the
-  freeze.
+  freeze. The pool audit (2026-10-13) then changed six cards: Blazing
+  Charge, Kindled Edge, Chain Lightning, Tempest of the Four Winds,
+  Downburst and Eula: Icetide Vortex.
 - **Next:** per `operations/stage-gate.md` he is frozen on `main` once that
   change merges. Later card changes go through `varka-next` with a suite
   record; text-only fixes may land on `main`. Then his story, events and

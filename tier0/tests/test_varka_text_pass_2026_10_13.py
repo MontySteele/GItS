@@ -29,7 +29,8 @@ FOLDED = {
     "ProtoVkChargedLunge": ("6m", "Electro"),
     "ProtoVkEmberCleave": ("9m", "Pyro"),
     "ProtoVkChainLightning": ("8m", "Electro"),
-    "ProtoVkTempestOfTheFourWinds": ("4m", "None"),
+    # Varka pool audit (2026-10-13): 6 [8], was 4 [5].
+    "ProtoVkTempestOfTheFourWinds": ("6m", "None"),
     "ProtoVkVioletStorm": ("6m", "Electro"),
     "ProtoVkKindledEdge": ("7m", "Pyro"),
     "ProtoVkRazorClawAndThunder": ("6m", "Electro"),
@@ -53,8 +54,11 @@ def test_stoke_the_flames_rider_is_not_folded():
 def test_kindled_edge_prints_its_follow_up_as_a_folded_leg():
     face = _row("proto_vk_kindled_edge")["description"]
     assert face.endswith("deal {VkAgain:diff()} additional damage.")
-    assert 'new VarkaFollowUpDamageVar("VkAgain", "VkBase")' in _cs(
-        "ProtoVkKindledEdge")
+    # Varka pool audit (2026-10-13): the bonus is its own 5 [7] VkAmount.
+    cs = _cs("ProtoVkKindledEdge")
+    assert 'new VarkaFollowUpDamageVar("VkAgain", "VkAmount")' in cs
+    assert 'new DynamicVar("VkAmount", 5m)' in cs
+    assert 'DynamicVars["VkAmount"].UpgradeValueBy(2m);' in cs
 
 
 def test_razors_bonus_folds_inside_its_hit():

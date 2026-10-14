@@ -274,7 +274,7 @@ KIND_FIELDS = {
     "electro_strike": ("base",),
     "electro_all": ("base",),
     "violet_storm": ("base",),
-    "kindled_edge": ("base",),
+    "kindled_edge": ("base", "amount"),
     "storm_battery": ("per",),
     "frost_ward": ("base", "per"),
     "gleeful_songs": ("base", "per"),
@@ -1268,14 +1268,16 @@ def _rebalance_kind(state, fx: dict, card, led: VarkaLedger) -> bool:
     p = state.player
     aim = state.card_aim
     if kind == "kindled_edge":
-        # "Deal 7 Pyro damage. If it sets off an Elemental Reaction, deal 7
-        # more." The more is element-less (a second application is not
-        # printed), a powered hit of the card on the same enemy.
+        # "Deal 7 Pyro damage. If it sets off an Elemental Reaction, deal 5
+        # additional damage." (Varka pool audit, 2026-10-13: the bonus is its
+        # own `amount`, was the base hit's.) The more is element-less (a
+        # second application is not printed), a powered hit of the card on
+        # the same enemy.
         before = state.reactions_this_card
         _card_hit(state, card, aim, fx["base"], "pyro")
         if (state.reactions_this_card > before and aim is not None
                 and aim.alive):
-            _card_hit(state, card, aim, fx["base"], None)
+            _card_hit(state, card, aim, fx["amount"], None)
     elif kind == "storm_battery":
         # "Deal 2 Electro damage to ALL enemies for each other card in your
         # Hand." The card has left the hand, so the hand is the others.
@@ -1404,13 +1406,15 @@ def op_varka(state, fx: dict, card) -> None:
                     state, e, fx["amount"], element=None,
                     source="attack" if card.type == "attack" else "card")
     elif kind == "swirled_oath":
-        # Downburst (2026-10-04): "If it Swirls, gain 2 Oath of the element
-        # Swirled." One gain event per element Swirled, on top of the Swirl's
-        # own credit; through `gain`, so Oath Unto Death, Dawn Wind's March
-        # and Boreas's Fang all see it.
+        # Downburst (Varka pool audit, 2026-10-13): "If it Swirls, gain 2
+        # Oath of each element." One gain event per Oath element (Pyro, Hydro,
+        # Cryo, Electro, the printed order) when the play Swirled anything,
+        # on top of the Swirl's own credit; through `gain`, so Oath Unto
+        # Death, Dawn Wind's March and Boreas's Fang all see it.
         swirled = led.play_swirl_elements[-1] if led.play_swirl_elements else []
-        for el in dict.fromkeys(swirled):
-            gain(state, el, fx["amount"], "swirled_oath")
+        if any(el in ELEMENTS for el in swirled):
+            for el in ("pyro", "hydro", "cryo", "electro"):
+                gain(state, el, fx["amount"], "swirled_oath")
     elif kind == "swirl_fresh_auras":
         for e, aura, turns in _fresh_snapshot(state):
             if not e.alive:
