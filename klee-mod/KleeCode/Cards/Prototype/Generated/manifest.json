@@ -432,24 +432,34 @@
     "proto_ym_deadline",
     "proto_ym_edict_of_cleansing",
     "proto_ym_editor_in_chief",
+    "proto_ym_evergreen_charm",
+    "proto_ym_fallen_petals",
     "proto_ym_footnote",
     "proto_ym_fox_fire_draft",
     "proto_ym_fox_trick",
     "proto_ym_foxfire_lure",
+    "proto_ym_foxfire_sweep",
     "proto_ym_foxs_mooncall",
+    "proto_ym_grafted_branch",
+    "proto_ym_inked_branches",
     "proto_ym_kitsune_flash",
     "proto_ym_kitsune_guile",
+    "proto_ym_kitsune_pounce",
     "proto_ym_kitsune_rite",
     "proto_ym_manuscript_pile",
+    "proto_ym_margin_note",
+    "proto_ym_mikage_thunder",
     "proto_ym_mischievous_teasing",
     "proto_ym_print_run",
     "proto_ym_proofread",
     "proto_ym_reborn_as_guuji_yae",
     "proto_ym_rooted_shrine",
+    "proto_ym_royalties",
     "proto_ym_sakura_channeling",
     "proto_ym_sakura_grove",
     "proto_ym_sakura_seal",
     "proto_ym_serialization",
+    "proto_ym_shrine_bell",
     "proto_ym_shrine_maidens_guard",
     "proto_ym_shrine_offering",
     "proto_ym_sly_strike",
@@ -888,24 +898,34 @@
     "proto_ym_deadline": "yae",
     "proto_ym_edict_of_cleansing": "yae",
     "proto_ym_editor_in_chief": "yae",
+    "proto_ym_evergreen_charm": "yae",
+    "proto_ym_fallen_petals": "yae",
     "proto_ym_footnote": "yae",
     "proto_ym_fox_fire_draft": "yae",
     "proto_ym_fox_trick": "yae",
     "proto_ym_foxfire_lure": "yae",
+    "proto_ym_foxfire_sweep": "yae",
     "proto_ym_foxs_mooncall": "yae",
+    "proto_ym_grafted_branch": "yae",
+    "proto_ym_inked_branches": "yae",
     "proto_ym_kitsune_flash": "yae",
     "proto_ym_kitsune_guile": "yae",
+    "proto_ym_kitsune_pounce": "yae",
     "proto_ym_kitsune_rite": "yae",
     "proto_ym_manuscript_pile": "yae",
+    "proto_ym_margin_note": "yae",
+    "proto_ym_mikage_thunder": "yae",
     "proto_ym_mischievous_teasing": "yae",
     "proto_ym_print_run": "yae",
     "proto_ym_proofread": "yae",
     "proto_ym_reborn_as_guuji_yae": "yae",
     "proto_ym_rooted_shrine": "yae",
+    "proto_ym_royalties": "yae",
     "proto_ym_sakura_channeling": "yae",
     "proto_ym_sakura_grove": "yae",
     "proto_ym_sakura_seal": "yae",
     "proto_ym_serialization": "yae",
+    "proto_ym_shrine_bell": "yae",
     "proto_ym_shrine_maidens_guard": "yae",
     "proto_ym_shrine_offering": "yae",
     "proto_ym_sly_strike": "yae",
@@ -2320,7 +2340,7 @@
       "yae_per": 1
     },
     "proto_ym_deadline": {
-      "block": 2
+      "block": 3
     },
     "proto_ym_edict_of_cleansing": {
       "power_amount": 2
@@ -2328,11 +2348,17 @@
     "proto_ym_editor_in_chief": {
       "cost": -1
     },
+    "proto_ym_evergreen_charm": {
+      "block": 3
+    },
+    "proto_ym_fallen_petals": {
+      "upgraded_power": "ym_fallen_petals_plus"
+    },
     "proto_ym_footnote": {
       "yae_amount": 1
     },
     "proto_ym_fox_fire_draft": {
-      "yae_amount": 1
+      "yae_amount": 2
     },
     "proto_ym_fox_trick": {
       "power_amount": 1
@@ -2340,7 +2366,16 @@
     "proto_ym_foxfire_lure": {
       "power_amount": 1
     },
+    "proto_ym_foxfire_sweep": {
+      "damage": 2
+    },
     "proto_ym_foxs_mooncall": {
+      "cost": -1
+    },
+    "proto_ym_grafted_branch": {
+      "yae_amount": 1
+    },
+    "proto_ym_inked_branches": {
       "cost": -1
     },
     "proto_ym_kitsune_flash": {
@@ -2350,17 +2385,26 @@
     "proto_ym_kitsune_guile": {
       "power_amount": 1
     },
+    "proto_ym_kitsune_pounce": {
+      "damage": 3
+    },
     "proto_ym_kitsune_rite": {
       "cost": -1
     },
     "proto_ym_manuscript_pile": {
       "draw": 1
     },
+    "proto_ym_margin_note": {
+      "damage": 3
+    },
+    "proto_ym_mikage_thunder": {
+      "power_amount": 1
+    },
     "proto_ym_mischievous_teasing": {
       "draw": 1
     },
     "proto_ym_print_run": {
-      "yae_base": 1,
+      "yae_base": 2,
       "yae_per": 1
     },
     "proto_ym_proofread": {
@@ -2370,10 +2414,13 @@
       "cost": -1
     },
     "proto_ym_rooted_shrine": {
-      "block": 2
+      "block": 3
+    },
+    "proto_ym_royalties": {
+      "cost": -1
     },
     "proto_ym_sakura_channeling": {
-      "power_amount": 1
+      "cost": -1
     },
     "proto_ym_sakura_grove": {
       "power_amount": 1
@@ -2384,9 +2431,11 @@
     "proto_ym_serialization": {
       "power_amount": 1
     },
+    "proto_ym_shrine_bell": {
+      "damage": 3
+    },
     "proto_ym_shrine_maidens_guard": {
-      "yae_base": 2,
-      "yae_per": 1
+      "block": 3
     },
     "proto_ym_shrine_offering": {
       "block": 3
@@ -2405,10 +2454,14 @@
       "damage": 3
     },
     "proto_ym_thunderbolt_tithe": {
+      "yae_base": 1,
       "yae_per": 2
     },
     "proto_ym_twin_sakura": {
-      "cost": -1
+      "add": {
+        "op": "block",
+        "amount": 4
+      }
     },
     "proto_ym_yakan_evocation": {
       "cost": -1

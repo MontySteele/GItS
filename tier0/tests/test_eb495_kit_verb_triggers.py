@@ -359,9 +359,11 @@ SIM_CALL_SITES = {
     # pet's Electro hit under a Power's source, unpowered; the card-carried
     # hits of Thunderbolt Tithe, Bestseller and Kitsune Flash, powered and
     # Electro; Fox Fire's rider, 4 Electro to a random enemy, unpowered.
+    # (Source order since the Rites, 2026-10-14: a damage strike's hit,
+    # Fox Fire, then the card-carried hit.)
     ('yae_shrine.py', 1): ("'card'", 'False', 'ELEMENT'),
-    ('yae_shrine.py', 2): ('source', None, 'ELEMENT'),
-    ('yae_shrine.py', 3): ("'card'", 'False', 'ELEMENT'),
+    ('yae_shrine.py', 2): ("'card'", 'False', 'ELEMENT'),
+    ('yae_shrine.py', 3): ('source', None, 'ELEMENT'),
 }
 
 

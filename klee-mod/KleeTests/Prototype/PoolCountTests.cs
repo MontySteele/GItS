@@ -117,17 +117,17 @@ public class PoolCountTests
     }
 
     /// <summary>
-    /// YAE MIKO, A STAGED KIT BELOW 78 (batch one, 2026-10-13): her card
-    /// paper's thirty, 9 / 13 / 8, and no Ancients or co-op tier yet (the
-    /// paper's "Not in this batch, said so"). The size argument is how a kit
-    /// in its first batch is pinned -- Furina's 24-row slice and 39-row pool
-    /// were pinned the same way before the pool to 78 -- and this row moves
-    /// to 78 with her second half.
+    /// YAE MIKO, A STAGED KIT BELOW 78: batch one's thirty (2026-10-13) and
+    /// the design axes' ten (ruled 2026-10-14), 15 / 16 / 9, and no Ancients
+    /// or co-op tier yet (the paper's "Not in this batch, said so"). The size
+    /// argument is how a kit in its first batches is pinned -- Furina's
+    /// 24-row slice and 39-row pool were pinned the same way before the pool
+    /// to 78 -- and this row moves to 78 with her last batch.
     /// </summary>
     [Fact]
-    public void Yae_is_a_staged_30_and_9_13_8_with_no_ancients_yet()
+    public void Yae_is_a_staged_40_and_15_16_9_with_no_ancients_yet()
     {
-        AssertPool("YaeRoster", "Pool", 9, 13, 8, size: 30);
+        AssertPool("YaeRoster", "Pool", 15, 16, 9, size: 40);
         Assert.DoesNotContain(typeof(global::KleeMod.RosterAncientCards).GetProperties(),
             p => p.Name == "Yae");
     }

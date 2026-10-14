@@ -930,7 +930,10 @@ ARM_KEYWORDS = (
     ArmKeyword("Sakura", ("Sakura", "Tenko"), "ArmKeywordTips.ForSakura"),
     ArmKeyword("Edit", ("Edit", "Edited", "Annotated", "Publish", "Red Ink",
                         "Footnote", "Deadline Extension", "Fox Fire",
-                        "Sakura Seal"), "ArmKeywordTips.ForEdit"),
+                        "Sakura Seal", "Royalties"), "ArmKeywordTips.ForEdit"),
+    # YAE MIKO, THE DESIGN AXES (ruled 2026-10-14): the shrine's Rite, one
+    # tip naming the four.
+    ArmKeyword("Rite", ("Rite",), "ArmKeywordTips.ForRite"),
     ArmKeyword("Lightfall Sword", ("Lightfall Sword",),
                "ArmKeywordTips.ForLightfallSword"),
 )
@@ -3011,6 +3014,11 @@ YAE_KINDS = {
     "block_per_annotated": "BlockPerAnnotated",
     "annotated_strike": "AnnotatedStrike",
     "fox_fire": "FoxFire",
+    # The design axes (ruled 2026-10-14).
+    "rite": "Rite",
+    "edit_sakura": "EditSakura",
+    "plant_level": "PlantLevel",
+    "strike_if_weak": "StrikeIfWeak",
 }
 YAE_KIND_FIELDS = {
     "plant": ("amount",),
@@ -3027,20 +3035,32 @@ YAE_KIND_FIELDS = {
     "block_per_annotated": ("base", "per"),
     "annotated_strike": ("base", "amount"),
     "fox_fire": (),
+    "rite": (),
+    "edit_sakura": ("amount",),
+    "plant_level": ("amount",),
+    "strike_if_weak": (),
 }
 #: The kinds that aim at the enemy the player picks (`target: enemy`).
 YAE_AIMED_KINDS = {"lure", "damage_per_sakura", "damage_per_annotated",
-                   "annotated_strike"}
+                   "annotated_strike", "strike_if_weak"}
 #: The kinds that name an Annotation (`annotation:`), and the C#
 #: `YaeAnnotation` member each sheet name is.
-YAE_ANNOTATION_KINDS = {"edit", "edit_all"}
+YAE_ANNOTATION_KINDS = {"edit", "edit_all", "edit_sakura"}
 YAE_ANNOTATIONS = {
     "red_ink": "RedInk",
     "footnote": "Footnote",
     "deadline": "DeadlineExtension",
     "fox_fire": "FoxFire",
     "sakura_seal": "SakuraSeal",
+    "royalties": "Royalties",
 }
+#: The design axes (ruled 2026-10-14): the shrine's four Rites (`rite:`,
+#: the C# `YaeRite` member), the Annotations a Sakura can carry, and the end
+#: an `edit_sakura` counts from (`which:`, the C# `YaeSakuraEnd`).
+YAE_RITES = {"thunder": "Thunder", "warding": "Warding",
+             "wildfire": "Wildfire", "offering": "Offering"}
+YAE_SAKURA_ANNOTATIONS = {"red_ink", "fox_fire", "deadline"}
+YAE_SAKURA_ENDS = {"newest": "Newest", "oldest": "Oldest", "every": "Every"}
 YAE_VAR_FIELDS = {"per": "YmPer", "base": "YmBase", "amount": "YmAmount"}
 #: The value `YaeCards` reads for a field the card declares no var for: a
 #: count of 1 ("Plant a Sakura") and a base of 0 (Thunderbolt Tithe) print
@@ -3054,14 +3074,19 @@ def yae_needs_var(card: dict, eff: dict, field: str) -> bool:
     if f"yae_{field}" in upgrade_plan(card)[0]:
         return True
     return int(eff[field]) != YAE_FIELD_DEFAULTS[field]
-YAE_FIELDS = {"op", "kind", "target", "per", "base", "amount", "annotation"}
+YAE_FIELDS = {"op", "kind", "target", "per", "base", "amount", "annotation",
+              "rite", "which"}
 
 
 def yae_call(eff: dict) -> str:
     """The one awaited call a `yae` op emits."""
     args = "choiceContext, this, cardPlay"
+    if eff.get("kind") == "edit_sakura":
+        args += f", YaeSakuraEnd.{YAE_SAKURA_ENDS[eff['which']]}"
     if eff.get("kind") in YAE_ANNOTATION_KINDS:
         args += f", YaeAnnotation.{YAE_ANNOTATIONS[eff['annotation']]}"
+    if eff.get("kind") == "rite":
+        args += f", YaeRite.{YAE_RITES[eff['rite']]}"
     return f"await YaeCards.{YAE_KINDS[eff['kind']]}({args});"
 #: `kokomi` (THE KOKOMI EXPANSION, BATCH ONE, 2026-09-29): one kind per
 #: now-line verb, each ONE awaited `KokomiCards.<method>` call
@@ -4186,10 +4211,13 @@ APPLY_POWERS = {
     # klee-mod/KleeCode/Powers/Prototype/YaePowers.cs; each row carries its
     # own `description:`. Sim twins: tier0/engine/yae_shrine.py.
     "ym_sakura_grove": ("SakuraGrovePower", None,
-        "Your [gold]Sakura[/gold] strike for {X} more."),
+        "Your [gold]Sakura[/gold] strikes are {X} bigger in Thunder, Warding "
+        "and Wildfire."),
     "ym_edict_of_cleansing": ("EdictOfCleansingPower", None,
-        "Your [gold]Sakura[/gold] strikes deal {X} more to an enemy with a "
-        "[gold]Pyro[/gold], [gold]Hydro[/gold] or [gold]Cryo[/gold] aura."),
+        "Your [gold]Sakura[/gold] strikes deal {X} additional damage to an "
+        "enemy that is "
+        "[gold]Weak[/gold] or has a [gold]Pyro[/gold], [gold]Hydro[/gold] "
+        "or [gold]Cryo[/gold] aura."),
     "ym_serialization": ("SerializationPower", None,
         "Whenever you [gold]Edit[/gold] a card, gain {X} [gold]Block[/gold]."),
     "ym_foxs_mooncall": ("FoxsMooncallPower", None,
@@ -4198,7 +4226,18 @@ APPLY_POWERS = {
     "ym_yakan_offering": ("YakanOfferingPower", None,
         "At the start of your turn, plant {X} [gold]Sakura[/gold]."),
     "ym_sakura_channeling": ("SakuraChannelingPower", None,
-        "Whenever a [gold]Sakura[/gold] strikes, gain {X} [gold]Block[/gold]."),
+        "Your [gold]Sakura[/gold] also strike as Thunder, whatever the "
+        "[gold]Rite[/gold]."),
+    # The design axes, batch two (2026-10-14).
+    "ym_mikage_thunder": ("MikageThunderPower", None,
+        "Your [gold]Sakura[/gold] strikes are {X} bigger in Thunder, Warding "
+        "and Wildfire."),
+    "ym_fallen_petals": ("FallenPetalsPower", None,
+        "Whenever a [gold]Sakura[/gold] withers, gain {X} Energy on your "
+        "next turn."),
+    "ym_fallen_petals_plus": ("FallenPetalsPlusPower", None,
+        "Whenever a [gold]Sakura[/gold] withers, gain {X} Energy and draw "
+        "{X} card on your next turn."),
     "ym_editor_in_chief": ("EditorInChiefPower", None,
         "Whenever you play an [gold]Annotated[/gold] card, a "
         "[gold]Sakura[/gold] strikes."),
@@ -5822,6 +5861,17 @@ def blocked_reason(
                 return f"yae {kind} annotation mismatch"
             if "annotation" in eff and eff["annotation"] not in YAE_ANNOTATIONS:
                 return f"yae annotation {eff['annotation']!r}"
+            if (kind == "rite") != ("rite" in eff):
+                return f"yae {kind} rite mismatch"
+            if "rite" in eff and eff["rite"] not in YAE_RITES:
+                return f"yae rite {eff['rite']!r}"
+            if (kind == "edit_sakura") != ("which" in eff):
+                return f"yae {kind} which mismatch"
+            if "which" in eff and eff["which"] not in YAE_SAKURA_ENDS:
+                return f"yae which {eff['which']!r}"
+            if (kind == "edit_sakura"
+                    and eff["annotation"] not in YAE_SAKURA_ANNOTATIONS):
+                return f"yae {eff['annotation']!r} has no Sakura reading"
         if op == "add_knight":
             unknown = set(eff) - ADD_KNIGHT_FIELDS
             if unknown:
@@ -14101,6 +14151,8 @@ def _authored_face_numbers(card: dict):
                 if not isinstance(value, int) or value == 0:
                     continue
                 if field == "amount" and value == 1 and eff["kind"] !=                         "annotated_strike":
+                    continue
+                if eff["kind"] == "edit_sakura":
                     continue
                 key = f"yae_{field}"
                 owns = key in upgrade_plan(card)[0]

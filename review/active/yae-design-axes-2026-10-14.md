@@ -279,7 +279,7 @@ The rule:
 
 | Annotation | On a Sakura |
 |---|---|
-| Red Ink | Its strike is 3 bigger, in whatever Rite. |
+| Red Ink | Its strike is 3 bigger (not in Offering). |
 | Fox Fire | When it strikes, it also deals 4 Electro damage to a random enemy. |
 | Deadline Extension | It does not wither. |
 
@@ -296,7 +296,10 @@ A card that edits a Sakura cannot give them.
 
 Picks 2 to 4 are (a): four Rites; Energy when a Sakura withers (Fallen
 Petals); batch two's eight cards. With the two cards above, the pool is
-40 (15 / 17 / 8).
+40 (15 / 16 / 9).
+
+Claude, 2026-10-14: Red Ink skips Offering, like Sakura Grove; +3 cards a
+strike was too much draw. The tally reads 15 / 16 / 9, as built.
 
 **Pick 5:** Claude builds it now. If the build plays well, five Yae seats
 run before [USER] is home; if not, two seats as a sanity check ("does this

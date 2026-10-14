@@ -144,7 +144,7 @@ public abstract class StagePerformerBadge : PowerModel
               + (upgraded ? FurinaStageLaw.NeuvilletteHydroBonusUpgraded
                           : FurinaStageLaw.NeuvilletteHydroBonus)
               + " additional damage. Act: deal [gold]Hydro[/gold] damage to ALL enemies "
-              + "equal to the HP you lost since your last turn.",
+              + "equal to HP you lost or [gold]Drained[/gold] since your last turn.",
             StagePerformer.Escoffier =>
                 "Your guests' acts deal "
               + (upgraded ? FurinaStageLaw.EscoffierLineBonusUpgraded

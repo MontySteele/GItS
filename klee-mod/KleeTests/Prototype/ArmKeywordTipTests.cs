@@ -417,7 +417,10 @@ public class ArmKeywordTipTests
         // 6 (a); `ForSakura` already stood and now prints her tip on hers).
         // 52 with the Furina sweep (2026-10-14): `ForFlip`, Ousia / Pneuma's
         // word.
-        Assert.Equal(52, attaches.Count);
+        // 53 with Yae's design axes (2026-10-14): `ForRite`, the shrine's
+        // Rite.
+        Assert.Equal(53, attaches.Count);
+        Assert.Contains(attaches, m => m.Name == "ForRite");
         Assert.Contains(attaches, m => m.Name == "ForFlip");
         Assert.Contains(attaches, m => m.Name == "ForEdit");
         Assert.Contains(attaches, m => m.Name == "ForBigBaddaBoomTotal");

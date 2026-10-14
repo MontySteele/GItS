@@ -143,6 +143,9 @@ public static class ArmKeywordTips
     /// <summary>YAE MIKO (2026-10-13): her two words, Sakura (on
     /// <see cref="SakuraKey"/>, read for her cards) and Edit.</summary>
     public const string EditKey = "KLEEMOD-ARM_YAE_EDIT";
+    /// <summary>YAE MIKO, THE DESIGN AXES (ruled 2026-10-14): the shrine's
+    /// Rite.</summary>
+    public const string RiteKey = "KLEEMOD-ARM_YAE_RITE";
     public const string LightfallSwordKey = "KLEEMOD-ARM_LIGHTFALL_SWORD";
 
     // THE TEXT PASS OF 2026-10-08, and NOT A KEYWORD ROW: the Plan tip a
@@ -646,8 +649,8 @@ public static class ArmKeywordTips
     /// (paper sec.2; the numbers are <see cref="Powers.YaeLaw"/>'s).</summary>
     public static readonly string YaeSakuraTip =
         $"Up to {Powers.YaeLaw.SakuraCap} stand beside you. At the end of your "
-      + $"turn each strikes a random enemy for {Powers.YaeLaw.SakuraBase} plus "
-      + "its Level [gold]Electro[/gold] damage, oldest first. Each lasts "
+      + "turn each strikes under the shrine's [gold]Rite[/gold] (Thunder at "
+      + "the start of combat), oldest first. Each lasts "
       + $"{Powers.YaeLaw.SakuraTurns} turns. Planting one raises the others' "
       + $"Level by 1 (up to {Powers.YaeLaw.LevelCap}). [gold]Tenko[/gold]: "
       + $"every Sakura strikes now and lasts {Powers.YaeLaw.SakuraTurns} turns "
@@ -668,8 +671,24 @@ public static class ArmKeywordTips
       + "[gold]Footnote[/gold] (draw 1), [gold]Deadline Extension[/gold] "
       + "([gold]Retain[/gold]), [gold]Fox Fire[/gold] ("
       + Powers.YaeLaw.FoxFireDamage + " [gold]Electro[/gold] damage to a random "
-      + "enemy), [gold]Sakura Seal[/gold] (plant a [gold]Sakura[/gold]). "
-      + "A Published Annotation lasts the run.";
+      + "enemy), [gold]Sakura Seal[/gold] (plant a [gold]Sakura[/gold]), "
+      + "[gold]Royalties[/gold] (gain " + Powers.YaeLaw.RoyaltiesPayout
+      + " Energy). On a [gold]Sakura[/gold]: Red Ink makes its strike "
+      + Powers.YaeLaw.RedInkAmount + " bigger (not in Offering), Fox Fire adds "
+      + Powers.YaeLaw.FoxFireDamage + " damage, Deadline Extension stops it "
+      + "withering. A Published Annotation lasts the run.";
+
+    /// <summary>
+    /// YAE MIKO, THE DESIGN AXES (ruled 2026-10-14): the shrine's Rite, what
+    /// every Sakura strike does. One sentence, the four named.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForRite(
+        IEnumerable<IHoverTip> inherited, CardModel? card) =>
+        With(inherited, RiteKey, YaeRiteTip);
+
+    public static readonly string YaeRiteTip =
+        "Sets what [gold]Sakura[/gold] strikes do. Thunder: damage. Warding: "
+      + "[gold]Block[/gold]. Wildfire: ALL enemies. Offering: draw.";
 
     /// <summary>The text pass of 2026-10-08: Eula's blade, a counter on the
     /// enemy (<c>LightfallSwordPower</c>) with a badge and no tip.</summary>

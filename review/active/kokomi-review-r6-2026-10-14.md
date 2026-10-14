@@ -102,8 +102,9 @@ Companion summoners, every Block number and the starter.
 **Built 2026-10-14** (branch `kokomi-r6-build-2026-10-14`): section 3 and
 picks 1 to 3. The two Powers are named Kurage Vanguard and Following Current.
 Their faces end at "Hydro damage." (text convention 3 keeps "the front
-enemy" off card lines; they hit the front enemy). Read the Field's now-line
-reads "Take 1 of your top 3 cards. Bury the rest." to fit the card ceiling.
+enemy" off card lines; they hit the front enemy). Read the Field reads "Take 1 of
+your top 3. Put the rest on the bottom. Plan: Put a Draw Pile card into your
+Hand. It costs 0 this turn." to fit the card ceiling.
 At Water's Edge ends "Plans count." (the lint refuses parentheses).
 Kelp Wall's Plan says "the Attack damage you blocked" (item 12: Disintegration
 does not count). Sea's Reproach fires on a Plan's Weak; Heizou does not count

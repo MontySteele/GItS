@@ -51,7 +51,7 @@ public sealed class ProtoYmPrintRun : CustomCardModel, ICharacterCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("YmBase", 4m),
+            new DynamicVar("YmBase", 6m),
             new DynamicVar("YmPer", 2m)
         };
 
@@ -70,6 +70,6 @@ public sealed class ProtoYmPrintRun : CustomCardModel, ICharacterCard
     protected override void OnUpgrade()
     {
         DynamicVars["YmPer"].UpgradeValueBy(1m);
-        DynamicVars["YmBase"].UpgradeValueBy(1m);
+        DynamicVars["YmBase"].UpgradeValueBy(2m);
     }
 }

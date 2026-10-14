@@ -45,13 +45,13 @@ public sealed class ProtoYmRootedShrine : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Rooted Shrine"),
-        ("description", "Each [gold]Sakura[/gold] gains a Level. Gain {Block:diff()} [gold]Block[/gold]."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Each [gold]Sakura[/gold] gains a Level."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(3m, ValueProp.Move)
+            new BlockVar(6m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -63,12 +63,12 @@ public sealed class ProtoYmRootedShrine : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await YaeCards.LevelUp(choiceContext, this, cardPlay);
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
+        await YaeCards.LevelUp(choiceContext, this, cardPlay);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Block.UpgradeValueBy(2m);
+        DynamicVars.Block.UpgradeValueBy(3m);
     }
 }

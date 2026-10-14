@@ -871,7 +871,8 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
         combat["shrine"] = shrine
         combat["you"]["powers"] = [
             pw for pw in combat["you"]["powers"]
-            if not _SAKURA_NAME.match(_text(pw.get("name")))]
+            if not _SAKURA_NAME.match(_text(pw.get("name")))
+            and not _RITE_NAME.match(_text(pw.get("name")))]
     # 2026-09-26 (control seat, Necrobinder): Osty, and any pet no kit block
     # prints, with its HP.
     allies = _allies(p, (plans or {}).get("pet_entity_id"))
@@ -954,7 +955,12 @@ def varka_oath(player: dict[str, Any],
 #: Strikes left: T." The five Annotations are her Enchantments' names.
 _SAKURA_NAME = re.compile(r"^Sakura (\d)$")
 _SAKURA_LEVEL = re.compile(r"Level (\d+)")
-_SAKURA_STRIKE = re.compile(r"for (\d+) Electro damage")
+_SAKURA_STRIKE = re.compile(r"(?:for|gives you|draws you) (\d+)")
+#: The design axes (ruled 2026-10-14): the shrine's Rite is one badge,
+#: "Rite: Thunder" (`YaeRiteBadgePower`), and a Sakura's Annotation is named
+#: in its badge sentence.
+_RITE_NAME = re.compile(r"^Rite: (Thunder|Warding|Wildfire|Offering)$")
+YAE_SAKURA_ANNOTATIONS = ("Red Ink", "Deadline Extension", "Fox Fire")
 _SAKURA_TURNS = re.compile(r"Strikes left: (\d+)")
 _LURE_NAME = "Foxfire Lure"
 YAE_ANNOTATIONS = ("Red Ink", "Footnote", "Deadline Extension", "Fox Fire",
@@ -982,6 +988,11 @@ def yae_shrine(player: dict[str, Any],
     hers = character in ("yae", "yae miko") or "yae" in character.split()
     if not (hers or badges):
         return None
+    rite = None
+    for pw in you["powers"]:
+        m = _RITE_NAME.match(_text(pw.get("name")))
+        if m:
+            rite = m.group(1)
     sakura = []
     for slot, pw in sorted(badges, key=lambda b: b[0]):
         text = _text(pw.get("text"))
@@ -989,9 +1000,11 @@ def yae_shrine(player: dict[str, Any],
         strike = _SAKURA_STRIKE.search(text)
         turns = _SAKURA_TURNS.search(text)
         lv = int(level.group(1)) if level else _int(pw.get("stacks"))
+        ann = next((a for a in YAE_SAKURA_ANNOTATIONS if a in text), None)
         sakura.append({"slot": slot, "level": lv,
                        "strike": int(strike.group(1)) if strike else 2 + lv,
-                       "turns": int(turns.group(1)) if turns else None})
+                       "turns": int(turns.group(1)) if turns else None,
+                       "annotation": ann})
     lure = None
     for enemy in combat["enemies"]:
         if any(_text(pw.get("name")) == _LURE_NAME
@@ -1003,7 +1016,8 @@ def yae_shrine(player: dict[str, Any],
         ench = face.get("enchantment")
         if isinstance(ench, dict) and _text(ench.get("name")) in YAE_ANNOTATIONS:
             annotated += 1
-    return {"sakura": sakura, "lure": lure, "annotated": annotated}
+    return {"sakura": sakura, "lure": lure, "annotated": annotated,
+            "rite": rite}
 
 
 #: A performer's SHORT name -- the word the glossary rows and the faces use

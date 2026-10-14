@@ -30,6 +30,7 @@ public enum YaeAnnotation
     DeadlineExtension = 3,
     FoxFire = 4,
     SakuraSeal = 5,
+    Royalties = 6,
 }
 
 /// <summary>
@@ -109,6 +110,7 @@ public static class YaeAnnotationText
         YaeAnnotation.DeadlineExtension => "Deadline Extension",
         YaeAnnotation.FoxFire => "Fox Fire",
         YaeAnnotation.SakuraSeal => "Sakura Seal",
+        YaeAnnotation.Royalties => "Royalties",
         _ => "",
     };
 
@@ -124,6 +126,21 @@ public static class YaeAnnotationText
           + "[gold]Electro[/gold] damage to a random enemy.",
         YaeAnnotation.SakuraSeal =>
             "When this card is played, plant a [gold]Sakura[/gold].",
+        YaeAnnotation.Royalties =>
+            $"When this card is played, gain {YaeLaw.RoyaltiesPayout} Energy.",
+        _ => "",
+    };
+
+    /// <summary>What an Annotation does on a SAKURA (ruled 2026-10-14);
+    /// empty for the ones with no Sakura reading.</summary>
+    public static string SakuraRule(YaeAnnotation annotation) => annotation switch
+    {
+        YaeAnnotation.RedInk =>
+            $"Its strike is {YaeLaw.RedInkAmount} bigger (not in Offering).",
+        YaeAnnotation.FoxFire =>
+            $"When it strikes, it also deals {YaeLaw.FoxFireDamage} "
+          + "[gold]Electro[/gold] damage to a random enemy.",
+        YaeAnnotation.DeadlineExtension => "It does not wither.",
         _ => "",
     };
 }
@@ -214,6 +231,23 @@ public sealed class SakuraSealAnnotation : YaeAnnotationModel
 
     public override Task OnPlay(PlayerChoiceContext choiceContext, CardPlay? cardPlay) =>
         YaeShrine.Plant(choiceContext, Card.Owner?.Creature, 1);
+}
+
+/// <summary>Royalties (design axes batch two, ruled 2026-10-14): "when
+/// played, gain 1 Energy", after the card's own effects.</summary>
+public sealed class RoyaltiesAnnotation : YaeAnnotationModel
+{
+    public override YaeAnnotation Annotation => YaeAnnotation.Royalties;
+
+    public override bool HasExtraCardText => true;
+
+    protected override IEnumerable<string> IconCandidates => Borrow("glam");
+
+    public override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay? cardPlay)
+    {
+        if (Card.Owner is not { } owner) return;
+        await PlayerCmd.GainEnergy(YaeLaw.RoyaltiesPayout, owner);
+    }
 }
 
 /// <summary>
@@ -315,6 +349,7 @@ public static class YaeEditing
         YaeAnnotation.DeadlineExtension => (YaeAnnotationModel)ModelDb.Enchantment<DeadlineExtensionAnnotation>().ToMutable(),
         YaeAnnotation.FoxFire => (YaeAnnotationModel)ModelDb.Enchantment<FoxFireAnnotation>().ToMutable(),
         YaeAnnotation.SakuraSeal => (YaeAnnotationModel)ModelDb.Enchantment<SakuraSealAnnotation>().ToMutable(),
+        YaeAnnotation.Royalties => (YaeAnnotationModel)ModelDb.Enchantment<RoyaltiesAnnotation>().ToMutable(),
         _ => null,
     };
 

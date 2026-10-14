@@ -2990,6 +2990,28 @@ proto_ym_mischievous_teasing	ImageGen/images/cards/yae/proto_ym_mischievous_teas
 proto_ym_reborn_as_guuji_yae	ImageGen/images/cards/yae/proto_ym_reborn_as_guuji_yae.png	500	380	cover	y0.30@1.4	shortlist	1	png	Yae Miko Portrait.png		splash	
 # proto_ym_editor_in_chief <- Yae reading a manuscript on the shrine porch, logo cropped out
 proto_ym_editor_in_chief	ImageGen/images/cards/yae/proto_ym_editor_in_chief.png	500	380	cover	x0.60,y0.42@1.3	shortlist	1	png	Yae Miko Birthday 2022.png		splash	
+# ---------- Yae Miko, the design axes (2026-10-14): batch two's ten cards ----------
+# Official wiki art, one distinct source per card, none used by another row.
+# proto_ym_shrine_bell <- Yae at the spring festival under the shrine's sakura
+proto_ym_shrine_bell	ImageGen/images/cards/yae/proto_ym_shrine_bell.png	500	380	cover	x0.74,y0.50@1.0	shortlist	1	png	Vernal Equinox Day 2024.png		splash	
+# proto_ym_grafted_branch <- Yae beneath a blossoming sakura branch
+proto_ym_grafted_branch	ImageGen/images/cards/yae/proto_ym_grafted_branch.png	500	380	cover	y0.40	shortlist	1	png	Yae Miko Birthday 2023 2.jpg		splash	
+# proto_ym_margin_note <- Yae beside her letter to a reader, the letter half kept
+proto_ym_margin_note	ImageGen/images/cards/yae/proto_ym_margin_note.png	500	380	cover	x0.45,y0.45@1.1	shortlist	1	png	Blessings From Sakura 6.png		splash	
+# proto_ym_kitsune_pounce <- Yae with her fox spirits leaping
+proto_ym_kitsune_pounce	ImageGen/images/cards/yae/proto_ym_kitsune_pounce.png	500	380	cover	x0.42,y0.45@1.3	shortlist	1	png	App Store Event Character Wallpaper Yae Miko Version 2.5.png		splash	
+# proto_ym_foxfire_sweep <- Yae sweeping her gohei across the shrine
+proto_ym_foxfire_sweep	ImageGen/images/cards/yae/proto_ym_foxfire_sweep.png	500	380	cover	x0.62,y0.45@1.2	shortlist	1	png	Version 2.5 Full Wallpaper 2.png		splash	
+# proto_ym_evergreen_charm <- Yae under the ever-blooming sakura
+proto_ym_evergreen_charm	ImageGen/images/cards/yae/proto_ym_evergreen_charm.png	500	380	cover	x0.50,y0.35@1.4	shortlist	1	png	Version 3.7 Wallpaper 2.png		splash	
+# proto_ym_fallen_petals <- Yae among falling petals, the title cropped out
+proto_ym_fallen_petals	ImageGen/images/cards/yae/proto_ym_fallen_petals.png	500	380	cover	x0.72,y0.50@1.25	shortlist	1	png	Everbloom Violet.png		splash	
+# proto_ym_mikage_thunder <- Yae beside the Shogun at the shrine
+proto_ym_mikage_thunder	ImageGen/images/cards/yae/proto_ym_mikage_thunder.png	500	380	cover	x0.55,y0.45@1.1	shortlist	1	png	New Year 2023 JP.png		splash	
+# proto_ym_inked_branches <- Yae with brush and foxes under the branches
+proto_ym_inked_branches	ImageGen/images/cards/yae/proto_ym_inked_branches.png	500	380	cover	y0.45@1.2	shortlist	1	png	Yae Miko Birthday 2025.png		splash	
+# proto_ym_royalties <- Yae at her merchandise stall, the text cropped out
+proto_ym_royalties	ImageGen/images/cards/yae/proto_ym_royalties.png	500	380	cover	x0.75,y0.45@1.4	shortlist	1	png	Fall 2023 Pop-Up Store.png		splash	
 # power_yae_sakura <- her skill's icon, the Sesshou Sakura
 power_yae_sakura	ImageGen/images/yae/powers/sakura.png	256	256	contain	center	shortlist	1	png	Talent Yakan Evocation Sesshou Sakura.png		icon
 # power_yae_foxfire_lure <- her foxfire attack's icon
@@ -3063,3 +3085,7 @@ proto_kk_sea_glass_harvest	ImageGen/images/cards/kokomi/proto_kk_sea_glass_harve
 proto_kk_flotsam_surge	ImageGen/images/cards/kokomi/proto_kk_flotsam_surge.png	500	380	cover	y0.42	shortlist	1	png	Hydro Hypostasis Character Card.png		tcg	
 # kk_sea_glass <- the glowing blue Sea Ganoderma: a thing the tide leaves behind
 kk_sea_glass	ImageGen/images/cards/kokomi/kk_sea_glass.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Sea Ganoderma.png		item	
+# proto_kk_kurage_vanguard <- a lone jellyfish adrift in the dark water, Kokomi review r6 (2026-10-14)
+proto_kk_kurage_vanguard	ImageGen/images/cards/kokomi/proto_kk_kurage_vanguard.png	500	380	cover	center	shortlist	1	png	Enemy Hat Jellyfish 2.png		splash	
+# proto_kk_following_current <- the Moonglow Jellyfish's bell, lit from within, Kokomi review r6 (2026-10-14)
+proto_kk_following_current	ImageGen/images/cards/kokomi/proto_kk_following_current.png	500	380	cover	y0.30	shortlist	1	png	Wildlife Moonglow Jellyfish Archive.png		splash	

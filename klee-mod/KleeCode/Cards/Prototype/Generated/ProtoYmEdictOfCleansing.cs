@@ -38,20 +38,20 @@ public sealed class ProtoYmEdictOfCleansing : CustomCardModel, ICharacterCard
     public string CharacterId => "yae";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSakura(base.ExtraHoverTips, this);
+        BaseKeywordTips.ForWeak(ArmKeywordTips.ForSakura(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_edict_of_cleansing");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Edict of Cleansing"),
-        ("description", "Your [gold]Sakura[/gold] strikes deal {PowerAmount:diff()} more to an enemy with a [gold]Pyro[/gold], [gold]Hydro[/gold] or [gold]Cryo[/gold] aura."),
+        ("description", "Your [gold]Sakura[/gold] strikes deal {PowerAmount:diff()} more to an enemy that is [gold]Weak[/gold] or has a [gold]Pyro[/gold], [gold]Hydro[/gold] or [gold]Cryo[/gold] aura."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 4m)
+            new DynamicVar("PowerAmount", 3m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

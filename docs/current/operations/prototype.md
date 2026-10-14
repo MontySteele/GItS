@@ -110,8 +110,12 @@ twin is `tier0/engine/yae_shrine.py`. Her cards speak one verb,
 `{op: yae, kind: ...}`, each kind one `YaeCards.<Kind>` call; its numbers are
 the card's `Ym*` vars and the upgrade keys `yae_per` / `yae_base` /
 `yae_amount` move them. Meditations of a Yako adds the rest-site Publish
-(`Relics/MeditationsOfAYako.cs`, Shovel's Dig shape). Her pool is a staged 30
+(`Relics/MeditationsOfAYako.cs`, Shovel's Dig shape). Her pool is a staged 40
 (`PoolCountTests`' `size:` argument). Parity: `tier0/tests/test_yae_parity.py`.
+Since the design axes (2026-10-14) `kind: rite` names its Rite (`rite:`
+thunder / warding / wildfire / offering, the C# `YaeRite`) and
+`kind: edit_sakura` names its end (`which:` newest / oldest / every, the C#
+`YaeSakuraEnd`) and a Sakura reading (red_ink, fox_fire, deadline).
 
 **KOKOMI'S PLAN.** The **Bake-Kurage** is a real pet
 (`Powers/Prototype/BakeKuragePet.cs`) enemies cannot target. A card with a
@@ -134,6 +138,6 @@ must never read different rosters (R64). The per-row reasoning is in
 **POOL WIRING** (legacy cleanup stage 4): each character's pool lists its
 `proto_` rows in `GenerateAllCards` and offers its roster
 (`*Roster.OfferablePool`, `FurinaStageRoster.Pool`, `VarkaRoster.Pool`).
-Counts are pinned by `KleeTests/Prototype/PoolCountTests.cs`: 78 per kit (Yae a staged 30 until her second half). Still checked:
+Counts are pinned by `KleeTests/Prototype/PoolCountTests.cs`: 78 per kit (Yae a staged 40 until her last batch). Still checked:
 the tier0 schema validators, the codegen, `lint_generated_structure` and
 `lint_pool_membership`. Depth: `docs/current/atlas/klee-mod-cards.md` §7.

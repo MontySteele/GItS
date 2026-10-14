@@ -8371,6 +8371,57 @@ What the move changed on the faces, and only on the faces:
   sim pilot's choice; in game the player chooses from the five
   (`YaeModalOptions`).
 
+## Yae Miko, the design axes, 2026-10-14
+
+`review/active/yae-design-axes-2026-10-14.md`, ruled the same day ([USER]:
+"I like the idea of splitting the Shrine from the Sakura ... 2,3,4) agreed on
+your defaults otherwise."): Rites plus Sakura Annotations, sec.4's realigned
+30, sec.5's eight and the Ruled section's two (Inked Branches, Evergreen
+Charm). Pool 40: 15 / 16 / 9 by the printed rarities (the paper's own tally
+says 15 / 17 / 8; its tables put five Commons, two Uncommons and Royalties
+at Rare in sec.5, and Evergreen Charm at Common and Inked Branches at
+Uncommon in the Ruled section).
+
+New grammar: `kind: rite` (`rite:`), `kind: edit_sakura` (`which:` newest,
+oldest or every; `annotation:` red_ink, fox_fire or deadline), `kind:
+plant_level` (Grafted Branch, `amount` the Level), `kind: strike_if_weak`
+(Kitsune Pounce); the sixth Annotation `royalties`.
+
+Readings taken where the paper leaves room:
+- Red Ink on a Sakura is 3 bigger in Thunder, Warding and Wildfire, not in
+  Offering, as Sakura Grove (Claude, 2026-10-14: "+3 cards a strike was too
+  much draw"; the paper's "in whatever Rite" is amended).
+- Fallen Petals pays its Energy (and its upgrade's card) at the start of her
+  next turn, beside Offering's draw: a Sakura withers at the end of her turn,
+  when Energy is lost. The face says "on your next turn".
+- Kitsune Pounce's "a Sakura" is the highest Level (Editor-in-Chief's pick),
+  striking under the current Rite, aimed at that enemy.
+- Grafted Branch into a full shrine levels the three and adds none, the
+  plant rule; under Fox's Mooncall its Level is never below 2.
+- Deadline Extension on a Sakura stops its timer (it never withers); a later
+  Edit that replaces it lets the timer run from where it stood.
+- A Sakura Edit is not "Edit a card", so Serialization does not pay for it.
+- Sakura Channeling's Thunder strike carries the Sakura's Red Ink too; its
+  Fox Fire fires once a strike.
+- Reborn as Guuji Yae still chooses among the five original Annotations;
+  Royalties is not on its grid.
+- Mikage Thunder: the paper prints no upgrade and the Prototype-stage rule
+  reaches none, so the upgrade moves its number (1 to 2), Sakura Grove's
+  shape.
+- Fox Fire Draft upgraded is "every Sakura" as the three newest (the cap).
+
+What changed, row by row: Shrine Maiden's Guard 6 [9] Block and Rite:
+Warding (was 4 + 2 per Sakura); Thunder Rite adds Rite: Thunder; Kitsune
+Guile adds Rite: Wildfire; Manuscript Pile Rite: Offering (its Retain Edit
+went); Sakura Channeling "also strike as Thunder", 2 [1] (was 2 [3] Block a
+strike); Print Run 6 [8] + 2 [3]; Deadline 5 [8]; Rooted Shrine 6 [9] Block
+first, then the Level; Yakan Evocation and Twin Sakura print the full-shrine
+reading; Twin Sakura costs 1 and its upgrade adds 4 Block (was 2 [1]); Sakura
+Grove 2 [3] in Thunder, Warding and Wildfire; Edict of Cleansing 3 [5], Weak
+or a reacting aura; Foxfire Lure costs 0; Sly Strike 7 [9]; Thunderbolt
+Tithe 3 [4] plus 4 [6] per Sakura; Fox Fire Draft edits the newest Sakura
+(upgraded: every Sakura).
+
 ## Kokomi pool overhaul, 2026-10-13
 
 `review/active/kokomi-pool-overhaul-2026-10-13.md`, picks 1 (a) and 2 (a).
@@ -8612,12 +8663,15 @@ defaults, other than the first question." Then, on pick 1: "Let's go with
   unless it says ALL, which the Plan tip carries), so the faces end at
   "Hydro damage." Vanguard fires after the morning's Plans and before Dawn
   Tide; Following Current once per carry-out, after the Plan's clauses.
-  Pool 78 (20 / 38 / 20).
-- **Read the Field** (pick 3 (a)): "Plan: Put a card from your Draw Pile
-  into your Hand. It costs 0 this turn." Both engines (`SetThisTurn(0)`,
-  `free_this_turn`). To fit the 120-character card ceiling the now-line
-  reads "Take 1 of your top 3 [4] cards. Bury the rest." (same effect: the
-  others go to the bottom). Treatise unchanged.
+  Pool 78 (20 / 38 / 20). Art: Enemy Hat Jellyfish 2 (Vanguard) and the
+  Moonglow Jellyfish archive image (Following Current), art/plan.tsv.
+- **Read the Field** (pick 3 (a)): the Plan's card costs 0 this turn, both
+  engines (`SetThisTurn(0)`, `free_this_turn`). The ruled "Put a card from
+  your Draw Pile into your Hand. It costs 0 this turn." beside "Take 1 of
+  your top 3 cards. Put the rest on the bottom." is 133 characters against
+  the 120 card ceiling, so the face reads "Take 1 of your top 3 [4]. Put the
+  rest on the bottom. Plan: Put a Draw Pile card into your Hand. It costs 0
+  this turn." (117). Same effect. Treatise unchanged.
 - **At Water's Edge** (item 8): the face and badge end "Plans count." A
   Plan's hit is hers (`AtWatersEdgePower.AfterDamageGiven`, dealer her). The
   review's "(a Plan counts)" is said without parentheses, which the text

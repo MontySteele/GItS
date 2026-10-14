@@ -507,6 +507,23 @@ internal static class KleePowerIcons
             ?? KleePck.Path("klee/powers/passion_overload.png"),
         EditorInChiefPower => KleePck.Path("yae/powers/editor_in_chief.png")
             ?? KleePck.Path("varka/powers/electro_wind.png"),
+        // THE DESIGN AXES (2026-10-14): the four Rite badges and batch two's
+        // three powers borrow her own badges nearest their rule until their
+        // art lands (the art debt in the PR that built them).
+        ThunderRitePower => KleePck.Path("yae/powers/editor_in_chief.png")
+            ?? KleePck.Path("varka/powers/electro_wind.png"),
+        WardingRitePower => KleePck.Path("yae/powers/serialization.png")
+            ?? KleePck.Path("klee/powers/passion_overload.png"),
+        WildfireRitePower => KleePck.Path("yae/powers/foxfire_lure.png")
+            ?? KleePck.Path("klee/powers/detonation_vuln.png"),
+        OfferingRitePower => KleePck.Path("yae/powers/yakan_offering.png")
+            ?? KleePck.Path("klee/powers/oz_summon.png"),
+        MikageThunderPower => KleePck.Path("yae/powers/sakura_grove.png")
+            ?? KleePck.Path("klee/powers/bomb_damage_up.png"),
+        FallenPetalsPower => KleePck.Path("yae/powers/sakura.png")
+            ?? KleePck.Path("klee/powers/oz_summon.png"),
+        FallenPetalsPlusPower => KleePck.Path("yae/powers/sakura.png")
+            ?? KleePck.Path("klee/powers/oz_summon.png"),
         UnwaveringBannerPower =>
             KleePck.Path("varka/powers/stormward_stance.png"),
         CycleOfSeasonsPower => KleePck.Path("varka/powers/boreas_unbound.png"),
