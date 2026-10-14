@@ -271,8 +271,8 @@ def _plant_level(player) -> int:
 def plant(state, n: int = 1, reason: str = "plant",
           level: Optional[int] = None) -> None:
     """Plant `n` Sakura, one at a time (each levels the ones standing).
-    `level` (Grafted Branch) starts the new one higher, never lower than the
-    plant Level. No Level cap."""
+    `level` (Grafted Branch) starts the new one higher, plus Fox's Mooncall's
+    bonus as any plant, never lower than the plant Level. No Level cap."""
     led = ledger(state.player)
     if led is None:
         return
@@ -289,7 +289,7 @@ def plant(state, n: int = 1, reason: str = "plant",
         led.seq += 1
         start = _plant_level(state.player)
         if level is not None:
-            start = max(start, level)
+            start = max(start, level + start - PLANT_LEVEL)   # Mooncall too
         led.sakura.append(Sakura(level=start,
                                  turns_left=SAKURA_TURNS, seq=led.seq))
         state.emit("yae_plant", reason=reason, count=len(led.sakura),

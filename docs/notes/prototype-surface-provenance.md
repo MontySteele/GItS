@@ -8452,7 +8452,7 @@ strikes); `proto_ym_mikage_thunder` `level_up` 1 then `tenko`, upgrade
 `yae_amount: 1` (2 Levels), its face "Each Sakura gains {IfUpgraded:show:2
 Levels|a Level}. Tenko."; `MikageThunderPower` and `ym_mikage_thunder`
 removed. Readings: Grove pays at her turn start after Yakan Offering's plant;
-Grafted Branch's Level stays a floor under Fox's Mooncall (max, not +1).
+Fox's Mooncall raises Grafted Branch's Level too (3 [4] under one copy).
 The old "Mikage Thunder: the paper prints no upgrade" note above is
 superseded.
 

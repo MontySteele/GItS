@@ -129,6 +129,18 @@ public class YaeReviewR1PicksTests : IDisposable
     }
 
     [Fact]
+    public void Mooncall_raises_grafted_branch_too()
+    {
+        var ledger = Fresh();
+        Assert.True(ledger.Plant(YaeLaw.PlantLevel + 1, 2));   // one Mooncall
+        Assert.Equal(3, ledger.Standing[0].Level);
+        Assert.True(ledger.Plant(YaeLaw.PlantLevel + 2, 3));   // two, upgraded
+        Assert.Equal(5, ledger.Standing[1].Level);
+        Assert.True(ledger.Plant(YaeLaw.PlantLevel, 2));       // none
+        Assert.Equal(2, ledger.Standing[2].Level);
+    }
+
+    [Fact]
     public void Grove_levels_only_the_newest()
     {
         var ledger = Fresh();

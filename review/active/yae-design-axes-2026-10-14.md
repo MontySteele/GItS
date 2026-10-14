@@ -362,5 +362,5 @@ Built in both engines (C# `YaeShrine.cs`, sim `tier0/engine/yae_shrine.py`):
 4. The Rite clause, the Rite badge and the seat page sum the uncapped
    Levels; each Sakura badge shows its Level with no cap.
 
-Reading kept: Grafted Branch's "starts at Level 2 [3]" is still a floor, so
-under one Fox's Mooncall it starts at 2, not 3.
+Fox's Mooncall raises Grafted Branch too (confirmed 2026-10-14): under one
+Mooncall it starts at Level 3 [4], under two at 4 [5].

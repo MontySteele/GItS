@@ -142,11 +142,14 @@ public sealed class YaeShrineLedger
     public bool Plant(int plantLevel) => Plant(plantLevel, null);
 
     /// <summary>Plant one, the new Sakura starting at <paramref name="startLevel"/>
-    /// where a card says so (Grafted Branch): never below the plant Level.
+    /// where a card says so (Grafted Branch), raised as every plant is by
+    /// Fox's Mooncall (its bonus is <paramref name="plantLevel"/> over
+    /// <see cref="YaeLaw.PlantLevel"/>); never below the plant Level.
     /// </summary>
     public bool Plant(int plantLevel, int? startLevel)
     {
-        if (startLevel is { } at) plantLevel = Math.Max(plantLevel, at);
+        if (startLevel is { } at)
+            plantLevel = Math.Max(plantLevel, at + plantLevel - YaeLaw.PlantLevel);
         foreach (var s in _sakura)
         {
             s.Level++;

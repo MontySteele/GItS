@@ -161,6 +161,16 @@ def test_mooncall_copies_stack():
     assert [s.level for s in _led(st).sakura] == [3, 3]
 
 
+def test_mooncall_raises_grafted_branch_too():
+    st = _state()
+    _play(st, _ym("foxs_mooncall"))
+    _play(st, _ym("grafted_branch"))                 # 2, +1
+    assert _led(st).sakura[-1].level == 3
+    _play(st, _ym("foxs_mooncall"))
+    _play(st, _ym("grafted_branch") + "+")           # 3, +2
+    assert _led(st).sakura[-1].level == 5
+
+
 def test_grove_levels_the_newest_each_turn_start():
     st = _state()
     _play(st, _ym("sakura_grove"))
