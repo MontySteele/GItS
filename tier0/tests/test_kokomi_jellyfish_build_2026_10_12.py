@@ -205,14 +205,16 @@ def test_all_streams_counts_every_sting_played_this_combat():
 
 
 # --- The Shape of Water ------------------------------------------------------------------
+# Kokomi review (2026-10-13), pick (a): a base hit. "Deal 5 [7] Hydro damage,
+# plus 5 [7] for each Sting you played this turn." (was 0 + 6 [8] each).
 
 def test_the_shape_of_water_is_an_uncommon_attack_at_1():
     row = loader.get_card("proto_kk_the_shape_of_water")
     assert (row.type, row.cost, row.rarity) == ("attack", 1, "uncommon")
     assert row.effects[0]["amount_formula"] == {
-        "base": 0, "per": 6, "count": "stings_played_this_turn"}
-    assert _up("proto_kk_the_shape_of_water").effects[0]["amount_formula"][
-        "per"] == 8
+        "base": 5, "per": 5, "count": "stings_played_this_turn"}
+    up = _up("proto_kk_the_shape_of_water").effects[0]["amount_formula"]
+    assert (up["base"], up["per"]) == (7, 7)
 
 
 def test_the_shape_of_water_counts_this_turn_only():
@@ -225,15 +227,28 @@ def test_the_shape_of_water_counts_this_turn_only():
     _play(st, card(kokomi_plan.STING_ID))
     hp = st.enemies[0].hp
     _play(st, card("proto_kk_the_shape_of_water"))
-    assert hp - st.enemies[0].hp == 6 * 2
+    assert hp - st.enemies[0].hp == 5 + 5 * 2 == 15
 
 
-def test_the_shape_of_water_with_no_stings_deals_nothing():
+def test_the_shape_of_water_with_no_stings_deals_its_base():
     st = kokomi_state()
     _attacking(st)
+    st.enemies[0].hp = st.enemies[0].max_hp = 500
     hp = st.enemies[0].hp
     _play(st, card("proto_kk_the_shape_of_water"))
-    assert st.enemies[0].hp == hp
+    assert hp - st.enemies[0].hp == 5
+
+
+@pytest.mark.parametrize("stings, dealt", [(0, 7), (2, 21)])
+def test_the_shape_of_water_upgraded(stings, dealt):
+    st = kokomi_state()
+    _attacking(st)
+    st.enemies[0].hp = st.enemies[0].max_hp = 500
+    for _ in range(stings):
+        _play(st, card(kokomi_plan.STING_ID))
+    hp = st.enemies[0].hp
+    _play(st, _up("proto_kk_the_shape_of_water"))
+    assert hp - st.enemies[0].hp == dealt
 
 
 # --- the pool ------------------------------------------------------------------------

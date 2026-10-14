@@ -2139,14 +2139,15 @@
 - {id: proto_kk_the_shape_of_water, name: "The Shape of Water", character: kokomi,
    authored_by: [claude],
    # Her normal attack's last hit, the Silent's Finisher: one hit, so a
-   # damage-cutting boss takes it whole.
+   # damage-cutting boss takes it whole. Kokomi review (2026-10-13), pick
+   # (a): a base hit, 5 [7] (was 0 with no Sting, 6 [8] each).
    cost: 1, type: attack, rarity: uncommon,
-   description: "Deal {ExtraDamage:diff()} [gold]Hydro[/gold] damage for each [gold]Sting[/gold] you played this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   description: "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus {ExtraDamage:diff()} for each [gold]Sting[/gold] you played this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: enemy,
-              amount_formula: {base: 0, per: 6,
+              amount_formula: {base: 5, per: 5,
                                count: stings_played_this_turn}}],
-   # 8 each.
-   upgrade: {formula_per: 2}}
+   # 7, plus 7 each.
+   upgrade: {formula_base: 2, formula_per: 2}}
 
 # The jellyfish cards (card paper sec.1 rule 4): generated, in no pool
 # (`C.KOKOMI_OFF_POOL_ROW_IDS`), Ethereal, Exhaust when played or carried out.
