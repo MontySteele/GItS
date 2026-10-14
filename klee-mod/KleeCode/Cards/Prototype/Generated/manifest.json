@@ -356,6 +356,7 @@
     "proto_vk_change_of_guard",
     "proto_vk_charge_of_the_knights",
     "proto_vk_charged_lunge",
+    "proto_vk_comrades_of_the_expedition",
     "proto_vk_converging_winds",
     "proto_vk_crosscurrent",
     "proto_vk_crosswind",
@@ -366,6 +367,7 @@
     "proto_vk_diluc_searing_onslaught",
     "proto_vk_downburst",
     "proto_vk_ember_cleave",
+    "proto_vk_escort_duty",
     "proto_vk_eula_icetide_vortex",
     "proto_vk_eye_of_stormterror",
     "proto_vk_eye_of_the_storm",
@@ -386,6 +388,7 @@
     "proto_vk_lisa_lightning_rose",
     "proto_vk_lisa_pulsating_witch",
     "proto_vk_lisa_violet_arc",
+    "proto_vk_marching_orders",
     "proto_vk_mika_starfrost_swirl",
     "proto_vk_noelle_steadfast_maid",
     "proto_vk_northwind_avatar",
@@ -420,8 +423,10 @@
     "proto_vk_vow_of_the_blade",
     "proto_vk_wall_of_gales",
     "proto_vk_weathervane",
+    "proto_vk_west_winds_blessing",
     "proto_vk_wildfire_oath",
     "proto_vk_windborne_resolve",
+    "proto_vk_windward_flank",
     "proto_vk_wolfpack"
   ],
   "owners": {
@@ -775,6 +780,7 @@
     "proto_vk_change_of_guard": "varka",
     "proto_vk_charge_of_the_knights": "varka",
     "proto_vk_charged_lunge": "varka",
+    "proto_vk_comrades_of_the_expedition": "varka",
     "proto_vk_converging_winds": "varka",
     "proto_vk_crosscurrent": "varka",
     "proto_vk_crosswind": "varka",
@@ -785,6 +791,7 @@
     "proto_vk_diluc_searing_onslaught": "varka",
     "proto_vk_downburst": "varka",
     "proto_vk_ember_cleave": "varka",
+    "proto_vk_escort_duty": "varka",
     "proto_vk_eula_icetide_vortex": "varka",
     "proto_vk_eye_of_stormterror": "varka",
     "proto_vk_eye_of_the_storm": "varka",
@@ -805,6 +812,7 @@
     "proto_vk_lisa_lightning_rose": "varka",
     "proto_vk_lisa_pulsating_witch": "varka",
     "proto_vk_lisa_violet_arc": "varka",
+    "proto_vk_marching_orders": "varka",
     "proto_vk_mika_starfrost_swirl": "varka",
     "proto_vk_noelle_steadfast_maid": "varka",
     "proto_vk_northwind_avatar": "varka",
@@ -839,8 +847,10 @@
     "proto_vk_vow_of_the_blade": "varka",
     "proto_vk_wall_of_gales": "varka",
     "proto_vk_weathervane": "varka",
+    "proto_vk_west_winds_blessing": "varka",
     "proto_vk_wildfire_oath": "varka",
     "proto_vk_windborne_resolve": "varka",
+    "proto_vk_windward_flank": "varka",
     "proto_vk_wolfpack": "varka"
   },
   "mode_faces": {
@@ -2012,6 +2022,9 @@
     "proto_vk_charged_lunge": {
       "varka_base": 3
     },
+    "proto_vk_comrades_of_the_expedition": {
+      "cost": -1
+    },
     "proto_vk_converging_winds": {
       "power_amount": 2
     },
@@ -2046,6 +2059,9 @@
     "proto_vk_ember_cleave": {
       "varka_base": 2,
       "varka_amount": 1
+    },
+    "proto_vk_escort_duty": {
+      "block": 3
     },
     "proto_vk_eula_icetide_vortex": {
       "damage": 3
@@ -2110,6 +2126,9 @@
     "proto_vk_lisa_violet_arc": {
       "formula_base": 1,
       "formula_per": 1
+    },
+    "proto_vk_marching_orders": {
+      "cost": -1
     },
     "proto_vk_mika_starfrost_swirl": {
       "power_amount": 1
@@ -2217,11 +2236,17 @@
     "proto_vk_weathervane": {
       "innate": true
     },
+    "proto_vk_west_winds_blessing": {
+      "innate": true
+    },
     "proto_vk_wildfire_oath": {
       "innate": true
     },
     "proto_vk_windborne_resolve": {
       "power_amount": 2
+    },
+    "proto_vk_windward_flank": {
+      "cost": -1
     },
     "proto_vk_wolfpack": {
       "innate": true

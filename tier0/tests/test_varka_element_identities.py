@@ -81,8 +81,10 @@ GONE = ("updraft", "pressure_front", "unfurled_banner", "four_winds_accord",
 
 
 def test_the_pool_stays_78_with_the_five_swaps(varka):
+    # His co-op five (2026-10-13) sit outside the pool count.
     pool = {c.id: c for c in loader.prototype_cards()
-            if c.id.startswith(V.ID_PREFIX) and c.rarity != "basic"}
+            if c.id.startswith(V.ID_PREFIX) and c.rarity != "basic"
+            and c.id not in loader.multiplayer_ids()}
     assert len(pool) == 78
     by = {r: sum(1 for c in pool.values() if c.rarity == r)
           for r in ("common", "uncommon", "rare")}

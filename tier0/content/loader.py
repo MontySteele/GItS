@@ -557,10 +557,10 @@ def _validate_plan_shape(card: Card) -> None:
         raise ValueError(f"card {card.id!r}: {reason}")
 
 
-#: The three overhaul arms with a multiplayer tier (the co-op set,
-#: review/records/coop-set-2026-09-25.md). `gen_klee_cards.COOP_ARM_PREFIXES`
-#: is the twin.
-MULTIPLAYER_ARM_PREFIXES = ("proto_ko_", "proto_fs_", "proto_kk_")
+#: The overhaul arms with a multiplayer tier (the co-op set,
+#: review/records/coop-set-2026-09-25.md; Varka's five, 2026-10-13).
+#: `gen_klee_cards.COOP_ARM_PREFIXES` is the twin.
+MULTIPLAYER_ARM_PREFIXES = ("proto_ko_", "proto_fs_", "proto_kk_", "proto_vk_")
 
 
 def _validate_multiplayer(sheet_name: str, d: dict) -> None:
@@ -583,7 +583,7 @@ def _validate_multiplayer(sheet_name: str, d: dict) -> None:
         if not str(card_id).startswith(MULTIPLAYER_ARM_PREFIXES):
             raise ValueError(
                 f"{sheet_name}: {card_id!r}: `multiplayer:` on a row outside "
-                f"the three overhaul arms {MULTIPLAYER_ARM_PREFIXES}")
+                f"the overhaul arms {MULTIPLAYER_ARM_PREFIXES}")
 
     def _walk(effects):
         for fx in effects or []:

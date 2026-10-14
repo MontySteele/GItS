@@ -581,8 +581,11 @@ def make_pilot():
 def pool():
     from tier0.content import loader
     out = {"common": [], "uncommon": [], "rare": []}
+    # Varka's co-op five (2026-10-13) are offered only in co-op: never dealt
+    # here, as `GetUnlockedCards` drops them from a one-player run.
+    coop_only = loader.multiplayer_ids()
     for c in loader.prototype_cards():
-        if c.id.startswith(P) and c.rarity in out:
+        if c.id.startswith(P) and c.rarity in out and c.id not in coop_only:
             out[c.rarity].append(c.id)
     return out
 

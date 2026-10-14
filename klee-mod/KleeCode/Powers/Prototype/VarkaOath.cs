@@ -905,6 +905,9 @@ public static class VarkaOath
                 await eye.Draw(choiceContext);
             }
         }
+        // West Wind's Blessing (Varka's co-op five, 2026-10-13): the first
+        // Swirl each turn gives each other player energy.
+        await WestWindsBlessingPower.OnSwirl(dealer);
         if (current != Element.None)
         {
             Log.Info($"[{KleeMod.ModId}] VARKA Swirl on {target.Name}: "
@@ -1175,7 +1178,7 @@ public static class VarkaOath
 /// the generated card, reading its own numbers off the card's `Vk*` vars.
 /// Sim twins: the `varka` op kinds in <c>tier0/engine/varka_oath.py</c>.
 /// </summary>
-public static class VarkaCards
+public static partial class VarkaCards
 {
     private static decimal Var(CardModel card, string name) =>
         card.DynamicVars[name].BaseValue;

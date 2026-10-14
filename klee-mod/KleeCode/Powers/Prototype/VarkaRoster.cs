@@ -165,7 +165,24 @@ internal static class VarkaRoster
     /// on an empty draw; Ancient rarity never rolls anywhere else.
     /// </summary>
     internal static IEnumerable<CardModel> OfferablePool() =>
-        Pool().Concat(RosterAncientCards.Varka);
+        Pool().Concat(RosterAncientCards.Varka).Concat(MultiplayerSlice());
+
+    /// <summary>
+    /// THE MULTIPLAYER TIER (Varka's co-op five, ruled 2026-10-13): five cards
+    /// offered only in co-op, outside the pool's count, on
+    /// <c>KleeOverhaulRoster.MultiplayerSlice</c>'s terms -- each declares
+    /// <c>CardMultiplayerConstraint.MultiplayerOnly</c>, and
+    /// <c>GetUnlockedCards</c> drops it from a one-player run. Three
+    /// Uncommons and two Rares. Sim mirror: <c>C.VARKA_MULTIPLAYER_IDS</c>.
+    /// </summary>
+    internal static CardModel[] MultiplayerSlice() => new CardModel[]
+    {
+        ModelDb.Card<ProtoVkEscortDuty>(),
+        ModelDb.Card<ProtoVkMarchingOrders>(),
+        ModelDb.Card<ProtoVkWindwardFlank>(),
+        ModelDb.Card<ProtoVkComradesOfTheExpedition>(),
+        ModelDb.Card<ProtoVkWestWindsBlessing>(),
+    };
 
     /// <summary>
     /// Every card of his that must resolve <c>CardModel.Pool</c> to his pool:

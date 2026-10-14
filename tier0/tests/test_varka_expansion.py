@@ -71,8 +71,10 @@ def _play(st, card, target=None):
 
 
 def _rows():
+    # His co-op five (2026-10-13) sit outside the pool count.
+    coop_only = loader.multiplayer_ids()
     return [c for c in loader.prototype_cards()
-            if c.id.startswith(V.ID_PREFIX)]
+            if c.id.startswith(V.ID_PREFIX) and c.id not in coop_only]
 
 
 # ---------------------------------------------------------------------------

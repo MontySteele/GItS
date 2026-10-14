@@ -3681,6 +3681,63 @@ trigger, so the next explosion on the players' turn still pays
 (`SparksForEveryonePower.Counts`, asked before the latch). With nobody else
 alive the latch is not spent either. The upgrade is Innate; the cost stays 2.
 
+### Varka (2026-10-13)
+
+[USER], 2026-10-13: "On the gap - I think that now is actually a great time
+to design 5 co-op cards for Varka". On the paper's five: "Escort Duty - Sounds
+fine if a little low. Marching Orders needs a buff. Let's make it 'their
+attacks this turn." From what I recall a base-game multiplayer card just gives
+5 strength for the turn, so this one is weaker in act 1 and scaler better in
+act 3. Venerer's Gale - not a fan. How about something modeled off of
+Flanking, but weaker (as this is a lower rarity). A skill that says "Swirled
+enemies take 50% more damage from other players this turn" or something like
+that. Comrades of the Expedition - sounds good! West Wind's Blessing - sounds
+good to me!" Escort Duty went from 5 [7] to 6 [9] for "a little low";
+Venerer's Gale became Windward Flank. Five `multiplayer: true` rows on the
+first set's terms, three Uncommons and two Rares: `VarkaRoster
+.MultiplayerSlice`, offered beside his pool and outside its count, mirrored by
+`C.VARKA_MULTIPLAYER_IDS` (`tools/lint_arm_pool_parity.py` holds the three
+together). The runtime is `CoopSet.cs`, "VARKA". `proto_vk_` joined the
+multiplayer prefixes (`gen_klee_cards.COOP_ARM_PREFIXES`,
+`loader.MULTIPLAYER_ARM_PREFIXES`). No art yet: the five sit on
+`art_coverage.KNOWN_MISSING` until their sources are picked.
+
+**`proto_vk_escort_duty`**: "Each player" includes Varka (Kokomi's
+convention). His Block is the row's `block` op; the new `varka` kind
+`escort_duty` gives each other player the same `Block` var through Joint
+Orders' call, then Swirls one enemy wearing an aura, picked on the shared
+`CombatTargets` stream (Violet Storm's roll), with Jean's damage-less Anemo
+hit. No enemy with an aura, no Swirl. 6 [9].
+
+**`proto_vk_marching_orders`**: the `varka` kind `marching_orders`, the first
+kind that aims at another player (`target: ally`, `VARKA_ALLY_KINDS`, so
+`varka` joined `COOP_ALLY_OPS`). His current element's Oath is read once, at
+the play, and placed on the chosen player as `AttackUpThisTurnPower`
+(Coordinated Strike's power), which adds it to each of their Attacks and
+leaves at the end of the turn; later Oath does not move it. No current
+element or 0 Oath places nothing. The face prints the live number,
+"(+N damage)", through `VarkaCurrentOathVar` (`{VkOath}`), unfolded because
+the bonus lands on someone else's Attacks. 1 [0].
+
+**`proto_vk_windward_flank`**: Jean's `swirl`, then `WindwardFlankPower` on
+the same enemy, placed by Varka, whether or not the Swirl happened.
+Shrapnel's shred without the Mine: Flanking's dealer check at x1.5, Single and
+instanced per applier, Debuff, removed at the end of the players' turn.
+1 [0].
+
+**`proto_vk_comrades_of_the_expedition`**: `ComradesOfTheExpeditionPower` on
+Varka. Each play of another player's Attack (`CoopSet.IsAnotherPlayersAttack`,
+Knights of Favonius' trigger) gains the stack (1) of his current element's
+Oath at `AfterCardPlayed`, through `VarkaOath.Gain`, so Oath Unto Death and
+Dawn Wind's March see it. No current element, nothing. 2 [1].
+
+**`proto_vk_west_winds_blessing`**: `WestWindsBlessingPower` on Varka, paid
+from `VarkaOath.OnSwirl` for every Swirl he makes. On Sparks for Everyone's
+terms: only on the players' turn (a Swirl while the enemies act gives nothing
+and leaves the trigger), once per round on the power's own latch, each other
+living player gains the stack (1) in energy through `PlayerCmd.GainEnergy`.
+The upgrade is Innate; the cost stays 2.
+
 ## Kokomi core pass: eight cards (2026-09-27)
 
 Design: `review/ruled/kokomi-core-pass-2026-09-27.md` (ruled at its defaults).

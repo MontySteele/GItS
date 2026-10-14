@@ -2613,6 +2613,11 @@ VARKA_KINDS = {
     # VARKA TEXT PASS (2026-10-13): Tidal Bulwark, "Deal Hydro damage equal
     # to your Block, plus 2 [3] for each Hydro Oath." One Hydro hit.
     "tidal_bulwark": "TidalBulwark",
+    # VARKA'S CO-OP FIVE (2026-10-13): Escort Duty's other players' Block and
+    # random Swirl, and Marching Orders' snapshot on another player
+    # (Powers/Prototype/CoopSet.cs, "VARKA").
+    "escort_duty": "EscortDuty",
+    "marching_orders": "MarchingOrders",
 }
 #: The numeric fields each kind prints, in call order.
 VARKA_KIND_FIELDS = {
@@ -2671,6 +2676,10 @@ VARKA_AIMED_KINDS = {"apply_current_element", "ascension_hit", "avatar_hit",
                      "pyro_strike", "shatter", "deep_freeze",
                      # Varka text pass (2026-10-13).
                      "tidal_bulwark"}
+#: A kind that aims at ANOTHER PLAYER (the co-op set's `target: ally`,
+#: `TargetType.AnyAlly`): Marching Orders. Only a `multiplayer: true` row may
+#: print one (`card_level_reason`).
+VARKA_ALLY_KINDS = {"marching_orders"}
 #: A kind that reaches ALL enemies (the expansion): the row says
 #: `target: all_enemies`, which makes the card's TargetType AllEnemies.
 VARKA_ALL_KINDS = {"thundering_verdict", "electro_all",
@@ -3414,6 +3423,18 @@ APPLY_POWERS = {
     "ko_sparks_for_everyone": ("SparksForEveryonePower", None,
         "The first time each turn one of your [gold]Bombs[/gold] goes off, "
         "each other player gains {X} [gold]Energy[/gold]."),
+    # VARKA'S CO-OP FIVE (2026-10-13). Same file, same terms.
+    # `vk_windward_flank` goes on the ENEMY Swirled (`ENEMY_APPLY_POWERS`),
+    # placed by Varka; the other two sit on him and watch the other players.
+    "vk_windward_flank": ("WindwardFlankPower", None,
+        "This turn, other players' Attacks deal 50% more damage to this "
+        "enemy."),
+    "vk_comrades_of_the_expedition": ("ComradesOfTheExpeditionPower", None,
+        "Whenever another player plays an Attack, gain {X} "
+        "[gold]Oath[/gold] of your [gold]current element[/gold]."),
+    "vk_west_winds_blessing": ("WestWindsBlessingPower", None,
+        "The first time each turn you [gold]Swirl[/gold], each other player "
+        "gains {X} [gold]Energy[/gold]."),
     "mc_sinful_hex": ("SinfulHexPower", None,
         "Whenever an [gold]Electro[/gold] [gold]Elemental Reaction[/gold] "
         "happens this turn, deal {X} [gold]Electro[/gold] damage to a random "
@@ -3939,7 +3960,9 @@ ENEMY_APPLY_POWERS = {"weak", "vulnerable",
                       "mi_aurous_blaze",
                       # THE CO-OP SET, SECOND BATCH: Shrapnel's shred, on the
                       # enemy its Mine went on.
-                      "ko_shrapnel"}
+                      "ko_shrapnel",
+                      # Varka's co-op five: Windward Flank's, on the enemy.
+                      "vk_windward_flank"}
 
 # Sheet fields apply_power may carry. Anything else encodes a mechanic this
 # generator does not understand -- fail loudly (UNPARSEABLE discipline).
@@ -4355,14 +4378,17 @@ TARGET_CS = {
 # other player" takes no target and lives in the POWER or the Plan clause that
 # prints it (`KleeMod.Powers.CoopSet.OtherPlayers`). The ops that may aim at
 # an ally, and nothing else may:
-COOP_ALLY_OPS = frozenset(("apply_power", "block", "block_largest_bomb"))
+COOP_ALLY_OPS = frozenset(("apply_power", "block", "block_largest_bomb",
+                           # Varka's co-op five: Marching Orders' kind
+                           # (`VARKA_ALLY_KINDS`, which the `varka` check holds).
+                           "varka"))
 #: The powers a card may place ON another player. Each is placed by the card's
 #: owner (`applier: Owner.Creature`) and reads its applier back: Pass the
 #: Match sets off the APPLIER's Bombs, Guest of Honor spends the APPLIER's lead.
 COOP_ALLY_POWERS = frozenset(("ko_pass_the_match",))
 #: The three arms with a multiplayer tier -- the only rows `multiplayer:` may
 #: sit on (`card_level_reason`).
-COOP_ARM_PREFIXES = ("proto_ko_", "proto_fs_", "proto_kk_")
+COOP_ARM_PREFIXES = ("proto_ko_", "proto_fs_", "proto_kk_", "proto_vk_")
 
 
 def _aims_at_ally(card: dict) -> bool:
@@ -5342,6 +5368,7 @@ def blocked_reason(
             # `target: all_enemies`, and no other kind takes a target.
             want_target = ("enemy" if kind in VARKA_AIMED_KINDS
                            and kind not in VARKA_IMPLIED_AIM_KINDS
+                           else "ally" if kind in VARKA_ALLY_KINDS
                            else "all_enemies" if kind in VARKA_ALL_KINDS
                            else "random_enemy" if kind in VARKA_RANDOM_KINDS
                            else None)
@@ -7630,6 +7657,10 @@ def preview_token_vars(card: dict) -> list[str]:
         out.append(f"new SetOffBombsVar({mult})")
     if "{PressureHit" in text:
         out.append("new DebuffsAfterDamageVar()")
+    if "{VkOath" in text:
+        # Varka's co-op five (2026-10-13): Marching Orders' "(+N damage)",
+        # his current element's Oath, read live (`VarkaCurrentOathVar`).
+        out.append("new VarkaCurrentOathVar()")
     if "{BonusHit" in text:
         bonus = next((int(e["bonus_if"]["amount"]) for e in effects
                       if e.get("op") == "damage" and e.get("bonus_if")

@@ -3574,6 +3574,50 @@
    # Mend 12.
    upgrade: {kokomi_amount: 4}}
 
+# --- Varka (VarkaRoster.MultiplayerSlice) ---
+# His co-op five (ruled 2026-10-13). "Each player" includes Varka. Rules:
+# CoopSet.cs, "VARKA"; provenance: "The co-op set", "Varka (2026-10-13)".
+
+- {id: proto_vk_escort_duty, name: "Escort Duty", character: varka,
+   authored_by: [claude], multiplayer: true,
+   # 5 [7] on paper; 6 [9] at the ruling ("a little low").
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Each player gains {Block:diff()} [gold]Block[/gold]. [gold]Swirl[/gold] a random enemy with an aura.",
+   effects: [{op: block, amount: 6},
+             {op: varka, kind: escort_duty}],
+   upgrade: {block: 3}}
+
+- {id: proto_vk_marching_orders, name: "Marching Orders", character: varka,
+   authored_by: [claude], multiplayer: true,
+   # The bonus is read once, when it is played, and holds for their turn.
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Choose another player. Their Attacks this turn deal additional damage equal to your [gold]Oath[/gold] of your [gold]current element[/gold].{InCombat:\n(+{VkOath} damage)|}",
+   effects: [{op: varka, kind: marching_orders, target: ally}],
+   upgrade: {cost: -1}}
+
+- {id: proto_vk_windward_flank, name: "Windward Flank", character: varka,
+   authored_by: [claude], multiplayer: true,
+   # Flanking's shape, weaker: x1.5 for this turn, Swirled or not.
+   cost: 1, type: skill, rarity: uncommon,
+   description: "[gold]Swirl[/gold] the enemy. This turn, other players' Attacks deal 50% more damage to it.",
+   effects: [{op: swirl, target: enemy},
+             {op: apply_power, power: vk_windward_flank, amount: 1, target: enemy}],
+   upgrade: {cost: -1}}
+
+- {id: proto_vk_comrades_of_the_expedition, name: "Comrades of the Expedition", character: varka,
+   authored_by: [claude], multiplayer: true,
+   cost: 2, type: power, rarity: rare,
+   description: "Whenever another player plays an Attack, gain 1 [gold]Oath[/gold] of your [gold]current element[/gold].",
+   effects: [{op: apply_power, power: vk_comrades_of_the_expedition, amount: 1, target: self}],
+   upgrade: {cost: -1}}
+
+- {id: proto_vk_west_winds_blessing, name: "West Wind's Blessing", character: varka,
+   authored_by: [claude], multiplayer: true,
+   cost: 2, type: power, rarity: rare,
+   description: "The first time each turn you [gold]Swirl[/gold], each other player gains {energyPrefix:energyIcons(1)}.",
+   effects: [{op: apply_power, power: vk_west_winds_blessing, amount: 1, target: self}],
+   upgrade: {innate: true}}
+
 # VARKA, THE OATH REWORK (review/active/varka-paper-kit-2026-09-28.md, ruled
 # 2026-09-29). Rules: Powers/Prototype/VarkaOath.cs, tier0/engine/varka_oath.py.
 # Per-row reasoning: docs/notes/prototype-surface-provenance.md, "Varka".

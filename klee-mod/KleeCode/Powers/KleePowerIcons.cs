@@ -409,6 +409,15 @@ internal static class KleePowerIcons
         ShrapnelPower => KleePck.Path("klee/powers/detonation_vuln.png"),
         SparksForEveryonePower =>
             KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
+        // Varka's co-op five (2026-10-13), on the same borrowing terms:
+        // Windward Flank's shred wears Shrapnel's, West Wind's Blessing's
+        // energy gift Sparks for Everyone's, and Comrades' Oath gain
+        // Stormward Stance's (the Oath badge the expansion borrows).
+        WindwardFlankPower => KleePck.Path("klee/powers/detonation_vuln.png"),
+        WestWindsBlessingPower =>
+            KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
+        ComradesOfTheExpeditionPower =>
+            KleePck.Path("varka/powers/stormward_stance.png"),
         // Klee final pass (2026-10-02): Cover Your Ears!'s this-turn Strength
         // loss on an enemy borrows the Bomb's Vulnerable sigil, the badge
         // Shrapnel's enemy debuff already wears. Its own art stays owed.

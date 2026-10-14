@@ -160,8 +160,8 @@ def test_every_row_resolves_and_every_upgrade_applies(varka):
     rows = [c for c in loader.prototype_cards()
             if c.id.startswith(V.ID_PREFIX)]
     # 47, 84 since the expansion, 83 since Windbound Execution retired
-    # (Starter (a), 2026-10-13).
-    assert len(rows) == 83
+    # (Starter (a), 2026-10-13), 88 with his co-op five (2026-10-13).
+    assert len(rows) == 88
     for c in rows:
         loader.get_card(c.id)
         if c.no_upgrade:

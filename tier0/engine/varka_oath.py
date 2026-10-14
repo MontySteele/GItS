@@ -260,6 +260,10 @@ KINDS = frozenset({
     "temp_strength", "next_pyro_attack",
     # VARKA TEXT PASS (2026-10-13).
     "tidal_bulwark",
+    # VARKA'S CO-OP FIVE (2026-10-13): multiplayer rows the sim never deals
+    # (`tier0/engine/coop.py`); resolved anyway, their other-player halves
+    # land on no one.
+    "escort_duty", "marching_orders",
 })
 KIND_FIELDS = {
     "ascension_hit": ("per",),
@@ -311,6 +315,8 @@ KIND_TARGETS = {
     "pyro_strike": "enemy", "shatter": "enemy", "deep_freeze": "enemy",
     # Varka text pass (2026-10-13).
     "tidal_bulwark": "enemy",
+    # Varka's co-op five (2026-10-13): "Choose another player."
+    "marching_orders": "ally",
 }
 #: `upgraded` is the `varka_upgraded` delta's mark (Pathfinder's Mark+).
 OP_FIELDS = frozenset({"op", "kind", "target", "per", "base", "amount",
@@ -1375,6 +1381,25 @@ def op_varka(state, fx: dict, card) -> None:
     kind = fx["kind"]
     p = state.player
     if _expansion_kind(state, fx, card, led):
+        return
+    if kind == "escort_duty":
+        # Varka's co-op five: "Each player gains 6 Block. Swirl a random
+        # enemy with an aura." His own Block is the row's `block` op; the
+        # other players' lands on no one. The Swirl is a damage-less Anemo
+        # hit on one aura'd enemy picked at random (C# `Rng.CombatTargets`);
+        # with none, nothing.
+        from tier0.engine import coop               # late: cycle
+        coop.no_other_player(state, "escort_duty", card)
+        auras = [e for e in state.living_enemies if e.aura]
+        if auras:
+            reactions.resolve_hit(state, state.rng.choice(auras), ELEMENT, 0,
+                                  "swirl_op")
+        return
+    if kind == "marching_orders":
+        # Varka's co-op five: the Oath snapshot goes ON another player, and
+        # a one-seat fight has none.
+        from tier0.engine import coop               # late: cycle
+        coop.no_other_player(state, "marching_orders", card)
         return
     if kind == "apply_current_element":
         if led.current is None:

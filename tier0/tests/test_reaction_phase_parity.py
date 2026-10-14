@@ -1150,6 +1150,11 @@ CO_TENANCY_LEDGER = {
             "expiring at the end of the player turn, Playdate's shape below. "
             "Removes itself and touches nothing a co-tenant reads. No sim "
             "twin: tier 0 seats one player (engine/coop.py)",
+        ("Powers/Prototype/CoopSet.cs", "WindwardFlankPower"):
+            "(Varka's co-op five, 2026-10-13). Windward Flank's 'this turn' "
+            "on the enemy, expiring at the end of the player turn, Pass the "
+            "Match's boundary. Removes itself and touches nothing a co-tenant "
+            "reads. No sim twin: tier 0 seats one player (engine/coop.py)",
         ("Powers/Prototype/KleeExpansionPowers.cs", "PlaydatePower"):
             "(the Klee overhaul, R276). Playdate's discount "
             "expiring at the end of the turn that wrote it, "
