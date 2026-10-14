@@ -43,6 +43,12 @@ face centre on the canvas centre line. The crown is the top of the head mass
 the icon keeps (Klee's hat crown, not its feather; Kokomi's hair, not her bow;
 Furina's hair, not the tilted top hat on the side of her head).
 
+A row may override that framing (`head_px`, `crown_at`, `face_at`, `disc`)
+and keep a signature piece that breaks out of the disc (`keep_above`: the
+source's own alpha above that source row is kept outside the disc, inside the
+4px margin). Only Furina does, for her top hat (the user, 2026-10-13: "The
+new one isn't bad, but the hat is dictinctive.").
+
 The landmarks are hand-measured in SOURCE pixels, so each row also pins the
 source's size and alpha bbox: a re-rendered source fails loudly ("re-measure")
 instead of silently reframing.
@@ -79,6 +85,8 @@ DISC_R = 38.0
 # Head placement on the canvas.
 HEAD_PX = 50.0     # crown-to-chin span
 CROWN_Y = 7.0      # crown row
+# The canvas margin no content may enter (the base icons' ~4px).
+MARGIN = 4
 # Supersampling for the disc's antialiased edge.
 _SS = 8
 
@@ -92,6 +100,14 @@ class Icon:
     face_cx: float         # face centre column (between the eyes / over the chin)
     crown_y: float         # top of the head mass the icon keeps
     chin_y: float          # chin row
+    # Optional per-row framing overrides (None = the shared framing above).
+    head_px: float | None = None    # crown-to-chin span on the canvas
+    crown_at: float | None = None   # canvas row the crown lands on
+    face_at: float | None = None    # canvas column the face centre lands on
+    disc: tuple | None = None       # (cx, cy, r) of the content disc
+    # Source row above which the source's own alpha is kept OUTSIDE the disc
+    # (a hat that breaks out of the frame), inside the canvas margin.
+    keep_above: float | None = None
 
 
 CHARS = {
@@ -116,15 +132,23 @@ CHARS = {
         source_size=(1920, 1200), source_bbox=(227, 70, 1092, 1118),
         face_cx=626, crown_y=110, chin_y=272),
     # Furina: her model-rendered select close-up (tools/char_render/pack.py,
-    # PR #1241). Her top hat sits tilted on the side of her head, so the crown
-    # is the top of her HAIR under the brim, not the hat; the hat shows where
-    # it stays inside the disc. Face centre is the middle of her 3/4 face
-    # (eyes at x 1245 and 1342, chin at 1323).
+    # PR #1241). The crown is the top of her HAIR under the brim; face centre
+    # is the middle of her 3/4 face (eyes at x 1245 and 1342, chin at 1323).
+    # Her lopsided top hat is her signature piece, as Ironclad's helmet is
+    # his, so it breaks out of the top of the disc: the source's own alpha
+    # above row 330 (just under the brim) is kept outside the disc, inside the
+    # 4px margin. To fit the hat (source rows 60..330; only the tip of its
+    # tallest spike, rows 37..60, is trimmed) her face shrinks to 44px
+    # crown-to-chin (0.16 canvas px per source px, source row 60 at canvas
+    # row 4), sits 2px right of centre so the hat (x 1087..1456) is centred,
+    # and the disc drops to r 34 at y 47 to frame face and chin.
     "furina": Icon(
         source="ImageGen/images/furina/ui/select_closeup.png",
         out="ImageGen/images/furina/ui/char_icon.png",
         source_size=(1920, 1080), source_bbox=(945, 37, 1834, 1080),
-        face_cx=1300, crown_y=260, chin_y=537),
+        face_cx=1300, crown_y=260, chin_y=537,
+        head_px=44.32, crown_at=36.0, face_at=44.4,
+        disc=(42.5, 47.0, 34.0), keep_above=330),
 }
 
 
@@ -134,21 +158,34 @@ def alpha_bbox(im: Image.Image) -> tuple:
     return int(xs.min()), int(ys.min()), int(xs.max()) + 1, int(ys.max()) + 1
 
 
-def disc_mask() -> np.ndarray:
+def disc_mask(cx: float = DISC_CX, cy: float = DISC_CY,
+              r: float = DISC_R) -> np.ndarray:
     """Antialiased disc coverage on the canvas, float 0..1."""
     n = CANVAS * _SS
     c = (np.arange(n) + 0.5) / _SS
-    d2 = (c[None, :] - DISC_CX) ** 2 + (c[:, None] - DISC_CY) ** 2
-    hit = (d2 <= DISC_R * DISC_R).astype(np.float64)
+    d2 = (c[None, :] - cx) ** 2 + (c[:, None] - cy) ** 2
+    hit = (d2 <= r * r).astype(np.float64)
     return hit.reshape(CANVAS, _SS, CANVAS, _SS).mean(axis=(1, 3))
+
+
+def above_mask(row: float) -> np.ndarray:
+    """Antialiased coverage of canvas rows above `row`, inside the margin box."""
+    n = CANVAS * _SS
+    c = (np.arange(n) + 0.5) / _SS
+    inside = (c >= MARGIN) & (c <= CANVAS - MARGIN)
+    hit = ((c[:, None] < row) & inside[:, None] & inside[None, :])
+    return hit.astype(np.float64).reshape(CANVAS, _SS, CANVAS, _SS).mean(axis=(1, 3))
 
 
 def build_icon(src: Image.Image, spec: Icon) -> Image.Image:
     src = src.convert("RGBA")
-    scale = HEAD_PX / (spec.chin_y - spec.crown_y)        # canvas px per source px
+    head_px = HEAD_PX if spec.head_px is None else spec.head_px
+    crown_at = CROWN_Y if spec.crown_at is None else spec.crown_at
+    scale = head_px / (spec.chin_y - spec.crown_y)        # canvas px per source px
     # Canvas (0,0)-(CANVAS,CANVAS) in source coordinates.
-    x0 = spec.face_cx - DISC_CX / scale
-    y0 = spec.crown_y - CROWN_Y / scale
+    face_at = DISC_CX if spec.face_at is None else spec.face_at
+    x0 = spec.face_cx - face_at / scale
+    y0 = spec.crown_y - crown_at / scale
     side = CANVAS / scale
     # Pad so the box never leaves the source (resize's box must lie inside it).
     pad = int(side) + 2
@@ -157,7 +194,10 @@ def build_icon(src: Image.Image, spec: Icon) -> Image.Image:
     box = (x0 + pad, y0 + pad, x0 + pad + side, y0 + pad + side)
     icon = padded.resize((CANVAS, CANVAS), Image.LANCZOS, box=box)
     a = np.asarray(icon).copy()
-    a[..., 3] = np.round(a[..., 3] * disc_mask()).astype(np.uint8)
+    mask = disc_mask() if spec.disc is None else disc_mask(*spec.disc)
+    if spec.keep_above is not None:
+        mask = np.maximum(mask, above_mask((spec.keep_above - y0) * scale))
+    a[..., 3] = np.round(a[..., 3] * mask).astype(np.uint8)
     a[a[..., 3] == 0, :3] = 0
     return Image.fromarray(a, "RGBA")
 

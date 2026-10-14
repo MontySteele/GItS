@@ -50,6 +50,23 @@ def test_icon_has_base_dimensions_and_margin():
     assert a[BASE_CANVAS // 2, BASE_CANVAS // 2] == 255
 
 
+def test_a_breakout_keeps_the_hat_outside_the_disc_inside_the_margin():
+    # Furina's top hat breaks out of the disc (2026-10-13): source alpha above
+    # `keep_above` survives outside the disc, but never enters the 4px margin.
+    import dataclasses
+    plain = gci.build_icon(_synthetic_source(), _spec())
+    hat = gci.build_icon(_synthetic_source(), dataclasses.replace(
+        _spec(), disc=(42.5, 50.0, 30.0), keep_above=200))
+    a = np.asarray(hat)[..., 3]
+    margin = 4
+    assert a[:margin, :].max() == 0 and a[-margin:, :].max() == 0
+    assert a[:, :margin].max() == 0 and a[:, -margin:].max() == 0
+    # The corner above the disc is kept where the source is opaque ...
+    assert a[margin + 2, margin + 8] == 255
+    # ... and a plain row (no keep_above) is unchanged by the new fields.
+    assert np.asarray(plain)[margin + 2, margin + 8, 3] == 0
+
+
 def test_unknown_character_is_refused(capsys):
     assert gci.main(["--chars", "nobody", "--art-root", str(ROOT)]) == 2
 
