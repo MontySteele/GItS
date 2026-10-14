@@ -118,6 +118,9 @@ CARD_DIRS = tuple(IMAGES / name for name in CARD_DIR_NAMES)
 # KNOWN-set pattern (as in tools/art_lint.py): a stale file with a reason on
 # record is a NOTE, not a failure. Never prune an entry without a new reason.
 KNOWN_STALE = {
+    "proto_vk_windbound_execution": (
+        "Varka starter (a) (2026-10-13, 0c88d4e2c): Four Winds' Ascension replaced this card, and the row left the pool. Its art/plan.tsv row stays, so a full fetch repaints it. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
     "proto_kk_riptide_guard": (
         "The Kokomi pool overhaul (2026-10-13, review/active/kokomi-pool-overhaul-2026-10-13.md sec.4) cut this row: Turning Tide takes its slot. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
