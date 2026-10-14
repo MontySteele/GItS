@@ -1,9 +1,9 @@
 """Kokomi's model-scene generator (tools/kokomi_rig), phase A of her model art.
 
-Her frames are not rendered yet (2026-10-14: the game was in use, so no
-Blender), so tools/char_render/kokomi_frames.json does not exist and her
-layer-cut rig still ships. These tests hold the generator against a
-SYNTHETIC manifest shaped exactly as tools/char_render/pack.py writes one,
+Her frames were first rendered 2026-10-14 (tools/char_render/kokomi_frames.json,
+committed); her layer-cut rig and the static merchant sprite no longer ship.
+Most of these tests hold the generator against a SYNTHETIC manifest shaped
+exactly as tools/char_render/pack.py writes one,
 with her clips' real frame times (tools/char_render/kokomi_clips.py), so the
 wire step after the render is `python -m tools.kokomi_rig gen` and nothing
 more:
@@ -14,14 +14,15 @@ more:
   * the water jet's layer draws over the attack from the manifest's frame
     and rests at Hydro;
   * the merchant loops stance B; the shadow sits under both;
-  * once the real manifest exists, the shipped scenes are what the
-    generator writes (until then the CLI says so and the check passes);
-  * build_pck copies her frames VRAM-compressed and switches rest and select
-    art only when they exist.
+  * the shipped scenes are what the generator writes from the real
+    manifest, and her attack delay is that manifest's main impact;
+  * build_pck copies her frames VRAM-compressed, switches rest and select
+    art only when they exist, and writes no static merchant or layer rig.
 """
 from __future__ import annotations
 
 import importlib.util
+import json
 import re
 from pathlib import Path
 
@@ -173,16 +174,20 @@ def test_one_shot_lengths_are_the_clips(frames):
     assert set(rig.load_spec()["model"]["sheets"]) == set(rig.SHEET_NODE) == set(KC.CLIPS) - {"merchant"}
 
 
-def test_the_shipped_scenes_are_the_generators_once_she_is_rendered(capsys):
-    if not rig.FRAMES.exists():
-        assert cli.main(["gen", "--check"]) == 0
-        assert "does not exist yet" in capsys.readouterr().out
-        assert cli.main(["gen"]) == 2
-        # her layer-cut rig still ships until the render lands
-        assert "kokomi_combat_body.png" in rig.SCENE.read_text(encoding="utf-8")
-        return
+def test_the_shipped_scenes_are_the_generators_now_she_is_rendered():
+    assert rig.FRAMES.exists()
+    assert cli.main(["gen", "--check"]) == 0
     assert rig.SCENE.read_text(encoding="utf-8") == rig.render_scene()
     assert rig.MERCHANT_SCENE.read_text(encoding="utf-8") == rig.render_merchant_scene()
+    # her layer-cut rig no longer ships
+    assert "kokomi_combat_body.png" not in rig.SCENE.read_text(encoding="utf-8")
+
+
+def test_her_attack_hit_lands_on_the_clips_main_impact():
+    real = json.loads(rig.FRAMES.read_text(encoding="utf-8"))
+    cs = (ROOT / "klee-mod" / "KleeCode" / "Kokomi.cs").read_text(encoding="utf-8")
+    delay = float(re.search(r"AttackAnimDelay => ([0-9.]+)f;", cs).group(1))
+    assert delay == pytest.approx(real["sheets"]["attack"]["events"]["main"])
 
 
 def test_the_pack_copies_her_frames_compressed_and_switches_rest_and_select_only_when_present():
@@ -193,3 +198,6 @@ def test_the_pack_copies_her_frames_compressed_and_switches_rest_and_select_only
     assert "\"res://kokomi/model/$kokomiRestArt\"" in ps
     assert "Test-Path (Join-Path $src 'kokomi\\ui\\select_closeup.png')" in ps
     assert "\"res://kokomi/ui/$kokomiSelectArt\"" in ps
+    # the generated merchant scene replaced the static sprite; the old rig's layers no longer ship
+    assert "'kokomi\\model\\merchant_character.tscn'" not in ps
+    assert "$rigChar" not in ps and "kokomi\\model\\layers" not in ps

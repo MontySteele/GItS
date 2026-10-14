@@ -150,8 +150,11 @@ def test_the_sample_contract_is_well_formed():
     # model art (phase B, 2026-10-13) -- thirteen frame sheets (seven combat
     # clips, the shop loop, the rapier layer, Spend/Drain/Repay, her shadow),
     # eleven guest stills, her generated merchant scene and Freminet's scene
-    # in; her old rig's four layers and the ten flat guest cutouts out.
-    assert len(parsed.resources) == 467
+    # in; her old rig's four layers and the ten flat guest cutouts out. Then
+    # +5: Kokomi's model art (phase A, 2026-10-14) -- nine frame sheets (six
+    # combat clips, the shop loop, the water jet, her shadow) and her
+    # generated merchant scene in, her old rig's five layers out.
+    assert len(parsed.resources) == 472
 
 
 def test_a_v2_contract_is_stale_by_definition():
@@ -266,6 +269,7 @@ def test_end_to_end_on_a_staged_package(tmp_path):
     # Dumpty clip and its big bomb, +9 for Varka's model art (twelve sheets
     # and his merchant scene in, four rig layers out), +12 for Furina's (13
     # sheets, 11 guest stills, her merchant scene and Freminet's in; four rig
-    # layers and ten guest cutouts out).
-    assert report.checked["contract_resources"] == 467
+    # layers and ten guest cutouts out), +5 for Kokomi's (nine sheets and her
+    # merchant scene in, five rig layers out).
+    assert report.checked["contract_resources"] == 472
     assert report.checked["package_files"] == 3

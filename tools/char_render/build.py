@@ -84,6 +84,11 @@ def main(argv=None) -> int:
     ap.add_argument("--skip-render", action="store_true", help="paint and pack what --work already holds")
     ap.add_argument("--jobs", default="", help="render only these jobs (indices into jobs(), e.g. 0,4)")
     args = ap.parse_args(argv)
+    # Blender's lines carry Chinese bone names; a cp1252 console would crash
+    # echoing them, so the echo is utf-8 and replaces what it cannot show
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8", errors="replace")
     work = Path(args.work)
     work.mkdir(parents=True, exist_ok=True)
     pick = {int(j) for j in args.jobs.split(",") if j}

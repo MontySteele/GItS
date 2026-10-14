@@ -228,8 +228,6 @@ BUILD_ARTIFACTS = ("klee/build_id.tres", "klee/localization/")
 # test_pck_source_map_rules_are_still_in_the_build_script.
 PCK_SOURCE_RULES = [
     ("klee/model/layers/", "ImageGen/images/model/layers/combat/"),
-    ("kokomi/model/layers/", "ImageGen/images/kokomi/model/layers/combat/"),
-    ("varka/model/layers/", "ImageGen/images/varka/model/layers/combat/"),
     ("furina/salon/", "ImageGen/images/furina/salon/"),
     ("kokomi/summon/", "ImageGen/images/kokomi/summon/"),
     ("klee/ui/", "ImageGen/images/ui/"),
@@ -246,13 +244,11 @@ PCK_SOURCE_RULES = [
     ("kokomi/model/", "ImageGen/images/kokomi/model/"),
 ]
 
-# Substrings that must still be present in build_pck.ps1 for the four
+# Substrings that must still be present in build_pck.ps1 for the three
 # non-obvious rules above to be true. The other twelve are the two generic
 # `foreach ($d in 'ui','powers','relics','model')` loops.
 PCK_SOURCE_RULE_EVIDENCE = {
     "klee/model/layers/": r"model\layers\combat",
-    "kokomi/model/layers/": r"$rigChar\model\layers\combat",
-    "varka/model/layers/": r"$rigChar\model\layers\combat",
     "furina/salon/": r"furina\salon",
     "kokomi/summon/": r"kokomi\summon",
 }

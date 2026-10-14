@@ -209,7 +209,7 @@ def test_the_pack_imports_his_sheets_vram_compressed_and_switches_rest_and_selec
     assert "'varka_rest.png'" in ps and "res://varka/model/$varkaRestArt" in ps
     assert "'select_closeup.png'" in ps and "res://varka/ui/$varkaSelectArt" in ps
     # his old rig's layers no longer ship, and the merchant scene is the generated one
-    assert "foreach ($rigChar in @('kokomi'))" in ps
+    assert "varka\\model\\layers" not in ps
     assert "'varka\\model\\merchant_character.tscn'" not in ps
 
 
