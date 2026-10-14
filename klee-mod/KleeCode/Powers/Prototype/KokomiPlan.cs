@@ -3107,6 +3107,10 @@ public static class KokomiPlan
             {
                 switch (clause.Kind)
                 {
+                    // Kokomi wording pass (2026-10-14): Crystal Collapse's
+                    // picture names the Companion it caught.
+                    case Kind.PlayCopyOfCompanion:
+                        return CopiesCaption(clause.Card?.Title.ToString());
                     case Kind.DamagePerPlanThisTurn:
                         var twice = index > 0
                             && kokomi.Powers.OfType<NereidsAscensionPower>()
@@ -3143,6 +3147,23 @@ public static class KokomiPlan
         {
             return null;
         }
+    }
+
+    /// <summary>Crystal Collapse's caption (Kokomi wording pass,
+    /// 2026-10-14): "Copies Juuga", the caught card's own name -- the half
+    /// after a Companion's em dash, cut at a colon so it fits the picture --
+    /// or "Copies nothing". PURE. The full name is the entry's
+    /// <see cref="Entry.Title"/>.</summary>
+    public static string CopiesCaption(string? title)
+    {
+        if (string.IsNullOrWhiteSpace(title)) return "Copies nothing";
+        var name = title!;
+        var dash = name.LastIndexOf('—');
+        if (dash >= 0) name = name.Substring(dash + 1).Trim();
+        var colon = name.IndexOf(':');
+        if (colon > 0) name = name.Substring(0, colon).Trim();
+        if (name.Length == 0) name = title!.Trim();
+        return "Copies " + name;
     }
 
     /// <summary>The strip's damage caption, "Deals N".</summary>

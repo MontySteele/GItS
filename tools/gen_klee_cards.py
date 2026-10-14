@@ -1513,6 +1513,9 @@ BOARD_ONLY_TIP_CALLS = frozenset({
     "ArmKeywordTips.ForEmptyField",
     "ArmKeywordTips.ForElementSwitch",
     "ArmKeywordTips.ForCompanionPlan",
+    # Kokomi wording pass (2026-10-14): Crystal Collapse's preview of the
+    # Companion it copies shows only in combat, once one has been played.
+    "KokomiCards.WithCopiedCompanionPreview",
 })
 
 
@@ -1753,6 +1756,20 @@ def card_needs_an_exhausted_card(card: dict) -> bool:
     the row's `plan_from_exhaust`. Twin: `kokomi_plan.needs_an_exhausted_card`."""
     return any(eff.get("op") == "plan_from_exhaust"
                for eff in card.get("effects", []))
+
+
+def card_needs_a_played_companion(card: dict) -> bool:
+    """Is this row unplayable while no Companion has been played this combat?
+    (Kokomi wording pass, 2026-10-14, [USER]: "Yep, please proceed".) Crystal
+    Collapse copies the last Companion played, captured when the Plan is
+    written; with none it was written and carried out as nothing. Derived
+    from a PLAN-ONLY row's `play_copy_of_companion` clause, so a row with a
+    now-line of its own would gate only its Plan (none exists). Twin:
+    `kokomi_plan.needs_a_played_companion`."""
+    if card.get("effects"):
+        return False
+    return any(clause.get("op") == "play_copy_of_companion"
+               for clause in (card.get("plan") or []))
 
 
 def card_needs_a_plannable_card(card: dict) -> bool:
@@ -17354,6 +17371,7 @@ def emit(
     if (card_is_set_off_only(card) or card_needs_a_waiting_plan(card)
             or card_needs_a_plannable_card(card)
             or card_needs_an_exhausted_card(card)
+            or card_needs_a_played_companion(card)
             or stage_fixed_price(card) is not None
             or card.get("playable_if")):
         interfaces += ", IUnplayableReasonCard"
@@ -18051,6 +18069,13 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     if "[gold]Ward" in desc:
         tips_expr = ("KokomiCards.WithWardPreview("
                      f"{tips_expr or 'base.ExtraHoverTips'})")
+    # Kokomi wording pass (2026-10-14): Crystal Collapse previews the
+    # Companion it copies -- the one a waiting Plan caught, or the one it
+    # would catch now -- the same Blade Dance shape, live.
+    if any(clause.get("op") == "play_copy_of_companion"
+           for clause in (card.get("plan") or [])):
+        tips_expr = ("KokomiCards.WithCopiedCompanionPreview("
+                     f"{tips_expr or 'base.ExtraHoverTips'}, this)")
     # THE KLEE STATUS PACKAGE: Klee Can Explain! previews the card it makes,
     # Compact's Fuel tip.
     for eff in card.get("effects", []):
@@ -18432,8 +18457,16 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     # while the Exhaust Pile is empty.
     plan_gated = (card_needs_a_waiting_plan(card)
                   or card_needs_a_plannable_card(card)
-                  or card_needs_an_exhausted_card(card))
-    if card_needs_an_exhausted_card(card):
+                  or card_needs_an_exhausted_card(card)
+                  or card_needs_a_played_companion(card))
+    if card_needs_a_played_companion(card):
+        plan_gate_expr = "KokomiRefounding.AnyCompanionPlayed(this)"
+        plan_gate_why = "no Companion has been played this combat"
+        plan_gate_note = (
+            "    // Kokomi wording pass (2026-10-14): unplayable until a\n"
+            "    // Companion has been played this combat, rather than\n"
+            "    // writing a Plan that copies nothing.\n")
+    elif card_needs_an_exhausted_card(card):
         plan_gate_expr = "KokomiRefounding.AnyExhausted(this)"
         plan_gate_why = "your Exhaust Pile is empty"
         plan_gate_note = (
