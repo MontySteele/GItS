@@ -9,8 +9,11 @@ Outputs (all gitignored Tier F, ledgered in art/SOURCES.tsv):
     ImageGen/images/kokomi/ui/select_portrait.png        132x195
     ImageGen/images/kokomi/ui/select_portrait_locked.png 132x195
     ImageGen/images/kokomi/ui/selection_splash.png      1920x1200
-    ImageGen/images/kokomi/ui/char_icon.png               88x88
     ImageGen/images/kokomi/ui/map_marker.png              49x64
+
+The top-bar icon (ui/char_icon.png) left this script on 2026-10-13:
+tools/gen_char_icons.py draws it from her select splash, framed to the base
+game's 85x85 icons, and one out-path has one producer.
 
 WHY SHE NEEDS A CUT AND FURINA DID NOT. Furina's governing render arrived as a
 transparent cutout. Kokomi's best full-body art -- Sangonomiya Kokomi Portrait,
@@ -49,7 +52,6 @@ MODEL = ROOT / "ImageGen" / "images" / "kokomi" / "model"
 
 # Set by eye (see module docstring). Larger fraction = wider shot.
 PORTRAIT_HEAD_FRAC = 0.42
-ICON_HEAD_FRAC = 0.20
 MARKER_HEAD_FRAC = 0.24
 
 # Selection splash. She sits left of centre because the select screen's info
@@ -104,11 +106,9 @@ def main():
     locked_variant(portrait).save(UI / "select_portrait_locked.png")
     print("  select_portrait.png    132x195 (+ locked, identical framing)")
 
-    head_crop(cutout, 88, 88, head_frac=ICON_HEAD_FRAC,
-              centre_on="head").save(UI / "char_icon.png")
     head_crop(cutout, 49, 64, head_frac=MARKER_HEAD_FRAC,
               centre_on="head").save(UI / "map_marker.png")
-    print("  char_icon.png 88x88, map_marker.png 49x64")
+    print("  map_marker.png 49x64")
 
     # Selection splash. Framed off the ALPHA BBOX rather than the image frame
     # -- the Portrait carries ~9% empty margin all round, so scaling by frame

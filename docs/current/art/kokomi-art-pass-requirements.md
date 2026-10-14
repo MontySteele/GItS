@@ -363,7 +363,7 @@ screen just shows the wrong girl.
 |---|---|---|
 | `ui/select_portrait.png` | 132×195 | `gen_kokomi_stills.py` |
 | `ui/select_portrait_locked.png` | 132×195 | derived from the portrait |
-| `ui/char_icon.png` | 88×88 | `gen_kokomi_stills.py` |
+| `ui/char_icon.png` | 85×85 | `gen_char_icons.py` (from `selection_splash.png`) |
 | `ui/map_marker.png` | 49×64 | `gen_kokomi_stills.py` |
 | `ui/selection_splash.png` | 1920×1200 | `gen_kokomi_stills.py` |
 | `model/combat_model.png` | 240×280 | `gen_kokomi_stills.py` |

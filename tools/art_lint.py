@@ -565,13 +565,11 @@ GENERATOR_OWNED = {
     "ImageGen/images/kokomi/ui/select_portrait.png":        "gen_kokomi_stills.py",
     "ImageGen/images/kokomi/ui/select_portrait_locked.png": "gen_kokomi_stills.py",
     "ImageGen/images/kokomi/ui/selection_splash.png":       "gen_kokomi_stills.py",
-    "ImageGen/images/kokomi/ui/char_icon.png":              "gen_kokomi_stills.py",
     "ImageGen/images/kokomi/ui/map_marker.png":             "gen_kokomi_stills.py",
     # Varka (prototype, 2026-09-29): same six surfaces from his own render,
     # less the roster tile, which his model art took over (below).
     "ImageGen/images/varka/model/combat_model.png":         "gen_varka_stills.py",
     "ImageGen/images/varka/ui/selection_splash.png":        "gen_varka_stills.py",
-    "ImageGen/images/varka/ui/char_icon.png":               "gen_varka_stills.py",
     "ImageGen/images/varka/ui/map_marker.png":              "gen_varka_stills.py",
     "ImageGen/images/furina/salon/glyph_damage.png":        "gen_salon_glyphs.py",
     "ImageGen/images/furina/salon/glyph_block.png":         "gen_salon_glyphs.py",
@@ -642,6 +640,12 @@ GENERATOR_OWNED = {
     "ImageGen/images/ui/transition_wipe.png":               "gen_transition_wipe.py",
     "ImageGen/images/kokomi/ui/transition_wipe.png":        "gen_transition_wipe.py",
     "ImageGen/images/varka/ui/transition_wipe.png":         "gen_transition_wipe.py",
+    # The top-bar icons (2026-10-13): head and shoulders cut from each
+    # character's select art and framed to the base game's 85x85 icons by one
+    # script. Furina's stays gen_furina_stills.py's until her model lands.
+    "ImageGen/images/ui/char_icon.png":                     "gen_char_icons.py",
+    "ImageGen/images/varka/ui/char_icon.png":               "gen_char_icons.py",
+    "ImageGen/images/kokomi/ui/char_icon.png":              "gen_char_icons.py",
     # EB-37: derived from each character's own char_icon.png, so a plan row
     # claiming one of these would be sourcing a halo from the wiki instead of
     # from the fill it has to agree with.
