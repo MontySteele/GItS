@@ -676,7 +676,7 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
                                  _hook("shared", "block_held", "write")],
     # Sea Glass Harvest reads the DRAW PILE since the Kokomi round-1 fixes
     # (2026-10-12), and the HAND too since the round-5 review (2026-10-14).
-    "transform_statuses_in_hand_and_draw_pile": [
+    "transform_statuses_you_have": [
         _hook("shared", "junk_remove", "write"),
         _hook("shared", "hand_contents", "write"),
         _hook("shared", "draw_pile", "write")],
@@ -960,6 +960,12 @@ POWER_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "kk_dawn_tide": [_hook("private", "kurage", "read"),
                      _hook("shared", "aura_reaction", "write"),
                      _hook("shared", "enemy_count", "read")],
+    # Kokomi review r6 (2026-10-14): one Hydro hit at the front, per turn
+    # or per carry-out.
+    "kk_kurage_vanguard": [_hook("private", "kurage", "read"),
+                           _hook("shared", "aura_reaction", "write")],
+    "kk_following_current": [_hook("private", "kurage", "read"),
+                             _hook("shared", "aura_reaction", "write")],
     "kk_sangonomiyas_counsel": [_hook("private", "kurage", "read")],
     # Furina. A Drain or a Repay WRITES the Stage; a Spend USES it.
     "fs_salons_encore": [_hook("private", "stage", "read"),

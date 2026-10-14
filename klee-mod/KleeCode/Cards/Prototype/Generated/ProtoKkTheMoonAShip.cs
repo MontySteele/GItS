@@ -48,7 +48,7 @@ public sealed class ProtoKkTheMoonAShip : CustomCardModel, ICharacterCard, IPlan
     public override List<(string, string)>? Localization => new()
     {
         ("title", "The Moon, A Ship O'er the Seas"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold].\nOr [gold]plan[/gold]: [gold]Mend[/gold] {PlanMend:diff()}."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold].\nOr [gold]plan[/gold]: [gold]Mend[/gold] {PlanMend:diff()}{InCombat: ({MendLands} will land)|}."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -64,7 +64,8 @@ public sealed class ProtoKkTheMoonAShip : CustomCardModel, ICharacterCard, IPlan
         new List<DynamicVar>
         {
             new BlockVar(12m, ValueProp.Move),
-            new DynamicVar("PlanMend", 6m)
+            new DynamicVar("PlanMend", 6m),
+            new MendLandsVar(6)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

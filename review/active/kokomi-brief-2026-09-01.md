@@ -94,7 +94,10 @@ the Bake-Kurage carries it out at the start of her next turn.
 
 Printed keywords: Plan, and the base game's Ethereal (Dusk retired
 2026-10-12). Mend appears only on Rare Exhaust
-cards, as the healing law already has it (`LAW.md`, card-sheet rules).
+cards, as the healing law already has it (`LAW.md`, card-sheet rules). Mend
+keeps its cap (never above the HP she started the combat with), and in
+combat its cards print what will land, "Mend 6 (1 will land)" (Kokomi review
+r6, pick 1 (a), 2026-10-14; [USER]: "Let's go with (a)").
 
 ## 3. The decision, and why the old drafts had none
 

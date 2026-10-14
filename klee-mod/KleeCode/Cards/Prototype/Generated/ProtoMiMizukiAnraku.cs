@@ -58,7 +58,7 @@ public sealed class ProtoMiMizukiAnraku : CustomCardModel, ICompanionCard, IWrit
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Yumemizuki Mizuki — Anraku Secret Spring Therapy"),
-        ("description", "[gold]Swirl[/gold] ALL enemies. Deal {CalculatedDamage:diff()} damage to ALL enemies and [gold]Mend[/gold] 6."),
+        ("description", "[gold]Swirl[/gold] ALL enemies. Deal {CalculatedDamage:diff()} damage to ALL enemies and [gold]Mend[/gold] 6{InCombat: ({MendLands} will land)|}."),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on
@@ -74,7 +74,8 @@ public sealed class ProtoMiMizukiAnraku : CustomCardModel, ICompanionCard, IWrit
         {
             new CalculationBaseVar(14m),
             new ExtraDamageVar(1m),
-            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card))
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card)),
+            new MendLandsVar(6)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

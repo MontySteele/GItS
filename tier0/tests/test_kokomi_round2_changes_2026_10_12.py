@@ -36,7 +36,7 @@ def _amount(c):
     # adds a Sting now. Kurage Canopy left it in the Kokomi round 3 A-list
     # (2026-10-13): it makes Wards now (`test_kokomi_payoff_pass`).
     # Grand Strategist 4 [6] since the pool overhaul (was 7 [10]).
-    ("proto_kk_grand_strategist", 4, 6),
+    ("proto_kk_grand_strategist", 6, 8),   # Kokomi review r6 item 4
     ("proto_kk_shoal_of_spears", 5, 6),
 ])
 def test_the_retuned_numbers(cid, base, up):

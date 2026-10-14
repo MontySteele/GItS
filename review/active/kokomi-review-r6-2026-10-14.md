@@ -99,6 +99,15 @@ Companion summoners, every Block number and the starter.
 
 ## Picks
 
+**Built 2026-10-14** (branch `kokomi-r6-build-2026-10-14`): section 3 and
+picks 1 to 3. The two Powers are named Kurage Vanguard and Following Current.
+Their faces end at "Hydro damage." (text convention 3 keeps "the front
+enemy" off card lines; they hit the front enemy). Read the Field's now-line
+reads "Take 1 of your top 3 cards. Bury the rest." to fit the card ceiling.
+Kelp Wall's Plan says "the Attack damage you blocked" (item 12: Disintegration
+does not count). Sea's Reproach fires on a Plan's Weak; Heizou does not count
+his own Swirl. Details: provenance note "Kokomi review r6, 2026-10-14".
+
 **Ruled 2026-10-14, all four: 1 (a), 2 (b), 3 (a), 4 (b).** [USER]: "2,3,4)
 Good with the defaults, other than the first question." Then, on pick 1:
 "Let's go with (a)." Mend keeps its cap, printed on the card and receipt.

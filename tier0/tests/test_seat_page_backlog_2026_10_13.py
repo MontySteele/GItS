@@ -60,10 +60,14 @@ def test_ripple_basin_prints_outside_the_total_with_no_attack_yet():
 
 
 def test_ripple_basin_adds_nothing_once_an_attack_is_played():
+    # Kokomi review r6 (2026-10-14, item 11): it greys out rather than
+    # vanishing -- named, with no Block.
     got = line([_hit(12)], _you([RIPPLE]), [], [],
                [_row("Skill"), _row("Attack")])
     assert "you would take 12" in got
-    assert "Ripple Basin" not in got
+    assert CONDITIONAL not in got
+    assert ("Ripple Basin: no Block this turn (you played or planned an "
+            "Attack).") in got
 
 
 def test_a_carried_attack_from_last_turn_does_not_count():

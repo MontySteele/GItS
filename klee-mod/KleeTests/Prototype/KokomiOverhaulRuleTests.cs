@@ -325,7 +325,7 @@ public class KokomiOverhaulRuleTests
                     "EachPlayerEnergy", "EachPlayerDraw",
                     // THE STATUS BATCH (2026-10-01): the two that read the
                     // hand just drawn.
-                    "BlockPerStatusInHand", "TransformStatusesInHandAndDrawPile",
+                    "BlockPerStatusInHand", "TransformStatusesYouHave",
                     // THE RE-FOUNDING (2026-10-12).
                     "AddStings", "GainStrength", "JuugaGuard",
                     "PlayCompanion",
@@ -711,10 +711,14 @@ public class KokomiOverhaulRuleTests
     [Fact]
     public void The_cap_lives_in_exactly_one_place()
     {
+        // Kokomi review r6 pick 1 (a) (2026-10-14): the arithmetic is
+        // `MendWouldLand`, which Mend and the face's "(N will land)" share.
         var mend = Tide("Mend");
         var calls = Il.Calls(mend);
-        Assert.Contains("KokomiOverhaulLedger.get_EntryHp", calls);
+        Assert.Contains("KokomiRules.MendWouldLand", calls);
         Assert.Contains("CreatureCmd.Heal", calls);
+        Assert.Contains("KokomiOverhaulLedger.get_EntryHp",
+                        Il.Calls(Tide("MendWouldLand")));
 
         // And nothing else heals, so no Mend can skip the cap.
         var others = typeof(KokomiRules).GetMethods(HeadlessGame.All)

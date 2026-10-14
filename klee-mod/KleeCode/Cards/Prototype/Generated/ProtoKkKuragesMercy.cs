@@ -53,13 +53,14 @@ public sealed class ProtoKkKuragesMercy : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kurage's Mercy"),
-        ("description", "Each player [gold]Mend[/gold]s {KkAmount:diff()}."),
+        ("description", "Each player [gold]Mend[/gold]s {KkAmount:diff()}{InCombat: ({MendLands} will land on you)|}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("KkAmount", 8m)
+            new DynamicVar("KkAmount", 8m),
+            new MendLandsVar(8)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

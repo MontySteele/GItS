@@ -94,8 +94,13 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
   (a)): eight Plan lines and payoffs rewritten to Counter, Intent and Chain
   readings, six cards cut and six new ones in their slots, pool still 78
   (20 / 38 / 20). Untested in game until a deploy.
-- **Next:** [USER]'s picks on review r4; the default is his own finish-line
-  run.
+- **Since:** review r6 (`review/active/kokomi-review-r6-2026-10-14.md`,
+  picks 1 (a), 2 (b), 3 (a)) is built: a numbers pass, Mend's cap printed
+  ("Mend 6 (1 will land)"), Jellyfish Current and Coordinated Tide cut for
+  Kurage Vanguard and Following Current (two Hydro sources), and Read the
+  Field's card costs 0. Two new cards draw blank until an art pass.
+- **Next:** five to eight seats overnight on this build, then [USER]'s run
+  (pick 4 (b)).
 - **Possible change, parked:** Nereid's Ascension carries her burst's name
   only (no HP scaling, healing or jellyfish refresh, unlike the other three
   kits' bursts). [USER]: "Let's flag this as a possible change on Kokomi and

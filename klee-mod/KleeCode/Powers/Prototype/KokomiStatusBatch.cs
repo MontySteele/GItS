@@ -105,12 +105,12 @@ public static class KokomiStatusBatch
         return done;
     }
 
-    /// <summary>Sea Glass Harvest: "Transform every Status and Curse in your
-    /// Hand and Draw Pile into Sea Glass [Sea Glass+]." Compact's body with
-    /// curses added, over the draw pile since the Kokomi round-1 fixes
-    /// (2026-10-12) and the hand as well since the Kokomi round-5 review
-    /// (2026-10-14, A8), so a Status drawn that morning becomes Sea Glass the
-    /// same turn. A curse the game will not transform stays.</summary>
+    /// <summary>Sea Glass Harvest: "Transform every Status and Curse you have
+    /// into Sea Glass [Sea Glass+]." Compact's body with curses added, over
+    /// the draw pile since the Kokomi round-1 fixes (2026-10-12), the hand as
+    /// well since the Kokomi round-5 review (2026-10-14, A8), and the discard
+    /// pile since the round-6 review (2026-10-14, item 6). A curse the game
+    /// will not transform stays.</summary>
     public static async Task<int?> TransformStatuses(Player player,
                                                      bool upgraded)
     {
@@ -118,6 +118,7 @@ public static class KokomiStatusBatch
         if (combat == null) return 0;
         var targets = PileStatuses(player, PileType.Hand)
             .Concat(PileStatuses(player, PileType.Draw))
+            .Concat(PileStatuses(player, PileType.Discard))
             .Where(c => c.IsTransformable).ToList();
         if (targets.Count == 0) return 0;
         var swaps = new List<CardTransformation>();

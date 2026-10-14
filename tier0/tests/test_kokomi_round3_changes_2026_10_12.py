@@ -93,7 +93,7 @@ def test_kelp_wall_now_line_blocks_and_draws():
 def test_watchful_shoal_numbers_and_face():
     row = loader.get_card("proto_kk_watchful_shoal")
     up = upgrades.apply_upgrade(loader.get_card("proto_kk_watchful_shoal"))
-    assert (row.effects[0]["amount"], up.effects[0]["amount"]) == (3, 5)
+    assert (row.effects[0]["amount"], up.effects[0]["amount"]) == (4, 6)   # Kokomi review r6 item 3
     assert _rows()["proto_kk_watchful_shoal"]["description"] == (
         "Your [gold]Stings[/gold] deal {PowerAmount:diff()} additional "
         "damage. Your [gold]Wards[/gold] gain {PowerAmount:diff()} "

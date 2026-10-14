@@ -74,7 +74,7 @@ def test_a_0_cost_sting_can_still_be_written_and_carried_out():
 
 @pytest.mark.parametrize("cid,base,up", [
     ("proto_kk_jellyfish_drift", 6, 8),
-    ("proto_kk_watatsumi_drill", 6, 9),
+    ("proto_kk_watatsumi_drill", 7, 10),   # Kokomi review r6 item 1
     # Kokomi round 3 A-list (2026-10-13): 6 [9], Cloak and Dagger's 6.
     ("proto_kk_bubble_ward", 6, 9),
 ])

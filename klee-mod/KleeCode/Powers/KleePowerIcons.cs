@@ -176,6 +176,11 @@ internal static class KleePowerIcons
         UndercurrentSnarePower =>
             KleePck.Path("klee/powers/detonation_vuln.png"),
         DawnTidePower => KleePck.Path("kokomi/powers/bake_kurage.png"),
+        // Kokomi review r6 (2026-10-14): the two Hydro sources borrow the
+        // jellyfish's badge, the block above's rule.
+        KurageVanguardPower => KleePck.Path("kokomi/powers/bake_kurage.png"),
+        FollowingCurrentPower =>
+            KleePck.Path("kokomi/powers/bake_kurage.png"),
         JuugaGuardPower => KleePck.Path("klee/powers/oz_summon.png"),
         NereidsAscensionPower => KleePck.Path(
             "kokomi/powers/before_sun_and_moon.png"),

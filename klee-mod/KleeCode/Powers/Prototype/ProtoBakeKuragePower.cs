@@ -11,6 +11,7 @@ using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.ValueProps;
@@ -62,7 +63,8 @@ public sealed class ProtoBakeKuragePower : PowerModel, ILocalizationProvider
             // (`blindplay_notes.PLAN_COUNT_NOTE`). Spec:
             // `review/records/text-pass-2026-09-25/kokomi-rewrite.md`.
             "Enemies can't target it. It holds your [gold]Plans[/gold] "
-          + "until your next turn."
+          // Kokomi review r6 (2026-10-14, item 11): when in the turn.
+          + "until after your next draw."
           // A PLAN STAYS OPEN (2026-10-01, ruled), pick 5 (a): "Plans carry
           // out on their Plan line; click a waiting Plan to flip it." One
           // short sentence, inside the 125 ceiling (100 rendered).
@@ -116,6 +118,9 @@ public sealed class ProtoBakeKuragePower : PowerModel, ILocalizationProvider
         // so the Hydro it applies is standing for her own turn rather than
         // spent by a Plan that reacts with it. Sim twin:
         // `kokomi_plan.dawn_tide`, after `resolve_all`.
+        // KOKOMI REVIEW R6 (2026-10-14, pick 2 (b)): Kurage Vanguard's hit
+        // first, so it can react with an aura standing from her last turn.
+        await KurageVanguardPower.Signal(choiceContext, Owner);
         await DawnTidePower.Signal(choiceContext, Owner);
     }
 
@@ -413,17 +418,71 @@ public static class KokomiRules
     public static async Task<int> Mend(
         PlayerChoiceContext choiceContext, Creature? kokomi, int amount)
     {
-        if (!MendIsLive(kokomi) || amount <= 0) return 0;
-
-        var entry = KokomiOverhaulLedger.For(kokomi!).EntryHp;
-        var room = entry - (int)kokomi!.CurrentHp;
-        var landed = room > 0 ? System.Math.Min(amount, room) : 0;
+        var landed = MendWouldLand(kokomi, amount);
 
         if (landed > 0)
         {
-            await CreatureCmd.Heal(kokomi, landed);
+            await CreatureCmd.Heal(kokomi!, landed);
         }
 
         return landed;
+    }
+
+    /// <summary>
+    /// What a Mend of <paramref name="amount"/> would heal right now: the
+    /// cap's arithmetic, shared by <see cref="Mend"/> and the faces' "(N will
+    /// land)" (<see cref="MendLandsVar"/>, Kokomi review r6 pick 1 (a),
+    /// 2026-10-14), so the number printed is the number healed. PURE.
+    /// </summary>
+    public static int MendWouldLand(Creature? kokomi, int amount)
+    {
+        if (!MendIsLive(kokomi) || amount <= 0) return 0;
+        var entry = KokomiOverhaulLedger.For(kokomi!).EntryHp;
+        var room = entry - (int)kokomi!.CurrentHp;
+        return room > 0 ? System.Math.Min(amount, room) : 0;
+    }
+}
+
+/// <summary>
+/// KOKOMI REVIEW R6, PICK 1 (a) (2026-10-14): MEND'S CAP ON THE FACE. [USER]:
+/// "Let's go with (a)" -- Mend keeps its cap, printed on the card and the
+/// receipt. The face's <c>{InCombat: ({MendLands} will land)|}</c> reads
+/// what a Mend of the card's own number would heal now, by
+/// <see cref="KokomiRules.MendWouldLand"/>: The Moon's Plan prints "Mend 6 (1
+/// will land)" at near-full HP. The card's number is its own var (an upgrade
+/// moves it): <c>PlanMend</c>, <c>Mend</c> or <c>KkAmount</c>, else the
+/// literal the row prints. A Plan's Mend lands next turn, so the figure is
+/// the board now, which the receipt then confirms. Display only.
+/// </summary>
+public sealed class MendLandsVar : DynamicVar
+{
+    /// <summary>The face's token.</summary>
+    public const string Token = "MendLands";
+
+    private static readonly string[] Sources = { "PlanMend", "Mend", "KkAmount" };
+
+    public MendLandsVar(decimal printed) : base(Token, printed)
+    {
+    }
+
+    /// <summary>The card's Mend number, as printed.</summary>
+    public static int Printed(CardModel card, decimal fallback)
+    {
+        foreach (var name in Sources)
+        {
+            if (card.DynamicVars.TryGetValue(name, out var v))
+                return (int)v.BaseValue;
+        }
+        return (int)fallback;
+    }
+
+    public override void UpdateCardPreview(
+        CardModel card, CardPreviewMode previewMode, Creature? target,
+        bool runGlobalHooks)
+    {
+        PreviewValue = BaseValue;
+        if (!DamagePreview.Live(card, runGlobalHooks)) return;
+        PreviewValue = KokomiRules.MendWouldLand(card.Owner!.Creature,
+                                                 Printed(card, BaseValue));
     }
 }

@@ -1307,6 +1307,29 @@ PLAN_LANDS_STRENGTH = "; your Strength was {strength} when written"
 PLAN_DEFEND_WARNING = ("     - {enemy} intends to Block; {plan} ({n}) lands "
                        "into that Block.")
 
+# KOKOMI REVIEW R6 (2026-10-14). Item 11: the morning's place in the turn,
+# under the order note.
+PLAN_AFTER_DRAW_NOTE = "- Plans carry out after your draw."
+#: Item 7: a Counter Plan that pays only off an enemy Attack, on a board where
+#: no living enemy intends one.
+PLAN_NO_ATTACK_WARNING = ("     - {enemies} {verb} not intend to attack: "
+                          "{plan}'s Plan {what}.")
+PLAN_NO_ATTACK_WHAT = {"attackers": "hits no one", "blocked": "deals 0",
+                       "energy": "gives no Energy"}
+#: Item 9: an ALL-enemies hit that a body's Vulnerable will raise.
+PLAN_LANDS_VULNERABLE = " ({parts}, after Vulnerable)"
+#: Item 9 and pick 1 (a): a receipt names what moved its number, the way the
+#: Hard To Kill receipt names a cap.
+RECEIPT_BONUS = " — asked for {asked}, {n} landed: {names}."
+RECEIPT_MEND = (" — Mend {asked}, {n} landed: Mend never heals above the HP "
+                "you started this combat with.")
+#: Item 10: Energy above the turn's own, by the relics that gave it.
+ENERGY_LINE = "Energy {energy} left of {max_energy}"
+ENERGY_LINE_BONUS = "Energy {energy} ({max_energy} a turn, {parts})"
+#: Item 11: Ripple Basin once an Attack is played or planned this turn.
+INCOMING_CONDITIONAL_LOST = (" {name}: no Block this turn (you played or "
+                             "planned an Attack).")
+
 # `EB-752`. THE RELIC TERM NO DAMAGE FACE CAN FOLD.
 #
 # THE FIND (Klee r27, lanes 2 and cook, fight 2 each). "Ka-pow! printed Deal 4

@@ -653,6 +653,8 @@ public static class KokomiRefounding
         // THE POOL OVERHAUL (2026-10-13): Battle Formation, when the third
         // Plan of the turn finishes.
         await BattleFormationPower.OnCarriedOut(choiceContext, kokomi);
+        // KOKOMI REVIEW R6 (2026-10-14, pick 2 (b)): Following Current's hit.
+        await FollowingCurrentPower.OnCarriedOut(choiceContext, kokomi);
     }
 
     /// <summary>Gorou, General's War Banner's Plan line: "Gain 1 Strength."
@@ -1115,5 +1117,100 @@ public sealed class DawnTidePower : PowerModel, ILocalizationProvider
         {
             AuraPower.MorningWindow--;
         }
+    }
+}
+
+/// <summary>
+/// KOKOMI REVIEW R6 (2026-10-14, pick 2 (b)): the two Hydro sources built for
+/// the act-2 boss's damage bar, beside the Bake-Kurage's own Plan hits. One
+/// hit each: Hydro, dealt by her through the Bake-Kurage (a Plan hit's terms,
+/// <c>powered: false</c>, so her Strength and Weak do not move it and the
+/// target's Vulnerable and Block do), at <see cref="KokomiPlan.FrontEnemy"/>.
+/// Credited to the Bake-Kurage in telemetry, under the Power's name. Sim
+/// twin: <c>kokomi_plan.kurage_hit</c>.
+/// </summary>
+public static class KurageHydroSources
+{
+    public static async Task Hit(PlayerChoiceContext choiceContext,
+                                 Creature kokomi, int amount, string cause,
+                                 bool morning)
+    {
+        if (amount <= 0) return;
+        var target = KokomiPlan.FrontEnemy(kokomi);
+        if (target == null || target.IsDead) return;
+        using var credit = Diagnostics.DamageCredit.Open(
+            kokomi, Diagnostics.DamageCredit.Pet, "Bake-Kurage",
+            cause: cause, card: cause);
+        if (morning) AuraPower.MorningWindow++;
+        try
+        {
+            await ElementalHit.Deal(choiceContext, target, Element.Hydro,
+                                    amount, kokomi, powered: false);
+        }
+        finally
+        {
+            if (morning) AuraPower.MorningWindow--;
+        }
+    }
+}
+
+/// <summary>Kurage Vanguard (Kokomi review r6, 2026-10-14): "At the start of
+/// your turn, the Bake-Kurage deals 4 [6] Hydro damage to the front enemy."
+/// Called from <c>ProtoBakeKuragePower.AfterPlayerTurnStart</c> after the
+/// morning's Plans and before Dawn Tide; copies stack into one hit. Sim
+/// twin: <c>kokomi_plan.kurage_vanguard</c>.</summary>
+public sealed class KurageVanguardPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Kurage Vanguard"),
+        ("description",
+            "At the start of your turn, the [gold]Bake-Kurage[/gold] deals "
+          + "[blue]{Amount}[/blue] [gold]Hydro[/gold] damage."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    public static async Task Signal(PlayerChoiceContext choiceContext,
+                                    Creature? kokomi)
+    {
+        if (!KokomiOverhaul.LiveFor(kokomi)) return;
+        var amount = (int)kokomi!.Powers.OfType<KurageVanguardPower>()
+            .Sum(p => p.Amount);
+        await KurageHydroSources.Hit(choiceContext, kokomi, amount,
+                                     "Kurage Vanguard", morning: true);
+    }
+}
+
+/// <summary>Following Current (Kokomi review r6, 2026-10-14): "Whenever a
+/// Plan is carried out, the Bake-Kurage deals 3 [4] Hydro damage to the front
+/// enemy." Once per carry-out, after the Plan's own clauses, either line
+/// (<see cref="KokomiRefounding.OnCarriedOut"/>); copies stack into one hit.
+/// Sim twin: <c>kokomi_plan.following_current</c>.</summary>
+public sealed class FollowingCurrentPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Following Current"),
+        ("description",
+            "Whenever a [gold]Plan[/gold] is carried out, the "
+          + "[gold]Bake-Kurage[/gold] deals [blue]{Amount}[/blue] "
+          + "[gold]Hydro[/gold] damage."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    public static async Task OnCarriedOut(PlayerChoiceContext choiceContext,
+                                          Creature kokomi)
+    {
+        var amount = (int)kokomi.Powers.OfType<FollowingCurrentPower>()
+            .Sum(p => p.Amount);
+        await KurageHydroSources.Hit(choiceContext, kokomi, amount,
+                                     "Following Current",
+                                     morning: KokomiPlan.InMorning(kokomi));
     }
 }

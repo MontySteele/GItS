@@ -1875,7 +1875,13 @@ def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
                                                  int)
                                    and not isinstance(
                                        row.get("written_strength"), bool)
-                                   else None)}
+                                   else None),
+              # Kokomi review r6 (2026-10-14, item 7): a Counter Plan that
+              # pays only off an enemy Attack ("attackers", "blocked",
+              # "energy"); item 11: the card written is an Attack. Absent on
+              # an older bridge: None and False, and nothing is said.
+              "needs_attack": _text(row.get("needs_attack")) or None,
+              "attack": row.get("attack") is True}
              for row in (raw.get("queue") or []) if isinstance(row, dict)]
     pet_id = raw.get("pet_entity_id")
     pet_name = _text(raw.get("pet_name")) or "Bake-Kurage"

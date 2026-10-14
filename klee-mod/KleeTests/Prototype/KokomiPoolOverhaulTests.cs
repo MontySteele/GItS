@@ -62,7 +62,9 @@ public class KokomiPoolOverhaulTests
     [Theory]
     [InlineData("ProtoKkRiptideGuard", "ProtoKkTurningTideChain")]
     [InlineData("ProtoKkReserves", "ProtoKkBrineSpray")]
-    [InlineData("ProtoKkBraceForTheTide", "ProtoKkJellyfishCurrent")]
+    // Jellyfish Current's slot is Kurage Vanguard's since the Kokomi review
+    // r6 (2026-10-14, pick 2 (b); `KokomiReviewR6Tests`).
+    [InlineData("ProtoKkBraceForTheTide", "ProtoKkKurageVanguard")]
     [InlineData("ProtoKkMoonsReflection", "ProtoKkPreparedRetreat")]
     [InlineData("ProtoKkCeremonialGarment", "ProtoKkBattleFormation")]
     [InlineData("ProtoKkWatatsumiResistance", "ProtoKkTurnabout")]
@@ -127,20 +129,14 @@ public class KokomiPoolOverhaulTests
         Assert.Equal((KokomiPlan.Kind.DamageTakenSince,
                       KokomiPlan.Aim.AllEnemies), (taken.Kind, taken.Aim));
 
-        foreach (var power in new CardModel[] { new ProtoKkJellyfishCurrent(),
-                                                new ProtoKkBattleFormation() })
-        {
-            Assert.Equal((CardType.Power, 1),
-                         (power.Type, power.EnergyCost.Canonical));
-        }
-        Assert.Equal(CardRarity.Uncommon, new ProtoKkJellyfishCurrent().Rarity);
-        Assert.Equal(CardRarity.Rare, new ProtoKkBattleFormation().Rarity);
-        Assert.Contains(CardKeyword.Innate,
-                        Upgraded<ProtoKkJellyfishCurrent>().Keywords);
+        // Jellyfish Current and Coordinated Tide left with the Kokomi
+        // review r6 (2026-10-14, pick 2 (b)).
+        var formation = new ProtoKkBattleFormation();
+        Assert.Equal((CardType.Power, 1),
+                     (formation.Type, formation.EnergyCost.Canonical));
+        Assert.Equal(CardRarity.Rare, formation.Rarity);
         Assert.Contains(CardKeyword.Innate,
                         Upgraded<ProtoKkBattleFormation>().Keywords);
-        Assert.Contains(CardKeyword.Innate,
-                        Upgraded<ProtoKkCoordinatedTide>().Keywords);
     }
 
     [Fact]
@@ -149,20 +145,18 @@ public class KokomiPoolOverhaulTests
         var kelp = Assert.Single(new ProtoKkKelpWall().PlanClauses);
         Assert.Equal((KokomiPlan.Kind.DamageBlockedSince,
                       KokomiPlan.Aim.FrontEnemy), (kelp.Kind, kelp.Aim));
-        Assert.Contains("damage you blocked since you planned this",
+        // Kokomi review r6 (2026-10-14, item 12): "the Attack damage".
+        Assert.Contains("Attack damage you blocked since you planned this",
                         Face(new ProtoKkKelpWall()));
         var field = Assert.Single(new ProtoKkReadTheField().PlanClauses);
         Assert.Equal(KokomiPlan.Kind.DrawPileToHand, field.Kind);
         Assert.Contains(Seq("KokomiPlan", "DrawPileToHand"),
                         c => c.Contains("CardSelectCmd.FromCombatPile"));
-        Assert.Equal("Whenever a [gold]Companion[/gold] triggers an "
-                   + "[gold]Elemental Reaction[/gold], add a "
-                   + "[gold]Sting[/gold] to your [gold]Hand[/gold].",
-                     Face(new ProtoKkCoordinatedTide()));
         Assert.Equal("Whenever you trigger an [gold]Elemental "
                    + "Reaction[/gold], deal {PowerAmount:diff()} damage to "
                    + "ALL enemies.", Face(new ProtoKkGrandStrategist()));
-        Assert.Equal((4, 6), (Var<ProtoKkGrandStrategist>("PowerAmount"),
+        // Kokomi review r6 (2026-10-14, item 4): 6 [8].
+        Assert.Equal((6, 8), (Var<ProtoKkGrandStrategist>("PowerAmount"),
                               Var<ProtoKkGrandStrategist>("PowerAmount", true)));
     }
 

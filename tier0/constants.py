@@ -933,7 +933,7 @@ KOKOMI_REFOUNDING_IDS: tuple[str, ...] = (
     "proto_kk_kurage_bloom",
     "proto_kk_kurage_barrage",
     "proto_kk_watchful_shoal",
-    "proto_kk_coordinated_tide",
+    "proto_kk_following_current",
     "proto_kk_brine_spray",
     "proto_kk_spearhead",
     "proto_kk_steady_tide",
@@ -980,7 +980,9 @@ KOKOMI_JELLYFISH_IDS: tuple[str, ...] = (
 # of its rarity: Turning Tide for Riptide Guard, Brine Spray for Reserves,
 # Jellyfish Current for Brace for the Tide, Prepared Retreat for Moon's
 # Reflection, Battle Formation for Ceremonial Garment and Turnabout for
-# Watatsumi Resistance. The pool's
+# Watatsumi Resistance. The Kokomi review r6 (2026-10-14, pick 2 (b)) put
+# Kurage Vanguard in Jellyfish Current's slot and Following Current in
+# Coordinated Tide's. The pool's
 # history is in git (`git show kokomi-casket-frozen-2026-10-12:tier0/constants.py`).
 # `tools/lint_arm_pool_parity.py` compares this tuple,
 # `KokomiOverhaulRoster.Slice()` and the sheet BY ORDER.
@@ -1022,7 +1024,7 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_kk_suffocating_deep",
     "proto_kk_coral_crash",
     "proto_kk_evening_watch",
-    "proto_kk_jellyfish_current",
+    "proto_kk_kurage_vanguard",
     "proto_kk_watatsumis_grace",
     "proto_kk_tidal_riposte",
     "proto_kk_shoal_call",

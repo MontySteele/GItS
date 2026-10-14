@@ -849,7 +849,7 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             if hit is None:
                 hit = next((fx for fx in (getattr(card, "plan", None) or [])
                             if fx.get("op")
-                            == "transform_statuses_in_hand_and_draw_pile"),
+                            == "transform_statuses_you_have"),
                            None)
             ok = hit is not None and val is True
             if ok:

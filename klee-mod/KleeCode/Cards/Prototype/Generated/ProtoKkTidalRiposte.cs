@@ -47,7 +47,7 @@ public sealed class ProtoKkTidalRiposte : CustomCardModel, ICharacterCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 5m)
+            new DynamicVar("PowerAmount", 8m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -64,6 +64,6 @@ public sealed class ProtoKkTidalRiposte : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PowerAmount"].UpgradeValueBy(2m);
+        DynamicVars["PowerAmount"].UpgradeValueBy(3m);
     }
 }
