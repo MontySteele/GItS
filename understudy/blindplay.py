@@ -213,7 +213,7 @@ from understudy.blindplay_grammar import (   # noqa: E402,F401  (re-export)
     _resolve_enemy, _rest_keyword, SELF_TARGETS, _skip, _split_qualifier,
     _STALE_NUMBER, unclaimed_rewards, _use_potion, VERBS,
     resolve_shown_card, shown_hand, living_targets, stale_target,
-    NO_LIVING_ENEMY)
+    NO_LIVING_ENEMY, copy_left_since_look)
 from understudy.blindplay_session import (   # noqa: E402,F401  (re-export)
     AUTHOR_FAMILY, Budget, check_independent, CodexThread, command_schema,
     FIGHT_QUESTIONS, forecast_block, MODEL_FAMILIES, model_family,
@@ -719,6 +719,14 @@ def cmd_act(args) -> int:
         board = refusal_board(state)
         if board:
             mark_refusal(board, args.command, shown_why.split("; ")[0])
+        # Kokomi seat, lane 5 (2026-10-14): that copy was on the page and
+        # was played (or left the hand) since -- a skip, not counted, and
+        # never re-aimed at another copy (`copy_left_since_look`). The board
+        # mark above still holds a chained `end turn` once.
+        skipped = copy_left_since_look(shown_why)
+        if skipped:
+            print(skipped)
+            return 1
         print(f"REFUSED: {shown_why}")
         _refused(live)
         return 1

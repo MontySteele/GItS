@@ -207,15 +207,18 @@ def test_a_chained_numbered_play_names_the_copy_the_page_showed(
     assert [a for a, _ in wire.posts] == ["play_card", "play_card"]
 
 
-def test_a_copy_already_played_is_refused_not_re_aimed(
+def test_a_copy_already_played_is_skipped_not_re_aimed(
         lane, monkeypatch, capsys):
+    # 2026-10-14 (Kokomi, lane 5): skipped, not counted -- and still never
+    # re-aimed at a neighbour (`test_refusal_changed_under_the_seat.py`).
     wire = _live(monkeypatch, _fight([_guard() for _ in range(3)]))
     assert _observe() == 0
     assert _act('play "Coral Guard (2)"') == 0
     _play_index(wire, wire.posts[-1][1]["card_index"])
     capsys.readouterr()
     assert _act('play "Coral Guard (2)"') == 1
-    assert "has been played since" in capsys.readouterr().out
+    assert ('Skipped: "Coral Guard (2)" was played since your last look'
+            in capsys.readouterr().out)
     assert len(wire.posts) == 1
 
 
