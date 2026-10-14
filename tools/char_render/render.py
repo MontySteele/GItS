@@ -177,15 +177,25 @@ def grip_hand(arm, side, grip_w, rot, pole):
 #: 2026-10-13: "the way he's holding the claymores looks kinda weird, like
 #: they're going through his hands"). The plain grip puts the palm's centre
 #: ON the handle's axis, so on a planted blade the hilt runs through the hand.
-#: A resting hand lies palm-down on top of the pommel instead: the hand
-#: level and pointing out from his shoulder, its palm turned down the blade,
-#: lifted (fit_rest) until no hand vertex is inside the pommel, with
-#: REST_CLEAR to spare, and the fingers draped over its far side.
-REST_LIFTS = tuple(round(0.005 * i, 3) for i in range(25))   # units the palm's centre sits over the pommel top
-REST_CURLS = (50, 42, 34, 26, 18, 10)
-REST_CLEAR = 0.003
+#: A resting hand lies palm-down ON the pommel instead: the hand pointing out
+#: from his shoulder with the wrist relaxed and dropped (REST_DROOP), its palm
+#: turned down the blade, and lowered (fit_rest) until the palm TOUCHES the
+#: pommel's gem, the fingers curled loosely over and round its top.
+#: [USER], 2026-10-13, on the first rest (the palm cleared the gem): "His
+#: hands are awkwardly hovering over the swords now. Can we show him lightly
+#: touching the swords (palms on the hilts)?" So the fit asks for CONTACT,
+#: not clearance: the gem may sit up to REST_SINK inside the palm's skin,
+#: and a finger may lie up to REST_SKIN into the pommel's surface on its
+#: hidden side but never cross the side that faces the camera (REST_FRONT).
+REST_LIFTS = tuple(round(0.10 - 0.0025 * i, 4) for i in range(45))   # palm centre (bone) over the pommel top, high to low
+REST_CURLS = (20, 28, 36, 44, 52, 60)     # the palm finds the gem at the first; then curl as far as contact allows
+REST_SINK = 0.006        # the gem's point at most this far inside the palm (units; ~6 mm)
+REST_SKIN = 0.006        # a finger at most this far into the pommel, on its hidden side
+REST_FRONT = 0.002       # and on the side facing the camera, at most this (a touch)
+REST_DROOP = 22.0        # degrees the hand tips down from level: a relaxed wrist
 POMMEL_CAP = 0.06        # the tapering cap at a pommel's top (the gem), units
-POMMEL_TIP_R = 0.012     # the cap's point: the footprint a resting palm must clear
+POMMEL_TIP_R = 0.012     # the cap's point: the footprint the palm rests on
+VIEW = (0.0, -1.0, 0.0)  # toward the camera (world)
 _PALM = {}
 _HAND_IDX = {}
 
@@ -218,8 +228,9 @@ def palm_side(arm, side):
 
 def rest_hand(arm, side, top_w, rot, pole, lift):
     """IK the arm so the palm's centre sits `lift` over the pommel's top
-    (top_w, world), the hand level and pointing out from the shoulder, its
-    palm turned down the blade."""
+    (top_w, world; negative sinks it onto the gem), the hand pointing out
+    from the shoulder and tipped REST_DROOP down, its palm turned down the
+    blade."""
     inv = arm.matrix_world.inverted()
     down = (inv.to_3x3() @ (rot.to_matrix() @ Vector((0, -1, 0)))).normalized()
     G = inv @ top_w - down * lift
@@ -232,7 +243,8 @@ def rest_hand(arm, side, top_w, rot, pole, lift):
         out = G - pbs[f"腕.{side}"].head
         level = out - out.dot(down) * down
         if level.length > 1e-4:
-            T.aim(arm, f"手首.{side}", level.normalized())
+            dr = math.radians(REST_DROOP)
+            T.aim(arm, f"手首.{side}", (level.normalized() * math.cos(dr) + down * math.sin(dr)).normalized())
         h, _z, n = _hand_frame(arm, side)
         a, t = n - n.dot(h) * h, down - down.dot(h) * h
         if a.length > 1e-6 and t.length > 1e-6:
@@ -249,8 +261,11 @@ def rest_hand(arm, side, top_w, rot, pole, lift):
 def hand_clearance(mesh, side, base, top, r):
     """The deformed hand (outline hull off) against a pommel from `base` to
     `top` (world) of radius r: the nearest hand vertex's distance from its
-    axis along that span (none may be under r), and how high the hand's
-    lowest vertex over the pommel's footprint sits above its top (the rest)."""
+    axis along that span, overall and on the half facing the camera
+    (`min_front_dist`); how many hand vertices lie along that span (fingers
+    curled down round it); and where the hand's lowest vertex over the
+    pommel's footprint sits against its top (`rest_gap`: positive is a gap,
+    negative the gem pressed into the palm)."""
     import numpy as np
     if side not in _HAND_IDX:
         names = {f"手首.{side}"} | {f"{f}{d}.{side}" for f in T.FINGERS + ["親指"] for d in "０１２３"}
@@ -283,9 +298,23 @@ def hand_clearance(mesh, side, base, top, r):
     # point (the gem), so over it only the point's own footprint counts
     on = (s >= 0) & (s <= span - POMMEL_CAP)
     over = d <= POMMEL_TIP_R
-    return {"min_axis_dist": round(float(d[on].min()), 4) if on.any() else None, "pommel_r": r,
+    radial = (P - b) - np.outer(s, ax)
+    front = on & (radial @ np.array(VIEW) > 0)
+    return {"min_axis_dist": round(float(d[on].min()), 4) if on.any() else None,
+            "min_front_dist": round(float(d[front].min()), 4) if front.any() else None, "pommel_r": r,
             "rest_gap": round(float((s[over] - span).min()), 4) if over.any() else None,
             "hand_verts_on_pommel": int(on.sum())}
+
+
+def rest_ok(m, r):
+    """Contact, not clearance: the palm on the gem (rest_gap in [-REST_SINK,
+    0]), no finger deeper than REST_SKIN into the pommel, and none crossing
+    its camera side by more than REST_FRONT."""
+    if m["rest_gap"] is None or not -REST_SINK <= m["rest_gap"] <= 0.0:
+        return False
+    if m["min_axis_dist"] is not None and m["min_axis_dist"] < r - REST_SKIN:
+        return False
+    return m["min_front_dist"] is None or m["min_front_dist"] >= r - REST_FRONT
 
 
 def pommel_span(spec, at_w, rot, grip):
@@ -296,9 +325,10 @@ def pommel_span(spec, at_w, rot, grip):
 
 
 def fit_rest(arm, mesh, side, top_w, rot, pole, grip, curl):
-    """Rest the hand on its pommel: the lowest lift (REST_LIFTS) at which
-    some finger curl (REST_CURLS, most draped first) leaves every hand vertex
-    at least REST_CLEAR outside the pommel. Returns (lift, finger curl)."""
+    """Rest the hand on its pommel: lowering it (REST_LIFTS) with the fingers
+    loosely curled (REST_CURLS[0]), the first lift at which the PALM is in
+    contact (rest_ok); then the fingers curl down over the pommel as far as
+    contact still holds. Returns (lift, finger curl)."""
     spec = CFG["blades"][side]
     base, top = pommel_span(spec, top_w, rot, grip)
     if side not in _PALM:
@@ -306,18 +336,18 @@ def fit_rest(arm, mesh, side, top_w, rot, pole, grip, curl):
     best = None
     for lift in REST_LIFTS:
         rest_hand(arm, side, top_w, rot, pole, lift)
-        for c in REST_CURLS:
+        T.curl(arm, side, min(REST_CURLS[0], curl[0]), curl[1])
+        if not rest_ok(hand_clearance(mesh, side, base, top, spec["pommel_r"]), spec["pommel_r"]):
+            continue
+        best = (lift, min(REST_CURLS[0], curl[0]))
+        for c in REST_CURLS[1:]:
             T.curl(arm, side, min(c, curl[0]), curl[1])
-            m = hand_clearance(mesh, side, base, top, spec["pommel_r"])
-            if m["min_axis_dist"] is None or m["min_axis_dist"] >= spec["pommel_r"] + REST_CLEAR:
-                if m["rest_gap"] is None or m["rest_gap"] >= REST_CLEAR:
-                    best = (lift, min(c, curl[0]))
-                    break
-        if best:
-            break
+            if rest_ok(hand_clearance(mesh, side, base, top, spec["pommel_r"]), spec["pommel_r"]):
+                best = (lift, min(c, curl[0]))
+        break
     if best is None:
-        print("WARN rest: no clear rest for", side)
-        best = (REST_LIFTS[-1], REST_CURLS[-1])
+        print("WARN rest: no contact rest for", side)
+        best = (0.0, REST_CURLS[-1])
     rest_hand(arm, side, top_w, rot, pole, best[0])
     T.curl(arm, side, best[1], curl[1])
     print(f"REST {side} lift {best[0]} curl {best[1]} palm {_PALM[side]:+.0f}")

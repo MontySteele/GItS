@@ -445,13 +445,16 @@ def test_the_manifest_was_packed_at_his_ruled_height():
     assert m["stance_a"]["width_px"] <= 300, m["stance_a"]
 
 
-def test_his_hands_rest_on_the_pommels_and_never_go_through_them():
-    # [USER], 2026-10-13, on the select close-up: "the way he's holding the
-    # claymores looks kinda weird, like they're going through his hands".
-    # render.py measures the deformed hand mesh against each pommel in stance
-    # B (the shop loop's first frame and the select still): no hand vertex
-    # inside the pommel's body (its axis distance at least its radius), and
-    # the palm down on its top, not floating over it.
+def test_his_palms_rest_on_the_pommels_and_no_finger_crosses_their_front():
+    # [USER], 2026-10-13, on the select close-up: first "like they're going
+    # through his hands", then, of the hands lifted clear: "His hands are
+    # awkwardly hovering over the swords now. Can we show him lightly touching
+    # the swords (palms on the hilts)?" render.py measures the deformed hand
+    # mesh against each pommel in stance B (the shop loop's first frame and the
+    # select still): the palm ON the gem (the gem's point at most a few
+    # thousandths of a unit inside the palm, never a gap), a finger at most a
+    # skin's depth into the pommel on its hidden side, and none through the
+    # side that faces the camera.
     m = json.loads(pack.manifest_path("varka").read_text(encoding="utf-8"))
     rest = m["hands_on_pommels"]
     assert set(rest) == {"merchant", "select"}
@@ -460,8 +463,9 @@ def test_his_hands_rest_on_the_pommels_and_never_go_through_them():
         for side, g in sides.items():
             r = chars.CHARS["varka"]["blades"][side]["pommel_r"]
             assert g["pommel_r"] == r
-            assert g["min_axis_dist"] is None or g["min_axis_dist"] >= r, (still, side, g)
-            assert g["rest_gap"] is not None and 0.0 <= g["rest_gap"] <= 0.05, (still, side, g)
+            assert g["rest_gap"] is not None and -0.006 <= g["rest_gap"] <= 0.0, ("contact", still, side, g)
+            assert g["min_axis_dist"] is None or g["min_axis_dist"] >= r - 0.006, (still, side, g)
+            assert g["min_front_dist"] is None or g["min_front_dist"] >= r - 0.002, ("the visible front", still, side, g)
 
 
 def test_tight_box_ignores_the_faint_haze():
