@@ -71,7 +71,7 @@ price; Doubt and Max HP are heavy ones and are used sparingly.
 |---|---|---|
 | Blast the pond! | Gain 75 Gold. Add **Confinement**. | KABOOM! Fish everywhere. Klee hopes the Spire doesn't tell Jean. |
 | Just one little bomb. | Add **Fish Blasting**. | Just a little one. Klee keeps the biggest fish for Dodoco. |
-| Leave them be. | Remove a card. | Klee puts the fuse away. Jean would be proud. Probably. |
+| Leave them be. | Remove a card. | Klee puts the fuse away and watches the fish swim past. |
 
 **Dodoco Goes Missing** (act 1, every option priced). Dodoco is a stuffed
 toy; something in the Spire took it.
@@ -98,7 +98,10 @@ Opening line by act-1 choice: *chased* "Klee knows this trail. She ran most of i
 | Swap her best bomb for Dodoco. | Transform a card. | It gives her a rock in return. Klee keeps the rock. |
 
 **The Knights Come Looking** keeps its options and effects. On the Dodoco
-thread it opens: "Dodoco rides on Klee's shoulder the whole way."
+thread it opens: "Dodoco rides on Klee's shoulder the whole way." **If Dodoco
+went missing in act 1 and act 2 brought no event**, it opens instead: "A
+knight holds out something small and a little sticky. 'Found this on the
+stairs below. Is it yours?' It's Dodoco." Doubt is removed as the event opens.
 
 **Mom's Marks** (act 1, a price with free ways out):
 
@@ -107,7 +110,7 @@ thread it opens: "Dodoco rides on Klee's shoulder the whole way."
 | Option | Effect | Result |
 |---|---|---|
 | Follow Mom's marks. | Gain 75 Gold. | The marks lead to a little pouch of Mora. Mom always leaves snack money. |
-| Try the recipe right now. | Lose 10 HP. Add **Alice's Recipe** (a Rare). | It works! Mostly. Klee's eyebrows will grow back. |
+| Try the recipe right now. | Lose 10 HP. Add **Alice's Recipe** (a Rare). | It works! Klee's eyebrows will grow back. |
 | Add a mark of her own. | Upgrade 2 random cards. | A bomb, a star, and "Klee was here too!" |
 
 **Alice's Cache** (act 2, every option priced, the strongest reward in the
@@ -131,9 +134,9 @@ Opening line by act-2 choice: *opened* "You opened it, didn't you? Of course you
 | Option | Effect | Result |
 |---|---|---|
 | Read it out loud to Dodoco. | Heal 20 HP. | "...and I'll see you in Mondstadt. Love, Mom." Klee reads it twice. |
-| Try the trick on the back. | Lose 10 HP. Add an upgraded **Alice's Introduction Magic** (a Rare). | It goes wrong four times and right once. Once is enough. |
-| *Saved the cache:* Open the chest at last. | Gain a random Rare relic. | It's been ticking for a whole act. It's still wonderful. |
-| *Otherwise:* Fold the note into a fuse. | Upgrade 3 random cards that place a Bomb. | Mom's handwriting burns blue. Of course it does. |
+| Try the trick on the back. | Lose 10 HP. Add an upgraded **Alice's Introduction Magic** (a Rare). | On the fifth try, it works. "I did it, Dodoco! Let's do it again!" |
+| *Saved the cache:* Open the chest at last. | Gain a random Rare relic. | Klee sets the chest down and opens it at arm's length, just like Mom said. |
+| *Otherwise:* Fold the note into a fuse. | Upgrade 3 random cards that place a Bomb. | The ink burns blue. Klee saves a scrap for later. |
 
 **A Letter from Jean** keeps its options and effects, with result lines: "Klee
 reads it twice, then a third time. She tucks it in next to Dodoco." / "Dear
@@ -145,18 +148,25 @@ bomb. Jean won't mind. Probably."
 His results show what he does: he gives orders, checks on people, and makes
 room.
 
-**Lore, checked.** His character story ("Participating in the Trial") holds
-up: on his first knight's exam he knocked out every examiner and was rejected
+**Lore, one source.** His character story ("Participating in the Trial"), as
+the community transcribes it: on his first knight's exam he knocked out every examiner and was rejected
 anyway. That night he staged an ambush on Grand Master Valentine to prove the
 Knights could not protect their own Grand Master. Valentine took him for a
 drink and told him to travel and find his own reason to be a knight. He found
-it years later with Simon Page: home. Source: the character story as given
-on Baidu Baike's Varka page; one community source, consistent with
-`varka-lore-census-2026-10-13.md`.
+it years later with Simon Page: home. Source: Baidu Baike's Varka page. The
+lore census (`varka-lore-census-2026-10-13.md`) traces to the same community
+source, so this is one source, not two; no official text was found. If it
+proves wrong, A Song on the Wind and The First Exam change to his Knight of
+Boreas years. The song tells the story once; the exam only shows how easily
+he carries it now.
 
-**Dispatch from Mondstadt** keeps its options (sign every one: upgrade 2; sign
-later: 75 Gold and Overdue Reports; request reinforcements: choose a Knight),
-with result lines.
+**Dispatch from Mondstadt** keeps its options and effects, with result lines:
+
+| Option | Result |
+|---|---|
+| Stop to sign every one of them. | He signs them against the wall, one after another. The courier has never seen him read a report so carefully. |
+| Sign them later. | "Tell her they're in good hands." He tucks the satchel under his cloak. |
+| Request reinforcements. | "And not the new recruits. Send the ones who complain. They're usually right." |
 
 **The Second Satchel** (act 2, every option priced). Signing pays out whether
 or not he still has Overdue Reports.
@@ -167,7 +177,7 @@ Opening line by act-1 choice: *signed* "You signed the last lot so fast, sir, sh
 
 | Option | Effect | Result |
 |---|---|---|
-| Sign them by lamplight. | Lose 8 HP. Upgrade 2 random cards. Remove every **Overdue Reports**. | No sleep tonight. Half of it was useful, which is more than usual. |
+| Sign them by lamplight. | Lose 8 HP. Upgrade 2 random cards. Remove every **Overdue Reports**. | He signs the last page at dawn, then goes back and reads the casualty lists twice. |
 | Hand them to the courier. | Lose 75 Gold. Remove a card. | "Consider it a promotion. And a raise." |
 | Lose them on the stairs. | Gain 2 random potions. Add **Overdue Reports**. | He keeps the satchel. It had snacks in it. |
 
@@ -178,7 +188,7 @@ reason to be here, unlike Alice: she came to collect her late Grand Master.
 
 | Option | Effect | Result |
 |---|---|---|
-| Let her lead the last stretch. | Add an upgraded **Jean: Dandelion Breeze**. | "Lead on, Acting Grand Master." "Just Jean, today." |
+| Let her lead the last stretch. | Add an upgraded **Jean: Dandelion Breeze**. | "Lead on, Acting Grand Master." "Then keep up, Grand Master." |
 | Promise a full report at Angel's Share. | Remove every Curse. Lose 25 Gold for each. Locked with no Curse. | "Every word. I'm buying." |
 | Carry her ledger the rest of the way. | Upgrade 3 random cards. Add **Overdue Reports**. | He reads it on the way. It's mostly complaints about him. |
 
@@ -192,7 +202,19 @@ reason to be here, unlike Alice: she came to collect her late Grand Master.
 | Leave them your supplies. | Lose 75 Gold. Remove a card. | He leaves his own pack and travels light. "Eat. That's an order." |
 | Send them down with a message. | Gain 2 random potions. Add **Overdue Reports**. | "Tell Jean we're fine." They press their potions on him, and their paperwork. |
 
-**The Wolf of the North** keeps its options, with result lines.
+**The Wolf of the North** keeps its options and effects, with result lines:
+
+| Option | Result |
+|---|---|
+| Spar with him. | They wreck half the landing. Boreas looks pleased with himself. |
+| Rest at his side. | He sleeps with his back against the wolf's flank, the way he did on the northern watch. |
+| Ask after the pack. | Boreas shows him Razor running with the wolves, fast and grinning. Varka watches until it fades. |
+
+**The Long Way Home's reunion replies** become one per knight (today all
+three share "Ha, good to have you here!"). Eula, "You still owe me a rematch":
+"Tomorrow. After I've slept. I won't go easy." Noelle, "let me take the front
+line": "It's yours. I'll be right behind you." Diluc, "your usual table":
+"Tell them to bring up the good bottle. The one you hide."
 
 **The Long Way Home** keeps its options. Opening line by Rearguard choice:
 *took the rear* "The three from the rearguard march at the front of the column, grinning." *supplies* "The three from the rearguard are waiting at the top of the stairs, fed and rested. They saved him a loaf." *sent down* "Halfway home, three knights climb back up to meet him. 'Message delivered, sir. Jean says hurry up.'"
@@ -210,13 +232,13 @@ reason to be here, unlike Alice: she came to collect her late Grand Master.
 **The First Exam** (act 2, a price with free ways out). Like Starsnatch, it
 happens now, in the Spire, and the memory is what it stirs up.
 
-> Training dummies stand in a ring on this landing, as if someone set up a knight's exam inside the Spire. Varka remembers his first: he knocked out every examiner and got a rejection letter anyway.
+> Training dummies stand in a ring on this landing, as if someone set up a knight's exam inside the Spire. Varka cracks his knuckles. He has taken this exam before.
 
 | Option | Effect | Result |
 |---|---|---|
 | Knock them all down again. | Lose 8 HP. Add an upgraded **Four Winds' Ascension**. | Every dummy down in one pass. Nobody here to reject him. |
 | Do it properly this time. | Upgrade 2 random cards. | One at a time, by the book. Valentine would laugh at him. |
-| Walk past. | Heal 15 HP. | He found his reason a long time ago. He pats the nearest dummy on the way by. |
+| Walk past. | Heal 15 HP. | He pats the nearest dummy on the way by. |
 
 ## 4. The build
 
