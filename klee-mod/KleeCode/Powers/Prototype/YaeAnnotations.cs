@@ -119,7 +119,8 @@ public static class YaeAnnotationText
     {
         YaeAnnotation.RedInk =>
             $"This card deals {YaeLaw.RedInkAmount} more damage and gives "
-          + $"{YaeLaw.RedInkAmount} more [gold]Block[/gold].",
+          + $"{YaeLaw.RedInkAmount} more [gold]Block[/gold]. On a card that "
+          + "only plants, it goes to the [gold]Sakura[/gold].",
         YaeAnnotation.Footnote => "When this card is played, draw 1 card.",
         YaeAnnotation.DeadlineExtension => "This card has [gold]Retain[/gold].",
         YaeAnnotation.FoxFire =>
@@ -411,7 +412,8 @@ public static class YaeEditing
             var picked = (await CardSelectCmd.FromHand(
                 choiceContext, owner,
                 new CardSelectorPrefs(new LocString(Table, EditPromptKey), 1),
-                c => Editable(c, editor), editor)).FirstOrDefault();
+                c => Editable(c, editor) && YaeAnnotationReach.Affects(c, annotation),
+                editor)).FirstOrDefault();
             if (picked == null) return;
             if (!Annotate(picked, annotation)) continue;
             YaeShrineLedger.For(owner.Creature).NoteEdit();
@@ -434,7 +436,8 @@ public static class YaeEditing
             choiceContext, owner);
         if (chosen == YaeAnnotation.None) chosen = fallback;
         var cards = PileType.Hand.GetPile(owner).Cards
-            .Where(c => Editable(c, editor)).ToList();
+            .Where(c => Editable(c, editor) && YaeAnnotationReach.Affects(c, chosen))
+            .ToList();
         var n = 0;
         foreach (var card in cards)
         {
@@ -501,10 +504,12 @@ public static class YaeEditing
             .Distinct()
             .ToList();
 
-    /// <summary>The Publish offer for a player's deck.</summary>
+    /// <summary>The Publish offer for a player's deck. A card its draft would
+    /// do nothing on is not offered (the dead-edit filter).</summary>
     public static IEnumerable<CardModel> PublishChoices(Player player) =>
-        PublishChoices(player.Deck.Cards.Select(c =>
-            (c, Draft(c), c.Enchantment is YaeAnnotationModel)));
+        PublishChoices(player.Deck.Cards
+            .Where(c => YaeAnnotationReach.Affects(c, Draft(c)))
+            .Select(c => (c, Draft(c), c.Enchantment is YaeAnnotationModel)));
 
     /// <summary>
     /// At the end of a fight: every deck card's draft becomes the Annotation

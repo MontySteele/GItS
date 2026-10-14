@@ -397,3 +397,35 @@ Built in both engines:
    elite or boss fight, you may Publish up to 2 Annotations." Open to
    change.
 4. Sakura Annotations are still never Published.
+
+## Red Ink on a planting card, ruled 2026-10-14
+
+Red Ink on Yakan Evocation did nothing: the card deals no damage and gives
+no Block, and planting never read the card's Annotation. Claude offered:
+"1. The Sakura inherits it ... Red Ink on Yakan Evocation would then plant a
+Sakura that strikes 3 bigger ... 2. Block dead Edits. The chooser greys out
+any card the Annotation can't affect."
+
+[USER]: "Hmm, let's do both. Make the Sakura work, but also try to block
+dead edits when we can."
+
+Built in both engines:
+1. **Inheritance (Red Ink only).** Red Ink on a card that plants a Sakura
+   and itself deals no damage and gives no Block passes to every Sakura that
+   play plants (Yakan Evocation, Twin Sakura's two, Grafted Branch). The
+   Sakura reading is unchanged: it lasts the Sakura's life, is never
+   Published, and makes its strike 3 bigger (not in Offering). With three
+   standing the plant only levels, so nothing inherits. Fox Fire, Deadline
+   Extension, Footnote, Royalties and Sakura Seal keep their card readings.
+   A Published Red Ink planting card plants a Red Ink Sakura every play.
+   Twin Sakura+ gains 4 Block, so Red Ink rides that Block instead.
+2. **Dead edits are blocked.** An Edit's chooser, Reborn as Guuji Yae and
+   the after-elite Publish offer skip a card the Annotation would do nothing
+   on. Only Red Ink can be dead: it needs a card that deals damage (an
+   Attack, or a card with a damage number), gives Block, or plants. The
+   facts come from the card's own data, not its text; Print Run's Block is
+   one of her own verbs, so it is marked for this rule (Nimble unchanged).
+   With no valid card in hand the Edit does nothing, silently, as the base
+   game's hand selections do.
+3. **Card text.** The Red Ink rule gains one clause: "On a card that only
+   plants, it goes to the Sakura."

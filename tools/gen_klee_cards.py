@@ -3078,6 +3078,28 @@ YAE_FIELDS = {"op", "kind", "target", "per", "base", "amount", "annotation",
               "rite", "which"}
 
 
+#: The `yae` kinds whose play plants a Sakura (`ISakuraPlanterCard`).
+YAE_PLANT_KINDS = frozenset({"plant", "plant_level"})
+
+
+def yae_plants_sakura(card: dict) -> bool:
+    """Does this row's own play plant a Sakura? Sim twin:
+    `yae_shrine.plants_sakura`."""
+    return any(fx.get("op") == "yae" and fx.get("kind") in YAE_PLANT_KINDS
+               for fx in iter_effects(card.get("effects") or []))
+
+
+#: The `yae` kinds that give the card's own Block (`IYaeBlockCard`).
+YAE_BLOCK_KINDS = frozenset({"block_per_sakura", "block_per_annotated"})
+
+
+def yae_gives_block(card: dict) -> bool:
+    """Does a `yae` kind on this row give the card's own Block? Sim twin:
+    `yae_shrine.gives_block`."""
+    return any(fx.get("op") == "yae" and fx.get("kind") in YAE_BLOCK_KINDS
+               for fx in iter_effects(card.get("effects") or []))
+
+
 def yae_call(eff: dict) -> str:
     """The one awaited call a `yae` op emits."""
     args = "choiceContext, this, cardPlay"
@@ -17219,6 +17241,18 @@ def emit(
     if any(fx.get("op") == "set_off"
            for fx in iter_effects(card.get("effects") or [])):
         interfaces += ", ISetOffCard"
+    # YAE MIKO, RED INK ON A PLANTING CARD (ruled 2026-10-14): a row whose own
+    # play plants a Sakura (`yae` plant / plant_level) says so on the class,
+    # a MARKER read by `YaeAnnotationReach.Plants` (the Edit filter, and Red
+    # Ink passing to the Sakura it plants). Sim twin:
+    # `yae_shrine.plants_sakura`, off the same ops.
+    if yae_plants_sakura(card):
+        interfaces += ", ISakuraPlanterCard"
+    # The same rule's Block fact: a `yae` kind that gives the card's own
+    # Block (Print Run) declares no BlockVar, so `GainsBlock` cannot see it
+    # (and Nimble stays as it was); Red Ink still rides it.
+    if yae_gives_block(card):
+        interfaces += ", IYaeBlockCard"
     # The Furina whole-run round 2 (2026-10-10): a row whose own play pays
     # Fanfare declares it, so telemetry can count the Spend cards in hand.
     # DERIVED from the row's `stage_spend*` ops, modes included; a Power
