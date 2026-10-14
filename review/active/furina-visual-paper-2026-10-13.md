@@ -170,3 +170,7 @@ Sheets: `scratchpad/furina-art/sheets/`.
 **Black patches.** Every guest was checked again: no 9 by 9 px block of near-black (all channels under 28) appears on any of the eleven, before or after.
 
 Sheet: `scratchpad/furina-art/sheets/f_guest_lineup.png`.
+
+## Ruled: ship
+
+The three re-posed guests (Neuvillette, Sigewinne, Clorinde) approved. [USER], 2026-10-14: "On Varka and Furina - ship it! The new renders look great!"
