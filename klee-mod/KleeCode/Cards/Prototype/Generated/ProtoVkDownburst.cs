@@ -51,8 +51,18 @@ public sealed class ProtoVkDownburst : CustomCardModel, IElementalCard, ICharact
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Downburst"),
-        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If it [gold]Swirls[/gold], gain {VkAmount:diff()} [gold]Oath[/gold] of each element."),
+        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If it [gold]Swirls[/gold], gain {VkAmount:diff()} [gold]Oath[/gold] of each element.{InCombat:{VarkaSwirl}|}"),
     };
+
+    /// <summary>This card's in-combat Oath and Swirl lines
+    /// (`VarkaOath.SwitchLine`, `VarkaOath.WildfireLine`,
+    /// `VarkaOath.SwirlLine`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("VarkaSwirl", VarkaOath.SwirlLine(this));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

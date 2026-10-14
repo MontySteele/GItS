@@ -176,6 +176,8 @@ def test_the_reader_carries_the_keys_the_mod_sends():
          "wolfpack",
          # The Varka wave (2026-10-13): Stoke the Flames' bonus.
          "stoked",
+         # Varka round 5 (2026-10-13): what the play made you discard.
+         "discarded", "discard_picked_for_you",
          # Seat page backlog (2026-10-13): the card's type (Ripple Basin).
          "card_type"])
     assert sorted(rows[0]["hits"][0]) == sorted(

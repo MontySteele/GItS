@@ -1506,6 +1506,20 @@ def resolutions(player: dict[str, Any]) -> list[dict[str, Any]] | None:
                         for ev in (row.get("events") or [])
                         if isinstance(ev, dict)
                         and _text(ev.get("kind")) == "stoked"),
+                    # Varka round 5 (2026-10-13): the cards this play made
+                    # you discard, and whether the game picked them (the hand
+                    # held no more than it asked for).
+                    "discarded": [
+                        _text(ev.get("card"))
+                        for ev in (row.get("events") or [])
+                        if isinstance(ev, dict)
+                        and _text(ev.get("kind")) == "play_discard"
+                        and _text(ev.get("card"))],
+                    "discard_picked_for_you": any(
+                        _text(ev.get("power"))
+                        for ev in (row.get("events") or [])
+                        if isinstance(ev, dict)
+                        and _text(ev.get("kind")) == "play_discard"),
                     "swirl_no_aura": _int(row.get("swirl_no_aura")),
                     "swirl_on_aura": _int(row.get("swirl_on_aura")),
                     "applied": applied,
