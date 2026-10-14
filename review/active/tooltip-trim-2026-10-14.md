@@ -90,6 +90,8 @@ riders). Klee and Varka are frozen at Balance; text-only changes land on
 
 ## Picks
 
+**Ruled 2026-10-14, all three (a).** [USER]: "The tooltip trim makes sense - approved!"
+
 1. **The house rule (3 boxes, about 90 characters, no restated base words,
    riders to the seat page, a lint to hold it):** **(a) yes**; (b) yes, with
    a different cap you name.
