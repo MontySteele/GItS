@@ -206,10 +206,13 @@ public static class SparkCounter
 
     /// <summary>
     /// The counter's place in the row above the energy orb: after Furina's
-    /// Fanfare gauge when she holds Sparks, first otherwise.
+    /// Fanfare gauge when she holds Sparks, above Varka's Oath dial when he
+    /// does (<see cref="VarkaOathDial.SlotsTall"/>), first otherwise.
     /// </summary>
     public static int SlotFor(Creature? creature) =>
-        FanfareCounter.AppliesTo(creature) ? DrainedCounter.Slot + 1 : 0;
+        FanfareCounter.AppliesTo(creature) ? DrainedCounter.Slot + 1
+        : VarkaOathDial.AppliesTo(creature)
+            ? VarkaOathDial.SlotsTall(FallbackSide) : 0;
 
     /// <summary>The number the badge draws: the bank, right now, through the
     /// arm's one read

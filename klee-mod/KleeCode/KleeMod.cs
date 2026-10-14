@@ -239,6 +239,10 @@ public static class KleeMod
                 // Plan line, a pick from the Draw Pile, on the same terms.
                 [Powers.KokomiPlan.DrawPilePromptKey] =
                     Powers.KokomiPlan.DrawPilePromptText,
+                // THE PLANS VIEW (2026-10-14): the controller's grid of
+                // waiting Plans, on the same terms.
+                [Vfx.KokomiPlanView.PromptKey] =
+                    Vfx.KokomiPlanView.PromptText,
                 // R276, the Klee pool expansion's two discard-pile picks
                 // (Treasure Map, Come Back and Play!), on the same terms.
                 [Powers.KleeExpansion.SetOffPromptKey] =
@@ -271,6 +275,13 @@ public static class KleeMod
                 [Powers.YaeEditing.AnnotationPromptKey] =
                     Powers.YaeEditing.AnnotationPromptText,
             });
+
+            // YAE MIKO (2026-10-14): each Annotation's Edit prompt, which
+            // names it and what it does (`YaeEditing.EditPromptTextFor`).
+            LocManager.Instance.GetTable("cards").MergeWith(
+                Powers.YaeAnnotationText.All.ToDictionary(
+                    Powers.YaeEditing.EditPromptKeyFor,
+                    Powers.YaeEditing.EditPromptTextFor));
 
             // YAE MIKO (2026-10-14, Publish after elites and bosses):
             // Meditations of a Yako's reward-screen row. A Reward's
@@ -563,6 +574,8 @@ public static class KleeMod
                     [Cards.ArmKeywordTips.SakuraKey + ".title"] = "Sakura",
                     // YAE MIKO (2026-10-13): her second word.
                     [Cards.ArmKeywordTips.EditKey + ".title"] = "Edit",
+                    // 2026-10-14: Tenko, split out of her Sakura tip.
+                    [Cards.ArmKeywordTips.TenkoKey + ".title"] = "Tenko",
                     // The design axes (2026-10-14): the shrine's Rite.
                     [Cards.ArmKeywordTips.RiteKey + ".title"] = "Rite",
                     [Cards.ArmKeywordTips.LightfallSwordKey + ".title"] =
@@ -632,6 +645,13 @@ public static class KleeMod
                     [Cards.BaseKeywordTips.EtherealKey + ".title"] =
                         "Ethereal",
                 };
+            // YAE MIKO (2026-10-14): each Annotation's own tip, titled by
+            // its name (`ArmKeywordTips.ForAnnotation`).
+            foreach (var annotation in Powers.YaeAnnotationText.All)
+            {
+                keywordFallback[Cards.ArmKeywordTips.KeyOf(annotation) + ".title"] =
+                    Powers.YaeAnnotationText.Name(annotation);
+            }
             keywordTable.MergeWith(keywordFallback
                 .Where(pair => !keywordTable.HasEntry(pair.Key))
                 .ToDictionary(pair => pair.Key, pair => pair.Value));

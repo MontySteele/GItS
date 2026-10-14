@@ -174,6 +174,9 @@ public static class OathBadge
             badge.Refresh();
         }
         await SyncLeft(choiceContext, varka, ledger);
+        // The Oath dial by the Energy orb (2026-10-14) is the same view of
+        // the ledger, redrawn on the same funnel. Display only.
+        global::KleeMod.Vfx.VarkaOathDial.Refresh(varka);
     }
 
     /// <summary>The left-element flag this ledger wants, or null. PURE.

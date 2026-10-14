@@ -38,7 +38,7 @@ public sealed class ProtoYmProofread : CustomCardModel, ICharacterCard
     public string CharacterId => "yae";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForEdit(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForEdit(ArmKeywordTips.ForAnnotation(base.ExtraHoverTips, this, YaeAnnotation.RedInk, false), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_proofread");
 

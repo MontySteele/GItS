@@ -923,14 +923,24 @@ ARM_KEYWORDS = (
                "ArmKeywordTips.ForElementalReaction"),
     # YAE MIKO (2026-10-13), pick 6 (a): "two tips, Sakura and Edit; Tenko
     # lives in the Sakura tip and the five Annotation names in the Edit tip".
-    # So a face printing Tenko hovers the Sakura tip, and one printing an
-    # Annotation's name, "Annotated" or "Publish" hovers the Edit tip.
+    # A face printing "Edit", "Annotated" or "Publish" hovers the Edit tip.
     # `Sakura` is the companion Sesshou Sakura's word too; `ForSakura` prints
     # her tip on her own cards.
-    ArmKeyword("Sakura", ("Sakura", "Tenko"), "ArmKeywordTips.ForSakura"),
-    ArmKeyword("Edit", ("Edit", "Edited", "Annotated", "Publish", "Red Ink",
-                        "Footnote", "Deadline Extension", "Fox Fire",
-                        "Sakura Seal", "Royalties"), "ArmKeywordTips.ForEdit"),
+    # [USER] (2026-10-14): "no need to show the text for every possible edit
+    # if the card can only apply one." The Edit tip is the general rule, and
+    # each Annotation a face golds is its own tip (`annotation_tip_args`, one
+    # call per name, its Sakura reading on a row that Edits a Sakura). Read
+    # before the Edit tip: it is what this card does.
+    # [USER] (2026-10-14): "Sakura and Tenko should be cut into separate
+    # tips." A face printing Tenko hovers the Tenko tip, and the Sakura tip
+    # only if it names Sakura too.
+    ArmKeyword("Sakura", ("Sakura",), "ArmKeywordTips.ForSakura"),
+    ArmKeyword("Tenko", ("Tenko",), "ArmKeywordTips.ForTenko"),
+    ArmKeyword("Annotation", ("Red Ink", "Footnote", "Deadline Extension",
+                              "Fox Fire", "Sakura Seal", "Royalties"),
+               "ArmKeywordTips.ForAnnotation"),
+    ArmKeyword("Edit", ("Edit", "Edited", "Annotated", "Publish"),
+               "ArmKeywordTips.ForEdit"),
     # YAE MIKO, THE DESIGN AXES (ruled 2026-10-14): the shrine's Rite, one
     # tip naming the four.
     ArmKeyword("Rite", ("Rite",), "ArmKeywordTips.ForRite"),
@@ -1513,6 +1523,9 @@ BOARD_ONLY_TIP_CALLS = frozenset({
     "ArmKeywordTips.ForEmptyField",
     "ArmKeywordTips.ForElementSwitch",
     "ArmKeywordTips.ForCompanionPlan",
+    # Kokomi wording pass (2026-10-14): Crystal Collapse's preview of the
+    # Companion it copies shows only in combat, once one has been played.
+    "KokomiCards.WithCopiedCompanionPreview",
 })
 
 
@@ -1753,6 +1766,20 @@ def card_needs_an_exhausted_card(card: dict) -> bool:
     the row's `plan_from_exhaust`. Twin: `kokomi_plan.needs_an_exhausted_card`."""
     return any(eff.get("op") == "plan_from_exhaust"
                for eff in card.get("effects", []))
+
+
+def card_needs_a_played_companion(card: dict) -> bool:
+    """Is this row unplayable while no Companion has been played this combat?
+    (Kokomi wording pass, 2026-10-14, [USER]: "Yep, please proceed".) Crystal
+    Collapse copies the last Companion played, captured when the Plan is
+    written; with none it was written and carried out as nothing. Derived
+    from a PLAN-ONLY row's `play_copy_of_companion` clause, so a row with a
+    now-line of its own would gate only its Plan (none exists). Twin:
+    `kokomi_plan.needs_a_played_companion`."""
+    if card.get("effects"):
+        return False
+    return any(clause.get("op") == "play_copy_of_companion"
+               for clause in (card.get("plan") or []))
 
 
 def card_needs_a_plannable_card(card: dict) -> bool:
@@ -3061,6 +3088,31 @@ YAE_RITES = {"thunder": "Thunder", "warding": "Warding",
              "wildfire": "Wildfire", "offering": "Offering"}
 YAE_SAKURA_ANNOTATIONS = {"red_ink", "fox_fire", "deadline"}
 YAE_SAKURA_ENDS = {"newest": "Newest", "oldest": "Oldest", "every": "Every"}
+#: The printed name of each `YaeAnnotation` member (`YaeAnnotationText.Name`).
+YAE_ANNOTATION_NAMES = {
+    "RedInk": "Red Ink",
+    "Footnote": "Footnote",
+    "DeadlineExtension": "Deadline Extension",
+    "FoxFire": "Fox Fire",
+    "SakuraSeal": "Sakura Seal",
+    "Royalties": "Royalties",
+}
+
+
+def annotation_tip_args(card: dict, description: str) -> list[str]:
+    """The `ForAnnotation` calls' trailing arguments a face owes, one per
+    Annotation it golds, in the sheet's order: the member and whether this
+    row Edits a SAKURA with it (`edit_sakura`), which takes the Sakura
+    reading. [USER] (2026-10-14): "no need to show the text for every
+    possible edit if the card can only apply one"."""
+    printed = set(golded_tokens(description))
+    on_sakura = {YAE_ANNOTATIONS[e["annotation"]]
+                 for e in iter_effects(card.get("effects") or [])
+                 if e.get("op") == "yae" and e.get("kind") == "edit_sakura"}
+    return [f", this, YaeAnnotation.{member}, "
+            f"{'true' if member in on_sakura else 'false'}"
+            for member, name in YAE_ANNOTATION_NAMES.items()
+            if name in printed]
 YAE_VAR_FIELDS = {"per": "YmPer", "base": "YmBase", "amount": "YmAmount"}
 #: The value `YaeCards` reads for a field the card declares no var for: a
 #: count of 1 ("Plant a Sakura") and a base of 0 (Thunderbolt Tithe) print
@@ -17231,6 +17283,20 @@ def emit(
     # same figure `WillReplace` is asked with.
     if salon_deploy_card(card):
         interfaces += ", ISalonDeployCard"
+    # THE OATH DIAL (Varka, 2026-10-14). A row whose play makes an element
+    # his current one says WHICH on the class, the same element its switch
+    # line and switch tip are emitted with (`varka_switch_element`), so the
+    # dial by the Energy orb can preview the switch for the card in hand.
+    # Display only; `VarkaOath.WouldSwitchTo` still asks whether it would.
+    varka_switch_member = ""
+    varka_switch = varka_switch_element(card, profile)
+    if varka_switch is not None:
+        interfaces += ", IVarkaSwitchCard"
+        varka_switch_member = (
+            "\n\n    /// <summary>The element this card makes Varka's current "
+            "element\n    /// (`VarkaOathDial` previews it).</summary>\n"
+            "    public Element VarkaSwitchElement => "
+            f"{ELEMENT_CS[varka_switch]};")
     # (R276, Where Did I Put It?). A row that prints a Set off
     # declares it on the class: `ISetOffCard` is a MARKER with no members, and
     # the one question it answers is "is this a Set off card", which the look
@@ -17388,6 +17454,7 @@ def emit(
     if (card_is_set_off_only(card) or card_needs_a_waiting_plan(card)
             or card_needs_a_plannable_card(card)
             or card_needs_an_exhausted_card(card)
+            or card_needs_a_played_companion(card)
             or stage_fixed_price(card) is not None
             or card.get("playable_if")):
         interfaces += ", IUnplayableReasonCard"
@@ -18059,6 +18126,13 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             # Advantage, refused by the jellyfish).
             elif attach == "ArmKeywordTips.ForPlan" and not card.get("plan"):
                 attach = "ArmKeywordTips.ForPlanNoLine"
+            # Yae (2026-10-14): one tip per Annotation the face names.
+            if attach == "ArmKeywordTips.ForAnnotation":
+                for args in annotation_tip_args(card, desc):
+                    tips_expr = (
+                        f"{attach}({tips_expr or 'base.ExtraHoverTips'}"
+                        f"{args})")
+                continue
             tips_expr = (
                 f"{attach}({tips_expr or 'base.ExtraHoverTips'}, this)")
         # `EB-377`, and it is last of the last for the reason the block above
@@ -18085,6 +18159,13 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     if "[gold]Ward" in desc:
         tips_expr = ("KokomiCards.WithWardPreview("
                      f"{tips_expr or 'base.ExtraHoverTips'})")
+    # Kokomi wording pass (2026-10-14): Crystal Collapse previews the
+    # Companion it copies -- the one a waiting Plan caught, or the one it
+    # would catch now -- the same Blade Dance shape, live.
+    if any(clause.get("op") == "play_copy_of_companion"
+           for clause in (card.get("plan") or [])):
+        tips_expr = ("KokomiCards.WithCopiedCompanionPreview("
+                     f"{tips_expr or 'base.ExtraHoverTips'}, this)")
     # THE KLEE STATUS PACKAGE: Klee Can Explain! previews the card it makes,
     # Compact's Fuel tip.
     for eff in card.get("effects", []):
@@ -18466,8 +18547,16 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     # while the Exhaust Pile is empty.
     plan_gated = (card_needs_a_waiting_plan(card)
                   or card_needs_a_plannable_card(card)
-                  or card_needs_an_exhausted_card(card))
-    if card_needs_an_exhausted_card(card):
+                  or card_needs_an_exhausted_card(card)
+                  or card_needs_a_played_companion(card))
+    if card_needs_a_played_companion(card):
+        plan_gate_expr = "KokomiRefounding.AnyCompanionPlayed(this)"
+        plan_gate_why = "no Companion has been played this combat"
+        plan_gate_note = (
+            "    // Kokomi wording pass (2026-10-14): unplayable until a\n"
+            "    // Companion has been played this combat, rather than\n"
+            "    // writing a Plan that copies nothing.\n")
+    elif card_needs_an_exhausted_card(card):
         plan_gate_expr = "KokomiRefounding.AnyExhausted(this)"
         plan_gate_why = "your Exhaust Pile is empty"
         plan_gate_note = (
@@ -18790,7 +18879,7 @@ public sealed class {cls} : {interfaces}
     {{
         ("title", "{title_cs}"),
         ("description", {desc_expr}),
-    }};{tags_member}{wide_target_member}{flip_member}{discard_discount_member}{stage_bow_member}{transcendence_member}{return_to_hand_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{plan_gate_member}{plan_reason_member}{stage_gate_member}{stage_reason_member}{playable_gate_member}{playable_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}{homework_member}
+    }};{tags_member}{wide_target_member}{flip_member}{discard_discount_member}{stage_bow_member}{transcendence_member}{varka_switch_member}{return_to_hand_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{plan_gate_member}{plan_reason_member}{stage_gate_member}{stage_reason_member}{playable_gate_member}{playable_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}{homework_member}
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

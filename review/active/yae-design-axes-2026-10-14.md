@@ -427,5 +427,7 @@ Built in both engines:
    one of her own verbs, so it is marked for this rule (Nimble unchanged).
    With no valid card in hand the Edit does nothing, silently, as the base
    game's hand selections do.
-3. **Card text.** The Red Ink rule gains one clause: "On a card that only
-   plants, it goes to the Sakura."
+3. **Card text.** The Red Ink card tip (and its hover on an Edited card)
+   gains one clause: "If it only plants, the Sakura gets it." (shortened
+   from "On a card that only plants, it goes to the Sakura." to fit the
+   100-character hover cap). The Edit prompt is unchanged.

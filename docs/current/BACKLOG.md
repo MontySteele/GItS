@@ -52,6 +52,7 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - `EB-803` `proto_mc_kaeya_frostgnaw` wears Cold-Blooded Strike's named art (only Frostgnaw's own pick is owed).
 - `EB-53` end-of-turn docket: capture the co-op half (`C6`) on the two-seat runtime (`embark --coop`) and isolate the electro (Oz) leg.
 - `EB-296` / `EB-300` controller: a live walk that the Kokomi pet is targetable by D-pad and mouse, and that the hand is reachable after a custom-target card.
+- Kokomi's Plans view (`Vfx/Prototype/KokomiPlanView.cs`, 2026-10-14) is unseen in game: on her turn with a controller, the left stick press opens the grid, the captions sit under the cards, A flips a two-line Plan and its caption follows, a Plan-only card says why, B and Confirm hand focus back to the hand, and the peek glyph shows under the strip.
 - `EB-159` [USER] at the machine: listen for the modded player's death sound (`set_hp player 1`, end turn into a hit).
 - `EB-38` [USER] at a shop: the spine-less character portrait idles (the rest-site half is seen).
 - `EB-160` verify a live locale switch: the injected loc tables survive it, or a `LocException` names the seam.

@@ -4,6 +4,7 @@ using Godot;
 using HarmonyLib;
 using KleeMod.Powers;
 using MegaCrit.Sts2.Core.Combat;
+using MegaCrit.Sts2.Core.ControllerInput;
 using MegaCrit.Sts2.Core.Context;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
@@ -12,6 +13,7 @@ using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Nodes.CommonUi;
 using MegaCrit.Sts2.Core.Nodes.HoverTips;
 using MegaCrit.Sts2.addons.mega_text;
 using BaseLib.Abstracts;
@@ -73,7 +75,12 @@ namespace KleeMod.Vfx;
 /// picture when clicked (<see cref="IndexMeta"/>).
 ///
 /// NO CONTROLLER FOCUS, still (`EB-300`): the strip, the pager included, is
-/// out of the focus graph. A controller player cannot page or flip here.
+/// out of the focus graph. A controller player reaches the Plans through the
+/// Plans view instead (<see cref="KokomiPlanView"/>, 2026-10-14): the game's
+/// "peek" button (the left stick press by default) opens a card grid of every
+/// waiting Plan, where A flips one. While a controller is in use the strip
+/// draws that button's glyph and "Plans" under the column, so the player can
+/// find it; the hint is a picture and a word, out of the walk like the rest.
 ///
 /// QUARANTINED. `Vfx/Prototype/**` is Compile Remove'd without
 /// `-p:PrototypeCards=true`. Revert is the flag.
@@ -100,6 +107,9 @@ internal static class KokomiPlanStrip
     // 14 since the Kokomi review (2026-10-13): "into 12 Block" fits the
     // 92-pixel picture.
     private const int LineFontSize = 14;
+
+    /// <summary>The button hint's row: the glyph is this square.</summary>
+    private const float HintHeight = 32f;
 
     /// <summary>The caption under a two-line Plan.</summary>
     internal const string PlanLineCaption = "Plan line";
@@ -140,6 +150,10 @@ internal static class KokomiPlanStrip
         var root = Build(me);
         ui.AddChildSafely(root);
         Displays.Set(me, root);
+        // THE CONTROLLER'S DOOR (2026-10-14): the peek button opens the Plans
+        // view, bound for exactly this root's life.
+        KokomiPlanView.Bind(root, me);
+        WireDeviceSwitch(root, me);
         Paint(root, me);
     }
 
@@ -163,6 +177,7 @@ internal static class KokomiPlanStrip
             if (root == null) return;
         }
         Paint(root, player);
+        KokomiPlanView.Refresh(player);
     }
 
     /// <summary>Teardown, character-scoped like every other door into a
@@ -171,6 +186,7 @@ internal static class KokomiPlanStrip
     {
         var me = TryGetMe(state);
         if (me == null || !Live(me.Creature)) return;
+        KokomiPlanView.Close();
         Displays.Discard(me);
     }
 
@@ -293,6 +309,42 @@ internal static class KokomiPlanStrip
         count.AddThemeColorOverride(ThemeConstants.Label.FontColor, CountColor);
         WirePager(count, root, me);
         root.AddChildSafely(count);
+
+        // THE BUTTON HINT (2026-10-14): the peek glyph and "Plans", drawn
+        // only while a controller (or keyboard-only play) is in use. A
+        // picture and a word -- no input, no focus (`EB-300`).
+        var hint = new Control
+        {
+            Name = "PadHint",
+            MouseFilter = Control.MouseFilterEnum.Ignore,
+            FocusMode = Control.FocusModeEnum.None,
+            Size = new Vector2(ThumbWidth, HintHeight),
+            Visible = false,
+        };
+        var glyph = new TextureRect
+        {
+            Name = "Glyph",
+            MouseFilter = Control.MouseFilterEnum.Ignore,
+            FocusMode = Control.FocusModeEnum.None,
+            ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+            StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
+            Size = new Vector2(HintHeight, HintHeight),
+        };
+        hint.AddChildSafely(glyph);
+        var words = new Label
+        {
+            Name = "Words",
+            MouseFilter = Control.MouseFilterEnum.Ignore,
+            FocusMode = Control.FocusModeEnum.None,
+            VerticalAlignment = VerticalAlignment.Center,
+            Position = new Vector2(HintHeight + 4f, 0f),
+            Size = new Vector2(ThumbWidth - HintHeight - 4f, HintHeight),
+        };
+        words.AddThemeFontSizeOverride(ThemeConstants.Label.FontSize,
+                                       LineFontSize + 4);
+        words.AddThemeColorOverride(ThemeConstants.Label.FontColor, CountColor);
+        hint.AddChildSafely(words);
+        root.AddChildSafely(hint);
         // The whole subtree, in one call, AFTER the children exist -- the
         // recursive flag is a property of the node it is set on and is read
         // through the tree, so setting it last covers what was added above and
@@ -375,8 +427,82 @@ internal static class KokomiPlanStrip
             }
         }
 
+        PaintHint(root, page, pending.Count);
         if (count == null) return;
         count.Text = KokomiPlanPages.PagerCaption(page, pending.Count);
+    }
+
+    /// <summary>
+    /// THE BUTTON HINT: the peek button's glyph (the game's own, so a
+    /// remapped button shows its new glyph) and "Plans", under the last
+    /// picture or under the pager. Hidden for a mouse player and for an empty
+    /// queue.
+    /// </summary>
+    private static void PaintHint(Control root, int page, int count)
+    {
+        var hint = root.GetNodeOrNull<Control>("PadHint");
+        if (hint == null) return;
+        try
+        {
+            var input = NControllerManager.Instance?.InputType
+                        ?? InputType.MouseAndKeyboard;
+            var key = input == InputType.KeyboardOnlyMode
+                ? NInputManager.Instance?.GetCurrentHotkey(MegaInput.peek)
+                    .ToString()
+                : null;
+            var text = count > 0 ? KokomiPlanViewRows.HintText(input, key) : null;
+            hint.Visible = text != null;
+            if (text == null) return;
+            var glyph = hint.GetNodeOrNull<TextureRect>("Glyph");
+            if (glyph != null)
+            {
+                glyph.Texture = input == InputType.Controller
+                    ? NInputManager.Instance?.GetHotkeyIcon(MegaInput.peek)
+                    : null;
+                glyph.Visible = glyph.Texture != null;
+            }
+            var words = hint.GetNodeOrNull<Label>("Words");
+            if (words != null)
+            {
+                words.Text = text;
+                words.Position = new Vector2(
+                    glyph is { Visible: true } ? HintHeight + 4f : 0f, 0f);
+            }
+            var drawn = Math.Min(
+                count - KokomiPlanPages.PageStart(page, count), MaxDrawn);
+            var row = KokomiPlanViewRows.HintRow(drawn, count);
+            hint.Position = new Vector2(0f, row <= MaxDrawn
+                ? row * (ThumbHeight + ThumbGap)
+                : MaxDrawn * (ThumbHeight + ThumbGap) + CountFontSize + 12f);
+        }
+        catch (Exception e)
+        {
+            hint.Visible = false;
+            Log.Warn($"[{KleeMod.ModId}] plan strip: hint skipped: {e}");
+        }
+    }
+
+    /// <summary>
+    /// Repaint when the player picks up a controller or the mouse, so the
+    /// hint follows the device. Connected to this root and disconnected as it
+    /// leaves the tree, the way the game's own buttons pair the two.
+    /// </summary>
+    private static void WireDeviceSwitch(Control root, Player me)
+    {
+        var devices = NControllerManager.Instance;
+        if (devices == null) return;
+        var repaint = Callable.From(() =>
+        {
+            if (GodotObject.IsInstanceValid(root)) Paint(root, me);
+        });
+        devices.Connect(NControllerManager.SignalName.ControllerDetected, repaint);
+        devices.Connect(NControllerManager.SignalName.MouseDetected, repaint);
+        root.TreeExiting += () =>
+        {
+            if (!GodotObject.IsInstanceValid(devices)) return;
+            devices.Disconnect(NControllerManager.SignalName.ControllerDetected, repaint);
+            devices.Disconnect(NControllerManager.SignalName.MouseDetected, repaint);
+        };
     }
 
     /// <summary>

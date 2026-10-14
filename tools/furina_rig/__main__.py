@@ -15,7 +15,8 @@ from . import guests, rig
 
 
 def scenes() -> list[tuple]:
-    out = [(rig.SCENE, rig.render_scene()), (rig.MERCHANT_SCENE, rig.render_merchant_scene())]
+    out = [(rig.SCENE, rig.render_scene()), (rig.MERCHANT_SCENE, rig.render_merchant_scene()),
+           (rig.SELECT_SCENE, rig.render_select_scene())]
     out += [(guests.scene_path(name), text) for name, text in guests.render_guests().items()]
     return out
 
@@ -37,6 +38,7 @@ def main(argv: list[str] | None = None) -> int:
             else:
                 print(f"{path.name} is current.")
             continue
+        path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(text, encoding="utf-8", newline="\n")
         print(f"wrote {path.relative_to(rig.ROOT)} ({len(text)} bytes)")
     return stale

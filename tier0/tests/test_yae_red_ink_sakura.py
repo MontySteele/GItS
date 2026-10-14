@@ -249,5 +249,5 @@ def test_a_yae_kinds_own_block_counts_for_red_ink_in_both_engines():
 def test_the_red_ink_rule_says_where_it_goes():
     src = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
            / "YaeAnnotations.cs").read_text(encoding="utf-8")
-    assert "On a card that \"\n          + \"only plants, it goes to the " \
-           "[gold]Sakura[/gold]." in src
+    assert ('"If it only plants, the [gold]Sakura[/gold] gets it."'
+            in src)

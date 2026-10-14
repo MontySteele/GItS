@@ -167,7 +167,7 @@ public class YaeRedInkSakuraTests : IDisposable
     [Fact]
     public void The_red_ink_rule_says_where_it_goes()
     {
-        Assert.EndsWith("On a card that only plants, it goes to the [gold]Sakura[/gold].",
-                        YaeAnnotationText.Rule(YaeAnnotation.RedInk));
+        Assert.EndsWith("If it only plants, the [gold]Sakura[/gold] gets it.",
+                        YaeAnnotationText.TipBody(YaeAnnotation.RedInk, false));
     }
 }

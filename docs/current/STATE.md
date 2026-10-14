@@ -93,7 +93,10 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
 - **Rules** (`review/active/kokomi-brief-2026-09-01.md` sec.2): a card with a
   Plan line, or any Companion, can be played on the Bake-Kurage instead. It
   is carried out at the start of her next turn, after the draw; clicking a
-  waiting Plan flips it to the now-line. A planned Companion is carried out
+  waiting Plan flips it to the now-line. On a controller the peek button (left
+  stick press, its glyph drawn under the Plan strip) opens a grid of the
+  waiting Plans, each captioned with the line it will carry out as, where A
+  flips one and B closes (unseen in game). A planned Companion is carried out
   after the Bake-Kurage applies Hydro to its target.
 - **Starter relic:** the Tamakushi Casket gains 3 Block at the start of her
   turn while a Plan is waiting, after the Block clear and before Plans
@@ -158,6 +161,13 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
   - **Current element:** that of his last Knight, or of the last Pyro, Hydro,
     Cryo or Electro any card of his applied. His cards read only its Oath; a
     card that would change it says "(Makes X current)" in combat.
+  - **Display:** the Oath dial by the Energy orb, where Regent shows his
+    Stars (`Vfx/Prototype/VarkaOathDial.cs`; 2026-10-14, [USER]: "Agreed on
+    2! It's definitely the cleanest option!"): four element pips with their
+    Oath, the current one large and lit; a pip pulses when its Oath rises; a
+    card in hand that would switch elements rings the pip it would make
+    current. His Oath badge stays on the model (the seat page reads it) but
+    is hidden on his own status strip.
   - **Swirl:** a Swirl he makes gains 1 Oath of the element Swirled, and
     while he holds Boreas's Fang it pays his current element (Pyro 3
     damage, Hydro 3 Block, Cryo 1 Vulnerable, Electro 3 to ALL).

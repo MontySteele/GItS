@@ -38,7 +38,7 @@ public sealed class ProtoYmDeadline : CustomCardModel, ICharacterCard
     public string CharacterId => "yae";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForEdit(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForEdit(ArmKeywordTips.ForAnnotation(base.ExtraHoverTips, this, YaeAnnotation.DeadlineExtension, false), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_deadline");
 

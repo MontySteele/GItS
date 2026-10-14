@@ -1456,7 +1456,8 @@
    cost: 1, type: attack, rarity: uncommon,
    # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
    # Plan line buys what only a head start can buy.
-   description: "Deal 5 [gold]Hydro[/gold] damage twice. [gold]Plan[/gold]: Next turn, your first Attack is played twice.",
+   # Wording pass 2026-10-14: "Next turn" read as a second turn of delay.
+   description: "Deal 5 [gold]Hydro[/gold] damage twice. [gold]Plan[/gold]: Your first Attack that turn is played twice.",
    effects: [{op: damage, amount: 5, target: enemy, times: 2}],
    plan: [{op: first_attack_twice}],
    # 2026-10-11 Kokomi card pass (review/ruled/kokomi-card-pass-2026-10-11.md):
@@ -1735,7 +1736,9 @@
    authored_by: [claude],
    cost: 1, type: power, rarity: rare,
    # kokomi-review-r5-2026-10-14 numbers pass: 3 -> 2 Plans, draw 2 -> 1.
-   description: "Whenever 2 or more [gold]Plans[/gold] are carried out in one turn, gain {energyPrefix:energyIcons(1)} and draw 1 card.",
+   # Kokomi wording pass (2026-10-14): the face says once a turn, as the
+   # power already paid (`BattleFormationPower`, the ledger's Claim).
+   description: "The first time each turn 2 or more [gold]Plans[/gold] are carried out, gain {energyPrefix:energyIcons(1)} and draw 1 card.",
    effects: [{op: apply_power, power: kk_battle_formation, amount: 1, target: self}],
    upgrade: {innate: true}}
 
@@ -2278,8 +2281,9 @@
    nation: inazuma, star: 4, rarity: uncommon, role_c: trigger, element: geo,
    cost: 1, type: skill, exhaust: true,
    # The paper's Plan line ("For 3 turns, at the end of your turn gain 6
-   # Block") shortened to the 120-character card ceiling.
-   description: "For 3 turns, at the end of your turn deal 7 [gold]Geo[/gold] damage to a random enemy. [gold]Plan[/gold]: Gain 6 [gold]Block[/gold].",
+   # Block"). Kokomi wording pass (2026-10-14): "Gain 6 Block" alone hid the
+   # three turns; "For 3 turns ... instead" fits the 120-character ceiling.
+   description: "For 3 turns, at the end of your turn deal 7 [gold]Geo[/gold] damage to a random enemy. [gold]Plan[/gold]: For 3 turns, gain 6 [gold]Block[/gold] instead.",
    effects: [{op: apply_power, power: mi_juuga, amount: 3, target: self}],
    plan: [{op: juuga_guard, amount: 3}]}
 

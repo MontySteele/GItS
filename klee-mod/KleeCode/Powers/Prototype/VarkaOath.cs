@@ -404,6 +404,20 @@ public enum OathSource
 }
 
 /// <summary>
+/// THE OATH DIAL'S PREVIEW (2026-10-14). The codegen puts this on every row
+/// whose play makes an element Varka's current one (<c>gen_klee_cards
+/// .varka_switch_element</c>, the element its "(Makes Pyro current)" line and
+/// its switch tip are emitted with), and nothing else implements it. Whether
+/// the play WOULD switch now is still <see cref="VarkaOath.WouldSwitchTo"/>'s
+/// question. Display only.
+/// </summary>
+public interface IVarkaSwitchCard
+{
+    /// <summary>The element this card makes current.</summary>
+    Element VarkaSwitchElement { get; }
+}
+
+/// <summary>
 /// VARKA'S OATH RULES (sec.3, sec.4), the one door that moves the ledger and
 /// pays for it. Every Knight play, every application and every Swirl of his
 /// passes here once:
@@ -1212,6 +1226,9 @@ public static class VarkaOath
                 await VarkaRules.ChooseUpgradedKnight(choiceContext, player);
             }
         }
+        // The Oath dial: a new turn can end the Elixir's read-all-four.
+        // Display only.
+        global::KleeMod.Vfx.VarkaOathDial.Refresh(varka);
     }
 
     /// <summary>

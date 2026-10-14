@@ -6434,6 +6434,9 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
     # re-founding (2026-10-12): `TamakushiCasket.Face`.
     src += (REPO / "klee-mod" / "KleeCode" / "Relics"
             / "TamakushiCasket.cs").read_text(encoding="utf-8")
+    # Yae's Annotations (2026-10-14): each row is `YaeAnnotationText`'s.
+    src += (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
+            / "YaeAnnotations.cs").read_text(encoding="utf-8")
     anchors = {
         # `EB-343` (R248) rewrote the word: it gained a fourth rule and
         # [USER] held it to the 135-character tip ceiling (PR #340), so
@@ -6583,13 +6586,26 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         "current element": [" you applied. Swirls pay it: "],
         "Knight": ["One of Varka's Companions. Playing one makes its element "
                    "your ", "current element. ", " does not."],
-        # YAE MIKO (2026-10-13): `ArmKeywordTips.YaeSakuraTip` and
-        # `YaeEditTip`, the prose between the interpolated `YaeLaw` numbers.
-        "Sakura": [" stand beside you. At the end of your ",
-                   "each strikes under the shrine's ",
-                   "every Sakura strikes now and lasts "],
-        "Edit": ["Give a card in your hand an Annotation for this combat, "
-                 "replacing ", "A Published Annotation lasts the run."],
+        # YAE MIKO (2026-10-13): `ArmKeywordTips.YaeSakuraTip`,
+        # `YaeTenkoTip` and `YaeEditTip`, the prose between the interpolated
+        # `YaeLaw` numbers; split and cut 2026-10-14.
+        "Sakura": ["Strikes at the end of your turn under the current ",
+                   " turns, then strikes once more. ",
+                   "; planting another gives the rest a ",
+                   "Level (even when full)."],
+        "Tenko": [" strikes now and lasts ", " turns again."],
+        "Edit": ["Give a card an Annotation for this combat, replacing any "
+                 "it had. A ", "Published one lasts the run."],
+        # 2026-10-14: each Annotation's own row, `YaeAnnotationText.Rule`
+        # and `.SakuraRule` (YaeAnnotations.cs).
+        "Red Ink": ["This card deals ", " more damage and gives ",
+                    "'s strike is ", "bigger (not in Offering)."],
+        "Footnote": ["When this card is played, draw 1 card."],
+        "Deadline Extension": ["This card has ", " does not wither."],
+        "Fox Fire": ["When this card is played, deal ",
+                     " damage to a random enemy.", " strikes, it also deals "],
+        "Sakura Seal": ["When this card is played, plant a "],
+        "Royalties": ["When this card is played, gain ", " Energy."],
         # The design axes (ruled 2026-10-14): the shrine's Rite.
         "Rite": ["Sets what ", " strikes do. Thunder: damage. Warding: "],
     }
