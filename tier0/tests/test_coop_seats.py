@@ -998,6 +998,21 @@ def test_an_agreed_vote_says_what_the_party_got():
         "Strike. The party got First Strike."]
 
 
+def test_a_partner_vote_unknown_on_the_client_is_not_called_lost():
+    """Co-op Spiral Abyss 2026-10-14: the client's page said "Klee's vote did
+    not reach this game" when the client's own vote won and the host's vote
+    message had not landed yet. The party still got one Blessing."""
+    state = _abyss_vote_page(shared=False, last_vote={
+        "chosen": "Overflow", "split": False,
+        "votes": [{"player": "Klee", "is_local": False, "choice": None},
+                  {"player": "Varka", "is_local": True,
+                   "choice": "Overflow"}]})
+    line, = blindplay_coop.vote_outcome(state)
+    assert "did not reach" not in line
+    assert ("Klee's vote was not yet known on this game when the vote "
+            "settled; you chose Overflow. The party got Overflow.") in line
+
+
 def test_an_open_vote_marks_nothing_taken_and_reads_as_votes():
     """The page marked a Blessing "TAKEN, by Klee" while the party voted."""
     state = _abyss_vote_page(votes=[

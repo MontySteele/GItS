@@ -114,6 +114,11 @@ lane is refused) is lifted by the coordinator, which prints the streak before an
 python -m understudy.blindplay reset-refusals --lane 1   # clears the streak and refusal marks; budget untouched
 ```
 
+Only genuine refusals count toward the stop. A command refused because the
+board changed since the seat's last look (the fight ended, the named enemy
+died, the co-op partner moved the screen) prints `Skipped: ... since your last
+look` and is neither sent nor counted.
+
 A seat can also ask for one word at any time: `observe --define "<Word>"`
 prints the screen's definition, or the glossary's own row marked
 "(not on this screen)".

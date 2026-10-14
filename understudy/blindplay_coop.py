@@ -242,7 +242,14 @@ def vote_outcome(state: dict[str, Any]) -> list[str]:
         elif who == "You":
             said.append("your vote did not reach this game")
         else:
-            said.append(f"{who}'s vote did not reach this game")
+            # Co-op Spiral Abyss (2026-10-14, act-2 Blessing, client page):
+            # on the client the host's vote message can land after the
+            # result, and the bridge infers it only where the client's own
+            # vote lost (`vendor/STS2_MCP/gits/GitsCoopOutcomes.cs`). Where
+            # the client's vote won, the host's is unknown here -- not lost:
+            # the host settles the vote and both games take its result.
+            said.append(f"{who}'s vote was not yet known on this game when "
+                        f"the vote settled")
     line = "The party's vote: " + "; ".join(said) + "."
     if last.get("split") is True:
         line += (f" The vote split, and the game drew one of the votes at "

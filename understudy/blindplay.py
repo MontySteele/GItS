@@ -135,6 +135,7 @@ from understudy.blindplay_shape import (   # noqa: E402,F401  (re-export)
     clear_refusal_streak, count_refusal, MAX_REFUSALS, refusal_streak,
     clear_refusal, mark_refusal, pending_refusal,
     clear_sent, mark_sent, room_of, screen_changed_after,
+    clear_look, read_look, remember_look,
     card_skips, clear_card_skips, mark_card_skip,
     read_shown_hand, remember_shown_hand,
     MAX_ACTIONS_ENV, read_budget, set_budget,
@@ -211,7 +212,8 @@ from understudy.blindplay_grammar import (   # noqa: E402,F401  (re-export)
     _pet_target, _play, _proceed, _QUALIFIER, _QUOTED, _refuse, Resolution,
     _resolve_enemy, _rest_keyword, SELF_TARGETS, _skip, _split_qualifier,
     _STALE_NUMBER, unclaimed_rewards, _use_potion, VERBS,
-    resolve_shown_card, shown_hand)
+    resolve_shown_card, shown_hand, living_targets, stale_target,
+    NO_LIVING_ENEMY)
 from understudy.blindplay_session import (   # noqa: E402,F401  (re-export)
     AUTHOR_FAMILY, Budget, check_independent, CodexThread, command_schema,
     FIGHT_QUESTIONS, forecast_block, MODEL_FAMILIES, model_family,
@@ -382,6 +384,9 @@ def cmd_observe(args) -> int:
                 # Varka round (2026-10-13): a look ends the stale batch
                 # (`blindplay_shape.screen_changed_after`).
                 clear_sent()
+                # Co-op Spiral Abyss (2026-10-14): and is what a later
+                # refusal is checked against (`changed_under`).
+                remember_look(room_of(_screen(state)), living_targets(state))
             # 2026-10-08: the lane's cap on every page, which is where the
             # seat brief now tells the seat to read it.
             count, cap = budget_spent()
@@ -578,11 +583,13 @@ END_TURN_AFTER_REFUSAL = (
 # page was a fight (a shop) and this command wanted one, the act says the fight
 # is over (the shop is closed) and prints the page that is up now.
 ROOM_CLOSED_REFUSALS = {
-    "you are not in a battle": (COMBAT_SCREENS, "The fight is over"),
+    "you are not in a battle": (COMBAT_SCREENS, "the fight ended"),
     "you are not in a shop": (frozenset({"shop", "fake_merchant"}),
-                              "The shop is closed"),
+                              "the shop closed"),
 }
-ROOM_CLOSED_TAIL = ": nothing was sent. This is the screen now."
+ROOM_CLOSED_TAIL = (": nothing was sent, and this is not counted as a "
+                    "refusal. This is the screen now; look it over before "
+                    "the next command.")
 
 #: What a command gets when an earlier one in its batch left the room.
 SCREEN_CHANGED_SKIP = ("Skipped: the screen changed after {command}; look "
@@ -594,8 +601,54 @@ def room_closed(why: str, prev_screen: str) -> str:
     or "" where the refusal is about something else."""
     for refusal, (screens, said) in ROOM_CLOSED_REFUSALS.items():
         if why.startswith(refusal) and prev_screen in screens:
-            return said + ROOM_CLOSED_TAIL
+            return CHANGED_UNDER_SKIP.format(what=said) + ROOM_CLOSED_TAIL
     return ""
+
+
+# CO-OP SPIRAL ABYSS (2026-10-14, lanes 4 host Klee / 5 client Varka, twice).
+# A COMMAND REFUSED BECAUSE THE FIGHT CHANGED UNDER IT IS A SKIP. The client
+# chained `play` commands; the host's Bombs killed the last enemy (or the
+# named one) in between, and the rest were refused -- no fight, target gone --
+# and three of those in a row tripped the sticky REFUSAL STOP and ended the
+# seat. A refusal is now checked against the seat's last look
+# (`blindplay_shape.read_look`): where the room changed since that look, or
+# the enemy the command aimed at was alive on it and is not now, the command
+# is skipped -- not sent, not counted toward the stop. A refusal on the board
+# the seat looked at (a bad name, an unaffordable card) still counts. Solo
+# and co-op alike: a seat's own lethal play earlier in the batch is the same.
+CHANGED_UNDER_SKIP = "Skipped: {what} since your last look"
+CHANGED_UNDER_TAIL = (": nothing was sent, and this is not counted as a "
+                      "refusal. Look again.")
+#: What each room is called when it closed under a command.
+ROOM_ENDED = {"fight": "the fight ended", "shop": "the shop closed"}
+
+
+def changed_under(state: dict[str, Any], command: str, why: str,
+                  prev_screen: str) -> tuple[str, bool]:
+    """`(sentence, show_page)` for a refusal the board changed under since
+    the seat's last look; `("", False)` for a genuine refusal."""
+    closed = room_closed(why, prev_screen)
+    if closed:
+        return closed, True
+    look = read_look()
+    if not look:
+        return "", False
+    then = str(look.get("room") or "")
+    now = room_of(_screen(state))
+    if then and now and then != now:
+        what = ROOM_ENDED.get(then, "the screen changed")
+        return (CHANGED_UNDER_SKIP.format(what=what) + ROOM_CLOSED_TAIL,
+                True)
+    living = [str(n) for n in (look.get("living") or [])]
+    if now == "fight" and living:
+        if why.startswith(NO_LIVING_ENEMY):
+            return (CHANGED_UNDER_SKIP.format(what="every enemy went down")
+                    + CHANGED_UNDER_TAIL, False)
+        gone = stale_target(state, command, living)
+        if gone:
+            return (CHANGED_UNDER_SKIP.format(what=f'"{gone}" is gone')
+                    + CHANGED_UNDER_TAIL, False)
+    return "", False
 
 
 def cmd_act(args) -> int:
@@ -620,9 +673,11 @@ def cmd_act(args) -> int:
     # Co-op paired round 2026-10-09: a fight that ended partway through a
     # batch left the rest of the batch refused past three with no stop. The
     # streak is the lane's (`blindplay_shape.MAX_REFUSALS`), and every
-    # refusal below counts toward it, "The fight is over" included. A command
-    # skipped because an earlier one of its batch left the room is not a
-    # refusal (Varka round 2026-10-13, below). The stop is sticky; the
+    # refusal below counts toward it. A command skipped because an earlier
+    # one of its batch left the room is not a refusal (Varka round
+    # 2026-10-13, below), nor is one refused because the fight changed under
+    # it since the seat's last look (co-op 2026-10-14, `changed_under`):
+    # nothing is sent either way. The stop is sticky; the
     # coordinator lifts it with `reset-refusals --lane N`.
     if live and refusal_streak() >= MAX_REFUSALS:
         print(refusal_stop_line(refusal_streak()))
@@ -686,16 +741,24 @@ def cmd_act(args) -> int:
     board = refusal_board(state) if live else ""
     if not res["ok"]:
         why = _text(res.get("refusal")) or ACT_UNRESOLVED
-        closed = room_closed(why, prev_screen) if live else ""
-        if closed:
-            print(closed)
-            print()
-            try:
-                print(_page(screen_page(state, full=not _brief_on(args)),
-                            args))
-            except (qa_packet.PacketLeak, BlindPlayError) as exc:
-                print(f"REFUSED: {exc}", file=out)
-            _refused(live)
+        # Co-op Spiral Abyss (2026-10-14): refused because the board changed
+        # under it since the seat's last look -- a skip, not counted
+        # (`changed_under`). A target that died in a fight still going keeps
+        # the end-turn hold, so a chained `end turn` does not waste the card.
+        skipped, show_page = (changed_under(state, args.command, why,
+                                            prev_screen)
+                              if live else ("", False))
+        if skipped:
+            print(skipped)
+            if show_page:
+                print()
+                try:
+                    print(_page(screen_page(state,
+                                            full=not _brief_on(args)), args))
+                except (qa_packet.PacketLeak, BlindPlayError) as exc:
+                    print(f"REFUSED: {exc}", file=out)
+            elif board:
+                mark_refusal(board, args.command, skipped.split(":")[0])
             return 1
         if board:
             mark_refusal(board, args.command, why.split(". ")[0])
@@ -798,6 +861,7 @@ def _cmd_wait(state: dict[str, Any], seconds: int, live: bool,
             print(f"REFUSED: {exc}", file=_refusal_stream(args))
             return 1
         clear_sent()
+        remember_look(room_of(_screen(state)), living_targets(state))
         return 0
     try:
         latest, waited, moved = blindplay_coop.wait_for_partner(
@@ -819,6 +883,7 @@ def _cmd_wait(state: dict[str, Any], seconds: int, live: bool,
         print(f"REFUSED: {exc}", file=_refusal_stream(args))
         return 1
     clear_sent()
+    remember_look(room_of(_screen(latest)), living_targets(latest))
     return 0
 
 
@@ -1031,6 +1096,7 @@ def cmd_reset_refusals(args) -> int:
     clear_refusal_streak(lane)
     clear_refusal(lane)
     clear_sent(lane)
+    clear_look(lane)
     print(f"lane {tag} after:  {held()}")
     return 0
 
