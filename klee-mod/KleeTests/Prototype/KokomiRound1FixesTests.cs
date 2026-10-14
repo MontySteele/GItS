@@ -56,16 +56,18 @@ public class KokomiRound1FixesTests
     // ---- Sea Glass Harvest ----------------------------------------------------
 
     [Fact]
-    public void Sea_glass_harvest_transforms_the_draw_pile()
+    public void Sea_glass_harvest_transforms_the_hand_and_draw_pile()
     {
-        Assert.Equal(KokomiPlan.Kind.TransformStatusesInDrawPile,
+        Assert.Equal(KokomiPlan.Kind.TransformStatusesInHandAndDrawPile,
                      Assert.Single(new ProtoKkSeaGlassHarvest().PlanClauses)
                          .Kind);
         var body = Il.Calls(Il.Method("KokomiStatusBatch", "TransformStatuses"));
         Assert.Contains(body, c => c.Contains("KokomiStatusBatch.PileStatuses"));
         Assert.DoesNotContain(body,
             c => c.Contains("KokomiStatusBatch.HandStatuses"));
-        Assert.Contains("Transform every Status and Curse in your [gold]Draw Pile[/gold]",
+        // Kokomi review r5 (2026-10-14, A8): the hand too.
+        Assert.Contains("Transform every Status and Curse in your "
+                        + "[gold]Hand[/gold] and [gold]Draw Pile[/gold]",
                         Face(new ProtoKkSeaGlassHarvest()));
     }
 

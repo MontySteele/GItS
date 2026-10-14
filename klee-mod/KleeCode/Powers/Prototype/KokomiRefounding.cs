@@ -880,6 +880,14 @@ public sealed class WatchfulShoalPower : PowerModel, ILocalizationProvider
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
+    /// <summary>Kokomi review r5 (2026-10-14, A9): the badge defines the two
+    /// cards it names, as the card's face does (<see
+    /// cref="KokomiCards.WithStingPreview"/>), so "Wards" is defined where a
+    /// seat reads it. Two boxes, inside the three-tip cap.</summary>
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        KokomiCards.WithWardPreview(KokomiCards.WithStingPreview(
+            System.Array.Empty<IHoverTip>()));
+
     /// <summary>The Plan-line bonus a Sting written now carries: the stack
     /// on <paramref name="kokomi"/>, 0 for any other card.</summary>
     public static int StingBonus(Creature? kokomi, CardModel? card)

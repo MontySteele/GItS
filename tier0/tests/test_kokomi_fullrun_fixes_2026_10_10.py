@@ -70,9 +70,12 @@ def test_another_counted_relic_prints_no_casket_line():
 
 
 def test_the_plan_list_says_strength_is_read_when_written():
+    # Kokomi review r5 (2026-10-14, A2): the Strength line folded into the
+    # reworded note, and the order line took its place.
     page = blindplay.observe(_kokomi([dict(TAMAKUSHI, counter=0)]))
     at = page.index("## The Bake-Kurage")
-    assert "- Strength is read when the Plan is written." in page[at:]
+    assert "- Your Strength when you write it counts" in page[at:]
+    assert "- Plans carry out in the order written." in page[at:]
 
 
 def test_a_treatise_draw_prints_a_receipt():
