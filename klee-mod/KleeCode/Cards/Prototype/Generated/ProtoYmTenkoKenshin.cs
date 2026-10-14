@@ -44,7 +44,7 @@ public sealed class ProtoYmTenkoKenshin : CustomCardModel, IElementalCard, IChar
         new[] { KleeKeywords.AppliesElectro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForTenko(ArmKeywordTips.ForSakura(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this), this);
+        ArmKeywordTips.ForTenko(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_tenko_kenshin");
 

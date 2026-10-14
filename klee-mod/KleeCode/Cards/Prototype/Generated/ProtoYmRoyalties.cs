@@ -41,7 +41,7 @@ public sealed class ProtoYmRoyalties : CustomCardModel, ICharacterCard
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForEdit(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForEdit(ArmKeywordTips.ForAnnotation(base.ExtraHoverTips, this, YaeAnnotation.Royalties, false), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_royalties");
 

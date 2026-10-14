@@ -4537,10 +4537,9 @@
              {op: varka, kind: deep_freeze, target: enemy}],
    upgrade: {cost: -1}}
 
-# YAE MIKO: review/active/yae-card-paper-2026-10-13.md and
-# review/active/yae-design-axes-2026-10-14.md (Sakura Annotations; shrine r2,
-# ruled 2026-10-14: the Rite is gone, typed Tenko replaces "Rite: X").
-# Rules: YaeShrine.cs, yae_shrine.py; reasoning: provenance note "Yae Miko".
+# YAE MIKO: review/active/yae-card-paper-2026-10-13.md, yae-design-axes-2026-10-14.md
+# (Annotations; shrine r2: no Rite, typed Tenko). Rules: YaeShrine.cs,
+# yae_shrine.py; reasoning: provenance note "Yae Miko".
 
 # --- the starter (paper sec.3): base Strike x4 + Defend x4 have no row ---
 

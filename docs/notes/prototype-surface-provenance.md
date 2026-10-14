@@ -8511,8 +8511,9 @@ ruled 2026-10-14"). Built in both engines (`YaeShrine.cs`,
 - Faces: the Rite clause, the Rite badge and the seat page's Rite line are
   gone. A Tenko row's live clause is "Tenko (12 damage)" / "Tenko (Warding:
   12 Block)", and "(no Sakura)" / "(Warding, no Sakura)" with none standing
-  (`YaeShrineFace.TenkoLine`, sim `tenko_line`). One Tenko tip
-  (`ArmKeywordTips.YaeTenkoTip`) replaces the Rite tip.
+  (`YaeShrineFace.TenkoLine`, sim `tenko_line`). The Tenko tip
+  (`ArmKeywordTips.YaeTenkoTip`) names the three kinds; the Rite tip is
+  gone.
 
 ## Kokomi pool overhaul, 2026-10-13
 

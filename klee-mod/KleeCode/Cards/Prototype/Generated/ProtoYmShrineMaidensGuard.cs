@@ -38,7 +38,7 @@ public sealed class ProtoYmShrineMaidensGuard : CustomCardModel, ICharacterCard
     public string CharacterId => "yae";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForTenko(ArmKeywordTips.ForSakura(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForTenko(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_shrine_maidens_guard");
 

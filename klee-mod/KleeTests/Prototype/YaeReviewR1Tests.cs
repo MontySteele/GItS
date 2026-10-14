@@ -109,7 +109,7 @@ public class YaeReviewR1Tests : IDisposable
         Assert.Contains("Warding", ArmKeywordTips.YaeTenkoTip);
         Assert.Contains("Wildfire", ArmKeywordTips.YaeTenkoTip);
         Assert.Contains("Offering", ArmKeywordTips.YaeTenkoTip);
-        Assert.Contains("3 turns again", ArmKeywordTips.YaeTenkoTip);
+        Assert.Contains("reset to 3 turns", ArmKeywordTips.YaeTenkoTip);
         Assert.Contains("oldest", ArmKeywordTips.YaeSakuraTip);
         Assert.DoesNotContain("Rite", ArmKeywordTips.YaeSakuraTip);
     }

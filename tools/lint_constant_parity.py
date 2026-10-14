@@ -732,6 +732,11 @@ UNMIRRORED: dict[str, str] = {
         "presentation: the overflow count's font size.",
     "KokomiPlanStrip.LineFontSize":
         "presentation: the Plan line / Now-line caption's font size (pick 5a).",
+    "KokomiPlanStrip.HintHeight":
+        "presentation: the controller button hint's row height and glyph "
+        "size, in pixels (the Plans view, 2026-10-14).",
+    "KokomiPlanView.CaptionFontSize":
+        "presentation: the Plans view's caption font size.",
     "KokomiPlanStrip.MaxDrawn":
         "presentation: how many pending Plans get a picture before the column "
         "runs off the band. Not a cap on the queue -- nothing limits how many "

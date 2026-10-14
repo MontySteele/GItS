@@ -38,7 +38,7 @@ public sealed class ProtoYmKitsuneGuile : CustomCardModel, ICharacterCard
     public string CharacterId => "yae";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForWeak(ArmKeywordTips.ForTenko(ArmKeywordTips.ForSakura(base.ExtraHoverTips, this), this), this);
+        BaseKeywordTips.ForWeak(ArmKeywordTips.ForTenko(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_kitsune_guile");
 

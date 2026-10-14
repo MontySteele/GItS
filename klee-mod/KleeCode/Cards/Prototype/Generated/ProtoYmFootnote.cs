@@ -41,7 +41,7 @@ public sealed class ProtoYmFootnote : CustomCardModel, ICharacterCard
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForEdit(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForEdit(ArmKeywordTips.ForAnnotation(base.ExtraHoverTips, this, YaeAnnotation.Footnote, false), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_footnote");
 

@@ -95,7 +95,10 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
 - **Rules** (`review/active/kokomi-brief-2026-09-01.md` sec.2): a card with a
   Plan line, or any Companion, can be played on the Bake-Kurage instead. It
   is carried out at the start of her next turn, after the draw; clicking a
-  waiting Plan flips it to the now-line. A planned Companion is carried out
+  waiting Plan flips it to the now-line. On a controller the peek button (left
+  stick press, its glyph drawn under the Plan strip) opens a grid of the
+  waiting Plans, each captioned with the line it will carry out as, where A
+  flips one and B closes (unseen in game). A planned Companion is carried out
   after the Bake-Kurage applies Hydro to its target.
 - **Starter relic:** the Tamakushi Casket gains 3 Block at the start of her
   turn while a Plan is waiting, after the Block clear and before Plans

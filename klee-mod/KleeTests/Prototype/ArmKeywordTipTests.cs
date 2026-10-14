@@ -151,8 +151,9 @@ public class ArmKeywordTipTests
             .Select(f => (string)f.GetRawConstantValue()!)
             .ToList();
 
-        // One key per attach, the rider included (`EB-378`).
-        Assert.Equal(Attaches().Count(), keys.Count);
+        // One key per attach, the rider included (`EB-378`), but for
+        // `ForAnnotation`, whose six keys are `KeyOf`'s (2026-10-14).
+        Assert.Equal(Attaches().Count() - 1, keys.Count);
         Assert.Equal(keys.Count, keys.Distinct().Count());
         Assert.All(keys, k => Assert.StartsWith("KLEEMOD-ARM_", k));
         Assert.DoesNotContain("KLEEMOD-BOMB", keys);
@@ -418,8 +419,13 @@ public class ArmKeywordTipTests
         // 52 with the Furina sweep (2026-10-14): `ForFlip`, Ousia / Pneuma's
         // word.
         // 53 with Yae's design axes (2026-10-14): `ForRite`, the shrine's
-        // Rite; shrine r2 (2026-10-14) swapped it for `ForTenko`.
-        Assert.Equal(53, attaches.Count);
+        // Rite.
+        // 55 with Yae's tip cut (2026-10-14): `ForAnnotation`, one tip per
+        // Annotation a face names, and `ForTenko`, split out of her Sakura
+        // tip.
+        // 54 with Yae's shrine r2 (2026-10-14): `ForRite` left with the Rite.
+        Assert.Equal(54, attaches.Count);
+        Assert.Contains(attaches, m => m.Name == "ForAnnotation");
         Assert.Contains(attaches, m => m.Name == "ForTenko");
         Assert.DoesNotContain(attaches, m => m.Name == "ForRite");
         Assert.Contains(attaches, m => m.Name == "ForFlip");

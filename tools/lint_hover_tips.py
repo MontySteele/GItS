@@ -71,9 +71,8 @@ BOX_DEBT = {
 
 #: Long tips a ruled pick keeps, curated. An entry no card raises FAILS.
 LONG_OK = {
-    "YaeSakuraTip": "Yae paper pick 6 (a): Tenko lives in the Sakura tip",
-    "YaeEditTip": "Yae paper pick 6 (a): the Edit tip lists the five "
-                  "Annotations",
+    "YaeSakuraTip": "her shrine's rule, the strike, timer, cap and plant "
+                    "Level in one tip ([USER]'s wording, 2026-10-14)",
 }
 
 _GOLD = re.compile(r"\[/?(gold|blue)\]")
@@ -184,6 +183,39 @@ def method_keys() -> dict[str, str]:
     return out
 
 
+def arm_statics() -> dict[str, str]:
+    """`static readonly string` tip bodies in `ArmKeywordTips`, rendered."""
+    src = re.sub(r"^\s*//.*$", "", tc.read(ARM), flags=re.M)
+    return {name: tc.csharp_text(expr) for name, expr in re.findall(
+        r"static readonly string (\w+) =\s*(.*?);", src, re.S)}
+
+
+def annotation_rules() -> dict[tuple[str, str], str]:
+    """`YaeAnnotationText.Rule` and `.SakuraRule`'s arms, rendered, keyed
+    (method, member)."""
+    src = tc.read(MOD / "Powers" / "Prototype" / "YaeAnnotations.cs")
+    out: dict[tuple[str, str], str] = {}
+    for method in ("Rule", "SakuraRule"):
+        body = src[src.index(f"public static string {method}("):]
+        body = body[:body.index("_ =>")]
+        arms = re.split(r"YaeAnnotation\.(\w+) =>", body)[1:]
+        for member, expr in zip(arms[::2], arms[1::2]):
+            out[(method, member)] = tc.csharp_text(expr)
+    return out
+
+
+def annotation_body(args: str) -> str:
+    """`ForAnnotation(..., this, YaeAnnotation.X, onSakura)`'s body, as
+    `YaeAnnotationText.TipBody` picks it."""
+    m = re.search(r"YaeAnnotation\.(\w+),\s*(true|false)", args)
+    if not m:
+        return ""
+    rules = annotation_rules()
+    if m.group(2) == "true" and rules.get(("SakuraRule", m.group(1))):
+        return rules[("SakuraRule", m.group(1))]
+    return rules.get(("Rule", m.group(1)), "")
+
+
 def keyword_bodies() -> dict[str, str]:
     rows = {row.ident: row.raw for row in tc.keyword_fallback_rows()}
     consts = tc._consts(re.sub(r"^\s*//.*$", "", tc.read(ARM), flags=re.M))
@@ -258,8 +290,12 @@ class Bodies:
         if owner != "ArmKeywordTips":
             # Base-game tips and card previews: one box, base length.
             return 1, None, method
+        if method == "ForAnnotation":
+            return 1, visible(annotation_body(args)), method
+        if method == "ForTenko":
+            return 1, visible(arm_statics()["YaeTenkoTip"]), method
         if method == "ForEdit":
-            return 1, "@YaeEditTip", method
+            return 1, visible(arm_statics()["YaeEditTip"]), method
         if method == "ForSakura" and cls.startswith("ProtoYm"):
             return 1, "@YaeSakuraTip", method
         if method == "ForSpark":

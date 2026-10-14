@@ -38,7 +38,7 @@ public sealed class ProtoYmEvergreenCharm : CustomCardModel, ICharacterCard
     public string CharacterId => "yae";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForEdit(ArmKeywordTips.ForSakura(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForEdit(ArmKeywordTips.ForAnnotation(ArmKeywordTips.ForSakura(base.ExtraHoverTips, this), this, YaeAnnotation.DeadlineExtension, true), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_evergreen_charm");
 

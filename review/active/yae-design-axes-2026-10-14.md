@@ -449,10 +449,13 @@ Built in both engines (C# `YaeShrine.cs`, sim `tier0/engine/yae_shrine.py`):
 6. **Sakura Channeling** has lost its job. Its text now reads "Your Sakura
    strike as Thunder at the end of your turn." and it does nothing extra.
    Replacement pending (design session).
-7. **Words.** One Tenko tip replaces the Rite tip: "Every Sakura strikes
-   now and lasts 3 turns again. Warding: as Block. Wildfire: its Level to
-   ALL enemies. Offering: draw 1 card next turn." The Sakura tip drops the
-   Rite and says the full-shrine rule. In combat a Tenko card says what its
+7. **Words.** The Tenko tip (split from the Sakura tip by #1305) names the
+   kinds, within the 100-character tip cap: "All Sakura strike now, reset to
+   3 turns. Warding: Block. Wildfire: Level to ALL. Offering: draw 1." The
+   Rite tip is gone. The Sakura tip drops the Rite and says the full-shrine
+   rule: "Strikes a random enemy for 2 plus its Level at the end of your
+   turn. Lasts 3 turns, then strikes once more. Up to 3; planting when full
+   refreshes the oldest and gives it a Level." In combat a Tenko card says what its
    Tenko would do now: "Tenko (12 damage)", "Tenko (Warding: 12 Block)",
    and "(no Sakura)" / "(Warding, no Sakura)" with none standing. The Rite
    badge and the seat page's Rite line are gone.

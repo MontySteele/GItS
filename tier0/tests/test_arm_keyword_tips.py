@@ -257,6 +257,14 @@ def test_every_table_row_has_a_method_and_a_registered_title_row(keyword):
     method = keyword.attach.split(".", 1)[1]
     assert f"IEnumerable<IHoverTip> {method}(" in tips, keyword.word
 
+    if method == "ForAnnotation":
+        # Yae (2026-10-14): one key per Annotation (`KeyOf`), each titled by
+        # its name in a loop over `YaeAnnotationText.All`.
+        assert '"KLEEMOD-ARM_YAE_" + annotation' in tips
+        mod = MOD_CS.read_text(encoding="utf-8")
+        assert "foreach (var annotation in Powers.YaeAnnotationText.All)" in mod
+        assert "ArmKeywordTips.KeyOf(annotation) + \".title\"" in mod
+        return
     const = _key_const(keyword)
     assert re.search(rf'\bconst string {const} = "KLEEMOD-ARM_[A-Z_]+";',
                      tips), keyword.word
@@ -914,13 +922,10 @@ CONJUGATIONS = {"Exhausted": "Exhaust",
                 # High Stakes (the Spend round, 2026-10-10): "HP you have
                 # Drained and not Repaid" (the page's Repay row matches it).
                 "Repaid": "Repay",
-                # YAE MIKO (2026-10-13), pick 6 (a): her two rows carry the
-                # words her faces gold (Tenko in Sakura; the five
-                # Annotations, Annotated and Publish in Edit).
-                "Tenko": "Sakura", "Edited": "Edit", "Annotated": "Edit",
-                "Publish": "Edit", "Red Ink": "Edit", "Footnote": "Edit",
-                "Deadline Extension": "Edit", "Fox Fire": "Edit",
-                "Sakura Seal": "Edit", "Royalties": "Edit"}
+                # YAE MIKO (2026-10-13): the Edit row carries Edited,
+                # Annotated and Publish. Tenko and each Annotation are rows
+                # of their own since 2026-10-14.
+                "Edited": "Edit", "Annotated": "Edit", "Publish": "Edit"}
 
 
 def _word_owner(word: str) -> str:
