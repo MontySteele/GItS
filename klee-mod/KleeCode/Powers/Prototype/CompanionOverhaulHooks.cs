@@ -305,9 +305,13 @@ public static class CompanionOverhaulReactions
     /// aura power is removed before this runs, exactly as the sim clears
     /// `enemy.aura` before `_react`.
     /// </summary>
+    /// <param name="cardSource">The card whose hit set the reaction off,
+    /// where the damage carried one (the Kokomi pool overhaul, 2026-10-13:
+    /// Coordinated Tide's Companion and Jellyfish Current's Sting).</param>
     internal static async Task Note(
         PlayerChoiceContext choiceContext, Reaction reaction,
-        Creature target, Creature? dealer, Element consumedAura)
+        Creature target, Creature? dealer, Element consumedAura,
+        CardModel? cardSource = null)
     {
         if (reaction == Reaction.None) return;
 
@@ -339,10 +343,11 @@ public static class CompanionOverhaulReactions
         await CompanionHexerei.OnReaction(
             choiceContext, reaction, target, dealer, consumedAura);
 
-        // THE KOKOMI RE-FOUNDING (2026-10-12): Grand Strategist, "Whenever a
-        // Plan causes an Elemental Reaction". Sim twin: the same read in
+        // THE KOKOMI POOL OVERHAUL (2026-10-13): a reaction she triggered --
+        // All Streams' count, Grand Strategist, Coordinated Tide and
+        // Jellyfish Current. Sim twin: `kokomi_plan.note_reaction`, from
         // `effects.companion_overhaul_reaction`.
-        await KokomiRefounding.OnReaction(choiceContext, dealer);
+        await KokomiRefounding.OnReaction(choiceContext, dealer, cardSource);
 
         if (reaction != Reaction.Swirl) return;
 

@@ -235,7 +235,10 @@ def _proto_power(effects: list[dict]) -> dict | None:
 #: `gen_klee_cards.PLAN_UPGRADE_VARS`; the three move together or a smithed
 #: prototype is two different cards.
 PLAN_DELTA_OPS: dict[str, tuple[str, ...]] = {
-    "plan_damage": ("damage",),
+    "plan_damage": ("damage",
+                    # The Kokomi pool overhaul (2026-10-13): Feint's and
+                    # Turning Tide's per-Plan rate.
+                    "damage_per_plan_this_turn"),
     # `EB-335`. Tide Wall's per-Plan scaler is a BLOCK clause wearing a count,
     # so it takes `plan_block`'s key rather than a sixth key of its own --
     # one printed Block number per row is still the rule, and the flat `block`
@@ -247,7 +250,13 @@ PLAN_DELTA_OPS: dict[str, tuple[str, ...]] = {
                    # R276, Tide Wall: the flat bonus on top of the intent.
                    "block_max_intent"),
     "plan_mend": ("mend",),
-    "plan_power_amount": ("apply_power",),
+    "plan_power_amount": ("apply_power",
+                          # The Kokomi pool overhaul (2026-10-13): Undercurrent
+                          # Snare's Strength loss.
+                          "lose_strength_this_turn"),
+    # The Kokomi pool overhaul (2026-10-13): Prepared Retreat's "gain 1 [2]
+    # Energy".
+    "plan_energy": ("energy", "energy_if_attacked_since"),
     # The Kokomi level pass (2026-10-12), Gorou's War Banner: "Plan: Gain 1
     # [2] Strength."
     "plan_strength": ("gain_strength",),

@@ -33,10 +33,15 @@ def _card(cid: str):
 
 
 # --- 1. Moon's Reflection -------------------------------------------------------
+# The card left with the Kokomi pool overhaul (2026-10-13, Prepared Retreat
+# takes its slot). Its `plan_from_exhaust` op and the empty-pile gate stay
+# registered with no row spelling them, so the gate is pinned on a bare row.
 
 def test_moons_reflection_is_unplayable_while_the_exhaust_pile_is_empty(caches):
+    from tier0.engine.state import Card
     st = kokomi_state()
-    moon = _card("proto_kk_moons_reflection")
+    moon = Card(id="proto_kk_probe_reflection", name="Probe", cost=1,
+                type="skill", effects=[{"op": "plan_from_exhaust"}])
     assert kokomi_plan.needs_an_exhausted_card(moon) is True
     assert combat.card_playable(st, moon) is False
     st.player.exhaust_pile.append(_card("proto_kk_riptide"))
@@ -44,21 +49,16 @@ def test_moons_reflection_is_unplayable_while_the_exhaust_pile_is_empty(caches):
 
 
 def test_moons_reflection_carries_the_reason_and_keeps_its_face():
-    src = (GEN / "ProtoKkMoonsReflection.cs").read_text(encoding="utf-8")
-    assert "IUnplayableReasonCard" in src
-    assert "KokomiRefounding.AnyExhausted(this)" in src
-    assert '"your Exhaust Pile is empty"' in src
-    assert ("Choose a card in your [gold]Exhaust Pile[/gold]. Next turn, "
-            "carry out its [gold]Plan[/gold], or play it if it has none.") in src
+    """Cut by the pool overhaul: no row, no generated class."""
+    assert not (GEN / "ProtoKkMoonsReflection.cs").exists()
     rows = {r["id"]: r for r in proto._rows()}
-    assert gen_klee_cards.card_needs_an_exhausted_card(
-        rows["proto_kk_moons_reflection"])
+    assert "proto_kk_moons_reflection" not in rows
 
 
 def test_only_moons_reflection_takes_the_exhaust_gate():
     hits = [c.id for c in loader.prototype_cards()
             if kokomi_plan.needs_an_exhausted_card(c)]
-    assert hits == ["proto_kk_moons_reflection"]
+    assert hits == []
 
 
 # --- 3. Opening Gambit and Second Wave: a Skill never spends Vigor ---------------

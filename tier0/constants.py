@@ -887,6 +887,11 @@ KOKOMI_OVERHAUL_CASKET_BLOCK = 3
 # paper's Rare): how many are offered. Mirrored BY VALUE against
 # `KokomiCompanionPlan.GeneralsOffered`.
 KOKOMI_GENERALS_OFFERED = 3
+# THE KOKOMI POOL OVERHAUL (2026-10-13): Battle Formation's "Whenever 3 or
+# more Plans are carried out in one turn, gain 1 Energy and draw 2 cards".
+# The Power's stack is the Energy. `BattleFormationPower.Threshold` / `.Draw`.
+KOKOMI_BATTLE_FORMATION_THRESHOLD = 3
+KOKOMI_BATTLE_FORMATION_DRAW = 2
 
 # THE STARTER, WHOLE (brief draft 6 sec.4; slice draft 6 sec.3). Ten cards, in
 # the printed order. A REPLACEMENT and not a substitution list because every one
@@ -918,7 +923,7 @@ KOKOMI_OVERHAUL_STARTER_IDS: tuple[str, ...] = (
 # appended LAST to `KOKOMI_OVERHAUL_POOL_IDS` in the sheet's order.
 KOKOMI_REFOUNDING_IDS: tuple[str, ...] = (
     "proto_kk_tidal_surge",
-    "proto_kk_riptide_guard",
+    "proto_kk_turning_tide_chain",
     "proto_kk_watatsumi_drill",
     "proto_kk_orders_from_the_shrine",
     "proto_kk_kurages_wake",
@@ -928,7 +933,7 @@ KOKOMI_REFOUNDING_IDS: tuple[str, ...] = (
     "proto_kk_kurage_barrage",
     "proto_kk_watchful_shoal",
     "proto_kk_coordinated_tide",
-    "proto_kk_reserves",
+    "proto_kk_brine_spray",
     "proto_kk_spearhead",
     "proto_kk_steady_tide",
     "proto_kk_resolve_of_watatsumi",
@@ -968,9 +973,13 @@ KOKOMI_JELLYFISH_IDS: tuple[str, ...] = (
     "proto_kk_the_shape_of_water",
 )
 
-# THE OFFERABLE POOL, WHOLE: 78, 21 / 37 / 20 since the jellyfish build
-# (21 / 36 / 21 from the re-founding, 2026-10-12), in the sheet's own order,
-# then Gorou's four. The pool's
+# THE OFFERABLE POOL, WHOLE: 78, 20 / 38 / 20, in the sheet's own order, then
+# Gorou's four. THE POOL OVERHAUL (2026-10-13, review/active/kokomi-pool-
+# overhaul-2026-10-13.md sec.4) put each new card in the slot of the cut card
+# of its rarity: Turning Tide for Riptide Guard, Brine Spray for Reserves,
+# Jellyfish Current for Brace for the Tide, Prepared Retreat for Moon's
+# Reflection, Battle Formation for Ceremonial Garment and Turnabout for
+# Watatsumi Resistance. The pool's
 # history is in git (`git show kokomi-casket-frozen-2026-10-12:tier0/constants.py`).
 # `tools/lint_arm_pool_parity.py` compares this tuple,
 # `KokomiOverhaulRoster.Slice()` and the sheet BY ORDER.
@@ -987,7 +996,7 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_kk_sango_isshin",
     "proto_kk_change_of_plans",
     "proto_kk_undertow",
-    "proto_kk_moons_reflection",
+    "proto_kk_prepared_retreat",
     "proto_kk_riptide",
     "proto_kk_pincer",
     "proto_kk_flank",
@@ -1008,11 +1017,11 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_kk_drowning_pressure",
     "proto_kk_undercurrent_snare",
     "proto_kk_at_waters_edge",
-    "proto_kk_ceremonial_garment",
+    "proto_kk_battle_formation",
     "proto_kk_suffocating_deep",
     "proto_kk_coral_crash",
     "proto_kk_evening_watch",
-    "proto_kk_brace_for_the_tide",
+    "proto_kk_jellyfish_current",
     "proto_kk_watatsumis_grace",
     "proto_kk_tidal_riposte",
     "proto_kk_shoal_call",
@@ -1021,7 +1030,7 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_kk_shoal_of_spears",
     "proto_kk_seas_reproach",
     "proto_kk_tidal_rebuke",
-    "proto_kk_watatsumi_resistance",
+    "proto_kk_turnabout",
     "proto_kk_kelp_wall",
     "proto_kk_tidecleanse",
     "proto_kk_sea_glass_harvest",

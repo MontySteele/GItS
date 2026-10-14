@@ -702,7 +702,13 @@ KOKOMI_OVERHAUL_OPS = frozenset((
     # THE RE-FOUNDING (2026-10-12): Kurage's Wake's Stings, Gorou's two Plan
     # lines and a written Companion's clause, each with its own branch in
     # `_op_price` on this set's terms.
-    "add_stings", "gain_strength", "juuga_guard", "play_companion"))
+    "add_stings", "gain_strength", "juuga_guard", "play_companion",
+    # THE POOL OVERHAUL (2026-10-13): the Chain, Counter and Intent clauses
+    # and Read the Field's fetch, each with its own branch in `_op_price` on
+    # this set's terms.
+    "damage_per_plan_this_turn", "damage_blocked_since",
+    "damage_taken_since", "energy_if_attacked_since",
+    "lose_strength_this_turn", "draw_pile_to_hand"))
 
 #: A HIT FOR A FRACTION OF HER MAX HP -- BOTH SPELLINGS. `damage_quarter_max_hp`
 #: is what the sheet writes today (Sango Isshin, now-line and planned half);
@@ -954,6 +960,19 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
     if op == "juuga_guard":
         # Gorou's Juuga: N turns of the rule's Block, at face.
         return _neutral_amount(fx, 0) * C.MI_JUUGA_GUARD_BLOCK
+    # THE KOKOMI POOL OVERHAUL (2026-10-13).
+    if op == "damage_per_plan_this_turn":
+        # Feint, Turning Tide: the rate once -- the line counts itself, so
+        # one Plan carried out is the floor; more is a queue fact.
+        return _neutral_amount(fx, 0)
+    if op in ("damage_blocked_since", "damage_taken_since",
+              "energy_if_attacked_since", "lose_strength_this_turn"):
+        # ZERO: each reads the enemy turn the Plan sat through or the
+        # intents when it lands, a fight fact an offer screen cannot read.
+        return 0.0
+    if op == "draw_pile_to_hand":
+        # Read the Field: one card of her choice, a generated card's price.
+        return STATIC_GENERATED_CARD_VALUE
     if op == "play_companion":
         # A written Companion: one neutral card resolved without being paid
         # for again, `play_copy_of_companion`'s price. Never on a sheet row
@@ -2207,6 +2226,19 @@ STATIC_OP_PRICING: dict[str, str] = {
     "gain_strength": "STATIC_STRENGTH_VALUE per Strength, the now-line "
                      "apply_power strength price (permanent Strength)",
     "juuga_guard": "its turns at C.MI_JUUGA_GUARD_BLOCK each, at face",
+    # --- the Kokomi pool overhaul (2026-10-13) ---
+    "damage_per_plan_this_turn": "the per-Plan rate once: the line counts "
+                                 "itself, so one carry-out is the floor",
+    "damage_blocked_since": "ZERO: the damage she blocked while it waited, "
+                            "a fight fact an offer screen cannot read",
+    "damage_taken_since": "ZERO: the damage enemies dealt her while it "
+                          "waited, a fight fact an offer screen cannot read",
+    "energy_if_attacked_since": "ZERO: Energy only if an enemy attacked "
+                                "while it waited, a fight fact",
+    "lose_strength_this_turn": "ZERO: Strength off the enemies that intend "
+                               "to attack when it lands, a board fact",
+    "draw_pile_to_hand": "STATIC_GENERATED_CARD_VALUE: one card of her "
+                         "choice into the hand",
     "play_companion": "STATIC_AUTOPLAY_VALUE: a written Companion is one "
                       "neutral card resolved free next turn, "
                       "play_copy_of_companion's price; the writer mints the "

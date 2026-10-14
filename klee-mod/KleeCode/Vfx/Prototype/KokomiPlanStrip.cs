@@ -338,7 +338,10 @@ internal static class KokomiPlanStrip
                     entry.TwoLine, flipped,
                     KokomiPlan.LiveBlock(entry, kokomi),
                     KokomiPlan.KeptBlockAhead(entry, kokomi),
-                    KokomiPlan.DefendsAhead(entry, kokomi));
+                    KokomiPlan.DefendsAhead(entry, kokomi),
+                    // THE POOL OVERHAUL (2026-10-13): a Counter or Chain
+                    // Plan's number as it stands.
+                    KokomiPlan.LiveLine(entry, kokomi, i));
                 line.Visible = caption != null;
                 line.Text = caption ?? string.Empty;
             }

@@ -128,10 +128,11 @@ public class EnchantedRiderTests
         // `KokomiPlan.Kind.Block` pays with
         // `GainBlock(kokomi, plan.Amount, ValueProp.Move, null)` -- the same
         // null `CardPlay`, so the same absent card source, so the same face.
-        // Read the Field prints a planned Block (Cleansing Wave did, until
-        // the Casket pass cut it, 2026-09-28).
+        // Tide Wall prints a planned Block (Read the Field did until the
+        // Kokomi pool overhaul, 2026-10-13; Cleansing Wave until the Casket
+        // pass cut it, 2026-09-28).
         var seat = Seat.Kokomi();
-        var card = Held<ProtoKkReadTheField>(seat);
+        var card = Held<ProtoKkTideWall>(seat);
         Enchant<Nimble>(card, NimbleAmount);
 
         var planned = card.DynamicVars["PlanBlock"];

@@ -341,6 +341,12 @@ def _runtime_count(state: CombatState, token: str,
         # played this turn". Cleared by `kokomi_plan.roll_turn`. C# twin:
         # `KokomiOverhaulLedger.StingsPlayedThisTurn`.
         return state.kk_stings_played_this_turn
+    if token == "reactions_triggered_this_combat":
+        # The Kokomi pool overhaul (2026-10-13) -- All Streams Flow to the
+        # Sea, "plus 5 for each Elemental Reaction you triggered this
+        # combat" (`kokomi_plan.note_reaction`). C# twin:
+        # `KokomiOverhaulLedger.ReactionsThisCombat`.
+        return state.kk_reactions_this_combat
     if token == "debuffs_on_target":
         # CURRENT-KIT USE ONLY (R276) -- Well Laid, "plus 3 for each debuff on
         # the enemy". The AIMED enemy, `_power_amount_formula`'s read: the
@@ -3401,6 +3407,9 @@ RUNTIME_COUNT_NAMES = frozenset({
     # Shape of Water, Stings played face-up. Same registry reason.
     "stings_played_this_combat",
     "stings_played_this_turn",
+    # The Kokomi pool overhaul (2026-10-13): All Streams Flow to the Sea, the
+    # Elemental Reactions she triggered this combat. Same registry reason.
+    "reactions_triggered_this_combat",
     # CURRENT-KIT USE ONLY (R213 B) -- the drain op's count. Same
     # reason as the two above: the loader validates every count token at LOAD
     # off this set.
@@ -5136,6 +5145,15 @@ OPS = {
     "gain_strength": _op_kokomi_plan_only,
     "juuga_guard": _op_kokomi_plan_only,
     "play_companion": _op_kokomi_plan_only,
+    # THE KOKOMI POOL OVERHAUL (2026-10-13): the Chain, Counter and Intent
+    # lines and Read the Field's fetch, each naming the carry-out turn or the
+    # enemy turn the Plan sat through.
+    "damage_per_plan_this_turn": _op_kokomi_plan_only,
+    "damage_blocked_since": _op_kokomi_plan_only,
+    "damage_taken_since": _op_kokomi_plan_only,
+    "energy_if_attacked_since": _op_kokomi_plan_only,
+    "lose_strength_this_turn": _op_kokomi_plan_only,
+    "draw_pile_to_hand": _op_kokomi_plan_only,
     # --- base-game parity ops (the real Ironclad pool) ---
     "upgrade_in_hand": _op_upgrade_in_hand,
     "gain_max_hp": _op_gain_max_hp,
@@ -5193,12 +5211,22 @@ def resolve_card(state: CombatState, card: Card) -> None:
         furina_stage.end_play(state)
         state.card_aim = None
         state.card_aim_bound = False
+        # THE KOKOMI POOL OVERHAUL (2026-10-13): no card's hit is resolving
+        # once the play is over, so a reaction after it (Dawn Tide at turn
+        # start) is credited to no card. A free play restores the outer
+        # card's (`combat._FREE_PLAY_CONTEXT`).
+        state.kk_hit_card = None
 
 
 def _resolve_card_bound(state: CombatState, card: Card) -> None:
     # Control provenance (§2.2a): a companion's control counts toward
     # SUPPORT_CARRY.
     state.current_card_companion = card.is_companion
+    # THE KOKOMI POOL OVERHAUL (2026-10-13): this card's own hits, for
+    # Jellyfish Current (a Sting's) and Coordinated Tide (a Companion's).
+    # `kokomi_plan.note_reaction` reads it; the C# twin is the reaction's
+    # `cardSource`.
+    state.kk_hit_card = card
     state.reactions_this_card = 0
     state.kills_this_card = 0
     state.fatal_kills_this_card = 0
@@ -6475,9 +6503,10 @@ def companion_overhaul_reaction(state: CombatState, enemy: Enemy,
     # `tier0.engine.companion_hexerei` argues both, and why a volley that can
     # react again is safe to fire from inside this site.
     companion_hexerei.note_reaction(state, enemy, name, aura)
-    # THE KOKOMI RE-FOUNDING (2026-10-12): Grand Strategist, "Whenever a Plan
-    # causes an Elemental Reaction". `KokomiRefounding.OnReaction` is the twin.
-    kokomi_plan.grand_strategist(state)
+    # THE KOKOMI POOL OVERHAUL (2026-10-13): a reaction she triggered --
+    # All Streams' count, Grand Strategist, Coordinated Tide and Jellyfish
+    # Current. `KokomiRefounding.OnReaction` is the twin.
+    kokomi_plan.note_reaction(state)
     if name == "swirl":
         # THE INAZUMA ARM'S Swirl WINDOW. Heizou's Heartstopper
         # Strike prints "deals 4 more for each Swirl this turn", so the count

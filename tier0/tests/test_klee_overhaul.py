@@ -598,9 +598,10 @@ def test_the_two_last_clauses_are_exhaust_then_a_draw():
     subject, and it deliberately reads `effects:` alone -- no `plan:` -- the
     same as the day this test was written) now reads `power_amount` off that
     line; the row itself keeps "remove exhaust" off the table by declaring its
-    own `upgrade:` (`test_prototype_surface.py` pins that). Moon's Reflection
-    -- `exhaust: true`, no printed number on either line -- is the same shape
-    Vanguard used to be.
+    own `upgrade:` (`test_prototype_surface.py` pins that). Call the
+    Generals -- `exhaust: true`, cost 1, no printed number -- is the same shape
+    Vanguard used to be (Moon's Reflection was the example until the Kokomi
+    pool overhaul cut it, 2026-10-13).
     """
     from tier0.content import upgrades
 
@@ -611,7 +612,7 @@ def test_the_two_last_clauses_are_exhaust_then_a_draw():
 
     # Change of Plans authors its own upgrade since [USER]'s run (2026-10-11),
     # so the default rule no longer reaches it (pinned in test_kokomi_plan).
-    assert delta("proto_kk_moons_reflection") == {"remove": "exhaust"}
+    assert delta("proto_kk_call_the_generals") == {"remove": "exhaust"}
 
     # The counted-power half: `weak` at 1 IS a printed number, so it never
     # reaches the two clauses at all. Rally was the example until the status

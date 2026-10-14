@@ -96,7 +96,11 @@ public class KokomiStatusBatchTests : IDisposable
         Assert.Equal("Play on the [gold]Bake-Kurage[/gold].\n[gold]Plan[/gold]: "
                    + "Deal {PlanDamage:diff()} [gold]Hydro[/gold] damage.",
                      Face(new ProtoKkMasterstroke()));
-        Assert.DoesNotContain("Or [gold]", Face(new ProtoKkBraceForTheTide()));
+        // Turnabout (the pool overhaul, 2026-10-13), Brace for the Tide's
+        // successor as the Plan-only Skill beside Masterstroke.
+        Assert.StartsWith("Play on the [gold]Bake-Kurage[/gold].\n"
+                        + "[gold]Plan[/gold]: ", Face(new ProtoKkTurnabout()));
+        Assert.DoesNotContain("Or [gold]", Face(new ProtoKkTurnabout()));
     }
 
     [Fact]
@@ -147,12 +151,14 @@ public class KokomiStatusBatchTests : IDisposable
     [Fact]
     public void Kelp_wall_plans_a_flat_twelve_fifteen_upgraded()
     {
-        // The Kokomi level pass (2026-10-12): the status count went.
+        // The Kokomi level pass (2026-10-12): the status count went. The pool
+        // overhaul (2026-10-13): a Counter line, the damage she blocked since
+        // she planned it, at the front enemy (was a flat 12 [15] Block).
         var card = new ProtoKkKelpWall();
         Assert.Equal(1m, card.DynamicVars.Cards.BaseValue);
         var clause = Assert.Single(card.PlanClauses);
-        Assert.Equal((KokomiPlan.Kind.Block, 12), (clause.Kind, clause.Amount));
-        Assert.Equal(15, Assert.Single(Upgraded<ProtoKkKelpWall>().PlanClauses).Amount);
+        Assert.Equal((KokomiPlan.Kind.DamageBlockedSince, KokomiPlan.Aim.FrontEnemy),
+                     (clause.Kind, clause.Aim));
         Assert.DoesNotContain("status or curse", Face(card));
         // The clause's own machinery stays registered for a later row.
         Assert.Contains(Seq("KokomiStatusBatch", "BlockPerStatus"),

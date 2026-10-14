@@ -80,6 +80,12 @@ PLAN_KINDS = frozenset((
     # THE RE-FOUNDING (2026-10-12): Kurage's Wake's Stings and Gorou's two
     # Plan lines. See `ADD_STINGS` and the two beside it.
     "add_stings", "gain_strength", "juuga_guard",
+    # THE POOL OVERHAUL (2026-10-13, review/active/kokomi-pool-overhaul-
+    # 2026-10-13.md sec.2-4): the Counter, Intent and Chain lines. See
+    # `DAMAGE_PER_PLAN_THIS_TURN` and the five beside it.
+    "damage_per_plan_this_turn", "damage_blocked_since",
+    "damage_taken_since", "energy_if_attacked_since",
+    "lose_strength_this_turn", "draw_pile_to_hand",
 ))
 
 #: The clauses that carry NO `amount`. Each is a whole rule rather than a
@@ -99,6 +105,9 @@ PLAN_AMOUNTLESS_OPS = frozenset((
     "first_attack_twice",
     # THE STATUS BATCH: "every status and curse".
     "transform_statuses_in_draw_pile",
+    # THE POOL OVERHAUL (2026-10-13): Kelp Wall's and Turnabout's size is read
+    # off the ledger at carry-out; Read the Field's is one card.
+    "damage_blocked_since", "damage_taken_since", "draw_pile_to_hand",
 ))
 
 #: The two debuffs a Plan may apply. `KokomiPlan.PLAN_APPLY_POWERS`' twin.
@@ -113,12 +122,18 @@ PLAN_APPLY_POWERS = frozenset(("weak", "vulnerable"))
 #: attack, read off the board AT CARRY-OUT since the Kokomi level pass
 #: (2026-10-12), Tide Wall's read (`_aimed`).
 PLAN_AIMS = frozenset(("front_enemy", "all_enemies",
-                       "enemies_intending_attack"))
+                       "enemies_intending_attack",
+                       # THE POOL OVERHAUL (2026-10-13), Brine Sting: each
+                       # enemy that attacked her since the Plan was written.
+                       "enemies_attacked_since"))
 
 #: The clauses that take an aim. Everything else is self-facing.
 PLAN_AIMED_OPS = frozenset((
     "damage", "damage_quarter_max_hp",
-    "apply_power"))
+    "apply_power",
+    # THE POOL OVERHAUL (2026-10-13).
+    "damage_per_plan_this_turn", "damage_blocked_since",
+    "damage_taken_since", "lose_strength_this_turn"))
 
 #: R276. The clauses whose `amount` may be zero: Tide Wall's is a flat bonus on
 #: top of the front enemy's intent, and the base card prints none. THE FEED
@@ -176,7 +191,55 @@ PLAN_ONLY_OPS = frozenset((
                            "transform_statuses_in_draw_pile",
                            # THE RE-FOUNDING: each names the carry-out turn.
                            "add_stings", "gain_strength",
-                           "juuga_guard"))
+                           "juuga_guard",
+                           # THE POOL OVERHAUL (2026-10-13): each reads the
+                           # turn it lands on or the enemy turn it sat
+                           # through, which only a Plan has.
+                           "damage_per_plan_this_turn",
+                           "damage_blocked_since", "damage_taken_since",
+                           "energy_if_attacked_since",
+                           "lose_strength_this_turn", "draw_pile_to_hand"))
+
+#: THE POOL OVERHAUL (2026-10-13, review/active/kokomi-pool-overhaul-
+#: 2026-10-13.md, picks 1 (a) and 2 (a); [USER]: "On Kokomi, I'm good with
+#: default on 1 and 2."). Three things only a Plan can do (sec.2):
+#:
+#: CHAIN -- Feint and Turning Tide: "Deal N for each Plan carried out this
+#: turn". The count is `state.kk_plans_carried_out_this_turn`, raised at the
+#: TOP of `_resolve_entry`, so the Plan being carried out counts itself; a
+#: doubled carry-out counts twice, Sango Isshin's per-carry-out reading.
+#:
+#: COUNTER -- "since you planned this" is from the moment the Plan is written
+#: until it is carried out. `schedule` stamps the entry with the arm's three
+#: running totals (`since_blocked`, `since_taken`, `since_attacks`) and the
+#: carry-out reads the difference, so each Plan has its own window:
+#:   * Kelp Wall, `damage_blocked_since`: Block that absorbed enemy attack
+#:     damage (`kk_damage_blocked_total`);
+#:   * Brine Sting, the `enemies_attacked_since` aim: each enemy whose Attack
+#:     hit her, blocked or not (`kk_attackers`, one entry per hit);
+#:   * Prepared Retreat, `energy_if_attacked_since`: any such hit;
+#:   * Turnabout, `damage_taken_since`: all the damage enemies dealt her,
+#:     blocked or not (`kk_damage_taken_total`).
+#: The totals are written at the one site an enemy's attack lands on her
+#: (`combat`, beside Tidal Riposte: `note_enemy_hit`).
+#:
+#: INTENT -- Undercurrent Snare: "Each enemy that intends to attack loses 3
+#: Strength this turn", read at landing like Flank, and returned at the end
+#: of the round as Piercing Wail's is (`temp_strength_down`).
+#:
+#: Read the Field's "Put a card from your Draw Pile into your Hand" is the
+#: player's choice in the mod (Secret Technique's screen); the pilot takes
+#: `effects._best_card`, an INSTRUMENT SURFACE.
+#: `KokomiPlan.Kind.DamagePerPlanThisTurn` and the five beside it are the
+#: twins.
+DAMAGE_PER_PLAN_THIS_TURN = "damage_per_plan_this_turn"
+DAMAGE_BLOCKED_SINCE = "damage_blocked_since"
+DAMAGE_TAKEN_SINCE = "damage_taken_since"
+ENERGY_IF_ATTACKED_SINCE = "energy_if_attacked_since"
+LOSE_STRENGTH_THIS_TURN = "lose_strength_this_turn"
+DRAW_PILE_TO_HAND = "draw_pile_to_hand"
+#: Brine Sting's aim.
+ENEMIES_ATTACKED_SINCE = "enemies_attacked_since"
 
 #: THE STATUS BATCH (2026-10-01, review/active/kokomi-status-batch-2026-10-01.md).
 #: Kelp Wall's old "plus 3 for each status or curse in your hand when written"
@@ -297,10 +360,16 @@ WATATSUMI_RESISTANCE = "kk_watatsumi_resistance"
 SANGONOMIYAS_ORDERS = "kk_sangonomiyas_orders"   # turn start: N Companions
 KURAGE_BLOOM = "kk_kurage_bloom"                 # turn start: N Stings
 WATCHFUL_SHOAL = "kk_watchful_shoal"             # Stings +N dmg, Wards +N Block
-COORDINATED_TIDE = "kk_coordinated_tide"         # Ethereal carried out: N
-GRAND_STRATEGIST = "kk_grand_strategist"         # a Plan's reaction: N to ALL
+COORDINATED_TIDE = "kk_coordinated_tide"         # a Companion's reaction: N Stings
+GRAND_STRATEGIST = "kk_grand_strategist"         # her reaction: N to ALL
 ENDLESS_SHOAL = "kk_endless_shoal"               # a Plan carried out: N Stings
 DAWN_TIDE = "kk_dawn_tide"                       # turn start: Hydro to ALL
+#: THE POOL OVERHAUL (2026-10-13, sec.4). Jellyfish Current: "Whenever a Sting
+#: triggers an Elemental Reaction, add a Sting to your Hand." Battle
+#: Formation: "Whenever 3 or more Plans are carried out in one turn, gain 1
+#: Energy and draw 2 cards." `JellyfishCurrentPower`, `BattleFormationPower`.
+JELLYFISH_CURRENT = "kk_jellyfish_current"       # a Sting's reaction: N Stings
+BATTLE_FORMATION = "kk_battle_formation"         # third Plan a turn: N Energy, 2N cards
 #: Nereid's Ascension (`EB-492`). A MARKER AND NOT A WINDOW: the Rare is a
 #: Power costing 2 that lasts the fight, so there is no duration to tick and
 #: `carry_out_times` reads only whether it is worn. It replaced a `plan_twice`
@@ -473,6 +542,12 @@ def _aimed(state: CombatState, clause: dict,
         # The Kokomi level pass (2026-10-12): the intents on the board at
         # carry-out, as Tide Wall reads them. `KokomiPlan.Aimed`'s twin.
         return [e for e in state.living_enemies if _intends_to_attack(e)]
+    if aim == ENEMIES_ATTACKED_SINCE:
+        # THE POOL OVERHAUL (2026-10-13), Brine Sting: each living enemy
+        # whose Attack hit her since this Plan was written, once each, in
+        # board order. No entry (a bare clause) reads nobody.
+        hit_by = attackers_since(state, entry)
+        return [e for e in state.living_enemies if id(e) in hit_by]
     if aim == "front_enemy":
         # `EB-643`, CONVERGING TIDE. The one aim a now-line may re-point:
         # "every queued Plan aims at this enemy instead of the front". The
@@ -869,7 +944,13 @@ def schedule(state: CombatState, card: Card,
     now_card = (owner if own_line and owner.effects and owner.plan
                 else None)
     entry = PlanEntry(card_id=card.id, clauses=body, card=held, label=label,
-                      extra=extra, now_card=now_card, source=card)
+                      extra=extra, now_card=now_card, source=card,
+                      # THE POOL OVERHAUL (2026-10-13): "since you planned
+                      # this" opens now, per Plan (`DAMAGE_PER_PLAN_THIS_TURN`'s
+                      # header). `KokomiOverhaulLedger.OpenWindow` is the twin.
+                      since_blocked=state.kk_damage_blocked_total,
+                      since_taken=state.kk_damage_taken_total,
+                      since_attacks=len(state.kk_attackers))
     state.kk_plan_queue.append(entry)
     state.emit("plan_written", card=card.id, clauses=len(body),
                queued=len(state.kk_plan_queue),
@@ -1221,7 +1302,10 @@ def pilot_flips(state: CombatState) -> None:
 #: The per-card context a now-line carry-out opens and then restores, on top
 #: of `combat._FREE_PLAY_CONTEXT`: the bound aim, and the replay latch that
 #: keeps a nested read from aiming at the pet.
-_NOW_LINE_CONTEXT = ("card_aim", "card_aim_bound", "kurage_autoplaying")
+_NOW_LINE_CONTEXT = ("card_aim", "card_aim_bound", "kurage_autoplaying",
+                     # The pool overhaul (2026-10-13): the now-line's hits are
+                     # the card's own.
+                     "kk_hit_card")
 
 
 def carry_out_now_line(state: CombatState, entry: PlanEntry) -> None:
@@ -1255,6 +1339,7 @@ def carry_out_now_line(state: CombatState, entry: PlanEntry) -> None:
         state.card_aim = aim[0]
         state.card_aim_bound = True
         state.kurage_autoplaying = True
+        state.kk_hit_card = card
         state.current_card_companion = False
         state.reactions_this_card = 0
         state.kills_this_card = 0
@@ -1307,6 +1392,10 @@ def _resolve_entry(state: CombatState, entry: PlanEntry, why: str,
     """
     state.emit("plan_carried_out", card=entry.card_id, why=why,
                clauses=len(entry.clauses))
+    # THE POOL OVERHAUL (2026-10-13), CHAIN: this carry-out counts itself, so
+    # the count rises before its clauses run. `KokomiOverhaulLedger
+    # .NotePlanCarryingOut` is the twin.
+    state.kk_plans_carried_out_this_turn += 1
     wrote = [False, False]
     if entry.line == "now" and entry.now_card is not None:
         # A PLAN STAYS OPEN (2026-10-01): the player chose the now-line. It
@@ -1318,7 +1407,13 @@ def _resolve_entry(state: CombatState, entry: PlanEntry, why: str,
         # THE RE-FOUNDING (2026-10-12): Grand Strategist's window -- a
         # reaction inside it was caused by this Plan. `KokomiPlan.IsCarryingOut`.
         was = state.kk_carrying_out
+        was_card = state.kk_hit_card
         state.kk_carrying_out = True
+        # THE POOL OVERHAUL (2026-10-13): a Plan line's hit is the writing
+        # card's own hit (a written Sting's reacts for Jellyfish Current, a
+        # Companion's Plan line for Coordinated Tide). `KokomiPlan.Hit`'s
+        # credit scope is the twin.
+        state.kk_hit_card = entry.source
         try:
             for clause in entry.clauses:
                 if state.over or not state.player.alive:
@@ -1328,10 +1423,9 @@ def _resolve_entry(state: CombatState, entry: PlanEntry, why: str,
                                 drain_entries=drain_entries)
         finally:
             state.kk_carrying_out = was
-    # Kokomi round-3 changes (2026-10-12): Coordinated Tide lands before the
-    # plan bus, the C#'s order since its hit moved into the carry-out's
-    # results line (`KokomiPlan.ResolveEntry`).
-    coordinated_tide(state, entry)
+            state.kk_hit_card = was_card
+    # (Coordinated Tide's carry-out hit left with the pool overhaul,
+    # 2026-10-13: it reads a Companion's reaction, `note_reaction`.)
     _note_plan_resolved(state, entry)
     note_carried_out(state, entry)
     return wrote[0], wrote[1]
@@ -1384,6 +1478,9 @@ def _note_plan_resolved(state: CombatState,
             added = add_jellyfish(state, WARD_ID, canopy, upgraded=upgraded)
             state.emit("plan_kurage_canopy", amount=added,
                        upgraded=upgraded)
+    # THE POOL OVERHAUL (2026-10-13): Battle Formation, when the third Plan of
+    # the turn finishes.
+    battle_formation(state)
 
 
 def _resolve_clause(state: CombatState, entry: PlanEntry,
@@ -1464,6 +1561,36 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
         state.emit("plan_juuga_guard", turns=amount)
     elif op == PLAY_COMPANION:
         carry_out_companion(state, entry.card)
+    # THE POOL OVERHAUL (2026-10-13): the Chain, Counter and Intent lines.
+    elif op == DAMAGE_PER_PLAN_THIS_TURN:
+        # Feint, Turning Tide: the rate times the Plans carried out this
+        # turn, this one included.
+        _hit(state, clause, amount * state.kk_plans_carried_out_this_turn,
+             entry=entry, double=double_damage)
+    elif op == DAMAGE_BLOCKED_SINCE:
+        # Kelp Wall: the damage she blocked since it was written.
+        _hit(state, clause, blocked_since(state, entry), entry=entry,
+             double=double_damage)
+    elif op == DAMAGE_TAKEN_SINCE:
+        # Turnabout: all the damage enemies dealt her since, blocked or not.
+        _hit(state, clause, taken_since(state, entry), entry=entry,
+             double=double_damage)
+    elif op == ENERGY_IF_ATTACKED_SINCE:
+        # Prepared Retreat: Energy if an enemy attacked her since.
+        attacked = attacked_since(state, entry)
+        if attacked:
+            p.energy += amount
+            state.emit("energy", amount=amount)
+        state.emit("plan_prepared_retreat", attacked=attacked, amount=amount)
+    elif op == LOSE_STRENGTH_THIS_TURN:
+        # Undercurrent Snare: Piercing Wail's this-turn loss on each enemy
+        # that intends to attack when it lands.
+        for enemy in _aimed(state, clause, entry):
+            powers.apply_power(state, enemy, "temp_strength_down", amount,
+                               applier=p)
+    elif op == DRAW_PILE_TO_HAND:
+        # Read the Field: one card of her choice from the Draw Pile.
+        draw_pile_to_hand(state)
     elif op in coop.PLAN_OPS:
         # THE CO-OP SET: Joint Orders' ally draws, Coordinated Strike's other
         # players hit harder. Nobody else is at a one-seat table, so the
@@ -1772,6 +1899,8 @@ def roll_turn(state: CombatState) -> None:
     state.kk_next_plan_extra = None
     # The jellyfish build (2026-10-12): The Shape of Water's "this turn".
     state.kk_stings_played_this_turn = 0
+    # The pool overhaul (2026-10-13): the Chain count's "this turn".
+    state.kk_plans_carried_out_this_turn = 0
     # (Crystal Collapse's memory is combat-wide since the Kokomi level pass,
     # 2026-10-12, so the turn boundary leaves it alone.)
 
@@ -2414,7 +2543,14 @@ def carry_out_companion(state: CombatState, card: Optional[Card]) -> None:
         return
     front = front_enemy(state)
     if front is not None:
-        reactions.resolve_hit(state, front, "hydro", 0, "plan")
+        # The Bake-Kurage's Hydro is the pet's own, never the Companion's hit
+        # (the pool overhaul, 2026-10-13: Coordinated Tide).
+        was_card = state.kk_hit_card
+        state.kk_hit_card = None
+        try:
+            reactions.resolve_hit(state, front, "hydro", 0, "plan")
+        finally:
+            state.kk_hit_card = was_card
     state.emit("plan_companion", card=card.id,
                target=None if front is None else front.name)
     was = state.kurage_aim
@@ -2451,22 +2587,6 @@ def note_written(state: CombatState, card: Card) -> None:
         watatsumi_resistance(state)
 
 
-def coordinated_tide(state: CombatState, entry: PlanEntry) -> None:
-    """COORDINATED TIDE: a Plan written by an Ethereal card was carried out,
-    so hit the front enemy. Once per carry-out, either line, outside the
-    carrying window. `KokomiRefounding.CoordinatedTide` is the twin."""
-    from tier0.engine import effects                # late import: cycle
-    card = entry.source
-    if not live(state) or card is None or not card.is_ethereal:
-        return
-    n = int(state.player.powers.get(COORDINATED_TIDE, 0))
-    front = front_enemy(state)
-    if n and front is not None:
-        state.emit("plan_coordinated_tide", target=front.name, amount=n)
-        effects.deal_damage_to_enemy(state, front, n, element="hydro",
-                                     source="plan", powered=False)
-
-
 def note_carried_out(state: CombatState, entry: PlanEntry) -> None:
     """A Plan was just carried out. ENDLESS SHOAL (the jellyfish build,
     2026-10-12): "Whenever the Bake-Kurage carries out a Plan, add a Sting to
@@ -2498,12 +2618,13 @@ def note_sting_played(state: CombatState, card: Card) -> None:
 
 
 def grand_strategist(state: CombatState) -> None:
-    """GRAND STRATEGIST: "Whenever a Plan causes an Elemental Reaction, deal 5
-    damage to ALL enemies." Called from `effects.companion_overhaul_reaction`,
-    the one site a reaction resolves; a reaction inside a carry-out
-    (`state.kk_carrying_out`) was caused by the Plan. Unelemented, power
-    damage. `KokomiRefounding.OnReaction` is the twin."""
-    if not live(state) or not state.kk_carrying_out:
+    """GRAND STRATEGIST (the pool overhaul, 2026-10-13): "Whenever you trigger
+    an Elemental Reaction, deal 4 damage to ALL enemies." Any reaction
+    credited to her -- her cards, her Companions, the Bake-Kurage's Plans and
+    Dawn Tide alike (was a Plan's reaction alone). Unelemented, power damage,
+    so it cannot react again. Called from `note_reaction`.
+    `KokomiRefounding.OnReaction` is the twin."""
+    if not live(state):
         return
     n = int(state.player.powers.get(GRAND_STRATEGIST, 0))
     if n <= 0:
@@ -2513,6 +2634,134 @@ def grand_strategist(state: CombatState) -> None:
     for enemy in list(state.living_enemies):
         effects.deal_damage_to_enemy(state, enemy, n, element=None,
                                      source="plan", powered=False)
+
+
+def note_reaction(state: CombatState) -> None:
+    """THE POOL OVERHAUL (2026-10-13): an Elemental Reaction she triggered.
+    Called from `effects.companion_overhaul_reaction`, the one site a reaction
+    resolves; tier 0 seats one player and no enemy applies an element, so
+    every reaction here is hers.
+
+      * All Streams Flow to the Sea's per-combat count
+        (`kk_reactions_this_combat`);
+      * Grand Strategist, any reaction;
+      * Coordinated Tide, a Companion card's own hit, played or carried out
+        as a Plan (`kk_hit_card`: the copy a written Companion plays, or the
+        Companion whose Plan line hit);
+      * Jellyfish Current, a Sting's own hit, played, flipped or carried out
+        as its Plan line.
+
+    THE HIT'S CARD (`kk_hit_card`) is the card whose own hit reacted: set by
+    `effects._resolve_card_bound` for a card being resolved and by
+    `_resolve_entry` for a Plan line's hits. The Bake-Kurage's Hydro before a
+    written Companion is the pet's, not the Companion's (`carry_out_companion`
+    clears it). `KokomiRefounding.OnReaction` is the twin.
+
+    JELLYFISH CURRENT IS BOUNDED, the thin-deck loop rule's known set: each
+    reaction consumes the aura it reacted with, so a Sting reacts once per
+    aura some other card put up."""
+    if not live(state):
+        return
+    state.kk_reactions_this_combat += 1
+    grand_strategist(state)
+    card = state.kk_hit_card
+    if card is None:
+        return
+    p = state.player
+    from tier0.engine import companion_hexerei      # late import: cycle
+    tide = int(p.powers.get(COORDINATED_TIDE, 0))
+    if tide and companion_hexerei.counts_as_companion(state, card):
+        added = add_jellyfish(state, STING_ID, tide, upgraded=False)
+        state.emit("plan_coordinated_tide", card=card.id, stings=added)
+    current = int(p.powers.get(JELLYFISH_CURRENT, 0))
+    if current and card.id.rstrip("+") == STING_ID:
+        added = add_jellyfish(state, STING_ID, current, upgraded=False)
+        state.emit("plan_jellyfish_current", stings=added)
+
+
+def note_enemy_hit(state: CombatState, enemy: Enemy, blocked: int,
+                   incoming: int) -> None:
+    """THE POOL OVERHAUL (2026-10-13): one hit of an enemy's attack landed on
+    her -- `incoming` before Block, `blocked` of it absorbed. The running
+    totals every "since you planned this" Plan reads the difference of
+    (`DAMAGE_PER_PLAN_THIS_TURN`'s header). Called from `combat`, beside Tidal
+    Riposte. `ProtoBakeKuragePower.AfterDamageReceived` is the twin."""
+    if not live(state) or enemy is None:
+        return
+    state.kk_damage_blocked_total += max(0, int(blocked))
+    state.kk_damage_taken_total += max(0, int(incoming))
+    state.kk_attackers.append(id(enemy))
+
+
+def blocked_since(state: CombatState, entry: Optional[PlanEntry]) -> int:
+    """Kelp Wall: the damage she blocked since `entry` was written."""
+    if entry is None:
+        return 0
+    return max(0, state.kk_damage_blocked_total - entry.since_blocked)
+
+
+def taken_since(state: CombatState, entry: Optional[PlanEntry]) -> int:
+    """Turnabout: all the damage enemies dealt her since `entry` was
+    written, blocked or not."""
+    if entry is None:
+        return 0
+    return max(0, state.kk_damage_taken_total - entry.since_taken)
+
+
+def attackers_since(state: CombatState,
+                    entry: Optional[PlanEntry]) -> set:
+    """Brine Sting and Prepared Retreat: the enemies (by identity) whose
+    Attack hit her since `entry` was written."""
+    if entry is None:
+        return set()
+    return set(state.kk_attackers[entry.since_attacks:])
+
+
+def attacked_since(state: CombatState, entry: Optional[PlanEntry]) -> bool:
+    """Prepared Retreat: did any enemy attack her since `entry` was
+    written?"""
+    return bool(attackers_since(state, entry))
+
+
+def battle_formation(state: CombatState) -> None:
+    """BATTLE FORMATION (the pool overhaul, 2026-10-13): "Whenever 3 or more
+    Plans are carried out in one turn, gain 1 Energy and draw 2 cards." Once a
+    turn, when the third carry-out of the turn finishes (the tail of
+    `_resolve_entry`, through `_note_plan_resolved`). The stack is the
+    Energy (a second copy adds 1); the draw is 2 however many.
+    `BattleFormationPower` is the twin."""
+    if not live(state):
+        return
+    n = int(state.player.powers.get(BATTLE_FORMATION, 0))
+    if n <= 0 or (state.kk_plans_carried_out_this_turn
+                  < C.KOKOMI_BATTLE_FORMATION_THRESHOLD):
+        return
+    if not claim_once_per_turn(state, BATTLE_FORMATION):
+        return
+    energy = n
+    cards = C.KOKOMI_BATTLE_FORMATION_DRAW
+    state.player.energy += energy
+    state.emit("energy", amount=energy)
+    state.draw(cards)
+    state.emit("plan_battle_formation", energy=energy, cards=cards)
+
+
+def draw_pile_to_hand(state: CombatState) -> Optional[Card]:
+    """READ THE FIELD's Plan line (the pool overhaul, 2026-10-13): "Put a card
+    from your Draw Pile into your Hand." The player chooses in the mod; the
+    pilot takes `effects._best_card`, an INSTRUMENT SURFACE. An empty pile or
+    a full hand is a no-op. `KokomiPlan.DrawPileToHand` is the twin."""
+    from tier0.engine import effects                # late import: cycle
+    from tier0.engine.state import remove_instance
+    pile = list(state.player.draw_pile)
+    if not pile or len(state.player.hand) >= C.MAX_HAND_SIZE:
+        state.emit("plan_draw_pile_to_hand", card=None)
+        return None
+    pick = effects._best_card(pile)
+    remove_instance(state.player.draw_pile, pick)
+    state.player.hand.append(pick)
+    state.emit("plan_draw_pile_to_hand", card=pick.id)
+    return pick
 
 
 def dawn_tide(state: CombatState) -> None:

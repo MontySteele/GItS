@@ -275,6 +275,112 @@ public sealed class KokomiOverhaulLedger
         PlansCarriedOutThisCombat++;
     }
 
+    // ---- THE POOL OVERHAUL (2026-10-13) ------------------------------------
+    // review/active/kokomi-pool-overhaul-2026-10-13.md, picks 1 (a) and 2 (a).
+    // [USER]: "On Kokomi, I'm good with default on 1 and 2."
+
+    /// <summary>
+    /// CHAIN: the Plans carried out THIS TURN, the one being carried out
+    /// included -- Feint's and Turning Tide's "for each Plan carried out this
+    /// turn" and Battle Formation's third. Raised by
+    /// <see cref="NotePlanCarryingOut"/> at the top of each carry-out, before
+    /// its clauses run, so each Chain line counts itself; a doubled carry-out
+    /// counts twice. Rolled with the turn. Sim twin:
+    /// <c>CombatState.kk_plans_carried_out_this_turn</c>.
+    /// </summary>
+    public int PlansCarriedOutThisTurn { get; private set; }
+
+    /// <summary>A carry-out begins (<c>KokomiPlan.ResolveEntry</c>).</summary>
+    public void NotePlanCarryingOut() => PlansCarriedOutThisTurn++;
+
+    /// <summary>
+    /// COUNTER: the running totals every "since you planned this" Plan reads
+    /// the difference of, per combat and never rolled. Written by
+    /// <see cref="NoteEnemyHit"/> from
+    /// <c>ProtoBakeKuragePower.AfterDamageReceived</c>, the marker every
+    /// board has:
+    ///   * <see cref="DamageBlockedTotal"/> -- Block that absorbed enemy
+    ///     ATTACK damage (Kelp Wall);
+    ///   * <see cref="DamageTakenTotal"/> -- all the damage enemies dealt
+    ///     her, blocked or not (Turnabout);
+    ///   * the attackers -- one entry per enemy Attack hit aimed at her,
+    ///     blocked or not, by <c>CombatId</c> (Brine Sting, Prepared
+    ///     Retreat).
+    /// Sim twins: <c>CombatState.kk_damage_blocked_total</c>,
+    /// <c>kk_damage_taken_total</c>, <c>kk_attackers</c>.
+    /// </summary>
+    public int DamageBlockedTotal { get; private set; }
+
+    /// <inheritdoc cref="DamageBlockedTotal"/>
+    public int DamageTakenTotal { get; private set; }
+
+    private readonly List<string> _attackers = new();
+
+    /// <summary>One enemy hit landed on her. <paramref name="attack"/> is a
+    /// powered Attack (the game's <c>IsPoweredAttack</c>): only an Attack
+    /// counts as "attacked you" and only an Attack's absorbed damage as
+    /// "damage you blocked"; every enemy hit counts toward the damage dealt
+    /// her.</summary>
+    public void NoteEnemyHit(string attackerId, int blocked, int unblocked,
+                             bool attack)
+    {
+        DamageTakenTotal += System.Math.Max(0, blocked)
+                          + System.Math.Max(0, unblocked);
+        if (!attack) return;
+        DamageBlockedTotal += System.Math.Max(0, blocked);
+        _attackers.Add(attackerId);
+    }
+
+    /// <summary>
+    /// ONE PLAN'S "SINCE YOU PLANNED THIS": the three running totals at the
+    /// moment it was written. Stamped on the entry by
+    /// <c>KokomiPlan.Schedule</c> (<see cref="OpenWindow"/>); each Counter
+    /// clause reads its total less this. Sim twin: <c>PlanEntry.since_*</c>.
+    /// </summary>
+    public readonly record struct Since(int Blocked, int Taken, int Attacks);
+
+    /// <summary>A Plan is written: its window opens on the totals as they
+    /// stand.</summary>
+    public Since OpenWindow() =>
+        new(DamageBlockedTotal, DamageTakenTotal, _attackers.Count);
+
+    /// <summary>Kelp Wall: the damage she blocked since the window opened.
+    /// No window reads 0.</summary>
+    public int BlockedSince(Since? window) =>
+        window is { } w ? System.Math.Max(0, DamageBlockedTotal - w.Blocked)
+                        : 0;
+
+    /// <summary>Turnabout: all the damage enemies dealt her since, blocked
+    /// or not.</summary>
+    public int TakenSince(Since? window) =>
+        window is { } w ? System.Math.Max(0, DamageTakenTotal - w.Taken) : 0;
+
+    /// <summary>Brine Sting: the enemies (by <c>CombatId</c>) whose Attack
+    /// hit her since the window opened.</summary>
+    public HashSet<string> AttackersSince(Since? window)
+    {
+        var set = new HashSet<string>();
+        if (window is not { } w) return set;
+        for (var i = System.Math.Max(0, w.Attacks); i < _attackers.Count; i++)
+        {
+            set.Add(_attackers[i]);
+        }
+        return set;
+    }
+
+    /// <summary>Prepared Retreat: did any enemy attack her since?</summary>
+    public bool AttackedSince(Since? window) =>
+        window is { } w && _attackers.Count > w.Attacks;
+
+    /// <summary>All Streams Flow to the Sea: the Elemental Reactions she
+    /// triggered this combat (<c>KokomiRefounding.OnReaction</c>). Never
+    /// rolled. Sim twin: <c>CombatState.kk_reactions_this_combat</c>.
+    /// </summary>
+    public int ReactionsThisCombat { get; private set; }
+
+    /// <summary>One reaction she triggered.</summary>
+    public void NoteReaction() => ReactionsThisCombat++;
+
     /// <summary>The morning opens with <paramref name="plans"/> Plans due.
     /// Written by <c>KokomiPlan.ResolveAll</c> and by nothing else.</summary>
     public void NoteMorning(int plans) => PlansThisMorning = plans;
@@ -309,6 +415,8 @@ public sealed class KokomiOverhaulLedger
         NextPlanExtra = null;
         // The jellyfish build (2026-10-12): The Shape of Water's "this turn".
         StingsPlayedThisTurn = 0;
+        // The pool overhaul (2026-10-13): the Chain count's "this turn".
+        PlansCarriedOutThisTurn = 0;
         _round = round;
     }
 }

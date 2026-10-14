@@ -13,6 +13,7 @@ using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
+using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Powers;
 
@@ -164,6 +165,32 @@ public sealed class ProtoBakeKuragePower : PowerModel, ILocalizationProvider
         var ledger = KokomiOverhaulLedger.For(Owner);
         ledger.NoteCompanionCard(cardPlay.Card);
         ledger.NoteCompanionPlayed();
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// THE POOL OVERHAUL (2026-10-13): "SINCE YOU PLANNED THIS". Every enemy
+    /// hit that lands on her moves the ledger's running totals
+    /// (<see cref="KokomiOverhaulLedger.NoteEnemyHit"/>): the damage it
+    /// dealt, blocked or not (Turnabout), and for a powered Attack the Block
+    /// that absorbed it (Kelp Wall) and who dealt it (Brine Sting, Prepared
+    /// Retreat). Hosted on the marker every board has, for the reason the
+    /// Companion memory above is. Sim twin: <c>kokomi_plan.note_enemy_hit</c>,
+    /// beside Tidal Riposte.
+    /// </summary>
+    public override Task AfterDamageReceived(
+        PlayerChoiceContext choiceContext, Creature target, DamageResult result,
+        ValueProp props, Creature? dealer, CardModel? cardSource)
+    {
+        if (Owner == null || target != Owner) return Task.CompletedTask;
+        if (dealer == null || !dealer.IsEnemy) return Task.CompletedTask;
+        if (!KokomiOverhaul.LiveFor(Owner)) return Task.CompletedTask;
+        KokomiOverhaulLedger.For(Owner).NoteEnemyHit(
+            dealer.CombatId.ToString() ?? "",
+            (int)result.BlockedDamage, (int)result.UnblockedDamage,
+            props.IsPoweredAttack());
+        // The strip's Counter captions read the totals.
+        Vfx.KokomiPlanStrip.Refresh(Owner);
         return Task.CompletedTask;
     }
 }

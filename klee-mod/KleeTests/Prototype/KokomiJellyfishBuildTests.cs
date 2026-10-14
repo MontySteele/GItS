@@ -196,15 +196,17 @@ public class KokomiJellyfishBuildTests
     [Fact]
     public void All_streams_is_a_rare_that_counts_stings_played_this_combat()
     {
+        // The pool overhaul (2026-10-13): 5 [7], plus 5 for each Elemental
+        // Reaction she triggered this combat (was 4 [8] plus 2 per Sting).
         var card = new ProtoKkAllStreamsFlow();
         Assert.Equal((CardType.Attack, CardRarity.Rare, 1),
                      (card.Type, card.Rarity, card.EnergyCost.Canonical));
-        Assert.Equal(4m, card.DynamicVars.CalculationBase.BaseValue);
-        Assert.Equal(2m, card.DynamicVars.ExtraDamage.BaseValue);
-        Assert.Equal(8m, Upgraded<ProtoKkAllStreamsFlow>()
+        Assert.Equal(5m, card.DynamicVars.CalculationBase.BaseValue);
+        Assert.Equal(5m, card.DynamicVars.ExtraDamage.BaseValue);
+        Assert.Equal(7m, Upgraded<ProtoKkAllStreamsFlow>()
                              .DynamicVars.CalculationBase.BaseValue);
         var vars = VarCalls(typeof(ProtoKkAllStreamsFlow));
-        Assert.Contains(vars, c => c.Contains("get_StingsPlayedThisCombat"));
+        Assert.Contains(vars, c => c.Contains("get_ReactionsThisCombat"));
         Assert.Contains("{InCombat:", Face(card));
     }
 

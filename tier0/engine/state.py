@@ -1096,6 +1096,14 @@ class PlanEntry:
     now_card: Optional["Card"] = None
     line: str = "plan"
     source: Optional["Card"] = None
+    # THE KOKOMI POOL OVERHAUL (2026-10-13): "since you planned this" -- the
+    # arm's three running totals when this Plan was written (Block that
+    # absorbed enemy attack damage, all the damage enemies dealt her, and the
+    # number of enemy attack hits), so the carry-out reads the difference.
+    # `kokomi_plan.schedule` stamps them; `KokomiPlan.Entry.Since` is the twin.
+    since_blocked: int = 0
+    since_taken: int = 0
+    since_attacks: int = 0
 
 @dataclass
 class CombatState:
@@ -1354,6 +1362,23 @@ class CombatState:
     # `KokomiRefounding.IsFreeWrite`'s twin).
     kk_carrying_out: bool = False
     kk_free_write: Optional["Card"] = None
+    # THE KOKOMI POOL OVERHAUL (2026-10-13, review/active/kokomi-pool-
+    # overhaul-2026-10-13.md). `kk_plans_carried_out_this_turn` is the Chain
+    # count, raised at the top of each carry-out so it counts itself (Feint,
+    # Turning Tide, Battle Formation; cleared by `kokomi_plan.roll_turn`).
+    # The three running totals every "since you planned this" Plan reads the
+    # difference of: Block that absorbed enemy attack damage, all the damage
+    # enemies dealt her, and one entry per enemy attack hit (the enemy's
+    # identity) -- written by `kokomi_plan.note_enemy_hit`. The reactions she
+    # triggered this combat (All Streams Flow to the Sea), and the card whose
+    # own hit is resolving (`kk_hit_card`: Jellyfish Current's Sting and
+    # Coordinated Tide's Companion). `KokomiOverhaulLedger`'s twins.
+    kk_plans_carried_out_this_turn: int = 0
+    kk_damage_blocked_total: int = 0
+    kk_damage_taken_total: int = 0
+    kk_attackers: list[int] = field(default_factory=list)
+    kk_reactions_this_combat: int = 0
+    kk_hit_card: Optional["Card"] = None
     # (C.KLEE_OVERHAUL): RULE 7'S TWO COUNTERS AND THE TWO
     # MEMORIES, the twin of `KleeOverhaulLedger`. Per FIGHT and per SEAT for
     # the reason `kk_plan_queue` above is: tier 0 runs one seat, so the C#'s
