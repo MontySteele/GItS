@@ -423,10 +423,11 @@ public class ArmKeywordTipTests
         // 55 with Yae's tip cut (2026-10-14): `ForAnnotation`, one tip per
         // Annotation a face names, and `ForTenko`, split out of her Sakura
         // tip.
-        Assert.Equal(55, attaches.Count);
+        // 54 with Yae's shrine r2 (2026-10-14): `ForRite` left with the Rite.
+        Assert.Equal(54, attaches.Count);
         Assert.Contains(attaches, m => m.Name == "ForAnnotation");
         Assert.Contains(attaches, m => m.Name == "ForTenko");
-        Assert.Contains(attaches, m => m.Name == "ForRite");
+        Assert.DoesNotContain(attaches, m => m.Name == "ForRite");
         Assert.Contains(attaches, m => m.Name == "ForFlip");
         Assert.Contains(attaches, m => m.Name == "ForEdit");
         Assert.Contains(attaches, m => m.Name == "ForBigBaddaBoomTotal");

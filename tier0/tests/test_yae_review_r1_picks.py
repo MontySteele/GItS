@@ -2,10 +2,10 @@
 
 Design: `review/active/yae-design-axes-2026-10-14.md`, "Review r1, ruled
 2026-10-14". Pick 1 (a), LAST BLOOM: a Sakura that withers strikes once more
-under the current Rite, then leaves (Fallen Petals banks it after). Pick 2:
-Levels have no cap; Fox's Mooncall plants 1 Level higher per copy; Sakura
-Grove levels the newest Sakura at her turn start; Mikage Thunder levels
-every Sakura, then Tenko. C# twin: `KleeTests/Prototype/YaeReviewR1PicksTests.cs`.
+(as Thunder since shrine r2), then leaves (Fallen Petals banks it after).
+Pick 2: Levels have no cap; Fox's Mooncall plants 1 Level higher per copy;
+Sakura Grove levels every Sakura at her turn start (shrine r2); Mikage
+Thunder levels every Sakura, then Tenko. C# twin: `KleeTests/Prototype/YaeReviewR1PicksTests.cs`.
 """
 
 from __future__ import annotations
@@ -78,28 +78,20 @@ def _run_out(st):
 
 # --- Last Bloom ------------------------------------------------------------
 
-@pytest.mark.parametrize("rite", Y.RITES)
-def test_a_withering_sakura_blooms_under_each_rite(rite):
+def test_a_withering_sakura_blooms_as_thunder():
+    # Shrine r2: there is no Rite; the bloom is a Thunder strike.
     st = _state(n=2)
     _play(st, _ym("yakan_evocation"))                # Level 1
     _run_out(st)
-    Y.set_rite(st, rite)
     hp = sum(e.hp for e in st.enemies)
     st.player.block = 0
     Y.turn_end(st)
     bloom = _strikes(st, "bloom")
-    assert len(bloom) == 1 and bloom[0]["rite"] == rite
+    assert len(bloom) == 1 and bloom[0]["rite"] == Y.THUNDER
     assert bloom[0]["amount"] == _strikes(st, "turn_end")[-1]["amount"]
     assert _led(st).sakura == []
-    lost = hp - sum(e.hp for e in st.enemies)
-    if rite == Y.THUNDER:
-        assert lost == 2 * 3
-    elif rite == Y.WILDFIRE:
-        assert lost == 2 * 2 * 1                     # two strikes, both enemies
-    elif rite == Y.WARDING:
-        assert st.player.block == 2 * 3 and lost == 0
-    else:
-        assert _led(st).pending_draw == 2 and lost == 0
+    assert hp - sum(e.hp for e in st.enemies) == 2 * 3
+    assert st.player.block == 0
 
 
 def test_the_bloom_carries_the_sakuras_annotation():
@@ -147,8 +139,8 @@ def test_levels_go_past_three():
     for _ in range(4):
         _play(st, _ym("rooted_shrine"))
     assert _led(st).sakura[0].level == 5
-    assert Y.rite_total(st, Y.THUNDER) == 2 + 5
-    assert Y.rite_line(st, Y.THUNDER) == " (your Sakura: 7 damage)"
+    assert Y.tenko_total(st, Y.THUNDER) == 2 + 5
+    assert Y.tenko_line(st, Y.THUNDER) == " (7 damage)"
 
 
 def test_mooncall_copies_stack():
@@ -158,7 +150,7 @@ def test_mooncall_copies_stack():
     assert _led(st).sakura[-1].level == 2
     _play(st, _ym("foxs_mooncall"))
     _play(st, _ym("yakan_evocation"))
-    assert [s.level for s in _led(st).sakura] == [3, 3]
+    assert [s.level for s in _led(st).sakura] == [2, 3]   # no levelling
 
 
 def test_mooncall_raises_grafted_branch_too():
@@ -171,18 +163,19 @@ def test_mooncall_raises_grafted_branch_too():
     assert _led(st).sakura[-1].level == 5
 
 
-def test_grove_levels_the_newest_each_turn_start():
+def test_grove_levels_every_sakura_each_turn_start():
+    # Shrine r2 (ruled 2026-10-14): "each Sakura gains a Level".
     st = _state()
     _play(st, _ym("sakura_grove"))
     Y.turn_start(st)                                 # none standing: nothing
     _play(st, _ym("yakan_evocation"))
-    _play(st, _ym("yakan_evocation"))                # levels 2 / 1
+    _play(st, _ym("grafted_branch"))                 # levels 1 / 2
     Y.turn_start(st)
-    assert [s.level for s in _led(st).sakura] == [2, 2]
+    assert [s.level for s in _led(st).sakura] == [2, 3]
     _play(st, _ym("sakura_grove"))                   # a second copy
     Y.turn_start(st)
-    assert [s.level for s in _led(st).sakura] == [2, 4]
-    assert Y.strike_size(st, _led(st).sakura[0], Y.THUNDER) == 2 + 2
+    assert [s.level for s in _led(st).sakura] == [4, 5]
+    assert Y.strike_size(st, _led(st).sakura[0], Y.THUNDER) == 2 + 4
 
 
 def test_grove_upgrade_is_innate():

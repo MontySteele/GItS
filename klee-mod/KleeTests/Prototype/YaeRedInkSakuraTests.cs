@@ -62,7 +62,7 @@ public class YaeRedInkSakuraTests : IDisposable
         var s = Assert.Single(ledger.Standing);
         Assert.Equal(YaeAnnotation.RedInk, s.Annotation);
         Assert.Equal(YaeLaw.SakuraBase + s.Level + YaeLaw.RedInkAmount,
-                     YaeShrineLedger.StrikeSize(YaeRite.Thunder, s.Level, s.Annotation));
+                     YaeShrineLedger.StrikeSize(YaeTenkoKind.Thunder, s.Level, s.Annotation));
     }
 
     [Fact]
@@ -77,7 +77,7 @@ public class YaeRedInkSakuraTests : IDisposable
     }
 
     [Fact]
-    public void A_full_shrine_plant_that_only_levels_inherits_nothing()
+    public void A_full_shrine_plant_that_feeds_the_oldest_inherits_nothing()
     {
         var ledger = Fresh();
         for (var i = 0; i < 3; i++) ledger.Plant(YaeLaw.PlantLevel);

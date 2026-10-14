@@ -21,8 +21,10 @@ public interface IYaeCharacter
 ///     3 beside her, each with a Level and a 3-strike timer. At the end of
 ///     her turn each strikes, oldest first, for 2 + its Level Electro as a
 ///     pet's hit, then the timers tick; a Sakura that withers strikes once
-///     more (Last Bloom). Planting levels the standing ones, without cap;
-///     Tenko strikes now and resets every timer.
+///     more (Last Bloom). A plant creates one at the card's Level; with
+///     three standing the oldest refreshes and gains a Level instead (shrine
+///     r2). Tenko strikes now (typed: as Block, at ALL, or as draw) and
+///     resets every timer.
 ///   * EDIT (<see cref="YaeEditing"/>): a card in hand gains one of five
 ///     Annotations (her Enchantments, <see cref="YaeAnnotationModel"/>) for
 ///     the combat. PUBLISH keeps one for the run: The Seven Glamours in

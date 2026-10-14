@@ -470,8 +470,8 @@ public static class YaeEditing
     /// "Edit a card in your hand: &lt;Annotation&gt;", <paramref name="times"/>
     /// times. The player picks each card (the sim's pilot picks by its
     /// default reading, <c>yae_shrine._edit_target</c>). Nothing qualifies:
-    /// nothing happens (the cost is already paid). Serialization pays per
-    /// Edit.
+    /// nothing happens (the cost is already paid). (Serialization pays per
+    /// Annotated card played now, shrine r2.)
     /// </summary>
     public static async Task Edit(PlayerChoiceContext choiceContext,
                                   CardModel editor, YaeAnnotation annotation,
@@ -490,7 +490,6 @@ public static class YaeEditing
             if (picked == null) return;
             if (!Annotate(picked, annotation)) continue;
             YaeShrineLedger.For(owner.Creature).NoteEdit();
-            await SerializationPower.Pay(owner.Creature, 1);
         }
     }
 
@@ -518,7 +517,6 @@ public static class YaeEditing
         }
         if (n == 0) return;
         for (var i = 0; i < n; i++) YaeShrineLedger.For(owner.Creature).NoteEdit();
-        await SerializationPower.Pay(owner.Creature, n);
     }
 
     /// <summary>

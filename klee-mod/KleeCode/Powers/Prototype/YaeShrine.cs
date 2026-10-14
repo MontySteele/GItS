@@ -15,12 +15,14 @@ using MegaCrit.Sts2.Core.ValueProps;
 namespace KleeMod.Powers;
 
 /// <summary>
-/// THE SHRINE'S RITE (<c>review/active/yae-design-axes-2026-10-14.md</c>,
-/// ruled 2026-10-14): what every Sakura strike does. Thunder at every combat
-/// start; a "Rite: X" card switches it and it holds until replaced. Sim
-/// twin: <c>yae_shrine.RITES</c>.
+/// WHAT ONE SAKURA STRIKE DOES (shrine r2, ruled 2026-10-14, in
+/// <c>review/active/yae-design-axes-2026-10-14.md</c>): the persistent Rite
+/// is gone. Every end-of-turn strike, Last Bloom, Editor-in-Chief and
+/// Kitsune Pounce strike as Thunder; a typed Tenko ("Tenko (Warding)")
+/// strikes every Sakura once as its kind. Sim twin:
+/// <c>yae_shrine.TENKO_KINDS</c>.
 /// </summary>
-public enum YaeRite
+public enum YaeTenkoKind
 {
     Thunder = 0,
     Warding = 1,
@@ -120,9 +122,6 @@ public sealed class YaeShrineLedger
     /// <summary>Edits made this combat.</summary>
     public int Edits { get; private set; }
 
-    /// <summary>The shrine's Rite; every combat opens in Thunder.</summary>
-    public YaeRite Rite { get; set; } = YaeRite.Thunder;
-
     /// <summary>Offering: cards she draws at the start of her next turn.
     /// </summary>
     public int PendingDraw { get; internal set; }
@@ -133,11 +132,12 @@ public sealed class YaeShrineLedger
     public int PendingWithers { get; internal set; }
 
     /// <summary>
-    /// PLANT ONE (pick 1 (a), ruled): every standing Sakura gains a Level (no
-    /// cap: Yae review r1, pick 2), then a new one is added at
+    /// PLANT ONE (shrine r2, ruled 2026-10-14): a new Sakura at
     /// <paramref name="plantLevel"/> with <see cref="YaeLaw.SakuraTurns"/>
-    /// strikes left -- unless three stand, in which case the three are
-    /// levelled and none is added. Returns whether one was added.
+    /// strikes left; the others are NOT levelled. With three standing, the
+    /// OLDEST instead refreshes (<see cref="YaeLaw.SakuraTurns"/> again) and
+    /// gains 1 Level, and none is added. Levels have no cap. Returns whether
+    /// one was added.
     /// </summary>
     public bool Plant(int plantLevel) => Plant(plantLevel, null);
 
@@ -155,11 +155,13 @@ public sealed class YaeShrineLedger
     {
         if (startLevel is { } at)
             plantLevel = Math.Max(plantLevel, at + plantLevel - YaeLaw.PlantLevel);
-        foreach (var s in _sakura)
+        if (_sakura.Count >= YaeLaw.SakuraCap)
         {
-            s.Level++;
+            var oldest = _sakura[0];
+            oldest.TurnsLeft = YaeLaw.SakuraTurns;
+            oldest.Level++;
+            return false;
         }
-        if (_sakura.Count >= YaeLaw.SakuraCap) return false;
         Seq++;
         _sakura.Add(new YaeSakura
         {
@@ -188,13 +190,6 @@ public sealed class YaeShrineLedger
     public void LevelUp(int n)
     {
         foreach (var s in _sakura) s.Level += n;
-    }
-
-    /// <summary>Sakura Grove: "your newest Sakura gains a Level" (+n). No-op
-    /// with none standing.</summary>
-    public void LevelUpNewest(int n)
-    {
-        if (_sakura.Count > 0) _sakura[^1].Level += n;
     }
 
     /// <summary>After the end-of-turn strikes every timer ticks. A Deadline
@@ -277,25 +272,25 @@ public sealed class YaeShrineLedger
     /// Block apply later, in the hit. PURE.
     /// </summary>
     public static int StrikeDamage(int level, bool reacts, int edict) =>
-        StrikeSize(YaeRite.Thunder, level, YaeAnnotation.None)
+        StrikeSize(YaeTenkoKind.Thunder, level, YaeAnnotation.None)
         + (reacts ? edict : 0);
 
     /// <summary>
-    /// ONE STRIKE'S SIZE UNDER A RITE (ruled 2026-10-14), before Edict:
-    /// Thunder and Warding 2 + Level, Wildfire Level, Offering 1 card. A Red
-    /// Ink Sakura's 3 adds to all but Offering (Claude, 2026-10-14). Sakura
-    /// Grove and Mikage Thunder raise Levels now (Yae review r1, pick 2), so
-    /// no global bonus sizes a strike. PURE.
+    /// ONE STRIKE'S SIZE AS A TENKO KIND (shrine r2), before Edict: Thunder
+    /// and Warding 2 + Level, Wildfire Level, Offering 1 card. A Red Ink
+    /// Sakura's 3 adds to all but Offering (Claude, 2026-10-14). Sakura Grove
+    /// and Mikage Thunder raise Levels, so no global bonus sizes a strike.
+    /// PURE.
     /// </summary>
-    public static int StrikeSize(YaeRite rite, int level, YaeAnnotation annotation)
+    public static int StrikeSize(YaeTenkoKind rite, int level, YaeAnnotation annotation)
     {
         var size = rite switch
         {
-            YaeRite.Offering => YaeLaw.OfferingPerStrike,
-            YaeRite.Wildfire => level,
+            YaeTenkoKind.Offering => YaeLaw.OfferingPerStrike,
+            YaeTenkoKind.Wildfire => level,
             _ => YaeLaw.SakuraBase + level,
         };
-        if (annotation == YaeAnnotation.RedInk && rite != YaeRite.Offering)
+        if (annotation == YaeAnnotation.RedInk && rite != YaeTenkoKind.Offering)
             size += YaeLaw.RedInkAmount;
         return size;
     }
@@ -333,10 +328,12 @@ public static class YaeShrine
         return aura != null && aura.Element is Element.Pyro or Element.Hydro or Element.Cryo;
     }
 
-    /// <summary>Plant <paramref name="n"/> Sakura, one at a time (each levels
-    /// the ones standing). <paramref name="startLevel"/>: Grafted Branch.
+    /// <summary>Plant <paramref name="n"/> Sakura, one at a time (with three
+    /// standing, each further plant refreshes and levels the then-oldest).
+    /// <paramref name="startLevel"/>: Grafted Branch.
     /// <paramref name="inherited"/>: the planting card's Red Ink, given to
-    /// each Sakura this plants (<see cref="YaeAnnotationReach.Inherited"/>).
+    /// each NEW Sakura this plants, not to an oldest it refreshes
+    /// (<see cref="YaeAnnotationReach.Inherited"/>).
     /// </summary>
     public static async Task Plant(PlayerChoiceContext choiceContext,
                                    Creature? yae, int n, int? startLevel = null,
@@ -356,12 +353,12 @@ public static class YaeShrine
     public static bool IsWeak(Creature? target) =>
         target != null && target.Powers.OfType<WeakPower>().Any(p => p.Amount > 0);
 
-    /// <summary>The size of <paramref name="sakura"/>'s strike under
-    /// <paramref name="rite"/> (the shrine's, by default), before Edict.
+    /// <summary>The size of <paramref name="sakura"/>'s strike as
+    /// <paramref name="rite"/> (Thunder by default), before Edict.
     /// </summary>
-    public static int Size(Creature yae, YaeSakura sakura, YaeRite? rite = null) =>
-        YaeShrineLedger.StrikeSize(
-            rite ?? YaeShrineLedger.For(yae).Rite, sakura.Level, sakura.Annotation);
+    public static int Size(Creature yae, YaeSakura sakura,
+                           YaeTenkoKind rite = YaeTenkoKind.Thunder) =>
+        YaeShrineLedger.StrikeSize(rite, sakura.Level, sakura.Annotation);
 
     /// <summary>The enemy a single-target strike lands on: the card's aim
     /// (Kitsune Pounce), else this turn's Lure while it lives, else one
@@ -392,43 +389,38 @@ public static class YaeShrine
     }
 
     /// <summary>
-    /// ONE SAKURA'S STRIKE, UNDER THE SHRINE'S RITE (ruled 2026-10-14):
-    /// Thunder hits one enemy (the aim, the Lure, else random); Warding gives
-    /// her Block (unpowered); Wildfire hits ALL; Offering banks a card for
-    /// her next turn. Then Sakura Channeling's Thunder strike (in any other
-    /// Rite) and the Sakura's own Fox Fire.
+    /// ONE SAKURA'S STRIKE AS <paramref name="rite"/> (shrine r2; Thunder
+    /// unless a typed Tenko says otherwise): Thunder hits one enemy (the aim,
+    /// the Lure, else random); Warding gives her Block (unpowered); Wildfire
+    /// hits ALL; Offering banks a card for her next turn. Then the Sakura's
+    /// own Fox Fire.
     /// </summary>
     public static async Task Strike(PlayerChoiceContext choiceContext,
                                     Creature yae, YaeSakura sakura,
-                                    Creature? aim = null)
+                                    Creature? aim = null,
+                                    YaeTenkoKind rite = YaeTenkoKind.Thunder)
     {
         if (yae.CombatState?.HittableEnemies.Any(e => e.IsAlive) != true) return;
         var ledger = YaeShrineLedger.For(yae);
-        var rite = ledger.Rite;
         var size = Size(yae, sakura, rite);
         ledger.NoteStrike();
         switch (rite)
         {
-            case YaeRite.Thunder:
+            case YaeTenkoKind.Thunder:
                 if (Aim(yae, aim) is { } target) await Hit(choiceContext, yae, target, size);
                 break;
-            case YaeRite.Warding:
+            case YaeTenkoKind.Warding:
                 if (size > 0) await CreatureCmd.GainBlock(yae, size, ValueProp.Unpowered, null);
                 break;
-            case YaeRite.Wildfire:
+            case YaeTenkoKind.Wildfire:
                 foreach (var enemy in yae.CombatState!.HittableEnemies.Where(e => e.IsAlive).ToList())
                 {
                     await Hit(choiceContext, yae, enemy, size);
                 }
                 break;
-            case YaeRite.Offering:
+            case YaeTenkoKind.Offering:
                 ledger.PendingDraw += size;
                 break;
-        }
-        if (rite != YaeRite.Thunder && yae.HasPower<SakuraChannelingPower>()
-            && Aim(yae, aim) is { } thunderTarget)
-        {
-            await Hit(choiceContext, yae, thunderTarget, Size(yae, sakura, YaeRite.Thunder));
         }
         if (sakura.Annotation == YaeAnnotation.FoxFire)
         {
@@ -436,29 +428,34 @@ public static class YaeShrine
         }
     }
 
-    /// <summary>Every Sakura strikes, oldest first, while an enemy lives.
-    /// </summary>
+    /// <summary>Every Sakura strikes as <paramref name="rite"/>, oldest
+    /// first, while an enemy lives.</summary>
     public static async Task StrikeAll(PlayerChoiceContext choiceContext,
-                                       Creature yae)
+                                       Creature yae,
+                                       YaeTenkoKind rite = YaeTenkoKind.Thunder)
     {
         foreach (var sakura in YaeShrineLedger.For(yae).Standing.ToList())
         {
             if (yae.CombatState?.HittableEnemies.Any(e => e.IsAlive) != true) break;
-            await Strike(choiceContext, yae, sakura);
+            await Strike(choiceContext, yae, sakura, null, rite);
         }
     }
 
     /// <summary>
-    /// TENKO: "every Sakura strikes now (the same strikes, oldest first),
-    /// then every timer is set back to 3. Tenko with no Sakura does nothing.
-    /// Tenko keeps the board."
+    /// TENKO (shrine r2, ruled 2026-10-14): every Sakura strikes now, oldest
+    /// first, as <paramref name="kind"/>: plain Tenko as Thunder, "Tenko
+    /// (Warding)" as Block, "Tenko (Wildfire)" its Level to ALL, "Tenko
+    /// (Offering)" a card next turn. Then every timer is set back to 3
+    /// ([USER], 2026-10-14: "make Tenko keep resetting the duration").
+    /// Tenko with no Sakura does nothing.
     /// </summary>
-    public static async Task Tenko(PlayerChoiceContext choiceContext, Creature? yae)
+    public static async Task Tenko(PlayerChoiceContext choiceContext, Creature? yae,
+                                   YaeTenkoKind kind = YaeTenkoKind.Thunder)
     {
         if (yae == null || !Live(yae)) return;
         var ledger = YaeShrineLedger.For(yae);
         if (ledger.Count == 0) return;
-        await StrikeAll(choiceContext, yae);
+        await StrikeAll(choiceContext, yae, kind);
         ledger.Refresh();
         await SakuraBadge.Sync(choiceContext, yae);
     }
@@ -479,7 +476,8 @@ public static class YaeShrine
     /// <summary>
     /// Her turn start, after the draw (<c>KleeElementalHooks.AfterPlayerTurnStart</c>,
     /// the sim's <c>yae_shrine.turn_start</c> site): the Lure expires, then
-    /// Yakan Offering plants, then Sakura Grove levels the newest.
+    /// Yakan Offering plants, then Sakura Grove levels every Sakura (shrine
+    /// r2).
     /// </summary>
     public static async Task TurnStart(PlayerChoiceContext choiceContext, Player player)
     {
@@ -513,7 +511,7 @@ public static class YaeShrine
         if (grove > 0 && ledger.Count > 0)
         {
             yae.Powers.OfType<SakuraGrovePower>().FirstOrDefault()?.Pulse();
-            ledger.LevelUpNewest(grove);
+            ledger.LevelUp(grove);
         }
         await SakuraBadge.Sync(choiceContext, yae);
     }
@@ -522,9 +520,9 @@ public static class YaeShrine
     /// Her turn end (<c>KleeElementalHooks.BeforeSideTurnEnd</c>, the sim's
     /// <c>yae_shrine.turn_end</c> site): the strikes, then every timer ticks.
     /// LAST BLOOM (Yae review r1, pick 1 (a), ruled 2026-10-14): each Sakura
-    /// whose timer ran out, oldest first, strikes once more under the current
-    /// Rite (a normal strike), THEN withers -- so Fallen Petals banks it after
-    /// the bloom.
+    /// whose timer ran out, oldest first, strikes once more as Thunder (a
+    /// normal strike), THEN withers -- so Fallen Petals banks it after the
+    /// bloom.
     /// </summary>
     public static async Task TurnEnd(PlayerChoiceContext choiceContext, Creature yae)
     {
@@ -547,8 +545,9 @@ public static class YaeShrine
     }
 
     /// <summary>
-    /// Editor-in-Chief, after the card's own effects and its Annotation's:
-    /// "Whenever you play an Annotated card, a Sakura strikes (the highest
+    /// After an Annotated card's own effects and its Annotation's:
+    /// Serialization (shrine r2, "Whenever you play an Annotated card, gain 3
+    /// Block"), then Editor-in-Chief, "a Sakura strikes (the highest
     /// Level)", once per stack.
     /// </summary>
     public static async Task AfterCardPlayed(PlayerChoiceContext choiceContext,
@@ -557,6 +556,7 @@ public static class YaeShrine
         var yae = cardPlay.Card?.Owner?.Creature;
         if (yae == null || !Live(yae)) return;
         if (!YaeEditing.IsAnnotated(cardPlay.Card)) return;
+        await SerializationPower.Pay(yae, 1);
         var stacks = yae.GetPowerAmount<EditorInChiefPower>();
         var ledger = YaeShrineLedger.For(yae);
         for (var i = 0; i < stacks; i++)
@@ -569,7 +569,7 @@ public static class YaeShrine
     }
 
     /// <summary>Kitsune Pounce: "If the enemy is Weak, a Sakura strikes it"
-    /// -- the highest Level, under the shrine's Rite, aimed at it.</summary>
+    /// -- the highest Level, as Thunder, aimed at it.</summary>
     public static async Task StrikeIfWeak(PlayerChoiceContext choiceContext,
                                           Creature? yae, Creature? target)
     {
@@ -582,58 +582,60 @@ public static class YaeShrine
 }
 
 /// <summary>
-/// THE LIVE FACE LINES (Claude, 2026-10-14, Yae review r1, no pick). A
-/// "Rite: X" card's face carries <c>{InCombat:{YaeRite}|}</c> right after
-/// the Rite's name, and the line says what the shrine would do under X,
-/// summed over the Sakura standing: "Rite: Warding (your Sakura: 5 Block)".
-/// A Tenko card that does more than Tenko carries <c>{InCombat:{YaeTenko}|}</c>
-/// after the word, "(no Sakura)" while none stands. Both are empty off a
-/// combat, on a canonical card, and for anyone but a live Yae; the Rite line
-/// is empty with no Sakura standing. The Rite's own job only: before Edict,
-/// Sakura Channeling's extra Thunder strike and Fox Fire. Display only.
-/// Sim twin: <c>yae_shrine.rite_line</c> / <c>tenko_line</c>.
+/// THE LIVE TENKO CLAUSE (shrine r2, 2026-10-14; it replaces review r1's
+/// "Rite: X (your Sakura: ...)" line). A Tenko card's face carries
+/// <c>{InCombat:{YaeTenko}|}</c>: right after "Tenko" on a plain Tenko,
+/// inside the brackets on a typed one. In combat it says what the Tenko would
+/// do now, summed over the Sakura standing: "Tenko (12 damage)", "Tenko
+/// (Warding: 12 Block)"; with none standing "Tenko (no Sakura)", "Tenko
+/// (Warding, no Sakura)". Empty off a combat, on a canonical card, and for
+/// anyone but a live Yae. The Tenko's own job only: before Edict and Fox
+/// Fire. Display only. Sim twin: <c>yae_shrine.tenko_line</c>.
 /// </summary>
 public static class YaeShrineFace
 {
-    /// <summary>The description token a "Rite: X" clause rides on.</summary>
-    public const string RiteToken = "YaeRite";
-
     /// <summary>The description token a Tenko clause rides on.</summary>
     public const string TenkoToken = "YaeTenko";
 
-    /// <summary>The Tenko clause's words.</summary>
+    /// <summary>A plain Tenko's clause with no Sakura standing.</summary>
     public const string NoSakura = " (no Sakura)";
 
-    /// <summary>A "Rite: <paramref name="rite"/>" card's live clause.</summary>
-    public static string RiteLine(CardModel? card, YaeRite rite) =>
-        Owner(card) is { } yae ? RiteWords(rite, Total(yae, rite)) : "";
+    /// <summary>A typed Tenko's clause with no Sakura standing, inside its
+    /// brackets.</summary>
+    public const string NoSakuraTyped = ", no Sakura";
 
     /// <summary>A Tenko card's live clause.</summary>
-    public static string TenkoLine(CardModel? card) =>
-        Owner(card) is { } yae && YaeShrine.Count(yae) == 0 ? NoSakura : "";
+    public static string TenkoLine(CardModel? card,
+                                   YaeTenkoKind kind = YaeTenkoKind.Thunder) =>
+        Owner(card) is { } yae ? TenkoWords(kind, Total(yae, kind)) : "";
 
     /// <summary>What every Sakura standing beside <paramref name="yae"/>
-    /// would strike for under <paramref name="rite"/>, summed.</summary>
-    public static int Total(Creature yae, YaeRite rite) =>
-        YaeShrineLedger.For(yae).Standing.Sum(s => YaeShrine.Size(yae, s, rite));
+    /// would strike for as <paramref name="kind"/>, summed.</summary>
+    public static int Total(Creature yae, YaeTenkoKind kind) =>
+        YaeShrineLedger.For(yae).Standing.Sum(s => YaeShrine.Size(yae, s, kind));
 
     /// <summary>The same sum off the numbers alone. PURE.</summary>
-    public static int Total(IEnumerable<YaeSakura> standing, YaeRite rite) =>
-        standing.Sum(s => YaeShrineLedger.StrikeSize(rite, s.Level, s.Annotation));
+    public static int Total(IEnumerable<YaeSakura> standing, YaeTenkoKind kind) =>
+        standing.Sum(s => YaeShrineLedger.StrikeSize(kind, s.Level, s.Annotation));
 
-    /// <summary>The clause for a total, " (your Sakura: 5 Block)"; empty at
-    /// 0, which is no Sakura standing. PURE.</summary>
-    public static string RiteWords(YaeRite rite, int total) =>
-        total <= 0 ? "" : $" (your Sakura: {RiteAmount(rite, total.ToString(System.Globalization.CultureInfo.InvariantCulture))})";
-
-    /// <summary>What the shrine does, for a number written as
-    /// <paramref name="n"/>: "5 damage", "5 Block", "5 to ALL", "draw 5".
-    /// The Rite badge writes it with its <c>{Total}</c> var. PURE.</summary>
-    public static string RiteAmount(YaeRite rite, string n) => rite switch
+    /// <summary>The clause for a total: " (12 damage)" or ": 12 Block"; at
+    /// 0, which is no Sakura standing, the "no Sakura" words. PURE.</summary>
+    public static string TenkoWords(YaeTenkoKind kind, int total)
     {
-        YaeRite.Warding => $"{n} Block",
-        YaeRite.Wildfire => $"{n} to ALL",
-        YaeRite.Offering => $"draw {n}",
+        var typed = kind != YaeTenkoKind.Thunder;
+        if (total <= 0) return typed ? NoSakuraTyped : NoSakura;
+        var what = Amount(kind, total.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        return typed ? $": {what}" : $" ({what})";
+    }
+
+    /// <summary>What a Tenko of <paramref name="kind"/> does, for a number
+    /// written as <paramref name="n"/>: "5 damage", "5 Block", "5 to ALL",
+    /// "draw 5". PURE.</summary>
+    public static string Amount(YaeTenkoKind kind, string n) => kind switch
+    {
+        YaeTenkoKind.Warding => $"{n} Block",
+        YaeTenkoKind.Wildfire => $"{n} to ALL",
+        YaeTenkoKind.Offering => $"draw {n}",
         _ => $"{n} damage",
     };
 
@@ -674,10 +676,16 @@ public static class YaeCards
         YaeShrine.Plant(choiceContext, card.Owner?.Creature, Var(card, "YmAmount"),
                         null, YaeAnnotationReach.Inherited(card));
 
-    /// <summary>"Tenko."</summary>
+    /// <summary>"Tenko." (Thunder).</summary>
     public static Task Tenko(PlayerChoiceContext choiceContext, CardModel card,
                              CardPlay cardPlay) =>
         YaeShrine.Tenko(choiceContext, card.Owner?.Creature);
+
+    /// <summary>"Tenko (Warding)", "Tenko (Wildfire)", "Tenko (Offering)"
+    /// (shrine r2: they replace "Rite: X").</summary>
+    public static Task Tenko(PlayerChoiceContext choiceContext, CardModel card,
+                             CardPlay cardPlay, YaeTenkoKind kind) =>
+        YaeShrine.Tenko(choiceContext, card.Owner?.Creature, kind);
 
     /// <summary>Shrine Offering: "Each Sakura lasts 1 more turn."</summary>
     public static async Task Extend(PlayerChoiceContext choiceContext,
@@ -762,17 +770,6 @@ public static class YaeCards
         CardHit(choiceContext, card, cardPlay,
                 Var(card, "YmBase")
                 + (YaeEditing.IsAnnotated(card) ? Var(card, "YmAmount") : 0));
-
-    /// <summary>"Rite: X": the shrine's Rite until another replaces it.
-    /// </summary>
-    public static async Task Rite(PlayerChoiceContext choiceContext, CardModel card,
-                                  CardPlay cardPlay, YaeRite rite)
-    {
-        var yae = card.Owner?.Creature;
-        if (yae == null || !YaeShrine.Live(yae)) return;
-        YaeShrineLedger.For(yae).Rite = rite;
-        await SakuraBadge.Sync(choiceContext, yae);
-    }
 
     /// <summary>"Edit your newest / oldest Sakura: X" (YmAmount from that
     /// end; Fox Fire Draft's upgrade takes the newest three, every Sakura),

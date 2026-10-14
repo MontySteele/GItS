@@ -14,28 +14,32 @@ constant census nor the world stamp.
 
 THE RULES AS MODELLED:
   * SAKURA: up to `SAKURA_CAP` on a per-fight ledger (`YaeLedger.sakura`),
-    each with a LEVEL and a TIMER (strikes left). Planted at `PLANT_LEVEL`
-    (+1 per Fox's Mooncall) with 3 strikes left. Planting while others stand
-    raises every standing Sakura's Level by 1, WITHOUT CAP (Yae review r1,
-    pick 2, ruled 2026-10-14: Levels stack and leave with their Sakura);
-    planting a fourth levels the three and adds none (`SCALING ==
-    "level"`, the paper's pick 1 (a)). Under `SCALING == "count"` (pick 1 (b),
+    each with a LEVEL and a TIMER (strikes left). SHRINE R2 (ruled
+    2026-10-14): a plant creates a Sakura at the Level the card prints
+    (`PLANT_LEVEL`, Grafted Branch its own), +1 per Fox's Mooncall, with 3
+    strikes left, and does NOT level the others. With 3 standing a plant
+    instead makes the OLDEST refresh (3 strikes again) and gain 1 Level
+    (`SCALING == "level"`, the paper's pick 1 (a)). Levels have no cap
+    (Yae review r1, pick 2). Under `SCALING == "count"` (pick 1 (b),
     the proposal's placeholder) Levels are off: a Sakura strikes for the
     count-table value, a fourth plant replaces the oldest, and each Tenko
     raises a per-fight shrine bonus that every strike adds. The table
     is the proposal's placeholder lifted by 1 so both answers share a
     ceiling (15 a turn at three).
-  * STRIKE: at the end of her turn each Sakura, oldest first, deals
+  * STRIKE: at the end of her turn each Sakura, oldest first, ALWAYS as
+    Thunder (shrine r2: there is no Rite any more), deals
     `SAKURA_BASE + Level` Electro to one random living enemy (the Lure's
     enemy this turn, while it lives), unpowered (a pet's hit: no Strength, no
     Weak; Vulnerable and Block apply), source "card" (a Power's hit in the
     EB-495 matrix). Then its timer ticks; at 0 it withers. LAST BLOOM (Yae
     review r1, pick 1 (a)): a Sakura that withers first strikes once more
-    under the current Rite (a normal strike), then leaves; Fallen Petals
+    as Thunder (a normal strike), then leaves; Fallen Petals
     banks it after the bloom. A strike that kills ends nothing else early.
-  * TENKO: every Sakura strikes now, oldest first, then every timer is set
-    back to 3. The strikes are the same strikes (Grove, Edict, Channeling
-    all pay). Tenko with no Sakura does nothing.
+  * TENKO (shrine r2): every Sakura strikes now, oldest first, as the
+    card's KIND says: plain Tenko as Thunder; Tenko (Warding) as Block;
+    Tenko (Wildfire) its Level to ALL; Tenko (Offering) 1 more card next
+    turn. Then every timer is set back to 3 ([USER], 2026-10-14: "make
+    Tenko keep resetting the duration"). Tenko with no Sakura does nothing.
   * EDIT: a card in hand (never the editing card itself, never a Status,
     Curse or kit card) gains one ANNOTATION for the combat, overwriting any
     it had: Red Ink (+3 damage and +3 Block, as the card's own riders),
@@ -53,24 +57,23 @@ THE RULES AS MODELLED:
     left (`YaeLedger.drafts`, slot -> last Annotation) and offers each slot
     not yet Published (`publish_choices`, `publish_after_fight`).
   * POWERS (self, by name): Sakura Grove (at her turn start, after Yakan
-    Offering, the newest Sakura gains n Levels), Edict of Cleansing
+    Offering, each Sakura gains n Levels), Edict of Cleansing
     (+n on a damage strike at an enemy that is Weak or wears Pyro, Hydro or
-    Cryo), Serialization (Block per Edit, unpowered), Fox's Mooncall (plant
+    Cryo), Serialization (Block per Annotated card played, unpowered), Fox's Mooncall (plant
     n Levels higher), Yakan Offering (plant at the start of her turn, after
-    the draw), Sakura Channeling (every strike also strikes as Thunder),
+    the draw), Sakura Channeling (shrine r2: a no-op marker, its job went with the
+    Rite; replacement pending a design session),
     Editor-in-Chief (after an Annotated card's play, the highest-Level Sakura
     strikes), Fallen Petals
     (Energy per wither; its upgrade's power also draws).
 
-  * RITES (`review/active/yae-design-axes-2026-10-14.md`, ruled
-    2026-10-14): the shrine has one RITE (`YaeLedger.rite`), Thunder at
-    every combat start; a "Rite: X" card switches it and it holds. Every
-    strike works under it: Thunder 2 + Level Electro to a random enemy;
-    Warding 2 + Level Block (unpowered); Wildfire Level Electro to ALL;
-    Offering, 1 more card drawn at the start of her next turn. Edict
-    pays on damage strikes at an enemy that is Weak or will react. The Lure
-    aims single-target damage strikes. Sakura Channeling: a strike in any
-    other Rite also strikes as Thunder.
+  * TENKO KINDS (shrine r2, `review/active/yae-design-axes-2026-10-14.md`,
+    ruled 2026-10-14; the persistent Rite is gone): a strike is one of
+    Thunder 2 + Level Electro to a random enemy; Warding 2 + Level Block
+    (unpowered); Wildfire Level Electro to ALL; Offering, 1 more card
+    drawn at the start of her next turn. Only a typed Tenko strikes in the
+    last three. Edict pays on damage strikes at an enemy that is Weak or
+    will react. The Lure aims single-target damage strikes.
   * SAKURA ANNOTATIONS: a Sakura may carry one of Red Ink (its strike is 3
     bigger, not in Offering, as Sakura Grove), Fox Fire (4 Electro
     to a random enemy whenever it strikes) or Deadline Extension (its timer
@@ -150,10 +153,10 @@ PUBLISH_COUNT = {MEDITATIONS: 1, MEDITATIONS_UPGRADED: 2}
 #: The rooms whose win offers it (C# `YaeEditing.OffersPublish`).
 PUBLISH_ROOMS = ("elite", "boss")
 
-# --- the Rites (design axes, ruled 2026-10-14; C# `YaeRite`) ---
+# --- the Tenko kinds (shrine r2, ruled 2026-10-14; C# `YaeTenkoKind`) ---
 THUNDER, WARDING, WILDFIRE, OFFERING = (
     "thunder", "warding", "wildfire", "offering")
-RITES = (THUNDER, WARDING, WILDFIRE, OFFERING)
+TENKO_KINDS = (THUNDER, WARDING, WILDFIRE, OFFERING)
 #: Offering's strike: this many more cards at the start of her next turn.
 OFFERING_DRAW = 1
 #: The Annotations a Sakura can carry (`edit_sakura`).
@@ -186,7 +189,6 @@ KIND_FIELDS = {
     "annotated_strike": ("base", "amount"),
     "fox_fire": (),
     # The design axes (ruled 2026-10-14).
-    "rite": (),
     "edit_sakura": ("amount",),
     "plant_level": ("amount",),
     "strike_if_weak": (),
@@ -199,8 +201,9 @@ KIND_TARGETS = {
 }
 #: Kinds that take an `annotation:` name.
 ANNOTATION_KINDS = frozenset({"edit", "edit_all", "edit_sakura"})
+#: `as:` names a typed Tenko's kind (shrine r2); absent, it is Thunder.
 OP_FIELDS = frozenset({"op", "kind", "amount", "base", "per", "target",
-                       "annotation", "rite", "which"})
+                       "annotation", "as", "which"})
 
 
 @dataclass
@@ -218,7 +221,6 @@ class YaeLedger:
     seq: int = 0
     shrine_bonus: int = 0         # SCALING == "count": +1 per Tenko
     lure: object = None           # this turn's aimed enemy, or None
-    rite: str = THUNDER           # every combat opens in Thunder
     pending_draw: int = 0         # Offering: cards at her next turn start
     pending_withers: int = 0      # Fallen Petals: withers to pay next turn
     strikes: int = 0              # this combat
@@ -286,23 +288,26 @@ def _plant_level(player) -> int:
 def plant(state, n: int = 1, reason: str = "plant",
           level: Optional[int] = None,
           annotation: Optional[str] = None) -> None:
-    """Plant `n` Sakura, one at a time (each levels the ones standing).
-    `level` (Grafted Branch) starts the new one higher, plus Fox's Mooncall's
-    bonus as any plant, never lower than the plant Level. No Level cap.
-    `annotation`: what each new Sakura inherits from the planting card (Red
-    Ink on a card that only plants, `inherited`)."""
+    """Plant `n` Sakura, one at a time. SHRINE R2 (ruled 2026-10-14): a
+    plant creates a Sakura at the card's Level (`level`, Grafted Branch;
+    else `PLANT_LEVEL`) plus Fox's Mooncall's bonus, and does not level the
+    others. With 3 standing the OLDEST refreshes (3 strikes again) and gains
+    1 Level instead (Mooncall does not add to that Level). No Level cap.
+    `annotation`: what each NEW Sakura inherits from the planting card (Red
+    Ink on a card that only plants, `inherited`); a refreshed oldest keeps
+    its own."""
     led = ledger(state.player)
     if led is None:
         return
     for _ in range(n):
-        if SCALING == "level":
-            for s in led.sakura:
-                s.level += 1
-            if len(led.sakura) >= SAKURA_CAP:
+        if len(led.sakura) >= SAKURA_CAP:
+            if SCALING == "level":
+                oldest = led.sakura[0]
+                oldest.turns_left = SAKURA_TURNS
+                oldest.level += 1
                 state.emit("yae_level", reason=reason,
                            levels=[s.level for s in led.sakura])
                 continue
-        elif len(led.sakura) >= SAKURA_CAP:
             led.sakura.pop(0)                       # (b): the oldest goes
         led.seq += 1
         start = _plant_level(state.player)
@@ -317,13 +322,13 @@ def plant(state, n: int = 1, reason: str = "plant",
 
 
 def strike_size(state, s: Sakura, rite: Optional[str] = None) -> int:
-    """One strike's size under `rite` (the shrine's, by default), before
-    Edict: Thunder and Warding 2 + Level, Wildfire Level, Offering 1; a Red
-    Ink Sakura's 3 adds to all but Offering (Claude, 2026-10-14). No global
-    bonus: Grove and Mikage Thunder raise Levels (Yae review r1, pick 2)."""
+    """One strike's size as `rite` (a Tenko kind; Thunder by default),
+    before Edict: Thunder and Warding 2 + Level, Wildfire Level, Offering
+    1; a Red Ink Sakura's 3 adds to all but Offering (Claude, 2026-10-14).
+    No global bonus: Grove and Mikage Thunder raise Levels."""
     p = state.player
     led = ledger(p)
-    rite = rite or led.rite
+    rite = rite or THUNDER
     if rite == OFFERING:
         size = OFFERING_DRAW
     else:
@@ -339,42 +344,43 @@ def strike_size(state, s: Sakura, rite: Optional[str] = None) -> int:
     return size
 
 
-#: THE LIVE FACE LINES (Claude, 2026-10-14, Yae review r1, no pick; C# twin
-#: `YaeShrineFace`). A "Rite: X" card says in combat what the shrine would do
-#: under X, summed over the Sakura standing ("Rite: Warding (your Sakura: 5
-#: Block)"); a Tenko card with no Sakura says "(no Sakura)". Before Edict,
-#: Channeling's extra Thunder strike and Fox Fire: the Rite's own job only.
-RITE_FACE = {THUNDER: "{n} damage", WARDING: "{n} Block",
-             WILDFIRE: "{n} to ALL", OFFERING: "draw {n}"}
-RITE_LINE = " (your Sakura: {what})"
+#: THE LIVE TENKO CLAUSE (shrine r2, 2026-10-14; C# twin `YaeShrineFace`).
+#: In combat a Tenko card says what its Tenko would do now, summed over the
+#: Sakura standing: "Tenko (12 damage)", "Tenko (Warding: 12 Block)"; with
+#: none standing "Tenko (no Sakura)", "Tenko (Warding, no Sakura)". Before
+#: Edict and Fox Fire: the Tenko's own job only.
+TENKO_FACE = {THUNDER: "{n} damage", WARDING: "{n} Block",
+              WILDFIRE: "{n} to ALL", OFFERING: "draw {n}"}
+#: A typed Tenko's printed name, "Tenko (Warding)".
+TENKO_NAME = {WARDING: "Warding", WILDFIRE: "Wildfire", OFFERING: "Offering"}
 NO_SAKURA = " (no Sakura)"
+NO_SAKURA_TYPED = ", no Sakura"
 
 
-def rite_total(state, rite: str) -> int:
-    """What every Sakura standing would strike for under `rite`, summed."""
+def tenko_total(state, kind: str = THUNDER) -> int:
+    """What every Sakura standing would strike for as `kind`, summed."""
     led = ledger(state.player)
     if led is None:
         return 0
-    return sum(strike_size(state, s, rite) for s in led.sakura)
+    return sum(strike_size(state, s, kind) for s in led.sakura)
 
 
-def rite_words(rite: str, total: int) -> str:
-    """The clause for a total: empty at 0 (no Sakura standing). PURE."""
+def tenko_words(kind: str, total: int) -> str:
+    """The clause for a total; at 0 (no Sakura standing) the "no Sakura"
+    words. Thunder's stands in its own brackets, a typed kind's inside the
+    kind's ("Tenko (Warding: 5 Block)"). PURE."""
+    typed = kind != THUNDER
     if total <= 0:
-        return ""
-    return RITE_LINE.format(what=RITE_FACE[rite].format(n=total))
+        return NO_SAKURA_TYPED if typed else NO_SAKURA
+    what = TENKO_FACE[kind].format(n=total)
+    return f": {what}" if typed else f" ({what})"
 
 
-def rite_line(state, rite: str) -> str:
-    """A "Rite: X" card's live clause, or "" with no Sakura standing."""
-    return rite_words(rite, rite_total(state, rite))
-
-
-def tenko_line(state) -> str:
-    """A Tenko card's live clause: "(no Sakura)" while none stands."""
+def tenko_line(state, kind: str = THUNDER) -> str:
+    """A Tenko card's live clause; "" off a Yae."""
     if ledger(state.player) is None:
         return ""
-    return NO_SAKURA if sakura_count(state.player) == 0 else ""
+    return tenko_words(kind, tenko_total(state, kind))
 
 
 def edict_applies(target) -> bool:
@@ -430,15 +436,15 @@ def fox_fire(state, source: str) -> None:
                                  powered=False)
 
 
-def strike(state, s: Sakura, reason: str, aim=None) -> None:
-    """One Sakura's strike, under the shrine's Rite, then Sakura
-    Channeling's Thunder strike (in any other Rite) and the Sakura's own
-    Fox Fire. `aim` (Kitsune Pounce) names the enemy a single-target damage
-    strike lands on, ahead of the Lure."""
+def strike(state, s: Sakura, reason: str, aim=None,
+           rite: str = THUNDER) -> None:
+    """One Sakura's strike as `rite` (a Tenko kind; Thunder unless a typed
+    Tenko says otherwise), then the Sakura's own Fox Fire. `aim` (Kitsune
+    Pounce) names the enemy a single-target damage strike lands on, ahead
+    of the Lure."""
     led = ledger(state.player)
     if not state.living_enemies:
         return
-    rite = led.rite
     size = strike_size(state, s, rite)
     led.strikes += 1
     target = _aim(state, aim) if rite == THUNDER else None
@@ -455,30 +461,16 @@ def strike(state, s: Sakura, reason: str, aim=None) -> None:
             _hit(state, e, size, reason, rite)
     elif rite == OFFERING:
         led.pending_draw += size
-    if rite != THUNDER and _power(state.player, CHANNELING):
-        target = _aim(state, aim)
-        if target is not None:
-            _hit(state, target, strike_size(state, s, THUNDER),
-                 "channeling", THUNDER)
     if s.annotation == FOX_FIRE:
         fox_fire(state, "sakura")
 
 
-def strike_all(state, reason: str) -> None:
+def strike_all(state, reason: str, rite: str = THUNDER) -> None:
     led = ledger(state.player)
     for s in list(led.sakura):
         if not state.living_enemies:
             break
-        strike(state, s, reason)
-
-
-def set_rite(state, rite: str) -> None:
-    """"Rite: X": the shrine's Rite until another replaces it."""
-    if rite not in RITES:
-        raise ValueError(f"unknown Rite {rite!r}")
-    led = ledger(state.player)
-    led.rite = rite
-    state.emit("yae_rite", rite=rite)
+        strike(state, s, reason, rite=rite)
 
 
 def edit_sakura(state, which: str, n: int, annotation: str) -> None:
@@ -503,13 +495,17 @@ def highest(led):
     return max(led.sakura, key=lambda s: (s.level, -s.seq))
 
 
-def tenko(state) -> None:
-    """Every Sakura strikes now, then every timer is set back to 3."""
+def tenko(state, kind: str = THUNDER) -> None:
+    """Every Sakura strikes now as `kind` (shrine r2: plain Tenko is
+    Thunder), then every timer is set back to 3 ([USER], 2026-10-14: "make
+    Tenko keep resetting the duration")."""
+    if kind not in TENKO_KINDS:
+        raise ValueError(f"unknown Tenko kind {kind!r}")
     led = ledger(state.player)
     if led is None or not led.sakura:
         return
-    state.emit("yae_tenko", count=len(led.sakura))
-    strike_all(state, "tenko")
+    state.emit("yae_tenko", count=len(led.sakura), kind=kind)
+    strike_all(state, "tenko", kind)
     for s in led.sakura:
         s.turns_left = SAKURA_TURNS
     if SCALING == "count":
@@ -529,18 +525,19 @@ def level_up(state, n: int) -> None:
         s.level += n
 
 
-def level_up_newest(state, n: int) -> None:
-    """Sakura Grove: "your newest Sakura gains a Level" (n Levels)."""
+def grove(state, n: int) -> None:
+    """Sakura Grove (shrine r2): "each Sakura gains a Level" (n Levels)."""
     led = ledger(state.player)
     if led.sakura:
-        led.sakura[-1].level += n
+        for s in led.sakura:
+            s.level += n
         state.emit("yae_level", reason="sakura_grove",
                    levels=[s.level for s in led.sakura])
 
 
 def turn_start(state) -> None:
     """`combat._player_turn`, post-draw: the Lure expires; Yakan Offering
-    plants; then Sakura Grove levels the newest."""
+    plants; then Sakura Grove levels every Sakura."""
     led = ledger(state.player)
     if led is None:
         return
@@ -559,16 +556,16 @@ def turn_start(state) -> None:
         state.draw(draw)
     for _ in range(_power(state.player, YAKAN_OFFERING)):
         plant(state, 1, "yakan_offering")
-    grove = _power(state.player, SAKURA_GROVE)
-    if grove:
-        level_up_newest(state, grove)
+    levels = _power(state.player, SAKURA_GROVE)
+    if levels:
+        grove(state, levels)
 
 
 def turn_end(state) -> None:
     """`combat`'s player turn end: the strikes, then the timers tick. LAST
     BLOOM (Yae review r1, pick 1 (a), ruled 2026-10-14): each Sakura whose
-    timer ran out, oldest first, strikes once more under the current Rite,
-    then withers (and Fallen Petals banks it)."""
+    timer ran out, oldest first, strikes once more as Thunder, then withers
+    (and Fallen Petals banks it)."""
     led = ledger(state.player)
     if led is None:
         return
@@ -758,7 +755,6 @@ def edit(state, editor, annotation: str, n: int = 1) -> None:
             return
         annotate(state, target, annotation)
         led.edits += 1
-        _block(state, _power(state.player, SERIALIZATION), "serialization")
 
 
 def edit_all(state, editor, default: str) -> None:
@@ -771,8 +767,6 @@ def edit_all(state, editor, default: str) -> None:
         annotate(state, c, name, "reborn")
     if cards:
         led.edits += len(cards)
-        _block(state, _power(state.player, SERIALIZATION) * len(cards),
-               "serialization")
 
 
 def publish(state, editor) -> None:
@@ -833,11 +827,15 @@ def publish_after_fight(room: str, drafts: dict, published: dict,
 
 
 def after_play(state, card) -> None:
-    """`effects.resolve_card`, after the card's own effects: Editor-in-Chief,
-    "whenever you play an Annotated card, a Sakura strikes" (the highest
-    Level, the oldest on a tie)."""
+    """`effects.resolve_card`, after the card's own effects, for an
+    Annotated card: Serialization (shrine r2, "whenever you play an
+    Annotated card, gain 3 Block"), then Editor-in-Chief, "a Sakura
+    strikes" (the highest Level, the oldest on a tie)."""
     led = ledger(state.player)
-    if led is None or not is_annotated(card) or not led.sakura:
+    if led is None or not is_annotated(card):
+        return
+    _block(state, _power(state.player, SERIALIZATION), "serialization")
+    if not led.sakura:
         return
     for _ in range(_power(state.player, EDITOR_IN_CHIEF)):
         if not state.living_enemies:
@@ -896,11 +894,11 @@ def validate_op(card_id: str, fx: dict) -> None:
     if "annotation" in fx and fx["annotation"] not in ANNOTATIONS:
         raise ValueError(f"card {card_id!r}: unknown Annotation "
                          f"{fx['annotation']!r}")
-    if (kind == "rite") != ("rite" in fx):
-        raise ValueError(f"card {card_id!r}: yae {kind!r} "
-                         f"{'needs' if kind == 'rite' else 'takes no'} `rite:`")
-    if "rite" in fx and fx["rite"] not in RITES:
-        raise ValueError(f"card {card_id!r}: unknown Rite {fx['rite']!r}")
+    if "as" in fx and kind != "tenko":
+        raise ValueError(f"card {card_id!r}: yae {kind!r} takes no `as:`")
+    if "as" in fx and fx["as"] not in TENKO_NAME:
+        raise ValueError(f"card {card_id!r}: unknown Tenko kind "
+                         f"{fx['as']!r}")
     if (kind == "edit_sakura") != ("which" in fx):
         raise ValueError(f"card {card_id!r}: yae {kind!r} "
                          f"{'needs' if kind == 'edit_sakura' else 'takes no'}"
@@ -943,7 +941,7 @@ def op_yae(state, fx: dict, card) -> None:
     if kind == "plant":
         plant(state, fx["amount"], "card", annotation=inherited(card))
     elif kind == "tenko":
-        tenko(state)
+        tenko(state, fx.get("as", THUNDER))
     elif kind == "extend":
         extend(state, fx["amount"])
     elif kind == "level_up":
@@ -972,8 +970,6 @@ def op_yae(state, fx: dict, card) -> None:
                   fx["base"] + (fx["amount"] if is_annotated(card) else 0))
     elif kind == "fox_fire":
         fox_fire(state, card.id)
-    elif kind == "rite":
-        set_rite(state, fx["rite"])
     elif kind == "edit_sakura":
         edit_sakura(state, fx["which"], fx["amount"], fx["annotation"])
     elif kind == "plant_level":

@@ -14,9 +14,9 @@ namespace KleeMod.Tests.Prototype;
 /// YAE REVIEW R1 PICKS (ruled 2026-10-14;
 /// <c>review/active/yae-design-axes-2026-10-14.md</c>, "Review r1, ruled
 /// 2026-10-14"). Pick 1 (a), LAST BLOOM: a Sakura that withers strikes once
-/// more under the current Rite, then leaves, and Fallen Petals banks it
+/// more (as Thunder since shrine r2), then leaves, and Fallen Petals banks it
 /// after. Pick 2: Levels have no cap; Fox's Mooncall plants 1 Level higher
-/// per copy; Sakura Grove levels the newest Sakura at her turn start; Mikage
+/// per copy; Sakura Grove levels every Sakura at her turn start (shrine r2); Mikage
 /// Thunder levels every Sakura, then Tenko. Headless, so the ledger is read
 /// by value and the door's order off its IL. Sim twin:
 /// <c>tier0/tests/test_yae_review_r1_picks.py</c>.
@@ -71,16 +71,14 @@ public class YaeReviewR1PicksTests : IDisposable
     }
 
     [Fact]
-    public void The_bloom_strikes_under_whatever_rite_the_shrine_holds()
+    public void The_bloom_strikes_as_thunder()
     {
-        // Strike reads the shrine's Rite; the bloom passes none of its own,
-        // so it is the current Rite's strike in each of the four.
-        foreach (var rite in Enum.GetValues<YaeRite>())
-        {
-            Assert.True(YaeShrineLedger.StrikeSize(rite, 2, YaeAnnotation.None) > 0);
-        }
-        var calls = Il.CallSequence(typeof(YaeShrine).GetMethod(nameof(YaeShrine.Strike))!).ToList();
-        Assert.Contains(calls, c => c.Contains("get_Rite"));
+        // Shrine r2: there is no Rite; Strike defaults to Thunder and the
+        // bloom passes no kind of its own.
+        var strike = typeof(YaeShrine).GetMethod(nameof(YaeShrine.Strike))!;
+        var kind = strike.GetParameters().Single(p => p.ParameterType == typeof(YaeTenkoKind));
+        Assert.Equal(YaeTenkoKind.Thunder, kind.DefaultValue);
+        Assert.DoesNotContain(Il.CallSequence(strike), c => c.Contains("get_Rite"));
     }
 
     [Fact]
@@ -108,10 +106,11 @@ public class YaeReviewR1PicksTests : IDisposable
     {
         var ledger = Fresh();
         for (var i = 0; i < 5; i++) ledger.Plant(YaeLaw.PlantLevel);
-        Assert.Equal(new[] { 5, 4, 3 }, ledger.Standing.Select(s => s.Level));
+        // Shrine r2: plants 4 and 5 feed the oldest.
+        Assert.Equal(new[] { 3, 1, 1 }, ledger.Standing.Select(s => s.Level));
         ledger.LevelUp(2);
-        Assert.Equal(new[] { 7, 6, 5 }, ledger.Standing.Select(s => s.Level));
-        Assert.Equal(9 + 8 + 7, YaeShrineFace.Total(ledger.Standing, YaeRite.Thunder));
+        Assert.Equal(new[] { 5, 3, 3 }, ledger.Standing.Select(s => s.Level));
+        Assert.Equal(7 + 5 + 5, YaeShrineFace.Total(ledger.Standing, YaeTenkoKind.Thunder));
     }
 
     [Fact]
@@ -140,25 +139,20 @@ public class YaeReviewR1PicksTests : IDisposable
     }
 
     [Fact]
-    public void Grove_levels_only_the_newest()
+    public void Grove_levels_every_sakura()
     {
-        var ledger = Fresh();
-        ledger.LevelUpNewest(1);                  // none standing: nothing
-        ledger.Plant(YaeLaw.PlantLevel);
-        ledger.Plant(YaeLaw.PlantLevel);          // 2 / 1
-        ledger.LevelUpNewest(1);
-        Assert.Equal(new[] { 2, 2 }, ledger.Standing.Select(s => s.Level));
-        ledger.LevelUpNewest(2);                  // two copies
-        Assert.Equal(new[] { 2, 4 }, ledger.Standing.Select(s => s.Level));
+        // Shrine r2 (ruled 2026-10-14): "each Sakura gains a Level".
+        Assert.Null(typeof(YaeShrineLedger).GetMethod("LevelUpNewest"));
         var calls = Il.CallSequence(typeof(YaeShrine).GetMethod(nameof(YaeShrine.TurnStart))!).ToList();
         Assert.Contains(calls, c => c.Contains("SakuraGrovePower"));
+        Assert.Contains(calls, c => c.Contains(nameof(YaeShrineLedger.LevelUp)));
     }
 
     [Fact]
     public void Grove_upgrade_is_innate()
     {
         var card = new ProtoYmSakuraGrove();
-        Assert.Equal("At the start of your turn, your newest [gold]Sakura[/gold] gains a Level.",
+        Assert.Equal("At the start of your turn, each [gold]Sakura[/gold] gains a Level.",
                      Face(card));
         Assert.Contains(Il.Calls(Il.Method(nameof(ProtoYmSakuraGrove), "OnUpgrade")),
                         c => c.Contains("AddKeyword"));

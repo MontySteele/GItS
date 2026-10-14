@@ -38,14 +38,14 @@ public sealed class ProtoYmSakuraChanneling : CustomCardModel, ICharacterCard
     public string CharacterId => "yae";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForRite(ArmKeywordTips.ForSakura(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForSakura(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_sakura_channeling");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sakura Channeling"),
-        ("description", "Your [gold]Sakura[/gold] also strike as Thunder, whatever the [gold]Rite[/gold]."),
+        ("description", "Your [gold]Sakura[/gold] strike as Thunder at the end of your turn."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

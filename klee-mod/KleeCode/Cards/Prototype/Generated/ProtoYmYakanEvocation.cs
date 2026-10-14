@@ -45,7 +45,7 @@ public sealed class ProtoYmYakanEvocation : CustomCardModel, ICharacterCard, ISa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Yakan Evocation"),
-        ("description", "Plant a [gold]Sakura[/gold] (with 3 standing, each gains a Level instead)."),
+        ("description", "Plant a [gold]Sakura[/gold] (with 3 standing, your oldest refreshes and gains a Level)."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

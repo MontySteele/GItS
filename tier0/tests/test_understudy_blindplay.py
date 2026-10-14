@@ -6589,11 +6589,12 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # YAE MIKO (2026-10-13): `ArmKeywordTips.YaeSakuraTip`,
         # `YaeTenkoTip` and `YaeEditTip`, the prose between the interpolated
         # `YaeLaw` numbers; split and cut 2026-10-14.
-        "Sakura": ["Strikes at the end of your turn under the current ",
-                   " turns, then strikes once more. ",
-                   "; planting another gives the rest a ",
-                   "Level (even when full)."],
-        "Tenko": [" strikes now and lasts ", " turns again."],
+        # Shrine r2 (2026-10-14): no Rite, the full-shrine plant, the kinds.
+        "Sakura": [" plus its Level ",
+                   "then strikes once more. Up to ",
+                   "when full refreshes the oldest and gives it a Level."],
+        "Tenko": [" strike now, reset to ",
+                  "Wildfire: Level to ALL. Offering: draw 1."],
         "Edit": ["Give a card an Annotation for this combat, replacing any "
                  "it had. A ", "Published one lasts the run."],
         # 2026-10-14: each Annotation's own row, `YaeAnnotationText.Rule`
@@ -6606,8 +6607,7 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                      " damage to a random enemy.", " strikes, it also deals "],
         "Sakura Seal": ["When this card is played, plant a "],
         "Royalties": ["When this card is played, gain ", " Energy."],
-        # The design axes (ruled 2026-10-14): the shrine's Rite.
-        "Rite": ["Sets what ", " strikes do. Thunder: damage. Warding: "],
+        # (The Rite row left with the Rite, Yae shrine r2, 2026-10-14.)
     }
     # `Spotlighted` (2026-09-06) is a row with NO tooltip to be held in step
     # with, `Companion`'s old kind (see above) -- named for its own reason: five Furina surfaces

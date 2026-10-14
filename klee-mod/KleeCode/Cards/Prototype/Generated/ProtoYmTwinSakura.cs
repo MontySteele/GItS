@@ -49,7 +49,7 @@ public sealed class ProtoYmTwinSakura : CustomCardModel, ICharacterCard, ISakura
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Twin Sakura"),
-        ("description", "Plant {YmAmount:diff()} [gold]Sakura[/gold] (with 3 standing, each gains a Level instead).{IfUpgraded:show: Gain 4 [gold]Block[/gold].|}"),
+        ("description", "Plant {YmAmount:diff()} [gold]Sakura[/gold] (with 3 standing, your oldest refreshes and gains a Level).{IfUpgraded:show: Gain 4 [gold]Block[/gold].|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

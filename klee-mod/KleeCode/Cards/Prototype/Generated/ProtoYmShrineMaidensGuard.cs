@@ -38,14 +38,14 @@ public sealed class ProtoYmShrineMaidensGuard : CustomCardModel, ICharacterCard
     public string CharacterId => "yae";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForRite(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForTenko(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_shrine_maidens_guard");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Shrine Maiden's Guard"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Rite[/gold]: Warding{InCombat:{YaeRite}|}."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Tenko[/gold] (Warding{InCombat:{YaeTenko}|})."),
     };
 
     /// <summary>This card's in-combat shrine clauses
@@ -54,7 +54,7 @@ public sealed class ProtoYmShrineMaidensGuard : CustomCardModel, ICharacterCard
         MegaCrit.Sts2.Core.Localization.LocString description)
     {
         base.AddExtraArgsToDescription(description);
-        description.Add("YaeRite", YaeShrineFace.RiteLine(this, YaeRite.Warding));
+        description.Add("YaeTenko", YaeShrineFace.TenkoLine(this, YaeTenkoKind.Warding));
     }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -73,7 +73,7 @@ public sealed class ProtoYmShrineMaidensGuard : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
-        await YaeCards.Rite(choiceContext, this, cardPlay, YaeRite.Warding);
+        await YaeCards.Tenko(choiceContext, this, cardPlay, YaeTenkoKind.Warding);
     }
 
     protected override void OnUpgrade()
