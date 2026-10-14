@@ -23,8 +23,8 @@ from typing import Any, Callable
 from understudy import bridge, qa_packet
 from understudy.blindplay_read import (_blob, _entity_id, _fold, _int,
                                        _is_mod_source_tip, _label,
-                                       _listing, _number_names, _relics,
-                                       _screen, _text)
+                                       _hand, _listing, _number_names,
+                                       _relics, _screen, _text)
 from understudy.blindplay_shape import (HAZARD_EVENT_TITLES, HAZARD_EVENTS,
                                         INSTANT_GUARDED_HAZARDS,
                                         drop_state, lane_state_dir, lane_tag,
@@ -1472,7 +1472,8 @@ _FIGHT_MEMORY: dict[str, Any] = {"roster": {}, "ordinals": {},
                                  "handles": {}, "elements": set(),
                                  "round": None, "hp": {}, "reborn": {},
                                  "replaced": {}, "kills": {}, "shown": {},
-                                 "revived": {}, "briefed": set()}
+                                 "revived": {}, "briefed": set(),
+                                 "hand": {}}
 #: Whether this process has read the lane's store yet. The load is lazy and
 #: happens once: a fresh `observe` pays one file read, and a long-lived
 #: `Session` pays it on its first fight and never again.
@@ -1506,7 +1507,7 @@ def _load_fight() -> None:
     # from a store written before that row -- absent being the same answer an
     # unread body gives, so an older store simply mints no replacement.
     for key in ("ordinals", "names", "handles", "hp", "reborn", "replaced",
-                "kills", "shown", "revived"):
+                "kills", "shown", "revived", "hand"):
         value = held.get(key)
         if isinstance(value, dict):
             _FIGHT_MEMORY[key] = dict(value)
@@ -1536,6 +1537,7 @@ def _save_fight() -> None:
            "revived": dict(_FIGHT_MEMORY["revived"]),
            "kills": dict(_FIGHT_MEMORY["kills"]),
            "shown": dict(_FIGHT_MEMORY["shown"]),
+           "hand": dict(_FIGHT_MEMORY["hand"]),
            "numbered": sorted(_FIGHT_MEMORY["numbered"]),
            "elements": sorted(_FIGHT_MEMORY["elements"]),
            "briefed": sorted(_FIGHT_MEMORY["briefed"]),
@@ -1559,6 +1561,7 @@ def forget_fight() -> None:
     _FIGHT_MEMORY["kills"] = {}
     _FIGHT_MEMORY["shown"] = {}
     _FIGHT_MEMORY["briefed"] = set()
+    _FIGHT_MEMORY["hand"] = {}
     _FIGHT_LOADED[0] = True
     _drop_store("fight", _FIGHT_STORE_DIR)
 
@@ -1578,6 +1581,158 @@ def remember_briefed(keys: set[str]) -> None:
         return
     _FIGHT_MEMORY["briefed"] |= set(keys)
     _save_fight()
+
+
+# YAE SEATS (2026-10-14, three of them; a Furina seat before). A HAND NUMBER
+# NAMES ONE CARD UNTIL THAT CARD LEAVES THE HAND. The copy numbers were a
+# place in the hand, re-counted on every page, and the shown-hand memory
+# found a copy again by its printed face. An Edit changes a face (it adds an
+# Annotation), so after Red Ink landed on `Strike (1)` the face the seat had
+# read belonged to `Strike (2)`, and `play "Strike (1)"` played that one,
+# twice in one run; another seat played the wrong Defend the same way.
+#
+# The wire carries no card instance id, so identity is TRACKED here, card by
+# card, across every hand this lane reads: the hand keeps its order through a
+# play, a draw and an Edit, so the remembered hand is aligned to the new one
+# in order, title by title (most matches first, same face as tie-break). A
+# matched card keeps its label whatever its face now says; a card played
+# through this tool is dropped by its index (`hand_card_left`), so a copy that
+# shares its face is never mistaken for it; a card new to the hand takes the
+# next number for its title, never one a live copy holds or one this turn
+# already gave out. A title held once prints bare until a second copy joins
+# it, and the bare one keeps its bare name. A new turn numbers its hand
+# afresh. The memory lives in the fight store, so a seat that spawns a
+# process per call sees the same labels.
+
+
+def _hand_face(entry: dict[str, Any]) -> str:
+    """What a hand card prints, as one string: the alignment's tie-break."""
+    return json.dumps([_text(entry.get("name")), _text(entry.get("cost")),
+                       _text(entry.get("description")),
+                       entry.get("enchantment")], sort_keys=True, default=str)
+
+
+def _hand_base(title: str) -> str:
+    """The title an in-hand upgrade does not change, for the alignment."""
+    return _fold(title).rstrip("+").strip()
+
+
+def _align(old: list[dict[str, Any]], bases: list[str], faces: list[str]
+           ) -> list[tuple[int, int]]:
+    """In-order pairs `(old row, new card)` of one title, most pairs first,
+    then most faces unchanged; ties keep the earlier pairing."""
+    n, m = len(old), len(bases)
+    best = [[0] * (m + 1) for _ in range(n + 1)]
+    for i in range(n - 1, -1, -1):
+        for j in range(m - 1, -1, -1):
+            take = 0
+            if old[i].get("b") == bases[j]:
+                take = 1000 + (old[i].get("f") == faces[j]) + best[i + 1][j + 1]
+            best[i][j] = max(take, best[i + 1][j], best[i][j + 1])
+    pairs, i, j = [], 0, 0
+    while i < n and j < m:
+        if old[i].get("b") == bases[j] and best[i][j] == (
+                1000 + (old[i].get("f") == faces[j]) + best[i + 1][j + 1]):
+            pairs.append((i, j))
+            i, j = i + 1, j + 1
+        elif best[i + 1][j] >= best[i][j + 1]:
+            i += 1
+        else:
+            j += 1
+    return pairs
+
+
+def _hand_turn(state: dict[str, Any]) -> tuple[str, str]:
+    run = _blob(state, "run")
+    return str(run.get("floor")), str(_blob(state, "battle").get("round"))
+
+
+def _label_hand(state: dict[str, Any], hand: list[dict[str, Any]]
+                ) -> tuple[list[str], dict[str, Any]]:
+    """`(labels, memory)` for `hand`, read against the lane's memory. Pure:
+    the caller decides whether the memory is kept."""
+    _load_fight()
+    floor, round_ = _hand_turn(state)
+    mem = _FIGHT_MEMORY.get("hand") or {}
+    # A new turn is a new hand: the wire cannot say which card was Retained
+    # and which was drawn, so the numbers start again (the note says so).
+    if mem.get("floor") != floor or mem.get("round") != round_:
+        mem = {}
+    old = [r for r in (mem.get("cards") or []) if isinstance(r, dict)]
+    titles = [_text(e.get("name")) for e in hand]
+    keys = [_fold(t) for t in titles]
+    bases = [_hand_base(t) for t in titles]
+    faces = [_hand_face(e) for e in hand]
+    nums: list[int | None] = [None] * len(hand)
+    for i, j in _align(old, bases, faces):
+        if old[i].get("k") == keys[j] and isinstance(old[i].get("n"), int):
+            nums[j] = old[i]["n"]
+    nxt = {str(k): int(v) for k, v in (mem.get("next") or {}).items()}
+    for k, n in zip(keys, nums):
+        if n is not None:
+            nxt[k] = max(nxt.get(k, 0), n or 1)
+    for j, k in enumerate(keys):
+        if nums[j] is not None:
+            continue
+        if keys.count(k) == 1:
+            nums[j] = 0
+        else:
+            nxt[k] = nxt.get(k, 0) + 1
+            nums[j] = nxt[k]
+    labels = [t if not n else f"{t} ({n})" for t, n in zip(titles, nums)]
+    held = {"floor": floor, "round": round_, "next": nxt,
+            "cards": [{"b": b, "k": k, "f": f, "n": n}
+                      for b, k, f, n in zip(bases, keys, faces, nums)]}
+    return labels, held
+
+
+def hand_labels(state: dict[str, Any], remember: bool = True) -> list[str]:
+    """The name each card in the fight's hand prints, in hand order: the
+    title, numbered where another card in hand prints it too, and the same
+    number for the same card until it leaves the hand."""
+    labels, held = _label_hand(state, _hand(state))
+    # A chooser over the fight may hold back the card being played or the
+    # ones picked; it is read, never remembered (`chooser_labels`).
+    if _screen(state) in ("hand_select", "card_select", "bundle_select"):
+        remember = False
+    if remember and held != _FIGHT_MEMORY.get("hand"):
+        _FIGHT_MEMORY["hand"] = held
+        _save_fight()
+    return labels
+
+
+def hand_card_left(state: dict[str, Any], index: int) -> None:
+    """The card at `index` of this state's hand was played: drop it from the
+    memory, so a copy printing the same face never inherits its number."""
+    hand_labels(state)
+    cards = (_FIGHT_MEMORY.get("hand") or {}).get("cards") or []
+    if 0 <= index < len(cards):
+        del cards[index]
+        _save_fight()
+
+
+def chooser_labels(state: dict[str, Any], entries: list[dict[str, Any]]
+                   ) -> list[str]:
+    """The names a hand chooser (`hand_select`, an Edit's pick) prints: each
+    offered card under its hand label, read without moving the memory. Where
+    a card cannot be placed in the remembered hand, the list is numbered in
+    its own order, as every other chooser is."""
+    _load_fight()
+    mem = _FIGHT_MEMORY.get("hand") or {}
+    turn = _hand_turn(state)
+    old = [r for r in (mem.get("cards") or []) if isinstance(r, dict)]
+    if old and (mem.get("floor"), mem.get("round")) == turn and entries:
+        titles = [_text(e.get("name")) for e in entries]
+        pairs = _align(old, [_hand_base(t) for t in titles],
+                       [_hand_face(e) for e in entries])
+        got = {j: old[i] for i, j in pairs
+               if old[i].get("k") == _fold(titles[j])}
+        if len(got) == len(entries):
+            labels = [t if not got[j].get("n") else f"{t} ({got[j]['n']})"
+                      for j, t in enumerate(titles)]
+            if len({_fold(x) for x in labels}) == len(labels):
+                return labels
+    return _number_names([_text(e.get("name")) for e in entries])
 
 
 def forget_briefed() -> None:

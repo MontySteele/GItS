@@ -49,11 +49,11 @@ Kokomi: during your turn, `flip <n>` (or `flip "<card>"`) switches Plan n in you
 Two things on one screen printing the same name are NUMBERED in printed order —
 `Water's Edge (1)` / `Water's Edge (2)` — and an upgraded copy is separated by
 `(upgraded)` / `(not upgraded)`. A bare name that is ambiguous is refused with
-the working forms listed back; use one of those. A numbered card in your hand
-names the copy on the page you last read with `observe` and does not shift as
-you play, so `play "Sting (3)"` then `play "Sting (4)"` plays the two copies
-that page showed; a copy already played is refused. `observe` again for new
-numbers.
+the working forms listed back; use one of those. A number on a card in your
+hand stays with that card while it is in your hand this turn: it
+does not shift as you play or Edit, so `play "Sting (3)"` then
+`play "Sting (4)"` plays the two copies the page showed. A new card takes a new number; a copy already
+played is skipped, never swapped for another.
 
 ### What blindness means here
 

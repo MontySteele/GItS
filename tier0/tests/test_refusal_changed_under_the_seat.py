@@ -230,7 +230,7 @@ def test_four_chained_plays_of_one_numbered_copy_skip_three(lane, capsys):
         assert out.startswith('Skipped: "Sting (1)" was played since your '
                               'last look: nothing was sent, and this is not '
                               'counted as a refusal.'), out
-        assert "`observe` again" in out
+        assert "look again" in out
         assert "REFUSED" not in out and "REFUSAL STOP" not in out
     assert blindplay_shape.refusal_streak() == 0
     # Never re-aimed: the two Stings left were not played for the seat.
@@ -257,24 +257,22 @@ def test_a_copy_that_left_the_hand_unplayed_is_a_skip(lane, capsys):
     assert posted == []
 
 
-def test_a_copy_printed_differently_now_still_counts(lane, capsys):
+def test_a_copy_printed_differently_now_is_still_that_copy(lane, capsys):
     screen, posted = lane
     screen["now"] = _hand_of([_sting(), _sting(cost="0"), _sting()])
     assert blindplay.cmd_observe(_observe()) == 0
     capsys.readouterr()
-    # Every copy left now prints a face the page never showed: the seat must
-    # pick by the current names, and the refusal counts.
+    # Every copy left now prints a face the page never showed. Yae seats
+    # (2026-10-14): a number is the card's while it is in hand, so "(2)" is
+    # still the middle copy -- not a refusal, and not another copy.
     moved = copy.deepcopy(screen["now"])
     for card in moved["player"]["hand"]:
         card["cost"] = "2"
     moved["player"]["hand"][1]["cost"] = "3"
     screen["now"] = moved
-    assert blindplay.cmd_act(_act('play "Sting (2)"')) == 1
-    out = capsys.readouterr().out
-    assert out.startswith("REFUSED: "), out
-    assert "the copies now" in out
-    assert blindplay_shape.refusal_streak() == 1
-    assert posted == []
+    assert blindplay.cmd_act(_act('play "Sting (2)"')) == 0
+    assert blindplay_shape.refusal_streak() == 0
+    assert [p[2]["card_index"] for p in posted] == [1]
 
 
 def test_the_skip_line_reads_names_with_quotes_in_them():

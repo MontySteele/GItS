@@ -248,7 +248,7 @@ def test_a_memory_from_another_turn_names_nothing(lane, monkeypatch):
 
 def test_the_page_and_the_brief_say_the_number_holds():
     from understudy import blindplay_notes
-    assert "does not shift as you play" in blindplay_notes.HAND_REPEAT_NOTE
+    assert "does not shift when you play" in blindplay_notes.HAND_REPEAT_NOTE
     brief = (blindplay.REPO / "docs" / "current" / "operations"
              / "seat-brief.md").read_text(encoding="utf-8")
     assert "does not shift as" in brief

@@ -219,7 +219,8 @@ from understudy.blindplay_session import (   # noqa: E402,F401  (re-export)
     AUTHOR_FAMILY, Budget, check_independent, CodexThread, command_schema,
     FIGHT_QUESTIONS, forecast_block, MODEL_FAMILIES, model_family,
     answer_lines, post_when_the_room_is_open, RECORD_DISCLAIMER,
-    record_schema, refused, _result_line, ROOM_NOT_OPEN, RUN_QUESTIONS,
+    record_schema, refused, card_played, _result_line, ROOM_NOT_OPEN,
+    RUN_QUESTIONS,
     ScriptedThread, ScriptedWire, Session, taken_line, Transcript)
 from understudy.blindplay_record import (   # noqa: E402,F401  (re-export)
     AUDIT_EXTRA, audit_markdown, build_version, _game_dir, game_version,
@@ -861,6 +862,8 @@ def cmd_act(args) -> int:
     # lines, in the same order, the session hands its seat.
     clear_refusal()
     mark_sent(args.command, room_of(_screen(state)))
+    # Yae seats (2026-10-14): the played card's number leaves with it.
+    card_played(state, action, post, result)
     # Kokomi round 2 (2026-10-13, lane 5): a sent `skip` on a card reward is
     # the deliberate skip, so the reward screen's `proceed` hold no longer
     # holds for that card row (`card_skips`); a sent `proceed` leaves the
