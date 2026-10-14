@@ -920,7 +920,7 @@ CONJUGATIONS = {"Exhausted": "Exhaust",
                 "Tenko": "Sakura", "Edited": "Edit", "Annotated": "Edit",
                 "Publish": "Edit", "Red Ink": "Edit", "Footnote": "Edit",
                 "Deadline Extension": "Edit", "Fox Fire": "Edit",
-                "Sakura Seal": "Edit"}
+                "Sakura Seal": "Edit", "Royalties": "Edit"}
 
 
 def _word_owner(word: str) -> str:

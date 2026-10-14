@@ -346,6 +346,8 @@ MIRRORED: dict[str, object] = {
     "YaeLaw.MooncallLevelCap": _yae("MOONCALL_LEVEL_CAP"),
     "YaeLaw.RedInkAmount": _yae("RED_INK_AMOUNT"),
     "YaeLaw.FoxFireDamage": _yae("FOX_FIRE_DAMAGE"),
+    "YaeLaw.OfferingPerStrike": _yae("OFFERING_DRAW"),
+    "YaeLaw.RoyaltiesPayout": _yae("ROYALTIES_ENERGY"),
     "VarkaLaw.SwirlPyroDamage": _varka("SWIRL_PYRO_DAMAGE"),
     "VarkaLaw.SwirlHydroBlock": _varka("SWIRL_HYDRO_BLOCK"),
     "VarkaLaw.SwirlCryoVulnerable": _varka("SWIRL_CRYO_VULNERABLE"),

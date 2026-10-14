@@ -2726,7 +2726,16 @@ def _render_oath(oath: dict[str, Any]) -> list[str]:
 
 SHRINE_HEADING = "## Your shrine"
 SHRINE_COUNT_LINE = ("- Sakura: {n} of 3. At the end of your turn each "
-                     "strikes a random enemy, oldest first.")
+                     "strikes, oldest first.")
+#: The design axes (ruled 2026-10-14): what every strike does under the
+#: shrine's Rite.
+SHRINE_RITE_LINE = "- Rite: {rite}. {rule}"
+SHRINE_RITE_RULES = {
+    "Thunder": "Each strike hits a random enemy for its number.",
+    "Warding": "Each strike gives you its number in Block.",
+    "Wildfire": "Each strike hits ALL enemies for its number.",
+    "Offering": "Each strike draws you its number of cards next turn.",
+}
 SHRINE_NONE_LINE = "- Sakura: none. Plant one to start your shrine."
 SHRINE_ROW = ("- Sakura {slot}: Level {level}, strikes for {strike}"
               "{turns}.")
@@ -2739,10 +2748,15 @@ def _render_shrine(shrine: dict[str, Any]) -> list[str]:
     enemy, the Annotated count, one fact a line."""
     rows = shrine["sakura"]
     out = [SHRINE_COUNT_LINE.format(n=len(rows)) if rows else SHRINE_NONE_LINE]
+    if shrine.get("rite") in SHRINE_RITE_RULES:
+        out.append(SHRINE_RITE_LINE.format(
+            rite=shrine["rite"], rule=SHRINE_RITE_RULES[shrine["rite"]]))
     for row in rows:
         turns = row.get("turns")
         tail = ("" if turns is None else
                 f", {turns} strike{'s' if turns != 1 else ''} left")
+        if row.get("annotation"):
+            tail += f", {row['annotation']}"
         out.append(SHRINE_ROW.format(slot=row["slot"], level=row["level"],
                                      strike=row["strike"], turns=tail))
     if shrine.get("lure"):

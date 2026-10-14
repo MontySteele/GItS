@@ -38,20 +38,20 @@ public sealed class ProtoYmSakuraChanneling : CustomCardModel, ICharacterCard
     public string CharacterId => "yae";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSakura(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForRite(ArmKeywordTips.ForSakura(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_sakura_channeling");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sakura Channeling"),
-        ("description", "Whenever a [gold]Sakura[/gold] strikes, gain {PowerAmount:diff()} [gold]Block[/gold]."),
+        ("description", "Your [gold]Sakura[/gold] also strike as Thunder, whatever the [gold]Rite[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 2m)
+
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -63,11 +63,11 @@ public sealed class ProtoYmSakuraChanneling : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<SakuraChannelingPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<SakuraChannelingPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
+        EnergyCost.UpgradeBy(-1);
     }
 }

@@ -45,13 +45,13 @@ public sealed class ProtoYmSakuraGrove : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sakura Grove"),
-        ("description", "Your [gold]Sakura[/gold] strike for {PowerAmount:diff()} more."),
+        ("description", "Your [gold]Sakura[/gold] strike for {PowerAmount:diff()} more in Thunder, Warding and Wildfire."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 1m)
+            new DynamicVar("PowerAmount", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

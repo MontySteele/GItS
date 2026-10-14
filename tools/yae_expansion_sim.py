@@ -281,6 +281,15 @@ def _draft_ops(fx):
         return [{"op": "block", "amount": base + 2 * per}]
     if kind == "annotated_strike":
         return [{"op": "damage", "amount": base + amt // 2, "target": "enemy"}]
+    # The design axes (2026-10-14), at the same nominal board.
+    if kind == "rite":
+        return [{"op": "block", "amount": 3}]
+    if kind == "edit_sakura":
+        return [{"op": "damage", "amount": 3 * min(amt, 2), "target": "random_enemy"}]
+    if kind == "plant_level":
+        return [{"op": "damage", "amount": 6 + 2 * amt, "target": "random_enemy"}]
+    if kind == "strike_if_weak":
+        return [{"op": "damage", "amount": 2, "target": "enemy"}]
     return None
 
 
