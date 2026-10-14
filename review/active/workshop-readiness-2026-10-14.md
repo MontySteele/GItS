@@ -43,6 +43,8 @@ tags.
 
 ## Picks
 
+**Ruled 2026-10-14.** [USER]: "On Steam, I'm good with the defaults." All three picks (a).
+
 1. **Who uploads:** **(a) you run the uploader from your Steam account**, and
    I prepare the workspace (content, `workshop.json`, image) and a dry run.
    (b) Some other route you name. Uploading is your call: it publishes under

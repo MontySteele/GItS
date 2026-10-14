@@ -22,10 +22,6 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
-- **Kokomi review r5** (`kokomi-review-r5-2026-10-14.md`, two picks, defaults
-  (a)): 1 win in 5; the A-list (#1275) and the numbers pass (#1276) are built.
-- **Steam Workshop readiness** (`workshop-readiness-2026-10-14.md`, three
-  picks, defaults (a)): who uploads, first visibility, Yae in or out.
 - **Furina sweep** (`furina-sweep-2026-10-14.md`, three picks, defaults
   (a); built on #1271): fifteen cuts, fifteen adds that are not a resource
   verb plus a number, Powers 20 to 17, Block 41 to 68 printed.

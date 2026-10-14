@@ -141,6 +141,8 @@ passes them.
 
 ## Picks
 
+**Ruled 2026-10-14.** [USER]: "On Kokomi, agreed all around!" Both picks (a).
+
 1. **The plan-less opening hand** (the starter is yours). **(a) Leave it** as
    ruled in R268: the pool answers it, and every deck here had a drafted Plan
    card by fight 3. (b) Swap one Defend for Tidal Screen ("Gain 7 Block. Or
