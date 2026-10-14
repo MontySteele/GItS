@@ -1323,6 +1323,17 @@ PLAN_NO_ATTACK_WHAT = {"attackers": "hits no one", "blocked": "deals 0",
                        "energy": "gives no Energy"}
 #: Item 9: an ALL-enemies hit that a body's Vulnerable will raise.
 PLAN_LANDS_VULNERABLE = " ({parts}, after Vulnerable)"
+#: Kokomi round 7 (2026-10-14): Vulnerable an earlier Plan applies in the same
+#: morning raises this hit too. "Four planned Stings did 16 on a Vulnerable
+#: Beetle; I could not tell whether Vulnerable boosts Plan hits."
+PLAN_LANDS_VULNERABLE_FROM = " ({parts}, after Vulnerable from {plan})"
+PLAN_LANDS_VULNERABLE_FRONT = " ({n} after Vulnerable from {plan})"
+#: Kokomi round 7: a Plan that plays a card (a Companion, Moon's Reflection,
+#: Crystal Collapse) plays it through the game's own auto-play, which Ringing
+#: counts as the turn's one card, as it counts any card played for you.
+PLAN_RINGING_WARNING = "     - Ringing: a carried-out Plan uses your one card."
+RINGING_USED_NOTE = ("- Ringing: {cards} {verb} played for you, which used "
+                     "your one card this turn.")
 #: Item 9 and pick 1 (a): a receipt names what moved its number, the way the
 #: Hard To Kill receipt names a cap.
 RECEIPT_BONUS = " — asked for {asked}, {n} landed: {names}."
@@ -1331,6 +1342,9 @@ RECEIPT_MEND = (" — Mend {asked}, {n} landed: Mend never heals above the HP "
 #: Item 10: Energy above the turn's own, by the relics that gave it.
 ENERGY_LINE = "Energy {energy} left of {max_energy}"
 ENERGY_LINE_BONUS = "Energy {energy} ({max_energy} a turn, {parts})"
+#: Kokomi round 7 (2026-10-14): Energy above the turn's own that no relic face
+#: accounts for. Not "this turn's plays": on turn 1 nothing had been played.
+ENERGY_LINE_OTHER = "+{n} from other effects"
 #: Item 11: Ripple Basin once an Attack is played or planned this turn.
 INCOMING_CONDITIONAL_LOST = (" {name}: no Block this turn (you played or "
                              "planned an Attack).")

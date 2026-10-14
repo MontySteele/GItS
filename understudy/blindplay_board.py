@@ -1901,7 +1901,14 @@ def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
               # "energy"); item 11: the card written is an Attack. Absent on
               # an older bridge: None and False, and nothing is said.
               "needs_attack": _text(row.get("needs_attack")) or None,
-              "attack": row.get("attack") is True}
+              "attack": row.get("attack") is True,
+              # Kokomi round 7 (2026-10-14): the Plan plays a card (a
+              # Companion, Moon's Reflection, Crystal Collapse), which
+              # Ringing counts; and where its Vulnerable lands ("all",
+              # "front"), which a later Plan's hit meets. Absent on an older
+              # bridge: False and "", and nothing is said.
+              "plays_card": row.get("plays_card") is True,
+              "vulnerable_aim": _text(row.get("vulnerable_aim"))}
              for row in (raw.get("queue") or []) if isinstance(row, dict)]
     pet_id = raw.get("pet_entity_id")
     pet_name = _text(raw.get("pet_name")) or "Bake-Kurage"

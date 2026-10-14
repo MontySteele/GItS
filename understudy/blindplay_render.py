@@ -113,8 +113,13 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         PLAN_NO_ATTACK_WARNING,
                                         PLAN_NO_ATTACK_WHAT,
                                         PLAN_LANDS_VULNERABLE,
+                                        PLAN_LANDS_VULNERABLE_FROM,
+                                        PLAN_LANDS_VULNERABLE_FRONT,
+                                        PLAN_RINGING_WARNING,
+                                        RINGING_USED_NOTE,
                                         RECEIPT_BONUS, RECEIPT_MEND,
                                         ENERGY_LINE, ENERGY_LINE_BONUS,
+                                        ENERGY_LINE_OTHER,
                                         INCOMING_CONDITIONAL_LOST,
                                         CARD_OFFER_AFTER_SKIP_NOTE,
                                         PLAN_AIM_NOTE,
@@ -720,7 +725,9 @@ def _into_block_clauses(pl: dict[str, Any],
 
 
 def _plan_lands_lines(entry: dict[str, Any],
-                      enemies: list[dict[str, Any]]) -> list[str]:
+                      enemies: list[dict[str, Any]],
+                      ahead: list[dict[str, Any]] | None = None
+                      ) -> list[str]:
     """Kokomi review r5 (2026-10-14), A2 and A1: under one waiting Plan.
 
     A2: what the Plan will land per body and where, with her Strength when it
@@ -752,13 +759,29 @@ def _plan_lands_lines(entry: dict[str, Any],
     # each body's Vulnerable makes of it (the front's is already folded into
     # `damage`). Only a Vulnerable that will still be up at the morning (2 or
     # more, `KokomiPlan.VulnerableAtMorning`), at the game's 1.5x.
+    # Kokomi round 7 (2026-10-14): and Vulnerable a Plan AHEAD of this one
+    # applies in the same morning, which the hit meets when it lands
+    # (`ElementalHit.Deal` reads the target's Vulnerable at the hit).
+    source, made = _vulnerable_ahead(ahead or [], enemies)
     if aim == "all":
+        up = [b for b in bodies if _stacks_of(b, "vulnerable") >= 2
+              or id(b) in made]
         parts = [f"{int(n * 1.5)} on {b.get('name') or 'an enemy'}"
-                 for b in bodies if _stacks_of(b, "vulnerable") >= 2]
+                 for b in up]
         if parts:
+            fresh = any(_stacks_of(b, "vulnerable") < 2 for b in up)
             out[0] = (out[0][:-1]
-                      + PLAN_LANDS_VULNERABLE.format(parts=", ".join(parts))
+                      + (PLAN_LANDS_VULNERABLE_FROM.format(
+                          parts=", ".join(parts), plan=source) if fresh
+                         else PLAN_LANDS_VULNERABLE.format(
+                             parts=", ".join(parts)))
                       + ".")
+    elif (aim == "front" and bodies and id(bodies[0]) in made
+          and not entry.get("after_vulnerable")):
+        out[0] = (out[0][:-1]
+                  + PLAN_LANDS_VULNERABLE_FRONT.format(n=int(n * 1.5),
+                                                       plan=source)
+                  + ".")
     for body in bodies:
         if any(_fold(i.get("type")) == "defend"
                for i in body.get("intents") or []):
@@ -766,6 +789,56 @@ def _plan_lands_lines(entry: dict[str, Any],
                 enemy=body.get("name") or "The enemy", plan=entry["name"],
                 n=n))
     return out
+
+
+def _vulnerable_ahead(ahead: list[dict[str, Any]],
+                      enemies: list[dict[str, Any]]
+                      ) -> tuple[str, set[int]]:
+    """Kokomi round 7 (2026-10-14): the first Plan ahead that applies
+    Vulnerable, by name, and the bodies (by `id`) it will make Vulnerable
+    before a later Plan's hit lands: every living body for an ALL-enemies
+    one, the front for a front one. The wire's `vulnerable_aim`; nothing on
+    an older bridge."""
+    living = [e for e in enemies if not e.get("phase_flip")
+              and not (isinstance(e.get("hp"), int) and e["hp"] <= 0)]
+    front = _front_body(enemies)
+    source, made = "", set()
+    for entry in ahead:
+        aim = entry.get("vulnerable_aim") or ""
+        hit = (living if aim == "all"
+               else [front] if aim == "front" and front is not None else [])
+        if hit and not source:
+            source = str(entry.get("name") or "an earlier Plan")
+        made |= {id(b) for b in hit}
+    return source, made
+
+
+def _wears_ringing(you: dict[str, Any]) -> bool:
+    return any(_fold(p.get("name")) == "ringing"
+               for p in you.get("powers") or [])
+
+
+def _ringing_on_or_coming(you: dict[str, Any],
+                          enemies: list[dict[str, Any]]) -> bool:
+    """Kokomi round 7 (2026-10-14): is Ringing on her, or does an enemy
+    intend to apply it (the move table's "applies Ringing 1")?"""
+    return _wears_ringing(you) or any(
+        "ringing" in _fold(i.get("effect"))
+        for e in enemies for i in e.get("intents") or [])
+
+
+def _ringing_used_lines(you: dict[str, Any],
+                        rows: list[dict[str, Any]]) -> list[str]:
+    """Kokomi round 7 (2026-10-14): under Ringing, the cards the game played
+    for her this turn (a carried-out Companion Plan among them), which
+    `RingingPower.ShouldPlay` counts as the turn's one card play."""
+    if not _wears_ringing(you):
+        return []
+    cards = [f"**{r['card']}**" for r in rows if r.get("auto_played")]
+    if not cards:
+        return []
+    return ["", RINGING_USED_NOTE.format(
+        cards=_and_list(cards), verb="was" if len(cards) == 1 else "were")]
 
 
 def _plan_no_attack_lines(entry: dict[str, Any],
@@ -2697,28 +2770,45 @@ def _status_clause(counts: Any) -> str:
 
 
 #: Kokomi review r6 (2026-10-14, item 10): a relic face that gives Energy,
-#: "gain 1 Energy" or the icon form the wire may print.
-_RELIC_ENERGY = re.compile(r"\bgain (\d+) (?:\[?energy\]?|\[E\])", re.I)
+#: "gain 1 Energy" or the icon form the wire may print. Kokomi round 7
+#: (2026-10-14): also "gain an additional 4 Energy" (Very Hot Cocoa) and
+#: "start the next combat with 2 Energy" (Venerable Tea Set).
+_RELIC_ENERGY = re.compile(
+    r"\b(?:gain|with)(?: an additional| an extra)? (\d+)"
+    r"(?: extra| additional)? (?:\[?energy\]?|\[E\])", re.I)
+#: Kokomi round 7 (2026-10-14): a face that gives Energy EVERY turn raises the
+#: turn's own Energy (`ModifyMaxEnergy`: Prismatic Gem, Philosopher's Stone,
+#: Velvet Choker and the rest), so it is already inside "N a turn" and is
+#: never named as a bonus on top of it. Naming it there printed
+#: "Energy 7 (4 a turn, +1 Prismatic Gem, +2 from this turn's plays)" on a
+#: turn 1 whose 3 extra were Lantern's 1 and the Tea Set's 2.
+_EVERY_TURN = re.compile(r"\b(?:each|every) turn\b", re.I)
 
 
 def _energy_line(you: dict[str, Any]) -> str:
     """`Energy 2 left of 3`, or, where she holds more than a turn's, what
     gave the rest: `Energy 4 (3 a turn, +1 Lantern)` (Kokomi review r6,
     2026-10-14, item 10; "4 left of 3" read as a bug). The relics are named
-    by their faces; a surplus no relic face accounts for is said as such."""
+    by their faces, skipping a used-up relic and one whose Energy comes every
+    turn (it is in the turn's own); a surplus no relic face accounts for is
+    said as such. The first figure is the game's own Energy, all of it
+    spendable."""
     energy, top = you.get("energy"), you.get("max_energy")
     if not (isinstance(energy, int) and isinstance(top, int)) or energy <= top:
         return ENERGY_LINE.format(energy=energy, max_energy=top)
     surplus = energy - top
     parts: list[str] = []
     for relic in you.get("relics") or []:
-        found = _RELIC_ENERGY.search(str(relic.get("text") or ""))
+        text = str(relic.get("text") or "")
+        if relic.get("used_up") or _EVERY_TURN.search(text):
+            continue
+        found = _RELIC_ENERGY.search(text)
         if found and surplus > 0:
             n = min(int(found.group(1)), surplus)
             parts.append(f"+{n} {relic.get('name') or 'a relic'}")
             surplus -= n
     if surplus > 0:
-        parts.append(f"+{surplus} from this turn's plays")
+        parts.append(ENERGY_LINE_OTHER.format(n=surplus))
     return ENERGY_LINE_BONUS.format(energy=energy, max_energy=top,
                                     parts=", ".join(parts))
 
@@ -4187,6 +4277,7 @@ def render(obs: dict[str, Any]) -> str:
                 # `EB-773`: and which of them is written at a body the Plans
                 # ahead of it will already have killed.
                 past_lethal = _past_lethal_clauses(pl, c.get("enemies") or [])
+                ringing = _ringing_on_or_coming(you, c.get("enemies") or [])
                 into_block = _into_block_clauses(pl, c.get("enemies") or [])
                 for i, e in enumerate(pl["queue"], 1):
                     # The Kokomi review (2026-10-13): the first Plan is
@@ -4225,7 +4316,12 @@ def render(obs: dict[str, Any]) -> str:
                     # Kokomi review r5 (2026-10-14, A2 and A1): what it will
                     # land, her Strength named, and a body intending to
                     # Block in its way.
-                    out += _plan_lands_lines(e, c.get("enemies") or [])
+                    out += _plan_lands_lines(e, c.get("enemies") or [],
+                                             pl["queue"][:i - 1])
+                    # Kokomi round 7 (2026-10-14): a Plan that plays a card
+                    # spends Ringing's one card.
+                    if e.get("plays_card") and ringing:
+                        out.append(PLAN_RINGING_WARNING)
                     # Kokomi review r6 (2026-10-14, item 7): a Counter Plan
                     # no enemy intends to attack into.
                     out += _plan_no_attack_lines(e, c.get("enemies") or [])
@@ -4327,6 +4423,7 @@ def render(obs: dict[str, Any]) -> str:
             out += _resolution_lines(c["resolutions"],
                                      stage=c.get("stage") is not None,
                                      enemies=c.get("enemies") or [])
+            out += _ringing_used_lines(you, c["resolutions"])
         if you["potions"]:
             out += ["", "## Potions", ""]
             # `EB-341`: how many slots there are, beside how many are used.
