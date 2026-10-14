@@ -357,6 +357,8 @@ SWIRL_ROWS = frozenset((
     "proto_mf_lynette_astonishing_shift",
     "proto_mf_lynette_enigmatic_feint",
     "proto_vk_jean_dandelion_breeze",
+    # Varka's co-op five (2026-10-13): Windward Flank's "Swirl the enemy".
+    "proto_vk_windward_flank",
 ))
 
 

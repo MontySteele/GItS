@@ -69,8 +69,11 @@ def _burn():
 
 
 def _pool():
+    # His co-op five (2026-10-13) sit outside the pool count.
+    coop_only = loader.multiplayer_ids()
     return {c.id: c for c in loader.prototype_cards()
-            if c.id.startswith(V.ID_PREFIX) and c.rarity != "basic"}
+            if c.id.startswith(V.ID_PREFIX) and c.rarity != "basic"
+            and c.id not in coop_only}
 
 
 CUT = ("gale_mantle", "west_wind_shield", "knightly_guard", "tailwind_guard",

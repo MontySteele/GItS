@@ -469,6 +469,12 @@ UNMIRRORED: dict[str, str] = {
         "takes on an enemy holding Klee's Mine. Only ANOTHER player's hit can "
         "take it, and tier 0 seats one player (`tier0/engine/coop.py`), so the "
         "sim has no hit this number could ever apply to and no counterpart.",
+    "WindwardFlankPower.Shred":
+        "VARKA'S CO-OP FIVE (2026-10-13). Windward Flank's printed '50% "
+        "more': the multiplier another player's Attack takes on the enemy "
+        "this turn. Only ANOTHER player's hit can take it, and tier 0 seats "
+        "one player (`tier0/engine/coop.py`), so the sim has no counterpart "
+        "(ShrapnelPower.Shred's reason).",
     "PunchOffMirror.MaxHitSparksPerVisit":
         "`EB-769`. AN ALLOCATION BOUND on a decoration, not balance: how many "
         "`NHitSparkVfx` nodes one visit to the Punch-Off may add to the combat "

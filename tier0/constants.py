@@ -1045,6 +1045,17 @@ KOKOMI_OVERHAUL_MULTIPLAYER_IDS: tuple[str, ...] = (
     "proto_kk_kurages_mercy",
 )
 
+# VARKA'S CO-OP FIVE (2026-10-13), on the same terms: `VarkaRoster
+# .MultiplayerSlice`'s mirror, outside his pool count, never dealt by the
+# one-seat sim. Three Uncommons and two Rares.
+VARKA_MULTIPLAYER_IDS: tuple[str, ...] = (
+    "proto_vk_escort_duty",
+    "proto_vk_marching_orders",
+    "proto_vk_windward_flank",
+    "proto_vk_comrades_of_the_expedition",
+    "proto_vk_west_winds_blessing",
+)
+
 # THE TWO-PLAN CAP -- A LANE RULE BEHIND A RUNTIME TOGGLE, DEFAULT OFF
 # (`EB-643`, R265). "At most N Plans a morning; the rest wait, in order" is a
 # TRIAL and not a shipped rule, so the default is 0 and 0 means unlimited: with

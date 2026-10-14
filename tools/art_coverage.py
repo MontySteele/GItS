@@ -565,12 +565,31 @@ KNOWN_STALE = {
 # on record. `tools/shipped_card_art.py` and its test fail on a missing key NOT
 # listed here, and on an entry here that has since been painted or cut.
 KNOWN_MISSING = {
-    # Empty since 2026-10-12: the 32 keys listed here (24 Kokomi re-founding
+    # Emptied 2026-10-12: the 32 keys listed here (24 Kokomi re-founding
     # and jellyfish rows, Sting and Ward among them, and 8 Furina block-gap
     # and diversity-pass rows) were painted by the missing-art census, whose
     # plan rows are in art/plan.tsv under "Art bill 2026-10-12". An entry here
     # is a card the player sees BLANK; tools/deploy_round.py now names every
     # one in its summary, so adding one is a visible choice.
+    #
+    # VARKA'S CO-OP FIVE (2026-10-13): built without art. Picking each
+    # card's source image is an eyes-on pass with the art tree, owed in a
+    # plan.tsv row; until then they draw blank, in co-op only.
+    "proto_vk_escort_duty": (
+        "Varka's co-op five (2026-10-13): new multiplayer row, no source "
+        "picked yet."),
+    "proto_vk_marching_orders": (
+        "Varka's co-op five (2026-10-13): new multiplayer row, no source "
+        "picked yet."),
+    "proto_vk_windward_flank": (
+        "Varka's co-op five (2026-10-13): new multiplayer row, no source "
+        "picked yet."),
+    "proto_vk_comrades_of_the_expedition": (
+        "Varka's co-op five (2026-10-13): new multiplayer row, no source "
+        "picked yet."),
+    "proto_vk_west_winds_blessing": (
+        "Varka's co-op five (2026-10-13): new multiplayer row, no source "
+        "picked yet."),
 }
 
 
