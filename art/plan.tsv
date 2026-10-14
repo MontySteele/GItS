@@ -2776,6 +2776,17 @@ proto_vk_pyre_oath	ImageGen/images/cards/varka/proto_vk_pyre_oath.png	500	380	co
 proto_vk_stoke_the_flames	ImageGen/images/cards/varka/proto_vk_stoke_the_flames.png	500	380	cover	y0.30	shortlist	1	png	Bennett Wish.png		splash	
 proto_vk_deep_freeze	ImageGen/images/cards/varka/proto_vk_deep_freeze.png	500	380	cover	y0.30	shortlist	1	png	Eula Wish.png		splash	
 proto_vk_shatter	ImageGen/images/cards/varka/proto_vk_shatter.png	500	380	cover	y0.30	shortlist	1	png	Rosaria Wish.png		splash	
+# ---------- Varka's co-op five (2026-10-13), multiplayer-only rows ----------
+# proto_vk_escort_duty <- Varka, blade out, standing before his comrades
+proto_vk_escort_duty	ImageGen/images/cards/varka/proto_vk_escort_duty.png	500	380	cover	x0.45,y0.47@1.2	shortlist	1	png	A Knight's Resolve Quest Still 2 Aether.png		splash	
+# proto_vk_marching_orders <- the Grand Master addressing the company
+proto_vk_marching_orders	ImageGen/images/cards/varka/proto_vk_marching_orders.png	500	380	cover	x0.55	shortlist	1	png	Echoes of Fate Quest Still 2 Aether.png		splash	
+# proto_vk_windward_flank <- Varka and the wind-wolf, calendar text cropped out
+proto_vk_windward_flank	ImageGen/images/cards/varka/proto_vk_windward_flank.png	500	380	cover	x0.17,y0.34@2.2	shortlist	1	png	Version Luna V Event Calendar.png		splash	
+# proto_vk_comrades_of_the_expedition <- the Knights of Favonius together, logo cropped out
+proto_vk_comrades_of_the_expedition	ImageGen/images/cards/varka/proto_vk_comrades_of_the_expedition.png	500	380	cover	x0.52,y0.50@1.4	shortlist	1	png	Genshin Impact Knights of Favonius Closed Beta Test.jpg		splash	
+# proto_vk_west_winds_blessing <- the expedition's banner in the wind, epilogue text cropped out
+proto_vk_west_winds_blessing	ImageGen/images/cards/varka/proto_vk_west_winds_blessing.png	500	380	cover	y0.55@1.2	shortlist	1	png	Facts About Varka II 4.png		splash	
 divine_strategy	ImageGen/images/cards/kokomi/divine_strategy.png	500	380	contain	center	shortlist	1	png	Talent Divine Maiden's Deliverance.png		item	kokomi_pool
 kk_open_the_casket	ImageGen/images/cards/kokomi/kk_open_the_casket.png	500	380	contain	center	shortlist	1	png	Talent Tamakushi Casket.png		item	kokomi_pool
 kk_sea_glass	ImageGen/images/cards/kokomi/kk_sea_glass.png	500	380	contain	center	shortlist	1	png	Item Crystal Marrow.png		item	kokomi_pool
