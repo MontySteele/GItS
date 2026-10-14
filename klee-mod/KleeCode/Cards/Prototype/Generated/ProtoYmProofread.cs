@@ -38,14 +38,14 @@ public sealed class ProtoYmProofread : CustomCardModel, ICharacterCard
     public string CharacterId => "yae";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForEdit(ArmKeywordTips.ForAnnotation(base.ExtraHoverTips, this, YaeAnnotation.RedInk, false), this);
+        ArmKeywordTips.ForEdit(ArmKeywordTips.ForAnnotation(base.ExtraHoverTips, this, YaeAnnotation.Reprint, false), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_proofread");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Proofread"),
-        ("description", "[gold]Edit[/gold] a card in your hand: [gold]Red Ink[/gold]."),
+        ("description", "[gold]Edit[/gold] a card in your hand: [gold]Reprint[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -63,7 +63,7 @@ public sealed class ProtoYmProofread : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await YaeCards.Edit(choiceContext, this, cardPlay, YaeAnnotation.RedInk);
+        await YaeCards.Edit(choiceContext, this, cardPlay, YaeAnnotation.Reprint);
     }
 
     protected override void OnUpgrade()

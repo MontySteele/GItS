@@ -1726,6 +1726,8 @@ ARM_KEYWORDS: dict[str, str] = {
                  "also deals 4 Electro damage to a random enemy."),
     "Sakura Seal": "When this card is played, plant a Sakura.",
     "Royalties": "When this card is played, gain 1 Energy.",
+    "Reprint": ("The first time this card is played each combat, play it "
+                "twice."),
     # `EB-625`. THE RELIC A FACE IS WRITTEN AGAINST. Shell Guard says
     # "whenever the Tamakushi Casket strikes" and nothing on the page said
     # what the Casket is or what makes it strike -- [USER]'s act-1 run read
@@ -2090,7 +2092,7 @@ _ARM_KEYWORD_ARM: dict[str, str] = {
     # 2026-10-14: Tenko and the six Annotations, split out of those two.
     "Tenko": "yae miko", "Red Ink": "yae miko", "Footnote": "yae miko",
     "Deadline Extension": "yae miko", "Fox Fire": "yae miko",
-    "Sakura Seal": "yae miko", "Royalties": "yae miko",
+    "Sakura Seal": "yae miko", "Royalties": "yae miko", "Reprint": "yae miko",
     # THE SALON'S TAB (2026-10-05): the summon and the four guests.
     "Summon": "furina", "Guest Star": "furina", "oldest guest": "furina",
     "Clorinde": "furina",
@@ -2189,6 +2191,7 @@ _ARM_KEYWORD_RE = {
     "Fox Fire": re.compile(r"\bFox Fire\b"),
     "Sakura Seal": re.compile(r"\bSakura Seal\b"),
     "Royalties": re.compile(r"\bRoyalties\b"),
+    "Reprint": re.compile(r"\bReprint\b"),
     # `EB-446`. NO PLURAL: there is one raven. It fires on Nightrider's face,
     # which names him and cannot grant him, and on the Power card that does --
     # every screen a reader can meet the word on, whether or not the run holds

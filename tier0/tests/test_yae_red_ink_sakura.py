@@ -61,6 +61,16 @@ def _card(name):
     return loader.get_card(_ym(name))
 
 
+def _red_ink_edit():
+    """A bare "Edit a card in your hand: Red Ink" (Proofread's face until
+    2026-10-14, when it became Reprint): the Red Ink Edit with nothing else
+    on the card, so a test reads Red Ink alone."""
+    card = loader.get_card(_ym("proofread"))
+    card.effects = [{"op": "yae", "kind": "edit", "annotation": Y.RED_INK,
+                     "amount": 1}]
+    return card
+
+
 def _play(st, card):
     if card not in st.player.hand:
         st.player.hand.append(card)
@@ -152,18 +162,18 @@ def test_red_ink_skips_a_pure_utility_card_footnote_takes_it():
     lure = _card("foxfire_lure")
     assert not Y.affects(lure, Y.RED_INK)
     for name in (Y.FOOTNOTE, Y.DEADLINE, Y.FOX_FIRE, Y.SAKURA_SEAL,
-                 Y.ROYALTIES):
+                 Y.ROYALTIES, Y.REPRINT):
         assert Y.affects(lure, name)
     for cid in ("strike", "defend", _ym("yakan_evocation"),
                 _ym("twin_sakura"), _ym("grafted_branch")):
         assert Y.affects(loader.get_card(cid), Y.RED_INK), cid
 
 
-def test_proofread_with_only_a_utility_card_in_hand_does_nothing():
+def test_a_red_ink_edit_with_only_a_utility_card_in_hand_does_nothing():
     st = _state()
     lure = _card("foxfire_lure")
     st.player.hand.append(lure)
-    _play(st, _card("proofread"))
+    _play(st, _red_ink_edit())
     assert not Y.is_annotated(lure)
     assert Y.ledger(st.player).edits == 0
 
@@ -180,7 +190,7 @@ def test_red_ink_goes_to_a_planting_card_over_a_utility_card():
     st = _state()
     lure, evo = _card("foxfire_lure"), _card("yakan_evocation")
     st.player.hand += [lure, evo]
-    _play(st, _card("proofread"))
+    _play(st, _red_ink_edit())
     assert evo.ym_annotation == Y.RED_INK and not Y.is_annotated(lure)
 
 
@@ -189,7 +199,7 @@ def test_a_pilot_choice_of_a_dead_card_edits_nothing():
     lure = _card("foxfire_lure")
     st.player.hand.append(lure)
     Y.ledger(st.player).edit_choice = lambda state, editor, ann: lure
-    _play(st, _card("proofread"))
+    _play(st, _red_ink_edit())
     assert not Y.is_annotated(lure)
 
 

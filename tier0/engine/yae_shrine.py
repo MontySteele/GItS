@@ -45,7 +45,10 @@ THE RULES AS MODELLED:
     it had: Red Ink (+3 damage and +3 Block, as the card's own riders),
     Footnote (draw 1 after its own effects), Deadline Extension (Retain), Fox
     Fire (after its own effects, 4 Electro to a random enemy, unpowered),
-    Sakura Seal (after its own effects, plant a Sakura). The target is the
+    Sakura Seal (after its own effects, plant a Sakura), Royalties (after
+    its own effects, gain 1 Energy), Reprint (the first play each combat is
+    played twice, Glam's rule: `reprint_replays`, read by
+    `combat._finish_play`'s replay loop). The target is the
     pilot's (`YaeLedger.edit_choice`); the default reading is `_edit_target`.
     "Annotated" is any card carrying one (`is_annotated`), a Published one
     included.
@@ -86,8 +89,9 @@ THE RULES AS MODELLED:
     full-shrine plant that only levels plants nothing, so nothing inherits.
     THE DEAD-EDIT FILTER: an Edit, Reborn as Guuji Yae and the after-elite
     Publish offer skip a card the Annotation would do nothing on
-    (`affects`): only Red Ink can be dead, on a card that deals no damage,
-    gives no Block and plants nothing. C# twin: `YaeAnnotationReach`.
+    (`affects`): Red Ink is dead on a card that deals no damage, gives no
+    Block and plants nothing; Reprint on a card that cannot be played. C#
+    twin: `YaeAnnotationReach`.
   * WITHERS: Fallen Petals' Energy (and its upgrade's draw) are paid at
     the start of her next turn, beside Offering's draw: a Sakura withers at
     the end of her turn, when Energy would be lost.
@@ -122,15 +126,16 @@ COUNT_TENKO_BONUS = 1       # (b): each Tenko adds 1 to every later strike
 SCALING = "level"
 
 # --- the Annotations ---
-RED_INK, FOOTNOTE, DEADLINE, FOX_FIRE, SAKURA_SEAL, ROYALTIES = (
+RED_INK, FOOTNOTE, DEADLINE, FOX_FIRE, SAKURA_SEAL, ROYALTIES, REPRINT = (
     "red_ink", "footnote", "deadline", "fox_fire", "sakura_seal",
-    "royalties")
-ANNOTATIONS = (RED_INK, FOOTNOTE, DEADLINE, FOX_FIRE, SAKURA_SEAL, ROYALTIES)
+    "royalties", "reprint")
+ANNOTATIONS = (RED_INK, FOOTNOTE, DEADLINE, FOX_FIRE, SAKURA_SEAL, ROYALTIES,
+               REPRINT)
 ROYALTIES_ENERGY = 1
 RED_INK_AMOUNT = 3
 FOX_FIRE_DAMAGE = 4
 #: What a Publish is worth to the default pilot, best first.
-PUBLISH_ORDER = (SAKURA_SEAL, ROYALTIES, FOOTNOTE, RED_INK, FOX_FIRE,
+PUBLISH_ORDER = (REPRINT, SAKURA_SEAL, ROYALTIES, FOOTNOTE, RED_INK, FOX_FIRE,
                  DEADLINE)
 
 # --- the powers her rows apply (`apply_power`, target self) ---
@@ -226,6 +231,10 @@ class YaeLedger:
     strikes: int = 0              # this combat
     strike_damage: int = 0        # printed amounts, this combat
     edits: int = 0
+    #: Reprint (2026-10-14): the cards (by `id`) whose Reprint has spent
+    #: its replay this fight. Per fight, so a Published Reprint plays twice
+    #: once every combat; a fresh Edit takes the card off it again.
+    reprinted: set = field(default_factory=set)
     #: slot -> last Annotation the fight left on that deck card (the
     #: evidence the after-elite Publish reads).
     drafts: dict = field(default_factory=dict)
@@ -615,6 +624,10 @@ def annotate(state, card, name: str, reason: str = "edit") -> None:
     if getattr(card, "ym_base_retain", None) is None:
         card.ym_base_retain = bool(card.retain)
     card.ym_annotation = name
+    if state is not None and name == REPRINT:
+        led = ledger(state.player)
+        if led is not None:
+            led.reprinted.discard(id(card))   # a fresh Reprint, unspent
     # The draft (pick 2 (a)): the C# writes it at every Edit
     # (`YaeEditing.Annotate`); the end-of-turn sweep below stays as the
     # backstop for a card annotated outside an Edit.
@@ -685,11 +698,35 @@ def gives_block(card) -> bool:
         for fx in _walk(card.effects))
 
 
+def playable(card) -> bool:
+    """Can the card be played at all? A Status or Curse, or an Unplayable
+    card, never is (C# `YaeAnnotationReach.Playable`)."""
+    return not card.is_junk and "unplayable" not in (card.tags or ())
+
+
 def affects(card, annotation: str) -> bool:
-    """Would `annotation` do anything on `card`? Only Red Ink can be dead.
-    C# `YaeAnnotationReach.Affects`."""
+    """Would `annotation` do anything on `card`? Red Ink needs damage, Block
+    or a plant; Reprint needs a playable card. C#
+    `YaeAnnotationReach.Affects`."""
+    if annotation == REPRINT:
+        return playable(card)
     return (annotation != RED_INK or deals_damage(card) or gives_block(card)
             or plants_sakura(card))
+
+
+def reprint_replays(state, card) -> int:
+    """Reprint, the base game's Glam ([USER], 2026-10-14: "Let's bump it to
+    'Play it twice.'"): "The first time this card is played each combat,
+    play it twice." The extra play count, 1 or 0, spent on the first play
+    this fight. C# `ReprintAnnotation.EnchantPlayCount`."""
+    if getattr(card, "ym_annotation", None) != REPRINT:
+        return 0
+    led = ledger(state.player)
+    if led is None or id(card) in led.reprinted:
+        return 0
+    led.reprinted.add(id(card))
+    state.emit("yae_reprint", card=card.id)
+    return 1
 
 
 def inherits(card) -> bool:
@@ -719,7 +756,8 @@ def _has_op(card, op: str) -> bool:
 def _edit_target(state, editor, annotation: str):
     """The default reading of "a card in your hand": Red Ink goes on the
     hardest-hitting Attack (most hits), else a Block card; Deadline on the
-    dearest card; the three play riders on the cheapest card. A card not yet
+    dearest card; Reprint on the dearest card, an Attack first; the play
+    riders on the cheapest card. A card not yet
     Annotated is preferred, so an Edit overwrites only when it must."""
     cands = _editable(state, editor, annotation)
     if not cands:
@@ -741,6 +779,9 @@ def _edit_target(state, editor, annotation: str):
         return blocks[0] if blocks else fresh[0]
     if annotation == DEADLINE:
         return max(fresh, key=cost)
+    if annotation == REPRINT:
+        # The card most worth a second play: the dearest, an Attack first.
+        return max(fresh, key=lambda c: (cost(c), c.type == "attack"))
     plain = [c for c in fresh if not c.exhaust] or fresh
     return min(plain, key=cost)
 

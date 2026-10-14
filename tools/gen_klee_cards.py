@@ -939,7 +939,8 @@ ARM_KEYWORDS = (
     # and the Rite's tip left with the Rite.
     ArmKeyword("Tenko", ("Tenko",), "ArmKeywordTips.ForTenko"),
     ArmKeyword("Annotation", ("Red Ink", "Footnote", "Deadline Extension",
-                              "Fox Fire", "Sakura Seal", "Royalties"),
+                              "Fox Fire", "Sakura Seal", "Royalties",
+                              "Reprint"),
                "ArmKeywordTips.ForAnnotation"),
     ArmKeyword("Edit", ("Edit", "Edited", "Annotated", "Publish"),
                "ArmKeywordTips.ForEdit"),
@@ -3077,6 +3078,7 @@ YAE_ANNOTATIONS = {
     "fox_fire": "FoxFire",
     "sakura_seal": "SakuraSeal",
     "royalties": "Royalties",
+    "reprint": "Reprint",
 }
 #: Shrine r2 (ruled 2026-10-14): a typed Tenko's kind (`as:` on a `tenko`
 #: op, the C# `YaeTenkoKind` member; absent, it is Thunder). The design axes
@@ -3094,6 +3096,7 @@ YAE_ANNOTATION_NAMES = {
     "FoxFire": "Fox Fire",
     "SakuraSeal": "Sakura Seal",
     "Royalties": "Royalties",
+    "Reprint": "Reprint",
 }
 
 

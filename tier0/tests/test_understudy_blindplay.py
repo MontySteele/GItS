@@ -6607,6 +6607,8 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                      " damage to a random enemy.", " strikes, it also deals "],
         "Sakura Seal": ["When this card is played, plant a "],
         "Royalties": ["When this card is played, gain ", " Energy."],
+        "Reprint": ["The first time this card is played each combat, play "
+                    "it twice."],
         # (The Rite row left with the Rite, Yae shrine r2, 2026-10-14.)
     }
     # `Spotlighted` (2026-09-06) is a row with NO tooltip to be held in step
