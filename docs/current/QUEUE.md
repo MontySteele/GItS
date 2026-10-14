@@ -22,6 +22,11 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
+- **Yae design axes** (`yae-design-axes-2026-10-14.md`, four picks, all
+  (a)): scaling and late damage free, Block the challenge, velocity as hand
+  quality; Energy from withering; batch two of eight; section 4's numbers
+  build without a pick.
+
 - **Distribution readiness** (`distribution-readiness-2026-10-12.md`, two picks,
   defaults (a)): a closed beta now, public early access once Varka and Furina
   reach Balance; a GitHub release first. (The `LAW.md` art line, #1145, is
