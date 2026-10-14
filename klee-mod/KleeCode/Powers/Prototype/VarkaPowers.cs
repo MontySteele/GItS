@@ -1023,17 +1023,19 @@ public sealed class WeathervanePower : PowerModel, ILocalizationProvider
     public override PowerStackType StackType => PowerStackType.Single;
 }
 
-/// <summary>Twin Gales: "Your Swirls pay both your current element and the
-/// element Swirled." A marker read by <see cref="VarkaOath.OnSwirl"/>.
-/// </summary>
+/// <summary>Twin Gales: "Your Swirls also pay the element they Swirl. If
+/// it's your current element, it pays twice." (Varka round 5, 2026-10-13:
+/// a matched element paid once.) A marker read by
+/// <see cref="VarkaOath.OnSwirl"/>.</summary>
 public sealed class TwinGalesPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
         ("title", "Twin Gales"),
         ("description",
-            "Your [gold]Swirls[/gold] pay both your [gold]current "
-          + "element[/gold] and the element they [gold]Swirl[/gold]."),
+            "Your [gold]Swirls[/gold] also pay the element they "
+          + "[gold]Swirl[/gold]. If it's your [gold]current element[/gold], "
+          + "it pays twice."),
     };
 
     public override PowerType Type => PowerType.Buff;

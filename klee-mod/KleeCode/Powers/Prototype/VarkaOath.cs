@@ -867,15 +867,16 @@ public static class VarkaOath
             ? ledger.Current : Element.None;
         // Stormterror's Scale: "Your Swirls pay twice." The expansion:
         // Crosscurrent's Swirl pays twice too (the two multiply); Twin Gales
-        // pays the element Swirled as well, once, when it is not the current
-        // one.
+        // pays the element Swirled as well. Varka round 5 (2026-10-13,
+        // varka-next): when that is the current element it pays again, so a
+        // matched element pays twice (the Fang's payout, then Twin Gales').
         var twin = dealer.HasPower<TwinGalesPower>();
         var times = Relics.StormterrorsScale.TakePayouts(dealer)
                     * (ledger.PaysTwice > 0 ? 2 : 1);
         for (var pay = 0; pay < times; pay++)
         {
             await Pay(choiceContext, target, dealer, current);
-            if (twin && IsOathElement(swirled) && swirled != current)
+            if (twin && IsOathElement(swirled))
             {
                 await Pay(choiceContext, target, dealer, swirled);
             }
@@ -930,19 +931,25 @@ public static class VarkaOath
 
     /// <summary>What one Swirl paid under Twin Gales, as the seat page prints
     /// it: the current element's payout, and the Swirled element's when it is
-    /// another Oath element, joined by "and", with " x2" when the Swirl paid
-    /// <paramref name="times"/> over (Stormterror's Scale, Crosscurrent).
-    /// Empty when nothing paid. PURE.</summary>
+    /// another Oath element, joined by "and"; " twice" when the two are the
+    /// same element (Varka round 5, 2026-10-13: a matched element pays
+    /// twice); with " x2" when the Swirl paid <paramref name="times"/> over
+    /// (Stormterror's Scale, Crosscurrent). Empty when nothing paid.
+    /// PURE.</summary>
     public static string TwinGalesPaid(Element current, Element swirled,
                                        int times)
     {
         if (times <= 0) return string.Empty;
         var parts = new List<string>();
         var first = PayoutWords(current);
-        if (first.Length > 0) parts.Add(first);
-        if (IsOathElement(swirled) && swirled != current)
+        if (IsOathElement(swirled) && swirled == current && first.Length > 0)
         {
-            parts.Add(PayoutWords(swirled));
+            parts.Add(first + " twice");
+        }
+        else
+        {
+            if (first.Length > 0) parts.Add(first);
+            if (IsOathElement(swirled)) parts.Add(PayoutWords(swirled));
         }
         if (parts.Count == 0) return string.Empty;
         var line = string.Join(" and ", parts);

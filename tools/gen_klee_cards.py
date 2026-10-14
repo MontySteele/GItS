@@ -3873,8 +3873,9 @@ APPLY_POWERS = {
         "At the start of your turn, you may choose an element you have "
         "[gold]Oath[/gold] in. It becomes your [gold]current element[/gold]."),
     "vk_twin_gales": ("TwinGalesPower", None,
-        "Your [gold]Swirls[/gold] pay both your [gold]current element[/gold] "
-        "and the element they [gold]Swirl[/gold]."),
+        "Your [gold]Swirls[/gold] also pay the element they "
+        "[gold]Swirl[/gold]. If it's your [gold]current element[/gold], it "
+        "pays twice."),
     "vk_eye_of_stormterror": ("EyeOfStormterrorPower", None,
         "The first 3 times you [gold]Swirl[/gold] each turn, draw {X} card."),
     "vk_the_order_answers": ("TheOrderAnswersPower", None,
