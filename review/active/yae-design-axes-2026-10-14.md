@@ -249,3 +249,55 @@ before the next batch.
    - **(a) Default:** Claude builds sections 4 and 5 after your picks, while
      no lanes are running, then you play her.
    - (b) Two seats first, then you play.
+
+## Ruled 2026-10-14
+
+[USER]: "1) I like the idea of splitting the Shrine from the Sakura. I'm
+thinking that this basically lets the Sakura have two effects - one from the
+Shrine, affected by Tenko, and a second added as a sort of in-place
+enchantment from some publishing style cards. If no enchantment is added,
+then it just does what the shrine does. ... 2,3,4) agreed on your defaults
+otherwise. 5) I think you'll probably have time to do seat rounds before I
+get off of work at this rate. If we have a build we actually like, do the
+full 5 - otherwise just 2 as a sanity check for 'does this survive act 1 now
+and do the cards work'."
+
+**Pick 1: Rites plus Sakura Annotations.** This combines (a) and (b).
+
+The rule:
+- **The shrine's Rite** (Thunder, Warding, Wildfire, Offering, as in
+  section 3) sets what every Sakura's strike does. Tenko fires every
+  Sakura now, under the current Rite.
+- **A Sakura may carry one Annotation.** It is written by cards that say
+  "Edit your newest Sakura", "Edit your oldest Sakura" or "Edit every
+  Sakura". Each strike then does the Rite's effect and also the
+  Annotation's. A new Edit on a Sakura replaces its old Annotation. The
+  Annotation lasts as long as the Sakura does, and it is never Published.
+- **A Sakura with no Annotation** does only what the shrine does.
+
+**What each Annotation does on a Sakura:**
+
+| Annotation | On a Sakura |
+|---|---|
+| Red Ink | Its strike is 3 bigger, in whatever Rite. |
+| Fox Fire | When it strikes, it also deals 4 Electro damage to a random enemy. |
+| Deadline Extension | It does not wither. |
+
+Footnote, Sakura Seal and Royalties have no Sakura reading in this batch.
+A card that edits a Sakura cannot give them.
+
+**The cards that write on Sakura:**
+- **Fox Fire Draft** (C, Skill 0, Exhaust) changes from "Edit a card in your
+  hand: Fox Fire" to **"Edit your newest Sakura: Fox Fire."** Upgraded:
+  "Edit every Sakura: Fox Fire."
+- **Inked Branches** (new, U, Skill 1 [0]): "Edit every Sakura: Red Ink."
+- **Evergreen Charm** (new, C, Skill 1): "Gain 5 [8] Block. Edit your
+  oldest Sakura: Deadline Extension."
+
+Picks 2 to 4 are (a): four Rites; Energy when a Sakura withers (Fallen
+Petals); batch two's eight cards. With the two cards above, the pool is
+40 (15 / 17 / 8).
+
+**Pick 5:** Claude builds it now. If the build plays well, five Yae seats
+run before [USER] is home; if not, two seats as a sanity check ("does this
+survive act 1 now and do the cards work").

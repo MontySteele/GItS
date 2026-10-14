@@ -22,11 +22,6 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
-- **Yae design axes** (`yae-design-axes-2026-10-14.md`, five picks, all
-  (a), revised on [USER]'s note): Rites, so the shrine can also Block, sweep
-  or draw, one job at a time; four Rites; Energy when a Sakura withers;
-  batch two of eight; build after the picks, then his run.
-
 - **Distribution readiness** (`distribution-readiness-2026-10-12.md`, two picks,
   defaults (a)): a closed beta now, public early access once Varka and Furina
   reach Balance; a GitHub release first. (The `LAW.md` art line, #1145, is
