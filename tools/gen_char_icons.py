@@ -118,12 +118,16 @@ CHARS = {
         source_size=(1920, 1080), source_bbox=(883, 36, 1616, 1080),
         face_cx=1270, crown_y=215, chin_y=628),
     # Varka: his model-rendered select close-up (tools/char_render/pack.py),
-    # the crossed-arms, smirking render of PR #1238.
+    # the crossed-arms, smirking render of PR #1238, re-rendered with his two
+    # swords standing beside his legs (figure 1655px tall, was 2150). Crown is
+    # the top of his hair, 6px under its single tallest spike (tip row 38);
+    # eyes at x 1165 and 1222, chin at row 262 over x 1195. The swords stand
+    # at x 455..820 and 1450..1895 below row 450, far outside the disc.
     "varka": Icon(
         source="ImageGen/images/varka/ui/select_closeup.png",
         out="ImageGen/images/varka/ui/char_icon.png",
-        source_size=(1920, 1080), source_bbox=(905, 37, 1627, 1080),
-        face_cx=1250, crown_y=45, chin_y=292),
+        source_size=(1920, 1080), source_bbox=(455, 37, 1895, 1080),
+        face_cx=1194, crown_y=44, chin_y=262),
     # Kokomi: her select splash (tools/gen_kokomi_stills.py); she has no model
     # render yet.
     "kokomi": Icon(
