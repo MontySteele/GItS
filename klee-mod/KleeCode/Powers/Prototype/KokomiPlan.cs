@@ -3008,7 +3008,44 @@ public static class KokomiPlan
                 // Item 11: the card written is an Attack, which the base
                 // game counts as an Attack played this turn (Ripple Basin).
                 ["attack"] = entry.Source?.Type == CardType.Attack,
+                // KOKOMI ROUND 7 (2026-10-14): the Plan plays a card through
+                // the game's own auto-play, which Ringing counts as the
+                // turn's one card; and where the Vulnerable it applies lands,
+                // which a later Plan's hit in the same morning meets. Display
+                // only; false and "" for a flipped one.
+                ["plays_card"] = !(entry.Now && entry.TwoLine)
+                    && PlaysACard(entry),
+                ["vulnerable_aim"] = entry.Now && entry.TwoLine
+                    ? "" : VulnerableAim(entry),
             };
+    }
+
+    /// <summary>KOKOMI ROUND 7 (2026-10-14): does carrying this entry out
+    /// play a card? A Companion (<see cref="KokomiRefounding.CarryOut"/>),
+    /// Moon's Reflection (<see cref="Replay"/>) and Crystal Collapse
+    /// (<see cref="PlayCopy"/>) go through <c>CardCmd.AutoPlay</c>, which
+    /// logs a card play the way the base game's own auto-plays do, so
+    /// <c>RingingPower.ShouldPlay</c> counts it. Every other clause plays no
+    /// card. Display only.</summary>
+    public static bool PlaysACard(Entry entry) =>
+        entry.Clauses.Any(clause => clause.Kind is Kind.PlayCompanion
+            or Kind.ReplayExhausted or Kind.PlayCopyOfCompanion);
+
+    /// <summary>KOKOMI ROUND 7 (2026-10-14): where this entry's Vulnerable
+    /// lands, in <see cref="WrittenAim"/>'s words ("all", "front", "other"),
+    /// or "" for an entry that applies none. Display only.</summary>
+    public static string VulnerableAim(Entry entry)
+    {
+        var vulnerable = entry.Clauses
+            .Where(clause => clause.Kind == Kind.ApplyVulnerable).ToList();
+        if (vulnerable.Count == 0) return "";
+        if (entry.AimOverride != null) return "other";
+        if (vulnerable.Any(clause => clause.Aim == Aim.AllEnemies))
+        {
+            return "all";
+        }
+        return vulnerable.Any(clause => clause.Aim == Aim.FrontEnemy)
+            ? "front" : "other";
     }
 
     /// <summary>KOKOMI REVIEW R6 (2026-10-14, item 7): which Counter reading
