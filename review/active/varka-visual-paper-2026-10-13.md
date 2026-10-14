@@ -32,7 +32,7 @@ This is phase A: the art pipeline, every render, and the review sheets. Phase B 
 | hurt | His body snaps back; the guard holds, both blades lifted together a little in his fixed grip. | 0.8 s | 16 |
 | death | He drives both blades into the ground either side, sinks to one knee between them, lets go and bows his head. It holds from 1.6 s. | 2.2 s | 25 |
 | ascension | For Four Winds' Ascension. He crouches and jumps straight up (hips 0.80 units, 0.39 of his height), the lead blade swung up over his head and the other held back for balance. Coming down, the lead blade chops over the top and is driven point-first, near vertical, into the ground in front of him as he lands (impact, frame 10). A hard landing, low beside the planted blade; he pulls it out and is back in the guard. No turn. The ground burst is a separate effect clip (see Round 3). | 1.3 s | 26 |
-| merchant | Stance B: upright, both claymores planted either side, his hands on the hilts. It breathes. | 3.0 s loop | 30 at 10 fps |
+| merchant | Stance B: upright, arms crossed over his chest, both claymores planted point-down in front of him, a slight smirk. It breathes. | 3.0 s loop | 30 at 10 fps |
 
 **Stills:**
 - rest site: sitting upright on the ground facing the fire, knees up and forearms on them, both blades planted upright behind him;
@@ -204,18 +204,26 @@ His old layer-cut rig's four layers no longer ship. The contract fixture went fr
    - **(a) Default:** go to phase B as is.
    - (b) Change the poses first: the guard, the spin-to-slam, the jump and drive, or the ground burst.
 
-## Re-rendered at 82 in, hands on the pommels (2026-10-13)
+## Re-rendered at 82 in (2026-10-13)
 
 [USER], on the heights chart: "Hmm. Ok, let's give Varka the height boost and use these proportion. (a)." His `height_in` in `tools/char_render/chars.py` is now 82, and the interim `ruled_height_in` is gone. Every clip and still was rendered again at the new scale (combat ppu 276.9, was 263.4). Motion, shading, trails, the ground burst and the texture pipeline are unchanged; only the size moved. Standing he is 284.3 px in full at 1080p against a target of 283.4. The frames come to 12 sheets, 92.1 Mpx (47.5 MB of PNG).
 
-[USER], the same evening, on the select screen: "the way he's holding the claymores looks kinda weird, like they're going through his hands." The cause: the plain grip puts the palm's centre on the handle's axis, so on the planted blades of stance B the hilt ran through his palm and fingers. Stance B (the shop loop and the select close-up) now rests his hands ON the pommels:
-- each blade stands with its pommel's top at his hand, about chest height (pommel tops 1.46 and 1.40 units up). The points go in about a quarter of their length, where `pack.py` cuts them at the ground line, so the planted blades look shorter than before;
-- `render.py` (`fit_rest`) lays each hand palm-down on its pommel, pointing out from his shoulder with the wrist dropped 22 degrees. It lowers the hand until the palm touches the pommel's gem, then curls the fingers down over the pommel as far as contact allows (36 degrees on the far hand, 20 on the near one);
-- the manifest records the measured result (`hands_on_pommels`). In both the shop's first frame and the select still the palm is on the gem: its point sits 0.0011 to 0.0013 units inside the palm's surface, and no gap shows. No finger goes into either pommel: the nearest is 0.044 units from the axis against radii of 0.034 and 0.038;
-- the test `test_his_palms_rest_on_the_pommels_and_no_finger_crosses_their_front` holds those numbers, and `test_stance_b_plants_both_blades_with_his_hands_on_them` holds the pose. The test allows the gem up to 0.006 units into the palm (hidden inside the hand) and never a gap. It allows a finger up to 0.006 units into the pommel on its hidden side, and no more than 0.002 on the side that faces the camera.
+[USER], the same evening, on the select screen: "the way he's holding the claymores looks kinda weird, like they're going through his hands." Two fixes followed: first the hands lifted clear of the pommels, then, on "His hands are awkwardly hovering over the swords now", palms resting on the pommels. Both are replaced by the next section.
 
-[USER], on the first rest (where the palm cleared the gem by 0.007 units): "Varka needs more work still for the main character pose. His hands are awkwardly hovering over the swords now. Can we show him lightly touching the swords (palms on the hilts)?" The fit now asks for contact, not clearance, so both palms visibly rest on the hilts at the select close-up camera.
+## Stance B: arms crossed, swords planted in front, a slight smirk (2026-10-13)
 
-A closed fist round the handle was tried first and dropped. His gauntlets are thick and the handle is narrow (0.016 to 0.018 units), so no fist that cleared the handle also closed round it. Each one either floated beside the hilt or had its fingers through it.
+[USER]: "Ok, I dont think the "hands over sword" thing is working for Varka. Can we have him cross his arms instead, with his swords infront of him? And let's have the facial expression be more of a slight smile or smirk." His reference for the face was a relaxed, confident half-smile: closed mouth, relaxed brows, a steady gaze.
 
-No combat clip changes grip. The roster tile is unchanged: it shows no hands. Sheets: `scratchpad/varka-art/sheets/` (`e_shop_rest_select_roster.png` shows the new stance B; every other sheet is at 82 in).
+What changed (the shop loop, the select close-up, the roster tile and its locked twin):
+- **Arms crossed.** `varka_clips.regal` poses both arms across his chest (`crossed_arms`). The near (right) forearm lies in front, its hand tucked against the far upper arm. The far (left) forearm lies behind and below it, its hand closing round the near elbow. That hand is turned 40 degrees about itself so its thumb lies along the forearm instead of rising into the near upper arm.
+- **Swords in front.** Both claymores stand on their own, point-down, side by side in front of his legs, the points a little apart. The pommels' tops are 1.28 units up (his waist). The points go about a third of their length into the ground, where `pack.py` cuts them at the ground line. In the select close-up only the pommels and the top of the grips show at the bottom edge; the shop shows the whole blades.
+- **Smirk.** The morphs are にやり (smirk) 0.45, 真面目 0.1 and なごみ (relaxed eyes) 0.12, on the shop, the select close-up and the roster tile. The old faces used にこり, which on this model is a brow morph only, so the mouth never smiled.
+- **The mouth line.** The face's outline hull folded into the lips and drew dark ticks at the mouth's corners and a heavy upper lip. At select scale that read as a grimace, whatever the morphs said. `render.py` `unline_mouth` now takes the skin round the mouth out of the outline (`chars.py` `mouth_mat`). The jaw's outline stays. The combat clips and the rest site were not re-rendered, because at combat scale the face is about 10 px tall and the ticks do not show. The next full render picks the change up.
+
+How it is held:
+- `render.py` `arms_crossed` measures the deformed mesh on the shop loop's first frame and on the select still. For each forearm and hand it finds the deepest vertex behind the surface of the other arm and of his body. It also records where his chin, his forearms and each blade's top fall on the canvas. The manifest keeps the result (`arms_crossed`).
+- Measured: the deepest sink of any forearm into the other arm is 0.0118 units (one vertex past 0.01, where the stacked forearms touch). Into his body it is 0.0052. Each blade's top is 31 to 37 px under his forearms on the select still and 8 to 10 px under them in the shop.
+- `test_his_crossed_arms_clear_each_other_and_the_blades_hide_neither_face_nor_arms` holds those numbers. It allows 0.015 units of sink and at most three vertices past 0.01, and it requires every blade top under the forearms and the forearms under the chin. `test_stance_b_crosses_his_arms_with_both_blades_planted_in_front` holds the pose and the smirk. They replace the two pommel tests.
+- The pommel-rest code (`fit_rest` and its contact checks) is gone from `render.py`. No other clip used it.
+
+The merchant scene was regenerated from the manifest (`python -m tools.varka_rig gen`); `combat.tscn` is unchanged. Sheet: `scratchpad/varka-art/sheets/e_shop_rest_select_roster.png`.

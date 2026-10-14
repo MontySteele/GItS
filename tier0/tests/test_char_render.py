@@ -294,21 +294,35 @@ def test_the_impacts_are_marked_and_the_trails_cover_them():
     assert any(w["blade"] == vc.DRIVE and w["from"] <= t <= w["to"] for w in asc["trails"])
 
 
-def test_stance_b_plants_both_blades_with_his_hands_on_them():
-    b = vc.MERCHANT["keys"][0][1]["blades"]
+def test_stance_b_crosses_his_arms_with_both_blades_planted_in_front():
+    # [USER], 2026-10-13: "Can we have him cross his arms instead, with his
+    # swords infront of him? And let's have the facial expression be more of
+    # a slight smile or smirk."
+    p = vc.MERCHANT["keys"][0][1]
+    assert p.get("arms_crossed")
+    b = p["blades"]
     for side in ("L", "R"):
-        assert b[side]["anchor"] == "ground" and b[side]["hand"] and b[side]["dir"][2] < -0.95
-        # [USER], 2026-10-13: "like they're going through his hands" -- the
-        # hands REST on the pommels: the blade stands with its pommel's top
-        # (chars.py) at his hand, about chest height
-        assert b[side]["rest"] and b[side]["grip"] == chars.CHARS["varka"]["blades"][side]["pommel"][1]
-        assert 1.3 <= b[side]["at"][2] <= 1.5, b[side]["at"]
+        # planted point-down, standing free (no hand on it), the pommel's top
+        # (chars.py) at about his waist, in front of him
+        assert b[side]["anchor"] == "ground" and not b[side]["hand"] and b[side]["dir"][2] < -0.95
+        assert b[side]["grip"] == chars.CHARS["varka"]["blades"][side]["pommel"][1]
+        assert 1.15 <= b[side]["at"][2] <= 1.35, b[side]["at"]
+        assert b[side]["at"][1] < -0.3, "in front of him (toward the viewer)"
+    assert b["L"]["at"][0] > 0 > b["R"]["at"][0], "side by side"
+    # each hand is posed across his chest, to the other side
+    hands = {op[1]: op for op in p["ops"] if op[0] == "hand"}
+    assert set(hands) == {"L", "R"} and all(op[2] == vc.CH for op in hands.values())
+    assert hands["R"][3][0] > 0 > hands["L"][3][0], "each wrist crosses to the other side"
+    assert hands["R"][3][1] < hands["L"][3][1], "the near forearm in front"
+    for name in ("select", "portrait"):
+        assert vc.STILLS[name]["morphs"] == vc.SMIRK, name
+    assert vc.SMIRK.get("にやり", 0) > 0 and all(v <= 0.5 for v in vc.SMIRK.values()), "a slight smirk"
     assert vc.SELECT["blades"] == vc.regal(1.0)["blades"], "the select close-up is stance B too"
-    # no other clip rests a hand on a pommel
+    assert vc.SELECT.get("arms_crossed")
+    # no other clip crosses his arms or plants both blades free
     for name, clip in vc.CLIPS.items():
         if name != "merchant":
-            assert not any(bl.get("rest") for k in clip["keys"] for bl in k[1]["blades"].values()), name
-    assert b["L"]["at"][0] > 0 > b["R"]["at"][0], "one either side"
+            assert not any(k[1].get("arms_crossed") for k in clip["keys"]), name
     # the rest site: both blades planted upright behind him, and he sits upright
     for bl in vc.REST["blades"].values():
         assert not bl["hand"] and bl["anchor"] == "ground" and bl["dir"][2] < -0.95
@@ -445,27 +459,28 @@ def test_the_manifest_was_packed_at_his_ruled_height():
     assert m["stance_a"]["width_px"] <= 300, m["stance_a"]
 
 
-def test_his_palms_rest_on_the_pommels_and_no_finger_crosses_their_front():
-    # [USER], 2026-10-13, on the select close-up: first "like they're going
-    # through his hands", then, of the hands lifted clear: "His hands are
-    # awkwardly hovering over the swords now. Can we show him lightly touching
-    # the swords (palms on the hilts)?" render.py measures the deformed hand
-    # mesh against each pommel in stance B (the shop loop's first frame and the
-    # select still): the palm ON the gem (the gem's point at most a few
-    # thousandths of a unit inside the palm, never a gap), a finger at most a
-    # skin's depth into the pommel on its hidden side, and none through the
-    # side that faces the camera.
+def test_his_crossed_arms_clear_each_other_and_the_blades_hide_neither_face_nor_arms():
+    # render.py arms_crossed measures the deformed mesh in stance B (the shop
+    # loop's first frame and the select still): how far any forearm or hand
+    # vertex sinks behind the surface of the other arm or of his body (a
+    # forearm through a forearm, a gauntlet through his chest), and, on the
+    # canvas (y px, down), his chin, his crossed forearms and each blade's top.
     m = json.loads(pack.manifest_path("varka").read_text(encoding="utf-8"))
-    rest = m["hands_on_pommels"]
-    assert set(rest) == {"merchant", "select"}
-    for still, sides in rest.items():
-        assert set(sides) == {"L", "R"}, still
-        for side, g in sides.items():
-            r = chars.CHARS["varka"]["blades"][side]["pommel_r"]
-            assert g["pommel_r"] == r
-            assert g["rest_gap"] is not None and -0.006 <= g["rest_gap"] <= 0.0, ("contact", still, side, g)
-            assert g["min_axis_dist"] is None or g["min_axis_dist"] >= r - 0.006, (still, side, g)
-            assert g["min_front_dist"] is None or g["min_front_dist"] >= r - 0.002, ("the visible front", still, side, g)
+    crossed = m["arms_crossed"]
+    assert set(crossed) == {"merchant", "select"}
+    for still, g in crossed.items():
+        for side in ("L", "R"):
+            # stacked forearms touch: a skin's depth (0.015 units, ~1.5 cm)
+            # at most, and only at a few vertices past 0.01
+            assert g[side]["into_other_arm"] <= 0.015 and g[side]["into_other_arm_n"] <= 3, (still, side, g[side])
+            assert g[side]["into_body"] <= 0.015 and g[side]["into_body_n"] <= 3, (still, side, g[side])
+        top, bottom = g["forearms_px"]
+        assert g["chin_px"] < top, ("his forearms are under his chin", still)
+        assert set(g["blade_top_px"]) == {"L", "R"}
+        for side, y in g["blade_top_px"].items():
+            # every blade's highest point is under his crossed forearms: the
+            # blades cover neither them nor his face
+            assert y > bottom, ("a blade reaches his arms", still, side, y, bottom)
 
 
 def test_tight_box_ignores_the_faint_haze():

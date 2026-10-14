@@ -5,182 +5,182 @@
 
 [sub_resource type="AtlasTexture" id="Atlas_merchant_0"]
 atlas = ExtResource("1_merchant")
-region = Rect2(0, 0, 486, 729)
-margin = Rect2(0, 2, 0, 2)
+region = Rect2(0, 0, 340, 728)
+margin = Rect2(16, 2, 16, 2)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_merchant_1"]
 atlas = ExtResource("1_merchant")
-region = Rect2(486, 0, 486, 728)
-margin = Rect2(0, 3, 0, 3)
+region = Rect2(340, 0, 340, 728)
+margin = Rect2(16, 2, 16, 2)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_merchant_2"]
 atlas = ExtResource("1_merchant")
-region = Rect2(972, 0, 486, 729)
-margin = Rect2(0, 2, 0, 2)
+region = Rect2(680, 0, 341, 728)
+margin = Rect2(15, 2, 15, 2)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_merchant_3"]
 atlas = ExtResource("1_merchant")
-region = Rect2(1458, 0, 486, 729)
-margin = Rect2(0, 2, 0, 2)
+region = Rect2(1021, 0, 342, 728)
+margin = Rect2(14, 2, 14, 2)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_merchant_4"]
 atlas = ExtResource("1_merchant")
-region = Rect2(1944, 0, 486, 729)
-margin = Rect2(0, 2, 0, 2)
+region = Rect2(1363, 0, 343, 728)
+margin = Rect2(13, 2, 13, 2)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_merchant_5"]
 atlas = ExtResource("1_merchant")
-region = Rect2(2430, 0, 486, 729)
-margin = Rect2(0, 2, 0, 2)
+region = Rect2(1706, 0, 344, 728)
+margin = Rect2(12, 2, 12, 2)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_merchant_6"]
 atlas = ExtResource("1_merchant")
-region = Rect2(2916, 0, 486, 729)
-margin = Rect2(0, 2, 0, 2)
+region = Rect2(2050, 0, 346, 729)
+margin = Rect2(10, 1, 10, 1)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_merchant_7"]
 atlas = ExtResource("1_merchant")
-region = Rect2(0, 729, 486, 729)
-margin = Rect2(0, 2, 0, 2)
+region = Rect2(2396, 0, 347, 729)
+margin = Rect2(9, 1, 9, 1)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_merchant_8"]
 atlas = ExtResource("1_merchant")
-region = Rect2(486, 729, 486, 730)
-margin = Rect2(0, 1, 0, 1)
+region = Rect2(0, 729, 349, 729)
+margin = Rect2(7, 1, 7, 1)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_merchant_9"]
 atlas = ExtResource("1_merchant")
-region = Rect2(972, 729, 486, 730)
-margin = Rect2(0, 1, 0, 1)
+region = Rect2(349, 729, 351, 729)
+margin = Rect2(5, 1, 5, 1)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_merchant_10"]
 atlas = ExtResource("1_merchant")
-region = Rect2(1458, 729, 486, 730)
-margin = Rect2(0, 1, 0, 1)
+region = Rect2(700, 729, 352, 730)
+margin = Rect2(4, 0, 4, 0)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_merchant_11"]
 atlas = ExtResource("1_merchant")
-region = Rect2(1944, 729, 486, 730)
-margin = Rect2(0, 1, 0, 1)
+region = Rect2(1052, 729, 353, 730)
+margin = Rect2(3, 0, 3, 0)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_merchant_12"]
 atlas = ExtResource("1_merchant")
-region = Rect2(2430, 729, 486, 731)
-margin = Rect2(0, 0, 0, 0)
+region = Rect2(1405, 729, 354, 730)
+margin = Rect2(2, 0, 2, 0)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_merchant_13"]
 atlas = ExtResource("1_merchant")
-region = Rect2(2916, 729, 486, 731)
+region = Rect2(1759, 729, 356, 730)
 margin = Rect2(0, 0, 0, 0)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_merchant_14"]
 atlas = ExtResource("1_merchant")
-region = Rect2(0, 1460, 486, 731)
+region = Rect2(2115, 729, 356, 730)
 margin = Rect2(0, 0, 0, 0)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_merchant_15"]
 atlas = ExtResource("1_merchant")
-region = Rect2(486, 1460, 486, 731)
+region = Rect2(2471, 729, 356, 730)
 margin = Rect2(0, 0, 0, 0)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_merchant_16"]
 atlas = ExtResource("1_merchant")
-region = Rect2(972, 1460, 486, 731)
+region = Rect2(0, 1459, 356, 730)
 margin = Rect2(0, 0, 0, 0)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_merchant_17"]
 atlas = ExtResource("1_merchant")
-region = Rect2(1458, 1460, 486, 731)
+region = Rect2(356, 1459, 356, 730)
 margin = Rect2(0, 0, 0, 0)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_merchant_18"]
 atlas = ExtResource("1_merchant")
-region = Rect2(1944, 1460, 486, 731)
-margin = Rect2(0, 0, 0, 0)
+region = Rect2(712, 1459, 354, 730)
+margin = Rect2(2, 0, 2, 0)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_merchant_19"]
 atlas = ExtResource("1_merchant")
-region = Rect2(2430, 1460, 486, 730)
-margin = Rect2(0, 1, 0, 1)
+region = Rect2(1066, 1459, 353, 730)
+margin = Rect2(3, 0, 3, 0)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_merchant_20"]
 atlas = ExtResource("1_merchant")
-region = Rect2(2916, 1460, 486, 730)
-margin = Rect2(0, 1, 0, 1)
+region = Rect2(1419, 1459, 352, 730)
+margin = Rect2(4, 0, 4, 0)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_merchant_21"]
 atlas = ExtResource("1_merchant")
-region = Rect2(0, 2191, 486, 730)
-margin = Rect2(0, 1, 0, 1)
+region = Rect2(1771, 1459, 351, 729)
+margin = Rect2(5, 1, 5, 1)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_merchant_22"]
 atlas = ExtResource("1_merchant")
-region = Rect2(486, 2191, 486, 730)
-margin = Rect2(0, 1, 0, 1)
+region = Rect2(2122, 1459, 349, 729)
+margin = Rect2(7, 1, 7, 1)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_merchant_23"]
 atlas = ExtResource("1_merchant")
-region = Rect2(972, 2191, 486, 729)
-margin = Rect2(0, 2, 0, 2)
+region = Rect2(2471, 1459, 347, 729)
+margin = Rect2(9, 1, 9, 1)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_merchant_24"]
 atlas = ExtResource("1_merchant")
-region = Rect2(1458, 2191, 486, 729)
-margin = Rect2(0, 2, 0, 2)
+region = Rect2(0, 2189, 346, 729)
+margin = Rect2(10, 1, 10, 1)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_merchant_25"]
 atlas = ExtResource("1_merchant")
-region = Rect2(1944, 2191, 486, 729)
-margin = Rect2(0, 2, 0, 2)
+region = Rect2(346, 2189, 344, 728)
+margin = Rect2(12, 2, 12, 2)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_merchant_26"]
 atlas = ExtResource("1_merchant")
-region = Rect2(2430, 2191, 486, 729)
-margin = Rect2(0, 2, 0, 2)
+region = Rect2(690, 2189, 343, 728)
+margin = Rect2(13, 2, 13, 2)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_merchant_27"]
 atlas = ExtResource("1_merchant")
-region = Rect2(2916, 2191, 486, 729)
-margin = Rect2(0, 2, 0, 2)
+region = Rect2(1033, 2189, 342, 728)
+margin = Rect2(14, 2, 14, 2)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_merchant_28"]
 atlas = ExtResource("1_merchant")
-region = Rect2(0, 2921, 486, 729)
-margin = Rect2(0, 2, 0, 2)
+region = Rect2(1375, 2189, 341, 728)
+margin = Rect2(15, 2, 15, 2)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_merchant_29"]
 atlas = ExtResource("1_merchant")
-region = Rect2(486, 2921, 486, 728)
-margin = Rect2(0, 3, 0, 3)
+region = Rect2(1716, 2189, 340, 728)
+margin = Rect2(16, 2, 16, 2)
 filter_clip = true
 
 [sub_resource type="Animation" id="Animation_reset"]
@@ -224,14 +224,14 @@ _data = {
 [node name="VarkaMerchant" type="Node2D"]
 
 [node name="Shadow" type="Sprite2D" parent="."]
-position = Vector2(12.8, 0)
-scale = Vector2(0.8291, 0.8262)
+position = Vector2(3.5, 0)
+scale = Vector2(0.5176, 0.5159)
 texture = ExtResource("0_shadow")
 
 [node name="Sheet" type="Sprite2D" parent="."]
 texture = SubResource("Atlas_merchant_0")
 centered = false
-offset = Vector2(-219, -720)
+offset = Vector2(-179, -720)
 scale = Vector2(0.6667, 0.6667)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]

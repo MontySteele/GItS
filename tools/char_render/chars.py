@@ -204,6 +204,8 @@ CHARS = {
                   "pommel": (0.18, 0.338), "pommel_r": 0.034},
         },
         "hide_mats": set(),
+        # the face's outline stops short of the lips (render.py unline_mouth)
+        "mouth_mat": "口舌",
         "camera_height": 1.0,
     },
 }
