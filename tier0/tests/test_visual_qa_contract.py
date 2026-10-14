@@ -146,8 +146,12 @@ def test_the_sample_contract_is_well_formed():
     # (klee_bomb_big.png), 2026-10-13. Then +9: Varka's model art (phase B,
     # 2026-10-13) -- twelve frame sheets (seven combat clips, the shop loop,
     # two element layers, the ground burst, his shadow) and his generated
-    # merchant scene in, his old rig's four layers out.
-    assert len(parsed.resources) == 455
+    # merchant scene in, his old rig's four layers out. Then +12: Furina's
+    # model art (phase B, 2026-10-13) -- thirteen frame sheets (seven combat
+    # clips, the shop loop, the rapier layer, Spend/Drain/Repay, her shadow),
+    # eleven guest stills, her generated merchant scene and Freminet's scene
+    # in; her old rig's four layers and the ten flat guest cutouts out.
+    assert len(parsed.resources) == 467
 
 
 def test_a_v2_contract_is_stale_by_definition():
@@ -260,6 +264,8 @@ def test_end_to_end_on_a_staged_package(tmp_path):
     # sprite each), +4 for the supporting pool's two guests, -3 for Klee's
     # Set Off (its own sheet in, four splash-rig layers out), +2 for her Jumpy
     # Dumpty clip and its big bomb, +9 for Varka's model art (twelve sheets
-    # and his merchant scene in, four rig layers out).
-    assert report.checked["contract_resources"] == 455
+    # and his merchant scene in, four rig layers out), +12 for Furina's (13
+    # sheets, 11 guest stills, her merchant scene and Freminet's in; four rig
+    # layers and ten guest cutouts out).
+    assert report.checked["contract_resources"] == 467
     assert report.checked["package_files"] == 3

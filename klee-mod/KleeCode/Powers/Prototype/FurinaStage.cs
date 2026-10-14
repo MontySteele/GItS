@@ -1064,6 +1064,11 @@ public sealed class GameStageBoard : IStageBoard
     public Task Lunge(StageSeat? seat) =>
         Vfx.StagePerformerBeat.Act(seat?.Pet);
 
+    /// <summary>Her model art, phase B (2026-10-13): the Spend, Drain or
+    /// Repay effect on her body, fire-and-forget.</summary>
+    public void Effect(StageEffect effect) =>
+        Vfx.FurinaStageFx.Play(_owner, effect);
+
     public async Task Sync()
     {
         await FurinaStagePets.Sync(_owner);

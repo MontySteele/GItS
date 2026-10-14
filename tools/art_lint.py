@@ -556,8 +556,6 @@ def lint(rows, *, pixel_check: bool = True) -> list[str]:
 # still true; see the "structurally invisible defect" house rule.
 GENERATOR_OWNED = {
     "ImageGen/images/furina/model/combat_model.png":        "gen_furina_stills.py",
-    "ImageGen/images/furina/ui/select_portrait.png":        "gen_furina_stills.py",
-    "ImageGen/images/furina/ui/select_portrait_locked.png": "gen_furina_stills.py",
     "ImageGen/images/furina/ui/selection_splash.png":       "gen_furina_stills.py",
     "ImageGen/images/furina/ui/char_icon.png":              "gen_furina_stills.py",
     "ImageGen/images/furina/ui/map_marker.png":             "gen_furina_stills.py",
@@ -639,6 +637,39 @@ GENERATOR_OWNED = {
     "ImageGen/images/varka/ui/select_closeup.png":          "char_render/pack.py",
     "ImageGen/images/varka/ui/select_portrait.png":         "char_render/pack.py",
     "ImageGen/images/varka/ui/select_portrait_locked.png":  "char_render/pack.py",
+    # Furina's model art (phase B, 2026-10-13): her frame sheets, the attack's
+    # element layer, the Spend/Drain/Repay effects, shadow, rest still, select
+    # close-up, roster tile and the eleven guest stars' stills, rendered from
+    # the official models (which never enter the repo) and packed by one
+    # script; tools/char_render/furina_frames.json is the committed manifest.
+    "ImageGen/images/furina/model/frames/furina_idle.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_idle_low.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_attack.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_cast.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_hurt.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_death.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_rejoice.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_merchant.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_attack_fx.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_spend.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_drain.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_repay.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_shadow.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/furina_rest.png":         "char_render/pack.py",
+    "ImageGen/images/furina/ui/select_closeup.png":         "char_render/pack.py",
+    "ImageGen/images/furina/ui/select_portrait.png":        "char_render/pack.py",
+    "ImageGen/images/furina/ui/select_portrait_locked.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/guests/guest_charlotte.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/guests/guest_chevreuse.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/guests/guest_clorinde.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/guests/guest_escoffier.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/guests/guest_freminet.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/guests/guest_lynette.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/guests/guest_lyney.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/guests/guest_navia.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/guests/guest_neuvillette.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/guests/guest_sigewinne.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/guests/guest_wriothesley.png": "char_render/pack.py",
     "ImageGen/images/ui/transition_wipe.png":               "gen_transition_wipe.py",
     "ImageGen/images/kokomi/ui/transition_wipe.png":        "gen_transition_wipe.py",
     "ImageGen/images/varka/ui/transition_wipe.png":         "gen_transition_wipe.py",

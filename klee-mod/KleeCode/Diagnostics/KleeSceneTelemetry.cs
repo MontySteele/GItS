@@ -91,6 +91,13 @@ internal static class KleeSceneTelemetry
         // the ground burst draw uncoloured or stay off their target.
         ("varka/model/combat.tscn", "AttackFx"),
         ("varka/model/combat.tscn", "TargetBurst"),
+        // Hers (2026-10-13): the rapier's trail, and the three stage
+        // effects' players (FurinaStageFx); without them a Spend, a Drain or
+        // a Repay shows only its numbers again.
+        ("furina/model/combat.tscn", "AttackFx"),
+        ("furina/model/combat.tscn", "SpendFxPlayer"),
+        ("furina/model/combat.tscn", "DrainFxPlayer"),
+        ("furina/model/combat.tscn", "RepayFxPlayer"),
         ("furina/ui/salon_stage.tscn", "RibbonLabel"),
         ("shared/gauge.tscn", "ValueLabel"),
         // Without ChipLabel1 the docket renders slots with no numbers, which

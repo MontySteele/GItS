@@ -46,10 +46,12 @@ namespace KleeMod.Powers;
 /// ONE PRODUCER PER OUT-PATH (art_lint L11) is why the art is reused where it
 /// stands rather than copied to a second path. The eight guests' scenes
 /// (<c>guest_*.tscn</c>) are the same scene re-proportioned: people, not
-/// creatures, cut at 224 px (80% of Furina's 280) from each guest's in-game
-/// model render where it keys cleanly and from the Wish render otherwise, by
-/// <c>tools/cut_guest_bodies.py</c>, which writes the scenes from one
-/// template.
+/// creatures. Since 2026-10-13 each stands as a still rendered from the
+/// guest's official model at Furina's px per inch, so a guest is as tall
+/// beside her as the canon heights say, feet on the ground line
+/// (<c>tools/furina_rig/guests.py</c> writes the scenes from the trio's
+/// template; until then they were 224 px flat cutouts,
+/// <c>tools/cut_guest_bodies.py</c>).
 ///
 /// THEY STAND, WHERE THE JELLYFISH FLOATS, and that is the one number that is
 /// theirs rather than inherited. A <c>Sprite2D</c> centres on its origin, so a
@@ -97,8 +99,9 @@ public abstract class StagePerformerMonster : CustomPetModel, ILocalizationProvi
     {
         // One LITERAL path per guest, not one interpolated one: the deploy's
         // S12 check reads every `KleePck.Path("...")` literal and refuses a
-        // reference it cannot find in the staged pack. Each guest's body is
-        // cut by tools/cut_guest_bodies.py (224 px, 80% of Furina).
+        // reference it cannot find in the staged pack. Each guest stands as
+        // the still rendered from their official model, at Furina's px per
+        // inch (2026-10-13; scenes from tools/furina_rig/guests.py).
         StagePerformer.Charlotte => KleePck.Path("furina/model/guest_charlotte.tscn"),
         StagePerformer.Wriothesley => KleePck.Path("furina/model/guest_wriothesley.tscn"),
         StagePerformer.Lynette => KleePck.Path("furina/model/guest_lynette.tscn"),
@@ -106,9 +109,9 @@ public abstract class StagePerformerMonster : CustomPetModel, ILocalizationProvi
         StagePerformer.Lyney => KleePck.Path("furina/model/guest_lyney.tscn"),
         StagePerformer.Sigewinne => KleePck.Path("furina/model/guest_sigewinne.tscn"),
         StagePerformer.Chevreuse => KleePck.Path("furina/model/guest_chevreuse.tscn"),
-        // The pool to 75 (2026-10-09): three of its four guests were cut by
-        // the supporting pool's art pass and stand in their own scenes;
-        // Freminet has none yet and stands as the Osty fallback.
+        // The pool to 75 (2026-10-09): its four guests. Freminet stood as the
+        // Osty fallback until his model still (2026-10-13).
+        StagePerformer.Freminet => KleePck.Path("furina/model/guest_freminet.tscn"),
         StagePerformer.Navia => KleePck.Path("furina/model/guest_navia.tscn"),
         StagePerformer.Neuvillette => KleePck.Path("furina/model/guest_neuvillette.tscn"),
         StagePerformer.Escoffier => KleePck.Path("furina/model/guest_escoffier.tscn"),
@@ -189,10 +192,9 @@ public sealed class ChevreuseMonster : StagePerformerMonster
 }
 
 // ---- THE POOL TO 75's four guests (2026-10-09,
-// review/ruled/furina-pool-growth-2026-10-09.md sec.5). Navia, Neuvillette
-// and Escoffier wear the scenes the supporting pool's art pass cut; Freminet
-// has none yet (`ModVisualsPathFor` answers null) and stands as the Osty
-// fallback until one is cut.
+// review/ruled/furina-pool-growth-2026-10-09.md sec.5). All four stand in
+// their own scenes since the guests' model stills (2026-10-13); Freminet was
+// the Osty fallback until then.
 
 public sealed class FreminetMonster : StagePerformerMonster
 {

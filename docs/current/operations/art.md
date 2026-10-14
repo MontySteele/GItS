@@ -133,6 +133,33 @@ Never hand-edit the scenes:
 .venv/Scripts/python -m tools.varka_rig gen [--check]           # write / check both scenes (no art)
 ```
 
+**Furina's scenes (`tools/furina_rig/`, phase B, 2026-10-13).** Varka's
+generator is the template and lends its primitives. Her
+`pck-src/furina/model/combat.tscn` and `merchant_character.tscn` come from
+`tools/furina_rig/furina.yaml` and `tools/char_render/furina_frames.json`:
+the router contract plus a `rejoice` state (Let the People Rejoice;
+`CardPlayMotion` sends `Rejoice`, the router absorbs the card's lunge), and
+`%AttackFx`, the phantom rapier's trail, on the element shader resting at
+Hydro (the node's `rest_element`, read by `ElementTrail`). The Spend, Drain
+and Repay effects are sprites under `Visuals/Facing/StageFx` at her chest,
+each on its manifest tint with an AnimationPlayer of its own at the root
+(`%SpendFxPlayer` and so on); `StageDirector` asks the board for one on each
+Spend, Drain and Repay (`IStageBoard.Effect`), and `KleeMod.Vfx.FurinaStageFx`
+plays it without waiting, stretching Drain and Repay along x to the nearest
+seated guest. `tools/furina_rig/guests.py` writes the eleven
+`guest_<name>.tscn` from the manifest's `guests` (the trio's template, the
+still's feet on the origin, Bounds the still's width). `build_pck.ps1` copies
+`ImageGen/images/furina/model/frames/*.png` and `model/guests/*.png` with
+VRAM-compressed imports, switches her rest scene to `furina_rest.png` and her
+select art to `ui/select_closeup.png` when they exist, and no longer ships her
+layer-cut rig or the guests' flat cutouts (`tools/cut_guest_bodies.py`, which
+no longer writes scenes). `char_render/pack.py` is the one producer of all of
+them and of her roster tile. Never hand-edit the scenes:
+
+```sh
+.venv/Scripts/python -m tools.furina_rig gen [--check]          # write / check her two scenes and the eleven guests (no art)
+```
+
 **The edge lint (L13, `art_lint.py --edges`).** `cover` is the wrong default for
 a figure. It scales the trimmed subject to FILL the plate and crops the
 overflow, so whenever the figure's aspect differs from the canvas it slices the

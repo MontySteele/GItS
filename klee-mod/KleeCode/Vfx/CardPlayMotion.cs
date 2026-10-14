@@ -49,6 +49,7 @@ internal static class CardPlayMotion
     internal const string SetOffTrigger = "SetOff";
     internal const string JumpyTrigger = "Jumpy";
     internal const string AscensionTrigger = "Ascension";
+    internal const string RejoiceTrigger = "Rejoice";
 
     /// <summary>
     /// Four Winds' Ascension plays Varka's Ascension clip: he jumps and drives
@@ -69,6 +70,26 @@ internal static class CardPlayMotion
     /// blade goes in at 0.5 s rather than a cast delay later.
     /// </summary>
     internal const float AscensionDelay = 0f;
+
+    /// <summary>
+    /// Let the People Rejoice plays Furina's Rejoice clip: she spins once and
+    /// opens into the flourish, up on the front toe with both arms flung up
+    /// and wide (review/active/furina-visual-paper-2026-10-13.md, the
+    /// signature trigger; ruled with phase A, [USER]: "Furina looks good!").
+    /// Only that card. A scene without a `rejoice` state lunges as for an
+    /// attack.
+    /// </summary>
+    internal static bool IsRejoicePlay(CardModel card)
+        => card is ProtoFsLetThePeopleRejoice;
+
+    /// <summary>
+    /// The wait after the Rejoice trigger before the card's own play goes
+    /// on: its Spend (the gold burst, during the spin), then its attack
+    /// command, which waits Furina's AttackAnimDelay (0.4 s). 0.2 + 0.4 puts
+    /// the hit on the flourish, the clip's frame 12 at 0.6 s
+    /// (tools/char_render/furina_frames.json, <c>rejoice.events.main</c>).
+    /// </summary>
+    internal const float RejoiceDelay = 0.2f;
 
     /// <summary>
     /// A Jumpy Dumpty card plays Klee's Jumpy Dumpty clip, whatever its type:
@@ -121,13 +142,15 @@ internal static class CardPlayMotion
 
         RefreshLowHealth(card);
 
-        // Varka's element layer colours itself from the card being played,
-        // so every play is noted, an Attack's too (its own command lunges).
+        // Varka's and Furina's element layer colours itself from the card
+        // being played, so every play is noted, an Attack's too (its own
+        // command lunges).
         ElementTrail.NotePlay(creature, card, cardPlay!.Target);
 
         var ours = DefinedByThisMod(card);
         var trigger = IsJumpyPlay(card) ? JumpyTrigger
             : IsAscensionPlay(card) ? AscensionTrigger
+            : IsRejoicePlay(card) ? RejoiceTrigger
             : IsSetOffPlay(card, ours) ? SetOffTrigger
             : TriggerFor(card.Type, ours);
         if (trigger == null) return;
@@ -140,6 +163,7 @@ internal static class CardPlayMotion
         var character = card.Owner!.Character;
         var delay = trigger == PowerUpTrigger ? character.PowerUpAnimDelay
             : trigger == AscensionTrigger ? AscensionDelay
+            : trigger == RejoiceTrigger ? RejoiceDelay
             : character.CastAnimDelay;
         await CreatureCmd.TriggerAnim(creature, trigger, delay);
     }

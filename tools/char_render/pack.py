@@ -97,9 +97,18 @@ STAGE_FILES = {"furina": {"spend": "furina_spend.png", "drain": "furina_drain.pn
 SHADOW_FILES = {"varka": "varka_shadow.png", "furina": "furina_shadow.png"}
 REST_FILES = {"varka": "varka_rest.png", "furina": "furina_rest.png"}
 #: Furina's guest stars, one still each (render.py --guests), under model/guests/
-GUEST_FILES = {"furina": {g: f"guest_{g}.png" for g in (
-    "charlotte", "chevreuse", "clorinde", "escoffier", "freminet", "lynette", "lyney", "navia", "neuvillette",
-    "sigewinne", "wriothesley")}}
+#: (spelled out, not formatted, for art_lint's GENERATOR_OWNED rot check)
+GUEST_FILES = {"furina": {"charlotte": "guest_charlotte.png",
+                          "chevreuse": "guest_chevreuse.png",
+                          "clorinde": "guest_clorinde.png",
+                          "escoffier": "guest_escoffier.png",
+                          "freminet": "guest_freminet.png",
+                          "lynette": "guest_lynette.png",
+                          "lyney": "guest_lyney.png",
+                          "navia": "guest_navia.png",
+                          "neuvillette": "guest_neuvillette.png",
+                          "sigewinne": "guest_sigewinne.png",
+                          "wriothesley": "guest_wriothesley.png"}}
 
 
 #: the alpha a texel needs to widen a sheet's cell: the toon pass leaves a
