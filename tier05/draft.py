@@ -661,6 +661,10 @@ KLEE_OVERHAUL_OPS = frozenset((
 #: one pricing decision: ZERO, see `_op_price`.
 VARKA_OPS = frozenset(("varka", "add_knight"))
 
+#: YAE's one verb (`tier0/engine/yae_shrine`), her staging sheet's rows only
+#: (`loader.STAGING_SHEETS`); no pool offers one to this drafter: ZERO.
+YAE_OPS = frozenset(("yae",))
+
 #: The Kokomi overhaul's verbs (DRAFT 6 behind
 #: `C.KOKOMI_OVERHAUL`). A second set beside the one above rather than a merged
 #: one, because the two arms are independent and a merged set would make either
@@ -818,7 +822,7 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         return 0.0
 
     # -- VARKA, the Oath rework (`varka_oath`, Varka seats only) -----------
-    if op in VARKA_OPS:
+    if op in VARKA_OPS or op in YAE_OPS:
         # ZERO, and deliberate. tier0 resolves both verbs for a Varka seat,
         # but no character sheet, run template or pool
         # offers a `proto_vk_` row to this drafter, so a price would be a
@@ -2155,6 +2159,10 @@ STATIC_OP_PRICING: dict[str, str] = {
             "and no pool offers a proto_vk_ row to this "
             "drafter, so no drafted number moves (prototype surface only)"
        for op in ("varka", "add_knight")},
+    # --- YAE MIKO, the shrine and the publishing house (yae_shrine) ---
+    "yae": "ZERO: YAE's verb resolves in tier0 only for a Yae seat, and her "
+           "rows live on a sim-only staging sheet no pool offers to this "
+           "drafter (tools/yae_expansion_sim prices it for her own drafts)",
     # --- the Kokomi overhaul, draft 6 (C.KOKOMI_OVERHAUL) ----
     # EB-311: the blanket ZERO these eight rows used to share is gone. One
     # rationale apiece now, each derived from a dial already in this table, and

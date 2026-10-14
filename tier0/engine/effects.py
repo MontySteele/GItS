@@ -17,7 +17,7 @@ from tier0 import constants as C
 from tier0.engine import (companion_coven, companion_hexerei, coop,
                           furina_stage, klee_overhaul, kokomi_plan,
                           lions_fang, powers, reactions, resources, statuses,
-                          varka_oath)
+                          varka_oath, yae_shrine)
 from tier0.engine.state import (SLY_AUTOPLAY_THIS_TURN, Bomb, Card,
                                 CombatState, Enemy,
                                 grant_sly_autoplay,
@@ -749,6 +749,9 @@ def owner_identity(owner: Optional[str]) -> tuple[str, str]:
 def _owner_identity_cached(owner: str) -> tuple[str, str]:
     if owner == varka_oath.CHARACTER:
         return (varka_oath.ELEMENT, "catalyst")
+    # YAE has no character yaml either (`yae_shrine.build_player`).
+    if owner == yae_shrine.CHARACTER:
+        return (yae_shrine.ELEMENT, yae_shrine.CADENCE)
     from tier0.content import loader                # late import (cycle)
     spec = loader._character_index().get(owner)
     if not spec:
@@ -4950,6 +4953,12 @@ def _op_kokomi(state: CombatState, fx: dict, card: Card) -> None:
     kokomi_plan.kind(state, fx, card, target)
 
 
+def _op_yae(state: CombatState, fx: dict, card: Card) -> None:
+    """YAE's shrine and publishing verbs, one `kind` per rule
+    (`yae_shrine.op_yae`)."""
+    yae_shrine.op_yae(state, fx, card)
+
+
 def _op_varka(state: CombatState, fx: dict, card: Card) -> None:
     """VARKA's Oath verbs, one `kind` per rule (`varka_oath.op_varka`).
     Refused by name for anyone who is not Varka, or with the switch off."""
@@ -4976,6 +4985,9 @@ OPS = {
     # VARKA, THE OATH REWORK (`varka_oath`): his rules' one op, and
     # Knights' Roll Call.
     "varka": _op_varka,
+    # YAE MIKO (`yae_shrine`, sim only until her picks are ruled): her
+    # rules' one op, one `kind:` per verb (Varka's shape).
+    "yae": _op_yae,
     # THE KOKOMI EXPANSION, BATCH ONE (2026-09-29): the now-line verbs, one
     # op with a `kind:` (Varka's shape).
     "kokomi": _op_kokomi,
@@ -5186,6 +5198,9 @@ def resolve_card(state: CombatState, card: Card) -> None:
         # Varka's Sturm und Drang rider, after the Attack (C#'s
         # `AfterCardPlayed`): a no-op unless a charge was spent on it.
         companion_overhaul_card_end(state, card, state.card_aim)
+        # YAE (`yae_shrine.after_play`): Editor-in-Chief's strike after an
+        # Annotated card's play. A no-op for anyone else.
+        yae_shrine.after_play(state, card)
     finally:
         if varka:
             varka_oath.end_play(state, card)

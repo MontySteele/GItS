@@ -20,6 +20,7 @@ from tier0.content import yaml_memo
 from tier0.engine import furina_stage
 from tier0.engine import state as state_mod
 from tier0.engine import varka_oath
+from tier0.engine import yae_shrine
 from tier0.engine.state import Card, Enemy, Player, sly_riders
 
 CONTENT_DIR = Path(__file__).parent
@@ -427,7 +428,10 @@ def prototype_cards(sheet: Path | None = None) -> list[Card]:
     # VARKA owns rows here and nowhere else. His rules are
     # `tier0/engine/varka_oath.py`, which has no switch (he ships nowhere
     # else), so his rows are schema-checked and always resolve.
-    known_characters = {"klee", "furina", "kokomi", "varka"}
+    # YAE's rows are `docs/yae-staging.yaml` (`STAGING_SHEETS`), sim only
+    # until her card paper's picks are ruled; the same validators run on
+    # them.
+    known_characters = {"klee", "furina", "kokomi", "varka", "yae"}
     seen: set[str] = set()
     cards: list[Card] = []
     for d in raw:
@@ -511,6 +515,27 @@ def prototype_cards(sheet: Path | None = None) -> list[Card]:
         _validate_card_shape(card)
         cards.append(card)
     return cards
+
+
+#: SIM-ONLY STAGING SHEETS: a kit whose rows are not yet on the surface
+#: (the surface compiles to the mod). Validated as surface rows are, resolved
+#: by `get_card`, offered by no pool and seen by no codegen. Yae's card stage
+#: (2026-10-13) is the first.
+STAGING_SHEETS = (DOCS_DIR / "yae-staging.yaml",)
+
+
+@lru_cache(maxsize=1)
+def _staging_index() -> dict[str, Card]:
+    """`{id: Card}` for every `STAGING_SHEETS` row, a third index consulted
+    only on a `proto_` id the surface does not hold."""
+    out: dict[str, Card] = {}
+    for sheet in STAGING_SHEETS:
+        for c in prototype_cards(sheet):
+            if c.id in out or c.id in _prototype_index():
+                raise ValueError(f"{sheet.name}: staged id {c.id!r} is "
+                                 "already a surface or staged row")
+            out[c.id] = c
+    return out
 
 
 @lru_cache(maxsize=1)
@@ -767,6 +792,10 @@ def _validate_effect_vocabulary(card_id: str, effects: list[dict]) -> None:
             # exactly the numeric fields that rule prints -- the codegen's
             # `VARKA_KINDS` / `VARKA_KIND_FIELDS` check, taken here too.
             varka_oath.validate_op(card_id, fx)
+        if op == "yae":
+            # YAE's one op: a known kind with exactly the numeric fields it
+            # prints, and an Annotation name where it names one.
+            yae_shrine.validate_op(card_id, fx)
         if op == "plant_bomb" and fx.get("wide_if") is not None:
             # R244 (Coven Errand). `wide_if:` is the SECOND door into the
             # predicate vocabulary and takes the same load-time check the
@@ -1010,7 +1039,8 @@ def _card_prototype(card_id: str) -> Card:
         # THE CURRENT KITS' DOOR (legacy cleanup stage 6: the sim always runs
         # them). Every kit's starter, pool and companion roster is `proto_` id
         # STRINGS, and the run layer resolves each one back through here.
-        card = _prototype_index()[plain]
+        index = _prototype_index()
+        card = index[plain] if plain in index else _staging_index()[plain]
     else:
         index = _card_index()
         # The substituted-prototype table is consulted ONLY on a miss, and
@@ -1594,7 +1624,7 @@ def reset_arm_caches() -> None:
     function for the length of its own case (`test_kokomi_plan` does): a cache
     that is not a cache right now has nothing to clear and is not an error.
     """
-    for fn in (_card_prototype, _substituted_card_index,
+    for fn in (_card_prototype, _substituted_card_index, _staging_index,
                upgrades._upgrade_index, upgrades._prototype_upgrade_index):
         getattr(fn, "cache_clear", lambda: None)()
 

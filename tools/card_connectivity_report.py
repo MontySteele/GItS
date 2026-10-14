@@ -477,6 +477,11 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # Call writes the hand, `choose_companion`'s.
     "varka": [_hook("shared", "aura_reaction", "write")],
     "add_knight": [_hook("shared", "hand_contents", "write")],
+    # YAE MIKO (`yae_shrine`, staging sheet only): her one op plants Sakura
+    # whose Electro strikes go through the shared reaction layer, and Edits
+    # write riders onto cards in hand.
+    "yae": [_hook("shared", "aura_reaction", "write"),
+            _hook("shared", "hand_contents", "write")],
     "grant_alices_mine_each_turn": [_hook("shared", "hand_contents", "write")],
     "gain_spark": [_hook("private", "sparks", "write")],
     # A competing use for the bank, mirroring spend_encore: the Sparks paid
