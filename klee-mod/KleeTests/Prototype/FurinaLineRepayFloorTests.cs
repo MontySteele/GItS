@@ -300,7 +300,7 @@ public class FurinaLineRepayFloorTests
         Assert.Contains("damage Neuvillette All 12 Hydro", kit.Board.Log);
         // The window opens again after her acts.
         Assert.Equal(0, kit.Stage.HpLostSinceLastTurn);
-        Assert.Contains("lost since your last turn",
+        Assert.Contains("lost or [gold]Drained[/gold] since your last turn",
             StagePerformerBadge.ActText(StagePerformer.Neuvillette));
         // Upgraded: the line +1, as before.
         Assert.Equal(3, FurinaStageLaw.NeuvilletteHydroBonusUpgraded);

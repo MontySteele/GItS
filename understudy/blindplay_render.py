@@ -3277,6 +3277,10 @@ FOLD_SELF_HIT = ("{who} {verb} you for {n} before the enemies act, and your "
 FOLD_SELF_HP = "{who} {verb} {n} HP"
 FOLD_OSTY = "{name} absorbs up to {hp}"
 FOLD_CAP = "{name} caps the turn's HP loss at {cap}"
+#: FURINA SWEEP ROUND (2026-10-14, r3): Tungsten Rod ("lose 1 less HP") takes
+#: its number off EACH loss of HP (`TungstenRod.ModifyHpLostAfterOsty`), so a
+#: hit Block stops costs nothing and three hits through Block cost 3 less.
+FOLD_LESS_PER_LOSS = "{name} takes {n} off each loss of HP"
 #: A hand card that hurts at the end of the turn, by its own sentence
 #: (Burn, Decay, Toxic, Infection, Wither: Block takes it; Bad Luck, Beckon:
 #: it is HP lost). Regret's number is the hand size, so it is named.
@@ -3338,6 +3342,9 @@ _NO_ATTACK_RELIC = re.compile(
     r"(?:did not|didn't) play any Attacks?\b[^.]*?gain (\d+) Block", re.I)
 #: Beating Remnant: "You cannot lose more than 20 HP in a single turn."
 _HP_LOSS_CAP = re.compile(r"lose more than (\d+) HP", re.I)
+#: Tungsten Rod: "Whenever you would lose HP, lose 1 less." By its sentence,
+#: or by its name where the wire sends no text (the game's number is 1).
+_HP_LOSS_LESS = re.compile(r"\blose (\d+) less\b", re.I)
 #: (The Tamakushi Casket's Block was counted here while it landed at the end
 #: of her turn. Since 2026-10-12 it lands at the start of her next turn,
 #: after the hits, so this line has nothing of it to count.)
@@ -3386,12 +3393,17 @@ def _turn_end_facts(you: dict[str, Any], hand: list[dict[str, Any]],
     conditional: list[tuple[str, int]] = []
     block_now = int(you.get("block") or 0)
     cap = None
+    less = None
     relics = you.get("relics") or []
     for relic in relics:
         name, text = str(relic.get("name") or ""), str(relic.get("text") or "")
         found = _HP_LOSS_CAP.search(text)
         if found:
             cap = (name, int(found.group(1)))
+            continue
+        found = _HP_LOSS_LESS.search(text)
+        if found or _fold(name) == "tungsten rod":
+            less = (name, int(found.group(1)) if found else 1)
             continue
         found = _NO_BLOCK_RELIC.search(text)
         if found:
@@ -3465,7 +3477,7 @@ def _turn_end_facts(you: dict[str, Any], hand: list[dict[str, Any]],
     osty = next((pet for pet in pets if pet.get("absorbs")
                  and int(pet.get("hp") or 0) > 0), None)
     return {"block": block_parts, "hit": hit_parts, "hp": hp_parts,
-            "osty": osty, "cap": cap, "unknown": unknown,
+            "osty": osty, "cap": cap, "less": less, "unknown": unknown,
             "conditional": conditional}
 
 
@@ -3513,6 +3525,40 @@ def _fold_clauses(facts: dict[str, Any], absorbs: bool) -> list[str]:
     return out
 
 
+def _split_hits(intent: dict[str, Any], part: int) -> list[int]:
+    """One attack part's `part` damage as the hits it lands in: the game's
+    `repeats`, or the `NxM` label's count, else one hit."""
+    breakdown = intent.get("breakdown") or {}
+    count = int(breakdown.get("repeats") or 0)
+    if count <= 0:
+        multi = _MULTI_HIT_LABEL.match(str(intent.get("label") or ""))
+        count = int(multi.group(2)) if multi else 1
+    each, extra = divmod(part, count)
+    return [each + (1 if i < extra else 0) for i in range(count)]
+
+
+def _take_less_per_loss(block: int, facts: dict[str, Any], hits: list[int],
+                        less: int) -> int:
+    """The take, hit by hit, with `less` off each loss of HP (Tungsten Rod),
+    in `_incoming_line`'s order: end-of-turn Block, the self-hits, the HP
+    losses, then the attacks, Osty taking unblocked attack damage first."""
+    held = block + sum(n for _name, n in facts["block"])
+    osty = int(facts["osty"]["hp"]) if facts["osty"] else 0
+    take = sum(max(0, n - less) for _name, n in facts["hp"])
+    self_hits = [n for _name, n in facts["hit"]]
+    for i, n in enumerate(self_hits + hits):
+        stopped = min(held, n)
+        held -= stopped
+        through = n - stopped
+        if i >= len(self_hits) and osty and through > 0:
+            soaked = min(osty, through)
+            osty -= soaked
+            through -= soaked
+        if through > 0:
+            take += max(0, through - less)
+    return take
+
+
 def _with_folds(line: str, clauses: list[str]) -> str:
     """`line` with its closing full stop moved after the folded facts."""
     return line[:-1] + INCOMING_FOLDS.format(folds="; ".join(clauses)) + "."
@@ -3529,6 +3575,7 @@ def _incoming_line(enemies: list[dict[str, Any]], you: dict[str, Any],
     them and your HP, folded in where the wire gives the number and said in
     a few words (`_turn_end_facts`); what it cannot count is named. No plan."""
     total, unknown, any_attack = 0, [], False
+    hits: list[int] = []
     vulnerable = _stacks_of(you, "vulnerable")
     for e in enemies:
         down = _is_down(e)
@@ -3549,6 +3596,7 @@ def _incoming_line(enemies: list[dict[str, Any]], you: dict[str, Any],
                     unknown.append(name)
             else:
                 total += part
+                hits += _split_hits(intent, part)
     facts = _turn_end_facts(you, hand or [], pets or [], resolutions)
     not_counted = (INCOMING_NOT_COUNTED.format(
         names=_and_list(facts["unknown"])) if facts["unknown"] else "")
@@ -3582,6 +3630,12 @@ def _incoming_line(enemies: list[dict[str, Any]], you: dict[str, Any],
         unblocked = max(0, unblocked - int(facts["osty"]["hp"]))
     take = lost + unblocked
     clauses = _fold_clauses(facts, absorbs)
+    if facts["less"]:
+        name, less = facts["less"]
+        lessened = _take_less_per_loss(block, facts, hits, less)
+        if lessened < take:
+            take = lessened
+            clauses.append(FOLD_LESS_PER_LOSS.format(name=name, n=less))
     if facts["cap"] and take > facts["cap"][1]:
         take = facts["cap"][1]
         clauses.append(FOLD_CAP.format(name=facts["cap"][0],
