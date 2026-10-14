@@ -64,7 +64,9 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   ruled, same doc): her starter relic no longer adds a rest-site option;
   "After an elite or boss fight, you may Publish an Annotation." It is a row
   on the combat reward screen offering the cards that fight left Annotated
-  (not yet Published); untested live until a deploy. Next: Yae seats (3 Kokomi and 2 Yae if this lands
+  (not yet Published); untested live until a deploy. **Red Ink on a planting
+  card** (2026-10-14, ruled, same doc): it passes to the Sakura planted, and
+  Edits skip cards an Annotation would do nothing on. Next: Yae seats (3 Kokomi and 2 Yae if this lands
   before the current seats finish), then [USER]'s play.
 
 ## The kits

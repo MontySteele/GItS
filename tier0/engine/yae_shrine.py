@@ -80,6 +80,14 @@ THE RULES AS MODELLED:
     never ticks, so it never withers), written by "Edit your newest /
     oldest / every Sakura" (`edit_sakura`). A new one replaces the old; it
     lasts the Sakura's life and is never Published.
+  * RED INK ON A PLANTING CARD (ruled 2026-10-14, the design-axes doc):
+    Red Ink on a card that plants a Sakura and itself deals no damage and
+    gives no Block passes to every Sakura that play plants (`inherits`); a
+    full-shrine plant that only levels plants nothing, so nothing inherits.
+    THE DEAD-EDIT FILTER: an Edit, Reborn as Guuji Yae and the after-elite
+    Publish offer skip a card the Annotation would do nothing on
+    (`affects`): only Red Ink can be dead, on a card that deals no damage,
+    gives no Block and plants nothing. C# twin: `YaeAnnotationReach`.
   * WITHERS: Fallen Petals' Energy (and its upgrade's draw) are paid at
     the start of her next turn, beside Offering's draw: a Sakura withers at
     the end of her turn, when Energy would be lost.
@@ -278,12 +286,16 @@ def _plant_level(player) -> int:
 
 
 def plant(state, n: int = 1, reason: str = "plant",
-          level: Optional[int] = None) -> None:
+          level: Optional[int] = None,
+          annotation: Optional[str] = None) -> None:
     """Plant `n` Sakura, one at a time. SHRINE R2 (ruled 2026-10-14): a
     plant creates a Sakura at the card's Level (`level`, Grafted Branch;
     else `PLANT_LEVEL`) plus Fox's Mooncall's bonus, and does not level the
     others. With 3 standing the OLDEST refreshes (3 strikes again) and gains
-    1 Level instead (Mooncall does not add to that Level). No Level cap."""
+    1 Level instead (Mooncall does not add to that Level). No Level cap.
+    `annotation`: what each NEW Sakura inherits from the planting card (Red
+    Ink on a card that only plants, `inherited`); a refreshed oldest keeps
+    its own."""
     led = ledger(state.player)
     if led is None:
         return
@@ -301,8 +313,10 @@ def plant(state, n: int = 1, reason: str = "plant",
         start = _plant_level(state.player)
         if level is not None:
             start = max(start, level + start - PLANT_LEVEL)   # Mooncall too
-        led.sakura.append(Sakura(level=start,
-                                 turns_left=SAKURA_TURNS, seq=led.seq))
+        led.sakura.append(Sakura(
+            level=start, turns_left=SAKURA_TURNS, seq=led.seq,
+            annotation=(annotation if annotation in SAKURA_ANNOTATIONS
+                        else None)))
         state.emit("yae_plant", reason=reason, count=len(led.sakura),
                    levels=[s.level for s in led.sakura])
 
@@ -627,9 +641,75 @@ def annotate(state, card, name: str, reason: str = "edit") -> None:
                    reason=reason)
 
 
-def _editable(state, editor) -> list:
+#: The `yae` kinds whose play plants a Sakura (C# `ISakuraPlanterCard`,
+#: `gen_klee_cards.YAE_PLANT_KINDS`).
+PLANT_KINDS = frozenset({"plant", "plant_level"})
+
+
+def _walk(effects):
+    """Every effect, `conditional` branches and `choose_one` modes
+    included."""
+    for fx in effects or ():
+        yield fx
+        if fx.get("op") == "conditional":
+            yield from _walk(fx.get("then"))
+            yield from _walk(fx.get("else"))
+        if fx.get("op") == "choose_one":
+            for mode in fx.get("modes") or ():
+                yield from _walk(mode.get("effects"))
+
+
+def plants_sakura(card) -> bool:
+    """Does the card's own play plant a Sakura?"""
+    return any(fx.get("op") == "yae" and fx.get("kind") in PLANT_KINDS
+               for fx in _walk(card.effects))
+
+
+def deals_damage(card) -> bool:
+    """An Attack, or any card with a damage op (the C# reads a damage var):
+    widened past Sharp's Attack door so a Skill that hits stays editable."""
+    return card.type == "attack" or any(
+        fx.get("op") == "damage" for fx in _walk(card.effects))
+
+
+#: The `yae` kinds that give the card's own Block (C# `IYaeBlockCard`).
+BLOCK_KINDS = frozenset({"block_per_sakura", "block_per_annotated"})
+
+
+def gives_block(card) -> bool:
+    """Nimble's door (the game's `GainsBlock`), or a `yae` kind that gives
+    the card's own Block (Print Run), which Red Ink rides too."""
+    from tier0.content import enchantments          # late: cycle
+    return enchantments._gains_block(card) or any(
+        fx.get("op") == "yae" and fx.get("kind") in BLOCK_KINDS
+        for fx in _walk(card.effects))
+
+
+def affects(card, annotation: str) -> bool:
+    """Would `annotation` do anything on `card`? Only Red Ink can be dead.
+    C# `YaeAnnotationReach.Affects`."""
+    return (annotation != RED_INK or deals_damage(card) or gives_block(card)
+            or plants_sakura(card))
+
+
+def inherits(card) -> bool:
+    """Does the card's Annotation pass to the Sakura it plants? Red Ink, on
+    a card that plants and deals no damage and gives no Block."""
+    return (getattr(card, "ym_annotation", None) == RED_INK
+            and plants_sakura(card) and not deals_damage(card)
+            and not gives_block(card))
+
+
+def inherited(card) -> Optional[str]:
+    return RED_INK if inherits(card) else None
+
+
+def _editable(state, editor, annotation: Optional[str] = None) -> list:
+    """The cards an Edit can reach; with `annotation`, only those it would
+    do something on (the dead-edit filter)."""
     return [c for c in state.player.hand
-            if c is not editor and not c.kit_card and not c.is_junk]
+            if c is not editor and not c.kit_card and not c.is_junk
+            and (annotation is None or affects(c, annotation))]
 
 
 def _has_op(card, op: str) -> bool:
@@ -641,7 +721,7 @@ def _edit_target(state, editor, annotation: str):
     hardest-hitting Attack (most hits), else a Block card; Deadline on the
     dearest card; the three play riders on the cheapest card. A card not yet
     Annotated is preferred, so an Edit overwrites only when it must."""
-    cands = _editable(state, editor)
+    cands = _editable(state, editor, annotation)
     if not cands:
         return None
     fresh = [c for c in cands if not is_annotated(c)] or cands
@@ -670,7 +750,8 @@ def edit(state, editor, annotation: str, n: int = 1) -> None:
     for _ in range(n):
         chooser = led.edit_choice or _edit_target
         target = chooser(state, editor, annotation)
-        if target is None:
+        if target is None or target not in _editable(state, editor,
+                                                     annotation):
             return
         annotate(state, target, annotation)
         led.edits += 1
@@ -681,7 +762,7 @@ def edit_all(state, editor, default: str) -> None:
     else the row's) on every other card in hand."""
     led = ledger(state.player)
     name = led.reborn_choice or default
-    cards = _editable(state, editor)
+    cards = _editable(state, editor, name)
     for c in cards:
         annotate(state, c, name, "reborn")
     if cards:
@@ -706,17 +787,22 @@ def offers_publish(room: str, gives_rewards: bool = True,
     return gives_rewards and not final_boss and room in PUBLISH_ROOMS
 
 
-def publish_choices(drafts: dict, published: dict) -> list:
+def publish_choices(drafts: dict, published: dict,
+                    cards: Optional[dict] = None) -> list:
     """The offer: every deck slot the fight left Annotated that is not yet
-    Published (a card holds one Enchantment), in slot order. C#
-    `YaeEditing.PublishChoices`."""
+    Published (a card holds one Enchantment), in slot order. `cards` (slot
+    -> card): a slot whose draft would do nothing on its card is not
+    offered (the dead-edit filter). C# `YaeEditing.PublishChoices`."""
     return [slot for slot in sorted(drafts)
-            if drafts[slot] and slot not in published]
+            if drafts[slot] and slot not in published
+            and (cards is None or slot not in cards
+                 or affects(cards[slot], drafts[slot]))]
 
 
 def publish_after_fight(room: str, drafts: dict, published: dict,
                         relic: str = MEDITATIONS, pick=None,
-                        final_boss: bool = False) -> list:
+                        final_boss: bool = False,
+                        cards: Optional[dict] = None) -> list:
     """The after-elite Publish, run-level: `drafts` is the fight's
     (`YaeLedger.drafts`), `published` the run's {slot: Annotation}, written
     in place. `pick(choices, drafts)` returns the slots to keep (empty is the
@@ -725,7 +811,7 @@ def publish_after_fight(room: str, drafts: dict, published: dict,
     if relic not in PUBLISH_COUNT or not offers_publish(
             room, final_boss=final_boss):
         return []
-    choices = publish_choices(drafts, published)
+    choices = publish_choices(drafts, published, cards)
     if not choices:
         return []
     if pick is None:
@@ -853,7 +939,7 @@ def op_yae(state, fx: dict, card) -> None:
         _refuse(f"op 'yae' ({fx.get('kind')!r}) on {card.id!r}")
     kind = fx["kind"]
     if kind == "plant":
-        plant(state, fx["amount"], "card")
+        plant(state, fx["amount"], "card", annotation=inherited(card))
     elif kind == "tenko":
         tenko(state, fx.get("as", THUNDER))
     elif kind == "extend":
@@ -887,7 +973,8 @@ def op_yae(state, fx: dict, card) -> None:
     elif kind == "edit_sakura":
         edit_sakura(state, fx["which"], fx["amount"], fx["annotation"])
     elif kind == "plant_level":
-        plant(state, 1, "card", level=fx["amount"])
+        plant(state, 1, "card", level=fx["amount"],
+              annotation=inherited(card))
     elif kind == "strike_if_weak":
         targets = effects._pick_targets(state, "enemy")
         target = targets[0] if targets else None

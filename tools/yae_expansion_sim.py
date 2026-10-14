@@ -469,6 +469,7 @@ def run(seed, pilot):
     deck: list = []
     hp = MAX_HP
     from tier0.engine import yae_shrine as Y
+    from tier0.content import loader
     published: dict = {}
     fights, offers, rests, publishes = [], [], [], []
     act1 = False
@@ -492,7 +493,11 @@ def run(seed, pilot):
             break
         # The relic's Publish, after an elite or the act-1 boss win.
         room = {"E": "elite", "B": "boss"}.get(kind, "monster")
-        for slot, ann in Y.publish_after_fight(room, r["drafts"], published):
+        # The dead-edit filter reads each slot's card (ruled 2026-10-14).
+        cards = {i: loader.get_card(cid)
+                 for i, cid in enumerate(Y.starter_ids() + deck)}
+        for slot, ann in Y.publish_after_fight(room, r["drafts"], published,
+                                               cards=cards):
             publishes.append((kind, slot, ann))
         if kind == "B":
             act1 = True

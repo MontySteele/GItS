@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoYmTwinSakura : CustomCardModel, ICharacterCard
+public sealed class ProtoYmTwinSakura : CustomCardModel, ICharacterCard, ISakuraPlanterCard
 {
     /// <summary>Block arrives only from the ruled upgrade (`add: block`), so the
     /// claim moves with it -- see gen_klee_cards `_upgrade_add_lines` (EB-122).</summary>

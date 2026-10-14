@@ -60,7 +60,7 @@ public abstract class YaeAnnotationModel : CustomEnchantmentModel, ILocalization
     public List<(string, string)>? Localization => new()
     {
         ("title", Name),
-        ("description", Rule),
+        ("description", YaeAnnotationText.TipBody(Annotation, false)),
         ("extraCardText", $"[gold]{Name}[/gold]."),
     };
 
@@ -166,7 +166,16 @@ public static class YaeAnnotationText
     public static string TipBody(YaeAnnotation annotation, bool onSakura) =>
         onSakura && SakuraRule(annotation).Length > 0
             ? SakuraRule(annotation)
-            : Rule(annotation);
+            : annotation == YaeAnnotation.RedInk
+                ? Rule(annotation) + " " + RedInkPlantClause
+                : Rule(annotation);
+
+    /// <summary>Red Ink on a card that only plants goes to the Sakura it
+    /// plants (ruled 2026-10-14, <see cref="YaeAnnotationReach"/>): one
+    /// clause on the Red Ink card tip and its enchantment hover, kept under
+    /// the 100-character hover cap.</summary>
+    public const string RedInkPlantClause =
+        "If it only plants, the [gold]Sakura[/gold] gets it.";
 
     /// <summary>Markup folded out, for a selection prompt. PURE.</summary>
     public static string Plain(string text) =>
@@ -476,7 +485,8 @@ public static class YaeEditing
                 choiceContext, owner,
                 new CardSelectorPrefs(
                     new LocString(Table, EditPromptKeyFor(annotation)), 1),
-                c => Editable(c, editor), editor)).FirstOrDefault();
+                c => Editable(c, editor) && YaeAnnotationReach.Affects(c, annotation),
+                editor)).FirstOrDefault();
             if (picked == null) return;
             if (!Annotate(picked, annotation)) continue;
             YaeShrineLedger.For(owner.Creature).NoteEdit();
@@ -498,7 +508,8 @@ public static class YaeEditing
             choiceContext, owner);
         if (chosen == YaeAnnotation.None) chosen = fallback;
         var cards = PileType.Hand.GetPile(owner).Cards
-            .Where(c => Editable(c, editor)).ToList();
+            .Where(c => Editable(c, editor) && YaeAnnotationReach.Affects(c, chosen))
+            .ToList();
         var n = 0;
         foreach (var card in cards)
         {
@@ -564,10 +575,12 @@ public static class YaeEditing
             .Distinct()
             .ToList();
 
-    /// <summary>The Publish offer for a player's deck.</summary>
+    /// <summary>The Publish offer for a player's deck. A card its draft would
+    /// do nothing on is not offered (the dead-edit filter).</summary>
     public static IEnumerable<CardModel> PublishChoices(Player player) =>
-        PublishChoices(player.Deck.Cards.Select(c =>
-            (c, Draft(c), c.Enchantment is YaeAnnotationModel)));
+        PublishChoices(player.Deck.Cards
+            .Where(c => YaeAnnotationReach.Affects(c, Draft(c)))
+            .Select(c => (c, Draft(c), c.Enchantment is YaeAnnotationModel)));
 
     /// <summary>
     /// At the end of a fight: every deck card's draft becomes the Annotation
