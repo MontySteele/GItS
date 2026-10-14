@@ -23,16 +23,11 @@ public class KokomiRound4AListTests
     [Fact]
     public void Moons_reflection_is_unplayable_while_the_exhaust_pile_is_empty()
     {
-        Assert.IsAssignableFrom<IUnplayableReasonCard>(new ProtoKkMoonsReflection());
-        Assert.Contains(
-            Il.Calls(Il.Method("ProtoKkMoonsReflection", "get_IsPlayable")),
-            c => c.Contains("KokomiRefounding.AnyExhausted"));
-        Assert.Contains("your Exhaust Pile is empty",
-            Il.Strings(Il.Method("ProtoKkMoonsReflection", "get_UnplayableReason")));
-        // A canonical copy has no pile to read and fails open.
-        var canonical = new ProtoKkMoonsReflection();
-        Assert.True(KokomiRefounding.AnyExhausted(canonical));
-        Assert.Null(((IUnplayableReasonCard)canonical).UnplayableReason);
+        // Moon's Reflection left with the Kokomi pool overhaul (2026-10-13);
+        // its gate stays, and a canonical copy of any card fails it open.
+        Assert.Null(typeof(KokomiPlan).Assembly.GetType(
+            "KleeMod.Cards.Prototype.Generated.ProtoKkMoonsReflection"));
+        Assert.True(KokomiRefounding.AnyExhausted(new ProtoKkTidecleanse()));
     }
 
     [Fact]

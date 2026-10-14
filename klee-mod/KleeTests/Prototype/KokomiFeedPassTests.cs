@@ -51,9 +51,13 @@ public class KokomiFeedPassTests : IDisposable
                      (card.Type, card.Rarity, card.EnergyCost.Canonical));
         Assert.Equal(8m, card.DynamicVars.Damage.BaseValue);
         Assert.Equal(11m, Upgraded<ProtoKkBrineSting>().DynamicVars.Damage.BaseValue);
+        // The pool overhaul (2026-10-13): a Counter line, 8 [11] to each
+        // enemy that attacked her since she planned it.
         var clause = Assert.Single(card.PlanClauses);
-        Assert.Equal((KokomiPlan.Kind.ApplyVulnerable, 1, KokomiPlan.Aim.AllEnemies),
+        Assert.Equal((KokomiPlan.Kind.Damage, 8, KokomiPlan.Aim.EnemiesAttackedSince),
                      (clause.Kind, clause.Amount, clause.Aim));
+        Assert.Equal(11, Assert.Single(
+            Upgraded<ProtoKkBrineSting>().PlanClauses).Amount);
     }
 
     [Fact]

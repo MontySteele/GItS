@@ -315,12 +315,11 @@ SIM_CALL_SITES = {
     ('kokomi_plan.py', 2): ("'plan'", 'False', "'hydro'"),
     # Expansion batch one: Tidal Riposte's answer, dealt as a planned hit is.
     ('kokomi_plan.py', 3): ("'plan'", 'False', "'hydro'"),
-    # THE RE-FOUNDING (2026-10-12): Coordinated Tide's Hydro hit on the
-    # front enemy when an Ethereal Plan is carried out, and Grand
-    # Strategist's unelemented hit to ALL when a Plan causes a reaction --
-    # both dealt as a planned hit is, unpowered.
-    ('kokomi_plan.py', 4): ("'plan'", 'False', "'hydro'"),
-    ('kokomi_plan.py', 5): ("'plan'", 'False', 'None'),
+    # THE RE-FOUNDING (2026-10-12): Grand Strategist's unelemented hit to
+    # ALL, on any reaction she triggers since the pool overhaul (2026-10-13),
+    # dealt as a planned hit is, unpowered. (Coordinated Tide's Hydro hit
+    # left with the pool overhaul: it adds a Sting now.)
+    ('kokomi_plan.py', 4): ("'plan'", 'False', 'None'),
     # VARKA, THE OATH REWORK (`varka_oath`, no switch). The expansion's
     # (2026-10-01) Cycle of Seasons and Assembly at the Cathedral: a Power's
     # damage, element-less and unpowered.

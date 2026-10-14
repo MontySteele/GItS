@@ -8370,3 +8370,119 @@ What the move changed on the faces, and only on the faces:
 - `proto_ym_reborn_as_guuji_yae`: the row's `annotation: sakura_seal` is the
   sim pilot's choice; in game the player chooses from the five
   (`YaeModalOptions`).
+
+## Kokomi pool overhaul, 2026-10-13
+
+`review/active/kokomi-pool-overhaul-2026-10-13.md`, picks 1 (a) and 2 (a).
+[USER]: "On Kokomi, I'm good with default on 1 and 2. We'll want a 5 seat run
+on this, but I'll likely be back after the Varka run concludes to do the
+Furina test first." Built as written, with the readings the paper lists.
+
+**The readings, in both engines.**
+
+- **Chain** ("for each Plan carried out this turn"): a per-turn count the
+  carry-out raises before its clauses run, so each Chain line counts itself
+  and a doubled carry-out (Nereid's Ascension, Second Wave) counts twice.
+  Change of Plans' carry-out counts too. `KokomiOverhaulLedger
+  .PlansCarriedOutThisTurn` / `kk_plans_carried_out_this_turn`, rolled with
+  the turn.
+- **Counter** ("since you planned this"): from the moment the Plan is written
+  until it is carried out, per Plan. The ledger keeps three running totals
+  per combat (Block that absorbed enemy Attack damage; all the damage enemies
+  dealt her, blocked or not; one entry per enemy Attack hit aimed at her, by
+  the attacker), written where an enemy hit lands on her
+  (`ProtoBakeKuragePower.AfterDamageReceived`, sim `note_enemy_hit` beside
+  Tidal Riposte). The Plan stamps the totals when written
+  (`KokomiPlan.Entry.Window`, sim `PlanEntry.since_*`) and reads the
+  difference. In the mod, Turnabout's total counts every enemy hit, Attack or
+  not; the sim's enemies deal damage only by Attack.
+- **Intent** (Undercurrent Snare): each enemy that intends to attack when the
+  Plan lands, Flank's read. "Loses 3 [4] Strength this turn" is the base
+  game's temporary loss (`UndercurrentSnarePower`, a `TemporaryStrengthPower`,
+  Cover Your Ears!'s shape; sim `temp_strength_down`).
+- **"Triggers an Elemental Reaction"**: the card's or the Companion's own hit.
+  The mod hands the reaction's `cardSource` to `KokomiRefounding.OnReaction`;
+  a Plan line's hit carries no card through `ElementalHit.Deal`, so
+  `KokomiPlan.Hit` credits it to the card that wrote the Plan
+  (`KokomiRefounding.CreditHits`). The sim's twin is `kk_hit_card`. The
+  Bake-Kurage's Hydro before a written Companion is the pet's, never the
+  Companion's. A reaction is "hers" when she or her Plans dealt it; All
+  Streams counts them per combat (`ReactionsThisCombat`).
+
+**Rewrites (sec.3).**
+
+- `proto_kk_kelp_wall`: Plan "Deal Hydro damage equal to the damage you
+  blocked since you planned this.", front enemy (was Gain 12 [15] Block). The
+  upgrade is the now-line's Block alone (5 [7]).
+- `proto_kk_feint`: Plan "Deal 5 [7] Hydro damage for each Plan carried out
+  this turn." (was Apply 1 [2] Vulnerable).
+- `proto_kk_brine_sting`: Plan "Deal 8 [11] Hydro damage to each enemy that
+  attacked you since you planned this." (was Apply 1 Vulnerable to ALL), the
+  `enemies_attacked_since` aim, once per attacker.
+- `proto_kk_undercurrent_snare`: Plan "Each enemy that intends to attack
+  loses 3 [4] Strength this turn." (was Apply 1 [2] Vulnerable to ALL).
+- `proto_kk_read_the_field`: Plan "Put a card from your Draw Pile into your
+  Hand." (was Gain 10 [12] Block), her choice from the whole pile; the
+  upgrade is the scry alone. The now-line, unchanged in effect, is reworded
+  to fit the 120-character card ceiling beside the new Plan line: "Look at
+  your top 3 [4] cards. Take 1; put the rest on the bottom." (was "Look at
+  the top 3 cards of your Draw Pile. Put 1 into your Hand and the rest on the
+  bottom.").
+- `proto_kk_coordinated_tide`: "Whenever a Companion triggers an Elemental
+  Reaction, add a Sting to your Hand." A Companion card's own hit, played or
+  carried out as a Plan (was 6 [9] Hydro whenever an Ethereal card was
+  carried out). The paper names no upgrade; it takes Innate, the jellyfish
+  generators' upgrade (Kurage Bloom, Endless Shoal, Jellyfish Current).
+- `proto_kk_grand_strategist`: "Whenever you trigger an Elemental Reaction,
+  deal 4 [6] damage to ALL enemies." Any reaction credited to her (was a
+  Plan's reaction, 7 [10]).
+- `proto_kk_all_streams_flow`: "Deal 5 [7] Hydro damage, plus 5 for each
+  Elemental Reaction you triggered this combat." (was 4 [8] plus 2 per Sting
+  played), count `reactions_triggered_this_combat`.
+
+**Cuts and the six new cards (sec.4),** each in the cut card's slot of its
+rarity, so the pool stays 78 (20 / 38 / 20):
+
+- Riptide Guard out; **Turning Tide** (`proto_kk_turning_tide_chain`, Common
+  Attack, 1): "Deal 7 [10] Hydro damage. Plan: Deal 4 [5] Hydro damage to ALL
+  enemies for each Plan carried out this turn." A new id: the re-founding's
+  cut card of the same name (`proto_kk_turning_tide`) stays cut and pinned
+  absent.
+- Reserves out; **Brine Spray** (Uncommon Attack, 1): "Deal 5 [7] Hydro
+  damage. If it triggers an Elemental Reaction, add 2 Stings to your Hand."
+  `reaction_triggered_by_this` (Diluc's read) and the `shoal_call` kind, now
+  legal inside a conditional branch.
+- Brace for the Tide out; **Jellyfish Current** (Uncommon Power, 1):
+  "Whenever a Sting triggers an Elemental Reaction, add a Sting to your
+  Hand." Upgrade Innate. A Sting played, flipped or carried out as its Plan
+  line. Bounded: each reaction consumes the aura (BACKLOG's loop-probe known
+  set).
+- Moon's Reflection out; **Prepared Retreat** (Uncommon Skill, 1): "Gain 7
+  [10] Block. Plan: If an enemy attacked you since you planned this, gain 1
+  [2] Energy." New upgrade key `plan_energy` (`EnergyVar` "PlanEnergy").
+- Ceremonial Garment out; **Battle Formation** (Rare Power, 1): "Whenever 3
+  or more Plans are carried out in one turn, gain 1 Energy and draw 2 cards."
+  Upgrade Innate. Once a turn, when the third carry-out finishes, on the
+  once-per-turn latch. A second copy adds 1 Energy (the stack is the Energy,
+  the face's icon); the draw stays 2.
+- Watatsumi Resistance out; **Turnabout** (Rare Skill, 2, Exhaust): "Plan:
+  Deal the damage enemies dealt you since you planned this, blocked or not,
+  to ALL enemies." The paper's "Deal damage equal to all the damage enemies
+  dealt you ..." in the 120-character card ceiling. Upgrade cost 1, the
+  Prototype-stage rule for a 2-cost card with no number.
+
+The cut cards' engine verbs stay registered with no row spelling them
+(`plan_from_exhaust`, the `reserves` and `double_block` kinds, the Ceremonial
+Garment and Watatsumi Resistance powers); their paintings are `KNOWN_STALE`
+and the six new rows `KNOWN_MISSING`.
+
+**Live lines.** A waiting Counter or Chain Plan prints its number as it
+stands on the strip's caption and the page ("Deals 14", "2 attackers",
+"Energy 1", "No attack yet"; `KokomiPlan.LiveLine`, the wire's `live`). A
+Chain forecast is the rate times its place in the queue. No card face prints
+one: in hand a Counter Plan has no window yet and a Chain Plan's count
+depends on Plans not yet written.
+
+Pins: `tier0/tests/test_kokomi_pool_overhaul_2026_10_13.py`,
+`klee-mod/KleeTests/Prototype/KokomiPoolOverhaulTests.cs`. Untested in game
+until a deploy.

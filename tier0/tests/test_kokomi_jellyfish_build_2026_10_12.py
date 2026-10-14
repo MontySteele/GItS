@@ -178,30 +178,34 @@ def test_the_turn_count_rolls_and_the_combat_count_does_not():
 # --- All Streams Flow to the Sea ------------------------------------------------------
 
 def test_all_streams_is_a_rare_attack_at_1():
+    """The Kokomi pool overhaul (2026-10-13): 5 [7], plus 5 for each
+    Elemental Reaction she triggered this combat (was 4 [8] plus 2 per Sting
+    played)."""
     row = loader.get_card("proto_kk_all_streams_flow")
     assert (row.type, row.cost, row.rarity) == ("attack", 1, "rare")
     assert row.effects[0]["amount_formula"] == {
-        "base": 4, "per": 2, "count": "stings_played_this_combat"}
+        "base": 5, "per": 5, "count": "reactions_triggered_this_combat"}
     assert _up("proto_kk_all_streams_flow").effects[0]["amount_formula"][
-        "base"] == 8
+        "base"] == 7
 
 
 def test_all_streams_counts_every_sting_played_this_combat():
+    """Stings played no longer feed it (the pool overhaul, 2026-10-13): the
+    count is the reactions she triggered this combat, which a turn roll
+    keeps. Sting plays on a bare body react with nothing."""
     st = kokomi_state()
     _attacking(st)
     st.enemies[0].hp = st.enemies[0].max_hp = 500
     for _ in range(3):
         _play(st, card(kokomi_plan.STING_ID))
+    assert st.kk_stings_played_this_combat == 3
+    assert st.kk_reactions_this_combat == 0
+    st.kk_reactions_this_combat = 2
     kokomi_plan.roll_turn(st)           # a new turn: the combat count stays
-    _play(st, card(kokomi_plan.STING_ID))
-    write_target = card(kokomi_plan.STING_ID)
-    st.enemies[0].intents = [{"kind": "block", "amount": 5}]
-    write(st, write_target)             # written: not counted
-    _attacking(st)
-    assert st.kk_stings_played_this_combat == 4
+    assert st.kk_reactions_this_combat == 2
     hp = st.enemies[0].hp
     _play(st, card("proto_kk_all_streams_flow"))
-    assert hp - st.enemies[0].hp == 4 + 2 * 4
+    assert hp - st.enemies[0].hp == 5 + 5 * 2
 
 
 # --- The Shape of Water ------------------------------------------------------------------

@@ -118,6 +118,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         PLAN_INTO_BLOCK_AND_DEFEND_CLAUSE,
                                         PLAN_INTO_DEFEND_CLAUSE,
                                         PLAN_BLOCK_NOW_CLAUSE,
+                                        PLAN_LIVE_CLAUSE,
                                         PLAN_FIRST_CLAUSE,
                                         BLOCK_KEEPING_POWERS,
                                         POWER_NOTE, SELECTION_NOTE,
@@ -3769,6 +3770,10 @@ def render(obs: dict[str, Any]) -> str:
                                + (PLAN_BLOCK_NOW_CLAUSE.format(
                                    block=e["block_now"])
                                   if e.get("block_now") is not None else "")
+                               # The Kokomi pool overhaul (2026-10-13): a
+                               # Counter or Chain Plan's number as it stands.
+                               + (PLAN_LIVE_CLAUSE.format(live=e["live"])
+                                  if e.get("live") else "")
                                + into_block.get(i - 1, "")
                                + past_lethal.get(i - 1, ""))
                     # A PLAN STAYS OPEN (2026-10-01), pick 5 (a): both

@@ -44,22 +44,22 @@ public sealed class ProtoKkAllStreamsFlow : CustomCardModel, IElementalCard, ICh
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KokomiCards.WithStingPreview(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro));
+        ArmKeywordTips.ForElementalReaction(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_all_streams_flow");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "All Streams Flow to the Sea"),
-        ("description", "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus {ExtraDamage:diff()} for each [gold]Sting[/gold] you played this combat.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("description", "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus {ExtraDamage:diff()} for each [gold]Elemental Reaction[/gold] you triggered this combat.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(4m),
-            new ExtraDamageVar(2m),
-            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => KokomiOverhaulLedger.For(card.Owner.Creature).StingsPlayedThisCombat)
+            new CalculationBaseVar(5m),
+            new ExtraDamageVar(5m),
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => KokomiOverhaulLedger.For(card.Owner.Creature).ReactionsThisCombat)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -81,6 +81,6 @@ public sealed class ProtoKkAllStreamsFlow : CustomCardModel, IElementalCard, ICh
 
     protected override void OnUpgrade()
     {
-        DynamicVars.CalculationBase.UpgradeValueBy(4m);
+        DynamicVars.CalculationBase.UpgradeValueBy(2m);
     }
 }

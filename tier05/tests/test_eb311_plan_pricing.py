@@ -277,10 +277,11 @@ def test_the_queue_verbs_price_off_dials_this_table_already_holds():
     assert card.cost == 0
     assert draft._static_power(card) == (
         draft.STATIC_AUTOPLAY_VALUE * (1 - C.PLAN_DELAY_DISCOUNT) / max(1, card.cost))
-    # Moon's Reflection: one card out of the exhaust pile, a turn late.
-    card = _proto("proto_kk_moons_reflection")
-    assert draft._static_power(card) == (
-        draft.STATIC_AUTOPLAY_VALUE * C.PLAN_DELAY_DISCOUNT / card.cost)
+    # Moon's Reflection's verb (the card left with the Kokomi pool overhaul,
+    # 2026-10-13; the op stays registered): one card out of the exhaust
+    # pile, a turn late.
+    assert draft._op_price({"op": "plan_from_exhaust"}) == (
+        draft.STATIC_AUTOPLAY_VALUE * C.PLAN_DELAY_DISCOUNT)
 
 
 def test_the_rare_power_takes_the_engine_credit():

@@ -32,10 +32,11 @@ def _amount(c):
 # The three jellyfish generators moved again in the jellyfish build
 # (2026-10-12): `test_kokomi_jellyfish_build_2026_10_12`.
 @pytest.mark.parametrize("cid,base,up", [
-    ("proto_kk_coordinated_tide", 6, 9),
-    # Kurage Canopy left this pin in the Kokomi round 3 A-list (2026-10-13):
-    # it makes Wards now (`test_kokomi_payoff_pass`).
-    ("proto_kk_grand_strategist", 7, 10),
+    # Coordinated Tide left this pin with the pool overhaul (2026-10-13): it
+    # adds a Sting now. Kurage Canopy left it in the Kokomi round 3 A-list
+    # (2026-10-13): it makes Wards now (`test_kokomi_payoff_pass`).
+    # Grand Strategist 4 [6] since the pool overhaul (was 7 [10]).
+    ("proto_kk_grand_strategist", 4, 6),
     ("proto_kk_shoal_of_spears", 5, 6),
 ])
 def test_the_retuned_numbers(cid, base, up):

@@ -118,6 +118,24 @@ CARD_DIRS = tuple(IMAGES / name for name in CARD_DIR_NAMES)
 # KNOWN-set pattern (as in tools/art_lint.py): a stale file with a reason on
 # record is a NOTE, not a failure. Never prune an entry without a new reason.
 KNOWN_STALE = {
+    "proto_kk_riptide_guard": (
+        "The Kokomi pool overhaul (2026-10-13, review/active/kokomi-pool-overhaul-2026-10-13.md sec.4) cut this row: Turning Tide takes its slot. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_reserves": (
+        "The Kokomi pool overhaul (2026-10-13, review/active/kokomi-pool-overhaul-2026-10-13.md sec.4) cut this row: Brine Spray takes its slot. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_brace_for_the_tide": (
+        "The Kokomi pool overhaul (2026-10-13, review/active/kokomi-pool-overhaul-2026-10-13.md sec.4) cut this row: Jellyfish Current takes its slot. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_moons_reflection": (
+        "The Kokomi pool overhaul (2026-10-13, review/active/kokomi-pool-overhaul-2026-10-13.md sec.4) cut this row: Prepared Retreat takes its slot. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_ceremonial_garment": (
+        "The Kokomi pool overhaul (2026-10-13, review/active/kokomi-pool-overhaul-2026-10-13.md sec.4) cut this row: Battle Formation takes its slot. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_watatsumi_resistance": (
+        "The Kokomi pool overhaul (2026-10-13, review/active/kokomi-pool-overhaul-2026-10-13.md sec.4) cut this row: Turnabout takes its slot. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
     "proto_kk_measured_breath": (
         "The Kokomi jellyfish build (2026-10-12, review/ruled/kokomi-jellyfish-growth-2026-10-12.md) cut this row: Endless Shoal takes its Uncommon slot. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
@@ -670,6 +688,12 @@ KNOWN_MISSING = {
     "proto_ym_editor_in_chief": (
         "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
     ),
+    "proto_kk_turning_tide_chain": "The Kokomi pool overhaul (review/active/kokomi-pool-overhaul-2026-10-13.md, ruled 2026-10-13); no painting yet. The re-founding's cut `proto_kk_turning_tide.png` (a card of the same name) is a candidate, unseen.",
+    "proto_kk_brine_spray": "The Kokomi pool overhaul (review/active/kokomi-pool-overhaul-2026-10-13.md, ruled 2026-10-13); no painting yet.",
+    "proto_kk_jellyfish_current": "The Kokomi pool overhaul (review/active/kokomi-pool-overhaul-2026-10-13.md, ruled 2026-10-13); no painting yet.",
+    "proto_kk_prepared_retreat": "The Kokomi pool overhaul (review/active/kokomi-pool-overhaul-2026-10-13.md, ruled 2026-10-13); no painting yet.",
+    "proto_kk_battle_formation": "The Kokomi pool overhaul (review/active/kokomi-pool-overhaul-2026-10-13.md, ruled 2026-10-13); no painting yet.",
+    "proto_kk_turnabout": "The Kokomi pool overhaul (review/active/kokomi-pool-overhaul-2026-10-13.md, ruled 2026-10-13); no painting yet.",
 }
 
 

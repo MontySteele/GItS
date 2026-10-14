@@ -51,15 +51,16 @@ public class KokomiExpansionTests : IDisposable
     {
         // The re-founding (2026-10-12) cut Weight of the Plan, Lull, The Long
         // Game, Salt in the Wound, Tidal Resonance and Kurage Swarm; the
-        // jellyfish build (2026-10-12) cut Measured Breath.
+        // jellyfish build (2026-10-12) cut Measured Breath; the pool overhaul
+        // (2026-10-13) cut Ceremonial Garment and Brace for the Tide.
         "ProtoKkUndertideLance",
         "ProtoKkGrandDesign",
         "ProtoKkMasterstroke",
         "ProtoKkDrowningPressure",
         "ProtoKkUndercurrentSnare",
-        "ProtoKkAtWatersEdge", "ProtoKkCeremonialGarment",
+        "ProtoKkAtWatersEdge",
         "ProtoKkSuffocatingDeep", "ProtoKkCoralCrash", "ProtoKkEveningWatch",
-        "ProtoKkBraceForTheTide", "ProtoKkWatatsumisGrace",
+        "ProtoKkWatatsumisGrace",
         "ProtoKkTidalRiposte", "ProtoKkShoalCall",
     };
 
@@ -171,10 +172,13 @@ public class KokomiExpansionTests : IDisposable
     [Fact]
     public void The_tide_control_faces_and_clauses()
     {
+        // The pool overhaul (2026-10-13): an Intent line, 3 [4] Strength off
+        // each enemy that intends to attack when it lands.
         var snare = Assert.Single(new ProtoKkUndercurrentSnare().PlanClauses);
-        Assert.Equal((KokomiPlan.Kind.ApplyVulnerable, 1, KokomiPlan.Aim.AllEnemies),
+        Assert.Equal((KokomiPlan.Kind.LoseStrengthThisTurn, 3,
+                      KokomiPlan.Aim.EnemiesIntendingAttack),
                      (snare.Kind, snare.Amount, snare.Aim));
-        Assert.Equal(2, Upgraded<ProtoKkUndercurrentSnare>().PlanClauses
+        Assert.Equal(4, Upgraded<ProtoKkUndercurrentSnare>().PlanClauses
                             .Single().Amount);
         // The re-founding (2026-10-12): Undercurrent Snare costs 1.
         Assert.Equal(1, new ProtoKkUndercurrentSnare().EnergyCost.Canonical);

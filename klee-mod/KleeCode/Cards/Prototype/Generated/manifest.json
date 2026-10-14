@@ -89,12 +89,12 @@
     "proto_kk_all_streams_flow",
     "proto_kk_ambush",
     "proto_kk_at_waters_edge",
-    "proto_kk_brace_for_the_tide",
+    "proto_kk_battle_formation",
     "proto_kk_breakwater",
+    "proto_kk_brine_spray",
     "proto_kk_brine_sting",
     "proto_kk_bubble_ward",
     "proto_kk_call_the_generals",
-    "proto_kk_ceremonial_garment",
     "proto_kk_change_of_plans",
     "proto_kk_coordinated_strike",
     "proto_kk_coordinated_tide",
@@ -109,6 +109,7 @@
     "proto_kk_flotsam_surge",
     "proto_kk_grand_design",
     "proto_kk_grand_strategist",
+    "proto_kk_jellyfish_current",
     "proto_kk_jellyfish_drift",
     "proto_kk_joint_orders",
     "proto_kk_kelp_wall",
@@ -119,18 +120,16 @@
     "proto_kk_kurages_oath",
     "proto_kk_kurages_wake",
     "proto_kk_masterstroke",
-    "proto_kk_moons_reflection",
     "proto_kk_nereids_ascension",
     "proto_kk_opening_gambit",
     "proto_kk_orders_from_the_shrine",
     "proto_kk_pearl_current",
     "proto_kk_pincer",
+    "proto_kk_prepared_retreat",
     "proto_kk_press_the_advantage",
     "proto_kk_read_the_field",
-    "proto_kk_reserves",
     "proto_kk_resolve_of_watatsumi",
     "proto_kk_riptide",
-    "proto_kk_riptide_guard",
     "proto_kk_riptide_ruin",
     "proto_kk_sango_isshin",
     "proto_kk_sangonomiyas_counsel",
@@ -159,6 +158,8 @@
     "proto_kk_tidecleanse",
     "proto_kk_tideturn",
     "proto_kk_treatise",
+    "proto_kk_turnabout",
+    "proto_kk_turning_tide_chain",
     "proto_kk_undercurrent_snare",
     "proto_kk_undertide_lance",
     "proto_kk_undertow",
@@ -166,7 +167,6 @@
     "proto_kk_ward",
     "proto_kk_watatsumi_drill",
     "proto_kk_watatsumi_muster",
-    "proto_kk_watatsumi_resistance",
     "proto_kk_watatsumis_grace",
     "proto_kk_watchful_shoal",
     "proto_ko_adventure_club",
@@ -545,12 +545,12 @@
     "proto_kk_all_streams_flow": "kokomi",
     "proto_kk_ambush": "kokomi",
     "proto_kk_at_waters_edge": "kokomi",
-    "proto_kk_brace_for_the_tide": "kokomi",
+    "proto_kk_battle_formation": "kokomi",
     "proto_kk_breakwater": "kokomi",
+    "proto_kk_brine_spray": "kokomi",
     "proto_kk_brine_sting": "kokomi",
     "proto_kk_bubble_ward": "kokomi",
     "proto_kk_call_the_generals": "kokomi",
-    "proto_kk_ceremonial_garment": "kokomi",
     "proto_kk_change_of_plans": "kokomi",
     "proto_kk_coordinated_strike": "kokomi",
     "proto_kk_coordinated_tide": "kokomi",
@@ -565,6 +565,7 @@
     "proto_kk_flotsam_surge": "kokomi",
     "proto_kk_grand_design": "kokomi",
     "proto_kk_grand_strategist": "kokomi",
+    "proto_kk_jellyfish_current": "kokomi",
     "proto_kk_jellyfish_drift": "kokomi",
     "proto_kk_joint_orders": "kokomi",
     "proto_kk_kelp_wall": "kokomi",
@@ -575,18 +576,16 @@
     "proto_kk_kurages_oath": "kokomi",
     "proto_kk_kurages_wake": "kokomi",
     "proto_kk_masterstroke": "kokomi",
-    "proto_kk_moons_reflection": "kokomi",
     "proto_kk_nereids_ascension": "kokomi",
     "proto_kk_opening_gambit": "kokomi",
     "proto_kk_orders_from_the_shrine": "kokomi",
     "proto_kk_pearl_current": "kokomi",
     "proto_kk_pincer": "kokomi",
+    "proto_kk_prepared_retreat": "kokomi",
     "proto_kk_press_the_advantage": "kokomi",
     "proto_kk_read_the_field": "kokomi",
-    "proto_kk_reserves": "kokomi",
     "proto_kk_resolve_of_watatsumi": "kokomi",
     "proto_kk_riptide": "kokomi",
-    "proto_kk_riptide_guard": "kokomi",
     "proto_kk_riptide_ruin": "kokomi",
     "proto_kk_sango_isshin": "kokomi",
     "proto_kk_sangonomiyas_counsel": "kokomi",
@@ -615,6 +614,8 @@
     "proto_kk_tidecleanse": "kokomi",
     "proto_kk_tideturn": "kokomi",
     "proto_kk_treatise": "kokomi",
+    "proto_kk_turnabout": "kokomi",
+    "proto_kk_turning_tide_chain": "kokomi",
     "proto_kk_undercurrent_snare": "kokomi",
     "proto_kk_undertide_lance": "kokomi",
     "proto_kk_undertow": "kokomi",
@@ -622,7 +623,6 @@
     "proto_kk_ward": "kokomi",
     "proto_kk_watatsumi_drill": "kokomi",
     "proto_kk_watatsumi_muster": "kokomi",
-    "proto_kk_watatsumi_resistance": "kokomi",
     "proto_kk_watatsumis_grace": "kokomi",
     "proto_kk_watchful_shoal": "kokomi",
     "proto_ko_adventure_club": "klee",
@@ -1215,7 +1215,7 @@
       "furina_amount": 1
     },
     "proto_kk_all_streams_flow": {
-      "formula_base": 4
+      "formula_base": 2
     },
     "proto_kk_ambush": {
       "plan_damage": 3
@@ -1223,23 +1223,24 @@
     "proto_kk_at_waters_edge": {
       "cost": -1
     },
-    "proto_kk_brace_for_the_tide": {
-      "cost": -1
+    "proto_kk_battle_formation": {
+      "innate": true
     },
     "proto_kk_breakwater": {
       "formula_base": 2
     },
+    "proto_kk_brine_spray": {
+      "damage": 2
+    },
     "proto_kk_brine_sting": {
-      "damage": 3
+      "damage": 3,
+      "plan_damage": 3
     },
     "proto_kk_bubble_ward": {
       "block": 3
     },
     "proto_kk_call_the_generals": {
       "cost": -1
-    },
-    "proto_kk_ceremonial_garment": {
-      "power_amount": 1
     },
     "proto_kk_change_of_plans": {
       "draw": 1
@@ -1248,7 +1249,7 @@
       "damage": 3
     },
     "proto_kk_coordinated_tide": {
-      "power_amount": 3
+      "innate": true
     },
     "proto_kk_coral_bulwark": {
       "block": 3
@@ -1270,7 +1271,7 @@
     },
     "proto_kk_feint": {
       "formula_base": 3,
-      "plan_power_amount": 1
+      "plan_damage": 2
     },
     "proto_kk_flank": {
       "damage": 3,
@@ -1283,7 +1284,10 @@
       "retain": true
     },
     "proto_kk_grand_strategist": {
-      "power_amount": 3
+      "power_amount": 2
+    },
+    "proto_kk_jellyfish_current": {
+      "innate": true
     },
     "proto_kk_jellyfish_drift": {
       "damage": 2
@@ -1292,8 +1296,7 @@
       "block": 3
     },
     "proto_kk_kelp_wall": {
-      "block": 2,
-      "plan_block": 3
+      "block": 2
     },
     "proto_kk_kurage_barrage": {
       "damage": 1
@@ -1317,9 +1320,6 @@
     "proto_kk_masterstroke": {
       "plan_damage": 12
     },
-    "proto_kk_moons_reflection": {
-      "cost": -1
-    },
     "proto_kk_nereids_ascension": {
       "innate": true
     },
@@ -1336,16 +1336,16 @@
     "proto_kk_pincer": {
       "damage": 1
     },
+    "proto_kk_prepared_retreat": {
+      "block": 3,
+      "plan_energy": 1
+    },
     "proto_kk_press_the_advantage": {
       "conditional_damage": 2,
       "conditional_then_damage": 1
     },
     "proto_kk_read_the_field": {
-      "scry": 1,
-      "plan_block": 2
-    },
-    "proto_kk_reserves": {
-      "cost": -1
+      "scry": 1
     },
     "proto_kk_resolve_of_watatsumi": {
       "power_amount": 1
@@ -1354,9 +1354,6 @@
       "damage": 3,
       "bonus_vs_debuff": 1,
       "plan_draw": 1
-    },
-    "proto_kk_riptide_guard": {
-      "block": 3
     },
     "proto_kk_riptide_ruin": {
       "damage": 3
@@ -1453,6 +1450,13 @@
     "proto_kk_treatise": {
       "innate": true
     },
+    "proto_kk_turnabout": {
+      "cost": -1
+    },
+    "proto_kk_turning_tide_chain": {
+      "damage": 3,
+      "plan_damage": 1
+    },
     "proto_kk_undercurrent_snare": {
       "plan_power_amount": 1
     },
@@ -1475,9 +1479,6 @@
     },
     "proto_kk_watatsumi_muster": {
       "upgraded_grant": true
-    },
-    "proto_kk_watatsumi_resistance": {
-      "cost": -1
     },
     "proto_kk_watatsumis_grace": {
       "power_amount": 5

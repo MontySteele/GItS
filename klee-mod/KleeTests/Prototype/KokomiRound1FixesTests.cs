@@ -45,9 +45,10 @@ public class KokomiRound1FixesTests
             KokomiPlan.Kind.BlockPerStatusInHand, 3, KokomiPlan.Aim.Self)
             with { WrittenCount = 2 };
         Assert.Equal(2, stamped.WrittenCount);
-        // The Kokomi level pass (2026-10-12): Kelp Wall's Plan is a flat
-        // Block, so no row spells the clause today; the machinery stays.
-        Assert.Equal(KokomiPlan.Kind.Block,
+        // The Kokomi level pass (2026-10-12): Kelp Wall's Plan left the status
+        // count, so no row spells the clause today; the machinery stays. (A
+        // Counter line since the pool overhaul, 2026-10-13.)
+        Assert.Equal(KokomiPlan.Kind.DamageBlockedSince,
                      Assert.Single(new ProtoKkKelpWall().PlanClauses).Kind);
         Assert.DoesNotContain("status or curse", Face(new ProtoKkKelpWall()));
     }

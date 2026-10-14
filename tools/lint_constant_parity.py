@@ -252,6 +252,9 @@ MIRRORED: dict[str, object] = {
     # Call the Generals' "1 of 3".
     "CompanionOverhaulLaw.JuugaGuardBlock": C.MI_JUUGA_GUARD_BLOCK,
     "KokomiCompanionPlan.GeneralsOffered": C.KOKOMI_GENERALS_OFFERED,
+    # THE POOL OVERHAUL (2026-10-13): Battle Formation's three numbers.
+    "BattleFormationPower.Threshold": C.KOKOMI_BATTLE_FORMATION_THRESHOLD,
+    "BattleFormationPower.Draw": C.KOKOMI_BATTLE_FORMATION_DRAW,
     # THE FURINA STAGE (`furina_stage.FURINA_STAGE`; `EB-723` /
     # `EB-724` / `EB-725`, R269). Same terms as every arm above and for the
     # same reason -- quarantined is not exempt. These NINE numbers ARE the

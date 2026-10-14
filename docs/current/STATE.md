@@ -90,15 +90,11 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
   Exhaust, and have a Plan line.
 - **Pool:** 78 (20 / 38 / 20), five co-op cards. Ancients: Divine Strategy
   (Tome) and Princess of Watatsumi (Tooth on Kurage's Oath).
-- **Latest:** round 4 on 2026-10-13 (five seats, 0.2.5263) was 1/5 won,
-  with three runs at an act-3 boss, and Wards were made in every lane
-  (`review/active/kokomi-review-r4-2026-10-13.md`). Its A-list is built:
-  Moon's Reflection is unplayable while the Exhaust Pile is empty, Opening
-  Gambit's and Second Wave's now-line no longer spends Vigor, the brief's
-  Casket line reads start of turn, and three page fixes (a copy a play adds
-  takes the next number, the difference line names only what moved, and
-  `--define` reads a power on the board). The rider-power sentence did not
-  fit the 125-character power ceiling (BACKLOG).
+- **Latest:** the pool overhaul is built
+  (`review/active/kokomi-pool-overhaul-2026-10-13.md`, picks 1 (a) and 2
+  (a)): eight Plan lines and payoffs rewritten to Counter, Intent and Chain
+  readings, six cards cut and six new ones in their slots, pool still 78
+  (20 / 38 / 20). Untested in game until a deploy.
 - **Next:** [USER]'s picks on review r4; the default is his own finish-line
   run.
 - **Possible change, parked:** Nereid's Ascension carries her burst's name

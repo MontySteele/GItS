@@ -167,6 +167,14 @@ internal static class KleePowerIcons
         GrandStrategistPower => KleePck.Path(
             "klee/powers/amp_reaction_up.png"),
         EndlessShoalPower => KleePck.Path("kokomi/powers/bake_kurage.png"),
+        // THE POOL OVERHAUL (2026-10-13): the two new Powers borrow the
+        // nearest shipped shape, the block above's rule, and Undercurrent
+        // Snare's this-turn loss wears Cover Your Ears!'s borrowed badge.
+        JellyfishCurrentPower => KleePck.Path("kokomi/powers/bake_kurage.png"),
+        BattleFormationPower => KleePck.Path(
+            "kokomi/powers/before_sun_and_moon.png"),
+        UndercurrentSnarePower =>
+            KleePck.Path("klee/powers/detonation_vuln.png"),
         DawnTidePower => KleePck.Path("kokomi/powers/bake_kurage.png"),
         JuugaGuardPower => KleePck.Path("klee/powers/oz_summon.png"),
         NereidsAscensionPower => KleePck.Path(

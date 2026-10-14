@@ -4334,7 +4334,7 @@ def test_the_number_kind_words_are_the_mods_own():
     # (`KokomiPlan.NoteRider`), which `_rider_clause` already prints.
     assert "Kind.DrawPerPlanAfter" not in asked
     entry = plan[plan.index(
-        "var wanted = AskedFor(kokomi, clause);"):]
+        "var wanted = AskedFor(kokomi, clause, entry);"):]
     assert entry.index("await ResolveOne(") < entry.index("kind = NumberKind(")
 
 

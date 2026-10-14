@@ -1368,6 +1368,11 @@ PLAN_INTO_DEFEND_CLAUSE = " (into the Block it gains on its turn)"
 # `block_now`, Frail and Dexterity folded), and says the read is repeated.
 PLAN_BLOCK_NOW_CLAUSE = (" ({block} Block against the attacks intended now; "
                          "it reads them again on the turn it lands)")
+# THE KOKOMI POOL OVERHAUL (2026-10-13): a waiting Counter or Chain Plan's
+# number as it stands -- the strip's caption ("Deals 14", "2 attackers",
+# "Energy 1", "No attack yet"; the wire's `live`). A Chain Plan's is what it
+# deals if the queue lands as written.
+PLAN_LIVE_CLAUSE = " (as it stands: {live})"
 # And which Plan is first, after Change of Plans moved the front (B2: "I
 # could not tell which Plan was first").
 PLAN_FIRST_CLAUSE = " (first)"

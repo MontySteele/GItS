@@ -328,7 +328,12 @@ public class KokomiOverhaulRuleTests
                     "BlockPerStatusInHand", "TransformStatusesInDrawPile",
                     // THE RE-FOUNDING (2026-10-12).
                     "AddStings", "GainStrength", "JuugaGuard",
-                    "PlayCompanion" },
+                    "PlayCompanion",
+                    // THE POOL OVERHAUL (2026-10-13): Chain, Counter and
+                    // Intent, and Read the Field's fetch.
+                    "DamagePerPlanThisTurn", "DamageBlockedSince",
+                    "DamageTakenSince", "EnergyIfAttackedSince",
+                    "LoseStrengthThisTurn", "DrawPileToHand" },
             System.Enum.GetNames(typeof(KokomiPlan.Kind)));
     }
 
@@ -344,8 +349,11 @@ public class KokomiOverhaulRuleTests
         // above: `EnemiesIntendingAttack` fixes its SET when the Plan is
         // written and holds it as `CombatId` STRINGS, so nothing here is a
         // pointer either. `KokomiPoolPassTests` carries that aim's own pins.
+        // The Kokomi pool overhaul (2026-10-13) appended Brine Sting's
+        // `EnemiesAttackedSince`, read off the Plan's own window.
         Assert.Equal(new[] { "Self", "FrontEnemy", "AllEnemies",
-                             "EnemiesIntendingAttack" },
+                             "EnemiesIntendingAttack",
+                             "EnemiesAttackedSince" },
                      System.Enum.GetNames(typeof(KokomiPlan.Aim)));
 
         var planned = typeof(KokomiPlan.Planned);
@@ -1089,8 +1097,10 @@ public class KokomiOverhaulRuleTests
     // ==================================================================
 
     [Theory]
-    [InlineData("ProtoKkReadTheField", 10)]
-    [InlineData("ProtoKkKelpWall", 12)]
+    // The Kokomi pool overhaul (2026-10-13) moved Read the Field's and Kelp
+    // Wall's Plan lines off Block; Steady Tide's "Plan: Gain 11 Block" is not
+    // an upgraded clause, so Tide Wall's flat 6 is the printed Plan Block.
+    [InlineData("ProtoKkTideWall", 6)]
     public void A_planned_blocks_printed_number_is_a_block_var(
         string card, int printed)
     {

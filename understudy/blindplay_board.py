@@ -1846,7 +1846,11 @@ def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
               "block_now": (row.get("block_now")
                             if isinstance(row.get("block_now"), int)
                             and not isinstance(row.get("block_now"), bool)
-                            else None)}
+                            else None),
+              # The Kokomi pool overhaul (2026-10-13): a Counter or Chain
+              # Plan's number as it stands, in the strip's words. Absent or
+              # null on every other entry and on an older bridge.
+              "live": _text(row.get("live")) or None}
              for row in (raw.get("queue") or []) if isinstance(row, dict)]
     pet_id = raw.get("pet_entity_id")
     pet_name = _text(raw.get("pet_name")) or "Bake-Kurage"
