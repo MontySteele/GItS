@@ -364,10 +364,30 @@ VARKA_PROFILE = CharacterProfile(
     emit_character_identity=True,
 )
 
+#: YAE MIKO, THE FIFTH CHARACTER (review/active/yae-card-paper-2026-10-13.md,
+#: ruled 2026-10-13). Varka's arrangement: a prototype-only owner, reached
+#: only through `PROTOTYPE_OWNERS`. CATALYST: her Attacks deal Electro (sec.1,
+#: "her Attack cards deal Electro damage, as Klee's deal Pyro"); the base
+#: game's Strike and Defend apply nothing.
+YAE_PROFILE = CharacterProfile(
+    character_id="yae",
+    sheet=REPO / "docs" / "prototype-surface.yaml",
+    out_dir=REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype" / "Generated",
+    manifest=(REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
+              / "Generated" / "manifest.json"),
+    namespace="KleeMod.Cards.Prototype.Generated",
+    native_element="electro",
+    cadence="catalyst_attack",
+    generator_script="tools/gen_prototype_cards.py",
+    art_loader="RosterArt",
+    emit_character_identity=True,
+)
+
 #: Every character a PROTOTYPE row may name: the shipped roster plus the
 #: prototype-only owners above. `gen_prototype_cards` reads this and nothing
 #: else reads it.
-PROTOTYPE_OWNERS = {**PROFILES, VARKA_PROFILE.character_id: VARKA_PROFILE}
+PROTOTYPE_OWNERS = {**PROFILES, VARKA_PROFILE.character_id: VARKA_PROFILE,
+                    YAE_PROFILE.character_id: YAE_PROFILE}
 
 # Ops this generator can express with verified Cmd APIs. Anything else blocks
 # the card. Keep this set honest -- widening it without a verified call site is
@@ -606,6 +626,10 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # awaited `VarkaCards.<Kind>` call per `kind:`
                   # (`VARKA_KINDS`).
                   "varka", "add_knight",
+                  # YAE MIKO (2026-10-13): her one verb, one awaited
+                  # `YaeCards.<Kind>` call per `kind:` (`YAE_KINDS`),
+                  # Varka's shape.
+                  "yae",
                   # THE KOKOMI EXPANSION, BATCH ONE (2026-09-29): her
                   # now-line verbs, one awaited `KokomiCards.<Kind>` call per
                   # `kind:` (`KOKOMI_KINDS`), Varka's shape.
@@ -895,7 +919,16 @@ ARM_KEYWORDS = (
     # shape `Bomb` and `Mine` have.
     ArmKeyword("Elemental Reaction", ("Elemental Reaction", "Elemental Reactions"),
                "ArmKeywordTips.ForElementalReaction"),
-    ArmKeyword("Sakura", ("Sakura",), "ArmKeywordTips.ForSakura"),
+    # YAE MIKO (2026-10-13), pick 6 (a): "two tips, Sakura and Edit; Tenko
+    # lives in the Sakura tip and the five Annotation names in the Edit tip".
+    # So a face printing Tenko hovers the Sakura tip, and one printing an
+    # Annotation's name, "Annotated" or "Publish" hovers the Edit tip.
+    # `Sakura` is the companion Sesshou Sakura's word too; `ForSakura` prints
+    # her tip on her own cards.
+    ArmKeyword("Sakura", ("Sakura", "Tenko"), "ArmKeywordTips.ForSakura"),
+    ArmKeyword("Edit", ("Edit", "Edited", "Annotated", "Publish", "Red Ink",
+                        "Footnote", "Deadline Extension", "Fox Fire",
+                        "Sakura Seal"), "ArmKeywordTips.ForEdit"),
     ArmKeyword("Lightfall Sword", ("Lightfall Sword",),
                "ArmKeywordTips.ForLightfallSword"),
 )
@@ -2778,6 +2811,80 @@ VARKA_CURRENT_HIT_PREVIEW_KINDS = {"ascension_hit", "avatar_hit"}
 #: is a number no card pays.
 VARKA_BLOCK_BASE_KINDS = {"frost_ward", "gleeful_songs"}
 VARKA_FIELDS = {"op", "kind", "target", "per", "base", "amount"}
+
+#: YAE MIKO (review/active/yae-card-paper-2026-10-13.md, ruled 2026-10-13):
+#: her one verb, `{op: yae, kind: ...}`, each kind ONE awaited
+#: `YaeCards.<method>` call (Powers/Prototype/YaeShrine.cs). The kinds and the
+#: numeric fields each prints are the sim twin's (`tier0/engine/yae_shrine.py`
+#: `KIND_FIELDS`); the fields are the card's DynamicVars `Ym<Field>`
+#: (`YAE_VAR_FIELDS`), moved by the upgrade keys `yae_<field>`.
+YAE_KINDS = {
+    "plant": "Plant",
+    "tenko": "Tenko",
+    "extend": "Extend",
+    "level_up": "LevelUp",
+    "edit": "Edit",
+    "edit_all": "EditAll",
+    "publish": "Publish",
+    "lure": "Lure",
+    "damage_per_sakura": "DamagePerSakura",
+    "block_per_sakura": "BlockPerSakura",
+    "damage_per_annotated": "DamagePerAnnotated",
+    "block_per_annotated": "BlockPerAnnotated",
+    "annotated_strike": "AnnotatedStrike",
+    "fox_fire": "FoxFire",
+}
+YAE_KIND_FIELDS = {
+    "plant": ("amount",),
+    "tenko": (),
+    "extend": ("amount",),
+    "level_up": ("amount",),
+    "edit": ("amount",),
+    "edit_all": (),
+    "publish": (),
+    "lure": (),
+    "damage_per_sakura": ("base", "per"),
+    "block_per_sakura": ("base", "per"),
+    "damage_per_annotated": ("base", "per"),
+    "block_per_annotated": ("base", "per"),
+    "annotated_strike": ("base", "amount"),
+    "fox_fire": (),
+}
+#: The kinds that aim at the enemy the player picks (`target: enemy`).
+YAE_AIMED_KINDS = {"lure", "damage_per_sakura", "damage_per_annotated",
+                   "annotated_strike"}
+#: The kinds that name an Annotation (`annotation:`), and the C#
+#: `YaeAnnotation` member each sheet name is.
+YAE_ANNOTATION_KINDS = {"edit", "edit_all"}
+YAE_ANNOTATIONS = {
+    "red_ink": "RedInk",
+    "footnote": "Footnote",
+    "deadline": "DeadlineExtension",
+    "fox_fire": "FoxFire",
+    "sakura_seal": "SakuraSeal",
+}
+YAE_VAR_FIELDS = {"per": "YmPer", "base": "YmBase", "amount": "YmAmount"}
+#: The value `YaeCards` reads for a field the card declares no var for: a
+#: count of 1 ("Plant a Sakura") and a base of 0 (Thunderbolt Tithe) print
+#: nothing and move with no upgrade, so they carry no var
+#: (`lint_generated_structure` L2) and the reader defaults them.
+YAE_FIELD_DEFAULTS = {"amount": 1, "base": 0, "per": 0}
+
+
+def yae_needs_var(card: dict, eff: dict, field: str) -> bool:
+    """Does this `yae` op's field need its `Ym<Field>` var?"""
+    if f"yae_{field}" in upgrade_plan(card)[0]:
+        return True
+    return int(eff[field]) != YAE_FIELD_DEFAULTS[field]
+YAE_FIELDS = {"op", "kind", "target", "per", "base", "amount", "annotation"}
+
+
+def yae_call(eff: dict) -> str:
+    """The one awaited call a `yae` op emits."""
+    args = "choiceContext, this, cardPlay"
+    if eff.get("kind") in YAE_ANNOTATION_KINDS:
+        args += f", YaeAnnotation.{YAE_ANNOTATIONS[eff['annotation']]}"
+    return f"await YaeCards.{YAE_KINDS[eff['kind']]}({args});"
 #: `kokomi` (THE KOKOMI EXPANSION, BATCH ONE, 2026-09-29): one kind per
 #: now-line verb, each ONE awaited `KokomiCards.<method>` call
 #: (Powers/Prototype/KokomiExpansion.cs). A kind that prints a number carries
@@ -3812,6 +3919,26 @@ APPLY_POWERS = {
     "vk_weathervane": ("WeathervanePower", None,
         "At the start of your turn, you may choose an element you have "
         "[gold]Oath[/gold] in. It becomes your [gold]current element[/gold]."),
+    # YAE MIKO (2026-10-13). Every class lives in
+    # klee-mod/KleeCode/Powers/Prototype/YaePowers.cs; each row carries its
+    # own `description:`. Sim twins: tier0/engine/yae_shrine.py.
+    "ym_sakura_grove": ("SakuraGrovePower", None,
+        "Your [gold]Sakura[/gold] strike for {X} more."),
+    "ym_edict_of_cleansing": ("EdictOfCleansingPower", None,
+        "Your [gold]Sakura[/gold] strikes deal {X} more to an enemy with a "
+        "[gold]Pyro[/gold], [gold]Hydro[/gold] or [gold]Cryo[/gold] aura."),
+    "ym_serialization": ("SerializationPower", None,
+        "Whenever you [gold]Edit[/gold] a card, gain {X} [gold]Block[/gold]."),
+    "ym_foxs_mooncall": ("FoxsMooncallPower", None,
+        "Your [gold]Sakura[/gold] are planted at Level 2 and can reach "
+        "Level 4."),
+    "ym_yakan_offering": ("YakanOfferingPower", None,
+        "At the start of your turn, plant {X} [gold]Sakura[/gold]."),
+    "ym_sakura_channeling": ("SakuraChannelingPower", None,
+        "Whenever a [gold]Sakura[/gold] strikes, gain {X} [gold]Block[/gold]."),
+    "ym_editor_in_chief": ("EditorInChiefPower", None,
+        "Whenever you play an [gold]Annotated[/gold] card, a "
+        "[gold]Sakura[/gold] strikes."),
     "vk_twin_gales": ("TwinGalesPower", None,
         "Your [gold]Swirls[/gold] pay both your [gold]current element[/gold] "
         "and the element they [gold]Swirl[/gold]."),
@@ -4237,6 +4364,9 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark",
                        # VARKA (the Oath rework): a `varka` op's own number,
                        # its `Vk<Field>` var.
                        "varka_per", "varka_base", "varka_amount",
+                       # YAE MIKO: a `yae` op's own number, its `Ym<Field>`
+                       # var.
+                       "yae_per", "yae_base", "yae_amount",
                        # VARKA (the expansion, Pathfinder's Mark+): the row's
                        # `varka` op reads `IsUpgraded` at play time, and the
                        # face carries its own `{IfUpgraded:show:...}` swap.
@@ -4436,6 +4566,9 @@ AIMING_OPS = ("damage", "place_bomb", "detonate", "move_bombs",
               # VARKA: `apply_current_element` (Favonius Drill) lands on
               # `cardPlay.Target`; `_aims_at_chosen_enemy` asks its target.
               "varka",
+              # YAE: her aimed kinds (`YAE_AIMED_KINDS`) read
+              # `cardPlay.Target`; only they say `target: enemy`.
+              "yae",
               # THE KOKOMI EXPANSION: Salt in the Wound's "if the enemy has
               # Weak" reads `cardPlay.Target`.
               "kokomi",
@@ -5385,6 +5518,33 @@ def blocked_reason(
                 if not isinstance(value, int) or isinstance(value, bool) \
                         or value < 0:
                     return f"varka {field} must be a literal int >= 0"
+        if op == "yae":
+            # YAE MIKO: a known kind, exactly the numeric fields it prints,
+            # the target only an aimed kind takes, and an Annotation only
+            # where the kind names one (`yae_shrine.validate_op`'s checks).
+            unknown = set(eff) - YAE_FIELDS
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
+            kind = eff.get("kind")
+            if kind not in YAE_KINDS:
+                return f"yae kind {kind!r}"
+            want_target = "enemy" if kind in YAE_AIMED_KINDS else None
+            if eff.get("target") != want_target:
+                return (f"yae {kind} takes target {want_target!r}, "
+                        f"row gives {eff.get('target')!r}")
+            wanted = set(YAE_KIND_FIELDS[kind])
+            given = set(eff) & set(YAE_VAR_FIELDS)
+            if given != wanted:
+                return (f"yae {kind} prints {sorted(wanted)}, "
+                        f"row gives {sorted(given)}")
+            for field in given:
+                value = eff[field]
+                if not isinstance(value, int) or isinstance(value, bool)                         or value < 0:
+                    return f"yae {field} must be a literal int >= 0"
+            if (kind in YAE_ANNOTATION_KINDS) != ("annotation" in eff):
+                return f"yae {kind} annotation mismatch"
+            if "annotation" in eff and eff["annotation"] not in YAE_ANNOTATIONS:
+                return f"yae annotation {eff['annotation']!r}"
         if op == "add_knight":
             unknown = set(eff) - ADD_KNIGHT_FIELDS
             if unknown:
@@ -7941,6 +8101,14 @@ def build_vars(card: dict) -> list[str]:
             # THE POOL TO 75: the kind's printed number, read back by
             # `FurinaCards` off the card.
             out.append(f'new DynamicVar("FsAmount", {int(eff["amount"])}m)')
+        elif op == "yae":
+            # YAE MIKO: each printed number is its own var, read back by
+            # `YaeCards` off the card.
+            for field in YAE_KIND_FIELDS[eff["kind"]]:
+                if not yae_needs_var(card, eff, field):
+                    continue
+                out.append(f'new DynamicVar("{YAE_VAR_FIELDS[field]}", '
+                           f'{int(eff[field])}m)')
         elif op == "varka":
             # VARKA (the Oath rework): each printed number is its own var,
             # read back by `VarkaCards` off the card.
@@ -8469,6 +8637,10 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         **{f"varka_{field}": any(e["op"] == "varka" and field in e
                                  for e in effects)
            for field in VARKA_VAR_FIELDS},
+        # YAE MIKO: each binds to the `yae` op that prints that field.
+        **{f"yae_{field}": any(e["op"] == "yae" and field in e
+                               for e in effects)
+           for field in YAE_VAR_FIELDS},
         "payload_mine": any(e["op"] == "plant_bomb"
                             and int(e.get("payload_mine_all", 0)) > 0
                             for e in effects),
@@ -10624,6 +10796,9 @@ def _emit_branch_op(
         # VARKA (the Oath rework): the top-level arm's one awaited call.
         lines.append(f"await VarkaCards.{VARKA_KINDS[eff['kind']]}("
                      "choiceContext, this, cardPlay);")
+    elif op == "yae":
+        # YAE MIKO: the top-level arm's one awaited call.
+        lines.append(yae_call(eff))
     elif op == "spend_charge":
         # R213 E1. Byte-for-byte the call build_body's top-level
         # arm makes. The GUARD is the point: a mode body has no IsPlayable to
@@ -12182,6 +12357,11 @@ def build_body(
             lines.append(
                 f"await VarkaCards.{method}(choiceContext, this, cardPlay);")
 
+        elif op == "yae":
+            # YAE MIKO: one awaited call per kind; the card and the play ride
+            # along so a kind reads its own `Ym*` vars and its target.
+            lines.append(yae_call(eff))
+
         elif op == "add_knight":
             # VARKA's Knights' Roll Call (Varka last pass, 2026-10-12): choose
             # 1 of 3 random Knights, into the hand at 0 this turn; with the
@@ -13578,6 +13758,20 @@ def _authored_face_numbers(card: dict):
                 else (None, None, eff["amount"])
         elif op == "draw" and isinstance(eff.get("amount"), int):
             yield None, None, eff["amount"]
+        elif op == "yae":
+            # YAE MIKO: her kinds' numbers in the order her faces print them
+            # (base before per or amount). A 0 base prints nothing
+            # (Thunderbolt Tithe), and a count of 1 prints "a" (Plant a
+            # Sakura); neither is yielded.
+            for field in YAE_KIND_FIELDS.get(eff.get("kind"), ()):
+                value = eff.get(field)
+                if not isinstance(value, int) or value == 0:
+                    continue
+                if field == "amount" and value == 1 and eff["kind"] !=                         "annotated_strike":
+                    continue
+                key = f"yae_{field}"
+                owns = key in upgrade_plan(card)[0]
+                yield (key, YAE_VAR_FIELDS[field], value) if owns                     else (None, None, value)
         # The Klee tempo paper (2026-10-07): Tinkering's "Gain 2 Sparks" and
         # Taste Test's "Add 2 Confiscated", each the number its delta moves.
         # A count of one prints "a" and no digit, so it is not yielded.
@@ -15518,6 +15712,12 @@ def build_upgrade(card: dict) -> list[str]:
                      "read at the gate and the payment.")
     for field, var in VARKA_VAR_FIELDS.items():
         key = f"varka_{field}"
+        if key in deltas:
+            done.add(key)
+            lines.append(f'DynamicVars["{var}"].UpgradeValueBy('
+                         f'{int(deltas[key])}m);')
+    for field, var in YAE_VAR_FIELDS.items():
+        key = f"yae_{field}"
         if key in deltas:
             done.add(key)
             lines.append(f'DynamicVars["{var}"].UpgradeValueBy('

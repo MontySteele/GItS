@@ -8347,3 +8347,26 @@ to befit a Rare's payoff, but otherwise agreed on (a). Eula: Icetide Vortex
   element still happens as a rule.
 - `proto_vk_eula_icetide_vortex`: (a). Costs 1, was 2; "Deal 8 [11] Cryo
   damage", was 10 [14]. The Oath line is unchanged.
+
+## Yae Miko, batch one, 2026-10-13
+
+Her card paper (`review/active/yae-card-paper-2026-10-13.md`) was ruled the
+same day and her 32 rows moved here from the sim-only staging sheet
+(`docs/yae-staging.yaml`, retired) with her C# build, unchanged in grammar.
+Her verb is `{op: yae, kind: ...}` with the fields `yae_shrine.KIND_FIELDS`
+names; `yae_amount` / `yae_base` / `yae_per` are its upgrade keys, applied by
+both engines since this move. Annotation names: red_ink, footnote, deadline,
+fox_fire, sakura_seal.
+
+What the move changed on the faces, and only on the faces:
+- Every upgradable number prints its token (the codegen places most; Twin
+  Sakura prints `{YmAmount:diff()}` itself, and Manuscript Pile and
+  Mischievous Teasing `{Cards:diff()}`).
+- Fox Fire Draft and Footnote: "Edit 2 cards" upgraded, the face's own
+  `{IfUpgraded:show:2 cards|a card}` swap (the `yae_amount: 1` delta).
+- The "Exhaust." the staging faces printed went: the keyword prints it.
+- `proto_ym_proofread`: pick 3, ruled. "Edit a card in your hand: Red Ink."
+  at 1 [0], no Block.
+- `proto_ym_reborn_as_guuji_yae`: the row's `annotation: sakura_seal` is the
+  sim pilot's choice; in game the player chooses from the five
+  (`YaeModalOptions`).

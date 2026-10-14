@@ -2,10 +2,10 @@
 
 Design: `review/active/yae-proposal-2026-10-12.md` (ruled 2026-10-12) and the
 card paper `review/active/yae-card-paper-2026-10-13.md`, whose sec.2 is the
-list of readings this module takes. Rows: `docs/yae-staging.yaml`, a SIM-ONLY
-staging sheet (the prototype surface compiles to the mod, and her C# waits on
-the paper's picks), read through the loader's prototype validators
-(`loader.STAGING_SHEETS`). No C# twin yet.
+list of readings this module takes, ruled 2026-10-13. Rows: the `proto_ym_`
+rows of `docs/prototype-surface.yaml`. C# twin:
+`klee-mod/KleeCode/Powers/Prototype/YaeShrine.cs` (`YaeLaw` mirrors the
+numbers below, `tools/lint_constant_parity.py`).
 
 NO SWITCH, as Varka: she ships nowhere else, so every hook this module adds to
 the shared engine is a dead branch for any player who is not Yae (`live`).
@@ -72,7 +72,7 @@ HP = 72
 ELEMENT = "electro"
 CADENCE = "catalyst"
 
-# --- the shrine (C# twin to come: `YaeShrine`) ---
+# --- the shrine (C# twin: `YaeLaw`, Powers/Prototype/YaeShrine.cs) ---
 SAKURA_CAP = 3
 SAKURA_TURNS = 3            # strikes a Sakura has when planted or refreshed
 SAKURA_BASE = 2             # a strike deals this plus the Sakura's Level
@@ -380,6 +380,14 @@ def annotate(state, card, name: str, reason: str = "edit") -> None:
     if getattr(card, "ym_base_retain", None) is None:
         card.ym_base_retain = bool(card.retain)
     card.ym_annotation = name
+    # The draft (pick 2 (a)): the C# writes it at every Edit
+    # (`YaeEditing.Annotate`); the end-of-turn sweep below stays as the
+    # backstop for a card annotated outside an Edit.
+    slot = getattr(card, "ym_slot", None)
+    if state is not None and slot is not None and reason != "published":
+        led = ledger(state.player)
+        if led is not None:
+            led.drafts[slot] = name
     card.enchant_damage = RED_INK_AMOUNT if name == RED_INK else 0
     card.enchant_block = RED_INK_AMOUNT if name == RED_INK else 0
     card.retain = card.ym_base_retain or name == DEADLINE
@@ -482,6 +490,18 @@ def after_play(state, card) -> None:
             return
         s = max(led.sakura, key=lambda s: (s.level, -s.seq))
         strike(state, s, "editor_in_chief")
+
+
+#: Universals never offered to one character: "Yae Miko -- Sesshou Sakura"
+#: stays in the Inazuma roster for the others and is hidden from Yae's own
+#: offers (pick 5 (a), ruled 2026-10-13). C# twin:
+#: `CompanionPool.IsHiddenFrom`.
+HIDDEN_COMPANIONS = {"proto_mi_yae_sesshou_sakura": CHARACTER}
+
+
+def hidden_from(card_id: str, character_id) -> bool:
+    """Is this companion never offered to `character_id`?"""
+    return HIDDEN_COMPANIONS.get(card_id) == character_id
 
 
 # --------------------------------------------------------------------------
