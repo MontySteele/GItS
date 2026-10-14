@@ -877,8 +877,7 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
         combat["shrine"] = shrine
         combat["you"]["powers"] = [
             pw for pw in combat["you"]["powers"]
-            if not _SAKURA_NAME.match(_text(pw.get("name")))
-            and not _RITE_NAME.match(_text(pw.get("name")))]
+            if not _SAKURA_NAME.match(_text(pw.get("name")))]
     # 2026-09-26 (control seat, Necrobinder): Osty, and any pet no kit block
     # prints, with its HP.
     allies = _allies(p, (plans or {}).get("pet_entity_id"))
