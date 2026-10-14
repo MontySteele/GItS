@@ -65,55 +65,66 @@ Each cut keeps the better twin or the more distinctive card.
 | The Deluge | R | Grand Deluge (the same card at Uncommon) |
 | Hymn of Renewal | R | Regina and Standing Room Only carry Strength |
 
-## 3. Fifteen new cards, none of them a resource verb plus a number
+## 3. Fifteen new cards, Furina's own
 
-Each new card does a job her pool cannot do today. Most say no Drain, Spend or
-Repay at all; her identity stays in the guests and the 43 resource cards that
-remain. Four add Block, because she has the thinnest Block of any character
-(41 printed, `furina-wave-2026-10-13.md`) and that is how your run ended.
-Numbers are set against the base card named in brackets.
+**Second set (2026-10-14).** The first fifteen were base cards renamed
+(Piercing Wail, Headbutt, Armaments, Calculated Gamble, Footwork,
+Equilibrium, Hologram, Skewer, Dual Wield). [USER]: "I do like the proposed
+cards, but I think that most of them are duplicates of another character's.
+Can we come up with distinct ideas for Furina, instead?" This set is built
+from what only she has: HP loss she chooses (Drain), her two arkhe, the trial
+and the Oratrice, the opening and the encore. On it: "The Ousia / Pneuma idea
+of flipped cards is very interesting! Generally, great ideas all around!";
+"Trial by Water sounds a little underpowered" (now carries Vulnerable); and
+"Water Ballet - isn't that a Necrobinder card?" (replaced by Arkhe in
+Balance; the Necrobinder's Danse Macabre carries a 2-Energy value in
+`game_ref/necrobinder.json`).
 
 **Common (6)**
-| Card | Type, cost | Text | Job (base analogue) |
-|---|---|---|---|
-| Rain of Tears | Skill 1 | Gain 5 [8] Block. Apply Hydro to ALL enemies. | Sets up her guests' reactions (Lyney Vaporize, Wriothesley and Escoffier Freeze, Clorinde Electro-Charged) |
-| Rehearsal | Skill 1 | Retain. Gain 7 [10] Block. | A Block card she can hold for the hit she sees coming |
-| Silence in the Court! | Skill 1 | ALL enemies lose 6 [8] Strength this turn. Exhaust. | Defence that is not Block (Piercing Wail) |
-| Pirouette | Attack 1 | Deal 4 [5] Hydro damage 3 times. | Multi-hit; each hit takes Neuvillette's Hydro bonus |
-| Spotlight Grab | Attack 1 | Deal 9 [12] damage. Put a card from your Discard Pile on top of your Draw Pile. | Sets up next turn's draw (Headbutt) |
-| Costume Fitting | Skill 1 | Gain 5 Block. Upgrade a card in your Hand for this combat [all of them]. | Card improvement (Armaments) |
+| Card | Type, cost | Text |
+|---|---|---|
+| Ousia / Pneuma | Attack 1 | Two faces, starts on Ousia. **Ousia:** Deal 8 [11] damage. Flip. **Pneuma:** Gain 7 [10] Block. Flip. |
+| Objection! | Skill 1 | Gain 5 [8] Block. The next time an enemy's attack makes you lose HP this turn, it takes twice that much. |
+| Tearful Monologue | Skill 1 | Gain 6 [9] Block. If you lost HP last turn, draw 2 cards. |
+| Stage Directions | Skill 1 | Gain 5 [8] Block. Put a card from your Hand on top of your Draw Pile. It costs 0 next turn. |
+| Opening Number | Attack 1 | Innate. Deal 7 [10] damage. On your first turn, deal 7 [10] more. |
+| Façade | Skill 1 | Gain Block equal to the HP you have lost this combat, up to 12 [16]. |
 
 **Uncommon (7)**
-| Card | Type, cost | Text | Job (base analogue) |
-|---|---|---|---|
-| Quick Change | Skill 0 | Discard your Hand, then draw that many cards [+1]. Exhaust. | Dig for a guest or for Block (Calculated Gamble) |
-| Read the Script | Skill 1 [0] | Look at the top 4 cards of your Draw Pile. Put 1 into your Hand; discard the rest. | Selection |
-| Practiced Grace | Power 1 | Gain 2 [3] Dexterity. | Makes her few Block cards count (Footwork) |
-| Mise en Scène | Skill 1 | Choose a card in your Hand. It costs 0 this turn. Draw 1 card [and it costs 0 until played]. | Cost cheating for her 2-cost payoffs |
-| Intermission | Skill 2 | Gain 11 [14] Block. Retain your Hand this turn. | Big defensive turn that keeps a combo hand (Equilibrium) |
-| Second Act | Skill 1 | Gain 4 [7] Block. Put a card from your Discard Pile into your Hand. Exhaust. | Replay a Guest Star or a payoff (Hologram) |
-| Solo Recital | Attack X | Deal 7 [9] damage X times. | Energy sink and a single-target finisher (Skewer) |
+| Card | Type, cost | Text |
+|---|---|---|
+| Trial by Water | Skill 1 | Apply 2 [3] Vulnerable. Until end of turn, whenever that enemy takes damage, gain 2 Fanfare. |
+| Rainfall Overture | Skill 1 [0] | Apply Hydro to ALL enemies. Your next Attack this turn hits ALL enemies. |
+| Encore Performance | Skill 1 | Play the top card of your Discard Pile for free. Exhaust it. [cost 0] |
+| Arkhe in Balance | Power 1 | Whenever you play an Attack, gain 2 [3] Block. Whenever you play a Skill, deal 2 [3] damage to a random enemy. |
+| Crowd Favorite | Power 1 | At the start of your turn, if your HP is below half, gain 1 Energy. [Innate] |
+| The Show's Not Over | Skill 0 | Can be played only if you lost HP this turn. Gain 2 Energy. Exhaust. [no Exhaust] |
+| Understudy's Debut | Attack 1 | Deal 6 [8] damage. If your HP is below half, deal 6 [8] more and gain 6 [8] Block. |
 
 **Rare (2)**
-| Card | Type, cost | Text | Job |
-|---|---|---|---|
-| Pneuma and Ousia | Power 1 | Whenever you play an Attack, gain 2 [3] Block. Whenever you play a Skill, deal 2 [3] damage to a random enemy. | Her two arkhe as a Power that pays for mixing card types, not for a resource |
-| Stand-In | Skill 1 [0] | Choose a card in your Hand other than Stand-In. Add a copy of it to your Hand. The copy Exhausts. | Doubles a Guest Star or a payoff (a Dual Wield bend at Rare) |
+| Card | Type, cost | Text |
+|---|---|---|
+| Verdict of the Oratrice | Skill 2 [1] | Choose an enemy. If its HP is no higher than your Fanfare, it dies. Otherwise deal damage equal to your Fanfare. Exhaust. |
+| Plot Twist | Skill 1 [0] | Choose an enemy that intends to attack. This turn its attack hits itself instead of you. Exhaust. |
 
-Stand-In may not copy a Stand-In (design call, 2026-10-14): two upgraded Stand-Ins copied each other forever at 0 Energy; with Pneuma and Ousia that is unlimited damage.
+The first set's Stand-In loop (two upgraded copies copying each other) goes
+with it.
 
 ## 4. What the pool looks like after
 
 | | Now | After |
 |---|---|---|
-| Non-guest cards naming a resource (a text search for Drain, Spend, Repay, Fanfare) | 58 | 43 |
+| Non-guest cards naming a resource (a text search for Drain, Spend, Repay, Fanfare) | 58 | 45 |
 | Powers | 20 | 17 |
-| Block cards / printed Block | 12 / 41 | 16 / 68 (base five: 61 to 121), plus Practiced Grace's Dexterity |
+| Block cards / printed Block | 12 / 41 | 17 / 59, plus Façade (up to 12) and Arkhe in Balance (base five: 61 to 121) |
 | Rarity split | 23 / 35 / 20 | 23 / 35 / 20 |
 
 Seventeen Powers sits at the low end of the base range (17 to 20). If you
 want more Power variety, restoring one of the overlap cuts (High Stakes,
 Pneuma Tides, Hymn of Renewal) costs nothing else.
+
+**Ruled 2026-10-14:** the cuts and the second set, with the two changes
+above; the first set's picks 2 and 3 fall away with its cards.
 
 ## 5. Plan
 
