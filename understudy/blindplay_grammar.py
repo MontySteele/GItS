@@ -465,6 +465,37 @@ SHOWN_CARD_PLAYED = ("{name!r} on the page you last read has been played "
 SHOWN_CARD_GONE = ("{name!r} on the page you last read is no longer in your "
                    "hand")
 
+#: KOKOMI SEAT, LANE 5 (2026-10-14, act 3, alive). A COPY PLAYED SINCE THE
+#: LOOK IS A SKIP, NOT A REFUSAL. The seat sent `play "Sting (1)"` four times
+#: in one batch; the first played it, the other three were refused
+#: (`SHOWN_CARD_PLAYED`), and three refusals in a row tripped the sticky
+#: REFUSAL STOP mid-run. A numbered copy the page printed that has since been
+#: played or has left the hand changed under the seat, as a target that died
+#: does (`blindplay.changed_under`): not sent, not counted. It is never
+#: re-aimed at another copy -- the seat chooses. The face-mismatch refusal
+#: (copies still in hand, printed differently) still counts.
+COPY_LEFT_SKIP = ("Skipped: {name} {what} since your last look: nothing was "
+                  "sent, and this is not counted as a refusal. The numbers "
+                  "on the page you read hold until you `observe` again; name "
+                  "a copy still in your hand, or look again.")
+_COPY_LEFT = tuple(
+    (re.compile(re.escape(prefix) + r"(?P<q>['\"])(?P<n>.*)(?P=q)"
+                + re.escape(suffix) + r"\Z", re.S), what)
+    for (prefix, _, suffix), what in (
+        (SHOWN_CARD_PLAYED.partition("{name!r}"), "was played"),
+        (SHOWN_CARD_GONE.partition("{name!r}"), "left your hand")))
+
+
+def copy_left_since_look(why: str) -> str:
+    """The skip line for a `resolve_shown_card` refusal whose numbered copy
+    was on the page the seat read and has been played or has left the hand
+    since; "" for any other refusal (it still counts)."""
+    for pattern, what in _COPY_LEFT:
+        m = pattern.match(why or "")
+        if m:
+            return COPY_LEFT_SKIP.format(name=f'"{m.group("n")}"', what=what)
+    return ""
+
 
 def shown_hand_key(state: dict[str, Any]) -> str:
     """The turn a remembered hand belongs to: floor and battle round. A hand
