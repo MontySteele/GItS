@@ -19,6 +19,7 @@ from understudy import authorship, bridge, offer_log, qa_packet, seat
 from understudy.blindplay_coop import (WAIT_POLL_S, blocked_on_partner,
                                        is_coop, not_waiting_line,
                                        wait_for_partner, wait_line)
+from understudy.blindplay_faces import hand_card_left
 from understudy.blindplay_grammar import act
 from understudy.blindplay_observe import observation
 from understudy.blindplay_read import _int, settle, settle_board, _text
@@ -742,6 +743,7 @@ class Session:
             result = post_when_the_room_is_open(
                 self.wire, action, post, tries=self.settle_tries,
                 delay=self.settle_delay_s)
+            card_played(state, action, post, result)
             # The card offer this answered, if any (`offer_log`).
             offer_log.record(state, res, command)
             # `EB-216`, R225's clause. AFTER the POST, because the ledger row
@@ -898,6 +900,14 @@ def refused(result: Any) -> bool:
     (`vendor/STS2_MCP/McpMod.Helpers.cs`)."""
     return (isinstance(result, dict)
             and _text(result.get("status")) == "error")
+
+
+def card_played(state: dict[str, Any], action: str, post: dict[str, Any],
+                result: Any) -> None:
+    """A sent play the bridge did not refuse: that card has left the hand,
+    so its number goes with it (`blindplay_faces.hand_card_left`)."""
+    if action == "play_card" and not refused(result)             and isinstance(post.get("card_index"), int):
+        hand_card_left(state, post["card_index"])
 
 
 def answer_lines(res: dict[str, Any], state: dict[str, Any] | None,

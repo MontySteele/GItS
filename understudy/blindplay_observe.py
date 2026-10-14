@@ -29,7 +29,7 @@ from understudy.blindplay_board import (_bundle_cards, _combat, deck_titles,
                                         map_floor,
                                         upgrade_deck_floor)
 from understudy.blindplay_faces import (SEAT_FACE_ID, _card_face,
-                                        _dedupe_text, _hazard,
+                                        _dedupe_text, _hazard, chooser_labels,
                                         _named_option, _number_faces,
                                         _reward_option, _shop_items,
                                         _shop_options,
@@ -402,6 +402,12 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         obs["prompt"] = _text(blob.get("prompt")) or "Choose a card."
         obs["offers"] = _number_faces(
             [_card_face(c) for c in _screen_cards(state)], "title")
+        # Yae seats (2026-10-14): a hand chooser (an Edit's pick) prints each
+        # card under the label the fight page gave it (`chooser_labels`).
+        if st == "hand_select":
+            for face, label in zip(obs["offers"], chooser_labels(
+                    state, _screen_cards(state))):
+                face["title"] = label
         # `EB-263`. WHAT THE SCREEN SAYS IS PICKED. Two channels now, and the
         # older one first: `BuildCardSelectState` puts the chosen card(s) in
         # `preview_cards` while a preview container is open, which the upgrade

@@ -5582,18 +5582,16 @@ def test_the_duplicate_name_note_does_not_say_two():
     page = blindplay.observe(state)
     assert "**Coral Guard (1)**" in page and "**Coral Guard (3)**" in page
     assert "Two cards here print the same name" not in page
-    assert "More than one card in this hand prints the same name" in page
-    # Kokomi round 2 (2026-10-13): the number now holds until the next
-    # `observe` (`resolve_shown_card`), and the note says that instead.
-    assert "does not shift as you play" in page
-    # `EB-181` narrowed the enchantment clause rather than dropping it: the
-    # bridge now carries an enchantment, so the note claims only what is
-    # still true -- that copies showing NONE cannot be told apart here.
-    assert "where two copies show none and differ only by one" in page
+    assert "Cards in this hand that print the same name are numbered" in page
+    # Yae seats (2026-10-14): a number stays with its card while it is in
+    # hand (`hand_labels`), and the note says so -- and says the one case
+    # it cannot promise.
+    assert "does not shift when you play" in page
+    assert "the page cannot tell which went" in page
 
 
 def test_the_duplicate_name_note_stays_off_a_hand_with_no_repeat():
-    assert "More than one card in this hand" not in blindplay.observe(
+    assert "Cards in this hand that print the same name" not in blindplay.observe(
         spark_priced_state())
 
 
@@ -6212,7 +6210,7 @@ def test_a_card_with_no_enchantment_key_claims_nothing():
     page = blindplay.observe(state)
     assert "Sharp 3" not in page
     # And the duplicate-name note still says what is true of THIS page.
-    assert "where two copies show none and differ only by one" in page
+    assert "Cards in this hand that print the same name are numbered" in page
 
 
 def metered_state(info: dict) -> dict:

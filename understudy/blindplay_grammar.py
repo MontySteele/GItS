@@ -23,7 +23,8 @@ from understudy.blindplay_board import (_bundle_cards, _combat, _event_option,
 from understudy.blindplay_faces import (_card_face, _card_title,
                                         _enemy_handles, _enemy_names,
                                         _named_option, _reward_option,
-                                        _shop_items, _shop_options)
+                                        _shop_items, _shop_options,
+                                        chooser_labels, hand_labels)
 from understudy.blindplay_notes import (NO_ALTERNATIVE_AT_ALL,
                                         NO_SACRIFICE_HERE, PREVIEW_LOCKED,
                                         SKIPPED_CARD_REWARD)
@@ -273,7 +274,8 @@ def _match(entries: list[dict[str, Any]], name: str, *,
            key: Callable[[dict[str, Any]], str],
            face: Callable[[dict[str, Any]], str] | None = None,
            number: bool = False, ordinal: int = 0,
-           advice: str = "") -> tuple[int, str]:
+           advice: str = "", stale: bool = True,
+           labelled: bool = False) -> tuple[int, str]:
     """`(index, refusal)` for `name` among `entries`, by PRINTED name only.
 
     Exact fold first, unique substring second. Two entries whose printed FACE
@@ -303,6 +305,10 @@ def _match(entries: list[dict[str, Any]], name: str, *,
     for the other side), and `+` survives the fold as a distinguishing mark,
     so the two titles are simply different names and the common case never
     reaches the ambiguity arm at all.
+
+    `labelled` says `key` already prints numbered names (the hand's
+    `hand_labels`); `stale=False` keeps a number no entry carries off any
+    numbered entry (Yae seats, 2026-10-14).
     """
     printed = [key(e) for e in entries]
     if number:
@@ -340,6 +346,11 @@ def _match(entries: list[dict[str, Any]], name: str, *,
         # entry. With two copies still on the screen `(3)` is genuinely
         # ambiguous and falls through to the refusal below, which advertises
         # the numbered names that would have worked.
+        #
+        # Yae seats (2026-10-14): in the hand (`stale=False`) only onto a
+        # copy printed BARE. A hand number stays with its card
+        # (`hand_labels`), so a number no card carries names a card that has
+        # left, and a numbered copy left is another card.
         bare = _STALE_NUMBER.sub("", name).strip()
         if bare and bare != name:
             want_bare = _fold(bare)
@@ -347,7 +358,8 @@ def _match(entries: list[dict[str, Any]], name: str, *,
                       if _fold(p) == want_bare]
                      or [i for i, p in enumerate(printed)
                          if want_bare and want_bare in _fold(p)])
-            if len(again) == 1:
+            if len(again) == 1 and (
+                    stale or not _STALE_NUMBER.search(printed[again[0]])):
                 name, want, exact = bare, want_bare, again
     hits = exact or loose
     if want_upgraded is not None:
@@ -383,7 +395,8 @@ def _match(entries: list[dict[str, Any]], name: str, *,
         # plays and are still refused with the names that pick one.
         copies = [i for i in hits
                   if _fold(_STALE_NUMBER.sub("", printed[i]).strip()) == want]
-        if (number and copies
+        # `labelled`: the caller numbered the names itself (`hand_labels`).
+        if ((number or labelled) and copies
                 and len({(_is_upgraded(entries[i]),
                           _text(entries[i].get("cost")))
                          for i in copies}) == 1):
@@ -469,12 +482,12 @@ def _numbered_titles(entries: list[dict[str, Any]]) -> list[str]:
 #: re-counted after the first play and held three Stings, and two Stings
 #: expired unused in the Matriarch fight. So `observe` remembers the hand it
 #: printed (`shown_hand`), and a numbered name typed before the next
-#: `observe` is resolved against THAT list: the copy it named, found again in
-#: the hand as it is now by its title and face. A copy already played through
-#: its number is refused, never re-aimed at a neighbour.
+#: `observe` is checked against THAT list. Yae seats (2026-10-14): a number
+#: now stays with its card while the card is in hand
+#: (`blindplay_faces.hand_labels`), so the page's label is still the card's;
+#: a copy already played through its number is refused, never re-aimed.
 SHOWN_CARD_PLAYED = ("{name!r} on the page you last read has been played "
-                     "since; the numbers do not shift until you `observe` "
-                     "again, so name a copy that is still in your hand")
+                     "since; name a copy that is still in your hand")
 SHOWN_CARD_GONE = ("{name!r} on the page you last read is no longer in your "
                    "hand")
 
@@ -488,8 +501,8 @@ SHOWN_CARD_GONE = ("{name!r} on the page you last read is no longer in your "
 #: re-aimed at another copy -- the seat chooses. The face-mismatch refusal
 #: (copies still in hand, printed differently) still counts.
 COPY_LEFT_SKIP = ("Skipped: {name} {what} since your last look: nothing was "
-                  "sent, and this is not counted as a refusal. The numbers "
-                  "on the page you read hold until you `observe` again; name "
+                  "sent, and this is not counted as a refusal. A number "
+                  "stays with its card while the card is in your hand; name "
                   "a copy still in your hand, or look again.")
 _COPY_LEFT = tuple(
     (re.compile(re.escape(prefix) + r"(?P<q>['\"])(?P<n>.*)(?P=q)"
@@ -525,10 +538,7 @@ def shown_hand(state: dict[str, Any]) -> dict[str, Any] | None:
     if _screen(state) not in COMBAT_SCREENS:
         return None
     hand = _hand(state)
-    titles = _numbered_titles(hand)
-    # Kokomi round 4 (2026-10-13): a hand with no repeat is remembered too,
-    # so a copy a play adds after this page is numbered on from it
-    # (`_with_new_copies`).
+    titles = hand_labels(state)
     if not hand:
         return None
     return {"turn": shown_hand_key(state), "played": [],
@@ -543,18 +553,14 @@ def resolve_shown_card(state: dict[str, Any], command: str,
     """`(command, shown_index, refusal)` for a `play` that names a card by a
     number the remembered page printed.
 
-    The command comes back with its card name rewritten to the name the SAME
-    copy carries in the hand now, and `shown_index` says which remembered row
-    it was (the caller marks it played once the play is sent). Untouched --
-    `(command, None, "")` -- for any other command, a name with no number, a
-    name the remembered page did not print, or a memory from another turn:
-    those resolve against the current hand exactly as before.
-
-    THE COPY IS FOUND BY ITS FACE. Same title and upgrade first; among those
-    the copy whose printed face is the remembered one; where none matches
-    exactly (a live number on a face moved, say Strength landed) and every
-    copy left prints one face, they are interchangeable and the first is
-    taken; where they differ, the current numbered names are the way out.
+    The command comes back unchanged: a hand label names one card for as long
+    as it stays in hand (`blindplay_faces.hand_labels`), so the label the page
+    printed is still that card's. `shown_index` says which remembered row it
+    was (the caller marks it played once the play is sent). Untouched with
+    `None` for any other command, a name with no number, a name the
+    remembered page did not print, or a memory from another turn. A label the
+    page printed whose card has left the hand since is refused, never
+    re-aimed at another copy (`copy_left_since_look` makes it a skip).
     """
     if not shown or shown.get("turn") != shown_hand_key(state):
         return command, None, ""
@@ -569,68 +575,12 @@ def resolve_shown_card(state: dict[str, Any], command: str,
     hit = next((j for j, r in enumerate(rows) if _fold(r.get("n")) == want),
                None)
     if hit is None:
-        # Kokomi round 4 (2026-10-13, lane 1 F9): a copy a play ADDED since
-        # the page is numbered on from the page's own count, so the numbers
-        # the seat counted hold for the rest of the turn.
-        grown = _with_new_copies(state, rows, shown.get("played") or [])
-        hit = next((j for j, r in enumerate(grown)
-                    if _fold(r.get("n")) == want), None)
-        if hit is None:
-            return command, None, ""
-        rows = grown
-        shown["cards"] = grown
-    row = rows[hit]
+        return command, None, ""
+    if any(_fold(label) == want for label in hand_labels(state)):
+        return command, hit, ""
     if hit in (shown.get("played") or []):
-        return command, None, SHOWN_CARD_PLAYED.format(name=row.get("n"))
-    hand = _hand(state)
-    titles = _numbered_titles(hand)
-    same = [i for i, e in enumerate(hand)
-            if _card_title(e) == row.get("title")
-            and _is_upgraded(e) == bool(row.get("up"))]
-    if not same:
-        return command, None, SHOWN_CARD_GONE.format(name=row.get("n"))
-    exact = [i for i in same if _card_face_key(hand[i]) == row.get("f")]
-    if exact:
-        pick = exact[0]
-    elif len({_card_face_key(hand[i]) for i in same}) == 1:
-        pick = same[0]
-    else:
-        return command, None, (
-            SHOWN_CARD_GONE.format(name=row.get("n"))
-            + " as it was printed; the copies now: "
-            + ", ".join(titles[i] for i in same))
-    rewritten = _QUOTED.sub(lambda _m: f'"{titles[pick]}"', command, count=1)
-    return rewritten, hit, ""
-
-
-def _with_new_copies(state: dict[str, Any], rows: list[dict[str, Any]],
-                     played: list[int]) -> list[dict[str, Any]]:
-    """The remembered rows plus one row per copy a play has ADDED to the hand
-    since the page was printed (Kokomi round 4, 2026-10-13, lane 1 F9).
-
-    A page showed two Stings; a play made two more; the seat counted four and
-    typed `Sting (3)`, which the re-counted hand (two left after two plays)
-    refused. Per title the page printed, the copies in hand beyond those the
-    page showed and has not seen played are new, and they take the next
-    numbers, in hand order: `Sting (3)`, `Sting (4)`. A title the page never
-    printed keeps the hand's own numbers. Pure; the caller keeps the result.
-    """
-    out = [dict(r) for r in rows]
-    done = set(played)
-    groups: dict[tuple[str, bool], list[dict[str, Any]]] = {}
-    for e in _hand(state):
-        groups.setdefault((_card_title(e), _is_upgraded(e)), []).append(e)
-    for (title, up), cards in groups.items():
-        mine = [j for j, r in enumerate(rows)
-                if r.get("title") == title and bool(r.get("up")) == up]
-        if not mine:
-            continue
-        left = sum(1 for j in mine if j not in done)
-        for k in range(len(cards) - left):
-            e = cards[left + k]
-            out.append({"n": f"{title} ({len(mine) + k + 1})", "title": title,
-                        "up": up, "f": _card_face_key(e)})
-    return out
+        return command, None, SHOWN_CARD_PLAYED.format(name=rows[hit].get("n"))
+    return command, None, SHOWN_CARD_GONE.format(name=rows[hit].get("n"))
 
 
 def _card_face_key(entry: dict[str, Any]) -> str:
@@ -881,9 +831,10 @@ def _full_hand_clause(state: dict[str, Any], name: str,
 
 def _play(state: dict[str, Any], cmd: Command) -> Resolution:
     hand = _hand(state)
-    titles = _numbered_titles(hand)
-    idx, why = _match(hand, cmd.name, key=_card_title, face=_card_face_key,
-                      number=True)
+    titles = hand_labels(state)
+    label = {id(e): t for e, t in zip(hand, titles)}
+    idx, why = _match(hand, cmd.name, key=lambda e: label[id(e)],
+                      face=_card_face_key, stale=False, labelled=True)
     if idx < 0:
         return _refuse(why + _full_hand_clause(state, cmd.name, hand))
     entry = hand[idx]
@@ -1191,14 +1142,16 @@ def _drop_potion(state: dict[str, Any], cmd: Command) -> Resolution:
                       {"potion": _text(entry.get("name"))})
 
 
-def _card_taken(entries: list[dict[str, Any]], idx: int) -> dict[str, Any]:
+def _card_taken(entries: list[dict[str, Any]], idx: int,
+                names: list[str] | None = None) -> dict[str, Any]:
     """The card a `choose` took, printed (`EB-341`).
 
     The title the page numbered, plus the card's own body where it has one --
     so the line after a pick names the thing that was added rather than only
     its name, which is the half a seat was reading off a later screen.
     """
-    printed: dict[str, Any] = {"card": _numbered_titles(entries)[idx]}
+    printed: dict[str, Any] = {
+        "card": (names or _numbered_titles(entries))[idx]}
     body = _card_face(entries[idx])["text"]
     if body:
         printed["text"] = body
@@ -1232,15 +1185,20 @@ def _choose(state: dict[str, Any], cmd: Command) -> Resolution:
         if _blob(state, st).get("preview_showing"):
             return _refuse(PREVIEW_LOCKED)
         entries = _screen_cards(state)
-        idx, why = _match(entries, cmd.name, key=_card_title,
-                          face=_card_face_key, number=True,
-                          ordinal=cmd.ordinal)
+        # Yae seats (2026-10-14): a hand chooser (an Edit's pick) names each
+        # card by its hand label, the name the fight page printed.
+        names = (chooser_labels(state, entries) if st == "hand_select"
+                 else _numbered_titles(entries))
+        label = {id(e): t for e, t in zip(entries, names)}
+        idx, why = _match(entries, cmd.name, key=lambda e: label[id(e)],
+                          face=_card_face_key, ordinal=cmd.ordinal,
+                          labelled=True)
         if idx < 0:
             return _refuse(why)
         verb = "select_card" if st == "card_select" else "combat_select_card"
         key = "index" if st == "card_select" else "card_index"
         return Resolution(True, "choose", {"action": verb, key: idx},
-                          _card_taken(entries, idx))
+                          _card_taken(entries, idx, names))
     if st == "bundle_select":
         # `EB-173`: match on the printed title of any card IN a bundle, the
         # only name this screen has. `_match` is deliberately not reused: its

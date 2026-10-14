@@ -15,9 +15,9 @@ from understudy import qa_packet
 from understudy.blindplay_faces import (_card_face, _card_title,
                                         _enemy_handles, _enemy_names,
                                         _hook_note, _intents, _meter_max,
-                                        _named_option, _number_faces, _powers,
+                                        _named_option, _powers,
                                         enemy_replacements, enemy_revivals,
-                                        relic_faces,
+                                        hand_labels, relic_faces,
                                         remember_deck, remember_kills,
                                         remembered_deck,
                                         remembered_enemy_name,
@@ -610,6 +610,7 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
     # Smith's screen two rooms later has no deck on its own feed. Remembered
     # here, on the one screen that carries it, and read back there.
     remember_deck(state)
+    labels = hand_labels(state)
     combat = {
         "you": {
             "hp": _int(p.get("hp")), "max_hp": _int(p.get("max_hp")),
@@ -654,11 +655,16 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
             "orbs": _orbs(p),
         },
         "round": _int(battle.get("round")),
-        "hand": _number_faces([_card_face(c) for c in _hand(state)], "title"),
+        # Yae seats (2026-10-14): one label per card for as long as it is
+        # in hand (`blindplay_faces.hand_labels`), not a re-count.
+        "hand": [dict(_card_face(c), title=label) for c, label
+                 in zip(_hand(state), labels)],
         # `EB-179`: whether the hand holds two cards printing one name, which
         # is the ONE place the missing enchantment field bites a reader.
-        "hand_repeats": len({_fold(_text(c.get("name")))
-                             for c in _hand(state)}) < len(_hand(state)),
+        # Yae seats (2026-10-14): and wherever a number is printed, which
+        # outlives the repeat that minted it.
+        "hand_repeats": any(label != _text(c.get("name"))
+                            for c, label in zip(_hand(state), labels)),
         "piles": {"draw": _int(p.get("draw_pile_count")),
                   "discard": _int(p.get("discard_pile_count")),
                   "exhaust": _int(p.get("exhaust_pile_count"))},

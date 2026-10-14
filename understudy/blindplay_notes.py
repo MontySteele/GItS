@@ -741,18 +741,23 @@ LAST_MORNING_NOTE = (
 # refused because the hand had been re-counted between them; a numbered name
 # is now resolved against the hand this page printed
 # (`blindplay_grammar.resolve_shown_card`), so the note says so.
-HAND_REPEAT_NOTE = ("*More than one card in this hand prints the same name. "
-                    "The copies are numbered in the order they are listed. "
-                    "A number names the copy on the page you last read with "
-                    "`observe`, and it does not shift as you play: "
-                    "`play \"Sting (3)\"` then `play \"Sting (4)\"` plays "
-                    "the two copies this page shows, and a copy already "
-                    "played is refused rather than swapped for another. "
-                    "`observe` again to see the new numbers. An enchantment "
-                    "prints beside the "
-                    "title where a card carries one, so where two copies show "
-                    "none and differ only by one, this page cannot say which "
-                    "is which.*")
+#
+# YAE SEATS (2026-10-14): it still shifted after a play or an Edit, because
+# the copy was found again by its face. A number is now the card's own while
+# it is in hand (`blindplay_faces.hand_labels`). The one thing the page cannot
+# promise, said here: the wire has no card id, so where one of two copies
+# printing the same face leaves the hand by an effect, not by a play sent from
+# here, which one went is a guess -- and the two play the same either way.
+HAND_REPEAT_NOTE = ("*Cards in this hand that print the same name are "
+                    "numbered. A number stays with its card while the card "
+                    "is in your hand this turn: it does not shift when you "
+                    "play another copy or when the card's face changes (an "
+                    "Edit). `play \"Sting (3)\"` then `play \"Sting (4)\"` "
+                    "plays the two copies this page shows. A new card takes "
+                    "a new number; a copy already played is skipped, never "
+                    "swapped for another. Where one of two identical copies "
+                    "leaves your hand by an effect, the page cannot tell "
+                    "which went; they play the same.*")
 
 # `EB-496`. THE WARNING WAS UNDER THE WRONG LIST, AND IT WAS ALSO WRONG.
 #
