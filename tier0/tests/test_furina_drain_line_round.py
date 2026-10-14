@@ -49,13 +49,10 @@ def _rows():
 PAYOUTS = {
     "proto_fs_hymn_of_many_waters": "PayBlock",
     "proto_fs_grand_entrance": "PayBlock",
-    "proto_fs_pneuma_tides": "PayVigor",
-    "proto_fs_hydro_lance": "PayDamage",
     "proto_fs_cleansing_torrent": "PayDamage",
 }
 
-NO_PAYOUT = ("proto_fs_soothing_waters", "proto_fs_pneuma_refrain",
-             "proto_fs_balance_the_books", "proto_fs_grand_absolution",
+NO_PAYOUT = ("proto_fs_pneuma_refrain", "proto_fs_grand_absolution",
              "proto_fs_singer_of_many_waters", "proto_fs_riptide_lunge",
              "proto_fs_clean_slate", "proto_fs_ebb_and_flow",
              "proto_fs_fountain_of_lucine")

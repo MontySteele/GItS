@@ -741,7 +741,9 @@ def test_the_four_base_words_the_surface_prints_are_exercised():
     Soothing Waters and Pneuma Tides print Vigor. Seven since the Kokomi
     re-founding (2026-10-12): five faces name Ethereal. Six again since the
     Kokomi level pass (2026-10-12): General's War Banner, the one face that
-    printed Dexterity, gains Block now."""
+    printed Dexterity, gains Block now. The Furina sweep (2026-10-14) cut
+    Soothing Waters and Pneuma Tides, so Vigor leaves, and Practiced Grace
+    prints Dexterity."""
     printed = {keyword.word
                for path in _prototype_files()
                for description in _descriptions(
@@ -749,7 +751,7 @@ def test_the_four_base_words_the_surface_prints_are_exercised():
                for keyword in gen.BASE_KEYWORDS
                if keyword.attach in gen.base_keyword_tip_calls(description)}
     assert printed == {"Vulnerable", "Weak", "Strength",
-                       "Frail", "Vigor", "Ethereal"}
+                       "Frail", "Dexterity", "Ethereal"}
 
 
 def test_the_row_the_defect_was_filed_against_carries_the_vulnerable_tip():
@@ -1320,7 +1322,7 @@ def test_a_spend_cards_sentence_face_still_splits_into_its_modes():
     # Tidal Flourish and Spirited Aria left the chooser for "Spend up to X"
     # (the Spend paper, 2026-10-10).
     for rid in ("proto_fs_surintendante_chevalmarin", "proto_fs_leading_lady",
-                "proto_fs_salons_tab", "proto_fs_interval_bell"):
+                "proto_fs_salons_tab"):
         assert gen.modal_option_faces(
             rows[rid], gen.modal_effect(rows[rid])["modes"]) is not None, rid
 

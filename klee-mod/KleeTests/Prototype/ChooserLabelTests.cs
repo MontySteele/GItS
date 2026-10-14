@@ -73,18 +73,4 @@ public class ChooserLabelTests
         }
     }
 
-    [Fact]
-    public void Interval_Bell_spend_option_reads_its_price_on_both_sides()
-    {
-        var plain = new ProtoFsIntervalBellModeB();
-        Assert.Equal("Spend 3",
-            plain.Localization!.Single(r => r.Item1 == "title").Item2);
-        Assert.Equal("Spend 2+", Upgraded(new ProtoFsIntervalBellModeB()).Title);
-
-        Assert.Contains(new ProtoFsIntervalBell().ModeLabels,
-            l => l.StartsWith("[gold]Spend[/gold] 3:"));
-        Assert.Contains(
-            ((IModalCard)Upgraded(new ProtoFsIntervalBell())).ModeLabels,
-            l => l.StartsWith("[gold]Spend[/gold] 2:"));
-    }
 }

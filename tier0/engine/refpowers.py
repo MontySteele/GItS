@@ -1204,6 +1204,12 @@ def retain_at_flush(state: CombatState, flushing: list[Card]) -> list[Card]:
     Returns the subset to keep in hand; the caller flushes the rest.
     """
     keep: list[Card] = []
+    # RetainHandPower (Equilibrium; Furina's Intermission, the sweep,
+    # 2026-10-14): the whole hand stays this turn, then the power is spent.
+    if state.player.powers.pop("retain_hand", 0):
+        if flushing:
+            state.emit("retain_hand", kept=[c.id for c in flushing])
+        return list(flushing)
     if not flushing:
         return keep
 

@@ -551,20 +551,6 @@ public class FurinaGuestRuleTests
     }
 
     [Fact]
-    public void Overdraft_gives_its_energy_next_turn()
-    {
-        // The 2026-10-09 build's loop ruling, Interval Bell's fix: the
-        // loop probe found 16 thin-deck cycles while the Energy came now.
-        // (Sold Out, its partner, was cut in the diversity pass, 2026-10-11.)
-        foreach (var type in new[] { typeof(ProtoFsOverdraft) })
-        {
-            var calls = Il.Calls(type.GetMethod("OnPlay", All)!);
-            Assert.Contains("FurinaStage.EnergyNextTurn", calls);
-            Assert.DoesNotContain("PlayerCmd.GainEnergy", calls);
-        }
-    }
-
-    [Fact]
     public void Grand_entrance_repays_after_a_guest_star_and_star_turn_reads_fanfare()
     {
         Assert.Contains("StageDirector.RepayFloor",

@@ -49,7 +49,7 @@ def test_the_pool_is_78_at_23_35_20():
                 "proto_fs_pay_the_tab", "proto_fs_sold_out"):
         assert cut not in FS.POOL_IDS
     for added in ("proto_fs_headliner", "proto_fs_the_leading_lady",
-                  "proto_fs_the_full_house", "proto_fs_packed_house"):
+                  "proto_fs_the_full_house"):
         assert added in FS.POOL_IDS
     assert loader.get_card("proto_fs_tutti").rarity == "common"
     assert loader.get_card("proto_fs_guest_star_wriothesley").rarity == "common"

@@ -2966,8 +2966,23 @@ FURINA_KINDS = {
     # guest" (one not on stage). Casting Call's `tutor_guest` now carries
     # its floor's draw as `amount` ("If you can't, draw 2 cards").
     "summon_random": "SummonRandom",
+    # THE SWEEP (review/active/furina-sweep-2026-10-14.md sec.3): seven
+    # base-game verbs, each one base card's command calls. Costume Fitting
+    # (Armaments), Quick Change (Calculated Gamble), Read the Script (look
+    # at the top N, take 1, discard the rest), Mise en Scene (a chosen hand
+    # card at 0), Intermission (Equilibrium's RetainHandPower), Second Act
+    # (Hologram) and Stand-In (Dual Wield's clone, the copy Exhausting). The
+    # three that change when upgraded read `IsUpgraded` (`furina_upgraded`).
+    "upgrade_in_hand": "UpgradeInHand",
+    "discard_hand_redraw": "DiscardHandRedraw",
+    "look_take_discard": "LookTakeDiscard",
+    "free_in_hand": "FreeInHand",
+    "retain_hand": "RetainHand",
+    "discard_to_hand": "DiscardToHand",
+    "copy_in_hand": "CopyInHand",
 }
-FURINA_KIND_AMOUNT = {"final_bow", "gain_fanfare", "tutor_guest"}
+FURINA_KIND_AMOUNT = {"final_bow", "gain_fanfare", "tutor_guest",
+                      "look_take_discard"}
 FURINA_FIELDS = {"op", "kind", "amount"}
 #: Alice's Detonator: no field -- the card is Alice's Mine (its own row), and
 #: whether it arrives upgraded is the card's own upgrade (`upgraded_grant`).
@@ -3555,6 +3570,11 @@ APPLY_POWERS = {
     # klee-mod/KleeCode/Powers/Prototype/FurinaPool75Powers.cs.
     "fs_leading_lady": ("LeadingLadyPower", None,
         "Your Attacks deal {X} additional damage for each guest on stage."),
+    # THE SWEEP (review/active/furina-sweep-2026-10-14.md sec.3). The class
+    # lives in klee-mod/KleeCode/Powers/Prototype/FurinaPool75Powers.cs.
+    "fs_pneuma_and_ousia": ("PneumaAndOusiaPower", None,
+        "Whenever you play an Attack, gain {X} [gold]Block[/gold]. Whenever "
+        "you play a Skill, deal {X} damage to a random enemy."),
     "fs_full_house": ("FullHousePower", None,
         "Whenever a guest's act deals damage, [gold]Spend[/gold] up to {X}: "
         "it deals that much more."),
@@ -4431,6 +4451,10 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark",
                        # `varka` op reads `IsUpgraded` at play time, and the
                        # face carries its own `{IfUpgraded:show:...}` swap.
                        "varka_upgraded",
+                       # FURINA, THE SWEEP (2026-10-14): a `furina` kind
+                       # reads IsUpgraded itself (Costume Fitting, Quick
+                       # Change, Mise en Scene).
+                       "furina_upgraded",
                        # THE KOKOMI EXPANSION: a `kokomi` op's own number.
                        "kokomi_amount",
                        # FURINA, THE POOL TO 75: a `furina` op's own number
@@ -8706,6 +8730,8 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
            for key in MODE_UPGRADE_KEYS if key in deltas},
         # VARKA (the expansion): the `varka` op reads IsUpgraded itself.
         "varka_upgraded": any(e["op"] == "varka" for e in effects),
+        # FURINA (the sweep, 2026-10-14): the `furina` op reads IsUpgraded.
+        "furina_upgraded": any(e["op"] == "furina" for e in effects),
         # Power cost sweep, 2026-09-30: binds to the first top-level
         # apply_power on the card's owner, and the named power must exist.
         "upgraded_power": (
@@ -15772,6 +15798,11 @@ def build_upgrade(card: dict) -> list[str]:
         done.add("upgraded_knight")
         lines.append("// upgraded_knight: the chosen Knight arrives upgraded, "
                      "read off IsUpgraded when the card is played.")
+    if "furina_upgraded" in deltas:
+        # FURINA (the sweep, 2026-10-14): the same play-time read.
+        done.add("furina_upgraded")
+        lines.append("// furina_upgraded: the furina op reads IsUpgraded "
+                     "when the card is played.")
     if "varka_upgraded" in deltas:
         # VARKA (the expansion, Pathfinder's Mark+). The same play-time read.
         done.add("varka_upgraded")

@@ -37,20 +37,6 @@ def _play(st, card):
     combat.play_card(st, card)
 
 
-def test_packed_house_is_a_skill_of_5_block_plus_1_every_4_fanfare():
-    row = loader.get_card("proto_fs_packed_house")
-    assert row.type == "skill" and row.cost == 1 and row.rarity == "common"
-    for bank, block in ((0, 5), (3, 5), (15, 8), (25, 11), (53, 18)):
-        st = _furina(bank)
-        _play(st, _card("proto_fs_packed_house"))
-        assert st.player.block == block, bank
-        assert st.player.ftd.fanfare == bank, bank     # never spends
-        assert st.enemies[0].hp == 300
-    st = _furina(15)
-    _play(st, _card("proto_fs_packed_house+"))
-    assert st.player.block == 11
-
-
 def test_fanfare_fours_reads_the_bank_in_fours():
     st = _furina(15)
     assert FS.fanfare_fours(st.player) == 3

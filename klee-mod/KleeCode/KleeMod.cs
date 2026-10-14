@@ -250,6 +250,16 @@ public static class KleeMod
                     Powers.FurinaCards.TutorPromptText,
                 [Powers.FurinaCards.BowPromptKey] =
                     Powers.FurinaCards.BowPromptText,
+                // FURINA, THE SWEEP (2026-10-14): Read the Script's, Mise en
+                // Scene's, Second Act's and Stand-In's picks.
+                [Powers.FurinaCards.LookPromptKey] =
+                    Powers.FurinaCards.LookPromptText,
+                [Powers.FurinaCards.FreePromptKey] =
+                    Powers.FurinaCards.FreePromptText,
+                [Powers.FurinaCards.ReturnPromptKey] =
+                    Powers.FurinaCards.ReturnPromptText,
+                [Powers.FurinaCards.CopyPromptKey] =
+                    Powers.FurinaCards.CopyPromptText,
                 // VARKA (the Oath rework): Change of Guard's grid, on the
                 // same terms.
                 [Powers.VarkaRules.ElementPromptKey] =

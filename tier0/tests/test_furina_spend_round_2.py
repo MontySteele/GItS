@@ -58,15 +58,6 @@ def _sheet_row(cid: str) -> dict:
 
 # ---- 1. High Stakes reads a running total --------------------------------------
 
-def test_high_stakes_face_says_drained_this_combat():
-    row = _sheet_row("proto_fs_high_stakes")
-    assert row["description"] == (
-        "Your Attacks deal 1 additional damage for every 4 HP you have "
-        "[gold]Drained[/gold] this combat.")
-    src = (GENERATED / "ProtoFsHighStakes.cs").read_text(encoding="utf-8")
-    assert "this combat." in src and "Repaid" not in src
-
-
 def test_the_drained_count_is_gross_and_repay_never_lowers_it():
     st = _furina()
     FS.drain(st, 8)
@@ -76,29 +67,6 @@ def test_the_drained_count_is_gross_and_repay_never_lowers_it():
     assert st.player.ftd.drained_this_combat == 8
     FS.drain(st, 3)
     assert st.player.ftd.drained_this_combat == 11
-
-
-def test_high_stakes_keeps_its_bonus_through_a_repay():
-    st = _furina()
-    _play(st, _card("proto_fs_high_stakes"))
-    FS.drain(st, 10)
-    assert FS.high_stakes_bonus(st) == 2         # 10 // 4
-    FS.repay(st, 10)
-    assert st.player.ftd.drained == 0
-    assert FS.high_stakes_bonus(st) == 2         # still 10 // 4
-    _play(st, _card("proto_fs_high_stakes+"))
-    assert FS.high_stakes_bonus(st) == 2 + 3     # 10 // 4 + 10 // 3
-
-
-def test_the_end_of_turn_singer_no_longer_eats_the_bonus():
-    """The record's diagnosis: net Drained sat near 0 because Salon
-    Solitaire Repays every turn."""
-    st = _furina()
-    _play(st, _card("proto_fs_high_stakes"))
-    FS.drain(st, 5)
-    T.end_of_turn(st)                            # the Singer Repays 1
-    assert st.player.ftd.drained == 4
-    assert FS.high_stakes_bonus(st) == 1
 
 
 # ---- 2. Gentle Current: cut in the diversity pass (2026-10-11) ------------
@@ -133,7 +101,7 @@ def _charlotte(drained=8):
 
 def test_charlottes_line_draws_on_a_cards_repay():
     st = _charlotte()
-    _play(st, _card("proto_fs_soothing_waters"))
+    _play(st, _card("proto_fs_pneuma_refrain"))
     assert st.player.ftd.charlotte_drew
     assert st.player.ftd.ledger["lines"]["charlotte"] == 1
     assert not st.player.ftd.in_card             # the play closed

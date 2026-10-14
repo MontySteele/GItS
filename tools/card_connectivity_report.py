@@ -997,6 +997,11 @@ POWER_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "fs_leading_lady": [_hook("private", "stage", "read"),
                         _hook("shared", "card_identity", "write")],
     "fs_full_house": [_hook("private", "stage", "use")],
+    # The sweep (2026-10-14): Pneuma and Ousia rides the play verb on any
+    # Attack or Skill, Block on one and a random hit on the other.
+    "fs_pneuma_and_ousia": [_hook("shared", "universal_verb_power", "write"),
+                            _hook("shared", "block_held", "write"),
+                            _hook("shared", "enemy_count", "read")],
 }
 
 # Powers whose rider fires on a UNIVERSAL VERB -- playing, drawing,

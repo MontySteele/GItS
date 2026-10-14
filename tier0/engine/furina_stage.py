@@ -187,12 +187,13 @@ STARTER_IDS: tuple[str, ...] = (
 #: 2026-10-09, with Standing Ovation moved to Uncommon), and the block gap's
 #: four (ruled 2026-10-09), and the diversity pass (ruled 2026-10-11:
 #: Headliner, Leading Lady, Full House and Packed House in; Gentle Current,
-#: Surging Waters, Pay the Tab and Sold Out out): 23 Common, 35 Uncommon,
+#: Surging Waters, Pay the Tab and Sold Out out), and the sweep
+#: (review/active/furina-sweep-2026-10-14.md: fifteen out, fifteen in):
+#: 23 Common, 35 Uncommon,
 #: 20 Rare, 78.
 POOL_IDS: tuple[str, ...] = (
     # Drain (five).
     "proto_fs_mademoiselle_crabaletta",
-    "proto_fs_soloists_solicitation",
     "proto_fs_surintendante_chevalmarin",
     "proto_fs_leading_lady",              # Gentilhomme Usher
     "proto_fs_salons_tab",
@@ -202,13 +203,9 @@ POOL_IDS: tuple[str, ...] = (
     "proto_fs_singer_of_many_waters",
     # Fanfare outlets (six).
     "proto_fs_tidal_flourish",
-    "proto_fs_spirited_aria",
     "proto_fs_quick_cue",                 # Quick Flourish
-    "proto_fs_standing_ovation_all",      # Standing Ovation
-    "proto_fs_interval_bell",
     "proto_fs_bravura",
     # The two Powers (Endless Waltz was cut 2026-10-09).
-    "proto_fs_salons_encore",
     "proto_fs_thunderous_applause",
     # The four guests.
     "proto_fs_guest_star_charlotte",
@@ -220,7 +217,6 @@ POOL_IDS: tuple[str, ...] = (
     "proto_fs_let_the_people_rejoice",
     # The pool to 39. Ousia.
     "proto_fs_grand_deluge",
-    "proto_fs_ousia_surge",
     "proto_fs_guest_star_lyney",
     "proto_fs_a_five_century_act",
     # Pneuma.
@@ -254,23 +250,15 @@ POOL_IDS: tuple[str, ...] = (
     "proto_fs_bring_the_house_down",
     # Ousia, Drain (10).
     "proto_fs_undercurrent",
-    "proto_fs_overdraft",
     "proto_fs_ousia_pledge",
     "proto_fs_against_the_tide",
     "proto_fs_riptide_lunge",
-    "proto_fs_high_stakes",
     "proto_fs_regina_of_all_waters",
-    "proto_fs_the_deluge",
     "proto_fs_all_in",
     # Pneuma, Repay (10).
-    "proto_fs_soothing_waters",
     "proto_fs_clean_slate",
-    "proto_fs_hydro_lance",
     "proto_fs_cleansing_torrent",
-    "proto_fs_balance_the_books",
     "proto_fs_rising_tide",
-    "proto_fs_pneuma_tides",
-    "proto_fs_hymn_of_renewal",
     "proto_fs_grand_absolution",
     # The bridge (1).
     "proto_fs_ebb_and_flow",
@@ -285,7 +273,23 @@ POOL_IDS: tuple[str, ...] = (
     "proto_fs_headliner",
     "proto_fs_the_leading_lady",          # Leading Lady
     "proto_fs_the_full_house",            # Full House
-    "proto_fs_packed_house",
+    # The sweep (review/active/furina-sweep-2026-10-14.md sec.3): 6
+    # Common, 7 Uncommon, 2 Rare, for the fifteen cut.
+    "proto_fs_rain_of_tears",
+    "proto_fs_rehearsal",
+    "proto_fs_silence_in_the_court",
+    "proto_fs_pirouette",
+    "proto_fs_spotlight_grab",
+    "proto_fs_costume_fitting",
+    "proto_fs_quick_change",
+    "proto_fs_read_the_script",
+    "proto_fs_practiced_grace",
+    "proto_fs_mise_en_scene",
+    "proto_fs_intermission",
+    "proto_fs_second_act",
+    "proto_fs_solo_recital",
+    "proto_fs_pneuma_and_ousia",
+    "proto_fs_stand_in",
 )
 
 #: The loader's older seams, empty since the slice: nothing is substituted
@@ -579,15 +583,31 @@ KINDS = ("act_oldest", "act_all", "final_bow", "tutor_guest",
          "gain_fanfare",
          # The diversity pass (2026-10-11): Ensemble Cast's "Summon a random
          # guest".
-         "summon_random")
+         "summon_random",
+         # The sweep (review/active/furina-sweep-2026-10-14.md sec.3): seven
+         # base-game verbs (`GENERIC_KINDS`), the C# `FurinaCards` twins.
+         "upgrade_in_hand", "discard_hand_redraw", "look_take_discard",
+         "free_in_hand", "retain_hand", "discard_to_hand", "copy_in_hand")
 #: Casting Call's `tutor_guest` carries its floor's draw ("If you can't,
-#: draw 2 cards"; the diversity pass, 2026-10-11).
-KIND_AMOUNT = ("final_bow", "gain_fanfare", "tutor_guest")
+#: draw 2 cards"; the diversity pass, 2026-10-11). Read the Script's look
+#: carries its 4.
+KIND_AMOUNT = ("final_bow", "gain_fanfare", "tutor_guest",
+               "look_take_discard")
+#: The sweep's kinds need no stage: a card of hers played by anyone does
+#: what it prints (the C# methods are ungated too). `upgraded` is the
+#: `furina_upgraded` delta's mark (Costume Fitting, Quick Change, Mise en
+#: Scene).
+GENERIC_KINDS = ("upgrade_in_hand", "discard_hand_redraw",
+                 "look_take_discard", "free_in_hand", "retain_hand",
+                 "discard_to_hand", "copy_in_hand")
+#: The base game's RetainHandPower (Equilibrium), read at the hand flush
+#: (`refpowers.retain_at_flush`).
+RETAIN_HAND = "retain_hand"
 
 
 def validate_op(card_id: str, fx: dict) -> None:
     """The loader's check, the codegen's `FURINA_KINDS` taken here too."""
-    unknown = set(fx) - {"op", "kind", "amount"}
+    unknown = set(fx) - {"op", "kind", "amount", "upgraded"}
     if unknown:
         raise ValueError(f"card {card_id!r}: furina field(s) "
                          f"{sorted(unknown)} not understood")
@@ -604,10 +624,14 @@ def validate_op(card_id: str, fx: dict) -> None:
 
 
 def kind(state, fx: dict, card) -> None:
-    """One `furina` kind. Inert for anyone who is not Furina."""
+    """One `furina` kind. Inert for anyone who is not Furina, except the
+    sweep's base-game verbs (`GENERIC_KINDS`)."""
+    k = fx["kind"]
+    if k in GENERIC_KINDS:
+        _generic_kind(state, fx, card)
+        return
     if not active(state.player):
         return
-    k = fx["kind"]
     if k == "act_oldest":
         T.act_oldest(state)
     elif k == "act_all":
@@ -626,6 +650,106 @@ def kind(state, fx: dict, card) -> None:
         T.gain(state, int(fx["amount"]), "card")
     else:                                            # pragma: no cover
         raise ValueError(f"unknown furina kind {k!r}")
+
+
+def _generic_kind(state, fx: dict, card) -> None:
+    """The sweep's seven verbs (review/active/furina-sweep-2026-10-14.md
+    sec.3), each the base card's body; the C# is `FurinaCards`. THE PILOT
+    CHOOSES with `effects._best_card` / `_worst_card`, this engine's stand-in
+    for the player's screen."""
+    from tier0 import constants as C
+    from tier0.engine import effects, refpowers
+    from tier0.engine.state import remove_instance
+    p = state.player
+    k = fx["kind"]
+    upgraded = bool(fx.get("upgraded", False))
+    if k == "upgrade_in_hand":
+        # Armaments: one card (the best one), or every card upgraded.
+        pool = [c for c in p.hand if not c.id.endswith("+")]
+        if not pool:
+            return
+        picks = pool if upgraded else [effects._best_card(pool)]
+        for c in picks:
+            i = next((n for n, h in enumerate(p.hand) if h is c), None)
+            if i is not None:
+                p.hand[i] = refpowers._upgraded(state, c)
+        state.emit("upgrade_in_hand", amount=len(picks))
+    elif k == "discard_hand_redraw":
+        # Calculated Gamble: discard the hand, draw that many [plus 1].
+        n = len(p.hand)
+        if n:
+            effects._op_discard(state, {"op": "discard", "amount": n}, card)
+        draw = n + (1 if upgraded else 0)
+        if draw and not state.over:
+            state.draw(draw)
+    elif k == "look_take_discard":
+        # Read the Script: the top N, the best one to the hand, the rest to
+        # the discard pile.
+        top = p.draw_pile[:int(fx["amount"])]
+        if not top:
+            return
+        pick = effects._best_card(top)
+        for seen in top:
+            remove_instance(p.draw_pile, seen)
+        if len(p.hand) < C.MAX_HAND_SIZE:
+            p.hand.append(pick)
+        else:
+            p.discard_pile.append(pick)
+        p.discard_pile.extend(c for c in top if c is not pick)
+        state.emit("look_take_discard", card=pick.id, seen=len(top))
+    elif k == "free_in_hand":
+        # Mise en Scene: the costliest card in hand costs 0 this turn. The
+        # upgrade's "until played" is read as this turn here, the turn the
+        # pilot plays it (the C# keeps it at 0 until played).
+        pool = [c for c in p.hand if isinstance(c.cost, int) and c.cost > 0]
+        if not pool:
+            return
+        pick = max(pool, key=lambda c: c.cost)
+        pick.free_this_turn = True
+        state.emit("free_in_hand", card=pick.id)
+    elif k == "retain_hand":
+        # Equilibrium: the base game's RetainHandPower, read and spent at
+        # this turn's hand flush (`refpowers.retain_at_flush`).
+        p.powers[RETAIN_HAND] = p.powers.get(RETAIN_HAND, 0) + 1
+    elif k == "discard_to_hand":
+        # Hologram: the best card of the discard pile into the hand.
+        if not p.discard_pile or len(p.hand) >= C.MAX_HAND_SIZE:
+            return
+        pick = effects._best_card(p.discard_pile)
+        remove_instance(p.discard_pile, pick)
+        p.hand.append(pick)
+        state.emit("discard_to_hand", card=pick.id)
+    elif k == "copy_in_hand":
+        # Dual Wield, any type: a copy of the best card in hand, which
+        # Exhausts.
+        if not p.hand or len(p.hand) >= C.MAX_HAND_SIZE:
+            return
+        import copy as _copy
+        pick = effects._best_card(p.hand)
+        twin = _copy.copy(pick)
+        twin.exhaust = True
+        p.hand.append(twin)
+        state.emit("copy_in_hand", card=pick.id)
+
+
+#: Pneuma and Ousia (the sweep, 2026-10-14): "Whenever you play an Attack,
+#: gain 2 Block. Whenever you play a Skill, deal 2 damage to a random
+#: enemy." [3] Its amount is both numbers; copies add.
+PNEUMA_AND_OUSIA = "fs_pneuma_and_ousia"
+
+
+def pneuma_and_ousia(state, card) -> None:
+    """Pneuma and Ousia's trigger after each card play (the C#
+    `PneumaAndOusiaPower.AfterCardPlayed`): unpowered Block on an Attack,
+    an unpowered hit on a random enemy on a Skill."""
+    n = state.player.powers.get(PNEUMA_AND_OUSIA, 0)
+    if n <= 0 or state.over:
+        return
+    from tier0.engine import refpowers
+    if card.type == "attack":
+        refpowers.gain_block(state, state.player, n)
+    elif card.type == "skill" and state.living_enemies:
+        T._hit(state, state.rng.choice(state.living_enemies), n, None)
 
 
 # ---- the pool to 75's reads (count tokens and predicates) -------------

@@ -18,22 +18,6 @@ public class FurinaSpendReviewFixesTests
 {
     // ---- 1. High Stakes: every 4 [3] ----------------------------------------
 
-    [Fact]
-    public void High_stakes_is_every_four_and_three_upgraded()
-    {
-        Assert.Equal(4, FurinaStageLaw.HighStakesEvery);
-        Assert.Equal(3, FurinaStageLaw.HighStakesEveryUpgraded);
-        Assert.Equal(4, new ProtoFsHighStakes().DynamicVars["PowerAmount"].IntValue);
-        var up = new ProtoFsHighStakes();
-        Seat.Set(up, "IsMutable", true);
-        typeof(MegaCrit.Sts2.Core.Models.CardModel)
-            .GetMethod("UpgradeInternal", HeadlessGame.All)!.Invoke(up, null);
-        Assert.Equal(3, up.DynamicVars["PowerAmount"].IntValue);
-        // 12 HP drained: +3 a hit, +4 upgraded.
-        Assert.Equal(3, FurinaStageLaw.HighStakesBonus(12, FurinaStageLaw.HighStakesEvery));
-        Assert.Equal(4, FurinaStageLaw.HighStakesBonus(12, FurinaStageLaw.HighStakesEveryUpgraded));
-    }
-
     // ---- 3. The Drain face names its Block source ---------------------------
 
     [Fact]
@@ -56,7 +40,7 @@ public class FurinaSpendReviewFixesTests
     {
         InCombat(() =>
         {
-            var b = Build(new ProtoFsOverdraft());             // Drain 4
+            var b = Build(new ProtoFsOusiaPledge());           // a Drain card
             var ledger = FurinaStageLedger.For(b.Furina.Creature);
             Seat.Force(b.Furina.Creature, "CurrentHp", ledger.Line + 10);
             Assert.Equal("", FurinaStageFacePreview.DrainLine(b.Card, 4));

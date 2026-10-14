@@ -8486,3 +8486,56 @@ depends on Plans not yet written.
 Pins: `tier0/tests/test_kokomi_pool_overhaul_2026_10_13.py`,
 `klee-mod/KleeTests/Prototype/KokomiPoolOverhaulTests.cs`. Untested in game
 until a deploy.
+
+## Furina: the sweep, 2026-10-14
+
+`review/active/furina-sweep-2026-10-14.md`, sec.2 and sec.3, built on the
+paper's defaults (picks 1 (a), 2 (a), 3 (a)) for [USER]'s next play session.
+[USER], after the 2026-10-14 run: "Overall, very fun! I definitely like
+Furina's current design!" and "a cleanup / dedupe pass on the cards to make
+space to add a wider variety of non guest star effects that aren't just a
+combinatorial verb salad of 'spend / drain / repay' + 'deal x damage' / deal x
+damage to all.' It's not so much that any one card was an offender as they all
+generically blurred together."
+
+**Fifteen cut** (6 Common, 7 Uncommon, 2 Rare): Soloist's Solicitation
+(`proto_fs_soloists_solicitation`), Spirited Aria, Standing Ovation
+(`proto_fs_standing_ovation_all`), Hydro Lance, Overdraft, Packed House,
+Interval Bell, Soothing Waters, Balance the Books, Salon's Encore, Ousia
+Surge, High Stakes, Pneuma Tides, The Deluge, Hymn of Renewal. Their history
+above stays as the record. The five cut Powers' classes (`SalonsEncorePower`,
+`OusiaSurgePower`, `HighStakesPower`, `PneumaTidesPower`,
+`HymnOfRenewalPower`) and their sim readers stay in the code, applied by no
+row.
+
+**Fifteen new** (6 / 7 / 2), each the base card named in brackets:
+Rain of Tears, Rehearsal, Silence in the Court! (Piercing Wail), Pirouette,
+Spotlight Grab (Headbutt), Costume Fitting (Armaments); Quick Change
+(Calculated Gamble), Read the Script, Practiced Grace (Footwork), Mise en
+Scène, Intermission (Equilibrium), Second Act (Hologram), Solo Recital
+(Skewer); Pneuma and Ousia, Stand-In (Dual Wield). The pool stays 78 at
+23 / 35 / 20.
+
+**How they are built.** Seven verbs are new `furina` kinds, each the base
+card's command calls (`FurinaCards`; sim `furina_stage._generic_kind`), and
+none is gated on her stage: `upgrade_in_hand`, `discard_hand_redraw`,
+`look_take_discard` (amount 4), `free_in_hand`, `retain_hand` (the base
+game's `RetainHandPower`), `discard_to_hand`, `copy_in_hand`. Costume
+Fitting, Quick Change and Mise en Scène upgrade through a new key,
+`furina_upgraded` (the kind reads `IsUpgraded`, `varka_upgraded`'s shape).
+Silence in the Court! is `lose_strength` with `this_turn`
+(`ProtoFsSilenceInTheCourtPower`, Cover Your Ears!' shape). Spotlight Grab is
+`recall_to_draw` from the discard pile. Pneuma and Ousia is
+`PneumaAndOusiaPower` (`AfterCardPlayed`; sim
+`furina_stage.pneuma_and_ousia`); the Block and the hit are unpowered.
+
+**Readings.**
+
+- Intermission prints "Retain your Hand this turn." with Retain not golded:
+  the page has no Retain definition to hover.
+- Mise en Scène: the paper's "Draw 1 card [and it costs 0 until played]" is
+  printed "It costs 0 {until played | this turn}. Draw 1 card." The sim
+  reads the upgrade as this turn (the turn the pilot plays it).
+- Costume Fitting prints "for this combat", Armaments' combat-only upgrade.
+- The sim's pilot picks with `_best_card` (Costume Fitting, Read the Script,
+  Second Act, Stand-In) and the costliest card (Mise en Scène).

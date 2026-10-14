@@ -48,16 +48,12 @@ public class FurinaDrainLineRoundTests
                  {
                      ("ProtoFsHymnOfManyWaters", "PayBlock"),
                      ("ProtoFsGrandEntrance", "PayBlock"),
-                     ("ProtoFsPneumaTides", "PayVigor"),
-                     ("ProtoFsHydroLance", "PayDamage"),
                      ("ProtoFsCleansingTorrent", "PayDamage"),
                  })
         {
             Assert.Contains($"FurinaStageFacePreview.{pay})", Generated(type));
         }
-        foreach (var type in new[] { "ProtoFsSoothingWaters",
-                                     "ProtoFsPneumaRefrain",
-                                     "ProtoFsBalanceTheBooks",
+        foreach (var type in new[] { "ProtoFsPneumaRefrain",
                                      "ProtoFsGrandAbsolution",
                                      "ProtoFsSingerOfManyWaters",
                                      "ProtoFsRiptideLunge",

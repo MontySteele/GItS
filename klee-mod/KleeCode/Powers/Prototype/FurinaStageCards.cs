@@ -9,6 +9,7 @@ using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.Powers;
 
 namespace KleeMod.Powers;
 
@@ -117,6 +118,169 @@ public static class FurinaCards
         }
         if (pick == null) return;
         await CardPileCmd.Add(pick, PileType.Hand, CardPilePosition.Top);
+    }
+
+    // ---- THE SWEEP (review/active/furina-sweep-2026-10-14.md sec.3) -----
+    // Seven base-game verbs, each one base card's command calls (decompiled
+    // sts2.dll). None needs her stage, so none is gated on it: a card of
+    // hers played by anyone does what it prints. The three that change when
+    // upgraded read IsUpgraded (`furina_upgraded`). Sim twin:
+    // `furina_stage.kind`.
+
+    /// <summary>Read the Script's grid prompt.</summary>
+    public const string LookPromptKey =
+        "KLEEMOD-FURINA_READ_THE_SCRIPT.selectionScreenPrompt";
+
+    public const string LookPromptText =
+        "Choose a card to put into your [gold]Hand[/gold]. The rest are discarded.";
+
+    /// <summary>Mise en Scene's hand prompt.</summary>
+    public const string FreePromptKey =
+        "KLEEMOD-FURINA_MISE_EN_SCENE.selectionScreenPrompt";
+
+    public const string FreePromptText = "Choose a card to cost 0.";
+
+    /// <summary>Second Act's discard-pile prompt.</summary>
+    public const string ReturnPromptKey =
+        "KLEEMOD-FURINA_SECOND_ACT.selectionScreenPrompt";
+
+    public const string ReturnPromptText =
+        "Choose a card to put into your [gold]Hand[/gold].";
+
+    /// <summary>Stand-In's hand prompt.</summary>
+    public const string CopyPromptKey =
+        "KLEEMOD-FURINA_STAND_IN.selectionScreenPrompt";
+
+    public const string CopyPromptText = "Choose a card to copy.";
+
+    private static List<CardModel> HandOf(Player owner) =>
+        CardPile.Get(PileType.Hand, owner)?.Cards.ToList()
+        ?? new List<CardModel>();
+
+    /// <summary>Costume Fitting: "Upgrade a card in your Hand for this
+    /// combat." [ALL cards] Armaments' body: <c>FromHandForUpgrade</c>, or
+    /// every upgradable hand card upgraded.</summary>
+    public static async Task UpgradeInHand(PlayerChoiceContext choiceContext,
+                                           CardModel card, CardPlay cardPlay)
+    {
+        if (card.Owner is not { } owner) return;
+        if (card.IsUpgraded)
+        {
+            foreach (var c in HandOf(owner).Where(c => c.IsUpgradable))
+            {
+                CardCmd.Upgrade(c);
+            }
+            return;
+        }
+        var pick = await CardSelectCmd.FromHandForUpgrade(
+            choiceContext, owner, card);
+        if (pick != null) CardCmd.Upgrade(pick);
+    }
+
+    /// <summary>Quick Change: "Discard your Hand, then draw that many
+    /// cards." [plus 1] Calculated Gamble's body.</summary>
+    public static async Task DiscardHandRedraw(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
+    {
+        if (card.Owner is not { } owner) return;
+        var hand = HandOf(owner);
+        var count = hand.Count + (card.IsUpgraded ? 1 : 0);
+        if (hand.Count == 0)
+        {
+            if (count > 0) await CardPileCmd.Draw(choiceContext, count, owner);
+            return;
+        }
+        await CardCmd.DiscardAndDraw(choiceContext, hand, count);
+    }
+
+    /// <summary>Read the Script: "Look at the top 4 cards of your Draw Pile.
+    /// Put 1 into your Hand; discard the rest." One seen card is taken
+    /// without a screen (<see cref="ScryTake"/>'s rule).</summary>
+    public static async Task LookTakeDiscard(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
+    {
+        if (card.Owner is not { } owner) return;
+        var top = CardPile.Get(PileType.Draw, owner)?.Cards
+                      .Take(Amount(card)).ToList()
+                  ?? new List<CardModel>();
+        if (top.Count == 0) return;
+        CardModel? pick = top.Count == 1
+            ? top[0]
+            : (await CardSelectCmd.FromSimpleGrid(
+                choiceContext, top, owner,
+                new CardSelectorPrefs(new LocString(Table, LookPromptKey), 1)))
+                .FirstOrDefault();
+        if (pick != null)
+        {
+            await CardPileCmd.Add(pick, PileType.Hand, CardPilePosition.Top);
+        }
+        var rest = top.Where(c => !ReferenceEquals(c, pick)).ToList();
+        if (rest.Count > 0) await CardCmd.Discard(choiceContext, rest);
+    }
+
+    /// <summary>Mise en Scene: "Choose a card in your Hand. It costs 0 this
+    /// turn." [until played] Enlightenment's cost calls, reduce-only, on one
+    /// chosen card that costs Energy.</summary>
+    public static async Task FreeInHand(PlayerChoiceContext choiceContext,
+                                        CardModel card, CardPlay cardPlay)
+    {
+        if (card.Owner is not { } owner) return;
+        var pick = (await CardSelectCmd.FromHand(
+            choiceContext, owner,
+            new CardSelectorPrefs(new LocString(Table, FreePromptKey), 1),
+            c => !c.EnergyCost.CostsX && c.EnergyCost.GetResolved() > 0,
+            card)).FirstOrDefault();
+        if (pick == null) return;
+        if (card.IsUpgraded)
+        {
+            pick.EnergyCost.SetUntilPlayed(0, reduceOnly: true);
+        }
+        else
+        {
+            pick.EnergyCost.SetThisTurn(0, reduceOnly: true);
+        }
+    }
+
+    /// <summary>Intermission: "Retain your Hand this turn." Equilibrium's
+    /// call: the base game's <c>RetainHandPower</c>, 1.</summary>
+    public static async Task RetainHand(PlayerChoiceContext choiceContext,
+                                        CardModel card, CardPlay cardPlay)
+    {
+        if (card.Owner?.Creature is not { } creature) return;
+        await PowerCmd.Apply<RetainHandPower>(
+            choiceContext, creature, 1m, creature, card);
+    }
+
+    /// <summary>Second Act: "Put a card from your Discard Pile into your
+    /// Hand." Hologram's body.</summary>
+    public static async Task DiscardToHand(PlayerChoiceContext choiceContext,
+                                           CardModel card, CardPlay cardPlay)
+    {
+        if (card.Owner is not { } owner) return;
+        var pile = CardPile.Get(PileType.Discard, owner);
+        if (pile == null || pile.Cards.Count == 0) return;
+        var pick = (await CardSelectCmd.FromCombatPile(
+            choiceContext, pile, owner,
+            new CardSelectorPrefs(new LocString(Table, ReturnPromptKey), 1)))
+            .FirstOrDefault();
+        if (pick != null) await CardPileCmd.Add(pick, PileType.Hand);
+    }
+
+    /// <summary>Stand-In: "Choose a card in your Hand. Add a copy of it to
+    /// your Hand. The copy Exhausts." Dual Wield's clone, any card type, with
+    /// Exhaust added to the copy (Wolfpack's <c>AddKeyword</c>).</summary>
+    public static async Task CopyInHand(PlayerChoiceContext choiceContext,
+                                        CardModel card, CardPlay cardPlay)
+    {
+        if (card.Owner is not { } owner) return;
+        var pick = (await CardSelectCmd.FromHand(
+            choiceContext, owner,
+            new CardSelectorPrefs(new LocString(Table, CopyPromptKey), 1),
+            null, card)).FirstOrDefault();
+        if (pick == null) return;
+        var copy = pick.CreateClone();
+        copy.AddKeyword(CardKeyword.Exhaust);
+        await CardPileCmd.AddGeneratedCardToCombat(copy, PileType.Hand, owner);
     }
 
     /// <summary>Final Bow's pick: the seat whose guest the player chose off a

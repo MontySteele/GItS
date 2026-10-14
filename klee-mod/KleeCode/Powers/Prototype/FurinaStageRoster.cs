@@ -69,7 +69,9 @@ public static class FurinaStageRoster
     /// 2026-10-09, with Standing Ovation moved to Uncommon), and THE BLOCK
     /// GAP's four (ruled 2026-10-09), and THE DIVERSITY PASS (ruled
     /// 2026-10-11: Headliner, Leading Lady, Full House and Packed House in;
-    /// Gentle Current, Surging Waters, Pay the Tab and Sold Out out): 23
+    /// Gentle Current, Surging Waters, Pay the Tab and Sold Out out), and
+    /// THE SWEEP (review/active/furina-sweep-2026-10-14.md: fifteen out,
+    /// fifteen in, none a resource verb plus a number): 23
     /// Commons, 35 Uncommons and 20 Rares, 78 (pinned by `PoolCountTests`). Sim twin:
     /// <c>furina_stage.POOL_IDS</c>, same order.
     /// </summary>
@@ -77,7 +79,6 @@ public static class FurinaStageRoster
     {
         // Drain (five).
         ModelDb.Card<ProtoFsMademoiselleCrabaletta>(),
-        ModelDb.Card<ProtoFsSoloistsSolicitation>(),
         ModelDb.Card<ProtoFsSurintendanteChevalmarin>(),
         ModelDb.Card<ProtoFsLeadingLady>(),
         ModelDb.Card<ProtoFsSalonsTab>(),
@@ -87,13 +88,9 @@ public static class FurinaStageRoster
         ModelDb.Card<ProtoFsSingerOfManyWaters>(),
         // Fanfare outlets (six).
         ModelDb.Card<ProtoFsTidalFlourish>(),
-        ModelDb.Card<ProtoFsSpiritedAria>(),
         ModelDb.Card<ProtoFsQuickCue>(),
-        ModelDb.Card<ProtoFsStandingOvationAll>(),
-        ModelDb.Card<ProtoFsIntervalBell>(),
         ModelDb.Card<ProtoFsBravura>(),
         // The two Powers (Uncommon; Endless Waltz was cut 2026-10-09).
-        ModelDb.Card<ProtoFsSalonsEncore>(),
         ModelDb.Card<ProtoFsThunderousApplause>(),
         // The four guests.
         ModelDb.Card<ProtoFsGuestStarCharlotte>(),
@@ -105,7 +102,6 @@ public static class FurinaStageRoster
         ModelDb.Card<ProtoFsLetThePeopleRejoice>(),
         // The pool to 39 (2026-10-05). Ousia.
         ModelDb.Card<ProtoFsGrandDeluge>(),
-        ModelDb.Card<ProtoFsOusiaSurge>(),
         ModelDb.Card<ProtoFsGuestStarLyney>(),
         ModelDb.Card<ProtoFsAFiveCenturyAct>(),
         // Pneuma.
@@ -140,23 +136,15 @@ public static class FurinaStageRoster
         ModelDb.Card<ProtoFsBringTheHouseDown>(),
         // Ousia, Drain (10).
         ModelDb.Card<ProtoFsUndercurrent>(),
-        ModelDb.Card<ProtoFsOverdraft>(),
         ModelDb.Card<ProtoFsOusiaPledge>(),
         ModelDb.Card<ProtoFsAgainstTheTide>(),
         ModelDb.Card<ProtoFsRiptideLunge>(),
-        ModelDb.Card<ProtoFsHighStakes>(),
         ModelDb.Card<ProtoFsReginaOfAllWaters>(),
-        ModelDb.Card<ProtoFsTheDeluge>(),
         ModelDb.Card<ProtoFsAllIn>(),
         // Pneuma, Repay (10).
-        ModelDb.Card<ProtoFsSoothingWaters>(),
         ModelDb.Card<ProtoFsCleanSlate>(),
-        ModelDb.Card<ProtoFsHydroLance>(),
         ModelDb.Card<ProtoFsCleansingTorrent>(),
-        ModelDb.Card<ProtoFsBalanceTheBooks>(),
         ModelDb.Card<ProtoFsRisingTide>(),
-        ModelDb.Card<ProtoFsPneumaTides>(),
-        ModelDb.Card<ProtoFsHymnOfRenewal>(),
         ModelDb.Card<ProtoFsGrandAbsolution>(),
         // The bridge (1).
         ModelDb.Card<ProtoFsEbbAndFlow>(),
@@ -171,6 +159,22 @@ public static class FurinaStageRoster
         ModelDb.Card<ProtoFsHeadliner>(),
         ModelDb.Card<ProtoFsTheLeadingLady>(),
         ModelDb.Card<ProtoFsTheFullHouse>(),
-        ModelDb.Card<ProtoFsPackedHouse>(),
+        // THE SWEEP (review/active/furina-sweep-2026-10-14.md sec.3):
+        // 6 Common, 7 Uncommon, 2 Rare, for the fifteen cut.
+        ModelDb.Card<ProtoFsRainOfTears>(),
+        ModelDb.Card<ProtoFsRehearsal>(),
+        ModelDb.Card<ProtoFsSilenceInTheCourt>(),
+        ModelDb.Card<ProtoFsPirouette>(),
+        ModelDb.Card<ProtoFsSpotlightGrab>(),
+        ModelDb.Card<ProtoFsCostumeFitting>(),
+        ModelDb.Card<ProtoFsQuickChange>(),
+        ModelDb.Card<ProtoFsReadTheScript>(),
+        ModelDb.Card<ProtoFsPracticedGrace>(),
+        ModelDb.Card<ProtoFsMiseEnScene>(),
+        ModelDb.Card<ProtoFsIntermission>(),
+        ModelDb.Card<ProtoFsSecondAct>(),
+        ModelDb.Card<ProtoFsSoloRecital>(),
+        ModelDb.Card<ProtoFsPneumaAndOusia>(),
+        ModelDb.Card<ProtoFsStandIn>(),
     };
 }

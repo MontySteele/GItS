@@ -446,6 +446,9 @@ def _finish_play(state: CombatState, card: Card,
         snap = refpowers.before_card_played(state, card)
         effects.resolve_card(state, card)
         refpowers.after_card_played(state, card, snap)
+        # Furina's Pneuma and Ousia (the sweep, 2026-10-14), on the same
+        # broadcast (`AfterCardPlayed`), each play index.
+        furina_stage.pneuma_and_ousia(state, card)
         # (C.COMPANION_OVERHAUL). Thoma's Crimson Ooyoroi, on the
         # broadcast the mod gives it (`AfterCardPlayed`) and beside the site
         # this engine already counts an Attack at. INSIDE the replay loop and

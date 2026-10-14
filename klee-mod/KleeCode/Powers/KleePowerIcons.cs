@@ -366,6 +366,9 @@ internal static class KleePowerIcons
         FountainOfLucinePower =>
             KleePck.Path("furina/powers/fountain_of_lucine.png"),
         OusiaSurgePower => KleePck.Path("furina/powers/ousia_surge.png"),
+        // THE SWEEP (2026-10-14): Pneuma and Ousia borrows the Ousia sigil.
+        PneumaAndOusiaPower =>
+            KleePck.Path("furina/powers/ousia_surge.png"),
         MasqueRedDeathPower =>
             KleePck.Path("furina/powers/masque_red_death.png"),
         AncientSeaAuthorityPower =>
