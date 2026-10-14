@@ -111,7 +111,6 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - Bridge `ModeLabels`/`RecordChoice` still carry the sheet's literal numbers for mode faces; read them from the card's vars instead.
 - Co-op dev grant: `give_card` is refused in multiplayer because the pile add bypasses the action-queue synchronizer; a synced grant would let a co-op seat round be dressed with named co-op cards.
 - An embark was never reverted (all its ledger rows APPLIED, the game still up at `game_over`) although the seat's teardown was run; find why before relying on `seat.py` teardown. `embark` now refuses a lane with a live un-reverted launch.
-- `test_local_tester` is flaky: it failed once and passed on re-run with no change; 82 more runs on 2026-10-13 never failed (two failures seen while `McpMod.cs` was being edited and built).
 - The seat harness sometimes sends end-turn twice in a row (seat rounds); find which path repeats it.
 - `EB-391` the `rest` verb sometimes fails its first call on an open rest site ("Rest site room is not open"); game-side race.
 - `EB-208` the seed ledger ships empty: run the Klee three-body seed hunt and record the first entries.
