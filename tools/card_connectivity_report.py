@@ -998,6 +998,20 @@ POWER_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "fs_leading_lady": [_hook("private", "stage", "read"),
                         _hook("shared", "card_identity", "write")],
     "fs_full_house": [_hook("private", "stage", "use")],
+    # The sweep, second set (2026-10-14). Arkhe in Balance rides the play
+    # verb on any Attack or Skill; Objection! and Plot Twist answer an
+    # enemy's attack; Trial by Water pays her Fanfare off any damage the
+    # enemy takes; Rainfall Overture widens the next Attack; Crowd Favorite
+    # reads her HP for Energy.
+    "fs_arkhe_in_balance": [_hook("shared", "universal_verb_power", "write"),
+                            _hook("shared", "block_held", "write"),
+                            _hook("shared", "enemy_count", "read")],
+    "fs_objection": [_hook("shared", "enemy_intent", "read"),
+                     _hook("shared", "hp_ledger", "read")],
+    "fs_trial_by_water": [_hook("private", "fanfare", "write")],
+    "fs_rainfall_overture": [_hook("shared", "card_identity", "write")],
+    "fs_crowd_favorite": [_hook("shared", "hp_ledger", "read")],
+    "fs_plot_twist": [_hook("shared", "enemy_intent", "write")],
 }
 
 # Powers whose rider fires on a UNIVERSAL VERB -- playing, drawing,
@@ -1139,6 +1153,11 @@ PREDICATE_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "plan_held": [_hook("private", "kurage", "read")],
     "stage_drained_this_turn": [_hook("private", "stage", "read")],
     "stage_none_drained": [_hook("private", "stage", "read")],
+    # The Furina sweep (2026-10-14).
+    "hp_lost_last_turn": [_hook("shared", "hp_ledger", "read")],
+    "first_turn_of_combat": [_hook("shared", "plays_this_turn", "read")],
+    "ousia_face": [_hook("shared", "card_identity", "read")],
+    "pneuma_face": [_hook("shared", "card_identity", "read")],
 }
 PREDICATE_PREFIXES: dict[str, list[tuple[str, str, str]]] = {
     "encore_at_least_": [_hook("private", "encore", "read")],
@@ -1153,6 +1172,8 @@ PREDICATE_PREFIXES: dict[str, list[tuple[str, str, str]]] = {
         _hook("shared", "card_identity", "read")],
     "exhaust_selection_size_at_least_": [
         _hook("shared", "exhaust_pile", "read")],
+    # Noelle's Breastplate and Understudy's Debut: "below half HP".
+    "hp_pct_below_": [_hook("shared", "hp_ledger", "read")],
 }
 
 # Prefixes whose argument is a NAME, not an integer. Kept separate from
@@ -1186,6 +1207,9 @@ CARD_FIELD_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # v4. A `plan:` line WRITES the Plan queue (filed on `kurage`); its
     # effects are walked by `classify_row` like `effects:`.
     "plan": [_hook("private", "kurage", "write")],
+    # The Furina sweep (2026-10-14): "Can be played only if" reads the
+    # predicate it names (HP lost this turn, an enemy's intent).
+    "playable_if": [_hook("shared", "card_timing", "read")],
 }
 CARD_FIELDS_NO_HOOK = frozenset({
     "id", "name", "cost", "type", "rarity", "solve", "tempo_band",

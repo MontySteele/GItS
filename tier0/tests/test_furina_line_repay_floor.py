@@ -101,8 +101,7 @@ def test_a_five_century_act_reads_its_new_text():
 # ---- the Repay floor ------------------------------------------------------------
 
 def test_the_damage_cards_repay_first_then_add_the_leftover():
-    for cid, base, n in (("proto_fs_hydro_lance", 14, 4),
-                         ("proto_fs_cleansing_torrent", 10, 4)):
+    for cid, base, n in (("proto_fs_cleansing_torrent", 10, 4),):
         row = _card(cid)
         assert [fx["op"] for fx in row.effects] == ["stage_repay", "damage"]
         # Nothing drained: the whole N is added.
@@ -135,17 +134,6 @@ def test_hymn_pays_block_for_what_it_could_not_repay():
     assert st.player.block == 12      # the 2026-10-11 trim (was 15)
 
 
-def test_soothing_waters_keeps_no_leftover_payout():
-    """Ruled 2026-10-09: a 0-cost draw-1 card paying out on an empty Repay
-    looped forever, so Soothing Waters is "Repay 2. Draw 1 card." [3]."""
-    assert "floor" not in _card("proto_fs_soothing_waters").effects[0]
-    assert _card("proto_fs_soothing_waters+").effects[0]["amount"] == 3
-    st = _furina()
-    _play(st, _card("proto_fs_soothing_waters"))
-    assert not st.player.powers.get("next_attack_up")
-    assert st.player.block == 0
-
-
 def test_fountain_has_no_floor_and_pneuma_tides_pays_vigor():
     st = _furina()
     effects.resolve_card(st, _card("proto_fs_fountain_of_lucine"))
@@ -154,10 +142,6 @@ def test_fountain_has_no_floor_and_pneuma_tides_pays_vigor():
     FS.drain(st, 1)
     T.turn_start(st)
     assert st.player.block == 0                             # no floor (2026-10-13)
-    st = _furina()
-    effects.resolve_card(st, _card("proto_fs_pneuma_tides"))
-    T.turn_start(st)
-    assert st.player.powers.get("next_attack_up") == 2
 
 
 def test_grand_entrance_charlotte_and_sigewinne_pay_block():
@@ -178,7 +162,7 @@ def test_grand_entrance_charlotte_and_sigewinne_pay_block():
 
 def test_the_unchanged_repays_pay_no_floor():
     for cid in ("proto_fs_pneuma_refrain", "proto_fs_clean_slate",
-                "proto_fs_balance_the_books", "proto_fs_rising_tide",
+                "proto_fs_rising_tide",
                 "proto_fs_riptide_lunge", "proto_fs_ebb_and_flow",
                 "proto_fs_singer_of_many_waters",
                 "proto_fs_grand_absolution"):
@@ -197,13 +181,8 @@ def test_endless_waltz_is_cut():
 # ---- the ruled card numbers ----------------------------------------------------------
 
 def test_the_ruled_card_numbers():
-    # Common again, Spend half (2026-10-11, Furina round 3 record, pick 1).
-    assert _card("proto_fs_standing_ovation_all").rarity == "common"
     crab = _card("proto_fs_mademoiselle_crabaletta")
     assert crab.effects[1]["amount"] == 20
-    solo = _card("proto_fs_soloists_solicitation")
-    assert solo.effects[1]["amount"] == 6
-    assert _card("proto_fs_soloists_solicitation+").effects[1]["amount"] == 9
     assert _card("proto_fs_mademoiselle_crabaletta+").effects[1]["amount"] == 26
     gaze = _card("proto_fs_commanding_gaze").effects[0]["modes"][0]
     assert gaze["effects"][0]["amount"] == 2

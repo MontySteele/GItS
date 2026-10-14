@@ -203,15 +203,6 @@ def arm(monkeypatch):
     _clear_caches()
 
 
-def test_interval_bells_spend_is_three_then_two(arm):
-    card = _proto("proto_fs_interval_bell")
-    spend = card.effects[0]["modes"][1]
-    assert FS.spend_mode_amount(spend) == 3
-    up = copy.deepcopy(card)
-    for fx in up.effects[0]["modes"][1]["effects"]:
-        if fx["op"] == "stage_spend":
-            fx["amount"] -= 1
-    assert FS.spend_mode_amount(up.effects[0]["modes"][1]) == 2
     # Its Spend mode's Energy comes next turn (the 2026-10-04 loop fix):
     # `tier0/tests/test_furina_tide_arm.py` pins it on the Salon's Tab rules.
 

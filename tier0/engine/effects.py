@@ -1017,6 +1017,8 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     enemy.hp -= hp_dmg
     state.emit("damage", target=enemy.name, amount=effective, blocked=blocked,
                base=base, source=source)
+    # Trial by Water (the Furina sweep): the marked enemy took damage.
+    furina_stage.trial_by_water(state, enemy, effective)
     if amped:
         # EB-57: the amp counter is settled HERE, not at the moment the aura
         # was consumed. `reactions._react` can only see `out - damage`, which
@@ -1630,6 +1632,11 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
     target = fx.get("target", "enemy")
     widen = fx.get("target_all_if_power")
     if widen and state.player.powers.get(widen, 0):
+        target = "all_enemies"
+    # Rainfall Overture (the Furina sweep): the widened Attack's aimed hits
+    # land on every enemy (`furina_stage.rainfall_arm`).
+    if (target == "enemy" and card is not None
+            and state.rainfall_wide_card is card):
         target = "all_enemies"
 
     # The Furina seat round (2026-09-26): `element_hits: N` -- only the FIRST N
@@ -2984,7 +2991,12 @@ def _op_scry_take(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_conditional(state: CombatState, fx: dict, card: Card) -> None:
-    fired = _predicate(state, fx["if"])
+    # Ousia / Pneuma (the Furina sweep): the face is the CARD's, so it is
+    # read here, where the card is (`Card.flipped`; C# `FurinaFlip`).
+    if fx["if"] in ("ousia_face", "pneuma_face"):
+        fired = card.flipped == (fx["if"] == "pneuma_face")
+    else:
+        fired = _predicate(state, fx["if"])
     # D4 telemetry (salon UI sprint, 2026-07-28). EMIT-ONLY, and deliberately
     # generic rather than a graceful_retreat special case: "how often does
     # this rider actually fire" is a question every conditional on the sheet
@@ -3214,6 +3226,13 @@ PREDICATE_NAMES = frozenset({
     # Grass Ring of Sanctification (2026-09-23): HP lost since the end of the
     # player's previous turn, the enemy turn included.
     "hp_lost_since_last_turn",
+    # THE FURINA SWEEP (2026-10-14): Tearful Monologue's last turn, Opening
+    # Number's first turn, and Ousia / Pneuma's two faces (read in
+    # `_op_conditional`, off the card).
+    "hp_lost_last_turn",
+    "first_turn_of_combat",
+    "ousia_face",
+    "pneuma_face",
     "enemy_intends_attack",
     # EB-118. Ownership is a yes/no on the sheet, so it is a name, not a
     # count prefix; the COUNTS are reachable as amounts.
@@ -3664,6 +3683,13 @@ def _predicate(state: CombatState, name: str) -> bool:
         return state.hp_lost_this_turn > 0
     if name == "hp_lost_since_last_turn":
         return state.hp_lost_since_last_turn > 0
+    if name == "hp_lost_last_turn":
+        return state.hp_lost_last_turn > 0
+    if name == "first_turn_of_combat":
+        return state.turn == 1
+    # Ousia / Pneuma's faces are the CARD's, read in `_op_conditional`.
+    if name == "ousia_face" or name == "pneuma_face":   # pragma: no cover
+        raise ValueError(f"{name} is read off the card (_op_conditional)")
     if name == "enemy_intends_attack":
         # Frozen enemies still attack under v1.5 (at -50%), so they count.
         return any(e.current_intent()["kind"] == "attack"

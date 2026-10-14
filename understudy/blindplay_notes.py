@@ -1753,6 +1753,8 @@ ARM_KEYWORDS: dict[str, str] = {
     # Guest Star exhausts and comes back when its guest leaves.
     "Repay": ("Regain that much drained HP, never more than you drained. A "
               "Repay counts the HP it returns."),
+    # THE SWEEP (2026-10-14): Ousia / Pneuma's word, `ArmKeywordTips.ForFlip`.
+    "Flip": "Turn this card to its other face; it starts each combat on Ousia.",
     "Summon": ("A guest joins at the back. On a full stage, the oldest guest "
                "acts once and leaves; its card goes to your Discard "
                "Pile."),
@@ -2019,7 +2021,7 @@ _ARM_KEYWORD_ARM: dict[str, str] = {
     "Plan": "kokomi", "Mend": "kokomi",
     "Tamakushi Casket": "kokomi",
     "Spend": "furina", "Fanfare": "furina", "Drain": "furina",
-    "Repay": "furina",
+    "Repay": "furina", "Flip": "furina",
     "Encore": "furina", "Spotlighted": "furina",
     # VARKA (the Oath rework): his three words are his alone.
     "Oath": "varka", "current element": "varka", "Knight": "varka",
@@ -2148,6 +2150,8 @@ _ARM_KEYWORD_RE = {
     # the faces print them ("drained HP" in a sentence is the plain word).
     "Drain": re.compile(r"\bDrain(?:s|ed)?\b"),
     "Repay": re.compile(r"\bRepa(?:y|ys|id)\b"),
+    # The sweep (2026-10-14): Ousia / Pneuma's verb.
+    "Flip": re.compile(r"\bFlip\b"),
     "Summon": re.compile(r"\b[Ss]ummon\b"),
     # The pool to 75 (2026-10-09): Encore!'s "oldest guest".
     "oldest guest": re.compile(r"\boldest guest\b"),

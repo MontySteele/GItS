@@ -134,6 +134,10 @@ public static class KleeMod
                     // build, and inert with the arm off -- every method's
                     // first line is `FurinaStage.LiveFor`.
                     .Concat(Powers.FurinaStageHooks.Subscribe(combatState))
+                    // FURINA, THE SWEEP (2026-10-14): the HP-lost counts,
+                    // the first turn and Stage Directions' next-turn cost,
+                    // for every seat (`FurinaSweep`).
+                    .Concat(Powers.FurinaSweepHooks.Subscribe(combatState))
                     // Track B's human feed: per-fight telemetry from normal
                     // play, in the schema the soak writes. Reads only -- see
                     // the three rules in PlayTelemetry.cs, the first of which
@@ -250,6 +254,9 @@ public static class KleeMod
                     Powers.FurinaCards.TutorPromptText,
                 [Powers.FurinaCards.BowPromptKey] =
                     Powers.FurinaCards.BowPromptText,
+                // FURINA, THE SWEEP (2026-10-14): Stage Directions' pick.
+                [Powers.FurinaCards.DirectionsPromptKey] =
+                    Powers.FurinaCards.DirectionsPromptText,
                 // VARKA (the Oath rework): Change of Guard's grid, on the
                 // same terms.
                 [Powers.VarkaRules.ElementPromptKey] =
@@ -503,6 +510,8 @@ public static class KleeMod
                         "Companion",
                     // VARKA (the Oath rework): his three words.
                     [Cards.ArmKeywordTips.OathKey + ".title"] = "Oath",
+                    // FURINA, THE SWEEP (2026-10-14): Ousia / Pneuma's word.
+                    [Cards.ArmKeywordTips.FlipKey + ".title"] = "Flip",
                     [Cards.ArmKeywordTips.CurrentElementKey + ".title"] =
                         "Current element",
                     [Cards.ArmKeywordTips.KnightKey + ".title"] = "Knight",

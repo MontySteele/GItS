@@ -365,6 +365,14 @@ class Card:
     cost_delta_this_turn: int = 0
     cost_delta_this_combat: int = 0
     free_this_turn: bool = False
+    # FURINA, THE SWEEP (2026-10-14): Stage Directions' "It costs 0 next
+    # turn" (`furina_stage.turn_start` turns it into `free_this_turn`);
+    # Ousia / Pneuma's face (True on Pneuma; a fresh copy each combat
+    # starts on Ousia), the C# `FurinaFlip`; and "Can be played only if"
+    # (`playable_if`, a sheet field read by `combat.card_playable`).
+    free_next_turn: bool = False
+    flipped: bool = False
+    playable_if: Optional[str] = None
     # EB-83, the on-draw hook. `EnergyCost.SetThisCombat` is the base game's
     # ABSOLUTE combat-scoped cost modifier -- the one Slither writes when the
     # card is drawn -- where every field above it is RELATIVE. Kept as its own
@@ -1227,6 +1235,14 @@ class CombatState:
     # of `combat._player_turn`; a fresh combat starts at 0, so turn one counts
     # from the start of combat. C# twin: `HpLossWindow`.
     hp_lost_since_last_turn: int = 0
+    # FURINA, THE SWEEP (2026-10-14). Tearful Monologue's "last turn": the
+    # round before this one (`hp_lost_this_turn` as it stood when the turn
+    # rolled, `refpowers.reset_turn_counters`); Facade's HP lost this
+    # combat; Rainfall Overture's widened Attack in flight. C# twin:
+    # `FurinaSweep`, `RainfallOverturePower`.
+    hp_lost_last_turn: int = 0
+    hp_lost_this_combat: int = 0
+    rainfall_wide_card: Optional["Card"] = None
     player_damage_events: int = 0          # TearAsunder hit-count history
     # Free-play machinery (Havoc / Cascade / HowlFromBeyond). The depth
     # counter backstops the seen_states guard in combat._player_turn, which

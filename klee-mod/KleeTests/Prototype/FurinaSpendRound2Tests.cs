@@ -66,26 +66,6 @@ public class FurinaSpendRound2Tests : IDisposable
     // ---- 1. High Stakes reads a running total ---------------------------------
 
     [Fact]
-    public void High_stakes_says_drained_this_combat_and_keeps_the_live_hover()
-    {
-        Assert.Equal(
-            "Your Attacks deal 1 additional damage for every "
-            + "{PowerAmount:diff()} HP you have [gold]Drained[/gold] this "
-            + "combat.",
-            Face(new ProtoFsHighStakes()));
-        var rows = new HighStakesPower().Localization!;
-        Assert.Equal(
-            "Your Attacks deal 1 additional damage for every "
-            + "[blue]{Amount}[/blue] HP you have [gold]Drained[/gold] this "
-            + "combat.",
-            rows.Single(r => r.Item1 == "description").Item2);
-        Assert.EndsWith(
-            "this combat. Now: [blue]{Bonus}[/blue] additional damage.",
-            rows.Single(r => r.Item1 == "smartDescription").Item2);
-        Assert.DoesNotContain("Repaid", Face(new ProtoFsHighStakes()));
-    }
-
-    [Fact]
     public void The_ledger_counts_every_drain_gross_and_repay_never_lowers_it()
     {
         var kit = StageKit.AtMax(62, 80, 80);            // line 60

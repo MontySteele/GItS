@@ -898,6 +898,8 @@ ARM_KEYWORDS = (
     # past tense: "every 5 HP you have Drained and not Repaid".
     ArmKeyword("Drain", ("Drain", "Drained"), "ArmKeywordTips.ForDrain"),
     ArmKeyword("Repay", ("Repay", "Repaid"), "ArmKeywordTips.ForRepay"),
+    # THE SWEEP (2026-10-14): Ousia / Pneuma turns over.
+    ArmKeyword("Flip", ("Flip",), "ArmKeywordTips.ForFlip"),
     # THE POOL TO 75 (2026-10-09, sec.5: "'Oldest guest' is the one a fourth
     # summon would remove; cards that name it carry a tip saying so"). Two
     # words, `current element`'s shape, so the tip never fires on prose.
@@ -1955,6 +1957,16 @@ PREDICATES_CS = {
     "target_has_pyro": "targetHadPyro",
     "element_changed_this_turn":
         "VarkaOath.ElementChangedThisTurn(Owner.Creature)",
+    # FURINA, THE SWEEP (review/active/furina-sweep-2026-10-14.md sec.3).
+    # Ousia / Pneuma's face, read off the card itself (`FurinaFlip`);
+    # Tearful Monologue's "If you lost HP last turn" (the round before this
+    # one: your last turn and the enemies' turn after it, any HP loss); and
+    # Opening Number's "On your first turn". Both reads are `FurinaSweep`'s,
+    # for any player. Sim twins: `effects._predicate`.
+    "ousia_face": "!FurinaFlip.OnPneuma(this)",
+    "pneuma_face": "FurinaFlip.OnPneuma(this)",
+    "hp_lost_last_turn": "FurinaSweep.LostHpLastTurn(Owner.Creature)",
+    "first_turn_of_combat": "FurinaSweep.FirstTurnOfCombat(Owner.Creature)",
 }
 
 # The if-clause each predicate renders on the card.
@@ -1999,6 +2011,10 @@ PREDICATE_TEXT = {
     "target_has_pyro": "If the enemy already has [gold]Pyro[/gold]",
     "element_changed_this_turn":
         "If your [gold]current element[/gold] changed this turn",
+    "ousia_face": "On Ousia",
+    "pneuma_face": "On Pneuma",
+    "hp_lost_last_turn": "If you lost HP last turn",
+    "first_turn_of_combat": "On your first turn",
 }
 
 _FANFARE_BAR = re.compile(r"^fanfare_at_least_(\d+)$")
@@ -3108,9 +3124,23 @@ FURINA_KINDS = {
     # guest" (one not on stage). Casting Call's `tutor_guest` now carries
     # its floor's draw as `amount` ("If you can't, draw 2 cards").
     "summon_random": "SummonRandom",
+    # THE SWEEP, SECOND SET (review/active/furina-sweep-2026-10-14.md
+    # sec.3): Ousia / Pneuma's turn of the card (`FurinaFlip`), Stage
+    # Directions' hand card to the top at 0 next turn, Facade's Block off the
+    # HP lost this combat (its cap the `amount`), Encore Performance's free
+    # play of the top Discard Pile card, and Verdict of the Oratrice's
+    # execute off her Fanfare (the one aimed kind, `FURINA_AIMED_KINDS`).
+    "flip": "Flip",
+    "stage_directions": "StageDirections",
+    "facade": "Facade",
+    "encore_performance": "EncorePerformance",
+    "verdict": "Verdict",
 }
-FURINA_KIND_AMOUNT = {"final_bow", "gain_fanfare", "tutor_guest"}
-FURINA_FIELDS = {"op", "kind", "amount"}
+FURINA_KIND_AMOUNT = {"final_bow", "gain_fanfare", "tutor_guest", "facade"}
+#: The kinds that read `cardPlay.Target`, and the only ones that say
+#: `target: enemy` (Yae's `YAE_AIMED_KINDS` shape).
+FURINA_AIMED_KINDS = {"verdict"}
+FURINA_FIELDS = {"op", "kind", "amount", "target"}
 #: Alice's Detonator: no field -- the card is Alice's Mine (its own row), and
 #: whether it arrives upgraded is the card's own upgrade (`upgraded_grant`).
 GRANT_ALICES_MINE_EACH_TURN_FIELDS = {"op"}
@@ -3698,6 +3728,27 @@ APPLY_POWERS = {
     # klee-mod/KleeCode/Powers/Prototype/FurinaPool75Powers.cs.
     "fs_leading_lady": ("LeadingLadyPower", None,
         "Your Attacks deal {X} additional damage for each guest on stage."),
+    # THE SWEEP, SECOND SET (review/active/furina-sweep-2026-10-14.md
+    # sec.3). The classes live in
+    # klee-mod/KleeCode/Powers/Prototype/FurinaSweepPowers.cs. Trial by
+    # Water's mark and Plot Twist's sit ON the enemy
+    # (`ENEMY_APPLY_POWERS`).
+    "fs_arkhe_in_balance": ("ArkheInBalancePower", None,
+        "Whenever you play an Attack, gain {X} [gold]Block[/gold]. Whenever "
+        "you play a Skill, deal {X} damage to a random enemy."),
+    "fs_objection": ("ObjectionPower", None,
+        "The next time an enemy's attack makes you lose HP this turn, it "
+        "takes twice that much."),
+    "fs_trial_by_water": ("TrialByWaterPower", None,
+        "Until end of turn, whenever this enemy takes damage, its accuser "
+        "gains {X} [gold]Fanfare[/gold]."),
+    "fs_rainfall_overture": ("RainfallOverturePower", None,
+        "Your next Attack this turn hits ALL enemies."),
+    "fs_crowd_favorite": ("CrowdFavoritePower", None,
+        "At the start of your turn, if your HP is below half, gain {X} "
+        "Energy."),
+    "fs_plot_twist": ("PlotTwistPower", None,
+        "This turn, this enemy's attack hits itself."),
     "fs_full_house": ("FullHousePower", None,
         "Whenever a guest's act deals damage, [gold]Spend[/gold] up to {X}: "
         "it deals that much more."),
@@ -4292,7 +4343,10 @@ ENEMY_APPLY_POWERS = {"weak", "vulnerable",
                       # enemy its Mine went on.
                       "ko_shrapnel",
                       # Varka's co-op five: Windward Flank's, on the enemy.
-                      "vk_windward_flank"}
+                      "vk_windward_flank",
+                      # FURINA, THE SWEEP: Trial by Water's mark and Plot
+                      # Twist's, on the chosen enemy.
+                      "fs_trial_by_water", "fs_plot_twist"}
 
 # Sheet fields apply_power may carry. Anything else encodes a mechanic this
 # generator does not understand -- fail loudly (UNPARSEABLE discipline).
@@ -4772,6 +4826,9 @@ AIMING_OPS = ("damage", "place_bomb", "detonate", "move_bombs",
               # YAE: her aimed kinds (`YAE_AIMED_KINDS`) read
               # `cardPlay.Target`; only they say `target: enemy`.
               "yae",
+              # FURINA, THE SWEEP: Verdict of the Oratrice's kind
+              # (`FURINA_AIMED_KINDS`), the only one that says `target: enemy`.
+              "furina",
               # THE KOKOMI EXPANSION: Salt in the Wound's "if the enemy has
               # Weak" reads `cardPlay.Target`.
               "kokomi",
@@ -4963,6 +5020,10 @@ CARD_FIELDS = {
     # card's own `TryModifyEnergyCostInCombat` over `FurinaStage.FanfareOf`.
     # Sim twin: `combat.card_cost`'s `cost_reduction_per_fanfare`.
     "cost_reduction_per_fanfare",
+    # FURINA, THE SWEEP (2026-10-14): "Can be played only if ..." -- a
+    # predicate (`PREDICATES_CS`) the card is unplayable without (The Show's
+    # Not Over, Plot Twist). Sim twin: `combat.card_playable`.
+    "playable_if",
 }
 
 
@@ -5673,6 +5734,10 @@ def blocked_reason(
             kind = eff.get("kind")
             if kind not in FURINA_KINDS:
                 return f"furina kind {kind!r}"
+            want_target = "enemy" if kind in FURINA_AIMED_KINDS else None
+            if eff.get("target") != want_target:
+                return (f"furina {kind} takes target {want_target!r}, "
+                        f"row gives {eff.get('target')!r}")
             if ("amount" in eff) != (kind in FURINA_KIND_AMOUNT):
                 return f"furina {kind} amount mismatch"
             if "amount" in eff and (not isinstance(eff["amount"], int)
@@ -17140,7 +17205,8 @@ def emit(
     if (card_is_set_off_only(card) or card_needs_a_waiting_plan(card)
             or card_needs_a_plannable_card(card)
             or card_needs_an_exhausted_card(card)
-            or stage_fixed_price(card) is not None):
+            or stage_fixed_price(card) is not None
+            or card.get("playable_if")):
         interfaces += ", IUnplayableReasonCard"
 
     # EB-184: a modal card DECLARES what each of its modes does about aiming,
@@ -18011,6 +18077,33 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             "        base.AddExtraArgsToDescription(description);\n"
             f"{adds}"
             "    }")
+    # FURINA, THE SWEEP (2026-10-14): Ousia / Pneuma, a TWO-FACED card. A
+    # row whose effects turn the card over (`{op: furina, kind: flip}`)
+    # names its face in combat (`FurinaFlip.TitleOf`), takes no target on
+    # its Block face, and hands its face to the description as `Pneuma` (the
+    # base game's description-argument seam). Sim twin: `Card.flipped`.
+    flip_member = ""
+    if any(e.get("op") == "furina" and e.get("kind") == "flip"
+           for e in card["effects"]):
+        if face_args or wide_aim is not None:
+            raise ValueError(
+                f"{card['id']}: a two-faced row cannot also carry an "
+                "in-combat Stage line or a live TargetType")
+        flip_member = (
+            "\n\n    /// <summary>Two faces (`FurinaFlip`): the face's name in"
+            " combat,\n    /// no target on the Pneuma face, and the face as"
+            " the\n    /// description's `Pneuma` argument.</summary>\n"
+            "    public override string Title =>"
+            " FurinaFlip.TitleOf(this, base.Title);\n\n"
+            "    public override TargetType TargetType =>\n"
+            "        FurinaFlip.OnPneuma(this) ? TargetType.Self"
+            " : base.TargetType;\n\n"
+            "    protected override void AddExtraArgsToDescription(\n"
+            "        MegaCrit.Sts2.Core.Localization.LocString description)\n"
+            "    {\n"
+            "        base.AddExtraArgsToDescription(description);\n"
+            '        description.Add("Pneuma", FurinaFlip.OnPneuma(this));\n'
+            "    }")
     per_fanfare = card.get("cost_reduction_per_fanfare")
     if per_fanfare:
         discard_discount_member = (
@@ -18245,6 +18338,31 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         "            ? null\n"
         f'            : "{plan_gate_why}";'
         if plan_gated else "")
+    # FURINA, THE SWEEP (2026-10-14): "Can be played only if ..." on the
+    # row (`playable_if`, a `PREDICATES_CS` read), the same pair: the gate
+    # and the sentence the page prints. Sim twin: `combat.card_playable`.
+    playable_if = card.get("playable_if")
+    playable_gate_member = ""
+    playable_reason_member = ""
+    if playable_if:
+        playable_cs = predicate_cs(playable_if)
+        if playable_cs is None:
+            raise ValueError(
+                f"{card['id']}: playable_if predicate {playable_if!r}")
+        playable_why = {
+            "hp_lost_this_turn": "you have not lost HP this turn",
+            "enemy_intends_attack": "no enemy intends to attack",
+        }.get(playable_if, "its condition is not met")
+        playable_gate_member = (
+            "\n\n    // Furina's sweep (2026-10-14): \"Can be played only"
+            " if\" -- the\n    // row's `playable_if`.\n"
+            "    protected override bool IsPlayable =>\n"
+            f"        {playable_cs};")
+        playable_reason_member = (
+            "\n\n    public string? UnplayableReason =>\n"
+            f"        {playable_cs}\n"
+            "            ? null\n"
+            f'            : "{playable_why}";')
     # R213 E1: the same cost line one meter over, and the mirror
     # of tier0 combat.charge_cost. TOP-LEVEL spends only, the sim's rule --
     # a price at the head of a `choose_one` MODE is that mode's cost line and
@@ -18390,7 +18508,7 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             f"        new[] {{ {flags_cs} }};")
     if sum(bool(x) for x in (spark_price, charge_price, modal_gate_member,
                              bomb_gate_member, plan_gate_member,
-                             stage_gate_member)) > 1:
+                             stage_gate_member, playable_gate_member)) > 1:
         raise ValueError(
             f"{card['id']}: two resource cost lines on one card -- only one "
             "IsPlayable override can be emitted")
@@ -18483,7 +18601,7 @@ public sealed class {cls} : {interfaces}
     {{
         ("title", "{title_cs}"),
         ("description", {desc_expr}),
-    }};{tags_member}{wide_target_member}{discard_discount_member}{stage_bow_member}{transcendence_member}{return_to_hand_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{plan_gate_member}{plan_reason_member}{stage_gate_member}{stage_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}{homework_member}
+    }};{tags_member}{wide_target_member}{flip_member}{discard_discount_member}{stage_bow_member}{transcendence_member}{return_to_hand_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{plan_gate_member}{plan_reason_member}{stage_gate_member}{stage_reason_member}{playable_gate_member}{playable_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}{homework_member}
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

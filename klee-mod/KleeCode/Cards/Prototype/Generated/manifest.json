@@ -9,7 +9,7 @@
     "proto_fs_a_five_century_act",
     "proto_fs_against_the_tide",
     "proto_fs_all_in",
-    "proto_fs_balance_the_books",
+    "proto_fs_arkhe_in_balance",
     "proto_fs_bis",
     "proto_fs_bravura",
     "proto_fs_bring_the_house_down",
@@ -21,10 +21,13 @@
     "proto_fs_crashing_waves",
     "proto_fs_crescendo",
     "proto_fs_critics_darling",
+    "proto_fs_crowd_favorite",
     "proto_fs_curtain_rise",
     "proto_fs_ebb_and_flow",
     "proto_fs_encore",
+    "proto_fs_encore_performance",
     "proto_fs_ensemble_cast",
+    "proto_fs_facade",
     "proto_fs_final_bow",
     "proto_fs_fountain_of_lucine",
     "proto_fs_grand_absolution",
@@ -42,50 +45,47 @@
     "proto_fs_guest_star_sigewinne",
     "proto_fs_guest_star_wriothesley",
     "proto_fs_headliner",
-    "proto_fs_high_stakes",
     "proto_fs_hold_the_stage",
-    "proto_fs_hydro_lance",
     "proto_fs_hymn_of_many_waters",
-    "proto_fs_hymn_of_renewal",
-    "proto_fs_interval_bell",
     "proto_fs_leading_lady",
     "proto_fs_let_the_people_rejoice",
     "proto_fs_mademoiselle_crabaletta",
+    "proto_fs_objection",
+    "proto_fs_opening_number",
     "proto_fs_ousia_pledge",
-    "proto_fs_ousia_surge",
-    "proto_fs_overdraft",
-    "proto_fs_packed_house",
+    "proto_fs_ousia_pneuma",
+    "proto_fs_plot_twist",
     "proto_fs_pneuma_refrain",
-    "proto_fs_pneuma_tides",
     "proto_fs_prima_donna",
     "proto_fs_private_box",
     "proto_fs_quick_cue",
+    "proto_fs_rainfall_overture",
     "proto_fs_regina_of_all_waters",
     "proto_fs_riptide_lunge",
     "proto_fs_rising_tide",
-    "proto_fs_salons_encore",
     "proto_fs_salons_tab",
     "proto_fs_showstopper",
     "proto_fs_singer_of_many_waters",
-    "proto_fs_soloists_solicitation",
-    "proto_fs_soothing_waters",
-    "proto_fs_spirited_aria",
+    "proto_fs_stage_directions",
     "proto_fs_standing_ovation",
-    "proto_fs_standing_ovation_all",
     "proto_fs_standing_room_only",
     "proto_fs_star_turn",
     "proto_fs_surintendante_chevalmarin",
-    "proto_fs_the_deluge",
+    "proto_fs_tearful_monologue",
     "proto_fs_the_full_house",
     "proto_fs_the_leading_lady",
     "proto_fs_the_masquerade",
     "proto_fs_the_show_must_go_on",
+    "proto_fs_the_shows_not_over",
     "proto_fs_thunderous_applause",
     "proto_fs_tidal_flourish",
+    "proto_fs_trial_by_water",
     "proto_fs_tutti",
     "proto_fs_undercurrent",
+    "proto_fs_understudys_debut",
     "proto_fs_universal_revelry",
     "proto_fs_velvet_curtain",
+    "proto_fs_verdict_of_the_oratrice",
     "proto_kk_all_streams_flow",
     "proto_kk_ambush",
     "proto_kk_at_waters_edge",
@@ -465,7 +465,7 @@
     "proto_fs_a_five_century_act": "furina",
     "proto_fs_against_the_tide": "furina",
     "proto_fs_all_in": "furina",
-    "proto_fs_balance_the_books": "furina",
+    "proto_fs_arkhe_in_balance": "furina",
     "proto_fs_bis": "furina",
     "proto_fs_bravura": "furina",
     "proto_fs_bring_the_house_down": "furina",
@@ -477,10 +477,13 @@
     "proto_fs_crashing_waves": "furina",
     "proto_fs_crescendo": "furina",
     "proto_fs_critics_darling": "furina",
+    "proto_fs_crowd_favorite": "furina",
     "proto_fs_curtain_rise": "furina",
     "proto_fs_ebb_and_flow": "furina",
     "proto_fs_encore": "furina",
+    "proto_fs_encore_performance": "furina",
     "proto_fs_ensemble_cast": "furina",
+    "proto_fs_facade": "furina",
     "proto_fs_final_bow": "furina",
     "proto_fs_fountain_of_lucine": "furina",
     "proto_fs_grand_absolution": "furina",
@@ -498,50 +501,47 @@
     "proto_fs_guest_star_sigewinne": "furina",
     "proto_fs_guest_star_wriothesley": "furina",
     "proto_fs_headliner": "furina",
-    "proto_fs_high_stakes": "furina",
     "proto_fs_hold_the_stage": "furina",
-    "proto_fs_hydro_lance": "furina",
     "proto_fs_hymn_of_many_waters": "furina",
-    "proto_fs_hymn_of_renewal": "furina",
-    "proto_fs_interval_bell": "furina",
     "proto_fs_leading_lady": "furina",
     "proto_fs_let_the_people_rejoice": "furina",
     "proto_fs_mademoiselle_crabaletta": "furina",
+    "proto_fs_objection": "furina",
+    "proto_fs_opening_number": "furina",
     "proto_fs_ousia_pledge": "furina",
-    "proto_fs_ousia_surge": "furina",
-    "proto_fs_overdraft": "furina",
-    "proto_fs_packed_house": "furina",
+    "proto_fs_ousia_pneuma": "furina",
+    "proto_fs_plot_twist": "furina",
     "proto_fs_pneuma_refrain": "furina",
-    "proto_fs_pneuma_tides": "furina",
     "proto_fs_prima_donna": "furina",
     "proto_fs_private_box": "furina",
     "proto_fs_quick_cue": "furina",
+    "proto_fs_rainfall_overture": "furina",
     "proto_fs_regina_of_all_waters": "furina",
     "proto_fs_riptide_lunge": "furina",
     "proto_fs_rising_tide": "furina",
-    "proto_fs_salons_encore": "furina",
     "proto_fs_salons_tab": "furina",
     "proto_fs_showstopper": "furina",
     "proto_fs_singer_of_many_waters": "furina",
-    "proto_fs_soloists_solicitation": "furina",
-    "proto_fs_soothing_waters": "furina",
-    "proto_fs_spirited_aria": "furina",
+    "proto_fs_stage_directions": "furina",
     "proto_fs_standing_ovation": "furina",
-    "proto_fs_standing_ovation_all": "furina",
     "proto_fs_standing_room_only": "furina",
     "proto_fs_star_turn": "furina",
     "proto_fs_surintendante_chevalmarin": "furina",
-    "proto_fs_the_deluge": "furina",
+    "proto_fs_tearful_monologue": "furina",
     "proto_fs_the_full_house": "furina",
     "proto_fs_the_leading_lady": "furina",
     "proto_fs_the_masquerade": "furina",
     "proto_fs_the_show_must_go_on": "furina",
+    "proto_fs_the_shows_not_over": "furina",
     "proto_fs_thunderous_applause": "furina",
     "proto_fs_tidal_flourish": "furina",
+    "proto_fs_trial_by_water": "furina",
     "proto_fs_tutti": "furina",
     "proto_fs_undercurrent": "furina",
+    "proto_fs_understudys_debut": "furina",
     "proto_fs_universal_revelry": "furina",
     "proto_fs_velvet_curtain": "furina",
+    "proto_fs_verdict_of_the_oratrice": "furina",
     "proto_kk_all_streams_flow": "kokomi",
     "proto_kk_ambush": "kokomi",
     "proto_kk_at_waters_edge": "kokomi",
@@ -930,10 +930,6 @@
       "ProtoFsCurtainRiseModeA",
       "ProtoFsCurtainRiseModeB"
     ],
-    "proto_fs_interval_bell": [
-      "ProtoFsIntervalBellModeA",
-      "ProtoFsIntervalBellModeB"
-    ],
     "proto_fs_leading_lady": [
       "ProtoFsLeadingLadyModeA",
       "ProtoFsLeadingLadyModeB"
@@ -966,8 +962,8 @@
     "proto_fs_all_in": {
       "stage_drain": -2
     },
-    "proto_fs_balance_the_books": {
-      "stage_repay": 2
+    "proto_fs_arkhe_in_balance": {
+      "power_amount": 1
     },
     "proto_fs_bis": {
       "innate": true
@@ -1008,6 +1004,9 @@
     "proto_fs_critics_darling": {
       "cost": -1
     },
+    "proto_fs_crowd_favorite": {
+      "innate": true
+    },
     "proto_fs_curtain_rise": {
       "conditional_damage": 3,
       "conditional_then_damage": 1
@@ -1019,8 +1018,14 @@
     "proto_fs_encore": {
       "retain": true
     },
+    "proto_fs_encore_performance": {
+      "cost": -1
+    },
     "proto_fs_ensemble_cast": {
       "cost": -1
+    },
+    "proto_fs_facade": {
+      "furina_amount": 4
     },
     "proto_fs_final_bow": {
       "furina_amount": 1
@@ -1073,24 +1078,12 @@
     "proto_fs_headliner": {
       "formula_base": 3
     },
-    "proto_fs_high_stakes": {
-      "power_amount": -1
-    },
     "proto_fs_hold_the_stage": {
       "formula_base": 2
-    },
-    "proto_fs_hydro_lance": {
-      "formula_base": 4
     },
     "proto_fs_hymn_of_many_waters": {
       "block": 2,
       "stage_repay": 1
-    },
-    "proto_fs_hymn_of_renewal": {
-      "cost": -1
-    },
-    "proto_fs_interval_bell": {
-      "stage_spend": -1
     },
     "proto_fs_leading_lady": {
       "conditional_block": 2,
@@ -1102,23 +1095,24 @@
     "proto_fs_mademoiselle_crabaletta": {
       "damage": 6
     },
+    "proto_fs_objection": {
+      "block": 3
+    },
+    "proto_fs_opening_number": {
+      "conditional_damage": 3
+    },
     "proto_fs_ousia_pledge": {
       "draw": 1
     },
-    "proto_fs_ousia_surge": {
-      "innate": true
+    "proto_fs_ousia_pneuma": {
+      "conditional_damage": 3,
+      "conditional_block": 3
     },
-    "proto_fs_overdraft": {
-      "stage_drain": -1
-    },
-    "proto_fs_packed_house": {
-      "formula_base": 3
+    "proto_fs_plot_twist": {
+      "cost": -1
     },
     "proto_fs_pneuma_refrain": {
       "stage_repay": 2
-    },
-    "proto_fs_pneuma_tides": {
-      "power_amount": 1
     },
     "proto_fs_prima_donna": {
       "cost": -1
@@ -1130,6 +1124,9 @@
     "proto_fs_quick_cue": {
       "damage": 3
     },
+    "proto_fs_rainfall_overture": {
+      "cost": -1
+    },
     "proto_fs_regina_of_all_waters": {
       "cost": -1
     },
@@ -1138,9 +1135,6 @@
     },
     "proto_fs_rising_tide": {
       "formula_per": 1
-    },
-    "proto_fs_salons_encore": {
-      "power_amount": 1
     },
     "proto_fs_salons_tab": {
       "mode_draw": [
@@ -1154,20 +1148,11 @@
     "proto_fs_singer_of_many_waters": {
       "cost": -1
     },
-    "proto_fs_soloists_solicitation": {
-      "damage": 3
-    },
-    "proto_fs_soothing_waters": {
-      "stage_repay": 1
-    },
-    "proto_fs_spirited_aria": {
-      "formula_base": 3
+    "proto_fs_stage_directions": {
+      "block": 3
     },
     "proto_fs_standing_ovation": {
       "block": 2,
-      "retain": true
-    },
-    "proto_fs_standing_ovation_all": {
       "retain": true
     },
     "proto_fs_standing_room_only": {
@@ -1180,8 +1165,8 @@
       "conditional_damage": 2,
       "conditional_then_damage": 1
     },
-    "proto_fs_the_deluge": {
-      "cost": -1
+    "proto_fs_tearful_monologue": {
+      "block": 3
     },
     "proto_fs_the_full_house": {
       "power_amount": 2
@@ -1195,11 +1180,17 @@
     "proto_fs_the_show_must_go_on": {
       "cost": -1
     },
+    "proto_fs_the_shows_not_over": {
+      "energy": 1
+    },
     "proto_fs_thunderous_applause": {
       "power_amount": 1
     },
     "proto_fs_tidal_flourish": {
       "formula_base": 3
+    },
+    "proto_fs_trial_by_water": {
+      "power_amount": 1
     },
     "proto_fs_tutti": {
       "cost": -1
@@ -1207,12 +1198,19 @@
     "proto_fs_undercurrent": {
       "formula_base": 2
     },
+    "proto_fs_understudys_debut": {
+      "conditional_damage": 2,
+      "conditional_block": 2
+    },
     "proto_fs_universal_revelry": {
       "cost": -1
     },
     "proto_fs_velvet_curtain": {
       "block": 3,
       "furina_amount": 1
+    },
+    "proto_fs_verdict_of_the_oratrice": {
+      "cost": -1
     },
     "proto_kk_all_streams_flow": {
       "formula_base": 2

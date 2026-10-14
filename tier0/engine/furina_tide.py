@@ -1067,6 +1067,7 @@ def drain(state, n: int) -> bool:
     f.ledger["drained_past"] = f.ledger.get("drained_past", 0) + (n - above)
     f.ledger["drains"] += 1
     state.hp_lost_this_turn += n
+    state.hp_lost_this_combat += n       # Facade (the sweep, 2026-10-14)
     state.emit("ftd_drain", amount=n, hp=p.hp, drained=f.drained)
     gain(state, n, "drain")
     _loop_readers(state, n)

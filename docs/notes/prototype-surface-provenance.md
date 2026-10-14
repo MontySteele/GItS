@@ -8487,6 +8487,73 @@ Pins: `tier0/tests/test_kokomi_pool_overhaul_2026_10_13.py`,
 `klee-mod/KleeTests/Prototype/KokomiPoolOverhaulTests.cs`. Untested in game
 until a deploy.
 
+## Furina: the sweep, 2026-10-14
+
+`review/active/furina-sweep-2026-10-14.md`, sec.2 and sec.3, built on the
+paper's defaults (picks 1 (a), 2 (a), 3 (a)) for [USER]'s next play session.
+[USER], after the 2026-10-14 run: "Overall, very fun! I definitely like
+Furina's current design!" and "a cleanup / dedupe pass on the cards to make
+space to add a wider variety of non guest star effects that aren't just a
+combinatorial verb salad of 'spend / drain / repay' + 'deal x damage' / deal x
+damage to all.' It's not so much that any one card was an offender as they all
+generically blurred together."
+
+**Fifteen cut** (6 Common, 7 Uncommon, 2 Rare): Soloist's Solicitation
+(`proto_fs_soloists_solicitation`), Spirited Aria, Standing Ovation
+(`proto_fs_standing_ovation_all`), Hydro Lance, Overdraft, Packed House,
+Interval Bell, Soothing Waters, Balance the Books, Salon's Encore, Ousia
+Surge, High Stakes, Pneuma Tides, The Deluge, Hymn of Renewal. Their history
+above stays as the record. The five cut Powers' classes (`SalonsEncorePower`,
+`OusiaSurgePower`, `HighStakesPower`, `PneumaTidesPower`,
+`HymnOfRenewalPower`) and their sim readers stay in the code, applied by no
+row.
+
+**Fifteen new, the second set** (6 / 7 / 2; sec.3 as revised and ruled
+2026-10-14). [USER] on the first set: "most of them are duplicates of another
+character's. Can we come up with distinct ideas for Furina, instead?" The
+first set (Rain of Tears ... Stand-In) left with its rows, its `furina` kinds
+(`upgrade_in_hand` ... `copy_in_hand`), the `furina_upgraded` key,
+`retain_hand` and Silence in the Court!'s power; its Stand-In loop note goes
+with it. The second set: Ousia / Pneuma, Objection!, Tearful Monologue,
+Stage Directions, Opening Number, Facade; Trial by Water, Rainfall Overture,
+Encore Performance, Arkhe in Balance, Crowd Favorite, The Show's Not Over,
+Understudy's Debut; Verdict of the Oratrice, Plot Twist. The pool stays 78 at
+23 / 35 / 20, 17 Powers.
+
+**How they are built.** Five new `furina` kinds (`FurinaCards`; sim
+`furina_stage._sweep_kind`): `flip` (Ousia / Pneuma; the face lives beside
+the card instance, `FurinaFlip`, so each combat's clone starts on Ousia),
+`stage_directions`, `facade` (its cap the `FsAmount`), `encore_performance`
+(Havoc's body off the Discard Pile) and `verdict` (the one aimed kind). Six
+Powers in `Powers/Prototype/FurinaSweepPowers.cs`: Arkhe in Balance (the
+first set's Pneuma and Ousia, renamed), Objection! (Flame Barrier's window),
+Trial by Water and Plot Twist (on the enemy), Rainfall Overture, Crowd
+Favorite. Two Harmony seams: `AttackCommand.Targeting` (a widened Attack's
+single-target hit aims at every enemy) and `AttackCommand.FromMonster` (a
+marked enemy's attack aims at itself). New predicates `ousia_face`,
+`pneuma_face`, `hp_lost_last_turn`, `first_turn_of_combat`; a new card field
+`playable_if`; the keyword `Flip`.
+
+**Readings.**
+
+- Ousia / Pneuma shows the face it is on in combat (title and text); off the
+  board it prints both faces. Built as two one-armed conditionals and a
+  flip, so both numbers are live vars.
+- Tearful Monologue's "last turn" is the round before this one: her last
+  turn and the enemies' turn after it, any HP loss (a Drain included).
+- Text to the conventions lint: Opening Number and Understudy's Debut say
+  "deal N additional damage" (paper: "N more"); Stage Directions says "Next
+  turn, it costs 0." (paper: "It costs 0 next turn."); Verdict says
+  "Otherwise, deal". The cost lasts through her next turn or until played
+  (the base game's "this turn").
+- Verdict executes with `CreatureCmd.Kill`, Doom's call, so it can execute a
+  boss; its damage is a Skill's card damage (Strength counts).
+- Plot Twist is playable only while some enemy intends to attack; the game
+  cannot restrict which enemy is chosen, so a non-attacker chosen wastes it.
+- The Show's Not Over keeps Exhaust when upgraded (Gain 2 [3] Energy; design
+  call 2026-10-14): the paper's no-Exhaust upgrade made 13 thin-deck loops
+  in the probe.
+
 ## Kokomi review r5 A-list, 2026-10-14
 
 Built without a pick from `kokomi-review-r5-2026-10-14.md` section A (five

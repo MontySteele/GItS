@@ -415,7 +415,10 @@ public class ArmKeywordTipTests
         // Power.
         // 51 with Yae Miko (2026-10-13): `ForEdit`, her second word (pick
         // 6 (a); `ForSakura` already stood and now prints her tip on hers).
-        Assert.Equal(51, attaches.Count);
+        // 52 with the Furina sweep (2026-10-14): `ForFlip`, Ousia / Pneuma's
+        // word.
+        Assert.Equal(52, attaches.Count);
+        Assert.Contains(attaches, m => m.Name == "ForFlip");
         Assert.Contains(attaches, m => m.Name == "ForEdit");
         Assert.Contains(attaches, m => m.Name == "ForBigBaddaBoomTotal");
         Assert.Contains(attaches, m => m.Name == "ForBoomBadgeTurn");

@@ -6532,6 +6532,9 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # The pool to 75 (2026-10-09): the guest rule's words.
         "Repay": ["Regain that much drained HP, never more than you ",
                   "drained. A ", " counts the HP it returns."],
+        # The Furina sweep (2026-10-14): Ousia / Pneuma's word.
+        "Flip": ["Turn this card to its other face; it starts each combat "
+                 "on Ousia."],
         "Summon": ["A guest joins at the back. On a full stage, the oldest "
                    "guest ", "acts once and leaves; its card goes to your "],
         "oldest guest": ["The guest on stage longest: the one a fourth summon "

@@ -2,9 +2,7 @@
 Salon's Tab slice (2026-10-05).
 
 The 2026-10-04 loop audit fixed Interval Bell's Spend mode to give its Energy
-NEXT turn. The probe must still see what that fix closed with the fix taken
-out (`pre_fix=True`): Interval Bell, Pneuma Refrain and Soloist's
-Solicitation pay for each other when Bell's Energy comes at once.
+NEXT turn; the sweep (2026-10-14) cut the Bell, so no pin on that fix is left.
 
 The post-fix sweep finds no productive loop. Until 2026-10-05 it found one
 per guest: an upgraded Guest Star (cost 0) cycled by two Salon's Tab+ (then
@@ -24,35 +22,9 @@ from tier0.engine import combat
 from tier0.engine import furina_stage as FS
 from tier0.harness import furina_loop_probe as P
 
-#: The loop the Bell fix closed, as the current pool spells it.
-PRE_FIX_LOOP = ("proto_fs_interval_bell", "proto_fs_pneuma_refrain",
-                "proto_fs_soloists_solicitation")
-
-
-def _try(combo, pre_fix, power=None):
-    return P.try_combo(P.variants(pre_fix), tuple(sorted(combo)), power)
-
-
-def test_pre_fix_bell_pneuma_and_solicitation_loop():
-    hit = _try(PRE_FIX_LOOP, pre_fix=True)
-    assert hit is not None and hit.productive
-    assert hit.growth["fanfare"] > 0
-
-
-def test_with_the_fix_bell_pneuma_and_solicitation_do_not_loop():
-    hit = _try(PRE_FIX_LOOP, pre_fix=False)
-    assert hit is None or not hit.productive
-
-
-def test_interval_bells_energy_is_owed_not_paid():
-    st = P._state((), {}, 0, take=True)
-    pool = P.variants(False)
-    st.player.hand = [copy.deepcopy(pool["proto_fs_interval_bell+"])]
-    st.player.discard_pile = [copy.deepcopy(pool["proto_fs_soloists_solicitation"])]
-    combat.play_card(st, st.player.hand[0])
-    assert st.player.energy == P.START_ENERGY
-    assert st.player.ftd.energy_next == 1
-    assert st.player.ftd.fanfare == P.START_FANFARE - 2
+#: The sweep (2026-10-14) cut Interval Bell, Soloist's Solicitation,
+#: Soothing Waters and Overdraft, and with them the pins on the Bell fix and
+#: on the pool to 75's Overdraft finding: no card is left to show either.
 
 
 def test_the_body_is_real_so_her_hp_bounds_a_drain_loop():
@@ -88,23 +60,14 @@ def test_the_tab_costs_energy_so_a_guest_and_two_tabs_stop():
             assert run.plays < 600, (g, order)
 
 
-@pytest.mark.parametrize("combo,pre_fix", [
-    (PRE_FIX_LOOP, True),
-    (("proto_fs_interval_bell",), False)])
-def test_the_screen_passes_every_loop_found(combo, pre_fix):
-    pool = P.variants(pre_fix)
-    assert P.could_cycle([P.profile(pool[c]) for c in combo], {})
-
-
 #: Inert cycles: 0-cost card draw that refills the hand and grows nothing.
 #: The pool to 75 adds Soothing Waters (0: Repay 2, draw 1) to them. The
 #: Repay floor as first built gave it Vigor on an empty Repay, which made it
 #: grow without end; the main session's ruling (2026-10-09) took its floor
 #: off, and it is inert again.
-#: Tutti!+ (0: each guest acts, draw 1) alone cycles inert too.
-KNOWN_INERT = {("proto_fs_interval_bell",), ("proto_fs_interval_bell+",),
-               ("proto_fs_soothing_waters",), ("proto_fs_soothing_waters+",),
-               ("proto_fs_tutti+",)}
+#: Tutti!+ (0: each guest acts, draw 1) alone cycles inert too. The sweep
+#: (2026-10-14) cut Interval Bell and Soothing Waters.
+KNOWN_INERT = {("proto_fs_tutti+",)}
 
 #: ACCEPTED LOOPS: productive cycles the sweep finds and [USER] has accepted,
 #: by base card set, each with its reason. A productive cycle not listed here
@@ -120,10 +83,15 @@ KNOWN_INERT = {("proto_fs_interval_bell",), ("proto_fs_interval_bell+",),
 _TUTTI_THIN_DECK = ("[USER], 2026-10-11: a theoretical loop in a thin deck "
                     "is not a problem unless trivial to assemble; this one "
                     "needs a deck thinned to Tutti!+ and the draw card")
-ACCEPTED_LOOPS = {
-    frozenset({"proto_fs_tutti", "proto_fs_interval_bell"}): _TUTTI_THIN_DECK,
-    frozenset({"proto_fs_tutti", "proto_fs_soothing_waters"}): _TUTTI_THIN_DECK,
-}
+#: THE SWEEP, SECOND SET (2026-10-14): The Show's Not Over+ without Exhaust
+#: made 13 thin-deck loops with an HP-losing draw card; the design call kept
+#: its Exhaust (the upgrade is 3 Energy instead), and none is left.
+ACCEPTED_LOOPS: dict = {}
+
+#: CLOSED LOOPS: found, then fixed by a design call, each with its reason.
+#: The probe must no longer find them.
+#: (Stand-In's, 2026-10-14, left with the first set's cards.)
+CLOSED_LOOPS: dict = {}
 
 #: THE POOL TO 75 (2026-10-09). The ruled batch, built as written, gave the
 #: sweep 81 productive cycles over 16 thin-deck card sets, every set but one
@@ -167,26 +135,3 @@ def test_no_named_combination_is_a_productive_loop(name):
 #: Charlotte's draw on stage cycle in a deck thinned to them; the same
 #: thin-deck loop as ACCEPTED_LOOPS, under the same ruling.
 ACCEPTED_NAMED = {"tutti_showstopper_house": _TUTTI_THIN_DECK}
-
-
-def test_soothing_waters_alone_grows_nothing_with_nothing_drained():
-    """The ruling (2026-10-09): no Repay floor on Soothing Waters, so its
-    thin-deck cycle is inert again."""
-    pool = P.variants(False)
-    cards = [pool["proto_fs_soothing_waters"]] * 2
-    run = P.play_out(cards, ["proto_fs_soothing_waters"], take=True,
-                     plays=60)
-    assert not run.productive
-
-
-def test_overdraft_and_pneuma_refrain_no_longer_cycle():
-    """The smallest of the pool to 75's findings before the 2026-10-09
-    ruling: Overdraft (Drain 4, then +1 Energy NOW) and two Pneuma Refrains
-    (Repay 5, draw 2) looped with her HP flat. With the Energy owed next
-    turn the turn's Energy runs out."""
-    pool = P.variants(False)
-    cards = [pool["proto_fs_overdraft"], pool["proto_fs_pneuma_refrain"],
-             pool["proto_fs_pneuma_refrain"]]
-    run = P.play_out(cards, ["proto_fs_overdraft", "proto_fs_pneuma_refrain"],
-                     take=True, plays=200)
-    assert not run.productive and run.plays < 200

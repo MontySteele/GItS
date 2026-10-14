@@ -2752,15 +2752,6 @@
    effects: [{op: stage_drain, amount: 5},
              {op: damage, amount: 20, target: enemy}]}
 
-- {id: proto_fs_soloists_solicitation, name: "Soloist's Solicitation",
-   upgrade: {damage: +3},
-   character: furina, authored_by: [claude],
-   register: salon, cost: 0, type: attack, rarity: common,
-   art_of: soloists_solicitation,
-   description: "[gold]Drain[/gold] 2. Deal 6 damage.",
-   effects: [{op: stage_drain, amount: 2},
-             {op: damage, amount: 6, target: enemy}]}
-
 - {id: proto_fs_surintendante_chevalmarin, name: "Surintendante Chevalmarin",
    upgrade: {conditional_damage: +2, conditional_then_damage: +1},
    character: furina, authored_by: [claude],
@@ -2848,18 +2839,6 @@
               amount_formula: {base: 5, per: 1, count: stage_spent},
               target: all_enemies, applies_element: true}]}
 
-- {id: proto_fs_spirited_aria, name: "Spirited Aria", character: furina,
-   upgrade: {formula_base: +3},
-   authored_by: [claude],
-   register: salon, cost: 1, type: attack, rarity: common,
-   description: "Deal {CalculationBase:diff()} damage. [gold]Spend[/gold] up to 12: deal 1 more for each. Draw 1 for every 4 spent.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
-   effects: [{op: stage_spend_up_to, amount: 12},
-             {op: damage,
-              amount_formula: {base: 8, per: 1, count: stage_spent},
-              target: enemy},
-             {op: draw,
-              amount_formula: {base: 0, per: 1, count: stage_spent_fours}}]}
-
 - {id: proto_fs_quick_cue, name: "Quick Flourish", character: furina,
    upgrade: {damage: +3},
    authored_by: [claude],
@@ -2867,34 +2846,6 @@
    description: "[gold]Spend[/gold] 4. Deal 11 [gold]Hydro[/gold] damage.",
    effects: [{op: stage_spend, amount: 4},
              {op: damage, amount: 11, target: enemy, applies_element: true}]}
-
-# 2026-10-11 Common again, Spend half (Furina round 3 record, pick 1).
-- {id: proto_fs_standing_ovation_all, name: "Standing Ovation", character: furina,
-   upgrade: {retain: true},
-   authored_by: [claude],
-   art_of: standing_ovation,
-   register: salon, cost: 1, type: attack, rarity: common,
-   description: "[gold]Spend[/gold] half your [gold]Fanfare[/gold]. Deal that much damage to ALL enemies.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
-   effects: [{op: stage_spend_half},
-             {op: damage,
-              amount_formula: {base: 0, per: 1, count: stage_spent},
-              target: all_enemies}]}
-
-# Interval Bell: the v2 text after #900, unchanged (sec.16); its Spend mode's
-# Energy comes next turn (the loop fix, 2026-10-04). Uncommon since the
-# 2026-10-09 playtest trim (provenance note, that date).
-- {id: proto_fs_interval_bell, name: "Interval Bell", character: furina,
-   upgrade: {stage_spend: -1},
-   authored_by: [claude],
-   register: salon, cost: 0, type: skill, rarity: uncommon,
-   description: "Draw 1 card. [gold]Spend[/gold] {IfUpgraded:show:2|3}: also, next turn, gain {energyPrefix:energyIcons(1)}.",
-   effects: [{op: choose_one, modes: [
-              {label: "Draw 1 card",
-               effects: [{op: draw, amount: 1}]},
-              {label: "[gold]Spend[/gold] {IfUpgraded:show:2|3}: draw 1 card. Next turn, gain {energyPrefix:energyIcons(1)}",
-               effects: [{op: stage_spend, amount: 3},
-                         {op: draw, amount: 1},
-                         {op: stage_energy_next, amount: 1}]}]}]}
 
 # Bravura: one Hydro hit of 7 [9] for every 3 spent (the diversity pass,
 # review/ruled/furina-diversity-pass-2026-10-11.md sec.2, ruled 2026-10-11;
@@ -2909,14 +2860,6 @@
               times_formula: {base: 0, per: 1, count: stage_spent_threes}}]}
 
 # --- THE THREE POWERS (Uncommon) ---
-
-- {id: proto_fs_salons_encore, name: "Salon's Encore", character: furina,
-   upgrade: {power_amount: +1},
-   authored_by: [claude],
-   register: salon, cost: 1, type: power, rarity: uncommon,
-   description: "Whenever you [gold]Drain[/gold], deal 3 damage to ALL enemies.",
-   effects: [{op: apply_power, power: fs_salons_encore, amount: 3,
-              target: self}]}
 
 - {id: proto_fs_thunderous_applause, name: "Thunderous Applause", character: furina,
    upgrade: {power_amount: +1},
@@ -3000,14 +2943,6 @@
    effects: [{op: stage_drain, amount: 6},
              {op: damage, amount: 16, target: all_enemies,
               applies_element: true}]}
-
-- {id: proto_fs_ousia_surge, name: "Ousia Surge", character: furina,
-   upgrade: {innate: true},
-   authored_by: [claude],
-   register: salon, cost: 1, type: power, rarity: uncommon,
-   description: "The first time each turn you [gold]Drain[/gold], draw 1 card.",
-   effects: [{op: apply_power, power: fs_ousia_surge, amount: 1,
-              target: self}]}
 
 - {id: proto_fs_guest_star_lyney, name: "Guest Star: Lyney", character: furina,
    upgrade: {guest_upgraded: true},
@@ -3278,14 +3213,6 @@
               amount_formula: {base: 5, per: 1, count: stage_drains},
               target: enemy}]}
 
-- {id: proto_fs_overdraft, name: "Overdraft", character: furina,
-   upgrade: {stage_drain: -1},
-   authored_by: [claude],
-   register: salon, cost: 0, type: skill, rarity: common,
-   description: "[gold]Drain[/gold] {IfUpgraded:show:3|4}. Next turn, gain {energyPrefix:energyIcons(1)}.",
-   effects: [{op: stage_drain, amount: 4},
-             {op: stage_energy_next, amount: 1}]}
-
 - {id: proto_fs_ousia_pledge, name: "Ousia Pledge", character: furina,
    upgrade: {draw: +1},
    authored_by: [claude],
@@ -3315,16 +3242,6 @@
              {op: conditional, if: killed_target,
               then: [{op: stage_repay, amount: 6}]}]}
 
-# High Stakes reads the HP drained this combat, gross (the Spend round 2,
-# 2026-10-10: the net count sat near 0 under Salon Solitaire's Repay).
-- {id: proto_fs_high_stakes, name: "High Stakes", character: furina,
-   upgrade: {power_amount: -1},
-   authored_by: [claude],
-   register: salon, cost: 1, type: power, rarity: uncommon,
-   description: "Your Attacks deal 1 additional damage for every 4 HP you have [gold]Drained[/gold] this combat.",
-   effects: [{op: apply_power, power: fs_high_stakes, amount: 4,
-              target: self}]}
-
 - {id: proto_fs_regina_of_all_waters, name: "Regina of All Waters", character: furina,
    upgrade: {cost: -1},
    authored_by: [claude],
@@ -3332,14 +3249,6 @@
    description: "At the start of your turn, [gold]Drain[/gold] 3, never past your line. If you do, gain 1 [gold]Strength[/gold].",
    effects: [{op: apply_power, power: fs_regina_of_all_waters, amount: 1,
               target: self}]}
-
-- {id: proto_fs_the_deluge, name: "The Deluge", character: furina,
-   upgrade: {cost: -1},
-   authored_by: [claude],
-   register: salon, cost: 2, type: attack, rarity: rare, exhaust: true,
-   description: "[gold]Drain[/gold] 8. Deal 24 damage to ALL enemies.",
-   effects: [{op: stage_drain, amount: 8},
-             {op: damage, amount: 24, target: all_enemies}]}
 
 # All In: costs 0 (the Review section).
 - {id: proto_fs_all_in, name: "All In", character: furina,
@@ -3352,15 +3261,6 @@
 
 # Pneuma, Repay (10): 3 Common, 5 Uncommon, 2 Rare.
 
-# Soothing Waters: Uncommon (taken on [USER]'s read).
-- {id: proto_fs_soothing_waters, name: "Soothing Waters", character: furina,
-   upgrade: {stage_repay: +1},
-   authored_by: [claude],
-   register: salon, cost: 0, type: skill, rarity: uncommon,
-   description: "[gold]Repay[/gold] 2. Draw 1 card.",
-   effects: [{op: stage_repay, amount: 2},
-             {op: draw, amount: 1}]}
-
 - {id: proto_fs_clean_slate, name: "Clean Slate", character: furina,
    upgrade: {damage: +3},
    authored_by: [claude],
@@ -3370,16 +3270,6 @@
              {op: stage_repay, amount: 3},
              {op: conditional, if: stage_none_drained,
               then: [{op: draw, amount: 1}]}]}
-
-- {id: proto_fs_hydro_lance, name: "Hydro Lance", character: furina,
-   upgrade: {formula_base: +4},
-   authored_by: [claude],
-   register: salon, cost: 2, type: attack, rarity: common,
-   description: "[gold]Repay[/gold] 4. Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus 1 for any HP it could not [gold]Repay[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
-   effects: [{op: stage_repay, amount: 4},
-             {op: damage,
-              amount_formula: {base: 14, per: 1, count: stage_repay_left},
-              target: enemy, applies_element: true}]}
 
 - {id: proto_fs_cleansing_torrent, name: "Cleansing Torrent", character: furina,
    upgrade: {formula_base: +4},
@@ -3391,19 +3281,6 @@
                amount_formula: {base: 10, per: 1, count: stage_repay_left},
                target: all_enemies, applies_element: true}]}
 
-# Balance the Books: all your drained HP, read before its own Repay. (Was
-# half, rounded down; the playtest of 2026-10-11, [USER]: "Balance the Books
-# is mostly a brick.")
-- {id: proto_fs_balance_the_books, name: "Balance the Books", character: furina,
-   upgrade: {stage_repay: +2},
-   authored_by: [claude],
-   register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Deal damage to ALL enemies equal to your drained HP. [gold]Repay[/gold] 4.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
-   effects: [{op: damage,
-              amount_formula: {base: 0, per: 1, count: stage_drained},
-              target: all_enemies, applies_element: false},
-             {op: stage_repay, amount: 4}]}
-
 - {id: proto_fs_rising_tide, name: "Rising Tide", character: furina,
    upgrade: {formula_per: +1},
    authored_by: [claude],
@@ -3412,25 +3289,6 @@
    effects: [{op: damage,
               amount_formula: {base: 6, per: 3, count: stage_repays_turn},
               target: enemy}]}
-
-- {id: proto_fs_pneuma_tides, name: "Pneuma Tides", character: furina,
-   upgrade: {power_amount: +1},
-   authored_by: [claude],
-   register: salon, cost: 1, type: power, rarity: uncommon,
-   description: "At the start of your turn, [gold]Repay[/gold] 2. Gain 1 [gold]Vigor[/gold] for any HP it could not [gold]Repay[/gold].",
-   effects: [{op: apply_power, power: fs_pneuma_tides, amount: 2,
-              target: self}]}
-
-# Hymn of Renewal: it counts the HP a Repay actually returned, not the number
-# printed on the card (the paper's Review section). That reading is on the
-# power's hover and the Repay tip, not on this face.
-- {id: proto_fs_hymn_of_renewal, name: "Hymn of Renewal", character: furina,
-   upgrade: {cost: -1},
-   authored_by: [claude],
-   register: salon, cost: 2, type: power, rarity: rare,
-   description: "Whenever you [gold]Repay[/gold] 4 or more HP at once, gain 1 [gold]Strength[/gold].",
-   effects: [{op: apply_power, power: fs_hymn_of_renewal, amount: 1,
-              target: self}]}
 
 - {id: proto_fs_grand_absolution, name: "Grand Absolution", character: furina,
    upgrade: {cost: -1},
@@ -3527,16 +3385,165 @@
    effects: [{op: apply_power, power: fs_full_house, amount: 4,
               target: self}]}
 
-# Packed House: the hoard's Block card, a small component. A Skill since the
-# Spend outlet paper (ruled 2026-10-12); it was "Deal 4 damage, plus 1 for
-# every 5 Fanfare you have". It reads the bank and never spends it.
-- {id: proto_fs_packed_house, name: "Packed House", character: furina,
-   upgrade: {formula_base: +3},
+# --- THE SWEEP (review/active/furina-sweep-2026-10-14.md sec.3, the second
+# set, ruled 2026-10-14): fifteen cut, fifteen new; 6 / 7 / 2, pool 78.
+# Provenance note, "Furina: the sweep, 2026-10-14". ---
+
+# Ousia / Pneuma: two faces, starts each combat on Ousia; playing a face does
+# it, then the card turns over (`furina` kind `flip`, `FurinaFlip`).
+- {id: proto_fs_ousia_pneuma, name: "Ousia / Pneuma", character: furina,
+   upgrade: {conditional_damage: +3, conditional_block: +3},
+   authored_by: [claude],
+   register: salon, cost: 1, type: attack, rarity: common,
+   description: "{Pneuma:Gain {BranchBlock:diff()} [gold]Block[/gold].|{InCombat:Deal {BranchDamage:diff()} damage.|Ousia: Deal {BranchDamage:diff()} damage.\nPneuma: Gain {BranchBlock:diff()} [gold]Block[/gold].}}\n[gold]Flip[/gold].",
+   effects: [{op: conditional, if: ousia_face,
+              then: [{op: damage, amount: 8, target: enemy}]},
+             {op: conditional, if: pneuma_face,
+              then: [{op: block, amount: 7}]},
+             {op: furina, kind: flip}]}
+
+# Objection!: Flame Barrier's window, once, for twice the HP the hit cost.
+- {id: proto_fs_objection, name: "Objection!", character: furina,
+   upgrade: {block: +3},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: common,
-   description: "Gain {CalculationBase:diff()} [gold]Block[/gold], plus 1 for every 4 [gold]Fanfare[/gold] you have.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
-   effects: [{op: block,
-              amount_formula: {base: 5, per: 1, count: stage_fanfare_fours}}]}
+   description: "Gain {Block:diff()} [gold]Block[/gold]. The next time an enemy's attack makes you lose HP this turn, it takes twice that much.",
+   effects: [{op: block, amount: 5},
+             {op: apply_power, power: fs_objection, amount: 1, target: self}]}
+
+# Tearful Monologue: "last turn" is the round before this one (your last
+# turn and the enemies' turn after it), any HP loss, a Drain included.
+- {id: proto_fs_tearful_monologue, name: "Tearful Monologue", character: furina,
+   upgrade: {block: +3},
+   authored_by: [claude],
+   register: salon, cost: 1, type: skill, rarity: common,
+   description: "Gain {Block:diff()} [gold]Block[/gold]. If you lost HP last turn, draw 2 cards.",
+   effects: [{op: block, amount: 6},
+             {op: conditional, if: hp_lost_last_turn,
+              then: [{op: draw, amount: 2}]}]}
+
+# Stage Directions: the chosen card goes on top and costs 0 through the end
+# of next turn (`furina` kind `stage_directions`).
+- {id: proto_fs_stage_directions, name: "Stage Directions", character: furina,
+   upgrade: {block: +3},
+   authored_by: [claude],
+   register: salon, cost: 1, type: skill, rarity: common,
+   description: "Gain {Block:diff()} [gold]Block[/gold]. Put a card from your [gold]Hand[/gold] on top of your [gold]Draw Pile[/gold]. Next turn, it costs 0.",
+   effects: [{op: block, amount: 5},
+             {op: furina, kind: stage_directions}]}
+
+# Opening Number: Innate; on the combat's first turn a second hit.
+- {id: proto_fs_opening_number, name: "Opening Number", character: furina,
+   upgrade: {conditional_damage: +3},
+   authored_by: [claude],
+   register: salon, cost: 1, type: attack, rarity: common, innate: true,
+   description: "Deal {Damage:diff()} damage. On your first turn, deal {BranchDamage:diff()} additional damage.",
+   effects: [{op: damage, amount: 7, target: enemy},
+             {op: conditional, if: first_turn_of_combat,
+              then: [{op: damage, amount: 7, target: enemy}]}]}
+
+# Facade: Block off every HP she has lost this combat, any source, capped
+# (`furina` kind `facade`, its cap the card's FsAmount).
+- {id: proto_fs_facade, name: "Façade", character: furina,
+   upgrade: {furina_amount: +4},
+   authored_by: [claude],
+   register: salon, cost: 1, type: skill, rarity: common,
+   description: "Gain [gold]Block[/gold] equal to the HP you have lost this combat, up to {FsAmount:diff()}.",
+   effects: [{op: furina, kind: facade, amount: 12}]}
+
+# Trial by Water: Vulnerable, and a this-turn mark that pays 2 Fanfare each
+# time the enemy takes damage (`TrialByWaterPower`).
+- {id: proto_fs_trial_by_water, name: "Trial by Water", character: furina,
+   upgrade: {power_amount: +1},
+   authored_by: [claude],
+   register: salon, cost: 1, type: skill, rarity: uncommon,
+   description: "Apply {PowerAmount:diff()} [gold]Vulnerable[/gold]. Until end of turn, whenever that enemy takes damage, gain 2 [gold]Fanfare[/gold].",
+   effects: [{op: apply_power, power: vulnerable, amount: 2, target: enemy},
+             {op: apply_power, power: fs_trial_by_water, amount: 2,
+              target: enemy}]}
+
+# Rainfall Overture: the next Attack this turn hits ALL enemies
+# (`RainfallOverturePower`: a single-target hit is aimed at every enemy).
+- {id: proto_fs_rainfall_overture, name: "Rainfall Overture", character: furina,
+   upgrade: {cost: -1},
+   authored_by: [claude],
+   register: salon, cost: 1, type: skill, rarity: uncommon,
+   description: "Apply [gold]Hydro[/gold] to ALL enemies. Your next Attack this turn hits ALL enemies.",
+   effects: [{op: apply_aura, element: hydro, target: all_enemies},
+             {op: apply_power, power: fs_rainfall_overture, amount: 1,
+              target: self}]}
+
+# Encore Performance: Havoc off the Discard Pile (`furina` kind
+# `encore_performance`).
+- {id: proto_fs_encore_performance, name: "Encore Performance", character: furina,
+   upgrade: {cost: -1},
+   authored_by: [claude],
+   register: salon, cost: 1, type: skill, rarity: uncommon,
+   description: "Play the top card of your [gold]Discard Pile[/gold] for free. [gold]Exhaust[/gold] it.",
+   effects: [{op: furina, kind: encore_performance}]}
+
+# Arkhe in Balance: her two arkhe as a Power that pays for mixing card types
+# (the first set's Pneuma and Ousia, renamed: [USER] read the first set's
+# Water Ballet as the Necrobinder's Danse Macabre).
+- {id: proto_fs_arkhe_in_balance, name: "Arkhe in Balance", character: furina,
+   upgrade: {power_amount: +1},
+   authored_by: [claude],
+   register: salon, cost: 1, type: power, rarity: uncommon,
+   description: "Whenever you play an Attack, gain {PowerAmount:diff()} [gold]Block[/gold]. Whenever you play a Skill, deal {PowerAmount:diff()} damage to a random enemy.",
+   effects: [{op: apply_power, power: fs_arkhe_in_balance, amount: 2,
+              target: self}]}
+
+# Crowd Favorite: below half HP at the start of her turn, 1 Energy.
+- {id: proto_fs_crowd_favorite, name: "Crowd Favorite", character: furina,
+   upgrade: {innate: true},
+   authored_by: [claude],
+   register: salon, cost: 1, type: power, rarity: uncommon,
+   description: "At the start of your turn, if your HP is below half, gain {energyPrefix:energyIcons(1)}.",
+   effects: [{op: apply_power, power: fs_crowd_favorite, amount: 1,
+              target: self}]}
+
+# The Show's Not Over: playable only once she has lost HP this turn
+# (`playable_if`).
+- {id: proto_fs_the_shows_not_over, name: "The Show's Not Over", character: furina,
+   upgrade: {energy: +1},
+   authored_by: [claude],
+   register: salon, cost: 0, type: skill, rarity: uncommon, exhaust: true,
+   playable_if: hp_lost_this_turn,
+   description: "Can be played only if you lost HP this turn. Gain {Energy:energyIcons()}.",
+   effects: [{op: energy, amount: 2}]}
+
+# Understudy's Debut: below half HP, a second hit and Block.
+- {id: proto_fs_understudys_debut, name: "Understudy's Debut", character: furina,
+   upgrade: {conditional_damage: +2, conditional_block: +2},
+   authored_by: [claude],
+   register: salon, cost: 1, type: attack, rarity: uncommon,
+   description: "Deal {Damage:diff()} damage. If your HP is below half, deal {BranchDamage:diff()} additional damage and gain {BranchBlock:diff()} [gold]Block[/gold].",
+   effects: [{op: damage, amount: 6, target: enemy},
+             {op: conditional, if: hp_pct_below_50,
+              then: [{op: damage, amount: 6, target: enemy}]},
+             {op: conditional, if: hp_pct_below_50,
+              then: [{op: block, amount: 6}]}]}
+
+# Verdict of the Oratrice: an execute off her Fanfare, which it does not
+# spend; any enemy, a boss included, as Doom kills one (`furina` kind
+# `verdict`).
+- {id: proto_fs_verdict_of_the_oratrice, name: "Verdict of the Oratrice", character: furina,
+   upgrade: {cost: -1},
+   authored_by: [claude],
+   register: salon, cost: 2, type: skill, rarity: rare, exhaust: true,
+   description: "Choose an enemy. If its HP is no higher than your [gold]Fanfare[/gold], it dies. Otherwise, deal damage equal to your [gold]Fanfare[/gold].",
+   effects: [{op: furina, kind: verdict, target: enemy}]}
+
+# Plot Twist: this turn the chosen enemy's attack hits itself
+# (`PlotTwistPower`). Playable only while an enemy intends to attack.
+- {id: proto_fs_plot_twist, name: "Plot Twist", character: furina,
+   upgrade: {cost: -1},
+   authored_by: [claude],
+   register: salon, cost: 1, type: skill, rarity: rare, exhaust: true,
+   playable_if: enemy_intends_attack,
+   description: "Choose an enemy that intends to attack. This turn its attack hits itself instead of you.",
+   effects: [{op: apply_power, power: fs_plot_twist, amount: 1,
+              target: enemy}]}
 
 # --- THE CO-OP SET (review/records/coop-set-2026-09-25.md): multiplayer-only,
 # outside every pool count. Why each row reads as it does:

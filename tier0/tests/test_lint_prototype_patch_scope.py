@@ -139,8 +139,14 @@ def test_the_shipped_prototype_tree_is_green() -> None:
     # stop Opening Gambit's and Second Wave's now-line (Skills) spending
     # Vigor. Scoped by the hit's source card, the BakeKuragePet answer: the
     # rule is the card's whoever plays it, and they resolve no seat.
-    # A TENTH appearing here is the next review question.
-    assert len(markers) == 9, markers
+    # IT WENT NINE -> ELEVEN ON 2026-10-14 (the Furina sweep): Rainfall
+    # Overture's `AttackCommand.Targeting` prefix and Plot Twist's
+    # `AttackCommand.FromMonster` postfix (`Powers/Prototype/
+    # FurinaSweepPowers.cs`). Scoped by the mark the card leaves -- a
+    # widened card, a marked enemy -- which only playing that card makes,
+    # whoever plays it; they resolve no seat.
+    # A TWELFTH appearing here is the next review question.
+    assert len(markers) == 11, markers
 
 
 def test_registered_in_the_ci_lane() -> None:

@@ -41,36 +41,6 @@ def _play(st, cid=CID):
     combat.play_card(st, card)
 
 
-def test_the_row_is_a_common_that_spends_half():
-    row = loader.get_card(CID)
-    assert row.rarity == "common" and row.cost == 1
-    assert row.effects[0]["op"] == "stage_spend_half"
-    sheet = (REPO / "docs" / "prototype-surface.yaml").read_text(
-        encoding="utf-8")
-    assert ('description: "[gold]Spend[/gold] half your [gold]Fanfare[/gold]'
-            '. Deal that much damage to ALL enemies.' in sheet)
-    assert T.CARDS["ftd_standing_ovation"].rarity == "common"
-
-
-def test_21_fanfare_spends_10_leaves_11_hits_each_for_10_and_no_bis():
-    st = _furina(21)
-    st.player.ftd.powers["bis"] = 1
-    _play(st)
-    assert st.player.ftd.fanfare == 11                  # Bis! kept nothing
-    assert st.player.ftd.ledger["bis_kept"] == 0
-    assert [e.hp for e in st.enemies] == [290, 290]
-    assert st.player.ftd.spends_this_turn == 1
-
-
-@pytest.mark.parametrize("bank", [0, 1])
-def test_0_or_1_fanfare_spends_nothing_and_deals_nothing(bank):
-    st = _furina(bank)
-    _play(st)
-    assert st.player.ftd.fanfare == bank
-    assert [e.hp for e in st.enemies] == [300, 300]
-    assert st.player.ftd.spends_this_turn == 0
-
-
 def test_the_sim_slice_twin_spends_half():
     st = _furina(21)
     st.player.ftd.powers["bis"] = 1

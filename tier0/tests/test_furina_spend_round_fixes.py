@@ -49,48 +49,6 @@ def _play(st, card):
 
 # ---- 1. High Stakes ------------------------------------------------------------
 
-def test_high_stakes_constants_mirror_the_card():
-    row = loader.get_card("proto_fs_high_stakes")
-    assert row.effects[0]["amount"] == FS.HIGH_STAKES_EVERY == 4
-    up = loader.get_card("proto_fs_high_stakes+")
-    assert up.effects[0]["amount"] == FS.HIGH_STAKES_EVERY_UPGRADED == 3
-    assert (row.cost, row.rarity) == (1, "uncommon")
-
-
-def test_high_stakes_reads_the_drained_this_combat():
-    """Round 2 (2026-10-10) made the count gross: Repay no longer lowers it
-    (`test_furina_spend_round_2.py`)."""
-    st = _furina()
-    _play(st, _card("proto_fs_high_stakes"))
-    assert st.player.ftd.high_stakes_every == [4]
-    assert FS.high_stakes_bonus(st) == 0
-    st.player.ftd.drained_this_combat = 14       # past the line counts too
-    assert FS.high_stakes_bonus(st) == 3         # 14 // 4
-
-
-def test_high_stakes_copies_add_their_own_bonus():
-    st = _furina()
-    _play(st, _card("proto_fs_high_stakes"))
-    _play(st, _card("proto_fs_high_stakes+"))
-    assert st.player.ftd.high_stakes_every == [4, 3]
-    st.player.ftd.drained_this_combat = 9
-    assert FS.high_stakes_bonus(st) == 2 + 3     # 9 // 4 + 9 // 3
-
-
-def test_high_stakes_no_longer_reads_the_line():
-    st = _furina(hp=40)                          # within 5 of the line (39)
-    _play(st, _card("proto_fs_high_stakes"))
-    assert FS.high_stakes_bonus(st) == 0         # nothing drained
-
-
-def test_high_stakes_adds_to_every_attack_hit():
-    st = _furina()
-    _play(st, _card("proto_fs_high_stakes"))
-    st.player.ftd.drained_this_combat = 10
-    strike = _card("strike")
-    assert effects.flat_attack_bonus(st, strike, 1) >= 2
-
-
 def test_a_pin_that_sets_the_power_directly_reads_one_copy():
     st = _furina()
     st.player.powers[FS.HIGH_STAKES] = 4
@@ -167,8 +125,9 @@ def test_every_fixed_drain_refusal_says_zero_hp():
     texts = [p.read_text(encoding="utf-8")
              for p in GENERATED.glob("ProtoFs*.cs")]
     assert not [t for t in texts if "below your Drain line" in t]
-    # 10 since the diversity pass (2026-10-11) cut Pay the Tab.
-    assert sum(': "it would take you to 0 HP";' in t for t in texts) >= 10
+    # 10 since the diversity pass (2026-10-11) cut Pay the Tab; 7 since the
+    # sweep (2026-10-14) cut Soloist's Solicitation, Overdraft and The Deluge.
+    assert sum(': "it would take you to 0 HP";' in t for t in texts) >= 7
 
 
 # ---- 5. Bubble Aria ------------------------------------------------------------

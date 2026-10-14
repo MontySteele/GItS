@@ -714,6 +714,16 @@ def test_no_doc_reasserts_the_refuted_pre_draw_order():
 
 CO_TENANCY_LEDGER = {
     "BeforeSideTurnStart": {
+        ("Powers/Prototype/FurinaSweepPowers.cs", "FurinaSweepHooks"):
+            "(the Furina sweep, 2026-10-14). The top of a player's turn: "
+            "`FurinaSweep.RollTurn` moves this round's HP loss to last "
+            "turn's, and `ApplyNextTurnCosts` sets Stage Directions' card to "
+            "cost 0 this turn. THE ORDERING QUESTION, answered: both tables "
+            "are this file's own, no co-tenant reads them, and a cost "
+            "modifier is read only when a card is played, after every "
+            "turn-start tenant has run. It deals no damage, grants no Block "
+            "and touches no element. Sim: `furina_stage.turn_start` and "
+            "`refpowers.reset_turn_counters`, at the top of her turn",
         ("Powers/Prototype/ProtoBombPower.cs", "ProtoBombPower"):
             "(the Klee overhaul, C.KLEE_OVERHAUL). Enemy-attached, "
             "and it GROWS rather than detonating -- rule 7 of the ruled brief "
@@ -1126,6 +1136,24 @@ CO_TENANCY_LEDGER = {
             "test_the_sequencer_walks_the_table",
     },
     "AfterSideTurnEnd": {
+        ("Powers/Prototype/FurinaSweepPowers.cs", "ObjectionPower"):
+            "(the Furina sweep). Flame Barrier's shape: removes itself at the "
+            "end of the enemies' turn. A removal only; no co-tenant reads it",
+        ("Powers/Prototype/FurinaSweepPowers.cs", "PlotTwistPower"):
+            "(the Furina sweep). Removes its mark from the enemy at the end "
+            "of the enemies' turn, after every attack it redirects. A "
+            "removal only; no co-tenant reads it",
+        ("Powers/Prototype/FurinaSweepPowers.cs", "RainfallOverturePower"):
+            "(the Furina sweep). Removes itself at the end of her turn ('this "
+            "turn'). A removal only; no co-tenant reads it. Sim: "
+            "`furina_stage.turn_end`",
+        ("Powers/Prototype/FurinaSweepPowers.cs", "TrialByWaterPower"):
+            "(the Furina sweep). Removes the mark from the enemy at the end of "
+            "the players' turn ('until end of turn'). A removal only; an "
+            "end-of-turn hit by a co-tenant landing before or after it pays "
+            "or does not pay its 2 Fanfare, the one order-dependent outcome, "
+            "and the sim drops it at the same site (`furina_stage.turn_end`, "
+            "after the guests act)",
         ("Powers/Prototype/VarkaPowers.cs", "OathLeftPower"):
             "(Varka element identities, 2026-10-01). The "
             "left-element flag beside his badge expires with his turn. "

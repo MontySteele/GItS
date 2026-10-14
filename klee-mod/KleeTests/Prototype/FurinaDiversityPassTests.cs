@@ -50,7 +50,7 @@ public class FurinaDiversityPassTests : IDisposable
         var pool = ArmPools.Named("KleeMod.Powers.FurinaStageRoster", "Pool");
         var names = pool.Select(c => c.GetType().Name).ToHashSet();
         foreach (var added in new[] { "ProtoFsHeadliner", "ProtoFsTheLeadingLady",
-                                      "ProtoFsTheFullHouse", "ProtoFsPackedHouse" })
+                                      "ProtoFsTheFullHouse" })
         {
             Assert.Contains(added, names);
         }
@@ -64,7 +64,6 @@ public class FurinaDiversityPassTests : IDisposable
         Assert.Equal(CardRarity.Common, new ProtoFsTutti().Rarity);
         Assert.Equal(CardRarity.Common, new ProtoFsGuestStarWriothesley().Rarity);
         Assert.Equal(CardRarity.Common, new ProtoFsHeadliner().Rarity);
-        Assert.Equal(CardRarity.Common, new ProtoFsPackedHouse().Rarity);
         Assert.Equal(CardRarity.Uncommon, new ProtoFsTheLeadingLady().Rarity);
         Assert.Equal(CardRarity.Uncommon, new ProtoFsTheFullHouse().Rarity);
     }
@@ -81,31 +80,6 @@ public class FurinaDiversityPassTests : IDisposable
             .DynamicVars.CalculationBase.BaseValue);
         Assert.Contains("FurinaStage.Of(card.Owner?.Creature).Count",
                         Generated("ProtoFsHeadliner"));
-    }
-
-    // Packed House became a Skill under the Spend outlet paper (ruled
-    // 2026-10-12): "Gain 5 [8] Block, plus 1 for every 4 Fanfare you have."
-    [Fact]
-    public void Packed_house_is_5_block_plus_1_every_4_fanfare_and_8_upgraded()
-    {
-        var card = new ProtoFsPackedHouse();
-        Assert.Equal(CardType.Skill, card.Type);
-        Assert.Equal(5m, card.DynamicVars.CalculationBase.BaseValue);
-        Assert.Equal(1m, card.DynamicVars.CalculationExtra.BaseValue);
-        Assert.Equal(8m, Upgraded(new ProtoFsPackedHouse())
-            .DynamicVars.CalculationBase.BaseValue);
-        var src = Generated("ProtoFsPackedHouse");
-        Assert.Contains("FurinaStage.FanfareFours(card.Owner?.Creature)", src);
-        Assert.Contains("CreatureCmd.GainBlock", src);
-        Assert.DoesNotContain("SpendUpTo", src);
-        Assert.DoesNotContain("SpendAll", src);
-        Assert.Equal(
-            "Gain {CalculationBase:diff()} [gold]Block[/gold], plus 1 for every "
-            + "4 [gold]Fanfare[/gold] you have.{InCombat:\n(Gains "
-            + "{CalculatedBlock:diff()} [gold]Block[/gold])|}",
-            Face(card));
-        Assert.Equal(4, FurinaStageLaw.PackedHouseFanfarePer);
-        Assert.Equal(0, FurinaStage.FanfareFours(null));
     }
 
     // ---- Leading Lady ------------------------------------------------------

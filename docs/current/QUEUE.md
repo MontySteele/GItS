@@ -22,9 +22,6 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
-- **Furina sweep** (`furina-sweep-2026-10-14.md`, three picks, defaults
-  (a); built on #1271): fifteen cuts, fifteen adds that are not a resource
-  verb plus a number, Powers 20 to 17, Block 41 to 68 printed.
 - **Distribution readiness** (`distribution-readiness-2026-10-12.md`, two picks,
   defaults (a)): a closed beta now, public early access once Varka and Furina
   reach Balance; a GitHub release first. (The `LAW.md` art line, #1145, is
