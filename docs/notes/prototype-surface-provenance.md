@@ -8550,9 +8550,9 @@ marked enemy's attack aims at itself). New predicates `ousia_face`,
   boss; its damage is a Skill's card damage (Strength counts).
 - Plot Twist is playable only while some enemy intends to attack; the game
   cannot restrict which enemy is chosen, so a non-attacker chosen wastes it.
-- The Show's Not Over+ (no Exhaust) loops in thin decks with an HP-losing
-  draw card, bounded by HP; recorded in the loop probe's accepted set under
-  [USER]'s thin-deck ruling (2026-10-11).
+- The Show's Not Over keeps Exhaust when upgraded (Gain 2 [3] Energy; design
+  call 2026-10-14): the paper's no-Exhaust upgrade made 13 thin-deck loops
+  in the probe.
 
 ## Kokomi review r5 A-list, 2026-10-14
 

@@ -184,7 +184,9 @@ public class FurinaSweepTests
         Assert.Equal(0, Upgraded(new ProtoFsPlotTwist())
             .EnergyCost.GetWithModifiers(CostModifiers.None));
         Assert.Contains(CardKeyword.Innate, Upgraded(new ProtoFsCrowdFavorite()).Keywords);
-        Assert.DoesNotContain(CardKeyword.Exhaust, Upgraded(new ProtoFsTheShowsNotOver()).Keywords);
+        // It keeps Exhaust (design call 2026-10-14: without it, 13 loops).
+        Assert.Contains(CardKeyword.Exhaust, Upgraded(new ProtoFsTheShowsNotOver()).Keywords);
+        Assert.Equal(3m, Upgraded(new ProtoFsTheShowsNotOver()).DynamicVars["Energy"].BaseValue);
     }
 
     [Fact]

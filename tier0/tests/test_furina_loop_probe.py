@@ -83,44 +83,10 @@ KNOWN_INERT = {("proto_fs_tutti+",)}
 _TUTTI_THIN_DECK = ("[USER], 2026-10-11: a theoretical loop in a thin deck "
                     "is not a problem unless trivial to assemble; this one "
                     "needs a deck thinned to Tutti!+ and the draw card")
-#: THE SWEEP, SECOND SET (2026-10-14). The Show's Not Over+ (0: if you
-#: lost HP this turn, gain 2 Energy; no Exhaust) with a card that loses HP
-#: and draws (Ousia Pledge's or Salon's Tab's Drain), in a deck thinned to
-#: those two or three cards, gains Energy every cycle. Each cycle Drains, so
-#: the loop is bounded by her HP; it needs the deck thinned to the set, so
-#: it is the thin-deck class [USER] ruled on 2026-10-11.
-_SHOWS_NOT_OVER_THIN_DECK = (
-    "[USER], 2026-10-11: a theoretical loop in a thin deck is not a problem "
-    "unless trivial to assemble; this one needs a deck thinned to The Show's "
-    "Not Over+ and an HP-losing draw card, and each cycle costs HP")
-ACCEPTED_LOOPS: dict = {
-    frozenset({"proto_fs_bubble_aria", "proto_fs_ousia_pledge", "proto_fs_the_shows_not_over"}):
-        _SHOWS_NOT_OVER_THIN_DECK,
-    frozenset({"proto_fs_bubble_aria", "proto_fs_the_shows_not_over", "proto_fs_tutti"}):
-        _SHOWS_NOT_OVER_THIN_DECK,
-    frozenset({"proto_fs_casting_call", "proto_fs_ousia_pledge", "proto_fs_the_shows_not_over"}):
-        _SHOWS_NOT_OVER_THIN_DECK,
-    frozenset({"proto_fs_clean_slate", "proto_fs_ousia_pledge", "proto_fs_the_shows_not_over"}):
-        _SHOWS_NOT_OVER_THIN_DECK,
-    frozenset({"proto_fs_clean_slate", "proto_fs_the_shows_not_over", "proto_fs_tutti"}):
-        _SHOWS_NOT_OVER_THIN_DECK,
-    frozenset({"proto_fs_cleansing_torrent", "proto_fs_ousia_pledge", "proto_fs_the_shows_not_over"}):
-        _SHOWS_NOT_OVER_THIN_DECK,
-    frozenset({"proto_fs_final_bow", "proto_fs_ousia_pledge", "proto_fs_the_shows_not_over"}):
-        _SHOWS_NOT_OVER_THIN_DECK,
-    frozenset({"proto_fs_hymn_of_many_waters", "proto_fs_ousia_pledge", "proto_fs_the_shows_not_over"}):
-        _SHOWS_NOT_OVER_THIN_DECK,
-    frozenset({"proto_fs_ousia_pledge", "proto_fs_pneuma_refrain", "proto_fs_the_shows_not_over"}):
-        _SHOWS_NOT_OVER_THIN_DECK,
-    frozenset({"proto_fs_ousia_pledge", "proto_fs_the_shows_not_over"}):
-        _SHOWS_NOT_OVER_THIN_DECK,
-    frozenset({"proto_fs_ousia_pledge", "proto_fs_the_shows_not_over", "proto_fs_tutti"}):
-        _SHOWS_NOT_OVER_THIN_DECK,
-    frozenset({"proto_fs_pneuma_refrain", "proto_fs_the_shows_not_over", "proto_fs_tutti"}):
-        _SHOWS_NOT_OVER_THIN_DECK,
-    frozenset({"proto_fs_salons_tab", "proto_fs_the_shows_not_over"}):
-        _SHOWS_NOT_OVER_THIN_DECK,
-}
+#: THE SWEEP, SECOND SET (2026-10-14): The Show's Not Over+ without Exhaust
+#: made 13 thin-deck loops with an HP-losing draw card; the design call kept
+#: its Exhaust (the upgrade is 3 Energy instead), and none is left.
+ACCEPTED_LOOPS: dict = {}
 
 #: CLOSED LOOPS: found, then fixed by a design call, each with its reason.
 #: The probe must no longer find them.

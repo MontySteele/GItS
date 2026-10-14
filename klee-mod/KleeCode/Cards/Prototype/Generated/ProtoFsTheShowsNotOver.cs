@@ -44,7 +44,7 @@ public sealed class ProtoFsTheShowsNotOver : CustomCardModel, ICharacterCard, IU
     public override List<(string, string)>? Localization => new()
     {
         ("title", "The Show's Not Over"),
-        ("description", "Can be played only if you lost HP this turn. Gain {energyPrefix:energyIcons(2)}."),
+        ("description", "Can be played only if you lost HP this turn. Gain {Energy:energyIcons()}."),
     };
 
     // Furina's sweep (2026-10-14): "Can be played only if" -- the
@@ -60,7 +60,7 @@ public sealed class ProtoFsTheShowsNotOver : CustomCardModel, ICharacterCard, IU
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new EnergyVar(2)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -72,11 +72,11 @@ public sealed class ProtoFsTheShowsNotOver : CustomCardModel, ICharacterCard, IU
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PlayerCmd.GainEnergy(2, Owner);
+        await PlayerCmd.GainEnergy(DynamicVars["Energy"].IntValue, Owner);
     }
 
     protected override void OnUpgrade()
     {
-        RemoveKeyword(CardKeyword.Exhaust);
+        DynamicVars["Energy"].UpgradeValueBy(1m);
     }
 }

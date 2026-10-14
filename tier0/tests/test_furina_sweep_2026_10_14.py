@@ -146,7 +146,8 @@ def test_the_shows_not_over_needs_hp_lost_this_turn():
     energy = st.player.energy
     combat.play_card(st, card)
     assert st.player.energy == energy + 2 and card.exhaust
-    assert not _card("proto_fs_the_shows_not_over+").exhaust
+    up = _card("proto_fs_the_shows_not_over+")
+    assert up.exhaust and up.effects[0]["amount"] == 3
 
 
 def test_understudys_debut_below_half_hits_twice_and_blocks():

@@ -1181,7 +1181,7 @@
       "cost": -1
     },
     "proto_fs_the_shows_not_over": {
-      "remove": "exhaust"
+      "energy": 1
     },
     "proto_fs_thunderous_applause": {
       "power_amount": 1

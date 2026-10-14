@@ -3505,11 +3505,11 @@
 # The Show's Not Over: playable only once she has lost HP this turn
 # (`playable_if`).
 - {id: proto_fs_the_shows_not_over, name: "The Show's Not Over", character: furina,
-   upgrade: {remove: exhaust},
+   upgrade: {energy: +1},
    authored_by: [claude],
    register: salon, cost: 0, type: skill, rarity: uncommon, exhaust: true,
    playable_if: hp_lost_this_turn,
-   description: "Can be played only if you lost HP this turn. Gain {energyPrefix:energyIcons(2)}.",
+   description: "Can be played only if you lost HP this turn. Gain {Energy:energyIcons()}.",
    effects: [{op: energy, amount: 2}]}
 
 # Understudy's Debut: below half HP, a second hit and Block.

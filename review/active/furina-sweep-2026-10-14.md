@@ -98,8 +98,10 @@ Balance; the Necrobinder's Danse Macabre carries a 2-Energy value in
 | Encore Performance | Skill 1 | Play the top card of your Discard Pile for free. Exhaust it. [cost 0] |
 | Arkhe in Balance | Power 1 | Whenever you play an Attack, gain 2 [3] Block. Whenever you play a Skill, deal 2 [3] damage to a random enemy. |
 | Crowd Favorite | Power 1 | At the start of your turn, if your HP is below half, gain 1 Energy. [Innate] |
-| The Show's Not Over | Skill 0 | Can be played only if you lost HP this turn. Gain 2 Energy. Exhaust. [no Exhaust] |
+| The Show's Not Over | Skill 0 | Can be played only if you lost HP this turn. Gain 2 [3] Energy. Exhaust. |
 | Understudy's Debut | Attack 1 | Deal 6 [8] damage. If your HP is below half, deal 6 [8] more and gain 6 [8] Block. |
+
+The Show's Not Over keeps Exhaust when upgraded: without it, a 0-cost repeatable +2 Energy made 13 thin-deck loops in the probe.
 
 **Rare (2)**
 | Card | Type, cost | Text |
