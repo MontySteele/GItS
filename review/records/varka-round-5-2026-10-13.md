@@ -68,8 +68,10 @@ by a fresh seat. Each run took 75 to 95 minutes, slower than the usual 50 to
    other damage Knights are Attacks. This changes Strength scaling, so it goes
    to `varka-next`.
 4. **Twin Gales: a matched element pays twice** (`varka-next`).
-5. **Act 3 Block** is a pick for [USER], not a change. The defence paper
-   (#1126) settled his Block, and the base cast dies to the same act 3 checks.
+5. **Act 3 Block: no change.** Ruled by [USER], 2026-10-13: "I'm thinking a)
+   no change. He's healthy-ish and we can revisit that later, but I do think
+   that the seats are doing as well on him as anyone else, so I'm not
+   convinced it's really a Varka problem as opposed to an agent problem."
 
 Not changing: Ascension's 0-Oath opening (the starter is meant to be weak and
 Retain is the answer), Weathervane and Windborne Resolve (one lane each).
