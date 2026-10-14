@@ -46,10 +46,13 @@ from __future__ import annotations
 X, Y, Z = (1, 0, 0), (0, 1, 0), (0, 0, 1)
 CH = "上半身2"
 YAW = 16
-#: the skirt's two long back tails (chain roots, parented to the hips)
-TAILS = ["左后摆_0_1", "右后摆_0_1"]
+#: the skirt's two long back tails (chain roots, parented to the hips). The
+#: names are the IMPORTED ones: mmd_tools renames the PMX's 左X / 右X to
+#: X.L / X.R (her Blender probe, 2026-10-13), so the PMX's 左后摆_0_1 is
+#: 后摆_0_1.L here (fixed 2026-10-14, before her first render).
+TAILS = ["后摆_0_1.L", "后摆_0_1.R"]
 #: the long sleeves (chain roots, parented to each elbow), side -> bone
-SLEEVES = {"L": "左袖_0_1", "R": "右袖_0_1"}
+SLEEVES = {"L": "袖_0_1.L", "R": "袖_0_1.R"}
 #: where a sleeve hangs from the elbow: down and a little behind her (world)
 SLEEVE_HANG = (0.0, 0.55, -1.0)
 #: the water jet: a line from the far hand's knuckles along the hand, this
