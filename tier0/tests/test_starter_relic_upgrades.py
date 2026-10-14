@@ -48,6 +48,8 @@ STARTERS: dict[str, str] = {
     # starter, so every reader that finds the starter by type finds it too.
     "BoreasFang": "WolfsGravestone",               # Varka
     "TamakushiCasket": "WatatsumiCasket",          # Kokomi (the overhaul)
+    # YAE MIKO (card paper sec.3, ruled 2026-10-13): her A4, a subclass.
+    "MeditationsOfAYako": "EnlightenedBlessing",   # Yae
     # The Klee scaling pass's staging tempo relic (klee-next, 2026-10-05,
     # sec.4 D): a copy of Pounding Surprise, upgraded the same way.
     "PoundingSurpriseNext": "ExplosiveFrags",
@@ -157,6 +159,8 @@ RELIC_POOLS = {
     "BoreasFang": "VarkaRelicPool.cs",
     # The Kokomi overhaul's starter.
     "TamakushiCasket": "KokomiRelicPool.cs",
+    # YAE MIKO (batch one).
+    "MeditationsOfAYako": "YaeRelicPool.cs",
 }
 
 _CODE = _ROOT / "klee-mod" / "KleeCode"
@@ -275,6 +279,9 @@ SIM_ROWS_ABSENT = {
     "WatatsumiCasket":
         "prototype arm (the Kokomi overhaul) with no tier05 Orobas row. "
         "Row lands at Balance.",
+    "EnlightenedBlessing":
+        "prototype (Yae) tier05 does not run; tier0 twin "
+        "yae_shrine.MEDITATIONS_UPGRADED. Row lands at Balance.",
 }
 
 

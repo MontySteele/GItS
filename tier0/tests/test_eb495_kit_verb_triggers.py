@@ -562,6 +562,10 @@ def test_only_the_set_off_cards_own_hit_is_an_attack():
     # Edge's "deal 7 more": the card's own second hit, with no element.
     # Starter (a), 2026-10-13 adds `VarkaCards.GaleHit`: Dandelion Gale's
     # second hit, the Ascension's on ALL enemies, the card's own hit.
+    # YAE MIKO (2026-10-13) adds `YaeCards.CardHit`: Kitsune Flash's,
+    # Thunderbolt Tithe's and Bestseller's one hit, the card's own Electro
+    # hit (the sim's reading: "ONE powered hit of the card"). Her Sakura and
+    # Fox Fire are pets' hits through `ElementalHit` and are not here.
     assert [path for path, _line in sites] == [
         "Powers/Prototype/ProtoBakeKuragePower.cs",
         "Powers/Prototype/ProtoBakeKuragePower.cs",
@@ -570,7 +574,8 @@ def test_only_the_set_off_cards_own_hit_is_an_attack():
         "Powers/Prototype/VarkaOath.cs",
         "Powers/Prototype/VarkaOath.cs",
         "Powers/Prototype/VarkaOath.cs",
-        "Powers/Prototype/VarkaRules.cs"]
+        "Powers/Prototype/VarkaRules.cs",
+        "Powers/Prototype/YaeShrine.cs"]
 
 
 # ==========================================================================
