@@ -734,19 +734,6 @@ if (-not (Test-Path $yaeFrames)) { Note-Skip 'yae\model\frames' $yaeFrames } els
     }
 }
 
-# Kokomi's combat rig (2026-10-02): the same treatment, cut by
-# tools/cut_combat_layers.py kokomi. Her model\ loop below is non-recursive, so
-# the layers\combat subdirectory needs its own block. Varka's layer-cut rig
-# rode this loop until his model frames replaced it (2026-10-13); nothing
-# loads its layers now, so they no longer ship.
-foreach ($rigChar in @('kokomi')) {
-    $rigLayerSrc = Join-Path $src "$rigChar\model\layers\combat"
-    if (-not (Test-Path $rigLayerSrc)) { Note-Skip "$rigChar\model\layers" $rigLayerSrc; continue }
-    $to = Join-Path $work "$rigChar\model\layers"
-    New-Item -ItemType Directory -Force -Path $to | Out-Null
-    Copy-Item (Join-Path $rigLayerSrc '*.png') -Destination $to
-}
-
 # Animation sprint 2 (Track D1): Salon member stage sprites, cut by
 # tools/cut_salon_members.py. Silhouette-first mini-sprites for salon_stage.tscn.
 # The guests' flat cutouts (guest_*.png, tools/cut_guest_bodies.py) sat here
@@ -1247,19 +1234,6 @@ $kokomiRestArt = if (Test-Path (Join-Path $src 'kokomi\model\kokomi_rest.png')) 
 [node name="KokomiRestSprite" type="Sprite2D"]
 texture = ExtResource("1_tex")
 '@).Replace('res://kokomi/model/combat_model.png', "res://kokomi/model/$kokomiRestArt"))
-
-# Her merchant scene: this static sprite until tools/kokomi_rig generates
-# pck-src/kokomi/model/merchant_character.tscn (stance B breathing on a loop,
-# phase A, 2026-10-14); the pck-src overlay below then replaces it at this
-# path. Delete this block in the commit that generates it, as Furina's was.
-[IO.File]::WriteAllText((Join-Path $work 'kokomi\model\merchant_character.tscn'), @'
-[gd_scene load_steps=2 format=3]
-
-[ext_resource type="Texture2D" path="res://kokomi/model/combat_model.png" id="1_tex"]
-
-[node name="KokomiMerchantSprite" type="Sprite2D"]
-texture = ExtResource("1_tex")
-'@)
 
 # Varka (prototype batch one): his select backdrop, his top-left icon and his
 # three model paths, the Kokomi shapes exactly -- three DISTINCT model paths

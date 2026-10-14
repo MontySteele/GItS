@@ -162,7 +162,9 @@ them and of her roster tile. Never hand-edit the scenes:
 ```
 
 **Kokomi's model art (`kokomi_clips.py`, `tools/kokomi_rig/`, phase A,
-2026-10-14).** Built without a render (the game was in use): her pose library
+2026-10-14).** Rendered 2026-10-14 (218 px at 1080p against a 217.7 target;
+`kokomi_frames.json` committed, both scenes generated, her layer-cut rig and
+static merchant sprite gone, `AttackAnimDelay` 0.4 s on the push). Her pose library
 on the body PMX `珊瑚宫心海.pmx` (the same bone set and proportions as
 Furina's), 63 in, rest height 1.6261 units read off the PMX's vertices.
 Phase A is the surfaces every kit needs: idle, low-HP idle, attack (a push
@@ -172,9 +174,8 @@ close-up, the roster tile (its producer moved here from
 `gen_kokomi_stills.py`) and the shadow. Card clips wait until her build is
 final. Her long sleeves and skirt tails are physics chains, so every pose
 hangs the sleeves from the elbows (`cloth`). `tools/kokomi_rig` generates
-her two scenes the moment `kokomi_frames.json` exists (tested now against a
-synthetic manifest); `build_pck.ps1` already copies her frames and switches
-her rest and select art when they exist. To finish, on a free machine:
+her two scenes from `kokomi_frames.json`; `build_pck.ps1` copies her frames
+and switches her rest and select art when they exist. To re-render:
 
 ```sh
 .venv/Scripts/python tools/char_render/build.py --char kokomi --models <scratch>/models --work <scratch dir> --art-root <scratch art root>
