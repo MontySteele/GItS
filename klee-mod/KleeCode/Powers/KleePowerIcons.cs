@@ -468,20 +468,28 @@ internal static class KleePowerIcons
         // Oath Power Stormward Stance's, an element-change Power Boreas
         // Unbound's, a Knight Power Study Buddy's (Grand Master's Order's).
         StaticFieldPower => KleePck.Path("varka/powers/electro_wind.png"),
-        // YAE MIKO (2026-10-13): placeholders, every one borrowed. The
-        // Sakura badges wear the companion Sakura's (Sesshou Sakura) icon;
-        // her powers borrow the nearest shipped badge until her art pass.
+        // YAE MIKO (art pass 2026-10-14): her own badges, art/plan.tsv's
+        // power_yae_ rows (her talent and constellation icons). Each keeps
+        // its old borrowed badge as the fallback, so a pck built before the
+        // art still draws one.
         SakuraBadgePower => KleePck.Path("yae/powers/sakura.png")
             ?? KleePck.Path("klee/powers/oz_summon.png"),
-        FoxfireLurePower => KleePck.Path("klee/powers/detonation_vuln.png"),
-        SakuraGrovePower => KleePck.Path("klee/powers/bomb_damage_up.png"),
-        EdictOfCleansingPower =>
-            KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
-        SerializationPower => KleePck.Path("klee/powers/passion_overload.png"),
-        FoxsMooncallPower => KleePck.Path("klee/powers/oz_summon.png"),
-        YakanOfferingPower => KleePck.Path("klee/powers/oz_summon.png"),
-        SakuraChannelingPower => KleePck.Path("klee/powers/passion_overload.png"),
-        EditorInChiefPower => KleePck.Path("varka/powers/electro_wind.png"),
+        FoxfireLurePower => KleePck.Path("yae/powers/foxfire_lure.png")
+            ?? KleePck.Path("klee/powers/detonation_vuln.png"),
+        SakuraGrovePower => KleePck.Path("yae/powers/sakura_grove.png")
+            ?? KleePck.Path("klee/powers/bomb_damage_up.png"),
+        EdictOfCleansingPower => KleePck.Path("yae/powers/edict_of_cleansing.png")
+            ?? KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
+        SerializationPower => KleePck.Path("yae/powers/serialization.png")
+            ?? KleePck.Path("klee/powers/passion_overload.png"),
+        FoxsMooncallPower => KleePck.Path("yae/powers/foxs_mooncall.png")
+            ?? KleePck.Path("klee/powers/oz_summon.png"),
+        YakanOfferingPower => KleePck.Path("yae/powers/yakan_offering.png")
+            ?? KleePck.Path("klee/powers/oz_summon.png"),
+        SakuraChannelingPower => KleePck.Path("yae/powers/sakura_channeling.png")
+            ?? KleePck.Path("klee/powers/passion_overload.png"),
+        EditorInChiefPower => KleePck.Path("yae/powers/editor_in_chief.png")
+            ?? KleePck.Path("varka/powers/electro_wind.png"),
         UnwaveringBannerPower =>
             KleePck.Path("varka/powers/stormward_stance.png"),
         CycleOfSeasonsPower => KleePck.Path("varka/powers/boreas_unbound.png"),

@@ -1006,11 +1006,8 @@ $pckDeferred = @{
     # The rule itself is untouched and still bites: the next referenced-but-
     # unmade path fails S12 until someone adds it here WITH a reason.
     #
-    # Yae Miko's Sakura badge (2026-10-14): her prototype ships before her art
-    # pass. KleePowerIcons.cs asks for yae/powers/sakura.png first and falls
-    # back to klee/powers/oz_summon.png, so the badge renders. Delete this
-    # entry when her art pass places the PNG.
-    'yae/powers/sakura.png' = 'Yae prototype before her art pass; falls back to klee/powers/oz_summon.png'
+    # Yae Miko's Sakura badge left on 2026-10-14, when her art pass placed
+    # yae/powers/sakura.png and her eight other badges.
 }
 
 $stagedContractS12 = Get-ChildItem $StageDir -Filter *.pck.contract.txt -ErrorAction SilentlyContinue |
