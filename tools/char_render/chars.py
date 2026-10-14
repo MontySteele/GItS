@@ -177,6 +177,16 @@ KOKOMI_STANCE = pose(
            far_pole=(0.2, 0.5, -1.0), near_curl=(25, 10), far_curl=(12, 4)),
     {"にこり": 0.6}, yaw=16)
 
+# ------------------------------------------------------------------ Yae Miko
+# The Guuji at ease: weight back, the near hand on her hip, the far hand
+# palm up before her chest where an ofuda sits (yae_clips stance A).
+YAE_STANCE = pose(
+    stance(drop=0.03, lean=-2.0, twist=-16, head_turn=34, head_nod=1, head_tilt=-5,
+           front=0.09, back=0.08)
+    + arms((-0.15, -0.05, -0.17), (0.20, -0.21, -0.04), near_pole=(-1.0, 0.3, 0.0),
+           far_pole=(0.2, 0.6, -1.0), near_curl=(30, 10), far_curl=(12, 4)),
+    {"にやり": 0.5, "じと目": 0.25}, yaw=16)
+
 # ------------------------------------------------------------------ Varka
 # Heavy and wide: knees bent, feet apart, the claymore held two-handed low
 # before him with the blade angled down toward the enemy's feet.
@@ -228,6 +238,30 @@ CHARS = {
         "blades": {},
         "hide_mats": set(),
         "camera_height": 0.8,
+    },
+    "yae": {
+        "pmx": "yae/unpacked/八重神子.pmx",
+        # 70 in: Navia's (GUEST_HEIGHTS_IN, the PROPORTIONS chart's tall
+        # female body), because the two packs share a head-bone height to
+        # 0.2% (19.024 vs 19.067 raw units over the lowest vertex, read off
+        # the PMX 2026-10-14). Not yet ruled by [USER]: Yae model review, pick 1.
+        "height_in": 70.0,
+        "hand_tip": "中指１",
+        "face_mats": FACE_MATS,
+        "no_line_mats": NO_LINE_MATS,
+        "expressions": {"smile": "にこり", "smirk": "にやり", "happy_eyes": "笑い", "blink": "まばたき",
+                        "wince": ("まばたき", "困る"), "sad": "悲しむ", "shock": "びっくり", "star_eyes": "星目",
+                        "half_lidded": "じと目", "wink": "ウィンク"},
+        "stance": YAE_STANCE,
+        "prop": None,
+        # the phase A clip set (render.py --clips, 2026-10-14), a temporary
+        # model: her pose library. Her pack has no gohei or catalyst, so she
+        # has no blades; her flick's fox spirit follows a phantom line off
+        # her far hand (yae_clips.PHANTOM), as Kokomi's jet does.
+        "clips": "yae_clips",
+        "blades": {},
+        "hide_mats": set(),
+        "camera_height": 0.9,
     },
     "varka": {
         "pmx": "varka/unpacked/法尔伽.pmx",

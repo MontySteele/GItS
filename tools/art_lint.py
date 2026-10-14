@@ -683,6 +683,24 @@ GENERATOR_OWNED = {
     "ImageGen/images/kokomi/ui/select_closeup.png":         "char_render/pack.py",
     "ImageGen/images/kokomi/ui/select_portrait.png":        "char_render/pack.py",
     "ImageGen/images/kokomi/ui/select_portrait_locked.png": "char_render/pack.py",
+    # Yae Miko's model art (phase A, a temporary model, 2026-10-14): Kokomi's
+    # set, rendered from her official model (which never enters the repo) and
+    # packed by one script; tools/char_render/yae_frames.json is the committed
+    # manifest. Until her first render Klee's files ship at her ui/ paths
+    # (build_pck.ps1 Copy-YaeFallback), which these then replace.
+    "ImageGen/images/yae/model/frames/yae_idle.png": "char_render/pack.py",
+    "ImageGen/images/yae/model/frames/yae_idle_low.png": "char_render/pack.py",
+    "ImageGen/images/yae/model/frames/yae_attack.png": "char_render/pack.py",
+    "ImageGen/images/yae/model/frames/yae_cast.png": "char_render/pack.py",
+    "ImageGen/images/yae/model/frames/yae_hurt.png": "char_render/pack.py",
+    "ImageGen/images/yae/model/frames/yae_death.png": "char_render/pack.py",
+    "ImageGen/images/yae/model/frames/yae_merchant.png": "char_render/pack.py",
+    "ImageGen/images/yae/model/frames/yae_attack_fx.png": "char_render/pack.py",
+    "ImageGen/images/yae/model/frames/yae_shadow.png": "char_render/pack.py",
+    "ImageGen/images/yae/model/yae_rest.png":               "char_render/pack.py",
+    "ImageGen/images/yae/ui/select_closeup.png":            "char_render/pack.py",
+    "ImageGen/images/yae/ui/select_portrait.png":           "char_render/pack.py",
+    "ImageGen/images/yae/ui/select_portrait_locked.png":    "char_render/pack.py",
     "ImageGen/images/ui/transition_wipe.png":               "gen_transition_wipe.py",
     "ImageGen/images/kokomi/ui/transition_wipe.png":        "gen_transition_wipe.py",
     "ImageGen/images/varka/ui/transition_wipe.png":         "gen_transition_wipe.py",

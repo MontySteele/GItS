@@ -44,7 +44,7 @@ EASES = {"io", "out", "in", "lin"}
 
 
 def test_every_kit_has_a_stance_in_the_pose_language():
-    assert set(chars.CHARS) == {"furina", "kokomi", "varka"}
+    assert set(chars.CHARS) == {"furina", "kokomi", "varka", "yae"}
     for name, cfg in chars.CHARS.items():
         st = cfg["stance"]
         assert {"yaw", "morphs", "ops", "prop"} <= set(st), name
@@ -815,3 +815,125 @@ def test_every_kokomi_out_path_has_one_producer():
         assert art_lint.GENERATOR_OWNED[f"ImageGen/images/kokomi/{out}"] == "char_render/pack.py", out
     text = (ROOT / "tools" / "gen_kokomi_stills.py").read_text(encoding="utf-8")
     assert '"select_portrait.png"' not in text and '"select_portrait_locked.png"' not in text
+
+
+# ------------------------------------------------------------------ Yae Miko (phase A, a temporary model, 2026-10-14)
+yc = _load("yae_clips")
+
+
+def test_kokomis_and_yaes_cloth_bones_are_the_imported_names():
+    # mmd_tools renames the PMX's 左X / 右X to X.L / X.R on import (Kokomi's
+    # Blender probe, 2026-10-13: 袖_0_1.L, 后摆_0_1.R); a raw 左 name is a
+    # KeyError in the first render
+    for lib in (kc, yc):
+        for bone in [*lib.TAILS, *lib.SLEEVES.values(), *getattr(lib, "FRONT", [])]:
+            assert not bone.startswith(("左", "右")), bone
+    assert yc.SLEEVES == {"L": "袖_0_1.L", "R": "袖_0_1.R"}
+    assert kc.SLEEVES == {"L": "袖_0_1.L", "R": "袖_0_1.R"}
+
+
+def test_every_yae_clip_runs_forward_and_every_loop_closes():
+    assert set(yc.CLIPS) == {*pack.COMBAT_CLIPS["yae"], "merchant"}
+    for name, clip in yc.CLIPS.items():
+        times = [k[0] for k in clip["keys"]]
+        assert times == sorted(times) and times[0] == 0.0, name
+        assert times[-1] <= clip["length"] + 1e-9, name
+        for _t, pose, ease in clip["keys"]:
+            assert ease in EASES, name
+            assert {"yaw", "morphs", "ops", "root"} <= set(pose), name
+            assert {op[0] for op in pose["ops"]} <= OPS, name
+        if clip["loop"]:
+            assert times[-1] == clip["length"], name
+            assert clip["keys"][0][1] == clip["keys"][-1][1], f"{name}: loop does not close"
+
+
+def test_yae_starts_and_ends_her_clips_in_stance_a_with_her_feet_planted():
+    a = yc.idle_pose(0.5)
+    for name in yc.FROM_IDLE:
+        keys = yc.CLIPS[name]["keys"]
+        assert keys[0][1] == a and keys[-1][1] == a, name
+    feet = [("movew", "足ＩＫ.L"), ("movew", "足ＩＫ.R")]
+    for name in ("idle", "idle_low", "cast", "hurt"):
+        for _t, pose, _e in yc.CLIPS[name]["keys"]:
+            for kind, bone in feet:
+                got, want = _op(pose, kind, bone)[2], _op(a, kind, bone)[2]
+                assert got[:2] == want[:2], (name, _t, bone)
+
+
+def test_her_pack_has_no_gohei_so_her_fox_spirit_is_a_phantom():
+    cfg = chars.CHARS["yae"]
+    assert cfg["clips"] == "yae_clips" and cfg["blades"] == {} and cfg["prop"] is None
+    assert cfg["pmx"] == "yae/unpacked/八重神子.pmx"
+    assert set(yc.PHANTOM) == {"L"} and kc.PHANTOM["L"] < yc.PHANTOM["L"] < 0.72
+    atk = yc.CLIPS["attack"]
+    (imp,) = atk["events"]["impact"]
+    assert atk["events"]["main"] == imp and any(abs(k[0] - imp) < 1e-9 for k in atk["keys"])
+    assert abs(imp * atk["fps"] - round(imp * atk["fps"])) < 1e-6, "the impact lands on a frame"
+    assert all(w["blade"] in yc.PHANTOM and w["from"] < imp <= w["to"] for w in atk["trails"])
+    assert any(abs(b["t"] - imp) < 1e-9 and b["kind"] == "thrust" for b in atk["bursts"]), "the spirit at the hit"
+    hit = next(k[1] for k in atk["keys"] if abs(k[0] - imp) < 1e-9)
+    far = _op(hit, "hand", "L")[3]
+    assert far[0] >= 0.5 and abs(far[2]) < 0.2, far
+    # the streak runs along the hand (render.py phantom_points): the hand points at the enemy
+    aim = _op(hit, "aimw", "手首.L")[2]
+    assert aim[0] > 0.9 and abs(aim[2]) < 0.2, aim
+    # no lunge: she does not close the distance
+    lead = _op(hit, "movew", "足ＩＫ.L")[2][0] - _op(yc.idle_pose(0.5), "movew", "足ＩＫ.L")[2][0]
+    assert 0 <= lead <= 0.05, lead
+
+
+def test_her_idle_never_holds_an_arm_out_and_her_open_hand_is_palm_up():
+    stills = [k[1] for name in ("idle", "idle_low", "merchant") for k in yc.CLIPS[name]["keys"]]
+    stills += [yc.CLIPS[name]["keys"][i][1] for name in (*yc.FROM_IDLE, "death") for i in (0, -1)]
+    stills += [yc.SELECT, yc.PORTRAIT, yc.STAND]
+    for p in stills:
+        assert not _held_out(p), _held_out(p)
+    a = yc.idle_pose(0.0)
+    assert _op(a, "aimw", "手首.L")[3] == yc.FAR_AIM[1], "palm up"
+    assert _op(a, "hand", "R")[3][2] < 0, "the near hand on her hip"
+
+
+def test_yaes_sleeves_hang_from_the_elbows_and_her_robe_lies_over_her_lap_when_seated():
+    poses = [k[1] for clip in yc.CLIPS.values() for k in clip["keys"]] + list(yc.STILLS.values())
+    for p in poses:
+        aimed = [op for op in p["ops"] if op[0] == "aimw" and op[1] in yc.SLEEVES.values()]
+        assert {op[1] for op in aimed} == set(yc.SLEEVES.values()), p
+        last_hand = max(i for i, op in enumerate(p["ops"]) if op[0] == "hand")
+        assert all(p["ops"].index(op) > last_hand for op in aimed), "the sleeves hang from where the arms ended"
+        for op in aimed:
+            assert op[2][2] < 0, "down"
+    # kneeling (death's last key) and seated (the rest seat): every front
+    # column is laid forward and down; standing, none is
+    for p in (yc.CLIPS["death"]["keys"][-1][1], yc.REST):
+        laid = {op[1]: op[2] for op in p["ops"] if op[0] == "aimw" and op[1] in yc.FRONT}
+        assert set(laid) == set(yc.FRONT), p
+        front = yc.fwd(p["yaw"])
+        for d in laid.values():
+            assert d[0] * front[0] + d[1] * front[1] > 0 and d[2] < 0, d
+    assert not [op for op in yc.idle_pose(0.0)["ops"] if op[0] == "aimw" and op[1] in yc.FRONT]
+
+
+def test_yaes_scale_jobs_and_sheets():
+    job = build.jobs("yae")
+    assert set(job[0]["clips"].split(",")) == set(pack.COMBAT_CLIPS["yae"])
+    assert {"stance_a", "stand"} <= set(job[0]["stills"].split(","))
+    assert [j["clips"] or j["stills"] for j in job[1:]] == ["merchant", "rest", "select,portrait"]
+    assert set(pack.SHEET_FILES["yae"]) == {*pack.COMBAT_CLIPS["yae"], "merchant"}
+    assert set(pack.FX_FILES["yae"]) == {"attack"}
+    assert "yae" not in pack.STAGE_FILES and "yae" not in pack.EFFECT_FILES
+    # her rest height was read off the PMX (ears and ornament on top); at
+    # 70 in (Navia's) over a 68 in adult at 235 px she is ~241.9 px, taller
+    # than Kokomi and Furina at 63 in and shorter than Varka at 82
+    assert build.REST_HEIGHT["yae"] == 1.8057 and chars.CHARS["yae"]["height_in"] == chars.GUEST_HEIGHTS_IN["navia"]
+    assert abs(build.combat_ppu("yae") * build.REST_HEIGHT["yae"] * chars.COMBAT_SCALE - 241.9) < 0.5
+    assert {"stance_a", "stand", "rest", "select", "portrait"} <= set(yc.STILLS)
+
+
+def test_every_yae_out_path_has_one_producer():
+    from tools import art_lint
+    files = [*pack.SHEET_FILES["yae"].values(), *pack.FX_FILES["yae"].values(), pack.SHADOW_FILES["yae"]]
+    for f in files:
+        assert art_lint.GENERATOR_OWNED[f"ImageGen/images/yae/model/frames/{f}"] == "char_render/pack.py", f
+    for out in ("model/yae_rest.png", "ui/select_closeup.png", "ui/select_portrait.png",
+                "ui/select_portrait_locked.png"):
+        assert art_lint.GENERATOR_OWNED[f"ImageGen/images/yae/{out}"] == "char_render/pack.py", out
