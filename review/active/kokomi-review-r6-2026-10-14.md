@@ -99,13 +99,25 @@ Companion summoners, every Block number and the starter.
 
 ## Picks
 
+**Ruled 2026-10-14, picks 2, 3 and 4 (b, a, b).** [USER]: "2,3,4) Good with
+the defaults, other than the first question." Pick 1 is open.
+
 1. **Mend's cap.** Mend heals only up to the HP you started the combat with.
    At near-full HP, The Moon's Plan prints 6 and heals 1. All three Mend cards
    are Rare and Exhaust: The Moon, Kurage's Mercy and Mizuki. `LAW.md` already
    allows true healing on such cards, so this changes the arm, not LAW.
-   - (a) Keep the cap and print it on the card and receipt: "Mend 6 (1 will
-     land)".
-   - **(b, default) Mend heals up to Max HP**, as a plain Heal.
+   - **(a, default)** Keep the cap and print it on the card and receipt:
+     "Mend 6 (1 will land)".
+   - (b) Mend heals up to Max HP, as a plain Heal.
+
+   *Claude, after [USER] asked "Why, exactly, do we want to just turn Mend
+   into Heal?":* the default moved from (b) to (a). Mend already returns HP
+   lost in the fight it is played in. The only thing a Heal adds is HP
+   carried in from earlier fights, which is run-long sustain. The cap was
+   built to keep that out (`kokomi-brief-2026-09-01.md`: "Mend is a thing she
+   can do, not a premise"). The Demon losses were short on damage a turn, not
+   on healing. The real defect is that the card prints 6 and heals 1 without
+   saying why, and (a) fixes that.
 
 2. **The reaction Powers** (0 of 25 over two rounds).
    - (a) Move only the numbers (items 4 and 5 above) and watch one more round.
