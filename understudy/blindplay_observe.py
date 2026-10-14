@@ -669,6 +669,15 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         obs["text"] = _text(ev.get("body") or ev.get("text")
                             or ev.get("description"))
         obs["in_dialogue"] = bool(ev.get("in_dialogue"))
+        # CO-OP SPIRAL ABYSS (2026-10-14): "the page does not say which
+        # Shadow lands on the enemies". Once the Blessing pick lands, the
+        # room carries the result line (the pick and the Shadow the enemies
+        # took; `vendor/STS2_MCP/gits/GitsAbyssPage.cs`) for as long as the
+        # room lasts, and the page says it at the top.
+        screen = ev.get("abyss_screen")
+        obs["abyss_result"] = _text(
+            ev.get("abyss_result")
+            or (screen.get("result") if isinstance(screen, dict) else None))
         # `EB-448`: through the event screen's OWN namer, so each option
         # carries the faces of the things it names and the mark saying it has
         # already been taken -- and so `choose` resolves against the same rows

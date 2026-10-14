@@ -9,7 +9,9 @@
 //   the Blessing and whose description is its text and "Shadow: name -
 //   text"), `in_dialogue` is false, and `abyss_screen` carries the act title,
 //   the strip and, once the pick lands, the result line. When the overlay is
-//   gone the room is the ordinary Ancient page again.
+//   gone the room is the ordinary Ancient page again, plus `abyss_result`
+//   (the pick and the Shadow the enemies took) read off the room's meta for
+//   as long as the room lasts (co-op Abyss run, 2026-10-14).
 //
 //   CHOOSE. `ExecuteChooseEventOption` asks `GitsChooseAbyssCard` first: card
 //   i's clickable is a game `NClickableControl`, and `ForceClick` emits the
@@ -63,7 +65,19 @@ public static partial class McpMod
     {
         var root = GitsAbyssOverlayRoot(uiRoom);
         var json = root == null ? null : GitsAbyssPageJson(root);
-        if (json != null) GitsAbyssPage.Apply(state, json);
+        if (json != null && GitsAbyssPage.Apply(state, json)) return;
+        try
+        {
+            if (uiRoom != null && GodotObject.IsInstanceValid(uiRoom)
+                && uiRoom.HasMeta(GitsAbyssPage.ResultMetaKey))
+            {
+                GitsAbyssPage.ApplyResult(state, uiRoom.GetMeta(GitsAbyssPage.ResultMetaKey).AsString());
+            }
+        }
+        catch (Exception)
+        {
+            // No result line: the room reads as before.
+        }
     }
 
     /// <summary>A choice while the Blessing screen is up, or null when it is

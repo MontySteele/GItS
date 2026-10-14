@@ -4329,6 +4329,10 @@ def render(obs: dict[str, Any]) -> str:
                      "its choice has already been taken)"])
     elif obs["screen"] == "event":
         out += [f"# {obs['title'] or 'Something happens'}", ""]
+        # Co-op Spiral Abyss (2026-10-14): the Blessing pick's result, which
+        # names the Shadow the enemies took (`blindplay_observe`).
+        if obs.get("abyss_result"):
+            out += [f"The Spiral Abyss: {obs['abyss_result']}", ""]
         if obs["text"]:
             out += [obs["text"], ""]
         if obs["in_dialogue"]:
