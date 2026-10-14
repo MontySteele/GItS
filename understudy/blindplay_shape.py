@@ -493,6 +493,13 @@ def clear_sent(lane: object = None) -> None:
     drop_state(sent_mark_path(lane))
 
 
+def last_sent_command(lane: object = None) -> str:
+    """The last command this lane sent, or `""` (no freshness check: it
+    only names the card in a sentence)."""
+    row = read_state_json(sent_mark_path(lane))
+    return str(row.get("command") or "") if isinstance(row, dict) else ""
+
+
 def screen_changed_after(room: str, lane: object = None,
                          now: float | None = None) -> str | None:
     """The sent command after which the lane left its room, if no look has
@@ -524,10 +531,11 @@ def look_path(lane: object = None) -> Path:
 
 
 def remember_look(room: str, living: list[str], lane: object = None,
-                  now: float | None = None) -> None:
-    """Remember the room the seat last looked at and the enemies alive on
-    it (printed names and letters, folded)."""
-    row = {"room": room, "living": list(living),
+                  now: float | None = None, screen: str = "") -> None:
+    """Remember the room the seat last looked at, the enemies alive on it
+    (printed names and letters, folded), and the screen kind the page was
+    rendered on (`state_type`), so a chooser that opened since is seen."""
+    row = {"room": room, "living": list(living), "screen": screen,
            "at": time.time() if now is None else now}
     write_atomic(look_path(lane), json.dumps(row))
 
