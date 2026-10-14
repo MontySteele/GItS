@@ -44,8 +44,7 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   ruled; the Stellar-Conduct nod is parked). **Prototype, batch one built
   in C#** (2026-10-13): the card paper
   `review/active/yae-card-paper-2026-10-13.md` is ruled (Levels by planting,
-  3-turn Sakura, Proofread plain at 1 [0], the rest-site Publish keeps a
-  card's last Annotation, two tips). Her 42 rows are the `proto_ym_` rows of
+  3-turn Sakura, Proofread plain at 1 [0], two tips). Her 42 rows are the `proto_ym_` rows of
   `docs/prototype-surface.yaml`; rules `Powers/Prototype/YaeShrine.cs` and
   `YaeAnnotations.cs`, sim twin `tier0/engine/yae_shrine.py`, harness
   `tools/yae_expansion_sim.py`. **Rites plus Sakura Annotations built**
@@ -57,7 +56,11 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   built** (2026-10-14, same doc): Last Bloom (a withering Sakura strikes once
   more), no Level cap, global Levels only from Fox's Mooncall (+1 per copy);
   Sakura Grove levels the newest Sakura each turn, Mikage Thunder levels
-  every Sakura then Tenko. Next: Yae seats (3 Kokomi and 2 Yae if this lands
+  every Sakura then Tenko. **Publish after elites and bosses** (2026-10-14,
+  ruled, same doc): her starter relic no longer adds a rest-site option;
+  "After an elite or boss fight, you may Publish an Annotation." It is a row
+  on the combat reward screen offering the cards that fight left Annotated
+  (not yet Published); untested live until a deploy. Next: Yae seats (3 Kokomi and 2 Yae if this lands
   before the current seats finish), then [USER]'s play.
 
 ## The kits

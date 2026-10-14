@@ -109,8 +109,9 @@ draft, a BaseLib saved field on the deck card) and `YaePowers.cs`; the sim
 twin is `tier0/engine/yae_shrine.py`. Her cards speak one verb,
 `{op: yae, kind: ...}`, each kind one `YaeCards.<Kind>` call; its numbers are
 the card's `Ym*` vars and the upgrade keys `yae_per` / `yae_base` /
-`yae_amount` move them. Meditations of a Yako adds the rest-site Publish
-(`Relics/MeditationsOfAYako.cs`, Shovel's Dig shape). Her pool is a staged 40
+`yae_amount` move them. Meditations of a Yako adds a Publish row to the
+reward screen after an elite or boss fight (`Relics/MeditationsOfAYako.cs`,
+`YaePublishReward`; it was a rest-site option until 2026-10-14). Her pool is a staged 40
 (`PoolCountTests`' `size:` argument). Parity: `tier0/tests/test_yae_parity.py`.
 Since the design axes (2026-10-14) `kind: rite` names its Rite (`rite:`
 thunder / warding / wildfire / offering, the C# `YaeRite`) and

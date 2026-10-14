@@ -17,8 +17,10 @@ the rules twin (`tier0/engine/yae_shrine.py`). Three readings, all smoke:
   the tier-0.5 act-1 pools, floors N N N N E R N N E R B, then a rest and
   an act-2 boss. A card reward of three after every non-boss-2 fight
   (C/U/R 60/37/3 after a normal fight, 50/40/10 after an elite or the boss).
-  A rest heals 30% OR Publishes (the relic): the pilot Publishes when HP is
-  at least half and a Sakura Seal or Footnote draft waits, else rests.
+  A rest heals 30%. After an elite or the act-1 boss the relic offers a
+  Publish (ruled 2026-10-14; it was a rest-site option): the pilot keeps the
+  best Annotation that fight left on a card not yet Published
+  (`yae_shrine.publish_after_fight`).
   Encounters, HP rolls and offers come from pilot-independent streams.
 
   SCALING -- per turn of every run fight: Sakura standing, their Levels,
@@ -444,19 +446,6 @@ def _turn_rows(log):
     return out
 
 
-def _publish_at_rest(hp, max_hp, drafts, published):
-    """Meditations of a Yako at a rest: Publish a waiting Sakura Seal or
-    Footnote draft when HP is at least half, else rest."""
-    from tier0.engine import yae_shrine as Y
-    good = {s: a for s, a in drafts.items()
-            if a in (Y.SAKURA_SEAL, Y.FOOTNOTE) and published.get(s) != a}
-    if hp * 2 >= max_hp and good:
-        slot = min(good, key=lambda s: Y.PUBLISH_ORDER.index(good[s]))
-        published[slot] = good[slot]
-        return hp, ("publish", slot, good[slot])
-    return min(max_hp, hp + int(0.3 * max_hp)), ("rest", None, None)
-
-
 def run(seed, pilot):
     from tier05 import acts
     enc_rng = random.Random(seed)
@@ -465,14 +454,14 @@ def run(seed, pilot):
     pl = pool()
     deck: list = []
     hp = MAX_HP
+    from tier0.engine import yae_shrine as Y
     published: dict = {}
-    drafts: dict = {}
-    fights, offers, rests = [], [], []
+    fights, offers, rests, publishes = [], [], [], []
     act1 = False
     for floor, kind in enumerate(TEMPLATE + ["B2"]):
         if kind == "R":
-            hp, choice = _publish_at_rest(hp, MAX_HP, drafts, published)
-            rests.append(choice)
+            hp = min(MAX_HP, hp + int(0.3 * MAX_HP))
+            rests.append(("rest", None, None))
             continue
         if kind == "B2":
             hp = min(MAX_HP, hp + int(0.3 * MAX_HP))
@@ -484,10 +473,13 @@ def run(seed, pilot):
         r.update(kind=kind, enc=spec["id"])
         fights.append(r)
         hp = r["hp_end"]
-        drafts.update(r["drafts"])
         published.update(r["published"])
         if not r["won"]:
             break
+        # The relic's Publish, after an elite or the act-1 boss win.
+        room = {"E": "elite", "B": "boss"}.get(kind, "monster")
+        for slot, ann in Y.publish_after_fight(room, r["drafts"], published):
+            publishes.append((kind, slot, ann))
         if kind == "B":
             act1 = True
         if kind in RARITY:
@@ -499,7 +491,7 @@ def run(seed, pilot):
     won = fights[-1]["kind"] == "B2" and fights[-1]["won"]
     return {"seed": seed, "pilot": pilot, "act1": act1, "won": won,
             "fights": fights, "offers": offers, "rests": rests,
-            "published": published}
+            "publishes": publishes, "published": published}
 
 
 def starter_battery(seed):
@@ -641,8 +633,9 @@ def report(data, out=print):
     out("|---|---|---|---|")
     for cid, o in sorted(offered.items(), key=lambda kv: -kv[1]):
         out(f"| {cid[len(P):]} | {o} | {picks[cid]} | {picks[cid] / o:.2f} |")
-    rests = Counter(c[0] for r in runs for c in r["rests"])
-    out(f"\nRest sites: {dict(rests)}; annotations published by slot: "
+    pubs = Counter(k for r in runs for k, _, _ in r.get("publishes", []))
+    out(f"\nAfter-fight Publishes by room: {dict(pubs)}; annotations "
+        f"published by slot: "
         f"{Counter(a for r in runs for a in r['published'].values())}")
     errs = [f for r in runs for f in r["fights"] if f["error"]]
     if errs:

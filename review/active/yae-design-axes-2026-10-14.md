@@ -46,8 +46,9 @@ Sources:
   strike) and Fox's Mooncall (Level 4).
 - **Within a hand:** Red Ink (+3 on one card) and Bestseller (+3 per
   Annotated card).
-- **Across the run:** Publishing, which keeps one Edit for good at a rest
-  site. No other character in the game has this.
+- **Across the run:** Publishing, which keeps one Edit for good after an
+  elite or boss fight (at a rest site until 2026-10-14; see the last
+  section). No other character in the game has this.
 
 **Velocity.**
 - **Energy:** no card gives any.
@@ -364,3 +365,35 @@ Built in both engines (C# `YaeShrine.cs`, sim `tier0/engine/yae_shrine.py`):
 
 Fox's Mooncall raises Grafted Branch too (confirmed 2026-10-14): under one
 Mooncall it starts at Level 3 [4], under two at 4 [5].
+
+## Publish after elites and bosses, ruled 2026-10-14
+
+[USER], on the rest-site Publish: "Hmm. Publish is already competing with
+smithing an upgrade as "thing you do at a rest site" - we might need to
+rethink this one."
+
+Claude proposed: "Publish after elites and bosses. Her starter relic becomes
+something like: 'After an elite or boss fight, you may Publish one card's
+Annotation.' The choice is made on the reward screen, from the cards
+Annotated in that fight, so you choose with the evidence fresh. ... If [the
+reward screen can't take a choice], an event-style popup right after the
+fight works the same way."
+
+[USER]: "Yep, sounds good to me! Let's try that."
+
+Built in both engines:
+1. **Meditations of a Yako:** "After an elite or boss fight, you may
+   Publish an Annotation." The rest-site option is gone; a rest site is
+   Rest or Smith again.
+2. **On the reward screen.** After an elite or boss win, the reward screen
+   carries a row, "Publish an Annotation". It opens a grid of the cards that
+   fight left Annotated, each shown wearing its Annotation; the copy picked
+   keeps it for the run. The grid can be closed without a pick, and leaving
+   the reward screen skips it. Nothing is offered after a normal fight, after
+   the final boss, or when no card is Annotated. A card that already carries
+   a Published Annotation is not offered (a card holds one).
+3. **Enlightened Blessing** (the Orobas upgrade) was "Publish and then Rest
+   or Smith", which no longer reads. Claude's interim reading: "After an
+   elite or boss fight, you may Publish up to 2 Annotations." Open to
+   change.
+4. Sakura Annotations are still never Published.

@@ -48,8 +48,10 @@ THE RULES AS MODELLED:
   * PUBLISH: the card's Annotation is marked permanent (`ym_published`). The
     sim's fights are single combats; the run harness (`tools/yae_expansion_sim`)
     carries a Published Annotation into the next fight by deck slot, and
-    Meditations of a Yako's rest-site Publish reads the DRAFTS the fight
-    left (`YaeLedger.drafts`, slot -> last Annotation).
+    Meditations of a Yako Publishes after an elite or boss fight (ruled
+    2026-10-14; it was a rest-site option): it reads the DRAFTS that fight
+    left (`YaeLedger.drafts`, slot -> last Annotation) and offers each slot
+    not yet Published (`publish_choices`, `publish_after_fight`).
   * POWERS (self, by name): Sakura Grove (at her turn start, after Yakan
     Offering, the newest Sakura gains n Levels), Edict of Cleansing
     (+n on a damage strike at an enemy that is Weak or wears Pyro, Hydro or
@@ -134,6 +136,11 @@ REACTING_AURAS = ("pyro", "hydro", "cryo")
 # --- the relic, as the sim spells a starting relic (`Player.relic_hooks`) ---
 MEDITATIONS = "meditations_of_a_yako"
 MEDITATIONS_UPGRADED = "meditations_of_a_yako+"
+#: Annotations one after-elite Publish may keep (C# `PublishCount`):
+#: Enlightened Blessing, the Orobas upgrade, keeps up to two.
+PUBLISH_COUNT = {MEDITATIONS: 1, MEDITATIONS_UPGRADED: 2}
+#: The rooms whose win offers it (C# `YaeEditing.OffersPublish`).
+PUBLISH_ROOMS = ("elite", "boss")
 
 # --- the Rites (design axes, ruled 2026-10-14; C# `YaeRite`) ---
 THUNDER, WARDING, WILDFIRE, OFFERING = (
@@ -210,7 +217,7 @@ class YaeLedger:
     strike_damage: int = 0        # printed amounts, this combat
     edits: int = 0
     #: slot -> last Annotation the fight left on that deck card (the
-    #: manuscript the rest-site Publish reads).
+    #: evidence the after-elite Publish reads).
     drafts: dict = field(default_factory=dict)
     # --- the pilot's choices (None: the default reading) ---
     edit_choice: object = None    # (state, card, annotation) -> card | None
@@ -696,6 +703,48 @@ def publish(state, editor) -> None:
     best = min(cands, key=lambda c: PUBLISH_ORDER.index(c.ym_annotation))
     best.ym_published = True
     state.emit("yae_publish", card=best.id, annotation=best.ym_annotation)
+
+
+def offers_publish(room: str, gives_rewards: bool = True,
+                   final_boss: bool = False) -> bool:
+    """Meditations of a Yako: "After an elite or boss fight, you may Publish
+    an Annotation." Never a normal fight, and never the final boss (no
+    reward screen follows it). C# `YaeEditing.OffersPublish`."""
+    return gives_rewards and not final_boss and room in PUBLISH_ROOMS
+
+
+def publish_choices(drafts: dict, published: dict) -> list:
+    """The offer: every deck slot the fight left Annotated that is not yet
+    Published (a card holds one Enchantment), in slot order. C#
+    `YaeEditing.PublishChoices`."""
+    return [slot for slot in sorted(drafts)
+            if drafts[slot] and slot not in published]
+
+
+def publish_after_fight(room: str, drafts: dict, published: dict,
+                        relic: str = MEDITATIONS, pick=None,
+                        final_boss: bool = False) -> list:
+    """The after-elite Publish, run-level: `drafts` is the fight's
+    (`YaeLedger.drafts`), `published` the run's {slot: Annotation}, written
+    in place. `pick(choices, drafts)` returns the slots to keep (empty is the
+    skip); the default reading keeps the best by `PUBLISH_ORDER`. Returns
+    [(slot, Annotation)] Published, empty when nothing is offered."""
+    if relic not in PUBLISH_COUNT or not offers_publish(
+            room, final_boss=final_boss):
+        return []
+    choices = publish_choices(drafts, published)
+    if not choices:
+        return []
+    if pick is None:
+        picked = sorted(choices, key=lambda s: (
+            PUBLISH_ORDER.index(drafts[s]), s))
+    else:
+        picked = [s for s in (pick(choices, drafts) or []) if s in choices]
+    out = []
+    for slot in picked[:PUBLISH_COUNT[relic]]:
+        published[slot] = drafts[slot]
+        out.append((slot, drafts[slot]))
+    return out
 
 
 def after_play(state, card) -> None:

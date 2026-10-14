@@ -14,6 +14,7 @@ using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Rooms;
 using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Powers;
@@ -252,7 +253,7 @@ public sealed class RoyaltiesAnnotation : YaeAnnotationModel
 
 /// <summary>
 /// THE PUBLISHING HOUSE (paper sec.2): Edit, the Annotated read, Publish and
-/// the drafts the rest-site Publish reads. Sim twin: the publishing-house
+/// the drafts the after-elite Publish reads. Sim twin: the publishing-house
 /// half of <c>tier0/engine/yae_shrine.py</c>.
 /// </summary>
 public static class YaeEditing
@@ -281,9 +282,10 @@ public static class YaeEditing
     /// per card)". Kept on the DECK card and saved with it (BaseLib's saved
     /// field on <see cref="CardModel"/>, the shape
     /// <c>Relics.VarkaStarterKnight</c> uses on a relic), so a save and load
-    /// between the fight and the rest keeps it. Written at every Edit
-    /// (<see cref="Annotate"/>), which is "last carried": an Annotation only
-    /// changes by an Edit. The value is a <see cref="YaeAnnotation"/>'s
+    /// between the fight and its reward screen keeps it. Written at every
+    /// Edit (<see cref="Annotate"/>), and rewritten at the end of every fight
+    /// to what that fight left (<see cref="SnapshotDrafts"/>), so after an
+    /// elite or boss it is exactly that fight's evidence. The value is a <see cref="YaeAnnotation"/>'s
     /// NAME, and the default is null so a card never Edited writes nothing
     /// into the save (BaseLib skips a null value); every other character's
     /// cards carry no field.
@@ -374,7 +376,7 @@ public static class YaeEditing
     /// <summary>
     /// Give <paramref name="card"/> one Annotation, overwriting any it had.
     /// A combat card also writes its deck card's draft, which is what the
-    /// rest-site Publish reads.
+    /// after-elite Publish reads.
     /// </summary>
     public static bool Annotate(CardModel card, YaeAnnotation annotation,
                                 bool recordDraft = true)
@@ -471,8 +473,96 @@ public static class YaeEditing
         PublishToDeck(deck, Of(picked));
     }
 
-    /// <summary>The deck cards a rest-site Publish can choose: every card
-    /// holding a draft. PURE over the deck.</summary>
-    public static IEnumerable<CardModel> Publishable(Player player) =>
-        player.Deck.Cards.Where(c => Draft(c) != YaeAnnotation.None);
+    // ---- Publish after elites and bosses (ruled 2026-10-14) ---------------
+
+    /// <summary>
+    /// Does this fight's reward screen carry Meditations of a Yako's Publish?
+    /// "After an elite or boss fight": an elite or a boss that gives rewards,
+    /// never a normal fight, and never the final boss (no reward screen
+    /// follows it). PURE.
+    /// </summary>
+    public static bool OffersPublish(RoomType roomType, bool givesRewards,
+                                     bool finalBoss) =>
+        givesRewards && !finalBoss
+        && (roomType == RoomType.Elite || roomType == RoomType.Boss);
+
+    /// <summary>
+    /// The Publish offer, PURE over its rows: each row is a deck card, the
+    /// Annotation the fight left on it (its draft) and whether it already
+    /// carries a Published Annotation. Offered: every card the fight left
+    /// Annotated that is not yet Published (a card holds one Enchantment, so
+    /// a second permanent Annotation has nowhere to go), in deck order, each
+    /// once.
+    /// </summary>
+    public static List<T> PublishChoices<T>(
+        IEnumerable<(T Card, YaeAnnotation Draft, bool Published)> rows) where T : class =>
+        rows.Where(r => r.Draft != YaeAnnotation.None && !r.Published)
+            .Select(r => r.Card)
+            .Distinct()
+            .ToList();
+
+    /// <summary>The Publish offer for a player's deck.</summary>
+    public static IEnumerable<CardModel> PublishChoices(Player player) =>
+        PublishChoices(player.Deck.Cards.Select(c =>
+            (c, Draft(c), c.Enchantment is YaeAnnotationModel)));
+
+    /// <summary>
+    /// At the end of a fight: every deck card's draft becomes the Annotation
+    /// its combat copy carries now, and a card the fight left plain holds
+    /// none. Cards made in combat have no deck card and are skipped.
+    /// </summary>
+    public static void SnapshotDrafts(Player? player)
+    {
+        if (player == null) return;
+        var carried = new Dictionary<CardModel, YaeAnnotation>();
+        foreach (var card in player.PlayerCombatState?.AllCards
+                             ?? Enumerable.Empty<CardModel>())
+        {
+            if (card.DeckVersion is { } deck && IsAnnotated(card))
+            {
+                carried[deck] = Of(card);
+            }
+        }
+        foreach (var deck in player.Deck.Cards)
+        {
+            RecordDraft(deck, carried.TryGetValue(deck, out var a) ? a : YaeAnnotation.None);
+        }
+    }
+
+    /// <summary>After a Publish: the fight's evidence is spent.</summary>
+    public static void ClearDrafts(Player player)
+    {
+        foreach (var deck in player.Deck.Cards) RecordDraft(deck, YaeAnnotation.None);
+    }
+
+    /// <summary>A copy of a deck card wearing its draft, for the Publish grid
+    /// only: never put in a pile, and taken out of the run once the grid
+    /// closes.</summary>
+    public static CardModel PublishPreview(CardModel deckCard)
+    {
+        var preview = deckCard.Owner!.RunState.CloneCard(deckCard);
+        Annotate(preview, Draft(deckCard), recordDraft: false);
+        return preview;
+    }
+
+    /// <summary>The deck cards the grid's picks stand for: each preview is
+    /// the copy of the deck card at the same index, so the exact copy picked
+    /// is the one Published, even beside an identical card. Nothing picked
+    /// (the grid closed) is nothing. PURE.</summary>
+    public static List<T> ResolvePicks<T>(IReadOnlyList<T> previews,
+                                          IReadOnlyList<T> decks,
+                                          IEnumerable<T> picked) where T : class
+    {
+        var chosen = new List<T>();
+        foreach (var p in picked)
+        {
+            for (var k = 0; k < previews.Count && k < decks.Count; k++)
+            {
+                if (!ReferenceEquals(previews[k], p)) continue;
+                if (!chosen.Contains(decks[k])) chosen.Add(decks[k]);
+                break;
+            }
+        }
+        return chosen;
+    }
 }
