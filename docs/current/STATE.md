@@ -117,8 +117,12 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
 - **Latest:** the overnight wave (`review/records/furina-wave-2026-10-13.md`,
   1 win in 6) shipped its text and display fixes (#1202). Her Block pool is the
   smallest of any character (12 cards, 41 Block printed; census in the record).
-- **Next:** a card-pool review on [USER]'s playtest: Block first, then the
-  conditional cards and the ones never taken. Otherwise she is left alone.
+- **Since:** the pool review (`review/active/furina-pool-review-2026-10-13.md`,
+  #1211) and the Guest Star package
+  (`review/active/furina-guest-package-2026-10-13.md`, #1214) are built and
+  deployed.
+- **Next:** [USER]'s playtest of that build. Her new model (#1241) is wired in
+  once the guest pose fixes are approved. Parked: Wriothesley's rarity.
 
 **Varka: Balance.**
 - **Rules** (`review/active/varka-paper-kit-2026-09-28.md` sec.3;
