@@ -90,8 +90,10 @@ public class KleeTempoTests
     {
         Assert.Equal((6m, 9m), (new ProtoKoSimmer().DynamicVars.Damage.BaseValue,
                                 Upgraded<ProtoKoSimmer>().DynamicVars.Damage.BaseValue));
-        Assert.Equal((2m, 1m), (new ProtoKoTasteTest().DynamicVars["Stash"].BaseValue,
-                                Upgraded<ProtoKoTasteTest>().DynamicVars["Stash"].BaseValue));
+        // The Klee/Varka cleanup (2026-10-14): Exhaust replaced the two
+        // Confiscated, and the upgrade is cost 2 -> 1.
+        Assert.Equal((2, 1), (new ProtoKoTasteTest().EnergyCost.Canonical,
+                              Upgraded<ProtoKoTasteTest>().EnergyCost.GetWithModifiers(CostModifiers.None)));
         Assert.Equal((2m, 3m), (new ProtoKoTinkering().DynamicVars["Sparks"].BaseValue,
                                 Upgraded<ProtoKoTinkering>().DynamicVars["Sparks"].BaseValue));
         Assert.Equal((7m, 10m), (new ProtoKoDodocoTag().DynamicVars.Damage.BaseValue,
@@ -113,8 +115,7 @@ public class KleeTempoTests
             Face(new ProtoKoSimmer()));
         Assert.Equal(
             "Deal [gold]Pyro[/gold] damage equal to twice your [gold]Bombs[/gold] on "
-          + "the enemy. They do not go off. Add {Stash:diff()} "
-          + "[gold]Confiscated[/gold] into your [gold]Discard Pile[/gold]."
+          + "the enemy. They do not go off."
           + "{InCombat:\n(Deals {BombHit:diff()} damage)|}",
             Face(new ProtoKoTasteTest()));
         Assert.Equal(

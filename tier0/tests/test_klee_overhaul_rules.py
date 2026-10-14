@@ -1170,10 +1170,11 @@ def test_exquisite_compound_gathers_the_board_and_grows_each_bomb(overhaul):
     assert got == [(5 + 4, True, 0), (6 + 4, False, 0), (7 + 4, False, 3)]
 
 
-def test_exquisite_compound_row_plays_four_and_six_upgraded(overhaul):
-    """The sheet row through the card path: 4, and 6 upgraded, per Bomb."""
-    for cid, growth in (("proto_ko_careful_arrangement", 4),
-                        ("proto_ko_careful_arrangement+", 6)):
+def test_exquisite_compound_row_plays_seven_and_ten_upgraded(overhaul):
+    """The sheet row through the card path: 7, and 10 upgraded, per Bomb
+    (Klee/Varka cleanup 2026-10-14, was 4 [6])."""
+    for cid, growth in (("proto_ko_careful_arrangement", 7),
+                        ("proto_ko_careful_arrangement+", 10)):
         # The play binds its aim to the lowest-HP enemy: b.
         a, b = make_enemy(hp=200, name="a"), make_enemy(hp=100, name="b")
         state = klee_state([a, b])

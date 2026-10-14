@@ -8743,3 +8743,37 @@ defaults, other than the first question." Then, on pick 1: "Let's go with
 
 Pins: `tier0/tests/test_kokomi_review_r6_2026_10_14.py`,
 `klee-mod/KleeTests/Prototype/KokomiReviewR6Tests.cs`.
+
+## Klee cleanup, 2026-10-14 (staged on `klee-next`)
+
+Built from `review/active/klee-varka-cleanup-2026-10-14.md`, Klee's table.
+[USER]: "Otherwise agreed on these." Klee is at Balance, so these rows change
+on `klee-next` and reach `main` in one promotion PR with a suite record
+(`operations/stage-gate.md`); each prediction below is graded by that suite.
+
+- `proto_ko_ammo_scavenging` (Lizard-Tail Gunpowder, C Skill, 1): "Place a
+  Bomb 8. Draw 1 card." Was "Draw 1 card for each of your Bombs that went off
+  this turn." Upgrade unchanged (Bomb +3, so 11). The `draw_per_set_off` op
+  is replaced by a plain `draw` 1 (C# `CardPileCmd.Draw`); the op and
+  `ProtoBombPower.DrawPerSetOff` stay registered with no row using them.
+  Taken 0 of 10 offers; predicted taken in at least 2 of 10.
+- `proto_ko_taste_test` (Taste Test, U Attack, 2): gains Exhaust; "Add 2
+  Confiscated into your Discard Pile" is gone, so its Confiscated rules tip
+  goes too. The old upgrade (`cards: -1`, one fewer Confiscated) had nothing
+  left to act on; the upgrade is now cost 2 -> 1 (`cost: -1`). That is the
+  sheet's usual upgrade for a card whose number is not a flat value (The Big
+  One, All of My Treasures!): the "twice your Bombs" read
+  (`target_total_double`) has no tunable amount, and a triple read would be a
+  new mechanic. Confiscated was fuel for Klee Can Explain!; Taste Test was
+  never taken, so that synergy was never seen. Taken 0 of 13; predicted taken
+  at least once in 13.
+- `proto_ko_careful_arrangement` (Exquisite Compound, U Skill, 1): each Bomb
+  grows by 7 [10] (was 4 [6]; upgrade `grow: +3`, was +2). Against one enemy
+  it was a weaker Chain Fuse (9). Taken 0 of 15; predicted taken in at least
+  2 of 15.
+
+The kit as a whole should not move: suite runs still reach act 3 at
+base-five rates, with damage a turn within 15%.
+
+Pins: `tier0/tests/test_klee_cleanup_2026_10_14.py`,
+`klee-mod/KleeTests/Prototype/KleeCleanup20261014Tests.cs`.
