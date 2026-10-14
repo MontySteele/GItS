@@ -302,6 +302,88 @@ def sink_depth(P, co, mesh, mask):
     return round(deep, 4), n
 
 
+#: px of background each hilt keeps from his silhouette (dilation of the hilt
+#: before the overlap count)
+HILT_GAP_PX = 3
+
+
+def _hilt_local(ob, base):
+    """(guard bottom, guard top) in the blade's local Y. The guard runs from
+    `base` (chars.py: the blade just past the guard) up to the top of the
+    blade's widest part (|x| over 3/4 of the widest: the crossguard's fins),
+    so the hilt is the guard and everything above it (grip, pommel)."""
+    if "hilt_y" not in ob:
+        xs = [abs(v.co.x) for v in ob.data.vertices]
+        wide = max(xs) * 0.75
+        ys = [v.co.y for v in ob.data.vertices if abs(v.co.x) > wide]
+        ob["hilt_y"] = (min(min(ys), base), max(ys))
+    return tuple(ob["hilt_y"])
+
+
+def _raster(cam_ob, ppu, pts, tris, size):
+    """A bool mask (rows, cols) of the triangles `tris` (index tuples into the
+    world points pts, fans for quads) on the canvas, and the points' px."""
+    import numpy as np
+    w, h = size
+    px = np.array([T.to_px(cam_ob, ppu, p) for p in pts], np.float64)
+    m = np.zeros((h, w), bool)
+    for t in tris:
+        for j in range(1, len(t) - 1):
+            a, b, c = px[t[0]], px[t[j]], px[t[j + 1]]
+            x0, x1 = int(max(0, np.floor(min(a[0], b[0], c[0])))), int(min(w - 1, np.ceil(max(a[0], b[0], c[0]))))
+            y0, y1 = int(max(0, np.floor(min(a[1], b[1], c[1])))), int(min(h - 1, np.ceil(max(a[1], b[1], c[1]))))
+            if x1 < x0 or y1 < y0:
+                continue
+            d = (b[1] - c[1]) * (a[0] - c[0]) + (c[0] - b[0]) * (a[1] - c[1])
+            if abs(d) < 1e-9:
+                continue
+            X, Y = np.meshgrid(np.arange(x0, x1 + 1) + 0.5, np.arange(y0, y1 + 1) + 0.5)
+            l1 = ((b[1] - c[1]) * (X - c[0]) + (c[0] - b[0]) * (Y - c[1])) / d
+            l2 = ((c[1] - a[1]) * (X - c[0]) + (a[0] - c[0]) * (Y - c[1])) / d
+            m[y0:y1 + 1, x0:x1 + 1] |= (l1 >= 0) & (l2 >= 0) & (l1 + l2 <= 1)
+    return m, px.tolist()
+
+
+def _grow(m, r):
+    """The mask grown by r px (a square)."""
+    import numpy as np
+    out = m.copy()
+    h, w = m.shape
+    for dy in range(-r, r + 1):
+        for dx in range(-r, r + 1):
+            src = m[max(0, -dy):h - max(0, dy), max(0, -dx):w - max(0, dx)]
+            out[max(0, dy):max(0, dy) + src.shape[0], max(0, dx):max(0, dx) + src.shape[1]] |= src
+    return out
+
+
+def hilts(mesh, blade_obs, cam_ob, ppu, co):
+    """Per blade on the canvas (px): the hilt's box, the guard's box, and how
+    many px of the hilt (grown by HILT_GAP_PX) fall on his body's silhouette."""
+    sc = bpy.context.scene
+    size = (sc.render.resolution_x, sc.render.resolution_y)
+    B, _ = _raster(cam_ob, ppu, [Vector(c) for c in co], [tuple(p.vertices) for p in mesh.data.polygons], size)
+    out = {}
+    for side, ob in blade_obs.items():
+        if ob.hide_render:
+            continue
+        g0, g1 = _hilt_local(ob, CFG["blades"][side]["base"])
+        mw = ob.matrix_world
+        keep = [v.index for v in ob.data.vertices if v.co.y >= g0]
+        ks = set(keep)
+        pts = [mw @ v.co for v in ob.data.vertices]
+        tris = [tuple(p.vertices) for p in ob.data.polygons if all(i in ks for i in p.vertices)]
+        H, px = _raster(cam_ob, ppu, pts, tris, size)
+        H = _grow(H, HILT_GAP_PX)
+        hp = [px[i] for i in keep]
+        gp = [px[v.index] for v in ob.data.vertices if g0 <= v.co.y <= g1]
+
+        def box(q):
+            return [round(min(p[0] for p in q), 1), round(min(p[1] for p in q), 1),
+                    round(max(p[0] for p in q), 1), round(max(p[1] for p in q), 1)]
+        out[side] = {"hilt_box_px": box(hp), "guard_box_px": box(gp), "on_body_px": int((H & B).sum())}
+    return out
+
+
 def arms_crossed(arm, mesh, blade_obs, cam_ob, ppu):
     """Stance B's measure (the manifest's `arms_crossed`): each forearm's
     deepest sink into the other arm and into the body; where his forearms
@@ -322,6 +404,7 @@ def arms_crossed(arm, mesh, blade_obs, cam_ob, ppu):
         if not ob.hide_render:
             tops[side] = round(min(T.to_px(cam_ob, ppu, c)[1] for c in T.world_box([ob])), 1)
     out["blade_top_px"] = tops
+    out["hilts"] = hilts(mesh, blade_obs, cam_ob, ppu, co)
     return out
 
 

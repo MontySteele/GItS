@@ -581,21 +581,25 @@ ASCENSION = {
 # ------------------------------------------------------------------ stance B
 # Where he is not fighting (the shop, character select): upright and at ease,
 # his arms crossed over his chest, both claymores planted point-down in the
-# ground in front of him, standing on their own.
+# ground either side of him, standing on their own.
 #: [USER], 2026-10-13: "I dont think the "hands over sword" thing is working
 #: for Varka. Can we have him cross his arms instead, with his swords infront
 #: of him? And let's have the facial expression be more of a slight smile or
 #: smirk." The near (right) forearm crosses in front, its hand tucked under
-#: the far upper arm; the far (left) forearm lies behind it, its hand tucked
-#: under the near upper arm. render.py arms_crossed measures that no forearm
-#: or gauntlet goes into the other arm or his chest, and that the blades'
-#: tops stay under his crossed forearms (so they hide neither those nor his
-#: face). Each blade's pommel top stands at about his waist; the points go in
-#: about a third of their length (pack.py cuts them at the ground line).
-B_L = (0.18, -0.42, 1.28)        # the pommels' tops, from the ground under him
-B_R = (-0.16, -0.44, 1.28)
-B_L_DIR = (0.07, 0.0, -1.0)      # guard to point: the points a little apart
-B_R_DIR = (-0.07, 0.0, -1.0)
+#: the far upper arm; the far (left) forearm lies behind it, its hand closing
+#: round the near elbow. render.py arms_crossed measures that no forearm or
+#: gauntlet goes into the other arm or his chest.
+#: Then, on the swords planted before his legs: "the swords are off-screen
+#: (rendered too low and cropped - the hilts are blending into his pants /
+#: torso)". So they flank him: one outside his near leg, one outside his far
+#: leg, planted shallow, each crossguard at about his hip and its pommel at
+#: about his lower ribs. arms_crossed also measures each hilt against his
+#: silhouette on the canvas (a gap of background between them), and pack.py
+#: frames the select close-up so both crossguards sit inside it.
+B_L = (0.62, -0.02, 1.52)        # the pommels' tops, from the ground under him
+B_R = (-0.62, -0.04, 1.52)
+B_L_DIR = (0.03, 0.0, -1.0)      # guard to point: the points a hair apart
+B_R_DIR = (-0.03, 0.0, -1.0)
 POMMEL_TOP = {"L": 0.338, "R": 0.354}        # chars.CHARS["varka"]["blades"][side]["pommel"][1]
 #: the wrists, from his upper chest's head, and where each elbow bends
 CROSS_R = (0.10, -0.24, -0.05)

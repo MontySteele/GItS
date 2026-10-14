@@ -294,7 +294,7 @@ def test_the_impacts_are_marked_and_the_trails_cover_them():
     assert any(w["blade"] == vc.DRIVE and w["from"] <= t <= w["to"] for w in asc["trails"])
 
 
-def test_stance_b_crosses_his_arms_with_both_blades_planted_in_front():
+def test_stance_b_crosses_his_arms_with_both_blades_planted_beside_him():
     # [USER], 2026-10-13: "Can we have him cross his arms instead, with his
     # swords infront of him? And let's have the facial expression be more of
     # a slight smile or smirk."
@@ -302,13 +302,15 @@ def test_stance_b_crosses_his_arms_with_both_blades_planted_in_front():
     assert p.get("arms_crossed")
     b = p["blades"]
     for side in ("L", "R"):
-        # planted point-down, standing free (no hand on it), the pommel's top
-        # (chars.py) at about his waist, in front of him
+        # planted point-down, standing free (no hand on it), shallow: the
+        # pommel's top (chars.py) at about his lower ribs. [USER], on the
+        # blades before his legs: "the swords are off-screen (rendered too
+        # low and cropped - the hilts are blending into his pants / torso)"
         assert b[side]["anchor"] == "ground" and not b[side]["hand"] and b[side]["dir"][2] < -0.95
         assert b[side]["grip"] == chars.CHARS["varka"]["blades"][side]["pommel"][1]
-        assert 1.15 <= b[side]["at"][2] <= 1.35, b[side]["at"]
-        assert b[side]["at"][1] < -0.3, "in front of him (toward the viewer)"
-    assert b["L"]["at"][0] > 0 > b["R"]["at"][0], "side by side"
+        assert 1.35 <= b[side]["at"][2] <= 1.65, b[side]["at"]
+        assert abs(b[side]["at"][0]) >= 0.45, "beside him, not before his legs"
+    assert b["L"]["at"][0] > 0 > b["R"]["at"][0], "one either side"
     # each hand is posed across his chest, to the other side
     hands = {op[1]: op for op in p["ops"] if op[0] == "hand"}
     assert set(hands) == {"L", "R"} and all(op[2] == vc.CH for op in hands.values())
@@ -476,11 +478,19 @@ def test_his_crossed_arms_clear_each_other_and_the_blades_hide_neither_face_nor_
             assert g[side]["into_body"] <= 0.015 and g[side]["into_body_n"] <= 3, (still, side, g[side])
         top, bottom = g["forearms_px"]
         assert g["chin_px"] < top, ("his forearms are under his chin", still)
-        assert set(g["blade_top_px"]) == {"L", "R"}
-        for side, y in g["blade_top_px"].items():
-            # every blade's highest point is under his crossed forearms: the
-            # blades cover neither them nor his face
-            assert y > bottom, ("a blade reaches his arms", still, side, y, bottom)
+        assert set(g["blade_top_px"]) == set(g["hilts"]) == {"L", "R"}
+        for side, h in g["hilts"].items():
+            # each hilt (guard, grip, pommel), grown by a few px of gap, lies
+            # off his silhouette: the swords read as swords, beside him, and
+            # cover neither his crossed arms nor his face
+            assert h["on_body_px"] <= 25, ("a hilt on his body", still, side, h)
+            assert g["blade_top_px"][side] > g["chin_px"], ("a blade by his face", still, side)
+    # the select close-up frames both crossguards whole, his head in the upper third
+    sel = m["select"]
+    assert set(sel["guards_px"]) == {"L", "R"}
+    for side, (x0, y0, x1, y1) in sel["guards_px"].items():
+        assert 0 <= x0 < x1 <= 1920 and 0 <= y0 < y1 <= 1080 - 24, (side, sel["guards_px"])
+    assert sel["chin_px"] < 1080 / 3, sel
 
 
 def test_tight_box_ignores_the_faint_haze():
