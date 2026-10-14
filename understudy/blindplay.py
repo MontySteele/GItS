@@ -134,7 +134,8 @@ from understudy.blindplay_shape import (   # noqa: E402,F401  (re-export)
     count_action, FIGHT_OVERLAYS, forget_budget, LANE_ENV, lane_tag,
     clear_refusal_streak, count_refusal, MAX_REFUSALS, refusal_streak,
     clear_refusal, mark_refusal, pending_refusal,
-    clear_sent, mark_sent, room_of, screen_changed_after,
+    clear_sent, last_sent_command, mark_sent, room_of,
+    screen_changed_after,
     clear_look, read_look, remember_look,
     card_skips, clear_card_skips, mark_card_skip,
     read_shown_hand, remember_shown_hand,
@@ -386,7 +387,8 @@ def cmd_observe(args) -> int:
                 clear_sent()
                 # Co-op Spiral Abyss (2026-10-14): and is what a later
                 # refusal is checked against (`changed_under`).
-                remember_look(room_of(_screen(state)), living_targets(state))
+                remember_look(room_of(_screen(state)), living_targets(state),
+                              screen=_screen(state))
             # 2026-10-08: the lane's cap on every page, which is where the
             # seat brief now tells the seat to read it.
             count, cap = budget_spent()
@@ -623,6 +625,37 @@ CHANGED_UNDER_TAIL = (": nothing was sent, and this is not counted as a "
 ROOM_ENDED = {"fight": "the fight ended", "shop": "the shop closed"}
 
 
+# FURINA SEAT (2026-10-14). A CHOICE THAT OPENED MID-BATCH IS A SKIP. A seat
+# chained `play "Curtain Rise"`, more plays and `end turn`; Curtain Rise
+# opened its chooser ("Deal damage 7" / "Drain 3: deal 12"), the rest of the
+# batch was refused against the choice, and three of those tripped the sticky
+# REFUSAL STOP -- so the `choose` that followed was refused too and the run
+# ended. A choice is an overlay (`FIGHT_OVERLAYS`): it keeps the room, so
+# neither `screen_changed_after` nor the room check in `changed_under` sees
+# it. Now a refusal on an overlay the seat's last look was not rendered on is
+# skipped: not sent, not counted. A `choose` on that chooser resolves and is
+# sent as always; a refusal on a chooser the seat has looked at still counts.
+CHOICE_OPENED_SKIP = ("Not sent: a choice opened since your last look{src}. "
+                      "This is not counted as a refusal. Look, then choose.")
+_FIRST_QUOTED = re.compile(r'"([^"]+)"')
+_COPY_NUMBER = re.compile(r"\s*\(\d+\)\s*$")
+
+
+def choice_opened_since_look(state: dict[str, Any]) -> str:
+    """The skip sentence for a command refused on a chooser that opened
+    since the seat's last look; `""` otherwise."""
+    now = _screen(state)
+    if now not in FIGHT_OVERLAYS:
+        return ""
+    look = read_look()
+    then = str((look or {}).get("screen") or "")
+    if not look or then == now:
+        return ""
+    found = _FIRST_QUOTED.search(last_sent_command())
+    name = _COPY_NUMBER.sub("", found.group(1)) if found else ""
+    return CHOICE_OPENED_SKIP.format(src=f' ("{name}")' if name else "")
+
+
 def changed_under(state: dict[str, Any], command: str, why: str,
                   prev_screen: str) -> tuple[str, bool]:
     """`(sentence, show_page)` for a refusal the board changed under since
@@ -676,9 +709,10 @@ def cmd_act(args) -> int:
     # refusal below counts toward it. A command skipped because an earlier
     # one of its batch left the room is not a refusal (Varka round
     # 2026-10-13, below), nor is one refused because the fight changed under
-    # it since the seat's last look (co-op 2026-10-14, `changed_under`):
-    # nothing is sent either way. The stop is sticky; the
-    # coordinator lifts it with `reset-refusals --lane N`.
+    # it since the seat's last look (co-op 2026-10-14, `changed_under`),
+    # nor one refused on a chooser that opened since that look (Furina
+    # seat 2026-10-14, `choice_opened_since_look`): nothing is sent. The
+    # stop is sticky; the coordinator lifts it with `reset-refusals --lane N`.
     if live and refusal_streak() >= MAX_REFUSALS:
         print(refusal_stop_line(refusal_streak()))
         return 2
@@ -723,7 +757,7 @@ def cmd_act(args) -> int:
         # was played (or left the hand) since -- a skip, not counted, and
         # never re-aimed at another copy (`copy_left_since_look`). The board
         # mark above still holds a chained `end turn` once.
-        skipped = copy_left_since_look(shown_why)
+        skipped = (choice_opened_since_look(state) if live else "")             or copy_left_since_look(shown_why)
         if skipped:
             print(skipped)
             return 1
@@ -756,6 +790,10 @@ def cmd_act(args) -> int:
         skipped, show_page = (changed_under(state, args.command, why,
                                             prev_screen)
                               if live else ("", False))
+        # Furina seat (2026-10-14): a chooser opened since the last look
+        # (`choice_opened_since_look`) -- a skip, not counted.
+        if live and not skipped:
+            skipped = choice_opened_since_look(state)
         if skipped:
             print(skipped)
             if show_page:
@@ -869,7 +907,8 @@ def _cmd_wait(state: dict[str, Any], seconds: int, live: bool,
             print(f"REFUSED: {exc}", file=_refusal_stream(args))
             return 1
         clear_sent()
-        remember_look(room_of(_screen(state)), living_targets(state))
+        remember_look(room_of(_screen(state)), living_targets(state),
+                      screen=_screen(state))
         return 0
     try:
         latest, waited, moved = blindplay_coop.wait_for_partner(
@@ -891,7 +930,8 @@ def _cmd_wait(state: dict[str, Any], seconds: int, live: bool,
         print(f"REFUSED: {exc}", file=_refusal_stream(args))
         return 1
     clear_sent()
-    remember_look(room_of(_screen(latest)), living_targets(latest))
+    remember_look(room_of(_screen(latest)), living_targets(latest),
+                  screen=_screen(latest))
     return 0
 
 
