@@ -343,7 +343,8 @@ def test_the_pack_imports_her_sheets_and_guests_vram_compressed_and_switches_res
         block = ps.split(anchor, 1)[1].split("\n}\n", 1)[0]
         assert "Write-TextureImport" in block, anchor
     assert "'furina_rest.png'" in ps and "res://furina/model/$furinaRestArt" in ps
-    assert "res://furina/ui/$furinaSelectArt" in ps
+    # the select scene is her rig's (tier0/tests/test_select_bg.py), not the pack's
+    assert "furina\\ui\\char_select_bg_furina.tscn" not in ps
     # her old rig's layers and the flat guest cutouts no longer ship, and the
     # merchant scene is the generated one
     assert "furina\\model\\layers\\combat" not in ps
