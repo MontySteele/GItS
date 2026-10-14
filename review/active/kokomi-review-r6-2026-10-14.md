@@ -99,8 +99,9 @@ Companion summoners, every Block number and the starter.
 
 ## Picks
 
-**Ruled 2026-10-14, picks 2, 3 and 4 (b, a, b).** [USER]: "2,3,4) Good with
-the defaults, other than the first question." Pick 1 is open.
+**Ruled 2026-10-14, all four: 1 (a), 2 (b), 3 (a), 4 (b).** [USER]: "2,3,4)
+Good with the defaults, other than the first question." Then, on pick 1:
+"Let's go with (a)." Mend keeps its cap, printed on the card and receipt.
 
 1. **Mend's cap.** Mend heals only up to the HP you started the combat with.
    At near-full HP, The Moon's Plan prints 6 and heals 1. All three Mend cards
