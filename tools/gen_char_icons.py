@@ -41,13 +41,14 @@ where it stays inside the disc. Each character's source is scaled so its
 crown-to-chin span is `HEAD_PX` and placed with the crown at `CROWN_Y` and the
 face centre on the canvas centre line. The crown is the top of the head mass
 the icon keeps (Klee's hat crown, not its feather; Kokomi's hair, not her bow;
-Furina's hair, not the tilted top hat on the side of her head).
+Furina's hair; her hat is kept above the disc, see below).
 
 A row may override that framing (`head_px`, `crown_at`, `face_at`, `disc`)
 and keep a signature piece that breaks out of the disc (`keep_above`: the
 source's own alpha above that source row is kept outside the disc, inside the
 4px margin). Only Furina does, for her top hat (the user, 2026-10-13: "The
-new one isn't bad, but the hat is dictinctive.").
+new one isn't bad, but the hat is dictinctive."; ruled 2026-10-14: "Sounds
+good - let's use Furina's hat version, (a)").
 
 The landmarks are hand-measured in SOURCE pixels, so each row also pins the
 source's size and alpha bbox: a re-rendered source fails loudly ("re-measure")
