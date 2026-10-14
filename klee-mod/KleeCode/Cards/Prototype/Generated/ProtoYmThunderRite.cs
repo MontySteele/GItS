@@ -44,7 +44,7 @@ public sealed class ProtoYmThunderRite : CustomCardModel, IElementalCard, IChara
         new[] { KleeKeywords.AppliesElectro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForRite(ArmKeywordTips.ForSakura(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this), this);
+        ArmKeywordTips.ForRite(ArmKeywordTips.ForTenko(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_thunder_rite");
 

@@ -143,6 +143,8 @@ public static class ArmKeywordTips
     /// <summary>YAE MIKO (2026-10-13): her two words, Sakura (on
     /// <see cref="SakuraKey"/>, read for her cards) and Edit.</summary>
     public const string EditKey = "KLEEMOD-ARM_YAE_EDIT";
+    /// <summary>Tenko, split out of her Sakura tip (2026-10-14).</summary>
+    public const string TenkoKey = "KLEEMOD-ARM_YAE_TENKO";
     /// <summary>YAE MIKO, THE DESIGN AXES (ruled 2026-10-14): the shrine's
     /// Rite.</summary>
     public const string RiteKey = "KLEEMOD-ARM_YAE_RITE";
@@ -635,8 +637,10 @@ public static class ArmKeywordTips
     ///
     /// YAE MIKO (2026-10-13): the same word on her own cards is her shrine,
     /// a different object (it levels and withers), so her cards and her
-    /// Sakura badge carry her tip (<see cref="YaeSakuraTip"/>). Pick 6 (a):
-    /// Tenko lives in this tip.
+    /// Sakura badge carry her tip (<see cref="YaeSakuraTip"/>). Tenko was
+    /// in this tip (pick 6 (a)) until [USER] (2026-10-14): "I think the
+    /// Sakura tooltip is overly verbose, and Sakura and Tenko should be cut
+    /// into separate tips" (<see cref="ForTenko"/>).
     public static IEnumerable<IHoverTip> ForSakura(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, SakuraKey,
@@ -645,38 +649,60 @@ public static class ArmKeywordTips
                 : "A totem that stays at your side all combat. At most 3 fire "
                 + "each turn.");
 
-    /// <summary>Yae's Sakura, plant, Level, the timer and Tenko, one tip
-    /// (paper sec.2; the numbers are <see cref="Powers.YaeLaw"/>'s).</summary>
+    /// <summary>Yae's Sakura: the strike, the timer, the cap and the plant
+    /// Level (paper sec.2; the numbers are <see cref="Powers.YaeLaw"/>'s).
+    /// [USER] (2026-10-14): "I still feel like that Sakura tooltip can be
+    /// condensed further somehow ... I don't think we need to say 'Combat
+    /// starts in Thunder' - that's just obvious." A plant on a full shrine
+    /// adds none and still Levels the ones standing
+    /// (<c>YaeShrineLedger.Plant</c>), hence "even when full".</summary>
     public static readonly string YaeSakuraTip =
-        $"Up to {Powers.YaeLaw.SakuraCap} stand beside you. At the end of your "
-      + "turn each strikes under the shrine's [gold]Rite[/gold] (Thunder at "
-      + "the start of combat), oldest first. Each lasts "
-      + $"{Powers.YaeLaw.SakuraTurns} turns; when it withers, it strikes once "
-      + "more. Planting one raises the others' Level by 1. [gold]Tenko[/gold]: "
-      + $"every Sakura strikes now and lasts {Powers.YaeLaw.SakuraTurns} turns "
-      + "again.";
+        "Strikes at the end of your turn under the current [gold]Rite[/gold]. "
+      + $"Lasts {Powers.YaeLaw.SakuraTurns} turns, then strikes once more. "
+      + $"Up to {Powers.YaeLaw.SakuraCap}; planting another gives the rest a "
+      + "Level (even when full).";
+
+    /// <summary>Tenko, her own tip since 2026-10-14 (split out of
+    /// <see cref="YaeSakuraTip"/>).</summary>
+    public static IEnumerable<IHoverTip> ForTenko(
+        IEnumerable<IHoverTip> inherited, CardModel? card) =>
+        With(inherited, TenkoKey, YaeTenkoTip);
+
+    public static readonly string YaeTenkoTip =
+        "Every [gold]Sakura[/gold] strikes now and lasts "
+      + $"{Powers.YaeLaw.SakuraTurns} turns again.";
 
     /// <summary>
-    /// YAE MIKO (2026-10-13), pick 6 (a): the Edit tip lists the five
-    /// Annotations; Publish is the relic's word, said here once.
+    /// YAE MIKO (2026-10-13): the Edit tip; Publish is the relic's word,
+    /// said here once. It is the general rule only. [USER] (2026-10-14):
+    /// "the 'Edit' tooltip seems unnecessarily long; no need to show the
+    /// text for every possible edit if the card can only apply one." The
+    /// Annotation a card applies is its own tip (<see cref="ForAnnotation"/>)
+    /// and its own selection prompt (<c>YaeEditing.EditPromptTextFor</c>).
     /// </summary>
     public static IEnumerable<IHoverTip> ForEdit(
         IEnumerable<IHoverTip> inherited, CardModel? card) =>
         With(inherited, EditKey, YaeEditTip);
 
     public static readonly string YaeEditTip =
-        "Give a card in your hand an Annotation for this combat, replacing "
-      + "any it had: [gold]Red Ink[/gold] (+"
-      + Powers.YaeLaw.RedInkAmount + " damage and [gold]Block[/gold]), "
-      + "[gold]Footnote[/gold] (draw 1), [gold]Deadline Extension[/gold] "
-      + "([gold]Retain[/gold]), [gold]Fox Fire[/gold] ("
-      + Powers.YaeLaw.FoxFireDamage + " [gold]Electro[/gold] damage to a random "
-      + "enemy), [gold]Sakura Seal[/gold] (plant a [gold]Sakura[/gold]), "
-      + "[gold]Royalties[/gold] (gain " + Powers.YaeLaw.RoyaltiesPayout
-      + " Energy). On a [gold]Sakura[/gold]: Red Ink makes its strike "
-      + Powers.YaeLaw.RedInkAmount + " bigger (not in Offering), Fox Fire adds "
-      + Powers.YaeLaw.FoxFireDamage + " damage, Deadline Extension stops it "
-      + "withering. A Published Annotation lasts the run.";
+        "Give a card an Annotation for this combat, replacing any it had. A "
+      + "Published one lasts the run.";
+
+    /// <summary>One Annotation's tip key, titled by its name.</summary>
+    public static string KeyOf(Powers.YaeAnnotation annotation) =>
+        "KLEEMOD-ARM_YAE_" + annotation.ToString().ToUpperInvariant();
+
+    /// <summary>
+    /// The one Annotation a face names, titled by its name: its card reading
+    /// (<c>YaeAnnotationText.Rule</c>), or its Sakura reading on a card that
+    /// Edits a Sakura (<paramref name="onSakura"/>, from the row's own
+    /// effect). Codegen attaches one per Annotation the face golds.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForAnnotation(
+        IEnumerable<IHoverTip> inherited, CardModel? card,
+        Powers.YaeAnnotation annotation, bool onSakura) =>
+        With(inherited, KeyOf(annotation),
+             Powers.YaeAnnotationText.TipBody(annotation, onSakura));
 
     /// <summary>
     /// YAE MIKO, THE DESIGN AXES (ruled 2026-10-14): the shrine's Rite, what

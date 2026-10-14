@@ -44,7 +44,7 @@ public sealed class ProtoYmMarginNote : CustomCardModel, IElementalCard, ICharac
         new[] { KleeKeywords.AppliesElectro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForEdit(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this);
+        ArmKeywordTips.ForEdit(ArmKeywordTips.ForAnnotation(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this, YaeAnnotation.RedInk, false), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_margin_note");
 

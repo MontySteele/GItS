@@ -671,11 +671,103 @@ public class YaePrototypeTests : IDisposable
     [Fact]
     public void Her_sakura_tip_is_her_shrines_and_the_companions_stays_its_own()
     {
-        Assert.Contains("Tenko", ArmKeywordTips.YaeSakuraTip);
-        Assert.Contains("Level", ArmKeywordTips.YaeSakuraTip);
-        foreach (var name in YaeModalOptions.Order.Select(YaeAnnotationText.Name))
+        // [USER] (2026-10-14): "Sakura and Tenko should be cut into separate
+        // tips", and "I don't think we need to say 'Combat starts in
+        // Thunder'".
+        Assert.Contains("Level (even when full)", ArmKeywordTips.YaeSakuraTip);
+        Assert.Contains("current [gold]Rite[/gold]", ArmKeywordTips.YaeSakuraTip);
+        Assert.DoesNotContain("Tenko", ArmKeywordTips.YaeSakuraTip);
+        Assert.DoesNotContain("Thunder", ArmKeywordTips.YaeSakuraTip);
+        Assert.Equal("Every [gold]Sakura[/gold] strikes now and lasts 3 turns again.",
+                     ArmKeywordTips.YaeTenkoTip);
+        Assert.DoesNotContain("starts in Thunder", ArmKeywordTips.YaeRiteTip);
+    }
+
+    [Fact]
+    public void The_sakura_tips_plant_clause_is_the_ledgers_rule()
+    {
+        // "planting another gives the rest a Level (even when full)".
+        var ledger = YaeShrineLedger.For(Seat.Yae().Creature);
+        Assert.True(ledger.Plant(YaeLaw.PlantLevel));
+        Assert.True(ledger.Plant(YaeLaw.PlantLevel));
+        Assert.True(ledger.Plant(YaeLaw.PlantLevel));
+        var before = ledger.Standing.Select(s => s.Level).ToList();
+        Assert.False(ledger.Plant(YaeLaw.PlantLevel));
+        Assert.Equal(YaeLaw.SakuraCap, ledger.Standing.Count);
+        Assert.Equal(before.Select(l => l + 1), ledger.Standing.Select(s => s.Level));
+    }
+
+    // ---- the Edit tip and each Annotation's own (2026-10-14) ----------------
+    // [USER]: "the 'Edit' tooltip seems unnecessarily long; no need to show
+    // the text for every possible edit if the card can only apply one."
+
+    [Fact]
+    public void The_edit_tip_is_the_general_rule_and_names_no_annotation()
+    {
+        Assert.Equal("Give a card an Annotation for this combat, replacing any "
+                     + "it had. A Published one lasts the run.",
+                     ArmKeywordTips.YaeEditTip);
+        foreach (var name in YaeAnnotationText.All.Select(YaeAnnotationText.Name))
         {
-            Assert.Contains(name, ArmKeywordTips.YaeEditTip);
+            Assert.DoesNotContain(name, ArmKeywordTips.YaeEditTip);
         }
+    }
+
+    [Fact]
+    public void An_annotation_tip_is_its_card_reading_or_its_sakura_reading()
+    {
+        Assert.Equal("This card deals 3 more damage and gives 3 more "
+                     + "[gold]Block[/gold].",
+                     YaeAnnotationText.TipBody(YaeAnnotation.RedInk, false));
+        Assert.Equal("The [gold]Sakura[/gold]'s strike is 3 bigger (not in "
+                     + "Offering).",
+                     YaeAnnotationText.TipBody(YaeAnnotation.RedInk, true));
+        Assert.Equal("The [gold]Sakura[/gold] does not wither.",
+                     YaeAnnotationText.TipBody(YaeAnnotation.DeadlineExtension, true));
+        Assert.Contains("When the [gold]Sakura[/gold] strikes",
+                        YaeAnnotationText.TipBody(YaeAnnotation.FoxFire, true));
+        // One with no Sakura reading falls back to its card reading.
+        Assert.Equal(YaeAnnotationText.Rule(YaeAnnotation.Footnote),
+                     YaeAnnotationText.TipBody(YaeAnnotation.Footnote, true));
+        Assert.Equal("KLEEMOD-ARM_YAE_REDINK", ArmKeywordTips.KeyOf(YaeAnnotation.RedInk));
+    }
+
+    [Fact]
+    public void A_card_that_applies_one_annotation_carries_that_tip_alone()
+    {
+        static string Chain(System.Type t) => System.IO.File.ReadAllText(
+            System.IO.Path.Combine(Round17Tests.Repo(), "klee-mod", "KleeCode", "Cards",
+                                   "Prototype", "Generated", t.Name + ".cs"));
+        var proofread = Chain(typeof(ProtoYmProofread));
+        Assert.Contains("ForAnnotation(base.ExtraHoverTips, this, YaeAnnotation.RedInk, false)", proofread);
+        Assert.DoesNotContain("YaeAnnotation.Footnote, ", proofread);
+        var branches = Chain(typeof(ProtoYmInkedBranches));
+        Assert.Contains("YaeAnnotation.RedInk, true)", branches);
+        // Reborn as Guuji Yae names none: its own chooser shows each face.
+        Assert.DoesNotContain("ForAnnotation", Chain(typeof(ProtoYmRebornAsGuujiYae)));
+    }
+
+    [Fact]
+    public void Each_edit_prompt_names_its_annotation_and_what_it_does()
+    {
+        Assert.Equal("Choose a card to Edit: Red Ink (it deals 3 more damage "
+                     + "and gives 3 more Block).",
+                     YaeEditing.EditPromptTextFor(YaeAnnotation.RedInk));
+        Assert.Equal("Choose a card to Edit: Footnote (when it is played, "
+                     + "draw 1 card).",
+                     YaeEditing.EditPromptTextFor(YaeAnnotation.Footnote));
+        Assert.Equal("Choose a card to Edit: Deadline Extension (it has "
+                     + "Retain).",
+                     YaeEditing.EditPromptTextFor(YaeAnnotation.DeadlineExtension));
+        Assert.Equal("Choose a card to Edit: Royalties (when it is played, "
+                     + "gain 1 Energy).",
+                     YaeEditing.EditPromptTextFor(YaeAnnotation.Royalties));
+        Assert.Equal(YaeEditing.EditPromptText,
+                     YaeEditing.EditPromptTextFor(YaeAnnotation.None));
+        Assert.Equal("KLEEMOD-YAE_EDIT_SAKURASEAL.selectionScreenPrompt",
+                     YaeEditing.EditPromptKeyFor(YaeAnnotation.SakuraSeal));
+        Assert.Equal(YaeAnnotationText.All.Length,
+                     YaeAnnotationText.All.Select(YaeEditing.EditPromptKeyFor)
+                         .Distinct().Count());
     }
 }

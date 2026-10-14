@@ -151,8 +151,9 @@ public class ArmKeywordTipTests
             .Select(f => (string)f.GetRawConstantValue()!)
             .ToList();
 
-        // One key per attach, the rider included (`EB-378`).
-        Assert.Equal(Attaches().Count(), keys.Count);
+        // One key per attach, the rider included (`EB-378`), but for
+        // `ForAnnotation`, whose six keys are `KeyOf`'s (2026-10-14).
+        Assert.Equal(Attaches().Count() - 1, keys.Count);
         Assert.Equal(keys.Count, keys.Distinct().Count());
         Assert.All(keys, k => Assert.StartsWith("KLEEMOD-ARM_", k));
         Assert.DoesNotContain("KLEEMOD-BOMB", keys);
@@ -419,7 +420,12 @@ public class ArmKeywordTipTests
         // word.
         // 53 with Yae's design axes (2026-10-14): `ForRite`, the shrine's
         // Rite.
-        Assert.Equal(53, attaches.Count);
+        // 55 with Yae's tip cut (2026-10-14): `ForAnnotation`, one tip per
+        // Annotation a face names, and `ForTenko`, split out of her Sakura
+        // tip.
+        Assert.Equal(55, attaches.Count);
+        Assert.Contains(attaches, m => m.Name == "ForAnnotation");
+        Assert.Contains(attaches, m => m.Name == "ForTenko");
         Assert.Contains(attaches, m => m.Name == "ForRite");
         Assert.Contains(attaches, m => m.Name == "ForFlip");
         Assert.Contains(attaches, m => m.Name == "ForEdit");

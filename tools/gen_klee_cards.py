@@ -923,14 +923,24 @@ ARM_KEYWORDS = (
                "ArmKeywordTips.ForElementalReaction"),
     # YAE MIKO (2026-10-13), pick 6 (a): "two tips, Sakura and Edit; Tenko
     # lives in the Sakura tip and the five Annotation names in the Edit tip".
-    # So a face printing Tenko hovers the Sakura tip, and one printing an
-    # Annotation's name, "Annotated" or "Publish" hovers the Edit tip.
+    # A face printing "Edit", "Annotated" or "Publish" hovers the Edit tip.
     # `Sakura` is the companion Sesshou Sakura's word too; `ForSakura` prints
     # her tip on her own cards.
-    ArmKeyword("Sakura", ("Sakura", "Tenko"), "ArmKeywordTips.ForSakura"),
-    ArmKeyword("Edit", ("Edit", "Edited", "Annotated", "Publish", "Red Ink",
-                        "Footnote", "Deadline Extension", "Fox Fire",
-                        "Sakura Seal", "Royalties"), "ArmKeywordTips.ForEdit"),
+    # [USER] (2026-10-14): "no need to show the text for every possible edit
+    # if the card can only apply one." The Edit tip is the general rule, and
+    # each Annotation a face golds is its own tip (`annotation_tip_args`, one
+    # call per name, its Sakura reading on a row that Edits a Sakura). Read
+    # before the Edit tip: it is what this card does.
+    # [USER] (2026-10-14): "Sakura and Tenko should be cut into separate
+    # tips." A face printing Tenko hovers the Tenko tip, and the Sakura tip
+    # only if it names Sakura too.
+    ArmKeyword("Sakura", ("Sakura",), "ArmKeywordTips.ForSakura"),
+    ArmKeyword("Tenko", ("Tenko",), "ArmKeywordTips.ForTenko"),
+    ArmKeyword("Annotation", ("Red Ink", "Footnote", "Deadline Extension",
+                              "Fox Fire", "Sakura Seal", "Royalties"),
+               "ArmKeywordTips.ForAnnotation"),
+    ArmKeyword("Edit", ("Edit", "Edited", "Annotated", "Publish"),
+               "ArmKeywordTips.ForEdit"),
     # YAE MIKO, THE DESIGN AXES (ruled 2026-10-14): the shrine's Rite, one
     # tip naming the four.
     ArmKeyword("Rite", ("Rite",), "ArmKeywordTips.ForRite"),
@@ -3078,6 +3088,31 @@ YAE_RITES = {"thunder": "Thunder", "warding": "Warding",
              "wildfire": "Wildfire", "offering": "Offering"}
 YAE_SAKURA_ANNOTATIONS = {"red_ink", "fox_fire", "deadline"}
 YAE_SAKURA_ENDS = {"newest": "Newest", "oldest": "Oldest", "every": "Every"}
+#: The printed name of each `YaeAnnotation` member (`YaeAnnotationText.Name`).
+YAE_ANNOTATION_NAMES = {
+    "RedInk": "Red Ink",
+    "Footnote": "Footnote",
+    "DeadlineExtension": "Deadline Extension",
+    "FoxFire": "Fox Fire",
+    "SakuraSeal": "Sakura Seal",
+    "Royalties": "Royalties",
+}
+
+
+def annotation_tip_args(card: dict, description: str) -> list[str]:
+    """The `ForAnnotation` calls' trailing arguments a face owes, one per
+    Annotation it golds, in the sheet's order: the member and whether this
+    row Edits a SAKURA with it (`edit_sakura`), which takes the Sakura
+    reading. [USER] (2026-10-14): "no need to show the text for every
+    possible edit if the card can only apply one"."""
+    printed = set(golded_tokens(description))
+    on_sakura = {YAE_ANNOTATIONS[e["annotation"]]
+                 for e in iter_effects(card.get("effects") or [])
+                 if e.get("op") == "yae" and e.get("kind") == "edit_sakura"}
+    return [f", this, YaeAnnotation.{member}, "
+            f"{'true' if member in on_sakura else 'false'}"
+            for member, name in YAE_ANNOTATION_NAMES.items()
+            if name in printed]
 YAE_VAR_FIELDS = {"per": "YmPer", "base": "YmBase", "amount": "YmAmount"}
 #: The value `YaeCards` reads for a field the card declares no var for: a
 #: count of 1 ("Plant a Sakura") and a base of 0 (Thunderbolt Tithe) print
@@ -18057,6 +18092,13 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             # Advantage, refused by the jellyfish).
             elif attach == "ArmKeywordTips.ForPlan" and not card.get("plan"):
                 attach = "ArmKeywordTips.ForPlanNoLine"
+            # Yae (2026-10-14): one tip per Annotation the face names.
+            if attach == "ArmKeywordTips.ForAnnotation":
+                for args in annotation_tip_args(card, desc):
+                    tips_expr = (
+                        f"{attach}({tips_expr or 'base.ExtraHoverTips'}"
+                        f"{args})")
+                continue
             tips_expr = (
                 f"{attach}({tips_expr or 'base.ExtraHoverTips'}, this)")
         # `EB-377`, and it is last of the last for the reason the block above
