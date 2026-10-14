@@ -45,7 +45,7 @@ public sealed class ProtoYmSakuraChanneling : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sakura Channeling"),
-        ("description", "Your [gold]Sakura[/gold] strike as Thunder at the end of your turn."),
+        ("description", "You can have 2 more [gold]Sakura[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -63,7 +63,7 @@ public sealed class ProtoYmSakuraChanneling : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<SakuraChannelingPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<SakuraChannelingPower>(choiceContext, Owner.Creature, 2, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()

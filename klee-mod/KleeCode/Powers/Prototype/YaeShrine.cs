@@ -148,14 +148,17 @@ public sealed class YaeShrineLedger
     /// <paramref name="inherited"/>: the Annotation the new Sakura carries
     /// from the card that planted it (Red Ink on a card that only plants,
     /// ruled 2026-10-14, <see cref="YaeAnnotationReach"/>); none is added
-    /// when three stand, so nothing inherits then.
+    /// when three stand, so nothing inherits then. <paramref name="cap"/>:
+    /// how many may stand (<see cref="YaeShrine.MaxSakura"/>: 3, plus 2 per
+    /// Sakura Channeling, 2026-10-14); the full-shrine rule fires at it.
     /// </summary>
     public bool Plant(int plantLevel, int? startLevel,
-                      YaeAnnotation inherited = YaeAnnotation.None)
+                      YaeAnnotation inherited = YaeAnnotation.None,
+                      int cap = YaeLaw.SakuraCap)
     {
         if (startLevel is { } at)
             plantLevel = Math.Max(plantLevel, at + plantLevel - YaeLaw.PlantLevel);
-        if (_sakura.Count >= YaeLaw.SakuraCap)
+        if (_sakura.Count >= cap)
         {
             var oldest = _sakura[0];
             oldest.TurnsLeft = YaeLaw.SakuraTurns;
@@ -320,6 +323,13 @@ public static class YaeShrine
     public static int PlantLevel(Creature yae) =>
         YaeLaw.PlantLevel + yae.GetPowerAmount<FoxsMooncallPower>();
 
+    /// <summary>How many Sakura may stand beside <paramref name="yae"/>: 3,
+    /// plus Sakura Channeling's amount ("You can have 2 more Sakura", 2 per
+    /// copy, this combat; designed 2026-10-14). Sim twin:
+    /// <c>yae_shrine.sakura_cap</c>.</summary>
+    public static int MaxSakura(Creature yae) =>
+        YaeLaw.SakuraCap + yae.GetPowerAmount<SakuraChannelingPower>();
+
     /// <summary>Do Pyro, Hydro or Cryo sit on this enemy, so an Electro strike
     /// reacts (Edict of Cleansing's read)?</summary>
     public static bool Reacts(Creature? target)
@@ -328,8 +338,13 @@ public static class YaeShrine
         return aura != null && aura.Element is Element.Pyro or Element.Hydro or Element.Cryo;
     }
 
-    /// <summary>Plant <paramref name="n"/> Sakura, one at a time (with three
-    /// standing, each further plant refreshes and levels the then-oldest).
+    /// <summary>Plant <paramref name="n"/> Sakura, one at a time. With the
+    /// shrine full (<see cref="MaxSakura"/>), each further plant makes the
+    /// then-oldest FIRST strike once exactly as its Last Bloom would
+    /// (<see cref="Strike"/>, Thunder: the Lure, Red Ink, Fox Fire as usual;
+    /// 2026-10-14, [USER]: "do you think the outgoing Sakura should strike as
+    /// though withered?"), then refresh and gain a Level
+    /// (<see cref="YaeShrineLedger.Plant(int, int?, YaeAnnotation, int)"/>).
     /// <paramref name="startLevel"/>: Grafted Branch.
     /// <paramref name="inherited"/>: the planting card's Red Ink, given to
     /// each NEW Sakura this plants, not to an oldest it refreshes
@@ -343,7 +358,12 @@ public static class YaeShrine
         var ledger = YaeShrineLedger.For(yae);
         for (var i = 0; i < n; i++)
         {
-            ledger.Plant(PlantLevel(yae), startLevel, inherited);
+            var cap = MaxSakura(yae);
+            if (ledger.Count >= cap && ledger.Count > 0)
+            {
+                await Strike(choiceContext, yae, ledger.Standing[0]);
+            }
+            ledger.Plant(PlantLevel(yae), startLevel, inherited, cap);
         }
         await SakuraBadge.Sync(choiceContext, yae);
     }

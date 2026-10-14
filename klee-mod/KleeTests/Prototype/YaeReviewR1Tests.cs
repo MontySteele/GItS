@@ -104,13 +104,15 @@ public class YaeReviewR1Tests : IDisposable
     }
 
     [Fact]
-    public void The_tenko_tip_names_the_kinds_and_the_sakura_tip_the_full_shrine()
+    public void The_tenko_tip_names_the_kinds_and_the_plant_faces_the_full_shrine()
     {
         Assert.Contains("Warding", ArmKeywordTips.YaeTenkoTip);
         Assert.Contains("Wildfire", ArmKeywordTips.YaeTenkoTip);
         Assert.Contains("Offering", ArmKeywordTips.YaeTenkoTip);
         Assert.Contains("reset to 3 turns", ArmKeywordTips.YaeTenkoTip);
-        Assert.Contains("oldest", ArmKeywordTips.YaeSakuraTip);
+        // 2026-10-14: the full-shrine rule left the tip for the plant faces.
+        Assert.DoesNotContain("oldest", ArmKeywordTips.YaeSakuraTip);
+        Assert.Contains("your oldest strikes, refreshes", Face(new ProtoYmYakanEvocation()));
         Assert.DoesNotContain("Rite", ArmKeywordTips.YaeSakuraTip);
     }
 

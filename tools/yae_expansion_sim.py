@@ -154,13 +154,14 @@ def _translate(state, fx, card=None):
     base, per, amt = fx.get("base", 0), fx.get("per", 0), fx.get("amount", 0)
     if kind == "plant":
         # A plant is three strikes to come (shrine r2: a full shrine refreshes
-        # and levels its oldest instead);
+        # and levels its oldest instead, the oldest striking first);
         # priced as a hit at a random enemy so a plant competes with a Strike.
         value = 0
         standing = n_sak
+        cap = Y.sakura_cap(state.player)   # Sakura Channeling: +2 per copy
         for _ in range(amt):
-            value += 2 * min(standing, Y.SAKURA_CAP) + (
-                6 if standing < Y.SAKURA_CAP else 0)
+            value += 2 * min(standing, cap) + (
+                6 if standing < cap else 3)   # full: the oldest strikes
             standing += 1
         yield {"op": "damage", "amount": value, "target": "random_enemy"}
     elif kind == "tenko":

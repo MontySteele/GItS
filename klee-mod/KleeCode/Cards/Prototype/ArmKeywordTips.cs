@@ -653,12 +653,14 @@ public static class ArmKeywordTips
     /// <see cref="Powers.YaeLaw"/>'s). [USER] (2026-10-14): "I still feel
     /// like that Sakura tooltip can be condensed further somehow". Shrine r2:
     /// a plant no longer levels the others; with 3 standing it refreshes and
-    /// levels the oldest (<c>YaeShrineLedger.Plant</c>).</summary>
+    /// levels the oldest (<c>YaeShrineLedger.Plant</c>). Condensed
+    /// 2026-10-14: the full-shrine rule is printed on the plant cards, and the
+    /// cap moves with Sakura Channeling, so both leave the tip; "random"
+    /// went to fit the 100-character cap.</summary>
     public static readonly string YaeSakuraTip =
-        $"Strikes a random enemy for {Powers.YaeLaw.SakuraBase} plus its Level "
-      + $"at the end of your turn. Lasts {Powers.YaeLaw.SakuraTurns} turns, "
-      + $"then strikes once more. Up to {Powers.YaeLaw.SakuraCap}; planting "
-      + "when full refreshes the oldest and gives it a Level.";
+        $"At the end of your turn, strikes an enemy for {Powers.YaeLaw.SakuraBase} "
+      + $"+ its Level. Lasts {Powers.YaeLaw.SakuraTurns} turns, then strikes "
+      + "once more.";
 
     /// <summary>
     /// YAE MIKO (2026-10-13): the Edit tip; Publish is the relic's word,

@@ -13,12 +13,14 @@ Her numbers live here rather than in `constants.py` so they move neither the
 constant census nor the world stamp.
 
 THE RULES AS MODELLED:
-  * SAKURA: up to `SAKURA_CAP` on a per-fight ledger (`YaeLedger.sakura`),
+  * SAKURA: up to `sakura_cap` (`SAKURA_CAP`, plus 2 per Sakura
+    Channeling) on a per-fight ledger (`YaeLedger.sakura`),
     each with a LEVEL and a TIMER (strikes left). SHRINE R2 (ruled
     2026-10-14): a plant creates a Sakura at the Level the card prints
     (`PLANT_LEVEL`, Grafted Branch its own), +1 per Fox's Mooncall, with 3
-    strikes left, and does NOT level the others. With 3 standing a plant
-    instead makes the OLDEST refresh (3 strikes again) and gain 1 Level
+    strikes left, and does NOT level the others. With the shrine full a
+    plant instead makes the OLDEST strike as its Last Bloom would, then
+    refresh (3 strikes again) and gain 1 Level (2026-10-14)
     (`SCALING == "level"`, the paper's pick 1 (a)). Levels have no cap
     (Yae review r1, pick 2). Under `SCALING == "count"` (pick 1 (b),
     the proposal's placeholder) Levels are off: a Sakura strikes for the
@@ -64,8 +66,8 @@ THE RULES AS MODELLED:
     (+n on a damage strike at an enemy that is Weak or wears Pyro, Hydro or
     Cryo), Serialization (Block per Annotated card played, unpowered), Fox's Mooncall (plant
     n Levels higher), Yakan Offering (plant at the start of her turn, after
-    the draw), Sakura Channeling (shrine r2: a no-op marker, its job went with the
-    Rite; replacement pending a design session),
+    the draw), Sakura Channeling ("You can have 2 more Sakura": its amount,
+    2 per copy, adds to `SAKURA_CAP` for the fight, `sakura_cap`),
     Editor-in-Chief (after an Annotated card's play, the highest-Level Sakura
     strikes), Fallen Petals
     (Energy per wither; its upgrade's power also draws).
@@ -289,6 +291,13 @@ def sakura_count(player) -> int:
     return 0 if led is None else len(led.sakura)
 
 
+def sakura_cap(player) -> int:
+    """How many Sakura may stand: 3, plus Sakura Channeling's amount (2 per
+    copy, designed 2026-10-14). The full-shrine rule fires at this. C#
+    twin: `YaeShrine.MaxSakura`."""
+    return SAKURA_CAP + _power(player, CHANNELING)
+
+
 def _plant_level(player) -> int:
     """1, plus 1 for each Fox's Mooncall ("planted 1 Level higher")."""
     return PLANT_LEVEL + _power(player, MOONCALL)
@@ -300,18 +309,24 @@ def plant(state, n: int = 1, reason: str = "plant",
     """Plant `n` Sakura, one at a time. SHRINE R2 (ruled 2026-10-14): a
     plant creates a Sakura at the card's Level (`level`, Grafted Branch;
     else `PLANT_LEVEL`) plus Fox's Mooncall's bonus, and does not level the
-    others. With 3 standing the OLDEST refreshes (3 strikes again) and gains
-    1 Level instead (Mooncall does not add to that Level). No Level cap.
+    others. With the shrine full (3 standing, plus 2 per Sakura Channeling:
+    `sakura_cap`) the OLDEST first strikes once exactly as its Last Bloom
+    would (Thunder, its Lure, Red Ink and Fox Fire as usual; 2026-10-14),
+    then refreshes (3 strikes again) and gains 1 Level instead (Mooncall
+    does not add to that Level). No Level cap. A two-plant into a full
+    shrine does it per plant.
     `annotation`: what each NEW Sakura inherits from the planting card (Red
     Ink on a card that only plants, `inherited`); a refreshed oldest keeps
     its own."""
     led = ledger(state.player)
     if led is None:
         return
+    cap = sakura_cap(state.player)
     for _ in range(n):
-        if len(led.sakura) >= SAKURA_CAP:
+        if len(led.sakura) >= cap:
             if SCALING == "level":
                 oldest = led.sakura[0]
+                strike(state, oldest, "full_shrine")   # as its Last Bloom
                 oldest.turns_left = SAKURA_TURNS
                 oldest.level += 1
                 state.emit("yae_level", reason=reason,

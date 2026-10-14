@@ -6590,9 +6590,10 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # `YaeTenkoTip` and `YaeEditTip`, the prose between the interpolated
         # `YaeLaw` numbers; split and cut 2026-10-14.
         # Shrine r2 (2026-10-14): no Rite, the full-shrine plant, the kinds.
-        "Sakura": [" plus its Level ",
-                   "then strikes once more. Up to ",
-                   "when full refreshes the oldest and gives it a Level."],
+        # Condensed 2026-10-14: the full-shrine rule is on the plant cards.
+        "Sakura": ["At the end of your turn, strikes an enemy for ",
+                   "+ its Level. Lasts ",
+                   " turns, then strikes "],
         "Tenko": [" strike now, reset to ",
                   "Wildfire: Level to ALL. Offering: draw 1."],
         "Edit": ["Give a card an Annotation for this combat, replacing any "
