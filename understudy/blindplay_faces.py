@@ -1658,7 +1658,14 @@ def _label_hand(state: dict[str, Any], hand: list[dict[str, Any]]
     # and which was drawn, so the numbers start again (the note says so).
     if mem.get("floor") != floor or mem.get("round") != round_:
         mem = {}
-    old = [r for r in (mem.get("cards") or []) if isinstance(r, dict)]
+    rows = [r for r in (mem.get("cards") or []) if isinstance(r, dict)]
+    # A card picked through a hand chooser (`hand_card_picked`) may have come
+    # back changed AND moved, so it is left out of the in-order alignment and
+    # takes its label back below, on a card the rest did not claim.
+    picked = {(p.get("k"), p.get("n")) for p in (mem.get("picked") or [])
+              if isinstance(p, dict)}
+    old = [r for r in rows if (r.get("k"), r.get("n")) not in picked]
+    back = [r for r in rows if (r.get("k"), r.get("n")) in picked]
     titles = [_text(e.get("name")) for e in hand]
     keys = [_fold(t) for t in titles]
     bases = [_hand_base(t) for t in titles]
@@ -1667,6 +1674,16 @@ def _label_hand(state: dict[str, Any], hand: list[dict[str, Any]]
     for i, j in _align(old, bases, faces):
         if old[i].get("k") == keys[j] and isinstance(old[i].get("n"), int):
             nums[j] = old[i]["n"]
+    for row in back:
+        if not isinstance(row.get("n"), int):
+            continue
+        free = [j for j, k in enumerate(keys)
+                if nums[j] is None and k == row.get("k")]
+        # A face no unpicked copy had first: that is the one the pick changed.
+        seen = {r.get("f") for r in old if r.get("k") == row.get("k")}
+        free.sort(key=lambda j: faces[j] in seen)
+        if free:
+            nums[free[0]] = row["n"]
     nxt = {str(k): int(v) for k, v in (mem.get("next") or {}).items()}
     for k, n in zip(keys, nums):
         if n is not None:
@@ -1711,28 +1728,81 @@ def hand_card_left(state: dict[str, Any], index: int) -> None:
         _save_fight()
 
 
+def _chooser_rows(state: dict[str, Any], entries: list[dict[str, Any]]
+                  ) -> list[tuple[str, int, str]] | None:
+    """`(key, number, label)` per offered card: the hand card it IS, found by
+    face, or `None` where one cannot be placed.
+
+    YAE BLOOM SEAT (2026-10-14, after #1290). A chooser's list is NOT the
+    hand in order: the bridge lists the hand's UI holders
+    (`BuildHandSelectState`, `hand.ActiveHolders`) and posts a pick by its
+    place among them, while the fight page's hand is the combat pile. A card
+    that went through a selection (Sakura Seal's Edit on `Defend (1)`) came
+    back elsewhere among the holders, the old in-order reading gave it its
+    neighbour's number, and Proofread aimed at `Defend (2)` replaced the
+    Seal. So each offered card is matched to the hand by its face (both are
+    the bridge's `BuildCardInfo`); copies with one face are interchangeable,
+    and take that face's labels in order, the picked ones last (a multi-pick
+    chooser no longer offers what it has taken)."""
+    hand = _hand(state)
+    if not hand or not entries:
+        return None
+    labels, held = _label_hand(state, hand)
+    mem = _FIGHT_MEMORY.get("hand") or {}
+    picked = set()
+    if (mem.get("floor"), mem.get("round")) == (held["floor"], held["round"]):
+        picked = {(p.get("k"), p.get("n")) for p in (mem.get("picked") or [])
+                  if isinstance(p, dict)}
+    rows = held["cards"]
+    pool: dict[str, list[int]] = {}
+    for j, r in enumerate(rows):
+        pool.setdefault(r["f"], []).append(j)
+    for js in pool.values():
+        js.sort(key=lambda j: (rows[j]["k"], rows[j]["n"]) in picked)
+    out: list[tuple[str, int, str]] = []
+    for e in entries:
+        js = pool.get(_hand_face(e)) or []
+        if not js:
+            return None
+        j = js.pop(0)
+        out.append((rows[j]["k"], rows[j]["n"], labels[j]))
+    if len({_fold(x[2]) for x in out}) != len(out):
+        return None
+    return out
+
+
 def chooser_labels(state: dict[str, Any], entries: list[dict[str, Any]]
                    ) -> list[str]:
     """The names a hand chooser (`hand_select`, an Edit's pick) prints: each
-    offered card under its hand label, read without moving the memory. Where
-    a card cannot be placed in the remembered hand, the list is numbered in
-    its own order, as every other chooser is."""
-    _load_fight()
-    mem = _FIGHT_MEMORY.get("hand") or {}
-    turn = _hand_turn(state)
-    old = [r for r in (mem.get("cards") or []) if isinstance(r, dict)]
-    if old and (mem.get("floor"), mem.get("round")) == turn and entries:
-        titles = [_text(e.get("name")) for e in entries]
-        pairs = _align(old, [_hand_base(t) for t in titles],
-                       [_hand_face(e) for e in entries])
-        got = {j: old[i] for i, j in pairs
-               if old[i].get("k") == _fold(titles[j])}
-        if len(got) == len(entries):
-            labels = [t if not got[j].get("n") else f"{t} ({got[j]['n']})"
-                      for j, t in enumerate(titles)]
-            if len({_fold(x) for x in labels}) == len(labels):
-                return labels
+    offered card under the label the fight page gives that card
+    (`_chooser_rows`), read without moving the memory. Where a card cannot be
+    placed in the hand, the list is numbered in its own order, as every
+    other chooser is."""
+    rows = _chooser_rows(state, entries)
+    if rows is not None:
+        return [label for _, _, label in rows]
     return _number_names([_text(e.get("name")) for e in entries])
+
+
+def hand_card_picked(state: dict[str, Any], index: int) -> None:
+    """The card at `index` of this hand chooser was picked: remember its
+    label, so the next look gives it back to that card wherever the pick
+    leaves it (changed by an Edit, moved among the holders, or gone)."""
+    if _screen(state) != "hand_select":
+        return
+    entries = [c for c in (_blob(state, "hand_select").get("cards")
+                           or _hand(state)) if isinstance(c, dict)]
+    rows = _chooser_rows(state, entries)
+    if rows is None or not 0 <= index < len(rows):
+        return
+    mem = _FIGHT_MEMORY.get("hand")
+    if not mem or _hand_turn(state) != (mem.get("floor"), mem.get("round")):
+        return
+    key, n, _ = rows[index]
+    got = [p for p in (mem.get("picked") or []) if isinstance(p, dict)]
+    if {"k": key, "n": n} not in got:
+        mem["picked"] = got + [{"k": key, "n": n}]
+        _save_fight()
 
 
 def forget_briefed() -> None:
