@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMfCharlotteEnduringFrosthelm : CustomCardModel, ICompanionCard, IWritableCompanion
+public sealed class ProtoMfCharlotteEnduringFrosthelm : CustomCardModel, ICompanionCard, IWritableCompanion, IVarkaSwitchCard
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -75,6 +75,10 @@ public sealed class ProtoMfCharlotteEnduringFrosthelm : CustomCardModel, ICompan
         base.AddExtraArgsToDescription(description);
         description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Cryo));
     }
+
+    /// <summary>The element this card makes Varka's current element
+    /// (`VarkaOathDial` previews it).</summary>
+    public Element VarkaSwitchElement => Element.Cryo;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

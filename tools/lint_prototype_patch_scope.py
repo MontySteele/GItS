@@ -92,6 +92,8 @@ PROTOTYPE_DIRS: tuple[str, ...] = (
 #
 #   * `KokomiResources.IsKokomi` / `FurinaResources.IsFurina` are the identity
 #     predicates themselves (`Player.Character is I<X>Character`);
+#   * `VarkaPrototype.IsVarka` is Varka's identity predicate (the Oath dial,
+#     2026-10-14, is his first prototype patch);
 #   * `KurageMemory.IsLive` / `BaseKitLive` are Kokomi's arm gate, whose whole
 #     body is `IsKokomi` plus the arm's own switch;
 #   * the raw `is [not] I<X>Character` tests are what those are made of, and
@@ -112,6 +114,9 @@ SCOPE_IDIOMS: tuple[str, ...] = (
     "is not IFurinaCharacter",
     "is IKleeCharacter",
     "is not IKleeCharacter",
+    "VarkaPrototype.IsVarka(",
+    "is IVarkaCharacter",
+    "is not IVarkaCharacter",
     "Powers.OfType<SparkAttackCostPower>",
 )
 

@@ -783,6 +783,16 @@ UNMIRRORED: dict[str, str] = {
         "panel's own units. It is a MARGIN rather than a position -- it is "
         "added to the panel's own edge at runtime -- and the sim has no "
         "energy panel, no viewport and nothing that could overlap.",
+    # Varka's Oath dial by the energy orb (2026-10-14, [USER]'s option 2).
+    "VarkaOathDial.SmallScale":
+        "presentation: a dimmed pip's size as a fraction of the current "
+        "element's pip. The numbers it draws are the ledger's Oath counts.",
+    "VarkaOathDial.PipGap":
+        "presentation: the gap between the dial's pips, in the energy "
+        "panel's own units. The sim draws no dial.",
+    "VarkaOathDial.Margin":
+        "presentation: the Spark counter's panel margin, named on the dial "
+        "for its tests. The sim has no energy panel.",
     # The Bake-Kurage's beat (`EB-316`, `EB-317`). Both numbers are SCREEN
     # TIME. They decide how long an animation and a speech bubble occupy the
     # frame and nothing else: no hit is added, removed, resized or reordered by

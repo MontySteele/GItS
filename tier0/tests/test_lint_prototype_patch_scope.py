@@ -145,8 +145,13 @@ def test_the_shipped_prototype_tree_is_green() -> None:
     # FurinaSweepPowers.cs`). Scoped by the mark the card leaves -- a
     # widened card, a marked enemy -- which only playing that card makes,
     # whoever plays it; they resolve no seat.
-    # A TWELFTH appearing here is the next review question.
-    assert len(markers) == 11, markers
+    # IT WENT ELEVEN -> TWELVE ON 2026-10-14 (Varka's Oath dial): its
+    # `NCombatUi.Deactivate` teardown (`Vfx/Prototype/VarkaOathDial.cs`),
+    # the same pure by-name teardown the Spark, Fanfare and Drained counters
+    # carry. It frees its own node and clears its own statics; the scope is
+    # at `Setup`, through `VarkaPrototype.IsVarka`.
+    # A THIRTEENTH appearing here is the next review question.
+    assert len(markers) == 12, markers
 
 
 def test_registered_in_the_ci_lane() -> None:

@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMfChevreuseBurstingGrenades : CustomCardModel, IElementalCard, ICompanionCard, IWritableCompanion
+public sealed class ProtoMfChevreuseBurstingGrenades : CustomCardModel, IElementalCard, ICompanionCard, IWritableCompanion, IVarkaSwitchCard
 {
     /// <summary>Sheet applies_element: this companion attack applies its element.</summary>
     public Element Element => Element.Pyro;
@@ -79,6 +79,10 @@ public sealed class ProtoMfChevreuseBurstingGrenades : CustomCardModel, IElement
         description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Pyro));
         description.Add("VarkaWildfire", VarkaOath.WildfireLine(this));
     }
+
+    /// <summary>The element this card makes Varka's current element
+    /// (`VarkaOathDial` previews it).</summary>
+    public Element VarkaSwitchElement => Element.Pyro;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
