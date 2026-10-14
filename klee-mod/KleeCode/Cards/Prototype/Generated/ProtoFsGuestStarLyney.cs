@@ -41,7 +41,9 @@ public sealed class ProtoFsGuestStarLyney : CustomCardModel, ICharacterCard
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForDrain(ArmKeywordTips.ForLyney(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this), this);
+        TipAudience.Seat
+            ? ArmKeywordTips.ForDrain(ArmKeywordTips.ForLyney(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this), this)
+            : ArmKeywordTips.ForDrain(ArmKeywordTips.ForLyney(ArmKeywordTips.ForGuestStar(base.ExtraHoverTips, this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_guest_star_lyney");
 

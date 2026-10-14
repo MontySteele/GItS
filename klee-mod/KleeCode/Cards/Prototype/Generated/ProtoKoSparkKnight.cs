@@ -35,7 +35,9 @@ namespace KleeMod.Cards.Prototype.Generated;
 public sealed class ProtoKoSparkKnight : CustomCardModel
 {
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSpark(base.ExtraHoverTips, this);
+        TipAudience.Seat
+            ? ArmKeywordTips.ForSpark(base.ExtraHoverTips, this)
+            : base.ExtraHoverTips;
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_spark_knight");
 

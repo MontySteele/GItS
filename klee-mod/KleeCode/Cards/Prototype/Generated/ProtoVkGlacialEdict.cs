@@ -41,7 +41,9 @@ public sealed class ProtoVkGlacialEdict : CustomCardModel, ICharacterCard
         new[] { KleeKeywords.AppliesCryo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForWeak(BaseKeywordTips.ForVulnerable(ArmKeywordTips.ForOath(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, appliesWithoutHit: true), this, Element.Cryo), this), this), this);
+        TipAudience.Seat
+            ? BaseKeywordTips.ForWeak(BaseKeywordTips.ForVulnerable(ArmKeywordTips.ForOath(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, appliesWithoutHit: true), this, Element.Cryo), this), this), this)
+            : BaseKeywordTips.ForVulnerable(ArmKeywordTips.ForOath(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, appliesWithoutHit: true), this, Element.Cryo), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_glacial_edict");
 

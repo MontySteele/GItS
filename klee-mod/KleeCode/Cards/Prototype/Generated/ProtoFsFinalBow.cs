@@ -38,7 +38,9 @@ public sealed class ProtoFsFinalBow : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFinalBowInTurn(base.ExtraHoverTips, this);
+        TipAudience.Seat
+            ? ArmKeywordTips.ForFinalBowInTurn(base.ExtraHoverTips, this)
+            : base.ExtraHoverTips;
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_final_bow");
 

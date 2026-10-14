@@ -44,7 +44,9 @@ public sealed class ProtoKkBrineSpray : CustomCardModel, IElementalCard, ICharac
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KokomiCards.WithStingPreview(ArmKeywordTips.ForElementalReaction(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro), this));
+        TipAudience.Seat
+            ? KokomiCards.WithStingPreview(ArmKeywordTips.ForElementalReaction(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro), this))
+            : KokomiCards.WithStingPreview(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro));
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_brine_spray");
 

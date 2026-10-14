@@ -44,7 +44,9 @@ public sealed class ProtoVkDownburst : CustomCardModel, IElementalCard, ICharact
         new[] { KleeKeywords.AppliesAnemo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForOath(ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo), this), this);
+        TipAudience.Seat
+            ? ArmKeywordTips.ForOath(ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo), this), this)
+            : ArmKeywordTips.ForOath(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_downburst");
 

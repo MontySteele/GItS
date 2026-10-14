@@ -52,7 +52,9 @@ public sealed class ProtoMiHeizouHeartstopper : CustomCardModel, IElementalCard,
         new[] { KleeKeywords.AppliesAnemo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSwirl(ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo), this), this);
+        TipAudience.Seat
+            ? ArmKeywordTips.ForSwirl(ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo), this), this)
+            : ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mi_heizou_heartstopper");
 

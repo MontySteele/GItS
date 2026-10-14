@@ -38,7 +38,9 @@ public sealed class ProtoKoBoomBadge : CustomCardModel, ISparkPricedCard
         new[] { CardKeyword.Retain };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSpark(ArmKeywordTips.ForSetOff(ArmKeywordTips.ForBomb(ArmKeywordTips.ForBoomBadgeTurn(base.ExtraHoverTips, this), this), this), this);
+        TipAudience.Seat
+            ? ArmKeywordTips.ForSpark(ArmKeywordTips.ForSetOff(ArmKeywordTips.ForBomb(ArmKeywordTips.ForBoomBadgeTurn(base.ExtraHoverTips, this), this), this), this)
+            : ArmKeywordTips.ForSpark(ArmKeywordTips.ForSetOff(ArmKeywordTips.ForBomb(base.ExtraHoverTips, this), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_boom_badge");
 

@@ -19,6 +19,10 @@ namespace KleeMod.Cards;
 /// For random/all-enemy cards it intentionally lists every distinct reaction
 /// currently available; choosing a particular target remains the player's
 /// decision.
+///
+/// THE TOOLTIP TRIM (2026-10-14): that board-wide list is now the blind
+/// seat's (<see cref="TipAudience.Seat"/>). A player sees one preview, for the
+/// enemy the card is aimed at, while aiming (<see cref="ReactionAim"/>).
 /// </summary>
 public static class KleeCardTooltips
 {
@@ -128,10 +132,20 @@ public static class KleeCardTooltips
 
         if (trigger == Element.None || card.CombatState == null) yield break;
 
+        // THE TOOLTIP TRIM (2026-10-14), pick 2 (a). A player sees a preview
+        // only for the enemy the card is being aimed at, raised by
+        // `ReactionAim` while it is dragged onto that enemy, and none while
+        // the card is only hovered in hand. A blind seat (`TipAudience.Seat`)
+        // reads every matching aura's preview, as before the trim.
+        var aimed = ReactionAim.TargetFor(card);
+        if (aimed == null && !TipAudience.Seat) yield break;
+
+        var previews = new List<IHoverTip>();
         var seen = new HashSet<Reaction>();
         var printedTrigger = trigger;
         foreach (var enemy in card.CombatState.HittableEnemies)
         {
+            if (aimed != null && !ReferenceEquals(enemy, aimed)) continue;
             var aura = AuraCmd.Find(enemy);
             if (aura == null) continue;
             trigger = printedTrigger;
@@ -175,11 +189,11 @@ public static class KleeCardTooltips
                 && ReactionEffects.FrozenArtifactDetail(enemy) != null)
             {
                 var boss = ReactionEffects.FrozenBossVulnWillApply(enemy);
-                yield return new HoverTip(
+                previews.Add(new HoverTip(
                     new LocString(Table, (boss ? FrozenBossPreviewKey
                                                : FrozenPreviewKey) + ".title"),
                     (elementOnlyOnSpend ? SpendOnlyPrefix : "")
-                        + FrozenArtifactBody(boss));
+                        + FrozenArtifactBody(boss)));
                 continue;
             }
             // 2026-10-04 (Furina v2 seat round): Tidal Flourish previewed
@@ -190,29 +204,36 @@ public static class KleeCardTooltips
             {
                 var key = PreviewKey(reaction,
                     keyword == KleeKeywords.FrozenBossPreview);
-                yield return new HoverTip(
+                previews.Add(new HoverTip(
                     new LocString(Table, (substitute == null
                         ? key : NoHitTitleKey(reaction)) + ".title"),
                     SpendOnlyPrefix + (substitute
                         ?? new LocString(Table, key + ".description")
-                            .GetFormattedText()));
+                            .GetFormattedText())));
             }
             else
             {
-                yield return substitute == null
+                previews.Add(substitute == null
                     ? HoverTipFactory.FromKeyword(keyword)
                     : new HoverTip(
                         new LocString(Table, NoHitTitleKey(reaction) + ".title"),
-                        substitute);
+                        substitute));
             }
             // Text pass 2026-09-25: the Electro-Charged preview names Poison
             // and no longer spells out how it ticks, so Poison's own tip
             // rides beside it. A hover tip cannot nest, so this is the attach.
             if (reaction == Reaction.ElectroCharged)
             {
-                yield return HoverTipFactory.FromPower<MegaCrit.Sts2.Core.Models.Powers.PoisonPower>();
+                previews.Add(HoverTipFactory.FromPower<MegaCrit.Sts2.Core.Models.Powers.PoisonPower>());
             }
         }
+
+        if (aimed != null)
+        {
+            ReactionAim.Collect(previews);
+            yield break;
+        }
+        foreach (var preview in previews) yield return preview;
     }
 
 

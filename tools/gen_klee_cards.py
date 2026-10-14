@@ -1472,6 +1472,148 @@ def base_keyword_tip_calls(description: str) -> list[str]:
             if printed.intersection(keyword.tokens)]
 
 
+# --- the tooltip trim (2026-10-14) ------------------------------------------
+#
+# review/active/tooltip-trim-2026-10-14.md sec.3, all three picks at (a).
+# [USER]: "her cards still make a million words of tooltips come up". A
+# PLAYER's static hover carries at most `PLAYER_TIP_CAP` boxes; the blind
+# seats read the full chain the generator always built, word for word, through
+# the bridge's seat scope (`TipAudience.Seat`). `tools/lint_hover_tips.py`
+# measures the player branch this emits.
+
+#: Boxes a card's static hover may raise for a player.
+PLAYER_TIP_CAP = 3
+
+#: Riders: a sentence a blind seat asked for about one card, not a word. The
+#: seat page keeps them; a player's hover does not raise them.
+SEAT_ONLY_TIP_CALLS = frozenset({
+    "ArmKeywordTips.ForPlanTwice",
+    "ArmKeywordTips.ForNereidsTwice",
+    "ArmKeywordTips.ForBankDamage",
+    "ArmKeywordTips.ForBisSpendUpTo",
+    "ArmKeywordTips.ForAscensionNoOath",
+    "ArmKeywordTips.ForFinalBowInTurn",
+    "ArmKeywordTips.ForOldestGuest",
+    "ArmKeywordTips.ForBigBaddaBoomTotal",
+    "ArmKeywordTips.ForBoomBadgeTurn",
+    "ArmKeywordTips.ForLionsFangLastTurn",
+    "ArmKeywordTips.ForPassTheMatchActing",
+})
+
+#: Tips that show only on a board in the state they name (no Bomb out, an
+#: element switch pending) or only to one owner (a Companion's Plan line, to
+#: a Kokomi): not part of the static hover the cap counts, the census's own
+#: "conditional" column.
+BOARD_ONLY_TIP_CALLS = frozenset({
+    "ArmKeywordTips.ForEmptyField",
+    "ArmKeywordTips.ForElementSwitch",
+    "ArmKeywordTips.ForCompanionPlan",
+})
+
+
+def split_tip_layers(expr: str) -> list[tuple[str, str]]:
+    """A generated `ExtraHoverTips` expression as its wrapper calls,
+    innermost first: `[(call, args after the inner list), ...]`. The chain is
+    `Outer(Inner(base.ExtraHoverTips, this), this)`, every call taking the
+    list it wraps as its first argument."""
+    layers: list[tuple[str, str]] = []
+    while expr != "base.ExtraHoverTips":
+        m = re.match(r"([\w.<>]+)\(", expr)
+        if not m or not expr.endswith(")"):
+            raise ValueError(f"not a tip chain: {expr!r}")
+        inner_start = m.end()
+        depth, i = 0, inner_start
+        while i < len(expr):
+            c = expr[i]
+            if c == "(":
+                depth += 1
+            elif c == ")":
+                if depth == 0:
+                    break
+                depth -= 1
+            elif c == "," and depth == 0:
+                break
+            i += 1
+        layers.append((m.group(1), expr[i:-1]))
+        expr = expr[inner_start:i]
+    return layers[::-1]
+
+
+def fold_tip_layers(layers: list[tuple[str, str]]) -> str:
+    """`split_tip_layers` backwards."""
+    expr = "base.ExtraHoverTips"
+    for call, args in layers:
+        expr = f"{call}({expr}{args})"
+    return expr
+
+
+def tip_layer_boxes(call: str, args: str) -> int:
+    """The static boxes one layer raises on a player's hover."""
+    if call in BOARD_ONLY_TIP_CALLS or call in SEAT_ONLY_TIP_CALLS:
+        return 0
+    if call == "KleeCardTooltips.ForCard":
+        # Its reaction previews show only while aiming (pick 2 (a)) and its
+        # element-override line only under a rider; what it adds to a static
+        # hover is the Confiscated rule and the Dazed card.
+        return (("includesConfiscatedRules: true" in args)
+                + ("includesDazedCard: true" in args))
+    return 1
+
+
+def keyword_tip_boxes(keywords: list[str]) -> int:
+    """The mod's own keyword boxes (`Applies Pyro`, `Knight`): the base
+    game's keywords (Exhaust, Retain) are its own business."""
+    return sum(1 for k in keywords if k.startswith("KleeKeywords."))
+
+
+def player_tip_layers(layers: list[tuple[str, str]], keywords: list[str],
+                      spark_priced: bool) -> list[tuple[str, str]]:
+    """The layers a PLAYER's hover raises, from the seat's full chain.
+
+    1. Riders (`SEAT_ONLY_TIP_CALLS`) are the seat's.
+    2. `Elemental Reaction` is dropped wherever an `Applies X` box is up: the
+       Applies box already says another aura reacts. `Swirl` likewise where
+       `Applies Anemo` is up, whose box names the Swirl.
+    3. `Spark` only on a card that prints a Spark cost.
+    4. A Guest Star card raises one merged Guest Star box, not Summon too.
+    5. At most `PLAYER_TIP_CAP` boxes: base words go first (the base game's
+       own tip, which a player already knows), then the outermost kit word.
+    """
+    applies = any(k.startswith("KleeKeywords.Applies") for k in keywords)
+    calls = {call for call, _ in layers}
+    out = []
+    for call, args in layers:
+        if call in SEAT_ONLY_TIP_CALLS:
+            continue
+        if call == "ArmKeywordTips.ForElementalReaction" and applies:
+            continue
+        if (call == "ArmKeywordTips.ForSwirl"
+                and "KleeKeywords.AppliesAnemo" in keywords):
+            continue
+        if call == "ArmKeywordTips.ForSpark" and not spark_priced:
+            continue
+        if (call == "ArmKeywordTips.ForSummon"
+                and "ArmKeywordTips.ForGuestStar" in calls):
+            continue
+        out.append((call, args))
+
+    def boxes(chain: list[tuple[str, str]]) -> int:
+        return keyword_tip_boxes(keywords) + sum(
+            tip_layer_boxes(c, a) for c, a in chain)
+
+    while boxes(out) > PLAYER_TIP_CAP:
+        cut = next((i for i in range(len(out) - 1, -1, -1)
+                    if out[i][0].startswith("BaseKeywordTips.")), None)
+        if cut is None:
+            cut = next((i for i in range(len(out) - 1, -1, -1)
+                        if tip_layer_boxes(*out[i])
+                        and out[i][0].startswith("ArmKeywordTips.")), None)
+        if cut is None:
+            break
+        del out[cut]
+    return out
+
+
 # --- companion batch (2026-07-21) --------------------------------------------
 def companion_damage_effects(card: dict) -> list[dict]:
     """Every OFFENSIVE damage effect on a companion card, mode bodies included.
@@ -17701,10 +17843,27 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             tips_expr = (f"KleeStatusPackage.WithPreview<{into_cls}>("
                          f"{tips_expr or 'base.ExtraHoverTips'})")
     if tips_expr:
-        tooltip_member = (
-            "\n    protected override IEnumerable<IHoverTip> ExtraHoverTips =>\n"
-            f"        {tips_expr};\n"
-        )
+        # THE TOOLTIP TRIM (2026-10-14): the chain built above is the blind
+        # seat's, word for word; a player reads `player_tip_layers`' cut of
+        # it. Where the two agree the member is the one chain.
+        player_expr = tips_expr
+        if profile.arm_keyword_tips:
+            player_expr = fold_tip_layers(player_tip_layers(
+                split_tip_layers(tips_expr), keywords,
+                any(eff.get("op") == "spend_spark"
+                    for eff in card["effects"])))
+        if player_expr == tips_expr:
+            tooltip_member = (
+                "\n    protected override IEnumerable<IHoverTip> ExtraHoverTips =>\n"
+                f"        {tips_expr};\n"
+            )
+        else:
+            tooltip_member = (
+                "\n    protected override IEnumerable<IHoverTip> ExtraHoverTips =>\n"
+                "        TipAudience.Seat\n"
+                f"            ? {tips_expr}\n"
+                f"            : {player_expr};\n"
+            )
     hover_using = (
         "\nusing MegaCrit.Sts2.Core.HoverTips;" if tooltip_member else "")
 
