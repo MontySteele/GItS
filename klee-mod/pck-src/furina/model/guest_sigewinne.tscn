@@ -229,16 +229,16 @@ position = Vector2(0, 0)
 [node name="Body" type="Sprite2D" parent="Visuals/Rig"]
 texture = ExtResource("1_sigewinne")
 centered = false
-offset = Vector2(-79.5, -381)
+offset = Vector2(-79, -381)
 scale = Vector2(0.5, 0.5)
 
 [node name="Bounds" type="Control" parent="."]
 unique_name_in_owner = true
 layout_mode = 3
 anchors_preset = 0
-offset_left = -39.8
+offset_left = -39.5
 offset_top = -190.5
-offset_right = 39.8
+offset_right = 39.5
 offset_bottom = 0.0
 mouse_filter = 2
 
