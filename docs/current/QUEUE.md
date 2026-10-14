@@ -22,6 +22,9 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
+- **Klee and Varka story chains** (`klee-varka-story-chains-2026-10-14.md`,
+  three picks, all (a)): eight events each in branching threads, a result
+  line on every option, Starsnatch Cliff as a memory, Alice in person.
 - **Distribution readiness** (`distribution-readiness-2026-10-12.md`, two picks,
   defaults (a)): a closed beta now, public early access once Varka and Furina
   reach Balance; a GitHub release first. (The `LAW.md` art line, #1145, is
