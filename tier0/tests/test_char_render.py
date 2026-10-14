@@ -6,8 +6,9 @@ can be held: every kit has a stance in the shared pose language, the scale
 follows the law (canon height over an adult, docs/current/LAW.md), the
 overlay shells that broke Klee's protect mask are recognised, Varka's pose
 library is well formed (two claymores, feet planted, impacts marked), the
-trail layer is deterministic and tintable, and the committed manifest was
-packed at his ruled height (review/active/varka-visual-paper-2026-10-13.md).
+trail layer is deterministic and tintable, the committed manifest was
+packed at his ruled height (82 in), and his hands rest on the pommels in
+stance B (review/active/varka-visual-paper-2026-10-13.md).
 """
 from __future__ import annotations
 
@@ -57,12 +58,15 @@ def test_scale_is_canon_height_over_an_adult():
     assert 168 <= chars.body_px(50.0) <= 176
     for name, cfg in chars.CHARS.items():
         px = chars.body_px(cfg["height_in"])
-        assert 200 <= px <= 270, name
+        assert 200 <= px <= 290, name
     # the ppu is solved per model, never shared: packs differ in scale
     assert chars.target_ppu("kokomi", 1.626) != chars.target_ppu("furina", 1.722)
-    # Varka's ruled 78 in: ~270 px, from his model's measured 2.05 unit rest height
-    assert abs(chars.body_px(78.0) - 269.6) < 0.5
-    assert abs(build.combat_ppu("varka") * build.REST_HEIGHT["varka"] * chars.COMBAT_SCALE - 269.6) < 0.5
+    # Varka's ruled 82 in ([USER], 2026-10-13: "let's give Varka the height
+    # boost and use these proportion"): ~283.4 px, from his model's measured
+    # 2.05 unit rest height; the interim ruled_height_in is gone
+    assert chars.CHARS["varka"]["height_in"] == 82.0 and "ruled_height_in" not in chars.CHARS["varka"]
+    assert abs(chars.body_px(82.0) - 283.4) < 0.1
+    assert abs(build.combat_ppu("varka") * build.REST_HEIGHT["varka"] * chars.COMBAT_SCALE - 283.4) < 0.5
 
 
 def test_overlay_shells_are_hidden_and_face_parts_unlined():
@@ -290,11 +294,37 @@ def test_the_impacts_are_marked_and_the_trails_cover_them():
     assert any(w["blade"] == vc.DRIVE and w["from"] <= t <= w["to"] for w in asc["trails"])
 
 
-def test_stance_b_plants_both_blades_with_his_hands_on_them():
-    b = vc.MERCHANT["keys"][0][1]["blades"]
+def test_stance_b_crosses_his_arms_with_both_blades_planted_beside_him():
+    # [USER], 2026-10-13: "Can we have him cross his arms instead, with his
+    # swords infront of him? And let's have the facial expression be more of
+    # a slight smile or smirk."
+    p = vc.MERCHANT["keys"][0][1]
+    assert p.get("arms_crossed")
+    b = p["blades"]
     for side in ("L", "R"):
-        assert b[side]["anchor"] == "ground" and b[side]["hand"] and b[side]["dir"][2] < -0.95
+        # planted point-down, standing free (no hand on it), shallow: the
+        # pommel's top (chars.py) at about his lower ribs. [USER], on the
+        # blades before his legs: "the swords are off-screen (rendered too
+        # low and cropped - the hilts are blending into his pants / torso)"
+        assert b[side]["anchor"] == "ground" and not b[side]["hand"] and b[side]["dir"][2] < -0.95
+        assert b[side]["grip"] == chars.CHARS["varka"]["blades"][side]["pommel"][1]
+        assert 1.35 <= b[side]["at"][2] <= 1.65, b[side]["at"]
+        assert abs(b[side]["at"][0]) >= 0.45, "beside him, not before his legs"
     assert b["L"]["at"][0] > 0 > b["R"]["at"][0], "one either side"
+    # each hand is posed across his chest, to the other side
+    hands = {op[1]: op for op in p["ops"] if op[0] == "hand"}
+    assert set(hands) == {"L", "R"} and all(op[2] == vc.CH for op in hands.values())
+    assert hands["R"][3][0] > 0 > hands["L"][3][0], "each wrist crosses to the other side"
+    assert hands["R"][3][1] < hands["L"][3][1], "the near forearm in front"
+    for name in ("select", "portrait"):
+        assert vc.STILLS[name]["morphs"] == vc.SMIRK, name
+    assert vc.SMIRK.get("にやり", 0) > 0 and all(v <= 0.5 for v in vc.SMIRK.values()), "a slight smirk"
+    assert vc.SELECT["blades"] == vc.regal(1.0)["blades"], "the select close-up is stance B too"
+    assert vc.SELECT.get("arms_crossed")
+    # no other clip crosses his arms or plants both blades free
+    for name, clip in vc.CLIPS.items():
+        if name != "merchant":
+            assert not any(k[1].get("arms_crossed") for k in clip["keys"]), name
     # the rest site: both blades planted upright behind him, and he sits upright
     for bl in vc.REST["blades"].values():
         assert not bl["hand"] and bl["anchor"] == "ground" and bl["dir"][2] < -0.95
@@ -429,6 +459,38 @@ def test_the_manifest_was_packed_at_his_ruled_height():
     assert m["texture_import"] == "vram_compressed", "visual paper, pick 1 (a)"
     # the low guard keeps stance A tight: no wider than the reviewed 295 px at 1080p
     assert m["stance_a"]["width_px"] <= 300, m["stance_a"]
+
+
+def test_his_crossed_arms_clear_each_other_and_the_blades_hide_neither_face_nor_arms():
+    # render.py arms_crossed measures the deformed mesh in stance B (the shop
+    # loop's first frame and the select still): how far any forearm or hand
+    # vertex sinks behind the surface of the other arm or of his body (a
+    # forearm through a forearm, a gauntlet through his chest), and, on the
+    # canvas (y px, down), his chin, his crossed forearms and each blade's top.
+    m = json.loads(pack.manifest_path("varka").read_text(encoding="utf-8"))
+    crossed = m["arms_crossed"]
+    assert set(crossed) == {"merchant", "select"}
+    for still, g in crossed.items():
+        for side in ("L", "R"):
+            # stacked forearms touch: a skin's depth (0.015 units, ~1.5 cm)
+            # at most, and only at a few vertices past 0.01
+            assert g[side]["into_other_arm"] <= 0.015 and g[side]["into_other_arm_n"] <= 3, (still, side, g[side])
+            assert g[side]["into_body"] <= 0.015 and g[side]["into_body_n"] <= 3, (still, side, g[side])
+        top, bottom = g["forearms_px"]
+        assert g["chin_px"] < top, ("his forearms are under his chin", still)
+        assert set(g["blade_top_px"]) == set(g["hilts"]) == {"L", "R"}
+        for side, h in g["hilts"].items():
+            # each hilt (guard, grip, pommel), grown by a few px of gap, lies
+            # off his silhouette: the swords read as swords, beside him, and
+            # cover neither his crossed arms nor his face
+            assert h["on_body_px"] <= 25, ("a hilt on his body", still, side, h)
+            assert g["blade_top_px"][side] > g["chin_px"], ("a blade by his face", still, side)
+    # the select close-up frames both crossguards whole, his head in the upper third
+    sel = m["select"]
+    assert set(sel["guards_px"]) == {"L", "R"}
+    for side, (x0, y0, x1, y1) in sel["guards_px"].items():
+        assert 0 <= x0 < x1 <= 1920 and 0 <= y0 < y1 <= 1080 - 24, (side, sel["guards_px"])
+    assert sel["chin_px"] < 1080 / 3, sel
 
 
 def test_tight_box_ignores_the_faint_haze():

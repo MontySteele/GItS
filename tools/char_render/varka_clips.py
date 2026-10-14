@@ -16,7 +16,8 @@ so his right side, .R, is nearest the camera), plus BLADES:
             hand    False = the blade lies free (planted, laid down)
             pole    the elbow's bend direction (world)
             grip    where on the handle the hand closes (default: the
-                    blade's own grip from chars.py; the pommel to rest on)
+                    blade's own grip from chars.py); on a free blade, the
+                    point of it placed at `at` (stance B: the pommel's top)
             curl    (finger, thumb) degrees
           A blade missing from a pose is hidden.
 
@@ -29,7 +30,7 @@ slide them; a spin turns him on the spot (`turned`), and his two blades always
 move as one pair (`pair`).
 
 THE SCALE: the model stands 2.05 units (import 0.08); every offset below is in
-those units, about 1.86x Klee's. His ruled height is 78 in (chars.py).
+those units, about 1.86x Klee's. His ruled height is 82 in (chars.py).
 
 The model is the official Varka pack (观海子, miHoYo); it is read in place from
 the operator's scratch directory and NEVER enters the repo.
@@ -578,17 +579,58 @@ ASCENSION = {
 }
 
 # ------------------------------------------------------------------ stance B
-# Where he is not fighting (the shop, character select): upright and regal,
-# both claymores planted point-down, one either side, his hands resting on the
-# hilts. Each claymore is nearly his height, so a hand at chest height puts
-# the tip a little into the ground (pack.py cuts it at the ground line).
-B_L = (0.42, -0.10, 1.56)        # grips at his chest; the tips ~0.3 and ~0.1 into the ground
-B_R = (-0.32, -0.18, 1.45)
+# Where he is not fighting (the shop, character select): upright and at ease,
+# his arms crossed over his chest, both claymores planted point-down in the
+# ground either side of him, standing on their own.
+#: [USER], 2026-10-13: "I dont think the "hands over sword" thing is working
+#: for Varka. Can we have him cross his arms instead, with his swords infront
+#: of him? And let's have the facial expression be more of a slight smile or
+#: smirk." The near (right) forearm crosses in front, its hand tucked under
+#: the far upper arm; the far (left) forearm lies behind it, its hand closing
+#: round the near elbow. render.py arms_crossed measures that no forearm or
+#: gauntlet goes into the other arm or his chest.
+#: Then, on the swords planted before his legs: "the swords are off-screen
+#: (rendered too low and cropped - the hilts are blending into his pants /
+#: torso)". So they flank him: one outside his near leg, one outside his far
+#: leg, planted shallow, each crossguard at about his hip and its pommel at
+#: about his lower ribs. arms_crossed also measures each hilt against his
+#: silhouette on the canvas (a gap of background between them), and pack.py
+#: frames the select close-up so both crossguards sit inside it.
+B_L = (0.62, -0.02, 1.52)        # the pommels' tops, from the ground under him
+B_R = (-0.62, -0.04, 1.52)
+B_L_DIR = (0.03, 0.0, -1.0)      # guard to point: the points a hair apart
+B_R_DIR = (-0.03, 0.0, -1.0)
+POMMEL_TOP = {"L": 0.338, "R": 0.354}        # chars.CHARS["varka"]["blades"][side]["pommel"][1]
+#: the wrists, from his upper chest's head, and where each elbow bends
+CROSS_R = (0.10, -0.24, -0.05)
+CROSS_L = (-0.08, -0.215, -0.09)
+POLE_R = (-1.0, -0.2, -0.6)
+POLE_L = (1.0, -0.2, -0.6)
+#: each hand points across, tucked back under the other upper arm; the far
+#: hand turned TUCK_TWIST_L about itself, so its thumb lies along the near
+#: forearm instead of rising into the near upper arm
+TUCK_R = (1.0, 0.6, 0.1)
+TUCK_L = (-1.0, 0.6, 0.1)
+TUCK_TWIST_L = -40.0
+TUCK_CURL = (70, 30)
+TUCK_CURL_L = (85, 60)     # the far hand closes round the near elbow, its thumb laid down
+#: the slight smirk ([USER]'s reference: a closed mouth, one corner raised,
+#: relaxed brows, a steady gaze)
+SMIRK = {"にやり": 0.45, "真面目": 0.1, "なごみ": 0.12}
+
+
+def crossed_arms():
+    return [("hand", "R", CH, CROSS_R, POLE_R),
+            ("aimw", "手首.R", TUCK_R),
+            ("curl", "R", *TUCK_CURL),
+            ("hand", "L", CH, CROSS_L, POLE_L),
+            ("aimw", "手首.L", TUCK_L, TUCK_TWIST_L),
+            ("curl", "L", *TUCK_CURL_L)]
 
 
 def regal(breath=0.0, swing=0.0, head_turn=30.0):
     b = breath
-    return pose(
+    p = pose(
         [("move", "センター", (0, 0, -0.02 - 0.006 * (1 - b))),
          ("movew", "足ＩＫ.L", (0.12, 0.02, 0)),
          ("movew", "足ＩＫ.R", (-0.10, -0.02, 0)),
@@ -598,12 +640,13 @@ def regal(breath=0.0, swing=0.0, head_turn=30.0):
          ("rotw", "頭", Z, head_turn * 0.6),
          ("rot", "頭", X, -2 + 1.5 * (1 - b)),
          ("rotw", "頭", Y, -2)]
+        + crossed_arms()
         + cloth(swing),
-        {"真面目": 0.4, "にこり": 0.25},
-        blades={"L": blade(add(B_L, (0, 0, -0.004 * (1 - b))), (0.06, 0.02, -1.0), (0.8, 0.4, -0.4),
-                           anchor="ground", curl=(70, 30)),
-                "R": blade(add(B_R, (0, 0, -0.004 * (1 - b))), (-0.06, -0.02, -1.0), (-0.8, 0.2, -0.4),
-                           anchor="ground", curl=(70, 30))})
+        dict(SMIRK),
+        blades={"L": blade(B_L, unit(B_L_DIR), (0, 0, -1), anchor="ground", hand=False, grip=POMMEL_TOP["L"]),
+                "R": blade(B_R, unit(B_R_DIR), (0, 0, -1), anchor="ground", hand=False, grip=POMMEL_TOP["R"])})
+    p["arms_crossed"] = True
+    return p
 
 
 MERCHANT = {
@@ -642,7 +685,6 @@ REST = pose(
 # ------------------------------------------------------------------ character select
 # A waist-up close-up of stance B, his face turned further toward the viewer.
 SELECT = regal(1.0, head_turn=16.0)
-SELECT["morphs"] = {"真面目": 0.3, "にこり": 0.45}
 
 # ------------------------------------------------------------------ roster tile
 # Head and shoulders, the face three-quarters toward the viewer; no blades.
@@ -650,7 +692,7 @@ PORTRAIT = pose(
     stance(drop=0.0, lean=0.0, twist=-18, head_turn=20, head_nod=-3, head_tilt=-2, front=0.10, back=0.08)
     + [("hand", "R", "足.R", (-0.10, -0.06, -0.10), (-1.0, 0.5, 0.0)),
        ("hand", "L", "足.L", (0.10, -0.04, -0.10), (1.0, 0.5, 0.0))],
-    {"にこり": 0.5, "真面目": 0.2})
+    dict(SMIRK))
 
 # ------------------------------------------------------------------ scale reference
 # Upright, arms at his sides, no blades: the still pack.py measures his

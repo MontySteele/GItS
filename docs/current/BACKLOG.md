@@ -17,7 +17,6 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 
 - Bennett's Passion Overload and Kujou Sara's Crowfeather Cover do not say that an Attack carries one element, or that Sara's Electro lands when both are up (`CompanionOverhaulRiders.ElementFor`, fixed order, not newest); the sentence does not fit the 125-character power ceiling (116 and 119 now). Kokomi review r4, item 4.
 - Kokomi has no loop probe (Furina's is `tier0/harness/furina_loop_probe.py`). Its known set, when one is built: Shoal Call x2 + Watchful Shoal+ + The Shape of Water (review r3), Kurage Canopy + a planned Ward, a 0-cost Weak and 3 Block a turn (review r4), and Jellyfish Current + Stings, bounded because each reaction consumes the aura (pool overhaul 2026-10-13).
-- Re-render Varka at his new 82 in (ruled 2026-10-13, chart proportions; `tools/char_render/chars.py`) and repack; needs a Blender session, do it with Furina's.
 - Kokomi round 3 (2026-10-11): check whether Thieving Hopper's Flutter ("50% less damage from Attacks") should halve Opening Gambit's doubled Plan (a Skill); lane 5, fight 11.
 - Kokomi round 3: Iron Club ("every 4 cards you play, draw 1") never visibly drew in lane 4; read `cards_drawn_by_turn` in her next round, or check the relic in game.
 - Off-character kit cards, base-game faithful (resources work for anyone and their gauge appears on first gain, like the Regent's Stars and Osty): Furina's Drain, Repay and Fanfare, Kokomi's Plans and Kurage, Varka's Oath. Each is done when its kit reaches Balance; Klee is done.
