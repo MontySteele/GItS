@@ -571,6 +571,105 @@ KNOWN_MISSING = {
     # plan rows are in art/plan.tsv under "Art bill 2026-10-12". An entry here
     # is a card the player sees BLANK; tools/deploy_round.py now names every
     # one in its summary, so adding one is a visible choice.
+    # YAE MIKO, batch one (2026-10-13): the 32 rows of her C# prototype,
+    # built before her art pass. Placeholders by choice: the art census
+    # paints them once the kit survives its first play.
+    "proto_ym_yakan_evocation": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_proofread": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_kitsune_flash": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_thunder_rite": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_shrine_offering": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_twin_sakura": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_deadline": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_fox_fire_draft": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_sly_strike": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_fox_trick": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_shrine_maidens_guard": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_sakura_grove": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_kitsune_rite": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_thunderbolt_tithe": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_rooted_shrine": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_edict_of_cleansing": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_bestseller": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_print_run": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_footnote": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_sakura_seal": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_serialization": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_manuscript_pile": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_kitsune_guile": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_foxfire_lure": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_tenko_kenshin": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_foxs_mooncall": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_yakan_offering": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_the_seven_glamours": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_sakura_channeling": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_mischievous_teasing": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_reborn_as_guuji_yae": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
+    "proto_ym_editor_in_chief": (
+        "Yae Miko batch one (2026-10-13): her C# prototype ships before her art pass; the card renders blank until the art census paints it."
+    ),
 }
 
 

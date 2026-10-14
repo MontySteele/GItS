@@ -33,6 +33,7 @@ public static class PrototypeRoster
     private static List<CardModel>? _klee;
     private static List<CardModel>? _kokomi;
     private static List<CardModel>? _varka;
+    private static List<CardModel>? _yae;
 
     private static List<CardModel> BuildFurina() =>
         new()
@@ -494,6 +495,43 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoVkWolfpack>(),
         };
 
+    private static List<CardModel> BuildYae() =>
+        new()
+        {
+            ModelDb.Card<ProtoYmBestseller>(),
+            ModelDb.Card<ProtoYmDeadline>(),
+            ModelDb.Card<ProtoYmEdictOfCleansing>(),
+            ModelDb.Card<ProtoYmEditorInChief>(),
+            ModelDb.Card<ProtoYmFootnote>(),
+            ModelDb.Card<ProtoYmFoxFireDraft>(),
+            ModelDb.Card<ProtoYmFoxTrick>(),
+            ModelDb.Card<ProtoYmFoxfireLure>(),
+            ModelDb.Card<ProtoYmFoxsMooncall>(),
+            ModelDb.Card<ProtoYmKitsuneFlash>(),
+            ModelDb.Card<ProtoYmKitsuneGuile>(),
+            ModelDb.Card<ProtoYmKitsuneRite>(),
+            ModelDb.Card<ProtoYmManuscriptPile>(),
+            ModelDb.Card<ProtoYmMischievousTeasing>(),
+            ModelDb.Card<ProtoYmPrintRun>(),
+            ModelDb.Card<ProtoYmProofread>(),
+            ModelDb.Card<ProtoYmRebornAsGuujiYae>(),
+            ModelDb.Card<ProtoYmRootedShrine>(),
+            ModelDb.Card<ProtoYmSakuraChanneling>(),
+            ModelDb.Card<ProtoYmSakuraGrove>(),
+            ModelDb.Card<ProtoYmSakuraSeal>(),
+            ModelDb.Card<ProtoYmSerialization>(),
+            ModelDb.Card<ProtoYmShrineMaidensGuard>(),
+            ModelDb.Card<ProtoYmShrineOffering>(),
+            ModelDb.Card<ProtoYmSlyStrike>(),
+            ModelDb.Card<ProtoYmTenkoKenshin>(),
+            ModelDb.Card<ProtoYmTheSevenGlamours>(),
+            ModelDb.Card<ProtoYmThunderRite>(),
+            ModelDb.Card<ProtoYmThunderboltTithe>(),
+            ModelDb.Card<ProtoYmTwinSakura>(),
+            ModelDb.Card<ProtoYmYakanEvocation>(),
+            ModelDb.Card<ProtoYmYakanOffering>(),
+        };
+
     /// <summary>Prototype rows owned by one character, or none.</summary>
     public static IReadOnlyList<CardModel> For(string characterId) =>
         characterId switch
@@ -502,6 +540,7 @@ public static class PrototypeRoster
             "klee" => _klee ??= BuildKlee(),
             "kokomi" => _kokomi ??= BuildKokomi(),
             "varka" => _varka ??= BuildVarka(),
+            "yae" => _yae ??= BuildYae(),
             _ => System.Array.Empty<CardModel>(),
         };
 }

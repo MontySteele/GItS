@@ -146,7 +146,7 @@ public static class KleeMod
                     .Concat(Story.StoryCombatHooks.Subscribe(combatState)));
 
         Log.Info($"[{ModId}] Klee, Furina and Kokomi registered"
-                 + ", and Varka (prototype)"
+                 + ", Varka and Yae Miko (prototype)"
                  + ".");
     }
 
@@ -250,7 +250,33 @@ public static class KleeMod
                 // same terms.
                 [Powers.VarkaRules.ElementPromptKey] =
                     Powers.VarkaRules.ElementPromptText,
+                // YAE MIKO (2026-10-13): the Edit, The Seven Glamours',
+                // Reborn as Guuji Yae's and the rest-site Publish's prompts,
+                // on the same terms.
+                [Powers.YaeEditing.EditPromptKey] =
+                    Powers.YaeEditing.EditPromptText,
+                [Powers.YaeEditing.PublishPromptKey] =
+                    Powers.YaeEditing.PublishPromptText,
+                [Powers.YaeEditing.AnnotationPromptKey] =
+                    Powers.YaeEditing.AnnotationPromptText,
+                [Relics.PublishRestSiteOption.PromptKey] =
+                    Relics.PublishRestSiteOption.PromptText,
             });
+
+            // YAE MIKO (2026-10-13): Meditations of a Yako's rest-site
+            // option. A RestSiteOption's Title and Description are the base
+            // game's `rest_site_ui` lookups (OPTION_<id>.name /
+            // .description), so its rows are merged here, their only source.
+            LocManager.Instance.GetTable("rest_site_ui").MergeWith(
+                new Dictionary<string, string>
+                {
+                    ["OPTION_" + Relics.PublishRestSiteOption.Id + ".name"] =
+                        Relics.PublishRestSiteOption.Name,
+                    ["OPTION_" + Relics.PublishRestSiteOption.Id + ".description"] =
+                        Relics.PublishRestSiteOption.DescriptionText,
+                    ["OPTION_" + Relics.PublishRestSiteOption.Id + ".descriptionDisabled"] =
+                        Relics.PublishRestSiteOption.DisabledText,
+                });
 
             // Runtime copy of the custom-keyword loc. The pck carries the
             // same table for normal packaged builds, but keeping these rows in
@@ -525,6 +551,8 @@ public static class KleeMod
                     [Cards.ArmKeywordTips.ElementalReactionKey + ".title"] =
                         "Elemental Reaction",
                     [Cards.ArmKeywordTips.SakuraKey + ".title"] = "Sakura",
+                    // YAE MIKO (2026-10-13): her second word.
+                    [Cards.ArmKeywordTips.EditKey + ".title"] = "Edit",
                     [Cards.ArmKeywordTips.LightfallSwordKey + ".title"] =
                         "Lightfall Sword",
                     [Cards.ArmKeywordTips.PlanOnlyKey + ".title"] = "Plan",
