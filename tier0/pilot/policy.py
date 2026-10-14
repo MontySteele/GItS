@@ -242,6 +242,9 @@ _ENGINE_LIVE_PREDICATES = frozenset({
     # `proto_fs_` rows, so no published number moves.
     "hp_lost_last_turn",
     "first_turn_of_combat",
+    # Yae review r1 (2026-10-14): a Sakura stands now, a pure read of her
+    # ledger (Kitsune Rite's gate).
+    "sakura_standing",
 })
 _ENGINE_LIVE_PREFIXES: tuple[str, ...] = ()
 

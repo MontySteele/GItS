@@ -45,8 +45,17 @@ public sealed class ProtoYmManuscriptPile : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Manuscript Pile"),
-        ("description", "Draw {Cards:diff()} cards. [gold]Rite[/gold]: Offering."),
+        ("description", "Draw {Cards:diff()} cards. [gold]Rite[/gold]: Offering{InCombat:{YaeRite}|}."),
     };
+
+    /// <summary>This card's in-combat shrine clauses
+    /// (`YaeShrineFace`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("YaeRite", YaeShrineFace.RiteLine(this, YaeRite.Offering));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

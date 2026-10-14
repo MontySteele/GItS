@@ -304,3 +304,21 @@ strike was too much draw. The tally reads 15 / 16 / 9, as built.
 **Pick 5:** Claude builds it now. If the build plays well, five Yae seats
 run before [USER] is home; if not, two seats as a sanity check ("does this
 survive act 1 now and do the cards work").
+
+## Claude, 2026-10-14 (review r1, no pick)
+
+Four changes, built in both engines:
+1. **A "Rite: X" card says what the shrine would do under X**, in combat,
+   summed over the Sakura standing: "Rite: Thunder (your Sakura: 12
+   damage)", "Rite: Warding (your Sakura: 5 Block)", "Rite: Wildfire (your
+   Sakura: 6 to ALL)", "Rite: Offering (your Sakura: draw 3)". A sum, not
+   per Sakura, because the Levels differ. Nothing is printed outside combat
+   or with no Sakura standing. The Rite badge and the seat page add "Your
+   Sakura now: 5 Block." for the current Rite. The sum is the Rite's own job:
+   Edict, Sakura Channeling's extra Thunder strike and Fox Fire are not in it.
+2. **Kitsune Rite cannot be played with no Sakura standing** and says so:
+   "Can only be played if a Sakura is standing." Thunder Rite, Mikage
+   Thunder and Tenko Kenshin print "Tenko (no Sakura)" while none stands.
+3. **Sakura Seal costs 0** (was 1 [0]). Its upgrade was the cost cut, so it
+   takes Footnote's: "Edit 2 cards in your hand: Sakura Seal."
+4. **Kitsune Rite: "Tenko. Draw 1 card."**, 1 [0], Exhaust, as before.

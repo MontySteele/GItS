@@ -1164,6 +1164,9 @@ PREDICATE_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "first_turn_of_combat": [_hook("shared", "plays_this_turn", "read")],
     "ousia_face": [_hook("shared", "card_identity", "read")],
     "pneuma_face": [_hook("shared", "card_identity", "read")],
+    # Yae review r1 (2026-10-14): Kitsune Rite's "Can only be played if a
+    # Sakura is standing".
+    "sakura_standing": [_hook("private", "sakura", "read")],
 }
 PREDICATE_PREFIXES: dict[str, list[tuple[str, str, str]]] = {
     "encore_at_least_": [_hook("private", "encore", "read")],

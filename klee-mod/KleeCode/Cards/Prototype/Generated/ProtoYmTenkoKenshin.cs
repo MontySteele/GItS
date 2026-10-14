@@ -51,8 +51,17 @@ public sealed class ProtoYmTenkoKenshin : CustomCardModel, IElementalCard, IChar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Great Secret Art: Tenko Kenshin"),
-        ("description", "Deal {Damage:diff()} [gold]Electro[/gold] damage to ALL enemies. [gold]Tenko[/gold]."),
+        ("description", "Deal {Damage:diff()} [gold]Electro[/gold] damage to ALL enemies. [gold]Tenko[/gold]{InCombat:{YaeTenko}|}."),
     };
+
+    /// <summary>This card's in-combat shrine clauses
+    /// (`YaeShrineFace`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("YaeTenko", YaeShrineFace.TenkoLine(this));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

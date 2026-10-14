@@ -98,8 +98,9 @@ def test_the_rite_and_a_sakuras_annotation_print_in_the_block():
     state = yae_state(badges=((1, 1, 6, 2, " [gold]Red Ink[/gold] makes its "
                                "strike 3 bigger."),), rite="Warding")
     lines = _block(blindplay.observe(state))
+    # Yae review r1 (2026-10-14): the line ends in the Sakura's sum now.
     assert lines[1] == ("- Rite: Warding. Each strike gives you its number "
-                        "in Block.")
+                        "in Block. Your Sakura now: 6 Block.")
     assert lines[2] == ("- Sakura 1: Level 1, strikes for 6, 2 strikes left, "
                         "Red Ink.")
     assert "Rite: Warding" not in blindplay.observe(state).split(

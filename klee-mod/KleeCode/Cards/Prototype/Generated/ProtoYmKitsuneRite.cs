@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoYmKitsuneRite : CustomCardModel, ICharacterCard
+public sealed class ProtoYmKitsuneRite : CustomCardModel, ICharacterCard, IUnplayableReasonCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "yae";
@@ -48,13 +48,23 @@ public sealed class ProtoYmKitsuneRite : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kitsune Rite"),
-        ("description", "[gold]Tenko[/gold]."),
+        ("description", "Can only be played if a [gold]Sakura[/gold] is standing. [gold]Tenko[/gold]. Draw 1 card."),
     };
+
+    // Furina's sweep (2026-10-14): "Can be played only if" -- the
+    // row's `playable_if`.
+    protected override bool IsPlayable =>
+        YaeShrine.Count(Owner.Creature) > 0;
+
+    public string? UnplayableReason =>
+        YaeShrine.Count(Owner.Creature) > 0
+            ? null
+            : "no Sakura is standing";
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new CardsVar(1)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -67,6 +77,7 @@ public sealed class ProtoYmKitsuneRite : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await YaeCards.Tenko(choiceContext, this, cardPlay);
+        await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
     }
 
     protected override void OnUpgrade()

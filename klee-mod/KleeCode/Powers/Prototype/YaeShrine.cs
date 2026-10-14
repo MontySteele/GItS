@@ -534,6 +534,79 @@ public static class YaeShrine
 }
 
 /// <summary>
+/// THE LIVE FACE LINES (Claude, 2026-10-14, Yae review r1, no pick). A
+/// "Rite: X" card's face carries <c>{InCombat:{YaeRite}|}</c> right after
+/// the Rite's name, and the line says what the shrine would do under X,
+/// summed over the Sakura standing: "Rite: Warding (your Sakura: 5 Block)".
+/// A Tenko card that does more than Tenko carries <c>{InCombat:{YaeTenko}|}</c>
+/// after the word, "(no Sakura)" while none stands. Both are empty off a
+/// combat, on a canonical card, and for anyone but a live Yae; the Rite line
+/// is empty with no Sakura standing. The Rite's own job only: before Edict,
+/// Sakura Channeling's extra Thunder strike and Fox Fire. Display only.
+/// Sim twin: <c>yae_shrine.rite_line</c> / <c>tenko_line</c>.
+/// </summary>
+public static class YaeShrineFace
+{
+    /// <summary>The description token a "Rite: X" clause rides on.</summary>
+    public const string RiteToken = "YaeRite";
+
+    /// <summary>The description token a Tenko clause rides on.</summary>
+    public const string TenkoToken = "YaeTenko";
+
+    /// <summary>The Tenko clause's words.</summary>
+    public const string NoSakura = " (no Sakura)";
+
+    /// <summary>A "Rite: <paramref name="rite"/>" card's live clause.</summary>
+    public static string RiteLine(CardModel? card, YaeRite rite) =>
+        Owner(card) is { } yae ? RiteWords(rite, Total(yae, rite)) : "";
+
+    /// <summary>A Tenko card's live clause.</summary>
+    public static string TenkoLine(CardModel? card) =>
+        Owner(card) is { } yae && YaeShrine.Count(yae) == 0 ? NoSakura : "";
+
+    /// <summary>What every Sakura standing beside <paramref name="yae"/>
+    /// would strike for under <paramref name="rite"/>, summed.</summary>
+    public static int Total(Creature yae, YaeRite rite) =>
+        YaeShrineLedger.For(yae).Standing.Sum(s => YaeShrine.Size(yae, s, rite));
+
+    /// <summary>The same sum off the numbers alone. PURE.</summary>
+    public static int Total(IEnumerable<YaeSakura> standing, YaeRite rite,
+                            int grove, int mikage) =>
+        standing.Sum(s => YaeShrineLedger.StrikeSize(rite, s.Level, grove, mikage,
+                                                     s.Annotation));
+
+    /// <summary>The clause for a total, " (your Sakura: 5 Block)"; empty at
+    /// 0, which is no Sakura standing. PURE.</summary>
+    public static string RiteWords(YaeRite rite, int total) =>
+        total <= 0 ? "" : $" (your Sakura: {RiteAmount(rite, total.ToString(System.Globalization.CultureInfo.InvariantCulture))})";
+
+    /// <summary>What the shrine does, for a number written as
+    /// <paramref name="n"/>: "5 damage", "5 Block", "5 to ALL", "draw 5".
+    /// The Rite badge writes it with its <c>{Total}</c> var. PURE.</summary>
+    public static string RiteAmount(YaeRite rite, string n) => rite switch
+    {
+        YaeRite.Warding => $"{n} Block",
+        YaeRite.Wildfire => $"{n} to ALL",
+        YaeRite.Offering => $"draw {n}",
+        _ => $"{n} damage",
+    };
+
+    private static Creature? Owner(CardModel? card)
+    {
+        Creature? owner;
+        try
+        {
+            owner = global::KleeMod.Cards.TipOwner.CreatureOf(card);
+        }
+        catch (Exception)
+        {
+            return null;
+        }
+        return owner?.CombatState != null && YaeShrine.Live(owner) ? owner : null;
+    }
+}
+
+/// <summary>
 /// YAE'S CARD VERBS (the sheet's `yae` op): one method per `kind`, each
 /// called as <c>await YaeCards.Kind(choiceContext, this, cardPlay)</c> by the
 /// generated card, reading its own numbers off the card's `Ym*` vars. Sim

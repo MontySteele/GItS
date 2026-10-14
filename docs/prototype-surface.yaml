@@ -4698,8 +4698,12 @@
 - {id: proto_ym_kitsune_rite, name: "Kitsune Rite", character: yae,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "[gold]Tenko[/gold].",
-   effects: [{op: yae, kind: tenko}],
+   # Claude, 2026-10-14 (Yae review r1, no pick): "Tenko. Draw 1 card.", and
+   # unplayable with no Sakura standing (a Tenko into nothing).
+   playable_if: sakura_standing,
+   description: "Can only be played if a [gold]Sakura[/gold] is standing. [gold]Tenko[/gold]. Draw 1 card.",
+   effects: [{op: yae, kind: tenko},
+             {op: draw, amount: 1}],
    upgrade: {cost: -1}}
 
 - {id: proto_ym_thunderbolt_tithe, name: "Thunderbolt Tithe", character: yae,
@@ -4752,10 +4756,12 @@
 
 - {id: proto_ym_sakura_seal, name: "Sakura Seal", character: yae,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: uncommon,
-   description: "[gold]Edit[/gold] a card in your hand: [gold]Sakura Seal[/gold].",
+   # Claude, 2026-10-14 (Yae review r1, no pick): 0 Energy (was 1 [0]). Its
+   # upgrade was the cost cut, so it takes Footnote's: Edit 2 cards.
+   cost: 0, type: skill, rarity: uncommon,
+   description: "[gold]Edit[/gold] {IfUpgraded:show:2 cards|a card} in your hand: [gold]Sakura Seal[/gold].",
    effects: [{op: yae, kind: edit, annotation: sakura_seal, amount: 1}],
-   upgrade: {cost: -1}}
+   upgrade: {yae_amount: 1}}
 
 - {id: proto_ym_serialization, name: "Serialization", character: yae,
    authored_by: [claude],

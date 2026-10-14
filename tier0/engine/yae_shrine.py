@@ -325,6 +325,44 @@ def strike_size(state, s: Sakura, rite: Optional[str] = None) -> int:
     return size
 
 
+#: THE LIVE FACE LINES (Claude, 2026-10-14, Yae review r1, no pick; C# twin
+#: `YaeShrineFace`). A "Rite: X" card says in combat what the shrine would do
+#: under X, summed over the Sakura standing ("Rite: Warding (your Sakura: 5
+#: Block)"); a Tenko card with no Sakura says "(no Sakura)". Before Edict,
+#: Channeling's extra Thunder strike and Fox Fire: the Rite's own job only.
+RITE_FACE = {THUNDER: "{n} damage", WARDING: "{n} Block",
+             WILDFIRE: "{n} to ALL", OFFERING: "draw {n}"}
+RITE_LINE = " (your Sakura: {what})"
+NO_SAKURA = " (no Sakura)"
+
+
+def rite_total(state, rite: str) -> int:
+    """What every Sakura standing would strike for under `rite`, summed."""
+    led = ledger(state.player)
+    if led is None:
+        return 0
+    return sum(strike_size(state, s, rite) for s in led.sakura)
+
+
+def rite_words(rite: str, total: int) -> str:
+    """The clause for a total: empty at 0 (no Sakura standing). PURE."""
+    if total <= 0:
+        return ""
+    return RITE_LINE.format(what=RITE_FACE[rite].format(n=total))
+
+
+def rite_line(state, rite: str) -> str:
+    """A "Rite: X" card's live clause, or "" with no Sakura standing."""
+    return rite_words(rite, rite_total(state, rite))
+
+
+def tenko_line(state) -> str:
+    """A Tenko card's live clause: "(no Sakura)" while none stands."""
+    if ledger(state.player) is None:
+        return ""
+    return NO_SAKURA if sakura_count(state.player) == 0 else ""
+
+
 def edict_applies(target) -> bool:
     """Edict of Cleansing's read: the enemy is Weak, or wears an aura an
     Electro strike reacts with."""

@@ -2856,6 +2856,16 @@ SHRINE_RITE_RULES = {
     "Wildfire": "Each strike hits ALL enemies for its number.",
     "Offering": "Each strike draws you its number of cards next turn.",
 }
+#: Yae review r1 (2026-10-14): the badge's live sentence, the sum of the
+#: rows' strikes in the Rite's words (C# `YaeRiteText.Now`, sim
+#: `yae_shrine.RITE_FACE`).
+SHRINE_RITE_NOW = " Your Sakura now: {what}."
+SHRINE_RITE_AMOUNTS = {
+    "Thunder": "{n} damage",
+    "Warding": "{n} Block",
+    "Wildfire": "{n} to ALL",
+    "Offering": "draw {n}",
+}
 SHRINE_NONE_LINE = "- Sakura: none. Plant one to start your shrine."
 SHRINE_ROW = ("- Sakura {slot}: Level {level}, strikes for {strike}"
               "{turns}.")
@@ -2869,8 +2879,15 @@ def _render_shrine(shrine: dict[str, Any]) -> list[str]:
     rows = shrine["sakura"]
     out = [SHRINE_COUNT_LINE.format(n=len(rows)) if rows else SHRINE_NONE_LINE]
     if shrine.get("rite") in SHRINE_RITE_RULES:
-        out.append(SHRINE_RITE_LINE.format(
-            rite=shrine["rite"], rule=SHRINE_RITE_RULES[shrine["rite"]]))
+        line = SHRINE_RITE_LINE.format(
+            rite=shrine["rite"], rule=SHRINE_RITE_RULES[shrine["rite"]])
+        # Yae review r1 (2026-10-14): what the Sakura standing do now under
+        # it, summed -- the Rite badge's and the "Rite: X" cards' clause.
+        total = sum(int(row.get("strike") or 0) for row in rows)
+        if total > 0:
+            line += SHRINE_RITE_NOW.format(
+                what=SHRINE_RITE_AMOUNTS[shrine["rite"]].format(n=total))
+        out.append(line)
     for row in rows:
         turns = row.get("turns")
         tail = ("" if turns is None else

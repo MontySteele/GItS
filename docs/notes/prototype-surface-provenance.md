@@ -8422,6 +8422,21 @@ or a reacting aura; Foxfire Lure costs 0; Sly Strike 7 [9]; Thunderbolt
 Tithe 3 [4] plus 4 [6] per Sakura; Fox Fire Draft edits the newest Sakura
 (upgraded: every Sakura).
 
+## Yae Miko, review r1, 2026-10-14
+
+Claude, no pick (`review/active/yae-design-axes-2026-10-14.md`, the dated
+note). Rows: `proto_ym_kitsune_rite` is "Can only be played if a Sakura is
+standing. Tenko. Draw 1 card." at 1 [0] (`playable_if: sakura_standing`, a
+new predicate in both engines); `proto_ym_sakura_seal` costs 0 and its
+upgrade is `yae_amount: 1` (Edit 2 cards), Footnote's, since its old upgrade
+was the cost cut. Faces: every "Rite: X" row carries `{InCombat:{YaeRite}|}`
+after the Rite's name and every other Tenko row `{InCombat:{YaeTenko}|}`
+after "Tenko", placed by the codegen off the ops (`yae_face_lines`) and
+filled by `YaeShrineFace`; sim twins `yae_shrine.rite_line` and
+`tenko_line`. Readings: the Rite clause is a sum over the Sakura standing,
+before Edict, Channeling's extra strike and Fox Fire; Kitsune Rite keeps the
+gate although it now draws, as the review asked.
+
 ## Kokomi pool overhaul, 2026-10-13
 
 `review/active/kokomi-pool-overhaul-2026-10-13.md`, picks 1 (a) and 2 (a).

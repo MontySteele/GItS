@@ -51,8 +51,17 @@ public sealed class ProtoYmFoxfireSweep : CustomCardModel, IElementalCard, IChar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Foxfire Sweep"),
-        ("description", "Deal {Damage:diff()} [gold]Electro[/gold] damage to ALL enemies. [gold]Rite[/gold]: Wildfire."),
+        ("description", "Deal {Damage:diff()} [gold]Electro[/gold] damage to ALL enemies. [gold]Rite[/gold]: Wildfire{InCombat:{YaeRite}|}."),
     };
+
+    /// <summary>This card's in-combat shrine clauses
+    /// (`YaeShrineFace`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("YaeRite", YaeShrineFace.RiteLine(this, YaeRite.Wildfire));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

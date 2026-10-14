@@ -51,8 +51,17 @@ public sealed class ProtoYmMikageThunder : CustomCardModel, IElementalCard, ICha
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Mikage Thunder"),
-        ("description", "[gold]Tenko[/gold]. For the rest of this combat, your [gold]Sakura[/gold] strike for {PowerAmount:diff()} more."),
+        ("description", "[gold]Tenko[/gold]{InCombat:{YaeTenko}|}. For the rest of this combat, your [gold]Sakura[/gold] strike for {PowerAmount:diff()} more."),
     };
+
+    /// <summary>This card's in-combat shrine clauses
+    /// (`YaeShrineFace`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("YaeTenko", YaeShrineFace.TenkoLine(this));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
