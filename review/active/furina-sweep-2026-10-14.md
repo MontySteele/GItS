@@ -33,10 +33,15 @@ Two consequences beyond the blur:
   Absolution / Balance the Books, Soothing Waters / Pneuma Refrain, Salon's Tab
   / Interval Bell (your note) / Overdraft, Salon's Encore / Thunderous
   Applause, Ousia Surge / Crescendo.
-- **Too many Powers.** She has 20 Powers in 78 cards, against roughly 12 to 15
-  for a base character. Your run died to exactly that: "drafting too many
-  powers and then not getting my block when I needed it." With 20 on offer,
-  Powers fill a quarter of every reward screen.
+- **Powers: at the top of the base range, not over it.** She has 20 Powers in
+  78 cards (26%). The base five have 17 to 20 in 85 draftable cards, 20 to
+  24% (`game_ref/<character>.json`, Ancients excluded). An earlier draft of
+  this page said "12 to 15"; that was wrong, and [USER] caught it (2026-10-14:
+  "most base game characters have 18 to 21 powers, counting multiplayer and
+  ancient cards"). The Power cuts below stand as dedupes, not as a count
+  target. Your run's death ("drafting too many powers and then not getting
+  my block when I needed it") is the thin Block pool more than the Power
+  count.
 
 ## 2. Fifteen cuts
 
@@ -106,8 +111,9 @@ Stand-In may not copy a Stand-In (design call, 2026-10-14): two upgraded Stand-I
 | Block cards / printed Block | 12 / 41 | 16 / 68 (base five: 61 to 121), plus Practiced Grace's Dexterity |
 | Rarity split | 23 / 35 / 20 | 23 / 35 / 20 |
 
-Seventeen Powers is still at the high end. A second trim waits until seats
-show whether Powers still crowd her reward screens.
+Seventeen Powers sits at the low end of the base range (17 to 20). If you
+want more Power variety, restoring one of the overlap cuts (High Stakes,
+Pneuma Tides, Hymn of Renewal) costs nothing else.
 
 ## 5. Plan
 
