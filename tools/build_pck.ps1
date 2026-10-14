@@ -759,8 +759,10 @@ if (-not (Test-Path $kurageSrc)) { Note-Skip 'kokomi\summon' $kurageSrc } else {
 # 'abyss' (2026-10-12) is not a character: it is the Spiral Abyss mode's own
 # namespace (ui\ for the menu emblem, powers\ for the Shadow badges and the
 # four Abyss Mage shields, relics\ for the display relics), and it takes the
-# same three surfaces through the same copy, so it rides this loop.
-foreach ($character in 'furina', 'kokomi', 'varka', 'abyss') {
+# same three surfaces through the same copy, so it rides this loop. 'yae'
+# (2026-10-14): her power badges, yae\powers; her other surfaces are still
+# Copy-YaeFallback's below, which a real Yae file always beats.
+foreach ($character in 'furina', 'kokomi', 'varka', 'yae', 'abyss') {
     $charSrc = Join-Path $src $character
     foreach ($d in 'ui', 'powers', 'relics', 'potions', 'model') {
         $from = Join-Path $charSrc $d
