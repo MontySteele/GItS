@@ -199,7 +199,11 @@ def test_the_pack_copies_her_frames_compressed_and_switches_rest_and_select_only
     assert "Copy-YaeFallback $relative" in ps
 
 
-def test_yae_loads_her_scene_first_and_keeps_the_still_as_the_fallback():
+def test_yae_keeps_the_still_until_her_scene_is_generated():
+    # The scene-first branch waits for the render commit (BACKLOG): deploy's
+    # S6c and S12 refuse a reference to a scene the pck lacks. That commit
+    # flips this test back to scene-first.
     cs = (ROOT / "klee-mod" / "KleeCode" / "Yae.cs").read_text(encoding="utf-8")
     body = cs.split("CreateCustomVisuals()", 1)[1]
-    assert body.index('KleePck.Path("yae/model/combat.tscn")') < body.index('KleePck.Path("yae/model/combat_model.png")')
+    assert 'KleePck.Path("yae/model/combat.tscn")' not in cs
+    assert 'KleePck.Path("yae/model/combat_model.png")' in body
