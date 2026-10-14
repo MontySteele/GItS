@@ -43,11 +43,13 @@ suite data.
 
 ## Pick
 
-1. **Tempest Charge's new job** (Uncommon Attack, 1 Energy):
-   - **(a, default) Two blades:** "Deal 5 [7] Anemo damage twice." Each hit
-     can Swirl, so one card can pay his Oath twice. His pool has no plain
-     double hit of its own (Diluc's is a Companion), and it is the dual
-     claymores.
+1. **Tempest Charge's new job** (Uncommon Attack, 1 Energy). The first
+   default, "Deal 5 [7] Anemo damage twice", is withdrawn. [USER]: "You can
+   only swirl an element once, and the Diluc card you're comparing Tempest
+   Charge against is part of Varka's personal pool."
+   - **(a, default) Setup:** "Deal 7 [10] Anemo damage. Apply your current
+     element to the enemy." It is the one Anemo card that sets up the next
+     Swirl, a job between Rising Gale and the Swirl payoffs.
    - (b) **Tempo:** "Deal 12 [16] Anemo damage. Costs 1 less for each Swirl
      this turn." A finisher after a Swirl chain.
    - (c) **Oath:** "Deal 9 [12] Anemo damage. Gain 1 Oath of your current
