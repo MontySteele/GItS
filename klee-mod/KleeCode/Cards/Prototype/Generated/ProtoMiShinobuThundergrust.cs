@@ -59,7 +59,7 @@ public sealed class ProtoMiShinobuThundergrust : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Shinobu — Thundergrust"),
-        ("description", "Deal {CalculatedDamage:diff()} [gold]Electro[/gold] damage. If you are below half HP, deal {BranchDamage:diff()} additional damage.{InCombat:{VarkaSwitch}|}"),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Electro[/gold] damage. If you are below half{InCombat:{HalfHp}| HP}, deal {BranchDamage:diff()} additional damage.{InCombat:{VarkaSwitch}|}"),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on
@@ -70,13 +70,14 @@ public sealed class ProtoMiShinobuThundergrust : CustomCardModel, IElementalCard
     /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
     public TargetType PrintedTargetType => base.TargetType;
 
-    /// <summary>The element this card makes current, on its in-combat line
-    /// (`VarkaOath.SwitchLine`).</summary>
+    /// <summary>This card's in-combat Stage line
+    /// (`FurinaStageFacePreview`).</summary>
     protected override void AddExtraArgsToDescription(
         MegaCrit.Sts2.Core.Localization.LocString description)
     {
         base.AddExtraArgsToDescription(description);
         description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Electro));
+        description.Add("HalfHp", HalfHpFace.Line(this));
     }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

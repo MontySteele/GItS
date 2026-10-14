@@ -53,7 +53,7 @@ public sealed class ProtoMcNoelleBreastplate : CustomCardModel, ICompanionCard, 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Noelle — Breastplate"),
-        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. If you are below half HP, gain {BranchBlock:diff()} additional [gold]Block[/gold]."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. If you are below half{InCombat:{HalfHp}| HP}, gain {BranchBlock:diff()} additional [gold]Block[/gold]."),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on
@@ -63,6 +63,15 @@ public sealed class ProtoMcNoelleBreastplate : CustomCardModel, ICompanionCard, 
 
     /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
     public TargetType PrintedTargetType => base.TargetType;
+
+    /// <summary>The HP this card's "below half" means, in combat
+    /// (`HalfHpFace`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("HalfHp", HalfHpFace.Line(this));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

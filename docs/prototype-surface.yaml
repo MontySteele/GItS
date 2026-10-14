@@ -2844,7 +2844,7 @@
    upgrade: {formula_base: +3},
    authored_by: [claude],
    register: salon, cost: 1, type: attack, rarity: uncommon,
-   description: "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage to ALL enemies. [gold]Spend[/gold] up to 10: deal 1 more for each.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   description: "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage to ALL enemies. [gold]Spend[/gold] up to 10, all you can: deal 1 more for each.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: stage_spend_up_to, amount: 10},
              {op: damage,
               amount_formula: {base: 5, per: 1, count: stage_spent},
@@ -3003,7 +3003,7 @@
    upgrade: {formula_base: +2},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Gain {CalculationBase:diff()} [gold]Block[/gold]. [gold]Spend[/gold] up to 16: gain 1 more for each.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
+   description: "Gain {CalculationBase:diff()} [gold]Block[/gold]. [gold]Spend[/gold] up to 16, all you can: gain 1 more for each.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
    effects: [{op: stage_spend_up_to, amount: 16},
              {op: block,
               amount_formula: {base: 6, per: 1, count: stage_spent}}]}
@@ -3130,7 +3130,7 @@
    upgrade: {damage: +1},
    authored_by: [claude],
    register: salon, cost: 1, type: attack, rarity: common,
-   description: "Deal {Damage:diff()} [gold]Hydro[/gold] damage twice. [gold]Spend[/gold] up to 16: hit once more for every 4.",
+   description: "Deal {Damage:diff()} [gold]Hydro[/gold] damage twice. [gold]Spend[/gold] up to 16, all you can: hit once more for every 4.",
    effects: [{op: stage_spend_up_to, amount: 16},
              {op: damage, amount: 4, target: enemy, applies_element: true,
               times_formula: {base: 2, per: 1, count: stage_spent_fours}}]}
@@ -3392,7 +3392,7 @@
    upgrade: {power_amount: +2},
    authored_by: [claude],
    register: salon, cost: 1, type: power, rarity: uncommon,
-   description: "Whenever a guest's act deals damage, [gold]Spend[/gold] up to {PowerAmount:diff()}: it deals that much more.",
+   description: "Whenever a guest's act deals damage, [gold]Spend[/gold] up to {PowerAmount:diff()}, all you can: it deals that much more.",
    effects: [{op: apply_power, power: fs_full_house, amount: 4,
               target: self}]}
 

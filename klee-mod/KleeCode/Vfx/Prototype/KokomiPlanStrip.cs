@@ -40,12 +40,14 @@ namespace KleeMod.Vfx;
 /// (brief sec.3). So this draws a COLUMN, front at the top, one thumbnail per
 /// pending Plan.
 ///
-/// A COLUMN, CAPPED, AND THE CAP IS HONEST. <see cref="MaxDrawn"/> thumbnails
-/// fit the band; a longer queue draws the first four and says "+N" under them
-/// rather than silently dropping the tail. The count under the column is the
-/// queue's whole length, which is the same number
-/// <c>PendingPlansPower</c>'s badge carries -- both read
-/// <c>KokomiPlan.Pending</c>, so the two cannot disagree.
+/// A COLUMN OF FOUR, PAGED. <see cref="MaxDrawn"/> thumbnails fit the band;
+/// a longer queue draws a page of four and says "+N" under them. Clicking
+/// "+N" turns to the next four (release fix, 2026-10-14: seats queued eight
+/// Plans in one turn and a human could inspect and flip only the first
+/// four); the last page says "Back" and returns to the front. Every page's
+/// pictures hover and flip exactly as the first page's do. Both the strip
+/// and <c>PendingPlansPower</c>'s badge read <c>KokomiPlan.Pending</c>, so
+/// the two cannot disagree.
 ///
 /// ON THE JELLYFISH IS WHERE THE SLICE ASKS FOR IT, and the honest report is
 /// that this is a SCREEN-EDGE HUD element, not a node parented to the pet.
@@ -66,9 +68,12 @@ namespace KleeMod.Vfx;
 /// <see cref="KokomiPlan.RequestFlip"/>, which goes through the game's action
 /// queue so a co-op peer flips the same Plan; a second click flips it back.
 /// Under each two-line Plan a caption says the line it will be carried out
-/// as ("Plan line" / "Now-line"), and a flipped picture is tinted. Plans past
-/// <see cref="MaxDrawn"/> have no picture to click; the bridge's `flip` verb
-/// reaches every one.
+/// as ("Plan line" / "Now-line"), and a flipped picture is tinted. A picture
+/// on a later page flips the Plan at its own queue position, read off the
+/// picture when clicked (<see cref="IndexMeta"/>).
+///
+/// NO CONTROLLER FOCUS, still (`EB-300`): the strip, the pager included, is
+/// out of the focus graph. A controller player cannot page or flip here.
 ///
 /// QUARANTINED. `Vfx/Prototype/**` is Compile Remove'd without
 /// `-p:PrototypeCards=true`. Revert is the flag.
@@ -84,7 +89,7 @@ internal static class KokomiPlanStrip
     private const int CountFontSize = 30;
 
     /// <summary>How many Plans get a picture. A fifth would run off the band.</summary>
-    internal const int MaxDrawn = 4;
+    internal const int MaxDrawn = KokomiPlanPages.PerPage;
 
     private static readonly Color CountColor = StsColors.cream;
 
@@ -103,6 +108,13 @@ internal static class KokomiPlanStrip
     /// <summary>The mark on the top picture: the Plan carried out first
     /// (Kokomi review 2026-10-13).</summary>
     internal const string FirstCaption = "First";
+
+    /// <summary>The page the strip is showing, on the root node.</summary>
+    private const string PageMeta = "kleemod_plan_page";
+
+    /// <summary>The queue position a picture is drawing, on the picture, so
+    /// a click on any page flips the Plan it shows.</summary>
+    private const string IndexMeta = "kleemod_plan_index";
 
     /// <summary>One element per seat, freed by the shared display skeleton the
     /// way the gauges are.</summary>
@@ -227,7 +239,7 @@ internal static class KokomiPlanStrip
                 Visible = false,
             };
             WireHover(thumb);
-            WireClick(thumb, me, i);
+            WireClick(thumb, me);
             var line = new Label
             {
                 Name = "Line",
@@ -267,7 +279,9 @@ internal static class KokomiPlanStrip
         var count = new Label
         {
             Name = "Count",
-            MouseFilter = Control.MouseFilterEnum.Ignore,
+            // THE PAGER (release fix, 2026-10-14): "+N" is clickable and
+            // turns to the next four Plans.
+            MouseFilter = Control.MouseFilterEnum.Stop,
             FocusMode = Control.FocusModeEnum.None,
             HorizontalAlignment = HorizontalAlignment.Center,
             Position = new Vector2(
@@ -277,6 +291,7 @@ internal static class KokomiPlanStrip
         count.AddThemeFontSizeOverride(ThemeConstants.Label.FontSize,
                                        CountFontSize);
         count.AddThemeColorOverride(ThemeConstants.Label.FontColor, CountColor);
+        WirePager(count, root, me);
         root.AddChildSafely(count);
         // The whole subtree, in one call, AFTER the children exist -- the
         // recursive flag is a property of the node it is set on and is read
@@ -305,17 +320,24 @@ internal static class KokomiPlanStrip
         // empty"; this is the half of the repair the HUD owns.
         var pending = KokomiPlan.Showing(player);
         var count = root.GetNodeOrNull<Label>("Count");
+        var page = KokomiPlanPages.ClampPage(
+            root.HasMeta(PageMeta) ? root.GetMeta(PageMeta).AsInt32() : 0,
+            pending.Count);
+        root.SetMeta(PageMeta, page);
+        var start = KokomiPlanPages.PageStart(page, pending.Count);
 
-        for (var i = 0; i < MaxDrawn; i++)
+        for (var slot = 0; slot < MaxDrawn; slot++)
         {
-            var thumb = root.GetNodeOrNull<TextureRect>("Plan" + i);
+            var thumb = root.GetNodeOrNull<TextureRect>("Plan" + slot);
             if (thumb == null) continue;
             var line = thumb.GetNodeOrNull<Label>("Line");
             var first = thumb.GetNodeOrNull<Label>("First");
+            var i = start + slot;
             if (i >= pending.Count)
             {
                 thumb.Visible = false;
                 SetCard(thumb, null);
+                if (thumb.HasMeta(IndexMeta)) thumb.RemoveMeta(IndexMeta);
                 if (line != null) line.Visible = false;
                 if (first != null) first.Visible = false;
                 continue;
@@ -323,6 +345,7 @@ internal static class KokomiPlanStrip
             thumb.Visible = true;
             thumb.Texture = Portrait(pending[i].Source);
             SetCard(thumb, pending[i].Source);
+            thumb.SetMeta(IndexMeta, i);
             // PICK 5 (a): the line a two-line Plan will be carried out as.
             var entry = pending[i];
             var flipped = entry.TwoLine && entry.Now;
@@ -330,7 +353,12 @@ internal static class KokomiPlanStrip
             // THE KOKOMI REVIEW (2026-10-13): the first Plan is marked, and
             // the caption reads the board -- Tide Wall's live total, or the
             // Block an Attack Plan will land in (`KokomiPlan.StripCaption`).
-            if (first != null) first.Visible = i == 0 && pending.Count > 1;
+            if (first != null)
+            {
+                var mark = KokomiPlanPages.PositionCaption(i, page, pending.Count);
+                first.Visible = mark != null;
+                first.Text = mark ?? string.Empty;
+            }
             if (line != null)
             {
                 var kokomi = player.Creature;
@@ -348,11 +376,39 @@ internal static class KokomiPlanStrip
         }
 
         if (count == null) return;
-        count.Text = pending.Count switch
+        count.Text = KokomiPlanPages.PagerCaption(page, pending.Count);
+    }
+
+    /// <summary>
+    /// THE PAGER: a left click on "+N" (or "Back") turns the strip to the next
+    /// page and repaints. Display only -- no Plan moves, so nothing goes
+    /// through the action queue and a co-op peer's strip is untouched.
+    /// </summary>
+    private static void WirePager(Label pager, Control root, Player me)
+    {
+        pager.GuiInput += input =>
         {
-            0 => string.Empty,
-            var n when n > MaxDrawn => "+" + (n - MaxDrawn),
-            _ => string.Empty,
+            if (input is not InputEventMouseButton
+                {
+                    ButtonIndex: MouseButton.Left, Pressed: true,
+                })
+            {
+                return;
+            }
+            try
+            {
+                var queue = KokomiPlan.Showing(me);
+                if (queue.Count <= MaxDrawn) return;
+                var page = root.HasMeta(PageMeta)
+                    ? root.GetMeta(PageMeta).AsInt32() : 0;
+                root.SetMeta(PageMeta, KokomiPlanPages.NextPage(page, queue.Count));
+                Paint(root, me);
+                pager.AcceptEvent();
+            }
+            catch (Exception e)
+            {
+                Log.Warn($"[{KleeMod.ModId}] plan strip: page skipped: {e}");
+            }
         };
     }
 
@@ -373,14 +429,14 @@ internal static class KokomiPlanStrip
 
     /// <summary>
     /// PICK 5 (a): a left click on the picture of a waiting two-line Plan
-    /// flips it. The thumbnail's slot IS the queue position (the strip draws
-    /// the queue front first), and <see cref="KokomiPlan.RequestFlip"/>
+    /// flips it. The picture carries its queue position (<see cref="IndexMeta"/>,
+    /// written by <see cref="Paint"/>, so a later page flips its own Plan), and <see cref="KokomiPlan.RequestFlip"/>
     /// refuses a Plan-only one, a click outside her turn, and a click during
     /// the morning drain (<see cref="KokomiPlan.Showing"/> differs from the
     /// queue then). Any failure is logged and swallowed: a click must never
     /// throw into the UI.
     /// </summary>
-    private static void WireClick(TextureRect thumb, Player me, int slot)
+    private static void WireClick(TextureRect thumb, Player me)
     {
         thumb.GuiInput += input =>
         {
@@ -398,6 +454,8 @@ internal static class KokomiPlanStrip
                 {
                     return;
                 }
+                if (!thumb.HasMeta(IndexMeta)) return;
+                var slot = thumb.GetMeta(IndexMeta).AsInt32();
                 var why = KokomiPlan.RequestFlip(me, slot);
                 if (why == null) thumb.AcceptEvent();
             }
@@ -479,6 +537,57 @@ internal static class KokomiPlanStrip
             return custom.CustomPortrait;
         }
         return card.HasPortrait ? card.Portrait : null;
+    }
+}
+
+/// <summary>
+/// THE STRIP'S PAGES (release fixes, 2026-10-14), the arithmetic alone so it
+/// is pinned headlessly: four Plans a page, "+N" turns to the next four, the
+/// last page says "Back".
+/// </summary>
+public static class KokomiPlanPages
+{
+    /// <summary>Plans on one page of the strip (<c>KokomiPlanStrip.MaxDrawn</c>).</summary>
+    public const int PerPage = 4;
+
+    /// <summary>The pager under the column on its last page.</summary>
+    public const string BackCaption = "Back";
+
+    /// <summary>How many pages a queue of <paramref name="count"/> needs (at
+    /// least one).</summary>
+    public static int PageCount(int count) =>
+        count <= PerPage ? 1 : (count + PerPage - 1) / PerPage;
+
+    /// <summary>A page still on the queue: one past the end (the morning
+    /// drain shortens it) falls back to the front.</summary>
+    public static int ClampPage(int page, int count) =>
+        page >= 0 && page < PageCount(count) ? page : 0;
+
+    /// <summary>The page a click on the pager turns to: the next, and from
+    /// the last back to the front.</summary>
+    public static int NextPage(int page, int count) =>
+        (ClampPage(page, count) + 1) % PageCount(count);
+
+    /// <summary>The queue position of the first picture on a page.</summary>
+    public static int PageStart(int page, int count) =>
+        ClampPage(page, count) * PerPage;
+
+    /// <summary>What the pager says: "+N" for the Plans after this page,
+    /// "Back" on the last page of a long queue, nothing for a short one.</summary>
+    public static string PagerCaption(int page, int count)
+    {
+        if (count <= PerPage) return string.Empty;
+        var after = count - (ClampPage(page, count) + 1) * PerPage;
+        return after > 0 ? "+" + after : BackCaption;
+    }
+
+    /// <summary>The mark at the top of a picture: "First" on the front Plan
+    /// of a queue of two or more, "Plan N" on every picture of a later page
+    /// (its place in the order), nothing otherwise.</summary>
+    public static string? PositionCaption(int index, int page, int count)
+    {
+        if (index == 0) return count > 1 ? KokomiPlanStrip.FirstCaption : null;
+        return ClampPage(page, count) > 0 ? "Plan " + (index + 1) : null;
     }
 }
 

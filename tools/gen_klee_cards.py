@@ -3775,8 +3775,8 @@ APPLY_POWERS = {
     "fs_plot_twist": ("PlotTwistPower", None,
         "This turn, this enemy's attack hits itself."),
     "fs_full_house": ("FullHousePower", None,
-        "Whenever a guest's act deals damage, [gold]Spend[/gold] up to {X}: "
-        "it deals that much more."),
+        "Whenever a guest's act deals damage, [gold]Spend[/gold] up to {X}, "
+        "all you can: it deals that much more."),
     # THE CO-OP SET (review/records/coop-set-2026-09-25.md). Every class lives
     # in klee-mod/KleeCode/Powers/Prototype/CoopSet.cs, compiled only under
     # `-p:PrototypeCards=true`; every row states its own face (`EB-215`). The
@@ -16820,6 +16820,34 @@ def yae_face_lines(card: dict, profile: "CharacterProfile",
     return desc, args
 
 
+#: THE RELEASE FIXES (2026-10-14): the token of a "below half" face's
+#: in-combat threshold, "below half (39 HP)".
+HALF_HP_TOKEN = "HalfHp"
+
+
+def half_hp_face_lines(card: dict, desc: str
+                       ) -> tuple[str, list[tuple[str, str]]]:
+    """A "below half" face with its threshold placed, and its (token, C#).
+
+    Release fixes (2026-10-14): Understudy's Debut and Crowd Favorite said
+    "below half" and a player had to work out the number. In combat the face
+    reads "below half (39 HP)": below half is `hp * 2 < max`, so the number
+    is half of Max HP rounded up (`HalfHpFace.Threshold`). "below half HP"
+    reads the same in combat and keeps its word out of it. DERIVED FROM THE
+    FACE, so any row that prints the words carries the number.
+    """
+    for words, rest in (("below half HP", " HP"), ("below half", "")):
+        if words in desc:
+            if desc.count(words) != 1:
+                raise ValueError(f"{card['id']}: a face prints {words!r} "
+                                 "once")
+            desc = desc.replace(
+                words,
+                "below half{InCombat:{" + HALF_HP_TOKEN + "}|" + rest + "}")
+            return desc, [(HALF_HP_TOKEN, "HalfHpFace.Line(this)")]
+    return desc, []
+
+
 #: THE ARCHAIC TOOTH (Varka review, ruled 2026-10-12: "Dandelion Gale could be
 #: the Replace version"). Orobas's relic transforms a starter card into its
 #: Ancient through the private `ArchaicTooth.TranscendenceUpgrades` map;
@@ -17149,6 +17177,8 @@ def emit(
     # after the words they qualify, so they are placed here, not appended.
     desc, yae_args = yae_face_lines(card, profile, desc)
     face_args.extend(yae_args)
+    desc, half_args = half_hp_face_lines(card, desc)
+    face_args.extend(half_args)
     desc_cs = desc.replace("\n", "\\n")
     desc_expr = f'"{desc_cs}"'
     if blanks_burst:
@@ -18187,6 +18217,9 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             "This card's in-combat shrine clauses\n"
             "    /// (`YaeShrineFace`)."
             if set(tokens) <= {YAE_RITE_TOKEN, YAE_TENKO_TOKEN} else
+            "The HP this card's \"below half\" means, in combat\n"
+            "    /// (`HalfHpFace`)."
+            if tokens == [HALF_HP_TOKEN] else
             "This card's in-combat Stage line\n"
             "    /// (`FurinaStageFacePreview`).")
         adds = "".join(f'        description.Add("{token}", {call});\n'
