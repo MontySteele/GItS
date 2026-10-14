@@ -32,6 +32,7 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
 | `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 78 |
 | `furina` | Furina | 78 | Fontaine | Hydro | Prototype | 78 |
 | `varka` | Varka | 80 | Mondstadt | Anemo | Balance | 78 |
+| `yae` | Yae Miko | 72 | Inazuma | Electro | Prototype | 30 (staged) |
 
 - Every kit: 78 draftable cards, plus two Ancient cards (one from Darv's
   Dusty Tome, one from Orobas's Archaic Tooth replacing a starter card).
@@ -41,13 +42,16 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
 - Every starter is the base Strike x4 and Defend x4 plus two cards of its own.
   Starter basics change only on [USER]'s pick. No kit starts with a Companion.
 - **Character five is Yae Miko** (`review/active/yae-proposal-2026-10-12.md`,
-  ruled; the Stellar-Conduct nod is parked). **Card stage, Paper:** the card
-  paper `review/active/yae-card-paper-2026-10-13.md` (readings, starter,
-  relic, a 30-card first batch, three answers to the Sakura scaling
-  question, picks open in `QUEUE.md`). Her rows are a sim-only staging sheet
-  (`docs/yae-staging.yaml`, `loader.STAGING_SHEETS`), her rules twin is
-  `tier0/engine/yae_shrine.py`, and `tools/yae_expansion_sim.py` is the
-  smoke harness. No C# until the picks are ruled.
+  ruled; the Stellar-Conduct nod is parked). **Prototype, batch one built
+  in C#** (2026-10-13): the card paper
+  `review/active/yae-card-paper-2026-10-13.md` is ruled (Levels by planting,
+  3-turn Sakura, Proofread plain at 1 [0], the rest-site Publish keeps a
+  card's last Annotation, two tips). Her 32 rows are the `proto_ym_` rows of
+  `docs/prototype-surface.yaml`; rules `Powers/Prototype/YaeShrine.cs` and
+  `YaeAnnotations.cs`, sim twin `tier0/engine/yae_shrine.py`, harness
+  `tools/yae_expansion_sim.py`. A staged pool of 30 (9 / 13 / 8, no
+  Ancients or co-op cards yet), placeholder art (Klee's at her paths, cards
+  blank). Next: [USER]'s first play.
 
 ## The kits
 
