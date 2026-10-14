@@ -239,6 +239,10 @@ public static class KleeMod
                 // Plan line, a pick from the Draw Pile, on the same terms.
                 [Powers.KokomiPlan.DrawPilePromptKey] =
                     Powers.KokomiPlan.DrawPilePromptText,
+                // THE PLANS VIEW (2026-10-14): the controller's grid of
+                // waiting Plans, on the same terms.
+                [Vfx.KokomiPlanView.PromptKey] =
+                    Vfx.KokomiPlanView.PromptText,
                 // R276, the Klee pool expansion's two discard-pile picks
                 // (Treasure Map, Come Back and Play!), on the same terms.
                 [Powers.KleeExpansion.SetOffPromptKey] =
