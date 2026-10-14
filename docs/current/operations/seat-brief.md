@@ -102,7 +102,9 @@ opened and left with `skip` is already skipped: it does not hold `proceed`.
 - **Refusals:** three consecutive refused commands is a stop. A refusal is a
   finding — write down what you asked for and what it said. The bridge counts
   them too ("The fight is over" lines included) and answers every command
-  after the third with `REFUSAL STOP`.
+  after the third with `REFUSAL STOP`. Never batch commands after a play
+  that might end the fight; `observe` first. A command typed after the
+  screen changed is `Skipped` and not sent.
 - **Stalls:** six identical screens running is a stop; it means the screen is
   one you cannot get off, which is itself the finding.
 
