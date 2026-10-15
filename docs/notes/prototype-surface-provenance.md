@@ -9033,3 +9033,36 @@ Pins: `tier0/tests/test_kokomi_review_r8_2026_10_14.py`,
 
 Pins: `tier0/tests/test_kokomi_review_r9_2026_10_15.py`,
 `klee-mod/KleeTests/Prototype/KokomiReviewR9Tests.cs`.
+
+## Yae review r4, items 1 to 8, 2026-10-15
+
+Source: `review/active/yae-review-r4-2026-10-15.md` (PR #1319), "Changes
+Claude builds (no pick)". Pick 1 (the publishing half) is not built here.
+
+- **Item 1, the Publish reward.** Cause (inferred from the records; the
+  game's grid code is not in the repo): the chooser asked for exactly one of
+  one card (`Prefs(1)` = min 1, max 1), which the game answers itself. It
+  now always opens a 0..max grid, confirmed by hand and closable, and at most
+  `max` picks resolve. `Relics/MeditationsOfAYako.cs`.
+- **Item 2, Red Ink into a full shrine.** The refreshed oldest Sakura takes
+  the planting card's Red Ink (`YaeShrineLedger.Plant`, `yae_shrine.plant`).
+- **Item 3, Deadline** `proto_ym_deadline`: Block 5 to 8, upgrade +3 (8 [11]).
+- **Item 4, Evergreen Charm** `proto_ym_evergreen_charm`: Block 7 [10]; new
+  sheet key `keeps: red_ink` on its `edit_sakura`. A Sakura holds one
+  Annotation, so a kept Red Ink is a flag (`KeepsRedInk` / `red_ink_kept`)
+  that leaves the +3 on the strike; any later Edit that does not keep it, or
+  a Red Ink plant refresh, clears it.
+- **Item 5, The Seven Glamours** `proto_ym_the_seven_glamours`: "Publish
+  every Annotated card in your hand." (Rare, 1 [0], Exhaust as before). No
+  chooser; the op is still `publish`.
+- **Item 6, Edit choosers.** In game the hand shows each card's Annotation;
+  the prompt now ends "It replaces any unpublished Annotation the card
+  carries." (a per-card warning needs a custom screen). The seat page tags a
+  card that holds a temporary Annotation: "the Edit replaces Footnote".
+- **Item 7, Foxfire Lure:** "your striking Sakura strike it" (card and mark).
+  Fox Trick prints no Sakura clause, so it is unchanged.
+- **Item 8, nothing to Edit:** a bubble over Yae ("Nothing to Edit." / "No
+  Sakura to Edit.") in game; the sim emits `yae_edit_nothing`.
+
+Pins: `tier0/tests/test_yae_review_r4.py`,
+`klee-mod/KleeTests/Prototype/YaeReviewR4Tests.cs`.

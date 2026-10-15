@@ -4607,8 +4607,9 @@
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
    # Design axes sec.4: Block floor 5 [8] (was 4 [6]).
-   description: "Gain 5 [gold]Block[/gold]. [gold]Edit[/gold] a card in your hand: [gold]Deadline Extension[/gold].",
-   effects: [{op: block, amount: 5},
+   # Yae review r4 item 3: 8 [11] (was 5 [8], two seats' never-again).
+   description: "Gain 8 [gold]Block[/gold]. [gold]Edit[/gold] a card in your hand: [gold]Deadline Extension[/gold].",
+   effects: [{op: block, amount: 8},
              {op: yae, kind: edit, annotation: deadline, amount: 1}],
    upgrade: {block: 3}}
 
@@ -4694,9 +4695,11 @@
 - {id: proto_ym_evergreen_charm, name: "Evergreen Charm", character: yae,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Gain 5 [gold]Block[/gold]. [gold]Edit[/gold] your oldest [gold]Sakura[/gold]: [gold]Deadline Extension[/gold].",
-   effects: [{op: block, amount: 5},
-             {op: yae, kind: edit_sakura, which: oldest, annotation: deadline, amount: 1}],
+   # Yae review r4 item 4: 7 [10] (was 5 [8]); the Edit keeps the Sakura's
+   # Red Ink (`keeps: red_ink`).
+   description: "Gain 7 [gold]Block[/gold]. [gold]Edit[/gold] your oldest [gold]Sakura[/gold]: [gold]Deadline Extension[/gold]. It keeps its Red Ink.",
+   effects: [{op: block, amount: 7},
+             {op: yae, kind: edit_sakura, which: oldest, annotation: deadline, amount: 1, keeps: red_ink}],
    upgrade: {block: 3}}
 
 # --- Uncommon (18) ---
@@ -4809,7 +4812,8 @@
    authored_by: [claude],
    # Design axes sec.4: 0 Energy (was 1).
    cost: 0, type: skill, rarity: uncommon,
-   description: "Apply 1 [gold]Weak[/gold] to an enemy. This turn, your [gold]Sakura[/gold] strike it.",
+   # Yae review r4 item 7: a Kitsune Sakura does not strike.
+   description: "Apply 1 [gold]Weak[/gold] to an enemy. This turn, your striking [gold]Sakura[/gold] strike it.",
    effects: [{op: apply_power, power: weak, amount: 1, target: enemy},
              {op: yae, kind: lure, target: enemy}],
    upgrade: {power_amount: 1}}
@@ -4889,7 +4893,9 @@
 - {id: proto_ym_the_seven_glamours, name: "The Seven Glamours", character: yae,
    authored_by: [claude],
    cost: 1, type: skill, rarity: rare, exhaust: true,
-   description: "[gold]Publish[/gold] an [gold]Annotated[/gold] card in your hand: its Annotation lasts the rest of the run.",
+   # Yae review r4 item 5: every Annotated card in hand (was one), Rare, 1 [0],
+   # Exhaust.
+   description: "[gold]Publish[/gold] every [gold]Annotated[/gold] card in your hand.",
    effects: [{op: yae, kind: publish}],
    upgrade: {cost: -1}}
 

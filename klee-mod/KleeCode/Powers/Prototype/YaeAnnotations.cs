@@ -9,6 +9,7 @@ using KleeMod.Elements;
 using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
+using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Enchantments;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
@@ -16,6 +17,7 @@ using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Nodes.Vfx;
 using MegaCrit.Sts2.Core.Rooms;
 using MegaCrit.Sts2.Core.Saves.Runs;
 using MegaCrit.Sts2.Core.ValueProps;
@@ -541,7 +543,38 @@ public static class YaeEditing
         annotation == YaeAnnotation.None
             ? EditPromptText
             : $"Choose a card to Edit: {YaeAnnotationText.Name(annotation)} "
-              + $"({YaeAnnotationText.PromptClause(annotation)}).";
+              + $"({YaeAnnotationText.PromptClause(annotation)}). "
+              + ReplacesWarning;
+
+    /// <summary>Yae review r4, item 6: the Edit chooser's warning. The hand
+    /// shows each card's current Annotation; this says the Edit overwrites
+    /// an unpublished one (a Published stack stays).</summary>
+    public const string ReplacesWarning =
+        "It replaces any unpublished Annotation the card carries.";
+
+    /// <summary>Yae review r4, item 8: what an Edit says when it has nothing
+    /// to Edit (a bubble over Yae).</summary>
+    public const string NothingToEditKey = "KLEEMOD-YAE_EDIT_NOTHING.bubble";
+
+    public const string NothingToEditText = "Nothing to Edit.";
+
+    public const string NoSakuraToEditKey = "KLEEMOD-YAE_EDIT_NOSAKURA.bubble";
+
+    public const string NoSakuraToEditText = "No Sakura to Edit.";
+
+    /// <summary>The bubble itself; a missing bubble never breaks a play.
+    /// </summary>
+    public static void SayNothing(Creature? yae, string key)
+    {
+        if (yae == null) return;
+        try
+        {
+            TalkCmd.Play(new LocString(Table, key), yae, VfxColor.White);
+        }
+        catch (Exception)
+        {
+        }
+    }
 
     /// <summary>The Seven Glamours' prompt.</summary>
     public const string PublishPromptKey = "KLEEMOD-YAE_PUBLISH.selectionScreenPrompt";
@@ -724,6 +757,11 @@ public static class YaeEditing
         if (owner?.Creature == null) return;
         for (var i = 0; i < times; i++)
         {
+            if (!PileType.Hand.GetPile(owner).Cards.Any(c => EditReaches(c, editor, annotation)))
+            {
+                SayNothing(owner.Creature, NothingToEditKey);
+                return;
+            }
             var picked = (await CardSelectCmd.FromHand(
                 choiceContext, owner,
                 new CardSelectorPrefs(
@@ -752,6 +790,7 @@ public static class YaeEditing
         var cards = PileType.Hand.GetPile(owner).Cards
             .Where(c => EditReaches(c, editor, chosen))
             .ToList();
+        if (cards.Count == 0) SayNothing(owner.Creature, NothingToEditKey);
         var n = 0;
         foreach (var card in cards)
         {
@@ -785,27 +824,29 @@ public static class YaeEditing
     }
 
     /// <summary>
-    /// The Seven Glamours: "Publish an Annotated card in your hand: its
-    /// Annotation lasts the rest of the run." The player picks among the
-    /// cards in hand with a temporary layer and a deck card: the layer joins
-    /// the combat card's stack and the deck card's.
+    /// The Seven Glamours (Yae review r4, item 5): "Publish every Annotated
+    /// card in your hand." Each card with a temporary layer and a deck card:
+    /// the layer joins the combat card's stack and the deck card's. No
+    /// chooser.
     /// </summary>
-    public static async Task PublishFromHand(PlayerChoiceContext choiceContext,
-                                             CardModel editor)
+    public static Task PublishFromHand(PlayerChoiceContext choiceContext,
+                                       CardModel editor)
     {
         var owner = editor.Owner;
-        if (owner == null) return;
-        var picked = (await CardSelectCmd.FromHand(
-            choiceContext, owner,
-            new CardSelectorPrefs(new LocString(Table, PublishPromptKey), 1),
-            c => Editable(c, editor) && Temporary(c) != YaeAnnotation.None
-                 && c.DeckVersion != null,
-            editor)).FirstOrDefault();
-        if (picked?.DeckVersion is not { } deck) return;
-        var moved = PublishLayer(picked);
-        if (moved == YaeAnnotation.None) return;
-        PublishToDeck(deck, moved);
-        RecordDraft(deck, YaeAnnotation.None);
+        if (owner == null) return Task.CompletedTask;
+        var cards = PileType.Hand.GetPile(owner).Cards
+            .Where(c => Editable(c, editor) && Temporary(c) != YaeAnnotation.None
+                        && c.DeckVersion != null)
+            .ToList();
+        foreach (var picked in cards)
+        {
+            var deck = picked.DeckVersion!;
+            var moved = PublishLayer(picked);
+            if (moved == YaeAnnotation.None) continue;
+            PublishToDeck(deck, moved);
+            RecordDraft(deck, YaeAnnotation.None);
+        }
+        return Task.CompletedTask;
     }
 
     // ---- The signature cards (review r3, sec.3) ---------------------------

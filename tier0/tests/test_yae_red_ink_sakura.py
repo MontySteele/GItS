@@ -114,14 +114,16 @@ def test_grafted_branch_passes_red_ink_too():
     assert [s.annotation for s in _sakura(st)] == [Y.RED_INK]
 
 
-def test_a_full_shrine_plant_that_only_levels_inherits_nothing():
+def test_a_full_shrine_plant_that_only_levels_gives_the_oldest_the_red_ink():
+    # Yae review r4, item 2 (was: inherits nothing).
     st = _state()
     Y.plant(st, 3)
     evo = _card("yakan_evocation")
     Y.annotate(st, evo, Y.RED_INK)
     _play(st, evo)
     assert len(_sakura(st)) == 3
-    assert all(s.annotation is None for s in _sakura(st))
+    assert _sakura(st)[0].annotation == Y.RED_INK
+    assert all(s.annotation is None for s in _sakura(st)[1:])
 
 
 def test_fox_fire_on_a_planting_card_does_not_inherit():

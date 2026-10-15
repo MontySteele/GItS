@@ -51,7 +51,7 @@ public sealed class ProtoYmDeadline : CustomCardModel, ICharacterCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(5m, ValueProp.Move)
+            new BlockVar(8m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

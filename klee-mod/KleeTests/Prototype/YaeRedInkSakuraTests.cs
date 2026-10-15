@@ -82,12 +82,15 @@ public class YaeRedInkSakuraTests : IDisposable
     }
 
     [Fact]
-    public void A_full_shrine_plant_that_feeds_the_oldest_inherits_nothing()
+    public void A_full_shrine_plant_that_feeds_the_oldest_gives_it_the_red_ink()
     {
+        // Yae review r4, item 2: the refreshed oldest Sakura takes the Red
+        // Ink (it was inherited by none).
         var ledger = Fresh();
         for (var i = 0; i < 3; i++) ledger.Plant(YaeLaw.PlantLevel);
         Assert.False(ledger.Plant(YaeLaw.PlantLevel, null, YaeAnnotation.RedInk));
-        Assert.All(ledger.Standing, s => Assert.Equal(YaeAnnotation.None, s.Annotation));
+        Assert.Equal(YaeAnnotation.RedInk, ledger.Standing[0].Annotation);
+        Assert.All(ledger.Standing.Skip(1), s => Assert.Equal(YaeAnnotation.None, s.Annotation));
     }
 
     [Fact]

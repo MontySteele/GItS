@@ -29,7 +29,7 @@ from understudy.blindplay_board import (_bundle_cards, _combat, deck_titles,
                                         map_floor,
                                         upgrade_deck_floor)
 from understudy.blindplay_faces import (SEAT_FACE_ID, _card_face,
-                                        _dedupe_text, _hazard, chooser_labels,
+                                        _dedupe_text, _hazard, chooser_labels, mark_edit_replaces,
                                         chooser_order,
                                         _named_option, _number_faces,
                                         _reward_option, _shop_items,
@@ -414,6 +414,7 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
                 face["title"] = label
             obs["offers"] = [obs["offers"][i] for i in chooser_order(
                 state, _screen_cards(state))]
+        mark_edit_replaces(obs["prompt"], obs["offers"])
         # `EB-263`. WHAT THE SCREEN SAYS IS PICKED. Two channels now, and the
         # older one first: `BuildCardSelectState` puts the chosen card(s) in
         # `preview_cards` while a preview container is open, which the upgrade

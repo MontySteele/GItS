@@ -367,7 +367,7 @@ def test_deadline_extension_never_withers(yae):
     st = _state()
     _play(st, _ym("yakan_evocation"))
     _play(st, _ym("evergreen_charm"))
-    assert st.player.block == 5
+    assert st.player.block == 7
     for _ in range(6):
         Y.turn_end(st)
         Y.turn_start(st)
@@ -623,7 +623,7 @@ def test_editor_in_chief_strikes_on_an_annotated_play(yae):
     assert hits[0]["level"] == 1                 # the highest (oldest on a tie)
 
 
-def test_publish_moves_the_best_temporary_layer_and_drafts_are_recorded(yae):
+def test_publish_moves_every_temporary_layer_and_drafts_are_recorded(yae):
     st = _state()
     a, b = loader.get_card("strike"), loader.get_card("strike")
     a.ym_slot, b.ym_slot = 10, 11
@@ -631,11 +631,12 @@ def test_publish_moves_the_best_temporary_layer_and_drafts_are_recorded(yae):
     _play(st, _red_ink_edit())                  # a: Red Ink
     _play(st, _ym("sakura_seal"))                # b: Sakura Seal
     _play(st, _ym("the_seven_glamours"))
-    # Review r3: the temporary layer moved onto b's stack, once.
+    # Review r3: the temporary layer moved onto b's stack, once. Yae review
+    # r4, item 5: and onto a's (every card in hand, was the best only).
     assert Y.stack(b) == [Y.SAKURA_SEAL] and Y.temp(b) is None
-    assert Y.stack(a) == [] and Y.temp(a) == Y.RED_INK
+    assert Y.stack(a) == [Y.RED_INK] and Y.temp(a) is None
     Y.turn_end(st)
-    assert _led(st).drafts == {10: Y.RED_INK}
+    assert _led(st).drafts == {}
 
 
 def test_a_published_annotation_enters_the_next_fight(yae):

@@ -185,14 +185,13 @@ public sealed class YaePublishReward : Reward
         return rect;
     }
 
-    /// <summary>The grid's terms: one pick (two under Enlightened
-    /// Blessing), and it may be closed without one. PURE.</summary>
-    public static CardSelectorPrefs Prefs(int max) => max <= 1
-        ? new CardSelectorPrefs(new LocString("cards", YaeEditing.PublishPromptKey), 1)
-        {
-            Cancelable = true,
-        }
-        : new CardSelectorPrefs(new LocString("cards", YaeEditing.PublishPromptKey), 0, max)
+    /// <summary>The grid's terms: up to `max` picks (one, or two under
+    /// Enlightened Blessing), confirmed by hand, and it may be closed without
+    /// one. The minimum is ZERO even for one pick: a grid that must pick one
+    /// of exactly one card is auto-answered by the game, which published a card
+    /// nobody chose (Yae review r4, item 1). PURE.</summary>
+    public static CardSelectorPrefs Prefs(int max) =>
+        new CardSelectorPrefs(new LocString("cards", YaeEditing.PublishPromptKey), 0, max)
         {
             Cancelable = true,
             RequireManualConfirmation = true,
@@ -215,7 +214,7 @@ public sealed class YaePublishReward : Reward
             foreach (var preview in previews) Player.RunState.RemoveCard(preview);
         }
         var n = 0;
-        foreach (var deck in YaeEditing.ResolvePicks(previews, decks, picked))
+        foreach (var deck in YaeEditing.ResolvePicks(previews, decks, picked).Take(max))
         {
             if (YaeEditing.PublishToDeck(deck, YaeEditing.Draft(deck))) n++;
         }

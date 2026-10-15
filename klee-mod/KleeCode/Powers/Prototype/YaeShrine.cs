@@ -59,6 +59,10 @@ public sealed class YaeSakura
     public int Seq { get; internal set; }
 
     public YaeAnnotation Annotation { get; internal set; }
+
+    /// <summary>Yae review r4, item 4: a Deadline Extension Edit that keeps
+    /// the Sakura's Red Ink leaves the +3 on it.</summary>
+    public bool KeepsRedInk { get; internal set; }
 }
 
 /// <summary>
@@ -166,6 +170,13 @@ public sealed class YaeShrineLedger
             {
                 oldest.TurnsLeft = Math.Max(oldest.TurnsLeft, YaeLaw.SakuraTurns);
                 oldest.Level++;
+                // Yae review r4, item 2: the planting card's Red Ink goes to
+                // the refreshed Sakura, as it would to a new one.
+                if (HasSakuraReading(inherited))
+                {
+                    oldest.Annotation = inherited;
+                    oldest.KeepsRedInk = false;
+                }
                 return false;
             }
             _sakura.RemoveAt(0);          // another kind: it withers
@@ -231,7 +242,8 @@ public sealed class YaeShrineLedger
     /// <summary>"Edit your newest / oldest Sakura" (<paramref name="n"/>
     /// from that end) or "Edit every Sakura": the Annotation replaces any
     /// each carried. Returns how many were Edited.</summary>
-    public int EditSakura(YaeSakuraEnd end, int n, YaeAnnotation annotation)
+    public int EditSakura(YaeSakuraEnd end, int n, YaeAnnotation annotation,
+                          bool keepRedInk = false)
     {
         if (!HasSakuraReading(annotation)) return 0;
         var ordered = end == YaeSakuraEnd.Oldest
@@ -241,7 +253,9 @@ public sealed class YaeShrineLedger
         if (end == YaeSakuraEnd.Every) n = ordered.Count;
         foreach (var s in ordered.Take(Math.Max(0, n)))
         {
+            var hadRed = s.Annotation == YaeAnnotation.RedInk || s.KeepsRedInk;
             s.Annotation = annotation;
+            s.KeepsRedInk = keepRedInk && hadRed && annotation != YaeAnnotation.RedInk;
             edited++;
         }
         return edited;
@@ -280,9 +294,10 @@ public sealed class YaeShrineLedger
     /// each enemy's damage for a Foxfire Sakura, Block for a Kitsune Sakura;
     /// a Red Ink Sakura's 3 adds to any kind. PURE.
     /// </summary>
-    public static int ActSize(YaeSakuraKind kind, int level, YaeAnnotation annotation) =>
+    public static int ActSize(YaeSakuraKind kind, int level, YaeAnnotation annotation,
+                              bool keptRedInk = false) =>
         KindBase(kind) + level
-        + (annotation == YaeAnnotation.RedInk ? YaeLaw.RedInkAmount : 0);
+        + (annotation == YaeAnnotation.RedInk || keptRedInk ? YaeLaw.RedInkAmount : 0);
 
     /// <summary>A Sakura (Thunder) strike's printed amount at an enemy:
     /// 2 + its Level, and Edict of Cleansing's when it applies. PURE.
@@ -367,7 +382,7 @@ public static class YaeShrine
     /// <summary>The size of <paramref name="sakura"/>'s action, before Edict.
     /// </summary>
     public static int Size(Creature yae, YaeSakura sakura) =>
-        YaeShrineLedger.ActSize(sakura.Kind, sakura.Level, sakura.Annotation);
+        YaeShrineLedger.ActSize(sakura.Kind, sakura.Level, sakura.Annotation, sakura.KeepsRedInk);
 
     /// <summary>The enemy a single-target strike lands on: the card's aim
     /// (Kitsune Pounce), else this turn's Lure while it lives, else one
@@ -619,7 +634,7 @@ public static class YaeShrineFace
     /// summed, off the numbers alone. PURE.</summary>
     public static int Total(IEnumerable<YaeSakura> standing, YaeSakuraKind kind) =>
         standing.Where(s => s.Kind == kind)
-            .Sum(s => YaeShrineLedger.ActSize(s.Kind, s.Level, s.Annotation));
+            .Sum(s => YaeShrineLedger.ActSize(s.Kind, s.Level, s.Annotation, s.KeepsRedInk));
 
     /// <summary>The clause for each kind's sum, in kind order, zeros left
     /// out: " (8 damage, 4 to each enemy, 5 Block)"; all zero is the "no
@@ -783,11 +798,13 @@ public static class YaeCards
     /// X".</summary>
     public static async Task EditSakura(PlayerChoiceContext choiceContext, CardModel card,
                                         CardPlay cardPlay, YaeSakuraEnd end,
-                                        YaeAnnotation annotation)
+                                        YaeAnnotation annotation,
+                                        bool keepRedInk = false)
     {
         var yae = card.Owner?.Creature;
         if (yae == null || !YaeShrine.Live(yae)) return;
-        YaeShrineLedger.For(yae).EditSakura(end, Var(card, "YmAmount"), annotation);
+        if (YaeShrineLedger.For(yae).EditSakura(end, Var(card, "YmAmount"), annotation, keepRedInk) == 0)
+            YaeEditing.SayNothing(yae, YaeEditing.NoSakuraToEditKey);
         await SakuraBadge.Sync(choiceContext, yae);
     }
 

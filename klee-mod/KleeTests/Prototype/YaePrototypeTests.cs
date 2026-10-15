@@ -868,19 +868,20 @@ public class YaePrototypeTests : IDisposable
     {
         Assert.Equal("Choose a card to Edit: Red Ink (it deals 3 more damage "
                      + "and gives 3 more Block).",
-                     YaeEditing.EditPromptTextFor(YaeAnnotation.RedInk));
+                     YaeEditing.EditPromptTextFor(YaeAnnotation.RedInk).Replace(" " + YaeEditing.ReplacesWarning, ""));
         Assert.Equal("Choose a card to Edit: Footnote (when it is played, "
                      + "draw 1 card).",
-                     YaeEditing.EditPromptTextFor(YaeAnnotation.Footnote));
+                     YaeEditing.EditPromptTextFor(YaeAnnotation.Footnote).Replace(" " + YaeEditing.ReplacesWarning, ""));
         Assert.Equal("Choose a card to Edit: Deadline Extension (it has "
                      + "Retain).",
-                     YaeEditing.EditPromptTextFor(YaeAnnotation.DeadlineExtension));
+                     YaeEditing.EditPromptTextFor(YaeAnnotation.DeadlineExtension).Replace(" " + YaeEditing.ReplacesWarning, ""));
         Assert.Equal("Choose a card to Edit: Royalties (when it is played, "
                      + "gain 1 Energy).",
-                     YaeEditing.EditPromptTextFor(YaeAnnotation.Royalties));
+                     YaeEditing.EditPromptTextFor(YaeAnnotation.Royalties).Replace(" " + YaeEditing.ReplacesWarning, ""));
         Assert.Equal("Choose a card to Edit: Reprint (the first time it is "
                      + "played each combat, it is played twice).",
-                     YaeEditing.EditPromptTextFor(YaeAnnotation.Reprint));
+                     YaeEditing.EditPromptTextFor(YaeAnnotation.Reprint).Replace(" " + YaeEditing.ReplacesWarning, ""));
+        Assert.EndsWith(YaeEditing.ReplacesWarning, YaeEditing.EditPromptTextFor(YaeAnnotation.RedInk));
         Assert.Equal(YaeEditing.EditPromptText,
                      YaeEditing.EditPromptTextFor(YaeAnnotation.None));
         Assert.Equal("KLEEMOD-YAE_EDIT_SAKURASEAL.selectionScreenPrompt",

@@ -3143,7 +3143,7 @@ def yae_needs_var(card: dict, eff: dict, field: str) -> bool:
         return True
     return int(eff[field]) != YAE_FIELD_DEFAULTS[field]
 YAE_FIELDS = {"op", "kind", "target", "per", "base", "amount", "annotation",
-              "as", "which"}
+              "as", "which", "keeps"}
 
 
 #: The `yae` kinds whose play plants a Sakura (`ISakuraPlanterCard`).
@@ -3175,6 +3175,8 @@ def yae_call(eff: dict) -> str:
         args += f", YaeSakuraEnd.{YAE_SAKURA_ENDS[eff['which']]}"
     if eff.get("kind") in YAE_ANNOTATION_KINDS:
         args += f", YaeAnnotation.{YAE_ANNOTATIONS[eff['annotation']]}"
+    if eff.get("keeps") == "red_ink":
+        args += ", keepRedInk: true"
     if eff.get("kind") in YAE_PLANT_AS_KINDS and "as" in eff:
         args += f", YaeSakuraKind.{YAE_SAKURA_KINDS[eff['as']]}"
     return f"await YaeCards.{YAE_KINDS[eff['kind']]}({args});"
@@ -5954,6 +5956,9 @@ def blocked_reason(
                 return f"yae {kind} takes no as:"
             if "as" in eff and eff["as"] not in YAE_SAKURA_KINDS:
                 return f"yae Sakura kind {eff['as']!r}"
+            if "keeps" in eff and (kind != "edit_sakura"
+                                   or eff["keeps"] != "red_ink"):
+                return "yae keeps: is red_ink, on an edit_sakura"
             if (kind == "edit_sakura") != ("which" in eff):
                 return f"yae {kind} which mismatch"
             if "which" in eff and eff["which"] not in YAE_SAKURA_ENDS:

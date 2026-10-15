@@ -48,7 +48,7 @@ public sealed class ProtoYmTheSevenGlamours : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "The Seven Glamours"),
-        ("description", "[gold]Publish[/gold] an [gold]Annotated[/gold] card in your hand: its Annotation lasts the rest of the run."),
+        ("description", "[gold]Publish[/gold] every [gold]Annotated[/gold] card in your hand."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
