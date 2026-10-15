@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoYmPrintRun : CustomCardModel, ICharacterCard, IYaeBlockCard
+public sealed class ProtoYmPrintRun : CustomCardModel, ICharacterCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "yae";
@@ -45,14 +45,15 @@ public sealed class ProtoYmPrintRun : CustomCardModel, ICharacterCard, IYaeBlock
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Print Run"),
-        ("description", "Gain {YmBase:diff()} [gold]Block[/gold], plus {YmPer:diff()} for each card you [gold]Edited[/gold] this combat."),
+        ("description", "Gain {CalculationBase:diff()} [gold]Block[/gold], plus {CalculationExtra:diff()} for each card you [gold]Edited[/gold] this combat.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("YmBase", 6m),
-            new DynamicVar("YmPer", 2m)
+            new CalculationBaseVar(6m),
+            new CalculationExtraVar(2m),
+            new FoldedCalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => YaeShrine.Edits(card.Owner.Creature))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -64,12 +65,12 @@ public sealed class ProtoYmPrintRun : CustomCardModel, ICharacterCard, IYaeBlock
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await YaeCards.BlockPerEdit(choiceContext, this, cardPlay);
+        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), DynamicVars.CalculatedBlock.Props, cardPlay);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["YmPer"].UpgradeValueBy(1m);
-        DynamicVars["YmBase"].UpgradeValueBy(2m);
+        DynamicVars.CalculationExtra.UpgradeValueBy(1m);
+        DynamicVars.CalculationBase.UpgradeValueBy(2m);
     }
 }

@@ -141,10 +141,13 @@ public class YaeRedInkSakuraTests : IDisposable
     }
 
     [Fact]
-    public void Print_runs_own_block_counts_without_moving_nimble()
+    public void Print_runs_own_block_counts_for_red_ink()
     {
+        // Since 2026-10-15 Print Run's Block is a CalculatedBlockVar (its
+        // face shows the total in combat), so the game's own GainsBlock
+        // answers, as on Expect a Fight; tier0's Nimble predicate agrees.
         var run = new ProtoYmPrintRun();
-        Assert.False(run.GainsBlock);                 // Nimble unchanged
+        Assert.True(run.GainsBlock);
         Assert.True(YaeAnnotationReach.GivesBlock(run));
     }
 

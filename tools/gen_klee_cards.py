@@ -6976,7 +6976,17 @@ KLEE_COUNTS = {
                          "EnemiesHoldingChargeFrom(card.Owner.Creature)",
 }
 
-RUNTIME_COUNTS = {**KOKOMI_CASKET_COUNTS, **VARKA_COUNTS, **KLEE_COUNTS}
+#: YAE: Bestseller and Print Run, "for each card you Edited this combat"
+#: (Yae review r5, pick 1 (a); `YaeShrineLedger.Edits`). On the calculated
+#: rail so the face shows the running total in combat, the way Perfected
+#: Strike does. Sim twin: the `edits_this_combat` runtime count.
+YAE_COUNTS = {
+    "edits_this_combat": "static (card, _) => YaeShrine.Edits("
+                         "card.Owner.Creature)",
+}
+
+RUNTIME_COUNTS = {**KOKOMI_CASKET_COUNTS, **VARKA_COUNTS, **KLEE_COUNTS,
+                  **YAE_COUNTS}
 
 
 def kokomi_casket_calc_rider(
@@ -17441,7 +17451,8 @@ def emit(
     if yae_plants_sakura(card):
         interfaces += ", ISakuraPlanterCard"
     # The same rule's Block fact: a `yae` kind that gives the card's own
-    # Block (Print Run) declares no BlockVar, so `GainsBlock` cannot see it
+    # Block (no row since Print Run took the calculated rail, 2026-10-15)
+    # declares no BlockVar, so `GainsBlock` cannot see it
     # (and Nimble stays as it was); Red Ink still rides it.
     if yae_gives_block(card):
         interfaces += ", IYaeBlockCard"

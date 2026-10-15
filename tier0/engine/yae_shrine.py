@@ -833,7 +833,8 @@ BLOCK_KINDS = frozenset({"block_per_sakura", "block_per_edit"})
 
 def gives_block(card) -> bool:
     """Nimble's door (the game's `GainsBlock`), or a `yae` kind that gives
-    the card's own Block (Print Run), which Red Ink rides too."""
+    the card's own Block, which Red Ink rides too (no row since Print Run
+    took the calculated rail, 2026-10-15)."""
     from tier0.content import enchantments          # late: cycle
     return enchantments._gains_block(card) or any(
         fx.get("op") == "yae" and fx.get("kind") in BLOCK_KINDS

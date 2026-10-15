@@ -225,3 +225,25 @@ def test_a_multi_card_edit_is_one_chooser_of_up_to_n():
     one = blindplay.observe(_edit_chooser(
         "Choose a card to Edit: Footnote (when played, draw 1 card)."))
     assert "Pick up to" not in one
+
+
+# Bestseller and Print Run count the cards she Edited this combat (Yae review
+# r5, pick 1 (a)); no card on the board shows it, so the bridge carries it
+# (`player.yae_shrine`, the mod's `YaeShrine.Snapshot`) and her block says it.
+
+def test_the_block_prints_the_cards_edited_this_combat():
+    for n in (0, 3):
+        state = yae_state(annotate=1)
+        state["player"]["yae_shrine"] = {"live": True, "edits_this_combat": n}
+        lines = _block(blindplay.observe(state))
+        assert lines[-2] == "- Annotated cards in your hand: 1."
+        assert lines[-1] == f"- Cards Edited this combat: {n}."
+
+
+def test_no_edits_line_when_the_wire_does_not_carry_the_count():
+    for raw in (None, {}):
+        state = yae_state()
+        if raw is not None:
+            state["player"]["yae_shrine"] = raw
+        lines = _block(blindplay.observe(state))
+        assert not any("Edited this combat" in line for line in lines)

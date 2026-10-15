@@ -51,14 +51,15 @@ public sealed class ProtoYmBestseller : CustomCardModel, IElementalCard, ICharac
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Bestseller"),
-        ("description", "Deal {YmBase:diff()} [gold]Electro[/gold] damage, plus {YmPer:diff()} for each card you [gold]Edited[/gold] this combat."),
+        ("description", "Deal {CalculationBase:diff()} [gold]Electro[/gold] damage, plus {ExtraDamage:diff()} for each card you [gold]Edited[/gold] this combat.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("YmBase", 8m),
-            new DynamicVar("YmPer", 2m)
+            new CalculationBaseVar(8m),
+            new ExtraDamageVar(2m),
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => YaeShrine.Edits(card.Owner.Creature))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -70,12 +71,17 @@ public sealed class ProtoYmBestseller : CustomCardModel, IElementalCard, ICharac
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await YaeCards.DamagePerEdit(choiceContext, this, cardPlay);
+        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
+            .FromCard(this, cardPlay)
+            .Targeting(cardPlay.Target)
+            .WithElementHitFx(this)
+            .Execute(choiceContext);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["YmPer"].UpgradeValueBy(1m);
-        DynamicVars["YmBase"].UpgradeValueBy(2m);
+        DynamicVars.ExtraDamage.UpgradeValueBy(1m);
+        DynamicVars.CalculationBase.UpgradeValueBy(2m);
     }
 }

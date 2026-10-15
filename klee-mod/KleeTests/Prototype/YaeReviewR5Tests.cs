@@ -6,6 +6,8 @@ using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Powers;
 using KleeMod.Relics;
 using KleeMod.Tests.Harness;
+using MegaCrit.Sts2.Core.Entities.Creatures;
+using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using Xunit;
 
@@ -88,34 +90,93 @@ public class YaeReviewR5Pick1Tests : IDisposable
     [Fact]
     public void Bestseller_and_print_run_are_8_and_6_plus_2_per_edit_upgraded_10_and_8_plus_3()
     {
-        foreach (var (card, lo, hi) in new (CardModel, int, int)[]
-                 { (new ProtoYmBestseller(), 8, 10), (new ProtoYmPrintRun(), 6, 8) })
+        // Since 2026-10-15 on the calculated rail (Perfected Strike's): the
+        // base is CalculationBase, the per-Edit slope ExtraDamage (an attack)
+        // or CalculationExtra (Block), and in combat the face adds the total.
+        foreach (var (card, perVar, lo, hi, total) in new (CardModel, string, int, int, string)[]
+                 { (new ProtoYmBestseller(), "ExtraDamage", 8, 10,
+                    "{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+                   (new ProtoYmPrintRun(), "CalculationExtra", 6, 8,
+                    "{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}") })
         {
-            Assert.Equal(lo, (int)card.DynamicVars["YmBase"].BaseValue);
-            Assert.Equal(2, (int)card.DynamicVars["YmPer"].BaseValue);
-            Assert.Contains("plus {YmPer:diff()} for each card you [gold]Edited[/gold] this combat.",
+            Assert.Equal(lo, (int)card.DynamicVars["CalculationBase"].BaseValue);
+            Assert.Equal(2, (int)card.DynamicVars[perVar].BaseValue);
+            Assert.Contains($"plus {{{perVar}:diff()}} for each card you [gold]Edited[/gold] this combat.",
                             Face(card));
+            Assert.EndsWith(total, Face(card));
             Upgrade(card);
-            Assert.Equal(hi, (int)card.DynamicVars["YmBase"].BaseValue);
-            Assert.Equal(3, (int)card.DynamicVars["YmPer"].BaseValue);
+            Assert.Equal(hi, (int)card.DynamicVars["CalculationBase"].BaseValue);
+            Assert.Equal(3, (int)card.DynamicVars[perVar].BaseValue);
         }
+    }
+
+    /// <summary>The calculated var's multiplier, the "for each" count the
+    /// game multiplies the slope by (`CalculatedVar._multiplierCalc`).</summary>
+    private static decimal Multiplier(CardModel card, string name) =>
+        ((Func<CardModel, Creature?, decimal>)typeof(CalculatedVar)
+            .GetField("_multiplierCalc", HeadlessGame.All)!
+            .GetValue(card.DynamicVars[name])!)(card, null);
+
+    private static T Owned<T>(Seat seat) where T : CardModel, new()
+    {
+        var card = new T();
+        Seat.Set(card, "IsMutable", true);
+        Seat.Set(card, "Owner", seat.Player);
+        return card;
+    }
+
+    [Fact]
+    public void The_faces_total_is_base_plus_per_for_each_edit_this_combat()
+    {
+        // 0 Edits: the base. 3 Edits: base + 3 x per (8 + 3 x 2 = 14 damage,
+        // 6 + 3 x 2 = 12 Block), the number the play pays.
+        var seat = Seat.Yae();
+        var bestseller = Owned<ProtoYmBestseller>(seat);
+        var printRun = Owned<ProtoYmPrintRun>(seat);
+        var ledger = YaeShrineLedger.For(seat.Creature);
+        Assert.Equal(0, ledger.Edits);
+        Assert.Equal(0m, Multiplier(bestseller, "CalculatedDamage"));
+        Assert.Equal(0m, Multiplier(printRun, "CalculatedBlock"));
+        var note = typeof(YaeShrineLedger).GetMethod("NoteEdit", HeadlessGame.All)!;
+        for (var i = 0; i < 3; i++) note.Invoke(ledger, null);
+        Assert.Equal(3m, Multiplier(bestseller, "CalculatedDamage"));
+        Assert.Equal(3m, Multiplier(printRun, "CalculatedBlock"));
+        Assert.Equal(14m, bestseller.DynamicVars["CalculationBase"].BaseValue
+                          + bestseller.DynamicVars["ExtraDamage"].BaseValue
+                            * Multiplier(bestseller, "CalculatedDamage"));
+        Assert.Equal(12m, printRun.DynamicVars["CalculationBase"].BaseValue
+                          + printRun.DynamicVars["CalculationExtra"].BaseValue
+                            * Multiplier(printRun, "CalculatedBlock"));
+        // Out of a fight the game computes no multiplier: the base, and the
+        // face's {InCombat:} clause is hidden.
+        Assert.Equal(8m, ((CalculatedVar)bestseller.DynamicVars["CalculatedDamage"]).Calculate(null));
+        Assert.Equal(6m, ((CalculatedVar)printRun.DynamicVars["CalculatedBlock"]).Calculate(null));
+        // Someone who is not Yae counts none.
+        var other = Owned<ProtoYmBestseller>(Seat.Klee());
+        Assert.Equal(0m, Multiplier(other, "CalculatedDamage"));
     }
 
     [Fact]
     public void The_payoffs_read_the_edit_count_not_the_hand()
     {
-        foreach (var name in new[] { nameof(YaeCards.DamagePerEdit), nameof(YaeCards.BlockPerEdit) })
-        {
-            var calls = Il.Calls(typeof(YaeCards).GetMethod(name)!);
-            Assert.Contains(calls, c => c.Contains("YaeShrine.Edits"));
-            Assert.DoesNotContain(calls, c => c.Contains("IsAnnotated"));
-        }
         Assert.Contains(Il.Calls(typeof(YaeShrine).GetMethod(nameof(YaeShrine.Edits))!),
                         c => c.Contains("get_Edits"));
+        // The plays pay the calculated var (the number the face shows).
         Assert.Contains(Il.Calls(Il.Method("ProtoYmBestseller", "OnPlay")),
-                        c => c.Contains(nameof(YaeCards.DamagePerEdit)));
+                        c => c.Contains("CalculatedDamage"));
         Assert.Contains(Il.Calls(Il.Method("ProtoYmPrintRun", "OnPlay")),
-                        c => c.Contains(nameof(YaeCards.BlockPerEdit)));
+                        c => c.Contains("CalculatedBlock"));
+    }
+
+    [Fact]
+    public void The_seat_page_snapshot_carries_the_edit_count_only_for_yae_in_a_fight()
+    {
+        // Outside a fight (no CombatState in this harness) the map is empty,
+        // so a map-screen poll never resets her ledger; another character's
+        // is always empty.
+        Assert.Empty(YaeShrine.Snapshot(Seat.Yae().Player));
+        Assert.Empty(YaeShrine.Snapshot(Seat.Klee().Player));
+        Assert.Empty(YaeShrine.Snapshot(null));
     }
 
     [Fact]

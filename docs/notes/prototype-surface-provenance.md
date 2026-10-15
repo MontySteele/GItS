@@ -9109,3 +9109,28 @@ hand." (no cost upgrade).
 
 Pins: `tier0/tests/test_yae_review_r4.py` (kill, no kill, Minion),
 `klee-mod/KleeTests/Prototype/YaeReviewR4Tests.cs`.
+
+## Yae: Bestseller and Print Run show their total (2026-10-15)
+
+`proto_ym_bestseller`, `proto_ym_print_run`. Hygiene, no number moved. Since
+Yae review r5, pick 1 (a) both count the cards she Edited this combat, and the
+face printed only the per-card number. Both rows now ride the calculated rail
+the base game's Perfected Strike uses (`CalculatedDamageVar` /
+`CalculatedBlockVar` with a multiplier; decompiled `PerfectedStrike.cs` line
+25, `ExpectAFight.cs` line 23): `{op: damage | block, amount_formula: {base,
+per, count: edits_this_combat}}`, upgrade `formula_base` / `formula_per`. In
+combat the face adds the house clause every calculated card prints,
+`{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}` and `(Gains
+{CalculatedBlock:diff()} [gold]Block[/gold])`; out of combat it reads as
+before. The count is `YaeShrine.Edits` (C#) and the `edits_this_combat`
+runtime count (sim).
+
+One engine fact moves with it: Print Run now declares a `CalculatedBlockVar`,
+so the game's `GainsBlock` is true (Nimble may enchant it, as it may Expect a
+Fight), in both engines. Red Ink still rides its Block.
+
+The seat page prints "Cards Edited this combat: N" in her shrine block, off
+`player.yae_shrine` (bridge `gits/GitsYaeShrine.cs`, mod `YaeShrine.Snapshot`).
+
+Pins: `tier0/tests/test_yae_review_r5.py`, `tier0/tests/test_yae_seat_page.py`,
+`klee-mod/KleeTests/Prototype/YaeReviewR5Tests.cs`.

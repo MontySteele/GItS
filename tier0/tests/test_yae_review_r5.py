@@ -159,13 +159,21 @@ def _ym(name):
 
 
 def test_bestseller_and_print_run_rows_count_edits():
-    for name, base, per, kind in (("bestseller", (8, 10), (2, 3), "damage_per_edit"),
-                                  ("print_run", (6, 8), (2, 3), "block_per_edit")):
-        fx = lambda c: next(f for f in c.effects if f.get("op") == "yae")
+    # 2026-10-15: on the calculated rail (Perfected Strike's), so the face
+    # shows the running total in combat; the numbers are unchanged.
+    for name, base, per, op in (("bestseller", (8, 10), (2, 3), "damage"),
+                                ("print_run", (6, 8), (2, 3), "block")):
+        fx = lambda c: next(f for f in c.effects if "amount_formula" in f)
         lo, hi = fx(_ym(name)), fx(_ym(name + "+"))
-        assert lo["kind"] == hi["kind"] == kind
-        assert (lo["base"], hi["base"]) == base
-        assert (lo["per"], hi["per"]) == per
+        assert lo["op"] == hi["op"] == op
+        assert (lo["amount_formula"]["count"] == hi["amount_formula"]["count"]
+                == "edits_this_combat")
+        assert (lo["amount_formula"]["base"], hi["amount_formula"]["base"]) == base
+        assert (lo["amount_formula"]["per"], hi["amount_formula"]["per"]) == per
+    assert "{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}" in _row(
+        "proto_ym_bestseller")["description"]
+    assert ("{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}"
+            in _row("proto_ym_print_run")["description"])
     assert "for each card you [gold]Edited[/gold] this combat" in _row(
         "proto_ym_bestseller")["description"]
     assert "for each card you [gold]Edited[/gold] this combat" in _row(

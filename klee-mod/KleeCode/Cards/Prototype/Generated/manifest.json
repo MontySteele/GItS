@@ -2346,8 +2346,8 @@
       "cost": -1
     },
     "proto_ym_bestseller": {
-      "yae_base": 2,
-      "yae_per": 1
+      "formula_base": 2,
+      "formula_per": 1
     },
     "proto_ym_deadline": {
       "block": 3
@@ -2414,8 +2414,8 @@
       "draw": 1
     },
     "proto_ym_print_run": {
-      "yae_base": 2,
-      "yae_per": 1
+      "formula_base": 2,
+      "formula_per": 1
     },
     "proto_ym_proofread": {
       "cost": -1

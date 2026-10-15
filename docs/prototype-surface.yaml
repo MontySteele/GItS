@@ -4757,9 +4757,10 @@
    # Yae review r4, pick 1 (a): 8 [10]. Yae review r5, pick 1 (a) (ruled
    # 2026-10-15, "For 1332 - agreed on (a)"): plus 2 [3] per card Edited
    # this combat (was plus 3 [4] per Annotated card in hand).
-   description: "Deal 8 [gold]Electro[/gold] damage, plus 2 for each card you [gold]Edited[/gold] this combat.",
-   effects: [{op: yae, kind: damage_per_edit, base: 8, per: 2, target: enemy}],
-   upgrade: {yae_base: 2, yae_per: 1}}
+   description: "Deal {CalculationBase:diff()} [gold]Electro[/gold] damage, plus {ExtraDamage:diff()} for each card you [gold]Edited[/gold] this combat.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: damage, target: enemy,
+              amount_formula: {base: 8, per: 2, count: edits_this_combat}}],
+   upgrade: {formula_base: 2, formula_per: 1}}
 
 - {id: proto_ym_print_run, name: "Print Run", character: yae,
    authored_by: [claude],
@@ -4767,9 +4768,10 @@
    # Yae review r5, pick 1 (a) (ruled 2026-10-15, "For 1332 - agreed on
    # (a)"): plus 2 [3] per card Edited this combat (was plus 3 [4] per
    # Annotated card in hand; design axes sec.4 set 6 [8]).
-   description: "Gain 6 [gold]Block[/gold], plus 2 for each card you [gold]Edited[/gold] this combat.",
-   effects: [{op: yae, kind: block_per_edit, base: 6, per: 2}],
-   upgrade: {yae_base: 2, yae_per: 1}}
+   description: "Gain {CalculationBase:diff()} [gold]Block[/gold], plus {CalculationExtra:diff()} for each card you [gold]Edited[/gold] this combat.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
+   effects: [{op: block,
+              amount_formula: {base: 6, per: 2, count: edits_this_combat}}],
+   upgrade: {formula_base: 2, formula_per: 1}}
 
 - {id: proto_ym_footnote, name: "Footnote", character: yae,
    authored_by: [claude],

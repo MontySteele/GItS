@@ -18,7 +18,8 @@ public interface ISakuraPlanterCard
 
 /// <summary>
 /// A card whose `yae` kind gives its own Block (block_per_sakura,
-/// block_per_edit: Print Run). It declares no BlockVar, so the game's
+/// block_per_edit; no row since Print Run took the calculated rail,
+/// 2026-10-15). It declares no BlockVar, so the game's
 /// <c>GainsBlock</c> is false (Nimble is unchanged), but Red Ink rides that
 /// Block: <see cref="YaeAnnotationReach.GivesBlock"/> reads this marker too.
 /// Codegen-emitted; sim twin <c>yae_shrine.gives_block</c>.
