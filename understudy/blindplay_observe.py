@@ -758,6 +758,11 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         # line on either screen saying the claim had failed. Both numbers are
         # on the feed and neither was printed.
         obs["potions_held"] = len(_potions(state))
+        # Yae review r6, item 3: Meditations of a Yako found nothing to
+        # Publish after this fight (`YaeShrine.Snapshot`).
+        shrine = _player(state).get("yae_shrine")
+        obs["nothing_to_publish"] = (isinstance(shrine, dict)
+                                     and shrine.get("nothing_to_publish") is True)
         obs["potion_slots"] = _potion_slots(state)
         obs["potion_offered"] = any(
             _fold(r.get("type")) == "potion"

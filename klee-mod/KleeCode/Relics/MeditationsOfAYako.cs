@@ -74,11 +74,25 @@ public class MeditationsOfAYako : CustomRelicModel
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForEdit(System.Array.Empty<IHoverTip>(), null);
 
+    /// <summary>Yae review r6, item 3: this fight was one that offers a
+    /// Publish and left no Annotation to Publish, so the relic flashed and
+    /// said "Nothing to Publish". Not saved; cleared when a fight ends and
+    /// when a room is entered. The seat page reads it through
+    /// <see cref="YaeShrine.Snapshot"/>.</summary>
+    public bool NothingToPublish { get; private set; }
+
     /// <summary>The fight's evidence: every deck card's draft becomes the
     /// Annotation its combat copy carries now.</summary>
     public override Task AfterCombatEnd(CombatRoom room)
     {
+        NothingToPublish = false;
         YaeEditing.SnapshotDrafts(Owner);
+        return Task.CompletedTask;
+    }
+
+    public override Task AfterRoomEntered(AbstractRoom room)
+    {
+        NothingToPublish = false;
         return Task.CompletedTask;
     }
 
@@ -86,6 +100,7 @@ public class MeditationsOfAYako : CustomRelicModel
                                           AbstractRoom? room)
     {
         if (player != Owner || room is not CombatRoom combat) return false;
+        NothingToPublish = false;
         var runState = player.RunState;
         var finalBoss = room.RoomType == RoomType.Boss
             && runState.CurrentActIndex >= runState.Acts.Count - 1;
@@ -94,7 +109,14 @@ public class MeditationsOfAYako : CustomRelicModel
         {
             return false;
         }
-        if (!YaeEditing.PublishChoices(player).Any()) return false;
+        if (!YaeEditing.PublishChoices(player).Any())
+        {
+            // Yae review r6, item 3: say why no Publish came.
+            NothingToPublish = true;
+            Flash();
+            YaeEditing.SayNothing(player.Creature, YaeEditing.NothingToPublishKey);
+            return false;
+        }
         rewards.Add(new YaePublishReward(player, this));
         return true;
     }

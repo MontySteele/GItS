@@ -69,8 +69,8 @@ THE RULES AS MODELLED (review r3, ruled 2026-10-14,
   * POWERS (self, by name): Sakura Grove (at her turn start, after Yakan
     Offering, each Sakura gains n Levels), Edict of Cleansing (+n on a
     damage action at an enemy that is Weak or wears Pyro, Hydro or Cryo;
-    damage kinds only), Serialization (Block per Annotated card played,
-    unpowered), Fox's Mooncall (plant n Levels higher), Yakan Offering
+    damage kinds only), Serialization (Block per card Edited, the
+    `edits` count's events, unpowered; Yae review r6 item 1), Fox's Mooncall (plant n Levels higher), Yakan Offering
     (plant at the start of her turn, after the draw), Sakura Channeling
     ("You can have 2 more Sakura"), Editor-in-Chief (after an Annotated
     card's play, the highest-Level Sakura acts), Serial Novel (above).
@@ -307,6 +307,16 @@ def _block(state, amount: int, reason: str) -> None:
     state.player.block += amount
     state.emit("block", amount=amount)
     state.emit("yae_block", amount=amount, reason=reason)
+
+
+def _note_edits(state, n: int) -> None:
+    """Count `n` Edits this combat and pay Serialization ("Whenever you
+    Edit a card, gain 3 [4] Block", Yae review r6 item 1) for them. C#
+    twin: `NoteEdit` plus `SerializationPower.Pay`."""
+    if n <= 0:
+        return
+    ledger(state.player).edits += n
+    _block(state, _power(state.player, SERIALIZATION) * n, "serialization")
 
 
 # --------------------------------------------------------------------------
@@ -558,7 +568,7 @@ def edit_sakura(state, which: str, n: int, annotation: str,
         s.red_ink_kept = bool(keeps == RED_INK and had_red
                               and annotation != RED_INK)
         state.emit("yae_sakura_annotate", seq=s.seq, annotation=annotation)
-    led.edits += len(ordered[:n])
+    _note_edits(state, len(ordered[:n]))
     return len(ordered[:n])
 
 
@@ -976,17 +986,17 @@ def edit(state, editor, annotation: str, n: int = 1,
         reach = [c for c in _edit_reaches(state, editor, annotation)
                  if not any(c is d for d in done)]
         if not reach:
-            return
+            break
         if led.edit_choice is not None:
             target = led.edit_choice(state, editor, annotation)
         else:
             target = _edit_target(state, editor, annotation,
                                   exclude=done, fresh_only=i > 0)
         if target is None or not any(target is c for c in reach):
-            return
+            break
         annotate(state, target, annotation)
         done.append(target)
-        led.edits += 1
+    _note_edits(state, len(done))
 
 
 def edit_all(state, editor, default: str) -> None:
@@ -999,8 +1009,7 @@ def edit_all(state, editor, default: str) -> None:
         state.emit("yae_edit_nothing", what="hand")
     for c in cards:
         annotate(state, c, name, "reborn")
-    if cards:
-        led.edits += len(cards)
+    _note_edits(state, len(cards))
 
 
 def publish(state, editor) -> None:
@@ -1068,13 +1077,11 @@ def publish_after_fight(room: str, drafts: dict, published: dict,
 
 def after_play(state, card) -> None:
     """`effects.resolve_card`, after the card's own effects, for an
-    Annotated card: Serialization ("whenever you play an Annotated card,
-    gain 3 Block"), then Editor-in-Chief, "a Sakura strikes" (the
+    Annotated card: Editor-in-Chief, "a Sakura strikes" (the
     highest-Level Sakura acts as its kind, the oldest on a tie)."""
     led = ledger(state.player)
     if led is None or not is_annotated(card):
         return
-    _block(state, _power(state.player, SERIALIZATION), "serialization")
     if not led.sakura:
         return
     for _ in range(_power(state.player, EDITOR_IN_CHIEF)):

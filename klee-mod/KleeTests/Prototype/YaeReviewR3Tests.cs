@@ -145,7 +145,9 @@ public class YaeReviewR3Tests : IDisposable
         Assert.Equal("Deal {Damage:diff()} [gold]Electro[/gold] damage to ALL enemies. Plant a "
                      + "[gold]Foxfire Sakura[/gold].", Face(new ProtoYmFoxfireSweep()));
         Assert.Contains("Weak[/gold] to ALL enemies. [gold]Tenko[/gold]", Face(new ProtoYmKitsuneGuile()));
-        Assert.Equal("Draw {Cards:diff()} cards. Each [gold]Sakura[/gold] lasts 1 more turn.",
+        // Yae review r6, item 2.
+        Assert.Equal("Draw {Cards:diff()} cards. [gold]Edit[/gold] a card in your hand: "
+                     + "[gold]Red Ink[/gold].",
                      Face(new ProtoYmManuscriptPile()));
         Assert.Contains(Il.CallSequence(Il.Method("ProtoYmShrineMaidensGuard", "OnPlay")),
                         c => c.Contains("YaeCards.Plant"));

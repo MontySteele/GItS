@@ -77,9 +77,11 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   the Masterpiece (one enchantment: a permanent Published stack plus one
   temporary slot; layers add up; Edits reach Published cards); Second
   Printing, Author's Copy (never an Author's Copy) and Serial Novel; Fallen
-  Petals an active Skill. Pool 43 (15 / 18 / 10). Untested live until a
-  deploy. Next: a five-seat round, looking at runs that take many elites
-  too.
+  Petals an active Skill. Pool 43 (15 / 18 / 10). **Review r6 built**
+  (2026-10-15, `review/active/yae-review-r6-2026-10-15.md`, no pick):
+  Serialization pays per card Edited, Manuscript Pile draws then Edits a
+  card with Red Ink. Next: [USER]'s own Yae run, the finish line for
+  Prototype.
 
 ## The kits
 

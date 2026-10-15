@@ -45,7 +45,7 @@ public sealed class ProtoYmSerialization : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Serialization"),
-        ("description", "Whenever you play an [gold]Annotated[/gold] card, gain {PowerAmount:diff()} [gold]Block[/gold]."),
+        ("description", "Whenever you [gold]Edit[/gold] a card, gain {PowerAmount:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -342,11 +342,17 @@ public static class YaeShrine
     /// reflection; <c>understudy/blindplay_board.yae_shrine</c>): the cards
     /// she Edited this combat, the count Bestseller and Print Run read. EMPTY
     /// for anyone not Yae and outside a fight (a ledger is asked for only
-    /// inside one, so a map-screen poll never resets it). Primitives only.
+    /// inside one, so a map-screen poll never resets it), except that a
+    /// Meditations of a Yako which found nothing to Publish after this fight
+    /// adds <c>nothing_to_publish</c> (Yae review r6, item 3). Primitives
+    /// only.
     /// </summary>
     public static Dictionary<string, object?> Snapshot(Player? player)
     {
         var snapshot = new Dictionary<string, object?>();
+        if (player?.Relics.OfType<global::KleeMod.Relics.MeditationsOfAYako>()
+                .Any(r => r.NothingToPublish) == true)
+            snapshot["nothing_to_publish"] = true;
         var yae = player?.Creature;
         if (yae == null || !Live(yae) || yae.CombatState == null) return snapshot;
         snapshot["live"] = true;
@@ -596,8 +602,7 @@ public static class YaeShrine
 
     /// <summary>
     /// After an Annotated card's own effects and its Annotations':
-    /// Serialization ("Whenever you play an Annotated card, gain 3 Block"),
-    /// then Editor-in-Chief, "a Sakura strikes": the highest-Level Sakura
+    /// Editor-in-Chief, "a Sakura strikes": the highest-Level Sakura
     /// acts as its kind, once per stack (review r3, the builder's reading).
     /// </summary>
     public static async Task AfterCardPlayed(PlayerChoiceContext choiceContext,
@@ -606,7 +611,6 @@ public static class YaeShrine
         var yae = cardPlay.Card?.Owner?.Creature;
         if (yae == null || !Live(yae)) return;
         if (!YaeEditing.IsAnnotated(cardPlay.Card)) return;
-        await SerializationPower.Pay(yae, 1);
         var stacks = yae.GetPowerAmount<EditorInChiefPower>();
         var ledger = YaeShrineLedger.For(yae);
         for (var i = 0; i < stacks; i++)
@@ -841,6 +845,7 @@ public static class YaeCards
         // each half. One that Edited a Sakura says nothing about the hand.
         var hand = handIfUpgraded && card.IsUpgraded;
         var edited = YaeShrineLedger.For(yae).EditSakura(end, Var(card, "YmAmount"), annotation, keepRedInk);
+        await SerializationPower.Pay(yae, edited);
         if (edited == 0 && !hand)
             YaeEditing.SayNothing(yae, YaeEditing.NoSakuraToEditKey);
         await SakuraBadge.Sync(choiceContext, yae);

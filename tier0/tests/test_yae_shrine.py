@@ -595,20 +595,17 @@ def test_annotated_readers_count_edits_and_the_card_itself(yae):
     assert st.enemies[0].hp == 100 - 10 - 12
 
 
-def test_serialization_pays_block_per_annotated_play_not_per_edit(yae):
-    # Shrine r2, (b) (ruled 2026-10-14).
+def test_serialization_pays_block_per_edit_not_per_annotated_play(yae):
+    # Yae review r6 item 1: "Whenever you Edit a card, gain 3 [4] Block."
     st = _state()
     _play(st, _ym("serialization"))
     st.player.hand += [loader.get_card("strike"), loader.get_card("defend")]
     _play(st, _ym("reborn_as_guuji_yae"))
-    assert st.player.block == 0                  # Editing pays nothing now
+    assert st.player.block == 2 * 3              # two cards Edited
     assert all(Y.temp(c) == Y.SAKURA_SEAL for c in st.player.hand)
     strike = st.player.hand[0]
     combat.play_card(st, strike)
-    assert st.player.block == 3                  # an Annotated play pays
-    plain = loader.get_card("strike")
-    _play(st, plain)
-    assert st.player.block == 3
+    assert st.player.block == 2 * 3              # an Annotated play pays nothing
 
 
 def test_editor_in_chief_strikes_on_an_annotated_play(yae):
