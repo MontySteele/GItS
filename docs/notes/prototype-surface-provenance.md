@@ -9134,3 +9134,27 @@ The seat page prints "Cards Edited this combat: N" in her shrine block, off
 
 Pins: `tier0/tests/test_yae_review_r5.py`, `tier0/tests/test_yae_seat_page.py`,
 `klee-mod/KleeTests/Prototype/YaeReviewR5Tests.cs`.
+
+## Yae review r6: Serialization and Manuscript Pile (2026-10-15)
+
+`proto_ym_serialization`, `proto_ym_manuscript_pile`. Yae is at Prototype, so
+these are Claude's (`review/active/yae-review-r6-2026-10-15.md`, items 1 and
+2, no pick); neither card was taken in two seat rounds (0 / 5 and 0 / 8; 0 / 7
+and 0 / 5).
+
+- **Serialization:** "Whenever you [gold]Edit[/gold] a card, gain 3 [4]
+  [gold]Block[/gold]." (was: whenever you play an Annotated card). It pays on
+  the events the per-combat Edit count records (`YaeShrineLedger.Edits`, sim
+  `edits`): each card in hand an Edit or Reborn Annotates, and each Sakura an
+  "Edit your ... Sakura" card Annotates (Inked Branches counts every one). A
+  Publish is not an Edit, and playing an Annotated card no longer pays. C#
+  `SerializationPower.Pay` from `YaeEditing.Edit`, `YaeEditing.EditAll` and
+  `YaeCards.EditSakura`; sim `yae_shrine._note_edits`. One Block gain per
+  Edit action (per x cards Edited), unpowered as before.
+- **Manuscript Pile:** "Draw 2 [3] cards. [gold]Edit[/gold] a card in your
+  hand: [gold]Red Ink[/gold]." (was: each Sakura lasts 1 more turn). The
+  draw lands first, then the one-card Edit chooser
+  (`{op: yae, kind: edit, annotation: red_ink, amount: 1}`).
+
+Pins: `tier0/tests/test_yae_review_r6.py`,
+`klee-mod/KleeTests/Prototype/YaeReviewR6Tests.cs`.

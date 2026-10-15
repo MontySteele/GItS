@@ -6604,7 +6604,11 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # Condensed 2026-10-14: the full-shrine rule is on the plant cards.
         "Sakura": ["At the end of your turn, strikes an enemy for ",
                    "+ its Level. Lasts ",
-                   " turns, then strikes "],
+                   " turns, then strikes ",
+                   "A Sakura strikes Kitsune Pounce's target when Pounce "
+                   "makes it strike, ",
+                   "else the enemy Foxfire Lure marked this turn, else a "
+                   "random enemy."],
         # Review r3 (2026-10-14): plain Tenko, the two kinds, the
         # full-shrine rule, and the Edit tip's two layers.
         "Tenko": ["Every ", " acts now. Refresh them to at least "],
@@ -6629,8 +6633,9 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                      " damage to a random enemy.", " acts, it also deals "],
         "Sakura Seal": ["When this card is played, plant a "],
         "Royalties": ["When this card is played, gain ", " Energy."],
+        # Yae review r6, items 4 and 5: Reprints stack; a Sakura's target.
         "Reprint": ["The first time this card is played each combat, play "
-                    "it twice."],
+                    "it once ", "more for each Reprint."],
         # (The Rite row left with the Rite, Yae shrine r2, 2026-10-14.)
     }
     # `Spotlighted` (2026-09-06) is a row with NO tooltip to be held in step

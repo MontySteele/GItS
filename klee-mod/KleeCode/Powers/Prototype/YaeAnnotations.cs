@@ -70,8 +70,10 @@ public static class YaeAnnotationText
             "When this card is played, plant a [gold]Sakura[/gold].",
         YaeAnnotation.Royalties =>
             $"When this card is played, gain {YaeLaw.RoyaltiesPayout} Energy.",
+        // Yae review r6, item 4: Reprints stack, and the hover says so.
         YaeAnnotation.Reprint =>
-            "The first time this card is played each combat, play it twice.",
+            "The first time this card is played each combat, play it once "
+          + "more for each Reprint.",
         _ => "",
     };
 
@@ -125,8 +127,7 @@ public static class YaeAnnotationText
     public static string PromptClause(YaeAnnotation annotation)
     {
         var rule = Plain(Rule(annotation)).TrimEnd('.');
-        rule = rule.Replace("This card", "It").Replace("this card", "it")
-                   .Replace("play it twice", "it is played twice");
+        rule = rule.Replace("This card", "It").Replace("this card", "it");
         return rule.Length == 0 ? rule
             : char.ToLowerInvariant(rule[0]) + rule.Substring(1);
     }
@@ -605,6 +606,12 @@ public static class YaeEditing
 
     public const string NoSakuraToEditText = "No Sakura to Edit.";
 
+    /// <summary>Yae review r6, item 3: Meditations of a Yako after an elite
+    /// or boss fight that left no Annotation to Publish.</summary>
+    public const string NothingToPublishKey = "KLEEMOD-YAE_PUBLISH_NOTHING.bubble";
+
+    public const string NothingToPublishText = "Nothing to Publish.";
+
     /// <summary>The bubble itself; a missing bubble never breaks a play.
     /// </summary>
     public static void SayNothing(Creature? yae, string key)
@@ -799,11 +806,15 @@ public static class YaeEditing
             choiceContext, owner, EditPrefs(annotation, times),
             c => EditReaches(c, editor, annotation),
             editor);
+        var n = 0;
         foreach (var card in EditTargets(picked, times))
         {
             if (!Annotate(card, annotation)) continue;
             YaeShrineLedger.For(owner.Creature).NoteEdit();
+            n++;
         }
+        // Serialization pays per Edit (Yae review r6, item 1).
+        await SerializationPower.Pay(owner.Creature, n);
     }
 
     /// <summary>
@@ -829,6 +840,7 @@ public static class YaeEditing
             if (Annotate(card, chosen)) n++;
         }
         for (var i = 0; i < n; i++) YaeShrineLedger.For(owner.Creature).NoteEdit();
+        await SerializationPower.Pay(owner.Creature, n);
     }
 
     /// <summary>

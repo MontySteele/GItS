@@ -413,6 +413,20 @@ TREASURE_PROCEED_NOTE = (
     "*The relic stays in the chest until you `choose` it; `proceed` leaves "
     "it behind.*")
 
+# Yae review r6, item 3. A seat took two Elites and could not tell why no
+# Publish came. Meditations of a Yako says so in game ("Nothing to Publish")
+# and the mod hands the page the same fact (`player.yae_shrine`
+# `nothing_to_publish`); printed only on that reward screen.
+NOTHING_TO_PUBLISH_NOTE = (
+    "*No Publish was offered: you made no Annotation that fight.*")
+
+# Yae review r6, item 5. Three seats could not tell which enemy a Sakura
+# strikes. The mod's rule (`YaeShrine.Aim`) in one sentence, word for word
+# the seat hover's (`ArmKeywordTips.YaeSakuraTargetRule`).
+SAKURA_TARGET_RULE = (
+    "A Sakura strikes Kitsune Pounce's target when Pounce makes it strike, "
+    "else the enemy Foxfire Lure marked this turn, else a random enemy.")
+
 # `EB-393`, the decline half. A ROOM WITH NO WAY OUT BUT THROUGH.
 #
 # The same seat: "and no option to decline... I was forced to add *something*."
@@ -1709,8 +1723,10 @@ ARM_KEYWORDS: dict[str, str] = {
     # Review r3 (ruled 2026-10-14): Tenko is one plain rule; the two kinds a
     # card names have their own rows; the full-shrine rule is its own row
     # (`ArmKeywordTips.YaeFullShrineTip`); an Edit fills the temporary slot.
+    # Yae review r6, item 5: which enemy it strikes (`YaeShrine.Aim`).
     "Sakura": ("At the end of your turn, strikes an enemy for 2 + its "
-               "Level. Lasts 3 turns, then strikes once more."),
+               "Level. Lasts 3 turns, then strikes once more. "
+               + SAKURA_TARGET_RULE),
     "Tenko": "Every Sakura acts now. Refresh them to at least 3 turns.",
     "Foxfire Sakura": ("A Sakura that hits ALL enemies for 1 + its Level "
                        "when it acts."),
@@ -1737,8 +1753,9 @@ ARM_KEYWORDS: dict[str, str] = {
                  "also deals 4 Electro damage to a random enemy."),
     "Sakura Seal": "When this card is played, plant a Sakura.",
     "Royalties": "When this card is played, gain 1 Energy.",
+    # Yae review r6, item 4: each Reprint adds one play.
     "Reprint": ("The first time this card is played each combat, play it "
-                "twice."),
+                "once more for each Reprint."),
     # `EB-625`. THE RELIC A FACE IS WRITTEN AGAINST. Shell Guard says
     # "whenever the Tamakushi Casket strikes" and nothing on the page said
     # what the Casket is or what makes it strike -- [USER]'s act-1 run read

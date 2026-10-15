@@ -46,6 +46,8 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         ENEMY_SIZE_NOTE,
                                         EVENT_NO_DECLINE_NOTE,
                                         TREASURE_PROCEED_NOTE,
+                                        NOTHING_TO_PUBLISH_NOTE,
+                                        SAKURA_TARGET_RULE,
                                         FRONT_ENEMY_NOTE,
                                         HAND_REPEAT_NOTE,
                                         LAST_MORNING_NOTE,
@@ -3133,6 +3135,11 @@ SHRINE_KIND = {"thunder": ("Sakura", "strikes an enemy for {n}"),
                "foxfire": ("Foxfire Sakura", "hits ALL enemies for {n} each"),
                "kitsune": ("Kitsune Sakura", "gives you {n} Block")}
 SHRINE_LURE_LINE = "- Foxfire Lure: your Sakura strike **{name}** this turn."
+#: Yae review r6, item 5: which enemy a Sakura strikes, the mod's own rule
+#: (`YaeShrine.Aim`) in the hover's sentence (`ArmKeywordTips.
+#: YaeSakuraTargetRule`). Printed under the rows where a striking Sakura
+#: stands.
+SHRINE_TARGET_LINE = "- " + SAKURA_TARGET_RULE
 SHRINE_ANNOTATED_LINE = "- Annotated cards in your hand: {n}."
 #: Bestseller and Print Run's count (Yae review r5, pick 1 (a)), which no card
 #: on the board shows (`YaeShrine.Snapshot`, via `player.yae_shrine`).
@@ -3171,6 +3178,8 @@ def _render_shrine(shrine: dict[str, Any]) -> list[str]:
                                      turns=tail))
     if rows and len(rows) >= cap:
         out.append(SHRINE_FULL_LINE)
+    if any((row.get("kind") or "thunder") == "thunder" for row in rows):
+        out.append(SHRINE_TARGET_LINE)
     if shrine.get("lure"):
         out.append(SHRINE_LURE_LINE.format(name=shrine["lure"]))
     out.append(SHRINE_ANNOTATED_LINE.format(n=shrine.get("annotated", 0)))
@@ -3988,7 +3997,8 @@ def _incoming_line(enemies: list[dict[str, Any]], you: dict[str, Any],
                    hand: list[dict[str, Any]] | None = None,
                    pets: list[dict[str, Any]] | None = None,
                    resolutions: list[dict[str, Any]] | None = None,
-                   planned_attack: bool = False) -> str:
+                   planned_attack: bool = False,
+                   shrine: dict[str, Any] | None = None) -> str:
     """`- Incoming this turn: N (your Block B): you would take T.`
 
     The sum of every attack part shown; a part it cannot count is named as
@@ -4020,6 +4030,7 @@ def _incoming_line(enemies: list[dict[str, Any]], you: dict[str, Any],
                 hits += _split_hits(intent, part)
     facts = _turn_end_facts(you, hand or [], pets or [], resolutions,
                             planned_attack)
+    facts["block"] = facts["block"] + _kitsune_block_parts(shrine)
     not_counted = (INCOMING_NOT_COUNTED.format(
         names=_and_list(facts["unknown"])) if facts["unknown"] else "")
     not_counted += "".join(INCOMING_CONDITIONAL_BLOCK.format(name=name, n=n)
@@ -4074,6 +4085,25 @@ def _incoming_line(enemies: list[dict[str, Any]], you: dict[str, Any],
         line += INCOMING_LEAVES.format(after=max(0, you["hp"] - take),
                                        max_hp=you["max_hp"])
     return line + not_counted
+
+
+def _kitsune_block_parts(shrine: dict[str, Any] | None
+                         ) -> list[tuple[str, int]]:
+    """Yae review r6, item 6: the Block each Kitsune Sakura adds at the end
+    of your turn, before the enemies act, off the numbers its shrine row
+    prints (`strike`, `turns`). Every Sakura acts at the end of the turn;
+    one whose last turn this is (1 turn left, no Deadline Extension) acts
+    once more as it withers (`YaeShrine.TurnEnd`)."""
+    out: list[tuple[str, int]] = []
+    for row in (shrine or {}).get("sakura") or []:
+        if row.get("kind") != "kitsune" or not row.get("strike"):
+            continue
+        acts = 1
+        if (row.get("turns") == 1
+                and row.get("annotation") != "Deadline Extension"):
+            acts = 2
+        out.append(("Kitsune Sakura", int(row["strike"]) * acts))
+    return out
 
 
 #: SEAT PAGE 3: the end-of-turn acts' Block, beside the incoming line on a
@@ -4737,7 +4767,8 @@ def render(obs: dict[str, Any]) -> str:
         if c["enemies"] and not obs.get("coop"):
             out += ["", _incoming_line(c["enemies"], you, c["hand"],
                                        c.get("pets"), c.get("resolutions"),
-                                       _planned_attack(c.get("plans")))
+                                       _planned_attack(c.get("plans")),
+                                       c.get("shrine"))
                     + _stage_block_clause(c.get("stage"))]
         # `EB-496`: and the rule about both handles, under the list they are
         # handles for. The hand's own note is about cards and says the
@@ -5107,6 +5138,8 @@ def render(obs: dict[str, Any]) -> str:
         if obs["screen"] == "treasure" and any(
                 i["enabled"] for i in obs["items"]):
             out += ["", TREASURE_PROCEED_NOTE]
+        if obs.get("nothing_to_publish"):
+            out += ["", NOTHING_TO_PUBLISH_NOTE]
         if obs.get("potion_barred"):
             out += ["", POTION_BARRED_NOTE.format(relic=obs["potion_barred"])]
         # `EB-341`: said on the screen where the claim is made, and only where

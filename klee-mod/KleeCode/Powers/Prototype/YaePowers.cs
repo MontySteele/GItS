@@ -280,17 +280,20 @@ public sealed class EdictOfCleansingPower : PowerModel, ILocalizationProvider
     public override PowerStackType StackType => PowerStackType.Counter;
 }
 
-/// <summary>Serialization (shrine r2, ruled 2026-10-14): "Whenever you play
-/// an Annotated card, gain 3 [4] Block." Paid by
-/// <see cref="YaeShrine.AfterCardPlayed"/>. Unpowered (the sim's `_block`,
-/// the Powers' door).</summary>
+/// <summary>Serialization (Yae review r6, item 1): "Whenever you Edit a
+/// card, gain 3 [4] Block." (was: whenever you play an Annotated card).
+/// Paid on the same events the per-combat Edit count records
+/// (<see cref="YaeShrineLedger.Edits"/>): each card in hand an Edit or
+/// Reborn Annotates, each Sakura an "Edit your ... Sakura" card Annotates.
+/// A Publish is not an Edit. Unpowered (the sim's `_block`, the Powers'
+/// door).</summary>
 public sealed class SerializationPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
         ("title", "Serialization"),
         ("description",
-            "Whenever you play an [gold]Annotated[/gold] card, gain "
+            "Whenever you [gold]Edit[/gold] a card, gain "
           + "[blue]{Amount}[/blue] [gold]Block[/gold]."),
     };
 
@@ -298,13 +301,13 @@ public sealed class SerializationPower : PowerModel, ILocalizationProvider
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    /// <summary>Pay <paramref name="plays"/> Annotated plays' Block.</summary>
-    internal static async Task Pay(Creature yae, int plays)
+    /// <summary>Pay <paramref name="edits"/> Edits' Block.</summary>
+    internal static async Task Pay(Creature yae, int edits)
     {
         var per = yae.GetPowerAmount<SerializationPower>();
-        if (per <= 0 || plays <= 0) return;
+        if (per <= 0 || edits <= 0) return;
         yae.Powers.OfType<SerializationPower>().FirstOrDefault()?.Flash();
-        await CreatureCmd.GainBlock(yae, per * plays, ValueProp.Unpowered, null);
+        await CreatureCmd.GainBlock(yae, per * edits, ValueProp.Unpowered, null);
     }
 }
 

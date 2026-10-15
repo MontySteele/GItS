@@ -299,6 +299,8 @@ public static class KleeMod
                         Powers.YaeEditing.NothingToEditText,
                     [Powers.YaeEditing.NoSakuraToEditKey] =
                         Powers.YaeEditing.NoSakuraToEditText,
+                    [Powers.YaeEditing.NothingToPublishKey] =
+                        Powers.YaeEditing.NothingToPublishText,
                 });
 
             // YAE MIKO (2026-10-14, Publish after elites and bosses):

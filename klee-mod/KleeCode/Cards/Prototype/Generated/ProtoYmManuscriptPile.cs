@@ -38,14 +38,14 @@ public sealed class ProtoYmManuscriptPile : CustomCardModel, ICharacterCard
     public string CharacterId => "yae";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSakura(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForEdit(ArmKeywordTips.ForAnnotation(base.ExtraHoverTips, this, YaeAnnotation.RedInk, false), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_manuscript_pile");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Manuscript Pile"),
-        ("description", "Draw {Cards:diff()} cards. Each [gold]Sakura[/gold] lasts 1 more turn."),
+        ("description", "Draw {Cards:diff()} cards. [gold]Edit[/gold] a card in your hand: [gold]Red Ink[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -64,7 +64,7 @@ public sealed class ProtoYmManuscriptPile : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
-        await YaeCards.Extend(choiceContext, this, cardPlay);
+        await YaeCards.Edit(choiceContext, this, cardPlay, YaeAnnotation.RedInk);
     }
 
     protected override void OnUpgrade()

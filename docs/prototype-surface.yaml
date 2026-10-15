@@ -4796,20 +4796,20 @@
 - {id: proto_ym_serialization, name: "Serialization", character: yae,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   # Shrine r2, (b) (ruled 2026-10-14): per Annotated card played (was per
-   # Edit).
-   description: "Whenever you play an [gold]Annotated[/gold] card, gain 3 [gold]Block[/gold].",
+   # Yae review r6 item 1: per Edit, the Edit count's events (was per
+   # Annotated card played, shrine r2).
+   description: "Whenever you [gold]Edit[/gold] a card, gain 3 [gold]Block[/gold].",
    effects: [{op: apply_power, power: ym_serialization, amount: 3, target: self}],
    upgrade: {power_amount: 1}}
 
 - {id: proto_ym_manuscript_pile, name: "Manuscript Pile", character: yae,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   # Design axes sec.4: its Retain Edit went. Review r3 (ruled 2026-10-14):
-   # the typed Tenko went; each Sakura lasts 1 more turn.
-   description: "Draw {Cards:diff()} cards. Each [gold]Sakura[/gold] lasts 1 more turn.",
+   # Yae review r6 item 2: Edit a card in your hand: Red Ink (was each
+   # Sakura lasts 1 more turn, review r3).
+   description: "Draw {Cards:diff()} cards. [gold]Edit[/gold] a card in your hand: [gold]Red Ink[/gold].",
    effects: [{op: draw, amount: 2},
-             {op: yae, kind: extend, amount: 1}],
+             {op: yae, kind: edit, annotation: red_ink, amount: 1}],
    upgrade: {draw: 1}}
 
 - {id: proto_ym_kitsune_guile, name: "Kitsune Guile", character: yae,

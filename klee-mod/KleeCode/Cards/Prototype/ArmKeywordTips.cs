@@ -616,7 +616,7 @@ public static class ArmKeywordTips
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, SakuraKey,
             card is ICharacterCard { CharacterId: Powers.YaePrototype.CharacterId }
-                ? YaeSakuraTip
+                ? (TipAudience.Seat ? YaeSakuraTip + " " + YaeSakuraTargetRule : YaeSakuraTip)
                 : "A totem that stays at your side all combat. At most 3 fire "
                 + "each turn.");
 
@@ -633,6 +633,17 @@ public static class ArmKeywordTips
         $"At the end of your turn, strikes an enemy for {Powers.YaeLaw.SakuraBase} "
       + $"+ its Level. Lasts {Powers.YaeLaw.SakuraTurns} turns, then strikes "
       + "once more.";
+
+    /// <summary>Yae review r6, item 5: which enemy a Sakura strikes
+    /// (<c>YaeShrine.Aim</c>: the aim Kitsune Pounce passes, else the Lure,
+    /// else random), in one sentence. The seat's hover adds it to
+    /// <see cref="YaeSakuraTip"/>; the player's hover stays under the
+    /// 100-character cap (<c>tools/lint_hover_tips.py</c>), where Foxfire
+    /// Lure's and Kitsune Pounce's own faces say it. The page's twin is
+    /// <c>blindplay_notes.SAKURA_TARGET_RULE</c>.</summary>
+    public static readonly string YaeSakuraTargetRule =
+        "A Sakura strikes Kitsune Pounce's target when Pounce makes it strike, "
+      + "else the enemy Foxfire Lure marked this turn, else a random enemy.";
 
     /// <summary>
     /// YAE MIKO (2026-10-13): the Edit tip; Publish is the relic's word,

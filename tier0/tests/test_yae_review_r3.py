@@ -184,7 +184,7 @@ def test_tenko_is_one_action_per_sakura_and_refreshes_to_three():
     assert [s.turns_left for s in _led(st).sakura] == [5, 3, 3]
 
 
-def test_kitsune_guile_tenkos_and_manuscript_pile_extends():
+def test_kitsune_guile_tenkos_and_manuscript_pile_draws_then_edits():
     st = _state()
     _play(st, "yakan_evocation")
     _play(st, "kitsune_guile")
@@ -193,8 +193,11 @@ def test_kitsune_guile_tenkos_and_manuscript_pile_extends():
     st.player.draw_pile = [_card("defend") for _ in range(3)]
     turns = _led(st).sakura[0].turns_left
     _play(st, "manuscript_pile")
-    assert _led(st).sakura[0].turns_left == turns + 1
+    # Yae review r6 item 2: no Sakura extension; it draws, then Edits a
+    # drawn card with Red Ink.
+    assert _led(st).sakura[0].turns_left == turns
     assert len(_acts(st)) == 1                   # no Tenko on it any more
+    assert [Y.temp(c) for c in st.player.hand].count(Y.RED_INK) == 1
 
 
 # --- full shrine, by kind ----------------------------------------------------
@@ -412,12 +415,14 @@ def test_bestseller_and_print_run_do_not_count_a_published_only_card():
     assert st.player.block == 6
 
 
-def test_serialization_pays_on_a_published_only_card():
+def test_serialization_no_longer_pays_on_a_published_card_play():
+    # Yae review r6 item 1: it pays per Edit; playing an Annotated card is
+    # not an Edit.
     st = _state()
     _play(st, "serialization")
     st.player.block = 0
     _play(st, _published("strike", [Y.FOOTNOTE]))
-    assert st.player.block == 3
+    assert st.player.block == 0
 
 
 def test_editor_in_chief_makes_the_highest_act_as_its_kind():

@@ -219,15 +219,17 @@ public class YaePrototypeTests : IDisposable
         Assert.DoesNotContain(calls, c => c.Contains("PendingDraw"));
     }
     [Fact]
-    public void Serialization_pays_per_annotated_play_not_per_edit()
+    public void Serialization_pays_per_edit_not_per_annotated_play()
     {
-        // Shrine r2, (b) (ruled 2026-10-14).
-        Assert.Contains(Il.CallSequence(typeof(YaeShrine).GetMethod(nameof(YaeShrine.AfterCardPlayed))!),
+        // Yae review r6, item 1 (was per Annotated card played, shrine r2).
+        Assert.DoesNotContain(Il.CallSequence(typeof(YaeShrine).GetMethod(nameof(YaeShrine.AfterCardPlayed))!),
+                              c => c.Contains("SerializationPower.Pay"));
+        Assert.Contains(Il.CallSequence(typeof(YaeEditing).GetMethod(nameof(YaeEditing.Edit))!),
                         c => c.Contains("SerializationPower.Pay"));
-        Assert.DoesNotContain(Il.CallSequence(typeof(YaeEditing).GetMethod(nameof(YaeEditing.Edit))!),
-                              c => c.Contains("SerializationPower.Pay"));
-        Assert.DoesNotContain(Il.CallSequence(typeof(YaeEditing).GetMethod(nameof(YaeEditing.EditAll))!),
-                              c => c.Contains("SerializationPower.Pay"));
+        Assert.Contains(Il.CallSequence(typeof(YaeEditing).GetMethod(nameof(YaeEditing.EditAll))!),
+                        c => c.Contains("SerializationPower.Pay"));
+        Assert.Contains(Il.CallSequence(typeof(YaeCards).GetMethod(nameof(YaeCards.EditSakura))!),
+                        c => c.Contains("SerializationPower.Pay"));
     }
 
     [Fact]
@@ -254,7 +256,8 @@ public class YaePrototypeTests : IDisposable
     public void The_four_changed_cards_do_their_new_jobs()
     {
         // Review r3's table: the Guard and the Sweep plant their kind,
-        // Kitsune Guile Tenkos, Manuscript Pile extends.
+        // Kitsune Guile Tenkos. Manuscript Pile Edits (Yae review r6, item
+        // 2; it extended).
         Assert.Contains(Il.CallSequence(typeof(ProtoYmShrineMaidensGuard).GetMethod(
             "OnPlay", HeadlessGame.All)!), c => c.Contains("YaeCards.Plant"));
         Assert.Contains(Il.CallSequence(typeof(ProtoYmFoxfireSweep).GetMethod(
@@ -262,7 +265,7 @@ public class YaePrototypeTests : IDisposable
         Assert.Contains(Il.CallSequence(typeof(ProtoYmKitsuneGuile).GetMethod(
             "OnPlay", HeadlessGame.All)!), c => c.Contains("YaeCards.Tenko"));
         Assert.Contains(Il.CallSequence(typeof(ProtoYmManuscriptPile).GetMethod(
-            "OnPlay", HeadlessGame.All)!), c => c.Contains("YaeCards.Extend"));
+            "OnPlay", HeadlessGame.All)!), c => c.Contains("YaeCards.Edit"));
         Assert.DoesNotContain(Il.CallSequence(typeof(ProtoYmManuscriptPile).GetMethod(
             "OnPlay", HeadlessGame.All)!), c => c.Contains("YaeCards.Tenko"));
     }
@@ -350,8 +353,10 @@ public class YaePrototypeTests : IDisposable
         Assert.Contains(Il.CallSequence(typeof(ProtoYmProofread).GetMethod(
             "OnPlay", HeadlessGame.All)!), c => c.Contains("YaeCards.Edit"));
         Assert.Equal(YaeAnnotation.Reprint, YaeEditing.ParseDraft("Reprint"));
+        // Yae review r6, item 4: each Reprint adds one play.
         Assert.Equal("The first time this card is played each combat, play it "
-                     + "twice.", YaeAnnotationText.Rule(YaeAnnotation.Reprint));
+                     + "once more for each Reprint.",
+                     YaeAnnotationText.Rule(YaeAnnotation.Reprint));
         Assert.Contains(YaeAnnotation.Reprint, YaeAnnotationText.All);
         // Reborn as Guuji Yae's faces are unchanged.
         Assert.DoesNotContain(YaeAnnotation.Reprint, YaeModalOptions.Order);
@@ -881,7 +886,7 @@ public class YaePrototypeTests : IDisposable
                      + "gain 1 Energy).",
                      YaeEditing.EditPromptTextFor(YaeAnnotation.Royalties).Replace(" " + YaeEditing.ReplacesWarning, ""));
         Assert.Equal("Choose a card to Edit: Reprint (the first time it is "
-                     + "played each combat, it is played twice).",
+                     + "played each combat, play it once more for each Reprint).",
                      YaeEditing.EditPromptTextFor(YaeAnnotation.Reprint).Replace(" " + YaeEditing.ReplacesWarning, ""));
         Assert.EndsWith(YaeEditing.ReplacesWarning, YaeEditing.EditPromptTextFor(YaeAnnotation.RedInk));
         Assert.Equal(YaeEditing.EditPromptText,
