@@ -95,7 +95,7 @@ def test_red_ink_yakan_evocation_plants_a_red_ink_sakura():
     _play(st, evo)
     (s,) = _sakura(st)
     assert s.annotation == Y.RED_INK
-    assert Y.strike_size(st, s) == Y.SAKURA_BASE + s.level + Y.RED_INK_AMOUNT
+    assert Y.act_size(st, s) == Y.SAKURA_BASE + s.level + Y.RED_INK_AMOUNT
 
 
 def test_twin_sakura_gives_red_ink_to_both():
@@ -187,7 +187,7 @@ def test_footnote_reaches_the_utility_card():
     lure = _card("foxfire_lure")
     st.player.hand.append(lure)
     _play(st, _card("footnote"))
-    assert lure.ym_annotation == Y.FOOTNOTE
+    assert Y.temp(lure) == Y.FOOTNOTE
 
 
 def test_red_ink_goes_to_a_planting_card_over_a_utility_card():
@@ -195,7 +195,7 @@ def test_red_ink_goes_to_a_planting_card_over_a_utility_card():
     lure, evo = _card("foxfire_lure"), _card("yakan_evocation")
     st.player.hand += [lure, evo]
     _play(st, _red_ink_edit())
-    assert evo.ym_annotation == Y.RED_INK and not Y.is_annotated(lure)
+    assert Y.temp(evo) == Y.RED_INK and not Y.is_annotated(lure)
 
 
 def test_a_pilot_choice_of_a_dead_card_edits_nothing():
@@ -213,7 +213,7 @@ def test_reborn_respects_the_filter():
     lure, strike = _card("foxfire_lure"), loader.get_card("strike")
     st.player.hand += [lure, strike]
     _play(st, _card("reborn_as_guuji_yae"))
-    assert strike.ym_annotation == Y.RED_INK
+    assert Y.temp(strike) == Y.RED_INK
     assert not Y.is_annotated(lure)
     assert Y.ledger(st.player).edits == 1
 
@@ -234,7 +234,8 @@ def test_the_publish_offer_respects_the_filter():
 
 def test_the_planting_marker_is_the_sims_planting_set():
     """The C# marker (codegen) and the sim's `plants_sakura` name the same
-    rows: Yakan Evocation, Twin Sakura and Grafted Branch."""
+    rows: Yakan Evocation, Twin Sakura, Grafted Branch, and (review r3) the
+    two kind planters, Foxfire Sweep and Shrine Maiden's Guard."""
     marked, planting = set(), set()
     for path in GENERATED.glob("ProtoYm*.cs"):
         text = path.read_text(encoding="utf-8")
@@ -244,7 +245,8 @@ def test_the_planting_marker_is_the_sims_planting_set():
         if Y.plants_sakura(loader.get_card(cid)):
             planting.add(cid)
     assert marked == planting == {_ym("yakan_evocation"), _ym("twin_sakura"),
-                                  _ym("grafted_branch")}
+                                  _ym("grafted_branch"), _ym("foxfire_sweep"),
+                                  _ym("shrine_maidens_guard")}
 
 
 def test_a_yae_kinds_own_block_counts_for_red_ink_in_both_engines():

@@ -57,7 +57,9 @@ public static class ArmKeywordTips
 {
     /// <summary>The hover-tip title table, the same one every other tip in the
     /// mod titles itself from.</summary>
-    private const string Table = "card_keywords";
+    /// <summary>The loc table every arm tip title lives in (public for the
+    /// Masterpiece's per-layer tips, review r3).</summary>
+    public const string Table = "card_keywords";
 
     // The keys. `KLEEMOD-ARM_` and not the bare word, because two of these
     // words already have a SHIPPED keyword with a DIFFERENT rule: `Bomb` is
@@ -144,9 +146,14 @@ public static class ArmKeywordTips
     /// <see cref="SakuraKey"/>, read for her cards) and Edit.</summary>
     public const string EditKey = "KLEEMOD-ARM_YAE_EDIT";
     /// <summary>YAE MIKO (2026-10-14): Tenko, split out of her Sakura tip;
-    /// shrine r2 (ruled 2026-10-14) gave it the three kinds and retired the
-    /// Rite's tip.</summary>
+    /// review r3 (ruled 2026-10-14) made it one plain rule again.</summary>
     public const string TenkoKey = "KLEEMOD-ARM_YAE_TENKO";
+    /// <summary>YAE MIKO, REVIEW R3 (ruled 2026-10-14): the two Sakura kinds
+    /// a card names, and the full-shrine plant every planting card carries.
+    /// </summary>
+    public const string FoxfireSakuraKey = "KLEEMOD-ARM_YAE_FOXFIRE_SAKURA";
+    public const string KitsuneSakuraKey = "KLEEMOD-ARM_YAE_KITSUNE_SAKURA";
+    public const string FullShrineKey = "KLEEMOD-ARM_YAE_FULL_SHRINE";
     public const string LightfallSwordKey = "KLEEMOD-ARM_LIGHTFALL_SWORD";
 
     // THE TEXT PASS OF 2026-10-08, and NOT A KEYWORD ROW: the Plan tip a
@@ -675,8 +682,8 @@ public static class ArmKeywordTips
         With(inherited, EditKey, YaeEditTip);
 
     public static readonly string YaeEditTip =
-        "Give a card an Annotation for this combat, replacing any it had. A "
-      + "Published one lasts the run.";
+        "Give a card an Annotation for this combat, replacing its last. "
+      + "Published ones stay and add up.";
 
     /// <summary>One Annotation's tip key, titled by its name.</summary>
     public static string KeyOf(Powers.YaeAnnotation annotation) =>
@@ -695,19 +702,52 @@ public static class ArmKeywordTips
              Powers.YaeAnnotationText.TipBody(annotation, onSakura));
 
     /// <summary>
-    /// YAE MIKO, SHRINE R2 (ruled 2026-10-14): Tenko and its three kinds,
-    /// the fewest words. It replaced the Rite's tip. A typed Tenko strikes AND
-    /// adds its kind ([USER], 2026-10-14: "Hmm, the double strike makes Tenko
-    /// effects quite strong, but let's try it and see what happens").
+    /// YAE MIKO, REVIEW R3 (ruled 2026-10-14): Tenko is one plain rule
+    /// again, the paper's words. The typed Tenko and its double effect left:
+    /// one action per Sakura, and the mix of kinds decides what it does.
     /// </summary>
     public static IEnumerable<IHoverTip> ForTenko(
         IEnumerable<IHoverTip> inherited, CardModel? card) =>
         With(inherited, TenkoKey, YaeTenkoTip);
 
     public static readonly string YaeTenkoTip =
-        "[gold]Sakura[/gold] strike now, refresh to "
-      + $"{Powers.YaeLaw.SakuraTurns} turns. Warding: +[gold]Block[/gold]. "
-      + "Wildfire: +Level to ALL. Offering: +draw 1.";
+        "Every [gold]Sakura[/gold] acts now. Refresh them to at least "
+      + $"{Powers.YaeLaw.SakuraTurns} turns.";
+
+    /// <summary>Review r3: a Foxfire Sakura, named on the card that plants
+    /// one (Foxfire Sweep).</summary>
+    public static IEnumerable<IHoverTip> ForFoxfireSakura(
+        IEnumerable<IHoverTip> inherited, CardModel? card) =>
+        With(inherited, FoxfireSakuraKey, YaeFoxfireSakuraTip);
+
+    public static readonly string YaeFoxfireSakuraTip =
+        "A [gold]Sakura[/gold] that hits ALL enemies for "
+      + $"{Powers.YaeLaw.FoxfireBase} + its Level when it acts.";
+
+    /// <summary>Review r3: the decoy ("Yae does not shield. A fox illusion
+    /// draws the blow."), named on Shrine Maiden's Guard.</summary>
+    public static IEnumerable<IHoverTip> ForKitsuneSakura(
+        IEnumerable<IHoverTip> inherited, CardModel? card) =>
+        With(inherited, KitsuneSakuraKey, YaeKitsuneSakuraTip);
+
+    public static readonly string YaeKitsuneSakuraTip =
+        "A fox decoy [gold]Sakura[/gold]. When it acts, you gain "
+      + $"{Powers.YaeLaw.KitsuneBase} + its Level [gold]Block[/gold].";
+
+    /// <summary>
+    /// Review r3 (amended after GPT's review): the full-shrine plant by
+    /// kind. It was printed on the plant cards ("with the shrine full, your
+    /// oldest strikes, refreshes and gains a Level"); with kinds it has two
+    /// branches, so every planting card carries it as a tip (codegen,
+    /// off the row's plant op) instead.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForFullShrine(
+        IEnumerable<IHoverTip> inherited, CardModel? card) =>
+        With(inherited, FullShrineKey, YaeFullShrineTip);
+
+    public static readonly string YaeFullShrineTip =
+        "Shrine full: your oldest acts. Same kind: it refreshes and gains a "
+      + "Level. Other kind: it withers.";
 
     /// <summary>The text pass of 2026-10-08: Eula's blade, a counter on the
     /// enemy (<c>LightfallSwordPower</c>) with a badge and no tip.</summary>

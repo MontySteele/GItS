@@ -96,11 +96,11 @@ public static class YaeAnnotationReach
               || Affects(annotation, DealsDamage(card), GivesBlock(card), Plants(card));
 
     /// <summary>The Annotation the Sakura this card plants inherit: Red Ink
-    /// when the card carries it and plants, else none.</summary>
-    public static YaeAnnotation Inherited(CardModel card)
-    {
-        var annotation = YaeEditing.Of(card);
-        return Inherits(annotation, DealsDamage(card), GivesBlock(card), Plants(card))
-            ? annotation : YaeAnnotation.None;
-    }
+    /// when any layer of the card carries it and it plants, else none. Once
+    /// (+3), however many Red Ink layers (review r3, the builder's reading:
+    /// a Sakura carries one Annotation).</summary>
+    public static YaeAnnotation Inherited(CardModel card) =>
+        YaeEditing.Count(card, YaeAnnotation.RedInk) > 0
+        && Inherits(YaeAnnotation.RedInk, DealsDamage(card), GivesBlock(card), Plants(card))
+            ? YaeAnnotation.RedInk : YaeAnnotation.None;
 }

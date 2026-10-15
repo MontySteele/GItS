@@ -19,11 +19,12 @@ namespace KleeMod.Powers;
 /// <summary>
 /// ONE SAKURA ON HER STATUS BAR (the paper's display: "two numbers per
 /// Sakura on the display (Level and turns left)"). The icon's number is the
-/// Sakura's LEVEL; the tooltip says the Level, its Thunder strike's size
-/// (shrine r2: there is no Rite), the Annotation it carries (ruled 2026-10-14) and the strikes it has
-/// left, and the seat page reads them off that sentence. Badge 1 is the oldest, the one
-/// that strikes first and withers first. A view of
-/// <see cref="YaeShrineLedger"/>, kept in step by <see cref="SakuraBadge.Sync"/>.
+/// Sakura's LEVEL; the tooltip names its KIND (review r3), the Level and the
+/// Level it was planted at (so the rest is what plants, Grove and the cards
+/// added since), what its action does now, the Annotation it carries and
+/// the turns it has left, and the seat page reads them off that sentence.
+/// Badge 1 is the oldest, the one that acts first and withers first. A view
+/// of <see cref="YaeShrineLedger"/>, kept in step by <see cref="SakuraBadge.Sync"/>.
 /// </summary>
 public abstract class SakuraBadgePower : PowerModel, ILocalizationProvider
 {
@@ -34,15 +35,19 @@ public abstract class SakuraBadgePower : PowerModel, ILocalizationProvider
     {
         ("title", $"Sakura {Slot + 1}"),
         ("description",
-            "A [gold]Sakura[/gold] beside you. At the end of your turn it "
-          + "strikes a random enemy."),
-        // The Annotation is a number (YaeAnnotation) read by the game's own
-        // `cond:` formatter, the shape SHRINK_POWER's shipped row uses.
+            "A [gold]Sakura[/gold] beside you. It acts at the end of your "
+          + "turn."),
+        // The kind and the Annotation are numbers (YaeSakuraKind,
+        // YaeAnnotation) read by the game's own `cond:` formatter, the shape
+        // SHRINK_POWER's shipped row uses. No placeholder sits inside a
+        // branch.
         ("smartDescription",
-            "Level {Level}. At the end of your turn it strikes a random enemy "
-          + "for {Strike} [gold]Electro[/gold] damage."
-          + $"{{Ann:cond:==1? [gold]Red Ink[/gold] makes its strike {YaeLaw.RedInkAmount} bigger (not in Offering).|==3? [gold]Deadline Extension[/gold] keeps it from withering.|==4? [gold]Fox Fire[/gold] adds {YaeLaw.FoxFireDamage} [gold]Electro[/gold] damage to a random enemy.|}}"
-          + " Strikes left: {Turns}."),
+            "{Kind:cond:==1?Foxfire Sakura|==2?Kitsune Sakura|Sakura}, "
+          + "Level {Level} (planted at {Planted}). "
+          + "{Kind:cond:==1?Hits ALL enemies for |==2?You gain |Strikes a random enemy for }"
+          + "{Strike}{Kind:cond:==2? [gold]Block[/gold].| [gold]Electro[/gold] damage.}"
+          + $"{{Ann:cond:==1? [gold]Red Ink[/gold]: +{YaeLaw.RedInkAmount}.|==3? [gold]Deadline Extension[/gold]: no wither.|==4? [gold]Fox Fire[/gold]: +{YaeLaw.FoxFireDamage} to a random enemy.|}}"
+          + " Turns left: {Turns}."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -52,7 +57,7 @@ public abstract class SakuraBadgePower : PowerModel, ILocalizationProvider
     protected override IEnumerable<DynamicVar> CanonicalVars => new List<DynamicVar>
     {
         new("Level", 1m), new("Turns", 3m), new("Strike", 3m),
-        new("Ann", 0m),
+        new("Ann", 0m), new("Kind", 0m), new("Planted", 1m),
     };
 
     private YaeSakura? Mine()
@@ -74,6 +79,8 @@ public abstract class SakuraBadgePower : PowerModel, ILocalizationProvider
         DynamicVars["Turns"].BaseValue = sakura.TurnsLeft;
         DynamicVars["Strike"].BaseValue = YaeShrine.Size(Owner, sakura);
         DynamicVars["Ann"].BaseValue = (int)sakura.Annotation;
+        DynamicVars["Kind"].BaseValue = (int)sakura.Kind;
+        DynamicVars["Planted"].BaseValue = sakura.PlantedLevel;
         InvokeDisplayAmountChanged();
     }
 }
@@ -357,40 +364,26 @@ public sealed class SakuraChannelingPower : PowerModel, ILocalizationProvider
     public override PowerStackType StackType => PowerStackType.Counter;
 }
 
-/// <summary>Fallen Petals (batch two): "Whenever a Sakura withers, gain 1
-/// Energy", paid at the start of her next turn by
-/// <see cref="YaeShrine.TurnStart"/> (a Sakura withers at her turn's end).
-/// </summary>
-public sealed class FallenPetalsPower : PowerModel, ILocalizationProvider
+/// <summary>Serial Novel (review r3, sec.3, ruled 2026-10-14): "At the
+/// start of your turn, put a random Annotated card from your Discard Pile
+/// into your hand." One card per stack, paid by
+/// <see cref="YaeShrine.TurnStart"/> after the draw.</summary>
+public sealed class SerialNovelPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
-        ("title", "Fallen Petals"),
+        ("title", "Serial Novel"),
         ("description",
-            "Whenever a [gold]Sakura[/gold] withers, gain "
-          + "{Amount:energyIcons()} on your next turn."),
+            "At the start of your turn, put [blue]{Amount}[/blue] random "
+          + "[gold]Annotated[/gold] card from your Discard Pile into your "
+          + "hand."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
-}
 
-/// <summary>Fallen Petals, upgraded: "and draw 1 card".</summary>
-public sealed class FallenPetalsPlusPower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Fallen Petals+"),
-        ("description",
-            "Whenever a [gold]Sakura[/gold] withers, gain "
-          + "{Amount:energyIcons()} and draw [blue]{Amount}[/blue] card on your "
-          + "next turn."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
+    internal void Pulse() => Flash();
 }
 
 /// <summary>Editor-in-Chief: "Whenever you play an Annotated card, a Sakura

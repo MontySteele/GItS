@@ -87,7 +87,7 @@ def test_a_withering_sakura_blooms_as_thunder():
     st.player.block = 0
     Y.turn_end(st)
     bloom = _strikes(st, "bloom")
-    assert len(bloom) == 1 and bloom[0]["rite"] == Y.THUNDER
+    assert len(bloom) == 1 and bloom[0]["kind"] == Y.THUNDER
     assert bloom[0]["amount"] == _strikes(st, "turn_end")[-1]["amount"]
     assert _led(st).sakura == []
     assert hp - sum(e.hp for e in st.enemies) == 2 * 3
@@ -112,12 +112,12 @@ def test_deadline_extension_never_withers_so_never_blooms():
         Y.turn_end(st)
     assert len(_led(st).sakura) == 1
     assert not _strikes(st, "bloom")
-    assert _led(st).pending_withers == 0
+    assert not any(r["event"] == "yae_wither" for r in st.log)
 
 
-def test_the_bloom_comes_before_the_wither_and_fallen_petals():
+def test_the_bloom_comes_before_the_wither():
+    # (Fallen Petals no longer banks a wither: review r3 made it a Skill.)
     st = _state()
-    _play(st, _ym("fallen_petals"))
     _play(st, _ym("yakan_evocation"))
     _run_out(st)
     mark = len(st.log)
@@ -125,10 +125,6 @@ def test_the_bloom_comes_before_the_wither_and_fallen_petals():
     events = [r["event"] for r in st.log[mark:]
               if r["event"] in ("yae_sakura_strike", "yae_wither")]
     assert events == ["yae_sakura_strike", "yae_sakura_strike", "yae_wither"]
-    assert _led(st).pending_withers == 1
-    energy = st.player.energy
-    Y.turn_start(st)
-    assert st.player.energy - energy == 1
 
 
 # --- No Level cap ------------------------------------------------------------
@@ -139,8 +135,8 @@ def test_levels_go_past_three():
     for _ in range(4):
         _play(st, _ym("rooted_shrine"))
     assert _led(st).sakura[0].level == 5
-    assert Y.tenko_total(st, Y.THUNDER) == 2 + 5
-    assert Y.tenko_line(st, Y.THUNDER) == " (7 damage)"
+    assert Y.tenko_totals(st)[Y.THUNDER] == 2 + 5
+    assert Y.tenko_line(st) == " (7 damage)"
 
 
 def test_mooncall_copies_stack():
@@ -175,7 +171,7 @@ def test_grove_levels_every_sakura_each_turn_start():
     _play(st, _ym("sakura_grove"))                   # a second copy
     Y.turn_start(st)
     assert [s.level for s in _led(st).sakura] == [4, 5]
-    assert Y.strike_size(st, _led(st).sakura[0], Y.THUNDER) == 2 + 4
+    assert Y.act_size(st, _led(st).sakura[0]) == 2 + 4
 
 
 def test_grove_upgrade_is_innate():

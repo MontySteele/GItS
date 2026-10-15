@@ -4541,7 +4541,8 @@
    upgrade: {cost: -1}}
 
 # YAE MIKO: review/active/yae-card-paper-2026-10-13.md, yae-design-axes-2026-10-14.md
-# (Annotations; shrine r2: no Rite, typed Tenko). Rules: YaeShrine.cs,
+# (Annotations; shrine r2: no Rite), yae-review-r3-2026-10-14.md (Sakura kinds,
+# plain Tenko, the Masterpiece, signature cards). Rules: YaeShrine.cs,
 # yae_shrine.py; reasoning: provenance note "Yae Miko".
 
 # --- the starter (paper sec.3): base Strike x4 + Defend x4 have no row ---
@@ -4550,9 +4551,9 @@
    authored_by: [claude],
    cost: 1, type: skill, rarity: basic,
    # Shrine r2 (ruled 2026-10-14): planted at Level 1, the others are not
-   # levelled; with the shrine full the oldest strikes (as its Last Bloom),
-   # refreshes and gains a Level (2026-10-14).
-   description: "Plant a [gold]Sakura[/gold] (with the shrine full, your oldest strikes, refreshes and gains a Level).",
+   # levelled. Review r3 (ruled 2026-10-14): the full-shrine rule depends on
+   # the kinds, so it moved off the face into its own tip (ForFullShrine).
+   description: "Plant a [gold]Sakura[/gold].",
    effects: [{op: yae, kind: plant, amount: 1}],
    upgrade: {cost: -1}}
 
@@ -4595,10 +4596,10 @@
 - {id: proto_ym_twin_sakura, name: "Twin Sakura", character: yae,
    authored_by: [claude],
    # Design axes sec.4: costs 1 (was 2 [1]); the upgrade adds Gain 4 Block.
-   # Shrine r2: both at Level 1; with the shrine one short the second plant
-   # makes the then-oldest strike, refresh and level.
+   # Shrine r2: both at Level 1. Review r3: the full-shrine rule is the
+   # Full shrine tip's.
    cost: 1, type: skill, rarity: common,
-   description: "Plant {YmAmount:diff()} [gold]Sakura[/gold] (with the shrine full, your oldest strikes, refreshes and gains a Level).",
+   description: "Plant {YmAmount:diff()} [gold]Sakura[/gold].",
    effects: [{op: yae, kind: plant, amount: 2}],
    upgrade: {add: {op: block, amount: 4}}}
 
@@ -4640,10 +4641,11 @@
 - {id: proto_ym_shrine_maidens_guard, name: "Shrine Maiden's Guard", character: yae,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   # Shrine r2 (ruled 2026-10-14): Tenko (Warding) replaces Rite: Warding.
-   description: "Gain 6 [gold]Block[/gold]. [gold]Tenko[/gold] (Warding).",
+   # Review r3 (ruled 2026-10-14): the Common Guard leaves a Block source
+   # behind (was Tenko (Warding)).
+   description: "Gain 6 [gold]Block[/gold]. Plant a [gold]Kitsune Sakura[/gold].",
    effects: [{op: block, amount: 6},
-             {op: yae, kind: tenko, as: warding}],
+             {op: yae, kind: plant, amount: 1, as: kitsune}],
    upgrade: {block: 3}}
 
 # Batch two (design axes sec.5 and the Ruled section).
@@ -4682,10 +4684,11 @@
 - {id: proto_ym_foxfire_sweep, name: "Foxfire Sweep", character: yae,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   # Shrine r2 (ruled 2026-10-14): Tenko (Wildfire) replaces Rite: Wildfire.
-   description: "Deal 4 [gold]Electro[/gold] damage to ALL enemies. [gold]Tenko[/gold] (Wildfire).",
+   # Review r3 (ruled 2026-10-14): plants a Foxfire Sakura (was Tenko
+   # (Wildfire), which "ended fights in 1-2 turns").
+   description: "Deal 4 [gold]Electro[/gold] damage to ALL enemies. Plant a [gold]Foxfire Sakura[/gold].",
    effects: [{op: damage, amount: 4, target: all_enemies},
-             {op: yae, kind: tenko, as: wildfire}],
+             {op: yae, kind: plant, amount: 1, as: foxfire}],
    upgrade: {damage: 2}}
 
 - {id: proto_ym_evergreen_charm, name: "Evergreen Charm", character: yae,
@@ -4696,7 +4699,7 @@
              {op: yae, kind: edit_sakura, which: oldest, annotation: deadline, amount: 1}],
    upgrade: {block: 3}}
 
-# --- Uncommon (16) ---
+# --- Uncommon (18) ---
 
 - {id: proto_ym_sakura_grove, name: "Sakura Grove", character: yae,
    authored_by: [claude],
@@ -4786,20 +4789,20 @@
 - {id: proto_ym_manuscript_pile, name: "Manuscript Pile", character: yae,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   # Design axes sec.4: its Retain Edit went. Shrine r2 (ruled 2026-10-14):
-   # Tenko (Offering) replaces Rite: Offering.
-   description: "Draw {Cards:diff()} cards. [gold]Tenko[/gold] (Offering).",
+   # Design axes sec.4: its Retain Edit went. Review r3 (ruled 2026-10-14):
+   # the typed Tenko went; each Sakura lasts 1 more turn.
+   description: "Draw {Cards:diff()} cards. Each [gold]Sakura[/gold] lasts 1 more turn.",
    effects: [{op: draw, amount: 2},
-             {op: yae, kind: tenko, as: offering}],
+             {op: yae, kind: extend, amount: 1}],
    upgrade: {draw: 1}}
 
 - {id: proto_ym_kitsune_guile, name: "Kitsune Guile", character: yae,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   # Shrine r2 (ruled 2026-10-14): Tenko (Wildfire) replaces Rite: Wildfire.
-   description: "Apply 2 [gold]Weak[/gold] to ALL enemies. [gold]Tenko[/gold] (Wildfire).",
+   # Review r3 (ruled 2026-10-14): plain Tenko (was Tenko (Wildfire)).
+   description: "Apply 2 [gold]Weak[/gold] to ALL enemies. [gold]Tenko[/gold].",
    effects: [{op: apply_power, power: weak, amount: 2, target: all_enemies},
-             {op: yae, kind: tenko, as: wildfire}],
+             {op: yae, kind: tenko}],
    upgrade: {power_amount: 1}}
 
 - {id: proto_ym_foxfire_lure, name: "Foxfire Lure", character: yae,
@@ -4815,12 +4818,14 @@
 
 - {id: proto_ym_fallen_petals, name: "Fallen Petals", character: yae,
    authored_by: [claude],
-   cost: 1, type: power, rarity: uncommon,
-   # A Sakura withers at the end of her turn, so the Energy (and the
-   # upgrade's card) are paid at the start of her next turn.
-   description: "Whenever a [gold]Sakura[/gold] withers, gain {energyPrefix:energyIcons(1)}{IfUpgraded:show: and draw 1 card|} on your next turn.",
-   effects: [{op: apply_power, power: ym_fallen_petals, amount: 1, target: self}],
-   upgrade: {upgraded_power: ym_fallen_petals_plus}}
+   # Review r3, sec.4 (ruled 2026-10-14): an active evoke (was the Power
+   # "Whenever a Sakura withers, gain 1 Energy", the "never again" card in
+   # four records: seats refresh Sakura, so they never wither). One action
+   # in total, and nothing with no Sakura.
+   cost: 0, type: skill, rarity: uncommon,
+   description: "Your oldest [gold]Sakura[/gold] withers (it acts once, its Last Bloom). If one did, gain {energyPrefix:energyIcons(1)}{IfUpgraded:show: and draw 1 card|}.",
+   effects: [{op: yae, kind: fallen_petals}],
+   upgrade: {yae_upgraded: true}}
 
 - {id: proto_ym_mikage_thunder, name: "Mikage Thunder", character: yae,
    authored_by: [claude],
@@ -4839,7 +4844,25 @@
    effects: [{op: yae, kind: edit_sakura, which: every, annotation: red_ink, amount: 1}],
    upgrade: {cost: -1}}
 
-# --- Rare (9) ---
+# Review r3, sec.3 (ruled 2026-10-14): the signature Uncommons.
+
+- {id: proto_ym_second_printing, name: "Second Printing", character: yae,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: uncommon, exhaust: true,
+   description: "Put an [gold]Annotated[/gold] card from your Discard Pile into your hand.{IfUpgraded:show: It costs 0 this turn.|}",
+   effects: [{op: yae, kind: second_printing}],
+   upgrade: {yae_upgraded: true}}
+
+- {id: proto_ym_authors_copy, name: "Author's Copy", character: yae,
+   authored_by: [claude],
+   # Never copies an Author's Copy: GPT found a +1 Energy loop through
+   # Royalties, and LAW forbids energy-positive copy loops.
+   cost: 1, type: skill, rarity: uncommon, exhaust: true,
+   description: "Add a copy of an [gold]Annotated[/gold] card in your hand (not an Author's Copy) to your hand. It keeps its Annotations.",
+   effects: [{op: yae, kind: authors_copy}],
+   upgrade: {cost: -1}}
+
+# --- Rare (10) ---
 
 - {id: proto_ym_tenko_kenshin, name: "Great Secret Art: Tenko Kenshin", character: yae,
    authored_by: [claude],
@@ -4911,4 +4934,13 @@
    cost: 1, type: skill, rarity: rare, exhaust: true,
    description: "[gold]Edit[/gold] a card in your hand: [gold]Royalties[/gold] (when played, gain {energyPrefix:energyIcons(1)}).",
    effects: [{op: yae, kind: edit, annotation: royalties, amount: 1}],
+   upgrade: {cost: -1}}
+
+# Review r3, sec.3 (ruled 2026-10-14): the signature Rare.
+
+- {id: proto_ym_serial_novel, name: "Serial Novel", character: yae,
+   authored_by: [claude],
+   cost: 2, type: power, rarity: rare,
+   description: "At the start of your turn, put a random [gold]Annotated[/gold] card from your Discard Pile into your hand.",
+   effects: [{op: apply_power, power: ym_serial_novel, amount: 1, target: self}],
    upgrade: {cost: -1}}

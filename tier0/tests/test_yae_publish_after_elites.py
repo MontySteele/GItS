@@ -45,9 +45,16 @@ def test_no_offer_when_nothing_is_annotated():
     assert published == {}
 
 
-def test_the_offer_skips_cards_already_published():
+def test_the_offer_includes_cards_already_published():
+    # Review r3, pick 2 (a): a Published card is offered again; the pick
+    # joins its stack (the Masterpiece).
     drafts = {0: Y.RED_INK, 3: Y.FOOTNOTE, 5: Y.SAKURA_SEAL}
-    assert Y.publish_choices(drafts, {5: Y.SAKURA_SEAL}) == [0, 3]
+    assert Y.publish_choices(drafts, {5: [Y.SAKURA_SEAL]}) == [0, 3, 5]
+    published = {5: [Y.SAKURA_SEAL]}
+    out = Y.publish_after_fight("elite", drafts, published,
+                                pick=lambda choices, d: [5])
+    assert out == [(5, Y.SAKURA_SEAL)]
+    assert published == {5: [Y.SAKURA_SEAL, Y.SAKURA_SEAL]}
 
 
 def test_the_chosen_copy_is_the_one_published():
@@ -56,7 +63,7 @@ def test_the_chosen_copy_is_the_one_published():
     published: dict = {}
     out = Y.publish_after_fight("elite", drafts, published,
                                 pick=lambda choices, d: [1])
-    assert out == [(1, Y.FOX_FIRE)] and published == {1: Y.FOX_FIRE}
+    assert out == [(1, Y.FOX_FIRE)] and published == {1: [Y.FOX_FIRE]}
 
 
 def test_skip_publishes_nothing():

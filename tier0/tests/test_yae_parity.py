@@ -51,7 +51,8 @@ def test_the_law_numbers_mirror_the_sim():
         "SakuraCap": Y.SAKURA_CAP, "SakuraTurns": Y.SAKURA_TURNS,
         "SakuraBase": Y.SAKURA_BASE, "PlantLevel": Y.PLANT_LEVEL,
         "RedInkAmount": Y.RED_INK_AMOUNT, "FoxFireDamage": Y.FOX_FIRE_DAMAGE,
-        "OfferingPerStrike": Y.OFFERING_DRAW,
+        # Review r3 (2026-10-14): the kinds' bases; Offering left.
+        "FoxfireBase": Y.FOXFIRE_BASE, "KitsuneBase": Y.KITSUNE_BASE,
         "RoyaltiesPayout": Y.ROYALTIES_ENERGY,
     }
 
@@ -71,10 +72,12 @@ def test_the_op_grammar_is_one_table_in_each_engine():
                                    if t == "enemy"}
     assert gen.YAE_ANNOTATION_KINDS == set(Y.ANNOTATION_KINDS)
     assert set(gen.YAE_ANNOTATIONS) == set(Y.ANNOTATIONS)
-    # Shrine r2 (2026-10-14): the typed Tenko kinds; the design axes: the
-    # Sakura readings, the ends.
-    assert set(gen.YAE_TENKO_KINDS) == set(Y.TENKO_NAME)
-    assert set(Y.TENKO_NAME) == set(Y.TENKO_KINDS) - {Y.THUNDER}
+    # Review r3 (2026-10-14): the Sakura kinds a plant names (the typed
+    # Tenko is gone), the kinds that read their upgrade; the design axes:
+    # the Sakura readings, the ends.
+    assert set(gen.YAE_SAKURA_KINDS) == set(Y.SAKURA_KINDS) - {Y.THUNDER}
+    assert gen.YAE_PLANT_AS_KINDS == set(Y.PLANT_AS_KINDS)
+    assert gen.YAE_UPGRADED_KINDS == set(Y.UPGRADED_KINDS)
     assert gen.YAE_SAKURA_ANNOTATIONS == set(Y.SAKURA_ANNOTATIONS)
     assert set(gen.YAE_SAKURA_ENDS) == set(Y.SAKURA_EDIT_ENDS)
 
@@ -86,7 +89,8 @@ def test_every_kind_is_a_yaecards_method_and_every_annotation_a_member():
     members = ANNOTATIONS_CS.read_text(encoding="utf-8")
     for member in gen.YAE_ANNOTATIONS.values():
         assert re.search(rf"\b{member} = \d+,", members), member
-    for member in list(gen.YAE_TENKO_KINDS.values()) + list(gen.YAE_SAKURA_ENDS.values()):
+    for member in (["Thunder"] + list(gen.YAE_SAKURA_KINDS.values())
+                   + list(gen.YAE_SAKURA_ENDS.values())):
         assert re.search(rf"\b{member} = \d+,", shrine), member
 
 
@@ -95,7 +99,7 @@ def test_every_power_her_rows_apply_is_a_class():
         encoding="utf-8")
     for name in (Y.SAKURA_GROVE, Y.EDICT, Y.SERIALIZATION, Y.MOONCALL,
                  Y.YAKAN_OFFERING, Y.CHANNELING, Y.EDITOR_IN_CHIEF,
-                 Y.FALLEN_PETALS, Y.FALLEN_PETALS_PLUS):
+                 Y.SERIAL_NOVEL):
         cls = gen.APPLY_POWERS[name][0]
         assert f"class {cls} " in text, cls
 
@@ -129,14 +133,14 @@ def test_each_row_carries_its_numbers_and_upgrade_into_the_class(card):
                         in text), (card.id, var, delta)
 
 
-def test_the_roster_lists_the_sims_starter_and_the_forty():
+def test_the_roster_lists_the_sims_starter_and_the_forty_three():
     text = ROSTER_CS.read_text(encoding="utf-8")
     pool = re.search(r"Pool\(\) => new CardModel\[\]\s*\{(.*?)\n\s*\};",
                      text, re.S).group(1)
     listed = [gen.pascal(c.id) for c in _rows() if c.rarity != "basic"]
     named = re.findall(r"ModelDb\.Card<(\w+)>", pool)
     assert named == listed
-    assert len(named) == 40
+    assert len(named) == 43
     starter = re.search(r"StartingDeck\(\) => new CardModel\[\]\s*\{(.*?)\n\s*\};",
                         text, re.S).group(1)
     own = [n for n in re.findall(r"ModelDb\.Card<(\w+)>", starter)

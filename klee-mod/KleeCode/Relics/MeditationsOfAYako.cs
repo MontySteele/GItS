@@ -33,7 +33,9 @@ namespace KleeMod.Relics;
 /// screen. After an elite or boss win the relic adds one
 /// <see cref="YaePublishReward"/> to the combat reward screen
 /// (<see cref="TryModifyRewards"/>, the hook Prayer Wheel uses), only when
-/// some card is Annotated and not yet Published.
+/// the fight left some card a temporary layer to Publish. Review r3 (ruled
+/// 2026-10-14): a Published card may be offered again, and the pick joins
+/// its permanent stack (the Masterpiece).
 ///
 /// No free setup ([USER]'s rule): fight one opens with an empty shrine and
 /// an unedited deck, and the relic holds no state of its own, so its Orobas
@@ -129,9 +131,9 @@ public sealed class EnlightenedBlessing : MeditationsOfAYako
 
 /// <summary>
 /// PUBLISH, THE REWARD-SCREEN ROW. Claiming it opens a grid of the cards the
-/// fight left Annotated, each shown as a copy wearing that Annotation; the
-/// one picked is that exact deck card, and its Annotation becomes the deck
-/// card's Enchantment, which the run save keeps. The grid can be closed
+/// fight left a temporary layer on, each shown as a copy wearing its stack
+/// and that layer; the one picked is that exact deck card, and the layer
+/// joins the deck card's permanent stack, which the run save keeps. The grid can be closed
 /// without a pick (the row stays, as a full-belt potion's does), and leaving
 /// the reward screen skips it. Not serialised: the reward screen is rebuilt
 /// from the room and the hooks on a reload, and the drafts it reads are
