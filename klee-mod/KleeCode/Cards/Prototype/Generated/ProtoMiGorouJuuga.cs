@@ -56,7 +56,7 @@ public sealed class ProtoMiGorouJuuga : CustomCardModel, ICompanionCard, IPlanne
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Gorou — Juuga: Forward Unto Victory"),
-        ("description", "For {PowerAmount:diff()} turns, at the end of your turn deal 7 [gold]Geo[/gold] damage to a random enemy.\nOr [gold]plan[/gold]: For 3 turns, gain 6 [gold]Block[/gold] instead."),
+        ("description", "For {PowerAmount:diff()} turns, deal 7 [gold]Geo[/gold] damage to a random enemy at the end of your turn.\nOr [gold]plan[/gold]: Gain 6 [gold]Block[/gold] instead."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

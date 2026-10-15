@@ -2115,10 +2115,10 @@ def test_scry_bottom_on_an_empty_pile_is_a_printed_no_op(overhaul):
 # docs/notes/prototype-surface-provenance.md, "Kokomi pool pass four".
 # =============================================================================
 
-def test_read_the_field_takes_one_card_and_bottoms_what_it_saw(overhaul):
+def test_read_the_field_takes_one_card_and_leaves_the_rest_on_top(overhaul):
     """`EB-679`. SELECTION AND NOT A LOOK: the chosen card goes to the HAND
-    and every other card the player was shown goes to the bottom, in the order
-    it was seen. The pilot takes the LOWEST-cost card of the N, which is
+    and every other card the player was shown stays on top, in the order it
+    was seen (wording pass 2026-10-15; they were bottomed). The pilot takes the LOWEST-cost card of the N, which is
     `_op_scry_bottom`'s stand-in read the other way round -- the card wanted
     now is the one that can be paid for now."""
     st = kokomi_state()
@@ -2130,7 +2130,7 @@ def test_read_the_field_takes_one_card_and_bottoms_what_it_saw(overhaul):
     effects.OPS["scry_take"](st, {"op": "scry_take", "amount": 3},
                              _row("proto_kk_read_the_field"))
     assert [c.id for c in st.player.hand] == ["cheap"]
-    assert [c.id for c in st.player.draw_pile] == ["tail", "dear", "mid"]
+    assert [c.id for c in st.player.draw_pile] == ["dear", "mid", "tail"]
     assert any(e["event"] == "scry_take" for e in st.log)
 
 
