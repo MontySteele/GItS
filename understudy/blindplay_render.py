@@ -335,6 +335,9 @@ def _render_card(c: dict[str, Any], bullet: str = "-",
     # differ by, on one line, so two copies of one title are told apart at a
     # glance instead of by a paragraph explaining that they cannot be.
     head += enchantment_tag(c.get("enchantment"))
+    # Yae review r4, item 6: an Edit chooser says what the Edit would erase.
+    if c.get("replaces"):
+        head += f" -- the Edit replaces {c['replaces']}"
     # `EB-286`: the COST SLOT as the game paints it, energy and Spark
     # together, through the one formatter the staged page already uses.
     # `qa_packet.cost_label` answers `-` when the wire sent no cost at all,

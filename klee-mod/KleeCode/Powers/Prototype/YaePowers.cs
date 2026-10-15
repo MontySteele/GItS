@@ -206,7 +206,7 @@ public sealed class FoxfireLurePower : PowerModel, ILocalizationProvider
     {
         ("title", "Foxfire Lure"),
         ("description",
-            "This turn, Yae's [gold]Sakura[/gold] strike this enemy."),
+            "This turn, Yae's striking [gold]Sakura[/gold] strike this enemy."),
     };
 
     public override PowerType Type => PowerType.Debuff;

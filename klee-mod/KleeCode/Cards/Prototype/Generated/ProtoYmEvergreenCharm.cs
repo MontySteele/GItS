@@ -45,13 +45,13 @@ public sealed class ProtoYmEvergreenCharm : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Evergreen Charm"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Edit[/gold] your oldest [gold]Sakura[/gold]: [gold]Deadline Extension[/gold]."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Edit[/gold] your oldest [gold]Sakura[/gold]: [gold]Deadline Extension[/gold]. It keeps its Red Ink."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(5m, ValueProp.Move)
+            new BlockVar(7m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -64,7 +64,7 @@ public sealed class ProtoYmEvergreenCharm : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
-        await YaeCards.EditSakura(choiceContext, this, cardPlay, YaeSakuraEnd.Oldest, YaeAnnotation.DeadlineExtension);
+        await YaeCards.EditSakura(choiceContext, this, cardPlay, YaeSakuraEnd.Oldest, YaeAnnotation.DeadlineExtension, keepRedInk: true);
     }
 
     protected override void OnUpgrade()

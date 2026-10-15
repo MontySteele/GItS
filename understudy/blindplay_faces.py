@@ -409,6 +409,27 @@ def _enchantment(blob: Any) -> dict[str, Any] | None:
 MASTERPIECE_NAME = "Annotated"
 
 
+#: Yae review r4, item 6: an Edit's prompt reads "Choose a card to Edit: Red
+#: Ink (...)", and the Masterpiece's text lists "... This combat: Footnote."
+_EDIT_PROMPT = re.compile(r"^Choose a card to Edit")
+_THIS_COMBAT = re.compile(r"This combat:\s*([^.]+)")
+
+
+def mark_edit_replaces(prompt: str, faces: list[dict[str, Any]]) -> None:
+    """On an Edit chooser, tag each offered card that already carries a
+    temporary Annotation with `replaces` (the Edit overwrites it; a Published
+    stack stays). PURE over its arguments; mutates the faces."""
+    if not _EDIT_PROMPT.match(prompt or ""):
+        return
+    for face in faces:
+        ench = face.get("enchantment")
+        if not isinstance(ench, dict):
+            continue
+        m = _THIS_COMBAT.search(_text(ench.get("text")))
+        if m:
+            face["replaces"] = m.group(1).strip()
+
+
 def enchantment_tag(ench: dict[str, Any] | None) -> str:
     """The enchantment beside a title: " (Sharp 3)", " (Reprint)", or
     " (Reprint: used)" once the game has greyed it this combat. PURE."""

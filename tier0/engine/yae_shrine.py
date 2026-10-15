@@ -223,7 +223,8 @@ PLANT_AS_KINDS = frozenset({"plant", "plant_level"})
 #: `IsUpgraded`): Fallen Petals' draw, Second Printing's free card.
 UPGRADED_KINDS = frozenset({"fallen_petals", "second_printing"})
 OP_FIELDS = frozenset({"op", "kind", "amount", "base", "per", "target",
-                       "annotation", "as", "which", "upgraded", "seal"})
+                       "annotation", "as", "which", "upgraded", "seal",
+                       "keeps"})
 
 
 @dataclass
@@ -234,6 +235,10 @@ class Sakura:
     annotation: Optional[str] = None   # Red Ink, Fox Fire or Deadline
     kind: str = THUNDER           # review r3: Thunder, Foxfire or Kitsune
     planted_level: Optional[int] = None   # the Level it was planted at
+    #: Yae review r4, item 4: a Deadline Extension Edit that "keeps its Red
+    #: Ink" leaves the +3 on a Sakura whose one Annotation slot is now
+    #: Deadline Extension.
+    red_ink_kept: bool = False
 
 
 @dataclass
@@ -351,6 +356,11 @@ def plant(state, n: int = 1, reason: str = "plant",
                 if oldest.kind == kind:
                     oldest.turns_left = max(oldest.turns_left, SAKURA_TURNS)
                     oldest.level += 1
+                    # Yae review r4, item 2: the planting card's Red Ink
+                    # goes to the refreshed Sakura, as to a new one.
+                    if annotation in SAKURA_ANNOTATIONS:
+                        oldest.annotation = annotation
+                        oldest.red_ink_kept = False
                     state.emit("yae_level", reason=reason,
                                levels=[s.level for s in led.sakura])
                     continue
@@ -385,7 +395,7 @@ def act_size(state, s: Sakura) -> int:
     else:
         size = (COUNT_TABLE[min(SAKURA_CAP, len(led.sakura))]
                 + led.shrine_bonus + kind_base(s.kind) - SAKURA_BASE)
-    if s.annotation == RED_INK:
+    if s.annotation == RED_INK or s.red_ink_kept:
         size += RED_INK_AMOUNT
     return size
 
@@ -520,7 +530,8 @@ def act_all(state, reason: str) -> None:
         act(state, s, reason)
 
 
-def edit_sakura(state, which: str, n: int, annotation: str) -> None:
+def edit_sakura(state, which: str, n: int, annotation: str,
+                keeps: Optional[str] = None) -> None:
     """"Edit your newest / oldest Sakura" (`n` from that end), "Edit every
     Sakura" (`which` every): the Annotation replaces any the Sakura
     carried."""
@@ -530,8 +541,13 @@ def edit_sakura(state, which: str, n: int, annotation: str) -> None:
     ordered = led.sakura if which == "oldest" else list(reversed(led.sakura))
     if which == "every":
         n = len(ordered)
+    if not ordered:
+        state.emit("yae_edit_nothing", what="sakura")
     for s in ordered[:n]:
+        had_red = s.annotation == RED_INK or s.red_ink_kept
         s.annotation = annotation
+        s.red_ink_kept = bool(keeps == RED_INK and had_red
+                              and annotation != RED_INK)
         state.emit("yae_sakura_annotate", seq=s.seq, annotation=annotation)
 
 
@@ -931,6 +947,9 @@ def edit(state, editor, annotation: str, n: int = 1) -> None:
         target = chooser(state, editor, annotation)
         if target is None or target not in _edit_reaches(state, editor,
                                                      annotation):
+            if not _edit_reaches(state, editor, annotation):
+                # Yae review r4, item 8: it says so rather than doing nothing.
+                state.emit("yae_edit_nothing", what="hand")
             return
         annotate(state, target, annotation)
         led.edits += 1
@@ -942,6 +961,8 @@ def edit_all(state, editor, default: str) -> None:
     led = ledger(state.player)
     name = led.reborn_choice or default
     cards = _edit_reaches(state, editor, name)
+    if not cards:
+        state.emit("yae_edit_nothing", what="hand")
     for c in cards:
         annotate(state, c, name, "reborn")
     if cards:
@@ -949,13 +970,11 @@ def edit_all(state, editor, default: str) -> None:
 
 
 def publish(state, editor) -> None:
-    """The Seven Glamours: the best card in hand with a temporary layer is
-    Published (its temporary layer moves onto its stack)."""
-    cands = [c for c in _editable(state, editor) if temp(c)]
-    if not cands:
-        return
-    best = min(cands, key=lambda c: PUBLISH_ORDER.index(temp(c)))
-    publish_card(state, best)
+    """The Seven Glamours (Yae review r4, item 5): EVERY card in hand with a
+    temporary layer is Published (the layer moves onto its stack). Was the
+    best one only."""
+    for c in [c for c in _editable(state, editor) if temp(c)]:
+        publish_card(state, c)
 
 
 def offers_publish(room: str, gives_rewards: bool = True,
@@ -1163,6 +1182,9 @@ def validate_op(card_id: str, fx: dict) -> None:
         raise ValueError(f"card {card_id!r}: `which:` is newest, oldest or "
                          "every, "
                          f"got {fx['which']!r}")
+    if "keeps" in fx and (kind != "edit_sakura" or fx["keeps"] != RED_INK):
+        raise ValueError(f"card {card_id!r}: `keeps:` is red_ink, on an "
+                         "edit_sakura")
     if kind == "edit_sakura" and fx["annotation"] not in SAKURA_ANNOTATIONS:
         raise ValueError(f"card {card_id!r}: {fx['annotation']!r} has no "
                          "Sakura reading")
@@ -1230,7 +1252,8 @@ def op_yae(state, fx: dict, card) -> None:
     elif kind == "fox_fire":
         fox_fire(state, card.id)
     elif kind == "edit_sakura":
-        edit_sakura(state, fx["which"], fx["amount"], fx["annotation"])
+        edit_sakura(state, fx["which"], fx["amount"], fx["annotation"],
+                    fx.get("keeps"))
     elif kind == "plant_level":
         plant(state, 1, "card", level=fx["amount"],
               annotation=inherited(card), kind=fx.get("as", THUNDER))

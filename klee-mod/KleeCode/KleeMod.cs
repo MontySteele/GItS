@@ -287,6 +287,14 @@ public static class KleeMod
                 Powers.YaeAnnotationText.All.ToDictionary(
                     Powers.YaeEditing.EditPromptKeyFor,
                     Powers.YaeEditing.EditPromptTextFor));
+            LocManager.Instance.GetTable("cards").MergeWith(
+                new Dictionary<string, string>
+                {
+                    [Powers.YaeEditing.NothingToEditKey] =
+                        Powers.YaeEditing.NothingToEditText,
+                    [Powers.YaeEditing.NoSakuraToEditKey] =
+                        Powers.YaeEditing.NoSakuraToEditText,
+                });
 
             // YAE MIKO (2026-10-14, Publish after elites and bosses):
             // Meditations of a Yako's reward-screen row. A Reward's

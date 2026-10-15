@@ -1,0 +1,190 @@
+"""Yae review r4, items 1 to 8 (build 0.2.5561 round). Sim half; the C# half
+is `klee-mod/KleeTests/Prototype/YaeReviewR4Tests.cs`."""
+
+from __future__ import annotations
+
+import random
+
+import pytest
+
+from tier0.content import loader
+from tier0.engine import combat
+from tier0.engine import yae_shrine as Y
+from tier0.engine.state import CombatState, Enemy
+from understudy import blindplay
+
+
+@pytest.fixture(autouse=True)
+def yae():
+    loader.reset_arm_caches()
+    Y.SCALING = "level"
+    try:
+        yield
+    finally:
+        loader.reset_arm_caches()
+
+
+def _state():
+    enemies = [Enemy(hp=100, max_hp=100, name="e0",
+                     intents=[{"kind": "block", "amount": 0}])]
+    p = Y.build_player()
+    p.draw_pile = []
+    st = CombatState(player=p, enemies=enemies, rng=random.Random(0))
+    st.turn = 1
+    st.in_player_turn = True
+    return st
+
+
+def _card(name):
+    return loader.get_card("proto_ym_" + name)
+
+
+def _play(st, card):
+    if card not in st.player.hand:
+        st.player.hand.append(card)
+    st.player.energy = max(st.player.energy, 10)
+    combat.play_card(st, card)
+    return card
+
+
+def _row(card_id):
+    import yaml
+    from pathlib import Path
+    sheet = Path(__file__).resolve().parents[2] / "docs" / "prototype-surface.yaml"
+    rows = yaml.safe_load(sheet.read_text(encoding="utf-8"))
+    rows = rows["cards"] if isinstance(rows, dict) else rows
+    return next(r for r in rows if r["id"] == card_id)
+
+
+def _block(card):
+    return next(e["amount"] for e in card.effects if e["op"] == "block")
+
+
+def _events(st, name):
+    return [e for e in st.log if e.get("event") == name]
+
+
+# 2. Red Ink on a planting card into a full shrine ---------------------------
+
+def test_refreshed_sakura_gets_the_planting_cards_red_ink():
+    st = _state()
+    for _ in range(Y.SAKURA_CAP):
+        Y.plant(st, 1)
+    oldest = Y.ledger(st.player).sakura[0]
+    assert oldest.annotation is None
+    Y.plant(st, 1, annotation=Y.RED_INK)          # same kind: refresh
+    assert len(Y.ledger(st.player).sakura) == Y.SAKURA_CAP
+    assert oldest.annotation == Y.RED_INK
+    assert oldest.level == 2
+
+
+def test_a_plant_with_no_red_ink_leaves_a_refreshed_annotation_alone():
+    st = _state()
+    for _ in range(Y.SAKURA_CAP):
+        Y.plant(st, 1)
+    oldest = Y.ledger(st.player).sakura[0]
+    oldest.annotation = Y.FOX_FIRE
+    Y.plant(st, 1)
+    assert oldest.annotation == Y.FOX_FIRE
+
+
+# 3, 4. Deadline and Evergreen Charm -----------------------------------------
+
+def test_deadline_is_8_and_11_upgraded():
+    assert _block(_card("deadline")) == 8
+    assert _block(loader.get_card("proto_ym_deadline+")) == 11
+    assert "Gain 8 " in _row("proto_ym_deadline")["description"]
+
+
+def test_evergreen_charm_is_7_and_10_and_keeps_red_ink():
+    c = _card("evergreen_charm")
+    assert _block(c) == 7
+    assert "It keeps its Red Ink." in _row("proto_ym_evergreen_charm")["description"]
+    assert _block(loader.get_card("proto_ym_evergreen_charm+")) == 10
+    st = _state()
+    Y.plant(st, 1)
+    s = Y.ledger(st.player).sakura[0]
+    s.annotation = Y.RED_INK
+    plain = Y.act_size(st, s)
+    _play(st, c)
+    assert s.annotation == Y.DEADLINE and s.red_ink_kept
+    assert Y.act_size(st, s) == plain                # the +3 stays
+    # An Edit that does not keep it drops it.
+    Y.edit_sakura(st, "oldest", 1, Y.FOX_FIRE)
+    assert not s.red_ink_kept
+
+
+def test_evergreen_charm_on_a_sakura_without_red_ink_keeps_nothing():
+    st = _state()
+    Y.plant(st, 1)
+    s = Y.ledger(st.player).sakura[0]
+    _play(st, _card("evergreen_charm"))
+    assert s.annotation == Y.DEADLINE and not s.red_ink_kept
+
+
+# 5. The Seven Glamours ------------------------------------------------------
+
+def test_seven_glamours_publishes_every_annotated_card_in_hand():
+    c = _card("the_seven_glamours")
+    assert c.rarity == "rare" and c.exhaust and c.cost == 1
+    assert loader.get_card("proto_ym_the_seven_glamours+").cost == 0
+    assert _row("proto_ym_the_seven_glamours")["description"].startswith(
+        "[gold]Publish[/gold] every [gold]Annotated[/gold] card in your hand")
+    st = _state()
+    a, b, plain = _card("sly_strike"), _card("sly_strike"), _card("sly_strike")
+    for x in (a, b, plain):
+        st.player.hand.append(x)
+    Y.annotate(st, a, Y.RED_INK)
+    Y.annotate(st, b, Y.FOOTNOTE)
+    _play(st, c)
+    assert Y.stack(a) == [Y.RED_INK] and Y.temp(a) is None
+    assert Y.stack(b) == [Y.FOOTNOTE] and Y.temp(b) is None
+    assert Y.stack(plain) == []
+
+
+# 6. The Edit chooser (seat page) --------------------------------------------
+
+def _hand_select(prompt, enchantment):
+    card = {"index": 0, "name": "Strike", "id": "STRIKE_YAE",
+            "description": "Deal 6 damage.", "type": "Attack", "cost": "1",
+            "selected": False}
+    if enchantment:
+        card["enchantment"] = enchantment
+    return card
+
+
+def test_mark_edit_replaces_names_the_temporary_annotation():
+    from understudy.blindplay_faces import mark_edit_replaces
+    faces = [{"enchantment": {"name": "Annotated",
+                              "text": "Published: Red Ink. This combat: Footnote."}},
+             {"enchantment": {"name": "Annotated", "text": "Published: Red Ink."}},
+             {"enchantment": None}, {}]
+    mark_edit_replaces("Choose a card to Edit: Red Ink (x).", faces)
+    assert faces[0]["replaces"] == "Footnote"
+    assert "replaces" not in faces[1] and "replaces" not in faces[2]
+    other = [{"enchantment": {"name": "Annotated",
+                              "text": "This combat: Footnote."}}]
+    mark_edit_replaces("Choose a card to Publish.", other)
+    assert "replaces" not in other[0]
+
+
+# 8. An Edit with nothing to Edit says so -------------------------------------
+
+def test_margin_note_with_no_card_says_so():
+    st = _state()
+    c = _card("margin_note")
+    st.player.hand[:] = []
+    _play(st, c)
+    assert any(e.get("what") == "hand" for e in _events(st, "yae_edit_nothing"))
+
+
+def test_evergreen_charm_with_no_sakura_says_so():
+    st = _state()
+    _play(st, _card("evergreen_charm"))
+    assert any(e.get("what") == "sakura" for e in _events(st, "yae_edit_nothing"))
+
+
+# 7. Foxfire Lure --------------------------------------------------------------
+
+def test_foxfire_lure_says_striking_sakura():
+    assert "your striking [gold]Sakura[/gold] strike it" in         _row("proto_ym_foxfire_lure")["description"]
