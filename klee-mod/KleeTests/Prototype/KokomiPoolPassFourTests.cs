@@ -96,11 +96,11 @@ public class KokomiPoolPassFourTests
     // ======================================================================
 
     [Fact]
-    public void Read_the_field_takes_one_of_three_and_bottoms_the_rest()
+    public void Read_the_field_takes_one_of_three_and_leaves_the_rest_on_top()
     {
         // The screen is the game's own selection grid over the top N; the pick
-        // is added to the HAND and everything else the player was shown goes
-        // to the bottom of the pile it came from, so nothing leaves the deck.
+        // is added to the HAND and everything else the player was shown stays
+        // on top in its order (wording pass 2026-10-15; it was bottomed).
         // Twin: `effects._op_scry_take`, which takes the lowest-cost card
         // because the sim has no human.
         var source = Source("ProtoKkReadTheField");
@@ -112,7 +112,7 @@ public class KokomiPoolPassFourTests
         Assert.Contains(Il.Calls(Il.Method("ScryTake", "Choose")),
                         c => c.Contains("ScryTake.get_Prompt"));
         Assert.Contains("CardPileCmd.Add(taken, PileType.Hand)", source);
-        Assert.Contains("CardPilePosition.Bottom", source);
+        Assert.DoesNotContain("CardPilePosition.Bottom", source);
         // THE 5 BLOCK IS GONE: a dead slot beside a Dusk Plan, and the whole
         // now-line is the selection now.
         Assert.DoesNotContain("CreatureCmd.GainBlock", source);

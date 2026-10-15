@@ -1870,6 +1870,11 @@ PREDICATES_CS = {
     # window as a snapshot of the same monotonic counter.
     "reaction_triggered_this_turn": "ReactionEffects.ReactionTriggeredThisTurn",
     "killed_target": "enemiesAtStart.Any(e => e.IsDead)",
+    # Hand of Greed's Fatal gate (2026-10-15, The Seven Glamours): only an
+    # enemy none of whose powers refuse it (`ShouldOwnerDeathTriggerFatal`;
+    # MinionPower does), read before the hit. Sim twin: tier0's
+    # `fatal_kills_this_card` / `Enemy.counts_for_fatal`.
+    "killed_target_fatal": "fatalAtStart.Any(e => e.IsDead)",
     # fanfare_at_least_N is PARAMETRIC (see predicate_cs / predicate_text):
     # the bar is authored per card and moves at red-pen, so a literal map
     # turned every new threshold into a codegen KeyError.
@@ -2009,6 +2014,7 @@ PREDICATE_TEXT = {
     "reaction_triggered_by_this": "If it triggered an [gold]Elemental Reaction[/gold]",
     "reaction_triggered_this_turn": "If an [gold]Elemental Reaction[/gold] triggered this turn",
     "killed_target": "If it kills",
+    "killed_target_fatal": "If it kills",
     "has_salon_members": "If you have a [gold]Salon Member[/gold]",
     # (`EB-723`). The FALLBACK wording only: every Spend row states
     # its own face with `description:`, because rule 8's rider is printed as
@@ -2339,6 +2345,11 @@ def negated_predicate_text(name: str) -> str | None:
 #: conditional branch (`BRANCH_OPS`): Brine Spray's add-N-Stings.
 KOKOMI_BRANCH_KINDS = frozenset(("shoal_call",))
 
+#: YAE MIKO (2026-10-15): the kinds legal inside a conditional branch: The
+#: Seven Glamours' "If this kills an enemy, Publish an Annotated card in your
+#: hand". Numberless, one awaited `YaeCards` call with no locals.
+YAE_BRANCH_KINDS = frozenset(("publish",))
+
 CONDITIONAL_FIELDS = {"op", "if", "then", "else"}
 
 # Ops legal inside a conditional branch: plain resolvers with literal (or
@@ -2434,6 +2445,9 @@ BRANCH_OPS = {"damage", "block", "draw", "gain_spark", "gain_encore",
               # awaited `KokomiCards` call with no locals, which is the whole
               # branch-legality criterion.
               "kokomi",
+              # YAE MIKO (2026-10-15): The Seven Glamours' Publish on a kill,
+              # the `publish` kind alone (`YAE_BRANCH_KINDS`).
+              "yae",
               # THE KOKOMI OVERHAUL. Sango Isshin's redesigned
               # payoff, "...deal a quarter of your Max HP to ALL enemies
               # instead". ALL-ENEMIES ONLY, and `_branch_op_reason` blocks the
@@ -2477,6 +2491,8 @@ BRANCH_FIELDS = {
     "varka": {"op", "kind"},
     # THE KOKOMI POOL OVERHAUL: an add-N-Stings kind and its literal N.
     "kokomi": {"op", "kind", "amount"},
+    # YAE: a numberless kind only (The Seven Glamours' publish).
+    "yae": {"op", "kind"},
     "spend_spark": {"op", "amount"},
     # Same key set the top-level `mend` validator enforces, so the two cannot
     # disagree about what a Mend is.
@@ -2603,6 +2619,11 @@ def _branch_op_reason(eff: dict, where: str) -> str | None:
             return f"branch kokomi kind {eff.get('kind')!r}"
         if not isinstance(eff.get("amount"), int) or eff["amount"] <= 0:
             return "branch kokomi amount must be a positive literal int"
+        return None
+    if eff["op"] == "yae":
+        # YAE MIKO (2026-10-15): a numberless kind (`YAE_BRANCH_KINDS`).
+        if eff.get("kind") not in YAE_BRANCH_KINDS:
+            return f"branch yae kind {eff.get('kind')!r}"
         return None
     if eff["op"] == "varka":
         # VARKA (the Oath rework): only a NUMBERLESS kind, whose one call
@@ -9850,6 +9871,12 @@ BRANCH_UNNUMBERED_OPS = frozenset({"apply_aura"})
 #: damage number; the draw's number is the draw's.
 BRANCH_BESIDE_DAMAGE_OPS = frozenset({"draw"})
 
+#: Furina's card pass (2026-10-15). A clause a branch may carry beside its
+#: BLOCK number that prints a number of a different kind (Pneuma's "Repay 2.
+#: Gain 8 Block."). The Block var is still the one Block number; the Repay
+#: prints its own literal.
+BRANCH_BESIDE_BLOCK_OPS = frozenset({"stage_repay"})
+
 
 def mode_hit_carries(card: dict, eff: dict) -> dict[str, str]:
     """`{var token: C# element}` for each mode of a two-mode `choose_one`
@@ -9992,7 +10019,8 @@ def folded_branch_damage(card: dict, eff: dict) -> list[tuple[str, int, int,
         # the damage var's place, so the damage is still the one damage
         # number the branch prints.
         beside = BRANCH_PRICE_OPS | BRANCH_UNNUMBERED_OPS | (
-            BRANCH_BESIDE_DAMAGE_OPS if op == "damage" else frozenset())
+            BRANCH_BESIDE_DAMAGE_OPS if op == "damage"
+            else BRANCH_BESIDE_BLOCK_OPS if op == "block" else frozenset())
         if any(c.get("op") not in beside
                for c in branch if c is not clause):
             return None
@@ -11900,6 +11928,11 @@ def build_body(
             "var swirlsAtStart = VarkaOath.SwirlsMadeBy(Owner.Creature);")
     if "killed_target" in preds:
         lines.append("var enemiesAtStart = CombatState!.HittableEnemies.ToList();")
+    if "killed_target_fatal" in preds:
+        lines.append(
+            "var fatalAtStart = CombatState!.HittableEnemies"
+            ".Where(e => e.Powers.All(p => p.ShouldOwnerDeathTriggerFatal()))"
+            ".ToList();")
     if "target_has_pyro" in preds:
         # VARKA (the expansion): Amber: Sharpshooter's snapshot, the
         # `targetHadAura` shape on one element, fresh or spent.
@@ -13322,14 +13355,14 @@ def build_body(
 
         elif op == "scry_take":
             # `EB-679` (Read the Field, pool pass four). `scry_bottom`'s screen
-            # with the pick going the OTHER way: the player is shown the top N,
-            # the one they choose is added to the HAND and everything else they
-            # were shown goes to the bottom of the draw pile. Nothing leaves the
+            # with the pick going the OTHER way: the player is shown the top N
+            # and the one they choose is added to the HAND. Nothing leaves the
             # deck, which is `scry_bottom`'s promise kept one verb over.
             #
-            # THE UNPICKED ARE BOTTOMED IN THE ORDER THEY WERE SEEN, so the
-            # pile under them is untouched and both engines agree about what
-            # the next draw is (`effects._op_scry_take`).
+            # THE UNPICKED STAY ON TOP IN THE ORDER THEY WERE SEEN (wording
+            # pass 2026-10-15, kit census pick 3; they were bottomed), so
+            # nothing else moves and both engines agree about what the next
+            # draw is (`effects._op_scry_take`).
             #
             # THE SIM HAS NO SCREEN and takes the lowest-cost card of the N,
             # stated there as the stand-in for player choice it is.
@@ -13338,8 +13371,7 @@ def build_body(
             # the one branch this arm does not own: a grid of ONE holds no
             # decision, so the game opens no screen, and the r28 lane "spent a
             # turn unsure it had whiffed" because nothing said the card had
-            # been taken. The take and the bottoming stay here; only the
-            # picking moved.
+            # been taken. The take stays here; only the picking moved.
             n = ('DynamicVars["Scry"].IntValue' if scry_upgrade(card)
                  else int(eff["amount"]))
             lines.append(
@@ -13352,11 +13384,6 @@ def build_body(
                 "                foreach (var taken in takePick)" + "\n" +
                 "                {" + "\n" +
                 "                    await CardPileCmd.Add(taken, PileType.Hand);" + "\n" +
-                "                }" + "\n" +
-                "                foreach (var seen in top)" + "\n" +
-                "                {" + "\n" +
-                "                    if (takePick.Contains(seen)) continue;" + "\n" +
-                "                    await CardPileCmd.Add(seen, PileType.Draw, CardPilePosition.Bottom);" + "\n" +
                 "                }" + "\n" +
                 "            }" + "\n" +
                 "        }"
@@ -15389,9 +15416,7 @@ def build_description(card: dict, *,
             # otherwise print "top 3" forever while the upgraded one showed 4.
             n = ("{Scry:diff()}" if scry_upgrade(card)
                  else str(int(eff["amount"])))
-            parts.append(
-                f"Look at the top {n} cards of your draw pile; put one into "
-                "your hand and the rest on the bottom.")
+            parts.append(f"Take 1 of your top {n} cards.")
 
         elif op == "exhaust_from" and eff.get("select") == "chosen":
             n = ("{Exhausts:diff()}" if exhaust_upgrade(card)
@@ -16764,8 +16789,49 @@ def stage_spend_short_call(card: dict) -> str | None:
     return f"FurinaStageFacePreview.SpendShort(this, {amount})"
 
 
+def is_flip_row(card: dict) -> bool:
+    """Does this row turn over (`{op: furina, kind: flip}`, Ousia / Pneuma)?"""
+    return any(e.get("op") == "furina" and e.get("kind") == "flip"
+               for e in card.get("effects") or [])
+
+
+#: A two-faced row's face predicates, and whether each is the Pneuma face.
+FLIP_FACES = {"ousia_face": False, "pneuma_face": True}
+
+
+def flip_face_args(card: dict) -> list[tuple[str, str]]:
+    """A two-faced row's in-combat Stage lines, each on its own face only.
+
+    Furina's card pass (2026-10-15, `review/active/furina-card-pass-
+    2026-10-15.md` sec.1): Ousia Drains and Pneuma Repays, so each face
+    carries the line its op carries on any other card -- the Drain line on
+    Ousia, "(Repays N)" on Pneuma -- read off that face's `then:` as if it
+    were the row's top level, and blank while the card shows the other face.
+    """
+    args = []
+    for fx in card.get("effects") or []:
+        if fx.get("op") != "conditional" or fx.get("if") not in FLIP_FACES:
+            continue
+        face = dict(card, effects=list(fx.get("then") or []))
+        pneuma = FLIP_FACES[fx["if"]]
+        for token, call in ((STAGE_DRAIN_LINE_TOKEN,
+                             stage_drain_line_call(face)),
+                            (STAGE_REPAY_TOKEN, stage_repay_call(face))):
+            if not call:
+                continue
+            if any(t == token for t, _ in args):
+                raise ValueError(f"{card['id']}: both faces print the same "
+                                 "Stage line")
+            gated = (f'(FurinaFlip.OnPneuma(this) ? {call} : "")' if pneuma
+                     else f'(FurinaFlip.OnPneuma(this) ? "" : {call})')
+            args.append((token, gated))
+    return args
+
+
 def stage_face_args(card: dict) -> list[tuple[str, str]]:
     """Every in-combat Stage line a row's face carries, as (token, C#)."""
+    if is_flip_row(card):
+        return flip_face_args(card)
     args = []
     for token, call in ((STAGE_BOW_TOKEN, stage_bow_preview_call(card)),
                         (STAGE_DRAIN_LINE_TOKEN, stage_drain_line_call(card)),
@@ -18409,12 +18475,20 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     # its Block face, and hands its face to the description as `Pneuma` (the
     # base game's description-argument seam). Sim twin: `Card.flipped`.
     flip_member = ""
-    if any(e.get("op") == "furina" and e.get("kind") == "flip"
-           for e in card["effects"]):
-        if face_args or wide_aim is not None:
+    if is_flip_row(card):
+        # Furina's card pass (2026-10-15): a face's own Stage lines
+        # (`flip_face_args`) ride the same description-argument override;
+        # any other line, or a live TargetType, still refuses.
+        if (wide_aim is not None
+                or any(t not in (STAGE_DRAIN_LINE_TOKEN, STAGE_REPAY_TOKEN)
+                       for t, _ in face_args)):
             raise ValueError(
                 f"{card['id']}: a two-faced row cannot also carry an "
-                "in-combat Stage line or a live TargetType")
+                "in-combat line other than its faces' Stage lines, or a "
+                "live TargetType")
+        face_adds = "".join(f'        description.Add("{token}", {call});\n'
+                            for token, call in face_args)
+        stage_bow_member = ""
         flip_member = (
             "\n\n    /// <summary>Two faces (`FurinaFlip`): the face's name in"
             " combat,\n    /// no target on the Pneuma face, and the face as"
@@ -18429,6 +18503,7 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             "    {\n"
             "        base.AddExtraArgsToDescription(description);\n"
             '        description.Add("Pneuma", FurinaFlip.OnPneuma(this));\n'
+            f"{face_adds}"
             "    }")
     per_fanfare = card.get("cost_reduction_per_fanfare")
     if per_fanfare:

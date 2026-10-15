@@ -34,16 +34,22 @@ public sealed class FurinaRelicPool : RelicPoolModel
             // of Orobas grant. Ancient rarity keeps it off reward rolls, which
             // take Common/Uncommon/Rare/Shop/Boss only.
             .Append(ModelDb.Relic<Relics.CurtainNeverFalls>());
-        // FURINA'S OWN TWO (the Salon's Tab, 2026-10-05); membership only,
-        // for the reason above. What may be rolled is `GetUnlockedRelics`.
+        // FURINA'S OWN (the Salon's Tab, 2026-10-05; the card pass's six,
+        // 2026-10-15); membership only, for the reason above. What may be
+        // rolled is `GetUnlockedRelics`.
         relics = relics
             .Append(ModelDb.Relic<Relics.OperaGlasses>())
-            .Append(ModelDb.Relic<Relics.GrandTheaterProgram>());
+            .Append(ModelDb.Relic<Relics.GrandTheaterProgram>())
+            .Append(ModelDb.Relic<Relics.OperaTicketStub>())
+            .Append(ModelDb.Relic<Relics.FontaineTeardrop>())
+            .Append(ModelDb.Relic<Relics.ClaquesLedger>())
+            .Append(ModelDb.Relic<Relics.BouquetOfRoses>())
+            .Append(ModelDb.Relic<Relics.EpicleseSeasonPass>());
         return relics;
     }
 
     /// <summary>
-    /// THE OFFER: Salon Solitaire, her two and The Curtain Never Falls. The
+    /// THE OFFER: Salon Solitaire, her seven and The Curtain Never Falls. The
     /// Silent borrow is not offered.
     /// </summary>
     public override IEnumerable<RelicModel> GetUnlockedRelics(

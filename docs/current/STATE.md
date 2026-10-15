@@ -121,6 +121,10 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
   Exhaust, and have a Plan line.
 - **Pool:** 78 (20 / 38 / 20), five co-op cards. Ancients: Divine Strategy
   (Tome) and Princess of Watatsumi (Tooth on Kurage's Oath).
+- **Relics and potions:** her own seven relics and three potions
+  (`review/active/kokomi-relics-potions-2026-10-15.md`, kit census picks 1
+  and 2); the Silent borrow is gone from both. Placeholder icons until her
+  art pass. Untested in game until a deploy.
 - **Latest:** the pool overhaul is built
   (`review/active/kokomi-pool-overhaul-2026-10-13.md`, picks 1 (a) and 2
   (a)): eight Plan lines and payoffs rewritten to Counter, Intent and Chain
@@ -151,8 +155,11 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
     pushes the oldest guest off: it acts once, then leaves. A second copy of
     a guest moves it to the newest seat and it acts once.
 - **Pool:** 78 (23 / 35 / 20). Relics: Salon Solitaire ("At the end of your
-  turn, Repay 1."), its upgrade The Curtain Never Falls, Opera Glasses, Grand
-  Theater Program; one potion, Bottled Applause. Ancients: Center of
+  turn, Repay 1."), its upgrade The Curtain Never Falls, and her seven: Opera
+  Glasses, Opera Ticket Stub, Fontaine Teardrop, Grand Theater Program,
+  Claque's Ledger, Bouquet of Roses, Epiclese Season Pass; three potions, Bottled Applause, Bottled Encore, Water of Lucine
+  (`review/active/furina-card-pass-2026-10-15.md`, which also gave Ousia /
+  Pneuma a Drain face and a Repay face). Ancients: Center of
   Attention (Tome) and All the World's a Stage (Tooth on Rising Applause).
   Sim twin `tier0/engine/furina_tide.py`.
 - **Latest:** the overnight wave (`review/records/furina-wave-2026-10-13.md`,

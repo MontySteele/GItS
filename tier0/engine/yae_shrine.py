@@ -970,11 +970,15 @@ def edit_all(state, editor, default: str) -> None:
 
 
 def publish(state, editor) -> None:
-    """The Seven Glamours (Yae review r4, item 5): EVERY card in hand with a
-    temporary layer is Published (the layer moves onto its stack). Was the
-    best one only."""
-    for c in [c for c in _editable(state, editor) if temp(c)]:
-        publish_card(state, c)
+    """The Seven Glamours (2026-10-15): on a kill (the row's
+    `killed_target_fatal` branch), ONE card in hand with a temporary layer is
+    Published (the layer moves onto its stack). The player's pick is read as
+    the best by `PUBLISH_ORDER`. Yae review r4 had made it every such card,
+    which [USER] ruled OP."""
+    cands = [c for c in _editable(state, editor) if temp(c)]
+    if not cands:
+        return
+    publish_card(state, min(cands, key=lambda c: PUBLISH_ORDER.index(temp(c))))
 
 
 def offers_publish(room: str, gives_rewards: bool = True,

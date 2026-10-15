@@ -63,9 +63,9 @@ def test_call_the_generals_hands_a_card_that_costs_0_this_turn():
     (got,) = st.player.hand
     assert got.free_this_turn and got.is_ethereal and got.cost >= 2
     rows = {r["id"]: r for r in proto._rows()}
-    # The card text pass (2026-10-12): "It is Ethereal and costs 0 this turn."
+    # Wording pass (2026-10-15): "It costs 0 this turn and is Ethereal."
     assert rows["proto_kk_call_the_generals"]["description"].endswith(
-        "costs 0 this turn.")
+        "costs 0 this turn and is [gold]Ethereal[/gold].")
 
 
 def _draws(st):

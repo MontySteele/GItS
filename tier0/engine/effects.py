@@ -2955,15 +2955,16 @@ def _op_scry_bottom(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_scry_take(state: CombatState, fx: dict, card: Card) -> None:
-    """`EB-679` (pool pass four), READ THE FIELD: "look at the top N cards of
-    your draw pile; put one into your hand and the rest on the bottom".
+    """`EB-679` (pool pass four), READ THE FIELD: "Take 1 of your top N
+    cards." Since the wording pass (2026-10-15, kit census pick 3) the cards
+    not taken STAY on top of the draw pile in their order; they were bottomed.
 
     SELECTION AND NOT A LOOK, which is the whole redesign. `scry_bottom` asked
     the player to bury one card of two and r26's lane never made a decision off
     it -- burying the card you like least is a choice about the card you did
     not want, and the seats valued taking the card they DID. So the pick comes
-    to hand and everything it was seen beside goes to the bottom, which is what
-    makes the number on the face worth moving (3, and 4 upgraded).
+    to hand, which is what makes the number on the face worth moving (3, and
+    4 upgraded).
 
     THE PILOT TAKES THE LOWEST-COST CARD, this engine's stand-in for player
     choice, stated rather than hidden -- `_op_scry_bottom`'s convention read
@@ -2971,8 +2972,8 @@ def _op_scry_take(state: CombatState, fx: dict, card: Card) -> None:
     paid for now.  The mod puts a real selection screen here instead
     (`ScryBottom.TakePrompt`, and `gen_klee_cards`'s emitter).
 
-    THE REST GO TO THE BOTTOM IN THE ORDER THEY WERE SEEN, so nothing leaves
-    the deck and the pile beneath them is untouched. A pile shorter than N is
+    THE REST STAY WHERE THEY WERE, on top in the order they were seen, so
+    nothing leaves the deck and nothing else moves. A pile shorter than N is
     read short rather than refused, and an empty pile is a printed no-op --
     the shape `_op_scry_bottom` already keeps.
     """
@@ -2981,12 +2982,8 @@ def _op_scry_take(state: CombatState, fx: dict, card: Card) -> None:
     if not top:
         return
     pick = min(top, key=lambda c: (c.cost if isinstance(c.cost, int) else 0))
-    for seen in top:
-        remove_instance(state.player.draw_pile, seen)
+    remove_instance(state.player.draw_pile, pick)
     state.player.hand.append(pick)
-    for seen in top:
-        if seen is not pick:
-            state.player.draw_pile.append(seen)
     state.emit("scry_take", card=pick.id, seen=len(top))
 
 

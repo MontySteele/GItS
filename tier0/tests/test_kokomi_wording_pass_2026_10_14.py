@@ -82,8 +82,10 @@ def test_battle_formation_pays_once_however_many_plans(caches):
 
 def test_juuga_plan_line_says_three_turns():
     row = _row("proto_mi_gorou_juuga")
+    # Wording pass (2026-10-15): the 3 turns lead and cover both lines.
+    assert row["description"].startswith("For 3 turns,")
     assert row["description"].endswith(
-        "[gold]Plan[/gold]: For 3 turns, gain 6 [gold]Block[/gold] instead.")
+        "[gold]Plan[/gold]: Gain 6 [gold]Block[/gold] instead.")
     assert row["plan"] == [{"op": "juuga_guard", "amount": 3}]
 
 

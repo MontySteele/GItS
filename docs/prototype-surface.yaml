@@ -801,7 +801,7 @@
 - {id: proto_ko_simmer, name: "Simmer", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal 6 [gold]Pyro[/gold] damage, plus your largest [gold]Bomb[/gold]'s size on any enemy. It does not go off. Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].{InCombat:\n(Deals {BombHit:diff()} damage)|}",
+   description: "Deal 6 [gold]Pyro[/gold] damage plus your largest [gold]Bomb[/gold]'s size, on any enemy, not setting it off. Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].{InCombat:\n(Deals {BombHit:diff()} damage)|}",
    upgrade: {damage: +3},
    effects: [{op: damage_from_bombs, read: largest, amount: 6, target: enemy},
              {op: add_card, card: status_dazed, zone: discard, amount: 1}]}
@@ -809,7 +809,7 @@
 - {id: proto_ko_taste_test, name: "Taste Test", character: klee,
    authored_by: [claude],
    cost: 2, type: attack, rarity: uncommon,
-   description: "Deal [gold]Pyro[/gold] damage equal to twice your [gold]Bombs[/gold] on the enemy. They do not go off. Add 2 [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold].{InCombat:\n(Deals {BombHit:diff()} damage)|}",
+   description: "Deal [gold]Pyro[/gold] damage equal to twice your [gold]Bombs[/gold] on the enemy, not setting them off. Add 2 [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold].{InCombat:\n(Deals {BombHit:diff()} damage)|}",
    upgrade: {cards: -1},
    effects: [{op: damage_from_bombs, read: target_total_double, target: enemy},
              {op: add_card, card: confiscated, zone: discard, amount: 2}]}
@@ -1274,7 +1274,7 @@
    cost: 1, type: skill, rarity: uncommon,
    # Pool overhaul (2026-10-13) and Kokomi review r6 pick 3 (a): the Plan
    # fetches a card that costs 0 this turn. Provenance note.
-   description: "Take 1 of your top {Scry:diff()}. Put the rest on the bottom. [gold]Plan[/gold]: Put a [gold]Draw Pile[/gold] card into your [gold]Hand[/gold]. It costs 0 this turn.",
+   description: "Take 1 of your top {Scry:diff()} cards. [gold]Plan[/gold]: Put a [gold]Draw Pile[/gold] card into your [gold]Hand[/gold]. It costs 0 this turn.",
    effects: [{op: scry_take, amount: 3}],
    plan: [{op: draw_pile_to_hand}],
    # 4 seen; the Plan line prints no number.
@@ -2166,7 +2166,7 @@
    # Kokomi round 2 (2026-10-12): the chosen card costs 0 this turn (the base game's
    # Discovery template).
    cost: 1, type: skill, rarity: rare, exhaust: true,
-   description: "Choose 1 of 3 random Rare Inazuma [gold]Companions[/gold] to add into your [gold]Hand[/gold]. It is [gold]Ethereal[/gold] and costs 0 this turn.",
+   description: "Choose 1 of 3 random Rare Inazuma [gold]Companions[/gold] to add into your [gold]Hand[/gold]. It costs 0 this turn and is [gold]Ethereal[/gold].",
    effects: [{op: kokomi, kind: call_the_generals}],
    upgrade: {cost: -1}}
 
@@ -2285,10 +2285,9 @@
    # Kokomi's own card since the re-founding (2026-10-12, card paper sec.3).
    nation: inazuma, star: 4, rarity: uncommon, role_c: trigger, element: geo,
    cost: 1, type: skill, exhaust: true,
-   # The paper's Plan line ("For 3 turns, at the end of your turn gain 6
-   # Block"). Kokomi wording pass (2026-10-14): "Gain 6 Block" alone hid the
-   # three turns; "For 3 turns ... instead" fits the 120-character ceiling.
-   description: "For 3 turns, at the end of your turn deal 7 [gold]Geo[/gold] damage to a random enemy. [gold]Plan[/gold]: For 3 turns, gain 6 [gold]Block[/gold] instead.",
+   # Plan: for 3 turns, 6 Block at the end of your turn instead of the
+   # damage (wording pass 2026-10-15; provenance note).
+   description: "For 3 turns, deal 7 [gold]Geo[/gold] damage to a random enemy at the end of your turn. [gold]Plan[/gold]: Gain 6 [gold]Block[/gold] instead.",
    effects: [{op: apply_power, power: mi_juuga, amount: 3, target: self}],
    plan: [{op: juuga_guard, amount: 3}]}
 
@@ -2701,7 +2700,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: geo,
    cost: 1, type: skill,
-   description: "[gold]Exhaust[/gold] every Status in your [gold]Hand[/gold]. Your largest [gold]Bomb[/gold], on any enemy, grows by 6 for each. Draw 1 card for each.",
+   description: "[gold]Exhaust[/gold] every Status in your [gold]Hand[/gold]. For each, draw 1 card and your largest [gold]Bomb[/gold], on any enemy, grows by 6.",
    upgrade: {grow: +2},
    effects: [{op: exhaust_statuses_grow_largest, amount: 6, draw_each: 1}]}
 
@@ -3410,16 +3409,19 @@
 # Provenance note, "Furina: the sweep, 2026-10-14". ---
 
 # Ousia / Pneuma: two faces, starts each combat on Ousia; playing a face does
-# it, then the card turns over (`furina` kind `flip`, `FurinaFlip`).
+# it, then the card turns over (`furina` kind `flip`, `FurinaFlip`). Each face
+# does one half of her kit since her card pass (2026-10-15; provenance note).
 - {id: proto_fs_ousia_pneuma, name: "Ousia / Pneuma", character: furina,
    upgrade: {conditional_damage: +3, conditional_block: +3},
    authored_by: [claude],
    register: salon, cost: 1, type: attack, rarity: common,
-   description: "{Pneuma:Gain {BranchBlock:diff()} [gold]Block[/gold].|{InCombat:Deal {BranchDamage:diff()} damage.|Ousia: Deal {BranchDamage:diff()} damage.\nPneuma: Gain {BranchBlock:diff()} [gold]Block[/gold].}}\n[gold]Flip[/gold].",
+   description: "{Pneuma:[gold]Repay[/gold] 2. Gain {BranchBlock:diff()} [gold]Block[/gold].|{InCombat:[gold]Drain[/gold] 2. Deal {BranchDamage:diff()} damage.|Ousia: [gold]Drain[/gold] 2. Deal {BranchDamage:diff()} damage.\nPneuma: [gold]Repay[/gold] 2. Gain {BranchBlock:diff()} [gold]Block[/gold].}}\n[gold]Flip[/gold].",
    effects: [{op: conditional, if: ousia_face,
-              then: [{op: damage, amount: 8, target: enemy}]},
+              then: [{op: stage_drain, amount: 2},
+                     {op: damage, amount: 10, target: enemy}]},
              {op: conditional, if: pneuma_face,
-              then: [{op: block, amount: 7}]},
+              then: [{op: stage_repay, amount: 2},
+                     {op: block, amount: 8}]},
              {op: furina, kind: flip}]}
 
 # Objection!: Flame Barrier's window, once, for twice the HP the hit cost.
@@ -4892,12 +4894,15 @@
 
 - {id: proto_ym_the_seven_glamours, name: "The Seven Glamours", character: yae,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: rare, exhaust: true,
-   # Yae review r4 item 5: every Annotated card in hand (was one), Rare, 1 [0],
-   # Exhaust.
-   description: "[gold]Publish[/gold] every [gold]Annotated[/gold] card in your hand.",
-   effects: [{op: yae, kind: publish}],
-   upgrade: {cost: -1}}
+   cost: 2, type: attack, rarity: rare, exhaust: true,
+   # 2026-10-15 ([USER]: "it looks obviously OP"): was a 1 [0] Skill Publishing
+   # every Annotated card in hand. The kill is Hand of Greed's Fatal check (no
+   # Minions). Provenance note, "Yae: The Seven Glamours on a kill".
+   description: "Deal 12 [gold]Electro[/gold] damage. If this kills an enemy, [gold]Publish[/gold] an [gold]Annotated[/gold] card in your hand.",
+   effects: [{op: damage, amount: 12, target: enemy},
+             {op: conditional, if: killed_target_fatal,
+              then: [{op: yae, kind: publish}]}],
+   upgrade: {damage: 4}}
 
 - {id: proto_ym_sakura_channeling, name: "Sakura Channeling", character: yae,
    authored_by: [claude],

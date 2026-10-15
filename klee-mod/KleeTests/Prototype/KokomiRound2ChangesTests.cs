@@ -76,9 +76,8 @@ public class KokomiRound2ChangesTests
     [Fact]
     public void Call_the_generals_hands_a_card_that_costs_0_this_turn()
     {
-        // The card text pass (2026-10-12): "It is Ethereal and costs 0 this
-        // turn."
-        Assert.EndsWith("costs 0 this turn.",
+        // Wording pass (2026-10-15): "It costs 0 this turn and is Ethereal."
+        Assert.EndsWith("costs 0 this turn and is [gold]Ethereal[/gold].",
                         Face(new ProtoKkCallTheGenerals()));
         var calls = Il.CallSequence(
             Il.Method("KokomiCards", "CallTheGenerals")).ToList();

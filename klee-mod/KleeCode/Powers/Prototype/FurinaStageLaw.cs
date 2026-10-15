@@ -253,6 +253,14 @@ public static class FurinaStageLaw
         System.Math.Max(0, maxHp) / LineMaxHpDivisor
       + (lyney ? LyneyLineDrop : 0);
 
+    /// <summary>Epiclese Season Pass (Furina's card pass, 2026-10-15): "You
+    /// have 1 more guest seat." Copies add.</summary>
+    public const int SeasonPassSeats = 1;
+
+    /// <summary>Bouquet of Roses: "Whenever you Spend 10 or more at once,
+    /// gain [E]."</summary>
+    public const int BouquetSpend = 10;
+
     /// <summary>The buffer is 1/4 of her Max HP, rounded down. Mirrors
     /// <c>furina_tide.LINE_MAX_HP_DIVISOR</c>.</summary>
     public const int LineMaxHpDivisor = 4;

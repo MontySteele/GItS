@@ -385,6 +385,15 @@ _VARKA_ITEMS_REASON = (
     "built C# first (operations/prototype.md); no sim twin exists until "
     "Balance.")
 
+#: Kokomi's own relics and potions (review/active/kokomi-relics-potions-
+#: 2026-10-15.md), built C# first like Varka's: tier0's Kokomi twin models
+#: no relic but the Casket.
+_KOKOMI_ITEMS_REASON = (
+    "KOKOMI'S OWN RELICS AND POTIONS (review/active/kokomi-relics-potions-"
+    "2026-10-15.md). A printed number on a Prototype-stage relic or potion of "
+    "hers, built C# first (operations/prototype.md); no sim twin exists until "
+    "Balance.")
+
 #: THE SPIRAL ABYSS MODE (review/active/spiral-abyss-pools-2026-10-12.md):
 #: a run modifier's printed numbers. The mode is not measured against the base
 #: five (paper sec.1) and the sim models no run modifier, so none has a twin.
@@ -463,6 +472,9 @@ UNMIRRORED: dict[str, str] = {
     "AbyssDraft.OptionCount": _ABYSS_REASON,
     "AlicesGuidebook.Growth": _ARM_ITEMS_REASON,
     "BottledResolve.Oath": _VARKA_ITEMS_REASON,
+    "BottledShoal.Stings": _KOKOMI_ITEMS_REASON,
+    "OceanHuedClam.MendAmount": _KOKOMI_ITEMS_REASON,
+    "ResistanceArmband.Block": _KOKOMI_ITEMS_REASON,
     "KnightsCommission.Oath": _VARKA_ITEMS_REASON,
     "WindblumeGarland.Block": _VARKA_ITEMS_REASON,
     "BlastingPowder.Growth": _ARM_ITEMS_REASON,
@@ -479,6 +491,13 @@ UNMIRRORED: dict[str, str] = {
     "FireworksStand.Threshold": _ARM_ITEMS_REASON,
     "OperaGlasses.Fanfare": _ARM_ITEMS_REASON,
     "GrandTheaterProgram.Fanfare": _ARM_ITEMS_REASON,
+    # Furina's card pass (2026-10-15, review/active/furina-card-pass-
+    # 2026-10-15.md): her five relics' numbers, built C# first like the two
+    # above; tier0's Stage twin models none of her relics.
+    "ClaquesLedger.Fanfare": _ARM_ITEMS_REASON,
+    "BouquetOfRoses.Energy": _ARM_ITEMS_REASON,
+    "FurinaStageLaw.BouquetSpend": _ARM_ITEMS_REASON,
+    "FurinaStageLaw.SeasonPassSeats": _ARM_ITEMS_REASON,
     "WatatsumiCasket.WatatsumiBlock":
         "THE KOKOMI OVERHAUL'S TOUCH OF OROBAS UPGRADE (2026-09-30, main-"
         "session design from the co-op playtest; 3 Block for each Plan "

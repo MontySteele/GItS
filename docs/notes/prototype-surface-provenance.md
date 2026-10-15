@@ -8837,7 +8837,11 @@ marked enemy's attack aims at itself). New predicates `ousia_face`,
 
 - Ousia / Pneuma shows the face it is on in combat (title and text); off the
   board it prints both faces. Built as two one-armed conditionals and a
-  flip, so both numbers are live vars.
+  flip, so both numbers are live vars. Furina's card pass (2026-10-15,
+  `review/active/furina-card-pass-2026-10-15.md` sec.1) gave each face one
+  half of her kit: Ousia "Drain 2. Deal 10 [13] damage." (was 8 [11]),
+  Pneuma "Repay 2. Gain 8 [11] Block." (was 7 [10]). Each face carries its
+  op's in-combat line on that face only (`gen_klee_cards.flip_face_args`).
 - Tearful Monologue's "last turn" is the round before this one: her last
   turn and the enemies' turn after it, any HP loss (a Drain included).
 - Text to the conventions lint: Opening Number and Understudy's Debut say
@@ -9052,9 +9056,9 @@ Claude builds (no pick)". Pick 1 (the publishing half) is not built here.
   Annotation, so a kept Red Ink is a flag (`KeepsRedInk` / `red_ink_kept`)
   that leaves the +3 on the strike; any later Edit that does not keep it, or
   a Red Ink plant refresh, clears it.
-- **Item 5, The Seven Glamours** `proto_ym_the_seven_glamours`: "Publish
-  every Annotated card in your hand." (Rare, 1 [0], Exhaust as before). No
-  chooser; the op is still `publish`.
+- **Item 5, The Seven Glamours** `proto_ym_the_seven_glamours`: was
+  "Publish every Annotated card in your hand." (Rare, 1 [0], Exhaust).
+  Replaced the same day: "Yae: The Seven Glamours on a kill" below.
 - **Item 6, Edit choosers.** In game the hand shows each card's Annotation;
   the prompt now ends "It replaces any unpublished Annotation the card
   carries." (a per-card warning needs a custom screen). The seat page tags a
@@ -9065,4 +9069,43 @@ Claude builds (no pick)". Pick 1 (the publishing half) is not built here.
   Sakura to Edit.") in game; the sim emits `yae_edit_nothing`.
 
 Pins: `tier0/tests/test_yae_review_r4.py`,
+`klee-mod/KleeTests/Prototype/YaeReviewR4Tests.cs`.
+
+## Wording pass (2026-10-15, kit census pick 3)
+
+Source: `review/active/kit-census-2026-10-15.md`, pick 3 (a). Faces only,
+no number moves, on `proto_ko_simmer`, `proto_ko_taste_test`,
+`proto_mc_albedo_dust_of_purification`, `proto_mi_gorou_juuga` (Plan: "Gain
+6 Block instead", still for 3 turns) and `proto_kk_call_the_generals` (Orders
+from the Shrine's word order). One behaviour change, decided with the pass:
+`proto_kk_read_the_field` reads "Take 1 of your top 3 [4] cards." and the
+cards not taken stay on top of the Draw Pile in their order (the `scry_take`
+op, both engines; were bottomed). Pins: `tier0/tests/test_kokomi_plan.py`,
+`klee-mod/KleeTests/Prototype/KokomiPoolPassFourTests.cs`.
+
+## Yae: The Seven Glamours on a kill (2026-10-15)
+
+[USER]: "Reading The Seven Glamours more carefully, it looks obviously OP - I
+thought it was Publishing one card per fight, not the whole hand. There is
+precedent for this cards giving permanent benefits, such as The Hunt or Hand
+of Gold, but they generally require a condition of some kind."
+
+`proto_ym_the_seven_glamours` is now a Rare Attack, 2, Exhaust: "Deal 12 [16]
+Electro damage. If this kills an enemy, Publish an Annotated card in your
+hand." (no cost upgrade).
+
+- **The kill** is Hand of Greed's Fatal check (decompiled `HandOfGreed.OnPlay`:
+  `Target.Powers.All(p => p.ShouldOwnerDeathTriggerFatal())`, read before the
+  hit). A Minion's death does not count (`MinionPower` answers false). New
+  codegen predicate `killed_target_fatal` (C# snapshot `fatalAtStart`), which
+  the sim already had for Feed (`fatal_kills_this_card`,
+  `Enemy.counts_for_fatal`).
+- **One card, chosen.** `YaeEditing.PublishFromHand` opens the hand chooser
+  over the cards with a temporary layer (`PublishReaches`), skipped when only
+  one qualifies; none does nothing. The sim reads the pick as the best by
+  `PUBLISH_ORDER`. The `yae` op is legal in a conditional branch for the
+  `publish` kind only (`YAE_BRANCH_KINDS`).
+- **Art:** the row keeps its portrait; the Attack frame comes from the type.
+
+Pins: `tier0/tests/test_yae_review_r4.py` (kill, no kill, Minion),
 `klee-mod/KleeTests/Prototype/YaeReviewR4Tests.cs`.

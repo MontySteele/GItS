@@ -191,3 +191,61 @@ public sealed class NereidsAscensionPower : PowerModel, ILocalizationProvider
 
     public override PowerStackType StackType => PowerStackType.Single;
 }
+
+/// <summary>
+/// A STUNNING STRATAGEM (Kokomi's own potions, 2026-10-15,
+/// <c>review/active/kokomi-relics-potions-2026-10-15.md</c>): "Next turn,
+/// every Plan is carried out twice." Nereid's Ascension's read, widened to
+/// every entry and scoped to one turn: <c>KokomiPlan.StratagemTimes</c> asks
+/// for it inside the drain loop and at Change of Plans' door, so the morning
+/// and any Plan carried out early on that turn are all doubled.
+///
+/// THE TURN IS A ROUND NUMBER, armed by the potion (<see cref="Arm"/>) as the
+/// round after the one it was drunk in. A second potion arms its own next
+/// round. The badge leaves at the end of the last armed turn.
+/// </summary>
+public sealed class StunningStratagemPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "A Stunning Stratagem"),
+        ("description",
+            "Next turn, every [gold]Plan[/gold] is carried out twice."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Single;
+
+    /// <summary>Made on first use, never by the constructor (Andrius's
+    /// Howl's reason: a mutable power is a copy of the canonical one).
+    /// </summary>
+    private HashSet<int>? _rounds;
+
+    private HashSet<int> Rounds => _rounds ??= new();
+
+    /// <summary>The armed rounds. Read by the tests.</summary>
+    public IReadOnlyCollection<int> Armed => Rounds;
+
+    /// <summary>Arm the round after <paramref name="drunkIn"/>.</summary>
+    public void Arm(int drunkIn) => Rounds.Add(drunkIn + 1);
+
+    /// <summary>Is <paramref name="round"/> an armed turn? PURE.</summary>
+    public bool LiveIn(int round) => Rounds.Contains(round);
+
+    /// <summary>Is this turn an armed one?</summary>
+    public bool LiveNow => LiveIn(Owner?.CombatState?.RoundNumber ?? -1);
+
+    /// <summary>Does any armed turn lie after <paramref name="round"/>?
+    /// PURE.</summary>
+    public bool OwedAfter(int round) => Rounds.Any(r => r > round);
+
+    public override async Task AfterSideTurnEnd(
+        PlayerChoiceContext choiceContext, CombatSide side,
+        IEnumerable<Creature> participants)
+    {
+        if (side != CombatSide.Player) return;
+        if (OwedAfter(Owner?.CombatState?.RoundNumber ?? int.MaxValue)) return;
+        await PowerCmd.Remove(this);
+    }
+}
