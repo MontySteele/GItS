@@ -1931,9 +1931,10 @@
 - {id: proto_kk_tidecleanse, name: "Tidecleanse", character: kokomi,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common,
-   # The re-founding (2026-10-12): no Plan line; the Exhaust is the
-   # now-line, first. "Up to": she chooses which when she holds more.
-   description: "[gold]Exhaust[/gold] up to {KkAmount:diff()} Statuses or Curses in your [gold]Hand[/gold]. Apply 1 [gold]Weak[/gold].",
+   # Re-founding (2026-10-12): no Plan line; "up to": she chooses which.
+   # Kokomi review r9 (2026-10-15, item 1): the draw is inside the
+   # exhaust_statuses kind, one per card exhausted; none with no Status.
+   description: "[gold]Exhaust[/gold] up to {KkAmount:diff()} Statuses or Curses in your [gold]Hand[/gold]. Draw 1 card for each. Apply 1 [gold]Weak[/gold].",
    effects: [{op: kokomi, kind: exhaust_statuses, amount: 2},
              {op: apply_power, power: weak, amount: 1, target: enemy}],
    # Up to 3 (the old Plan line's upgrade, carried over).
@@ -2031,7 +2032,9 @@
    # Kokomi level pass (2026-10-12, sec.2): choose 1 of 3, cost 1 [0]. The
    # upgraded grant goes: the cost is the upgrade, one axis.
    cost: 1, type: skill, rarity: common,
-   description: "Choose 1 of 3 random Common Inazuma [gold]Companions[/gold] to add into your [gold]Hand[/gold]. It is [gold]Ethereal[/gold].",
+   # Kokomi review r9 (2026-10-15, item 2): the pick costs 0 this turn
+   # (Call the Generals' rider); taken 1 of 9.
+   description: "Choose 1 of 3 random Common Inazuma [gold]Companions[/gold] to add into your [gold]Hand[/gold]. It costs 0 this turn and is [gold]Ethereal[/gold].",
    effects: [{op: kokomi, kind: choose_common_companion}],
    upgrade: {cost: -1}}
 
@@ -2058,8 +2061,10 @@
 
 - {id: proto_kk_sangonomiyas_orders, name: "Sangonomiya's Orders", character: kokomi,
    authored_by: [claude],
-   cost: 1, type: power, rarity: uncommon,
-   description: "At the start of your turn, add a random Common Inazuma [gold]Companion[/gold] to your [gold]Hand[/gold]. It is [gold]Ethereal[/gold].",
+   # Kokomi review r9 (2026-10-15, item 3): the card costs 0 and the Power
+   # costs 2 (was 1); taken 0 of 7, 0 of 6 in r8.
+   cost: 2, type: power, rarity: uncommon,
+   description: "At the start of your turn, add a random Common Inazuma [gold]Companion[/gold] to your [gold]Hand[/gold]. It costs 0 and is [gold]Ethereal[/gold].",
    effects: [{op: apply_power, power: kk_sangonomiyas_orders, amount: 1, target: self}],
    upgrade: {innate: true}}
 

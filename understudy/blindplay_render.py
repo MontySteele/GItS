@@ -606,7 +606,8 @@ def _render_carry_out(pl: dict[str, Any],
     if pl.get("summon_hits"):
         out.append("- These fired at the end of your last turn, before the "
                    "enemies acted:")
-        out += _carry_out_rows(pl["summon_hits"], enemies, you)
+        out += _carry_out_rows(pl["summon_hits"], enemies, you,
+                               name_reactions=True)
     # (`EB-680`'s Dusk heading left with Dusk, the Kokomi re-founding,
     # 2026-10-12: every carry-out is a morning one again.)
     if pl["carried_out"]:
@@ -865,9 +866,16 @@ def _plan_no_attack_lines(entry: dict[str, Any],
         plan=entry["name"], what=what)]
 
 
+#: Kokomi review r9 (2026-10-15, item 6): an end-of-turn summon's row names
+#: the reactions its hit set off ("Poison appeared on enemies after the
+#: Ring's tick with no reaction named").
+SUMMON_REACTION_CLAUSE = " It set off {names}."
+
+
 def _carry_out_rows(rows: list[dict[str, Any]],
                     enemies: list[dict[str, Any]] | None = None,
-                    you: dict[str, Any] | None = None) -> list[str]:
+                    you: dict[str, Any] | None = None,
+                    name_reactions: bool = False) -> list[str]:
     """One heading's worth of Plans, in the order the jellyfish took them.
 
     `EB-453` PUT THE UNRUN PLANS IN THE SAME LIST. A kill inside the first
@@ -884,9 +892,26 @@ def _carry_out_rows(rows: list[dict[str, Any]],
             continue
         out.append(
             f"  - {said['line']}{_kind_clause(said, enemies, you)}"
-            f"{_rider_clause(said)}")
+            f"{_rider_clause(said)}"
+            f"{_summon_reaction_clause(said) if name_reactions else ''}")
         out += _render_moved(said)
     return out
+
+
+def _summon_reaction_clause(said: dict[str, Any]) -> str:
+    """The reactions a summon's volley set off, by name, once each, unless the
+    receipt already named them as the bonus on its number. `""` for none."""
+    names: list[str] = []
+    for name in said.get("reactions") or []:
+        if name not in names:
+            names.append(name)
+    if not names or all(n in _kind_clause_text(said) for n in names):
+        return ""
+    return SUMMON_REACTION_CLAUSE.format(names=_and_list(names))
+
+
+def _kind_clause_text(said: dict[str, Any]) -> str:
+    return _kind_clause(said)
 
 
 def _rider_clause(said: dict[str, Any]) -> str:
@@ -1169,13 +1194,27 @@ PLAYED_CAP_COUNTED = "    - Counted this turn: {cards}."
 PLAYED_CAP_FOR_YOU = " (played for you)"
 
 
+#: Kokomi review r9 (2026-10-15, item 8): Smoggy (one Skill) and Sloth (three
+#: cards) both counted a Plan WRITTEN as the card played; a seat found Defend+
+#: locked after Oath-planning a Skill. Said once under the limit, on a page
+#: that has Plans.
+PLAYED_CAP_PLAN_NOTE = ("    - Writing a Plan counts as playing that card, "
+                        "so a card you write uses this limit.")
+
+
 def _played_cap_lines(power: dict[str, Any],
-                      resolutions: list[dict[str, Any]] | None) -> list[str]:
+                      resolutions: list[dict[str, Any]] | None,
+                      plans: bool = False) -> list[str]:
     """The cards a "play more than N cards" power counted this turn, off the
-    turn's ledger, or nothing (no such power, no ledger, nothing played)."""
+    turn's ledger, or nothing (no such power, no ledger, nothing played).
+    On a page with Plans (`plans`) the limit also says writing a Plan counts
+    as playing the card (Kokomi review r9, item 8)."""
     cap = _turn_allowance(power)
-    if cap is None or cap[1] != "played" or not resolutions:
+    if cap is None or cap[1] != "played":
         return []
+    note = [PLAYED_CAP_PLAN_NOTE] if plans else []
+    if not resolutions:
+        return note
     names: list[str] = []
     for row in resolutions:
         if row.get("carried") or row.get("is_local") is False:
@@ -1188,8 +1227,8 @@ def _played_cap_lines(power: dict[str, Any],
             name += f" x{plays}"
         names.append(name)
     if not names:
-        return []
-    return [PLAYED_CAP_COUNTED.format(cards=", ".join(names))]
+        return note
+    return [PLAYED_CAP_COUNTED.format(cards=", ".join(names))] + note
 
 
 # `EB-525`. THE STEP THE SENTENCE DOES NOT SAY IT LEAVES OUT.
@@ -2837,9 +2876,15 @@ _RELIC_ENERGY = re.compile(
 #: "Energy 7 (4 a turn, +1 Prismatic Gem, +2 from this turn's plays)" on a
 #: turn 1 whose 3 extra were Lantern's 1 and the Tea Set's 2.
 _EVERY_TURN = re.compile(r"\b(?:each|every) turn\b", re.I)
+#: Kokomi review r9 (2026-10-15, item 10): a face that pays Energy once, when
+#: a combat opens. It is a source on round 1 only; "(3 a turn, +1 Lantern, +1
+#: Seal of Gold)" on a later round named a relic that had paid nothing.
+_COMBAT_OPENING = re.compile(
+    r"\bstart(?: of| the)?(?: each| the| next)? combat\b|\bfirst turn\b",
+    re.I)
 
 
-def _energy_line(you: dict[str, Any]) -> str:
+def _energy_line(you: dict[str, Any], round_number: int | None = None) -> str:
     """`Energy 2 left of 3`, or, where she holds more than a turn's, what
     gave the rest: `Energy 4 (3 a turn, +1 Lantern)` (Kokomi review r6,
     2026-10-14, item 10; "4 left of 3" read as a bug). The relics are named
@@ -2855,6 +2900,11 @@ def _energy_line(you: dict[str, Any]) -> str:
     for relic in you.get("relics") or []:
         text = str(relic.get("text") or "")
         if relic.get("used_up") or _EVERY_TURN.search(text):
+            continue
+        # Item 10: a combat-opening Energy is this turn's source on round 1
+        # only (`round_number` None reads an older caller: as before).
+        if (isinstance(round_number, int) and round_number > 1
+                and _COMBAT_OPENING.search(text)):
             continue
         found = _RELIC_ENERGY.search(text)
         if found and surplus > 0:
@@ -2878,7 +2928,7 @@ def _render_board_behind(c: dict[str, Any]) -> list[str]:
     you = c["you"]
     out = ["", BOARD_BEHIND_HEADING, "",
            f"- HP {you['hp']}/{you['max_hp']} · Block {you['block']} · "
-           + _energy_line(you)
+           + _energy_line(you, c.get("round"))
            + (f" · Stars {you['stars']}" if you.get("stars") is not None
               else "")]
     hand = [card["title"] for card in c.get("hand") or []]
@@ -4168,7 +4218,7 @@ def render(obs: dict[str, Any]) -> str:
         out += [f"# Battle — round {c['round']}", "",
                 f"- HP {you['hp']}/{you['max_hp']}",
                 f"- Block {you['block']}",
-                "- " + _energy_line(you)]
+                "- " + _energy_line(you, c.get("round"))]
         out += _stars_line(you)
         defined = {row["name"] for row in (obs.get("keywords") or [])}
         spark_named = False
@@ -4251,7 +4301,8 @@ def render(obs: dict[str, Any]) -> str:
             out.append(_render_power(pw, "- "))
             # Kokomi review r8 (2026-10-14, item 11): under a card-limit
             # curse (Sloth), the cards it counted this turn.
-            out += _played_cap_lines(pw, c.get("resolutions"))
+            out += _played_cap_lines(pw, c.get("resolutions"),
+                                     plans=c.get("plans") is not None)
             # `EB-610`, THE OTHER SHAPE SPARK ARRIVES IN. The clause above is
             # emitted inside the METERS loop, and the live look of 2026-09-16
             # read a build whose wire carried Spark POWER-shaped -- a

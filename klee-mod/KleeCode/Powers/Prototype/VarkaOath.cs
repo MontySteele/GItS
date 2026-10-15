@@ -1112,12 +1112,12 @@ public static class VarkaOath
             .Any(e => AuraCmd.Find(e) != null));
     }
 
-    /// <summary>The words: "(No aura to Swirl)" when there is no aura, else
+    /// <summary>The words: "(no aura: no Swirl)" when there is no aura, else
     /// empty. PURE.</summary>
     public static string SwirlWords(bool aura) => aura ? "" : NoAuraToSwirl;
 
     /// <summary><see cref="SwirlWords"/>' line.</summary>
-    public const string NoAuraToSwirl = "\n(No aura to Swirl)";
+    public const string NoAuraToSwirl = "\n(no aura: no Swirl)";
 
     /// <summary>
     /// WILDFIRE OATH'S PREVIEW (BACKLOG: "Wildfire Oath's damage has no

@@ -166,8 +166,10 @@ public static partial class KokomiCards
         var pick = await CardSelectCmd.FromChooseACardScreen(
             choiceContext, offered, owner, canSkip: true);
         if (pick == null) return;
-        await CardPileCmd.AddGeneratedCardToCombat(
-            KokomiCompanionPlan.Generate(pick), PileType.Hand, owner);
+        // Kokomi review r9 (2026-10-15, item 2): "It costs 0 this turn."
+        var made = KokomiCompanionPlan.Generate(pick);
+        made.EnergyCost.SetThisTurn(0);
+        await CardPileCmd.AddGeneratedCardToCombat(made, PileType.Hand, owner);
     }
 
     private static async Task AddCompanionCards(CardModel card, int amount)
@@ -303,8 +305,11 @@ public static partial class KokomiCards
     {
         var owner = card.Owner;
         if (owner == null || !KokomiOverhaul.LiveFor(owner.Creature)) return;
-        await KokomiStatusBatch.ExhaustStatuses(choiceContext, owner,
-                                                Amount(card), card);
+        var done = await KokomiStatusBatch.ExhaustStatuses(
+            choiceContext, owner, Amount(card), card) ?? 0;
+        // Kokomi review r9 (2026-10-15, item 1): "Draw 1 card for each."
+        if (done > 0)
+            await CardPileCmd.Draw(choiceContext, done, owner);
     }
 }
 
@@ -860,7 +865,8 @@ public sealed class SangonomiyasOrdersPower : PowerModel, ILocalizationProvider
           + "Common Inazuma "
           + "{Amount:plural:[gold]Companion[/gold]|[gold]Companions[/gold]} "
           + "to your [gold]Hand[/gold]. "
-          + "{Amount:plural:It is|They are} [gold]Ethereal[/gold]."),
+          + "{Amount:plural:It costs|They cost} 0 and "
+          + "{Amount:plural:is|are} [gold]Ethereal[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -885,9 +891,11 @@ public sealed class SangonomiyasOrdersPower : PowerModel, ILocalizationProvider
             .ToList();
         foreach (var companion in made)
         {
+            // Kokomi review r9 (2026-10-15, item 3): "It costs 0."
+            var free = KokomiCompanionPlan.Generate(companion);
+            free.EnergyCost.SetThisTurn(0);
             await CardPileCmd.AddGeneratedCardToCombat(
-                KokomiCompanionPlan.Generate(companion), PileType.Hand,
-                player);
+                free, PileType.Hand, player);
         }
     }
 }

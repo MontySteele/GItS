@@ -257,6 +257,9 @@ public sealed class KleeElementalHooks : AbstractModel
         // the turn-end mark standing, and the opening below then CARRIED the
         // last fight's rows into this one's first turn.
         ReactionLog.ResetFight();
+        // Kokomi review r9 (2026-10-15, item 9): and last fight's carry-out
+        // receipts.
+        KokomiPlan.ResetFight();
         RelicAnswerLog.ResetFight();
         ReactionEvents.ResetFight();
         ReactionEffects.MarkTurnStart();

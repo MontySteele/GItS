@@ -8911,3 +8911,39 @@ lands next turn by design, so the cards pay Block now.
 
 Pins: `tier0/tests/test_kokomi_review_r8_2026_10_14.py`,
 `klee-mod/KleeTests/Prototype/KokomiReviewR8Tests.cs`.
+
+## Kokomi review r9 (2026-10-15)
+
+`review/active/kokomi-review-r9-2026-10-15.md`, items 1 to 10, Claude's
+(Kokomi is at Prototype). Five seats, 2 wins in 5, build 0.2.5538.
+
+- **Tidecleanse** (`proto_kk_tidecleanse`, item 1): "Exhaust up to 2 [3]
+  Statuses or Curses in your Hand. **Draw 1 card for each.** Apply 1 Weak."
+  Taken 1 of 18 (0 of 7 in r8). The draw is inside the `exhaust_statuses`
+  kind: one card per card exhausted, so with no Status in hand nothing is
+  drawn. Both engines (`kokomi_plan.exhaust_statuses`,
+  `KokomiCards.ExhaustStatuses`).
+- **Orders from the Shrine** (`proto_kk_orders_from_the_shrine`, item 2):
+  the pick "costs 0 this turn and is Ethereal". Cost 1 [0] is unchanged.
+- **Sangonomiya's Orders** (`proto_kk_sangonomiyas_orders`, item 3): the Power
+  costs 2 (was 1); the card it adds each turn "costs 0 and is Ethereal". The
+  Power's own text says so (`SangonomiyasOrdersPower`). Upgrade stays Innate.
+- **Opening Gambit's doubling** (item 4): a waiting Plan the rider will reach
+  shows the doubled written number (`KokomiPlan.DoubledBy`, `QueueRow`), and
+  a card about to be written behind a Gambit previews it
+  (`PlanDamageVar.UpdateCardPreview`). The rider is spent by the next entry
+  of the same drain, so a flipped two-line Plan is not doubled.
+- **Overridden element** (item 5): the finished face swaps the printed
+  element word for the applied one ("[element] damage", "Apply [element]"),
+  `OverriddenElementFace`, a postfix on `GetDescriptionForPile`.
+- **Summon receipts** (item 6): a summon's volley files its reactions under
+  its own name and its row carries them; the page says "It set off
+  Electro-Charged."
+- **No aura** (item 7): Varka's face reads "(no aura: no Swirl)" on its own
+  line, Sucrose's wording. Varka's numbers do not change.
+- **Seat page** (items 8 to 10): a card limit says writing a Plan counts as
+  playing the card; the last carry-out receipts clear when a combat opens;
+  a combat-opening Energy relic is named on round 1 only.
+
+Pins: `tier0/tests/test_kokomi_review_r9_2026_10_15.py`,
+`klee-mod/KleeTests/Prototype/KokomiReviewR9Tests.cs`.
