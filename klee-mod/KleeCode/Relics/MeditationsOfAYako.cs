@@ -59,12 +59,16 @@ public class MeditationsOfAYako : CustomRelicModel
     /// <summary>How many Annotations one reward may Publish.</summary>
     public virtual int PublishCount => 1;
 
+    public const string DescriptionText =
+        "After an elite or boss fight, you may [gold]Publish[/gold] an "
+      + "Annotation you made that fight.";
+
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Meditations of a Yako"),
-        ("description",
-            "After an elite or boss fight, you may [gold]Publish[/gold] an "
-          + "Annotation."),
+        // Yae review r5, item 6: the reward is offered only when the fight
+        // left an Annotation to Publish, so the text says whose.
+        ("description", DescriptionText),
     };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
@@ -117,12 +121,14 @@ public sealed class EnlightenedBlessing : MeditationsOfAYako
 
     public override int PublishCount => 2;
 
+    public new const string DescriptionText =
+        "After an elite or boss fight, you may [gold]Publish[/gold] up to "
+      + "2 Annotations you made that fight.";
+
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Enlightened Blessing"),
-        ("description",
-            "After an elite or boss fight, you may [gold]Publish[/gold] up to "
-          + "2 Annotations."),
+        ("description", DescriptionText),
     };
 
     /// <summary>Already the upgrade.</summary>

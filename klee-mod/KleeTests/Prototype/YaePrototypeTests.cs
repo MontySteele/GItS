@@ -809,8 +809,10 @@ public class YaePrototypeTests : IDisposable
         Assert.True(ledger.Plant(YaeLaw.PlantLevel, null, kind: YaeSakuraKind.Kitsune));
         Assert.Equal(YaeLaw.SakuraCap, ledger.Count);
         Assert.Equal(YaeSakuraKind.Kitsune, ledger.Standing[^1].Kind);
-        Assert.Equal("Shrine full: your oldest acts. Same kind: it refreshes "
-                     + "and gains a Level. Other kind: it withers.",
+        Assert.Equal("Planting makes your oldest Sakura act. If the new Sakura "
+                     + "is the same kind, the oldest stays and gains a Level. "
+                     + "If not, the oldest withers and the new one takes its "
+                     + "place.",
                      ArmKeywordTips.YaeFullShrineTip);
     }
     // ---- the Edit tip and each Annotation's own (2026-10-14) ----------------

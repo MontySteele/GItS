@@ -411,7 +411,8 @@ MASTERPIECE_NAME = "Annotated"
 
 #: Yae review r4, item 6: an Edit's prompt reads "Choose a card to Edit: Red
 #: Ink (...)", and the Masterpiece's text lists "... This combat: Footnote."
-_EDIT_PROMPT = re.compile(r"^Choose a card to Edit")
+# Yae review r5: the one-card chooser and the "up to N" one (#1330).
+_EDIT_PROMPT = re.compile(r"^Choose (a card|up to \d+ cards) to Edit")
 _THIS_COMBAT = re.compile(r"This combat:\s*([^.]+)")
 
 

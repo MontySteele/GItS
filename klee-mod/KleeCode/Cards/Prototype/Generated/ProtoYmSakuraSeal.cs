@@ -41,14 +41,14 @@ public sealed class ProtoYmSakuraSeal : CustomCardModel, ICharacterCard
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForEdit(ArmKeywordTips.ForAnnotation(base.ExtraHoverTips, this, YaeAnnotation.SakuraSeal, false), this);
+        ArmKeywordTips.ForEdit(ArmKeywordTips.ForAnnotation(ArmKeywordTips.ForSakura(base.ExtraHoverTips, this), this, YaeAnnotation.SakuraSeal, false), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_sakura_seal");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sakura Seal"),
-        ("description", "[gold]Edit[/gold] up to {YmAmount:diff()} cards in your hand: [gold]Sakura Seal[/gold]."),
+        ("description", "[gold]Edit[/gold] up to {YmAmount:diff()} cards in your hand: [gold]Sakura Seal[/gold] (when played, plant a [gold]Sakura[/gold])."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -710,9 +710,13 @@ public static class ArmKeywordTips
         IEnumerable<IHoverTip> inherited, CardModel? card) =>
         With(inherited, FullShrineKey, YaeFullShrineTip);
 
+    /// <summary>Yae review r5, item 5: four of five seats could not read
+    /// the short form until it bit them. The title says "Full shrine".
+    /// </summary>
     public static readonly string YaeFullShrineTip =
-        "Shrine full: your oldest acts. Same kind: it refreshes and gains a "
-      + "Level. Other kind: it withers.";
+        "Planting makes your oldest Sakura act. If the new Sakura is the same "
+      + "kind, the oldest stays and gains a Level. If not, the oldest withers "
+      + "and the new one takes its place.";
 
     /// <summary>The text pass of 2026-10-08: Eula's blade, a counter on the
     /// enemy (<c>LightfallSwordPower</c>) with a badge and no tip.</summary>
