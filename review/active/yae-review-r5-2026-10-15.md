@@ -117,8 +117,10 @@ every Power.
 
 ## Next
 
-Items 1 to 7 are built (#1333). Pick 1 is built once ruled, then a Yae round of
-five seats.
+Items 1 to 7 are built (#1333). Pick 1 (a) is built (PR "Yae review r5, pick
+1 (a): Bestseller and Print Run count Edits this combat"): both read the
+per-combat Edit count, which now also counts each Sakura an Edit Annotates.
+Next, a Yae round of five seats.
 
 ## Ruled 2026-10-15
 

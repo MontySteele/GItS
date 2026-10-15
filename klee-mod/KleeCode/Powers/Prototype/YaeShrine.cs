@@ -130,7 +130,12 @@ public sealed class YaeShrineLedger
     /// <summary>Actions made this combat (telemetry, the seat page).</summary>
     public int Strikes { get; private set; }
 
-    /// <summary>Edits made this combat.</summary>
+    /// <summary>Cards Edited this combat: each card in hand an Edit,
+    /// Reborn as Guuji Yae or Inked Branches+ Annotated, and each Sakura an
+    /// "Edit your ... Sakura" card Annotated (Inked Branches counts every
+    /// one). A Publish is not an Edit. Bestseller and Print Run count it
+    /// (Yae review r5, pick 1 (a), ruled 2026-10-15). Per combat, as the
+    /// whole ledger is: never saved, a new combat starts it at 0.</summary>
     public int Edits { get; private set; }
 
     /// <summary>
@@ -258,6 +263,7 @@ public sealed class YaeShrineLedger
             s.KeepsRedInk = keepRedInk && hadRed && annotation != YaeAnnotation.RedInk;
             edited++;
         }
+        Edits += edited;
         return edited;
     }
 
@@ -325,6 +331,11 @@ public static class YaeShrine
     /// anyone else).</summary>
     public static int Count(Creature? yae) =>
         yae == null || !Live(yae) ? 0 : YaeShrineLedger.For(yae).Count;
+
+    /// <summary>The cards <paramref name="yae"/> Edited this combat (0 for
+    /// anyone else): what Bestseller and Print Run count.</summary>
+    public static int Edits(Creature? yae) =>
+        yae == null || !Live(yae) ? 0 : YaeShrineLedger.For(yae).Edits;
 
     /// <summary>The Level a Sakura is planted at: 1, plus 1 for each Fox's
     /// Mooncall.</summary>
@@ -771,20 +782,20 @@ public static class YaeCards
         CardBlock(card, cardPlay,
                   Var(card, "YmBase") + Var(card, "YmPer") * YaeShrine.Count(card.Owner?.Creature));
 
-    /// <summary>Bestseller: base + per for each Annotated card in hand, the
-    /// card itself counted when Annotated (any layer, a Published one
-    /// included).</summary>
-    public static Task DamagePerAnnotated(PlayerChoiceContext choiceContext,
-                                          CardModel card, CardPlay cardPlay) =>
+    /// <summary>Bestseller: base + per for each card you Edited this combat
+    /// (<see cref="YaeShrineLedger.Edits"/>; Yae review r5, pick 1 (a),
+    /// ruled 2026-10-15: was per Annotated card in hand).</summary>
+    public static Task DamagePerEdit(PlayerChoiceContext choiceContext,
+                                     CardModel card, CardPlay cardPlay) =>
         CardHit(choiceContext, card, cardPlay,
-                Var(card, "YmBase") + Var(card, "YmPer") * YaeEditing.AnnotatedInHand(card));
+                Var(card, "YmBase") + Var(card, "YmPer") * YaeShrine.Edits(card.Owner?.Creature));
 
-    /// <summary>Print Run: base + per for each Annotated card in hand.
+    /// <summary>Print Run: base + per for each card you Edited this combat.
     /// </summary>
-    public static Task BlockPerAnnotated(PlayerChoiceContext choiceContext,
-                                         CardModel card, CardPlay cardPlay) =>
+    public static Task BlockPerEdit(PlayerChoiceContext choiceContext,
+                                    CardModel card, CardPlay cardPlay) =>
         CardBlock(card, cardPlay,
-                  Var(card, "YmBase") + Var(card, "YmPer") * YaeEditing.AnnotatedInHand(card));
+                  Var(card, "YmBase") + Var(card, "YmPer") * YaeShrine.Edits(card.Owner?.Creature));
 
     /// <summary>Kitsune Flash: base, and amount more if this card is
     /// Annotated.</summary>

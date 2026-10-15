@@ -3061,8 +3061,8 @@ YAE_KINDS = {
     "lure": "Lure",
     "damage_per_sakura": "DamagePerSakura",
     "block_per_sakura": "BlockPerSakura",
-    "damage_per_annotated": "DamagePerAnnotated",
-    "block_per_annotated": "BlockPerAnnotated",
+    "damage_per_edit": "DamagePerEdit",
+    "block_per_edit": "BlockPerEdit",
     "annotated_strike": "AnnotatedStrike",
     "fox_fire": "FoxFire",
     # The design axes (ruled 2026-10-14).
@@ -3085,8 +3085,8 @@ YAE_KIND_FIELDS = {
     "lure": (),
     "damage_per_sakura": ("base", "per"),
     "block_per_sakura": ("base", "per"),
-    "damage_per_annotated": ("base", "per"),
-    "block_per_annotated": ("base", "per"),
+    "damage_per_edit": ("base", "per"),
+    "block_per_edit": ("base", "per"),
     "annotated_strike": ("base", "amount"),
     "fox_fire": (),
     "edit_sakura": ("amount",),
@@ -3097,7 +3097,7 @@ YAE_KIND_FIELDS = {
     "authors_copy": (),
 }
 #: The kinds that aim at the enemy the player picks (`target: enemy`).
-YAE_AIMED_KINDS = {"lure", "damage_per_sakura", "damage_per_annotated",
+YAE_AIMED_KINDS = {"lure", "damage_per_sakura", "damage_per_edit",
                    "annotated_strike", "strike_if_weak"}
 #: The kinds that name an Annotation (`annotation:`), and the C#
 #: `YaeAnnotation` member each sheet name is.
@@ -3179,7 +3179,7 @@ def yae_plants_sakura(card: dict) -> bool:
 
 
 #: The `yae` kinds that give the card's own Block (`IYaeBlockCard`).
-YAE_BLOCK_KINDS = frozenset({"block_per_sakura", "block_per_annotated"})
+YAE_BLOCK_KINDS = frozenset({"block_per_sakura", "block_per_edit"})
 
 
 def yae_gives_block(card: dict) -> bool:

@@ -4754,18 +4754,21 @@
 - {id: proto_ym_bestseller, name: "Bestseller", character: yae,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   # Yae review r4, pick 1 (a) (ruled 2026-10-15): 8 [10] (was 5 [7]).
-   description: "Deal 8 [gold]Electro[/gold] damage, plus 3 for each [gold]Annotated[/gold] card in your hand.",
-   effects: [{op: yae, kind: damage_per_annotated, base: 8, per: 3, target: enemy}],
+   # Yae review r4, pick 1 (a): 8 [10]. Yae review r5, pick 1 (a) (ruled
+   # 2026-10-15, "For 1332 - agreed on (a)"): plus 2 [3] per card Edited
+   # this combat (was plus 3 [4] per Annotated card in hand).
+   description: "Deal 8 [gold]Electro[/gold] damage, plus 2 for each card you [gold]Edited[/gold] this combat.",
+   effects: [{op: yae, kind: damage_per_edit, base: 8, per: 2, target: enemy}],
    upgrade: {yae_base: 2, yae_per: 1}}
 
 - {id: proto_ym_print_run, name: "Print Run", character: yae,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   # Design axes sec.4: 6 [8] + 2 [3] per Annotated card (was 4 + 2).
-   # Yae review r4, pick 1 (a) (ruled 2026-10-15): plus 3 [4] (was 2 [3]).
-   description: "Gain 6 [gold]Block[/gold], plus 3 for each [gold]Annotated[/gold] card in your hand.",
-   effects: [{op: yae, kind: block_per_annotated, base: 6, per: 3}],
+   # Yae review r5, pick 1 (a) (ruled 2026-10-15, "For 1332 - agreed on
+   # (a)"): plus 2 [3] per card Edited this combat (was plus 3 [4] per
+   # Annotated card in hand; design axes sec.4 set 6 [8]).
+   description: "Gain 6 [gold]Block[/gold], plus 2 for each card you [gold]Edited[/gold] this combat.",
+   effects: [{op: yae, kind: block_per_edit, base: 6, per: 2}],
    upgrade: {yae_base: 2, yae_per: 1}}
 
 - {id: proto_ym_footnote, name: "Footnote", character: yae,

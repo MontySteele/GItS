@@ -88,7 +88,7 @@ THE RULES AS MODELLED (review r3, ruled 2026-10-14,
 
 READINGS TAKEN WHERE THE PAPER LEAVES ROOM (each in the builder's report):
   * Tier 0 seats one player, so every Sakura is hers.
-  * `damage_per_sakura` and `damage_per_annotated` are ONE powered hit of
+  * `damage_per_sakura` and `damage_per_edit` are ONE powered hit of
     the card (Strength counts, flat Attack riders ride it) carrying Electro.
   * Reborn as Guuji Yae's one Annotation is the pilot's (`reborn_choice`),
     else the row's printed default (Sakura Seal).
@@ -195,8 +195,8 @@ KIND_FIELDS = {
     "lure": (),
     "damage_per_sakura": ("base", "per"),
     "block_per_sakura": ("base", "per"),
-    "damage_per_annotated": ("base", "per"),
-    "block_per_annotated": ("base", "per"),
+    "damage_per_edit": ("base", "per"),
+    "block_per_edit": ("base", "per"),
     "annotated_strike": ("base", "amount"),
     "fox_fire": (),
     # The design axes (ruled 2026-10-14).
@@ -211,7 +211,7 @@ KIND_FIELDS = {
 KINDS = frozenset(KIND_FIELDS)
 KIND_TARGETS = {
     "lure": "enemy", "damage_per_sakura": "enemy",
-    "damage_per_annotated": "enemy", "annotated_strike": "enemy",
+    "damage_per_edit": "enemy", "annotated_strike": "enemy",
     "strike_if_weak": "enemy",
 }
 #: Kinds that take an `annotation:` name.
@@ -253,6 +253,10 @@ class YaeLedger:
     lure: object = None           # this turn's aimed enemy, or None
     strikes: int = 0              # actions this combat
     strike_damage: int = 0        # printed damage, this combat
+    #: Cards Edited this combat (Yae review r5, pick 1 (a), ruled
+    #: 2026-10-15): each hand card an Edit / Reborn Annotated and each
+    #: Sakura an `edit_sakura` Annotated. A Publish is not an Edit.
+    #: Bestseller and Print Run count it. C# twin: `YaeShrineLedger.Edits`.
     edits: int = 0
     #: Reprint (review r3): the cards (by `id`) already played this fight,
     #: so their stacked Reprints are inert for the rest of it.
@@ -554,6 +558,7 @@ def edit_sakura(state, which: str, n: int, annotation: str,
         s.red_ink_kept = bool(keeps == RED_INK and had_red
                               and annotation != RED_INK)
         state.emit("yae_sakura_annotate", seq=s.seq, annotation=annotation)
+    led.edits += len(ordered[:n])
     return len(ordered[:n])
 
 
@@ -712,10 +717,6 @@ def is_published(card) -> bool:
     return bool(stack(card))
 
 
-def annotated_in_hand(state) -> int:
-    return sum(1 for c in state.player.hand if is_annotated(c))
-
-
 def _apply_layers(card) -> None:
     """The card's riders from every layer, added up (review r3): Red Ink
     +3 each on damage and Block, Deadline Retain, and one play rider per
@@ -827,7 +828,7 @@ def deals_damage(card) -> bool:
 
 
 #: The `yae` kinds that give the card's own Block (C# `IYaeBlockCard`).
-BLOCK_KINDS = frozenset({"block_per_sakura", "block_per_annotated"})
+BLOCK_KINDS = frozenset({"block_per_sakura", "block_per_edit"})
 
 
 def gives_block(card) -> bool:
@@ -1280,12 +1281,10 @@ def op_yae(state, fx: dict, card) -> None:
         _card_hit(state, card, fx["base"] + fx["per"] * len(led.sakura))
     elif kind == "block_per_sakura":
         _card_block(state, card, fx["base"] + fx["per"] * len(led.sakura))
-    elif kind == "damage_per_annotated":
-        _card_hit(state, card,
-                  fx["base"] + fx["per"] * annotated_in_hand(state))
-    elif kind == "block_per_annotated":
-        _card_block(state, card,
-                    fx["base"] + fx["per"] * annotated_in_hand(state))
+    elif kind == "damage_per_edit":
+        _card_hit(state, card, fx["base"] + fx["per"] * led.edits)
+    elif kind == "block_per_edit":
+        _card_block(state, card, fx["base"] + fx["per"] * led.edits)
     elif kind == "annotated_strike":
         _card_hit(state, card,
                   fx["base"] + (fx["amount"] if is_annotated(card) else 0))

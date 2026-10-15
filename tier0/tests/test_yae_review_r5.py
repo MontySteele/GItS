@@ -149,3 +149,92 @@ def test_sakura_seal_and_footnote_name_what_their_annotation_does():
     assert _row("proto_ym_footnote")["description"] == (
         "[gold]Edit[/gold] up to 2 cards in your hand: [gold]Footnote[/gold]"
         " (when played, draw 1 card).")
+
+
+# Pick 1 (a), ruled 2026-10-15 ("For 1332 - agreed on (a)"): Bestseller and
+# Print Run count the cards you Edited this combat ---------------------------
+
+def _ym(name):
+    return loader.get_card("proto_ym_" + name)
+
+
+def test_bestseller_and_print_run_rows_count_edits():
+    for name, base, per, kind in (("bestseller", (8, 10), (2, 3), "damage_per_edit"),
+                                  ("print_run", (6, 8), (2, 3), "block_per_edit")):
+        fx = lambda c: next(f for f in c.effects if f.get("op") == "yae")
+        lo, hi = fx(_ym(name)), fx(_ym(name + "+"))
+        assert lo["kind"] == hi["kind"] == kind
+        assert (lo["base"], hi["base"]) == base
+        assert (lo["per"], hi["per"]) == per
+    assert "for each card you [gold]Edited[/gold] this combat" in _row(
+        "proto_ym_bestseller")["description"]
+    assert "for each card you [gold]Edited[/gold] this combat" in _row(
+        "proto_ym_print_run")["description"]
+
+
+def test_the_count_starts_at_zero_each_combat():
+    st = _state()
+    assert Y.ledger(st.player).edits == 0
+    _play(st, _ym("bestseller"))
+    assert st.enemies[0].hp == 100 - 8
+    _play(st, _ym("print_run"))
+    assert st.player.block == 6
+    Y.ledger(st.player).edits = 4
+    Y.open_combat(st.player)
+    assert Y.ledger(st.player).edits == 0
+
+
+def test_a_two_card_edit_adds_two_and_the_payoffs_read_it():
+    st = _state()
+    st.player.hand += [loader.get_card("strike"), loader.get_card("defend")]
+    _play(st, _ym("footnote"))                   # Edits 2 cards
+    assert Y.ledger(st.player).edits == 2
+    _play(st, _ym("bestseller"))                 # 8 + 2 x 2
+    assert st.enemies[0].hp == 100 - 12
+    _play(st, _ym("print_run+"))                 # 8 + 3 x 2
+    assert st.player.block == 14
+
+
+def test_edited_cards_count_after_they_leave_the_hand():
+    st = _state()
+    a, b = loader.get_card("strike"), loader.get_card("defend")
+    st.player.hand += [a, b]
+    _play(st, _ym("footnote"))
+    _play(st, a)
+    _play(st, b)
+    st.player.hand = []                          # Footnote's draws aside
+    st.player.block = 0
+    _play(st, _ym("print_run"))                  # 6 + 2 x 2, hand empty
+    assert st.player.block == 10
+
+
+def test_each_sakura_inked_branches_edits_counts():
+    st = _state()
+    for _ in range(3):
+        Y.plant(st, 1)
+    _play(st, _ym("inked_branches"))
+    assert Y.ledger(st.player).edits == 3
+
+
+def test_reborn_counts_each_card_it_edits():
+    st = _state()
+    st.player.hand += [loader.get_card("strike"), loader.get_card("defend"),
+                       loader.get_card("strike")]
+    _play(st, _ym("reborn_as_guuji_yae"))
+    assert Y.ledger(st.player).edits == 3
+
+
+def test_a_publish_is_not_an_edit():
+    st = _state()
+    c = loader.get_card("strike")
+    Y.publish_to(c, [Y.REPRINT])
+    st.player.hand.append(c)
+    _play(st, _ym("bestseller"))                 # a Published card, no Edits
+    assert st.enemies[0].hp == 100 - 8
+    led = Y.ledger(st.player)
+    c2 = loader.get_card("strike")
+    st.player.hand.append(c2)
+    Y.annotate(st, c2, Y.FOOTNOTE)
+    before = led.edits
+    Y.publish_card(st, c2)
+    assert led.edits == before

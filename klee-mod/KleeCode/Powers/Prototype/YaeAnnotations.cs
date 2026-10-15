@@ -693,19 +693,6 @@ public static class YaeEditing
     /// <summary>Does the card carry a Published layer? PURE.</summary>
     public static bool Published(CardModel? card) => Stack(card).Count > 0;
 
-    /// <summary>Annotated cards in the owner's hand; the card being played
-    /// counts if it is Annotated (Bestseller counts itself). PURE over the
-    /// piles.</summary>
-    public static int AnnotatedInHand(CardModel playing)
-    {
-        var owner = playing.Owner;
-        if (owner == null) return 0;
-        var hand = PileType.Hand.GetPile(owner).Cards;
-        var n = hand.Count(IsAnnotated);
-        if (!hand.Contains(playing) && IsAnnotated(playing)) n++;
-        return n;
-    }
-
     /// <summary>
     /// "Edit a card in your hand: never the Edit card itself, never a Status
     /// or Curse, never a kit card." PURE.
