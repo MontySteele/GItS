@@ -206,14 +206,21 @@ public class YaePrototypeTests : IDisposable
     }
 
     [Fact]
-    public void Each_kind_does_its_own_job_in_the_strike_and_channeling_is_blank()
+    public void Each_kind_does_its_own_job_in_the_strike()
     {
         var calls = Il.CallSequence(typeof(YaeShrine).GetMethod(nameof(YaeShrine.Strike))!).ToList();
+        // Every strike hits first, a typed Tenko's too ([USER], 2026-10-14:
+        // "Hmm, the double strike makes Tenko effects quite strong, but let's
+        // try it and see what happens"), then the kind's bonus.
+        var hit = calls.FindIndex(c => c.Contains("YaeShrine.Hit"));
+        Assert.True(hit >= 0);
+        Assert.True(hit < calls.FindIndex(c => c.Contains("CreatureCmd.GainBlock")));
+        Assert.True(hit < calls.FindIndex(c => c.Contains("set_PendingDraw")));
         Assert.Contains(calls, c => c.Contains("CreatureCmd.GainBlock"));      // Warding
         Assert.Contains(calls, c => c.Contains("set_PendingDraw"));            // Offering
         Assert.Contains(calls, c => c.Contains("HittableEnemies"));            // Wildfire
         Assert.Contains(calls, c => c.Contains(nameof(YaeShrine.FoxFire)));    // Fox Fire
-        // Sakura Channeling's job went with the Rite: replacement pending.
+        // Sakura Channeling (2026-10-14) raises the cap, not the strike.
         Assert.DoesNotContain(calls, c => c.Contains("SakuraChannelingPower"));
         Assert.DoesNotContain(calls, c => c.Contains("get_Rite"));
     }
@@ -383,6 +390,24 @@ public class YaePrototypeTests : IDisposable
     }
 
     [Fact]
+    public void A_spent_reprint_reads_spent_and_offers_no_replay()
+    {
+        // Two blind seats (2026-10-14) expected a second replay off a spent
+        // Reprint. Glam's greyed tab (Status = Disabled) stays; the hover
+        // adds "Used this combat." and drops the Replay tip once spent.
+        var t = typeof(ReprintAnnotation);
+        var after = Il.CallSequence(t.GetMethod("AfterCardPlayed")!);
+        Assert.Contains(after, c => c.Contains("set_BaseValue"));
+        var tips = t.GetProperty("ExtraHoverTips", HeadlessGame.All)!.GetGetMethod(true)!;
+        Assert.Equal(t, tips.DeclaringType);
+        Assert.Contains(Il.CallSequence(tips), c => c.Contains("get_Status"));
+        var description = new ReprintAnnotation().Localization!
+            .Single(kv => kv.Item1 == "description").Item2;
+        Assert.Equal(YaeAnnotationText.Rule(YaeAnnotation.Reprint)
+                     + "{Spent:cond:==1? Used this combat.|}", description);
+    }
+
+    [Fact]
     public void Reprint_reaches_any_playable_card()
     {
         Assert.True(YaeAnnotationReach.Affects(YaeAnnotation.Reprint, false, false, false));
@@ -442,6 +467,36 @@ public class YaePrototypeTests : IDisposable
         ledger.Refresh();
         Assert.Equal(2, ledger.Count);
         Assert.All(ledger.Standing, s => Assert.Equal(3, s.TurnsLeft));
+    }
+
+    [Fact]
+    public void Tenko_never_shortens_a_timer_extended_past_three()
+    {
+        // Main session, 2026-10-14 (after a GPT design review): each timer
+        // becomes max(its turns, 3).
+        var ledger = Fresh();
+        PlantN(ledger, 1);
+        ledger.Extend(3);                         // 6
+        ledger.TickAndWither();                   // 5
+        PlantN(ledger, 1);                        // 5, 3
+        ledger.TickAndWither();                   // 4, 2
+        ledger.Refresh();
+        Assert.Equal(new[] { 4, 3 }, ledger.Standing.Select(s => s.TurnsLeft).ToArray());
+    }
+
+    [Fact]
+    public void A_full_shrine_plant_never_shortens_the_oldests_timer()
+    {
+        var ledger = Fresh();
+        PlantN(ledger, 1);
+        ledger.Extend(3);                         // the oldest at 6
+        PlantN(ledger, 2);                        // 6, 3, 3: full
+        Assert.False(ledger.Plant(YaeLaw.PlantLevel));
+        Assert.Equal(6, ledger.Standing.First().TurnsLeft);
+        ledger.TickAndWither();
+        ledger.TickAndWither();                   // 4, 1, 1
+        Assert.False(ledger.Plant(YaeLaw.PlantLevel));
+        Assert.Equal(4, ledger.Standing.First().TurnsLeft);
     }
 
     [Fact]
@@ -521,7 +576,12 @@ public class YaePrototypeTests : IDisposable
         Assert.Empty(SakuraBadge.Wanted(0));
         Assert.Equal(new[] { typeof(SakuraFirstPower), typeof(SakuraSecondPower) },
                      SakuraBadge.Wanted(2));
-        Assert.Equal(3, SakuraBadge.Wanted(5).Count);
+        // Sakura Channeling (2026-10-14): a badge per Sakura up to nine.
+        Assert.Equal(5, SakuraBadge.Wanted(5).Count);
+        Assert.Equal(typeof(SakuraFifthPower), SakuraBadge.Wanted(5)[4]);
+        Assert.Equal(9, SakuraBadge.Wanted(12).Count);
+        Assert.Equal(Enumerable.Range(0, 9),
+                     SakuraBadge.Slots.Select(t => ((SakuraBadgePower)Activator.CreateInstance(t)!).Slot));
     }
 
     // ---- Edit and Annotations (sec.2) ----------------------------------------
@@ -755,14 +815,18 @@ public class YaePrototypeTests : IDisposable
         // Thunder'".
         // Shrine r2 (2026-10-14): no Rite, and a full-shrine plant feeds the
         // oldest; the Tenko tip names its three kinds.
-        Assert.Contains("refreshes the oldest and gives it a Level",
-                        ArmKeywordTips.YaeSakuraTip);
+        // Condensed 2026-10-14: the full-shrine rule lives on the plant
+        // cards (it moves with Sakura Channeling), so the tip drops it.
+        Assert.Equal("At the end of your turn, strikes an enemy for 2 + its "
+                     + "Level. Lasts 3 turns, then strikes once more.",
+                     ArmKeywordTips.YaeSakuraTip);
+        Assert.True(ArmKeywordTips.YaeSakuraTip.Length <= 100);
         Assert.DoesNotContain("Rite", ArmKeywordTips.YaeSakuraTip);
         Assert.DoesNotContain("Tenko", ArmKeywordTips.YaeSakuraTip);
         Assert.DoesNotContain("Thunder", ArmKeywordTips.YaeSakuraTip);
-        Assert.Equal("All [gold]Sakura[/gold] strike now, reset to 3 turns. "
-                     + "Warding: [gold]Block[/gold]. Wildfire: Level to ALL. "
-                     + "Offering: draw 1.",
+        Assert.Equal("[gold]Sakura[/gold] strike now, refresh to 3 turns. "
+                     + "Warding: +[gold]Block[/gold]. Wildfire: +Level to ALL. "
+                     + "Offering: +draw 1.",
                      ArmKeywordTips.YaeTenkoTip);
     }
 
@@ -801,8 +865,8 @@ public class YaePrototypeTests : IDisposable
     public void An_annotation_tip_is_its_card_reading_or_its_sakura_reading()
     {
         Assert.Equal("This card deals 3 more damage and gives 3 more "
-                     + "[gold]Block[/gold]. If it only plants, the "
-                     + "[gold]Sakura[/gold] gets it.",
+                     + "[gold]Block[/gold]. If it plants, its "
+                     + "[gold]Sakura[/gold] get it too.",
                      YaeAnnotationText.TipBody(YaeAnnotation.RedInk, false));
         Assert.Equal("The [gold]Sakura[/gold]'s strike is 3 bigger (not in "
                      + "Offering).",

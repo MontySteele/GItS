@@ -397,7 +397,24 @@ def _enchantment(blob: Any) -> dict[str, Any] | None:
                            "text": _text(blob.get("description"))}
     if blob.get("shows_amount") and _int(blob.get("amount")):
         row["amount"] = _int(blob.get("amount"))
+    # Reprint spent (two seats, 2026-10-14): the bridge's `disabled` is the
+    # game's `Status == Disabled`, the greyed tab (Glam, Swift, Sown, Yae's
+    # Reprint after its first play). Absent means live.
+    if blob.get("disabled"):
+        row["used"] = True
     return row
+
+
+def enchantment_tag(ench: dict[str, Any] | None) -> str:
+    """The enchantment beside a title: " (Sharp 3)", " (Reprint)", or
+    " (Reprint: used)" once the game has greyed it this combat. PURE."""
+    if not isinstance(ench, dict) or not ench.get("name"):
+        return ""
+    if ench.get("used"):
+        return f" ({ench['name']}: used)"
+    if ench.get("amount"):
+        return f" ({ench['name']} {ench['amount']})"
+    return f" ({ench['name']})"
 
 
 # `EB-262`, AND IT IS THE WHOLE ROW. A SHOP ITEM CARRIES ITS NAME UNDER ITS
@@ -1731,7 +1748,28 @@ def hand_card_left(state: dict[str, Any], index: int) -> None:
 def _chooser_rows(state: dict[str, Any], entries: list[dict[str, Any]]
                   ) -> list[tuple[str, int, str]] | None:
     """`(key, number, label)` per offered card: the hand card it IS, found by
-    face, or `None` where one cannot be placed.
+    face, or `None` where one cannot be placed (`_chooser_match`)."""
+    rows = _chooser_match(state, entries)
+    return None if rows is None else [r[1:] for r in rows]
+
+
+def chooser_order(state: dict[str, Any], entries: list[dict[str, Any]]
+                  ) -> list[int]:
+    """The offered cards' indices in HAND order, the order the fight page
+    printed them in (a Yae seat, 2026-10-14: the chooser listed the holders'
+    order and the seat picked the wrong card twice). The page prints the
+    chooser in this order; a pick still posts the bridge's own index. Where a
+    card cannot be placed in the hand, the bridge's order. PURE over the
+    memory."""
+    rows = _chooser_match(state, entries)
+    if rows is None:
+        return list(range(len(entries)))
+    return sorted(range(len(entries)), key=lambda i: rows[i][0])
+
+
+def _chooser_match(state: dict[str, Any], entries: list[dict[str, Any]]
+                   ) -> list[tuple[int, str, int, str]] | None:
+    """`(hand position, key, number, label)` per offered card, or `None`.
 
     YAE BLOOM SEAT (2026-10-14, after #1290). A chooser's list is NOT the
     hand in order: the bridge lists the hand's UI holders
@@ -1759,14 +1797,14 @@ def _chooser_rows(state: dict[str, Any], entries: list[dict[str, Any]]
         pool.setdefault(r["f"], []).append(j)
     for js in pool.values():
         js.sort(key=lambda j: (rows[j]["k"], rows[j]["n"]) in picked)
-    out: list[tuple[str, int, str]] = []
+    out: list[tuple[int, str, int, str]] = []
     for e in entries:
         js = pool.get(_hand_face(e)) or []
         if not js:
             return None
         j = js.pop(0)
-        out.append((rows[j]["k"], rows[j]["n"], labels[j]))
-    if len({_fold(x[2]) for x in out}) != len(out):
+        out.append((j, rows[j]["k"], rows[j]["n"], labels[j]))
+    if len({_fold(x[3]) for x in out}) != len(out):
         return None
     return out
 

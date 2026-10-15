@@ -30,6 +30,7 @@ from understudy.blindplay_board import (_bundle_cards, _combat, deck_titles,
                                         upgrade_deck_floor)
 from understudy.blindplay_faces import (SEAT_FACE_ID, _card_face,
                                         _dedupe_text, _hazard, chooser_labels,
+                                        chooser_order,
                                         _named_option, _number_faces,
                                         _reward_option, _shop_items,
                                         _shop_options,
@@ -404,10 +405,15 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
             [_card_face(c) for c in _screen_cards(state)], "title")
         # Yae seats (2026-10-14): a hand chooser (an Edit's pick) prints each
         # card under the label the fight page gave it (`chooser_labels`).
+        # And in HAND order, as the fight page listed them (a Yae seat,
+        # 2026-10-14, picked the wrong card twice off the holders' order);
+        # `choose` still posts the bridge's own index (`chooser_order`).
         if st == "hand_select":
             for face, label in zip(obs["offers"], chooser_labels(
                     state, _screen_cards(state))):
                 face["title"] = label
+            obs["offers"] = [obs["offers"][i] for i in chooser_order(
+                state, _screen_cards(state))]
         # `EB-263`. WHAT THE SCREEN SAYS IS PICKED. Two channels now, and the
         # older one first: `BuildCardSelectState` puts the chosen card(s) in
         # `preview_cards` while a preview container is open, which the upgrade

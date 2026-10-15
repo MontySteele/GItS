@@ -1713,16 +1713,18 @@ ARM_KEYWORDS: dict[str, str] = {
     # printed only where a face names it.
     # Shrine r2 (ruled 2026-10-14): no Rite; a full-shrine plant feeds the
     # oldest; Tenko names its three kinds.
-    "Sakura": ("Strikes a random enemy for 2 plus its Level at the end of "
-               "your turn. Lasts 3 turns, then strikes once more. Up to 3; "
-               "planting when full refreshes the oldest and gives it a "
-               "Level."),
-    "Tenko": ("All Sakura strike now, reset to 3 turns. Warding: Block. "
-              "Wildfire: Level to ALL. Offering: draw 1."),
+    # Condensed 2026-10-14: the full-shrine rule is on the plant cards.
+    "Sakura": ("At the end of your turn, strikes an enemy for 2 + its "
+               "Level. Lasts 3 turns, then strikes once more."),
+    # A typed Tenko strikes AND adds its kind ([USER], 2026-10-14).
+    "Tenko": ("Sakura strike now, refresh to 3 turns. Warding: +Block. "
+              "Wildfire: +Level to ALL. Offering: +draw 1."),
     "Edit": ("Give a card an Annotation for this combat, replacing any it "
              "had. A Published one lasts the run."),
-    "Red Ink": ("This card deals 3 more damage and gives 3 more Block. On a "
-                "Sakura: the Sakura's strike is 3 bigger (not in Offering)."),
+    # 2026-10-14: Red Ink on a planting card reaches its Sakura too.
+    "Red Ink": ("This card deals 3 more damage and gives 3 more Block. If it "
+                "plants, its Sakura get it too. On a Sakura: the Sakura's "
+                "strike is 3 bigger (not in Offering)."),
     "Footnote": "When this card is played, draw 1 card.",
     "Deadline Extension": ("This card has Retain. On a Sakura: the Sakura "
                            "does not wither."),

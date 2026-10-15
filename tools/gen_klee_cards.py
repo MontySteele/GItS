@@ -4301,8 +4301,7 @@ APPLY_POWERS = {
     "ym_yakan_offering": ("YakanOfferingPower", None,
         "At the start of your turn, plant {X} [gold]Sakura[/gold]."),
     "ym_sakura_channeling": ("SakuraChannelingPower", None,
-        "Your [gold]Sakura[/gold] strike as Thunder at the end of your "
-        "turn."),
+        "You can have {X} more [gold]Sakura[/gold]."),
     # The design axes, batch two (2026-10-14).
     "ym_fallen_petals": ("FallenPetalsPower", None,
         "Whenever a [gold]Sakura[/gold] withers, gain {X} Energy on your "
@@ -16862,7 +16861,7 @@ def yae_face_lines(card: dict, profile: "CharacterProfile",
 
     A row that Tenkos says in combat what its Tenko would do now, summed
     over the Sakura standing: "Tenko (12 damage)", "Tenko (Warding: 12
-    Block)"; with none standing "Tenko (no Sakura)", "Tenko (Warding, no
+    damage, 12 Block)"; with none standing "Tenko (no Sakura)", "Tenko (Warding, no
     Sakura)". The `{InCombat:{YaeTenko}|}` goes right after "Tenko" on a
     plain row and inside the kind's brackets on a typed one. DERIVED FROM
     THE OPS, so a new Tenko row carries its clause the day it exists. Sim

@@ -93,15 +93,57 @@ public sealed class SakuraThirdPower : SakuraBadgePower
     public override int Slot => 2;
 }
 
+// Sakura Channeling (2026-10-14): "You can have 2 more Sakura", per copy,
+// so the shrine can hold 5, 7, 9 ... One badge per slot up to nine (three
+// copies); a tenth Sakura still stands and strikes, it shows no badge.
+
+public sealed class SakuraFourthPower : SakuraBadgePower
+{
+    public override int Slot => 3;
+}
+
+public sealed class SakuraFifthPower : SakuraBadgePower
+{
+    public override int Slot => 4;
+}
+
+public sealed class SakuraSixthPower : SakuraBadgePower
+{
+    public override int Slot => 5;
+}
+
+public sealed class SakuraSeventhPower : SakuraBadgePower
+{
+    public override int Slot => 6;
+}
+
+public sealed class SakuraEighthPower : SakuraBadgePower
+{
+    public override int Slot => 7;
+}
+
+public sealed class SakuraNinthPower : SakuraBadgePower
+{
+    public override int Slot => 8;
+}
+
 /// <summary>Keeps one badge per standing Sakura.</summary>
 public static class SakuraBadge
 {
     /// <summary>The badges <paramref name="count"/> Sakura want, oldest
     /// first. PURE.</summary>
     public static IReadOnlyList<System.Type> Wanted(int count) =>
-        new[] { typeof(SakuraFirstPower), typeof(SakuraSecondPower), typeof(SakuraThirdPower) }
-            .Take(System.Math.Max(0, System.Math.Min(YaeLaw.SakuraCap, count)))
+        Slots.Take(System.Math.Max(0, System.Math.Min(Slots.Length, count)))
             .ToList();
+
+    /// <summary>Every badge, oldest Sakura first (nine: three Sakura
+    /// Channelings' worth).</summary>
+    public static readonly System.Type[] Slots =
+    {
+        typeof(SakuraFirstPower), typeof(SakuraSecondPower), typeof(SakuraThirdPower),
+        typeof(SakuraFourthPower), typeof(SakuraFifthPower), typeof(SakuraSixthPower),
+        typeof(SakuraSeventhPower), typeof(SakuraEighthPower), typeof(SakuraNinthPower),
+    };
 
     /// <summary>Add or remove badges to match the ledger, then refresh them.
     /// Headless (no combat) it does nothing. (The Rite badge left with the
@@ -118,17 +160,33 @@ public static class SakuraBadge
         foreach (var type in wanted)
         {
             if (yae.Powers.Any(p => p.GetType() == type)) continue;
-            if (type == typeof(SakuraFirstPower))
-                await PowerCmd.Apply<SakuraFirstPower>(choiceContext, yae, 1, yae, null, silent: true);
-            else if (type == typeof(SakuraSecondPower))
-                await PowerCmd.Apply<SakuraSecondPower>(choiceContext, yae, 1, yae, null, silent: true);
-            else
-                await PowerCmd.Apply<SakuraThirdPower>(choiceContext, yae, 1, yae, null, silent: true);
+            await Apply(choiceContext, yae, type);
         }
         foreach (var badge in yae.Powers.OfType<SakuraBadgePower>())
         {
             badge.Refresh();
         }
+    }
+
+    private static Task Apply(PlayerChoiceContext choiceContext, Creature yae, System.Type type)
+    {
+        if (type == typeof(SakuraFirstPower))
+            return PowerCmd.Apply<SakuraFirstPower>(choiceContext, yae, 1, yae, null, silent: true);
+        if (type == typeof(SakuraSecondPower))
+            return PowerCmd.Apply<SakuraSecondPower>(choiceContext, yae, 1, yae, null, silent: true);
+        if (type == typeof(SakuraThirdPower))
+            return PowerCmd.Apply<SakuraThirdPower>(choiceContext, yae, 1, yae, null, silent: true);
+        if (type == typeof(SakuraFourthPower))
+            return PowerCmd.Apply<SakuraFourthPower>(choiceContext, yae, 1, yae, null, silent: true);
+        if (type == typeof(SakuraFifthPower))
+            return PowerCmd.Apply<SakuraFifthPower>(choiceContext, yae, 1, yae, null, silent: true);
+        if (type == typeof(SakuraSixthPower))
+            return PowerCmd.Apply<SakuraSixthPower>(choiceContext, yae, 1, yae, null, silent: true);
+        if (type == typeof(SakuraSeventhPower))
+            return PowerCmd.Apply<SakuraSeventhPower>(choiceContext, yae, 1, yae, null, silent: true);
+        if (type == typeof(SakuraEighthPower))
+            return PowerCmd.Apply<SakuraEighthPower>(choiceContext, yae, 1, yae, null, silent: true);
+        return PowerCmd.Apply<SakuraNinthPower>(choiceContext, yae, 1, yae, null, silent: true);
     }
 }
 
@@ -280,23 +338,23 @@ public sealed class YakanOfferingPower : PowerModel, ILocalizationProvider
     internal void Pulse() => Flash();
 }
 
-/// <summary>Sakura Channeling (design axes sec.4, the bend). SHRINE R2
-/// (2026-10-14): its job ("also strike as Thunder, whatever the Rite") went
-/// with the Rite, and every end-of-turn strike is Thunder now, so it is a
-/// marker nothing reads: REPLACEMENT PENDING (design session).</summary>
+/// <summary>Sakura Channeling, the Rare that bends the 3-Sakura limit
+/// (designed by the main session 2026-10-14: [USER] judged Yae "generally
+/// underpowered right now"): "You can have 2 more Sakura". Its amount, 2 per
+/// copy, is read by <see cref="YaeShrine.MaxSakura"/> for this combat; the
+/// full-shrine plant fires at that cap.</summary>
 public sealed class SakuraChannelingPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
         ("title", "Sakura Channeling"),
         ("description",
-            "Your [gold]Sakura[/gold] strike as Thunder at the end of your "
-          + "turn."),
+            "You can have [blue]{Amount}[/blue] more [gold]Sakura[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
-    public override PowerStackType StackType => PowerStackType.Single;
+    public override PowerStackType StackType => PowerStackType.Counter;
 }
 
 /// <summary>Fallen Petals (batch two): "Whenever a Sakura withers, gain 1

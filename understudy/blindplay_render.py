@@ -13,6 +13,7 @@ from typing import Any
 
 from understudy import qa_packet
 from understudy.blindplay_board import PHASE_FLIP_LINE, enchant_moves_line
+from understudy.blindplay_faces import enchantment_tag
 from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         ENEMY_FOLD_NOTE,
                                         ENEMY_FOLD_NOTE_EXCEPT,
@@ -333,10 +334,7 @@ def _render_card(c: dict[str, Any], bullet: str = "-",
     # where `(upgraded)` already sits -- the two facts a copy of a card can
     # differ by, on one line, so two copies of one title are told apart at a
     # glance instead of by a paragraph explaining that they cannot be.
-    ench = c.get("enchantment")
-    if ench:
-        head += (f" ({ench['name']} {ench['amount']})" if ench.get("amount")
-                 else f" ({ench['name']})")
+    head += enchantment_tag(c.get("enchantment"))
     # `EB-286`: the COST SLOT as the game paints it, energy and Spark
     # together, through the one formatter the staged page already uses.
     # `qa_packet.cost_label` answers `-` when the wire sent no cost at all,
@@ -3053,9 +3051,13 @@ def _render_oath(oath: dict[str, Any],
 
 
 SHRINE_HEADING = "## Your shrine"
-SHRINE_COUNT_LINE = ("- Sakura: {n} of 3. At the end of your turn each "
+SHRINE_COUNT_LINE = ("- Sakura: {n} of {cap}. At the end of your turn each "
                      "strikes, oldest first.")
 SHRINE_NONE_LINE = "- Sakura: none. Plant one to start your shrine."
+#: 2026-10-14: a plant into a full shrine makes the oldest strike as its Last
+#: Bloom would, then refresh and gain a Level (`YaeShrine.Plant`).
+SHRINE_FULL_LINE = ("- Shrine full: your next plant makes Sakura 1 strike, "
+                    "then refresh and gain a Level.")
 SHRINE_ROW = ("- Sakura {slot}: Level {level}, strikes for {strike}"
               "{turns}.")
 SHRINE_LURE_LINE = "- Foxfire Lure: your Sakura strike **{name}** this turn."
@@ -3066,7 +3068,10 @@ def _render_shrine(shrine: dict[str, Any]) -> list[str]:
     """Her block: each Sakura's Level, strike and strikes left, the Lure's
     enemy, the Annotated count, one fact a line."""
     rows = shrine["sakura"]
-    out = [SHRINE_COUNT_LINE.format(n=len(rows)) if rows else SHRINE_NONE_LINE]
+    # Sakura Channeling (2026-10-14) raises the cap: 3, plus 2 per copy.
+    cap = shrine.get("cap", 3)
+    out = [SHRINE_COUNT_LINE.format(n=len(rows), cap=cap) if rows
+           else SHRINE_NONE_LINE]
     for row in rows:
         turns = row.get("turns")
         tail = ("" if turns is None else
@@ -3075,6 +3080,8 @@ def _render_shrine(shrine: dict[str, Any]) -> list[str]:
             tail += f", {row['annotation']}"
         out.append(SHRINE_ROW.format(slot=row["slot"], level=row["level"],
                                      strike=row["strike"], turns=tail))
+    if rows and len(rows) >= cap:
+        out.append(SHRINE_FULL_LINE)
     if shrine.get("lure"):
         out.append(SHRINE_LURE_LINE.format(name=shrine["lure"]))
     out.append(SHRINE_ANNOTATED_LINE.format(n=shrine.get("annotated", 0)))

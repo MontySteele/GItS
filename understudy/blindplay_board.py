@@ -16,6 +16,7 @@ from understudy.blindplay_faces import (_card_face, _card_title,
                                         _enemy_handles, _enemy_names,
                                         _hook_note, _intents, _meter_max,
                                         _named_option, _powers,
+                                        enchantment_tag,
                                         enemy_replacements, enemy_revivals,
                                         hand_labels, relic_faces,
                                         remember_deck, remember_kills,
@@ -482,10 +483,7 @@ def deck_titles(state: dict[str, Any]) -> list[dict[str, Any]]:
             continue
         if card.get("upgraded") and not title.rstrip().endswith("+"):
             title += " (upgraded)"
-        ench = card.get("enchantment")
-        if isinstance(ench, dict) and ench.get("name"):
-            title += (f" ({ench['name']} {ench['amount']})"
-                      if ench.get("amount") else f" ({ench['name']})")
+        title += enchantment_tag(card.get("enchantment"))
         counts[title] = counts.get(title, 0) + 1
     return [{"title": t, "count": n} for t, n in sorted(counts.items())]
 
@@ -871,7 +869,9 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
     # YAE MIKO (2026-10-13): her shrine -- each Sakura's Level, what it
     # strikes for and the strikes it has left, the Lure's enemy, and how many
     # Annotated cards she holds. Her Sakura badges' lines go: the block says
-    # them in words.
+    # them in words. (Shrine r2 took the Rite badge, and its `_RITE_NAME`
+    # left the module with it: the filter named it still, so any other
+    # power on her raised NameError. Fixed 2026-10-14.)
     shrine = yae_shrine(p, combat)
     if shrine is not None:
         combat["shrine"] = shrine
@@ -966,19 +966,24 @@ _SAKURA_STRIKE = re.compile(r"for (\d+)")
 YAE_SAKURA_ANNOTATIONS = ("Red Ink", "Deadline Extension", "Fox Fire")
 _SAKURA_TURNS = re.compile(r"Strikes left: (\d+)")
 _LURE_NAME = "Foxfire Lure"
+#: How many Sakura may stand: 3, plus Sakura Channeling's stacks ("You can
+#: have 2 more Sakura", 2 per copy; `YaeShrine.MaxSakura`, 2026-10-14).
+YAE_SAKURA_CAP = 3
+_CHANNELING_NAME = "Sakura Channeling"
 YAE_ANNOTATIONS = ("Red Ink", "Footnote", "Deadline Extension", "Fox Fire",
                    "Sakura Seal", "Royalties", "Reprint")
 
 
 def yae_shrine(player: dict[str, Any],
                combat: dict[str, Any]) -> dict[str, Any] | None:
-    """YAE's block: `{sakura, lure, annotated}`, or None on a board that is
+    """YAE's block: `{sakura, cap, lure, annotated}`, or None on a board that is
     not hers (no Sakura badge and a wire that does not name her).
 
     `sakura` is one row per badge, oldest first: `{slot, level, strike,
     turns}` read off the badge sentence (the badge amount is the Level where
     the sentence is missing); `lure` is the name of the enemy wearing
-    Foxfire Lure, or None; `annotated` counts the hand's cards carrying one
+    Foxfire Lure, or None; `cap` is how many may stand (3, plus Sakura
+    Channeling's stacks); `annotated` counts the hand's cards carrying one
     of her five Annotations (the hand face's `enchantment`).
     """
     you = combat["you"]
@@ -1014,7 +1019,11 @@ def yae_shrine(player: dict[str, Any],
         ench = face.get("enchantment")
         if isinstance(ench, dict) and _text(ench.get("name")) in YAE_ANNOTATIONS:
             annotated += 1
-    return {"sakura": sakura, "lure": lure, "annotated": annotated}
+    cap = YAE_SAKURA_CAP + sum(
+        _int(pw.get("stacks")) for pw in you["powers"]
+        if _text(pw.get("name")) == _CHANNELING_NAME)
+    return {"sakura": sakura, "cap": cap, "lure": lure,
+            "annotated": annotated}
 
 
 #: A performer's SHORT name -- the word the glossary rows and the faces use

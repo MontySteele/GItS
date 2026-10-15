@@ -1582,7 +1582,7 @@ public static partial class McpMod
     }
 
     /// <summary>
-    /// `{ id, name, description, amount, shows_amount }` for an enchanted
+    /// `{ id, name, description, amount, shows_amount[, disabled] }` for an enchanted
     /// card, or null when the card carries none (`EB-181`). Never throws: it
     /// runs inside every card serialisation on every state poll, including the
     /// compendium's canonical copies.
@@ -1593,7 +1593,7 @@ public static partial class McpMod
         {
             var enchantment = card.Enchantment;
             if (enchantment == null) return null;
-            return new Dictionary<string, object?>
+            var info = new Dictionary<string, object?>
             {
                 ["id"] = enchantment.Id.Entry,
                 ["name"] = SafeGetText(() => enchantment.Title),
@@ -1601,6 +1601,16 @@ public static partial class McpMod
                 ["amount"] = enchantment.DisplayAmount,
                 ["shows_amount"] = enchantment.ShowAmount
             };
+            // GItS LOCAL EDIT (Reprint spent, 2026-10-14). The game greys a
+            // spent enchantment's tab (`Status == Disabled`: Glam, Swift,
+            // Sown, Yae's Reprint after its first play) and the wire did not
+            // say so, so two seats read a spent Reprint as live. Emitted only
+            // when disabled: an absent key means "live", as before.
+            if (enchantment.Status == MegaCrit.Sts2.Core.Entities.Enchantments.EnchantmentStatus.Disabled)
+            {
+                info["disabled"] = true;
+            }
+            return info;
         }
         catch (Exception)
         {

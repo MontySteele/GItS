@@ -43,9 +43,10 @@ public class YaeReviewR1Tests : IDisposable
     public void The_tenko_clause_names_the_sum_in_each_kinds_words()
     {
         Assert.Equal(" (12 damage)", YaeShrineFace.TenkoWords(YaeTenkoKind.Thunder, 12));
-        Assert.Equal(": 5 Block", YaeShrineFace.TenkoWords(YaeTenkoKind.Warding, 5));
-        Assert.Equal(": 2 to ALL", YaeShrineFace.TenkoWords(YaeTenkoKind.Wildfire, 2));
-        Assert.Equal(": draw 3", YaeShrineFace.TenkoWords(YaeTenkoKind.Offering, 3));
+        // A typed Tenko strikes AND adds its kind (2026-10-14).
+        Assert.Equal(": 5 damage, 5 Block", YaeShrineFace.TenkoWords(YaeTenkoKind.Warding, 5, 5));
+        Assert.Equal(": 5 damage, 2 to each enemy", YaeShrineFace.TenkoWords(YaeTenkoKind.Wildfire, 5, 2));
+        Assert.Equal(": 9 damage, draw 3", YaeShrineFace.TenkoWords(YaeTenkoKind.Offering, 9, 3));
         // No Sakura standing.
         Assert.Equal(" (no Sakura)", YaeShrineFace.TenkoWords(YaeTenkoKind.Thunder, 0));
         Assert.Equal(", no Sakura", YaeShrineFace.TenkoWords(YaeTenkoKind.Warding, 0));
@@ -104,13 +105,15 @@ public class YaeReviewR1Tests : IDisposable
     }
 
     [Fact]
-    public void The_tenko_tip_names_the_kinds_and_the_sakura_tip_the_full_shrine()
+    public void The_tenko_tip_names_the_kinds_and_the_plant_faces_the_full_shrine()
     {
         Assert.Contains("Warding", ArmKeywordTips.YaeTenkoTip);
         Assert.Contains("Wildfire", ArmKeywordTips.YaeTenkoTip);
         Assert.Contains("Offering", ArmKeywordTips.YaeTenkoTip);
-        Assert.Contains("reset to 3 turns", ArmKeywordTips.YaeTenkoTip);
-        Assert.Contains("oldest", ArmKeywordTips.YaeSakuraTip);
+        Assert.Contains("refresh to 3 turns", ArmKeywordTips.YaeTenkoTip);
+        // 2026-10-14: the full-shrine rule left the tip for the plant faces.
+        Assert.DoesNotContain("oldest", ArmKeywordTips.YaeSakuraTip);
+        Assert.Contains("your oldest strikes, refreshes", Face(new ProtoYmYakanEvocation()));
         Assert.DoesNotContain("Rite", ArmKeywordTips.YaeSakuraTip);
     }
 
