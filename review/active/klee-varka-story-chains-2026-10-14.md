@@ -301,3 +301,8 @@ of Boreas years, as the lore note above says.
 3. **Numbers.**
    - **(a, default)** As above.
    - (b) You name the ones to change.
+
+## Ruled 2026-10-15
+
+[USER]: "we can ship the event branch; looks good to me!" Pick 1 (a), all
+sixteen events with GPT's notes applied; pick 3 (a), the numbers as written.

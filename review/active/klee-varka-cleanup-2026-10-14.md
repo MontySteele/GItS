@@ -50,13 +50,16 @@ suite data.
    - **(a, default) Tempo:** "Deal 12 [16] Anemo damage. Costs 1 less for
      each Swirl this turn." A finisher after a Swirl chain.
    - (b) **Setup:** "Deal 7 [10] Anemo damage. Apply your current element to
-     the enemy." It would be the one Anemo card that sets up the next Swirl,
-     but it breaks `LAW.md`'s "No character card applies an off-element aura"
-     (off-element access comes only from Companions, a partner or a guest), so
-     taking it means amending LAW too. Glacial Edict already applies Cryo from
-     a Varka card; that conflict joins its next review against Deep Freeze.
-     (Default moved from Setup to Tempo on 2026-10-15, GPT review relayed by
-     [USER]: "Tempest Charge's default conflicts with LAW.")
+     the enemy." It would be the one Anemo card that sets up the next Swirl.
+     (Default moved from Setup to Tempo on 2026-10-15 after GPT read it as
+     breaking `LAW.md`'s off-element line. [USER] corrected that: "Varka has
+     many 'off-element' cards by design as his deck has anemo, pyro, hydro,
+     electro and cryo in it." So (b) needs no LAW change, and Glacial Edict's
+     Cryo is not a conflict.)
    - (c) **Oath:** "Deal 9 [12] Anemo damage. Gain 1 Oath of your current
      element." Direct scaling. It may be too strong at Uncommon; the suite
      would tell.
+
+## Ruled 2026-10-15
+
+[USER]: "we can ship the event branch; looks good to me!" Pick 1 (a), Tempo.
