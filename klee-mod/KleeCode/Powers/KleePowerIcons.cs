@@ -184,6 +184,10 @@ internal static class KleePowerIcons
         JuugaGuardPower => KleePck.Path("klee/powers/oz_summon.png"),
         NereidsAscensionPower => KleePck.Path(
             "kokomi/powers/before_sun_and_moon.png"),
+        // Kokomi's own potions (2026-10-15): A Stunning Stratagem is Nereid's
+        // read widened to every Plan for a turn, so it wears Nereid's badge.
+        StunningStratagemPower => KleePck.Path(
+            "kokomi/powers/before_sun_and_moon.png"),
         // The four with no shipped Kokomi power to borrow from -- the Plan
         // badge, its draw rider and the two Commander powers -- take
         // the nearest shipped SHAPE instead: a Klee companion power for the
