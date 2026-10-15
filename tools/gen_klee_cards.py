@@ -1872,6 +1872,11 @@ PREDICATES_CS = {
     # window as a snapshot of the same monotonic counter.
     "reaction_triggered_this_turn": "ReactionEffects.ReactionTriggeredThisTurn",
     "killed_target": "enemiesAtStart.Any(e => e.IsDead)",
+    # Hand of Greed's Fatal gate (2026-10-15, The Seven Glamours): only an
+    # enemy none of whose powers refuse it (`ShouldOwnerDeathTriggerFatal`;
+    # MinionPower does), read before the hit. Sim twin: tier0's
+    # `fatal_kills_this_card` / `Enemy.counts_for_fatal`.
+    "killed_target_fatal": "fatalAtStart.Any(e => e.IsDead)",
     # fanfare_at_least_N is PARAMETRIC (see predicate_cs / predicate_text):
     # the bar is authored per card and moves at red-pen, so a literal map
     # turned every new threshold into a codegen KeyError.
@@ -2011,6 +2016,7 @@ PREDICATE_TEXT = {
     "reaction_triggered_by_this": "If it triggered an [gold]Elemental Reaction[/gold]",
     "reaction_triggered_this_turn": "If an [gold]Elemental Reaction[/gold] triggered this turn",
     "killed_target": "If it kills",
+    "killed_target_fatal": "If it kills",
     "has_salon_members": "If you have a [gold]Salon Member[/gold]",
     # (`EB-723`). The FALLBACK wording only: every Spend row states
     # its own face with `description:`, because rule 8's rider is printed as
@@ -2341,6 +2347,11 @@ def negated_predicate_text(name: str) -> str | None:
 #: conditional branch (`BRANCH_OPS`): Brine Spray's add-N-Stings.
 KOKOMI_BRANCH_KINDS = frozenset(("shoal_call",))
 
+#: YAE MIKO (2026-10-15): the kinds legal inside a conditional branch: The
+#: Seven Glamours' "If this kills an enemy, Publish an Annotated card in your
+#: hand". Numberless, one awaited `YaeCards` call with no locals.
+YAE_BRANCH_KINDS = frozenset(("publish",))
+
 CONDITIONAL_FIELDS = {"op", "if", "then", "else"}
 
 # Ops legal inside a conditional branch: plain resolvers with literal (or
@@ -2436,6 +2447,9 @@ BRANCH_OPS = {"damage", "block", "draw", "gain_spark", "gain_encore",
               # awaited `KokomiCards` call with no locals, which is the whole
               # branch-legality criterion.
               "kokomi",
+              # YAE MIKO (2026-10-15): The Seven Glamours' Publish on a kill,
+              # the `publish` kind alone (`YAE_BRANCH_KINDS`).
+              "yae",
               # THE KOKOMI OVERHAUL. Sango Isshin's redesigned
               # payoff, "...deal a quarter of your Max HP to ALL enemies
               # instead". ALL-ENEMIES ONLY, and `_branch_op_reason` blocks the
@@ -2479,6 +2493,8 @@ BRANCH_FIELDS = {
     "varka": {"op", "kind"},
     # THE KOKOMI POOL OVERHAUL: an add-N-Stings kind and its literal N.
     "kokomi": {"op", "kind", "amount"},
+    # YAE: a numberless kind only (The Seven Glamours' publish).
+    "yae": {"op", "kind"},
     "spend_spark": {"op", "amount"},
     # Same key set the top-level `mend` validator enforces, so the two cannot
     # disagree about what a Mend is.
@@ -2605,6 +2621,11 @@ def _branch_op_reason(eff: dict, where: str) -> str | None:
             return f"branch kokomi kind {eff.get('kind')!r}"
         if not isinstance(eff.get("amount"), int) or eff["amount"] <= 0:
             return "branch kokomi amount must be a positive literal int"
+        return None
+    if eff["op"] == "yae":
+        # YAE MIKO (2026-10-15): a numberless kind (`YAE_BRANCH_KINDS`).
+        if eff.get("kind") not in YAE_BRANCH_KINDS:
+            return f"branch yae kind {eff.get('kind')!r}"
         return None
     if eff["op"] == "varka":
         # VARKA (the Oath rework): only a NUMBERLESS kind, whose one call
@@ -11902,6 +11923,11 @@ def build_body(
             "var swirlsAtStart = VarkaOath.SwirlsMadeBy(Owner.Creature);")
     if "killed_target" in preds:
         lines.append("var enemiesAtStart = CombatState!.HittableEnemies.ToList();")
+    if "killed_target_fatal" in preds:
+        lines.append(
+            "var fatalAtStart = CombatState!.HittableEnemies"
+            ".Where(e => e.Powers.All(p => p.ShouldOwnerDeathTriggerFatal()))"
+            ".ToList();")
     if "target_has_pyro" in preds:
         # VARKA (the expansion): Amber: Sharpshooter's snapshot, the
         # `targetHadAura` shape on one element, fresh or spent.

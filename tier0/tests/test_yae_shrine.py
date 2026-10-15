@@ -623,20 +623,22 @@ def test_editor_in_chief_strikes_on_an_annotated_play(yae):
     assert hits[0]["level"] == 1                 # the highest (oldest on a tie)
 
 
-def test_publish_moves_every_temporary_layer_and_drafts_are_recorded(yae):
-    st = _state()
+def test_publish_moves_one_temporary_layer_and_drafts_are_recorded(yae):
+    st = _state(n=2)
     a, b = loader.get_card("strike"), loader.get_card("strike")
     a.ym_slot, b.ym_slot = 10, 11
     st.player.hand += [a, b]
     _play(st, _red_ink_edit())                  # a: Red Ink
     _play(st, _ym("sakura_seal"))                # b: Sakura Seal
+    st.enemies[0].hp = 1                         # the kill (2026-10-15)
     _play(st, _ym("the_seven_glamours"))
-    # Review r3: the temporary layer moved onto b's stack, once. Yae review
-    # r4, item 5: and onto a's (every card in hand, was the best only).
+    # Review r3: the temporary layer moved onto b's stack, once. 2026-10-15:
+    # one card only (the sim's pick is the best by PUBLISH_ORDER); a keeps
+    # its temporary Red Ink, which the turn end drafts.
     assert Y.stack(b) == [Y.SAKURA_SEAL] and Y.temp(b) is None
-    assert Y.stack(a) == [Y.RED_INK] and Y.temp(a) is None
+    assert Y.stack(a) == [] and Y.temp(a) == Y.RED_INK
     Y.turn_end(st)
-    assert _led(st).drafts == {}
+    assert _led(st).drafts == {10: Y.RED_INK}
 
 
 def test_a_published_annotation_enters_the_next_fight(yae):
