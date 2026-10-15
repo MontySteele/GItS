@@ -3012,6 +3012,14 @@ proto_ym_mikage_thunder	ImageGen/images/cards/yae/proto_ym_mikage_thunder.png	50
 proto_ym_inked_branches	ImageGen/images/cards/yae/proto_ym_inked_branches.png	500	380	cover	y0.45@1.2	shortlist	1	png	Yae Miko Birthday 2025.png		splash	
 # proto_ym_royalties <- Yae at her merchandise stall, the text cropped out
 proto_ym_royalties	ImageGen/images/cards/yae/proto_ym_royalties.png	500	380	cover	x0.75,y0.45@1.4	shortlist	1	png	Fall 2023 Pop-Up Store.png		splash	
+# ---------- Yae Miko, review r3 (2026-10-14): the three signature cards ----------
+# Official wiki art, one distinct source per card, none used by another row.
+# proto_ym_second_printing <- Yae strolling Hanamizaka, the publishing district
+proto_ym_second_printing	ImageGen/images/cards/yae/proto_ym_second_printing.png	500	380	cover	x0.50,y0.45	shortlist	1	png	Kitsune's Leisurely Stroll Around Hanamizaka 1.png		splash	
+# proto_ym_authors_copy <- Yae's gift to the Traveler, a copy signed by the author
+proto_ym_authors_copy	ImageGen/images/cards/yae/proto_ym_authors_copy.png	500	380	cover	x0.60,y0.45@1.2	shortlist	1	png	Yae Miko TPRGT 2022 - Aether.png		splash	
+# proto_ym_serial_novel <- her wish splash, the long-running story
+proto_ym_serial_novel	ImageGen/images/cards/yae/proto_ym_serial_novel.png	500	380	cover	x0.55,y0.40@1.2	shortlist	1	png	Yae Miko Wish.png		splash	
 # power_yae_sakura <- her skill's icon, the Sesshou Sakura
 power_yae_sakura	ImageGen/images/yae/powers/sakura.png	256	256	contain	center	shortlist	1	png	Talent Yakan Evocation Sesshou Sakura.png		icon
 # power_yae_foxfire_lure <- her foxfire attack's icon

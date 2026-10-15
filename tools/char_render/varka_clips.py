@@ -686,6 +686,22 @@ REST = pose(
 # A waist-up close-up of stance B, his face turned further toward the viewer.
 SELECT = regal(1.0, head_turn=16.0)
 
+#: The close-up's idle loop (select stage 2, 2026-10-15): HALF a breath, from
+#: the still's pose out to the exhale with the cloth swung. The game plays it
+#: forward then back, so every motion is a cosine of the loop (eased at both
+#: ends) and the loop has no seam. tools/select_loop.py renders it at the
+#: still's framing; frame 0 IS the still.
+SELECT_LOOP = {
+    "length": 2.0, "fps": 6, "loop": True, "motion_end": 2.0,
+    "keys": [
+        (0.0, regal(1.0, swing=0.0, head_turn=16.0), "io"),
+        (2.0, regal(0.0, swing=1.0, head_turn=16.0), "io"),
+    ],
+}
+#: not in CLIPS: a half loop that does not close on its own (the game plays it
+#: forward then back); only tools/select_loop.py renders it
+SELECT_LOOPS = {"select_loop": SELECT_LOOP}
+
 # ------------------------------------------------------------------ roster tile
 # Head and shoulders, the face three-quarters toward the viewer; no blades.
 PORTRAIT = pose(

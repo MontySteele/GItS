@@ -62,8 +62,15 @@ def test_the_shipped_scene_is_what_its_rig_writes(char):
         f"stale: run `python -m tools.{char}_rig gen`"
 
 
+def _stage1(char: str) -> str:
+    """The scene with no rendered loop: the still breathing (the fallback)."""
+    rig = RIGS[char]
+    return select_bg.render_select_scene(char, f"{char.capitalize()}Bg", rig.SELECT_TINT, rig.SELECT_ELEMENT,
+                                         rig.SELECT_FIGURE_X, None)
+
+
 def test_the_close_up_breathes_on_an_autoplaying_loop(char):
-    text = _text(char)
+    text = _stage1(char)
     player = _node(text, "AnimationPlayer")
     assert 'type="AnimationPlayer" parent="."' in player
     assert f'autoplay = "{select_bg.ANIMATION}"' in player
@@ -108,11 +115,15 @@ def test_the_element_emitters_are_there_at_base_counts(char):
 def test_the_scene_is_loadable_without_scripts_or_base_textures(char):
     text = _text(char)
     assert 'type="Script"' not in text and "script =" not in text
-    assert "res://images/" not in text and ".png" not in text.replace("select_closeup.png", "") \
-        .replace("select_bg.png", "")
+    assert "res://images/" not in text and ".png" not in text.replace("select_closeup_static.png", "") \
+        .replace("select_loop.png", "").replace("select_bg.png", "")
     exts = re.findall(r'\[ext_resource type="([^"]+)" path="([^"]+)"', text)
-    assert exts == [("Texture2D", f"res://{char}/ui/select_closeup.png"),
-                    ("Texture2D", f"res://{char}/ui/select_bg.png")]
+    assert exts[:2] == [("Texture2D", f"res://{char}/ui/select_closeup_static.png"),
+                        ("Texture2D", f"res://{char}/ui/select_bg.png")]
+    assert exts[2:] == [("Texture2D", f"res://{char}/ui/select_loop.png")]
+    assert [("Texture2D", f"res://{char}/ui/select_closeup.png"),
+            ("Texture2D", f"res://{char}/ui/select_bg.png")] == re.findall(
+        r'\[ext_resource type="([^"]+)" path="([^"]+)"', _stage1(char))
     subs = text.count("[sub_resource")
     assert f"[gd_scene load_steps={subs + len(exts) + 1} format=3]" in text
     # every SubResource a node or resource names is declared
@@ -125,7 +136,7 @@ def test_the_scene_is_loadable_without_scripts_or_base_textures(char):
 
 
 def test_text_only_and_small(char):
-    # stage 1 adds no PNG: well under the 100 KB budget for all three
+    # the scene itself is text: well under the 100 KB budget for all three
     assert len(_text(char).encode("utf-8")) < 12_000
 
 
@@ -146,3 +157,45 @@ def test_each_rig_names_its_own_element_and_tint():
     for c, rig in RIGS.items():
         assert rig.SELECT_ELEMENT == ELEMENT[c]
         assert f"self_modulate = {klee_rig.color(rig.SELECT_TINT)}" in _node(_text(c), "Backdrop")
+
+
+def test_the_rendered_loop_steps_a_sheet_over_the_moving_region_and_never_seams(char):
+    """Stage 2 (2026-10-15): the manifest tools/select_loop.json (written by
+    tools/select_loop.py from renders) names the sheet, its grid and the box
+    it replaces; the scene plays it forward then back, so the first frame
+    never shows twice in a row and nothing pops at the loop point."""
+    m = select_bg.load_loop(char)
+    assert m is not None, "no rendered loop in tools/select_loop.json"
+    text = _text(char)
+    sprite = _node(text, "LoopSprite")
+    assert 'type="Sprite2D" parent="."' in sprite
+    assert f"hframes = {m['grid'][0]}" in sprite and f"vframes = {m['grid'][1]}" in sprite
+    assert m["grid"][0] * m["grid"][1] >= m["frames"]
+    assert m["sheet"] == [m["grid"][0] * m["cell"][0], m["grid"][1] * m["cell"][1]]
+    # the texel budget (VRAM-compressed, about a byte a texel): a few MB, not tens
+    assert 4.0 <= m["texel_mb"] <= 10.0, m["texel_mb"]
+    # the sprite is drawn at 1/scale from the box's corner, over the Splash, under the particles
+    bx, by, bw, bh = m["box"]
+    assert f"position = Vector2({select_bg.num(bx)}, {select_bg.num(by)})" in sprite
+    assert abs(m["cell"][0] / m["scale"] - bw) < 4 / m["scale"] + 1
+    names = re.findall(r'\[node name="([^"]+)"', text)
+    assert names.index("Splash") + 1 == names.index("LoopSprite")
+    assert all(names.index(e) > names.index("LoopSprite") for e in _emitters(text) if e not in ("Glow", "Streaks"))
+    # the loop is a ping-pong, autoplayed, looping
+    seq = select_bg.pingpong(m["frames"])
+    assert seq[0] == 0 and seq[1] == 1 and seq[-1] == 1 and max(seq) == m["frames"] - 1
+    assert all(a != b for a, b in zip(seq, seq[1:] + seq[:1]))        # no frame holds across the seam
+    clip = text.split('[sub_resource type="Animation" id="Animation_select_idle"]', 1)[1].split("\n[", 1)[0]
+    assert "loop_mode = 1" in clip and 'NodePath("LoopSprite:frame")' in clip
+    assert f"[{', '.join(map(str, seq))}]" in clip
+    length = float(re.search(r"length = ([\d.]+)", clip).group(1))
+    assert abs(length - len(seq) / m["fps"]) < 0.01 and 3.0 <= length <= 6.0
+    assert f'autoplay = "{select_bg.ANIMATION}"' in _node(text, "AnimationPlayer")
+    # one producer of the manifest's files, both under their character's ui/
+    assert (m["sheet_file"], m["static_file"]) == ("select_loop.png", "select_closeup_static.png")
+
+
+def test_the_pack_builder_ships_the_loop_vram_compressed_and_refuses_without_it():
+    ps = BUILD.read_text(encoding="utf-8")
+    block = ps.split("select_loop.json", 1)[1].split("# Kokomi's backdrop tint", 1)[0]
+    assert "Write-TextureImport" in block and "throw" in block

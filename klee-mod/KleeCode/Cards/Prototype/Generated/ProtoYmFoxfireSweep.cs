@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoYmFoxfireSweep : CustomCardModel, IElementalCard, ICharacterCard
+public sealed class ProtoYmFoxfireSweep : CustomCardModel, IElementalCard, ICharacterCard, ISakuraPlanterCard
 {
     /// <summary>Sheet: all Yae attacks apply Electro (catalyst-grade cadence).</summary>
     public Element Element => Element.Electro;
@@ -44,24 +44,15 @@ public sealed class ProtoYmFoxfireSweep : CustomCardModel, IElementalCard, IChar
         new[] { KleeKeywords.AppliesElectro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForTenko(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this);
+        ArmKeywordTips.ForFullShrine(ArmKeywordTips.ForFoxfireSakura(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_foxfire_sweep");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Foxfire Sweep"),
-        ("description", "Deal {Damage:diff()} [gold]Electro[/gold] damage to ALL enemies. [gold]Tenko[/gold] (Wildfire{InCombat:{YaeTenko}|})."),
+        ("description", "Deal {Damage:diff()} [gold]Electro[/gold] damage to ALL enemies. Plant a [gold]Foxfire Sakura[/gold]."),
     };
-
-    /// <summary>This card's in-combat shrine clauses
-    /// (`YaeShrineFace`).</summary>
-    protected override void AddExtraArgsToDescription(
-        MegaCrit.Sts2.Core.Localization.LocString description)
-    {
-        base.AddExtraArgsToDescription(description);
-        description.Add("YaeTenko", YaeShrineFace.TenkoLine(this, YaeTenkoKind.Wildfire));
-    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
@@ -84,7 +75,7 @@ public sealed class ProtoYmFoxfireSweep : CustomCardModel, IElementalCard, IChar
             .WithElementHitFx(this)
             .SpawningHitVfxOnEachCreature()
             .Execute(choiceContext);
-        await YaeCards.Tenko(choiceContext, this, cardPlay, YaeTenkoKind.Wildfire);
+        await YaeCards.Plant(choiceContext, this, cardPlay, YaeSakuraKind.Foxfire);
     }
 
     protected override void OnUpgrade()

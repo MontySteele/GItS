@@ -67,7 +67,7 @@ public class YaeRedInkSakuraTests : IDisposable
         var s = Assert.Single(ledger.Standing);
         Assert.Equal(YaeAnnotation.RedInk, s.Annotation);
         Assert.Equal(YaeLaw.SakuraBase + s.Level + YaeLaw.RedInkAmount,
-                     YaeShrineLedger.StrikeSize(YaeTenkoKind.Thunder, s.Level, s.Annotation));
+                     YaeShrineLedger.ActSize(s.Kind, s.Level, s.Annotation));
     }
 
     [Fact]
@@ -93,15 +93,18 @@ public class YaeRedInkSakuraTests : IDisposable
     [Fact]
     public void The_planting_verbs_pass_the_cards_inheritance()
     {
+        // Review r3: each verb has a kind-taking overload, which carries the
+        // inheritance; the plain one forwards to it.
         foreach (var verb in new[] { nameof(YaeCards.Plant), nameof(YaeCards.PlantLevel) })
         {
-            var calls = Il.Calls(typeof(YaeCards).GetMethod(verb)!);
-            Assert.Contains($"{nameof(YaeAnnotationReach)}.{nameof(YaeAnnotationReach.Inherited)}", calls);
+            var kinded = typeof(YaeCards).GetMethods()
+                .Single(m => m.Name == verb && m.GetParameters().Length == 4);
+            Assert.Contains($"{nameof(YaeAnnotationReach)}.{nameof(YaeAnnotationReach.Inherited)}",
+                            Il.Calls(kinded));
         }
-        // The Sakura Seal Annotation's plant passes nothing: a card holds one
-        // Annotation, and it is Sakura Seal.
+        // The Masterpiece's Sakura Seal plant passes nothing on.
         Assert.DoesNotContain($"{nameof(YaeAnnotationReach)}.{nameof(YaeAnnotationReach.Inherited)}",
-            Il.Calls(typeof(SakuraSealAnnotation).GetMethod("OnPlay")!));
+            Il.Calls(typeof(YaeMasterpiece).GetMethod("OnPlay")!));
     }
 
     // ---- the card facts -----------------------------------------------------

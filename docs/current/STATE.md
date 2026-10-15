@@ -32,7 +32,7 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
 | `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 78 |
 | `furina` | Furina | 78 | Fontaine | Hydro | Prototype | 78 |
 | `varka` | Varka | 80 | Mondstadt | Anemo | Balance | 78 |
-| `yae` | Yae Miko | 72 | Inazuma | Electro | Prototype | 40 (staged) |
+| `yae` | Yae Miko | 72 | Inazuma | Electro | Prototype | 43 (staged) |
 
 - Every kit: 78 draftable cards, plus two Ancient cards (one from Darv's
   Dusty Tome, one from Orobas's Archaic Tooth replacing a starter card).
@@ -44,7 +44,7 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   ruled; the Stellar-Conduct nod is parked). **Prototype, batch one built
   in C#** (2026-10-13): the card paper
   `review/active/yae-card-paper-2026-10-13.md` is ruled (Levels by planting,
-  3-turn Sakura, Proofread plain at 1 [0], two tips). Her 42 rows are the `proto_ym_` rows of
+  3-turn Sakura, Proofread plain at 1 [0], two tips). Her 45 rows are the `proto_ym_` rows of
   `docs/prototype-surface.yaml`; rules `Powers/Prototype/YaeShrine.cs` and
   `YaeAnnotations.cs`, sim twin `tier0/engine/yae_shrine.py`, harness
   `tools/yae_expansion_sim.py`. **Rites plus Sakura Annotations built**
@@ -58,7 +58,7 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   Serialization pays per Annotated card played; Sakura Channeling now reads
   "You can have 2 more Sakura" (the cap, 3, rises by 2 per copy; the
   full-shrine plant fires at the new cap), and a plant into a full shrine
-  makes the oldest strike as its Last Bloom first, then refresh and level. A staged pool of 40 (15 / 16 / 9, no
+  makes the oldest strike as its Last Bloom first, then refresh and level. A staged pool of 40 (15 / 16 / 9 then; 43 since review r3; no
   Ancients or co-op cards yet), official card art. **Review r1 ruled and
   built** (2026-10-14, same doc): Last Bloom (a withering Sakura strikes once
   more), no Level cap, global Levels only from Fox's Mooncall (+1 per copy);
@@ -68,8 +68,18 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   on the combat reward screen offering the cards that fight left Annotated
   (not yet Published); untested live until a deploy. **Red Ink on a planting
   card** (2026-10-14, ruled, same doc): it passes to the Sakura planted, and
-  Edits skip cards an Annotation would do nothing on. Next: Yae seats (3 Kokomi and 2 Yae if this lands
-  before the current seats finish), then [USER]'s play.
+  Edits skip cards an Annotation would do nothing on. **Review r3 built**
+  (2026-10-14, `review/active/yae-review-r3-2026-10-14.md`, both picks (a)
+  as amended): Sakura kinds (Sakura, Foxfire Sakura to ALL, Kitsune Sakura
+  the Block decoy) that act at turn end, Last Bloom and Tenko; plain Tenko
+  ("Every Sakura acts now. Refresh them to at least 3 turns."); a
+  full-shrine plant levels the oldest of its kind or withers another kind;
+  the Masterpiece (one enchantment: a permanent Published stack plus one
+  temporary slot; layers add up; Edits reach Published cards); Second
+  Printing, Author's Copy (never an Author's Copy) and Serial Novel; Fallen
+  Petals an active Skill. Pool 43 (15 / 18 / 10). Untested live until a
+  deploy. Next: a five-seat round, looking at runs that take many elites
+  too.
 
 ## The kits
 

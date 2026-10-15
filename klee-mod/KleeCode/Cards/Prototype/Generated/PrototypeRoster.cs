@@ -496,6 +496,7 @@ public static class PrototypeRoster
     private static List<CardModel> BuildYae() =>
         new()
         {
+            ModelDb.Card<ProtoYmAuthorsCopy>(),
             ModelDb.Card<ProtoYmBestseller>(),
             ModelDb.Card<ProtoYmDeadline>(),
             ModelDb.Card<ProtoYmEdictOfCleansing>(),
@@ -526,6 +527,8 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoYmSakuraChanneling>(),
             ModelDb.Card<ProtoYmSakuraGrove>(),
             ModelDb.Card<ProtoYmSakuraSeal>(),
+            ModelDb.Card<ProtoYmSecondPrinting>(),
+            ModelDb.Card<ProtoYmSerialNovel>(),
             ModelDb.Card<ProtoYmSerialization>(),
             ModelDb.Card<ProtoYmShrineBell>(),
             ModelDb.Card<ProtoYmShrineMaidensGuard>(),

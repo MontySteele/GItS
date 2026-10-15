@@ -38,11 +38,17 @@ def _no_live_speed(monkeypatch):
 
 
 def _badge(slot: int, level: int, strike: int, turns: int,
-           tail: str = "") -> dict:
+           tail: str = "", kind: str = "Sakura",
+           planted: int | None = None) -> dict:
+    """`SakuraBadgePower`'s sentence (review r3): the kind, the Level and
+    the Level it was planted at, the action, the turns left."""
+    action = {"Sakura": f"Strikes a random enemy for {strike} Electro damage.",
+              "Foxfire Sakura": f"Hits ALL enemies for {strike} Electro damage.",
+              "Kitsune Sakura": f"You gain {strike} Block."}[kind]
     return _status(
         f"Sakura {slot}",
-        f"Level {level}. At the end of your turn it strikes a random enemy "
-        f"for {strike} Electro damage.{tail} Strikes left: {turns}.",
+        f"{kind}, Level {level}, planted at {planted or level}. {action}"
+        f"{tail} Turns left: {turns}.",
         level, "Counter")
 
 
@@ -84,23 +90,27 @@ def _block(page: str) -> list[str]:
 def test_the_page_prints_every_sakura_oldest_first():
     lines = _block(blindplay.observe(yae_state()))
     assert lines[0] == ("- Sakura: 3 of 3. At the end of your turn each "
-                        "strikes, oldest first.")
-    assert lines[1] == "- Sakura 1: Level 3, strikes for 5, 1 strike left."
-    assert lines[2] == "- Sakura 2: Level 2, strikes for 4, 2 strikes left."
-    assert lines[3] == "- Sakura 3: Level 1, strikes for 3, 3 strikes left."
-    # 2026-10-14: full, so the next plant makes the oldest strike first.
-    assert lines[4] == ("- Shrine full: your next plant makes Sakura 1 "
-                        "strike, then refresh and gain a Level.")
+                        "acts, oldest first.")
+    assert lines[1] == ("- Sakura 1: Sakura, Level 3 (planted at 3), strikes "
+                        "an enemy for 5, 1 turn left.")
+    assert lines[2] == ("- Sakura 2: Sakura, Level 2 (planted at 2), strikes "
+                        "an enemy for 4, 2 turns left.")
+    assert lines[3] == ("- Sakura 3: Sakura, Level 1 (planted at 1), strikes "
+                        "an enemy for 3, 3 turns left.")
+    # Review r3: full, so the next plant makes the oldest act first.
+    assert lines[4] == ("- Shrine full: your next plant makes Sakura 1 act. "
+                        "A Sakura of its kind then refreshes it and gives it "
+                        "a Level; another kind withers it and takes its "
+                        "place.")
     assert lines[-1] == "- Annotated cards in your hand: 0."
 
 
 def test_a_sakuras_annotation_prints_in_the_block_and_no_rite_line():
     # Shrine r2 (2026-10-14): the Rite line left with the Rite.
-    state = yae_state(badges=((1, 1, 6, 2, " [gold]Red Ink[/gold] makes its "
-                               "strike 3 bigger."),))
+    state = yae_state(badges=((1, 1, 6, 2, " [gold]Red Ink[/gold]: +3."),))
     lines = _block(blindplay.observe(state))
-    assert lines[1] == ("- Sakura 1: Level 1, strikes for 6, 2 strikes left, "
-                        "Red Ink.")
+    assert lines[1] == ("- Sakura 1: Sakura, Level 1 (planted at 1), strikes "
+                        "an enemy for 6, 2 turns left, Red Ink.")
     assert not any("Rite" in line for line in lines)
 
 
@@ -148,6 +158,40 @@ def test_sakura_channeling_raises_the_count_lines_cap():
         "Sakura Channeling", "You can have 2 more Sakura.", 2, "Counter"))
     lines = _block(blindplay.observe(state))
     assert lines[0] == ("- Sakura: 4 of 5. At the end of your turn each "
-                        "strikes, oldest first.")
-    assert lines[4] == "- Sakura 4: Level 1, strikes for 3, 3 strikes left."
+                        "acts, oldest first.")
+    assert lines[4] == ("- Sakura 4: Sakura, Level 1 (planted at 1), strikes "
+                        "an enemy for 3, 3 turns left.")
     assert not any(line.startswith("- Shrine full") for line in lines)
+
+
+# ---- review r3 (ruled 2026-10-14): kinds, Levels' origin, the Masterpiece --
+
+def test_each_sakura_shows_its_kind_and_where_its_levels_came_from():
+    state = yae_state(badges=((1, 5, 6, 2, "", "Foxfire Sakura", 2),
+                              (2, 3, 5, 3, "", "Kitsune Sakura", 1)))
+    lines = _block(blindplay.observe(state))
+    assert lines[1] == ("- Sakura 1: Foxfire Sakura, Level 5 (planted at 2, "
+                        "+3 since), hits ALL enemies for 6 each, 2 turns "
+                        "left.")
+    assert lines[2] == ("- Sakura 2: Kitsune Sakura, Level 3 (planted at 1, "
+                        "+2 since), gives you 5 Block, 3 turns left.")
+
+
+def test_a_published_card_shows_its_stack_beside_its_title():
+    state = yae_state()
+    card = state["player"]["hand"][0]
+    card["enchantment"] = {"id": "KLEEMOD-YAE_MASTERPIECE",
+                           "name": "Annotated",
+                           "description": "Published: Red Ink x2, Reprint. "
+                                          "This combat: Footnote.",
+                           "amount": 4, "shows_amount": True}
+    page = blindplay.observe(state)
+    hand = page.split("## Your hand", 1)[1]
+    assert "(Published: Red Ink x2, Reprint. This combat: Footnote)" in hand
+    assert _block(page)[-1] == "- Annotated cards in your hand: 1."
+
+
+def test_an_edit_chooser_warns_of_the_second_pick():
+    from understudy import blindplay_render as R
+    assert R.EDIT_PROMPT_HEAD == "Choose a card to Edit"
+    assert "opens this chooser again" in R.EDIT_SECOND_CHOOSER_NOTE

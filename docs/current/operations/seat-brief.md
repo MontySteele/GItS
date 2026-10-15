@@ -159,6 +159,9 @@ this order:
    allowed ones, every tool you used, and the sentence **"Repo files read:
    none."** if that is true. If it is not true, say exactly what you read; a
    declared look is a caveat on the round, an undeclared one is a void round.
+6. **`## In your own words`** (optional, one line) — what you would want to
+   play again, or anything you enjoyed or disliked about the run, in your own
+   words and any shape. Leave the heading out if you have nothing to add.
 
 Write what you saw, including the parts that made you look stupid. A seat that
 smooths over its own confusion has deleted the finding the round was run for.

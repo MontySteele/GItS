@@ -27,11 +27,16 @@ Constraints the text is written around:
 """
 from __future__ import annotations
 
+import json
 from dataclasses import dataclass, field
+from pathlib import Path
 
 from tools.klee_rig.rig import color, fnum, num, vec2
 
 NL = "\n"
+#: Stage 2 (2026-10-15): tools/select_loop.py renders the close-up as a loop
+#: and commits this manifest (sizes, the moving box, the grid; no pixels).
+LOOP_MANIFEST = Path(__file__).resolve().parent / "select_loop.json"
 WIDTH, HEIGHT = 1920, 1080
 #: Breath cycle (s). StaticPortraitIdle breathes rest/shop portraits on 2.4 s;
 #: a close-up is larger on screen, so it breathes slower.
@@ -261,6 +266,78 @@ def _animation_blocks() -> str:
     return NL.join(reset + idle)
 
 
+def load_loop(char: str) -> dict | None:
+    """The rendered loop's manifest entry for `char`, or None (the scene then
+    breathes the still, stage 1)."""
+    if not LOOP_MANIFEST.exists():
+        return None
+    return json.loads(LOOP_MANIFEST.read_text(encoding="utf-8")).get(char)
+
+
+def pingpong(frames: int) -> list[int]:
+    """Frame order of one loop: out to the last frame and back to the one
+    after the first (the first comes round again), so no frame shows twice
+    in a row and the loop has no seam."""
+    return list(range(frames)) + list(range(frames - 2, 0, -1))
+
+
+def _loop_animation_blocks(loop: dict) -> str:
+    seq = pingpong(loop["frames"])
+    step = 1.0 / loop["fps"]
+    length = len(seq) * step
+    times = [i * step for i in range(len(seq))]
+
+    def track(vals, times_):
+        return [
+            'tracks/0/type = "value"',
+            "tracks/0/imported = false",
+            "tracks/0/enabled = true",
+            'tracks/0/path = NodePath("LoopSprite:frame")',
+            "tracks/0/interp = 0",
+            "tracks/0/loop_wrap = true",
+            "tracks/0/keys = {",
+            f'"times": PackedFloat32Array({", ".join(fnum(t) for t in times_)}),',
+            f'"transitions": PackedFloat32Array({", ".join("1.0" for _ in times_)}),',
+            '"update": 1,',
+            f'"values": [{", ".join(str(v) for v in vals)}]',
+            "}",
+        ]
+    lines = [
+        '[sub_resource type="Animation" id="Animation_reset"]',
+        'resource_name = "RESET"',
+        "length = 0.001",
+        *track([0], [0.0]),
+        "",
+        '[sub_resource type="Animation" id="Animation_select_idle"]',
+        f'resource_name = "{ANIMATION}"',
+        f"length = {fnum(length)}",
+        "loop_mode = 1",
+        *track(seq, times),
+        "",
+        '[sub_resource type="AnimationLibrary" id="AnimationLibrary_select"]',
+        "_data = {",
+        '&"RESET": SubResource("Animation_reset"),',
+        f'&"{ANIMATION}": SubResource("Animation_select_idle")',
+        "}",
+        "",
+    ]
+    return NL.join(lines)
+
+
+def _loop_sprite(loop: dict) -> str:
+    bx, by, _bw, _bh = loop["box"]
+    k = 1.0 / loop["scale"]
+    return NL.join([
+        '[node name="LoopSprite" type="Sprite2D" parent="."]',
+        f"position = {vec2((bx, by))}",
+        f"scale = {vec2((round(k, 5), round(k, 5)))}",
+        'texture = ExtResource("3_loop")',
+        "centered = false",
+        f"hframes = {loop['grid'][0]}",
+        f"vframes = {loop['grid'][1]}",
+    ]) + NL
+
+
 def _emitter_node(e: Emitter) -> str:
     lines = [f'[node name="{e.name}" type="CPUParticles2D" parent="."]']
     if e.additive:
@@ -315,12 +392,19 @@ def _texture_rect(name: str, ext: str, extra: list[str]) -> str:
 
 
 def render_select_scene(char: str, root: str, tint: tuple[float, float, float, float],
-                        element: str, figure_x: float) -> str:
+                        element: str, figure_x: float, loop: dict | None = None) -> str:
     """`res://<char>/ui/char_select_bg_<char>.tscn`.
 
     `figure_x` is the close-up figure's horizontal centre in the 1920x1080
     still: the breath pivots on its bottom centre, and the element's glow
     sits behind it.
+
+    `loop` is the rendered loop's manifest entry (load_loop), or None for
+    stage 1: the still breathing on the AnimationPlayer. With it, the Splash
+    is the close-up with the moving region cleared (select_closeup_static.png)
+    and a Sprite2D steps through the loop's sheet over that region, forward
+    then back; the pose carries the breath, so the stage-1 tracks are gone.
+    The particles stay on top either way.
     """
     el = _element(figure_x)[element]
     behind = [e for e in el.emitters if e.behind]
@@ -331,16 +415,16 @@ def render_select_scene(char: str, root: str, tint: tuple[float, float, float, f
         subs.append(_ramp_block(e))
         if e.scale_curve:
             subs.append(_curve_block(e))
-    subs.append(_animation_blocks())
+    subs.append(_loop_animation_blocks(loop) if loop else _animation_blocks())
     load_steps = 3 + sum(s.count("[sub_resource") for s in subs)
 
-    head = NL.join([
-        f"[gd_scene load_steps={load_steps} format=3]",
-        "",
-        f'[ext_resource type="Texture2D" path="res://{char}/ui/select_closeup.png" id="1_art"]',
-        f'[ext_resource type="Texture2D" path="res://{char}/ui/select_bg.png" id="2_bg"]',
-        "",
-    ])
+    art = loop["static_file"] if loop else "select_closeup.png"
+    exts = [f'[ext_resource type="Texture2D" path="res://{char}/ui/{art}" id="1_art"]',
+            f'[ext_resource type="Texture2D" path="res://{char}/ui/select_bg.png" id="2_bg"]']
+    if loop:
+        exts.append(f'[ext_resource type="Texture2D" path="res://{char}/ui/{loop["sheet_file"]}" id="3_loop"]')
+        load_steps += 1
+    head = NL.join([f"[gd_scene load_steps={load_steps} format=3]", "", *exts, ""])
     root_node = NL.join([
         f'[node name="{root}" type="Control"]',
         "layout_mode = 3",
@@ -363,6 +447,8 @@ def render_select_scene(char: str, root: str, tint: tuple[float, float, float, f
                  "stretch_mode = 6\n", f"stretch_mode = 6\nself_modulate = {color(tint)}\n")]
     nodes += [_emitter_node(e) for e in behind]
     nodes.append(_texture_rect("Splash", "1_art", [f"pivot_offset = {vec2((figure_x, HEIGHT))}"]))
+    if loop:
+        nodes.append(_loop_sprite(loop))
     nodes += [_emitter_node(e) for e in front]
     nodes.append(NL.join([
         '[node name="AnimationPlayer" type="AnimationPlayer" parent="."]',

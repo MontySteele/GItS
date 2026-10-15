@@ -91,29 +91,30 @@ public class YaeSakuraChannelingTests : IDisposable
     }
 
     [Fact]
-    public void A_full_shrine_plant_strikes_the_oldest_first_as_its_last_bloom()
+    public void A_full_shrine_plant_makes_the_oldest_act_first_as_its_last_bloom()
     {
         // [USER] (2026-10-14): "when you plant a Sakura with 3 already on the
         // field, do you think the outgoing Sakura should strike as though
-        // withered?" The door strikes the oldest (Strike, Thunder, as
-        // TickAndBloom does) BEFORE the ledger refreshes and levels it, once
-        // per plant, at the live cap.
+        // withered?" Review r3: it ACTS as its kind, before the ledger levels
+        // it (same kind) or withers it (another kind), once per plant, at the
+        // live cap.
         var calls = Il.CallSequence(typeof(YaeShrine).GetMethod(nameof(YaeShrine.Plant))!).ToList();
         var cap = calls.FindIndex(c => c == "YaeShrine.MaxSakura");
-        var strike = calls.FindIndex(c => c == "YaeShrine.Strike");
+        var act = calls.FindIndex(c => c == "YaeShrine.Act");
         var plant = calls.FindIndex(c => c == "YaeShrineLedger.Plant");
         Assert.True(cap >= 0, string.Join(", ", calls));
-        Assert.True(strike > cap, string.Join(", ", calls));
-        Assert.True(plant > strike, string.Join(", ", calls));
+        Assert.True(act > cap, string.Join(", ", calls));
+        Assert.True(plant > act, string.Join(", ", calls));
     }
 
     [Fact]
-    public void The_plant_faces_say_the_oldest_strikes()
+    public void The_plant_faces_leave_the_full_shrine_rule_to_its_tip()
     {
+        // Review r3: the rule has two branches by kind, so it is the Full
+        // shrine tip every planting card carries.
         foreach (var card in new CardModel[] { new ProtoYmYakanEvocation(), new ProtoYmTwinSakura() })
         {
-            Assert.Contains("(with the shrine full, your oldest strikes, refreshes and gains a Level)",
-                            Face(card));
+            Assert.DoesNotContain("shrine full", Face(card));
         }
     }
 }

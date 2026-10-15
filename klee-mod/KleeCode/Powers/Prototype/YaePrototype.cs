@@ -18,18 +18,20 @@ public interface IYaeCharacter
 /// ruled 2026-10-13). The shrine and the publishing house:
 ///
 ///   * SAKURA (<see cref="YaeShrineLedger"/>, <see cref="YaeShrine"/>): up to
-///     3 beside her, each with a Level and a 3-strike timer. At the end of
-///     her turn each strikes, oldest first, for 2 + its Level Electro as a
-///     pet's hit, then the timers tick; a Sakura that withers strikes once
-///     more (Last Bloom). A plant creates one at the card's Level; with
-///     three standing the oldest refreshes and gains a Level instead (shrine
-///     r2). Tenko strikes now (typed: as Block, at ALL, or as draw) and
-///     refreshes every timer to at least 3.
-///   * EDIT (<see cref="YaeEditing"/>): a card in hand gains one of five
-///     Annotations (her Enchantments, <see cref="YaeAnnotationModel"/>) for
-///     the combat. PUBLISH keeps one for the run: The Seven Glamours in
-///     combat, and Meditations of a Yako's reward-screen Publish after an
-///     elite or boss fight (<c>Relics.MeditationsOfAYako</c>).
+///     3 beside her, each with a KIND (review r3: Sakura, Foxfire, Kitsune),
+///     a Level and a 3-action timer. A Sakura acts at the end of her turn
+///     (oldest first), once more when it withers (Last Bloom), and on
+///     Tenko: a Sakura strikes an enemy for 2 + its Level, a Foxfire Sakura
+///     hits ALL for 1 + its Level, a Kitsune Sakura gives 2 + its Level
+///     Block. A plant into a full shrine makes the oldest act; the same
+///     kind refreshes and levels it, another kind withers it and takes its
+///     place. Tenko: every Sakura acts now, then refreshes to at least 3.
+///   * EDIT (<see cref="YaeEditing"/>): a card in hand gains an Annotation
+///     in its one temporary slot for the combat. PUBLISH moves it onto the
+///     card's permanent stack (the Masterpiece, <see cref="YaeMasterpiece"/>,
+///     one enchantment holding both layers): The Seven Glamours in combat,
+///     and Meditations of a Yako's reward-screen Publish after an elite or
+///     boss fight (<c>Relics.MeditationsOfAYako</c>).
 ///
 /// NO SWITCH, as Varka: she ships nowhere else. BUILT IN BOTH ENGINES: the
 /// sim twin is <c>tier0/engine/yae_shrine.py</c>, whose numbers
@@ -62,8 +64,16 @@ public static class YaeLaw
     /// (pick 4 (a)).</summary>
     public const int SakuraTurns = 3;
 
-    /// <summary>A strike deals this plus the Sakura's Level.</summary>
+    /// <summary>A Sakura (Thunder) strikes for this plus its Level.</summary>
     public const int SakuraBase = 2;
+
+    /// <summary>A Foxfire Sakura hits ALL enemies for this plus its Level
+    /// (review r3, ruled 2026-10-14).</summary>
+    public const int FoxfireBase = 1;
+
+    /// <summary>A Kitsune Sakura, the decoy, gives this plus its Level
+    /// Block (review r3).</summary>
+    public const int KitsuneBase = 2;
 
     /// <summary>A Sakura is planted at Level 1, plus 1 for each Fox's
     /// Mooncall. Levels have no cap (Yae review r1, pick 2, ruled
@@ -77,10 +87,6 @@ public static class YaeLaw
 
     /// <summary>Fox Fire: this much Electro to a random enemy.</summary>
     public const int FoxFireDamage = 4;
-
-    /// <summary>Offering: each strike, this many more cards at the start of
-    /// her next turn (design axes, ruled 2026-10-14).</summary>
-    public const int OfferingPerStrike = 1;
 
     /// <summary>Royalties: this much Energy when the card is played.
     /// </summary>

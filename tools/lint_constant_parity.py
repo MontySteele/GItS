@@ -343,7 +343,10 @@ MIRRORED: dict[str, object] = {
     "YaeLaw.PlantLevel": _yae("PLANT_LEVEL"),
     "YaeLaw.RedInkAmount": _yae("RED_INK_AMOUNT"),
     "YaeLaw.FoxFireDamage": _yae("FOX_FIRE_DAMAGE"),
-    "YaeLaw.OfferingPerStrike": _yae("OFFERING_DRAW"),
+    # Review r3 (ruled 2026-10-14): the Sakura kinds' bases; Offering left
+    # with the typed Tenko.
+    "YaeLaw.FoxfireBase": _yae("FOXFIRE_BASE"),
+    "YaeLaw.KitsuneBase": _yae("KITSUNE_BASE"),
     "YaeLaw.RoyaltiesPayout": _yae("ROYALTIES_ENERGY"),
     "VarkaLaw.SwirlPyroDamage": _varka("SWIRL_PYRO_DAMAGE"),
     "VarkaLaw.SwirlHydroBlock": _varka("SWIRL_HYDRO_BLOCK"),

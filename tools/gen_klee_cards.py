@@ -938,6 +938,11 @@ ARM_KEYWORDS = (
     # Shrine r2 (ruled 2026-10-14): the Tenko tip names its three kinds,
     # and the Rite's tip left with the Rite.
     ArmKeyword("Tenko", ("Tenko",), "ArmKeywordTips.ForTenko"),
+    # Review r3 (ruled 2026-10-14): the two Sakura kinds a card names.
+    ArmKeyword("Foxfire Sakura", ("Foxfire Sakura",),
+               "ArmKeywordTips.ForFoxfireSakura"),
+    ArmKeyword("Kitsune Sakura", ("Kitsune Sakura",),
+               "ArmKeywordTips.ForKitsuneSakura"),
     ArmKeyword("Annotation", ("Red Ink", "Footnote", "Deadline Extension",
                               "Fox Fire", "Sakura Seal", "Royalties",
                               "Reprint"),
@@ -3045,6 +3050,10 @@ YAE_KINDS = {
     "edit_sakura": "EditSakura",
     "plant_level": "PlantLevel",
     "strike_if_weak": "StrikeIfWeak",
+    # Review r3 (ruled 2026-10-14).
+    "fallen_petals": "FallenPetals",
+    "second_printing": "SecondPrinting",
+    "authors_copy": "AuthorsCopy",
 }
 YAE_KIND_FIELDS = {
     "plant": ("amount",),
@@ -3064,6 +3073,9 @@ YAE_KIND_FIELDS = {
     "edit_sakura": ("amount",),
     "plant_level": ("amount",),
     "strike_if_weak": (),
+    "fallen_petals": (),
+    "second_printing": (),
+    "authors_copy": (),
 }
 #: The kinds that aim at the enemy the player picks (`target: enemy`).
 YAE_AIMED_KINDS = {"lure", "damage_per_sakura", "damage_per_annotated",
@@ -3080,12 +3092,15 @@ YAE_ANNOTATIONS = {
     "royalties": "Royalties",
     "reprint": "Reprint",
 }
-#: Shrine r2 (ruled 2026-10-14): a typed Tenko's kind (`as:` on a `tenko`
-#: op, the C# `YaeTenkoKind` member; absent, it is Thunder). The design axes
-#: (ruled 2026-10-14): the Annotations a Sakura can carry, and the end an
+#: Review r3 (ruled 2026-10-14): the kind of Sakura a plant makes (`as:` on
+#: a `plant` / `plant_level` op, the C# `YaeSakuraKind` member; absent, a
+#: plain Sakura). The typed Tenko is gone. The design axes (ruled
+#: 2026-10-14): the Annotations a Sakura can carry, and the end an
 #: `edit_sakura` counts from (`which:`, the C# `YaeSakuraEnd`).
-YAE_TENKO_KINDS = {"warding": "Warding", "wildfire": "Wildfire",
-                   "offering": "Offering"}
+YAE_SAKURA_KINDS = {"foxfire": "Foxfire", "kitsune": "Kitsune"}
+YAE_PLANT_AS_KINDS = {"plant", "plant_level"}
+#: The kinds that read `IsUpgraded` at play time (`yae_upgraded`).
+YAE_UPGRADED_KINDS = {"fallen_petals", "second_printing"}
 YAE_SAKURA_ANNOTATIONS = {"red_ink", "fox_fire", "deadline"}
 YAE_SAKURA_ENDS = {"newest": "Newest", "oldest": "Oldest", "every": "Every"}
 #: The printed name of each `YaeAnnotation` member (`YaeAnnotationText.Name`).
@@ -3160,8 +3175,8 @@ def yae_call(eff: dict) -> str:
         args += f", YaeSakuraEnd.{YAE_SAKURA_ENDS[eff['which']]}"
     if eff.get("kind") in YAE_ANNOTATION_KINDS:
         args += f", YaeAnnotation.{YAE_ANNOTATIONS[eff['annotation']]}"
-    if eff.get("kind") == "tenko" and "as" in eff:
-        args += f", YaeTenkoKind.{YAE_TENKO_KINDS[eff['as']]}"
+    if eff.get("kind") in YAE_PLANT_AS_KINDS and "as" in eff:
+        args += f", YaeSakuraKind.{YAE_SAKURA_KINDS[eff['as']]}"
     return f"await YaeCards.{YAE_KINDS[eff['kind']]}({args});"
 #: `kokomi` (THE KOKOMI EXPANSION, BATCH ONE, 2026-09-29): one kind per
 #: now-line verb, each ONE awaited `KokomiCards.<method>` call
@@ -4302,16 +4317,15 @@ APPLY_POWERS = {
         "At the start of your turn, plant {X} [gold]Sakura[/gold]."),
     "ym_sakura_channeling": ("SakuraChannelingPower", None,
         "You can have {X} more [gold]Sakura[/gold]."),
-    # The design axes, batch two (2026-10-14).
-    "ym_fallen_petals": ("FallenPetalsPower", None,
-        "Whenever a [gold]Sakura[/gold] withers, gain {X} Energy on your "
-        "next turn."),
-    "ym_fallen_petals_plus": ("FallenPetalsPlusPower", None,
-        "Whenever a [gold]Sakura[/gold] withers, gain {X} Energy and draw "
-        "{X} card on your next turn."),
+    # The design axes, batch two (2026-10-14). Fallen Petals' two powers
+    # left with review r3 (it is an active Skill now).
     "ym_editor_in_chief": ("EditorInChiefPower", None,
         "Whenever you play an [gold]Annotated[/gold] card, a "
         "[gold]Sakura[/gold] strikes."),
+    # Review r3 (ruled 2026-10-14), a signature card.
+    "ym_serial_novel": ("SerialNovelPower", None,
+        "At the start of your turn, put {X} random [gold]Annotated[/gold] "
+        "card from your [gold]Discard Pile[/gold] into your [gold]Hand[/gold]."),
     "vk_twin_gales": ("TwinGalesPower", None,
         "Your [gold]Swirls[/gold] pay both your [gold]current element[/gold] "
         "and the element they [gold]Swirl[/gold]."),
@@ -4743,6 +4757,10 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark",
                        # YAE MIKO: a `yae` op's own number, its `Ym<Field>`
                        # var.
                        "yae_per", "yae_base", "yae_amount",
+                       # YAE MIKO (review r3): the row's `yae` op reads
+                       # `IsUpgraded` at play time (Fallen Petals, Second
+                       # Printing); the face carries its own swap.
+                       "yae_upgraded",
                        # VARKA (the expansion, Pathfinder's Mark+): the row's
                        # `varka` op reads `IsUpgraded` at play time, and the
                        # face carries its own `{IfUpgraded:show:...}` swap.
@@ -5932,10 +5950,10 @@ def blocked_reason(
                 return f"yae {kind} annotation mismatch"
             if "annotation" in eff and eff["annotation"] not in YAE_ANNOTATIONS:
                 return f"yae annotation {eff['annotation']!r}"
-            if "as" in eff and kind != "tenko":
+            if "as" in eff and kind not in YAE_PLANT_AS_KINDS:
                 return f"yae {kind} takes no as:"
-            if "as" in eff and eff["as"] not in YAE_TENKO_KINDS:
-                return f"yae Tenko kind {eff['as']!r}"
+            if "as" in eff and eff["as"] not in YAE_SAKURA_KINDS:
+                return f"yae Sakura kind {eff['as']!r}"
             if (kind == "edit_sakura") != ("which" in eff):
                 return f"yae {kind} which mismatch"
             if "which" in eff and eff["which"] not in YAE_SAKURA_ENDS:
@@ -9057,6 +9075,11 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
            for key in MODE_UPGRADE_KEYS if key in deltas},
         # VARKA (the expansion): the `varka` op reads IsUpgraded itself.
         "varka_upgraded": any(e["op"] == "varka" for e in effects),
+        # YAE MIKO (review r3): the same play-time read, on a kind that
+        # reads it.
+        "yae_upgraded": any(e["op"] == "yae"
+                            and e.get("kind") in YAE_UPGRADED_KINDS
+                            for e in effects),
         # Power cost sweep, 2026-09-30: binds to the first top-level
         # apply_power on the card's owner, and the named power must exist.
         "upgraded_power": (
@@ -16125,6 +16148,11 @@ def build_upgrade(card: dict) -> list[str]:
         done.add("upgraded_knight")
         lines.append("// upgraded_knight: the chosen Knight arrives upgraded, "
                      "read off IsUpgraded when the card is played.")
+    if "yae_upgraded" in deltas:
+        # YAE MIKO (review r3). The same play-time read.
+        done.add("yae_upgraded")
+        lines.append("// yae_upgraded: the yae op reads IsUpgraded when "
+                     "the card is played.")
     if "varka_upgraded" in deltas:
         # VARKA (the expansion, Pathfinder's Mark+). The same play-time read.
         done.add("varka_upgraded")
@@ -16859,13 +16887,13 @@ def yae_face_lines(card: dict, profile: "CharacterProfile",
                    desc: str) -> tuple[str, list[tuple[str, str]]]:
     """A Yae row's face with its live Tenko clause placed, and (token, C#).
 
-    A row that Tenkos says in combat what its Tenko would do now, summed
-    over the Sakura standing: "Tenko (12 damage)", "Tenko (Warding: 12
-    damage, 12 Block)"; with none standing "Tenko (no Sakura)", "Tenko (Warding, no
-    Sakura)". The `{InCombat:{YaeTenko}|}` goes right after "Tenko" on a
-    plain row and inside the kind's brackets on a typed one. DERIVED FROM
-    THE OPS, so a new Tenko row carries its clause the day it exists. Sim
-    twin: `yae_shrine.tenko_line`.
+    A row that Tenkos says in combat what its Tenko would do now, summed by
+    kind over the Sakura standing: "Tenko (8 damage, 4 to each enemy, 5
+    Block)"; with none standing "Tenko (no Sakura)". The
+    `{InCombat:{YaeTenko}|}` goes right after "Tenko". Review r3 (ruled
+    2026-10-14): Tenko is one plain rule again, so a row prints it
+    unbracketed. DERIVED FROM THE OPS, so a new Tenko row carries its
+    clause the day it exists. Sim twin: `yae_shrine.tenko_line`.
     """
     if profile.character_id != "yae" or card.get("character") != "yae":
         return desc, []
@@ -16876,22 +16904,12 @@ def yae_face_lines(card: dict, profile: "CharacterProfile",
     if len(tenkos) != 1:
         raise ValueError(f"{card['id']}: a face reads one Tenko")
     token = "{InCombat:{" + YAE_TENKO_TOKEN + "}|}"
-    kind = tenkos[0].get("as")
-    if kind is None:
-        clause = "[gold]Tenko[/gold]"
-        if desc.count(clause) != 1 or desc.count(clause + " (") != 0:
-            raise ValueError(f"{card['id']}: a Tenko row prints {clause!r} "
-                             "once, unbracketed")
-        return (desc.replace(clause, clause + token),
-                [(YAE_TENKO_TOKEN, "YaeShrineFace.TenkoLine(this)")])
-    name = YAE_TENKO_KINDS[kind]
-    clause = f"[gold]Tenko[/gold] ({name})"
-    if desc.count(clause) != 1:
-        raise ValueError(f"{card['id']}: a typed Tenko row prints "
-                         f"{clause!r} once")
-    return (desc.replace(clause, f"[gold]Tenko[/gold] ({name}{token})"),
-            [(YAE_TENKO_TOKEN,
-              f"YaeShrineFace.TenkoLine(this, YaeTenkoKind.{name})")])
+    clause = "[gold]Tenko[/gold]"
+    if desc.count(clause) != 1 or desc.count(clause + " (") != 0:
+        raise ValueError(f"{card['id']}: a Tenko row prints {clause!r} "
+                         "once, unbracketed")
+    return (desc.replace(clause, clause + token),
+            [(YAE_TENKO_TOKEN, "YaeShrineFace.TenkoLine(this)")])
 
 
 #: THE RELEASE FIXES (2026-10-14): the token of a "below half" face's
@@ -18178,6 +18196,14 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
                 continue
             tips_expr = (
                 f"{attach}({tips_expr or 'base.ExtraHoverTips'}, this)")
+        # YAE MIKO, review r3 (ruled 2026-10-14): every row whose own play
+        # plants carries the full-shrine rule, which has two branches with
+        # kinds and left the plant faces. Off the op, read after the words.
+        if (profile.character_id == "yae" and card.get("character") == "yae"
+                and yae_plants_sakura(card)):
+            tips_expr = (
+                "ArmKeywordTips.ForFullShrine("
+                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
         # `EB-377`, and it is last of the last for the reason the block above
         # is last at all: an arm's invented word is the one the reader has
         # never met, and a base-game word restated is read after it.

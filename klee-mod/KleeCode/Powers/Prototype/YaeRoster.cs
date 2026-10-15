@@ -51,10 +51,12 @@ internal static class YaeRoster
         };
 
     /// <summary>
-    /// The pool: batch one's thirty (sec.5) realigned, and batch two's ten
+    /// The pool: batch one's thirty (sec.5) realigned, batch two's ten
     /// (<c>review/active/yae-design-axes-2026-10-14.md</c> sec.5 and its
-    /// Ruled section): FORTY, fifteen Commons, sixteen Uncommons and nine
-    /// Rares, in the sheet's order. A STAGED KIT BELOW 78:
+    /// Ruled section) and review r3's three signature cards
+    /// (<c>review/active/yae-review-r3-2026-10-14.md</c> sec.3): FORTY-THREE,
+    /// fifteen Commons, eighteen Uncommons and ten Rares, in the sheet's
+    /// order. A STAGED KIT BELOW 78:
     /// the second half of the pool waits on [USER]'s first play and the audit
     /// that follows it (the paper's "Not in this batch, said so"), as
     /// Furina's 24-row slice and Varka's 41 waited before theirs.
@@ -77,7 +79,7 @@ internal static class YaeRoster
         ModelDb.Card<ProtoYmKitsunePounce>(),
         ModelDb.Card<ProtoYmFoxfireSweep>(),
         ModelDb.Card<ProtoYmEvergreenCharm>(),
-        // Uncommon (16)
+        // Uncommon (18)
         ModelDb.Card<ProtoYmSakuraGrove>(),
         ModelDb.Card<ProtoYmKitsuneRite>(),
         ModelDb.Card<ProtoYmThunderboltTithe>(),
@@ -94,7 +96,9 @@ internal static class YaeRoster
         ModelDb.Card<ProtoYmFallenPetals>(),
         ModelDb.Card<ProtoYmMikageThunder>(),
         ModelDb.Card<ProtoYmInkedBranches>(),
-        // Rare (9)
+        ModelDb.Card<ProtoYmSecondPrinting>(),
+        ModelDb.Card<ProtoYmAuthorsCopy>(),
+        // Rare (10)
         ModelDb.Card<ProtoYmTenkoKenshin>(),
         ModelDb.Card<ProtoYmFoxsMooncall>(),
         ModelDb.Card<ProtoYmYakanOffering>(),
@@ -104,6 +108,7 @@ internal static class YaeRoster
         ModelDb.Card<ProtoYmRebornAsGuujiYae>(),
         ModelDb.Card<ProtoYmEditorInChief>(),
         ModelDb.Card<ProtoYmRoyalties>(),
+        ModelDb.Card<ProtoYmSerialNovel>(),
     };
 
     /// <summary>THE OFFER (<c>YaeCardPool.FilterThroughEpochs</c>): the pool.

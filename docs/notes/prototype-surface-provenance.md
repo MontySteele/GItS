@@ -8589,6 +8589,87 @@ ruled 2026-10-14"). Built in both engines (`YaeShrine.cs`,
   to ALL. Offering: +draw 1." (99 characters). `YaeShrineLedger.Refresh` /
   `.Plant`, sim `yae_shrine.tenko` / `plant`.
 
+## Yae review r3, 2026-10-14
+
+Ruled by [USER] (`review/active/yae-review-r3-2026-10-14.md`): "**Ruled
+2026-10-14: both picks (a), as amended.** [USER]: "Let's send it."" On the
+bound: "I do think that the masterpiece strategy will scale more than you
+think... an aggressive run can do 3 elites per act + 2 bosses = 11 mods
+before the final fight before a Power gives anything more. But as a payoff
+strategy, that might also just be 'fine.'" Built in both engines
+(`YaeShrine.cs`, `YaeAnnotations.cs`, `tier0/engine/yae_shrine.py`) and the
+Yae sim pilot (`tools/yae_expansion_sim.py`). Tests:
+`KleeTests/Prototype/YaeReviewR3Tests.cs`, `tier0/tests/test_yae_review_r3.py`.
+
+- **Sakura kinds.** Sakura (Thunder, the default) strikes an enemy for 2 +
+  Level; Foxfire Sakura hits ALL for 1 + Level; Kitsune Sakura (the decoy)
+  gives 2 + Level Block (unpowered). A Sakura acts at the end of the turn,
+  at Last Bloom and on Tenko. Red Ink adds 3 to any kind; Edict pays on the
+  two damage kinds only; Fox Fire and Deadline Extension as before.
+- **Tenko** is one plain rule: "Every Sakura acts now. Refresh them to at
+  least 3 turns." The typed Tenko (Warding, Wildfire, Offering) is gone.
+  The live clause sums by kind: "Tenko (8 damage, 4 to each enemy, 5
+  Block)", or "(no Sakura)".
+- **Full shrine, by kind.** The oldest acts; the same kind as the new plant
+  refreshes it to at least 3 and gives it a Level (none added); another kind
+  withers it and the new Sakura takes its place at its printed Level. The
+  rule left the plant faces (it has two branches now) for a "Full shrine"
+  tip every planting card carries: "Shrine full: your oldest acts. Same
+  kind: it refreshes and gains a Level. Other kind: it withers." (97).
+  Yakan Evocation reads "Plant a Sakura." and Twin Sakura "Plant 2 [2]
+  Sakura." The kinds carry tips: "A Sakura that hits ALL enemies for 1 + its
+  Level when it acts." and "A fox decoy Sakura. When it acts, you gain 2 +
+  its Level Block."
+- **The four cards:** Shrine Maiden's Guard "Gain 6 [9] Block. Plant a
+  Kitsune Sakura."; Foxfire Sweep "Deal 4 [6] Electro damage to ALL enemies.
+  Plant a Foxfire Sakura."; Kitsune Guile "Apply 2 [3] Weak to ALL enemies.
+  Tenko."; Manuscript Pile "Draw 2 [3] cards. Each Sakura lasts 1 more turn."
+- **The Masterpiece.** One enchantment, `YaeMasterpiece` (title
+  "Annotated"), holds both layers: the permanent stack (a saved `int[]`)
+  and one temporary slot. An Edit fills or replaces the temporary slot, a
+  Published card included (this replaces #1308's skip, pick 2 (a)); Publish
+  moves the temporary layer onto the stack once. Stacked layers add up: Red
+  Ink +3 each, Footnote 1 card each, Fox Fire once each, Sakura Seal a
+  plant each, Royalties 1 Energy each. Reprint: first play each combat
+  replays once per stacked Reprint, then those are inert; a new temporary
+  Reprint arms one fresh replay; a copy's Reprints are armed. The after-elite
+  Publish and The Seven Glamours both add to the stack; the offer includes
+  Published cards. The hover lists the layers ("Published: Red Ink x2,
+  Reprint. This combat: Footnote.", plus "Reprint: used this combat." once
+  spent) and one tip per Annotation's rule; the card face shows the play
+  riders ("[gold]Sakura Seal[/gold] x2."). The icon shows the layer count
+  from two. The Edit tip: "Give a card an Annotation for this combat,
+  replacing its last. Published ones stay and add up." (91).
+- **Signature cards.** Second Printing (U Skill, 0, Exhaust): "Put an
+  Annotated card from your Discard Pile into your hand. [It costs 0 this
+  turn.]" Author's Copy (U Skill, 1 [0], Exhaust): "Add a copy of an
+  Annotated card in your hand (not an Author's Copy) to your hand. It keeps
+  its Annotations." Serial Novel (R Power, 2 [1]): "At the start of your
+  turn, put a random Annotated card from your Discard Pile into your hand."
+  Pool 43 (15 / 18 / 10). Art: official wiki rows in `art/plan.tsv`
+  (Hanamizaka 1, TPRGT 2022 Aether, her Wish splash), crops not yet seen.
+- **Fallen Petals** (U Skill, 0): "Your oldest Sakura withers (it acts once,
+  its Last Bloom). If one did, gain 1 Energy [and draw 1 card]." Its two
+  powers are gone.
+- **Seat page.** Each Sakura row names its kind, its action and the Level
+  it was planted at ("Level 5 (planted at 2, +3 since)"); a Published card
+  shows its stack beside its title; an Edit chooser says a two-card Edit
+  opens it again.
+
+Builder's readings (Claude, 2026-10-14; each open to change):
+- Editor-in-Chief's "a Sakura strikes" makes the highest-Level Sakura act as
+  its kind (a Kitsune gives Block). Kitsune Pounce's "a Sakura strikes it"
+  takes the highest-Level damage Sakura (Sakura or Foxfire), aimed.
+- A full-shrine replacement puts the new Sakura in the NEWEST place.
+- Fallen Petals and a different-kind replacement wither the oldest even
+  under Deadline Extension (an active wither, not a timer).
+- A planting card's Red Ink passes to its Sakura once (+3), however many Red
+  Ink layers it carries (a Sakura holds one Annotation).
+- Publishing a temporary Reprint before the card's first play drops its
+  armed replay (the stack counts it); after the first play it stays armed.
+- Old saves: the seven per-Annotation enchantments are gone, so a mid-run
+  save with Published cards from an earlier build loses them.
+
 ## Kokomi pool overhaul, 2026-10-13
 
 `review/active/kokomi-pool-overhaul-2026-10-13.md`, picks 1 (a) and 2 (a).

@@ -172,6 +172,11 @@ def _take(argv, flag):
 def main():
     global RAW
     argv = sys.argv[1:]
+    if "-h" in argv or "--help" in argv:
+        # A bare run fetches and rewrites art/SOURCES.tsv, so asking for help
+        # must never fall through to it.
+        sys.stdout.buffer.write((__doc__ or "").encode("utf-8"))
+        return
     art_root = _take(argv, "--art-root")
     if art_root:
         RAW = Path(art_root).resolve() / "art" / "raw"

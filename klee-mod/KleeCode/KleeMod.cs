@@ -274,6 +274,11 @@ public static class KleeMod
                     Powers.YaeEditing.PublishPromptText,
                 [Powers.YaeEditing.AnnotationPromptKey] =
                     Powers.YaeEditing.AnnotationPromptText,
+                // Review r3 (2026-10-14): Second Printing and Author's Copy.
+                [Powers.YaeEditing.RecallPromptKey] =
+                    Powers.YaeEditing.RecallPromptText,
+                [Powers.YaeEditing.CopyPromptKey] =
+                    Powers.YaeEditing.CopyPromptText,
             });
 
             // YAE MIKO (2026-10-14): each Annotation's Edit prompt, which
@@ -577,6 +582,14 @@ public static class KleeMod
                     // Shrine r2 (2026-10-14): Tenko's own tip, which
                     // replaced the Rite's.
                     [Cards.ArmKeywordTips.TenkoKey + ".title"] = "Tenko",
+                    // Review r3 (2026-10-14): the two kinds and the
+                    // full-shrine plant.
+                    [Cards.ArmKeywordTips.FoxfireSakuraKey + ".title"] =
+                        "Foxfire Sakura",
+                    [Cards.ArmKeywordTips.KitsuneSakuraKey + ".title"] =
+                        "Kitsune Sakura",
+                    [Cards.ArmKeywordTips.FullShrineKey + ".title"] =
+                        "Full shrine",
                     [Cards.ArmKeywordTips.LightfallSwordKey + ".title"] =
                         "Lightfall Sword",
                     [Cards.ArmKeywordTips.PlanOnlyKey + ".title"] = "Plan",

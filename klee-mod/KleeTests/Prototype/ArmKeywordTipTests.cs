@@ -424,7 +424,13 @@ public class ArmKeywordTipTests
         // Annotation a face names, and `ForTenko`, split out of her Sakura
         // tip.
         // 54 with Yae's shrine r2 (2026-10-14): `ForRite` left with the Rite.
-        Assert.Equal(54, attaches.Count);
+        // 57 with Yae's review r3 (2026-10-14): `ForFoxfireSakura`,
+        // `ForKitsuneSakura` (the two kinds a card names) and
+        // `ForFullShrine` (every planting card's full-shrine rule).
+        Assert.Equal(57, attaches.Count);
+        Assert.Contains(attaches, m => m.Name == "ForFoxfireSakura");
+        Assert.Contains(attaches, m => m.Name == "ForKitsuneSakura");
+        Assert.Contains(attaches, m => m.Name == "ForFullShrine");
         Assert.Contains(attaches, m => m.Name == "ForAnnotation");
         Assert.Contains(attaches, m => m.Name == "ForTenko");
         Assert.DoesNotContain(attaches, m => m.Name == "ForRite");
