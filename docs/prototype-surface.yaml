@@ -4547,8 +4547,9 @@
    authored_by: [claude],
    cost: 1, type: skill, rarity: basic,
    # Shrine r2 (ruled 2026-10-14): planted at Level 1, the others are not
-   # levelled; with 3 standing the oldest refreshes and gains a Level.
-   description: "Plant a [gold]Sakura[/gold] (with 3 standing, your oldest refreshes and gains a Level).",
+   # levelled; with the shrine full the oldest strikes (as its Last Bloom),
+   # refreshes and gains a Level (2026-10-14).
+   description: "Plant a [gold]Sakura[/gold] (with the shrine full, your oldest strikes, refreshes and gains a Level).",
    effects: [{op: yae, kind: plant, amount: 1}],
    upgrade: {cost: -1}}
 
@@ -4591,10 +4592,10 @@
 - {id: proto_ym_twin_sakura, name: "Twin Sakura", character: yae,
    authored_by: [claude],
    # Design axes sec.4: costs 1 (was 2 [1]); the upgrade adds Gain 4 Block.
-   # Shrine r2: both at Level 1; with 2 standing the second plant refreshes
-   # and levels the then-oldest.
+   # Shrine r2: both at Level 1; with the shrine one short the second plant
+   # makes the then-oldest strike, refresh and level.
    cost: 1, type: skill, rarity: common,
-   description: "Plant {YmAmount:diff()} [gold]Sakura[/gold] (with 3 standing, your oldest refreshes and gains a Level).",
+   description: "Plant {YmAmount:diff()} [gold]Sakura[/gold] (with the shrine full, your oldest strikes, refreshes and gains a Level).",
    effects: [{op: yae, kind: plant, amount: 2}],
    upgrade: {add: {op: block, amount: 4}}}
 
@@ -4871,11 +4872,11 @@
 - {id: proto_ym_sakura_channeling, name: "Sakura Channeling", character: yae,
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
-   # Design axes sec.4, the bend (was 2 [3] Block per strike). SHRINE R2
-   # (2026-10-14): its job went with the Rite and every end-of-turn strike is
-   # Thunder, so it does nothing now. REPLACEMENT PENDING (design session).
-   description: "Your [gold]Sakura[/gold] strike as Thunder at the end of your turn.",
-   effects: [{op: apply_power, power: ym_sakura_channeling, amount: 1, target: self}],
+   # The Rare that bends the 3-Sakura limit (2026-10-14). Amount 2 per copy
+   # adds to the cap this combat (YaeShrine.MaxSakura); the full-shrine plant
+   # fires at the new cap. Why: provenance note, "Yae Miko, shrine r2".
+   description: "You can have 2 more [gold]Sakura[/gold].",
+   effects: [{op: apply_power, power: ym_sakura_channeling, amount: 2, target: self}],
    upgrade: {cost: -1}}
 
 - {id: proto_ym_mischievous_teasing, name: "Mischievous Teasing", character: yae,

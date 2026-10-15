@@ -13,12 +13,14 @@ Her numbers live here rather than in `constants.py` so they move neither the
 constant census nor the world stamp.
 
 THE RULES AS MODELLED:
-  * SAKURA: up to `SAKURA_CAP` on a per-fight ledger (`YaeLedger.sakura`),
+  * SAKURA: up to `sakura_cap` (`SAKURA_CAP`, plus 2 per Sakura
+    Channeling) on a per-fight ledger (`YaeLedger.sakura`),
     each with a LEVEL and a TIMER (strikes left). SHRINE R2 (ruled
     2026-10-14): a plant creates a Sakura at the Level the card prints
     (`PLANT_LEVEL`, Grafted Branch its own), +1 per Fox's Mooncall, with 3
-    strikes left, and does NOT level the others. With 3 standing a plant
-    instead makes the OLDEST refresh (3 strikes again) and gain 1 Level
+    strikes left, and does NOT level the others. With the shrine full a
+    plant instead makes the OLDEST strike as its Last Bloom would, then
+    refresh (3 strikes again) and gain 1 Level (2026-10-14)
     (`SCALING == "level"`, the paper's pick 1 (a)). Levels have no cap
     (Yae review r1, pick 2). Under `SCALING == "count"` (pick 1 (b),
     the proposal's placeholder) Levels are off: a Sakura strikes for the
@@ -64,8 +66,8 @@ THE RULES AS MODELLED:
     (+n on a damage strike at an enemy that is Weak or wears Pyro, Hydro or
     Cryo), Serialization (Block per Annotated card played, unpowered), Fox's Mooncall (plant
     n Levels higher), Yakan Offering (plant at the start of her turn, after
-    the draw), Sakura Channeling (shrine r2: a no-op marker, its job went with the
-    Rite; replacement pending a design session),
+    the draw), Sakura Channeling ("You can have 2 more Sakura": its amount,
+    2 per copy, adds to `SAKURA_CAP` for the fight, `sakura_cap`),
     Editor-in-Chief (after an Annotated card's play, the highest-Level Sakura
     strikes), Fallen Petals
     (Energy per wither; its upgrade's power also draws).
@@ -289,6 +291,13 @@ def sakura_count(player) -> int:
     return 0 if led is None else len(led.sakura)
 
 
+def sakura_cap(player) -> int:
+    """How many Sakura may stand: 3, plus Sakura Channeling's amount (2 per
+    copy, designed 2026-10-14). The full-shrine rule fires at this. C#
+    twin: `YaeShrine.MaxSakura`."""
+    return SAKURA_CAP + _power(player, CHANNELING)
+
+
 def _plant_level(player) -> int:
     """1, plus 1 for each Fox's Mooncall ("planted 1 Level higher")."""
     return PLANT_LEVEL + _power(player, MOONCALL)
@@ -300,18 +309,24 @@ def plant(state, n: int = 1, reason: str = "plant",
     """Plant `n` Sakura, one at a time. SHRINE R2 (ruled 2026-10-14): a
     plant creates a Sakura at the card's Level (`level`, Grafted Branch;
     else `PLANT_LEVEL`) plus Fox's Mooncall's bonus, and does not level the
-    others. With 3 standing the OLDEST refreshes (3 strikes again) and gains
-    1 Level instead (Mooncall does not add to that Level). No Level cap.
+    others. With the shrine full (3 standing, plus 2 per Sakura Channeling:
+    `sakura_cap`) the OLDEST first strikes once exactly as its Last Bloom
+    would (Thunder, its Lure, Red Ink and Fox Fire as usual; 2026-10-14),
+    then refreshes (3 strikes again) and gains 1 Level instead (Mooncall
+    does not add to that Level). No Level cap. A two-plant into a full
+    shrine does it per plant.
     `annotation`: what each NEW Sakura inherits from the planting card (Red
     Ink on a card that only plants, `inherited`); a refreshed oldest keeps
     its own."""
     led = ledger(state.player)
     if led is None:
         return
+    cap = sakura_cap(state.player)
     for _ in range(n):
-        if len(led.sakura) >= SAKURA_CAP:
+        if len(led.sakura) >= cap:
             if SCALING == "level":
                 oldest = led.sakura[0]
+                strike(state, oldest, "full_shrine")   # as its Last Bloom
                 oldest.turns_left = SAKURA_TURNS
                 oldest.level += 1
                 state.emit("yae_level", reason=reason,
@@ -355,11 +370,12 @@ def strike_size(state, s: Sakura, rite: Optional[str] = None) -> int:
 
 #: THE LIVE TENKO CLAUSE (shrine r2, 2026-10-14; C# twin `YaeShrineFace`).
 #: In combat a Tenko card says what its Tenko would do now, summed over the
-#: Sakura standing: "Tenko (12 damage)", "Tenko (Warding: 12 Block)"; with
+#: Sakura standing: "Tenko (12 damage)", "Tenko (Warding: 12 damage, 12
+#: Block)" (the strike, then the kind's bonus, 2026-10-14); with
 #: none standing "Tenko (no Sakura)", "Tenko (Warding, no Sakura)". Before
 #: Edict and Fox Fire: the Tenko's own job only.
 TENKO_FACE = {THUNDER: "{n} damage", WARDING: "{n} Block",
-              WILDFIRE: "{n} to ALL", OFFERING: "draw {n}"}
+              WILDFIRE: "{n} to each enemy", OFFERING: "draw {n}"}
 #: A typed Tenko's printed name, "Tenko (Warding)".
 TENKO_NAME = {WARDING: "Warding", WILDFIRE: "Wildfire", OFFERING: "Offering"}
 NO_SAKURA = " (no Sakura)"
@@ -374,22 +390,26 @@ def tenko_total(state, kind: str = THUNDER) -> int:
     return sum(strike_size(state, s, kind) for s in led.sakura)
 
 
-def tenko_words(kind: str, total: int) -> str:
-    """The clause for a total; at 0 (no Sakura standing) the "no Sakura"
-    words. Thunder's stands in its own brackets, a typed kind's inside the
-    kind's ("Tenko (Warding: 5 Block)"). PURE."""
+def tenko_words(kind: str, damage: int, bonus: int = 0) -> str:
+    """The clause for the strikes' damage and a typed kind's bonus; at 0
+    damage (no Sakura standing) the "no Sakura" words. Thunder's stands in
+    its own brackets, a typed kind's inside the kind's ("Tenko (Warding: 5
+    damage, 5 Block)"). PURE."""
     typed = kind != THUNDER
-    if total <= 0:
+    if damage <= 0:
         return NO_SAKURA_TYPED if typed else NO_SAKURA
-    what = TENKO_FACE[kind].format(n=total)
-    return f": {what}" if typed else f" ({what})"
+    strike = TENKO_FACE[THUNDER].format(n=damage)
+    if not typed:
+        return f" ({strike})"
+    return f": {strike}, {TENKO_FACE[kind].format(n=bonus)}"
 
 
 def tenko_line(state, kind: str = THUNDER) -> str:
     """A Tenko card's live clause; "" off a Yae."""
     if ledger(state.player) is None:
         return ""
-    return tenko_words(kind, tenko_total(state, kind))
+    return tenko_words(kind, tenko_total(state, THUNDER),
+                       tenko_total(state, kind))
 
 
 def edict_applies(target) -> bool:
@@ -447,23 +467,27 @@ def fox_fire(state, source: str) -> None:
 
 def strike(state, s: Sakura, reason: str, aim=None,
            rite: str = THUNDER) -> None:
-    """One Sakura's strike as `rite` (a Tenko kind; Thunder unless a typed
-    Tenko says otherwise), then the Sakura's own Fox Fire. `aim` (Kitsune
+    """One Sakura's strike: a Thunder hit, plus a typed Tenko's bonus as
+    `rite` (Warding Block, Wildfire Level to ALL, Offering a card next turn),
+    then the Sakura's own Fox Fire, once. `aim` (Kitsune
     Pounce) names the enemy a single-target damage strike lands on, ahead
     of the Lure."""
     led = ledger(state.player)
     if not state.living_enemies:
         return
+    damage = strike_size(state, s, THUNDER)
     size = strike_size(state, s, rite)
     led.strikes += 1
-    target = _aim(state, aim) if rite == THUNDER else None
+    target = _aim(state, aim)
     state.emit("yae_sakura_strike", reason=reason, level=s.level,
-               amount=size, rite=rite,
+               amount=damage, rite=rite,
                target=None if target is None else target.name)
-    if rite == THUNDER:
-        if target is not None:
-            _hit(state, target, size, reason, rite)
-    elif rite == WARDING:
+    # Every strike is a Thunder hit; a typed Tenko's ALSO does its kind
+    # ([USER], 2026-10-14: "Hmm, the double strike makes Tenko effects quite
+    # strong, but let's try it and see what happens").
+    if target is not None:
+        _hit(state, target, damage, reason, THUNDER)
+    if rite == WARDING:
         _block(state, size, "warding")
     elif rite == WILDFIRE:
         for e in list(state.living_enemies):
@@ -505,8 +529,8 @@ def highest(led):
 
 
 def tenko(state, kind: str = THUNDER) -> None:
-    """Every Sakura strikes now as `kind` (shrine r2: plain Tenko is
-    Thunder), then every timer is set back to 3 ([USER], 2026-10-14: "make
+    """Every Sakura strikes now as Thunder, plus `kind`'s bonus on a typed
+    Tenko (2026-10-14), then every timer is set back to 3 ([USER], 2026-10-14: "make
     Tenko keep resetting the duration")."""
     if kind not in TENKO_KINDS:
         raise ValueError(f"unknown Tenko kind {kind!r}")
@@ -749,6 +773,15 @@ def _editable(state, editor, annotation: Optional[str] = None) -> list:
             and (annotation is None or affects(c, annotation))]
 
 
+def _edit_reaches(state, editor, annotation: str) -> list:
+    """The cards an Edit (the chooser and Reborn as Guuji Yae) can reach:
+    `_editable` with the dead-edit filter, never a card with a Published
+    Annotation (shrine-r2 seat, 2026-10-14: an Edit used to override it for
+    the combat). C# twin: `YaeEditing.EditReaches`."""
+    return [c for c in _editable(state, editor, annotation)
+            if not getattr(c, "ym_published", False)]
+
+
 def _has_op(card, op: str) -> bool:
     return any(fx.get("op") == op for fx in card.effects)
 
@@ -759,7 +792,7 @@ def _edit_target(state, editor, annotation: str):
     dearest card; Reprint on the dearest card, an Attack first; the play
     riders on the cheapest card. A card not yet
     Annotated is preferred, so an Edit overwrites only when it must."""
-    cands = _editable(state, editor, annotation)
+    cands = _edit_reaches(state, editor, annotation)
     if not cands:
         return None
     fresh = [c for c in cands if not is_annotated(c)] or cands
@@ -791,7 +824,7 @@ def edit(state, editor, annotation: str, n: int = 1) -> None:
     for _ in range(n):
         chooser = led.edit_choice or _edit_target
         target = chooser(state, editor, annotation)
-        if target is None or target not in _editable(state, editor,
+        if target is None or target not in _edit_reaches(state, editor,
                                                      annotation):
             return
         annotate(state, target, annotation)
@@ -803,7 +836,7 @@ def edit_all(state, editor, default: str) -> None:
     else the row's) on every other card in hand."""
     led = ledger(state.player)
     name = led.reborn_choice or default
-    cards = _editable(state, editor, name)
+    cards = _edit_reaches(state, editor, name)
     for c in cards:
         annotate(state, c, name, "reborn")
     if cards:

@@ -162,8 +162,11 @@ def test_a_plant_does_not_level_the_others_and_a_full_shrine_feeds_the_oldest(ya
     assert oldest.turns_left == Y.SAKURA_TURNS
     _play(st, _ym("yakan_evocation"))
     assert [s.level for s in _led(st).sakura] == [3, 1, 1]
+    # 2026-10-14: each full-shrine plant struck the oldest first, at 1 then 2.
+    assert [r["amount"] for r in _strikes(st)] == [3, 4]
     Y.turn_end(st)
-    assert sum(r["amount"] for r in _strikes(st)) == 5 + 3 + 3
+    assert sum(r["amount"] for r in _strikes(st)
+               if r["reason"] != "full_shrine") == 5 + 3 + 3
 
 
 def test_twin_sakura_with_two_standing_plants_one_then_feeds_the_oldest(yae):
@@ -281,19 +284,23 @@ def test_thunder_strikes_one_enemy_for_two_plus_level(yae):
     assert sum(e.hp for e in st.enemies) == 200 - 3
 
 
-def test_tenko_warding_gives_two_plus_level_block_now_and_no_damage(yae):
+def test_tenko_warding_strikes_and_gives_two_plus_level_block(yae):
+    # [USER], 2026-10-14: "Hmm, the double strike makes Tenko effects quite
+    # strong, but let's try it and see what happens": a typed Tenko's
+    # Sakura strike as Thunder AND add the kind.
     st = _state()
     _play(st, _ym("yakan_evocation"))
     _play(st, _ym("grafted_branch"))             # levels 1 / 2
     _led(st).sakura[0].turns_left = 1
     _play(st, _ym("shrine_maidens_guard"))       # 6 Block, Tenko (Warding)
     assert st.player.block == 6 + (2 + 1) + (2 + 2)
-    assert st.enemies[0].hp == 100 and not _hits(st)
+    assert st.enemies[0].hp == 100 - (2 + 1) - (2 + 2)
+    assert len(_hits(st)) == 2
     # Tenko still resets every timer ([USER], 2026-10-14).
     assert [s.turns_left for s in _led(st).sakura] == [Y.SAKURA_TURNS] * 2
     st.player.block = 0
     Y.turn_end(st)                               # the turn end is Thunder
-    assert st.player.block == 0 and len(_hits(st)) == 2
+    assert st.player.block == 0 and len(_hits(st)) == 2 + 2
 
 
 def test_tenko_warding_reads_red_ink_and_fox_fire(yae):
@@ -307,7 +314,7 @@ def test_tenko_warding_reads_red_ink_and_fox_fire(yae):
     hp = st.enemies[0].hp
     Y.tenko(st, Y.WARDING)
     assert st.player.block == 3
-    assert hp - st.enemies[0].hp == Y.FOX_FIRE_DAMAGE
+    assert hp - st.enemies[0].hp == 3 + Y.FOX_FIRE_DAMAGE   # Fox Fire once
 
 
 def test_tenko_wildfire_strikes_all_for_level_and_red_ink(yae):
@@ -316,13 +323,16 @@ def test_tenko_wildfire_strikes_all_for_level_and_red_ink(yae):
     _play(st, _ym("grafted_branch"))             # levels 1 / 2
     hp = [e.hp for e in st.enemies]
     _play(st, _ym("kitsune_guile"))              # Tenko (Wildfire)
-    assert [h - e.hp for h, e in zip(hp, st.enemies)] == [3, 3, 3]
-    assert len(_strikes(st)) == 2 and len(_hits(st)) == 6
+    lost = [h - e.hp for h, e in zip(hp, st.enemies)]
+    # Each strike: Thunder (2 + Level) at one enemy, then Level to ALL.
+    assert sum(lost) == (3 + 4) + 3 * 3 and min(lost) >= 3
+    assert len(_strikes(st)) == 2 and len(_hits(st)) == 2 + 6
     assert {r["rite"] for r in _strikes(st)} == {Y.WILDFIRE}
     _play(st, _ym("inked_branches"))
     hp = [e.hp for e in st.enemies]
     Y.tenko(st, Y.WILDFIRE)
-    assert [h - e.hp for h, e in zip(hp, st.enemies)] == [9, 9, 9]
+    lost = [h - e.hp for h, e in zip(hp, st.enemies)]
+    assert sum(lost) == (6 + 7) + 3 * 9 and min(lost) >= 9
 
 
 def test_tenko_offering_draws_one_a_sakura_at_the_next_turn_start(yae):
@@ -331,7 +341,7 @@ def test_tenko_offering_draws_one_a_sakura_at_the_next_turn_start(yae):
     _play(st, _ym("inked_branches"))             # Red Ink skips Offering
     st.player.draw_pile = [loader.get_card("defend") for _ in range(9)]
     _play(st, _ym("manuscript_pile"))            # draw 2, Tenko (Offering)
-    assert _led(st).pending_draw == 2 and not _hits(st)
+    assert _led(st).pending_draw == 2 and len(_hits(st)) == 2
     st.player.hand = []
     Y.turn_start(st)
     assert len(st.player.hand) == 2 and _led(st).pending_draw == 0
@@ -350,17 +360,36 @@ def test_a_typed_tenko_holds_nothing_the_turn_end_stays_thunder(yae):
 
 
 
-def test_channeling_is_blank_after_shrine_r2(yae):
-    # Its job went with the Rite; replacement pending (design session).
+def test_channeling_lets_you_have_2_more_sakura_per_copy(yae):
+    # Designed 2026-10-14: "You can have 2 more Sakura."
+    st = _state()
+    assert Y.sakura_cap(st.player) == 3
+    _play(st, _ym("sakura_channeling"))
+    assert Y.sakura_cap(st.player) == 5
+    _play(st, _ym("sakura_channeling"))
+    assert Y.sakura_cap(st.player) == 7
+    Y.plant(st, 7)
+    assert [s.level for s in _led(st).sakura] == [1] * 7
+    Y.turn_end(st)
+    assert len(_hits(st)) == 7
+
+
+def test_the_full_shrine_rule_fires_at_channelings_cap(yae):
     st = _state()
     _play(st, _ym("sakura_channeling"))
-    _play(st, _ym("yakan_evocation"))
-    Y.turn_end(st)
-    assert len(_hits(st)) == 1
-    st.player.block = 0
-    hp = st.enemies[0].hp
-    Y.tenko(st, Y.WARDING)
-    assert st.player.block == 3 and st.enemies[0].hp == hp
+    Y.plant(st, 5)
+    assert len(_led(st).sakura) == 5
+    _led(st).sakura[0].turns_left = 1
+    Y.plant(st, 1)                               # full: the oldest feeds
+    assert len(_led(st).sakura) == 5
+    assert [s.level for s in _led(st).sakura] == [2, 1, 1, 1, 1]
+    assert _led(st).sakura[0].turns_left == Y.SAKURA_TURNS
+
+
+def test_without_channeling_the_shrine_still_holds_3(yae):
+    st = _state()
+    Y.plant(st, 4)
+    assert [s.level for s in _led(st).sakura] == [2, 1, 1]
 
 
 def test_sakura_annotations_each_reading(yae):
@@ -698,3 +727,38 @@ def test_the_harness_pool_is_the_staged_pool(yae):
     for d in S.DECKS.values():
         for cid in d["core"] + d["support"]:
             loader.get_card(cid)
+
+
+def test_a_full_shrine_plant_strikes_the_oldest_as_its_last_bloom(yae):
+    # [USER] (2026-10-14): "when you plant a Sakura with 3 already on the
+    # field, do you think the outgoing Sakura should strike as though
+    # withered?" It strikes first (Thunder, Red Ink and Fox Fire as usual),
+    # then refreshes and gains a Level.
+    st = _state()
+    Y.plant(st, 3)
+    _led(st).sakura[0].annotation = Y.RED_INK
+    hp = st.enemies[0].hp
+    Y.plant(st, 1)
+    assert [r["reason"] for r in _strikes(st)] == ["full_shrine"]
+    assert hp - st.enemies[0].hp == 2 + 1 + Y.RED_INK_AMOUNT   # its old Level
+    assert [s.level for s in _led(st).sakura] == [2, 1, 1]
+    assert _led(st).sakura[0].turns_left == Y.SAKURA_TURNS
+
+
+def test_twin_sakura_into_a_full_shrine_strikes_per_plant(yae):
+    st = _state()
+    Y.plant(st, 3)
+    _play(st, _ym("twin_sakura"))
+    # Plant one feeds the oldest (now the newest-refreshed, still first);
+    # plant two feeds it again: two strikes, at Levels 1 then 2.
+    assert [r["level"] for r in _strikes(st)] == [1, 2]
+    assert [s.level for s in _led(st).sakura] == [3, 1, 1]
+
+
+def test_a_plant_below_the_cap_strikes_nothing(yae):
+    st = _state()
+    _play(st, _ym("sakura_channeling"))
+    Y.plant(st, 5)
+    assert not _strikes(st)
+    Y.plant(st, 1)
+    assert len(_strikes(st)) == 1

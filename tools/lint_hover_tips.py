@@ -70,9 +70,7 @@ BOX_DEBT = {
 }
 
 #: Long tips a ruled pick keeps, curated. An entry no card raises FAILS.
-LONG_OK = {
-    "YaeSakuraTip": "her shrine's rule, the strike, timer, cap and plant "
-                    "Level in one tip ([USER]'s wording, 2026-10-14)",
+LONG_OK: dict[str, str] = {
 }
 
 _GOLD = re.compile(r"\[/?(gold|blue)\]")

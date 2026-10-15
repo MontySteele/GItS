@@ -88,6 +88,9 @@ def test_the_page_prints_every_sakura_oldest_first():
     assert lines[1] == "- Sakura 1: Level 3, strikes for 5, 1 strike left."
     assert lines[2] == "- Sakura 2: Level 2, strikes for 4, 2 strikes left."
     assert lines[3] == "- Sakura 3: Level 1, strikes for 3, 3 strikes left."
+    # 2026-10-14: full, so the next plant makes the oldest strike first.
+    assert lines[4] == ("- Shrine full: your next plant makes Sakura 1 "
+                        "strike, then refresh and gain a Level.")
     assert lines[-1] == "- Annotated cards in your hand: 0."
 
 
@@ -135,3 +138,16 @@ def test_her_option_id_and_her_display_name_fold_together():
     assert embark.option_id("yae") == "KLEEMOD-YAE"
     assert soak_navigate.character_matches("KLEEMOD-YAE", "Yae Miko")
     assert not soak_navigate.character_matches("KLEEMOD-YAE", "Varka")
+
+
+def test_sakura_channeling_raises_the_count_lines_cap():
+    # Designed 2026-10-14: "You can have 2 more Sakura", per copy.
+    state = yae_state(badges=((1, 1, 3, 3), (2, 1, 3, 3), (3, 1, 3, 3),
+                              (4, 1, 3, 3)))
+    state["player"]["status"].append(_status(
+        "Sakura Channeling", "You can have 2 more Sakura.", 2, "Counter"))
+    lines = _block(blindplay.observe(state))
+    assert lines[0] == ("- Sakura: 4 of 5. At the end of your turn each "
+                        "strikes, oldest first.")
+    assert lines[4] == "- Sakura 4: Level 1, strikes for 3, 3 strikes left."
+    assert not any(line.startswith("- Shrine full") for line in lines)

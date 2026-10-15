@@ -8507,15 +8507,71 @@ ruled 2026-10-14"). Built in both engines (`YaeShrine.cs`,
 - Sakura Grove: "each Sakura gains a Level" (was the newest), upgrade
   Innate. Serialization: "Whenever you play an Annotated card, gain 3 [4]
   Block" (was per Edit).
-- Sakura Channeling has no job left: its text reads "Your Sakura strike as
-  Thunder at the end of your turn." and the power is a marker nothing
-  reads. Replacement pending (design session).
+- Sakura Channeling lost its job with the Rite. **Replaced the same day**
+  (2026-10-14): the main session designed it as the Rare that bends the
+  3-Sakura limit, because [USER] judged Yae "generally underpowered right
+  now". Text: "You can have 2 more Sakura." Rare Power, 2 [1]. Rule: its
+  amount, 2 per copy, raises the shrine's cap for this combat
+  (`YaeShrine.MaxSakura`, sim `yae_shrine.sakura_cap`: 3 + Channeling), and
+  the full-shrine plant (the oldest refreshes and gains a Level) fires at
+  the new cap. Her status bar has a badge per Sakura up to nine
+  (three copies); a tenth stands and strikes without one. The seat page's
+  count line reads "N of cap".
+- The full-shrine plant strikes first, the same day. [USER]: "when you plant
+  a Sakura with 3 already on the field, do you think the outgoing Sakura
+  should strike as though withered?" The main session ruled yes: a plant
+  into a full shrine (at its cap, Channeling's raised cap included) makes
+  the oldest Sakura strike once exactly as its Last Bloom would (Thunder;
+  the Lure, Red Ink and Fox Fire as usual), THEN refresh to 3 turns and gain
+  a Level. Twin Sakura into a full shrine does it per plant. Yakan Evocation
+  and Twin Sakura now print "(with the shrine full, your oldest strikes,
+  refreshes and gains a Level)"; the number left the face, so it needs no
+  live cap. Door: `YaeShrine.Plant` strikes before `YaeShrineLedger.Plant`;
+  sim: `yae_shrine.plant`, strike reason "full_shrine". The seat page adds
+  "Shrine full: your next plant makes Sakura 1 strike, then refresh and gain
+  a Level." when the shrine is at its cap.
+- The Sakura tip, condensed the same day ([USER]: "I still feel like that
+  Sakura tooltip can be condensed further somehow"): "At the end of your
+  turn, strikes an enemy for 2 + its Level. Lasts 3 turns, then strikes once
+  more." The full-shrine rule is printed on the plant cards and moves with
+  Channeling, so it left the tip, as did the cap; "random" went to fit the
+  100-character tip cap (its LONG_OK exception is gone).
 - Faces: the Rite clause, the Rite badge and the seat page's Rite line are
   gone. A Tenko row's live clause is "Tenko (12 damage)" / "Tenko (Warding:
-  12 Block)", and "(no Sakura)" / "(Warding, no Sakura)" with none standing
+  12 damage, 12 Block)" (since the double strike, below), and "(no Sakura)" / "(Warding, no Sakura)" with none standing
   (`YaeShrineFace.TenkoLine`, sim `tenko_line`). The Tenko tip
   (`ArmKeywordTips.YaeTenkoTip`) names the three kinds; the Rite tip is
   gone.
+- Two fixes from the shrine-r2 seat (lane 4, 2026-10-14), both main-session
+  decisions. (1) A Wildfire Tenko's live clause reads per enemy, "Tenko
+  (Wildfire: 18 to each enemy)" (was "18 to ALL", which the seat read as
+  one volley split across enemies; each enemy takes the full amount).
+  `YaeShrineFace.Amount`, sim `TENKO_FACE`. Plain Tenko ("Tenko (12
+  damage)") and the Tenko tip are unchanged. (2) An Edit never targets a
+  card with a Published Annotation: the Edit chooser and Reborn as Guuji
+  Yae skip it (they used to override it for the combat). With no other
+  target the Edit does nothing, as a dead Edit does. Fox Fire Draft's
+  "Edit your newest Sakura" targets a Sakura and is untouched; Publish
+  itself is untouched. `YaeEditing.EditReaches` / `Published`, sim
+  `yae_shrine._edit_reaches`.
+- A typed Tenko strikes AND adds its kind, ruled the same day. [USER]: "Hmm,
+  the double strike makes Tenko effects quite strong, but let's try it and
+  see what happens." Every Sakura strikes now as Thunder (2 + Level at one
+  enemy; the aim, the Lure, Red Ink, Fox Fire and Edict as for any strike),
+  and a typed Tenko adds per Sakura: Warding, Block equal to 2 + Level (+3
+  Red Ink); Wildfire, its Level (+3 Red Ink) to ALL enemies; Offering, 1
+  card next turn. Fox Fire fires once per Sakura. Then every timer resets
+  to 3. Plain Tenko and the end-of-turn strike are unchanged. The live
+  clause reads "Tenko (Warding: 12 damage, 12 Block)", "Tenko (Wildfire:
+  12 damage, 3 to each enemy)", "Tenko (Offering: 12 damage, draw 3)". The
+  Tenko tip: "Sakura strike now, reset to 3 turns. Warding: +Block.
+  Wildfire: +Level to ALL. Offering: +draw 1." (97 characters). Card faces
+  keep "Tenko (Warding)" and the rest. `YaeShrine.Strike`,
+  `YaeShrineFace.TenkoWords`, sim `yae_shrine.strike` / `tenko_words`.
+- Reprint, spent, the same day (seat fix): after its first play the card's
+  enchantment tab greys (Glam's `Status = Disabled`), its hover adds "Used
+  this combat." and drops the Replay tip, and the seat page prints
+  "(Reprint: used)" off the bridge's new `disabled` flag.
 
 ## Kokomi pool overhaul, 2026-10-13
 

@@ -158,8 +158,11 @@ public class YaeRedInkSakuraTests : IDisposable
     public void The_edit_chooser_reborn_and_the_publish_offer_take_the_filter()
     {
         var affects = $"{nameof(YaeAnnotationReach)}.{nameof(YaeAnnotationReach.Affects)}";
-        Assert.Contains(affects, Il.Calls(typeof(YaeEditing).GetMethod(nameof(YaeEditing.Edit))!));
-        Assert.Contains(affects, Il.Calls(typeof(YaeEditing).GetMethod(nameof(YaeEditing.EditAll))!));
+        // The Edit chooser and Reborn read the filter through EditReaches.
+        var reaches = $"{nameof(YaeEditing)}.{nameof(YaeEditing.EditReaches)}";
+        Assert.Contains(affects, Il.Calls(typeof(YaeEditing).GetMethod(nameof(YaeEditing.EditReaches))!));
+        Assert.Contains(reaches, Il.Calls(typeof(YaeEditing).GetMethod(nameof(YaeEditing.Edit))!));
+        Assert.Contains(reaches, Il.Calls(typeof(YaeEditing).GetMethod(nameof(YaeEditing.EditAll))!));
         Assert.Contains(affects, Il.Calls(typeof(YaeEditing).GetMethod(
             nameof(YaeEditing.PublishChoices), new[] { typeof(Player) })!));
     }

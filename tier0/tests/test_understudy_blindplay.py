@@ -6201,6 +6201,31 @@ def test_a_chooser_row_carries_the_tag_its_hand_entry_carries():
     assert "**Strike (1)** (Spiral" not in page
 
 
+def test_a_spent_reprint_reads_used_and_offers_no_replay():
+    """Two blind seats (2026-10-14) read a spent Reprint as live and expected
+    a second replay. The bridge sends `disabled` when the game greys the tab
+    (`Status == Disabled`, Glam's display); the title says "used" and the
+    hover the mod sends has no Replay row."""
+    state = enchanted_hand_state()
+    card = state["player"]["hand"][1]
+    card["enchantment"] = {"id": "KLEEMOD-REPRINT_ANNOTATION",
+                           "name": "Reprint",
+                           "description": "The first time this card is "
+                                          "played each combat, play it "
+                                          "twice. Used this combat.",
+                           "amount": 0, "shows_amount": False,
+                           "disabled": True}
+    card["keywords"] = [{"name": "Reprint",
+                         "description": card["enchantment"]["description"]}]
+    page = blindplay.observe(state)
+    assert "**Water's Edge (2)** (Reprint: used)" in page
+    assert "Used this combat." in page
+    assert "Replay" not in page
+    # Live, the tag is bare, as before.
+    del card["enchantment"]["disabled"]
+    assert "**Water's Edge (2)** (Reprint)" in blindplay.observe(state)
+
+
 def test_a_card_with_no_enchantment_key_claims_nothing():
     """An absent key is the positive statement "not enchanted", and it is also
     what every bridge older than this row sends for every card. Neither may
@@ -6590,11 +6615,12 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # `YaeTenkoTip` and `YaeEditTip`, the prose between the interpolated
         # `YaeLaw` numbers; split and cut 2026-10-14.
         # Shrine r2 (2026-10-14): no Rite, the full-shrine plant, the kinds.
-        "Sakura": [" plus its Level ",
-                   "then strikes once more. Up to ",
-                   "when full refreshes the oldest and gives it a Level."],
+        # Condensed 2026-10-14: the full-shrine rule is on the plant cards.
+        "Sakura": ["At the end of your turn, strikes an enemy for ",
+                   "+ its Level. Lasts ",
+                   " turns, then strikes "],
         "Tenko": [" strike now, reset to ",
-                  "Wildfire: Level to ALL. Offering: draw 1."],
+                  "Wildfire: +Level to ALL. Offering: +draw 1."],
         "Edit": ["Give a card an Annotation for this combat, replacing any "
                  "it had. A ", "Published one lasts the run."],
         # 2026-10-14: each Annotation's own row, `YaeAnnotationText.Rule`

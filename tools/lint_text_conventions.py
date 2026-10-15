@@ -306,7 +306,10 @@ FRONT_ENEMY_ALLOWED = {"PlanKey", "proto_kk_undertide_lance", "proto_kk_tide_wal
 #: `more-damage`'s two counters: "N more" there is a count growing, not a
 #: bonus on a hit, and rule 8 is about the hit.
 MORE_COUNTERS = {"proto_kk_kurage_swarm", "KurageSwarmPower.description",
-                 "proto_vk_oath_unto_death", "OathUntoDeathPower.description"}
+                 "proto_vk_oath_unto_death", "OathUntoDeathPower.description",
+                 # Sakura Channeling (2026-10-14): "You can have N more
+                 # Sakura", the shrine's cap growing.
+                 "SakuraChannelingPower.description"}
 
 #: Card faces only: "your largest Bomb" says WHICH enemy's (the Klee round,
 #: 2026-10-11: Stoke the Fuse grew Torch Head's Bomb 16 by 49 when the seat

@@ -55,8 +55,10 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   Wildfire, Offering) replaces "Rite: X"; a plant comes in at its card's
   Level and no longer levels the others, a full-shrine plant refreshes and
   levels the oldest; Tenko still resets timers; Grove levels every Sakura;
-  Serialization pays per Annotated card played; Sakura Channeling is blank
-  (replacement pending). A staged pool of 40 (15 / 16 / 9, no
+  Serialization pays per Annotated card played; Sakura Channeling now reads
+  "You can have 2 more Sakura" (the cap, 3, rises by 2 per copy; the
+  full-shrine plant fires at the new cap), and a plant into a full shrine
+  makes the oldest strike as its Last Bloom first, then refresh and level. A staged pool of 40 (15 / 16 / 9, no
   Ancients or co-op cards yet), official card art. **Review r1 ruled and
   built** (2026-10-14, same doc): Last Bloom (a withering Sakura strikes once
   more), no Level cap, global Levels only from Fox's Mooncall (+1 per copy);
