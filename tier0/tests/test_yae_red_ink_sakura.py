@@ -3,10 +3,11 @@
 "Hmm, let's do both. Make the Sakura work, but also try to block dead edits
 when we can."
 
-  1. Red Ink on a card that plants a Sakura and itself deals no damage and
-     gives no Block passes to every Sakura that play plants; a full-shrine
-     plant that only levels plants nothing, so nothing inherits; no other
-     Annotation passes.
+  1. Red Ink on a card that plants a Sakura passes to every Sakura that
+     play plants, and the card's own damage and Block still take the +3
+     (widened 2026-10-14 after a GPT design review: Twin Sakura+ gains
+     Block and once lost the Sakura bonus); a full-shrine plant that only
+     levels plants nothing, so nothing inherits; no other Annotation passes.
   2. An Edit, Reborn as Guuji Yae and the after-elite Publish offer skip a
      card the Annotation would do nothing on: only Red Ink can be dead.
 
@@ -131,15 +132,18 @@ def test_fox_fire_on_a_planting_card_does_not_inherit():
     assert [s.annotation for s in _sakura(st)] == [None]
 
 
-def test_a_planting_card_that_gives_block_keeps_red_ink_on_its_block():
-    """Twin Sakura+ gains 4 Block: Red Ink rides the Block, no inheritance."""
+def test_a_planting_card_that_gives_block_gets_both():
+    """Twin Sakura+ gains 4 Block: Red Ink rides the Block AND both Sakura
+    inherit it (2026-10-14)."""
     twin = loader.get_card(_ym("twin_sakura") + "+")
     assert Y.plants_sakura(twin) and Y.gives_block(twin)
+    assert Y.inherits(twin) is False             # not annotated yet
     st = _state()
     Y.annotate(st, twin, Y.RED_INK)
+    assert Y.inherits(twin)
     _play(st, twin)
     assert st.player.block == 4 + Y.RED_INK_AMOUNT
-    assert all(s.annotation is None for s in _sakura(st))
+    assert [s.annotation for s in _sakura(st)] == [Y.RED_INK, Y.RED_INK]
 
 
 def test_a_published_red_ink_planting_card_plants_red_ink_every_play():
@@ -259,5 +263,5 @@ def test_a_yae_kinds_own_block_counts_for_red_ink_in_both_engines():
 def test_the_red_ink_rule_says_where_it_goes():
     src = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
            / "YaeAnnotations.cs").read_text(encoding="utf-8")
-    assert ('"If it only plants, the [gold]Sakura[/gold] gets it."'
+    assert ('"If it plants, its [gold]Sakura[/gold] get it too."'
             in src)

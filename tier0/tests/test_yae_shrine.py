@@ -762,3 +762,25 @@ def test_a_plant_below_the_cap_strikes_nothing(yae):
     assert not _strikes(st)
     Y.plant(st, 1)
     assert len(_strikes(st)) == 1
+
+
+def test_tenko_refreshes_every_timer_to_at_least_three(yae):
+    # Main session, 2026-10-14 (after a GPT design review): Tenko never
+    # shortens a timer extended past 3; a shorter one comes back up to 3.
+    st = _state()
+    Y.plant(st, 2)
+    Y.extend(st, 2)                              # 5, 5
+    _led(st).sakura[1].turns_left = 1
+    Y.tenko(st)
+    assert [s.turns_left for s in _led(st).sakura] == [5, Y.SAKURA_TURNS]
+
+
+def test_a_full_shrine_plant_never_shortens_the_oldests_timer(yae):
+    st = _state()
+    Y.plant(st, 3)
+    _led(st).sakura[0].turns_left = 6
+    Y.plant(st, 1)
+    assert _led(st).sakura[0].turns_left == 6
+    _led(st).sakura[0].turns_left = 1
+    Y.plant(st, 1)
+    assert _led(st).sakura[0].turns_left == Y.SAKURA_TURNS

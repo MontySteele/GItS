@@ -24,7 +24,7 @@ public interface IYaeCharacter
 ///     more (Last Bloom). A plant creates one at the card's Level; with
 ///     three standing the oldest refreshes and gains a Level instead (shrine
 ///     r2). Tenko strikes now (typed: as Block, at ALL, or as draw) and
-///     resets every timer.
+///     refreshes every timer to at least 3.
 ///   * EDIT (<see cref="YaeEditing"/>): a card in hand gains one of five
 ///     Annotations (her Enchantments, <see cref="YaeAnnotationModel"/>) for
 ///     the combat. PUBLISH keeps one for the run: The Seven Glamours in

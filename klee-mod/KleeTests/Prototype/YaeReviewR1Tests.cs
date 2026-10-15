@@ -110,7 +110,7 @@ public class YaeReviewR1Tests : IDisposable
         Assert.Contains("Warding", ArmKeywordTips.YaeTenkoTip);
         Assert.Contains("Wildfire", ArmKeywordTips.YaeTenkoTip);
         Assert.Contains("Offering", ArmKeywordTips.YaeTenkoTip);
-        Assert.Contains("reset to 3 turns", ArmKeywordTips.YaeTenkoTip);
+        Assert.Contains("refresh to 3 turns", ArmKeywordTips.YaeTenkoTip);
         // 2026-10-14: the full-shrine rule left the tip for the plant faces.
         Assert.DoesNotContain("oldest", ArmKeywordTips.YaeSakuraTip);
         Assert.Contains("your oldest strikes, refreshes", Face(new ProtoYmYakanEvocation()));
