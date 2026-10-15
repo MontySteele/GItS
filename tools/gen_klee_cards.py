@@ -3119,7 +3119,9 @@ YAE_ANNOTATIONS = {
 YAE_SAKURA_KINDS = {"foxfire": "Foxfire", "kitsune": "Kitsune"}
 YAE_PLANT_AS_KINDS = {"plant", "plant_level"}
 #: The kinds that read `IsUpgraded` at play time (`yae_upgraded`).
-YAE_UPGRADED_KINDS = {"fallen_petals", "second_printing"}
+#: Yae review r4, pick 1 (a): Inked Branches+ also Edits a card in your hand
+#: (`hand_if_upgraded: true` on its `edit_sakura`).
+YAE_UPGRADED_KINDS = {"fallen_petals", "second_printing", "edit_sakura"}
 YAE_SAKURA_ANNOTATIONS = {"red_ink", "fox_fire", "deadline"}
 YAE_SAKURA_ENDS = {"newest": "Newest", "oldest": "Oldest", "every": "Every"}
 #: The printed name of each `YaeAnnotation` member (`YaeAnnotationText.Name`).
@@ -3162,7 +3164,7 @@ def yae_needs_var(card: dict, eff: dict, field: str) -> bool:
         return True
     return int(eff[field]) != YAE_FIELD_DEFAULTS[field]
 YAE_FIELDS = {"op", "kind", "target", "per", "base", "amount", "annotation",
-              "as", "which", "keeps"}
+              "as", "which", "keeps", "hand_if_upgraded"}
 
 
 #: The `yae` kinds whose play plants a Sakura (`ISakuraPlanterCard`).
@@ -3196,6 +3198,8 @@ def yae_call(eff: dict) -> str:
         args += f", YaeAnnotation.{YAE_ANNOTATIONS[eff['annotation']]}"
     if eff.get("keeps") == "red_ink":
         args += ", keepRedInk: true"
+    if eff.get("hand_if_upgraded") is True:
+        args += ", handIfUpgraded: true"
     if eff.get("kind") in YAE_PLANT_AS_KINDS and "as" in eff:
         args += f", YaeSakuraKind.{YAE_SAKURA_KINDS[eff['as']]}"
     return f"await YaeCards.{YAE_KINDS[eff['kind']]}({args});"
@@ -5978,6 +5982,10 @@ def blocked_reason(
             if "keeps" in eff and (kind != "edit_sakura"
                                    or eff["keeps"] != "red_ink"):
                 return "yae keeps: is red_ink, on an edit_sakura"
+            if "hand_if_upgraded" in eff and (
+                    kind != "edit_sakura"
+                    or eff["hand_if_upgraded"] is not True):
+                return "yae hand_if_upgraded: is true, on an edit_sakura"
             if (kind == "edit_sakura") != ("which" in eff):
                 return f"yae {kind} which mismatch"
             if "which" in eff and eff["which"] not in YAE_SAKURA_ENDS:

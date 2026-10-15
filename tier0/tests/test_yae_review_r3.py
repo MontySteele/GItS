@@ -404,10 +404,10 @@ def test_reprint_used_reads_spent():
 def test_bestseller_and_print_run_count_a_published_only_card():
     st = _state()
     st.player.hand.append(_published("strike", [Y.REPRINT]))
-    _play(st, "bestseller")                      # 5 + 3 x 1
-    assert st.enemies[0].hp == 100 - 8
-    _play(st, "print_run")                       # 6 + 2 x 1
-    assert st.player.block == 8
+    _play(st, "bestseller")                      # 8 + 3 x 1
+    assert st.enemies[0].hp == 100 - 11
+    _play(st, "print_run")                       # 6 + 3 x 1
+    assert st.player.block == 9
 
 
 def test_serialization_pays_on_a_published_only_card():

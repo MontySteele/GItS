@@ -203,7 +203,8 @@ def test_sakura_seal_costs_0_and_its_upgrade_edits_two():
     base = loader.get_card(_ym("sakura_seal"))
     plus = loader.get_card(_ym("sakura_seal") + "+")
     assert base.cost == 0 and plus.cost == 0
-    assert base.effects[0]["amount"] == 1 and plus.effects[0]["amount"] == 2
+    # Yae review r4, pick 1 (a): up to 2 [3] (was 1 [2]).
+    assert base.effects[0]["amount"] == 2 and plus.effects[0]["amount"] == 3
     st = _state()
     a, b = loader.get_card("strike"), loader.get_card("defend")
     st.player.hand += [a, b]

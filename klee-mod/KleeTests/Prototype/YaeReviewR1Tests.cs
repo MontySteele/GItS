@@ -133,11 +133,12 @@ public class YaeReviewR1Tests : IDisposable
     {
         var seal = new ProtoYmSakuraSeal();
         Assert.Equal(0, seal.EnergyCost.Canonical);
-        Assert.Equal(1, (int)seal.DynamicVars["YmAmount"].BaseValue);
+        // Yae review r4, pick 1 (a): up to 2 [3] cards (was 1 [2]).
+        Assert.Equal(2, (int)seal.DynamicVars["YmAmount"].BaseValue);
         var upgrade = Il.Calls(Il.Method("ProtoYmSakuraSeal", "OnUpgrade"));
         Assert.Contains(upgrade, c => c.Contains("UpgradeValueBy"));
         Assert.DoesNotContain(upgrade, c => c.Contains("EnergyCost"));
-        Assert.Contains("{IfUpgraded:show:2 cards|a card}", Face(seal));
+        Assert.Contains("up to {YmAmount:diff()} cards", Face(seal));
     }
 
     // ==== 4. Kitsune Rite, Tenko and a card =================================

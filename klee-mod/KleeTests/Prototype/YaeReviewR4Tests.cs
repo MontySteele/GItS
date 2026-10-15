@@ -2,7 +2,10 @@ using System;
 using System.Linq;
 using KleeMod.Powers;
 using KleeMod.Relics;
+using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Tests.Harness;
+using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.Cards;
 using Xunit;
 
 namespace KleeMod.Tests.Prototype;
@@ -115,5 +118,84 @@ public class YaeReviewR4Tests : IDisposable
             .SelectMany(t => t.GetMethods(HeadlessGame.All))
             .SelectMany(Il.CallSequence);
         Assert.Contains(lambdas, c => c.Contains("ShouldOwnerDeathTriggerFatal"));
+    }
+
+    // Pick 1 (a), ruled 2026-10-15 ([USER]: "Otherwise I'm good with it."):
+    // a multi-card Edit is ONE chooser of up to N DIFFERENT cards that the
+    // player may stop short of (GPT, relayed by [USER]: "Multi-card Edits
+    // should offer up to the printed number of distinct targets"). Sim
+    // twin: test_yae_review_r4.py's pick 1 tests.
+
+    private static T Mutable<T>(T card) where T : CardModel
+    {
+        Seat.Set(card, "IsMutable", true);
+        return card;
+    }
+
+    [Fact]
+    public void A_multi_card_edit_is_one_chooser_of_zero_to_n()
+    {
+        foreach (var n in new[] { 2, 3 })
+        {
+            var prefs = YaeEditing.EditPrefs(YaeAnnotation.Footnote, n);
+            Assert.Equal(0, prefs.MinSelect);
+            Assert.Equal(n, prefs.MaxSelect);
+            Assert.True(prefs.RequireManualConfirmation);
+        }
+        var calls = Il.CallSequence(typeof(YaeEditing).GetMethod(nameof(YaeEditing.Edit))!).ToList();
+        Assert.Equal(1, calls.Count(c => c.Contains("CardSelectCmd.FromHand")));
+        Assert.Contains(calls, c => c.Contains(nameof(YaeEditing.EditPrefs)));
+        Assert.Contains(calls, c => c.Contains(nameof(YaeEditing.EditTargets)));
+    }
+
+    [Fact]
+    public void A_single_card_edit_still_must_pick_one()
+    {
+        var prefs = YaeEditing.EditPrefs(YaeAnnotation.RedInk, 1);
+        Assert.Equal(1, prefs.MinSelect);
+        Assert.Equal(1, prefs.MaxSelect);
+        Assert.False(prefs.RequireManualConfirmation);
+        var a = Mutable(new StrikeIronclad());
+        Assert.Equal(new[] { a }, YaeEditing.EditTargets(new[] { a }, 1));
+    }
+
+    [Fact]
+    public void A_multi_card_edit_annotates_distinct_targets()
+    {
+        var a = Mutable(new StrikeIronclad());
+        var b = Mutable(new DefendIronclad());
+        var c = Mutable(new StrikeIronclad());
+        Assert.Equal(new CardModel[] { a, b }, YaeEditing.EditTargets(new CardModel[] { a, a, b }, 2));
+        Assert.Equal(new CardModel[] { a, b }, YaeEditing.EditTargets(new CardModel[] { a, b, c }, 2));
+        Assert.Equal(new CardModel[] { a, b, c }, YaeEditing.EditTargets(new CardModel[] { a, b, b, c }, 3));
+    }
+
+    [Fact]
+    public void A_multi_card_edit_may_stop_short_including_at_zero()
+    {
+        var a = Mutable(new StrikeIronclad());
+        Assert.Equal(new CardModel[] { a }, YaeEditing.EditTargets(new CardModel[] { a }, 3));
+        Assert.Empty(YaeEditing.EditTargets(Array.Empty<CardModel>(), 2));
+        Assert.Empty(YaeEditing.EditTargets(null, 2));
+    }
+
+    [Fact]
+    public void The_up_to_prompt_reads_for_several_cards()
+    {
+        foreach (var a in YaeAnnotationText.All)
+        {
+            var text = YaeEditing.EditUpToPromptTextFor(a);
+            Assert.StartsWith("Choose up to {Amount} cards to Edit: " + YaeAnnotationText.Name(a), text);
+            Assert.EndsWith(YaeEditing.ReplacesWarning, text);
+            Assert.NotEqual(YaeEditing.EditPromptKeyFor(a), YaeEditing.EditUpToPromptKeyFor(a));
+        }
+    }
+
+    [Fact]
+    public void Inked_branches_upgraded_also_edits_a_hand_card()
+    {
+        var calls = Il.CallSequence(typeof(YaeCards).GetMethod(nameof(YaeCards.EditSakura))!).ToList();
+        Assert.Contains(calls, c => c.Contains("get_IsUpgraded"));
+        Assert.Contains(calls, c => c.Contains("YaeEditing.Edit"));
     }
 }

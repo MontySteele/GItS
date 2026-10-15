@@ -795,17 +795,22 @@ public static class YaeCards
                 + (YaeEditing.IsAnnotated(card) ? Var(card, "YmAmount") : 0));
 
     /// <summary>"Edit your newest / oldest Sakura: X", "Edit every Sakura:
-    /// X".</summary>
+    /// X". <paramref name="handIfUpgraded"/> (Inked Branches+, Yae review
+    /// r4, pick 1 (a)): the upgraded card also Edits a card in your hand
+    /// with it, read off <c>IsUpgraded</c> (`yae_upgraded`).</summary>
     public static async Task EditSakura(PlayerChoiceContext choiceContext, CardModel card,
                                         CardPlay cardPlay, YaeSakuraEnd end,
                                         YaeAnnotation annotation,
-                                        bool keepRedInk = false)
+                                        bool keepRedInk = false,
+                                        bool handIfUpgraded = false)
     {
         var yae = card.Owner?.Creature;
         if (yae == null || !YaeShrine.Live(yae)) return;
         if (YaeShrineLedger.For(yae).EditSakura(end, Var(card, "YmAmount"), annotation, keepRedInk) == 0)
             YaeEditing.SayNothing(yae, YaeEditing.NoSakuraToEditKey);
         await SakuraBadge.Sync(choiceContext, yae);
+        if (handIfUpgraded && card.IsUpgraded)
+            await YaeEditing.Edit(choiceContext, card, annotation, 1);
     }
 
     /// <summary>Grafted Branch: "Plant a Sakura. It starts at Level 2 [3]."
