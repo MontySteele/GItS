@@ -1571,14 +1571,11 @@
 
 - {id: proto_kk_shell_of_sanctuary, name: "Shell of Sanctuary", character: kokomi,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: common,
-   # Kokomi review r8 (2026-10-14) item 1: pays most on a Plan-heavy turn
-   # (was 6 Block, draw 1, a worse Kelp Wall).
-   description: "Gain {CalculationBase:diff()} [gold]Block[/gold]. Gain {CalculationExtra:diff()} more for each [gold]Plan[/gold] waiting.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
-   effects: [{op: block,
-              amount_formula: {base: 7, per: 2, count: plans_held}}],
-   # 10, plus 2 each.
-   upgrade: {formula_base: 3}}
+   cost: 1, type: skill, rarity: common, retain: true,
+   # Kokomi review r9 item 4: Retain, a different job from Breakwater.
+   description: "Gain {Block:diff()} [gold]Block[/gold].",
+   effects: [{op: block, amount: 6}],
+   upgrade: {block: 3}}
 
 - {id: proto_kk_tideturn, name: "Tideturn", character: kokomi,
    authored_by: [claude], art_of: tideturn,

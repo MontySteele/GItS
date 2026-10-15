@@ -1199,7 +1199,11 @@ PLAYED_CAP_FOR_YOU = " (played for you)"
 #: locked after Oath-planning a Skill. Said once under the limit, on a page
 #: that has Plans.
 PLAYED_CAP_PLAN_NOTE = ("    - Writing a Plan counts as playing that card, "
-                        "so a card you write uses this limit.")
+                        "so a card you write uses this limit. A planned "
+                        "Companion is played again when its Plan lands; "
+                        "other Plans only carry out their effect, so limits "
+                        "and \"whenever you play\" effects treat the two "
+                        "differently.")
 
 
 def _played_cap_lines(power: dict[str, Any],

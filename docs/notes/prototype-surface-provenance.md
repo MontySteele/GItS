@@ -8928,7 +8928,11 @@ Pins: `tier0/tests/test_kokomi_review_r8_2026_10_14.py`,
 - **Sangonomiya's Orders** (`proto_kk_sangonomiyas_orders`, item 3): the Power
   costs 2 (was 1); the card it adds each turn "costs 0 and is Ethereal". The
   Power's own text says so (`SangonomiyasOrdersPower`). Upgrade stays Innate.
-- **Opening Gambit's doubling** (item 4): a waiting Plan the rider will reach
+- **Shell of Sanctuary** (`proto_kk_shell_of_sanctuary`, item 4): "Gain 6
+  [9] Block. Retain." The per-Plan formula goes (it duplicated Breakwater);
+  Retain is a different job: defence kept in hand for the turn that needs
+  it. Both engines. Upgrade +3 Block.
+- **Opening Gambit's doubling** (item 5, was 4 in the first draft): a waiting Plan the rider will reach
   shows the doubled written number (`KokomiPlan.DoubledBy`, `QueueRow`), and
   a card about to be written behind a Gambit previews it
   (`PlanDamageVar.UpdateCardPreview`). The rider is spent by the next entry
@@ -8942,7 +8946,8 @@ Pins: `tier0/tests/test_kokomi_review_r8_2026_10_14.py`,
 - **No aura** (item 7): Varka's face reads "(no aura: no Swirl)" on its own
   line, Sucrose's wording. Varka's numbers do not change.
 - **Seat page** (items 8 to 10): a card limit says writing a Plan counts as
-  playing the card; the last carry-out receipts clear when a combat opens;
+  playing the card and that a planned Companion is played again when its
+  Plan lands (the Companion Plan hover says the same in one sentence); the last carry-out receipts clear when a combat opens;
   a combat-opening Energy relic is named on round 1 only.
 
 Pins: `tier0/tests/test_kokomi_review_r9_2026_10_15.py`,

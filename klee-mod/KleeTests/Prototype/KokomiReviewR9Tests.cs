@@ -7,6 +7,7 @@ using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Elements;
 using KleeMod.Powers;
 using KleeMod.Tests.Harness;
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Models;
 using Xunit;
 
@@ -64,6 +65,15 @@ public class KokomiReviewR9Tests
         var rows = ((ILocalizationProvider)new SangonomiyasOrdersPower())
             .Localization!;
         Assert.Contains("costs", rows.First(r => r.Item1 == "description").Item2);
+    }
+
+    [Fact]
+    public void Shell_of_sanctuary_is_a_flat_retained_block()
+    {
+        var shell = new ProtoKkShellOfSanctuary();
+        Assert.Equal(6m, shell.DynamicVars["Block"].BaseValue);
+        Assert.Contains(CardKeyword.Retain, shell.CanonicalKeywords);
+        Assert.Equal("Gain {Block:diff()} [gold]Block[/gold].", Face(shell));
     }
 
     // ---- item 4 ---------------------------------------------------------------

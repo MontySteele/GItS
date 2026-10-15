@@ -40,11 +40,16 @@ skip), Shell of Sanctuary 3 of 12, Kelp Wall 5 of 14. No death this round was
 
 - **Kaiser Crab, twice.** Its Surrounded rule adds 50% damage from the enemy
   behind you, and only a card played on an enemy turns you. Both losing seats
-  defended with untargeted Block cards and faced the wrong way; the back attacks
-  hit for 49 and 36. The winning seat chose its facing every turn ("the
-  stronger attacker in front") and took 49 down to 24. This is a base-game
-  fight with a printed answer, and the base characters turn the same way, so it
-  is not a kit change.
+  understood facing and tried to control it. Lane 1 turned toward each
+  attacker but was dealt a hand with no targeted card on the turn Rocket was
+  behind it. Lane 3 turned on several turns, but it dealt only 80 of 408 HP in
+  seven turns and left two potions unused. The winning seat chose its facing
+  every turn and took a 49 back attack down to 24. So the losses mix execution,
+  hands with no way to turn, and too little damage. Kokomi plays many cards on
+  the Bake-Kurage and defends with untargeted Block, so turning may cost her more
+  than it costs the base characters. No rule change yet. The next round asks
+  whether the seat could reach the facing it needed with its hand, and what
+  turning cost its Plans.
 - **Status floods.** The act-3 death was ten Slimed cards from the Berserker
   crowding out her Block cards. Toxic and Dazed did the same in round 8. Her
   card for this, Tidecleanse, is the least-taken card in her pool (below).
@@ -66,6 +71,12 @@ skip), Shell of Sanctuary 3 of 12, Kelp Wall 5 of 14. No death this round was
    0** and is Ethereal." Taken 0 of 7, and 0 of 6 in round 8. A free card every
    turn is strong, so the Power costs 2.
 
+4. **Shell of Sanctuary** (Common, 1): "Gain 6 [9] Block. **Retain.**" Its
+   round-8 text (7 Block plus 2 per Plan waiting) sat on top of Breakwater (6
+   plus 3 per Plan); the two gave the same 9 Block at one Plan. Shell now does
+   a different job: it keeps defence in hand for the turn that needs it. Five
+   round-8 deaths were a final hand with no Block card.
+
 Left alone, with the reason:
 - Coral Crash (0 of 13) is a Body Slam; the winning seat used it for 69 against
   Test Subject.
@@ -77,28 +88,37 @@ Left alone, with the reason:
 - Feint (2 of 16) is filler at Common.
 
 **Text and display.**
-4. **Opening Gambit's doubling** goes into the Plan preview. Three seats saw it
+5. **Opening Gambit's doubling** goes into the Plan preview. Three seats saw it
    print 10 or 13 and land 27 or 30. The preview must show the number that will
    land.
-5. **An overridden element** prints in the card text. Surging Shoal+ under Razor
+6. **An overridden element** prints in the card text. Surging Shoal+ under Razor
    showed the Electro tag and still read "Deal 13 Hydro damage".
-6. **End-of-turn reactions** print a receipt. Poison appeared on enemies after
+7. **End-of-turn reactions** print a receipt. Poison appeared on enemies after
    the Ring's tick with no reaction named.
-7. **One wording for "no aura".** Sucrose says "(no aura: no Swirl)" and Varka
+8. **One wording for "no aura".** Sucrose says "(no aura: no Swirl)" and Varka
    still says "(No aura to Swirl)". Use Sucrose's wording for both (text only;
    Varka's numbers do not change).
 
 **Seat harness only.**
-8. A **card-limit page** (Smoggy, Sloth) says that writing a Plan counts as
-   playing that card.
-9. The **"last carry-out" box** clears between fights. It once showed a Plan
+9. A **card-limit page** (Smoggy, Sloth) says that writing a Plan counts as
+   playing that card, and that a planned **Companion** is played again when its
+   Plan lands. Ordinary Plans only carry out their effect, so card limits and
+   "whenever you play" triggers treat the two differently. The Plan hover gains
+   one short sentence on the Companion case if it fits the tip limit; if not,
+   the seat page carries it alone.
+10. The **"last carry-out" box** clears between fights. It once showed a Plan
    from an earlier fight at a rest site.
-10. The **Energy line** names the source of each extra Energy that turn, not a
+11. The **Energy line** names the source of each extra Energy that turn, not a
     fixed list.
 
 ## Next
 
-Build 1 to 10 on this branch. No Kokomi seat round follows at once. Her next
+Build 1 to 11 on this branch. No Kokomi seat round follows at once. Her next
 round waits until Yae's round-3 build has been played, because seat time is
-the scarce budget. The next Kokomi review checks the three changed cards' take
-rates, and whether act 3 becomes the new wall.
+the scarce budget. The next Kokomi review judges decision quality more than the win rate:
+- whether setup turns leave affordable defence and a way to turn;
+- whether Sangonomiya's free Companions make interesting choices;
+- whether feeding the Plan queue starts to beat choosing which Plan to write.
+  Free Stings, per-Plan rewards and the new free Companions all push that way.
+  Then it checks whether act 3 becomes the new wall. She is not ready for
+  Balance until those answers are in.

@@ -52,8 +52,9 @@ public class KokomiReviewR8Tests
     [Fact]
     public void Shell_of_sanctuary_pays_per_plan_waiting()
     {
-        Assert.Equal((7, 10), Vars<ProtoKkShellOfSanctuary>("CalculationBase"));
-        Assert.Equal((2, 2), Vars<ProtoKkShellOfSanctuary>("CalculationExtra"));
+        // Superseded by Kokomi review r9 item 4: a flat 6 [9], Retain.
+        Assert.Equal((6, 9), Vars<ProtoKkShellOfSanctuary>("Block"));
+        Assert.Contains(CardKeyword.Retain, new ProtoKkShellOfSanctuary().CanonicalKeywords);
         Assert.Contains(Calls("ProtoKkShellOfSanctuary", "OnPlay"),
                         c => c.Contains("CreatureCmd.GainBlock"));
         Assert.DoesNotContain(Calls("ProtoKkShellOfSanctuary", "OnPlay"),

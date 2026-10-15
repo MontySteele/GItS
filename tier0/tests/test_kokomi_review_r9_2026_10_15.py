@@ -82,6 +82,21 @@ def test_watatsumi_muster_cards_keep_their_costs():
     assert not any(c.free_this_turn for c in st.player.hand[before:])
 
 
+# ---- item 4: Shell of Sanctuary ---------------------------------------------
+
+def test_shell_of_sanctuary_is_six_nine_block_with_retain():
+    row = loader.get_card("proto_kk_shell_of_sanctuary")
+    assert row.retain and row.cost == 1 and row.plan == []
+    assert row.effects == [{"op": "block", "amount": 6}]
+    up = upgrades.apply_upgrade(row)
+    assert up.effects == [{"op": "block", "amount": 9}] and up.retain
+    st = kokomi_state()
+    st.player.block = 0
+    from tier0.engine import effects
+    effects.resolve_card(st, loader.get_card("proto_kk_shell_of_sanctuary"))
+    assert st.player.block == 6
+
+
 # ---- item 7: one wording for "no aura" --------------------------------------
 
 def test_varka_says_no_aura_no_swirl_like_sucrose():
@@ -124,6 +139,9 @@ def test_a_card_limit_says_writing_a_plan_counts():
     assert counted[0].startswith("    - Counted this turn:")
     assert counted[-1] == note
     assert "Writing a Plan counts as playing that card" in note
+    assert "A planned Companion is played again" in note
+    tip = _src("klee-mod/KleeCode/Cards/Prototype/ArmKeywordTips.cs")
+    assert "It counts as played now and again when it lands." in tip
 
 
 # ---- item 10: the Energy line ------------------------------------------------

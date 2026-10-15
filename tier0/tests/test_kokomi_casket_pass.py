@@ -108,14 +108,11 @@ def test_the_commons(overhaul):
     assert press_up.effects[0]["else"][0]["amount"] == 9
     assert press_up.effects[0]["then"][0]["amount"] == 14
 
-    # Kokomi review r8 (2026-10-14, item 1): 7 [10] Block plus 2 for each
-    # Plan waiting (was 6 Block and a draw).
+    # Kokomi review r9 (2026-10-15, item 4): 6 [9] Block, Retain.
     shell = _row("proto_kk_shell_of_sanctuary")
     assert shell.plan == []
-    assert shell.effects == [{"op": "block", "amount_formula": {
-        "base": 7, "per": 2, "count": "plans_held"}}]
-    assert _up("proto_kk_shell_of_sanctuary").effects[0][
-        "amount_formula"]["base"] == 10
+    assert shell.effects == [{"op": "block", "amount": 6}]
+    assert _up("proto_kk_shell_of_sanctuary").effects[0]["amount"] == 9
 
 
 def test_no_common_increases_deck_size(overhaul):
