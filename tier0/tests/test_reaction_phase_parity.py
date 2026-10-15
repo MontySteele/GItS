@@ -1036,6 +1036,15 @@ CO_TENANCY_LEDGER = {
             "'no Bomb of yours'), is carried by Powers that cannot be in play "
             "before her first card, so turn 1 has no race; the sim has no "
             "counterpart until Balance",
+        ("Relics/FurinaStageRelics.cs", "OperaTicketStub"):
+            "(Furina's card pass, 2026-10-15). Turn-1-only: summons "
+            "Ensemble Cast's random guest onto a stage that is empty before "
+            "her first card. Its one co-tenant on the Stage, "
+            "FurinaStage.TurnStart (Grand Theater Program's Fanfare and her "
+            "turn-start Powers), reads no seat on turn 1 -- the Powers cannot "
+            "be in play before her first card and the Fanfare gain names no "
+            "guest -- so either order ends the same. No sim counterpart "
+            "until Balance",
         ("Relics/VarkaArmRelics.cs", "KnightsCommission"):
             "(Varka's own relics, 2026-10-01). Turn-1-only: gains "
             "2 Oath in the starting Knight's element (re-aimed 2026-10-01; it "

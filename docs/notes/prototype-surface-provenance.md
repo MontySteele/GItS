@@ -8837,7 +8837,11 @@ marked enemy's attack aims at itself). New predicates `ousia_face`,
 
 - Ousia / Pneuma shows the face it is on in combat (title and text); off the
   board it prints both faces. Built as two one-armed conditionals and a
-  flip, so both numbers are live vars.
+  flip, so both numbers are live vars. Furina's card pass (2026-10-15,
+  `review/active/furina-card-pass-2026-10-15.md` sec.1) gave each face one
+  half of her kit: Ousia "Drain 2. Deal 10 [13] damage." (was 8 [11]),
+  Pneuma "Repay 2. Gain 8 [11] Block." (was 7 [10]). Each face carries its
+  op's in-combat line on that face only (`gen_klee_cards.flip_face_args`).
 - Tearful Monologue's "last turn" is the round before this one: her last
   turn and the enemies' turn after it, any HP loss (a Drain included).
 - Text to the conventions lint: Opening Number and Understudy's Debut say

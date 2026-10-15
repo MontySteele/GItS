@@ -151,8 +151,12 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
     pushes the oldest guest off: it acts once, then leaves. A second copy of
     a guest moves it to the newest seat and it acts once.
 - **Pool:** 78 (23 / 35 / 20). Relics: Salon Solitaire ("At the end of your
-  turn, Repay 1."), its upgrade The Curtain Never Falls, Opera Glasses, Grand
-  Theater Program; one potion, Bottled Applause. Ancients: Center of
+  turn, Repay 1."), its upgrade The Curtain Never Falls, and her eight: Opera
+  Glasses, Opera Ticket Stub, Fontaine Teardrop, Grand Theater Program,
+  Claque's Ledger, Bouquet of Roses, Tear of the Lone Regina, Epiclese Season
+  Pass; three potions, Bottled Applause, Bottled Encore, Water of Lucine
+  (`review/active/furina-card-pass-2026-10-15.md`, which also gave Ousia /
+  Pneuma a Drain face and a Repay face). Ancients: Center of
   Attention (Tome) and All the World's a Stage (Tooth on Rising Applause).
   Sim twin `tier0/engine/furina_tide.py`.
 - **Latest:** the overnight wave (`review/records/furina-wave-2026-10-13.md`,

@@ -179,10 +179,21 @@ public static class FurinaStage
     {
         int Sum<T>() where T : PowerModel =>
             (int)owner.Powers.OfType<T>().Sum(p => p.Amount);
+        // Her relics (Furina's card pass, 2026-10-15), counted off the
+        // player; none headless.
+        int Held<T>() where T : RelicModel =>
+            owner.Player?.Relics.OfType<T>().Count() ?? 0;
+        var seasonPass = Held<Relics.EpicleseSeasonPass>();
         return new StageMods
         {
-            Capacity = owner.Powers.OfType<EnsembleCastPower>().Any()
-                ? FurinaStageLaw.EnsembleSeats : FurinaStageLaw.Seats,
+            Capacity = (owner.Powers.OfType<EnsembleCastPower>().Any()
+                ? FurinaStageLaw.EnsembleSeats : FurinaStageLaw.Seats)
+              + seasonPass * FurinaStageLaw.SeasonPassSeats,
+            SeasonPass = seasonPass,
+            TearOfRegina = Held<Relics.TearOfTheLoneRegina>(),
+            FontaineTeardrop = Held<Relics.FontaineTeardrop>(),
+            ClaquesLedger = Held<Relics.ClaquesLedger>(),
+            BouquetOfRoses = Held<Relics.BouquetOfRoses>(),
             GrandEntrance = Sum<GrandEntrancePower>(),
             Showstopper = Sum<ShowstopperPower>(),
             Crescendo = Sum<CrescendoPower>(),
@@ -351,6 +362,15 @@ public static class FurinaStage
         var back = await Director(choiceContext, owner!).RepayAll();
         RefreshBadges(owner);
         return back;
+    }
+
+    /// <summary>Bottled Encore: "Each guest acts twice."</summary>
+    public static async Task ActEachTwice(PlayerChoiceContext choiceContext,
+                                          Creature? owner)
+    {
+        if (!LiveFor(owner)) return;
+        await Director(choiceContext, owner!).ActEachTwice();
+        await Done(owner);
     }
 
     /// <summary>"Gain N Energy next turn" (`stage_energy_next`, Interval Bell
@@ -1073,6 +1093,21 @@ public sealed class GameStageBoard : IStageBoard
     {
         await FurinaStagePets.Sync(_owner);
         FurinaStage.RefreshBadges(_owner);
+    }
+
+    public async Task Energy(int amount)
+    {
+        if (amount <= 0 || _owner.IsDead || _owner.Player is not { } player) return;
+        await PlayerCmd.GainEnergy(amount, player);
+    }
+
+    public void FlashRelic(System.Type relic)
+    {
+        if (_owner.Player is not { } player) return;
+        foreach (var held in player.Relics.Where(r => r.GetType() == relic))
+        {
+            held.Flash();
+        }
     }
 }
 

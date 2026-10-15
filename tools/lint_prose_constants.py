@@ -254,6 +254,9 @@ ALLOWED: dict[tuple[str, str, str], str] = {
     ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoKoBlazingDelight.cs",
      "WaitForItPower.ReactionEnergy", "1"):
         "the card's own energy, not Wait For It's",
+    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoKoBlazingDelight.cs",
+     "BouquetOfRoses.Energy", "1"):
+        "the card's own energy, not Bouquet of Roses'",
     # KLEE'S STORY (2026-10-12): Confinement's "After 3 combats" is a story
     # Curse's length; these strings print their own numbers.
     ("klee-mod/KleeCode/Cards/Prototype/ArmKeywordTips.cs",

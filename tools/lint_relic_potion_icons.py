@@ -33,7 +33,8 @@ uses: a literal `"ns/relics/x.png"` (or `/potions/`), a helper call
 `ArmPotions.Image("character", "slug")`.
 
 ICON_DEBT has the lint_power_icons semantics: a named, reasoned exception that
-FAILS once it is no longer needed, so the set can only shrink. It is empty.
+FAILS once it is no longer needed, so the set can only shrink. It holds
+Furina's card pass's eight (2026-10-15).
 
 Run: python tools/lint_relic_potion_icons.py      (exit 1 with findings)
 """
@@ -51,7 +52,21 @@ ART_PLAN = REPO / "art" / "plan.tsv"
 ROOTS = ("CustomRelicModel", "CustomPotionModel")
 
 # Class name -> reason. Delete the row in the commit that gives it art.
-ICON_DEBT: dict[str, str] = {}
+_FURINA_PASS_ART = (
+    "Furina's card pass (2026-10-15, review/active/furina-card-pass-"
+    "2026-10-15.md): built C# first with the icon path wired; it draws "
+    "the base class's placeholder until its art/plan.tsv row lands.")
+
+ICON_DEBT: dict[str, str] = {
+    "OperaTicketStub": _FURINA_PASS_ART,
+    "FontaineTeardrop": _FURINA_PASS_ART,
+    "ClaquesLedger": _FURINA_PASS_ART,
+    "BouquetOfRoses": _FURINA_PASS_ART,
+    "TearOfTheLoneRegina": _FURINA_PASS_ART,
+    "EpicleseSeasonPass": _FURINA_PASS_ART,
+    "BottledEncore": _FURINA_PASS_ART,
+    "WaterOfLucine": _FURINA_PASS_ART,
+}
 
 CLASS = re.compile(
     r"^[ \t]*(?:public|internal)\s+(?P<mods>(?:sealed\s+|abstract\s+|static\s+|partial\s+)*)"

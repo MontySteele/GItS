@@ -3410,16 +3410,19 @@
 # Provenance note, "Furina: the sweep, 2026-10-14". ---
 
 # Ousia / Pneuma: two faces, starts each combat on Ousia; playing a face does
-# it, then the card turns over (`furina` kind `flip`, `FurinaFlip`).
+# it, then the card turns over (`furina` kind `flip`, `FurinaFlip`). Each face
+# does one half of her kit since her card pass (2026-10-15; provenance note).
 - {id: proto_fs_ousia_pneuma, name: "Ousia / Pneuma", character: furina,
    upgrade: {conditional_damage: +3, conditional_block: +3},
    authored_by: [claude],
    register: salon, cost: 1, type: attack, rarity: common,
-   description: "{Pneuma:Gain {BranchBlock:diff()} [gold]Block[/gold].|{InCombat:Deal {BranchDamage:diff()} damage.|Ousia: Deal {BranchDamage:diff()} damage.\nPneuma: Gain {BranchBlock:diff()} [gold]Block[/gold].}}\n[gold]Flip[/gold].",
+   description: "{Pneuma:[gold]Repay[/gold] 2. Gain {BranchBlock:diff()} [gold]Block[/gold].|{InCombat:[gold]Drain[/gold] 2. Deal {BranchDamage:diff()} damage.|Ousia: [gold]Drain[/gold] 2. Deal {BranchDamage:diff()} damage.\nPneuma: [gold]Repay[/gold] 2. Gain {BranchBlock:diff()} [gold]Block[/gold].}}\n[gold]Flip[/gold].",
    effects: [{op: conditional, if: ousia_face,
-              then: [{op: damage, amount: 8, target: enemy}]},
+              then: [{op: stage_drain, amount: 2},
+                     {op: damage, amount: 10, target: enemy}]},
              {op: conditional, if: pneuma_face,
-              then: [{op: block, amount: 7}]},
+              then: [{op: stage_repay, amount: 2},
+                     {op: block, amount: 8}]},
              {op: furina, kind: flip}]}
 
 # Objection!: Flame Barrier's window, once, for twice the HP the hit cost.

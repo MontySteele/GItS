@@ -131,6 +131,27 @@ public sealed record StageMods
     /// upgraded, a copy).</summary>
     public int FullHouse { get; init; }
 
+    // ---- her relics (Furina's card pass, 2026-10-15) ----------------------
+
+    /// <summary>Epiclese Season Pass copies: one more seat each.</summary>
+    public int SeasonPass { get; init; }
+
+    /// <summary>Tear of the Lone Regina copies: any doubles the Drain buffer.
+    /// </summary>
+    public int TearOfRegina { get; init; }
+
+    /// <summary>Fontaine Teardrop copies: a Repay of more than she has
+    /// drained gains the rest as Block, per copy.</summary>
+    public int FontaineTeardrop { get; init; }
+
+    /// <summary>Claque's Ledger copies: each guest act gains 1 Fanfare per
+    /// copy.</summary>
+    public int ClaquesLedger { get; init; }
+
+    /// <summary>Bouquet of Roses copies: each Spend of 10 or more gains 1
+    /// Energy per copy.</summary>
+    public int BouquetOfRoses { get; init; }
+
     public static readonly StageMods None = new();
 }
 
@@ -372,7 +393,7 @@ public sealed class FurinaStageLedger
     /// HP, plus 10 with Lyney on stage (<see cref="FurinaStageLaw.BufferOf"/>).
     /// </summary>
     public int Buffer => FurinaStageLaw.BufferOf(
-        EntryMaxHp, OnStage(StagePerformer.Lyney));
+        EntryMaxHp, OnStage(StagePerformer.Lyney), Mods.TearOfRegina > 0);
 
     /// <summary>The buffer she has left: the buffer less the drained HP
     /// within it (<see cref="DrainedAbove"/>). A hit never lowers it; a Repay
@@ -398,7 +419,7 @@ public sealed class FurinaStageLedger
     /// <summary>Where <see cref="Line"/> comes from, in words (2026-10-05).
     /// </summary>
     public string LineWhy => FurinaStageLaw.LineWhy(
-        OnStage(StagePerformer.Lyney));
+        OnStage(StagePerformer.Lyney), Mods.TearOfRegina > 0);
 
     /// <summary>Can she Drain <paramref name="amount"/> at
     /// <paramref name="hp"/>? Never refused for the line (2026-10-09); only

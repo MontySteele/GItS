@@ -309,7 +309,10 @@ MORE_COUNTERS = {"proto_kk_kurage_swarm", "KurageSwarmPower.description",
                  "proto_vk_oath_unto_death", "OathUntoDeathPower.description",
                  # Sakura Channeling (2026-10-14): "You can have N more
                  # Sakura", the shrine's cap growing.
-                 "SakuraChannelingPower.description"}
+                 "SakuraChannelingPower.description",
+                 # Epiclese Season Pass (Furina's card pass, 2026-10-15):
+                 # "You have 1 more guest seat", the seat count growing.
+                 "EpicleseSeasonPass.description"}
 
 #: Card faces only: "your largest Bomb" says WHICH enemy's (the Klee round,
 #: 2026-10-11: Stoke the Fuse grew Torch Head's Bomb 16 by 49 when the seat
@@ -340,8 +343,54 @@ class Row:
 IN_COMBAT = re.compile(r"\{InCombat:(?:[^{}|]|\{[^{}]*\})*\|([^{}]*)\}")
 
 
+def _selector(s: str, name: str) -> tuple[str, str, str] | None:
+    """`{<name>:A|B}<rest>` at the head of `s` as `(A, B, rest)`, braces
+    counted, or None."""
+    head = "{" + name + ":"
+    if not s.startswith(head):
+        return None
+    depth, bar = 0, -1
+    for i in range(len(head), len(s)):
+        c = s[i]
+        if c == "{":
+            depth += 1
+        elif c == "}":
+            if depth == 0:
+                if bar < 0:
+                    return None
+                return s[len(head):bar], s[bar + 1:i], s[i + 1:]
+            depth -= 1
+        elif c == "|" and depth == 0 and bar < 0:
+            bar = i
+    return None
+
+
+def two_faces(s: str) -> list[str] | None:
+    """A two-faced card's faces, each as the player reads it in combat, or
+    None for any other face.
+
+    Furina's card pass (2026-10-15): Ousia / Pneuma prints
+    `{Pneuma:<Pneuma>|{InCombat:<Ousia>|<both faces>}}<tail>`. In combat
+    only one face is on the card; off the board the two are listed, one face
+    a line, so the listing is two faces and not one paragraph of five
+    sentences. Each face is measured with its tail (the Flip line), and the
+    row is held to the longer.
+    """
+    outer = _selector(s, "Pneuma")
+    if outer is None:
+        return None
+    pneuma, rest, tail = outer
+    inner = _selector(rest, "InCombat")
+    ousia = inner[0] if inner is not None else rest
+    return [pneuma + tail, ousia + tail]
+
+
 def render(s: str) -> str:
     """Tags gone, every hole one numeral, the base game's measuring rule."""
+    faces = two_faces(s)
+    if faces is not None:
+        return max((render(face) for face in faces),
+                   key=lambda r: (sentences(r), len(r)))
     s = s.replace("\\n", " ").replace("\n", " ")
     # `{InCombat:<live line>|<off-board>}` is the base game's own Body Slam
     # shape, and the ceilings are STATIC faces: the off-board branch is what

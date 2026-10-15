@@ -249,9 +249,25 @@ public static class FurinaStageLaw
     /// hit used up the room.) Integer throughout, so the sim
     /// (<c>furina_tide.shipped_buffer</c>) computes the same number.
     /// </summary>
-    public static int BufferOf(int maxHp, bool lyney = false) =>
+    public static int BufferOf(int maxHp, bool lyney = false,
+                               bool tear = false) =>
         System.Math.Max(0, maxHp) / LineMaxHpDivisor
+            * (tear ? TearBufferMultiplier : 1)
       + (lyney ? LyneyLineDrop : 0);
+
+    /// <summary>Tear of the Lone Regina (Furina's card pass, 2026-10-15,
+    /// corrected the same day): "Your Drain buffer is twice as large." The
+    /// quarter doubles; Lyney's 10 adds after the doubling. Copies do not
+    /// stack. No sim twin: tier0 models none of her relics.</summary>
+    public const int TearBufferMultiplier = 2;
+
+    /// <summary>Epiclese Season Pass (Furina's card pass, 2026-10-15): "You
+    /// have 1 more guest seat." Copies add.</summary>
+    public const int SeasonPassSeats = 1;
+
+    /// <summary>Bouquet of Roses: "Whenever you Spend 10 or more at once,
+    /// gain [E]."</summary>
+    public const int BouquetSpend = 10;
 
     /// <summary>The buffer is 1/4 of her Max HP, rounded down. Mirrors
     /// <c>furina_tide.LINE_MAX_HP_DIVISOR</c>.</summary>
@@ -267,10 +283,15 @@ public static class FurinaStageLaw
     /// <summary>Where the line comes from, in words, for its hover and the
     /// seat page (2026-10-05: seats connected the line to their entry HP
     /// only late; the buffer's words since 2026-10-11).</summary>
-    public static string LineWhy(bool lyney) =>
-        LineWhyBase + (lyney ? ", plus " + LyneyLineDrop
-                               + " with Lyney on stage" : "")
+    public static string LineWhy(bool lyney, bool tear = false) =>
+        (tear ? LineWhyTear : LineWhyBase)
+      + (lyney ? ", plus " + LyneyLineDrop + " with Lyney on stage" : "")
       + LineWhyTail;
+
+    /// <summary>The line's source under Tear of the Lone Regina: the buffer
+    /// is twice the quarter.</summary>
+    public const string LineWhyTear =
+        "your HP minus your Drain buffer: 1/2 of your Max HP";
 
     /// <summary>The line's source, in the base game's words (2026-10-11).
     /// </summary>

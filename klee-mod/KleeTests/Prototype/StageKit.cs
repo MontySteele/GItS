@@ -127,6 +127,22 @@ internal sealed class RecordingBoard : IStageBoard
 
     public Task Sync() => Task.CompletedTask;
 
+    /// <summary>Furina's card pass (2026-10-15): Bouquet of Roses' Energy.
+    /// </summary>
+    internal int Energy;
+
+    Task IStageBoard.Energy(int amount)
+    {
+        Log.Add($"energy {amount}");
+        Energy += amount;
+        return Task.CompletedTask;
+    }
+
+    /// <summary>The relics that flashed, by type name, in order.</summary>
+    internal readonly List<string> Flashed = new();
+
+    public void FlashRelic(Type relic) => Flashed.Add(relic.Name);
+
     public void Effect(StageEffect effect) => Effects.Add(effect);
 
     /// <summary>The damage events, in order.</summary>
