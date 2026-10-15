@@ -63,9 +63,13 @@ public abstract class YaeAnnotationModel : CustomEnchantmentModel, ILocalization
     public List<(string, string)>? Localization => new()
     {
         ("title", Name),
-        ("description", YaeAnnotationText.TipBody(Annotation, false)),
+        ("description", DescriptionText),
         ("extraCardText", $"[gold]{Name}[/gold]."),
     };
+
+    /// <summary>The hover's sentence in the loc table; Reprint adds its
+    /// spent clause.</summary>
+    protected virtual string DescriptionText => YaeAnnotationText.TipBody(Annotation, false);
 
     /// <summary>The five ride any card an Edit can reach; the Edit's own
     /// filter (<see cref="YaeEditing.Editable"/>) is the rule.</summary>
@@ -317,10 +321,25 @@ public sealed class RoyaltiesAnnotation : YaeAnnotationModel
 /// mechanism), then it goes inert for the rest of the combat. The flag is
 /// not saved, so a Published Reprint is fresh on every combat's copy.
 /// Sim twin: <c>yae_shrine.reprint_replays</c>.
+///
+/// SPENT READS SPENT (two blind seats, 2026-10-14, expected a second
+/// replay). Glam's whole display is <c>Status = Disabled</c>, which greys the
+/// card's enchantment tab (<c>NCard.SetEnchantmentStatus</c>) and hides an
+/// extra card text; its hover still offers "Replay 1". Ours also drops the
+/// Replay tip once spent and its hover sentence adds "Used this combat."
+/// (the <see cref="SpentKey"/> var); the bridge sends <c>disabled</c> and the
+/// seat page prints "(Reprint: used)".
 /// </summary>
 public sealed class ReprintAnnotation : YaeAnnotationModel
 {
     private const string TimesKey = "Times";
+
+    /// <summary>1 once spent this combat: the hover's "Used this combat."
+    /// </summary>
+    public const string SpentKey = "Spent";
+
+    /// <summary>The clause the hover adds once spent. PURE.</summary>
+    public const string SpentClause = " Used this combat.";
 
     private bool _usedThisCombat;
 
@@ -329,10 +348,15 @@ public sealed class ReprintAnnotation : YaeAnnotationModel
     protected override IEnumerable<string> IconCandidates => Borrow("glam");
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
-        new[] { new DynamicVar(TimesKey, 1m) };
+        new[] { new DynamicVar(TimesKey, 1m), new DynamicVar(SpentKey, 0m) };
+
+    protected override string DescriptionText =>
+        base.DescriptionText + $"{{{SpentKey}:cond:==1?{SpentClause}|}}";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        new[] { HoverTipFactory.Static(StaticHoverTip.ReplayDynamic, DynamicVars[TimesKey]) };
+        Status == EnchantmentStatus.Disabled
+            ? Array.Empty<IHoverTip>()
+            : new[] { HoverTipFactory.Static(StaticHoverTip.ReplayDynamic, DynamicVars[TimesKey]) };
 
     private bool UsedThisCombat
     {
@@ -352,6 +376,7 @@ public sealed class ReprintAnnotation : YaeAnnotationModel
     {
         if (UsedThisCombat || cardPlay.Card != Card) return Task.CompletedTask;
         UsedThisCombat = true;
+        DynamicVars[SpentKey].BaseValue = 1m;
         Status = EnchantmentStatus.Disabled;
         return Task.CompletedTask;
     }

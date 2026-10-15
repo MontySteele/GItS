@@ -16,6 +16,7 @@ from understudy.blindplay_faces import (_card_face, _card_title,
                                         _enemy_handles, _enemy_names,
                                         _hook_note, _intents, _meter_max,
                                         _named_option, _powers,
+                                        enchantment_tag,
                                         enemy_replacements, enemy_revivals,
                                         hand_labels, relic_faces,
                                         remember_deck, remember_kills,
@@ -482,10 +483,7 @@ def deck_titles(state: dict[str, Any]) -> list[dict[str, Any]]:
             continue
         if card.get("upgraded") and not title.rstrip().endswith("+"):
             title += " (upgraded)"
-        ench = card.get("enchantment")
-        if isinstance(ench, dict) and ench.get("name"):
-            title += (f" ({ench['name']} {ench['amount']})"
-                      if ench.get("amount") else f" ({ench['name']})")
+        title += enchantment_tag(card.get("enchantment"))
         counts[title] = counts.get(title, 0) + 1
     return [{"title": t, "count": n} for t, n in sorted(counts.items())]
 

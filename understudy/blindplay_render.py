@@ -13,6 +13,7 @@ from typing import Any
 
 from understudy import qa_packet
 from understudy.blindplay_board import PHASE_FLIP_LINE, enchant_moves_line
+from understudy.blindplay_faces import enchantment_tag
 from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         ENEMY_FOLD_NOTE,
                                         ENEMY_FOLD_NOTE_EXCEPT,
@@ -332,10 +333,7 @@ def _render_card(c: dict[str, Any], bullet: str = "-",
     # where `(upgraded)` already sits -- the two facts a copy of a card can
     # differ by, on one line, so two copies of one title are told apart at a
     # glance instead of by a paragraph explaining that they cannot be.
-    ench = c.get("enchantment")
-    if ench:
-        head += (f" ({ench['name']} {ench['amount']})" if ench.get("amount")
-                 else f" ({ench['name']})")
+    head += enchantment_tag(c.get("enchantment"))
     # `EB-286`: the COST SLOT as the game paints it, energy and Spark
     # together, through the one formatter the staged page already uses.
     # `qa_packet.cost_label` answers `-` when the wire sent no cost at all,

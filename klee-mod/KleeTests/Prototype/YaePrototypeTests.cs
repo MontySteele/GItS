@@ -383,6 +383,24 @@ public class YaePrototypeTests : IDisposable
     }
 
     [Fact]
+    public void A_spent_reprint_reads_spent_and_offers_no_replay()
+    {
+        // Two blind seats (2026-10-14) expected a second replay off a spent
+        // Reprint. Glam's greyed tab (Status = Disabled) stays; the hover
+        // adds "Used this combat." and drops the Replay tip once spent.
+        var t = typeof(ReprintAnnotation);
+        var after = Il.CallSequence(t.GetMethod("AfterCardPlayed")!);
+        Assert.Contains(after, c => c.Contains("set_BaseValue"));
+        var tips = t.GetProperty("ExtraHoverTips", HeadlessGame.All)!.GetGetMethod(true)!;
+        Assert.Equal(t, tips.DeclaringType);
+        Assert.Contains(Il.CallSequence(tips), c => c.Contains("get_Status"));
+        var description = new ReprintAnnotation().Localization!
+            .Single(kv => kv.Item1 == "description").Item2;
+        Assert.Equal(YaeAnnotationText.Rule(YaeAnnotation.Reprint)
+                     + "{Spent:cond:==1? Used this combat.|}", description);
+    }
+
+    [Fact]
     public void Reprint_reaches_any_playable_card()
     {
         Assert.True(YaeAnnotationReach.Affects(YaeAnnotation.Reprint, false, false, false));

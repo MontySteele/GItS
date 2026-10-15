@@ -397,7 +397,24 @@ def _enchantment(blob: Any) -> dict[str, Any] | None:
                            "text": _text(blob.get("description"))}
     if blob.get("shows_amount") and _int(blob.get("amount")):
         row["amount"] = _int(blob.get("amount"))
+    # Reprint spent (two seats, 2026-10-14): the bridge's `disabled` is the
+    # game's `Status == Disabled`, the greyed tab (Glam, Swift, Sown, Yae's
+    # Reprint after its first play). Absent means live.
+    if blob.get("disabled"):
+        row["used"] = True
     return row
+
+
+def enchantment_tag(ench: dict[str, Any] | None) -> str:
+    """The enchantment beside a title: " (Sharp 3)", " (Reprint)", or
+    " (Reprint: used)" once the game has greyed it this combat. PURE."""
+    if not isinstance(ench, dict) or not ench.get("name"):
+        return ""
+    if ench.get("used"):
+        return f" ({ench['name']}: used)"
+    if ench.get("amount"):
+        return f" ({ench['name']} {ench['amount']})"
+    return f" ({ench['name']})"
 
 
 # `EB-262`, AND IT IS THE WHOLE ROW. A SHOP ITEM CARRIES ITS NAME UNDER ITS
