@@ -89,21 +89,61 @@ Evergreen Charm (5 Block that overwrote a Red Ink).
 8. **Margin Note** (and any Edit) with no card to Edit says so on the play
    rather than silently doing nothing.
 
+## The Seven Glamours, again (no pick)
+
+Item 5 shipped as "Publish every Annotated card in your hand." [USER]:
+"Reading The Seven Glamours more carefully, it looks obviously OP - I thought
+it was Publishing one card per fight, not the whole hand. There is precedent
+for this cards giving permanent benefits, such as The Hunt or Hand of Gold, but
+they generally require a condition of some kind." It becomes a kill card, the
+way Hand of Greed pays only on a kill:
+
+- **The Seven Glamours** (Rare Attack, 2, Exhaust): "Deal 12 [16] Electro
+  damage. If this kills an enemy, Publish an Annotated card in your hand."
+
+At most one Publish a fight, and only when it lands the kill.
+
 ## Pick
 
-**Pick 1: the publishing half.** Its payoff cards are never drafted, and her
-defence is short.
-- **(a) Default.** Rework the nine dead payoff cards so each one is good on its
-  own and makes or uses one Annotation as it plays. For example, Print Run
-  becomes "Gain 8 Block. Edit a card in your hand: Red Ink." Turn three of the
-  slots into Kitsune and Block cards. The Edits, Publish and the Masterpiece
-  stay. The idea of counting Annotations survives only on Rares.
-- (b) Make Annotations more common instead: more Edits at Common and more
-  Publish sources, and keep the payoffs as they are.
-- (c) Keep everything for one more round, to judge the Masterpiece with item 1
-  fixed.
+**Pick 1: the publishing half.** Rewritten 2026-10-15 after [USER]: "perhaps
+the issue is that we are trying to assemble an engine but the pieces are
+individually not working, so I'm not sure the fix is to just print a lot of
+block on them. What if instead we make some of the stronger Edit effects
+Exhaust (at either a lower price, or a stronger effect) so that future deck
+cycles are smaller?"
+
+The reading: an Annotation lasts the combat, so the engine is "Edit your good
+cards early, then see them again". An Edit card that stays in the deck dilutes
+the cycle it is trying to feed. Exhausting it does two jobs: each Edit hits
+harder, and the Annotated cards come round sooner.
+
+- **(a) Default: Edits that Exhaust.**
+  - **Sakura Seal** (Uncommon, 0): "Edit 2 [3] cards in your hand: Sakura
+    Seal. Exhaust." (was 1 [2] card, no Exhaust)
+  - **Footnote** (Uncommon, 0, already Exhausts): "Edit 2 [3] cards in your
+    hand: Footnote." (was 1 [2])
+  - **Inked Branches** (Uncommon, **0**, was 1 [0]): "Edit every Sakura [and a
+    card in your hand]: Red Ink. Exhaust."
+  - **Royalties** (Rare, 1 [0], already Exhausts): "Edit 2 cards in your hand:
+    Royalties." (was 1)
+  - Margin Note and Deadline stay repeatable, as the Common Edits. Proofread is
+    a starter card and is unchanged.
+  - The counting payoffs keep their jobs. Only their floors rise, so that one
+    Annotated card already pays:
+    - Bestseller: "Deal 8 [10] Electro damage, plus 3 [4] for each Annotated
+      card in your hand." (was 5 [7])
+    - Print Run: "Gain 6 [8] Block, plus 3 [4] for each Annotated card in your
+      hand." (was plus 2 [3])
+  - Serialization, Editor-in-Chief, Serial Novel, Second Printing and Author's
+    Copy are unchanged. With more cards Annotated per Edit, they get their
+    first fair test.
+- (b) The first plan: rework the nine payoffs so each makes or uses one
+  Annotation as it plays, and turn three slots into Kitsune and Block cards.
+- (c) Keep everything for one more round, now that item 1 has fixed the
+  Masterpiece reward.
 
 ## Next
 
-Build items 1 to 8 now. Pick 1 is built after [USER] rules on it, then a Yae
-round of five seats, two of them elite-heavy again.
+Items 1 to 8 are built (#1321). The Seven Glamours fix is built now. Pick 1
+is built once ruled, followed by a Yae round of five seats, two of them
+elite-heavy again.
