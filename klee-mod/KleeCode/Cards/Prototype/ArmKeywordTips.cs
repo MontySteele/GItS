@@ -441,7 +441,7 @@ public static class ArmKeywordTips
     internal const string CompanionPlanText =
         "Play it on the [gold]Bake-Kurage[/gold] to plan it. Next turn the Kurage applies [gold]Hydro[/gold], "
       + "then it is played: [gold]Strength[/gold] and [gold]Weak[/gold] "
-      + "count.";
+      + "count. It counts as played now and again when it lands.";
 
     /// <summary>
     /// `EB-378`: WHERE THE AURA CAME FROM, on the rows whose element is the

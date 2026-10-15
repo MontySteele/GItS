@@ -157,15 +157,13 @@ public class KokomiCasketPassTests : IDisposable
 
         // Kokomi review r8 (2026-10-14, item 1): 7 [10] Block, plus 2 for
         // each Plan waiting; no draw and no Plan line.
+        // Superseded by Kokomi review r9 item 4: a flat 6 [9], Retain.
         var shell = new ProtoKkShellOfSanctuary();
-        Assert.Equal(7m, Var(shell, "CalculationBase"));
-        Assert.Equal(2m, Var(shell, "CalculationExtra"));
-        Assert.Equal(10m, Var(Upgraded<ProtoKkShellOfSanctuary>(), "CalculationBase"));
+        Assert.Equal(6m, Var(shell, "Block"));
+        Assert.Equal(9m, Var(Upgraded<ProtoKkShellOfSanctuary>(), "Block"));
         Assert.DoesNotContain(Il.Calls(Il.Method("ProtoKkShellOfSanctuary", "OnPlay")),
                               c => c.Contains("KokomiPlan.Schedule"));
-        Assert.StartsWith("Gain {CalculationBase:diff()} [gold]Block[/gold]. "
-                          + "Gain {CalculationExtra:diff()} more for each "
-                          + "[gold]Plan[/gold] waiting.", Face(shell));
+        Assert.Equal("Gain {Block:diff()} [gold]Block[/gold].", Face(shell));
 
         // None of these creates a card.
         foreach (var type in new[] { "ProtoKkSurgingShoal",

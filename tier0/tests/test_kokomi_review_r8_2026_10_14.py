@@ -49,20 +49,20 @@ def _schedule_plans(st, n):
 
 # ---- item 1: Shell of Sanctuary -------------------------------------------
 
-def test_shell_of_sanctuary_pays_more_for_each_plan_waiting():
+def test_shell_of_sanctuary_is_a_flat_retained_block():
+    """Superseded by Kokomi review r9 (2026-10-15, item 4): 6 [9], Retain."""
     row = loader.get_card("proto_kk_shell_of_sanctuary")
-    assert row.plan == []
-    assert row.effects == [{"op": "block", "amount_formula": {
-        "base": 7, "per": 2, "count": "plans_held"}}]
-    assert _up("proto_kk_shell_of_sanctuary").effects[0][
-        "amount_formula"] == {"base": 10, "per": 2, "count": "plans_held"}
+    assert row.plan == [] and row.retain
+    assert row.effects == [{"op": "block", "amount": 6}]
+    assert _up("proto_kk_shell_of_sanctuary").effects[0]["amount"] == 9
     st = kokomi_state()
     effects.resolve_card(st, row)
-    assert st.player.block == 7
+    assert st.player.block == 6
     _schedule_plans(st, 3)
     st.player.block = 0
     effects.resolve_card(st, row)
-    assert st.player.block == 7 + 2 * 3
+    assert st.player.block == 6
+
 
 
 # ---- item 2: Evening Watch ------------------------------------------------
@@ -127,9 +127,8 @@ def test_feints_now_line_is_a_flat_8_whatever_waits():
 
 
 def test_the_five_faces_print_the_ruled_text():
-    assert _sheet_row("proto_kk_shell_of_sanctuary")["description"].startswith(
-        "Gain {CalculationBase:diff()} [gold]Block[/gold]. Gain "
-        "{CalculationExtra:diff()} more for each [gold]Plan[/gold] waiting.")
+    assert _sheet_row("proto_kk_shell_of_sanctuary")["description"] == (
+        "Gain {Block:diff()} [gold]Block[/gold].")
     assert _sheet_row("proto_kk_evening_watch")["description"] == (
         "Gain {KkAmount:diff()} [gold]Block[/gold] for each enemy intending "
         "to attack. Draw 1 card.")

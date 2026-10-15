@@ -1700,6 +1700,9 @@ def exhaust_statuses(state: CombatState, cap: int) -> int:
     for card in victims:
         if effects.remove_instance(state.player.hand, card):
             refpowers.exhaust_card(state, card)
+    if victims:
+        # Kokomi review r9 (2026-10-15, item 1): "Draw 1 card for each."
+        state.draw(len(victims))
     state.emit("plan_tidecleanse", exhausted=len(victims))
     return len(victims)
 
@@ -2419,7 +2422,7 @@ def _generate(card: Card) -> Card:
 
 
 def add_companions(state: CombatState, amount: int,
-                   upgraded: bool = False) -> int:
+                   upgraded: bool = False, free: bool = False) -> int:
     """ORDERS FROM THE SHRINE, WATATSUMI MUSTER: "Add N random Common Inazuma
     Companion cards to your hand. They are Ethereal." Distinct cards (Klee's
     Tag Along roll), upgraded on the upgraded card.
@@ -2438,6 +2441,9 @@ def add_companions(state: CombatState, amount: int,
         source = (loader.get_card(pick.id + upgrades.SUFFIX)
                   if upgraded and upgrades.has_upgrade(pick.id) else pick)
         card = _generate(source)
+        if free:
+            # Sangonomiya's Orders (r9, item 3): "It costs 0."
+            card.free_this_turn = True
         state.player.hand.append(card)
         state.emit("kk_companion_added", card=card.id)
         added += 1
@@ -2460,6 +2466,7 @@ def choose_common_companion(state: CombatState) -> int:
     if len(state.player.hand) >= C.MAX_HAND_SIZE:
         return 0
     card = _generate(offered[0])
+    card.free_this_turn = True      # r9 (2026-10-15, item 2): costs 0 this turn
     state.player.hand.append(card)
     state.emit("kk_companion_added", card=card.id)
     return 1
@@ -2857,7 +2864,7 @@ def turn_start_generators(state: CombatState) -> None:
         add_jellyfish(state, STING_ID, bloom, upgraded=False)
     orders = int(p.powers.get(SANGONOMIYAS_ORDERS, 0))
     if orders:
-        add_companions(state, orders, upgraded=False)
+        add_companions(state, orders, upgraded=False, free=True)
 
 
 def casket_block(state: CombatState) -> None:

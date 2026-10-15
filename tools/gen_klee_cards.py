@@ -3970,7 +3970,7 @@ APPLY_POWERS = {
     # sec.2). Every class lives in Powers/Prototype/KokomiRefounding.cs.
     "kk_sangonomiyas_orders": ("SangonomiyasOrdersPower", None,
         "At the start of your turn, add a random Common Inazuma "
-        "[gold]Companion[/gold] card to your hand. It is "
+        "[gold]Companion[/gold] card to your hand. It costs 0 and is "
         "[gold]Ethereal[/gold]."),
     "kk_kurage_bloom": ("KurageBloomPower", None,
         "At the start of your turn, add a [gold]Sting[/gold] to your hand."),
@@ -16848,7 +16848,7 @@ def varka_wildfire_face_arg(card: dict, profile: "CharacterProfile"
     return (VARKA_WILDFIRE_TOKEN, "VarkaOath.WildfireLine(this)")
 
 
-#: The token of a Varka Swirl card's in-combat "(No aura to Swirl)" line
+#: The token of a Varka Swirl card's in-combat "(no aura: no Swirl)" line
 #: (`VarkaOath.SwirlLine`).
 VARKA_SWIRL_TOKEN = "VarkaSwirl"
 
@@ -16858,7 +16858,7 @@ VARKA_SWIRL_KINDS = frozenset({"crosscurrent", "swirl_fresh_auras"})
 
 def varka_swirl_face_arg(card: dict, profile: "CharacterProfile",
                          aura_elements: list[str]) -> tuple[str, str] | None:
-    """`(token, C#)` for a Varka Swirl card's "(No aura to Swirl)" line, or
+    """`(token, C#)` for a Varka Swirl card's "(no aura: no Swirl)" line, or
     None.
 
     Varka round 5 (2026-10-13, "What to change" 1): "Swirl cards whose target
