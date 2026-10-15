@@ -136,3 +136,5 @@ time, which is the rules wrinkle in item 9.
   it prints its own Plan line. Item 9's Companion sentence goes with it.
 - (b) Keep it.
 
+**Ruled 2026-10-15: (a).** [USER]: "Agreed on Kokomi - let's get rid of
+Companions as Plans unless we make a card that specifically has a Plan line."
