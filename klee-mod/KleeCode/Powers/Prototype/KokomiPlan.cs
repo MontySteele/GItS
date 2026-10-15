@@ -1263,7 +1263,9 @@ public static class KokomiPlan
         // the FIRST entry alone, so a three-Plan morning under it is four
         // carry-outs and not six. `kokomi_plan.resolve_all` counts the same.
         KokomiOverhaulLedger.For(kokomi).NoteMorning(
-            due.Count + (CarryOutTimes(kokomi) > 1 ? 1 : 0));
+            StratagemTimes(kokomi) > 1
+                ? due.Count * StratagemTimes(kokomi)
+                : due.Count + (CarryOutTimes(kokomi) > 1 ? 1 : 0));
         // The display list is handed over BEFORE the sync, because `Sync`
         // refreshes the strip and the strip reads `Showing`: the badge goes
         // away in the same beat the column stays up, which is the true
@@ -1399,7 +1401,11 @@ public static class KokomiPlan
             // entry. That is the drain-local reading every other positional
             // rule in this arm already takes -- "the next Plan" means "in this
             // drain" -- and it is what lets the Rare pay a one-Plan morning.
-            var times = (index == 0 ? firstTimes : 1)
+            // A STUNNING STRATAGEM (Kokomi's own potions, 2026-10-15): "Next
+            // turn, every Plan is carried out twice." Read per entry like
+            // Nereid's, and twice said twice is still twice.
+            var times = System.Math.Max(index == 0 ? firstTimes : 1,
+                                        StratagemTimes(kokomi))
                       + (extraThis ? 1 : 0)
                       + System.Math.Max(0, entry.Extra);
             for (var i = 0; i < times; i++)
@@ -1769,12 +1775,41 @@ public static class KokomiPlan
         // card says so in as many words -- "carries out your front Plan NOW".
         // THE EXPANSION: an All Streams gift rides the entry, so a hurried
         // Plan is carried out its full number of times too.
-        for (var i = 0; i <= System.Math.Max(0, front.Extra); i++)
+        // A Stunning Stratagem's turn carries it out twice here too.
+        var times = StratagemTimes(kokomi) + System.Math.Max(0, front.Extra);
+        for (var i = 0; i < times; i++)
         {
             if (kokomi.IsDead) return;
             await ResolveNow(choiceContext, kokomi, front);
         }
     }
+
+    /// <summary>
+    /// Bottled Tide (Kokomi's own potions, 2026-10-15): "The Bake-Kurage
+    /// carries out every waiting Plan now." Change of Plans' door
+    /// (<see cref="ResolveFront"/>) once for each Plan waiting when it is
+    /// drunk, front first. A Plan written by one of those carry-outs waits
+    /// for the next morning like every other; the cap does not apply, since
+    /// the face says every Plan.
+    /// </summary>
+    public static async Task ResolveEveryNow(
+        PlayerChoiceContext choiceContext, Creature? kokomi)
+    {
+        if (!KokomiOverhaul.LiveFor(kokomi)) return;
+        var waiting = Pending(kokomi!.Player).Count;
+        for (var i = 0; i < waiting; i++)
+        {
+            if (kokomi.IsDead || kokomi.CombatState == null) return;
+            await ResolveFront(choiceContext, kokomi);
+        }
+    }
+
+    /// <summary>How many times every Plan is carried out right now: two on
+    /// the turn A Stunning Stratagem armed, one otherwise
+    /// (<see cref="StunningStratagemPower.LiveNow"/>).</summary>
+    public static int StratagemTimes(Creature kokomi) =>
+        kokomi.Powers.OfType<StunningStratagemPower>().Any(p => p.LiveNow)
+            ? 2 : 1;
 
     /// <summary>"Each player" (pool completion, Tactical Relay): every living
     /// player creature on her side, herself included -- the base game's
@@ -1965,6 +2000,10 @@ public static class KokomiPlan
         // `kokomi_plan.note_carried_out`.
         await KokomiRefounding.OnCarriedOut(choiceContext, kokomi,
                                             entry.Returns);
+        // KOKOMI'S OWN RELICS (2026-10-15): Everlasting Moonglow, after the
+        // turn's first carry-out, through either door.
+        await Relics.KokomiArmRelics.AfterPlanCarriedOut(kokomi,
+                                                        entry.Returns);
         return (wroteDouble, wroteExtra);
     }
 

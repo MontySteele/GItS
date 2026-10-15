@@ -9070,3 +9070,15 @@ Claude builds (no pick)". Pick 1 (the publishing half) is not built here.
 
 Pins: `tier0/tests/test_yae_review_r4.py`,
 `klee-mod/KleeTests/Prototype/YaeReviewR4Tests.cs`.
+
+## Wording pass (2026-10-15, kit census pick 3)
+
+Source: `review/active/kit-census-2026-10-15.md`, pick 3 (a). Faces only,
+no number moves, on `proto_ko_simmer`, `proto_ko_taste_test`,
+`proto_mc_albedo_dust_of_purification`, `proto_mi_gorou_juuga` (Plan: "Gain
+6 Block instead", still for 3 turns) and `proto_kk_call_the_generals` (Orders
+from the Shrine's word order). One behaviour change, decided with the pass:
+`proto_kk_read_the_field` reads "Take 1 of your top 3 [4] cards." and the
+cards not taken stay on top of the Draw Pile in their order (the `scry_take`
+op, both engines; were bottomed). Pins: `tier0/tests/test_kokomi_plan.py`,
+`klee-mod/KleeTests/Prototype/KokomiPoolPassFourTests.cs`.

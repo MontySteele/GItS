@@ -13331,14 +13331,14 @@ def build_body(
 
         elif op == "scry_take":
             # `EB-679` (Read the Field, pool pass four). `scry_bottom`'s screen
-            # with the pick going the OTHER way: the player is shown the top N,
-            # the one they choose is added to the HAND and everything else they
-            # were shown goes to the bottom of the draw pile. Nothing leaves the
+            # with the pick going the OTHER way: the player is shown the top N
+            # and the one they choose is added to the HAND. Nothing leaves the
             # deck, which is `scry_bottom`'s promise kept one verb over.
             #
-            # THE UNPICKED ARE BOTTOMED IN THE ORDER THEY WERE SEEN, so the
-            # pile under them is untouched and both engines agree about what
-            # the next draw is (`effects._op_scry_take`).
+            # THE UNPICKED STAY ON TOP IN THE ORDER THEY WERE SEEN (wording
+            # pass 2026-10-15, kit census pick 3; they were bottomed), so
+            # nothing else moves and both engines agree about what the next
+            # draw is (`effects._op_scry_take`).
             #
             # THE SIM HAS NO SCREEN and takes the lowest-cost card of the N,
             # stated there as the stand-in for player choice it is.
@@ -13347,8 +13347,7 @@ def build_body(
             # the one branch this arm does not own: a grid of ONE holds no
             # decision, so the game opens no screen, and the r28 lane "spent a
             # turn unsure it had whiffed" because nothing said the card had
-            # been taken. The take and the bottoming stay here; only the
-            # picking moved.
+            # been taken. The take stays here; only the picking moved.
             n = ('DynamicVars["Scry"].IntValue' if scry_upgrade(card)
                  else int(eff["amount"]))
             lines.append(
@@ -13361,11 +13360,6 @@ def build_body(
                 "                foreach (var taken in takePick)" + "\n" +
                 "                {" + "\n" +
                 "                    await CardPileCmd.Add(taken, PileType.Hand);" + "\n" +
-                "                }" + "\n" +
-                "                foreach (var seen in top)" + "\n" +
-                "                {" + "\n" +
-                "                    if (takePick.Contains(seen)) continue;" + "\n" +
-                "                    await CardPileCmd.Add(seen, PileType.Draw, CardPilePosition.Bottom);" + "\n" +
                 "                }" + "\n" +
                 "            }" + "\n" +
                 "        }"
@@ -15398,9 +15392,7 @@ def build_description(card: dict, *,
             # otherwise print "top 3" forever while the upgraded one showed 4.
             n = ("{Scry:diff()}" if scry_upgrade(card)
                  else str(int(eff["amount"])))
-            parts.append(
-                f"Look at the top {n} cards of your draw pile; put one into "
-                "your hand and the rest on the bottom.")
+            parts.append(f"Take 1 of your top {n} cards.")
 
         elif op == "exhaust_from" and eff.get("select") == "chosen":
             n = ("{Exhausts:diff()}" if exhaust_upgrade(card)

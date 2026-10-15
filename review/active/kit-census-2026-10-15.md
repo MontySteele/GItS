@@ -107,3 +107,11 @@ Pyro Bombs Vaporize, which is working as designed, so they stay.
   a ceiling.
 - (b) Prototype kits only (Kokomi, Furina).
 - (c) Leave it.
+
+Built 2026-10-15 (`wording-pass-2026-10-15`): six cards reworded, text only
+except Read the Field, whose unpicked cards now stay on top of the Draw Pile
+(Kokomi is at Prototype). Words before and after: Read the Field 26 to 21,
+Gorou Juuga 25 to 22, Simmer 24 to 23, Taste Test 23 to 22, Albedo Dust of
+Purification 22 to 21, Call the Generals 21 (word order only). Simmer and
+Taste Test say "not setting it off" to fit the 120-character card ceiling. No card in the
+four kits is now over 23 words (recount by the census `words` rule).

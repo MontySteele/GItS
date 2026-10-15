@@ -1073,6 +1073,19 @@ CO_TENANCY_LEDGER = {
             "1 (nothing played yet), so it cannot meet the two turn-1 "
             "relics; no co-tenant reads the hand or the piles here. No sim "
             "counterpart until Balance",
+        ("Relics/KokomiArmRelics.cs", "ElectroSigil"):
+            "(Kokomi's own relics, 2026-10-15). Turn-1-only: "
+            "Electro on every enemy, Fresh Catch's shape. It runs beside "
+            "ProtoBakeKuragePower's morning drain, which on turn 1 has no Plan "
+            "to carry out (none can be written before her first card), so no "
+            "Plan hit can meet the Electro in either order. No sim "
+            "counterpart until Balance",
+        ("Relics/KokomiArmRelics.cs", "ResistanceMusterRoll"):
+            "(Kokomi's own relics, 2026-10-15). Turn-1-only: "
+            "a chosen Inazuma Companion to the hand, free this turn, Favonius "
+            "Duty Roster's shape. It shares only the hand with the turn-1 "
+            "co-tenants and nothing reads the hand at this broadcast. No sim "
+            "counterpart until Balance",
         ("Powers/TurnEndSequencer.cs", "TurnEndSequencer"):
             "EB-53/N1: redraws the end-of-turn attribution docket, nothing "
             "else. It has NO stake in this broadcast's order because it "
@@ -1211,6 +1224,11 @@ CO_TENANCY_LEDGER = {
             "(the Kokomi overhaul, R276). Pincer's carry-out, "
             "\"this turn\", on the same-turn boundary (FLAG-1 / R114). "
             "Removes itself and touches nothing else",
+        ("Powers/Prototype/KokomiOverhaulPowers.cs",
+         "StunningStratagemPower"):
+            "(Kokomi's own potions, 2026-10-15). A Stunning "
+            "Stratagem's armed turn ending: removes itself once no armed turn "
+            "is still ahead, and touches nothing else",
         ("Diagnostics/PlayTelemetry.cs", "PlayTelemetryHooks"):
             "diagnostics observer; reads, never writes board state",
         ("Powers/CompanionPowers.cs", "ReplayNextCompanionPower"):

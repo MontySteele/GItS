@@ -926,7 +926,8 @@ def potion_rows() -> list[Row]:
 KIT_RELIC_FILES = ("PoundingSurprise.cs", "PoundingSurpriseNext.cs",
                    "TamakushiCasket.cs", "KleeArmRelics.cs",
                    "UpgradedStarterRelics.cs", "FurinaStageRelics.cs",
-                   "SalonSolitaire.cs", "BoreasFang.cs", "VarkaArmRelics.cs")
+                   "SalonSolitaire.cs", "BoreasFang.cs", "VarkaArmRelics.cs",
+                   "KokomiArmRelics.cs")
 
 
 def prototype_rows() -> list[Row]:
