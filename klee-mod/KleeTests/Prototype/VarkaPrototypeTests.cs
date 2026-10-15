@@ -667,8 +667,7 @@ public class VarkaPrototypeTests : IDisposable
     [Fact]
     public void The_swirl_readers_diff_his_swirl_count()
     {
-        foreach (var type in new[] { "ProtoVkTempestCharge", "ProtoVkCrosswind",
-                                     "ProtoVkRisingGale" })
+        foreach (var type in new[] { "ProtoVkCrosswind", "ProtoVkRisingGale" })
         {
             var calls = Il.CallSequence(Il.Method(type, "OnPlay"));
             Assert.Equal(2, calls.Count(c => c == "VarkaOath.SwirlsMadeBy"));
@@ -676,15 +675,16 @@ public class VarkaPrototypeTests : IDisposable
     }
 
     [Fact]
-    public void Tempest_charge_reads_its_swirl_after_the_hit_and_before_the_draw()
+    public void Rising_gale_reads_its_swirl_after_the_hit_and_before_the_draw()
     {
         // The 2026-10-05 seat round (review/records/varka-combo-round-
-        // 2026-10-05.md, screen item 2) never saw the draw. The Swirl
-        // resolves INSIDE the attack (AuraPower's AfterDamageReceived ->
+        // 2026-10-05.md, screen item 2) never saw the draw (then on Tempest
+        // Charge, which no longer draws; Rising Gale keeps the shape). The
+        // Swirl resolves INSIDE the attack (AuraPower's AfterDamageReceived ->
         // ReactionEffects.Resolve -> VarkaOath.OnSwirl -> NoteSwirl on the
         // dealer, the card's own Owner.Creature), so the order that makes it
         // fire is: snapshot, attack, re-read, draw.
-        var calls = Il.CallSequence(Il.Method("ProtoVkTempestCharge", "OnPlay")).ToList();
+        var calls = Il.CallSequence(Il.Method("ProtoVkRisingGale", "OnPlay")).ToList();
         var snap = calls.IndexOf("VarkaOath.SwirlsMadeBy");
         var hit = calls.IndexOf("AttackCommand.Execute");
         var reread = calls.LastIndexOf("VarkaOath.SwirlsMadeBy");
@@ -694,6 +694,46 @@ public class VarkaPrototypeTests : IDisposable
         // And OnSwirl counts the Swirl first, on the dealer's ledger.
         Assert.Contains("VarkaOathLedger.NoteSwirl",
                         Il.CallSequence(Il.Method("VarkaOath", "OnSwirl")));
+    }
+
+    [Fact]
+    public void Tempest_charge_deals_12_and_costs_1_less_per_swirl_this_turn()
+    {
+        // Klee and Varka cleanup review, pick 1 (a), 2026-10-15: "Deal 12
+        // [16] Anemo damage. Costs 1 less for each Swirl this turn."
+        var charge = new ProtoVkTempestCharge();
+        Assert.Equal(1, charge.EnergyCost.Canonical);
+        Assert.Equal(CardType.Attack, charge.Type);
+        Assert.Equal(CardRarity.Uncommon, charge.Rarity);
+        Assert.Equal(12m, Var(charge, "Damage"));
+        Assert.Equal(16m, Var(Upgraded<ProtoVkTempestCharge>(), "Damage"));
+        // No draw any more.
+        var play = Il.CallSequence(Il.Method("ProtoVkTempestCharge", "OnPlay"));
+        Assert.DoesNotContain(play, c => c.StartsWith("CardPileCmd.Draw"));
+        Assert.DoesNotContain("VarkaOath.SwirlsMadeBy", play);
+        // The discount is the card's own and touches only itself, and a free
+        // card stays free.
+        Assert.False(charge.TryModifyEnergyCostInCombat(
+            new ProtoVkRisingGale(), 1m, out var other));
+        Assert.Equal(1m, other);
+        Assert.False(charge.TryModifyEnergyCostInCombat(charge, 0m, out var free));
+        Assert.Equal(0m, free);
+        // 1 less per Swirl this turn, floored at 0 ...
+        var discount = Il.CallSequence(Il.Method("ProtoVkTempestCharge",
+                                                 "TryModifyEnergyCostInCombat"));
+        Assert.Contains("VarkaOath.SwirlsThisTurn", discount);
+        Assert.Contains(discount, c => c.StartsWith("Math.Max"));
+        Assert.Contains("VarkaOathLedger.get_SwirlsThisTurn",
+                        Il.CallSequence(Il.Method("VarkaOath", "SwirlsThisTurn")));
+        // ... off the ledger's count, which the next round clears.
+        var ledger = FreshLedger();
+        ledger.RollTo(1);
+        var body = Seat.Klee(30).Creature;
+        ledger.NoteSwirl(body);
+        ledger.NoteSwirl(body);
+        Assert.Equal(2, ledger.SwirlsThisTurn);
+        ledger.RollTo(2);
+        Assert.Equal(0, ledger.SwirlsThisTurn);
     }
 
     // ---- the Knights -------------------------------------------------------

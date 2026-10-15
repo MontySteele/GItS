@@ -51,13 +51,25 @@ public sealed class ProtoVkTempestCharge : CustomCardModel, IElementalCard, ICha
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tempest Charge"),
-        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If it [gold]Swirls[/gold], draw 1 card."),
+        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Costs 1 less for each [gold]Swirl[/gold] this turn."),
     };
+
+    /// <summary>Sheet `cost_reduction_per_swirl_this_turn: 1`: this card
+    /// costs 1 less for each Swirl its owner made this turn.</summary>
+    public override bool TryModifyEnergyCostInCombat(
+        CardModel card, decimal originalCost, out decimal modifiedCost)
+    {
+        modifiedCost = originalCost;
+        if (!ReferenceEquals(card, this) || originalCost <= 0m) return false;
+        modifiedCost = System.Math.Max(0m, originalCost - 1m
+            * VarkaOath.SwirlsThisTurn(Owner?.Creature));
+        return true;
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(8m, ValueProp.Move)
+            new DamageVar(12m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -69,21 +81,16 @@ public sealed class ProtoVkTempestCharge : CustomCardModel, IElementalCard, ICha
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        var swirlsAtStart = VarkaOath.SwirlsMadeBy(Owner.Creature);
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
             .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
             .WithElementHitFx(this)
             .Execute(choiceContext);
-        if (VarkaOath.SwirlsMadeBy(Owner.Creature) > swirlsAtStart)
-        {
-            await CardPileCmd.Draw(choiceContext, 1m, Owner);
-        }
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(3m);
+        DynamicVars.Damage.UpgradeValueBy(4m);
     }
 }

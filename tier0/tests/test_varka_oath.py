@@ -805,3 +805,37 @@ def test_downburst_without_an_aura_gains_nothing(varka):
     _play(st, _vk("downburst"))
     assert _led(st).swirls_made == 0
     assert _led(st).oath == before
+
+
+def test_tempest_charge_deals_12_and_costs_1_less_per_swirl_this_turn(varka):
+    # Klee and Varka cleanup review, pick 1 (a), 2026-10-15: "Deal 12 [16]
+    # Anemo damage. Costs 1 less for each Swirl this turn." The mod's twin is
+    # the card's `TryModifyEnergyCostInCombat` over `VarkaOath.SwirlsThisTurn`.
+    for card_id, dealt in ((_vk("tempest_charge"), 12),
+                           (_vk("tempest_charge") + "+", 16)):
+        st = _state(enemies=[_enemy(name="a", hp=100)], fang=False)
+        hand = len(st.player.hand)
+        _play(st, card_id)
+        assert st.enemies[0].hp == 100 - dealt
+        assert len(st.player.hand) == hand          # no draw any more
+    st = _state(element="hydro", fang=False,
+                enemies=[_enemy(name="a", aura="pyro")])
+    charge = loader.get_card(_vk("tempest_charge"))
+    assert combat.card_cost(st, charge) == 1
+    _play(st, _vk("tempest_charge"))                # a Swirl on "a"
+    assert _led(st).swirls_this_turn == 1
+    assert combat.card_cost(st, charge) == 0
+    st.enemies[0].aura, st.enemies[0].aura_turns_left = "pyro", 2
+    st.player.hand.append(charge)
+    st.player.energy = 0
+    combat.play_card(st, charge)                    # free at 0 Energy
+    assert charge not in st.player.hand and st.player.energy == 0
+    assert _led(st).swirls_this_turn == 2           # floored at 0, not -1
+    assert combat.card_cost(st, loader.get_card(_vk("tempest_charge"))) == 0
+    V.turn_start(st)                                # the count resets
+    assert _led(st).swirls_this_turn == 0
+    assert combat.card_cost(st, loader.get_card(_vk("tempest_charge"))) == 1
+    # A hit that does not Swirl takes nothing off.
+    st = _state(fang=False, enemies=[_enemy(name="a")])
+    _play(st, _vk("tempest_charge"))
+    assert combat.card_cost(st, loader.get_card(_vk("tempest_charge"))) == 1

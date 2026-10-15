@@ -3887,11 +3887,10 @@
 - {id: proto_vk_tempest_charge, name: "Tempest Charge", character: varka,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If it [gold]Swirls[/gold], draw 1 card.",
-   effects: [{op: damage, amount: 8, target: enemy},
-             {op: conditional, if: swirled_by_this,
-              then: [{op: draw, amount: 1}]}],
-   upgrade: {damage: 3}}
+   cost_reduction_per_swirl_this_turn: 1,
+   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Costs 1 less for each [gold]Swirl[/gold] this turn.",
+   effects: [{op: damage, amount: 12, target: enemy}],
+   upgrade: {damage: 4}}
 
 - {id: proto_vk_favonius_cut, name: "Favonius Cut", character: varka,
    authored_by: [claude],

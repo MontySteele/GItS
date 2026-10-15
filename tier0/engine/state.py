@@ -357,6 +357,13 @@ class Card:
     # the card's own `TryModifyEnergyCostInCombat` over
     # `FurinaStage.FanfareOf`. A sheet field (`gen_klee_cards.CARD_FIELDS`).
     cost_reduction_per_fanfare: int = 0
+    # VARKA, TEMPEST CHARGE (Klee and Varka cleanup review, pick 1 (a),
+    # 2026-10-15): "Costs 1 less for each Swirl this turn." The value is the
+    # Energy off per Swirl, read at cost time off his ledger's
+    # `swirls_this_turn` (cleared at his turn start); the mod's twin is the
+    # card's own `TryModifyEnergyCostInCombat` over `VarkaOath.SwirlsThisTurn`.
+    # A sheet field (`gen_klee_cards.CARD_FIELDS`).
+    cost_reduction_per_swirl_this_turn: int = 0
     # EnergyCost.AddThisTurn / AddThisCombat / SetToFreeThisTurn -- state the
     # base game keeps on the CARD INSTANCE, not on its owner. Two copies of
     # the same card discount themselves independently, and the combat-scoped
