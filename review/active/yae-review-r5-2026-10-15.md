@@ -70,9 +70,11 @@ there. The seats that drafted Edits liked them for what the Edited card did
    opens one chooser of up to N cards; the note is rewritten.
 2. **Inked Branches+ with nothing to Edit** shows "Nothing to Edit" twice; once.
 3. **A Reprinted attack whose first hit kills its target** showed "played two
-   times" with one hit (lane 2). Find what the game does with the second play
-   and match the base game's Replay; if the second play is lost, say so on the
-   page.
+   times" with one hit (lane 2). The base game does the same: every extra play
+   keeps the original target and a dead target is not replaced
+   (`CardModel.cs:1896-1919`, `AttackCommand.cs:558-563` in the decompiled
+   game; base Glam and Spiral behave alike). Behaviour is unchanged; the seat
+   page now says the extra play hits nothing (#1333).
 4. **The lane 4 freeze.** The game thread stopped right after the window
    regained focus ("Restored foreground FPS"); a managed stack dump shows no
    game or mod code on it, so the hang is in the engine. Added to the `EB-489`
@@ -115,5 +117,5 @@ every Power.
 
 ## Next
 
-Items 1 to 7 are built now. Pick 1 is built once ruled, then a Yae round of
+Items 1 to 7 are built (#1333). Pick 1 is built once ruled, then a Yae round of
 five seats.
