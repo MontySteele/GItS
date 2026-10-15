@@ -166,11 +166,6 @@ public static class ArmKeywordTips
     // 2026-10-08, sec.5). Same title, so the hover still reads "Plan".
     public const string PlanOnlyKey = "KLEEMOD-ARM_PLAN_ONLY";
 
-    // THE KOKOMI RE-FOUNDING (2026-10-12), and NOT A KEYWORD ROW: the Plan tip
-    // a Companion card carries while Kokomi holds it. Any Companion can be
-    // written, and no face or tip said so. Same title, so it reads "Plan".
-    public const string CompanionPlanKey = "KLEEMOD-ARM_PLAN_COMPANION";
-
     // THE KOKOMI ROUND-1 FIXES (2026-10-12), and NOT A KEYWORD ROW: the Plan
     // tip a card carries when its face NAMES Plans but prints no Plan line of
     // its own (Press the Advantage, Treatise, Breakwater ...). PlanKey's
@@ -409,39 +404,6 @@ public static class ArmKeywordTips
             "A card with a Plan line can be played on the "
           + "[gold]Bake-Kurage[/gold] to happen next turn. This card has no "
           + "Plan line.");
-
-    /// <summary>
-    /// THE KOKOMI RE-FOUNDING (2026-10-12): "Any Companion card can be
-    /// written as a Plan" (design pass pick 4 (a)), and nothing on screen
-    /// said so. Attached by <c>gen_klee_cards.emit</c> to every
-    /// <see cref="IWritableCompanion"/> row, and printed only while the card's
-    /// owner is Kokomi (<see cref="KokomiCompanionPlan.OnKokomi"/>), the
-    /// same test that lets it target the Bake-Kurage.
-    /// </summary>
-    public static IEnumerable<IHoverTip> ForCompanionPlan(
-        IEnumerable<IHoverTip> inherited, CardModel card)
-    {
-        if (!KokomiCompanionPlan.OnKokomi(card)) return inherited;
-        return With(inherited, CompanionPlanKey,
-            card is Prototype.Generated.ProtoMcAlbedoDustOfPurification
-                ? CompanionPlanText + " " + DustPlanText
-                : CompanionPlanText);
-    }
-
-    /// <summary>BACKLOG (Albedo -- Dust of Purification): planned, its exhaust
-    /// reads the Draw Pile, as Sea Glass Harvest's Plan does
-    /// (<c>KleeStatusPackage.ExhaustStatusesGrowLargest</c>).</summary>
-    internal const string DustPlanText =
-        "Planned, it reads your [gold]Draw Pile[/gold] instead of your "
-      + "[gold]Hand[/gold].";
-
-    /// <summary><see cref="ForCompanionPlan"/>'s sentence. INTERNAL, as
-    /// <see cref="KnightTipText"/> is: every public string constant here is a
-    /// tip key.</summary>
-    internal const string CompanionPlanText =
-        "Play it on the [gold]Bake-Kurage[/gold] to plan it. Next turn the Kurage applies [gold]Hydro[/gold], "
-      + "then it is played: [gold]Strength[/gold] and [gold]Weak[/gold] "
-      + "count. It counts as played now and again when it lands.";
 
     /// <summary>
     /// `EB-378`: WHERE THE AURA CAME FROM, on the rows whose element is the

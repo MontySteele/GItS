@@ -115,16 +115,11 @@ NOTHING_BEHIND_CLAUSE = " No enemy is behind you now."
 #: does not mark which cards turn her to face their target." Beside each
 #: hand card that takes `on`, only while you are Surrounded.
 TURNS_YOU_TAG = " (turns you)"
-#: The Kokomi re-founding (2026-10-12): "Any Companion card can be written
-#: as a Plan", and no face says so. Beside each hand card the jellyfish takes
-#: whose own face prints no Plan line.
-WRITABLE_TAG = " (can be written as a Plan)"
-#: And the Plan row says it on a Kokomi page, in step with the cards' tip
-#: (`ArmKeywordTips.ForCompanionPlan`), with what the carry-out does.
-PLAN_COMPANION_CLAUSE = (
-    " Any Companion card can be written too: next turn the Bake-Kurage "
-    "applies Hydro to the front enemy first, then the Companion plays free "
-    "and Exhausts.")
+#: (The re-founding's "(can be written as a Plan)" hand tag and the Plan
+#: row's "Any Companion card can be written too" clause left with Kokomi
+#: review r9 pick 1 (a), 2026-10-15: "let's get rid of Companions as Plans
+#: unless we make a card that specifically has a Plan line." A card the
+#: jellyfish takes now always prints its Plan line.)
 
 #: 2026-09-26 (control seat, Ironclad): "Sozu: the tool said 'Took: Power
 #: Potion' and nothing arrived." Said beside the offer, before the claim.
@@ -1287,10 +1282,10 @@ PLAN_COUNT_CAPPED_NOTE = ("- The jellyfish carries out at most {n} Plans at "
 # yours and Frail does cut it. Two clauses, one rule, both predictable from
 # the sentence.
 #
-# KOKOMI PRE-RUN FIXES (2026-10-12): AND THE EXCEPTION. A written Companion is
-# not a clause the jellyfish deals: `KokomiCompanionPlan.CarryOut` auto-plays
-# a clone of the card, a real play of hers, so her Weak and Strength at that
-# moment move it (round 3 lane 5: Shinobu written as "Deal 8" landed 6).
+# (KOKOMI PRE-RUN FIXES, 2026-10-12, added the exception for a written
+# Companion, played as a card at its carry-out; it left with Kokomi review r9
+# pick 1 (a), 2026-10-15, when a Companion stopped being plannable without a
+# Plan line of its own.)
 # KOKOMI REVIEW R5 (2026-10-14, A2): reworded. "Shrink or Weak on you never
 # cuts it" read as "nothing on me cuts it", and Tender cut a planned Oath+
 # (run 1); the Strength-at-writing rule (the 2026-10-10 line it replaces) was
@@ -1300,9 +1295,7 @@ PLAN_WRITTEN_NUMBER_NOTE = ("- Your Strength when you write it counts, a loss "
                             "you never does. A Plan that reads an intent "
                             "(Tide Wall, Flank, Undercurrent Snare) reads it "
                             "when it lands. A planned Block is yours, so "
-                            "Frail cuts it. A written Companion is played as "
-                            "a card next turn, so your Strength and Weak "
-                            "then count.")
+                            "Frail cuts it.")
 #: Kokomi review r5 (2026-10-14, A2): so Spearhead before Masterstroke is
 #: visible.
 PLAN_ORDER_NOTE = "- Plans carry out in the order written."
@@ -3512,10 +3505,6 @@ def _keyword_rows(obs: dict[str, Any],
     for row in rows:
         if row["name"] == "Summon" and _arm_owns("Summon", who):
             row["text"] = _summon_row(hay)
-        # The Kokomi re-founding (2026-10-12): her Plan row also says any
-        # Companion can be written. On her row only, never the off-arm one.
-        if row["name"] == "Plan" and row["text"] == ARM_KEYWORDS["Plan"]:
-            row["text"] += PLAN_COMPANION_CLAUSE
     # 2026-09-26: the base game's words, off a haystack with the names of
     # the shelves, options, relics and potions struck (`_NAMED_ROW_KEYS`).
     names = _item_names(obs)

@@ -381,9 +381,6 @@ def _omitted_from_upgrade(state: dict[str, Any]) -> list[dict[str, str]]:
 #: every note on this page is read under: the game spells the screen `select`
 #: for a dozen different asks and the sentence is what tells them apart.
 _REMOVAL_PROMPT = re.compile(r"\b(remove|removal|destroy|purge)\b", re.I)
-#: A face that prints its own Plan line ("Plan:", "Or plan:") says it can be
-#: written; the `writable` mark is for the cards that do not.
-_PLAN_WORD = re.compile(r"\bplan\b", re.I)
 
 
 def is_removal_screen(blob: dict[str, Any]) -> bool:
@@ -828,16 +825,6 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
         # in the Bake-Kurage's receipt as in the enemy list four lines down.
         name_moved_rows(plans, _enemies(state), combat["enemies"])
         combat["plans"] = plans
-        # The Kokomi re-founding (2026-10-12): any Companion card can be
-        # written as a Plan, and its face does not say so. A hand card the
-        # game lets onto the jellyfish (`can_target_pet`, the field `EB-480`
-        # reads) whose face prints no Plan line is marked, so the seat can
-        # see which cards the `on "Bake-Kurage"` form takes.
-        if plans.get("pet"):
-            for raw, face in zip(_hand(state), combat["hand"]):
-                if (raw.get("can_target_pet") is True
-                        and not _PLAN_WORD.search(str(face.get("text") or ""))):
-                    face["writable"] = True
     stage = furina_stage(p)
     if stage is not None:
         # `EB-743`, and it is `EB-329`'s rule a third arm over: the mod names

@@ -629,12 +629,10 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # THE RE-FOUNDING (2026-10-12). Kurage's Wake's Plan line hands Stings to
     # the hand; Gorou's two Plan lines are a Strength (permanent since the
     # Kokomi level pass) and a Block
-    # clock; a written Companion's clause plays the card -- each on the
-    # queue that carries it out.
+    # clock -- each on the queue that carries it out.
     "add_stings": [_hook("shared", "hand_contents", "write")],
     "gain_strength": [_hook("private", "kurage", "use")],
     "juuga_guard": [_hook("shared", "block_held", "write")],
-    "play_companion": [_hook("private", "kurage", "use")],
     # THE KOKOMI POOL OVERHAUL (2026-10-13). Chain reads the carry-outs this
     # turn; Counter reads the enemy turn the Plan sat through (Block held,
     # damage taken, who attacked); Intent reads the intents and takes

@@ -312,6 +312,9 @@ public class KokomiOverhaulRuleTests
         // `BlockPerAttackingEnemy`, `DoubleBlock`, `ExhaustStatusesInHand` and
         // `DiscardAndDraw` with Dusk and the cut cards, and appended
         // `AddStings`, `GainStrength`, `JuugaGuard` and `PlayCompanion`.
+        //
+        // KOKOMI REVIEW R9 PICK 1 (a) (2026-10-15) removed `PlayCompanion`:
+        // only a Companion that prints a Plan line can be planned.
         Assert.Equal(
             new[] { "Draw", "Energy", "Block", "Mend", "Damage",
                     "DamageQuarterMaxHp",
@@ -328,7 +331,6 @@ public class KokomiOverhaulRuleTests
                     "BlockPerStatusInHand", "TransformStatusesYouHave",
                     // THE RE-FOUNDING (2026-10-12).
                     "AddStings", "GainStrength", "JuugaGuard",
-                    "PlayCompanion",
                     // THE POOL OVERHAUL (2026-10-13): Chain, Counter and
                     // Intent, and Read the Field's fetch.
                     "DamagePerPlanThisTurn", "DamageBlockedSince",

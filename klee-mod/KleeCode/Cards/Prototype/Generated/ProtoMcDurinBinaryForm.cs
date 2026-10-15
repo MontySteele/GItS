@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcDurinBinaryForm : CustomCardModel, IElementalCard, ICompanionCard, IWritableCompanion, IVarkaSwitchCard, IModalCard
+public sealed class ProtoMcDurinBinaryForm : CustomCardModel, IElementalCard, ICompanionCard, IVarkaSwitchCard, IModalCard
 {
     /// <summary>Sheet applies_element: this companion attack applies its element.</summary>
     public Element Element => Element.Pyro;
@@ -52,7 +52,7 @@ public sealed class ProtoMcDurinBinaryForm : CustomCardModel, IElementalCard, IC
         new[] { KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCompanionPlan(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro), this, Element.Pyro), this);
+        ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro), this, Element.Pyro);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_durin_binary_form");
 
@@ -61,14 +61,6 @@ public sealed class ProtoMcDurinBinaryForm : CustomCardModel, IElementalCard, IC
         ("title", "Durin — Binary Form"),
         ("description", "Choose one, then draw 1 card. [gold]White[/gold]: Deal {IfUpgraded:show:8|6} [gold]Pyro[/gold] damage to ALL enemies. [gold]Dark[/gold]: Deal {IfUpgraded:show:5|4} [gold]Pyro[/gold] damage to an enemy 3 times.{InCombat:{VarkaSwitch}|}{InCombat:{VarkaWildfire}|}"),
     };
-
-    /// <summary>On Kokomi, this Companion card can also be written as a Plan on
-    /// the Bake-Kurage (the re-founding, 2026-10-12).</summary>
-    public override TargetType TargetType =>
-        KokomiCompanionPlan.TargetFor(this, base.TargetType);
-
-    /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
-    public TargetType PrintedTargetType => base.TargetType;
 
     /// <summary>This card's in-combat Oath lines
     /// (`VarkaOath.SwitchLine`, `VarkaOath.WildfireLine`).</summary>
@@ -111,11 +103,6 @@ public sealed class ProtoMcDurinBinaryForm : CustomCardModel, IElementalCard, IC
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (KokomiPlan.PlayedOnPet(cardPlay))
-        {
-            await KokomiCompanionPlan.Write(choiceContext, this, cardPlay);
-            return;
-        }
         var modeOptions = new List<CardModel>
         {
             ModalChoice.CreateMatchingOption<ProtoMcDurinBinaryFormModeA>(Owner, this),

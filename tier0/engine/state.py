@@ -1096,8 +1096,8 @@ class PlanEntry:
     # kokomi-delay-pays-2026-10-01.md sec.2). `now_card` is the card whose
     # now-line this Plan may be carried out as instead: set by `schedule`
     # only for a Plan written from a TWO-LINE card's own line (Moon's
-    # Reflection's found card included), never for a Plan-only card or a
-    # written Companion. `line` is the line it will be carried out as, "plan" (the
+    # Reflection's found card included), never for a Plan-only card. `line`
+    # is the line it will be carried out as, "plan" (the
     # default) or "now" once the player has flipped it while it waits
     # (`kokomi_plan.flip`, pick 5a).
     # `KokomiPlan.Entry.Now` is the twin of `line`.

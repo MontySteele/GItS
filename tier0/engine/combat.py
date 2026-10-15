@@ -671,10 +671,11 @@ def resolve_free_play(state: CombatState, card: Card,
         # drawn. A Sly discard IS a hand card, and does carry its context.
         drawn_turn, first_copy = state.drawn_context(card)
         state.drawn_in_hand.pop(id(card), None)
-        # THE KOKOMI RE-FOUNDING (2026-10-12): a written Companion is played
-        # by the Bake-Kurage's carry-out, and that play is the PLAN's -- the
-        # card was already counted as played when she wrote it. `plan_carry`
-        # tells EB-17's per-id tally so (`metrics`), and nothing else.
+        # THE KOKOMI RE-FOUNDING (2026-10-12): a card a Plan plays at its
+        # carry-out (Crystal Collapse's copy, Moon's Reflection's replay) is
+        # the PLAN's play -- the Plan card was counted when she wrote it.
+        # `plan_carry` tells EB-17's per-id tally so (`metrics`), and nothing
+        # else.
         state.emit("play", card=card.id, cost=0, energy_left=p.energy,
                    free=True, drawn_turn=drawn_turn, first_copy=first_copy,
                    plan_carry=bool(getattr(state, "kk_carrying_out", False)))

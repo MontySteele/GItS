@@ -94,9 +94,9 @@ at 78 (20 / 38 / 20).
 - **Stings and reactions:** Brine Spray, Jellyfish Current, the new All Streams
   and Grand Strategist make an Electro or Cryo Companion turn Stings into
   Poison or Frozen engines.
-- **Companions in the middle:** Coordinated Tide pays both sides. A Companion
-  written as a Plan already reacts with the Bake-Kurage's Hydro (rule 8), so it
-  makes Stings.
+- **Companions in the middle:** Coordinated Tide pays both sides. (A
+  Companion written as a Plan reacted with the Bake-Kurage's Hydro here; that
+  rule is gone. Kokomi review r9, pick 1 (a), 2026-10-15: [USER]: "Agreed on Kokomi - let's get rid of Companions as Plans unless we make a card that specifically has a Plan line.")
 
 ## Picks
 

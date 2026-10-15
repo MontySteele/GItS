@@ -5016,61 +5016,44 @@ def test_an_older_bridge_prints_the_form_and_no_waiting_line():
     assert "the jellyfish waits" not in page
 
 
-#: The Kokomi re-founding (2026-10-12): a Companion with no Plan line of its
-#: own, which the game lets onto the jellyfish on her board.
-WRITABLE_COMPANION = "Yoimiya — Firework Flare-Up"
+#: Kokomi review r9 pick 1 (a), 2026-10-15; [USER]: "let's get rid of
+#: Companions as Plans unless we make a card that specifically has a Plan
+#: line." A Companion with no Plan line, which the game no longer lets onto
+#: the jellyfish.
+PLAIN_COMPANION = "Yoimiya — Firework Flare-Up"
 
 
 def _companion_hand(state: dict) -> dict:
-    """`_planning_hand`'s board with a writable Companion added to the hand,
-    and its Plan card printing a Plan line as a current face does (the
-    recording predates the line)."""
+    """`_planning_hand`'s board with a plain Companion added to the hand: no
+    Plan line, and the game refuses it the jellyfish."""
     out = _planning_hand(state)
-    for card in out["player"]["hand"]:
-        if card["name"] == "All Streams Flow to the Sea":
-            card["description"] = "Gain 6 Block. Plan: Deal 9 damage."
     companion = dict(out["player"]["hand"][0])
     companion.update({"id": "PROTO_MI_YOIMIYA_FIREWORK_FLARE_UP",
-                      "name": WRITABLE_COMPANION,
+                      "name": PLAIN_COMPANION,
                       "description": "Deal 6 damage.", "keywords": [],
                       "index": len(out["player"]["hand"]),
-                      "can_target_pet": True})
+                      "can_target_pet": False})
     out["player"]["hand"].append(companion)
     return out
 
 
-def test_a_companion_is_written_with_the_plan_verb_and_marked_in_hand():
-    """The Kokomi re-founding (2026-10-12): "Any Companion card can be
-    written as a Plan." The seat writes one with the verb a Plan card takes,
-    the hand marks it (its face prints no Plan line), and a Plan card that
-    says so on its face carries no mark."""
+def test_a_plain_companion_is_not_offered_the_bake_kurage():
+    """Pick 1 (a): the page neither marks a plain Companion as plannable nor
+    says any Companion can be written; with every Plan card barred, the
+    `on "Bake-Kurage"` form is not offered for it."""
     state = _companion_hand(plans_combat_state(TWO_PLANS))
-
-    res = blindplay.act(state, f'play "{WRITABLE_COMPANION}" on "Bake-Kurage"')
-    assert res["ok"], res
-    assert res["post"]["target"] == "41"
-
     page = blindplay.observe(state)
-    marked = [line for line in page.splitlines()
-              if blindplay_notes.WRITABLE_TAG in line]
-    assert len(marked) == 1 and WRITABLE_COMPANION in marked[0], marked
-    assert 'on "Bake-Kurage"' in page
+    assert "(can be written as a Plan)" not in page
+    assert "Any Companion card can be written" not in page
+    assert not hasattr(blindplay_notes, "WRITABLE_TAG")
+    assert not hasattr(blindplay_notes, "PLAN_COMPANION_CLAUSE")
 
-    # With the Plan card barred, the Companion alone still offers the form.
     barred = json.loads(json.dumps(state))
     for card in barred["player"]["hand"]:
-        if card["name"] != WRITABLE_COMPANION:
-            card["can_target_pet"] = False
+        card["can_target_pet"] = False
     obs = blindplay.observation(barred)
-    assert any('on "Bake-Kurage"' in c for c in obs["commands"])
-
-
-def test_the_plan_row_says_any_companion_can_be_written():
-    """The page's Plan row is the tip word for word, then one clause on her
-    page only: any Companion can be written, and what its carry-out does."""
-    page = blindplay.observe(_companion_hand(plans_combat_state(TWO_PLANS)))
-    assert blindplay.ARM_KEYWORDS["Plan"] + blindplay_notes.PLAN_COMPANION_CLAUSE in page
-    assert blindplay_notes.PLAN_COMPANION_CLAUSE not in blindplay.ARM_KEYWORDS["Plan"]
+    assert not any(PLAIN_COMPANION in c and 'on "Bake-Kurage"' in c
+                   for c in obs["commands"])
 
 
 def test_the_plan_word_left_the_modifier_rule_to_the_panel():
@@ -10858,9 +10841,7 @@ def test_the_plan_panel_says_the_written_number_does_not_move():
                     "(Tender) as much as a gain; Weak or Shrink on you never "
                     "does. A Plan that reads an intent (Tide Wall, Flank, "
                     "Undercurrent Snare) reads it when it lands. A planned "
-                    "Block is yours, so Frail cuts it. A written Companion "
-                    "is played as a card next turn, so your Strength and "
-                    "Weak then count.")
+                    "Block is yours, so Frail cuts it.")
     assert "afterwards" not in said
     # Beside the count rule, which is the one it qualifies.
     assert lines.index(blindplay.PLAN_COUNT_NOTE) + 1 == \

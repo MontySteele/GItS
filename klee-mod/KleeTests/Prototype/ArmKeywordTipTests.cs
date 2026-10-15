@@ -427,7 +427,10 @@ public class ArmKeywordTipTests
         // 57 with Yae's review r3 (2026-10-14): `ForFoxfireSakura`,
         // `ForKitsuneSakura` (the two kinds a card names) and
         // `ForFullShrine` (every planting card's full-shrine rule).
-        Assert.Equal(57, attaches.Count);
+        // 56 with Kokomi review r9 pick 1 (a) (2026-10-15):
+        // `ForCompanionPlan` left with the rule that any Companion can be
+        // written as a Plan.
+        Assert.Equal(56, attaches.Count);
         Assert.Contains(attaches, m => m.Name == "ForFoxfireSakura");
         Assert.Contains(attaches, m => m.Name == "ForKitsuneSakura");
         Assert.Contains(attaches, m => m.Name == "ForFullShrine");
@@ -446,7 +449,7 @@ public class ArmKeywordTipTests
         Assert.Contains(attaches, m => m.Name == "ForAscensionReturn");
         Assert.Contains(attaches, m => m.Name == "ForNereidsTwice");
         Assert.Contains(attaches, m => m.Name == "ForPlanNoLine");
-        Assert.Contains(attaches, m => m.Name == "ForCompanionPlan");
+        Assert.DoesNotContain(attaches, m => m.Name == "ForCompanionPlan");
         Assert.Contains(attaches, m => m.Name == "ForBankDamage");
         Assert.Contains(attaches, m => m.Name == "ForElementSwitch");
         Assert.Contains(attaches, m => m.Name == "ForOath");

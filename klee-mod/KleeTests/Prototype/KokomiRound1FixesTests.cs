@@ -91,13 +91,17 @@ public class KokomiRound1FixesTests
     // ---- Treatise ------------------------------------------------------------------
 
     [Fact]
-    public void Treatise_fires_on_any_card_that_can_be_written()
+    public void Treatise_fires_on_any_plan_card_or_companion()
     {
         // Round 1 found a Companion did not trigger it (the seat that "never
         // saw it draw" played Shinobu and Kirara). Kokomi round 2
-        // (2026-10-12) widened the gate to `KokomiRefounding.CanBeWritten`: a
-        // printed Plan line, or a Companion card. A carry-out is not a play
-        // of hers (`KokomiPlan.IsCarryingOut`).
+        // (2026-10-12) widened the gate: a printed Plan line, or a Companion
+        // card. Kokomi review r9 pick 1 (a) (2026-10-15) took plain
+        // Companions off the Bake-Kurage, so `CanBeWritten` no longer names
+        // them and the gate reads `ICompanionCard` itself: the face ("a Plan
+        // card or a Companion without planning it") and the cards that count
+        // are unchanged. A carry-out is not a play of hers
+        // (`KokomiPlan.IsCarryingOut`).
         foreach (var card in new CardModel[]
                  { new ProtoKkKelpWall(), new ProtoKkTideWall(),
                    new ProtoKkKuragesOath(), new ProtoKkSlackWater() })
@@ -109,12 +113,15 @@ public class KokomiRound1FixesTests
                  { new ProtoMiShinobuSanctifyingRing(),
                    new ProtoMiKiraraSurpriseDispatch() })
         {
-            Assert.IsAssignableFrom<IWritableCompanion>(card);
+            Assert.IsAssignableFrom<global::KleeMod.Cards.ICompanionCard>(card);
             Assert.False(card is IPlannedCard, card.GetType().Name);
+            Assert.False(KokomiRefounding.CanBeWritten(card), card.GetType().Name);
         }
         var calls = Il.CallSequence(Il.Method("TreatisePower", "AfterCardPlayed"))
             .ToList();
         Assert.Contains(calls, c => c.Contains("KokomiRefounding.CanBeWritten"));
+        Assert.Contains(typeof(global::KleeMod.Cards.ICompanionCard),
+            Il.TypesTested(Il.Method("TreatisePower", "AfterCardPlayed")));
         Assert.Contains(calls, c => c.Contains("KokomiPlan.PlayedOnPet"));
         var carrying = calls.FindIndex(c => c.Contains("KokomiPlan.IsCarryingOut"));
         var claim = calls.FindIndex(
@@ -126,18 +133,18 @@ public class KokomiRound1FixesTests
     // ---- Albedo -- Dust of Purification ------------------------------------------
 
     [Fact]
-    public void Dust_of_purification_written_as_a_plan_reads_the_draw_pile()
+    public void Dust_of_purification_carried_out_by_a_plan_reads_the_draw_pile()
     {
         // BACKLOG (Albedo -- Dust of Purification): Sea Glass Harvest's fix.
         // Carried out (before the turn's draw) its exhaust reads the Draw
-        // Pile; played face-up it reads the hand. Structural pin; the sim
+        // Pile; played face-up it reads the hand. Since Kokomi review r9
+        // pick 1 (a) it is no longer written itself; Crystal Collapse's copy
+        // is the carry-out that still plays it. Structural pin; the sim
         // twin is behavioural (test_klee_status_package.py).
         var calls = Il.Calls(Il.Method("KleeStatusPackage",
                                        "ExhaustStatusesGrowLargest"));
         Assert.Contains(calls, c => c.Contains("KokomiPlan.IsCarryingOut"));
         Assert.Contains(calls, c => c.Contains("KleeStatusPackage.ExhaustStatuses"));
-        Assert.Contains(Il.Strings(Il.Method("ArmKeywordTips", "ForCompanionPlan")),
-                        s => s.Contains("[gold]Draw Pile[/gold] instead"));
     }
 
     // ---- Press the Advantage -----------------------------------------------------------

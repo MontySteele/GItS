@@ -25,11 +25,15 @@ namespace KleeMod.Powers;
 /// (2026-10-11): the face says "without writing it as a Plan" instead, because
 /// seats read "normally" as jargon.
 ///
-/// KOKOMI ROUND 2 (2026-10-12): any card that can be written as a Plan
-/// (<see cref="KokomiRefounding.CanBeWritten"/>: a Plan line, or a Companion
-/// card) counts, played without writing it. A carry-out is not a play of
-/// hers (<see cref="KokomiPlan.IsCarryingOut"/>): a written Companion's
-/// carried-out copy draws nothing.
+/// KOKOMI ROUND 2 (2026-10-12): a Plan card or a Companion card counts,
+/// played without writing it (the face: "a Plan card or a Companion without
+/// planning it"). Since Kokomi review r9 pick 1 (a) (2026-10-15) a Companion
+/// can be planned only when it prints a Plan line, so the gate names
+/// Companions itself (<see cref="ICompanionCard"/>) rather than reading
+/// <see cref="KokomiRefounding.CanBeWritten"/> alone: the cards that count
+/// are unchanged. A carry-out is not a play of hers
+/// (<see cref="KokomiPlan.IsCarryingOut"/>): Crystal Collapse's copy draws
+/// nothing.
 ///
 /// ONCE PER TURN on the ledger's shared latch
 /// (<see cref="KokomiOverhaulLedger.ClaimOncePerTurn"/>), claimed before the
@@ -57,7 +61,8 @@ public sealed class TreatisePower : PowerModel, ILocalizationProvider
     {
         if (Owner == null || Amount <= 0) return;
         if (cardPlay.Card.Owner?.Creature != Owner) return;
-        if (!KokomiRefounding.CanBeWritten(cardPlay.Card)) return;
+        if (!KokomiRefounding.CanBeWritten(cardPlay.Card)
+            && cardPlay.Card is not ICompanionCard) return;
         if (KokomiPlan.PlayedOnPet(cardPlay)) return;
         var player = Owner.Player;
         if (player == null) return;

@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoVkBarbaraShowBegin : CustomCardModel, ICompanionCard, IWritableCompanion, IVarkaSwitchCard
+public sealed class ProtoVkBarbaraShowBegin : CustomCardModel, ICompanionCard, IVarkaSwitchCard
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -49,7 +49,7 @@ public sealed class ProtoVkBarbaraShowBegin : CustomCardModel, ICompanionCard, I
         new[] { KleeKeywords.Knight, KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCompanionPlan(ArmKeywordTips.ForElementSwitch(base.ExtraHoverTips, this, Element.Hydro), this);
+        ArmKeywordTips.ForElementSwitch(base.ExtraHoverTips, this, Element.Hydro);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_barbara_show_begin");
 
@@ -58,14 +58,6 @@ public sealed class ProtoVkBarbaraShowBegin : CustomCardModel, ICompanionCard, I
         ("title", "Barbara: Gleeful Songs"),
         ("description", "Apply [gold]Hydro[/gold] to ALL enemies. Gain {VkBase:diff()} [gold]Block[/gold], plus {VkPer:diff()} for each enemy the [gold]Hydro[/gold] reacts on.{InCombat:{VarkaSwitch}|}"),
     };
-
-    /// <summary>On Kokomi, this Companion card can also be written as a Plan on
-    /// the Bake-Kurage (the re-founding, 2026-10-12).</summary>
-    public override TargetType TargetType =>
-        KokomiCompanionPlan.TargetFor(this, base.TargetType);
-
-    /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
-    public TargetType PrintedTargetType => base.TargetType;
 
     /// <summary>The element this card makes current, on its in-combat line
     /// (`VarkaOath.SwitchLine`).</summary>
@@ -96,11 +88,6 @@ public sealed class ProtoVkBarbaraShowBegin : CustomCardModel, ICompanionCard, I
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (KokomiPlan.PlayedOnPet(cardPlay))
-        {
-            await KokomiCompanionPlan.Write(choiceContext, this, cardPlay);
-            return;
-        }
         await VarkaCards.GleefulSongs(choiceContext, this, cardPlay);
     }
 

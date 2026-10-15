@@ -62,9 +62,6 @@ internal static class PlayerTips
         [ArmKeywordTips.PlanNoLineKey] =
             "This card has no Plan line, so it cannot be played on the "
           + "[gold]Bake-Kurage[/gold].",
-        [ArmKeywordTips.CompanionPlanKey] =
-            "Play it on the [gold]Bake-Kurage[/gold] to carry it out next "
-          + "turn.",
 
         // Shared element words.
         [ArmKeywordTips.SwirlKey] =
