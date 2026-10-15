@@ -57,13 +57,12 @@ public class ArmRelicsPotionsTests
         Assert.Equal(
             new[] { PotionRarity.Common, PotionRarity.Uncommon, PotionRarity.Rare },
             klee.Select(p => p.Rarity).ToArray());
-        // THE SALON'S TAB (2026-10-05, proposal sec.16): Furina keeps Opera
-        // Glasses (Common), Grand Theater Program (Rare) and Bottled Applause
-        // (Common); the rest left with the v2 Stage.
-        Assert.Equal(new[] { RelicRarity.Common, RelicRarity.Rare },
-                     FurinaStageRelics.Types
-                         .Select(t => Canon<RelicModel>(t).Rarity).ToArray());
-        Assert.Equal(new[] { typeof(BottledApplause) }, ArmPotions.Furina);
+        // THE SALON'S TAB (2026-10-05, proposal sec.16) kept Opera Glasses
+        // (Common), Grand Theater Program (Rare) and Bottled Applause
+        // (Common); Furina's card pass (2026-10-15) adds five relics and two
+        // potions (`FurinaRelicsPotionsTests` pins the set).
+        Assert.Equal(7, FurinaStageRelics.Types.Count);
+        Assert.Equal(3, ArmPotions.Furina.Count);
         foreach (var set in new[] { ArmPotions.Klee, ArmPotions.Furina })
         {
             var potions = set.Select(t => Canon<PotionModel>(t)).ToList();

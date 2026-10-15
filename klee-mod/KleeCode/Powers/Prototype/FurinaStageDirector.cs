@@ -104,6 +104,14 @@ public interface IStageBoard
     /// <summary>The bodies catch up with the seats.</summary>
     Task Sync();
 
+    /// <summary>Furina gains Energy (Bouquet of Roses, Furina's card pass,
+    /// 2026-10-15).</summary>
+    Task Energy(int amount);
+
+    /// <summary>A relic of hers that just paid flashes (Furina's card pass,
+    /// 2026-10-15). Display only.</summary>
+    void FlashRelic(System.Type relic);
+
     /// <summary>A Spend, a Drain or a Repay happened: its effect plays on her
     /// body. Display only and never awaited, so it never holds the rules up.
     /// </summary>
@@ -207,7 +215,7 @@ public sealed class StageDirector
         if (!_stage.Spend(price)) return 0;
         _board.Effect(StageEffect.Spend);
         if (navia != null) await _board.LineCue(navia);
-        await AfterSpend();
+        await AfterSpend(price);
         return price;
     }
 
@@ -223,7 +231,7 @@ public sealed class StageDirector
         {
             _board.Effect(StageEffect.Spend);
             if (navia != null) await _board.LineCue(navia);
-            await AfterSpend();
+            await AfterSpend(spent);
             var sro = _stage.Mods.StandingRoomOnly;
             if (sro > 0 && !_board.Over) await _board.Strength(sro);
         }
@@ -252,7 +260,7 @@ public sealed class StageDirector
         if (spent <= 0) return 0;
         _board.Effect(StageEffect.Spend);
         if (navia != null) await _board.LineCue(navia);
-        await AfterSpend();
+        await AfterSpend(spent);
         return spent;
     }
 
@@ -270,7 +278,7 @@ public sealed class StageDirector
     /// <summary>The source Freminet's act files its Spend under.</summary>
     public const string FreminetSpendSource = "Freminet";
 
-    private async Task AfterSpend()
+    private async Task AfterSpend(int spent)
     {
         await Thunderous();
         await Chevreuse();
@@ -279,6 +287,20 @@ public sealed class StageDirector
         {
             await _board.Draw(crescendo);
         }
+        await Bouquet(spent);
+    }
+
+    /// <summary>Bouquet of Roses (Furina's card pass, 2026-10-15): "Whenever
+    /// you Spend 10 or more at once, gain [E]." Once per Spend, spend-all
+    /// cards included; it reads what the Spend counts as spent. Copies add.
+    /// </summary>
+    private async Task Bouquet(int spent)
+    {
+        var copies = _stage.Mods.BouquetOfRoses;
+        if (copies <= 0 || spent < FurinaStageLaw.BouquetSpend
+            || _board.Over) return;
+        _board.FlashRelic(typeof(Relics.BouquetOfRoses));
+        await _board.Energy(copies);
     }
 
     /// <summary>Chevreuse's line: "Whenever you Spend, apply 1 Vulnerable to
@@ -476,52 +498,71 @@ public sealed class StageDirector
     /// </summary>
     public async Task<int> Repay(int amount)
     {
+        // Fontaine Teardrop reads the Repay against what she had drained
+        // before it (Furina's card pass, 2026-10-15).
+        var drained = _stage.Drained;
         var room = _stage.RepayRoom(amount, _board.Hp, _board.MaxHp);
-        if (room <= 0 || _board.Over) return 0;
-        var back = await _board.Heal(room);
-        if (back <= 0) return 0;
-        _board.Effect(StageEffect.Repay);
-        _stage.NoteRepay(back);
-        _stage.Note(new StageBeat(FurinaStageLedger.RepayEvent, default, -1,
-                                  _stage.Fanfare, back, ""));
-        _stage.Gain(back, "Repay");
-        await LoopReaders(back);
-        if (_stage.SeatOf(StagePerformer.Clorinde) is { } clorinde
-            && !_board.Over)
+        var back = room > 0 && !_board.Over ? await _board.Heal(room) : 0;
+        if (back > 0)
         {
-            _stage.NoteLine(StagePerformer.Clorinde,
-                            FurinaStageLaw.ClorindePerRepay * back);
-            await _board.LineCue(clorinde);
-            await _board.Damage(StagePerformer.Clorinde, StageTarget.Random,
-                                FurinaStageLaw.ClorindePerRepay * back,
-                                Element.Electro);
+            _board.Effect(StageEffect.Repay);
+            _stage.NoteRepay(back);
+            _stage.Note(new StageBeat(FurinaStageLedger.RepayEvent, default, -1,
+                                      _stage.Fanfare, back, ""));
+            _stage.Gain(back, "Repay");
+            await LoopReaders(back);
+            if (_stage.SeatOf(StagePerformer.Clorinde) is { } clorinde
+                && !_board.Over)
+            {
+                _stage.NoteLine(StagePerformer.Clorinde,
+                                FurinaStageLaw.ClorindePerRepay * back);
+                await _board.LineCue(clorinde);
+                await _board.Damage(StagePerformer.Clorinde, StageTarget.Random,
+                                    FurinaStageLaw.ClorindePerRepay * back,
+                                    Element.Electro);
+            }
+            // Charlotte's line counts a Repay from one of her cards only (the
+            // Spend round 2, 2026-10-10): not her own act, a Power or Salon
+            // Solitaire (`FurinaStageLedger.CardRepaying`).
+            if (_stage.SeatOf(StagePerformer.Charlotte) is { } charlotte
+                && _stage.CardRepaying
+                && !_stage.CharlotteDrewThisTurn && !_board.Over)
+            {
+                _stage.CharlotteDrewThisTurn = true;
+                _stage.NoteLine(StagePerformer.Charlotte,
+                                FurinaStageLaw.CharlotteLineDraw);
+                await _board.LineCue(charlotte);
+                await _board.Draw(FurinaStageLaw.CharlotteLineDraw);
+            }
+            if (_stage.SeatOf(StagePerformer.Sigewinne) is { } sigewinne
+                && !_board.Over)
+            {
+                _stage.NoteLine(StagePerformer.Sigewinne, back);
+                await _board.LineCue(sigewinne);
+                await _board.Block(back);
+            }
+            var hymn = _stage.Mods.HymnOfRenewal;
+            if (hymn > 0 && back >= FurinaStageLaw.HymnThreshold && !_board.Over)
+            {
+                await _board.Strength(hymn);
+            }
         }
-        // Charlotte's line counts a Repay from one of her cards only (the
-        // Spend round 2, 2026-10-10): not her own act, a Power or Salon
-        // Solitaire (`FurinaStageLedger.CardRepaying`).
-        if (_stage.SeatOf(StagePerformer.Charlotte) is { } charlotte
-            && _stage.CardRepaying
-            && !_stage.CharlotteDrewThisTurn && !_board.Over)
-        {
-            _stage.CharlotteDrewThisTurn = true;
-            _stage.NoteLine(StagePerformer.Charlotte,
-                            FurinaStageLaw.CharlotteLineDraw);
-            await _board.LineCue(charlotte);
-            await _board.Draw(FurinaStageLaw.CharlotteLineDraw);
-        }
-        if (_stage.SeatOf(StagePerformer.Sigewinne) is { } sigewinne
-            && !_board.Over)
-        {
-            _stage.NoteLine(StagePerformer.Sigewinne, back);
-            await _board.LineCue(sigewinne);
-            await _board.Block(back);
-        }
-        var hymn = _stage.Mods.HymnOfRenewal;
-        if (hymn > 0 && back >= FurinaStageLaw.HymnThreshold && !_board.Over)
-        {
-            await _board.Strength(hymn);
-        }
+        await Teardrop(amount - drained);
         return back;
+    }
+
+    /// <summary>Fontaine Teardrop (Furina's card pass, 2026-10-15):
+    /// "Whenever you Repay more than you have drained, gain the rest as
+    /// Block." Any Repay -- a card's, a guest's, Salon Solitaire's; a
+    /// printed "Gain 1 Block for any HP it could not Repay" pays beside it.
+    /// <paramref name="rest"/> is the Repay less what she had drained.
+    /// Copies add.</summary>
+    private async Task Teardrop(int rest)
+    {
+        var copies = _stage.Mods.FontaineTeardrop;
+        if (copies <= 0 || rest <= 0 || _board.Over) return;
+        _board.FlashRelic(typeof(Relics.FontaineTeardrop));
+        await _board.Block(rest * copies);
     }
 
     /// <summary>
@@ -666,15 +707,33 @@ public sealed class StageDirector
     /// Charlotte's line).</summary>
     public async Task<bool> Act(StageSeat seat)
     {
+        bool acted;
         _stage.Acting++;
         try
         {
-            return await ActBody(seat);
+            acted = await ActBody(seat);
         }
         finally
         {
             _stage.Acting--;
         }
+        if (acted) Claque();
+        return acted;
+    }
+
+    /// <summary>The source Claque's Ledger files its Fanfare under.</summary>
+    public const string ClaquesLedgerTitle = "Claque's Ledger";
+
+    /// <summary>Claque's Ledger (Furina's card pass, 2026-10-15): "Whenever
+    /// a guest acts, gain 1 Fanfare." Every act -- the end of her turn,
+    /// Encore!, Tutti!, Final Bow, Showstopper, Bring the House Down, a
+    /// Bow; a guest that acts twice gains 2. Copies add.</summary>
+    private void Claque()
+    {
+        var copies = _stage.Mods.ClaquesLedger;
+        if (copies <= 0 || _board.Over) return;
+        _board.FlashRelic(typeof(Relics.ClaquesLedger));
+        _stage.Gain(copies, ClaquesLedgerTitle);
     }
 
     // The act itself; `Act` holds the Acting count around it. The lunge is
@@ -911,6 +970,23 @@ public sealed class StageDirector
             if (_board.Over) break;
             if (!_stage.Holds(seat)) continue;
             if (await Act(seat)) acts++;
+        }
+        return acts;
+    }
+
+    /// <summary>Bottled Encore (Furina's card pass, 2026-10-15): "Each guest
+    /// acts twice." Front to back, each guest's two acts together, Final
+    /// Bow's "acts twice". Returns the acts made.</summary>
+    public async Task<int> ActEachTwice()
+    {
+        var acts = 0;
+        foreach (var seat in _stage.Seats.ToList())
+        {
+            for (var i = 0; i < 2; i++)
+            {
+                if (_board.Over || !_stage.Holds(seat)) break;
+                if (await Act(seat)) acts++;
+            }
         }
         return acts;
     }

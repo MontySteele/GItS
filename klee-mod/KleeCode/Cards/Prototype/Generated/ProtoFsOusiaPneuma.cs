@@ -38,14 +38,14 @@ public sealed class ProtoFsOusiaPneuma : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFlip(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForFlip(ArmKeywordTips.ForRepay(ArmKeywordTips.ForDrain(base.ExtraHoverTips, this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_ousia_pneuma");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Ousia / Pneuma"),
-        ("description", "{Pneuma:Gain {BranchBlock:diff()} [gold]Block[/gold].|{InCombat:Deal {BranchDamage:diff()} damage.|Ousia: Deal {BranchDamage:diff()} damage.\nPneuma: Gain {BranchBlock:diff()} [gold]Block[/gold].}}\n[gold]Flip[/gold]."),
+        ("description", "{Pneuma:[gold]Repay[/gold] 2. Gain {BranchBlock:diff()} [gold]Block[/gold].|{InCombat:[gold]Drain[/gold] 2. Deal {BranchDamage:diff()} damage.|Ousia: [gold]Drain[/gold] 2. Deal {BranchDamage:diff()} damage.\nPneuma: [gold]Repay[/gold] 2. Gain {BranchBlock:diff()} [gold]Block[/gold].}}\n[gold]Flip[/gold].{InCombat:{StageDrainLine}|}{InCombat:{StageRepay}|}"),
     };
 
     /// <summary>Two faces (`FurinaFlip`): the face's name in combat,
@@ -61,13 +61,15 @@ public sealed class ProtoFsOusiaPneuma : CustomCardModel, ICharacterCard
     {
         base.AddExtraArgsToDescription(description);
         description.Add("Pneuma", FurinaFlip.OnPneuma(this));
+        description.Add("StageDrainLine", (FurinaFlip.OnPneuma(this) ? "" : FurinaStageFacePreview.DrainLine(this, 2)));
+        description.Add("StageRepay", (FurinaFlip.OnPneuma(this) ? FurinaStageFacePreview.Repay(this, 2) : ""));
     }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new FoldedDamageVar("BranchDamage", 8m, ValueProp.Move),
-            new FoldedBlockVar("BranchBlock", 7m, ValueProp.Move)
+            new FoldedDamageVar("BranchDamage", 10m, ValueProp.Move),
+            new FoldedBlockVar("BranchBlock", 8m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -81,8 +83,9 @@ public sealed class ProtoFsOusiaPneuma : CustomCardModel, ICharacterCard
     {
         if (!FurinaFlip.OnPneuma(this))
         {
+            await FurinaStage.Drain(choiceContext, Owner.Creature, 2);
             ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-            await DamageCmd.Attack((IsUpgraded ? 11m : 8m))
+            await DamageCmd.Attack((IsUpgraded ? 13m : 10m))
                 .FromCard(this, cardPlay)
                 .Targeting(cardPlay.Target)
                 .WithElementHitFx(this)
@@ -90,7 +93,8 @@ public sealed class ProtoFsOusiaPneuma : CustomCardModel, ICharacterCard
         }
         if (FurinaFlip.OnPneuma(this))
         {
-            await CreatureCmd.GainBlock(Owner.Creature, new BlockVar((IsUpgraded ? 10m : 7m), ValueProp.Move), cardPlay);
+            await FurinaStage.Repay(choiceContext, Owner.Creature, 2);
+            await CreatureCmd.GainBlock(Owner.Creature, new BlockVar((IsUpgraded ? 11m : 8m), ValueProp.Move), cardPlay);
         }
         await FurinaCards.Flip(choiceContext, this, cardPlay);
     }

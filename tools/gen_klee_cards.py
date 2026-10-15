@@ -9873,6 +9873,12 @@ BRANCH_UNNUMBERED_OPS = frozenset({"apply_aura"})
 #: damage number; the draw's number is the draw's.
 BRANCH_BESIDE_DAMAGE_OPS = frozenset({"draw"})
 
+#: Furina's card pass (2026-10-15). A clause a branch may carry beside its
+#: BLOCK number that prints a number of a different kind (Pneuma's "Repay 2.
+#: Gain 8 Block."). The Block var is still the one Block number; the Repay
+#: prints its own literal.
+BRANCH_BESIDE_BLOCK_OPS = frozenset({"stage_repay"})
+
 
 def mode_hit_carries(card: dict, eff: dict) -> dict[str, str]:
     """`{var token: C# element}` for each mode of a two-mode `choose_one`
@@ -10015,7 +10021,8 @@ def folded_branch_damage(card: dict, eff: dict) -> list[tuple[str, int, int,
         # the damage var's place, so the damage is still the one damage
         # number the branch prints.
         beside = BRANCH_PRICE_OPS | BRANCH_UNNUMBERED_OPS | (
-            BRANCH_BESIDE_DAMAGE_OPS if op == "damage" else frozenset())
+            BRANCH_BESIDE_DAMAGE_OPS if op == "damage"
+            else BRANCH_BESIDE_BLOCK_OPS if op == "block" else frozenset())
         if any(c.get("op") not in beside
                for c in branch if c is not clause):
             return None
@@ -16784,8 +16791,49 @@ def stage_spend_short_call(card: dict) -> str | None:
     return f"FurinaStageFacePreview.SpendShort(this, {amount})"
 
 
+def is_flip_row(card: dict) -> bool:
+    """Does this row turn over (`{op: furina, kind: flip}`, Ousia / Pneuma)?"""
+    return any(e.get("op") == "furina" and e.get("kind") == "flip"
+               for e in card.get("effects") or [])
+
+
+#: A two-faced row's face predicates, and whether each is the Pneuma face.
+FLIP_FACES = {"ousia_face": False, "pneuma_face": True}
+
+
+def flip_face_args(card: dict) -> list[tuple[str, str]]:
+    """A two-faced row's in-combat Stage lines, each on its own face only.
+
+    Furina's card pass (2026-10-15, `review/active/furina-card-pass-
+    2026-10-15.md` sec.1): Ousia Drains and Pneuma Repays, so each face
+    carries the line its op carries on any other card -- the Drain line on
+    Ousia, "(Repays N)" on Pneuma -- read off that face's `then:` as if it
+    were the row's top level, and blank while the card shows the other face.
+    """
+    args = []
+    for fx in card.get("effects") or []:
+        if fx.get("op") != "conditional" or fx.get("if") not in FLIP_FACES:
+            continue
+        face = dict(card, effects=list(fx.get("then") or []))
+        pneuma = FLIP_FACES[fx["if"]]
+        for token, call in ((STAGE_DRAIN_LINE_TOKEN,
+                             stage_drain_line_call(face)),
+                            (STAGE_REPAY_TOKEN, stage_repay_call(face))):
+            if not call:
+                continue
+            if any(t == token for t, _ in args):
+                raise ValueError(f"{card['id']}: both faces print the same "
+                                 "Stage line")
+            gated = (f'(FurinaFlip.OnPneuma(this) ? {call} : "")' if pneuma
+                     else f'(FurinaFlip.OnPneuma(this) ? "" : {call})')
+            args.append((token, gated))
+    return args
+
+
 def stage_face_args(card: dict) -> list[tuple[str, str]]:
     """Every in-combat Stage line a row's face carries, as (token, C#)."""
+    if is_flip_row(card):
+        return flip_face_args(card)
     args = []
     for token, call in ((STAGE_BOW_TOKEN, stage_bow_preview_call(card)),
                         (STAGE_DRAIN_LINE_TOKEN, stage_drain_line_call(card)),
@@ -18448,12 +18496,20 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     # its Block face, and hands its face to the description as `Pneuma` (the
     # base game's description-argument seam). Sim twin: `Card.flipped`.
     flip_member = ""
-    if any(e.get("op") == "furina" and e.get("kind") == "flip"
-           for e in card["effects"]):
-        if face_args or wide_aim is not None:
+    if is_flip_row(card):
+        # Furina's card pass (2026-10-15): a face's own Stage lines
+        # (`flip_face_args`) ride the same description-argument override;
+        # any other line, or a live TargetType, still refuses.
+        if (wide_aim is not None
+                or any(t not in (STAGE_DRAIN_LINE_TOKEN, STAGE_REPAY_TOKEN)
+                       for t, _ in face_args)):
             raise ValueError(
                 f"{card['id']}: a two-faced row cannot also carry an "
-                "in-combat Stage line or a live TargetType")
+                "in-combat line other than its faces' Stage lines, or a "
+                "live TargetType")
+        face_adds = "".join(f'        description.Add("{token}", {call});\n'
+                            for token, call in face_args)
+        stage_bow_member = ""
         flip_member = (
             "\n\n    /// <summary>Two faces (`FurinaFlip`): the face's name in"
             " combat,\n    /// no target on the Pneuma face, and the face as"
@@ -18468,6 +18524,7 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             "    {\n"
             "        base.AddExtraArgsToDescription(description);\n"
             '        description.Add("Pneuma", FurinaFlip.OnPneuma(this));\n'
+            f"{face_adds}"
             "    }")
     per_fanfare = card.get("cost_reduction_per_fanfare")
     if per_fanfare:
