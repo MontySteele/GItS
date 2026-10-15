@@ -8542,6 +8542,18 @@ ruled 2026-10-14"). Built in both engines (`YaeShrine.cs`,
   (`YaeShrineFace.TenkoLine`, sim `tenko_line`). The Tenko tip
   (`ArmKeywordTips.YaeTenkoTip`) names the three kinds; the Rite tip is
   gone.
+- Two fixes from the shrine-r2 seat (lane 4, 2026-10-14), both main-session
+  decisions. (1) A Wildfire Tenko's live clause reads per enemy, "Tenko
+  (Wildfire: 18 to each enemy)" (was "18 to ALL", which the seat read as
+  one volley split across enemies; each enemy takes the full amount).
+  `YaeShrineFace.Amount`, sim `TENKO_FACE`. Plain Tenko ("Tenko (12
+  damage)") and the Tenko tip are unchanged. (2) An Edit never targets a
+  card with a Published Annotation: the Edit chooser and Reborn as Guuji
+  Yae skip it (they used to override it for the combat). With no other
+  target the Edit does nothing, as a dead Edit does. Fox Fire Draft's
+  "Edit your newest Sakura" targets a Sakura and is untouched; Publish
+  itself is untouched. `YaeEditing.EditReaches` / `Published`, sim
+  `yae_shrine._edit_reaches`.
 
 ## Kokomi pool overhaul, 2026-10-13
 

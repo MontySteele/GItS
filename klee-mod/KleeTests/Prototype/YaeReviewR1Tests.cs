@@ -44,7 +44,7 @@ public class YaeReviewR1Tests : IDisposable
     {
         Assert.Equal(" (12 damage)", YaeShrineFace.TenkoWords(YaeTenkoKind.Thunder, 12));
         Assert.Equal(": 5 Block", YaeShrineFace.TenkoWords(YaeTenkoKind.Warding, 5));
-        Assert.Equal(": 2 to ALL", YaeShrineFace.TenkoWords(YaeTenkoKind.Wildfire, 2));
+        Assert.Equal(": 2 to each enemy", YaeShrineFace.TenkoWords(YaeTenkoKind.Wildfire, 2));
         Assert.Equal(": draw 3", YaeShrineFace.TenkoWords(YaeTenkoKind.Offering, 3));
         // No Sakura standing.
         Assert.Equal(" (no Sakura)", YaeShrineFace.TenkoWords(YaeTenkoKind.Thunder, 0));

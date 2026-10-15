@@ -374,7 +374,7 @@ def strike_size(state, s: Sakura, rite: Optional[str] = None) -> int:
 #: none standing "Tenko (no Sakura)", "Tenko (Warding, no Sakura)". Before
 #: Edict and Fox Fire: the Tenko's own job only.
 TENKO_FACE = {THUNDER: "{n} damage", WARDING: "{n} Block",
-              WILDFIRE: "{n} to ALL", OFFERING: "draw {n}"}
+              WILDFIRE: "{n} to each enemy", OFFERING: "draw {n}"}
 #: A typed Tenko's printed name, "Tenko (Warding)".
 TENKO_NAME = {WARDING: "Warding", WILDFIRE: "Wildfire", OFFERING: "Offering"}
 NO_SAKURA = " (no Sakura)"
@@ -764,6 +764,15 @@ def _editable(state, editor, annotation: Optional[str] = None) -> list:
             and (annotation is None or affects(c, annotation))]
 
 
+def _edit_reaches(state, editor, annotation: str) -> list:
+    """The cards an Edit (the chooser and Reborn as Guuji Yae) can reach:
+    `_editable` with the dead-edit filter, never a card with a Published
+    Annotation (shrine-r2 seat, 2026-10-14: an Edit used to override it for
+    the combat). C# twin: `YaeEditing.EditReaches`."""
+    return [c for c in _editable(state, editor, annotation)
+            if not getattr(c, "ym_published", False)]
+
+
 def _has_op(card, op: str) -> bool:
     return any(fx.get("op") == op for fx in card.effects)
 
@@ -774,7 +783,7 @@ def _edit_target(state, editor, annotation: str):
     dearest card; Reprint on the dearest card, an Attack first; the play
     riders on the cheapest card. A card not yet
     Annotated is preferred, so an Edit overwrites only when it must."""
-    cands = _editable(state, editor, annotation)
+    cands = _edit_reaches(state, editor, annotation)
     if not cands:
         return None
     fresh = [c for c in cands if not is_annotated(c)] or cands
@@ -806,7 +815,7 @@ def edit(state, editor, annotation: str, n: int = 1) -> None:
     for _ in range(n):
         chooser = led.edit_choice or _edit_target
         target = chooser(state, editor, annotation)
-        if target is None or target not in _editable(state, editor,
+        if target is None or target not in _edit_reaches(state, editor,
                                                      annotation):
             return
         annotate(state, target, annotation)
@@ -818,7 +827,7 @@ def edit_all(state, editor, default: str) -> None:
     else the row's) on every other card in hand."""
     led = ledger(state.player)
     name = led.reborn_choice or default
-    cards = _editable(state, editor, name)
+    cards = _edit_reaches(state, editor, name)
     for c in cards:
         annotate(state, c, name, "reborn")
     if cards:

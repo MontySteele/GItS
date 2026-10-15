@@ -472,6 +472,27 @@ public static class YaeEditing
         && candidate.Type != CardType.Curse
         && candidate.Type != CardType.Quest;
 
+    /// <summary>
+    /// Does this combat card carry a Published Annotation? Its deck card
+    /// holds the Annotation, which only a Publish writes there. A card made
+    /// in combat has no deck card and is never Published. PURE.
+    /// </summary>
+    public static bool Published(CardModel? card) =>
+        card?.DeckVersion is { } deck && IsAnnotated(deck);
+
+    /// <summary>
+    /// The cards an Edit (the chooser and Reborn as Guuji Yae) can reach:
+    /// <see cref="Editable"/>, never a card with a Published Annotation
+    /// (shrine-r2 seat, 2026-10-14: an Edit used to override it for the
+    /// combat), and never one the Annotation would do nothing on (the
+    /// dead-edit filter). PURE.
+    /// </summary>
+    public static bool EditReaches(CardModel candidate, CardModel? editor,
+                                   YaeAnnotation annotation) =>
+        Editable(candidate, editor)
+        && !Published(candidate)
+        && YaeAnnotationReach.Affects(candidate, annotation);
+
     /// <summary>The model for one Annotation, fresh and mutable.</summary>
     public static YaeAnnotationModel? Create(YaeAnnotation annotation) => annotation switch
     {
@@ -526,7 +547,8 @@ public static class YaeEditing
     /// <summary>
     /// "Edit a card in your hand: &lt;Annotation&gt;", <paramref name="times"/>
     /// times. The player picks each card (the sim's pilot picks by its
-    /// default reading, <c>yae_shrine._edit_target</c>). Nothing qualifies:
+    /// default reading, <c>yae_shrine._edit_target</c>), never a card with a
+    /// Published Annotation (<see cref="EditReaches"/>). Nothing qualifies:
     /// nothing happens (the cost is already paid). (Serialization pays per
     /// Annotated card played now, shrine r2.)
     /// </summary>
@@ -542,7 +564,7 @@ public static class YaeEditing
                 choiceContext, owner,
                 new CardSelectorPrefs(
                     new LocString(Table, EditPromptKeyFor(annotation)), 1),
-                c => Editable(c, editor) && YaeAnnotationReach.Affects(c, annotation),
+                c => EditReaches(c, editor, annotation),
                 editor)).FirstOrDefault();
             if (picked == null) return;
             if (!Annotate(picked, annotation)) continue;
@@ -554,7 +576,8 @@ public static class YaeEditing
     /// Reborn as Guuji Yae: "Choose an Annotation. Edit every other card in
     /// your hand with it." The player chooses from the five faces
     /// (<see cref="Cards.Prototype.YaeModalOptions"/>); the sim's pilot takes
-    /// the row's printed default, Sakura Seal.
+    /// the row's printed default, Sakura Seal. A card with a Published
+    /// Annotation is skipped (<see cref="EditReaches"/>).
     /// </summary>
     public static async Task EditAll(PlayerChoiceContext choiceContext,
                                      CardModel editor, YaeAnnotation fallback)
@@ -565,7 +588,7 @@ public static class YaeEditing
             choiceContext, owner);
         if (chosen == YaeAnnotation.None) chosen = fallback;
         var cards = PileType.Hand.GetPile(owner).Cards
-            .Where(c => Editable(c, editor) && YaeAnnotationReach.Affects(c, chosen))
+            .Where(c => EditReaches(c, editor, chosen))
             .ToList();
         var n = 0;
         foreach (var card in cards)

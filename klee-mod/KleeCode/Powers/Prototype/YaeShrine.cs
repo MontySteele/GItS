@@ -649,12 +649,13 @@ public static class YaeShrineFace
     }
 
     /// <summary>What a Tenko of <paramref name="kind"/> does, for a number
-    /// written as <paramref name="n"/>: "5 damage", "5 Block", "5 to ALL",
+    /// written as <paramref name="n"/>: "5 damage", "5 Block", "5 to each enemy"
+    /// (per enemy, not split; shrine-r2 seat 2026-10-14),
     /// "draw 5". PURE.</summary>
     public static string Amount(YaeTenkoKind kind, string n) => kind switch
     {
         YaeTenkoKind.Warding => $"{n} Block",
-        YaeTenkoKind.Wildfire => $"{n} to ALL",
+        YaeTenkoKind.Wildfire => $"{n} to each enemy",
         YaeTenkoKind.Offering => $"draw {n}",
         _ => $"{n} damage",
     };

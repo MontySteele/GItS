@@ -98,7 +98,7 @@ def test_the_tenko_clause_sums_the_sakura_standing_as_that_kind():
         _play(st, _ym("yakan_evocation"))        # Levels 1, 1, 1
     assert Y.tenko_line(st, Y.THUNDER) == " (9 damage)"
     assert Y.tenko_line(st, Y.WARDING) == ": 9 Block"
-    assert Y.tenko_line(st, Y.WILDFIRE) == ": 3 to ALL"
+    assert Y.tenko_line(st, Y.WILDFIRE) == ": 3 to each enemy"
     assert Y.tenko_line(st, Y.OFFERING) == ": draw 3"
 
 
