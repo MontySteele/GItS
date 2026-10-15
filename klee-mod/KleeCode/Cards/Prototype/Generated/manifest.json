@@ -1403,7 +1403,7 @@
       "damage": 2
     },
     "proto_kk_shell_of_sanctuary": {
-      "formula_base": 3
+      "block": 3
     },
     "proto_kk_shoal_call": {
       "kokomi_amount": 1
