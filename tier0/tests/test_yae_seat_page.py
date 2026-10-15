@@ -98,10 +98,11 @@ def test_the_page_prints_every_sakura_oldest_first():
     assert lines[3] == ("- Sakura 3: Sakura, Level 1 (planted at 1), strikes "
                         "an enemy for 3, 3 turns left.")
     # Review r3: full, so the next plant makes the oldest act first.
-    assert lines[4] == ("- Shrine full: your next plant makes Sakura 1 act. "
-                        "A Sakura of its kind then refreshes it and gives it "
-                        "a Level; another kind withers it and takes its "
-                        "place.")
+    # Yae review r5, item 5: the hover's sentences.
+    assert lines[4] == ("- Shrine full: planting makes your oldest Sakura "
+                        "act. If the new Sakura is the same kind, the oldest "
+                        "stays and gains a Level. If not, the oldest withers "
+                        "and the new one takes its place.")
     assert lines[-1] == "- Annotated cards in your hand: 0."
 
 
@@ -191,7 +192,36 @@ def test_a_published_card_shows_its_stack_beside_its_title():
     assert _block(page)[-1] == "- Annotated cards in your hand: 1."
 
 
-def test_an_edit_chooser_warns_of_the_second_pick():
+def _edit_chooser(prompt: str) -> dict:
+    """SYNTHETIC, in `BuildCardSelectState`'s grid shape, with an Edit's
+    prompt."""
+    card = lambda i, name, text: {"index": i, "id": f"KLEEMOD-{name.upper()}",
+                                  "name": name, "description": text,
+                                  "cost": 1, "card_type": "Skill"}
+    return {"state_type": "card_select",
+            "player": {"character": "yae", "potions": [], "relics": [],
+                       "max_potion_slots": 3},
+            "card_select": {"screen_type": "simple_select",
+                            "closes_on_last_pick": False,
+                            "prompt": prompt,
+                            "can_skip": False, "can_cancel": False,
+                            "preview_showing": False, "can_confirm": False,
+                            "selection_known": True,
+                            "cards": [card(0, "Strike", "Deal 6 damage."),
+                                      card(1, "Defend", "Gain 5 Block.")]}}
+
+
+def test_a_multi_card_edit_is_one_chooser_of_up_to_n():
+    # Yae review r5, item 1: since #1330 a multi-card Edit is ONE chooser of
+    # up to N different cards; the page no longer promises a second one.
     from understudy import blindplay_render as R
     assert R.EDIT_PROMPT_HEAD == "Choose a card to Edit"
-    assert "opens this chooser again" in R.EDIT_SECOND_CHOOSER_NOTE
+    assert not hasattr(R, "EDIT_SECOND_CHOOSER_NOTE")
+    page = blindplay.observe(_edit_chooser(
+        "Choose up to 2 cards to Edit: Footnote (when played, draw 1 card)."))
+    assert ("*Pick up to 2 different cards on this one screen, then "
+            "confirm. Fewer, or none, is allowed.*") in page
+    assert "chooser again" not in page
+    one = blindplay.observe(_edit_chooser(
+        "Choose a card to Edit: Footnote (when played, draw 1 card)."))
+    assert "Pick up to" not in one

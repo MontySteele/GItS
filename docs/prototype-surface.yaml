@@ -4772,8 +4772,9 @@
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon, exhaust: true,
    # Yae review r4, pick 1 (a) (ruled 2026-10-15): up to 2 [3] cards (was
-   # 1 [2]), one chooser of different cards.
-   description: "[gold]Edit[/gold] up to 2 cards in your hand: [gold]Footnote[/gold].",
+   # 1 [2]), one chooser of different cards. Yae review r5, item 7: the
+   # Annotation says what it does, as Royalties does.
+   description: "[gold]Edit[/gold] up to 2 cards in your hand: [gold]Footnote[/gold] (when played, draw 1 card).",
    effects: [{op: yae, kind: edit, annotation: footnote, amount: 2}],
    upgrade: {yae_amount: 1}}
 
@@ -4781,8 +4782,9 @@
    authored_by: [claude],
    # Yae review r1 (2026-10-14): 0 Energy (was 1 [0]). Review r4, pick 1 (a)
    # (ruled 2026-10-15): up to 2 [3] cards (was 1 [2]), and it Exhausts.
+   # Yae review r5, item 7: the Annotation says what it does.
    cost: 0, type: skill, rarity: uncommon, exhaust: true,
-   description: "[gold]Edit[/gold] up to 2 cards in your hand: [gold]Sakura Seal[/gold].",
+   description: "[gold]Edit[/gold] up to 2 cards in your hand: [gold]Sakura Seal[/gold] (when played, plant a [gold]Sakura[/gold]).",
    effects: [{op: yae, kind: edit, annotation: sakura_seal, amount: 2}],
    upgrade: {yae_amount: 1}}
 

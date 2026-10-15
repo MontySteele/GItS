@@ -103,7 +103,9 @@ public class YaeReviewR1Tests : IDisposable
         Assert.Equal("Plant a [gold]Sakura[/gold].", Face(new ProtoYmYakanEvocation()));
         Assert.DoesNotContain("Warding", ArmKeywordTips.YaeTenkoTip);
         Assert.DoesNotContain("Rite", ArmKeywordTips.YaeSakuraTip);
-        Assert.True(ArmKeywordTips.YaeFullShrineTip.Length <= 100);
+        // Yae review r5, item 5: the long form (170) replaced the 97-character
+        // one, which four of five seats could not read until it bit them.
+        Assert.True(ArmKeywordTips.YaeFullShrineTip.Length <= 170);
     }
     // ==== 2. Tenko with no Sakura ===========================================
 

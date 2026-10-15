@@ -85,6 +85,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         RESOLUTION_CARRIED_CLAUSE,
                                         RESOLUTION_OVERFLOW_CLAUSE,
                                         RESOLUTION_REPLAYED_CLAUSE,
+                                        RESOLUTION_REPLAYED_KILL_CLAUSE,
                                         PARTNER_RESOLUTIONS_HEADING,
                                         RESOLUTION_AUTO_TURN_NOTE,
                                         NO_RESOLUTIONS_THIS_TURN,
@@ -2222,7 +2223,10 @@ def _resolution_lines(rows: list[dict[str, Any]],
         if row.get("overflowed"):
             clauses += RESOLUTION_OVERFLOW_CLAUSE
         if (row.get("play_count") or 1) > 1:
-            clauses += RESOLUTION_REPLAYED_CLAUSE.format(
+            # Yae review r5, item 3: a replay whose target died hits nothing.
+            replayed = (RESOLUTION_REPLAYED_KILL_CLAUSE if row.get("killed")
+                        else RESOLUTION_REPLAYED_CLAUSE)
+            clauses += replayed.format(
                 times=_TIMES.get(row["play_count"], str(row["play_count"])))
         out.append(RESOLUTION_ROW.format(card=row["card"], clauses=clauses))
         # 2026-09-25 evening: the performer a random summon rolled.
@@ -3102,19 +3106,26 @@ def _render_oath(oath: dict[str, Any],
 
 
 SHRINE_HEADING = "## Your shrine"
-#: An Edit's chooser (`YaeEditing.EditPromptTextFor`) and its note.
+#: An Edit's chooser (`YaeEditing.EditPromptTextFor`).
 EDIT_PROMPT_HEAD = "Choose a card to Edit"
-EDIT_SECOND_CHOOSER_NOTE = ("*One card per pick. A card that Edits 2 cards "
-                            "opens this chooser again for the second.*")
+#: Yae review r5, item 1: since #1330 a multi-card Edit is ONE chooser of up
+#: to N different cards (`YaeEditing.EditUpToPromptTextFor`, "Choose up to
+#: {Amount} cards to Edit"), and the player may stop short, none included.
+EDIT_UP_TO_PROMPT = re.compile(r"^Choose up to (\d+) cards to Edit")
+EDIT_UP_TO_NOTE = ("*Pick up to {n} different cards on this one screen, then "
+                   "confirm. Fewer, or none, is allowed.*")
 SHRINE_COUNT_LINE = ("- Sakura: {n} of {cap}. At the end of your turn each "
                      "acts, oldest first.")
 SHRINE_NONE_LINE = "- Sakura: none. Plant one to start your shrine."
 #: Review r3 (ruled 2026-10-14): a plant into a full shrine makes the oldest
 #: act as its Last Bloom would; the same kind then refreshes and gains a
 #: Level, another kind withers it and takes its place (`YaeShrine.Plant`).
-SHRINE_FULL_LINE = ("- Shrine full: your next plant makes Sakura 1 act. A "
-                    "Sakura of its kind then refreshes it and gives it a "
-                    "Level; another kind withers it and takes its place.")
+#: Yae review r5, item 5: the hover's own sentences
+#: (`ArmKeywordTips.YaeFullShrineTip`).
+SHRINE_FULL_LINE = ("- Shrine full: planting makes your oldest Sakura act. "
+                    "If the new Sakura is the same kind, the oldest stays and "
+                    "gains a Level. If not, the oldest withers and the new "
+                    "one takes its place.")
 SHRINE_ROW = ("- Sakura {slot}: {kind}, Level {level}{origin}, {action}"
               "{turns}.")
 #: Each kind's action on the row (review r3).
@@ -4847,10 +4858,11 @@ def render(obs: dict[str, Any]) -> str:
                         "run has been read.*"]
     elif obs["screen"] in ("card_reward", "card_select"):
         out += [f"# {obs['prompt']}", ""]
-        # Review r3, seat cleanup: a two-card Edit (Footnote+, Sakura Seal+)
-        # opens this chooser once per card, so the seat expects the second.
-        if str(obs.get("prompt") or "").startswith(EDIT_PROMPT_HEAD):
-            out += [EDIT_SECOND_CHOOSER_NOTE, ""]
+        # Yae review r5, item 1: a multi-card Edit is one chooser of up to
+        # N different cards, which the seat may stop short of.
+        up_to = EDIT_UP_TO_PROMPT.match(str(obs.get("prompt") or ""))
+        if up_to:
+            out += [EDIT_UP_TO_NOTE.format(n=up_to.group(1)), ""]
         for card in obs["offers"]:
             out += _render_card(card)
         if obs["screen"] == "card_select":

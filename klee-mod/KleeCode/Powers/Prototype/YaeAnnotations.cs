@@ -793,17 +793,19 @@ public static class YaeEditing
     /// r4, pick 1 (a), ruled 2026-10-15): ONE chooser of up to
     /// <paramref name="times"/> different cards, which the player may stop
     /// short of, none included. A Published card is reachable
-    /// (<see cref="EditReaches"/>). Nothing qualifies: it says so.
+    /// (<see cref="EditReaches"/>). Nothing qualifies: it says so, unless
+    /// <paramref name="sayNothing"/> is false (Inked Branches+ after it
+    /// Edited a Sakura, Yae review r5, item 2).
     /// </summary>
     public static async Task Edit(PlayerChoiceContext choiceContext,
                                   CardModel editor, YaeAnnotation annotation,
-                                  int times)
+                                  int times, bool sayNothing = true)
     {
         var owner = editor.Owner;
         if (owner?.Creature == null || times <= 0) return;
         if (!PileType.Hand.GetPile(owner).Cards.Any(c => EditReaches(c, editor, annotation)))
         {
-            SayNothing(owner.Creature, NothingToEditKey);
+            if (sayNothing) SayNothing(owner.Creature, NothingToEditKey);
             return;
         }
         var picked = await CardSelectCmd.FromHand(

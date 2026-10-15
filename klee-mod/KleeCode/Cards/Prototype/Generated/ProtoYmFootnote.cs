@@ -48,7 +48,7 @@ public sealed class ProtoYmFootnote : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Footnote"),
-        ("description", "[gold]Edit[/gold] up to {YmAmount:diff()} cards in your hand: [gold]Footnote[/gold]."),
+        ("description", "[gold]Edit[/gold] up to {YmAmount:diff()} cards in your hand: [gold]Footnote[/gold] (when played, draw 1 card)."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
