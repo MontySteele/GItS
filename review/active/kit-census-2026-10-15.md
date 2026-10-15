@@ -80,6 +80,8 @@ Pyro Bombs Vaporize, which is working as designed, so they stay.
 
 ## Picks
 
+**Ruled 2026-10-15, all three (a).** [USER]: "Agreed on all of the above!"
+
 **Pick 1: the relic and potion gap.**
 - **(a) Default.** Claude designs Kokomi a full set (7 relics, 3 potions) and
   completes Furina's (4 more relics, 2 more potions), each in the base shape,
