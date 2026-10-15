@@ -230,11 +230,11 @@ def _translate(state, fx, card=None):
         yield {"op": "damage", "amount": base + per * n_sak, "target": "enemy"}
     elif kind == "block_per_sakura":
         yield {"op": "block", "amount": base + per * n_sak}
-    elif kind == "damage_per_annotated":
-        yield {"op": "damage", "amount": base + per * Y.annotated_in_hand(state),
+    elif kind == "damage_per_edit":
+        yield {"op": "damage", "amount": base + per * led.edits,
                "target": "enemy"}
-    elif kind == "block_per_annotated":
-        yield {"op": "block", "amount": base + per * Y.annotated_in_hand(state)}
+    elif kind == "block_per_edit":
+        yield {"op": "block", "amount": base + per * led.edits}
     elif kind == "annotated_strike":
         more = amt if (card is not None and Y.is_annotated(card)) else 0
         yield {"op": "damage", "amount": base + more, "target": "enemy"}
@@ -317,9 +317,9 @@ def _draft_ops(fx):
         return [{"op": "damage", "amount": base + 2 * per, "target": "enemy"}]
     if kind == "block_per_sakura":
         return [{"op": "block", "amount": base + 2 * per}]
-    if kind == "damage_per_annotated":
+    if kind == "damage_per_edit":
         return [{"op": "damage", "amount": base + 2 * per, "target": "enemy"}]
-    if kind == "block_per_annotated":
+    if kind == "block_per_edit":
         return [{"op": "block", "amount": base + 2 * per}]
     if kind == "annotated_strike":
         return [{"op": "damage", "amount": base + amt // 2, "target": "enemy"}]

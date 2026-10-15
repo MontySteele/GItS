@@ -269,12 +269,11 @@ public class YaeReviewR3Tests : IDisposable
     [Fact]
     public void Every_reader_of_an_annotation_reads_the_layers()
     {
-        // Bestseller, Print Run, Serialization and Editor-in-Chief read
-        // IsAnnotated, which is "any layer".
+        // Serialization and Editor-in-Chief read IsAnnotated, which is "any
+        // layer". (Bestseller and Print Run count Edits since Yae review r5,
+        // pick 1 (a): YaeReviewR5Tests.)
         Assert.Contains(Il.Calls(typeof(YaeEditing).GetMethod(nameof(YaeEditing.IsAnnotated))!),
                         c => c.Contains(nameof(YaeEditing.Layers)));
-        Assert.Contains(Il.Calls(typeof(YaeEditing).GetMethod(nameof(YaeEditing.AnnotatedInHand))!),
-                        c => c.Contains(nameof(YaeEditing.IsAnnotated)));
         Assert.Contains(Il.Calls(typeof(YaeShrine).GetMethod(nameof(YaeShrine.AfterCardPlayed))!),
                         c => c.Contains(nameof(YaeEditing.IsAnnotated)));
         // Red Ink inheritance counts layers.

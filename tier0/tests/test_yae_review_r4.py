@@ -248,8 +248,9 @@ def test_pick1_rows():
     assert (amount(royal), amount(_card("royalties+"))) == (2, 2)
     assert _card("royalties+").cost == 0
     assert _card("inked_branches+").cost == 0
-    for name, base, per in (("bestseller", (8, 10), (3, 4)),
-                            ("print_run", (6, 8), (3, 4))):
+    # Yae review r5, pick 1 (a): plus 2 [3] per card Edited this combat.
+    for name, base, per in (("bestseller", (8, 10), (2, 3)),
+                            ("print_run", (6, 8), (2, 3))):
         fx = lambda c: next(f for f in c.effects if f.get("op") == "yae")
         lo, hi = fx(_card(name)), fx(_card(name + "+"))
         assert (lo["base"], hi["base"]) == base

@@ -45,14 +45,14 @@ public sealed class ProtoYmPrintRun : CustomCardModel, ICharacterCard, IYaeBlock
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Print Run"),
-        ("description", "Gain {YmBase:diff()} [gold]Block[/gold], plus {YmPer:diff()} for each [gold]Annotated[/gold] card in your hand."),
+        ("description", "Gain {YmBase:diff()} [gold]Block[/gold], plus {YmPer:diff()} for each card you [gold]Edited[/gold] this combat."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new DynamicVar("YmBase", 6m),
-            new DynamicVar("YmPer", 3m)
+            new DynamicVar("YmPer", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -64,7 +64,7 @@ public sealed class ProtoYmPrintRun : CustomCardModel, ICharacterCard, IYaeBlock
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await YaeCards.BlockPerAnnotated(choiceContext, this, cardPlay);
+        await YaeCards.BlockPerEdit(choiceContext, this, cardPlay);
     }
 
     protected override void OnUpgrade()

@@ -577,21 +577,22 @@ def test_footnote_fox_fire_and_sakura_seal_fire_after_the_cards_own_effects(yae)
     assert len(_led(st).sakura) == 1
 
 
-def test_annotated_readers_count_the_hand_and_the_card_itself(yae):
+def test_annotated_readers_count_edits_and_the_card_itself(yae):
     st = _state()
     a = loader.get_card("strike")
     st.player.hand.append(a)
     _play(st, _red_ink_edit())
-    _play(st, _ym("bestseller"))                 # 8 + 3 x 1
-    assert st.enemies[0].hp == 100 - 11
-    _play(st, _ym("print_run"))                  # 6 + 3 x 1
-    assert st.player.block == 9
+    # Yae review r5, pick 1 (a): per card Edited this combat (1 here).
+    _play(st, _ym("bestseller"))                 # 8 + 2 x 1
+    assert st.enemies[0].hp == 100 - 10
+    _play(st, _ym("print_run"))                  # 6 + 2 x 1
+    assert st.player.block == 8
     flash = loader.get_card(_ym("kitsune_flash"))
     st.player.hand.append(flash)
     _play(st, _red_ink_edit())                  # Red Ink on the Flash
     assert Y.temp(flash) == Y.RED_INK
     _play(st, flash)                             # 6 + 3 (annotated) + 3 ink
-    assert st.enemies[0].hp == 100 - 11 - 12
+    assert st.enemies[0].hp == 100 - 10 - 12
 
 
 def test_serialization_pays_block_per_annotated_play_not_per_edit(yae):

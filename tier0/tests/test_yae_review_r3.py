@@ -401,13 +401,15 @@ def test_reprint_used_reads_spent():
 
 # --- the readers of an Annotation, with layers ---------------------------------
 
-def test_bestseller_and_print_run_count_a_published_only_card():
+def test_bestseller_and_print_run_do_not_count_a_published_only_card():
+    # Yae review r5, pick 1 (a) (ruled 2026-10-15): they count the cards
+    # Edited this combat, and a Published card in hand is not an Edit.
     st = _state()
     st.player.hand.append(_published("strike", [Y.REPRINT]))
-    _play(st, "bestseller")                      # 8 + 3 x 1
-    assert st.enemies[0].hp == 100 - 11
-    _play(st, "print_run")                       # 6 + 3 x 1
-    assert st.player.block == 9
+    _play(st, "bestseller")                      # 8 + 2 x 0
+    assert st.enemies[0].hp == 100 - 8
+    _play(st, "print_run")                       # 6 + 2 x 0
+    assert st.player.block == 6
 
 
 def test_serialization_pays_on_a_published_only_card():

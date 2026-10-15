@@ -51,14 +51,14 @@ public sealed class ProtoYmBestseller : CustomCardModel, IElementalCard, ICharac
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Bestseller"),
-        ("description", "Deal {YmBase:diff()} [gold]Electro[/gold] damage, plus {YmPer:diff()} for each [gold]Annotated[/gold] card in your hand."),
+        ("description", "Deal {YmBase:diff()} [gold]Electro[/gold] damage, plus {YmPer:diff()} for each card you [gold]Edited[/gold] this combat."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new DynamicVar("YmBase", 8m),
-            new DynamicVar("YmPer", 3m)
+            new DynamicVar("YmPer", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -70,7 +70,7 @@ public sealed class ProtoYmBestseller : CustomCardModel, IElementalCard, ICharac
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await YaeCards.DamagePerAnnotated(choiceContext, this, cardPlay);
+        await YaeCards.DamagePerEdit(choiceContext, this, cardPlay);
     }
 
     protected override void OnUpgrade()
