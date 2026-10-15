@@ -1711,8 +1711,7 @@ ARM_KEYWORDS: dict[str, str] = {
     # Condensed 2026-10-14: the full-shrine rule is on the plant cards.
     "Sakura": ("At the end of your turn, strikes an enemy for 2 + its "
                "Level. Lasts 3 turns, then strikes once more."),
-    # Warding is Block only, no damage (a seat, 2026-10-14).
-    "Tenko": ("All Sakura strike, reset to 3 turns. Warding: Block only. "
+    "Tenko": ("All Sakura strike now, reset to 3 turns. Warding: Block. "
               "Wildfire: Level to ALL. Offering: draw 1."),
     "Edit": ("Give a card an Annotation for this combat, replacing any it "
              "had. A Published one lasts the run."),

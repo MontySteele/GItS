@@ -703,8 +703,8 @@ public static class ArmKeywordTips
         With(inherited, TenkoKey, YaeTenkoTip);
 
     public static readonly string YaeTenkoTip =
-        "All [gold]Sakura[/gold] strike, reset to "
-      + $"{Powers.YaeLaw.SakuraTurns} turns. Warding: [gold]Block[/gold] only. "
+        "All [gold]Sakura[/gold] strike now, reset to "
+      + $"{Powers.YaeLaw.SakuraTurns} turns. Warding: [gold]Block[/gold]. "
       + "Wildfire: Level to ALL. Offering: draw 1.";
 
     /// <summary>The text pass of 2026-10-08: Eula's blade, a counter on the

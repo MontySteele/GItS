@@ -6619,7 +6619,7 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         "Sakura": ["At the end of your turn, strikes an enemy for ",
                    "+ its Level. Lasts ",
                    " turns, then strikes "],
-        "Tenko": [" strike, reset to ", " only. ",
+        "Tenko": [" strike now, reset to ",
                   "Wildfire: Level to ALL. Offering: draw 1."],
         "Edit": ["Give a card an Annotation for this combat, replacing any "
                  "it had. A ", "Published one lasts the run."],

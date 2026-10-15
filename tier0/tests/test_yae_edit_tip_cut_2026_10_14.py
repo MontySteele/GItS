@@ -113,9 +113,8 @@ def test_the_seat_glossary_splits_the_rows():
     assert "Red Ink" not in rows["Edit"] and "Tenko" not in rows["Sakura"]
     assert "Thunder" not in rows["Sakura"]
     # Shrine r2 (2026-10-14): the Tenko row names its three kinds.
-    # A seat (2026-10-14) read Warding as Block AND a strike: Block only.
-    assert rows["Tenko"] == ("All Sakura strike, reset to 3 turns. "
-                             "Warding: Block only. Wildfire: Level to ALL. "
+    assert rows["Tenko"] == ("All Sakura strike now, reset to 3 turns. "
+                             "Warding: Block. Wildfire: Level to ALL. "
                              "Offering: draw 1.")
     assert "Rite" not in rows and "Rite" not in rows["Sakura"]
     assert rows["Red Ink"].startswith(
