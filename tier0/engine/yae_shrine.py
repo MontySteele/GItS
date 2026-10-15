@@ -370,7 +370,8 @@ def strike_size(state, s: Sakura, rite: Optional[str] = None) -> int:
 
 #: THE LIVE TENKO CLAUSE (shrine r2, 2026-10-14; C# twin `YaeShrineFace`).
 #: In combat a Tenko card says what its Tenko would do now, summed over the
-#: Sakura standing: "Tenko (12 damage)", "Tenko (Warding: 12 Block)"; with
+#: Sakura standing: "Tenko (12 damage)", "Tenko (Warding: 12 damage, 12
+#: Block)" (the strike, then the kind's bonus, 2026-10-14); with
 #: none standing "Tenko (no Sakura)", "Tenko (Warding, no Sakura)". Before
 #: Edict and Fox Fire: the Tenko's own job only.
 TENKO_FACE = {THUNDER: "{n} damage", WARDING: "{n} Block",
@@ -389,22 +390,26 @@ def tenko_total(state, kind: str = THUNDER) -> int:
     return sum(strike_size(state, s, kind) for s in led.sakura)
 
 
-def tenko_words(kind: str, total: int) -> str:
-    """The clause for a total; at 0 (no Sakura standing) the "no Sakura"
-    words. Thunder's stands in its own brackets, a typed kind's inside the
-    kind's ("Tenko (Warding: 5 Block)"). PURE."""
+def tenko_words(kind: str, damage: int, bonus: int = 0) -> str:
+    """The clause for the strikes' damage and a typed kind's bonus; at 0
+    damage (no Sakura standing) the "no Sakura" words. Thunder's stands in
+    its own brackets, a typed kind's inside the kind's ("Tenko (Warding: 5
+    damage, 5 Block)"). PURE."""
     typed = kind != THUNDER
-    if total <= 0:
+    if damage <= 0:
         return NO_SAKURA_TYPED if typed else NO_SAKURA
-    what = TENKO_FACE[kind].format(n=total)
-    return f": {what}" if typed else f" ({what})"
+    strike = TENKO_FACE[THUNDER].format(n=damage)
+    if not typed:
+        return f" ({strike})"
+    return f": {strike}, {TENKO_FACE[kind].format(n=bonus)}"
 
 
 def tenko_line(state, kind: str = THUNDER) -> str:
     """A Tenko card's live clause; "" off a Yae."""
     if ledger(state.player) is None:
         return ""
-    return tenko_words(kind, tenko_total(state, kind))
+    return tenko_words(kind, tenko_total(state, THUNDER),
+                       tenko_total(state, kind))
 
 
 def edict_applies(target) -> bool:
@@ -462,23 +467,27 @@ def fox_fire(state, source: str) -> None:
 
 def strike(state, s: Sakura, reason: str, aim=None,
            rite: str = THUNDER) -> None:
-    """One Sakura's strike as `rite` (a Tenko kind; Thunder unless a typed
-    Tenko says otherwise), then the Sakura's own Fox Fire. `aim` (Kitsune
+    """One Sakura's strike: a Thunder hit, plus a typed Tenko's bonus as
+    `rite` (Warding Block, Wildfire Level to ALL, Offering a card next turn),
+    then the Sakura's own Fox Fire, once. `aim` (Kitsune
     Pounce) names the enemy a single-target damage strike lands on, ahead
     of the Lure."""
     led = ledger(state.player)
     if not state.living_enemies:
         return
+    damage = strike_size(state, s, THUNDER)
     size = strike_size(state, s, rite)
     led.strikes += 1
-    target = _aim(state, aim) if rite == THUNDER else None
+    target = _aim(state, aim)
     state.emit("yae_sakura_strike", reason=reason, level=s.level,
-               amount=size, rite=rite,
+               amount=damage, rite=rite,
                target=None if target is None else target.name)
-    if rite == THUNDER:
-        if target is not None:
-            _hit(state, target, size, reason, rite)
-    elif rite == WARDING:
+    # Every strike is a Thunder hit; a typed Tenko's ALSO does its kind
+    # ([USER], 2026-10-14: "Hmm, the double strike makes Tenko effects quite
+    # strong, but let's try it and see what happens").
+    if target is not None:
+        _hit(state, target, damage, reason, THUNDER)
+    if rite == WARDING:
         _block(state, size, "warding")
     elif rite == WILDFIRE:
         for e in list(state.living_enemies):
@@ -520,8 +529,8 @@ def highest(led):
 
 
 def tenko(state, kind: str = THUNDER) -> None:
-    """Every Sakura strikes now as `kind` (shrine r2: plain Tenko is
-    Thunder), then every timer is set back to 3 ([USER], 2026-10-14: "make
+    """Every Sakura strikes now as Thunder, plus `kind`'s bonus on a typed
+    Tenko (2026-10-14), then every timer is set back to 3 ([USER], 2026-10-14: "make
     Tenko keep resetting the duration")."""
     if kind not in TENKO_KINDS:
         raise ValueError(f"unknown Tenko kind {kind!r}")

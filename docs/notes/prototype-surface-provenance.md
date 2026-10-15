@@ -8538,7 +8538,7 @@ ruled 2026-10-14"). Built in both engines (`YaeShrine.cs`,
   100-character tip cap (its LONG_OK exception is gone).
 - Faces: the Rite clause, the Rite badge and the seat page's Rite line are
   gone. A Tenko row's live clause is "Tenko (12 damage)" / "Tenko (Warding:
-  12 Block)", and "(no Sakura)" / "(Warding, no Sakura)" with none standing
+  12 damage, 12 Block)" (since the double strike, below), and "(no Sakura)" / "(Warding, no Sakura)" with none standing
   (`YaeShrineFace.TenkoLine`, sim `tenko_line`). The Tenko tip
   (`ArmKeywordTips.YaeTenkoTip`) names the three kinds; the Rite tip is
   gone.
@@ -8554,6 +8554,24 @@ ruled 2026-10-14"). Built in both engines (`YaeShrine.cs`,
   "Edit your newest Sakura" targets a Sakura and is untouched; Publish
   itself is untouched. `YaeEditing.EditReaches` / `Published`, sim
   `yae_shrine._edit_reaches`.
+- A typed Tenko strikes AND adds its kind, ruled the same day. [USER]: "Hmm,
+  the double strike makes Tenko effects quite strong, but let's try it and
+  see what happens." Every Sakura strikes now as Thunder (2 + Level at one
+  enemy; the aim, the Lure, Red Ink, Fox Fire and Edict as for any strike),
+  and a typed Tenko adds per Sakura: Warding, Block equal to 2 + Level (+3
+  Red Ink); Wildfire, its Level (+3 Red Ink) to ALL enemies; Offering, 1
+  card next turn. Fox Fire fires once per Sakura. Then every timer resets
+  to 3. Plain Tenko and the end-of-turn strike are unchanged. The live
+  clause reads "Tenko (Warding: 12 damage, 12 Block)", "Tenko (Wildfire:
+  12 damage, 3 to each enemy)", "Tenko (Offering: 12 damage, draw 3)". The
+  Tenko tip: "Sakura strike now, reset to 3 turns. Warding: +Block.
+  Wildfire: +Level to ALL. Offering: +draw 1." (97 characters). Card faces
+  keep "Tenko (Warding)" and the rest. `YaeShrine.Strike`,
+  `YaeShrineFace.TenkoWords`, sim `yae_shrine.strike` / `tenko_words`.
+- Reprint, spent, the same day (seat fix): after its first play the card's
+  enchantment tab greys (Glam's `Status = Disabled`), its hover adds "Used
+  this combat." and drops the Replay tip, and the seat page prints
+  "(Reprint: used)" off the bridge's new `disabled` flag.
 
 ## Kokomi pool overhaul, 2026-10-13
 

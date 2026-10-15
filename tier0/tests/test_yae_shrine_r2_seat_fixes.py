@@ -66,8 +66,8 @@ def _published(card, annotation=Y.RED_INK):
 # ---- 1. the Wildfire clause ------------------------------------------------
 
 def test_wildfire_reads_per_enemy_and_plain_tenko_is_unchanged():
-    assert Y.tenko_words(Y.WILDFIRE, 18) == ": 18 to each enemy"
-    assert "ALL" not in Y.tenko_words(Y.WILDFIRE, 18)
+    assert Y.tenko_words(Y.WILDFIRE, 12, 18) == ": 12 damage, 18 to each enemy"
+    assert "ALL" not in Y.tenko_words(Y.WILDFIRE, 12, 18)
     assert Y.tenko_words(Y.THUNDER, 12) == " (12 damage)"
 
 

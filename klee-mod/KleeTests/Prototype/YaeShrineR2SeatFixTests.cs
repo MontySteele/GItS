@@ -54,9 +54,9 @@ public class YaeShrineR2SeatFixTests : IDisposable
     [Fact]
     public void Wildfire_reads_per_enemy_and_plain_tenko_is_unchanged()
     {
-        Assert.Equal(": 18 to each enemy", YaeShrineFace.TenkoWords(YaeTenkoKind.Wildfire, 18));
+        Assert.Equal(": 12 damage, 18 to each enemy", YaeShrineFace.TenkoWords(YaeTenkoKind.Wildfire, 12, 18));
         Assert.Equal("18 to each enemy", YaeShrineFace.Amount(YaeTenkoKind.Wildfire, "18"));
-        Assert.DoesNotContain("ALL", YaeShrineFace.TenkoWords(YaeTenkoKind.Wildfire, 18));
+        Assert.DoesNotContain("ALL", YaeShrineFace.TenkoWords(YaeTenkoKind.Wildfire, 12, 18));
         Assert.Equal(" (12 damage)", YaeShrineFace.TenkoWords(YaeTenkoKind.Thunder, 12));
     }
 

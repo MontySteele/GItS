@@ -696,16 +696,18 @@ public static class ArmKeywordTips
 
     /// <summary>
     /// YAE MIKO, SHRINE R2 (ruled 2026-10-14): Tenko and its three kinds,
-    /// the fewest words. It replaced the Rite's tip.
+    /// the fewest words. It replaced the Rite's tip. A typed Tenko strikes AND
+    /// adds its kind ([USER], 2026-10-14: "Hmm, the double strike makes Tenko
+    /// effects quite strong, but let's try it and see what happens").
     /// </summary>
     public static IEnumerable<IHoverTip> ForTenko(
         IEnumerable<IHoverTip> inherited, CardModel? card) =>
         With(inherited, TenkoKey, YaeTenkoTip);
 
     public static readonly string YaeTenkoTip =
-        "All [gold]Sakura[/gold] strike now, reset to "
-      + $"{Powers.YaeLaw.SakuraTurns} turns. Warding: [gold]Block[/gold]. "
-      + "Wildfire: Level to ALL. Offering: draw 1.";
+        "[gold]Sakura[/gold] strike now, reset to "
+      + $"{Powers.YaeLaw.SakuraTurns} turns. Warding: +[gold]Block[/gold]. "
+      + "Wildfire: +Level to ALL. Offering: +draw 1.";
 
     /// <summary>The text pass of 2026-10-08: Eula's blade, a counter on the
     /// enemy (<c>LightfallSwordPower</c>) with a badge and no tip.</summary>

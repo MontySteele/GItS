@@ -284,19 +284,23 @@ def test_thunder_strikes_one_enemy_for_two_plus_level(yae):
     assert sum(e.hp for e in st.enemies) == 200 - 3
 
 
-def test_tenko_warding_gives_two_plus_level_block_now_and_no_damage(yae):
+def test_tenko_warding_strikes_and_gives_two_plus_level_block(yae):
+    # [USER], 2026-10-14: "Hmm, the double strike makes Tenko effects quite
+    # strong, but let's try it and see what happens": a typed Tenko's
+    # Sakura strike as Thunder AND add the kind.
     st = _state()
     _play(st, _ym("yakan_evocation"))
     _play(st, _ym("grafted_branch"))             # levels 1 / 2
     _led(st).sakura[0].turns_left = 1
     _play(st, _ym("shrine_maidens_guard"))       # 6 Block, Tenko (Warding)
     assert st.player.block == 6 + (2 + 1) + (2 + 2)
-    assert st.enemies[0].hp == 100 and not _hits(st)
+    assert st.enemies[0].hp == 100 - (2 + 1) - (2 + 2)
+    assert len(_hits(st)) == 2
     # Tenko still resets every timer ([USER], 2026-10-14).
     assert [s.turns_left for s in _led(st).sakura] == [Y.SAKURA_TURNS] * 2
     st.player.block = 0
     Y.turn_end(st)                               # the turn end is Thunder
-    assert st.player.block == 0 and len(_hits(st)) == 2
+    assert st.player.block == 0 and len(_hits(st)) == 2 + 2
 
 
 def test_tenko_warding_reads_red_ink_and_fox_fire(yae):
@@ -310,7 +314,7 @@ def test_tenko_warding_reads_red_ink_and_fox_fire(yae):
     hp = st.enemies[0].hp
     Y.tenko(st, Y.WARDING)
     assert st.player.block == 3
-    assert hp - st.enemies[0].hp == Y.FOX_FIRE_DAMAGE
+    assert hp - st.enemies[0].hp == 3 + Y.FOX_FIRE_DAMAGE   # Fox Fire once
 
 
 def test_tenko_wildfire_strikes_all_for_level_and_red_ink(yae):
@@ -319,13 +323,16 @@ def test_tenko_wildfire_strikes_all_for_level_and_red_ink(yae):
     _play(st, _ym("grafted_branch"))             # levels 1 / 2
     hp = [e.hp for e in st.enemies]
     _play(st, _ym("kitsune_guile"))              # Tenko (Wildfire)
-    assert [h - e.hp for h, e in zip(hp, st.enemies)] == [3, 3, 3]
-    assert len(_strikes(st)) == 2 and len(_hits(st)) == 6
+    lost = [h - e.hp for h, e in zip(hp, st.enemies)]
+    # Each strike: Thunder (2 + Level) at one enemy, then Level to ALL.
+    assert sum(lost) == (3 + 4) + 3 * 3 and min(lost) >= 3
+    assert len(_strikes(st)) == 2 and len(_hits(st)) == 2 + 6
     assert {r["rite"] for r in _strikes(st)} == {Y.WILDFIRE}
     _play(st, _ym("inked_branches"))
     hp = [e.hp for e in st.enemies]
     Y.tenko(st, Y.WILDFIRE)
-    assert [h - e.hp for h, e in zip(hp, st.enemies)] == [9, 9, 9]
+    lost = [h - e.hp for h, e in zip(hp, st.enemies)]
+    assert sum(lost) == (6 + 7) + 3 * 9 and min(lost) >= 9
 
 
 def test_tenko_offering_draws_one_a_sakura_at_the_next_turn_start(yae):
@@ -334,7 +341,7 @@ def test_tenko_offering_draws_one_a_sakura_at_the_next_turn_start(yae):
     _play(st, _ym("inked_branches"))             # Red Ink skips Offering
     st.player.draw_pile = [loader.get_card("defend") for _ in range(9)]
     _play(st, _ym("manuscript_pile"))            # draw 2, Tenko (Offering)
-    assert _led(st).pending_draw == 2 and not _hits(st)
+    assert _led(st).pending_draw == 2 and len(_hits(st)) == 2
     st.player.hand = []
     Y.turn_start(st)
     assert len(st.player.hand) == 2 and _led(st).pending_draw == 0

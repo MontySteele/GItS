@@ -16861,7 +16861,7 @@ def yae_face_lines(card: dict, profile: "CharacterProfile",
 
     A row that Tenkos says in combat what its Tenko would do now, summed
     over the Sakura standing: "Tenko (12 damage)", "Tenko (Warding: 12
-    Block)"; with none standing "Tenko (no Sakura)", "Tenko (Warding, no
+    damage, 12 Block)"; with none standing "Tenko (no Sakura)", "Tenko (Warding, no
     Sakura)". The `{InCombat:{YaeTenko}|}` goes right after "Tenko" on a
     plain row and inside the kind's brackets on a typed one. DERIVED FROM
     THE OPS, so a new Tenko row carries its clause the day it exists. Sim

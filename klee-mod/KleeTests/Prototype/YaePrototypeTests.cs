@@ -209,6 +209,13 @@ public class YaePrototypeTests : IDisposable
     public void Each_kind_does_its_own_job_in_the_strike()
     {
         var calls = Il.CallSequence(typeof(YaeShrine).GetMethod(nameof(YaeShrine.Strike))!).ToList();
+        // Every strike hits first, a typed Tenko's too ([USER], 2026-10-14:
+        // "Hmm, the double strike makes Tenko effects quite strong, but let's
+        // try it and see what happens"), then the kind's bonus.
+        var hit = calls.FindIndex(c => c.Contains("YaeShrine.Hit"));
+        Assert.True(hit >= 0);
+        Assert.True(hit < calls.FindIndex(c => c.Contains("CreatureCmd.GainBlock")));
+        Assert.True(hit < calls.FindIndex(c => c.Contains("set_PendingDraw")));
         Assert.Contains(calls, c => c.Contains("CreatureCmd.GainBlock"));      // Warding
         Assert.Contains(calls, c => c.Contains("set_PendingDraw"));            // Offering
         Assert.Contains(calls, c => c.Contains("HittableEnemies"));            // Wildfire
@@ -787,9 +794,9 @@ public class YaePrototypeTests : IDisposable
         Assert.DoesNotContain("Rite", ArmKeywordTips.YaeSakuraTip);
         Assert.DoesNotContain("Tenko", ArmKeywordTips.YaeSakuraTip);
         Assert.DoesNotContain("Thunder", ArmKeywordTips.YaeSakuraTip);
-        Assert.Equal("All [gold]Sakura[/gold] strike now, reset to 3 turns. "
-                     + "Warding: [gold]Block[/gold]. Wildfire: Level to ALL. "
-                     + "Offering: draw 1.",
+        Assert.Equal("[gold]Sakura[/gold] strike now, reset to 3 turns. "
+                     + "Warding: +[gold]Block[/gold]. Wildfire: +Level to ALL. "
+                     + "Offering: +draw 1.",
                      ArmKeywordTips.YaeTenkoTip);
     }
 

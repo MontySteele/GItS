@@ -168,18 +168,18 @@ def _translate(state, fx, card=None):
         if n_sak:
             how = fx.get("as", Y.THUNDER)
             kept = sum(2 for s in led.sakura if s.turns_left <= 1)
+            # Every Tenko strikes as Thunder; a typed one adds its kind
+            # (2026-10-14).
+            now = sum(Y.strike_damage(state, s, None) for s in led.sakura)
+            yield {"op": "damage", "amount": now + kept,
+                   "target": "random_enemy"}
             if how == Y.WARDING:
                 yield {"op": "block", "amount": Y.tenko_total(state, how)}
             elif how == Y.OFFERING:
                 yield {"op": "draw", "amount": n_sak}
             elif how == Y.WILDFIRE:
-                yield {"op": "damage",
-                       "amount": Y.tenko_total(state, how) + kept,
+                yield {"op": "damage", "amount": Y.tenko_total(state, how),
                        "target": "all_enemies"}
-            else:
-                now = sum(Y.strike_damage(state, s, None) for s in led.sakura)
-                yield {"op": "damage", "amount": now + kept,
-                       "target": "random_enemy"}
     elif kind == "extend":
         if n_sak:
             yield {"op": "block", "amount": 2 * n_sak * amt}
@@ -275,12 +275,17 @@ def _draft_ops(fx):
     if kind == "plant":
         return [{"op": "damage", "amount": 6 * amt, "target": "random_enemy"}]
     if kind == "tenko":
-        # Shrine r2: a typed Tenko's Block or sweep at the nominal board.
+        # Shrine r2: the strikes at the nominal board, plus a typed Tenko's
+        # Block, sweep or draw (2026-10-14: a typed Tenko does both).
+        hit = {"op": "damage", "amount": 7, "target": "random_enemy"}
         if fx.get("as") == "warding":
-            return [{"op": "block", "amount": 7}]
+            return [hit, {"op": "block", "amount": 7}]
         if fx.get("as") == "offering":
-            return [{"op": "draw", "amount": 2}]
-        return [{"op": "damage", "amount": 7, "target": "random_enemy"}]
+            return [hit, {"op": "draw", "amount": 2}]
+        if fx.get("as") == "wildfire":
+            return [hit, {"op": "damage", "amount": 3,
+                          "target": "all_enemies"}]
+        return [hit]
     if kind == "extend":
         return [{"op": "block", "amount": 3 * amt}]
     if kind == "level_up":

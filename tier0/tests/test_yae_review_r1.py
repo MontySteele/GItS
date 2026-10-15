@@ -97,9 +97,10 @@ def test_the_tenko_clause_sums_the_sakura_standing_as_that_kind():
     for _ in range(3):
         _play(st, _ym("yakan_evocation"))        # Levels 1, 1, 1
     assert Y.tenko_line(st, Y.THUNDER) == " (9 damage)"
-    assert Y.tenko_line(st, Y.WARDING) == ": 9 Block"
-    assert Y.tenko_line(st, Y.WILDFIRE) == ": 3 to each enemy"
-    assert Y.tenko_line(st, Y.OFFERING) == ": draw 3"
+    # A typed Tenko strikes AND adds its kind (2026-10-14).
+    assert Y.tenko_line(st, Y.WARDING) == ": 9 damage, 9 Block"
+    assert Y.tenko_line(st, Y.WILDFIRE) == ": 9 damage, 3 to each enemy"
+    assert Y.tenko_line(st, Y.OFFERING) == ": 9 damage, draw 3"
 
 
 def test_the_clause_reads_levels_and_red_ink_as_the_strike_does():

@@ -6620,7 +6620,7 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                    "+ its Level. Lasts ",
                    " turns, then strikes "],
         "Tenko": [" strike now, reset to ",
-                  "Wildfire: Level to ALL. Offering: draw 1."],
+                  "Wildfire: +Level to ALL. Offering: +draw 1."],
         "Edit": ["Give a card an Annotation for this combat, replacing any "
                  "it had. A ", "Published one lasts the run."],
         # 2026-10-14: each Annotation's own row, `YaeAnnotationText.Rule`
