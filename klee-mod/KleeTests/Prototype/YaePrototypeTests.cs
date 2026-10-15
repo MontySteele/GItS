@@ -787,8 +787,10 @@ public class YaePrototypeTests : IDisposable
         Assert.DoesNotContain("Rite", ArmKeywordTips.YaeSakuraTip);
         Assert.DoesNotContain("Tenko", ArmKeywordTips.YaeSakuraTip);
         Assert.DoesNotContain("Thunder", ArmKeywordTips.YaeSakuraTip);
-        Assert.Equal("All [gold]Sakura[/gold] strike now, reset to 3 turns. "
-                     + "Warding: [gold]Block[/gold]. Wildfire: Level to ALL. "
+        // A seat (2026-10-14) read Warding as Block AND a strike; Warding
+        // strikes for Block only (YaeShrine.Strike).
+        Assert.Equal("All [gold]Sakura[/gold] strike, reset to 3 turns. "
+                     + "Warding: [gold]Block[/gold] only. Wildfire: Level to ALL. "
                      + "Offering: draw 1.",
                      ArmKeywordTips.YaeTenkoTip);
     }
