@@ -132,6 +132,43 @@ public enum StoryEffectKind
 
     /// <summary>Nothing (the skip).</summary>
     Nothing,
+
+    // ---- The story chains (review/active/klee-varka-story-chains-2026-10-14.md)
+
+    /// <summary>Lose <c>Amount</c> HP (Dense Vegetation's cost: unblockable).</summary>
+    LoseHp,
+
+    /// <summary>Gain <c>Amount</c> Gold.</summary>
+    GainGold,
+
+    /// <summary>Lose <c>Amount</c> Gold. A price: locked when the player has
+    /// less.</summary>
+    LoseGold,
+
+    /// <summary>Gain a random relic (Luminous Choir's pull).</summary>
+    GainRandomRelic,
+
+    /// <summary>Gain a random Rare relic.</summary>
+    GainRandomRareRelic,
+
+    /// <summary>Gain <c>Amount</c> random potions, offered as rewards
+    /// (Endless Conveyor's Suspicious Condiment).</summary>
+    GainRandomPotions,
+
+    /// <summary>Transform <c>Amount</c> cards of the player's choice
+    /// (Morphic Grove). Locked with no card that can be transformed.</summary>
+    TransformCards,
+
+    /// <summary>Remove every copy of <c>Card</c> from the deck. With none,
+    /// nothing.</summary>
+    RemoveEvery,
+
+    /// <summary>Remove every Curse; lose <c>Amount</c> Gold for each.
+    /// Locked with no Curse, or with less Gold than the price.</summary>
+    RemoveEveryCurseLoseGoldEach,
+
+    /// <summary>Upgrade a card of the player's choice.</summary>
+    UpgradeChosenCard,
 }
 
 /// <summary>One option's effect.</summary>
@@ -139,14 +176,103 @@ public sealed record StoryEffect(
     StoryEffectKind Kind, int Amount = 0, Type? Card = null, int HpLoss = 0);
 
 /// <summary>One option: its button, its effect line, what it does, and the
-/// page it leaves on screen (<c>null</c>: the event's own page stays).</summary>
+/// page it leaves on screen (<c>null</c>: the event's own page stays).
+/// <see cref="Then"/> are further steps, run in order after
+/// <see cref="Effect"/> ("Lose 10 HP. Gain a random relic."). An option with
+/// <see cref="ShownIf"/> is offered only when the condition holds on the
+/// run's saved story (Mom's Last Note's "Saved the cache" slot).</summary>
 public sealed record StoryOption(
     string Key, string Title, string Description, StoryEffect Effect,
-    string? Result = null);
+    string? Result = null)
+{
+    public IReadOnlyList<StoryEffect> Then { get; init; } = Array.Empty<StoryEffect>();
+
+    public StoryCondition? ShownIf { get; init; }
+
+    /// <summary>Every step, in order.</summary>
+    public IReadOnlyList<StoryEffect> Effects
+    {
+        get
+        {
+            var all = new List<StoryEffect>(1 + Then.Count) { Effect };
+            all.AddRange(Then);
+            return all;
+        }
+    }
+
+    /// <summary>All the HP the option costs (for the game's lethal warning).</summary>
+    public int HpCost
+    {
+        get
+        {
+            var total = 0;
+            foreach (var e in Effects)
+            {
+                total += e.HpLoss;
+                if (e.Kind == StoryEffectKind.LoseHp) total += e.Amount;
+            }
+            return total;
+        }
+    }
+}
 
 /// <summary>One event: the act it belongs to (0 is act 1), the model type
-/// the game knows it by, its page, its options and its picture.</summary>
+/// the game knows it by, its page, its options and its picture.
+///
+/// THE CHAIN. <see cref="Follows"/> names the events of the act before that
+/// lead here; <see cref="Home"/> marks the act's home event, offered when the
+/// act before brought none. Act 1's events are drawn at random.
+/// <see cref="Openings"/> are the lines the page opens with, matched in order
+/// against the run's saved story; the first that holds is used.</summary>
 public sealed record StoryEvent(
     int ActIndex, Type EventType, string Title, string Body,
     IReadOnlyList<StoryOption> Options,
-    Func<Texture2D?> Portrait, string FallbackPortraitPath);
+    Func<Texture2D?> Portrait, string FallbackPortraitPath)
+{
+    public IReadOnlyList<Type> Follows { get; init; } = Array.Empty<Type>();
+
+    public bool Home { get; init; }
+
+    public IReadOnlyList<StoryOpening> Openings { get; init; } = Array.Empty<StoryOpening>();
+}
+
+/// <summary>What the run saved for one story event: the act it fired in, the
+/// event, and the option chosen (null while it is still open).</summary>
+public sealed record StoryRecord(int ActIndex, Type EventType, string? OptionKey);
+
+/// <summary>
+/// A test against the run's saved story. <see cref="Fired"/>: that event fired
+/// (and, with <see cref="Option"/>, that option was chosen).
+/// <see cref="NoEventInAct"/>: no story event fired in that act.
+/// <see cref="Not"/> inverts the whole test. All empty: always true.
+/// </summary>
+public sealed record StoryCondition(
+    Type? Fired = null, string? Option = null, int? NoEventInAct = null, bool Not = false)
+{
+    public bool Holds(IReadOnlyList<StoryRecord> records)
+    {
+        var holds = true;
+        if (Fired != null)
+        {
+            holds = false;
+            foreach (var r in records)
+            {
+                if (r.EventType == Fired && (Option == null || r.OptionKey == Option)) holds = true;
+            }
+        }
+        if (holds && NoEventInAct is int act)
+        {
+            foreach (var r in records)
+            {
+                if (r.ActIndex == act) holds = false;
+            }
+        }
+        return Not ? !holds : holds;
+    }
+}
+
+/// <summary>A line the page opens with when <see cref="When"/> holds, and a
+/// card removed from the owner's deck as the page opens (Doubt, when Dodoco
+/// comes home).</summary>
+public sealed record StoryOpening(
+    string Key, StoryCondition When, string Line, Type? RemovesOnOpen = null);

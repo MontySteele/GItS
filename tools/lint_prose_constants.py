@@ -270,6 +270,21 @@ ALLOWED: dict[tuple[str, str, str], str] = {
     ("klee-mod/KleeCode/Story/KleeStory.cs",
      "KleeOverhaulLaw.BombGrowth", "2"):
         "the story event's upgrade count, not the Bomb's growth",
+    # THE STORY CHAINS (2026-10-15, review/active/klee-varka-story-chains-
+    # 2026-10-14.md): Mom's Last Note's "Upgrade 3 random cards that place a
+    # Bomb" is the event's own count (the ruled paper's text).
+    ("klee-mod/KleeCode/Story/KleeStory.cs",
+     "FurinaStageLaw.EscoffierLineBonusUpgraded", "3"):
+        "the story event's upgrade count, not a Furina guest number",
+    ("klee-mod/KleeCode/Story/KleeStory.cs",
+     "FurinaStageLaw.HighStakesEveryUpgraded", "3"):
+        "the story event's upgrade count, not a Furina guest number",
+    ("klee-mod/KleeCode/Story/KleeStory.cs",
+     "FurinaStageLaw.NaviaLineDiscountUpgraded", "3"):
+        "the story event's upgrade count, not a Furina guest number",
+    ("klee-mod/KleeCode/Story/KleeStory.cs",
+     "FurinaStageLaw.NeuvilletteHydroBonusUpgraded", "3"):
+        "the story event's upgrade count, not a Furina guest number",
     # VARKA'S STORY (2026-10-13, review/active/varka-story-2026-10-13.md):
     # "Upgrade 2 random cards" and "Upgrade 3 random cards" are the story
     # events' own counts (the ruled paper's text), not a Furina number.
