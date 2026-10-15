@@ -1,0 +1,104 @@
+# Kokomi review, round 9, 2026-10-15
+
+Five blind Sonnet seats, whole runs at A0, on build 0.2.5538 (the round-8
+build: Shell of Sanctuary, Evening Watch, Undercurrent Snare, Surging Shoal and
+Feint changes, plus ten display fixes). The seat records are in the session
+scratchpad (`seats/archive/kokomi-r9-l1` to `-l5`). Take rates come from
+`tools/offer_report.py --character kokomi --since 2026-10-14T23:15` (91 card
+rewards, 15 shop offers).
+
+## Result: 2 wins in 5
+
+| Seed | End |
+|---|---|
+| ARMU2JSQJ7XL | **Won**: Soul Fysh, Kaiser Crab, Aeonglass. Lowest HP 23 |
+| LNYY2S8E9X6C | **Won**: Waterfall Giant, The Insatiable, Test Subject. Ended about 60/80 |
+| UU4ZHAR84QVV | Died in act 3 (floor 46) to the Slimed Berserker, left at 23/261 |
+| 32V170EHU5BP | Died to Kaiser Crab (act-2 boss), floor 33, by 2 HP |
+| K565PR61DY54 | Died to Kaiser Crab (act-2 boss), floor 33 |
+
+Round 8 won 0 of 7, and round 6 won 1 of 8. This is her best round. Three of
+five seats reached act 3, and act 2 is no longer where most runs end.
+
+## What wins
+
+There are two different winning routes, and both are the kit's own:
+- **Stacked Plans.** Nereid's Ascension (the first Plan is carried out twice)
+  and Opening Gambit (the next Plan deals double) with an area Plan. The best
+  turns were 93 damage from Tideturn+ with five Plans waiting (The Insatiable),
+  54 to every enemy from Gambit then Tamakushi's Wrath, and 68 from two Lance
+  Plans under Strength.
+- **Electro-Charged poison.** Shinobu's Sanctifying Ring ticks Electro on every
+  enemy at the end of each turn, and her Hydro Stings react with it. One seat
+  poisoned three Gardeners in a single turn and won the run on this engine.
+
+The round-8 Block changes landed: Surging Shoal was taken 4 of 7 times (was a
+skip), Shell of Sanctuary 3 of 12, Kelp Wall 5 of 14. No death this round was
+"a hand with no Block card" against an ordinary act-2 fight.
+
+## What loses
+
+- **Kaiser Crab, twice.** Its Surrounded rule adds 50% damage from the enemy
+  behind you, and only a card played on an enemy turns you. Both losing seats
+  defended with untargeted Block cards and faced the wrong way; the back attacks
+  hit for 49 and 36. The winning seat chose its facing every turn ("the
+  stronger attacker in front") and took 49 down to 24. This is a base-game
+  fight with a printed answer, and the base characters turn the same way, so it
+  is not a kit change.
+- **Status floods.** The act-3 death was ten Slimed cards from the Berserker
+  crowding out her Block cards. Toxic and Dazed did the same in round 8. Her
+  card for this, Tidecleanse, is the least-taken card in her pool (below).
+
+## Changes Claude builds (no pick)
+
+**Cards.** Kokomi is at Prototype, so these are Claude's.
+1. **Tidecleanse** (Common, 0): "Exhaust up to 2 [3] Statuses or Curses in
+   your Hand. **Draw 1 card for each.** Apply 1 Weak." Taken 1 of 18 this
+   round and 0 of 7 in round 8. A status flood is the one time she needs it, and
+   then it should give the hand back. With no statuses in hand it draws nothing,
+   so it is not a Common cantrip.
+2. **Orders from the Shrine** (Common, 1 [0]): "Choose 1 of 3 random Common
+   Inazuma Companions to add into your Hand. **It costs 0 this turn** and is
+   Ethereal." It cost a card and an Energy to make a card that cost another
+   Energy. Taken 1 of 9; one seat's "never again".
+3. **Sangonomiya's Orders** (Uncommon Power, **2**; upgrade Innate): "At the start of
+   your turn, add a random Common Inazuma Companion to your Hand. **It costs
+   0** and is Ethereal." Taken 0 of 7, and 0 of 6 in round 8. A free card every
+   turn is strong, so the Power costs 2.
+
+Left alone, with the reason:
+- Coral Crash (0 of 13) is a Body Slam; the winning seat used it for 69 against
+  Test Subject.
+- Gorou Inuzaka (0 of 12) was praised in round 8.
+- Press the Advantage pays 11 only if a Plan is written first, which is the
+  design.
+- Bubble Ward (one "never again") and Endless Shoal (one "never again") were
+  both taken every time they were offered.
+- Feint (2 of 16) is filler at Common.
+
+**Text and display.**
+4. **Opening Gambit's doubling** goes into the Plan preview. Three seats saw it
+   print 10 or 13 and land 27 or 30. The preview must show the number that will
+   land.
+5. **An overridden element** prints in the card text. Surging Shoal+ under Razor
+   showed the Electro tag and still read "Deal 13 Hydro damage".
+6. **End-of-turn reactions** print a receipt. Poison appeared on enemies after
+   the Ring's tick with no reaction named.
+7. **One wording for "no aura".** Sucrose says "(no aura: no Swirl)" and Varka
+   still says "(No aura to Swirl)". Use Sucrose's wording for both (text only;
+   Varka's numbers do not change).
+
+**Seat harness only.**
+8. A **card-limit page** (Smoggy, Sloth) says that writing a Plan counts as
+   playing that card.
+9. The **"last carry-out" box** clears between fights. It once showed a Plan
+   from an earlier fight at a rest site.
+10. The **Energy line** names the source of each extra Energy that turn, not a
+    fixed list.
+
+## Next
+
+Build 1 to 10 on this branch. No Kokomi seat round follows at once. Her next
+round waits until Yae's round-3 build has been played, because seat time is
+the scarce budget. The next Kokomi review checks the three changed cards' take
+rates, and whether act 3 becomes the new wall.
