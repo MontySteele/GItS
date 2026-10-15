@@ -181,12 +181,13 @@ public static class YaeAnnotationText
                 ? Rule(annotation) + " " + RedInkPlantClause
                 : Rule(annotation);
 
-    /// <summary>Red Ink on a card that only plants goes to the Sakura it
-    /// plants (ruled 2026-10-14, <see cref="YaeAnnotationReach"/>): one
-    /// clause on the Red Ink card tip and its enchantment hover, kept under
-    /// the 100-character hover cap.</summary>
+    /// <summary>Red Ink on a card that plants also goes to every Sakura it
+    /// plants, the card keeping its own +3 (ruled 2026-10-14, widened the
+    /// same day, <see cref="YaeAnnotationReach"/>): one clause on the Red Ink
+    /// card tip and its enchantment hover, kept under the 100-character hover
+    /// cap.</summary>
     public const string RedInkPlantClause =
-        "If it only plants, the [gold]Sakura[/gold] gets it.";
+        "If it plants, its [gold]Sakura[/gold] get it too.";
 
     /// <summary>Markup folded out, for a selection prompt. PURE.</summary>
     public static string Plain(string text) =>

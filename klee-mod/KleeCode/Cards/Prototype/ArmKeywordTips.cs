@@ -705,7 +705,7 @@ public static class ArmKeywordTips
         With(inherited, TenkoKey, YaeTenkoTip);
 
     public static readonly string YaeTenkoTip =
-        "[gold]Sakura[/gold] strike now, reset to "
+        "[gold]Sakura[/gold] strike now, refresh to "
       + $"{Powers.YaeLaw.SakuraTurns} turns. Warding: +[gold]Block[/gold]. "
       + "Wildfire: +Level to ALL. Offering: +draw 1.";
 

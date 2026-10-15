@@ -44,14 +44,19 @@ public class YaeRedInkSakuraTests : IDisposable
     // ---- 1. inheritance -----------------------------------------------------
 
     [Fact]
-    public void Only_red_ink_on_a_card_that_only_plants_inherits()
+    public void Only_red_ink_on_a_planting_card_inherits()
     {
+        // Widened 2026-10-14 (main session, after a GPT design review): a
+        // planting card that also deals damage or gives Block passes Red
+        // Ink to its Sakura too, keeping its own +3.
         Assert.True(YaeAnnotationReach.Inherits(YaeAnnotation.RedInk, false, false, true));
+        Assert.True(YaeAnnotationReach.Inherits(YaeAnnotation.RedInk, false, true, true));
+        Assert.True(YaeAnnotationReach.Inherits(YaeAnnotation.RedInk, true, false, true));
+        Assert.True(YaeAnnotationReach.Inherits(YaeAnnotation.RedInk, true, true, true));
         Assert.False(YaeAnnotationReach.Inherits(YaeAnnotation.FoxFire, false, false, true));
         Assert.False(YaeAnnotationReach.Inherits(YaeAnnotation.DeadlineExtension, false, false, true));
-        Assert.False(YaeAnnotationReach.Inherits(YaeAnnotation.RedInk, false, true, true));
-        Assert.False(YaeAnnotationReach.Inherits(YaeAnnotation.RedInk, true, false, true));
         Assert.False(YaeAnnotationReach.Inherits(YaeAnnotation.RedInk, false, false, false));
+        Assert.False(YaeAnnotationReach.Inherits(YaeAnnotation.RedInk, true, true, false));
     }
 
     [Fact]
@@ -116,12 +121,17 @@ public class YaeRedInkSakuraTests : IDisposable
     }
 
     [Fact]
-    public void Twin_sakura_upgraded_gives_block_so_red_ink_rides_the_block()
+    public void Twin_sakura_upgraded_gives_block_and_still_passes_red_ink()
     {
         var twin = new ProtoYmTwinSakura();
         Upgrade(twin);
         Assert.True(YaeAnnotationReach.GivesBlock(twin));
+        Assert.True(YaeAnnotationReach.Plants(twin));
         Assert.True(YaeAnnotationReach.Affects(twin, YaeAnnotation.RedInk));
+        // Red Ink rides its Block AND reaches both Sakura (2026-10-14).
+        Assert.True(YaeAnnotationReach.Inherits(YaeAnnotation.RedInk,
+            YaeAnnotationReach.DealsDamage(twin), YaeAnnotationReach.GivesBlock(twin),
+            YaeAnnotationReach.Plants(twin)));
     }
 
     [Fact]
@@ -170,7 +180,7 @@ public class YaeRedInkSakuraTests : IDisposable
     [Fact]
     public void The_red_ink_rule_says_where_it_goes()
     {
-        Assert.EndsWith("If it only plants, the [gold]Sakura[/gold] gets it.",
+        Assert.EndsWith("If it plants, its [gold]Sakura[/gold] get it too.",
                         YaeAnnotationText.TipBody(YaeAnnotation.RedInk, false));
     }
 }

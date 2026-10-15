@@ -33,9 +33,12 @@ public interface IYaeBlockCard
 /// do both. Make the Sakura work, but also try to block dead edits when we
 /// can."
 ///
-/// 1. INHERITANCE (Red Ink only): Red Ink on a card that plants a Sakura and
-///    itself deals no damage and gives no Block passes to every Sakura that
-///    play plants (a full-shrine plant that only levels plants nothing).
+/// 1. INHERITANCE (Red Ink only): Red Ink on a card that plants a Sakura
+///    passes to every Sakura that play plants (a full-shrine plant that only
+///    levels plants nothing), and the card's own damage and Block still take
+///    the +3. Widened 2026-10-14 (main session, after a GPT design review):
+///    it once passed only off a card that "only plants", so Twin Sakura+,
+///    which gains Block, lost the Sakura bonus on upgrade.
 /// 2. THE DEAD-EDIT FILTER: an Edit's chooser, Reborn as Guuji Yae and the
 ///    after-elite Publish offer skip a card the Annotation would do nothing
 ///    on. Red Ink needs a card that deals damage, gives Block or plants;
@@ -78,10 +81,11 @@ public static class YaeAnnotationReach
         !card.Keywords.Contains(CardKeyword.Unplayable);
 
     /// <summary>Does <paramref name="annotation"/> on a card with these
-    /// facts pass to the Sakura it plants? PURE.</summary>
+    /// facts pass to the Sakura it plants? Red Ink on any planting card; its
+    /// own damage and Block do not stop it (2026-10-14). PURE.</summary>
     public static bool Inherits(YaeAnnotation annotation, bool damage, bool block,
                                 bool plants) =>
-        annotation == YaeAnnotation.RedInk && plants && !damage && !block;
+        annotation == YaeAnnotation.RedInk && plants;
 
     /// <summary>Would <paramref name="annotation"/> do anything on
     /// <paramref name="card"/>?</summary>
@@ -92,7 +96,7 @@ public static class YaeAnnotationReach
               || Affects(annotation, DealsDamage(card), GivesBlock(card), Plants(card));
 
     /// <summary>The Annotation the Sakura this card plants inherit: Red Ink
-    /// when the card carries it and only plants, else none.</summary>
+    /// when the card carries it and plants, else none.</summary>
     public static YaeAnnotation Inherited(CardModel card)
     {
         var annotation = YaeEditing.Of(card);

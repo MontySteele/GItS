@@ -8572,6 +8572,22 @@ ruled 2026-10-14"). Built in both engines (`YaeShrine.cs`,
   enchantment tab greys (Glam's `Status = Disabled`), its hover adds "Used
   this combat." and drops the Replay tip, and the seat page prints
   "(Reprint: used)" off the bridge's new `disabled` flag.
+- Two main-session decisions, 2026-10-14, after a GPT design review flagged
+  that Twin Sakura's upgrade weakened Red Ink and that Tenko could shorten
+  an extended timer. (1) Red Ink on any card that plants reaches every
+  Sakura it plants, and the card's own damage and Block still take +3 (it
+  used to pass only off a card that "only plants", so Twin Sakura+, which
+  gains Block, kept Red Ink on the card and lost the Sakura bonus). A
+  planting card is never a dead Red Ink target. The Red Ink tip: "This card
+  deals 3 more damage and gives 3 more Block. If it plants, its Sakura get
+  it too." (90 characters); the seat glossary's Red Ink row carries the same
+  clause. `YaeAnnotationReach.Inherits`, sim `yae_shrine.inherits`. (2)
+  Tenko refreshes each timer to at least 3, never shorter: a Sakura extended
+  past 3 ("each Sakura lasts 1 more turn") keeps its turns. The full-shrine
+  plant's refresh of the oldest follows the same rule. The Tenko tip reads
+  "Sakura strike now, refresh to 3 turns. Warding: +Block. Wildfire: +Level
+  to ALL. Offering: +draw 1." (99 characters). `YaeShrineLedger.Refresh` /
+  `.Plant`, sim `yae_shrine.tenko` / `plant`.
 
 ## Kokomi pool overhaul, 2026-10-13
 

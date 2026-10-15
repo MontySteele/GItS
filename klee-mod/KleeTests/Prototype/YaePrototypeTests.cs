@@ -470,6 +470,36 @@ public class YaePrototypeTests : IDisposable
     }
 
     [Fact]
+    public void Tenko_never_shortens_a_timer_extended_past_three()
+    {
+        // Main session, 2026-10-14 (after a GPT design review): each timer
+        // becomes max(its turns, 3).
+        var ledger = Fresh();
+        PlantN(ledger, 1);
+        ledger.Extend(3);                         // 6
+        ledger.TickAndWither();                   // 5
+        PlantN(ledger, 1);                        // 5, 3
+        ledger.TickAndWither();                   // 4, 2
+        ledger.Refresh();
+        Assert.Equal(new[] { 4, 3 }, ledger.Standing.Select(s => s.TurnsLeft).ToArray());
+    }
+
+    [Fact]
+    public void A_full_shrine_plant_never_shortens_the_oldests_timer()
+    {
+        var ledger = Fresh();
+        PlantN(ledger, 1);
+        ledger.Extend(3);                         // the oldest at 6
+        PlantN(ledger, 2);                        // 6, 3, 3: full
+        Assert.False(ledger.Plant(YaeLaw.PlantLevel));
+        Assert.Equal(6, ledger.Standing.First().TurnsLeft);
+        ledger.TickAndWither();
+        ledger.TickAndWither();                   // 4, 1, 1
+        Assert.False(ledger.Plant(YaeLaw.PlantLevel));
+        Assert.Equal(4, ledger.Standing.First().TurnsLeft);
+    }
+
+    [Fact]
     public void Tenko_strikes_every_sakura_oldest_first_then_refreshes()
     {
         // The door's order, read off its IL: the strikes, then the refresh.
@@ -794,7 +824,7 @@ public class YaePrototypeTests : IDisposable
         Assert.DoesNotContain("Rite", ArmKeywordTips.YaeSakuraTip);
         Assert.DoesNotContain("Tenko", ArmKeywordTips.YaeSakuraTip);
         Assert.DoesNotContain("Thunder", ArmKeywordTips.YaeSakuraTip);
-        Assert.Equal("[gold]Sakura[/gold] strike now, reset to 3 turns. "
+        Assert.Equal("[gold]Sakura[/gold] strike now, refresh to 3 turns. "
                      + "Warding: +[gold]Block[/gold]. Wildfire: +Level to ALL. "
                      + "Offering: +draw 1.",
                      ArmKeywordTips.YaeTenkoTip);
@@ -835,8 +865,8 @@ public class YaePrototypeTests : IDisposable
     public void An_annotation_tip_is_its_card_reading_or_its_sakura_reading()
     {
         Assert.Equal("This card deals 3 more damage and gives 3 more "
-                     + "[gold]Block[/gold]. If it only plants, the "
-                     + "[gold]Sakura[/gold] gets it.",
+                     + "[gold]Block[/gold]. If it plants, its "
+                     + "[gold]Sakura[/gold] get it too.",
                      YaeAnnotationText.TipBody(YaeAnnotation.RedInk, false));
         Assert.Equal("The [gold]Sakura[/gold]'s strike is 3 bigger (not in "
                      + "Offering).",

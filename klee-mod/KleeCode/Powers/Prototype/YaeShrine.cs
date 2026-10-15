@@ -135,7 +135,7 @@ public sealed class YaeShrineLedger
     /// PLANT ONE (shrine r2, ruled 2026-10-14): a new Sakura at
     /// <paramref name="plantLevel"/> with <see cref="YaeLaw.SakuraTurns"/>
     /// strikes left; the others are NOT levelled. With three standing, the
-    /// OLDEST instead refreshes (<see cref="YaeLaw.SakuraTurns"/> again) and
+    /// OLDEST instead refreshes (to at least <see cref="YaeLaw.SakuraTurns"/>) and
     /// gains 1 Level, and none is added. Levels have no cap. Returns whether
     /// one was added.
     /// </summary>
@@ -146,7 +146,7 @@ public sealed class YaeShrineLedger
     /// Fox's Mooncall (its bonus is <paramref name="plantLevel"/> over
     /// <see cref="YaeLaw.PlantLevel"/>); never below the plant Level.
     /// <paramref name="inherited"/>: the Annotation the new Sakura carries
-    /// from the card that planted it (Red Ink on a card that only plants,
+    /// from the card that planted it (Red Ink on a card that plants,
     /// ruled 2026-10-14, <see cref="YaeAnnotationReach"/>); none is added
     /// when three stand, so nothing inherits then. <paramref name="cap"/>:
     /// how many may stand (<see cref="YaeShrine.MaxSakura"/>: 3, plus 2 per
@@ -161,7 +161,7 @@ public sealed class YaeShrineLedger
         if (_sakura.Count >= cap)
         {
             var oldest = _sakura[0];
-            oldest.TurnsLeft = YaeLaw.SakuraTurns;
+            oldest.TurnsLeft = Math.Max(oldest.TurnsLeft, YaeLaw.SakuraTurns);
             oldest.Level++;
             return false;
         }
@@ -176,10 +176,13 @@ public sealed class YaeShrineLedger
         return true;
     }
 
-    /// <summary>Tenko's second half: "every timer is set back to 3".</summary>
+    /// <summary>Tenko's second half: every timer is refreshed to at least
+    /// 3, never shortened (2026-10-14, main session after a GPT design
+    /// review: a timer extended past 3, Deadline Extension or "lasts 1 more
+    /// turn", keeps its turns).</summary>
     public void Refresh()
     {
-        foreach (var s in _sakura) s.TurnsLeft = YaeLaw.SakuraTurns;
+        foreach (var s in _sakura) s.TurnsLeft = Math.Max(s.TurnsLeft, YaeLaw.SakuraTurns);
     }
 
     /// <summary>"Each Sakura lasts 1 more turn": +n strikes on every timer.
@@ -468,7 +471,7 @@ public static class YaeShrine
     /// first, as Thunder, and a typed Tenko adds its kind's bonus per Sakura
     /// (<see cref="Strike"/>): "Tenko (Warding)" Block, "Tenko (Wildfire)"
     /// its Level to ALL, "Tenko (Offering)" a card next turn. The end-of-turn
-    /// strike still happens. Then every timer is set back to 3
+    /// strike still happens. Then every timer is refreshed to at least 3
     /// ([USER], 2026-10-14: "make Tenko keep resetting the duration").
     /// Tenko with no Sakura does nothing.
     /// </summary>
@@ -702,7 +705,7 @@ public static class YaeCards
             : name == "YmAmount" ? 1 : 0;
 
     /// <summary>"Plant a Sakura" / "Plant 2 Sakura". Red Ink on a card that
-    /// only plants passes to each Sakura planted (ruled 2026-10-14).</summary>
+    /// plants passes to each Sakura planted (ruled 2026-10-14, widened the same day).</summary>
     public static Task Plant(PlayerChoiceContext choiceContext, CardModel card,
                              CardPlay cardPlay) =>
         YaeShrine.Plant(choiceContext, card.Owner?.Creature, Var(card, "YmAmount"),

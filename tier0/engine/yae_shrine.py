@@ -40,7 +40,7 @@ THE RULES AS MODELLED:
   * TENKO (shrine r2): every Sakura strikes now, oldest first, as the
     card's KIND says: plain Tenko as Thunder; Tenko (Warding) as Block;
     Tenko (Wildfire) its Level to ALL; Tenko (Offering) 1 more card next
-    turn. Then every timer is set back to 3 ([USER], 2026-10-14: "make
+    turn. Then every timer is refreshed to at least 3 ([USER], 2026-10-14: "make
     Tenko keep resetting the duration"). Tenko with no Sakura does nothing.
   * EDIT: a card in hand (never the editing card itself, never a Status,
     Curse or kit card) gains one ANNOTATION for the combat, overwriting any
@@ -85,10 +85,11 @@ THE RULES AS MODELLED:
     never ticks, so it never withers), written by "Edit your newest /
     oldest / every Sakura" (`edit_sakura`). A new one replaces the old; it
     lasts the Sakura's life and is never Published.
-  * RED INK ON A PLANTING CARD (ruled 2026-10-14, the design-axes doc):
-    Red Ink on a card that plants a Sakura and itself deals no damage and
-    gives no Block passes to every Sakura that play plants (`inherits`); a
-    full-shrine plant that only levels plants nothing, so nothing inherits.
+  * RED INK ON A PLANTING CARD (ruled 2026-10-14, the design-axes doc;
+    widened the same day after a GPT design review): Red Ink on a card that
+    plants a Sakura passes to every Sakura that play plants (`inherits`),
+    and the card's own damage and Block still take the +3; a full-shrine
+    plant that only levels plants nothing, so nothing inherits.
     THE DEAD-EDIT FILTER: an Edit, Reborn as Guuji Yae and the after-elite
     Publish offer skip a card the Annotation would do nothing on
     (`affects`): Red Ink is dead on a card that deals no damage, gives no
@@ -312,11 +313,11 @@ def plant(state, n: int = 1, reason: str = "plant",
     others. With the shrine full (3 standing, plus 2 per Sakura Channeling:
     `sakura_cap`) the OLDEST first strikes once exactly as its Last Bloom
     would (Thunder, its Lure, Red Ink and Fox Fire as usual; 2026-10-14),
-    then refreshes (3 strikes again) and gains 1 Level instead (Mooncall
+    then refreshes (to at least 3 strikes) and gains 1 Level instead (Mooncall
     does not add to that Level). No Level cap. A two-plant into a full
     shrine does it per plant.
     `annotation`: what each NEW Sakura inherits from the planting card (Red
-    Ink on a card that only plants, `inherited`); a refreshed oldest keeps
+    Ink on a card that plants, `inherited`); a refreshed oldest keeps
     its own."""
     led = ledger(state.player)
     if led is None:
@@ -327,7 +328,7 @@ def plant(state, n: int = 1, reason: str = "plant",
             if SCALING == "level":
                 oldest = led.sakura[0]
                 strike(state, oldest, "full_shrine")   # as its Last Bloom
-                oldest.turns_left = SAKURA_TURNS
+                oldest.turns_left = max(oldest.turns_left, SAKURA_TURNS)
                 oldest.level += 1
                 state.emit("yae_level", reason=reason,
                            levels=[s.level for s in led.sakura])
@@ -530,8 +531,9 @@ def highest(led):
 
 def tenko(state, kind: str = THUNDER) -> None:
     """Every Sakura strikes now as Thunder, plus `kind`'s bonus on a typed
-    Tenko (2026-10-14), then every timer is set back to 3 ([USER], 2026-10-14: "make
-    Tenko keep resetting the duration")."""
+    Tenko (2026-10-14), then every timer is refreshed to at least 3 ([USER],
+    2026-10-14: "make Tenko keep resetting the duration"; never shortened,
+    main session 2026-10-14 after a GPT design review)."""
     if kind not in TENKO_KINDS:
         raise ValueError(f"unknown Tenko kind {kind!r}")
     led = ledger(state.player)
@@ -540,7 +542,7 @@ def tenko(state, kind: str = THUNDER) -> None:
     state.emit("yae_tenko", count=len(led.sakura), kind=kind)
     strike_all(state, "tenko", kind)
     for s in led.sakura:
-        s.turns_left = SAKURA_TURNS
+        s.turns_left = max(s.turns_left, SAKURA_TURNS)
     if SCALING == "count":
         led.shrine_bonus += COUNT_TENKO_BONUS
 
@@ -755,10 +757,10 @@ def reprint_replays(state, card) -> int:
 
 def inherits(card) -> bool:
     """Does the card's Annotation pass to the Sakura it plants? Red Ink, on
-    a card that plants and deals no damage and gives no Block."""
+    any card that plants; its own damage and Block still take the +3
+    (widened 2026-10-14)."""
     return (getattr(card, "ym_annotation", None) == RED_INK
-            and plants_sakura(card) and not deals_damage(card)
-            and not gives_block(card))
+            and plants_sakura(card))
 
 
 def inherited(card) -> Optional[str]:
