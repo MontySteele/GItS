@@ -550,6 +550,6 @@ SELECT_FIGURE_X = 1390.0
 
 
 def render_select_scene() -> str:
-    from tools.select_bg import render_select_scene as _render
+    from tools.select_bg import load_loop, render_select_scene as _render
 
-    return _render("furina", "FurinaBg", SELECT_TINT, SELECT_ELEMENT, SELECT_FIGURE_X)
+    return _render("furina", "FurinaBg", SELECT_TINT, SELECT_ELEMENT, SELECT_FIGURE_X, load_loop("furina"))

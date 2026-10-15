@@ -81,6 +81,24 @@ that `setoff` used to cross-fade to was retired on 2026-10-13 (owner: "I
 regret keeping that around"); its cut layers no longer ship, except Dodoco,
 which `pck-src/klee/vfx/dodoco_pop.tscn` draws.
 
+**Character-select idle loops (`tools/select_loop.py`, stage 2, 2026-10-15).**
+Klee, Varka and Furina's select scenes play a rendered loop of the close-up:
+the same pose, camera, scale and paint as `select_closeup.png`, moved through
+half a breath (`SELECT_LOOP` in each pose library: chest, head, arms, the
+pigtails, coat tails or cloth, all cosines) and played forward then back, so
+there is no seam. Only the box of pixels that moves goes in the sheet
+(`ui/select_loop.png`, 13 frames at 6 fps, about 8 M texels, VRAM-compressed by
+`build_pck.ps1`'s `.import`); the rest is `ui/select_closeup_static.png`. The
+still stays, and `tools/select_bg.py` draws the stage-1 breathing still for a
+character with no entry in the committed `tools/select_loop.json`. Kokomi and
+Yae wait for real models.
+
+```sh
+.venv/Scripts/python tools/select_loop.py build --char klee --pmx <klee pmx> --work <scratch dir> --art-root <main checkout>
+.venv/Scripts/python tools/select_loop.py build --char varka|furina --models <scratch>/models --work <scratch dir> --art-root <main checkout>
+.venv/Scripts/python -m tools.<char>_rig gen     # the scene reads the manifest
+```
+
 **The other kits' model renders (`tools/char_render/`, Varka first, 2026-10-13).**
 The same pipeline for a kit whose `chars.py` entry names a pose library:
 `toon.py` is the Blender half both renderers import (style H1's STYLE, the

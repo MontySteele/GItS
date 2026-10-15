@@ -605,6 +605,8 @@ GENERATOR_OWNED = {
     "ImageGen/images/model/frames/klee_shadow.png":         "klee_render/pack.py",
     "ImageGen/images/model/klee_rest.png":                  "klee_render/pack.py",
     "ImageGen/images/ui/select_closeup.png":                "klee_render/pack.py",
+    "ImageGen/images/ui/select_loop.png": "select_loop.py",
+    "ImageGen/images/ui/select_closeup_static.png": "select_loop.py",
     # The roster tile and its locked twin (2026-10-13): a face close-up from
     # the same renders, the locked one derived from it by pack.py (as the
     # other kits' stills generators derive theirs). Until then the tile was a
@@ -630,6 +632,8 @@ GENERATOR_OWNED = {
     "ImageGen/images/varka/model/frames/varka_shadow.png":  "char_render/pack.py",
     "ImageGen/images/varka/model/varka_rest.png":           "char_render/pack.py",
     "ImageGen/images/varka/ui/select_closeup.png":          "char_render/pack.py",
+    "ImageGen/images/varka/ui/select_loop.png": "select_loop.py",
+    "ImageGen/images/varka/ui/select_closeup_static.png": "select_loop.py",
     "ImageGen/images/varka/ui/select_portrait.png":         "char_render/pack.py",
     "ImageGen/images/varka/ui/select_portrait_locked.png":  "char_render/pack.py",
     # Furina's model art (phase B, 2026-10-13): her frame sheets, the attack's
@@ -652,6 +656,8 @@ GENERATOR_OWNED = {
     "ImageGen/images/furina/model/frames/furina_shadow.png": "char_render/pack.py",
     "ImageGen/images/furina/model/furina_rest.png":         "char_render/pack.py",
     "ImageGen/images/furina/ui/select_closeup.png":         "char_render/pack.py",
+    "ImageGen/images/furina/ui/select_loop.png": "select_loop.py",
+    "ImageGen/images/furina/ui/select_closeup_static.png": "select_loop.py",
     "ImageGen/images/furina/ui/select_portrait.png":        "char_render/pack.py",
     "ImageGen/images/furina/ui/select_portrait_locked.png": "char_render/pack.py",
     "ImageGen/images/furina/model/guests/guest_charlotte.png": "char_render/pack.py",
