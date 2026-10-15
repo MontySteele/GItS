@@ -37,7 +37,10 @@ each; the base five use 14 to 21.
 
 A keyword on only one or two of our cards that nothing else names:
 - **Flip** (Furina, Ousia / Pneuma: "Gain N Block. Flip."). Her design is
-  final and this is her lore's duality, so it stays.
+  final and this is her lore's duality, so it stays. **Ruled 2026-10-15:**
+  each face does its half of her kit, so Flip stops being standalone. Ousia:
+  "Drain 2. Deal 10 damage." Pneuma: "Repay 2. Gain 8 Block." (numbers set in
+  the build). [USER]: "Makes sense - I like it!" Built in her next card pass.
 - **Mend** (Kokomi, The Moon and the co-op Kurage's Mercy). It is the healer's
   identity, so it stays. The Moon was one seat's "never again" in round 8, so
   it is watched.
