@@ -122,7 +122,13 @@ chain):
 |---|---|---|
 | It's an emergency! Open it! | Lose 15 HP. Gain a random Rare relic. | KABOOM. Mom wasn't joking about lively. Inside, wrapped in fireproof cloth, is something wonderful. |
 | Save it for a real emergency. | Lose 5 HP. Gain a random potion. | The chest sputters at her the whole way up. Klee carries it very, very carefully. |
-| Leave it for the next adventurer. | Lose 50 Gold. Transform 2 cards. | Klee swaps in two of her own bombs, and some Mora for luck. Fair's fair. |
+| Leave it for the next adventurer. | Lose up to 50 Gold. Transform 2 cards. | Klee swaps in two of her own bombs, and some Mora for luck. Fair's fair. |
+
+This option is always open, so the event never forces a death: at 5 HP the
+two HP options would kill, and "Lose 50 Gold" would lock with less than 50.
+With less, Klee leaves what she has (GPT review, relayed by [USER]: "Alice's
+Cache needs an always-available exit... an unavoidable death at an event
+needs an explicit design decision").
 
 **Mom's Last Note** (act 3, a price with free ways out). Alice stays
 offscreen.
