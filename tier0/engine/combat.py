@@ -301,6 +301,10 @@ def card_cost(state: CombatState, card: Card) -> int:
     if card.cost_reduction_per_fanfare:
         cost = max(0, cost - furina_stage.fanfare(state.player)
                    // card.cost_reduction_per_fanfare)
+    if card.cost_reduction_per_swirl_this_turn:
+        led = varka_oath.ledger(state.player)
+        swirls = led.swirls_this_turn if led is not None else 0
+        cost = max(0, cost - card.cost_reduction_per_swirl_this_turn * swirls)
     if card.is_companion and state.companion_cost_delta_this_turn:
         cost = max(0, cost + state.companion_cost_delta_this_turn)
     # (R276): Playdate's discount on the next Companion card.

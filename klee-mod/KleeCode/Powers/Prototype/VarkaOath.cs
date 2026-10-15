@@ -461,6 +461,13 @@ public static class VarkaOath
         creature != null && Live(creature)
             ? VarkaOathLedger.For(creature).SwirlsMade : 0;
 
+    /// <summary>Tempest Charge's discount: Swirls he made this turn (the
+    /// ledger rolls the count to 0 each round). Sim twin: the ledger's
+    /// <c>swirls_this_turn</c>, read by <c>combat.card_cost</c>.</summary>
+    public static int SwirlsThisTurn(Creature? creature) =>
+        creature != null && Live(creature)
+            ? VarkaOathLedger.For(creature).SwirlsThisTurn : 0;
+
     // ---- the expansion's reads (2026-10-01) ---------------------------------
 
     /// <summary>Charge of the Knights: Knights played this fight.</summary>
