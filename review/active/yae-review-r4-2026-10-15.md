@@ -147,3 +147,12 @@ harder, and the Annotated cards come round sooner.
 Items 1 to 8 are built (#1321). The Seven Glamours fix is built now. Pick 1
 is built once ruled, followed by a Yae round of five seats, two of them
 elite-heavy again.
+
+## Ruled 2026-10-15
+
+[USER]: "Otherwise I'm good with it." Pick 1 (a), Edits that Exhaust. The
+"otherwise" is GPT's note, relayed by [USER]: "Multi-card Edits should offer
+up to the printed number of distinct targets. A player should be able to stop
+rather than overwrite an Annotation they want to keep. Ideally this is one
+selection screen." The build makes every multi-card Edit one chooser of up to
+that many different cards, and the text reads "Edit up to 2 [3] cards".
