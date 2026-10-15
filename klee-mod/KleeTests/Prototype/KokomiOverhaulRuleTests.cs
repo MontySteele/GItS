@@ -1029,9 +1029,9 @@ public class KokomiOverhaulRuleTests
         // STRUCTURAL, and the class's own header says why: the base var
         // reaches `CardModel.CombatState`, so the NUMBER needs a live combat
         // this harness cannot build. What is pinned is the wiring.
-        // Feint since the re-founding (2026-10-12) cut Driftglass: the same
-        // aimed `CalculatedDamageVar` shape.
-        var calculated = (object)new ProtoKkFeint().DynamicVars
+        // Tideturn since Kokomi review r8 (2026-10-14) made Feint's now-line
+        // flat: the same aimed `CalculatedDamageVar` shape.
+        var calculated = (object)new ProtoKkTideturn().DynamicVars
             .CalculatedDamage;
         Assert.IsType<FrontFoldedDamageVar>(calculated);
         // The game's own var underneath, so nothing about the multiplier, the

@@ -58,7 +58,7 @@ public sealed class ProtoMcSucroseGust : CustomCardModel, ICompanionCard, IWrita
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sucrose — Wind Spirit Creation"),
-        ("description", "[gold]Swirl[/gold] ALL enemies. Draw {Cards:diff()} card{Cards:plural:|s}."),
+        ("description", "[gold]Swirl[/gold] ALL enemies{InCombat:{SwirlAura}|}. Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on
@@ -68,6 +68,15 @@ public sealed class ProtoMcSucroseGust : CustomCardModel, ICompanionCard, IWrita
 
     /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
     public TargetType PrintedTargetType => base.TargetType;
+
+    /// <summary>Whether this card's Swirl has an aura to Swirl, in combat
+    /// (`SwirlAuraFace`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("SwirlAura", SwirlAuraFace.Line(this));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

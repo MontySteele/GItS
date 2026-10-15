@@ -324,6 +324,10 @@ public static class CompanionOverhaulReactions
 
         if (dealer == null) return;
 
+        // Kokomi review r8 (2026-10-14, item 9): a reaction inside one of her
+        // carry-outs goes on that Plan's receipt ("63 landed: Vaporize").
+        KokomiPlan.NoteReaction(dealer, reaction);
+
         // Dahlia, Favonian Favor: "Whenever a reaction happens this turn, gain
         // 3 Block." The stack IS the 3, so a second copy pays twice. ANY
         // reaction counts; the card names none.

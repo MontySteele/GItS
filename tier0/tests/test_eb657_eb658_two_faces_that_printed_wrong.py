@@ -49,9 +49,11 @@ def test_feint_left_the_pair_for_a_count():
     Plan was carried out") onto the COUNT ("plus 3 for each Plan carried out
     this turn"), so it prints a calculated var and no folded pair. The pair's
     live-print rule is `EB-657`'s and it is held on the row that prints the
-    two-armed shape today, Press the Advantage, below."""
+    two-armed shape today, Press the Advantage, below. Kokomi review r8
+    (2026-10-14, item 5) made the now-line a flat 8, so it prints a plain
+    number and still no folded pair."""
     face = _sheet_row("proto_kk_feint")["description"]
-    assert "{CalculationBase:diff()}" in face
+    assert face.startswith("Deal 8 [gold]Hydro[/gold] damage.")
     assert "{PlainDamage:diff()}" not in face
     src = (GENERATED / "ProtoKkFeint.cs").read_text(encoding="utf-8")
     assert "PlanCarriedDamageVar" not in src

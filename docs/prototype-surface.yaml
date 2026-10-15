@@ -1242,15 +1242,14 @@
 - {id: proto_kk_feint, name: "Feint", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   # The re-founding (2026-10-12): per Plan waiting. The pool overhaul
-   # (2026-10-13): a Chain Plan (was Apply 1 [2] Vulnerable). Provenance note.
-   # kokomi-review-r5-2026-10-14 numbers pass: base 6 -> 8, Plan 5 -> 6 per Plan.
-   description: "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus {ExtraDamage:diff()} for each [gold]Plan[/gold] waiting. [gold]Plan[/gold]: Deal 6 [gold]Hydro[/gold] damage for each [gold]Plan[/gold] carried out this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
-   effects: [{op: damage, target: enemy,
-              amount_formula: {base: 8, per: 3, count: plans_held}}],
+   # Pool overhaul (2026-10-13): a Chain Plan. Review r5: Plan 5 -> 6.
+   # Kokomi review r8 (2026-10-14) item 5: the now-line is a flat 8 (was
+   # 8, plus 3 per Plan waiting). Provenance notes.
+   description: "Deal 8 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 6 [gold]Hydro[/gold] damage for each [gold]Plan[/gold] carried out this turn.",
+   effects: [{op: damage, amount: 8, target: enemy}],
    plan: [{op: damage_per_plan_this_turn, amount: 6, target: front_enemy}],
-   # 11, plus 3 each / Plan 8 per Plan.
-   upgrade: {formula_base: 3, plan_damage: 2}}
+   # 10 / Plan 8 per Plan.
+   upgrade: {damage: 2, plan_damage: 2}}
 
 - {id: proto_kk_ambush, name: "Ambush", character: kokomi,
    authored_by: [claude],
@@ -1546,13 +1545,13 @@
 - {id: proto_kk_surging_shoal, name: "Surging Shoal", character: kokomi,
    authored_by: [claude],
    cost: 2, type: attack, rarity: uncommon,
-   # The re-founding (2026-10-12): the Plan line goes to ALL enemies, with
-   # no Strength rider (it was written for the Casket's Strength).
-   description: "Deal 14 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 12 [gold]Hydro[/gold] damage to ALL enemies.",
-   effects: [{op: damage, amount: 14, target: enemy}],
-   plan: [{op: damage, amount: 12, target: all_enemies}],
-   # 18 / Plan 16.
-   upgrade: {damage: 4, plan_damage: 4}}
+   # Kokomi review r8 (2026-10-14) item 4: attacks and defends now, no Plan
+   # (was 14 damage, Plan 12 to ALL enemies).
+   description: "Deal 10 [gold]Hydro[/gold] damage to ALL enemies. Gain 10 [gold]Block[/gold].",
+   effects: [{op: damage, amount: 10, target: all_enemies},
+             {op: block, amount: 10}],
+   # 13 / 13.
+   upgrade: {damage: 3, block: 3}}
 
 # PEARL DIVER IS CUT (the status batch, 2026-10-01,
 # review/active/kokomi-status-batch-2026-10-01.md sec.2). Provenance
@@ -1573,11 +1572,13 @@
 - {id: proto_kk_shell_of_sanctuary, name: "Shell of Sanctuary", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   # The re-founding (2026-10-12): Dusk is retired; Block now, then the draw.
-   description: "Gain 6 [gold]Block[/gold]. Draw 1 card.",
-   effects: [{op: block, amount: 6}, {op: draw, amount: 1}],
-   # 9 Block.
-   upgrade: {block: 3}}
+   # Kokomi review r8 (2026-10-14) item 1: pays most on a Plan-heavy turn
+   # (was 6 Block, draw 1, a worse Kelp Wall).
+   description: "Gain {CalculationBase:diff()} [gold]Block[/gold]. Gain {CalculationExtra:diff()} more for each [gold]Plan[/gold] waiting.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
+   effects: [{op: block,
+              amount_formula: {base: 7, per: 2, count: plans_held}}],
+   # 10, plus 2 each.
+   upgrade: {formula_base: 3}}
 
 - {id: proto_kk_tideturn, name: "Tideturn", character: kokomi,
    authored_by: [claude], art_of: tideturn,
@@ -1709,12 +1710,13 @@
    # enemies). Provenance note.
    cost: 1, type: skill, rarity: uncommon,
    # kokomi-review-r5-2026-10-14 numbers pass: Gain 5 Block added; Plan 3 -> 4 Strength.
-   description: "Gain 5 [gold]Block[/gold]. Apply 2 [gold]Weak[/gold]. [gold]Plan[/gold]: Each enemy that intends to attack loses 4 [gold]Strength[/gold] this turn.",
-   effects: [{op: block, amount: 5},
+   # Kokomi review r8 (2026-10-14) item 3: Block 5 -> 8 [11]. Plan unchanged.
+   description: "Gain 8 [gold]Block[/gold]. Apply 2 [gold]Weak[/gold]. [gold]Plan[/gold]: Each enemy that intends to attack loses 4 [gold]Strength[/gold] this turn.",
+   effects: [{op: block, amount: 8},
              {op: apply_power, power: weak, amount: 2, target: enemy}],
    plan: [{op: lose_strength_this_turn, amount: 4, target: enemies_intending_attack}],
-   # Plan 5 Strength; the now-line does not upgrade.
-   upgrade: {plan_power_amount: 1}}
+   # 11 Block / Plan 5 Strength.
+   upgrade: {block: 3, plan_power_amount: 1}}
 
 - {id: proto_kk_at_waters_edge, name: "At Water's Edge", character: kokomi,
    authored_by: [claude],
@@ -1773,9 +1775,10 @@
    # The re-founding (2026-10-12): Dusk is retired; the Block per attacker is
    # the now-line, counted when it is played.
    description: "Gain {KkAmount:diff()} [gold]Block[/gold] for each enemy intending to attack. Draw 1 card.",
-   effects: [{op: kokomi, kind: block_per_attacker, amount: 4},
+   # Kokomi review r8 (2026-10-14) item 2: 4 [6] -> 6 [8] per attacker.
+   effects: [{op: kokomi, kind: block_per_attacker, amount: 6},
              {op: draw, amount: 1}],
-   # 6 each.
+   # 8 each.
    upgrade: {kokomi_amount: 2}}
 
 # BRACE FOR THE TIDE IS CUT (the pool overhaul, 2026-10-13, sec.4): Jellyfish

@@ -16923,6 +16923,46 @@ def half_hp_face_lines(card: dict, desc: str
     return desc, []
 
 
+#: KOKOMI REVIEW R8 (2026-10-14, item 7): the token of a Sucrose Swirl face's
+#: in-combat "(no aura: no Swirl)" clause (`SwirlAuraFace.Token`), and the
+#: words, the C# `SwirlAuraFace.NoAura`.
+SWIRL_AURA_TOKEN = "SwirlAura"
+SWIRL_AURA_WORDS = " (no aura: no Swirl)"
+
+#: The Swirl phrases the clause follows, in the order they are tried.
+SWIRL_AURA_PHRASES = ("[gold]Swirl[/gold] ALL enemies",
+                      "[gold]Swirl[/gold] the enemy")
+
+
+def swirl_aura_face_lines(card: dict, desc: str
+                          ) -> tuple[str, list[tuple[str, str]]]:
+    """A Sucrose Swirl face with its "(no aura: no Swirl)" clause placed, and
+    its (token, C#).
+
+    Kokomi review r8 (2026-10-14, item 7): two seat plays were wasted on a
+    Sucrose Swirl with no element on the board. The way Tenko says "(no
+    Sakura)", the clause goes right after "Swirl the enemy" / "Swirl ALL
+    enemies" and prints in combat while the aimed enemy (or, unaimed, every
+    enemy) has no aura (`SwirlAuraFace.Line`). Sucrose's shared Companion
+    rows only, the ones the review names: a row whose name starts "Sucrose"
+    and whose effects Swirl. Varka's own rows keep `VarkaOath.SwirlLine`.
+    """
+    if not str(card.get("name") or "").startswith("Sucrose"):
+        return desc, []
+    if not any(e.get("op") == "swirl" for e in _effects_everywhere(card)):
+        return desc, []
+    token = "{InCombat:{" + SWIRL_AURA_TOKEN + "}|}"
+    for phrase in SWIRL_AURA_PHRASES:
+        if phrase in desc:
+            if desc.count(phrase) != 1:
+                raise ValueError(f"{card['id']}: a face prints {phrase!r} "
+                                 "once")
+            return (desc.replace(phrase, phrase + token),
+                    [(SWIRL_AURA_TOKEN, "SwirlAuraFace.Line(this)")])
+    raise ValueError(f"{card['id']}: a Sucrose Swirl row prints none of "
+                     f"{SWIRL_AURA_PHRASES!r}")
+
+
 #: THE ARCHAIC TOOTH (Varka review, ruled 2026-10-12: "Dandelion Gale could be
 #: the Replace version"). Orobas's relic transforms a starter card into its
 #: Ancient through the private `ArchaicTooth.TranscendenceUpgrades` map;
@@ -17254,6 +17294,9 @@ def emit(
     face_args.extend(yae_args)
     desc, half_args = half_hp_face_lines(card, desc)
     face_args.extend(half_args)
+    # Kokomi review r8 (2026-10-14, item 7): Sucrose's "(no aura: no Swirl)".
+    desc, swirl_aura_args = swirl_aura_face_lines(card, desc)
+    face_args.extend(swirl_aura_args)
     desc_cs = desc.replace("\n", "\\n")
     desc_expr = f'"{desc_cs}"'
     if blanks_burst:
@@ -18336,6 +18379,9 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             "The HP this card's \"below half\" means, in combat\n"
             "    /// (`HalfHpFace`)."
             if tokens == [HALF_HP_TOKEN] else
+            "Whether this card's Swirl has an aura to Swirl, in combat\n"
+            "    /// (`SwirlAuraFace`)."
+            if tokens == [SWIRL_AURA_TOKEN] else
             "This card's in-combat Stage line\n"
             "    /// (`FurinaStageFacePreview`).")
         adds = "".join(f'        description.Add("{token}", {call});\n'

@@ -76,7 +76,8 @@ public class MondstadtCompanionsTests
         Assert.Equal(TargetType.AllEnemies, card.TargetType);
         Assert.DoesNotContain(CardKeyword.Exhaust, card.CanonicalKeywords);
         Assert.Equal(
-            "[gold]Swirl[/gold] ALL enemies. Draw {Cards:diff()} card{Cards:plural:|s}.",
+            // Kokomi review r8 (2026-10-14, item 7): "(no aura: no Swirl)".
+            "[gold]Swirl[/gold] ALL enemies{InCombat:{SwirlAura}|}. Draw {Cards:diff()} card{Cards:plural:|s}.",
             Face(card));
         Assert.Equal(1m, card.DynamicVars.Cards.BaseValue);
         Assert.Equal(2m, Upgraded<ProtoMcSucroseGust>().DynamicVars.Cards.BaseValue);

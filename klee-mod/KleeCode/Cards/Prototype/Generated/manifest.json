@@ -1285,7 +1285,7 @@
       "kokomi_amount": 2
     },
     "proto_kk_feint": {
-      "formula_base": 3,
+      "damage": 2,
       "plan_damage": 2
     },
     "proto_kk_flank": {
@@ -1397,7 +1397,7 @@
       "damage": 2
     },
     "proto_kk_shell_of_sanctuary": {
-      "block": 3
+      "formula_base": 3
     },
     "proto_kk_shoal_call": {
       "kokomi_amount": 1
@@ -1423,8 +1423,8 @@
       "damage": 3
     },
     "proto_kk_surging_shoal": {
-      "damage": 4,
-      "plan_damage": 4
+      "damage": 3,
+      "block": 3
     },
     "proto_kk_tactical_relay": {
       "plan_draw": 1
@@ -1476,6 +1476,7 @@
       "plan_damage": 1
     },
     "proto_kk_undercurrent_snare": {
+      "block": 3,
       "plan_power_amount": 1
     },
     "proto_kk_undertide_lance": {

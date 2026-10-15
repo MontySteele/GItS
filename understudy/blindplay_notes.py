@@ -1169,9 +1169,14 @@ PLAN_AIM_NOTE = ("- A Plan with one target (damage or a debuff like Weak) "
 # keyword is at its 135-character ceiling and cannot carry this
 # (`PLAN_AIM_NOTE`'s argument, whole); the panel has no ceiling, and it is the
 # screen every Plan is written from.
-PLAN_BLOCK_NOTE = ("- A Plan is carried out before you play anything, so it "
-                   "lands in whatever Block the enemy is still standing in "
-                   "from its own turn -- you cannot strip that Block first.")
+#
+# KOKOMI REVIEW R8 (2026-10-14, item 8): ONE WORDING FOR WHEN PLANS HAPPEN.
+# The strip says "Plans carry out after your draw" (`PLAN_AFTER_DRAW_NOTE`),
+# and this note said "before you play anything" on the same page, which a
+# seat read as two rules. The timing clause goes; the Block fact stays.
+PLAN_BLOCK_NOTE = ("- A Plan lands in whatever Block the enemy is still "
+                   "standing in from its own turn -- you cannot strip that "
+                   "Block first.")
 
 PLAN_HYDRO_NOTE = ("- Every planned HIT is the jellyfish's, and it is a Hydro "
                    "hit: it leaves a Hydro aura, or reacts with the aura "
@@ -3697,6 +3702,11 @@ RESOLUTION_HIT_SELF = ", your own HP cost"
 #: The power name the page names as the source of a hit on you.
 THORNS_POWER = "Thorns"
 RESOLUTION_NO_HITS = "  Nothing this page can count landed off it."
+#: Kokomi review r8 (2026-10-14, item 12): a Power with nothing to measure on
+#: the turn it is played (Resolve, Sea's Reproach) printed the line above, and
+#: a seat read it as the Power having failed.
+RESOLUTION_POWER_PLAYED = ("  It is a Power: it is now on you and works "
+                           "from there.")
 #: 2026-09-26 (the Silent control seat): "Poison applied is never shown in
 #: 'what it did'." A power the card put on an enemy, or took off one.
 RESOLUTION_APPLIED = "  Put **{power} {n}** on **{target}**."

@@ -2419,6 +2419,11 @@ def _powers(blob: dict[str, Any]) -> list[dict[str, Any]]:
         # the page prints no number where it says `Single`. Absent (an older
         # bridge) prints the number as before.
         power["numbered"] = _text(row.get("stack")) != "Single"
+        # Kokomi review r8 (2026-10-14, item 10): the bridge keeps a power
+        # whose text threw (`GitsPowerRow.Unreadable`) instead of dropping
+        # it; At Water's Edge vanished from a seat's list for a screen.
+        if _text(row.get("unreadable")):
+            power["unreadable"] = True
         # `EB-340`: the tips the wire hangs on the status row, carried through
         # so the glossary can define a word an enemy's buff line announced.
         # `Galvanic 6 -- Powers are afflicted with Galvanized` reached a blind

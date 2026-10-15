@@ -2113,6 +2113,10 @@ def _carried_out_row(row: dict[str, Any], pet_name: str) -> dict[str, Any]:
             # Its hit found no living body to aim at: an earlier Plan that
             # morning killed the target (BACKLOG 2026-10-13).
             "no_target": bool(row.get("no_target")),
+            # Kokomi review r8 (2026-10-14, item 9): the reactions the Plan's
+            # own hits set off, by name ("Vaporize"); empty on an older mod.
+            "reactions": [_text(r) for r in (row.get("reactions") or [])
+                          if _text(r)],
             # `EB-440`: A ROW IS A BODY THIS PLAN MOVED SOMETHING ON, and
             # Block is something. The filter existed to drop the mod's
             # zero-delta rows, and a beat that spent itself entirely on a

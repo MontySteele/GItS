@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoKkSurgingShoal : CustomCardModel, IElementalCard, ICharacterCard, IPlannedCard, INowLineCard
+public sealed class ProtoKkSurgingShoal : CustomCardModel, IElementalCard, ICharacterCard
 {
     /// <summary>Sheet: all Kokomi attacks apply Hydro (catalyst-grade cadence).</summary>
     public Element Element => Element.Hydro;
@@ -44,70 +44,44 @@ public sealed class ProtoKkSurgingShoal : CustomCardModel, IElementalCard, IChar
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro), this);
+        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_surging_shoal");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Surging Shoal"),
-        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage.\nOr [gold]plan[/gold]: Deal {PlanDamage:diff()} [gold]Hydro[/gold] damage to ALL enemies."),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies. Gain {Block:diff()} [gold]Block[/gold]."),
     };
-
-    /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
-    /// was written. Carried out by the Bake-Kurage at the start of her next
-    /// turn (<see cref="KokomiPlan.ResolveAll"/>).</summary>
-    public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
-        new[]
-        {
-            new KokomiPlan.Planned(KokomiPlan.Kind.Damage, DynamicVars["PlanDamage"].IntValue, KokomiPlan.Aim.AllEnemies),
-        };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(14m, ValueProp.Move),
-            new KokomiPlan.PlanDamageVar(12m)
+            new DamageVar(10m, ValueProp.Move),
+            new BlockVar(10m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoKkSurgingShoal()
-        : base(2, CardType.Attack, CardRarity.Uncommon, KokomiTargets.PetOrEnemy, autoAdd: false)
+        : base(2, CardType.Attack, CardRarity.Uncommon, TargetType.AllEnemies, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (KokomiPlan.PlayedOnPet(cardPlay))
-        {
-            await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
-            if (DivineStrategyPower.NowLine(cardPlay, Owner.Creature, DivineStrategyPower.Aim.FrontEnemy) is not { } nowLine) return;
-            cardPlay = nowLine;
-        }
-        await PlayNowLine(choiceContext, cardPlay);
-    }
-
-    /// <summary>Where the now-line aims when the Bake-Kurage carries it out
-    /// for a Plan (a Plan stays open, 2026-10-01).</summary>
-    public DivineStrategyPower.Aim NowLineAim => DivineStrategyPower.Aim.FrontEnemy;
-
-    /// <summary>The card's now-line. Played face-up from <c>OnPlay</c>, and carried
-    /// out by the Bake-Kurage when the player chooses it for a Plan
-    /// (<see cref="KokomiPlan.ChooseLines"/>).</summary>
-    public async Task PlayNowLine(PlayerChoiceContext choiceContext, CardPlay cardPlay)
-    {
-        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
             .FromCard(this, cardPlay)
-            .Targeting(cardPlay.Target)
+            .TargetingAllOpponents(CombatState!)
             .WithElementHitFx(this)
+            .SpawningHitVfxOnEachCreature()
             .Execute(choiceContext);
+        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(4m);
-        DynamicVars["PlanDamage"].UpgradeValueBy(4m);
+        DynamicVars.Damage.UpgradeValueBy(3m);
+        DynamicVars.Block.UpgradeValueBy(3m);
     }
 }

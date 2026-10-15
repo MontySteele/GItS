@@ -115,10 +115,12 @@ def test_the_new_cards_numbers_and_upgrades():
 
 
 def test_the_rewrites_numbers():
-    # Numbers pass (kokomi-review-r5-2026-10-14): Snare Block 5 and Plan
-    # 4 [5]; Brine Sting 10 [13] / Plan 10 [13].
+    # Numbers pass (kokomi-review-r5-2026-10-14): Snare Plan 4 [5]; Brine
+    # Sting 10 [13] / Plan 10 [13]. Kokomi review r8 (2026-10-14, item 3):
+    # Snare's Block 5 -> 8 [11].
     snare = loader.get_card("proto_kk_undercurrent_snare")
-    assert snare.effects[0] == {"op": "block", "amount": 5}
+    assert snare.effects[0] == {"op": "block", "amount": 8}
+    assert _up("proto_kk_undercurrent_snare").effects[0]["amount"] == 11
     assert snare.plan == [{"op": "lose_strength_this_turn", "amount": 4,
                            "target": "enemies_intending_attack"}]
     assert _up("proto_kk_undercurrent_snare").plan[0]["amount"] == 5
