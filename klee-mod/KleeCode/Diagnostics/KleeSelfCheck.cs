@@ -194,6 +194,8 @@ internal static class KleeSelfCheck
         if (pool == null || pool.Count == 0) return;   // R3/R7 own the empty case.
 
         var source = ModelDb.RelicPool<SilentRelicPool>().AllRelics.ToList();
+        // Furina and Kokomi also drop the discard-only pair (census pick 2).
+        var dropDiscard = character.RelicPool is FurinaRelicPool or KokomiRelicPool;
         var ids = pool.Select(r => r.Id).ToHashSet();
 
         foreach (var relic in source.Where(r => !InheritedSilentRelics.IsKept(r)))
@@ -209,8 +211,23 @@ internal static class KleeSelfCheck
             }
         }
 
+        if (dropDiscard)
+        {
+            foreach (var relic in source.Where(r => !InheritedSilentRelics.IsKeptDiscard(r)))
+            {
+                if (ids.Contains(relic.Id))
+                {
+                    Fail("R21", $"{character.GetType().Name}'s relic pool still "
+                              + $"contains {relic.GetType().Name}, which pays "
+                              + "only on a discard and this kit has none "
+                              + "(kit census pick 2).");
+                }
+            }
+        }
+
         var kept = source.Count(r => ids.Contains(r.Id));
-        var expected = source.Count - InheritedSilentRelics.Dropped.Count;
+        var expected = source.Count - InheritedSilentRelics.Dropped.Count
+            - (dropDiscard ? InheritedSilentRelics.DiscardOnly.Count : 0);
         if (kept != expected)
         {
             Fail("R21", $"{character.GetType().Name}'s relic pool keeps {kept} "
