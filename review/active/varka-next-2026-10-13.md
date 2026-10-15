@@ -45,4 +45,9 @@ twice". Source: lanes 1 and 2 (lane 2's worst card, twice).
 
 **Prediction:** Twin Gales stops being a dead pick in a one-element deck. Its
 take rate rises, and runs that hold it deal more Swirl payout damage per
-fight, by at most one payout per Swirl.
+fight. Each Swirl gains one extra payout of the Swirled element, and that
+extra is multiplied with the rest of the Swirl: two extra payouts under
+Stormterror's Scale or Crosscurrent, four with both (the two multiply,
+`VarkaOath.cs`). Corrected 2026-10-15: the first wording said "at most one
+payout per Swirl", which the multipliers break (GPT review, relayed by
+[USER]).
