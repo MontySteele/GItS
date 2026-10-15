@@ -91,7 +91,7 @@ def test_her_surface_rows_load_with_the_paper_counts(yae):
             continue
         assert c.character == Y.CHARACTER
         by[c.rarity] = by.get(c.rarity, 0) + 1
-    assert by == {"basic": 2, "common": 15, "uncommon": 16, "rare": 9}
+    assert by == {"basic": 2, "common": 15, "uncommon": 18, "rare": 10}
 
 
 def test_her_rows_resolve_through_get_card_and_the_staging_sheet_is_gone(yae):
@@ -229,8 +229,10 @@ def test_sakura_readers_count_the_standing(yae):
     _play(st, _ym("twin_sakura"))
     _play(st, _ym("thunderbolt_tithe"))          # 3 + 4 x 2
     assert st.enemies[0].hp == 100 - 11
-    _play(st, _ym("shrine_maidens_guard"))       # 6, then Tenko (Warding)
-    assert st.player.block == 6 + 3 + 3
+    # Review r3: the Guard plants a Kitsune Sakura (was Tenko (Warding)).
+    _play(st, _ym("shrine_maidens_guard"))
+    assert st.player.block == 6 and len(_led(st).sakura) == 3
+    assert _led(st).sakura[-1].kind == Y.KITSUNE
 
 
 def test_mooncall_plants_one_higher_and_levels_have_no_cap(yae):
@@ -280,84 +282,17 @@ def test_thunder_strikes_one_enemy_for_two_plus_level(yae):
     _play(st, _ym("yakan_evocation"))
     Y.turn_end(st)
     hits = _hits(st)
-    assert len(hits) == 1 and hits[0]["amount"] == 3 and hits[0]["rite"] == Y.THUNDER
+    assert len(hits) == 1 and hits[0]["amount"] == 3 and hits[0]["kind"] == Y.THUNDER
     assert sum(e.hp for e in st.enemies) == 200 - 3
 
 
-def test_tenko_warding_strikes_and_gives_two_plus_level_block(yae):
-    # [USER], 2026-10-14: "Hmm, the double strike makes Tenko effects quite
-    # strong, but let's try it and see what happens": a typed Tenko's
-    # Sakura strike as Thunder AND add the kind.
-    st = _state()
-    _play(st, _ym("yakan_evocation"))
-    _play(st, _ym("grafted_branch"))             # levels 1 / 2
-    _led(st).sakura[0].turns_left = 1
-    _play(st, _ym("shrine_maidens_guard"))       # 6 Block, Tenko (Warding)
-    assert st.player.block == 6 + (2 + 1) + (2 + 2)
-    assert st.enemies[0].hp == 100 - (2 + 1) - (2 + 2)
-    assert len(_hits(st)) == 2
-    # Tenko still resets every timer ([USER], 2026-10-14).
-    assert [s.turns_left for s in _led(st).sakura] == [Y.SAKURA_TURNS] * 2
-    st.player.block = 0
-    Y.turn_end(st)                               # the turn end is Thunder
-    assert st.player.block == 0 and len(_hits(st)) == 2 + 2
-
-
-def test_tenko_warding_reads_red_ink_and_fox_fire(yae):
-    st = _state()
-    _play(st, _ym("yakan_evocation"))
-    _play(st, _ym("inked_branches"))             # Red Ink: +3
-    _play(st, _ym("shrine_maidens_guard"))
-    assert st.player.block == 6 + (2 + 1 + 3)
-    _play(st, _ym("fox_fire_draft"))             # Fox Fire replaces it
-    st.player.block = 0
-    hp = st.enemies[0].hp
-    Y.tenko(st, Y.WARDING)
-    assert st.player.block == 3
-    assert hp - st.enemies[0].hp == 3 + Y.FOX_FIRE_DAMAGE   # Fox Fire once
-
-
-def test_tenko_wildfire_strikes_all_for_level_and_red_ink(yae):
-    st = _state(n=3)
-    _play(st, _ym("yakan_evocation"))
-    _play(st, _ym("grafted_branch"))             # levels 1 / 2
-    hp = [e.hp for e in st.enemies]
-    _play(st, _ym("kitsune_guile"))              # Tenko (Wildfire)
-    lost = [h - e.hp for h, e in zip(hp, st.enemies)]
-    # Each strike: Thunder (2 + Level) at one enemy, then Level to ALL.
-    assert sum(lost) == (3 + 4) + 3 * 3 and min(lost) >= 3
-    assert len(_strikes(st)) == 2 and len(_hits(st)) == 2 + 6
-    assert {r["rite"] for r in _strikes(st)} == {Y.WILDFIRE}
-    _play(st, _ym("inked_branches"))
-    hp = [e.hp for e in st.enemies]
-    Y.tenko(st, Y.WILDFIRE)
-    lost = [h - e.hp for h, e in zip(hp, st.enemies)]
-    assert sum(lost) == (6 + 7) + 3 * 9 and min(lost) >= 9
-
-
-def test_tenko_offering_draws_one_a_sakura_at_the_next_turn_start(yae):
-    st = _state()
-    _play(st, _ym("twin_sakura"))
-    _play(st, _ym("inked_branches"))             # Red Ink skips Offering
-    st.player.draw_pile = [loader.get_card("defend") for _ in range(9)]
-    _play(st, _ym("manuscript_pile"))            # draw 2, Tenko (Offering)
-    assert _led(st).pending_draw == 2 and len(_hits(st)) == 2
-    st.player.hand = []
-    Y.turn_start(st)
-    assert len(st.player.hand) == 2 and _led(st).pending_draw == 0
-
-
-def test_a_typed_tenko_holds_nothing_the_turn_end_stays_thunder(yae):
-    st = _state()
-    _play(st, _ym("yakan_evocation"))
-    _play(st, _ym("foxfire_sweep"))              # Tenko (Wildfire), now
-    assert _strikes(st)[-1]["rite"] == Y.WILDFIRE
-    Y.turn_end(st)
-    assert _strikes(st)[-1]["rite"] == Y.THUNDER
-    _play(st, _ym("thunder_rite"))               # plain Tenko: Thunder
-    assert _strikes(st)[-1]["rite"] == Y.THUNDER
-
-
+def test_the_typed_tenko_is_gone(yae):
+    # Review r3 (ruled 2026-10-14): "Tenko becomes one plain rule again."
+    assert not hasattr(Y, "WARDING") and not hasattr(Y, "TENKO_KINDS")
+    for cid in ("shrine_maidens_guard", "foxfire_sweep", "kitsune_guile",
+                "manuscript_pile"):
+        for fx in loader.get_card(_ym(cid)).effects:
+            assert not (fx.get("kind") == "tenko" and "as" in fx)
 
 
 def test_channeling_lets_you_have_2_more_sakura_per_copy(yae):
@@ -398,10 +333,7 @@ def test_sakura_annotations_each_reading(yae):
     _play(st, _ym("inked_branches"))             # Red Ink on every Sakura
     s = _led(st).sakura[0]
     assert s.annotation == Y.RED_INK
-    assert Y.strike_size(st, s, Y.THUNDER) == 3 + 3
-    assert Y.strike_size(st, s, Y.WARDING) == 3 + 3
-    assert Y.strike_size(st, s, Y.WILDFIRE) == 1 + 3
-    assert Y.strike_size(st, s, Y.OFFERING) == 1       # not in Offering
+    assert Y.act_size(st, s) == 3 + 3
     _play(st, _ym("fox_fire_draft"))             # Fox Fire on the newest
     assert s.annotation == Y.FOX_FIRE            # replaces the Red Ink
     hp = st.enemies[0].hp
@@ -447,31 +379,40 @@ def test_a_sakura_edit_needs_a_sakura_reading(yae):
     with pytest.raises(ValueError):
         Y.validate_op("x", {"op": "yae", "kind": "edit_sakura", "which": "newest",
                             "annotation": "footnote", "amount": 1})
+    # Review r3: no typed Tenko; `as:` names a plant's kind only.
     with pytest.raises(ValueError):
-        Y.validate_op("x", {"op": "yae", "kind": "tenko", "as": "storm"})
+        Y.validate_op("x", {"op": "yae", "kind": "tenko", "as": "kitsune"})
     with pytest.raises(ValueError):
         Y.validate_op("x", {"op": "yae", "kind": "plant", "amount": 1,
                             "as": "warding"})
-    with pytest.raises(ValueError):
-        Y.validate_op("x", {"op": "yae", "kind": "tenko", "as": "thunder"})
+    Y.validate_op("x", {"op": "yae", "kind": "plant", "amount": 1,
+                        "as": "kitsune"})
 
 
-def test_fallen_petals_pays_energy_next_turn_and_its_upgrade_draws(yae):
+def test_fallen_petals_withers_the_oldest_now_and_pays_energy(yae):
+    # Review r3, sec.4: an active evoke. One action in total, and nothing
+    # with no Sakura.
     st = _state()
-    _play(st, _ym("fallen_petals"))
-    _play(st, loader.get_card(_ym("fallen_petals") + "+"))
-    _play(st, _ym("yakan_evocation"))
-    for _ in range(2):
-        Y.turn_end(st)
-        Y.turn_start(st)
     st.player.energy = 0
-    st.player.hand = []
+    _play(st, _ym("fallen_petals"))
+    assert st.player.energy == 10 and not _strikes(st)   # _play topped it up
+    st.player.energy = 0
+    _play(st, _ym("yakan_evocation"))
+    _play(st, _ym("grafted_branch"))             # levels 1 / 2
+    st.player.energy = 0
     st.player.draw_pile = [loader.get_card("defend") for _ in range(3)]
-    Y.turn_end(st)                               # the third strike: withers
-    assert not _led(st).sakura and _led(st).pending_withers == 1
-    Y.turn_start(st)
-    assert st.player.energy == 2                 # 1 + 1 (both powers)
-    assert len(st.player.hand) == 1              # the upgrade's card
+    hand = len(st.player.hand)
+    c = loader.get_card(_ym("fallen_petals"))
+    st.player.hand.append(c)
+    combat.play_card(st, c)
+    assert [s.level for s in _led(st).sakura] == [2]     # the oldest went
+    assert len(_strikes(st)) == 1 and _strikes(st)[0]["reason"] == "bloom"
+    assert st.player.energy == 1 and len(st.player.hand) == hand
+    up = loader.get_card(_ym("fallen_petals") + "+")
+    st.player.hand.append(up)
+    combat.play_card(st, up)
+    assert not _led(st).sakura and st.player.energy == 2
+    assert len(st.player.hand) == hand + 1       # the upgrade's card
 
 
 def test_grafted_branch_plants_at_its_level(yae):
@@ -501,7 +442,7 @@ def test_proofread_edits_reprint_and_the_first_play_each_combat_is_twice(yae):
     strike = loader.get_card("strike")
     st.player.hand.append(strike)
     _play(st, _ym("proofread"))
-    assert strike.ym_annotation == Y.REPRINT
+    assert Y.temp(strike) == Y.REPRINT
     assert st.player.block == 0
     _play(st, strike)
     assert st.enemies[0].hp == 100 - 6 - 6
@@ -524,7 +465,7 @@ def test_a_fresh_reprint_edit_plays_twice_again(yae):
 
 def test_a_published_reprint_plays_twice_once_every_combat(yae):
     c = Y.build_player(published={0: Y.REPRINT}).draw_pile[0]
-    assert c.ym_annotation == Y.REPRINT and c.ym_published
+    assert Y.stack(c) == [Y.REPRINT] and Y.is_published(c)
     for _ in range(2):                           # two fights, the same card
         st = _state()
         _play(st, c)
@@ -544,7 +485,7 @@ def test_royalties_annotation_gains_energy(yae):
     a = loader.get_card("strike")
     st.player.hand.append(a)
     _play(st, _ym("royalties"))
-    assert a.ym_annotation == Y.ROYALTIES
+    assert Y.temp(a) == Y.ROYALTIES
     st.player.energy = 5
     combat.play_card(st, a)
     assert st.player.energy == 5 - 1 + 1
@@ -580,7 +521,7 @@ def test_red_ink_rides_the_edited_cards_hits_and_block(yae):
     strike = loader.get_card("strike")
     st.player.hand.append(strike)
     _play(st, _red_ink_edit())
-    assert strike.ym_annotation == Y.RED_INK and Y.is_annotated(strike)
+    assert Y.temp(strike) == Y.RED_INK and Y.is_annotated(strike)
     assert st.player.block == 0                  # Proofread gives no Block (pick 3)
     _play(st, strike)
     assert st.enemies[0].hp == 100 - 6 - 3
@@ -607,10 +548,10 @@ def test_an_edit_overwrites_and_deadline_retains(yae):
     st.player.hand.append(c)
     _play(st, _red_ink_edit())
     _play(st, _ym("deadline"))
-    assert c.ym_annotation == Y.DEADLINE and c.retain
+    assert Y.temp(c) == Y.DEADLINE and c.retain
     assert c.enchant_damage == 0
     _play(st, _red_ink_edit())
-    assert c.ym_annotation == Y.RED_INK and not c.retain
+    assert Y.temp(c) == Y.RED_INK and not c.retain
 
 
 def test_footnote_fox_fire_and_sakura_seal_fire_after_the_cards_own_effects(yae):
@@ -648,7 +589,7 @@ def test_annotated_readers_count_the_hand_and_the_card_itself(yae):
     flash = loader.get_card(_ym("kitsune_flash"))
     st.player.hand.append(flash)
     _play(st, _red_ink_edit())                  # Red Ink on the Flash
-    assert flash.ym_annotation == Y.RED_INK
+    assert Y.temp(flash) == Y.RED_INK
     _play(st, flash)                             # 6 + 3 (annotated) + 3 ink
     assert st.enemies[0].hp == 100 - 8 - 12
 
@@ -660,7 +601,7 @@ def test_serialization_pays_block_per_annotated_play_not_per_edit(yae):
     st.player.hand += [loader.get_card("strike"), loader.get_card("defend")]
     _play(st, _ym("reborn_as_guuji_yae"))
     assert st.player.block == 0                  # Editing pays nothing now
-    assert all(c.ym_annotation == Y.SAKURA_SEAL for c in st.player.hand)
+    assert all(Y.temp(c) == Y.SAKURA_SEAL for c in st.player.hand)
     strike = st.player.hand[0]
     combat.play_card(st, strike)
     assert st.player.block == 3                  # an Annotated play pays
@@ -682,7 +623,7 @@ def test_editor_in_chief_strikes_on_an_annotated_play(yae):
     assert hits[0]["level"] == 1                 # the highest (oldest on a tie)
 
 
-def test_publish_marks_the_best_annotated_card_and_drafts_are_recorded(yae):
+def test_publish_moves_the_best_temporary_layer_and_drafts_are_recorded(yae):
     st = _state()
     a, b = loader.get_card("strike"), loader.get_card("strike")
     a.ym_slot, b.ym_slot = 10, 11
@@ -690,17 +631,18 @@ def test_publish_marks_the_best_annotated_card_and_drafts_are_recorded(yae):
     _play(st, _red_ink_edit())                  # a: Red Ink
     _play(st, _ym("sakura_seal"))                # b: Sakura Seal
     _play(st, _ym("the_seven_glamours"))
-    assert getattr(b, "ym_published", False) and not getattr(
-        a, "ym_published", False)
+    # Review r3: the temporary layer moved onto b's stack, once.
+    assert Y.stack(b) == [Y.SAKURA_SEAL] and Y.temp(b) is None
+    assert Y.stack(a) == [] and Y.temp(a) == Y.RED_INK
     Y.turn_end(st)
-    assert _led(st).drafts == {10: Y.RED_INK, 11: Y.SAKURA_SEAL}
+    assert _led(st).drafts == {10: Y.RED_INK}
 
 
 def test_a_published_annotation_enters_the_next_fight(yae):
     p = Y.build_player(published={0: Y.SAKURA_SEAL})
     c = p.draw_pile[0]
-    assert c.id == "strike" and c.ym_annotation == Y.SAKURA_SEAL
-    assert c.ym_published
+    assert c.id == "strike" and Y.stack(c) == [Y.SAKURA_SEAL]
+    assert Y.is_published(c) and Y.temp(c) is None
 
 
 # ---------------------------------------------------------------------------
@@ -723,7 +665,7 @@ def test_the_harness_pool_is_the_staged_pool(yae):
     from tools import yae_expansion_sim as S
     pl = S.pool()
     assert {k: len(v) for k, v in pl.items()} == {
-        "common": 15, "uncommon": 16, "rare": 9}
+        "common": 15, "uncommon": 18, "rare": 10}
     for d in S.DECKS.values():
         for cid in d["core"] + d["support"]:
             loader.get_card(cid)

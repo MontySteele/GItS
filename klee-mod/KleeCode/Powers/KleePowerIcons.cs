@@ -507,13 +507,12 @@ internal static class KleePowerIcons
             ?? KleePck.Path("klee/powers/passion_overload.png"),
         EditorInChiefPower => KleePck.Path("yae/powers/editor_in_chief.png")
             ?? KleePck.Path("varka/powers/electro_wind.png"),
-        // THE DESIGN AXES (2026-10-14): batch two's powers borrow her own
-        // badges nearest their rule until their art lands. (The four Rite
-        // badges left with the Rite, shrine r2.)
-        FallenPetalsPower => KleePck.Path("yae/powers/sakura.png")
-            ?? KleePck.Path("klee/powers/oz_summon.png"),
-        FallenPetalsPlusPower => KleePck.Path("yae/powers/sakura.png")
-            ?? KleePck.Path("klee/powers/oz_summon.png"),
+        // Review r3 (2026-10-14): Serial Novel borrows Editor-in-Chief's
+        // badge, the nearest rule, until its art lands. (Fallen Petals'
+        // two powers left when it became a Skill; the four Rite badges left
+        // with the Rite, shrine r2.)
+        SerialNovelPower => KleePck.Path("yae/powers/editor_in_chief.png")
+            ?? KleePck.Path("varka/powers/electro_wind.png"),
         UnwaveringBannerPower =>
             KleePck.Path("varka/powers/stormward_stance.png"),
         CycleOfSeasonsPower => KleePck.Path("varka/powers/boreas_unbound.png"),

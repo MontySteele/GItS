@@ -51,12 +51,10 @@ public class YaeReviewR1PicksTests : IDisposable
         ledger.Tick();
         var due = ledger.Tick();
         var s = Assert.Single(due);
-        // It blooms from here: still standing, nothing banked yet.
+        // It blooms from here: still standing until it withers.
         Assert.Single(ledger.Standing);
-        Assert.Equal(0, ledger.PendingWithers);
-        ledger.Wither(s);
+        Assert.True(ledger.Wither(s));
         Assert.Equal(0, ledger.Count);
-        Assert.Equal(1, ledger.PendingWithers);   // Fallen Petals, after
     }
 
     [Fact]
@@ -65,20 +63,19 @@ public class YaeReviewR1PicksTests : IDisposable
         var calls = Il.CallSequence(typeof(YaeShrine).GetMethod(
             nameof(YaeShrine.TickAndBloom))!).ToList();
         var tick = calls.FindIndex(c => c.Contains(nameof(YaeShrineLedger.Tick)));
-        var strike = calls.FindIndex(c => c.Contains(nameof(YaeShrine.Strike)));
+        var strike = calls.FindIndex(c => c.Contains(nameof(YaeShrine.Act)));
         var wither = calls.FindIndex(c => c.Contains(nameof(YaeShrineLedger.Wither)));
         Assert.True(tick >= 0 && strike > tick && wither > strike, string.Join(", ", calls));
     }
 
     [Fact]
-    public void The_bloom_strikes_as_thunder()
+    public void The_bloom_acts_as_the_sakuras_own_kind()
     {
-        // Shrine r2: there is no Rite; Strike defaults to Thunder and the
-        // bloom passes no kind of its own.
-        var strike = typeof(YaeShrine).GetMethod(nameof(YaeShrine.Strike))!;
-        var kind = strike.GetParameters().Single(p => p.ParameterType == typeof(YaeTenkoKind));
-        Assert.Equal(YaeTenkoKind.Thunder, kind.DefaultValue);
-        Assert.DoesNotContain(Il.CallSequence(strike), c => c.Contains("get_Rite"));
+        // Review r3: an action reads the Sakura's kind; no Tenko kind rides
+        // it any more.
+        var act = typeof(YaeShrine).GetMethod(nameof(YaeShrine.Act))!;
+        Assert.DoesNotContain(act.GetParameters(), p => p.ParameterType.Name == "YaeTenkoKind");
+        Assert.Contains(Il.CallSequence(act), c => c.Contains("get_Kind"));
     }
 
     [Fact]
@@ -89,7 +86,6 @@ public class YaeReviewR1PicksTests : IDisposable
         ledger.EditSakura(YaeSakuraEnd.Every, 1, YaeAnnotation.DeadlineExtension);
         for (var i = 0; i < 6; i++) Assert.Empty(ledger.Tick());
         Assert.Single(ledger.Standing);
-        Assert.Equal(0, ledger.PendingWithers);
     }
 
     [Fact]
@@ -110,7 +106,7 @@ public class YaeReviewR1PicksTests : IDisposable
         Assert.Equal(new[] { 3, 1, 1 }, ledger.Standing.Select(s => s.Level));
         ledger.LevelUp(2);
         Assert.Equal(new[] { 5, 3, 3 }, ledger.Standing.Select(s => s.Level));
-        Assert.Equal(7 + 5 + 5, YaeShrineFace.Total(ledger.Standing, YaeTenkoKind.Thunder));
+        Assert.Equal(7 + 5 + 5, YaeShrineFace.Total(ledger.Standing, YaeSakuraKind.Thunder));
     }
 
     [Fact]

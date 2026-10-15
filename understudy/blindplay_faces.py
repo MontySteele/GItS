@@ -405,11 +405,21 @@ def _enchantment(blob: Any) -> dict[str, Any] | None:
     return row
 
 
+#: The title of Yae's one enchantment (`YaeMasterpiece.Title`).
+MASTERPIECE_NAME = "Annotated"
+
+
 def enchantment_tag(ench: dict[str, Any] | None) -> str:
     """The enchantment beside a title: " (Sharp 3)", " (Reprint)", or
     " (Reprint: used)" once the game has greyed it this combat. PURE."""
     if not isinstance(ench, dict) or not ench.get("name"):
         return ""
+    # Review r3: Yae's Masterpiece is ONE enchantment holding both layers,
+    # titled "Annotated"; its description is the list ("Published: Red Ink
+    # x2, Reprint. This combat: Footnote."), so a Published card shows its
+    # stack beside its title.
+    if ench["name"] == MASTERPIECE_NAME and ench.get("text"):
+        return f" ({_text(ench['text']).rstrip('.')})"
     if ench.get("used"):
         return f" ({ench['name']}: used)"
     if ench.get("amount"):

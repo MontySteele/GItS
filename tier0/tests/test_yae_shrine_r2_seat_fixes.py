@@ -1,11 +1,11 @@
-"""SHRINE-R2 SEAT FIXES (lane 4, 2026-10-14; main-session decisions,
-`docs/notes/prototype-surface-provenance.md`).
+"""SHRINE-R2 SEAT FIXES (lane 4, 2026-10-14), AS REVIEW R3 LEFT THEM.
 
-  1. A Wildfire Tenko's live clause reads per enemy, "18 to each enemy",
-     never "18 to ALL" (a seat read that as one volley split).
-  2. An Edit (the chooser and Reborn as Guuji Yae) never reaches a card
-     with a Published Annotation; with no other target it does nothing,
-     as a dead Edit does.
+  1. The Wildfire clause's fix ("18 to each enemy", never "to ALL") lives on
+     as the Foxfire Sakura's words in the plain Tenko clause; the typed
+     Tenko itself is gone (review r3, ruled 2026-10-14).
+  2. #1308's "an Edit never reaches a Published card" is REPLACED (review
+     r3, pick 2 (a)): an Edit on a Published card fills its one temporary
+     slot, which a later Edit replaces and a Publish moves onto the stack.
 
 The sim half. The C# half is
 `klee-mod/KleeTests/Prototype/YaeShrineR2SeatFixTests.cs`.
@@ -58,57 +58,51 @@ def _play(st, card):
 
 
 def _published(card, annotation=Y.RED_INK):
-    Y.annotate(None, card, annotation, "published")
-    card.ym_published = True
+    Y.publish_to(card, [annotation])
     return card
 
 
-# ---- 1. the Wildfire clause ------------------------------------------------
+# ---- 1. the per-enemy words --------------------------------------------------
 
-def test_wildfire_reads_per_enemy_and_plain_tenko_is_unchanged():
-    assert Y.tenko_words(Y.WILDFIRE, 12, 18) == ": 12 damage, 18 to each enemy"
-    assert "ALL" not in Y.tenko_words(Y.WILDFIRE, 12, 18)
-    assert Y.tenko_words(Y.THUNDER, 12) == " (12 damage)"
-
-
-# ---- 2. an Edit never reaches a Published card -----------------------------
-
-def test_the_edit_chooser_skips_a_published_card_for_a_plain_one():
-    st = _state()
-    pub = _published(loader.get_card("strike"))
-    plain = loader.get_card("strike")
-    st.player.hand += [pub, plain]
-    _play(st, _card("footnote"))
-    assert pub.ym_annotation == Y.RED_INK
-    assert plain.ym_annotation == Y.FOOTNOTE
+def test_a_foxfire_sakura_reads_per_enemy_in_the_clause():
+    assert Y.tenko_words({Y.FOXFIRE: 18}) == " (18 to each enemy)"
+    assert "ALL" not in Y.tenko_words({Y.THUNDER: 12, Y.FOXFIRE: 18})
+    assert Y.tenko_words({Y.THUNDER: 12}) == " (12 damage)"
 
 
-def test_an_edit_with_only_a_published_card_in_hand_does_nothing():
+# ---- 2. an Edit on a Published card fills its temporary slot -----------------
+
+def test_an_edit_reaches_a_published_card_and_keeps_its_stack():
     st = _state()
     pub = _published(loader.get_card("strike"))
     st.player.hand.append(pub)
     _play(st, _card("footnote"))
-    assert pub.ym_annotation == Y.RED_INK
-    assert Y.ledger(st.player).edits == 0
+    assert Y.stack(pub) == [Y.RED_INK] and Y.temp(pub) == Y.FOOTNOTE
+    assert Y.ledger(st.player).edits == 1
+    # Both layers act: Red Ink's +3 and Footnote's draw.
+    st.player.draw_pile = [loader.get_card("defend")]
+    hp = st.enemies[0].hp
+    _play(st, pub)
+    assert hp - st.enemies[0].hp == 6 + 3
+    assert any(c.id == "defend" for c in st.player.hand)
 
 
-def test_a_pilot_choice_of_a_published_card_edits_nothing():
+def test_a_later_edit_replaces_the_temporary_slot_never_the_stack():
     st = _state()
     pub = _published(loader.get_card("strike"))
     st.player.hand.append(pub)
-    Y.ledger(st.player).edit_choice = lambda state, editor, ann: pub
     _play(st, _card("footnote"))
-    assert pub.ym_annotation == Y.RED_INK
-    assert Y.ledger(st.player).edits == 0
+    _play(st, _card("deadline"))
+    assert Y.stack(pub) == [Y.RED_INK] and Y.temp(pub) == Y.DEADLINE
 
 
-def test_reborn_skips_a_published_card():
+def test_reborn_reaches_a_published_card():
     st = _state()
     Y.ledger(st.player).reborn_choice = Y.FOOTNOTE
     pub = _published(loader.get_card("strike"))
     plain = loader.get_card("defend")
     st.player.hand += [pub, plain]
     _play(st, _card("reborn_as_guuji_yae"))
-    assert pub.ym_annotation == Y.RED_INK
-    assert plain.ym_annotation == Y.FOOTNOTE
-    assert Y.ledger(st.player).edits == 1
+    assert Y.temp(pub) == Y.FOOTNOTE and Y.stack(pub) == [Y.RED_INK]
+    assert Y.temp(plain) == Y.FOOTNOTE
+    assert Y.ledger(st.player).edits == 2

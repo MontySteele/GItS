@@ -17,14 +17,15 @@ using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Rooms;
+using MegaCrit.Sts2.Core.Saves.Runs;
 using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Powers;
 
-/// <summary>Her five Annotations (paper sec.2), in the order the Edit tip
-/// lists them. <see cref="None"/> is "not Annotated". A saved draft stores
-/// the member's NAME (<see cref="YaeEditing.Draft"/>), so a name never
-/// changes; the numbers follow the sheet's order.</summary>
+/// <summary>Her seven Annotations (paper sec.2), in the order the Edit tip
+/// lists them. <see cref="None"/> is "not Annotated". A saved draft and a
+/// saved stack store these NUMBERS and NAMES, so neither ever changes.
+/// </summary>
 public enum YaeAnnotation
 {
     None = 0,
@@ -37,78 +38,8 @@ public enum YaeAnnotation
     Reprint = 7,
 }
 
-/// <summary>
-/// ONE ANNOTATION, ONE ENCHANTMENT. Paper sec.2: "her Enchantments, one per
-/// card, saved on the card as the engine's <c>CardCmd.Enchant</c> already
-/// does". The engine gives a card at most one Enchantment and clones it with
-/// the card (a copy of the instance keeps it, a fresh copy by id does not:
-/// the paper's reading), runs its <see cref="OnPlay"/> AFTER the card's own
-/// effects (<c>CardModel.OnPlayWrapper</c>), and serialises it with a deck
-/// card, which is what makes a Published Annotation last the run for free.
-///
-/// Sim twin: <c>yae_shrine.annotate</c> and the card's <c>enchant_*</c>
-/// riders.
-/// </summary>
-public abstract class YaeAnnotationModel : CustomEnchantmentModel, ILocalizationProvider
-{
-    /// <summary>Which of the five this is.</summary>
-    public abstract YaeAnnotation Annotation { get; }
-
-    /// <summary>The printed name.</summary>
-    public string Name => YaeAnnotationText.Name(Annotation);
-
-    /// <summary>What it does, one sentence (the tip and the hover).</summary>
-    public string Rule => YaeAnnotationText.Rule(Annotation);
-
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", Name),
-        ("description", DescriptionText),
-        ("extraCardText", $"[gold]{Name}[/gold]."),
-    };
-
-    /// <summary>The hover's sentence in the loc table; Reprint adds its
-    /// spent clause.</summary>
-    protected virtual string DescriptionText => YaeAnnotationText.TipBody(Annotation, false);
-
-    /// <summary>The five ride any card an Edit can reach; the Edit's own
-    /// filter (<see cref="YaeEditing.Editable"/>) is the rule.</summary>
-    public override bool CanEnchantCardType(CardType cardType) => true;
-
-    /// <summary>A borrowed base-game icon where the game ships one, else the
-    /// engine's own missing-enchantment fallback (null). Placeholder art.
-    /// </summary>
-    protected override string? CustomIconPath
-    {
-        get
-        {
-            foreach (var path in IconCandidates)
-            {
-                try
-                {
-                    if (ResourceLoader.Exists(path)) return path;
-                }
-                catch (Exception)
-                {
-                    return null;
-                }
-            }
-            return null;
-        }
-    }
-
-    /// <summary>Base enchantment icons this one borrows, best first.</summary>
-    protected abstract IEnumerable<string> IconCandidates { get; }
-
-    protected static IEnumerable<string> Borrow(string entry) => new[]
-    {
-        $"res://images/enchantments/{entry}.png",
-        $"res://images/enchantments/beta/{entry}.png",
-    };
-}
-
-/// <summary>The five Annotations' names and rules, one table, read by the
-/// enchantments, the Reborn faces and the Edit tip.</summary>
+/// <summary>The seven Annotations' names and rules, one table, read by the
+/// Masterpiece, the Reborn faces and the Edit tip.</summary>
 public static class YaeAnnotationText
 {
     public static string Name(YaeAnnotation annotation) => annotation switch
@@ -142,16 +73,16 @@ public static class YaeAnnotationText
         _ => "",
     };
 
-    /// <summary>What an Annotation does on a SAKURA (ruled 2026-10-14);
-    /// empty for the ones with no Sakura reading. Each sentence names the
-    /// Sakura, so it reads alone as the Annotation's own tip.</summary>
+    /// <summary>What an Annotation does on a SAKURA; empty for the ones with
+    /// no Sakura reading. Review r3: Red Ink works on any kind (damage, each
+    /// enemy's damage, or Block).</summary>
     public static string SakuraRule(YaeAnnotation annotation) => annotation switch
     {
         YaeAnnotation.RedInk =>
-            $"The [gold]Sakura[/gold]'s strike is {YaeLaw.RedInkAmount} "
-          + "bigger (not in Offering).",
+            $"The [gold]Sakura[/gold]'s action is {YaeLaw.RedInkAmount} "
+          + "bigger.",
         YaeAnnotation.FoxFire =>
-            "When the [gold]Sakura[/gold] strikes, it also deals "
+            "When the [gold]Sakura[/gold] acts, it also deals "
           + $"{YaeLaw.FoxFireDamage} [gold]Electro[/gold] damage to a random "
           + "enemy.",
         YaeAnnotation.DeadlineExtension =>
@@ -168,12 +99,9 @@ public static class YaeAnnotationText
         YaeAnnotation.Reprint,
     };
 
-    /// <summary>
-    /// The one Annotation's tip on the card that applies it ([USER],
-    /// 2026-10-14: "no need to show the text for every possible edit if the
-    /// card can only apply one"): its card reading, or its Sakura reading on
-    /// a card that Edits a Sakura. PURE.
-    /// </summary>
+    /// <summary>The one Annotation's tip on the card that applies it: its
+    /// card reading, or its Sakura reading on a card that Edits a Sakura.
+    /// PURE.</summary>
     public static string TipBody(YaeAnnotation annotation, bool onSakura) =>
         onSakura && SakuraRule(annotation).Length > 0
             ? SakuraRule(annotation)
@@ -182,10 +110,7 @@ public static class YaeAnnotationText
                 : Rule(annotation);
 
     /// <summary>Red Ink on a card that plants also goes to every Sakura it
-    /// plants, the card keeping its own +3 (ruled 2026-10-14, widened the
-    /// same day, <see cref="YaeAnnotationReach"/>): one clause on the Red Ink
-    /// card tip and its enchantment hover, kept under the 100-character hover
-    /// cap.</summary>
+    /// plants, the card keeping its own +3.</summary>
     public const string RedInkPlantClause =
         "If it plants, its [gold]Sakura[/gold] get it too.";
 
@@ -193,12 +118,8 @@ public static class YaeAnnotationText
     public static string Plain(string text) =>
         text.Replace("[gold]", "").Replace("[/gold]", "");
 
-    /// <summary>
-    /// The card reading as a clause about the card being picked: "This card
-    /// deals ..." becomes "it deals ...", "When this card is played, ..."
-    /// becomes "when it is played, ...". The same sentence as
-    /// <see cref="Rule"/>, so the prompt never quotes its own number. PURE.
-    /// </summary>
+    /// <summary>The card reading as a clause about the card being picked.
+    /// PURE.</summary>
     public static string PromptClause(YaeAnnotation annotation)
     {
         var rule = Plain(Rule(annotation)).TrimEnd('.');
@@ -207,186 +128,395 @@ public static class YaeAnnotationText
         return rule.Length == 0 ? rule
             : char.ToLowerInvariant(rule[0]) + rule.Substring(1);
     }
-}
 
-/// <summary>Red Ink: "this card deals 3 more damage (per hit) and gives 3 more
-/// Block (per gain)". Sharp's damage door (a powered attack only) and
-/// Nimble's Block door, at <see cref="YaeLaw.RedInkAmount"/>.</summary>
-public sealed class RedInkAnnotation : YaeAnnotationModel
-{
-    public override YaeAnnotation Annotation => YaeAnnotation.RedInk;
-
-
-
-    protected override IEnumerable<string> IconCandidates => Borrow("sharp");
-
-    public override decimal EnchantDamageAdditive(decimal originalDamage, ValueProp props) =>
-        props.IsPoweredAttack() ? YaeLaw.RedInkAmount : 0m;
-
-    public override decimal EnchantBlockAdditive(decimal originalBlock) =>
-        YaeLaw.RedInkAmount;
-}
-
-/// <summary>Footnote: "when played, draw 1, after its own effects".</summary>
-public sealed class FootnoteAnnotation : YaeAnnotationModel
-{
-    public override YaeAnnotation Annotation => YaeAnnotation.Footnote;
-
-
-
-    public override bool HasExtraCardText => true;
-
-    protected override IEnumerable<string> IconCandidates => Borrow("swift");
-
-    public override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay? cardPlay)
+    /// <summary>"Red Ink x2, Reprint": each distinct Annotation once, in the
+    /// order first met, with its count past one. PURE.</summary>
+    public static string List(IEnumerable<YaeAnnotation> layers)
     {
-        if (Card.Owner is not { } owner) return;
-        await CardPileCmd.Draw(choiceContext, 1, owner);
+        var order = new List<YaeAnnotation>();
+        var count = new Dictionary<YaeAnnotation, int>();
+        foreach (var a in layers)
+        {
+            if (a == YaeAnnotation.None) continue;
+            if (!count.ContainsKey(a))
+            {
+                order.Add(a);
+                count[a] = 0;
+            }
+            count[a]++;
+        }
+        return string.Join(", ", order.Select(a =>
+            count[a] > 1 ? $"{Name(a)} x{count[a]}" : Name(a)));
     }
-}
 
-/// <summary>Deadline Extension: Retain, Steady's way (the keyword, added on
-/// enchant). Removed again when an Edit overwrites it, unless the card
-/// printed Retain itself (<see cref="YaeEditing.Clear"/>).</summary>
-public sealed class DeadlineExtensionAnnotation : YaeAnnotationModel
-{
-    public override YaeAnnotation Annotation => YaeAnnotation.DeadlineExtension;
+    /// <summary>The prefix of the Masterpiece's stack line.</summary>
+    public const string PublishedHead = "Published: ";
 
+    /// <summary>The prefix of its temporary-slot line.</summary>
+    public const string ThisCombatHead = "This combat: ";
 
+    /// <summary>The line a spent Reprint adds.</summary>
+    public const string ReprintUsed = "Reprint: used this combat.";
 
-    protected override IEnumerable<string> IconCandidates => Borrow("steady");
-
-    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        new[] { HoverTipFactory.FromKeyword(CardKeyword.Retain) };
-
-    protected override void OnEnchant()
+    /// <summary>
+    /// THE MASTERPIECE'S HOVER (review r3: "its tip lists them"): "Published:
+    /// Red Ink x2, Reprint. This combat: Footnote." and, once every Reprint
+    /// on it is spent this combat, "Reprint: used this combat." The seat page
+    /// reads these three heads. PURE.
+    /// </summary>
+    public static string Summary(IReadOnlyList<YaeAnnotation> stack,
+                                 YaeAnnotation temporary, bool reprintUsed)
     {
-        Card.AddKeyword(CardKeyword.Retain);
+        var parts = new List<string>();
+        if (stack.Count > 0) parts.Add(PublishedHead + List(stack) + ".");
+        if (temporary != YaeAnnotation.None)
+            parts.Add(ThisCombatHead + Name(temporary) + ".");
+        if (reprintUsed) parts.Add(ReprintUsed);
+        return string.Join(" ", parts);
     }
-}
 
-/// <summary>Fox Fire: "when played, deal 4 Electro damage to a random enemy,
-/// after its own effects, a pet's hit".</summary>
-public sealed class FoxFireAnnotation : YaeAnnotationModel
-{
-    public override YaeAnnotation Annotation => YaeAnnotation.FoxFire;
-
-
-
-    public override bool HasExtraCardText => true;
-
-    protected override IEnumerable<string> IconCandidates => Borrow("imbued");
-
-    public override Task OnPlay(PlayerChoiceContext choiceContext, CardPlay? cardPlay) =>
-        YaeShrine.FoxFire(choiceContext, Card.Owner?.Creature);
-}
-
-/// <summary>Sakura Seal: "when played, plant a Sakura, after its own effects".
-/// The bridge from the house to the shrine.</summary>
-public sealed class SakuraSealAnnotation : YaeAnnotationModel
-{
-    public override YaeAnnotation Annotation => YaeAnnotation.SakuraSeal;
-
-
-
-    public override bool HasExtraCardText => true;
-
-    protected override IEnumerable<string> IconCandidates => Borrow("sown");
-
-    public override Task OnPlay(PlayerChoiceContext choiceContext, CardPlay? cardPlay) =>
-        YaeShrine.Plant(choiceContext, Card.Owner?.Creature, 1);
-}
-
-/// <summary>Royalties (design axes batch two, ruled 2026-10-14): "when
-/// played, gain 1 Energy", after the card's own effects.</summary>
-public sealed class RoyaltiesAnnotation : YaeAnnotationModel
-{
-    public override YaeAnnotation Annotation => YaeAnnotation.Royalties;
-
-    public override bool HasExtraCardText => true;
-
-    protected override IEnumerable<string> IconCandidates => Borrow("glam");
-
-    public override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay? cardPlay)
+    /// <summary>The card face's line: the Annotations that act when the
+    /// card is played, golded, with their counts ("[gold]Footnote[/gold] x2.
+    /// [gold]Sakura Seal[/gold]."). Empty when none does. PURE.</summary>
+    public static string FaceLine(IEnumerable<YaeAnnotation> layers)
     {
-        if (Card.Owner is not { } owner) return;
-        await PlayerCmd.GainEnergy(YaeLaw.RoyaltiesPayout, owner);
+        var shown = layers.Where(a => a is YaeAnnotation.Footnote
+            or YaeAnnotation.FoxFire or YaeAnnotation.SakuraSeal
+            or YaeAnnotation.Royalties).ToList();
+        if (shown.Count == 0) return "";
+        return string.Join(" ", shown.Distinct().Select(a =>
+        {
+            var n = shown.Count(x => x == a);
+            return n > 1 ? $"[gold]{Name(a)}[/gold] x{n}." : $"[gold]{Name(a)}[/gold].";
+        }));
     }
 }
 
 /// <summary>
-/// Reprint ([USER], 2026-10-14, on Proofread: "Let's bump it to 'Play it
-/// twice.' AKA the card gets repeated (I think this is a base game
-/// enchant?)"): the base game's Glam, whole. The first play each combat
-/// adds one to the play count (<see cref="EnchantPlayCount"/>, the Replay
-/// mechanism), then it goes inert for the rest of the combat. The flag is
-/// not saved, so a Published Reprint is fresh on every combat's copy.
-/// Sim twin: <c>yae_shrine.reprint_replays</c>.
-///
-/// SPENT READS SPENT (two blind seats, 2026-10-14, expected a second
-/// replay). Glam's whole display is <c>Status = Disabled</c>, which greys the
-/// card's enchantment tab (<c>NCard.SetEnchantmentStatus</c>) and hides an
-/// extra card text; its hover still offers "Replay 1". Ours also drops the
-/// Replay tip once spent and its hover sentence adds "Used this combat."
-/// (the <see cref="SpentKey"/> var); the bridge sends <c>disabled</c> and the
-/// seat page prints "(Reprint: used)".
+/// THE MASTERPIECE'S ARITHMETIC (review r3, sec.2, ruled 2026-10-14), PURE,
+/// so the headless suite pins it by value. Sim twin: the publishing-house
+/// half of <c>tier0/engine/yae_shrine.py</c> (<c>layers</c>, <c>count</c>,
+/// <c>reprint_replays</c>).
 /// </summary>
-public sealed class ReprintAnnotation : YaeAnnotationModel
+public static class YaeLayers
 {
-    private const string TimesKey = "Times";
-
-    /// <summary>1 once spent this combat: the hover's "Used this combat."
+    /// <summary>Every layer: the stack first, then the temporary slot.
     /// </summary>
-    public const string SpentKey = "Spent";
+    public static IReadOnlyList<YaeAnnotation> All(IReadOnlyList<YaeAnnotation> stack,
+                                                   YaeAnnotation temporary) =>
+        temporary == YaeAnnotation.None
+            ? stack
+            : stack.Concat(new[] { temporary }).ToList();
 
-    /// <summary>The clause the hover adds once spent. PURE.</summary>
-    public const string SpentClause = " Used this combat.";
+    /// <summary>How many layers of <paramref name="annotation"/>.</summary>
+    public static int Count(IReadOnlyList<YaeAnnotation> stack, YaeAnnotation temporary,
+                            YaeAnnotation annotation) =>
+        stack.Count(a => a == annotation) + (temporary == annotation ? 1 : 0);
 
-    private bool _usedThisCombat;
+    /// <summary>
+    /// REPRINT, EXACTLY: the replays this play adds. On the card's first
+    /// play each combat, one per Reprint on the stack (then those are inert
+    /// for the combat); plus one per ARMED temporary Reprint (an Edit arms
+    /// one fresh replay; a copy's are armed).
+    /// </summary>
+    public static int Replays(int stackReprints, bool playedOnce, int armed) =>
+        (playedOnce ? 0 : stackReprints) + Math.Max(0, armed);
 
-    public override YaeAnnotation Annotation => YaeAnnotation.Reprint;
+    /// <summary>
+    /// What Publishing a temporary Reprint does to its armed replay: before
+    /// the card's first play this combat the stack now counts it, so it is
+    /// dropped (never counted twice); after, it stays armed.
+    /// </summary>
+    public static int ArmedAfterPublish(YaeAnnotation published, bool playedOnce, int armed) =>
+        published == YaeAnnotation.Reprint && !playedOnce ? 0 : armed;
 
-    protected override IEnumerable<string> IconCandidates => Borrow("glam");
+    /// <summary>"Reprint: used": the card carries a Reprint and has no
+    /// replay left this combat.</summary>
+    public static bool ReprintUsed(int reprints, bool playedOnce, int armed) =>
+        reprints > 0 && playedOnce && armed <= 0;
+}
 
-    protected override IEnumerable<DynamicVar> CanonicalVars =>
-        new[] { new DynamicVar(TimesKey, 1m), new DynamicVar(SpentKey, 0m) };
+/// <summary>
+/// A TEXT VAR: the Masterpiece's summary as a description placeholder. The
+/// game's SmartFormat writes a placeholder with no format through the
+/// object's own <c>ToString()</c> (<c>DynamicVar</c> is not
+/// <c>IFormattable</c>), so this var prints its owner's words rather than a
+/// number. Its number is 0 and nothing reads it.
+/// </summary>
+public sealed class YaeTextVar : DynamicVar
+{
+    private readonly Func<YaeMasterpiece, string> _text;
 
-    protected override string DescriptionText =>
-        base.DescriptionText + $"{{{SpentKey}:cond:==1?{SpentClause}|}}";
-
-    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        Status == EnchantmentStatus.Disabled
-            ? Array.Empty<IHoverTip>()
-            : new[] { HoverTipFactory.Static(StaticHoverTip.ReplayDynamic, DynamicVars[TimesKey]) };
-
-    private bool UsedThisCombat
+    public YaeTextVar(string name, Func<YaeMasterpiece, string> text)
+        : base(name, 0m)
     {
-        get => _usedThisCombat;
+        _text = text;
+    }
+
+    public override string ToString() =>
+        _owner is YaeMasterpiece m ? _text(m) : "";
+}
+
+/// <summary>
+/// THE MASTERPIECE (review r3, sec.2, ruled 2026-10-14: "One custom
+/// enchantment holds both layers; its tip lists them"). Every Annotated card
+/// carries this one enchantment:
+///
+///   * THE PERMANENT STACK (<see cref="Published"/>): every Published
+///     Annotation, kept for the run. A <c>[SavedProperty]</c>, so the deck
+///     card's save keeps it.
+///   * ONE TEMPORARY SLOT (<see cref="Temporary"/>): a combat Edit fills it
+///     and another Edit replaces it; it never touches the stack and is never
+///     saved (a deck card never carries one).
+///   * PUBLISHING moves the temporary layer onto the stack, once.
+///
+/// Stacked Annotations add up: Red Ink +3 each (Sharp's and Nimble's
+/// doors), Footnote, Fox Fire, Sakura Seal and Royalties once each when the
+/// card is played (after its own effects, <c>CardModel.OnPlayWrapper</c>),
+/// Deadline Extension Retain. REPRINT per <see cref="YaeLayers.Replays"/>.
+///
+/// A change of layers swaps in a fresh model (<see cref="YaeEditing.Apply"/>)
+/// so the card redraws its enchantment exactly as an Edit always did; the
+/// Reprint state rides across the swap. Sim twin: the publishing-house half
+/// of <c>tier0/engine/yae_shrine.py</c>.
+/// </summary>
+public sealed class YaeMasterpiece : CustomEnchantmentModel, ILocalizationProvider
+{
+    /// <summary>The hover's text var.</summary>
+    public const string LayersKey = "Layers";
+
+    /// <summary>The card face's text var.</summary>
+    public const string FaceKey = "Face";
+
+    /// <summary>The hover title.</summary>
+    public const string Title = "Annotated";
+
+    private int[] _published = Array.Empty<int>();
+    private YaeAnnotation _temporary;
+    private bool _playedOnce;
+    private int _armed;
+
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", Title),
+        ("description", "{" + LayersKey + "}"),
+        ("extraCardText", "{" + FaceKey + "}"),
+    };
+
+    /// <summary>The permanent stack, as saved: each layer's number, oldest
+    /// first.</summary>
+    [SavedProperty]
+    public int[] Published
+    {
+        get => _published;
         set
         {
             AssertMutable();
-            _usedThisCombat = value;
+            _published = value ?? Array.Empty<int>();
         }
     }
 
-    public override int EnchantPlayCount(int originalPlayCount) =>
-        UsedThisCombat ? originalPlayCount
-                       : originalPlayCount + DynamicVars[TimesKey].IntValue;
+    /// <summary>The permanent stack, oldest first.</summary>
+    public IReadOnlyList<YaeAnnotation> Stack =>
+        _published.Select(n => Enum.IsDefined(typeof(YaeAnnotation), n)
+                ? (YaeAnnotation)n : YaeAnnotation.None)
+            .Where(a => a != YaeAnnotation.None).ToList();
 
+    /// <summary>The temporary slot (this combat's Edit), or none.</summary>
+    public YaeAnnotation Temporary
+    {
+        get => _temporary;
+        internal set
+        {
+            AssertMutable();
+            _temporary = value;
+        }
+    }
+
+    /// <summary>Played this combat: the stack's Reprints are inert.</summary>
+    public bool PlayedOnce => _playedOnce;
+
+    /// <summary>Fresh replays from a temporary Reprint.</summary>
+    public int Armed => _armed;
+
+    /// <summary>Every layer, the stack first.</summary>
+    public IReadOnlyList<YaeAnnotation> Layers => YaeLayers.All(Stack, _temporary);
+
+    /// <summary>How many layers of <paramref name="annotation"/>.</summary>
+    public int Count(YaeAnnotation annotation) =>
+        YaeLayers.Count(Stack, _temporary, annotation);
+
+    /// <summary>"Reprint: used this combat."</summary>
+    public bool ReprintSpent =>
+        YaeLayers.ReprintUsed(Count(YaeAnnotation.Reprint), _playedOnce, _armed);
+
+    /// <summary>Set the layers and the Reprint state (a fresh model only).
+    /// </summary>
+    internal void Set(IEnumerable<YaeAnnotation> stack, YaeAnnotation temporary,
+                      bool playedOnce, int armed)
+    {
+        AssertMutable();
+        _published = stack.Where(a => a != YaeAnnotation.None).Select(a => (int)a).ToArray();
+        _temporary = temporary;
+        _playedOnce = playedOnce;
+        _armed = Math.Max(0, armed);
+    }
+
+    /// <summary>A copy is a new card: its Reprints are armed (review r3).
+    /// </summary>
+    internal void ArmAsCopy()
+    {
+        AssertMutable();
+        _playedOnce = false;
+        _armed = _temporary == YaeAnnotation.Reprint ? 1 : 0;
+        Status = EnchantmentStatus.Normal;
+    }
+
+    protected override IEnumerable<DynamicVar> CanonicalVars => new DynamicVar[]
+    {
+        new YaeTextVar(LayersKey, m => m.SummaryText),
+        new YaeTextVar(FaceKey, m => YaeAnnotationText.FaceLine(m.Layers)),
+    };
+
+    /// <summary>The hover's words.</summary>
+    public string SummaryText =>
+        YaeAnnotationText.Summary(Stack, _temporary, ReprintSpent);
+
+    /// <summary>The face shows the layers that act when it is played.
+    /// </summary>
+    public override bool HasExtraCardText =>
+        YaeAnnotationText.FaceLine(Layers).Length > 0;
+
+    /// <summary>The icon shows how many layers once there are two.</summary>
+    public override bool ShowAmount => Layers.Count > 1;
+
+    public override int DisplayAmount => Layers.Count;
+
+    /// <summary>The Masterpiece rides any card an Edit can reach; the Edit's
+    /// own filter (<see cref="YaeEditing.Editable"/>) is the rule.</summary>
+    public override bool CanEnchantCardType(CardType cardType) => true;
+
+    /// <summary>Each distinct layer's own rule, under the summary.</summary>
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        YaeAnnotationText.All.Where(a => Count(a) > 0).Select(a => (IHoverTip)new HoverTip(
+            new LocString(Cards.ArmKeywordTips.KeywordTable, Cards.ArmKeywordTips.KeyOf(a) + ".title"),
+            YaeAnnotationText.Rule(a))).ToList();
+
+    /// <summary>The newest layer's borrowed base-game icon (Reprint first,
+    /// the one a player watches), else the engine's missing-icon fallback.
+    /// Placeholder art.</summary>
+    protected override string? CustomIconPath
+    {
+        get
+        {
+            var layers = Layers;
+            if (layers.Count == 0) return null;
+            var shown = layers.Contains(YaeAnnotation.Reprint)
+                ? YaeAnnotation.Reprint : layers[layers.Count - 1];
+            foreach (var path in IconCandidates(shown))
+            {
+                try
+                {
+                    if (ResourceLoader.Exists(path)) return path;
+                }
+                catch (Exception)
+                {
+                    return null;
+                }
+            }
+            return null;
+        }
+    }
+
+    /// <summary>The base enchantment icon each Annotation borrows.</summary>
+    public static string IconEntry(YaeAnnotation annotation) => annotation switch
+    {
+        YaeAnnotation.RedInk => "sharp",
+        YaeAnnotation.Footnote => "swift",
+        YaeAnnotation.DeadlineExtension => "steady",
+        YaeAnnotation.FoxFire => "imbued",
+        YaeAnnotation.SakuraSeal => "sown",
+        _ => "glam",
+    };
+
+    private static IEnumerable<string> IconCandidates(YaeAnnotation annotation) => new[]
+    {
+        $"res://images/enchantments/{IconEntry(annotation)}.png",
+        $"res://images/enchantments/beta/{IconEntry(annotation)}.png",
+    };
+
+    /// <summary>Deadline Extension: Retain, Steady's way (the keyword, added
+    /// on enchant; <see cref="YaeEditing.Clear"/> takes it back).</summary>
+    protected override void OnEnchant()
+    {
+        if (Count(YaeAnnotation.DeadlineExtension) > 0) Card.AddKeyword(CardKeyword.Retain);
+        RefreshStatus();
+    }
+
+    /// <summary>Red Ink: 3 more damage per hit for each layer (a powered
+    /// attack only).</summary>
+    public override decimal EnchantDamageAdditive(decimal originalDamage, ValueProp props) =>
+        props.IsPoweredAttack() ? YaeLaw.RedInkAmount * Count(YaeAnnotation.RedInk) : 0m;
+
+    /// <summary>Red Ink: 3 more Block per gain for each layer.</summary>
+    public override decimal EnchantBlockAdditive(decimal originalBlock) =>
+        YaeLaw.RedInkAmount * Count(YaeAnnotation.RedInk);
+
+    /// <summary>The play riders, one per layer, the stack first.</summary>
+    public override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay? cardPlay)
+    {
+        var owner = Card.Owner;
+        foreach (var layer in Layers)
+        {
+            switch (layer)
+            {
+                case YaeAnnotation.Footnote:
+                    if (owner != null) await CardPileCmd.Draw(choiceContext, 1, owner);
+                    break;
+                case YaeAnnotation.FoxFire:
+                    await YaeShrine.FoxFire(choiceContext, owner?.Creature);
+                    break;
+                case YaeAnnotation.SakuraSeal:
+                    await YaeShrine.Plant(choiceContext, owner?.Creature, 1);
+                    break;
+                case YaeAnnotation.Royalties:
+                    if (owner != null) await PlayerCmd.GainEnergy(YaeLaw.RoyaltiesPayout, owner);
+                    break;
+            }
+        }
+    }
+
+    /// <summary>REPRINT (<see cref="YaeLayers.Replays"/>).</summary>
+    public override int EnchantPlayCount(int originalPlayCount) =>
+        originalPlayCount
+        + YaeLayers.Replays(Stack.Count(a => a == YaeAnnotation.Reprint), _playedOnce, _armed);
+
+    /// <summary>After this card's play: the stack's Reprints go inert for
+    /// the combat and an armed replay is spent.</summary>
     public override Task AfterCardPlayed(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (UsedThisCombat || cardPlay.Card != Card) return Task.CompletedTask;
-        UsedThisCombat = true;
-        DynamicVars[SpentKey].BaseValue = 1m;
-        Status = EnchantmentStatus.Disabled;
+        if (cardPlay.Card != Card) return Task.CompletedTask;
+        _playedOnce = true;
+        _armed = 0;
+        RefreshStatus();
         return Task.CompletedTask;
+    }
+
+    /// <summary>The greyed tab: only when every layer is a spent Reprint
+    /// (nothing on the card does anything more this combat).</summary>
+    private void RefreshStatus()
+    {
+        if (!IsMutable) return;
+        Status = ReprintSpent && Layers.All(a => a == YaeAnnotation.Reprint)
+            ? EnchantmentStatus.Disabled : EnchantmentStatus.Normal;
     }
 }
 
 /// <summary>
-/// THE PUBLISHING HOUSE (paper sec.2): Edit, the Annotated read, Publish and
-/// the drafts the after-elite Publish reads. Sim twin: the publishing-house
-/// half of <c>tier0/engine/yae_shrine.py</c>.
+/// THE PUBLISHING HOUSE (paper sec.2; review r3's two layers): Edit, the
+/// Annotated read, Publish, the drafts the after-elite Publish reads, and
+/// the signature cards. Sim twin: the publishing-house half of
+/// <c>tier0/engine/yae_shrine.py</c>.
 /// </summary>
 public static class YaeEditing
 {
@@ -398,15 +528,7 @@ public static class YaeEditing
 
     public const string EditPromptText = "Choose a card to Edit.";
 
-    /// <summary>
-    /// [USER] (2026-10-14): "We could move the actual Edit's effect text into
-    /// the selection screen, since AFAIK we only ever apply one type of edit
-    /// in a given screen." Every hand screen an Edit opens applies the one
-    /// Annotation its card names (<see cref="Edit"/>); Reborn as Guuji Yae
-    /// chooses the Annotation on its own screen and opens no hand screen, and
-    /// the Sakura Edits open none. So each Annotation has its own prompt row,
-    /// and <see cref="YaeAnnotation.None"/> keeps the generic one.
-    /// </summary>
+    /// <summary>Each Annotation's own Edit prompt.</summary>
     public static string EditPromptKeyFor(YaeAnnotation annotation) =>
         annotation == YaeAnnotation.None
             ? EditPromptKey
@@ -431,19 +553,23 @@ public static class YaeEditing
 
     public const string AnnotationPromptText = "Choose an Annotation.";
 
+    /// <summary>Second Printing's prompt (review r3).</summary>
+    public const string RecallPromptKey = "KLEEMOD-YAE_RECALL.selectionScreenPrompt";
+
+    public const string RecallPromptText = "Choose an Annotated card to put into your hand.";
+
+    /// <summary>Author's Copy's prompt (review r3).</summary>
+    public const string CopyPromptKey = "KLEEMOD-YAE_COPY.selectionScreenPrompt";
+
+    public const string CopyPromptText = "Choose an Annotated card to copy.";
+
     /// <summary>
-    /// THE DRAFT (pick 2 (a), ruled): "the card keeps the Annotation it last
-    /// carried in a combat this run (its draft; the game remembers one draft
-    /// per card)". Kept on the DECK card and saved with it (BaseLib's saved
-    /// field on <see cref="CardModel"/>, the shape
-    /// <c>Relics.VarkaStarterKnight</c> uses on a relic), so a save and load
-    /// between the fight and its reward screen keeps it. Written at every
-    /// Edit (<see cref="Annotate"/>), and rewritten at the end of every fight
-    /// to what that fight left (<see cref="SnapshotDrafts"/>), so after an
-    /// elite or boss it is exactly that fight's evidence. The value is a <see cref="YaeAnnotation"/>'s
-    /// NAME, and the default is null so a card never Edited writes nothing
-    /// into the save (BaseLib skips a null value); every other character's
-    /// cards carry no field.
+    /// THE DRAFT (pick 2 (a), ruled): the temporary layer a deck card's
+    /// combat copy carried, kept on the DECK card and saved with it, so a
+    /// save and load between the fight and its reward screen keeps it.
+    /// Written at every Edit and rewritten at the end of every fight
+    /// (<see cref="SnapshotDrafts"/>). The value is a
+    /// <see cref="YaeAnnotation"/>'s NAME; null writes nothing.
     /// </summary>
     private static readonly SavedSpireField<CardModel, string?> Drafts =
         new(() => null, "KleeMod_YaeDraft");
@@ -463,19 +589,37 @@ public static class YaeEditing
     public static void RecordDraft(CardModel deckCard, YaeAnnotation annotation) =>
         Drafts.Set(deckCard, annotation == YaeAnnotation.None ? null : annotation.ToString());
 
-    /// <summary>The Annotation a card carries, a Published one included.
-    /// PURE.</summary>
-    public static YaeAnnotation Of(CardModel? card) =>
-        card?.Enchantment is YaeAnnotationModel a ? a.Annotation : YaeAnnotation.None;
+    /// <summary>The card's Masterpiece, or null.</summary>
+    public static YaeMasterpiece? Masterpiece(CardModel? card) =>
+        card?.Enchantment as YaeMasterpiece;
+
+    /// <summary>Every layer the card carries, the stack first. PURE.</summary>
+    public static IReadOnlyList<YaeAnnotation> Layers(CardModel? card) =>
+        Masterpiece(card)?.Layers ?? Array.Empty<YaeAnnotation>();
+
+    /// <summary>The permanent stack. PURE.</summary>
+    public static IReadOnlyList<YaeAnnotation> Stack(CardModel? card) =>
+        Masterpiece(card)?.Stack ?? Array.Empty<YaeAnnotation>();
+
+    /// <summary>The temporary slot. PURE.</summary>
+    public static YaeAnnotation Temporary(CardModel? card) =>
+        Masterpiece(card)?.Temporary ?? YaeAnnotation.None;
+
+    /// <summary>How many layers of <paramref name="annotation"/>. PURE.
+    /// </summary>
+    public static int Count(CardModel? card, YaeAnnotation annotation) =>
+        Masterpiece(card)?.Count(annotation) ?? 0;
 
     /// <summary>"Annotated means carrying any Annotation, a Published one
     /// included." PURE.</summary>
-    public static bool IsAnnotated(CardModel? card) => Of(card) != YaeAnnotation.None;
+    public static bool IsAnnotated(CardModel? card) => Layers(card).Count > 0;
+
+    /// <summary>Does the card carry a Published layer? PURE.</summary>
+    public static bool Published(CardModel? card) => Stack(card).Count > 0;
 
     /// <summary>Annotated cards in the owner's hand; the card being played
-    /// counts if it is Annotated (Bestseller counts itself), which is why it
-    /// is added when it has already left the hand. PURE over the piles.
-    /// </summary>
+    /// counts if it is Annotated (Bestseller counts itself). PURE over the
+    /// piles.</summary>
     public static int AnnotatedInHand(CardModel playing)
     {
         var owner = playing.Owner;
@@ -488,9 +632,7 @@ public static class YaeEditing
 
     /// <summary>
     /// "Edit a card in your hand: never the Edit card itself, never a Status
-    /// or Curse, never a kit card." PURE. (The sim's `kit_card` is the old
-    /// Burst kit, which no C# card is; a Quest card is the engine's third
-    /// never-enchantable type.)
+    /// or Curse, never a kit card." PURE.
     /// </summary>
     public static bool Editable(CardModel candidate, CardModel? editor) =>
         !ReferenceEquals(candidate, editor)
@@ -499,50 +641,27 @@ public static class YaeEditing
         && candidate.Type != CardType.Quest;
 
     /// <summary>
-    /// Does this combat card carry a Published Annotation? Its deck card
-    /// holds the Annotation, which only a Publish writes there. A card made
-    /// in combat has no deck card and is never Published. PURE.
-    /// </summary>
-    public static bool Published(CardModel? card) =>
-        card?.DeckVersion is { } deck && IsAnnotated(deck);
-
-    /// <summary>
     /// The cards an Edit (the chooser and Reborn as Guuji Yae) can reach:
-    /// <see cref="Editable"/>, never a card with a Published Annotation
-    /// (shrine-r2 seat, 2026-10-14: an Edit used to override it for the
-    /// combat), and never one the Annotation would do nothing on (the
-    /// dead-edit filter). PURE.
+    /// <see cref="Editable"/>, and never one the Annotation would do nothing
+    /// on (the dead-edit filter). A PUBLISHED card is reachable (review r3,
+    /// pick 2 (a), replacing #1308's skip): the Edit fills its temporary
+    /// slot. PURE.
     /// </summary>
     public static bool EditReaches(CardModel candidate, CardModel? editor,
                                    YaeAnnotation annotation) =>
         Editable(candidate, editor)
-        && !Published(candidate)
         && YaeAnnotationReach.Affects(candidate, annotation);
 
-    /// <summary>The model for one Annotation, fresh and mutable.</summary>
-    public static YaeAnnotationModel? Create(YaeAnnotation annotation) => annotation switch
-    {
-        YaeAnnotation.RedInk => (YaeAnnotationModel)ModelDb.Enchantment<RedInkAnnotation>().ToMutable(),
-        YaeAnnotation.Footnote => (YaeAnnotationModel)ModelDb.Enchantment<FootnoteAnnotation>().ToMutable(),
-        YaeAnnotation.DeadlineExtension => (YaeAnnotationModel)ModelDb.Enchantment<DeadlineExtensionAnnotation>().ToMutable(),
-        YaeAnnotation.FoxFire => (YaeAnnotationModel)ModelDb.Enchantment<FoxFireAnnotation>().ToMutable(),
-        YaeAnnotation.SakuraSeal => (YaeAnnotationModel)ModelDb.Enchantment<SakuraSealAnnotation>().ToMutable(),
-        YaeAnnotation.Royalties => (YaeAnnotationModel)ModelDb.Enchantment<RoyaltiesAnnotation>().ToMutable(),
-        YaeAnnotation.Reprint => (YaeAnnotationModel)ModelDb.Enchantment<ReprintAnnotation>().ToMutable(),
-        _ => null,
-    };
-
     /// <summary>
-    /// Clear whatever Enchantment the card carries ("overwriting any it
-    /// had"), taking back the Retain a Deadline Extension added unless the
-    /// card prints Retain itself.
+    /// Clear whatever Enchantment the card carries, taking back the Retain a
+    /// Deadline Extension added unless the card prints Retain itself.
     /// </summary>
     public static void Clear(CardModel card)
     {
         var had = card.Enchantment;
         if (had == null) return;
         CardCmd.ClearEnchantment(card);
-        if (had is DeadlineExtensionAnnotation
+        if (had is YaeMasterpiece m && m.Count(YaeAnnotation.DeadlineExtension) > 0
             && !card.CanonicalKeywords.Contains(CardKeyword.Retain))
         {
             card.RemoveKeyword(CardKeyword.Retain);
@@ -551,18 +670,40 @@ public static class YaeEditing
     }
 
     /// <summary>
-    /// Give <paramref name="card"/> one Annotation, overwriting any it had.
-    /// A combat card also writes its deck card's draft, which is what the
-    /// after-elite Publish reads.
+    /// Give <paramref name="card"/> these layers: a fresh Masterpiece carrying
+    /// <paramref name="stack"/> and <paramref name="temporary"/>, the Reprint
+    /// state given, swapped in for whatever it wore (so the card redraws it).
+    /// No layer at all leaves the card plain.
+    /// </summary>
+    public static bool Apply(CardModel card, IEnumerable<YaeAnnotation> stack,
+                             YaeAnnotation temporary, bool playedOnce, int armed)
+    {
+        var layers = stack.Where(a => a != YaeAnnotation.None).ToList();
+        Clear(card);
+        if (layers.Count == 0 && temporary == YaeAnnotation.None) return true;
+        var model = (YaeMasterpiece)ModelDb.Enchantment<YaeMasterpiece>().ToMutable();
+        model.Set(layers, temporary, playedOnce, armed);
+        if (!model.CanEnchant(card)) return false;
+        CardCmd.Enchant(model, card, 1m);
+        return true;
+    }
+
+    /// <summary>
+    /// AN EDIT: <paramref name="annotation"/> fills the card's temporary
+    /// slot, replacing what was there; the stack is never touched. A
+    /// temporary Reprint arms one fresh replay. A combat card also writes
+    /// its deck card's draft, which is what the after-elite Publish reads.
     /// </summary>
     public static bool Annotate(CardModel card, YaeAnnotation annotation,
                                 bool recordDraft = true)
     {
-        var model = Create(annotation);
-        if (model == null) return false;
-        Clear(card);
-        if (!model.CanEnchant(card)) return false;
-        CardCmd.Enchant(model, card, 1m);
+        if (annotation == YaeAnnotation.None) return false;
+        var had = Masterpiece(card);
+        if (!Apply(card, Stack(card), annotation, had?.PlayedOnce ?? false,
+                   annotation == YaeAnnotation.Reprint ? 1 : 0))
+        {
+            return false;
+        }
         if (recordDraft && card.DeckVersion is { } deck)
         {
             RecordDraft(deck, annotation);
@@ -572,11 +713,8 @@ public static class YaeEditing
 
     /// <summary>
     /// "Edit a card in your hand: &lt;Annotation&gt;", <paramref name="times"/>
-    /// times. The player picks each card (the sim's pilot picks by its
-    /// default reading, <c>yae_shrine._edit_target</c>), never a card with a
-    /// Published Annotation (<see cref="EditReaches"/>). Nothing qualifies:
-    /// nothing happens (the cost is already paid). (Serialization pays per
-    /// Annotated card played now, shrine r2.)
+    /// times. The player picks each card, a Published one included
+    /// (<see cref="EditReaches"/>). Nothing qualifies: nothing happens.
     /// </summary>
     public static async Task Edit(PlayerChoiceContext choiceContext,
                                   CardModel editor, YaeAnnotation annotation,
@@ -600,10 +738,8 @@ public static class YaeEditing
 
     /// <summary>
     /// Reborn as Guuji Yae: "Choose an Annotation. Edit every other card in
-    /// your hand with it." The player chooses from the five faces
-    /// (<see cref="Cards.Prototype.YaeModalOptions"/>); the sim's pilot takes
-    /// the row's printed default, Sakura Seal. A card with a Published
-    /// Annotation is skipped (<see cref="EditReaches"/>).
+    /// your hand with it." The sim's pilot takes the row's printed default,
+    /// Sakura Seal.
     /// </summary>
     public static async Task EditAll(PlayerChoiceContext choiceContext,
                                      CardModel editor, YaeAnnotation fallback)
@@ -621,23 +757,38 @@ public static class YaeEditing
         {
             if (Annotate(card, chosen)) n++;
         }
-        if (n == 0) return;
         for (var i = 0; i < n; i++) YaeShrineLedger.For(owner.Creature).NoteEdit();
     }
 
     /// <summary>
-    /// "A Published Annotation lasts the rest of the run." Written on the
-    /// DECK card, which the engine saves with its Enchantment; the combat
-    /// card keeps what it carries. Returns false for a card with no deck
-    /// card (a copy made in combat), which has nothing to publish to.
+    /// "A Published Annotation lasts the rest of the run": added to the
+    /// DECK card's stack, which the run save keeps. Stacks grow (review r3).
     /// </summary>
     public static bool PublishToDeck(CardModel deckCard, YaeAnnotation annotation) =>
-        Annotate(deckCard, annotation, recordDraft: false);
+        annotation != YaeAnnotation.None
+        && Apply(deckCard, Stack(deckCard).Concat(new[] { annotation }),
+                 YaeAnnotation.None, false, 0);
+
+    /// <summary>
+    /// PUBLISH IN COMBAT: the card's temporary layer moves onto its own
+    /// stack, once (<see cref="YaeLayers.ArmedAfterPublish"/> keeps a Reprint
+    /// from counting twice). Returns what moved.
+    /// </summary>
+    public static YaeAnnotation PublishLayer(CardModel card)
+    {
+        var m = Masterpiece(card);
+        if (m == null || m.Temporary == YaeAnnotation.None) return YaeAnnotation.None;
+        var moved = m.Temporary;
+        Apply(card, m.Stack.Concat(new[] { moved }), YaeAnnotation.None,
+              m.PlayedOnce, YaeLayers.ArmedAfterPublish(moved, m.PlayedOnce, m.Armed));
+        return moved;
+    }
 
     /// <summary>
     /// The Seven Glamours: "Publish an Annotated card in your hand: its
     /// Annotation lasts the rest of the run." The player picks among the
-    /// Annotated cards in hand that have a deck card.
+    /// cards in hand with a temporary layer and a deck card: the layer joins
+    /// the combat card's stack and the deck card's.
     /// </summary>
     public static async Task PublishFromHand(PlayerChoiceContext choiceContext,
                                              CardModel editor)
@@ -647,19 +798,93 @@ public static class YaeEditing
         var picked = (await CardSelectCmd.FromHand(
             choiceContext, owner,
             new CardSelectorPrefs(new LocString(Table, PublishPromptKey), 1),
-            c => Editable(c, editor) && IsAnnotated(c) && c.DeckVersion != null,
+            c => Editable(c, editor) && Temporary(c) != YaeAnnotation.None
+                 && c.DeckVersion != null,
             editor)).FirstOrDefault();
         if (picked?.DeckVersion is not { } deck) return;
-        PublishToDeck(deck, Of(picked));
+        var moved = PublishLayer(picked);
+        if (moved == YaeAnnotation.None) return;
+        PublishToDeck(deck, moved);
+        RecordDraft(deck, YaeAnnotation.None);
+    }
+
+    // ---- The signature cards (review r3, sec.3) ---------------------------
+
+    /// <summary>
+    /// Second Printing: "Put an Annotated card from your Discard Pile into
+    /// your hand. [It costs 0 this turn.]"
+    /// </summary>
+    public static async Task SecondPrinting(PlayerChoiceContext choiceContext,
+                                            CardModel editor, bool free)
+    {
+        var owner = editor.Owner;
+        if (owner == null) return;
+        var discard = PileType.Discard.GetPile(owner);
+        if (!discard.Cards.Any(IsAnnotated)) return;
+        var picked = (await CardSelectCmd.FromCombatPile(
+            choiceContext, discard, owner,
+            new CardSelectorPrefs(new LocString(Table, RecallPromptKey), 1),
+            IsAnnotated)).FirstOrDefault();
+        if (picked == null) return;
+        await CardPileCmd.Add(picked, PileType.Hand);
+        if (free) picked.EnergyCost.SetThisTurn(0);
+    }
+
+    /// <summary>Serial Novel: <paramref name="n"/> random Annotated cards
+    /// from the Discard Pile into the hand, one at a time.</summary>
+    public static async Task RecallRandomAnnotated(Player player, int n)
+    {
+        var rng = player.RunState.Rng.CombatCardSelection;
+        for (var i = 0; i < n; i++)
+        {
+            var cands = PileType.Discard.GetPile(player).Cards.Where(IsAnnotated).ToList();
+            if (cands.Count == 0) return;
+            await CardPileCmd.Add(rng.NextItem(cands), PileType.Hand);
+        }
+    }
+
+    /// <summary>
+    /// What Author's Copy can copy: an Annotated card in hand, never itself
+    /// and never an Author's Copy (review r3: LAW, "copy effects never make
+    /// an energy-positive loop"; an Author's Copy+ with Royalties copied by
+    /// another made +1 Energy a turn). PURE.
+    /// </summary>
+    public static bool CopyReaches(CardModel candidate, CardModel? editor) =>
+        !ReferenceEquals(candidate, editor)
+        && !IsAuthorsCopy(candidate)
+        && IsAnnotated(candidate);
+
+    /// <summary>Is this card an Author's Copy (any copy of one)?</summary>
+    public static bool IsAuthorsCopy(CardModel? card) =>
+        card is Cards.Prototype.Generated.ProtoYmAuthorsCopy;
+
+    /// <summary>
+    /// Author's Copy: "Add a copy of an Annotated card in your hand (not an
+    /// Author's Copy) to your hand. It keeps its Annotations." A copy is a
+    /// new card: its Reprints are armed.
+    /// </summary>
+    public static async Task AuthorsCopy(PlayerChoiceContext choiceContext,
+                                         CardModel editor)
+    {
+        var owner = editor.Owner;
+        if (owner == null) return;
+        var picked = (await CardSelectCmd.FromHand(
+            choiceContext, owner,
+            new CardSelectorPrefs(new LocString(Table, CopyPromptKey), 1),
+            c => CopyReaches(c, editor),
+            editor)).FirstOrDefault();
+        if (picked == null) return;
+        var copy = picked.CreateClone();
+        Masterpiece(copy)?.ArmAsCopy();
+        await CardPileCmd.AddGeneratedCardToCombat(copy, PileType.Hand, owner);
     }
 
     // ---- Publish after elites and bosses (ruled 2026-10-14) ---------------
 
     /// <summary>
     /// Does this fight's reward screen carry Meditations of a Yako's Publish?
-    /// "After an elite or boss fight": an elite or a boss that gives rewards,
-    /// never a normal fight, and never the final boss (no reward screen
-    /// follows it). PURE.
+    /// An elite or a boss that gives rewards, never a normal fight, and never
+    /// the final boss. PURE.
     /// </summary>
     public static bool OffersPublish(RoomType roomType, bool givesRewards,
                                      bool finalBoss) =>
@@ -668,15 +893,14 @@ public static class YaeEditing
 
     /// <summary>
     /// The Publish offer, PURE over its rows: each row is a deck card, the
-    /// Annotation the fight left on it (its draft) and whether it already
-    /// carries a Published Annotation. Offered: every card the fight left
-    /// Annotated that is not yet Published (a card holds one Enchantment, so
-    /// a second permanent Annotation has nowhere to go), in deck order, each
-    /// once.
+    /// temporary layer the fight left on it (its draft) and whether it
+    /// already carries a Published stack. Offered: every card the fight left
+    /// a draft on, in deck order, each once. A Published card is offered
+    /// again (review r3: stacks grow).
     /// </summary>
     public static List<T> PublishChoices<T>(
         IEnumerable<(T Card, YaeAnnotation Draft, bool Published)> rows) where T : class =>
-        rows.Where(r => r.Draft != YaeAnnotation.None && !r.Published)
+        rows.Where(r => r.Draft != YaeAnnotation.None)
             .Select(r => r.Card)
             .Distinct()
             .ToList();
@@ -686,12 +910,13 @@ public static class YaeEditing
     public static IEnumerable<CardModel> PublishChoices(Player player) =>
         PublishChoices(player.Deck.Cards
             .Where(c => YaeAnnotationReach.Affects(c, Draft(c)))
-            .Select(c => (c, Draft(c), c.Enchantment is YaeAnnotationModel)));
+            .Select(c => (c, Draft(c), Published(c))));
 
     /// <summary>
-    /// At the end of a fight: every deck card's draft becomes the Annotation
-    /// its combat copy carries now, and a card the fight left plain holds
-    /// none. Cards made in combat have no deck card and are skipped.
+    /// At the end of a fight: every deck card's draft becomes the TEMPORARY
+    /// layer its combat copy carries now (the stack is already the deck
+    /// card's), and a card the fight left without one holds none. Cards
+    /// made in combat have no deck card and are skipped.
     /// </summary>
     public static void SnapshotDrafts(Player? player)
     {
@@ -700,9 +925,9 @@ public static class YaeEditing
         foreach (var card in player.PlayerCombatState?.AllCards
                              ?? Enumerable.Empty<CardModel>())
         {
-            if (card.DeckVersion is { } deck && IsAnnotated(card))
+            if (card.DeckVersion is { } deck && Temporary(card) != YaeAnnotation.None)
             {
-                carried[deck] = Of(card);
+                carried[deck] = Temporary(card);
             }
         }
         foreach (var deck in player.Deck.Cards)
@@ -717,9 +942,9 @@ public static class YaeEditing
         foreach (var deck in player.Deck.Cards) RecordDraft(deck, YaeAnnotation.None);
     }
 
-    /// <summary>A copy of a deck card wearing its draft, for the Publish grid
-    /// only: never put in a pile, and taken out of the run once the grid
-    /// closes.</summary>
+    /// <summary>A copy of a deck card wearing its stack and, in its temporary
+    /// slot, its draft, for the Publish grid only: never put in a pile, and
+    /// taken out of the run once the grid closes.</summary>
     public static CardModel PublishPreview(CardModel deckCard)
     {
         var preview = deckCard.Owner!.RunState.CloneCard(deckCard);
@@ -728,9 +953,7 @@ public static class YaeEditing
     }
 
     /// <summary>The deck cards the grid's picks stand for: each preview is
-    /// the copy of the deck card at the same index, so the exact copy picked
-    /// is the one Published, even beside an identical card. Nothing picked
-    /// (the grid closed) is nothing. PURE.</summary>
+    /// the copy of the deck card at the same index. PURE.</summary>
     public static List<T> ResolvePicks<T>(IReadOnlyList<T> previews,
                                           IReadOnlyList<T> decks,
                                           IEnumerable<T> picked) where T : class

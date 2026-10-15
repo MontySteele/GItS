@@ -38,14 +38,14 @@ public sealed class ProtoYmYakanEvocation : CustomCardModel, ICharacterCard, ISa
     public string CharacterId => "yae";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSakura(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForFullShrine(ArmKeywordTips.ForSakura(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_yakan_evocation");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Yakan Evocation"),
-        ("description", "Plant a [gold]Sakura[/gold] (with the shrine full, your oldest strikes, refreshes and gains a Level)."),
+        ("description", "Plant a [gold]Sakura[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -111,13 +111,13 @@ public class YaePrototypeTests : IDisposable
         Assert.Equal(3, YaeLaw.SakuraCap);
         Assert.Equal(3, YaeLaw.SakuraTurns);
         Assert.Equal(2, YaeLaw.SakuraBase);
+        Assert.Equal(1, YaeLaw.FoxfireBase);     // review r3
+        Assert.Equal(2, YaeLaw.KitsuneBase);     // review r3
         Assert.Equal(1, YaeLaw.PlantLevel);
         Assert.Equal(3, YaeLaw.RedInkAmount);
         Assert.Equal(4, YaeLaw.FoxFireDamage);
-        Assert.Equal(1, YaeLaw.OfferingPerStrike);
         Assert.Equal(1, YaeLaw.RoyaltiesPayout);
     }
-
     [Fact]
     public void A_plant_is_level_one_with_three_strikes()
     {
@@ -188,43 +188,36 @@ public class YaePrototypeTests : IDisposable
     // ---- the Tenko kinds (shrine r2, ruled 2026-10-14) -----------------------
 
     [Fact]
-    public void The_shrine_has_no_rite_any_more()
+    public void The_shrine_has_no_rite_and_no_typed_tenko()
     {
         Assert.Null(typeof(YaeShrineLedger).GetProperty("Rite"));
-        Assert.Equal(0, (int)YaeTenkoKind.Thunder);
         Assert.Null(typeof(YaeCards).GetMethod("Rite"));
+        // Review r3: the typed Tenko is gone; Tenko takes no kind.
+        Assert.Null(typeof(SakuraBadge).Assembly.GetType("KleeMod.Powers.YaeTenkoKind"));
+        Assert.Single(typeof(YaeCards).GetMethods(), m => m.Name == nameof(YaeCards.Tenko));
+        Assert.Equal(0, (int)YaeSakuraKind.Thunder);
     }
-
     [Fact]
-    public void Each_tenko_kinds_strike_size()
+    public void Each_sakura_kinds_action_size()
     {
-        // Thunder and Warding 2 + Level; Wildfire Level; Offering 1 card.
-        Assert.Equal(5, YaeShrineLedger.StrikeSize(YaeTenkoKind.Thunder, 3, YaeAnnotation.None));
-        Assert.Equal(5, YaeShrineLedger.StrikeSize(YaeTenkoKind.Warding, 3, YaeAnnotation.None));
-        Assert.Equal(3, YaeShrineLedger.StrikeSize(YaeTenkoKind.Wildfire, 3, YaeAnnotation.None));
-        Assert.Equal(1, YaeShrineLedger.StrikeSize(YaeTenkoKind.Offering, 3, YaeAnnotation.None));
+        // Review r3: Sakura 2 + Level, Foxfire 1 + Level, Kitsune 2 + Level.
+        Assert.Equal(5, YaeShrineLedger.ActSize(YaeSakuraKind.Thunder, 3, YaeAnnotation.None));
+        Assert.Equal(4, YaeShrineLedger.ActSize(YaeSakuraKind.Foxfire, 3, YaeAnnotation.None));
+        Assert.Equal(5, YaeShrineLedger.ActSize(YaeSakuraKind.Kitsune, 3, YaeAnnotation.None));
+        Assert.True(YaeShrineLedger.DealsDamage(YaeSakuraKind.Foxfire));
+        Assert.False(YaeShrineLedger.DealsDamage(YaeSakuraKind.Kitsune));
     }
-
     [Fact]
-    public void Each_kind_does_its_own_job_in_the_strike()
+    public void Each_kind_does_its_own_job_when_it_acts()
     {
-        var calls = Il.CallSequence(typeof(YaeShrine).GetMethod(nameof(YaeShrine.Strike))!).ToList();
-        // Every strike hits first, a typed Tenko's too ([USER], 2026-10-14:
-        // "Hmm, the double strike makes Tenko effects quite strong, but let's
-        // try it and see what happens"), then the kind's bonus.
-        var hit = calls.FindIndex(c => c.Contains("YaeShrine.Hit"));
-        Assert.True(hit >= 0);
-        Assert.True(hit < calls.FindIndex(c => c.Contains("CreatureCmd.GainBlock")));
-        Assert.True(hit < calls.FindIndex(c => c.Contains("set_PendingDraw")));
-        Assert.Contains(calls, c => c.Contains("CreatureCmd.GainBlock"));      // Warding
-        Assert.Contains(calls, c => c.Contains("set_PendingDraw"));            // Offering
-        Assert.Contains(calls, c => c.Contains("HittableEnemies"));            // Wildfire
+        var calls = Il.CallSequence(typeof(YaeShrine).GetMethod(nameof(YaeShrine.Act))!).ToList();
+        Assert.Contains(calls, c => c.Contains("YaeShrine.Hit"));               // Sakura, Foxfire
+        Assert.Contains(calls, c => c.Contains("CreatureCmd.GainBlock"));      // Kitsune
+        Assert.Contains(calls, c => c.Contains("HittableEnemies"));            // Foxfire: ALL
         Assert.Contains(calls, c => c.Contains(nameof(YaeShrine.FoxFire)));    // Fox Fire
-        // Sakura Channeling (2026-10-14) raises the cap, not the strike.
         Assert.DoesNotContain(calls, c => c.Contains("SakuraChannelingPower"));
-        Assert.DoesNotContain(calls, c => c.Contains("get_Rite"));
+        Assert.DoesNotContain(calls, c => c.Contains("PendingDraw"));
     }
-
     [Fact]
     public void Serialization_pays_per_annotated_play_not_per_edit()
     {
@@ -238,26 +231,17 @@ public class YaePrototypeTests : IDisposable
     }
 
     [Fact]
-    public void Offering_and_fallen_petals_pay_at_her_next_turn_start()
+    public void Nothing_is_banked_for_her_next_turn_start_any_more()
     {
+        // Review r3: Offering left with the typed Tenko and Fallen Petals is
+        // an active Skill; the turn start brings Serial Novel's card.
         var calls = Il.CallSequence(typeof(YaeShrine).GetMethod(nameof(YaeShrine.TurnStart))!).ToList();
-        Assert.Contains(calls, c => c.Contains("TakePending"));
-        Assert.Contains(calls, c => c.Contains("FallenPetalsPower"));
-        Assert.Contains(calls, c => c.Contains("FallenPetalsPlusPower"));
-        Assert.Contains(calls, c => c.Contains("PlayerCmd.GainEnergy"));
-        Assert.Contains(calls, c => c.Contains("CardPileCmd.Draw"));
+        Assert.DoesNotContain(calls, c => c.Contains("TakePending"));
+        Assert.DoesNotContain(calls, c => c.Contains("FallenPetals"));
+        Assert.Contains(calls, c => c.Contains("SerialNovelPower"));
+        Assert.Contains(calls, c => c.Contains(nameof(YaeEditing.RecallRandomAnnotated)));
+        Assert.Null(typeof(SakuraBadge).Assembly.GetType("KleeMod.Powers.FallenPetalsPower"));
     }
-
-    [Fact]
-    public void A_wither_is_banked_for_fallen_petals()
-    {
-        var ledger = Fresh();
-        PlantN(ledger, 1);
-        for (var i = 0; i < 3; i++) ledger.TickAndWither();
-        Assert.Equal(0, ledger.Count);
-        Assert.Equal(1, ledger.PendingWithers);
-    }
-
     [Fact]
     public void The_rite_badges_are_gone()
     {
@@ -267,36 +251,35 @@ public class YaePrototypeTests : IDisposable
     }
 
     [Fact]
-    public void Typed_tenko_cards_tenko_as_their_kind()
+    public void The_four_changed_cards_do_their_new_jobs()
     {
+        // Review r3's table: the Guard and the Sweep plant their kind,
+        // Kitsune Guile Tenkos, Manuscript Pile extends.
         Assert.Contains(Il.CallSequence(typeof(ProtoYmShrineMaidensGuard).GetMethod(
-            "OnPlay", HeadlessGame.All)!), c => c.Contains("YaeCards.Tenko"));
+            "OnPlay", HeadlessGame.All)!), c => c.Contains("YaeCards.Plant"));
         Assert.Contains(Il.CallSequence(typeof(ProtoYmFoxfireSweep).GetMethod(
-            "OnPlay", HeadlessGame.All)!), c => c.Contains("YaeCards.Tenko"));
-        Assert.Contains(Il.CallSequence(typeof(ProtoYmManuscriptPile).GetMethod(
-            "OnPlay", HeadlessGame.All)!), c => c.Contains("YaeCards.Tenko"));
+            "OnPlay", HeadlessGame.All)!), c => c.Contains("YaeCards.Plant"));
         Assert.Contains(Il.CallSequence(typeof(ProtoYmKitsuneGuile).GetMethod(
             "OnPlay", HeadlessGame.All)!), c => c.Contains("YaeCards.Tenko"));
+        Assert.Contains(Il.CallSequence(typeof(ProtoYmManuscriptPile).GetMethod(
+            "OnPlay", HeadlessGame.All)!), c => c.Contains("YaeCards.Extend"));
+        Assert.DoesNotContain(Il.CallSequence(typeof(ProtoYmManuscriptPile).GetMethod(
+            "OnPlay", HeadlessGame.All)!), c => c.Contains("YaeCards.Tenko"));
     }
-
     // ---- Sakura Annotations (ruled 2026-10-14) -------------------------------
 
     [Fact]
-    public void Red_ink_makes_a_sakuras_strike_three_bigger_but_not_in_offering()
+    public void Red_ink_makes_any_kinds_action_three_bigger()
     {
-        // Claude, 2026-10-14: Red Ink skips Offering, like Sakura Grove.
-        Assert.Equal(YaeShrineLedger.StrikeSize(YaeTenkoKind.Offering, 2, YaeAnnotation.None),
-                     YaeShrineLedger.StrikeSize(YaeTenkoKind.Offering, 2, YaeAnnotation.RedInk));
-        foreach (var rite in new[] { YaeTenkoKind.Thunder, YaeTenkoKind.Warding, YaeTenkoKind.Wildfire })
+        foreach (var kind in new[] { YaeSakuraKind.Thunder, YaeSakuraKind.Foxfire, YaeSakuraKind.Kitsune })
         {
             Assert.Equal(
-                YaeShrineLedger.StrikeSize(rite, 2, YaeAnnotation.None) + YaeLaw.RedInkAmount,
-                YaeShrineLedger.StrikeSize(rite, 2, YaeAnnotation.RedInk));
+                YaeShrineLedger.ActSize(kind, 2, YaeAnnotation.None) + YaeLaw.RedInkAmount,
+                YaeShrineLedger.ActSize(kind, 2, YaeAnnotation.RedInk));
         }
-        Assert.Equal(YaeShrineLedger.StrikeSize(YaeTenkoKind.Thunder, 2, YaeAnnotation.None),
-                     YaeShrineLedger.StrikeSize(YaeTenkoKind.Thunder, 2, YaeAnnotation.FoxFire));
+        Assert.Equal(YaeShrineLedger.ActSize(YaeSakuraKind.Thunder, 2, YaeAnnotation.None),
+                     YaeShrineLedger.ActSize(YaeSakuraKind.Thunder, 2, YaeAnnotation.FoxFire));
     }
-
     [Fact]
     public void Sakura_edits_reach_newest_oldest_and_every_and_replace()
     {
@@ -375,38 +358,27 @@ public class YaePrototypeTests : IDisposable
     }
 
     [Fact]
-    public void Reprint_is_glam_a_play_count_hook_spent_after_the_first_play()
+    public void Reprint_is_a_play_count_hook_on_the_masterpiece()
     {
-        var t = typeof(ReprintAnnotation);
+        var t = typeof(YaeMasterpiece);
         Assert.Equal(t, t.GetMethod("EnchantPlayCount")!.DeclaringType);
         Assert.Equal(t, t.GetMethod("AfterCardPlayed")!.DeclaringType);
-        // No OnPlay rider: the extra play is the engine's own Replay.
-        Assert.NotEqual(t, t.GetMethod("OnPlay")!.DeclaringType);
-        var after = Il.CallSequence(t.GetMethod("AfterCardPlayed")!);
-        Assert.Contains(after, c => c.Contains("set_UsedThisCombat"));
-        Assert.Contains(after, c => c.Contains("set_Status"));
         Assert.Contains(Il.CallSequence(t.GetMethod("EnchantPlayCount")!),
-                        c => c.Contains("get_UsedThisCombat"));
+                        c => c.Contains(nameof(YaeLayers.Replays)));
     }
-
     [Fact]
-    public void A_spent_reprint_reads_spent_and_offers_no_replay()
+    public void A_spent_reprint_reads_spent()
     {
         // Two blind seats (2026-10-14) expected a second replay off a spent
-        // Reprint. Glam's greyed tab (Status = Disabled) stays; the hover
-        // adds "Used this combat." and drops the Replay tip once spent.
-        var t = typeof(ReprintAnnotation);
-        var after = Il.CallSequence(t.GetMethod("AfterCardPlayed")!);
-        Assert.Contains(after, c => c.Contains("set_BaseValue"));
-        var tips = t.GetProperty("ExtraHoverTips", HeadlessGame.All)!.GetGetMethod(true)!;
-        Assert.Equal(t, tips.DeclaringType);
-        Assert.Contains(Il.CallSequence(tips), c => c.Contains("get_Status"));
-        var description = new ReprintAnnotation().Localization!
-            .Single(kv => kv.Item1 == "description").Item2;
-        Assert.Equal(YaeAnnotationText.Rule(YaeAnnotation.Reprint)
-                     + "{Spent:cond:==1? Used this combat.|}", description);
+        // Reprint: the Masterpiece's hover says "Reprint: used this combat."
+        Assert.True(YaeLayers.ReprintUsed(1, playedOnce: true, armed: 0));
+        Assert.False(YaeLayers.ReprintUsed(1, playedOnce: true, armed: 1));
+        Assert.False(YaeLayers.ReprintUsed(1, playedOnce: false, armed: 0));
+        Assert.False(YaeLayers.ReprintUsed(0, playedOnce: true, armed: 0));
+        Assert.Contains(YaeAnnotationText.ReprintUsed,
+                        YaeAnnotationText.Summary(new[] { YaeAnnotation.Reprint },
+                                                  YaeAnnotation.None, true));
     }
-
     [Fact]
     public void Reprint_reaches_any_playable_card()
     {
@@ -420,14 +392,13 @@ public class YaePrototypeTests : IDisposable
     [Fact]
     public void Royalties_gains_energy_after_the_cards_own_effects()
     {
-        Assert.Equal(typeof(RoyaltiesAnnotation),
-                     typeof(RoyaltiesAnnotation).GetMethod("OnPlay")!.DeclaringType);
-        Assert.Contains(Il.CallSequence(typeof(RoyaltiesAnnotation).GetMethod("OnPlay")!),
+        var t = typeof(YaeMasterpiece);
+        Assert.Equal(t, t.GetMethod("OnPlay")!.DeclaringType);
+        Assert.Contains(Il.CallSequence(t.GetMethod("OnPlay")!),
                         c => c.Contains("PlayerCmd.GainEnergy"));
         Assert.Equal(6, (int)YaeAnnotation.Royalties);
         Assert.Equal(YaeAnnotation.Royalties, YaeEditing.ParseDraft("Royalties"));
     }
-
     [Fact]
     public void A_sakura_planted_on_turn_n_strikes_n_n1_n2_and_is_gone_on_n3()
     {
@@ -504,7 +475,7 @@ public class YaePrototypeTests : IDisposable
     {
         // The door's order, read off its IL: the strikes, then the refresh.
         var calls = Il.CallSequence(typeof(YaeShrine).GetMethod(nameof(YaeShrine.Tenko))!).ToList();
-        var strike = calls.FindIndex(c => c.Contains(nameof(YaeShrine.StrikeAll)));
+        var strike = calls.FindIndex(c => c.Contains(nameof(YaeShrine.ActAll)));
         var refresh = calls.FindIndex(c => c.Contains(nameof(YaeShrineLedger.Refresh)));
         Assert.True(strike >= 0 && refresh > strike, string.Join(", ", calls));
     }
@@ -513,7 +484,7 @@ public class YaePrototypeTests : IDisposable
     public void The_turn_end_strikes_then_ticks_and_blooms()
     {
         var calls = Il.CallSequence(typeof(YaeShrine).GetMethod(nameof(YaeShrine.TurnEnd))!).ToList();
-        var strike = calls.FindIndex(c => c.Contains(nameof(YaeShrine.StrikeAll)));
+        var strike = calls.FindIndex(c => c.Contains(nameof(YaeShrine.ActAll)));
         var tick = calls.FindIndex(c => c.Contains(nameof(YaeShrine.TickAndBloom)));
         Assert.True(strike >= 0 && tick > strike, string.Join(", ", calls));
     }
@@ -631,50 +602,53 @@ public class YaePrototypeTests : IDisposable
     }
 
     [Fact]
-    public void Red_ink_is_a_powered_hit_rider_and_a_block_rider()
+    public void Red_ink_is_a_powered_hit_rider_and_a_block_rider_per_layer()
     {
-        var red = Uninit<RedInkAnnotation>();
-        Assert.Equal(3m, red.EnchantDamageAdditive(6m,
-            MegaCrit.Sts2.Core.ValueProps.ValueProp.Move));
-        Assert.Equal(0m, red.EnchantDamageAdditive(6m,
-            MegaCrit.Sts2.Core.ValueProps.ValueProp.Unpowered));
-        Assert.Equal(3m, red.EnchantBlockAdditive(5m));
+        var t = typeof(YaeMasterpiece);
+        Assert.Equal(t, t.GetMethod("EnchantDamageAdditive")!.DeclaringType);
+        Assert.Equal(t, t.GetMethod("EnchantBlockAdditive")!.DeclaringType);
+        Assert.Contains(Il.CallSequence(t.GetMethod("EnchantDamageAdditive")!),
+                        c => c.Contains("IsPoweredAttack"));
+        Assert.Equal(2, YaeLayers.Count(new[] { YaeAnnotation.RedInk, YaeAnnotation.Reprint },
+                                        YaeAnnotation.RedInk, YaeAnnotation.RedInk));
     }
-
     [Fact]
     public void Riders_resolve_after_the_cards_own_effects()
     {
         // The engine runs an Enchantment's OnPlay after the card's own
-        // (CardModel.OnPlayWrapper); the three riders live there.
-        foreach (var t in new[] { typeof(FootnoteAnnotation), typeof(FoxFireAnnotation),
-                                  typeof(SakuraSealAnnotation) })
-        {
-            Assert.Equal(t, t.GetMethod("OnPlay")!.DeclaringType);
-        }
-        var seal = Il.CallSequence(typeof(SakuraSealAnnotation).GetMethod("OnPlay")!).ToList();
-        Assert.Contains(seal, c => c.Contains("YaeShrine.Plant"));
+        // (CardModel.OnPlayWrapper); the Masterpiece's riders live there.
+        var calls = Il.CallSequence(typeof(YaeMasterpiece).GetMethod("OnPlay")!).ToList();
+        Assert.Contains(calls, c => c.Contains("YaeShrine.Plant"));
+        Assert.Contains(calls, c => c.Contains("YaeShrine.FoxFire"));
+        Assert.Contains(calls, c => c.Contains("CardPileCmd.Draw"));
     }
-
     [Fact]
-    public void An_edit_overwrites_and_records_the_draft_on_the_deck_card()
+    public void An_edit_fills_the_temporary_slot_and_records_the_draft_on_the_deck_card()
     {
         var calls = Il.CallSequence(typeof(YaeEditing).GetMethod(nameof(YaeEditing.Annotate))!).ToList();
-        var clear = calls.FindIndex(c => c.Contains(nameof(YaeEditing.Clear)));
-        var enchant = calls.FindIndex(c => c.Contains("CardCmd.Enchant"));
+        var apply = calls.FindIndex(c => c.Contains(nameof(YaeEditing.Apply)));
         var draft = calls.FindIndex(c => c.Contains(nameof(YaeEditing.RecordDraft)));
-        Assert.True(clear >= 0 && enchant > clear && draft > enchant,
-                    string.Join(", ", calls));
+        Assert.True(apply >= 0 && draft > apply, string.Join(", ", calls));
         Assert.Contains(calls, c => c.Contains("get_DeckVersion"));
+        Assert.Contains(calls, c => c.Contains(nameof(YaeEditing.Stack)));     // the stack kept
+        var swap = Il.CallSequence(typeof(YaeEditing).GetMethod(nameof(YaeEditing.Apply))!).ToList();
+        var clear = swap.FindIndex(c => c.Contains(nameof(YaeEditing.Clear)));
+        var enchant = swap.FindIndex(c => c.Contains("CardCmd.Enchant"));
+        Assert.True(clear >= 0 && enchant > clear, string.Join(", ", swap));
     }
-
     [Fact]
     public void Publish_writes_the_deck_card_which_the_run_save_keeps()
     {
         var calls = Il.CallSequence(typeof(YaeEditing).GetMethod(nameof(YaeEditing.PublishFromHand))!).ToList();
         Assert.Contains(calls, c => c.Contains("get_DeckVersion"));
+        Assert.Contains(calls, c => c.Contains(nameof(YaeEditing.PublishLayer)));
         Assert.Contains(calls, c => c.Contains(nameof(YaeEditing.PublishToDeck)));
+        // The stack is a saved property on the one enchantment.
+        var prop = typeof(YaeMasterpiece).GetProperty(nameof(YaeMasterpiece.Published))!;
+        Assert.NotNull(prop.GetCustomAttributes(typeof(MegaCrit.Sts2.Core.Saves.Runs.SavedPropertyAttribute), false)
+                           .SingleOrDefault());
+        Assert.Equal(typeof(int[]), prop.PropertyType);
     }
-
     // ---- the relic (sec.3) ---------------------------------------------------
 
     // Publish after elites and bosses (ruled 2026-10-14,
@@ -748,8 +722,9 @@ public class YaePrototypeTests : IDisposable
     }
 
     [Fact]
-    public void The_offer_is_the_annotated_cards_not_yet_published_in_deck_order()
+    public void The_offer_is_every_card_with_a_draft_published_ones_included()
     {
+        // Review r3, pick 2 (a): stacks grow, so a Published card is offered.
         var strike1 = new DeckSlot("Strike");
         var strike2 = new DeckSlot("Strike");
         var published = new DeckSlot("Bestseller");
@@ -757,13 +732,12 @@ public class YaePrototypeTests : IDisposable
         var offer = YaeEditing.PublishChoices(new[]
         {
             (strike1, YaeAnnotation.RedInk, false),
-            (plain, YaeAnnotation.None, false),
+            (plain, YaeAnnotation.None, true),
             (published, YaeAnnotation.SakuraSeal, true),
             (strike2, YaeAnnotation.FoxFire, false),
         });
-        Assert.Equal(new[] { strike1, strike2 }, offer);
+        Assert.Equal(new[] { strike1, published, strike2 }, offer);
     }
-
     [Fact]
     public void The_chosen_copy_is_the_one_published_and_a_skip_publishes_nothing()
     {
@@ -810,41 +784,35 @@ public class YaePrototypeTests : IDisposable
     [Fact]
     public void Her_sakura_tip_is_her_shrines_and_the_companions_stays_its_own()
     {
-        // [USER] (2026-10-14): "Sakura and Tenko should be cut into separate
-        // tips", and "I don't think we need to say 'Combat starts in
-        // Thunder'".
-        // Shrine r2 (2026-10-14): no Rite, and a full-shrine plant feeds the
-        // oldest; the Tenko tip names its three kinds.
-        // Condensed 2026-10-14: the full-shrine rule lives on the plant
-        // cards (it moves with Sakura Channeling), so the tip drops it.
         Assert.Equal("At the end of your turn, strikes an enemy for 2 + its "
                      + "Level. Lasts 3 turns, then strikes once more.",
                      ArmKeywordTips.YaeSakuraTip);
         Assert.True(ArmKeywordTips.YaeSakuraTip.Length <= 100);
-        Assert.DoesNotContain("Rite", ArmKeywordTips.YaeSakuraTip);
         Assert.DoesNotContain("Tenko", ArmKeywordTips.YaeSakuraTip);
-        Assert.DoesNotContain("Thunder", ArmKeywordTips.YaeSakuraTip);
-        Assert.Equal("[gold]Sakura[/gold] strike now, refresh to 3 turns. "
-                     + "Warding: +[gold]Block[/gold]. Wildfire: +Level to ALL. "
-                     + "Offering: +draw 1.",
+        // Review r3: Tenko is one plain rule, the paper's words.
+        Assert.Equal("Every [gold]Sakura[/gold] acts now. Refresh them to at "
+                     + "least 3 turns.",
                      ArmKeywordTips.YaeTenkoTip);
     }
-
     [Fact]
-    public void The_sakura_tips_plant_clause_is_the_ledgers_rule()
+    public void The_full_shrine_tip_is_the_ledgers_rule()
     {
-        // "planting when full refreshes the oldest and gives it a Level".
+        // Review r3: same kind levels the oldest; another kind withers it.
         var ledger = YaeShrineLedger.For(Seat.Yae().Creature);
         Assert.True(ledger.Plant(YaeLaw.PlantLevel));
         Assert.True(ledger.Plant(YaeLaw.PlantLevel));
         Assert.True(ledger.Plant(YaeLaw.PlantLevel));
         var before = ledger.Standing.Select(s => s.Level).ToList();
         Assert.False(ledger.Plant(YaeLaw.PlantLevel));
-        Assert.Equal(YaeLaw.SakuraCap, ledger.Standing.Count);
         Assert.Equal(new[] { before[0] + 1, before[1], before[2] },
                      ledger.Standing.Select(s => s.Level));
+        Assert.True(ledger.Plant(YaeLaw.PlantLevel, null, kind: YaeSakuraKind.Kitsune));
+        Assert.Equal(YaeLaw.SakuraCap, ledger.Count);
+        Assert.Equal(YaeSakuraKind.Kitsune, ledger.Standing[^1].Kind);
+        Assert.Equal("Shrine full: your oldest acts. Same kind: it refreshes "
+                     + "and gains a Level. Other kind: it withers.",
+                     ArmKeywordTips.YaeFullShrineTip);
     }
-
     // ---- the Edit tip and each Annotation's own (2026-10-14) ----------------
     // [USER]: "the 'Edit' tooltip seems unnecessarily long; no need to show
     // the text for every possible edit if the card can only apply one."
@@ -852,15 +820,15 @@ public class YaePrototypeTests : IDisposable
     [Fact]
     public void The_edit_tip_is_the_general_rule_and_names_no_annotation()
     {
-        Assert.Equal("Give a card an Annotation for this combat, replacing any "
-                     + "it had. A Published one lasts the run.",
+        Assert.Equal("Give a card an Annotation for this combat, replacing "
+                     + "its last. Published ones stay and add up.",
                      ArmKeywordTips.YaeEditTip);
+        Assert.True(ArmKeywordTips.YaeEditTip.Length <= 100);
         foreach (var name in YaeAnnotationText.All.Select(YaeAnnotationText.Name))
         {
             Assert.DoesNotContain(name, ArmKeywordTips.YaeEditTip);
         }
     }
-
     [Fact]
     public void An_annotation_tip_is_its_card_reading_or_its_sakura_reading()
     {
@@ -868,12 +836,11 @@ public class YaePrototypeTests : IDisposable
                      + "[gold]Block[/gold]. If it plants, its "
                      + "[gold]Sakura[/gold] get it too.",
                      YaeAnnotationText.TipBody(YaeAnnotation.RedInk, false));
-        Assert.Equal("The [gold]Sakura[/gold]'s strike is 3 bigger (not in "
-                     + "Offering).",
+        Assert.Equal("The [gold]Sakura[/gold]'s action is 3 bigger.",
                      YaeAnnotationText.TipBody(YaeAnnotation.RedInk, true));
         Assert.Equal("The [gold]Sakura[/gold] does not wither.",
                      YaeAnnotationText.TipBody(YaeAnnotation.DeadlineExtension, true));
-        Assert.Contains("When the [gold]Sakura[/gold] strikes",
+        Assert.Contains("When the [gold]Sakura[/gold] acts",
                         YaeAnnotationText.TipBody(YaeAnnotation.FoxFire, true));
         // One with no Sakura reading falls back to its card reading.
         Assert.Equal(YaeAnnotationText.Rule(YaeAnnotation.Footnote),

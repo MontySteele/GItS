@@ -346,7 +346,10 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT",
                     "KLEEMOD-ARM_KLEE_BIG_BADDA_BOOM_TOTAL",
                     "KLEEMOD-ARM_KLEE_BOOM_BADGE_TURN",
                     "KLEEMOD-ARM_KLEE_LIONS_FANG_LAST_TURN",
-                    "KLEEMOD-ARM_KLEE_PASS_THE_MATCH_ACTING"}
+                    "KLEEMOD-ARM_KLEE_PASS_THE_MATCH_ACTING",
+                    # Yae review r3 (2026-10-14): the full-shrine rule,
+                    # attached off a planting row's op, not a printed word.
+                    "KLEEMOD-ARM_YAE_FULL_SHRINE"}
 
 
 def test_the_arm_keys_never_collide_with_a_shipped_keyword_id():

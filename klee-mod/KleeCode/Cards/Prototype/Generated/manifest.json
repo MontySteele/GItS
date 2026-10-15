@@ -428,6 +428,7 @@
     "proto_vk_windborne_resolve",
     "proto_vk_windward_flank",
     "proto_vk_wolfpack",
+    "proto_ym_authors_copy",
     "proto_ym_bestseller",
     "proto_ym_deadline",
     "proto_ym_edict_of_cleansing",
@@ -458,6 +459,8 @@
     "proto_ym_sakura_channeling",
     "proto_ym_sakura_grove",
     "proto_ym_sakura_seal",
+    "proto_ym_second_printing",
+    "proto_ym_serial_novel",
     "proto_ym_serialization",
     "proto_ym_shrine_bell",
     "proto_ym_shrine_maidens_guard",
@@ -894,6 +897,7 @@
     "proto_vk_windborne_resolve": "varka",
     "proto_vk_windward_flank": "varka",
     "proto_vk_wolfpack": "varka",
+    "proto_ym_authors_copy": "yae",
     "proto_ym_bestseller": "yae",
     "proto_ym_deadline": "yae",
     "proto_ym_edict_of_cleansing": "yae",
@@ -924,6 +928,8 @@
     "proto_ym_sakura_channeling": "yae",
     "proto_ym_sakura_grove": "yae",
     "proto_ym_sakura_seal": "yae",
+    "proto_ym_second_printing": "yae",
+    "proto_ym_serial_novel": "yae",
     "proto_ym_serialization": "yae",
     "proto_ym_shrine_bell": "yae",
     "proto_ym_shrine_maidens_guard": "yae",
@@ -2336,6 +2342,9 @@
     "proto_vk_wolfpack": {
       "innate": true
     },
+    "proto_ym_authors_copy": {
+      "cost": -1
+    },
     "proto_ym_bestseller": {
       "yae_base": 2,
       "yae_per": 1
@@ -2353,7 +2362,7 @@
       "block": 3
     },
     "proto_ym_fallen_petals": {
-      "upgraded_power": "ym_fallen_petals_plus"
+      "yae_upgraded": true
     },
     "proto_ym_footnote": {
       "yae_amount": 1
@@ -2428,6 +2437,12 @@
     },
     "proto_ym_sakura_seal": {
       "yae_amount": 1
+    },
+    "proto_ym_second_printing": {
+      "yae_upgraded": true
+    },
+    "proto_ym_serial_novel": {
+      "cost": -1
     },
     "proto_ym_serialization": {
       "power_amount": 1

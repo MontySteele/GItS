@@ -84,73 +84,63 @@ def _face(card_id: str) -> str:
 # 1. The Tenko clause (shrine r2 replaced review r1's Rite clause)
 # ---------------------------------------------------------------------------
 
-def test_no_sakura_says_so_in_each_kind():
+def test_no_sakura_says_so():
     st = _state()
-    for kind in Y.TENKO_KINDS:
-        assert Y.tenko_total(st, kind) == 0
+    assert Y.tenko_totals(st) == {k: 0 for k in Y.SAKURA_KINDS}
     assert Y.tenko_line(st) == " (no Sakura)"
-    assert Y.tenko_line(st, Y.WARDING) == ", no Sakura"
 
 
-def test_the_tenko_clause_sums_the_sakura_standing_as_that_kind():
+def test_the_tenko_clause_sums_the_sakura_standing_by_kind():
+    # Review r3: one plain Tenko; the clause sums each kind's action.
     st = _state()
     for _ in range(3):
         _play(st, _ym("yakan_evocation"))        # Levels 1, 1, 1
-    assert Y.tenko_line(st, Y.THUNDER) == " (9 damage)"
-    # A typed Tenko strikes AND adds its kind (2026-10-14).
-    assert Y.tenko_line(st, Y.WARDING) == ": 9 damage, 9 Block"
-    assert Y.tenko_line(st, Y.WILDFIRE) == ": 9 damage, 3 to each enemy"
-    assert Y.tenko_line(st, Y.OFFERING) == ": 9 damage, draw 3"
+    assert Y.tenko_line(st) == " (9 damage)"
+    Y.ledger(st.player).sakura[1].kind = Y.FOXFIRE
+    Y.ledger(st.player).sakura[2].kind = Y.KITSUNE
+    assert Y.tenko_line(st) == " (3 damage, 2 to each enemy, 3 Block)"
 
 
-def test_the_clause_reads_levels_and_red_ink_as_the_strike_does():
+def test_the_clause_reads_levels_and_red_ink_as_the_action_does():
     st = _state()
     _play(st, _ym("yakan_evocation"))            # Level 1
     Y.level_up(st, 3)                            # Level 4: no cap
     Y.edit_sakura(st, "every", 1, Y.RED_INK)
-    assert Y.tenko_total(st, Y.THUNDER) == 2 + 4 + Y.RED_INK_AMOUNT
-    assert Y.tenko_total(st, Y.WILDFIRE) == 4 + Y.RED_INK_AMOUNT
-    assert Y.tenko_total(st, Y.OFFERING) == 1    # Red Ink skips Offering
+    assert Y.tenko_totals(st)[Y.THUNDER] == 2 + 4 + Y.RED_INK_AMOUNT
 
 
 def test_the_clause_is_what_the_tenko_then_does():
     st = _state()
-    _play(st, _ym("yakan_evocation"))
-    _play(st, _ym("grafted_branch"))
-    promised = Y.tenko_total(st, Y.WARDING)
-    _play(st, _ym("shrine_maidens_guard"))       # 6 Block, Tenko (Warding)
-    assert st.player.block == 6 + promised
+    _play(st, _ym("shrine_maidens_guard"))       # 6 Block, a Kitsune Sakura
+    st.player.block = 0
+    promised = Y.tenko_totals(st)[Y.KITSUNE]
+    _play(st, _ym("kitsune_guile"))              # Tenko
+    assert st.player.block == promised == 2 + 1
 
 
 def test_the_words_are_one_table_in_both_engines():
     cs = SHRINE_CS.read_text(encoding="utf-8")
-    for kind in Y.TENKO_KINDS:
+    for kind in Y.SAKURA_KINDS:
         words = Y.TENKO_FACE[kind]
         if kind == Y.THUNDER:
             assert '_ => $"' + words + '"' in cs, words
         else:
-            name = gen.YAE_TENKO_KINDS[kind]
-            assert Y.TENKO_NAME[kind] == name
-            assert f'YaeTenkoKind.{name} => $"{words}"' in cs, words
+            name = gen.YAE_SAKURA_KINDS[kind]
+            assert f'YaeSakuraKind.{name} => $"{words}"' in cs, words
     assert f'NoSakura = "{Y.NO_SAKURA}"' in cs
-    assert f'NoSakuraTyped = "{Y.NO_SAKURA_TYPED}"' in cs
+    assert "YaeTenkoKind" not in cs
 
 
-@pytest.mark.parametrize("card_id,kind", [
-    (_ym("shrine_maidens_guard"), "Warding"),
-    (_ym("foxfire_sweep"), "Wildfire"),
-    (_ym("kitsune_guile"), "Wildfire"),
-    (_ym("manuscript_pile"), "Offering"),
+@pytest.mark.parametrize("card_id", [
+    _ym("shrine_maidens_guard"), _ym("foxfire_sweep"), _ym("kitsune_guile"),
+    _ym("manuscript_pile"),
 ])
-def test_every_typed_tenko_card_carries_the_clause_inside_its_brackets(
-        card_id, kind):
+def test_no_card_prints_a_typed_tenko(card_id):
     face = _face(card_id)
-    assert f"[gold]Tenko[/gold] ({kind}{{InCombat:{{YaeTenko}}|}})" in face
-    assert "Rite" not in face
+    assert "(Warding" not in face and "(Wildfire" not in face
+    assert "(Offering" not in face and "Rite" not in face
     text = (GENERATED / f"{gen.pascal(card_id)}.cs").read_text(encoding="utf-8")
-    assert (f'description.Add("YaeTenko", YaeShrineFace.TenkoLine(this, '
-            f'YaeTenkoKind.{kind}));') in text
-    assert f"YaeCards.Tenko(choiceContext, this, cardPlay, YaeTenkoKind.{kind})" in text
+    assert "YaeTenkoKind" not in text
 
 
 def test_the_seat_page_has_no_rite_line():
@@ -218,7 +208,7 @@ def test_sakura_seal_costs_0_and_its_upgrade_edits_two():
     a, b = loader.get_card("strike"), loader.get_card("defend")
     st.player.hand += [a, b]
     _play(st, plus)
-    assert a.ym_annotation == Y.SAKURA_SEAL == b.ym_annotation
+    assert Y.temp(a) == Y.SAKURA_SEAL == Y.temp(b)
 
 
 # ---------------------------------------------------------------------------

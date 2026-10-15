@@ -42,14 +42,14 @@ public sealed class ProtoYmTwinSakura : CustomCardModel, ICharacterCard, ISakura
     public string CharacterId => "yae";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSakura(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForFullShrine(ArmKeywordTips.ForSakura(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_twin_sakura");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Twin Sakura"),
-        ("description", "Plant {YmAmount:diff()} [gold]Sakura[/gold] (with the shrine full, your oldest strikes, refreshes and gains a Level).{IfUpgraded:show: Gain 4 [gold]Block[/gold].|}"),
+        ("description", "Plant {YmAmount:diff()} [gold]Sakura[/gold].{IfUpgraded:show: Gain 4 [gold]Block[/gold].|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

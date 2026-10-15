@@ -38,24 +38,15 @@ public sealed class ProtoYmManuscriptPile : CustomCardModel, ICharacterCard
     public string CharacterId => "yae";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForTenko(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForSakura(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_manuscript_pile");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Manuscript Pile"),
-        ("description", "Draw {Cards:diff()} cards. [gold]Tenko[/gold] (Offering{InCombat:{YaeTenko}|})."),
+        ("description", "Draw {Cards:diff()} cards. Each [gold]Sakura[/gold] lasts 1 more turn."),
     };
-
-    /// <summary>This card's in-combat shrine clauses
-    /// (`YaeShrineFace`).</summary>
-    protected override void AddExtraArgsToDescription(
-        MegaCrit.Sts2.Core.Localization.LocString description)
-    {
-        base.AddExtraArgsToDescription(description);
-        description.Add("YaeTenko", YaeShrineFace.TenkoLine(this, YaeTenkoKind.Offering));
-    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
@@ -73,7 +64,7 @@ public sealed class ProtoYmManuscriptPile : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
-        await YaeCards.Tenko(choiceContext, this, cardPlay, YaeTenkoKind.Offering);
+        await YaeCards.Extend(choiceContext, this, cardPlay);
     }
 
     protected override void OnUpgrade()
