@@ -130,14 +130,16 @@ public class ArmRelicsPotionsTests
     }
 
     [Fact]
-    public void Kokomi_keeps_the_silent_borrow_for_relics_and_potions()
+    public void Kokomi_drops_the_silent_borrow_for_her_own_relics_and_potions()
     {
-        // No offer override: `RelicPoolModel`'s own, which is every member.
-        Assert.Equal(typeof(RelicPoolModel),
+        // Her own set (review/active/kokomi-relics-potions-2026-10-15.md,
+        // kit census picks 1 and 2): the offer is overridden, and the potion
+        // pool is hers. KokomiRelicsPotionsTests pins both in full.
+        Assert.Equal(typeof(KokomiRelicPool),
             typeof(KokomiRelicPool).GetMethod("GetUnlockedRelics")!.DeclaringType);
         var potions = Il.CallSequence(
             typeof(Kokomi).GetProperty("PotionPool")!.GetGetMethod()!);
-        Assert.Equal(new[] { "ModelDb.PotionPool<SilentPotionPool>" },
+        Assert.Equal(new[] { "ModelDb.PotionPool<KokomiPotionPool>" },
                      potions.Where(c => c.StartsWith("ModelDb.")).ToArray());
     }
 

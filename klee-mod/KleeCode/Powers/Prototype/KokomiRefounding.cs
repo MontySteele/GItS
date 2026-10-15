@@ -60,6 +60,9 @@ public static partial class KokomiCards
                 ? combat.CreateCard<ProtoKkSting>(owner)
                 : combat.CreateCard<ProtoKkWard>(owner);
             if (upgraded) card.UpgradeInternal();
+            // Kurage Lantern (Kokomi's own relics, 2026-10-15): one made
+            // while she holds it is not Ethereal.
+            Relics.KurageLantern.Steady(owner.Creature, card);
             await CardPileCmd.AddGeneratedCardToCombat(card, PileType.Hand,
                                                         owner);
             made++;
@@ -772,6 +775,8 @@ public static class KokomiRefounding
     {
         if (dealer == null || !KokomiOverhaul.LiveFor(dealer)) return;
         KokomiOverhaulLedger.For(dealer).NoteReaction();
+        // Ocean-Hued Clam (Kokomi's own relics, 2026-10-15): Mend 1.
+        await Relics.KokomiArmRelics.OnReaction(choiceContext, dealer);
         var amount = (int)dealer.Powers.OfType<GrandStrategistPower>()
             .Sum(p => p.Amount);
         if (amount > 0 && dealer.CombatState is { } combat)
