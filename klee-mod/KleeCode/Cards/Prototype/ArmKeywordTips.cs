@@ -57,9 +57,12 @@ public static class ArmKeywordTips
 {
     /// <summary>The hover-tip title table, the same one every other tip in the
     /// mod titles itself from.</summary>
-    /// <summary>The loc table every arm tip title lives in (public for the
-    /// Masterpiece's per-layer tips, review r3).</summary>
-    public const string Table = "card_keywords";
+    private const string Table = "card_keywords";
+
+    /// <summary>The loc table every arm tip title lives in, for the
+    /// Masterpiece's per-layer tips (review r3). A property, so the key scan
+    /// (public string constants) never counts it as a key.</summary>
+    public static string KeywordTable => Table;
 
     // The keys. `KLEEMOD-ARM_` and not the bare word, because two of these
     // words already have a SHIPPED keyword with a DIFFERENT rule: `Bomb` is

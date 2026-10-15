@@ -125,9 +125,11 @@ public class PoolCountTests
     /// to 78 -- and this row moves to 78 with her last batch.
     /// </summary>
     [Fact]
-    public void Yae_is_a_staged_40_and_15_16_9_with_no_ancients_yet()
+    public void Yae_is_a_staged_43_and_15_18_10_with_no_ancients_yet()
     {
-        AssertPool("YaeRoster", "Pool", 15, 16, 9, size: 40);
+        // Review r3 (2026-10-14): Second Printing and Author's Copy
+        // (Uncommons) and Serial Novel (a Rare) joined the staged 40.
+        AssertPool("YaeRoster", "Pool", 15, 18, 10, size: 43);
         Assert.DoesNotContain(typeof(global::KleeMod.RosterAncientCards).GetProperties(),
             p => p.Name == "Yae");
     }

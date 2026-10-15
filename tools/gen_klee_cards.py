@@ -4325,7 +4325,7 @@ APPLY_POWERS = {
     # Review r3 (ruled 2026-10-14), a signature card.
     "ym_serial_novel": ("SerialNovelPower", None,
         "At the start of your turn, put {X} random [gold]Annotated[/gold] "
-        "card from your Discard Pile into your hand."),
+        "card from your [gold]Discard Pile[/gold] into your [gold]Hand[/gold]."),
     "vk_twin_gales": ("TwinGalesPower", None,
         "Your [gold]Swirls[/gold] pay both your [gold]current element[/gold] "
         "and the element they [gold]Swirl[/gold]."),

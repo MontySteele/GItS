@@ -61,16 +61,6 @@ public sealed class YaeSakura
     public YaeAnnotation Annotation { get; internal set; }
 }
 
-/// <summary>What a plant did: added a Sakura, refreshed and levelled the
-/// oldest (same kind, full shrine), or replaced the oldest (another kind,
-/// full shrine).</summary>
-public enum YaePlantResult
-{
-    Added = 0,
-    Levelled = 1,
-    Replaced = 2,
-}
-
 /// <summary>
 /// YAE'S SHRINE, ONE FIGHT'S WORTH (paper sec.2, "Sakura"). PURE -- no
 /// command runs here -- so the headless suite pins every reading by value;
@@ -142,9 +132,10 @@ public sealed class YaeShrineLedger
     /// <summary>
     /// PLANT ONE: a new Sakura of <paramref name="kind"/> at
     /// <paramref name="plantLevel"/> with <see cref="YaeLaw.SakuraTurns"/>
-    /// actions left; the others are NOT levelled.
+    /// actions left; the others are NOT levelled. Returns whether a Sakura
+    /// was added (a full-shrine plant of the oldest's kind adds none).
     /// </summary>
-    public YaePlantResult Plant(int plantLevel) => Plant(plantLevel, null);
+    public bool Plant(int plantLevel) => Plant(plantLevel, null);
 
     /// <summary>
     /// Plant one, starting at <paramref name="startLevel"/> where a card
@@ -161,14 +152,13 @@ public sealed class YaeShrineLedger
     /// and none is added; ANOTHER KIND withers the oldest and the new Sakura
     /// takes its place, as the newest, at its printed Level.
     /// </summary>
-    public YaePlantResult Plant(int plantLevel, int? startLevel,
+    public bool Plant(int plantLevel, int? startLevel,
                                 YaeAnnotation inherited = YaeAnnotation.None,
                                 int cap = YaeLaw.SakuraCap,
                                 YaeSakuraKind kind = YaeSakuraKind.Thunder)
     {
         if (startLevel is { } at)
             plantLevel = Math.Max(plantLevel, at + plantLevel - YaeLaw.PlantLevel);
-        var result = YaePlantResult.Added;
         if (_sakura.Count >= cap && _sakura.Count > 0)
         {
             var oldest = _sakura[0];
@@ -176,10 +166,9 @@ public sealed class YaeShrineLedger
             {
                 oldest.TurnsLeft = Math.Max(oldest.TurnsLeft, YaeLaw.SakuraTurns);
                 oldest.Level++;
-                return YaePlantResult.Levelled;
+                return false;
             }
-            _sakura.RemoveAt(0);
-            result = YaePlantResult.Replaced;
+            _sakura.RemoveAt(0);          // another kind: it withers
         }
         Seq++;
         _sakura.Add(new YaeSakura
@@ -191,7 +180,7 @@ public sealed class YaeShrineLedger
             Seq = Seq,
             Annotation = HasSakuraReading(inherited) ? inherited : YaeAnnotation.None,
         });
-        return result;
+        return true;
     }
 
     /// <summary>Tenko's second half: every timer is refreshed to at least

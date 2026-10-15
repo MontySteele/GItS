@@ -43,7 +43,7 @@ public abstract class SakuraBadgePower : PowerModel, ILocalizationProvider
         // branch.
         ("smartDescription",
             "{Kind:cond:==1?Foxfire Sakura|==2?Kitsune Sakura|Sakura}, "
-          + "Level {Level} (planted at {Planted}). "
+          + "Level {Level}, planted at {Planted}. "
           + "{Kind:cond:==1?Hits ALL enemies for |==2?You gain |Strikes a random enemy for }"
           + "{Strike}{Kind:cond:==2? [gold]Block[/gold].| [gold]Electro[/gold] damage.}"
           + $"{{Ann:cond:==1? [gold]Red Ink[/gold]: +{YaeLaw.RedInkAmount}.|==3? [gold]Deadline Extension[/gold]: no wither.|==4? [gold]Fox Fire[/gold]: +{YaeLaw.FoxFireDamage} to a random enemy.|}}"
@@ -375,8 +375,8 @@ public sealed class SerialNovelPower : PowerModel, ILocalizationProvider
         ("title", "Serial Novel"),
         ("description",
             "At the start of your turn, put [blue]{Amount}[/blue] random "
-          + "[gold]Annotated[/gold] card from your Discard Pile into your "
-          + "hand."),
+          + "[gold]Annotated[/gold] card from your [gold]Discard Pile[/gold] "
+          + "into your [gold]Hand[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;

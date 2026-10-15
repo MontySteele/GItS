@@ -3051,15 +3051,25 @@ def _render_oath(oath: dict[str, Any],
 
 
 SHRINE_HEADING = "## Your shrine"
+#: An Edit's chooser (`YaeEditing.EditPromptTextFor`) and its note.
+EDIT_PROMPT_HEAD = "Choose a card to Edit"
+EDIT_SECOND_CHOOSER_NOTE = ("*One card per pick. A card that Edits 2 cards "
+                            "opens this chooser again for the second.*")
 SHRINE_COUNT_LINE = ("- Sakura: {n} of {cap}. At the end of your turn each "
-                     "strikes, oldest first.")
+                     "acts, oldest first.")
 SHRINE_NONE_LINE = "- Sakura: none. Plant one to start your shrine."
-#: 2026-10-14: a plant into a full shrine makes the oldest strike as its Last
-#: Bloom would, then refresh and gain a Level (`YaeShrine.Plant`).
-SHRINE_FULL_LINE = ("- Shrine full: your next plant makes Sakura 1 strike, "
-                    "then refresh and gain a Level.")
-SHRINE_ROW = ("- Sakura {slot}: Level {level}, strikes for {strike}"
+#: Review r3 (ruled 2026-10-14): a plant into a full shrine makes the oldest
+#: act as its Last Bloom would; the same kind then refreshes and gains a
+#: Level, another kind withers it and takes its place (`YaeShrine.Plant`).
+SHRINE_FULL_LINE = ("- Shrine full: your next plant makes Sakura 1 act. A "
+                    "Sakura of its kind then refreshes it and gives it a "
+                    "Level; another kind withers it and takes its place.")
+SHRINE_ROW = ("- Sakura {slot}: {kind}, Level {level}{origin}, {action}"
               "{turns}.")
+#: Each kind's action on the row (review r3).
+SHRINE_KIND = {"thunder": ("Sakura", "strikes an enemy for {n}"),
+               "foxfire": ("Foxfire Sakura", "hits ALL enemies for {n} each"),
+               "kitsune": ("Kitsune Sakura", "gives you {n} Block")}
 SHRINE_LURE_LINE = "- Foxfire Lure: your Sakura strike **{name}** this turn."
 SHRINE_ANNOTATED_LINE = "- Annotated cards in your hand: {n}."
 
@@ -3075,11 +3085,24 @@ def _render_shrine(shrine: dict[str, Any]) -> list[str]:
     for row in rows:
         turns = row.get("turns")
         tail = ("" if turns is None else
-                f", {turns} strike{'s' if turns != 1 else ''} left")
+                f", {turns} turn{'s' if turns != 1 else ''} left")
         if row.get("annotation"):
             tail += f", {row['annotation']}"
-        out.append(SHRINE_ROW.format(slot=row["slot"], level=row["level"],
-                                     strike=row["strike"], turns=tail))
+        name, action = SHRINE_KIND.get(row.get("kind") or "thunder",
+                                       SHRINE_KIND["thunder"])
+        # Review r3, seat cleanup: where the Levels came from. The badge
+        # names the Level it was planted at; the rest came since (Sakura
+        # Grove, Rooted Shrine, Mikage Thunder, a full-shrine plant).
+        planted = row.get("planted")
+        origin = ""
+        if planted is not None:
+            gained = row["level"] - planted
+            origin = (f" (planted at {planted}, +{gained} since)" if gained > 0
+                      else f" (planted at {planted})")
+        out.append(SHRINE_ROW.format(slot=row["slot"], kind=name,
+                                     level=row["level"], origin=origin,
+                                     action=action.format(n=row["strike"]),
+                                     turns=tail))
     if rows and len(rows) >= cap:
         out.append(SHRINE_FULL_LINE)
     if shrine.get("lure"):
@@ -4772,6 +4795,10 @@ def render(obs: dict[str, Any]) -> str:
                         "run has been read.*"]
     elif obs["screen"] in ("card_reward", "card_select"):
         out += [f"# {obs['prompt']}", ""]
+        # Review r3, seat cleanup: a two-card Edit (Footnote+, Sakura Seal+)
+        # opens this chooser once per card, so the seat expects the second.
+        if str(obs.get("prompt") or "").startswith(EDIT_PROMPT_HEAD):
+            out += [EDIT_SECOND_CHOOSER_NOTE, ""]
         for card in obs["offers"]:
             out += _render_card(card)
         if obs["screen"] == "card_select":

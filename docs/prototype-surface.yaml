@@ -4540,9 +4540,8 @@
              {op: varka, kind: deep_freeze, target: enemy}],
    upgrade: {cost: -1}}
 
-# YAE MIKO: review/active/yae-card-paper-2026-10-13.md, yae-design-axes-2026-10-14.md
-# (Annotations; shrine r2: no Rite), yae-review-r3-2026-10-14.md (Sakura kinds,
-# plain Tenko, the Masterpiece, signature cards). Rules: YaeShrine.cs,
+# YAE MIKO: review/active/yae-card-paper-2026-10-13.md, yae-design-axes-2026-10-14.md,
+# yae-review-r3-2026-10-14.md (Sakura kinds, plain Tenko, the Masterpiece). Rules: YaeShrine.cs,
 # yae_shrine.py; reasoning: provenance note "Yae Miko".
 
 # --- the starter (paper sec.3): base Strike x4 + Defend x4 have no row ---
@@ -4550,9 +4549,8 @@
 - {id: proto_ym_yakan_evocation, name: "Yakan Evocation", character: yae,
    authored_by: [claude],
    cost: 1, type: skill, rarity: basic,
-   # Shrine r2 (ruled 2026-10-14): planted at Level 1, the others are not
-   # levelled. Review r3 (ruled 2026-10-14): the full-shrine rule depends on
-   # the kinds, so it moved off the face into its own tip (ForFullShrine).
+   # Review r3 (ruled 2026-10-14): the full-shrine rule moved off the face
+   # into its own tip (ForFullShrine). Provenance, "Yae review r3".
    description: "Plant a [gold]Sakura[/gold].",
    effects: [{op: yae, kind: plant, amount: 1}],
    upgrade: {cost: -1}}
@@ -4818,12 +4816,10 @@
 
 - {id: proto_ym_fallen_petals, name: "Fallen Petals", character: yae,
    authored_by: [claude],
-   # Review r3, sec.4 (ruled 2026-10-14): an active evoke (was the Power
-   # "Whenever a Sakura withers, gain 1 Energy", the "never again" card in
-   # four records: seats refresh Sakura, so they never wither). One action
-   # in total, and nothing with no Sakura.
+   # Review r3, sec.4 (ruled 2026-10-14): an active evoke (was a Power, the
+   # "never again" card in four records). Provenance, "Yae review r3".
    cost: 0, type: skill, rarity: uncommon,
-   description: "Your oldest [gold]Sakura[/gold] withers (it acts once, its Last Bloom). If one did, gain {energyPrefix:energyIcons(1)}{IfUpgraded:show: and draw 1 card|}.",
+   description: "Your oldest [gold]Sakura[/gold] withers (it acts once, its Last Bloom). If one did, gain {energyPrefix:energyIcons(1)}{IfUpgraded:show:, and draw 1 card|}.",
    effects: [{op: yae, kind: fallen_petals}],
    upgrade: {yae_upgraded: true}}
 
@@ -4849,7 +4845,7 @@
 - {id: proto_ym_second_printing, name: "Second Printing", character: yae,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon, exhaust: true,
-   description: "Put an [gold]Annotated[/gold] card from your Discard Pile into your hand.{IfUpgraded:show: It costs 0 this turn.|}",
+   description: "Put an [gold]Annotated[/gold] card from your [gold]Discard Pile[/gold] into your [gold]Hand[/gold].{IfUpgraded:show: It costs 0 this turn.|}",
    effects: [{op: yae, kind: second_printing}],
    upgrade: {yae_upgraded: true}}
 
@@ -4858,7 +4854,7 @@
    # Never copies an Author's Copy: GPT found a +1 Energy loop through
    # Royalties, and LAW forbids energy-positive copy loops.
    cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "Add a copy of an [gold]Annotated[/gold] card in your hand (not an Author's Copy) to your hand. It keeps its Annotations.",
+   description: "Add a copy of an [gold]Annotated[/gold] card in your [gold]Hand[/gold] (not an Author's Copy) to your [gold]Hand[/gold]. It keeps its Annotations.",
    effects: [{op: yae, kind: authors_copy}],
    upgrade: {cost: -1}}
 
@@ -4941,6 +4937,6 @@
 - {id: proto_ym_serial_novel, name: "Serial Novel", character: yae,
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
-   description: "At the start of your turn, put a random [gold]Annotated[/gold] card from your Discard Pile into your hand.",
+   description: "At the start of your turn, put a random [gold]Annotated[/gold] card from your [gold]Discard Pile[/gold] into your [gold]Hand[/gold].",
    effects: [{op: apply_power, power: ym_serial_novel, amount: 1, target: self}],
    upgrade: {cost: -1}}

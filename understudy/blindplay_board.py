@@ -954,24 +954,30 @@ def varka_oath(player: dict[str, Any],
 
 
 #: YAE MIKO (review/active/yae-card-paper-2026-10-13.md, built 2026-10-13).
-#: Her Sakura badges are titled "Sakura 1" (the oldest) to "Sakura 3", and the
-#: badge sentence (`SakuraBadgePower`'s smart description) reads "Level L. At
-#: the end of your turn it strikes a random enemy for S Electro damage.
-#: Strikes left: T." The five Annotations are her Enchantments' names.
+#: Her Sakura badges are titled "Sakura 1" (the oldest) to "Sakura 9", and the
+#: badge sentence (`SakuraBadgePower`'s smart description, review r3) reads
+#: "Foxfire Sakura, Level L (planted at P). Hits ALL enemies for S Electro
+#: damage. Turns left: T." -- the kind first ("Sakura", "Foxfire Sakura",
+#: "Kitsune Sakura"), and a Kitsune's action is "You gain S Block."
 _SAKURA_NAME = re.compile(r"^Sakura (\d)$")
 _SAKURA_LEVEL = re.compile(r"Level (\d+)")
-_SAKURA_STRIKE = re.compile(r"for (\d+)")
+_SAKURA_PLANTED = re.compile(r"planted at (\d+)")
+_SAKURA_STRIKE = re.compile(r"(?:for|You gain) (\d+)")
+#: Review r3 (ruled 2026-10-14): the three kinds, as the badge names them.
+YAE_SAKURA_KINDS = {"Foxfire Sakura": "foxfire", "Kitsune Sakura": "kitsune"}
 #: The design axes (ruled 2026-10-14): a Sakura's Annotation is named in its
 #: badge sentence. (Shrine r2 took the Rite badge away.)
 YAE_SAKURA_ANNOTATIONS = ("Red Ink", "Deadline Extension", "Fox Fire")
-_SAKURA_TURNS = re.compile(r"Strikes left: (\d+)")
+_SAKURA_TURNS = re.compile(r"(?:Strikes|Turns) left: (\d+)")
 _LURE_NAME = "Foxfire Lure"
 #: How many Sakura may stand: 3, plus Sakura Channeling's stacks ("You can
 #: have 2 more Sakura", 2 per copy; `YaeShrine.MaxSakura`, 2026-10-14).
 YAE_SAKURA_CAP = 3
 _CHANNELING_NAME = "Sakura Channeling"
 YAE_ANNOTATIONS = ("Red Ink", "Footnote", "Deadline Extension", "Fox Fire",
-                   "Sakura Seal", "Royalties", "Reprint")
+                   "Sakura Seal", "Royalties", "Reprint",
+                   # Review r3: the one enchantment holding both layers.
+                   "Annotated")
 
 
 def yae_shrine(player: dict[str, Any],
@@ -1004,7 +1010,11 @@ def yae_shrine(player: dict[str, Any],
         turns = _SAKURA_TURNS.search(text)
         lv = int(level.group(1)) if level else _int(pw.get("stacks"))
         ann = next((a for a in YAE_SAKURA_ANNOTATIONS if a in text), None)
-        sakura.append({"slot": slot, "level": lv,
+        kind = next((k for name, k in YAE_SAKURA_KINDS.items()
+                     if text.startswith(name)), "thunder")
+        planted = _SAKURA_PLANTED.search(text)
+        sakura.append({"slot": slot, "level": lv, "kind": kind,
+                       "planted": int(planted.group(1)) if planted else None,
                        "strike": int(strike.group(1)) if strike else 2 + lv,
                        "turns": int(turns.group(1)) if turns else None,
                        "annotation": ann})

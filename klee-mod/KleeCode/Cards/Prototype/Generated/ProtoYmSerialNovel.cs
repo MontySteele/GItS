@@ -45,7 +45,7 @@ public sealed class ProtoYmSerialNovel : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Serial Novel"),
-        ("description", "At the start of your turn, put a random [gold]Annotated[/gold] card from your Discard Pile into your hand."),
+        ("description", "At the start of your turn, put a random [gold]Annotated[/gold] card from your [gold]Discard Pile[/gold] into your [gold]Hand[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -6622,18 +6622,25 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         "Sakura": ["At the end of your turn, strikes an enemy for ",
                    "+ its Level. Lasts ",
                    " turns, then strikes "],
-        "Tenko": [" strike now, refresh to ",
-                  "Wildfire: +Level to ALL. Offering: +draw 1."],
-        "Edit": ["Give a card an Annotation for this combat, replacing any "
-                 "it had. A ", "Published one lasts the run."],
+        # Review r3 (2026-10-14): plain Tenko, the two kinds, the
+        # full-shrine rule, and the Edit tip's two layers.
+        "Tenko": ["Every ", " acts now. Refresh them to at least "],
+        "Foxfire Sakura": [" that hits ALL enemies for ",
+                           " + its Level when it acts."],
+        "Kitsune Sakura": ["A fox decoy ", ". When it acts, you gain "],
+        "Full shrine": ["Shrine full: your oldest acts. Same kind: it "
+                        "refreshes and gains a ",
+                        "Level. Other kind: it withers."],
+        "Edit": ["Give a card an Annotation for this combat, replacing "
+                 "its last. ", "Published ones stay and add up."],
         # 2026-10-14: each Annotation's own row, `YaeAnnotationText.Rule`
         # and `.SakuraRule` (YaeAnnotations.cs).
         "Red Ink": ["This card deals ", " more damage and gives ",
-                    "'s strike is ", "bigger (not in Offering)."],
+                    "'s action is ", "bigger."],
         "Footnote": ["When this card is played, draw 1 card."],
         "Deadline Extension": ["This card has ", " does not wither."],
         "Fox Fire": ["When this card is played, deal ",
-                     " damage to a random enemy.", " strikes, it also deals "],
+                     " damage to a random enemy.", " acts, it also deals "],
         "Sakura Seal": ["When this card is played, plant a "],
         "Royalties": ["When this card is played, gain ", " Energy."],
         "Reprint": ["The first time this card is played each combat, play "

@@ -48,7 +48,7 @@ public sealed class ProtoYmSecondPrinting : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Second Printing"),
-        ("description", "Put an [gold]Annotated[/gold] card from your Discard Pile into your hand.{IfUpgraded:show: It costs 0 this turn.|}"),
+        ("description", "Put an [gold]Annotated[/gold] card from your [gold]Discard Pile[/gold] into your [gold]Hand[/gold].{IfUpgraded:show: It costs 0 this turn.|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

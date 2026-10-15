@@ -48,7 +48,7 @@ public sealed class ProtoYmAuthorsCopy : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Author's Copy"),
-        ("description", "Add a copy of an [gold]Annotated[/gold] card in your hand (not an Author's Copy) to your hand. It keeps its Annotations."),
+        ("description", "Add a copy of an [gold]Annotated[/gold] card in your [gold]Hand[/gold] (not an Author's Copy) to your [gold]Hand[/gold]. It keeps its Annotations."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -399,7 +399,7 @@ public sealed class YaeMasterpiece : CustomEnchantmentModel, ILocalizationProvid
     /// <summary>Each distinct layer's own rule, under the summary.</summary>
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         YaeAnnotationText.All.Where(a => Count(a) > 0).Select(a => (IHoverTip)new HoverTip(
-            new LocString(Cards.ArmKeywordTips.Table, Cards.ArmKeywordTips.KeyOf(a) + ".title"),
+            new LocString(Cards.ArmKeywordTips.KeywordTable, Cards.ArmKeywordTips.KeyOf(a) + ".title"),
             YaeAnnotationText.Rule(a))).ToList();
 
     /// <summary>The newest layer's borrowed base-game icon (Reprint first,

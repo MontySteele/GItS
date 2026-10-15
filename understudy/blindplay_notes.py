@@ -1713,23 +1713,30 @@ ARM_KEYWORDS: dict[str, str] = {
     # printed only where a face names it.
     # Shrine r2 (ruled 2026-10-14): no Rite; a full-shrine plant feeds the
     # oldest; Tenko names its three kinds.
-    # Condensed 2026-10-14: the full-shrine rule is on the plant cards.
+    # Review r3 (ruled 2026-10-14): Tenko is one plain rule; the two kinds a
+    # card names have their own rows; the full-shrine rule is its own row
+    # (`ArmKeywordTips.YaeFullShrineTip`); an Edit fills the temporary slot.
     "Sakura": ("At the end of your turn, strikes an enemy for 2 + its "
                "Level. Lasts 3 turns, then strikes once more."),
-    # A typed Tenko strikes AND adds its kind ([USER], 2026-10-14).
-    "Tenko": ("Sakura strike now, refresh to 3 turns. Warding: +Block. "
-              "Wildfire: +Level to ALL. Offering: +draw 1."),
-    "Edit": ("Give a card an Annotation for this combat, replacing any it "
-             "had. A Published one lasts the run."),
+    "Tenko": "Every Sakura acts now. Refresh them to at least 3 turns.",
+    "Foxfire Sakura": ("A Sakura that hits ALL enemies for 1 + its Level "
+                       "when it acts."),
+    "Kitsune Sakura": ("A fox decoy Sakura. When it acts, you gain 2 + its "
+                       "Level Block."),
+    "Full shrine": ("Shrine full: your oldest acts. Same kind: it refreshes "
+                    "and gains a Level. Other kind: it withers."),
+    "Edit": ("Give a card an Annotation for this combat, replacing its "
+             "last. Published ones stay and add up. A card that Edits 2 "
+             "cards opens the chooser twice, one card each."),
     # 2026-10-14: Red Ink on a planting card reaches its Sakura too.
     "Red Ink": ("This card deals 3 more damage and gives 3 more Block. If it "
                 "plants, its Sakura get it too. On a Sakura: the Sakura's "
-                "strike is 3 bigger (not in Offering)."),
+                "action is 3 bigger."),
     "Footnote": "When this card is played, draw 1 card.",
     "Deadline Extension": ("This card has Retain. On a Sakura: the Sakura "
                            "does not wither."),
     "Fox Fire": ("When this card is played, deal 4 Electro damage to a "
-                 "random enemy. On a Sakura: when the Sakura strikes, it "
+                 "random enemy. On a Sakura: when the Sakura acts, it "
                  "also deals 4 Electro damage to a random enemy."),
     "Sakura Seal": "When this card is played, plant a Sakura.",
     "Royalties": "When this card is played, gain 1 Energy.",
@@ -2100,6 +2107,9 @@ _ARM_KEYWORD_ARM: dict[str, str] = {
     "Tenko": "yae miko", "Red Ink": "yae miko", "Footnote": "yae miko",
     "Deadline Extension": "yae miko", "Fox Fire": "yae miko",
     "Sakura Seal": "yae miko", "Royalties": "yae miko", "Reprint": "yae miko",
+    # Review r3 (2026-10-14).
+    "Foxfire Sakura": "yae miko", "Kitsune Sakura": "yae miko",
+    "Full shrine": "yae miko",
     # THE SALON'S TAB (2026-10-05): the summon and the four guests.
     "Summon": "furina", "Guest Star": "furina", "oldest guest": "furina",
     "Clorinde": "furina",
@@ -2190,6 +2200,11 @@ _ARM_KEYWORD_RE = {
     # are their own rows (2026-10-14).
     "Sakura": re.compile(r"\bSakura\b"),
     "Tenko": re.compile(r"\bTenko\b"),
+    # Review r3 (2026-10-14): the two kinds a face names, and the
+    # full-shrine rule (the shrine block's "Shrine full" line prints it).
+    "Foxfire Sakura": re.compile(r"\bFoxfire Sakura\b"),
+    "Kitsune Sakura": re.compile(r"\bKitsune Sakura\b"),
+    "Full shrine": re.compile(r"\b[Ff]ull shrine\b|\bShrine full\b"),
     "Edit": re.compile(r"\bEdit(?:ed|s)?\b|\bAnnotat(?:ed|ions?)\b"
                        r"|\bPublish(?:ed)?\b"),
     "Red Ink": re.compile(r"\bRed Ink\b"),
