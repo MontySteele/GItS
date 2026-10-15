@@ -48,7 +48,7 @@ public sealed class ProtoKoSimmer : CustomCardModel, IElementalCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Simmer"),
-        ("description", "Deal {Damage:diff()} [gold]Pyro[/gold] damage, plus your largest [gold]Bomb[/gold]'s size on any enemy. It does not go off. Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].{InCombat:\n(Deals {BombHit:diff()} damage)|}"),
+        ("description", "Deal {Damage:diff()} [gold]Pyro[/gold] damage plus your largest [gold]Bomb[/gold]'s size, on any enemy, not setting it off. Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].{InCombat:\n(Deals {BombHit:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

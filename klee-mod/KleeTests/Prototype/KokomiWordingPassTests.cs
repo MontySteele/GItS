@@ -61,7 +61,9 @@ public class KokomiWordingPassTests
     {
         var face = Face(new ProtoMiGorouJuuga());
         Assert.EndsWith(
-            "For 3 turns, gain 6 [gold]Block[/gold] instead.", face);
+            "[gold]plan[/gold]: Gain 6 [gold]Block[/gold] instead.", face);
+        // Wording pass 2026-10-15: the 3 turns lead the face and cover both lines.
+        Assert.StartsWith("For {PowerAmount:diff()} turns,", face);
         var clause = Assert.Single(new ProtoMiGorouJuuga().PlanClauses);
         Assert.Equal((KokomiPlan.Kind.JuugaGuard, 3),
                      (clause.Kind, clause.Amount));

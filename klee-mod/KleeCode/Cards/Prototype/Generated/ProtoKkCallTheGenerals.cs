@@ -48,7 +48,7 @@ public sealed class ProtoKkCallTheGenerals : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Call the Generals"),
-        ("description", "Choose 1 of 3 random Rare Inazuma [gold]Companions[/gold] to add into your [gold]Hand[/gold]. It is [gold]Ethereal[/gold] and costs 0 this turn."),
+        ("description", "Choose 1 of 3 random Rare Inazuma [gold]Companions[/gold] to add into your [gold]Hand[/gold]. It costs 0 this turn and is [gold]Ethereal[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
