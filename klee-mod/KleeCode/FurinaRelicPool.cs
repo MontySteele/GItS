@@ -22,10 +22,12 @@ public sealed class FurinaRelicPool : RelicPoolModel
         // The borrowed roster MINUS Helical Dart and Snecko Skull (the ruling
         // on QUEUE pick `fanout-picks-2026-09-16 4.3`, at its default). See
         // InheritedSilentRelics for why the two go and why the drop is safe.
+        // Tingsha and Tough Bandages go too: no card here discards (kit
+        // census pick 2, ruled 2026-10-15).
         // Members only: the offer below is her own pool. Salon Solitaire is
         // the Stage's starting relic; a starter is never rolled, so membership
         // only lets RelicModel.Pool resolve (R269, EB-725).
-        IEnumerable<RelicModel> relics = InheritedSilentRelics.Curated()
+        IEnumerable<RelicModel> relics = InheritedSilentRelics.Curated(dropDiscard: true)
             .Append(ModelDb.Relic<Relics.SalonSolitaire>())
             // EPOCH 2 / D1 (audit sec.1.2): the upgraded starter was poolless and
             // RelicModel.Pool throws for a poolless relic, mid-run at the Touch

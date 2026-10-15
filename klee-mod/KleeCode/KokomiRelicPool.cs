@@ -23,7 +23,9 @@ public sealed class KokomiRelicPool : RelicPoolModel
         // The borrowed roster MINUS Helical Dart and Snecko Skull (the ruling
         // on QUEUE pick `fanout-picks-2026-09-16 4.3`, at its default). See
         // InheritedSilentRelics for why the two go and why the drop is safe.
-        InheritedSilentRelics.Curated()
+        // Tingsha and Tough Bandages go too: no card here discards (kit
+        // census pick 2, ruled 2026-10-15).
+        InheritedSilentRelics.Curated(dropDiscard: true)
             .Append(ModelDb.Relic<Relics.TamakushiCasket>())
             .Append(ModelDb.Relic<Relics.WatatsumiCasket>());
 }
