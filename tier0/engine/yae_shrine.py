@@ -221,10 +221,13 @@ ANNOTATION_KINDS = frozenset({"edit", "edit_all", "edit_sakura"})
 PLANT_AS_KINDS = frozenset({"plant", "plant_level"})
 #: Kinds that read their upgrade at play time (`yae_upgraded`, C#
 #: `IsUpgraded`): Fallen Petals' draw, Second Printing's free card.
-UPGRADED_KINDS = frozenset({"fallen_petals", "second_printing"})
+#: Yae review r4, pick 1 (a): Inked Branches+ also Edits a card in your
+#: hand (`hand_if_upgraded: true` on its `edit_sakura`).
+UPGRADED_KINDS = frozenset({"fallen_petals", "second_printing",
+                            "edit_sakura"})
 OP_FIELDS = frozenset({"op", "kind", "amount", "base", "per", "target",
                        "annotation", "as", "which", "upgraded", "seal",
-                       "keeps"})
+                       "keeps", "hand_if_upgraded"})
 
 
 @dataclass
@@ -907,16 +910,22 @@ def _has_op(card, op: str) -> bool:
     return any(fx.get("op") == op for fx in card.effects)
 
 
-def _edit_target(state, editor, annotation: str):
+def _edit_target(state, editor, annotation: str, exclude=(),
+                 fresh_only: bool = False):
     """The default reading of "a card in your hand": Red Ink goes on the
     hardest-hitting Attack (most hits), else a Block card; Deadline on the
     dearest card; Reprint on the dearest card, an Attack first; the play
     riders on the cheapest card. A card with an empty temporary slot is
     preferred, so an Edit replaces one only when it must."""
-    cands = _edit_reaches(state, editor, annotation)
+    cands = [c for c in _edit_reaches(state, editor, annotation)
+             if not any(c is x for x in exclude)]
     if not cands:
         return None
-    fresh = [c for c in cands if not temp(c)] or cands
+    fresh = [c for c in cands if not temp(c)]
+    if not fresh and fresh_only:
+        # A later pick of a multi-card Edit may stop rather than overwrite.
+        return None
+    fresh = fresh or cands
 
     def cost(c):
         return c.cost if isinstance(c.cost, int) else 1
@@ -941,17 +950,34 @@ def _edit_target(state, editor, annotation: str):
 
 
 def edit(state, editor, annotation: str, n: int = 1) -> None:
+    """"Edit a card in your hand" (n == 1) or "Edit up to n cards in your
+    hand" (Yae review r4, ruled 2026-10-15): one chooser of up to n
+    DIFFERENT cards, and the player may stop early. The default reading
+    fills the first pick as a single Edit does; a later pick never
+    overwrites an Annotation (it stops instead). C# twin:
+    `YaeEditing.Edit`."""
     led = ledger(state.player)
-    for _ in range(n):
-        chooser = led.edit_choice or _edit_target
-        target = chooser(state, editor, annotation)
-        if target is None or target not in _edit_reaches(state, editor,
-                                                     annotation):
-            if not _edit_reaches(state, editor, annotation):
-                # Yae review r4, item 8: it says so rather than doing nothing.
-                state.emit("yae_edit_nothing", what="hand")
+    if n <= 0:
+        return
+    if not _edit_reaches(state, editor, annotation):
+        # Yae review r4, item 8: it says so rather than doing nothing.
+        state.emit("yae_edit_nothing", what="hand")
+        return
+    done: list = []
+    for i in range(n):
+        reach = [c for c in _edit_reaches(state, editor, annotation)
+                 if not any(c is d for d in done)]
+        if not reach:
+            return
+        if led.edit_choice is not None:
+            target = led.edit_choice(state, editor, annotation)
+        else:
+            target = _edit_target(state, editor, annotation,
+                                  exclude=done, fresh_only=i > 0)
+        if target is None or not any(target is c for c in reach):
             return
         annotate(state, target, annotation)
+        done.append(target)
         led.edits += 1
 
 
@@ -1189,6 +1215,10 @@ def validate_op(card_id: str, fx: dict) -> None:
     if "keeps" in fx and (kind != "edit_sakura" or fx["keeps"] != RED_INK):
         raise ValueError(f"card {card_id!r}: `keeps:` is red_ink, on an "
                          "edit_sakura")
+    if "hand_if_upgraded" in fx and (kind != "edit_sakura"
+                                     or fx["hand_if_upgraded"] is not True):
+        raise ValueError(f"card {card_id!r}: `hand_if_upgraded:` is true, "
+                         "on an edit_sakura")
     if kind == "edit_sakura" and fx["annotation"] not in SAKURA_ANNOTATIONS:
         raise ValueError(f"card {card_id!r}: {fx['annotation']!r} has no "
                          "Sakura reading")
@@ -1258,6 +1288,9 @@ def op_yae(state, fx: dict, card) -> None:
     elif kind == "edit_sakura":
         edit_sakura(state, fx["which"], fx["amount"], fx["annotation"],
                     fx.get("keeps"))
+        if fx.get("hand_if_upgraded") and fx.get("upgraded"):
+            # Inked Branches+: "[and a card in your hand]".
+            edit(state, card, fx["annotation"], 1)
     elif kind == "plant_level":
         plant(state, 1, "card", level=fx["amount"],
               annotation=inherited(card), kind=fx.get("as", THUNDER))

@@ -52,7 +52,7 @@ public sealed class ProtoYmPrintRun : CustomCardModel, ICharacterCard, IYaeBlock
         new List<DynamicVar>
         {
             new DynamicVar("YmBase", 6m),
-            new DynamicVar("YmPer", 2m)
+            new DynamicVar("YmPer", 3m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
