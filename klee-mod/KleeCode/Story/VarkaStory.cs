@@ -8,21 +8,29 @@ namespace KleeMod.Story;
 /// VARKA'S STORY TABLE. Every string here is the ruled paper's, word for word
 /// (<c>review/active/varka-story-2026-10-13.md</c>: the intro, the eight
 /// Ancients, Dispatch from Mondstadt, The Wolf of the North, The Long Way
-/// Home, the combat and pair lines; ruled "Sounds good! Let's go with it.").
+/// Home, the combat and pair lines; ruled "Sounds good! Let's go with it.")
+/// and the story chains (<c>review/active/klee-varka-story-chains-2026-10-14.md</c>,
+/// ruled 2026-10-15: five new events, every result line, opening line and
+/// reunion reply).
 /// <c>VarkaStoryTests</c> holds each one against the paper. Nothing in this
 /// file is authored here. His pair with Klee is in Klee's table (written with
 /// her batch); <see cref="StoryRules.BossEntryPlan"/> finds it from either.
 /// </summary>
 public static class VarkaStory
 {
-    /// <summary>Varka's answer when one of the three steps out (sec.5).</summary>
-    public const string HomeAnswer = "Ha, good to have you here! Come on, we're nearly there.";
+    /// <summary>His reply to each knight who steps out (the story chains:
+    /// "The Long Way Home's reunion replies become one per knight").</summary>
+    public const string EulaAnswer = "Tomorrow. After I've slept. I won't go easy.";
+
+    public const string NoelleAnswer = "It's yours. I'll be right behind you.";
+
+    public const string DilucAnswer = "Tell them to bring up the good bottle. The one you hide.";
 
     /// <summary>Varka's line on the skip (sec.5, "Wave them back to the column.").</summary>
     public const string WaveBackLine = "Stay with the others. I'll meet you all at the foot of the stairs.";
 
-    private static string HomeResult(string knight, string line) =>
-        knight + ": \"" + line + "\"\n" + "Varka: \"" + HomeAnswer + "\"";
+    private static string HomeResult(string knight, string line, string answer) =>
+        knight + ": \"" + line + "\"\n" + "Varka: \"" + answer + "\"";
 
     public static readonly CharacterStory Table = new()
     {
@@ -94,13 +102,17 @@ public static class VarkaStory
                 {
                     new StoryOption("SIGN_EVERY_ONE", "Stop to sign every one of them.",
                         "Upgrade 2 random cards.",
-                        new StoryEffect(StoryEffectKind.UpgradeRandomCards, 2)),
+                        new StoryEffect(StoryEffectKind.UpgradeRandomCards, 2),
+                        "He signs them against the wall, one after another. The courier has never seen "
+                      + "him read a report so carefully."),
                     new StoryOption("SIGN_THEM_LATER", "Sign them later.",
                         "Gain 75 Gold. Add [gold]Overdue Reports[/gold] to your deck.",
-                        new StoryEffect(StoryEffectKind.GainGoldAddCard, 75, typeof(OverdueReports))),
+                        new StoryEffect(StoryEffectKind.GainGoldAddCard, 75, typeof(OverdueReports)),
+                        "\"Tell her they're in good hands.\" He tucks the satchel under his cloak."),
                     new StoryOption("REQUEST_REINFORCEMENTS", "Request reinforcements for the expedition.",
                         "Choose 1 of 3 random Knights to add to your deck.",
-                        new StoryEffect(StoryEffectKind.ChooseFromPoolToDeck, 3)),
+                        new StoryEffect(StoryEffectKind.ChooseFromPoolToDeck, 3),
+                        "\"And not the new recruits. Send the ones who complain. They're usually right.\""),
                 },
                 Portrait: () => KleeArt.CardPortrait("proto_vk_grand_masters_order"),
                 FallbackPortraitPath: "res://images/events/potion_courier.png"),
@@ -118,16 +130,24 @@ public static class VarkaStory
                 {
                     new StoryOption("SPAR", "Spar with him.",
                         "Lose 12 HP. Upgrade 3 random cards.",
-                        new StoryEffect(StoryEffectKind.LoseHpUpgradeRandomCards, 3, HpLoss: 12)),
+                        new StoryEffect(StoryEffectKind.LoseHpUpgradeRandomCards, 3, HpLoss: 12),
+                        "They wreck half the landing. Boreas looks pleased with himself."),
                     new StoryOption("REST", "Rest at his side.",
                         "Heal 20 HP.",
-                        new StoryEffect(StoryEffectKind.Heal, 20)),
+                        new StoryEffect(StoryEffectKind.Heal, 20),
+                        "He sleeps with his back against the wolf's flank, the way he did on the northern watch."),
                     new StoryOption("ASK_AFTER_THE_PACK", "Ask after the pack.",
                         "Add an upgraded [gold]Razor: Awakening[/gold] to your deck.",
-                        new StoryEffect(StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoVkRazorClawAndThunder))),
+                        new StoryEffect(StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoVkRazorClawAndThunder)),
+                        "Boreas shows him Razor running with the wolves, fast and grinning. Varka watches "
+                      + "until it fades."),
                 },
                 Portrait: () => KleeArt.CardPortrait("proto_vk_boreas_unbound"),
-                FallbackPortraitPath: "res://images/events/punch_off.png"),
+                FallbackPortraitPath: "res://images/events/punch_off.png")
+            {
+                Follows = new[] { typeof(VarkaRearguard) },
+                Home = true,
+            },
 
             new StoryEvent(
                 ActIndex: 2,
@@ -143,22 +163,222 @@ public static class VarkaStory
                     new StoryOption("EULA", "Eula",
                         "Add an upgraded [gold]Eula: Icetide Vortex[/gold] to your deck.",
                         new StoryEffect(StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoVkEulaIcetideVortex)),
-                        HomeResult("Eula", "You still owe me a rematch. Don't you dare go easy.")),
+                        HomeResult("Eula", "You still owe me a rematch. Don't you dare go easy.", EulaAnswer)),
                     new StoryOption("NOELLE", "Noelle",
                         "Add an upgraded [gold]Noelle: Steadfast Maid[/gold] to your deck.",
                         new StoryEffect(StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoVkNoelleSteadfastMaid)),
-                        HomeResult("Noelle", "Welcome back, Grand Master! Please, let me take the front line.")),
+                        HomeResult("Noelle", "Welcome back, Grand Master! Please, let me take the front line.", NoelleAnswer)),
                     new StoryOption("DILUC", "Diluc",
                         "Add an upgraded [gold]Diluc: Searing Onslaught[/gold] to your deck.",
                         new StoryEffect(StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoVkDilucSearingOnslaught)),
-                        HomeResult("Diluc", "Angel's Share is holding your usual table. Don't keep it waiting.")),
+                        HomeResult("Diluc", "Angel's Share is holding your usual table. Don't keep it waiting.", DilucAnswer)),
                     new StoryOption("WAVE_THEM_BACK", "Wave them back to the column.",
                         "Nothing.",
                         new StoryEffect(StoryEffectKind.Nothing),
                         "Varka: \"" + WaveBackLine + "\""),
                 },
                 Portrait: () => KleeArt.CardPortrait("proto_vk_rally_to_the_banner"),
-                FallbackPortraitPath: "res://images/events/the_legends_were_true.png"),
+                FallbackPortraitPath: "res://images/events/the_legends_were_true.png")
+            {
+                Follows = new[] { typeof(VarkaWolfOfTheNorth), typeof(VarkaFirstExam) },
+                Home = true,
+                Openings = new[]
+                {
+                    new StoryOpening("TOOK_THE_REAR",
+                        new StoryCondition(typeof(VarkaRearguard), "TAKE_THE_REAR"),
+                        "The three from the rearguard march at the front of the column, grinning."),
+                    new StoryOpening("SUPPLIES",
+                        new StoryCondition(typeof(VarkaRearguard), "LEAVE_SUPPLIES"),
+                        "The three from the rearguard are waiting at the top of the stairs, fed and "
+                      + "rested. They saved him a loaf."),
+                    new StoryOpening("SENT_DOWN",
+                        new StoryCondition(typeof(VarkaRearguard), "SEND_THEM_DOWN"),
+                        "Halfway home, three knights climb back up to meet him. \"Message delivered, sir. "
+                      + "Jean says hurry up.\""),
+                },
+            },
+
+            // ---- The story chains (review/active/klee-varka-story-chains-2026-10-14.md)
+
+            new StoryEvent(
+                ActIndex: 1,
+                EventType: typeof(VarkaSecondSatchel),
+                Title: "The Second Satchel",
+                Body:
+                    "Another courier, another satchel, heavier than the first. \"The Acting Grand Master "
+                  + "says these are the urgent ones, sir. She underlined [i]urgent[/i].\"",
+                Options: new[]
+                {
+                    new StoryOption("SIGN_BY_LAMPLIGHT", "Sign them by lamplight.",
+                        "Lose 8 HP. Upgrade 2 random cards. Remove every [gold]Overdue Reports[/gold].",
+                        new StoryEffect(StoryEffectKind.LoseHp, 8),
+                        "He signs the last page at dawn, then goes back and reads the casualty lists twice.")
+                    {
+                        Then = new[]
+                        {
+                            new StoryEffect(StoryEffectKind.UpgradeRandomCards, 2),
+                            new StoryEffect(StoryEffectKind.RemoveEvery, 0, typeof(OverdueReports)),
+                        },
+                    },
+                    new StoryOption("HAND_TO_THE_COURIER", "Hand them to the courier.",
+                        "Lose 75 Gold. Remove a card.",
+                        new StoryEffect(StoryEffectKind.LoseGold, 75),
+                        "\"Consider it a promotion. And a raise.\"")
+                    {
+                        Then = new[] { new StoryEffect(StoryEffectKind.RemoveCard) },
+                    },
+                    new StoryOption("LOSE_THEM_ON_THE_STAIRS", "Lose them on the stairs.",
+                        "Gain 2 random potions. Add [gold]Overdue Reports[/gold].",
+                        new StoryEffect(StoryEffectKind.GainRandomPotions, 2),
+                        "He keeps the satchel. It had snacks in it.")
+                    {
+                        Then = new[] { new StoryEffect(StoryEffectKind.AddCard, 0, typeof(OverdueReports)) },
+                    },
+                },
+                Portrait: () => KleeArt.CardPortrait("proto_vk_grand_masters_verdict"),
+                FallbackPortraitPath: "res://images/events/potion_courier.png")
+            {
+                Follows = new[] { typeof(VarkaDispatchFromMondstadt) },
+                Openings = new[]
+                {
+                    new StoryOpening("SIGNED",
+                        new StoryCondition(typeof(VarkaDispatchFromMondstadt), "SIGN_EVERY_ONE"),
+                        "\"You signed the last lot so fast, sir, she sent twice as many.\""),
+                    new StoryOpening("LATER",
+                        new StoryCondition(typeof(VarkaDispatchFromMondstadt), "SIGN_THEM_LATER"),
+                        "\"Your overdue reports are now very overdue.\""),
+                    new StoryOpening("REINFORCEMENTS",
+                        new StoryCondition(typeof(VarkaDispatchFromMondstadt), "REQUEST_REINFORCEMENTS"),
+                        "\"The reinforcements came with forms.\""),
+                },
+            },
+
+            new StoryEvent(
+                ActIndex: 2,
+                EventType: typeof(VarkaActingGrandMaster),
+                Title: "The Acting Grand Master",
+                Body:
+                    "Jean is waiting on the landing, alone, a ledger under her arm. \"Five years, Grand "
+                  + "Master. I came up to collect.\" She almost manages not to smile. Then, quieter: \"The "
+                  + "reports from the Spire stopped. I had to see for myself that you were all still standing.\"",
+                Options: new[]
+                {
+                    new StoryOption("LET_HER_LEAD", "Let her lead the last stretch.",
+                        "Add an upgraded [gold]Jean — Dandelion Breeze[/gold].",
+                        new StoryEffect(StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoMcJeanDandelionBreeze)),
+                        "\"Lead on, Acting Grand Master.\" \"Then keep up, Grand Master.\""),
+                    new StoryOption("PROMISE_A_FULL_REPORT", "Promise a full report at Angel's Share.",
+                        "Remove every Curse. Lose 25 Gold for each.",
+                        new StoryEffect(StoryEffectKind.RemoveEveryCurseLoseGoldEach, 25),
+                        "\"Every word. I'm buying.\""),
+                    new StoryOption("CARRY_HER_LEDGER", "Carry her ledger the rest of the way.",
+                        "Upgrade 3 random cards. Add [gold]Overdue Reports[/gold].",
+                        new StoryEffect(StoryEffectKind.UpgradeRandomCards, 3),
+                        "He reads it on the way. It's mostly complaints about him.")
+                    {
+                        Then = new[] { new StoryEffect(StoryEffectKind.AddCard, 0, typeof(OverdueReports)) },
+                    },
+                },
+                Portrait: () => KleeArt.CardPortrait("proto_vk_jean_dandelion_breeze"),
+                FallbackPortraitPath: "res://images/events/the_legends_were_true.png")
+            {
+                Follows = new[] { typeof(VarkaSecondSatchel) },
+            },
+
+            new StoryEvent(
+                ActIndex: 0,
+                EventType: typeof(VarkaRearguard),
+                Title: "The Rearguard",
+                Body:
+                    "Three Favonius knights sit against the wall of the landing, bandaged and grey with "
+                  + "dust. They straighten when they see him. \"Grand Master. We fell behind. We can still "
+                  + "fight, sir.\"",
+                Options: new[]
+                {
+                    new StoryOption("TAKE_THE_REAR", "Take the rear yourself.",
+                        "Lose 10 HP. Choose 1 of 3 random Knights.",
+                        new StoryEffect(StoryEffectKind.LoseHp, 10),
+                        "\"You lot walk in front. I'll keep the stairs behind us.\"")
+                    {
+                        Then = new[] { new StoryEffect(StoryEffectKind.ChooseFromPoolToDeck, 3) },
+                    },
+                    new StoryOption("LEAVE_SUPPLIES", "Leave them your supplies.",
+                        "Lose 75 Gold. Remove a card.",
+                        new StoryEffect(StoryEffectKind.LoseGold, 75),
+                        "He leaves his own pack and travels light. \"Eat. That's an order.\"")
+                    {
+                        Then = new[] { new StoryEffect(StoryEffectKind.RemoveCard) },
+                    },
+                    new StoryOption("SEND_THEM_DOWN", "Send them down with a message.",
+                        "Gain 2 random potions. Add [gold]Overdue Reports[/gold].",
+                        new StoryEffect(StoryEffectKind.GainRandomPotions, 2),
+                        "\"Tell Jean we're fine.\" They press their potions on him, and their paperwork.")
+                    {
+                        Then = new[] { new StoryEffect(StoryEffectKind.AddCard, 0, typeof(OverdueReports)) },
+                    },
+                },
+                Portrait: () => KleeArt.CardPortrait("proto_vk_knights_muster"),
+                FallbackPortraitPath: "res://images/events/punch_off.png"),
+
+            new StoryEvent(
+                ActIndex: 0,
+                EventType: typeof(VarkaSongOnTheWind),
+                Title: "A Song on the Wind",
+                Body:
+                    "The wind on this landing carries an old Mondstadt tune: a young man knocks out every "
+                  + "examiner, is rejected anyway, then ambushes the Grand Master on his way home from the "
+                  + "tavern to make a point. Varka knows the song. He was the young man.",
+                Options: new[]
+                {
+                    new StoryOption("HUM_ALONG", "Hum along.",
+                        "Heal 12 HP.",
+                        new StoryEffect(StoryEffectKind.Heal, 12),
+                        "He gets the second verse wrong. He always does."),
+                    new StoryOption("TOAST_ABSENT_FRIENDS", "Toast absent friends.",
+                        "Gain a random potion.",
+                        new StoryEffect(StoryEffectKind.GainRandomPotions, 1),
+                        "He pours out a little of the good wine for Valentine."),
+                    new StoryOption("REMEMBER_VALENTINES_ADVICE", "Remember Valentine's advice.",
+                        "Upgrade a card.",
+                        new StoryEffect(StoryEffectKind.UpgradeChosenCard),
+                        "\"Find a reason of your own.\" He did, eventually. It was home."),
+                },
+                Portrait: () => KleeArt.CardPortrait("proto_vk_windborne_resolve"),
+                FallbackPortraitPath: "res://images/events/wellspring.png"),
+
+            new StoryEvent(
+                ActIndex: 1,
+                EventType: typeof(VarkaFirstExam),
+                Title: "The First Exam",
+                Body:
+                    "Training dummies stand in a ring on this landing, as if someone set up a knight's exam "
+                  + "inside the Spire. Varka cracks his knuckles. He has taken this exam before.",
+                Options: new[]
+                {
+                    new StoryOption("KNOCK_THEM_ALL_DOWN", "Knock them all down again.",
+                        "Lose 8 HP. Add an upgraded [gold]Four Winds' Ascension[/gold].",
+                        new StoryEffect(StoryEffectKind.LoseHp, 8),
+                        "Every dummy down in one pass. Nobody here to reject him.")
+                    {
+                        Then = new[]
+                        {
+                            new StoryEffect(StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoVkFourWindsAscension)),
+                        },
+                    },
+                    new StoryOption("DO_IT_PROPERLY", "Do it properly this time.",
+                        "Upgrade 2 random cards.",
+                        new StoryEffect(StoryEffectKind.UpgradeRandomCards, 2),
+                        "One at a time, by the book. Valentine would laugh at him."),
+                    new StoryOption("WALK_PAST", "Walk past.",
+                        "Heal 15 HP.",
+                        new StoryEffect(StoryEffectKind.Heal, 15),
+                        "He pats the nearest dummy on the way by."),
+                },
+                Portrait: () => KleeArt.CardPortrait("proto_vk_four_winds_ascension"),
+                FallbackPortraitPath: "res://images/events/punch_off.png")
+            {
+                Follows = new[] { typeof(VarkaSongOnTheWind) },
+            },
         },
 
         // Orobas's Archaic Tooth replaces the Ascension with Dandelion Gale,
@@ -173,19 +393,25 @@ public static class VarkaStory
 }
 
 /// <summary>Act 1, Varka only: Dispatch from Mondstadt.</summary>
-public sealed class VarkaDispatchFromMondstadt : StoryEventModel
-{
-    protected override StoryEvent Data => VarkaStory.Table.Events[0];
-}
+public sealed class VarkaDispatchFromMondstadt : StoryEventModel { }
 
-/// <summary>Act 2, Varka only: The Wolf of the North.</summary>
-public sealed class VarkaWolfOfTheNorth : StoryEventModel
-{
-    protected override StoryEvent Data => VarkaStory.Table.Events[1];
-}
+/// <summary>Act 2, Varka only: The Wolf of the North (the home thread).</summary>
+public sealed class VarkaWolfOfTheNorth : StoryEventModel { }
 
-/// <summary>Act 3, Varka only: The Long Way Home.</summary>
-public sealed class VarkaLongWayHome : StoryEventModel
-{
-    protected override StoryEvent Data => VarkaStory.Table.Events[2];
-}
+/// <summary>Act 3, Varka only: The Long Way Home (the home finale).</summary>
+public sealed class VarkaLongWayHome : StoryEventModel { }
+
+/// <summary>Act 2, Varka only: The Second Satchel.</summary>
+public sealed class VarkaSecondSatchel : StoryEventModel { }
+
+/// <summary>Act 3, Varka only: The Acting Grand Master.</summary>
+public sealed class VarkaActingGrandMaster : StoryEventModel { }
+
+/// <summary>Act 1, Varka only: The Rearguard.</summary>
+public sealed class VarkaRearguard : StoryEventModel { }
+
+/// <summary>Act 1, Varka only: A Song on the Wind.</summary>
+public sealed class VarkaSongOnTheWind : StoryEventModel { }
+
+/// <summary>Act 2, Varka only: The First Exam.</summary>
+public sealed class VarkaFirstExam : StoryEventModel { }
