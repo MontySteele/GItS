@@ -1421,6 +1421,15 @@ public static partial class McpMod
             state["furina_stage"] = furinaStage;
         }
 
+        // GItS LOCAL EDIT (Yae, 2026-10-15). The cards she Edited this
+        // combat -- what Bestseller and Print Run count, kept by the rule and
+        // shown by no card. Same absent/empty contract as the two above.
+        // Implementation and its reflection contract: gits/GitsYaeShrine.cs.
+        if (GitsYaeShrineState(player) is { } yaeShrine)
+        {
+            state["yae_shrine"] = yaeShrine;
+        }
+
         // GItS LOCAL EDIT (`EB-681`). WHAT REACTED THIS TURN, BY NAME. A
         // reaction is what several kits are ABOUT and the feed carried no
         // trace of one: the aura is consumed, the effect lands, and a reader

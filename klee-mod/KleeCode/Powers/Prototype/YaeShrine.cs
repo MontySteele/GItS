@@ -337,6 +337,23 @@ public static class YaeShrine
     public static int Edits(Creature? yae) =>
         yae == null || !Live(yae) ? 0 : YaeShrineLedger.For(yae).Edits;
 
+    /// <summary>
+    /// The seat page's read (the bridge's <c>gits/GitsYaeShrine.cs</c>, by
+    /// reflection; <c>understudy/blindplay_board.yae_shrine</c>): the cards
+    /// she Edited this combat, the count Bestseller and Print Run read. EMPTY
+    /// for anyone not Yae and outside a fight (a ledger is asked for only
+    /// inside one, so a map-screen poll never resets it). Primitives only.
+    /// </summary>
+    public static Dictionary<string, object?> Snapshot(Player? player)
+    {
+        var snapshot = new Dictionary<string, object?>();
+        var yae = player?.Creature;
+        if (yae == null || !Live(yae) || yae.CombatState == null) return snapshot;
+        snapshot["live"] = true;
+        snapshot["edits_this_combat"] = Edits(yae);
+        return snapshot;
+    }
+
     /// <summary>The Level a Sakura is planted at: 1, plus 1 for each Fox's
     /// Mooncall.</summary>
     public static int PlantLevel(Creature yae) =>
@@ -782,15 +799,17 @@ public static class YaeCards
         CardBlock(card, cardPlay,
                   Var(card, "YmBase") + Var(card, "YmPer") * YaeShrine.Count(card.Owner?.Creature));
 
-    /// <summary>Bestseller: base + per for each card you Edited this combat
-    /// (<see cref="YaeShrineLedger.Edits"/>; Yae review r5, pick 1 (a),
-    /// ruled 2026-10-15: was per Annotated card in hand).</summary>
+    /// <summary>Base + per for each card you Edited this combat, one powered
+    /// Electro hit (<see cref="YaeShrineLedger.Edits"/>). No row since
+    /// Bestseller took the calculated rail (2026-10-15).</summary>
     public static Task DamagePerEdit(PlayerChoiceContext choiceContext,
                                      CardModel card, CardPlay cardPlay) =>
         CardHit(choiceContext, card, cardPlay,
                 Var(card, "YmBase") + Var(card, "YmPer") * YaeShrine.Edits(card.Owner?.Creature));
 
-    /// <summary>Print Run: base + per for each card you Edited this combat.
+    /// <summary>Base + per for each card you Edited this combat, the card's
+    /// own Block (no row since Print Run took the calculated rail,
+    /// 2026-10-15).
     /// </summary>
     public static Task BlockPerEdit(PlayerChoiceContext choiceContext,
                                     CardModel card, CardPlay cardPlay) =>

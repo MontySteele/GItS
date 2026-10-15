@@ -252,8 +252,10 @@ def test_the_planting_marker_is_the_sims_planting_set():
 
 
 def test_a_yae_kinds_own_block_counts_for_red_ink_in_both_engines():
-    """Print Run's Block is a `yae` kind (no BlockVar, so no GainsBlock):
-    Red Ink rides it, so the filter keeps it (C# `IYaeBlockCard`)."""
+    """Red Ink rides Print Run's Block, so the filter keeps it. Since
+    2026-10-15 Print Run is on the calculated rail (a `CalculatedBlockVar`,
+    so the game's own GainsBlock answers); no generated row is a `yae`
+    Block kind today, so no card carries the C# `IYaeBlockCard` marker."""
     run = _card("print_run")
     assert Y.gives_block(run) and Y.affects(run, Y.RED_INK)
     marked = set()
@@ -261,7 +263,9 @@ def test_a_yae_kinds_own_block_counts_for_red_ink_in_both_engines():
         text = path.read_text(encoding="utf-8")
         if "IYaeBlockCard" in text.split("{", 1)[0]:
             marked.add(re.search(r"Sheet entry: id=(\S+)", text).group(1))
-    assert marked == {_ym("print_run")}
+    assert marked == set()
+    src = (GENERATED / "ProtoYmPrintRun.cs").read_text(encoding="utf-8")
+    assert "CalculatedBlockVar(" in src
 
 
 def test_the_red_ink_rule_says_where_it_goes():

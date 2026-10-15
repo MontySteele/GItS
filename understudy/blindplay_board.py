@@ -969,15 +969,17 @@ YAE_ANNOTATIONS = ("Red Ink", "Footnote", "Deadline Extension", "Fox Fire",
 
 def yae_shrine(player: dict[str, Any],
                combat: dict[str, Any]) -> dict[str, Any] | None:
-    """YAE's block: `{sakura, cap, lure, annotated}`, or None on a board that is
-    not hers (no Sakura badge and a wire that does not name her).
+    """YAE's block: `{sakura, cap, lure, annotated, edits}`, or None on a
+    board that is not hers (no Sakura badge and a wire that does not name
+    her).
 
     `sakura` is one row per badge, oldest first: `{slot, level, strike,
     turns}` read off the badge sentence (the badge amount is the Level where
     the sentence is missing); `lure` is the name of the enemy wearing
     Foxfire Lure, or None; `cap` is how many may stand (3, plus Sakura
     Channeling's stacks); `annotated` counts the hand's cards carrying one
-    of her five Annotations (the hand face's `enchantment`).
+    of her five Annotations (the hand face's `enchantment`); `edits` is the
+    cards she Edited this combat (`player.yae_shrine`), or None off the wire.
     """
     you = combat["you"]
     badges = []
@@ -1019,8 +1021,17 @@ def yae_shrine(player: dict[str, Any],
     cap = YAE_SAKURA_CAP + sum(
         _int(pw.get("stacks")) for pw in you["powers"]
         if _text(pw.get("name")) == _CHANNELING_NAME)
+    # Bestseller and Print Run's count (Yae review r5, pick 1 (a)): the cards
+    # she Edited this combat, off `player.yae_shrine` (the bridge's
+    # `gits/GitsYaeShrine.cs`, the mod's `YaeShrine.Snapshot`). None when the
+    # wire does not carry it (an older bridge, or out of a fight), so the page
+    # prints no number it was not given.
+    raw = player.get("yae_shrine")
+    edits = (raw.get("edits_this_combat")
+             if isinstance(raw, dict) and raw.get("live") else None)
     return {"sakura": sakura, "cap": cap, "lure": lure,
-            "annotated": annotated}
+            "annotated": annotated,
+            "edits": edits if isinstance(edits, int) else None}
 
 
 #: A performer's SHORT name -- the word the glossary rows and the faces use

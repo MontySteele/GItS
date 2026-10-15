@@ -464,6 +464,12 @@ def _runtime_count(state: CombatState, token: str,
             or token == "knights_played_this_combat"
             or token == "half_total_oath"):
         return varka_oath.count(state, token)
+    if token == "edits_this_combat":
+        # YAE (Bestseller, Print Run; Yae review r5, pick 1 (a)): the cards
+        # she Edited this combat. 0 for anyone who is not Yae. C# twin
+        # `YaeShrine.Edits`.
+        led = yae_shrine.ledger(state.player)
+        return led.edits if led is not None else 0
     raise ValueError(f"unknown runtime count {token!r}")
 
 
@@ -3446,6 +3452,9 @@ RUNTIME_COUNT_NAMES = frozenset({
     "half_total_oath",
     # AoE trim, 2026-10-03: Bombs Away!'s "for each enemy with a Bomb".
     "enemies_with_bomb",
+    # Yae review r5, pick 1 (a): Bestseller and Print Run's "for each card
+    # you Edited this combat".
+    "edits_this_combat",
 })
 
 # The one prefix family, exactly as `PREDICATE_PREFIXES` carries its own.

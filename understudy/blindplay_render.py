@@ -3134,11 +3134,15 @@ SHRINE_KIND = {"thunder": ("Sakura", "strikes an enemy for {n}"),
                "kitsune": ("Kitsune Sakura", "gives you {n} Block")}
 SHRINE_LURE_LINE = "- Foxfire Lure: your Sakura strike **{name}** this turn."
 SHRINE_ANNOTATED_LINE = "- Annotated cards in your hand: {n}."
+#: Bestseller and Print Run's count (Yae review r5, pick 1 (a)), which no card
+#: on the board shows (`YaeShrine.Snapshot`, via `player.yae_shrine`).
+SHRINE_EDITS_LINE = "- Cards Edited this combat: {n}."
 
 
 def _render_shrine(shrine: dict[str, Any]) -> list[str]:
     """Her block: each Sakura's Level, strike and strikes left, the Lure's
-    enemy, the Annotated count, one fact a line."""
+    enemy, the Annotated count, the cards Edited this combat, one fact a
+    line."""
     rows = shrine["sakura"]
     # Sakura Channeling (2026-10-14) raises the cap: 3, plus 2 per copy.
     cap = shrine.get("cap", 3)
@@ -3170,6 +3174,8 @@ def _render_shrine(shrine: dict[str, Any]) -> list[str]:
     if shrine.get("lure"):
         out.append(SHRINE_LURE_LINE.format(name=shrine["lure"]))
     out.append(SHRINE_ANNOTATED_LINE.format(n=shrine.get("annotated", 0)))
+    if shrine.get("edits") is not None:
+        out.append(SHRINE_EDITS_LINE.format(n=shrine["edits"]))
     return out
 
 

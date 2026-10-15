@@ -251,7 +251,9 @@ def test_pick1_rows():
     # Yae review r5, pick 1 (a): plus 2 [3] per card Edited this combat.
     for name, base, per in (("bestseller", (8, 10), (2, 3)),
                             ("print_run", (6, 8), (2, 3))):
-        fx = lambda c: next(f for f in c.effects if f.get("op") == "yae")
+        # 2026-10-15: on the calculated rail (the face shows the total).
+        fx = lambda c: next(f["amount_formula"] for f in c.effects
+                            if "amount_formula" in f)
         lo, hi = fx(_card(name)), fx(_card(name + "+"))
         assert (lo["base"], hi["base"]) == base
         assert (lo["per"], hi["per"]) == per
