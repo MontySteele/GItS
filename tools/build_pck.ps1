@@ -948,6 +948,30 @@ foreach ($closeup in @('ui\select_closeup.png', 'furina\ui\select_closeup.png', 
     }
 }
 
+# Select stage 2 (2026-10-15): when tools/select_loop.json has an entry for a
+# character, its generated scene draws the rendered idle loop instead of the
+# breathing still -- select_loop.png (a sheet of frames) and
+# select_closeup_static.png (the close-up with the moving region cleared),
+# both written by tools/select_loop.py, the one producer. The sheet imports
+# VRAM-compressed (one byte a texel, Write-TextureImport); the pack refuses to
+# build without the files a manifest entry names, rather than ship a scene
+# pointing at a missing texture.
+$selectLoops = Get-Content -Raw (Join-Path $repo 'tools\select_loop.json') -ErrorAction SilentlyContinue | ConvertFrom-Json
+foreach ($loopChar in @('klee', 'furina', 'varka')) {
+    if ($null -eq $selectLoops -or $null -eq $selectLoops.$loopChar) { continue }
+    $uiRel = if ($loopChar -eq 'klee') { 'ui' } else { "$loopChar\ui" }
+    $toUi = Join-Path $work "$loopChar\ui"
+    New-Item -ItemType Directory -Force -Path $toUi | Out-Null
+    foreach ($f in @($selectLoops.$loopChar.sheet_file, $selectLoops.$loopChar.static_file)) {
+        $from = Join-Path $src "$uiRel\$f"
+        if (-not (Test-Path $from)) {
+            throw "Missing $uiRel\$f under $src. The generated select scene draws the rendered loop; render it with tools/select_loop.py."
+        }
+        Copy-Item $from -Destination $toUi -Force
+        Write-TextureImport (Join-Path $toUi "$f.import")
+    }
+}
+
 
 # Kokomi's backdrop tint began as the only thing distinguishing her select
 # screen from Klee's while she ran on Klee's fallback splash. Her own art

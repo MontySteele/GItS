@@ -682,7 +682,7 @@ def main():
     objs = [mesh] + list(blade_obs.values())
 
     for name in [c for c in args.clips.split(",") if c]:
-        spec = LIB.CLIPS[name]
+        spec = LIB.CLIPS.get(name) or LIB.SELECT_LOOPS[name]
         keys = spec["keys"]
         caps = [capture(root, arm, mesh, k[1]) for k in keys]
         fps = spec["fps"]

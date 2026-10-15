@@ -287,35 +287,58 @@ def rest_still(R: Path):
 SELECT_TOP, SELECT_KEEP, SELECT_SIDE = 36, 48, 24
 
 
+def select_placer(R: Path, target_h: int = 2150):
+    """The close-up's framing as a function: (place, rec). `place(im, at=(0, 0))`
+    puts an image rendered at the select still's camera and scale (its pixel
+    (0, 0) at `at` on the still's canvas) onto the 1920x1080 close-up, ground
+    clip, crop, scale and position exactly as the still's. The still itself
+    is `place(still)`; tools/select_loop.py places the loop's frames the same
+    way, so frame 0 is the still."""
+    meta = json.loads((R / "select.json").read_text(encoding="utf-8"))
+    s = float(meta["ppu"]) / FX.REF_PPU
+    sel = Image.open(R / "select.png").convert("RGBA")
+    sel = ground_clip(sel, meta["origin_px"][1], s)
+    bx, by, bx1, by1 = KP.alpha_box([sel])
+    sel = sel.crop((bx, by, bx1, by1))
+    guards = {g: v["guard_box_px"] for g, v in ((meta.get("arms_crossed") or {}).get("hilts") or {}).items()}
+    if guards:
+        low = max(g[3] for g in guards.values()) - by
+        target_h = min(target_h, math.floor((1080 - SELECT_KEEP - SELECT_TOP) * sel.height / low))
+    k = target_h / sel.height
+    new_w = round(sel.width * k)
+    cx = min(1260, 1920 - SELECT_SIDE - (new_w - new_w // 2))
+    x0 = cx - new_w // 2
+    rec = {"size": [1920, 1080], "figure_h": target_h}
+
+    def to_canvas(x, y):
+        return [round((x - bx) * k + x0, 1), round((y - by) * k + SELECT_TOP, 1)]
+    if guards:
+        rec["guards_px"] = {g: to_canvas(v[0], v[1]) + to_canvas(v[2], v[3]) for g, v in sorted(guards.items())}
+        rec["chin_px"] = to_canvas(0, meta["arms_crossed"]["chin_px"])[1]
+
+    def place(im: Image.Image, at=(0, 0)) -> Image.Image:
+        pad = 96            # a moving frame may reach past the still's canvas
+        base = Image.new("RGBA", (sel.width + bx + pad * 2 + im.width, sel.height + by + pad * 2 + im.height),
+                         (0, 0, 0, 0))
+        # the still's canvas, shifted by `pad`, holds the frame at `at`
+        base.paste(im, (round(at[0]) + pad, round(at[1]) + pad))
+        base = ground_clip(base, meta["origin_px"][1] + pad, s)
+        part = base.crop((bx + pad, by + pad, bx1 + pad, by1 + pad))
+        part = part.resize((new_w, target_h), Image.LANCZOS)
+        canvas = Image.new("RGBA", (1920, 1080), (0, 0, 0, 0))
+        canvas.paste(part, (x0, SELECT_TOP), part)
+        return canvas
+    return place, rec
+
+
 def select_closeup(R: Path, target_h: int = 2150):
     """1920x1080, the figure right of centre, bleeding off the bottom (Klee's
     framing). When the still records its blades' crossguards (render.py
     arms_crossed, stance B), the figure is drawn smaller if it must be, so
     both crossguards sit inside the frame, and moved left if its right edge
     would leave it. The manifest gets where the crossguards and the chin land."""
-    meta = json.loads((R / "select.json").read_text(encoding="utf-8"))
-    sel = Image.open(R / "select.png").convert("RGBA")
-    sel = ground_clip(sel, meta["origin_px"][1], float(meta["ppu"]) / FX.REF_PPU)
-    bx, by, bx1, by1 = KP.alpha_box([sel])
-    sel = sel.crop((bx, by, bx1, by1))
-    guards = {s: g["guard_box_px"] for s, g in ((meta.get("arms_crossed") or {}).get("hilts") or {}).items()}
-    if guards:
-        low = max(g[3] for g in guards.values()) - by
-        target_h = min(target_h, math.floor((1080 - SELECT_KEEP - SELECT_TOP) * sel.height / low))
-    k = target_h / sel.height
-    sel = sel.resize((round(sel.width * k), target_h), Image.LANCZOS)
-    cx = min(1260, 1920 - SELECT_SIDE - (sel.width - sel.width // 2))
-    x0 = cx - sel.width // 2
-    canvas = Image.new("RGBA", (1920, 1080), (0, 0, 0, 0))
-    canvas.paste(sel, (x0, SELECT_TOP), sel)
-    rec = {"size": [1920, 1080], "figure_h": target_h}
-
-    def to_canvas(x, y):
-        return [round((x - bx) * k + x0, 1), round((y - by) * k + SELECT_TOP, 1)]
-    if guards:
-        rec["guards_px"] = {s: to_canvas(g[0], g[1]) + to_canvas(g[2], g[3]) for s, g in sorted(guards.items())}
-        rec["chin_px"] = to_canvas(0, meta["arms_crossed"]["chin_px"])[1]
-    return canvas, rec
+    place, rec = select_placer(R, target_h)
+    return place(Image.open(R / "select.png").convert("RGBA")), rec
 
 
 def main(argv=None) -> int:
