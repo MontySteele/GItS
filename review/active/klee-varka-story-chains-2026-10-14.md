@@ -54,7 +54,7 @@ draft pick 2, now option b).
 |---|---|---|---|
 | Base game | 25% | 39% | 37% |
 | First draft | 25% | 63% | 13% |
-| This draft | 25% (4) | 50% (8) | 25% (4) |
+| This draft | 25% (4) | 56% (9) | 19% (3) |
 
 Where the ratio and the story pulled apart, the story won: a reunion with
 Dodoco should not be a choice of two bad things. The ratio is a check, not
@@ -102,6 +102,13 @@ thread it opens: "Dodoco rides on Klee's shoulder the whole way." **If Dodoco
 went missing in act 1 and act 2 brought no event**, it opens instead: "A
 knight holds out something small and a little sticky. 'Found this on the
 stairs below. Is it yours?' It's Dodoco." Doubt is removed as the event opens.
+It gains a fourth option, Klee's version of Varka's "Wave them back to the
+column", so the reunion never forces a late card into the deck (GPT review,
+relayed by [USER]):
+
+| Option | Effect | Result |
+|---|---|---|
+| Everyone can come! | Nothing. | Klee: "You can all come! Dodoco, make room!" Three knights fall in behind her, trying very hard to look like they were planning to anyway. |
 
 **Mom's Marks** (act 1, a price with free ways out):
 
@@ -113,8 +120,8 @@ stairs below. Is it yours?' It's Dodoco." Doubt is removed as the event opens.
 | Try the recipe right now. | Lose 10 HP. Add **Alice's Recipe** (a Rare). | It works! Klee's eyebrows will grow back. |
 | Add a mark of her own. | Upgrade 2 random cards. | A bomb, a star, and "Klee was here too!" |
 
-**Alice's Cache** (act 2, every option priced, the strongest reward in the
-chain):
+**Alice's Cache** (act 2, a price with a free way out, the strongest reward
+in the chain):
 
 > At the end of Mom's marks is a little chest with a note: "For my darling Klee. Open in an emergency only! It's a bit lively, so stand back. And don't tell Jean. ♪" The chest is ticking.
 
@@ -122,13 +129,17 @@ chain):
 |---|---|---|
 | It's an emergency! Open it! | Lose 15 HP. Gain a random Rare relic. | KABOOM. Mom wasn't joking about lively. Inside, wrapped in fireproof cloth, is something wonderful. |
 | Save it for a real emergency. | Lose 5 HP. Gain a random potion. | The chest sputters at her the whole way up. Klee carries it very, very carefully. |
-| Leave it for the next adventurer. | Lose up to 50 Gold. Transform 2 cards. | Klee swaps in two of her own bombs, and some Mora for luck. Fair's fair. |
+| Leave it for the next adventurer. | Lose 50 Gold. Transform 2 cards. Locked with less than 50 Gold. | Klee swaps in two of her own bombs, and some Mora for luck. Fair's fair. |
 
-This option is always open, so the event never forces a death: at 5 HP the
-two HP options would kill, and "Lose 50 Gold" would lock with less than 50.
-With less, Klee leaves what she has (GPT review, relayed by [USER]: "Alice's
-Cache needs an always-available exit... an unavoidable death at an event
-needs an explicit design decision").
+| Back away from the ticking. | Nothing. | Klee tiptoes backwards all the way to the stairs. Dodoco keeps watch. |
+
+The last option is the free way out, so the event never forces a death. At 5
+HP the two HP options would kill, and the Gold option locks with less than 50.
+A first fix, "Lose up to 50 Gold", made the transforms free with no Gold. So
+the paid option stays paid, and leaving costs nothing and pays nothing (GPT
+review, relayed by [USER]: "retain the paid transform option and add a
+separate, rewardless way to leave the chest"). The Cache moves from "every
+option priced" to "a price, with a free way out".
 
 **Mom's Last Note** (act 3, a price with free ways out). Alice stays
 offscreen.
@@ -190,11 +201,11 @@ Opening line by act-1 choice: *signed* "You signed the last lot so fast, sir, sh
 **The Acting Grand Master** (act 3, a price with free ways out). Jean has a
 reason to be here, unlike Alice: she came to collect her late Grand Master.
 
-> Jean is waiting on the landing, alone, a ledger under her arm. "Five years, Grand Master. I came up to collect." She almost manages not to smile.
+> Jean is waiting on the landing, alone, a ledger under her arm. "Five years, Grand Master. I came up to collect." She almost manages not to smile. Then, quieter: "The reports from the Spire stopped. I had to see for myself that you were all still standing."
 
 | Option | Effect | Result |
 |---|---|---|
-| Let her lead the last stretch. | Add an upgraded **Jean: Dandelion Breeze**. | "Lead on, Acting Grand Master." "Then keep up, Grand Master." |
+| Let her lead the last stretch. | Add an upgraded **Jean: Dandelion Breeze**. *(a jackpot)* | "Lead on, Acting Grand Master." "Then keep up, Grand Master." |
 | Promise a full report at Angel's Share. | Remove every Curse. Lose 25 Gold for each. Locked with no Curse. | "Every word. I'm buying." |
 | Carry her ledger the rest of the way. | Upgrade 3 random cards. Add **Overdue Reports**. | He reads it on the way. It's mostly complaints about him. |
 
@@ -242,9 +253,22 @@ happens now, in the Spire, and the memory is what it stirs up.
 
 | Option | Effect | Result |
 |---|---|---|
-| Knock them all down again. | Lose 8 HP. Add an upgraded **Four Winds' Ascension**. | Every dummy down in one pass. Nobody here to reject him. |
+| Knock them all down again. | Lose 8 HP. Add an upgraded **Four Winds' Ascension**. *(a jackpot)* | Every dummy down in one pass. Nobody here to reject him. |
 | Do it properly this time. | Upgrade 2 random cards. | One at a time, by the book. Valentine would laugh at him. |
 | Walk past. | Heal 15 HP. | He pats the nearest dummy on the way by. |
+
+**Two jackpots, on purpose.** A second upgraded Four Winds' Ascension (The
+First Exam) is another copy of his scaling attack, and the upgraded Jean (The
+Acting Grand Master) gives Block and Swirl for the rest of the run. Both are
+worth more than an ordinary card reward. They ship as deliberate high-value
+outcomes. The overall share of priced options does not show that these two are
+balanced, so the suite and the seats watch them (GPT review, relayed by [USER]).
+
+**Exam lore: check before release.** The First Exam and A Song on the Wind rest
+on one community transcription of his character story. They are fine as
+adaptations, but their exact canon details are confirmed against the in-game
+text before the Workshop release. If that check fails, both move to his Knight
+of Boreas years, as the lore note above says.
 
 ## 4. The build
 
