@@ -806,11 +806,17 @@ public static class YaeCards
     {
         var yae = card.Owner?.Creature;
         if (yae == null || !YaeShrine.Live(yae)) return;
-        if (YaeShrineLedger.For(yae).EditSakura(end, Var(card, "YmAmount"), annotation, keepRedInk) == 0)
+        // Yae review r5, item 2: Inked Branches+ with neither a Sakura nor a
+        // hand card to Edit says "Nothing to Edit" once, not a bubble from
+        // each half. One that Edited a Sakura says nothing about the hand.
+        var hand = handIfUpgraded && card.IsUpgraded;
+        var edited = YaeShrineLedger.For(yae).EditSakura(end, Var(card, "YmAmount"), annotation, keepRedInk);
+        if (edited == 0 && !hand)
             YaeEditing.SayNothing(yae, YaeEditing.NoSakuraToEditKey);
         await SakuraBadge.Sync(choiceContext, yae);
-        if (handIfUpgraded && card.IsUpgraded)
-            await YaeEditing.Edit(choiceContext, card, annotation, 1);
+        if (hand)
+            await YaeEditing.Edit(choiceContext, card, annotation, 1,
+                                  sayNothing: edited == 0);
     }
 
     /// <summary>Grafted Branch: "Plant a Sakura. It starts at Level 2 [3]."

@@ -534,17 +534,19 @@ def act_all(state, reason: str) -> None:
 
 
 def edit_sakura(state, which: str, n: int, annotation: str,
-                keeps: Optional[str] = None) -> None:
+                keeps: Optional[str] = None, quiet: bool = False) -> int:
     """"Edit your newest / oldest Sakura" (`n` from that end), "Edit every
     Sakura" (`which` every): the Annotation replaces any the Sakura
-    carried."""
+    carried. Returns how many it Edited; `quiet` (Inked Branches+, whose
+    hand half speaks for both, Yae review r5 item 2) says nothing when
+    none stand."""
     if annotation not in SAKURA_ANNOTATIONS:
         raise ValueError(f"no Sakura reading for {annotation!r}")
     led = ledger(state.player)
     ordered = led.sakura if which == "oldest" else list(reversed(led.sakura))
     if which == "every":
         n = len(ordered)
-    if not ordered:
+    if not ordered and not quiet:
         state.emit("yae_edit_nothing", what="sakura")
     for s in ordered[:n]:
         had_red = s.annotation == RED_INK or s.red_ink_kept
@@ -552,6 +554,7 @@ def edit_sakura(state, which: str, n: int, annotation: str,
         s.red_ink_kept = bool(keeps == RED_INK and had_red
                               and annotation != RED_INK)
         state.emit("yae_sakura_annotate", seq=s.seq, annotation=annotation)
+    return len(ordered[:n])
 
 
 def highest(led, kinds=SAKURA_KINDS):
@@ -949,7 +952,8 @@ def _edit_target(state, editor, annotation: str, exclude=(),
     return min(plain, key=cost)
 
 
-def edit(state, editor, annotation: str, n: int = 1) -> None:
+def edit(state, editor, annotation: str, n: int = 1,
+         say_nothing: bool = True) -> None:
     """"Edit a card in your hand" (n == 1) or "Edit up to n cards in your
     hand" (Yae review r4, ruled 2026-10-15): one chooser of up to n
     DIFFERENT cards, and the player may stop early. The default reading
@@ -960,8 +964,10 @@ def edit(state, editor, annotation: str, n: int = 1) -> None:
     if n <= 0:
         return
     if not _edit_reaches(state, editor, annotation):
-        # Yae review r4, item 8: it says so rather than doing nothing.
-        state.emit("yae_edit_nothing", what="hand")
+        # Yae review r4, item 8: it says so rather than doing nothing
+        # (unless Inked Branches+ already Edited a Sakura, r5 item 2).
+        if say_nothing:
+            state.emit("yae_edit_nothing", what="hand")
         return
     done: list = []
     for i in range(n):
@@ -1286,11 +1292,14 @@ def op_yae(state, fx: dict, card) -> None:
     elif kind == "fox_fire":
         fox_fire(state, card.id)
     elif kind == "edit_sakura":
-        edit_sakura(state, fx["which"], fx["amount"], fx["annotation"],
-                    fx.get("keeps"))
-        if fx.get("hand_if_upgraded") and fx.get("upgraded"):
+        # Yae review r5, item 2: Inked Branches+ says "Nothing to Edit"
+        # once when neither half finds a card. C# twin: `YaeCards.EditSakura`.
+        hand = bool(fx.get("hand_if_upgraded") and fx.get("upgraded"))
+        edited = edit_sakura(state, fx["which"], fx["amount"],
+                             fx["annotation"], fx.get("keeps"), quiet=hand)
+        if hand:
             # Inked Branches+: "[and a card in your hand]".
-            edit(state, card, fx["annotation"], 1)
+            edit(state, card, fx["annotation"], 1, say_nothing=edited == 0)
     elif kind == "plant_level":
         plant(state, 1, "card", level=fx["amount"],
               annotation=inherited(card), kind=fx.get("as", THUNDER))

@@ -1716,11 +1716,15 @@ ARM_KEYWORDS: dict[str, str] = {
                        "when it acts."),
     "Kitsune Sakura": ("A fox decoy Sakura. When it acts, you gain 2 + its "
                        "Level Block."),
-    "Full shrine": ("Shrine full: your oldest acts. Same kind: it refreshes "
-                    "and gains a Level. Other kind: it withers."),
+    # Yae review r5, item 5.
+    "Full shrine": ("Planting makes your oldest Sakura act. If the new Sakura "
+                    "is the same kind, the oldest stays and gains a Level. If "
+                    "not, the oldest withers and the new one takes its "
+                    "place."),
     "Edit": ("Give a card an Annotation for this combat, replacing its "
-             "last. Published ones stay and add up. A card that Edits 2 "
-             "cards opens the chooser twice, one card each."),
+             "last. Published ones stay and add up. A card that Edits up "
+             "to 2 cards opens one chooser: pick up to 2 different cards, "
+             "fewer or none."),
     # 2026-10-14: Red Ink on a planting card reaches its Sakura too.
     "Red Ink": ("This card deals 3 more damage and gives 3 more Block. If it "
                 "plants, its Sakura get it too. On a Sakura: the Sakura's "
@@ -3792,6 +3796,16 @@ RESOLUTION_OVERFLOW_CLAUSE = " *(more hits landed than this page will list)*"
 #: once (First Strike, Echo Form). Its hits from every play are listed under
 #: it; without this a seat holding First Strike read "never doubled".
 RESOLUTION_REPLAYED_CLAUSE = " *(played {times} times; the hits of every play are below)*"
+#: Yae review r5, item 3 (lane 2: a Reprinted attack killed its target with
+#: its first play, and the page said "played two times" over one hit). The
+#: second play does run, but the base game keeps the play's target and an
+#: attack on a dead target hits nothing (`CardModel.OnPlayWrapper` passes
+#: the same `target` to every play; `AttackCommand.Execute` drops dead
+#: targets and stops). Printed when the card killed something.
+RESOLUTION_REPLAYED_KILL_CLAUSE = (
+    " *(played {times} times; the hits of every play are below. A play "
+    "aimed at an enemy that had already died hits nothing: the game does not "
+    "pick a new target)*")
 #: The co-op partner's plays this turn, under the other-player section and
 #: never under yours (the same seat round: "What you played" listed them).
 PARTNER_RESOLUTIONS_HEADING = "### What {partner} played this turn"
