@@ -36,7 +36,14 @@ draws the blow.
   - **Kitsune Sakura** (the decoy): a fox illusion draws the blow. You gain
     2 + its Level Block.
 - **A Sakura acts** at the end of your turn, once more when it withers (Last
-  Bloom), and when a full-shrine plant pushes it (as now).
+  Bloom), and when Tenko fires.
+- **Planting into a full shrine** (amended after GPT's review: with kinds, the
+  old rule could never change a full shrine's mix):
+  - **Same kind as your oldest:** the oldest acts, refreshes to at least 3
+    turns and gains a Level, as now. A one-kind shrine keeps its scaling.
+  - **A different kind:** the oldest acts, withers, and the new Sakura takes
+    its place at its printed Level. Changing the board's mix costs you an
+    established Sakura.
 - **Tenko** becomes one plain rule again: "Every Sakura acts now. Refresh them
   to at least 3 turns." The typed Tenko and its double effect go. This is the
   power cut: one action per Sakura, not two. The mix of kinds you planted
@@ -62,33 +69,51 @@ because the Common Guard now leaves a Block source behind.
 [USER] asked whether Publish should be "many smaller buffs" or "some kind of
 'super card' style effect that does something insane". Claude recommends the
 super card:
-- **Publishing a card that already has a Published Annotation adds to it.**
-  The card keeps every Published Annotation. Red Ink twice is +6; Reprint
-  twice plays it three times; Sakura Seal twice plants two. Publish happens
-  only after elites and bosses, so a card collects about four to six over a
-  run. That rate is the cap; none is printed.
-- **A combat Edit on a Published card adds** for that combat and never
-  replaces a Published Annotation. (Today Edits skip Published cards.) That
-  combat Annotation is what a Publish then adds to the stack.
-- **The Seven Glamours** (Publish from hand) becomes the fast way to grow one.
-- Technically, one custom enchantment holds the list and its tip lists them.
+- **Two layers on each card** (amended after GPT's review):
+  - **The permanent stack:** every Published Annotation, kept for the run.
+    Red Ink twice is +6; Reprint twice replays twice; Sakura Seal twice plants
+    two.
+  - **One temporary slot:** a combat Edit fills it, and another Edit replaces
+    it. It never touches the stack. So repeated Proofreads cannot pile up
+    Reprints within one fight.
+  - **Publishing moves the temporary layer onto the stack,** once.
+- **The real bound** is not "four to six". It is one Publish per elite and
+  boss, plus every Seven Glamours you play (a Rare, Exhaust, usable in any
+  fight). A seat round judges the Masterpiece with those rules, not with an
+  assumed count.
+- **Reprint, exactly:** a card's Reprints add up. On the card's first play
+  each combat it replays once per Reprint layer, then those go inert for the
+  combat. A new temporary Reprint arms one fresh replay. A copy is a new card:
+  its Reprints are armed.
+- Technically, one custom enchantment holds both layers and its tip lists
+  them.
 
 ## 3. Signature cards (new)
 
 | Card | Text |
 |---|---|
 | Second Printing (U Skill, 0) | Put an Annotated card from your Discard Pile into your hand. [It costs 0 this turn.] Exhaust. |
-| Author's Copy (U Skill, 1 [0]) | Add a copy of an Annotated card in your hand to your hand. It keeps its Annotations. Exhaust. |
+| Author's Copy (U Skill, 1 [0]) | Add a copy of an Annotated card in your hand (not an Author's Copy) to your hand. It keeps its Annotations. Exhaust. |
 | Serial Novel (Rare Power, 2 [1]) | At the start of your turn, put a random Annotated card from your Discard Pile into your hand. |
 
-Bestseller and Print Run stay as support.
+**Author's Copy cannot copy an Author's Copy.** GPT found a loop: an
+Author's Copy+ Annotated with Royalties, copied by another Author's Copy, makes
+a 0-cost copy that copies the original again, for +1 Energy each time. LAW
+forbids energy-positive copy loops ("copy effects never make an
+energy-positive loop"). Banning copies of generated cards would not close it,
+because the target is the original in hand.
+
+Bestseller and Print Run stay as support. **Watch:** a Masterpiece makes one
+card matter a lot. The round should say whether runs feel more dependable or
+more dependent on drawing one card.
 
 ## 4. Seat cleanup
 
 - **Fallen Petals** was the "never again" card in four records: seats refresh
   Sakura, so they never wither. It becomes an active evoke, **Fallen Petals**
-  (U Skill, 0): "Your oldest Sakura acts, then withers. Gain 1 Energy. [Draw 1
-  card.]"
+  (U Skill, 0): "Your oldest Sakura withers (it acts once, its Last Bloom). If
+  one did, gain 1 Energy [and draw 1 card]." One action in total, and nothing
+  with no Sakura.
 - **Seat page:** mark Published cards; warn that a two-card Edit opens a
   second chooser; say where a Sakura's Levels came from.
 - **Watch next round:** Inked Branches, Print Run, Royalties and Sakura
@@ -96,11 +121,16 @@ Bestseller and Print Run stay as support.
 
 ## Picks
 
+[USER] on the plan: "I like the new direction!" GPT's sanity check
+recommended the amended defaults below, and this page now carries them.
+
 1. **This plan as a whole** (kinds, Masterpiece, three signature cards,
    Fallen Petals).
-   - **(a, default)** Build all of it, then a five-seat round.
+   - **(a, default)** Build all of it as amended (full-shrine replacement by
+     kind, the real Publish bound, Author's Copy closed), then a five-seat
+     round.
    - (b) Kinds first, Masterpiece and signature cards in a later round.
 2. **An Edit on a Published card.**
-   - **(a, default)** It adds for the combat and can be Published onto the
-     stack.
+   - **(a, default)** It fills the one temporary slot, which a later Edit
+     replaces and a Publish moves onto the stack.
    - (b) Published cards stay closed to Edits; only Publish adds.
