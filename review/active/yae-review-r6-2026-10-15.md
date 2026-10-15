@@ -85,5 +85,7 @@ game.
 
 ## Next
 
-Items 1 to 7 are built now. Yae has had six seat rounds; the next step is your
+Items 1 to 7 are built in #1336. Item 7 finding: the page was not behind. The
+boss was at 51 under a turn-start chooser, and the pick let a full-shrine plant
+kill it. The harness now skips the chained command and does not count it as a refusal. Yae has had six seat rounds; the next step is your
 own Yae run on the new build, the finish line for Prototype.
