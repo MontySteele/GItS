@@ -51,7 +51,7 @@ public sealed class ProtoKkFeint : CustomCardModel, IElementalCard, ICharacterCa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Feint"),
-        ("description", "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus {ExtraDamage:diff()} for each [gold]Plan[/gold] waiting.\nOr [gold]plan[/gold]: Deal {PlanDamage:diff()} [gold]Hydro[/gold] damage for each [gold]Plan[/gold] carried out this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage.\nOr [gold]plan[/gold]: Deal {PlanDamage:diff()} [gold]Hydro[/gold] damage for each [gold]Plan[/gold] carried out this turn."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -66,9 +66,7 @@ public sealed class ProtoKkFeint : CustomCardModel, IElementalCard, ICharacterCa
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(8m),
-            new ExtraDamageVar(3m),
-            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => KokomiPlan.PlansHeld(card.Owner.Creature)),
+            new DamageVar(8m, ValueProp.Move),
             new DynamicVar("PlanDamage", 6m)
         };
 
@@ -100,7 +98,7 @@ public sealed class ProtoKkFeint : CustomCardModel, IElementalCard, ICharacterCa
     public async Task PlayNowLine(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
+        await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
             .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
             .WithElementHitFx(this)
@@ -109,7 +107,7 @@ public sealed class ProtoKkFeint : CustomCardModel, IElementalCard, ICharacterCa
 
     protected override void OnUpgrade()
     {
-        DynamicVars.CalculationBase.UpgradeValueBy(3m);
+        DynamicVars.Damage.UpgradeValueBy(2m);
         DynamicVars["PlanDamage"].UpgradeValueBy(2m);
     }
 }

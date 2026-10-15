@@ -67,6 +67,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         RESOLUTION_HIT_THORNS, THORNS_POWER,
                                         RESOLUTION_HIT_SELF,
                                         RESOLUTION_NO_HITS,
+                                        RESOLUTION_POWER_PLAYED,
                                         RESOLUTION_NO_HITS_STAGE,
                                         RESOLUTION_SUMMONED,
                                         RESOLUTION_OATH, RESOLUTION_FANG,
@@ -977,9 +978,19 @@ def _receipt_bonus_names(said: dict[str, Any],
                          you: dict[str, Any] | None) -> list[str]:
     """The powers on the board that can account for a number ABOVE what the
     clause asked for: the bodies it moved for a hit (Vulnerable), her own for
-    Block (Dexterity, Watchful Shoal on a Ward). Named as printed."""
+    Block (Dexterity, Watchful Shoal on a Ward). Named as printed.
+
+    Kokomi review r8 (2026-10-14, item 9): and, for a hit, the reactions the
+    Plan's own hits set off, off the wire (`reactions`). Masterstroke asked
+    for 42 and landed 63 on a Pyro body: the Plan's Hydro Vaporized it. The
+    body died, so no power on the next board could name the bonus, and the
+    receipt said only "the clause asked for 42"."""
     wanted = RECEIPT_BONUS_POWERS.get(str(said.get("kind") or ""), ())
     names: list[str] = []
+    if said.get("kind") == "damage":
+        for reaction in said.get("reactions") or []:
+            if reaction not in names:
+                names.append(reaction)
     if said.get("kind") == "damage":
         moved = {_fold(m.get("target")) for m in said.get("moved") or []}
         holders = [e for e in enemies or [] if _fold(e.get("name")) in moved]
@@ -1146,6 +1157,39 @@ def _turn_allowance(power: dict[str, Any]) -> tuple[int, str] | None:
     if not 0 <= stacks <= cap:
         return None
     return cap, ("played" if _PLAYED_CAP.search(text) else "left")
+
+
+#: Kokomi review r8 (2026-10-14, item 11): under a cap on the cards you play
+#: each turn (Sloth), the cards it counted. A seat's Sloth refused Resolve
+#: with 2 Energy left, and the screen did not say a Companion the Bake-Kurage
+#: played for a Plan (twice, under Nereid) had counted: Sloth counts every
+#: card play of yours (`SlothPower.BeforeCardPlayed`), the game's own
+#: auto-plays included.
+PLAYED_CAP_COUNTED = "    - Counted this turn: {cards}."
+PLAYED_CAP_FOR_YOU = " (played for you)"
+
+
+def _played_cap_lines(power: dict[str, Any],
+                      resolutions: list[dict[str, Any]] | None) -> list[str]:
+    """The cards a "play more than N cards" power counted this turn, off the
+    turn's ledger, or nothing (no such power, no ledger, nothing played)."""
+    cap = _turn_allowance(power)
+    if cap is None or cap[1] != "played" or not resolutions:
+        return []
+    names: list[str] = []
+    for row in resolutions:
+        if row.get("carried") or row.get("is_local") is False:
+            continue
+        name = f"**{row['card']}**"
+        if row.get("auto_played"):
+            name += PLAYED_CAP_FOR_YOU
+        plays = max(1, int(row.get("play_count") or 1))
+        if plays > 1:
+            name += f" x{plays}"
+        names.append(name)
+    if not names:
+        return []
+    return [PLAYED_CAP_COUNTED.format(cards=", ".join(names))]
 
 
 # `EB-525`. THE STEP THE SENTENCE DOES NOT SAY IT LEAVES OUT.
@@ -1325,6 +1369,12 @@ RELIC_USED_UP = " (used up: it has done its job and does nothing more)"
 #: prints it once and says so.
 POWER_LISTED_TWICE_CLAUSE = " (the game lists this twice)"
 
+#: Kokomi review r8 (2026-10-14, item 10): a power the bridge could not read
+#: the text of on this screen. It used to vanish from the list for that
+#: screen (At Water's Edge against Hunter Killer); it is still on you.
+POWER_UNREADABLE_CLAUSE = (" — still on you; the game would not give its text "
+                           "on this screen")
+
 
 def _once(powers: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """The powers with a second row of the same name and amount folded
@@ -1393,6 +1443,8 @@ def _render_power(power: dict[str, Any], indent: str) -> str:
                  if power["behind"] else NOTHING_BEHIND_CLAUSE)
     if power.get("listed_twice"):
         line += POWER_LISTED_TWICE_CLAUSE
+    if power.get("unreadable") and not power.get("text"):
+        line += POWER_UNREADABLE_CLAUSE
     return line
 
 
@@ -2176,6 +2228,10 @@ def _resolution_lines(rows: list[dict[str, Any]],
             # Swirl says so (Sucrose on a bare board).
             if row.get("swirl_no_aura") and not row.get("swirl_on_aura"):
                 out.append(RESOLUTION_NO_AURA)
+            # Kokomi review r8 (2026-10-14, item 12): a Power with nothing
+            # to measure says it is on you, not that nothing landed.
+            elif _fold(row.get("card_type")) == "power":
+                out.append(RESOLUTION_POWER_PLAYED)
             else:
                 out.append(RESOLUTION_NO_HITS_STAGE if stage
                            else RESOLUTION_NO_HITS)
@@ -4193,6 +4249,9 @@ def render(obs: dict[str, Any]) -> str:
                 spark_named = True
         for pw in _once(you["powers"]):
             out.append(_render_power(pw, "- "))
+            # Kokomi review r8 (2026-10-14, item 11): under a card-limit
+            # curse (Sloth), the cards it counted this turn.
+            out += _played_cap_lines(pw, c.get("resolutions"))
             # `EB-610`, THE OTHER SHAPE SPARK ARRIVES IN. The clause above is
             # emitted inside the METERS loop, and the live look of 2026-09-16
             # read a build whose wire carried Spark POWER-shaped -- a

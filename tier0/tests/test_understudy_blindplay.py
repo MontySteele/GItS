@@ -3933,9 +3933,12 @@ def test_the_meter_ledger_stays_off_the_carry_out_block():
         # happen -- a relic striking, and a Plan the fight cut off -- and
         # neither is a ledger row. `no_target` (2026-10-13) is the same
         # kind of fact: the Plan's target was already dead.
+        # `reactions` (Kokomi review r8, 2026-10-14): the reactions the
+        # Plan's own hits set off, which a sighted player watched happen.
         assert set(row) == {"card", "number", "line", "kind", "asked",
                             "on_play", "board_read", "moved",
-                            "riders", "unfinished", "no_target"}
+                            "riders", "unfinished", "no_target",
+                            "reactions"}
         for moved in row["moved"]:
             assert set(moved) == {"target", "combat_id", "amount", "dead",
                                   "absorbed"}

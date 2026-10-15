@@ -368,7 +368,40 @@ public static class KokomiPlan
         IReadOnlyList<MovedOn>? Moved, bool OnPlay,
         string? Kind = null, int? Asked = null,
         IReadOnlyList<Rider>? Riders = null, bool Unfinished = false,
-        bool NoTarget = false);
+        bool NoTarget = false, IReadOnlyList<string>? Reactions = null);
+
+    /// <summary>KOKOMI REVIEW R8 (2026-10-14, item 9): the Elemental
+    /// Reactions a carry-out's own hits set off, by name, in order. A
+    /// Masterstroke written for 42 landed 63 on a Pyro body: the Plan's Hydro
+    /// Vaporized it, and the receipt said only "the clause asked for 42",
+    /// because the target died and nothing on the next board could name the
+    /// bonus. Filled inside the carrying window (<see cref="NoteReaction"/>)
+    /// and read onto the row as <c>reactions</c>.</summary>
+    private static readonly Dictionary<Player, List<string>> _reactions = new();
+
+    /// <summary>A reaction just resolved with <paramref name="dealer"/> as
+    /// its dealer. Inside a carry-out of hers it is the Plan's, and its name
+    /// goes on that carry-out's receipt; anywhere else nothing. Called by
+    /// <c>CompanionOverhaulReactions.Note</c>. Display only.</summary>
+    public static void NoteReaction(Creature? dealer, Reaction reaction)
+    {
+        var seat = dealer?.Player;
+        if (seat == null || reaction == Reaction.None
+            || !IsCarryingOut(seat)) return;
+        if (!_reactions.TryGetValue(seat, out var names))
+        {
+            _reactions[seat] = names = new List<string>();
+        }
+        names.Add(ReactionName(reaction));
+    }
+
+    /// <summary>A reaction as the page prints it. PURE.</summary>
+    public static string ReactionName(Reaction reaction) => reaction switch
+    {
+        Reaction.ElectroCharged => "Electro-Charged",
+        Reaction.Overload => "Overloaded",
+        _ => reaction.ToString(),
+    };
 
     /// <summary>
     /// SOMETHING ELSE THAT LANDED INSIDE ONE PLAN'S WINDOW, by name and by
@@ -1790,6 +1823,7 @@ public static class KokomiPlan
         // hit, its one rider, left with the pool overhaul, 2026-10-13.)
         var riders = new List<Rider>();
         if (seat != null) _aimedAtNoOne.Remove(seat);
+        if (seat != null) _reactions.Remove(seat);
         if (seat != null) _carrying.Add(seat);
         try
         {
@@ -1840,11 +1874,17 @@ public static class KokomiPlan
             // nothing, which is the honest reading.
             var noTarget = seat != null && _aimedAtNoOne.Remove(seat)
                            && number == null;
+            // Item 9 (Kokomi review r8): the reactions its hits set off.
+            List<string>? reactions = null;
+            if (seat != null && _reactions.Remove(seat, out var noted))
+            {
+                reactions = noted;
+            }
             Announce(kokomi,
                      entry.Now && entry.TwoLine
                          ? NowLineTitle(entry.Title) : entry.Title,
                      number, Moved(before, kokomi),
-                     onPlay, kind, asked, riders, noTarget);
+                     onPlay, kind, asked, riders, noTarget, reactions);
         }
 
         // SANGO ISSHIN's condition, written HERE because this is the one place
@@ -1886,13 +1926,15 @@ public static class KokomiPlan
                                  IReadOnlyList<MovedOn>? moved, bool onPlay,
                                  string? kind = null, int? asked = null,
                                  IReadOnlyList<Rider>? riders = null,
-                                 bool noTarget = false)
+                                 bool noTarget = false,
+                                 IReadOnlyList<string>? reactions = null)
     {
         var line = Vfx.KurageBeat.Line(card, number);
         Vfx.KurageBeat.Say(BakeKuragePet.Of(kokomi) ?? kokomi, line);
         Record(kokomi, new CarriedOutPlan(card, number, line, moved, onPlay,
                                           kind, asked, riders,
-                                          NoTarget: noTarget));
+                                          NoTarget: noTarget,
+                                          Reactions: reactions));
     }
 
     /// <summary>
@@ -2751,6 +2793,10 @@ public static class KokomiPlan
             ["unfinished"] = said.Unfinished,
             // A hit that found no living body to aim at (BACKLOG 2026-10-13).
             ["no_target"] = said.NoTarget,
+            // Kokomi review r8 (2026-10-14, item 9): the reactions its own
+            // hits set off, which the receipt names beside a number above
+            // its ask (a Vaporize). Null where none.
+            ["reactions"] = said.Reactions?.ToList(),
         };
 
     /// One named rider inside one Plan's window (`EB-453`). A named method for

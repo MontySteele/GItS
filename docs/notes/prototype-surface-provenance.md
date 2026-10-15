@@ -8853,3 +8853,61 @@ defaults, other than the first question." Then, on pick 1: "Let's go with
 
 Pins: `tier0/tests/test_kokomi_review_r6_2026_10_14.py`,
 `klee-mod/KleeTests/Prototype/KokomiReviewR6Tests.cs`.
+
+## Kokomi review r8, 2026-10-14
+
+Built from `review/active/kokomi-review-r8-2026-10-14.md`, items 1 to 12
+(Claude's; Kokomi is at Prototype). Seven seats, 0 wins; five of the seven
+deaths were a long fight ending on a hand with no Block card. A Plan's Block
+lands next turn by design, so the cards pay Block now.
+
+- **Shell of Sanctuary** (item 1): "Gain 7 [10] Block. Gain 2 more for each
+  Plan waiting." (was 6 [9] Block, draw 1, a worse Kelp Wall). Breakwater's
+  shape (`amount_formula`, `plans_held`), so no new op; the face shows the
+  total in combat.
+- **Evening Watch** (item 2): 6 [8] Block per enemy intending to attack
+  (was 4 [6]); draw 1 unchanged.
+- **Undercurrent Snare** (item 3): Block 8 [11] (was 5, no upgrade); Weak 2
+  and the Plan (4 [5] Strength off each attacker this turn) unchanged.
+- **Surging Shoal** (item 4): "Deal 10 [13] Hydro damage to ALL enemies.
+  Gain 10 [13] Block." No Plan (was 14 [18], Plan 12 [16] to ALL).
+- **Feint** (item 5): the now-line is a flat "Deal 8 [10] Hydro damage."
+  (was 8 [11] plus 3 per Plan waiting); the Plan (6 [8] per Plan carried out
+  this turn) unchanged.
+- **Mend's "(N will land)"** (item 6): the face token `{MendLands}` has no
+  `:diff()`, and the game formats a bare token through `ToString()` /
+  `IConvertible`, which read the printed number and never the preview. So
+  every face written without a preview pass (the hand on the wire, a waiting
+  Plan's line) said "6 will land". `MendLandsVar` now reads
+  `KokomiRules.MendWouldLand` at format time (`BlockMarkVar`'s shape).
+- **Sucrose** (item 7): the three Sucrose Swirl rows carry
+  `{InCombat:{SwirlAura}|}` right after "Swirl the enemy" / "Swirl ALL
+  enemies"; in combat it reads " (no aura: no Swirl)" while the aimed enemy,
+  or unaimed every enemy, has no aura (`SwirlAuraFace`,
+  `gen_klee_cards.swirl_aura_face_lines`). Varka's rows keep their own
+  "(No aura to Swirl)".
+- **When Plans happen** (item 8): the panel's Block note loses "before you
+  play anything"; "Plans carry out after your draw" is the one wording.
+- **Masterstroke 42 / 63** (item 9): not Vulnerable. The lane log shows the
+  carry-out Vaporized the Louse Progenitor (Hydro onto its Pyro aura, x1.5:
+  42 to 63); the body had no Vulnerable. The strip leaves the reaction out
+  of a waiting Plan's number on purpose (`KokomiPlan.PlannedDamage`: a
+  reaction is one-shot and an ALL Plan uses the aura up). The receipt could
+  not name it because the target died. A carry-out now carries the
+  reactions its own hits set off (`reactions`, `KokomiPlan.NoteReaction`),
+  and the receipt reads "asked for 42, 63 landed: Vaporize."
+- **At Water's Edge vanished** (item 10): not Hunter Killer, whose only
+  debuff is Tender (Strength and Dexterity, removes nothing), and nothing in
+  the mod removes the power; the log shows it played once that fight. The
+  one path that drops a power from the page while it stays on you is the
+  bridge's per-power catch, which skipped a row whose text threw (that turn
+  opened two potion choose-a-card screens). The row now stays, flagged
+  `unreadable` (`gits/GitsPowerRow.cs`), and the page says "still on you;
+  the game would not give its text on this screen".
+- **Seat page** (items 11, 12): under Sloth (any "play more than N cards"
+  power) the page lists the cards it counted this turn, a card the game
+  played for you marked so; a Power with nothing to measure says "It is a
+  Power: it is now on you and works from there."
+
+Pins: `tier0/tests/test_kokomi_review_r8_2026_10_14.py`,
+`klee-mod/KleeTests/Prototype/KokomiReviewR8Tests.cs`.

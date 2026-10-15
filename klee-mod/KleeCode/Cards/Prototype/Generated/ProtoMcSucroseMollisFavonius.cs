@@ -58,7 +58,7 @@ public sealed class ProtoMcSucroseMollisFavonius : CustomCardModel, ICompanionCa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sucrose — Mollis Favonius"),
-        ("description", "[gold]Swirl[/gold] the enemy. Draw 1 card. This turn, [gold]Melt[/gold], [gold]Vaporize[/gold] and [gold]Overloaded[/gold] deal {PowerAmount:diff()} additional damage."),
+        ("description", "[gold]Swirl[/gold] the enemy{InCombat:{SwirlAura}|}. Draw 1 card. This turn, [gold]Melt[/gold], [gold]Vaporize[/gold] and [gold]Overloaded[/gold] deal {PowerAmount:diff()} additional damage."),
     };
 
     /// <summary>On Kokomi, this Companion card can also be written as a Plan on
@@ -68,6 +68,15 @@ public sealed class ProtoMcSucroseMollisFavonius : CustomCardModel, ICompanionCa
 
     /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
     public TargetType PrintedTargetType => base.TargetType;
+
+    /// <summary>Whether this card's Swirl has an aura to Swirl, in combat
+    /// (`SwirlAuraFace`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("SwirlAura", SwirlAuraFace.Line(this));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

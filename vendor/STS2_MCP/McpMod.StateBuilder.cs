@@ -3261,7 +3261,24 @@ public static partial class McpMod
                 GitsAddPowerFacts(power, row);
                 powers.Add(row);
             }
-            catch { /* skip this power - game engine state may be inconsistent */ }
+            catch (Exception ex)
+            {
+                // GItS LOCAL EDIT (Kokomi review r8, 2026-10-14, item 10):
+                // the row stays when its text throws, instead of the power
+                // vanishing from the list for a screen
+                // (`gits/GitsPowerRow.cs` has the find).
+                try
+                {
+                    powers.Add(GitsPowerRow.Unreadable(
+                        power.Id.Entry,
+                        SafeGetText(() => power.Title),
+                        power.DisplayAmount,
+                        power.StackType.ToString(),
+                        power.TypeForCurrentAmount.ToString(),
+                        ex.GetType().Name));
+                }
+                catch { /* the power's own facts threw too: skip it */ }
+            }
         }
         return powers;
     }

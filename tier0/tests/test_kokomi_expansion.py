@@ -265,9 +265,9 @@ def test_evening_watch_blocks_per_enemy_intending_to_attack(overhaul):
     st = kokomi_state(enemies=[a, b, c])
     _library(st)
     _write(st, "proto_kk_evening_watch")
-    # The re-founding (2026-10-12): 4 [6] each, counted when played, then a
-    # draw.
-    assert st.player.block == 4 * 2
+    # The re-founding (2026-10-12): Block each, counted when played, then a
+    # draw. Kokomi review r8 (2026-10-14, item 2): 6 [8] each (was 4 [6]).
+    assert st.player.block == 6 * 2
     assert len(st.player.hand) == 1
 
 

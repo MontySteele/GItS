@@ -485,4 +485,40 @@ public sealed class MendLandsVar : DynamicVar
         PreviewValue = KokomiRules.MendWouldLand(card.Owner!.Creature,
                                                  Printed(card, BaseValue));
     }
+
+    /// <summary>
+    /// KOKOMI REVIEW R8 (2026-10-14, item 6): READ AT FORMAT TIME. The face
+    /// prints <c>{MendLands}</c> with no <c>:diff()</c>, and the game formats
+    /// a bare token through <c>ToString()</c> / <c>IConvertible</c>, which
+    /// read <see cref="DynamicVar.BaseValue"/> -- the printed 6 -- and never
+    /// <see cref="DynamicVar.PreviewValue"/>. So a screen that wrote the face
+    /// without a preview pass (the hand on the wire, a waiting Plan's line)
+    /// said "6 will land" while Mend healed 0. Both are overridden and both
+    /// answer <see cref="KokomiRules.MendWouldLand"/> off the card's owner,
+    /// <c>BlockMarkVar</c>'s construction; with no owner in a combat (a
+    /// canonical card) the printed number.
+    /// </summary>
+    internal int Live
+    {
+        get
+        {
+            if (_owner is not CardModel card) return (int)BaseValue;
+            Creature? owner;
+            try
+            {
+                owner = card.Owner?.Creature;
+            }
+            catch (System.Exception)
+            {
+                return (int)BaseValue;
+            }
+            if (owner?.CombatState == null) return (int)BaseValue;
+            return KokomiRules.MendWouldLand(owner, Printed(card, BaseValue));
+        }
+    }
+
+    protected override decimal GetBaseValueForIConvertible() => Live;
+
+    public override string ToString() =>
+        Live.ToString(System.Globalization.CultureInfo.InvariantCulture);
 }
