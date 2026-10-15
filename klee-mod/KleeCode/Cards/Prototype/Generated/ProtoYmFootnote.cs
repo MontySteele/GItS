@@ -48,13 +48,13 @@ public sealed class ProtoYmFootnote : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Footnote"),
-        ("description", "[gold]Edit[/gold] {IfUpgraded:show:2 cards|a card} in your hand: [gold]Footnote[/gold]."),
+        ("description", "[gold]Edit[/gold] up to {YmAmount:diff()} cards in your hand: [gold]Footnote[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("YmAmount", 1m)
+            new DynamicVar("YmAmount", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

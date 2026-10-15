@@ -546,6 +546,49 @@ public static class YaeEditing
               + $"({YaeAnnotationText.PromptClause(annotation)}). "
               + ReplacesWarning;
 
+    /// <summary>Yae review r4, pick 1 (a) (ruled 2026-10-15): a multi-card
+    /// Edit's one chooser, "Edit up to N cards". The game fills
+    /// <c>{Amount}</c> from the selector's max.</summary>
+    public static string EditUpToPromptKeyFor(YaeAnnotation annotation) =>
+        "KLEEMOD-YAE_EDIT_UPTO_" + annotation.ToString().ToUpperInvariant()
+        + ".selectionScreenPrompt";
+
+    /// <summary>"Choose up to {Amount} cards to Edit: Red Ink (...)." PURE.
+    /// </summary>
+    public static string EditUpToPromptTextFor(YaeAnnotation annotation) =>
+        $"Choose up to {{Amount}} cards to Edit: {YaeAnnotationText.Name(annotation)} "
+        + $"({YaeAnnotationText.PromptClause(annotation)}). "
+        + ReplacesWarning;
+
+    /// <summary>The Edit chooser's terms. One card: exactly one, as before.
+    /// Several: ONE chooser of zero to <paramref name="times"/> cards, so
+    /// the player may stop rather than overwrite an Annotation (GPT, relayed
+    /// by [USER], 2026-10-15). A hand chooser picks distinct cards. PURE.
+    /// </summary>
+    public static CardSelectorPrefs EditPrefs(YaeAnnotation annotation, int times) =>
+        times <= 1
+            ? new CardSelectorPrefs(new LocString(Table, EditPromptKeyFor(annotation)), 1)
+            : new CardSelectorPrefs(new LocString(Table, EditUpToPromptKeyFor(annotation)), 0, times)
+            {
+                RequireManualConfirmation = true,
+            };
+
+    /// <summary>What a multi-card Edit annotates out of the chooser's
+    /// answer: each card once, in pick order, at most
+    /// <paramref name="times"/>. PURE.</summary>
+    public static List<CardModel> EditTargets(IEnumerable<CardModel>? picked, int times)
+    {
+        var targets = new List<CardModel>();
+        if (picked == null) return targets;
+        foreach (var card in picked)
+        {
+            if (targets.Count >= times) break;
+            if (card == null || targets.Any(t => ReferenceEquals(t, card))) continue;
+            targets.Add(card);
+        }
+        return targets;
+    }
+
     /// <summary>Yae review r4, item 6: the Edit chooser's warning. The hand
     /// shows each card's current Annotation; this says the Edit overwrites
     /// an unpublished one (a Published stack stays).</summary>
@@ -745,31 +788,31 @@ public static class YaeEditing
     }
 
     /// <summary>
-    /// "Edit a card in your hand: &lt;Annotation&gt;", <paramref name="times"/>
-    /// times. The player picks each card, a Published one included
-    /// (<see cref="EditReaches"/>). Nothing qualifies: nothing happens.
+    /// "Edit a card in your hand: &lt;Annotation&gt;" (one card, which the
+    /// player must pick) or "Edit up to N cards in your hand" (Yae review
+    /// r4, pick 1 (a), ruled 2026-10-15): ONE chooser of up to
+    /// <paramref name="times"/> different cards, which the player may stop
+    /// short of, none included. A Published card is reachable
+    /// (<see cref="EditReaches"/>). Nothing qualifies: it says so.
     /// </summary>
     public static async Task Edit(PlayerChoiceContext choiceContext,
                                   CardModel editor, YaeAnnotation annotation,
                                   int times)
     {
         var owner = editor.Owner;
-        if (owner?.Creature == null) return;
-        for (var i = 0; i < times; i++)
+        if (owner?.Creature == null || times <= 0) return;
+        if (!PileType.Hand.GetPile(owner).Cards.Any(c => EditReaches(c, editor, annotation)))
         {
-            if (!PileType.Hand.GetPile(owner).Cards.Any(c => EditReaches(c, editor, annotation)))
-            {
-                SayNothing(owner.Creature, NothingToEditKey);
-                return;
-            }
-            var picked = (await CardSelectCmd.FromHand(
-                choiceContext, owner,
-                new CardSelectorPrefs(
-                    new LocString(Table, EditPromptKeyFor(annotation)), 1),
-                c => EditReaches(c, editor, annotation),
-                editor)).FirstOrDefault();
-            if (picked == null) return;
-            if (!Annotate(picked, annotation)) continue;
+            SayNothing(owner.Creature, NothingToEditKey);
+            return;
+        }
+        var picked = await CardSelectCmd.FromHand(
+            choiceContext, owner, EditPrefs(annotation, times),
+            c => EditReaches(c, editor, annotation),
+            editor);
+        foreach (var card in EditTargets(picked, times))
+        {
+            if (!Annotate(card, annotation)) continue;
             YaeShrineLedger.For(owner.Creature).NoteEdit();
         }
     }

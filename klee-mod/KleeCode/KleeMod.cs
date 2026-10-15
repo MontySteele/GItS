@@ -287,6 +287,11 @@ public static class KleeMod
                 Powers.YaeAnnotationText.All.ToDictionary(
                     Powers.YaeEditing.EditPromptKeyFor,
                     Powers.YaeEditing.EditPromptTextFor));
+            // Yae review r4, pick 1 (a): a multi-card Edit's one chooser.
+            LocManager.Instance.GetTable("cards").MergeWith(
+                Powers.YaeAnnotationText.All.ToDictionary(
+                    Powers.YaeEditing.EditUpToPromptKeyFor,
+                    Powers.YaeEditing.EditUpToPromptTextFor));
             LocManager.Instance.GetTable("cards").MergeWith(
                 new Dictionary<string, string>
                 {

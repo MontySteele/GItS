@@ -145,8 +145,10 @@ harder, and the Annotated cards come round sooner.
 ## Next
 
 Items 1 to 8 are built (#1321). The Seven Glamours fix is built now. Pick 1
-is built once ruled, followed by a Yae round of five seats, two of them
-elite-heavy again.
+(a) is built (#1330): the six cards above, and every multi-card Edit is
+one chooser of up to that many different cards, which the player may stop
+short of (Inked Branches+ Edits one card in hand). Next is a Yae round of
+five seats, two of them elite-heavy again.
 
 ## Ruled 2026-10-15
 

@@ -227,3 +227,82 @@ def test_evergreen_charm_with_no_sakura_says_so():
 
 def test_foxfire_lure_says_striking_sakura():
     assert "your striking [gold]Sakura[/gold] strike it" in         _row("proto_ym_foxfire_lure")["description"]
+
+
+# Pick 1 (a), ruled 2026-10-15 ([USER]: "Otherwise I'm good with it."):
+# Edits that Exhaust, and a multi-card Edit is one chooser of up to N
+# DIFFERENT cards that the player may stop short of (GPT, relayed by
+# [USER]). C# half: YaeReviewR4Tests' pick 1 facts.
+
+def test_pick1_rows():
+    seal, foot = _card("sakura_seal"), _card("footnote")
+    inked, royal = _card("inked_branches"), _card("royalties")
+    assert (seal.cost, seal.exhaust) == (0, True)
+    assert (foot.cost, foot.exhaust) == (0, True)
+    assert (inked.cost, inked.exhaust) == (0, True)
+    assert (royal.cost, royal.exhaust) == (1, True)
+    amount = lambda c: next(fx["amount"] for fx in c.effects
+                            if fx.get("op") == "yae")
+    assert (amount(seal), amount(_card("sakura_seal+"))) == (2, 3)
+    assert (amount(foot), amount(_card("footnote+"))) == (2, 3)
+    assert (amount(royal), amount(_card("royalties+"))) == (2, 2)
+    assert _card("royalties+").cost == 0
+    assert _card("inked_branches+").cost == 0
+    for name, base, per in (("bestseller", (8, 10), (3, 4)),
+                            ("print_run", (6, 8), (3, 4))):
+        fx = lambda c: next(f for f in c.effects if f.get("op") == "yae")
+        lo, hi = fx(_card(name)), fx(_card(name + "+"))
+        assert (lo["base"], hi["base"]) == base
+        assert (lo["per"], hi["per"]) == per
+
+
+def _hand(st, *names):
+    cards = [loader.get_card(n) for n in names]
+    st.player.hand += cards
+    return cards
+
+
+def test_a_multi_edit_picks_distinct_cards():
+    st = _state()
+    a, b = _hand(st, "strike", "defend")
+    _play(st, _card("footnote"))
+    assert Y.temp(a) == Y.FOOTNOTE and Y.temp(b) == Y.FOOTNOTE
+    assert Y.ledger(st.player).edits == 2
+
+
+def test_a_multi_edit_never_edits_the_same_card_twice():
+    st = _state()
+    (a,) = _hand(st, "strike")
+    _play(st, _card("footnote+"))           # up to 3, one card to reach
+    assert Y.temp(a) == Y.FOOTNOTE
+    assert Y.ledger(st.player).edits == 1
+
+
+def test_a_pilot_that_names_the_same_card_again_stops():
+    st = _state()
+    a, b = _hand(st, "strike", "defend")
+    Y.ledger(st.player).edit_choice = lambda state, editor, ann: a
+    _play(st, _card("footnote"))
+    assert Y.temp(a) == Y.FOOTNOTE and not Y.is_annotated(b)
+    assert Y.ledger(st.player).edits == 1
+
+
+def test_a_later_pick_stops_rather_than_overwrite():
+    st = _state()
+    a, b = _hand(st, "strike", "defend")
+    Y.annotate(st, b, Y.RED_INK)
+    _play(st, _card("sakura_seal"))
+    # The first pick takes the fresh card; the second would overwrite Red
+    # Ink, so it stops.
+    assert Y.temp(a) == Y.SAKURA_SEAL and Y.temp(b) == Y.RED_INK
+
+
+def test_inked_branches_upgraded_also_edits_a_hand_card():
+    st = _state()
+    Y.plant(st, 1)
+    (a,) = _hand(st, "strike")
+    _play(st, _card("inked_branches"))
+    assert Y.ledger(st.player).sakura[0].annotation == Y.RED_INK
+    assert not Y.is_annotated(a)
+    _play(st, _card("inked_branches+"))
+    assert Y.temp(a) == Y.RED_INK

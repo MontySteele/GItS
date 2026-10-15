@@ -44,8 +44,14 @@ def test_every_hand_edit_screen_applies_exactly_one_annotation():
     edit = src[src.index("public static async Task Edit("):]
     edit = edit[:edit.index("\n    }\n")]
     assert "YaeAnnotation annotation," in edit
-    assert "EditPromptKeyFor(annotation)" in edit
-    assert "EditPromptKey)" not in edit
+    # Yae review r4, pick 1 (a): the chooser's terms live in `EditPrefs`,
+    # one prompt for one card, an "up to" prompt for several.
+    assert "EditPrefs(annotation, times)" in edit
+    prefs = src[src.index("public static CardSelectorPrefs EditPrefs("):]
+    prefs = prefs[:prefs.index("};")]
+    assert "EditPromptKeyFor(annotation)" in prefs
+    assert "EditUpToPromptKeyFor(annotation)" in prefs
+    assert "EditPromptKey)" not in edit + prefs
     callers = 0
     for path in GEN.glob("ProtoYm*.cs"):
         for call in re.findall(r"YaeCards\.Edit\((.*?)\);", path.read_text(

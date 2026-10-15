@@ -582,16 +582,16 @@ def test_annotated_readers_count_the_hand_and_the_card_itself(yae):
     a = loader.get_card("strike")
     st.player.hand.append(a)
     _play(st, _red_ink_edit())
-    _play(st, _ym("bestseller"))                 # 5 + 3 x 1
-    assert st.enemies[0].hp == 100 - 8
-    _play(st, _ym("print_run"))                  # 6 + 2 x 1
-    assert st.player.block == 8
+    _play(st, _ym("bestseller"))                 # 8 + 3 x 1
+    assert st.enemies[0].hp == 100 - 11
+    _play(st, _ym("print_run"))                  # 6 + 3 x 1
+    assert st.player.block == 9
     flash = loader.get_card(_ym("kitsune_flash"))
     st.player.hand.append(flash)
     _play(st, _red_ink_edit())                  # Red Ink on the Flash
     assert Y.temp(flash) == Y.RED_INK
     _play(st, flash)                             # 6 + 3 (annotated) + 3 ink
-    assert st.enemies[0].hp == 100 - 8 - 12
+    assert st.enemies[0].hp == 100 - 11 - 12
 
 
 def test_serialization_pays_block_per_annotated_play_not_per_edit(yae):

@@ -2386,7 +2386,7 @@
       "yae_amount": 1
     },
     "proto_ym_inked_branches": {
-      "cost": -1
+      "yae_upgraded": true
     },
     "proto_ym_kitsune_flash": {
       "yae_base": 2,
