@@ -121,6 +121,13 @@ more dependent on drawing one card.
 
 ## Picks
 
+**Ruled 2026-10-14: both picks (a), as amended.** [USER]: "Let's send it." And on
+the bound: "I do think that the masterpiece strategy will scale more than you
+think... an aggressive run can do 3 elites per act + 2 bosses = 11 mods before
+the final fight before a Power gives anything more. But as a payoff strategy,
+that might also just be 'fine.'" So the round should look at runs that take
+many elites, not only typical ones.
+
 [USER] on the plan: "I like the new direction!" GPT's sanity check
 recommended the amended defaults below, and this page now carries them.
 
