@@ -122,3 +122,17 @@ the scarce budget. The next Kokomi review judges decision quality more than the 
   Free Stings, per-Plan rewards and the new free Companions all push that way.
   Then it checks whether act 3 becomes the new wall. She is not ready for
   Balance until those answers are in.
+
+## Pick (added 2026-10-15, after [USER] asked whether seats use it)
+
+**Pick 1: planning any Companion.** [USER]: "I'd be curious to know if seats
+actually make use of that or if we're overcomplicating them for no gain." In the
+six Kokomi seat transcripts still readable (rounds 8 and 9), Companions were
+played 241 times and written as a Plan 22 times (9%, about four a run). Several
+of those 22 were her own Companions that print a Plan line anyway (Gorou,
+Qiqi). Planning a Companion is also the one Plan that plays its card a second
+time, which is the rules wrinkle in item 9.
+- **(a) Default.** Drop the general rule. A Companion can be written as a Plan only if
+  it prints its own Plan line. Item 9's Companion sentence goes with it.
+- (b) Keep it.
+

@@ -22,6 +22,8 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
+- **Kokomi review r9, pick 1** (`kokomi-review-r9-2026-10-15.md`): drop the general "plan any Companion" rule (9% of Companion plays used it); default (a).
+- **Yae review r4, pick 1** (`yae-review-r4-2026-10-15.md`, PR #1319): rework the never-drafted publishing payoffs; default (a).
 - **Distribution readiness** (`distribution-readiness-2026-10-12.md`, two picks,
   defaults (a)): a closed beta now, public early access once Varka and Furina
   reach Balance; a GitHub release first. (The `LAW.md` art line, #1145, is
