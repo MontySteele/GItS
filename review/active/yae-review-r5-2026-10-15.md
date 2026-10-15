@@ -119,3 +119,8 @@ every Power.
 
 Items 1 to 7 are built (#1333). Pick 1 is built once ruled, then a Yae round of
 five seats.
+
+## Ruled 2026-10-15
+
+[USER]: "For 1332 - agreed on (a)". Pick 1 (a): Bestseller and Print Run count
+the cards you Edited this combat.

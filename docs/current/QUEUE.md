@@ -22,7 +22,6 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
-- **Yae review r5** (`yae-review-r5-2026-10-15.md`, one pick, (a) count
   Edits): what the publishing payoffs count.
 - **Distribution readiness** (`distribution-readiness-2026-10-12.md`, two picks,
   defaults (a)): a closed beta now, public early access once Varka and Furina
