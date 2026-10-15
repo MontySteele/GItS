@@ -25,8 +25,7 @@ guest half `PlayerTips.Guest` picks off the face, and the Applies-X rows in
 of the base game's own length and is counted, not measured.
 
 NOT COUNTED: a tip that shows only on a board in the state it names
-(`ForEmptyField`, `ForElementSwitch`) or only to one owner (a Companion's
-Plan line, to a Kokomi: `ForCompanionPlan`), and the reaction previews inside
+(`ForEmptyField`, `ForElementSwitch`), and the reaction previews inside
 `KleeCardTooltips.ForCard`, which a player sees only while aiming.
 
 A structurally invisible defect ("structurally invisible defects" in memory):
@@ -53,12 +52,10 @@ PLAYER = MOD / "Cards" / "Prototype" / "PlayerTips.cs"
 CAP_BOXES = 3
 CAP_CHARS = 100
 
-#: Shown only on a board in the state the tip names, or only to one owner
-#: (a Companion's Plan line, to a Kokomi): not a static box.
+#: Shown only on a board in the state the tip names: not a static box.
 BOARD_ONLY = frozenset({
     "ArmKeywordTips.ForEmptyField",
     "ArmKeywordTips.ForElementSwitch",
-    "ArmKeywordTips.ForCompanionPlan",
 })
 
 #: Cards whose own mod keywords alone pass the cap, curated: the generator

@@ -252,7 +252,7 @@ public static partial class KokomiCards
     /// 3 cards from your hand as Plans. They cost 0." Each chosen card is
     /// written exactly as if she had played it on the Bake-Kurage, for 0
     /// Energy (<see cref="KokomiRefounding.WriteFree"/>). Only a card that can
-    /// be written is offered: one with a Plan line, or a Companion card.
+    /// be written is offered: one with a Plan line.
     /// </summary>
     public static async Task GrandDesign(
         PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
@@ -314,33 +314,14 @@ public static partial class KokomiCards
 }
 
 /// <summary>
-/// A Companion card that can be written as a Plan (design pass pick 4 (a)):
-/// every generated Companion row. <see cref="PrintedTargetType"/> is the
-/// target the card prints, before <see cref="KokomiCompanionPlan.TargetFor"/>
-/// lets it reach the Bake-Kurage on Kokomi.
-/// </summary>
-public interface IWritableCompanion
-{
-    TargetType PrintedTargetType { get; }
-}
-
-/// <summary>
-/// COMPANIONS AS PLANS (design pass pick 4 (a), ruled 2026-10-12): "Any
-/// Companion card can be written as a Plan. It is carried out next turn at
-/// its printed rate, and the Bake-Kurage applies Hydro to its target first,
-/// so each written Companion reacts with that Hydro and never with the
-/// Companion before it."
-///
-/// WRITTEN like any Plan card: played on the Bake-Kurage, it is paid for and
-/// goes where a played card goes (a generated one Exhausts); its Plan is ONE
-/// clause holding the card (<see cref="KokomiPlan.Kind.PlayCompanion"/>).
-/// CARRIED OUT as Crystal Collapse's copy is: a clone, played free and
-/// Exhausted, so the deck is not a card short for having written it -- the
-/// card itself is not played twice. Its Hydro lands FIRST, on its target: the
-/// front enemy for a Companion that aims at an enemy (a Plan's target rule),
-/// and the front enemy too for one that does not (paper sec.1 rule 5), so a
-/// Companion that hits reacts with it and one that only buffs or blocks
-/// carries the Hydro alone. Sim twin: <c>kokomi_plan.carry_out_companion</c>.
+/// KOKOMI'S COMPANION GENERATORS: Call the Generals, Sangonomiya's Orders and
+/// their kin make Inazuma Companions. The re-founding's general rule that
+/// "any Companion card can be written as a Plan" (design pass pick 4 (a),
+/// 2026-10-12) lived here too and is gone (Kokomi review r9 pick 1 (a),
+/// 2026-10-15; [USER]: "let's get rid of Companions as Plans unless we make a
+/// card that specifically has a Plan line."): a Companion is planned only
+/// through a Plan line it prints (Gorou's), on the Plan path every Plan card
+/// takes, and the Bake-Kurage refuses any other.
 /// </summary>
 public static class KokomiCompanionPlan
 {
@@ -349,77 +330,6 @@ public static class KokomiCompanionPlan
 
     /// <summary>The nation her generators draw from.</summary>
     public const string Nation = "inazuma";
-
-    /// <summary>
-    /// The card's target on THIS owner: on Kokomi it also accepts the
-    /// Bake-Kurage (an aimed Companion becomes "an enemy or the
-    /// Bake-Kurage", any other "you or the Bake-Kurage", her own cards'
-    /// spellings); everyone else sees the printed target. A canonical copy has
-    /// no owner (its getter throws), so it prints its own.
-    /// </summary>
-    public static TargetType TargetFor(CardModel card, TargetType printed)
-    {
-        if (!OnKokomi(card)) return printed;
-        if (printed == TargetType.AnyEnemy) return KokomiTargets.PetOrEnemy;
-        if (printed == TargetType.AnyAlly) return KokomiTargets.PetOrAlly;
-        return KokomiTargets.PetOrSelf;
-    }
-
-    /// <summary>Is this card held by Kokomi, so it can be written as a Plan?
-    /// <see cref="TargetFor"/>'s test, and the Companion Plan tip's
-    /// (<c>ArmKeywordTips.ForCompanionPlan</c>). A canonical copy has no owner
-    /// (its getter throws), so it answers false.</summary>
-    public static bool OnKokomi(CardModel card)
-    {
-        if (!card.IsMutable) return false;
-        Creature? owner;
-        try
-        {
-            owner = card.Owner?.Creature;
-        }
-        catch (System.Exception)
-        {
-            return false;
-        }
-        return KokomiOverhaul.LiveFor(owner);
-    }
-
-    /// <summary>Write a played Companion as a Plan: one clause holding the
-    /// card itself.</summary>
-    public static Task Write(PlayerChoiceContext choiceContext, CardModel card,
-                             CardPlay cardPlay) =>
-        KokomiPlan.Schedule(choiceContext, card.Owner?.Creature, card,
-            new[]
-            {
-                new KokomiPlan.Planned(KokomiPlan.Kind.PlayCompanion, 0,
-                                       KokomiPlan.Aim.FrontEnemy, card),
-            });
-
-    /// <summary>Does the Companion aim at an enemy as printed?</summary>
-    public static bool AimsAtAnEnemy(CardModel? card) =>
-        card is IWritableCompanion { PrintedTargetType: TargetType.AnyEnemy };
-
-    /// <summary>
-    /// The carry-out: the Bake-Kurage applies Hydro to the target, then a
-    /// free clone of the Companion is played at it (an aimed one) or with no
-    /// chosen target (any other), and Exhausts. No front enemy left: no Hydro,
-    /// and an aimed Companion finds no target and is not played.
-    /// </summary>
-    public static async Task CarryOut(
-        PlayerChoiceContext choiceContext, Creature kokomi, CardModel? card)
-    {
-        if (card == null || kokomi.CombatState is not { } combat) return;
-        var front = KokomiPlan.FrontEnemy(kokomi);
-        if (front != null)
-        {
-            await ElementalHit.ApplyOnly(choiceContext, front, Element.Hydro,
-                                         kokomi);
-        }
-        var copy = combat.CloneCard(card);
-        copy.ExhaustOnNextPlay = true;
-        await CardCmd.AutoPlay(choiceContext, copy,
-                               AimsAtAnEnemy(card) ? front : null);
-    }
 
     /// <summary>
     /// The Companions her generators may make for <paramref name="owner"/>:
@@ -477,11 +387,11 @@ public static class KokomiRefounding
             .Where(e => !e.IsDead)
             .Count(CurtainCallHooks.IntendsAttack) ?? 0;
 
-    /// <summary>Can this card be written as a Plan? A Plan line, or a
-    /// Companion card. PURE.</summary>
+    /// <summary>Can this card be written as a Plan? Only a card that prints a
+    /// Plan line, a Companion included (Gorou's): Kokomi review r9 pick 1
+    /// (a), 2026-10-15, dropped "any Companion card". PURE.</summary>
     public static bool CanBeWritten(CardModel? card) =>
-        card is IPlannedCard { PlanClauses.Count: > 0 }
-        || card is IWritableCompanion;
+        card is IPlannedCard { PlanClauses.Count: > 0 };
 
     /// <summary>Grand Design's gate (Kokomi review 2026-10-13): does her
     /// hand hold a card, other than <paramref name="card"/> itself, that can
@@ -760,8 +670,7 @@ public static class KokomiRefounding
     /// "Its own hit" is <paramref name="cardSource"/>, the card the game's
     /// damage carried, or, for a Plan line's hit (which goes out through
     /// <c>ElementalHit.Deal</c> with no card), the card that wrote the Plan
-    /// (<see cref="CreditHits"/>, opened by <c>KokomiPlan.Hit</c>). The
-    /// Bake-Kurage's Hydro before a written Companion credits no card.
+    /// (<see cref="CreditHits"/>, opened by <c>KokomiPlan.Hit</c>).
     /// JELLYFISH CURRENT IS BOUNDED: each reaction consumes the aura it
     /// reacted with (the thin-deck loop rule's known set). Sim twin:
     /// <c>kokomi_plan.note_reaction</c>.

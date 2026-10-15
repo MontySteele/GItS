@@ -105,7 +105,9 @@ Left alone, with the reason:
    Plan lands. Ordinary Plans only carry out their effect, so card limits and
    "whenever you play" triggers treat the two differently. The Plan hover gains
    one short sentence on the Companion case if it fits the tip limit; if not,
-   the seat page carries it alone.
+   the seat page carries it alone. *(Pick 1 (a), 2026-10-15: the Companion
+   sentence is gone from both, with the rule; the page keeps "writing a Plan
+   counts as playing that card".)*
 10. The **"last carry-out" box** clears between fights. It once showed a Plan
    from an earlier fight at a rest site.
 11. The **Energy line** names the source of each extra Energy that turn, not a
@@ -138,3 +140,8 @@ time, which is the rules wrinkle in item 9.
 
 **Ruled 2026-10-15: (a).** [USER]: "Agreed on Kokomi - let's get rid of
 Companions as Plans unless we make a card that specifically has a Plan line."
+Built 2026-10-15: the Bake-Kurage refuses a Companion with no Plan line (it
+keeps its printed target), the planned-Companion carry-out and its hover tip
+are removed, and the seat page's hand tag and Plan-row clause go with them.
+Treatise's face is unchanged and still true: every play of a plain Companion
+counts.

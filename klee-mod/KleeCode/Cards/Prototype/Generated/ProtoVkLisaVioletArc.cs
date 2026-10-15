@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoVkLisaVioletArc : CustomCardModel, ICompanionCard, IWritableCompanion, IVarkaSwitchCard
+public sealed class ProtoVkLisaVioletArc : CustomCardModel, ICompanionCard, IVarkaSwitchCard
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -49,7 +49,7 @@ public sealed class ProtoVkLisaVioletArc : CustomCardModel, ICompanionCard, IWri
         new[] { KleeKeywords.Knight, KleeKeywords.AppliesElectro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCompanionPlan(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro, appliesWithoutHit: true), this, Element.Electro), this);
+        ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro, appliesWithoutHit: true), this, Element.Electro);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_lisa_violet_arc");
 
@@ -58,14 +58,6 @@ public sealed class ProtoVkLisaVioletArc : CustomCardModel, ICompanionCard, IWri
         ("title", "Lisa: Infinite Circuit"),
         ("description", "Apply [gold]Electro[/gold] to an enemy. Gain {CalculationBase:diff()} [gold]Block[/gold], plus {CalculationExtra:diff()} for each Attack you played this turn.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}{InCombat:{VarkaSwitch}|}"),
     };
-
-    /// <summary>On Kokomi, this Companion card can also be written as a Plan on
-    /// the Bake-Kurage (the re-founding, 2026-10-12).</summary>
-    public override TargetType TargetType =>
-        KokomiCompanionPlan.TargetFor(this, base.TargetType);
-
-    /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
-    public TargetType PrintedTargetType => base.TargetType;
 
     /// <summary>The element this card makes current, on its in-combat line
     /// (`VarkaOath.SwitchLine`).</summary>
@@ -97,11 +89,6 @@ public sealed class ProtoVkLisaVioletArc : CustomCardModel, ICompanionCard, IWri
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (KokomiPlan.PlayedOnPet(cardPlay))
-        {
-            await KokomiCompanionPlan.Write(choiceContext, this, cardPlay);
-            return;
-        }
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await ElementalHit.ApplyOnly(choiceContext, cardPlay.Target, Element.Electro, Owner.Creature);
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), DynamicVars.CalculatedBlock.Props, cardPlay);

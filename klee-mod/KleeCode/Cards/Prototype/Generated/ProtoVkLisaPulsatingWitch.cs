@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoVkLisaPulsatingWitch : CustomCardModel, ICompanionCard, IWritableCompanion, IVarkaSwitchCard
+public sealed class ProtoVkLisaPulsatingWitch : CustomCardModel, ICompanionCard, IVarkaSwitchCard
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -49,7 +49,7 @@ public sealed class ProtoVkLisaPulsatingWitch : CustomCardModel, ICompanionCard,
         new[] { KleeKeywords.Knight, KleeKeywords.AppliesElectro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCompanionPlan(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro, appliesWithoutHit: true), this, Element.Electro), this);
+        ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro, appliesWithoutHit: true), this, Element.Electro);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_lisa_pulsating_witch");
 
@@ -58,14 +58,6 @@ public sealed class ProtoVkLisaPulsatingWitch : CustomCardModel, ICompanionCard,
         ("title", "Lisa: Pulsating Witch"),
         ("description", "Apply [gold]Electro[/gold] to ALL enemies. Draw 1 card for each enemy.{InCombat:{VarkaSwitch}|}"),
     };
-
-    /// <summary>On Kokomi, this Companion card can also be written as a Plan on
-    /// the Bake-Kurage (the re-founding, 2026-10-12).</summary>
-    public override TargetType TargetType =>
-        KokomiCompanionPlan.TargetFor(this, base.TargetType);
-
-    /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
-    public TargetType PrintedTargetType => base.TargetType;
 
     /// <summary>The element this card makes current, on its in-combat line
     /// (`VarkaOath.SwitchLine`).</summary>
@@ -95,11 +87,6 @@ public sealed class ProtoVkLisaPulsatingWitch : CustomCardModel, ICompanionCard,
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (KokomiPlan.PlayedOnPet(cardPlay))
-        {
-            await KokomiCompanionPlan.Write(choiceContext, this, cardPlay);
-            return;
-        }
         foreach (var auraTarget in CombatState!.HittableEnemies.ToList())
         {
             await ElementalHit.ApplyOnly(choiceContext, auraTarget, Element.Electro, Owner.Creature);

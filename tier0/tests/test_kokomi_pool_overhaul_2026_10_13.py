@@ -377,30 +377,6 @@ def test_coordinated_tide_pays_for_a_companions_own_reaction():
     assert _stings(st) == 1
 
 
-def test_coordinated_tide_pays_for_a_written_companion_reacting_with_the_hydro():
-    """Rule 8: a written Companion reacts with the Bake-Kurage's Hydro, so
-    it makes Stings."""
-    st = kokomi_state()
-    st.player.powers[kokomi_plan.COORDINATED_TIDE] = 1
-    write(st, card("proto_mi_shinobu_thundergrust"))
-    carry_out(st)
-    assert "electrocharged" in reactions(st)
-    assert _stings(st) == 1
-
-
-def test_the_bake_kurages_own_hydro_is_not_the_companions_reaction():
-    """A Companion written into an Electro aura: the pet's Hydro reacts first
-    (hers, not the Companion's) and the Companion's Electro then lands on a
-    bare body."""
-    st = kokomi_state()
-    st.player.powers[kokomi_plan.COORDINATED_TIDE] = 1
-    write(st, card("proto_mi_shinobu_thundergrust"))
-    st.enemies[0].aura, st.enemies[0].aura_turns_left = "electro", 2
-    carry_out(st)
-    assert reactions(st) == ["electrocharged"]
-    assert _stings(st) == 0
-
-
 def test_coordinated_tide_ignores_her_own_cards():
     st = kokomi_state()
     st.player.powers[kokomi_plan.COORDINATED_TIDE] = 1

@@ -1521,13 +1521,11 @@ SEAT_ONLY_TIP_CALLS = frozenset({
 })
 
 #: Tips that show only on a board in the state they name (no Bomb out, an
-#: element switch pending) or only to one owner (a Companion's Plan line, to
-#: a Kokomi): not part of the static hover the cap counts, the census's own
+#: element switch pending, a Companion already played): not part of the static hover the cap counts, the census's own
 #: "conditional" column.
 BOARD_ONLY_TIP_CALLS = frozenset({
     "ArmKeywordTips.ForEmptyField",
     "ArmKeywordTips.ForElementSwitch",
-    "ArmKeywordTips.ForCompanionPlan",
     # Kokomi wording pass (2026-10-14): Crystal Collapse's preview of the
     # Companion it copies shows only in combat, once one has been played.
     "KokomiCards.WithCopiedCompanionPreview",
@@ -17250,22 +17248,13 @@ def emit(
                     "await PlayNowLine(choiceContext, cardPlay);"]
         else:
             body = [schedule]
-    # THE KOKOMI RE-FOUNDING (2026-10-12, review/active/kokomi-design-pass-
-    # 2026-10-11.md pick 4 (a), ruled): ANY Companion card can be written as a
-    # Plan. A Companion row with no Plan line of its own takes the same one
-    # `if` at the top: played on the Bake-Kurage, it is written
-    # (`KokomiCompanionPlan.Write`) and carried out next turn at its printed
-    # rate, after the Bake-Kurage applies Hydro to its target. Its TargetType
-    # accepts the jellyfish only on Kokomi (`KokomiCompanionPlan.TargetFor`),
-    # so every other character plays it exactly as before.
-    companion_plan = is_companion(card) and not plan_body
-    if companion_plan:
-        body = ["if (KokomiPlan.PlayedOnPet(cardPlay))",
-                "{",
-                "    await KokomiCompanionPlan.Write(choiceContext, this, "
-                "cardPlay);",
-                "    return;",
-                "}"] + body
+    # A COMPANION IS PLANNED ONLY THROUGH A PLAN LINE IT PRINTS (Kokomi
+    # review r9 pick 1 (a), 2026-10-15; [USER]: "let's get rid of Companions
+    # as Plans unless we make a card that specifically has a Plan line."). The
+    # re-founding's general rule (design pass pick 4 (a)) wrote any Companion
+    # row as a Plan; it is gone, so a Companion row with no `plan:` prints its
+    # own target and the Bake-Kurage refuses it as it refuses any card with no
+    # Plan line. A Companion row that prints one takes the Plan path above.
     upgrade = build_upgrade(card)
     _, no_upgrade_reason = upgrade_plan(card)
     desc = build_description(card)
@@ -17337,9 +17326,6 @@ def emit(
         interfaces += ", IElementalCard"
     if is_companion(card):
         interfaces += ", ICompanionCard"
-        # THE KOKOMI RE-FOUNDING (2026-10-12): writable as a Plan on Kokomi.
-        if companion_plan:
-            interfaces += ", IWritableCompanion"
     elif profile.emit_character_identity:
         interfaces += ", ICharacterCard"
     # `EB-637` / `EB-644`. A row that fields a Salon member says so on the
@@ -18171,13 +18157,6 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
                 "ArmKeywordTips.ForElementSwitch("
                 f"{tips_expr or 'base.ExtraHoverTips'}, this, "
                 f"{ELEMENT_CS[switch_element]})")
-        # THE KOKOMI RE-FOUNDING (2026-10-12): a Companion she can write as a
-        # Plan says so while she holds it. A fact about THIS card on THIS
-        # board, so it sits with the riders above (live, Kokomi's only).
-        if companion_plan:
-            tips_expr = (
-                "ArmKeywordTips.ForCompanionPlan("
-                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
         spark_priced = any(eff.get("op") == "spend_spark"
                            for eff in card["effects"])
         for attach in arm_keyword_tip_calls(desc, spark_priced):
@@ -18507,23 +18486,6 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             " for no\n    /// target (the Varka expansion).</summary>\n"
             "    public override TargetType TargetType =>\n"
             "        IsUpgraded ? TargetType.AllEnemies : base.TargetType;")
-    # THE KOKOMI RE-FOUNDING (2026-10-12): a Companion row's target accepts
-    # the Bake-Kurage on Kokomi, and only there (`KokomiCompanionPlan`).
-    if companion_plan:
-        if wide_target_member:
-            raise SystemExit(
-                f"{card['id']}: a Companion row with its own live TargetType "
-                "cannot also take the Companion Plan's -- the two overrides "
-                "would collide")
-        wide_target_member = (
-            "\n\n    /// <summary>On Kokomi, this Companion card can also be"
-            " written as a Plan on\n    /// the Bake-Kurage (the re-founding,"
-            " 2026-10-12).</summary>\n"
-            "    public override TargetType TargetType =>\n"
-            "        KokomiCompanionPlan.TargetFor(this, base.TargetType);\n\n"
-            "    /// <summary>The target this Companion prints, which its"
-            " carry-out aims by.</summary>\n"
-            "    public TargetType PrintedTargetType => base.TargetType;")
     # EB-118 §4.5, the Spark cost line. Sparks are a PowerModel and not a
     # CustomResource, so BaseLib's SetCanonicalCost rail below cannot carry
     # this price: the gate is CardModel.IsPlayable, the extension point the

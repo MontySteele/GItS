@@ -269,13 +269,14 @@ EACH_PLAYER_DRAW = "each_player_draw"
 #: Kurage's Wake's "Plan: Add 2 Stings to your hand"; Gorou's War Banner
 #: "Plan: Gain 1 Strength" (permanent since the Kokomi level pass) and Juuga "Plan:
 #: For 3 turns, at the end of your turn gain 6 Block" (`amount` is the turns,
-#: the Block is `C.MI_JUUGA_GUARD_BLOCK`); and a written Companion, whose one
-#: clause holds the card (`carry_out_companion`). `KokomiPlan.Kind.AddStings`,
-#: `GainStrength`, `JuugaGuard`, `PlayCompanion` are the twins.
+#: the Block is `C.MI_JUUGA_GUARD_BLOCK`). `KokomiPlan.Kind.AddStings`,
+#: `GainStrength`, `JuugaGuard` are the twins. (A written Companion's
+#: `play_companion` left with Kokomi review r9 pick 1 (a), 2026-10-15:
+#: "let's get rid of Companions as Plans unless we make a card that
+#: specifically has a Plan line.")
 ADD_STINGS = "add_stings"
 GAIN_STRENGTH = "gain_strength"
 JUUGA_GUARD = "juuga_guard"
-PLAY_COMPANION = "play_companion"
 #: Juuga's Plan line's power on her: stacks are TURNS REMAINING.
 MI_JUUGA_GUARD = "mi_juuga_guard"
 #: The two jellyfish cards (card paper sec.1 rule 4), off-pool sheet rows.
@@ -703,18 +704,13 @@ def plan_aimed_at_pet(state: CombatState, card: Card) -> bool:
     return not any(_intends_to_attack(e) for e in state.living_enemies)
 
 
-def writable_companion(card: Optional[Card]) -> bool:
-    """A Companion card with no Plan line of its own: written, it is carried
-    out at its printed rate (design pass pick 4 (a), ruled 2026-10-12).
-    `IWritableCompanion` is the twin (the codegen stamps every Companion row
-    with no `plan:`)."""
-    return card is not None and card.is_companion and not card.plan
-
-
 def can_be_written(card: Optional[Card]) -> bool:
-    """Can this card be written as a Plan? A Plan line, or a Companion card.
-    `KokomiRefounding.CanBeWritten` is the twin."""
-    return card is not None and (bool(card.plan) or writable_companion(card))
+    """Can this card be written as a Plan? Only a card that prints a Plan
+    line, a Companion included (Gorou's). Kokomi review r9 pick 1 (a),
+    2026-10-15: "let's get rid of Companions as Plans unless we make a card
+    that specifically has a Plan line." `KokomiRefounding.CanBeWritten` is
+    the twin."""
+    return card is not None and bool(card.plan)
 
 
 def _intends_to_attack(enemy: Enemy) -> bool:
@@ -884,11 +880,6 @@ def schedule(state: CombatState, card: Card,
     which is also the card `KokomiPlan.ScheduleFromExhaust` hands its own
     `source` parameter.
 
-    A COMPANION WITH NO PLAN LINE (the re-founding, 2026-10-12) is written as
-    one `play_companion` clause holding the card itself, carried out next turn
-    at its printed rate after the Bake-Kurage applies Hydro to its target
-    (`carry_out_companion`). `KokomiCompanionPlan.Write` is the twin.
-
     A PLAN IS ONLY EVER QUEUED HERE (`EB-570`). The Moon Overlooks the Waters
     used to carry the entry out on the spot as well -- "Plans also happen now"
     -- and the Rare deleted the kit's one question rather than answering it:
@@ -899,12 +890,6 @@ def schedule(state: CombatState, card: Card,
     """
     if not live(state):
         return
-    # THE RE-FOUNDING (2026-10-12): a Companion with no Plan line of its own
-    # is written as ONE clause holding the card (`KokomiCompanionPlan.Write`).
-    companion = clauses is None and writable_companion(card)
-    if companion:
-        clauses = [{"op": PLAY_COMPANION, "target": "front_enemy"}]
-        replay = card
     body = list(clauses if clauses is not None else card.plan)
     if not body:
         return
@@ -962,7 +947,7 @@ def schedule(state: CombatState, card: Card,
     # card, or the writing card itself), and only when this is that card's
     # own Plan line -- Moon's Reflection's replay shape writes a clause of its
     # own and is not two-line. A Dusk Plan is left as it is (paper sec.2).
-    own_line = (clauses is None or enchanted_by is not None) and not companion
+    own_line = clauses is None or enchanted_by is not None
     now_card = (owner if own_line and owner.effects and owner.plan
                 else None)
     entry = PlanEntry(card_id=card.id, clauses=body, card=held, label=label,
@@ -1581,8 +1566,6 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
         # Stacks are turns; `effects.inazuma_overhaul_turn_end` pays it.
         p.powers[MI_JUUGA_GUARD] = p.powers.get(MI_JUUGA_GUARD, 0) + amount
         state.emit("plan_juuga_guard", turns=amount)
-    elif op == PLAY_COMPANION:
-        carry_out_companion(state, entry.card)
     # THE POOL OVERHAUL (2026-10-13): the Chain, Counter and Intent lines.
     elif op == DAMAGE_PER_PLAN_THIS_TURN:
         # Feint, Turning Tide: the rate times the Plans carried out this
@@ -2160,10 +2143,13 @@ def note_face_up_plan_card(state: CombatState, card: Card) -> None:
     it. `TreatisePower.AfterCardPlayed` is the twin. Copies add cards, still
     once a turn.
 
-    KOKOMI ROUND 2 (2026-10-12): "a card you could have written as a Plan"
-    -- `can_be_written`, so a Companion card counts too. A carry-out is not
-    her play (`kk_carrying_out`): a written Companion's copy draws nothing."""
-    if not live(state) or not can_be_written(card):
+    KOKOMI ROUND 2 (2026-10-12): a Plan card or a Companion card counts
+    (the face: "a Plan card or a Companion without planning it"). Since
+    Kokomi review r9 pick 1 (a) (2026-10-15) a Companion is plannable only
+    when it prints a Plan line, so the gate names Companions itself rather
+    than reading `can_be_written`. A carry-out is not her play
+    (`kk_carrying_out`): Crystal Collapse's copy draws nothing."""
+    if not live(state) or not (can_be_written(card) or card.is_companion):
         return
     if state.kk_carrying_out:
         return
@@ -2558,40 +2544,6 @@ def grand_design(state: CombatState, card: Card, amount: int) -> int:
     return written
 
 
-def carry_out_companion(state: CombatState, card: Optional[Card]) -> None:
-    """A WRITTEN COMPANION, CARRIED OUT (design pass pick 4 (a)): the
-    Bake-Kurage applies Hydro to the front enemy, then a free COPY of the
-    Companion is played -- aimed at that enemy when it aims at one -- and
-    Exhausts. Crystal Collapse's copy (`_play_copy`) with the Hydro first, so
-    a Companion that hits reacts with it and one that only buffs or blocks
-    carries the Hydro alone. No front enemy: no Hydro, and the copy plays at
-    whoever its own aim finds. `KokomiCompanionPlan.CarryOut` is the twin."""
-    import copy as _copy
-
-    from tier0.engine import effects, reactions     # late import: cycle
-    if card is None:
-        state.emit("plan_companion_empty")
-        return
-    front = front_enemy(state)
-    if front is not None:
-        # The Bake-Kurage's Hydro is the pet's own, never the Companion's hit
-        # (the pool overhaul, 2026-10-13: Coordinated Tide).
-        was_card = state.kk_hit_card
-        state.kk_hit_card = None
-        try:
-            reactions.resolve_hit(state, front, "hydro", 0, "plan")
-        finally:
-            state.kk_hit_card = was_card
-    state.emit("plan_companion", card=card.id,
-               target=None if front is None else front.name)
-    was = state.kurage_aim
-    state.kurage_aim = front
-    try:
-        effects._free_play(state, _copy.deepcopy(card), force_exhaust=True)
-    finally:
-        state.kurage_aim = was
-
-
 def watchful_shoal_bonus(state: CombatState, card: Optional[Card],
                          jellyfish_id: str) -> int:
     """WATCHFUL SHOAL (Kokomi round-3 changes, 2026-10-12): "Your Stings deal
@@ -2715,16 +2667,15 @@ def note_reaction(state: CombatState) -> None:
         (`kk_reactions_this_combat`);
       * Grand Strategist, any reaction;
       * Coordinated Tide, a Companion card's own hit, played or carried out
-        as a Plan (`kk_hit_card`: the copy a written Companion plays, or the
-        Companion whose Plan line hit);
+        as its Plan line (`kk_hit_card`: the Companion, Crystal Collapse's
+        copy, or the Companion whose Plan line hit);
       * Jellyfish Current, a Sting's own hit, played, flipped or carried out
         as its Plan line.
 
     THE HIT'S CARD (`kk_hit_card`) is the card whose own hit reacted: set by
     `effects._resolve_card_bound` for a card being resolved and by
-    `_resolve_entry` for a Plan line's hits. The Bake-Kurage's Hydro before a
-    written Companion is the pet's, not the Companion's (`carry_out_companion`
-    clears it). `KokomiRefounding.OnReaction` is the twin.
+    `_resolve_entry` for a Plan line's hits. `KokomiRefounding.OnReaction` is
+    the twin.
 
     JELLYFISH CURRENT IS BOUNDED, the thin-deck loop rule's known set: each
     reaction consumes the aura it reacted with, so a Sting reacts once per

@@ -29,8 +29,6 @@ public class KokomiRound7DisplayTests
     public void Only_the_card_playing_clauses_play_a_card()
     {
         Assert.True(KokomiPlan.PlaysACard(Of(new KokomiPlan.Planned(
-            KokomiPlan.Kind.PlayCompanion, 0, KokomiPlan.Aim.FrontEnemy))));
-        Assert.True(KokomiPlan.PlaysACard(Of(new KokomiPlan.Planned(
             KokomiPlan.Kind.ReplayExhausted, 0, KokomiPlan.Aim.Self))));
         Assert.True(KokomiPlan.PlaysACard(Of(new KokomiPlan.Planned(
             KokomiPlan.Kind.PlayCopyOfCompanion, 0, KokomiPlan.Aim.FrontEnemy))));

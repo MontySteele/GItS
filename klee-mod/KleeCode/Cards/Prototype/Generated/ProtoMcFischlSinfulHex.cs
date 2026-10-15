@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcFischlSinfulHex : CustomCardModel, IElementalCard, ICompanionCard, IWritableCompanion, IVarkaSwitchCard
+public sealed class ProtoMcFischlSinfulHex : CustomCardModel, IElementalCard, ICompanionCard, IVarkaSwitchCard
 {
     /// <summary>Sheet applies_element: this companion attack applies its element.</summary>
     public Element Element => Element.Electro;
@@ -53,8 +53,8 @@ public sealed class ProtoMcFischlSinfulHex : CustomCardModel, IElementalCard, IC
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         TipAudience.Seat
-            ? ArmKeywordTips.ForElementalReaction(ArmKeywordTips.ForCompanionPlan(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this, Element.Electro), this), this)
-            : ArmKeywordTips.ForCompanionPlan(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this, Element.Electro), this);
+            ? ArmKeywordTips.ForElementalReaction(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this, Element.Electro), this)
+            : ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this, Element.Electro);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_fischl_sinful_hex");
 
@@ -63,14 +63,6 @@ public sealed class ProtoMcFischlSinfulHex : CustomCardModel, IElementalCard, IC
         ("title", "Fischl — Undone Be Thy Sinful Hex"),
         ("description", "Deal {CalculatedDamage:diff()} damage. This turn, each [gold]Electro[/gold] [gold]Elemental Reaction[/gold] deals {PowerAmount:diff()} [gold]Electro[/gold] damage to a random enemy.{InCombat:{VarkaSwitch}|}"),
     };
-
-    /// <summary>On Kokomi, this Companion card can also be written as a Plan on
-    /// the Bake-Kurage (the re-founding, 2026-10-12).</summary>
-    public override TargetType TargetType =>
-        KokomiCompanionPlan.TargetFor(this, base.TargetType);
-
-    /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
-    public TargetType PrintedTargetType => base.TargetType;
 
     /// <summary>The element this card makes current, on its in-combat line
     /// (`VarkaOath.SwitchLine`).</summary>
@@ -103,11 +95,6 @@ public sealed class ProtoMcFischlSinfulHex : CustomCardModel, IElementalCard, IC
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (KokomiPlan.PlayedOnPet(cardPlay))
-        {
-            await KokomiCompanionPlan.Write(choiceContext, this, cardPlay);
-            return;
-        }
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)

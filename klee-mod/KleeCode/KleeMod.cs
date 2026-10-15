@@ -601,10 +601,6 @@ public static class KleeMod
                     [Cards.ArmKeywordTips.LightfallSwordKey + ".title"] =
                         "Lightfall Sword",
                     [Cards.ArmKeywordTips.PlanOnlyKey + ".title"] = "Plan",
-                    // The Kokomi re-founding (2026-10-12): the Plan tip a
-                    // Companion carries while Kokomi holds it.
-                    [Cards.ArmKeywordTips.CompanionPlanKey + ".title"] =
-                        "Plan",
                     // The Kokomi round-1 fixes (2026-10-12): the Plan tip on
                     // a card that names Plans and has no Plan line.
                     [Cards.ArmKeywordTips.PlanNoLineKey + ".title"] = "Plan",

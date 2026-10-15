@@ -81,12 +81,13 @@ the Bake-Kurage carries it out at the start of her next turn.
    the last Plan's card and cost). No cap on the queue: R266 retired the
    two-Plan cap as a rule; a free turn is priced by the faces, not by a
    throughput limit.
-7. **Companions as Plans; the Casket is Block (2026-10-12).** Any
-   Companion card can be written as a Plan. It is carried out next turn at
-   its printed rate, and the Bake-Kurage applies Hydro to its target first
-   (the front enemy), so it reacts with that Hydro. A generated Companion is
-   Ethereal and Exhausts. Gorou's four are her own cards and print their own
-   Plan lines at the 1.3 rate. Her relic, the Tamakushi Casket, reads: "At
+7. **Companions; the Casket is Block (2026-10-12).** A Companion card can
+   be written as a Plan only if it prints its own Plan line (Kokomi review
+   r9, pick 1 (a), 2026-10-15; [USER]: "Agreed on Kokomi - let's get rid of Companions as Plans unless we make a card that specifically has a Plan line."
+   The 2026-10-12 rule that any Companion could be written, carried out
+   next turn after the Bake-Kurage's Hydro, is gone.) A generated Companion
+   is Ethereal and Exhausts. Gorou's four are her own cards and print their
+   own Plan lines at the 1.3 rate. Her relic, the Tamakushi Casket, reads: "At
    the start of your turn, if a Plan is waiting, gain 3 Block." It lands
    after the Block clear and before Plans resolve. (The Watatsumi Casket:
    3 for each Plan waiting.) The count and Open the Casket are retired. (Same two papers;

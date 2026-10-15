@@ -167,16 +167,13 @@ public static class KokomiPlan
         // 2026-10-12.md). Kurage's Wake's "Add 2 Stings to your hand";
         // Gorou's War Banner "Gain 1 Strength" (permanent since the Kokomi
         // level pass, 2026-10-12) and Juuga "For 3
-        // turns, at the end of your turn gain 6 Block" (amount = the turns);
-        // and a written Companion (design pass pick 4 (a)), whose clause
-        // holds the card and is carried out at its printed rate after the
-        // Bake-Kurage applies Hydro to its target
-        // (<see cref="KokomiCompanionPlan.CarryOut"/>). Sim twins
-        // `kokomi_plan`, the same names.
+        // turns, at the end of your turn gain 6 Block" (amount = the turns).
+        // Sim twins `kokomi_plan`, the same names. (A written Companion's
+        // PlayCompanion left with Kokomi review r9 pick 1 (a), 2026-10-15:
+        // only a Companion that prints a Plan line can be planned.)
         AddStings,
         GainStrength,
         JuugaGuard,
-        PlayCompanion,
         // THE POOL OVERHAUL (2026-10-13, review/active/kokomi-pool-overhaul-
         // 2026-10-13.md sec.2-4; [USER]: "On Kokomi, I'm good with default on
         // 1 and 2."). Three things only a Plan can do:
@@ -236,9 +233,8 @@ public static class KokomiPlan
     /// <summary>
     /// One scheduled clause. <paramref name="Card"/> is set for
     /// <see cref="Kind.ReplayExhausted"/> (Moon's Reflection's chosen card),
-    /// for <see cref="Kind.PlayCopyOfCompanion"/> (Crystal Collapse's
-    /// captured Companion) and for <see cref="Kind.PlayCompanion"/> (the
-    /// written Companion itself), and is the one place a Plan holds an object
+    /// and for <see cref="Kind.PlayCopyOfCompanion"/> (Crystal Collapse's
+    /// captured Companion), and is the one place a Plan holds an object
     /// rather than a number. Both are filled in when the Plan is written, never read
     /// off the board at carry-out.
     ///
@@ -642,7 +638,7 @@ public static class KokomiPlan
     /// <summary>Is a Plan of this seat being carried out right now? Grand
     /// Strategist's "Whenever a Plan causes an Elemental Reaction": a
     /// reaction inside this window was caused by the Plan -- its own hit, or
-    /// a written Companion's Hydro and hit. Sim twin:
+    /// the hit of a card it plays (Crystal Collapse's copy). Sim twin:
     /// `state.kk_carrying_out`.</summary>
     public static bool IsCarryingOut(Player? player) =>
         player != null && _carrying.Contains(player);
@@ -1582,7 +1578,7 @@ public static class KokomiPlan
     /// <summary>
     /// The lines the due entries are carried out as: each keeps the line it
     /// was flipped to while it waited, and an entry that cannot offer the
-    /// choice (Plan-only, a written Companion) is always its Plan line. No
+    /// choice (Plan-only) is always its Plan line. No
     /// screen (pick 5a).
     /// Returns the entries in the same order.
     /// </summary>
@@ -2205,14 +2201,6 @@ public static class KokomiPlan
                 await PowerCmd.Apply<JuugaGuardPower>(
                     choiceContext, kokomi, plan.Amount, applier: kokomi,
                     cardSource: null);
-                return null;
-
-            case Kind.PlayCompanion:
-                // The Companion prints its own numbers as it resolves; this
-                // clause produced none of its own (`EB-317`'s line names the
-                // card alone).
-                await KokomiCompanionPlan.CarryOut(choiceContext, kokomi,
-                                                   plan.Card);
                 return null;
 
             case Kind.AllyDraw:
@@ -3138,15 +3126,14 @@ public static class KokomiPlan
     }
 
     /// <summary>KOKOMI ROUND 7 (2026-10-14): does carrying this entry out
-    /// play a card? A Companion (<see cref="KokomiRefounding.CarryOut"/>),
-    /// Moon's Reflection (<see cref="Replay"/>) and Crystal Collapse
+    /// play a card? Moon's Reflection (<see cref="Replay"/>) and Crystal Collapse
     /// (<see cref="PlayCopy"/>) go through <c>CardCmd.AutoPlay</c>, which
     /// logs a card play the way the base game's own auto-plays do, so
     /// <c>RingingPower.ShouldPlay</c> counts it. Every other clause plays no
     /// card. Display only.</summary>
     public static bool PlaysACard(Entry entry) =>
-        entry.Clauses.Any(clause => clause.Kind is Kind.PlayCompanion
-            or Kind.ReplayExhausted or Kind.PlayCopyOfCompanion);
+        entry.Clauses.Any(clause => clause.Kind is Kind.ReplayExhausted
+            or Kind.PlayCopyOfCompanion);
 
     /// <summary>KOKOMI ROUND 7 (2026-10-14): where this entry's Vulnerable
     /// lands, in <see cref="WrittenAim"/>'s words ("all", "front", "other"),

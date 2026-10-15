@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMiShinobuThundergrust : CustomCardModel, IElementalCard, ICompanionCard, IWritableCompanion, IVarkaSwitchCard
+public sealed class ProtoMiShinobuThundergrust : CustomCardModel, IElementalCard, ICompanionCard, IVarkaSwitchCard
 {
     /// <summary>Sheet applies_element: this companion attack applies its element.</summary>
     public Element Element => Element.Electro;
@@ -52,7 +52,7 @@ public sealed class ProtoMiShinobuThundergrust : CustomCardModel, IElementalCard
         new[] { KleeKeywords.AppliesElectro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCompanionPlan(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this, Element.Electro), this);
+        ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this, Element.Electro);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mi_shinobu_thundergrust");
 
@@ -61,14 +61,6 @@ public sealed class ProtoMiShinobuThundergrust : CustomCardModel, IElementalCard
         ("title", "Shinobu — Thundergrust"),
         ("description", "Deal {CalculatedDamage:diff()} [gold]Electro[/gold] damage. If you are below half{InCombat:{HalfHp}| HP}, deal {BranchDamage:diff()} additional damage.{InCombat:{VarkaSwitch}|}"),
     };
-
-    /// <summary>On Kokomi, this Companion card can also be written as a Plan on
-    /// the Bake-Kurage (the re-founding, 2026-10-12).</summary>
-    public override TargetType TargetType =>
-        KokomiCompanionPlan.TargetFor(this, base.TargetType);
-
-    /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
-    public TargetType PrintedTargetType => base.TargetType;
 
     /// <summary>This card's in-combat Stage line
     /// (`FurinaStageFacePreview`).</summary>
@@ -102,11 +94,6 @@ public sealed class ProtoMiShinobuThundergrust : CustomCardModel, IElementalCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (KokomiPlan.PlayedOnPet(cardPlay))
-        {
-            await KokomiCompanionPlan.Write(choiceContext, this, cardPlay);
-            return;
-        }
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)

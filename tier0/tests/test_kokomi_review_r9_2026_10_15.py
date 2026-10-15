@@ -139,9 +139,12 @@ def test_a_card_limit_says_writing_a_plan_counts():
     assert counted[0].startswith("    - Counted this turn:")
     assert counted[-1] == note
     assert "Writing a Plan counts as playing that card" in note
-    assert "A planned Companion is played again" in note
+    # Pick 1 (a), 2026-10-15; [USER]: "let's get rid of Companions as Plans
+    # unless we make a card that specifically has a Plan line." Item 9's
+    # Companion sentence went with the rule, on the page and on the hover.
+    assert "Companion" not in note
     tip = _src("klee-mod/KleeCode/Cards/Prototype/ArmKeywordTips.cs")
-    assert "It counts as played now and again when it lands." in tip
+    assert "again when it lands" not in tip
 
 
 # ---- item 10: the Energy line ------------------------------------------------

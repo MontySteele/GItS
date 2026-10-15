@@ -96,12 +96,28 @@ def test_treatise_draws_nothing_for_a_plain_card():
 
 
 def test_treatise_draws_nothing_for_a_written_companions_carry_out():
+    """Gorou's Plan line (a Companion that prints one, the only kind written
+    since Kokomi review r9 pick 1 (a)): its carry-out draws nothing."""
     st = kokomi_state()
-    write(st, card("proto_mi_shinobu_thundergrust"))
+    write(st, card("proto_mi_gorou_inuzaka"))
     st.player.powers[kokomi_plan.TREATISE] = 1
     st.player.draw_pile = [card("proto_kk_evening_watch") for _ in range(3)]
     carry_out(st)
     assert _draws(st) == []
+
+
+def test_treatise_still_draws_for_a_companion_with_no_plan_line():
+    """Kokomi review r9 pick 1 (a) took plain Companions off the Bake-Kurage;
+    Treatise's face ("a Plan card or a Companion without planning it") still
+    counts every play of one."""
+    st = kokomi_state()
+    st.player.powers[kokomi_plan.TREATISE] = 1
+    st.player.draw_pile = [card("proto_kk_evening_watch") for _ in range(3)]
+    c = card("proto_mi_shinobu_thundergrust")
+    assert not kokomi_plan.can_be_written(c)
+    st.player.hand.append(c)
+    combat.play_card(st, c)
+    assert _draws(st) != []
 
 
 def test_nereids_ascension_carries_the_twice_tip():

@@ -29,15 +29,15 @@ def test_a_power_draw_names_the_power_not_the_card_row():
     assert phrase == ["drew Defend (Treatise)"]
 
 
-# --- 2. a written Companion is played ----------------------------------------
+# --- 2. the written number note -----------------------------------------------
 
 def test_the_written_number_note_names_strength_and_intent_reads():
-    # Kokomi review r5 (2026-10-14, A2) reworded the note; the Frail and
-    # written-Companion clauses stay.
+    # Kokomi review r5 (2026-10-14, A2) reworded the note; the Frail clause
+    # stays. The written-Companion clause left with Kokomi review r9 pick 1
+    # (a), 2026-10-15: a Companion with no Plan line can no longer be planned.
     said = blindplay_notes.PLAN_WRITTEN_NUMBER_NOTE
     assert "A planned Block is yours, so Frail cuts it." in said
-    assert ("A written Companion is played as a card next turn, so your "
-            "Strength and Weak then count.") in said
+    assert "Companion" not in said
     assert "a loss (Tender) as much as a gain" in said
     assert "Weak or Shrink on you never does" in said
     assert "reads it when it lands" in said

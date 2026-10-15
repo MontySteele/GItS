@@ -5177,12 +5177,11 @@ OPS = {
     # just drawn.
     "block_per_status_in_hand": _op_kokomi_plan_only,
     "transform_statuses_you_have": _op_kokomi_plan_only,
-    # THE KOKOMI RE-FOUNDING (2026-10-12): Kurage's Wake's Stings, Gorou's
-    # two Plan lines and a written Companion's clause.
+    # THE KOKOMI RE-FOUNDING (2026-10-12): Kurage's Wake's Stings and
+    # Gorou's two Plan lines.
     "add_stings": _op_kokomi_plan_only,
     "gain_strength": _op_kokomi_plan_only,
     "juuga_guard": _op_kokomi_plan_only,
-    "play_companion": _op_kokomi_plan_only,
     # THE KOKOMI POOL OVERHAUL (2026-10-13): the Chain, Counter and Intent
     # lines and Read the Field's fetch, each naming the carry-out turn or the
     # enemy turn the Plan sat through.

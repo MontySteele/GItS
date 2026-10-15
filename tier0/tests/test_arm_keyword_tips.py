@@ -324,9 +324,6 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT",
                     # The text pass of 2026-10-08: the Plan tip a plan-only
                     # card carries in ForPlan's place (no line above, no flip).
                     "KLEEMOD-ARM_PLAN_ONLY",
-                    # The Kokomi re-founding (2026-10-12): the Plan tip a
-                    # Companion carries while Kokomi holds it.
-                    "KLEEMOD-ARM_PLAN_COMPANION",
                     # The Kokomi round-1 fixes (2026-10-12): the Plan tip a
                     # card that names Plans with no Plan line carries.
                     "KLEEMOD-ARM_PLAN_NO_LINE",
