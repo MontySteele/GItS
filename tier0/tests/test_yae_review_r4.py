@@ -124,22 +124,61 @@ def test_evergreen_charm_on_a_sakura_without_red_ink_keeps_nothing():
 
 # 5. The Seven Glamours ------------------------------------------------------
 
-def test_seven_glamours_publishes_every_annotated_card_in_hand():
-    c = _card("the_seven_glamours")
-    assert c.rarity == "rare" and c.exhaust and c.cost == 1
-    assert loader.get_card("proto_ym_the_seven_glamours+").cost == 0
-    assert _row("proto_ym_the_seven_glamours")["description"].startswith(
-        "[gold]Publish[/gold] every [gold]Annotated[/gold] card in your hand")
+# 2026-10-15 ([USER]: "it looks obviously OP - I thought it was Publishing one
+# card per fight, not the whole hand"): a 2-cost Attack, 12 [16], Exhaust,
+# that Publishes ONE Annotated card in hand, and only on a kill (Hand of
+# Greed's Fatal check: a Minion's death does not count).
+
+def _glamours_state(n=2):
     st = _state()
+    st.enemies = [Enemy(hp=100, max_hp=100, name=f"e{i}",
+                        intents=[{"kind": "block", "amount": 0}])
+                  for i in range(n)]
     a, b, plain = _card("sly_strike"), _card("sly_strike"), _card("sly_strike")
     for x in (a, b, plain):
         st.player.hand.append(x)
     Y.annotate(st, a, Y.RED_INK)
     Y.annotate(st, b, Y.FOOTNOTE)
-    _play(st, c)
-    assert Y.stack(a) == [Y.RED_INK] and Y.temp(a) is None
+    return st, a, b, plain
+
+
+def test_seven_glamours_row():
+    c = _card("the_seven_glamours")
+    assert (c.rarity, c.type, c.cost, c.exhaust) == ("rare", "attack", 2, True)
+    up = loader.get_card("proto_ym_the_seven_glamours+")
+    assert up.cost == 2
+    assert next(e["amount"] for e in up.effects if e["op"] == "damage") == 16
+    assert _row("proto_ym_the_seven_glamours")["description"] == (
+        "Deal 12 [gold]Electro[/gold] damage. If this kills an enemy, "
+        "[gold]Publish[/gold] an [gold]Annotated[/gold] card in your hand.")
+
+
+def test_seven_glamours_kill_publishes_one_card():
+    st, a, b, plain = _glamours_state()
+    st.enemies[0].hp = 5
+    _play(st, _card("the_seven_glamours"))
+    assert not st.enemies[0].alive
+    # One card: the sim's pick is the best by PUBLISH_ORDER (Footnote).
     assert Y.stack(b) == [Y.FOOTNOTE] and Y.temp(b) is None
+    assert Y.stack(a) == [] and Y.temp(a) == Y.RED_INK
     assert Y.stack(plain) == []
+
+
+def test_seven_glamours_without_a_kill_publishes_nothing():
+    st, a, b, plain = _glamours_state()
+    _play(st, _card("the_seven_glamours"))
+    assert st.enemies[0].hp == 88
+    assert Y.stack(a) == [] and Y.stack(b) == []
+    assert Y.temp(a) == Y.RED_INK and Y.temp(b) == Y.FOOTNOTE
+
+
+def test_seven_glamours_minion_kill_publishes_nothing():
+    st, a, b, plain = _glamours_state()
+    st.enemies[0].hp = 5
+    st.enemies[0].counts_for_fatal = False       # a summoned Minion
+    _play(st, _card("the_seven_glamours"))
+    assert not st.enemies[0].alive
+    assert Y.stack(a) == [] and Y.stack(b) == []
 
 
 # 6. The Edit chooser (seat page) --------------------------------------------

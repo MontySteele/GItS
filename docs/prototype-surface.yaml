@@ -4891,12 +4891,15 @@
 
 - {id: proto_ym_the_seven_glamours, name: "The Seven Glamours", character: yae,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: rare, exhaust: true,
-   # Yae review r4 item 5: every Annotated card in hand (was one), Rare, 1 [0],
-   # Exhaust.
-   description: "[gold]Publish[/gold] every [gold]Annotated[/gold] card in your hand.",
-   effects: [{op: yae, kind: publish}],
-   upgrade: {cost: -1}}
+   cost: 2, type: attack, rarity: rare, exhaust: true,
+   # 2026-10-15 ([USER]: "it looks obviously OP"): was a 1 [0] Skill Publishing
+   # every Annotated card in hand. The kill is Hand of Greed's Fatal check (no
+   # Minions). Provenance note, "Yae: The Seven Glamours on a kill".
+   description: "Deal 12 [gold]Electro[/gold] damage. If this kills an enemy, [gold]Publish[/gold] an [gold]Annotated[/gold] card in your hand.",
+   effects: [{op: damage, amount: 12, target: enemy},
+             {op: conditional, if: killed_target_fatal,
+              then: [{op: yae, kind: publish}]}],
+   upgrade: {damage: 4}}
 
 - {id: proto_ym_sakura_channeling, name: "Sakura Channeling", character: yae,
    authored_by: [claude],

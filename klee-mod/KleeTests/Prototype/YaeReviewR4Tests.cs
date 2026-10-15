@@ -89,11 +89,31 @@ public class YaeReviewR4Tests : IDisposable
         }
     }
 
+    // The Seven Glamours, 2026-10-15 ([USER]: "it looks obviously OP - I
+    // thought it was Publishing one card per fight, not the whole hand"):
+    // one card, chosen, on a kill. Behaviour (kill, no kill, Minion): the sim
+    // twin's test_seven_glamours_*.
+
     [Fact]
-    public void The_seven_glamours_publishes_without_a_chooser()
+    public void The_seven_glamours_publishes_one_chosen_card()
     {
         var calls = Il.CallSequence(typeof(YaeEditing).GetMethod(nameof(YaeEditing.PublishFromHand))!).ToList();
-        Assert.DoesNotContain(calls, c => c.Contains("FromHand"));
-        Assert.Contains(calls, c => c.Contains(nameof(YaeEditing.PublishLayer)));
+        Assert.Contains(calls, c => c.Contains("CardSelectCmd.FromHand"));
+        Assert.Equal(1, calls.Count(c => c.Contains(nameof(YaeEditing.PublishLayer))));
+    }
+
+    [Fact]
+    public void The_seven_glamours_publishes_only_on_a_fatal_kill()
+    {
+        var card = typeof(global::KleeMod.Cards.Prototype.Generated.ProtoYmTheSevenGlamours);
+        var onPlay = Il.CallSequence(card.GetMethod("OnPlay", HeadlessGame.All)!).ToList();
+        Assert.Contains(onPlay, c => c.Contains("DamageCmd.Attack"));
+        Assert.Contains(onPlay, c => c.Contains("YaeCards.Publish"));
+        // Hand of Greed's gate: the snapshot asks each enemy's powers
+        // whether its death triggers Fatal (MinionPower says no).
+        var lambdas = card.GetNestedTypes(HeadlessGame.All)
+            .SelectMany(t => t.GetMethods(HeadlessGame.All))
+            .SelectMany(Il.CallSequence);
+        Assert.Contains(lambdas, c => c.Contains("ShouldOwnerDeathTriggerFatal"));
     }
 }

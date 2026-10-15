@@ -309,6 +309,7 @@ def test_the_seven_glamours_adds_to_an_existing_stack():
     c = _published("strike", [Y.RED_INK])
     st.player.hand.append(c)
     _play(st, "margin_note")                     # Red Ink, temporary
+    st.enemies[0].hp = 1                         # its kill (2026-10-15)
     _play(st, "the_seven_glamours")
     assert Y.stack(c) == [Y.RED_INK, Y.RED_INK]
 

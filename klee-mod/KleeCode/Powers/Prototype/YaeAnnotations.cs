@@ -824,30 +824,40 @@ public static class YaeEditing
     }
 
     /// <summary>
-    /// The Seven Glamours (Yae review r4, item 5): "Publish every Annotated
-    /// card in your hand." Each card with a temporary layer and a deck card:
-    /// the layer joins the combat card's stack and the deck card's. No
-    /// chooser.
+    /// The Seven Glamours (2026-10-15): "If this kills an enemy, Publish an
+    /// Annotated card in your hand." The player picks one card with a
+    /// temporary layer and a deck card (no chooser when there is only one):
+    /// the layer joins the combat card's stack and the deck card's. Was every
+    /// such card (Yae review r4, item 5), which [USER] ruled OP.
     /// </summary>
-    public static Task PublishFromHand(PlayerChoiceContext choiceContext,
-                                       CardModel editor)
+    public static async Task PublishFromHand(PlayerChoiceContext choiceContext,
+                                             CardModel editor)
     {
         var owner = editor.Owner;
-        if (owner == null) return Task.CompletedTask;
-        var cards = PileType.Hand.GetPile(owner).Cards
-            .Where(c => Editable(c, editor) && Temporary(c) != YaeAnnotation.None
-                        && c.DeckVersion != null)
+        if (owner == null) return;
+        var cands = PileType.Hand.GetPile(owner).Cards
+            .Where(c => PublishReaches(c, editor))
             .ToList();
-        foreach (var picked in cards)
-        {
-            var deck = picked.DeckVersion!;
-            var moved = PublishLayer(picked);
-            if (moved == YaeAnnotation.None) continue;
-            PublishToDeck(deck, moved);
-            RecordDraft(deck, YaeAnnotation.None);
-        }
-        return Task.CompletedTask;
+        if (cands.Count == 0) return;
+        var picked = cands.Count == 1
+            ? cands[0]
+            : (await CardSelectCmd.FromHand(
+                choiceContext, owner,
+                new CardSelectorPrefs(new LocString(Table, PublishPromptKey), 1),
+                c => PublishReaches(c, editor),
+                editor)).FirstOrDefault();
+        if (picked?.DeckVersion is not { } deck) return;
+        var moved = PublishLayer(picked);
+        if (moved == YaeAnnotation.None) return;
+        PublishToDeck(deck, moved);
+        RecordDraft(deck, YaeAnnotation.None);
     }
+
+    /// <summary>What The Seven Glamours can Publish: a card in hand an Edit
+    /// reaches, with a temporary layer and a deck card. PURE.</summary>
+    public static bool PublishReaches(CardModel card, CardModel? editor) =>
+        Editable(card, editor) && Temporary(card) != YaeAnnotation.None
+        && card.DeckVersion != null;
 
     // ---- The signature cards (review r3, sec.3) ---------------------------
 
