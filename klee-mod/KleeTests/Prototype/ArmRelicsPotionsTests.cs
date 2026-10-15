@@ -59,9 +59,9 @@ public class ArmRelicsPotionsTests
             klee.Select(p => p.Rarity).ToArray());
         // THE SALON'S TAB (2026-10-05, proposal sec.16) kept Opera Glasses
         // (Common), Grand Theater Program (Rare) and Bottled Applause
-        // (Common); Furina's card pass (2026-10-15) adds six relics and two
+        // (Common); Furina's card pass (2026-10-15) adds five relics and two
         // potions (`FurinaRelicsPotionsTests` pins the set).
-        Assert.Equal(8, FurinaStageRelics.Types.Count);
+        Assert.Equal(7, FurinaStageRelics.Types.Count);
         Assert.Equal(3, ArmPotions.Furina.Count);
         foreach (var set in new[] { ArmPotions.Klee, ArmPotions.Furina })
         {

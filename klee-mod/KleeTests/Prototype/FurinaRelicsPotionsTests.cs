@@ -42,14 +42,14 @@ public class FurinaRelicsPotionsTests : IDisposable
     // ==== the shape and the pools ============================================
 
     [Fact]
-    public void Her_eight_relics_and_three_potions_by_rarity()
+    public void Her_seven_relics_in_the_base_shape_and_three_potions()
     {
         Assert.Equal(
             new[]
             {
                 RelicRarity.Common, RelicRarity.Uncommon, RelicRarity.Uncommon,
                 RelicRarity.Rare, RelicRarity.Rare, RelicRarity.Rare,
-                RelicRarity.Rare, RelicRarity.Shop,
+                RelicRarity.Shop,
             },
             FurinaStageRelics.Types.Select(t => Canon<RelicModel>(t).Rarity).ToArray());
         Assert.Equal(
@@ -61,7 +61,7 @@ public class FurinaRelicsPotionsTests : IDisposable
     }
 
     [Fact]
-    public void Her_pool_lists_and_offers_all_eight_with_her_starter_and_ancient()
+    public void Her_pool_lists_and_offers_all_seven_with_her_starter_and_ancient()
     {
         var members = Il.CallSequence(Il.Method("FurinaRelicPool", "GenerateAllRelics"));
         foreach (var t in FurinaStageRelics.Types)
@@ -94,8 +94,6 @@ public class FurinaRelicsPotionsTests : IDisposable
                      Face(typeof(ClaquesLedger)));
         Assert.Equal("Whenever you [gold]Spend[/gold] 10 or more at once, gain "
                      + "{energyPrefix:energyIcons(1)}.", Face(typeof(BouquetOfRoses)));
-        Assert.Equal("Your [gold]Drain[/gold] buffer is twice as large.",
-                     Face(typeof(TearOfTheLoneRegina)));
         Assert.Equal("You have [blue]1[/blue] more guest seat.",
                      Face(typeof(EpicleseSeasonPass)));
         Assert.Equal("Each guest acts twice.", Face(typeof(BottledEncore)));
@@ -209,39 +207,15 @@ public class FurinaRelicsPotionsTests : IDisposable
     }
 
     [Fact]
-    public void Tear_of_the_lone_regina_doubles_the_buffer_and_lyney_adds_after()
-    {
-        Assert.Equal(20, FurinaStageLaw.BufferOf(80));
-        Assert.Equal(40, FurinaStageLaw.BufferOf(80, tear: true));
-        Assert.Equal(50, FurinaStageLaw.BufferOf(80, lyney: true, tear: true));
-        Assert.Equal(42, FurinaStageLaw.BufferOf(85, tear: true));   // 21 x 2
-        var kit = new StageKit(new StageMods { TearOfRegina = 1 }, 0, 80, 80, 80);
-        Assert.Equal(40, kit.Stage.Buffer);
-        StageKit.Run(kit.Director.Drain(30));
-        Assert.Equal(30, kit.Stage.DrainedAbove);
-        Assert.Equal(10, kit.Stage.BufferLeft);
-        // The Drained counter's hover and the line's words read the real
-        // buffer; the Drain tip is unchanged.
-        Assert.StartsWith(Vfx.DrainedCounter.BufferSentence(10),
-                          Vfx.DrainedCounter.HoverBody(kit.Stage.Drained,
-                                                       kit.Stage.BufferLeft));
-        Assert.Contains("1/2 of your Max HP", kit.Stage.LineWhy);
-        Assert.Contains("1/4 of your Max HP",
-                        new StageKit(null, 0, 80, 80, 80).Stage.LineWhy);
-    }
-
-    [Fact]
     public void Epiclese_season_pass_adds_a_seat_and_the_relics_are_read_off_her()
     {
         var furina = Seat.Furina();
         Give<EpicleseSeasonPass>(furina);
-        Give<TearOfTheLoneRegina>(furina);
         Give<FontaineTeardrop>(furina);
         Give<ClaquesLedger>(furina);
         Give<BouquetOfRoses>(furina);
         var mods = FurinaStage.ModsOf(furina.Creature);
         Assert.Equal(FurinaStageLaw.Seats + 1, mods.Capacity);
-        Assert.Equal(1, mods.TearOfRegina);
         Assert.Equal(1, mods.FontaineTeardrop);
         Assert.Equal(1, mods.ClaquesLedger);
         Assert.Equal(1, mods.BouquetOfRoses);

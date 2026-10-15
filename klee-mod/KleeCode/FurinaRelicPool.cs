@@ -44,13 +44,12 @@ public sealed class FurinaRelicPool : RelicPoolModel
             .Append(ModelDb.Relic<Relics.FontaineTeardrop>())
             .Append(ModelDb.Relic<Relics.ClaquesLedger>())
             .Append(ModelDb.Relic<Relics.BouquetOfRoses>())
-            .Append(ModelDb.Relic<Relics.TearOfTheLoneRegina>())
             .Append(ModelDb.Relic<Relics.EpicleseSeasonPass>());
         return relics;
     }
 
     /// <summary>
-    /// THE OFFER: Salon Solitaire, her eight and The Curtain Never Falls. The
+    /// THE OFFER: Salon Solitaire, her seven and The Curtain Never Falls. The
     /// Silent borrow is not offered.
     /// </summary>
     public override IEnumerable<RelicModel> GetUnlockedRelics(

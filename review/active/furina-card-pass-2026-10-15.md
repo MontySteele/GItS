@@ -31,7 +31,6 @@ Uncommons, two more Rares and a Shop relic.
 | Uncommon | Fontaine Teardrop | Whenever you Repay more than you have drained, gain the rest as Block. | Drain / Repay | Orichalcum-size with Salon Solitaire (1 a turn); larger with Repay cards |
 | Rare | Claque's Ledger | Whenever a guest acts, gain 1 Fanfare. | Guests to Fanfare | Grand Theater Program (1 Fanfare a turn) |
 | Rare | Bouquet of Roses | Whenever you Spend 10 or more at once, gain [E]. | Fanfare | Ivory Tile (a big card refunds Energy) |
-| Rare | Tear of the Lone Regina | Your Drain buffer is twice as large. | Drain | Bends the Drain line |
 | Shop | Epiclese Season Pass | You have 1 more guest seat. | Guests | Runic Capacitor (more Orb slots) |
 
 Readings a builder needs:
@@ -44,13 +43,10 @@ Readings a builder needs:
   Showstopper and Bring the House Down. A guest that acts twice gains 2.
 - **Bouquet of Roses:** a single Spend of 10 or more Fanfare, spend-all cards
   included. Once per Spend.
-- **Tear of the Lone Regina:** the buffer (1/4 of Max HP) doubles to 1/2;
-  Lyney's +10 adds after the doubling (buffer = 2 x quarter + 10), in the
-  words of Lyney's line ("Your Drain buffer is 10 HP larger"). The Drain tip
-  is unchanged; the Drained counter's hover reads the real buffer.
-  Corrected 2026-10-15 ([USER]: 'we already restore all drained HP, it's the
-  drain line that's a quarter').
 - **Epiclese Season Pass:** 3 seats become 4; with Ensemble Cast, 4 become 5.
+
+Tear of the Lone Regina cut 2026-10-15: four Rares would be one over the base
+shape, and it overlapped Lyney's line and A Five-Century Act.
 
 ## 3. Potions
 

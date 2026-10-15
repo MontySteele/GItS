@@ -34,7 +34,7 @@ uses: a literal `"ns/relics/x.png"` (or `/potions/`), a helper call
 
 ICON_DEBT has the lint_power_icons semantics: a named, reasoned exception that
 FAILS once it is no longer needed, so the set can only shrink. It holds
-Furina's card pass's eight (2026-10-15).
+Furina's card pass's seven (2026-10-15).
 
 Run: python tools/lint_relic_potion_icons.py      (exit 1 with findings)
 """
@@ -62,7 +62,6 @@ ICON_DEBT: dict[str, str] = {
     "FontaineTeardrop": _FURINA_PASS_ART,
     "ClaquesLedger": _FURINA_PASS_ART,
     "BouquetOfRoses": _FURINA_PASS_ART,
-    "TearOfTheLoneRegina": _FURINA_PASS_ART,
     "EpicleseSeasonPass": _FURINA_PASS_ART,
     "BottledEncore": _FURINA_PASS_ART,
     "WaterOfLucine": _FURINA_PASS_ART,

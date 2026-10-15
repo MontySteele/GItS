@@ -480,13 +480,12 @@ UNMIRRORED: dict[str, str] = {
     "OperaGlasses.Fanfare": _ARM_ITEMS_REASON,
     "GrandTheaterProgram.Fanfare": _ARM_ITEMS_REASON,
     # Furina's card pass (2026-10-15, review/active/furina-card-pass-
-    # 2026-10-15.md): her six relics' numbers, built C# first like the two
+    # 2026-10-15.md): her five relics' numbers, built C# first like the two
     # above; tier0's Stage twin models none of her relics.
     "ClaquesLedger.Fanfare": _ARM_ITEMS_REASON,
     "BouquetOfRoses.Energy": _ARM_ITEMS_REASON,
     "FurinaStageLaw.BouquetSpend": _ARM_ITEMS_REASON,
     "FurinaStageLaw.SeasonPassSeats": _ARM_ITEMS_REASON,
-    "FurinaStageLaw.TearBufferMultiplier": _ARM_ITEMS_REASON,
     "WatatsumiCasket.WatatsumiBlock":
         "THE KOKOMI OVERHAUL'S TOUCH OF OROBAS UPGRADE (2026-09-30, main-"
         "session design from the co-op playtest; 3 Block for each Plan "

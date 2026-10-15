@@ -25,18 +25,18 @@ namespace KleeMod.Relics;
 ///
 /// FURINA'S CARD PASS (2026-10-15,
 /// <c>review/active/furina-card-pass-2026-10-15.md</c> sec.2; kit census
-/// pick 1 (a), [USER]: "Agreed on all of the above!") adds six: two
-/// Uncommons, three Rares and a Shop relic.
+/// pick 1 (a), [USER]: "Agreed on all of the above!") adds five: two
+/// Uncommons, two Rares and a Shop relic.
 /// </summary>
 public static class FurinaStageRelics
 {
-    /// <summary>Her eight, by rarity, in the papers' table order.</summary>
+    /// <summary>Her seven, by rarity, in the papers' table order.</summary>
     public static readonly IReadOnlyList<Type> Types = new[]
     {
         typeof(OperaGlasses),
         typeof(OperaTicketStub), typeof(FontaineTeardrop),
         typeof(GrandTheaterProgram), typeof(ClaquesLedger),
-        typeof(BouquetOfRoses), typeof(TearOfTheLoneRegina),
+        typeof(BouquetOfRoses),
         typeof(EpicleseSeasonPass),
     };
 
@@ -119,7 +119,7 @@ public sealed class GrandTheaterProgram : CustomRelicModel
 
 // ---- Furina's card pass (2026-10-15) ---------------------------------------
 
-/// <summary>One of the card pass's six: <c>furina/relics/&lt;slug&gt;.png</c>,
+/// <summary>One of the card pass's five: <c>furina/relics/&lt;slug&gt;.png</c>,
 /// the base game's placeholder until its art lands.</summary>
 public abstract class FurinaStageRelic : CustomRelicModel
 {
@@ -235,27 +235,6 @@ public sealed class BouquetOfRoses : FurinaStageRelic
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForSpend(Array.Empty<IHoverTip>(), null!);
-}
-
-/// <summary>Rare: "Your Drain buffer is twice as large." (corrected
-/// 2026-10-15; [USER]: "we already restore all drained HP, it's the drain
-/// line that's a quarter"). Read in <see cref="FurinaStageLedger.Buffer"/>
-/// through <see cref="FurinaStageLaw.BufferOf"/>, Lyney's 10 added after
-/// the doubling.</summary>
-public sealed class TearOfTheLoneRegina : FurinaStageRelic
-{
-    protected override string Slug => "tear_of_the_lone_regina";
-
-    public override RelicRarity Rarity => RelicRarity.Rare;
-
-    public override List<(string, string)>? Localization => new()
-    {
-        ("title", "Tear of the Lone Regina"),
-        ("description", "Your [gold]Drain[/gold] buffer is twice as large."),
-    };
-
-    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForDrain(Array.Empty<IHoverTip>(), null!);
 }
 
 /// <summary>Shop: "You have 1 more guest seat." Read in

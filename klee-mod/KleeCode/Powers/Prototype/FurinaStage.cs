@@ -190,7 +190,6 @@ public static class FurinaStage
                 ? FurinaStageLaw.EnsembleSeats : FurinaStageLaw.Seats)
               + seasonPass * FurinaStageLaw.SeasonPassSeats,
             SeasonPass = seasonPass,
-            TearOfRegina = Held<Relics.TearOfTheLoneRegina>(),
             FontaineTeardrop = Held<Relics.FontaineTeardrop>(),
             ClaquesLedger = Held<Relics.ClaquesLedger>(),
             BouquetOfRoses = Held<Relics.BouquetOfRoses>(),
