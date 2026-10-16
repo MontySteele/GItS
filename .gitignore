@@ -108,3 +108,7 @@ review/qa/
 
 # Appended by every unseeded harness run (understudy/harness.py); local only.
 understudy/logs/phase0-unseeded.jsonl
+
+# Steam Workshop upload workspaces (tools/package_workshop.py): the built mod
+# with Tier F art, and ModUploader's mod_id.txt for each variant.
+.workshop/
