@@ -285,6 +285,18 @@ ALLOWED: dict[tuple[str, str, str], str] = {
     ("klee-mod/KleeCode/Story/KleeStory.cs",
      "FurinaStageLaw.NeuvilletteHydroBonusUpgraded", "3"):
         "the story event's upgrade count, not a Furina guest number",
+    # FURINA'S STORY (2026-10-16, review/active/furina-story-2026-10-15.md):
+    # An Empty House's "Lose 8 HP. Upgrade 2 random cards." is the event's
+    # own price and count (the ruled paper's text), not a guest number.
+    ("klee-mod/KleeCode/Story/FurinaStory.cs",
+     "FurinaStageLaw.LynetteActDamageUpgraded", "8"):
+        "the story event's HP price, not Lynette's act damage",
+    ("klee-mod/KleeCode/Story/FurinaStory.cs",
+     "FurinaStageLaw.WriothesleyActDamageUpgraded", "8"):
+        "the story event's HP price, not Wriothesley's act damage",
+    ("klee-mod/KleeCode/Story/FurinaStory.cs",
+     "FurinaStageLaw.SingerRepayUpgraded", "2"):
+        "the story event's upgrade count, not the Singer's repay",
     # VARKA'S STORY (2026-10-13, review/active/varka-story-2026-10-13.md):
     # "Upgrade 2 random cards" and "Upgrade 3 random cards" are the story
     # events' own counts (the ruled paper's text), not a Furina number.

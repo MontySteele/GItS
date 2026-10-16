@@ -201,6 +201,12 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
   [USER]: "Let's promote as-is"): furina-next papers 1 and 2 (Crescendo,
   Standing Room Only, Prima Donna; Bravura and Bring the House Down capped,
   Extended Run for Bis!). Suite 3 mean end floor 42.8, four of five in act 3.
+- **Story built** (2026-10-16, `review/active/furina-story-2026-10-15.md`,
+  ruled "I like the Furina event PR! Approved!"): her select line, eight
+  Ancient exchanges, eight events in three threads (the stage, the prophecy,
+  her friends; `Story/FurinaStory.cs`), the Stage Fright story curse, combat
+  lines (her signature is Let the People Rejoice) and her Kokomi and Yae
+  pairs. Unseen in game until a deploy.
 - **Next:** paper 3 on act 1 and 2 HP loss and the Repay cards that read
   "Repays 0", on a fresh `furina-next`; the co-op check owed at a finish
   line.

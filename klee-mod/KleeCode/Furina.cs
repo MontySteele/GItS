@@ -21,8 +21,9 @@ public sealed class Furina : CustomCharacterModel, IFurinaCharacter
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Furina"),
-        ("description",
-            "The Regina of All Waters, Kindreds, Peoples and Laws."),
+        // The intro (review/active/furina-story-2026-10-15.md sec.3), from
+        // her story table.
+        ("description", Story.FurinaStory.Table.Intro),
         ("titleObject", "Furina"),
         ("pronounSubject", "she"),
         ("pronounObject", "her"),

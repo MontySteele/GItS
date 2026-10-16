@@ -14,7 +14,7 @@ namespace KleeMod.Story;
 /// and every option's effect is a value in a <see cref="CharacterStory"/>;
 /// the machinery (<see cref="StoryAncients"/>, <see cref="StoryEventModel"/>,
 /// <see cref="StoryLines"/>, <see cref="StoryLoc"/>) reads the table and names
-/// no character. Kokomi and Furina get their lines (Varka has his, VarkaStory.cs) by adding a table
+/// no character. Kokomi and Yae get their lines (Varka and Furina have theirs, VarkaStory.cs and FurinaStory.cs) by adding a table
 /// to <see cref="StoryRegistry.All"/> and, for an event, a one-line
 /// <see cref="StoryEventModel"/> subclass (the game's ModelDb needs one type
 /// per event).
