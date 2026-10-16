@@ -41,9 +41,9 @@ public static class StoryRules
     ///
     /// THE FIRST EVENT ROOM OF THE ACT. The first event a story character's
     /// run pulls in the act is her event, and at most one of hers fires an
-    /// act (<see cref="Route"/>). With two story characters at one table the
-    /// first player's event comes first, and the next player's at the act's
-    /// next event room.
+    /// act (<see cref="Route"/>). The solo rule; a co-op table goes through
+    /// <see cref="RoomEventFor"/>, where every player's event shares the
+    /// act's story room.
     /// </summary>
     /// <param name="seats">Each player's character and that player's saved
     /// story (<see cref="Records"/>), in seat order.</param>
@@ -61,6 +61,50 @@ public static class StoryRules
             if (e != null) return e;
         }
         return null;
+    }
+
+    /// <summary>
+    /// THE MODEL AN EVENT ROOM BECOMES, or null for the drawn event.
+    ///
+    /// SOLO: her own event type (<see cref="EventFor"/>), unchanged.
+    ///
+    /// CO-OP (ruled 2026-10-16, the chains paper's "Co-op"): the act's story
+    /// room is a story room for every player at once. Where any seat's story
+    /// would claim this room (<see cref="CoopRoom"/>), the room becomes
+    /// <see cref="StoryCoopRoomEvent"/>, whose copy for each player shows
+    /// that player's own event or the placeholder.
+    /// </summary>
+    public static Type? RoomEventFor(
+        IReadOnlyList<(Type Character, IReadOnlyList<StoryRecord> Records)> seats,
+        int actIndex, ulong seed)
+    {
+        if (seats.Count <= 1) return EventFor(seats, actIndex, seed)?.EventType;
+        return CoopRoom(seats, actIndex, seed) == null ? null : typeof(StoryCoopRoomEvent);
+    }
+
+    /// <summary>
+    /// THE CO-OP STORY ROOM, seat by seat, or null when no seat's story has
+    /// an event this act (the room stays the drawn event). Each seat gets its
+    /// own routed event (<see cref="CoopEventFor"/>), or null: the
+    /// placeholder, for a character with no story table, a story with no
+    /// event this act, or a story that already fired this act.
+    /// </summary>
+    public static IReadOnlyList<StoryEvent?>? CoopRoom(
+        IReadOnlyList<(Type Character, IReadOnlyList<StoryRecord> Records)> seats,
+        int actIndex, ulong seed)
+    {
+        var room = seats.Select(s => CoopEventFor(s.Character, s.Records, actIndex, seed)).ToList();
+        return room.Any(e => e != null) ? room : null;
+    }
+
+    /// <summary>One player's page in the co-op story room: her own routed
+    /// event, by the solo rules (<see cref="Route"/>) on her own saved story,
+    /// or null for the placeholder.</summary>
+    public static StoryEvent? CoopEventFor(
+        Type? character, IReadOnlyList<StoryRecord> records, int actIndex, ulong seed)
+    {
+        var story = StoryRegistry.For(character);
+        return story == null ? null : Route(story, actIndex, records, seed);
     }
 
     /// <summary>
@@ -113,6 +157,11 @@ public static class StoryRules
     /// visited events (each story event belongs to one act) and the player's
     /// event choices in the run history, whose titles are the options' loc
     /// keys (<c>ENTRY.pages.INITIAL.options.KEY.title</c>).
+    ///
+    /// A CHOICE IS ALSO A VISIT. In a co-op story room
+    /// (<see cref="StoryCoopRoomEvent"/>) the run visits the room's model,
+    /// not a player's event; her choice under that event's keys, in HER run
+    /// history, is what says it fired, and fired for her alone.
     /// </summary>
     public static List<StoryRecord> Records(
         CharacterStory story, Func<Type, bool> visited, IEnumerable<string?> choiceKeys,
@@ -122,7 +171,6 @@ public static class StoryRules
         var records = new List<StoryRecord>();
         foreach (var e in story.Events)
         {
-            if (!visited(e.EventType)) continue;
             var prefix = entryOf(e.EventType) + ".pages.INITIAL.options.";
             string? option = null;
             foreach (var k in keys)
@@ -132,6 +180,7 @@ public static class StoryRules
                     option = k[prefix.Length..^".title".Length];
                 }
             }
+            if (option == null && !visited(e.EventType)) continue;
             records.Add(new StoryRecord(e.ActIndex, e.EventType, option));
         }
         return records;
@@ -172,7 +221,9 @@ public static class StoryRules
     }
 
     /// <summary>Whether this player may take the event's options: it is
-    /// HER event. Everyone else at the table gets the page and Proceed.</summary>
+    /// HER event. Everyone else at the table gets the page and Proceed (a
+    /// co-op room saved before the co-op story rooms; since then a co-op
+    /// table draws <see cref="StoryCoopRoomEvent"/>, where everyone plays).</summary>
     public static bool IsOwnersEvent(Type? ownerCharacter, Type eventType) =>
         StoryRegistry.For(ownerCharacter)?.Events.Any(e => e.EventType == eventType) ?? false;
 
