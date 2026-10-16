@@ -307,19 +307,20 @@ APPROVED_FAMILY_EXCEPTIONS = {
         "`Character Details` Rare for Kokomi. Details 1 only -- the rest of "
         "the family stays banned.",
     # Art redo, Varka and Furina (2026-10-16,
-    # review/active/art-redo-varka-furina-2026-10-16.md): [USER] picked these
-    # three from a contact sheet of the actual crops. Each crop clears the
+    # review/active/art-redo-varka-furina-2026-10-16.md): Claude picked these
+    # three from a contact sheet of the actual crops; they stand once [USER]
+    # rules that paper's pick 1. Each crop clears the
     # family's disqualifier: the banners' text sits on the far left, outside
     # the right-hand crop, and the concept-art page's wordmark and border sit
     # outside the zoomed seahorse.
     "splashscreen chanson of many waters tempestuous destiny":
-        "art redo 2026-10-16: [USER] picked it for Tidal Flourish from the "
+        "art redo 2026-10-16: picked for Tidal Flourish from the "
         "crop (`x0.76,y0.45@1.35`), which cuts the banner text.",
     "splashscreen romaritime meluserenity chanson of many waters":
-        "art redo 2026-10-16: [USER] picked it for Bubble Aria from the crop "
+        "art redo 2026-10-16: picked for Bubble Aria from the crop "
         "(`x0.84,y0.5@1.3`), which cuts the banner text.",
     "ride the waves to a rendezvous in fontaine bubbler seahorse concept art":
-        "art redo 2026-10-16: [USER] picked it for Surintendante Chevalmarin "
+        "art redo 2026-10-16: picked for Surintendante Chevalmarin "
         "from the crop (`x0.36,y0.62@1.8`), which shows only the seahorse "
         "studies, no wordmark or page border.",
 }

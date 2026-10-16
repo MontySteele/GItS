@@ -5,7 +5,7 @@ Varka or Furina looking at the actual art ... can we do a run over Varka and
 Furina and assess the general quality of all the current picks an whether we
 want any redos?" Every current card picture for both kits was looked at. The
 rows below had a real defect (logo or text, a duplicate of another card, a tiny
-upscaled icon, a screenshot), and [USER] chose a replacement for each from a
+upscaled icon, a screenshot), and Claude chose a replacement for each from a
 sheet of the actual crops. This PR changes `art/plan.tsv` (the rank-1 row of
 each card, which is the picture that ships) and the matching
 `art/SOURCES.tsv` lines. All 31 crops come from the Genshin Impact fandom wiki
