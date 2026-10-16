@@ -121,6 +121,10 @@ public class MeditationsOfAYako : CustomRelicModel
         return true;
     }
 
+    /// <summary>The outline atlas sprite (see SalonSolitaire): without an
+    /// override it derives from the mod id, which the atlas lacks.</summary>
+    protected override string IconBaseName => "ring_of_the_snake";
+
     /// <summary>Placeholder art: Kokomi's Pearl of Wisdom icon, borrowed
     /// until her art pass plans her own.</summary>
     public override string PackedIconPath =>

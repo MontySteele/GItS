@@ -3630,7 +3630,11 @@
   "full_px": 262.6,
   "hat_to_boot_px": 258.1,
   "width_px": 268.5,
-  "neck_px": 230.0
+  "neck_px": 230.0,
+  "chest_px": [
+   9.2,
+   -197.6
+  ]
  },
  "target_body_px": 283.4,
  "shadow": {

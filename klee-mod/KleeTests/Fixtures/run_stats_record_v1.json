@@ -1,0 +1,135 @@
+{
+  "schema_version": 1,
+  "run_uuid": "0b5e3c3e-6f1a-4d2b-9c4d-3a2f1e0d9c8b",
+  "install_id": "7d1f2e3c-4b5a-4968-8776-a5b4c3d2e1f0",
+  "mod_version": "0.3.0",
+  "variant": "beta",
+  "build_id": "v0.111.0",
+  "character": "CHARACTER.KLEEMOD-KLEE",
+  "ascension": 3,
+  "game_mode": "standard",
+  "coop": true,
+  "partners": [
+    "CHARACTER.IRONCLAD"
+  ],
+  "victory": false,
+  "floor_reached": 7,
+  "act_reached": 2,
+  "acts": [
+    "ACT.OVERGROWTH",
+    "ACT.HIVE"
+  ],
+  "killed_by_encounter": "ENCOUNTER.THE_KIN_BOSS",
+  "killed_by_event": null,
+  "run_time_s": 2345,
+  "deck": [
+    {
+      "id": "CARD.STRIKE_KLEE",
+      "upgrades": 0
+    },
+    {
+      "id": "CARD.DEFEND_KLEE",
+      "upgrades": 0
+    },
+    {
+      "id": "CARD.KLEEMOD-KABOOM",
+      "upgrades": 1
+    }
+  ],
+  "relics": [
+    "RELIC.KLEEMOD-DODOCO",
+    "RELIC.ARCANE_SCROLL"
+  ],
+  "floors": [
+    {
+      "floor": 1,
+      "act": 1,
+      "type": "ancient",
+      "room": "EVENT.NEOW",
+      "hp": 70,
+      "max_hp": 70,
+      "damage_taken": 0
+    },
+    {
+      "floor": 2,
+      "act": 1,
+      "type": "monster",
+      "room": "ENCOUNTER.TOADPOLES_WEAK",
+      "hp": 61,
+      "max_hp": 70,
+      "damage_taken": 9,
+      "card_choice": {
+        "offered": [
+          "CARD.KLEEMOD-KABOOM",
+          "CARD.KLEEMOD-PROTO_SPARK_SPLASH",
+          "CARD.KLEEMOD-POP"
+        ],
+        "picked": [
+          "CARD.KLEEMOD-KABOOM"
+        ]
+      }
+    },
+    {
+      "floor": 3,
+      "act": 1,
+      "type": "unknown",
+      "room": "EVENT.BRAIN_LEECH",
+      "hp": 58,
+      "max_hp": 70,
+      "damage_taken": 3
+    },
+    {
+      "floor": 4,
+      "act": 1,
+      "type": "rest_site",
+      "room": null,
+      "hp": 70,
+      "max_hp": 72,
+      "damage_taken": 0
+    },
+    {
+      "floor": 5,
+      "act": 2,
+      "type": "elite",
+      "room": "ENCOUNTER.BYRDONIS_ELITE",
+      "hp": 40,
+      "max_hp": 72,
+      "damage_taken": 30,
+      "card_choice": {
+        "offered": [
+          "CARD.KLEEMOD-POP",
+          "CARD.KLEEMOD-KABOOM"
+        ],
+        "picked": []
+      }
+    },
+    {
+      "floor": 6,
+      "act": 2,
+      "type": "shop",
+      "room": null,
+      "hp": 40,
+      "max_hp": 72,
+      "damage_taken": 0
+    },
+    {
+      "floor": 7,
+      "act": 2,
+      "type": "boss",
+      "room": "ENCOUNTER.THE_KIN_BOSS",
+      "hp": 0,
+      "max_hp": 72,
+      "damage_taken": 40
+    }
+  ],
+  "ancients": [
+    {
+      "floor": 1,
+      "offered": [
+        "ARCANE_SCROLL",
+        "LEAD_PAPERWEIGHT"
+      ],
+      "picked": "ARCANE_SCROLL"
+    }
+  ]
+}

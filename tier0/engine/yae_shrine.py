@@ -74,11 +74,24 @@ THE RULES AS MODELLED (review r3, ruled 2026-10-14,
     (plant at the start of her turn, after the draw), Sakura Channeling
     ("You can have 2 more Sakura"), Editor-in-Chief (after an Annotated
     card's play, the highest-Level Sakura acts), Serial Novel (above).
-  * SAKURA ANNOTATIONS: a Sakura may carry one of Red Ink (its action is 3
+  * SAKURA ANNOTATIONS: a Sakura may carry Red Ink (its action is 3
     bigger: damage, each enemy's damage, or Block), Fox Fire (4 Electro to a
-    random enemy whenever it acts) or Deadline Extension (its timer never
+    random enemy whenever it acts) and Deadline Extension (its timer never
     ticks), written by "Edit your newest / oldest / every Sakura"
-    (`edit_sakura`). A new one replaces the old; it lasts the Sakura's life.
+    (`edit_sakura`). THE POOL TO 78, pick 2 (a) (ruled 2026-10-15,
+    `review/active/yae-pool-to-78-2026-10-15.md`): distinct Annotations
+    COEXIST on a Sakura; a second copy of one it has does nothing; an Edit
+    that changes nothing is not an Edit (no Bestseller, Print Run or
+    Serialization pay); they survive a Tenko refresh and a same-kind refresh
+    and go when the Sakura withers or is replaced.
+  * THE POOL TO 78 (same paper, sec.2): a strike AIMED at a chosen enemy
+    (Sacred Spark, Narukami Judgment, Saiguu's Lesson, Fox's Verdict, Kitsune
+    Pounce) is one hit on it, a Foxfire Sakura's included; only a Sakura's
+    own act hits ALL. Scattered Blossoms draws per Sakura that withers;
+    Saiguu's Lesson strikes an enemy she makes Weak; The Shrine's Sacred
+    Shade gives Block per Sakura as her turn ends; Editorial Priority frees
+    the first Annotated card each turn; Stellar Conduct strikes again on a
+    reaction; Eternity stops the timers.
   * RED INK ON A PLANTING CARD: Red Ink on a card that plants passes to
     every Sakura that play plants (`inherits`), once (+3) however many Red
     Ink layers the card has; a full-shrine plant that only levels plants
@@ -157,6 +170,13 @@ YAKAN_OFFERING = "ym_yakan_offering"
 CHANNELING = "ym_sakura_channeling"
 EDITOR_IN_CHIEF = "ym_editor_in_chief"
 SERIAL_NOVEL = "ym_serial_novel"
+# The pool to 78 (2026-10-15).
+ENLIGHTENED_BLESSING = "ym_enlightened_blessing"
+SAIGUUS_LESSON = "ym_saiguus_lesson"
+SACRED_SHADE = "ym_sacred_shade"
+EDITORIAL_PRIORITY = "ym_editorial_priority"
+STELLAR_CONDUCT = "ym_stellar_conduct"
+ETERNITY = "ym_eternity"
 #: Auras an Electro strike reacts with (Edict of Cleansing's read).
 REACTING_AURAS = ("pyro", "hydro", "cryo")
 
@@ -207,12 +227,28 @@ KIND_FIELDS = {
     "fallen_petals": (),
     "second_printing": (),
     "authors_copy": (),
+    # The pool to 78 (ruled 2026-10-15).
+    "strike_target": (),
+    "strike_all_at": (),
+    "kitsune_act": (),
+    "level_kitsune": ("amount",),
+    "retain_hand": (),
+    "replant": ("amount",),
+    "plant_missing": (),
+    "plant_until_full": (),
+    "daisesshou": ("per",),
+    "energy_per_sakura": (),
+    "afterword": (),
+    "verdict": (),
 }
 KINDS = frozenset(KIND_FIELDS)
 KIND_TARGETS = {
     "lure": "enemy", "damage_per_sakura": "enemy",
     "damage_per_edit": "enemy", "annotated_strike": "enemy",
     "strike_if_weak": "enemy",
+    # The pool to 78.
+    "strike_target": "enemy", "strike_all_at": "enemy",
+    "daisesshou": "all_enemies",
 }
 #: Kinds that take an `annotation:` name.
 ANNOTATION_KINDS = frozenset({"edit", "edit_all", "edit_sakura"})
@@ -227,7 +263,7 @@ UPGRADED_KINDS = frozenset({"fallen_petals", "second_printing",
                             "edit_sakura"})
 OP_FIELDS = frozenset({"op", "kind", "amount", "base", "per", "target",
                        "annotation", "as", "which", "upgraded", "seal",
-                       "keeps", "hand_if_upgraded"})
+                       "hand_if_upgraded", "lasts"})
 
 
 @dataclass
@@ -235,13 +271,23 @@ class Sakura:
     level: int
     turns_left: int
     seq: int                      # planting order, the ledger's clock
-    annotation: Optional[str] = None   # Red Ink, Fox Fire or Deadline
     kind: str = THUNDER           # review r3: Thunder, Foxfire or Kitsune
     planted_level: Optional[int] = None   # the Level it was planted at
-    #: Yae review r4, item 4: a Deadline Extension Edit that "keeps its Red
-    #: Ink" leaves the +3 on a Sakura whose one Annotation slot is now
-    #: Deadline Extension.
-    red_ink_kept: bool = False
+    #: The pool to 78, pick 2 (a): the distinct Annotations it carries, in
+    #: the order written (Red Ink, Fox Fire, Deadline Extension coexist).
+    #: C# twin: `YaeSakura.Annotations`.
+    annotations: list = field(default_factory=list)
+
+    def has(self, name: str) -> bool:
+        return name in self.annotations
+
+    def add(self, name: Optional[str]) -> bool:
+        """Write one Annotation; False when it changes nothing (one it
+        already carries, or one with no Sakura reading)."""
+        if name not in SAKURA_ANNOTATIONS or name in self.annotations:
+            return False
+        self.annotations.append(name)
+        return True
 
 
 @dataclass
@@ -270,6 +316,10 @@ class YaeLedger:
     #: (state, candidates) -> card | None, for Second Printing and Author's
     #: Copy.
     recall_choice: object = None
+    #: The pool to 78: Editorial Priority's "first Annotated card this
+    #: turn" has been played; Hold the Presses' "Retain your hand this turn".
+    priority_used: bool = False
+    retain_hand: bool = False
 
 
 # --------------------------------------------------------------------------
@@ -351,7 +401,7 @@ def _plant_level(player) -> int:
 def plant(state, n: int = 1, reason: str = "plant",
           level: Optional[int] = None,
           annotation: Optional[str] = None,
-          kind: str = THUNDER) -> None:
+          kind: str = THUNDER, lasts: int = 0) -> None:
     """Plant `n` Sakura of `kind`, one at a time, each at the card's Level
     (`level`, Grafted Branch; else `PLANT_LEVEL`) plus Fox's Mooncall's
     bonus. FULL SHRINE (review r3, amended): the OLDEST acts first; if it is
@@ -374,10 +424,9 @@ def plant(state, n: int = 1, reason: str = "plant",
                     oldest.turns_left = max(oldest.turns_left, SAKURA_TURNS)
                     oldest.level += 1
                     # Yae review r4, item 2: the planting card's Red Ink
-                    # goes to the refreshed Sakura, as to a new one.
-                    if annotation in SAKURA_ANNOTATIONS:
-                        oldest.annotation = annotation
-                        oldest.red_ink_kept = False
+                    # goes to the refreshed Sakura, as to a new one (beside
+                    # what it carries, the pool to 78, pick 2 (a)).
+                    oldest.add(annotation)
                     state.emit("yae_level", reason=reason,
                                levels=[s.level for s in led.sakura])
                     continue
@@ -387,17 +436,17 @@ def plant(state, n: int = 1, reason: str = "plant",
                     led.sakura.remove(oldest)
                 state.emit("yae_wither", count=1, standing=len(led.sakura),
                            reason="replaced")
+                _withered(state, 1)
             else:
                 led.sakura.pop(0)                   # (b): the oldest goes
         led.seq += 1
         start = _plant_level(state.player)
         if level is not None:
             start = max(start, level + start - PLANT_LEVEL)   # Mooncall too
-        led.sakura.append(Sakura(
-            level=start, turns_left=SAKURA_TURNS, seq=led.seq,
-            annotation=(annotation if annotation in SAKURA_ANNOTATIONS
-                        else None),
-            kind=kind, planted_level=start))
+        new = Sakura(level=start, turns_left=SAKURA_TURNS + max(0, lasts),
+                     seq=led.seq, kind=kind, planted_level=start)
+        new.add(annotation)
+        led.sakura.append(new)
         state.emit("yae_plant", reason=reason, count=len(led.sakura),
                    kind=kind, levels=[s.level for s in led.sakura])
 
@@ -412,7 +461,7 @@ def act_size(state, s: Sakura) -> int:
     else:
         size = (COUNT_TABLE[min(SAKURA_CAP, len(led.sakura))]
                 + led.shrine_bonus + kind_base(s.kind) - SAKURA_BASE)
-    if s.annotation == RED_INK or s.red_ink_kept:
+    if s.has(RED_INK):
         size += RED_INK_AMOUNT
     return size
 
@@ -479,8 +528,13 @@ def _aim(state, aim=None):
     return state.rng.choice(living) if living else None
 
 
-def _hit(state, target, size: int, reason: str, kind: str) -> None:
-    """One damage action's hit: Electro, unpowered, Edict on top."""
+def _hit(state, target, size: int, reason: str, kind: str,
+         again: bool = False) -> None:
+    """One damage action's hit: Electro, unpowered, Edict on top. STELLAR
+    CONDUCT (the pool to 78): a hit that triggers an Elemental Reaction
+    strikes again, once per stack; a strike again never strikes again. The
+    reaction is read off `reactions_this_turn` across the hit (C#
+    `ReactionEffects.TotalResolved`)."""
     from tier0.engine import effects                # late: cycle
     led = ledger(state.player)
     dmg = size + (_power(state.player, EDICT) if edict_applies(target) else 0)
@@ -489,8 +543,16 @@ def _hit(state, target, size: int, reason: str, kind: str) -> None:
     led.strike_damage += dmg
     state.emit("yae_sakura_hit", reason=reason, kind=kind, amount=dmg,
                target=target.name)
+    before = state.reactions_this_turn
     effects.deal_damage_to_enemy(state, target, dmg, element=ELEMENT,
                                  source="card", powered=False)
+    if again or state.reactions_this_turn <= before:
+        return
+    for _ in range(_power(state.player, STELLAR_CONDUCT)):
+        if not target.alive:
+            return
+        state.emit("yae_stellar_conduct", target=target.name)
+        _hit(state, target, size, "stellar_conduct", kind, again=True)
 
 
 def fox_fire(state, source: str) -> None:
@@ -509,7 +571,9 @@ def fox_fire(state, source: str) -> None:
 def act(state, s: Sakura, reason: str, aim=None) -> None:
     """ONE SAKURA ACTS as its kind (review r3): a Sakura strikes one enemy
     (`aim`, else the Lure's, else random), a Foxfire Sakura hits ALL, a
-    Kitsune Sakura gives her Block; then its own Fox Fire, once."""
+    Kitsune Sakura gives her Block; then its own Fox Fire, once. The pool to
+    78: a strike AIMED at a chosen enemy (`aim`) is one hit on it, a Foxfire
+    Sakura's included."""
     led = ledger(state.player)
     if not state.living_enemies:
         return
@@ -522,6 +586,10 @@ def act(state, s: Sakura, reason: str, aim=None) -> None:
                    target=None if target is None else target.name)
         if target is not None:
             _hit(state, target, size, reason, s.kind)
+    elif s.kind == FOXFIRE and aim is not None and aim.alive:
+        state.emit("yae_sakura_strike", reason=reason, level=s.level,
+                   amount=size, kind=s.kind, target=aim.name)
+        _hit(state, aim, size, reason, s.kind)
     elif s.kind == FOXFIRE:
         state.emit("yae_sakura_strike", reason=reason, level=s.level,
                    amount=size, kind=s.kind, target="ALL")
@@ -531,7 +599,7 @@ def act(state, s: Sakura, reason: str, aim=None) -> None:
         state.emit("yae_sakura_strike", reason=reason, level=s.level,
                    amount=0, kind=s.kind, block=size, target=None)
         _block(state, size, "kitsune")
-    if s.annotation == FOX_FIRE:
+    if s.has(FOX_FIRE):
         fox_fire(state, "sakura")
 
 
@@ -548,12 +616,13 @@ def act_all(state, reason: str) -> None:
 
 
 def edit_sakura(state, which: str, n: int, annotation: str,
-                keeps: Optional[str] = None, quiet: bool = False) -> int:
+                quiet: bool = False) -> int:
     """"Edit your newest / oldest Sakura" (`n` from that end), "Edit every
-    Sakura" (`which` every): the Annotation replaces any the Sakura
-    carried. Returns how many it Edited; `quiet` (Inked Branches+, whose
-    hand half speaks for both, Yae review r5 item 2) says nothing when
-    none stand."""
+    Sakura" (`which` every). The pool to 78, pick 2 (a): the Annotation
+    joins what the Sakura carries; on one that already has it, it changes
+    nothing, and an Edit that changes nothing is not an Edit. Returns how
+    many it Edited; `quiet` (Inked Branches+, whose hand half speaks for
+    both, Yae review r5 item 2) says nothing when none stand."""
     if annotation not in SAKURA_ANNOTATIONS:
         raise ValueError(f"no Sakura reading for {annotation!r}")
     led = ledger(state.player)
@@ -562,14 +631,13 @@ def edit_sakura(state, which: str, n: int, annotation: str,
         n = len(ordered)
     if not ordered and not quiet:
         state.emit("yae_edit_nothing", what="sakura")
+    edited = 0
     for s in ordered[:n]:
-        had_red = s.annotation == RED_INK or s.red_ink_kept
-        s.annotation = annotation
-        s.red_ink_kept = bool(keeps == RED_INK and had_red
-                              and annotation != RED_INK)
-        state.emit("yae_sakura_annotate", seq=s.seq, annotation=annotation)
-    _note_edits(state, len(ordered[:n]))
-    return len(ordered[:n])
+        if s.add(annotation):
+            edited += 1
+            state.emit("yae_sakura_annotate", seq=s.seq, annotation=annotation)
+    _note_edits(state, edited)
+    return edited
 
 
 def highest(led, kinds=SAKURA_KINDS):
@@ -601,11 +669,13 @@ def extend(state, n: int) -> None:
         s.turns_left += n
 
 
-def level_up(state, n: int) -> None:
-    """"Each Sakura gains a Level" (n Levels), no cap."""
+def level_up(state, n: int, kind: Optional[str] = None) -> None:
+    """"Each Sakura gains a Level" (n Levels), no cap; with `kind`, that
+    kind only (Kitsune Veil)."""
     led = ledger(state.player)
     for s in led.sakura:
-        s.level += n
+        if kind is None or s.kind == kind:
+            s.level += n
 
 
 def grove(state, n: int) -> None:
@@ -630,7 +700,112 @@ def wither_oldest(state, reason: str = "fallen_petals") -> bool:
         led.sakura.remove(oldest)
     state.emit("yae_wither", count=1, standing=len(led.sakura),
                reason=reason)
+    _withered(state, 1)
     return True
+
+
+def _withered(state, n: int) -> None:
+    """SCATTERED BLOSSOMS (the pool to 78): "Whenever a Sakura withers,
+    draw 1 card", per stack per Sakura. C# twin: `YaeShrine.Withered`."""
+    per = _power(state.player, ENLIGHTENED_BLESSING)
+    if per > 0 and n > 0:
+        state.emit("yae_enlightened_blessing", cards=per * n)
+        state.draw(per * n)
+
+
+def wither_all(state) -> int:
+    """Forbidden Art: Daisesshou: every Sakura withers, each acting once
+    (its Last Bloom), oldest first. Returns how many."""
+    led = ledger(state.player)
+    if led is None:
+        return 0
+    n = 0
+    for s in list(led.sakura):
+        act(state, s, "bloom")
+        if s in led.sakura:
+            led.sakura.remove(s)
+            n += 1
+    if n:
+        state.emit("yae_wither", count=n, standing=len(led.sakura),
+                   reason="daisesshou")
+    _withered(state, n)
+    return n
+
+
+def replant(state, higher: int, annotation: Optional[str] = None) -> None:
+    """Replanting: the oldest withers (its Last Bloom); one of its kind is
+    planted at its Level plus `higher` (Fox's Mooncall still adds)."""
+    led = ledger(state.player)
+    if led is None or not led.sakura:
+        return
+    oldest = led.sakura[0]
+    kind, lvl = oldest.kind, oldest.level
+    if wither_oldest(state, "replanting"):
+        plant(state, 1, "replanting", level=lvl + higher,
+              annotation=annotation, kind=kind)
+
+
+def missing_kinds(led) -> list:
+    """Genre Shift: the kinds with none standing, in kind order."""
+    return [k for k in SAKURA_KINDS if all(s.kind != k for s in led.sakura)]
+
+
+def damage_sakura(led) -> list:
+    """The striking Sakura (a Sakura or a Foxfire Sakura), oldest first."""
+    return [s for s in led.sakura if s.kind in DAMAGE_KINDS]
+
+
+def strike_target(state, target, reason: str = "strike") -> None:
+    """"A Sakura strikes it": the highest-Level striking Sakura, one hit."""
+    led = ledger(state.player)
+    if led is None or target is None or not target.alive:
+        return
+    s = highest(led, DAMAGE_KINDS)
+    if s is not None:
+        act(state, s, reason, aim=target)
+
+
+def shrine_full(state) -> bool:
+    """Torii Ward's "If your shrine is full"."""
+    led = ledger(state.player)
+    return led is not None and len(led.sakura) >= sakura_cap(state.player)
+
+
+def weak_enemies(state) -> int:
+    """Disarming Smile's count: living enemies wearing Weak."""
+    return sum(1 for e in state.living_enemies
+               if int(e.powers.get("weak", 0)) > 0)
+
+
+def on_power_applied(state, target, name: str, stacks: int,
+                     applier=None) -> None:
+    """SAIGUU'S LESSON: Weak she lands on an enemy makes a Sakura strike it,
+    once per stack of the power. `powers.apply_power`'s hook. C# twin:
+    `SaiguusLessonPower.AfterPowerAmountChanged`."""
+    if name != "weak" or stacks <= 0 or target is state.player:
+        return
+    if not live(state.player) or not getattr(target, "alive", False):
+        return
+    if applier is not None and applier is not state.player:
+        return
+    if applier is None and not state.in_player_turn:
+        return
+    for _ in range(_power(state.player, SAIGUUS_LESSON)):
+        strike_target(state, target, "saiguus_lesson")
+
+
+def editorial_free(state, card) -> bool:
+    """Editorial Priority: an Annotated card costs 0 while this turn's first
+    has not been played. `combat.card_cost`'s hook."""
+    led = ledger(state.player)
+    return (led is not None and _power(state.player, EDITORIAL_PRIORITY) > 0
+            and not led.priority_used and is_annotated(card))
+
+
+def retains_hand(state) -> bool:
+    """Hold the Presses: "Retain your hand this turn"."""
+    led = ledger(state.player)
+    return led is not None and led.retain_hand
 
 
 def turn_start(state) -> None:
@@ -641,6 +816,8 @@ def turn_start(state) -> None:
     if led is None:
         return
     led.lure = None
+    led.priority_used = False
+    led.retain_hand = False
     for _ in range(_power(state.player, SERIAL_NOVEL)):
         cands = [c for c in state.player.discard_pile if is_annotated(c)]
         if not cands or len(state.player.hand) >= _max_hand():
@@ -663,15 +840,22 @@ def turn_end(state) -> None:
     led = ledger(state.player)
     if led is None:
         return
+    # The Shrine's Sacred Shade (the pool to 78): Block per Sakura standing
+    # as the turn ends, before they act.
+    shade = _power(state.player, SACRED_SHADE)
+    if shade and led.sakura:
+        _block(state, shade * len(led.sakura), "sacred_shade")
     act_all(state, "turn_end")
+    eternal = _power(state.player, ETERNITY) > 0    # Eternity: no timer ticks
     for s in led.sakura:
-        if s.annotation != DEADLINE:          # Deadline Extension: no wither
+        if not eternal and not s.has(DEADLINE):  # Deadline: no wither
             s.turns_left -= 1
-    withered = [s for s in led.sakura if s.turns_left <= 0]
+    withered = [] if eternal else [s for s in led.sakura if s.turns_left <= 0]
     for s in withered:
         act(state, s, "bloom")                # still standing as it blooms
         led.sakura.remove(s)
         state.emit("yae_wither", count=1, standing=len(led.sakura))
+    _withered(state, len(withered))
     _record_drafts(state)
 
 
@@ -808,7 +992,8 @@ def publish_to(card, names) -> None:
 
 #: The `yae` kinds whose play plants a Sakura (C# `ISakuraPlanterCard`,
 #: `gen_klee_cards.YAE_PLANT_KINDS`).
-PLANT_KINDS = frozenset({"plant", "plant_level"})
+PLANT_KINDS = frozenset({"plant", "plant_level", "replant", "plant_missing",
+                         "plant_until_full"})
 
 
 def _walk(effects):
@@ -1082,6 +1267,8 @@ def after_play(state, card) -> None:
     led = ledger(state.player)
     if led is None or not is_annotated(card):
         return
+    # Editorial Priority: the first Annotated card played this turn spent it.
+    led.priority_used = True
     if not led.sakura:
         return
     for _ in range(_power(state.player, EDITOR_IN_CHIEF)):
@@ -1227,9 +1414,12 @@ def validate_op(card_id: str, fx: dict) -> None:
         raise ValueError(f"card {card_id!r}: `which:` is newest, oldest or "
                          "every, "
                          f"got {fx['which']!r}")
-    if "keeps" in fx and (kind != "edit_sakura" or fx["keeps"] != RED_INK):
-        raise ValueError(f"card {card_id!r}: `keeps:` is red_ink, on an "
-                         "edit_sakura")
+    if "lasts" in fx and (kind != "plant_level"
+                          or not isinstance(fx["lasts"], int)
+                          or isinstance(fx["lasts"], bool)
+                          or fx["lasts"] <= 0):
+        raise ValueError(f"card {card_id!r}: `lasts:` is a positive int, on "
+                         "a plant_level")
     if "hand_if_upgraded" in fx and (kind != "edit_sakura"
                                      or fx["hand_if_upgraded"] is not True):
         raise ValueError(f"card {card_id!r}: `hand_if_upgraded:` is true, "
@@ -1239,10 +1429,12 @@ def validate_op(card_id: str, fx: dict) -> None:
                          "Sakura reading")
 
 
-def _card_hit(state, card, amount: int) -> None:
-    """One powered Electro hit of the card on the play's aim."""
+def _card_hit(state, card, amount: int, target=None) -> None:
+    """One powered Electro hit of the card on the play's aim, or on
+    `target` (Daisesshou's ALL, one hit each)."""
     from tier0.engine import effects                # late: cycle
-    targets = effects._pick_targets(state, "enemy")
+    targets = ([target] if target is not None
+               else effects._pick_targets(state, "enemy"))
     if not targets or amount <= 0:
         return
     if card.type == "attack":
@@ -1303,13 +1495,14 @@ def op_yae(state, fx: dict, card) -> None:
         # once when neither half finds a card. C# twin: `YaeCards.EditSakura`.
         hand = bool(fx.get("hand_if_upgraded") and fx.get("upgraded"))
         edited = edit_sakura(state, fx["which"], fx["amount"],
-                             fx["annotation"], fx.get("keeps"), quiet=hand)
+                             fx["annotation"], quiet=hand)
         if hand:
             # Inked Branches+: "[and a card in your hand]".
             edit(state, card, fx["annotation"], 1, say_nothing=edited == 0)
     elif kind == "plant_level":
         plant(state, 1, "card", level=fx["amount"],
-              annotation=inherited(card), kind=fx.get("as", THUNDER))
+              annotation=inherited(card), kind=fx.get("as", THUNDER),
+              lasts=int(fx.get("lasts", 0)))
     elif kind == "strike_if_weak":
         targets = effects._pick_targets(state, "enemy")
         target = targets[0] if targets else None
@@ -1328,6 +1521,63 @@ def op_yae(state, fx: dict, card) -> None:
         second_printing(state, card, bool(fx.get("upgraded")))
     elif kind == "authors_copy":
         authors_copy(state, card)
+    # --- the pool to 78 (ruled 2026-10-15) ---
+    elif kind == "strike_target":
+        targets = effects._pick_targets(state, "enemy")
+        strike_target(state, targets[0] if targets else None, "sacred_spark")
+    elif kind == "strike_all_at":
+        targets = effects._pick_targets(state, "enemy")
+        target = targets[0] if targets else None
+        for s in damage_sakura(led):
+            if target is None or not target.alive:
+                break
+            act(state, s, "judgment", aim=target)
+    elif kind == "verdict":
+        for s in damage_sakura(led):
+            weak = [e for e in state.living_enemies
+                    if int(e.powers.get("weak", 0)) > 0]
+            if not weak:
+                break
+            for e in weak:
+                if e.alive:
+                    act(state, s, "verdict", aim=e)
+    elif kind == "kitsune_act":
+        for s in [x for x in led.sakura if x.kind == KITSUNE]:
+            if not state.living_enemies:
+                break
+            act(state, s, "kitsunes_shelter")
+    elif kind == "level_kitsune":
+        level_up(state, fx["amount"], kind=KITSUNE)
+    elif kind == "retain_hand":
+        led.retain_hand = True
+    elif kind == "replant":
+        replant(state, fx["amount"], inherited(card))
+    elif kind == "plant_missing":
+        for k in missing_kinds(led):
+            plant(state, 1, "genre_shift", annotation=inherited(card), kind=k)
+    elif kind == "plant_until_full":
+        room = sakura_cap(state.player) - len(led.sakura)
+        if room > 0:
+            plant(state, room, "narukami_bloom", annotation=inherited(card))
+    elif kind == "daisesshou":
+        n = wither_all(state)
+        amount = fx["per"] * n
+        if amount > 0:
+            for e in list(state.living_enemies):
+                _card_hit(state, card, amount, target=e)
+    elif kind == "energy_per_sakura":
+        n = len(led.sakura)
+        if n:
+            state.player.energy += n
+            state.emit("energy", amount=n)
+    elif kind == "afterword":
+        p = state.player
+        for c in [c for c in p.discard_pile if is_annotated(c)]:
+            if len(p.hand) >= _max_hand():
+                break
+            p.discard_pile.remove(c)
+            p.hand.append(c)
+            state.emit("yae_afterword", card=c.id)
     else:
         _refuse(f"yae kind {kind!r}")
 

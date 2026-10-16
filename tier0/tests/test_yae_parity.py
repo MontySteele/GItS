@@ -133,14 +133,14 @@ def test_each_row_carries_its_numbers_and_upgrade_into_the_class(card):
                         in text), (card.id, var, delta)
 
 
-def test_the_roster_lists_the_sims_starter_and_the_forty_three():
+def test_the_roster_lists_the_sims_starter_and_the_seventy_eight():
     text = ROSTER_CS.read_text(encoding="utf-8")
     pool = re.search(r"Pool\(\) => new CardModel\[\]\s*\{(.*?)\n\s*\};",
                      text, re.S).group(1)
     listed = [gen.pascal(c.id) for c in _rows() if c.rarity != "basic"]
     named = re.findall(r"ModelDb\.Card<(\w+)>", pool)
     assert named == listed
-    assert len(named) == 43
+    assert len(named) == 78
     starter = re.search(r"StartingDeck\(\) => new CardModel\[\]\s*\{(.*?)\n\s*\};",
                         text, re.S).group(1)
     own = [n for n in re.findall(r"ModelDb\.Card<(\w+)>", starter)

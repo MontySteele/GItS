@@ -1,0 +1,136 @@
+[gd_scene load_steps=16 format=3]
+
+[ext_resource type="Texture2D" path="res://furina/model/frames/furina_gfx_chevreuse.png" id="1_chevreuse"]
+
+[sub_resource type="AtlasTexture" id="Atlas_chevreuse_0"]
+atlas = ExtResource("1_chevreuse")
+region = Rect2(0, 0, 120, 124)
+margin = Rect2(72, 89, 153, 152)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_chevreuse_1"]
+atlas = ExtResource("1_chevreuse")
+region = Rect2(120, 0, 123, 137)
+margin = Rect2(75, 93, 150, 139)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_chevreuse_2"]
+atlas = ExtResource("1_chevreuse")
+region = Rect2(243, 0, 153, 160)
+margin = Rect2(70, 57, 120, 116)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_chevreuse_3"]
+atlas = ExtResource("1_chevreuse")
+region = Rect2(396, 0, 188, 196)
+margin = Rect2(47, 57, 85, 80)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_chevreuse_4"]
+atlas = ExtResource("1_chevreuse")
+region = Rect2(0, 196, 180, 216)
+margin = Rect2(54, 50, 93, 60)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_chevreuse_5"]
+atlas = ExtResource("1_chevreuse")
+region = Rect2(180, 196, 191, 221)
+margin = Rect2(42, 45, 82, 55)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_chevreuse_6"]
+atlas = ExtResource("1_chevreuse")
+region = Rect2(371, 196, 213, 227)
+margin = Rect2(30, 30, 60, 49)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_chevreuse_7"]
+atlas = ExtResource("1_chevreuse")
+region = Rect2(0, 423, 235, 251)
+margin = Rect2(19, 14, 38, 25)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_chevreuse_8"]
+atlas = ExtResource("1_chevreuse")
+region = Rect2(235, 423, 256, 272)
+margin = Rect2(9, 0, 17, 4)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_chevreuse_9"]
+atlas = ExtResource("1_chevreuse")
+region = Rect2(0, 695, 273, 237)
+margin = Rect2(0, 39, 0, 39)
+filter_clip = true
+
+[sub_resource type="Shader" id="Shader_element"]
+code = "shader_type canvas_item;
+
+uniform vec4 element : source_color = vec4(0.560784, 1.0, 0.839216, 1.0);
+varying vec4 tint;
+
+void vertex() {
+	tint = COLOR;
+}
+
+void fragment() {
+	vec4 heat = texture(TEXTURE, UV);
+	COLOR = vec4(mix(element.rgb, vec3(1.0), smoothstep(0.72, 1.0, heat.r)), heat.a) * tint;
+}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tint"]
+shader = SubResource("Shader_element")
+shader_parameter/element = Color(1, 0.4353, 0.8157, 1)
+
+[sub_resource type="Animation" id="Animation_chevreuse"]
+resource_name = "chevreuse"
+length = 0.5
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Fx:self_modulate")
+tracks/0/interp = 0
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.5),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Fx:texture")
+tracks/1/interp = 0
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [SubResource("Atlas_chevreuse_0"), SubResource("Atlas_chevreuse_1"), SubResource("Atlas_chevreuse_2"), SubResource("Atlas_chevreuse_3"), SubResource("Atlas_chevreuse_4"), SubResource("Atlas_chevreuse_5"), SubResource("Atlas_chevreuse_6"), SubResource("Atlas_chevreuse_7"), SubResource("Atlas_chevreuse_8"), SubResource("Atlas_chevreuse_9")]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_chevreuse"]
+_data = {
+&"chevreuse": SubResource("Animation_chevreuse")
+}
+
+[node name="GuestFx" type="Node2D"]
+metadata/guest = "chevreuse"
+metadata/anchor = "center"
+metadata/length = 0.5
+
+[node name="Fx" type="Sprite2D" parent="."]
+unique_name_in_owner = true
+self_modulate = Color(1, 1, 1, 0)
+material = SubResource("ShaderMaterial_tint")
+texture = SubResource("Atlas_chevreuse_0")
+centered = false
+offset = Vector2(-137, -154)
+scale = Vector2(0.5, 0.5)
+
+[node name="FxPlayer" type="AnimationPlayer" parent="."]
+unique_name_in_owner = true
+libraries = {
+&"": SubResource("AnimationLibrary_chevreuse")
+}
+autoplay = "chevreuse"

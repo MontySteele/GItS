@@ -97,7 +97,10 @@ internal static class KleeSelfCheck
                          ModelDb.Character<Varka>(),
                          // Yae Miko (2026-10-13), on the same terms.
                          ModelDb.Character<Yae>(),
-                     })
+                     }
+                     // A kit this build leaves out (ReleaseVariant.cs,
+                     // -p:GitsKits) registers no character; nothing to check.
+                     .Where(ReleaseKits.Ships))
             {
                 CheckCharacterInvariants(character);
                 CheckCharacterAssets(character);
@@ -459,15 +462,21 @@ internal static class KleeSelfCheck
         // ArmStarterBasics, which is the seam that answers it.
         foreach (var tag in new[] { CardTag.Strike, CardTag.Defend })
         {
-            // VARKA's pool holds no Basic Strike or Defend at all -- his
-            // starter's base pair is Silent's -- and his answer is the seam
-            // above, `ArmStarterBasics`, which Large Capsule and Fasten are
-            // patched to ask BEFORE their unguarded First().
-            if ((character is Powers.IVarkaCharacter
-                 || character is Powers.IYaeCharacter)
-                && Powers.ArmStarterBasics.StrikeFor(character) != null)
+            // A character whose starter is the base pair (all five kits since
+            // the kits moved to base Strike/Defend: Varka's and Yae's pools
+            // never held a Basic Strike or Defend, and Klee's, Furina's and
+            // Kokomi's no longer do) is answered by the seam above,
+            // `ArmStarterBasics`, which Large Capsule and Fasten are patched
+            // to ask BEFORE their unguarded First(). Per tag: the seam must
+            // answer the one being checked. (Until 2026-10-16 only Varka and
+            // Yae were let through, so every boot logged six stale R11
+            // findings for Klee, Furina and Kokomi.)
+            var seam = tag == CardTag.Strike
+                ? Powers.ArmStarterBasics.StrikeFor(character)
+                : Powers.ArmStarterBasics.DefendFor(character);
+            if (seam != null)
             {
-                break;
+                continue;
             }
             if (!pool.Any(c => c.Rarity == CardRarity.Basic && c.Tags.Contains(tag)))
             {

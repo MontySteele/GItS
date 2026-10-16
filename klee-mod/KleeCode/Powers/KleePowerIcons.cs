@@ -520,6 +520,21 @@ internal static class KleePowerIcons
         // with the Rite, shrine r2.)
         SerialNovelPower => KleePck.Path("yae/powers/editor_in_chief.png")
             ?? KleePck.Path("varka/powers/electro_wind.png"),
+        // The pool to 78 (2026-10-15): no new art (the build generated
+        // none), so each new Power borrows her badge nearest its rule until
+        // its art pass (a BACKLOG line).
+        EnlightenedBlessingPower => KleePck.Path("yae/powers/sakura.png")
+            ?? KleePck.Path("klee/powers/oz_summon.png"),
+        SaiguusLessonPower => KleePck.Path("yae/powers/foxfire_lure.png")
+            ?? KleePck.Path("klee/powers/detonation_vuln.png"),
+        SacredShadePower => KleePck.Path("yae/powers/yakan_offering.png")
+            ?? KleePck.Path("klee/powers/oz_summon.png"),
+        EditorialPriorityPower => KleePck.Path("yae/powers/serialization.png")
+            ?? KleePck.Path("klee/powers/passion_overload.png"),
+        StellarConductPower => KleePck.Path("yae/powers/edict_of_cleansing.png")
+            ?? KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
+        EternityPower => KleePck.Path("yae/powers/sakura_grove.png")
+            ?? KleePck.Path("klee/powers/bomb_damage_up.png"),
         UnwaveringBannerPower =>
             KleePck.Path("varka/powers/stormward_stance.png"),
         CycleOfSeasonsPower => KleePck.Path("varka/powers/boreas_unbound.png"),

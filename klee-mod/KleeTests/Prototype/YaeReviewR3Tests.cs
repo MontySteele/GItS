@@ -96,7 +96,7 @@ public class YaeReviewR3Tests : IDisposable
         var newest = ledger.Standing[^1];
         Assert.Equal(YaeSakuraKind.Foxfire, newest.Kind);
         Assert.Equal(1, newest.Level);                 // its printed Level
-        Assert.Equal(YaeAnnotation.RedInk, newest.Annotation);
+        Assert.Equal(new[] { YaeAnnotation.RedInk }, newest.Annotations);
         Assert.Equal(new[] { 5, 5, 1 }, ledger.Standing.Select(s => s.Level));
     }
 
