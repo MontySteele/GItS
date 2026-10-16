@@ -938,6 +938,19 @@ public static class YaeEditing
         }
     }
 
+    /// <summary>Afterword (the pool to 78): "Put every Annotated card from
+    /// your Discard Pile into your Hand", in Discard Pile order, until the
+    /// hand is full (the base game's hand limit; the rest stay).</summary>
+    public static async Task RecallAllAnnotated(Player player)
+    {
+        foreach (var card in PileType.Discard.GetPile(player).Cards.Where(IsAnnotated).ToList())
+        {
+            if (PileType.Hand.GetPile(player).Cards.Count >= CardPile.MaxCardsInHand) return;
+            await CardPileCmd.Add(card, PileType.Hand);
+        }
+    }
+
+
     /// <summary>
     /// What Author's Copy can copy: an Annotated card in hand, never itself
     /// and never an Author's Copy (review r3: LAW, "copy effects never make

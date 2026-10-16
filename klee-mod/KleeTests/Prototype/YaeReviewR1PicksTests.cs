@@ -118,7 +118,8 @@ public class YaeReviewR1PicksTests : IDisposable
         var ledger = Fresh();
         ledger.Plant(YaeLaw.PlantLevel + 2);
         Assert.Equal(3, ledger.Standing[0].Level);
-        Assert.Equal("Your [gold]Sakura[/gold] are planted 1 Level higher.",
+        // The pool to 78, Ruled: its upgrade plants 2 Levels higher.
+        Assert.Equal("Your [gold]Sakura[/gold] are planted {IfUpgraded:show:2 Levels|1 Level} higher.",
                      Face(new ProtoYmFoxsMooncall()));
     }
 

@@ -94,7 +94,7 @@ def test_red_ink_yakan_evocation_plants_a_red_ink_sakura():
     Y.annotate(st, evo, Y.RED_INK)
     _play(st, evo)
     (s,) = _sakura(st)
-    assert s.annotation == Y.RED_INK
+    assert s.annotations == [Y.RED_INK]
     assert Y.act_size(st, s) == Y.SAKURA_BASE + s.level + Y.RED_INK_AMOUNT
 
 
@@ -103,7 +103,7 @@ def test_twin_sakura_gives_red_ink_to_both():
     twin = _card("twin_sakura")
     Y.annotate(st, twin, Y.RED_INK)
     _play(st, twin)
-    assert [s.annotation for s in _sakura(st)] == [Y.RED_INK, Y.RED_INK]
+    assert [s.annotations for s in _sakura(st)] == [[Y.RED_INK], [Y.RED_INK]]
 
 
 def test_grafted_branch_passes_red_ink_too():
@@ -111,7 +111,7 @@ def test_grafted_branch_passes_red_ink_too():
     graft = _card("grafted_branch")
     Y.annotate(st, graft, Y.RED_INK)
     _play(st, graft)
-    assert [s.annotation for s in _sakura(st)] == [Y.RED_INK]
+    assert [s.annotations for s in _sakura(st)] == [[Y.RED_INK]]
 
 
 def test_a_full_shrine_plant_that_only_levels_gives_the_oldest_the_red_ink():
@@ -122,8 +122,8 @@ def test_a_full_shrine_plant_that_only_levels_gives_the_oldest_the_red_ink():
     Y.annotate(st, evo, Y.RED_INK)
     _play(st, evo)
     assert len(_sakura(st)) == 3
-    assert _sakura(st)[0].annotation == Y.RED_INK
-    assert all(s.annotation is None for s in _sakura(st)[1:])
+    assert _sakura(st)[0].annotations == [Y.RED_INK]
+    assert all(s.annotations == [] for s in _sakura(st)[1:])
 
 
 def test_fox_fire_on_a_planting_card_does_not_inherit():
@@ -131,7 +131,7 @@ def test_fox_fire_on_a_planting_card_does_not_inherit():
     evo = _card("yakan_evocation")
     Y.annotate(st, evo, Y.FOX_FIRE)
     _play(st, evo)
-    assert [s.annotation for s in _sakura(st)] == [None]
+    assert [s.annotations for s in _sakura(st)] == [[]]
 
 
 def test_a_planting_card_that_gives_block_gets_both():
@@ -145,7 +145,7 @@ def test_a_planting_card_that_gives_block_gets_both():
     assert Y.inherits(twin)
     _play(st, twin)
     assert st.player.block == 4 + Y.RED_INK_AMOUNT
-    assert [s.annotation for s in _sakura(st)] == [Y.RED_INK, Y.RED_INK]
+    assert [s.annotations for s in _sakura(st)] == [[Y.RED_INK], [Y.RED_INK]]
 
 
 def test_a_published_red_ink_planting_card_plants_red_ink_every_play():
@@ -157,7 +157,7 @@ def test_a_published_red_ink_planting_card_plants_red_ink_every_play():
     st.player.discard_pile = [c for c in st.player.discard_pile
                               if c is not evo]
     _play(st, evo)
-    assert [s.annotation for s in _sakura(st)] == [Y.RED_INK, Y.RED_INK]
+    assert [s.annotations for s in _sakura(st)] == [[Y.RED_INK], [Y.RED_INK]]
 
 
 # ---------------------------------------------------------------------------
@@ -236,8 +236,9 @@ def test_the_publish_offer_respects_the_filter():
 
 def test_the_planting_marker_is_the_sims_planting_set():
     """The C# marker (codegen) and the sim's `plants_sakura` name the same
-    rows: Yakan Evocation, Twin Sakura, Grafted Branch, and (review r3) the
-    two kind planters, Foxfire Sweep and Shrine Maiden's Guard."""
+    rows: Yakan Evocation, Twin Sakura, Grafted Branch, (review r3) the
+    two kind planters, Foxfire Sweep and Shrine Maiden's Guard, and the pool
+    to 78's eight (2026-10-15)."""
     marked, planting = set(), set()
     for path in GENERATED.glob("ProtoYm*.cs"):
         text = path.read_text(encoding="utf-8")
@@ -248,7 +249,11 @@ def test_the_planting_marker_is_the_sims_planting_set():
             planting.add(cid)
     assert marked == planting == {_ym("yakan_evocation"), _ym("twin_sakura"),
                                   _ym("grafted_branch"), _ym("foxfire_sweep"),
-                                  _ym("shrine_maidens_guard")}
+                                  _ym("shrine_maidens_guard"),
+                                  _ym("thunder_petal"), _ym("kitsune_flick"),
+                                  _ym("shrine_lantern"), _ym("genre_shift"),
+                                  _ym("replanting"), _ym("narukami_bloom"),
+                                  _ym("guardian_of_narukami")}
 
 
 def test_a_yae_kinds_own_block_counts_for_red_ink_in_both_engines():

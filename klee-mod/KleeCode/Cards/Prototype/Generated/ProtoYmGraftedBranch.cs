@@ -45,13 +45,13 @@ public sealed class ProtoYmGraftedBranch : CustomCardModel, ICharacterCard, ISak
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Grafted Branch"),
-        ("description", "Plant a [gold]Sakura[/gold]. It starts at Level {YmAmount:diff()}."),
+        ("description", "Plant a [gold]Sakura[/gold]. It starts at Level {YmAmount:diff()} and lasts 1 more turn."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("YmAmount", 2m)
+            new DynamicVar("YmAmount", 3m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -63,7 +63,7 @@ public sealed class ProtoYmGraftedBranch : CustomCardModel, ICharacterCard, ISak
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await YaeCards.PlantLevel(choiceContext, this, cardPlay);
+        await YaeCards.PlantLevel(choiceContext, this, cardPlay, lasts: 1);
     }
 
     protected override void OnUpgrade()

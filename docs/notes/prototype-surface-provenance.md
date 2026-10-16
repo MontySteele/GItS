@@ -9207,3 +9207,43 @@ at 0; the count clears at his next turn. Pins:
 `Tempest_charge_deals_12_and_costs_1_less_per_swirl_this_turn`
 (`klee-mod/KleeTests/Prototype/VarkaPrototypeTests.cs`). It leaves
 `varka_expansion_sim.GENERIC_DRAW`. Untested in game until a deploy.
+
+## Yae: the pool to 78 (2026-10-15)
+
+`review/active/yae-pool-to-78-2026-10-15.md`, ruled 2026-10-15, all picks
+(a) ([USER]: "it's 'good enough' to merge the PR ... we can take it as-is and
+then start removing the less interesting cards as we playtest with a
+full-sized deck"). Thirty-five rows (5 / 20 / 10; 16 Attacks, 13 Skills, 6
+Powers) take her pool from 43 to 78 at 20 / 38 / 20. The texts are the
+paper's revised ones (Genre Shift at 2, Torii Ward drawing on a full shrine)
+and the four upgrades the Ruled section changed (Saiguu's Lesson and Stellar
+Conduct gain Innate, Fox's Verdict gains Retain, Fox's Mooncall plants 2
+Levels higher).
+
+- **Sec.3.** Sakura Grove becomes the Rare ([USER]: "Sakura grove seems
+  better than Fox's Mooncall at a lower rarity"; it compounds like Demon
+  Form) and Fox's Mooncall the Uncommon at 1. Grafted Branch is Level 3 [4]
+  and lasts 1 more turn ([USER]: "Grafted Branch looks a little
+  underpowered"). Evergreen Charm loses "It keeps its Red Ink." ([USER]:
+  "what does it have to do with Red Ink?"), because pick 2 (a) makes it the
+  rule.
+- **Pick 2 (a).** Distinct Annotations coexist on a Sakura; a duplicate does
+  nothing; an Edit that changes nothing is not an Edit (no Bestseller, Print
+  Run or Serialization pay); they survive Tenko and same-kind refreshes and
+  go when the Sakura withers or is replaced.
+- **Targeting.** A strike aimed at a chosen enemy is one hit on it, a
+  Foxfire Sakura's included; only a Sakura's own act hits ALL.
+- **Builder's readings** (named in the PR): "A Sakura strikes it" is the
+  highest-Level striking Sakura (Kitsune Pounce's reading), and the
+  one-hit targeting rule covers Kitsune Pounce too; Petal Storm, Sakura
+  Canopy and Daisesshou are one hit (or one Block gain) of N times the per
+  number; Daisesshou's and Replanting's withers act as their Last Bloom;
+  Replanting's new Sakura starts at the withered one's Level plus 1 [2], and
+  Fox's Mooncall still adds; Late Night Reading's "3 Sakura" is 3 or more;
+  Eternity stops every timer; Scattered Blossoms draws on every wither,
+  a replacing plant's included; The Shrine's Sacred Shade counts the Sakura
+  standing as the turn ends, before they act; Editorial Priority frees one
+  card a turn however many copies.
+- **Renamed on build.** The paper's "Enlightened Blessing" Power ships as
+  Scattered Blossoms (coordinator, on #1347): her starter relic's Orobas
+  upgrade already carries the name. The id stays `proto_ym_enlightened_blessing`.

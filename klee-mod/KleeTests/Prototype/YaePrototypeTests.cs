@@ -284,20 +284,23 @@ public class YaePrototypeTests : IDisposable
                      YaeShrineLedger.ActSize(YaeSakuraKind.Thunder, 2, YaeAnnotation.FoxFire));
     }
     [Fact]
-    public void Sakura_edits_reach_newest_oldest_and_every_and_replace()
+    public void Sakura_edits_reach_newest_oldest_and_every_and_add_up()
     {
+        // The pool to 78, pick 2 (a): an Edit joins what a Sakura carries.
         var ledger = Fresh();
         PlantN(ledger, 3);
         Assert.Equal(1, ledger.EditSakura(YaeSakuraEnd.Newest, 1, YaeAnnotation.FoxFire));
-        Assert.Equal(new[] { YaeAnnotation.None, YaeAnnotation.None, YaeAnnotation.FoxFire },
-                     ledger.Standing.Select(s => s.Annotation));
+        Assert.Equal(new[] { 0, 0, 1 }, ledger.Standing.Select(s => s.Annotations.Count));
+        Assert.True(ledger.Standing[2].Has(YaeAnnotation.FoxFire));
         ledger.EditSakura(YaeSakuraEnd.Oldest, 1, YaeAnnotation.DeadlineExtension);
-        Assert.Equal(YaeAnnotation.DeadlineExtension, ledger.Standing[0].Annotation);
+        Assert.Equal(new[] { YaeAnnotation.DeadlineExtension }, ledger.Standing[0].Annotations);
         Assert.Equal(3, ledger.EditSakura(YaeSakuraEnd.Every, 1, YaeAnnotation.RedInk));
-        Assert.All(ledger.Standing, s => Assert.Equal(YaeAnnotation.RedInk, s.Annotation));
+        Assert.All(ledger.Standing, s => Assert.True(s.Has(YaeAnnotation.RedInk)));
+        Assert.Equal(new[] { YaeAnnotation.DeadlineExtension, YaeAnnotation.RedInk },
+                     ledger.Standing[0].Annotations);
         // Only three Annotations have a Sakura reading.
         Assert.Equal(0, ledger.EditSakura(YaeSakuraEnd.Every, 1, YaeAnnotation.Footnote));
-        Assert.All(ledger.Standing, s => Assert.Equal(YaeAnnotation.RedInk, s.Annotation));
+        Assert.All(ledger.Standing, s => Assert.DoesNotContain(YaeAnnotation.Footnote, s.Annotations));
     }
 
     [Fact]
@@ -308,7 +311,7 @@ public class YaePrototypeTests : IDisposable
         ledger.EditSakura(YaeSakuraEnd.Oldest, 1, YaeAnnotation.DeadlineExtension);
         for (var i = 0; i < 10; i++) ledger.TickAndWither();
         var kept = Assert.Single(ledger.Standing);
-        Assert.Equal(YaeAnnotation.DeadlineExtension, kept.Annotation);
+        Assert.Equal(new[] { YaeAnnotation.DeadlineExtension }, kept.Annotations);
         Assert.Equal(YaeLaw.SakuraTurns, kept.TurnsLeft);
     }
 
@@ -317,7 +320,7 @@ public class YaePrototypeTests : IDisposable
     {
         var ledger = Fresh();
         PlantN(ledger, 1);
-        Assert.Equal(YaeAnnotation.None, ledger.Standing[0].Annotation);
+        Assert.Empty(ledger.Standing[0].Annotations);
     }
 
     // ---- batch two -----------------------------------------------------------
@@ -337,9 +340,13 @@ public class YaePrototypeTests : IDisposable
     [Fact]
     public void Kitsune_pounce_strikes_only_a_weak_enemy()
     {
+        // The pool to 78: the strike itself is StrikeTarget's (Sacred
+        // Spark's "A Sakura strikes it"), behind the Weak gate.
         var calls = Il.CallSequence(typeof(YaeShrine).GetMethod(nameof(YaeShrine.StrikeIfWeak))!).ToList();
         Assert.Contains(calls, c => c.Contains(nameof(YaeShrine.IsWeak)));
-        Assert.Contains(calls, c => c.Contains(nameof(YaeShrineLedger.Highest)));
+        Assert.Contains(calls, c => c.Contains(nameof(YaeShrine.StrikeTarget)));
+        Assert.Contains(Il.CallSequence(typeof(YaeShrine).GetMethod(nameof(YaeShrine.StrikeTarget))!),
+                        c => c.Contains(nameof(YaeShrineLedger.Highest)));
     }
 
     // ---- Reprint ([USER], 2026-10-14, on Proofread: "Let's bump it to
