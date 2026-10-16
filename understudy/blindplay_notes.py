@@ -422,10 +422,12 @@ NOTHING_TO_PUBLISH_NOTE = (
 
 # Yae review r6, item 5. Three seats could not tell which enemy a Sakura
 # strikes. The mod's rule (`YaeShrine.Aim`) in one sentence, word for word
-# the seat hover's (`ArmKeywordTips.YaeSakuraTargetRule`).
+# the seat hover's (`ArmKeywordTips.YaeSakuraTargetRule`); Hunting Gaze
+# joined it with the refill (2026-10-16).
 SAKURA_TARGET_RULE = (
     "A Sakura strikes Kitsune Pounce's target when Pounce makes it strike, "
-    "else the enemy Foxfire Lure marked this turn, else a random enemy.")
+    "else the enemy Foxfire Lure marked this turn, else (with Hunting Gaze) "
+    "the last enemy your Attacks hit, else a random enemy.")
 
 # `EB-393`, the decline half. A ROOM WITH NO WAY OUT BUT THROUGH.
 #

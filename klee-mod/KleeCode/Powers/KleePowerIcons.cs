@@ -535,6 +535,10 @@ internal static class KleePowerIcons
             ?? KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
         EternityPower => KleePck.Path("yae/powers/sakura_grove.png")
             ?? KleePck.Path("klee/powers/bomb_damage_up.png"),
+        // The refill (2026-10-16): no new art; Hunting Gaze borrows the
+        // Lure's badge, the other aim.
+        HuntingGazePower => KleePck.Path("yae/powers/foxfire_lure.png")
+            ?? KleePck.Path("klee/powers/detonation_vuln.png"),
         UnwaveringBannerPower =>
             KleePck.Path("varka/powers/stormward_stance.png"),
         CycleOfSeasonsPower => KleePck.Path("varka/powers/boreas_unbound.png"),

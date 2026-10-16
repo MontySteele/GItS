@@ -174,11 +174,6 @@ BRANCH_ONLY_KNOWN: dict[str, tuple[tuple[str, ...], str]] = {
         " generated card carries `BaseKeywordTips.ForVulnerable` and"
         " `BaseKeywordTips.ForWeak` for them (checked in"
         " ProtoFsCommandingGaze.cs)."),
-    # YAE, THE POOL TO 78 (2026-10-15).
-    "proto_ym_omikuji": (
-        ("apply_power",),
-        "Omikuji's Weak sits in its second mode; the generated card carries"
-        " `BaseKeywordTips.ForWeak` for it (checked in ProtoYmOmikuji.cs)."),
 }
 
 

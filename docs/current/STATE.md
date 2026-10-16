@@ -85,8 +85,11 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   (16 Attacks, 13 Skills, 6 Powers), pool 78 (20 / 38 / 20); Sakura Grove a
   Rare and Fox's Mooncall an Uncommon at 1; distinct Annotations coexist on
   a Sakura and a no-change Edit is not an Edit; an aimed strike is one hit,
-  a Foxfire Sakura's included. The new cards draw blank portraits until her
-  art pass; the Sakura display (pick 3) is a BACKLOG line. Next: five seats
+  a Foxfire Sakura's included. The Sakura display (pick 3) is a BACKLOG
+  line. **The dedupe and the refill built** (2026-10-16,
+  `review/active/yae-dedupe-2026-10-16.md` and `yae-refill-2026-10-16.md`):
+  eleven near-copies cut and eleven new cards added, pool still 78 (20 / 38 /
+  20); the eleven draw blank portraits until her art pass. Next: five seats
   on the full pool, then [USER]'s run (pick 4 (a)).
 
 ## The kits

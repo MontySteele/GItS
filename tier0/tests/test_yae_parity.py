@@ -54,6 +54,10 @@ def test_the_law_numbers_mirror_the_sim():
         # Review r3 (2026-10-14): the kinds' bases; Offering left.
         "FoxfireBase": Y.FOXFIRE_BASE, "KitsuneBase": Y.KITSUNE_BASE,
         "RoyaltiesPayout": Y.ROYALTIES_ENERGY,
+        # The refill (2026-10-16): Kitsune Barrage's hits, Sesshou Fang's
+        # Level.
+        "BarrageHits": Y.BARRAGE_HITS, "BarrageFullHits": Y.BARRAGE_FULL_HITS,
+        "BarrageSakura": Y.BARRAGE_SAKURA, "FangLevel": Y.FANG_LEVEL,
     }
 
 

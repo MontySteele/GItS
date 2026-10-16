@@ -312,6 +312,13 @@ def card_cost(state: CombatState, card: Card) -> int:
         led = varka_oath.ledger(state.player)
         swirls = led.swirls_this_turn if led is not None else 0
         cost = max(0, cost - card.cost_reduction_per_swirl_this_turn * swirls)
+    if card.cost_reduction_if_edited_this_turn:
+        # YAE, THE REFILL: Publisher's Deadline, "Costs 1 less if you Edited
+        # a card this turn". C# twin: the card's own
+        # `TryModifyEnergyCostInCombat` over `YaeShrine.EditsThisTurn`.
+        led = yae_shrine.ledger(state.player)
+        if led is not None and led.edits_this_turn > 0:
+            cost = max(0, cost - card.cost_reduction_if_edited_this_turn)
     if card.is_companion and state.companion_cost_delta_this_turn:
         cost = max(0, cost + state.companion_cost_delta_this_turn)
     # (R276): Playdate's discount on the next Companion card.

@@ -69,7 +69,8 @@ public class YaeReviewR6Tests
     public void The_seat_sakura_tip_names_its_target_and_the_player_tip_stays_short()
     {
         Assert.Equal("A Sakura strikes Kitsune Pounce's target when Pounce makes it "
-                     + "strike, else the enemy Foxfire Lure marked this turn, else a "
+                     + "strike, else the enemy Foxfire Lure marked this turn, else "
+                     + "(with Hunting Gaze) the last enemy your Attacks hit, else a "
                      + "random enemy.", ArmKeywordTips.YaeSakuraTargetRule);
         Assert.True(ArmKeywordTips.YaeSakuraTip.Length <= 100);
     }

@@ -95,7 +95,7 @@ public class YaePrototypeTests : IDisposable
     [Fact]
     public void Her_attacks_deal_electro_and_proofread_has_no_block()
     {
-        Assert.Equal(global::KleeMod.Elements.Element.Electro, new ProtoYmKitsuneFlash().Element);
+        Assert.Equal(global::KleeMod.Elements.Element.Electro, new ProtoYmSlyStrike().Element);
         Assert.Equal(global::KleeMod.Elements.Element.Electro, new ProtoYmTenkoKenshin().Element);
         var proofread = new ProtoYmProofread();
         Assert.Equal(CardType.Skill, proofread.Type);
@@ -574,7 +574,7 @@ public class YaePrototypeTests : IDisposable
     {
         var editor = new ProtoYmProofread();
         Assert.False(YaeEditing.Editable(editor, editor));
-        Assert.True(YaeEditing.Editable(new ProtoYmKitsuneFlash(), editor));
+        Assert.True(YaeEditing.Editable(new ProtoYmSlyStrike(), editor));
         Assert.False(YaeEditing.Editable(new Dazed(), editor));
         Assert.False(YaeEditing.Editable(new Regret(), editor));
     }
@@ -790,7 +790,7 @@ public class YaePrototypeTests : IDisposable
         var card = new ProtoMiYaeSesshouSakura();
         Assert.True(CompanionPool.IsHiddenFrom(card, "yae"));
         Assert.False(CompanionPool.IsHiddenFrom(card, "klee"));
-        Assert.False(CompanionPool.IsHiddenFrom(new ProtoYmKitsuneFlash(), "yae"));
+        Assert.False(CompanionPool.IsHiddenFrom(new ProtoYmSlyStrike(), "yae"));
     }
 
     [Fact]

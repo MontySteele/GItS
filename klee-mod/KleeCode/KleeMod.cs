@@ -306,6 +306,9 @@ public static class KleeMod
                         Powers.YaeEditing.NothingToEditText,
                     [Powers.YaeEditing.NoSakuraToEditKey] =
                         Powers.YaeEditing.NoSakuraToEditText,
+                    // The refill (2026-10-16): Rewrite's discard chooser.
+                    [Powers.YaeCards.RewritePromptKey] =
+                        Powers.YaeCards.RewritePromptText,
                     [Powers.YaeEditing.NothingToPublishKey] =
                         Powers.YaeEditing.NothingToPublishText,
                 });
