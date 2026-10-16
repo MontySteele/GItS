@@ -22,6 +22,9 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
+- **Yae dedupe** (`yae-dedupe-2026-10-16.md`, two picks, defaults (a)):
+  cut 11 near-copies (8 Commons, 3 Uncommons); Claude designs 11
+  replacements aimed at her act 1 and 2 damage, built together with the cuts.
 - **Distribution readiness** (`distribution-readiness-2026-10-12.md`, two picks,
   defaults (a)): a closed beta now, public early access once Varka and Furina
   reach Balance; a GitHub release first. (The `LAW.md` art line, #1145, is

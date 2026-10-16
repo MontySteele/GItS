@@ -36,9 +36,9 @@ card at each rarity, not on an attack and a Block card side by side.
 | **Rooted Shrine** (U Skill 1) | Gain 6 Block. Each Sakura gains a Level. | 1/2 | Block twin of Narukami Ray | Narukami Ray, Kitsune Veil |
 | **Omikuji** (U Skill 1) | Choose: each Sakura gains a Level, or 2 Weak to ALL. | 0/3 | Both modes are other cards | Narukami Ray, Kitsune Guile |
 
-That is 8 of 20 Commons and 3 of 38 Uncommons. None of the 11 has art in
-the blank-portrait list except Kitsune Flick, Sacred Spark and Shrine
-Lantern, so the art pass skips all 11 and spends nothing on them.
+That is 8 of 20 Commons and 3 of 38 Uncommons. Three of the 11 (Kitsune
+Flick, Sacred Spark, Shrine Lantern) are among her 35 blank portraits; the
+art pass running now skips them.
 
 **Looked at and kept.**
 - Sakura Canopy (Block per Sakura) and The Shrine's Sacred Shade (the same,
@@ -53,8 +53,8 @@ Lantern, so the art pass skips all 11 and spends nothing on them.
 
 ## 3. Refilling the pool
 
-Cutting 11 leaves 67. The pool is 78 by the kit checklist, and 8 of the
-holes are Commons. Round 7 says what the new cards should do: her damage is
+Cutting 11 leaves 67. Every kit's pool is 78, and 8 of the holes are
+Commons. Round 7 says what the new cards should do: her damage is
 0.78 of base in acts 1 and 2, she bleeds in act 1, and Sakura strike a random
 enemy (two thirds of the Kin Priest fight's Sakura damage went to minions).
 So the refill leans on early damage and aimed strikes, in new shapes, not a
