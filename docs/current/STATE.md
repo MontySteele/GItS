@@ -194,9 +194,13 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
   served taking her to Balance and evaluating overnight."). Her cards and rules
   on `main` are frozen; changes go on `furina-next` with a suite record
   (`operations/stage-gate.md`).
-- **Next:** Balance suite 1 on the base-five baseline seeds, plus the co-op
-  check owed at a finish line. His read to test: act 1 easy (guests' flat
-  numbers), act 2 the danger, act 3 easy once Powers scale.
+- **Promoted 2026-10-16** (`review/records/furina-suite-3-2026-10-16.md`,
+  [USER]: "Let's promote as-is"): furina-next papers 1 and 2 (Crescendo,
+  Standing Room Only, Prima Donna; Bravura and Bring the House Down capped,
+  Extended Run for Bis!). Suite 3 mean end floor 42.8, four of five in act 3.
+- **Next:** paper 3 on act 1 and 2 HP loss and the Repay cards that read
+  "Repays 0", on a fresh `furina-next`; the co-op check owed at a finish
+  line.
 
 **Varka: Balance.**
 - **Rules** (`review/active/varka-paper-kit-2026-09-28.md` sec.3;
