@@ -118,9 +118,12 @@ def test_the_scene_is_loadable_without_scripts_or_base_textures(char):
     assert "res://images/" not in text and ".png" not in text.replace("select_closeup_static.png", "") \
         .replace("select_loop.png", "").replace("select_bg.png", "")
     exts = re.findall(r'\[ext_resource type="([^"]+)" path="([^"]+)"', text)
-    assert exts[:2] == [("Texture2D", f"res://{char}/ui/select_closeup_static.png"),
-                        ("Texture2D", f"res://{char}/ui/select_bg.png")]
-    assert exts[2:] == [("Texture2D", f"res://{char}/ui/select_loop.png")]
+    # A null static_file (Klee, Furina: the moving box holds the whole figure,
+    # so the plate would be blank) ships no plate and no Splash.
+    plate = select_bg.load_loop(char)["static_file"]
+    want = [("Texture2D", f"res://{char}/ui/{plate}")] if plate else []
+    assert exts == want + [("Texture2D", f"res://{char}/ui/select_bg.png"),
+                           ("Texture2D", f"res://{char}/ui/select_loop.png")]
     assert [("Texture2D", f"res://{char}/ui/select_closeup.png"),
             ("Texture2D", f"res://{char}/ui/select_bg.png")] == re.findall(
         r'\[ext_resource type="([^"]+)" path="([^"]+)"', _stage1(char))
@@ -132,7 +135,8 @@ def test_the_scene_is_loadable_without_scripts_or_base_textures(char):
     assert used <= declared, used - declared
     # node order: backdrop under everything, the player last
     names = re.findall(r'\[node name="([^"]+)"', text)
-    assert names[1] == "Backdrop" and names[-1] == "AnimationPlayer" and "Splash" in names
+    assert names[1] == "Backdrop" and names[-1] == "AnimationPlayer"
+    assert ("Splash" in names) == bool(plate)
 
 
 def test_text_only_and_small(char):
@@ -179,7 +183,10 @@ def test_the_rendered_loop_steps_a_sheet_over_the_moving_region_and_never_seams(
     assert f"position = Vector2({select_bg.num(bx)}, {select_bg.num(by)})" in sprite
     assert abs(m["cell"][0] / m["scale"] - bw) < 4 / m["scale"] + 1
     names = re.findall(r'\[node name="([^"]+)"', text)
-    assert names.index("Splash") + 1 == names.index("LoopSprite")
+    if m["static_file"]:
+        assert names.index("Splash") + 1 == names.index("LoopSprite")
+    else:
+        assert "Splash" not in names
     assert all(names.index(e) > names.index("LoopSprite") for e in _emitters(text) if e not in ("Glow", "Streaks"))
     # the loop is a ping-pong, autoplayed, looping
     seq = select_bg.pingpong(m["frames"])
@@ -192,7 +199,8 @@ def test_the_rendered_loop_steps_a_sheet_over_the_moving_region_and_never_seams(
     assert abs(length - len(seq) / m["fps"]) < 0.01 and 3.0 <= length <= 6.0
     assert f'autoplay = "{select_bg.ANIMATION}"' in _node(text, "AnimationPlayer")
     # one producer of the manifest's files, both under their character's ui/
-    assert (m["sheet_file"], m["static_file"]) == ("select_loop.png", "select_closeup_static.png")
+    assert m["sheet_file"] == "select_loop.png"
+    assert m["static_file"] in ("select_closeup_static.png", None)
 
 
 def test_the_pack_builder_ships_the_loop_vram_compressed_and_refuses_without_it():

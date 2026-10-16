@@ -962,7 +962,10 @@ foreach ($loopChar in @('klee', 'furina', 'varka')) {
     $uiRel = if ($loopChar -eq 'klee') { 'ui' } else { "$loopChar\ui" }
     $toUi = Join-Path $work "$loopChar\ui"
     New-Item -ItemType Directory -Force -Path $toUi | Out-Null
+    # static_file is null when the moving box holds the whole figure (Klee,
+    # Furina): the plate would be blank, so none ships and the scene has no Splash.
     foreach ($f in @($selectLoops.$loopChar.sheet_file, $selectLoops.$loopChar.static_file)) {
+        if (-not $f) { continue }
         $from = Join-Path $src "$uiRel\$f"
         if (-not (Test-Path $from)) {
             throw "Missing $uiRel\$f under $src. The generated select scene draws the rendered loop; render it with tools/select_loop.py."

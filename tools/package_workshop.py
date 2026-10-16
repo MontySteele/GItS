@@ -25,8 +25,11 @@ THE WORKSPACE, `.workshop/<variant>/` (gitignored):
                              contentDescriptors, minBranch/maxBranch null
     image.png                the Workshop preview, < 1 MB
     content/<id>/            ONLY the mod: <id>.dll, <id>.pck, manifest.json,
-                             images/cards/*.png (the set deploy stages, less a
-                             left-out kit's own art)
+                             images/cards/*.webp (the set deploy stages, less a
+                             left-out kit's own art, as lossless WebP: same
+                             pixels, ~29% smaller; a card whose WebP would not
+                             decode to identical pixels ships as its .png.
+                             `RosterArt.CardPortrait` tries .webp, then .png)
     mod_id.txt               written by ModUploader on the first upload and
                              KEPT by every later run of this tool (it is how
                              the next upload updates the same item)
@@ -283,7 +286,7 @@ def plan(variant: Variant, version: str, *, dll: Path, pck: Path,
     art = {s: p for s, p in ship.items() if s not in left_out}
     art_size = sum(p.stat().st_size for p in art.values())
     entries.append(Entry(f"{cid}/images/cards/ ({len(art)} png)", art_size,
-                         str(images_root)))
+                         f"{images_root} (as png; staged as lossless webp, ~-29%)"))
     if left_out & set(ship):
         notes.append(f"left out {len(left_out & set(ship))} png of the kit(s) "
                      f"{', '.join(sorted(set(ALL_KITS) - set(variant.kits)))}")
@@ -351,10 +354,35 @@ def check_dll(dll: Path, variant: Variant, endpoint: str | None = None) -> None:
                          "rebuild without --skip-build")
 
 
+def stage_card(src: Path, cards: Path, stem: str) -> Path:
+    """Write one card portrait into `cards` as lossless WebP, or as a copy of
+    its png when the WebP would not decode to the same pixels (or the source
+    will not open). Returns the file written."""
+    from PIL import Image
+
+    dest = cards / f"{stem}.webp"
+    try:
+        with Image.open(src) as im:
+            im.load()
+            want = im.convert("RGBA").tobytes()
+            im.save(dest, "WEBP", lossless=True, quality=100, method=6, exact=True)
+        with Image.open(dest) as back:
+            same = back.convert("RGBA").tobytes() == want
+    except Exception:  # an unreadable source ships as it is
+        same = False
+    if same:
+        return dest
+    dest.unlink(missing_ok=True)
+    dest = cards / f"{stem}.png"
+    shutil.copy2(src, dest)
+    return dest
+
+
 def write_workspace(variant: Variant, version: str, workspace: Path, *,
                     dll: Path, pck: Path, art: dict[str, Path],
                     image: Path | None, visibility: str,
-                    change_note: str | None, endpoint: str | None = None) -> None:
+                    change_note: str | None, endpoint: str | None = None) -> tuple[int, int, int]:
+    """Lay out the workspace. Returns (webp cards, png fallbacks, card bytes)."""
     workspace.mkdir(parents=True, exist_ok=True)
     content = workspace / "content"
     if content.exists():
@@ -369,8 +397,9 @@ def write_workspace(variant: Variant, version: str, workspace: Path, *,
         f.write("\n")
     shutil.copy2(dll, mod / f"{variant.mod_id}.dll")
     shutil.copy2(pck, mod / f"{variant.mod_id}.pck")
-    for stem, path in sorted(art.items()):
-        shutil.copy2(path, cards / f"{stem}.png")
+    staged = [stage_card(path, cards, stem) for stem, path in sorted(art.items())]
+    webp = sum(1 for p in staged if p.suffix == ".webp")
+    card_bytes = sum(p.stat().st_size for p in staged)
 
     # The game parses EVERY .json under a mod folder as a manifest.
     stray = [p for p in content.rglob("*.json") if p != mod / "manifest.json"]
@@ -388,6 +417,7 @@ def write_workspace(variant: Variant, version: str, workspace: Path, *,
         placeholder_image(target, variant.title)
     if target.stat().st_size >= IMAGE_LIMIT:
         raise SystemExit(f"{target} is {target.stat().st_size} bytes; the limit is 1 MB")
+    return webp, len(staged) - webp, card_bytes
 
 
 def main(argv=None) -> int:
@@ -438,10 +468,14 @@ def main(argv=None) -> int:
         print(f"no pck at {args.pck}", file=sys.stderr)
         return 1
     check_dll(dll, variant, endpoint)
-    write_workspace(variant, version, workspace, dll=dll, pck=args.pck, art=art,
-                    image=args.image, visibility=args.visibility,
-                    change_note=args.change_note, endpoint=endpoint)
+    webp, png, card_bytes = write_workspace(
+        variant, version, workspace, dll=dll, pck=args.pck, art=art,
+        image=args.image, visibility=args.visibility,
+        change_note=args.change_note, endpoint=endpoint)
     print(f"wrote {workspace}")
+    png_bytes = sum(p.stat().st_size for p in art.values())
+    print(f"  cards: {webp} lossless webp (pixel-checked), {png} png fallback; "
+          f"{png_bytes / 1e6:.2f} MB as png -> {card_bytes / 1e6:.2f} MB staged")
     if (workspace / "mod_id.txt").exists():
         print(f"  mod_id.txt kept: the upload updates item "
               f"{(workspace / 'mod_id.txt').read_text(encoding='utf-8').strip()}")

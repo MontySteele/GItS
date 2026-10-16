@@ -88,7 +88,9 @@ half a breath (`SELECT_LOOP` in each pose library: chest, head, arms, the
 pigtails, coat tails or cloth, all cosines) and played forward then back, so
 there is no seam. Only the box of pixels that moves goes in the sheet
 (`ui/select_loop.png`, 13 frames at 6 fps, about 8 M texels, VRAM-compressed by
-`build_pck.ps1`'s `.import`); the rest is `ui/select_closeup_static.png`. The
+`build_pck.ps1`'s `.import`); the rest is `ui/select_closeup_static.png`,
+which Klee and Furina do not have (their whole figure moves, so the manifest
+names `static_file` null and the scene has no Splash). The
 still stays, and `tools/select_bg.py` draws the stage-1 breathing still for a
 character with no entry in the committed `tools/select_loop.json`. Kokomi and
 Yae wait for real models.
