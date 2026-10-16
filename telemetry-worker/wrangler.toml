@@ -13,8 +13,8 @@ enabled = false
 [[d1_databases]]
 binding = "DB"
 database_name = "gits-telemetry"
-# Replace with the id `npx wrangler d1 create gits-telemetry` prints.
-database_id = "00000000-0000-0000-0000-000000000000"
+# Created 2026-10-16 (`npx wrangler d1 create gits-telemetry`).
+database_id = "b65c1371-9a6f-4a79-a0ab-b3e200fed7a6"
 migrations_dir = "migrations"
 
 # Per-client-IP burst limit (Workers Rate Limiting binding). The key is a hash
