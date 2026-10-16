@@ -207,6 +207,15 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
   Teardrop doubles the floor.
 - **Next:** suite 4 on the `+next` build against the paper's predictions;
   the co-op check owed at a finish line.
+- **Story built** (2026-10-16, `review/active/furina-story-2026-10-15.md`,
+  ruled "I like the Furina event PR! Approved!"): her select line, eight
+  Ancient exchanges, eight events in three threads (the stage, the prophecy,
+  her friends; `Story/FurinaStory.cs`), the Stage Fright story curse, combat
+  lines (her signature is Let the People Rejoice) and her Kokomi and Yae
+  pairs. Unseen in game until a deploy.
+- **Next:** paper 3 on act 1 and 2 HP loss and the Repay cards that read
+  "Repays 0", on a fresh `furina-next`; the co-op check owed at a finish
+  line.
 
 **Varka: Balance.**
 - **Rules** (`review/active/varka-paper-kit-2026-09-28.md` sec.3;

@@ -286,7 +286,7 @@ of Boreas years, as the lore note above says.
     those there are; locked with none.
   - "Remove every Overdue Reports" or Doubt with none: that part does nothing;
     the rest of the option still pays.
-- **Co-op** is unchanged: each character's event goes only to its owner.
+- **Co-op**: ruled again 2026-10-16, see "Co-op (ruled 2026-10-16)" below.
 - **Cards named here that already exist:** Dodoco Tag, Alice's Recipe, Alice's
   Introduction Magic, Fish Blasting, Four Winds' Ascension, and Jean:
   Dandelion Breeze. **Doubt** is the base game's curse and stays until removed.
@@ -306,3 +306,33 @@ of Boreas years, as the lore note above says.
 
 [USER]: "we can ship the event branch; looks good to me!" Pick 1 (a), all
 sixteen events with GPT's notes applied; pick 3 (a), the numbers as written.
+
+## Co-op (ruled 2026-10-16)
+
+Until now, in co-op every player in an event room got a copy of the same
+event: only its owner had options, the others saw the page and Proceed, and a
+second story character's event waited for the act's next event room.
+
+[USER]: "Is it possible to instead give them separate events, appropriate to
+their character? And for characters who have no events, they get a
+placeholder like "heal 10 or gain 50 gold"".
+
+- **One story room per act for the whole table.** The act's first event room
+  that any player's story would claim (as before) is a story room for every
+  player at once.
+- **Each player gets their own event** in it: their character's event for the
+  act, routed from their own saved story by the same rules as solo, with
+  their own options, and the effects apply to them only. Each player's chain
+  records only their own choice.
+- **A placeholder for everyone else:** a player whose character has no story,
+  whose story has no event this act, or whose story already fired this act
+  gets **A Quiet Landing**: "The stairs are quiet here, and nothing on this
+  landing is waiting for you." Options: Rest. (Heal 10 HP.) or Search the
+  landing. (Gain 50 Gold.)
+- **Solo is unchanged.**
+- **How it is built** (`klee-mod/KleeCode/Story/StoryEvents.cs`,
+  `StoryCoopRoomEvent`): the game gives every player a copy of one room
+  event, so the room is one model whose copy shows each player their own
+  event or the placeholder. Both clients route every copy from shared state
+  (the seed, the act, each player's run history), so they agree. Unseen in
+  game.

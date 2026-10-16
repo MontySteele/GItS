@@ -1422,7 +1422,7 @@ public static partial class McpMod
         }
 
         // GItS LOCAL EDIT (Yae, 2026-10-15). The cards she Edited this
-        // combat -- what Bestseller and Print Run count, kept by the rule and
+        // combat -- what Bestseller counts, kept by the rule and
         // shown by no card. Same absent/empty contract as the two above.
         // Implementation and its reflection contract: gits/GitsYaeShrine.cs.
         if (GitsYaeShrineState(player) is { } yaeShrine)
@@ -1929,7 +1929,15 @@ public static partial class McpMod
         var eventModel = eventRoom.CanonicalEvent;
         bool isAncient = eventModel is AncientEventModel;
         state["event_id"] = eventModel.Id.Entry;
-        state["event_name"] = SafeGetText(() => eventModel.Title);
+        // GItS LOCAL EDIT (co-op story rooms, 2026-10-16). The heading is
+        // read off the local player's copy, the one the game's own screen
+        // titles (`EventRoom.EnterInternal` hands `GetLocalEvent()` to
+        // `NEventRoom.Create`, whose `SetupLayout` calls `SetTitle(_event
+        // .Title)`) and the one the options come from. A co-op story room's
+        // canonical copy is never routed to a player, so its Title is the
+        // placeholder's ("A Quiet Landing") on every player's page.
+        var titleModel = GitsLocalEvent.OrNothing(() => eventRoom.LocalMutableEvent) ?? eventModel;
+        state["event_name"] = SafeGetText(() => titleModel.Title);
         state["is_ancient"] = isAncient;
 
         // Check dialogue state for ancients

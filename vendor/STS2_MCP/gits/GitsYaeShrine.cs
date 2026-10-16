@@ -1,8 +1,8 @@
 // GItS LOCAL ADDITION - not upstream STS2MCP.
 //
-// YAE: A COUNT THE RULE KEEPS AND THE BOARD DOES NOT SHOW. Bestseller and
-// Print Run (Yae review r5, pick 1 (a)) scale with "each card you Edited this
-// combat", and nothing on the board carries that number: an Edit leaves an
+// YAE: A COUNT THE RULE KEEPS AND THE BOARD DOES NOT SHOW. Bestseller (Yae
+// review r5, pick 1 (a)) scales with "each card you Edited this combat", and
+// nothing on the board carries that number: an Edit leaves an
 // enchantment on a card, and the card may since have been played, discarded
 // or exhausted. The mod keeps it (`YaeShrineLedger.Edits`); this file is the
 // read, so a blind seat's page can print "Cards Edited this combat: N".

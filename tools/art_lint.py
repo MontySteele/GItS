@@ -156,7 +156,6 @@ PENDING_UNDERSIZE = {
     # (same 480x270 the user accepted for bombs_away). Surfaced for the red-pen
     # session, not self-approved.
     "gentilhomme_usher",        # Salon Solitaire Ousia Preview.gif
-    "mademoiselle_crabaletta",  # Salon Solitaire Plunging Water Preview.gif
     "full_ensemble",            # Salon Solitaire Pneuma Preview.gif (all Members)
     # 447x328 applause-crowd art -- a genuine content match for "Rapturous
     # Applause", short of 500x380 by 11%/14%. Mild upscale, user's call.
