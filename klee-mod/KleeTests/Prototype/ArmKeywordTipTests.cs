@@ -408,6 +408,8 @@ public class ArmKeywordTipTests
         // `ForAscensionNoOath`, the rider on Four Winds' Ascension's element
         // hit (it gains no Oath), and `ForBisSpendUpTo`, Bis!'s (a "Spend up
         // to" does not count).
+        // 55 with furina-next paper 2 (2026-10-16): `ForBisSpendUpTo` left
+        // with Bis!.
         // 47 with the Furina wave (2026-10-13): `ForFinalBowInTurn`, Final
         // Bow's (its acts happen one after another).
         // 50 with the Klee text-only fixes (2026-10-13): four riders,
@@ -430,7 +432,7 @@ public class ArmKeywordTipTests
         // 56 with Kokomi review r9 pick 1 (a) (2026-10-15):
         // `ForCompanionPlan` left with the rule that any Companion can be
         // written as a Plan.
-        Assert.Equal(56, attaches.Count);
+        Assert.Equal(55, attaches.Count);
         Assert.Contains(attaches, m => m.Name == "ForFoxfireSakura");
         Assert.Contains(attaches, m => m.Name == "ForKitsuneSakura");
         Assert.Contains(attaches, m => m.Name == "ForFullShrine");
@@ -445,7 +447,7 @@ public class ArmKeywordTipTests
         Assert.Contains(attaches, m => m.Name == "ForPassTheMatchActing");
         Assert.Contains(attaches, m => m.Name == "ForFinalBowInTurn");
         Assert.Contains(attaches, m => m.Name == "ForAscensionNoOath");
-        Assert.Contains(attaches, m => m.Name == "ForBisSpendUpTo");
+        Assert.DoesNotContain(attaches, m => m.Name == "ForBisSpendUpTo");
         Assert.Contains(attaches, m => m.Name == "ForAscensionReturn");
         Assert.Contains(attaches, m => m.Name == "ForNereidsTwice");
         Assert.Contains(attaches, m => m.Name == "ForPlanNoLine");

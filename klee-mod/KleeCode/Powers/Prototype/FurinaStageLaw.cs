@@ -208,10 +208,6 @@ public static class FurinaStageLaw
     /// gain 1 Strength." (HP actually repaid.)</summary>
     public const int HymnThreshold = 4;
 
-    /// <summary>Prima Donna: "if you have 10 or more Fanfare, gain 1
-    /// Energy."</summary>
-    public const int PrimaDonnaFanfare = 10;
-
     /// <summary>Regina of All Waters: "At the start of your turn, Drain 3,
     /// never past your line. If you do, gain 1 Strength." (2026-10-10)
     /// </summary>

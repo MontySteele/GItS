@@ -418,18 +418,14 @@ public class FurinaTideTests
     }
 
     [Fact]
-    public void Bis_keeps_half_of_a_spend_all_rounded_down()
+    public void A_spend_all_takes_the_whole_bank()
     {
-        var kit = StageKit.With(new StageMods { Bis = 1 }, 9);
+        // furina-next paper 2 (2026-10-16): Bis! is gone; nothing keeps
+        // half of a spend-all back.
+        var kit = StageKit.With(9);
         Assert.Equal(9, Run(kit.Director.SpendAll()));
         Assert.Equal(9, kit.Stage.SpentThisPlay);
-        Assert.Equal(4, kit.Stage.Fanfare);
-        // A Spend N is not a spend-all.
-        Assert.Equal(4, Run(kit.Director.Spend(4)));
         Assert.Equal(0, kit.Stage.Fanfare);
-        var none = StageKit.With(9);
-        Run(none.Director.SpendAll());
-        Assert.Equal(0, none.Stage.Fanfare);
     }
 
     [Fact]
