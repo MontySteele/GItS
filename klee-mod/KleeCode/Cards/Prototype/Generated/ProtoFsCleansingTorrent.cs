@@ -80,7 +80,7 @@ public sealed class ProtoFsCleansingTorrent : CustomCardModel, IElementalCard, I
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await FurinaStage.Repay(choiceContext, Owner.Creature, 4);
+        await FurinaStage.Repay(choiceContext, Owner.Creature, 4, StageFloor.None);
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)
             .TargetingAllOpponents(CombatState!)

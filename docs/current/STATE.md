@@ -201,9 +201,12 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
   [USER]: "Let's promote as-is"): furina-next papers 1 and 2 (Crescendo,
   Standing Room Only, Prima Donna; Bravura and Bring the House Down capped,
   Extended Run for Bis!). Suite 3 mean end floor 42.8, four of five in act 3.
-- **Next:** paper 3 on act 1 and 2 HP loss and the Repay cards that read
-  "Repays 0", on a fresh `furina-next`; the co-op check owed at a finish
-  line.
+- **On `furina-next`:** paper 3 (`review/active/furina-next-3-2026-10-16.md`,
+  both picks (a)) is built: any HP a Repay cannot return becomes Block,
+  Pneuma Refrain Repays 4 [6], Endless Waltz Repays 2 first, Fontaine
+  Teardrop doubles the floor.
+- **Next:** suite 4 on the `+next` build against the paper's predictions;
+  the co-op check owed at a finish line.
 
 **Varka: Balance.**
 - **Rules** (`review/active/varka-paper-kit-2026-09-28.md` sec.3;

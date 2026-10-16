@@ -210,15 +210,27 @@ public static class FurinaStageFacePreview
                           : char.ToUpperInvariant(words[0]) + words.Substring(1);
 
     /// <summary>"(Repays N)": what a Repay of <paramref name="amount"/>
-    /// would return now. Empty off a combat or a Furina board. A card with a
-    /// Repay floor names its <paramref name="payout"/> ("Block", "Vigor",
-    /// "damage") whenever the Repay would return less than its full amount:
-    /// "(Repays 0, +3 Block)" (the drain-line round, 2026-10-09).</summary>
+    /// would return now. Empty off a combat or a Furina board. A Repay's
+    /// floor <paramref name="payout"/> ("Block", "Vigor", "damage") leads
+    /// whenever the Repay would return less than its full amount:
+    /// "(Repay 0: gain 3 Block)" (furina-next paper 3, 2026-10-16: "not
+    /// 'Repays 0'"; it read "(Repays 0, +3 Block)" since 2026-10-09). The
+    /// Block counts Fontaine Teardrop.</summary>
     public static string Repay(CardModel card, int amount,
                                string payout = "") =>
         Owner(card) is { } owner
-            ? Line(Room(owner, amount), amount, payout)
+            ? Line(Room(owner, amount), amount, payout, PerHp(owner, payout))
             : "";
+
+    /// <summary>What the floor pays for each HP it could not return: 1, and
+    /// for the Block floor 1 more for each Fontaine Teardrop
+    /// (<see cref="StageDirector.FloorBlock"/>).</summary>
+    private static int PerHp(
+        MegaCrit.Sts2.Core.Entities.Creatures.Creature owner, string payout) =>
+        payout == PayBlock
+            ? StageDirector.FloorBlock(1, FurinaStageLedger.For(owner).Mods
+                                              .FontaineTeardrop)
+            : 1;
 
     /// <summary>The Repay floor's payout words, as the faces print them.
     /// </summary>
@@ -240,21 +252,36 @@ public static class FurinaStageFacePreview
     /// <summary>The line's words, for the pins.</summary>
     public static string Line(int repays) => $"\n(Repays {repays})";
 
-    /// <summary>The line with the Repay floor's payout: "(Repays 1, +2
-    /// Block)" when a Repay of <paramref name="amount"/> returns only
-    /// <paramref name="repays"/>; the plain line when it returns all of it
-    /// or the card has no <paramref name="payout"/>.</summary>
-    public static string Line(int repays, int amount, string payout) =>
-        string.IsNullOrEmpty(payout) || repays >= amount
-            ? Line(repays)
-            : $"\n(Repays {repays}, +{amount - repays} {payout})";
+    /// <summary>The line with the Repay floor's payout, the floor first:
+    /// "(Repay 1: gain 2 Block)" when a Repay of <paramref name="amount"/>
+    /// returns only <paramref name="repays"/> (paper 3, 2026-10-16); the
+    /// plain line when it returns all of it or there is no
+    /// <paramref name="payout"/>. <paramref name="perHp"/> is what each HP
+    /// left pays (2 Block with Fontaine Teardrop).</summary>
+    public static string Line(int repays, int amount, string payout,
+                              int perHp = 1)
+    {
+        if (string.IsNullOrEmpty(payout) || repays >= amount)
+        {
+            return Line(repays);
+        }
+        var pays = (amount - repays) * perHp;
+        var what = payout == PayDamage
+            ? $"+{pays} damage"
+            : $"gain {pays} {payout}";
+        return $"\n(Repay {repays}: {what})";
+    }
 
     /// <summary>"(Repays N)" for a card that Drains
-    /// <paramref name="drainFirst"/> before it Repays (Riptide Lunge): the
-    /// Repay reads the board after the card's own Drain.</summary>
+    /// <paramref name="drainFirst"/> before it Repays (Coup de Théâtre): the
+    /// Repay reads the board after the card's own Drain, and names its
+    /// floor's <paramref name="payout"/> the same way.</summary>
     public static string RepayAfterDrain(CardModel card, int amount,
-                                         int drainFirst) =>
-        Owner(card) is { } owner ? Line(Room(owner, amount, drainFirst)) : "";
+                                         int drainFirst, string payout = "") =>
+        Owner(card) is { } owner
+            ? Line(Room(owner, amount, drainFirst), amount, payout,
+                   PerHp(owner, payout))
+            : "";
 
     /// <summary>What a Repay of <paramref name="amount"/> returns at this
     /// HP: never more than she drained, never past Max HP. A read; the

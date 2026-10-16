@@ -1095,10 +1095,12 @@ public static class ArmKeywordTips
 
     /// <summary>Rule 2: Repay N. The pool to 75 (Hymn of Renewal's reading,
     /// the paper's Review section): a Repay counts the HP it returns.
+    /// furina-next paper 3 (2026-10-16): the rule is one line, "Any HP a
+    /// Repay cannot return becomes Block."
     /// </summary>
     internal const string RepayBody =
-        "Regain that much drained HP, never more than you drained. A Repay "
-      + "counts the HP it returns.";
+        "Regain that much drained HP; a Repay counts the HP it returns. "
+      + "Any HP a Repay cannot return becomes [gold]Block[/gold].";
 
     public static IEnumerable<IHoverTip> ForRepay(
         IEnumerable<IHoverTip> inherited, CardModel card) =>

@@ -101,21 +101,23 @@ public class FurinaLineRepayFloorTests
         // Repay 5 returns 1 (her line's Block 1), then the floor's 4.
         Assert.Equal(new[] { "heal 1", "cue Sigewinne", "block 1", "block 4" },
                      up.Board.Log.ToArray());
-        Assert.Contains(BlockFloor.Replace("[gold]", "").Replace("[/gold]", ""),
-            StagePerformerBadge.ActText(StagePerformer.Charlotte)
-                .Replace("[gold]", "").Replace("[/gold]", ""));
-        Assert.Contains("could not",
+        // furina-next paper 3 (2026-10-16): the floor is the Repay rule, so
+        // the acts drop the clause.
+        Assert.DoesNotContain("could not",
+            StagePerformerBadge.ActText(StagePerformer.Charlotte));
+        Assert.DoesNotContain("could not",
             StagePerformerBadge.ActText(StagePerformer.Sigewinne));
     }
 
     [Fact]
-    public void Pneuma_tides_and_grand_entrance_pay_their_floor_and_fountain_none()
+    public void Pneuma_tides_grand_entrance_and_fountain_pay_their_floor()
     {
-        // Fountain: no floor (ruled 2026-10-13); nothing drained, nothing paid.
+        // Fountain: the Block floor (paper 3, 2026-10-16; none since
+        // 2026-10-13); nothing drained, all 3 is Block.
         var kit = StageKit.Of();
         kit.Stage.ScheduleRepay(3, 1);
         Run(kit.Director.TurnStartRepays());
-        Assert.Empty(kit.Board.Log);
+        Assert.Equal(new[] { "block 3" }, kit.Board.Log.ToArray());
         // Pneuma Tides: Vigor.
         kit.Board.Log.Clear();
         Run(kit.Director.PneumaTides(2));
@@ -124,34 +126,41 @@ public class FurinaLineRepayFloorTests
         // (Gentle Current Repays on play since the Spend round 2.)
         Assert.Contains("StageDirector.RepayFloor",
             Il.Calls(Il.Method("FurinaStage", "GuestStar")));
+        // Paper 3: the rule covers the Block floor, so no face prints it.
         foreach (var card in new CardModel[]
                  {
                      new ProtoFsGrandEntrance(), new ProtoFsHymnOfManyWaters(),
+                     new ProtoFsFountainOfLucine(),
                  })
         {
-            Assert.Contains(BlockFloor, Face(card));
+            Assert.DoesNotContain(BlockFloor, Face(card));
+            Assert.DoesNotContain("could not", Face(card));
         }
-        Assert.DoesNotContain("could not", Face(new ProtoFsFountainOfLucine()));
         Assert.Contains("could not",
             new PneumaTidesPower().Localization!
                 .Single(r => r.Item1 == "description").Item2);
-        Assert.Contains("could not",
+        Assert.DoesNotContain("could not",
             new GrandEntrancePower().Localization!
                 .Single(r => r.Item1 == "description").Item2);
     }
 
     [Fact]
-    public void Hymn_passes_its_floor_to_the_repay()
+    public void Every_card_repay_takes_the_default_block_floor_but_the_torrent()
     {
-        Assert.Contains("DynamicVars[\"RepayAmount\"].IntValue, StageFloor.Block)",
+        // Paper 3 (2026-10-16): Block is `FurinaStage.Repay`'s default, so
+        // no card names it; Cleansing Torrent's floor is its damage.
+        Assert.Contains("DynamicVars[\"RepayAmount\"].IntValue);",
                         Generated("ProtoFsHymnOfManyWaters"));
-        // The unchanged Repays pass none.
-        foreach (var type in new[] { "ProtoFsPneumaRefrain", "ProtoFsCleanSlate",
-                                     "ProtoFsEbbAndFlow",
+        foreach (var type in new[] { "ProtoFsHymnOfManyWaters",
+                                     "ProtoFsPneumaRefrain", "ProtoFsCleanSlate",
+                                     "ProtoFsEbbAndFlow", "ProtoFsRisingTide",
+                                     "ProtoFsOusiaPneuma",
                                      "ProtoFsRiptideLunge" })
         {
             Assert.DoesNotContain("StageFloor.", Generated(type));
         }
+        Assert.Contains("Owner.Creature, 4, StageFloor.None);",
+                        Generated("ProtoFsCleansingTorrent"));
     }
 
     [Fact]

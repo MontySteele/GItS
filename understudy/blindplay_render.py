@@ -2717,12 +2717,12 @@ STAGE_FORECAST_TWICE = ", twice"
 STAGE_FORECAST_TIMES = ", {n} times"
 STAGE_FORECAST_AFTER = "- After the acts: Fanfare {fanfare}."
 #: FURINA ROUND 3 (2026-10-11, review change 2): a Repay act names its floor
-#: as the card face does ("(Repays 0, +2 Block)",
-#: `FurinaStageBowPreview.Line`). A seat read Charlotte's act that gave 2
+#: as the card face does (`FurinaStageBowPreview.Line`; the floor first,
+#: "(Repay 0: gain 2 Block)", since furina-next paper 3, 2026-10-16). A seat read Charlotte's act that gave 2
 #: Block as "Repay 0". Printed only when the Repay returns less than its
 #: number; what it returns is read the face's way (`Room`): never more than
 #: she has drained, never past her Max HP, walked front to back.
-STAGE_FORECAST_REPAY_FLOOR = " (repays {back}, +{floor} Block)"
+STAGE_FORECAST_REPAY_FLOOR = " (Repay {back}: gain {floor} Block)"
 STAGE_LOG_REPAY_FLOOR = ", +{floor} Block"
 #: What one act of each kind does, as the forecast names it.
 STAGE_KIND_WORDS = {

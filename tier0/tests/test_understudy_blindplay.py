@@ -6542,8 +6542,9 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                   "drained returns ", "after combat; more than that only ",
                   " returns."],
         # The pool to 75 (2026-10-09): the guest rule's words.
-        "Repay": ["Regain that much drained HP, never more than you ",
-                  "drained. A ", " counts the HP it returns."],
+        # furina-next paper 3 (2026-10-16): the Block floor's one line.
+        "Repay": ["Regain that much drained HP; a Repay counts the HP it "
+                  "returns. ", "Any HP a Repay cannot return becomes "],
         # The Furina sweep (2026-10-14): Ousia / Pneuma's word.
         "Flip": ["Turn this card to its other face; it starts each combat "
                  "on Ousia."],

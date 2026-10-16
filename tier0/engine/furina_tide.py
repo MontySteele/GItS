@@ -371,9 +371,10 @@ CARDS: dict[str, Spec] = {
     # HP it could not Repay. (The 2026-10-11 playtest trim, was 8.)
     "ftd_hymn": Spec("Hymn of Many Waters", 1, "skill", "common",
                      "block_repay", (6, 3)),
-    # Pneuma Refrain (1): Repay 5. Draw 2 cards.
+    # Pneuma Refrain (1): Repay 4. Draw 2 cards. (furina-next paper 3,
+    # 2026-10-16: was 5; the Block floor is the rule.)
     "ftd_pneuma_refrain": Spec("Pneuma Refrain", 1, "skill", "uncommon",
-                               "repay_draw", (5, 2)),
+                               "repay_draw", (4, 2)),
     # Singer of Many Waters (1): Retain. Repay all your drained HP. Exhaust.
     # (Retain since the 2026-10-11 playtest.)
     "ftd_singer": Spec("Singer of Many Waters", 1, "skill", "rare",
@@ -570,7 +571,7 @@ CARDS: dict[str, Spec] = {
     "ftd_balance_the_books": Spec("Balance the Books", 1, "skill",
                                   "uncommon", "balance_books", (4,)),
     "ftd_rising_tide": Spec("Endless Waltz", 1, "attack", "uncommon",
-                            "rising_tide", (6, 3)),
+                            "rising_tide", (6, 3, 2)),
     "ftd_pneuma_tides": Spec("Pneuma Tides", 1, "power", "uncommon",
                              "power", (2,), "pneuma_tides"),
     "ftd_hymn_of_renewal": Spec("Hymn of Renewal", 2, "power", "rare",
@@ -1208,13 +1209,24 @@ class caused_by:
         return False
 
 
+def floor_block(left: int, teardrops: int = 0) -> int:
+    """The Block floor's Block for `left` HP a Repay could not return: 1
+    each, and 1 more each per Fontaine Teardrop (furina-next paper 3,
+    2026-10-16: "An unreturned Repay gains 2 Block for each HP instead of
+    1."). The C# `StageDirector.FloorBlock`. The sim models none of her
+    relics, so it passes no Teardrop."""
+    return 0 if left <= 0 else left * (1 + max(0, teardrops))
+
+
 def repay_floor(state, n: int, floor: str) -> int:
-    """THE REPAY FLOOR (ruled 2026-10-09): "Repay N. Gain X for any HP it
-    could not Repay." The Repay resolves first; the leftover, N minus the HP
-    it returned, is paid as Block (`block`, unpowered, as Sigewinne's line
+    """THE REPAY FLOOR (ruled 2026-10-09; every numbered Repay's since
+    furina-next paper 3, 2026-10-16: "Any HP a Repay cannot return becomes
+    Block."). The Repay resolves first; the leftover, N minus the HP it
+    returned, is paid as Block (`block`, unpowered, as Sigewinne's line
     pays) or Vigor (`vigor`: the sim's `next_attack_up`, the base game's
-    "your next Attack deals N more"). The C# `StageDirector.RepayFloor`.
-    Returns HP repaid."""
+    "your next Attack deals N more"); `none` is "Repay all" and the damage
+    card's own floor. The Block is not HP, so the Repay readers never see
+    it. The C# `StageDirector.RepayFloor`. Returns HP repaid."""
     if n <= 0:
         return 0
     back = repay(state, n)
@@ -1223,7 +1235,7 @@ def repay_floor(state, n: int, floor: str) -> int:
     if left <= 0 or state.over or not p.alive:
         return back
     if floor == "block":
-        p.block += left
+        p.block += floor_block(left)
     elif floor == "vigor":
         from tier0.engine import powers as _powers
         _powers.apply_power(state, p, "next_attack_up", left)
@@ -1232,7 +1244,7 @@ def repay_floor(state, n: int, floor: str) -> int:
     return back
 
 
-def card_repay(state, n: int, floor: str = "none") -> int:
+def card_repay(state, n: int, floor: str = "block") -> int:
     """A card's Repay N: with its floor, and the leftover recorded for the
     play (`repay_left_this_play`, the damage cards' floor). Returns HP
     repaid."""
@@ -1607,12 +1619,13 @@ def turn_start(state) -> None:
     for item in f.fountains:
         item[1] -= 1
     f.fountains = [item for item in f.fountains if item[1] > 0]
-    # Fountain of Lucine's Repay has no floor (2026-10-13); Pneuma Tides'
-    # pays Vigor (the Repay floor, 2026-10-09).
+    # Fountain of Lucine's Repay has the Block floor (paper 3, 2026-10-16;
+    # none since 2026-10-13); Pneuma Tides' pays Vigor (the Repay floor,
+    # 2026-10-09).
     for amount in due:
         if state.over or not state.player.alive:
             break
-        f.ledger["fountain_repaid"] += repay(state, amount)
+        f.ledger["fountain_repaid"] += repay_floor(state, amount, "block")
     tides = _player_power(p, "pneuma_tides")
     if tides and not state.over and p.alive:
         repay_floor(state, tides, "vigor")
@@ -1680,7 +1693,8 @@ def end_of_turn(state) -> None:
     if f.singer_rests and f.drained_this_turn:
         f.ledger["singer_skipped"] += 1
     elif not state.over and state.player.alive:
-        repay(state, f.singer)
+        # Paper 3 (2026-10-16): Salon Solitaire's Repay has the Block floor.
+        repay_floor(state, f.singer, "block")
     # Neuvillette's window (2026-10-09): what she loses from here on -- the
     # enemies' turn first -- counts for his next act.
     f.hp_lost_window = 0
@@ -1798,7 +1812,7 @@ def resolve_card(state, card) -> None:
         _card_block(state, card, n[0])
         repay_floor(state, n[1], "block")
     elif k == "repay_draw":
-        repay(state, n[0])
+        repay_floor(state, n[0], "block")
         state.draw(n[1])
     elif k == "repay_all":
         repay(state, f.drained)
@@ -1867,14 +1881,14 @@ def resolve_card(state, card) -> None:
             target = _bound_target(state)
             _card_damage(state, card, n[1])
             if target is not None and not target.alive:
-                repay(state, n[2])
+                repay_floor(state, n[2], "block")
     elif k == "deluge":
         if drain(state, n[0]):
             f.ledger["fixed_drains"] += 1
             _card_damage(state, card, n[1], all_enemies=True)
     elif k == "clean_slate":
         _card_damage(state, card, n[0])
-        repay(state, n[1])
+        repay_floor(state, n[1], "block")
         if f.drained <= 0:
             state.draw(n[2])
     elif k == "hydro_hit_repay":
@@ -1888,8 +1902,11 @@ def resolve_card(state, card) -> None:
         dmg = f.drained                  # all of it (2026-10-11; was half)
         if dmg > 0:
             _card_damage(state, card, dmg, all_enemies=True)
-        repay(state, n[0])
+        repay_floor(state, n[0], "block")
     elif k == "rising_tide":
+        # Paper 3 (2026-10-16): "Repay 2." first; it counts only if it
+        # returned HP.
+        repay_floor(state, n[2], "block")
         _card_damage(state, card, n[0] + n[1] * f.repays_this_turn)
     elif k == "grand_absolution":
         back = repay(state, f.drained)
@@ -1898,7 +1915,7 @@ def resolve_card(state, card) -> None:
     elif k == "ebb_flow":
         if drain(state, n[0]):
             f.ledger["fixed_drains"] += 1
-            repay(state, n[1])
+            repay_floor(state, n[1], "block")
     # --- The block gap (2026-10-09) ---
     elif k == "block_fanfare":
         _card_block(state, card, n[0])

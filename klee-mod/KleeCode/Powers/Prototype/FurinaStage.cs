@@ -342,15 +342,16 @@ public static class FurinaStage
         return drained;
     }
 
-    /// <summary>Rule 2: Repay N, a card's. With a
-    /// <paramref name="floor"/>, the part of N it could not return is paid
-    /// as Block or Vigor (the Repay floor, 2026-10-09); either way the
-    /// leftover is recorded for the play
-    /// (<see cref="FurinaStageLedger.RepayLeftThisPlay"/>, the damage cards'
-    /// floor). Returns HP repaid.</summary>
+    /// <summary>Rule 2: Repay N, a card's. The part of N it could not
+    /// return is paid as Block (furina-next paper 3, 2026-10-16: "Any HP a
+    /// Repay cannot return becomes Block"); a card whose floor is its own
+    /// damage (Cleansing Torrent) passes <see cref="StageFloor.None"/>.
+    /// Either way the leftover is recorded for the play
+    /// (<see cref="FurinaStageLedger.RepayLeftThisPlay"/>, the damage
+    /// card's floor). Returns HP repaid.</summary>
     public static async Task<int> Repay(PlayerChoiceContext choiceContext,
                                         Creature? owner, int amount,
-                                        StageFloor floor = StageFloor.None)
+                                        StageFloor floor = StageFloor.Block)
     {
         if (!LiveFor(owner)) return 0;
         var director = Director(choiceContext, owner!);
@@ -427,7 +428,7 @@ public static class FurinaStage
         {
             using (director.Stage.CausedBy(StageDirector.GrandEntranceTitle))
             {
-                // "Repay 4. Gain 1 Block for any HP it could not Repay."
+                // "Repay 4." with the rule's Block floor (paper 3).
                 await director.RepayFloor(entrance, StageFloor.Block);
             }
         }
@@ -500,6 +501,24 @@ public static class FurinaStage
     /// </summary>
     public static int RepaysThisTurn(Creature? owner) =>
         LiveFor(owner) ? FurinaStageLedger.For(owner!).RepaysThisTurn : 0;
+
+    /// <summary>Endless Waltz (furina-next paper 3, 2026-10-16): "Repay 2.
+    /// Deal X damage, plus Y for each time you Repaid this turn." Its own
+    /// Repay counts only when it returns HP. During the play, after that
+    /// Repay, the count as it stands; before the play, the count plus 1 if
+    /// a Repay of <paramref name="amount"/> would return HP now. One
+    /// expression, so preview and resolution agree.</summary>
+    public static int RepaysThisTurnWith(CardModel? card, int amount)
+    {
+        if (card?.Owner?.Creature is not { } owner || !LiveFor(owner))
+        {
+            return 0;
+        }
+        var ledger = FurinaStageLedger.For(owner);
+        if (ledger.RepayedThisPlay) return ledger.RepaysThisTurn;
+        return ledger.RepaysThisTurn
+             + (FurinaStageFacePreview.Room(owner, amount) > 0 ? 1 : 0);
+    }
 
     /// <summary>Grand Absolution's "that much": HP THIS play's Repays
     /// returned.</summary>

@@ -4953,11 +4953,12 @@ def _op_stage_drain(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_stage_repay(state: CombatState, fx: dict, card: Card) -> None:
-    """"Repay N": regain up to N drained HP. With a `floor:` (block or
-    vigor), "Gain 1 Block [Vigor] for any HP it could not Repay" (the Repay
-    floor, ruled 2026-10-09)."""
+    """"Repay N": regain up to N drained HP. Any HP it cannot return
+    becomes Block (furina-next paper 3, 2026-10-16; the Repay floor of
+    2026-10-09); `floor: none` is a card whose floor is its own damage
+    (Cleansing Torrent)."""
     furina_stage.repay(state, _amount(state, fx.get("amount", 1)),
-                       fx.get("floor", "none"))
+                       fx.get("floor", "block"))
 
 
 def _op_stage_repay_all(state: CombatState, fx: dict, card: Card) -> None:

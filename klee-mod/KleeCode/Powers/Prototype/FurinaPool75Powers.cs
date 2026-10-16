@@ -21,9 +21,10 @@ namespace KleeMod.Powers;
 // twin: `tier0/engine/furina_tide.py`, through `furina_stage.ARM_POWER_IDS`.
 // ======================================================================
 
-/// <summary><i>Grand Entrance</i>: "Whenever you play a Guest Star, Repay 4.
-/// Gain 1 Block for any HP it could not Repay." [6] (The Repay floor,
-/// 2026-10-09.) Copies add.</summary>
+/// <summary><i>Grand Entrance</i>: "Whenever you play a Guest Star, Repay 4."
+/// [6] Its Block floor is the rule's since furina-next paper 3 (2026-10-16),
+/// so the face drops the clause it printed (the Repay floor, 2026-10-09).
+/// Copies add.</summary>
 public sealed class GrandEntrancePower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
@@ -31,8 +32,7 @@ public sealed class GrandEntrancePower : PowerModel, ILocalizationProvider
         ("title", "Grand Entrance"),
         ("description",
             "Whenever you play a Guest Star, [gold]Repay[/gold] "
-          + "[blue]{Amount}[/blue]. Gain 1 [gold]Block[/gold] for any HP it "
-          + "could not [gold]Repay[/gold]."),
+          + "[blue]{Amount}[/blue]."),
     };
 
     public override PowerType Type => PowerType.Buff;
