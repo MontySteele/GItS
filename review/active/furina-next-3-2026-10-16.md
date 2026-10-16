@@ -112,17 +112,18 @@ A seat still calling a Repay card situational is not by itself a miss.
 4. Act 3 damage stays at least 0.85 of base, and at least four of five runs
    reach act 3 (suite 3: 0.95, four).
 
-## Picks
+## Picks (ruled 2026-10-16)
 
-1. **The rule.**
-   - **(a) Default:** an unreturned Repay gains Block, as above, with the
-     two card rows, the Fontaine Teardrop change and the Block-first
-     preview.
-   - (b) An unreturned Repay gains Fanfare instead of Block: never blank,
-     but it feeds the bank, not the bleeding.
-   - (c) No rule; fix only Pneuma Refrain and Endless Waltz by hand.
-2. **Act 1 Block beyond the rule.**
-   - **(a) Default:** nothing more; the rule is the Block change, and
-     taking hits for Fanfare stays her identity.
-   - (b) Also add 2 Block to her three Common Block cards that print the
-     least (Velvet Curtain, Stage Directions, Tearful Monologue).
+[USER]: "Overall I agree with the paper, but as per usual with Furina, I'd
+like to sanity check that we don't turn any of her cards into overly-verbose
+Yugioh cards. Agreed on both counts, but let's also ask that the agent scan
+the modified cars and make sure that the relevant text and tooltips are
+clear and concise."
+
+1. **The rule: (a)**, as amended: an unreturned Repay gains Block, the two
+   card rows, the Fontaine Teardrop change and the Block-first preview.
+2. **Act 1 Block beyond the rule: (a).** Nothing more until suite 4.
+
+**Build condition.** Every card, relic and tooltip the change touches is
+read back for length and clarity in the build: base-game templates, one
+keyword tip for the rule, no card gaining a clause it does not need.

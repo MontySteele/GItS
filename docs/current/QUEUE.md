@@ -22,10 +22,6 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
-- **furina-next paper 3** (`furina-next-3-2026-10-16.md`, two picks,
-  defaults (a)): an unreturned Repay gains Block (so Repay cards are never
-  blank and are Block in act 1, where she bleeds); Pneuma Refrain Repay 4,
-  Endless Waltz Repays 2 first; no other Block change.
 - **Distribution readiness** (`distribution-readiness-2026-10-12.md`, two picks,
   defaults (a)): a closed beta now, public early access once Varka and Furina
   reach Balance; a GitHub release first. (The `LAW.md` art line, #1145, is
