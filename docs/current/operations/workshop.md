@@ -32,8 +32,8 @@ friends_only), `--change-note`, `--image` (preview png, under 1 MB),
 **What it writes**, under `.workshop/<variant>/` (gitignored):
 `workshop.json` (title, the DRAFT description, visibility, changeNote, tags,
 BaseLib's item 3737335127 as the dependency, minBranch/maxBranch null),
-`image.png` (today the Mods-screen badge, which lacks Varka; a placeholder if
-absent) and `content/<id>/` holding only `<id>.dll`, `<id>.pck`,
+`image.png` (`ImageGen/images/workshop_preview.png`, the five idle renders,
+made by `tools/make_workshop_preview.py`; a placeholder if absent) and `content/<id>/` holding only `<id>.dll`, `<id>.pck`,
 `manifest.json` and `images/cards/`. Never the seat bridge, never an
 auto-play mod. A left-out kit's own card art stays out. `mod_id.txt`, which
 ModUploader writes on the first upload, is kept by every later run.

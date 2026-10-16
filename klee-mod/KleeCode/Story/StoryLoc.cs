@@ -53,6 +53,12 @@ public static class StoryLoc
                 }
             }
         }
+        // The co-op story room's own rows: its placeholder page.
+        foreach (var (k, v) in StoryEventModel.Rows(
+                     StoryCoop.QuietLanding, StoryRegistry.EntryOf(typeof(StoryCoopRoomEvent))))
+        {
+            rows[k] = v;
+        }
         return rows;
     }
 

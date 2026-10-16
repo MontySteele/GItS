@@ -271,6 +271,25 @@ public static class FurinaCards
         typeof(ProtoFsGuestStarEscoffier),
     };
 
+    /// <summary>The eleven Guest Stars, canonical, in her pool's order: what
+    /// "Choose 1 of 3 random Guest Stars" (her story, A Steambird Clipping)
+    /// draws from. A list, not <see cref="GuestCardTypes"/>, so the draw's
+    /// order is fixed on every client.</summary>
+    public static IReadOnlyList<CardModel> GuestStars() => new CardModel[]
+    {
+        ModelDb.Card<ProtoFsGuestStarCharlotte>(),
+        ModelDb.Card<ProtoFsGuestStarWriothesley>(),
+        ModelDb.Card<ProtoFsGuestStarLynette>(),
+        ModelDb.Card<ProtoFsGuestStarClorinde>(),
+        ModelDb.Card<ProtoFsGuestStarLyney>(),
+        ModelDb.Card<ProtoFsGuestStarSigewinne>(),
+        ModelDb.Card<ProtoFsGuestStarChevreuse>(),
+        ModelDb.Card<ProtoFsGuestStarFreminet>(),
+        ModelDb.Card<ProtoFsGuestStarNavia>(),
+        ModelDb.Card<ProtoFsGuestStarNeuvillette>(),
+        ModelDb.Card<ProtoFsGuestStarEscoffier>(),
+    };
+
     /// <summary>A guest's Guest Star row, canonical.</summary>
     public static CardModel GuestCardOf(StagePerformer who) => who switch
     {
