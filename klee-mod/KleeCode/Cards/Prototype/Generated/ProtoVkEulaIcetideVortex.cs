@@ -86,7 +86,7 @@ public sealed class ProtoVkEulaIcetideVortex : CustomCardModel, IElementalCard, 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoVkEulaIcetideVortex()
-        : base(1, CardType.Skill, CardRarity.Uncommon, TargetType.AnyEnemy, autoAdd: false)
+        : base(1, CardType.Attack, CardRarity.Uncommon, TargetType.AnyEnemy, autoAdd: false)
     {
     }
 

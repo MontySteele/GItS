@@ -6635,7 +6635,9 @@ From the combo pass's seat round (review/records/varka-combo-round-2026-10-05.md
   which counts it on the dealer, the card's Owner.Creature) before the
   `swirled_by_this` re-read, so the draw fires. The seat page carries no draw
   event, only the hand after the play, which is why the seat could not see it.
-  Pinned by `Tempest_charge_reads_its_swirl_after_the_hit_and_before_the_draw`.
+  Pinned by `Tempest_charge_reads_its_swirl_after_the_hit_and_before_the_draw`,
+  now `Rising_gale_reads_its_swirl_after_the_hit_and_before_the_draw`: Tempest
+  Charge stopped drawing on 2026-10-15 (below).
 
 ## Kokomi kit review, 2026-10-05
 
@@ -9188,3 +9190,20 @@ The Varka Powers named after their cards (`SwornBrotherhoodPower`,
 the new names, and so do the seat page's Lupical lines. Older entries above
 keep the names the cards had when they were written. Art is keyed by id, so
 every card keeps its picture.
+
+## Tempest Charge, 2026-10-15
+
+Klee and Varka cleanup review, pick 1 (a), Tempo. **Tempest Charge**
+(`proto_vk_tempest_charge`, Varka Uncommon Attack, 1) was Rising Gale's text
+at a higher cost ("Deal 8 [11] Anemo damage. If it Swirls, draw 1 card.") and
+is now "Deal 12 [16] Anemo damage. Costs 1 less for each Swirl this turn."
+New card field `cost_reduction_per_swirl_this_turn` (Varka rows, numeric
+cost): the sim reads his ledger's `swirls_this_turn` in `combat.card_cost`;
+the mod emits the card's own `TryModifyEnergyCostInCombat` over
+`VarkaOath.SwirlsThisTurn`, which reads the ledger's per-round count. Floored
+at 0; the count clears at his next turn. Pins:
+`test_tempest_charge_deals_12_and_costs_1_less_per_swirl_this_turn`
+(`tier0/tests/test_varka_oath.py`) and
+`Tempest_charge_deals_12_and_costs_1_less_per_swirl_this_turn`
+(`klee-mod/KleeTests/Prototype/VarkaPrototypeTests.cs`). It leaves
+`varka_expansion_sim.GENERIC_DRAW`. Untested in game until a deploy.

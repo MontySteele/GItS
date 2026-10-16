@@ -3926,11 +3926,10 @@
 - {id: proto_vk_tempest_charge, name: "Tempest Charge", character: varka,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If it [gold]Swirls[/gold], draw 1 card.",
-   effects: [{op: damage, amount: 8, target: enemy},
-             {op: conditional, if: swirled_by_this,
-              then: [{op: draw, amount: 1}]}],
-   upgrade: {damage: 3}}
+   cost_reduction_per_swirl_this_turn: 1,
+   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Costs 1 less for each [gold]Swirl[/gold] this turn.",
+   effects: [{op: damage, amount: 12, target: enemy}],
+   upgrade: {damage: 4}}
 
 - {id: proto_vk_favonius_cut, name: "Favonius Cut", character: varka,
    authored_by: [claude],
@@ -4003,8 +4002,9 @@
    authored_by: [claude],
    nation: mondstadt, star: 5, rarity: uncommon, role_c: applier, element: cryo,
    # Varka pool audit (2026-10-13), ruled (a): costs 1, was 2; 8 [11], was
-   # 10 [14].
-   cost: 1, type: skill, personal_pool: varka,
+   # 10 [14]. Varka round 5 (varka-next, review/active/varka-next-2026-10-13.md):
+   # an Attack, was a Skill; same cost and numbers.
+   cost: 1, type: attack, personal_pool: varka,
    description: "Deal {CalculatedDamage:diff()} [gold]Cryo[/gold] damage. Gain 1 [gold]Cryo[/gold] [gold]Oath[/gold] for each enemy with a [gold]Cryo[/gold] aura.",
    effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
              {op: varka, kind: oath_per_cryo_enemy}],
@@ -4439,8 +4439,11 @@
 
 - {id: proto_vk_twin_gales, name: "Twin Gales", character: varka,
    authored_by: [claude],
+   # Varka round 5 (varka-next, review/active/varka-next-2026-10-13.md): a
+   # matched element pays twice. Was "Your Swirls pay both your current
+   # element and the element they Swirl." (paid once when they matched).
    cost: 1, type: power, rarity: rare,
-   description: "Your [gold]Swirls[/gold] pay both your [gold]current element[/gold] and the element they [gold]Swirl[/gold].",
+   description: "Your [gold]Swirls[/gold] also pay the element they [gold]Swirl[/gold]. If it's your [gold]current element[/gold], it pays twice.",
    effects: [{op: apply_power, power: vk_twin_gales, amount: 1, target: self}],
    upgrade: {innate: true}}
 

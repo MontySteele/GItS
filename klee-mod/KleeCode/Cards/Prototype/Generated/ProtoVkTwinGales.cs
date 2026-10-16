@@ -45,7 +45,7 @@ public sealed class ProtoVkTwinGales : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Twin Gales"),
-        ("description", "Your [gold]Swirls[/gold] pay both your [gold]current element[/gold] and the element they [gold]Swirl[/gold]."),
+        ("description", "Your [gold]Swirls[/gold] also pay the element they [gold]Swirl[/gold]. If it's your [gold]current element[/gold], it pays twice."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
