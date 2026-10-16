@@ -26,9 +26,9 @@ the Spire makes that look like home.
 | | Act 1 (random) | Act 2 | Act 3 |
 |---|---|---|---|
 | The stage | An Empty House | The Understudy | Curtain Call |
-| The prophecy | Rising Water (a memory) | The Oratrice's Echo | The Throne of Glass |
-| Her friends | A Steambird Clipping | A Letter from the Court (home) | The Throne of Glass (home) |
-| No act-1 event | | A Letter from the Court | The Throne of Glass |
+| The prophecy | Rising Water (a memory) | The Oratrice's Echo | An Empty Throne |
+| Her friends | A Steambird Clipping | A Letter from the Court (home) | An Empty Throne (home) |
+| No act-1 event | | A Letter from the Court | An Empty Throne |
 
 Ratio (the chains paper's check): 1 all-free event, 5 with a price and a free
 way out, 2 with every option priced (13% / 62% / 25%; base game 25 / 39 / 37).
@@ -100,8 +100,8 @@ act-1 event; price, free way out). Opening: *read* "She can still do the
 voices." *replied* "She hopes Charlotte got her letter." *kept* "The clipping
 is still in her glove." *no event* none. *Body:* A letter on the step, sealed
 in the Palais Mermonia's wax, the handwriting very neat. "Miss Furina. The
-Court notes your absence. The Court also notes that no cake has been ordered
-from your café in some weeks, and is concerned. N."
+Court notes your absence. The Court also notes that Café Lutèce has not sold a
+single Pour la Justice in some weeks, and is concerned. N."
 
 | Option | Effect | Result |
 |---|---|---|
@@ -122,13 +122,14 @@ waiting for her. They have waited a very long time.
 | Bow and leave them wanting more. | Heal 30 HP. | One bow, properly, and off while they're still clapping. Always leave before they stop. |
 | Ask them to stay for an encore. | Upgrade 3 random cards. Add **Stage Fright**. | They stay. They will always stay if she asks. That is the part that frightens her. |
 
-**Act 3. The Throne of Glass** (home finale; follows The Oratrice's Echo, A
+**Act 3. An Empty Throne** (home finale; follows The Oratrice's Echo, A
 Letter from the Court, or no act-2 event; price, free way out). Opening:
 *guilty* "She already said it out loud once." *innocent* "The scale's
 question is still with her." *performed* "She has run out of old
 monologues." *any letter* "The letter is in her glove." *Body:* At the top of
-the stairs sits a throne of blue glass, just like the one where she waited
-five hundred years for the end of the world. It is empty. A seat for one.
+the stairs stands a throne over still water, the one from the prophecy, where
+the Archon was to sit weeping when everyone else was gone. It is empty. A
+seat for one.
 
 | Option | Effect | Result |
 |---|---|---|
@@ -182,6 +183,12 @@ cover."
    - **(a) Default:** as written.
    - (b) You name lines to change.
 
-Lore to check before release (the repo has no Furina census; these are from
-memory): the café and Neuvillette's letter, the blue-glass throne image, and
-the prophecy wording. The lore review checks them with her cards.
+**Lore** (checked against a sourced census, scratch
+`lore-census/furina-lore-census-2026-10-15.md`; the story sources are
+second-hand). Canon: the 500 years, the prophecy (the people dissolve and the
+Archon is left weeping alone on her throne), the trial at the Opera Epiclese,
+her acting after it, Café Lutèce selling her cake (Pour la Justice, from the
+recipe La Lettre à Focalors), Charlotte as the Steambird's reporter. Ours, as
+the chains' scenes are: Neuvillette's letter, Charlotte's review and every
+landing in the Spire. Changed after the check: the throne is the prophecy's,
+not "blue glass", and the café is named.
