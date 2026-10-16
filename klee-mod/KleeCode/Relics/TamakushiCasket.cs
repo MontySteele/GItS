@@ -157,7 +157,7 @@ public class TamakushiCasket : CustomRelicModel
     /// FALLBACK ICON, borrowed from the relic whose slot this takes. Art is
     /// commissioned when a slice is ACCEPTED, not before.
     /// </summary>
-    protected override string IconBaseName => "snake_ring";
+    protected override string IconBaseName => "ring_of_the_snake";
 
     public override string PackedIconPath =>
         KleePck.Path("kokomi/relics/pearl_of_wisdom.png") ?? base.PackedIconPath;

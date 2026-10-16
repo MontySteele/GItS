@@ -67,3 +67,27 @@ def test_debt_rots():
                                 "Gone": "cut"})
     assert any(f.startswith("Fang: on ICON_DEBT") for f in found)
     assert any(f.startswith("Gone: on ICON_DEBT") for f in found)
+
+
+def test_head_outlines_are_clean():
+    assert lint.outline_findings() == []
+
+
+def test_an_outline_the_base_atlas_lacks_bites():
+    # 2026-10-16: three starters named "snake_ring" and drew "NO PE".
+    world = {
+        "Base": _row(["CustomRelicModel"],
+                     'protected override string IconBaseName => "burning_blood";',
+                     abstract=True),
+        "Inherits": _row(["Base"], ""),
+        "Snake": _row(["CustomRelicModel"],
+                      'protected override string IconBaseName => "snake_ring";'),
+        "Ring": _row(["CustomRelicModel"],
+                     'protected override string IconBaseName => "ring_of_the_snake";'),
+        "Bare": _row(["CustomRelicModel"], "no override"),
+        "Potion": _row(["CustomPotionModel"], "potions derive no outline"),
+    }
+    found = lint.outline_findings(world)
+    assert len(found) == 2, found
+    assert any(f.startswith("Snake") and "snake_ring" in f for f in found)
+    assert any(f.startswith("Bare") and "no IconBaseName" in f for f in found)

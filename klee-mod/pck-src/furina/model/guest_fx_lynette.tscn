@@ -1,0 +1,154 @@
+[gd_scene load_steps=19 format=3]
+
+[ext_resource type="Texture2D" path="res://furina/model/frames/furina_gfx_lynette.png" id="1_lynette"]
+
+[sub_resource type="AtlasTexture" id="Atlas_lynette_0"]
+atlas = ExtResource("1_lynette")
+region = Rect2(0, 0, 451, 437)
+margin = Rect2(0, 0, 0, 0)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_lynette_1"]
+atlas = ExtResource("1_lynette")
+region = Rect2(451, 0, 385, 396)
+margin = Rect2(17, 28, 66, 41)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_lynette_2"]
+atlas = ExtResource("1_lynette")
+region = Rect2(0, 437, 344, 335)
+margin = Rect2(44, 72, 107, 102)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_lynette_3"]
+atlas = ExtResource("1_lynette")
+region = Rect2(344, 437, 288, 295)
+margin = Rect2(84, 86, 163, 142)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_lynette_4"]
+atlas = ExtResource("1_lynette")
+region = Rect2(632, 437, 252, 246)
+margin = Rect2(97, 102, 199, 191)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_lynette_5"]
+atlas = ExtResource("1_lynette")
+region = Rect2(0, 772, 212, 225)
+margin = Rect2(108, 123, 239, 212)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_lynette_6"]
+atlas = ExtResource("1_lynette")
+region = Rect2(212, 772, 196, 214)
+margin = Rect2(112, 146, 255, 223)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_lynette_7"]
+atlas = ExtResource("1_lynette")
+region = Rect2(408, 772, 171, 207)
+margin = Rect2(125, 156, 280, 230)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_lynette_8"]
+atlas = ExtResource("1_lynette")
+region = Rect2(579, 772, 140, 187)
+margin = Rect2(146, 167, 311, 250)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_lynette_9"]
+atlas = ExtResource("1_lynette")
+region = Rect2(719, 772, 110, 157)
+margin = Rect2(165, 177, 341, 280)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_lynette_10"]
+atlas = ExtResource("1_lynette")
+region = Rect2(829, 772, 113, 113)
+margin = Rect2(164, 174, 338, 324)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_lynette_11"]
+atlas = ExtResource("1_lynette")
+region = Rect2(0, 997, 125, 125)
+margin = Rect2(158, 168, 326, 312)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_lynette_12"]
+atlas = ExtResource("1_lynette")
+region = Rect2(125, 997, 92, 95)
+margin = Rect2(173, 183, 359, 342)
+filter_clip = true
+
+[sub_resource type="Shader" id="Shader_element"]
+code = "shader_type canvas_item;
+
+uniform vec4 element : source_color = vec4(0.560784, 1.0, 0.839216, 1.0);
+varying vec4 tint;
+
+void vertex() {
+	tint = COLOR;
+}
+
+void fragment() {
+	vec4 heat = texture(TEXTURE, UV);
+	COLOR = vec4(mix(element.rgb, vec3(1.0), smoothstep(0.72, 1.0, heat.r)), heat.a) * tint;
+}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tint"]
+shader = SubResource("Shader_element")
+shader_parameter/element = Color(0.5608, 1, 0.8392, 1)
+
+[sub_resource type="Animation" id="Animation_lynette"]
+resource_name = "lynette"
+length = 0.65
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Fx:self_modulate")
+tracks/0/interp = 0
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.65),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Fx:texture")
+tracks/1/interp = 0
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [SubResource("Atlas_lynette_0"), SubResource("Atlas_lynette_1"), SubResource("Atlas_lynette_2"), SubResource("Atlas_lynette_3"), SubResource("Atlas_lynette_4"), SubResource("Atlas_lynette_5"), SubResource("Atlas_lynette_6"), SubResource("Atlas_lynette_7"), SubResource("Atlas_lynette_8"), SubResource("Atlas_lynette_9"), SubResource("Atlas_lynette_10"), SubResource("Atlas_lynette_11"), SubResource("Atlas_lynette_12")]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_lynette"]
+_data = {
+&"lynette": SubResource("Animation_lynette")
+}
+
+[node name="GuestFx" type="Node2D"]
+metadata/guest = "lynette"
+metadata/anchor = "center"
+metadata/length = 0.65
+
+[node name="Fx" type="Sprite2D" parent="."]
+unique_name_in_owner = true
+self_modulate = Color(1, 1, 1, 0)
+material = SubResource("ShaderMaterial_tint")
+texture = SubResource("Atlas_lynette_0")
+centered = false
+offset = Vector2(-220, -230)
+scale = Vector2(0.5, 0.5)
+
+[node name="FxPlayer" type="AnimationPlayer" parent="."]
+unique_name_in_owner = true
+libraries = {
+&"": SubResource("AnimationLibrary_lynette")
+}
+autoplay = "lynette"

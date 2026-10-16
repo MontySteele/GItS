@@ -543,3 +543,426 @@ def repay_return(ppu: float = REF_PPU, fps: int = STAGE_FPS):
 
 
 STAGE_EFFECTS = {"spend": spend_burst, "drain": drain_stream, "repay": repay_return}
+
+
+# ------------------------------------------------------------------ Furina's guest effects
+#: One short effect per guest star, Furina's plan item "guest-star pizazz"
+#: ([USER]: "unique particle effects or similar for each guest";
+#: review/active/furina-guest-fx-2026-10-16.md). Same heat format as the
+#: stage effects, every length at REF_PPU, each 0.5 to 0.7 s at STAGE_FPS.
+#: Each returns (frames, origin): every frame on one cell, `origin` the
+#: anchor -- the GUEST_ANCHOR point of the creature it plays on ("feet" the
+#: bottom of its hitbox, "center" its effect spawn point).
+GUEST_SEED = 41
+#: Overloaded's pink: ReactionFx.For(Reaction.Overload)'s flash
+#: (klee-mod/KleeCode/Vfx/ReactionFx.cs); Geo gold: ElementFlashHex(Geo).
+OVERLOAD_HEX = "#ff6fd0"
+GEO_HEX = "#ffd36b"
+GUEST_TINTS = {
+    "charlotte": ELEMENTS["cryo"], "chevreuse": OVERLOAD_HEX, "clorinde": ELEMENTS["electro"],
+    "escoffier": ELEMENTS["cryo"], "freminet": ELEMENTS["cryo"], "lynette": ELEMENTS["anemo"],
+    "lyney": ELEMENTS["pyro"], "navia": GEO_HEX, "neuvillette": ELEMENTS["hydro"],
+    "sigewinne": ELEMENTS["hydro"], "wriothesley": ELEMENTS["cryo"],
+}
+GUEST_ANCHOR = {
+    "charlotte": "center", "chevreuse": "center", "clorinde": "center", "escoffier": "feet",
+    "freminet": "center", "lynette": "center", "lyney": "center", "navia": "center",
+    "neuvillette": "center", "sigewinne": "center", "wriothesley": "feet",
+}
+#: seconds each runs
+GUEST_LEN = {
+    "charlotte": 0.5, "chevreuse": 0.5, "clorinde": 0.55, "escoffier": 0.7, "freminet": 0.6,
+    "lynette": 0.65, "lyney": 0.7, "navia": 0.6, "neuvillette": 0.5, "sigewinne": 0.7,
+    "wriothesley": 0.6,
+}
+
+
+def _poly(buf, pts, val):
+    """A convex polygon at one heat, as a triangle fan."""
+    for a, b in zip(pts[1:], pts[2:]):
+        fill_triangle(buf, (pts[0], a, b), (val, val, val))
+
+
+def _line(buf, a, b, width, val):
+    _segment(buf, a, b, width, val, val)
+    _disc(buf, a, width / 2, val, 0.2)
+    _disc(buf, b, width / 2, val, 0.2)
+
+
+def _shard(buf, c, ang, length, width, val):
+    """An angular ice or crystal shard: a long kite, point first along ang."""
+    ca, sa = math.cos(ang), math.sin(ang)
+    tip = (c[0] + ca * length * 0.62, c[1] + sa * length * 0.62)
+    back = (c[0] - ca * length * 0.38, c[1] - sa * length * 0.38)
+    left = (c[0] - sa * width / 2, c[1] + ca * width / 2)
+    right = (c[0] + sa * width / 2, c[1] - ca * width / 2)
+    fill_triangle(buf, (tip, left, right), (val, val * 0.8, val * 0.8))
+    fill_triangle(buf, (back, left, right), (val * 0.6, val * 0.8, val * 0.8))
+
+
+def _lens(buf, a, b, width, val, n=18):
+    """A slash: a thin lens from a to b, widest at the middle."""
+    dx, dy = b[0] - a[0], b[1] - a[1]
+    m = math.hypot(dx, dy)
+    if m < 1e-6 or val <= 0:
+        return
+    nx, ny = -dy / m, dx / m
+    pts = [_lerp(a, b, i / n) for i in range(n + 1)]
+    for i in range(n):
+        w0 = width / 2 * math.sin(math.pi * i / n) ** 0.7
+        w1 = width / 2 * math.sin(math.pi * (i + 1) / n) ** 0.7
+        p, q = pts[i], pts[i + 1]
+        fill_quad(buf, ((p[0] + nx * w0, p[1] + ny * w0), (q[0] + nx * w1, q[1] + ny * w1),
+                        (q[0] - nx * w1, q[1] - ny * w1), (p[0] - nx * w0, p[1] - ny * w0)), (val, val, val, val))
+
+
+def _heart(buf, c, r, val):
+    _disc(buf, (c[0] - 0.5 * r, c[1] - 0.2 * r), 0.58 * r, val, 0.4)
+    _disc(buf, (c[0] + 0.5 * r, c[1] - 0.2 * r), 0.58 * r, val, 0.4)
+    fill_triangle(buf, ((c[0] - 1.02 * r, c[1] - 0.02 * r), (c[0] + 1.02 * r, c[1] - 0.02 * r),
+                        (c[0], c[1] + 1.1 * r)), (val, val, val))
+
+
+def _fade(u, start):
+    """1 until `start`, then down to 0 at the end."""
+    return 1.0 if u < start else max(0.0, 1 - (u - start) / (1 - start))
+
+
+def _guest_frames(name, ppu, fps, cell, draw):
+    """Run draw(buf, t, u, c, k, i) over the effect's frames: `cell` is
+    (w, h, origin x, origin y) at REF_PPU, `c` the origin in supersampled px,
+    `k` px per REF_PPU px in the buffer, `u` the phase 0..1."""
+    s = float(ppu) / REF_PPU
+    w, h, ox, oy = cell
+    W, H = int(round(w * s)), int(round(h * s))
+    origin = (ox * s, oy * s)
+    k = SUPER * s
+    c = (origin[0] * SUPER, origin[1] * SUPER)
+    length = GUEST_LEN[name]
+    out = []
+    for i in range(int(math.ceil(length * fps - 1e-9))):
+        t = i / fps
+        buf = np.zeros((H * SUPER, W * SUPER), np.float32)
+        draw(buf, t, t / length, c, k, i)
+        out.append(_finish(buf, s))
+    return out, origin
+
+
+def wriothesley_shock(ppu: float = REF_PPU, fps: int = STAGE_FPS):
+    """Wriothesley: an upward shock from the target's feet, six angular ice
+    shards flung up and out. 0.6 s."""
+    rng = np.random.default_rng(GUEST_SEED)
+    shards = [(math.radians(-150 + i * 24 + rng.uniform(-7, 7)), rng.uniform(520, 760), rng.uniform(-6, 6),
+               rng.uniform(52, 76), rng.uniform(16, 22)) for i in range(6)]
+    column = [(rng.uniform(-60, 60), rng.uniform(150, 260), rng.uniform(9, 15)) for _ in range(5)]
+
+    def draw(buf, t, u, c, k, i):
+        cx, cy = c
+        if u < 0.22:
+            _disc(buf, (cx, cy - 30 * k), 85 * k, 1 - u / 0.22)
+        _ring(buf, (cx, cy), (30 + 220 * (1 - (1 - u) ** 2)) * k, (14 * (1 - u) + 3) * k, 0.9 * (1 - u) ** 1.3,
+              flat=GROUND_FLAT)
+        if u < 0.65:
+            g = u / 0.65
+            for dx, length, w in column:
+                r0 = 80 * g * k
+                r1 = r0 + length * min(1.0, g * 3) * k
+                stroke(buf, (cx + dx * k, cy - r0), (cx + dx * 1.2 * k, cy - r1), w * k * (1 - 0.6 * g),
+                       (1 - g) ** 1.1)
+        fade = _fade(u, 0.55)
+        for ang, speed, spin, length, width in shards:
+            x = cx + math.cos(ang) * speed * t * k
+            y = cy - 40 * k + (math.sin(ang) * speed * t + 0.5 * 1500 * t * t) * k
+            _shard(buf, (x, y), ang + spin * t, length * k, width * k, 0.95 * fade)
+    return _guest_frames("wriothesley", ppu, fps, (560, 640, 280, 500), draw)
+
+
+def lynette_swirl(ppu: float = REF_PPU, fps: int = STAGE_FPS):
+    """Lynette: a swirl ring tightening onto the target, three star
+    sparkles. 0.65 s."""
+    stars = [(math.radians(a), r, t0, size) for a, r, t0, size in
+             ((-40, 120, 0.12, 30), (160, 105, 0.24, 26), (70, 125, 0.36, 32))]
+
+    def draw(buf, t, u, c, k, i):
+        cx, cy = c
+        g = min(1.0, u / 0.75)
+        R = 175 - 145 * (1 - (1 - g) ** 1.6)
+        fade = _fade(u, 0.7)
+        for arm in range(3):
+            head = arm * 2 * math.pi / 3 + 10.0 * t
+            n = 14
+            for j in range(n):
+                f0, f1 = j / n, (j + 1) / n           # tail (0) to head (1)
+                a0, a1 = head - 1.9 * (1 - f0), head - 1.9 * (1 - f1)
+                r0, r1 = R * (1 + 0.35 * (1 - f0)), R * (1 + 0.35 * (1 - f1))
+                p = (cx + math.cos(a0) * r0 * k, cy + math.sin(a0) * r0 * k)
+                q = (cx + math.cos(a1) * r1 * k, cy + math.sin(a1) * r1 * k)
+                _segment(buf, p, q, (3 + 11 * f1) * k, (0.2 + 0.8 * f0) * fade, (0.2 + 0.8 * f1) * fade)
+        if u > 0.62:
+            w = (u - 0.62) / 0.38
+            _disc(buf, (cx, cy), (40 + 40 * w) * k, math.sin(math.pi * min(1.0, w * 1.3)) * 0.95)
+        for ang, r, t0, size in stars:
+            w = (u - t0) / 0.4
+            if 0 <= w <= 1:
+                rr = r * (1 - 0.3 * w)
+                _star(buf, (cx + math.cos(ang) * rr * k, cy + math.sin(ang) * rr * k),
+                      size * k * math.sin(math.pi * w), math.sin(math.pi * w))
+    return _guest_frames("lynette", ppu, fps, (480, 480, 240, 240), draw)
+
+
+def clorinde_cross(ppu: float = REF_PPU, fps: int = STAGE_FPS):
+    """Clorinde: two crossing slashes, an X, and a flash where they cross.
+    0.55 s."""
+    rng = np.random.default_rng(GUEST_SEED + 2)
+    sparks = [(rng.uniform(0, 2 * math.pi), rng.uniform(70, 120)) for _ in range(7)]
+
+    def draw(buf, t, u, c, k, i):
+        cx, cy = c
+        for (ax, ay), (bx, by), t0 in (((-165, -150), (165, 150), 0.0), ((165, -150), (-165, 150), 0.14)):
+            if u < t0:
+                continue
+            p = min(1.0, 0.3 + (u - t0) / 0.2)    # a cut is already under way on its first frame
+            v = _fade(u, 0.42)
+            a = (cx + ax * k, cy + ay * k)
+            e = (cx + (ax + (bx - ax) * p) * k, cy + (ay + (by - ay) * p) * k)
+            _lens(buf, a, e, 26 * k, 0.6 * v)
+            _lens(buf, a, e, 9 * k, 1.0 * v)
+        g = (u - 0.3) / 0.45
+        if 0 <= g <= 1:
+            _disc(buf, (cx, cy), (45 + 55 * g) * k, math.sin(math.pi * min(1.0, g * 1.6)) ** 0.8)
+            for ang, length in sparks:
+                r0 = (30 + 60 * g) * k
+                r1 = r0 + length * (1 - g) * k
+                stroke(buf, (cx + math.cos(ang) * r0, cy + math.sin(ang) * r0),
+                       (cx + math.cos(ang) * r1, cy + math.sin(ang) * r1), 7 * k, 1 - g)
+    return _guest_frames("clorinde", ppu, fps, (480, 460, 240, 230), draw)
+
+
+def lyney_cards(ppu: float = REF_PPU, fps: int = STAGE_FPS):
+    """Lyney: small playing cards flipping out from the centre, each
+    trailing a flame tip. 0.7 s."""
+    rng = np.random.default_rng(GUEST_SEED + 3)
+    cards = [(math.radians(-90 + i * 60 + rng.uniform(-12, 12)), rng.uniform(380, 470), rng.uniform(0, math.pi),
+              rng.uniform(-3, 3)) for i in range(6)]
+
+    def draw(buf, t, u, c, k, i):
+        cx, cy = c
+        if u < 0.16:
+            _disc(buf, (cx, cy), 55 * k, 1 - u / 0.16)
+        fade = _fade(u, 0.7)
+        for n, (ang, speed, flip0, spin) in enumerate(cards):
+            r = speed * t * (1 - 0.5 * min(1.0, t / 0.7))
+            ca, sa = math.cos(ang), math.sin(ang)
+            x, y = cx + ca * r * k, cy + sa * r * k
+            # the flame tip, trailing back toward the centre, flickering
+            flick = 0.8 + 0.2 * math.sin(40 * t + n * 1.7)
+            tail = (x - ca * (34 + 26 * flick) * k, y - sa * (34 + 26 * flick) * k)
+            stroke(buf, (x - ca * 10 * k, y - sa * 10 * k), tail, 22 * k * flick, 0.9 * fade)
+            _disc(buf, (x - ca * 8 * k, y - sa * 8 * k), 12 * k, 0.95 * fade, 0.8)
+            # the card, flipping: its width follows |cos| of the flip
+            rot = ang + math.pi / 2 + spin * t
+            hw = 17 * k * max(0.14, abs(math.cos(flip0 + 13 * t)))
+            hh = 24 * k
+            cr, sr = math.cos(rot), math.sin(rot)
+            pts = [(x + dx * cr - dy * sr, y + dx * sr + dy * cr) for dx, dy in ((-hw, -hh), (hw, -hh), (hw, hh), (-hw, hh))]
+            fill_quad(buf, pts, (0.45 * fade,) * 4)
+            for a, b in zip(pts, pts[1:] + pts[:1]):
+                _segment(buf, a, b, 4.5 * k, 1.0 * fade, 1.0 * fade)
+    return _guest_frames("lyney", ppu, fps, (600, 560, 300, 280), draw)
+
+
+def escoffier_frost(ppu: float = REF_PPU, fps: int = STAGE_FPS):
+    """Escoffier: a low ring of frosty steam that widens and settles at the
+    target's feet, with snow sparkles falling. 0.7 s."""
+    rng = np.random.default_rng(GUEST_SEED + 4)
+    puffs = [(2 * math.pi * j / 22 + rng.uniform(-0.1, 0.1), rng.uniform(0.8, 1.2), rng.uniform(10, 34))
+             for j in range(22)]
+    flakes = [(rng.uniform(-220, 220), rng.uniform(-300, -150), rng.uniform(0.0, 0.25), rng.uniform(140, 220),
+               rng.uniform(11, 17), rng.uniform(0, 2 * math.pi)) for _ in range(9)]
+
+    def draw(buf, t, u, c, k, i):
+        cx, cy = c
+        if u < 0.2:
+            _disc(buf, (cx, cy - 10 * k), 60 * k, 0.8 * (1 - u / 0.2))
+        R = 40 + 230 * (1 - (1 - u) ** 3)
+        v = (1 - u) ** 0.8
+        _ring(buf, (cx, cy), R * k, (8 * (1 - u) + 3) * k, 0.85 * (1 - u) ** 1.5, flat=GROUND_FLAT)
+        for ang, size, lift in puffs:
+            x = cx + math.cos(ang) * R * k
+            y = cy + math.sin(ang) * R * GROUND_FLAT * k - lift * min(1.0, u * 2) * k
+            _disc(buf, (x, y), (22 + 26 * u) * size * k, 0.55 * v, 2.0)
+        for x0, y0, t0, fall, size, ph in flakes:
+            w = (t - t0) / (GUEST_LEN["escoffier"] - t0)
+            if 0 <= w <= 1:
+                x = cx + (x0 + 14 * math.sin(6 * t + ph)) * k
+                y = cy + (y0 + fall * (t - t0)) * k
+                _star(buf, (x, y), size * k, math.sin(math.pi * min(1.0, w * 1.2)) ** 0.7)
+    return _guest_frames("escoffier", ppu, fps, (640, 460, 320, 340), draw)
+
+
+def charlotte_flash(ppu: float = REF_PPU, fps: int = STAGE_FPS):
+    """Charlotte: a camera flash on Furina -- a white rectangular frame with
+    corner brackets snaps in and fades. 0.5 s."""
+    def draw(buf, t, u, c, k, i):
+        cx, cy = c
+        if u < 0.28:
+            _disc(buf, (cx, cy), 150 * k, (1 - u / 0.28) ** 1.4, 1.2)
+        sc = 1.25 - 0.25 * min(1.0, t / 0.08)
+        v = _fade(u, 0.4) ** 1.2
+        hw, hh = 130 * sc * k, 95 * sc * k
+        corners = [(-hw, -hh), (hw, -hh), (hw, hh), (-hw, hh)]
+        for (ax, ay), (bx, by) in zip(corners, corners[1:] + corners[:1]):
+            _segment(buf, (cx + ax, cy + ay), (cx + bx, cy + by), 3 * k, 0.7 * v, 0.7 * v)
+        arm = 48 * sc * k
+        o = 14 * sc * k
+        for ax, ay in corners:
+            sx, sy = (1 if ax < 0 else -1), (1 if ay < 0 else -1)
+            p = (cx + ax - sx * o, cy + ay - sy * o)
+            _line(buf, p, (p[0] + sx * arm, p[1]), 9 * k, v)
+            _line(buf, p, (p[0], p[1] + sy * arm), 9 * k, v)
+    return _guest_frames("charlotte", ppu, fps, (440, 380, 220, 190), draw)
+
+
+def sigewinne_bubbles(ppu: float = REF_PPU, fps: int = STAGE_FPS):
+    """Sigewinne: six bubbles rising from Furina, one small heart-shaped
+    sparkle at the top. 0.7 s."""
+    rng = np.random.default_rng(GUEST_SEED + 6)
+    bubbles = [(rng.uniform(-90, 90), rng.uniform(0.0, 0.18), rng.uniform(300, 400), rng.uniform(13, 22),
+                rng.uniform(0, 2 * math.pi)) for _ in range(6)]
+    bubbles[0] = (bubbles[0][0], 0.0, *bubbles[0][2:])    # one rises from the first frame
+
+    def draw(buf, t, u, c, k, i):
+        cx, cy = c
+        fade = _fade(u, 0.72)
+        for x0, t0, speed, r, ph in bubbles:
+            if t < t0:
+                continue
+            dt = t - t0
+            x = cx + (x0 + 16 * math.sin(7 * dt + ph)) * k
+            y = cy + (60 - speed * dt) * k
+            rr = r * (1 + 0.35 * min(1.0, dt / 0.5)) * k
+            a = min(1.0, (dt + 0.04) / 0.08) * fade
+            _ring(buf, (x, y), rr, 3.2 * k, 0.9 * a)
+            _disc(buf, (x, y), rr, 0.22 * a, 3.0)
+            _disc(buf, (x - 0.38 * rr, y - 0.38 * rr), 0.28 * rr, a, 0.8)
+        w = (u - 0.42) / 0.58
+        if 0 <= w <= 1:
+            pop = math.sin(math.pi * min(1.0, w * 1.15)) ** 0.6
+            hc = (cx + 6 * k, cy - (250 + 20 * w) * k)
+            _heart(buf, hc, 22 * k * (0.7 + 0.3 * pop), pop)
+            _star(buf, (hc[0] + 30 * k, hc[1] - 24 * k), 14 * k * pop, pop)
+    return _guest_frames("sigewinne", ppu, fps, (380, 540, 190, 380), draw)
+
+
+#: px at REF_PPU from her chest to the plate's centre: in front of her,
+#: toward the enemies (her body is about 230 px wide at REF_PPU)
+FREMINET_FRONT = 130
+
+
+def freminet_plate(ppu: float = REF_PPU, fps: int = STAGE_FPS):
+    """Freminet: a hexagonal ice plate flashes in front of Furina and fades.
+    0.6 s. The origin is her chest; the plate stands FREMINET_FRONT px
+    toward the enemies, narrowed so it reads as a shield held out."""
+    def draw(buf, t, u, c, k, i):
+        hx, hy = c[0] + FREMINET_FRONT * k, c[1]
+        g = min(1.0, u / 0.15)
+        sc = 0.8 + 0.2 * g
+        v = (0.5 + 0.5 * g) * _fade(u, 0.35) ** 1.3
+        if u < 0.22:
+            _disc(buf, (hx, hy), 120 * k, 1 - u / 0.22)
+        R = 120 * sc * k
+        pts = [(hx + math.cos(math.radians(-90 + 60 * j)) * R * 0.62, hy + math.sin(math.radians(-90 + 60 * j)) * R)
+               for j in range(6)]
+        _poly(buf, pts, 0.3 * v)
+        inner = [(hx + (p[0] - hx) * 0.58, hy + (p[1] - hy) * 0.58) for p in pts]
+        for a, b in zip(pts, pts[1:] + pts[:1]):
+            _line(buf, a, b, 7 * k, v)
+        for a, b in zip(inner, inner[1:] + inner[:1]):
+            _segment(buf, a, b, 3 * k, 0.6 * v, 0.6 * v)
+        for p in pts:
+            _segment(buf, (hx, hy), p, 2.5 * k, 0.5 * v, 0.5 * v)
+        w = (u - 0.15) / 0.35
+        if 0 <= w <= 1:
+            _star(buf, pts[0], 28 * k * math.sin(math.pi * w), math.sin(math.pi * w))
+    return _guest_frames("freminet", ppu, fps, (420, 380, 120, 190), draw)
+
+
+def navia_shards(ppu: float = REF_PPU, fps: int = STAGE_FPS):
+    """Navia: a spray of gold crystal shards and a few confetti bits off
+    her. 0.6 s."""
+    rng = np.random.default_rng(GUEST_SEED + 8)
+    shards = [(math.radians(rng.uniform(-165, -15)), rng.uniform(420, 660), rng.uniform(-8, 8),
+               rng.uniform(30, 50), rng.uniform(14, 20)) for _ in range(9)]
+    bits = [(math.radians(rng.uniform(-160, -20)), rng.uniform(240, 440), rng.uniform(0, 2 * math.pi),
+             rng.uniform(8, 18), rng.uniform(9, 13), rng.uniform(4, 6)) for _ in range(10)]
+
+    def draw(buf, t, u, c, k, i):
+        cx, cy = c
+        if u < 0.18:
+            _disc(buf, (cx, cy), 65 * k, 1 - u / 0.18)
+        fade = _fade(u, 0.6)
+        for ang, speed, spin, length, width in shards:
+            x = cx + math.cos(ang) * speed * t * k
+            y = cy + (math.sin(ang) * speed * t + 0.5 * 1300 * t * t) * k
+            _shard(buf, (x, y), ang + spin * t, length * k, width * k, 0.95 * fade)
+        for ang, speed, spin0, spin_v, lw, lh in bits:
+            x = cx + math.cos(ang) * speed * t * k
+            y = cy + (math.sin(ang) * speed * t + 0.5 * 800 * t * t) * k
+            a = spin0 + spin_v * t
+            ca, sa = math.cos(a), math.sin(a)
+            hw, hh = lw * k / 2, lh * k / 2 * (0.4 + 0.6 * abs(ca))
+            quad = [(x + dx * ca - dy * sa, y + dx * sa + dy * ca) for dx, dy in ((-hw, -hh), (hw, -hh), (hw, hh), (-hw, hh))]
+            v = (0.55 + 0.45 * abs(math.cos(a * 1.7))) * fade
+            fill_quad(buf, quad, (v, v, v, v))
+    return _guest_frames("navia", ppu, fps, (520, 540, 260, 340), draw)
+
+
+def neuvillette_ring(ppu: float = REF_PPU, fps: int = STAGE_FPS):
+    """Neuvillette: a thin water ring that widens fast over the target.
+    0.5 s."""
+    def draw(buf, t, u, c, k, i):
+        cx, cy = c
+        if u < 0.14:
+            _disc(buf, (cx, cy), 32 * k, 1 - u / 0.14)
+        for t0, val in ((0.0, 0.95), (0.16, 0.55)):
+            w = (u - t0) / (1 - t0)
+            if 0 <= w <= 1:
+                R = 16 + 225 * (1 - (1 - min(1.0, w / 0.8)) ** 2)
+                _ring(buf, (cx, cy), R * k, (5 * (1 - w) + 2) * k, val * (1 - w) ** 1.1)
+    return _guest_frames("neuvillette", ppu, fps, (520, 520, 260, 260), draw)
+
+
+def chevreuse_crackle(ppu: float = REF_PPU, fps: int = STAGE_FPS):
+    """Chevreuse: a small Overloaded crackle spark off her. 0.5 s."""
+    def draw(buf, t, u, c, k, i):
+        cx, cy = c
+        rng = np.random.default_rng(GUEST_SEED + 10 + i // 2)    # the bolts re-strike every two frames
+        if u < 0.3:
+            _disc(buf, (cx, cy), 38 * k, 1 - u / 0.3)
+        v = _fade(u, 0.45)
+        for j in range(5):
+            ang = 2 * math.pi * (j + rng.uniform(-0.3, 0.3)) / 5
+            length = rng.uniform(60, 110) * (0.6 + 0.4 * min(1.0, u * 4))
+            pts, r = [(cx, cy)], 0.0
+            while r < length:
+                r = min(length, r + 22)
+                jit = rng.uniform(-12, 12)
+                pts.append((cx + (math.cos(ang) * r - math.sin(ang) * jit) * k,
+                            cy + (math.sin(ang) * r + math.cos(ang) * jit) * k))
+            last = max(1, len(pts) - 1)
+            for n, (a, b) in enumerate(zip(pts, pts[1:])):
+                _segment(buf, a, b, (5 - 3 * n / last) * k, v * (1 - 0.4 * n / last), v * (1 - 0.4 * (n + 1) / last))
+        for j in range(6):
+            ang = 2 * math.pi * j / 6 + 0.4
+            r = (20 + 140 * u) * k
+            _disc(buf, (cx + math.cos(ang) * r, cy + math.sin(ang) * r - 30 * u * u * k), 5 * k, v * 0.9, 0.6)
+    return _guest_frames("chevreuse", ppu, fps, (320, 320, 160, 160), draw)
+
+
+#: guest name -> its effect, in the manifest's guest order
+GUEST_EFFECTS = {
+    "charlotte": charlotte_flash, "chevreuse": chevreuse_crackle, "clorinde": clorinde_cross,
+    "escoffier": escoffier_frost, "freminet": freminet_plate, "lynette": lynette_swirl, "lyney": lyney_cards,
+    "navia": navia_shards, "neuvillette": neuvillette_ring, "sigewinne": sigewinne_bubbles,
+    "wriothesley": wriothesley_shock,
+}

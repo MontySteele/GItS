@@ -179,6 +179,24 @@ them and of her roster tile. Never hand-edit the scenes:
 .venv/Scripts/python -m tools.furina_rig gen [--check]          # write / check her two scenes and the eleven guests (no art)
 ```
 
+**Furina's guest effects (2026-10-16, `review/active/furina-guest-fx-2026-10-16.md`).**
+One short effect per guest star, drawn by `tools/char_render/fx.py`
+(`GUEST_EFFECTS`, numpy and Pillow, no render) and packed by `pack.py
+--guest-fx-only` into `ImageGen/images/furina/model/frames/furina_gfx_<name>.png`
+and the manifest's `guest_fx`; `tools/furina_rig/guest_fx.py` writes one
+`guest_fx_<name>.tscn` each (root metadata `anchor` and `length`, `%Fx` on the
+element shader at the manifest tint, `%FxPlayer` autoplaying the clip).
+`KleeMod.Vfx.FurinaGuestFx` instantiates the scene in the room's
+`CombatVfxContainer` on the enemy hit, on Furina or on the guest, and frees it
+when it ends; the game board calls it from the act's lunge, the act's hit and
+the line's cue, and Neuvillette's from the two doors his Hydro bonus is added
+in. The review sheet is `pack.py --guest-fx-sheet <png>`:
+
+```sh
+.venv/Scripts/python tools/char_render/pack.py --char furina --guest-fx-only --art-root <main checkout> [--check]
+.venv/Scripts/python tools/char_render/pack.py --char furina --guest-fx-sheet review/qa/furina-guest-fx-2026-10-16/sheet.png
+```
+
 **Kokomi's model art (`kokomi_clips.py`, `tools/kokomi_rig/`, phase A,
 2026-10-14).** Rendered 2026-10-14 (218 px at 1080p against a 217.7 target;
 `kokomi_frames.json` committed, both scenes generated, her layer-cut rig and

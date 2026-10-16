@@ -1,0 +1,142 @@
+[gd_scene load_steps=17 format=3]
+
+[ext_resource type="Texture2D" path="res://furina/model/frames/furina_gfx_clorinde.png" id="1_clorinde"]
+
+[sub_resource type="AtlasTexture" id="Atlas_clorinde_0"]
+atlas = ExtResource("1_clorinde")
+region = Rect2(0, 0, 119, 112)
+margin = Rect2(0, 0, 220, 198)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_clorinde_1"]
+atlas = ExtResource("1_clorinde")
+region = Rect2(119, 0, 257, 237)
+margin = Rect2(3, 3, 82, 73)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_clorinde_2"]
+atlas = ExtResource("1_clorinde")
+region = Rect2(376, 0, 335, 308)
+margin = Rect2(4, 2, 4, 2)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_clorinde_3"]
+atlas = ExtResource("1_clorinde")
+region = Rect2(711, 0, 333, 306)
+margin = Rect2(4, 4, 6, 4)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_clorinde_4"]
+atlas = ExtResource("1_clorinde")
+region = Rect2(0, 308, 333, 306)
+margin = Rect2(4, 4, 6, 4)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_clorinde_5"]
+atlas = ExtResource("1_clorinde")
+region = Rect2(333, 308, 333, 305)
+margin = Rect2(4, 4, 6, 5)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_clorinde_6"]
+atlas = ExtResource("1_clorinde")
+region = Rect2(666, 308, 331, 304)
+margin = Rect2(5, 5, 8, 6)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_clorinde_7"]
+atlas = ExtResource("1_clorinde")
+region = Rect2(0, 614, 329, 302)
+margin = Rect2(6, 6, 10, 8)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_clorinde_8"]
+atlas = ExtResource("1_clorinde")
+region = Rect2(329, 614, 327, 299)
+margin = Rect2(7, 7, 12, 11)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_clorinde_9"]
+atlas = ExtResource("1_clorinde")
+region = Rect2(656, 614, 323, 296)
+margin = Rect2(9, 9, 16, 14)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_clorinde_10"]
+atlas = ExtResource("1_clorinde")
+region = Rect2(0, 916, 320, 292)
+margin = Rect2(11, 11, 19, 18)
+filter_clip = true
+
+[sub_resource type="Shader" id="Shader_element"]
+code = "shader_type canvas_item;
+
+uniform vec4 element : source_color = vec4(0.560784, 1.0, 0.839216, 1.0);
+varying vec4 tint;
+
+void vertex() {
+	tint = COLOR;
+}
+
+void fragment() {
+	vec4 heat = texture(TEXTURE, UV);
+	COLOR = vec4(mix(element.rgb, vec3(1.0), smoothstep(0.72, 1.0, heat.r)), heat.a) * tint;
+}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tint"]
+shader = SubResource("Shader_element")
+shader_parameter/element = Color(0.7529, 0.549, 1, 1)
+
+[sub_resource type="Animation" id="Animation_clorinde"]
+resource_name = "clorinde"
+length = 0.55
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Fx:self_modulate")
+tracks/0/interp = 0
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.55),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Fx:texture")
+tracks/1/interp = 0
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [SubResource("Atlas_clorinde_0"), SubResource("Atlas_clorinde_1"), SubResource("Atlas_clorinde_2"), SubResource("Atlas_clorinde_3"), SubResource("Atlas_clorinde_4"), SubResource("Atlas_clorinde_5"), SubResource("Atlas_clorinde_6"), SubResource("Atlas_clorinde_7"), SubResource("Atlas_clorinde_8"), SubResource("Atlas_clorinde_9"), SubResource("Atlas_clorinde_10")]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_clorinde"]
+_data = {
+&"clorinde": SubResource("Animation_clorinde")
+}
+
+[node name="GuestFx" type="Node2D"]
+metadata/guest = "clorinde"
+metadata/anchor = "center"
+metadata/length = 0.55
+
+[node name="Fx" type="Sprite2D" parent="."]
+unique_name_in_owner = true
+self_modulate = Color(1, 1, 1, 0)
+material = SubResource("ShaderMaterial_tint")
+texture = SubResource("Atlas_clorinde_0")
+centered = false
+offset = Vector2(-170, -157)
+scale = Vector2(0.5, 0.5)
+
+[node name="FxPlayer" type="AnimationPlayer" parent="."]
+unique_name_in_owner = true
+libraries = {
+&"": SubResource("AnimationLibrary_clorinde")
+}
+autoplay = "clorinde"

@@ -136,3 +136,18 @@ def test_reset_refusals_lifts_the_stop(lane, capsys):
     assert blindplay_shape.refusal_streak() == 0
     assert blindplay_shape.pending_refusal("board") is None
     assert blindplay_shape.screen_changed_after("rewards") is None
+
+
+def test_new_seat_clears_its_own_lanes_streak(lane, capsys):
+    """2026-10-16: a fresh seat taking over a stopped run inherited the stop
+    (twice) until the coordinator cleared the streak by hand. `new-seat`
+    now clears it for the lane GITS_LANE names, and no other lane's."""
+    for _ in range(3):
+        blindplay_shape.count_refusal()
+        blindplay_shape.count_refusal("4")
+    assert blindplay_shape.refusal_streak() == 3
+    assert blindplay.main(["new-seat"]) == 0
+    assert "lane 3" in capsys.readouterr().out
+    assert blindplay_shape.refusal_streak() == 0
+    assert blindplay_shape.refusal_streak("4") == 3
+    blindplay_shape.clear_refusal_streak("4")
