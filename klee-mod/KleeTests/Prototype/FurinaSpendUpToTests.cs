@@ -66,30 +66,31 @@ public class FurinaSpendUpToTests
     [Fact]
     public void It_is_a_spend_only_when_at_least_one_is_spent()
     {
-        var mods = new StageMods { Thunderous = 3, Crescendo = 1 };
+        var mods = new StageMods { Thunderous = 3, StandingRoomOnly = 1 };
         var none = StageKit.With(mods, 0, StagePerformer.Chevreuse);
         Assert.Equal(0, Run(none.Director.SpendUpTo(10)));
         Assert.Equal(0, none.Stage.SpendsThisTurn);
         Assert.Equal(0, Count(none, "power "));
         Assert.Equal(0, Count(none, "vulnerable "));
-        Assert.Equal(0, Count(none, "draw "));
+        Assert.Equal(0, Count(none, "strength "));
 
         var one = StageKit.With(mods, 1, StagePerformer.Chevreuse);
         Assert.Equal(1, Run(one.Director.SpendUpTo(10)));
         Assert.Equal(1, one.Stage.SpendsThisTurn);
         Assert.Equal(1, Count(one, "power "));            // Thunderous Applause
         Assert.Contains("vulnerable Random 1", one.Board.Log);   // Chevreuse
-        Assert.Contains("draw 1", one.Board.Log);               // Crescendo
+        Assert.Contains("strength 1", one.Board.Log);   // Standing Room Only
     }
 
     [Fact]
-    public void Bis_and_standing_room_only_ignore_an_up_to_spend()
+    public void Bis_ignores_an_up_to_spend_and_standing_room_only_answers_both()
     {
+        // furina-next (2026-10-16): Standing Room Only answers every Spend.
         var mods = new StageMods { Bis = 1, StandingRoomOnly = 2 };
         var kit = StageKit.With(mods, 20);
         Assert.Equal(12, Run(kit.Director.SpendUpTo(12)));
         Assert.Equal(8, kit.Stage.Fanfare);                 // no half back
-        Assert.Equal(0, Count(kit, "strength "));
+        Assert.Contains("strength 2", kit.Board.Log);
         // The same bank through a spend-all: Bis! keeps half, SRO answers.
         var all = StageKit.With(mods, 20);
         Assert.Equal(20, Run(all.Director.SpendAll()));

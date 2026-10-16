@@ -987,10 +987,13 @@ POWER_HOOKS: dict[str, list[tuple[str, str, str]]] = {
                           _hook("shared", "block_held", "write")],
     "fs_showstopper": [_hook("private", "stage", "use")],
     "fs_ensemble_cast": [_hook("private", "stage", "write")],
-    "fs_crescendo": [_hook("private", "stage", "read"),
-                     _hook("shared", "draw_pile", "use"),
-                     _hook("shared", "hand_contents", "write")],
+    # furina-next (2026-10-16): Crescendo writes Fanfare at turn start; the
+    # upgraded Prima Donna draws.
+    "fs_crescendo": [_hook("private", "stage", "write")],
     "fs_prima_donna": [_hook("private", "stage", "read")],
+    "fs_prima_donna_plus": [_hook("private", "stage", "read"),
+                            _hook("shared", "draw_pile", "use"),
+                            _hook("shared", "hand_contents", "write")],
     "fs_standing_room_only": [_hook("private", "stage", "read")],
     "fs_high_stakes": [_hook("private", "stage", "read"),
                        _hook("shared", "card_identity", "write")],

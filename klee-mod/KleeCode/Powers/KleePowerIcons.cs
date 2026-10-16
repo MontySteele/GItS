@@ -406,6 +406,8 @@ internal static class KleePowerIcons
         PneumaTidesPower => KleePck.Path("furina/powers/ovation_trickle.png"),
         PrimaDonnaPower =>
             KleePck.Path("furina/powers/star_of_the_show.png"),
+        PrimaDonnaPlusPower =>
+            KleePck.Path("furina/powers/star_of_the_show.png"),
         ReginaOfAllWatersPower =>
             KleePck.Path("furina/powers/limelight.png"),
         ShowstopperPower => KleePck.Path("furina/powers/top_billing.png"),

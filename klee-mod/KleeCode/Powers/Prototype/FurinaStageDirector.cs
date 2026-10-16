@@ -205,7 +205,8 @@ public sealed class StageDirector
         _stage.Gain(amount, source);
 
     /// <summary>A Spend N. Thunderous Applause, Chevreuse's line and
-    /// Crescendo answer a Spend. Returns the price when the Spend was made
+    /// Standing Room Only answer a Spend. Returns the price when the Spend was
+    /// made
     /// (Navia's line may take less from the bank), 0 when it was not.
     /// </summary>
     public async Task<int> Spend(int price)
@@ -220,8 +221,7 @@ public sealed class StageDirector
     }
 
     /// <summary>"Spend all your Fanfare": one Spend. Returns what the card
-    /// reads (the whole bank; 0 held is no Spend). Standing Room Only answers
-    /// a spend-all of at least 1.</summary>
+    /// reads (the whole bank; 0 held is no Spend).</summary>
     public async Task<int> SpendAll()
     {
         var navia = _stage.NaviaDiscount > 0 && _stage.Fanfare > 0
@@ -232,16 +232,14 @@ public sealed class StageDirector
             _board.Effect(StageEffect.Spend);
             if (navia != null) await _board.LineCue(navia);
             await AfterSpend(spent);
-            var sro = _stage.Mods.StandingRoomOnly;
-            if (sro > 0 && !_board.Over) await _board.Strength(sro);
         }
         return spent;
     }
 
     /// <summary>"Spend up to X" (the Spend paper, 2026-10-10): one Spend when
     /// at least 1 counts, answered like any Spend (Thunderous Applause,
-    /// Chevreuse, Crescendo) but not like a spend-all (no Bis!, no Standing
-    /// Room Only). Returns what counts as spent.
+    /// Chevreuse, Standing Room Only) but not like a spend-all (no Bis!).
+    /// Returns what counts as spent.
     /// <paramref name="forPlay"/> is false for a guest's act.</summary>
     public async Task<int> SpendUpTo(int cap, bool forPlay = true,
                                       string source = "")
@@ -278,16 +276,26 @@ public sealed class StageDirector
     /// <summary>The source Freminet's act files its Spend under.</summary>
     public const string FreminetSpendSource = "Freminet";
 
+    /// <summary>What answers every Spend, whoever makes it (her cards, Full
+    /// House, Navia's and Freminet's acts, Showstopper): the one hook.
+    /// <paramref name="spent"/> is what the Spend counts as spent.</summary>
     private async Task AfterSpend(int spent)
     {
         await Thunderous();
         await Chevreuse();
-        var crescendo = _stage.Mods.Crescendo;
-        if (crescendo > 0 && _stage.SpendsThisTurn == 1 && !_board.Over)
-        {
-            await _board.Draw(crescendo);
-        }
+        await StandingRoomOnly(spent);
         await Bouquet(spent);
+    }
+
+    /// <summary>Standing Room Only (furina-next, 2026-10-16): "Whenever you
+    /// Spend, gain 1 Strength." A Spend of 0 is no Spend; every Spend that
+    /// counts at least 1 answers, a guest's and Showstopper's included.
+    /// Copies add.</summary>
+    private async Task StandingRoomOnly(int spent)
+    {
+        var sro = _stage.Mods.StandingRoomOnly;
+        if (sro <= 0 || spent <= 0 || _board.Over) return;
+        await _board.Strength(sro);
     }
 
     /// <summary>Bouquet of Roses (Furina's card pass, 2026-10-15): "Whenever
@@ -629,6 +637,36 @@ public sealed class StageDirector
 
     // ---- the turn-start Powers (the pool to 75) ----------------------------
 
+    public const string CrescendoTitle = "Crescendo";
+
+    /// <summary>Crescendo (furina-next, 2026-10-16): "At the start of your
+    /// turn, gain 2 [3] Fanfare, then 2 [3] more each turn after." Counted
+    /// from the turn it is played, so played on turn 1 it pays 2, 4, 6 on
+    /// turns 2 to 4 (<see cref="FurinaStageLedger.CrescendoDue"/>). Returns
+    /// the Fanfare gained.</summary>
+    public int Crescendo()
+    {
+        var applied = _stage.Mods.Crescendo;
+        if (applied <= 0 || _board.Over) return 0;
+        var due = _stage.CrescendoDue(applied);
+        return due > 0 ? _stage.Gain(due, CrescendoTitle) : 0;
+    }
+
+    /// <summary>Prima Donna (furina-next, 2026-10-16): "At the start of your
+    /// turn, if you Spent last turn, gain 1 Energy [and draw 1 card]." Last
+    /// turn is her previous turn, its end-of-turn Spends (Full House,
+    /// Showstopper) included; a Spend of 0 is no Spend. Returns the Energy
+    /// gained.</summary>
+    public async Task<int> PrimaDonna()
+    {
+        var energy = _stage.Mods.PrimaDonna;
+        if (energy <= 0 || !_stage.SpentLastTurn || _board.Over) return 0;
+        await _board.Energy(energy);
+        var draw = _stage.Mods.PrimaDonnaDraw;
+        if (draw > 0 && !_board.Over) await _board.Draw(draw);
+        return energy;
+    }
+
     /// <summary>Pneuma Tides: "At the start of your turn, Repay 2. Gain 1
     /// Vigor for any HP it could not Repay." One Repay of the summed amount.
     /// </summary>
@@ -871,7 +909,7 @@ public sealed class StageDirector
     /// guest's act deals damage, Spend up to 4: it deals that much more."
     /// [6] Called once by an act about to deal damage, before the hit; the
     /// copies' caps add into one Spend, a Spend like any (Thunderous
-    /// Applause, Chevreuse and Crescendo answer it), filed under Full House.
+    /// Applause, Chevreuse and Standing Room Only answer it), filed under Full House.
     /// Returns what it spent: the act's extra damage a hit (an act to ALL
     /// adds it to every enemy). Sim twin: <c>furina_tide.full_house</c>.
     /// </summary>

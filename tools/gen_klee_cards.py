@@ -889,7 +889,10 @@ ARM_KEYWORDS = (
     # `lead performer` became `front performer` everywhere. `Bow` is printed
     # as a verb, `[gold]Bow[/gold]s`, so the golded span is still the bare
     # word and the one token covers it.
-    ArmKeyword("Spend", ("Spend", "Spends"), "ArmKeywordTips.ForSpend"),
+    # Prima Donna (furina-next, 2026-10-16) prints the past tense: "if you
+    # Spent last turn".
+    ArmKeyword("Spend", ("Spend", "Spends", "Spent"),
+               "ArmKeywordTips.ForSpend"),
     ArmKeyword("Fanfare", ("Fanfare",), "ArmKeywordTips.ForFanfare"),
     # THE SALON'S TAB (2026-10-05): the HP loan's two verbs. `Bow`, `front
     # performer`, `Cue`, `Rehearsal`, `Ousia` and `Pneuma` left with the v2
@@ -3839,14 +3842,20 @@ APPLY_POWERS = {
         "again."),
     "fs_ensemble_cast": ("EnsembleCastPower", None,
         "You have 4 guest seats."),
+    # Furina's engines (furina-next, 2026-10-16): Crescendo counts from the
+    # turn it is played; Prima Donna's upgraded card installs the Plus power
+    # (`upgraded_power`), which also draws.
     "fs_crescendo": ("CrescendoPower", None,
-        "The first time you [gold]Spend[/gold] each turn, draw {X} card."),
+        "At the start of your turn, gain {X} [gold]Fanfare[/gold], then {X} "
+        "more each turn after."),
     "fs_prima_donna": ("PrimaDonnaPower", None,
-        "At the start of your turn, if you have 10 or more "
-        "[gold]Fanfare[/gold], gain 1 Energy."),
+        "At the start of your turn, if you [gold]Spent[/gold] last turn, "
+        "gain 1 Energy."),
+    "fs_prima_donna_plus": ("PrimaDonnaPlusPower", None,
+        "At the start of your turn, if you [gold]Spent[/gold] last turn, "
+        "gain 1 Energy and draw 1 card."),
     "fs_standing_room_only": ("StandingRoomOnlyPower", None,
-        "Whenever you [gold]Spend[/gold] all your [gold]Fanfare[/gold] and it "
-        "is at least 1, gain 1 [gold]Strength[/gold]."),
+        "Whenever you [gold]Spend[/gold], gain 1 [gold]Strength[/gold]."),
     "fs_high_stakes": ("HighStakesPower", None,
         "Your Attacks deal 1 additional damage for every {X} HP you have "
         "[gold]Drained[/gold] and not [gold]Repaid[/gold]."),

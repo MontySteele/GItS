@@ -9207,3 +9207,43 @@ at 0; the count clears at his next turn. Pins:
 `Tempest_charge_deals_12_and_costs_1_less_per_swirl_this_turn`
 (`klee-mod/KleeTests/Prototype/VarkaPrototypeTests.cs`). It leaves
 `varka_expansion_sim.GENERIC_DRAW`. Untested in game until a deploy.
+
+## Furina's engines, furina-next 2026-10-16
+
+`review/active/furina-next-2026-10-15.md`, pick 1 (a), as revised after
+GPT's review. [USER]: "On Furina's powers - I'm good with this now, ship
+it!" Three Powers keep their names, rarities and roles and each loses the
+condition that kept it from firing. Built on `furina-next`; it reaches `main`
+in the promotion PR with suite 2's record.
+
+| id | was | now |
+|---|---|---|
+| `proto_fs_crescendo` (Uncommon, 1) | The first time each turn you Spend, draw 1 card. (upg: Innate) | At the start of your turn, gain 2 [3] Fanfare, then 2 [3] more each turn after. |
+| `proto_fs_standing_room_only` (Rare) | 2 [1]. Whenever you Spend all your Fanfare and it is at least 1, gain 1 Strength. | 1. Whenever you Spend, gain 1 Strength. (upg: Innate) |
+| `proto_fs_prima_donna` (Rare) | 2 [1]. At the start of your turn, if you have 10 or more Fanfare, gain [E]. | 2. At the start of your turn, if you Spent last turn, gain [E] [and draw 1 card]. |
+
+- **Crescendo** counts from the turn it is played: its first payment is at
+  the next turn start (2, then 4, 6 ...; upgraded 3, 6, 9). The ledger keeps
+  each copy taken in and what it has paid (`FurinaStageLedger.CrescendoDue`,
+  read lazily at turn start as Fountain of Lucine is), so a later copy starts
+  small. It pays beside Grand Theater Program, before Regina.
+- **Standing Room Only** answers every Spend that counts at least 1, from the
+  director's one after-Spend hook (`StageDirector.AfterSpend`): her cards,
+  Full House, Navia's and Freminet's acts and Showstopper. A Spend of 0 is no
+  Spend. A Spend Navia's line discounts counts what the card counts (the
+  price), as every other Spend reader does.
+- **Prima Donna**'s "last turn" is latched when her turn closes
+  (`FurinaStageLedger.CloseTurn`, after the guests act), so end-of-turn
+  Spends (Full House, Showstopper) count and a Spend this turn never pays
+  this turn. The upgraded card installs `PrimaDonnaPlusPower`
+  (`upgraded_power: fs_prima_donna_plus`), which also draws 1. The 10-Fanfare
+  constant (`PrimaDonnaFanfare`) is gone. The Spend tip now also reads the
+  past tense, `[gold]Spent[/gold]`.
+- **The runaway check** (sec.3): Standing Room Only with Full House (4),
+  Showstopper and three damaging guests (Wriothesley, Clorinde, Lynette) on a
+  200 bank gives 7 Strength in one end of turn (three Full House Spends,
+  Showstopper's Spend 5, three more): `Full_house_showstopper_and_three_damaging_guests_give_seven_strength_a_turn`.
+
+Pins: `klee-mod/KleeTests/Prototype/FurinaEnginesTests.cs`; sim twin
+(`tier0/engine/furina_tide.py`) in `tier0/tests/test_furina_pool75.py` and
+`test_furina_spend_up_to.py`. Untested in game until a `+next` deploy.

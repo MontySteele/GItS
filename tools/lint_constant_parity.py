@@ -324,7 +324,6 @@ MIRRORED: dict[str, object] = {
     "FurinaStageLaw.HighStakesEvery": _stage("HIGH_STAKES_EVERY"),
     "FurinaStageLaw.HighStakesEveryUpgraded": _stage("HIGH_STAKES_EVERY_UPGRADED"),
     "FurinaStageLaw.HymnThreshold": _stage("HYMN_THRESHOLD"),
-    "FurinaStageLaw.PrimaDonnaFanfare": _stage("PRIMA_DONNA_FANFARE"),
     "FurinaStageLaw.ReginaDrain": _stage("REGINA_DRAIN"),
     "FurinaStageLaw.StarTurnFanfarePer": _stage("STAR_TURN_FANFARE_PER"),
     # The diversity pass (2026-10-11): Bravura's "for every 3 spent" and

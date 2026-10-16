@@ -3182,27 +3182,34 @@
    description: "Deal 15 damage. Costs 1 less for every 6 [gold]Fanfare[/gold] you have.",
    effects: [{op: damage, amount: 15, target: enemy}]}
 
+# Furina's engines (review/active/furina-next-2026-10-15.md, ruled
+# 2026-10-16): counts from the turn it is played, 2, 4, 6 ... [3, 6, 9].
+# Provenance note, "Furina's engines, furina-next 2026-10-16".
 - {id: proto_fs_crescendo, name: "Crescendo", character: furina,
-   upgrade: {innate: true},
+   upgrade: {power_amount: +1},
    authored_by: [claude],
    register: salon, cost: 1, type: power, rarity: uncommon,
-   description: "The first time each turn you [gold]Spend[/gold], draw 1 card.",
-   effects: [{op: apply_power, power: fs_crescendo, amount: 1,
+   description: "At the start of your turn, gain {PowerAmount:diff()} [gold]Fanfare[/gold], then {PowerAmount:diff()} more each turn after.",
+   effects: [{op: apply_power, power: fs_crescendo, amount: 2,
               target: self}]}
 
+# "Last turn" is her previous turn, its end-of-turn Spends included; a Spend
+# of 0 is no Spend. The upgraded card installs the Plus power, which draws.
 - {id: proto_fs_prima_donna, name: "Prima Donna", character: furina,
-   upgrade: {cost: -1},
+   upgrade: {upgraded_power: fs_prima_donna_plus},
    authored_by: [claude],
    register: salon, cost: 2, type: power, rarity: rare,
-   description: "At the start of your turn, if you have 10 or more [gold]Fanfare[/gold], gain {energyPrefix:energyIcons(1)}.",
+   description: "At the start of your turn, if you [gold]Spent[/gold] last turn, gain {energyPrefix:energyIcons(1)}{IfUpgraded:show: and draw 1 card|}.",
    effects: [{op: apply_power, power: fs_prima_donna, amount: 1,
               target: self}]}
 
+# Every Spend of at least 1 counts: her cards', a guest's (Full House, Navia,
+# Freminet) and Showstopper's.
 - {id: proto_fs_standing_room_only, name: "Standing Room Only", character: furina,
-   upgrade: {cost: -1},
+   upgrade: {innate: true},
    authored_by: [claude],
-   register: salon, cost: 2, type: power, rarity: rare,
-   description: "Whenever you [gold]Spend[/gold] all your [gold]Fanfare[/gold] and it is at least 1, gain 1 [gold]Strength[/gold].",
+   register: salon, cost: 1, type: power, rarity: rare,
+   description: "Whenever you [gold]Spend[/gold], gain 1 [gold]Strength[/gold].",
    effects: [{op: apply_power, power: fs_standing_room_only, amount: 1,
               target: self}]}
 

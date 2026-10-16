@@ -71,13 +71,15 @@ def test_it_is_a_spend_only_when_at_least_one_is_spent():
     assert st.enemies[0].powers.get("vulnerable") == 1
 
 
-def test_bis_and_standing_room_only_ignore_an_up_to_spend():
+def test_bis_ignores_an_up_to_spend_and_standing_room_only_answers_both():
+    # furina-next (2026-10-16): Standing Room Only answers every Spend.
     st = _furina(20)
     st.player.ftd.powers["bis"] = 1
     st.player.powers[FS.STANDING_ROOM_ONLY] = 2
     assert FS.spend_up_to(st, 12) == 12
     assert st.player.ftd.fanfare == 8                   # no half back
-    assert not st.player.powers.get("strength")
+    assert st.player.powers.get("strength") == 2
+    st.player.powers["strength"] = 0
     # The same bank through a spend-all: Bis! keeps half, SRO answers.
     st.player.ftd.fanfare = 20
     assert FS.spend_all(st) == 20

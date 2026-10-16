@@ -112,11 +112,22 @@ public sealed record StageMods
     /// end of her turn for Spend 5.</summary>
     public int Showstopper { get; init; }
 
-    /// <summary>Crescendo: cards drawn on the first Spend each turn.</summary>
+    /// <summary>Crescendo (furina-next, 2026-10-16): the applied total of its
+    /// steps (2 a copy, 3 upgraded). What each copy has paid is the ledger's
+    /// (<see cref="FurinaStageLedger.CrescendoDue"/>).</summary>
     public int Crescendo { get; init; }
 
-    /// <summary>Standing Room Only: Strength per spend-all of at least 1.
+    /// <summary>Prima Donna (furina-next, 2026-10-16): Energy at turn start
+    /// when she Spent last turn, every copy (upgraded or not) adding 1.
     /// </summary>
+    public int PrimaDonna { get; init; }
+
+    /// <summary>The upgraded Prima Donna's cards drawn with that Energy.
+    /// </summary>
+    public int PrimaDonnaDraw { get; init; }
+
+    /// <summary>Standing Room Only (furina-next, 2026-10-16): Strength per
+    /// Spend of at least 1, whoever makes it.</summary>
     public int StandingRoomOnly { get; init; }
 
     /// <summary>Hymn of Renewal: Strength per Repay of 4 or more HP.</summary>
@@ -346,6 +357,9 @@ public sealed class FurinaStageLedger
         Opened = false;
         _fountains.Clear();
         FountainSeen = 0;
+        _crescendos.Clear();
+        CrescendoSeen = 0;
+        SpentLastTurn = false;
         _spends.Clear();
         PeakFanfare = 0;
         PlayingCard = "";
@@ -522,7 +536,13 @@ public sealed class FurinaStageLedger
 
     /// <summary>The end of her turn, after the guests act: the
     /// since-her-last-turn window opens again.</summary>
-    public void CloseTurn() => HpLostSinceLastTurn = 0;
+    public void CloseTurn()
+    {
+        HpLostSinceLastTurn = 0;
+        // Prima Donna (furina-next, 2026-10-16): the turn that just closed
+        // is "last turn" at her next turn start.
+        SpentLastTurn = SpendsThisTurn > 0;
+    }
 
     /// <summary>Rule 2: how much a Repay of <paramref name="amount"/> returns
     /// at this HP: never more than she drained, never past Max HP. Clamps the
@@ -682,7 +702,7 @@ public sealed class FurinaStageLedger
     }
 
     /// <summary>Spends made this turn (the "first Spend each turn" of
-    /// Navia's line and Crescendo).</summary>
+    /// Navia's line; Prima Donna reads it at the turn's close).</summary>
     public int SpendsThisTurn { get; private set; }
 
     /// <summary>Navia's line (the pool to 75): what the next Spend is
@@ -844,6 +864,42 @@ public sealed class FurinaStageLedger
 
     /// <summary>Is any Repay still owed?</summary>
     public bool OwesRepays => _fountains.Count > 0;
+
+    // ---- Crescendo: a Fanfare gain that grows each turn (furina-next) -----
+
+    /// <summary>Each Crescendo taken in: { step, payments made }.</summary>
+    private readonly List<int[]> _crescendos = new();
+
+    /// <summary>How much of Crescendo's applied total (its steps) has been
+    /// taken in. Like Fountain of Lucine it is read lazily at her turn start,
+    /// so a copy played this turn first pays at the next.</summary>
+    public int CrescendoSeen { get; private set; }
+
+    /// <summary>Crescendo at this turn start: "gain 2 [3] Fanfare, then 2 [3]
+    /// more each turn after", counted from the turn it was played. The steps
+    /// applied since the last turn start become one new voice; each voice
+    /// then pays its step times the turns it has paid, this one included
+    /// (2, 4, 6 ...). Returns the Fanfare due (0 with none).</summary>
+    public int CrescendoDue(int applied)
+    {
+        if (applied > CrescendoSeen)
+        {
+            _crescendos.Add(new[] { applied - CrescendoSeen, 0 });
+            CrescendoSeen = applied;
+        }
+        var due = 0;
+        foreach (var voice in _crescendos)
+        {
+            voice[1]++;
+            due += voice[0] * voice[1];
+        }
+        return due;
+    }
+
+    /// <summary>Did she Spend (at least 1) during her previous turn, its
+    /// end-of-turn Spends included? Prima Donna's "if you Spent last turn";
+    /// latched when her turn closes (<see cref="CloseTurn"/>).</summary>
+    public bool SpentLastTurn { get; private set; }
 
     /// <summary>A fresh per-play spend record (every card play).
     /// <paramref name="card"/> is the card's name as the play telemetry

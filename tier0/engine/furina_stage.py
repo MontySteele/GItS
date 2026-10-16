@@ -97,7 +97,6 @@ SHOWSTOPPER_SPEND = T.SHOWSTOPPER_SPEND
 HIGH_STAKES_EVERY = T.HIGH_STAKES_EVERY
 HIGH_STAKES_EVERY_UPGRADED = T.HIGH_STAKES_EVERY_UPGRADED
 HYMN_THRESHOLD = T.HYMN_THRESHOLD
-PRIMA_DONNA_FANFARE = T.PRIMA_DONNA_FANFARE
 REGINA_DRAIN = T.REGINA_DRAIN
 STAR_TURN_FANFARE_PER = T.STAR_TURN_FANFARE_PER
 BRAVURA_SPENT_PER = T.BRAVURA_SPENT_PER
@@ -130,6 +129,8 @@ SHOWSTOPPER = "fs_showstopper"
 ENSEMBLE_CAST = "fs_ensemble_cast"
 CRESCENDO = "fs_crescendo"
 PRIMA_DONNA = "fs_prima_donna"
+# furina-next (2026-10-16): the upgraded Prima Donna's power, which also draws.
+PRIMA_DONNA_PLUS = "fs_prima_donna_plus"
 STANDING_ROOM_ONLY = "fs_standing_room_only"
 HIGH_STAKES = "fs_high_stakes"
 REGINA_OF_ALL_WATERS = "fs_regina_of_all_waters"
@@ -157,6 +158,7 @@ ARM_POWER_IDS = {
     "ensemble_cast": ENSEMBLE_CAST,
     "crescendo": CRESCENDO,
     "prima_donna": PRIMA_DONNA,
+    "prima_donna_plus": PRIMA_DONNA_PLUS,
     "standing_room_only": STANDING_ROOM_ONLY,
     "high_stakes": HIGH_STAKES,
     "regina": REGINA_OF_ALL_WATERS,
@@ -987,8 +989,9 @@ READINGS: tuple[str, ...] = (
     "and again after Showstopper.",
     "Escoffier's line adds to every damaging act, his own included; it does "
     "not touch Block or Repay acts.",
-    "Regina drains first at turn start, then Fountain of Lucine and Pneuma "
-    "Tides Repay, then Prima Donna reads the Fanfare.",
+    "Crescendo gains first at turn start, then Regina drains, then Fountain "
+    "of Lucine and Pneuma Tides Repay, then Prima Donna pays if she Spent "
+    "last turn (furina-next, 2026-10-16).",
     "Salon Solitaire's Repay comes after the guests act, at the end of her "
     "turn.",
     "Charlotte's line counts the Singer's end-of-turn Repay: with no Repay "

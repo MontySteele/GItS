@@ -1025,7 +1025,7 @@
       "damage": 1
     },
     "proto_fs_crescendo": {
-      "innate": true
+      "power_amount": 1
     },
     "proto_fs_critics_darling": {
       "cost": -1
@@ -1141,7 +1141,7 @@
       "stage_repay": 2
     },
     "proto_fs_prima_donna": {
-      "cost": -1
+      "upgraded_power": "fs_prima_donna_plus"
     },
     "proto_fs_private_box": {
       "formula_base": 2,
@@ -1182,7 +1182,7 @@
       "retain": true
     },
     "proto_fs_standing_room_only": {
-      "cost": -1
+      "innate": true
     },
     "proto_fs_star_turn": {
       "damage": 5
