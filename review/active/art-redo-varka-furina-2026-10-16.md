@@ -8,7 +8,7 @@ rows below had a real defect (logo or text, a duplicate of another card, a tiny
 upscaled icon, a screenshot), and Claude chose a replacement for each from a
 sheet of the actual crops. This PR changes `art/plan.tsv` (the rank-1 row of
 each card, which is the picture that ships) and the matching
-`art/SOURCES.tsv` lines. All 31 crops come from the Genshin Impact fandom wiki
+`art/SOURCES.tsv` lines. All 37 crops come from the Genshin Impact fandom wiki
 (official art).
 
 ## The swaps
@@ -43,6 +43,12 @@ each card, which is the picture that ships) and the matching
 | Knight of Boreas | same still as Charge of the Knights; shows Kaeya | NPC Wolf Knight.png |
 | Frost Ward, Kindled Edge, Rippling Guard, Storm Battery | logo and white frame in the crop | same birthday art, zoomed (`x0.5,y0.52@1.35`) past the logo and frame |
 | Boreas Fang (relic) | same icon as Andrius's Howl | Item Boreal Wolf's Broken Fang.png |
+| Absolute Zero | Ganyu (Liyue); pick 2 | Character Diona Full Wish.png |
+| Chain Lightning | Beidou (Liyue); pick 2 | Fischl Birthday 2023.png, zoomed past the logo |
+| Charged Lunge | Cyno (Sumeru); pick 2 | Razor Birthday 2023.png, zoomed past the logo |
+| Static Field | Keqing (Liyue); pick 2 | Lisa Birthday 2025.png, zoomed past the logo |
+| Tidal Bulwark | Freminet (Fontaine); pick 2 | Dahlia Birthday 2026.png, zoomed past the logo |
+| Knights' Muster | "Song of the Welkin Moon" title in the top left | same wallpaper, zoomed (`x0.5,y0.58@1.2`) past the title |
 
 Notes:
 
@@ -69,9 +75,9 @@ git: official art stays out of the repo (`docs/current/operations/art.md`), and
   hunt were offered on two or three rows at once, and Quick Flourish and
   Thunderous Applause found nothing new. A later Furina redo will have very
   few official files left to choose from.
-- Some of Varka's off-element cards show characters from other nations: Cyno
-  on Charged Lunge, Beidou on Chain Lightning, Keqing on Static Field, Ganyu on
-  Absolute Zero. They stay as they are (pick 2).
+- Varka's cards now show only Mondstadt characters (pick 2, ruled (b)). The
+  full wish art of Razor and Dahlia was not used: Razor — Lightning Fang and
+  Dahlia — Favonian Favor already wear it.
 
 **After merge (main checkout, Git Bash).** This fetches only these rows'
 sources into `art/raw`, renders them, promotes rank 1 into `ImageGen`, and
@@ -80,7 +86,7 @@ rewritten.
 
 ```sh
 cd C:/Users/Monty/Documents/GitHub/GItS
-IDS=proto_fs_curtain_rise,singer_of_many_waters,mademoiselle_crabaletta,proto_fs_bis,proto_fs_the_show_must_go_on,proto_fs_crowd_favorite,proto_fs_bubble_aria,proto_fs_crescendo,proto_fs_ebb_and_flow,proto_fs_tidal_flourish,proto_fs_final_bow,guest_neuvillette_droplets,guest_neuvillette_judgment,proto_fs_plot_twist,proto_fs_pneuma_refrain,proto_fs_arkhe_in_balance,proto_fs_riptide_lunge,surintendante_chevalmarin,proto_vk_oathbound_aegis,proto_vk_wildfire_oath,proto_vk_vow_of_the_blade,proto_vk_tailwind_stride,proto_vk_knights_roll_call,proto_vk_unwavering_banner,proto_vk_converging_winds,proto_vk_sworn_brotherhood,proto_vk_frost_ward,proto_vk_kindled_edge,proto_vk_rippling_guard,proto_vk_storm_battery,relic_boreas_fang
+IDS=proto_fs_curtain_rise,singer_of_many_waters,mademoiselle_crabaletta,proto_fs_bis,proto_fs_the_show_must_go_on,proto_fs_crowd_favorite,proto_fs_bubble_aria,proto_fs_crescendo,proto_fs_ebb_and_flow,proto_fs_tidal_flourish,proto_fs_final_bow,guest_neuvillette_droplets,guest_neuvillette_judgment,proto_fs_plot_twist,proto_fs_pneuma_refrain,proto_fs_arkhe_in_balance,proto_fs_riptide_lunge,surintendante_chevalmarin,proto_vk_oathbound_aegis,proto_vk_wildfire_oath,proto_vk_vow_of_the_blade,proto_vk_tailwind_stride,proto_vk_knights_roll_call,proto_vk_unwavering_banner,proto_vk_converging_winds,proto_vk_sworn_brotherhood,proto_vk_frost_ward,proto_vk_kindled_edge,proto_vk_rippling_guard,proto_vk_storm_battery,relic_boreas_fang,proto_vk_absolute_zero,proto_vk_chain_lightning,proto_vk_charged_lunge,proto_vk_static_field,proto_vk_tidal_bulwark,proto_vk_knights_muster
 .venv/Scripts/python.exe -c "import sys,urllib.request as u;sys.path.insert(0,'tools');import art_fetch as f;ids=set(sys.argv[1].split(','));t=sorted({r['title'] for r in f.read_plan() if r['asset_id'] in ids and r['rank']==1});res=f.resolve(t);[(f.RAW/f.rawname(x)).write_bytes(u.urlopen(u.Request(res[x][0],headers=f.HEADERS),timeout=120).read()) for x in t if x in res and not (f.RAW/f.rawname(x)).exists()];print(len(res),'of',len(t),'resolved')" "$IDS"
 printf '%s\t1\n' ${IDS//,/ } > "$TEMP/art-redo-picks.tsv"
 .venv/Scripts/python.exe tools/art_process.py --assets "$IDS"
@@ -90,12 +96,14 @@ powershell -File tools/build_pck.ps1
 
 `--assets` renders every rank of these rows. A GAP line for a rank 2 or 3
 whose source is not on disk does not matter: only rank 1 is promoted. Expect
-"31 picks promoted".
+"37 picks promoted".
 
 ## Picks
 1. **The new art.**
    - **(a) Default:** take every swap in the table.
    - (b) Take them except the ones you name.
-2. **Varka's other-nation faces.**
-   - **(a) Default:** keep them; the cards are off-element by design.
-   - (b) Re-pick them with Mondstadt characters where one fits.
+2. **Varka's other-nation faces.** Ruled (b). [USER]: "let's try and clean up
+   Varka to only Use characters affiliated from Mondstadt (this would include
+   recent releases like Nicole, Durin, Prune) rather than off-region
+   characters." The five rows re-picked are in the table; Knights. Muster.s
+   title crop was fixed alongside. Preview: `...scratchpadmond-candops-final.png`.

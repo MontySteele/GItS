@@ -2390,8 +2390,8 @@ power_varka_electro_wind	ImageGen/images/varka/powers/electro_wind.png	256	256	c
 power_varka_stormward_stance	ImageGen/images/varka/powers/stormward_stance.png	256	256	contain	center	shortlist	1	png	Talent Wind's Vanguard.png		icon
 power_varka_converging_winds	ImageGen/images/varka/powers/converging_winds.png	256	256	contain	center	shortlist	1	png	Talent Northwind Avatar.png		icon
 power_varka_boreas_unbound	ImageGen/images/varka/powers/boreas_unbound.png	256	256	contain	center	shortlist	1	png	Talent Windbound Execution.png		icon
-# Cards: 2 starter signatures + 19 pool cards. Wordmarked sources (Introduction Card, Card 2, Banner) are cropped or pushed in past their printed names.
-proto_vk_knights_muster	ImageGen/images/cards/varka/proto_vk_knights_muster.png	500	380	cover	center	shortlist	1	png	Version Luna V Wallpaper 1.png		splash
+# Cards: 2 starter signatures + 19 pool cards. Wordmarked sources (Introduction Card, Card 2, Banner) are cropped or pushed in past their printed names. ; zoomed past the title (art redo 2026-10-16)
+proto_vk_knights_muster	ImageGen/images/cards/varka/proto_vk_knights_muster.png	500	380	cover	x0.5,y0.58@1.2	shortlist	1	png	Version Luna V Wallpaper 1.png		splash
 proto_vk_four_winds_ascension	ImageGen/images/cards/varka/proto_vk_four_winds_ascension.png	500	380	cover	x0.5,y0.45	shortlist	1	png	Varka Wish.png		splash
 proto_vk_windbound_execution	ImageGen/images/cards/varka/proto_vk_windbound_execution.png	500	380	cover	center	shortlist	1	png	Version Luna V Wallpaper 2.png		splash
 proto_vk_squall	ImageGen/images/cards/varka/proto_vk_squall.png	500	380	cover	x0.55,y0.35	shortlist	1	png	Varka Profile.png		splash
@@ -2624,8 +2624,8 @@ proto_kk_watatsumi_resistance	ImageGen/images/cards/kokomi/proto_kk_watatsumi_re
 proto_kk_watatsumis_grace	ImageGen/images/cards/kokomi/proto_kk_watatsumis_grace.png	500	380	cover	x0.42	shortlist	1	png	Watatsumi Island.png		splash	kokomi_pool
 # proto_kk_weight_of_the_plan <- chibi Kokomi at her desk, Kokomi framed
 proto_kk_weight_of_the_plan	ImageGen/images/cards/kokomi/proto_kk_weight_of_the_plan.png	500	380	cover	x0.40,y0.42@1.3	shortlist	1	png	Sangonomiya Kokomi TPRGT 2023 - Aether.png		splash	kokomi_pool
-# proto_vk_absolute_zero <- Ganyu, face and ice
-proto_vk_absolute_zero	ImageGen/images/cards/varka/proto_vk_absolute_zero.png	500	380	cover	x0.45,y0.28@2.2	shortlist	1	png	Character Ganyu Full Wish.png		splash	
+# proto_vk_absolute_zero <- Diona, Mondstadt (was Ganyu; art redo 2026-10-16, pick 2 (b))
+proto_vk_absolute_zero	ImageGen/images/cards/varka/proto_vk_absolute_zero.png	500	380	cover	x0.36,y0.22@2.2	shortlist	1	png	Character Diona Full Wish.png		splash	
 # proto_vk_amber_sharpshooter <- Amber, face in frame
 proto_vk_amber_sharpshooter	ImageGen/images/cards/varka/proto_vk_amber_sharpshooter.png	500	380	cover	x0.42,y0.40@1.4	shortlist	1	png	Amber Birthday 2022.png		splash	
 # proto_vk_assembly_at_the_cathedral <- the cathedral nave
@@ -2642,14 +2642,14 @@ proto_vk_barbara_whisper_of_water	ImageGen/images/cards/varka/proto_vk_barbara_w
 proto_vk_blazing_charge	ImageGen/images/cards/varka/proto_vk_blazing_charge.png	500	380	cover	x0.57,y0.26@2.4	shortlist	1	png	Character Bennett Full Wish.png		splash	
 # proto_vk_cavalry_charge <- Varka at the centre of his knights
 proto_vk_cavalry_charge	ImageGen/images/cards/varka/proto_vk_cavalry_charge.png	500	380	cover	x0.50,y0.40@1.2	shortlist	1	png	Story Quest Fated Warrior.png		splash	
-# proto_vk_chain_lightning <- Beidou, face and lightning (Fischl Full Wish is taken: L1)
-proto_vk_chain_lightning	ImageGen/images/cards/varka/proto_vk_chain_lightning.png	500	380	cover	x0.53,y0.25@2	shortlist	1	png	Character Beidou Full Wish.png		splash	
+# proto_vk_chain_lightning <- Fischl, Mondstadt (was Beidou; art redo 2026-10-16, pick 2 (b))
+proto_vk_chain_lightning	ImageGen/images/cards/varka/proto_vk_chain_lightning.png	500	380	cover	x0.4,y0.32@1.5	shortlist	1	png	Fischl Birthday 2023.png		splash	
 # proto_vk_change_of_guard <- Jean at her desk in the Knights' office, waist up
 proto_vk_change_of_guard	ImageGen/images/cards/varka/proto_vk_change_of_guard.png	500	380	cover	x0.36,y0.42@4.4	shortlist	1	png	Hangout Event An Ordinary Day for the Knights of Favonius.png		splash	
 # proto_vk_charge_of_the_knights <- Jean leading the Knights in the headquarters hall, waist up
 proto_vk_charge_of_the_knights	ImageGen/images/cards/varka/proto_vk_charge_of_the_knights.png	500	380	cover	x0.66,y0.29@3.4	shortlist	1	png	Archon Quest Knights of Favonius.png		splash	knights_of_favonius_aq
-# proto_vk_charged_lunge <- Cyno, face and lightning (Razor Wish is taken: L1)
-proto_vk_charged_lunge	ImageGen/images/cards/varka/proto_vk_charged_lunge.png	500	380	cover	x0.50,y0.30@1.8	shortlist	1	png	Character Cyno Full Wish.png		splash	
+# proto_vk_charged_lunge <- Razor, Mondstadt (was Cyno; art redo 2026-10-16, pick 2 (b))
+proto_vk_charged_lunge	ImageGen/images/cards/varka/proto_vk_charged_lunge.png	500	380	cover	x0.55,y0.36@1.6	shortlist	1	png	Razor Birthday 2023.png		splash	
 # proto_vk_crosscurrent <- Sucrose, face in frame
 proto_vk_crosscurrent	ImageGen/images/cards/varka/proto_vk_crosscurrent.png	500	380	cover	x0.47,y0.25@2.4	shortlist	1	png	Character Sucrose Full Wish.png		splash	
 # proto_vk_crosswind <- Venti, face in frame
@@ -2718,8 +2718,8 @@ proto_vk_rising_gale	ImageGen/images/cards/varka/proto_vk_rising_gale.png	500	38
 proto_vk_shifting_gale	ImageGen/images/cards/varka/proto_vk_shifting_gale.png	500	380	cover	x0.33,y0.42@1.2	shortlist	1	png	Venti Birthday 2021.png		splash	
 # proto_vk_short_circuit <- Razor, face in frame
 proto_vk_short_circuit	ImageGen/images/cards/varka/proto_vk_short_circuit.png	500	380	cover	x0.45,y0.32@1.6	shortlist	1	png	Genshin-Impact-Razor.png		splash	
-# proto_vk_static_field <- Keqing, face in frame
-proto_vk_static_field	ImageGen/images/cards/varka/proto_vk_static_field.png	500	380	cover	x0.56,y0.28@2.4	shortlist	1	png	Character Keqing Full Wish.png		splash	
+# proto_vk_static_field <- Lisa, Mondstadt (was Keqing; art redo 2026-10-16, pick 2 (b))
+proto_vk_static_field	ImageGen/images/cards/varka/proto_vk_static_field.png	500	380	cover	x0.5,y0.38@1.5	shortlist	1	png	Lisa Birthday 2025.png		splash	
 # proto_vk_storm_surge <- Dvalin over the forest
 proto_vk_storm_surge	ImageGen/images/cards/varka/proto_vk_storm_surge.png	500	380	cover	x0.55	shortlist	1	png	Dvalin In-Game.png		splash	
 # proto_vk_sworn_brotherhood <- the Wolf Knight beside a great wolf before Mondstadt (art redo 2026-10-16)
@@ -2732,8 +2732,8 @@ proto_vk_tempest_of_the_four_winds	ImageGen/images/cards/varka/proto_vk_tempest_
 proto_vk_the_order_answers	ImageGen/images/cards/varka/proto_vk_the_order_answers.png	500	380	cover	x0.42,y0.30@1.6	shortlist	1	png	Eula Introduction Card.png		splash	
 # proto_vk_thundering_verdict <- Razor, face in frame
 proto_vk_thundering_verdict	ImageGen/images/cards/varka/proto_vk_thundering_verdict.png	500	380	cover	x0.45,y0.38@1.4	shortlist	1	png	Razor Birthday 2025.png		splash	
-# proto_vk_tidal_bulwark <- Freminet, face and water (Furina Full Wish is taken: L1)
-proto_vk_tidal_bulwark	ImageGen/images/cards/varka/proto_vk_tidal_bulwark.png	500	380	cover	x0.60,y0.38@2.4	shortlist	1	png	Character Freminet Full Wish.png		splash	
+# proto_vk_tidal_bulwark <- Dahlia, Mondstadt (was Freminet; art redo 2026-10-16, pick 2 (b))
+proto_vk_tidal_bulwark	ImageGen/images/cards/varka/proto_vk_tidal_bulwark.png	500	380	cover	x0.5,y0.4@1.5	shortlist	1	png	Dahlia Birthday 2026.png		splash	
 # proto_vk_twin_gales <- chibi Aether and Venti picnic
 proto_vk_twin_gales	ImageGen/images/cards/varka/proto_vk_twin_gales.png	500	380	cover	y0.42	shortlist	1	png	Venti Birthday 2021 - Shorts.png		splash	
 # proto_vk_unwavering_banner <- the Mondstadt emblem as a banner over a hall (art redo 2026-10-16)
