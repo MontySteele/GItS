@@ -22,6 +22,9 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
+- **Lore review** (`lore-review-2026-10-15.md`, four picks, all (a)): eight
+  Varka renames, five Furina renames, Klee's Ka-pow!, and a sourced lore check
+  before the Workshop release.
 - **Distribution readiness** (`distribution-readiness-2026-10-12.md`, two picks,
   defaults (a)): a closed beta now, public early access once Varka and Furina
   reach Balance; a GitHub release first. (The `LAW.md` art line, #1145, is
