@@ -9240,8 +9240,10 @@ Levels higher).
   number; Daisesshou's and Replanting's withers act as their Last Bloom;
   Replanting's new Sakura starts at the withered one's Level plus 1 [2], and
   Fox's Mooncall still adds; Late Night Reading's "3 Sakura" is 3 or more;
-  Eternity stops every timer; Enlightened Blessing draws on every wither,
+  Eternity stops every timer; Scattered Blossoms draws on every wither,
   a replacing plant's included; The Shrine's Sacred Shade counts the Sakura
   standing as the turn ends, before they act; Editorial Priority frees one
-  card a turn however many copies. Enlightened Blessing shares its name with
-  her upgraded relic.
+  card a turn however many copies.
+- **Renamed on build.** The paper's "Enlightened Blessing" Power ships as
+  Scattered Blossoms (coordinator, on #1347): her starter relic's Orobas
+  upgrade already carries the name. The id stays `proto_ym_enlightened_blessing`.

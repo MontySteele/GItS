@@ -87,7 +87,7 @@ THE RULES AS MODELLED (review r3, ruled 2026-10-14,
   * THE POOL TO 78 (same paper, sec.2): a strike AIMED at a chosen enemy
     (Sacred Spark, Narukami Judgment, Saiguu's Lesson, Fox's Verdict, Kitsune
     Pounce) is one hit on it, a Foxfire Sakura's included; only a Sakura's
-    own act hits ALL. Enlightened Blessing draws per Sakura that withers;
+    own act hits ALL. Scattered Blossoms draws per Sakura that withers;
     Saiguu's Lesson strikes an enemy she makes Weak; The Shrine's Sacred
     Shade gives Block per Sakura as her turn ends; Editorial Priority frees
     the first Annotated card each turn; Stellar Conduct strikes again on a
@@ -705,7 +705,7 @@ def wither_oldest(state, reason: str = "fallen_petals") -> bool:
 
 
 def _withered(state, n: int) -> None:
-    """ENLIGHTENED BLESSING (the pool to 78): "Whenever a Sakura withers,
+    """SCATTERED BLOSSOMS (the pool to 78): "Whenever a Sakura withers,
     draw 1 card", per stack per Sakura. C# twin: `YaeShrine.Withered`."""
     per = _power(state.player, ENLIGHTENED_BLESSING)
     if per > 0 and n > 0:

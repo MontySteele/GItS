@@ -458,15 +458,15 @@ public static class YaeShrine
             }
             var replaced = ledger.WouldReplace(cap, kind);
             ledger.Plant(PlantLevel(yae), startLevel, inherited, cap, kind, lasts);
-            // A replaced oldest withered (the pool to 78: Enlightened
-            // Blessing reads every wither).
+            // A replaced oldest withered (the pool to 78: Scattered
+            // Blossoms reads every wither).
             if (replaced) await Withered(choiceContext, yae, 1);
         }
         await SakuraBadge.Sync(choiceContext, yae);
     }
 
     /// <summary>
-    /// ENLIGHTENED BLESSING (the pool to 78): "Whenever a Sakura withers,
+    /// SCATTERED BLOSSOMS (the pool to 78): "Whenever a Sakura withers,
     /// draw 1 card." Paid once per Sakura that withered, per stack: a timer
     /// run out, Fallen Petals, Replanting, Daisesshou, a full-shrine plant
     /// that replaced the oldest. Sim twin: <c>yae_shrine._withered</c>.

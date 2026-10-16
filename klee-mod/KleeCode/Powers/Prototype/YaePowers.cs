@@ -422,14 +422,14 @@ public sealed class EditorInChiefPower : PowerModel, ILocalizationProvider
 //  tier0/engine/yae_shrine.py.
 // ---------------------------------------------------------------------------
 
-/// <summary>Enlightened Blessing: "Whenever a Sakura withers, draw 1 card."
+/// <summary>Scattered Blossoms: "Whenever a Sakura withers, draw 1 card."
 /// Paid by <see cref="YaeShrine.Withered"/>, one card per stack per Sakura
 /// that withered.</summary>
 public sealed class EnlightenedBlessingPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
-        ("title", "Enlightened Blessing"),
+        ("title", "Scattered Blossoms"),
         ("description",
             "Whenever a [gold]Sakura[/gold] withers, draw [blue]{Amount}[/blue] "
           + "{Amount:plural:card|cards}."),

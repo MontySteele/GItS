@@ -44,7 +44,7 @@ public sealed class ProtoYmEnlightenedBlessing : CustomCardModel, ICharacterCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Enlightened Blessing"),
+        ("title", "Scattered Blossoms"),
         ("description", "Whenever a [gold]Sakura[/gold] withers, draw 1 card."),
     };
 

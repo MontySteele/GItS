@@ -5077,7 +5077,7 @@
               else: [{op: draw, amount: 2}]}],
    upgrade: {draw: 1}}
 
-- {id: proto_ym_enlightened_blessing, name: "Enlightened Blessing", character: yae,
+- {id: proto_ym_enlightened_blessing, name: "Scattered Blossoms", character: yae,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
    description: "Whenever a [gold]Sakura[/gold] withers, draw 1 card.",
