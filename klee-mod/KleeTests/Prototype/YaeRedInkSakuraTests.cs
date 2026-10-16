@@ -121,7 +121,7 @@ public class YaeRedInkSakuraTests : IDisposable
     public void The_planting_cards_carry_the_marker_and_only_plant()
     {
         foreach (var card in new CardModel[]
-                 { new ProtoYmYakanEvocation(), new ProtoYmTwinSakura(), new ProtoYmGraftedBranch() })
+                 { new ProtoYmYakanEvocation(), new ProtoYmTwinSakura(), new ProtoYmReplanting() })
         {
             Assert.True(YaeAnnotationReach.Plants(card), card.GetType().Name);
             Assert.False(YaeAnnotationReach.DealsDamage(card), card.GetType().Name);
@@ -146,14 +146,19 @@ public class YaeRedInkSakuraTests : IDisposable
     }
 
     [Fact]
-    public void Print_runs_own_block_counts_for_red_ink()
+    public void A_calculated_block_and_a_yae_kinds_block_count_for_red_ink()
     {
-        // Since 2026-10-15 Print Run's Block is a CalculatedBlockVar (its
-        // face shows the total in combat), so the game's own GainsBlock
-        // answers, as on Expect a Fight; tier0's Nimble predicate agrees.
-        var run = new ProtoYmPrintRun();
-        Assert.True(run.GainsBlock);
-        Assert.True(YaeAnnotationReach.GivesBlock(run));
+        // Sakura Canopy's Block is a CalculatedBlockVar (its face shows the
+        // total in combat), so the game's own GainsBlock answers, as on
+        // Expect a Fight. The refill (2026-10-16): Hide Behind the Shrine's
+        // "gain 5 more" is a `yae` kind's own Block, the IYaeBlockCard
+        // marker. tier0's Nimble predicate agrees on both.
+        var canopy = new ProtoYmSakuraCanopy();
+        Assert.True(canopy.GainsBlock);
+        Assert.True(YaeAnnotationReach.GivesBlock(canopy));
+        var hide = new ProtoYmHideBehindTheShrine();
+        Assert.True(hide is IYaeBlockCard);
+        Assert.True(YaeAnnotationReach.GivesBlock(hide));
     }
 
     // ---- 2. the dead-edit filter --------------------------------------------
@@ -171,8 +176,8 @@ public class YaeRedInkSakuraTests : IDisposable
         }
         foreach (var card in new CardModel[]
                  { new StrikeIronclad(), new DefendIronclad(), new ProtoYmYakanEvocation(),
-                   new ProtoYmTwinSakura(), new ProtoYmGraftedBranch(), new ProtoYmKitsuneFlash(),
-                   new ProtoYmPrintRun() })
+                   new ProtoYmTwinSakura(), new ProtoYmReplanting(), new ProtoYmSesshouFang(),
+                   new ProtoYmSakuraCanopy() })
         {
             Assert.True(YaeAnnotationReach.Affects(card, YaeAnnotation.RedInk), card.GetType().Name);
         }

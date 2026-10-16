@@ -928,7 +928,10 @@ CONJUGATIONS = {"Exhausted": "Exhaust",
                 # YAE MIKO (2026-10-13): the Edit row carries Edited,
                 # Annotated and Publish. Tenko and each Annotation are rows
                 # of their own since 2026-10-14.
-                "Edited": "Edit", "Annotated": "Edit", "Publish": "Edit"}
+                "Edited": "Edit", "Annotated": "Edit", "Publish": "Edit",
+                # The Yae refill (2026-10-16): Inscribed Thunder's "for each
+                # Annotation on this card".
+                "Annotation": "Edit"}
 
 
 def _word_owner(word: str) -> str:

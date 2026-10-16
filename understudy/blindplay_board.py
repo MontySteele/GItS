@@ -1053,7 +1053,7 @@ def yae_shrine(player: dict[str, Any],
     cap = YAE_SAKURA_CAP + sum(
         _int(pw.get("stacks")) for pw in you["powers"]
         if _text(pw.get("name")) == _CHANNELING_NAME)
-    # Bestseller and Print Run's count (Yae review r5, pick 1 (a)): the cards
+    # Bestseller's count (Yae review r5, pick 1 (a)): the cards
     # she Edited this combat, off `player.yae_shrine` (the bridge's
     # `gits/GitsYaeShrine.cs`, the mod's `YaeShrine.Snapshot`). None when the
     # wire does not carry it (an older bridge, or out of a fight), so the page

@@ -106,11 +106,13 @@ def test_twin_sakura_gives_red_ink_to_both():
     assert [s.annotations for s in _sakura(st)] == [[Y.RED_INK], [Y.RED_INK]]
 
 
-def test_grafted_branch_passes_red_ink_too():
+def test_a_plant_at_a_level_passes_red_ink_too():
+    # Guardian of Narukami (Grafted Branch's role until the dedupe cut it,
+    # 2026-10-16).
     st = _state()
-    graft = _card("grafted_branch")
-    Y.annotate(st, graft, Y.RED_INK)
-    _play(st, graft)
+    guard = _card("guardian_of_narukami")
+    Y.annotate(st, guard, Y.RED_INK)
+    _play(st, guard)
     assert [s.annotations for s in _sakura(st)] == [[Y.RED_INK]]
 
 
@@ -171,7 +173,7 @@ def test_red_ink_skips_a_pure_utility_card_footnote_takes_it():
                  Y.ROYALTIES, Y.REPRINT):
         assert Y.affects(lure, name)
     for cid in ("strike", "defend", _ym("yakan_evocation"),
-                _ym("twin_sakura"), _ym("grafted_branch")):
+                _ym("twin_sakura"), _ym("guardian_of_narukami")):
         assert Y.affects(loader.get_card(cid), Y.RED_INK), cid
 
 
@@ -236,9 +238,9 @@ def test_the_publish_offer_respects_the_filter():
 
 def test_the_planting_marker_is_the_sims_planting_set():
     """The C# marker (codegen) and the sim's `plants_sakura` name the same
-    rows: Yakan Evocation, Twin Sakura, Grafted Branch, (review r3) the
-    two kind planters, Foxfire Sweep and Shrine Maiden's Guard, and the pool
-    to 78's eight (2026-10-15)."""
+    rows: Yakan Evocation, Twin Sakura, (review r3) the two kind planters,
+    Foxfire Sweep and Shrine Maiden's Guard, and the pool to 78's five left
+    after the dedupe (2026-10-16)."""
     marked, planting = set(), set()
     for path in GENERATED.glob("ProtoYm*.cs"):
         text = path.read_text(encoding="utf-8")
@@ -248,28 +250,28 @@ def test_the_planting_marker_is_the_sims_planting_set():
         if Y.plants_sakura(loader.get_card(cid)):
             planting.add(cid)
     assert marked == planting == {_ym("yakan_evocation"), _ym("twin_sakura"),
-                                  _ym("grafted_branch"), _ym("foxfire_sweep"),
+                                  _ym("foxfire_sweep"),
                                   _ym("shrine_maidens_guard"),
-                                  _ym("thunder_petal"), _ym("kitsune_flick"),
-                                  _ym("shrine_lantern"), _ym("genre_shift"),
+                                  _ym("thunder_petal"), _ym("genre_shift"),
                                   _ym("replanting"), _ym("narukami_bloom"),
                                   _ym("guardian_of_narukami")}
 
 
 def test_a_yae_kinds_own_block_counts_for_red_ink_in_both_engines():
-    """Red Ink rides Print Run's Block, so the filter keeps it. Since
-    2026-10-15 Print Run is on the calculated rail (a `CalculatedBlockVar`,
-    so the game's own GainsBlock answers); no generated row is a `yae`
-    Block kind today, so no card carries the C# `IYaeBlockCard` marker."""
-    run = _card("print_run")
-    assert Y.gives_block(run) and Y.affects(run, Y.RED_INK)
+    """Red Ink rides a `yae` kind's own Block, so the filter keeps it. The
+    refill (2026-10-16): Hide Behind the Shrine's "gain 5 more" is one, the
+    only row carrying the C# `IYaeBlockCard` marker. Sakura Canopy's Block
+    is on the calculated rail (a `CalculatedBlockVar`), which the game's own
+    GainsBlock answers."""
+    hide = _card("hide_behind_the_shrine")
+    assert Y.gives_block(hide) and Y.affects(hide, Y.RED_INK)
     marked = set()
     for path in GENERATED.glob("ProtoYm*.cs"):
         text = path.read_text(encoding="utf-8")
         if "IYaeBlockCard" in text.split("{", 1)[0]:
             marked.add(re.search(r"Sheet entry: id=(\S+)", text).group(1))
-    assert marked == set()
-    src = (GENERATED / "ProtoYmPrintRun.cs").read_text(encoding="utf-8")
+    assert marked == {_ym("hide_behind_the_shrine")}
+    src = (GENERATED / "ProtoYmSakuraCanopy.cs").read_text(encoding="utf-8")
     assert "CalculatedBlockVar(" in src
 
 

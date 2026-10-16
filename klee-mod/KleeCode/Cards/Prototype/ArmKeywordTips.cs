@@ -633,14 +633,16 @@ public static class ArmKeywordTips
 
     /// <summary>Yae review r6, item 5: which enemy a Sakura strikes
     /// (<c>YaeShrine.Aim</c>: the aim Kitsune Pounce passes, else the Lure,
-    /// else random), in one sentence. The seat's hover adds it to
+    /// else Hunting Gaze's last enemy attacked (the refill, 2026-10-16), else
+    /// random), in one sentence. The seat's hover adds it to
     /// <see cref="YaeSakuraTip"/>; the player's hover stays under the
     /// 100-character cap (<c>tools/lint_hover_tips.py</c>), where Foxfire
     /// Lure's and Kitsune Pounce's own faces say it. The page's twin is
     /// <c>blindplay_notes.SAKURA_TARGET_RULE</c>.</summary>
     public static readonly string YaeSakuraTargetRule =
         "A Sakura strikes Kitsune Pounce's target when Pounce makes it strike, "
-      + "else the enemy Foxfire Lure marked this turn, else a random enemy.";
+      + "else the enemy Foxfire Lure marked this turn, else (with Hunting Gaze) "
+      + "the last enemy your Attacks hit, else a random enemy.";
 
     /// <summary>
     /// YAE MIKO (2026-10-13): the Edit tip; Publish is the relic's word,
