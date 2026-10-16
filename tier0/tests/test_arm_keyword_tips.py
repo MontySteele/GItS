@@ -922,6 +922,9 @@ CONJUGATIONS = {"Exhausted": "Exhaust",
                 # High Stakes (the Spend round, 2026-10-10): "HP you have
                 # Drained and not Repaid" (the page's Repay row matches it).
                 "Repaid": "Repay",
+                # Prima Donna (furina-next, 2026-10-16): "if you Spent last
+                # turn" (the page's Spend row matches it).
+                "Spent": "Spend",
                 # YAE MIKO (2026-10-13): the Edit row carries Edited,
                 # Annotated and Publish. Tenko and each Annotation are rows
                 # of their own since 2026-10-14.

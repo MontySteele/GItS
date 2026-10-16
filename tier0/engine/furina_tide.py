@@ -182,7 +182,6 @@ SHOWSTOPPER_SPEND = 5              # Showstopper: end of turn, Spend 5
 HIGH_STAKES_EVERY = 4
 HIGH_STAKES_EVERY_UPGRADED = 3
 HYMN_THRESHOLD = 4                 # Hymn of Renewal: a Repay of 4 or more HP
-PRIMA_DONNA_FANFARE = 10           # Prima Donna: 10 or more Fanfare
 REGINA_DRAIN = 3                   # Regina of All Waters: Drain 3
 STAR_TURN_FANFARE_PER = 6          # Star Turn: 1 less per 6 Fanfare
 # The diversity pass (review/ruled/furina-diversity-pass-2026-10-11.md,
@@ -231,6 +230,14 @@ class Ftd:
     ousia_drew: bool = False         # Ousia Surge: drawn this turn
     fountains: list = field(default_factory=list)   # [amount, turns left]
     fountain_seen: int = 0           # the arm power's total already scheduled
+    # Crescendo (furina-next, 2026-10-16): each copy taken in, [step,
+    # payments made], and the applied total already taken in (the C#
+    # `FurinaStageLedger.CrescendoDue`).
+    crescendos: list = field(default_factory=list)
+    crescendo_seen: int = 0
+    # Prima Donna (furina-next): she Spent during her previous turn, latched
+    # at the end of her turn (the C# `SpentLastTurn`).
+    spent_last_turn: bool = False
     energy_next: int = 0             # Salon's Tab: Energy next turn
     stage: list = field(default_factory=list)
     # The pool to 75 (sec.3): which guests on stage were brought or moved by
@@ -238,7 +245,7 @@ class Ftd:
     # returns to the discard pile when its guest leaves).
     stage_up: set = field(default_factory=set)
     stage_cards: dict = field(default_factory=dict)
-    spends_this_turn: int = 0        # Navia's line and Crescendo
+    spends_this_turn: int = 0        # Navia's line and Prima Donna
     drains_this_combat: int = 0      # Undercurrent's count
     # High Stakes' count (the Spend round 2, 2026-10-10): HP drained this
     # combat, gross; no Repay lowers it (the C# `DrainedThisCombat`).
@@ -506,11 +513,13 @@ CARDS: dict[str, Spec] = {
     # build's loop ruling, Interval Bell's fix).
     "ftd_sold_out": Spec("Sold Out", 1, "skill", "uncommon", "sold_out",
                          (6, 1, 2)),
+    # Furina's engines (furina-next, 2026-10-16): Crescendo's number is its
+    # step (2, then 4, 6 ...); Standing Room Only costs 1.
     "ftd_crescendo": Spec("Crescendo", 1, "power", "uncommon", "power",
-                          (1,), "crescendo"),
+                          (2,), "crescendo"),
     "ftd_prima_donna": Spec("Prima Donna", 2, "power", "rare", "power",
                             (1,), "prima_donna"),
-    "ftd_standing_room_only": Spec("Standing Room Only", 2, "power", "rare",
+    "ftd_standing_room_only": Spec("Standing Room Only", 1, "power", "rare",
                                    "power", (1,), "standing_room_only"),
     "ftd_bring_the_house_down": Spec("Bring the House Down", 2, "attack",
                                      "rare", "house_down", (1,)),
@@ -943,13 +952,15 @@ def spend(state, amount: int) -> bool:
     state.emit("ftd_spend", amount=pay, fanfare=f.fanfare)
     if discount:
         _line(state, "navia", discount)
-    _after_spend(state)
+    _after_spend(state, amount)
     return True
 
 
-def _after_spend(state) -> None:
-    """The Spend readers: Thunderous Applause, Chevreuse's line (upgraded:
-    also 1 Weak) and Crescendo (the first Spend each turn)."""
+def _after_spend(state, spent: int) -> None:
+    """The Spend readers, whoever makes the Spend: Thunderous Applause,
+    Chevreuse's line (upgraded: also 1 Weak) and Standing Room Only
+    (furina-next, 2026-10-16: "Whenever you Spend, gain 1 Strength"; a Spend
+    of 0 is no Spend). `spent` is what the Spend counts."""
     f = _f(state)
     thunder = (THUNDEROUS_DAMAGE * f.powers["thunderous"]
                + _arm_power(state, "thunderous"))
@@ -965,9 +976,9 @@ def _after_spend(state) -> None:
             _powers.apply_power(state,
                                 state.rng.choice(state.living_enemies),
                                 "weak", CHEVREUSE_LINE_WEAK_UPGRADED)
-    crescendo = _player_power(state.player, "crescendo")
-    if crescendo and f.spends_this_turn == 1 and not state.over:
-        state.draw(crescendo)
+    sro = _player_power(state.player, "standing_room_only")
+    if sro and spent > 0 and not state.over:
+        _strength(state, sro)
 
 
 def up_to_of(f: Ftd, cap: int) -> int:
@@ -980,8 +991,8 @@ def up_to_of(f: Ftd, cap: int) -> int:
 def spend_up_to(state, cap: int) -> int:
     """"Spend up to X" (the Spend paper, 2026-10-10, pick 1): spends X, or all
     she holds if that is less, and never fails. A Spend only when at least 1
-    counts (Thunderous Applause, Chevreuse, Crescendo); not a spend-all, so
-    Bis! and Standing Room Only ignore it. Navia's line makes the first 2 [3]
+    counts (Thunderous Applause, Chevreuse, Standing Room Only); not a
+    spend-all, so Bis! ignores it. Navia's line makes the first 2 [3]
     points of the first Spend each turn free: they count, and are not taken.
     Returns what counts as spent."""
     f = _f(state)
@@ -998,7 +1009,7 @@ def spend_up_to(state, cap: int) -> int:
     state.emit("ftd_spend", amount=pay, fanfare=f.fanfare)
     if free:
         _line(state, "navia", free)
-    _after_spend(state)
+    _after_spend(state, counted)
     return counted
 
 
@@ -1013,7 +1024,7 @@ def spend_share(state, divisor: int) -> int:
 def spend_half(state) -> int:
     """"Spend half your Fanfare" (Standing Ovation, 2026-10-11): a "Spend up
     to" of half the bank, rounded down, so 0 or 1 held spends nothing. Not a
-    spend-all: Bis! and Standing Room Only ignore it. Returns what counts as
+    spend-all: Bis! ignores it. Returns what counts as
     spent."""
     return spend_up_to(state, _f(state).fanfare // 2)
 
@@ -1021,8 +1032,8 @@ def spend_half(state) -> int:
 def spend_all(state) -> int:
     """"Spend all your Fanfare": one Spend of everything held (nothing held
     is no Spend). Navia's first Spend each turn keeps 2 (3 upgraded); Bis!
-    keeps half, rounded down; the card reads the whole bank. Standing Room
-    Only answers a spend-all of at least 1. Returns what the card reads."""
+    keeps half, rounded down; the card reads the whole bank. Returns what
+    the card reads."""
     f = _f(state)
     held = f.fanfare
     if held <= 0:
@@ -1037,12 +1048,11 @@ def spend_all(state) -> int:
     state.emit("ftd_spend", amount=pay, fanfare=f.fanfare)
     if keep:
         _line(state, "navia", keep)
-    _after_spend(state)
+    _after_spend(state, held)
     if _player_power(state.player, "bis"):
         kept = held // 2
         f.fanfare += kept
         f.ledger["bis_kept"] += kept
-    _strength(state, _player_power(state.player, "standing_room_only"))
     return held
 
 
@@ -1391,8 +1401,8 @@ def full_house(state) -> int:
     """Full House (the diversity pass, 2026-10-11): "Whenever a guest's act
     deals damage, Spend up to 4: it deals that much more." [6] Called once
     by an act about to deal damage; copies add their caps into one Spend (a
-    Spend like any, so Thunderous Applause, Chevreuse and Crescendo answer
-    it). Returns what it spent, the act's extra damage a hit. The C# twin is
+    Spend like any, so Thunderous Applause, Chevreuse and Standing Room
+    Only answer it). Returns what it spent, the act's extra damage a hit. The C# twin is
     `StageDirector.FullHouse`."""
     cap = _player_power(state.player, "full_house")
     if cap <= 0 or state.over or not state.player.alive:
@@ -1549,9 +1559,10 @@ def turn_start(state) -> None:
     f = _f(state)
     p = state.player
     # The pool to 75's turn-start Powers, in the C# `FurinaStage.TurnStart`
-    # order: Regina of All Waters first (so the Repays after it have room),
-    # then Fountain of Lucine, Pneuma Tides, and Prima Donna
-    # last (so it reads the Fanfare they printed).
+    # order: Crescendo's Fanfare (furina-next, 2026-10-16), then Regina of
+    # All Waters (so the Repays after it have room), Fountain of Lucine,
+    # Pneuma Tides, and Prima Donna last.
+    crescendo_gains(state)
     # Regina's Drain stops at the line, like a guest's act (2026-10-10, "I'm
     # good with stopping Regina's Drain at the line"): "Drain 3, never past
     # your line. If you do, gain 1 Strength."
@@ -1579,9 +1590,42 @@ def turn_start(state) -> None:
     tides = _player_power(p, "pneuma_tides")
     if tides and not state.over and p.alive:
         repay_floor(state, tides, "vigor")
-    donna = _player_power(p, "prima_donna")
-    if donna and f.fanfare >= PRIMA_DONNA_FANFARE and p.alive:
-        p.energy += donna
+    prima_donna(state)
+
+
+def crescendo_gains(state) -> int:
+    """Crescendo (furina-next, 2026-10-16): "At the start of your turn, gain
+    2 [3] Fanfare, then 2 [3] more each turn after", counted from the turn it
+    was played (the C# `StageDirector.Crescendo`). Returns the gain."""
+    f = _f(state)
+    applied = _player_power(state.player, "crescendo")
+    if applied <= 0 or state.over:
+        return 0
+    if applied > f.crescendo_seen:
+        f.crescendos.append([applied - f.crescendo_seen, 0])
+        f.crescendo_seen = applied
+    due = 0
+    for voice in f.crescendos:
+        voice[1] += 1
+        due += voice[0] * voice[1]
+    gain(state, due, "Crescendo")
+    return due
+
+
+def prima_donna(state) -> int:
+    """Prima Donna (furina-next, 2026-10-16): "At the start of your turn,
+    if you Spent last turn, gain 1 Energy [and draw 1 card]" (the C#
+    `StageDirector.PrimaDonna`). Returns the Energy gained."""
+    f = _f(state)
+    p = state.player
+    plus = _player_power(p, "prima_donna_plus")
+    energy = _player_power(p, "prima_donna") + plus
+    if energy <= 0 or not f.spent_last_turn or not p.alive or state.over:
+        return 0
+    p.energy += energy
+    if plus:
+        state.draw(plus)
+    return energy
 
 
 def _arm_fountain(state) -> int:
@@ -1614,6 +1658,8 @@ def end_of_turn(state) -> None:
     # Neuvillette's window (2026-10-09): what she loses from here on -- the
     # enemies' turn first -- counts for his next act.
     f.hp_lost_window = 0
+    # Prima Donna (furina-next): this turn is "last turn" at her next.
+    f.spent_last_turn = f.spends_this_turn > 0
 
 
 def resolve_card(state, card) -> None:

@@ -889,7 +889,10 @@ ARM_KEYWORDS = (
     # `lead performer` became `front performer` everywhere. `Bow` is printed
     # as a verb, `[gold]Bow[/gold]s`, so the golded span is still the bare
     # word and the one token covers it.
-    ArmKeyword("Spend", ("Spend", "Spends"), "ArmKeywordTips.ForSpend"),
+    # Prima Donna (furina-next, 2026-10-16) prints the past tense: "if you
+    # Spent last turn".
+    ArmKeyword("Spend", ("Spend", "Spends", "Spent"),
+               "ArmKeywordTips.ForSpend"),
     ArmKeyword("Fanfare", ("Fanfare",), "ArmKeywordTips.ForFanfare"),
     # THE SALON'S TAB (2026-10-05): the HP loan's two verbs. `Bow`, `front
     # performer`, `Cue`, `Rehearsal`, `Ousia` and `Pneuma` left with the v2
@@ -3839,14 +3842,20 @@ APPLY_POWERS = {
         "again."),
     "fs_ensemble_cast": ("EnsembleCastPower", None,
         "You have 4 guest seats."),
+    # Furina's engines (furina-next, 2026-10-16): Crescendo counts from the
+    # turn it is played; Prima Donna's upgraded card installs the Plus power
+    # (`upgraded_power`), which also draws.
     "fs_crescendo": ("CrescendoPower", None,
-        "The first time you [gold]Spend[/gold] each turn, draw {X} card."),
+        "At the start of your turn, gain {X} [gold]Fanfare[/gold], then {X} "
+        "more each turn after."),
     "fs_prima_donna": ("PrimaDonnaPower", None,
-        "At the start of your turn, if you have 10 or more "
-        "[gold]Fanfare[/gold], gain 1 Energy."),
+        "At the start of your turn, if you [gold]Spent[/gold] last turn, "
+        "gain 1 Energy."),
+    "fs_prima_donna_plus": ("PrimaDonnaPlusPower", None,
+        "At the start of your turn, if you [gold]Spent[/gold] last turn, "
+        "gain 1 Energy and draw 1 card."),
     "fs_standing_room_only": ("StandingRoomOnlyPower", None,
-        "Whenever you [gold]Spend[/gold] all your [gold]Fanfare[/gold] and it "
-        "is at least 1, gain 1 [gold]Strength[/gold]."),
+        "Whenever you [gold]Spend[/gold], gain 1 [gold]Strength[/gold]."),
     "fs_high_stakes": ("HighStakesPower", None,
         "Your Attacks deal 1 additional damage for every {X} HP you have "
         "[gold]Drained[/gold] and not [gold]Repaid[/gold]."),
@@ -4352,8 +4361,9 @@ APPLY_POWERS = {
         "At the start of your turn, put {X} random [gold]Annotated[/gold] "
         "card from your [gold]Discard Pile[/gold] into your [gold]Hand[/gold]."),
     "vk_twin_gales": ("TwinGalesPower", None,
-        "Your [gold]Swirls[/gold] pay both your [gold]current element[/gold] "
-        "and the element they [gold]Swirl[/gold]."),
+        "Your [gold]Swirls[/gold] also pay the element they "
+        "[gold]Swirl[/gold]. If it's your [gold]current element[/gold], it "
+        "pays twice."),
     "vk_eye_of_stormterror": ("EyeOfStormterrorPower", None,
         "The first 3 times you [gold]Swirl[/gold] each turn, draw {X} card."),
     "vk_the_order_answers": ("TheOrderAnswersPower", None,
@@ -5182,6 +5192,13 @@ CARD_FIELDS = {
     # card's own `TryModifyEnergyCostInCombat` over `FurinaStage.FanfareOf`.
     # Sim twin: `combat.card_cost`'s `cost_reduction_per_fanfare`.
     "cost_reduction_per_fanfare",
+    # VARKA, TEMPEST CHARGE (Klee and Varka cleanup review, pick 1 (a),
+    # 2026-10-15): "Costs 1 less for each Swirl this turn." The value is the
+    # Energy off per Swirl; emitted as the card's own
+    # `TryModifyEnergyCostInCombat` over `VarkaOath.SwirlsThisTurn` (Eye of
+    # Stormterror's count). Sim twin: `combat.card_cost`'s
+    # `cost_reduction_per_swirl_this_turn`.
+    "cost_reduction_per_swirl_this_turn",
     # FURINA, THE SWEEP (2026-10-14): "Can be played only if ..." -- a
     # predicate (`PREDICATES_CS`) the card is unplayable without (The Show's
     # Not Over, Plot Twist). Sim twin: `combat.card_playable`.
@@ -5259,6 +5276,18 @@ def card_level_reason(
         if not isinstance(card.get("cost"), int):
             return ("cost_reduction_per_fanfare on an X or unprinted cost -- "
                     "there is no number to discount")
+    per_swirl = card.get("cost_reduction_per_swirl_this_turn")
+    if per_swirl is not None:
+        if (not isinstance(per_swirl, int) or isinstance(per_swirl, bool)
+                or per_swirl <= 0):
+            return ("cost_reduction_per_swirl_this_turn must be a positive "
+                    "literal int")
+        if card.get("character") != "varka":
+            return ("cost_reduction_per_swirl_this_turn on a non-Varka row -- "
+                    "the count is his Oath ledger's")
+        if not isinstance(card.get("cost"), int):
+            return ("cost_reduction_per_swirl_this_turn on an X or unprinted "
+                    "cost -- there is no number to discount")
     rate = card.get("cost_reduction_per_discard_this_turn")
     if rate is not None:
         if not isinstance(rate, int) or isinstance(rate, bool) or rate <= 0:
@@ -18538,6 +18567,21 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             "        modifiedCost = System.Math.Max(0m, originalCost\n"
             "            - FurinaStage.FanfareOf(Owner?.Creature) / "
             f"{int(per_fanfare)});\n"
+            "        return true;\n"
+            "    }")
+    per_swirl = card.get("cost_reduction_per_swirl_this_turn")
+    if per_swirl:
+        discard_discount_member = (
+            "\n\n    /// <summary>Sheet `cost_reduction_per_swirl_this_turn: "
+            f"{int(per_swirl)}`: this card\n    /// costs {int(per_swirl)} less for each "
+            "Swirl its owner made this turn.</summary>\n"
+            "    public override bool TryModifyEnergyCostInCombat(\n"
+            "        CardModel card, decimal originalCost, out decimal modifiedCost)\n"
+            "    {\n"
+            "        modifiedCost = originalCost;\n"
+            "        if (!ReferenceEquals(card, this) || originalCost <= 0m) return false;\n"
+            f"        modifiedCost = System.Math.Max(0m, originalCost - {int(per_swirl)}m\n"
+            "            * VarkaOath.SwirlsThisTurn(Owner?.Creature));\n"
             "        return true;\n"
             "    }")
     discount_rate = card.get("cost_reduction_per_discard_this_turn")

@@ -196,6 +196,8 @@ public static class FurinaStage
             GrandEntrance = Sum<GrandEntrancePower>(),
             Showstopper = Sum<ShowstopperPower>(),
             Crescendo = Sum<CrescendoPower>(),
+            PrimaDonna = Sum<PrimaDonnaPower>() + Sum<PrimaDonnaPlusPower>(),
+            PrimaDonnaDraw = Sum<PrimaDonnaPlusPower>(),
             StandingRoomOnly = Sum<StandingRoomOnlyPower>(),
             HymnOfRenewal = Sum<HymnOfRenewalPower>(),
             Revelry = Sum<UniversalRevelryPower>(),
@@ -563,11 +565,25 @@ public static class FurinaStage
                 await Gain(choiceContext, furina, program, "Grand Theater Program");
             }
         }
+        CrescendoGains(choiceContext, furina);
         await ReginaDrains(choiceContext, furina);
         await FountainRepays(choiceContext, furina);
         await PneumaTidesRepays(choiceContext, furina);
-        await PrimaDonnaEnergy(furina);
+        await PrimaDonnaEnergy(choiceContext, furina);
         RefreshBadges(furina);
+    }
+
+    /// <summary>Crescendo (furina-next, 2026-10-16): "At the start of your
+    /// turn, gain 2 [3] Fanfare, then 2 [3] more each turn after", counted
+    /// from the turn it was played. Beside Grand Theater Program, the other
+    /// turn-start Fanfare.</summary>
+    private static void CrescendoGains(PlayerChoiceContext choiceContext,
+                                       Creature furina)
+    {
+        using (FurinaStageLedger.For(furina).CausedBy(StageDirector.CrescendoTitle))
+        {
+            Director(choiceContext, furina).Crescendo();
+        }
     }
 
     /// <summary>Regina of All Waters: "At the start of your turn, Drain 3,
@@ -599,16 +615,13 @@ public static class FurinaStage
         }
     }
 
-    /// <summary>Prima Donna: "At the start of your turn, if you have 10 or
-    /// more Fanfare, gain 1 Energy." Last of her turn-start Powers, so it
-    /// reads the Fanfare they printed. Copies add.</summary>
-    private static async Task PrimaDonnaEnergy(Creature furina)
+    /// <summary>Prima Donna (furina-next, 2026-10-16): "At the start of your
+    /// turn, if you Spent last turn, gain 1 Energy [and draw 1 card]." Last
+    /// of her turn-start Powers. Copies add.</summary>
+    private static async Task PrimaDonnaEnergy(
+        PlayerChoiceContext choiceContext, Creature furina)
     {
-        var copies = (int)furina.Powers.OfType<PrimaDonnaPower>()
-            .Sum(p => p.Amount);
-        if (copies <= 0 || furina.Player is not { } player) return;
-        if (FanfareOf(furina) < FurinaStageLaw.PrimaDonnaFanfare) return;
-        await PlayerCmd.GainEnergy(copies, player);
+        await Director(choiceContext, furina).PrimaDonna();
     }
 
     /// <summary>Fountain of Lucine: what the power took in since the last

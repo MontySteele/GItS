@@ -312,7 +312,10 @@ MORE_COUNTERS = {"proto_kk_kurage_swarm", "KurageSwarmPower.description",
                  "SakuraChannelingPower.description",
                  # Epiclese Season Pass (Furina's card pass, 2026-10-15):
                  # "You have 1 more guest seat", the seat count growing.
-                 "EpicleseSeasonPass.description"}
+                 "EpicleseSeasonPass.description",
+                 # Crescendo (furina-next, 2026-10-16): "then 2 more each
+                 # turn after", its Fanfare gain growing.
+                 "proto_fs_crescendo", "CrescendoPower.description"}
 
 #: Card faces only: "your largest Bomb" says WHICH enemy's (the Klee round,
 #: 2026-10-11: Stoke the Fuse grew Torch Head's Bomb 16 by 49 when the seat

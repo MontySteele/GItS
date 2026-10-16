@@ -3182,27 +3182,34 @@
    description: "Deal 15 damage. Costs 1 less for every 6 [gold]Fanfare[/gold] you have.",
    effects: [{op: damage, amount: 15, target: enemy}]}
 
+# Furina's engines (review/active/furina-next-2026-10-15.md, ruled
+# 2026-10-16): counts from the turn it is played, 2, 4, 6 ... [3, 6, 9].
+# Provenance note, "Furina's engines, furina-next 2026-10-16".
 - {id: proto_fs_crescendo, name: "Crescendo", character: furina,
-   upgrade: {innate: true},
+   upgrade: {power_amount: +1},
    authored_by: [claude],
    register: salon, cost: 1, type: power, rarity: uncommon,
-   description: "The first time each turn you [gold]Spend[/gold], draw 1 card.",
-   effects: [{op: apply_power, power: fs_crescendo, amount: 1,
+   description: "At the start of your turn, gain {PowerAmount:diff()} [gold]Fanfare[/gold], then {PowerAmount:diff()} more each turn after.",
+   effects: [{op: apply_power, power: fs_crescendo, amount: 2,
               target: self}]}
 
+# "Last turn" is her previous turn, its end-of-turn Spends included; a Spend
+# of 0 is no Spend. The upgraded card installs the Plus power, which draws.
 - {id: proto_fs_prima_donna, name: "Prima Donna", character: furina,
-   upgrade: {cost: -1},
+   upgrade: {upgraded_power: fs_prima_donna_plus},
    authored_by: [claude],
    register: salon, cost: 2, type: power, rarity: rare,
-   description: "At the start of your turn, if you have 10 or more [gold]Fanfare[/gold], gain {energyPrefix:energyIcons(1)}.",
+   description: "At the start of your turn, if you [gold]Spent[/gold] last turn, gain {energyPrefix:energyIcons(1)}{IfUpgraded:show: and draw 1 card|}.",
    effects: [{op: apply_power, power: fs_prima_donna, amount: 1,
               target: self}]}
 
+# Every Spend of at least 1 counts: her cards', a guest's (Full House, Navia,
+# Freminet) and Showstopper's.
 - {id: proto_fs_standing_room_only, name: "Standing Room Only", character: furina,
-   upgrade: {cost: -1},
+   upgrade: {innate: true},
    authored_by: [claude],
-   register: salon, cost: 2, type: power, rarity: rare,
-   description: "Whenever you [gold]Spend[/gold] all your [gold]Fanfare[/gold] and it is at least 1, gain 1 [gold]Strength[/gold].",
+   register: salon, cost: 1, type: power, rarity: rare,
+   description: "Whenever you [gold]Spend[/gold], gain 1 [gold]Strength[/gold].",
    effects: [{op: apply_power, power: fs_standing_room_only, amount: 1,
               target: self}]}
 
@@ -3926,11 +3933,10 @@
 - {id: proto_vk_tempest_charge, name: "Tempest Charge", character: varka,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If it [gold]Swirls[/gold], draw 1 card.",
-   effects: [{op: damage, amount: 8, target: enemy},
-             {op: conditional, if: swirled_by_this,
-              then: [{op: draw, amount: 1}]}],
-   upgrade: {damage: 3}}
+   cost_reduction_per_swirl_this_turn: 1,
+   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Costs 1 less for each [gold]Swirl[/gold] this turn.",
+   effects: [{op: damage, amount: 12, target: enemy}],
+   upgrade: {damage: 4}}
 
 - {id: proto_vk_favonius_cut, name: "Favonius Cut", character: varka,
    authored_by: [claude],
@@ -4003,8 +4009,9 @@
    authored_by: [claude],
    nation: mondstadt, star: 5, rarity: uncommon, role_c: applier, element: cryo,
    # Varka pool audit (2026-10-13), ruled (a): costs 1, was 2; 8 [11], was
-   # 10 [14].
-   cost: 1, type: skill, personal_pool: varka,
+   # 10 [14]. Varka round 5 (varka-next, review/active/varka-next-2026-10-13.md):
+   # an Attack, was a Skill; same cost and numbers.
+   cost: 1, type: attack, personal_pool: varka,
    description: "Deal {CalculatedDamage:diff()} [gold]Cryo[/gold] damage. Gain 1 [gold]Cryo[/gold] [gold]Oath[/gold] for each enemy with a [gold]Cryo[/gold] aura.",
    effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
              {op: varka, kind: oath_per_cryo_enemy}],
@@ -4439,8 +4446,11 @@
 
 - {id: proto_vk_twin_gales, name: "Twin Gales", character: varka,
    authored_by: [claude],
+   # Varka round 5 (varka-next, review/active/varka-next-2026-10-13.md): a
+   # matched element pays twice. Was "Your Swirls pay both your current
+   # element and the element they Swirl." (paid once when they matched).
    cost: 1, type: power, rarity: rare,
-   description: "Your [gold]Swirls[/gold] pay both your [gold]current element[/gold] and the element they [gold]Swirl[/gold].",
+   description: "Your [gold]Swirls[/gold] also pay the element they [gold]Swirl[/gold]. If it's your [gold]current element[/gold], it pays twice.",
    effects: [{op: apply_power, power: vk_twin_gales, amount: 1, target: self}],
    upgrade: {innate: true}}
 
