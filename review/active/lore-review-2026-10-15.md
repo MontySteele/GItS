@@ -20,17 +20,16 @@ March, Azure Devour, Grand Master's Order, Grand Master's Verdict, Tempest of
 the Four Winds), plus his Knight cards. About half the rest are weather words
 any Anemo kit could print (Wall of Gales, Storm Surge, Tailwind Stride,
 Weathervane, Downburst, Eye Wall). His story has hooks the pool never uses:
-the Lion of the South (the Grand Master's place among the Four Winds), his
-title Knight of Boreas, his Oath's own name, the wolves (Razor, his adopted
+his title Knight of Boreas (he is the Wolf of the North among the Four
+Winds), his Oath's own name, the wolves (Razor, his adopted
 son), the friend he lost (Crepus), the bards' tales he grew up wanting to be
 in, and the desk work he leaves to Jean.
 
 | Today | Text (short) | New name | Hook |
 |---|---|---|---|
-| Sworn Brotherhood (R Power) | gain Oath each turn | **Lion of the South** | his title among the Four Winds |
+| Sworn Brotherhood (R Power) | gain Oath each turn | **Knight of Boreas** | his title |
 | Oath Unto Death (R Power) | each Oath gain is +1 | **Azure Fang's Oath** | his passive's stack, the name of his Oath |
 | Wolfpack (R Power) | Four Winds' Ascension shuffles a copy back | **Lupical** | Razor's word for family |
-| Boreas Unbound (R Power) | element change gives Energy | **Knight of Boreas** | his title |
 | Thundering Verdict (R Attack) | X-times Electro to ALL | **Lightning Fang** | Razor's Burst; also stops two "Verdict"s in his pool |
 | Dawn Patrol (U Skill) | gain Energy, draw | **Leave It for Jean** | he dodges paperwork |
 | Tailwind Stride (U Skill) | draw | **A Bard's Tale** | the hero tales he grew up on |
@@ -81,8 +80,8 @@ sources.
 
 ## Picks
 
-1. **Varka's eight renames** (sec.1).
-   - **(a) Default:** all eight.
+1. **Varka's renames** (sec.1).
+   - **(a) Default:** all of them.
    - (b) You name the ones to keep.
 2. **Furina's five renames** (sec.2).
    - **(a) Default:** all five.
@@ -95,3 +94,17 @@ sources.
      Varka's, then every story line and name in sec.4 checked against it and
      the Varka census, with anything unconfirmed changed or cut.
    - (b) Ship on what we have.
+
+## Ruled 2026-10-15
+
+[USER]: "Varka is the current Wolf of the North; the current Lion of the South
+is Jean. Otherwise these all make sense." So Sworn Brotherhood becomes Knight
+of Boreas and Boreas Unbound keeps its name; the other Varka and all five
+Furina renames stand (picks 1 and 2 (a)). The Varka census's Four Winds line
+is corrected.
+
+Pick 3 (b): "I think that at one point, Kaboom! was in use for something else;
+we can rename that now." Ka-pow! becomes Kaboom! (the old Kaboom! card was
+deleted; `docs/prototype-surface.yaml` header).
+
+Pick 4 (a): "I'd say yes - let's build a lore source for the others."
