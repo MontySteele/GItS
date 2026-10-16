@@ -967,6 +967,24 @@ YAE_ANNOTATIONS = ("Red Ink", "Footnote", "Deadline Extension", "Fox Fire",
                    "Annotated")
 
 
+def _sakura_annotations(raw: Any) -> dict[int, list[str]]:
+    """`{slot: [Annotation, ...]}` off the wire's `player.yae_shrine.sakura`
+    rows (the mod's `YaeShrineLedger.SakuraRows`: each Sakura's Annotations
+    in the order written), or `{}` where the wire does not carry them (an
+    older bridge, or out of a fight). Only her three Sakura Annotations
+    count."""
+    if not isinstance(raw, dict) or not raw.get("live"):
+        return {}
+    out: dict[int, list[str]] = {}
+    for row in raw.get("sakura") or []:
+        if not isinstance(row, dict) or not isinstance(row.get("slot"), int):
+            continue
+        names = [_text(a) for a in row.get("annotations") or []]
+        out[row["slot"]] = [a for a in dict.fromkeys(names)
+                            if a in YAE_SAKURA_ANNOTATIONS]
+    return out
+
+
 def yae_shrine(player: dict[str, Any],
                combat: dict[str, Any]) -> dict[str, Any] | None:
     """YAE's block: `{sakura, cap, lure, annotated, edits}`, or None on a
@@ -974,8 +992,13 @@ def yae_shrine(player: dict[str, Any],
     her).
 
     `sakura` is one row per badge, oldest first: `{slot, level, strike,
-    turns}` read off the badge sentence (the badge amount is the Level where
-    the sentence is missing); `lure` is the name of the enemy wearing
+    turns, annotations, annotation}` read off the badge sentence (the badge
+    amount is the Level where the sentence is missing); `annotations` names
+    every Annotation the Sakura carries (the pool to 78, pick 2 (a): distinct
+    ones coexist), in the order applied where the wire's
+    `player.yae_shrine.sakura` row for that slot says it, else in the badge
+    sentence's fixed order; `annotation` is its first, or None (kept for the
+    readers of one); `lure` is the name of the enemy wearing
     Foxfire Lure, or None; `cap` is how many may stand (3, plus Sakura
     Channeling's stacks); `annotated` counts the hand's cards carrying one
     of her five Annotations (the hand face's `enchantment`); `edits` is the
@@ -991,6 +1014,8 @@ def yae_shrine(player: dict[str, Any],
     hers = character in ("yae", "yae miko") or "yae" in character.split()
     if not (hers or badges):
         return None
+    raw = player.get("yae_shrine")
+    applied = _sakura_annotations(raw)
     sakura = []
     for slot, pw in sorted(badges, key=lambda b: b[0]):
         text = _text(pw.get("text"))
@@ -998,7 +1023,13 @@ def yae_shrine(player: dict[str, Any],
         strike = _SAKURA_STRIKE.search(text)
         turns = _SAKURA_TURNS.search(text)
         lv = int(level.group(1)) if level else _int(pw.get("stacks"))
-        ann = next((a for a in YAE_SAKURA_ANNOTATIONS if a in text), None)
+        anns = [a for a in YAE_SAKURA_ANNOTATIONS if a in text]
+        if slot in applied:
+            # The wire's order is the order applied; the badge stays the
+            # authority on WHICH it carries (a stale row adds none).
+            order = applied[slot]
+            anns = ([a for a in order if a in anns]
+                    + [a for a in anns if a not in order])
         kind = next((k for name, k in YAE_SAKURA_KINDS.items()
                      if text.startswith(name)), "thunder")
         planted = _SAKURA_PLANTED.search(text)
@@ -1006,7 +1037,8 @@ def yae_shrine(player: dict[str, Any],
                        "planted": int(planted.group(1)) if planted else None,
                        "strike": int(strike.group(1)) if strike else 2 + lv,
                        "turns": int(turns.group(1)) if turns else None,
-                       "annotation": ann})
+                       "annotations": anns,
+                       "annotation": anns[0] if anns else None})
     lure = None
     for enemy in combat["enemies"]:
         if any(_text(pw.get("name")) == _LURE_NAME
@@ -1026,7 +1058,6 @@ def yae_shrine(player: dict[str, Any],
     # `gits/GitsYaeShrine.cs`, the mod's `YaeShrine.Snapshot`). None when the
     # wire does not carry it (an older bridge, or out of a fight), so the page
     # prints no number it was not given.
-    raw = player.get("yae_shrine")
     edits = (raw.get("edits_this_combat")
              if isinstance(raw, dict) and raw.get("live") else None)
     return {"sakura": sakura, "cap": cap, "lure": lure,
