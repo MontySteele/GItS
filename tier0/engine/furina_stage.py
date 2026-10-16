@@ -114,13 +114,15 @@ GUESTS = ("charlotte", "wriothesley", "lynette", "clorinde",
 SALONS_ENCORE = "fs_salons_encore"
 THUNDEROUS_APPLAUSE = "fs_thunderous_applause"
 UNIVERSAL_REVELRY = "fs_universal_revelry"
-# The pool to 39: Ousia Surge, A Five-Century Act, Critics' Darling and Bis!
+# The pool to 39: Ousia Surge, A Five-Century Act and Critics' Darling
 # 1 a copy; Fountain of Lucine its Repay (3, 4 upgraded) a play, scheduled
 # for three turns at her next turn start (`furina_tide.turn_start`).
 OUSIA_SURGE = "fs_ousia_surge"
 A_FIVE_CENTURY_ACT = "fs_a_five_century_act"
 CRITICS_DARLING = "fs_critics_darling"
-BIS = "fs_bis"
+# furina-next paper 2 (2026-10-16): Extended Run, Bis!'s slot, applies
+# its printed number (8, 12 upgraded).
+EXTENDED_RUN = "fs_extended_run"
 FOUNTAIN_OF_LUCINE = "fs_fountain_of_lucine"
 # The pool to 75: each applies its printed number (Grand Entrance 4 [6], High
 # Stakes 4 [6], Pneuma Tides 2 [3]) or 1 a copy.
@@ -151,7 +153,7 @@ ARM_POWER_IDS = {
     "ousia_surge": OUSIA_SURGE,
     "five_century": A_FIVE_CENTURY_ACT,
     "critics_darling": CRITICS_DARLING,
-    "bis": BIS,
+    "extended_run": EXTENDED_RUN,
     # The pool to 75.
     "grand_entrance": GRAND_ENTRANCE,
     "showstopper": SHOWSTOPPER,
@@ -498,7 +500,7 @@ def spend(state, amount: int) -> int:
 
 
 def spend_all(state) -> int:
-    """"Spend all your Fanfare." Nothing held is no Spend; Bis! keeps half
+    """"Spend all your Fanfare." Nothing held is no Spend
     (`furina_tide.spend_all`)."""
     if not active(state.player):
         return 0
@@ -507,16 +509,18 @@ def spend_all(state) -> int:
 
 def spend_up_to(state, cap: int) -> int:
     """"Spend up to X" (the Spend paper, 2026-10-10): X or all she holds,
-    never fails (`furina_tide.spend_up_to`). Returns what counts as spent."""
+    never fails. A played card's Spend, so Extended Run (furina-next paper
+    2, 2026-10-16) adds to the whole cap (`furina_tide.spend_up_to_card`).
+    Returns what counts as spent."""
     if not active(state.player):
         return 0
-    return T.spend_up_to(state, int(cap))
+    return T.spend_up_to_card(state, int(cap))
 
 
 def spend_half(state) -> int:
     """"Spend half your Fanfare" (Standing Ovation, 2026-10-11): half the
-    bank, rounded down (`furina_tide.spend_half`); not a spend-all, so no
-    Bis!. Returns what counts as spent."""
+    bank, rounded down (`furina_tide.spend_half`); no printed number, so no
+    Extended Run. Returns what counts as spent."""
     if not active(state.player):
         return 0
     return T.spend_half(state)

@@ -274,12 +274,15 @@ def test_the_arm_fountain_schedules_its_repay_at_her_turn_start():
     assert st2.player.block == 11
 
 
-def test_bis_on_the_arm_keeps_half_of_rising_applause():
+def test_extended_run_on_the_arm_and_rising_applause_takes_the_bank():
+    # furina-next paper 2 (2026-10-16): Bis!'s row is Extended Run, and a
+    # spend-all (Rising Applause) keeps nothing back.
     st = _furina()
     effects.resolve_card(st, _row("proto_fs_bis"))
+    assert st.player.powers.get(FS.EXTENDED_RUN) == 8
     FS.drain(st, 9)
     effects.resolve_card(st, _row("proto_fs_standing_ovation"))
-    assert FS.fanfare(st.player) == 4
+    assert FS.fanfare(st.player) == 0
 
 
 def test_spend_takes_the_full_price_or_nothing():

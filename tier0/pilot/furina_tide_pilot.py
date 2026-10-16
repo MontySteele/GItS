@@ -286,13 +286,15 @@ def _outlet_rate(spec) -> float:
         return (NEXT_ENERGY * 0.5 * n[1] + DRAW * n[2]) / n[0]
     if k == "house_down":
         return float(n[0])
+    if k == "bravura":
+        return n[0] / n[1]
     if k == "block_spend_hit":
         return n[2] / n[1]
     if k == "spend_fixed_hit":
         return n[1] / n[0]
     if k == "spend_energy":
         return 6.0 / n[1]
-    if k in ("block_spend_all", "bravura"):
+    if k == "block_spend_all":
         return float(n[1])
     if k == "rejoice":
         return float(n[0]) * 1.3
@@ -524,7 +526,7 @@ def card_damage(state, card) -> float:
     if k == "hit_repay":
         return float(n[0])
     if k == "bravura":
-        return float(n[0] + n[1] * f.fanfare)
+        return float(n[0] * (T.card_up_to_of(state, n[2]) // n[1]))
     if k == "block_spend_hit":
         return float(n[2] if f.fanfare >= n[1] else 0)
     if k == "block_spend_all":
@@ -550,7 +552,7 @@ def card_damage(state, card) -> float:
     if k == "rising_tide":
         return float(n[0] + n[1] * f.repays_this_turn)
     if k == "house_down":
-        return float(n[0] * f.fanfare)
+        return float(n[0] * T.card_up_to_of(state, n[1] * len(f.stage)))
     return 0.0
 
 
@@ -661,8 +663,9 @@ def value(state, card, playable: list, decider) -> float:
         return (_block_value(n[0], need_now)
                 + T.FOUNTAIN_TURNS * 0.6 * per_repay * n[1])
     if k == "bravura":
-        pts = f.fanfare
-        return _single(state, n[0] + n[1] * pts) - spend_cost(state, pts)
+        pts = T.card_up_to_of(state, n[2])
+        return (_single(state, n[0] * (pts // n[1]))
+                - spend_cost(state, pts))
     if k == "rejoice":
         pts = f.fanfare
         if pts <= 0:
@@ -714,7 +717,7 @@ def value(state, card, playable: list, decider) -> float:
             return 0.8 * tl * DRAW * 0.8
         if m == "five_century":
             return 0.8 * tl * 1.5
-        if m == "bis":
+        if m == "extended_run":
             return 0.8 * tl * 2.0
         if m == "masquerade":
             # The block gap (2026-10-09): Block per Drain.
@@ -734,7 +737,7 @@ def value(state, card, playable: list, decider) -> float:
     if k == "star_turn":
         return _single(state, n[0])
     if k == "house_down":
-        pts = f.fanfare
+        pts = T.card_up_to_of(state, n[1] * len(f.stage))
         return (_single(state, n[0] * pts) - spend_cost(state, pts)
                 + GUEST_ACT * len(f.stage))
     if k in T.FIXED_DRAIN_KINDS:

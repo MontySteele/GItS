@@ -83,18 +83,17 @@ public class FurinaSpendUpToTests
     }
 
     [Fact]
-    public void Bis_ignores_an_up_to_spend_and_standing_room_only_answers_both()
+    public void Standing_room_only_answers_an_up_to_spend_and_a_spend_all()
     {
         // furina-next (2026-10-16): Standing Room Only answers every Spend.
-        var mods = new StageMods { Bis = 1, StandingRoomOnly = 2 };
+        var mods = new StageMods { StandingRoomOnly = 2 };
         var kit = StageKit.With(mods, 20);
         Assert.Equal(12, Run(kit.Director.SpendUpTo(12)));
-        Assert.Equal(8, kit.Stage.Fanfare);                 // no half back
+        Assert.Equal(8, kit.Stage.Fanfare);
         Assert.Contains("strength 2", kit.Board.Log);
-        // The same bank through a spend-all: Bis! keeps half, SRO answers.
         var all = StageKit.With(mods, 20);
         Assert.Equal(20, Run(all.Director.SpendAll()));
-        Assert.Equal(10, all.Stage.Fanfare);
+        Assert.Equal(0, all.Stage.Fanfare);
         Assert.Contains("strength 2", all.Board.Log);
     }
 

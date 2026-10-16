@@ -43,6 +43,6 @@ def _play(st, cid=CID):
 
 def test_the_sim_slice_twin_spends_half():
     st = _furina(21)
-    st.player.ftd.powers["bis"] = 1
+    st.player.ftd.powers["extended_run"] = 8     # no printed number
     assert T.spend_half(st) == 10
     assert st.player.ftd.fanfare == 11

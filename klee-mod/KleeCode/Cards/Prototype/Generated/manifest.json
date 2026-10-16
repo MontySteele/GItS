@@ -992,7 +992,7 @@
       "power_amount": 1
     },
     "proto_fs_bis": {
-      "innate": true
+      "power_amount": 4
     },
     "proto_fs_bravura": {
       "damage": 2
