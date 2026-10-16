@@ -387,7 +387,8 @@ let_the_people_rejoice	ImageGen/images/cards/furina/let_the_people_rejoice.png	5
 encore_performance	ImageGen/images/cards/furina/encore_performance.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Furina Wallpaper without Watermark.png		splash	
 encore_performance	ImageGen/images/cards/furina/encore_performance.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Furina Introduction Card 2.png		splash	
 encore_performance	ImageGen/images/cards/furina/encore_performance.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Coronated Prima Donna Pneuma Turnaround.png		splash	
-singer_of_many_waters	ImageGen/images/cards/furina/singer_of_many_waters.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Chanson of Many Waters.png		splash	
+# singer_of_many_waters <- Furina singing with a lute (art redo 2026-10-16)
+singer_of_many_waters	ImageGen/images/cards/furina/singer_of_many_waters.png	500	380	cover	x0.5,y0.40	shortlist	1	png	Marechaussee Hunter Judgment Day Furina Marechaussee Hunter.png		splash	
 singer_of_many_waters	ImageGen/images/cards/furina/singer_of_many_waters.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Character Furina Game (Pneuma).png		tcg	
 unheard_confession	ImageGen/images/cards/furina/unheard_confession.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Starlit Letter Portrait Furina.png		splash	
 unheard_confession	ImageGen/images/cards/furina/unheard_confession.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	La vaguelette.png		splash	
@@ -455,10 +456,12 @@ reginas_mercy	ImageGen/images/cards/furina/reginas_mercy.png	500	380	cover_autoc
 gentilhomme_usher	ImageGen/images/cards/furina/gentilhomme_usher.png	500	380	cover_autocrop	cover@0.06	shortlist	1	gif	Salon Solitaire Ousia Preview.gif	50	vfx	furina_pool
 gentilhomme_usher	ImageGen/images/cards/furina/gentilhomme_usher.png	500	380	cover_autocrop	cover@0.06	shortlist	2	gif	Salon Solitaire Plunging Water Preview.gif	50	vfx	furina_pool
 gentilhomme_usher	ImageGen/images/cards/furina/gentilhomme_usher.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Namecard Background Furina Banquet.png		splash	furina_pool
-surintendante_chevalmarin	ImageGen/images/cards/furina/surintendante_chevalmarin.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Film Stand Surintendante Chevalmarin.png		item	furina_pool
+# surintendante_chevalmarin <- official concept art of the Bubbler Seahorse (art redo 2026-10-16)
+surintendante_chevalmarin	ImageGen/images/cards/furina/surintendante_chevalmarin.png	500	380	cover	x0.36,y0.62@1.8	shortlist	1	png	Ride the Waves to a Rendezvous in Fontaine Bubbler Seahorse Concept Art.png		splash	furina_pool
 surintendante_chevalmarin	ImageGen/images/cards/furina/surintendante_chevalmarin.png	500	380	cover_autocrop	cover@0.06	shortlist	2	gif	Salon Solitaire Ousia Preview.gif	50	vfx	furina_pool
 surintendante_chevalmarin	ImageGen/images/cards/furina/surintendante_chevalmarin.png	500	380	cover_autocrop	cover@0.06	shortlist	3	png	Chevalmarin Film Fantasyland.png		splash	furina_pool
-mademoiselle_crabaletta	ImageGen/images/cards/furina/mademoiselle_crabaletta.png	500	380	cover_autocrop	cover@0.06	shortlist	1	gif	Salon Solitaire Plunging Water Preview.gif	50	vfx	furina_pool
+# mademoiselle_crabaletta <- a big blue Fontaine ocean crab (art redo 2026-10-16)
+mademoiselle_crabaletta	ImageGen/images/cards/furina/mademoiselle_crabaletta.png	500	380	cover	y0.5	shortlist	1	png	Item Crab Ocean.png		splash	furina_pool
 mademoiselle_crabaletta	ImageGen/images/cards/furina/mademoiselle_crabaletta.png	500	380	cover_autocrop	cover@0.06	shortlist	2	gif	Salon Solitaire Pneuma Preview.gif	50	vfx	furina_pool
 dinner_service	ImageGen/images/cards/furina/dinner_service.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Namecard Background Furina Banquet.png		splash	furina_pool
 dinner_service	ImageGen/images/cards/furina/dinner_service.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Item Furina Banquet.png		item	furina_pool
@@ -624,10 +627,12 @@ freminet_shattering_pressure	ImageGen/images/cards/companions/freminet_shatterin
 guest_neuvillette_tears	ImageGen/images/cards/companions/guest_neuvillette_tears.png	500	380	cover	y0.16	shortlist	1	png	Neuvillette Character Card.png		tcg	neuvillette
 guest_neuvillette_tears	ImageGen/images/cards/companions/guest_neuvillette_tears.png	500	380	cover	y0.16	shortlist	2	png	Neuvillette Character Card Platinum.png		tcg	neuvillette
 guest_neuvillette_tears	ImageGen/images/cards/companions/guest_neuvillette_tears.png	500	380	cover	y0.16	shortlist	3	png	Neuvillette Character Card Golden.png		tcg	neuvillette
-guest_neuvillette_droplets	ImageGen/images/cards/companions/guest_neuvillette_droplets.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Neuvillette Wish.png		splash	neuvillette
+# guest_neuvillette_droplets <- Neuvillette underwater among rising bubbles and droplets (art redo 2026-10-16)
+guest_neuvillette_droplets	ImageGen/images/cards/companions/guest_neuvillette_droplets.png	500	380	cover	x0.5,y0.45	shortlist	1	png	App Store Event Character Wallpaper Neuvillette Version 4.1.png		splash	neuvillette
 guest_neuvillette_droplets	ImageGen/images/cards/companions/guest_neuvillette_droplets.png	500	380	cover	y0.16	shortlist	2	png	Neuvillette Character Card Platinum.png		tcg	neuvillette
 guest_neuvillette_droplets	ImageGen/images/cards/companions/guest_neuvillette_droplets.png	500	380	cover	y0.16	shortlist	3	png	Neuvillette Character Card Golden.png		tcg	neuvillette
-guest_neuvillette_judgment	ImageGen/images/cards/companions/guest_neuvillette_judgment.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Neuvillette Full Wish.png		splash	neuvillette
+# guest_neuvillette_judgment <- Neuvillette at the judge's bench; zoomed so the copyright mark at bottom right is cut (art redo 2026-10-16)
+guest_neuvillette_judgment	ImageGen/images/cards/companions/guest_neuvillette_judgment.png	500	380	cover	x0.62,y0.47@1.06	shortlist	1	png	Version 4.1 Wallpaper 2.png		splash	neuvillette
 guest_neuvillette_judgment	ImageGen/images/cards/companions/guest_neuvillette_judgment.png	500	380	cover	y0.16	shortlist	2	png	Neuvillette Character Card Platinum.png		tcg	neuvillette
 guest_neuvillette_judgment	ImageGen/images/cards/companions/guest_neuvillette_judgment.png	500	380	cover	y0.16	shortlist	3	png	Neuvillette Character Card Golden.png		tcg	neuvillette
 lynette_enigmatic_feint	ImageGen/images/cards/companions/lynette_enigmatic_feint.png	500	380	cover	y0.16	shortlist	1	png	Lynette Character Card.png		tcg	lynette
@@ -1833,28 +1838,28 @@ proto_mi_gorou_crystal_collapse	ImageGen/images/cards/companions/proto_mi_gorou_
 # L1, L7 and L12 all partition on is_prototype(), and a prototype row wearing
 # a shipped picture is the pattern the partition exists for. Those six are
 # the rows worth a second look on the contact sheet.
-# proto_fs_curtain_rise <- Chanson of Many Waters: the aria that opens the evening
-proto_fs_curtain_rise	ImageGen/images/cards/furina/proto_fs_curtain_rise.png	500	380	cover	center	shortlist	1	png	Chanson of Many Waters.png		splash	
+# proto_fs_curtain_rise <- the storybook stage before the show, a lone figure under the proscenium (art redo 2026-10-16)
+proto_fs_curtain_rise	ImageGen/images/cards/furina/proto_fs_curtain_rise.png	500	380	cover	x0.5,y0.5	shortlist	1	png	Soloist's Prologue Computer Graphic.png		splash	
 # proto_fs_standing_ovation 'Rising Applause' <- the Conclusive Ovation TCG card
 proto_fs_standing_ovation	ImageGen/images/cards/furina/proto_fs_standing_ovation.png	500	380	cover	top	shortlist	1	png	Conclusive Ovation Equipment Card.png		tcg	
 # proto_fs_understudy <- the chibi Furina: the small stand-in, not the star
 proto_fs_understudy	ImageGen/images/cards/furina/proto_fs_understudy.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Furina Special Program Chibi.png		sticker	
 # proto_fs_warm_reception <- the Banquet namecard: the house received and fed
 proto_fs_warm_reception	ImageGen/images/cards/furina/proto_fs_warm_reception.png	500	380	cover	center	shortlist	1	png	Namecard Background Furina Banquet.png		splash	
-# proto_fs_tidal_flourish <- Calamitous Tread: the wave that hits everything
-proto_fs_tidal_flourish	ImageGen/images/cards/furina/proto_fs_tidal_flourish.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Calamitous Tread Graphic 2.png		splash	
+# proto_fs_tidal_flourish <- Furina sweeping through water; banner text cropped out (art redo 2026-10-16)
+proto_fs_tidal_flourish	ImageGen/images/cards/furina/proto_fs_tidal_flourish.png	500	380	cover	x0.76,y0.45@1.35	shortlist	1	png	Splashscreen Chanson of Many Waters Tempestuous Destiny.png		splash	
 # proto_fs_interposition <- Fragrant Fantasy 2, the sibling of held_breath's own pick
 proto_fs_interposition	ImageGen/images/cards/furina/proto_fs_interposition.png	500	380	cover	center	shortlist	1	png	Fragrant Fantasy Furina 2.png		splash	
 # proto_fs_scene_change <- the Fragrant Fantasy wallpaper: the same scene, restaged
 proto_fs_scene_change	ImageGen/images/cards/furina/proto_fs_scene_change.png	500	380	cover	y0.35	shortlist	1	png	Fragrant Fantasy Wallpaper.png		splash	
 # proto_fs_grand_entrance <- her full Wish splash: the arrival, at full height
 proto_fs_grand_entrance	ImageGen/images/cards/furina/proto_fs_grand_entrance.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Furina Full Wish.png		splash	
-# proto_fs_pneuma_refrain <- Furina in her PNEUMA arkhe, the card's own word
-proto_fs_pneuma_refrain	ImageGen/images/cards/furina/proto_fs_pneuma_refrain.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Furina Game (Pneuma).png		splash	
-# proto_fs_bis 'Bis!' <- her second TCG card: the encore of the first
-proto_fs_bis	ImageGen/images/cards/furina/proto_fs_bis.png	500	380	cover	top	shortlist	1	png	Furina Card 2.png		tcg	
-# proto_fs_final_bow <- the Starlit Letter wallpaper: the last look, house lights down
-proto_fs_final_bow	ImageGen/images/cards/furina/proto_fs_final_bow.png	500	380	cover	center	shortlist	1	png	Starlit Letter Wallpaper Furina.png		splash	
+# proto_fs_pneuma_refrain <- Furina in her Pneuma arkhe, head and shoulders (art redo 2026-10-16)
+proto_fs_pneuma_refrain	ImageGen/images/cards/furina/proto_fs_pneuma_refrain.png	500	380	cover	x0.5,y0.20	shortlist	1	png	Character Furina Game (Pneuma).png		splash	
+# proto_fs_bis 'Bis!' <- the cast's curtain call under confetti: the encore (art redo 2026-10-16)
+proto_fs_bis	ImageGen/images/cards/furina/proto_fs_bis.png	500	380	cover	x0.5,y0.55	shortlist	1	png	The Two Musketeers' Triumph Quest Still 1 Lumine.png		splash	
+# proto_fs_final_bow <- a still from Furina's farewell story quest (art redo 2026-10-16)
+proto_fs_final_bow	ImageGen/images/cards/furina/proto_fs_final_bow.png	500	380	cover	x0.5,y0.5	shortlist	1	png	This Life, Just Like a Light Trickle of Song Still 1 Aether.png		splash	
 # ---------- Blank-portrait pass 2026-09-24: every prototype card gets a face ----------
 # art_coverage listed 49 prototype cards with no portrait (KleeArt.CardPortrait
 # returned Blank()). Six Klee rows above wear the spares painted for cut cards
@@ -1998,8 +2003,8 @@ power_furina_guest_lynette	ImageGen/images/furina/powers/guest_lynette.png	256	2
 # the full-wish art and the character card behind it. Blank source_group keeps
 # strict L1 inside the prototype partition.
 # -- 1. Arranging the stage --
-# proto_fs_plot_twist <- NEW: the Lyney trial's reveal drawn as a diagram -- the trapdoor and the water, arrows showing the trick
-proto_fs_plot_twist	ImageGen/images/cards/furina/proto_fs_plot_twist.png	500	380	cover	center	shortlist	1	png	Lies Cast Shadows Under Gathered Lights Computer Graphic.png		splash
+# proto_fs_plot_twist <- Lyney's magic stage at night, the trick before the reveal (art redo 2026-10-16)
+proto_fs_plot_twist	ImageGen/images/cards/furina/proto_fs_plot_twist.png	500	380	cover	x0.42,y0.5	shortlist	1	png	Apocalypse Still 2.png		splash
 # proto_fs_revolving_stage <- NEW: the Opera Epiclese stage, curtain up and empty, before the next turn
 proto_fs_revolving_stage	ImageGen/images/cards/furina/proto_fs_revolving_stage.png	500	380	cover	x0.45	shortlist	1	png	Archon Quest Lies Cast Shadows Under Gathered Lights.png		splash
 # proto_fs_guest_star_lyney <- NEW: Lyney's own Wish splash: the guest who joins the stage
@@ -2037,8 +2042,8 @@ proto_fs_da_capo	ImageGen/images/cards/furina/proto_fs_da_capo.png	500	380	cover
 # proto_fs_grand_finale <- NEW: the whole company on stage under the confetti, the last bow
 proto_fs_grand_finale	ImageGen/images/cards/furina/proto_fs_grand_finale.png	500	380	cover	center	shortlist	1	png	The Two Musketeers' Triumph Quest Still 1 Aether.png		splash
 # -- 6. Hydro and reactions --
-# proto_fs_bubble_aria <- NEW: Furina singing in a ring of bubbles
-proto_fs_bubble_aria	ImageGen/images/cards/furina/proto_fs_bubble_aria.png	500	380	cover	x0.36	shortlist	1	png	App Store Event Character Wallpaper Furina Version 4.2.png		splash
+# proto_fs_bubble_aria <- Furina among floating bubbles with Sigewinne; banner text cropped out (art redo 2026-10-16)
+proto_fs_bubble_aria	ImageGen/images/cards/furina/proto_fs_bubble_aria.png	500	380	cover	x0.84,y0.5@1.3	shortlist	1	png	Splashscreen Romaritime Meluserenity Chanson of Many Waters.png		splash
 # proto_fs_grand_deluge <- NEW: the Archon Quest's turning point, the sea torn open into a vortex
 proto_fs_grand_deluge	ImageGen/images/cards/furina/proto_fs_grand_deluge.png	500	380	cover	x0.45	shortlist	1	png	Archon Quest Turning Point.png		splash
 # proto_fs_regina_of_all_waters <- NEW: Focalors in the flooded Opera Epiclese, the Hydro Archon herself
@@ -2370,7 +2375,8 @@ act_vignette_sumeru	ImageGen/images/teyvat/map/sumeru_vignette.png	2035	1440	vig
 varka_select_bg	ImageGen/images/varka/ui/select_bg.png	1920	1080	cover	center	auto	1	png	Namecard Background Varka Lead Wolf.png		splash
 # Boreas's Fang (starting relic). No 'fang' item exists; the Boreas drops are
 # the closest objects, the Spirit Locket reading most like a tooth or claw.
-relic_boreas_fang	ImageGen/images/varka/relics/boreas_fang.png	256	256	contain	center	shortlist	1	png	Item Spirit Locket of Boreas.png		icon
+# relic_boreas_fang <- the Boreal Wolf's broken fang (art redo 2026-10-16)
+relic_boreas_fang	ImageGen/images/varka/relics/boreas_fang.png	256	256	contain	center	shortlist	1	png	Item Boreal Wolf's Broken Fang.png		icon
 relic_boreas_fang	ImageGen/images/varka/relics/boreas_fang.png	256	256	contain	center	shortlist	2	png	Item Tail of Boreas.png		icon
 relic_boreas_fang	ImageGen/images/varka/relics/boreas_fang.png	256	256	contain	center	shortlist	3	png	Lupus Majoris Shape.png		icon
 # Power icons. The four Winds wear the Mondstadt Vision of their element (the
@@ -2400,11 +2406,14 @@ proto_vk_kaeya_frostgnaw	ImageGen/images/cards/varka/proto_vk_kaeya_frostgnaw.pn
 proto_vk_tempest_charge	ImageGen/images/cards/varka/proto_vk_tempest_charge.png	500	380	cover	x0.5,y0.45	shortlist	1	png	Fated Warrior Quest Still 4.png		splash
 proto_vk_favonius_cut	ImageGen/images/cards/varka/proto_vk_favonius_cut.png	500	380	cover	x0.47,y0.40@1.8	shortlist	1	png	Varka Introduction Card 2.png		splash
 proto_vk_grand_masters_order	ImageGen/images/cards/varka/proto_vk_grand_masters_order.png	500	380	cover	y0.40	shortlist	1	png	Varka Mural.png		splash
-proto_vk_knights_roll_call	ImageGen/images/cards/varka/proto_vk_knights_roll_call.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Icon Emoji Paimon's Paintings 48 Varka 1.png		sticker
+# proto_vk_knights_roll_call <- Kaeya, Klee and Jean side by side (art redo 2026-10-16)
+proto_vk_knights_roll_call	ImageGen/images/cards/varka/proto_vk_knights_roll_call.png	500	380	cover	x0.5,y0.55	shortlist	1	png	Mondstadt Tourism Revitalization Project Wallpaper.png		splash
 proto_vk_eye_of_the_storm	ImageGen/images/cards/varka/proto_vk_eye_of_the_storm.png	500	380	cover	center	shortlist	1	png	Namecard Background Varka Lead Wolf.png		splash
 proto_vk_stormward_stance	ImageGen/images/cards/varka/proto_vk_stormward_stance.png	500	380	cover	y0.30	shortlist	1	png	Varka Portrait.png		splash
-proto_vk_tailwind_stride	ImageGen/images/cards/varka/proto_vk_tailwind_stride.png	500	380	cover_autocrop	contain@0.06	shortlist	1	png	Icon Emoji Paimon's Paintings 48 Varka 3.png		sticker
-proto_vk_converging_winds	ImageGen/images/cards/varka/proto_vk_converging_winds.png	500	380	cover	center	shortlist	1	png	Version Luna V Event Calendar Wallpaper.png		splash
+# proto_vk_tailwind_stride <- Venti, the bard, with his lyre (art redo 2026-10-16)
+proto_vk_tailwind_stride	ImageGen/images/cards/varka/proto_vk_tailwind_stride.png	500	380	cover	x0.56,y0.5@1.2	shortlist	1	png	Venti Birthday 2025.png		splash
+# proto_vk_converging_winds <- Venti with Dvalin and Boreas wheeling around him; text cropped out (art redo 2026-10-16)
+proto_vk_converging_winds	ImageGen/images/cards/varka/proto_vk_converging_winds.png	500	380	cover	x0.55,y0.4@1.25	shortlist	1	png	Global Release in 1 Day Artwork - Venti, Boreas and Dvalin.jpg		splash
 proto_vk_boreas_unbound	ImageGen/images/cards/varka/proto_vk_boreas_unbound.png	500	380	cover	x0.5,y0.45	shortlist	1	png	Fated Warrior Quest Still 3.png		splash
 # ---------- Kokomi art pass 2 (2026-09-29): faces, not legs ----------
 # [USER]: "re-do her art pass for card art, because so many cards are just
@@ -2691,8 +2700,8 @@ proto_vk_northwind_avatar	ImageGen/images/cards/varka/proto_vk_northwind_avatar.
 proto_vk_oath_of_the_knights	ImageGen/images/cards/varka/proto_vk_oath_of_the_knights.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Song of the Welkin Moon Knights of Favonius.png		item	
 # proto_vk_oath_unto_death <- Varka at the right, text cropped out
 proto_vk_oath_unto_death	ImageGen/images/cards/varka/proto_vk_oath_unto_death.png	500	380	cover	x0.82,y0.30@2.2	shortlist	1	png	Facts About Varka I 0.png		splash	
-# proto_vk_oathbound_aegis <- the reinforcement shield
-proto_vk_oathbound_aegis	ImageGen/images/cards/varka/proto_vk_oathbound_aegis.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Icon Fated Warrior Reinforcements.png		item	fated_warrior_reinforcements
+# proto_vk_oathbound_aegis <- the Grand Masters' swords standing together (art redo 2026-10-16)
+proto_vk_oathbound_aegis	ImageGen/images/cards/varka/proto_vk_oathbound_aegis.png	500	380	cover	x0.5,y0.5	shortlist	1	png	Swords of the Grand Masters.png		splash	fated_warrior_reinforcements
 # proto_vk_oathsworn_strike <- Varka mid-swing, banner text cropped out (the Splashscreen is L9-banned)
 proto_vk_oathsworn_strike	ImageGen/images/cards/varka/proto_vk_oathsworn_strike.png	500	380	cover	x0.62,y0.30@1.7	shortlist	1	png	Facts About Varka II 0.png		splash	
 # proto_vk_pathfinders_mark <- the sketch of Jean and Dvalin
@@ -2713,8 +2722,8 @@ proto_vk_short_circuit	ImageGen/images/cards/varka/proto_vk_short_circuit.png	50
 proto_vk_static_field	ImageGen/images/cards/varka/proto_vk_static_field.png	500	380	cover	x0.56,y0.28@2.4	shortlist	1	png	Character Keqing Full Wish.png		splash	
 # proto_vk_storm_surge <- Dvalin over the forest
 proto_vk_storm_surge	ImageGen/images/cards/varka/proto_vk_storm_surge.png	500	380	cover	x0.55	shortlist	1	png	Dvalin In-Game.png		splash	
-# proto_vk_sworn_brotherhood <- Kaeya in the headquarters hall, waist up (second use of the still)
-proto_vk_sworn_brotherhood	ImageGen/images/cards/varka/proto_vk_sworn_brotherhood.png	500	380	cover	x0.21,y0.29@3.4	shortlist	1	png	Archon Quest Knights of Favonius.png		splash	knights_of_favonius_aq
+# proto_vk_sworn_brotherhood <- the Wolf Knight beside a great wolf before Mondstadt (art redo 2026-10-16)
+proto_vk_sworn_brotherhood	ImageGen/images/cards/varka/proto_vk_sworn_brotherhood.png	500	380	cover	x0.5,y0.55	shortlist	1	png	NPC Wolf Knight.png		splash	knights_of_favonius_aq
 # proto_vk_tailwind_guard <- Windwail Highland
 proto_vk_tailwind_guard	ImageGen/images/cards/varka/proto_vk_tailwind_guard.png	500	380	cover	x0.42	shortlist	1	png	Windwail Highland Version 1.0.png		splash	
 # proto_vk_tempest_of_the_four_winds <- the heroes falling past Dvalin, Korean title cropped out (the Splashscreen is L9-banned)
@@ -2727,32 +2736,32 @@ proto_vk_thundering_verdict	ImageGen/images/cards/varka/proto_vk_thundering_verd
 proto_vk_tidal_bulwark	ImageGen/images/cards/varka/proto_vk_tidal_bulwark.png	500	380	cover	x0.60,y0.38@2.4	shortlist	1	png	Character Freminet Full Wish.png		splash	
 # proto_vk_twin_gales <- chibi Aether and Venti picnic
 proto_vk_twin_gales	ImageGen/images/cards/varka/proto_vk_twin_gales.png	500	380	cover	y0.42	shortlist	1	png	Venti Birthday 2021 - Shorts.png		splash	
-# proto_vk_unwavering_banner <- the Mondstadt emblem
-proto_vk_unwavering_banner	ImageGen/images/cards/varka/proto_vk_unwavering_banner.png	500	380	cover_autocrop	contain@0.10	shortlist	1	png	Mondstadt Emblem Day.png		item	
+# proto_vk_unwavering_banner <- the Mondstadt emblem as a banner over a hall (art redo 2026-10-16)
+proto_vk_unwavering_banner	ImageGen/images/cards/varka/proto_vk_unwavering_banner.png	500	380	cover	x0.7,y0.5	shortlist	1	png	Namecard Background Mondstadt Hero's Fame.png		splash	
 # proto_vk_violet_storm <- Lisa, face and lightning (Lisa Wish is taken: L1)
 proto_vk_violet_storm	ImageGen/images/cards/varka/proto_vk_violet_storm.png	500	380	cover	x0.50,y0.25@3	shortlist	1	png	Lisa Wish Old CBT.png		splash	
-# proto_vk_vow_of_the_blade <- Varka's icon portrait, face
-proto_vk_vow_of_the_blade	ImageGen/images/cards/varka/proto_vk_vow_of_the_blade.png	500	380	cover	y0.40	shortlist	1	png	Varka Icon.png		sticker	
+# proto_vk_vow_of_the_blade <- Varka with his greatsword planted (art redo 2026-10-16)
+proto_vk_vow_of_the_blade	ImageGen/images/cards/varka/proto_vk_vow_of_the_blade.png	500	380	cover	x0.5,y0.38@1.4	shortlist	1	png	Ready for Battle Varka Preview.png		splash	
 # proto_vk_wall_of_gales <- Stormterror's arena
 proto_vk_wall_of_gales	ImageGen/images/cards/varka/proto_vk_wall_of_gales.png	500	380	cover	center	shortlist	1	png	Domain Confront Stormterror.png		splash	
 # proto_vk_weathervane <- Mondstadt City from above
 proto_vk_weathervane	ImageGen/images/cards/varka/proto_vk_weathervane.png	500	380	cover	x0.42	shortlist	1	png	Mondstadt City.png		splash	
 # proto_vk_west_wind_shield <- Jean, face in frame
 proto_vk_west_wind_shield	ImageGen/images/cards/varka/proto_vk_west_wind_shield.png	500	380	cover	x0.55,y0.38@1.6	shortlist	1	png	Jean Profile.png		splash	
-# proto_vk_wildfire_oath <- Diluc's flames
-proto_vk_wildfire_oath	ImageGen/images/cards/varka/proto_vk_wildfire_oath.png	500	380	cover_autocrop	contain@0.06	shortlist	1	png	Item Diluc Flames.png		item	
+# proto_vk_wildfire_oath <- Diluc wreathed in flame (art redo 2026-10-16)
+proto_vk_wildfire_oath	ImageGen/images/cards/varka/proto_vk_wildfire_oath.png	500	380	cover	x0.5,y0.45	shortlist	1	png	Red Dead of Night Preview.png		splash	
 # proto_vk_windborne_resolve <- Venti, face in frame
 proto_vk_windborne_resolve	ImageGen/images/cards/varka/proto_vk_windborne_resolve.png	500	380	cover	x0.47,y0.38@1.4	shortlist	1	png	Venti Birthday 2026.png		splash	
 # proto_vk_wolfpack <- chibi Razor
 proto_vk_wolfpack	ImageGen/images/cards/varka/proto_vk_wolfpack.png	500	380	cover	x0.38,y0.55@1.3	shortlist	1	png	Razor Birthday 2024 - Shorts.png		splash	
-# proto_vk_kindled_edge <- Amber (Pyro starter companion)
-proto_vk_kindled_edge	ImageGen/images/cards/varka/proto_vk_kindled_edge.png	500	380	cover	y0.30	shortlist	1	png	Amber Birthday 2024.png		splash	
-# proto_vk_storm_battery <- Lisa (Electro)
-proto_vk_storm_battery	ImageGen/images/cards/varka/proto_vk_storm_battery.png	500	380	cover	y0.30	shortlist	1	png	Lisa Birthday 2024.png		splash	
-# proto_vk_frost_ward <- Kaeya (Cryo)
-proto_vk_frost_ward	ImageGen/images/cards/varka/proto_vk_frost_ward.png	500	380	cover	y0.30	shortlist	1	png	Kaeya Birthday 2024.png		splash	
-# proto_vk_rippling_guard <- Barbara (Hydro)
-proto_vk_rippling_guard	ImageGen/images/cards/varka/proto_vk_rippling_guard.png	500	380	cover	y0.30	shortlist	1	png	Barbara Birthday 2024.png		splash	
+# proto_vk_kindled_edge <- Amber (Pyro starter companion), zoomed past the frame and logo (art redo 2026-10-16)
+proto_vk_kindled_edge	ImageGen/images/cards/varka/proto_vk_kindled_edge.png	500	380	cover	x0.5,y0.52@1.35	shortlist	1	png	Amber Birthday 2024.png		splash	
+# proto_vk_storm_battery <- Lisa (Electro), zoomed past the frame and logo (art redo 2026-10-16)
+proto_vk_storm_battery	ImageGen/images/cards/varka/proto_vk_storm_battery.png	500	380	cover	x0.5,y0.52@1.35	shortlist	1	png	Lisa Birthday 2024.png		splash	
+# proto_vk_frost_ward <- Kaeya (Cryo), zoomed past the frame and logo (art redo 2026-10-16)
+proto_vk_frost_ward	ImageGen/images/cards/varka/proto_vk_frost_ward.png	500	380	cover	x0.5,y0.52@1.35	shortlist	1	png	Kaeya Birthday 2024.png		splash	
+# proto_vk_rippling_guard <- Barbara (Hydro), zoomed past the frame and logo (art redo 2026-10-16)
+proto_vk_rippling_guard	ImageGen/images/cards/varka/proto_vk_rippling_guard.png	500	380	cover	x0.5,y0.52@1.35	shortlist	1	png	Barbara Birthday 2024.png		splash	
 # ---------- Art bill 2026-10-06: eight missing card keys ----------
 proto_vk_ember_cleave	ImageGen/images/cards/varka/proto_vk_ember_cleave.png	500	380	cover	y0.30	shortlist	1	png	Diluc Wish.png		splash	
 proto_vk_pyre_oath	ImageGen/images/cards/varka/proto_vk_pyre_oath.png	500	380	cover	y0.28	shortlist	1	png	Diluc Profile.png		splash	
@@ -2786,8 +2795,10 @@ proto_fs_clean_slate	ImageGen/images/cards/furina/proto_fs_clean_slate.png	500	3
 proto_fs_cleansing_torrent	ImageGen/images/cards/furina/proto_fs_cleansing_torrent.png	500	380	cover	center	shortlist	1	png	Namecard Background Fontaine Lucine.png		splash	
 proto_fs_commanding_gaze	ImageGen/images/cards/furina/proto_fs_commanding_gaze.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Furina Expression 1.png		sticker	
 proto_fs_crashing_waves	ImageGen/images/cards/furina/proto_fs_crashing_waves.png	500	380	cover	x0.30	shortlist	1	png	Namecard Background Fontaine Judgment.png		splash	
-proto_fs_crescendo	ImageGen/images/cards/furina/proto_fs_crescendo.png	500	380	cover	x0.42,y0.45	shortlist	1	png	App Store Event Character Wallpaper Furina Version Luna II.png		splash	
-proto_fs_ebb_and_flow	ImageGen/images/cards/furina/proto_fs_ebb_and_flow.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Calamitous Tread Graphic 5.png		splash	
+# proto_fs_crescendo <- Furina above a rising wave; title text cropped out (art redo 2026-10-16)
+proto_fs_crescendo	ImageGen/images/cards/furina/proto_fs_crescendo.png	500	380	cover	x0.45,y0.25@2.0	shortlist	1	png	Version 4.2 Special Program Coming Soon.png		splash	
+# proto_fs_ebb_and_flow <- Fontaine from above, the city on the water and its falls (art redo 2026-10-16)
+proto_fs_ebb_and_flow	ImageGen/images/cards/furina/proto_fs_ebb_and_flow.png	500	380	cover	x0.5,y0.5	shortlist	1	png	Fontaine.png		splash	
 proto_fs_encore	ImageGen/images/cards/furina/proto_fs_encore.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Furina Wallpaper without Watermark.png		splash	
 proto_fs_ensemble_cast	ImageGen/images/cards/furina/proto_fs_ensemble_cast.png	500	380	cover	x0.44	shortlist	1	png	Version 4.0 Wallpaper 1.png		splash	
 proto_fs_fountain_of_lucine	ImageGen/images/cards/furina/proto_fs_fountain_of_lucine.png	500	380	cover	y0.50	shortlist	1	png	Fountain of Lucine.png		splash	
@@ -2799,7 +2810,8 @@ proto_fs_hymn_of_many_waters	ImageGen/images/cards/furina/proto_fs_hymn_of_many_
 proto_fs_ousia_pledge	ImageGen/images/cards/furina/proto_fs_ousia_pledge.png	500	380	cover	y0.22	shortlist	1	png	Furina NPC Ousia.png		splash	
 proto_fs_pay_the_tab	ImageGen/images/cards/furina/proto_fs_pay_the_tab.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Rainbow Macarons.png		item	
 proto_fs_prima_donna	ImageGen/images/cards/furina/proto_fs_prima_donna.png	500	380	cover	x0.45	shortlist	1	png	App Store Event Character Wallpaper Furina Version 5.4.png		splash	
-proto_fs_riptide_lunge	ImageGen/images/cards/furina/proto_fs_riptide_lunge.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	On-Hit Effect Furina.png		vfx	
+# proto_fs_riptide_lunge <- Furina's rapier through a water arc (art redo 2026-10-16)
+proto_fs_riptide_lunge	ImageGen/images/cards/furina/proto_fs_riptide_lunge.png	500	380	cover	x0.5,y0.45	shortlist	1	png	Weapon Splendor of Tranquil Waters Ousia.png		splash	
 proto_fs_rising_tide	ImageGen/images/cards/furina/proto_fs_rising_tide.png	500	380	cover	x0.40	shortlist	1	png	Primordial Sea.png		splash	
 proto_fs_salons_tab	ImageGen/images/cards/furina/proto_fs_salons_tab.png	500	380	cover	x0.62,y0.50@1.3	shortlist	1	png	Chanson of Many Waters 2024-06-25 - Furina Shorts.png		splash	
 proto_fs_showstopper	ImageGen/images/cards/furina/proto_fs_showstopper.png	500	380	cover	x0.33,y0.50@1.5	shortlist	1	png	Version Luna I Wallpaper 3.png		splash	
@@ -2888,8 +2900,8 @@ proto_fs_the_leading_lady	ImageGen/images/cards/furina/proto_fs_the_leading_lady
 proto_fs_velvet_curtain	ImageGen/images/cards/furina/proto_fs_velvet_curtain.png	500	380	cover	y0.45	shortlist	1	png	Starlit Letter Portrait Furina.png		splash	
 # proto_fs_the_masquerade <- the mask falls: Furina alone in the spotlight
 proto_fs_the_masquerade	ImageGen/images/cards/furina/proto_fs_the_masquerade.png	500	380	cover	x0.50,y0.55	shortlist	1	png	Archon Quest The Opera of Noirceur and Blancheur.png		splash	
-# proto_fs_the_show_must_go_on <- Furina's own card art
-proto_fs_the_show_must_go_on	ImageGen/images/cards/furina/proto_fs_the_show_must_go_on.png	500	380	cover	y0.33	shortlist	1	png	Furina Card.png		splash	
+# proto_fs_the_show_must_go_on <- Furina leaping forward ahead of Fontaine's cast (art redo 2026-10-16)
+proto_fs_the_show_must_go_on	ImageGen/images/cards/furina/proto_fs_the_show_must_go_on.png	500	380	cover	x0.20,y0.5	shortlist	1	png	Version 4.1 Full Wallpaper 1.png		splash	
 # ---------- Varka's relic and potion icons (2026-10-12): each rendered Burning Blood / the base potion until now ----------
 # relic_knights_commission <- the Knights' arms
 relic_knights_commission	ImageGen/images/varka/relics/knights_commission.png	256	256	contain	center	shortlist	1	png	Item Favonius Coat of Arms.png		icon
@@ -3055,10 +3067,10 @@ proto_fs_trial_by_water	ImageGen/images/cards/furina/proto_fs_trial_by_water.png
 proto_fs_rainfall_overture	ImageGen/images/cards/furina/proto_fs_rainfall_overture.png	500	380	cover	center	shortlist	1	png	Decree of the Deeps 2024-04-02 - Neuvillette Shorts.png		splash	
 # proto_fs_encore_performance <- Furina's curtain call, her voice-cast card
 proto_fs_encore_performance	ImageGen/images/cards/furina/proto_fs_encore_performance.png	500	380	cover	x0.22,y0.45@1.5	shortlist	1	png	Furina VA Announcement.png		splash	
-# proto_fs_arkhe_in_balance <- the Arkhe article art: Pneuma and Ousia side by side
-proto_fs_arkhe_in_balance	ImageGen/images/cards/furina/proto_fs_arkhe_in_balance.png	500	380	cover	center	shortlist	1	png	Arkhe.png		splash	
-# proto_fs_crowd_favorite <- Furina at the front of Fontaine's whole cast, the Version 4.0 wallpaper
-proto_fs_crowd_favorite	ImageGen/images/cards/furina/proto_fs_crowd_favorite.png	500	380	cover	x0.13,y0.45@1.6	shortlist	1	png	Version 4.0 Full Wallpaper 1.png		splash	
+# proto_fs_arkhe_in_balance <- the Ousia outfit turnaround, front view (art redo 2026-10-16)
+proto_fs_arkhe_in_balance	ImageGen/images/cards/furina/proto_fs_arkhe_in_balance.png	500	380	cover	x0.125,y0.32@2.4	shortlist	1	png	Coronated Prima Donna Ousia Turnaround.png		splash	
+# proto_fs_crowd_favorite <- Furina leading a parade of Teyvat's stars under balloons (art redo 2026-10-16)
+proto_fs_crowd_favorite	ImageGen/images/cards/furina/proto_fs_crowd_favorite.png	500	380	cover	x0.45,y0.6@1.25	shortlist	1	png	Version 4.1 Full Wallpaper 3.jpg		splash	
 # proto_fs_the_shows_not_over "The Show's Not Over" <- Furina alone on the stage, still performing, Starlight Reverie
 proto_fs_the_shows_not_over	ImageGen/images/cards/furina/proto_fs_the_shows_not_over.png	500	380	cover	x0.40,y0.86@1.6	shortlist	1	png	Starlight Reverie Wallpaper Furina Vertical.png		splash	
 # proto_fs_understudys_debut "Understudy's Debut" <- Yelan dressed as the Hydro Archon: the stand-in takes the stage
