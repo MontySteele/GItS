@@ -34,8 +34,11 @@ friends_only), `--change-note`, `--image` (preview png, under 1 MB),
 BaseLib's item 3737335127 as the dependency, minBranch/maxBranch null),
 `image.png` (`ImageGen/images/workshop_preview.png`, the five idle renders,
 made by `tools/make_workshop_preview.py`; a placeholder if absent) and `content/<id>/` holding only `<id>.dll`, `<id>.pck`,
-`manifest.json` and `images/cards/`. Never the seat bridge, never an
-auto-play mod. A left-out kit's own card art stays out. `mod_id.txt`, which
+`manifest.json` and `images/cards/`. Card portraits go up as lossless WebP
+(same pixels, about 29% smaller, checked file by file; a file that fails the
+check ships as its png), and `RosterArt.CardPortrait` tries `<id>.webp`, then
+`<id>.png`. The dev deploy and the art tools stay on png. Never the seat
+bridge, never an auto-play mod. A left-out kit's own card art stays out. `mod_id.txt`, which
 ModUploader writes on the first upload, is kept by every later run.
 
 **The release build.** `dotnet build -c Release -p:WorkshopRelease=true

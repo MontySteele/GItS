@@ -404,7 +404,9 @@ def render_select_scene(char: str, root: str, tint: tuple[float, float, float, f
     is the close-up with the moving region cleared (select_closeup_static.png)
     and a Sprite2D steps through the loop's sheet over that region, forward
     then back; the pose carries the breath, so the stage-1 tracks are gone.
-    The particles stay on top either way.
+    The particles stay on top either way. A loop whose static_file is null
+    (the moving box holds the whole figure, so the plate would be blank)
+    has no Splash at all: the sheet is the figure.
     """
     el = _element(figure_x)[element]
     behind = [e for e in el.emitters if e.behind]
@@ -419,8 +421,11 @@ def render_select_scene(char: str, root: str, tint: tuple[float, float, float, f
     load_steps = 3 + sum(s.count("[sub_resource") for s in subs)
 
     art = loop["static_file"] if loop else "select_closeup.png"
-    exts = [f'[ext_resource type="Texture2D" path="res://{char}/ui/{art}" id="1_art"]',
-            f'[ext_resource type="Texture2D" path="res://{char}/ui/select_bg.png" id="2_bg"]']
+    exts = [f'[ext_resource type="Texture2D" path="res://{char}/ui/select_bg.png" id="2_bg"]']
+    if art:
+        exts.insert(0, f'[ext_resource type="Texture2D" path="res://{char}/ui/{art}" id="1_art"]')
+    else:
+        load_steps -= 1
     if loop:
         exts.append(f'[ext_resource type="Texture2D" path="res://{char}/ui/{loop["sheet_file"]}" id="3_loop"]')
         load_steps += 1
@@ -446,7 +451,8 @@ def render_select_scene(char: str, root: str, tint: tuple[float, float, float, f
              _texture_rect("Backdrop", "2_bg", []).replace(
                  "stretch_mode = 6\n", f"stretch_mode = 6\nself_modulate = {color(tint)}\n")]
     nodes += [_emitter_node(e) for e in behind]
-    nodes.append(_texture_rect("Splash", "1_art", [f"pivot_offset = {vec2((figure_x, HEIGHT))}"]))
+    if art:
+        nodes.append(_texture_rect("Splash", "1_art", [f"pivot_offset = {vec2((figure_x, HEIGHT))}"]))
     if loop:
         nodes.append(_loop_sprite(loop))
     nodes += [_emitter_node(e) for e in front]

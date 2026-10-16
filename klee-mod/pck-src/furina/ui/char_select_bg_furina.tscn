@@ -1,6 +1,5 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=15 format=3]
 
-[ext_resource type="Texture2D" path="res://furina/ui/select_closeup_static.png" id="1_art"]
 [ext_resource type="Texture2D" path="res://furina/ui/select_bg.png" id="2_bg"]
 [ext_resource type="Texture2D" path="res://furina/ui/select_loop.png" id="3_loop"]
 
@@ -129,15 +128,6 @@ scale_amount_min = 15.0
 scale_amount_max = 20.0
 scale_amount_curve = SubResource("Curve_Glow")
 color_ramp = SubResource("Ramp_Glow")
-
-[node name="Splash" type="TextureRect" parent="."]
-layout_mode = 0
-offset_right = 1920.0
-offset_bottom = 1080.0
-pivot_offset = Vector2(1390, 1080)
-texture = ExtResource("1_art")
-expand_mode = 1
-stretch_mode = 6
 
 [node name="LoopSprite" type="Sprite2D" parent="."]
 position = Vector2(936, 28)

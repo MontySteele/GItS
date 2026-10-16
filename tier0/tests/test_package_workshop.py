@@ -185,6 +185,8 @@ def test_the_workspace_holds_the_mod_only(name, tmp_path):
     mod = content / v.mod_id
     assert sorted(p.name for p in mod.iterdir()) == sorted(
         ["images", "manifest.json", f"{v.mod_id}.dll", f"{v.mod_id}.pck"])
+    # The stand-ins are not real pngs, so each falls back to its .png;
+    # test_card_art_is_staged_as_lossless_webp covers the conversion.
     assert sorted(p.name for p in (mod / "images" / "cards").iterdir()) == [
         "proto_kl_spark.png", "proto_vk_oath.png"]
     assert [p.name for p in content.rglob("*.json")] == ["manifest.json"]
@@ -206,6 +208,41 @@ def test_a_placeholder_preview_is_written_when_no_art_exists(tmp_path):
     assert png.read_bytes()[:4] == b"\x89PNG"
     assert png.stat().st_size < pw.IMAGE_LIMIT
     assert json.loads((ws / "workshop.json").read_text(encoding="utf-8"))["changeNote"] == "first"
+
+
+def test_card_art_is_staged_as_lossless_webp(tmp_path):
+    # The Workshop ships card portraits as WebP (~29% smaller than the png);
+    # the loader (`RosterArt.PortraitCandidates`) tries .webp, then .png. The
+    # conversion must hold every pixel, transparency included.
+    Image = pytest.importorskip("PIL.Image")
+    src_dir = tmp_path / "src"
+    src_dir.mkdir()
+    rgb = Image.new("RGB", (7, 5))
+    rgb.putdata([((x * 37) % 256, (y * 53) % 256, (x * y * 11) % 256)
+                 for y in range(5) for x in range(7)])
+    rgb.save(src_dir / "a_rgb.png")
+    rgba = Image.new("RGBA", (6, 4))
+    rgba.putdata([(x * 40, y * 60, 200, (x * y * 30) % 256)
+                  for y in range(4) for x in range(6)])
+    rgba.save(src_dir / "b_rgba.png")
+    (src_dir / "c_broken.png").write_bytes(b"not a png")
+    cards = tmp_path / "cards"
+    cards.mkdir()
+
+    written = {stem: pw.stage_card(src_dir / f"{stem}.png", cards, stem)
+               for stem in ("a_rgb", "b_rgba", "c_broken")}
+
+    assert written["a_rgb"].name == "a_rgb.webp"
+    assert written["b_rgba"].name == "b_rgba.webp"
+    for stem in ("a_rgb", "b_rgba"):
+        with Image.open(src_dir / f"{stem}.png") as want, Image.open(written[stem]) as got:
+            assert got.format == "WEBP"
+            assert got.convert("RGBA").tobytes() == want.convert("RGBA").tobytes()
+    # A source the encoder cannot read ships as the png it was.
+    assert written["c_broken"].name == "c_broken.png"
+    assert written["c_broken"].read_bytes() == b"not a png"
+    assert sorted(p.name for p in cards.iterdir()) == [
+        "a_rgb.webp", "b_rgba.webp", "c_broken.png"]
 
 
 def test_the_dll_check_is_exact():

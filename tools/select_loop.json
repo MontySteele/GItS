@@ -24,7 +24,7 @@
    5908
   ],
   "sheet_file": "select_loop.png",
-  "static_file": "select_closeup_static.png",
+  "static_file": null,
   "texel_mb": 8.6
  },
  "klee": {
@@ -51,7 +51,7 @@
    6272
   ],
   "sheet_file": "select_loop.png",
-  "static_file": "select_closeup_static.png",
+  "static_file": null,
   "texel_mb": 8.13
  },
  "varka": {

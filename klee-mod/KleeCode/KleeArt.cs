@@ -135,7 +135,8 @@ internal static class RosterArt
 
     /// <summary>
     /// Absolute path to the images folder next to our dll. deploy.ps1 stages
-    /// images/cards/*.png into the deployed mod directory.
+    /// images/cards/*.png into the deployed mod directory;
+    /// tools/package_workshop.py stages them as lossless *.webp.
     /// </summary>
     private static string ImageRoot
     {
@@ -151,7 +152,7 @@ internal static class RosterArt
     }
 
     /// <summary>
-    /// Loads images/cards/&lt;cardId&gt;.png. cardId is the YAML sheet id
+    /// Loads images/cards/&lt;cardId&gt;.webp, else .png. cardId is the YAML sheet id
     /// (snake_case), which is what the art pipeline names files.
     ///
     /// NEVER NULL WHEN THE ENGINE IS UP (`EB-275`): a row with no staged image
@@ -167,6 +168,16 @@ internal static class RosterArt
     /// its picture and keeps the base picture rather than draw a blank.</summary>
     internal static bool LastResolved { get; private set; }
 
+    /// <summary>The portrait files tried for <paramref name="cardId"/>, in
+    /// order: images/cards/&lt;id&gt;.webp (the Workshop package), then
+    /// &lt;id&gt;.png (the dev deploy). Image.Load picks the decoder by
+    /// extension.</summary>
+    internal static string[] PortraitCandidates(string imageRoot, string cardId) => new[]
+    {
+        Path.Combine(imageRoot, "cards", cardId + ".webp"),
+        Path.Combine(imageRoot, "cards", cardId + ".png"),
+    };
+
     public static Texture2D? CardPortrait(string cardId)
     {
         if (Cache.TryGetValue(cardId, out var node))
@@ -180,7 +191,14 @@ internal static class RosterArt
         // Resolved-to-blank rows never reach the LRU -- see Unresolved.
         if (Unresolved.Contains(cardId)) return Blank();
 
-        var path = Path.Combine(ImageRoot, "cards", cardId + ".png");
+        // The Workshop package ships lossless WebP (same pixels, ~29% smaller);
+        // the dev deploy ships PNG. Take the first that exists.
+        var path = string.Empty;
+        foreach (var candidate in PortraitCandidates(ImageRoot, cardId))
+        {
+            path = candidate;
+            if (Godot.FileAccess.FileExists(candidate)) break;
+        }
         Texture2D? texture = null;
 
         // Guard with FileAccess.FileExists exactly as Downfall does, so a
