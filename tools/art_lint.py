@@ -306,6 +306,11 @@ APPROVED_FAMILY_EXCEPTIONS = {
         "R151 (2026-08-10, M8.3): [USER] approved exactly one hand-cropped "
         "`Character Details` Rare for Kokomi. Details 1 only -- the rest of "
         "the family stays banned.",
+    # Yae art pass 2026-10-16 (Yae is Prototype; Claude chose the picture):
+    # proto_ym_saiguus_lesson takes Yae's own figure out of this splash.
+    "splashscreen when the sakura bloom":
+        "Yae art pass 2026-10-16: picked from the crop (`x0.62,y0.2@1.8`), "
+        "which leaves out the banner text.",
 }
 
 
@@ -653,6 +658,18 @@ GENERATOR_OWNED = {
     "ImageGen/images/furina/model/frames/furina_spend.png": "char_render/pack.py",
     "ImageGen/images/furina/model/frames/furina_drain.png": "char_render/pack.py",
     "ImageGen/images/furina/model/frames/furina_repay.png": "char_render/pack.py",
+    # her guest stars' effects (2026-10-16, fx.GUEST_EFFECTS; no render needed)
+    "ImageGen/images/furina/model/frames/furina_gfx_charlotte.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_gfx_chevreuse.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_gfx_clorinde.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_gfx_escoffier.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_gfx_freminet.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_gfx_lynette.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_gfx_lyney.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_gfx_navia.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_gfx_neuvillette.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_gfx_sigewinne.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_gfx_wriothesley.png": "char_render/pack.py",
     "ImageGen/images/furina/model/frames/furina_shadow.png": "char_render/pack.py",
     "ImageGen/images/furina/model/furina_rest.png":         "char_render/pack.py",
     "ImageGen/images/furina/ui/select_closeup.png":         "char_render/pack.py",

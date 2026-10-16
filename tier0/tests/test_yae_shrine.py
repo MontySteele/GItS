@@ -91,7 +91,8 @@ def test_her_surface_rows_load_with_the_paper_counts(yae):
             continue
         assert c.character == Y.CHARACTER
         by[c.rarity] = by.get(c.rarity, 0) + 1
-    assert by == {"basic": 2, "common": 15, "uncommon": 18, "rare": 10}
+    # The pool to 78 (ruled 2026-10-15): 20 / 38 / 20.
+    assert by == {"basic": 2, "common": 20, "uncommon": 38, "rare": 20}
 
 
 def test_her_rows_resolve_through_get_card_and_the_staging_sheet_is_gone(yae):
@@ -332,20 +333,21 @@ def test_sakura_annotations_each_reading(yae):
     _play(st, _ym("yakan_evocation"))
     _play(st, _ym("inked_branches"))             # Red Ink on every Sakura
     s = _led(st).sakura[0]
-    assert s.annotation == Y.RED_INK
+    assert s.annotations == [Y.RED_INK]
     assert Y.act_size(st, s) == 3 + 3
     _play(st, _ym("fox_fire_draft"))             # Fox Fire on the newest
-    assert s.annotation == Y.FOX_FIRE            # replaces the Red Ink
+    # The pool to 78, pick 2 (a): it joins the Red Ink.
+    assert s.annotations == [Y.RED_INK, Y.FOX_FIRE]
     hp = st.enemies[0].hp
     Y.turn_end(st)
-    assert hp - st.enemies[0].hp == 3 + Y.FOX_FIRE_DAMAGE
+    assert hp - st.enemies[0].hp == 3 + 3 + Y.FOX_FIRE_DAMAGE
     assert any(r["event"] == "yae_fox_fire" for r in st.log)
 
 
 def test_an_unannotated_sakura_does_only_the_rite(yae):
     st = _state()
     _play(st, _ym("yakan_evocation"))
-    assert _led(st).sakura[0].annotation is None
+    assert _led(st).sakura[0].annotations == []
     Y.turn_end(st)
     assert not any(r["event"] == "yae_fox_fire" for r in st.log)
 
@@ -355,12 +357,14 @@ def test_newest_oldest_and_every(yae):
     for _ in range(3):
         _play(st, _ym("yakan_evocation"))
     _play(st, _ym("fox_fire_draft"))
-    assert [s.annotation for s in _led(st).sakura] == [None, None, Y.FOX_FIRE]
+    assert [s.annotations for s in _led(st).sakura] == [[], [], [Y.FOX_FIRE]]
     _play(st, _ym("evergreen_charm"))
-    assert [s.annotation for s in _led(st).sakura] == [Y.DEADLINE, None, Y.FOX_FIRE]
+    assert [s.annotations for s in _led(st).sakura] == [
+        [Y.DEADLINE], [], [Y.FOX_FIRE]]
     up = loader.get_card(_ym("fox_fire_draft") + "+")
     _play(st, up)                                # upgraded: every Sakura
-    assert [s.annotation for s in _led(st).sakura] == [Y.FOX_FIRE] * 3
+    assert [s.annotations for s in _led(st).sakura] == [
+        [Y.DEADLINE, Y.FOX_FIRE], [Y.FOX_FIRE], [Y.FOX_FIRE]]
 
 
 def test_deadline_extension_never_withers(yae):
@@ -398,14 +402,14 @@ def test_fallen_petals_withers_the_oldest_now_and_pays_energy(yae):
     assert st.player.energy == 10 and not _strikes(st)   # _play topped it up
     st.player.energy = 0
     _play(st, _ym("yakan_evocation"))
-    _play(st, _ym("grafted_branch"))             # levels 1 / 2
+    _play(st, _ym("grafted_branch"))             # levels 1 / 3
     st.player.energy = 0
     st.player.draw_pile = [loader.get_card("defend") for _ in range(3)]
     hand = len(st.player.hand)
     c = loader.get_card(_ym("fallen_petals"))
     st.player.hand.append(c)
     combat.play_card(st, c)
-    assert [s.level for s in _led(st).sakura] == [2]     # the oldest went
+    assert [s.level for s in _led(st).sakura] == [3]     # the oldest went
     assert len(_strikes(st)) == 1 and _strikes(st)[0]["reason"] == "bloom"
     assert st.player.energy == 1 and len(st.player.hand) == hand
     up = loader.get_card(_ym("fallen_petals") + "+")
@@ -417,10 +421,12 @@ def test_fallen_petals_withers_the_oldest_now_and_pays_energy(yae):
 
 def test_grafted_branch_plants_at_its_level(yae):
     st = _state()
+    # The pool to 78, sec.3: Level 3 [4] and 1 more turn.
     _play(st, _ym("grafted_branch"))
-    assert [s.level for s in _led(st).sakura] == [2]
+    assert [s.level for s in _led(st).sakura] == [3]
+    assert _led(st).sakura[0].turns_left == Y.SAKURA_TURNS + 1
     _play(st, loader.get_card(_ym("grafted_branch") + "+"))
-    assert [s.level for s in _led(st).sakura] == [2, 3]     # no levelling
+    assert [s.level for s in _led(st).sakura] == [3, 4]     # no levelling
 
 
 def test_kitsune_pounce_strikes_a_weak_enemy(yae):
@@ -666,7 +672,7 @@ def test_the_harness_pool_is_the_staged_pool(yae):
     from tools import yae_expansion_sim as S
     pl = S.pool()
     assert {k: len(v) for k, v in pl.items()} == {
-        "common": 15, "uncommon": 18, "rare": 10}
+        "common": 20, "uncommon": 38, "rare": 20}
     for d in S.DECKS.values():
         for cid in d["core"] + d["support"]:
             loader.get_card(cid)
@@ -679,7 +685,7 @@ def test_a_full_shrine_plant_strikes_the_oldest_as_its_last_bloom(yae):
     # then refreshes and gains a Level.
     st = _state()
     Y.plant(st, 3)
-    _led(st).sakura[0].annotation = Y.RED_INK
+    _led(st).sakura[0].add(Y.RED_INK)
     hp = st.enemies[0].hp
     Y.plant(st, 1)
     assert [r["reason"] for r in _strikes(st)] == ["full_shrine"]

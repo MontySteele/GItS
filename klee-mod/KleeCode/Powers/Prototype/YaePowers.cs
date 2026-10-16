@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using BaseLib.Abstracts;
 using MegaCrit.Sts2.Core.Commands;
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
@@ -37,16 +38,19 @@ public abstract class SakuraBadgePower : PowerModel, ILocalizationProvider
         ("description",
             "A [gold]Sakura[/gold] beside you. It acts at the end of your "
           + "turn."),
-        // The kind and the Annotation are numbers (YaeSakuraKind,
-        // YaeAnnotation) read by the game's own `cond:` formatter, the shape
-        // SHRINK_POWER's shipped row uses. No placeholder sits inside a
-        // branch.
+        // The kind is a number (YaeSakuraKind) read by the game's own
+        // `cond:` formatter, the shape SHRINK_POWER's shipped row uses; the
+        // pool to 78 (pick 2 (a)) lets Annotations coexist, so each is its
+        // own 0/1 flag, in Red Ink, Deadline Extension, Fox Fire order. No
+        // placeholder sits inside a branch.
         ("smartDescription",
             "{Kind:cond:==1?Foxfire Sakura|==2?Kitsune Sakura|Sakura}, "
           + "Level {Level}, planted at {Planted}. "
           + "{Kind:cond:==1?Hits ALL enemies for |==2?You gain |Strikes a random enemy for }"
           + "{Strike}{Kind:cond:==2? [gold]Block[/gold].| [gold]Electro[/gold] damage.}"
-          + $"{{Ann:cond:==1? [gold]Red Ink[/gold]: +{YaeLaw.RedInkAmount}.|==3? [gold]Deadline Extension[/gold]: no wither.|==4? [gold]Fox Fire[/gold]: +{YaeLaw.FoxFireDamage} to a random enemy.|}}"
+          + $"{{RedInk:cond:==1? [gold]Red Ink[/gold]: +{YaeLaw.RedInkAmount}.|}}"
+          + "{Deadline:cond:==1? [gold]Deadline Extension[/gold]: no wither.|}"
+          + $"{{FoxFire:cond:==1? [gold]Fox Fire[/gold]: +{YaeLaw.FoxFireDamage} to a random enemy.|}}"
           + " Turns left: {Turns}."),
     };
 
@@ -57,7 +61,8 @@ public abstract class SakuraBadgePower : PowerModel, ILocalizationProvider
     protected override IEnumerable<DynamicVar> CanonicalVars => new List<DynamicVar>
     {
         new("Level", 1m), new("Turns", 3m), new("Strike", 3m),
-        new("Ann", 0m), new("Kind", 0m), new("Planted", 1m),
+        new("RedInk", 0m), new("Deadline", 0m), new("FoxFire", 0m),
+        new("Kind", 0m), new("Planted", 1m),
     };
 
     private YaeSakura? Mine()
@@ -78,7 +83,9 @@ public abstract class SakuraBadgePower : PowerModel, ILocalizationProvider
         DynamicVars["Level"].BaseValue = sakura.Level;
         DynamicVars["Turns"].BaseValue = sakura.TurnsLeft;
         DynamicVars["Strike"].BaseValue = YaeShrine.Size(Owner, sakura);
-        DynamicVars["Ann"].BaseValue = (int)sakura.Annotation;
+        DynamicVars["RedInk"].BaseValue = sakura.Has(YaeAnnotation.RedInk) ? 1 : 0;
+        DynamicVars["Deadline"].BaseValue = sakura.Has(YaeAnnotation.DeadlineExtension) ? 1 : 0;
+        DynamicVars["FoxFire"].BaseValue = sakura.Has(YaeAnnotation.FoxFire) ? 1 : 0;
         DynamicVars["Kind"].BaseValue = (int)sakura.Kind;
         DynamicVars["Planted"].BaseValue = sakura.PlantedLevel;
         InvokeDisplayAmountChanged();
@@ -313,7 +320,9 @@ public sealed class SerializationPower : PowerModel, ILocalizationProvider
 
 /// <summary>Fox's Mooncall (Yae review r1, pick 2, ruled 2026-10-14): "Your
 /// Sakura are planted 1 Level higher", per copy (two copies plant at Level
-/// 3). <see cref="YaeShrine.PlantLevel"/> reads the amount.</summary>
+/// 3); the pool to 78: an Uncommon at 1 whose upgrade plants 2 Levels
+/// higher (amount 2). <see cref="YaeShrine.PlantLevel"/> reads the amount.
+/// </summary>
 public sealed class FoxsMooncallPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
@@ -405,4 +414,185 @@ public sealed class EditorInChiefPower : PowerModel, ILocalizationProvider
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
+}
+
+// ---------------------------------------------------------------------------
+//  THE POOL TO 78 (review/active/yae-pool-to-78-2026-10-15.md, ruled
+//  2026-10-15, all picks (a)). Sim twins by name in
+//  tier0/engine/yae_shrine.py.
+// ---------------------------------------------------------------------------
+
+/// <summary>Scattered Blossoms: "Whenever a Sakura withers, draw 1 card."
+/// Paid by <see cref="YaeShrine.Withered"/>, one card per stack per Sakura
+/// that withered.</summary>
+public sealed class EnlightenedBlessingPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Scattered Blossoms"),
+        ("description",
+            "Whenever a [gold]Sakura[/gold] withers, draw [blue]{Amount}[/blue] "
+          + "{Amount:plural:card|cards}."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    internal void Pulse() => Flash();
+}
+
+/// <summary>Saiguu's Lesson: "Whenever you apply Weak to an enemy, a Sakura
+/// strikes it." Each copy strikes once per enemy the Weak lands on
+/// (<see cref="YaeShrine.OnWeakApplied"/>): the highest-Level Sakura that
+/// strikes, one hit on that enemy.</summary>
+public sealed class SaiguusLessonPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Saiguu's Lesson"),
+        ("description",
+            "Whenever you apply [gold]Weak[/gold] to an enemy, a "
+          + "[gold]Sakura[/gold] strikes it."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    /// <summary>Does this change pay? Weak, gained, on a living enemy, put
+    /// there by <paramref name="owner"/>. PURE.</summary>
+    public static bool Pays(PowerModel? power, decimal amount,
+                            Creature? applier, Creature? owner) =>
+        power is MegaCrit.Sts2.Core.Models.Powers.WeakPower
+        && amount > 0m
+        && owner != null && applier == owner
+        && power.Owner is { IsEnemy: true, IsDead: false };
+
+    public override async Task AfterPowerAmountChanged(
+        PlayerChoiceContext choiceContext, PowerModel power, decimal amount,
+        Creature? applier, CardModel? cardSource)
+    {
+        if (Owner == null || Amount <= 0 || !Pays(power, amount, applier, Owner)) return;
+        if (!YaeShrine.Live(Owner)) return;
+        Flash();
+        await YaeShrine.OnWeakApplied(choiceContext, Owner, power.Owner!, Amount);
+    }
+}
+
+/// <summary>The Shrine's Sacred Shade: "At the end of your turn, gain 2 [3]
+/// Block for each Sakura." Paid by <see cref="YaeShrine.TurnEnd"/>, before
+/// the Sakura act.</summary>
+public sealed class SacredShadePower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "The Shrine's Sacred Shade"),
+        ("description",
+            "At the end of your turn, gain [blue]{Amount}[/blue] "
+          + "[gold]Block[/gold] for each [gold]Sakura[/gold]."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    internal void Pulse() => Flash();
+}
+
+/// <summary>
+/// Editorial Priority: "The first Annotated card you play each turn costs
+/// 0." The base game's FreeSkillPower shape: the cost hook answers 0 for an
+/// Annotated card in hand (or being played) while this turn's first has not
+/// been played, and the first Annotated card played spends it
+/// (<see cref="YaeShrineLedger.PriorityUsed"/>, cleared at her turn start).
+/// One free card a turn however many copies.
+/// </summary>
+public sealed class EditorialPriorityPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Editorial Priority"),
+        ("description",
+            "The first [gold]Annotated[/gold] card you play each turn costs 0."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    /// <summary>Does the power free this card now? PURE over its facts.
+    /// </summary>
+    public static bool Frees(bool annotated, bool inHandOrPlay, bool used) =>
+        annotated && inHandOrPlay && !used;
+
+    private bool Used => Owner != null && YaeShrineLedger.For(Owner).PriorityUsed;
+
+    public override bool TryModifyEnergyCostInCombat(
+        CardModel card, decimal originalCost, out decimal modifiedCost)
+    {
+        modifiedCost = originalCost;
+        if (Owner == null || card.Owner?.Creature != Owner) return false;
+        var pile = card.Pile?.Type;
+        if (!Frees(YaeEditing.IsAnnotated(card),
+                   pile == PileType.Hand || pile == PileType.Play, Used))
+        {
+            return false;
+        }
+        modifiedCost = 0m;
+        return true;
+    }
+
+    public override Task BeforeCardPlayed(CardPlay cardPlay)
+    {
+        if (Owner == null || cardPlay.Card?.Owner?.Creature != Owner) return Task.CompletedTask;
+        if (!YaeEditing.IsAnnotated(cardPlay.Card)) return Task.CompletedTask;
+        var ledger = YaeShrineLedger.For(Owner);
+        if (!ledger.PriorityUsed)
+        {
+            ledger.PriorityUsed = true;
+            Flash();
+        }
+        return Task.CompletedTask;
+    }
+}
+
+/// <summary>Stellar Conduct (the proposal's parked nod, any reaction):
+/// "Whenever a Sakura's strike triggers an Elemental Reaction, it strikes
+/// again." Paid inside the Sakura's hit (<c>YaeShrine.Hit</c>), once per
+/// stack; a strike again never strikes again.</summary>
+public sealed class StellarConductPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Stellar Conduct"),
+        ("description",
+            "Whenever a [gold]Sakura[/gold]'s strike triggers an "
+          + "[gold]Elemental Reaction[/gold], it strikes again."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    internal void Pulse() => Flash();
+}
+
+/// <summary>Eternity: "Your Sakura no longer wither when their turns run
+/// out." While she has it no timer ticks (<see cref="YaeShrineLedger.Tick"/>);
+/// a Sakura still withers to Fallen Petals, Replanting, Daisesshou or a
+/// full-shrine plant of another kind.</summary>
+public sealed class EternityPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Eternity"),
+        ("description",
+            "Your [gold]Sakura[/gold] no longer wither when their turns run "
+          + "out."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Single;
 }

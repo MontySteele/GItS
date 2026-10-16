@@ -115,6 +115,57 @@ def test_a_sakuras_annotation_prints_in_the_block_and_no_rite_line():
     assert not any("Rite" in line for line in lines)
 
 
+# The pool to 78, pick 2 (a): distinct Annotations coexist on a Sakura. The
+# badge sentence flags each in a fixed order (Red Ink, Deadline Extension,
+# Fox Fire); the wire's `player.yae_shrine.sakura` rows give the order applied.
+
+ALL_THREE = (" [gold]Red Ink[/gold]: +3. [gold]Deadline Extension[/gold]: no "
+             "wither. [gold]Fox Fire[/gold]: +3 to a random enemy.")
+
+
+def test_a_sakura_lists_every_annotation_it_carries():
+    state = yae_state(badges=((1, 1, 6, 2, ALL_THREE), (2, 1, 3, 3)))
+    lines = _block(blindplay.observe(state))
+    assert lines[1] == ("- Sakura 1: Sakura, Level 1 (planted at 1), strikes "
+                        "an enemy for 6, 2 turns left, Red Ink, Deadline "
+                        "Extension, Fox Fire.")
+    assert lines[2] == ("- Sakura 2: Sakura, Level 1 (planted at 1), strikes "
+                        "an enemy for 3, 3 turns left.")
+
+
+def test_the_annotations_print_in_the_order_applied_off_the_wire():
+    state = yae_state(badges=((1, 1, 6, 2, ALL_THREE),
+                              (2, 1, 6, 3, " [gold]Red Ink[/gold]: +3."
+                                           " [gold]Fox Fire[/gold]: +3 to a "
+                                           "random enemy.")))
+    state["player"]["yae_shrine"] = {
+        "live": True, "edits_this_combat": 5,
+        "sakura": [{"slot": 1, "annotations": ["Fox Fire", "Red Ink",
+                                               "Deadline Extension"]},
+                   {"slot": 2, "annotations": ["Fox Fire", "Red Ink"]}]}
+    shrine = blindplay_board.yae_shrine(
+        state["player"], {"you": {"powers": [
+            {"name": pw["name"], "text": pw["description"]}
+            for pw in state["player"]["status"]]}, "enemies": []})
+    assert shrine["sakura"][0]["annotations"] == [
+        "Fox Fire", "Red Ink", "Deadline Extension"]
+    # The old one-value field stays, the first applied.
+    assert shrine["sakura"][0]["annotation"] == "Fox Fire"
+    lines = _block(blindplay.observe(state))
+    assert lines[1].endswith("2 turns left, Fox Fire, Red Ink, Deadline "
+                             "Extension.")
+    assert lines[2].endswith("3 turns left, Fox Fire, Red Ink.")
+
+
+def test_the_badge_decides_which_annotations_a_stale_wire_row_adds_none():
+    state = yae_state(badges=((1, 1, 6, 2, " [gold]Red Ink[/gold]: +3."),))
+    state["player"]["yae_shrine"] = {
+        "live": True, "edits_this_combat": 1,
+        "sakura": [{"slot": 1, "annotations": ["Fox Fire", "Red Ink"]}]}
+    lines = _block(blindplay.observe(state))
+    assert lines[1].endswith("2 turns left, Red Ink.")
+
+
 def test_her_badges_leave_the_power_list_for_the_block():
     page = blindplay.observe(yae_state())
     assert "Sakura 1 3" not in page.split("## Your shrine")[0]

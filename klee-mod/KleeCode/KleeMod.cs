@@ -149,6 +149,13 @@ public static class KleeMod
                     // table.
                     .Concat(Story.StoryCombatHooks.Subscribe(combatState)));
 
+        // OPT-IN RUN STATS (RunStats/RunStatsHook.cs): only in a build with a
+        // telemetry endpoint (the beta package made with --telemetry-endpoint).
+        // Every other build compiles no RunStats file and has nothing here.
+#if GITS_RUN_STATS
+        RunStats.RunStatsHook.Install();
+#endif
+
         Log.Info($"[{ModId}] Klee, Furina and Kokomi registered"
                  + ", Varka and Yae Miko (prototype)"
                  + ".");
@@ -894,6 +901,11 @@ internal static class LocManager_Initialize_Patch
         // Ancient exchanges and spoken lines. Disjoint keys from both merges
         // above, and its own try/catch.
         Story.StoryLoc.Inject();
+
+#if GITS_RUN_STATS
+        // The run-stats setting's label (settings_ui), its own try/catch.
+        RunStats.RunStatsHook.InjectLoc();
+#endif
     }
 }
 

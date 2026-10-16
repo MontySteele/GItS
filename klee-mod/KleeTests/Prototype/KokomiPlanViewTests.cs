@@ -117,14 +117,29 @@ public class KokomiPlanViewTests
     // ---- the strip's button hint --------------------------------------------
 
     [Fact]
-    public void The_hint_shows_for_a_controller_and_keyboard_only_never_for_the_mouse()
+    public void The_hint_shows_for_every_device_and_names_the_keyboard_key()
     {
         Assert.Equal("Plans",
             KokomiPlanViewRows.HintText(InputType.Controller, null));
         Assert.Equal("S: Plans",
             KokomiPlanViewRows.HintText(InputType.KeyboardOnlyMode, "S"));
         Assert.Null(KokomiPlanViewRows.HintText(InputType.KeyboardOnlyMode, ""));
-        Assert.Null(KokomiPlanViewRows.HintText(InputType.MouseAndKeyboard, "Space"));
+        // Mouse and keyboard (2026-10-16): the peek key is named, and with no
+        // key the clickable hint still says "Plans".
+        Assert.Equal("Space: Plans",
+            KokomiPlanViewRows.HintText(InputType.MouseAndKeyboard, "Space"));
+        Assert.Equal("Plans",
+            KokomiPlanViewRows.HintText(InputType.MouseAndKeyboard, null));
+    }
+
+    [Theory]
+    [InlineData(Godot.Key.Space, "Space")]   // peek, mouse and keyboard
+    [InlineData(Godot.Key.S, "S")]           // peek, keyboard only
+    [InlineData(Godot.Key.Key7, "7")]
+    [InlineData(Godot.Key.None, null)]       // unbound
+    public void The_hint_prints_the_key_by_its_plain_name(Godot.Key key, string name)
+    {
+        Assert.Equal(name, KokomiPlanViewRows.KeyName(key));
     }
 
     [Theory]
@@ -162,8 +177,11 @@ public class KokomiPlanViewTests
         Assert.Contains("NHotkeyManager.PushHotkeyPressedBinding", bind);
         Assert.Contains("NHotkeyManager.RemoveHotkeyPressedBinding", bind);
         Assert.Contains("KokomiPlanView.TryOpen", bind);
+        // The game's own peek action, remappable in its input settings.
+        Assert.Contains("peek", Il.StaticFieldsRead(Il.Method("KokomiPlanView", "Bind")));
         var open = Il.Calls(Il.Method("KokomiPlanView", "TryOpen"));
-        Assert.Contains("NControllerManager.get_IsUsingDirectionalNavigation", open);
+        // Any device opens it (2026-10-16): no controller-only gate.
+        Assert.DoesNotContain("NControllerManager.get_IsUsingDirectionalNavigation", open);
         Assert.Contains("KokomiOverhaul.LiveFor", open);
         Assert.Contains("KokomiPlan.Showing", open);
         Assert.Contains("KokomiPlanView.ScreenBusy", open);
@@ -188,6 +206,14 @@ public class KokomiPlanViewTests
                         Il.Calls(Il.Method("KokomiPlanStrip", "DiscardAll")));
         Assert.Contains("KokomiPlanStrip.PaintHint",
                         Il.Calls(Il.Method("KokomiPlanStrip", "Paint")));
+        // The hint names the game's current peek key, so a remap shows.
+        var hint = Il.Calls(Il.Method("KokomiPlanStrip", "PaintHint"));
+        Assert.Contains("NInputManager.GetCurrentHotkey", hint);
+        Assert.Contains("peek", Il.StaticFieldsRead(Il.Method("KokomiPlanStrip", "PaintHint")));
+        Assert.Contains("KokomiPlanViewRows.KeyName", hint);
+        // The mouse's door: a click on the hint opens the same view.
+        Assert.Contains("KokomiPlanStrip.WireHintClick",
+                        Il.Calls(Il.Method("KokomiPlanStrip", "Build")));
         // `EB-300` kept: the whole strip, hint included, is out of focus.
         Assert.Contains("Control.SetFocusBehaviorRecursive",
                         Il.Calls(Il.Method("KokomiPlanStrip", "Build")));

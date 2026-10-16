@@ -470,6 +470,14 @@ def _runtime_count(state: CombatState, token: str,
         # `YaeShrine.Edits`.
         led = yae_shrine.ledger(state.player)
         return led.edits if led is not None else 0
+    if token == "sakura_count":
+        # YAE, THE POOL TO 78: Petal Storm's and Sakura Canopy's "for each
+        # Sakura". C# twin `YaeShrine.Count`.
+        return yae_shrine.sakura_count(state.player)
+    if token == "weak_enemies":
+        # YAE, THE POOL TO 78: Disarming Smile's "for each enemy that is
+        # Weak". C# twin `YaeShrine.WeakEnemies`.
+        return yae_shrine.weak_enemies(state)
     raise ValueError(f"unknown runtime count {token!r}")
 
 
@@ -3287,6 +3295,10 @@ PREDICATE_NAMES = frozenset({
     # THE EXPANSION (2026-10-01): Amber: Sharpshooter, Shifting Gale.
     "target_has_pyro",
     "element_changed_this_turn",
+    # YAE, THE POOL TO 78 (2026-10-15): Torii Ward's "If your shrine is
+    # full", Late Night Reading's "If you have 3 Sakura" (3 or more).
+    "shrine_full",
+    "three_sakura",
 })
 
 # Parameterised predicates: prefix + an argument the branch parses itself.
@@ -3455,6 +3467,9 @@ RUNTIME_COUNT_NAMES = frozenset({
     # Yae review r5, pick 1 (a): Bestseller and Print Run's "for each card
     # you Edited this combat".
     "edits_this_combat",
+    # The Yae pool to 78 (2026-10-15).
+    "sakura_count",
+    "weak_enemies",
 })
 
 # The one prefix family, exactly as `PREDICATE_PREFIXES` carries its own.
@@ -3558,6 +3573,10 @@ def _predicate(state: CombatState, name: str) -> bool:
         return state.target_had_aura
     if name == "reaction_triggered_by_this":
         return state.reactions_this_card > 0
+    if name == "shrine_full":
+        return yae_shrine.shrine_full(state)
+    if name == "three_sakura":
+        return yae_shrine.sakura_count(state.player) >= 3
     if name == "reaction_triggered_this_turn":
         # Chevreuse Vanguard's Valor. RULED: ANY reaction counts, not
         # Overload-only -- must never be a dead draw off-Pyro/Electro.

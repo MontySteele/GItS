@@ -152,11 +152,11 @@ def test_mooncall_copies_stack():
 def test_mooncall_raises_grafted_branch_too():
     st = _state()
     _play(st, _ym("foxs_mooncall"))
-    _play(st, _ym("grafted_branch"))                 # 2, +1
-    assert _led(st).sakura[-1].level == 3
+    _play(st, _ym("grafted_branch"))                 # 3, +1
+    assert _led(st).sakura[-1].level == 4
     _play(st, _ym("foxs_mooncall"))
-    _play(st, _ym("grafted_branch") + "+")           # 3, +2
-    assert _led(st).sakura[-1].level == 5
+    _play(st, _ym("grafted_branch") + "+")           # 4, +2
+    assert _led(st).sakura[-1].level == 6
 
 
 def test_grove_levels_every_sakura_each_turn_start():
@@ -165,12 +165,12 @@ def test_grove_levels_every_sakura_each_turn_start():
     _play(st, _ym("sakura_grove"))
     Y.turn_start(st)                                 # none standing: nothing
     _play(st, _ym("yakan_evocation"))
-    _play(st, _ym("grafted_branch"))                 # levels 1 / 2
+    _play(st, _ym("grafted_branch"))                 # levels 1 / 3
     Y.turn_start(st)
-    assert [s.level for s in _led(st).sakura] == [2, 3]
+    assert [s.level for s in _led(st).sakura] == [2, 4]
     _play(st, _ym("sakura_grove"))                   # a second copy
     Y.turn_start(st)
-    assert [s.level for s in _led(st).sakura] == [4, 5]
+    assert [s.level for s in _led(st).sakura] == [4, 6]
     assert Y.act_size(st, _led(st).sakura[0]) == 2 + 4
 
 

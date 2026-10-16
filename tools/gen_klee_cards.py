@@ -1999,6 +1999,12 @@ PREDICATES_CS = {
     "pneuma_face": "FurinaFlip.OnPneuma(this)",
     "hp_lost_last_turn": "FurinaSweep.LostHpLastTurn(Owner.Creature)",
     "first_turn_of_combat": "FurinaSweep.FirstTurnOfCombat(Owner.Creature)",
+    # YAE, THE POOL TO 78 (2026-10-15): Torii Ward's "If your shrine is
+    # full" and Late Night Reading's "If you have 3 Sakura" (3 or more, so a
+    # Sakura Channeling shrine still reads it). Sim twins:
+    # `effects._predicate` via `yae_shrine.shrine_full` / `sakura_count`.
+    "shrine_full": "YaeShrine.Full(Owner.Creature)",
+    "three_sakura": "YaeShrine.Count(Owner.Creature) >= 3",
 }
 
 # The if-clause each predicate renders on the card.
@@ -2048,6 +2054,8 @@ PREDICATE_TEXT = {
     "pneuma_face": "On Pneuma",
     "hp_lost_last_turn": "If you lost HP last turn",
     "first_turn_of_combat": "On your first turn",
+    "shrine_full": "If your shrine is full",
+    "three_sakura": "If you have 3 [gold]Sakura[/gold]",
 }
 
 _FANFARE_BAR = re.compile(r"^fanfare_at_least_(\d+)$")
@@ -2342,7 +2350,11 @@ KOKOMI_BRANCH_KINDS = frozenset(("shoal_call",))
 #: YAE MIKO (2026-10-15): the kinds legal inside a conditional branch: The
 #: Seven Glamours' "If this kills an enemy, Publish an Annotated card in your
 #: hand". Numberless, one awaited `YaeCards` call with no locals.
-YAE_BRANCH_KINDS = frozenset(("publish",))
+YAE_BRANCH_KINDS = frozenset(("publish",
+                              # The pool to 78: Omikuji's "each Sakura gains
+                              # a Level" mode, its count the default 1 (no
+                              # var, `YAE_FIELD_DEFAULTS`).
+                              "level_up"))
 
 CONDITIONAL_FIELDS = {"op", "if", "then", "else"}
 
@@ -2485,8 +2497,9 @@ BRANCH_FIELDS = {
     "varka": {"op", "kind"},
     # THE KOKOMI POOL OVERHAUL: an add-N-Stings kind and its literal N.
     "kokomi": {"op", "kind", "amount"},
-    # YAE: a numberless kind only (The Seven Glamours' publish).
-    "yae": {"op", "kind"},
+    # YAE: a numberless kind (The Seven Glamours' publish), or one whose
+    # count is the reader's default (Omikuji's level_up, amount 1).
+    "yae": {"op", "kind", "amount"},
     "spend_spark": {"op", "amount"},
     # Same key set the top-level `mend` validator enforces, so the two cannot
     # disagree about what a Mend is.
@@ -2573,10 +2586,14 @@ def _branch_op_reason(eff: dict, where: str) -> str | None:
         # and for their original reason: both declare locals inside their own
         # blocks, and emitting either a second, subtly different way is the
         # drift this table exists to prevent.
-        if eff.get("target") == "enemy":
+        if eff.get("target") in ("enemy", "all_enemies"):
+            # YAE, THE POOL TO 78 (2026-10-15): Omikuji's "apply 2 Weak to
+            # ALL enemies" mode. The all-enemies arm is the top-level arm's
+            # own `foreach`, whose loop variable is scoped to the loop, so it
+            # declares nothing in the branch's scope.
             if eff["power"] not in ENEMY_APPLY_POWERS:
-                return ("branch apply_power target 'enemy' for self power "
-                        f"'{eff['power']}'")
+                return (f"branch apply_power target '{eff['target']}' for "
+                        f"self power '{eff['power']}'")
         elif eff.get("target") != "self":
             return f"branch apply_power target '{eff.get('target')}'"
     if eff["op"] == "damage_quarter_max_hp":
@@ -2618,6 +2635,12 @@ def _branch_op_reason(eff: dict, where: str) -> str | None:
         # YAE MIKO (2026-10-15): a numberless kind (`YAE_BRANCH_KINDS`).
         if eff.get("kind") not in YAE_BRANCH_KINDS:
             return f"branch yae kind {eff.get('kind')!r}"
+        # A branch declares no var, so a count must be the default the
+        # reader falls back on (`YaeCards.Var`).
+        for field in YAE_KIND_FIELDS[eff["kind"]]:
+            if eff.get(field) != YAE_FIELD_DEFAULTS[field]:
+                return (f"branch yae {eff['kind']} {field} must be "
+                        f"{YAE_FIELD_DEFAULTS[field]}")
         return None
     if eff["op"] == "varka":
         # VARKA (the Oath rework): only a NUMBERLESS kind, whose one call
@@ -3067,6 +3090,20 @@ YAE_KINDS = {
     "fallen_petals": "FallenPetals",
     "second_printing": "SecondPrinting",
     "authors_copy": "AuthorsCopy",
+    # The pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, ruled
+    # 2026-10-15, all picks (a)).
+    "strike_target": "StrikeTarget",
+    "strike_all_at": "StrikeAllAt",
+    "kitsune_act": "KitsuneAct",
+    "level_kitsune": "LevelKitsune",
+    "retain_hand": "RetainHand",
+    "replant": "Replant",
+    "plant_missing": "PlantMissing",
+    "plant_until_full": "PlantUntilFull",
+    "daisesshou": "Daisesshou",
+    "energy_per_sakura": "EnergyPerSakura",
+    "afterword": "Afterword",
+    "verdict": "Verdict",
 }
 YAE_KIND_FIELDS = {
     "plant": ("amount",),
@@ -3089,10 +3126,28 @@ YAE_KIND_FIELDS = {
     "fallen_petals": (),
     "second_printing": (),
     "authors_copy": (),
+    "strike_target": (),
+    "strike_all_at": (),
+    "kitsune_act": (),
+    "level_kitsune": ("amount",),
+    "retain_hand": (),
+    "replant": ("amount",),
+    "plant_missing": (),
+    "plant_until_full": (),
+    "daisesshou": ("per",),
+    "energy_per_sakura": (),
+    "afterword": (),
+    "verdict": (),
 }
 #: The kinds that aim at the enemy the player picks (`target: enemy`).
 YAE_AIMED_KINDS = {"lure", "damage_per_sakura", "damage_per_edit",
-                   "annotated_strike", "strike_if_weak"}
+                   "annotated_strike", "strike_if_weak",
+                   # The pool to 78: "A Sakura strikes it", "Each striking
+                   # Sakura strikes it".
+                   "strike_target", "strike_all_at"}
+#: The kinds that reach ALL enemies (`target: all_enemies`, the card's
+#: TargetType AllEnemies): Forbidden Art: Daisesshou.
+YAE_ALL_KINDS = {"daisesshou"}
 #: The kinds that name an Annotation (`annotation:`), and the C#
 #: `YaeAnnotation` member each sheet name is.
 YAE_ANNOTATION_KINDS = {"edit", "edit_all", "edit_sakura"}
@@ -3158,11 +3213,14 @@ def yae_needs_var(card: dict, eff: dict, field: str) -> bool:
         return True
     return int(eff[field]) != YAE_FIELD_DEFAULTS[field]
 YAE_FIELDS = {"op", "kind", "target", "per", "base", "amount", "annotation",
-              "as", "which", "keeps", "hand_if_upgraded"}
+              "as", "which", "hand_if_upgraded", "lasts"}
 
 
 #: The `yae` kinds whose play plants a Sakura (`ISakuraPlanterCard`).
-YAE_PLANT_KINDS = frozenset({"plant", "plant_level"})
+YAE_PLANT_KINDS = frozenset({"plant", "plant_level",
+                             # The pool to 78: Replanting, Genre Shift,
+                             # Narukami Bloom.
+                             "replant", "plant_missing", "plant_until_full"})
 
 
 def yae_plants_sakura(card: dict) -> bool:
@@ -3190,12 +3248,14 @@ def yae_call(eff: dict) -> str:
         args += f", YaeSakuraEnd.{YAE_SAKURA_ENDS[eff['which']]}"
     if eff.get("kind") in YAE_ANNOTATION_KINDS:
         args += f", YaeAnnotation.{YAE_ANNOTATIONS[eff['annotation']]}"
-    if eff.get("keeps") == "red_ink":
-        args += ", keepRedInk: true"
     if eff.get("hand_if_upgraded") is True:
         args += ", handIfUpgraded: true"
     if eff.get("kind") in YAE_PLANT_AS_KINDS and "as" in eff:
         args += f", YaeSakuraKind.{YAE_SAKURA_KINDS[eff['as']]}"
+    if eff.get("lasts"):
+        # Grafted Branch (the pool to 78): "and lasts 1 more turn". Named,
+        # and after the kind, so it never precedes a positional argument.
+        args += f", lasts: {int(eff['lasts'])}"
     return f"await YaeCards.{YAE_KINDS[eff['kind']]}({args});"
 #: `kokomi` (THE KOKOMI EXPANSION, BATCH ONE, 2026-09-29): one kind per
 #: now-line verb, each ONE awaited `KokomiCards.<method>` call
@@ -4352,6 +4412,24 @@ APPLY_POWERS = {
     "ym_serial_novel": ("SerialNovelPower", None,
         "At the start of your turn, put {X} random [gold]Annotated[/gold] "
         "card from your [gold]Discard Pile[/gold] into your [gold]Hand[/gold]."),
+    # The pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, ruled
+    # 2026-10-15).
+    "ym_enlightened_blessing": ("EnlightenedBlessingPower", None,
+        "Whenever a [gold]Sakura[/gold] withers, draw {X} card."),
+    "ym_saiguus_lesson": ("SaiguusLessonPower", None,
+        "Whenever you apply [gold]Weak[/gold] to an enemy, a "
+        "[gold]Sakura[/gold] strikes it."),
+    "ym_sacred_shade": ("SacredShadePower", None,
+        "At the end of your turn, gain {X} [gold]Block[/gold] for each "
+        "[gold]Sakura[/gold]."),
+    "ym_editorial_priority": ("EditorialPriorityPower", None,
+        "The first [gold]Annotated[/gold] card you play each turn costs 0."),
+    "ym_stellar_conduct": ("StellarConductPower", None,
+        "Whenever a [gold]Sakura[/gold]'s strike triggers an "
+        "[gold]Elemental Reaction[/gold], it strikes again."),
+    "ym_eternity": ("EternityPower", None,
+        "Your [gold]Sakura[/gold] no longer wither when their turns run "
+        "out."),
     "vk_twin_gales": ("TwinGalesPower", None,
         "Your [gold]Swirls[/gold] also pay the element they "
         "[gold]Swirl[/gold]. If it's your [gold]current element[/gold], it "
@@ -5979,7 +6057,9 @@ def blocked_reason(
             kind = eff.get("kind")
             if kind not in YAE_KINDS:
                 return f"yae kind {kind!r}"
-            want_target = "enemy" if kind in YAE_AIMED_KINDS else None
+            want_target = ("enemy" if kind in YAE_AIMED_KINDS
+                           else "all_enemies" if kind in YAE_ALL_KINDS
+                           else None)
             if eff.get("target") != want_target:
                 return (f"yae {kind} takes target {want_target!r}, "
                         f"row gives {eff.get('target')!r}")
@@ -6000,9 +6080,11 @@ def blocked_reason(
                 return f"yae {kind} takes no as:"
             if "as" in eff and eff["as"] not in YAE_SAKURA_KINDS:
                 return f"yae Sakura kind {eff['as']!r}"
-            if "keeps" in eff and (kind != "edit_sakura"
-                                   or eff["keeps"] != "red_ink"):
-                return "yae keeps: is red_ink, on an edit_sakura"
+            if "lasts" in eff and (kind != "plant_level"
+                                   or not isinstance(eff["lasts"], int)
+                                   or isinstance(eff["lasts"], bool)
+                                   or eff["lasts"] <= 0):
+                return "yae lasts: is a positive int, on a plant_level"
             if "hand_if_upgraded" in eff and (
                     kind != "edit_sakura"
                     or eff["hand_if_upgraded"] is not True):
@@ -7004,6 +7086,14 @@ KLEE_COUNTS = {
 YAE_COUNTS = {
     "edits_this_combat": "static (card, _) => YaeShrine.Edits("
                          "card.Owner.Creature)",
+    # The pool to 78 (2026-10-15): Petal Storm's and Sakura Canopy's "for
+    # each Sakura", Disarming Smile's "for each enemy that is Weak" (read
+    # when the Block is gained, after its own Weak). Sim twins: the
+    # `sakura_count` and `weak_enemies` runtime counts.
+    "sakura_count": "static (card, _) => YaeShrine.Count("
+                       "card.Owner.Creature)",
+    "weak_enemies": "static (card, _) => YaeShrine.WeakEnemies("
+                    "card.Owner.Creature)",
 }
 
 RUNTIME_COUNTS = {**KOKOMI_CASKET_COUNTS, **VARKA_COUNTS, **KLEE_COUNTS,
@@ -11469,6 +11559,15 @@ def _emit_branch_op(
                 f"await PowerCmd.Apply<{cls}>(choiceContext, cardPlay.Target, "
                 f'{amount}, applier: Owner.Creature, '
                 "cardSource: this);"
+            )
+        elif eff.get("target") == "all_enemies":
+            # Byte-for-byte the top-level all-enemies arm (Omikuji, 2026-10-15).
+            lines.append(
+                "foreach (var debuffTarget in CombatState!.HittableEnemies.ToList())\n"
+                "        {\n"
+                f"            await PowerCmd.Apply<{cls}>(choiceContext, debuffTarget, "
+                f"{amount}, applier: Owner.Creature, cardSource: this);\n"
+                "        }"
             )
         else:
             lines.append(
@@ -17041,7 +17140,10 @@ def yae_face_lines(card: dict, profile: "CharacterProfile",
     tenkos = [e for e in ops if e.get("kind") == "tenko"]
     if not tenkos:
         return desc, []
-    if len(tenkos) != 1:
+    # The pool to 78 (2026-10-15): Kagura's Verity prints "Tenko twice",
+    # one clause for its two ops (the first Tenko's, what it does now).
+    twice = len(tenkos) == 2 and "[gold]Tenko[/gold] twice" in desc
+    if len(tenkos) != 1 and not twice:
         raise ValueError(f"{card['id']}: a face reads one Tenko")
     token = "{InCombat:{" + YAE_TENKO_TOKEN + "}|}"
     clause = "[gold]Tenko[/gold]"
@@ -17292,6 +17394,11 @@ def emit(
         # THE KOKOMI EXPANSION's Salt in the Wound reads the chosen enemy.
         if eff["op"] == "kokomi" and eff.get("target") == "enemy":
             target_type = TARGET_CS["enemy"]
+            break
+        # YAE, THE POOL TO 78: Forbidden Art: Daisesshou's hit reaches ALL
+        # enemies (`YAE_ALL_KINDS`), as a damage op to all_enemies does.
+        if eff["op"] == "yae" and eff.get("target") == "all_enemies":
+            target_type = TARGET_CS["all_enemies"]
             break
         # EB-118: a modal's aiming verb sits inside a mode body, so a card
         # whose only enemy-facing effect is modal would declare TargetType.Self

@@ -98,8 +98,12 @@ public sealed class Varka : CustomCharacterModel, IVarkaCharacter
         KleePck.Path("varka/ui/character_icon.tscn");
     public override string? CustomEnergyCounterPath =>
         "res://scenes/combat/energy_counters/ironclad_energy_counter.tscn";
+    // The flying-card trail (a Power card flies into him on it). Ironclad's is
+    // orange fire, which read as "an orange streak" on Absolute Zero (in-game
+    // check, 2026-10-16); the Defect's cyan is the base trail nearest his
+    // Anemo teal.
     public override string? CustomTrailPath =>
-        "res://scenes/vfx/card_trail_ironclad.tscn";
+        "res://scenes/vfx/card_trail_defect.tscn";
     public override string? CustomMapMarkerPath =>
         KleePck.Path("varka/ui/map_marker.png");
     public override string? CustomCharacterSelectBg =>

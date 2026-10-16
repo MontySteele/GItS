@@ -18,6 +18,9 @@ These tests hold what needs neither the art nor the engine:
     Spend, Drain and Repay beats;
   * the guests: each still at its manifest height, feet on the ground line,
     its Bounds its own width, and Freminet in a scene of his own;
+  * the guest effects (2026-10-16): one generated guest_fx_<name>.tscn per
+    guest from the manifest's `guest_fx`, hooked to the board's lunge, hit
+    and line cue and to Neuvillette's two Hydro-bonus doors;
   * the pack: VRAM-compressed imports, the rest/select switches, the old rig
     and cutouts out, and one producer for every out-path.
 """
@@ -369,3 +372,67 @@ def test_every_out_path_of_her_model_art_has_one_producer(scene_text, frames):
     stills = (ROOT / "tools" / "gen_furina_stills.py").read_text(encoding="utf-8")
     assert '"select_portrait.png"' not in stills and '"select_portrait_locked.png"' not in stills
     assert art_lint.generator_owned([]) == []
+
+
+# ---------------------------------------------------------------------------
+# the guest effects (2026-10-16, "guest-star pizazz")
+# ---------------------------------------------------------------------------
+
+
+def test_each_guest_effect_scene_is_generated_and_keeps_the_contract(frames):
+    from tools.furina_rig import guest_fx
+    scenes = guest_fx.render_guest_fx()
+    assert set(scenes) == set(frames["guests"]) == set(frames["guest_fx"])
+    assert guest_fx.render_guest_fx() == scenes
+    sc = frames["combat_scale"]
+    for name, text in scenes.items():
+        assert text == guest_fx.scene_path(name).read_text(encoding="utf-8"), \
+            f"guest_fx_{name}.tscn is stale: run `python -m tools.furina_rig gen`"
+        rec = frames["guest_fx"][name]
+        nodes = verify.parse_nodes(text)
+        root = nodes[guest_fx.ROOT_NODE] if guest_fx.ROOT_NODE in nodes else nodes["."]
+        assert root.type == "Node2D"
+        assert root.props["metadata/guest"] == f'"{name}"'
+        assert root.props["metadata/anchor"] == f'"{rec["anchor"]}"'
+        assert float(root.props["metadata/length"]) == pytest.approx(rec["length"])
+        sprite = nodes[guest_fx.SPRITE].props
+        assert sprite["unique_name_in_owner"] == "true"
+        assert sprite["self_modulate"] == "Color(1, 1, 1, 0)", f"{name} shows at rest"
+        assert sprite["offset"] == rig.vec2((-rec["origin"][0], -rec["origin"][1]))
+        assert sprite["scale"] == rig.vec2((sc, sc))
+        assert sprite["material"] == f'SubResource("{guest_fx.MATERIAL_ID}")'
+        assert f"shader_parameter/element = {rig.color(rig.hex_color(rec['tint']))}" in text
+        player = nodes[guest_fx.PLAYER]
+        assert player.type == "AnimationPlayer" and player.props["unique_name_in_owner"] == "true"
+        assert player.props["autoplay"] == f'"{name}"'
+        assert f'path="res://furina/model/frames/{rec["pages"][0]["file"]}"' in text
+        times, values = _keys(text, name, f"{guest_fx.SPRITE}:texture")
+        assert times == pytest.approx([i / rec["fps"] for i in range(rec["count"])], abs=1e-4)
+        assert values == [f'SubResource("Atlas_{name}_{i}")' for i in range(rec["count"])]
+        show_t, show_v = _keys(text, name, f"{guest_fx.SPRITE}:self_modulate")
+        assert show_t == pytest.approx([0.0, rec["length"]]) and show_v == ["Color(1, 1, 1, 1)", "Color(1, 1, 1, 0)"]
+
+
+def test_the_guest_effects_are_hooked_to_the_boards_lunge_hit_and_line():
+    fx = (CS / "Vfx" / "Prototype" / "FurinaGuestFx.cs").read_text(encoding="utf-8")
+    from tools.furina_rig import guest_fx
+    assert f'SpriteNode = "{guest_fx.SPRITE}"' in fx and f'PlayerNode = "{guest_fx.PLAYER}"' in fx
+    assert 'AnchorMeta = "anchor"' in fx and 'FeetAnchor = "feet"' in fx
+    assert '$"{SceneDir}/guest_fx_{NameOf(who)}.tscn"' in fx and 'SceneDir = "furina/model"' in fx
+    board = (PROTO / "FurinaStage.cs").read_text(encoding="utf-8")
+
+    def body(sig: str) -> str:
+        start = board.index(sig)
+        return board[start:board.index("\n    }\n", start)]
+
+    lunge = body("public async Task Lunge(StageSeat? seat)")
+    assert lunge.index("StagePerformerBeat.Act(seat?.Pet)") < lunge.index("FurinaGuestFx.OnAct(_owner, seat)")
+    assert "Vfx.FurinaGuestFx.OnLine(seat);" in body("public Task LineCue(StageSeat? seat)")
+    assert "await Hit(target, amount, element, who);" in body("public async Task Damage(StagePerformer who")
+    assert "Vfx.FurinaGuestFx.OnHit(guest, enemy);" in body("private Task<int> One(")
+    # a Power's hit is no guest's: it plays nothing
+    assert "await Hit(target, amount, Element.None);" in body("public async Task PowerHit(")
+    hit = (CS / "Powers" / "ElementalHit.cs").read_text(encoding="utf-8")
+    assert "Vfx.FurinaGuestFx.OnHydroBonus(hydroBonus, element, target);" in hit
+    powers = (PROTO / "FurinaStagePowers.cs").read_text(encoding="utf-8")
+    assert "Vfx.FurinaGuestFx.OnHydroBonus(FurinaStage.HydroBonus(dealer, element), element, target);" in powers

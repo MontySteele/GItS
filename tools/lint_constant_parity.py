@@ -882,6 +882,9 @@ UNMIRRORED: dict[str, str] = {
         "presentation: narrowest x stretch of a Drain/Repay effect.",
     "FurinaStageFx.MaxStretch":
         "presentation: widest x stretch of a Drain/Repay effect.",
+    # Furina's guest effects (2026-10-16): a straggler node is freed after this.
+    "FurinaGuestFx.LeakSeconds":
+        "presentation: leak guard on a guest effect node, in seconds.",
     "ThrownProjectile.FlightSeconds":
         "presentation: hand-to-target flight of the thrown bomb in seconds.",
     "ThrownProjectile.ArcLift":

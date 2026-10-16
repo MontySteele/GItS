@@ -3020,6 +3020,69 @@ proto_ym_second_printing	ImageGen/images/cards/yae/proto_ym_second_printing.png	
 proto_ym_authors_copy	ImageGen/images/cards/yae/proto_ym_authors_copy.png	500	380	cover	x0.60,y0.45@1.2	shortlist	1	png	Yae Miko TPRGT 2022 - Aether.png		splash	
 # proto_ym_serial_novel <- her wish splash, the long-running story
 proto_ym_serial_novel	ImageGen/images/cards/yae/proto_ym_serial_novel.png	500	380	cover	x0.55,y0.40@1.2	shortlist	1	png	Yae Miko Wish.png		splash	
+# ---------- Yae art pass (2026-10-16): 31 blank portraits, official wiki art chosen by Claude (Prototype) ----------
+# proto_ym_afterword <- quest still, YPH (Yae art pass 2026-10-16)
+proto_ym_afterword	ImageGen/images/cards/yae/proto_ym_afterword.png	500	380	cover	x0.4,y0.55@1.1	shortlist	1	png	World Quest Yae Publishing House's Invitation.png		splash	
+# proto_ym_cliffhanger <- anomaly impact (Yae art pass 2026-10-16)
+proto_ym_cliffhanger	ImageGen/images/cards/yae/proto_ym_cliffhanger.png	500	380	cover	x0.45,y0.5@1.0	shortlist	1	png	Inazuma Anomaly Impact.png		splash	
+# proto_ym_disarming_smile <- Yae valentine (Yae art pass 2026-10-16)
+proto_ym_disarming_smile	ImageGen/images/cards/yae/proto_ym_disarming_smile.png	500	380	cover	x0.55,y0.5@1.35	shortlist	1	png	Valentine's Day 2023 - Yae Miko.png		splash	
+# proto_ym_editorial_priority <- Katheryne shop (Yae art pass 2026-10-16)
+proto_ym_editorial_priority	ImageGen/images/cards/yae/proto_ym_editorial_priority.png	500	380	cover	x0.4,y0.5@1.0	shortlist	1	png	World Quest Katheryne in Inazuma.png		splash	
+# proto_ym_enlightened_blessing <- sakura petals river (Yae art pass 2026-10-16)
+proto_ym_enlightened_blessing	ImageGen/images/cards/yae/proto_ym_enlightened_blessing.png	500	380	cover	x0.3,y0.45@1.0	shortlist	1	png	Silken Courtyard Sakura Bridge.png		splash	
+# proto_ym_eternity <- Raiden electro sphere (Yae art pass 2026-10-16)
+proto_ym_eternity	ImageGen/images/cards/yae/proto_ym_eternity.png	500	380	cover	x0.5,y0.45@1.0	shortlist	1	png	App Store Event Character Wallpaper Raiden Shogun Version 3.3.png		splash	
+# proto_ym_forbidden_art_daisesshou <- Yougou concept (Yae art pass 2026-10-16)
+proto_ym_forbidden_art_daisesshou	ImageGen/images/cards/yae/proto_ym_forbidden_art_daisesshou.png	500	380	cover	x0.5,y0.5@1.0	shortlist	1	png	Depths of Mt. Yougou Concept Art.png		splash	
+# proto_ym_foxs_bargain <- Yae wallpaper (Yae art pass 2026-10-16)
+proto_ym_foxs_bargain	ImageGen/images/cards/yae/proto_ym_foxs_bargain.png	500	380	cover	x0.55,y0.5@1.0	shortlist	1	png	App Store Event Character Wallpaper Yae Miko Version 3.2.png		splash	
+# proto_ym_foxs_verdict <- kitsune statue GN shrine (Yae art pass 2026-10-16)
+proto_ym_foxs_verdict	ImageGen/images/cards/yae/proto_ym_foxs_verdict.png	500	380	cover	x0.4,y0.5@1.0	shortlist	1	png	Earth Kitsune Statue Grand Narukami Shrine 1 Context.png		splash	
+# proto_ym_galley_proof <- Yae intro banner (Yae art pass 2026-10-16)
+proto_ym_galley_proof	ImageGen/images/cards/yae/proto_ym_galley_proof.png	500	380	cover	x0.3,y0.5@1.2	shortlist	1	png	Yae Miko Introduction Banner.jpg		splash	
+# proto_ym_genre_shift <- chronicled wish group (Yae art pass 2026-10-16)
+proto_ym_genre_shift	ImageGen/images/cards/yae/proto_ym_genre_shift.png	500	380	cover	x0.5,y0.5@1.0	shortlist	1	png	Inazuma Chronicled Wish & Sports Event.jpg		splash	
+# proto_ym_guardian_of_narukami <- Grand Narukami Shrine (Yae art pass 2026-10-16)
+proto_ym_guardian_of_narukami	ImageGen/images/cards/yae/proto_ym_guardian_of_narukami.png	500	380	cover	x0.38,y0.5@1.0	shortlist	1	png	Grand Narukami Shrine.png		splash	
+# proto_ym_hold_the_presses <- Tenshukaku interior (Yae art pass 2026-10-16)
+proto_ym_hold_the_presses	ImageGen/images/cards/yae/proto_ym_hold_the_presses.png	500	380	cover	x0.38,y0.5@1.0	shortlist	1	png	Tenshukaku Interior 3.png		splash	
+# proto_ym_kaguras_verity <- Raiden bday 2025 (Yae art pass 2026-10-16)
+proto_ym_kaguras_verity	ImageGen/images/cards/yae/proto_ym_kaguras_verity.png	500	380	cover	x0.5,y0.4@1.25	shortlist	1	png	Raiden Shogun Birthday 2025.png		splash	
+# proto_ym_kitsune_veil <- sky kitsune statue Araumi (Yae art pass 2026-10-16)
+proto_ym_kitsune_veil	ImageGen/images/cards/yae/proto_ym_kitsune_veil.png	500	380	cover	x0.5,y0.45@1.0	shortlist	1	png	Sky Kitsune Statue Araumi.png		splash	
+# proto_ym_kitsunes_shelter <- Moon-bathed Fang shrine (Yae art pass 2026-10-16)
+proto_ym_kitsunes_shelter	ImageGen/images/cards/yae/proto_ym_kitsunes_shelter.png	500	380	cover	x0.3,y0.5@1.3	shortlist	1	png	The Moon-Bathed Deep Fang Shrine.png		splash	
+# proto_ym_late_night_reading <- Yae book (Yae art pass 2026-10-16)
+proto_ym_late_night_reading	ImageGen/images/cards/yae/proto_ym_late_night_reading.png	500	380	cover	x0.82,y0.42@1.3	shortlist	1	png	Kitsune's Leisurely Stroll Around Hanamizaka.jpg		splash	
+# proto_ym_narukami_bloom <- Radiant Sakura quest (Yae art pass 2026-10-16)
+proto_ym_narukami_bloom	ImageGen/images/cards/yae/proto_ym_narukami_bloom.png	500	380	cover	x0.38,y0.5@1.0	shortlist	1	png	Story Quest Radiant Sakura.png		splash	
+# proto_ym_narukami_judgment <- Sara bday 2022 (Yae art pass 2026-10-16)
+proto_ym_narukami_judgment	ImageGen/images/cards/yae/proto_ym_narukami_judgment.png	500	380	cover	x0.5,y0.4@1.25	shortlist	1	png	Kujou Sara Birthday 2022.png		splash	
+# proto_ym_narukami_ray <- thunder sakura 2 (Yae art pass 2026-10-16)
+proto_ym_narukami_ray	ImageGen/images/cards/yae/proto_ym_narukami_ray.png	500	380	cover	x0.5,y0.5@1.0	shortlist	1	png	Thunder Sakura 2 Location Context.png		splash	
+# proto_ym_offertory_box <- mouun shrine (Yae art pass 2026-10-16)
+proto_ym_offertory_box	ImageGen/images/cards/yae/proto_ym_offertory_box.png	500	380	cover	x0.5,y0.5@1.0	shortlist	1	png	Offering pool mouun shrine.jpeg		splash	
+# proto_ym_petal_storm <- Ayaka bday 2021 (Yae art pass 2026-10-16)
+proto_ym_petal_storm	ImageGen/images/cards/yae/proto_ym_petal_storm.png	500	380	cover	x0.5,y0.4@1.25	shortlist	1	png	Kamisato Ayaka Birthday 2021.png		splash	
+# proto_ym_replanting <- thunder sakura healed (Yae art pass 2026-10-16)
+proto_ym_replanting	ImageGen/images/cards/yae/proto_ym_replanting.png	500	380	cover	x0.5,y0.5@1.0	shortlist	1	png	Thunder Sakura Healed.png		splash	
+# proto_ym_sacred_thunderbolt <- calling down thunder (Yae art pass 2026-10-16)
+proto_ym_sacred_thunderbolt	ImageGen/images/cards/yae/proto_ym_sacred_thunderbolt.png	500	380	cover	x0.3,y0.5@1.0	shortlist	1	png	Commission Calling Down the Thunder.png		splash	
+# proto_ym_saiguus_lesson <- Yae splash (Yae art pass 2026-10-16)
+proto_ym_saiguus_lesson	ImageGen/images/cards/yae/proto_ym_saiguus_lesson.png	500	380	cover	x0.62,y0.2@1.8	shortlist	1	png	Splashscreen When the Sakura Bloom.png		splash	
+# proto_ym_sakura_canopy <- Hanamizaka (Yae art pass 2026-10-16)
+proto_ym_sakura_canopy	ImageGen/images/cards/yae/proto_ym_sakura_canopy.png	500	380	cover	x0.38,y0.5@1.0	shortlist	1	png	Hanamizaka.png		splash	
+# proto_ym_shrines_sacred_shade <- Narukami concept (Yae art pass 2026-10-16)
+proto_ym_shrines_sacred_shade	ImageGen/images/cards/yae/proto_ym_shrines_sacred_shade.png	500	380	cover	x0.4,y0.5@1.0	shortlist	1	png	Narukami Island Concept Art.png		splash	
+# proto_ym_spiritfox_prank <- Kirara bday (Yae art pass 2026-10-16)
+proto_ym_spiritfox_prank	ImageGen/images/cards/yae/proto_ym_spiritfox_prank.png	500	380	cover	x0.5,y0.45@1.25	shortlist	1	png	Kirara Birthday 2024.png		splash	
+# proto_ym_stellar_conduct <- Makoto consciousness (Yae art pass 2026-10-16)
+proto_ym_stellar_conduct	ImageGen/images/cards/yae/proto_ym_stellar_conduct.png	500	380	cover	x0.5,y0.5@1.0	shortlist	1	png	Makoto Consciousness.png		splash	
+# proto_ym_thunder_petal <- arborism 4 (Yae art pass 2026-10-16)
+proto_ym_thunder_petal	ImageGen/images/cards/yae/proto_ym_thunder_petal.png	500	380	cover	x0.3,y0.45@1.35	shortlist	1	png	Sakura Arborism Thunder Sakura 4.png		splash	
+# proto_ym_torii_ward <- neko shrine torii (Yae art pass 2026-10-16)
+proto_ym_torii_ward	ImageGen/images/cards/yae/proto_ym_torii_ward.png	500	380	cover	x0.4,y0.5@1.0	shortlist	1	png	World Quest Neko Is a Cat Shrine Canteen.png		splash	
 # power_yae_sakura <- her skill's icon, the Sesshou Sakura
 power_yae_sakura	ImageGen/images/yae/powers/sakura.png	256	256	contain	center	shortlist	1	png	Talent Yakan Evocation Sesshou Sakura.png		icon
 # power_yae_foxfire_lure <- her foxfire attack's icon
@@ -3097,3 +3160,41 @@ kk_sea_glass	ImageGen/images/cards/kokomi/kk_sea_glass.png	500	380	cover_autocro
 proto_kk_kurage_vanguard	ImageGen/images/cards/kokomi/proto_kk_kurage_vanguard.png	500	380	cover	center	shortlist	1	png	Enemy Hat Jellyfish 2.png		splash	
 # proto_kk_following_current <- the Moonglow Jellyfish's bell, lit from within, Kokomi review r6 (2026-10-14)
 proto_kk_following_current	ImageGen/images/cards/kokomi/proto_kk_following_current.png	500	380	cover	y0.30	shortlist	1	png	Wildlife Moonglow Jellyfish Archive.png		splash	
+# ---------- Kokomi's and Furina's relic and potion icons (2026-10-16): off tools/lint_relic_potion_icons.py ICON_DEBT ----------
+# godot.log had 12 'pck resource missing: res://furina|kokomi/relics/*.png' lines: the
+# C# wired the paths and no row ever produced them. Titles found with tools/art_hunt.py.
+# Rank-1 shortlist picks like the Varka block; re-pick on the contact sheet if one reads wrong.
+# relic_sango_pearl <- NEW: a branch of Watatsumi coral, the island's own treasure (Sango Pearl; Item Sango Pearl is the Casket's icon)
+relic_sango_pearl	ImageGen/images/kokomi/relics/sango_pearl.png	256	256	contain	center	shortlist	1	png	Item Coral Branch of a Distant Sea.png		icon	
+# relic_resistance_armband <- NEW: the Sangonomiya crest the resistance wears
+relic_resistance_armband	ImageGen/images/kokomi/relics/resistance_armband.png	256	256	contain	center	shortlist	1	png	Item Inazuma Sangonomiya Crest.png		icon	
+# relic_electro_sigil <- NEW: the item of that name
+relic_electro_sigil	ImageGen/images/kokomi/relics/electro_sigil.png	256	256	contain	center	shortlist	1	png	Item Electro Sigil.png		icon	
+# relic_everlasting_moonglow <- NEW: her catalyst, the relic's namesake
+relic_everlasting_moonglow	ImageGen/images/kokomi/relics/everlasting_moonglow.png	256	256	contain	center	shortlist	1	png	Weapon Everlasting Moonglow.png		icon	
+# relic_ocean_hued_clam <- NEW: the flower of her Ocean-Hued Clam set
+relic_ocean_hued_clam	ImageGen/images/kokomi/relics/ocean_hued_clam.png	256	256	contain	center	shortlist	1	png	Item Sea-Dyed Blossom.png		icon	
+# relic_kurage_lantern <- NEW: a glowing jellyfish, the Bake-Kurage's light
+relic_kurage_lantern	ImageGen/images/kokomi/relics/kurage_lantern.png	256	256	contain	center	shortlist	1	png	Item Sapphire Blue Hat Jellyfish.png		icon	
+# relic_resistance_muster_roll <- NEW: a recruitment notice, the roll of those who answered
+relic_resistance_muster_roll	ImageGen/images/kokomi/relics/resistance_muster_roll.png	256	256	contain	center	shortlist	1	png	Item Recruitment Notice Image.png		icon	
+# potion_bottled_shoal <- NEW: a bottled brew, a shoal of Stings
+potion_bottled_shoal	ImageGen/images/kokomi/potions/bottled_shoal.png	256	256	contain	center	shortlist	1	png	Item Dustproof Potion.png		icon	
+# potion_bottled_tide <- NEW: a healing draught, the tide that carries every Plan out
+potion_bottled_tide	ImageGen/images/kokomi/potions/bottled_tide.png	256	256	contain	center	shortlist	1	png	Item Enhanced Healing Potion.png		icon	
+# potion_a_stunning_stratagem <- NEW: an Electro oil, the stratagem that stuns
+potion_a_stunning_stratagem	ImageGen/images/kokomi/potions/a_stunning_stratagem.png	256	256	contain	center	shortlist	1	png	Item Shocking Essential Oil.png		icon	
+# relic_opera_ticket_stub <- NEW: a ticket, a guest at the door
+relic_opera_ticket_stub	ImageGen/images/furina/relics/opera_ticket_stub.png	256	256	contain	center	shortlist	1	png	Item Paradise Ticket.png		icon	
+# relic_fontaine_teardrop <- NEW: a teardrop, the Repay that overflows
+relic_fontaine_teardrop	ImageGen/images/furina/relics/fontaine_teardrop.png	256	256	contain	center	shortlist	1	png	Item Teardrop of the Moon.png		icon	
+# relic_claques_ledger <- NEW: a notice of the street's talk, the claque's tally
+relic_claques_ledger	ImageGen/images/furina/relics/claques_ledger.png	256	256	contain	center	shortlist	1	png	Item Tavern Notice Whispers of the Street.png		icon	
+# relic_bouquet_of_roses <- NEW: Fontaine's own rose
+relic_bouquet_of_roses	ImageGen/images/furina/relics/bouquet_of_roses.png	256	256	contain	center	shortlist	1	png	Item Rainbow Rose.png		icon	
+# relic_epiclese_season_pass <- NEW: a ticket for the whole season
+relic_epiclese_season_pass	ImageGen/images/furina/relics/epiclese_season_pass.png	256	256	contain	center	shortlist	1	png	Item Festive Tour Ticket.png		icon	
+# potion_bottled_encore <- NEW: a golden oil, every guest again
+potion_bottled_encore	ImageGen/images/furina/potions/bottled_encore.png	256	256	contain	center	shortlist	1	png	Item Golden House Maiden Essential Oil.png		icon	
+# potion_water_of_lucine <- NEW: the Lucine fountain itself
+potion_water_of_lucine	ImageGen/images/furina/potions/water_of_lucine.png	256	256	contain	center	shortlist	1	png	Item Fontaine Lucine.png		icon	

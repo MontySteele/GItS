@@ -84,7 +84,7 @@ def test_inked_branches_plus_that_edited_a_sakura_is_quiet_about_the_hand():
     st.player.hand[:] = []
     _play(st, loader.get_card("proto_ym_inked_branches+"))
     assert _nothing(st) == []
-    assert Y.ledger(st.player).sakura[0].annotation == Y.RED_INK
+    assert Y.ledger(st.player).sakura[0].annotations == [Y.RED_INK]
 
 
 def test_plain_inked_branches_with_no_sakura_still_says_so():

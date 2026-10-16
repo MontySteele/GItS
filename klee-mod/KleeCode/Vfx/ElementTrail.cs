@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using Godot;
+using KleeMod.Cards;
 using KleeMod.Elements;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Logging;
@@ -120,6 +121,23 @@ internal static class ElementTrail
     };
 
     /// <summary>
+    /// The element the layer shows for a play: the element the play hits
+    /// with, else the element it makes Varka's current
+    /// (<see cref="Powers.IVarkaSwitchCard"/>), else a companion card's own
+    /// (<see cref="ICompanionCard"/>). In-game check 2026-10-16: Tidal
+    /// Bulwark (Hydro) and Razor: Awakening (Electro) print no element of
+    /// their own, so <see cref="ElementHitFx.ElementOf"/> said None and both
+    /// drew Anemo teal. Display only. Pure.
+    /// </summary>
+    internal static Element TrailElementOf(Element hit, object? card)
+    {
+        if (hit != Element.None) return hit;
+        if (card is Powers.IVarkaSwitchCard { VarkaSwitchElement: var sw } && sw != Element.None) return sw;
+        if (card is ICompanionCard { CompanionElement: var co }) return co;
+        return Element.None;
+    }
+
+    /// <summary>
     /// Called by <see cref="CardPlayMotion"/> as every play begins, before
     /// any trigger it or the card sends. Never throws: a colour must never
     /// cost a card play.
@@ -130,7 +148,7 @@ internal static class ElementTrail
         {
             Pending.AddOrUpdate(creature, new Note
             {
-                Element = ElementHitFx.ElementOf(card),
+                Element = TrailElementOf(ElementHitFx.ElementOf(card), card),
                 Target = target,
                 AtMs = Time.GetTicksMsec(),
             });

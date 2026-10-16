@@ -246,6 +246,15 @@ def test_kitsune_block_parts_read_the_rows():
     assert blindplay_render._kitsune_block_parts(None) == []
 
 
+def test_kitsune_block_parts_see_deadline_extension_among_several():
+    # The pool to 78, pick 2 (a): Deadline Extension need not be the first.
+    shrine = _shrine({"kind": "kitsune", "strike": 6, "turns": 1,
+                      "annotation": "Red Ink",
+                      "annotations": ["Red Ink", "Deadline Extension"]})
+    assert blindplay_render._kitsune_block_parts(shrine) == [
+        ("Kitsune Sakura", 6)]
+
+
 def test_the_incoming_line_folds_the_kitsune_block_in():
     shrine = _shrine({"kind": "kitsune", "strike": 5, "turns": 3})
     plain = blindplay_render._incoming_line(_attacker(12), _you(2))

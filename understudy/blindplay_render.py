@@ -3159,8 +3159,13 @@ def _render_shrine(shrine: dict[str, Any]) -> list[str]:
         turns = row.get("turns")
         tail = ("" if turns is None else
                 f", {turns} turn{'s' if turns != 1 else ''} left")
-        if row.get("annotation"):
-            tail += f", {row['annotation']}"
+        # The pool to 78, pick 2 (a): every Annotation it carries, by name,
+        # in the order applied (`annotation` alone on an older row).
+        anns = row.get("annotations")
+        if anns is None:
+            anns = [row["annotation"]] if row.get("annotation") else []
+        for ann in anns:
+            tail += f", {ann}"
         name, action = SHRINE_KIND.get(row.get("kind") or "thunder",
                                        SHRINE_KIND["thunder"])
         # Review r3, seat cleanup: where the Levels came from. The badge
@@ -4099,8 +4104,8 @@ def _kitsune_block_parts(shrine: dict[str, Any] | None
         if row.get("kind") != "kitsune" or not row.get("strike"):
             continue
         acts = 1
-        if (row.get("turns") == 1
-                and row.get("annotation") != "Deadline Extension"):
+        anns = row.get("annotations") or [row.get("annotation")]
+        if row.get("turns") == 1 and "Deadline Extension" not in anns:
             acts = 2
         out.append(("Kitsune Sakura", int(row["strike"]) * acts))
     return out
