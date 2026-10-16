@@ -22,6 +22,9 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
+- **Furina's story** (`furina-story-2026-10-15.md`, three picks, all (a)): eight
+  events in three threads, the Stage Fright curse, and her Ancient, combat and
+  pair lines.
 - **Distribution readiness** (`distribution-readiness-2026-10-12.md`, two picks,
   defaults (a)): a closed beta now, public early access once Varka and Furina
   reach Balance; a GitHub release first. (The `LAW.md` art line, #1145, is
