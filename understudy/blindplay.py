@@ -1117,12 +1117,17 @@ def cmd_new_seat(args) -> int:
     """The coordinator's reset before a fresh seat on a lane that already
     played (a per-act handoff, 2026-10-02): `--brief` defines each word once
     per LANE, so the new seat would never see a word the last one met. Forgets
-    the words the lane has been shown; the action budget is left alone."""
+    the words the lane has been shown and clears its refusal streak; the
+    action budget is left alone."""
     blindplay_shape.forget_words_seen()
     # Seat page 3: and a fight in progress briefs its enemies again.
     forget_briefed()
-    print(f"lane {lane_tag(None)}: words forgotten; the next brief page "
-          f"defines each word again (action budget unchanged).")
+    # 2026-10-16: a fresh seat taking over a stopped run inherited the last
+    # seat's REFUSAL STOP (twice) until the coordinator cleared it by hand.
+    clear_refusal_streak()
+    print(f"lane {lane_tag(None)}: words forgotten, refusal streak cleared; "
+          f"the next brief page defines each word again (action budget "
+          f"unchanged).")
     return 0
 
 
@@ -1225,7 +1230,8 @@ def main(argv: list[str] | None = None) -> int:
     w = sub.add_parser("new-seat", help="coordinator: before a fresh seat on "
                                         "a lane that already played, forget "
                                         "the words the lane was shown so "
-                                        "--brief defines them again; the "
+                                        "--brief defines them again, and "
+                                        "clear its refusal streak; the "
                                         "action budget is untouched")
     w.set_defaults(func=cmd_new_seat)
 
