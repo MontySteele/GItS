@@ -22,6 +22,9 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
+- **Yae, the pool to 78** (`yae-pool-to-78-2026-10-15.md`, four picks, all (a)):
+  35 cards with her engine also on Attacks, Sakura keep their Annotations, the
+  Sakura display, then five seats.
 - **Distribution readiness** (`distribution-readiness-2026-10-12.md`, two picks,
   defaults (a)): a closed beta now, public early access once Varka and Furina
   reach Balance; a GitHub release first. (The `LAW.md` art line, #1145, is
