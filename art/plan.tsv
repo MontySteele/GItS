@@ -2930,16 +2930,10 @@ power_fontaine_masque_red_death	ImageGen/images/furina/powers/masque_red_death.p
 proto_ym_yakan_evocation	ImageGen/images/cards/yae/proto_ym_yakan_evocation.png	500	380	cover	y0.40@1.15	shortlist	1	png	Sesshou Sakura Summon.png		tcg	
 # proto_ym_proofread <- Yae, book in hand, plotting the next chapter
 proto_ym_proofread	ImageGen/images/cards/yae/proto_ym_proofread.png	500	380	cover	x0.36,y0.55@1.6	shortlist	1	png	Yae Miko TPRGT 2023 - Aether.png		splash	
-# proto_ym_kitsune_flash <- Yae swinging her gohei
-proto_ym_kitsune_flash	ImageGen/images/cards/yae/proto_ym_kitsune_flash.png	500	380	cover	x0.45	shortlist	1	png	Yae Miko Profile.png		splash	
 # proto_ym_thunder_rite <- Yae at the torii before the Sacred Sakura
 proto_ym_thunder_rite	ImageGen/images/cards/yae/proto_ym_thunder_rite.png	500	380	cover	x0.40	shortlist	1	png	Version 2.5 Wallpaper 1.png		splash	
-# proto_ym_shrine_offering <- the Grand Narukami Shrine (TCG support card)
-proto_ym_shrine_offering	ImageGen/images/cards/yae/proto_ym_shrine_offering.png	500	380	cover	y0.45@1.15	shortlist	1	png	Grand Narukami Shrine Support Card.png		tcg	
 # proto_ym_twin_sakura <- her talent card: Sakura blossom and Electro spirit
 proto_ym_twin_sakura	ImageGen/images/cards/yae/proto_ym_twin_sakura.png	500	380	cover	y0.45@1.15	shortlist	1	png	The Shrine's Sacred Shade Equipment Card.png		tcg	
-# proto_ym_deadline <- a vendor pressing something on an unimpressed Yae
-proto_ym_deadline	ImageGen/images/cards/yae/proto_ym_deadline.png	500	380	cover	x0.40,y0.55@1.3	shortlist	1	png	Kitsune's Leisurely Stroll Around Hanamizaka 2.png		splash	
 # proto_ym_fox_fire_draft <- Yae by moonlight under violet sakura
 proto_ym_fox_fire_draft	ImageGen/images/cards/yae/proto_ym_fox_fire_draft.png	500	380	cover	x0.62,y0.40@1.3	shortlist	1	png	Yae Miko Birthday 2024.png		splash	
 # proto_ym_sly_strike <- Yae's sly close-up smile
@@ -2954,14 +2948,10 @@ proto_ym_sakura_grove	ImageGen/images/cards/yae/proto_ym_sakura_grove.png	500	38
 proto_ym_kitsune_rite	ImageGen/images/cards/yae/proto_ym_kitsune_rite.png	500	380	cover	y0.60	shortlist	1	png	Sky Kitsune Statue Mt Yougou.png		splash	
 # proto_ym_thunderbolt_tithe <- the Sacred Sakura behind its torii
 proto_ym_thunderbolt_tithe	ImageGen/images/cards/yae/proto_ym_thunderbolt_tithe.png	500	380	cover	center	shortlist	1	png	Namecard Background Inazuma Sacred Sakura.png		splash	
-# proto_ym_rooted_shrine <- the shrine rooted on the mountain (concept art)
-proto_ym_rooted_shrine	ImageGen/images/cards/yae/proto_ym_rooted_shrine.png	500	380	cover	x0.60	shortlist	1	png	Grand Narukami Shrine Concept Art.png		splash	
 # proto_ym_edict_of_cleansing <- the Earth Kitsune statues of the Sakura Cleansing Ritual
 proto_ym_edict_of_cleansing	ImageGen/images/cards/yae/proto_ym_edict_of_cleansing.png	500	380	cover	y0.55	shortlist	1	png	Earth Kitsune Statue.png		splash	
 # proto_ym_bestseller <- Yae with a light novel in hand
 proto_ym_bestseller	ImageGen/images/cards/yae/proto_ym_bestseller.png	500	380	cover	x0.68,y0.40	shortlist	1	png	Kitsune's Leisurely Stroll Around Hanamizaka 4.png		splash	
-# proto_ym_print_run <- the deluxe edition of her own light novel
-proto_ym_print_run	ImageGen/images/cards/yae/proto_ym_print_run.png	500	380	contain	center	shortlist	1	png	Item Pretty Please, Kitsune Guuji Limited Deluxe Edition.png		item	
 # proto_ym_footnote <- an annotated kitsune chronicle
 proto_ym_footnote	ImageGen/images/cards/yae/proto_ym_footnote.png	500	380	contain	center	shortlist	1	png	Book New Chronicles of the Six Kitsune.png		item	
 # proto_ym_sakura_seal <- her namecard: the dreaming fox among sakura
@@ -2992,10 +2982,6 @@ proto_ym_reborn_as_guuji_yae	ImageGen/images/cards/yae/proto_ym_reborn_as_guuji_
 proto_ym_editor_in_chief	ImageGen/images/cards/yae/proto_ym_editor_in_chief.png	500	380	cover	x0.60,y0.42@1.3	shortlist	1	png	Yae Miko Birthday 2022.png		splash	
 # ---------- Yae Miko, the design axes (2026-10-14): batch two's ten cards ----------
 # Official wiki art, one distinct source per card, none used by another row.
-# proto_ym_shrine_bell <- Yae at the spring festival under the shrine's sakura
-proto_ym_shrine_bell	ImageGen/images/cards/yae/proto_ym_shrine_bell.png	500	380	cover	x0.74,y0.50@1.0	shortlist	1	png	Vernal Equinox Day 2024.png		splash	
-# proto_ym_grafted_branch <- Yae beneath a blossoming sakura branch
-proto_ym_grafted_branch	ImageGen/images/cards/yae/proto_ym_grafted_branch.png	500	380	cover	y0.40	shortlist	1	png	Yae Miko Birthday 2023 2.jpg		splash	
 # proto_ym_margin_note <- Yae beside her letter to a reader, the letter half kept
 proto_ym_margin_note	ImageGen/images/cards/yae/proto_ym_margin_note.png	500	380	cover	x0.45,y0.45@1.1	shortlist	1	png	Blessings From Sakura 6.png		splash	
 # proto_ym_kitsune_pounce <- Yae with her fox spirits leaping

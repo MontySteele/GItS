@@ -6607,8 +6607,9 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                    " turns, then strikes ",
                    "A Sakura strikes Kitsune Pounce's target when Pounce "
                    "makes it strike, ",
-                   "else the enemy Foxfire Lure marked this turn, else a "
-                   "random enemy."],
+                   "else the enemy Foxfire Lure marked this turn, else "
+                   "(with Hunting Gaze) ",
+                   "the last enemy your Attacks hit, else a random enemy."],
         # Review r3 (2026-10-14): plain Tenko, the two kinds, the
         # full-shrine rule, and the Edit tip's two layers.
         "Tenko": ["Every ", " acts now. Refresh them to at least "],

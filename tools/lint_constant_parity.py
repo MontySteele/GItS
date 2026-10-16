@@ -348,6 +348,11 @@ MIRRORED: dict[str, object] = {
     "YaeLaw.FoxfireBase": _yae("FOXFIRE_BASE"),
     "YaeLaw.KitsuneBase": _yae("KITSUNE_BASE"),
     "YaeLaw.RoyaltiesPayout": _yae("ROYALTIES_ENERGY"),
+    # The refill (ruled 2026-10-16): Kitsune Barrage, Sesshou Fang.
+    "YaeLaw.BarrageHits": _yae("BARRAGE_HITS"),
+    "YaeLaw.BarrageFullHits": _yae("BARRAGE_FULL_HITS"),
+    "YaeLaw.BarrageSakura": _yae("BARRAGE_SAKURA"),
+    "YaeLaw.FangLevel": _yae("FANG_LEVEL"),
     "VarkaLaw.SwirlPyroDamage": _varka("SWIRL_PYRO_DAMAGE"),
     "VarkaLaw.SwirlHydroBlock": _varka("SWIRL_HYDRO_BLOCK"),
     "VarkaLaw.SwirlCryoVulnerable": _varka("SWIRL_CRYO_VULNERABLE"),

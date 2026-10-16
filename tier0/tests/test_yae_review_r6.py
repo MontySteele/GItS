@@ -190,7 +190,8 @@ def test_the_reprint_row_says_each_reprint_adds_a_play():
 # 5. Which enemy a Sakura strikes ------------------------------------------
 
 TARGET = ("A Sakura strikes Kitsune Pounce's target when Pounce makes it "
-          "strike, else the enemy Foxfire Lure marked this turn, else a "
+          "strike, else the enemy Foxfire Lure marked this turn, else "
+          "(with Hunting Gaze) the last enemy your Attacks hit, else a "
           "random enemy.")
 
 
@@ -202,7 +203,8 @@ def test_the_target_rule_is_one_sentence_on_the_page_and_the_hover():
             / "ArmKeywordTips.cs").read_text(encoding="utf-8")
     assert ('"A Sakura strikes Kitsune Pounce\'s target when Pounce makes it '
             'strike, "\n      + "else the enemy Foxfire Lure marked this '
-            'turn, else a random enemy."') in tips
+            'turn, else (with Hunting Gaze) "\n      + "the last enemy your '
+            'Attacks hit, else a random enemy."') in tips
 
 
 def _shrine(*rows):

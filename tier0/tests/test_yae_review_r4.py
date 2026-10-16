@@ -91,13 +91,7 @@ def test_a_plant_with_no_red_ink_leaves_a_refreshed_annotation_alone():
     assert oldest.annotations == [Y.FOX_FIRE, Y.RED_INK]
 
 
-# 3, 4. Deadline and Evergreen Charm -----------------------------------------
-
-def test_deadline_is_8_and_11_upgraded():
-    assert _block(_card("deadline")) == 8
-    assert _block(loader.get_card("proto_ym_deadline+")) == 11
-    assert "Gain 8 " in _row("proto_ym_deadline")["description"]
-
+# 3, 4. Evergreen Charm (Deadline was cut by the dedupe, 2026-10-16) --------
 
 def test_evergreen_charm_is_7_and_10_and_its_red_ink_sentence_is_gone():
     # The pool to 78, pick 2 (a): Annotations coexist on a Sakura, so the
@@ -254,8 +248,7 @@ def test_pick1_rows():
     assert _card("royalties+").cost == 0
     assert _card("inked_branches+").cost == 0
     # Yae review r5, pick 1 (a): plus 2 [3] per card Edited this combat.
-    for name, base, per in (("bestseller", (8, 10), (2, 3)),
-                            ("print_run", (6, 8), (2, 3))):
+    for name, base, per in (("bestseller", (8, 10), (2, 3)),):
         # 2026-10-15: on the calculated rail (the face shows the total).
         fx = lambda c: next(f["amount_formula"] for f in c.effects
                             if "amount_formula" in f)

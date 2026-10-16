@@ -8,7 +8,7 @@ namespace KleeMod.Powers;
 /// <summary>
 /// A CARD WHOSE OWN PLAY PLANTS A SAKURA, AS A TYPE. The codegen puts this on
 /// every row with a `yae` plant / plant_level op (Yakan Evocation, Twin
-/// Sakura, Grafted Branch) and nothing else implements it: a marker with no
+/// Sakura, Guardian of Narukami) and nothing else implements it: a marker with no
 /// members, read by <see cref="YaeAnnotationReach.Plants"/>. Sim twin:
 /// <c>yae_shrine.plants_sakura</c>, off the same ops.
 /// </summary>
@@ -18,7 +18,8 @@ public interface ISakuraPlanterCard
 
 /// <summary>
 /// A card whose `yae` kind gives its own Block (block_per_sakura,
-/// block_per_edit; no row since Print Run took the calculated rail,
+/// block_per_edit, and the refill's wither_newest_block, Hide Behind the
+/// Shrine; block_per_edit has no row since Print Run took the calculated rail,
 /// 2026-10-15). It declares no BlockVar, so the game's
 /// <c>GainsBlock</c> is false (Nimble is unchanged), but Red Ink rides that
 /// Block: <see cref="YaeAnnotationReach.GivesBlock"/> reads this marker too.

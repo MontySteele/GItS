@@ -95,7 +95,7 @@ def _hp(st):
 
 def test_every_plain_planter_plants_a_plain_sakura():
     st = _state()
-    for name in ("yakan_evocation", "twin_sakura", "grafted_branch"):
+    for name in ("yakan_evocation", "twin_sakura", "thunder_petal"):
         _play(st, name)
     assert {s.kind for s in _led(st).sakura} == {Y.THUNDER}
 
@@ -240,8 +240,8 @@ def test_a_replacement_honours_mooncall_and_red_ink():
 
 def test_a_planted_level_is_kept_so_the_display_can_say_the_rest():
     st = _state()
-    _play(st, "grafted_branch")
-    _play(st, "rooted_shrine")
+    Y.plant(st, 1, level=3)
+    _play(st, "narukami_ray")
     s = _led(st).sakura[0]
     assert (s.planted_level, s.level) == (3, 4)
 
@@ -279,7 +279,7 @@ def test_an_edit_fills_the_temporary_slot_and_a_later_one_replaces_it():
     st = _state()
     c = _published("strike", [Y.REPRINT])
     st.player.hand.append(c)
-    _play(st, "deadline")
+    _play(st, "cliffhanger")
     assert Y.stack(c) == [Y.REPRINT] and Y.temp(c) == Y.DEADLINE and c.retain
     _play(st, "footnote")
     assert Y.stack(c) == [Y.REPRINT] and Y.temp(c) == Y.FOOTNOTE
@@ -404,15 +404,13 @@ def test_reprint_used_reads_spent():
 
 # --- the readers of an Annotation, with layers ---------------------------------
 
-def test_bestseller_and_print_run_do_not_count_a_published_only_card():
+def test_bestseller_does_not_count_a_published_only_card():
     # Yae review r5, pick 1 (a) (ruled 2026-10-15): they count the cards
     # Edited this combat, and a Published card in hand is not an Edit.
     st = _state()
     st.player.hand.append(_published("strike", [Y.REPRINT]))
     _play(st, "bestseller")                      # 8 + 2 x 0
     assert st.enemies[0].hp == 100 - 8
-    _play(st, "print_run")                       # 6 + 2 x 0
-    assert st.player.block == 6
 
 
 def test_serialization_no_longer_pays_on_a_published_card_play():

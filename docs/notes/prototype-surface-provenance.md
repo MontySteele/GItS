@@ -9247,3 +9247,43 @@ Levels higher).
 - **Renamed on build.** The paper's "Enlightened Blessing" Power ships as
   Scattered Blossoms (coordinator, on #1347): her starter relic's Orobas
   upgrade already carries the name. The id stays `proto_ym_enlightened_blessing`.
+
+## Yae: the dedupe and the refill (2026-10-16)
+
+`review/active/yae-dedupe-2026-10-16.md` and
+`review/active/yae-refill-2026-10-16.md`, ruled 2026-10-16 ([USER]: "Agreed
+on the Yae paper picks!"), built together. The pool stays 78 at 20 / 38 / 20
+(29 Attacks, 34 Skills, 15 Powers).
+
+- **Cut (dedupe pick 1 (a)).** Kitsune Flick, Shrine Lantern, Grafted
+  Branch, Shrine Bell, Shrine Offering, Deadline, Sacred Spark, Kitsune Flash
+  (Commons); Print Run, Rooted Shrine, Omikuji (Uncommons). Their rows,
+  generated classes, art plan rows and blank-portrait entries go. The rules
+  they used stay, with no row (`extend`, `annotated_strike`,
+  `strike_target`, a plant_level's `lasts`), as `damage_per_edit` did.
+- **Added (dedupe pick 2 (a)).** Kitsune Barrage, Sesshou Fang, Falling
+  Blossom, Publisher's Deadline, Fox's Shade, Hide Behind the Shrine,
+  Rewrite, Dawn Prayer (Commons); Hunting Gaze, Inscribed Thunder, Kitsune's
+  Blessing (Uncommons), at the refill paper's numbers and upgrades. They
+  draw blank portraits until her art pass (`tools/art_coverage.py`).
+- **Rules added.** Seven `yae` kinds (`barrage`, `level_strike`,
+  `wither_oldest_at`, `wither_newest_block`, `rewrite`, `level_newest`,
+  `bless_highest`), the Hunting Gaze power, the predicate `any_enemy_weak`,
+  the count `annotations_on_card`, and the card field
+  `cost_reduction_if_edited_this_turn`. The ledger keeps Edits this turn
+  (cleared at her turn start) and the last enemy one of her Attack cards
+  hit (kept with or without Hunting Gaze). The seat's Sakura target sentence
+  names Hunting Gaze.
+- **Builder's readings** (named in the PR): Falling Blossom's Last Bloom at a
+  target its own hit killed acts as usual (random, or a Foxfire's ALL);
+  Hunting Gaze yields to the Lure and an aimed strike, its "attacked" is the
+  last enemy any hit of her Attack card landed on (an AoE's last body), and
+  Fox Fire's 4 damage is not a Sakura strike, so stays random; Kitsune's
+  Blessing breaks a Level tie by the oldest (Editor-in-Chief's reading);
+  Sesshou Fang's bonus is one hit with the base, as Kitsune Flash's was;
+  Kitsune Barrage is one attack of 2 or 3 hits; Hide Behind the Shrine's 5
+  more is the card's own Block (Dexterity applies); Rewrite discards 0 to N
+  chosen cards (the base game's Gambler's Brew chooser) and then Edits, so
+  the Edit can reach a card it drew; Inscribed Thunder's Annotations are
+  distinct ones, Published included; Dawn Prayer and Kitsune's Blessing do
+  nothing with no Sakura.

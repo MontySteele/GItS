@@ -112,6 +112,21 @@ public sealed class KleeElementalHooks : AbstractModel
     }
 
     /// <summary>
+    /// YAE MIKO, HUNTING GAZE (the refill, 2026-10-16): every hit an Attack
+    /// card of hers lands names the last enemy she attacked
+    /// (<see cref="YaeShrine.NoteAttacked"/>; a no-op for anyone else).
+    /// Sim twin: <c>effects.deal_damage_to_enemy</c>'s
+    /// <c>yae_shrine.note_attacked</c>.
+    /// </summary>
+    public override Task AfterDamageGiven(
+        PlayerChoiceContext choiceContext, Creature? dealer, DamageResult result,
+        ValueProp props, Creature target, CardModel? cardSource)
+    {
+        YaeShrine.NoteAttacked(dealer, result.Receiver, props, cardSource);
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
     /// Kit-grant check, turn-start site: fires AFTER the hand draw
     /// (CombatManager: draw, then this hook), the sim's exact phase -- so
     /// turn-start meter gains (bomb detonations with Blazing Delight splash

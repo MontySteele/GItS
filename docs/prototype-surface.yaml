@@ -4547,8 +4547,8 @@
              {op: varka, kind: deep_freeze, target: enemy}],
    upgrade: {cost: -1}}
 
-# YAE MIKO: review/active/yae-card-paper-2026-10-13.md, yae-design-axes-2026-10-14.md,
-# yae-review-r3-2026-10-14.md, yae-pool-to-78-2026-10-15.md. Rules: YaeShrine.cs,
+# YAE MIKO: review/active/yae-card-paper-2026-10-13.md, yae-design-axes, review-r3,
+# pool-to-78, dedupe and refill (2026-10-14 to 16). Rules: YaeShrine.cs,
 # yae_shrine.py; reasoning: provenance note "Yae Miko".
 
 # --- the starter (paper sec.3): base Strike x4 + Defend x4 have no row ---
@@ -4574,13 +4574,6 @@
 
 # --- Common (20) ---
 
-- {id: proto_ym_kitsune_flash, name: "Kitsune Flash", character: yae,
-   authored_by: [claude],
-   cost: 1, type: attack, rarity: common,
-   description: "Deal 6 [gold]Electro[/gold] damage. If this card is [gold]Annotated[/gold], deal 3 more.",
-   effects: [{op: yae, kind: annotated_strike, base: 6, amount: 3, target: enemy}],
-   upgrade: {yae_base: 2, yae_amount: 1}}
-
 - {id: proto_ym_thunder_rite, name: "Thunder Rite", character: yae,
    authored_by: [claude],
    cost: 2, type: attack, rarity: common,
@@ -4589,14 +4582,6 @@
    effects: [{op: damage, amount: 8, target: enemy},
              {op: yae, kind: tenko}],
    upgrade: {damage: 3}}
-
-- {id: proto_ym_shrine_offering, name: "Shrine Offering", character: yae,
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: common,
-   description: "Gain 6 [gold]Block[/gold]. Each [gold]Sakura[/gold] lasts 1 more turn.",
-   effects: [{op: block, amount: 6},
-             {op: yae, kind: extend, amount: 1}],
-   upgrade: {block: 3}}
 
 - {id: proto_ym_twin_sakura, name: "Twin Sakura", character: yae,
    authored_by: [claude],
@@ -4607,16 +4592,6 @@
    description: "Plant {YmAmount:diff()} [gold]Sakura[/gold].",
    effects: [{op: yae, kind: plant, amount: 2}],
    upgrade: {add: {op: block, amount: 4}}}
-
-- {id: proto_ym_deadline, name: "Deadline", character: yae,
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: common,
-   # Design axes sec.4: Block floor 5 [8] (was 4 [6]).
-   # Yae review r4 item 3: 8 [11] (was 5 [8], two seats' never-again).
-   description: "Gain 8 [gold]Block[/gold]. [gold]Edit[/gold] a card in your hand: [gold]Deadline Extension[/gold].",
-   effects: [{op: block, amount: 8},
-             {op: yae, kind: edit, annotation: deadline, amount: 1}],
-   upgrade: {block: 3}}
 
 - {id: proto_ym_fox_fire_draft, name: "Fox Fire Draft", character: yae,
    authored_by: [claude],
@@ -4655,22 +4630,6 @@
    upgrade: {block: 3}}
 
 # Batch two (design axes sec.5 and the Ruled section).
-
-- {id: proto_ym_shrine_bell, name: "Shrine Bell", character: yae,
-   authored_by: [claude],
-   cost: 1, type: attack, rarity: common,
-   description: "Deal 7 [gold]Electro[/gold] damage. Each [gold]Sakura[/gold] lasts 1 more turn.",
-   effects: [{op: damage, amount: 7, target: enemy},
-             {op: yae, kind: extend, amount: 1}],
-   upgrade: {damage: 3}}
-
-- {id: proto_ym_grafted_branch, name: "Grafted Branch", character: yae,
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: common,
-   # The pool to 78, sec.3: Level 3 [4] and 1 more turn (was Level 2 [3]).
-   description: "Plant a [gold]Sakura[/gold]. It starts at Level {YmAmount:diff()} and lasts 1 more turn.",
-   effects: [{op: yae, kind: plant_level, amount: 3, lasts: 1}],
-   upgrade: {yae_amount: 1}}
 
 - {id: proto_ym_margin_note, name: "Margin Note", character: yae,
    authored_by: [claude],
@@ -4720,24 +4679,6 @@
              {op: yae, kind: plant, amount: 1}],
    upgrade: {damage: 3}}
 
-- {id: proto_ym_kitsune_flick, name: "Kitsune Flick", character: yae,
-   authored_by: [claude],
-   cost: 1, type: attack, rarity: common,
-   description: "Deal 5 [gold]Electro[/gold] damage. Plant a [gold]Kitsune Sakura[/gold].",
-   effects: [{op: damage, amount: 5, target: enemy},
-             {op: yae, kind: plant, amount: 1, as: kitsune}],
-   upgrade: {damage: 3}}
-
-- {id: proto_ym_sacred_spark, name: "Sacred Spark", character: yae,
-   authored_by: [claude],
-   cost: 1, type: attack, rarity: common,
-   # "A Sakura strikes it": the highest-Level Sakura that strikes, at the
-   # aimed enemy; a Foxfire Sakura hits it once (the revision's targeting).
-   description: "Deal 4 [gold]Electro[/gold] damage. A [gold]Sakura[/gold] strikes it.",
-   effects: [{op: damage, amount: 4, target: enemy},
-             {op: yae, kind: strike_target, target: enemy}],
-   upgrade: {damage: 3}}
-
 - {id: proto_ym_cliffhanger, name: "Cliffhanger", character: yae,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
@@ -4746,13 +4687,81 @@
              {op: yae, kind: edit, annotation: deadline, amount: 1}],
    upgrade: {damage: 3}}
 
-- {id: proto_ym_shrine_lantern, name: "Shrine Lantern", character: yae,
+# The refill (review/active/yae-refill-2026-10-16.md, ruled 2026-10-16): eight
+# Commons for the eight the dedupe cut. Provenance note, "Yae: the dedupe and
+# the refill".
+
+- {id: proto_ym_kitsune_barrage, name: "Kitsune Barrage", character: yae,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: common,
+   # Reads the shrine when played: 2 hits, 3 with 3 or more Sakura standing.
+   description: "Deal 4 [gold]Electro[/gold] damage twice. If you have 3 or more [gold]Sakura[/gold], deal it 3 times.",
+   effects: [{op: yae, kind: barrage, amount: 4, target: enemy}],
+   upgrade: {yae_amount: 1}}
+
+- {id: proto_ym_sesshou_fang, name: "Sesshou Fang", character: yae,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: common,
+   # One hit, read when played: any Sakura of any kind at Level 3 or higher.
+   description: "Deal 6 [gold]Electro[/gold] damage. If a [gold]Sakura[/gold] is Level 3 or higher, deal 6 more.",
+   effects: [{op: yae, kind: level_strike, base: 6, amount: 6, target: enemy}],
+   upgrade: {yae_base: 2, yae_amount: 2}}
+
+- {id: proto_ym_falling_blossom, name: "Falling Blossom", character: yae,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: common,
+   # The wither plays its Last Bloom at this card's target, one hit,
+   # whatever the Sakura's kind (a Foxfire's included), as an aimed strike
+   # already is. A Kitsune Sakura's Last Bloom is still its Block.
+   description: "Deal 7 [gold]Electro[/gold] damage. Your oldest [gold]Sakura[/gold] withers; its Last Bloom strikes this enemy.",
+   effects: [{op: damage, amount: 7, target: enemy},
+             {op: yae, kind: wither_oldest_at, target: enemy}],
+   upgrade: {damage: 3}}
+
+- {id: proto_ym_publishers_deadline, name: "Publisher's Deadline", character: yae,
+   authored_by: [claude],
+   cost: 2, type: attack, rarity: common,
+   # Any Edit this turn, any card, any Annotation (Bestseller's count, per
+   # turn): `cost_reduction_if_edited_this_turn`.
+   cost_reduction_if_edited_this_turn: 1,
+   description: "Deal 12 [gold]Electro[/gold] damage. Costs 1 less if you [gold]Edited[/gold] a card this turn.",
+   effects: [{op: damage, amount: 12, target: enemy}],
+   upgrade: {damage: 4}}
+
+- {id: proto_ym_foxs_shade, name: "Fox's Shade", character: yae,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Gain 6 [gold]Block[/gold]. Plant a [gold]Foxfire Sakura[/gold].",
-   effects: [{op: block, amount: 6},
-             {op: yae, kind: plant, amount: 1, as: foxfire}],
+   description: "Gain 8 [gold]Block[/gold]. If any enemy is [gold]Weak[/gold], gain {BranchBlock:diff()} more.",
+   effects: [{op: block, amount: 8},
+             {op: conditional, if: any_enemy_weak,
+              then: [{op: block, amount: 4}]}],
    upgrade: {block: 3}}
+
+- {id: proto_ym_hide_behind_the_shrine, name: "Hide Behind the Shrine", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   # The newest withers as every Sakura does (its Last Bloom still acts);
+   # the 5 more is the card's own Block.
+   description: "Gain 7 [gold]Block[/gold]. Your newest [gold]Sakura[/gold] withers; if one did, gain {YmAmount:diff()} more.",
+   effects: [{op: block, amount: 7},
+             {op: yae, kind: wither_newest_block, amount: 5}],
+   upgrade: {block: 2}}
+
+- {id: proto_ym_rewrite, name: "Rewrite", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   # Discard 0 to 2 [3] chosen cards, draw as many, then the Edit (it can
+   # reach a card just drawn).
+   description: "Discard up to {YmAmount:diff()} cards, then draw that many. [gold]Edit[/gold] a card in your hand: [gold]Red Ink[/gold].",
+   effects: [{op: yae, kind: rewrite, amount: 2, annotation: red_ink}],
+   upgrade: {yae_amount: 1}}
+
+- {id: proto_ym_dawn_prayer, name: "Dawn Prayer", character: yae,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: common,
+   description: "Your newest [gold]Sakura[/gold] gains {YmAmount:diff()} Levels.",
+   effects: [{op: yae, kind: level_newest, amount: 2}],
+   upgrade: {yae_amount: 1}}
 
 # --- Uncommon (38) ---
 
@@ -4774,16 +4783,6 @@
    effects: [{op: yae, kind: damage_per_sakura, base: 3, per: 4, target: enemy}],
    upgrade: {yae_base: 1, yae_per: 2}}
 
-- {id: proto_ym_rooted_shrine, name: "Rooted Shrine", character: yae,
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: uncommon,
-   # Design axes sec.4: "Gain 6 [9] Block. Each Sakura gains a Level." (was
-   # 3 Block, after the Level).
-   description: "Gain 6 [gold]Block[/gold]. Each [gold]Sakura[/gold] gains a Level.",
-   effects: [{op: block, amount: 6},
-             {op: yae, kind: level_up, amount: 1}],
-   upgrade: {block: 3}}
-
 - {id: proto_ym_edict_of_cleansing, name: "Edict of Cleansing", character: yae,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
@@ -4801,17 +4800,6 @@
    description: "Deal {CalculationBase:diff()} [gold]Electro[/gold] damage, plus {ExtraDamage:diff()} for each card you [gold]Edited[/gold] this combat.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: enemy,
               amount_formula: {base: 8, per: 2, count: edits_this_combat}}],
-   upgrade: {formula_base: 2, formula_per: 1}}
-
-- {id: proto_ym_print_run, name: "Print Run", character: yae,
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: uncommon,
-   # Yae review r5, pick 1 (a) (ruled 2026-10-15, "For 1332 - agreed on
-   # (a)"): plus 2 [3] per card Edited this combat (was plus 3 [4] per
-   # Annotated card in hand; design axes sec.4 set 6 [8]).
-   description: "Gain {CalculationBase:diff()} [gold]Block[/gold], plus {CalculationExtra:diff()} for each card you [gold]Edited[/gold] this combat.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
-   effects: [{op: block,
-              amount_formula: {base: 6, per: 2, count: edits_this_combat}}],
    upgrade: {formula_base: 2, formula_per: 1}}
 
 - {id: proto_ym_footnote, name: "Footnote", character: yae,
@@ -5000,17 +4988,6 @@
              {op: yae, kind: kitsune_act}],
    upgrade: {damage: 3}}
 
-- {id: proto_ym_omikuji, name: "Omikuji", character: yae,
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: uncommon,
-   description: "Choose one: Each [gold]Sakura[/gold] gains a Level. Or: Apply 2 [gold]Weak[/gold] to ALL enemies.",
-   effects: [{op: choose_one, modes: [
-              {label: "Each [gold]Sakura[/gold] gains a Level",
-               effects: [{op: yae, kind: level_up, amount: 1}]},
-              {label: "Apply 2 [gold]Weak[/gold] to ALL enemies",
-               effects: [{op: apply_power, power: weak, amount: 2, target: all_enemies}]}]}],
-   upgrade: {cost: -1}}
-
 - {id: proto_ym_torii_ward, name: "Torii Ward", character: yae,
    authored_by: [claude],
    # Revised after GPT's review: it rewards a full shrine (it repeated
@@ -5105,6 +5082,36 @@
    description: "The first [gold]Annotated[/gold] card you play each turn costs 0.",
    effects: [{op: apply_power, power: ym_editorial_priority, amount: 1, target: self}],
    upgrade: {innate: true}}
+
+# The refill (review/active/yae-refill-2026-10-16.md): three Uncommons for
+# the three cut.
+
+- {id: proto_ym_hunting_gaze, name: "Hunting Gaze", character: yae,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   # Aims each strike that would pick a random enemy; an aimed strike, the
+   # Lure and a Foxfire's hit on ALL are unchanged. Copies do not stack.
+   description: "Your [gold]Sakura[/gold] strike the last enemy you attacked, while it lives.",
+   effects: [{op: apply_power, power: ym_hunting_gaze, amount: 1, target: self}],
+   upgrade: {innate: true}}
+
+- {id: proto_ym_inscribed_thunder, name: "Inscribed Thunder", character: yae,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: uncommon,
+   # Distinct Annotations on the played card, Published ones included.
+   description: "Deal {CalculationBase:diff()} [gold]Electro[/gold] damage, plus {ExtraDamage:diff()} for each [gold]Annotation[/gold] on this card.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: damage, target: enemy,
+              amount_formula: {base: 7, per: 5, count: annotations_on_card}}],
+   upgrade: {formula_base: 3}}
+
+- {id: proto_ym_kitsunes_blessing, name: "Kitsune's Blessing", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   # The highest-Level Sakura of any kind; on a tie, the oldest (Editor-in-
+   # Chief's reading).
+   description: "Your highest-Level [gold]Sakura[/gold] gains {YmAmount:diff()} Levels and lasts 2 more turns.",
+   effects: [{op: yae, kind: bless_highest, amount: 3, lasts: 2}],
+   upgrade: {yae_amount: 1}}
 
 # --- Rare (20) ---
 

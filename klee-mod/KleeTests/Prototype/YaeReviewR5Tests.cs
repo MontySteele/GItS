@@ -88,16 +88,15 @@ public class YaeReviewR5Pick1Tests : IDisposable
         ((CustomCardModel)card).Localization!.First(r => r.Item1 == "description").Item2;
 
     [Fact]
-    public void Bestseller_and_print_run_are_8_and_6_plus_2_per_edit_upgraded_10_and_8_plus_3()
+    public void Bestseller_is_8_plus_2_per_edit_upgraded_10_plus_3()
     {
         // Since 2026-10-15 on the calculated rail (Perfected Strike's): the
-        // base is CalculationBase, the per-Edit slope ExtraDamage (an attack)
-        // or CalculationExtra (Block), and in combat the face adds the total.
+        // base is CalculationBase, the per-Edit slope ExtraDamage, and in
+        // combat the face adds the total. (Print Run, its Block twin, was
+        // cut by the dedupe, 2026-10-16.)
         foreach (var (card, perVar, lo, hi, total) in new (CardModel, string, int, int, string)[]
                  { (new ProtoYmBestseller(), "ExtraDamage", 8, 10,
-                    "{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
-                   (new ProtoYmPrintRun(), "CalculationExtra", 6, 8,
-                    "{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}") })
+                    "{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}") })
         {
             Assert.Equal(lo, (int)card.DynamicVars["CalculationBase"].BaseValue);
             Assert.Equal(2, (int)card.DynamicVars[perVar].BaseValue);
@@ -128,29 +127,22 @@ public class YaeReviewR5Pick1Tests : IDisposable
     [Fact]
     public void The_faces_total_is_base_plus_per_for_each_edit_this_combat()
     {
-        // 0 Edits: the base. 3 Edits: base + 3 x per (8 + 3 x 2 = 14 damage,
-        // 6 + 3 x 2 = 12 Block), the number the play pays.
+        // 0 Edits: the base. 3 Edits: base + 3 x per (8 + 3 x 2 = 14
+        // damage), the number the play pays.
         var seat = Seat.Yae();
         var bestseller = Owned<ProtoYmBestseller>(seat);
-        var printRun = Owned<ProtoYmPrintRun>(seat);
         var ledger = YaeShrineLedger.For(seat.Creature);
         Assert.Equal(0, ledger.Edits);
         Assert.Equal(0m, Multiplier(bestseller, "CalculatedDamage"));
-        Assert.Equal(0m, Multiplier(printRun, "CalculatedBlock"));
         var note = typeof(YaeShrineLedger).GetMethod("NoteEdit", HeadlessGame.All)!;
         for (var i = 0; i < 3; i++) note.Invoke(ledger, null);
         Assert.Equal(3m, Multiplier(bestseller, "CalculatedDamage"));
-        Assert.Equal(3m, Multiplier(printRun, "CalculatedBlock"));
         Assert.Equal(14m, bestseller.DynamicVars["CalculationBase"].BaseValue
                           + bestseller.DynamicVars["ExtraDamage"].BaseValue
                             * Multiplier(bestseller, "CalculatedDamage"));
-        Assert.Equal(12m, printRun.DynamicVars["CalculationBase"].BaseValue
-                          + printRun.DynamicVars["CalculationExtra"].BaseValue
-                            * Multiplier(printRun, "CalculatedBlock"));
         // Out of a fight the game computes no multiplier: the base, and the
         // face's {InCombat:} clause is hidden.
         Assert.Equal(8m, ((CalculatedVar)bestseller.DynamicVars["CalculatedDamage"]).Calculate(null));
-        Assert.Equal(6m, ((CalculatedVar)printRun.DynamicVars["CalculatedBlock"]).Calculate(null));
         // Someone who is not Yae counts none.
         var other = Owned<ProtoYmBestseller>(Seat.Klee());
         Assert.Equal(0m, Multiplier(other, "CalculatedDamage"));
@@ -164,8 +156,6 @@ public class YaeReviewR5Pick1Tests : IDisposable
         // The plays pay the calculated var (the number the face shows).
         Assert.Contains(Il.Calls(Il.Method("ProtoYmBestseller", "OnPlay")),
                         c => c.Contains("CalculatedDamage"));
-        Assert.Contains(Il.Calls(Il.Method("ProtoYmPrintRun", "OnPlay")),
-                        c => c.Contains("CalculatedBlock"));
     }
 
     [Fact]
