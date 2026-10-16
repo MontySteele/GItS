@@ -127,3 +127,8 @@ Showstopper, Navia) are named and tested; Prima Donna's upgrade improves its
 return instead of adding Innate; the three upgrades no longer repeat; the
 diagnosis is softened; 4 of 46, not 56. Added: her Fanfare production a turn
 by act, which shows production, not only the peak, stops growing after act 2.
+
+## Ruled 2026-10-16
+
+[USER]: "On Furina's powers - I'm good with this now, ship it!" Pick 1 (a),
+as revised.
