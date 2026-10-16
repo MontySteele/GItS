@@ -15,6 +15,8 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 
 ## Kits and display (the mod)
 
+- Yae round 7 (2026-10-16): Proofread with one card in hand picked it without asking and overwrote that card's Retain (lane 4); Sakura Canopy+ prints "Gains 0 Block" while no Sakura stands (lane 4).
+- Ousia Pledge+ in a Yae deck was refused "it would take you to 0 HP" at 44 to 55 HP with Drain 3 (Yae round 7, lane 1): check the Drain gate for a player who is not Furina.
 - Bennett's Passion Overload and Kujou Sara's Crowfeather Cover do not say that an Attack carries one element, or that Sara's Electro lands when both are up (`CompanionOverhaulRiders.ElementFor`, fixed order, not newest); the sentence does not fit the 125-character power ceiling (116 and 119 now). Kokomi review r4, item 4.
 - Kokomi has no loop probe (Furina's is `tier0/harness/furina_loop_probe.py`). Its known set, when one is built: Shoal Call x2 + Watchful Shoal+ + The Shape of Water (review r3), Kurage Canopy + a planned Ward, and a 0-cost Weak and 3 Block a turn (review r4). (Jellyfish Current left the pool with review r6, 2026-10-14.)
 - Kokomi round 3 (2026-10-11): check whether Thieving Hopper's Flutter ("50% less damage from Attacks") should halve Opening Gambit's doubled Plan (a Skill); lane 5, fight 11.
@@ -123,6 +125,7 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 
 ## Harness, bridge and tools
 
+- The seat brief (`tools/seat.py --opus-brief`) names no path for the record: in Yae round 7 four seats wrote `record.md` in their scratch folder and one wrote none (its record came back in the hand-back only). Name the path in the brief.
 - Telemetry: Plan damage is credited to the writing card since #1222, so `damage_by_source` no longer has a "(Bake-Kurage)" key; update any analysis that reads it.
 - Shop card removal: after the first card is picked the screen refuses a re-pick and offers only confirm or skip; check whether the base screen allows a deselect and the bridge lacks the verb.
 - Bridge: Jumpy Dumpty refused without a target, a Durin chooser answered "still opening", and Mawler died at end of turn with no printed cause.
