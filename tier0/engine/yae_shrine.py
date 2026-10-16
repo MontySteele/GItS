@@ -17,7 +17,7 @@ THE RULES AS MODELLED (review r3, ruled 2026-10-14,
   * SAKURA: up to `sakura_cap` (`SAKURA_CAP`, plus 2 per Sakura
     Channeling) on a per-fight ledger (`YaeLedger.sakura`), each with a KIND,
     a LEVEL and a TIMER (actions left). A plant creates one at the Level the
-    card prints (`PLANT_LEVEL`, Grafted Branch its own), +1 per Fox's
+    card prints (`PLANT_LEVEL`, Guardian of Narukami its own), +1 per Fox's
     Mooncall, with 3 actions left, and does not level the others.
   * KINDS (review r3, sec.1): set when planted. Sakura (Thunder, the
     default) strikes one enemy for 2 + Level; a Foxfire Sakura hits ALL
@@ -81,17 +81,27 @@ THE RULES AS MODELLED (review r3, ruled 2026-10-14,
     (`edit_sakura`). THE POOL TO 78, pick 2 (a) (ruled 2026-10-15,
     `review/active/yae-pool-to-78-2026-10-15.md`): distinct Annotations
     COEXIST on a Sakura; a second copy of one it has does nothing; an Edit
-    that changes nothing is not an Edit (no Bestseller, Print Run or
-    Serialization pay); they survive a Tenko refresh and a same-kind refresh
+    that changes nothing is not an Edit (no Bestseller or Serialization
+    pay); they survive a Tenko refresh and a same-kind refresh
     and go when the Sakura withers or is replaced.
   * THE POOL TO 78 (same paper, sec.2): a strike AIMED at a chosen enemy
-    (Sacred Spark, Narukami Judgment, Saiguu's Lesson, Fox's Verdict, Kitsune
-    Pounce) is one hit on it, a Foxfire Sakura's included; only a Sakura's
+    (Narukami Judgment, Saiguu's Lesson, Fox's Verdict, Kitsune Pounce,
+    Falling Blossom's Last Bloom) is one hit on it, a Foxfire Sakura's included; only a Sakura's
     own act hits ALL. Scattered Blossoms draws per Sakura that withers;
     Saiguu's Lesson strikes an enemy she makes Weak; The Shrine's Sacred
     Shade gives Block per Sakura as her turn ends; Editorial Priority frees
     the first Annotated card each turn; Stellar Conduct strikes again on a
     reaction; Eternity stops the timers.
+  * THE DEDUPE AND THE REFILL (ruled 2026-10-16,
+    `review/active/yae-dedupe-2026-10-16.md`,
+    `review/active/yae-refill-2026-10-16.md`): eleven near-copies cut,
+    eleven cards added. HUNTING GAZE aims every strike that would pick a
+    random enemy at the last enemy one of her Attack cards hit
+    (`YaeLedger.last_attacked`, kept with or without the power), while it
+    lives; the Lure and an aimed strike come first, and a Foxfire Sakura's
+    own act still hits ALL. Publisher's Deadline reads the Edits made this
+    turn (`YaeLedger.edits_this_turn`). Kitsune's Blessing blesses the
+    highest-Level Sakura, the oldest on a tie (`highest`).
   * RED INK ON A PLANTING CARD: Red Ink on a card that plants passes to
     every Sakura that play plants (`inherits`), once (+3) however many Red
     Ink layers the card has; a full-shrine plant that only levels plants
@@ -157,6 +167,13 @@ ANNOTATIONS = (RED_INK, FOOTNOTE, DEADLINE, FOX_FIRE, SAKURA_SEAL, ROYALTIES,
 ROYALTIES_ENERGY = 1
 RED_INK_AMOUNT = 3
 FOX_FIRE_DAMAGE = 4
+#: The refill (2026-10-16): Kitsune Barrage hits twice, 3 times with
+#: `BARRAGE_SAKURA` or more Sakura; Sesshou Fang's threshold Level. C# twin:
+#: `YaeLaw.BarrageHits` / `BarrageFullHits` / `BarrageSakura` / `FangLevel`.
+BARRAGE_HITS = 2
+BARRAGE_FULL_HITS = 3
+BARRAGE_SAKURA = 3
+FANG_LEVEL = 3
 #: What a Publish is worth to the default pilot, best first.
 PUBLISH_ORDER = (REPRINT, SAKURA_SEAL, ROYALTIES, FOOTNOTE, RED_INK, FOX_FIRE,
                  DEADLINE)
@@ -177,6 +194,7 @@ SACRED_SHADE = "ym_sacred_shade"
 EDITORIAL_PRIORITY = "ym_editorial_priority"
 STELLAR_CONDUCT = "ym_stellar_conduct"
 ETERNITY = "ym_eternity"
+HUNTING_GAZE = "ym_hunting_gaze"            # the refill (2026-10-16)
 #: Auras an Electro strike reacts with (Edict of Cleansing's read).
 REACTING_AURAS = ("pyro", "hydro", "cryo")
 
@@ -240,6 +258,14 @@ KIND_FIELDS = {
     "energy_per_sakura": (),
     "afterword": (),
     "verdict": (),
+    # The refill (ruled 2026-10-16).
+    "barrage": ("amount",),
+    "level_strike": ("base", "amount"),
+    "wither_oldest_at": (),
+    "wither_newest_block": ("amount",),
+    "rewrite": ("amount",),
+    "level_newest": ("amount",),
+    "bless_highest": ("amount",),
 }
 KINDS = frozenset(KIND_FIELDS)
 KIND_TARGETS = {
@@ -249,9 +275,14 @@ KIND_TARGETS = {
     # The pool to 78.
     "strike_target": "enemy", "strike_all_at": "enemy",
     "daisesshou": "all_enemies",
+    # The refill.
+    "barrage": "enemy", "level_strike": "enemy", "wither_oldest_at": "enemy",
 }
 #: Kinds that take an `annotation:` name.
-ANNOTATION_KINDS = frozenset({"edit", "edit_all", "edit_sakura"})
+ANNOTATION_KINDS = frozenset({"edit", "edit_all", "edit_sakura",
+                              "rewrite"})
+#: Kinds that take `lasts:` ("lasts N more turns").
+LASTS_KINDS = frozenset({"plant_level", "bless_highest"})
 #: Kinds whose `as:` names the kind of Sakura they plant (review r3);
 #: absent, a plain Sakura.
 PLANT_AS_KINDS = frozenset({"plant", "plant_level"})
@@ -302,7 +333,7 @@ class YaeLedger:
     #: Cards Edited this combat (Yae review r5, pick 1 (a), ruled
     #: 2026-10-15): each hand card an Edit / Reborn Annotated and each
     #: Sakura an `edit_sakura` Annotated. A Publish is not an Edit.
-    #: Bestseller and Print Run count it. C# twin: `YaeShrineLedger.Edits`.
+    #: Bestseller counts it. C# twin: `YaeShrineLedger.Edits`.
     edits: int = 0
     #: Reprint (review r3): the cards (by `id`) already played this fight,
     #: so their stacked Reprints are inert for the rest of it.
@@ -320,6 +351,12 @@ class YaeLedger:
     #: turn" has been played; Hold the Presses' "Retain your hand this turn".
     priority_used: bool = False
     retain_hand: bool = False
+    #: The refill (2026-10-16): cards Edited this turn (Publisher's
+    #: Deadline), cleared at her turn start; and the last enemy one of her
+    #: Attack cards hit (Hunting Gaze). C# twins: `EditsThisTurn`,
+    #: `LastAttacked`.
+    edits_this_turn: int = 0
+    last_attacked: object = None
 
 
 # --------------------------------------------------------------------------
@@ -366,6 +403,7 @@ def _note_edits(state, n: int) -> None:
     if n <= 0:
         return
     ledger(state.player).edits += n
+    ledger(state.player).edits_this_turn += n
     _block(state, _power(state.player, SERIALIZATION) * n, "serialization")
 
 
@@ -403,7 +441,7 @@ def plant(state, n: int = 1, reason: str = "plant",
           annotation: Optional[str] = None,
           kind: str = THUNDER, lasts: int = 0) -> None:
     """Plant `n` Sakura of `kind`, one at a time, each at the card's Level
-    (`level`, Grafted Branch; else `PLANT_LEVEL`) plus Fox's Mooncall's
+    (`level`, Guardian of Narukami; else `PLANT_LEVEL`) plus Fox's Mooncall's
     bonus. FULL SHRINE (review r3, amended): the OLDEST acts first; if it is
     the same kind it refreshes (to at least 3) and gains 1 Level and none is
     added; if not, it withers and the new Sakura takes its place, as the
@@ -519,11 +557,17 @@ def strike_damage(state, s: Sakura, target) -> int:
 
 
 def _aim(state, aim=None):
+    """The aim, else the Lure, else (Hunting Gaze, the refill) the last
+    enemy her Attack cards hit while it lives, else random."""
     if aim is not None and aim.alive:
         return aim
     led = ledger(state.player)
     if led.lure is not None and led.lure.alive:
         return led.lure
+    if (_power(state.player, HUNTING_GAZE) > 0
+            and led.last_attacked is not None and led.last_attacked.alive):
+        state.emit("yae_hunting_gaze", target=led.last_attacked.name)
+        return led.last_attacked
     living = list(state.living_enemies)
     return state.rng.choice(living) if living else None
 
@@ -688,20 +732,56 @@ def grove(state, n: int) -> None:
                    levels=[s.level for s in led.sakura])
 
 
-def wither_oldest(state, reason: str = "fallen_petals") -> bool:
+def wither_oldest(state, reason: str = "fallen_petals", aim=None) -> bool:
     """Fallen Petals (review r3): the oldest Sakura acts once (its Last
-    Bloom) and withers, Deadline Extension or not. Whether one did."""
+    Bloom) and withers, Deadline Extension or not. Whether one did.
+    Falling Blossom (the refill): its Last Bloom strikes `aim`, one hit
+    whatever the kind, as an aimed strike is."""
+    return _wither_end(state, oldest=True, reason=reason, aim=aim)
+
+
+def wither_newest(state, reason: str = "hide_behind_the_shrine") -> bool:
+    """Hide Behind the Shrine (the refill): the newest Sakura acts once
+    (its Last Bloom) and withers. Whether one did."""
+    return _wither_end(state, oldest=False, reason=reason)
+
+
+def _wither_end(state, oldest: bool, reason: str, aim=None) -> bool:
     led = ledger(state.player)
     if led is None or not led.sakura:
         return False
-    oldest = led.sakura[0]
-    act(state, oldest, "bloom")
-    if oldest in led.sakura:
-        led.sakura.remove(oldest)
+    s = led.sakura[0] if oldest else led.sakura[-1]
+    act(state, s, "bloom", aim=aim)
+    if s in led.sakura:
+        led.sakura.remove(s)
     state.emit("yae_wither", count=1, standing=len(led.sakura),
                reason=reason)
     _withered(state, 1)
     return True
+
+
+def note_attacked(state, enemy, source: str) -> None:
+    """HUNTING GAZE's memory (the refill): a hit of one of her Attack cards
+    (`source == "attack"`) names the last enemy she attacked.
+    `effects.deal_damage_to_enemy`'s hook; a no-op for anyone not Yae. C#
+    twin: `YaeShrine.NoteAttacked`."""
+    if source != "attack":
+        return
+    led = ledger(state.player)
+    if led is not None:
+        led.last_attacked = enemy
+
+
+def barrage_hits(n_sakura: int) -> int:
+    """Kitsune Barrage: 2 hits, 3 with 3 or more Sakura. C# twin:
+    `YaeLaw.BarrageHitCount`."""
+    return BARRAGE_FULL_HITS if n_sakura >= BARRAGE_SAKURA else BARRAGE_HITS
+
+
+def annotations_on_card(card) -> int:
+    """Inscribed Thunder: the DISTINCT Annotations on the card, Published
+    ones included. C# twin: `YaeEditing.DistinctLayers`."""
+    return len(set(layers(card))) if card is not None else 0
 
 
 def _withered(state, n: int) -> None:
@@ -818,6 +898,7 @@ def turn_start(state) -> None:
     led.lure = None
     led.priority_used = False
     led.retain_hand = False
+    led.edits_this_turn = 0
     for _ in range(_power(state.player, SERIAL_NOVEL)):
         cands = [c for c in state.player.discard_pile if is_annotated(c)]
         if not cands or len(state.player.hand) >= _max_hand():
@@ -1028,7 +1109,8 @@ BLOCK_KINDS = frozenset({"block_per_sakura", "block_per_edit"})
 
 def gives_block(card) -> bool:
     """Nimble's door (the game's `GainsBlock`), or a `yae` kind that gives
-    the card's own Block, which Red Ink rides too (no row since Print Run
+    the card's own Block, which Red Ink rides too (Hide Behind the Shrine's
+    `wither_newest_block`, the refill; block_per_edit no row since Print Run
     took the calculated rail, 2026-10-15)."""
     from tier0.content import enchantments          # late: cycle
     return enchantments._gains_block(card) or any(
@@ -1414,12 +1496,14 @@ def validate_op(card_id: str, fx: dict) -> None:
         raise ValueError(f"card {card_id!r}: `which:` is newest, oldest or "
                          "every, "
                          f"got {fx['which']!r}")
-    if "lasts" in fx and (kind != "plant_level"
+    if "lasts" in fx and (kind not in LASTS_KINDS
                           or not isinstance(fx["lasts"], int)
                           or isinstance(fx["lasts"], bool)
                           or fx["lasts"] <= 0):
         raise ValueError(f"card {card_id!r}: `lasts:` is a positive int, on "
-                         "a plant_level")
+                         "a plant_level or a bless_highest")
+    if kind == "bless_highest" and "lasts" not in fx:
+        raise ValueError(f"card {card_id!r}: bless_highest needs `lasts:`")
     if "hand_if_upgraded" in fx and (kind != "edit_sakura"
                                      or fx["hand_if_upgraded"] is not True):
         raise ValueError(f"card {card_id!r}: `hand_if_upgraded:` is true, "
@@ -1429,9 +1513,10 @@ def validate_op(card_id: str, fx: dict) -> None:
                          "Sakura reading")
 
 
-def _card_hit(state, card, amount: int, target=None) -> None:
+def _card_hit(state, card, amount: int, target=None, hits: int = 1) -> None:
     """One powered Electro hit of the card on the play's aim, or on
-    `target` (Daisesshou's ALL, one hit each)."""
+    `target` (Daisesshou's ALL, one hit each); `hits` of them (Kitsune
+    Barrage)."""
     from tier0.engine import effects                # late: cycle
     targets = ([target] if target is not None
                else effects._pick_targets(state, "enemy"))
@@ -1440,8 +1525,11 @@ def _card_hit(state, card, amount: int, target=None) -> None:
     if card.type == "attack":
         amount += state.current_attack_bonus + card.enchant_damage
     source = "attack" if card.type == "attack" else "card"
-    effects.deal_damage_to_enemy(state, targets[0], amount, element=ELEMENT,
-                                 source=source)
+    for _ in range(max(0, hits)):
+        if not targets[0].alive:
+            return
+        effects.deal_damage_to_enemy(state, targets[0], amount,
+                                     element=ELEMENT, source=source)
 
 
 def _card_block(state, card, amount: int) -> None:
@@ -1578,6 +1666,42 @@ def op_yae(state, fx: dict, card) -> None:
             p.discard_pile.remove(c)
             p.hand.append(c)
             state.emit("yae_afterword", card=c.id)
+    # --- the refill (ruled 2026-10-16) ---
+    elif kind == "barrage":
+        _card_hit(state, card, fx["amount"],
+                  hits=barrage_hits(len(led.sakura)))
+    elif kind == "level_strike":
+        high = any(s.level >= FANG_LEVEL for s in led.sakura)
+        _card_hit(state, card, fx["base"] + (fx["amount"] if high else 0))
+    elif kind == "wither_oldest_at":
+        targets = effects._pick_targets(state, "enemy")
+        wither_oldest(state, "falling_blossom",
+                      aim=targets[0] if targets else None)
+    elif kind == "wither_newest_block":
+        if wither_newest(state):
+            _card_block(state, card, fx["amount"])
+    elif kind == "rewrite":
+        # "Discard up to N cards, then draw that many": the pilot's chosen
+        # discard (`effects._op_discard`, Sly and all), then the Edit.
+        before = state.discards_this_card
+        effects._op_discard(state, {"op": "discard", "amount": fx["amount"],
+                                    "select": "chosen"}, card)
+        n = state.discards_this_card - before
+        if n > 0:
+            state.draw(n)
+        edit(state, card, fx["annotation"], 1)
+    elif kind == "level_newest":
+        if led.sakura:
+            led.sakura[-1].level += fx["amount"]
+            state.emit("yae_level", reason="dawn_prayer",
+                       levels=[s.level for s in led.sakura])
+    elif kind == "bless_highest":
+        s = highest(led)
+        if s is not None:
+            s.level += fx["amount"]
+            s.turns_left += int(fx.get("lasts", 0))
+            state.emit("yae_level", reason="kitsunes_blessing",
+                       levels=[x.level for x in led.sakura])
     else:
         _refuse(f"yae kind {kind!r}")
 

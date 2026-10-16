@@ -65,7 +65,7 @@ def test_every_hand_edit_screen_applies_exactly_one_annotation():
     ("ProtoYmProofread", "Reprint", "false"),
     ("ProtoYmMarginNote", "RedInk", "false"),
     ("ProtoYmFootnote", "Footnote", "false"),
-    ("ProtoYmDeadline", "DeadlineExtension", "false"),
+    ("ProtoYmCliffhanger", "DeadlineExtension", "false"),
     ("ProtoYmSakuraSeal", "SakuraSeal", "false"),
     ("ProtoYmRoyalties", "Royalties", "false"),
     ("ProtoYmInkedBranches", "RedInk", "true"),

@@ -91,4 +91,25 @@ public static class YaeLaw
     /// <summary>Royalties: this much Energy when the card is played.
     /// </summary>
     public const int RoyaltiesPayout = 1;
+
+    /// <summary>Kitsune Barrage (the refill,
+    /// <c>review/active/yae-refill-2026-10-16.md</c>): "Deal 4 [5] Electro
+    /// damage twice. If you have 3 or more Sakura, deal it 3 times."</summary>
+    public const int BarrageHits = 2;
+
+    /// <summary>Kitsune Barrage's hits with a full shrine.</summary>
+    public const int BarrageFullHits = 3;
+
+    /// <summary>The Sakura standing Kitsune Barrage reads for its third
+    /// hit.</summary>
+    public const int BarrageSakura = 3;
+
+    /// <summary>Sesshou Fang (the refill): "If a Sakura is Level 3 or
+    /// higher, deal 6 [8] more."</summary>
+    public const int FangLevel = 3;
+
+    /// <summary>Kitsune Barrage's hit count for <paramref name="standing"/>
+    /// Sakura. PURE.</summary>
+    public static int BarrageHitCount(int standing) =>
+        standing >= BarrageSakura ? BarrageFullHits : BarrageHits;
 }

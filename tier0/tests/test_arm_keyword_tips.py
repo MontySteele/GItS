@@ -551,8 +551,10 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # unless Repaid. One sentence since the 2026-10-11 playtest.
             "Lose N HP. Each combat, the first 1/4 of your Max HP drained returns ",
             "after combat; more than that only [gold]Repay[/gold] returns.",
-            # The pool to 75 (2026-10-09): the guest rule's words.
-            "Regain that much drained HP, never more than you drained. A ",
+            # The pool to 75 (2026-10-09): the guest rule's words; the Block
+            # floor's one line since furina-next paper 3 (2026-10-16).
+            "Regain that much drained HP; a Repay counts the HP it returns. ",
+            "Any HP a Repay cannot return becomes [gold]Block[/gold].",
             "A guest joins at the back. On a full stage, the oldest guest ",
             "Exhausts. Acts at the end of your turn. When it leaves, this ",
     ):
@@ -928,7 +930,10 @@ CONJUGATIONS = {"Exhausted": "Exhaust",
                 # YAE MIKO (2026-10-13): the Edit row carries Edited,
                 # Annotated and Publish. Tenko and each Annotation are rows
                 # of their own since 2026-10-14.
-                "Edited": "Edit", "Annotated": "Edit", "Publish": "Edit"}
+                "Edited": "Edit", "Annotated": "Edit", "Publish": "Edit",
+                # The Yae refill (2026-10-16): Inscribed Thunder's "for each
+                # Annotation on this card".
+                "Annotation": "Edit"}
 
 
 def _word_owner(word: str) -> str:
@@ -1306,7 +1311,7 @@ def test_the_page_glossary_says_what_the_summon_and_performer_tips_say():
         "goes to your Discard Pile.")
     assert rows["Charlotte"] == (
         "The first time each turn one of your cards Repays, draw 1 card. "
-        "Act: Repay 3. Gain 1 Block for any HP it could not Repay.")
+        "Act: Repay 3.")
     for gone in ("Bow", "Gentilhomme Usher", "Surintendante Chevalmarin",
                  "Mademoiselle Crabaletta", "Ousia", "Pneuma"):
         assert gone not in rows, gone

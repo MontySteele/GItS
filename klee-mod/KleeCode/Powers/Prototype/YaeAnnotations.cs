@@ -697,6 +697,17 @@ public static class YaeEditing
     /// included." PURE.</summary>
     public static bool IsAnnotated(CardModel? card) => Layers(card).Count > 0;
 
+    /// <summary>Inscribed Thunder (the refill): the DISTINCT Annotations on
+    /// <paramref name="card"/>, Published ones included (two Red Ink layers
+    /// count once). Sim twin: the `annotations_on_card` runtime count.
+    /// </summary>
+    public static int DistinctLayers(CardModel? card) => DistinctCount(Layers(card));
+
+    /// <summary>The distinct Annotations among <paramref name="layers"/>.
+    /// PURE.</summary>
+    public static int DistinctCount(IEnumerable<YaeAnnotation> layers) =>
+        layers.Where(a => a != YaeAnnotation.None).Distinct().Count();
+
     /// <summary>Does the card carry a Published layer? PURE.</summary>
     public static bool Published(CardModel? card) => Stack(card).Count > 0;
 

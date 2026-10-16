@@ -422,10 +422,12 @@ NOTHING_TO_PUBLISH_NOTE = (
 
 # Yae review r6, item 5. Three seats could not tell which enemy a Sakura
 # strikes. The mod's rule (`YaeShrine.Aim`) in one sentence, word for word
-# the seat hover's (`ArmKeywordTips.YaeSakuraTargetRule`).
+# the seat hover's (`ArmKeywordTips.YaeSakuraTargetRule`); Hunting Gaze
+# joined it with the refill (2026-10-16).
 SAKURA_TARGET_RULE = (
     "A Sakura strikes Kitsune Pounce's target when Pounce makes it strike, "
-    "else the enemy Foxfire Lure marked this turn, else a random enemy.")
+    "else the enemy Foxfire Lure marked this turn, else (with Hunting Gaze) "
+    "the last enemy your Attacks hit, else a random enemy.")
 
 # `EB-393`, the decline half. A ROOM WITH NO WAY OUT BUT THROUGH.
 #
@@ -1837,9 +1839,10 @@ ARM_KEYWORDS: dict[str, str] = {
               "drained returns after combat; more than that only Repay "
               "returns."),
     # THE POOL TO 75 (2026-10-09): a Repay counts the HP it returns; a
-    # Guest Star exhausts and comes back when its guest leaves.
-    "Repay": ("Regain that much drained HP, never more than you drained. A "
-              "Repay counts the HP it returns."),
+    # Guest Star exhausts and comes back when its guest leaves. furina-next
+    # paper 3 (2026-10-16): the Block floor is the rule's one line.
+    "Repay": ("Regain that much drained HP; a Repay counts the HP it "
+              "returns. Any HP a Repay cannot return becomes Block."),
     # THE SWEEP (2026-10-14): Ousia / Pneuma's word, `ArmKeywordTips.ForFlip`.
     "Flip": "Turn this card to its other face; it starts each combat on Ousia.",
     "Summon": ("A guest joins at the back. On a full stage, the oldest guest "
@@ -1850,8 +1853,7 @@ ARM_KEYWORDS: dict[str, str] = {
     "oldest guest": ("The guest on stage longest: the one a fourth summon "
                      "would remove."),
     "Charlotte": ("The first time each turn one of your cards Repays, draw 1 "
-                  "card. Act: Repay 3. Gain 1 Block for any HP it could not "
-                  "Repay."),
+                  "card. Act: Repay 3."),
     "Wriothesley": ("Whenever you Drain, deal that much Cryo damage to a random "
                     "enemy. Act: deal 5 Cryo damage to a random enemy."),
     "Lynette": ("The first time each turn you lose HP to an enemy, gain "

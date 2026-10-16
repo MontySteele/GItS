@@ -148,15 +148,17 @@ public class YaePoolTo78Tests : IDisposable
     }
 
     [Fact]
-    public void Grafted_branch_is_level_3_and_lasts_one_more_turn()
+    public void A_plant_at_a_level_keeps_it_and_lasts_adds_turns()
     {
+        // Grafted Branch's rule (cut by the dedupe, 2026-10-16); Guardian of
+        // Narukami still plants at Level 3.
         var ledger = Fresh();
         Assert.True(ledger.Plant(YaeLaw.PlantLevel, 3, extraTurns: 1));
         Assert.Equal((3, YaeLaw.SakuraTurns + 1),
                      (ledger.Standing[0].Level, ledger.Standing[0].TurnsLeft));
-        var card = new ProtoYmGraftedBranch();
+        var card = new ProtoYmGuardianOfNarukami();
         Assert.Equal(3, (int)card.DynamicVars["YmAmount"].BaseValue);
-        Assert.Contains(Il.CallSequence(typeof(ProtoYmGraftedBranch).GetMethod("OnPlay",
+        Assert.Contains(Il.CallSequence(typeof(ProtoYmGuardianOfNarukami).GetMethod("OnPlay",
                             System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic)!),
                         c => c.Contains(nameof(YaeCards.PlantLevel)));
     }

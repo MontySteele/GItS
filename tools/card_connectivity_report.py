@@ -1216,6 +1216,10 @@ CARD_FIELD_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "cost_reduction_per_swirl_this_turn": [
         _hook("shared", "aura_reaction", "read"),
         _hook("shared", "card_identity", "write")],
+    # Publisher's Deadline's discount reads her Edits this turn.
+    "cost_reduction_if_edited_this_turn": [
+        _hook("shared", "card_timing", "read"),
+        _hook("shared", "card_identity", "write")],
     # v4. A `plan:` line WRITES the Plan queue (filed on `kurage`); its
     # effects are walked by `classify_row` like `effects:`.
     "plan": [_hook("private", "kurage", "write")],

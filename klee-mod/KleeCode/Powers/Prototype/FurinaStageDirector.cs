@@ -142,16 +142,20 @@ public enum StageSummonResult
 /// <summary>
 /// THE REPAY FLOOR (ruled 2026-10-09): "Repay N. Gain X for any HP it could
 /// not Repay." What a Repay pays for the part of N it could not return.
-/// The damage cards' floor (Surging Waters, Hydro Lance, Cleansing Torrent)
-/// is their own damage, read off
-/// <see cref="FurinaStageLedger.RepayLeftThisPlay"/>, so it is not here.
+/// furina-next paper 3 (ruled 2026-10-16) makes Block every numbered
+/// Repay's floor: "Any HP a Repay cannot return becomes Block." A card that
+/// prints another floor keeps it: Cleansing Torrent's is its own damage,
+/// read off <see cref="FurinaStageLedger.RepayLeftThisPlay"/>, so it Repays
+/// with <see cref="None"/>. "Repay all" has no number and no floor.
 /// </summary>
 public enum StageFloor
 {
-    /// <summary>No floor: a plain Repay.</summary>
+    /// <summary>No floor: "Repay all", or a card whose floor is its own
+    /// damage (Cleansing Torrent).</summary>
     None,
 
-    /// <summary>"Gain 1 Block for any HP it could not Repay."</summary>
+    /// <summary>The rule's floor (paper 3): 1 Block for each HP it could
+    /// not return, 2 with Fontaine Teardrop.</summary>
     Block,
 
     /// <summary>"Gain 1 Vigor for any HP it could not Repay."</summary>
@@ -507,9 +511,6 @@ public sealed class StageDirector
     /// </summary>
     public async Task<int> Repay(int amount)
     {
-        // Fontaine Teardrop reads the Repay against what she had drained
-        // before it (Furina's card pass, 2026-10-15).
-        var drained = _stage.Drained;
         var room = _stage.RepayRoom(amount, _board.Hp, _board.MaxHp);
         var back = room > 0 && !_board.Over ? await _board.Heal(room) : 0;
         if (back > 0)
@@ -556,28 +557,26 @@ public sealed class StageDirector
                 await _board.Strength(hymn);
             }
         }
-        await Teardrop(amount - drained);
         return back;
     }
 
-    /// <summary>Fontaine Teardrop (Furina's card pass, 2026-10-15):
-    /// "Whenever you Repay more than you have drained, gain the rest as
-    /// Block." Any Repay -- a card's, a guest's, Salon Solitaire's; a
-    /// printed "Gain 1 Block for any HP it could not Repay" pays beside it.
-    /// <paramref name="rest"/> is the Repay less what she had drained.
-    /// Copies add.</summary>
-    private async Task Teardrop(int rest)
-    {
-        var copies = _stage.Mods.FontaineTeardrop;
-        if (copies <= 0 || rest <= 0 || _board.Over) return;
-        _board.FlashRelic(typeof(Relics.FontaineTeardrop));
-        await _board.Block(rest * copies);
-    }
+    /// <summary>The Block floor's Block for <paramref name="left"/> HP a
+    /// Repay could not return: 1 each, and Fontaine Teardrop (paper 3,
+    /// ruled 2026-10-16): "An unreturned Repay gains 2 Block for each HP
+    /// instead of 1." Each copy adds 1 more. Sim twin:
+    /// <c>furina_tide.floor_block</c>.</summary>
+    public static int FloorBlock(int left, int teardrops) =>
+        left <= 0 ? 0 : left * (1 + System.Math.Max(0, teardrops));
 
     /// <summary>
-    /// THE REPAY FLOOR (ruled 2026-10-09): "Repay N. Gain X for any HP it
-    /// could not Repay." The Repay resolves first; the leftover, N minus the
-    /// HP it returned, is paid as Block or Vigor. Returns HP repaid.
+    /// THE REPAY FLOOR (ruled 2026-10-09; every numbered Repay's since
+    /// furina-next paper 3, 2026-10-16): "Any HP a Repay cannot return
+    /// becomes Block." The Repay resolves first; the leftover, N minus the
+    /// HP it returned, is paid as Block (<see cref="FloorBlock"/>) or Vigor.
+    /// The Block is not HP: the Repay readers (Universal Revelry, Critics'
+    /// Darling, Clorinde, Sigewinne) read only the HP returned. One floor
+    /// per Repay, so a guest's act or Grand Entrance never pays twice.
+    /// Returns HP repaid.
     /// </summary>
     public async Task<int> RepayFloor(int amount, StageFloor floor)
     {
@@ -588,7 +587,12 @@ public sealed class StageDirector
         switch (floor)
         {
             case StageFloor.Block:
-                await _board.Block(left);
+                var teardrops = _stage.Mods.FontaineTeardrop;
+                if (teardrops > 0)
+                {
+                    _board.FlashRelic(typeof(Relics.FontaineTeardrop));
+                }
+                await _board.Block(FloorBlock(left, teardrops));
                 break;
             case StageFloor.Vigor:
                 await _board.Vigor(left);
@@ -598,7 +602,8 @@ public sealed class StageDirector
     }
 
     /// <summary>Fountain of Lucine: at the start of her turn, each play still
-    /// owed Repays its amount, one Repay per play (no floor, 2026-10-13).
+    /// owed Repays its amount, one Repay per play, with the Block floor
+    /// (paper 3, 2026-10-16; it had none since 2026-10-13).
     /// </summary>
     public async Task<int> TurnStartRepays()
     {
@@ -606,12 +611,13 @@ public sealed class StageDirector
         foreach (var amount in _stage.TakeDueRepays())
         {
             if (_board.Over) break;
-            total += await Repay(amount);
+            total += await RepayFloor(amount, StageFloor.Block);
         }
         return total;
     }
 
-    /// <summary>Singer of Many Waters: "Repay all your drained HP."</summary>
+    /// <summary>Singer of Many Waters: "Repay all your drained HP." No
+    /// number, so no floor (paper 3): all of nothing is nothing.</summary>
     public Task<int> RepayAll() => Repay(_stage.Drained);
 
     /// <summary>THE CURTAIN CALL (sec.16; the Drain line rule, 2026-10-09):
@@ -789,12 +795,16 @@ public sealed class StageDirector
         {
             case StagePerformer.Charlotte:
             case StagePerformer.Sigewinne:
-                // "Repay 2. Gain 1 Block for any HP it could not Repay."
-                // (the Repay floor, 2026-10-09).
+                // "Repay 2." Its Block floor is the rule's (paper 3,
+                // 2026-10-16; the Repay floor since 2026-10-09), paid once.
                 moved = await RepayFloor(number, StageFloor.Block);
                 // Furina round 3 (2026-10-11): the log names the floor's
-                // Block, as the face does ("you Repay 0, +2 Block").
-                if (!_board.Over) floor = System.Math.Max(0, number - moved);
+                // Block, as the face does.
+                if (!_board.Over)
+                {
+                    floor = FloorBlock(System.Math.Max(0, number - moved),
+                                       _stage.Mods.FontaineTeardrop);
+                }
                 break;
             case StagePerformer.Wriothesley:
                 moved = number + await FullHouse() + EscoffierBonus();
@@ -1058,7 +1068,8 @@ public sealed class StageDirector
     /// The end of her turn (the pool to 75, sec.3): each guest acts, oldest
     /// first; then each Showstopper copy Spends 5 and the guests act again;
     /// then Salon Solitaire Repays <paramref name="singer"/> (0 without the
-    /// relic).
+    /// relic), with the Block floor (paper 3, 2026-10-16: "its 'Repay 1'
+    /// each turn end now gives 1 Block when nothing is drained").
     /// </summary>
     public async Task EndOfTurn(int singer)
     {
@@ -1076,7 +1087,10 @@ public sealed class StageDirector
                 await ActAll();
             }
         }
-        if (singer > 0 && !_board.Over) await Repay(singer);
+        if (singer > 0 && !_board.Over)
+        {
+            await RepayFloor(singer, StageFloor.Block);
+        }
         // Neuvillette's window (2026-10-09): what she loses from here on --
         // the enemies' turn first -- counts for his next act.
         _stage.CloseTurn();

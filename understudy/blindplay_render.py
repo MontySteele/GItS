@@ -2717,12 +2717,12 @@ STAGE_FORECAST_TWICE = ", twice"
 STAGE_FORECAST_TIMES = ", {n} times"
 STAGE_FORECAST_AFTER = "- After the acts: Fanfare {fanfare}."
 #: FURINA ROUND 3 (2026-10-11, review change 2): a Repay act names its floor
-#: as the card face does ("(Repays 0, +2 Block)",
-#: `FurinaStageBowPreview.Line`). A seat read Charlotte's act that gave 2
+#: as the card face does (`FurinaStageBowPreview.Line`; the floor first,
+#: "(Repay 0: gain 2 Block)", since furina-next paper 3, 2026-10-16). A seat read Charlotte's act that gave 2
 #: Block as "Repay 0". Printed only when the Repay returns less than its
 #: number; what it returns is read the face's way (`Room`): never more than
 #: she has drained, never past her Max HP, walked front to back.
-STAGE_FORECAST_REPAY_FLOOR = " (repays {back}, +{floor} Block)"
+STAGE_FORECAST_REPAY_FLOOR = " (Repay {back}: gain {floor} Block)"
 STAGE_LOG_REPAY_FLOOR = ", +{floor} Block"
 #: What one act of each kind does, as the forecast names it.
 STAGE_KIND_WORDS = {
@@ -3141,7 +3141,7 @@ SHRINE_LURE_LINE = "- Foxfire Lure: your Sakura strike **{name}** this turn."
 #: stands.
 SHRINE_TARGET_LINE = "- " + SAKURA_TARGET_RULE
 SHRINE_ANNOTATED_LINE = "- Annotated cards in your hand: {n}."
-#: Bestseller and Print Run's count (Yae review r5, pick 1 (a)), which no card
+#: Bestseller's count (Yae review r5, pick 1 (a)), which no card
 #: on the board shows (`YaeShrine.Snapshot`, via `player.yae_shrine`).
 SHRINE_EDITS_LINE = "- Cards Edited this combat: {n}."
 
@@ -3170,7 +3170,7 @@ def _render_shrine(shrine: dict[str, Any]) -> list[str]:
                                        SHRINE_KIND["thunder"])
         # Review r3, seat cleanup: where the Levels came from. The badge
         # names the Level it was planted at; the rest came since (Sakura
-        # Grove, Rooted Shrine, Mikage Thunder, a full-shrine plant).
+        # Grove, Narukami Ray, Mikage Thunder, a full-shrine plant).
         planted = row.get("planted")
         origin = ""
         if planted is not None:

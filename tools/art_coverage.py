@@ -636,19 +636,41 @@ KNOWN_MISSING = {
     # The Kokomi review r6's two Powers (2026-10-14) were painted in the
     # same PR, under "Kokomi review r6" in art/plan.tsv.
     # The Yae pool to 78's thirty-five (2026-10-15): 31 painted by the Yae
-    # art pass (2026-10-16, #1366); these four are the Yae dedupe's cut
-    # targets (review/active/yae-dedupe-2026-10-16.md), skipped by it.
-    "proto_ym_kitsune_flick": (
-        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    # art pass (2026-10-16, #1366); the other four were cut by the Yae
+    # dedupe (review/active/yae-dedupe-2026-10-16.md, 2026-10-16), whose
+    # refill's eleven cards follow.
+    "proto_ym_kitsune_barrage": (
+        "Yae refill (review/active/yae-refill-2026-10-16.md, built 2026-10-16): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it, from Inazuma sources only."
     ),
-    "proto_ym_sacred_spark": (
-        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    "proto_ym_sesshou_fang": (
+        "Yae refill (review/active/yae-refill-2026-10-16.md, built 2026-10-16): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it, from Inazuma sources only."
     ),
-    "proto_ym_shrine_lantern": (
-        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    "proto_ym_falling_blossom": (
+        "Yae refill (review/active/yae-refill-2026-10-16.md, built 2026-10-16): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it, from Inazuma sources only."
     ),
-    "proto_ym_omikuji": (
-        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    "proto_ym_publishers_deadline": (
+        "Yae refill (review/active/yae-refill-2026-10-16.md, built 2026-10-16): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it, from Inazuma sources only."
+    ),
+    "proto_ym_foxs_shade": (
+        "Yae refill (review/active/yae-refill-2026-10-16.md, built 2026-10-16): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it, from Inazuma sources only."
+    ),
+    "proto_ym_hide_behind_the_shrine": (
+        "Yae refill (review/active/yae-refill-2026-10-16.md, built 2026-10-16): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it, from Inazuma sources only."
+    ),
+    "proto_ym_rewrite": (
+        "Yae refill (review/active/yae-refill-2026-10-16.md, built 2026-10-16): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it, from Inazuma sources only."
+    ),
+    "proto_ym_dawn_prayer": (
+        "Yae refill (review/active/yae-refill-2026-10-16.md, built 2026-10-16): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it, from Inazuma sources only."
+    ),
+    "proto_ym_hunting_gaze": (
+        "Yae refill (review/active/yae-refill-2026-10-16.md, built 2026-10-16): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it, from Inazuma sources only."
+    ),
+    "proto_ym_inscribed_thunder": (
+        "Yae refill (review/active/yae-refill-2026-10-16.md, built 2026-10-16): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it, from Inazuma sources only."
+    ),
+    "proto_ym_kitsunes_blessing": (
+        "Yae refill (review/active/yae-refill-2026-10-16.md, built 2026-10-16): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it, from Inazuma sources only."
     ),
 }
 

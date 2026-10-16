@@ -92,7 +92,7 @@ def test_a_later_edit_replaces_the_temporary_slot_never_the_stack():
     pub = _published(loader.get_card("strike"))
     st.player.hand.append(pub)
     _play(st, _card("footnote"))
-    _play(st, _card("deadline"))
+    _play(st, _card("cliffhanger"))
     assert Y.stack(pub) == [Y.RED_INK] and Y.temp(pub) == Y.DEADLINE
 
 

@@ -9292,6 +9292,63 @@ Flourish's fixed cost unchanged); sim twin (`furina_tide.spend_up_to_card`)
 in `tier0/tests/test_furina_extended_run.py`. Untested in game until a
 `+next` deploy.
 
+## The Repay floor, furina-next paper 3, 2026-10-16
+
+`review/active/furina-next-3-2026-10-16.md` sec.2 as amended, picks 1 (a)
+and 2 (a). [USER]: "Overall I agree with the paper, but as per usual with
+Furina, I'd like to sanity check that we don't turn any of her cards into
+overly-verbose Yugioh cards. Agreed on both counts, but let's also ask that
+the agent scan the modified cars and make sure that the relevant text and
+tooltips are clear and concise." Built on `furina-next`; it reaches `main`
+in a promotion PR with suite 4's record.
+
+**The rule.** A Repay with a number that cannot return all its HP gains 1
+Block for each HP it could not return (`StageDirector.RepayFloor` with
+`StageFloor.Block`, now `FurinaStage.Repay`'s default; sim
+`furina_tide.repay_floor`, `card_repay`'s default). The Repay tip carries it
+as one line: "Any HP a Repay cannot return becomes Block."
+
+| id | was | now |
+|---|---|---|
+| `proto_fs_pneuma_refrain` (Uncommon Skill, 1) | Repay 5 [7]. Draw 2 cards. | Repay 4 [6]. Draw 2 cards. |
+| `proto_fs_rising_tide` (Endless Waltz, Uncommon Attack, 1) | Deal 6 damage, plus 3 [4] for each time you Repaid this turn. | Repay 2. Deal 6 damage, plus 3 [4] for each time you Repaid this turn. |
+| `proto_fs_hymn_of_many_waters` (Common Skill, 1) | Gain 6 [8] Block. Repay 3 [4]. Gain 1 Block for any HP it could not Repay. | Gain 6 [8] Block. Repay 3 [4]. |
+| `proto_fs_grand_entrance` (Uncommon Power, 1) | Whenever you play a Guest Star, Repay 4 [6]. Gain 1 Block for any HP it could not Repay. | Whenever you play a Guest Star, Repay 4 [6]. |
+| Fontaine Teardrop (Uncommon relic) | Whenever you Repay more than you have drained, gain the rest as Block. | An unreturned Repay gains 2 Block for each HP instead of 1. |
+
+- **Newly covered, text unchanged:** Clean Slate, Ebb and Flow, Fountain of
+  Lucine's next-turn Repay, Coup de Théâtre's kill Repay, Ousia / Pneuma's
+  Pneuma face, Endless Waltz, and Salon Solitaire's turn-end Repay 1 (The
+  Curtain Never Falls' 2). A won combat pays no floor (the director stops on
+  `Over`), so a kill Repay that ends the fight gives no Block.
+- **Applied once:** Hymn of Many Waters, Grand Entrance, Charlotte and
+  Sigewinne were already `StageFloor.Block`; the rule adds none. Charlotte's
+  and Sigewinne's act tips drop the same clause (the build condition: no
+  clause the rule covers).
+- **Its own floor:** Cleansing Torrent's row says `floor: none` (its damage
+  reads `stage_repay_left`); the generator refuses a damage-floor Repay
+  without it. "Repay all" (Singer of Many Waters, Grand Absolution, Water of
+  Lucine) has no floor. Pneuma Tides' Vigor floor is unchanged code; no row
+  prints it.
+- **Fontaine Teardrop** is paid inside the Block floor
+  (`StageDirector.FloorBlock`: 1 + copies a HP), so it reaches every Block
+  floor and nothing else: it no longer pays beside Cleansing Torrent's
+  damage, which it did. Each extra copy adds 1 more a HP (a reading; the
+  paper names one copy). The sim models none of her relics.
+- **Endless Waltz** keeps its count, Repays that returned HP this turn; its
+  in-combat damage line reads its own Repay before the play
+  (`FurinaStage.RepaysThisTurnWith`).
+- **The readers** (Universal Revelry, Critics' Darling, Clorinde,
+  Sigewinne's line) read the HP returned; the Block is not HP.
+- **The preview** leads with the floor: "(Repay 0: gain 3 Block)", "(Repay
+  1: gain 2 Block)", "(Repay 0: +4 damage)" for Cleansing Torrent; a full
+  return still reads "(Repays 3)". With Fontaine Teardrop the face shows the
+  doubled Block. The seat page's guest forecast reads the same way.
+
+Pins: `klee-mod/KleeTests/Prototype/FurinaNextThreeRepayFloorTests.cs` and
+`tier0/tests/test_furina_next_3_repay_floor.py`. Untested in game until a
+`+next` deploy.
+
 ## Yae: the pool to 78 (2026-10-15)
 
 `review/active/yae-pool-to-78-2026-10-15.md`, ruled 2026-10-15, all picks
@@ -9331,3 +9388,43 @@ Levels higher).
 - **Renamed on build.** The paper's "Enlightened Blessing" Power ships as
   Scattered Blossoms (coordinator, on #1347): her starter relic's Orobas
   upgrade already carries the name. The id stays `proto_ym_enlightened_blessing`.
+
+## Yae: the dedupe and the refill (2026-10-16)
+
+`review/active/yae-dedupe-2026-10-16.md` and
+`review/active/yae-refill-2026-10-16.md`, ruled 2026-10-16 ([USER]: "Agreed
+on the Yae paper picks!"), built together. The pool stays 78 at 20 / 38 / 20
+(29 Attacks, 34 Skills, 15 Powers).
+
+- **Cut (dedupe pick 1 (a)).** Kitsune Flick, Shrine Lantern, Grafted
+  Branch, Shrine Bell, Shrine Offering, Deadline, Sacred Spark, Kitsune Flash
+  (Commons); Print Run, Rooted Shrine, Omikuji (Uncommons). Their rows,
+  generated classes, art plan rows and blank-portrait entries go. The rules
+  they used stay, with no row (`extend`, `annotated_strike`,
+  `strike_target`, a plant_level's `lasts`), as `damage_per_edit` did.
+- **Added (dedupe pick 2 (a)).** Kitsune Barrage, Sesshou Fang, Falling
+  Blossom, Publisher's Deadline, Fox's Shade, Hide Behind the Shrine,
+  Rewrite, Dawn Prayer (Commons); Hunting Gaze, Inscribed Thunder, Kitsune's
+  Blessing (Uncommons), at the refill paper's numbers and upgrades. They
+  draw blank portraits until her art pass (`tools/art_coverage.py`).
+- **Rules added.** Seven `yae` kinds (`barrage`, `level_strike`,
+  `wither_oldest_at`, `wither_newest_block`, `rewrite`, `level_newest`,
+  `bless_highest`), the Hunting Gaze power, the predicate `any_enemy_weak`,
+  the count `annotations_on_card`, and the card field
+  `cost_reduction_if_edited_this_turn`. The ledger keeps Edits this turn
+  (cleared at her turn start) and the last enemy one of her Attack cards
+  hit (kept with or without Hunting Gaze). The seat's Sakura target sentence
+  names Hunting Gaze.
+- **Builder's readings** (named in the PR): Falling Blossom's Last Bloom at a
+  target its own hit killed acts as usual (random, or a Foxfire's ALL);
+  Hunting Gaze yields to the Lure and an aimed strike, its "attacked" is the
+  last enemy any hit of her Attack card landed on (an AoE's last body), and
+  Fox Fire's 4 damage is not a Sakura strike, so stays random; Kitsune's
+  Blessing breaks a Level tie by the oldest (Editor-in-Chief's reading);
+  Sesshou Fang's bonus is one hit with the base, as Kitsune Flash's was;
+  Kitsune Barrage is one attack of 2 or 3 hits; Hide Behind the Shrine's 5
+  more is the card's own Block (Dexterity applies); Rewrite discards 0 to N
+  chosen cards (the base game's Gambler's Brew chooser) and then Edits, so
+  the Edit can reach a card it drew; Inscribed Thunder's Annotations are
+  distinct ones, Published included; Dawn Prayer and Kitsune's Blessing do
+  nothing with no Sakura.

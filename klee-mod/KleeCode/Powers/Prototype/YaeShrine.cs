@@ -169,10 +169,24 @@ public sealed class YaeShrineLedger
     /// <summary>Cards Edited this combat: each card in hand an Edit,
     /// Reborn as Guuji Yae or Inked Branches+ Annotated, and each Sakura an
     /// "Edit your ... Sakura" card Annotated (Inked Branches counts every
-    /// one). A Publish is not an Edit. Bestseller and Print Run count it
+    /// one). A Publish is not an Edit. Bestseller counts it
     /// (Yae review r5, pick 1 (a), ruled 2026-10-15). Per combat, as the
     /// whole ledger is: never saved, a new combat starts it at 0.</summary>
     public int Edits { get; private set; }
+
+    /// <summary>Cards Edited THIS TURN, counted as <see cref="Edits"/> is
+    /// (the refill: Publisher's Deadline's "Costs 1 less if you Edited a
+    /// card this turn"). Cleared at her turn start
+    /// (<see cref="YaeShrine.TurnStart"/>). Sim twin:
+    /// <c>yae_shrine.YaeLedger.edits_this_turn</c>.</summary>
+    public int EditsThisTurn { get; internal set; }
+
+    /// <summary>HUNTING GAZE (the refill): the last enemy hit by one of her
+    /// Attack cards this combat, or null (<see cref="YaeShrine.NoteAttacked"/>).
+    /// Kept whether or not she has the power, so a Gaze played late still
+    /// knows whom she attacked. Sim twin: <c>yae_shrine.YaeLedger.last_attacked</c>.
+    /// </summary>
+    public Creature? LastAttacked { get; set; }
 
     /// <summary>
     /// PLANT ONE: a new Sakura of <paramref name="kind"/> at
@@ -184,7 +198,7 @@ public sealed class YaeShrineLedger
 
     /// <summary>
     /// Plant one, starting at <paramref name="startLevel"/> where a card
-    /// says so (Grafted Branch), raised as every plant is by Fox's Mooncall
+    /// says so (Guardian of Narukami), raised as every plant is by Fox's Mooncall
     /// (its bonus is <paramref name="plantLevel"/> over
     /// <see cref="YaeLaw.PlantLevel"/>); never below the plant Level.
     /// <paramref name="inherited"/>: the Annotation each NEW Sakura carries
@@ -226,7 +240,7 @@ public sealed class YaeShrineLedger
             Kind = kind,
             Level = plantLevel,
             PlantedLevel = plantLevel,
-            // Grafted Branch (the pool to 78): "and lasts 1 more turn".
+            // "and lasts 1 more turn" (Grafted Branch's, cut 2026-10-16).
             TurnsLeft = YaeLaw.SakuraTurns + Math.Max(0, extraTurns),
             Seq = Seq,
         };
@@ -300,7 +314,7 @@ public sealed class YaeShrineLedger
     /// from that end) or "Edit every Sakura". THE POOL TO 78, pick 2 (a): the
     /// Annotation joins what each carries; on one that already carries it,
     /// it changes nothing, and AN EDIT THAT CHANGES NOTHING IS NOT AN EDIT
-    /// (Bestseller, Print Run and Serialization never see it). Returns how
+    /// (Bestseller and Serialization never see it). Returns how
     /// many were Edited.</summary>
     public int EditSakura(YaeSakuraEnd end, int n, YaeAnnotation annotation)
     {
@@ -315,6 +329,7 @@ public sealed class YaeShrineLedger
             if (s.Add(annotation)) edited++;
         }
         Edits += edited;
+        EditsThisTurn += edited;
         return edited;
     }
 
@@ -332,7 +347,37 @@ public sealed class YaeShrineLedger
 
     internal void NoteStrike() => Strikes++;
 
-    internal void NoteEdit() => Edits++;
+    internal void NoteEdit()
+    {
+        Edits++;
+        EditsThisTurn++;
+    }
+
+    /// <summary>Dawn Prayer (the refill): "Your newest Sakura gains 2 [3]
+    /// Levels." Whether one stood.</summary>
+    public bool LevelNewest(int n)
+    {
+        if (_sakura.Count == 0) return false;
+        _sakura[_sakura.Count - 1].Level += n;
+        return true;
+    }
+
+    /// <summary>Kitsune's Blessing (the refill): "Your highest-Level Sakura
+    /// gains 3 [4] Levels and lasts 2 more turns." Any kind; on a tie, the
+    /// OLDEST (<see cref="Highest"/>, Editor-in-Chief's reading). The Sakura
+    /// blessed, or null with none.</summary>
+    public YaeSakura? Bless(int n, int lasts)
+    {
+        var s = Highest();
+        if (s == null) return null;
+        s.Level += n;
+        s.TurnsLeft += Math.Max(0, lasts);
+        return s;
+    }
+
+    /// <summary>Sesshou Fang (the refill): does any Sakura, any kind, stand
+    /// at <paramref name="level"/> or higher? PURE.</summary>
+    public bool AnyAtLevel(int level) => _sakura.Any(s => s.Level >= level);
 
     /// <summary>Does this kind deal damage (Edict, the Lure)? PURE.</summary>
     public static bool DealsDamage(YaeSakuraKind kind) => kind != YaeSakuraKind.Kitsune;
@@ -389,14 +434,38 @@ public static class YaeShrine
         yae == null || !Live(yae) ? 0 : YaeShrineLedger.For(yae).Count;
 
     /// <summary>The cards <paramref name="yae"/> Edited this combat (0 for
-    /// anyone else): what Bestseller and Print Run count.</summary>
+    /// anyone else): what Bestseller counts.</summary>
     public static int Edits(Creature? yae) =>
         yae == null || !Live(yae) ? 0 : YaeShrineLedger.For(yae).Edits;
+
+    /// <summary>The cards <paramref name="yae"/> Edited this turn (0 for
+    /// anyone else): Publisher's Deadline's discount (the refill).</summary>
+    public static int EditsThisTurn(Creature? yae) =>
+        yae == null || !Live(yae) ? 0 : YaeShrineLedger.For(yae).EditsThisTurn;
+
+    /// <summary>
+    /// HUNTING GAZE's memory (the refill): a hit of one of her own Attack
+    /// cards (a powered attack whose source is an Attack she owns) on
+    /// another creature makes that creature the last she attacked. A
+    /// Sakura's or Fox Fire's hit (a pet's, with no card) is not her
+    /// attack. <c>KleeElementalHooks.AfterDamageGiven</c> calls it for every
+    /// hit; a no-op for anyone not Yae. Sim twin:
+    /// <c>yae_shrine.note_attacked</c>.
+    /// </summary>
+    public static void NoteAttacked(Creature? dealer, Creature? receiver,
+                                    ValueProp props, CardModel? cardSource)
+    {
+        if (dealer == null || receiver == null || ReferenceEquals(receiver, dealer)) return;
+        if (!Live(dealer)) return;
+        if (cardSource is not { Type: CardType.Attack } || cardSource.Owner?.Creature != dealer) return;
+        if (!props.IsPoweredAttack()) return;
+        YaeShrineLedger.For(dealer).LastAttacked = receiver;
+    }
 
     /// <summary>
     /// The seat page's read (the bridge's <c>gits/GitsYaeShrine.cs</c>, by
     /// reflection; <c>understudy/blindplay_board.yae_shrine</c>): the cards
-    /// she Edited this combat, the count Bestseller and Print Run read, and
+    /// she Edited this combat, the count Bestseller reads, and
     /// each Sakura's Annotations in the order applied (<c>sakura</c>). EMPTY
     /// for anyone not Yae and outside a fight (a ledger is asked for only
     /// inside one, so a map-screen poll never resets it), except that a
@@ -456,7 +525,7 @@ public static class YaeShrine
     /// plant makes the then-oldest ACT first, exactly as its Last Bloom
     /// would; then the ledger levels it (same kind) or withers it and
     /// plants the new one in its place (another kind; review r3).
-    /// <paramref name="startLevel"/>: Grafted Branch.
+    /// <paramref name="startLevel"/>: Guardian of Narukami.
     /// <paramref name="inherited"/>: the planting card's Red Ink, given to
     /// each NEW Sakura this plants.
     /// </summary>
@@ -509,13 +578,21 @@ public static class YaeShrine
         YaeShrineLedger.ActSize(sakura.Kind, sakura.Level, sakura.Annotations);
 
     /// <summary>The enemy a single-target strike lands on: the card's aim
-    /// (Kitsune Pounce), else this turn's Lure while it lives, else one
-    /// random living enemy off the combat target stream.</summary>
+    /// (Kitsune Pounce), else this turn's Lure while it lives, else (with
+    /// Hunting Gaze, the refill) the last enemy her Attack cards hit while it
+    /// lives, else one random living enemy off the combat target stream.
+    /// Copies of Hunting Gaze do not stack: one aim either way.</summary>
     private static Creature? Aim(Creature yae, Creature? aim = null)
     {
         if (aim is { IsAlive: true }) return aim;
         var ledger = YaeShrineLedger.For(yae);
         if (ledger.Lure is { IsAlive: true } lured) return lured;
+        if (yae.GetPowerAmount<HuntingGazePower>() > 0
+            && ledger.LastAttacked is { IsAlive: true } prey)
+        {
+            yae.Powers.OfType<HuntingGazePower>().FirstOrDefault()?.Pulse();
+            return prey;
+        }
         var living = yae.CombatState?.HittableEnemies.Where(e => e.IsAlive).ToList();
         if (living == null || living.Count == 0) return null;
         var rng = yae.Player?.RunState.Rng.CombatTargets;
@@ -556,7 +633,7 @@ public static class YaeShrine
     /// gives her 2 + its Level Block (unpowered). Red Ink adds 3 to any of
     /// them. Then the Sakura's own Fox Fire, once.
     /// THE POOL TO 78 (revised after GPT's review): a strike AIMED at a
-    /// chosen enemy (<paramref name="aim"/>: Sacred Spark, Narukami Judgment,
+    /// chosen enemy (<paramref name="aim"/>: Falling Blossom, Narukami Judgment,
     /// Saiguu's Lesson, Fox's Verdict, Kitsune Pounce) is one hit on that
     /// enemy, a Foxfire Sakura's included; only its own act (turn end, Last
     /// Bloom, Tenko, a full-shrine plant) hits ALL.
@@ -626,16 +703,36 @@ public static class YaeShrine
     /// FALLEN PETALS (review r3, sec.4): "Your oldest Sakura withers (it acts
     /// once, its Last Bloom)." Deadline Extension does not stop it (an
     /// active wither, not a timer). Whether one did.
+    /// FALLING BLOSSOM (the refill): "its Last Bloom strikes this enemy",
+    /// <paramref name="aim"/>, one hit whatever the kind (a Foxfire's
+    /// included), as every aimed strike is; a dead aim falls back to the
+    /// plain act.
     /// </summary>
     public static async Task<bool> WitherOldest(PlayerChoiceContext choiceContext,
-                                                Creature? yae)
+                                                Creature? yae, Creature? aim = null)
     {
         if (yae == null || !Live(yae)) return false;
         var ledger = YaeShrineLedger.For(yae);
         if (ledger.Count == 0) return false;
         var oldest = ledger.Standing[0];
-        await Act(choiceContext, yae, oldest);
+        await Act(choiceContext, yae, oldest, aim);
         var withered = ledger.Wither(oldest);
+        if (withered) await Withered(choiceContext, yae, 1);
+        await SakuraBadge.Sync(choiceContext, yae);
+        return withered;
+    }
+
+    /// <summary>HIDE BEHIND THE SHRINE (the refill): "Your newest Sakura
+    /// withers", its Last Bloom as every wither's (it acts as its kind:
+    /// a Kitsune's Block, a Foxfire's hit on ALL). Whether one did.</summary>
+    public static async Task<bool> WitherNewest(PlayerChoiceContext choiceContext, Creature? yae)
+    {
+        if (yae == null || !Live(yae)) return false;
+        var ledger = YaeShrineLedger.For(yae);
+        if (ledger.Count == 0) return false;
+        var newest = ledger.Standing[ledger.Count - 1];
+        await Act(choiceContext, yae, newest);
+        var withered = ledger.Wither(newest);
         if (withered) await Withered(choiceContext, yae, 1);
         await SakuraBadge.Sync(choiceContext, yae);
         return withered;
@@ -730,6 +827,7 @@ public static class YaeShrine
         var ledger = YaeShrineLedger.For(yae);
         ledger.Lure = null;
         ledger.PriorityUsed = false;
+        ledger.EditsThisTurn = 0;
         await FoxfireLurePower.ClearAll(yae);
         var serial = yae.GetPowerAmount<SerialNovelPower>();
         if (serial > 0)
@@ -822,7 +920,7 @@ public static class YaeShrine
         await StrikeTarget(choiceContext, yae, target);
     }
 
-    /// <summary>"A Sakura strikes it" (Sacred Spark, Saiguu's Lesson; the
+    /// <summary>"A Sakura strikes it" (Saiguu's Lesson, Kitsune Pounce; the
     /// pool to 78): the highest-Level Sakura that strikes (a Sakura or a
     /// Foxfire Sakura), one hit on <paramref name="target"/>.</summary>
     public static async Task StrikeTarget(PlayerChoiceContext choiceContext,
@@ -1024,7 +1122,7 @@ public static class YaeCards
         await SakuraBadge.Sync(choiceContext, yae);
     }
 
-    /// <summary>Rooted Shrine, Mikage Thunder: "Each Sakura gains a Level"
+    /// <summary>Narukami Ray, Mikage Thunder: "Each Sakura gains a Level"
     /// (YmAmount Levels; no cap).</summary>
     public static async Task LevelUp(PlayerChoiceContext choiceContext,
                                      CardModel card, CardPlay cardPlay)
@@ -1085,7 +1183,7 @@ public static class YaeCards
                 Var(card, "YmBase") + Var(card, "YmPer") * YaeShrine.Edits(card.Owner?.Creature));
 
     /// <summary>Base + per for each card you Edited this combat, the card's
-    /// own Block (no row since Print Run took the calculated rail,
+    /// own Block (no row since Print Run, cut 2026-10-16, took the calculated rail,
     /// 2026-10-15).
     /// </summary>
     public static Task BlockPerEdit(PlayerChoiceContext choiceContext,
@@ -1093,7 +1191,7 @@ public static class YaeCards
         CardBlock(card, cardPlay,
                   Var(card, "YmBase") + Var(card, "YmPer") * YaeShrine.Edits(card.Owner?.Creature));
 
-    /// <summary>Kitsune Flash: base, and amount more if this card is
+    /// <summary>(No row since Kitsune Flash was cut, 2026-10-16.) Base, and amount more if this card is
     /// Annotated.</summary>
     public static Task AnnotatedStrike(PlayerChoiceContext choiceContext,
                                        CardModel card, CardPlay cardPlay) =>
@@ -1126,7 +1224,7 @@ public static class YaeCards
                                   sayNothing: edited == 0);
     }
 
-    /// <summary>Grafted Branch: "Plant a Sakura. It starts at Level 3 [4]
+    /// <summary>(Grafted Branch's, cut 2026-10-16:) "Plant a Sakura. It starts at Level 3 [4]
     /// and lasts 1 more turn." (<paramref name="lasts"/>, the pool to 78);
     /// Guardian of Narukami's Kitsune Sakura "starts at Level 3"
     /// (<paramref name="kind"/>).</summary>
@@ -1139,7 +1237,8 @@ public static class YaeCards
 
     // ---- The pool to 78 (review/active/yae-pool-to-78-2026-10-15.md) ------
 
-    /// <summary>Sacred Spark: "A Sakura strikes it."</summary>
+    /// <summary>"A Sakura strikes it." (No row since Sacred Spark was cut,
+    /// 2026-10-16.)</summary>
     public static Task StrikeTarget(PlayerChoiceContext choiceContext, CardModel card,
                                     CardPlay cardPlay) =>
         YaeShrine.StrikeTarget(choiceContext, card.Owner?.Creature, cardPlay.Target);
@@ -1261,20 +1360,117 @@ public static class YaeCards
                                    CardModel card, CardPlay cardPlay) =>
         YaeEditing.AuthorsCopy(choiceContext, card);
 
+    // ---- The refill (review/active/yae-refill-2026-10-16.md) --------------
+
+    /// <summary>Kitsune Barrage: "Deal 4 [5] Electro damage twice. If you
+    /// have 3 or more Sakura, deal it 3 times." The shrine is read when it
+    /// is played; one powered attack of the card with that many hits.
+    /// </summary>
+    public static Task Barrage(PlayerChoiceContext choiceContext, CardModel card,
+                               CardPlay cardPlay) =>
+        CardHit(choiceContext, card, cardPlay, Var(card, "YmAmount"),
+                YaeLaw.BarrageHitCount(YaeShrine.Count(card.Owner?.Creature)));
+
+    /// <summary>Sesshou Fang: "Deal 6 [8] Electro damage. If a Sakura is
+    /// Level 3 or higher, deal 6 [8] more." One hit, the shrine read when it
+    /// is played.</summary>
+    public static Task LevelStrike(PlayerChoiceContext choiceContext, CardModel card,
+                                   CardPlay cardPlay)
+    {
+        var yae = card.Owner?.Creature;
+        var high = yae != null && YaeShrine.Live(yae)
+                   && YaeShrineLedger.For(yae).AnyAtLevel(YaeLaw.FangLevel);
+        return CardHit(choiceContext, card, cardPlay,
+                       Var(card, "YmBase") + (high ? Var(card, "YmAmount") : 0));
+    }
+
+    /// <summary>Falling Blossom: "Your oldest Sakura withers; its Last Bloom
+    /// strikes this enemy."</summary>
+    public static async Task WitherOldestAt(PlayerChoiceContext choiceContext, CardModel card,
+                                            CardPlay cardPlay) =>
+        await YaeShrine.WitherOldest(choiceContext, card.Owner?.Creature, cardPlay.Target);
+
+    /// <summary>Hide Behind the Shrine: "Your newest Sakura withers; if one
+    /// did, gain 5 more [Block]", the card's own Block (YmAmount).</summary>
+    public static async Task WitherNewestBlock(PlayerChoiceContext choiceContext, CardModel card,
+                                               CardPlay cardPlay)
+    {
+        if (!await YaeShrine.WitherNewest(choiceContext, card.Owner?.Creature)) return;
+        await CardBlock(card, cardPlay, Var(card, "YmAmount"));
+    }
+
+    /// <summary>The discard chooser's prompt for Rewrite (merged into the
+    /// `cards` table by <c>KleeMod.InjectLocStrings</c>).</summary>
+    public const string RewritePromptKey = "KLEEMOD-YAE_REWRITE.selectionScreenPrompt";
+
+    public const string RewritePromptText = "Choose up to {Amount} cards to discard.";
+
+    /// <summary>Rewrite: "Discard up to 2 [3] cards, then draw that many.
+    /// Edit a card in your hand: Red Ink." The base game's Gambler's Brew
+    /// chooser (zero to YmAmount cards, confirmed by hand), then the Edit,
+    /// which can reach a card just drawn.</summary>
+    public static async Task Rewrite(PlayerChoiceContext choiceContext, CardModel card,
+                                     CardPlay cardPlay, YaeAnnotation annotation)
+    {
+        var owner = card.Owner;
+        if (owner == null) return;
+        var n = Var(card, "YmAmount");
+        var hand = PileType.Hand.GetPile(owner).Cards.Count(c => !ReferenceEquals(c, card));
+        if (n > 0 && hand > 0)
+        {
+            var picked = (await CardSelectCmd.FromHandForDiscard(
+                choiceContext, owner,
+                new CardSelectorPrefs(new LocString("cards", RewritePromptKey), 0, n)
+                {
+                    RequireManualConfirmation = true,
+                },
+                null, card)).Take(n).ToList();
+            if (picked.Count > 0)
+            {
+                await CardCmd.DiscardAndDraw(choiceContext, picked, picked.Count);
+            }
+        }
+        await YaeEditing.Edit(choiceContext, card, annotation, 1);
+    }
+
+    /// <summary>Dawn Prayer: "Your newest Sakura gains 2 [3] Levels."
+    /// </summary>
+    public static async Task LevelNewest(PlayerChoiceContext choiceContext, CardModel card,
+                                         CardPlay cardPlay)
+    {
+        var yae = card.Owner?.Creature;
+        if (yae == null || !YaeShrine.Live(yae)) return;
+        if (YaeShrineLedger.For(yae).LevelNewest(Var(card, "YmAmount")))
+            await SakuraBadge.Sync(choiceContext, yae);
+    }
+
+    /// <summary>Kitsune's Blessing: "Your highest-Level Sakura gains 3 [4]
+    /// Levels and lasts 2 more turns" (<paramref name="lasts"/>).</summary>
+    public static async Task BlessHighest(PlayerChoiceContext choiceContext, CardModel card,
+                                          CardPlay cardPlay, int lasts = 0)
+    {
+        var yae = card.Owner?.Creature;
+        if (yae == null || !YaeShrine.Live(yae)) return;
+        if (YaeShrineLedger.For(yae).Bless(Var(card, "YmAmount"), lasts) != null)
+            await SakuraBadge.Sync(choiceContext, yae);
+    }
+
     /// <summary>
-    /// ONE POWERED HIT OF THE CARD, carrying Electro. Red Ink rides it
-    /// through the engine's enchant door.
+    /// ONE POWERED ATTACK OF THE CARD, carrying Electro, of
+    /// <paramref name="hits"/> hits (Kitsune Barrage's two or three). Red
+    /// Ink rides it through the engine's enchant door.
     /// </summary>
     private static async Task CardHit(PlayerChoiceContext choiceContext,
                                       CardModel card, CardPlay cardPlay,
-                                      int damage)
+                                      int damage, int hits = 1)
     {
-        if (cardPlay.Target is not { IsAlive: true } target || damage <= 0) return;
+        if (cardPlay.Target is not { IsAlive: true } target || damage <= 0 || hits <= 0) return;
         using (HitElement.Carry(card, Element.Electro))
         {
             await DamageCmd.Attack(damage)
                 .FromCard(card, cardPlay)
                 .Targeting(target)
+                .WithHitCount(hits)
                 .WithElementHitFx(Element.Electro)
                 .Execute(choiceContext);
         }

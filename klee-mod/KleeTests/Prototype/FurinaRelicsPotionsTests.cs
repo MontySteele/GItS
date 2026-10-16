@@ -88,8 +88,9 @@ public class FurinaRelicsPotionsTests : IDisposable
     {
         Assert.Equal("At the start of each combat, [gold]Summon[/gold] a random guest.",
                      Face(typeof(OperaTicketStub)));
-        Assert.Equal("Whenever you [gold]Repay[/gold] more than you have drained, gain "
-                     + "the rest as [gold]Block[/gold].", Face(typeof(FontaineTeardrop)));
+        // furina-next paper 3 (2026-10-16), pick 1.
+        Assert.Equal("An unreturned [gold]Repay[/gold] gains 2 [gold]Block[/gold] for "
+                     + "each HP instead of 1.", Face(typeof(FontaineTeardrop)));
         Assert.Equal("Whenever a guest acts, gain [blue]1[/blue] [gold]Fanfare[/gold].",
                      Face(typeof(ClaquesLedger)));
         Assert.Equal("Whenever you [gold]Spend[/gold] 10 or more at once, gain "
@@ -136,32 +137,47 @@ public class FurinaRelicsPotionsTests : IDisposable
     }
 
     [Fact]
-    public void Fontaine_teardrop_pays_the_repay_past_the_drained_hp_as_block()
+    public void Fontaine_teardrop_doubles_the_block_floor()
     {
+        // furina-next paper 3 (2026-10-16): "An unreturned Repay gains 2
+        // Block for each HP instead of 1."
         var mods = new StageMods { FontaineTeardrop = 1 };
-        // Nothing drained: all 3 is the rest.
+        // Nothing drained: 3 unreturned, 6 Block, once.
         var kit = new StageKit(mods, 0, 78, 78);
-        Assert.Equal(0, StageKit.Run(kit.Director.Repay(3)));
-        Assert.Contains("block 3", kit.Board.Log);
+        Assert.Equal(0, StageKit.Run(kit.Director.RepayFloor(3, StageFloor.Block)));
+        Assert.Equal(new[] { "block 6" },
+                     kit.Board.Log.Where(l => l.StartsWith("block")).ToArray());
         Assert.Equal(new[] { "FontaineTeardrop" }, kit.Board.Flashed);
-        // 2 drained, Repay 3: 2 back and 1 Block.
+        // 2 drained, Repay 3: 2 back and 2 Block.
         kit = new StageKit(mods, 0, 78, 78);
         StageKit.Run(kit.Director.Drain(2));
-        Assert.Equal(2, StageKit.Run(kit.Director.Repay(3)));
-        Assert.Contains("block 1", kit.Board.Log);
-        // A Repay of no more than she drained pays nothing.
+        Assert.Equal(2, StageKit.Run(kit.Director.RepayFloor(3, StageFloor.Block)));
+        Assert.Equal(new[] { "block 2" },
+                     kit.Board.Log.Where(l => l.StartsWith("block")).ToArray());
+        // A Repay of no more than she drained pays nothing, and no flash.
         kit = new StageKit(mods, 0, 78, 78);
         StageKit.Run(kit.Director.Drain(4));
-        StageKit.Run(kit.Director.Repay(3));
-        Assert.DoesNotContain(kit.Board.Log, l => l.StartsWith("block"));
-        // A printed floor pays beside it: the two stack.
-        kit = new StageKit(mods, 0, 78, 78);
         StageKit.Run(kit.Director.RepayFloor(3, StageFloor.Block));
-        Assert.Equal(2, kit.Board.Log.Count(l => l == "block 3"));
-        // Without it, nothing.
-        kit = new StageKit(null, 0, 78, 78);
-        StageKit.Run(kit.Director.Repay(3));
         Assert.DoesNotContain(kit.Board.Log, l => l.StartsWith("block"));
+        Assert.Empty(kit.Board.Flashed);
+        // Salon Solitaire's turn-end Repay 1 with nothing drained: 2 Block.
+        kit = new StageKit(mods, 0, 78, 78);
+        StageKit.Run(kit.Director.EndOfTurn(1));
+        Assert.Contains("block 2", kit.Board.Log);
+        // A floor that is not Block (Cleansing Torrent's damage, "Repay
+        // all") gets nothing from it.
+        kit = new StageKit(mods, 0, 78, 78);
+        StageKit.Run(kit.Director.RepayFloor(3, StageFloor.None));
+        StageKit.Run(kit.Director.RepayAll());
+        Assert.DoesNotContain(kit.Board.Log, l => l.StartsWith("block"));
+        // Without it, 1 a HP.
+        kit = new StageKit(null, 0, 78, 78);
+        StageKit.Run(kit.Director.RepayFloor(3, StageFloor.Block));
+        Assert.Equal(new[] { "block 3" },
+                     kit.Board.Log.Where(l => l.StartsWith("block")).ToArray());
+        Assert.Equal(6, StageDirector.FloorBlock(3, 1));
+        Assert.Equal(9, StageDirector.FloorBlock(3, 2));
+        Assert.Equal(0, StageDirector.FloorBlock(0, 1));
     }
 
     [Fact]

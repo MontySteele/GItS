@@ -450,13 +450,14 @@ def test_riptide_lunge_repays_on_a_kill():
 def test_the_repay_cards_and_their_counts():
     st = _furina()
     FS.drain(st, 20)
-    # Two Pneuma Refrains (Repay 5) stand in for Balance the Books and
+    # Two Pneuma Refrains (Repay 4) stand in for Balance the Books and
     # Soothing Waters, cut in the sweep (2026-10-14).
     _play(st, _card("proto_fs_pneuma_refrain"))
     _play(st, _card("proto_fs_pneuma_refrain"))
     hp = st.enemies[0].hp
     _play(st, _card("proto_fs_rising_tide"))
-    assert hp - st.enemies[0].hp == 6 + 3 * 2
+    # Endless Waltz's own Repay 2 returns HP, so it counts (paper 3).
+    assert hp - st.enemies[0].hp == 6 + 3 * 3
     left = st.player.ftd.drained
     hp = st.enemies[0].hp
     _play(st, _card("proto_fs_grand_absolution"))
