@@ -108,6 +108,7 @@ someone types by hand, so an unreferenced script here is not necessarily dead.
 | `run_lints.py` | Run the repo's lint battery CONCURRENTLY and report every result. |
 | `seat.py` | One blind seat, end to end: embark the lane, play the run, tear the lane down. |
 | `shipped_card_art.py` | The shipped card-image set: the one list deploy stages into images/cards. |
+| `telemetry_remote.py` | Pull uploaded beta runs from the telemetry Worker's D1 database and summarise them. |
 | `telemetry_report.py` | The Balance telemetry report: per-fight medians by character, act and kind. |
 | `track_b_curves.py` | Track B's demand (B1) and output (B2) curves, from both feeds. |
 | `varka_expansion_sim.py` | VARKA EXPANSION -- the paper's sec.5 sim (Prototype stage, exploration, not a Balance measurement). |
