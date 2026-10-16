@@ -96,20 +96,14 @@ Same five seeds, one Sonnet seat per lane, on the `furina-next` staging build.
 6. Net HP lost per fight is not above suite 1 in any act (1.65 / 1.05 / 1.53
    of base).
 
-## Picks
+## Picks (ruled 2026-10-16)
 
-1. **The change set.**
-   - **(a) Default:** the four rows above on `furina-next`, then suite 3.
-   - (b) Bravura and Bring the House Down only, with Bis! kept, so the suite
-     isolates the capped spenders.
-   - (c) You name a different direction.
-2. **The starter.**
-   - **(a) Default:** Rising Applause stays as it is. Your second point is
-     about competition, and with only one other spend-all card in the pool,
-     the starter has fewer rivals. It still competes with the capped cards
-     (a bank of 30 spent by Rising Applause leaves Bravura nothing), but it
-     is the reliable fallback and the card that teaches Spend, and capping
-     it now could deepen the "big bank, no good outlet" turns. Let suite 3
-     show whether the capped cards are enough first.
-   - (b) Cap it ("Spend up to 15, all you can") so the bank spills over to
-     the other cards. This changes a starter card, so it is your call.
+[USER]: "Agreed on both picks. I still think that we should eventually
+change the starter, but for now it's fine." (After GPT's review, which
+backed an amended 1(a) and 2(a); the amendments are in section 2.)
+
+1. **The change set: (a).** The four rows above on `furina-next`, then
+   suite 3.
+2. **The starter: (a).** Rising Applause stays as it is for this test. A
+   starter change stays open for later: suite 3's three-way split of
+   full-bank turns is the evidence for it.
