@@ -48,7 +48,7 @@ CASES = [
      _deals("PressureHit"), "new DebuffsAfterDamageVar()"),
     ("proto_fs_bravura", "ProtoFsBravura", _deals("TotalDamage"),
      "new HitsTotalDamageVar(static card => 0 + 1 * "
-     "(FurinaStage.SpentOrFanfare(card) / FurinaStageLaw.BravuraSpentPer))"),
+     "(FurinaStage.SpentOrUpTo(card, 18) / FurinaStageLaw.BravuraSpentPer))"),
 ]
 
 

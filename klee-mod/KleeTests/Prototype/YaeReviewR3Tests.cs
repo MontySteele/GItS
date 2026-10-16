@@ -154,7 +154,7 @@ public class YaeReviewR3Tests : IDisposable
         // Every planting card carries the full-shrine tip.
         foreach (var card in new CardModel[]
                  {
-                     new ProtoYmYakanEvocation(), new ProtoYmTwinSakura(), new ProtoYmGraftedBranch(),
+                     new ProtoYmYakanEvocation(), new ProtoYmTwinSakura(), new ProtoYmReplanting(),
                      new ProtoYmShrineMaidensGuard(), new ProtoYmFoxfireSweep(),
                  })
         {

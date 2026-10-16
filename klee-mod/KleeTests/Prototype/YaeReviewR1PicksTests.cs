@@ -124,7 +124,7 @@ public class YaeReviewR1PicksTests : IDisposable
     }
 
     [Fact]
-    public void Mooncall_raises_grafted_branch_too()
+    public void Mooncall_raises_a_plant_at_a_level_too()
     {
         var ledger = Fresh();
         Assert.True(ledger.Plant(YaeLaw.PlantLevel + 1, 2));   // one Mooncall

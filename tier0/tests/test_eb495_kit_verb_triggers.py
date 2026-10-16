@@ -357,7 +357,7 @@ SIM_CALL_SITES = {
                            None, 'None'),
     # YAE MIKO (`yae_shrine`, sim only, 2026-10-13): a Sakura's strike, a
     # pet's Electro hit under a Power's source, unpowered; the card-carried
-    # hits of Thunderbolt Tithe, Bestseller and Kitsune Flash, powered and
+    # hits of Thunderbolt Tithe, Sesshou Fang and Kitsune Barrage, powered and
     # Electro; Fox Fire's rider, 4 Electro to a random enemy, unpowered.
     # (Source order since the Rites, 2026-10-14: a damage strike's hit,
     # Fox Fire, then the card-carried hit.)
@@ -566,8 +566,8 @@ def test_only_the_set_off_cards_own_hit_is_an_attack():
     # Edge's "deal 7 more": the card's own second hit, with no element.
     # Starter (a), 2026-10-13 adds `VarkaCards.GaleHit`: Dandelion Gale's
     # second hit, the Ascension's on ALL enemies, the card's own hit.
-    # YAE MIKO (2026-10-13) adds `YaeCards.CardHit`: Kitsune Flash's,
-    # Thunderbolt Tithe's and Bestseller's one hit, the card's own Electro
+    # YAE MIKO (2026-10-13) adds `YaeCards.CardHit`: Thunderbolt Tithe's,
+    # Sesshou Fang's and Kitsune Barrage's (its two or three hits) hit, the card's own Electro
     # hit (the sim's reading: "ONE powered hit of the card"). Her Sakura and
     # Fox Fire are pets' hits through `ElementalHit` and are not here.
     # The pool to 78 (2026-10-15) adds `YaeCards.CardHitAll`: Forbidden

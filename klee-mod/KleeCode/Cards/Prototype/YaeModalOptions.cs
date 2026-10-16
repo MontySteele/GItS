@@ -108,7 +108,9 @@ public sealed class AnnotationOptionDeadline : ModalOptionCard, AnnotationOption
 {
     public YaeAnnotation OptionAnnotation => YaeAnnotation.DeadlineExtension;
 
-    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_deadline");
+    // The dedupe (2026-10-16) cut Deadline; Cliffhanger prints the same
+    // Annotation.
+    public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_cliffhanger");
 
     public override List<(string, string)>? Localization => AnnotationFace.For(OptionAnnotation);
 }

@@ -98,6 +98,34 @@ public class VarkaModelArtTests
         Assert.Equal(hex, tint);
     }
 
+    /// <summary>In-game check 2026-10-16: Tidal Bulwark (Hydro) and Razor:
+    /// Awakening (Electro) print no element, so the trail drew Anemo teal.
+    /// The trail reads the element the play makes current, then a
+    /// companion's own.</summary>
+    [Theory]
+    [InlineData("ProtoVkTidalBulwark", Element.None, Element.Hydro)]
+    [InlineData("ProtoVkRazorClawAndThunder", Element.None, Element.Electro)]
+    [InlineData("ProtoVkKindledEdge", Element.None, Element.Pyro)]
+    [InlineData("ProtoVkTidalBulwark", Element.Cryo, Element.Cryo)]
+    [InlineData("ProtoVkKnightlyStrike", Element.Anemo, Element.Anemo)]
+    public void The_trail_shows_the_element_a_switch_or_companion_card_makes_current(
+        string card, Element hit, Element expected)
+    {
+        var type = Trail().Assembly.GetTypes()
+            .Single(t => t.FullName == "KleeMod.Cards.Prototype.Generated." + card);
+        var model = System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(type);
+        var got = (Element)Trail().GetMethod("TrailElementOf", All)!
+            .Invoke(null, new object?[] { hit, model })!;
+        Assert.Equal(expected, got);
+    }
+
+    [Fact]
+    public void His_card_trail_is_not_the_ironclads_orange()
+    {
+        var src = RepoFile("klee-mod/KleeCode/Varka.cs");
+        Assert.Contains("\"res://scenes/vfx/card_trail_defect.tscn\"", src);
+    }
+
     [Fact]
     public void A_fresh_entry_into_a_strike_colours_it_and_only_the_ascension_places_the_target_burst()
     {

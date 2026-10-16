@@ -333,8 +333,8 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT",
                     # Design-session calls (2026-10-13): Four Winds'
                     # Ascension's rider, its element hit gains no Oath.
                     "KLEEMOD-ARM_VARKA_ASCENSION_NO_OATH",
-                    # And Bis!'s rider: a "Spend up to" does not count.
-                    "KLEEMOD-ARM_STAGE_BIS_SPEND_UP_TO",
+                    # (Bis!'s rider left with Bis!, furina-next paper 2,
+                    # 2026-10-16.)
                     # The Furina wave (2026-10-13): Final Bow's rider, its
                     # acts happen one after another.
                     "KLEEMOD-ARM_STAGE_FINAL_BOW_IN_TURN",
@@ -922,10 +922,16 @@ CONJUGATIONS = {"Exhausted": "Exhaust",
                 # High Stakes (the Spend round, 2026-10-10): "HP you have
                 # Drained and not Repaid" (the page's Repay row matches it).
                 "Repaid": "Repay",
+                # Prima Donna (furina-next, 2026-10-16): "if you Spent last
+                # turn" (the page's Spend row matches it).
+                "Spent": "Spend",
                 # YAE MIKO (2026-10-13): the Edit row carries Edited,
                 # Annotated and Publish. Tenko and each Annotation are rows
                 # of their own since 2026-10-14.
-                "Edited": "Edit", "Annotated": "Edit", "Publish": "Edit"}
+                "Edited": "Edit", "Annotated": "Edit", "Publish": "Edit",
+                # The Yae refill (2026-10-16): Inscribed Thunder's "for each
+                # Annotation on this card".
+                "Annotation": "Edit"}
 
 
 def _word_owner(word: str) -> str:

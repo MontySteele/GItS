@@ -95,9 +95,6 @@ public static class ArmKeywordTips
     // Design-session call (2026-10-13), A RIDER AND NOT A KEYWORD: Four
     // Winds' Ascension's element hit gains no Oath, and that is the rule.
     public const string AscensionNoOathKey = "KLEEMOD-ARM_VARKA_ASCENSION_NO_OATH";
-    // Design-session call (2026-10-13), A RIDER AND NOT A KEYWORD: Bis!
-    // keeps half of a spend-all only, never of a "Spend up to".
-    public const string BisSpendUpToKey = "KLEEMOD-ARM_STAGE_BIS_SPEND_UP_TO";
     // The Furina wave (2026-10-13), A RIDER AND NOT A KEYWORD: Final Bow's
     // acts happen one after another.
     public const string FinalBowInTurnKey = "KLEEMOD-ARM_STAGE_FINAL_BOW_IN_TURN";
@@ -636,14 +633,16 @@ public static class ArmKeywordTips
 
     /// <summary>Yae review r6, item 5: which enemy a Sakura strikes
     /// (<c>YaeShrine.Aim</c>: the aim Kitsune Pounce passes, else the Lure,
-    /// else random), in one sentence. The seat's hover adds it to
+    /// else Hunting Gaze's last enemy attacked (the refill, 2026-10-16), else
+    /// random), in one sentence. The seat's hover adds it to
     /// <see cref="YaeSakuraTip"/>; the player's hover stays under the
     /// 100-character cap (<c>tools/lint_hover_tips.py</c>), where Foxfire
     /// Lure's and Kitsune Pounce's own faces say it. The page's twin is
     /// <c>blindplay_notes.SAKURA_TARGET_RULE</c>.</summary>
     public static readonly string YaeSakuraTargetRule =
         "A Sakura strikes Kitsune Pounce's target when Pounce makes it strike, "
-      + "else the enemy Foxfire Lure marked this turn, else a random enemy.";
+      + "else the enemy Foxfire Lure marked this turn, else (with Hunting Gaze) "
+      + "the last enemy your Attacks hit, else a random enemy.";
 
     /// <summary>
     /// YAE MIKO (2026-10-13): the Edit tip; Publish is the relic's word,
@@ -772,19 +771,6 @@ public static class ArmKeywordTips
     /// its own scaling. `gen_klee_cards.emit` raises it off the row's
     /// <c>ascension_hit</c> effect.
     /// </summary>
-    /// <summary>
-    /// Design-session call (2026-10-13): Bis! keeps half of a spend-all only
-    /// (<see cref="KleeMod.Powers.FurinaStageLedger.SpendAll"/>); a "Spend up
-    /// to" card is not one even when it empties the bank, and a seat read it
-    /// the other way. `gen_klee_cards.emit` raises it off the row's
-    /// <c>fs_bis</c> power.
-    /// </summary>
-    public static IEnumerable<IHoverTip> ForBisSpendUpTo(
-        IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, BisSpendUpToKey,
-            "A card that [gold]Spends[/gold] up to an amount does not count, "
-          + "even if it empties your [gold]Fanfare[/gold].");
-
     /// <summary>
     /// The Furina wave (2026-10-13, "To change now" 4): Final Bow's guest
     /// acts one act at a time, each resolving before the next

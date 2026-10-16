@@ -205,13 +205,15 @@ def test_tenko_with_no_sakura_does_nothing_and_thunder_rite_still_hits(yae):
     assert st.enemies[0].hp == 92 and not _strikes(st)
 
 
-def test_shrine_offering_extends_and_rooted_shrine_levels(yae):
+def test_extend_lengthens_and_narukami_ray_levels(yae):
+    # The dedupe (2026-10-16) cut Shrine Offering and Rooted Shrine; the
+    # `extend` rule stays (no row) and Narukami Ray levels.
     st = _state()
     _play(st, _ym("yakan_evocation"))
-    _play(st, _ym("shrine_offering"))
-    assert _led(st).sakura[0].turns_left == 4 and st.player.block == 6
-    _play(st, _ym("rooted_shrine"))              # 6 Block, then the Level
-    assert _led(st).sakura[0].level == 2 and st.player.block == 12
+    Y.extend(st, 1)
+    assert _led(st).sakura[0].turns_left == 4
+    _play(st, _ym("narukami_ray"))               # 5 to ALL, then the Level
+    assert _led(st).sakura[0].level == 2 and st.enemies[0].hp == 95
 
 
 def test_the_lure_aims_every_strike_this_turn_and_expires(yae):
@@ -402,7 +404,7 @@ def test_fallen_petals_withers_the_oldest_now_and_pays_energy(yae):
     assert st.player.energy == 10 and not _strikes(st)   # _play topped it up
     st.player.energy = 0
     _play(st, _ym("yakan_evocation"))
-    _play(st, _ym("grafted_branch"))             # levels 1 / 3
+    Y.plant(st, 1, level=3)                      # levels 1 / 3
     st.player.energy = 0
     st.player.draw_pile = [loader.get_card("defend") for _ in range(3)]
     hand = len(st.player.hand)
@@ -419,14 +421,15 @@ def test_fallen_petals_withers_the_oldest_now_and_pays_energy(yae):
     assert len(st.player.hand) == hand + 1       # the upgrade's card
 
 
-def test_grafted_branch_plants_at_its_level(yae):
+def test_a_plant_at_a_level_keeps_it_and_levels_no_other(yae):
+    # Guardian of Narukami's Kitsune Sakura starts at Level 3; `lasts` (no
+    # row since Grafted Branch was cut, 2026-10-16) adds turns.
     st = _state()
-    # The pool to 78, sec.3: Level 3 [4] and 1 more turn.
-    _play(st, _ym("grafted_branch"))
-    assert [s.level for s in _led(st).sakura] == [3]
-    assert _led(st).sakura[0].turns_left == Y.SAKURA_TURNS + 1
-    _play(st, loader.get_card(_ym("grafted_branch") + "+"))
+    _play(st, _ym("guardian_of_narukami"))
+    assert [(s.kind, s.level) for s in _led(st).sakura] == [(Y.KITSUNE, 3)]
+    Y.plant(st, 1, level=4, lasts=1)
     assert [s.level for s in _led(st).sakura] == [3, 4]     # no levelling
+    assert _led(st).sakura[1].turns_left == Y.SAKURA_TURNS + 1
 
 
 def test_kitsune_pounce_strikes_a_weak_enemy(yae):
@@ -553,7 +556,7 @@ def test_an_edit_overwrites_and_deadline_retains(yae):
     c = loader.get_card("strike")
     st.player.hand.append(c)
     _play(st, _red_ink_edit())
-    _play(st, _ym("deadline"))
+    _play(st, _ym("cliffhanger"))
     assert Y.temp(c) == Y.DEADLINE and c.retain
     assert c.enchant_damage == 0
     _play(st, _red_ink_edit())
@@ -591,14 +594,13 @@ def test_annotated_readers_count_edits_and_the_card_itself(yae):
     # Yae review r5, pick 1 (a): per card Edited this combat (1 here).
     _play(st, _ym("bestseller"))                 # 8 + 2 x 1
     assert st.enemies[0].hp == 100 - 10
-    _play(st, _ym("print_run"))                  # 6 + 2 x 1
-    assert st.player.block == 8
-    flash = loader.get_card(_ym("kitsune_flash"))
-    st.player.hand.append(flash)
-    _play(st, _red_ink_edit())                  # Red Ink on the Flash
-    assert Y.temp(flash) == Y.RED_INK
-    _play(st, flash)                             # 6 + 3 (annotated) + 3 ink
-    assert st.enemies[0].hp == 100 - 10 - 12
+    # The refill (2026-10-16): Inscribed Thunder reads its own Annotations.
+    thunder = loader.get_card(_ym("inscribed_thunder"))
+    st.player.hand.append(thunder)
+    _play(st, _red_ink_edit())                  # Red Ink on the Thunder
+    assert Y.temp(thunder) == Y.RED_INK
+    _play(st, thunder)                           # 7 + 5 x 1 + 3 ink
+    assert st.enemies[0].hp == 100 - 10 - 15
 
 
 def test_serialization_pays_block_per_edit_not_per_annotated_play(yae):

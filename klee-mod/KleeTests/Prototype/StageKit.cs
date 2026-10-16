@@ -104,7 +104,17 @@ internal sealed class RecordingBoard : IStageBoard
         return Task.CompletedTask;
     }
 
-    public Task Lunge(StageSeat? seat) => Task.CompletedTask;
+    /// <summary>The acts' lunges, by who lunged, in order: kept apart from
+    /// <see cref="Log"/>. The game board plays the guest effects off the
+    /// lunge (Charlotte, Sigewinne, Freminet) and off the act's hit
+    /// (<c>KleeMod.Vfx.FurinaGuestFx</c>, 2026-10-16).</summary>
+    internal readonly List<StagePerformer?> Lunges = new();
+
+    public Task Lunge(StageSeat? seat)
+    {
+        Lunges.Add(seat?.Who);
+        return Task.CompletedTask;
+    }
 
     /// <summary>The pool to 75: a line's cue, recorded by who fired.</summary>
     public Task LineCue(StageSeat? seat)

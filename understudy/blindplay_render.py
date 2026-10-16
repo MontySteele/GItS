@@ -3141,7 +3141,7 @@ SHRINE_LURE_LINE = "- Foxfire Lure: your Sakura strike **{name}** this turn."
 #: stands.
 SHRINE_TARGET_LINE = "- " + SAKURA_TARGET_RULE
 SHRINE_ANNOTATED_LINE = "- Annotated cards in your hand: {n}."
-#: Bestseller and Print Run's count (Yae review r5, pick 1 (a)), which no card
+#: Bestseller's count (Yae review r5, pick 1 (a)), which no card
 #: on the board shows (`YaeShrine.Snapshot`, via `player.yae_shrine`).
 SHRINE_EDITS_LINE = "- Cards Edited this combat: {n}."
 
@@ -3170,7 +3170,7 @@ def _render_shrine(shrine: dict[str, Any]) -> list[str]:
                                        SHRINE_KIND["thunder"])
         # Review r3, seat cleanup: where the Levels came from. The badge
         # names the Level it was planted at; the rest came since (Sakura
-        # Grove, Rooted Shrine, Mikage Thunder, a full-shrine plant).
+        # Grove, Narukami Ray, Mikage Thunder, a full-shrine plant).
         planted = row.get("planted")
         origin = ""
         if planted is not None:

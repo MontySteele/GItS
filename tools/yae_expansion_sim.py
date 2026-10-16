@@ -54,13 +54,15 @@ RARITY = {"N": (60, 37, 3), "E": (50, 40, 10), "B": (50, 40, 10)}
 P = "proto_ym_"
 MAX_HP = 72
 
-SHRINE = ["twin_sakura", "thunder_rite", "shrine_offering",
+# The dedupe and the refill (2026-10-16): each cut id gives its seat to the
+# refill card nearest its job.
+SHRINE = ["twin_sakura", "thunder_rite", "dawn_prayer",
           "shrine_maidens_guard", "sakura_grove", "kitsune_rite",
-          "thunderbolt_tithe", "rooted_shrine", "tenko_kenshin",
+          "thunderbolt_tithe", "kitsunes_blessing", "tenko_kenshin",
           "foxs_mooncall", "yakan_offering", "sakura_channeling"]
-PUBLISHING = ["kitsune_flash", "deadline", "fox_fire_draft", "bestseller",
-              "print_run", "footnote", "sakura_seal", "serialization",
-              "manuscript_pile", "the_seven_glamours",
+PUBLISHING = ["inscribed_thunder", "rewrite", "fox_fire_draft", "bestseller",
+              "publishers_deadline", "footnote", "sakura_seal",
+              "serialization", "manuscript_pile", "the_seven_glamours",
               "reborn_as_guuji_yae", "editor_in_chief",
               # Review r3 (ruled 2026-10-14): the signature cards.
               "second_printing", "authors_copy", "serial_novel"]
@@ -74,9 +76,9 @@ def _deck(core, support=()):
 
 DECKS = {
     "shrine": _deck(SHRINE, ["sakura_seal", "foxfire_lure", "edict_of_cleansing"]),
-    "publishing": _deck(PUBLISHING, ["twin_sakura", "shrine_offering"]),
-    "mischief": _deck(MISCHIEF, ["kitsune_flash", "sly_strike",
-                                 "thunder_rite", "shrine_offering"]),
+    "publishing": _deck(PUBLISHING, ["twin_sakura", "hide_behind_the_shrine"]),
+    "mischief": _deck(MISCHIEF, ["kitsune_barrage", "sly_strike",
+                                 "thunder_rite", "foxs_shade"]),
 }
 PILOTS = ("default",) + tuple(DECKS)
 

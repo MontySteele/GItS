@@ -9208,6 +9208,90 @@ at 0; the count clears at his next turn. Pins:
 (`klee-mod/KleeTests/Prototype/VarkaPrototypeTests.cs`). It leaves
 `varka_expansion_sim.GENERIC_DRAW`. Untested in game until a deploy.
 
+## Furina's engines, furina-next 2026-10-16
+
+`review/active/furina-next-2026-10-15.md`, pick 1 (a), as revised after
+GPT's review. [USER]: "On Furina's powers - I'm good with this now, ship
+it!" Three Powers keep their names, rarities and roles and each loses the
+condition that kept it from firing. Built on `furina-next`; it reaches `main`
+in the promotion PR with suite 2's record.
+
+| id | was | now |
+|---|---|---|
+| `proto_fs_crescendo` (Uncommon, 1) | The first time each turn you Spend, draw 1 card. (upg: Innate) | At the start of your turn, gain 2 [3] Fanfare, then 2 [3] more each turn after. |
+| `proto_fs_standing_room_only` (Rare) | 2 [1]. Whenever you Spend all your Fanfare and it is at least 1, gain 1 Strength. | 1. Whenever you Spend, gain 1 Strength. (upg: Innate) |
+| `proto_fs_prima_donna` (Rare) | 2 [1]. At the start of your turn, if you have 10 or more Fanfare, gain [E]. | 2. At the start of your turn, if you Spent last turn, gain [E] [and draw 1 card]. |
+
+- **Crescendo** counts from the turn it is played: its first payment is at
+  the next turn start (2, then 4, 6 ...; upgraded 3, 6, 9). The ledger keeps
+  each copy taken in and what it has paid (`FurinaStageLedger.CrescendoDue`,
+  read lazily at turn start as Fountain of Lucine is), so a later copy starts
+  small. It pays beside Grand Theater Program, before Regina.
+- **Standing Room Only** answers every Spend that counts at least 1, from the
+  director's one after-Spend hook (`StageDirector.AfterSpend`): her cards,
+  Full House, Navia's and Freminet's acts and Showstopper. A Spend of 0 is no
+  Spend. A Spend Navia's line discounts counts what the card counts (the
+  price), as every other Spend reader does.
+- **Prima Donna**'s "last turn" is latched when her turn closes
+  (`FurinaStageLedger.CloseTurn`, after the guests act), so end-of-turn
+  Spends (Full House, Showstopper) count and a Spend this turn never pays
+  this turn. The upgraded card installs `PrimaDonnaPlusPower`
+  (`upgraded_power: fs_prima_donna_plus`), which also draws 1. The 10-Fanfare
+  constant (`PrimaDonnaFanfare`) is gone. The Spend tip now also reads the
+  past tense, `[gold]Spent[/gold]`.
+- **The runaway check** (sec.3): Standing Room Only with Full House (4),
+  Showstopper and three damaging guests (Wriothesley, Clorinde, Lynette) on a
+  200 bank gives 7 Strength in one end of turn (three Full House Spends,
+  Showstopper's Spend 5, three more): `Full_house_showstopper_and_three_damaging_guests_give_seven_strength_a_turn`.
+
+Pins: `klee-mod/KleeTests/Prototype/FurinaEnginesTests.cs`; sim twin
+(`tier0/engine/furina_tide.py`) in `tier0/tests/test_furina_pool75.py` and
+`test_furina_spend_up_to.py`. Untested in game until a `+next` deploy.
+
+## Spending the bank, furina-next paper 2, 2026-10-16
+
+`review/active/furina-next-2-2026-10-16.md` sec.2, picks 1 (a) and 2 (a).
+[USER]: "Agreed on both picks. I still think that we should eventually
+change the starter, but for now it's fine." One spend-all in the starter
+(Rising Applause, unchanged), one in the pool (Let the People Rejoice,
+unchanged); the other two are capped, and a Power raises every cap. Built on
+`furina-next`; it reaches `main` in the promotion PR with suite 3's record.
+
+| id | was | now |
+|---|---|---|
+| `proto_fs_bravura` (Uncommon Attack, 1) | Spend all your Fanfare. Deal 7 [9] Hydro damage for every 3 spent. | Spend up to 18, all you can. Deal 7 [9] Hydro damage for every 3 spent. |
+| `proto_fs_bring_the_house_down` (Rare Attack, 2) | Spend all your Fanfare. Deal that much damage. Each guest acts. | Spend up to 10 for each guest on stage, all you can. Deal that much damage. Each guest acts. |
+| `proto_fs_bis` (Rare Power, 1) | Bis!: Whenever a card Spends all your Fanfare, keep half of it. (upg: Innate) | Extended Run: Attacks and Skills that Spend up to a number can Spend 8 [12] more. |
+
+- **Extended Run is renamed on Bis!'s old id** (the re-founding's
+  convention), so it keeps Bis!'s art row and painting, which still shows
+  the old card. Pool 78 and the rarity counts do not move. Bis!'s power,
+  its keep-half rule in `SpendAll` and its seat-only hover rider
+  (`ForBisSpendUpTo`) are gone.
+- **Scope.** `ExtendedRunPower`'s amount (8 a copy, 12 upgraded; copies
+  add) is added once, flat, to a played card's whole printed cap
+  (`FurinaStageLedger.CardUpToCap`, called only by the card verb
+  `FurinaStage.SpendUpTo` and its preview `SpentOrUpTo`). Bring the House
+  Down with three guests and one copy spends up to 38, in one Spend. It
+  reaches the five capped Attacks and Skills (Soloist's Solicitation and Hold
+  the Stage 16, Tidal Flourish 10, Bravura 18, Bring the House Down 10 a
+  guest). It does not reach Full House (`StageDirector.FullHouse`), Navia's
+  and Freminet's share-Spends (`SpendShare`), Standing Ovation's Spend half
+  (`SpendHalf`, no printed number) or a fixed Spend (Quick Flourish).
+- **The sheet.** `stage_spend_up_to` takes `per: stage_guests` (the cap is
+  `amount` times the guests on stage; C# `10 * FurinaStage.Of(..).Count`);
+  Bravura's preview reads `SpentOrUpTo(card, 18)` in threes.
+- **One reading the paper does not state:** with no guest on stage Bring the
+  House Down's own cap is 0, and Extended Run still adds its 8 (it adds to
+  the whole cap, whatever the cap is).
+
+Pins: `klee-mod/KleeTests/Prototype/FurinaExtendedRunTests.cs` (BHtD 3
+guests + one copy = 38; Bravura on 200 with two upgraded copies spends 42,
+14 hits of 7, two plain copies 34, 11 hits; Full House cap and Quick
+Flourish's fixed cost unchanged); sim twin (`furina_tide.spend_up_to_card`)
+in `tier0/tests/test_furina_extended_run.py`. Untested in game until a
+`+next` deploy.
+
 ## Yae: the pool to 78 (2026-10-15)
 
 `review/active/yae-pool-to-78-2026-10-15.md`, ruled 2026-10-15, all picks
@@ -9247,3 +9331,43 @@ Levels higher).
 - **Renamed on build.** The paper's "Enlightened Blessing" Power ships as
   Scattered Blossoms (coordinator, on #1347): her starter relic's Orobas
   upgrade already carries the name. The id stays `proto_ym_enlightened_blessing`.
+
+## Yae: the dedupe and the refill (2026-10-16)
+
+`review/active/yae-dedupe-2026-10-16.md` and
+`review/active/yae-refill-2026-10-16.md`, ruled 2026-10-16 ([USER]: "Agreed
+on the Yae paper picks!"), built together. The pool stays 78 at 20 / 38 / 20
+(29 Attacks, 34 Skills, 15 Powers).
+
+- **Cut (dedupe pick 1 (a)).** Kitsune Flick, Shrine Lantern, Grafted
+  Branch, Shrine Bell, Shrine Offering, Deadline, Sacred Spark, Kitsune Flash
+  (Commons); Print Run, Rooted Shrine, Omikuji (Uncommons). Their rows,
+  generated classes, art plan rows and blank-portrait entries go. The rules
+  they used stay, with no row (`extend`, `annotated_strike`,
+  `strike_target`, a plant_level's `lasts`), as `damage_per_edit` did.
+- **Added (dedupe pick 2 (a)).** Kitsune Barrage, Sesshou Fang, Falling
+  Blossom, Publisher's Deadline, Fox's Shade, Hide Behind the Shrine,
+  Rewrite, Dawn Prayer (Commons); Hunting Gaze, Inscribed Thunder, Kitsune's
+  Blessing (Uncommons), at the refill paper's numbers and upgrades. They
+  draw blank portraits until her art pass (`tools/art_coverage.py`).
+- **Rules added.** Seven `yae` kinds (`barrage`, `level_strike`,
+  `wither_oldest_at`, `wither_newest_block`, `rewrite`, `level_newest`,
+  `bless_highest`), the Hunting Gaze power, the predicate `any_enemy_weak`,
+  the count `annotations_on_card`, and the card field
+  `cost_reduction_if_edited_this_turn`. The ledger keeps Edits this turn
+  (cleared at her turn start) and the last enemy one of her Attack cards
+  hit (kept with or without Hunting Gaze). The seat's Sakura target sentence
+  names Hunting Gaze.
+- **Builder's readings** (named in the PR): Falling Blossom's Last Bloom at a
+  target its own hit killed acts as usual (random, or a Foxfire's ALL);
+  Hunting Gaze yields to the Lure and an aimed strike, its "attacked" is the
+  last enemy any hit of her Attack card landed on (an AoE's last body), and
+  Fox Fire's 4 damage is not a Sakura strike, so stays random; Kitsune's
+  Blessing breaks a Level tie by the oldest (Editor-in-Chief's reading);
+  Sesshou Fang's bonus is one hit with the base, as Kitsune Flash's was;
+  Kitsune Barrage is one attack of 2 or 3 hits; Hide Behind the Shrine's 5
+  more is the card's own Block (Dexterity applies); Rewrite discards 0 to N
+  chosen cards (the base game's Gambler's Brew chooser) and then Edits, so
+  the Edit can reach a card it drew; Inscribed Thunder's Annotations are
+  distinct ones, Published included; Dawn Prayer and Kitsune's Blessing do
+  nothing with no Sakura.

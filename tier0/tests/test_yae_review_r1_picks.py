@@ -133,7 +133,7 @@ def test_levels_go_past_three():
     st = _state()
     _play(st, _ym("yakan_evocation"))
     for _ in range(4):
-        _play(st, _ym("rooted_shrine"))
+        _play(st, _ym("narukami_ray"))           # Rooted Shrine's until cut
     assert _led(st).sakura[0].level == 5
     assert Y.tenko_totals(st)[Y.THUNDER] == 2 + 5
     assert Y.tenko_line(st) == " (7 damage)"
@@ -149,14 +149,16 @@ def test_mooncall_copies_stack():
     assert [s.level for s in _led(st).sakura] == [2, 3]   # no levelling
 
 
-def test_mooncall_raises_grafted_branch_too():
+def test_mooncall_raises_a_plant_at_a_level_too():
+    # Guardian of Narukami (Grafted Branch's role until the dedupe cut it,
+    # 2026-10-16).
     st = _state()
     _play(st, _ym("foxs_mooncall"))
-    _play(st, _ym("grafted_branch"))                 # 3, +1
+    _play(st, _ym("guardian_of_narukami"))           # 3, +1
     assert _led(st).sakura[-1].level == 4
     _play(st, _ym("foxs_mooncall"))
-    _play(st, _ym("grafted_branch") + "+")           # 4, +2
-    assert _led(st).sakura[-1].level == 6
+    _play(st, _ym("guardian_of_narukami") + "+")     # 3, +2
+    assert _led(st).sakura[-1].level == 5
 
 
 def test_grove_levels_every_sakura_each_turn_start():
@@ -165,7 +167,7 @@ def test_grove_levels_every_sakura_each_turn_start():
     _play(st, _ym("sakura_grove"))
     Y.turn_start(st)                                 # none standing: nothing
     _play(st, _ym("yakan_evocation"))
-    _play(st, _ym("grafted_branch"))                 # levels 1 / 3
+    Y.plant(st, 1, level=3)                          # levels 1 / 3
     Y.turn_start(st)
     assert [s.level for s in _led(st).sakura] == [2, 4]
     _play(st, _ym("sakura_grove"))                   # a second copy

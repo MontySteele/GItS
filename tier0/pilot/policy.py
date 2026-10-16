@@ -337,6 +337,9 @@ BLIND_PREDICATES = frozenset({
     # row through this pilot, so blind moves no measured number.
     "shrine_full",
     "three_sakura",
+    # YAE, THE REFILL (2026-10-16): Fox's Shade's "If any enemy is Weak".
+    # Same reason as the two above.
+    "any_enemy_weak",
 })
 BLIND_PREDICATE_PREFIXES: tuple[str, ...] = ()
 

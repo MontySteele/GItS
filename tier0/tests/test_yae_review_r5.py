@@ -151,18 +151,18 @@ def test_sakura_seal_and_footnote_name_what_their_annotation_does():
         " (when played, draw 1 card).")
 
 
-# Pick 1 (a), ruled 2026-10-15 ("For 1332 - agreed on (a)"): Bestseller and
-# Print Run count the cards you Edited this combat ---------------------------
+# Pick 1 (a), ruled 2026-10-15 ("For 1332 - agreed on (a)"): Bestseller
+# counts the cards you Edited this combat (Print Run cut 2026-10-16) -------
 
 def _ym(name):
     return loader.get_card("proto_ym_" + name)
 
 
-def test_bestseller_and_print_run_rows_count_edits():
+def test_bestseller_row_counts_edits():
     # 2026-10-15: on the calculated rail (Perfected Strike's), so the face
-    # shows the running total in combat; the numbers are unchanged.
-    for name, base, per, op in (("bestseller", (8, 10), (2, 3), "damage"),
-                                ("print_run", (6, 8), (2, 3), "block")):
+    # shows the running total in combat; the numbers are unchanged. (Print
+    # Run, its Block twin, was cut by the dedupe, 2026-10-16.)
+    for name, base, per, op in (("bestseller", (8, 10), (2, 3), "damage"),):
         fx = lambda c: next(f for f in c.effects if "amount_formula" in f)
         lo, hi = fx(_ym(name)), fx(_ym(name + "+"))
         assert lo["op"] == hi["op"] == op
@@ -172,12 +172,8 @@ def test_bestseller_and_print_run_rows_count_edits():
         assert (lo["amount_formula"]["per"], hi["amount_formula"]["per"]) == per
     assert "{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}" in _row(
         "proto_ym_bestseller")["description"]
-    assert ("{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}"
-            in _row("proto_ym_print_run")["description"])
     assert "for each card you [gold]Edited[/gold] this combat" in _row(
         "proto_ym_bestseller")["description"]
-    assert "for each card you [gold]Edited[/gold] this combat" in _row(
-        "proto_ym_print_run")["description"]
 
 
 def test_the_count_starts_at_zero_each_combat():
@@ -185,8 +181,6 @@ def test_the_count_starts_at_zero_each_combat():
     assert Y.ledger(st.player).edits == 0
     _play(st, _ym("bestseller"))
     assert st.enemies[0].hp == 100 - 8
-    _play(st, _ym("print_run"))
-    assert st.player.block == 6
     Y.ledger(st.player).edits = 4
     Y.open_combat(st.player)
     assert Y.ledger(st.player).edits == 0
@@ -199,8 +193,8 @@ def test_a_two_card_edit_adds_two_and_the_payoffs_read_it():
     assert Y.ledger(st.player).edits == 2
     _play(st, _ym("bestseller"))                 # 8 + 2 x 2
     assert st.enemies[0].hp == 100 - 12
-    _play(st, _ym("print_run+"))                 # 8 + 3 x 2
-    assert st.player.block == 14
+    _play(st, _ym("bestseller+"))                # 10 + 3 x 2
+    assert st.enemies[0].hp == 100 - 12 - 16
 
 
 def test_edited_cards_count_after_they_leave_the_hand():
@@ -211,9 +205,9 @@ def test_edited_cards_count_after_they_leave_the_hand():
     _play(st, a)
     _play(st, b)
     st.player.hand = []                          # Footnote's draws aside
-    st.player.block = 0
-    _play(st, _ym("print_run"))                  # 6 + 2 x 2, hand empty
-    assert st.player.block == 10
+    hp = st.enemies[0].hp
+    _play(st, _ym("bestseller"))                 # 8 + 2 x 2, hand empty
+    assert hp - st.enemies[0].hp == 12
 
 
 def test_each_sakura_inked_branches_edits_counts():

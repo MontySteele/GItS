@@ -350,14 +350,17 @@ def test_chevreuse_applies_vulnerable_per_spend_and_acts_for_five():
     assert st.enemies[0].hp == 200 - 7        # 5, Vulnerable: 7
 
 
-def test_bis_keeps_half_a_spend_all_rounded_down():
+def test_extended_run_raises_bravuras_cap_once():
+    # furina-next paper 2 (2026-10-16): Bravura spends up to 18, 7 Hydro
+    # for every 3; Extended Run (8) makes it 26.
     st = _state()
     f = st.player.ftd
-    f.powers["bis"] = 1
-    f.fanfare = 9
-    _play(st, "ftd_bravura")                     # pays for all nine
-    assert st.enemies[0].hp == 200 - (6 + 2 * 9)
-    assert f.fanfare == 4 and f.ledger["bis_kept"] == 4
+    f.powers["extended_run"] = 8
+    f.fanfare = 40
+    _play(st, "ftd_bravura")
+    assert f.fanfare == 40 - 26
+    assert f.ledger["spends"] == 1
+    assert st.enemies[0].hp == 200 - 7 * (26 // 3)
 
 
 # ----------------------------------------------------------------------

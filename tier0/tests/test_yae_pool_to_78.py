@@ -7,7 +7,8 @@
     and go when the Sakura withers or is replaced;
   * the Foxfire targeting rule: an aimed strike is one hit on the target;
   * the batch's new verbs and powers;
-  * sec.3: Grafted Branch, the Grove / Mooncall swap.
+  * sec.3: the Grove / Mooncall swap (Grafted Branch was cut by the dedupe,
+    2026-10-16).
 """
 
 from __future__ import annotations
@@ -72,14 +73,16 @@ def _hp(st):
 
 # --- the pool ----------------------------------------------------------------
 
-def test_the_pool_is_78_at_20_38_20_and_16_13_6_new():
+def test_the_pool_is_78_at_20_38_20():
     rows = [c for c in loader.prototype_cards()
             if c.id.startswith(Y.ID_PREFIX) and c.rarity != "basic"]
     assert len(rows) == 78
     assert Counter(c.rarity for c in rows) == {"common": 20, "uncommon": 38,
                                                "rare": 20}
-    assert Counter(c.type for c in rows) == {"attack": 28, "skill": 36,
-                                             "power": 14}
+    # The dedupe and the refill (2026-10-16): 4 Attacks and 7 Skills cut,
+    # 5 Attacks, 5 Skills and a Power added.
+    assert Counter(c.type for c in rows) == {"attack": 29, "skill": 34,
+                                             "power": 15}
 
 
 def test_grove_is_rare_and_mooncall_uncommon_at_1_upgrading_to_2_levels():
@@ -158,14 +161,16 @@ def test_foxs_verdict_one_hit_per_weak_enemy_per_striking_sakura():
                        100]
 
 
-def test_sacred_spark_and_narukami_judgment():
+def test_a_sakura_strikes_it_and_narukami_judgment():
+    # "A Sakura strikes it" (Saiguu's Lesson, Kitsune Pounce; Sacred Spark's
+    # until the dedupe cut it, 2026-10-16): the highest, the oldest on a tie.
     st = _state()
     Y.plant(st, 1)
     Y.plant(st, 1, kind=Y.FOXFIRE)
     Y.level_up(st, 1)
-    _play(st, "sacred_spark")
+    Y.strike_target(st, st.enemies[0])
     thunder = _led(st).sakura[0]
-    assert _hp(st) == [100 - 4 - Y.act_size(st, thunder)]  # highest, oldest
+    assert _hp(st) == [100 - Y.act_size(st, thunder)]  # highest, oldest
     st = _state()
     Y.plant(st, 1)
     Y.plant(st, 1, kind=Y.FOXFIRE)
@@ -311,10 +316,3 @@ def test_eternity_stops_the_timers():
     for _ in range(5):
         Y.turn_end(st)
     assert len(_led(st).sakura) == 1
-
-
-def test_grafted_branch_is_level_3_and_lasts_1_more_turn():
-    st = _state()
-    _play(st, "grafted_branch")
-    s = _led(st).sakura[0]
-    assert (s.level, s.turns_left) == (3, Y.SAKURA_TURNS + 1)

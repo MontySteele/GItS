@@ -578,6 +578,29 @@ public sealed class StellarConductPower : PowerModel, ILocalizationProvider
     internal void Pulse() => Flash();
 }
 
+/// <summary>Hunting Gaze (the refill,
+/// <c>review/active/yae-refill-2026-10-16.md</c>): "Your Sakura strike the
+/// last enemy you attacked, while it lives." Read where a strike would pick
+/// a random enemy (<c>YaeShrine.Aim</c>): an aimed strike, the Lure and a
+/// Foxfire Sakura's hit on ALL are unchanged; with no living target it
+/// falls back to random. Copies do not stack.</summary>
+public sealed class HuntingGazePower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Hunting Gaze"),
+        ("description",
+            "Your [gold]Sakura[/gold] strike the last enemy you attacked, "
+          + "while it lives."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Single;
+
+    internal void Pulse() => Flash();
+}
+
 /// <summary>Eternity: "Your Sakura no longer wither when their turns run
 /// out." While she has it no timer ticks (<see cref="YaeShrineLedger.Tick"/>);
 /// a Sakura still withers to Fallen Petals, Replanting, Daisesshou or a

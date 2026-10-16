@@ -324,7 +324,6 @@ MIRRORED: dict[str, object] = {
     "FurinaStageLaw.HighStakesEvery": _stage("HIGH_STAKES_EVERY"),
     "FurinaStageLaw.HighStakesEveryUpgraded": _stage("HIGH_STAKES_EVERY_UPGRADED"),
     "FurinaStageLaw.HymnThreshold": _stage("HYMN_THRESHOLD"),
-    "FurinaStageLaw.PrimaDonnaFanfare": _stage("PRIMA_DONNA_FANFARE"),
     "FurinaStageLaw.ReginaDrain": _stage("REGINA_DRAIN"),
     "FurinaStageLaw.StarTurnFanfarePer": _stage("STAR_TURN_FANFARE_PER"),
     # The diversity pass (2026-10-11): Bravura's "for every 3 spent" and
@@ -348,6 +347,11 @@ MIRRORED: dict[str, object] = {
     "YaeLaw.FoxfireBase": _yae("FOXFIRE_BASE"),
     "YaeLaw.KitsuneBase": _yae("KITSUNE_BASE"),
     "YaeLaw.RoyaltiesPayout": _yae("ROYALTIES_ENERGY"),
+    # The refill (ruled 2026-10-16): Kitsune Barrage, Sesshou Fang.
+    "YaeLaw.BarrageHits": _yae("BARRAGE_HITS"),
+    "YaeLaw.BarrageFullHits": _yae("BARRAGE_FULL_HITS"),
+    "YaeLaw.BarrageSakura": _yae("BARRAGE_SAKURA"),
+    "YaeLaw.FangLevel": _yae("FANG_LEVEL"),
     "VarkaLaw.SwirlPyroDamage": _varka("SWIRL_PYRO_DAMAGE"),
     "VarkaLaw.SwirlHydroBlock": _varka("SWIRL_HYDRO_BLOCK"),
     "VarkaLaw.SwirlCryoVulnerable": _varka("SWIRL_CRYO_VULNERABLE"),
@@ -883,6 +887,9 @@ UNMIRRORED: dict[str, str] = {
         "presentation: narrowest x stretch of a Drain/Repay effect.",
     "FurinaStageFx.MaxStretch":
         "presentation: widest x stretch of a Drain/Repay effect.",
+    # Furina's guest effects (2026-10-16): a straggler node is freed after this.
+    "FurinaGuestFx.LeakSeconds":
+        "presentation: leak guard on a guest effect node, in seconds.",
     "ThrownProjectile.FlightSeconds":
         "presentation: hand-to-target flight of the thrown bomb in seconds.",
     "ThrownProjectile.ArcLift":

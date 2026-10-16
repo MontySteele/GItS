@@ -306,6 +306,9 @@ public static class KleeMod
                         Powers.YaeEditing.NothingToEditText,
                     [Powers.YaeEditing.NoSakuraToEditKey] =
                         Powers.YaeEditing.NoSakuraToEditText,
+                    // The refill (2026-10-16): Rewrite's discard chooser.
+                    [Powers.YaeCards.RewritePromptKey] =
+                        Powers.YaeCards.RewritePromptText,
                     [Powers.YaeEditing.NothingToPublishKey] =
                         Powers.YaeEditing.NothingToPublishText,
                 });
@@ -554,10 +557,6 @@ public static class KleeMod
                     // Ascension's element hit, which gains no Oath.
                     [Cards.ArmKeywordTips.AscensionNoOathKey + ".title"] =
                         "The second hit",
-                    // Design-session call (2026-10-13): the rider on Bis!,
-                    // which Spends count.
-                    [Cards.ArmKeywordTips.BisSpendUpToKey + ".title"] =
-                        "Bis!",
                     // The Furina wave (2026-10-13): the rider on Final Bow,
                     // whose acts happen one after another.
                     [Cards.ArmKeywordTips.FinalBowInTurnKey + ".title"] =

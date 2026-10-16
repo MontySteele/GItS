@@ -44,21 +44,21 @@ public sealed class ProtoFsBravura : CustomCardModel, IElementalCard, ICharacter
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFanfare(ArmKeywordTips.ForSpend(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro), this), this);
+        ArmKeywordTips.ForSpend(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_bravura");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Bravura"),
-        ("description", "[gold]Spend[/gold] all your [gold]Fanfare[/gold]. Deal {Damage:diff()} [gold]Hydro[/gold] damage for every 3 spent.{InCombat:\n(Deals {TotalDamage:diff()} damage)|}"),
+        ("description", "[gold]Spend[/gold] up to 18, all you can. Deal {Damage:diff()} [gold]Hydro[/gold] damage for every 3 spent.{InCombat:\n(Deals {TotalDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new DamageVar(7m, ValueProp.Move),
-            new HitsTotalDamageVar(static card => 0 + 1 * (FurinaStage.SpentOrFanfare(card) / FurinaStageLaw.BravuraSpentPer))
+            new HitsTotalDamageVar(static card => 0 + 1 * (FurinaStage.SpentOrUpTo(card, 18) / FurinaStageLaw.BravuraSpentPer))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -70,7 +70,7 @@ public sealed class ProtoFsBravura : CustomCardModel, IElementalCard, ICharacter
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await FurinaStage.SpendAll(choiceContext, Owner.Creature);
+        await FurinaStage.SpendUpTo(choiceContext, Owner.Creature, 18);
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         if ((0 + 1 * FurinaStage.SpentThrees(this)) > 0)
         {

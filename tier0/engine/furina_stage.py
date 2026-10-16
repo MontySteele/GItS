@@ -97,7 +97,6 @@ SHOWSTOPPER_SPEND = T.SHOWSTOPPER_SPEND
 HIGH_STAKES_EVERY = T.HIGH_STAKES_EVERY
 HIGH_STAKES_EVERY_UPGRADED = T.HIGH_STAKES_EVERY_UPGRADED
 HYMN_THRESHOLD = T.HYMN_THRESHOLD
-PRIMA_DONNA_FANFARE = T.PRIMA_DONNA_FANFARE
 REGINA_DRAIN = T.REGINA_DRAIN
 STAR_TURN_FANFARE_PER = T.STAR_TURN_FANFARE_PER
 BRAVURA_SPENT_PER = T.BRAVURA_SPENT_PER
@@ -115,13 +114,15 @@ GUESTS = ("charlotte", "wriothesley", "lynette", "clorinde",
 SALONS_ENCORE = "fs_salons_encore"
 THUNDEROUS_APPLAUSE = "fs_thunderous_applause"
 UNIVERSAL_REVELRY = "fs_universal_revelry"
-# The pool to 39: Ousia Surge, A Five-Century Act, Critics' Darling and Bis!
+# The pool to 39: Ousia Surge, A Five-Century Act and Critics' Darling
 # 1 a copy; Fountain of Lucine its Repay (3, 4 upgraded) a play, scheduled
 # for three turns at her next turn start (`furina_tide.turn_start`).
 OUSIA_SURGE = "fs_ousia_surge"
 A_FIVE_CENTURY_ACT = "fs_a_five_century_act"
 CRITICS_DARLING = "fs_critics_darling"
-BIS = "fs_bis"
+# furina-next paper 2 (2026-10-16): Extended Run, Bis!'s slot, applies
+# its printed number (8, 12 upgraded).
+EXTENDED_RUN = "fs_extended_run"
 FOUNTAIN_OF_LUCINE = "fs_fountain_of_lucine"
 # The pool to 75: each applies its printed number (Grand Entrance 4 [6], High
 # Stakes 4 [6], Pneuma Tides 2 [3]) or 1 a copy.
@@ -130,6 +131,8 @@ SHOWSTOPPER = "fs_showstopper"
 ENSEMBLE_CAST = "fs_ensemble_cast"
 CRESCENDO = "fs_crescendo"
 PRIMA_DONNA = "fs_prima_donna"
+# furina-next (2026-10-16): the upgraded Prima Donna's power, which also draws.
+PRIMA_DONNA_PLUS = "fs_prima_donna_plus"
 STANDING_ROOM_ONLY = "fs_standing_room_only"
 HIGH_STAKES = "fs_high_stakes"
 REGINA_OF_ALL_WATERS = "fs_regina_of_all_waters"
@@ -150,13 +153,14 @@ ARM_POWER_IDS = {
     "ousia_surge": OUSIA_SURGE,
     "five_century": A_FIVE_CENTURY_ACT,
     "critics_darling": CRITICS_DARLING,
-    "bis": BIS,
+    "extended_run": EXTENDED_RUN,
     # The pool to 75.
     "grand_entrance": GRAND_ENTRANCE,
     "showstopper": SHOWSTOPPER,
     "ensemble_cast": ENSEMBLE_CAST,
     "crescendo": CRESCENDO,
     "prima_donna": PRIMA_DONNA,
+    "prima_donna_plus": PRIMA_DONNA_PLUS,
     "standing_room_only": STANDING_ROOM_ONLY,
     "high_stakes": HIGH_STAKES,
     "regina": REGINA_OF_ALL_WATERS,
@@ -496,7 +500,7 @@ def spend(state, amount: int) -> int:
 
 
 def spend_all(state) -> int:
-    """"Spend all your Fanfare." Nothing held is no Spend; Bis! keeps half
+    """"Spend all your Fanfare." Nothing held is no Spend
     (`furina_tide.spend_all`)."""
     if not active(state.player):
         return 0
@@ -505,16 +509,18 @@ def spend_all(state) -> int:
 
 def spend_up_to(state, cap: int) -> int:
     """"Spend up to X" (the Spend paper, 2026-10-10): X or all she holds,
-    never fails (`furina_tide.spend_up_to`). Returns what counts as spent."""
+    never fails. A played card's Spend, so Extended Run (furina-next paper
+    2, 2026-10-16) adds to the whole cap (`furina_tide.spend_up_to_card`).
+    Returns what counts as spent."""
     if not active(state.player):
         return 0
-    return T.spend_up_to(state, int(cap))
+    return T.spend_up_to_card(state, int(cap))
 
 
 def spend_half(state) -> int:
     """"Spend half your Fanfare" (Standing Ovation, 2026-10-11): half the
-    bank, rounded down (`furina_tide.spend_half`); not a spend-all, so no
-    Bis!. Returns what counts as spent."""
+    bank, rounded down (`furina_tide.spend_half`); no printed number, so no
+    Extended Run. Returns what counts as spent."""
     if not active(state.player):
         return 0
     return T.spend_half(state)
@@ -987,8 +993,9 @@ READINGS: tuple[str, ...] = (
     "and again after Showstopper.",
     "Escoffier's line adds to every damaging act, his own included; it does "
     "not touch Block or Repay acts.",
-    "Regina drains first at turn start, then Fountain of Lucine and Pneuma "
-    "Tides Repay, then Prima Donna reads the Fanfare.",
+    "Crescendo gains first at turn start, then Regina drains, then Fountain "
+    "of Lucine and Pneuma Tides Repay, then Prima Donna pays if she Spent "
+    "last turn (furina-next, 2026-10-16).",
     "Salon Solitaire's Repay comes after the guests act, at the end of her "
     "turn.",
     "Charlotte's line counts the Singer's end-of-turn Repay: with no Repay "

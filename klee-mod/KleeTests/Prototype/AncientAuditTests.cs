@@ -225,8 +225,12 @@ public class AncientAuditTests
             Il.Calls(Il.Method("FurinaStage", "SpendAll")));
         Assert.Contains("CenterOfAttentionPower.TryClaim",
             Il.Calls(Il.Method("FurinaStage", "Spend")));
-        Assert.Contains("CenterOfAttentionPower.TryClaim",
+        // furina-next paper 2 (2026-10-16): the card verb adds Extended Run
+        // to its cap, then pays through the one "Spend up to" path.
+        Assert.Contains("FurinaStage.SpendUpToCap",
             Il.Calls(Il.Method("FurinaStage", "SpendUpTo")));
+        Assert.Contains("CenterOfAttentionPower.TryClaim",
+            Il.Calls(Il.Method("FurinaStage", "SpendUpToCap")));
     }
 
     // ==== Dodoco Tales: one payment per explosion =============================

@@ -57,40 +57,40 @@ internal static class YaeRoster
     /// (<c>review/active/yae-review-r3-2026-10-14.md</c> sec.3), and the
     /// pool to 78's thirty-five (<c>review/active/yae-pool-to-78-2026-10-15.md</c>
     /// sec.2, ruled 2026-10-15; Sakura Grove and Fox's Mooncall swapped
-    /// rarities, sec.3): SEVENTY-EIGHT, twenty Commons, thirty-eight
-    /// Uncommons and twenty Rares, in the sheet's order. No Ancients and no
-    /// co-op tier yet.
+    /// rarities, sec.3), less the dedupe's eleven near-copies and plus the
+    /// refill's eleven (<c>review/active/yae-dedupe-2026-10-16.md</c>,
+    /// <c>review/active/yae-refill-2026-10-16.md</c>, ruled 2026-10-16):
+    /// SEVENTY-EIGHT, twenty Commons, thirty-eight Uncommons and twenty
+    /// Rares, in the sheet's order. No Ancients and no co-op tier yet.
     /// </summary>
     internal static IReadOnlyList<CardModel> Pool() => new CardModel[]
     {
         // Common (20)
-        ModelDb.Card<ProtoYmKitsuneFlash>(),
         ModelDb.Card<ProtoYmThunderRite>(),
-        ModelDb.Card<ProtoYmShrineOffering>(),
         ModelDb.Card<ProtoYmTwinSakura>(),
-        ModelDb.Card<ProtoYmDeadline>(),
         ModelDb.Card<ProtoYmFoxFireDraft>(),
         ModelDb.Card<ProtoYmSlyStrike>(),
         ModelDb.Card<ProtoYmFoxTrick>(),
         ModelDb.Card<ProtoYmShrineMaidensGuard>(),
-        ModelDb.Card<ProtoYmShrineBell>(),
-        ModelDb.Card<ProtoYmGraftedBranch>(),
         ModelDb.Card<ProtoYmMarginNote>(),
         ModelDb.Card<ProtoYmKitsunePounce>(),
         ModelDb.Card<ProtoYmFoxfireSweep>(),
         ModelDb.Card<ProtoYmEvergreenCharm>(),
         ModelDb.Card<ProtoYmThunderPetal>(),
-        ModelDb.Card<ProtoYmKitsuneFlick>(),
-        ModelDb.Card<ProtoYmSacredSpark>(),
         ModelDb.Card<ProtoYmCliffhanger>(),
-        ModelDb.Card<ProtoYmShrineLantern>(),
+        ModelDb.Card<ProtoYmKitsuneBarrage>(),
+        ModelDb.Card<ProtoYmSesshouFang>(),
+        ModelDb.Card<ProtoYmFallingBlossom>(),
+        ModelDb.Card<ProtoYmPublishersDeadline>(),
+        ModelDb.Card<ProtoYmFoxsShade>(),
+        ModelDb.Card<ProtoYmHideBehindTheShrine>(),
+        ModelDb.Card<ProtoYmRewrite>(),
+        ModelDb.Card<ProtoYmDawnPrayer>(),
         // Uncommon (38)
         ModelDb.Card<ProtoYmKitsuneRite>(),
         ModelDb.Card<ProtoYmThunderboltTithe>(),
-        ModelDb.Card<ProtoYmRootedShrine>(),
         ModelDb.Card<ProtoYmEdictOfCleansing>(),
         ModelDb.Card<ProtoYmBestseller>(),
-        ModelDb.Card<ProtoYmPrintRun>(),
         ModelDb.Card<ProtoYmFootnote>(),
         ModelDb.Card<ProtoYmSakuraSeal>(),
         ModelDb.Card<ProtoYmSerialization>(),
@@ -111,7 +111,6 @@ internal static class YaeRoster
         ModelDb.Card<ProtoYmGenreShift>(),
         ModelDb.Card<ProtoYmNarukamiJudgment>(),
         ModelDb.Card<ProtoYmKitsunesShelter>(),
-        ModelDb.Card<ProtoYmOmikuji>(),
         ModelDb.Card<ProtoYmToriiWard>(),
         ModelDb.Card<ProtoYmKitsuneVeil>(),
         ModelDb.Card<ProtoYmHoldThePresses>(),
@@ -123,6 +122,9 @@ internal static class YaeRoster
         ModelDb.Card<ProtoYmSaiguusLesson>(),
         ModelDb.Card<ProtoYmShrinesSacredShade>(),
         ModelDb.Card<ProtoYmEditorialPriority>(),
+        ModelDb.Card<ProtoYmHuntingGaze>(),
+        ModelDb.Card<ProtoYmInscribedThunder>(),
+        ModelDb.Card<ProtoYmKitsunesBlessing>(),
         // Rare (20)
         ModelDb.Card<ProtoYmTenkoKenshin>(),
         ModelDb.Card<ProtoYmYakanOffering>(),

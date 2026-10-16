@@ -85,8 +85,11 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   (16 Attacks, 13 Skills, 6 Powers), pool 78 (20 / 38 / 20); Sakura Grove a
   Rare and Fox's Mooncall an Uncommon at 1; distinct Annotations coexist on
   a Sakura and a no-change Edit is not an Edit; an aimed strike is one hit,
-  a Foxfire Sakura's included. The new cards draw blank portraits until her
-  art pass; the Sakura display (pick 3) is a BACKLOG line. Next: five seats
+  a Foxfire Sakura's included. The Sakura display (pick 3) is a BACKLOG
+  line. **The dedupe and the refill built** (2026-10-16,
+  `review/active/yae-dedupe-2026-10-16.md` and `yae-refill-2026-10-16.md`):
+  eleven near-copies cut and eleven new cards added, pool still 78 (20 / 38 /
+  20); the eleven draw blank portraits until her art pass. Next: five seats
   on the full pool, then [USER]'s run (pick 4 (a)).
 
 ## The kits
@@ -121,7 +124,10 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
   waiting Plan flips it to the now-line. On a controller the peek button (left
   stick press, its glyph drawn under the Plan strip) opens a grid of the
   waiting Plans, each captioned with the line it will carry out as, where A
-  flips one and B closes (unseen in game).
+  flips one and B closes (unseen in game). The same view opens on the
+  keyboard's peek key (Space, or S in keyboard-only play, both remappable in
+  the game's settings; the hint under the strip names it) and on a click on
+  that hint (2026-10-16, unseen in game).
 - **Starter relic:** the Tamakushi Casket gains 3 Block at the start of her
   turn while a Plan is waiting, after the Block clear and before Plans
   resolve. Its upgrade, the Watatsumi Casket, gains 3 for each Plan waiting.
@@ -191,9 +197,13 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
   served taking her to Balance and evaluating overnight."). Her cards and rules
   on `main` are frozen; changes go on `furina-next` with a suite record
   (`operations/stage-gate.md`).
-- **Next:** Balance suite 1 on the base-five baseline seeds, plus the co-op
-  check owed at a finish line. His read to test: act 1 easy (guests' flat
-  numbers), act 2 the danger, act 3 easy once Powers scale.
+- **Promoted 2026-10-16** (`review/records/furina-suite-3-2026-10-16.md`,
+  [USER]: "Let's promote as-is"): furina-next papers 1 and 2 (Crescendo,
+  Standing Room Only, Prima Donna; Bravura and Bring the House Down capped,
+  Extended Run for Bis!). Suite 3 mean end floor 42.8, four of five in act 3.
+- **Next:** paper 3 on act 1 and 2 HP loss and the Repay cards that read
+  "Repays 0", on a fresh `furina-next`; the co-op check owed at a finish
+  line.
 
 **Varka: Balance.**
 - **Rules** (`review/active/varka-paper-kit-2026-09-28.md` sec.3;

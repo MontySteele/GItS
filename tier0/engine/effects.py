@@ -465,7 +465,7 @@ def _runtime_count(state: CombatState, token: str,
             or token == "half_total_oath"):
         return varka_oath.count(state, token)
     if token == "edits_this_combat":
-        # YAE (Bestseller, Print Run; Yae review r5, pick 1 (a)): the cards
+        # YAE (Bestseller; Yae review r5, pick 1 (a)): the cards
         # she Edited this combat. 0 for anyone who is not Yae. C# twin
         # `YaeShrine.Edits`.
         led = yae_shrine.ledger(state.player)
@@ -478,6 +478,11 @@ def _runtime_count(state: CombatState, token: str,
         # YAE, THE POOL TO 78: Disarming Smile's "for each enemy that is
         # Weak". C# twin `YaeShrine.WeakEnemies`.
         return yae_shrine.weak_enemies(state)
+    if token == "annotations_on_card":
+        # YAE, THE REFILL (2026-10-16): Inscribed Thunder's "for each
+        # Annotation on this card", distinct, Published ones included. C#
+        # twin `YaeEditing.DistinctLayers`.
+        return yae_shrine.annotations_on_card(current_card)
     raise ValueError(f"unknown runtime count {token!r}")
 
 
@@ -934,6 +939,9 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     state.last_hit_landed = 0
     if not enemy.alive:
         return 0.0
+    # YAE, THE REFILL (2026-10-16): Hunting Gaze remembers the last enemy one
+    # of her Attack cards hit. A no-op for anyone not Yae.
+    yae_shrine.note_attacked(state, enemy, source)
     # Solar Isotoma (Crystallize engine): attack hits vs aura'd enemies
     # grant block — checked before the hit can consume the aura.
     if (source == "attack" and enemy.aura
@@ -3299,6 +3307,8 @@ PREDICATE_NAMES = frozenset({
     # full", Late Night Reading's "If you have 3 Sakura" (3 or more).
     "shrine_full",
     "three_sakura",
+    # YAE, THE REFILL (2026-10-16): Fox's Shade's "If any enemy is Weak".
+    "any_enemy_weak",
 })
 
 # Parameterised predicates: prefix + an argument the branch parses itself.
@@ -3464,12 +3474,14 @@ RUNTIME_COUNT_NAMES = frozenset({
     "half_total_oath",
     # AoE trim, 2026-10-03: Bombs Away!'s "for each enemy with a Bomb".
     "enemies_with_bomb",
-    # Yae review r5, pick 1 (a): Bestseller and Print Run's "for each card
+    # Yae review r5, pick 1 (a): Bestseller's "for each card
     # you Edited this combat".
     "edits_this_combat",
     # The Yae pool to 78 (2026-10-15).
     "sakura_count",
     "weak_enemies",
+    # The Yae refill (2026-10-16): Inscribed Thunder.
+    "annotations_on_card",
 })
 
 # The one prefix family, exactly as `PREDICATE_PREFIXES` carries its own.
@@ -3577,6 +3589,8 @@ def _predicate(state: CombatState, name: str) -> bool:
         return yae_shrine.shrine_full(state)
     if name == "three_sakura":
         return yae_shrine.sakura_count(state.player) >= 3
+    if name == "any_enemy_weak":
+        return yae_shrine.weak_enemies(state) > 0
     if name == "reaction_triggered_this_turn":
         # Chevreuse Vanguard's Valor. RULED: ANY reaction counts, not
         # Overload-only -- must never be a dead draw off-Pyro/Electro.
@@ -4982,8 +4996,14 @@ def _op_stage_spend_all(state: CombatState, fx: dict, card: Card) -> None:
 def _op_stage_spend_up_to(state: CombatState, fx: dict, card: Card) -> None:
     """"Spend up to X" (the Spend paper, 2026-10-10): X or all she holds,
     never fails. What it counted is this play's `stage_spent`."""
-    state.stage_spent_this_card = furina_stage.spend_up_to(
-        state, _amount(state, fx.get("amount", 1)))
+    cap = _amount(state, fx.get("amount", 1))
+    # furina-next paper 2 (2026-10-16): Bring the House Down's "Spend up to
+    # 10 for each guest on stage" (the C# `10 * FurinaStage.Of(..).Count`).
+    if fx.get("per") == "stage_guests":
+        cap *= len(furina_stage.stage(state.player))
+    elif fx.get("per") is not None:
+        raise ValueError(f"stage_spend_up_to per {fx['per']!r}")
+    state.stage_spent_this_card = furina_stage.spend_up_to(state, cap)
 
 
 def _op_stage_spend_half(state: CombatState, fx: dict, card: Card) -> None:
