@@ -72,3 +72,5 @@ Awakening (forces Electro), Unwavering Banner.
      play first.
 
 Raw transcripts: `review/qa/blindplay/` (local, gitignored).
+
+**Ruled 2026-10-15.** [USER]: "On Varka - yes, let's promote". Pick 1 (a).

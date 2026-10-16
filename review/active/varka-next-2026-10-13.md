@@ -63,3 +63,9 @@ damage. Costs 1 less for each Swirl this turn." (#1329)
 its plays (cost 0 or less than printed), and its pick rate in the suite is no
 lower than the old copy's. Varka's end floors and act-by-act HP stay within
 the suite-to-suite spread; this is a role change, not a power change.
+
+## Promoted 2026-10-15
+
+Suite record: `review/records/varka-next-suite-1-2026-10-15.md` (2 wins, all
+five runs to act 3; Eula and Tempest Charge SPLIT, Twin Gales ungraded).
+[USER]: "On Varka - yes, let's promote".
