@@ -43,7 +43,13 @@ def test_every_spend_up_to_spends_all_it_can():
     rows = _rows()
     ups = [rid for rid, row in rows.items()
            if "[gold]Spend[/gold] up to" in (row.get("description") or "")]
-    assert sorted(ups) == ["proto_fs_crashing_waves", "proto_fs_hold_the_stage",
+    # furina-next paper 2 (2026-10-16): Bravura and Bring the House Down
+    # spend up to a cap; Extended Run names the clause and spends nothing.
+    assert sorted(ups) == ["proto_fs_bis", "proto_fs_bravura",
+                           "proto_fs_bring_the_house_down",
+                           "proto_fs_crashing_waves", "proto_fs_hold_the_stage",
                            "proto_fs_the_full_house", "proto_fs_tidal_flourish"]
     for rid in ups:
-        assert ", all you can:" in rows[rid]["description"], rid
+        if rid == "proto_fs_bis":
+            continue
+        assert ", all you can" in rows[rid]["description"], rid

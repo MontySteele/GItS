@@ -202,7 +202,7 @@ def _new_ledger() -> dict:
         "guest_acts": collections.Counter(), "bows": 0,
         "started_at_or_below_half": False,
         "fanfare_end": 0, "unrepaid_end": 0, "curtain_repaid": 0,
-        "bis_kept": 0, "fountain_repaid": 0,
+        "fountain_repaid": 0,
         "damage_by_turn": collections.Counter(),
         # The pool to 75: guest lines that fired (their own log line,
         # sec.3), duplicate moves and leaves.
@@ -401,9 +401,11 @@ CARDS: dict[str, Spec] = {
     # Uncommon since the 2026-10-09 trim.
     "ftd_interval_bell": Spec("Interval Bell", 0, "skill", "uncommon",
                               "spend_energy", (1, 3, 1)),
-    # Bravura (1): Spend all your Fanfare. Deal 6, plus 2 per point.
+    # Bravura (1): Spend up to 18, all you can. Deal 7 Hydro damage for
+    # every 3 spent (furina-next paper 2, 2026-10-16: the hit, the per and
+    # the cap).
     "ftd_bravura": Spec("Bravura", 1, "attack", "uncommon", "bravura",
-                        (6, 2)),
+                        (7, 3, 18)),
     # --- Powers (2, Uncommon; Endless Waltz was cut 2026-10-09) ---
     # Salon's Encore (1): Whenever you Drain, deal 3 damage to ALL enemies.
     "ftd_salon_encore": Spec("Salon's Encore", 1, "power", "uncommon",
@@ -462,8 +464,11 @@ CARDS: dict[str, Spec] = {
     # Vulnerable to a random enemy. Act: deal 4 damage to a random enemy.
     "ftd_chevreuse": Spec("Guest Star: Chevreuse", 1, "skill", "uncommon",
                           "guest", (), "chevreuse", exhaust=True),
-    # Bis! (Power, 1): Whenever you Spend all your Fanfare, keep half of it.
-    "ftd_bis": Spec("Bis!", 1, "power", "rare", "power", (1,), "bis"),
+    # Extended Run (Power, 1; Bis!'s slot, furina-next paper 2,
+    # 2026-10-16): Attacks and Skills that Spend up to a number can Spend 8
+    # more.
+    "ftd_extended_run": Spec("Extended Run", 1, "power", "rare", "power",
+                             (8,), "extended_run"),
     # Critics' Darling (Power, 2, Rare): Whenever you Drain or Repay, deal
     # that much damage to a random enemy.
     "ftd_critics_darling": Spec("Critics' Darling", 2, "power", "rare",
@@ -521,8 +526,10 @@ CARDS: dict[str, Spec] = {
                             (1,), "prima_donna"),
     "ftd_standing_room_only": Spec("Standing Room Only", 1, "power", "rare",
                                    "power", (1,), "standing_room_only"),
+    # Spend up to 10 for each guest on stage (furina-next paper 2): damage
+    # per point, then the cap per guest.
     "ftd_bring_the_house_down": Spec("Bring the House Down", 2, "attack",
-                                     "rare", "house_down", (1,)),
+                                     "rare", "house_down", (1, 10)),
     # Ousia, Drain (10).
     "ftd_undercurrent": Spec("Unheard Confession", 1, "attack", "common",
                              "undercurrent", (2, 5, 1)),
@@ -988,11 +995,33 @@ def up_to_of(f: Ftd, cap: int) -> int:
     return 0 if cap <= 0 else min(cap, f.fanfare + navia_discount(f))
 
 
+def card_up_to_cap(state, printed: int) -> int:
+    """Extended Run (furina-next paper 2, 2026-10-16): "Attacks and Skills
+    that Spend up to a number can Spend 8 [12] more." A played card's whole
+    printed cap rises once by every copy's amount (the C#
+    `FurinaStageLedger.CardUpToCap`). Full House, a guest's share-Spend and
+    Spend half never read it."""
+    return (max(0, int(printed))
+            + max(0, _player_power(state.player, "extended_run")))
+
+
+def card_up_to_of(state, printed: int) -> int:
+    """What a played card's "Spend up to `printed`" counts now, Extended Run
+    included (the pilot's read; the C# `FurinaStage.SpentOrUpTo`)."""
+    return up_to_of(_f(state), card_up_to_cap(state, printed))
+
+
+def spend_up_to_card(state, printed: int) -> int:
+    """A played Attack's or Skill's "Spend up to `printed`": one Spend of
+    the card's cap, Extended Run included. Returns what counts as spent."""
+    return spend_up_to(state, card_up_to_cap(state, printed))
+
+
 def spend_up_to(state, cap: int) -> int:
     """"Spend up to X" (the Spend paper, 2026-10-10, pick 1): spends X, or all
     she holds if that is less, and never fails. A Spend only when at least 1
     counts (Thunderous Applause, Chevreuse, Standing Room Only); not a
-    spend-all, so Bis! ignores it. Navia's line makes the first 2 [3]
+    spend-all. Navia's line makes the first 2 [3]
     points of the first Spend each turn free: they count, and are not taken.
     Returns what counts as spent."""
     f = _f(state)
@@ -1023,17 +1052,16 @@ def spend_share(state, divisor: int) -> int:
 
 def spend_half(state) -> int:
     """"Spend half your Fanfare" (Standing Ovation, 2026-10-11): a "Spend up
-    to" of half the bank, rounded down, so 0 or 1 held spends nothing. Not a
-    spend-all: Bis! ignores it. Returns what counts as
-    spent."""
+    to" of half the bank, rounded down, so 0 or 1 held spends nothing. It
+    Spends no printed number, so Extended Run does not raise it. Returns
+    what counts as spent."""
     return spend_up_to(state, _f(state).fanfare // 2)
 
 
 def spend_all(state) -> int:
     """"Spend all your Fanfare": one Spend of everything held (nothing held
-    is no Spend). Navia's first Spend each turn keeps 2 (3 upgraded); Bis!
-    keeps half, rounded down; the card reads the whole bank. Returns what
-    the card reads."""
+    is no Spend). Navia's first Spend each turn keeps 2 (3 upgraded); the
+    card reads the whole bank. Returns what the card reads."""
     f = _f(state)
     held = f.fanfare
     if held <= 0:
@@ -1049,10 +1077,6 @@ def spend_all(state) -> int:
     if keep:
         _line(state, "navia", keep)
     _after_spend(state, held)
-    if _player_power(state.player, "bis"):
-        kept = held // 2
-        f.fanfare += kept
-        f.ledger["bis_kept"] += kept
     return held
 
 
@@ -1270,11 +1294,13 @@ def _hit(state, enemy, amount: int, element) -> None:
 
 
 def _card_damage(state, card, amount: int, *, all_enemies: bool = False,
-                 hydro: bool = False) -> None:
+                 hydro: bool = False, times: int = 1) -> None:
     from tier0.engine import effects
     f = _f(state)
     fx = {"op": "damage", "amount": amount,
           "target": "all_enemies" if all_enemies else "enemy"}
+    if times != 1:
+        fx["times"] = int(times)
     if hydro:
         fx["applies_element"] = True
     before = sum(e.hp for e in state.enemies)
@@ -1733,7 +1759,7 @@ def resolve_card(state, card) -> None:
     elif k in UPTO_KINDS:
         # "Spend up to X" (the Spend paper, 2026-10-10): no choice; 1 more
         # per point spent, and "for every 4" in fours.
-        spent = spend_up_to(state, upto_cap(spec))
+        spent = spend_up_to_card(state, upto_cap(spec))
         if k == "upto_aoe":
             _card_damage(state, card, n[0] + spent, all_enemies=True,
                          hydro=True)
@@ -1777,8 +1803,10 @@ def resolve_card(state, card) -> None:
     elif k == "repay_all":
         repay(state, f.drained)
     elif k == "bravura":
-        held = spend_all(state)
-        _card_damage(state, card, n[0] + n[1] * held)
+        # furina-next paper 2: Spend up to 18; 7 Hydro for every 3 spent.
+        hits = spend_up_to_card(state, n[2]) // n[1]
+        if hits > 0:
+            _card_damage(state, card, n[0], hydro=True, times=hits)
     elif k == "half_aoe":
         spent = spend_half(state)
         if spent > 0:
@@ -1810,7 +1838,8 @@ def resolve_card(state, card) -> None:
     elif k == "star_turn":
         _card_damage(state, card, n[0])
     elif k == "house_down":
-        held = spend_all(state)
+        # furina-next paper 2: Spend up to 10 for each guest on stage.
+        held = spend_up_to_card(state, n[1] * len(f.stage))
         _card_damage(state, card, n[0] * held)
         act_all(state)
     elif k == "undercurrent":
@@ -2003,7 +2032,9 @@ READINGS: tuple[str, ...] = (
     "above it (0 with none) and deals its damage either way. His line lowers the line by 10 while he is on "
     "stage, never below 1 HP. A Five-Century Act does not move the line: it "
     "returns the past-line part at the curtain call.",
-    "Bis! keeps half a spend-all, rounded down; a second copy adds nothing. "
+    "Extended Run adds once to a played Attack's or Skill's \"Spend up "
+    "to\" cap; copies add. Full House, guests' share-Spends and Spend half "
+    "do not read it. "
     "Fountain of Lucine's Repays come after her draw, one per play.",
     "Guest acts and lines are unpowered (Strength and Weak do not touch "
     "them).",

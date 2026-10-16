@@ -417,7 +417,8 @@ internal static class KleePowerIcons
             KleePck.Path("furina/powers/unheard_confession.png"),
         CriticsDarlingPower =>
             KleePck.Path("furina/powers/the_gallery_stirs.png"),
-        BisPower => KleePck.Path("furina/powers/stagehands_encore.png"),
+        ExtendedRunPower =>
+            KleePck.Path("furina/powers/stagehands_encore.png"),
         // THE SUPPORTING POOL (2026-09-26): the two new guests' faces, from
         // the same art pass, and the batch's nine powers borrowing the
         // shipped Furina sigil nearest their job, on the terms every borrow

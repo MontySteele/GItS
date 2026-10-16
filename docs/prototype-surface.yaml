@@ -2868,13 +2868,13 @@
 
 # Bravura: one Hydro hit of 7 [9] for every 3 spent (the diversity pass,
 # review/ruled/furina-diversity-pass-2026-10-11.md sec.2, ruled 2026-10-11;
-# was 6, plus 2 a point, one hit).
+# was 6, plus 2 a point, one hit). Spend up to 18: furina-next paper 2.
 - {id: proto_fs_bravura, name: "Bravura", character: furina,
    upgrade: {damage: +2},
    authored_by: [claude],
    register: salon, cost: 1, type: attack, rarity: uncommon,
-   description: "[gold]Spend[/gold] all your [gold]Fanfare[/gold]. Deal {Damage:diff()} [gold]Hydro[/gold] damage for every 3 spent.{InCombat:\n(Deals {TotalDamage:diff()} damage)|}",
-   effects: [{op: stage_spend_all},
+   description: "[gold]Spend[/gold] up to 18, all you can. Deal {Damage:diff()} [gold]Hydro[/gold] damage for every 3 spent.{InCombat:\n(Deals {TotalDamage:diff()} damage)|}",
+   effects: [{op: stage_spend_up_to, amount: 18},
              {op: damage, amount: 7, target: enemy, applies_element: true,
               times_formula: {base: 0, per: 1, count: stage_spent_threes}}]}
 
@@ -3023,12 +3023,14 @@
    description: "[gold]Summon[/gold] Chevreuse{IfUpgraded:show:+|}.{IfUpgraded:show: Also applies [gold]Weak[/gold].|}",
    effects: [{op: stage_guest, member: chevreuse}]}
 
-- {id: proto_fs_bis, name: "Bis!", character: furina,
-   upgrade: {innate: true},
+# Extended Run, on Bis!'s old id and painting (furina-next paper 2,
+# 2026-10-16). Scope: provenance note, "Spending the bank".
+- {id: proto_fs_bis, name: "Extended Run", character: furina,
+   upgrade: {power_amount: +4},
    authored_by: [claude],
    register: salon, cost: 1, type: power, rarity: rare,
-   description: "Whenever a card [gold]Spends[/gold] all your [gold]Fanfare[/gold], keep half of it.",
-   effects: [{op: apply_power, power: fs_bis, amount: 1,
+   description: "Attacks and Skills that [gold]Spend[/gold] up to a number can [gold]Spend[/gold] {PowerAmount:diff()} more.",
+   effects: [{op: apply_power, power: fs_extended_run, amount: 8,
               target: self}]}
 
 # --- THE POOL TO 75 (review/ruled/furina-pool-growth-2026-10-09.md sec.5,
@@ -3213,12 +3215,15 @@
    effects: [{op: apply_power, power: fs_standing_room_only, amount: 1,
               target: self}]}
 
+# Bring the House Down: Spend up to 10 for each guest on stage, in one Spend
+# (furina-next paper 2, review/active/furina-next-2-2026-10-16.md sec.2,
+# ruled 2026-10-16; was Spend all).
 - {id: proto_fs_bring_the_house_down, name: "Bring the House Down", character: furina,
    upgrade: {cost: -1},
    authored_by: [claude],
    register: salon, cost: 2, type: attack, rarity: rare,
-   description: "[gold]Spend[/gold] all your [gold]Fanfare[/gold]. Deal that much damage. Each guest acts.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
-   effects: [{op: stage_spend_all},
+   description: "[gold]Spend[/gold] up to 10 for each guest on stage, all you can. Deal that much damage. Each guest acts.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: stage_spend_up_to, amount: 10, per: stage_guests},
              {op: damage,
               amount_formula: {base: 0, per: 1, count: stage_spent},
               target: enemy},

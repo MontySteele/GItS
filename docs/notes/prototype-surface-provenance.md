@@ -9247,3 +9247,47 @@ in the promotion PR with suite 2's record.
 Pins: `klee-mod/KleeTests/Prototype/FurinaEnginesTests.cs`; sim twin
 (`tier0/engine/furina_tide.py`) in `tier0/tests/test_furina_pool75.py` and
 `test_furina_spend_up_to.py`. Untested in game until a `+next` deploy.
+
+## Spending the bank, furina-next paper 2, 2026-10-16
+
+`review/active/furina-next-2-2026-10-16.md` sec.2, picks 1 (a) and 2 (a).
+[USER]: "Agreed on both picks. I still think that we should eventually
+change the starter, but for now it's fine." One spend-all in the starter
+(Rising Applause, unchanged), one in the pool (Let the People Rejoice,
+unchanged); the other two are capped, and a Power raises every cap. Built on
+`furina-next`; it reaches `main` in the promotion PR with suite 3's record.
+
+| id | was | now |
+|---|---|---|
+| `proto_fs_bravura` (Uncommon Attack, 1) | Spend all your Fanfare. Deal 7 [9] Hydro damage for every 3 spent. | Spend up to 18, all you can. Deal 7 [9] Hydro damage for every 3 spent. |
+| `proto_fs_bring_the_house_down` (Rare Attack, 2) | Spend all your Fanfare. Deal that much damage. Each guest acts. | Spend up to 10 for each guest on stage, all you can. Deal that much damage. Each guest acts. |
+| `proto_fs_bis` (Rare Power, 1) | Bis!: Whenever a card Spends all your Fanfare, keep half of it. (upg: Innate) | Extended Run: Attacks and Skills that Spend up to a number can Spend 8 [12] more. |
+
+- **Extended Run is renamed on Bis!'s old id** (the re-founding's
+  convention), so it keeps Bis!'s art row and painting, which still shows
+  the old card. Pool 78 and the rarity counts do not move. Bis!'s power,
+  its keep-half rule in `SpendAll` and its seat-only hover rider
+  (`ForBisSpendUpTo`) are gone.
+- **Scope.** `ExtendedRunPower`'s amount (8 a copy, 12 upgraded; copies
+  add) is added once, flat, to a played card's whole printed cap
+  (`FurinaStageLedger.CardUpToCap`, called only by the card verb
+  `FurinaStage.SpendUpTo` and its preview `SpentOrUpTo`). Bring the House
+  Down with three guests and one copy spends up to 38, in one Spend. It
+  reaches the five capped Attacks and Skills (Soloist's Solicitation and Hold
+  the Stage 16, Tidal Flourish 10, Bravura 18, Bring the House Down 10 a
+  guest). It does not reach Full House (`StageDirector.FullHouse`), Navia's
+  and Freminet's share-Spends (`SpendShare`), Standing Ovation's Spend half
+  (`SpendHalf`, no printed number) or a fixed Spend (Quick Flourish).
+- **The sheet.** `stage_spend_up_to` takes `per: stage_guests` (the cap is
+  `amount` times the guests on stage; C# `10 * FurinaStage.Of(..).Count`);
+  Bravura's preview reads `SpentOrUpTo(card, 18)` in threes.
+- **One reading the paper does not state:** with no guest on stage Bring the
+  House Down's own cap is 0, and Extended Run still adds its 8 (it adds to
+  the whole cap, whatever the cap is).
+
+Pins: `klee-mod/KleeTests/Prototype/FurinaExtendedRunTests.cs` (BHtD 3
+guests + one copy = 38; Bravura on 200 with two upgraded copies spends 42,
+14 hits of 7, two plain copies 34, 11 hits; Full House cap and Quick
+Flourish's fixed cost unchanged); sim twin (`furina_tide.spend_up_to_card`)
+in `tier0/tests/test_furina_extended_run.py`. Untested in game until a
+`+next` deploy.

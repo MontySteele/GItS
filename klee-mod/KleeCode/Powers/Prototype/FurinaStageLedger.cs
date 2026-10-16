@@ -93,8 +93,10 @@ public sealed record StageMods
     /// copy to a random enemy.</summary>
     public int CriticsDarling { get; init; }
 
-    /// <summary>Bis! copies: any keeps half of a spend-all.</summary>
-    public int Bis { get; init; }
+    /// <summary>Extended Run (furina-next paper 2, 2026-10-16): the applied
+    /// total (8 a copy, 12 upgraded) an Attack's or Skill's "Spend up to"
+    /// cap rises by, once a play.</summary>
+    public int ExtendedRun { get; init; }
 
     /// <summary>Salon's Encore: damage to ALL enemies per Drain.</summary>
     public int SalonsEncore { get; init; }
@@ -753,11 +755,18 @@ public sealed class FurinaStageLedger
     public int UpToOf(int cap) =>
         cap <= 0 ? 0 : System.Math.Min(cap, Fanfare + NaviaDiscount);
 
+    /// <summary>Extended Run (furina-next paper 2, 2026-10-16): "Attacks and
+    /// Skills that Spend up to a number can Spend 8 [12] more." A played
+    /// card's whole printed cap rises once by every copy's amount (Bring the
+    /// House Down with three guests and one copy: 30 + 8). Full House, a
+    /// guest's share-Spend and Spend half never read it.</summary>
+    public int CardUpToCap(int printed) =>
+        System.Math.Max(0, printed) + System.Math.Max(0, Mods.ExtendedRun);
+
     /// <summary>
     /// "Spend up to X" (the Spend paper, 2026-10-10, pick 1): spends X, or
     /// all she holds if that is less, and never fails. It is a Spend only
-    /// when at least 1 was spent; it is not a spend-all, so Bis! and Standing
-    /// Room Only ignore it. Navia's line makes the first 2 [3] points of the
+    /// when at least 1 was spent; it is not a spend-all. Navia's line makes the first 2 [3] points of the
     /// first Spend each turn free: they count as spent and are not taken.
     /// Returns what counts as spent (0: no Spend).
     /// <paramref name="forPlay"/> records it as this card play's
@@ -804,9 +813,7 @@ public sealed class FurinaStageLedger
                            SeatKey: seat?.Key ?? -1));
     }
 
-    /// <summary>"Spend all your Fanfare." Nothing held is no Spend. Bis!
-    /// keeps half of it, rounded down: the spend and what it pays for are
-    /// the whole bank, and half the bank is back after. Navia's first Spend
+    /// <summary>"Spend all your Fanfare." Nothing held is no Spend. Navia's first Spend
     /// each turn keeps 2 (3 upgraded): the card reads the whole bank, and
     /// that much stays.</summary>
     public int SpendAll()
@@ -822,12 +829,6 @@ public sealed class FurinaStageLedger
         Note(new StageBeat(SpendEvent, default, -1, Fanfare, pay, ""));
         if (keep > 0) NoteLine(StagePerformer.Navia, keep);
         SpentThisPlay = held;
-        var kept = Mods.Bis > 0 ? held / 2 : 0;
-        if (kept > 0)
-        {
-            Fanfare += kept;
-            Note(new StageBeat(GainEvent, default, -1, Fanfare, kept, "Bis!"));
-        }
         return held;
     }
 
@@ -1028,7 +1029,7 @@ public sealed class FurinaStageLedger
     //
     // THE SPEND ROUND (2026-10-10, "Next round: telemetry first"): per fight,
     // her peak Fanfare and every Spend with the bank before it. Read off the
-    // beats every Fanfare move already files (a gain, Bis!'s return and each
+    // beats every Fanfare move already files (a gain and each
     // Spend all go through `Note`), so no Spend path needs a second call and
     // a new one is counted the day it files its beat. The ledger lives one
     // combat, so these are per fight. A read for `PlayTelemetry`; nothing

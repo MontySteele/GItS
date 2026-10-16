@@ -238,7 +238,8 @@ public sealed class StageDirector
 
     /// <summary>"Spend up to X" (the Spend paper, 2026-10-10): one Spend when
     /// at least 1 counts, answered like any Spend (Thunderous Applause,
-    /// Chevreuse, Standing Room Only) but not like a spend-all (no Bis!).
+    /// Chevreuse, Standing Room Only). The cap is what it is given: a
+    /// card's Extended Run is already in it (<c>FurinaStage.SpendUpTo</c>).
     /// Returns what counts as spent.
     /// <paramref name="forPlay"/> is false for a guest's act.</summary>
     public async Task<int> SpendUpTo(int cap, bool forPlay = true,
