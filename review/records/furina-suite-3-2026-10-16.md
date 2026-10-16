@@ -114,3 +114,8 @@ Fanfare, and the Repay cards that are blank when she is healthy.
    - (c) Do not promote yet; run paper 3 on `furina-next` first.
 
 Raw transcripts: `review/qa/blindplay/` (local, gitignored).
+
+**Ruled 2026-10-16.** [USER]: "I think this is a clear improvement over where
+we were. Let's promote as-is, and then when the current Yae dedupe pass
+lands, aim to get this into a private steam page. In the meantime we can do
+a paper round on the findings." Pick 1 (a).
