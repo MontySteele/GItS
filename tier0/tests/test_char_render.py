@@ -411,6 +411,21 @@ def test_ground_clip_cuts_below_the_feet_anchor_only():
     assert (out[:26, :, 3] == 255).all() and (out[26:, :, 3] == 0).all()
 
 
+def test_the_rest_still_keeps_what_hangs_below_the_feet_anchor(tmp_path):
+    """In-game check 2026-10-16: the rest still was ground-clipped like a
+    combat clip, so Varka's cloak and sword tips and Furina's hem ended on
+    one flat line. A seated still has no floor at the rig's origin."""
+    im = Image.new("RGBA", (40, 100), (0, 0, 0, 0))
+    im.paste(Image.new("RGBA", (10, 90), (255, 0, 0, 255)), (15, 5))   # rows 5..94
+    im.save(tmp_path / "rest.png")
+    (tmp_path / "rest.json").write_text(json.dumps(
+        {"ppu": 100.0, "origin_px": [20.0, 40.0], "hips_px": [20.0, 30.0]}), encoding="utf-8")
+    canvas, rec = pack.rest_still(tmp_path)
+    alpha = np.asarray(canvas)[:, :, 3]
+    assert (alpha > 0).sum() == 10 * 90, "every rendered texel kept"
+    assert rec["seat_px"][1] == round(0.6 * canvas.height)
+
+
 def test_the_packer_names_every_sheet_it_writes():
     files = pack.SHEET_FILES["varka"]
     assert set(files) == {*pack.COMBAT, "merchant"}

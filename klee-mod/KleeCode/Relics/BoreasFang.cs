@@ -237,7 +237,7 @@ public class BoreasFang : CustomRelicModel
 
     /// <summary>FALLBACK ICON: the base game's Ring of the Snake until the
     /// art pass's own file is in the pack.</summary>
-    protected override string IconBaseName => "snake_ring";
+    protected override string IconBaseName => "ring_of_the_snake";
 
     public override string PackedIconPath =>
         KleePck.Path("varka/relics/boreas_fang.png") ?? base.PackedIconPath;
