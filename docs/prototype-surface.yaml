@@ -2815,22 +2815,25 @@
 
 # --- REPAY (four) ---
 
-# Hymn of Many Waters: Block 8 [11] -> 6 [8], Repay 3 [4] kept ([USER],
-# 2026-10-11: "Yeah, I think Hymn needs a trim."; provenance note).
+# Hymn of Many Waters: Block 8 [11] -> 6 [8], Repay 3 [4] kept (2026-10-11);
+# its floor clause dropped, the rule's now (furina-next paper 3, 2026-10-16;
+# provenance note).
 - {id: proto_fs_hymn_of_many_waters, name: "Hymn of Many Waters", character: furina,
    upgrade: {block: +2, stage_repay: +1},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: common,
-   description: "Gain 6 [gold]Block[/gold]. [gold]Repay[/gold] 3. Gain 1 [gold]Block[/gold] for any HP it could not [gold]Repay[/gold].",
+   description: "Gain 6 [gold]Block[/gold]. [gold]Repay[/gold] 3.",
    effects: [{op: block, amount: 6},
-             {op: stage_repay, amount: 3, floor: block}]}
+             {op: stage_repay, amount: 3}]}
 
+# Pneuma Refrain: Repay 5 [7] -> 4 [6] (furina-next paper 3, 2026-10-16:
+# "One less, because it now always pays 4 Block when healthy.").
 - {id: proto_fs_pneuma_refrain, name: "Pneuma Refrain", character: furina,
    upgrade: {stage_repay: +2},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "[gold]Repay[/gold] 5. Draw 2 cards.",
-   effects: [{op: stage_repay, amount: 5},
+   description: "[gold]Repay[/gold] 4. Draw 2 cards.",
+   effects: [{op: stage_repay, amount: 4},
              {op: draw, amount: 2}]}
 
 # Singer of Many Waters: Retain added ([USER], 2026-10-11: "Singer of Many
@@ -2987,8 +2990,8 @@
    effects: [{op: stage_guest, member: sigewinne}]}
 
 # Fountain of Lucine: Block now, and a Power owing one Repay at the start of
-# the next turn (`FountainOfLucinePower`; sim `furina_tide`'s schedule). Ruled
-# 2026-10-13: 8 [11] Block, Repay 3, no Block floor, no three turns.
+# the next turn (`FountainOfLucinePower`). 8 [11] Block, Repay 3 (2026-10-13),
+# the Block floor since furina-next paper 3 (2026-10-16).
 - {id: proto_fs_fountain_of_lucine, name: "Fountain of Lucine", character: furina,
    upgrade: {block: +3},
    authored_by: [claude],
@@ -3082,7 +3085,7 @@
    upgrade: {power_amount: +2},
    authored_by: [claude],
    register: salon, cost: 1, type: power, rarity: uncommon,
-   description: "Whenever you play a Guest Star, [gold]Repay[/gold] 4. Gain 1 [gold]Block[/gold] for any HP it could not [gold]Repay[/gold].",
+   description: "Whenever you play a Guest Star, [gold]Repay[/gold] 4.",
    effects: [{op: apply_power, power: fs_grand_entrance, amount: 4,
               target: self}]}
 
@@ -3307,17 +3310,22 @@
    authored_by: [claude],
    register: salon, cost: 2, type: attack, rarity: uncommon,
    description: "[gold]Repay[/gold] 4. Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage to ALL enemies, plus 1 for any HP it could not [gold]Repay[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
-   effects: [{op: stage_repay, amount: 4},
+   # furina-next paper 3 (2026-10-16): it prints its own floor, damage, so
+   # its Repay pays no Block (`floor: none`).
+   effects: [{op: stage_repay, amount: 4, floor: none},
               {op: damage,
                amount_formula: {base: 10, per: 1, count: stage_repay_left},
                target: all_enemies, applies_element: true}]}
 
+# Endless Waltz: "Repay 2." first (furina-next paper 3, 2026-10-16); its own
+# Repay counts only when it returns HP (provenance note).
 - {id: proto_fs_rising_tide, name: "Endless Waltz", character: furina,
    upgrade: {formula_per: +1},
    authored_by: [claude],
    register: salon, cost: 1, type: attack, rarity: uncommon,
-   description: "Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} for each time you Repaid this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
-   effects: [{op: damage,
+   description: "[gold]Repay[/gold] 2. Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} for each time you Repaid this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: stage_repay, amount: 2},
+             {op: damage,
               amount_formula: {base: 6, per: 3, count: stage_repays_turn},
               target: enemy}]}
 

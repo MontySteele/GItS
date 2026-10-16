@@ -55,7 +55,7 @@ public sealed class ProtoFsRiptideLunge : CustomCardModel, ICharacterCard, IUnpl
     {
         base.AddExtraArgsToDescription(description);
         description.Add("StageDrainLine", FurinaStageFacePreview.DrainLine(this, 3));
-        description.Add("StageRepay", FurinaStageFacePreview.RepayAfterDrain(this, 6, 3));
+        description.Add("StageRepay", FurinaStageFacePreview.RepayAfterDrain(this, 6, 3, FurinaStageFacePreview.PayBlock));
     }
 
     // The Salon's Tab (2026-10-05): a fixed price is the cost line,

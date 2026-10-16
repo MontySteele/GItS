@@ -134,14 +134,17 @@ def test_hymn_pays_block_for_what_it_could_not_repay():
     assert st.player.block == 12      # the 2026-10-11 trim (was 15)
 
 
-def test_fountain_has_no_floor_and_pneuma_tides_pays_vigor():
+def test_fountain_has_the_block_floor():
+    # furina-next paper 3 (2026-10-16): its next-turn Repay 3 has the rule's
+    # floor (none since 2026-10-13): 1 drained returns 1, the other 2 pay
+    # 2 Block.
     st = _furina()
     effects.resolve_card(st, _card("proto_fs_fountain_of_lucine"))
     assert st.player.block == 8                             # the card's own
     st.player.block = 0
     FS.drain(st, 1)
     T.turn_start(st)
-    assert st.player.block == 0                             # no floor (2026-10-13)
+    assert st.player.block == 2
 
 
 def test_grand_entrance_charlotte_and_sigewinne_pay_block():
@@ -160,15 +163,19 @@ def test_grand_entrance_charlotte_and_sigewinne_pay_block():
     assert st.player.block == 3
 
 
-def test_the_unchanged_repays_pay_no_floor():
+def test_only_the_damage_floor_names_a_floor():
+    # furina-next paper 3 (2026-10-16): Block is every Repay's default, so
+    # no row says `floor: block`; Cleansing Torrent's floor is its damage.
     for cid in ("proto_fs_pneuma_refrain", "proto_fs_clean_slate",
-                "proto_fs_rising_tide",
+                "proto_fs_rising_tide", "proto_fs_hymn_of_many_waters",
                 "proto_fs_riptide_lunge", "proto_fs_ebb_and_flow",
                 "proto_fs_singer_of_many_waters",
                 "proto_fs_grand_absolution"):
         row = _card(cid)
         for fx in row.effects:
             assert "floor" not in fx, cid
+    torrent = _card("proto_fs_cleansing_torrent")
+    assert torrent.effects[0]["floor"] == "none"
 
 
 def test_endless_waltz_is_cut():

@@ -62,7 +62,7 @@ public sealed class ProtoFsOusiaPneuma : CustomCardModel, ICharacterCard
         base.AddExtraArgsToDescription(description);
         description.Add("Pneuma", FurinaFlip.OnPneuma(this));
         description.Add("StageDrainLine", (FurinaFlip.OnPneuma(this) ? "" : FurinaStageFacePreview.DrainLine(this, 2)));
-        description.Add("StageRepay", (FurinaFlip.OnPneuma(this) ? FurinaStageFacePreview.Repay(this, 2) : ""));
+        description.Add("StageRepay", (FurinaFlip.OnPneuma(this) ? FurinaStageFacePreview.Repay(this, 2, FurinaStageFacePreview.PayBlock) : ""));
     }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

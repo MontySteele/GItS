@@ -476,10 +476,10 @@ def drain(state, amount: int) -> bool:
     return T.drain(state, int(amount))
 
 
-def repay(state, amount: int, floor: str = "none") -> int:
+def repay(state, amount: int, floor: str = "block") -> int:
     """A card's Repay N, with its Repay floor (`floor`: none, block or
-    vigor; ruled 2026-10-09). The leftover is recorded for the play
-    (`repay_left`)."""
+    vigor; ruled 2026-10-09; Block by default since furina-next paper 3,
+    2026-10-16). The leftover is recorded for the play (`repay_left`)."""
     if not active(state.player):
         return 0
     return T.card_repay(state, int(amount), str(floor))

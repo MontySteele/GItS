@@ -172,8 +172,11 @@ public sealed class OperaTicketStub : FurinaStageRelic
     }
 }
 
-/// <summary>Uncommon: "Whenever you Repay more than you have drained, gain
-/// the rest as Block." Paid in <see cref="StageDirector.Repay"/>.</summary>
+/// <summary>Uncommon: "An unreturned Repay gains 2 Block for each HP instead
+/// of 1." (furina-next paper 3, 2026-10-16, pick 1: the rule made its old
+/// text, "Whenever you Repay more than you have drained, gain the rest as
+/// Block", every Repay's.) Paid in <see cref="StageDirector.FloorBlock"/>.
+/// </summary>
 public sealed class FontaineTeardrop : FurinaStageRelic
 {
     protected override string Slug => "fontaine_teardrop";
@@ -184,8 +187,8 @@ public sealed class FontaineTeardrop : FurinaStageRelic
     {
         ("title", "Fontaine Teardrop"),
         ("description",
-            "Whenever you [gold]Repay[/gold] more than you have drained, gain "
-          + "the rest as [gold]Block[/gold]."),
+            "An unreturned [gold]Repay[/gold] gains 2 [gold]Block[/gold] for "
+          + "each HP instead of 1."),
     };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>

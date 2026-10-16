@@ -7525,11 +7525,14 @@ def stage_stmt(eff: dict, amount: str | None = None) -> str:
                 f"{n});")
     if op == "stage_repay":
         n = amount if amount is not None else str(int(eff.get("amount", 1)))
-        # THE REPAY FLOOR (ruled 2026-10-09): "Repay N. Gain 1 Block [Vigor]
-        # for any HP it could not Repay." The floor is the director's
-        # (`StageDirector.RepayFloor`); a row with none is a plain Repay.
-        floor = STAGE_REPAY_FLOORS[str(eff.get("floor", "none"))]
-        tail = "" if floor == "None" else f", StageFloor.{floor}"
+        # THE REPAY FLOOR (ruled 2026-10-09; every numbered Repay's since
+        # furina-next paper 3, 2026-10-16: "Any HP a Repay cannot return
+        # becomes Block"). The floor is the director's
+        # (`StageDirector.RepayFloor`); Block is `FurinaStage.Repay`'s
+        # default, and `floor: none` marks a card whose floor is its own
+        # damage (Cleansing Torrent).
+        floor = STAGE_REPAY_FLOORS[stage_repay_floor(eff)]
+        tail = "" if floor == "Block" else f", StageFloor.{floor}"
         return ("await FurinaStage.Repay(choiceContext, Owner.Creature, "
                 f"{n}{tail});")
     if op == "stage_repay_all":
@@ -7539,8 +7542,18 @@ def stage_stmt(eff: dict, amount: str | None = None) -> str:
 
 #: THE REPAY FLOOR (ruled 2026-10-09): a `stage_repay`'s `floor:` -- what
 #: it pays for the part of N it could not return -- to the C# `StageFloor`.
-#: The damage cards' floor is their own damage (`stage_repay_left`).
+#: Block by default since furina-next paper 3 (2026-10-16). The damage
+#: card's floor is its own damage (`stage_repay_left`), so its row says
+#: `floor: none`.
 STAGE_REPAY_FLOORS = {"none": "None", "block": "Block", "vigor": "Vigor"}
+
+#: The floor a `stage_repay` names when its row says none (paper 3).
+STAGE_REPAY_DEFAULT_FLOOR = "block"
+
+
+def stage_repay_floor(eff: dict) -> str:
+    """A `stage_repay`'s floor key: its `floor:`, else Block (paper 3)."""
+    return str(eff.get("floor", STAGE_REPAY_DEFAULT_FLOOR))
 
 
 #: One C# expression per STAGE count token, read through a CalculatedVar so
@@ -7609,6 +7622,25 @@ def stage_repay_left_cs(card: dict, eff: dict) -> str | None:
     else:
         n = str(int(repay.get("amount", 1)))
     return STAGE_COUNT_CS["stage_repay_left"].replace("{n}", n)
+
+
+#: Endless Waltz (furina-next paper 3, 2026-10-16): "Repay 2. Deal X damage,
+#: plus Y for each time you Repaid this turn." Its own Repay counts when it
+#: returns HP, so the face reads it before the play. The N is filled per card.
+STAGE_REPAYS_TURN_OWN_CS = ("static (card, _) => "
+                            "FurinaStage.RepaysThisTurnWith(card, {n})")
+
+
+def stage_repays_turn_cs(card: dict, eff: dict) -> str:
+    """Endless Waltz's count when its own Repay comes first (paper 3): the
+    N read the way `stage_repay_left_cs` reads it."""
+    repay = _stage_repay_before(card, eff)
+    assert repay is not None
+    if (upgrade_deltas().get(card["id"]) or {}).get("stage_repay"):
+        n = f'card.DynamicVars["{STAGE_AMOUNT_VARS["stage_repay"]}"].IntValue'
+    else:
+        n = str(int(repay.get("amount", 1)))
+    return STAGE_REPAYS_TURN_OWN_CS.replace("{n}", n)
 
 
 def _stage_spender_before(card: dict, eff: dict) -> str | None:
@@ -7681,6 +7713,8 @@ def stage_count_calc_rider(card: dict,
         expr = stage_repay_left_cs(card, eff)
         if expr is None:
             return None
+    elif token == "stage_repays_turn" and _stage_repay_before(card, eff):
+        expr = stage_repays_turn_cs(card, eff)
     else:
         expr = (stage_spent_cs(card, eff) if token == "stage_spent"
                 else STAGE_COUNT_CS[token])
@@ -16891,34 +16925,50 @@ def stage_repay_call(card: dict) -> str | None:
             f'DynamicVars["RepayAmount"].IntValue{pay})')
 
 
-#: THE REPAY FLOOR'S PAYOUT ON THE FACE (the drain-line round, 2026-10-09):
-#: "(Repays 0, +3 Block)". A `floor:` names its payout; a power whose whole
-#: job is a floored Repay names its own.
+#: THE REPAY FLOOR'S PAYOUT ON THE FACE (the drain-line round, 2026-10-09;
+#: the floor first since furina-next paper 3, 2026-10-16): "(Repay 0: gain
+#: 3 Block)". A `floor:` names its payout, Block by default; a power whose
+#: whole job is a Repay names its own.
 STAGE_REPAY_PAYOUT_CS = {
     "block": "FurinaStageFacePreview.PayBlock",
     "vigor": "FurinaStageFacePreview.PayVigor",
     "damage": "FurinaStageFacePreview.PayDamage",
 }
 STAGE_REPAY_POWER_PAYOUTS = {
-    "fs_pneuma_tides": "vigor", "fs_fountain_of_lucine": "",
+    "fs_pneuma_tides": "vigor", "fs_fountain_of_lucine": "block",
     "fs_grand_entrance": "block"}
 
+#: The Repay powers whose face reads a `PowerAmount` var (an upgrade moves
+#: their number); Fountain of Lucine's Repay is fixed (2026-10-13).
+STAGE_REPAY_POWER_VARS = frozenset({"fs_pneuma_tides", "fs_grand_entrance"})
 
-def stage_repay_payout_cs(card: dict, repay: dict) -> str:
-    """The `, payout` argument of a top-level Repay's preview, or "".
 
-    A `floor:` of block or vigor pays that; a Repay whose card's damage
-    reads `stage_repay_left` (Surging Waters, Hydro Lance, Cleansing
-    Torrent) pays damage. A plain Repay (Soothing Waters, Pneuma Refrain)
-    pays nothing and keeps the plain line."""
-    floor = str(repay.get("floor", "none"))
-    if floor in STAGE_REPAY_PAYOUT_CS:
-        return ", " + STAGE_REPAY_PAYOUT_CS[floor]
+def _damage_reads_repay_left(card: dict) -> bool:
+    """Does the card's damage read `stage_repay_left` (Cleansing Torrent's
+    "plus 1 for any HP it could not Repay")?"""
     for fx in card.get("effects") or []:
         formula = fx.get("amount_formula") or {}
         if (fx.get("op") == "damage"
                 and formula.get("count") == "stage_repay_left"):
-            return ", " + STAGE_REPAY_PAYOUT_CS["damage"]
+            return True
+    return False
+
+
+def stage_repay_payout_cs(card: dict, repay: dict) -> str:
+    """The `, payout` argument of a Repay's preview, or "".
+
+    A Repay whose card's damage reads `stage_repay_left` (Cleansing
+    Torrent) pays damage, and its row must say `floor: none` so it never
+    pays Block beside it; otherwise its floor pays (Block by default, paper
+    3)."""
+    floor = stage_repay_floor(repay)
+    if _damage_reads_repay_left(card):
+        if floor != "none":
+            raise ValueError(f"{card['id']}: a Repay whose damage is its "
+                             "floor says `floor: none`")
+        return ", " + STAGE_REPAY_PAYOUT_CS["damage"]
+    if floor in STAGE_REPAY_PAYOUT_CS:
+        return ", " + STAGE_REPAY_PAYOUT_CS[floor]
     return ""
 
 
@@ -16945,7 +16995,7 @@ def stage_later_repay_call(card: dict) -> str | None:
             pay = (", " + STAGE_REPAY_PAYOUT_CS[kind]) if kind else ""
             # A fixed Repay (Fountain of Lucine, 2026-10-13) has no
             # PowerAmount variable: its number is the printed one.
-            uses_var = bool(kind)    # only the floored powers keep the var
+            uses_var = fx["power"] in STAGE_REPAY_POWER_VARS
             amount = ('DynamicVars["PowerAmount"].IntValue' if uses_var
                       else str(int(fx["amount"])))
             return ('FurinaStageFacePreview.Repay(this, '
@@ -16959,8 +17009,10 @@ def stage_later_repay_call(card: dict) -> str | None:
         raise ValueError(f"{card['id']}: a Repay preview reads one Repay")
     drain = stage_fixed_price(card)
     first = drain[1] if drain and drain[0] == "stage_drain" else 0
+    # Paper 3 (2026-10-16): the kill Repay has the Block floor too.
+    pay = stage_repay_payout_cs(card, nested[0])
     return ('FurinaStageFacePreview.RepayAfterDrain(this, '
-            f'{int(nested[0].get("amount", 1))}, {first})')
+            f'{int(nested[0].get("amount", 1))}, {first}{pay})')
 
 
 #: THE FURINA WAVE (2026-10-13, `review/records/furina-wave-2026-10-13.md`,

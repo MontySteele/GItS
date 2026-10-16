@@ -46,16 +46,21 @@ def _rows():
 
 # ---- 1. the Repay preview names its payout -----------------------------------
 
+# furina-next paper 3 (2026-10-16): every numbered Repay previews its Block
+# floor; Cleansing Torrent keeps its damage; "Repay all" has none.
 PAYOUTS = {
     "proto_fs_hymn_of_many_waters": "PayBlock",
     "proto_fs_grand_entrance": "PayBlock",
     "proto_fs_cleansing_torrent": "PayDamage",
+    "proto_fs_pneuma_refrain": "PayBlock",
+    "proto_fs_riptide_lunge": "PayBlock",
+    "proto_fs_clean_slate": "PayBlock",
+    "proto_fs_ebb_and_flow": "PayBlock",
+    "proto_fs_fountain_of_lucine": "PayBlock",
+    "proto_fs_rising_tide": "PayBlock",
 }
 
-NO_PAYOUT = ("proto_fs_pneuma_refrain", "proto_fs_grand_absolution",
-             "proto_fs_singer_of_many_waters", "proto_fs_riptide_lunge",
-             "proto_fs_clean_slate", "proto_fs_ebb_and_flow",
-             "proto_fs_fountain_of_lucine")
+NO_PAYOUT = ("proto_fs_grand_absolution", "proto_fs_singer_of_many_waters")
 
 
 @pytest.mark.parametrize("cid,pay", sorted(PAYOUTS.items()))
@@ -74,7 +79,9 @@ def test_the_preview_words_are_one_short_line():
     src = (Path(__file__).resolve().parents[2] / "klee-mod" / "KleeCode"
            / "Powers" / "Prototype" / "FurinaStageBowPreview.cs").read_text(
                encoding="utf-8")
-    assert '$"\\n(Repays {repays}, +{amount - repays} {payout})"' in src
+    # Paper 3 (2026-10-16): the floor first, "(Repay 0: gain 3 Block)".
+    assert '$"\\n(Repay {repays}: {what})"' in src
+    assert '$"gain {pays} {payout}"' in src
     for word in ('"Block"', '"Vigor"', '"damage"'):
         assert word in src
 

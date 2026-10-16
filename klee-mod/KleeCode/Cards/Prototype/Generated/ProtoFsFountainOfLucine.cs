@@ -54,7 +54,7 @@ public sealed class ProtoFsFountainOfLucine : CustomCardModel, ICharacterCard
         MegaCrit.Sts2.Core.Localization.LocString description)
     {
         base.AddExtraArgsToDescription(description);
-        description.Add("StageRepay", FurinaStageFacePreview.Repay(this, 3));
+        description.Add("StageRepay", FurinaStageFacePreview.Repay(this, 3, FurinaStageFacePreview.PayBlock));
     }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

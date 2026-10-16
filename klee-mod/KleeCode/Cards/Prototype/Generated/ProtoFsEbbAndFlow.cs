@@ -55,7 +55,7 @@ public sealed class ProtoFsEbbAndFlow : CustomCardModel, ICharacterCard, IUnplay
     {
         base.AddExtraArgsToDescription(description);
         description.Add("StageDrainLine", FurinaStageFacePreview.DrainLine(this, (IsUpgraded ? 6 : 4)));
-        description.Add("StageRepay", FurinaStageFacePreview.Repay(this, DynamicVars["RepayAmount"].IntValue));
+        description.Add("StageRepay", FurinaStageFacePreview.Repay(this, DynamicVars["RepayAmount"].IntValue, FurinaStageFacePreview.PayBlock));
     }
 
     // The Salon's Tab (2026-10-05): a fixed price is the cost line,
