@@ -19,7 +19,7 @@
 # BASE GAME's cards and have no row here. Kaboom! and Duck and Cover deleted;
 # Pop! and Dig In are in the pool below. ---
 
-- {id: proto_ko_kapow, name: "Ka-pow!", character: klee,
+- {id: proto_ko_kapow, name: "Kaboom!", character: klee,
    authored_by: [claude],
    cost: 0, type: attack, rarity: basic, retain: true,
    description: "[gold]Set off[/gold] the enemy. Deal 4 [gold]Pyro[/gold] damage.",
@@ -3134,7 +3134,7 @@
 
 # The Crowd (9): 3 Common, 3 Uncommon, 3 Rare.
 
-- {id: proto_fs_crashing_waves, name: "Crashing Waves", character: furina,
+- {id: proto_fs_crashing_waves, name: "Soloist's Solicitation", character: furina,
    upgrade: {damage: +1},
    authored_by: [claude],
    register: salon, cost: 1, type: attack, rarity: common,
@@ -3221,8 +3221,8 @@
 # the "Drain down to your line" cards: The Deluge, All In and Pay the Tab
 # Drain fixed amounts.
 
-# Undercurrent: the count includes its own Drain (it Drains first).
-- {id: proto_fs_undercurrent, name: "Undercurrent", character: furina,
+# Unheard Confession: the count includes its own Drain (it Drains first).
+- {id: proto_fs_undercurrent, name: "Unheard Confession", character: furina,
    upgrade: {formula_base: +2},
    authored_by: [claude],
    register: salon, cost: 1, type: attack, rarity: common,
@@ -3240,9 +3240,9 @@
    effects: [{op: stage_drain, amount: 3},
              {op: draw, amount: 2}]}
 
-# Against the Tide: "If you Drained this turn", any Drain of 1+ HP (2026-10-12;
+# Against All Odds: "If you Drained this turn", any Drain of 1+ HP (2026-10-12;
 # was "within 5 HP of your Drain line"; see the provenance notes).
-- {id: proto_fs_against_the_tide, name: "Against the Tide", character: furina,
+- {id: proto_fs_against_the_tide, name: "Against All Odds", character: furina,
    upgrade: {conditional_damage: +3, conditional_then_damage: +1},
    authored_by: [claude],
    register: salon, cost: 1, type: attack, rarity: uncommon,
@@ -3251,7 +3251,7 @@
               then: [{op: damage, amount: 14, target: enemy}],
               else: [{op: damage, amount: 8, target: enemy}]}]}
 
-- {id: proto_fs_riptide_lunge, name: "Riptide Lunge", character: furina,
+- {id: proto_fs_riptide_lunge, name: "Coup de Théâtre", character: furina,
    upgrade: {damage: +3},
    authored_by: [claude],
    register: salon, cost: 1, type: attack, rarity: uncommon,
@@ -3300,7 +3300,7 @@
                amount_formula: {base: 10, per: 1, count: stage_repay_left},
                target: all_enemies, applies_element: true}]}
 
-- {id: proto_fs_rising_tide, name: "Rising Tide", character: furina,
+- {id: proto_fs_rising_tide, name: "Endless Waltz", character: furina,
    upgrade: {formula_per: +1},
    authored_by: [claude],
    register: salon, cost: 1, type: attack, rarity: uncommon,
@@ -3955,7 +3955,7 @@
    effects: [{op: add_knight}],
    upgrade: {upgraded_knight: true}}
 
-- {id: proto_vk_tailwind_stride, name: "Tailwind Stride", character: varka,
+- {id: proto_vk_tailwind_stride, name: "A Bard's Tale", character: varka,
    authored_by: [claude],
    # Unconditional 3 [4] (user 2026-10-13: "When do you not have an
    # element outside turn 1?"); was 2, +1 [2] with a current element.
@@ -4103,7 +4103,7 @@
    effects: [{op: varka, kind: violet_storm, target: random_enemy, base: 6}],
    upgrade: {varka_base: 2}}
 
-- {id: proto_vk_sworn_brotherhood, name: "Sworn Brotherhood", character: varka,
+- {id: proto_vk_sworn_brotherhood, name: "Knight of Boreas", character: varka,
    authored_by: [claude],
    cost: 1, type: power, rarity: rare,
    # Varka round 3 (2026-10-10): 2 [3] of the current element; one Oath a
@@ -4337,7 +4337,7 @@
    effects: [{op: apply_power, power: vk_assembly_at_the_cathedral, amount: 2, target: self}],
    upgrade: {power_amount: 1}}
 
-- {id: proto_vk_dawn_patrol, name: "Dawn Patrol", character: varka,
+- {id: proto_vk_dawn_patrol, name: "Leave It for Jean", character: varka,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon, exhaust: true,
    description: "Gain {energyPrefix:energyIcons(1)}. Draw {Cards:diff()} card{Cards:plural:|s}.",
@@ -4375,7 +4375,7 @@
    effects: [{op: apply_power, power: vk_absolute_zero, amount: 1, target: self}],
    upgrade: {innate: true}}
 
-- {id: proto_vk_thundering_verdict, name: "Thundering Verdict", character: varka,
+- {id: proto_vk_thundering_verdict, name: "Lightning Fang", character: varka,
    authored_by: [claude],
    # Element identities (sec.3): re-aimed to X, Whirlwind's spend-it-all.
    cost: X, type: attack, rarity: rare,
@@ -4386,7 +4386,7 @@
    effects: [{op: varka, kind: thundering_verdict, target: all_enemies, base: 6, per: 1}],
    upgrade: {varka_base: 2}}
 
-- {id: proto_vk_oath_unto_death, name: "Oath Unto Death", character: varka,
+- {id: proto_vk_oath_unto_death, name: "Azure Fang's Oath", character: varka,
    authored_by: [claude],
    # Varka forced-Amber round (2026-10-10): costs 2, was 3.
    cost: 2, type: power, rarity: rare,
@@ -4403,7 +4403,7 @@
              {op: varka, kind: double_current_oath}],
    upgrade: {damage: 5}}
 
-- {id: proto_vk_wolfpack, name: "Wolfpack", character: varka,
+- {id: proto_vk_wolfpack, name: "Lupical", character: varka,
    authored_by: [claude],
    cost: 1, type: power, rarity: rare,
    # Varka payoff round, 2026-10-10: shuffled in, the copy Exhausts (was: to
@@ -4520,7 +4520,7 @@
 
 # --- Uncommon (2) ---
 
-- {id: proto_vk_pyre_oath, name: "Ashen Oath", character: varka,
+- {id: proto_vk_pyre_oath, name: "For Crepus", character: varka,
    authored_by: [claude],
    # Forced-Amber round (2026-10-10): was Pyre Oath, paid 1. The Pyro pass
    # (2026-10-11): Inflame plus 2 Pyro Oath, a gain that switches nothing.

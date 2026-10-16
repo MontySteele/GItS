@@ -832,12 +832,12 @@ def plot_twist(state, enemy, dmg: float) -> bool:
 
 # ---- the pool to 75's reads (count tokens and predicates) -------------
 def drains_this_combat(player) -> int:
-    """Undercurrent: "for each time you have Drained this combat"."""
+    """Unheard Confession (was Undercurrent): "for each time you have Drained this combat"."""
     return int(player.ftd.drains_this_combat) if active(player) else 0
 
 
 def repays_this_turn(player) -> int:
-    """Rising Tide: "for each time you Repaid this turn"."""
+    """Endless Waltz (was Rising Tide): "for each time you Repaid this turn"."""
     return int(player.ftd.repays_this_turn) if active(player) else 0
 
 
@@ -853,7 +853,7 @@ def repay_left(player) -> int:
 
 
 def drained_this_turn(player) -> bool:
-    """Against the Tide (2026-10-12): "If you Drained this turn" -- 1 or more
+    """Against All Odds (was Against the Tide, 2026-10-12): "If you Drained this turn" -- 1 or more
     HP drained this turn by any Drain, her cards' or a guest's act."""
     return active(player) and T.drained_this_turn(player)
 

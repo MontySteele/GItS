@@ -44,7 +44,7 @@ public sealed class ProtoFsRiptideLunge : CustomCardModel, ICharacterCard, IUnpl
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Riptide Lunge"),
+        ("title", "Coup de Théâtre"),
         ("description", "[gold]Drain[/gold] 3. Deal {Damage:diff()} damage. If this kills an enemy, [gold]Repay[/gold] 6.{InCombat:{StageDrainLine}|}{InCombat:{StageRepay}|}"),
     };
 

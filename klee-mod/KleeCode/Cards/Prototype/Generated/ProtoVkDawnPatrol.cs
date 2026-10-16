@@ -43,7 +43,7 @@ public sealed class ProtoVkDawnPatrol : CustomCardModel, ICharacterCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Dawn Patrol"),
+        ("title", "Leave It for Jean"),
         ("description", "Gain {energyPrefix:energyIcons(1)}. Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 
