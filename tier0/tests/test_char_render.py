@@ -952,3 +952,94 @@ def test_every_yae_out_path_has_one_producer():
     for out in ("model/yae_rest.png", "ui/select_closeup.png", "ui/select_portrait.png",
                 "ui/select_portrait_locked.png"):
         assert art_lint.GENERATOR_OWNED[f"ImageGen/images/yae/{out}"] == "char_render/pack.py", out
+
+
+# ---------------------------------------------------------------------------
+# Furina's guest effects (2026-10-16, "guest-star pizazz")
+# ---------------------------------------------------------------------------
+
+GUESTS11 = {"charlotte", "chevreuse", "clorinde", "escoffier", "freminet", "lynette", "lyney", "navia",
+            "neuvillette", "sigewinne", "wriothesley"}
+
+
+def test_every_guest_has_one_effect_with_a_tint_an_anchor_and_a_short_length():
+    assert set(fx.GUEST_EFFECTS) == set(fx.GUEST_TINTS) == set(fx.GUEST_ANCHOR) == set(fx.GUEST_LEN) == GUESTS11
+    assert set(pack.GUEST_FX_FILES["furina"]) == GUESTS11
+    assert set(pack.GUEST_FX_FILES["furina"]) == set(pack.GUEST_FILES["furina"]), "one effect per guest still"
+    for name in GUESTS11:
+        assert 0.5 <= fx.GUEST_LEN[name] <= 0.7, name
+        assert fx.GUEST_ANCHOR[name] in ("feet", "center"), name
+        assert pack.GUEST_FX_FILES["furina"][name] == f"furina_gfx_{name}.png"
+    # the effects that play at an enemy's feet: the ground shock and the frost ring
+    assert {n for n, a in fx.GUEST_ANCHOR.items() if a == "feet"} == {"wriothesley", "escoffier"}
+    for k in ("wriothesley", "lynette", "clorinde", "lyney", "escoffier", "charlotte", "sigewinne",
+              "freminet", "neuvillette"):
+        el = {"wriothesley": "cryo", "lynette": "anemo", "clorinde": "electro", "lyney": "pyro",
+              "escoffier": "cryo", "charlotte": "cryo", "sigewinne": "hydro", "freminet": "cryo",
+              "neuvillette": "hydro"}[k]
+        assert fx.GUEST_TINTS[k] == fx.ELEMENTS[el], k
+
+
+def test_the_guest_tints_are_the_mods_one_element_table():
+    reaction = (ROOT / "klee-mod" / "KleeCode" / "Vfx" / "ReactionFx.cs").read_text(encoding="utf-8")
+    table = reaction.split("ElementFlashHex(Element element)", 1)[1].split("};", 1)[0]
+    for el, hexc in fx.ELEMENTS.items():
+        assert f'"{hexc}"' in table, el
+    assert f'Element.Geo => "{fx.GEO_HEX}"' in table
+    assert f'Reaction.Overload => new Beat(Effect.FireBurstLarge, "#ff5ac8", "{fx.OVERLOAD_HEX}")' in reaction
+
+
+@pytest.mark.parametrize("name", sorted(GUESTS11))
+def test_each_guest_effect_is_neutral_deterministic_and_sized(name):
+    make = fx.GUEST_EFFECTS[name]
+    frames, origin = make(150.0, 20)
+    again, origin2 = make(150.0, 20)
+    assert origin == origin2
+    assert len(frames) == round(fx.GUEST_LEN[name] * 20)
+    assert all(np.array_equal(np.asarray(a), np.asarray(b)) for a, b in zip(frames, again))
+    size = frames[0].size
+    assert all(im.size == size for im in frames)
+    # sized to the creature, not the screen: under 700 px across at the reference scale
+    s = 150.0 / fx.REF_PPU
+    assert size[0] <= 700 * s + 1 and size[1] <= 700 * s + 1
+    assert 0 <= origin[0] <= size[0] and 0 <= origin[1] <= size[1]
+    for im in frames:
+        arr = np.asarray(im)
+        assert (arr[..., 0] == arr[..., 1]).all() and (arr[..., 1] == arr[..., 2]).all(), "colourless"
+    alpha = [np.asarray(im)[..., 3] for im in frames]
+    assert alpha[0].max() > 60, "something shows from the first frame"
+    assert max(a.max() for a in alpha) > 200, "a hot core somewhere"
+    assert alpha[-1].sum() < max(a.sum() for a in alpha) * 0.6, "it fades out by its end"
+
+
+def test_the_target_effects_sit_on_their_anchor():
+    # the ground shock rises from the feet: its early frames cover the point
+    frames, origin = fx.wriothesley_shock(150.0, 20)
+    a = np.asarray(frames[0])[..., 3]
+    x, y = round(origin[0]), round(origin[1])
+    assert a[y - 30:y + 4, x - 4:x + 4].max() > 150
+    # Freminet's plate stands in front of her (toward the enemies, +x)
+    frames, origin = fx.freminet_plate(150.0, 20)
+    a = np.asarray(frames[3])[..., 3].astype(float)
+    xs = np.nonzero(a.sum(0))[0]
+    assert xs.mean() > origin[0] + 30
+    # Sigewinne's bubbles rise above her chest
+    frames, origin = fx.sigewinne_bubbles(150.0, 20)
+    a = np.asarray(frames[-4])[..., 3].astype(float)
+    ys = np.nonzero(a.sum(1))[0]
+    assert ys.mean() < origin[1]
+
+
+def test_furinas_manifest_carries_the_guest_effects_as_packed():
+    m = json.loads(pack.manifest_path("furina").read_text(encoding="utf-8"))
+    assert set(m["guest_fx"]) == GUESTS11
+    for name, rec in m["guest_fx"].items():
+        assert rec["fps"] == fx.STAGE_FPS and rec["ppu"] == m["sheets"]["idle"]["ppu"]
+        assert rec["count"] == len(rec["frames"]) == round(fx.GUEST_LEN[name] * fx.STAGE_FPS)
+        assert abs(rec["length"] - rec["count"] / rec["fps"]) < 1e-6
+        assert rec["tint"] == fx.GUEST_TINTS[name] and rec["anchor"] == fx.GUEST_ANCHOR[name]
+        assert [p["file"] for p in rec["pages"]] == [pack.GUEST_FX_FILES["furina"][name]]
+        for p in rec["pages"]:
+            assert p["size"][0] <= pack.MAX_SHEET and p["size"][1] <= pack.MAX_SHEET
+    # the committed record is what the generator draws today (no render needed)
+    assert pack.main(["--char", "furina", "--guest-fx-only", "--check"]) == 0

@@ -959,7 +959,7 @@ public sealed class GameStageBoard : IStageBoard
         if (amount <= 0) return;
         using var credit = Diagnostics.DamageCredit.Open(
             _owner, Diagnostics.DamageCredit.Pet, who.ToString());
-        await Hit(target, amount, element);
+        await Hit(target, amount, element, who);
     }
 
     public async Task PowerHit(string source, StageTarget target, int amount)
@@ -1022,6 +1022,8 @@ public sealed class GameStageBoard : IStageBoard
     public Task LineCue(StageSeat? seat)
     {
         Vfx.StagePerformerBeat.Line(seat?.Pet);
+        // The guest effects (2026-10-16): Navia's discount, Chevreuse's line.
+        Vfx.FurinaGuestFx.OnLine(seat);
         return Task.CompletedTask;
     }
 
@@ -1040,7 +1042,11 @@ public sealed class GameStageBoard : IStageBoard
         seat.Cards.Clear();
     }
 
-    private async Task Hit(StageTarget target, int amount, Element element)
+    /// <summary><paramref name="who"/> is the guest whose act this is
+    /// (null for a Power's hit): its effect plays on each enemy it lands on
+    /// (the guest effects, 2026-10-16).</summary>
+    private async Task Hit(StageTarget target, int amount, Element element,
+                           StagePerformer? who = null)
     {
         var enemies = FurinaStage.Enemies(_owner).ToList();
         if (enemies.Count == 0) return;
@@ -1049,7 +1055,7 @@ public sealed class GameStageBoard : IStageBoard
             foreach (var enemy in enemies)
             {
                 if (Over) return;
-                await One(enemy, amount, element);
+                await One(enemy, amount, element, who);
             }
             return;
         }
@@ -1063,16 +1069,20 @@ public sealed class GameStageBoard : IStageBoard
         }
         if (FurinaStage.RandomOf(_owner, pool) is { } body)
         {
-            await One(body, amount, element);
+            await One(body, amount, element, who);
         }
     }
 
-    private Task<int> One(Creature enemy, int amount, Element element) =>
-        element == Element.None
+    private Task<int> One(Creature enemy, int amount, Element element,
+                          StagePerformer? who)
+    {
+        if (who is { } guest) Vfx.FurinaGuestFx.OnHit(guest, enemy);
+        return element == Element.None
             ? ElementalHit.DealUnelemented(_context, enemy, amount, _owner,
                                            powered: false)
             : ElementalHit.Deal(_context, enemy, element, amount, _owner,
                                 powered: false);
+    }
 
     public async Task Draw(int amount)
     {
@@ -1080,8 +1090,15 @@ public sealed class GameStageBoard : IStageBoard
         await CardPileCmd.Draw(_context, amount, player);
     }
 
-    public Task Lunge(StageSeat? seat) =>
-        Vfx.StagePerformerBeat.Act(seat?.Pet);
+    /// <summary>The act's lunge, then (the guest effects, 2026-10-16) the
+    /// effect of a guest whose act lands on Furina: Charlotte's flash,
+    /// Sigewinne's bubbles, Freminet's plate. Not awaited past the lunge.
+    /// </summary>
+    public async Task Lunge(StageSeat? seat)
+    {
+        await Vfx.StagePerformerBeat.Act(seat?.Pet);
+        Vfx.FurinaGuestFx.OnAct(_owner, seat);
+    }
 
     /// <summary>Her model art, phase B (2026-10-13): the Spend, Drain or
     /// Repay effect on her body, fire-and-forget.</summary>
