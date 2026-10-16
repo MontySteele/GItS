@@ -81,6 +81,9 @@ namespace KleeMod.Vfx;
 /// waiting Plan, where A flips one. While a controller is in use the strip
 /// draws that button's glyph and "Plans" under the column, so the player can
 /// find it; the hint is a picture and a word, out of the walk like the rest.
+/// With a keyboard the hint names the peek key ("Space: Plans", "S: Plans"),
+/// and a click on the hint opens the same view (2026-10-16), so the mouse
+/// has a door too. A click is not focus: the hint stays out of the walk.
 ///
 /// QUARANTINED. `Vfx/Prototype/**` is Compile Remove'd without
 /// `-p:PrototypeCards=true`. Revert is the flag.
@@ -310,13 +313,14 @@ internal static class KokomiPlanStrip
         WirePager(count, root, me);
         root.AddChildSafely(count);
 
-        // THE BUTTON HINT (2026-10-14): the peek glyph and "Plans", drawn
-        // only while a controller (or keyboard-only play) is in use. A
-        // picture and a word -- no input, no focus (`EB-300`).
+        // THE BUTTON HINT (2026-10-14): the peek glyph and "Plans" for a
+        // controller, the peek key and "Plans" for a keyboard (2026-10-16).
+        // A left click on it opens the Plans view (the mouse's door); no
+        // focus, ever (`EB-300`).
         var hint = new Control
         {
             Name = "PadHint",
-            MouseFilter = Control.MouseFilterEnum.Ignore,
+            MouseFilter = Control.MouseFilterEnum.Stop,
             FocusMode = Control.FocusModeEnum.None,
             Size = new Vector2(ThumbWidth, HintHeight),
             Visible = false,
@@ -344,6 +348,7 @@ internal static class KokomiPlanStrip
                                        LineFontSize + 4);
         words.AddThemeColorOverride(ThemeConstants.Label.FontColor, CountColor);
         hint.AddChildSafely(words);
+        WireHintClick(hint, words, me);
         root.AddChildSafely(hint);
         // The whole subtree, in one call, AFTER the children exist -- the
         // recursive flag is a property of the node it is set on and is read
@@ -446,9 +451,12 @@ internal static class KokomiPlanStrip
         {
             var input = NControllerManager.Instance?.InputType
                         ?? InputType.MouseAndKeyboard;
-            var key = input == InputType.KeyboardOnlyMode
-                ? NInputManager.Instance?.GetCurrentHotkey(MegaInput.peek)
-                    .ToString()
+            // The game's own current key for peek in either keyboard mode, so
+            // a remap in its input settings shows here.
+            var key = input != InputType.Controller
+                      && NInputManager.Instance is { } inputs
+                ? KokomiPlanViewRows.KeyName(
+                    inputs.GetCurrentHotkey(MegaInput.peek))
                 : null;
             var text = count > 0 ? KokomiPlanViewRows.HintText(input, key) : null;
             hint.Visible = text != null;
@@ -467,6 +475,12 @@ internal static class KokomiPlanStrip
                 words.Text = text;
                 words.Position = new Vector2(
                     glyph is { Visible: true } ? HintHeight + 4f : 0f, 0f);
+                // The click target covers the words, "Space: Plans" included,
+                // which run wider than a picture.
+                hint.Size = new Vector2(
+                    Math.Max(ThumbWidth,
+                             words.Position.X + words.GetMinimumSize().X),
+                    HintHeight);
             }
             var drawn = Math.Min(
                 count - KokomiPlanPages.PageStart(page, count), MaxDrawn);
@@ -510,6 +524,35 @@ internal static class KokomiPlanStrip
     /// page and repaints. Display only -- no Plan moves, so nothing goes
     /// through the action queue and a co-op peer's strip is untouched.
     /// </summary>
+    /// <summary>
+    /// THE MOUSE'S DOOR (2026-10-16): a left click on the hint opens the
+    /// Plans view, through the same <see cref="KokomiPlanView.TryOpen"/> the
+    /// peek key uses, so every refusal (not her turn, a card being aimed,
+    /// another screen up) holds for the click too. The words turn gold under
+    /// the pointer, the base game's highlight.
+    /// </summary>
+    private static void WireHintClick(Control hint, Label words, Player me)
+    {
+        hint.MouseEntered += () =>
+            words.AddThemeColorOverride(ThemeConstants.Label.FontColor,
+                                        StsColors.gold);
+        hint.MouseExited += () =>
+            words.AddThemeColorOverride(ThemeConstants.Label.FontColor,
+                                        CountColor);
+        hint.GuiInput += input =>
+        {
+            if (input is not InputEventMouseButton
+                {
+                    ButtonIndex: MouseButton.Left, Pressed: true,
+                })
+            {
+                return;
+            }
+            hint.AcceptEvent();
+            KokomiPlanView.TryOpen(me);
+        };
+    }
+
     private static void WirePager(Label pager, Control root, Player me)
     {
         pager.GuiInput += input =>
