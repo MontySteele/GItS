@@ -26,7 +26,8 @@ it is safe while the game runs.
 `--version` is required and plain (`0.3.0`), never the dev `0.2.N+dirty`.
 `--visibility` (private, public, unlisted, friends_only; default
 friends_only), `--change-note`, `--image` (preview png, under 1 MB),
-`--skip-build`, `--pck`, `--images-root` and `--out` are the options.
+`--skip-build`, `--pck`, `--images-root`, `--out` and (beta only)
+`--telemetry-endpoint` are the options.
 
 **What it writes**, under `.workshop/<variant>/` (gitignored):
 `workshop.json` (title, the DRAFT description, visibility, changeNote, tags,
@@ -48,6 +49,47 @@ relics, starter and Ancients; its code still compiles, so saves holding its
 ids still load. Universal Companions stay. `klee-mod/KleeCode/ReleaseVariant.cs`
 and `Patches/ReleaseKitsPatch.cs` are the code; `KleeTests/ReleaseVariantTests.cs`
 and `tier0/tests/test_package_workshop.py` the pins.
+
+**Opt-in run stats (beta only, 2026-10-16).** [USER]: "go ahead and try to
+build the opt-in upload now in the beta release so we can test drive the
+telemetry before we spread it further." Add the deployed Worker's URL
+(`telemetry-worker/README.md`, Deploy; today
+`https://gits-telemetry.gits-telemetry-worker.workers.dev`). It stays an
+option, never a constant in the code:
+
+```sh
+.venv/Scripts/python.exe tools/package_workshop.py --variant beta --version 0.3.0 \
+    --telemetry-endpoint https://gits-telemetry.gits-telemetry-worker.workers.dev
+```
+
+The upload sends `User-Agent: TeyvatSpire/<mod version> (+telemetry)`:
+Cloudflare's bot screen in front of the Worker answers 403 to some library
+defaults (`Python-urllib`) and 204 to a named client. A 403, like any other
+failure, is logged and dropped.
+
+That builds with `-p:GitsTelemetryEndpoint=<URL>/v1/run` (the route is
+appended if absent), which compiles `klee-mod/KleeCode/RunStats/`, and adds
+the privacy paragraph to the description. Without the option the beta has
+no uploader; `--variant public` refuses it, and dev, seat and test builds
+never name the property, so they compile no RunStats file at all. The dll
+check fails a `--skip-build` whose dll does not match (endpoint missing, or
+present when not asked for). Every build now also carries
+`-p:GitsVariant=<variant>`, read back as `WorkshopRelease.Variant`.
+
+What the player sees: one tickbox, "Share anonymous run stats with the
+Teyvat Spire developers", off by default, under Settings, Mod Configuration
+(BaseLib), Open Config, Teyvat Spire Roster (BaseLib's config screen; it is
+also on the main menu when BaseLib's own setting shows it there). It is
+stored in `%APPDATA%/SlayTheSpire2/mod_configs/KleeMod.cfg` with the install
+id, a random UUID v4 made the first time a run is sent and kept through
+Restore Defaults. A run goes up only when the game calls
+`ModManager.OnMetricsUpload` (its "Upload data" setting on, not abandoned,
+not a first run, not a debug build) and the tickbox is on; the game setting
+is read once more as a second belt. The record is schema v1, trimmed on the
+game thread and posted on a pool thread: one try, 10 s timeout, failures
+logged (`run stats:` in godot.log) and dropped, no retry queue.
+`KleeTests/RunStatsTests.cs` and `tier0/tests/test_run_stats_record.py` are
+the pins; `tools/telemetry_remote.py` reads what arrived.
 
 **What [USER] runs**, after editing the description in `workshop.json`
 (delete its DRAFT line) and checking `image.png`:

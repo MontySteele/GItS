@@ -42,6 +42,46 @@ public static class WorkshopRelease
     /// </summary>
     public static bool TelemetryWrites(bool release, string? declaredFeed) =>
         !release || !string.IsNullOrWhiteSpace(declaredFeed);
+
+    /// <summary>The assembly metadata key the csproj writes $(GitsVariant) to.</summary>
+    public const string VariantKey = "GitsVariant";
+
+    /// <summary>
+    /// The Workshop package this dll was built for (<c>beta</c> or
+    /// <c>public</c>, <c>-p:GitsVariant=...</c>, set by
+    /// <c>tools/package_workshop.py</c>), or null in a dev build.
+    /// </summary>
+    public static string? Variant =>
+        typeof(WorkshopRelease).Assembly
+            .GetCustomAttributes<AssemblyMetadataAttribute>()
+            .FirstOrDefault(a => a.Key == VariantKey)?.Value;
+
+    /// <summary>
+    /// The mod's plain version (<c>0.3.0</c>): the informational version up
+    /// to its <c>+</c> mark, which a Workshop build sets from
+    /// <c>--version</c>. "0.0.0" when the assembly carries none.
+    /// </summary>
+    public static string ModVersion
+    {
+        get
+        {
+            var info = typeof(WorkshopRelease).Assembly
+                .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+                .InformationalVersion;
+            return PlainVersion(info);
+        }
+    }
+
+    /// <summary>PURE: "0.3.0+workshop.beta" -> "0.3.0".</summary>
+    public static string PlainVersion(string? informational)
+    {
+        if (string.IsNullOrWhiteSpace(informational)) return "0.0.0";
+        var plain = informational.Split('+')[0].Trim();
+        var clean = new string(plain.Where(c => char.IsAsciiLetterOrDigit(c)
+                                                || c == '.' || c == '-' || c == '_')
+                                    .Take(32).ToArray());
+        return clean.Length == 0 ? "0.0.0" : clean;
+    }
 }
 
 /// <summary>

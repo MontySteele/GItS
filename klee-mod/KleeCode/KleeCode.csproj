@@ -85,6 +85,34 @@
       <_Parameter2>$(GitsKits)</_Parameter2>
     </AssemblyAttribute>
   </ItemGroup>
+  <ItemGroup Condition="'$(GitsVariant)' != ''">
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>GitsVariant</_Parameter1>
+      <_Parameter2>$(GitsVariant)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+  <!-- OPT-IN RUN STATS (2026-10-16; RunStats/RunStatsHook.cs,
+       docs/current/operations/workshop.md). Compiled in ONLY when an
+       endpoint is named:
+
+           -p:GitsTelemetryEndpoint=https://.../v1/run
+
+       tools/package_workshop.py passes it for a beta package given a
+       telemetry endpoint, and for nothing else. Every other build
+       (dev, seat, dotnet test, the public package) compiles no RunStats file
+       at all: no uploader, no setting, no install id. -->
+  <PropertyGroup Condition="'$(GitsTelemetryEndpoint)' != ''">
+    <DefineConstants>$(DefineConstants);GITS_RUN_STATS</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(GitsTelemetryEndpoint)' != ''">
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>GitsTelemetryEndpoint</_Parameter1>
+      <_Parameter2>$(GitsTelemetryEndpoint)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+  <ItemGroup Condition="'$(GitsTelemetryEndpoint)' == ''">
+    <Compile Remove="RunStats/**" />
+  </ItemGroup>
   <!-- Reference the game assembly + Harmony directly. Private=false: the game
        loads these from its own data folder, we must not ship copies. -->
   <ItemGroup>

@@ -229,3 +229,111 @@ def test_a_dry_run_writes_nothing(tmp_path, capsys):
 
 def test_the_workspace_is_ignored():
     assert ".workshop/" in (ROOT / ".gitignore").read_text(encoding="utf-8").splitlines()
+
+
+# ------------------------------------------------- opt-in run stats ---
+
+URL = "https://gits-telemetry.example.workers.dev"
+ROUTE = URL + "/v1/run"
+
+
+@pytest.mark.parametrize("name", ["public", "beta"])
+def test_no_endpoint_means_no_uploader_in_the_build(name, tmp_path):
+    v = pw.VARIANTS[name]
+    args = pw.build_args(v, "0.3.0", tmp_path)
+    assert f"-p:GitsVariant={name}" in args
+    assert not any("GitsTelemetryEndpoint" in a for a in args)
+    assert pw.telemetry_endpoint(v, None) is None
+
+
+def test_a_beta_endpoint_is_normalised_and_compiled_in(tmp_path):
+    beta = pw.VARIANTS["beta"]
+    for given in (URL, URL + "/", ROUTE):
+        assert pw.telemetry_endpoint(beta, given) == ROUTE
+    args = pw.build_args(beta, "0.3.0", tmp_path, ROUTE)
+    assert f"-p:GitsTelemetryEndpoint={ROUTE}" in args
+
+
+@pytest.mark.parametrize("bad", ["http://gits.example.dev", "gits.example.dev",
+                                 "https://a b.dev", "https://x.dev/v1/run?x=1;y"])
+def test_an_endpoint_must_be_plain_https(bad):
+    with pytest.raises(SystemExit):
+        pw.telemetry_endpoint(pw.VARIANTS["beta"], bad)
+
+
+def test_the_public_variant_refuses_an_endpoint():
+    with pytest.raises(SystemExit):
+        pw.telemetry_endpoint(pw.VARIANTS["public"], URL)
+    with pytest.raises(SystemExit):
+        pw.main(["--variant", "public", "--version", "0.3.0", "--dry-run",
+                 "--telemetry-endpoint", URL])
+
+
+def test_the_privacy_paragraph_rides_only_with_the_uploader():
+    beta = pw.VARIANTS["beta"]
+    without = pw.workshop_json(beta, "0.3.0", "friends_only", None)["description"]
+    with_ = pw.workshop_json(beta, "0.3.0", "friends_only", None, ROUTE)["description"]
+    assert "Run data (optional)" not in without
+    assert "Run data (optional)" in with_ and with_.startswith(without)
+    for words in ("Upload data", "no Steam id", "IP address is not stored",
+                  "deleted after a year", "random id"):
+        assert words in with_, words
+    # The paragraph names the setting by the label the mod actually shows.
+    hook = (ROOT / "klee-mod" / "KleeCode" / "RunStats" / "RunStatsHook.cs").read_text(encoding="utf-8")
+    label = "Share anonymous run stats with the Teyvat Spire developers"
+    assert f'"{label}"' in hook and f'"{label}"' in with_
+
+
+def _dll_with(*strings: str, tmp_path: Path) -> Path:
+    p = tmp_path / "klee.dll"
+    p.write_bytes(b"MZ" + b"".join(pw._blob(s) for s in strings) + b"\0" * 16)
+    return p
+
+
+def test_the_dll_check_reads_the_endpoint_both_ways(tmp_path):
+    beta = pw.VARIANTS["beta"]
+    base = ("GitsWorkshopRelease", "GitsKits", "+".join(beta.kits), "GitsVariant", "beta")
+    plain = _dll_with(*base, tmp_path=tmp_path)
+    pw.check_dll(plain, beta)
+    with pytest.raises(SystemExit):
+        pw.check_dll(plain, beta, ROUTE)          # asked for, not in the dll
+    (tmp_path / "e").mkdir()
+    armed = _dll_with(*base, "GitsTelemetryEndpoint", ROUTE, tmp_path=tmp_path / "e")
+    pw.check_dll(armed, beta, ROUTE)
+    with pytest.raises(SystemExit):
+        pw.check_dll(armed, beta)                 # in the dll, not asked for
+
+
+def test_a_long_blob_takes_a_two_byte_length():
+    s = "x" * 150
+    b = pw._blob(s)
+    assert b[:2] == bytes([0x80, 150]) and b[2:] == s.encode()
+
+
+def test_the_upload_names_itself_and_hardcodes_no_endpoint():
+    """Cloudflare's bot screen in front of the Worker returns 403 to the
+    `Python-urllib` agent and 204 to curl or an empty agent (checked by hand
+    against the deployed Worker, 2026-10-16). The client sends an explicit,
+    honest User-Agent and treats any non-2xx as a dropped failure. Static
+    only: nothing here touches the network."""
+    hook = (ROOT / "klee-mod" / "KleeCode" / "RunStats" / "RunStatsHook.cs").read_text(encoding="utf-8")
+    assert '$"TeyvatSpire/{WorkshopRelease.ModVersion} (+telemetry)"' in hook
+    assert '"User-Agent", UserAgent' in hook
+    assert "IsSuccessStatusCode" in hook
+    assert "TimeSpan.FromSeconds(10)" in hook
+    # The endpoint is a build option, read from assembly metadata; no URL in code.
+    for src in (ROOT / "klee-mod" / "KleeCode" / "RunStats").glob("*.cs"):
+        assert "workers.dev" not in src.read_text(encoding="utf-8"), src.name
+    assert "workers.dev" not in (ROOT / "tools" / "package_workshop.py").read_text(encoding="utf-8")
+
+
+def test_the_csproj_compiles_run_stats_only_with_an_endpoint():
+    proj = (ROOT / "klee-mod" / "KleeCode" / "KleeCode.csproj").read_text(encoding="utf-8")
+    assert "<ItemGroup Condition=\"'$(GitsTelemetryEndpoint)' == ''\">" in proj
+    assert '<Compile Remove="RunStats/**" />' in proj
+    assert "GITS_RUN_STATS" in proj
+    assert "<_Parameter1>GitsVariant</_Parameter1>" in proj
+    props = (ROOT / "klee-mod" / "Directory.Build.props").read_text(encoding="utf-8")
+    assert "GitsTelemetryEndpoint" not in props
+    mod = (ROOT / "klee-mod" / "KleeCode" / "KleeMod.cs").read_text(encoding="utf-8")
+    assert mod.count("#if GITS_RUN_STATS") == 2
