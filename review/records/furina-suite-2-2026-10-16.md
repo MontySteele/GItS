@@ -101,3 +101,11 @@ test (two plays, none).
    - (c) Promote all three as they are.
 
 Raw transcripts: `review/qa/blindplay/` (local, gitignored).
+
+**Ruled 2026-10-16.** [USER]: "Agreed on "do not promote" for the current
+Furina build." Pick 1 (a). His read for the next paper: "1) not enough ways to
+spend it big in act 3 2) too many spenders are "spend all" which you
+realistically don't want more than a couple of, and the starter already
+competes for that role anyway ... we need to limit the "spend all" effects so
+they don't brick everything else (possibly revisit the starter) but come up
+with other, capped spender effects that can still scale with powers."
