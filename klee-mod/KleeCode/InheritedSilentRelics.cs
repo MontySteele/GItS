@@ -57,14 +57,31 @@ public static class InheritedSilentRelics
     };
 
     /// <summary>
-    /// The borrowed Silent roster with <see cref="Dropped"/> removed. Every
-    /// one of the three pools goes through here and none reads
-    /// <c>ModelDb.RelicPool&lt;SilentRelicPool&gt;()</c> directly — pinned by
-    /// <c>InheritedSilentRelicsTests</c>, so a fourth pool cannot quietly
-    /// inherit the uncurated eight.
+    /// The two inherited relics that pay only when a card is DISCARDED
+    /// (Tingsha, Tough Bandages). Kit census pick 2 (ruled 2026-10-15): no
+    /// Furina or Kokomi card discards, so for those kits both are blank.
+    /// Varka has two discard cards and keeps them. Dropped per kit through
+    /// <c>Curated(dropDiscard: true)</c>. Klee is not opted in yet (Klee is
+    /// at Balance; staged on klee-next); Yae is unchanged.
     /// </summary>
-    public static IEnumerable<RelicModel> Curated() =>
-        ModelDb.RelicPool<SilentRelicPool>().AllRelics.Where(IsKept);
+    public static readonly IReadOnlyList<Type> DiscardOnly = new[]
+    {
+        typeof(MegaCrit.Sts2.Core.Models.Relics.Tingsha),
+        typeof(MegaCrit.Sts2.Core.Models.Relics.ToughBandages),
+    };
+
+    /// <summary>
+    /// The borrowed Silent roster with <see cref="Dropped"/> removed, and
+    /// <see cref="DiscardOnly"/> as well when <paramref name="dropDiscard"/>.
+    /// Every pool goes through here and none reads
+    /// <c>ModelDb.RelicPool&lt;SilentRelicPool&gt;()</c> directly - pinned by
+    /// <c>InheritedSilentRelicsTests</c>, so a new pool cannot quietly
+    /// inherit the uncurated roster.
+    /// </summary>
+    public static IEnumerable<RelicModel> Curated(bool dropDiscard = false) =>
+        ModelDb.RelicPool<SilentRelicPool>().AllRelics
+            .Where(IsKept)
+            .Where(r => !dropDiscard || IsKeptDiscard(r));
 
     /// <summary>
     /// Whether a relic survives the curation. <c>IsInstanceOfType</c> rather
@@ -73,4 +90,8 @@ public static class InheritedSilentRelics
     /// </summary>
     public static bool IsKept(RelicModel relic) =>
         !Dropped.Any(dropped => dropped.IsInstanceOfType(relic));
+
+    /// <summary>False for the discard-only relics (see <see cref="DiscardOnly"/>).</summary>
+    public static bool IsKeptDiscard(RelicModel relic) =>
+        !DiscardOnly.Any(t => t.IsInstanceOfType(relic));
 }

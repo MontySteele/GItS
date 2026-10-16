@@ -555,3 +555,25 @@ def render_merchant_scene(frames: dict | None = None) -> str:
         ]),
     ]
     return NL.join(out) + NL
+
+
+# ---------------------------------------------------------------------------
+# the character-select background
+# ---------------------------------------------------------------------------
+
+#: The select scene this generator is the one producer of (build_pck.ps1 only
+#: overlays it): the backdrop, the close-up breathing on a loop and the
+#: Pyro emitters (tools/select_bg.py, 2026-10-14).
+SELECT_SCENE = ROOT / "klee-mod" / "pck-src" / "klee" / "ui" / "char_select_bg_klee.tscn"
+#: The backdrop tint (as the scene carried it in build_pck.ps1).
+SELECT_TINT = (0.52, 0.42, 0.42, 1.0)
+SELECT_ELEMENT = "pyro"
+#: The figure's horizontal centre in select_closeup.png (its opaque columns
+#: span x 883-1616 in the 2026-10-14 render): the breath's pivot and the glow.
+SELECT_FIGURE_X = 1250.0
+
+
+def render_select_scene() -> str:
+    from tools.select_bg import load_loop, render_select_scene as _render
+
+    return _render("klee", "KleeBg", SELECT_TINT, SELECT_ELEMENT, SELECT_FIGURE_X, load_loop("klee"))

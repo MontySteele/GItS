@@ -1,617 +1,2653 @@
-[gd_scene load_steps=35 format=3]
+[gd_scene load_steps=329 format=3]
 
-[ext_resource type="Texture2D" path="res://furina/model/layers/furina_combat_coat_back.png" id="1_coat"]
-[ext_resource type="Texture2D" path="res://furina/model/layers/furina_combat_sword.png" id="2_sword"]
-[ext_resource type="Texture2D" path="res://furina/model/layers/furina_combat_body.png" id="3_body"]
-[ext_resource type="Texture2D" path="res://furina/model/layers/furina_combat_hat.png" id="4_hat"]
+[ext_resource type="Texture2D" path="res://furina/model/frames/furina_shadow.png" id="0_shadow"]
+[ext_resource type="Texture2D" path="res://furina/model/frames/furina_idle.png" id="1_idle"]
+[ext_resource type="Texture2D" path="res://furina/model/frames/furina_idle_low.png" id="2_idle_low"]
+[ext_resource type="Texture2D" path="res://furina/model/frames/furina_attack.png" id="3_attack"]
+[ext_resource type="Texture2D" path="res://furina/model/frames/furina_hurt.png" id="4_hurt"]
+[ext_resource type="Texture2D" path="res://furina/model/frames/furina_death.png" id="5_death"]
+[ext_resource type="Texture2D" path="res://furina/model/frames/furina_cast.png" id="6_cast"]
+[ext_resource type="Texture2D" path="res://furina/model/frames/furina_rejoice.png" id="7_rejoice"]
+[ext_resource type="Texture2D" path="res://furina/model/frames/furina_attack_fx.png" id="8_fx_attack"]
+[ext_resource type="Texture2D" path="res://furina/model/frames/furina_spend.png" id="9_stage_spend"]
+[ext_resource type="Texture2D" path="res://furina/model/frames/furina_drain.png" id="10_stage_drain"]
+[ext_resource type="Texture2D" path="res://furina/model/frames/furina_repay.png" id="11_stage_repay"]
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_0"]
+atlas = ExtResource("1_idle")
+region = Rect2(0, 0, 224, 437)
+margin = Rect2(8, 2, 12, 2)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_1"]
+atlas = ExtResource("1_idle")
+region = Rect2(224, 0, 224, 437)
+margin = Rect2(8, 2, 12, 2)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_2"]
+atlas = ExtResource("1_idle")
+region = Rect2(448, 0, 224, 437)
+margin = Rect2(8, 2, 12, 2)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_3"]
+atlas = ExtResource("1_idle")
+region = Rect2(672, 0, 225, 437)
+margin = Rect2(7, 2, 11, 2)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_4"]
+atlas = ExtResource("1_idle")
+region = Rect2(897, 0, 226, 437)
+margin = Rect2(7, 2, 10, 2)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_5"]
+atlas = ExtResource("1_idle")
+region = Rect2(1123, 0, 227, 437)
+margin = Rect2(6, 2, 9, 2)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_6"]
+atlas = ExtResource("1_idle")
+region = Rect2(1350, 0, 228, 437)
+margin = Rect2(5, 2, 8, 2)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_7"]
+atlas = ExtResource("1_idle")
+region = Rect2(1578, 0, 228, 438)
+margin = Rect2(5, 1, 8, 1)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_8"]
+atlas = ExtResource("1_idle")
+region = Rect2(0, 438, 230, 438)
+margin = Rect2(4, 1, 6, 1)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_9"]
+atlas = ExtResource("1_idle")
+region = Rect2(230, 438, 231, 438)
+margin = Rect2(3, 1, 5, 1)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_10"]
+atlas = ExtResource("1_idle")
+region = Rect2(461, 438, 231, 438)
+margin = Rect2(3, 1, 5, 1)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_11"]
+atlas = ExtResource("1_idle")
+region = Rect2(692, 438, 233, 438)
+margin = Rect2(2, 1, 3, 1)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_12"]
+atlas = ExtResource("1_idle")
+region = Rect2(925, 438, 234, 438)
+margin = Rect2(1, 1, 2, 1)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_13"]
+atlas = ExtResource("1_idle")
+region = Rect2(1159, 438, 234, 438)
+margin = Rect2(1, 1, 2, 1)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_14"]
+atlas = ExtResource("1_idle")
+region = Rect2(1393, 438, 235, 439)
+margin = Rect2(0, 0, 1, 0)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_15"]
+atlas = ExtResource("1_idle")
+region = Rect2(1628, 438, 236, 439)
+margin = Rect2(0, 0, 0, 0)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_16"]
+atlas = ExtResource("1_idle")
+region = Rect2(0, 877, 236, 439)
+margin = Rect2(0, 0, 0, 0)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_17"]
+atlas = ExtResource("1_idle")
+region = Rect2(236, 877, 236, 439)
+margin = Rect2(0, 0, 0, 0)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_18"]
+atlas = ExtResource("1_idle")
+region = Rect2(472, 877, 236, 439)
+margin = Rect2(0, 0, 0, 0)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_19"]
+atlas = ExtResource("1_idle")
+region = Rect2(708, 877, 235, 438)
+margin = Rect2(0, 1, 1, 1)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_20"]
+atlas = ExtResource("1_idle")
+region = Rect2(943, 877, 235, 438)
+margin = Rect2(0, 1, 1, 1)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_21"]
+atlas = ExtResource("1_idle")
+region = Rect2(1178, 877, 235, 438)
+margin = Rect2(0, 1, 1, 1)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_22"]
+atlas = ExtResource("1_idle")
+region = Rect2(1413, 877, 234, 438)
+margin = Rect2(1, 1, 2, 1)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_23"]
+atlas = ExtResource("1_idle")
+region = Rect2(1647, 877, 234, 438)
+margin = Rect2(1, 1, 2, 1)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_24"]
+atlas = ExtResource("1_idle")
+region = Rect2(0, 1316, 234, 438)
+margin = Rect2(1, 1, 2, 1)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_25"]
+atlas = ExtResource("1_idle")
+region = Rect2(234, 1316, 233, 438)
+margin = Rect2(1, 1, 3, 1)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_26"]
+atlas = ExtResource("1_idle")
+region = Rect2(467, 1316, 232, 438)
+margin = Rect2(2, 1, 4, 1)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_27"]
+atlas = ExtResource("1_idle")
+region = Rect2(699, 1316, 231, 438)
+margin = Rect2(3, 1, 5, 1)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_28"]
+atlas = ExtResource("1_idle")
+region = Rect2(930, 1316, 230, 438)
+margin = Rect2(4, 1, 6, 1)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_29"]
+atlas = ExtResource("1_idle")
+region = Rect2(1160, 1316, 228, 437)
+margin = Rect2(5, 2, 8, 2)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_30"]
+atlas = ExtResource("1_idle")
+region = Rect2(1388, 1316, 227, 437)
+margin = Rect2(6, 2, 9, 2)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_31"]
+atlas = ExtResource("1_idle")
+region = Rect2(1615, 1316, 225, 437)
+margin = Rect2(7, 2, 11, 2)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_32"]
+atlas = ExtResource("1_idle")
+region = Rect2(0, 1754, 225, 437)
+margin = Rect2(7, 2, 11, 2)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_33"]
+atlas = ExtResource("1_idle")
+region = Rect2(225, 1754, 224, 437)
+margin = Rect2(8, 2, 12, 2)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_low_0"]
+atlas = ExtResource("2_idle_low")
+region = Rect2(0, 0, 202, 429)
+margin = Rect2(7, 2, 7, 2)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_low_1"]
+atlas = ExtResource("2_idle_low")
+region = Rect2(202, 0, 202, 429)
+margin = Rect2(7, 2, 7, 2)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_low_2"]
+atlas = ExtResource("2_idle_low")
+region = Rect2(404, 0, 202, 429)
+margin = Rect2(7, 2, 7, 2)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_low_3"]
+atlas = ExtResource("2_idle_low")
+region = Rect2(606, 0, 203, 429)
+margin = Rect2(6, 2, 6, 2)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_low_4"]
+atlas = ExtResource("2_idle_low")
+region = Rect2(809, 0, 202, 429)
+margin = Rect2(6, 2, 7, 2)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_low_5"]
+atlas = ExtResource("2_idle_low")
+region = Rect2(1011, 0, 203, 429)
+margin = Rect2(5, 2, 6, 2)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_low_6"]
+atlas = ExtResource("2_idle_low")
+region = Rect2(1214, 0, 203, 430)
+margin = Rect2(5, 1, 6, 1)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_low_7"]
+atlas = ExtResource("2_idle_low")
+region = Rect2(1417, 0, 205, 430)
+margin = Rect2(4, 1, 4, 1)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_low_8"]
+atlas = ExtResource("2_idle_low")
+region = Rect2(0, 430, 206, 430)
+margin = Rect2(3, 1, 3, 1)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_low_9"]
+atlas = ExtResource("2_idle_low")
+region = Rect2(206, 430, 205, 430)
+margin = Rect2(3, 1, 4, 1)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_low_10"]
+atlas = ExtResource("2_idle_low")
+region = Rect2(411, 430, 206, 431)
+margin = Rect2(2, 0, 3, 0)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_low_11"]
+atlas = ExtResource("2_idle_low")
+region = Rect2(617, 430, 206, 431)
+margin = Rect2(2, 0, 3, 0)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_low_12"]
+atlas = ExtResource("2_idle_low")
+region = Rect2(823, 430, 207, 431)
+margin = Rect2(1, 0, 2, 0)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_low_13"]
+atlas = ExtResource("2_idle_low")
+region = Rect2(1030, 430, 207, 431)
+margin = Rect2(1, 0, 2, 0)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_low_14"]
+atlas = ExtResource("2_idle_low")
+region = Rect2(1237, 430, 208, 431)
+margin = Rect2(0, 0, 1, 0)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_low_15"]
+atlas = ExtResource("2_idle_low")
+region = Rect2(1445, 430, 208, 431)
+margin = Rect2(0, 0, 1, 0)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_low_16"]
+atlas = ExtResource("2_idle_low")
+region = Rect2(0, 861, 208, 431)
+margin = Rect2(0, 0, 1, 0)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_low_17"]
+atlas = ExtResource("2_idle_low")
+region = Rect2(208, 861, 207, 431)
+margin = Rect2(1, 0, 2, 0)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_low_18"]
+atlas = ExtResource("2_idle_low")
+region = Rect2(415, 861, 207, 431)
+margin = Rect2(1, 0, 2, 0)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_low_19"]
+atlas = ExtResource("2_idle_low")
+region = Rect2(622, 861, 206, 431)
+margin = Rect2(2, 0, 3, 0)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_low_20"]
+atlas = ExtResource("2_idle_low")
+region = Rect2(828, 861, 206, 431)
+margin = Rect2(2, 0, 3, 0)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_low_21"]
+atlas = ExtResource("2_idle_low")
+region = Rect2(1034, 861, 205, 430)
+margin = Rect2(3, 1, 4, 1)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_low_22"]
+atlas = ExtResource("2_idle_low")
+region = Rect2(1239, 861, 206, 430)
+margin = Rect2(3, 1, 3, 1)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_low_23"]
+atlas = ExtResource("2_idle_low")
+region = Rect2(1445, 861, 205, 430)
+margin = Rect2(4, 1, 4, 1)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_low_24"]
+atlas = ExtResource("2_idle_low")
+region = Rect2(0, 1292, 203, 430)
+margin = Rect2(5, 1, 6, 1)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_low_25"]
+atlas = ExtResource("2_idle_low")
+region = Rect2(203, 1292, 203, 429)
+margin = Rect2(5, 2, 6, 2)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_low_26"]
+atlas = ExtResource("2_idle_low")
+region = Rect2(406, 1292, 202, 429)
+margin = Rect2(6, 2, 7, 2)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_low_27"]
+atlas = ExtResource("2_idle_low")
+region = Rect2(608, 1292, 203, 429)
+margin = Rect2(6, 2, 6, 2)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_low_28"]
+atlas = ExtResource("2_idle_low")
+region = Rect2(811, 1292, 202, 429)
+margin = Rect2(7, 2, 7, 2)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_idle_low_29"]
+atlas = ExtResource("2_idle_low")
+region = Rect2(1013, 1292, 202, 429)
+margin = Rect2(7, 2, 7, 2)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_attack_0"]
+atlas = ExtResource("3_attack")
+region = Rect2(0, 0, 230, 438)
+margin = Rect2(35, 0, 96, 2)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_attack_1"]
+atlas = ExtResource("3_attack")
+region = Rect2(230, 0, 196, 435)
+margin = Rect2(33, 3, 130, 5)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_attack_2"]
+atlas = ExtResource("3_attack")
+region = Rect2(426, 0, 191, 433)
+margin = Rect2(32, 5, 135, 7)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_attack_3"]
+atlas = ExtResource("3_attack")
+region = Rect2(617, 0, 189, 433)
+margin = Rect2(32, 6, 137, 7)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_attack_4"]
+atlas = ExtResource("3_attack")
+region = Rect2(806, 0, 202, 434)
+margin = Rect2(29, 6, 124, 6)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_attack_5"]
+atlas = ExtResource("3_attack")
+region = Rect2(1008, 0, 213, 433)
+margin = Rect2(25, 6, 113, 7)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_attack_6"]
+atlas = ExtResource("3_attack")
+region = Rect2(1221, 0, 232, 431)
+margin = Rect2(19, 8, 94, 9)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_attack_7"]
+atlas = ExtResource("3_attack")
+region = Rect2(0, 438, 255, 427)
+margin = Rect2(14, 11, 71, 13)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_attack_8"]
+atlas = ExtResource("3_attack")
+region = Rect2(255, 438, 326, 417)
+margin = Rect2(0, 21, 0, 23)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_attack_9"]
+atlas = ExtResource("3_attack")
+region = Rect2(581, 438, 322, 416)
+margin = Rect2(4, 22, 4, 24)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_attack_10"]
+atlas = ExtResource("3_attack")
+region = Rect2(903, 438, 320, 415)
+margin = Rect2(6, 23, 6, 25)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_attack_11"]
+atlas = ExtResource("3_attack")
+region = Rect2(1223, 438, 316, 416)
+margin = Rect2(8, 22, 10, 24)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_attack_12"]
+atlas = ExtResource("3_attack")
+region = Rect2(0, 865, 297, 423)
+margin = Rect2(16, 15, 29, 17)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_attack_13"]
+atlas = ExtResource("3_attack")
+region = Rect2(297, 865, 271, 431)
+margin = Rect2(26, 7, 55, 9)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_attack_14"]
+atlas = ExtResource("3_attack")
+region = Rect2(568, 865, 256, 435)
+margin = Rect2(31, 3, 70, 5)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_attack_15"]
+atlas = ExtResource("3_attack")
+region = Rect2(824, 865, 244, 436)
+margin = Rect2(33, 2, 82, 4)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_attack_16"]
+atlas = ExtResource("3_attack")
+region = Rect2(1068, 865, 236, 437)
+margin = Rect2(34, 1, 90, 3)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_attack_17"]
+atlas = ExtResource("3_attack")
+region = Rect2(1304, 865, 231, 438)
+margin = Rect2(35, 0, 95, 2)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_attack_18"]
+atlas = ExtResource("3_attack")
+region = Rect2(0, 1303, 230, 438)
+margin = Rect2(35, 0, 96, 2)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_attack_19"]
+atlas = ExtResource("3_attack")
+region = Rect2(230, 1303, 230, 438)
+margin = Rect2(35, 0, 96, 2)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_hurt_0"]
+atlas = ExtResource("4_hurt")
+region = Rect2(0, 0, 231, 438)
+margin = Rect2(0, 0, 0, 1)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_hurt_1"]
+atlas = ExtResource("4_hurt")
+region = Rect2(231, 0, 179, 426)
+margin = Rect2(15, 12, 52, 13)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_hurt_2"]
+atlas = ExtResource("4_hurt")
+region = Rect2(410, 0, 177, 423)
+margin = Rect2(17, 16, 54, 16)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_hurt_3"]
+atlas = ExtResource("4_hurt")
+region = Rect2(587, 0, 178, 424)
+margin = Rect2(16, 15, 53, 15)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_hurt_4"]
+atlas = ExtResource("4_hurt")
+region = Rect2(765, 0, 179, 426)
+margin = Rect2(15, 13, 52, 13)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_hurt_5"]
+atlas = ExtResource("4_hurt")
+region = Rect2(944, 0, 180, 426)
+margin = Rect2(14, 12, 51, 13)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_hurt_6"]
+atlas = ExtResource("4_hurt")
+region = Rect2(0, 438, 180, 426)
+margin = Rect2(14, 12, 51, 13)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_hurt_7"]
+atlas = ExtResource("4_hurt")
+region = Rect2(180, 438, 179, 427)
+margin = Rect2(14, 11, 52, 12)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_hurt_8"]
+atlas = ExtResource("4_hurt")
+region = Rect2(359, 438, 180, 428)
+margin = Rect2(13, 10, 51, 11)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_hurt_9"]
+atlas = ExtResource("4_hurt")
+region = Rect2(539, 438, 182, 430)
+margin = Rect2(11, 8, 49, 9)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_hurt_10"]
+atlas = ExtResource("4_hurt")
+region = Rect2(721, 438, 183, 432)
+margin = Rect2(9, 6, 48, 7)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_hurt_11"]
+atlas = ExtResource("4_hurt")
+region = Rect2(904, 438, 186, 433)
+margin = Rect2(7, 5, 45, 6)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_hurt_12"]
+atlas = ExtResource("4_hurt")
+region = Rect2(0, 871, 202, 435)
+margin = Rect2(5, 3, 29, 4)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_hurt_13"]
+atlas = ExtResource("4_hurt")
+region = Rect2(202, 871, 215, 436)
+margin = Rect2(3, 2, 16, 3)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_hurt_14"]
+atlas = ExtResource("4_hurt")
+region = Rect2(417, 871, 224, 437)
+margin = Rect2(2, 1, 7, 2)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_hurt_15"]
+atlas = ExtResource("4_hurt")
+region = Rect2(641, 871, 229, 438)
+margin = Rect2(1, 0, 2, 1)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_death_0"]
+atlas = ExtResource("5_death")
+region = Rect2(0, 0, 230, 438)
+margin = Rect2(1, 0, 35, 3)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_death_1"]
+atlas = ExtResource("5_death")
+region = Rect2(230, 0, 180, 427)
+margin = Rect2(14, 11, 85, 14)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_death_2"]
+atlas = ExtResource("5_death")
+region = Rect2(410, 0, 178, 423)
+margin = Rect2(17, 16, 87, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_death_3"]
+atlas = ExtResource("5_death")
+region = Rect2(588, 0, 178, 423)
+margin = Rect2(16, 16, 87, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_death_4"]
+atlas = ExtResource("5_death")
+region = Rect2(766, 0, 182, 423)
+margin = Rect2(14, 16, 83, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_death_5"]
+atlas = ExtResource("5_death")
+region = Rect2(948, 0, 181, 422)
+margin = Rect2(12, 17, 84, 19)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_death_6"]
+atlas = ExtResource("5_death")
+region = Rect2(1129, 0, 183, 422)
+margin = Rect2(10, 17, 82, 19)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_death_7"]
+atlas = ExtResource("5_death")
+region = Rect2(0, 438, 183, 422)
+margin = Rect2(10, 17, 82, 19)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_death_8"]
+atlas = ExtResource("5_death")
+region = Rect2(183, 438, 183, 422)
+margin = Rect2(10, 17, 82, 19)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_death_9"]
+atlas = ExtResource("5_death")
+region = Rect2(366, 438, 183, 422)
+margin = Rect2(10, 17, 82, 19)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_death_10"]
+atlas = ExtResource("5_death")
+region = Rect2(549, 438, 183, 421)
+margin = Rect2(10, 18, 82, 20)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_death_11"]
+atlas = ExtResource("5_death")
+region = Rect2(732, 438, 183, 416)
+margin = Rect2(9, 23, 82, 25)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_death_12"]
+atlas = ExtResource("5_death")
+region = Rect2(915, 438, 190, 408)
+margin = Rect2(7, 31, 75, 33)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_death_13"]
+atlas = ExtResource("5_death")
+region = Rect2(1105, 438, 201, 393)
+margin = Rect2(3, 45, 64, 48)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_death_14"]
+atlas = ExtResource("5_death")
+region = Rect2(0, 860, 218, 376)
+margin = Rect2(0, 65, 47, 65)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_death_15"]
+atlas = ExtResource("5_death")
+region = Rect2(218, 860, 211, 348)
+margin = Rect2(2, 93, 54, 93)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_death_16"]
+atlas = ExtResource("5_death")
+region = Rect2(429, 860, 193, 321)
+margin = Rect2(13, 120, 72, 120)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_death_17"]
+atlas = ExtResource("5_death")
+region = Rect2(622, 860, 199, 312)
+margin = Rect2(24, 129, 66, 129)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_death_18"]
+atlas = ExtResource("5_death")
+region = Rect2(821, 860, 209, 306)
+margin = Rect2(24, 135, 56, 135)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_death_19"]
+atlas = ExtResource("5_death")
+region = Rect2(1030, 860, 211, 305)
+margin = Rect2(24, 136, 54, 136)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_death_20"]
+atlas = ExtResource("5_death")
+region = Rect2(0, 1236, 216, 301)
+margin = Rect2(24, 140, 49, 140)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_death_21"]
+atlas = ExtResource("5_death")
+region = Rect2(216, 1236, 223, 295)
+margin = Rect2(24, 146, 42, 146)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_death_22"]
+atlas = ExtResource("5_death")
+region = Rect2(439, 1236, 233, 287)
+margin = Rect2(23, 154, 32, 154)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_death_23"]
+atlas = ExtResource("5_death")
+region = Rect2(672, 1236, 239, 279)
+margin = Rect2(23, 162, 26, 162)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_death_24"]
+atlas = ExtResource("5_death")
+region = Rect2(911, 1236, 242, 276)
+margin = Rect2(23, 165, 23, 165)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_cast_0"]
+atlas = ExtResource("6_cast")
+region = Rect2(0, 0, 231, 438)
+margin = Rect2(0, 3, 13, 3)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_cast_1"]
+atlas = ExtResource("6_cast")
+region = Rect2(231, 0, 239, 440)
+margin = Rect2(2, 1, 5, 1)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_cast_2"]
+atlas = ExtResource("6_cast")
+region = Rect2(470, 0, 215, 440)
+margin = Rect2(3, 1, 29, 1)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_cast_3"]
+atlas = ExtResource("6_cast")
+region = Rect2(685, 0, 199, 441)
+margin = Rect2(3, 0, 45, 0)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_cast_4"]
+atlas = ExtResource("6_cast")
+region = Rect2(884, 0, 193, 441)
+margin = Rect2(4, 0, 51, 0)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_cast_5"]
+atlas = ExtResource("6_cast")
+region = Rect2(1077, 0, 190, 441)
+margin = Rect2(4, 0, 54, 0)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_cast_6"]
+atlas = ExtResource("6_cast")
+region = Rect2(0, 441, 189, 441)
+margin = Rect2(5, 0, 55, 0)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_cast_7"]
+atlas = ExtResource("6_cast")
+region = Rect2(189, 441, 189, 441)
+margin = Rect2(5, 0, 55, 0)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_cast_8"]
+atlas = ExtResource("6_cast")
+region = Rect2(378, 441, 189, 441)
+margin = Rect2(5, 0, 55, 0)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_cast_9"]
+atlas = ExtResource("6_cast")
+region = Rect2(567, 441, 189, 441)
+margin = Rect2(5, 0, 55, 0)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_cast_10"]
+atlas = ExtResource("6_cast")
+region = Rect2(756, 441, 189, 441)
+margin = Rect2(5, 0, 55, 0)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_cast_11"]
+atlas = ExtResource("6_cast")
+region = Rect2(945, 441, 189, 441)
+margin = Rect2(5, 0, 55, 0)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_cast_12"]
+atlas = ExtResource("6_cast")
+region = Rect2(1134, 441, 189, 441)
+margin = Rect2(5, 0, 55, 0)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_cast_13"]
+atlas = ExtResource("6_cast")
+region = Rect2(0, 882, 189, 441)
+margin = Rect2(5, 0, 55, 0)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_cast_14"]
+atlas = ExtResource("6_cast")
+region = Rect2(189, 882, 189, 441)
+margin = Rect2(5, 0, 55, 0)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_cast_15"]
+atlas = ExtResource("6_cast")
+region = Rect2(378, 882, 201, 441)
+margin = Rect2(4, 0, 43, 0)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_cast_16"]
+atlas = ExtResource("6_cast")
+region = Rect2(579, 882, 223, 440)
+margin = Rect2(3, 1, 21, 1)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_cast_17"]
+atlas = ExtResource("6_cast")
+region = Rect2(802, 882, 240, 440)
+margin = Rect2(2, 1, 4, 1)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_cast_18"]
+atlas = ExtResource("6_cast")
+region = Rect2(1042, 882, 242, 439)
+margin = Rect2(2, 2, 2, 2)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_cast_19"]
+atlas = ExtResource("6_cast")
+region = Rect2(0, 1323, 236, 439)
+margin = Rect2(1, 2, 8, 2)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_rejoice_0"]
+atlas = ExtResource("7_rejoice")
+region = Rect2(0, 0, 230, 438)
+margin = Rect2(40, 10, 105, 11)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_rejoice_1"]
+atlas = ExtResource("7_rejoice")
+region = Rect2(230, 0, 205, 435)
+margin = Rect2(40, 13, 130, 14)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_rejoice_2"]
+atlas = ExtResource("7_rejoice")
+region = Rect2(435, 0, 190, 430)
+margin = Rect2(39, 18, 145, 19)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_rejoice_3"]
+atlas = ExtResource("7_rejoice")
+region = Rect2(625, 0, 194, 431)
+margin = Rect2(33, 17, 141, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_rejoice_4"]
+atlas = ExtResource("7_rejoice")
+region = Rect2(819, 0, 236, 439)
+margin = Rect2(0, 7, 99, 10)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_rejoice_5"]
+atlas = ExtResource("7_rejoice")
+region = Rect2(1055, 0, 194, 443)
+margin = Rect2(45, 1, 141, 6)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_rejoice_6"]
+atlas = ExtResource("7_rejoice")
+region = Rect2(1249, 0, 174, 440)
+margin = Rect2(93, 0, 161, 9)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_rejoice_7"]
+atlas = ExtResource("7_rejoice")
+region = Rect2(1423, 0, 247, 445)
+margin = Rect2(88, 0, 88, 4)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_rejoice_8"]
+atlas = ExtResource("7_rejoice")
+region = Rect2(0, 445, 159, 446)
+margin = Rect2(96, 3, 176, 3)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_rejoice_9"]
+atlas = ExtResource("7_rejoice")
+region = Rect2(159, 445, 183, 438)
+margin = Rect2(56, 10, 152, 11)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_rejoice_10"]
+atlas = ExtResource("7_rejoice")
+region = Rect2(342, 445, 190, 429)
+margin = Rect2(39, 20, 145, 20)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_rejoice_11"]
+atlas = ExtResource("7_rejoice")
+region = Rect2(532, 445, 191, 434)
+margin = Rect2(60, 10, 144, 15)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_rejoice_12"]
+atlas = ExtResource("7_rejoice")
+region = Rect2(723, 445, 217, 443)
+margin = Rect2(29, 5, 118, 6)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_rejoice_13"]
+atlas = ExtResource("7_rejoice")
+region = Rect2(940, 445, 218, 443)
+margin = Rect2(28, 5, 117, 6)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_rejoice_14"]
+atlas = ExtResource("7_rejoice")
+region = Rect2(1158, 445, 219, 443)
+margin = Rect2(27, 5, 116, 6)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_rejoice_15"]
+atlas = ExtResource("7_rejoice")
+region = Rect2(1377, 445, 220, 443)
+margin = Rect2(25, 5, 115, 6)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_rejoice_16"]
+atlas = ExtResource("7_rejoice")
+region = Rect2(0, 891, 222, 443)
+margin = Rect2(23, 5, 113, 6)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_rejoice_17"]
+atlas = ExtResource("7_rejoice")
+region = Rect2(222, 891, 222, 443)
+margin = Rect2(23, 5, 113, 6)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_rejoice_18"]
+atlas = ExtResource("7_rejoice")
+region = Rect2(444, 891, 221, 443)
+margin = Rect2(24, 5, 114, 6)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_rejoice_19"]
+atlas = ExtResource("7_rejoice")
+region = Rect2(665, 891, 220, 443)
+margin = Rect2(26, 5, 115, 6)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_rejoice_20"]
+atlas = ExtResource("7_rejoice")
+region = Rect2(885, 891, 218, 443)
+margin = Rect2(28, 5, 117, 6)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_rejoice_21"]
+atlas = ExtResource("7_rejoice")
+region = Rect2(1103, 891, 217, 443)
+margin = Rect2(29, 5, 118, 6)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_rejoice_22"]
+atlas = ExtResource("7_rejoice")
+region = Rect2(1320, 891, 241, 442)
+margin = Rect2(20, 6, 94, 7)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_rejoice_23"]
+atlas = ExtResource("7_rejoice")
+region = Rect2(0, 1334, 266, 442)
+margin = Rect2(18, 6, 69, 7)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_rejoice_24"]
+atlas = ExtResource("7_rejoice")
+region = Rect2(266, 1334, 254, 440)
+margin = Rect2(36, 8, 81, 9)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_rejoice_25"]
+atlas = ExtResource("7_rejoice")
+region = Rect2(520, 1334, 241, 439)
+margin = Rect2(39, 9, 94, 10)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_rejoice_26"]
+atlas = ExtResource("7_rejoice")
+region = Rect2(761, 1334, 230, 438)
+margin = Rect2(40, 10, 105, 11)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_rejoice_27"]
+atlas = ExtResource("7_rejoice")
+region = Rect2(991, 1334, 230, 438)
+margin = Rect2(40, 10, 105, 11)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_rejoice_28"]
+atlas = ExtResource("7_rejoice")
+region = Rect2(1221, 1334, 230, 438)
+margin = Rect2(40, 10, 105, 11)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_rejoice_29"]
+atlas = ExtResource("7_rejoice")
+region = Rect2(1451, 1334, 230, 438)
+margin = Rect2(40, 10, 105, 11)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_fx_attack_0"]
+atlas = ExtResource("8_fx_attack")
+region = Rect2(0, 0, 3, 3)
+margin = Rect2(0, 0, 359, 252)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_fx_attack_1"]
+atlas = ExtResource("8_fx_attack")
+region = Rect2(3, 0, 75, 153)
+margin = Rect2(0, 6, 287, 102)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_fx_attack_2"]
+atlas = ExtResource("8_fx_attack")
+region = Rect2(78, 0, 112, 142)
+margin = Rect2(2, 0, 250, 113)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_fx_attack_3"]
+atlas = ExtResource("8_fx_attack")
+region = Rect2(190, 0, 145, 176)
+margin = Rect2(5, 2, 217, 79)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_fx_attack_4"]
+atlas = ExtResource("8_fx_attack")
+region = Rect2(335, 0, 178, 192)
+margin = Rect2(34, 4, 184, 63)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_fx_attack_5"]
+atlas = ExtResource("8_fx_attack")
+region = Rect2(0, 192, 271, 239)
+margin = Rect2(91, 16, 91, 16)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_fx_attack_6"]
+atlas = ExtResource("8_fx_attack")
+region = Rect2(271, 192, 268, 236)
+margin = Rect2(94, 16, 94, 19)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_fx_attack_7"]
+atlas = ExtResource("8_fx_attack")
+region = Rect2(0, 431, 265, 219)
+margin = Rect2(97, 21, 97, 36)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_fx_attack_8"]
+atlas = ExtResource("8_fx_attack")
+region = Rect2(265, 431, 184, 42)
+margin = Rect2(178, 195, 178, 213)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_fx_attack_9"]
+atlas = ExtResource("8_fx_attack")
+region = Rect2(0, 650, 184, 35)
+margin = Rect2(178, 198, 178, 220)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_fx_attack_10"]
+atlas = ExtResource("8_fx_attack")
+region = Rect2(184, 650, 159, 23)
+margin = Rect2(203, 207, 203, 232)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_spend_0"]
+atlas = ExtResource("9_stage_spend")
+region = Rect2(0, 0, 174, 175)
+margin = Rect2(220, 213, 440, 353)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_spend_1"]
+atlas = ExtResource("9_stage_spend")
+region = Rect2(174, 0, 178, 178)
+margin = Rect2(218, 212, 436, 350)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_spend_2"]
+atlas = ExtResource("9_stage_spend")
+region = Rect2(352, 0, 240, 239)
+margin = Rect2(187, 181, 374, 289)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_spend_3"]
+atlas = ExtResource("9_stage_spend")
+region = Rect2(592, 0, 296, 295)
+margin = Rect2(159, 153, 318, 233)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_spend_4"]
+atlas = ExtResource("9_stage_spend")
+region = Rect2(888, 0, 393, 450)
+margin = Rect2(136, 22, 221, 78)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_spend_5"]
+atlas = ExtResource("9_stage_spend")
+region = Rect2(1281, 0, 431, 488)
+margin = Rect2(116, 4, 183, 40)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_spend_6"]
+atlas = ExtResource("9_stage_spend")
+region = Rect2(0, 488, 450, 508)
+margin = Rect2(100, 0, 164, 20)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_spend_7"]
+atlas = ExtResource("9_stage_spend")
+region = Rect2(450, 488, 453, 507)
+margin = Rect2(86, 12, 161, 21)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_spend_8"]
+atlas = ExtResource("9_stage_spend")
+region = Rect2(903, 488, 472, 450)
+margin = Rect2(60, 76, 142, 78)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_spend_9"]
+atlas = ExtResource("9_stage_spend")
+region = Rect2(0, 996, 509, 454)
+margin = Rect2(33, 74, 105, 74)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_spend_10"]
+atlas = ExtResource("9_stage_spend")
+region = Rect2(509, 996, 562, 318)
+margin = Rect2(5, 72, 52, 210)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_spend_11"]
+atlas = ExtResource("9_stage_spend")
+region = Rect2(1071, 996, 581, 335)
+margin = Rect2(12, 74, 33, 193)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_spend_12"]
+atlas = ExtResource("9_stage_spend")
+region = Rect2(0, 1450, 614, 341)
+margin = Rect2(0, 88, 0, 187)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_spend_13"]
+atlas = ExtResource("9_stage_spend")
+region = Rect2(614, 1450, 557, 362)
+margin = Rect2(41, 91, 57, 166)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_spend_14"]
+atlas = ExtResource("9_stage_spend")
+region = Rect2(1171, 1450, 593, 382)
+margin = Rect2(21, 94, 21, 146)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_spend_15"]
+atlas = ExtResource("9_stage_spend")
+region = Rect2(0, 1832, 610, 400)
+margin = Rect2(4, 99, 4, 128)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_drain_0"]
+atlas = ExtResource("10_stage_drain")
+region = Rect2(0, 0, 3, 3)
+margin = Rect2(0, 0, 432, 131)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_drain_1"]
+atlas = ExtResource("10_stage_drain")
+region = Rect2(3, 0, 76, 54)
+margin = Rect2(1, 48, 359, 80)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_drain_2"]
+atlas = ExtResource("10_stage_drain")
+region = Rect2(79, 0, 88, 75)
+margin = Rect2(9, 33, 347, 59)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_drain_3"]
+atlas = ExtResource("10_stage_drain")
+region = Rect2(167, 0, 130, 68)
+margin = Rect2(4, 33, 305, 66)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_drain_4"]
+atlas = ExtResource("10_stage_drain")
+region = Rect2(297, 0, 182, 81)
+margin = Rect2(3, 15, 253, 53)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_drain_5"]
+atlas = ExtResource("10_stage_drain")
+region = Rect2(0, 81, 240, 106)
+margin = Rect2(12, 1, 195, 28)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_drain_6"]
+atlas = ExtResource("10_stage_drain")
+region = Rect2(240, 81, 317, 120)
+margin = Rect2(17, 5, 118, 14)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_drain_7"]
+atlas = ExtResource("10_stage_drain")
+region = Rect2(0, 201, 419, 119)
+margin = Rect2(7, 15, 16, 15)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_drain_8"]
+atlas = ExtResource("10_stage_drain")
+region = Rect2(0, 320, 368, 90)
+margin = Rect2(2, 37, 67, 44)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_drain_9"]
+atlas = ExtResource("10_stage_drain")
+region = Rect2(0, 410, 420, 89)
+margin = Rect2(0, 30, 15, 45)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_drain_10"]
+atlas = ExtResource("10_stage_drain")
+region = Rect2(0, 499, 399, 103)
+margin = Rect2(13, 27, 36, 31)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_drain_11"]
+atlas = ExtResource("10_stage_drain")
+region = Rect2(0, 602, 353, 113)
+margin = Rect2(36, 19, 82, 21)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_drain_12"]
+atlas = ExtResource("10_stage_drain")
+region = Rect2(353, 602, 295, 110)
+margin = Rect2(68, 8, 140, 24)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_drain_13"]
+atlas = ExtResource("10_stage_drain")
+region = Rect2(0, 715, 246, 116)
+margin = Rect2(110, 0, 189, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_drain_14"]
+atlas = ExtResource("10_stage_drain")
+region = Rect2(246, 715, 220, 100)
+margin = Rect2(163, 3, 215, 34)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_drain_15"]
+atlas = ExtResource("10_stage_drain")
+region = Rect2(466, 715, 208, 75)
+margin = Rect2(227, 22, 227, 59)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_drain_16"]
+atlas = ExtResource("10_stage_drain")
+region = Rect2(0, 831, 127, 43)
+margin = Rect2(302, 48, 308, 91)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_drain_17"]
+atlas = ExtResource("10_stage_drain")
+region = Rect2(127, 831, 36, 25)
+margin = Rect2(393, 51, 399, 109)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_repay_0"]
+atlas = ExtResource("11_stage_repay")
+region = Rect2(0, 0, 3, 3)
+margin = Rect2(0, 0, 515, 238)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_repay_1"]
+atlas = ExtResource("11_stage_repay")
+region = Rect2(3, 0, 61, 34)
+margin = Rect2(457, 147, 457, 207)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_repay_2"]
+atlas = ExtResource("11_stage_repay")
+region = Rect2(64, 0, 153, 78)
+margin = Rect2(362, 142, 365, 163)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_repay_3"]
+atlas = ExtResource("11_stage_repay")
+region = Rect2(217, 0, 230, 127)
+margin = Rect2(287, 107, 288, 114)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_repay_4"]
+atlas = ExtResource("11_stage_repay")
+region = Rect2(447, 0, 207, 136)
+margin = Rect2(224, 94, 311, 105)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_repay_5"]
+atlas = ExtResource("11_stage_repay")
+region = Rect2(654, 0, 179, 120)
+margin = Rect2(172, 96, 339, 121)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_repay_6"]
+atlas = ExtResource("11_stage_repay")
+region = Rect2(0, 136, 369, 90)
+margin = Rect2(130, 109, 149, 151)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_repay_7"]
+atlas = ExtResource("11_stage_repay")
+region = Rect2(369, 136, 373, 116)
+margin = Rect2(96, 96, 145, 125)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_repay_8"]
+atlas = ExtResource("11_stage_repay")
+region = Rect2(0, 252, 413, 130)
+margin = Rect2(27, 95, 105, 111)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_repay_9"]
+atlas = ExtResource("11_stage_repay")
+region = Rect2(413, 252, 431, 141)
+margin = Rect2(23, 84, 87, 100)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_repay_10"]
+atlas = ExtResource("11_stage_repay")
+region = Rect2(0, 393, 349, 152)
+margin = Rect2(15, 73, 169, 89)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_repay_11"]
+atlas = ExtResource("11_stage_repay")
+region = Rect2(349, 393, 282, 168)
+margin = Rect2(7, 62, 236, 73)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_repay_12"]
+atlas = ExtResource("11_stage_repay")
+region = Rect2(631, 393, 228, 183)
+margin = Rect2(0, 51, 290, 58)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_repay_13"]
+atlas = ExtResource("11_stage_repay")
+region = Rect2(0, 576, 201, 197)
+margin = Rect2(0, 40, 317, 44)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_repay_14"]
+atlas = ExtResource("11_stage_repay")
+region = Rect2(201, 576, 208, 208)
+margin = Rect2(0, 30, 310, 33)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_repay_15"]
+atlas = ExtResource("11_stage_repay")
+region = Rect2(409, 576, 215, 217)
+margin = Rect2(0, 20, 303, 24)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_repay_16"]
+atlas = ExtResource("11_stage_repay")
+region = Rect2(624, 576, 222, 229)
+margin = Rect2(0, 10, 296, 12)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_repay_17"]
+atlas = ExtResource("11_stage_repay")
+region = Rect2(0, 805, 226, 241)
+margin = Rect2(0, 0, 292, 0)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_repay_18"]
+atlas = ExtResource("11_stage_repay")
+region = Rect2(226, 805, 3, 3)
+margin = Rect2(0, 0, 515, 238)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_stage_repay_19"]
+atlas = ExtResource("11_stage_repay")
+region = Rect2(229, 805, 3, 3)
+margin = Rect2(0, 0, 515, 238)
+filter_clip = true
+
+[sub_resource type="Shader" id="Shader_element"]
+code = "shader_type canvas_item;
+
+uniform vec4 element : source_color = vec4(0.560784, 1.0, 0.839216, 1.0);
+varying vec4 tint;
+
+void vertex() {
+	tint = COLOR;
+}
+
+void fragment() {
+	vec4 heat = texture(TEXTURE, UV);
+	COLOR = vec4(mix(element.rgb, vec3(1.0), smoothstep(0.72, 1.0, heat.r)), heat.a) * tint;
+}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_element"]
+resource_local_to_scene = true
+shader = SubResource("Shader_element")
+shader_parameter/element = Color(0.3608, 0.7216, 1, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_spend"]
+shader = SubResource("Shader_element")
+shader_parameter/element = Color(1, 0.8275, 0.4196, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_drain"]
+shader = SubResource("Shader_element")
+shader_parameter/element = Color(0.3608, 0.7216, 1, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_repay"]
+shader = SubResource("Shader_element")
+shader_parameter/element = Color(0.3608, 0.7216, 1, 1)
 
 [sub_resource type="Animation" id="Animation_reset"]
 length = 0.001
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("Visuals/Facing/Rig:position")
+tracks/0/path = NodePath("Visuals/Facing/Model:modulate")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Vector2(0, -140)]
+"values": [Color(1, 1, 1, 1)]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath("Visuals/Facing/Rig:rotation")
+tracks/1/path = NodePath("Visuals/Facing/Model/Attack:self_modulate")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [0.0]
+"values": [Color(1, 1, 1, 0)]
 }
 tracks/2/type = "value"
 tracks/2/imported = false
 tracks/2/enabled = true
-tracks/2/path = NodePath("Visuals/Facing/Rig:modulate")
+tracks/2/path = NodePath("Visuals/Facing/Model/AttackFx:self_modulate")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Color(1, 1, 1, 1)]
+"values": [Color(1, 1, 1, 0)]
 }
 tracks/3/type = "value"
 tracks/3/imported = false
 tracks/3/enabled = true
-tracks/3/path = NodePath("Visuals/Facing/Rig/CoatBack:position")
+tracks/3/path = NodePath("Visuals/Facing/Model/Cast:self_modulate")
 tracks/3/interp = 1
 tracks/3/loop_wrap = true
 tracks/3/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Vector2(-8, 23)]
+"values": [Color(1, 1, 1, 0)]
 }
 tracks/4/type = "value"
 tracks/4/imported = false
 tracks/4/enabled = true
-tracks/4/path = NodePath("Visuals/Facing/Rig/Sword:position")
+tracks/4/path = NodePath("Visuals/Facing/Model/Death:self_modulate")
 tracks/4/interp = 1
 tracks/4/loop_wrap = true
 tracks/4/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Vector2(-78.5, -10.5)]
+"values": [Color(1, 1, 1, 0)]
 }
 tracks/5/type = "value"
 tracks/5/imported = false
 tracks/5/enabled = true
-tracks/5/path = NodePath("Visuals/Facing/Rig/Sword:modulate")
+tracks/5/path = NodePath("Visuals/Facing/Model/Hurt:self_modulate")
 tracks/5/interp = 1
 tracks/5/loop_wrap = true
 tracks/5/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Color(1, 1, 1, 1)]
+"values": [Color(1, 1, 1, 0)]
 }
 tracks/6/type = "value"
 tracks/6/imported = false
 tracks/6/enabled = true
-tracks/6/path = NodePath("Visuals/Facing/Rig/Body:position")
+tracks/6/path = NodePath("Visuals/Facing/Model/Idle:self_modulate")
 tracks/6/interp = 1
 tracks/6/loop_wrap = true
 tracks/6/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Vector2(15, 0)]
+"values": [Color(1, 1, 1, 1)]
 }
 tracks/7/type = "value"
 tracks/7/imported = false
 tracks/7/enabled = true
-tracks/7/path = NodePath("Visuals/Facing/Rig/Body:modulate")
+tracks/7/path = NodePath("Visuals/Facing/Model/IdleLow:self_modulate")
 tracks/7/interp = 1
 tracks/7/loop_wrap = true
 tracks/7/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Color(1, 1, 1, 1)]
+"values": [Color(1, 1, 1, 0)]
 }
 tracks/8/type = "value"
 tracks/8/imported = false
 tracks/8/enabled = true
-tracks/8/path = NodePath("Visuals/Facing/Rig/Hat:position")
+tracks/8/path = NodePath("Visuals/Facing/Model/Rejoice:self_modulate")
 tracks/8/interp = 1
 tracks/8/loop_wrap = true
 tracks/8/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Vector2(53, -107)]
+"values": [Color(1, 1, 1, 0)]
 }
 tracks/9/type = "value"
 tracks/9/imported = false
 tracks/9/enabled = true
-tracks/9/path = NodePath("Visuals/Facing/Rig/Hat:rotation")
+tracks/9/path = NodePath("Visuals/Facing/Model/Attack:texture")
+tracks/9/interp = 0
+tracks/9/loop_wrap = true
+tracks/9/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [SubResource("Atlas_attack_0")]
+}
+tracks/10/type = "value"
+tracks/10/imported = false
+tracks/10/enabled = true
+tracks/10/path = NodePath("Visuals/Facing/Model/AttackFx:texture")
+tracks/10/interp = 0
+tracks/10/loop_wrap = true
+tracks/10/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [SubResource("Atlas_fx_attack_0")]
+}
+tracks/11/type = "value"
+tracks/11/imported = false
+tracks/11/enabled = true
+tracks/11/path = NodePath("Visuals/Facing/Model/Cast:texture")
+tracks/11/interp = 0
+tracks/11/loop_wrap = true
+tracks/11/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [SubResource("Atlas_cast_0")]
+}
+tracks/12/type = "value"
+tracks/12/imported = false
+tracks/12/enabled = true
+tracks/12/path = NodePath("Visuals/Facing/Model/Death:texture")
+tracks/12/interp = 0
+tracks/12/loop_wrap = true
+tracks/12/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [SubResource("Atlas_death_0")]
+}
+tracks/13/type = "value"
+tracks/13/imported = false
+tracks/13/enabled = true
+tracks/13/path = NodePath("Visuals/Facing/Model/Hurt:texture")
+tracks/13/interp = 0
+tracks/13/loop_wrap = true
+tracks/13/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [SubResource("Atlas_hurt_0")]
+}
+tracks/14/type = "value"
+tracks/14/imported = false
+tracks/14/enabled = true
+tracks/14/path = NodePath("Visuals/Facing/Model/Idle:texture")
+tracks/14/interp = 0
+tracks/14/loop_wrap = true
+tracks/14/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [SubResource("Atlas_idle_0")]
+}
+tracks/15/type = "value"
+tracks/15/imported = false
+tracks/15/enabled = true
+tracks/15/path = NodePath("Visuals/Facing/Model/IdleLow:texture")
+tracks/15/interp = 0
+tracks/15/loop_wrap = true
+tracks/15/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [SubResource("Atlas_idle_low_0")]
+}
+tracks/16/type = "value"
+tracks/16/imported = false
+tracks/16/enabled = true
+tracks/16/path = NodePath("Visuals/Facing/Model/Rejoice:texture")
+tracks/16/interp = 0
+tracks/16/loop_wrap = true
+tracks/16/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [SubResource("Atlas_rejoice_0")]
+}
+
+[sub_resource type="Animation" id="Animation_idle"]
+resource_name = "idle"
+length = 2.8
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Visuals/Facing/Model/Idle:self_modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Visuals/Facing/Model/IdleLow:self_modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Visuals/Facing/Model/Attack:self_modulate")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Visuals/Facing/Model/Hurt:self_modulate")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("Visuals/Facing/Model/Death:self_modulate")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("Visuals/Facing/Model/Cast:self_modulate")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/6/type = "value"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("Visuals/Facing/Model/Rejoice:self_modulate")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/7/type = "value"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("Visuals/Facing/Model/Idle:texture")
+tracks/7/interp = 0
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"times": PackedFloat32Array(0, 0.0833, 0.1667, 0.25, 0.3333, 0.4167, 0.5, 0.5833, 0.6667, 0.75, 0.8333, 0.9167, 1, 1.0833, 1.1667, 1.25, 1.3333, 1.4167, 1.5, 1.5833, 1.6667, 1.75, 1.8333, 1.9167, 2, 2.0833, 2.1667, 2.25, 2.3333, 2.4167, 2.5, 2.5833, 2.6667, 2.75),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [SubResource("Atlas_idle_0"), SubResource("Atlas_idle_1"), SubResource("Atlas_idle_2"), SubResource("Atlas_idle_3"), SubResource("Atlas_idle_4"), SubResource("Atlas_idle_5"), SubResource("Atlas_idle_6"), SubResource("Atlas_idle_7"), SubResource("Atlas_idle_8"), SubResource("Atlas_idle_9"), SubResource("Atlas_idle_10"), SubResource("Atlas_idle_11"), SubResource("Atlas_idle_12"), SubResource("Atlas_idle_13"), SubResource("Atlas_idle_14"), SubResource("Atlas_idle_15"), SubResource("Atlas_idle_16"), SubResource("Atlas_idle_17"), SubResource("Atlas_idle_18"), SubResource("Atlas_idle_19"), SubResource("Atlas_idle_20"), SubResource("Atlas_idle_21"), SubResource("Atlas_idle_22"), SubResource("Atlas_idle_23"), SubResource("Atlas_idle_24"), SubResource("Atlas_idle_25"), SubResource("Atlas_idle_26"), SubResource("Atlas_idle_27"), SubResource("Atlas_idle_28"), SubResource("Atlas_idle_29"), SubResource("Atlas_idle_30"), SubResource("Atlas_idle_31"), SubResource("Atlas_idle_32"), SubResource("Atlas_idle_33")]
+}
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("Visuals/Facing/Model/AttackFx:self_modulate")
+tracks/8/interp = 1
+tracks/8/loop_wrap = true
+tracks/8/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_attack"]
+resource_name = "attack"
+length = 1.0
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Visuals/Facing/Model/Idle:self_modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Visuals/Facing/Model/IdleLow:self_modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Visuals/Facing/Model/Attack:self_modulate")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Visuals/Facing/Model/Hurt:self_modulate")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("Visuals/Facing/Model/Death:self_modulate")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("Visuals/Facing/Model/Cast:self_modulate")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/6/type = "value"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("Visuals/Facing/Model/Rejoice:self_modulate")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/7/type = "value"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("Visuals/Facing/Model/Attack:texture")
+tracks/7/interp = 0
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"times": PackedFloat32Array(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [SubResource("Atlas_attack_0"), SubResource("Atlas_attack_1"), SubResource("Atlas_attack_2"), SubResource("Atlas_attack_3"), SubResource("Atlas_attack_4"), SubResource("Atlas_attack_5"), SubResource("Atlas_attack_6"), SubResource("Atlas_attack_7"), SubResource("Atlas_attack_8"), SubResource("Atlas_attack_9"), SubResource("Atlas_attack_10"), SubResource("Atlas_attack_11"), SubResource("Atlas_attack_12"), SubResource("Atlas_attack_13"), SubResource("Atlas_attack_14"), SubResource("Atlas_attack_15"), SubResource("Atlas_attack_16"), SubResource("Atlas_attack_17"), SubResource("Atlas_attack_18"), SubResource("Atlas_attack_19")]
+}
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("Visuals/Facing/Model/AttackFx:self_modulate")
+tracks/8/interp = 0
+tracks/8/loop_wrap = true
+tracks/8/keys = {
+"times": PackedFloat32Array(0, 0.15, 0.7),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
+tracks/9/type = "value"
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/path = NodePath("Visuals/Facing/Model/AttackFx:texture")
+tracks/9/interp = 0
+tracks/9/loop_wrap = true
+tracks/9/keys = {
+"times": PackedFloat32Array(0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [SubResource("Atlas_fx_attack_0"), SubResource("Atlas_fx_attack_1"), SubResource("Atlas_fx_attack_2"), SubResource("Atlas_fx_attack_3"), SubResource("Atlas_fx_attack_4"), SubResource("Atlas_fx_attack_5"), SubResource("Atlas_fx_attack_6"), SubResource("Atlas_fx_attack_7"), SubResource("Atlas_fx_attack_8"), SubResource("Atlas_fx_attack_9"), SubResource("Atlas_fx_attack_10")]
+}
+
+[sub_resource type="Animation" id="Animation_hurt"]
+resource_name = "hurt"
+length = 0.8
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Visuals/Facing/Model:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.05, 0.35),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 0.45, 0.4, 1), Color(1, 1, 1, 1)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Visuals/Facing/Model/Idle:self_modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Visuals/Facing/Model/IdleLow:self_modulate")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Visuals/Facing/Model/Attack:self_modulate")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("Visuals/Facing/Model/Hurt:self_modulate")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("Visuals/Facing/Model/Death:self_modulate")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/6/type = "value"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("Visuals/Facing/Model/Cast:self_modulate")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/7/type = "value"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("Visuals/Facing/Model/Rejoice:self_modulate")
+tracks/7/interp = 1
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("Visuals/Facing/Model/Hurt:texture")
+tracks/8/interp = 0
+tracks/8/loop_wrap = true
+tracks/8/keys = {
+"times": PackedFloat32Array(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [SubResource("Atlas_hurt_0"), SubResource("Atlas_hurt_1"), SubResource("Atlas_hurt_2"), SubResource("Atlas_hurt_3"), SubResource("Atlas_hurt_4"), SubResource("Atlas_hurt_5"), SubResource("Atlas_hurt_6"), SubResource("Atlas_hurt_7"), SubResource("Atlas_hurt_8"), SubResource("Atlas_hurt_9"), SubResource("Atlas_hurt_10"), SubResource("Atlas_hurt_11"), SubResource("Atlas_hurt_12"), SubResource("Atlas_hurt_13"), SubResource("Atlas_hurt_14"), SubResource("Atlas_hurt_15")]
+}
+tracks/9/type = "value"
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/path = NodePath("Visuals/Facing/Model/AttackFx:self_modulate")
 tracks/9/interp = 1
 tracks/9/loop_wrap = true
 tracks/9/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [0.0]
-}
-
-[sub_resource type="Animation" id="Animation_idle"]
-resource_name = "idle"
-length = 3.5
-loop_mode = 1
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Visuals/Facing/Rig/Body:position")
-tracks/0/interp = 2
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 1.75, 3.5),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 0,
-"values": [Vector2(15, 0), Vector2(16.4, -1.3), Vector2(15, 0)]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("Visuals/Facing/Rig/CoatBack:position")
-tracks/1/interp = 2
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0, 1.75, 3.5),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 0,
-"values": [Vector2(-8, 23), Vector2(-11.2, 23.8), Vector2(-8, 23)]
-}
-tracks/2/type = "value"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath("Visuals/Facing/Rig/Sword:position")
-tracks/2/interp = 2
-tracks/2/loop_wrap = true
-tracks/2/keys = {
-"times": PackedFloat32Array(0, 1.75, 3.5),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 0,
-"values": [Vector2(-78.5, -10.5), Vector2(-80.3, -9.6), Vector2(-78.5, -10.5)]
-}
-tracks/3/type = "value"
-tracks/3/imported = false
-tracks/3/enabled = true
-tracks/3/path = NodePath("Visuals/Facing/Rig/Sword:modulate")
-tracks/3/interp = 2
-tracks/3/loop_wrap = true
-tracks/3/keys = {
-"times": PackedFloat32Array(0, 0.9, 1.75, 2.6, 3.5),
-"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
-"update": 0,
-"values": [Color(1, 1, 1, 1), Color(1.16, 1.2, 1.26, 1), Color(1, 1, 1, 1), Color(1.1, 1.13, 1.18, 1), Color(1, 1, 1, 1)]
-}
-tracks/4/type = "value"
-tracks/4/imported = false
-tracks/4/enabled = true
-tracks/4/path = NodePath("Visuals/Facing/Rig/Hat:position")
-tracks/4/interp = 2
-tracks/4/loop_wrap = true
-tracks/4/keys = {
-"times": PackedFloat32Array(0, 1.75, 3.5),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 0,
-"values": [Vector2(53, -107), Vector2(54.2, -108.1), Vector2(53, -107)]
-}
-tracks/5/type = "value"
-tracks/5/imported = false
-tracks/5/enabled = true
-tracks/5/path = NodePath("Visuals/Facing/Rig/Hat:rotation")
-tracks/5/interp = 2
-tracks/5/loop_wrap = true
-tracks/5/keys = {
-"times": PackedFloat32Array(0, 1.15, 2.3, 3.5),
-"transitions": PackedFloat32Array(1, 1, 1, 1),
-"update": 0,
-"values": [0.0, 0.026, -0.018, 0.0]
-}
-
-[sub_resource type="Animation" id="Animation_attack"]
-resource_name = "attack"
-length = 0.55
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Visuals/Facing/Rig:position")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.15, 0.38, 0.55),
-"transitions": PackedFloat32Array(0.5, 1.6, 1, 1),
-"update": 0,
-"values": [Vector2(0, -140), Vector2(38, -144), Vector2(-6, -139), Vector2(0, -140)]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("Visuals/Facing/Rig:rotation")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.15, 0.38, 0.55),
-"transitions": PackedFloat32Array(1, 1, 1, 1),
-"update": 0,
-"values": [0.0, -0.05, 0.02, 0.0]
-}
-tracks/2/type = "value"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath("Visuals/Facing/Rig/Sword:modulate")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/keys = {
-"times": PackedFloat32Array(0, 0.15, 0.45),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 0,
-"values": [Color(1, 1, 1, 1), Color(1.5, 1.6, 1.75, 1), Color(1, 1, 1, 1)]
-}
-tracks/3/type = "value"
-tracks/3/imported = false
-tracks/3/enabled = true
-tracks/3/path = NodePath("Visuals/Facing/Rig/CoatBack:position")
-tracks/3/interp = 1
-tracks/3/loop_wrap = true
-tracks/3/keys = {
-"times": PackedFloat32Array(0, 0.22, 0.45, 0.55),
-"transitions": PackedFloat32Array(1, 1, 1, 1),
-"update": 0,
-"values": [Vector2(-8, 23), Vector2(-20, 25), Vector2(-4, 22), Vector2(-8, 23)]
-}
-tracks/4/type = "value"
-tracks/4/imported = false
-tracks/4/enabled = true
-tracks/4/path = NodePath("Visuals/Facing/Rig/Hat:rotation")
-tracks/4/interp = 1
-tracks/4/loop_wrap = true
-tracks/4/keys = {
-"times": PackedFloat32Array(0, 0.2, 0.42, 0.55),
-"transitions": PackedFloat32Array(1, 1, 1, 1),
-"update": 0,
-"values": [0.0, -0.09, 0.04, 0.0]
-}
-
-[sub_resource type="Animation" id="Animation_hurt"]
-resource_name = "hurt"
-length = 0.4
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Visuals/Facing/Rig:position")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.06, 0.14, 0.22, 0.32, 0.4),
-"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1),
-"update": 0,
-"values": [Vector2(0, -140), Vector2(-11, -140), Vector2(6, -140), Vector2(-4, -140), Vector2(2, -140), Vector2(0, -140)]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("Visuals/Facing/Rig/Body:modulate")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.05, 0.35),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 0,
-"values": [Color(1, 1, 1, 1), Color(0.42, 0.78, 1, 1), Color(1, 1, 1, 1)]
-}
-tracks/2/type = "value"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath("Visuals/Facing/Rig/Hat:rotation")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/keys = {
-"times": PackedFloat32Array(0, 0.08, 0.4),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 0,
-"values": [0.0, 0.07, 0.0]
+"values": [Color(1, 1, 1, 0)]
 }
 
 [sub_resource type="Animation" id="Animation_death"]
 resource_name = "death"
-length = 1.2
+length = 2.2
 tracks/0/type = "value"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("Visuals/Facing/Rig:modulate")
+tracks/0/path = NodePath("Visuals/Facing/Model:modulate")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.2, 1.2),
-"transitions": PackedFloat32Array(1, 1, 1),
+"times": PackedFloat32Array(0, 0.12, 0.6, 1.7, 2.2),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
 "update": 0,
-"values": [Color(1, 1, 1, 1), Color(0.62, 0.82, 1, 1), Color(1, 1, 1, 0)]
+"values": [Color(1, 1, 1, 1), Color(1, 0.62, 0.6, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
 }
 tracks/1/type = "value"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath("Visuals/Facing/Rig:rotation")
-tracks/1/interp = 2
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.45, 1.2),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 0,
-"values": [0.0, 0.16, 0.1]
-}
-tracks/2/type = "value"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath("Visuals/Facing/Rig:position")
-tracks/2/interp = 2
-tracks/2/loop_wrap = true
-tracks/2/keys = {
-"times": PackedFloat32Array(0, 0.45, 1.2),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 0,
-"values": [Vector2(0, -140), Vector2(-6, -132), Vector2(-14, -122)]
-}
-tracks/3/type = "value"
-tracks/3/imported = false
-tracks/3/enabled = true
-tracks/3/path = NodePath("Visuals/Facing/Rig/Hat:rotation")
-tracks/3/interp = 1
-tracks/3/loop_wrap = true
-tracks/3/keys = {
-"times": PackedFloat32Array(0, 0.5, 1.2),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 0,
-"values": [0.0, -0.12, -0.2]
-}
-tracks/4/type = "value"
-tracks/4/imported = false
-tracks/4/enabled = true
-tracks/4/path = NodePath("Visuals/Facing/Rig/Sword:modulate")
-tracks/4/interp = 1
-tracks/4/loop_wrap = true
-tracks/4/keys = {
-"times": PackedFloat32Array(0, 0.6),
-"transitions": PackedFloat32Array(1, 1),
-"update": 0,
-"values": [Color(1, 1, 1, 1), Color(0.5, 0.5, 0.55, 1)]
-}
-
-[sub_resource type="Animation" id="Animation_cast"]
-resource_name = "cast"
-length = 0.4
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Visuals/Facing/Rig:position")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.12, 0.4),
-"transitions": PackedFloat32Array(0.5, 1.6, 1),
-"update": 0,
-"values": [Vector2(0, -140), Vector2(0, -149), Vector2(0, -140)]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("Visuals/Facing/Rig:rotation")
+tracks/1/path = NodePath("Visuals/Facing/Model/Idle:self_modulate")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.12, 0.4),
-"transitions": PackedFloat32Array(0.5, 1.6, 1),
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [0.0, -0.035, 0.0]
+"values": [Color(1, 1, 1, 0)]
 }
 tracks/2/type = "value"
 tracks/2/imported = false
 tracks/2/enabled = true
-tracks/2/path = NodePath("Visuals/Facing/Rig/Sword:position")
+tracks/2/path = NodePath("Visuals/Facing/Model/IdleLow:self_modulate")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
-"times": PackedFloat32Array(0, 0.14, 0.4),
-"transitions": PackedFloat32Array(0.5, 1.6, 1),
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Vector2(-78.5, -10.5), Vector2(-82, -24), Vector2(-78.5, -10.5)]
+"values": [Color(1, 1, 1, 0)]
 }
 tracks/3/type = "value"
 tracks/3/imported = false
 tracks/3/enabled = true
-tracks/3/path = NodePath("Visuals/Facing/Rig/Sword:modulate")
+tracks/3/path = NodePath("Visuals/Facing/Model/Attack:self_modulate")
 tracks/3/interp = 1
 tracks/3/loop_wrap = true
 tracks/3/keys = {
-"times": PackedFloat32Array(0, 0.12, 0.4),
-"transitions": PackedFloat32Array(1, 1, 1),
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Color(1, 1, 1, 1), Color(1.5, 1.6, 1.75, 1), Color(1, 1, 1, 1)]
+"values": [Color(1, 1, 1, 0)]
 }
 tracks/4/type = "value"
 tracks/4/imported = false
 tracks/4/enabled = true
-tracks/4/path = NodePath("Visuals/Facing/Rig/Hat:rotation")
+tracks/4/path = NodePath("Visuals/Facing/Model/Hurt:self_modulate")
 tracks/4/interp = 1
 tracks/4/loop_wrap = true
 tracks/4/keys = {
-"times": PackedFloat32Array(0, 0.15, 0.4),
-"transitions": PackedFloat32Array(1, 1, 1),
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [0.0, -0.06, 0.0]
-}
-
-[sub_resource type="Animation" id="Animation_power"]
-resource_name = "power"
-length = 0.5
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Visuals/Facing/Rig:position")
-tracks/0/interp = 1
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 0.18, 0.32, 0.5),
-"transitions": PackedFloat32Array(0.5, 1.6, 1, 1),
-"update": 0,
-"values": [Vector2(0, -140), Vector2(0, -156), Vector2(0, -153), Vector2(0, -140)]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("Visuals/Facing/Rig:rotation")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0, 0.18, 0.5),
-"transitions": PackedFloat32Array(0.5, 1.6, 1),
-"update": 0,
-"values": [0.0, -0.05, 0.0]
-}
-tracks/2/type = "value"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath("Visuals/Facing/Rig:modulate")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/keys = {
-"times": PackedFloat32Array(0, 0.18, 0.5),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 0,
-"values": [Color(1, 1, 1, 1), Color(1.15, 1.3, 1.5, 1), Color(1, 1, 1, 1)]
-}
-tracks/3/type = "value"
-tracks/3/imported = false
-tracks/3/enabled = true
-tracks/3/path = NodePath("Visuals/Facing/Rig/CoatBack:position")
-tracks/3/interp = 1
-tracks/3/loop_wrap = true
-tracks/3/keys = {
-"times": PackedFloat32Array(0, 0.2, 0.5),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 0,
-"values": [Vector2(-8, 23), Vector2(-20, 27), Vector2(-8, 23)]
-}
-tracks/4/type = "value"
-tracks/4/imported = false
-tracks/4/enabled = true
-tracks/4/path = NodePath("Visuals/Facing/Rig/Sword:modulate")
-tracks/4/interp = 1
-tracks/4/loop_wrap = true
-tracks/4/keys = {
-"times": PackedFloat32Array(0, 0.18, 0.5),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 0,
-"values": [Color(1, 1, 1, 1), Color(1.6, 1.7, 1.9, 1), Color(1, 1, 1, 1)]
+"values": [Color(1, 1, 1, 0)]
 }
 tracks/5/type = "value"
 tracks/5/imported = false
 tracks/5/enabled = true
-tracks/5/path = NodePath("Visuals/Facing/Rig/Hat:rotation")
+tracks/5/path = NodePath("Visuals/Facing/Model/Death:self_modulate")
 tracks/5/interp = 1
 tracks/5/loop_wrap = true
 tracks/5/keys = {
-"times": PackedFloat32Array(0, 0.2, 0.5),
-"transitions": PackedFloat32Array(1, 1, 1),
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [0.0, -0.08, 0.0]
-}
-
-[sub_resource type="Animation" id="Animation_idle_low"]
-resource_name = "idle_low"
-length = 4.5
-loop_mode = 1
-tracks/0/type = "value"
-tracks/0/imported = false
-tracks/0/enabled = true
-tracks/0/path = NodePath("Visuals/Facing/Rig:position")
-tracks/0/interp = 2
-tracks/0/loop_wrap = true
-tracks/0/keys = {
-"times": PackedFloat32Array(0, 2.25, 4.5),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 0,
-"values": [Vector2(0, -133), Vector2(0, -131.8), Vector2(0, -133)]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("Visuals/Facing/Rig:rotation")
-tracks/1/interp = 2
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0, 2.25, 4.5),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 0,
-"values": [0.045, 0.055, 0.045]
-}
-tracks/2/type = "value"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath("Visuals/Facing/Rig:modulate")
-tracks/2/interp = 2
-tracks/2/loop_wrap = true
-tracks/2/keys = {
-"times": PackedFloat32Array(0, 4.5),
-"transitions": PackedFloat32Array(1, 1),
-"update": 0,
-"values": [Color(0.85, 0.88, 0.95, 1), Color(0.85, 0.88, 0.95, 1)]
-}
-tracks/3/type = "value"
-tracks/3/imported = false
-tracks/3/enabled = true
-tracks/3/path = NodePath("Visuals/Facing/Rig/CoatBack:position")
-tracks/3/interp = 2
-tracks/3/loop_wrap = true
-tracks/3/keys = {
-"times": PackedFloat32Array(0, 2.25, 4.5),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 0,
-"values": [Vector2(-6, 25), Vector2(-7, 25.6), Vector2(-6, 25)]
-}
-tracks/4/type = "value"
-tracks/4/imported = false
-tracks/4/enabled = true
-tracks/4/path = NodePath("Visuals/Facing/Rig/Body:position")
-tracks/4/interp = 2
-tracks/4/loop_wrap = true
-tracks/4/keys = {
-"times": PackedFloat32Array(0, 2.25, 4.5),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 0,
-"values": [Vector2(15, 1), Vector2(15.8, 2.2), Vector2(15, 1)]
-}
-tracks/5/type = "value"
-tracks/5/imported = false
-tracks/5/enabled = true
-tracks/5/path = NodePath("Visuals/Facing/Rig/Sword:position")
-tracks/5/interp = 2
-tracks/5/loop_wrap = true
-tracks/5/keys = {
-"times": PackedFloat32Array(0, 2.25, 4.5),
-"transitions": PackedFloat32Array(1, 1, 1),
-"update": 0,
-"values": [Vector2(-75, -2), Vector2(-75.6, -1), Vector2(-75, -2)]
+"values": [Color(1, 1, 1, 1)]
 }
 tracks/6/type = "value"
 tracks/6/imported = false
 tracks/6/enabled = true
-tracks/6/path = NodePath("Visuals/Facing/Rig/Sword:modulate")
-tracks/6/interp = 2
+tracks/6/path = NodePath("Visuals/Facing/Model/Cast:self_modulate")
+tracks/6/interp = 1
 tracks/6/loop_wrap = true
 tracks/6/keys = {
-"times": PackedFloat32Array(0, 4.5),
-"transitions": PackedFloat32Array(1, 1),
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Color(0.8, 0.82, 0.88, 1), Color(0.8, 0.82, 0.88, 1)]
+"values": [Color(1, 1, 1, 0)]
 }
 tracks/7/type = "value"
 tracks/7/imported = false
 tracks/7/enabled = true
-tracks/7/path = NodePath("Visuals/Facing/Rig/Hat:rotation")
-tracks/7/interp = 2
+tracks/7/path = NodePath("Visuals/Facing/Model/Rejoice:self_modulate")
+tracks/7/interp = 1
 tracks/7/loop_wrap = true
 tracks/7/keys = {
-"times": PackedFloat32Array(0, 2.25, 4.5),
-"transitions": PackedFloat32Array(1, 1, 1),
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [0.07, 0.09, 0.07]
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("Visuals/Facing/Model/Death:texture")
+tracks/8/interp = 0
+tracks/8/loop_wrap = true
+tracks/8/keys = {
+"times": PackedFloat32Array(0, 0.0667, 0.1333, 0.2, 0.2667, 0.3333, 0.4, 0.4667, 0.5333, 0.6, 0.6667, 0.7333, 0.8, 0.8667, 0.9333, 1, 1.0667, 1.1333, 1.2, 1.2667, 1.3333, 1.4, 1.4667, 1.5333, 1.6),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [SubResource("Atlas_death_0"), SubResource("Atlas_death_1"), SubResource("Atlas_death_2"), SubResource("Atlas_death_3"), SubResource("Atlas_death_4"), SubResource("Atlas_death_5"), SubResource("Atlas_death_6"), SubResource("Atlas_death_7"), SubResource("Atlas_death_8"), SubResource("Atlas_death_9"), SubResource("Atlas_death_10"), SubResource("Atlas_death_11"), SubResource("Atlas_death_12"), SubResource("Atlas_death_13"), SubResource("Atlas_death_14"), SubResource("Atlas_death_15"), SubResource("Atlas_death_16"), SubResource("Atlas_death_17"), SubResource("Atlas_death_18"), SubResource("Atlas_death_19"), SubResource("Atlas_death_20"), SubResource("Atlas_death_21"), SubResource("Atlas_death_22"), SubResource("Atlas_death_23"), SubResource("Atlas_death_24")]
+}
+tracks/9/type = "value"
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/path = NodePath("Visuals/Facing/Model/AttackFx:self_modulate")
+tracks/9/interp = 1
+tracks/9/loop_wrap = true
+tracks/9/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_cast"]
+resource_name = "cast"
+length = 1.0
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Visuals/Facing/Model/Idle:self_modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Visuals/Facing/Model/IdleLow:self_modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Visuals/Facing/Model/Attack:self_modulate")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Visuals/Facing/Model/Hurt:self_modulate")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("Visuals/Facing/Model/Death:self_modulate")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("Visuals/Facing/Model/Cast:self_modulate")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+tracks/6/type = "value"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("Visuals/Facing/Model/Rejoice:self_modulate")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/7/type = "value"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("Visuals/Facing/Model/Cast:texture")
+tracks/7/interp = 0
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"times": PackedFloat32Array(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [SubResource("Atlas_cast_0"), SubResource("Atlas_cast_1"), SubResource("Atlas_cast_2"), SubResource("Atlas_cast_3"), SubResource("Atlas_cast_4"), SubResource("Atlas_cast_5"), SubResource("Atlas_cast_6"), SubResource("Atlas_cast_7"), SubResource("Atlas_cast_8"), SubResource("Atlas_cast_9"), SubResource("Atlas_cast_10"), SubResource("Atlas_cast_11"), SubResource("Atlas_cast_12"), SubResource("Atlas_cast_13"), SubResource("Atlas_cast_14"), SubResource("Atlas_cast_15"), SubResource("Atlas_cast_16"), SubResource("Atlas_cast_17"), SubResource("Atlas_cast_18"), SubResource("Atlas_cast_19")]
+}
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("Visuals/Facing/Model/AttackFx:self_modulate")
+tracks/8/interp = 1
+tracks/8/loop_wrap = true
+tracks/8/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_power"]
+resource_name = "power"
+length = 1.0
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Visuals/Facing/Model:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.38, 1),
+"transitions": PackedFloat32Array(0.5, 1.6, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1.15, 1.3, 1.5, 1), Color(1, 1, 1, 1)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Visuals/Facing/Model/Idle:self_modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Visuals/Facing/Model/IdleLow:self_modulate")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Visuals/Facing/Model/Attack:self_modulate")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("Visuals/Facing/Model/Hurt:self_modulate")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("Visuals/Facing/Model/Death:self_modulate")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/6/type = "value"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("Visuals/Facing/Model/Cast:self_modulate")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+tracks/7/type = "value"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("Visuals/Facing/Model/Rejoice:self_modulate")
+tracks/7/interp = 1
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("Visuals/Facing/Model/Cast:texture")
+tracks/8/interp = 0
+tracks/8/loop_wrap = true
+tracks/8/keys = {
+"times": PackedFloat32Array(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [SubResource("Atlas_cast_0"), SubResource("Atlas_cast_1"), SubResource("Atlas_cast_2"), SubResource("Atlas_cast_3"), SubResource("Atlas_cast_4"), SubResource("Atlas_cast_5"), SubResource("Atlas_cast_6"), SubResource("Atlas_cast_7"), SubResource("Atlas_cast_8"), SubResource("Atlas_cast_9"), SubResource("Atlas_cast_10"), SubResource("Atlas_cast_11"), SubResource("Atlas_cast_12"), SubResource("Atlas_cast_13"), SubResource("Atlas_cast_14"), SubResource("Atlas_cast_15"), SubResource("Atlas_cast_16"), SubResource("Atlas_cast_17"), SubResource("Atlas_cast_18"), SubResource("Atlas_cast_19")]
+}
+tracks/9/type = "value"
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/path = NodePath("Visuals/Facing/Model/AttackFx:self_modulate")
+tracks/9/interp = 1
+tracks/9/loop_wrap = true
+tracks/9/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_idle_low"]
+resource_name = "idle_low"
+length = 3.0
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Visuals/Facing/Model:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 3),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(0.92, 0.9, 0.9, 1), Color(0.92, 0.9, 0.9, 1)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Visuals/Facing/Model/Idle:self_modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Visuals/Facing/Model/IdleLow:self_modulate")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Visuals/Facing/Model/Attack:self_modulate")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("Visuals/Facing/Model/Hurt:self_modulate")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("Visuals/Facing/Model/Death:self_modulate")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/6/type = "value"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("Visuals/Facing/Model/Cast:self_modulate")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/7/type = "value"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("Visuals/Facing/Model/Rejoice:self_modulate")
+tracks/7/interp = 1
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("Visuals/Facing/Model/IdleLow:texture")
+tracks/8/interp = 0
+tracks/8/loop_wrap = true
+tracks/8/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [SubResource("Atlas_idle_low_0"), SubResource("Atlas_idle_low_1"), SubResource("Atlas_idle_low_2"), SubResource("Atlas_idle_low_3"), SubResource("Atlas_idle_low_4"), SubResource("Atlas_idle_low_5"), SubResource("Atlas_idle_low_6"), SubResource("Atlas_idle_low_7"), SubResource("Atlas_idle_low_8"), SubResource("Atlas_idle_low_9"), SubResource("Atlas_idle_low_10"), SubResource("Atlas_idle_low_11"), SubResource("Atlas_idle_low_12"), SubResource("Atlas_idle_low_13"), SubResource("Atlas_idle_low_14"), SubResource("Atlas_idle_low_15"), SubResource("Atlas_idle_low_16"), SubResource("Atlas_idle_low_17"), SubResource("Atlas_idle_low_18"), SubResource("Atlas_idle_low_19"), SubResource("Atlas_idle_low_20"), SubResource("Atlas_idle_low_21"), SubResource("Atlas_idle_low_22"), SubResource("Atlas_idle_low_23"), SubResource("Atlas_idle_low_24"), SubResource("Atlas_idle_low_25"), SubResource("Atlas_idle_low_26"), SubResource("Atlas_idle_low_27"), SubResource("Atlas_idle_low_28"), SubResource("Atlas_idle_low_29")]
+}
+tracks/9/type = "value"
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/path = NodePath("Visuals/Facing/Model/AttackFx:self_modulate")
+tracks/9/interp = 1
+tracks/9/loop_wrap = true
+tracks/9/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_rejoice"]
+resource_name = "rejoice"
+length = 1.5
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Visuals/Facing/Model/Idle:self_modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Visuals/Facing/Model/IdleLow:self_modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Visuals/Facing/Model/Attack:self_modulate")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Visuals/Facing/Model/Hurt:self_modulate")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("Visuals/Facing/Model/Death:self_modulate")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("Visuals/Facing/Model/Cast:self_modulate")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/6/type = "value"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("Visuals/Facing/Model/Rejoice:self_modulate")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+tracks/7/type = "value"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("Visuals/Facing/Model/Rejoice:texture")
+tracks/7/interp = 0
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"times": PackedFloat32Array(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.05, 1.1, 1.15, 1.2, 1.25, 1.3, 1.35, 1.4, 1.45),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [SubResource("Atlas_rejoice_0"), SubResource("Atlas_rejoice_1"), SubResource("Atlas_rejoice_2"), SubResource("Atlas_rejoice_3"), SubResource("Atlas_rejoice_4"), SubResource("Atlas_rejoice_5"), SubResource("Atlas_rejoice_6"), SubResource("Atlas_rejoice_7"), SubResource("Atlas_rejoice_8"), SubResource("Atlas_rejoice_9"), SubResource("Atlas_rejoice_10"), SubResource("Atlas_rejoice_11"), SubResource("Atlas_rejoice_12"), SubResource("Atlas_rejoice_13"), SubResource("Atlas_rejoice_14"), SubResource("Atlas_rejoice_15"), SubResource("Atlas_rejoice_16"), SubResource("Atlas_rejoice_17"), SubResource("Atlas_rejoice_18"), SubResource("Atlas_rejoice_19"), SubResource("Atlas_rejoice_20"), SubResource("Atlas_rejoice_21"), SubResource("Atlas_rejoice_22"), SubResource("Atlas_rejoice_23"), SubResource("Atlas_rejoice_24"), SubResource("Atlas_rejoice_25"), SubResource("Atlas_rejoice_26"), SubResource("Atlas_rejoice_27"), SubResource("Atlas_rejoice_28"), SubResource("Atlas_rejoice_29")]
+}
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("Visuals/Facing/Model/AttackFx:self_modulate")
+tracks/8/interp = 1
+tracks/8/loop_wrap = true
+tracks/8/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_furina"]
@@ -623,8 +2659,120 @@ _data = {
 &"hurt": SubResource("Animation_hurt"),
 &"idle": SubResource("Animation_idle"),
 &"idle_low": SubResource("Animation_idle_low"),
-&"power": SubResource("Animation_power")
+&"power": SubResource("Animation_power"),
+&"rejoice": SubResource("Animation_rejoice")
 }
+
+[sub_resource type="Animation" id="Animation_stage_spend"]
+resource_name = "spend"
+length = 0.8
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Visuals/Facing/StageFx/SpendFx:self_modulate")
+tracks/0/interp = 0
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.8),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Visuals/Facing/StageFx/SpendFx:texture")
+tracks/1/interp = 0
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [SubResource("Atlas_stage_spend_0"), SubResource("Atlas_stage_spend_1"), SubResource("Atlas_stage_spend_2"), SubResource("Atlas_stage_spend_3"), SubResource("Atlas_stage_spend_4"), SubResource("Atlas_stage_spend_5"), SubResource("Atlas_stage_spend_6"), SubResource("Atlas_stage_spend_7"), SubResource("Atlas_stage_spend_8"), SubResource("Atlas_stage_spend_9"), SubResource("Atlas_stage_spend_10"), SubResource("Atlas_stage_spend_11"), SubResource("Atlas_stage_spend_12"), SubResource("Atlas_stage_spend_13"), SubResource("Atlas_stage_spend_14"), SubResource("Atlas_stage_spend_15")]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_stage_spend"]
+_data = {
+&"spend": SubResource("Animation_stage_spend")
+}
+
+[sub_resource type="Animation" id="Animation_stage_drain"]
+resource_name = "drain"
+length = 0.9
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Visuals/Facing/StageFx/DrainFx:self_modulate")
+tracks/0/interp = 0
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.9),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Visuals/Facing/StageFx/DrainFx:texture")
+tracks/1/interp = 0
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [SubResource("Atlas_stage_drain_0"), SubResource("Atlas_stage_drain_1"), SubResource("Atlas_stage_drain_2"), SubResource("Atlas_stage_drain_3"), SubResource("Atlas_stage_drain_4"), SubResource("Atlas_stage_drain_5"), SubResource("Atlas_stage_drain_6"), SubResource("Atlas_stage_drain_7"), SubResource("Atlas_stage_drain_8"), SubResource("Atlas_stage_drain_9"), SubResource("Atlas_stage_drain_10"), SubResource("Atlas_stage_drain_11"), SubResource("Atlas_stage_drain_12"), SubResource("Atlas_stage_drain_13"), SubResource("Atlas_stage_drain_14"), SubResource("Atlas_stage_drain_15"), SubResource("Atlas_stage_drain_16"), SubResource("Atlas_stage_drain_17")]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_stage_drain"]
+_data = {
+&"drain": SubResource("Animation_stage_drain")
+}
+
+[sub_resource type="Animation" id="Animation_stage_repay"]
+resource_name = "repay"
+length = 1.0
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Visuals/Facing/StageFx/RepayFx:self_modulate")
+tracks/0/interp = 0
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Visuals/Facing/StageFx/RepayFx:texture")
+tracks/1/interp = 0
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [SubResource("Atlas_stage_repay_0"), SubResource("Atlas_stage_repay_1"), SubResource("Atlas_stage_repay_2"), SubResource("Atlas_stage_repay_3"), SubResource("Atlas_stage_repay_4"), SubResource("Atlas_stage_repay_5"), SubResource("Atlas_stage_repay_6"), SubResource("Atlas_stage_repay_7"), SubResource("Atlas_stage_repay_8"), SubResource("Atlas_stage_repay_9"), SubResource("Atlas_stage_repay_10"), SubResource("Atlas_stage_repay_11"), SubResource("Atlas_stage_repay_12"), SubResource("Atlas_stage_repay_13"), SubResource("Atlas_stage_repay_14"), SubResource("Atlas_stage_repay_15"), SubResource("Atlas_stage_repay_16"), SubResource("Atlas_stage_repay_17"), SubResource("Atlas_stage_repay_18"), SubResource("Atlas_stage_repay_19")]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_stage_repay"]
+_data = {
+&"repay": SubResource("Animation_stage_repay")
+}
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_idle"]
+animation = &"idle"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_attack"]
+animation = &"attack"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_hurt"]
+animation = &"hurt"
+
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_death"]
+animation = &"death"
 
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_cast"]
 animation = &"cast"
@@ -635,53 +2783,181 @@ animation = &"power"
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_idle_low"]
 animation = &"idle_low"
 
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_attack"]
-animation = &"attack"
-
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_death"]
-animation = &"death"
-
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_hurt"]
-animation = &"hurt"
-
-[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_idle"]
-animation = &"idle"
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_rejoice"]
+animation = &"rejoice"
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="Transition_start_idle"]
 advance_mode = 2
 
-[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_idle_death"]
-advance_mode = 0
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_idle_attack"]
+xfade_time = 0.1
+advance_mode = 1
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="Transition_idle_hurt"]
-advance_mode = 0
+xfade_time = 0.03
+advance_mode = 1
 
-[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_hurt_idle"]
-switch_mode = 2
-advance_mode = 2
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_idle_death"]
+xfade_time = 0.05
+advance_mode = 1
 
-[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_death_end"]
-switch_mode = 2
-advance_mode = 0
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_idle_cast"]
+xfade_time = 0.05
+advance_mode = 1
 
-[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_hurt_death"]
-advance_mode = 0
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_idle_power"]
+xfade_time = 0.05
+advance_mode = 1
 
-[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_idle_attack"]
-advance_mode = 0
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_idle_rejoice"]
+xfade_time = 0.1
+advance_mode = 1
 
-[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_attack_idle"]
-switch_mode = 2
-advance_mode = 2
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_idle_low_attack"]
+xfade_time = 0.1
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_idle_low_hurt"]
+xfade_time = 0.03
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_idle_low_death"]
+xfade_time = 0.05
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_idle_low_cast"]
+xfade_time = 0.05
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_idle_low_power"]
+xfade_time = 0.05
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_idle_low_rejoice"]
+xfade_time = 0.1
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_attack_hurt"]
+xfade_time = 0.03
+advance_mode = 1
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="Transition_attack_death"]
-advance_mode = 0
+xfade_time = 0.05
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_attack_cast"]
+xfade_time = 0.05
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_attack_power"]
+xfade_time = 0.05
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_attack_rejoice"]
+xfade_time = 0.05
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_hurt_attack"]
+xfade_time = 0.05
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_hurt_death"]
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_hurt_cast"]
+xfade_time = 0.05
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_hurt_power"]
+xfade_time = 0.05
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_hurt_rejoice"]
+xfade_time = 0.05
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_cast_attack"]
+xfade_time = 0.05
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_cast_hurt"]
+xfade_time = 0.03
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_cast_death"]
+xfade_time = 0.05
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_cast_power"]
+xfade_time = 0.05
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_cast_rejoice"]
+xfade_time = 0.05
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_power_attack"]
+xfade_time = 0.05
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_power_hurt"]
+xfade_time = 0.03
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_power_death"]
+xfade_time = 0.05
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_power_cast"]
+xfade_time = 0.05
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_power_rejoice"]
+xfade_time = 0.05
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_rejoice_attack"]
+xfade_time = 0.05
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_rejoice_hurt"]
+xfade_time = 0.03
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_rejoice_death"]
+xfade_time = 0.05
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_rejoice_cast"]
+xfade_time = 0.05
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_rejoice_power"]
+xfade_time = 0.05
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_attack_idle"]
+xfade_time = 0.05
+switch_mode = 2
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_hurt_idle"]
+xfade_time = 0.1
+switch_mode = 2
+advance_mode = 2
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="Transition_cast_idle"]
+xfade_time = 0.05
 switch_mode = 2
 advance_mode = 2
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="Transition_power_idle"]
+xfade_time = 0.05
+switch_mode = 2
+advance_mode = 2
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_rejoice_idle"]
+xfade_time = 0.05
 switch_mode = 2
 advance_mode = 2
 
@@ -694,6 +2970,10 @@ advance_condition = &"low_hp"
 xfade_time = 0.4
 advance_mode = 2
 advance_condition = &"healthy"
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_death_end"]
+switch_mode = 2
+advance_mode = 0
 
 [sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_furina"]
 states/End/position = Vector2(628, 153)
@@ -712,7 +2992,9 @@ states/idle_low/node = SubResource("AnimationNodeAnimation_idle_low")
 states/idle_low/position = Vector2(327, 365)
 states/power/node = SubResource("AnimationNodeAnimation_power")
 states/power/position = Vector2(470, 64)
-transitions = ["Start", "idle", SubResource("Transition_start_idle"), "idle", "death", SubResource("Transition_idle_death"), "idle", "hurt", SubResource("Transition_idle_hurt"), "hurt", "idle", SubResource("Transition_hurt_idle"), "death", "End", SubResource("Transition_death_end"), "hurt", "death", SubResource("Transition_hurt_death"), "idle", "attack", SubResource("Transition_idle_attack"), "attack", "idle", SubResource("Transition_attack_idle"), "attack", "death", SubResource("Transition_attack_death"), "cast", "idle", SubResource("Transition_cast_idle"), "power", "idle", SubResource("Transition_power_idle"), "idle", "idle_low", SubResource("Transition_idle_idle_low"), "idle_low", "idle", SubResource("Transition_idle_low_idle")]
+states/rejoice/node = SubResource("AnimationNodeAnimation_rejoice")
+states/rejoice/position = Vector2(470, 278)
+transitions = ["Start", "idle", SubResource("Transition_start_idle"), "idle", "attack", SubResource("Transition_idle_attack"), "idle", "hurt", SubResource("Transition_idle_hurt"), "idle", "death", SubResource("Transition_idle_death"), "idle", "cast", SubResource("Transition_idle_cast"), "idle", "power", SubResource("Transition_idle_power"), "idle", "rejoice", SubResource("Transition_idle_rejoice"), "idle_low", "attack", SubResource("Transition_idle_low_attack"), "idle_low", "hurt", SubResource("Transition_idle_low_hurt"), "idle_low", "death", SubResource("Transition_idle_low_death"), "idle_low", "cast", SubResource("Transition_idle_low_cast"), "idle_low", "power", SubResource("Transition_idle_low_power"), "idle_low", "rejoice", SubResource("Transition_idle_low_rejoice"), "attack", "hurt", SubResource("Transition_attack_hurt"), "attack", "death", SubResource("Transition_attack_death"), "attack", "cast", SubResource("Transition_attack_cast"), "attack", "power", SubResource("Transition_attack_power"), "attack", "rejoice", SubResource("Transition_attack_rejoice"), "hurt", "attack", SubResource("Transition_hurt_attack"), "hurt", "death", SubResource("Transition_hurt_death"), "hurt", "cast", SubResource("Transition_hurt_cast"), "hurt", "power", SubResource("Transition_hurt_power"), "hurt", "rejoice", SubResource("Transition_hurt_rejoice"), "cast", "attack", SubResource("Transition_cast_attack"), "cast", "hurt", SubResource("Transition_cast_hurt"), "cast", "death", SubResource("Transition_cast_death"), "cast", "power", SubResource("Transition_cast_power"), "cast", "rejoice", SubResource("Transition_cast_rejoice"), "power", "attack", SubResource("Transition_power_attack"), "power", "hurt", SubResource("Transition_power_hurt"), "power", "death", SubResource("Transition_power_death"), "power", "cast", SubResource("Transition_power_cast"), "power", "rejoice", SubResource("Transition_power_rejoice"), "rejoice", "attack", SubResource("Transition_rejoice_attack"), "rejoice", "hurt", SubResource("Transition_rejoice_hurt"), "rejoice", "death", SubResource("Transition_rejoice_death"), "rejoice", "cast", SubResource("Transition_rejoice_cast"), "rejoice", "power", SubResource("Transition_rejoice_power"), "attack", "idle", SubResource("Transition_attack_idle"), "hurt", "idle", SubResource("Transition_hurt_idle"), "cast", "idle", SubResource("Transition_cast_idle"), "power", "idle", SubResource("Transition_power_idle"), "rejoice", "idle", SubResource("Transition_rejoice_idle"), "idle", "idle_low", SubResource("Transition_idle_idle_low"), "idle_low", "idle", SubResource("Transition_idle_low_idle"), "death", "End", SubResource("Transition_death_end")]
 
 [node name="FurinaCombat" type="Node2D"]
 
@@ -722,24 +3004,106 @@ unique_name_in_owner = true
 [node name="Facing" type="Node2D" parent="Visuals"]
 unique_name_in_owner = true
 
-[node name="Rig" type="Node2D" parent="Visuals/Facing"]
-position = Vector2(0, -140)
+[node name="Shadow" type="Sprite2D" parent="Visuals/Facing"]
+position = Vector2(2.6, 0)
+scale = Vector2(0.5004, 0.5017)
+texture = ExtResource("0_shadow")
 
-[node name="CoatBack" type="Sprite2D" parent="Visuals/Facing/Rig"]
-position = Vector2(-8, 23)
-texture = ExtResource("1_coat")
+[node name="Model" type="Node2D" parent="Visuals/Facing"]
 
-[node name="Sword" type="Sprite2D" parent="Visuals/Facing/Rig"]
-position = Vector2(-78.5, -10.5)
-texture = ExtResource("2_sword")
+[node name="Idle" type="Sprite2D" parent="Visuals/Facing/Model"]
+texture = SubResource("Atlas_idle_0")
+centered = false
+offset = Vector2(-129, -434)
+scale = Vector2(0.5, 0.5)
 
-[node name="Body" type="Sprite2D" parent="Visuals/Facing/Rig"]
-position = Vector2(15, 0)
-texture = ExtResource("3_body")
+[node name="IdleLow" type="Sprite2D" parent="Visuals/Facing/Model"]
+self_modulate = Color(1, 1, 1, 0)
+texture = SubResource("Atlas_idle_low_0")
+centered = false
+offset = Vector2(-130, -425)
+scale = Vector2(0.5, 0.5)
 
-[node name="Hat" type="Sprite2D" parent="Visuals/Facing/Rig"]
-position = Vector2(53, -107)
-texture = ExtResource("4_hat")
+[node name="Attack" type="Sprite2D" parent="Visuals/Facing/Model"]
+self_modulate = Color(1, 1, 1, 0)
+texture = SubResource("Atlas_attack_0")
+centered = false
+offset = Vector2(-160, -433)
+scale = Vector2(0.5, 0.5)
+
+[node name="Hurt" type="Sprite2D" parent="Visuals/Facing/Model"]
+self_modulate = Color(1, 1, 1, 0)
+texture = SubResource("Atlas_hurt_0")
+centered = false
+offset = Vector2(-126, -433)
+scale = Vector2(0.5, 0.5)
+
+[node name="Death" type="Sprite2D" parent="Visuals/Facing/Model"]
+self_modulate = Color(1, 1, 1, 0)
+texture = SubResource("Atlas_death_0")
+centered = false
+offset = Vector2(-126, -433)
+scale = Vector2(0.5, 0.5)
+
+[node name="Cast" type="Sprite2D" parent="Visuals/Facing/Model"]
+self_modulate = Color(1, 1, 1, 0)
+texture = SubResource("Atlas_cast_0")
+centered = false
+offset = Vector2(-125, -435)
+scale = Vector2(0.5, 0.5)
+
+[node name="Rejoice" type="Sprite2D" parent="Visuals/Facing/Model"]
+self_modulate = Color(1, 1, 1, 0)
+texture = SubResource("Atlas_rejoice_0")
+centered = false
+offset = Vector2(-165, -442)
+scale = Vector2(0.5, 0.5)
+
+[node name="AttackFx" type="Sprite2D" parent="Visuals/Facing/Model"]
+unique_name_in_owner = true
+self_modulate = Color(1, 1, 1, 0)
+material = SubResource("ShaderMaterial_element")
+texture = SubResource("Atlas_fx_attack_0")
+centered = false
+offset = Vector2(-34, -512)
+scale = Vector2(0.5, 0.5)
+metadata/rest_element = "hydro"
+
+[node name="StageFx" type="Node2D" parent="Visuals/Facing"]
+unique_name_in_owner = true
+position = Vector2(1.5, -140.8)
+
+[node name="SpendFx" type="Sprite2D" parent="Visuals/Facing/StageFx"]
+unique_name_in_owner = true
+self_modulate = Color(1, 1, 1, 0)
+material = SubResource("ShaderMaterial_spend")
+texture = SubResource("Atlas_stage_spend_0")
+centered = false
+offset = Vector2(-307, -301)
+scale = Vector2(0.5, 0.5)
+metadata/effect = "spend"
+
+[node name="DrainFx" type="Sprite2D" parent="Visuals/Facing/StageFx"]
+unique_name_in_owner = true
+self_modulate = Color(1, 1, 1, 0)
+material = SubResource("ShaderMaterial_drain")
+texture = SubResource("Atlas_stage_drain_0")
+centered = false
+offset = Vector2(-47, -65)
+scale = Vector2(0.5, 0.5)
+metadata/effect = "drain"
+metadata/reach = 192.0
+
+[node name="RepayFx" type="Sprite2D" parent="Visuals/Facing/StageFx"]
+unique_name_in_owner = true
+self_modulate = Color(1, 1, 1, 0)
+material = SubResource("ShaderMaterial_repay")
+texture = SubResource("Atlas_stage_repay_0")
+centered = false
+offset = Vector2(-96, -162)
+scale = Vector2(0.5, 0.5)
+metadata/effect = "repay"
+metadata/reach = 192.0
 
 [node name="Bounds" type="Control" parent="."]
 unique_name_in_owner = true
@@ -771,3 +3135,22 @@ active = true
 callback_mode_discrete = 0
 tree_root = SubResource("AnimationNodeStateMachine_furina")
 anim_player = NodePath("../AnimationPlayer")
+metadata/idle_desync = true
+
+[node name="SpendFxPlayer" type="AnimationPlayer" parent="."]
+unique_name_in_owner = true
+libraries = {
+&"": SubResource("AnimationLibrary_stage_spend")
+}
+
+[node name="DrainFxPlayer" type="AnimationPlayer" parent="."]
+unique_name_in_owner = true
+libraries = {
+&"": SubResource("AnimationLibrary_stage_drain")
+}
+
+[node name="RepayFxPlayer" type="AnimationPlayer" parent="."]
+unique_name_in_owner = true
+libraries = {
+&"": SubResource("AnimationLibrary_stage_repay")
+}

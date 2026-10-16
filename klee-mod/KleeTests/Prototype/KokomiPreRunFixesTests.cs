@@ -66,14 +66,6 @@ public class KokomiPreRunFixesTests
     }
 
     [Fact]
-    public void The_companion_plan_tip_says_strength_and_weak_count()
-    {
-        var said = string.Join(" ", Il.Strings(
-            Il.Method("ArmKeywordTips", "ForCompanionPlan")));
-        Assert.Contains("then it is played: [gold]Strength[/gold] and [gold]Weak[/gold] count.", said);
-    }
-
-    [Fact]
     public void Nereids_tip_says_an_early_carry_out_is_single()
     {
         var said = string.Join(" ", Il.Strings(

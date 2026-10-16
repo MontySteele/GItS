@@ -493,6 +493,13 @@ def clear_sent(lane: object = None) -> None:
     drop_state(sent_mark_path(lane))
 
 
+def last_sent_command(lane: object = None) -> str:
+    """The last command this lane sent, or `""` (no freshness check: it
+    only names the card in a sentence)."""
+    row = read_state_json(sent_mark_path(lane))
+    return str(row.get("command") or "") if isinstance(row, dict) else ""
+
+
 def screen_changed_after(room: str, lane: object = None,
                          now: float | None = None) -> str | None:
     """The sent command after which the lane left its room, if no look has
@@ -510,6 +517,57 @@ def screen_changed_after(room: str, lane: object = None,
     except (TypeError, ValueError):
         return None
     return str(row.get("command") or "the last command")
+
+
+# CO-OP SPIRAL ABYSS (2026-10-14, lanes 4/5). THE SEAT'S LAST LOOK. The
+# client seat chained `play` commands; the host's Bombs killed the last enemy
+# in between, the rest were refused against a fight that had ended (or a
+# target that had died), and three of those tripped the sticky stop. The look
+# each `observe` (and each page `wait` prints) leaves here is what a refused
+# command is checked against: a refusal whose room or target changed since
+# that look is a skip, not a refusal (`blindplay.changed_under`).
+def look_path(lane: object = None) -> Path:
+    return lane_state_dir(lane) / f"_blindplay-last-look-lane{lane_tag(lane)}.json"
+
+
+def remember_look(room: str, living: list[str], lane: object = None,
+                  now: float | None = None, screen: str = "") -> None:
+    """Remember the room the seat last looked at, the enemies alive on it
+    (printed names and letters, folded), and the screen kind the page was
+    rendered on (`state_type`), so a chooser that opened since is seen.
+
+    Yae review r6, item 7 (lane 2, Aeonglass). A look at a fight OVERLAY
+    (`room_of` gives `""`) keeps the room the last look held, as
+    `mark_sent` does. The seat looked at a turn-start chooser (Stratagem)
+    with the boss at 51; its `choose` let the turn start finish, a
+    full-shrine plant killed the boss, and the chained `play` was refused
+    as a counted refusal, because a look with no room could not see that
+    the fight had ended since (`blindplay.changed_under`). The page was not
+    behind: the kill came after the pick."""
+    if not room:
+        held = read_state_json(look_path(lane))
+        room = str(held.get("room") or "") if isinstance(held, dict) else ""
+    row = {"room": room, "living": list(living), "screen": screen,
+           "at": time.time() if now is None else now}
+    write_atomic(look_path(lane), json.dumps(row))
+
+
+def read_look(lane: object = None, now: float | None = None) -> dict | None:
+    """The seat's last look, if it is fresh (`REFUSAL_MARK_TTL_S`)."""
+    row = read_state_json(look_path(lane))
+    if not isinstance(row, dict):
+        return None
+    now = time.time() if now is None else now
+    try:
+        if now - float(row.get("at") or 0) > REFUSAL_MARK_TTL_S:
+            return None
+    except (TypeError, ValueError):
+        return None
+    return row
+
+
+def clear_look(lane: object = None) -> None:
+    drop_state(look_path(lane))
 
 
 # KOKOMI ROUND 2 (2026-10-13, lane 5). A DELIBERATE `skip` IS THE SKIP. The

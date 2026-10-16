@@ -134,6 +134,10 @@ public static class KleeMod
                     // build, and inert with the arm off -- every method's
                     // first line is `FurinaStage.LiveFor`.
                     .Concat(Powers.FurinaStageHooks.Subscribe(combatState))
+                    // FURINA, THE SWEEP (2026-10-14): the HP-lost counts,
+                    // the first turn and Stage Directions' next-turn cost,
+                    // for every seat (`FurinaSweep`).
+                    .Concat(Powers.FurinaSweepHooks.Subscribe(combatState))
                     // Track B's human feed: per-fight telemetry from normal
                     // play, in the schema the soak writes. Reads only -- see
                     // the three rules in PlayTelemetry.cs, the first of which
@@ -146,7 +150,7 @@ public static class KleeMod
                     .Concat(Story.StoryCombatHooks.Subscribe(combatState)));
 
         Log.Info($"[{ModId}] Klee, Furina and Kokomi registered"
-                 + ", and Varka (prototype)"
+                 + ", Varka and Yae Miko (prototype)"
                  + ".");
     }
 
@@ -235,6 +239,10 @@ public static class KleeMod
                 // Plan line, a pick from the Draw Pile, on the same terms.
                 [Powers.KokomiPlan.DrawPilePromptKey] =
                     Powers.KokomiPlan.DrawPilePromptText,
+                // THE PLANS VIEW (2026-10-14): the controller's grid of
+                // waiting Plans, on the same terms.
+                [Vfx.KokomiPlanView.PromptKey] =
+                    Vfx.KokomiPlanView.PromptText,
                 // R276, the Klee pool expansion's two discard-pile picks
                 // (Treasure Map, Come Back and Play!), on the same terms.
                 [Powers.KleeExpansion.SetOffPromptKey] =
@@ -250,11 +258,61 @@ public static class KleeMod
                     Powers.FurinaCards.TutorPromptText,
                 [Powers.FurinaCards.BowPromptKey] =
                     Powers.FurinaCards.BowPromptText,
+                // FURINA, THE SWEEP (2026-10-14): Stage Directions' pick.
+                [Powers.FurinaCards.DirectionsPromptKey] =
+                    Powers.FurinaCards.DirectionsPromptText,
                 // VARKA (the Oath rework): Change of Guard's grid, on the
                 // same terms.
                 [Powers.VarkaRules.ElementPromptKey] =
                     Powers.VarkaRules.ElementPromptText,
+                // YAE MIKO (2026-10-13): the Edit, The Seven Glamours',
+                // Reborn as Guuji Yae's prompts, on the same terms. The
+                // Publish prompt also titles the after-elite Publish grid.
+                [Powers.YaeEditing.EditPromptKey] =
+                    Powers.YaeEditing.EditPromptText,
+                [Powers.YaeEditing.PublishPromptKey] =
+                    Powers.YaeEditing.PublishPromptText,
+                [Powers.YaeEditing.AnnotationPromptKey] =
+                    Powers.YaeEditing.AnnotationPromptText,
+                // Review r3 (2026-10-14): Second Printing and Author's Copy.
+                [Powers.YaeEditing.RecallPromptKey] =
+                    Powers.YaeEditing.RecallPromptText,
+                [Powers.YaeEditing.CopyPromptKey] =
+                    Powers.YaeEditing.CopyPromptText,
             });
+
+            // YAE MIKO (2026-10-14): each Annotation's Edit prompt, which
+            // names it and what it does (`YaeEditing.EditPromptTextFor`).
+            LocManager.Instance.GetTable("cards").MergeWith(
+                Powers.YaeAnnotationText.All.ToDictionary(
+                    Powers.YaeEditing.EditPromptKeyFor,
+                    Powers.YaeEditing.EditPromptTextFor));
+            // Yae review r4, pick 1 (a): a multi-card Edit's one chooser.
+            LocManager.Instance.GetTable("cards").MergeWith(
+                Powers.YaeAnnotationText.All.ToDictionary(
+                    Powers.YaeEditing.EditUpToPromptKeyFor,
+                    Powers.YaeEditing.EditUpToPromptTextFor));
+            LocManager.Instance.GetTable("cards").MergeWith(
+                new Dictionary<string, string>
+                {
+                    [Powers.YaeEditing.NothingToEditKey] =
+                        Powers.YaeEditing.NothingToEditText,
+                    [Powers.YaeEditing.NoSakuraToEditKey] =
+                        Powers.YaeEditing.NoSakuraToEditText,
+                    [Powers.YaeEditing.NothingToPublishKey] =
+                        Powers.YaeEditing.NothingToPublishText,
+                });
+
+            // YAE MIKO (2026-10-14, Publish after elites and bosses):
+            // Meditations of a Yako's reward-screen row. A Reward's
+            // Description is a table lookup, so its row is merged into
+            // `gameplay_ui` here, its only source.
+            LocManager.Instance.GetTable("gameplay_ui").MergeWith(
+                new Dictionary<string, string>
+                {
+                    [Relics.YaePublishReward.DescriptionKey] =
+                        Relics.YaePublishReward.DescriptionText,
+                });
 
             // Runtime copy of the custom-keyword loc. The pck carries the
             // same table for normal packaged builds, but keeping these rows in
@@ -283,18 +341,21 @@ public static class KleeMod
                     // keywords golded and numerals blue. No number, no
                     // constant and no rule moved -- the interpolations are
                     // the same interpolations.
+                    // THE TOOLTIP TRIM (2026-10-14): one sentence each, about
+                    // 80 characters. "No aura:" left (the card applies it
+                    // either way), Anemo's Swirl damage stays on its box.
                     ["KLEEMOD-APPLIES_PYRO.title"] = "Applies Pyro",
                     ["KLEEMOD-APPLIES_PYRO.description"] =
-                        $"No aura: applies [gold]Pyro[/gold] for [blue]{Elements.ReactionConstants.AuraDurationTurns}[/blue] turns. Another aura: consumed, and an [gold]Elemental Reaction[/gold] triggers.",
+                        $"Applies [gold]Pyro[/gold] for [blue]{Elements.ReactionConstants.AuraDurationTurns}[/blue] turns. Another aura is consumed in an [gold]Elemental Reaction[/gold].",
                     ["KLEEMOD-APPLIES_HYDRO.title"] = "Applies Hydro",
                     ["KLEEMOD-APPLIES_HYDRO.description"] =
-                        $"No aura: applies [gold]Hydro[/gold] for [blue]{Elements.ReactionConstants.AuraDurationTurns}[/blue] turns. Another aura: consumed, and an [gold]Elemental Reaction[/gold] triggers.",
+                        $"Applies [gold]Hydro[/gold] for [blue]{Elements.ReactionConstants.AuraDurationTurns}[/blue] turns. Another aura is consumed in an [gold]Elemental Reaction[/gold].",
                     ["KLEEMOD-APPLIES_ELECTRO.title"] = "Applies Electro",
                     ["KLEEMOD-APPLIES_ELECTRO.description"] =
-                        $"No aura: applies [gold]Electro[/gold] for [blue]{Elements.ReactionConstants.AuraDurationTurns}[/blue] turns. Another aura: consumed, and an [gold]Elemental Reaction[/gold] triggers.",
+                        $"Applies [gold]Electro[/gold] for [blue]{Elements.ReactionConstants.AuraDurationTurns}[/blue] turns. Another aura is consumed in an [gold]Elemental Reaction[/gold].",
                     ["KLEEMOD-APPLIES_CRYO.title"] = "Applies Cryo",
                     ["KLEEMOD-APPLIES_CRYO.description"] =
-                        $"No aura: applies [gold]Cryo[/gold] for [blue]{Elements.ReactionConstants.AuraDurationTurns}[/blue] turns. Another aura: consumed, and an [gold]Elemental Reaction[/gold] triggers.",
+                        $"Applies [gold]Cryo[/gold] for [blue]{Elements.ReactionConstants.AuraDurationTurns}[/blue] turns. Another aura is consumed in an [gold]Elemental Reaction[/gold].",
                     // `EB-454`. The two that TRIGGER: a reaction happens and
                     // no aura is left, so the sentence is the four above with
                     // the duration clause replaced by the reason there is none.
@@ -303,10 +364,10 @@ public static class KleeMod
                     // face never said a Swirl hits ALL enemies, so the tip
                     // every Anemo card hovers names the Swirl and its 2.
                     ["KLEEMOD-APPLIES_ANEMO.description"] =
-                        $"No aura: nothing happens. Another aura: it [gold]Swirls[/gold], dealing [blue]{Elements.ReactionConstants.SwirlDamage}[/blue] unblockable damage to ALL enemies and spreading that element.",
+                        $"Leaves no aura. Another aura [gold]Swirls[/gold]: [blue]{Elements.ReactionConstants.SwirlDamage}[/blue] unblockable damage to ALL enemies, and the aura spreads.",
                     ["KLEEMOD-APPLIES_GEO.title"] = "Applies Geo",
                     ["KLEEMOD-APPLIES_GEO.description"] =
-                        "No aura: nothing happens. Another aura: consumed, and an [gold]Elemental Reaction[/gold] triggers. [gold]Geo[/gold] never stays on an enemy.",
+                        "Never stays on an enemy. Another aura is consumed in an [gold]Elemental Reaction[/gold].",
                     ["KLEEMOD-CONFISCATED.title"] = "Confiscated",
                     ["KLEEMOD-CONFISCATED.description"] =
                         "A 1-cost Status card that does nothing. [gold]Exhaust[/gold].",
@@ -474,6 +535,8 @@ public static class KleeMod
                         "Companion",
                     // VARKA (the Oath rework): his three words.
                     [Cards.ArmKeywordTips.OathKey + ".title"] = "Oath",
+                    // FURINA, THE SWEEP (2026-10-14): Ousia / Pneuma's word.
+                    [Cards.ArmKeywordTips.FlipKey + ".title"] = "Flip",
                     [Cards.ArmKeywordTips.CurrentElementKey + ".title"] =
                         "Current element",
                     [Cards.ArmKeywordTips.KnightKey + ".title"] = "Knight",
@@ -529,13 +592,22 @@ public static class KleeMod
                     [Cards.ArmKeywordTips.ElementalReactionKey + ".title"] =
                         "Elemental Reaction",
                     [Cards.ArmKeywordTips.SakuraKey + ".title"] = "Sakura",
+                    // YAE MIKO (2026-10-13): her second word.
+                    [Cards.ArmKeywordTips.EditKey + ".title"] = "Edit",
+                    // Shrine r2 (2026-10-14): Tenko's own tip, which
+                    // replaced the Rite's.
+                    [Cards.ArmKeywordTips.TenkoKey + ".title"] = "Tenko",
+                    // Review r3 (2026-10-14): the two kinds and the
+                    // full-shrine plant.
+                    [Cards.ArmKeywordTips.FoxfireSakuraKey + ".title"] =
+                        "Foxfire Sakura",
+                    [Cards.ArmKeywordTips.KitsuneSakuraKey + ".title"] =
+                        "Kitsune Sakura",
+                    [Cards.ArmKeywordTips.FullShrineKey + ".title"] =
+                        "Full shrine",
                     [Cards.ArmKeywordTips.LightfallSwordKey + ".title"] =
                         "Lightfall Sword",
                     [Cards.ArmKeywordTips.PlanOnlyKey + ".title"] = "Plan",
-                    // The Kokomi re-founding (2026-10-12): the Plan tip a
-                    // Companion carries while Kokomi holds it.
-                    [Cards.ArmKeywordTips.CompanionPlanKey + ".title"] =
-                        "Plan",
                     // The Kokomi round-1 fixes (2026-10-12): the Plan tip on
                     // a card that names Plans and has no Plan line.
                     [Cards.ArmKeywordTips.PlanNoLineKey + ".title"] = "Plan",
@@ -596,6 +668,13 @@ public static class KleeMod
                     [Cards.BaseKeywordTips.EtherealKey + ".title"] =
                         "Ethereal",
                 };
+            // YAE MIKO (2026-10-14): each Annotation's own tip, titled by
+            // its name (`ArmKeywordTips.ForAnnotation`).
+            foreach (var annotation in Powers.YaeAnnotationText.All)
+            {
+                keywordFallback[Cards.ArmKeywordTips.KeyOf(annotation) + ".title"] =
+                    Powers.YaeAnnotationText.Name(annotation);
+            }
             keywordTable.MergeWith(keywordFallback
                 .Where(pair => !keywordTable.HasEntry(pair.Key))
                 .ToDictionary(pair => pair.Key, pair => pair.Value));

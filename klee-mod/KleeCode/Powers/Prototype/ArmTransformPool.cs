@@ -71,7 +71,8 @@ public static class ArmTransformPool
         if (owner == null) return null;
         var character = owner.Character;
         if (!(character is IKleeCharacter || character is IKokomiCharacter
-              || character is IFurinaCharacter || character is IVarkaCharacter))
+              || character is IFurinaCharacter || character is IVarkaCharacter
+              || character is IYaeCharacter))
         {
             return null;
         }

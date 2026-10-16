@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcSucroseMollisFavonius : CustomCardModel, ICompanionCard, IWritableCompanion
+public sealed class ProtoMcSucroseMollisFavonius : CustomCardModel, ICompanionCard
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -49,23 +49,26 @@ public sealed class ProtoMcSucroseMollisFavonius : CustomCardModel, ICompanionCa
         new[] { KleeKeywords.AppliesAnemo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSwirl(ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, appliesWithoutHit: true), this), this);
+        TipAudience.Seat
+            ? ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, appliesWithoutHit: true), this)
+            : KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, appliesWithoutHit: true);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_sucrose_mollis_favonius");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sucrose — Mollis Favonius"),
-        ("description", "[gold]Swirl[/gold] the enemy. Draw 1 card. This turn, [gold]Melt[/gold], [gold]Vaporize[/gold] and [gold]Overloaded[/gold] deal {PowerAmount:diff()} additional damage."),
+        ("description", "[gold]Swirl[/gold] the enemy{InCombat:{SwirlAura}|}. Draw 1 card. This turn, [gold]Melt[/gold], [gold]Vaporize[/gold] and [gold]Overloaded[/gold] deal {PowerAmount:diff()} additional damage."),
     };
 
-    /// <summary>On Kokomi, this Companion card can also be written as a Plan on
-    /// the Bake-Kurage (the re-founding, 2026-10-12).</summary>
-    public override TargetType TargetType =>
-        KokomiCompanionPlan.TargetFor(this, base.TargetType);
-
-    /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
-    public TargetType PrintedTargetType => base.TargetType;
+    /// <summary>Whether this card's Swirl has an aura to Swirl, in combat
+    /// (`SwirlAuraFace`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("SwirlAura", SwirlAuraFace.Line(this));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
@@ -83,11 +86,6 @@ public sealed class ProtoMcSucroseMollisFavonius : CustomCardModel, ICompanionCa
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (KokomiPlan.PlayedOnPet(cardPlay))
-        {
-            await KokomiCompanionPlan.Write(choiceContext, this, cardPlay);
-            return;
-        }
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await ElementalHit.ApplyOnly(choiceContext, cardPlay.Target, Element.Anemo, Owner.Creature);
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);

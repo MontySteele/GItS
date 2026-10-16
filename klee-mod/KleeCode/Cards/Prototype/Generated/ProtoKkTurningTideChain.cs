@@ -66,8 +66,8 @@ public sealed class ProtoKkTurningTideChain : CustomCardModel, IElementalCard, I
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(7m, ValueProp.Move),
-            new DynamicVar("PlanDamage", 4m)
+            new DamageVar(9m, ValueProp.Move),
+            new DynamicVar("PlanDamage", 5m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

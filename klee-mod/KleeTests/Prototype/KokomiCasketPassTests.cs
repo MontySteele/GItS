@@ -73,20 +73,20 @@ public class KokomiCasketPassTests : IDisposable
     // ---- C. the re-keyed payoffs ------------------------------------------
 
     [Fact]
-    public void Feint_is_six_plus_three_per_carry_out_and_plans_vulnerable()
+    public void Feint_is_a_flat_eight_and_a_chain_plan()
     {
-        // The cleanup pass (2026-09-29): a base of 6, upgraded 9.
+        // Kokomi review r8 (2026-10-14, item 5): the now-line is a flat 8 [10]
+        // (was 8 [11] plus 3 per Plan waiting); the Plan 6 [8] unchanged.
         var card = new ProtoKkFeint();
-        Assert.Equal(6m, Var(card, "CalculationBase"));
-        Assert.Equal(3m, Var(card, "ExtraDamage"));
+        Assert.Equal(8m, card.DynamicVars.Damage.BaseValue);
+        Assert.False(card.DynamicVars.ContainsKey("ExtraDamage"));
         var up = Upgraded<ProtoKkFeint>();
-        Assert.Equal(9m, Var(up, "CalculationBase"));
-        Assert.Equal(3m, Var(up, "ExtraDamage"));
+        Assert.Equal(10m, up.DynamicVars.Damage.BaseValue);
         // The pool overhaul (2026-10-13): the Plan is a Chain line, 5 [7]
         // per Plan carried out this turn (was Apply 1 [2] Vulnerable).
-        Assert.Equal((KokomiPlan.Kind.DamagePerPlanThisTurn, 5),
+        Assert.Equal((KokomiPlan.Kind.DamagePerPlanThisTurn, 6),
                      (card.PlanClauses.Single().Kind, card.PlanClauses.Single().Amount));
-        Assert.Equal(7, up.PlanClauses.Single().Amount);
+        Assert.Equal(8, up.PlanClauses.Single().Amount);
     }
 
     [Fact]
@@ -132,16 +132,16 @@ public class KokomiCasketPassTests : IDisposable
     public void The_commons()
     {
         // (Massed Volley and Signal Arrow left in the re-founding, 2026-10-12.)
-        // The re-founding: Surging Shoal's Plan is 12 [16] to ALL enemies.
+        // Kokomi review r8 (2026-10-14, item 4): Surging Shoal deals 10 [13]
+        // to ALL enemies and gains 10 [13] Block, with no Plan line.
         var shoal = new ProtoKkSurgingShoal();
         Assert.Equal(2, shoal.EnergyCost.Canonical);
-        Assert.Equal(14m, shoal.DynamicVars.Damage.BaseValue);
-        Assert.Equal((12, KokomiPlan.Aim.AllEnemies),
-                     (shoal.PlanClauses.Single().Amount,
-                      shoal.PlanClauses.Single().Aim));
+        Assert.Equal(10m, shoal.DynamicVars.Damage.BaseValue);
+        Assert.Equal(10m, shoal.DynamicVars.Block.BaseValue);
+        Assert.IsNotAssignableFrom<IPlannedCard>(shoal);
         var shoalUp = Upgraded<ProtoKkSurgingShoal>();
-        Assert.Equal(18m, shoalUp.DynamicVars.Damage.BaseValue);
-        Assert.Equal(16, shoalUp.PlanClauses.Single().Amount);
+        Assert.Equal(13m, shoalUp.DynamicVars.Damage.BaseValue);
+        Assert.Equal(13m, shoalUp.DynamicVars.Block.BaseValue);
 
         // Pearl Diver left the pool in the status batch (2026-10-01).
 
@@ -155,15 +155,15 @@ public class KokomiCasketPassTests : IDisposable
         Assert.Contains(Il.Calls(Il.Method("ProtoKkPressTheAdvantage", "OnPlay")),
                         c => c.Contains("KokomiPlan.PlansHeld"));
 
-        // The re-founding (2026-10-12): Dusk is retired; 6 [9] Block now and
-        // a draw, no Plan line.
+        // Kokomi review r8 (2026-10-14, item 1): 7 [10] Block, plus 2 for
+        // each Plan waiting; no draw and no Plan line.
+        // Superseded by Kokomi review r9 item 4: a flat 6 [9], Retain.
         var shell = new ProtoKkShellOfSanctuary();
-        Assert.Equal(1m, shell.DynamicVars.Cards.BaseValue);
-        Assert.Equal(6m, shell.DynamicVars.Block.BaseValue);
-        Assert.Equal(9m, Upgraded<ProtoKkShellOfSanctuary>().DynamicVars.Block.BaseValue);
+        Assert.Equal(6m, Var(shell, "Block"));
+        Assert.Equal(9m, Var(Upgraded<ProtoKkShellOfSanctuary>(), "Block"));
         Assert.DoesNotContain(Il.Calls(Il.Method("ProtoKkShellOfSanctuary", "OnPlay")),
                               c => c.Contains("KokomiPlan.Schedule"));
-        Assert.Equal("Gain {Block:diff()} [gold]Block[/gold]. Draw 1 card.", Face(shell));
+        Assert.Equal("Gain {Block:diff()} [gold]Block[/gold].", Face(shell));
 
         // None of these creates a card.
         foreach (var type in new[] { "ProtoKkSurgingShoal",

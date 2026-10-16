@@ -170,14 +170,15 @@ def test_drowning_pressures_floor_is_its_own_debuffs(overhaul):
 
 def test_undercurrent_snare_plans_vulnerable_on_all(overhaul):
     """The pool overhaul (2026-10-13): the Plan line is an Intent read --
-    each enemy that intends to attack when it lands loses 3 Strength this
-    turn (Piercing Wail's `temp_strength_down`); no Vulnerable any more."""
+    each enemy that intends to attack when it lands loses 4 Strength this
+    turn (Piercing Wail's `temp_strength_down`; 3 -> 4 in the numbers pass,
+    kokomi-review-r5-2026-10-14); no Vulnerable any more."""
     a, b = make_enemy(hp=100, name="a"), make_enemy(hp=100, name="b",
                                                      intents=QUIET)
     st = kokomi_state(enemies=[a, b])
     kokomi_plan.schedule(st, _row("proto_kk_undercurrent_snare"))
     kokomi_plan.resolve_all(st)
-    assert a.powers.get("temp_strength_down") == 3
+    assert a.powers.get("temp_strength_down") == 4
     assert b.powers.get("temp_strength_down") is None
     assert a.powers.get("vulnerable") is None
 
@@ -264,9 +265,9 @@ def test_evening_watch_blocks_per_enemy_intending_to_attack(overhaul):
     st = kokomi_state(enemies=[a, b, c])
     _library(st)
     _write(st, "proto_kk_evening_watch")
-    # The re-founding (2026-10-12): 4 [6] each, counted when played, then a
-    # draw.
-    assert st.player.block == 4 * 2
+    # The re-founding (2026-10-12): Block each, counted when played, then a
+    # draw. Kokomi review r8 (2026-10-14, item 2): 6 [8] each (was 4 [6]).
+    assert st.player.block == 6 * 2
     assert len(st.player.hand) == 1
 
 

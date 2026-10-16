@@ -249,39 +249,6 @@ public class PoolCompletionTests : IDisposable
     // its v2 text.
 
     [Fact]
-    public void Interval_bells_price_moves_in_the_gate_and_the_payment()
-    {
-        var calls = Seq("ProtoFsIntervalBell", "OnPlay");
-        Assert.Contains(calls, c => c.Contains("FurinaStage.CanSpend"));
-        Assert.Contains(calls, c => c.Contains("FurinaStage.Spend"));
-        Assert.Contains(calls, c => c.Contains("get_IsUpgraded"));
-        Assert.Equal(0, new ProtoFsIntervalBell().EnergyCost.Canonical);
-        // Uncommon since the 2026-10-09 playtest trim.
-        Assert.Equal(CardRarity.Uncommon, new ProtoFsIntervalBell().Rarity);
-    }
-
-    /// <summary>The loop fix (2026-10-04): Interval Bell's Spend mode gains
-    /// its Energy NEXT turn, through the game's EnergyNextTurnPower. Sim
-    /// twin: <c>tier0/tests/test_furina_loop_probe.py</c>.</summary>
-    [Fact]
-    public void Interval_bells_energy_comes_next_turn()
-    {
-        var calls = Seq("ProtoFsIntervalBell", "OnPlay");
-        Assert.Contains(calls, c => c.Contains("FurinaStage.EnergyNextTurn"));
-        Assert.DoesNotContain(calls, c => c.Contains("PlayerCmd.GainEnergy"));
-        Assert.Contains(Seq("FurinaStage", "EnergyNextTurn"),
-                        c => c.Contains("PowerCmd.Apply")
-                             && c.Contains("EnergyNextTurnPower"));
-        // The card text pass (2026-10-12): "Next turn," and the energy icon;
-        // the bridge's mode label keeps the words.
-        Assert.Contains("also, next turn, gain {energyPrefix:energyIcons(1)}",
-                        Face(new ProtoFsIntervalBell()));
-        Assert.All(((IModalCard)Upgraded<ProtoFsIntervalBell>()).ModeLabels
-                       .Skip(1),
-                   l => Assert.EndsWith("Next turn, gain 1 [gold]Energy[/gold]", l));
-    }
-
-    [Fact]
     public void A_chosen_spend_is_free_once_under_center_of_attention()
     {
         Assert.False(CenterOfAttentionPower.Covers(null));

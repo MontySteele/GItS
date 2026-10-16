@@ -43,9 +43,9 @@ the end, neither Energy nor Fanfare fell. A sustained run is PRODUCTIVE when
 that window grew anything: Fanfare, damage dealt, Block, Energy, next turn's
 Energy, a Power's stacks, a guest's acts, or HP. Otherwise it is INERT.
 
-`--pre-fix` puts back the one loop fix that still has a card (Interval
-Bell's Spend mode gaining its Energy now, not next turn) so the probe can be
-seen to catch what it fixed. `tier0/tests/test_furina_loop_probe.py` pins
+`--pre-fix` puts back the one loop fix the 2026-10-04 audit made (Interval
+Bell's Spend mode gaining its Energy now, not next turn). The sweep
+(2026-10-14) cut Interval Bell, so today it changes no card. `tier0/tests/test_furina_loop_probe.py` pins
 both directions. AN INSTRUMENT, not a balance number.
 """
 
@@ -536,15 +536,9 @@ NAMED: dict[str, tuple[tuple[str, ...], tuple[str, ...],
         ("proto_fs_final_bow", "proto_fs_guest_star_charlotte"),
         ("proto_fs_grand_entrance",),
         ((), ("sigewinne",))),
-    # "Overdraft, Soothing Waters, Sold Out and Crescendo together. This is
-    # the one cycle not bounded by HP." Sold Out was cut in the diversity
-    # pass (2026-10-11); Interval Bell, the other Spend-for-Energy-next-turn
-    # card, stands in.
-    "energy_cycle": (
-        ("proto_fs_overdraft", "proto_fs_soothing_waters",
-         "proto_fs_interval_bell"),
-        ("proto_fs_crescendo",),
-        ((),)),
+    # "Overdraft, Soothing Waters, Sold Out and Crescendo together" left
+    # with its cards: Sold Out in the diversity pass (2026-10-11), Overdraft,
+    # Soothing Waters and Interval Bell in the sweep (2026-10-14).
 }
 
 #: Whole turns a `play_turns` run lasts, and the plays one turn may make

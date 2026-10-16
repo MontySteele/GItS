@@ -86,6 +86,7 @@ someone types by hand, so an unreferenced script here is not necessarily dead.
 | `lint_sly_grammar.py` | Parity lint: ONE Sly grammar, on both sides of the C# wall (EB-71, R174). |
 | `lint_stamp_rows.py` | Correction D: STATE.md's live-cell rows are STAMPS, and a stamp is short. |
 | `lint_text_conventions.py` | Player-facing TEXT against `docs/current/text-conventions.md`. |
+| `lint_hover_tips.py` | A player's card hover: at most 3 boxes, 100 characters a box (the tooltip trim, 2026-10-14). |
 | `lint_text_encoding.py` | Every text read/write must declare its encoding. |
 | `lint_unique_names.py` | Player-facing display-name uniqueness lint. |
 | `lint_upgrade_comment_arithmetic.py` | L7: the `# a -> b` arithmetic on an upgrade row must still be true. |

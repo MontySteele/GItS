@@ -714,6 +714,16 @@ def test_no_doc_reasserts_the_refuted_pre_draw_order():
 
 CO_TENANCY_LEDGER = {
     "BeforeSideTurnStart": {
+        ("Powers/Prototype/FurinaSweepPowers.cs", "FurinaSweepHooks"):
+            "(the Furina sweep, 2026-10-14). The top of a player's turn: "
+            "`FurinaSweep.RollTurn` moves this round's HP loss to last "
+            "turn's, and `ApplyNextTurnCosts` sets Stage Directions' card to "
+            "cost 0 this turn. THE ORDERING QUESTION, answered: both tables "
+            "are this file's own, no co-tenant reads them, and a cost "
+            "modifier is read only when a card is played, after every "
+            "turn-start tenant has run. It deals no damage, grants no Block "
+            "and touches no element. Sim: `furina_stage.turn_start` and "
+            "`refpowers.reset_turn_counters`, at the top of her turn",
         ("Powers/Prototype/ProtoBombPower.cs", "ProtoBombPower"):
             "(the Klee overhaul, C.KLEE_OVERHAUL). Enemy-attached, "
             "and it GROWS rather than detonating -- rule 7 of the ruled brief "
@@ -1026,6 +1036,15 @@ CO_TENANCY_LEDGER = {
             "'no Bomb of yours'), is carried by Powers that cannot be in play "
             "before her first card, so turn 1 has no race; the sim has no "
             "counterpart until Balance",
+        ("Relics/FurinaStageRelics.cs", "OperaTicketStub"):
+            "(Furina's card pass, 2026-10-15). Turn-1-only: summons "
+            "Ensemble Cast's random guest onto a stage that is empty before "
+            "her first card. Its one co-tenant on the Stage, "
+            "FurinaStage.TurnStart (Grand Theater Program's Fanfare and her "
+            "turn-start Powers), reads no seat on turn 1 -- the Powers cannot "
+            "be in play before her first card and the Fanfare gain names no "
+            "guest -- so either order ends the same. No sim counterpart "
+            "until Balance",
         ("Relics/VarkaArmRelics.cs", "KnightsCommission"):
             "(Varka's own relics, 2026-10-01). Turn-1-only: gains "
             "2 Oath in the starting Knight's element (re-aimed 2026-10-01; it "
@@ -1053,6 +1072,19 @@ CO_TENANCY_LEDGER = {
             "Ascensions he played last turn back to the hand. Never on turn "
             "1 (nothing played yet), so it cannot meet the two turn-1 "
             "relics; no co-tenant reads the hand or the piles here. No sim "
+            "counterpart until Balance",
+        ("Relics/KokomiArmRelics.cs", "ElectroSigil"):
+            "(Kokomi's own relics, 2026-10-15). Turn-1-only: "
+            "Electro on every enemy, Fresh Catch's shape. It runs beside "
+            "ProtoBakeKuragePower's morning drain, which on turn 1 has no Plan "
+            "to carry out (none can be written before her first card), so no "
+            "Plan hit can meet the Electro in either order. No sim "
+            "counterpart until Balance",
+        ("Relics/KokomiArmRelics.cs", "ResistanceMusterRoll"):
+            "(Kokomi's own relics, 2026-10-15). Turn-1-only: "
+            "a chosen Inazuma Companion to the hand, free this turn, Favonius "
+            "Duty Roster's shape. It shares only the hand with the turn-1 "
+            "co-tenants and nothing reads the hand at this broadcast. No sim "
             "counterpart until Balance",
         ("Powers/TurnEndSequencer.cs", "TurnEndSequencer"):
             "EB-53/N1: redraws the end-of-turn attribution docket, nothing "
@@ -1126,6 +1158,24 @@ CO_TENANCY_LEDGER = {
             "test_the_sequencer_walks_the_table",
     },
     "AfterSideTurnEnd": {
+        ("Powers/Prototype/FurinaSweepPowers.cs", "ObjectionPower"):
+            "(the Furina sweep). Flame Barrier's shape: removes itself at the "
+            "end of the enemies' turn. A removal only; no co-tenant reads it",
+        ("Powers/Prototype/FurinaSweepPowers.cs", "PlotTwistPower"):
+            "(the Furina sweep). Removes its mark from the enemy at the end "
+            "of the enemies' turn, after every attack it redirects. A "
+            "removal only; no co-tenant reads it",
+        ("Powers/Prototype/FurinaSweepPowers.cs", "RainfallOverturePower"):
+            "(the Furina sweep). Removes itself at the end of her turn ('this "
+            "turn'). A removal only; no co-tenant reads it. Sim: "
+            "`furina_stage.turn_end`",
+        ("Powers/Prototype/FurinaSweepPowers.cs", "TrialByWaterPower"):
+            "(the Furina sweep). Removes the mark from the enemy at the end of "
+            "the players' turn ('until end of turn'). A removal only; an "
+            "end-of-turn hit by a co-tenant landing before or after it pays "
+            "or does not pay its 2 Fanfare, the one order-dependent outcome, "
+            "and the sim drops it at the same site (`furina_stage.turn_end`, "
+            "after the guests act)",
         ("Powers/Prototype/VarkaPowers.cs", "OathLeftPower"):
             "(Varka element identities, 2026-10-01). The "
             "left-element flag beside his badge expires with his turn. "
@@ -1174,6 +1224,11 @@ CO_TENANCY_LEDGER = {
             "(the Kokomi overhaul, R276). Pincer's carry-out, "
             "\"this turn\", on the same-turn boundary (FLAG-1 / R114). "
             "Removes itself and touches nothing else",
+        ("Powers/Prototype/KokomiOverhaulPowers.cs",
+         "StunningStratagemPower"):
+            "(Kokomi's own potions, 2026-10-15). A Stunning "
+            "Stratagem's armed turn ending: removes itself once no armed turn "
+            "is still ahead, and touches nothing else",
         ("Diagnostics/PlayTelemetry.cs", "PlayTelemetryHooks"):
             "diagnostics observer; reads, never writes board state",
         ("Powers/CompanionPowers.cs", "ReplayNextCompanionPower"):

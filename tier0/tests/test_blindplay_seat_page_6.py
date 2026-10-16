@@ -213,3 +213,38 @@ def test_regret_and_intangible_are_named_not_counted():
 
 def test_no_attack_and_nothing_that_hurts_is_unchanged():
     assert line([], _you(), [], []) == blindplay_render.INCOMING_NONE
+
+
+# ------------------------------------- 5. Tungsten Rod (2026-10-14, r3) --
+# The Furina sweep round: the line ignored Tungsten Rod. It takes 1 off EACH
+# loss of HP (`TungstenRod.ModifyHpLostAfterOsty`), so it is counted per hit.
+
+ROD = {"name": "Tungsten Rod",
+       "text": "Whenever you would lose HP, lose 1 less."}
+
+
+def test_tungsten_rod_takes_one_off_a_hit_through_block():
+    assert line(_hit(12), _you(block=4, relics=[ROD]), [], []) == (
+        "- Incoming this turn: 12 (your Block 4): you would take 7 "
+        "(Tungsten Rod takes 1 off each loss of HP). "
+        "You would be at 53/80 HP.")
+
+
+def test_tungsten_rod_counts_each_hit_of_a_multi_hit():
+    hits = [{"name": "Byrd", "hp": 20, "intents": [
+        {"type": "Attack", "label": "3x4", "title": "Peck"}]}]
+    # 12 against 5 Block: 3 blocked, 2+1 blocked, then 3 and 3 through,
+    # each one less: 0 + 2 + 2 = 4.
+    assert "you would take 4 (Tungsten Rod" in line(
+        hits, _you(block=5, relics=[ROD]), [], [])
+
+
+def test_tungsten_rod_says_nothing_when_block_takes_it_all():
+    assert "Tungsten" not in line(_hit(5), _you(block=10, relics=[ROD]), [],
+                                  [])
+
+
+def test_tungsten_rod_by_name_alone():
+    rod = {"name": "Tungsten Rod", "text": ""}
+    assert "you would take 11 (Tungsten Rod" in line(
+        _hit(12), _you(relics=[rod]), [], [])

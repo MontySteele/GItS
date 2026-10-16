@@ -40,6 +40,11 @@ Notes on individual lints:
   held for `klee-next`. `--self-test`, `--report` (the top-level badges and
   relics, without gating), `--census` (lengths, with every string over its
   target flagged).
+- `lint_hover_tips.py` (the tooltip trim, 2026-10-14) holds every generated
+  card's PLAYER hover to at most 3 boxes of at most 100 characters. A card's
+  `ExtraHoverTips` is `TipAudience.Seat ? <seat chain> : <player chain>`;
+  the seat chain keeps every rider for the blind page (the bridge reads as a
+  seat) and is not measured. `--census` prints boxes and characters per card.
 - `lint_recall_exhaust.py` (`EB-118`) is suite-gated through
   `tier0/tests/test_eb118_recall_exhaust.py`; its three sweeps and why leg (a)
   is vacuous are in its docstring.

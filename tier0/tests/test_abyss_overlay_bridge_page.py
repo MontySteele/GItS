@@ -29,8 +29,13 @@ REPO = Path(__file__).resolve().parents[2]
 BRIDGE = REPO / "vendor" / "STS2_MCP"
 ABYSS = REPO / "klee-mod" / "KleeCode" / "Abyss"
 
-WHISPER = ("The Abyss whispers, urging you deeper. Take one Blessing; "
-           "the enemies take one of the Shadows you pass.")
+WHISPER = ("The Abyss whispers, urging you deeper. Take one Blessing. "
+           "The enemies take one Shadow, at random, from the Blessings you "
+           "pass.")
+
+#: Co-op Abyss run, 2026-10-14: the Shadow beside a Blessing read as the one
+#: that comes with it, three acts running.
+PASS_LINE = "If you pass this, the enemies may take its Shadow:"
 
 CARDS = [
     ("The Ley Line",
@@ -52,7 +57,7 @@ def _screen_state(resolved: bool = False) -> dict:
     room, with `GitsAbyssPage.Apply` laid over it."""
     options = [] if resolved else [
         {"index": i, "title": b,
-         "description": f"{bt}\nShadow: {s} — {st}",
+         "description": f"{bt}\n{PASS_LINE} {s} — {st}",
          "is_locked": False, "is_proceed": False, "was_chosen": False,
          "keywords": []}
         for i, (b, bt, s, st) in enumerate(CARDS)]
@@ -86,7 +91,7 @@ def test_the_screen_reads_as_its_own_page():
     for blessing, text, shadow, shadow_text in CARDS:
         assert blessing in page
         assert text in page
-        assert f"Shadow: {shadow}" in page
+        assert f"{PASS_LINE} {shadow}" in page
         assert shadow_text in page
     # Not the Ancient's: no dialogue to advance and nothing of Neow's.
     assert "Neow" not in page
@@ -152,3 +157,24 @@ def test_the_render_rig_prints_the_models_words():
     assert 'ShadowBandLabel = "Shadow"' in model
     for path in re.findall(r'"(abyss/(?:relics|powers)/[a-z_]+\.png)"', model):
         assert f'"{path}"' in rig
+
+
+def test_the_page_says_which_shadow_the_enemies_took():
+    """Co-op Abyss run, 2026-10-14: "the page does not say which Shadow
+    lands on the enemies". The resolved screen, and the Ancient's page after
+    it (`event.abyss_result`, off the room), print the result line."""
+    line = "The party chose Overflow. The enemies took Fatui Skirmishers."
+    state = _screen_state(resolved=True)
+    state["event"]["abyss_screen"]["result"] = line
+    assert f"The Spiral Abyss: {line}" in blindplay.observe(state)
+
+    after = _screen_state()
+    after["event"].update({"event_name": "Neow", "body": "Neow speaks.",
+                           "abyss_result": line})
+    del after["event"]["abyss_screen"]
+    page = blindplay.observe(after)
+    assert f"The Spiral Abyss: {line}" in page
+
+    plain = _screen_state()
+    del plain["event"]["abyss_screen"]
+    assert "The Spiral Abyss:" not in blindplay.observe(plain)

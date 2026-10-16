@@ -116,18 +116,6 @@ def test_tidal_flourish_deals_5_plus_1_per_point_up_to_10():
     assert st.player.ftd.fanfare == 20
 
 
-def test_spirited_aria_deals_8_plus_1_per_point_and_draws_per_4():
-    st = _furina(3)
-    _play(st, _card("proto_fs_spirited_aria"))          # 3: no draw
-    assert st.enemies[0].hp == 300 - 11
-    assert len(st.player.hand) == 0
-    st.player.ftd.fanfare = 20
-    _play(st, _card("proto_fs_spirited_aria+"))         # 11 + 12, draw 3
-    assert st.enemies[0].hp == 300 - 11 - 23
-    assert len(st.player.hand) == 3
-    assert st.player.ftd.fanfare == 8
-
-
 def test_crashing_waves_hits_twice_plus_once_per_4_up_to_16():
     for bank, hits, left in ((0, 2, 0), (3, 2, 0), (8, 4, 0), (30, 6, 14)):
         st = _furina(bank)
@@ -152,8 +140,8 @@ def test_hold_the_stage_gains_6_plus_1_per_point_up_to_16():
     assert st.player.ftd.fanfare == 24
 
 
-def test_the_four_cards_have_no_chooser():
-    for cid in ("proto_fs_tidal_flourish", "proto_fs_spirited_aria",
+def test_the_three_cards_have_no_chooser():
+    for cid in ("proto_fs_tidal_flourish",
                 "proto_fs_crashing_waves", "proto_fs_hold_the_stage"):
         ops = [fx["op"] for fx in loader.get_card(cid).effects]
         assert "choose_one" not in ops, cid

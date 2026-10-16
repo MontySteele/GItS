@@ -278,32 +278,26 @@ public class FurinaSpendUpToTests
     // ---- the four cards -------------------------------------------------------
 
     [Fact]
-    public void The_four_cards_print_spend_up_to_and_upgrade_their_base()
+    public void The_three_cards_print_spend_up_to_and_upgrade_their_base()
     {
         Assert.StartsWith(
             "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage to ALL "
-            + "enemies. [gold]Spend[/gold] up to 10: deal 1 more for each.",
+            + "enemies. [gold]Spend[/gold] up to 10, all you can: deal 1 more for each.",
             Face(new ProtoFsTidalFlourish()));
-        Assert.StartsWith(
-            "Deal {CalculationBase:diff()} damage. [gold]Spend[/gold] up to 12: "
-            + "deal 1 more for each. Draw 1 for every 4 spent.",
-            Face(new ProtoFsSpiritedAria()));
         // The Furina wave (2026-10-13): and its in-combat line, what the
         // bank buys now (`FurinaWaveTests`).
         Assert.Equal(
             "Deal {Damage:diff()} [gold]Hydro[/gold] damage twice. "
-            + "[gold]Spend[/gold] up to 16: hit once more for every 4."
+            + "[gold]Spend[/gold] up to 16, all you can: hit once more for every 4."
             + "{InCombat:{StageSpendHits}|}",
             Face(new ProtoFsCrashingWaves()));
         Assert.StartsWith(
             "Gain {CalculationBase:diff()} [gold]Block[/gold]. "
-            + "[gold]Spend[/gold] up to 16: gain 1 more for each.",
+            + "[gold]Spend[/gold] up to 16, all you can: gain 1 more for each.",
             Face(new ProtoFsHoldTheStage()));
 
         Assert.Equal(5m, new ProtoFsTidalFlourish().DynamicVars.CalculationBase.BaseValue);
         Assert.Equal(8m, Upgraded(new ProtoFsTidalFlourish()).DynamicVars.CalculationBase.BaseValue);
-        Assert.Equal(8m, new ProtoFsSpiritedAria().DynamicVars.CalculationBase.BaseValue);
-        Assert.Equal(11m, Upgraded(new ProtoFsSpiritedAria()).DynamicVars.CalculationBase.BaseValue);
         Assert.Equal(4m, new ProtoFsCrashingWaves().DynamicVars.Damage.BaseValue);
         Assert.Equal(5m, Upgraded(new ProtoFsCrashingWaves()).DynamicVars.Damage.BaseValue);
         Assert.Equal(6m, new ProtoFsHoldTheStage().DynamicVars.CalculationBase.BaseValue);
@@ -312,7 +306,6 @@ public class FurinaSpendUpToTests
 
     [Theory]
     [InlineData("ProtoFsTidalFlourish", 10)]
-    [InlineData("ProtoFsSpiritedAria", 12)]
     [InlineData("ProtoFsCrashingWaves", 16)]
     [InlineData("ProtoFsHoldTheStage", 16)]
     public void Each_card_spends_up_to_its_x_on_play_with_no_chooser(
@@ -332,11 +325,6 @@ public class FurinaSpendUpToTests
     {
         Assert.Contains(".WithHitCount(2 + 1 * FurinaStage.SpentFours(this))",
                         Generated("ProtoFsCrashingWaves"));
-        Assert.Contains(
-            "CardPileCmd.Draw(choiceContext, 0 + 1 * FurinaStage.SpentFours(this), Owner)",
-            Generated("ProtoFsSpiritedAria"));
-        Assert.Contains("FurinaStage.SpentOrUpTo(card, 12)",
-                        Generated("ProtoFsSpiritedAria"));
         Assert.Equal(4, FurinaStageLaw.SpendUpToEvery);
         Assert.Equal(3, FurinaStageLaw.NaviaSpendDivisor);
         Assert.Equal(2, FurinaStageLaw.NaviaActMultiplier);

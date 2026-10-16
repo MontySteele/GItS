@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoVkChainLightning : CustomCardModel, IElementalCard, ICharacterCard
+public sealed class ProtoVkChainLightning : CustomCardModel, IElementalCard, ICharacterCard, IVarkaSwitchCard
 {
     /// <summary>Its hits carry their own element (a `varka` kind),
     /// not the cadence's Anemo; the card says so rather than leave
@@ -65,6 +65,10 @@ public sealed class ProtoVkChainLightning : CustomCardModel, IElementalCard, ICh
         description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Electro));
     }
 
+    /// <summary>The element this card makes Varka's current element
+    /// (`VarkaOathDial` previews it).</summary>
+    public Element VarkaSwitchElement => Element.Electro;
+
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
@@ -82,11 +86,14 @@ public sealed class ProtoVkChainLightning : CustomCardModel, IElementalCard, ICh
     {
         await VarkaCards.ElectroAll(choiceContext, this, cardPlay);
         {
+            var handBefore = CardPile.Get(PileType.Hand, Owner)?.Cards.Count ?? 0;
             var picked = (await CardSelectCmd.FromHandForDiscard(
                 choiceContext, Owner,
                 new CardSelectorPrefs(CardSelectorPrefs.DiscardSelectionPrompt, 2),
                 null, this)).ToList();
             await CardCmd.Discard(choiceContext, picked);
+            ResolutionLedger.NoteDiscards(Title, picked.Select(c => c.Title).ToList(),
+                ResolutionLedger.DiscardPickedForYou(handBefore, 2));
         }
     }
 

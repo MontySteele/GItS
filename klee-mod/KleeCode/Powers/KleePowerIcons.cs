@@ -176,8 +176,17 @@ internal static class KleePowerIcons
         UndercurrentSnarePower =>
             KleePck.Path("klee/powers/detonation_vuln.png"),
         DawnTidePower => KleePck.Path("kokomi/powers/bake_kurage.png"),
+        // Kokomi review r6 (2026-10-14): the two Hydro sources borrow the
+        // jellyfish's badge, the block above's rule.
+        KurageVanguardPower => KleePck.Path("kokomi/powers/bake_kurage.png"),
+        FollowingCurrentPower =>
+            KleePck.Path("kokomi/powers/bake_kurage.png"),
         JuugaGuardPower => KleePck.Path("klee/powers/oz_summon.png"),
         NereidsAscensionPower => KleePck.Path(
+            "kokomi/powers/before_sun_and_moon.png"),
+        // Kokomi's own potions (2026-10-15): A Stunning Stratagem is Nereid's
+        // read widened to every Plan for a turn, so it wears Nereid's badge.
+        StunningStratagemPower => KleePck.Path(
             "kokomi/powers/before_sun_and_moon.png"),
         // The four with no shipped Kokomi power to borrow from -- the Plan
         // badge, its draw rider and the two Commander powers -- take
@@ -366,6 +375,18 @@ internal static class KleePowerIcons
         FountainOfLucinePower =>
             KleePck.Path("furina/powers/fountain_of_lucine.png"),
         OusiaSurgePower => KleePck.Path("furina/powers/ousia_surge.png"),
+        // THE SWEEP, SECOND SET (2026-10-14): borrowed sigils until the
+        // powers get their own.
+        ArkheInBalancePower =>
+            KleePck.Path("furina/powers/ousia_surge.png"),
+        ObjectionPower => KleePck.Path("furina/powers/masque_red_death.png"),
+        TrialByWaterPower =>
+            KleePck.Path("furina/powers/guest_neuvillette.png"),
+        RainfallOverturePower =>
+            KleePck.Path("furina/powers/fountain_of_lucine.png"),
+        CrowdFavoritePower =>
+            KleePck.Path("furina/powers/ousia_surge.png"),
+        PlotTwistPower => KleePck.Path("furina/powers/masque_red_death.png"),
         MasqueRedDeathPower =>
             KleePck.Path("furina/powers/masque_red_death.png"),
         AncientSeaAuthorityPower =>
@@ -468,6 +489,34 @@ internal static class KleePowerIcons
         // Oath Power Stormward Stance's, an element-change Power Boreas
         // Unbound's, a Knight Power Study Buddy's (Grand Master's Order's).
         StaticFieldPower => KleePck.Path("varka/powers/electro_wind.png"),
+        // YAE MIKO (art pass 2026-10-14): her own badges, art/plan.tsv's
+        // power_yae_ rows (her talent and constellation icons). Each keeps
+        // its old borrowed badge as the fallback, so a pck built before the
+        // art still draws one.
+        SakuraBadgePower => KleePck.Path("yae/powers/sakura.png")
+            ?? KleePck.Path("klee/powers/oz_summon.png"),
+        FoxfireLurePower => KleePck.Path("yae/powers/foxfire_lure.png")
+            ?? KleePck.Path("klee/powers/detonation_vuln.png"),
+        SakuraGrovePower => KleePck.Path("yae/powers/sakura_grove.png")
+            ?? KleePck.Path("klee/powers/bomb_damage_up.png"),
+        EdictOfCleansingPower => KleePck.Path("yae/powers/edict_of_cleansing.png")
+            ?? KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
+        SerializationPower => KleePck.Path("yae/powers/serialization.png")
+            ?? KleePck.Path("klee/powers/passion_overload.png"),
+        FoxsMooncallPower => KleePck.Path("yae/powers/foxs_mooncall.png")
+            ?? KleePck.Path("klee/powers/oz_summon.png"),
+        YakanOfferingPower => KleePck.Path("yae/powers/yakan_offering.png")
+            ?? KleePck.Path("klee/powers/oz_summon.png"),
+        SakuraChannelingPower => KleePck.Path("yae/powers/sakura_channeling.png")
+            ?? KleePck.Path("klee/powers/passion_overload.png"),
+        EditorInChiefPower => KleePck.Path("yae/powers/editor_in_chief.png")
+            ?? KleePck.Path("varka/powers/electro_wind.png"),
+        // Review r3 (2026-10-14): Serial Novel borrows Editor-in-Chief's
+        // badge, the nearest rule, until its art lands. (Fallen Petals'
+        // two powers left when it became a Skill; the four Rite badges left
+        // with the Rite, shrine r2.)
+        SerialNovelPower => KleePck.Path("yae/powers/editor_in_chief.png")
+            ?? KleePck.Path("varka/powers/electro_wind.png"),
         UnwaveringBannerPower =>
             KleePck.Path("varka/powers/stormward_stance.png"),
         CycleOfSeasonsPower => KleePck.Path("varka/powers/boreas_unbound.png"),

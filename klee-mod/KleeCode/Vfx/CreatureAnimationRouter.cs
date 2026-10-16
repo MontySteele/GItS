@@ -85,6 +85,11 @@ internal static class CreatureAnimationRouter
         // target (2026-10-13). Sent by CardPlayMotion for that card; a scene
         // without the state lunges as for an attack.
         ["Ascension"] = new[] { "ascension", "attack" },
+        // Furina's Let the People Rejoice: a spin, then the flourish, up on
+        // one toe with both arms flung wide (2026-10-13). Sent by
+        // CardPlayMotion for that card; a scene without the state lunges as
+        // for an attack.
+        ["Rejoice"] = new[] { "rejoice", "attack" },
     };
 
     internal const string IdleState = "idle";
@@ -94,17 +99,18 @@ internal static class CreatureAnimationRouter
     internal const string SetOffState = "setoff";
     internal const string JumpyState = "jumpy";
     internal const string AscensionState = "ascension";
+    internal const string RejoiceState = "rejoice";
 
     /// <summary>
-    /// A Set Off, Jumpy Dumpty or Four Winds' Ascension play is ONE clip: the
-    /// attack lunge and cast that the same card's own commands send while it
-    /// runs would cut it short, so while the tree is in
-    /// <see cref="SetOffState"/>, <see cref="JumpyState"/> or
-    /// <see cref="AscensionState"/> those three triggers are absorbed. Hits
-    /// and death still interrupt it. Pure.
+    /// A Set Off, Jumpy Dumpty, Four Winds' Ascension or Let the People
+    /// Rejoice play is ONE clip: the attack lunge and cast that the same
+    /// card's own commands send while it runs would cut it short, so while
+    /// the tree is in <see cref="SetOffState"/>, <see cref="JumpyState"/>,
+    /// <see cref="AscensionState"/> or <see cref="RejoiceState"/> those three
+    /// triggers are absorbed. Hits and death still interrupt it. Pure.
     /// </summary>
     internal static bool AbsorbedBy(string? currentState, string trigger)
-        => currentState is SetOffState or JumpyState or AscensionState
+        => currentState is SetOffState or JumpyState or AscensionState or RejoiceState
            && trigger is "Attack" or "Cast" or "PowerUp";
 
     /// <summary>
@@ -208,9 +214,9 @@ internal static class CreatureAnimationRouter
             {
                 ThrownProjectile.Schedule(creature, tree, target, node);
             }
-            // Varka's element layer takes the played card's colour, and the
-            // Ascension's ground burst goes under its target; inert for every
-            // scene without the layer.
+            // Varka's and Furina's element layer takes the played card's
+            // colour, and the Ascension's ground burst goes under its target;
+            // inert for every scene without the layer.
             ElementTrail.OnTravel(creature, current, target);
         }
     }

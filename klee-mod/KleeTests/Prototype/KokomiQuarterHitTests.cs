@@ -128,7 +128,7 @@ public class KokomiQuarterHitTests
         var body = Description<ProtoBakeKuragePower>();
 
         Assert.StartsWith("Enemies can't target it. It holds your "
-                        + "[gold]Plans[/gold] until your next turn.", body);
+                        + "[gold]Plans[/gold] until after your next draw.", body);
         Assert.DoesNotContain("Dusk", body);
     }
 

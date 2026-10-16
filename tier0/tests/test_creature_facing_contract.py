@@ -101,16 +101,34 @@ def test_the_patch_prefixes_attack_command_execute():
         "flip this patch exists to avoid")
 
 
-def test_execute_is_the_only_thing_this_file_patches():
-    """Stated as an enumeration so a SECOND patch cannot slip in beside it.
+def test_the_patches_are_enumerated():
+    """Stated as an enumeration so a new patch cannot slip in beside them.
 
-    The named alternative -- `CreatureCmd.Damage`, which every damage
-    overload funnels into -- is the tempting one precisely because it is easy
-    to reach. It is also the impact-time flip.
+    2026-10-14 (the Kaiser Crab fight, Furina never turned): a card play aimed
+    at an enemy, a death and the player's turn start turn the model too. The
+    damage funnel -- `CreatureCmd.Damage`, which every overload reaches -- is
+    still the impact-time flip for an ATTACK, so it is patched for pet and
+    guest hits only (their owner does not lunge), pinned below.
     """
     patched = re.findall(r"\[HarmonyPatch\(typeof\((\w+)\),\s*nameof\((\w+\.\w+)\)\)\]",
                          CODE)
-    assert patched == [("AttackCommand", "AttackCommand.Execute")], patched
+    assert patched == [
+        ("AttackCommand", "AttackCommand.Execute"),
+        ("Hook", "Hook.BeforeCardPlayed"),
+        ("Hook", "Hook.AfterDeath"),
+        ("Hook", "Hook.AfterPlayerTurnStart"),
+    ], patched
+    funnel = re.findall(r"\[HarmonyPatch\(typeof\(CreatureCmd\),\s*nameof\(CreatureCmd\.Damage\),",
+                        CODE)
+    assert len(funnel) == 1, funnel
+
+
+def test_the_damage_funnel_turns_only_a_pet_or_guest_owner():
+    """A player's own hit through the funnel would be the impact-time flip."""
+    body = CODE[CODE.index("class CreatureCmd_Damage_Facing"):]
+    body = body[:body.index("\n}\n")]
+    assert "PetHitOwner(dealer)" in body, body
+    assert "FaceToward(dealer" not in body, body
 
 
 # --- decision 3: the reflection lookup degrades, never throws ------------
@@ -147,8 +165,8 @@ def test_facing_is_aimed_at_the_mean_of_the_targets():
     Act 2 Kaiser Crab, the only boss with FullyCenterPlayers) are the entire
     reason this file exists.
     """
-    assert re.search(r"targetXs\.Average\(\)", CODE), CODE
-    assert not re.search(r"targetXs\s*\[\s*0\s*\]", CODE), CODE
+    assert re.search(r"toward\.Average\(\)", CODE), CODE
+    assert not re.search(r"(toward|aimed|targets)\s*\[\s*0\s*\]", CODE), CODE
 
 
 def test_dead_zone_and_self_target_are_excluded():

@@ -54,12 +54,6 @@ def test_spend_only_element_is_detected_on_the_two_flourishes():
         rows["proto_fs_surintendante_chevalmarin"])
 
 
-def test_interval_bell_spend_title_is_rendered_per_side():
-    card = _rows()["proto_fs_interval_bell"]
-    assert gen.stage_mode_title(card, 1, None) == "Spend 3"
-    assert gen.stage_mode_title(card, 1, None, upgraded=True) == "Spend 2"
-
-
 def test_upgrade_swap_resolves_both_sides():
     text = "Spend {IfUpgraded:show:2|3}: gain {IfUpgraded:show:6|4}"
     assert gen.resolve_upgrade_swap(text, False) == "Spend 3: gain 4"

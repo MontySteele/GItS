@@ -62,7 +62,9 @@ public class KokomiPoolOverhaulTests
     [Theory]
     [InlineData("ProtoKkRiptideGuard", "ProtoKkTurningTideChain")]
     [InlineData("ProtoKkReserves", "ProtoKkBrineSpray")]
-    [InlineData("ProtoKkBraceForTheTide", "ProtoKkJellyfishCurrent")]
+    // Jellyfish Current's slot is Kurage Vanguard's since the Kokomi review
+    // r6 (2026-10-14, pick 2 (b); `KokomiReviewR6Tests`).
+    [InlineData("ProtoKkBraceForTheTide", "ProtoKkKurageVanguard")]
     [InlineData("ProtoKkMoonsReflection", "ProtoKkPreparedRetreat")]
     [InlineData("ProtoKkCeremonialGarment", "ProtoKkBattleFormation")]
     [InlineData("ProtoKkWatatsumiResistance", "ProtoKkTurnabout")]
@@ -82,19 +84,21 @@ public class KokomiPoolOverhaulTests
         var tide = new ProtoKkTurningTideChain();
         Assert.Equal((CardType.Attack, CardRarity.Common, 1),
                      (tide.Type, tide.Rarity, tide.EnergyCost.Canonical));
-        Assert.Equal((7, 10), (Var<ProtoKkTurningTideChain>("Damage"),
+        // The numbers pass (kokomi-review-r5-2026-10-14): Tide 9 [12] / Plan 5 [6],
+        // Spray 8 [10], Retreat 8 [11], Snare Plan 4.
+        Assert.Equal((9, 12), (Var<ProtoKkTurningTideChain>("Damage"),
                                Var<ProtoKkTurningTideChain>("Damage", true)));
         var chain = Assert.Single(tide.PlanClauses);
-        Assert.Equal((KokomiPlan.Kind.DamagePerPlanThisTurn, 4,
+        Assert.Equal((KokomiPlan.Kind.DamagePerPlanThisTurn, 5,
                       KokomiPlan.Aim.AllEnemies),
                      (chain.Kind, chain.Amount, chain.Aim));
-        Assert.Equal(5, Assert.Single(
+        Assert.Equal(6, Assert.Single(
             Upgraded<ProtoKkTurningTideChain>().PlanClauses).Amount);
 
         var spray = new ProtoKkBrineSpray();
         Assert.Equal((CardType.Attack, CardRarity.Uncommon, 1),
                      (spray.Type, spray.Rarity, spray.EnergyCost.Canonical));
-        Assert.Equal((5, 7), (Var<ProtoKkBrineSpray>("Damage"),
+        Assert.Equal((8, 10), (Var<ProtoKkBrineSpray>("Damage"),
                               Var<ProtoKkBrineSpray>("Damage", true)));
         Assert.Equal(2, Var<ProtoKkBrineSpray>("KkAmount"));
         Assert.Contains("If it triggers an [gold]Elemental Reaction[/gold], "
@@ -104,7 +108,7 @@ public class KokomiPoolOverhaulTests
         Assert.Equal((CardType.Skill, CardRarity.Uncommon, 1),
                      (retreat.Type, retreat.Rarity,
                       retreat.EnergyCost.Canonical));
-        Assert.Equal((7, 10), (Var<ProtoKkPreparedRetreat>("Block"),
+        Assert.Equal((8, 11), (Var<ProtoKkPreparedRetreat>("Block"),
                                Var<ProtoKkPreparedRetreat>("Block", true)));
         Assert.Equal((1, 2), (Var<ProtoKkPreparedRetreat>("PlanEnergy"),
                               Var<ProtoKkPreparedRetreat>("PlanEnergy", true)));
@@ -125,20 +129,14 @@ public class KokomiPoolOverhaulTests
         Assert.Equal((KokomiPlan.Kind.DamageTakenSince,
                       KokomiPlan.Aim.AllEnemies), (taken.Kind, taken.Aim));
 
-        foreach (var power in new CardModel[] { new ProtoKkJellyfishCurrent(),
-                                                new ProtoKkBattleFormation() })
-        {
-            Assert.Equal((CardType.Power, 1),
-                         (power.Type, power.EnergyCost.Canonical));
-        }
-        Assert.Equal(CardRarity.Uncommon, new ProtoKkJellyfishCurrent().Rarity);
-        Assert.Equal(CardRarity.Rare, new ProtoKkBattleFormation().Rarity);
-        Assert.Contains(CardKeyword.Innate,
-                        Upgraded<ProtoKkJellyfishCurrent>().Keywords);
+        // Jellyfish Current and Coordinated Tide left with the Kokomi
+        // review r6 (2026-10-14, pick 2 (b)).
+        var formation = new ProtoKkBattleFormation();
+        Assert.Equal((CardType.Power, 1),
+                     (formation.Type, formation.EnergyCost.Canonical));
+        Assert.Equal(CardRarity.Rare, formation.Rarity);
         Assert.Contains(CardKeyword.Innate,
                         Upgraded<ProtoKkBattleFormation>().Keywords);
-        Assert.Contains(CardKeyword.Innate,
-                        Upgraded<ProtoKkCoordinatedTide>().Keywords);
     }
 
     [Fact]
@@ -147,20 +145,18 @@ public class KokomiPoolOverhaulTests
         var kelp = Assert.Single(new ProtoKkKelpWall().PlanClauses);
         Assert.Equal((KokomiPlan.Kind.DamageBlockedSince,
                       KokomiPlan.Aim.FrontEnemy), (kelp.Kind, kelp.Aim));
-        Assert.Contains("damage you blocked since you planned this",
+        // Kokomi review r6 (2026-10-14, item 12): "the Attack damage".
+        Assert.Contains("Attack damage you blocked since you planned this",
                         Face(new ProtoKkKelpWall()));
         var field = Assert.Single(new ProtoKkReadTheField().PlanClauses);
         Assert.Equal(KokomiPlan.Kind.DrawPileToHand, field.Kind);
         Assert.Contains(Seq("KokomiPlan", "DrawPileToHand"),
                         c => c.Contains("CardSelectCmd.FromCombatPile"));
-        Assert.Equal("Whenever a [gold]Companion[/gold] triggers an "
-                   + "[gold]Elemental Reaction[/gold], add a "
-                   + "[gold]Sting[/gold] to your [gold]Hand[/gold].",
-                     Face(new ProtoKkCoordinatedTide()));
         Assert.Equal("Whenever you trigger an [gold]Elemental "
                    + "Reaction[/gold], deal {PowerAmount:diff()} damage to "
                    + "ALL enemies.", Face(new ProtoKkGrandStrategist()));
-        Assert.Equal((4, 6), (Var<ProtoKkGrandStrategist>("PowerAmount"),
+        // Kokomi review r6 (2026-10-14, item 4): 6 [8].
+        Assert.Equal((6, 8), (Var<ProtoKkGrandStrategist>("PowerAmount"),
                               Var<ProtoKkGrandStrategist>("PowerAmount", true)));
     }
 
@@ -236,7 +232,7 @@ public class KokomiPoolOverhaulTests
     public void Undercurrent_snare_takes_strength_this_turn_from_the_attackers()
     {
         var snare = Assert.Single(new ProtoKkUndercurrentSnare().PlanClauses);
-        Assert.Equal((KokomiPlan.Kind.LoseStrengthThisTurn, 3,
+        Assert.Equal((KokomiPlan.Kind.LoseStrengthThisTurn, 4,
                       KokomiPlan.Aim.EnemiesIntendingAttack),
                      (snare.Kind, snare.Amount, snare.Aim));
         Assert.True(typeof(TemporaryStrengthPower)
@@ -248,12 +244,12 @@ public class KokomiPoolOverhaulTests
     // ---- BATTLE FORMATION -----------------------------------------------------------
 
     [Fact]
-    public void Battle_formation_pays_once_at_the_third_plan()
+    public void Battle_formation_pays_once_at_the_second_plan()
     {
-        Assert.False(BattleFormationPower.Pays(2));
+        Assert.False(BattleFormationPower.Pays(1));
+        Assert.True(BattleFormationPower.Pays(2));
         Assert.True(BattleFormationPower.Pays(3));
-        Assert.True(BattleFormationPower.Pays(4));
-        Assert.Equal(2, BattleFormationPower.Draw);
+        Assert.Equal(1, BattleFormationPower.Draw);
         var ledger = Ledger();
         ledger.RollTo(1);
         Assert.True(ledger.Claim(BattleFormationPower.ClaimKey));
@@ -331,7 +327,7 @@ public class KokomiPoolOverhaulTests
     public void All_streams_reads_the_reactions_this_combat()
     {
         var card = new ProtoKkAllStreamsFlow();
-        Assert.Equal((5, 5), (card.DynamicVars.CalculationBase.IntValue,
+        Assert.Equal((10, 5), (card.DynamicVars.CalculationBase.IntValue,
                               card.DynamicVars.ExtraDamage.IntValue));
         Assert.Contains("for each [gold]Elemental Reaction[/gold] you "
                       + "triggered this combat", Face(card));

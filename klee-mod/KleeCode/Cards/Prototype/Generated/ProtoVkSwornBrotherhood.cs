@@ -44,7 +44,7 @@ public sealed class ProtoVkSwornBrotherhood : CustomCardModel, ICharacterCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Sworn Brotherhood"),
+        ("title", "Knight of Boreas"),
         ("description", "At the start of your turn, gain {PowerAmount:diff()} [gold]Oath[/gold] of your [gold]current element[/gold]."),
     };
 

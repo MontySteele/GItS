@@ -167,7 +167,8 @@ public sealed class AtWatersEdgePower : PowerModel, ILocalizationProvider
             "The first time each turn you deal [gold]Hydro[/gold] damage to "
           + "an enemy, apply "
           + "[blue]{Amount}[/blue] [gold]Weak[/gold] and [blue]{Amount}[/blue] "
-          + "[gold]Vulnerable[/gold] to it."),
+          // Kokomi review r6 (2026-10-14, item 8): a Plan's hit counts.
+          + "[gold]Vulnerable[/gold] to it. [gold]Plans[/gold] count."),
     };
 
     public override PowerType Type => PowerType.Buff;

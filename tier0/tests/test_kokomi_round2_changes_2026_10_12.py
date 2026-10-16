@@ -36,7 +36,7 @@ def _amount(c):
     # adds a Sting now. Kurage Canopy left it in the Kokomi round 3 A-list
     # (2026-10-13): it makes Wards now (`test_kokomi_payoff_pass`).
     # Grand Strategist 4 [6] since the pool overhaul (was 7 [10]).
-    ("proto_kk_grand_strategist", 4, 6),
+    ("proto_kk_grand_strategist", 6, 8),   # Kokomi review r6 item 4
     ("proto_kk_shoal_of_spears", 5, 6),
 ])
 def test_the_retuned_numbers(cid, base, up):
@@ -63,9 +63,9 @@ def test_call_the_generals_hands_a_card_that_costs_0_this_turn():
     (got,) = st.player.hand
     assert got.free_this_turn and got.is_ethereal and got.cost >= 2
     rows = {r["id"]: r for r in proto._rows()}
-    # The card text pass (2026-10-12): "It is Ethereal and costs 0 this turn."
+    # Wording pass (2026-10-15): "It costs 0 this turn and is Ethereal."
     assert rows["proto_kk_call_the_generals"]["description"].endswith(
-        "costs 0 this turn.")
+        "costs 0 this turn and is [gold]Ethereal[/gold].")
 
 
 def _draws(st):
@@ -96,12 +96,28 @@ def test_treatise_draws_nothing_for_a_plain_card():
 
 
 def test_treatise_draws_nothing_for_a_written_companions_carry_out():
+    """Gorou's Plan line (a Companion that prints one, the only kind written
+    since Kokomi review r9 pick 1 (a)): its carry-out draws nothing."""
     st = kokomi_state()
-    write(st, card("proto_mi_shinobu_thundergrust"))
+    write(st, card("proto_mi_gorou_inuzaka"))
     st.player.powers[kokomi_plan.TREATISE] = 1
     st.player.draw_pile = [card("proto_kk_evening_watch") for _ in range(3)]
     carry_out(st)
     assert _draws(st) == []
+
+
+def test_treatise_still_draws_for_a_companion_with_no_plan_line():
+    """Kokomi review r9 pick 1 (a) took plain Companions off the Bake-Kurage;
+    Treatise's face ("a Plan card or a Companion without planning it") still
+    counts every play of one."""
+    st = kokomi_state()
+    st.player.powers[kokomi_plan.TREATISE] = 1
+    st.player.draw_pile = [card("proto_kk_evening_watch") for _ in range(3)]
+    c = card("proto_mi_shinobu_thundergrust")
+    assert not kokomi_plan.can_be_written(c)
+    st.player.hand.append(c)
+    combat.play_card(st, c)
+    assert _draws(st) != []
 
 
 def test_nereids_ascension_carries_the_twice_tip():

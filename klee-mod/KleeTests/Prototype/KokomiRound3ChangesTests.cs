@@ -116,7 +116,8 @@ public class KokomiRound3ChangesTests
         Assert.StartsWith(
             "Gain {Block:diff()} [gold]Block[/gold]. Draw 1 card.",
             Face(new ProtoKkKelpWall()));
-        Assert.Equal((5, 7), (Var<ProtoKkKelpWall>("Block"),
+        // The numbers pass (kokomi-review-r5-2026-10-14): 7 [9].
+        Assert.Equal((7, 9), (Var<ProtoKkKelpWall>("Block"),
                               Var<ProtoKkKelpWall>("Block", true)));
         // The pool overhaul (2026-10-13): the Plan prints no number (was the
         // level pass's flat 12 [15]).
@@ -128,7 +129,8 @@ public class KokomiRound3ChangesTests
     [Fact]
     public void Watchful_shoal_numbers_and_face()
     {
-        Assert.Equal((3, 5), (Var<ProtoKkWatchfulShoal>("PowerAmount"),
+        // Kokomi review r6 (2026-10-14, item 3): 4 [6].
+        Assert.Equal((4, 6), (Var<ProtoKkWatchfulShoal>("PowerAmount"),
                               Var<ProtoKkWatchfulShoal>("PowerAmount", true)));
         Assert.Equal(
             "Your [gold]Stings[/gold] deal {PowerAmount:diff()} additional "

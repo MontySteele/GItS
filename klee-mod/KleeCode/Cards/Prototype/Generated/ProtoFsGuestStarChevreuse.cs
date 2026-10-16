@@ -41,7 +41,9 @@ public sealed class ProtoFsGuestStarChevreuse : CustomCardModel, ICharacterCard
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForWeak(ArmKeywordTips.ForChevreuse(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this), this);
+        TipAudience.Seat
+            ? BaseKeywordTips.ForWeak(ArmKeywordTips.ForChevreuse(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this), this)
+            : BaseKeywordTips.ForWeak(ArmKeywordTips.ForChevreuse(ArmKeywordTips.ForGuestStar(base.ExtraHoverTips, this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_guest_star_chevreuse");
 

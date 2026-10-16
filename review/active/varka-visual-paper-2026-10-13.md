@@ -32,7 +32,7 @@ This is phase A: the art pipeline, every render, and the review sheets. Phase B 
 | hurt | His body snaps back; the guard holds, both blades lifted together a little in his fixed grip. | 0.8 s | 16 |
 | death | He drives both blades into the ground either side, sinks to one knee between them, lets go and bows his head. It holds from 1.6 s. | 2.2 s | 25 |
 | ascension | For Four Winds' Ascension. He crouches and jumps straight up (hips 0.80 units, 0.39 of his height), the lead blade swung up over his head and the other held back for balance. Coming down, the lead blade chops over the top and is driven point-first, near vertical, into the ground in front of him as he lands (impact, frame 10). A hard landing, low beside the planted blade; he pulls it out and is back in the guard. No turn. The ground burst is a separate effect clip (see Round 3). | 1.3 s | 26 |
-| merchant | Stance B: upright, both claymores planted either side, his hands on the hilts. It breathes. | 3.0 s loop | 30 at 10 fps |
+| merchant | Stance B: upright, arms crossed over his chest, both claymores planted point-down either side of him, a slight smirk. It breathes. | 3.0 s loop | 30 at 10 fps |
 
 **Stills:**
 - rest site: sitting upright on the ground facing the fire, knees up and forearms on them, both blades planted upright behind him;
@@ -61,7 +61,7 @@ R=G=B is "heat" (1 is the white core, about 0.5 the glow), and A is coverage. A 
 
 ## Measured
 
-- **Height.** Standing (`stand`), he is 265.5 px from hair to boot and 270.5 px in full at 1080p. The target is 269.6 (78 in over a 68 in adult, times 235 px). That is 1.13 to 1.15 of the base adults. In stance A his neck sits at 218.8 px against 238.7 standing (the crouch), and the figure with both blades is 255.5 px wide (294.5 in the reviewed take, 473 in the first). Nothing rises over his head: the guard's full height is 249.9 px.
+- **Height** (re-rendered at 82 in, see the last section). Standing (`stand`), he is 279.3 px from hair to boot and 284.3 px in full at 1080p. The target is 283.4 (82 in over a 68 in adult, times 235 px). That is 1.19 to 1.21 of the base adults. In stance A his neck sits at 230.0 px against 251.0 standing (the crouch), and the figure with both blades is 268.5 px wide. At 78 in these were 265.5, 270.5, 218.8, 238.7 and 255.5 px.
 - **Style** (L* p90 / C* p90, opaque pixels at 1080p):
 
 | Figure | L* p90 | C* p90 |
@@ -203,3 +203,43 @@ His old layer-cut rig's four layers no longer ship. The contract fixture went fr
 2. **The motion,** redone after your second look (Round 3), on these sheets: `scratchpad/varka-art/sheets/` (`c_attack_anemo.gif` and `c_ascension_pyro.gif` show it moving).
    - **(a) Default:** go to phase B as is.
    - (b) Change the poses first: the guard, the spin-to-slam, the jump and drive, or the ground burst.
+
+## Re-rendered at 82 in (2026-10-13)
+
+[USER], on the heights chart: "Hmm. Ok, let's give Varka the height boost and use these proportion. (a)." His `height_in` in `tools/char_render/chars.py` is now 82, and the interim `ruled_height_in` is gone. Every clip and still was rendered again at the new scale (combat ppu 276.9, was 263.4). Motion, shading, trails, the ground burst and the texture pipeline are unchanged; only the size moved. Standing he is 284.3 px in full at 1080p against a target of 283.4. The frames come to 12 sheets, 92.1 Mpx (47.5 MB of PNG).
+
+[USER], the same evening, on the select screen: "the way he's holding the claymores looks kinda weird, like they're going through his hands." Two fixes followed: first the hands lifted clear of the pommels, then, on "His hands are awkwardly hovering over the swords now", palms resting on the pommels. Both are replaced by the next section.
+
+## Stance B: arms crossed, swords planted in front, a slight smirk (2026-10-13)
+
+[USER]: "Ok, I dont think the "hands over sword" thing is working for Varka. Can we have him cross his arms instead, with his swords infront of him? And let's have the facial expression be more of a slight smile or smirk." His reference for the face was a relaxed, confident half-smile: closed mouth, relaxed brows, a steady gaze.
+
+What changed (the shop loop, the select close-up, the roster tile and its locked twin):
+- **Arms crossed.** `varka_clips.regal` poses both arms across his chest (`crossed_arms`). The near (right) forearm lies in front, its hand tucked against the far upper arm. The far (left) forearm lies behind and below it, its hand closing round the near elbow. That hand is turned 40 degrees about itself so its thumb lies along the forearm instead of rising into the near upper arm.
+- **Swords in front (superseded below: they now stand beside him).** Both claymores stand on their own, point-down, side by side in front of his legs, the points a little apart. The pommels' tops are 1.28 units up (his waist). The points go about a third of their length into the ground, where `pack.py` cuts them at the ground line. In the select close-up only the pommels and the top of the grips show at the bottom edge; the shop shows the whole blades.
+- **Smirk.** The morphs are にやり (smirk) 0.45, 真面目 0.1 and なごみ (relaxed eyes) 0.12, on the shop, the select close-up and the roster tile. The old faces used にこり, which on this model is a brow morph only, so the mouth never smiled.
+- **The mouth line.** The face's outline hull folded into the lips and drew dark ticks at the mouth's corners and a heavy upper lip. At select scale that read as a grimace, whatever the morphs said. `render.py` `unline_mouth` now takes the skin round the mouth out of the outline (`chars.py` `mouth_mat`). The jaw's outline stays. The combat clips and the rest site were not re-rendered, because at combat scale the face is about 10 px tall and the ticks do not show. The next full render picks the change up.
+
+How it is held:
+- `render.py` `arms_crossed` measures the deformed mesh on the shop loop's first frame and on the select still. For each forearm and hand it finds the deepest vertex behind the surface of the other arm and of his body. It also records where his chin, his forearms and each blade's top fall on the canvas. The manifest keeps the result (`arms_crossed`).
+- Measured: the deepest sink of any forearm into the other arm is 0.0118 units (one vertex past 0.01, where the stacked forearms touch). Into his body it is 0.0052. Each blade's top is 31 to 37 px under his forearms on the select still and 8 to 10 px under them in the shop.
+- `test_his_crossed_arms_clear_each_other_and_the_blades_hide_neither_face_nor_arms` holds those numbers. It allows 0.015 units of sink and at most three vertices past 0.01, and it requires every blade top under the forearms and the forearms under the chin. `test_stance_b_crosses_his_arms_with_both_blades_planted_in_front` holds the pose and the smirk. They replace the two pommel tests.
+- The pommel-rest code (`fit_rest` and its contact checks) is gone from `render.py`. No other clip used it.
+
+The merchant scene was regenerated from the manifest (`python -m tools.varka_rig gen`); `combat.tscn` is unchanged. Sheet: `scratchpad/varka-art/sheets/e_shop_rest_select_roster.png`.
+
+### The swords moved beside him (2026-10-13)
+
+[USER]: "Varka's face is much improved! And the crossed arms are good! But the swords are off-screen (rendered too low and cropped - the hilts are blending into his pants / torso). Let's fix that and then I think this will be good to go."
+
+The face, the smirk and the crossed arms are unchanged. What changed:
+- **Swords beside him.** Each claymore stands point-down outside one leg, 0.62 units out from his centre and level with him, not in front. They are planted shallower: each pommel's top is 1.52 units up (about his lower ribs) and each crossguard sits at about his hip. Both swords show whole in the shop.
+- **A measured gap.** `render.py` `arms_crossed` now also records, for each blade, the box of its hilt and of its crossguard on the canvas, and how many pixels of the hilt fall on his body's outline once the hilt is grown by 3 px. The crossguard runs from the blade's `base` (chars.py: just past the guard) up to the top of its widest part. Measured: 0 px on the select still and 0 px in the shop, for both blades.
+- **The select close-up's framing.** `pack.py` `select_closeup` now draws the figure smaller when it must, so both crossguards sit at least 48 px above the bottom of the 1920x1080 frame, and moves it left if its right edge would leave the frame. The figure is now 1655 px tall, where it was 2150. The crossguards land at y 825 to 1032 and his chin at y 229, in the upper third. The image's opaque box went from (905, 36, 1628, 1080) to (454, 36, 1895, 1080). The roster tile is still a face crop.
+- **Tests.** `test_his_crossed_arms_clear_each_other_and_the_blades_hide_neither_face_nor_arms` now also requires each hilt to sit off his outline (at most 25 px) on both frames, both crossguards to sit whole inside the select frame, and his chin to sit in its upper third. `test_stance_b_crosses_his_arms_with_both_blades_planted_beside_him` requires the pommel tops at 1.35 to 1.65 units up and each blade at least 0.45 units to one side.
+
+Sheet: `scratchpad/varka-art/sheets/e_shop_rest_select_roster.png`.
+
+## Ruled: ship
+
+Varka's swords (beside his legs, crossguards in the select frame) approved. [USER], 2026-10-14: "On Varka and Furina - ship it! The new renders look great!"

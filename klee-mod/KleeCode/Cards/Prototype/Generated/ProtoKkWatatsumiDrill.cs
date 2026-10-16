@@ -57,7 +57,7 @@ public sealed class ProtoKkWatatsumiDrill : CustomCardModel, IElementalCard, ICh
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(6m, ValueProp.Move)
+            new DamageVar(7m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

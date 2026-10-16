@@ -114,6 +114,11 @@ lane is refused) is lifted by the coordinator, which prints the streak before an
 python -m understudy.blindplay reset-refusals --lane 1   # clears the streak and refusal marks; budget untouched
 ```
 
+Only genuine refusals count toward the stop. A command refused because the
+board changed since the seat's last look (the fight ended, the named enemy
+died, the co-op partner moved the screen) prints `Skipped: ... since your last
+look` and is neither sent nor counted.
+
 A seat can also ask for one word at any time: `observe --define "<Word>"`
 prints the screen's definition, or the glossary's own row marked
 "(not on this screen)".
@@ -372,7 +377,10 @@ plain `observe` prints it on every round-1 page; `observe --define
 "<enemy>"` prints it again); **Incoming this turn** sums the attack
 telegraphs against your Block, naming as unknown a part whose figure may not
 count Weak or Vulnerable (on Furina's stage too, where guests cannot be
-targeted; not in co-op, where a telegraph names no target); **Since last
+targeted; not in co-op, where a telegraph names no target), counts a Death
+Blow telegraph, and names a "when killed" power's damage (Waterfall Giant's
+Steam Eruption) as "Killing it now: N" before the kill and "Not this turn"
+after it; **Since last
 page** names what the mod's `ResolutionLedger` filed that the after-state
 does not show (a card drawn by an effect, a debuff Artifact negated, a
 one-off enemy trigger, a stolen card given back, an attack that Shattered

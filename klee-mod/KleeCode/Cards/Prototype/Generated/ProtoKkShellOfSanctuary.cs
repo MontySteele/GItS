@@ -36,19 +36,21 @@ public sealed class ProtoKkShellOfSanctuary : CustomCardModel, ICharacterCard
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "kokomi";
 
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { CardKeyword.Retain };
+
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_shell_of_sanctuary");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Shell of Sanctuary"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Draw 1 card."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(6m, ValueProp.Move),
-            new CardsVar(1)
+            new BlockVar(6m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -61,7 +63,6 @@ public sealed class ProtoKkShellOfSanctuary : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
-        await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
     }
 
     protected override void OnUpgrade()

@@ -312,6 +312,9 @@ public class KokomiOverhaulRuleTests
         // `BlockPerAttackingEnemy`, `DoubleBlock`, `ExhaustStatusesInHand` and
         // `DiscardAndDraw` with Dusk and the cut cards, and appended
         // `AddStings`, `GainStrength`, `JuugaGuard` and `PlayCompanion`.
+        //
+        // KOKOMI REVIEW R9 PICK 1 (a) (2026-10-15) removed `PlayCompanion`:
+        // only a Companion that prints a Plan line can be planned.
         Assert.Equal(
             new[] { "Draw", "Energy", "Block", "Mend", "Damage",
                     "DamageQuarterMaxHp",
@@ -325,10 +328,9 @@ public class KokomiOverhaulRuleTests
                     "EachPlayerEnergy", "EachPlayerDraw",
                     // THE STATUS BATCH (2026-10-01): the two that read the
                     // hand just drawn.
-                    "BlockPerStatusInHand", "TransformStatusesInDrawPile",
+                    "BlockPerStatusInHand", "TransformStatusesYouHave",
                     // THE RE-FOUNDING (2026-10-12).
                     "AddStings", "GainStrength", "JuugaGuard",
-                    "PlayCompanion",
                     // THE POOL OVERHAUL (2026-10-13): Chain, Counter and
                     // Intent, and Read the Field's fetch.
                     "DamagePerPlanThisTurn", "DamageBlockedSince",
@@ -711,10 +713,14 @@ public class KokomiOverhaulRuleTests
     [Fact]
     public void The_cap_lives_in_exactly_one_place()
     {
+        // Kokomi review r6 pick 1 (a) (2026-10-14): the arithmetic is
+        // `MendWouldLand`, which Mend and the face's "(N will land)" share.
         var mend = Tide("Mend");
         var calls = Il.Calls(mend);
-        Assert.Contains("KokomiOverhaulLedger.get_EntryHp", calls);
+        Assert.Contains("KokomiRules.MendWouldLand", calls);
         Assert.Contains("CreatureCmd.Heal", calls);
+        Assert.Contains("KokomiOverhaulLedger.get_EntryHp",
+                        Il.Calls(Tide("MendWouldLand")));
 
         // And nothing else heals, so no Mend can skip the cap.
         var others = typeof(KokomiRules).GetMethods(HeadlessGame.All)
@@ -1025,9 +1031,9 @@ public class KokomiOverhaulRuleTests
         // STRUCTURAL, and the class's own header says why: the base var
         // reaches `CardModel.CombatState`, so the NUMBER needs a live combat
         // this harness cannot build. What is pinned is the wiring.
-        // Feint since the re-founding (2026-10-12) cut Driftglass: the same
-        // aimed `CalculatedDamageVar` shape.
-        var calculated = (object)new ProtoKkFeint().DynamicVars
+        // Tideturn since Kokomi review r8 (2026-10-14) made Feint's now-line
+        // flat: the same aimed `CalculatedDamageVar` shape.
+        var calculated = (object)new ProtoKkTideturn().DynamicVars
             .CalculatedDamage;
         Assert.IsType<FrontFoldedDamageVar>(calculated);
         // The game's own var underneath, so nothing about the multiplier, the

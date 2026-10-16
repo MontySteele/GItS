@@ -309,6 +309,25 @@ public static class AbyssRules
 
     public static bool FatuiRoom(bool isElite, bool isBoss) => isElite || isBoss;
 
+    /// <summary>
+    /// The Shadow badges an enemy in this room wears: every Shadow in force,
+    /// less the two room-filtered ones where this room is not theirs. Co-op
+    /// Abyss run, 2026-10-14: Fatui Skirmishers' badge ("Elites and bosses
+    /// enter combat with 3 Plated Armor") sat on every hallway enemy, and both
+    /// seats read it as Plated Armor on every enemy. The effect was right
+    /// (elites and bosses only, the paper's line); the badge now says so by
+    /// being only where the effect is. A summon takes neither: both are about
+    /// entering combat (<c>SpiralAbyss.AfterCreatureAddedToCombat</c>).
+    /// </summary>
+    public static IReadOnlyList<AbyssShadow> BadgesFor(
+        IEnumerable<AbyssShadow> inForce, bool isElite, bool isBoss) =>
+        inForce.Where(s => s switch
+        {
+            AbyssShadow.FatuiSkirmishers => FatuiRoom(isElite, isBoss),
+            AbyssShadow.MageShield => MageShieldRoom(isElite),
+            _ => true,
+        }).ToList();
+
     /// <summary>The shield after one hit: the counter element breaks it
     /// whole, any other hit removes 1.</summary>
     public static int ShieldAfterHit(int hits, Element hitElement, Element shieldElement)

@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMiMizukiAnraku : CustomCardModel, ICompanionCard, IWritableCompanion
+public sealed class ProtoMiMizukiAnraku : CustomCardModel, ICompanionCard
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -49,30 +49,25 @@ public sealed class ProtoMiMizukiAnraku : CustomCardModel, ICompanionCard, IWrit
         new[] { CardKeyword.Exhaust, KleeKeywords.AppliesAnemo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSwirl(ArmKeywordTips.ForMend(ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, appliesWithoutHit: true), this), this), this);
+        TipAudience.Seat
+            ? ArmKeywordTips.ForSwirl(ArmKeywordTips.ForMend(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, appliesWithoutHit: true), this), this)
+            : ArmKeywordTips.ForMend(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, appliesWithoutHit: true), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mi_mizuki_anraku");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Yumemizuki Mizuki — Anraku Secret Spring Therapy"),
-        ("description", "[gold]Swirl[/gold] ALL enemies. Deal {CalculatedDamage:diff()} damage to ALL enemies and [gold]Mend[/gold] 6."),
+        ("description", "[gold]Swirl[/gold] ALL enemies. Deal {CalculatedDamage:diff()} damage to ALL enemies and [gold]Mend[/gold] 6{InCombat: ({MendLands} will land)|}."),
     };
-
-    /// <summary>On Kokomi, this Companion card can also be written as a Plan on
-    /// the Bake-Kurage (the re-founding, 2026-10-12).</summary>
-    public override TargetType TargetType =>
-        KokomiCompanionPlan.TargetFor(this, base.TargetType);
-
-    /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
-    public TargetType PrintedTargetType => base.TargetType;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new CalculationBaseVar(14m),
             new ExtraDamageVar(1m),
-            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card))
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card)),
+            new MendLandsVar(6)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -84,11 +79,6 @@ public sealed class ProtoMiMizukiAnraku : CustomCardModel, ICompanionCard, IWrit
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (KokomiPlan.PlayedOnPet(cardPlay))
-        {
-            await KokomiCompanionPlan.Write(choiceContext, this, cardPlay);
-            return;
-        }
         foreach (var auraTarget in CombatState!.HittableEnemies.ToList())
         {
             await ElementalHit.ApplyOnly(choiceContext, auraTarget, Element.Anemo, Owner.Creature);

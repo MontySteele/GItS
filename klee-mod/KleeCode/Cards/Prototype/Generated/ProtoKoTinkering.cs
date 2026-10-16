@@ -35,7 +35,9 @@ namespace KleeMod.Cards.Prototype.Generated;
 public sealed class ProtoKoTinkering : CustomCardModel
 {
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSpark(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.None, includesConfiscatedRules: true), this);
+        TipAudience.Seat
+            ? ArmKeywordTips.ForSpark(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.None, includesConfiscatedRules: true), this)
+            : KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.None, includesConfiscatedRules: true);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_tinkering");
 

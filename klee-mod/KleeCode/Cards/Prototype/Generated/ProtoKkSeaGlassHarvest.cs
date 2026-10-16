@@ -45,7 +45,7 @@ public sealed class ProtoKkSeaGlassHarvest : CustomCardModel, ICharacterCard, IP
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sea Glass Harvest"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold].\nOr [gold]plan[/gold]: Transform every Status and Curse in your [gold]Draw Pile[/gold] into [gold]Sea Glass[/gold]{IfUpgraded:show:+|}."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold].\nOr [gold]plan[/gold]: Transform every Status and Curse you have into [gold]Sea Glass[/gold]{IfUpgraded:show:+|}."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -54,7 +54,7 @@ public sealed class ProtoKkSeaGlassHarvest : CustomCardModel, ICharacterCard, IP
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.TransformStatusesInDrawPile, 0, KokomiPlan.Aim.Self),
+            new KokomiPlan.Planned(KokomiPlan.Kind.TransformStatusesYouHave, 0, KokomiPlan.Aim.Self),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

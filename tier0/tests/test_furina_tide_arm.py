@@ -239,12 +239,12 @@ def test_the_pool_is_78_rows_23_35_20():
     # more towards putting Navia to Uncommon first"): 20 / 38 / 20.
     # Standing Ovation Common again, Spend half (2026-10-11): 21 / 37 / 20.
     # The diversity pass (2026-10-11): four in, four cut, Tutti! and
-    # Wriothesley to Common: 23 / 35 / 20.
+    # Wriothesley to Common: 23 / 35 / 20. The sweep (2026-10-14): fifteen
+    # out, fifteen in at the same rarities, 23 / 35 / 20.
     rows = {c.id: c for c in loader.prototype_cards()}
     rarities = [rows[cid].rarity for cid in FS.POOL_IDS]
     assert len(FS.POOL_IDS) == 78 == len(set(FS.POOL_IDS))
     assert "proto_fs_endless_waltz" not in rows
-    assert rows["proto_fs_standing_ovation_all"].rarity == "common"
     assert (rarities.count("common"), rarities.count("uncommon"),
             rarities.count("rare")) == (23, 35, 20)
     assert rows["proto_fs_guest_star_navia"].rarity == "uncommon"

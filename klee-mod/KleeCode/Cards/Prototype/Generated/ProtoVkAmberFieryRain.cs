@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoVkAmberFieryRain : CustomCardModel, IElementalCard, ICompanionCard, IWritableCompanion
+public sealed class ProtoVkAmberFieryRain : CustomCardModel, IElementalCard, ICompanionCard, IVarkaSwitchCard
 {
     /// <summary>Sheet applies_element: this companion attack applies its element.</summary>
     public Element Element => Element.Pyro;
@@ -52,7 +52,7 @@ public sealed class ProtoVkAmberFieryRain : CustomCardModel, IElementalCard, ICo
         new[] { KleeKeywords.Knight, KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCompanionPlan(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro), this, Element.Pyro), this);
+        ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro), this, Element.Pyro);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_mc_amber_fiery_rain");
 
@@ -61,14 +61,6 @@ public sealed class ProtoVkAmberFieryRain : CustomCardModel, IElementalCard, ICo
         ("title", "Amber: Precise Shot"),
         ("description", "Deal {CalculatedDamage:diff()} [gold]Pyro[/gold] damage. Gain {Block:diff()} [gold]Block[/gold].{InCombat:{VarkaSwitch}|}{InCombat:{VarkaWildfire}|}"),
     };
-
-    /// <summary>On Kokomi, this Companion card can also be written as a Plan on
-    /// the Bake-Kurage (the re-founding, 2026-10-12).</summary>
-    public override TargetType TargetType =>
-        KokomiCompanionPlan.TargetFor(this, base.TargetType);
-
-    /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
-    public TargetType PrintedTargetType => base.TargetType;
 
     /// <summary>This card's in-combat Oath lines
     /// (`VarkaOath.SwitchLine`, `VarkaOath.WildfireLine`).</summary>
@@ -79,6 +71,10 @@ public sealed class ProtoVkAmberFieryRain : CustomCardModel, IElementalCard, ICo
         description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Pyro));
         description.Add("VarkaWildfire", VarkaOath.WildfireLine(this));
     }
+
+    /// <summary>The element this card makes Varka's current element
+    /// (`VarkaOathDial` previews it).</summary>
+    public Element VarkaSwitchElement => Element.Pyro;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
@@ -98,11 +94,6 @@ public sealed class ProtoVkAmberFieryRain : CustomCardModel, IElementalCard, ICo
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (KokomiPlan.PlayedOnPet(cardPlay))
-        {
-            await KokomiCompanionPlan.Write(choiceContext, this, cardPlay);
-            return;
-        }
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)

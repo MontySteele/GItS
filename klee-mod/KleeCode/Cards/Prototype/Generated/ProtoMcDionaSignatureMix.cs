@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcDionaSignatureMix : CustomCardModel, ICompanionCard, IWritableCompanion
+public sealed class ProtoMcDionaSignatureMix : CustomCardModel, ICompanionCard
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -49,7 +49,7 @@ public sealed class ProtoMcDionaSignatureMix : CustomCardModel, ICompanionCard, 
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForWeak(ArmKeywordTips.ForCompanionPlan(base.ExtraHoverTips, this), this);
+        BaseKeywordTips.ForWeak(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_diona_signature_mix");
 
@@ -58,14 +58,6 @@ public sealed class ProtoMcDionaSignatureMix : CustomCardModel, ICompanionCard, 
         ("title", "Diona — Signature Mix"),
         ("description", "Apply {PowerAmount:diff()} [gold]Weak[/gold] to ALL enemies. For 2 turns, at the start of your turn gain 4 [gold]Block[/gold]."),
     };
-
-    /// <summary>On Kokomi, this Companion card can also be written as a Plan on
-    /// the Bake-Kurage (the re-founding, 2026-10-12).</summary>
-    public override TargetType TargetType =>
-        KokomiCompanionPlan.TargetFor(this, base.TargetType);
-
-    /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
-    public TargetType PrintedTargetType => base.TargetType;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
@@ -82,11 +74,6 @@ public sealed class ProtoMcDionaSignatureMix : CustomCardModel, ICompanionCard, 
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (KokomiPlan.PlayedOnPet(cardPlay))
-        {
-            await KokomiCompanionPlan.Write(choiceContext, this, cardPlay);
-            return;
-        }
         foreach (var debuffTarget in CombatState!.HittableEnemies.ToList())
         {
             await PowerCmd.Apply<WeakPower>(choiceContext, debuffTarget, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);

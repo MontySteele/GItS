@@ -132,10 +132,6 @@ public class FurinaLineRepayFloorTests
             Assert.Contains(BlockFloor, Face(card));
         }
         Assert.DoesNotContain("could not", Face(new ProtoFsFountainOfLucine()));
-        // Soothing Waters keeps no floor (ruled 2026-10-09): a 0-cost
-        // draw-1 card paying out on an empty Repay looped forever.
-        Assert.DoesNotContain("could not", Face(new ProtoFsSoothingWaters()));
-        Assert.Contains(VigorFloor, Face(new ProtoFsPneumaTides()));
         Assert.Contains("could not",
             new PneumaTidesPower().Localization!
                 .Single(r => r.Item1 == "description").Item2);
@@ -149,10 +145,9 @@ public class FurinaLineRepayFloorTests
     {
         Assert.Contains("DynamicVars[\"RepayAmount\"].IntValue, StageFloor.Block)",
                         Generated("ProtoFsHymnOfManyWaters"));
-        // The unchanged Repays pass none, Soothing Waters among them.
+        // The unchanged Repays pass none.
         foreach (var type in new[] { "ProtoFsPneumaRefrain", "ProtoFsCleanSlate",
-                                     "ProtoFsSoothingWaters",
-                                     "ProtoFsBalanceTheBooks", "ProtoFsEbbAndFlow",
+                                     "ProtoFsEbbAndFlow",
                                      "ProtoFsRiptideLunge" })
         {
             Assert.DoesNotContain("StageFloor.", Generated(type));
@@ -164,7 +159,6 @@ public class FurinaLineRepayFloorTests
     {
         foreach (var (type, n, damage) in new[]
                  {
-                     ("ProtoFsHydroLance", "4", 14m),
                      ("ProtoFsCleansingTorrent", "4", 10m),
                  })
         {
@@ -175,15 +169,13 @@ public class FurinaLineRepayFloorTests
                         < src.IndexOf("await DamageCmd.Attack(",
                                       System.StringComparison.Ordinal), type);
             var card = (CardModel)System.Activator.CreateInstance(
-                typeof(ProtoFsHydroLance).Assembly
+                typeof(ProtoFsCleansingTorrent).Assembly
                     .GetType("KleeMod.Cards.Prototype.Generated." + type)!)!;
             Assert.Equal(damage, card.DynamicVars.CalculationBase.BaseValue);
             Assert.Equal(1m, card.DynamicVars.ExtraDamage.BaseValue);
             Assert.Contains("plus 1 for any HP it could not", Face(card));
         }
         // The upgrades still raise the damage.
-        Assert.Equal(18m, Upgraded(new ProtoFsHydroLance())
-            .DynamicVars.CalculationBase.BaseValue);
         Assert.Equal(14m, Upgraded(new ProtoFsCleansingTorrent())
             .DynamicVars.CalculationBase.BaseValue);
         // The ledger's record: what this play's Repay left, cleared per play.
@@ -200,7 +192,7 @@ public class FurinaLineRepayFloorTests
     [Fact]
     public void Endless_waltz_is_cut()
     {
-        Assert.Null(typeof(ProtoFsHydroLance).Assembly.GetType(
+        Assert.Null(typeof(ProtoFsCleansingTorrent).Assembly.GetType(
             "KleeMod.Cards.Prototype.Generated.ProtoFsEndlessWaltz"));
         Assert.DoesNotContain(ArmPools.Named("KleeMod.Powers.FurinaStageRoster", "Pool"),
             c => c.GetType().Name.Contains("EndlessWaltz"));
@@ -237,14 +229,6 @@ public class FurinaLineRepayFloorTests
     // ---- the ruled card numbers ----------------------------------------------
 
     [Fact]
-    public void Standing_ovation_is_common()
-    {
-        // Common again, Spend half (2026-10-11, Furina round 3 record,
-        // pick 1).
-        Assert.Equal(CardRarity.Common, new ProtoFsStandingOvationAll().Rarity);
-    }
-
-    [Fact]
     public void Bravura_deals_7_hydro_for_every_3_spent_and_9_upgraded()
     {
         // The diversity pass (2026-10-11): "Spend all your Fanfare. Deal 7
@@ -266,13 +250,10 @@ public class FurinaLineRepayFloorTests
     }
 
     [Fact]
-    public void Crabaletta_deals_20_and_soloists_solicitation_6()
+    public void Crabaletta_deals_20()
     {
         Assert.Equal(20m, new ProtoFsMademoiselleCrabaletta().DynamicVars.Damage.BaseValue);
         Assert.Equal(26m, Upgraded(new ProtoFsMademoiselleCrabaletta())
-            .DynamicVars.Damage.BaseValue);
-        Assert.Equal(6m, new ProtoFsSoloistsSolicitation().DynamicVars.Damage.BaseValue);
-        Assert.Equal(9m, Upgraded(new ProtoFsSoloistsSolicitation())
             .DynamicVars.Damage.BaseValue);
     }
 
@@ -319,7 +300,7 @@ public class FurinaLineRepayFloorTests
         Assert.Contains("damage Neuvillette All 12 Hydro", kit.Board.Log);
         // The window opens again after her acts.
         Assert.Equal(0, kit.Stage.HpLostSinceLastTurn);
-        Assert.Contains("lost since your last turn",
+        Assert.Contains("lost or [gold]Drained[/gold] since your last turn",
             StagePerformerBadge.ActText(StagePerformer.Neuvillette));
         // Upgraded: the line +1, as before.
         Assert.Equal(3, FurinaStageLaw.NeuvilletteHydroBonusUpgraded);

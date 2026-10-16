@@ -887,11 +887,12 @@ KOKOMI_OVERHAUL_CASKET_BLOCK = 3
 # paper's Rare): how many are offered. Mirrored BY VALUE against
 # `KokomiCompanionPlan.GeneralsOffered`.
 KOKOMI_GENERALS_OFFERED = 3
-# THE KOKOMI POOL OVERHAUL (2026-10-13): Battle Formation's "Whenever 3 or
-# more Plans are carried out in one turn, gain 1 Energy and draw 2 cards".
+# THE KOKOMI POOL OVERHAUL (2026-10-13): Battle Formation's "Whenever 2 or
+# more Plans are carried out in one turn, gain 1 Energy and draw 1 card"
+# (kokomi-review-r5-2026-10-14 numbers pass: 3 -> 2, draw 2 -> 1).
 # The Power's stack is the Energy. `BattleFormationPower.Threshold` / `.Draw`.
-KOKOMI_BATTLE_FORMATION_THRESHOLD = 3
-KOKOMI_BATTLE_FORMATION_DRAW = 2
+KOKOMI_BATTLE_FORMATION_THRESHOLD = 2
+KOKOMI_BATTLE_FORMATION_DRAW = 1
 
 # THE STARTER, WHOLE (brief draft 6 sec.4; slice draft 6 sec.3). Ten cards, in
 # the printed order. A REPLACEMENT and not a substitution list because every one
@@ -932,7 +933,7 @@ KOKOMI_REFOUNDING_IDS: tuple[str, ...] = (
     "proto_kk_kurage_bloom",
     "proto_kk_kurage_barrage",
     "proto_kk_watchful_shoal",
-    "proto_kk_coordinated_tide",
+    "proto_kk_following_current",
     "proto_kk_brine_spray",
     "proto_kk_spearhead",
     "proto_kk_steady_tide",
@@ -979,7 +980,9 @@ KOKOMI_JELLYFISH_IDS: tuple[str, ...] = (
 # of its rarity: Turning Tide for Riptide Guard, Brine Spray for Reserves,
 # Jellyfish Current for Brace for the Tide, Prepared Retreat for Moon's
 # Reflection, Battle Formation for Ceremonial Garment and Turnabout for
-# Watatsumi Resistance. The pool's
+# Watatsumi Resistance. The Kokomi review r6 (2026-10-14, pick 2 (b)) put
+# Kurage Vanguard in Jellyfish Current's slot and Following Current in
+# Coordinated Tide's. The pool's
 # history is in git (`git show kokomi-casket-frozen-2026-10-12:tier0/constants.py`).
 # `tools/lint_arm_pool_parity.py` compares this tuple,
 # `KokomiOverhaulRoster.Slice()` and the sheet BY ORDER.
@@ -1021,7 +1024,7 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_kk_suffocating_deep",
     "proto_kk_coral_crash",
     "proto_kk_evening_watch",
-    "proto_kk_jellyfish_current",
+    "proto_kk_kurage_vanguard",
     "proto_kk_watatsumis_grace",
     "proto_kk_tidal_riposte",
     "proto_kk_shoal_call",

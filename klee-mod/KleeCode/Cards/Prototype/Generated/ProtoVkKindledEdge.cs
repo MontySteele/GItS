@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoVkKindledEdge : CustomCardModel, IElementalCard, ICharacterCard
+public sealed class ProtoVkKindledEdge : CustomCardModel, IElementalCard, ICharacterCard, IVarkaSwitchCard
 {
     /// <summary>Its hits carry their own element (a `varka` kind),
     /// not the cadence's Anemo; the card says so rather than leave
@@ -46,7 +46,9 @@ public sealed class ProtoVkKindledEdge : CustomCardModel, IElementalCard, IChara
         new[] { KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForElementalReaction(ArmKeywordTips.ForElementSwitch(base.ExtraHoverTips, this, Element.Pyro), this);
+        TipAudience.Seat
+            ? ArmKeywordTips.ForElementalReaction(ArmKeywordTips.ForElementSwitch(base.ExtraHoverTips, this, Element.Pyro), this)
+            : ArmKeywordTips.ForElementSwitch(base.ExtraHoverTips, this, Element.Pyro);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_kindled_edge");
 
@@ -65,6 +67,10 @@ public sealed class ProtoVkKindledEdge : CustomCardModel, IElementalCard, IChara
         description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Pyro));
         description.Add("VarkaWildfire", VarkaOath.WildfireLine(this));
     }
+
+    /// <summary>The element this card makes Varka's current element
+    /// (`VarkaOathDial` previews it).</summary>
+    public Element VarkaSwitchElement => Element.Pyro;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

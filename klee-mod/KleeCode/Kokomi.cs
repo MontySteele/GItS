@@ -79,8 +79,10 @@ public sealed class Kokomi : CustomCharacterModel, IKokomiCharacter
     public override RelicPoolModel RelicPool =>
         ModelDb.RelicPool<KokomiRelicPool>();
 
+    /// <summary>Her own three (<c>review/active/kokomi-relics-potions-2026-10-15.md</c>).
+    /// </summary>
     public override PotionPoolModel PotionPool =>
-        ModelDb.PotionPool<SilentPotionPool>();
+        ModelDb.PotionPool<Potions.KokomiPotionPool>();
 
     /// <summary>
     /// The base Strike x4, Defend x4, Kurage's Oath and Slack Water
@@ -172,10 +174,13 @@ public sealed class Kokomi : CustomCharacterModel, IKokomiCharacter
                 ResourceLoader.Load<Texture2D>(path));
     }
 
-    // Started at the roster's shared values. Hers are a taste call that
-    // cannot be made before there is an animation to time them against, so
-    // they stay parked rather than guessed.
-    public override float AttackAnimDelay => 0.15f;
+    /// <summary>The hit lands on her attack clip's main impact: frame 8 at
+    /// 20 fps, the push at full extension
+    /// (tools/char_render/kokomi_frames.json, <c>events.main</c>), as
+    /// Furina's and Varka's land on theirs. It was 0.15 s, the roster's
+    /// shared value, until her model clips existed. The cast delay stays
+    /// parked at the shared value.</summary>
+    public override float AttackAnimDelay => 0.4f;
 
     public override float CastAnimDelay => 0.25f;
 

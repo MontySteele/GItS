@@ -61,6 +61,57 @@ public class InheritedSilentRelicsTests
     }
 
     /// <summary>
+    /// Census pick 2: the discard-only pair is exactly Tingsha and Tough
+    /// Bandages, and only the opt-in filter removes them.
+    /// </summary>
+    [Fact]
+    public void The_discard_pair_is_Tingsha_and_ToughBandages()
+    {
+        Assert.Equal(
+            new[] { "Tingsha", "ToughBandages" },
+            InheritedSilentRelics.DiscardOnly.Select(t => t.Name).OrderBy(n => n).ToArray());
+
+        var roster = BorrowedRoster();
+        var gone = roster.Where(t => !InheritedSilentRelics.IsKeptDiscard(Uninitialized(t)))
+                         .Select(t => t.Name).OrderBy(n => n).ToArray();
+        Assert.Equal(new[] { "Tingsha", "ToughBandages" }, gone);
+        // The default curation (IsKept) still keeps both.
+        foreach (var t in roster.Where(t => gone.Contains(t.Name)))
+            Assert.True(InheritedSilentRelics.IsKept(Uninitialized(t)));
+    }
+
+    /// <summary>Furina and Kokomi opt in; Klee, Varka and Yae do not.</summary>
+    [Theory]
+    [InlineData(typeof(global::KleeMod.FurinaRelicPool), true)]
+    [InlineData(typeof(global::KleeMod.KokomiRelicPool), true)]
+    [InlineData(typeof(global::KleeMod.KleeRelicPool), false)]
+    [InlineData(typeof(global::KleeMod.VarkaRelicPool), false)]
+    [InlineData(typeof(global::KleeMod.YaeRelicPool), false)]
+    public void Only_furina_and_kokomi_drop_the_discard_pair(Type pool, bool drops)
+    {
+        var method = pool.GetMethod("GenerateAllRelics", HeadlessGame.All)!;
+        Assert.Equal(drops, DropsDiscard(method));
+    }
+
+    // Curated(dropDiscard: true) loads the constant 1 right before the call;
+    // the default loads 0. Read the opcode stream.
+    private static bool DropsDiscard(MethodBase method)
+    {
+        var il = method.GetMethodBody()!.GetILAsByteArray()!;
+        for (var i = 0; i + 5 < il.Length; i++)
+        {
+            if (il[i + 1] != 0x28) continue;   // call
+            MethodBase? target;
+            try { target = method.Module.ResolveMethod(BitConverter.ToInt32(il, i + 2)); }
+            catch { continue; }
+            if (target?.DeclaringType == typeof(InheritedSilentRelics) && target.Name == "Curated")
+                return il[i] == 0x17;          // ldc.i4.1
+        }
+        throw new InvalidOperationException(
+            method.DeclaringType!.Name + " does not call InheritedSilentRelics.Curated");
+    }
+
+    /// <summary>
     /// THE COUNT MOVED BY EXACTLY TWO, read off the SHIPPED roster rather than
     /// off the census's prose. `SilentRelicPool.GenerateAllRelics` names its
     /// members as `ModelDb.Relic&lt;T&gt;()` call sites, so the source roster

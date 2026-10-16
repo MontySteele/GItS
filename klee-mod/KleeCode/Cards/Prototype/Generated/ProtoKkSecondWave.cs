@@ -44,7 +44,9 @@ public sealed class ProtoKkSecondWave : CustomCardModel, IElementalCard, ICharac
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForPlan(ArmKeywordTips.ForPlanTwice(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro), this), this);
+        TipAudience.Seat
+            ? ArmKeywordTips.ForPlan(ArmKeywordTips.ForPlanTwice(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro), this), this)
+            : ArmKeywordTips.ForPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_second_wave");
 

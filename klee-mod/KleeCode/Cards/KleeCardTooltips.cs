@@ -19,6 +19,10 @@ namespace KleeMod.Cards;
 /// For random/all-enemy cards it intentionally lists every distinct reaction
 /// currently available; choosing a particular target remains the player's
 /// decision.
+///
+/// THE TOOLTIP TRIM (2026-10-14): that board-wide list is now the blind
+/// seat's (<see cref="TipAudience.Seat"/>). A player sees one preview, for the
+/// enemy the card is aimed at, while aiming (<see cref="ReactionAim"/>).
 /// </summary>
 public static class KleeCardTooltips
 {
@@ -128,10 +132,20 @@ public static class KleeCardTooltips
 
         if (trigger == Element.None || card.CombatState == null) yield break;
 
+        // THE TOOLTIP TRIM (2026-10-14), pick 2 (a). A player sees a preview
+        // only for the enemy the card is being aimed at, raised by
+        // `ReactionAim` while it is dragged onto that enemy, and none while
+        // the card is only hovered in hand. A blind seat (`TipAudience.Seat`)
+        // reads every matching aura's preview, as before the trim.
+        var aimed = ReactionAim.TargetFor(card);
+        if (aimed == null && !TipAudience.Seat) yield break;
+
+        var previews = new List<IHoverTip>();
         var seen = new HashSet<Reaction>();
         var printedTrigger = trigger;
-        foreach (var enemy in card.CombatState.HittableEnemies)
+        foreach (var enemy in PreviewOrder(card, card.CombatState.HittableEnemies))
         {
+            if (aimed != null && !ReferenceEquals(enemy, aimed)) continue;
             var aura = AuraCmd.Find(enemy);
             if (aura == null) continue;
             trigger = printedTrigger;
@@ -175,11 +189,11 @@ public static class KleeCardTooltips
                 && ReactionEffects.FrozenArtifactDetail(enemy) != null)
             {
                 var boss = ReactionEffects.FrozenBossVulnWillApply(enemy);
-                yield return new HoverTip(
+                previews.Add(new HoverTip(
                     new LocString(Table, (boss ? FrozenBossPreviewKey
                                                : FrozenPreviewKey) + ".title"),
                     (elementOnlyOnSpend ? SpendOnlyPrefix : "")
-                        + FrozenArtifactBody(boss));
+                        + FrozenArtifactBody(boss)));
                 continue;
             }
             // 2026-10-04 (Furina v2 seat round): Tidal Flourish previewed
@@ -190,29 +204,36 @@ public static class KleeCardTooltips
             {
                 var key = PreviewKey(reaction,
                     keyword == KleeKeywords.FrozenBossPreview);
-                yield return new HoverTip(
+                previews.Add(new HoverTip(
                     new LocString(Table, (substitute == null
                         ? key : NoHitTitleKey(reaction)) + ".title"),
                     SpendOnlyPrefix + (substitute
                         ?? new LocString(Table, key + ".description")
-                            .GetFormattedText()));
+                            .GetFormattedText())));
             }
             else
             {
-                yield return substitute == null
+                previews.Add(substitute == null
                     ? HoverTipFactory.FromKeyword(keyword)
                     : new HoverTip(
                         new LocString(Table, NoHitTitleKey(reaction) + ".title"),
-                        substitute);
+                        substitute));
             }
             // Text pass 2026-09-25: the Electro-Charged preview names Poison
             // and no longer spells out how it ticks, so Poison's own tip
             // rides beside it. A hover tip cannot nest, so this is the attach.
             if (reaction == Reaction.ElectroCharged)
             {
-                yield return HoverTipFactory.FromPower<MegaCrit.Sts2.Core.Models.Powers.PoisonPower>();
+                previews.Add(HoverTipFactory.FromPower<MegaCrit.Sts2.Core.Models.Powers.PoisonPower>());
             }
         }
+
+        if (aimed != null)
+        {
+            ReactionAim.Collect(previews);
+            yield break;
+        }
+        foreach (var preview in previews) yield return preview;
     }
 
 
@@ -329,12 +350,76 @@ public static class KleeCardTooltips
                  + $"into that {aura} aura it lands {Capped(enemy, printed)}."
                  + UnblockedRaiserClause(dealer);
         }
+        // THE FACE FOLDED A DIFFERENT BODY (Kokomi seats, 2026-10-14). Two
+        // seats read "Reaction preview: Vaporize ... lands 31" on a Chevreuse
+        // whose hit into a Hydro Ovicopter dealt 21. The face had folded the
+        // FRONT enemy's terms -- its Vaporize included, 14 x 1.5 = 21 -- and
+        // this line multiplied that 21 by 1.5 again for another Hydro body.
+        // So the face body's terms come OUT of the printed number before this
+        // body's go in (`LandedOffFoldedFace`).
         var landed = TargetAlreadyFolded(card)
-            ? Capped(enemy, (int)(printed * mult))
+            ? LandedOffFoldedFace(
+                printed,
+                FaceBody(card) is { } face ? BodyTerms(face, card, dealer) : 1m,
+                BodyTerms(enemy, card, dealer),
+                SimDamagePipeline.TargetCap(enemy))
             : SimDamagePipeline.ResolveOnTarget(enemy, printed, mult);
         return $"The triggering hit deals {mult:0.##}x damage and consumes "
              + $"the aura. Into that {aura} aura this card's {printed} lands "
              + $"{landed}." + UnblockedRaiserClause(dealer);
+    }
+
+    /// <summary>
+    /// The order the reaction loop visits bodies in: where the face folded a
+    /// body, THAT body first, so a reaction it shares with another body is
+    /// previewed off the body the printed number already describes. Board
+    /// order otherwise. PURE.
+    /// </summary>
+    private static IEnumerable<Creature> PreviewOrder(
+        CardModel card, IEnumerable<Creature> hittable)
+    {
+        var list = hittable.ToList();
+        var face = TargetAlreadyFolded(card) ? FaceBody(card) : null;
+        if (face == null || !list.Remove(face)) return list;
+        list.Insert(0, face);
+        return list;
+    }
+
+    /// <summary>
+    /// The target-side multiplier a powered hit from this card meets on
+    /// <paramref name="body"/>: the product of that body's own
+    /// <c>ModifyDamageMultiplicative</c> answers -- its aura's amplifier
+    /// (<c>AuraPower</c>) and its Vulnerable -- the same hooks the face's
+    /// preview folded. PURE: those hooks run on every preview.
+    /// </summary>
+    private static decimal BodyTerms(Creature body, CardModel card, Creature? dealer)
+    {
+        var terms = 1m;
+        foreach (var power in body.Powers)
+        {
+            terms *= power.ModifyDamageMultiplicative(
+                body, 1m, MegaCrit.Sts2.Core.ValueProps.ValueProp.Move,
+                dealer, card, null);
+        }
+        return terms;
+    }
+
+    /// <summary>
+    /// What a folded face's <paramref name="printed"/> lands on another body:
+    /// the face body's target terms (<paramref name="faceTerms"/>) divided
+    /// back out, this body's (<paramref name="bodyTerms"/>) multiplied in,
+    /// one truncation, then this body's <paramref name="cap"/>. The Kokomi
+    /// seats' case (2026-10-14): a 21 folded off a Hydro front enemy, into a
+    /// second Hydro body, is 21 -- not 31. Rounded to six places before the
+    /// truncation so a divide-then-multiply never lands a hair under an
+    /// integer. Public so a headless test can pin the arithmetic.
+    /// </summary>
+    public static int LandedOffFoldedFace(
+        int printed, decimal faceTerms, decimal bodyTerms, decimal cap)
+    {
+        if (faceTerms <= 0m) faceTerms = 1m;
+        var landed = (int)decimal.Round(printed / faceTerms * bodyTerms, 6);
+        return landed > cap ? (int)cap : landed;
     }
 
     /// <summary>

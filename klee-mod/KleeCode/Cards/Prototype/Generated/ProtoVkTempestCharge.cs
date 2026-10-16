@@ -44,14 +44,16 @@ public sealed class ProtoVkTempestCharge : CustomCardModel, IElementalCard, ICha
         new[] { KleeKeywords.AppliesAnemo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo), this);
+        TipAudience.Seat
+            ? ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo), this)
+            : KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_tempest_charge");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tempest Charge"),
-        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Costs 1 less for each [gold]Swirl[/gold] this turn."),
+        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Costs 1 less for each [gold]Swirl[/gold] this turn.{InCombat:{VarkaSwirl}|}"),
     };
 
     /// <summary>Sheet `cost_reduction_per_swirl_this_turn: 1`: this card
@@ -64,6 +66,16 @@ public sealed class ProtoVkTempestCharge : CustomCardModel, IElementalCard, ICha
         modifiedCost = System.Math.Max(0m, originalCost - 1m
             * VarkaOath.SwirlsThisTurn(Owner?.Creature));
         return true;
+    }
+
+    /// <summary>This card's in-combat Oath and Swirl lines
+    /// (`VarkaOath.SwitchLine`, `VarkaOath.WildfireLine`,
+    /// `VarkaOath.SwirlLine`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("VarkaSwirl", VarkaOath.SwirlLine(this));
     }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

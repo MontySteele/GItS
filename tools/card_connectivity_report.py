@@ -629,12 +629,10 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # THE RE-FOUNDING (2026-10-12). Kurage's Wake's Plan line hands Stings to
     # the hand; Gorou's two Plan lines are a Strength (permanent since the
     # Kokomi level pass) and a Block
-    # clock; a written Companion's clause plays the card -- each on the
-    # queue that carries it out.
+    # clock -- each on the queue that carries it out.
     "add_stings": [_hook("shared", "hand_contents", "write")],
     "gain_strength": [_hook("private", "kurage", "use")],
     "juuga_guard": [_hook("shared", "block_held", "write")],
-    "play_companion": [_hook("private", "kurage", "use")],
     # THE KOKOMI POOL OVERHAUL (2026-10-13). Chain reads the carry-outs this
     # turn; Counter reads the enemy turn the Plan sat through (Block held,
     # damage taken, who attacked); Intent reads the intents and takes
@@ -675,9 +673,10 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "block_per_status_in_hand": [_hook("shared", "hand_contents", "read"),
                                  _hook("shared", "block_held", "write")],
     # Sea Glass Harvest reads the DRAW PILE since the Kokomi round-1 fixes
-    # (2026-10-12): the Plan converts the dead draws still to come.
-    "transform_statuses_in_draw_pile": [
+    # (2026-10-12), and the HAND too since the round-5 review (2026-10-14).
+    "transform_statuses_you_have": [
         _hook("shared", "junk_remove", "write"),
+        _hook("shared", "hand_contents", "write"),
         _hook("shared", "draw_pile", "write")],
 }
 
@@ -959,6 +958,12 @@ POWER_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "kk_dawn_tide": [_hook("private", "kurage", "read"),
                      _hook("shared", "aura_reaction", "write"),
                      _hook("shared", "enemy_count", "read")],
+    # Kokomi review r6 (2026-10-14): one Hydro hit at the front, per turn
+    # or per carry-out.
+    "kk_kurage_vanguard": [_hook("private", "kurage", "read"),
+                           _hook("shared", "aura_reaction", "write")],
+    "kk_following_current": [_hook("private", "kurage", "read"),
+                             _hook("shared", "aura_reaction", "write")],
     "kk_sangonomiyas_counsel": [_hook("private", "kurage", "read")],
     # Furina. A Drain or a Repay WRITES the Stage; a Spend USES it.
     "fs_salons_encore": [_hook("private", "stage", "read"),
@@ -997,6 +1002,20 @@ POWER_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "fs_leading_lady": [_hook("private", "stage", "read"),
                         _hook("shared", "card_identity", "write")],
     "fs_full_house": [_hook("private", "stage", "use")],
+    # The sweep, second set (2026-10-14). Arkhe in Balance rides the play
+    # verb on any Attack or Skill; Objection! and Plot Twist answer an
+    # enemy's attack; Trial by Water pays her Fanfare off any damage the
+    # enemy takes; Rainfall Overture widens the next Attack; Crowd Favorite
+    # reads her HP for Energy.
+    "fs_arkhe_in_balance": [_hook("shared", "universal_verb_power", "write"),
+                            _hook("shared", "block_held", "write"),
+                            _hook("shared", "enemy_count", "read")],
+    "fs_objection": [_hook("shared", "enemy_intent", "read"),
+                     _hook("shared", "hp_ledger", "read")],
+    "fs_trial_by_water": [_hook("private", "fanfare", "write")],
+    "fs_rainfall_overture": [_hook("shared", "card_identity", "write")],
+    "fs_crowd_favorite": [_hook("shared", "hp_ledger", "read")],
+    "fs_plot_twist": [_hook("shared", "enemy_intent", "write")],
 }
 
 # Powers whose rider fires on a UNIVERSAL VERB -- playing, drawing,
@@ -1138,6 +1157,11 @@ PREDICATE_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "plan_held": [_hook("private", "kurage", "read")],
     "stage_drained_this_turn": [_hook("private", "stage", "read")],
     "stage_none_drained": [_hook("private", "stage", "read")],
+    # The Furina sweep (2026-10-14).
+    "hp_lost_last_turn": [_hook("shared", "hp_ledger", "read")],
+    "first_turn_of_combat": [_hook("shared", "plays_this_turn", "read")],
+    "ousia_face": [_hook("shared", "card_identity", "read")],
+    "pneuma_face": [_hook("shared", "card_identity", "read")],
 }
 PREDICATE_PREFIXES: dict[str, list[tuple[str, str, str]]] = {
     "encore_at_least_": [_hook("private", "encore", "read")],
@@ -1152,6 +1176,8 @@ PREDICATE_PREFIXES: dict[str, list[tuple[str, str, str]]] = {
         _hook("shared", "card_identity", "read")],
     "exhaust_selection_size_at_least_": [
         _hook("shared", "exhaust_pile", "read")],
+    # Noelle's Breastplate and Understudy's Debut: "below half HP".
+    "hp_pct_below_": [_hook("shared", "hp_ledger", "read")],
 }
 
 # Prefixes whose argument is a NAME, not an integer. Kept separate from
@@ -1189,6 +1215,9 @@ CARD_FIELD_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # v4. A `plan:` line WRITES the Plan queue (filed on `kurage`); its
     # effects are walked by `classify_row` like `effects:`.
     "plan": [_hook("private", "kurage", "write")],
+    # The Furina sweep (2026-10-14): "Can be played only if" reads the
+    # predicate it names (HP lost this turn, an enemy's intent).
+    "playable_if": [_hook("shared", "card_timing", "read")],
 }
 CARD_FIELDS_NO_HOOK = frozenset({
     "id", "name", "cost", "type", "rarity", "solve", "tempo_band",

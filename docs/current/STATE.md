@@ -30,24 +30,58 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
 |---|---|---|---|---|---|---|
 | `klee` | Klee | 70 | Mondstadt | Pyro | Balance | 78 |
 | `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 78 |
-| `furina` | Furina | 78 | Fontaine | Hydro | Prototype | 78 |
+| `furina` | Furina | 78 | Fontaine | Hydro | Balance | 78 |
 | `varka` | Varka | 80 | Mondstadt | Anemo | Balance | 78 |
+| `yae` | Yae Miko | 72 | Inazuma | Electro | Prototype | 43 (staged) |
 
 - Every kit: 78 draftable cards, plus two Ancient cards (one from Darv's
   Dusty Tome, one from Orobas's Archaic Tooth replacing a starter card).
-  Klee and Kokomi have co-op cards; Varka's five are being designed
-  ([USER]: "now is actually a great time to design 5 co-op cards for
-  Varka"); Furina has none since the Stage rework.
+  Klee, Kokomi and Varka have co-op cards (Varka's five are built); Furina
+  has none since the Stage rework.
 - Every starter is the base Strike x4 and Defend x4 plus two cards of its own.
   Starter basics change only on [USER]'s pick. No kit starts with a Companion.
 - **Character five is Yae Miko** (`review/active/yae-proposal-2026-10-12.md`,
-  ruled; the Stellar-Conduct nod is parked). **Card stage, Paper:** the card
-  paper `review/active/yae-card-paper-2026-10-13.md` (readings, starter,
-  relic, a 30-card first batch, three answers to the Sakura scaling
-  question, picks open in `QUEUE.md`). Her rows are a sim-only staging sheet
-  (`docs/yae-staging.yaml`, `loader.STAGING_SHEETS`), her rules twin is
-  `tier0/engine/yae_shrine.py`, and `tools/yae_expansion_sim.py` is the
-  smoke harness. No C# until the picks are ruled.
+  ruled; the Stellar-Conduct nod is parked). **Prototype, batch one built
+  in C#** (2026-10-13): the card paper
+  `review/active/yae-card-paper-2026-10-13.md` is ruled (Levels by planting,
+  3-turn Sakura, Proofread plain at 1 [0], two tips). Her 45 rows are the `proto_ym_` rows of
+  `docs/prototype-surface.yaml`; rules `Powers/Prototype/YaeShrine.cs` and
+  `YaeAnnotations.cs`, sim twin `tier0/engine/yae_shrine.py`, harness
+  `tools/yae_expansion_sim.py`. **Rites plus Sakura Annotations built**
+  (2026-10-14, `review/active/yae-design-axes-2026-10-14.md`, ruled): a
+  Sakura may carry Red Ink, Fox Fire or Deadline Extension, the 30
+  realigned and ten new cards. **Shrine r2** (2026-10-14, same doc, ruled):
+  the Rite is gone, every strike is Thunder and typed Tenko (Warding,
+  Wildfire, Offering) replaces "Rite: X"; a plant comes in at its card's
+  Level and no longer levels the others, a full-shrine plant refreshes and
+  levels the oldest; Tenko still resets timers; Grove levels every Sakura;
+  Serialization pays per Annotated card played; Sakura Channeling now reads
+  "You can have 2 more Sakura" (the cap, 3, rises by 2 per copy; the
+  full-shrine plant fires at the new cap), and a plant into a full shrine
+  makes the oldest strike as its Last Bloom first, then refresh and level. A staged pool of 40 (15 / 16 / 9 then; 43 since review r3; no
+  Ancients or co-op cards yet), official card art. **Review r1 ruled and
+  built** (2026-10-14, same doc): Last Bloom (a withering Sakura strikes once
+  more), no Level cap, global Levels only from Fox's Mooncall (+1 per copy);
+  Mikage Thunder levels every Sakura then Tenko. **Publish after elites and bosses** (2026-10-14,
+  ruled, same doc): her starter relic no longer adds a rest-site option;
+  "After an elite or boss fight, you may Publish an Annotation." It is a row
+  on the combat reward screen offering the cards that fight left Annotated
+  (not yet Published); untested live until a deploy. **Red Ink on a planting
+  card** (2026-10-14, ruled, same doc): it passes to the Sakura planted, and
+  Edits skip cards an Annotation would do nothing on. **Review r3 built**
+  (2026-10-14, `review/active/yae-review-r3-2026-10-14.md`, both picks (a)
+  as amended): Sakura kinds (Sakura, Foxfire Sakura to ALL, Kitsune Sakura
+  the Block decoy) that act at turn end, Last Bloom and Tenko; plain Tenko
+  ("Every Sakura acts now. Refresh them to at least 3 turns."); a
+  full-shrine plant levels the oldest of its kind or withers another kind;
+  the Masterpiece (one enchantment: a permanent Published stack plus one
+  temporary slot; layers add up; Edits reach Published cards); Second
+  Printing, Author's Copy (never an Author's Copy) and Serial Novel; Fallen
+  Petals an active Skill. Pool 43 (15 / 18 / 10). **Review r6 built**
+  (2026-10-15, `review/active/yae-review-r6-2026-10-15.md`, no pick):
+  Serialization pays per card Edited, Manuscript Pile draws then Edits a
+  card with Red Ink. Next: [USER]'s own Yae run, the finish line for
+  Prototype.
 
 ## The kits
 
@@ -75,10 +109,13 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
 
 **Kokomi: Prototype.**
 - **Rules** (`review/active/kokomi-brief-2026-09-01.md` sec.2): a card with a
-  Plan line, or any Companion, can be played on the Bake-Kurage instead. It
+  Plan line can be played on the Bake-Kurage instead (a Companion only if it
+  prints one; Kokomi review r9, pick 1 (a), 2026-10-15). It
   is carried out at the start of her next turn, after the draw; clicking a
-  waiting Plan flips it to the now-line. A planned Companion is carried out
-  after the Bake-Kurage applies Hydro to its target.
+  waiting Plan flips it to the now-line. On a controller the peek button (left
+  stick press, its glyph drawn under the Plan strip) opens a grid of the
+  waiting Plans, each captioned with the line it will carry out as, where A
+  flips one and B closes (unseen in game).
 - **Starter relic:** the Tamakushi Casket gains 3 Block at the start of her
   turn while a Plan is waiting, after the Block clear and before Plans
   resolve. Its upgrade, the Watatsumi Casket, gains 3 for each Plan waiting.
@@ -86,19 +123,28 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
   Exhaust, and have a Plan line.
 - **Pool:** 78 (20 / 38 / 20), five co-op cards. Ancients: Divine Strategy
   (Tome) and Princess of Watatsumi (Tooth on Kurage's Oath).
+- **Relics and potions:** her own seven relics and three potions
+  (`review/active/kokomi-relics-potions-2026-10-15.md`, kit census picks 1
+  and 2); the Silent borrow is gone from both. Placeholder icons until her
+  art pass. Untested in game until a deploy.
 - **Latest:** the pool overhaul is built
   (`review/active/kokomi-pool-overhaul-2026-10-13.md`, picks 1 (a) and 2
   (a)): eight Plan lines and payoffs rewritten to Counter, Intent and Chain
   readings, six cards cut and six new ones in their slots, pool still 78
   (20 / 38 / 20). Untested in game until a deploy.
-- **Next:** [USER]'s picks on review r4; the default is his own finish-line
-  run.
+- **Since:** review r6 (`review/active/kokomi-review-r6-2026-10-14.md`,
+  picks 1 (a), 2 (b), 3 (a)) is built: a numbers pass, Mend's cap printed
+  ("Mend 6 (1 will land)"), Jellyfish Current and Coordinated Tide cut for
+  Kurage Vanguard and Following Current (two Hydro sources), and Read the
+  Field's card costs 0. Both new cards wear official wiki art.
+- **Next:** five to eight seats overnight on this build, then [USER]'s run
+  (pick 4 (b)).
 - **Possible change, parked:** Nereid's Ascension carries her burst's name
   only (no HP scaling, healing or jellyfish refresh, unlike the other three
   kits' bursts). [USER]: "Let's flag this as a possible change on Kokomi and
   otherwise leave it alone."
 
-**Furina: Prototype.**
+**Furina: Balance** (2026-10-15).
 - **Rules** (`review/active/furina-research-proposal-2026-10-05.md`, sec.2):
   - **Drain** spends HP, never to 0. Each combat she has a Drain buffer of 1/4
     of her Max HP (Lyney adds 10); her own Drains may go past it, a guest's
@@ -111,8 +157,11 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
     pushes the oldest guest off: it acts once, then leaves. A second copy of
     a guest moves it to the newest seat and it acts once.
 - **Pool:** 78 (23 / 35 / 20). Relics: Salon Solitaire ("At the end of your
-  turn, Repay 1."), its upgrade The Curtain Never Falls, Opera Glasses, Grand
-  Theater Program; one potion, Bottled Applause. Ancients: Center of
+  turn, Repay 1."), its upgrade The Curtain Never Falls, and her seven: Opera
+  Glasses, Opera Ticket Stub, Fontaine Teardrop, Grand Theater Program,
+  Claque's Ledger, Bouquet of Roses, Epiclese Season Pass; three potions, Bottled Applause, Bottled Encore, Water of Lucine
+  (`review/active/furina-card-pass-2026-10-15.md`, which also gave Ousia /
+  Pneuma a Drain face and a Repay face). Ancients: Center of
   Attention (Tome) and All the World's a Stage (Tooth on Rising Applause).
   Sim twin `tier0/engine/furina_tide.py`.
 - **Latest:** the overnight wave (`review/records/furina-wave-2026-10-13.md`,
@@ -122,8 +171,23 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
   #1211) and the Guest Star package
   (`review/active/furina-guest-package-2026-10-13.md`, #1214) are built and
   deployed.
-- **Next:** [USER]'s playtest of that build. Her new model (#1241) is wired in
-  once the guest pose fixes are approved. Parked: Wriothesley's rarity.
+- **Design final** ([USER], 2026-10-14, after his run died mid act 3:
+  "Overall, very fun! I definitely like Furina's current design!"). Her model
+  is in ("new model looks good!").
+- **Sweep:** the cleanup / dedupe pass (`review/active/furina-sweep-2026-10-14.md`,
+  fifteen cuts and fifteen adds) is ruled and built (#1271). Parked:
+  Wriothesley's rarity.
+- **Balance** ([USER], 2026-10-15, after his finish-line run on 0.2.5618
+  cleared the Queen: "Act 1 was pretty easy (I think the flat numbers on the
+  guests beat out the damage and block checks you need here) - act 2 was very
+  touch and I nearly died several times - act 3 was pretty easy again as all of
+  my power scaling caught up. Overall, very solid! ... I think we're better
+  served taking her to Balance and evaluating overnight."). Her cards and rules
+  on `main` are frozen; changes go on `furina-next` with a suite record
+  (`operations/stage-gate.md`).
+- **Next:** Balance suite 1 on the base-five baseline seeds, plus the co-op
+  check owed at a finish line. His read to test: act 1 easy (guests' flat
+  numbers), act 2 the danger, act 3 easy once Powers scale.
 
 **Varka: Balance.**
 - **Rules** (`review/active/varka-paper-kit-2026-09-28.md` sec.3;
@@ -132,6 +196,13 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
   - **Current element:** that of his last Knight, or of the last Pyro, Hydro,
     Cryo or Electro any card of his applied. His cards read only its Oath; a
     card that would change it says "(Makes X current)" in combat.
+  - **Display:** the Oath dial by the Energy orb, where Regent shows his
+    Stars (`Vfx/Prototype/VarkaOathDial.cs`; 2026-10-14, [USER]: "Agreed on
+    2! It's definitely the cleanest option!"): four element pips with their
+    Oath, the current one large and lit; a pip pulses when its Oath rises; a
+    card in hand that would switch elements rings the pip it would make
+    current. His Oath badge stays on the model (the seat page reads it) but
+    is hidden on his own status strip.
   - **Swirl:** a Swirl he makes gains 1 Oath of the element Swirled, and
     while he holds Boreas's Fang it pays his current element (Pyro 3
     damage, Hydro 3 Block, Cryo 1 Vulnerable, Electro 3 to ALL).

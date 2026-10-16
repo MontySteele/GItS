@@ -61,7 +61,7 @@ ROW_CAP = 3
 HEADER_CAP = 12
 
 PATTERNS = ("*-cards.yaml", "*-companions.yaml", "*-upgrades.yaml")
-NAMED = ("prototype-surface.yaml", "yae-staging.yaml")
+NAMED = ("prototype-surface.yaml",)
 
 # Out of scope, each for the reason SCOPE in the docstring gives.
 EXCLUDED = frozenset({"role-tempo-floors.yaml"})

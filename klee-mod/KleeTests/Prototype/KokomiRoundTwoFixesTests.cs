@@ -99,7 +99,9 @@ public class KokomiRoundTwoFixesTests
         }
         Assert.Empty(wrong);
         Assert.True(checkedCards > 800, $"checked {checkedCards}");
-        Assert.True(plannable > 150, $"plannable {plannable}");
+        // 78 (both faces) since Kokomi review r9 pick 1 (a), 2026-10-15:
+        // Companions with no Plan line left the Bake-Kurage's reach.
+        Assert.True(plannable > 60, $"plannable {plannable}");
     }
 
     [Fact]
