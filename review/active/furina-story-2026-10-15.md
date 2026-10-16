@@ -45,7 +45,7 @@ straightens before she can stop herself.*
 
 | Option | Effect | Result |
 |---|---|---|
-| Perform for no one. | Lose 8 HP. Upgrade 2 random cards. | She plays every part and lands the high note she always used to miss. Nobody claps. She bows anyway. |
+| Perform for no one. | Lose 8 HP. Upgrade 2 random cards. | She plays every part and finally lands the high note in the second act. Nobody claps. She bows anyway, and makes a note about the lighting. |
 | Sit in the front row. | Heal 10 HP. | She has never actually sat out here. The seats are softer than she thought. She stays until her feet stop aching. |
 | Take a costume from the rack. | Gain a random relic. Add **Stage Fright**. | It fits perfectly. She would very much like to know who took her measurements. |
 
@@ -67,9 +67,9 @@ interview! —C."*
 
 | Option | Effect | Result |
 |---|---|---|
-| Read it aloud, twice. | Heal 12 HP. | She does all the voices, Charlotte's too. The second time she reads it slower, to make it last. |
-| Cast the sequel in the margin. | Choose 1 of 3 random Guest Stars. | Lead: Furina. Then a part for everyone she can think of, and bigger parts for the ones who stayed. |
-| Fold it into her glove. | Gain a random potion. | For later. Some nights are long. |
+| Read it aloud, twice. | Heal 12 HP. | She does all the voices, Charlotte's included. On the second reading she adds the exclamation marks Charlotte left out. |
+| Cast the sequel in the margin. | Choose 1 of 3 random Guest Stars. | Lead: Furina. Then a part for everyone she can think of. Charlotte gets a cameo, as a reporter, which serves her right. |
+| Fold it into her glove. | Gain a random potion. | Folded along the old creases. She'll want it for the next person who doubts her. |
 
 Nothing in this event is sent anywhere: she reads it, writes on it, or keeps
 it. Post reaching her in the Spire is the chains' convention (Jean's letter,
@@ -86,8 +86,8 @@ the understudy. Nobody told me how it ends."
 
 | Option | Effect | Result |
 |---|---|---|
-| Teach her the ending. | Lose 6 HP. Add an upgraded **Understudy's Debut**. | "You bow on the last note, not after. Chin up. And if you're scared, nobody needs to know." "Are you scared?" "All the time. You get used to it." |
-| Take the role back. | Remove a card. Add **Stage Fright**. | The girl hurries off, relieved. Furina takes her mark, and finds her hands are shaking. |
+| Teach her the ending. | Lose 6 HP. Add an upgraded **Understudy's Debut**. | "You bow on the last note, not after. Chin up. Hands where they can see them. No, like this." By the fifth try the girl has it. "Are you ever scared?" "Again. From the top." |
+| Take the role back. | Remove a card. Add **Stage Fright**. | The girl hurries off, relieved. Furina takes her mark. She knows every line, and the first one still comes out a beat late. |
 | Let her improvise. | Gain 50 Gold. | Her ending is completely wrong and the empty seats love it. Furina laughs so hard she has to sit down. |
 
 **Act 2. The Oratrice's Echo** (follows Rising Water; every option priced).
@@ -100,8 +100,8 @@ know. A plate reads: *State your case.*
 | Option | Effect | Result |
 |---|---|---|
 | Plead guilty. | Lose 12 HP. Gain a random Rare relic. | "I lied to everyone for five hundred years." A pause. "And it kept them alive." The scale tips, and something drops into the tray. |
-| Plead innocent. | Heal 15 HP. Add **Stage Fright**. | "I did what I had to, and it worked." It's true. Her voice wobbles anyway. The scale doesn't move; it never decided anything by itself. |
-| Give it a performance. | Lose 50 Gold. Transform 2 cards. Locked with less than 50 Gold. | There is a slot for an admission fee. She pays, then gives it the old monologue from the top. It's still good. The machine hands back something new. |
+| Plead innocent. | Heal 15 HP. Add **Stage Fright**. | "I did what I had to, and it worked." The scale doesn't move. "Well? Say something." It never could decide anything by itself. |
+| Give it a performance. | Lose 50 Gold. Transform 2 cards. Locked with less than 50 Gold. | There is a slot for an admission fee. She pays, under protest, then gives it the old monologue from the top. It's still good. The machine hands back something new. |
 
 **Act 2. A Letter from the Court** (home; follows A Steambird Clipping or no
 act-1 event; price, free way out). Opening: *read* "She is still doing
@@ -115,7 +115,7 @@ some weeks, and is concerned. N."
 
 | Option | Effect | Result |
 |---|---|---|
-| Write back at length. | Upgrade a card. | Four pages, mostly about cake. The last line: "I'm fine. Thank you for noticing." The courier tucks it away carefully. |
+| Write back at length. | Upgrade a card. | Four pages: the stairs (too many), the lighting (dreadful), a very rude Ancient, and the cake situation, which she considers urgent. The courier tucks it away carefully. |
 | Order the cake anyway. | Lose 40 Gold. Heal 25 HP. Locked with less than 40 Gold. | She sends the courier off with the Mora and an order. On the next landing a box from Café Lutèce is waiting, still cold. She eats the whole thing on the stairs. |
 | Keep it for a hard night. | Add **Tearful Monologue**. | "Tell him I'll write." She reads it twice more on the way up. |
 
@@ -125,21 +125,21 @@ census; it joins the release lore check.
 
 **Act 3. Curtain Call** (follows The Understudy; price, free way out).
 Opening: *taught* "A note from the understudy: 'I bowed on the last note!'"
-*took the role* "She has been carrying the role alone again." *improvised*
+*took the role* "She knows the role by heart now, the understudy's lines too." *improvised*
 "She still laughs about that ending." *Body:* The last stage. Every seat is
 full, and every face is someone she knew in Fontaine, or nearly. They have
 been waiting for her a long time.
 
 | Option | Effect | Result |
 |---|---|---|
-| Give them the finale. | Lose 10 HP. Add an upgraded **Let the People Rejoice**. *(a jackpot)* | She gives them everything, because she wants to, not because she has to. It is the best night of her life, and she knows it while it's happening. |
+| Give them the finale. | Lose 10 HP. Add an upgraded **Let the People Rejoice**. *(a jackpot)* | Halfway through she changes the ending, because she has a better one. The orchestra, somehow, follows her. |
 | Bow and leave them wanting more. | Heal 30 HP. | One proper bow, and off while they're still clapping. Someone in the wings is grinning at her. |
-| Ask them to stay for an encore. | Upgrade 3 random cards. Add **Stage Fright**. | They stay. Her heart is pounding, the good kind of nervous. This time she picks the song. |
+| Ask them to stay for an encore. | Upgrade 3 random cards. Add **Stage Fright**. | They stay. Her heart is pounding. She sends the orchestra back to the top twice, because the tempo is wrong. |
 
 **Act 3. An Empty Throne** (home finale; follows The Oratrice's Echo, A
 Letter from the Court, or no act-2 event; price, free way out). Opening:
-*guilty* "She has said it out loud once now." *innocent* "The scale's
-silence is still with her." *performed* "She has run out of old
+*guilty* "She has said it out loud once now." *innocent* "She is
+still annoyed with that scale." *performed* "She has run out of old
 monologues." *any letter* "The letter is in her glove." *Body:* At the top of
 the stairs is a throne over still water: the one from the prophecy, where the
 Archon was to sit weeping after everyone else was gone. It is empty. A seat
@@ -147,9 +147,9 @@ for one.
 
 | Option | Effect | Result |
 |---|---|---|
-| Sit in it one last time. | Lose 15 HP. Gain a random Rare relic. | Just as cold as she remembers. She tells herself she won't cry, and then she does, and that's alright. |
-| Walk past it. | Heal 20 HP. | "No, thank you." She has people waiting. |
-| Break it. | Lose 8 HP. Remove a card. Remove every **Doubt**. | It shatters like a stage prop, because that's all this one is. The real one she carried for five hundred years. This one she gets to break. |
+| Sit in it one last time. | Lose 15 HP. Gain a random Rare relic. | Just as cold as she remembers. She tells herself she won't cry, and then she does. |
+| Walk past it. | Heal 20 HP. | "No, thank you," she says, as if it had offered, and keeps climbing. |
+| Break it. | Lose 8 HP. Remove a card. Remove every **Doubt**. | It shatters like a stage prop, because that's all this one is. |
 
 Cards named that already exist: Understudy's Debut, Let the People Rejoice,
 Tearful Monologue, and the eleven Guest Stars. Doubt is the base curse.
@@ -166,10 +166,10 @@ Spire is the biggest stage she has ever seen."
 |---|---|---|
 | Neow | A performer. How bright you burn. | Oh! Well. Thank you. Do you say that to everyone? |
 | Orobas | Your trinket hums. Let me make it sing. | As long as it's in tune. I'll know if it isn't. |
-| Pael | You have bitten off more than you can chew. | People have been telling me that for five hundred years. |
+| Pael | You have bitten off more than you can chew. | Did anyone ask you? No. I didn't think so. |
 | Tezcatara | Warm yourself by my light. | That's... actually very kind. Thank you. |
 | Nonupeipe | You wear a crown you set down. | I set it down on purpose. My neck is much happier. |
-| Tanx | Do you fight for glory? | I've had glory. I'm fighting so I can go home. |
+| Tanx | Do you fight for glory? | Glory? Please. Have you read my reviews? |
 | Vakuu | Trade with me. | Show me what you have. And don't tell me it's priceless; everyone says that. |
 | Darv | I collect what others leave behind. | You'd have loved the Palais's lost property office. |
 
@@ -177,8 +177,8 @@ Spire is the biggest stage she has ever seen."
 came to see." Low HP "I'm fine! I'm... fine. Keep going." Her full Spend
 (signature) "Let the people rejoice!" (her Burst line, kept). Boss kill "Ha!
 Did you see that? Tell me someone saw that." Run loss "So that's the ending.
-I really thought there'd be another act." Run win "Curtain. And this time, I
-wrote the ending."
+I really thought there'd be another act." Run win "Curtain! Now, who's
+writing the review?"
 
 **Pairs** (filed in her table; Klee's and Varka's stay in theirs):
 with Kokomi, Furina: "A strategist! Do you need a dramatic entrance? I have
@@ -241,3 +241,19 @@ human and in-character but not flanderized."
   wanting to go home (Tanx), and a run win that says she wrote the ending. The
   narration is shorter and gives her small, ordinary reactions (the soft
   seats, laughing until she sits down, "Thank you for noticing").
+
+## Second voice pass 2026-10-15 (GPT's notes, relayed by [USER])
+
+GPT: "The strongest "AI" feeling comes from the narrator explaining what each
+experience means ... Her post-trial personality still includes pride,
+fussiness, embarrassment, artistic judgment, and generosity." Its list,
+taken whole: the Understudy's coaching now carries the fear ("Again. From
+the top."); Curtain Call shows one delighted moment (she changes the ending
+and the orchestra follows) instead of stating it; the throne results end on
+the action; Pael and Tanx answer the Ancient in front of her; the Court
+letter reports the Spire, not only cake. Read in a row, the results had too
+many shaking hands, long nights and neat closure, so the clipping, the
+encore, the walk past the throne and the run win were changed to pride,
+fussiness and professional judgment. Kept as GPT asked: the costume, Orobas,
+Yae's cover, the improvised ending, Neow, Tezcatara, Rising Water, the front
+row.
