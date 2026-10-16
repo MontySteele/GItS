@@ -105,5 +105,5 @@ whose source is not on disk does not matter: only rank 1 is promoted. Expect
 2. **Varka's other-nation faces.** Ruled (b). [USER]: "let's try and clean up
    Varka to only Use characters affiliated from Mondstadt (this would include
    recent releases like Nicole, Durin, Prune) rather than off-region
-   characters." The five rows re-picked are in the table; Knights. Muster.s
-   title crop was fixed alongside. Preview: `...scratchpadmond-candops-final.png`.
+   characters." The five rows re-picked are in the table; Knights' Muster's
+   title crop was fixed alongside. Preview: `...\scratchpad\mond-cand\crops-final.png`.
