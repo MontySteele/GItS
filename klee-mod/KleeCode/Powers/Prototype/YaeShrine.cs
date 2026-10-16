@@ -139,6 +139,20 @@ public sealed class YaeShrineLedger
     /// <summary>How many stand now ("standing counts Sakura now").</summary>
     public int Count => _sakura.Count;
 
+    /// <summary>The seat page's per-Sakura read (<see cref="YaeShrine.Snapshot"/>):
+    /// one row per Sakura, oldest first, <c>slot</c> matching its badge
+    /// ("Sakura 1" is the oldest) and <c>annotations</c> naming each
+    /// Annotation it carries in the order written. The badge sentence lists
+    /// them in a fixed order; this keeps the order they were applied.
+    /// Primitives only.</summary>
+    public List<object?> SakuraRows() =>
+        _sakura.Select((s, i) => (object?)new Dictionary<string, object?>
+        {
+            ["slot"] = i + 1,
+            ["annotations"] = s.Annotations
+                .Select(a => (object?)YaeAnnotationText.Name(a)).ToList(),
+        }).ToList();
+
     /// <summary>The planting clock.</summary>
     public int Seq { get; private set; }
 
@@ -382,7 +396,8 @@ public static class YaeShrine
     /// <summary>
     /// The seat page's read (the bridge's <c>gits/GitsYaeShrine.cs</c>, by
     /// reflection; <c>understudy/blindplay_board.yae_shrine</c>): the cards
-    /// she Edited this combat, the count Bestseller and Print Run read. EMPTY
+    /// she Edited this combat, the count Bestseller and Print Run read, and
+    /// each Sakura's Annotations in the order applied (<c>sakura</c>). EMPTY
     /// for anyone not Yae and outside a fight (a ledger is asked for only
     /// inside one, so a map-screen poll never resets it), except that a
     /// Meditations of a Yako which found nothing to Publish after this fight
@@ -399,6 +414,10 @@ public static class YaeShrine
         if (yae == null || !Live(yae) || yae.CombatState == null) return snapshot;
         snapshot["live"] = true;
         snapshot["edits_this_combat"] = Edits(yae);
+        // The pool to 78, pick 2 (a): a Sakura carries several Annotations,
+        // and the page lists them in the order applied (the badge sentence
+        // keeps its fixed-order flags, which an older page still reads).
+        snapshot["sakura"] = YaeShrineLedger.For(yae).SakuraRows();
         return snapshot;
     }
 

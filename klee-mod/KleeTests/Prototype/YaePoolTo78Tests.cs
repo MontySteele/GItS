@@ -49,6 +49,24 @@ public class YaePoolTo78Tests : IDisposable
     }
 
     [Fact]
+    public void The_seat_page_read_names_each_sakuras_annotations_in_the_order_applied()
+    {
+        var ledger = Fresh();
+        for (var i = 0; i < 2; i++) ledger.Plant(YaeLaw.PlantLevel);
+        ledger.EditSakura(YaeSakuraEnd.Oldest, 1, YaeAnnotation.FoxFire);
+        ledger.EditSakura(YaeSakuraEnd.Oldest, 1, YaeAnnotation.DeadlineExtension);
+        ledger.EditSakura(YaeSakuraEnd.Oldest, 1, YaeAnnotation.RedInk);
+        var rows = ledger.SakuraRows()
+            .Cast<System.Collections.Generic.Dictionary<string, object?>>().ToList();
+        Assert.Equal(2, rows.Count);
+        Assert.Equal(1, rows[0]["slot"]);
+        Assert.Equal(new object?[] { "Fox Fire", "Deadline Extension", "Red Ink" },
+                     ((System.Collections.Generic.List<object?>)rows[0]["annotations"]!).ToArray());
+        Assert.Equal(2, rows[1]["slot"]);
+        Assert.Empty((System.Collections.Generic.List<object?>)rows[1]["annotations"]!);
+    }
+
+    [Fact]
     public void An_edit_that_changes_nothing_is_not_an_edit()
     {
         var ledger = Fresh();

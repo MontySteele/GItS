@@ -13,8 +13,10 @@
 // hit, every failure swallowed -- a state read must never throw.
 //
 // THE CONTRACT. `KleeMod.Powers.YaeShrine.Snapshot(Player)` returns a
-// Dictionary<string, object?> of primitives (`live`, `edits_this_combat`),
-// handed straight to the wire under `player.yae_shrine`. ABSENT means "no Yae
+// Dictionary<string, object?> of primitives (`live`, `edits_this_combat`, and
+// `sakura`: one `{slot, annotations}` row per Sakura, oldest first, each
+// Annotation named in the order applied), handed straight to the wire under
+// `player.yae_shrine`. ABSENT means "no Yae
 // in this build"; EMPTY means "not Yae, or not in a fight".
 //
 // READ-ONLY.
