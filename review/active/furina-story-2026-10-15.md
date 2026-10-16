@@ -56,7 +56,7 @@ she waited for exactly this, and smiled through every day of it.*
 |---|---|---|
 | Run for the stairs. | Lose 10 HP. Remove a card. | She runs until the steps are dry and her lungs burn. Something heavy stays behind. |
 | Stand in it until it stops. | Add **Doubt**. Upgrade 3 random cards. | It stops at her knees. It always stopped at her knees. She stands there a long time anyway. |
-| Hum the overture and wade on. | Gain 75 Gold. Add **Stage Fright**. | She hums all the way across. Her hands don't stop shaking until later. |
+| Hum the overture and wade on. | Gain 75 Gold. Add **Stage Fright**. | She hums all the way across. The water is full of coins, like the Fountain of Lucine; she gathers a handful. Her hands don't stop shaking until later. |
 
 **Act 1. A Steambird Clipping** (all free). *A page of The Steambird is pinned
 under a stone, folded to the reviews. One is circled in red: "Former Archon
@@ -91,9 +91,9 @@ know. A plate reads: *State your case.*
 
 | Option | Effect | Result |
 |---|---|---|
-| Plead guilty. | Lose 12 HP. Gain a random Rare relic. | "Guilty of lying to everyone for five hundred years." The scale tips, and something drops into the tray. |
-| Plead innocent. | Heal 15 HP. Add **Doubt**. | "I did what I was asked to do." The scale doesn't move. It never decided anything on its own. |
-| Give it a performance. | Lose 50 Gold. Transform 2 cards. Locked with less than 50 Gold. | She gives it the old monologue, word perfect. It accepts, and hands back something new. |
+| Plead guilty. | Lose 12 HP. Gain a random Rare relic. | "Guilty of lying to everyone for five hundred years. And of keeping them safe while I did it." The scale tips, and something drops into the tray. |
+| Plead innocent. | Heal 15 HP. Add **Stage Fright**. | "I did what I was asked to do, and it worked." The scale doesn't move. It never decided anything on its own. |
+| Give it a performance. | Lose 50 Gold. Transform 2 cards. Locked with less than 50 Gold. | A slot under the plate takes an admission fee. Then she gives it the old monologue, word perfect. It accepts, and hands back something new. |
 
 **Act 2. A Letter from the Court** (home; follows A Steambird Clipping or no
 act-1 event; price, free way out). Opening: *read* "She can still do the
@@ -106,7 +106,7 @@ single Pour la Justice in some weeks, and is concerned. N."
 | Option | Effect | Result |
 |---|---|---|
 | Write back at length. | Upgrade a card. | Four pages. Mostly about cake. |
-| Order the cake anyway. | Lose 40 Gold. Heal 25 HP. Locked with less than 40 Gold. | Somewhere far below, a confused waiter receives a very large order. |
+| Order the cake anyway. | Lose 40 Gold. Heal 25 HP. Locked with less than 40 Gold. | She leaves the Mora on the step. On the next landing waits a box from Café Lutèce, still cold. She eats it on the stairs, all of it. |
 | Keep it for a hard night. | Add **Tearful Monologue**. | She reads it twice more before the next landing. |
 
 **Act 3. Curtain Call** (follows The Understudy; price, free way out).
@@ -118,9 +118,9 @@ waiting for her. They have waited a very long time.
 
 | Option | Effect | Result |
 |---|---|---|
-| Give them the finale. | Lose 10 HP. Add an upgraded **Let the People Rejoice**. *(a jackpot)* | She gives them everything. The applause goes on long after the lights. |
-| Bow and leave them wanting more. | Heal 30 HP. | One bow, properly, and off while they're still clapping. Always leave before they stop. |
-| Ask them to stay for an encore. | Upgrade 3 random cards. Add **Stage Fright**. | They stay. They will always stay if she asks. That is the part that frightens her. |
+| Give them the finale. | Lose 10 HP. Add an upgraded **Let the People Rejoice**. *(a jackpot)* | She gives them everything, because she wants to. It is the best night of her life, and she knows it while it's happening. |
+| Bow and leave them wanting more. | Heal 30 HP. | One bow, properly, and off while they're still clapping. The understudy is waiting in the wings, grinning. |
+| Ask them to stay for an encore. | Upgrade 3 random cards. Add **Stage Fright**. | They stay, and she is nervous all over again, the good kind. She picks the song herself. |
 
 **Act 3. An Empty Throne** (home finale; follows The Oratrice's Echo, A
 Letter from the Court, or no act-2 event; price, free way out). Opening:
@@ -135,7 +135,7 @@ seat for one.
 |---|---|---|
 | Sit in it one last time. | Lose 15 HP. Gain a random Rare relic. | Exactly as cold as she remembers. She doesn't cry. Then she does, and it's fine. |
 | Walk past it. | Heal 20 HP. | Some seats are better left empty. She has people waiting. |
-| Break it. | Lose 8 HP. Remove a card. Remove every **Doubt**. | It shatters like a stage prop, because that is all it ever was. |
+| Break it. | Lose 8 HP. Remove a card. Remove every **Doubt**. | It shatters like a stage prop, because this one is. The real one she carried for five hundred years. This one she gets to break. |
 
 Cards named that already exist: Understudy's Debut, Let the People Rejoice,
 Tearful Monologue, and the eleven Guest Stars. Doubt is the base curse.
@@ -143,8 +143,8 @@ Tearful Monologue, and the eleven Guest Stars. Doubt is the base curse.
 ## 3. Her lines
 
 **Character select.** *The Regina of All Waters.* "She played a god for five
-hundred years and was very good at it. Now she is only Furina, and the Spire
-is the biggest stage she has ever seen."
+hundred years and was very good at it. Now she chooses her own roles, and the
+Spire is the biggest stage she has ever seen."
 
 **Ancients** (each Ancient's greeting, then hers):
 
@@ -192,3 +192,16 @@ recipe La Lettre à Focalors), Charlotte as the Steambird's reporter. Ours, as
 the chains' scenes are: Neuvillette's letter, Charlotte's review and every
 landing in the Spire. Changed after the check: the throne is the prophecy's,
 not "blue glass", and the café is named.
+
+## Revised 2026-10-15 after GPT's review (relayed by [USER])
+
+- The stage thread ends happy: Curtain Call's three results are now about a
+  performance she chose ("It is the best night of her life"); the prophecy
+  thread keeps the heavy material.
+- Pleading guilty now owns both halves ("And of keeping them safe while I did
+  it"); pleading innocent costs Stage Fright, not Doubt, so self-condemnation
+  is not the scene's verdict.
+- The broken throne is the Spire's prop, not her burden.
+- Every payment has a source: coins in the water (the Fountain of Lucine), an
+  admission slot on the false Oratrice, a cake box she eats on the stairs.
+- Select line: "Now she chooses her own roles".
