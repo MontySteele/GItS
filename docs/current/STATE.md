@@ -121,7 +121,10 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
   waiting Plan flips it to the now-line. On a controller the peek button (left
   stick press, its glyph drawn under the Plan strip) opens a grid of the
   waiting Plans, each captioned with the line it will carry out as, where A
-  flips one and B closes (unseen in game).
+  flips one and B closes (unseen in game). The same view opens on the
+  keyboard's peek key (Space, or S in keyboard-only play, both remappable in
+  the game's settings; the hint under the strip names it) and on a click on
+  that hint (2026-10-16, unseen in game).
 - **Starter relic:** the Tamakushi Casket gains 3 Block at the start of her
   turn while a Plan is waiting, after the Block clear and before Plans
   resolve. Its upgrade, the Watatsumi Casket, gains 3 for each Plan waiting.
