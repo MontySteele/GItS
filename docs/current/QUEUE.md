@@ -22,6 +22,10 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
+- **Furina suite 3** (`review/records/furina-suite-3-2026-10-16.md`, one
+  pick, default (a)): promote `furina-next` (papers 1 and 2) to main; mean
+  end floor 42.8 (suites 1 and 2: 36.2, 32.4), four of five in act 3; then
+  paper 3 on act 1-2 HP loss and the Repay cards that read "Repays 0".
 - **Distribution readiness** (`distribution-readiness-2026-10-12.md`, two picks,
   defaults (a)): a closed beta now, public early access once Varka and Furina
   reach Balance; a GitHub release first. (The `LAW.md` art line, #1145, is
