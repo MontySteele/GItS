@@ -49,6 +49,20 @@ namespace KleeMod.Vfx;
 /// to. The strip draws the button's glyph and "Plans" under the column while a
 /// controller is in use (<see cref="KokomiPlanStrip"/>).
 ///
+/// KEYBOARD AND MOUSE (2026-10-16; in-game check: "opens only on the left
+/// stick press, no keyboard key and no key hint"). Peek is not a controller
+/// action alone: the game binds it on the keyboard too -- Space in mouse and
+/// keyboard play, S in keyboard-only play (<c>NInputManager</c>'s
+/// <c>DefaultHotkeyInputMap</c> and <c>DefaultKbOnlyInputMap</c>), both
+/// remappable in the game's own input settings. In combat no other default
+/// keyboard action sits on either key (the numbers pick cards, E ends the
+/// turn, A/S/D/X or A/D/Q/F the piles, M or Tab the map), and peek's only
+/// other combat user is a card selection's peek button, which pushes its own
+/// binding on top while it is up. So the same binding serves every device;
+/// the view used to refuse a mouse player and now does not. The strip names
+/// the key ("Space: Plans") and the hint itself is clickable, so a mouse
+/// player opens the same view with a click.
+///
 /// IN THE VIEW: the Plans in queue order, the first at the top left, each with
 /// a caption under its card -- "1. Plan line", "2. Now-line", "3. Plan only".
 /// A on a two-line Plan asks <see cref="KokomiPlan.RequestFlip"/> (the
@@ -118,20 +132,17 @@ internal static class KokomiPlanView
     }
 
     /// <summary>
-    /// The button. Opens only where opening cannot interrupt anything: her
-    /// own play phase, not mid-drain, a controller or keyboard-only player,
+    /// The button, the key or a click on the strip's hint. Opens only where
+    /// opening cannot interrupt anything: her own play phase, not mid-drain,
     /// the hand in play mode with no card being aimed, and no other screen
-    /// up. Anything else is a no-op, never a throw into the UI.
+    /// up. Any device may open it. Anything else is a no-op, never a throw
+    /// into the UI.
     /// </summary>
-    private static void TryOpen(Player me)
+    internal static void TryOpen(Player me)
     {
         try
         {
             if (_screen != null && GodotObject.IsInstanceValid(_screen)) return;
-            if (NControllerManager.Instance is not { IsUsingDirectionalNavigation: true })
-            {
-                return;
-            }
             if (!KokomiOverhaul.LiveFor(me.Creature)) return;
             if (me.PlayerCombatState?.Phase != PlayerTurnPhase.Play) return;
             if (!ReferenceEquals(KokomiPlan.Showing(me), KokomiPlan.Pending(me)))
@@ -435,16 +446,36 @@ public static class KokomiPlanViewRows
 
     /// <summary>
     /// The words of the strip's button hint, or null for none. A controller
-    /// shows the glyph and "Plans"; keyboard-only play names the key; a
-    /// mouse player has the strip's own click and sees no hint.
+    /// shows the glyph and "Plans"; keyboard play names the peek key ("S:
+    /// Plans" keyboard-only, "Space: Plans" with a mouse, 2026-10-16). A
+    /// mouse player whose peek key is unbound still sees "Plans", since the
+    /// hint is clickable; keyboard-only play with no key shows nothing.
     /// </summary>
     public static string? HintText(InputType input, string? key) => input switch
     {
         InputType.Controller => HintCaption,
         InputType.KeyboardOnlyMode when !string.IsNullOrEmpty(key) =>
             $"{key}: {HintCaption}",
+        InputType.MouseAndKeyboard => string.IsNullOrEmpty(key)
+            ? HintCaption
+            : $"{key}: {HintCaption}",
         _ => null,
     };
+
+    /// <summary>
+    /// A bound key's name as the hint prints it: "Space", "S", a number key
+    /// as its digit ("Key1" is "1"); an unbound key (<c>Key.None</c>) is
+    /// null.
+    /// </summary>
+    public static string? KeyName(Key key)
+    {
+        if (key == Key.None) return null;
+        var name = key.ToString();
+        return name.Length == 4 && name.StartsWith("Key", StringComparison.Ordinal)
+            && char.IsDigit(name[3])
+            ? name.Substring(3)
+            : name;
+    }
 
     /// <summary>
     /// Where the hint sits in the strip's column, in picture rows from the
