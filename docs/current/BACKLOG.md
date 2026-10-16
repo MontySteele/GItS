@@ -15,6 +15,9 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 
 ## Kits and display (the mod)
 
+- Furina, Let the People Rejoice's damage preview ignores an enemy's Hard To Kill cap (face said 34, each Exoskeleton took 9; suite 3 lane 5).
+- Furina's seat page never defines "past your line" in the Drain tip (suite 3 lane 5).
+- Furina's seat page printed a word tip for Charlotte on a screen with no Charlotte card (suite 3 lane 3).
 - Yae round 7 (2026-10-16): Proofread with one card in hand picked it without asking and overwrote that card's Retain (lane 4); Sakura Canopy+ prints "Gains 0 Block" while no Sakura stands (lane 4).
 - Ousia Pledge+ in a Yae deck was refused "it would take you to 0 HP" at 44 to 55 HP with Drain 3 (Yae round 7, lane 1): check the Drain gate for a player who is not Furina.
 - Bennett's Passion Overload and Kujou Sara's Crowfeather Cover do not say that an Attack carries one element, or that Sara's Electro lands when both are up (`CompanionOverhaulRiders.ElementFor`, fixed order, not newest); the sentence does not fit the 125-character power ceiling (116 and 119 now). Kokomi review r4, item 4.

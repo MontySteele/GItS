@@ -5,8 +5,8 @@ Text only; no number or behavior moves:
   * Lynette's Guest Star line reads "The first time each turn you lose HP to
     an enemy, gain double Fanfare." and her tip fits the 135 ceiling with no
     lint exception;
-  * Bis! says a card Spends all your Fanfare, and its hover says a "Spend up
-    to" card does not count;
+  * (Bis!'s face and rider left with Bis!, furina-next paper 2,
+    2026-10-16: `test_furina_extended_run`.)
   * Four Winds' Ascension's hover says its element hit gains no Oath.
   * (Wolfpack's play line: `test_varka_payoff_seat_page`.)
 """
@@ -39,17 +39,11 @@ def test_lynettes_line_reads_that_much_again_and_needs_no_exception():
     assert len(tip) <= 135
 
 
-def test_bis_face_and_hover_say_which_spends_count():
-    assert _rows()["proto_fs_bis"]["description"] == (
-        "Whenever a card [gold]Spends[/gold] all your [gold]Fanfare[/gold], "
-        "keep half of it.")
+def test_bis_rider_left_with_bis():
     face = (PROTOTYPE_DIR / "ProtoFsBis.cs").read_text(encoding="utf-8")
-    assert "Whenever a card [gold]Spends[/gold] all your" in face
-    assert "ArmKeywordTips.ForBisSpendUpTo(" in face
-    assert ('"A card that [gold]Spends[/gold] up to an amount does not count, "'
-            in TIPS_CS.read_text(encoding="utf-8"))
-    for rid, row in _rows().items():
-        assert gen.keeps_half_a_spend_all(row) == (rid == "proto_fs_bis"), rid
+    assert "ForBisSpendUpTo" not in face
+    assert "ForBisSpendUpTo" not in TIPS_CS.read_text(encoding="utf-8")
+    assert not hasattr(gen, "keeps_half_a_spend_all")
 
 
 def test_four_winds_ascension_says_its_hit_gains_no_oath():

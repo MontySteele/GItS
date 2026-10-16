@@ -889,7 +889,10 @@ ARM_KEYWORDS = (
     # `lead performer` became `front performer` everywhere. `Bow` is printed
     # as a verb, `[gold]Bow[/gold]s`, so the golded span is still the bare
     # word and the one token covers it.
-    ArmKeyword("Spend", ("Spend", "Spends"), "ArmKeywordTips.ForSpend"),
+    # Prima Donna (furina-next, 2026-10-16) prints the past tense: "if you
+    # Spent last turn".
+    ArmKeyword("Spend", ("Spend", "Spends", "Spent"),
+               "ArmKeywordTips.ForSpend"),
     ArmKeyword("Fanfare", ("Fanfare",), "ArmKeywordTips.ForFanfare"),
     # THE SALON'S TAB (2026-10-05): the HP loan's two verbs. `Bow`, `front
     # performer`, `Cue`, `Rehearsal`, `Ousia` and `Pneuma` left with the v2
@@ -1373,14 +1376,6 @@ def final_bow_acts_in_turn(card: dict) -> bool:
                for e in card.get("effects") or [])
 
 
-def keeps_half_a_spend_all(card: dict) -> bool:
-    """Design-session call (2026-10-13): does this row apply Bis!, which
-    keeps half of a spend-all and never of a "Spend up to"? Asked of the
-    effect, so the tip follows the power, not an id."""
-    return any(e.get("op") == "apply_power" and e.get("power") == "fs_bis"
-               for e in card.get("effects") or [])
-
-
 def ascension_hit_gains_no_oath(card: dict) -> bool:
     """Design-session call (2026-10-13): does this row deal Four Winds'
     Ascension's element hit, which gains no Oath (a payoff does not feed its
@@ -1511,7 +1506,6 @@ SEAT_ONLY_TIP_CALLS = frozenset({
     "ArmKeywordTips.ForPlanTwice",
     "ArmKeywordTips.ForNereidsTwice",
     "ArmKeywordTips.ForBankDamage",
-    "ArmKeywordTips.ForBisSpendUpTo",
     "ArmKeywordTips.ForAscensionNoOath",
     "ArmKeywordTips.ForFinalBowInTurn",
     "ArmKeywordTips.ForOldestGuest",
@@ -3921,9 +3915,10 @@ APPLY_POWERS = {
     "fs_critics_darling": ("CriticsDarlingPower", None,
         "Whenever you [gold]Drain[/gold] or [gold]Repay[/gold], deal that "
         "much damage to a random enemy."),
-    "fs_bis": ("BisPower", None,
-        "Whenever a card [gold]Spends[/gold] all your [gold]Fanfare[/gold], "
-        "keep half of it."),
+    # furina-next paper 2 (2026-10-16): Extended Run takes Bis!'s slot.
+    "fs_extended_run": ("ExtendedRunPower", None,
+        "Attacks and Skills that [gold]Spend[/gold] up to a number can "
+        "[gold]Spend[/gold] {X} more."),
     # THE POOL TO 75 (review/ruled/furina-pool-growth-2026-10-09.md sec.5).
     # Every class lives in klee-mod/KleeCode/Powers/Prototype/
     # FurinaPool75Powers.cs.
@@ -3934,14 +3929,20 @@ APPLY_POWERS = {
         "again."),
     "fs_ensemble_cast": ("EnsembleCastPower", None,
         "You have 4 guest seats."),
+    # Furina's engines (furina-next, 2026-10-16): Crescendo counts from the
+    # turn it is played; Prima Donna's upgraded card installs the Plus power
+    # (`upgraded_power`), which also draws.
     "fs_crescendo": ("CrescendoPower", None,
-        "The first time you [gold]Spend[/gold] each turn, draw {X} card."),
+        "At the start of your turn, gain {X} [gold]Fanfare[/gold], then {X} "
+        "more each turn after."),
     "fs_prima_donna": ("PrimaDonnaPower", None,
-        "At the start of your turn, if you have 10 or more "
-        "[gold]Fanfare[/gold], gain 1 Energy."),
+        "At the start of your turn, if you [gold]Spent[/gold] last turn, "
+        "gain 1 Energy."),
+    "fs_prima_donna_plus": ("PrimaDonnaPlusPower", None,
+        "At the start of your turn, if you [gold]Spent[/gold] last turn, "
+        "gain 1 Energy and draw 1 card."),
     "fs_standing_room_only": ("StandingRoomOnlyPower", None,
-        "Whenever you [gold]Spend[/gold] all your [gold]Fanfare[/gold] and it "
-        "is at least 1, gain 1 [gold]Strength[/gold]."),
+        "Whenever you [gold]Spend[/gold], gain 1 [gold]Strength[/gold]."),
     "fs_high_stakes": ("HighStakesPower", None,
         "Your Attacks deal 1 additional damage for every {X} HP you have "
         "[gold]Drained[/gold] and not [gold]Repaid[/gold]."),
@@ -7458,6 +7459,28 @@ STAGE_AMOUNT_VARS: dict[str, str] = {
 }
 
 
+#: furina-next paper 2 (2026-10-16): a `stage_spend_up_to`'s `per:` -- the
+#: count its `amount` is multiplied by -- as a C# expression over an owner.
+STAGE_UP_TO_PER_CS = {
+    # Bring the House Down: "Spend up to 10 for each guest on stage".
+    "stage_guests": "FurinaStage.Of({owner}).Count",
+}
+
+
+def stage_up_to_cap_cs(eff: dict, owner: str) -> str:
+    """A "Spend up to X" row's printed cap as C#: the literal, or the
+    literal times its `per:` count read off `owner`. Extended Run is not
+    here: `FurinaStage.SpendUpTo` / `SpentOrUpTo` add it to the whole cap."""
+    n = str(int(eff.get("amount", 1)))
+    per = eff.get("per")
+    if per is None:
+        return n
+    if per not in STAGE_UP_TO_PER_CS:
+        raise SystemExit(f"gen_klee_cards: stage_spend_up_to per {per!r} "
+                         "has no C# count")
+    return f"{n} * {STAGE_UP_TO_PER_CS[per].format(owner=owner)}"
+
+
 def stage_stmt(eff: dict, amount: str | None = None) -> str:
     """One stage op -> the one awaited statement it emits."""
     op = eff["op"]
@@ -7485,12 +7508,15 @@ def stage_stmt(eff: dict, amount: str | None = None) -> str:
     if op == "stage_spend_up_to":
         # The Spend paper (2026-10-10): spends X or all she holds, never
         # fails; the play's `stage_spent` is what it counted.
-        n = str(int(eff.get("amount", 1)))
+        # furina-next paper 2 (2026-10-16): a row's cap may be per guest
+        # ("Spend up to 10 for each guest on stage"), and Extended Run adds
+        # to the whole cap inside `FurinaStage.SpendUpTo`.
+        n = stage_up_to_cap_cs(eff, "Owner.Creature")
         return ("await FurinaStage.SpendUpTo(choiceContext, Owner.Creature, "
                 f"{n});")
     if op == "stage_spend_half":
         # Standing Ovation (2026-10-11): a "Spend up to" half the bank,
-        # rounded down; not a spend-all, so no Bis!.
+        # rounded down; not "up to a number", so no Extended Run.
         return ("await FurinaStage.SpendHalf(choiceContext, "
                 "Owner.Creature);")
     if op == "stage_drain":
@@ -7627,8 +7653,8 @@ def stage_spent_cs(card: dict, eff: dict) -> str:
     if up_to is not None:
         # The Spend paper (2026-10-10): before the play, what "Spend up to
         # X" would count now; during it, what it counted.
-        return ("static (card, _) => FurinaStage.SpentOrUpTo(card, "
-                f"{int(up_to.get('amount', 1))})")
+        cap = stage_up_to_cap_cs(up_to, "card.Owner?.Creature")
+        return f"static (card, _) => FurinaStage.SpentOrUpTo(card, {cap})"
     return STAGE_COUNT_CS["stage_spent"]
 
 
@@ -8420,8 +8446,15 @@ def _preview_hit_count(card: dict) -> str:
                 formula.get("count")) in PREVIEW_HIT_COUNTS:
             base = int(formula.get("base", 0))
             per = int(formula.get("per", 1))
-            return (f"{base} + {per} * "
-                    f"({PREVIEW_HIT_COUNTS[str(formula['count'])]})")
+            count = PREVIEW_HIT_COUNTS[str(formula["count"])]
+            up_to = _stage_up_to_before(card, eff)
+            if formula["count"] == "stage_spent_threes" and up_to is not None:
+                # furina-next paper 2 (2026-10-16): Bravura's "Spend up to
+                # 18" previews what the cap (Extended Run's included) takes.
+                cap = stage_up_to_cap_cs(up_to, "card.Owner?.Creature")
+                count = (f"FurinaStage.SpentOrUpTo(card, {cap}) / "
+                         "FurinaStageLaw.BravuraSpentPer")
+            return f"{base} + {per} * ({count})"
     raise SystemExit(
         f"gen_klee_cards: {card['id']}: the face prints {{TotalDamage}} but "
         "no damage op has a hit count PREVIEW_HIT_COUNTS can read")
@@ -18375,13 +18408,9 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             tips_expr = (
                 "ArmKeywordTips.ForNereidsTwice("
                 f"{tips_expr or 'base.ExtraHoverTips'}, this)")
-        # Design-session calls (2026-10-13): Bis! says a "Spend up to" does
-        # not count, and Four Winds' Ascension's element hit gains no Oath.
-        # The same rider shape.
-        if keeps_half_a_spend_all(card):
-            tips_expr = (
-                "ArmKeywordTips.ForBisSpendUpTo("
-                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
+        # Design-session call (2026-10-13): Four Winds' Ascension's element
+        # hit gains no Oath. (Bis!'s rider left with Bis!, furina-next paper
+        # 2, 2026-10-16.)
         if ascension_hit_gains_no_oath(card):
             tips_expr = (
                 "ArmKeywordTips.ForAscensionNoOath("

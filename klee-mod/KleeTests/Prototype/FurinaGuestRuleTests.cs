@@ -479,26 +479,8 @@ public class FurinaGuestRuleTests
             Il.Calls(typeof(ProtoFsCastingCall).GetMethod("OnPlay", All)!));
     }
 
-    [Fact]
-    public void Crescendo_draws_on_the_first_spend_each_turn_only()
-    {
-        var kit = StageKit.With(new StageMods { Crescendo = 1 }, 9);
-        Run(kit.Director.Spend(2));
-        Run(kit.Director.Spend(2));
-        Assert.Equal(1, kit.Board.Drawn);
-        kit.Stage.OpenTurn();
-        Run(kit.Director.SpendAll());
-        Assert.Equal(2, kit.Board.Drawn);
-    }
-
-    [Fact]
-    public void Standing_room_only_gives_strength_on_a_spend_all_of_at_least_one()
-    {
-        var kit = StageKit.With(new StageMods { StandingRoomOnly = 1 }, 3);
-        Run(kit.Director.SpendAll());
-        Run(kit.Director.SpendAll());                   // nothing held
-        Assert.Equal(1, kit.Board.Gained);
-    }
+    // Crescendo and Standing Room Only (furina-next, 2026-10-16): pinned in
+    // FurinaEnginesTests.
 
     [Fact]
     public void Hymn_of_renewal_counts_hp_actually_repaid()
@@ -523,7 +505,8 @@ public class FurinaGuestRuleTests
         var low = StageKit.At(3, 78);                   // 3 - 3 = 0 HP: no room
         Assert.Equal(0, Run(low.Director.Regina(1)));
         Assert.Equal(0, low.Board.Gained);
-        foreach (var hook in new[] { "FurinaStage.ReginaDrains",
+        foreach (var hook in new[] { "FurinaStage.CrescendoGains",
+                                     "FurinaStage.ReginaDrains",
                                      "FurinaStage.PneumaTidesRepays",
                                      "FurinaStage.PrimaDonnaEnergy" })
         {

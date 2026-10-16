@@ -979,18 +979,22 @@ POWER_HOOKS: dict[str, list[tuple[str, str, str]]] = {
                               _hook("shared", "hp_ledger", "write")],
     "fs_fountain_of_lucine": [_hook("private", "stage", "write")],
     "fs_critics_darling": [_hook("private", "stage", "read")],
-    "fs_bis": [_hook("private", "stage", "read"),
-               _hook("private", "stage", "write")],
+    # furina-next paper 2 (2026-10-16): Extended Run raises a played card's
+    # "Spend up to" cap.
+    "fs_extended_run": [_hook("private", "stage", "read")],
     "fs_grand_entrance": [_hook("shared", "plays_this_turn", "read"),
                           _hook("shared", "card_identity", "read"),
                           _hook("private", "stage", "write"),
                           _hook("shared", "block_held", "write")],
     "fs_showstopper": [_hook("private", "stage", "use")],
     "fs_ensemble_cast": [_hook("private", "stage", "write")],
-    "fs_crescendo": [_hook("private", "stage", "read"),
-                     _hook("shared", "draw_pile", "use"),
-                     _hook("shared", "hand_contents", "write")],
+    # furina-next (2026-10-16): Crescendo writes Fanfare at turn start; the
+    # upgraded Prima Donna draws.
+    "fs_crescendo": [_hook("private", "stage", "write")],
     "fs_prima_donna": [_hook("private", "stage", "read")],
+    "fs_prima_donna_plus": [_hook("private", "stage", "read"),
+                            _hook("shared", "draw_pile", "use"),
+                            _hook("shared", "hand_contents", "write")],
     "fs_standing_room_only": [_hook("private", "stage", "read")],
     "fs_high_stakes": [_hook("private", "stage", "read"),
                        _hook("shared", "card_identity", "write")],

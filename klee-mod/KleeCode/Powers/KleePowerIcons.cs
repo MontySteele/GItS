@@ -406,6 +406,8 @@ internal static class KleePowerIcons
         PneumaTidesPower => KleePck.Path("furina/powers/ovation_trickle.png"),
         PrimaDonnaPower =>
             KleePck.Path("furina/powers/star_of_the_show.png"),
+        PrimaDonnaPlusPower =>
+            KleePck.Path("furina/powers/star_of_the_show.png"),
         ReginaOfAllWatersPower =>
             KleePck.Path("furina/powers/limelight.png"),
         ShowstopperPower => KleePck.Path("furina/powers/top_billing.png"),
@@ -415,7 +417,8 @@ internal static class KleePowerIcons
             KleePck.Path("furina/powers/unheard_confession.png"),
         CriticsDarlingPower =>
             KleePck.Path("furina/powers/the_gallery_stirs.png"),
-        BisPower => KleePck.Path("furina/powers/stagehands_encore.png"),
+        ExtendedRunPower =>
+            KleePck.Path("furina/powers/stagehands_encore.png"),
         // THE SUPPORTING POOL (2026-09-26): the two new guests' faces, from
         // the same art pass, and the batch's nine powers borrowing the
         // shipped Furina sigil nearest their job, on the terms every borrow
