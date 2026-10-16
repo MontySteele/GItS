@@ -40,7 +40,7 @@ public sealed class ProtoFsRisingTide : CustomCardModel, ICharacterCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Rising Tide"),
+        ("title", "Endless Waltz"),
         ("description", "Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} for each time you Repaid this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 

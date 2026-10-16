@@ -54,7 +54,7 @@ public sealed class ProtoVkThunderingVerdict : CustomCardModel, IElementalCard, 
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Thundering Verdict"),
+        ("title", "Lightning Fang"),
         ("description", "Deal {VkBase:diff()} [gold]Electro[/gold] damage, plus {VkPer:diff()} for each [gold]Electro[/gold] [gold]Oath[/gold], to ALL enemies X times.{InCombat:\n(Deals {VkHit:diff()} damage each time)|}{InCombat:{VarkaSwitch}|}"),
     };
 

@@ -44,7 +44,7 @@ public sealed class ProtoVkPyreOath : CustomCardModel, ICharacterCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Ashen Oath"),
+        ("title", "For Crepus"),
         ("description", "Gain {PowerAmount:diff()} [gold]Strength[/gold]. Gain {VkAmount:diff()} [gold]Pyro[/gold] [gold]Oath[/gold]."),
     };
 

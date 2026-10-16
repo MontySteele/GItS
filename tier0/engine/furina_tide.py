@@ -492,7 +492,7 @@ CARDS: dict[str, Spec] = {
     # The Crowd (9).
     # Crashing Waves (1): Deal 4 Hydro damage twice. Spend up to 12: hit
     # once more for every 4. (The Spend paper.)
-    "ftd_crashing_waves": Spec("Crashing Waves", 1, "attack", "common",
+    "ftd_crashing_waves": Spec("Soloist's Solicitation", 1, "attack", "common",
                                "upto_volley", (4, 2, 12)),
     "ftd_bubble_aria": Spec("Bubble Aria", 1, "skill", "common",
                             "spend_block_draw", (6, 3, 2)),
@@ -515,17 +515,17 @@ CARDS: dict[str, Spec] = {
     "ftd_bring_the_house_down": Spec("Bring the House Down", 2, "attack",
                                      "rare", "house_down", (1,)),
     # Ousia, Drain (10).
-    "ftd_undercurrent": Spec("Undercurrent", 1, "attack", "common",
+    "ftd_undercurrent": Spec("Unheard Confession", 1, "attack", "common",
                              "undercurrent", (2, 5, 1)),
     "ftd_overdraft": Spec("Overdraft", 0, "skill", "common",
                           "drain_energy_next", (4, 1)),
     "ftd_ousia_pledge": Spec("Ousia Pledge", 1, "skill", "common",
                              "drain_draw", (3, 2)),
-    "ftd_against_the_tide": Spec("Against the Tide", 1, "attack",
+    "ftd_against_the_tide": Spec("Against All Odds", 1, "attack",
                                  "uncommon", "drained_turn_hit", (8, 14)),
     "ftd_pay_the_tab": Spec("Pay the Tab", 1, "skill", "uncommon",
                             "drain_draw", (6, 3)),
-    "ftd_riptide_lunge": Spec("Riptide Lunge", 1, "attack", "uncommon",
+    "ftd_riptide_lunge": Spec("Coup de Théâtre", 1, "attack", "uncommon",
                               "riptide", (3, 10, 6)),
     "ftd_high_stakes": Spec("High Stakes", 1, "power", "uncommon", "power",
                             (HIGH_STAKES_EVERY,), "high_stakes"),
@@ -553,7 +553,7 @@ CARDS: dict[str, Spec] = {
                                   "uncommon", "hydro_aoe_repay", (10, 4)),
     "ftd_balance_the_books": Spec("Balance the Books", 1, "skill",
                                   "uncommon", "balance_books", (4,)),
-    "ftd_rising_tide": Spec("Rising Tide", 1, "attack", "uncommon",
+    "ftd_rising_tide": Spec("Endless Waltz", 1, "attack", "uncommon",
                             "rising_tide", (6, 3)),
     "ftd_pneuma_tides": Spec("Pneuma Tides", 1, "power", "uncommon",
                              "power", (2,), "pneuma_tides"),
@@ -812,7 +812,7 @@ def high_stakes_bonus(player) -> int:
 
 
 def drained_this_turn(player) -> bool:
-    """Against the Tide (2026-10-12): "If you Drained this turn" -- 1 or more
+    """Against All Odds (was Against the Tide, 2026-10-12): "If you Drained this turn" -- 1 or more
     HP drained this turn by any Drain (the C# `FurinaStage.DrainedThisTurn`,
     off `FurinaStageLedger.DrainedThisTurn`)."""
     return player.ftd.drained_hp_this_turn > 0

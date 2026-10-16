@@ -30,7 +30,7 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
 |---|---|---|---|---|---|---|
 | `klee` | Klee | 70 | Mondstadt | Pyro | Balance | 78 |
 | `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 78 |
-| `furina` | Furina | 78 | Fontaine | Hydro | Prototype | 78 |
+| `furina` | Furina | 78 | Fontaine | Hydro | Balance | 78 |
 | `varka` | Varka | 80 | Mondstadt | Anemo | Balance | 78 |
 | `yae` | Yae Miko | 72 | Inazuma | Electro | Prototype | 43 (staged) |
 
@@ -144,7 +144,7 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
   kits' bursts). [USER]: "Let's flag this as a possible change on Kokomi and
   otherwise leave it alone."
 
-**Furina: Prototype.**
+**Furina: Balance** (2026-10-15).
 - **Rules** (`review/active/furina-research-proposal-2026-10-05.md`, sec.2):
   - **Drain** spends HP, never to 0. Each combat she has a Drain buffer of 1/4
     of her Max HP (Lyney adds 10); her own Drains may go past it, a guest's
@@ -174,10 +174,20 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
 - **Design final** ([USER], 2026-10-14, after his run died mid act 3:
   "Overall, very fun! I definitely like Furina's current design!"). Her model
   is in ("new model looks good!").
-- **Next:** the sweep he asked for in the same message ("a cleanup / dedupe
-  pass on the cards to make space to add a wider variety of non guest star
-  effects"): `review/active/furina-sweep-2026-10-14.md`, fifteen cuts and
-  fifteen adds, built on #1271, picks open. Parked: Wriothesley's rarity.
+- **Sweep:** the cleanup / dedupe pass (`review/active/furina-sweep-2026-10-14.md`,
+  fifteen cuts and fifteen adds) is ruled and built (#1271). Parked:
+  Wriothesley's rarity.
+- **Balance** ([USER], 2026-10-15, after his finish-line run on 0.2.5618
+  cleared the Queen: "Act 1 was pretty easy (I think the flat numbers on the
+  guests beat out the damage and block checks you need here) - act 2 was very
+  touch and I nearly died several times - act 3 was pretty easy again as all of
+  my power scaling caught up. Overall, very solid! ... I think we're better
+  served taking her to Balance and evaluating overnight."). Her cards and rules
+  on `main` are frozen; changes go on `furina-next` with a suite record
+  (`operations/stage-gate.md`).
+- **Next:** Balance suite 1 on the base-five baseline seeds, plus the co-op
+  check owed at a finish line. His read to test: act 1 easy (guests' flat
+  numbers), act 2 the danger, act 3 easy once Powers scale.
 
 **Varka: Balance.**
 - **Rules** (`review/active/varka-paper-kit-2026-09-28.md` sec.3;

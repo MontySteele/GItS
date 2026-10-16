@@ -26,7 +26,7 @@ Sources: B = https://baike.baidu.com/en/item/Varka/662218 ; GB = https://genshin
 - Andrius: sometimes sparred with Varka so Varka could pass his predecessors (B). The Knight of Boreas title and the Wolf's Gravestone are tied to Andrius (DS, [SPEC] on how).
 - Fatui: Childe's lines call Varka extremely strong (DS). Nod-Krai: Arlecchino, Nico, Dottore (B).
 - Not found: Klee, Albedo, Amber, Noelle details. Do not invent them.
-- Four Winds: Dvalin (Dragon of the East), Andrius (Wolf of the North), Vennessa (Falcon of the West), and the Lion of the South, a human, the Knights' Grand Master (search summary of Sportskeeda/Touchtapplay; unverified). Barbatos is the Archon, not one of the four. Decarabian and Andrius were the old gods; Vennessa was a slave who helped overthrow the Lawrences and founded the Knights.
+- Four Winds: Dvalin (Dragon of the East), Andrius (Wolf of the North), Vennessa (Falcon of the West), and the Lion of the South, a human, the Knights' Grand Master (search summary of Sportskeeda/Touchtapplay; unverified). Correction ([USER], 2026-10-15): "Varka is the current Wolf of the North; the current Lion of the South is Jean." Barbatos is the Archon, not one of the four. Decarabian and Andrius were the old gods; Vennessa was a slave who helped overthrow the Lawrences and founded the Knights.
 - Azure Fang's Oath: stack name in his A4 passive (GB). Boreas = the North Wind, Andrius's domain; the fang is the wolf.
 
 ## 4. Kit names (GB; effects paraphrased)

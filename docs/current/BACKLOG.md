@@ -63,7 +63,9 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - `EB-159` [USER] at the machine: listen for the modded player's death sound (`set_hp player 1`, end turn into a hit).
 - `EB-38` [USER] at a shop: the spine-less character portrait idles (the rest-site half is seen).
 - `EB-160` verify a live locale switch: the injected loc tables survive it, or a `LocException` names the seam.
-- Furina screen (wave 2026-10-12): Hymn's "(Repays 0)" preview is wrong after a Drain; Spend damage never shows Vulnerable; a boss shows "Frozen 1".
+- Furina screen (wave 2026-10-12): Hymn's "(Repays 0)" preview is wrong after a Drain; Spend damage never shows Vulnerable; a boss shows "Frozen 1"; suite 1 (2026-10-15): Pneuma Refrain and Hymn print "Repays 0" after enemy hits and seats read it as broken, with nothing saying only drained HP repays.
+- Furina suite 1: Quick Flourish ("Spend 4") is unplayable below 4 Fanfare without the card saying so; the Lynette glossary line does not match her card.
+- Whispering Earring (base relic) plays a seat's first turn invisibly: the seat page should log the cards it played (Furina suite 1, lane 1).
 - Kaiser Crab (Varka wave 2026-10-13, lane 5 fight 16): when Baron Bunny's turn-start hit killed Rocket, Crab Rage's 99 Block never reached Crusher (telemetry: 18 enemy Block all fight, Crusher's own Guarded Strike; Crusher then died to Tidal Bulwark and Blazing Charge). The base game grants it in `CrabRagePower.AfterDeath` and no mod code was found that removes it; reproduce live (`set_hp` Rocket low, Baron Bunny).
 - Kokomi round 3 (lane 4 F6): Change of Plans was refused "no Energy" with four Plans waiting. Not reproduced: it costs 0, its gate reads only the queue, and the sim plays it at 0 Energy with four waiting (`test_kokomi_round3_alist_2026_10_13`). The game's refusal enum ("EnergyCostTooHigh") is what prints "not enough energy"; have the next seat record the hand and Energy on any such refusal.
 - Varka text (ascension check 2026-10-12): a Knight Companion's element switch (Team Effort) shows only after the play; Kindled Edge switched him to Pyro with no "Element switch" line; Four Winds' Ascension returns after a mid-fight reshuffle, unprinted.
@@ -74,7 +76,7 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - Mine text does not say it consumes the aura set for the big Bomb (the Mine tip is at its 135-character ceiling; the plain-Bombs half is in the tip since #1226).
 - Perfect Timing's replay did not visibly fire when its first Set off killed the target.
 - "Witch's Homework" and "Witch's Homework II" read alike in hand lists (a naming pick for [USER]; the Retain half is a tip since #1226).
-- Chained Reactions' +3 missed a two-Bomb Ka-pow! set-off (trace); Durin's start-of-turn tick skipped one fight (Fogmog, trace).
+- Chained Reactions' +3 missed a two-Bomb Kaboom! set-off (trace); Durin's start-of-turn tick skipped one fight (Fogmog, trace).
 - The Spark line vanishes at 0, and Snecko Oil's added Spark costs are unexplained; a Mine going off printed "gives 1 Spark" plus Pounding Surprise's "+1 Spark" but the seat counted +1.
 - Wait For It... printed "Nothing ... landed" on paying turns; Weak shows different Pyro numbers on card and board; the Melt preview reads as if the whole Bomb pile multiplies.
 
@@ -85,7 +87,7 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - The hand-full discard line for generated Stings and Wards prints only after the Plans resolve (Kokomi round 4, lane 1, fight 16).
 - No receipt says what a Set off detonated, so a Set off that kills reads as a vanished Bomb. Needs a detonation log in the mod like ReactionLog, a bridge read and a page line such as "Sizzle set off Corpse Slug: Mine 3 (3), Bomb 16 (2, killed it). Nothing jumped."
 - Incoming ignores Mines that fire first and Look Out!'s Block from them; the "Put Mine N on ..." lines after Big Badda Boom read as five Mines from one Bomb.
-- Ka-pow!'s own damage is not printed when its target dies to its Bombs, and the hits of a fight-ending Rapid Fire are skipped.
+- Kaboom!'s own damage is not printed when its target dies to its Bombs, and the hits of a fight-ending Rapid Fire are skipped.
 - The resolution rows do not say which hit was which (Four Winds' Ascension+ read "2, 3, 9, 36" unlabelled); needs a source label per hit on `ResolutionLedger`'s wire and in `blindplay_render`'s hit rows.
 - Cycle of Seasons' trigger damage prints on the line of the card that changed Varka's element, and Cycle's own line reads "Nothing this page can count landed off it".
 - Copy numbers renumber after a play, so "Frantic Escape (2)" picked the other copy; name copies by something stable (cost or upgrade) or warn on renumber. The bridge renumbers mid-turn too ("Sting (3)" vanished after a play and the next command was refused; Kokomi jellyfish round 2026-10-12, lane 1). Numbers now hold until the next `observe` (`resolve_shown_card`), but Kokomi round 3 lane 5 F6 still wasted The Shape of Water on a renumbered Sting; stable handles for a whole turn need copy identity across observes (a per-card id on the wire).

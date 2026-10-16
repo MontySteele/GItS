@@ -523,7 +523,7 @@ public class ResolutionLedgerTests
         ResolutionLedger.OpenPlay("vk_fwa", "Four Winds' Ascension", false);
         ResolutionLedger.ClosePlay();
         ResolutionLedger.NoteEventOnPlay(ResolutionLedger.Wolfpack,
-            "Four Winds' Ascension", "Four Winds' Ascension", "Wolfpack",
+            "Four Winds' Ascension", "Four Winds' Ascension", "Lupical",
             amount: 1);
         var rows = ResolutionLedger.Snapshot();
         Assert.Single(rows);
@@ -536,7 +536,7 @@ public class ResolutionLedgerTests
         Fresh();
         ResolutionLedger.OpenPlay("vk_fwa", "Four Winds' Ascension", false);
         ResolutionLedger.NoteEventOnPlay(ResolutionLedger.Wolfpack,
-            "Four Winds' Ascension", "Four Winds' Ascension", "Wolfpack",
+            "Four Winds' Ascension", "Four Winds' Ascension", "Lupical",
             amount: 2);
         rows = ResolutionLedger.Snapshot();
         Assert.Single(rows);
@@ -547,7 +547,7 @@ public class ResolutionLedgerTests
         ResolutionLedger.OpenPlay("strike", "Strike", false);
         ResolutionLedger.ClosePlay();
         ResolutionLedger.NoteEventOnPlay(ResolutionLedger.Wolfpack,
-            "Four Winds' Ascension", "Four Winds' Ascension", "Wolfpack",
+            "Four Winds' Ascension", "Four Winds' Ascension", "Lupical",
             amount: 1);
         rows = ResolutionLedger.Snapshot();
         Assert.Empty((List<Dictionary<string, object?>>)rows[0]["events"]!);

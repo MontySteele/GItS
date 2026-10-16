@@ -460,6 +460,31 @@ def test_twin_gales_pays_the_swirled_element_too(varka):
     assert st.enemies[0].hp == 100 - 2 - 3           # and Pyro paid
 
 
+def test_twin_gales_pays_a_matched_element_twice(varka):
+    """Varka round 5 (2026-10-13, varka-next): "If it's your current element,
+    it pays twice." A Hydro Swirl with Hydro current pays Hydro's Block twice;
+    it paid once."""
+    st = _state(enemies=[_enemy(aura="hydro")])
+    led = _led(st)
+    led.current = "hydro"
+    st.player.powers[V.TWIN_GALES] = 1
+    _play(st, _vk("jean_dandelion_breeze"))
+    assert st.player.block == 7 + 3 + 3               # Hydro paid twice
+    assert st.enemies[0].hp == 100 - 2
+
+
+def test_twin_gales_without_a_current_payout_pays_the_swirled_once(varka):
+    """With no Fang held his current element pays nothing, so Twin Gales'
+    own payout is the only one."""
+    st = _state(enemies=[_enemy(aura="hydro")])
+    led = _led(st)
+    led.current = "hydro"
+    st.player.relic_hooks = ()
+    st.player.powers[V.TWIN_GALES] = 1
+    _play(st, _vk("jean_dandelion_breeze"))
+    assert st.player.block == 7 + 3
+
+
 def test_oath_unto_death_costs_2_and_keeps_its_innate_upgrade(varka):
     # The forced-Amber round (2026-10-10): cost 3 to 2.
     oud = loader.get_card(_vk("oath_unto_death"))

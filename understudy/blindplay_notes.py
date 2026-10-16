@@ -3761,7 +3761,7 @@ RESOLUTION_FANG_DEFAULT = "Boreas's Fang"
 #: Design-session call (2026-10-13): Wolfpack's copy, on the Ascension's own
 #: play line. It went into the draw pile unseen, and two seats never knew it
 #: worked. `{n}` is "a copy" or "2 copies".
-RESOLUTION_WOLFPACK = ("  Wolfpack: shuffled {n} of Four Winds' Ascension "
+RESOLUTION_WOLFPACK = ("  Lupical: shuffled {n} of Four Winds' Ascension "
                        "into your Draw Pile.")
 #: The Varka wave (2026-10-13): Stoke the Flames' bonus, on the Attack that
 #: took it. A seat "never saw the number change in the log, and could not tell

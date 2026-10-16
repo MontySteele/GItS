@@ -1208,6 +1208,10 @@ CARD_FIELD_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # v4. Star Turn's printed discount reads the Stage's Fanfare.
     "cost_reduction_per_fanfare": [_hook("private", "stage", "read"),
                                    _hook("shared", "card_identity", "write")],
+    # Tempest Charge's printed discount reads his Swirls this turn.
+    "cost_reduction_per_swirl_this_turn": [
+        _hook("shared", "aura_reaction", "read"),
+        _hook("shared", "card_identity", "write")],
     # v4. A `plan:` line WRITES the Plan queue (filed on `kurage`); its
     # effects are walked by `classify_row` like `effects:`.
     "plan": [_hook("private", "kurage", "write")],

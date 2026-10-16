@@ -257,3 +257,13 @@ encore, the walk past the throne and the run win were changed to pride,
 fussiness and professional judgment. Kept as GPT asked: the costume, Orobas,
 Yae's cover, the improvised ending, Neow, Tezcatara, Rising Water, the front
 row.
+
+## Ruled 2026-10-15
+
+[USER]: "I like the Furina event PR! Approved!" All three picks at (a), with
+both voice passes.
+
+## Ruled 2026-10-15
+
+[USER]: "I like the Furina event PR! Approved!" All three picks at (a), with
+both voice passes.
