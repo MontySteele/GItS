@@ -46,23 +46,31 @@ spenders whose cap or hit count grows, and a Power raises every cap.
 |---|---|---|
 | **Rising Applause** (starter) | Gain 5 Block. Spend all your Fanfare and deal that much Hydro damage. | Unchanged (pick 2). |
 | **Let the People Rejoice** (Rare Attack, 2) | Spend all. Deal 2 damage to ALL enemies per point. | Unchanged: the pool's one big act 3 spend. |
-| **Bravura** (Uncommon Attack, 1) | Spend all. Deal 7 Hydro damage for every 3 spent. | Spend up to 18, all you can. Deal 6 [8] Hydro damage for every 3 spent. |
+| **Bravura** (Uncommon Attack, 1) | Spend all. Deal 7 [9] Hydro damage for every 3 spent. | Spend up to 18, all you can. Deal 7 [9] Hydro damage for every 3 spent. |
 | **Bring the House Down** (Rare Attack, 2) | Spend all. Deal that much damage. Each guest acts. | Spend up to 10 for each guest on stage, all you can. Deal that much damage. Each guest acts. |
-| **Bis!** → **Extended Run** (Rare Power, 1) | Whenever a card Spends all your Fanfare, keep half of it. (1 of 9 taken) | Cards that Spend up to a number can Spend 8 [12] more. |
+| **Bis!** → **Extended Run** (Rare Power, 1) | Whenever a card Spends all your Fanfare, keep half of it. (1 of 9 taken) | Attacks and Skills that Spend up to a number can Spend 8 [12] more. |
 
-- **Strength now has something to multiply.** Bravura and Soloist's
-  Solicitation hit once for each chunk spent, so Leading Lady and Standing
-  Room Only add damage to every hit. A spend-all single hit gets Strength
-  once. This is how capped spenders grow with her Powers: in hits, and in
-  Extended Run's caps.
+- **Bravura keeps its damage.** It already hit once per 3 spent, so
+  Strength already multiplied across its hits; the cap alone is the change.
+  What it gains is the Fanfare left over for the next card, and Extended
+  Run's larger cap. (The first draft also cut it to 6 [8]; GPT's review
+  pointed out nothing justified both cuts at once.)
 - **Bring the House Down grows with her stage.** With three guests it spends
   up to 30, and each guest also acts.
 - **Extended Run** takes Bis!'s slot. Bis! only rewarded spend-all cards,
-  which are now two in a deck. Extended Run touches the five capped spenders
-  (Soloist's Solicitation 16 to 24, Hold the Stage 16 to 24, Tidal Flourish 10
-  to 18, Bravura 18 to 26, Bring the House Down) and Full House. Two copies
-  plus Bravura on a 200 bank: 14 hits of 6, before Strength. A C# test pins
-  this, as #1350 did for Standing Room Only.
+  which are now two in a deck. Its scope, pinned by C# tests as #1350 did for
+  Standing Room Only:
+  - It adds to a played card's whole cap once: Bring the House Down with
+    three guests and one Extended Run spends up to 38 (30 + 8), in one Spend.
+  - It touches the five capped Attacks and Skills: Soloist's Solicitation
+    and Hold the Stage 16 to 24, Tidal Flourish 10 to 18, Bravura 18 to 26,
+    and Bring the House Down.
+  - It does **not** touch Full House (a Power whose guest-act payments are
+    automatic), Navia's and Freminet's fractional Spends, or fixed costs such
+    as Quick Flourish.
+  - Worked example: Bravura on a 200 bank with two **upgraded** Extended
+    Runs spends 42, 14 hits of 7; with two unupgraded copies it spends 34,
+    11 hits.
 - Prima Donna (0 of 2 taken) and Standing Room Only (played twice) are not
   changed; neither has had a fair test yet.
 
@@ -73,8 +81,14 @@ The pool stays at 78, and the rarity counts do not change.
 Same five seeds, one Sonnet seat per lane, on the `furina-next` staging build.
 
 1. The average capped Spend in act 3 rises from 5 to 6 Fanfare to at least 9.
-2. Turns starting at 20+ Fanfare with no spender in hand that can spend at
-   least 10 fall below a third (today about half).
+2. Turns starting at 20+ Fanfare where a spender is in hand but none can
+   spend at least 10 fall below a third of such turns. The record reports
+   these turns in three groups, kept apart: no spender in hand at all;
+   a spender in hand but too small; a useful spender in hand but
+   unaffordable or wrong for the threat. Higher caps only help the second
+   group. If the first group stays near today's 37 to 41%, the next change
+   is access (Retain on a capped spender, or a way to fetch one), not
+   bigger caps.
 3. Bravura, Bring the House Down and Extended Run together are taken in at
    least a quarter of their offers.
 4. Act 3 normal-fight damage is at least 0.85 of base (suite 2: 0.68).
@@ -92,6 +106,10 @@ Same five seeds, one Sonnet seat per lane, on the `furina-next` staging build.
 2. **The starter.**
    - **(a) Default:** Rising Applause stays as it is. Your second point is
      about competition, and with only one other spend-all card in the pool,
-     the starter stops having rivals. It is also the card that teaches Spend.
+     the starter has fewer rivals. It still competes with the capped cards
+     (a bank of 30 spent by Rising Applause leaves Bravura nothing), but it
+     is the reliable fallback and the card that teaches Spend, and capping
+     it now could deepen the "big bank, no good outlet" turns. Let suite 3
+     show whether the capped cards are enough first.
    - (b) Cap it ("Spend up to 15, all you can") so the bank spills over to
      the other cards. This changes a starter card, so it is your call.
