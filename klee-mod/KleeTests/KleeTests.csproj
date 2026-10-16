@@ -171,6 +171,17 @@
              Link="Vendor/GitsPowerRow.cs" />
   </ItemGroup>
 
+  <!-- OPT-IN RUN STATS (2026-10-16). The mod compiles RunStats/** only in a
+       build with -p:GitsTelemetryEndpoint, and this project builds the mod
+       without one, so the mod under test has no uploader (pinned by
+       RunStatsTests). The two PURE files, the trimmer and the two-switch
+       decision, are compiled here directly instead: the same source the beta
+       ships. The hook and the BaseLib setting (Godot, network) are not. -->
+  <ItemGroup>
+    <Compile Include="../KleeCode/RunStats/RunRecord.cs" Link="RunStats/RunRecord.cs" />
+    <Compile Include="../KleeCode/RunStats/RunStatsUpload.cs" Link="RunStats/RunStatsUpload.cs" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="xunit" Version="2.9.2" />

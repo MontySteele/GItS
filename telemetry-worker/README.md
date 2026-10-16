@@ -1,12 +1,15 @@
 # Run telemetry Worker
 
 A Cloudflare Worker with one route, `POST /v1/run`, that stores one trimmed record per finished run of
-the Teyvat Spire beta in a D1 database. This folder is the server side only; the mod's upload is a later PR.
+the Teyvat Spire beta in a D1 database. This folder is the server side; the mod's side is
+`klee-mod/KleeCode/RunStats/`, compiled only into a beta package built with `--telemetry-endpoint`
+(`docs/current/operations/workshop.md`).
 
 **Two switches gate every upload, and both must be on.** (1) The game's own "Upload data" setting: when
 modded, the game skips Mega Crit's upload and calls `ModManager.OnMetricsUpload(run, isVictory,
 localPlayerId)` instead, only with that setting on, and never for an abandoned run, a debug build or a
-first-ever run (`MetricUtilities.UploadRunMetricsInternal`). (2) The mod's own opt-in switch.
+first-ever run (`MetricUtilities.UploadRunMetricsInternal`). (2) The mod's own opt-in switch, "Share
+anonymous run stats with the Teyvat Spire developers" in BaseLib's mod config, default off.
 
 ## What is collected (schema v1, `schema/run-v1.json`)
 
@@ -54,7 +57,8 @@ dropped. Request logging (`observability`) is off in `wrangler.toml`.
     npx wrangler d1 migrations apply gits-telemetry --remote
     npx wrangler deploy                        # prints the https://gits-telemetry.<account>.workers.dev URL
 
-The URL goes into the mod's upload PR. No secrets are needed.
+The URL goes to `tools/package_workshop.py --variant beta --telemetry-endpoint URL`. No secrets are
+needed.
 
 ## Pull the data
 
@@ -67,7 +71,11 @@ Raw SQL: `npx wrangler d1 execute gits-telemetry --remote --json --command "SELE
 
 ## Workshop privacy paragraph (DRAFT)
 
-> **Run data (optional).** If you turn on "Share run data" in the mod's settings *and* the game's own
+`tools/package_workshop.py` adds this, as plain text, to the beta's description when it is given an
+endpoint (`PRIVACY_PARAGRAPH`, which also names where the setting is).
+
+> **Run data (optional).** If you turn on "Share anonymous run stats with the Teyvat Spire developers"
+> in the mod's settings *and* the game's own
 > "Upload data" setting is on, the mod sends a short summary of each finished run to the Teyvat Spire
 > developers: your character, ascension, result, the cards and relics you ended with, which cards you were
 > offered and took, and your HP floor by floor. It holds no Steam id, name, chat or other personal details,

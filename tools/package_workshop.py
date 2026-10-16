@@ -56,6 +56,14 @@ rule read off the decompile, not yet seen in the game.
 THE VERSION is the plain `--version` (`0.3.0`), required, never the dev
 build's `0.2.NNNN+dirty`. Co-op peers need the same version AND the same
 variant.
+
+OPT-IN RUN STATS (2026-10-16). `--telemetry-endpoint URL` (the deployed
+Worker, `telemetry-worker/README.md`) compiles the uploader into a BETA
+build: `-p:GitsTelemetryEndpoint=<URL>/v1/run`, which compiles
+`klee-mod/KleeCode/RunStats/` and adds the privacy paragraph to the
+description. Without it the beta has no uploader; the public variant
+refuses the option, so a public build never has one. The dll check
+confirms the endpoint is in the dll when asked for and absent when not.
 """
 from __future__ import annotations
 
@@ -127,6 +135,16 @@ BETA_NOTE = """
 
 BETA: every kit, including Yae Miko (in progress). Enable this or the main release, not both."""
 
+# The Workshop privacy paragraph (telemetry-worker/README.md), in the beta's
+# description only when the build carries the uploader.
+PRIVACY_PARAGRAPH = """
+
+Run data (optional). If you turn on "Share anonymous run stats with the Teyvat Spire developers" in the mod's settings (Settings, Mod Configuration (BaseLib), Open Config, Teyvat Spire Roster) and the game's own "Upload data" setting is on, the mod sends a short summary of each finished run to the Teyvat Spire developers: your character, ascension, result, the cards and relics you ended with, which cards you were offered and took, and your HP floor by floor. It holds no Steam id, name, chat or other personal details, and your IP address is not stored. Runs are tied only to a random id made by the mod on your machine. Data is used to balance the mod and deleted after a year. Turn the switch off at any time to stop."""
+
+TELEMETRY_ROUTE = "/v1/run"
+ENDPOINT_RE = re.compile(r"^https://[A-Za-z0-9.-]+(:\d+)?(/[A-Za-z0-9._~/-]*)?$")
+ENDPOINT_KEY = "GitsTelemetryEndpoint"
+
 
 # ------------------------------------------------------------- pure parts ---
 
@@ -137,7 +155,24 @@ def check_version(version: str) -> str:
     return version
 
 
-def build_args(variant: Variant, version: str, out_dir: Path) -> list[str]:
+def telemetry_endpoint(variant: Variant, url: str | None) -> str | None:
+    """The upload URL a build compiles in, or None for no uploader. Beta
+    only, https only; the Worker's route is appended when not given."""
+    if not url:
+        return None
+    if variant.name != "beta":
+        raise SystemExit("--telemetry-endpoint is for --variant beta only: "
+                         "a public build compiles no uploader")
+    url = url.strip().rstrip("/")
+    if not url.endswith(TELEMETRY_ROUTE):
+        url += TELEMETRY_ROUTE
+    if not ENDPOINT_RE.match(url) or len(url) > 200:
+        raise SystemExit(f"--telemetry-endpoint must be a plain https URL, got {url!r}")
+    return url
+
+
+def build_args(variant: Variant, version: str, out_dir: Path,
+               endpoint: str | None = None) -> list[str]:
     """The release build's command line. `+` separates the kits because `;`
     and `,` split an MSBuild `-p:` value."""
     return [
@@ -145,6 +180,8 @@ def build_args(variant: Variant, version: str, out_dir: Path) -> list[str]:
         "--nologo",
         "-p:WorkshopRelease=true",
         f"-p:GitsKits={'+'.join(variant.kits)}",
+        f"-p:GitsVariant={variant.name}",
+        *([f"-p:{ENDPOINT_KEY}={endpoint}"] if endpoint else []),
         f"-p:AssemblyVersion={version}",
         f"-p:FileVersion={version}",
         f"-p:InformationalVersion={version}+workshop.{variant.name}",
@@ -166,10 +203,11 @@ def manifest_for(variant: Variant, version: str, source: dict) -> dict:
 
 
 def workshop_json(variant: Variant, version: str, visibility: str,
-                  change_note: str | None) -> dict:
+                  change_note: str | None, endpoint: str | None = None) -> dict:
     if visibility not in VISIBILITIES:
         raise SystemExit(f"--visibility must be one of {', '.join(VISIBILITIES)}")
-    description = DESCRIPTION_DRAFT + (BETA_NOTE if variant.name == "beta" else "")
+    description = (DESCRIPTION_DRAFT + (BETA_NOTE if variant.name == "beta" else "")
+                   + (PRIVACY_PARAGRAPH if endpoint else ""))
     return {
         "title": variant.title,
         "description": description,
@@ -266,9 +304,11 @@ def plan(variant: Variant, version: str, *, dll: Path, pck: Path,
 
 
 def print_plan(variant: Variant, version: str, workspace: Path,
-               entries: list[Entry], notes: list[str]) -> None:
+               entries: list[Entry], notes: list[str],
+               endpoint: str | None = None) -> None:
     print(f"workspace {workspace}  (variant {variant.name}, mod id {variant.mod_id}, "
           f"version {version}, kits {'+'.join(variant.kits)})")
+    print(f"  run stats: {'uploader compiled in, posts to ' + endpoint if endpoint else 'none (no uploader compiled)'}")
     total = 0
     for e in entries:
         size = "--" if e.size is None else f"{e.size / 1e6:9.2f} MB"
@@ -282,27 +322,38 @@ def print_plan(variant: Variant, version: str, workspace: Path,
 # ----------------------------------------------------------------- write ---
 
 def _blob(text: str) -> bytes:
-    """A short string as a custom-attribute blob stores it: one length byte,
-    then UTF-8. Exact, so `klee+kokomi+furina+varka` does not match inside
-    the beta's `...+varka+yae`."""
+    """A string as a custom-attribute blob stores it: its compressed length
+    (one byte under 128, two under 16384, ECMA-335 II.23.2), then UTF-8.
+    Exact, so `klee+kokomi+furina+varka` does not match inside the beta's
+    `...+varka+yae`."""
     raw = text.encode()
-    assert len(raw) < 128
-    return bytes([len(raw)]) + raw
+    n = len(raw)
+    assert n < 0x4000
+    head = bytes([n]) if n < 0x80 else bytes([0x80 | (n >> 8), n & 0xFF])
+    return head + raw
 
 
-def check_dll(dll: Path, variant: Variant) -> None:
-    """The built dll carries the release flag and this variant's kit list."""
+def check_dll(dll: Path, variant: Variant, endpoint: str | None = None) -> None:
+    """The built dll carries the release flag, this variant's name and kit
+    list, and the telemetry endpoint exactly when one was asked for."""
     data = dll.read_bytes()
-    lost = [w for w in ("GitsWorkshopRelease", "GitsKits", "+".join(variant.kits))
-            if _blob(w) not in data]
+    want = ["GitsWorkshopRelease", "GitsKits", "+".join(variant.kits),
+            "GitsVariant", variant.name]
+    if endpoint:
+        want += [ENDPOINT_KEY, endpoint]
+    lost = [w for w in want if _blob(w) not in data]
     if lost:
-        raise SystemExit(f"{dll} lacks {lost}: not a workshop build of {variant.name}")
+        raise SystemExit(f"{dll} lacks {lost}: not a workshop build of {variant.name}"
+                         + (" with that telemetry endpoint" if endpoint else ""))
+    if not endpoint and _blob(ENDPOINT_KEY) in data:
+        raise SystemExit(f"{dll} carries a telemetry endpoint but none was asked for: "
+                         "rebuild without --skip-build")
 
 
 def write_workspace(variant: Variant, version: str, workspace: Path, *,
                     dll: Path, pck: Path, art: dict[str, Path],
                     image: Path | None, visibility: str,
-                    change_note: str | None) -> None:
+                    change_note: str | None, endpoint: str | None = None) -> None:
     workspace.mkdir(parents=True, exist_ok=True)
     content = workspace / "content"
     if content.exists():
@@ -326,7 +377,7 @@ def write_workspace(variant: Variant, version: str, workspace: Path, *,
         raise SystemExit(f"stray json in content: {stray}")
 
     with open(workspace / "workshop.json", "w", encoding="utf-8", newline="\n") as f:
-        json.dump(workshop_json(variant, version, visibility, change_note), f,
+        json.dump(workshop_json(variant, version, visibility, change_note, endpoint), f,
                   indent=2, ensure_ascii=False)
         f.write("\n")
     target = workspace / "image.png"
@@ -353,16 +404,20 @@ def main(argv=None) -> int:
     ap.add_argument("--image", type=Path, default=PREVIEW,
                     help="preview png (< 1 MB); a placeholder if absent")
     ap.add_argument("--out", type=Path, default=OUT)
+    ap.add_argument("--telemetry-endpoint", metavar="URL",
+                    help="beta only: compile the opt-in run-stats uploader, posting "
+                         "to URL (the Worker; /v1/run is appended if absent)")
     args = ap.parse_args(argv)
 
     variant = VARIANTS[args.variant]
     version = check_version(args.version)
+    endpoint = telemetry_endpoint(variant, args.telemetry_endpoint)
     workspace = args.out / variant.name
     build_dir = args.out / "_build" / variant.name
     dll = build_dir / "bin" / "klee.dll"
 
     if not args.dry_run and not args.skip_build:
-        cmd = build_args(variant, version, build_dir.resolve())
+        cmd = build_args(variant, version, build_dir.resolve(), endpoint)
         print("building:", " ".join(cmd[1:]), flush=True)
         if subprocess.run(cmd, cwd=ROOT).returncode != 0:
             print("build failed", file=sys.stderr)
@@ -370,7 +425,7 @@ def main(argv=None) -> int:
 
     entries, notes, art = plan(variant, version, dll=dll, pck=args.pck,
                                images_root=args.images_root, image=args.image)
-    print_plan(variant, version, workspace, entries, notes)
+    print_plan(variant, version, workspace, entries, notes, endpoint)
     if args.dry_run:
         print("dry run: nothing built or written")
         return 0
@@ -381,10 +436,10 @@ def main(argv=None) -> int:
     if not args.pck.exists():
         print(f"no pck at {args.pck}", file=sys.stderr)
         return 1
-    check_dll(dll, variant)
+    check_dll(dll, variant, endpoint)
     write_workspace(variant, version, workspace, dll=dll, pck=args.pck, art=art,
                     image=args.image, visibility=args.visibility,
-                    change_note=args.change_note)
+                    change_note=args.change_note, endpoint=endpoint)
     print(f"wrote {workspace}")
     if (workspace / "mod_id.txt").exists():
         print(f"  mod_id.txt kept: the upload updates item "
