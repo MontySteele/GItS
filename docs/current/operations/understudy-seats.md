@@ -104,7 +104,7 @@ last one met. Before starting each seat after the first on a lane, the
 coordinator runs:
 
 ```sh
-GITS_LANE=1 python -m understudy.blindplay new-seat   # forgets the lane's seen words; budget untouched
+GITS_LANE=1 python -m understudy.blindplay new-seat   # forgets the lane's seen words and clears its refusal streak; budget untouched
 ```
 
 **A lane stuck at `REFUSAL STOP`** (the stop is sticky; every later seat on the
