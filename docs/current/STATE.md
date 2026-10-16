@@ -32,7 +32,7 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
 | `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 78 |
 | `furina` | Furina | 78 | Fontaine | Hydro | Balance | 78 |
 | `varka` | Varka | 80 | Mondstadt | Anemo | Balance | 78 |
-| `yae` | Yae Miko | 72 | Inazuma | Electro | Prototype | 43 (staged) |
+| `yae` | Yae Miko | 72 | Inazuma | Electro | Prototype | 78 |
 
 - Every kit: 78 draftable cards, plus two Ancient cards (one from Darv's
   Dusty Tome, one from Orobas's Archaic Tooth replacing a starter card).
@@ -80,8 +80,14 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   Petals an active Skill. Pool 43 (15 / 18 / 10). **Review r6 built**
   (2026-10-15, `review/active/yae-review-r6-2026-10-15.md`, no pick):
   Serialization pays per card Edited, Manuscript Pile draws then Edits a
-  card with Red Ink. Next: [USER]'s own Yae run, the finish line for
-  Prototype.
+  card with Red Ink. **The pool to 78 built** (2026-10-15,
+  `review/active/yae-pool-to-78-2026-10-15.md`, all picks (a)): 35 cards
+  (16 Attacks, 13 Skills, 6 Powers), pool 78 (20 / 38 / 20); Sakura Grove a
+  Rare and Fox's Mooncall an Uncommon at 1; distinct Annotations coexist on
+  a Sakura and a no-change Edit is not an Edit; an aimed strike is one hit,
+  a Foxfire Sakura's included. The new cards draw blank portraits until her
+  art pass; the Sakura display (pick 3) is a BACKLOG line. Next: five seats
+  on the full pool, then [USER]'s run (pick 4 (a)).
 
 ## The kits
 

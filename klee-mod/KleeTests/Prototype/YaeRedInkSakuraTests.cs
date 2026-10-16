@@ -65,9 +65,9 @@ public class YaeRedInkSakuraTests : IDisposable
         var ledger = Fresh();
         Assert.True(ledger.Plant(YaeLaw.PlantLevel, null, YaeAnnotation.RedInk));
         var s = Assert.Single(ledger.Standing);
-        Assert.Equal(YaeAnnotation.RedInk, s.Annotation);
+        Assert.Equal(new[] { YaeAnnotation.RedInk }, s.Annotations);
         Assert.Equal(YaeLaw.SakuraBase + s.Level + YaeLaw.RedInkAmount,
-                     YaeShrineLedger.ActSize(s.Kind, s.Level, s.Annotation));
+                     YaeShrineLedger.ActSize(s.Kind, s.Level, s.Annotations));
     }
 
     [Fact]
@@ -77,7 +77,7 @@ public class YaeRedInkSakuraTests : IDisposable
         // Annotation: Twin Sakura's two.
         var ledger = Fresh();
         for (var i = 0; i < 2; i++) ledger.Plant(YaeLaw.PlantLevel, null, YaeAnnotation.RedInk);
-        Assert.All(ledger.Standing, s => Assert.Equal(YaeAnnotation.RedInk, s.Annotation));
+        Assert.All(ledger.Standing, s => Assert.Equal(new[] { YaeAnnotation.RedInk }, s.Annotations));
         Assert.Equal(2, ledger.Count);
     }
 
@@ -89,19 +89,24 @@ public class YaeRedInkSakuraTests : IDisposable
         var ledger = Fresh();
         for (var i = 0; i < 3; i++) ledger.Plant(YaeLaw.PlantLevel);
         Assert.False(ledger.Plant(YaeLaw.PlantLevel, null, YaeAnnotation.RedInk));
-        Assert.Equal(YaeAnnotation.RedInk, ledger.Standing[0].Annotation);
-        Assert.All(ledger.Standing.Skip(1), s => Assert.Equal(YaeAnnotation.None, s.Annotation));
+        Assert.Equal(new[] { YaeAnnotation.RedInk }, ledger.Standing[0].Annotations);
+        Assert.All(ledger.Standing.Skip(1), s => Assert.Empty(s.Annotations));
     }
 
     [Fact]
     public void The_planting_verbs_pass_the_cards_inheritance()
     {
         // Review r3: each verb has a kind-taking overload, which carries the
-        // inheritance; the plain one forwards to it.
-        foreach (var verb in new[] { nameof(YaeCards.Plant), nameof(YaeCards.PlantLevel) })
+        // inheritance; the plain one forwards to it. The pool to 78:
+        // PlantLevel is one method whose kind (and Grafted Branch's extra
+        // turn) are optional, and its new planters carry it too.
+        foreach (var verb in new[] { nameof(YaeCards.Plant), nameof(YaeCards.PlantLevel),
+                                     nameof(YaeCards.Replant), nameof(YaeCards.PlantMissing),
+                                     nameof(YaeCards.PlantUntilFull) })
         {
             var kinded = typeof(YaeCards).GetMethods()
-                .Single(m => m.Name == verb && m.GetParameters().Length == 4);
+                .Where(m => m.Name == verb)
+                .OrderByDescending(m => m.GetParameters().Length).First();
             Assert.Contains($"{nameof(YaeAnnotationReach)}.{nameof(YaeAnnotationReach.Inherited)}",
                             Il.Calls(kinded));
         }

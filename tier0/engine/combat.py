@@ -291,6 +291,9 @@ def card_cost(state: CombatState, card: Card) -> int:
     # modifier and floored at 0 like they are.
     if card.free_this_turn:
         return 0
+    # YAE, THE POOL TO 78: Editorial Priority's first Annotated card a turn.
+    if yae_shrine.editorial_free(state, card):
+        return 0
     cost = max(0, cost + card.cost_delta_this_turn
                + card.cost_delta_this_combat)
     if card.cost_reduction_per_attack_this_turn:

@@ -635,6 +635,113 @@ KNOWN_MISSING = {
     # art pass (2026-10-14)" in art/plan.tsv.
     # The Kokomi review r6's two Powers (2026-10-14) were painted in the
     # same PR, under "Kokomi review r6" in art/plan.tsv.
+    # The Yae pool to 78's thirty-five (2026-10-15): art owed, listed
+    # so every deploy summary names them.
+    "proto_ym_thunder_petal": (
+        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    ),
+    "proto_ym_kitsune_flick": (
+        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    ),
+    "proto_ym_sacred_spark": (
+        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    ),
+    "proto_ym_cliffhanger": (
+        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    ),
+    "proto_ym_shrine_lantern": (
+        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    ),
+    "proto_ym_narukami_ray": (
+        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    ),
+    "proto_ym_galley_proof": (
+        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    ),
+    "proto_ym_petal_storm": (
+        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    ),
+    "proto_ym_foxs_bargain": (
+        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    ),
+    "proto_ym_spiritfox_prank": (
+        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    ),
+    "proto_ym_genre_shift": (
+        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    ),
+    "proto_ym_narukami_judgment": (
+        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    ),
+    "proto_ym_kitsunes_shelter": (
+        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    ),
+    "proto_ym_omikuji": (
+        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    ),
+    "proto_ym_torii_ward": (
+        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    ),
+    "proto_ym_kitsune_veil": (
+        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    ),
+    "proto_ym_hold_the_presses": (
+        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    ),
+    "proto_ym_sakura_canopy": (
+        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    ),
+    "proto_ym_disarming_smile": (
+        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    ),
+    "proto_ym_replanting": (
+        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    ),
+    "proto_ym_late_night_reading": (
+        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    ),
+    "proto_ym_enlightened_blessing": (
+        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    ),
+    "proto_ym_saiguus_lesson": (
+        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    ),
+    "proto_ym_shrines_sacred_shade": (
+        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    ),
+    "proto_ym_editorial_priority": (
+        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    ),
+    "proto_ym_forbidden_art_daisesshou": (
+        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    ),
+    "proto_ym_kaguras_verity": (
+        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    ),
+    "proto_ym_narukami_bloom": (
+        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    ),
+    "proto_ym_sacred_thunderbolt": (
+        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    ),
+    "proto_ym_offertory_box": (
+        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    ),
+    "proto_ym_afterword": (
+        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    ),
+    "proto_ym_foxs_verdict": (
+        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    ),
+    "proto_ym_guardian_of_narukami": (
+        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    ),
+    "proto_ym_stellar_conduct": (
+        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    ),
+    "proto_ym_eternity": (
+        "Yae pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, built 2026-10-15): a new card with no art pass yet; the build PR generated no art. Draws the blank portrait until her art pass paints it."
+    ),
 }
 
 
