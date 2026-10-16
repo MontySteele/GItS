@@ -97,7 +97,10 @@ internal static class KleeSelfCheck
                          ModelDb.Character<Varka>(),
                          // Yae Miko (2026-10-13), on the same terms.
                          ModelDb.Character<Yae>(),
-                     })
+                     }
+                     // A kit this build leaves out (ReleaseVariant.cs,
+                     // -p:GitsKits) registers no character; nothing to check.
+                     .Where(ReleaseKits.Ships))
             {
                 CheckCharacterInvariants(character);
                 CheckCharacterAssets(character);

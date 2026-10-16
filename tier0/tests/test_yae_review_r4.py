@@ -71,10 +71,10 @@ def test_refreshed_sakura_gets_the_planting_cards_red_ink():
     for _ in range(Y.SAKURA_CAP):
         Y.plant(st, 1)
     oldest = Y.ledger(st.player).sakura[0]
-    assert oldest.annotation is None
+    assert oldest.annotations == []
     Y.plant(st, 1, annotation=Y.RED_INK)          # same kind: refresh
     assert len(Y.ledger(st.player).sakura) == Y.SAKURA_CAP
-    assert oldest.annotation == Y.RED_INK
+    assert oldest.annotations == [Y.RED_INK]
     assert oldest.level == 2
 
 
@@ -83,9 +83,12 @@ def test_a_plant_with_no_red_ink_leaves_a_refreshed_annotation_alone():
     for _ in range(Y.SAKURA_CAP):
         Y.plant(st, 1)
     oldest = Y.ledger(st.player).sakura[0]
-    oldest.annotation = Y.FOX_FIRE
+    oldest.add(Y.FOX_FIRE)
     Y.plant(st, 1)
-    assert oldest.annotation == Y.FOX_FIRE
+    assert oldest.annotations == [Y.FOX_FIRE]
+    # The pool to 78, pick 2 (a): a Red Ink plant joins the Fox Fire.
+    Y.plant(st, 1, annotation=Y.RED_INK)
+    assert oldest.annotations == [Y.FOX_FIRE, Y.RED_INK]
 
 
 # 3, 4. Deadline and Evergreen Charm -----------------------------------------
@@ -96,30 +99,32 @@ def test_deadline_is_8_and_11_upgraded():
     assert "Gain 8 " in _row("proto_ym_deadline")["description"]
 
 
-def test_evergreen_charm_is_7_and_10_and_keeps_red_ink():
+def test_evergreen_charm_is_7_and_10_and_its_red_ink_sentence_is_gone():
+    # The pool to 78, pick 2 (a): Annotations coexist on a Sakura, so the
+    # sentence "It keeps its Red Ink." went and the +3 stays by the rule.
     c = _card("evergreen_charm")
     assert _block(c) == 7
-    assert "It keeps its Red Ink." in _row("proto_ym_evergreen_charm")["description"]
+    assert "Red Ink" not in _row("proto_ym_evergreen_charm")["description"]
+    assert "keeps" not in _row("proto_ym_evergreen_charm")["effects"][1]
     assert _block(loader.get_card("proto_ym_evergreen_charm+")) == 10
     st = _state()
     Y.plant(st, 1)
     s = Y.ledger(st.player).sakura[0]
-    s.annotation = Y.RED_INK
+    s.add(Y.RED_INK)
     plain = Y.act_size(st, s)
     _play(st, c)
-    assert s.annotation == Y.DEADLINE and s.red_ink_kept
+    assert s.annotations == [Y.RED_INK, Y.DEADLINE]
     assert Y.act_size(st, s) == plain                # the +3 stays
-    # An Edit that does not keep it drops it.
     Y.edit_sakura(st, "oldest", 1, Y.FOX_FIRE)
-    assert not s.red_ink_kept
+    assert s.annotations == [Y.RED_INK, Y.DEADLINE, Y.FOX_FIRE]
 
 
-def test_evergreen_charm_on_a_sakura_without_red_ink_keeps_nothing():
+def test_evergreen_charm_on_a_plain_sakura_writes_deadline_alone():
     st = _state()
     Y.plant(st, 1)
     s = Y.ledger(st.player).sakura[0]
     _play(st, _card("evergreen_charm"))
-    assert s.annotation == Y.DEADLINE and not s.red_ink_kept
+    assert s.annotations == [Y.DEADLINE]
 
 
 # 5. The Seven Glamours ------------------------------------------------------
@@ -305,7 +310,7 @@ def test_inked_branches_upgraded_also_edits_a_hand_card():
     Y.plant(st, 1)
     (a,) = _hand(st, "strike")
     _play(st, _card("inked_branches"))
-    assert Y.ledger(st.player).sakura[0].annotation == Y.RED_INK
+    assert Y.ledger(st.player).sakura[0].annotations == [Y.RED_INK]
     assert not Y.is_annotated(a)
     _play(st, _card("inked_branches+"))
     assert Y.temp(a) == Y.RED_INK

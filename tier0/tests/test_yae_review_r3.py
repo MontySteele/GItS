@@ -235,7 +235,7 @@ def test_a_replacement_honours_mooncall_and_red_ink():
     _play(st, evo)
     new = _led(st).sakura[-1]
     assert new.kind == Y.THUNDER and new.level == 2
-    assert new.annotation == Y.RED_INK and new.planted_level == 2
+    assert new.annotations == [Y.RED_INK] and new.planted_level == 2
 
 
 def test_a_planted_level_is_kept_so_the_display_can_say_the_rest():
@@ -243,7 +243,7 @@ def test_a_planted_level_is_kept_so_the_display_can_say_the_rest():
     _play(st, "grafted_branch")
     _play(st, "rooted_shrine")
     s = _led(st).sakura[0]
-    assert (s.planted_level, s.level) == (2, 3)
+    assert (s.planted_level, s.level) == (3, 4)
 
 
 # ===========================================================================
@@ -460,7 +460,7 @@ def test_stacked_red_ink_passes_to_a_sakura_once():
     st = _state()
     _play(st, _published("yakan_evocation", [Y.RED_INK, Y.RED_INK]))
     s = _led(st).sakura[0]
-    assert s.annotation == Y.RED_INK and Y.act_size(st, s) == 2 + 1 + 3
+    assert s.annotations == [Y.RED_INK] and Y.act_size(st, s) == 2 + 1 + 3
 
 
 # ===========================================================================

@@ -230,3 +230,7 @@ def apply_power(state: CombatState, target: Fighter, name: str, stacks: int,
     # leave it None and refpowers recovers it from the acting side.
     from tier0.engine import refpowers          # late import avoids cycle
     refpowers.on_power_applied(state, target, name, stacks, applier)
+    # YAE, THE POOL TO 78: Saiguu's Lesson, a Sakura strikes an enemy she
+    # makes Weak. A no-op for anyone else.
+    from tier0.engine import yae_shrine         # late import avoids cycle
+    yae_shrine.on_power_applied(state, target, name, stacks, applier)

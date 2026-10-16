@@ -112,3 +112,7 @@ understudy/logs/phase0-unseeded.jsonl
 # The telemetry Worker's npm install and wrangler's local state (local D1 rows).
 telemetry-worker/node_modules/
 telemetry-worker/.wrangler/
+
+# Steam Workshop upload workspaces (tools/package_workshop.py): the built mod
+# with Tier F art, and ModUploader's mod_id.txt for each variant.
+.workshop/

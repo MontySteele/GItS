@@ -47,30 +47,27 @@ public class YaeReviewR4Tests : IDisposable
         var ledger = Fresh();
         for (var i = 0; i < 3; i++) ledger.Plant(YaeLaw.PlantLevel);
         Assert.False(ledger.Plant(YaeLaw.PlantLevel, null, YaeAnnotation.RedInk));
-        Assert.Equal(YaeAnnotation.RedInk, ledger.Standing[0].Annotation);
+        Assert.Equal(new[] { YaeAnnotation.RedInk }, ledger.Standing[0].Annotations);
         Assert.False(ledger.Plant(YaeLaw.PlantLevel, null, YaeAnnotation.None));
-        Assert.Equal(YaeAnnotation.RedInk, ledger.Standing[0].Annotation);
+        Assert.Equal(new[] { YaeAnnotation.RedInk }, ledger.Standing[0].Annotations);
     }
 
     [Fact]
-    public void A_deadline_edit_that_keeps_red_ink_keeps_the_three()
+    public void A_deadline_edit_on_a_red_ink_sakura_keeps_the_three()
     {
+        // The pool to 78, pick 2 (a): Annotations coexist, so Evergreen
+        // Charm's "It keeps its Red Ink" is the rule and left its face.
         var ledger = Fresh();
         ledger.Plant(YaeLaw.PlantLevel, null, YaeAnnotation.RedInk);
         var s = ledger.Standing[0];
-        var before = YaeShrineLedger.ActSize(s.Kind, s.Level, s.Annotation, s.KeepsRedInk);
+        var before = YaeShrineLedger.ActSize(s.Kind, s.Level, s.Annotations);
         Assert.Equal(1, ledger.EditSakura(YaeSakuraEnd.Oldest, 1,
-                                          YaeAnnotation.DeadlineExtension, keepRedInk: true));
-        Assert.Equal(YaeAnnotation.DeadlineExtension, s.Annotation);
-        Assert.Equal(before, YaeShrineLedger.ActSize(s.Kind, s.Level, s.Annotation, s.KeepsRedInk));
-        // An Edit that does not keep it ends it.
-        ledger.EditSakura(YaeSakuraEnd.Oldest, 1, YaeAnnotation.FoxFire);
-        Assert.False(s.KeepsRedInk);
-        // Nothing to keep on a plain Sakura.
-        var t = Fresh();
-        t.Plant(YaeLaw.PlantLevel);
-        t.EditSakura(YaeSakuraEnd.Oldest, 1, YaeAnnotation.DeadlineExtension, keepRedInk: true);
-        Assert.False(t.Standing[0].KeepsRedInk);
+                                          YaeAnnotation.DeadlineExtension));
+        Assert.Equal(new[] { YaeAnnotation.RedInk, YaeAnnotation.DeadlineExtension },
+                     s.Annotations);
+        Assert.Equal(before, YaeShrineLedger.ActSize(s.Kind, s.Level, s.Annotations));
+        Assert.DoesNotContain("Red Ink",
+            new ProtoYmEvergreenCharm().Localization!.First(l => l.Item1 == "description").Item2);
     }
 
     [Fact]

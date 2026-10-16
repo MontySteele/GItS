@@ -111,8 +111,8 @@ twin is `tier0/engine/yae_shrine.py`. Her cards speak one verb,
 the card's `Ym*` vars and the upgrade keys `yae_per` / `yae_base` /
 `yae_amount` move them. Meditations of a Yako adds a Publish row to the
 reward screen after an elite or boss fight (`Relics/MeditationsOfAYako.cs`,
-`YaePublishReward`; it was a rest-site option until 2026-10-14). Her pool is a staged 40
-(`PoolCountTests`' `size:` argument). Parity: `tier0/tests/test_yae_parity.py`.
+`YaePublishReward`; it was a rest-site option until 2026-10-14). Her pool is 78 since
+the pool to 78 (2026-10-15). Parity: `tier0/tests/test_yae_parity.py`.
 Since the design axes (2026-10-14) `kind: rite` names its Rite (`rite:`
 thunder / warding / wildfire / offering, the C# `YaeRite`) and
 `kind: edit_sakura` names its end (`which:` newest / oldest / every, the C#
@@ -139,6 +139,6 @@ must never read different rosters (R64). The per-row reasoning is in
 **POOL WIRING** (legacy cleanup stage 4): each character's pool lists its
 `proto_` rows in `GenerateAllCards` and offers its roster
 (`*Roster.OfferablePool`, `FurinaStageRoster.Pool`, `VarkaRoster.Pool`).
-Counts are pinned by `KleeTests/Prototype/PoolCountTests.cs`: 78 per kit (Yae a staged 40 until her last batch). Still checked:
+Counts are pinned by `KleeTests/Prototype/PoolCountTests.cs`: 78 per kit. Still checked:
 the tier0 schema validators, the codegen, `lint_generated_structure` and
 `lint_pool_membership`. Depth: `docs/current/atlas/klee-mod-cards.md` §7.
