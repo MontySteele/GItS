@@ -111,5 +111,6 @@ great!"
 2. **Varka's other-nation faces: (b).** [USER]: "let's try and clean up
    Varka to only Use characters affiliated from Mondstadt (this would include
    recent releases like Nicole, Durin, Prune) rather than off-region
-   characters." The five re-picks are in the table; Knights' Muster's title
+   characters." On the re-picks: "the Mondstadt repicks are all good too!"
+   The five re-picks are in the table; Knights' Muster's title
    crop was fixed alongside.
