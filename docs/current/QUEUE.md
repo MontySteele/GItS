@@ -22,6 +22,10 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
+- **furina-next paper 2** (`furina-next-2-2026-10-16.md`, two picks,
+  defaults (a)): one spend-all card in the pool besides the starter, Bravura
+  and Bring the House Down capped, Bis! becomes Extended Run (raises every
+  Spend cap); the starter stays.
 - **Distribution readiness** (`distribution-readiness-2026-10-12.md`, two picks,
   defaults (a)): a closed beta now, public early access once Varka and Furina
   reach Balance; a GitHub release first. (The `LAW.md` art line, #1145, is

@@ -1,0 +1,97 @@
+# furina-next paper 2, 2026-10-16: spending the bank
+
+Furina is a Balance kit. These changes go on `furina-next`, which keeps
+Crescendo, Standing Room Only and Prima Donna from paper 1
+(`review/active/furina-next-2026-10-15.md`), and reach `main` only through a
+promotion PR with a suite record graded against the predictions below.
+
+**Why.** Suite 2 (`review/records/furina-suite-2-2026-10-16.md`, ruled "do not
+promote"): the bank now grows (act 3 production 10.6 a turn, above act 2's
+8.8), and it goes unspent. [USER]'s read: "1) not enough ways to spend it big
+in act 3 2) too many spenders are "spend all" which you realistically don't
+want more than a couple of, and the starter already competes for that role
+anyway ... we need to limit the "spend all" effects so they don't brick
+everything else (possibly revisit the starter) but come up with other, capped
+spender effects that can still scale with powers."
+
+## 1. What the numbers say
+
+Both suites, ten runs, 169 fights (scratch `furina-gap/hand.py`):
+
+- **A big bank usually has nowhere to go.** Of the turns that started with 20
+  or more Fanfare, 54 to 59% had no spend-all card in hand, and 37 to 41% had
+  no Fanfare spender of any kind.
+- **The capped spenders are too small to matter.** In acts 2 and 3 the bank
+  held more than the card's limit for 77% to 95% of capped Spends, and the
+  average capped Spend was 5 to 7 Fanfare. Spend-all cards made about half
+  the Spends (36% in act 3 to 76% in act 1) but used 65% to 88% of the
+  Fanfare.
+- **One card does half the spending.** Rising Applause made 117 of 268 Spends.
+  Of the pool's three other spend-all cards, Let the People Rejoice was taken
+  6 times in 11 offers, Bring the House Down 1 in 5, Bravura 0 in 4. The seats
+  pass over a second or third spend-all, as you said they would.
+- **Fanfare is still in the bank when act 3 fights end.** In fights she won,
+  the median left over was 12 in suite 1 and 18 in suite 2.
+
+So your read holds, with one adjustment: decks rarely stack spend-all cards,
+because the seats already pass them over. What actually fails is the turn
+when the bank is full and only small spenders are in hand.
+
+## 2. The changes
+
+One spend-all in the starter, one in the pool. The other two become capped
+spenders whose cap or hit count grows, and a Power raises every cap.
+
+| Card | Today | furina-next |
+|---|---|---|
+| **Rising Applause** (starter) | Gain 5 Block. Spend all your Fanfare and deal that much Hydro damage. | Unchanged (pick 2). |
+| **Let the People Rejoice** (Rare Attack, 2) | Spend all. Deal 2 damage to ALL enemies per point. | Unchanged: the pool's one big act 3 spend. |
+| **Bravura** (Uncommon Attack, 1) | Spend all. Deal 7 Hydro damage for every 3 spent. | Spend up to 18, all you can. Deal 6 [8] Hydro damage for every 3 spent. |
+| **Bring the House Down** (Rare Attack, 2) | Spend all. Deal that much damage. Each guest acts. | Spend up to 10 for each guest on stage, all you can. Deal that much damage. Each guest acts. |
+| **Bis!** → **Extended Run** (Rare Power, 1) | Whenever a card Spends all your Fanfare, keep half of it. (1 of 9 taken) | Cards that Spend up to a number can Spend 8 [12] more. |
+
+- **Strength now has something to multiply.** Bravura and Soloist's
+  Solicitation hit once for each chunk spent, so Leading Lady and Standing
+  Room Only add damage to every hit. A spend-all single hit gets Strength
+  once. This is how capped spenders grow with her Powers: in hits, and in
+  Extended Run's caps.
+- **Bring the House Down grows with her stage.** With three guests it spends
+  up to 30, and each guest also acts.
+- **Extended Run** takes Bis!'s slot. Bis! only rewarded spend-all cards,
+  which are now two in a deck. Extended Run touches the five capped spenders
+  (Soloist's Solicitation 16 to 24, Hold the Stage 16 to 24, Tidal Flourish 10
+  to 18, Bravura 18 to 26, Bring the House Down) and Full House. Two copies
+  plus Bravura on a 200 bank: 14 hits of 6, before Strength. A C# test pins
+  this, as #1350 did for Standing Room Only.
+- Prima Donna (0 of 2 taken) and Standing Room Only (played twice) are not
+  changed; neither has had a fair test yet.
+
+The pool stays at 78, and the rarity counts do not change.
+
+## 3. Predictions (written before suite 3)
+
+Same five seeds, one Sonnet seat per lane, on the `furina-next` staging build.
+
+1. The average capped Spend in act 3 rises from 5 to 6 Fanfare to at least 9.
+2. Turns starting at 20+ Fanfare with no spender in hand that can spend at
+   least 10 fall below a third (today about half).
+3. Bravura, Bring the House Down and Extended Run together are taken in at
+   least a quarter of their offers.
+4. Act 3 normal-fight damage is at least 0.85 of base (suite 2: 0.68).
+5. At least three of five runs reach act 3 (suite 2: one).
+6. Net HP lost per fight is not above suite 1 in any act (1.65 / 1.05 / 1.53
+   of base).
+
+## Picks
+
+1. **The change set.**
+   - **(a) Default:** the four rows above on `furina-next`, then suite 3.
+   - (b) Bravura and Bring the House Down only, with Bis! kept, so the suite
+     isolates the capped spenders.
+   - (c) You name a different direction.
+2. **The starter.**
+   - **(a) Default:** Rising Applause stays as it is. Your second point is
+     about competition, and with only one other spend-all card in the pool,
+     the starter stops having rivals. It is also the card that teaches Spend.
+   - (b) Cap it ("Spend up to 15, all you can") so the bank spills over to
+     the other cards. This changes a starter card, so it is your call.
