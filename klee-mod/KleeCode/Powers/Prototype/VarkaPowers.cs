@@ -478,7 +478,7 @@ public sealed class DawnWindsMarchPower : PowerModel, ILocalizationProvider
     public override PowerStackType StackType => PowerStackType.Counter;
 }
 
-/// <summary>Sworn Brotherhood+ (sec.6; the upgrade since the power cost
+/// <summary>Knight of Boreas+ (was Sworn Brotherhood; sec.6; the upgrade since the power cost
 /// sweep, 2026-09-30): "At the start of your turn, gain 1
 /// Oath of every element." Paid by <see cref="VarkaOath.TurnStart"/>.
 /// </summary>
@@ -486,7 +486,7 @@ public sealed class SwornBrotherhoodPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
-        ("title", "Sworn Brotherhood"),
+        ("title", "Knight of Boreas"),
         ("description",
             "At the start of your turn, gain [blue]{Amount}[/blue] "
           + "[gold]Oath[/gold] of every element."),
@@ -497,7 +497,7 @@ public sealed class SwornBrotherhoodPower : PowerModel, ILocalizationProvider
     public override PowerStackType StackType => PowerStackType.Counter;
 }
 
-/// <summary>Sworn Brotherhood, the base card (power cost sweep,
+/// <summary>Knight of Boreas, the base card (power cost sweep,
 /// 2026-09-30): "At the start of your turn, gain 1 Oath of your current
 /// element." Nothing without a current element. The upgraded card installs
 /// <see cref="SwornBrotherhoodPower"/> (every element) instead. Paid in
@@ -507,7 +507,7 @@ public sealed class SwornBrotherhoodCurrentPower : PowerModel, ILocalizationProv
 {
     public List<(string, string)>? Localization => new()
     {
-        ("title", "Sworn Brotherhood"),
+        ("title", "Knight of Boreas"),
         ("description",
             "At the start of your turn, gain [blue]{Amount}[/blue] "
           + "[gold]Oath[/gold] of your [gold]current element[/gold]."),
@@ -873,14 +873,14 @@ public sealed class AbsoluteZeroPower : PowerModel, ILocalizationProvider
     }
 }
 
-/// <summary>Oath Unto Death: "Whenever you gain Oath of your current
+/// <summary>Azure Fang's Oath (was Oath Unto Death): "Whenever you gain Oath of your current
 /// element, gain 1 more." Read inside <see cref="VarkaOath.Gain"/>, so the
 /// extra point is part of the same gain.</summary>
 public sealed class OathUntoDeathPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
-        ("title", "Oath Unto Death"),
+        ("title", "Azure Fang's Oath"),
         ("description",
             "Whenever you gain [gold]Oath[/gold] of your [gold]current "
           + "element[/gold], gain [blue]{Amount}[/blue] more."),
@@ -891,7 +891,7 @@ public sealed class OathUntoDeathPower : PowerModel, ILocalizationProvider
     public override PowerStackType StackType => PowerStackType.Counter;
 }
 
-/// <summary>Wolfpack (the Varka payoff round, 2026-10-10): "Whenever you
+/// <summary>Lupical (was Wolfpack; the Varka payoff round, 2026-10-10): "Whenever you
 /// play Four Winds' Ascension, shuffle a copy of it into your Draw Pile. The
 /// copy Exhausts." Paid by <see cref="VarkaOath.EndPlay"/>, one copy per
 /// stack, upgraded when the played one was, at a random depth of the draw
@@ -901,7 +901,7 @@ public sealed class WolfpackPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
-        ("title", "Wolfpack"),
+        ("title", "Lupical"),
         ("description",
             "Whenever you play [gold]Four Winds' Ascension[/gold], shuffle a copy of it "
           + "into your [gold]Draw Pile[/gold]. The copy "
@@ -942,7 +942,7 @@ public sealed class WolfpackPower : PowerModel, ILocalizationProvider
             catch (System.Exception) { title = string.Empty; }
             ResolutionLedger.NoteEventOnPlay(ResolutionLedger.Wolfpack, title,
                                              "Four Winds' Ascension",
-                                             "Wolfpack", amount: made);
+                                             "Lupical", amount: made);
         }
     }
 }

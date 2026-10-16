@@ -9158,3 +9158,33 @@ and 0 / 5).
 
 Pins: `tier0/tests/test_yae_review_r6.py`,
 `klee-mod/KleeTests/Prototype/YaeReviewR6Tests.cs`.
+
+## Lore renames (2026-10-15)
+
+Names only; ids, text and numbers unchanged
+(`review/active/lore-review-2026-10-15.md`, picks 1 and 3). [USER]: "Varka is
+the current Wolf of the North; the current Lion of the South is Jean.
+Otherwise these all make sense." and "I think that at one point, Kaboom! was
+in use for something else; we can rename that now."
+
+| id | was | now |
+|---|---|---|
+| `proto_vk_sworn_brotherhood` | Sworn Brotherhood | Knight of Boreas |
+| `proto_vk_oath_unto_death` | Oath Unto Death | Azure Fang's Oath |
+| `proto_vk_wolfpack` | Wolfpack | Lupical |
+| `proto_vk_thundering_verdict` | Thundering Verdict | Lightning Fang |
+| `proto_vk_dawn_patrol` | Dawn Patrol | Leave It for Jean |
+| `proto_vk_tailwind_stride` | Tailwind Stride | A Bard's Tale |
+| `proto_vk_pyre_oath` | Ashen Oath | For Crepus |
+| `proto_fs_crashing_waves` | Crashing Waves | Soloist's Solicitation |
+| `proto_fs_rising_tide` | Rising Tide | Endless Waltz |
+| `proto_fs_undercurrent` | Undercurrent | Unheard Confession |
+| `proto_fs_riptide_lunge` | Riptide Lunge | Coup de Théâtre |
+| `proto_fs_against_the_tide` | Against the Tide | Against All Odds |
+| `proto_ko_kapow` | Ka-pow! | Kaboom! |
+
+The Varka Powers named after their cards (`SwornBrotherhoodPower`,
+`SwornBrotherhoodCurrentPower`, `OathUntoDeathPower`, `WolfpackPower`) carry
+the new names, and so do the seat page's Lupical lines. Older entries above
+keep the names the cards had when they were written. Art is keyed by id, so
+every card keeps its picture.

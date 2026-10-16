@@ -3603,7 +3603,7 @@ EVENT_HP_RETURNED_PAST = "Drained {n} HP returned, {past} of it past your line"
 #: what Ethereal Exhausted at the turn's end. Seats read both as "vanished".
 EVENT_TO_DISCARD = "{n} {card} to the discard pile (hand full)"
 EVENT_ETHEREAL = "exhausted (Ethereal): {cards}"
-EVENT_WOLFPACK = ("Wolfpack shuffled {n} of Four Winds' Ascension into your "
+EVENT_WOLFPACK = ("Lupical shuffled {n} of Four Winds' Ascension into your "
                   "draw pile (it Exhausts when played)")
 #: And under Twin Gales, what each Swirl paid ("Numbers held"; a line, not a
 #: rule): `{paid}` is the mod's own words, `VarkaOath.TwinGalesPaid`.
