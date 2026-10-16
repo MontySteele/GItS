@@ -3020,6 +3020,69 @@ proto_ym_second_printing	ImageGen/images/cards/yae/proto_ym_second_printing.png	
 proto_ym_authors_copy	ImageGen/images/cards/yae/proto_ym_authors_copy.png	500	380	cover	x0.60,y0.45@1.2	shortlist	1	png	Yae Miko TPRGT 2022 - Aether.png		splash	
 # proto_ym_serial_novel <- her wish splash, the long-running story
 proto_ym_serial_novel	ImageGen/images/cards/yae/proto_ym_serial_novel.png	500	380	cover	x0.55,y0.40@1.2	shortlist	1	png	Yae Miko Wish.png		splash	
+# ---------- Yae art pass (2026-10-16): 31 blank portraits, official wiki art chosen by Claude (Prototype) ----------
+# proto_ym_afterword <- quest still, YPH (Yae art pass 2026-10-16)
+proto_ym_afterword	ImageGen/images/cards/yae/proto_ym_afterword.png	500	380	cover	x0.4,y0.55@1.1	shortlist	1	png	World Quest Yae Publishing House's Invitation.png		splash	
+# proto_ym_cliffhanger <- anomaly impact (Yae art pass 2026-10-16)
+proto_ym_cliffhanger	ImageGen/images/cards/yae/proto_ym_cliffhanger.png	500	380	cover	x0.45,y0.5@1.0	shortlist	1	png	Inazuma Anomaly Impact.png		splash	
+# proto_ym_disarming_smile <- Yae valentine (Yae art pass 2026-10-16)
+proto_ym_disarming_smile	ImageGen/images/cards/yae/proto_ym_disarming_smile.png	500	380	cover	x0.55,y0.5@1.35	shortlist	1	png	Valentine's Day 2023 - Yae Miko.png		splash	
+# proto_ym_editorial_priority <- Katheryne shop (Yae art pass 2026-10-16)
+proto_ym_editorial_priority	ImageGen/images/cards/yae/proto_ym_editorial_priority.png	500	380	cover	x0.4,y0.5@1.0	shortlist	1	png	World Quest Katheryne in Inazuma.png		splash	
+# proto_ym_enlightened_blessing <- sakura petals river (Yae art pass 2026-10-16)
+proto_ym_enlightened_blessing	ImageGen/images/cards/yae/proto_ym_enlightened_blessing.png	500	380	cover	x0.3,y0.45@1.0	shortlist	1	png	Silken Courtyard Sakura Bridge.png		splash	
+# proto_ym_eternity <- Raiden electro sphere (Yae art pass 2026-10-16)
+proto_ym_eternity	ImageGen/images/cards/yae/proto_ym_eternity.png	500	380	cover	x0.5,y0.45@1.0	shortlist	1	png	App Store Event Character Wallpaper Raiden Shogun Version 3.3.png		splash	
+# proto_ym_forbidden_art_daisesshou <- Yougou concept (Yae art pass 2026-10-16)
+proto_ym_forbidden_art_daisesshou	ImageGen/images/cards/yae/proto_ym_forbidden_art_daisesshou.png	500	380	cover	x0.5,y0.5@1.0	shortlist	1	png	Depths of Mt. Yougou Concept Art.png		splash	
+# proto_ym_foxs_bargain <- Yae wallpaper (Yae art pass 2026-10-16)
+proto_ym_foxs_bargain	ImageGen/images/cards/yae/proto_ym_foxs_bargain.png	500	380	cover	x0.55,y0.5@1.0	shortlist	1	png	App Store Event Character Wallpaper Yae Miko Version 3.2.png		splash	
+# proto_ym_foxs_verdict <- kitsune statue GN shrine (Yae art pass 2026-10-16)
+proto_ym_foxs_verdict	ImageGen/images/cards/yae/proto_ym_foxs_verdict.png	500	380	cover	x0.4,y0.5@1.0	shortlist	1	png	Earth Kitsune Statue Grand Narukami Shrine 1 Context.png		splash	
+# proto_ym_galley_proof <- Yae intro banner (Yae art pass 2026-10-16)
+proto_ym_galley_proof	ImageGen/images/cards/yae/proto_ym_galley_proof.png	500	380	cover	x0.3,y0.5@1.2	shortlist	1	png	Yae Miko Introduction Banner.jpg		splash	
+# proto_ym_genre_shift <- chronicled wish group (Yae art pass 2026-10-16)
+proto_ym_genre_shift	ImageGen/images/cards/yae/proto_ym_genre_shift.png	500	380	cover	x0.5,y0.5@1.0	shortlist	1	png	Inazuma Chronicled Wish & Sports Event.jpg		splash	
+# proto_ym_guardian_of_narukami <- Grand Narukami Shrine (Yae art pass 2026-10-16)
+proto_ym_guardian_of_narukami	ImageGen/images/cards/yae/proto_ym_guardian_of_narukami.png	500	380	cover	x0.38,y0.5@1.0	shortlist	1	png	Grand Narukami Shrine.png		splash	
+# proto_ym_hold_the_presses <- Tenshukaku interior (Yae art pass 2026-10-16)
+proto_ym_hold_the_presses	ImageGen/images/cards/yae/proto_ym_hold_the_presses.png	500	380	cover	x0.38,y0.5@1.0	shortlist	1	png	Tenshukaku Interior 3.png		splash	
+# proto_ym_kaguras_verity <- Raiden bday 2025 (Yae art pass 2026-10-16)
+proto_ym_kaguras_verity	ImageGen/images/cards/yae/proto_ym_kaguras_verity.png	500	380	cover	x0.5,y0.4@1.25	shortlist	1	png	Raiden Shogun Birthday 2025.png		splash	
+# proto_ym_kitsune_veil <- sky kitsune statue Araumi (Yae art pass 2026-10-16)
+proto_ym_kitsune_veil	ImageGen/images/cards/yae/proto_ym_kitsune_veil.png	500	380	cover	x0.5,y0.45@1.0	shortlist	1	png	Sky Kitsune Statue Araumi.png		splash	
+# proto_ym_kitsunes_shelter <- Moon-bathed Fang shrine (Yae art pass 2026-10-16)
+proto_ym_kitsunes_shelter	ImageGen/images/cards/yae/proto_ym_kitsunes_shelter.png	500	380	cover	x0.3,y0.5@1.3	shortlist	1	png	The Moon-Bathed Deep Fang Shrine.png		splash	
+# proto_ym_late_night_reading <- Yae book (Yae art pass 2026-10-16)
+proto_ym_late_night_reading	ImageGen/images/cards/yae/proto_ym_late_night_reading.png	500	380	cover	x0.82,y0.42@1.3	shortlist	1	png	Kitsune's Leisurely Stroll Around Hanamizaka.jpg		splash	
+# proto_ym_narukami_bloom <- Radiant Sakura quest (Yae art pass 2026-10-16)
+proto_ym_narukami_bloom	ImageGen/images/cards/yae/proto_ym_narukami_bloom.png	500	380	cover	x0.38,y0.5@1.0	shortlist	1	png	Story Quest Radiant Sakura.png		splash	
+# proto_ym_narukami_judgment <- Sara bday 2022 (Yae art pass 2026-10-16)
+proto_ym_narukami_judgment	ImageGen/images/cards/yae/proto_ym_narukami_judgment.png	500	380	cover	x0.5,y0.4@1.25	shortlist	1	png	Kujou Sara Birthday 2022.png		splash	
+# proto_ym_narukami_ray <- thunder sakura 2 (Yae art pass 2026-10-16)
+proto_ym_narukami_ray	ImageGen/images/cards/yae/proto_ym_narukami_ray.png	500	380	cover	x0.5,y0.5@1.0	shortlist	1	png	Thunder Sakura 2 Location Context.png		splash	
+# proto_ym_offertory_box <- mouun shrine (Yae art pass 2026-10-16)
+proto_ym_offertory_box	ImageGen/images/cards/yae/proto_ym_offertory_box.png	500	380	cover	x0.5,y0.5@1.0	shortlist	1	png	Offering pool mouun shrine.jpeg		splash	
+# proto_ym_petal_storm <- Ayaka bday 2021 (Yae art pass 2026-10-16)
+proto_ym_petal_storm	ImageGen/images/cards/yae/proto_ym_petal_storm.png	500	380	cover	x0.5,y0.4@1.25	shortlist	1	png	Kamisato Ayaka Birthday 2021.png		splash	
+# proto_ym_replanting <- thunder sakura healed (Yae art pass 2026-10-16)
+proto_ym_replanting	ImageGen/images/cards/yae/proto_ym_replanting.png	500	380	cover	x0.5,y0.5@1.0	shortlist	1	png	Thunder Sakura Healed.png		splash	
+# proto_ym_sacred_thunderbolt <- calling down thunder (Yae art pass 2026-10-16)
+proto_ym_sacred_thunderbolt	ImageGen/images/cards/yae/proto_ym_sacred_thunderbolt.png	500	380	cover	x0.3,y0.5@1.0	shortlist	1	png	Commission Calling Down the Thunder.png		splash	
+# proto_ym_saiguus_lesson <- Yae splash (Yae art pass 2026-10-16)
+proto_ym_saiguus_lesson	ImageGen/images/cards/yae/proto_ym_saiguus_lesson.png	500	380	cover	x0.62,y0.2@1.8	shortlist	1	png	Splashscreen When the Sakura Bloom.png		splash	
+# proto_ym_sakura_canopy <- Hanamizaka (Yae art pass 2026-10-16)
+proto_ym_sakura_canopy	ImageGen/images/cards/yae/proto_ym_sakura_canopy.png	500	380	cover	x0.38,y0.5@1.0	shortlist	1	png	Hanamizaka.png		splash	
+# proto_ym_shrines_sacred_shade <- Narukami concept (Yae art pass 2026-10-16)
+proto_ym_shrines_sacred_shade	ImageGen/images/cards/yae/proto_ym_shrines_sacred_shade.png	500	380	cover	x0.4,y0.5@1.0	shortlist	1	png	Narukami Island Concept Art.png		splash	
+# proto_ym_spiritfox_prank <- Kirara bday (Yae art pass 2026-10-16)
+proto_ym_spiritfox_prank	ImageGen/images/cards/yae/proto_ym_spiritfox_prank.png	500	380	cover	x0.5,y0.45@1.25	shortlist	1	png	Kirara Birthday 2024.png		splash	
+# proto_ym_stellar_conduct <- Makoto consciousness (Yae art pass 2026-10-16)
+proto_ym_stellar_conduct	ImageGen/images/cards/yae/proto_ym_stellar_conduct.png	500	380	cover	x0.5,y0.5@1.0	shortlist	1	png	Makoto Consciousness.png		splash	
+# proto_ym_thunder_petal <- arborism 4 (Yae art pass 2026-10-16)
+proto_ym_thunder_petal	ImageGen/images/cards/yae/proto_ym_thunder_petal.png	500	380	cover	x0.3,y0.45@1.35	shortlist	1	png	Sakura Arborism Thunder Sakura 4.png		splash	
+# proto_ym_torii_ward <- neko shrine torii (Yae art pass 2026-10-16)
+proto_ym_torii_ward	ImageGen/images/cards/yae/proto_ym_torii_ward.png	500	380	cover	x0.4,y0.5@1.0	shortlist	1	png	World Quest Neko Is a Cat Shrine Canteen.png		splash	
 # power_yae_sakura <- her skill's icon, the Sesshou Sakura
 power_yae_sakura	ImageGen/images/yae/powers/sakura.png	256	256	contain	center	shortlist	1	png	Talent Yakan Evocation Sesshou Sakura.png		icon
 # power_yae_foxfire_lure <- her foxfire attack's icon
