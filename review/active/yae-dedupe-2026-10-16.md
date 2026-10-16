@@ -60,14 +60,10 @@ enemy (two thirds of the Kin Priest fight's Sakura damage went to minions).
 So the refill leans on early damage and aimed strikes, in new shapes, not a
 third attack/Block pair.
 
-## Picks
+## Picks (ruled 2026-10-16)
 
-1. **The cuts.**
-   - **(a) Default:** all 11 go.
-   - (b) All except the ones you name.
-2. **The refill.**
-   - **(a) Default:** Claude designs 11 replacements (8 Common, 3
-     Uncommon) to the brief in section 3, in a short follow-up paper;
-     cuts and new cards are built together, so the pool never plays at 67,
-     then her art pass covers the new cards.
-   - (b) Cut now and play the 67-card pool in your run; refill after it.
+[USER]: "Agreed on the Yae paper picks!"
+
+1. **The cuts: (a).** All 11 go.
+2. **The refill: (a).** Claude designs 11 replacements (8 Common, 3
+   Uncommon) to section 3's brief; cuts and new cards are built together.
