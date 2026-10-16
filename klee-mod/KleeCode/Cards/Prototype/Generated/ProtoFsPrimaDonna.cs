@@ -38,14 +38,14 @@ public sealed class ProtoFsPrimaDonna : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFanfare(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForSpend(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_prima_donna");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Prima Donna"),
-        ("description", "At the start of your turn, if you have 10 or more [gold]Fanfare[/gold], gain {energyPrefix:energyIcons(1)}."),
+        ("description", "At the start of your turn, if you [gold]Spent[/gold] last turn, gain {energyPrefix:energyIcons(1)}{IfUpgraded:show: and draw 1 card|}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -63,11 +63,18 @@ public sealed class ProtoFsPrimaDonna : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<PrimaDonnaPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        if (IsUpgraded)
+        {
+            await PowerCmd.Apply<PrimaDonnaPlusPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        }
+        else
+        {
+            await PowerCmd.Apply<PrimaDonnaPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        }
     }
 
     protected override void OnUpgrade()
     {
-        EnergyCost.UpgradeBy(-1);
+        // upgraded_power: the upgraded card installs PrimaDonnaPlusPower, read off IsUpgraded when the card is played.
     }
 }

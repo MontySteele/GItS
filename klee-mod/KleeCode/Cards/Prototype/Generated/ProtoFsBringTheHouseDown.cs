@@ -38,14 +38,14 @@ public sealed class ProtoFsBringTheHouseDown : CustomCardModel, ICharacterCard, 
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFanfare(ArmKeywordTips.ForSpend(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForSpend(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_bring_the_house_down");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Bring the House Down"),
-        ("description", "[gold]Spend[/gold] all your [gold]Fanfare[/gold]. Deal that much damage. Each guest acts.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("description", "[gold]Spend[/gold] up to 10 for each guest on stage, all you can. Deal that much damage. Each guest acts.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -53,7 +53,7 @@ public sealed class ProtoFsBringTheHouseDown : CustomCardModel, ICharacterCard, 
         {
             new CalculationBaseVar(0m),
             new ExtraDamageVar(1m),
-            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.SpentOrFanfare(card))
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.SpentOrUpTo(card, 10 * FurinaStage.Of(card.Owner?.Creature).Count))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -65,7 +65,7 @@ public sealed class ProtoFsBringTheHouseDown : CustomCardModel, ICharacterCard, 
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await FurinaStage.SpendAll(choiceContext, Owner.Creature);
+        await FurinaStage.SpendUpTo(choiceContext, Owner.Creature, 10 * FurinaStage.Of(Owner.Creature).Count);
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)
