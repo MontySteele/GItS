@@ -358,10 +358,16 @@ def guest_fx_only(char: str, art: Path, check: bool) -> int:
 def rest_still(R: Path):
     """BaseLib centres the texture at y = -0.1 h inside a 0.5 container, so a
     point at (w/2, 0.6 h) of the texture lands on the anchor: pad so the seat
-    (the hips' head) is that point (Klee's rule)."""
+    (the hips' head) is that point (Klee's rule).
+
+    NO GROUND CLIP. The combat clips cut below the feet anchor so planted
+    blades read as driven into the floor; a seated still has no floor at that
+    line (the rig's origin sits above the boots and the hem), and the cut drew
+    Varka's sword tips, cloak and seat, and Furina's coat hem, on one flat
+    edge, so he seemed to float in front of the log (in-game check
+    2026-10-16). The still keeps every texel it rendered."""
     meta = json.loads((R / "rest.json").read_text(encoding="utf-8"))
-    s = float(meta["ppu"]) / FX.REF_PPU
-    rest = ground_clip(Image.open(R / "rest.png").convert("RGBA"), meta["origin_px"][1], s)
+    rest = Image.open(R / "rest.png").convert("RGBA")
     rb = KP.alpha_box([rest])
     rest = rest.crop(rb)
     hx, hy = meta["hips_px"][0] - rb[0], meta["hips_px"][1] - rb[1]

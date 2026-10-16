@@ -38,7 +38,7 @@ from pathlib import Path
 
 import yaml
 
-from tools.klee_rig.rig import color, fnum, num, vec2
+from tools.klee_rig.rig import color, fnum, num, shadow_fade, vec2
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
@@ -318,6 +318,9 @@ def build_animations(spec: dict, frames: dict, clips: dict[str, Clip]) -> dict[s
     for name in ANIMATION_ORDER:
         anim = spec["animations"][name]
         tracks = [_expand(anim, tr) for tr in anim.get("tracks", ())]
+        fade = shadow_fade(tracks, MODEL, f"{FACING}/{SHADOW_NODE}")   # the shadow fades with him at death
+        if fade is not None:
+            tracks.append(fade)
         tracks += state_tracks(spec, frames, clips, anim)
         paths = [t.path for t in tracks]
         assert len(paths) == len(set(paths)), f"{name}: duplicate track"

@@ -84,7 +84,7 @@ public sealed class OperaGlasses : CustomRelicModel
                                Fanfare, "Opera Glasses");
     }
 
-    protected override string IconBaseName => "snake_ring";
+    protected override string IconBaseName => "ring_of_the_snake";
     public override string PackedIconPath =>
         KleePck.Path(FurinaStageRelics.Icon("opera_glasses")) ?? base.PackedIconPath;
     protected override string BigIconPath =>
@@ -109,7 +109,7 @@ public sealed class GrandTheaterProgram : CustomRelicModel
           + "[/blue] [gold]Fanfare[/gold]."),
     };
 
-    protected override string IconBaseName => "snake_ring";
+    protected override string IconBaseName => "ring_of_the_snake";
     public override string PackedIconPath =>
         KleePck.Path(FurinaStageRelics.Icon("grand_theater_program")) ?? base.PackedIconPath;
     protected override string BigIconPath =>
@@ -127,7 +127,7 @@ public abstract class FurinaStageRelic : CustomRelicModel
 
     protected abstract string Slug { get; }
 
-    protected override string IconBaseName => "snake_ring";
+    protected override string IconBaseName => "ring_of_the_snake";
 
     public override string PackedIconPath =>
         KleePck.Path(FurinaStageRelics.Icon(Slug)) ?? base.PackedIconPath;

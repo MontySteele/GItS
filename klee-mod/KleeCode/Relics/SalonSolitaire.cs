@@ -90,17 +90,23 @@ public sealed class SalonSolitaire : CustomRelicModel
     }
 
     /// <summary>
-    /// FALLBACK ICON, borrowed from the relic whose slot this takes. Art is
-    /// commissioned when a slice is ACCEPTED, not before -- the rule the
-    /// Casket and the overhaul power icons both follow.
+    /// THE ICON is her talent's own, "Talent Salon Solitaire.png"
+    /// (art/plan.tsv relic_salon_solitaire). Until 2026-10-16 this pointed
+    /// at ethereal_spotlight.png, the Spotlight item picture of the relic
+    /// whose slot this took, so the select screen showed a spotlight.
+    ///
+    /// IconBaseName names only the OUTLINE atlas sprite the base RelicModel
+    /// still derives from it (<c>PackedIconOutlinePath</c>); it must be a
+    /// sprite the base atlas holds, or the game draws its "NO PE"
+    /// placeholder behind the icon. "snake_ring" was not one (2026-10-16).
     /// </summary>
-    protected override string IconBaseName => "snake_ring";
+    protected override string IconBaseName => "ring_of_the_snake";
 
     public override string PackedIconPath =>
-        KleePck.Path("furina/relics/ethereal_spotlight.png")
+        KleePck.Path("furina/relics/salon_solitaire.png")
         ?? base.PackedIconPath;
 
     protected override string BigIconPath =>
-        KleePck.Path("furina/relics/ethereal_spotlight.png")
+        KleePck.Path("furina/relics/salon_solitaire.png")
         ?? base.BigIconPath;
 }
