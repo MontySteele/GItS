@@ -87,7 +87,8 @@ ROOT = Path(__file__).resolve().parent.parent
 CSPROJ = ROOT / "klee-mod" / "KleeCode" / "KleeCode.csproj"
 SOURCE_MANIFEST = ROOT / "klee-mod" / "Klee" / "manifest.json"
 PCK = ROOT / "klee-mod" / "assets" / "klee.pck"
-PREVIEW = ROOT / "ImageGen" / "images" / "mod_image.png"
+PREVIEW = ROOT / "ImageGen" / "images" / "workshop_preview.png"   # tools/make_workshop_preview.py
+BADGE = ROOT / "ImageGen" / "images" / "mod_image.png"
 SURFACE = ROOT / "docs" / "prototype-surface.yaml"
 OUT = ROOT / ".workshop"
 
@@ -294,9 +295,9 @@ def plan(variant: Variant, version: str, *, dll: Path, pck: Path,
         entries.append(Entry("image.png", size, str(image)))
         if size >= IMAGE_LIMIT:
             notes.append(f"PREVIEW TOO BIG: {image} is {size} bytes (limit 1 MB)")
-        if image.name == PREVIEW.name:
+        if image.name == BADGE.name:
             notes.append("image.png is the Mods-screen badge (Klee, Furina, Kokomi; "
-                         "no Varka), a stand-in until real preview art exists")
+                         "no Varka); run tools/make_workshop_preview.py for the real one")
     else:
         entries.append(Entry("image.png", None, "generated placeholder"))
         notes.append("NO PREVIEW ART: image.png is a generated placeholder")
