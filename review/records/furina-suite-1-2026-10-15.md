@@ -87,3 +87,5 @@ with tonight's Varka seats (same seat type, same seeds) as the control for play:
      hold her as she is.
 
 Raw transcripts: `review/qa/blindplay/` (local, gitignored).
+
+**Ruled 2026-10-15.** [USER]: "On Furina - yes, let's do a paper on this". Pick 1 (a).
