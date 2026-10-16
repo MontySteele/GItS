@@ -53,12 +53,19 @@ and `tier0/tests/test_package_workshop.py` the pins.
 **Opt-in run stats (beta only, 2026-10-16).** [USER]: "go ahead and try to
 build the opt-in upload now in the beta release so we can test drive the
 telemetry before we spread it further." Add the deployed Worker's URL
-(`telemetry-worker/README.md`, Deploy):
+(`telemetry-worker/README.md`, Deploy; today
+`https://gits-telemetry.gits-telemetry-worker.workers.dev`). It stays an
+option, never a constant in the code:
 
 ```sh
 .venv/Scripts/python.exe tools/package_workshop.py --variant beta --version 0.3.0 \
-    --telemetry-endpoint https://gits-telemetry.<account>.workers.dev
+    --telemetry-endpoint https://gits-telemetry.gits-telemetry-worker.workers.dev
 ```
+
+The upload sends `User-Agent: TeyvatSpire/<mod version> (+telemetry)`:
+Cloudflare's bot screen in front of the Worker answers 403 to some library
+defaults (`Python-urllib`) and 204 to a named client. A 403, like any other
+failure, is logged and dropped.
 
 That builds with `-p:GitsTelemetryEndpoint=<URL>/v1/run` (the route is
 appended if absent), which compiles `klee-mod/KleeCode/RunStats/`, and adds

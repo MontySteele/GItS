@@ -310,6 +310,23 @@ def test_a_long_blob_takes_a_two_byte_length():
     assert b[:2] == bytes([0x80, 150]) and b[2:] == s.encode()
 
 
+def test_the_upload_names_itself_and_hardcodes_no_endpoint():
+    """Cloudflare's bot screen in front of the Worker returns 403 to the
+    `Python-urllib` agent and 204 to curl or an empty agent (checked by hand
+    against the deployed Worker, 2026-10-16). The client sends an explicit,
+    honest User-Agent and treats any non-2xx as a dropped failure. Static
+    only: nothing here touches the network."""
+    hook = (ROOT / "klee-mod" / "KleeCode" / "RunStats" / "RunStatsHook.cs").read_text(encoding="utf-8")
+    assert '$"TeyvatSpire/{WorkshopRelease.ModVersion} (+telemetry)"' in hook
+    assert '"User-Agent", UserAgent' in hook
+    assert "IsSuccessStatusCode" in hook
+    assert "TimeSpan.FromSeconds(10)" in hook
+    # The endpoint is a build option, read from assembly metadata; no URL in code.
+    for src in (ROOT / "klee-mod" / "KleeCode" / "RunStats").glob("*.cs"):
+        assert "workers.dev" not in src.read_text(encoding="utf-8"), src.name
+    assert "workers.dev" not in (ROOT / "tools" / "package_workshop.py").read_text(encoding="utf-8")
+
+
 def test_the_csproj_compiles_run_stats_only_with_an_endpoint():
     proj = (ROOT / "klee-mod" / "KleeCode" / "KleeCode.csproj").read_text(encoding="utf-8")
     assert "<ItemGroup Condition=\"'$(GitsTelemetryEndpoint)' == ''\">" in proj

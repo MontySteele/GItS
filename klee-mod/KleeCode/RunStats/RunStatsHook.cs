@@ -67,6 +67,9 @@ internal static class RunStatsHook
 
     private static readonly HttpClient Http = new() { Timeout = TimeSpan.FromSeconds(10) };
 
+    /// <summary>"TeyvatSpire/0.3.0 (+telemetry)".</summary>
+    public static string UserAgent => $"TeyvatSpire/{WorkshopRelease.ModVersion} (+telemetry)";
+
     public static string? Endpoint =>
         typeof(RunStatsHook).Assembly.GetCustomAttributes<AssemblyMetadataAttribute>()
             .FirstOrDefault(a => a.Key == EndpointKey)?.Value;
@@ -141,9 +144,19 @@ internal static class RunStatsHook
         {
             try
             {
-                using var body = new StringContent(json, Encoding.UTF8, "application/json");
-                using var response = await Http.PostAsync(endpoint, body).ConfigureAwait(false);
-                Log.Info($"[{KleeMod.ModId}] run stats: sent ({(int)response.StatusCode}, {json.Length} bytes)");
+                using var request = new HttpRequestMessage(HttpMethod.Post, endpoint)
+                {
+                    Content = new StringContent(json, Encoding.UTF8, "application/json"),
+                };
+                // An explicit, honest agent: Cloudflare's bot screen in front of
+                // the Worker answers 403 to some library defaults
+                // (Python-urllib), 204 to a named client.
+                request.Headers.TryAddWithoutValidation("User-Agent", UserAgent);
+                using var response = await Http.SendAsync(request).ConfigureAwait(false);
+                if (response.IsSuccessStatusCode)
+                    Log.Info($"[{KleeMod.ModId}] run stats: sent ({(int)response.StatusCode}, {json.Length} bytes)");
+                else
+                    Log.Warn($"[{KleeMod.ModId}] run stats: refused ({(int)response.StatusCode}), dropped");
             }
             catch (Exception e)
             {
