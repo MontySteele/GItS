@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcKaeyaFrostgnaw : CustomCardModel, IElementalCard, ICompanionCard, IWritableCompanion
+public sealed class ProtoMcKaeyaFrostgnaw : CustomCardModel, IElementalCard, ICompanionCard, IVarkaSwitchCard
 {
     /// <summary>Sheet applies_element: this companion attack applies its element.</summary>
     public Element Element => Element.Cryo;
@@ -52,7 +52,7 @@ public sealed class ProtoMcKaeyaFrostgnaw : CustomCardModel, IElementalCard, ICo
         new[] { KleeKeywords.AppliesCryo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCompanionPlan(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo), this, Element.Cryo), this);
+        ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo), this, Element.Cryo);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_kaeya_frostgnaw");
 
@@ -62,14 +62,6 @@ public sealed class ProtoMcKaeyaFrostgnaw : CustomCardModel, IElementalCard, ICo
         ("description", "Deal {CalculatedDamage:diff()} [gold]Cryo[/gold] damage. Gain {Block:diff()} [gold]Block[/gold].{InCombat:{VarkaSwitch}|}"),
     };
 
-    /// <summary>On Kokomi, this Companion card can also be written as a Plan on
-    /// the Bake-Kurage (the re-founding, 2026-10-12).</summary>
-    public override TargetType TargetType =>
-        KokomiCompanionPlan.TargetFor(this, base.TargetType);
-
-    /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
-    public TargetType PrintedTargetType => base.TargetType;
-
     /// <summary>The element this card makes current, on its in-combat line
     /// (`VarkaOath.SwitchLine`).</summary>
     protected override void AddExtraArgsToDescription(
@@ -78,6 +70,10 @@ public sealed class ProtoMcKaeyaFrostgnaw : CustomCardModel, IElementalCard, ICo
         base.AddExtraArgsToDescription(description);
         description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Cryo));
     }
+
+    /// <summary>The element this card makes Varka's current element
+    /// (`VarkaOathDial` previews it).</summary>
+    public Element VarkaSwitchElement => Element.Cryo;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
@@ -97,11 +93,6 @@ public sealed class ProtoMcKaeyaFrostgnaw : CustomCardModel, IElementalCard, ICo
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (KokomiPlan.PlayedOnPet(cardPlay))
-        {
-            await KokomiCompanionPlan.Write(choiceContext, this, cardPlay);
-            return;
-        }
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)

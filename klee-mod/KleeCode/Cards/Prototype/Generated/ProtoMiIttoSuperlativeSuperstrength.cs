@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMiIttoSuperlativeSuperstrength : CustomCardModel, IElementalCard, ICompanionCard, IWritableCompanion
+public sealed class ProtoMiIttoSuperlativeSuperstrength : CustomCardModel, IElementalCard, ICompanionCard
 {
     /// <summary>Sheet applies_element: this companion attack applies its element.</summary>
     public Element Element => Element.Geo;
@@ -52,7 +52,7 @@ public sealed class ProtoMiIttoSuperlativeSuperstrength : CustomCardModel, IElem
         new[] { KleeKeywords.AppliesGeo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Geo), this);
+        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Geo);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mi_itto_superlative_superstrength");
 
@@ -61,14 +61,6 @@ public sealed class ProtoMiIttoSuperlativeSuperstrength : CustomCardModel, IElem
         ("title", "Itto — Superlative Superstrength"),
         ("description", "Deal {CalculatedDamage:diff()} [gold]Geo[/gold] damage. Gain {Block:diff()} [gold]Block[/gold]."),
     };
-
-    /// <summary>On Kokomi, this Companion card can also be written as a Plan on
-    /// the Bake-Kurage (the re-founding, 2026-10-12).</summary>
-    public override TargetType TargetType =>
-        KokomiCompanionPlan.TargetFor(this, base.TargetType);
-
-    /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
-    public TargetType PrintedTargetType => base.TargetType;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
@@ -88,11 +80,6 @@ public sealed class ProtoMiIttoSuperlativeSuperstrength : CustomCardModel, IElem
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (KokomiPlan.PlayedOnPet(cardPlay))
-        {
-            await KokomiCompanionPlan.Write(choiceContext, this, cardPlay);
-            return;
-        }
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)

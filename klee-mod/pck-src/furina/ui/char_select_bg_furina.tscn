@@ -1,0 +1,196 @@
+[gd_scene load_steps=16 format=3]
+
+[ext_resource type="Texture2D" path="res://furina/ui/select_closeup_static.png" id="1_art"]
+[ext_resource type="Texture2D" path="res://furina/ui/select_bg.png" id="2_bg"]
+[ext_resource type="Texture2D" path="res://furina/ui/select_loop.png" id="3_loop"]
+
+[sub_resource type="Gradient" id="Gradient_Tex_dot"]
+offsets = PackedFloat32Array(0, 0.35, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.55, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="Tex_dot"]
+gradient = SubResource("Gradient_Tex_dot")
+width = 32
+height = 32
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="Gradient" id="Gradient_Tex_bubble"]
+offsets = PackedFloat32Array(0, 0.55, 0.8, 0.9, 1)
+colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 0.12, 1, 1, 1, 0.85, 1, 1, 1, 0.5, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="Tex_bubble"]
+gradient = SubResource("Gradient_Tex_bubble")
+width = 48
+height = 48
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="CanvasItemMaterial" id="Material_additive"]
+blend_mode = 1
+
+[sub_resource type="Gradient" id="Ramp_Glow"]
+offsets = PackedFloat32Array(0, 0.5, 1)
+colors = PackedColorArray(0.36, 0.72, 1, 0, 0.36, 0.72, 1, 0.25, 0.36, 0.72, 1, 0)
+
+[sub_resource type="Curve" id="Curve_Glow"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.5, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="Gradient" id="Ramp_Bubbles"]
+offsets = PackedFloat32Array(0, 0.12, 0.85, 1)
+colors = PackedColorArray(0.65, 0.85, 1, 0, 0.7, 0.88, 1, 0.75, 0.7, 0.9, 1, 0.6, 0.8, 0.95, 1, 0)
+
+[sub_resource type="Gradient" id="Ramp_Droplets"]
+offsets = PackedFloat32Array(0, 0.3, 1)
+colors = PackedColorArray(0.55, 0.82, 1, 0, 0.75, 0.92, 1, 0.9, 0.55, 0.82, 1, 0)
+
+[sub_resource type="Animation" id="Animation_reset"]
+resource_name = "RESET"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("LoopSprite:frame")
+tracks/0/interp = 0
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0.0),
+"transitions": PackedFloat32Array(1.0),
+"update": 1,
+"values": [0]
+}
+
+[sub_resource type="Animation" id="Animation_select_idle"]
+resource_name = "select_idle"
+length = 4.0
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("LoopSprite:frame")
+tracks/0/interp = 0
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0.0, 0.166667, 0.333333, 0.5, 0.666667, 0.833333, 1.0, 1.166667, 1.333333, 1.5, 1.666667, 1.833333, 2.0, 2.166667, 2.333333, 2.5, 2.666667, 2.833333, 3.0, 3.166667, 3.333333, 3.5, 3.666667, 3.833333),
+"transitions": PackedFloat32Array(1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0),
+"update": 1,
+"values": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_select"]
+_data = {
+&"RESET": SubResource("Animation_reset"),
+&"select_idle": SubResource("Animation_select_idle")
+}
+
+[node name="FurinaBg" type="Control"]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -960.0
+offset_top = -540.0
+offset_right = 960.0
+offset_bottom = 540.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(960, 540)
+
+[node name="Backdrop" type="TextureRect" parent="."]
+layout_mode = 0
+offset_right = 1920.0
+offset_bottom = 1080.0
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 6
+self_modulate = Color(0.33, 0.55, 0.68, 1)
+
+[node name="Glow" type="CPUParticles2D" parent="."]
+material = SubResource("Material_additive")
+position = Vector2(1390, 720)
+amount = 2
+texture = SubResource("Tex_dot")
+lifetime = 4.5
+preprocess = 4.5
+local_coords = true
+emission_shape = 3
+emission_rect_extents = Vector2(140, 140)
+direction = Vector2(0, -1)
+spread = 0.0
+gravity = Vector2(0, 0)
+initial_velocity_min = 0.0
+initial_velocity_max = 6.0
+scale_amount_min = 15.0
+scale_amount_max = 20.0
+scale_amount_curve = SubResource("Curve_Glow")
+color_ramp = SubResource("Ramp_Glow")
+
+[node name="Splash" type="TextureRect" parent="."]
+layout_mode = 0
+offset_right = 1920.0
+offset_bottom = 1080.0
+pivot_offset = Vector2(1390, 1080)
+texture = ExtResource("1_art")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="LoopSprite" type="Sprite2D" parent="."]
+position = Vector2(936, 28)
+scale = Vector2(1.25, 1.25)
+texture = ExtResource("3_loop")
+centered = false
+hframes = 2
+vframes = 7
+
+[node name="Bubbles" type="CPUParticles2D" parent="."]
+material = SubResource("Material_additive")
+position = Vector2(960, 1120)
+amount = 18
+texture = SubResource("Tex_bubble")
+lifetime = 10.0
+preprocess = 10.0
+local_coords = true
+emission_shape = 3
+emission_rect_extents = Vector2(1000, 30)
+direction = Vector2(0, -1)
+spread = 10.0
+gravity = Vector2(0, -6)
+initial_velocity_min = 40.0
+initial_velocity_max = 80.0
+tangential_accel_min = -10.0
+tangential_accel_max = 10.0
+damping_min = 0.0
+damping_max = 2.0
+scale_amount_min = 0.35
+scale_amount_max = 0.8
+color_ramp = SubResource("Ramp_Bubbles")
+
+[node name="Droplets" type="CPUParticles2D" parent="."]
+material = SubResource("Material_additive")
+position = Vector2(960, 640)
+amount = 24
+texture = SubResource("Tex_dot")
+lifetime = 8.0
+preprocess = 8.0
+local_coords = true
+emission_shape = 3
+emission_rect_extents = Vector2(1000, 460)
+direction = Vector2(0, -1)
+spread = 30.0
+gravity = Vector2(0, -4)
+initial_velocity_min = 10.0
+initial_velocity_max = 30.0
+scale_amount_min = 0.06
+scale_amount_max = 0.15
+color_ramp = SubResource("Ramp_Droplets")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_select")
+}
+autoplay = "select_idle"

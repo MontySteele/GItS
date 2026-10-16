@@ -40,8 +40,8 @@ model sizes, not canon heights; only their ratios are used, anchored on
 Furina = 63 in (scale 63 / 150.5 in per chart cm). That puts Neuvillette at
 76.4 in against his canon 192 cm (75.6 in). Klee, Furina and Kokomi keep their
 ruled heights (the chart is within 3% of each). Varka moves to 82 in (chart
-196.4 cm, a size above the other tall males) at his next re-render; until then
-`ruled_height_in` holds it. GUEST_HEIGHTS_IN holds Furina's guest stars from
+196.4 cm, a size above the other tall males); his clips were re-rendered at
+it the same day. GUEST_HEIGHTS_IN holds Furina's guest stars from
 the same chart.
 """
 from __future__ import annotations
@@ -68,6 +68,40 @@ GUEST_HEIGHTS_IN = {
     "charlotte": 63.1, "lynette": 63.3, "freminet": 66.0, "lyney": 66.7,
     "clorinde": 69.2, "navia": 70.0, "wriothesley": 76.1, "neuvillette": 76.4,
 }
+
+
+#: The guest stars' packs (scratch models/<guest>/unpacked/, all 观海
+#: adaptations on the shared bone set, probed 2026-10-13: every bone chars.py
+#: and toon.py pose is present in all eleven; none has a 手先 bone). `head`
+#: is the 頭 bone's height over the lowest vertex in raw PMX units, the
+#: measure each guest is scaled by (hats, ears and Sigewinne's antennae left
+#: out); `face` and `hide` add to FACE_MATS / the hidden overlays.
+FURINA_HEAD = 16.763
+GUESTS = {
+    "charlotte": {"pmx": "charlotte/unpacked/夏洛蒂.pmx", "head": 16.638},
+    "chevreuse": {"pmx": "chevreuse/unpacked/夏沃蕾.pmx", "head": 16.639},
+    "clorinde": {"pmx": "clorinde/unpacked/克洛琳德.pmx", "head": 18.931},
+    # 肌2 is a skin layer over her stocking tops whose lace cut-outs rendered
+    # as two solid black patches on her thighs; without it the white lace
+    # stocking tops (体2) and the skin above them read (probed 2026-10-13)
+    "escoffier": {"pmx": "escoffier/unpacked/爱可菲.pmx", "head": 17.134, "hide": {"肌2"}},
+    # his pack wears the diving helmet; the guest still shows his face
+    "freminet": {"pmx": "freminet/unpacked/菲米尼.pmx", "head": 17.567,
+                 "hide": {"头盔", "头盔表情1", "头盔表情2", "头盔表情3", "头盔表情4"}},
+    "lynette": {"pmx": "lynette/unpacked/【琳妮特】.pmx", "head": 16.630},
+    "lyney": {"pmx": "lyney/unpacked/林尼.pmx", "head": 17.541},
+    "navia": {"pmx": "navia/unpacked/娜维娅.pmx", "head": 19.067},
+    "neuvillette": {"pmx": "neuvillette/unpacked/那维莱特.pmx", "head": 20.676, "face": {"眉影"}},
+    "sigewinne": {"pmx": "sigewinne/unpacked/希格雯.pmx", "head": 12.061},
+    "wriothesley": {"pmx": "wriothesley/unpacked/莱欧斯利.pmx", "head": 20.327, "face": {"眉影"}},
+}
+
+
+def guest_ppu(guest: str, furina_ppu: float) -> float:
+    """A guest's texture px per unit: Furina's, times the guest's height over
+    hers (GUEST_HEIGHTS_IN over 63 in), over the guest's head-bone height
+    over hers -- so every guest stands at the same px per inch as Furina."""
+    return furina_ppu * (GUEST_HEIGHTS_IN[guest] / CHARS["furina"]["height_in"]) * (FURINA_HEAD / GUESTS[guest]["head"])
 
 
 def body_px(height_in: float) -> float:
@@ -123,13 +157,14 @@ def pose(ops, morphs=None, yaw=14.0, prop=None):
 REST = pose([], {}, yaw=0.0)
 
 # ------------------------------------------------------------------ Furina
-# Theatrical: weight on the front foot, rear heel up, the far arm swept out
-# toward the enemy palm-open like a bow to the house, the near hand at her hip.
+# Theatrical: weight on the front foot, rear heel up, the near hand on her hip
+# and the far hand low and open at her waist (the first look's sketch of
+# furina_clips stance A, without its palm-up wrist turn).
 FURINA_STANCE = pose(
     stance(drop=0.035, lean=-2.0, twist=-18, head_turn=38, head_nod=-3, head_tilt=-4,
            front=0.10, back=0.10, back_lift=0.035)
-    + arms((-0.12, 0.00, -0.30), (0.46, -0.12, 0.30), near_anchor="上半身2",
-           near_pole=(-1.0, 0.3, 0.0), far_pole=(0.0, 0.4, -1.0), near_curl=(30, 10), far_curl=(8, 0)),
+    + arms((-0.13, -0.06, -0.15), (0.24, -0.20, -0.08), near_anchor="上半身2",
+           near_pole=(-1.0, 0.3, 0.0), far_pole=(0.2, 0.6, -1.0), near_curl=(30, 10), far_curl=(14, 0)),
     {"にやり": 0.7, "口角上げ": 0.3}, yaw=16)
 
 # ------------------------------------------------------------------ Kokomi
@@ -141,6 +176,16 @@ KOKOMI_STANCE = pose(
     + arms((-0.10, -0.06, -0.36), (0.30, -0.18, 0.16), near_pole=(-1.0, 0.3, 0.0),
            far_pole=(0.2, 0.5, -1.0), near_curl=(25, 10), far_curl=(12, 4)),
     {"にこり": 0.6}, yaw=16)
+
+# ------------------------------------------------------------------ Yae Miko
+# The Guuji at ease: weight back, the near hand on her hip, the far hand
+# palm up before her chest where an ofuda sits (yae_clips stance A).
+YAE_STANCE = pose(
+    stance(drop=0.03, lean=-2.0, twist=-16, head_turn=34, head_nod=1, head_tilt=-5,
+           front=0.09, back=0.08)
+    + arms((-0.15, -0.05, -0.17), (0.20, -0.21, -0.04), near_pole=(-1.0, 0.3, 0.0),
+           far_pole=(0.2, 0.6, -1.0), near_curl=(30, 10), far_curl=(12, 4)),
+    {"にやり": 0.5, "じと目": 0.25}, yaw=16)
 
 # ------------------------------------------------------------------ Varka
 # Heavy and wide: knees bent, feet apart, the claymore held two-handed low
@@ -167,6 +212,13 @@ CHARS = {
                         "wince": ("まばたき", "困る"), "sad": "悲しむ", "shock": "びっくり"},
         "stance": FURINA_STANCE,
         "prop": None,
+        # the full clip set (render.py --clips): her pose library. Her pack
+        # has no sword, so she has no blades; her attack's trail follows a
+        # phantom rapier off her far hand (furina_clips.PHANTOM).
+        "clips": "furina_clips",
+        "blades": {},
+        "hide_mats": set(),
+        "camera_height": 0.8,
     },
     "kokomi": {
         "pmx": "kokomi/unpacked/珊瑚宫心海.pmx",
@@ -178,13 +230,42 @@ CHARS = {
                         "wince": ("まばたき", "困る"), "sad": "悲しむ", "shock": "びっくり", "star_eyes": "星目"},
         "stance": KOKOMI_STANCE,
         "prop": None,
+        # the phase A clip set (render.py --clips, 2026-10-14): her pose
+        # library. Her pack has no catalyst, so she has no blades; her
+        # attack's jet follows a phantom line off her far hand
+        # (kokomi_clips.PHANTOM), as Furina's rapier does.
+        "clips": "kokomi_clips",
+        "blades": {},
+        "hide_mats": set(),
+        "camera_height": 0.8,
+    },
+    "yae": {
+        "pmx": "yae/unpacked/八重神子.pmx",
+        # 70 in: Navia's (GUEST_HEIGHTS_IN, the PROPORTIONS chart's tall
+        # female body), because the two packs share a head-bone height to
+        # 0.2% (19.024 vs 19.067 raw units over the lowest vertex, read off
+        # the PMX 2026-10-14). Not yet ruled by [USER]: Yae model review, pick 1.
+        "height_in": 70.0,
+        "hand_tip": "中指１",
+        "face_mats": FACE_MATS,
+        "no_line_mats": NO_LINE_MATS,
+        "expressions": {"smile": "にこり", "smirk": "にやり", "happy_eyes": "笑い", "blink": "まばたき",
+                        "wince": ("まばたき", "困る"), "sad": "悲しむ", "shock": "びっくり", "star_eyes": "星目",
+                        "half_lidded": "じと目", "wink": "ウィンク"},
+        "stance": YAE_STANCE,
+        "prop": None,
+        # the phase A clip set (render.py --clips, 2026-10-14), a temporary
+        # model: her pose library. Her pack has no gohei or catalyst, so she
+        # has no blades; her flick's fox spirit follows a phantom line off
+        # her far hand (yae_clips.PHANTOM), as Kokomi's jet does.
+        "clips": "yae_clips",
+        "blades": {},
+        "hide_mats": set(),
+        "camera_height": 0.9,
     },
     "varka": {
         "pmx": "varka/unpacked/法尔伽.pmx",
-        "height_in": 78.0,          # ruled 2026-10-13: his custom in-game model is tall
-        # 82 in ruled later the same day (PROPORTIONS above); 78 stays live
-        # until his re-render, because the packed manifest was built at 78.
-        "ruled_height_in": 82.0,
+        "height_in": 82.0,          # ruled 2026-10-13 (PROPORTIONS above): a size above the tall males
         "hand_tip": "中指１",
         "face_mats": FACE_MATS,
         "no_line_mats": NO_LINE_MATS,
@@ -196,14 +277,19 @@ CHARS = {
         # claymores, one per hand ([USER], 2026-10-13: a dual wielder). Each
         # blade's local frame as imported: tip along -Y, the flat in the XY
         # plane; `grip` is where the palm closes on the handle, `base` the
-        # blade just past the guard and `tip` its point (measured on the
+        # blade just past the guard and `tip` its point, `pommel` the pommel
+        # from its foot to its top and `pommel_r` its radius (measured on the
         # meshes, 2026-10-13). The longer Varka_Sword leads in the far hand.
         "clips": "varka_clips",
         "blades": {
-            "R": {"pmx": "varka/unpacked/武器.pmx", "grip": 0.08, "base": -0.36, "tip": -1.49},
-            "L": {"pmx": "varka/unpacked/剑.pmx", "grip": 0.06, "base": -0.38, "tip": -1.80},
+            "R": {"pmx": "varka/unpacked/武器.pmx", "grip": 0.08, "base": -0.36, "tip": -1.49,
+                  "pommel": (0.17, 0.354), "pommel_r": 0.038},
+            "L": {"pmx": "varka/unpacked/剑.pmx", "grip": 0.06, "base": -0.38, "tip": -1.80,
+                  "pommel": (0.18, 0.338), "pommel_r": 0.034},
         },
         "hide_mats": set(),
+        # the face's outline stops short of the lips (render.py unline_mouth)
+        "mouth_mat": "口舌",
         "camera_height": 1.0,
     },
 }

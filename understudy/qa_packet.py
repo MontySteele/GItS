@@ -1310,6 +1310,10 @@ def _hole_values(template: str, values: dict[str, int]) -> dict[str, int]:
     return out
 
 
+#: A "below half" face's in-combat arm (`gen_klee_cards.half_hp_face_lines`).
+_HALF_HP_ARM = re.compile(r"\{InCombat:\{HalfHp\}\|[^{}]*\}")
+
+
 @lru_cache(maxsize=4)
 def _written_face_index_cached(repo: Path) -> tuple[
         tuple[str, tuple[str, tuple[tuple[str, int], ...],
@@ -1332,6 +1336,10 @@ def _written_face_index_cached(repo: Path) -> tuple[
         # A two-arm swap is two sentences; `EB-529`'s bound, for its reason.
         if not template or "{IfUpgraded" in template:
             continue
+        # Release fixes (2026-10-14): "below half" prints its number in
+        # combat, " (39 HP)" (`HalfHpFace`); a combat face is the one this
+        # line reads, so the template carries that arm as a number.
+        template = _HALF_HP_ARM.sub(" ({HalfHp} HP)", template)
         values = _hole_values(template, _canonical_values(src))
         if not values:
             continue

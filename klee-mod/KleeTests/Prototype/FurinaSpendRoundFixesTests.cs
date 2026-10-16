@@ -70,25 +70,6 @@ public class FurinaSpendRoundFixesTests : IDisposable
 
     // ---- 1. High Stakes ------------------------------------------------------
 
-    [Fact]
-    public void High_stakes_prints_the_divisor_from_the_constants()
-    {
-        var card = new ProtoFsHighStakes();
-        Assert.Equal(
-            "Your Attacks deal 1 additional damage for every "
-            + "{PowerAmount:diff()} HP you have [gold]Drained[/gold] this "
-            + "combat.",
-            Face(card));
-        Assert.Equal(FurinaStageLaw.HighStakesEvery,
-                     card.DynamicVars["PowerAmount"].IntValue);
-        Assert.Equal(FurinaStageLaw.HighStakesEveryUpgraded,
-                     Upgraded(new ProtoFsHighStakes())
-                         .DynamicVars["PowerAmount"].IntValue);
-        Assert.Equal(CardRarity.Uncommon, card.Rarity);
-        Assert.Contains(": base(1, CardType.Power, CardRarity.Uncommon",
-                        Generated("ProtoFsHighStakes"));
-    }
-
     [Theory]
     [InlineData(0, 5, 0)]
     [InlineData(4, 5, 0)]
@@ -130,7 +111,7 @@ public class FurinaSpendRoundFixesTests : IDisposable
         ledger.NoteDrain(1, 80);
         Assert.Equal(3m, Hit(stakes, attack));        // 15 / 5
         // Not a Skill's hit, not an unpowered hit, not someone else's.
-        Assert.Equal(0m, Hit(stakes, new ProtoFsOverdraft()));
+        Assert.Equal(0m, Hit(stakes, new ProtoFsOusiaPledge()));
         Assert.Equal(0m, Hit(stakes, attack, ValueProp.Unpowered));
         Assert.Equal(0m, stakes.ModifyDamageAdditive(
             enemy, 6m, ValueProp.Move, enemy, attack, null));
@@ -202,7 +183,7 @@ public class FurinaSpendRoundFixesTests : IDisposable
     {
         InCombat(() =>
         {
-            var b = Build(new ProtoFsOverdraft());            // Drain 4
+            var b = Build(new ProtoFsOusiaPledge());          // a Drain card
             var ledger = FurinaStageLedger.For(b.Furina.Creature);
             // 2 HP of Drain buffer left (the Drain buffer, 2026-10-11).
             ledger.NoteDrain(ledger.BufferLeft - 2,
@@ -277,10 +258,12 @@ public class FurinaSpendRoundFixesTests : IDisposable
             .Contains("below your Drain line"));
         var refusing = files.Count(f => File.ReadAllText(f)
             .Contains(": \"it would take you to 0 HP\";"));
-        // 10 since the diversity pass (2026-10-11) cut Pay the Tab.
-        Assert.True(refusing >= 10, $"{refusing} fixed-Drain refusals");
+        // 10 since the diversity pass (2026-10-11) cut Pay the Tab; 7 since
+        // the sweep (2026-10-14) cut Soloist's Solicitation, Overdraft and
+        // The Deluge.
+        Assert.True(refusing >= 7, $"{refusing} fixed-Drain refusals");
         Assert.Contains(": \"it would take you to 0 HP\";",
-                        Generated("ProtoFsOverdraft"));
+                        Generated("ProtoFsOusiaPledge"));
     }
 
     // ---- 5. Bubble Aria's chooser label --------------------------------------
@@ -529,7 +512,7 @@ public class FurinaSpendRoundFixesTests : IDisposable
         Assert.Equal(3, (int)Invoke("CountSpendCards", new List<CardModel>
         {
             new ProtoFsQuickCue(), new ProtoFsBravura(),
-            new ProtoFsSpiritedAria(), new ProtoFsThunderousApplause(),
+            new ProtoFsTidalFlourish(), new ProtoFsThunderousApplause(),
             new ProtoFsShowstopper(), new ProtoFsCurtainRise(),
         })!);
         Assert.Equal(0, (int)Invoke("CountSpendCards", new object?[] { null })!);

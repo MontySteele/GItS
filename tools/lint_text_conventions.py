@@ -306,7 +306,13 @@ FRONT_ENEMY_ALLOWED = {"PlanKey", "proto_kk_undertide_lance", "proto_kk_tide_wal
 #: `more-damage`'s two counters: "N more" there is a count growing, not a
 #: bonus on a hit, and rule 8 is about the hit.
 MORE_COUNTERS = {"proto_kk_kurage_swarm", "KurageSwarmPower.description",
-                 "proto_vk_oath_unto_death", "OathUntoDeathPower.description"}
+                 "proto_vk_oath_unto_death", "OathUntoDeathPower.description",
+                 # Sakura Channeling (2026-10-14): "You can have N more
+                 # Sakura", the shrine's cap growing.
+                 "SakuraChannelingPower.description",
+                 # Epiclese Season Pass (Furina's card pass, 2026-10-15):
+                 # "You have 1 more guest seat", the seat count growing.
+                 "EpicleseSeasonPass.description"}
 
 #: Card faces only: "your largest Bomb" says WHICH enemy's (the Klee round,
 #: 2026-10-11: Stoke the Fuse grew Torch Head's Bomb 16 by 49 when the seat
@@ -337,8 +343,54 @@ class Row:
 IN_COMBAT = re.compile(r"\{InCombat:(?:[^{}|]|\{[^{}]*\})*\|([^{}]*)\}")
 
 
+def _selector(s: str, name: str) -> tuple[str, str, str] | None:
+    """`{<name>:A|B}<rest>` at the head of `s` as `(A, B, rest)`, braces
+    counted, or None."""
+    head = "{" + name + ":"
+    if not s.startswith(head):
+        return None
+    depth, bar = 0, -1
+    for i in range(len(head), len(s)):
+        c = s[i]
+        if c == "{":
+            depth += 1
+        elif c == "}":
+            if depth == 0:
+                if bar < 0:
+                    return None
+                return s[len(head):bar], s[bar + 1:i], s[i + 1:]
+            depth -= 1
+        elif c == "|" and depth == 0 and bar < 0:
+            bar = i
+    return None
+
+
+def two_faces(s: str) -> list[str] | None:
+    """A two-faced card's faces, each as the player reads it in combat, or
+    None for any other face.
+
+    Furina's card pass (2026-10-15): Ousia / Pneuma prints
+    `{Pneuma:<Pneuma>|{InCombat:<Ousia>|<both faces>}}<tail>`. In combat
+    only one face is on the card; off the board the two are listed, one face
+    a line, so the listing is two faces and not one paragraph of five
+    sentences. Each face is measured with its tail (the Flip line), and the
+    row is held to the longer.
+    """
+    outer = _selector(s, "Pneuma")
+    if outer is None:
+        return None
+    pneuma, rest, tail = outer
+    inner = _selector(rest, "InCombat")
+    ousia = inner[0] if inner is not None else rest
+    return [pneuma + tail, ousia + tail]
+
+
 def render(s: str) -> str:
     """Tags gone, every hole one numeral, the base game's measuring rule."""
+    faces = two_faces(s)
+    if faces is not None:
+        return max((render(face) for face in faces),
+                   key=lambda r: (sentences(r), len(r)))
     s = s.replace("\\n", " ").replace("\n", " ")
     # `{InCombat:<live line>|<off-board>}` is the base game's own Body Slam
     # shape, and the ceilings are STATIC faces: the off-board branch is what
@@ -429,6 +481,11 @@ def _tip_body(body: str, consts: dict[str, str]) -> str:
     declaration, and an `ActText(StagePerformer.X)` call to its switch arm.
     Before the text pass of 2026-10-08 those eleven measured zero."""
     name = body.strip()
+    # The tooltip trim (2026-10-14): a guest tip is the seat's whole sentence
+    # inside `PlayerTips.Guest(card, ...)`, which picks the player's half.
+    guest = re.fullmatch(r"PlayerTips\.Guest\(card,\s*(.*)\)", name, re.S)
+    if guest:
+        name = guest.group(1).strip()
     if re.fullmatch(r"\w+", name) and name in consts:
         return consts[name]
     # `, card.IsUpgraded)` too (the card text pass, 2026-10-12): every guest
@@ -468,6 +525,37 @@ def keyword_fallback_rows() -> list[Row]:
             i = skip_literal(kleemod, i) if kleemod[i] == '"' else i + 1
         rows.append(Row("tip", m.group(1), csharp_text(kleemod[m.end():i]),
                         "klee-mod/KleeCode/KleeMod.cs"))
+    return rows
+
+
+def player_tip_rows() -> list[Row]:
+    """`PlayerTips.Bodies`: the player's words for an arm tip (the tooltip
+    trim, 2026-10-14), held to the same conventions as the seat's."""
+    path = MOD / "Cards" / "Prototype" / "PlayerTips.cs"
+    if not path.exists():
+        return []
+    src = re.sub(r"^\s*//.*$", "", read(path), flags=re.M)
+    where = str(path.relative_to(REPO))
+    rows: list[Row] = []
+    for m in re.finditer(r"\[ArmKeywordTips\.(\w+Key)\]\s*=\s*", src):
+        i, n, depth = m.end(), len(src), 0
+        while i < n:
+            c = src[i]
+            if c == '"':
+                i = skip_literal(src, i)
+                continue
+            if c in "([":
+                depth += 1
+            elif c in ")]":
+                depth -= 1
+            elif c in ",}" and depth == 0:
+                break
+            i += 1
+        expr = src[m.end():i].strip()
+        if re.fullmatch(r"\w+", expr):
+            continue
+        rows.append(Row("tip", m.group(1) + ".player", csharp_text(expr),
+                        where))
     return rows
 
 
@@ -838,13 +926,15 @@ def potion_rows() -> list[Row]:
 KIT_RELIC_FILES = ("PoundingSurprise.cs", "PoundingSurpriseNext.cs",
                    "TamakushiCasket.cs", "KleeArmRelics.cs",
                    "UpgradedStarterRelics.cs", "FurinaStageRelics.cs",
-                   "SalonSolitaire.cs", "BoreasFang.cs", "VarkaArmRelics.cs")
+                   "SalonSolitaire.cs", "BoreasFang.cs", "VarkaArmRelics.cs",
+                   "KokomiArmRelics.cs")
 
 
 def prototype_rows() -> list[Row]:
     LOC_TALLY.clear()
     return (card_rows(MOD / "Cards" / "Prototype" / "Generated", IN_SCOPE)
             + tip_rows()
+            + player_tip_rows()
             + base_tip_rows()
             + keyword_fallback_rows()
             + loc_rows(sorted((MOD / "Powers" / "Prototype").glob("*.cs")), "power", "proto")

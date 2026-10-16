@@ -51,8 +51,18 @@ public sealed class ProtoVkNorthwindAvatar : CustomCardModel, IElementalCard, IC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Northwind Avatar"),
-        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkBase:diff()}, plus {VkPer:diff()} per [gold]Oath[/gold] of your [gold]current element[/gold], as that element.{InCombat:\n(Deals {VkHit:diff()} damage)|}"),
+        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkBase:diff()}, plus {VkPer:diff()} per [gold]Oath[/gold] of your [gold]current element[/gold], as that element.{InCombat:\n(Deals {VkHit:diff()} damage)|}{InCombat:{VarkaSwirl}|}"),
     };
+
+    /// <summary>This card's in-combat Oath and Swirl lines
+    /// (`VarkaOath.SwitchLine`, `VarkaOath.WildfireLine`,
+    /// `VarkaOath.SwirlLine`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("VarkaSwirl", VarkaOath.SwirlLine(this));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

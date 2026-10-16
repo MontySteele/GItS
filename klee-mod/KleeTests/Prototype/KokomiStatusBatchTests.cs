@@ -210,7 +210,7 @@ public class KokomiStatusBatchTests : IDisposable
         // The Kokomi card pass (2026-10-11): 10 [13] Block.
         Assert.Equal(10m, card.DynamicVars.Block.BaseValue);
         Assert.Equal(13m, Upgraded<ProtoKkSeaGlassHarvest>().DynamicVars.Block.BaseValue);
-        Assert.Equal(KokomiPlan.Kind.TransformStatusesInDrawPile,
+        Assert.Equal(KokomiPlan.Kind.TransformStatusesYouHave,
                      Assert.Single(card.PlanClauses).Kind);
         Assert.Contains("[gold]Sea Glass[/gold]{IfUpgraded:show:+|}", Face(card));
         var body = Seq("KokomiStatusBatch", "TransformStatuses");

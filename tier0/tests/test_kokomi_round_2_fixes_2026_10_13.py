@@ -35,7 +35,7 @@ def _upgraded(card):
         return None
 
 
-def test_grand_design_counts_every_plan_card_and_companion_and_nothing_else():
+def test_grand_design_counts_every_plan_card_and_nothing_else():
     rows = loader.prototype_cards()
     checked = 0
     wrong = []
@@ -47,7 +47,9 @@ def test_grand_design_counts_every_plan_card_and_companion_and_nothing_else():
             st.player.energy = 3
             gd = copy.deepcopy(loader.get_card("proto_kk_grand_design"))
             st.player.hand = [gd, card]
-            want = ((bool(card.plan) or card.is_companion)
+            # Kokomi review r9 pick 1 (a), 2026-10-15: a Companion counts
+            # only when it prints a Plan line.
+            want = (bool(card.plan)
                     and card.id != "proto_kk_grand_design")
             if combat.card_playable(st, gd) != want:
                 wrong.append((card.id, card.upgraded))
@@ -207,15 +209,18 @@ def test_a_chained_numbered_play_names_the_copy_the_page_showed(
     assert [a for a, _ in wire.posts] == ["play_card", "play_card"]
 
 
-def test_a_copy_already_played_is_refused_not_re_aimed(
+def test_a_copy_already_played_is_skipped_not_re_aimed(
         lane, monkeypatch, capsys):
+    # 2026-10-14 (Kokomi, lane 5): skipped, not counted -- and still never
+    # re-aimed at a neighbour (`test_refusal_changed_under_the_seat.py`).
     wire = _live(monkeypatch, _fight([_guard() for _ in range(3)]))
     assert _observe() == 0
     assert _act('play "Coral Guard (2)"') == 0
     _play_index(wire, wire.posts[-1][1]["card_index"])
     capsys.readouterr()
     assert _act('play "Coral Guard (2)"') == 1
-    assert "has been played since" in capsys.readouterr().out
+    assert ('Skipped: "Coral Guard (2)" was played since your last look'
+            in capsys.readouterr().out)
     assert len(wire.posts) == 1
 
 
@@ -245,7 +250,7 @@ def test_a_memory_from_another_turn_names_nothing(lane, monkeypatch):
 
 def test_the_page_and_the_brief_say_the_number_holds():
     from understudy import blindplay_notes
-    assert "does not shift as you play" in blindplay_notes.HAND_REPEAT_NOTE
+    assert "does not shift when you play" in blindplay_notes.HAND_REPEAT_NOTE
     brief = (blindplay.REPO / "docs" / "current" / "operations"
              / "seat-brief.md").read_text(encoding="utf-8")
     assert "does not shift as" in brief

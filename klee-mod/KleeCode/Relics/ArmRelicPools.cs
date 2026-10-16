@@ -9,7 +9,9 @@ namespace KleeMod.Relics;
 /// THE ARMS' RELIC OFFER, one rule for both pools
 /// (<c>review/active/relics-potions-klee-furina-2026-09-27.md</c>, pick 1(a)):
 /// a character's pool is the starter, its own seven and the Ancient; the
-/// Silent borrow is gone. Kokomi's pool has no override and keeps the borrow.
+/// Silent borrow is gone. Kokomi's joined on 2026-10-15
+/// (<c>review/active/kokomi-relics-potions-2026-10-15.md</c>, kit census
+/// picks 1 and 2).
 ///
 /// Pure, over the pool's own members, so the tests run it on the real
 /// relic types without a booted <c>ModelDb</c>.
@@ -24,8 +26,8 @@ public static class ArmRelicPools
             .Append(typeof(ExplosiveFrags))
             .ToArray();
 
-    /// <summary>Furina's pool: Salon Solitaire, her two (Opera Glasses, Grand
-    /// Theater Program), The Curtain Never Falls.</summary>
+    /// <summary>Furina's pool: Salon Solitaire, her seven
+    /// (<see cref="FurinaStageRelics.Types"/>), The Curtain Never Falls.</summary>
     public static readonly IReadOnlyList<Type> FurinaArmPool =
         new[] { typeof(SalonSolitaire) }
             .Concat(FurinaStageRelics.Types)
@@ -38,6 +40,15 @@ public static class ArmRelicPools
         new[] { typeof(BoreasFang) }
             .Concat(VarkaArmRelics.Types)
             .Append(typeof(WolfsGravestone))
+            .ToArray();
+
+    /// <summary>Kokomi's pool: the Tamakushi Casket, her seven, the Watatsumi
+    /// Casket (<c>review/active/kokomi-relics-potions-2026-10-15.md</c>).
+    /// </summary>
+    public static readonly IReadOnlyList<Type> KokomiArmPool =
+        new[] { typeof(TamakushiCasket) }
+            .Concat(KokomiArmRelics.Types)
+            .Append(typeof(WatatsumiCasket))
             .ToArray();
 
     /// <summary>What the pool offers: the members in the arm pool.</summary>

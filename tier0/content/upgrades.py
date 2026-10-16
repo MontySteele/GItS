@@ -558,6 +558,10 @@ def _prototype_deltas(merged: dict[str, dict]) -> dict[str, dict]:
     from tier0.engine import varka_oath        # late: loader imports us
     reachable |= {c.id for c in loader.prototype_cards()
                   if c.id.startswith(varka_oath.ID_PREFIX)}
+    # YAE MIKO (2026-10-13), on Varka's terms: every `proto_ym_` row.
+    from tier0.engine import yae_shrine        # late: loader imports us
+    reachable |= {c.id for c in loader.prototype_cards()
+                  if c.id.startswith(yae_shrine.ID_PREFIX)}
     deltas: dict[str, dict] = {}
     for card in loader.prototype_cards():
         if card.id not in reachable:
@@ -845,7 +849,7 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             if hit is None:
                 hit = next((fx for fx in (getattr(card, "plan", None) or [])
                             if fx.get("op")
-                            == "transform_statuses_in_draw_pile"),
+                            == "transform_statuses_you_have"),
                            None)
             ok = hit is not None and val is True
             if ok:
@@ -1424,6 +1428,23 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             ok = _bump_first((fx for fx in everywhere
                               if fx.get("op") == "varka"),
                              key[len("varka_"):], val)
+        elif key in ("yae_per", "yae_base", "yae_amount"):
+            # YAE MIKO: one numeric field of the row's `yae` op (its C#
+            # DynamicVar `YmPer` / `YmBase` / `YmAmount`).
+            ok = _bump_first((fx for fx in everywhere
+                              if fx.get("op") == "yae"),
+                             key[len("yae_"):], val)
+        elif key == "yae_upgraded":
+            # YAE MIKO (review r3): the row's `yae` op reads its upgrade at
+            # play time (`IsUpgraded` in C#): Fallen Petals+ draws, Second
+            # Printing+'s card costs 0. Boolean, only True is a ruling.
+            if val is not True:
+                raise ValueError(
+                    f"yae_upgraded delta on {base_id!r} must be true")
+            hit = next((fx for fx in top if fx.get("op") == "yae"), None)
+            ok = hit is not None
+            if hit:
+                hit["upgraded"] = True
         elif key == "varka_upgraded":
             # VARKA (the expansion, Pathfinder's Mark+): the row's `varka`
             # op reads its upgrade at play time (`IsUpgraded` in C#).

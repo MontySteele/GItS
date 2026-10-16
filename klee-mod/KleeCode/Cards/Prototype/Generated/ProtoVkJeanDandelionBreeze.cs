@@ -41,15 +41,27 @@ public sealed class ProtoVkJeanDandelionBreeze : CustomCardModel, ICharacterCard
         new[] { KleeKeywords.AppliesAnemo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, appliesWithoutHit: true), this);
+        TipAudience.Seat
+            ? ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, appliesWithoutHit: true), this)
+            : KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, appliesWithoutHit: true);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_jean_dandelion_breeze");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Jean — Wind Companion"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Swirl[/gold] the enemy."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Swirl[/gold] the enemy.{InCombat:{VarkaSwirl}|}"),
     };
+
+    /// <summary>This card's in-combat Oath and Swirl lines
+    /// (`VarkaOath.SwitchLine`, `VarkaOath.WildfireLine`,
+    /// `VarkaOath.SwirlLine`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("VarkaSwirl", VarkaOath.SwirlLine(this));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

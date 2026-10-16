@@ -3933,9 +3933,12 @@ def test_the_meter_ledger_stays_off_the_carry_out_block():
         # happen -- a relic striking, and a Plan the fight cut off -- and
         # neither is a ledger row. `no_target` (2026-10-13) is the same
         # kind of fact: the Plan's target was already dead.
+        # `reactions` (Kokomi review r8, 2026-10-14): the reactions the
+        # Plan's own hits set off, which a sighted player watched happen.
         assert set(row) == {"card", "number", "line", "kind", "asked",
                             "on_play", "board_read", "moved",
-                            "riders", "unfinished", "no_target"}
+                            "riders", "unfinished", "no_target",
+                            "reactions"}
         for moved in row["moved"]:
             assert set(moved) == {"target", "combat_id", "amount", "dead",
                                   "absorbed"}
@@ -5013,61 +5016,44 @@ def test_an_older_bridge_prints_the_form_and_no_waiting_line():
     assert "the jellyfish waits" not in page
 
 
-#: The Kokomi re-founding (2026-10-12): a Companion with no Plan line of its
-#: own, which the game lets onto the jellyfish on her board.
-WRITABLE_COMPANION = "Yoimiya — Firework Flare-Up"
+#: Kokomi review r9 pick 1 (a), 2026-10-15; [USER]: "let's get rid of
+#: Companions as Plans unless we make a card that specifically has a Plan
+#: line." A Companion with no Plan line, which the game no longer lets onto
+#: the jellyfish.
+PLAIN_COMPANION = "Yoimiya — Firework Flare-Up"
 
 
 def _companion_hand(state: dict) -> dict:
-    """`_planning_hand`'s board with a writable Companion added to the hand,
-    and its Plan card printing a Plan line as a current face does (the
-    recording predates the line)."""
+    """`_planning_hand`'s board with a plain Companion added to the hand: no
+    Plan line, and the game refuses it the jellyfish."""
     out = _planning_hand(state)
-    for card in out["player"]["hand"]:
-        if card["name"] == "All Streams Flow to the Sea":
-            card["description"] = "Gain 6 Block. Plan: Deal 9 damage."
     companion = dict(out["player"]["hand"][0])
     companion.update({"id": "PROTO_MI_YOIMIYA_FIREWORK_FLARE_UP",
-                      "name": WRITABLE_COMPANION,
+                      "name": PLAIN_COMPANION,
                       "description": "Deal 6 damage.", "keywords": [],
                       "index": len(out["player"]["hand"]),
-                      "can_target_pet": True})
+                      "can_target_pet": False})
     out["player"]["hand"].append(companion)
     return out
 
 
-def test_a_companion_is_written_with_the_plan_verb_and_marked_in_hand():
-    """The Kokomi re-founding (2026-10-12): "Any Companion card can be
-    written as a Plan." The seat writes one with the verb a Plan card takes,
-    the hand marks it (its face prints no Plan line), and a Plan card that
-    says so on its face carries no mark."""
+def test_a_plain_companion_is_not_offered_the_bake_kurage():
+    """Pick 1 (a): the page neither marks a plain Companion as plannable nor
+    says any Companion can be written; with every Plan card barred, the
+    `on "Bake-Kurage"` form is not offered for it."""
     state = _companion_hand(plans_combat_state(TWO_PLANS))
-
-    res = blindplay.act(state, f'play "{WRITABLE_COMPANION}" on "Bake-Kurage"')
-    assert res["ok"], res
-    assert res["post"]["target"] == "41"
-
     page = blindplay.observe(state)
-    marked = [line for line in page.splitlines()
-              if blindplay_notes.WRITABLE_TAG in line]
-    assert len(marked) == 1 and WRITABLE_COMPANION in marked[0], marked
-    assert 'on "Bake-Kurage"' in page
+    assert "(can be written as a Plan)" not in page
+    assert "Any Companion card can be written" not in page
+    assert not hasattr(blindplay_notes, "WRITABLE_TAG")
+    assert not hasattr(blindplay_notes, "PLAN_COMPANION_CLAUSE")
 
-    # With the Plan card barred, the Companion alone still offers the form.
     barred = json.loads(json.dumps(state))
     for card in barred["player"]["hand"]:
-        if card["name"] != WRITABLE_COMPANION:
-            card["can_target_pet"] = False
+        card["can_target_pet"] = False
     obs = blindplay.observation(barred)
-    assert any('on "Bake-Kurage"' in c for c in obs["commands"])
-
-
-def test_the_plan_row_says_any_companion_can_be_written():
-    """The page's Plan row is the tip word for word, then one clause on her
-    page only: any Companion can be written, and what its carry-out does."""
-    page = blindplay.observe(_companion_hand(plans_combat_state(TWO_PLANS)))
-    assert blindplay.ARM_KEYWORDS["Plan"] + blindplay_notes.PLAN_COMPANION_CLAUSE in page
-    assert blindplay_notes.PLAN_COMPANION_CLAUSE not in blindplay.ARM_KEYWORDS["Plan"]
+    assert not any(PLAIN_COMPANION in c and 'on "Bake-Kurage"' in c
+                   for c in obs["commands"])
 
 
 def test_the_plan_word_left_the_modifier_rule_to_the_panel():
@@ -5080,7 +5066,9 @@ def test_the_plan_word_left_the_modifier_rule_to_the_panel():
 
     assert "folds as you write it" not in plan
     assert "Weak" not in plan
-    assert "carries the numbers you wrote" in blindplay.PLAN_WRITTEN_NUMBER_NOTE
+    # Kokomi review r5 (2026-10-14, A2): reworded.
+    assert ("Your Strength when you write it counts"
+            in blindplay.PLAN_WRITTEN_NUMBER_NOTE)
 
 
 def test_a_feed_with_no_pet_target_field_plays_the_card_as_it_always_did():
@@ -5580,18 +5568,16 @@ def test_the_duplicate_name_note_does_not_say_two():
     page = blindplay.observe(state)
     assert "**Coral Guard (1)**" in page and "**Coral Guard (3)**" in page
     assert "Two cards here print the same name" not in page
-    assert "More than one card in this hand prints the same name" in page
-    # Kokomi round 2 (2026-10-13): the number now holds until the next
-    # `observe` (`resolve_shown_card`), and the note says that instead.
-    assert "does not shift as you play" in page
-    # `EB-181` narrowed the enchantment clause rather than dropping it: the
-    # bridge now carries an enchantment, so the note claims only what is
-    # still true -- that copies showing NONE cannot be told apart here.
-    assert "where two copies show none and differ only by one" in page
+    assert "Cards in this hand that print the same name are numbered" in page
+    # Yae seats (2026-10-14): a number stays with its card while it is in
+    # hand (`hand_labels`), and the note says so -- and says the one case
+    # it cannot promise.
+    assert "does not shift when you play" in page
+    assert "the page cannot tell which went" in page
 
 
 def test_the_duplicate_name_note_stays_off_a_hand_with_no_repeat():
-    assert "More than one card in this hand" not in blindplay.observe(
+    assert "Cards in this hand that print the same name" not in blindplay.observe(
         spark_priced_state())
 
 
@@ -6201,6 +6187,31 @@ def test_a_chooser_row_carries_the_tag_its_hand_entry_carries():
     assert "**Strike (1)** (Spiral" not in page
 
 
+def test_a_spent_reprint_reads_used_and_offers_no_replay():
+    """Two blind seats (2026-10-14) read a spent Reprint as live and expected
+    a second replay. The bridge sends `disabled` when the game greys the tab
+    (`Status == Disabled`, Glam's display); the title says "used" and the
+    hover the mod sends has no Replay row."""
+    state = enchanted_hand_state()
+    card = state["player"]["hand"][1]
+    card["enchantment"] = {"id": "KLEEMOD-REPRINT_ANNOTATION",
+                           "name": "Reprint",
+                           "description": "The first time this card is "
+                                          "played each combat, play it "
+                                          "twice. Used this combat.",
+                           "amount": 0, "shows_amount": False,
+                           "disabled": True}
+    card["keywords"] = [{"name": "Reprint",
+                         "description": card["enchantment"]["description"]}]
+    page = blindplay.observe(state)
+    assert "**Water's Edge (2)** (Reprint: used)" in page
+    assert "Used this combat." in page
+    assert "Replay" not in page
+    # Live, the tag is bare, as before.
+    del card["enchantment"]["disabled"]
+    assert "**Water's Edge (2)** (Reprint)" in blindplay.observe(state)
+
+
 def test_a_card_with_no_enchantment_key_claims_nothing():
     """An absent key is the positive statement "not enchanted", and it is also
     what every bridge older than this row sends for every card. Neither may
@@ -6210,7 +6221,7 @@ def test_a_card_with_no_enchantment_key_claims_nothing():
     page = blindplay.observe(state)
     assert "Sharp 3" not in page
     # And the duplicate-name note still says what is true of THIS page.
-    assert "where two copies show none and differ only by one" in page
+    assert "Cards in this hand that print the same name are numbered" in page
 
 
 def metered_state(info: dict) -> dict:
@@ -6434,6 +6445,9 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
     # re-founding (2026-10-12): `TamakushiCasket.Face`.
     src += (REPO / "klee-mod" / "KleeCode" / "Relics"
             / "TamakushiCasket.cs").read_text(encoding="utf-8")
+    # Yae's Annotations (2026-10-14): each row is `YaeAnnotationText`'s.
+    src += (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
+            / "YaeAnnotations.cs").read_text(encoding="utf-8")
     anchors = {
         # `EB-343` (R248) rewrote the word: it gained a fourth rule and
         # [USER] held it to the 135-character tip ceiling (PR #340), so
@@ -6530,6 +6544,9 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # The pool to 75 (2026-10-09): the guest rule's words.
         "Repay": ["Regain that much drained HP, never more than you ",
                   "drained. A ", " counts the HP it returns."],
+        # The Furina sweep (2026-10-14): Ousia / Pneuma's word.
+        "Flip": ["Turn this card to its other face; it starts each combat "
+                 "on Ousia."],
         "Summon": ["A guest joins at the back. On a full stage, the oldest "
                    "guest ", "acts once and leaves; its card goes to your "],
         "oldest guest": ["The guest on stage longest: the one a fourth summon "
@@ -6580,6 +6597,46 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         "current element": [" you applied. Swirls pay it: "],
         "Knight": ["One of Varka's Companions. Playing one makes its element "
                    "your ", "current element. ", " does not."],
+        # YAE MIKO (2026-10-13): `ArmKeywordTips.YaeSakuraTip`,
+        # `YaeTenkoTip` and `YaeEditTip`, the prose between the interpolated
+        # `YaeLaw` numbers; split and cut 2026-10-14.
+        # Shrine r2 (2026-10-14): no Rite, the full-shrine plant, the kinds.
+        # Condensed 2026-10-14: the full-shrine rule is on the plant cards.
+        "Sakura": ["At the end of your turn, strikes an enemy for ",
+                   "+ its Level. Lasts ",
+                   " turns, then strikes ",
+                   "A Sakura strikes Kitsune Pounce's target when Pounce "
+                   "makes it strike, ",
+                   "else the enemy Foxfire Lure marked this turn, else a "
+                   "random enemy."],
+        # Review r3 (2026-10-14): plain Tenko, the two kinds, the
+        # full-shrine rule, and the Edit tip's two layers.
+        "Tenko": ["Every ", " acts now. Refresh them to at least "],
+        "Foxfire Sakura": [" that hits ALL enemies for ",
+                           " + its Level when it acts."],
+        "Kitsune Sakura": ["A fox decoy ", ". When it acts, you gain "],
+        # Yae review r5, item 5: the long form.
+        "Full shrine": ["Planting makes your oldest Sakura act. If the new "
+                        "Sakura is the same ",
+                        "kind, the oldest stays and gains a Level. If not, "
+                        "the oldest withers ",
+                        "and the new one takes its place."],
+        "Edit": ["Give a card an Annotation for this combat, replacing "
+                 "its last. ", "Published ones stay and add up."],
+        # 2026-10-14: each Annotation's own row, `YaeAnnotationText.Rule`
+        # and `.SakuraRule` (YaeAnnotations.cs).
+        "Red Ink": ["This card deals ", " more damage and gives ",
+                    "'s action is ", "bigger."],
+        "Footnote": ["When this card is played, draw 1 card."],
+        "Deadline Extension": ["This card has ", " does not wither."],
+        "Fox Fire": ["When this card is played, deal ",
+                     " damage to a random enemy.", " acts, it also deals "],
+        "Sakura Seal": ["When this card is played, plant a "],
+        "Royalties": ["When this card is played, gain ", " Energy."],
+        # Yae review r6, items 4 and 5: Reprints stack; a Sakura's target.
+        "Reprint": ["The first time this card is played each combat, play "
+                    "it once ", "more for each Reprint."],
+        # (The Rite row left with the Rite, Yae shrine r2, 2026-10-14.)
     }
     # `Spotlighted` (2026-09-06) is a row with NO tooltip to be held in step
     # with, `Companion`'s old kind (see above) -- named for its own reason: five Furina surfaces
@@ -10156,21 +10213,15 @@ def _two_all_faces_state() -> dict:
 
 
 def test_an_all_face_the_wire_aims_says_so_when_it_is_played_bare():
-    """`EB-527`. THE REFUSAL THAT COST AN ELITE TURN.
+    """`EB-527`, and since the Kokomi review r6 (2026-10-14, item 13) the
+    bare play GOES THROUGH.
 
     Furina r12 lane 2: `play "Lynette — Magic Trick: Astonishing Shift"` bare
-    was refused "there is more than one enemy, so say which" -- a sentence
-    about the board that says nothing about the card. "The very next turn the
-    opposite happened: Chevreuse ... refused with 'does its own aiming, so it
-    takes no `on`'. Two cards, both printing ALL enemies, with opposite
-    targeting rules and nothing on either face to tell them apart."
-
-    THE WIRE IS RIGHT AND THE FACE IS INCOMPLETE: Magic Trick's Swirl half
-    needs a body, so the game aims the card at one, and the ALL in its damage
-    clause is about what the hit does rather than how it is played. `EB-499`
-    gave the other direction its own sentence; this is that sentence's twin.
-
-    Seen to FAIL: the refusal was the board's generic one.
+    was refused "there is more than one enemy, so say which". `EB-527` made
+    the refusal name the face ("prints ALL enemies and is still aimed at one
+    body"); item 13 ruled that a card whose own line prints ALL enemies takes
+    no target at all. The game still aims Magic Trick at one body (its Swirl),
+    so the bare play goes to the front enemy and the answer says so.
     """
     state = _two_all_faces_state()
     _new_process()
@@ -10178,13 +10229,9 @@ def test_an_all_face_the_wire_aims_says_so_when_it_is_played_bare():
 
     res = blindplay.act(state, 'play "Lynette — Magic Trick"')
 
-    assert not res["ok"] and res["post"] is None
-    assert ("'Lynette — Magic Trick' prints \"ALL enemies\" and is still aimed "
-            "at one body, so say which: ") in res["refusal"]
-    assert "Phantasmal Gardener (1)" in res["refusal"]
-    # And the form that works is offered, `EB-402`'s rule unchanged: every
-    # refusal ends in the commands that resolve (`_with_forms`).
-    assert 'play "Lynette — Magic Trick" on "Phantasmal Gardener (1)"'         in res["refusal"]
+    assert res["ok"], res["refusal"]
+    assert res["post"]["target"]
+    assert "Phantasmal Gardener (1)" in res["printed"]["auto_target"]
 
 
 def test_the_face_that_aims_itself_drops_the_clause_and_says_so():
@@ -10792,19 +10839,17 @@ def test_the_plan_panel_says_the_written_number_does_not_move():
                     "line": "Bake-Kurage: Kurage's Oath, 7",
                     "kind": "Damage", "asked": 7})))
     lines = page.splitlines()
-    assert blindplay.PLAN_WRITTEN_NUMBER_NOTE.startswith(
-        "- A Plan carries the numbers you wrote.")
     assert blindplay.PLAN_WRITTEN_NUMBER_NOTE in lines
-    # `EB-688`. AND BOTH CASES ARE PREDICTABLE FROM IT. "afterwards" was the
-    # word that was not the rule: both r27 and r28 wrote a Plan while ALREADY
-    # debuffed and were paid in full. "Either 'a hit you land' excludes the
-    # jellyfish's hit ... or Plans are simply immune. The rules text does not
-    # say which, and the difference matters" (r28 lane 1, (c) 2). It is the
-    # first, and the Block half is `EB-659`'s mirror of it.
+    # Kokomi review r5 (2026-10-14, A2): the paper's wording. "Shrink or Weak
+    # on you never cuts it" read as "nothing on me cuts it" (Tender cut a
+    # planned Oath+), so the Strength half is said first, a loss as much as
+    # a gain.
     said = blindplay.PLAN_WRITTEN_NUMBER_NOTE
-    assert "Every planned HIT is the jellyfish's" in said
-    assert "before or after you write it" in said
-    assert "a planned BLOCK is yours, so Frail does cut it" in said
+    assert said == ("- Your Strength when you write it counts, a loss "
+                    "(Tender) as much as a gain; Weak or Shrink on you never "
+                    "does. A Plan that reads an intent (Tide Wall, Flank, "
+                    "Undercurrent Snare) reads it when it lands. A planned "
+                    "Block is yours, so Frail cuts it.")
     assert "afterwards" not in said
     # Beside the count rule, which is the one it qualifies.
     assert lines.index(blindplay.PLAN_COUNT_NOTE) + 1 == \
@@ -12196,10 +12241,12 @@ def test_a_branch_clause_un_folds_too_and_not_only_the_first_one():
          "name": "Noelle — Breastplate", "type": "Skill", "cost": "1",
          "can_play": True, "index": 0, "target_type": "Self",
          "is_upgraded": False, "keywords": [],
-         "description": ("Gain 10 Block. If you are below half HP, gain 6 "
-                         "additional Block.")}]
+         # In combat "below half" prints its number (release fixes,
+         # 2026-10-14, `HalfHpFace`).
+         "description": ("Gain 10 Block. If you are below half (35 HP), "
+                         "gain 6 additional Block.")}]
     page = blindplay.observe(state)
-    assert ("Unmodified: Gain 8 Block. If you are below half HP, gain 4 "
+    assert ("Unmodified: Gain 8 Block. If you are below half (35 HP), gain 4 "
             "additional Block.") in page
 
 

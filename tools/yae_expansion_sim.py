@@ -7,7 +7,7 @@ stage exploration; nothing here is a balance claim).
     .venv/Scripts/python.exe -m tools.yae_expansion_sim --scaling count ...   # pick 1 (b)
     .venv/Scripts/python.exe -m tools.yae_expansion_sim --starter --seeds 300   # the starter alone
 
-Reads the staging rows (`docs/yae-staging.yaml`, `loader._staging_index`) and
+Reads her surface rows (`docs/prototype-surface.yaml`, `proto_ym_`) and
 the rules twin (`tier0/engine/yae_shrine.py`). Three readings, all smoke:
 
   STARTER -- the ten-card starter and Meditations of a Yako against every
@@ -17,8 +17,10 @@ the rules twin (`tier0/engine/yae_shrine.py`). Three readings, all smoke:
   the tier-0.5 act-1 pools, floors N N N N E R N N E R B, then a rest and
   an act-2 boss. A card reward of three after every non-boss-2 fight
   (C/U/R 60/37/3 after a normal fight, 50/40/10 after an elite or the boss).
-  A rest heals 30% OR Publishes (the relic): the pilot Publishes when HP is
-  at least half and a Sakura Seal or Footnote draft waits, else rests.
+  A rest heals 30%. After an elite or the act-1 boss the relic offers a
+  Publish (ruled 2026-10-14; it was a rest-site option): the pilot keeps the
+  best temporary layer that fight left, a Published card included (review
+  r3: stacks grow, the Masterpiece; `yae_shrine.publish_after_fight`).
   Encounters, HP rolls and offers come from pilot-independent streams.
 
   SCALING -- per turn of every run fight: Sakura standing, their Levels,
@@ -59,7 +61,9 @@ SHRINE = ["twin_sakura", "thunder_rite", "shrine_offering",
 PUBLISHING = ["kitsune_flash", "deadline", "fox_fire_draft", "bestseller",
               "print_run", "footnote", "sakura_seal", "serialization",
               "manuscript_pile", "the_seven_glamours",
-              "reborn_as_guuji_yae", "editor_in_chief"]
+              "reborn_as_guuji_yae", "editor_in_chief",
+              # Review r3 (ruled 2026-10-14): the signature cards.
+              "second_printing", "authors_copy", "serial_novel"]
 MISCHIEF = ["sly_strike", "fox_trick", "kitsune_guile", "foxfire_lure",
             "mischievous_teasing", "manuscript_pile"]
 
@@ -85,7 +89,7 @@ SCALING = "level"
 #: or one starter number. Module constants of `yae_shrine`, and two starter
 #: riders patched onto the staged rows in this process only.
 KNOBS = {"base": "SAKURA_BASE", "turns": "SAKURA_TURNS",
-         "plant_level": "PLANT_LEVEL", "cap": "LEVEL_CAP",
+         "plant_level": "PLANT_LEVEL",
          "proofread_block": None, "yakan_block": None}
 
 
@@ -112,7 +116,7 @@ def enable(scaling=None, knobs=None):
             setattr(Y, KNOBS[k], v)
     if knobs and (knobs.get("proofread_block") or knobs.get("yakan_block")):
         loader.reset_arm_caches()
-        idx = loader._staging_index()
+        idx = loader._prototype_index()
         if knobs.get("proofread_block"):
             row = idx[P + "proofread"]
             row.effects = [{"op": "block", "amount": knobs["proofread_block"]}
@@ -150,22 +154,50 @@ def _translate(state, fx, card=None):
     kind = fx.get("kind")
     n_sak = len(led.sakura)
     base, per, amt = fx.get("base", 0), fx.get("per", 0), fx.get("amount", 0)
-    if kind == "plant":
-        # A plant is three strikes to come (more when it levels the shrine);
-        # priced as a hit at a random enemy so a plant competes with a Strike.
+    if kind in ("plant", "plant_level"):
+        # A plant is three actions to come (a full shrine makes its oldest
+        # act first, then levels it or replaces it, review r3); priced as
+        # its kind's action so a plant competes with a Strike or a Defend.
         value = 0
         standing = n_sak
-        for _ in range(amt):
-            value += 2 * min(standing, Y.SAKURA_CAP) + (
-                6 if standing < Y.SAKURA_CAP else 0)
+        cap = Y.sakura_cap(state.player)   # Sakura Channeling: +2 per copy
+        for _ in range(max(1, amt) if kind == "plant" else 1):
+            value += 2 * min(standing, cap) + (
+                6 if standing < cap else 3)   # full: the oldest acts
             standing += 1
-        yield {"op": "damage", "amount": value, "target": "random_enemy"}
+        how = fx.get("as", Y.THUNDER)
+        if how == Y.KITSUNE:
+            yield {"op": "block", "amount": value}
+        elif how == Y.FOXFIRE:
+            yield {"op": "damage", "amount": max(1, value * 2 // 3),
+                   "target": "all_enemies"}
+        else:
+            yield {"op": "damage", "amount": value, "target": "random_enemy"}
     elif kind == "tenko":
         if n_sak:
-            now = sum(Y.strike_damage(state, s, None) for s in led.sakura)
+            # Review r3: every Sakura acts as its kind; the refresh saves
+            # the ones about to wither.
             kept = sum(2 for s in led.sakura if s.turns_left <= 1)
-            yield {"op": "damage", "amount": now + kept,
+            totals = Y.tenko_totals(state)
+            yield {"op": "damage", "amount": totals[Y.THUNDER] + kept,
                    "target": "random_enemy"}
+            if totals[Y.FOXFIRE]:
+                yield {"op": "damage", "amount": totals[Y.FOXFIRE],
+                       "target": "all_enemies"}
+            if totals[Y.KITSUNE]:
+                yield {"op": "block", "amount": totals[Y.KITSUNE]}
+    elif kind == "fallen_petals":
+        # Review r3: the oldest acts once and withers, then 1 Energy.
+        if n_sak:
+            yield {"op": "energy", "amount": 1}
+            if fx.get("upgraded"):
+                yield {"op": "draw", "amount": 1}
+    elif kind == "second_printing":
+        if any(Y.is_annotated(c) for c in state.player.discard_pile):
+            yield {"op": "draw", "amount": 1}
+    elif kind == "authors_copy":
+        if Y.copy_candidates(state, card):
+            yield {"op": "damage", "amount": 6, "target": "random_enemy"}
     elif kind == "extend":
         if n_sak:
             yield {"op": "block", "amount": 2 * n_sak * amt}
@@ -174,8 +206,11 @@ def _translate(state, fx, card=None):
             yield {"op": "damage", "amount": 2 * n_sak * amt,
                    "target": "random_enemy"}
     elif kind == "edit":
+        # Reprint (2026-10-14): a second play of a card in hand, about a
+        # Strike's worth.
         value = {Y.RED_INK: 3, Y.FOOTNOTE: 3, Y.DEADLINE: 1, Y.FOX_FIRE: 4,
-                 Y.SAKURA_SEAL: 6}[fx["annotation"]]
+                 Y.SAKURA_SEAL: 6, Y.ROYALTIES: 4,
+                 Y.REPRINT: 6}.get(fx["annotation"], 3)
         others = len([c for c in state.player.hand if c is not card])
         if others:
             yield {"op": "damage", "amount": value * min(amt, others),
@@ -186,7 +221,7 @@ def _translate(state, fx, card=None):
             yield {"op": "damage", "amount": 4 * others,
                    "target": "random_enemy"}
     elif kind == "publish":
-        if any(Y.is_annotated(c) for c in state.player.hand if c is not card):
+        if any(Y.temp(c) for c in state.player.hand if c is not card):
             yield {"op": "damage", "amount": 3, "target": "random_enemy"}
     elif kind == "lure":
         if n_sak:
@@ -195,11 +230,11 @@ def _translate(state, fx, card=None):
         yield {"op": "damage", "amount": base + per * n_sak, "target": "enemy"}
     elif kind == "block_per_sakura":
         yield {"op": "block", "amount": base + per * n_sak}
-    elif kind == "damage_per_annotated":
-        yield {"op": "damage", "amount": base + per * Y.annotated_in_hand(state),
+    elif kind == "damage_per_edit":
+        yield {"op": "damage", "amount": base + per * led.edits,
                "target": "enemy"}
-    elif kind == "block_per_annotated":
-        yield {"op": "block", "amount": base + per * Y.annotated_in_hand(state)}
+    elif kind == "block_per_edit":
+        yield {"op": "block", "amount": base + per * led.edits}
     elif kind == "annotated_strike":
         more = amt if (card is not None and Y.is_annotated(card)) else 0
         yield {"op": "damage", "amount": base + more, "target": "enemy"}
@@ -233,7 +268,7 @@ def make_pilot():
 def pool():
     from tier0.content import loader
     out = {"common": [], "uncommon": [], "rare": []}
-    for c in loader._staging_index().values():
+    for c in loader._prototype_index().values():
         if c.id.startswith(P) and c.rarity in out:
             out[c.rarity].append(c.id)
     return out
@@ -256,8 +291,15 @@ def _draft_ops(fx):
     kind = fx.get("kind")
     base, per, amt = fx.get("base", 0), fx.get("per", 0), fx.get("amount", 0)
     if kind == "plant":
+        # Review r3: a Kitsune Sakura is Block to come, a Foxfire one AoE.
+        if fx.get("as") == "kitsune":
+            return [{"op": "block", "amount": 6 * amt}]
+        if fx.get("as") == "foxfire":
+            return [{"op": "damage", "amount": 4 * amt,
+                     "target": "all_enemies"}]
         return [{"op": "damage", "amount": 6 * amt, "target": "random_enemy"}]
     if kind == "tenko":
+        # Review r3: every Sakura acts at the nominal board.
         return [{"op": "damage", "amount": 7, "target": "random_enemy"}]
     if kind == "extend":
         return [{"op": "block", "amount": 3 * amt}]
@@ -275,12 +317,27 @@ def _draft_ops(fx):
         return [{"op": "damage", "amount": base + 2 * per, "target": "enemy"}]
     if kind == "block_per_sakura":
         return [{"op": "block", "amount": base + 2 * per}]
-    if kind == "damage_per_annotated":
+    if kind == "damage_per_edit":
         return [{"op": "damage", "amount": base + 2 * per, "target": "enemy"}]
-    if kind == "block_per_annotated":
+    if kind == "block_per_edit":
         return [{"op": "block", "amount": base + 2 * per}]
     if kind == "annotated_strike":
         return [{"op": "damage", "amount": base + amt // 2, "target": "enemy"}]
+    # The design axes (2026-10-14), at the same nominal board.
+    if kind == "edit_sakura":
+        return [{"op": "damage", "amount": 3 * min(amt, 2), "target": "random_enemy"}]
+    if kind == "plant_level":
+        return [{"op": "damage", "amount": 6 + 2 * amt, "target": "random_enemy"}]
+    if kind == "strike_if_weak":
+        return [{"op": "damage", "amount": 2, "target": "enemy"}]
+    # Review r3 (2026-10-14), at the same nominal board.
+    if kind == "fallen_petals":
+        return [{"op": "energy", "amount": 1},
+                {"op": "damage", "amount": 3, "target": "random_enemy"}]
+    if kind == "second_printing":
+        return [{"op": "draw", "amount": 1}]
+    if kind == "authors_copy":
+        return [{"op": "damage", "amount": 5, "target": "random_enemy"}]
     return None
 
 
@@ -378,13 +435,14 @@ def fight(deck, enemies, seed, hp, published=None):
     led = s.player.yae_ledger
     won = bool(s.player.alive) and not s.living_enemies
     block, dmg = _log_reads(s.log)
+    # Review r3: each deck slot's permanent stack (the Masterpiece) as the
+    # fight left it, The Seven Glamours' additions included.
     pub = {}
     for pile in (s.player.hand, s.player.draw_pile, s.player.discard_pile,
                  s.player.exhaust_pile):
         for c in pile:
-            if getattr(c, "ym_published", False) and getattr(
-                    c, "ym_annotation", None) and c.ym_slot is not None:
-                pub[c.ym_slot] = c.ym_annotation
+            if Y.stack(c) and getattr(c, "ym_slot", None) is not None:
+                pub[c.ym_slot] = Y.stack(c)
     return {"won": won, "turns": s.turn,
             "hp_lost": start - max(0, s.player.hp),
             "hp_end": max(0, s.player.hp), "plays": dict(plays),
@@ -435,19 +493,6 @@ def _turn_rows(log):
     return out
 
 
-def _publish_at_rest(hp, max_hp, drafts, published):
-    """Meditations of a Yako at a rest: Publish a waiting Sakura Seal or
-    Footnote draft when HP is at least half, else rest."""
-    from tier0.engine import yae_shrine as Y
-    good = {s: a for s, a in drafts.items()
-            if a in (Y.SAKURA_SEAL, Y.FOOTNOTE) and published.get(s) != a}
-    if hp * 2 >= max_hp and good:
-        slot = min(good, key=lambda s: Y.PUBLISH_ORDER.index(good[s]))
-        published[slot] = good[slot]
-        return hp, ("publish", slot, good[slot])
-    return min(max_hp, hp + int(0.3 * max_hp)), ("rest", None, None)
-
-
 def run(seed, pilot):
     from tier05 import acts
     enc_rng = random.Random(seed)
@@ -456,14 +501,15 @@ def run(seed, pilot):
     pl = pool()
     deck: list = []
     hp = MAX_HP
+    from tier0.engine import yae_shrine as Y
+    from tier0.content import loader
     published: dict = {}
-    drafts: dict = {}
-    fights, offers, rests = [], [], []
+    fights, offers, rests, publishes = [], [], [], []
     act1 = False
     for floor, kind in enumerate(TEMPLATE + ["B2"]):
         if kind == "R":
-            hp, choice = _publish_at_rest(hp, MAX_HP, drafts, published)
-            rests.append(choice)
+            hp = min(MAX_HP, hp + int(0.3 * MAX_HP))
+            rests.append(("rest", None, None))
             continue
         if kind == "B2":
             hp = min(MAX_HP, hp + int(0.3 * MAX_HP))
@@ -475,10 +521,17 @@ def run(seed, pilot):
         r.update(kind=kind, enc=spec["id"])
         fights.append(r)
         hp = r["hp_end"]
-        drafts.update(r["drafts"])
         published.update(r["published"])
         if not r["won"]:
             break
+        # The relic's Publish, after an elite or the act-1 boss win.
+        room = {"E": "elite", "B": "boss"}.get(kind, "monster")
+        # The dead-edit filter reads each slot's card (ruled 2026-10-14).
+        cards = {i: loader.get_card(cid)
+                 for i, cid in enumerate(Y.starter_ids() + deck)}
+        for slot, ann in Y.publish_after_fight(room, r["drafts"], published,
+                                               cards=cards):
+            publishes.append((kind, slot, ann))
         if kind == "B":
             act1 = True
         if kind in RARITY:
@@ -490,7 +543,7 @@ def run(seed, pilot):
     won = fights[-1]["kind"] == "B2" and fights[-1]["won"]
     return {"seed": seed, "pilot": pilot, "act1": act1, "won": won,
             "fights": fights, "offers": offers, "rests": rests,
-            "published": published}
+            "publishes": publishes, "published": published}
 
 
 def starter_battery(seed):
@@ -589,7 +642,7 @@ def report(data, out=print):
             f"{_mean([f['strike_damage'] / max(1, f['turns']) for f in fs]):.1f} | "
             f"{_mean([f['strikes'] for f in fs]):.1f} | "
             f"{_mean([f['edits'] for f in fs]):.1f} | "
-            f"{_mean([len(r['published']) for r in rs]):.2f} | "
+            f"{_mean([sum(len(v) for v in r['published'].values()) for r in rs]):.2f} | "
             f"{sum(1 for f in fs if f['error'])} |")
     out("\n## How the Sakura scale over a fight (every run fight, by turn)")
     out("| pilot | turn | fights | Sakura standing | mean Level | "
@@ -632,9 +685,13 @@ def report(data, out=print):
     out("|---|---|---|---|")
     for cid, o in sorted(offered.items(), key=lambda kv: -kv[1]):
         out(f"| {cid[len(P):]} | {o} | {picks[cid]} | {picks[cid] / o:.2f} |")
-    rests = Counter(c[0] for r in runs for c in r["rests"])
-    out(f"\nRest sites: {dict(rests)}; annotations published by slot: "
-        f"{Counter(a for r in runs for a in r['published'].values())}")
+    pubs = Counter(k for r in runs for k, _, _ in r.get("publishes", []))
+    out(f"\nAfter-fight Publishes by room: {dict(pubs)}; annotations "
+        f"published (every layer of every stack): "
+        f"{Counter(a for r in runs for v in r['published'].values() for a in v)}")
+    deepest = max((len(v) for r in runs for v in r["published"].values()),
+                  default=0)
+    out(f"Deepest stack on one card (the Masterpiece): {deepest}")
     errs = [f for r in runs for f in r["fights"] if f["error"]]
     if errs:
         out(f"\nERRORS ({len(errs)}): {errs[0]['error']}\n{errs[0]['trace']}")

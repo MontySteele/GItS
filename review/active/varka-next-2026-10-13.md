@@ -51,3 +51,15 @@ Stormterror's Scale or Crosscurrent, four with both (the two multiply,
 `VarkaOath.cs`). Corrected 2026-10-15: the first wording said "at most one
 payout per Swirl", which the multipliers break (GPT review, relayed by
 [USER]).
+
+## 3. Tempest Charge: a Swirl-chain finisher
+
+`proto_vk_tempest_charge` printed Rising Gale's exact text at 1 Energy for 8
+against Rising Gale's 0 for 4. Cleanup pick 1 (a), ruled 2026-10-15 ([USER]:
+"we can ship the event branch; looks good to me!"): "Deal 12 [16] Anemo
+damage. Costs 1 less for each Swirl this turn." (#1329)
+
+**Prediction:** Tempest Charge is played after at least one Swirl in most of
+its plays (cost 0 or less than printed), and its pick rate in the suite is no
+lower than the old copy's. Varka's end floors and act-by-act HP stay within
+the suite-to-suite spread; this is a role change, not a power change.

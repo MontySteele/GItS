@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcJeanGaleBlade : CustomCardModel, IElementalCard, ICompanionCard, IWritableCompanion
+public sealed class ProtoMcJeanGaleBlade : CustomCardModel, IElementalCard, ICompanionCard
 {
     /// <summary>Sheet applies_element: this companion attack applies its element.</summary>
     public Element Element => Element.Anemo;
@@ -52,7 +52,9 @@ public sealed class ProtoMcJeanGaleBlade : CustomCardModel, IElementalCard, ICom
         new[] { KleeKeywords.AppliesAnemo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSwirl(ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo), this), this);
+        TipAudience.Seat
+            ? ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo), this)
+            : KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_jean_gale_blade");
 
@@ -61,14 +63,6 @@ public sealed class ProtoMcJeanGaleBlade : CustomCardModel, IElementalCard, ICom
         ("title", "Jean — Gale Blade"),
         ("description", "Deal {CalculatedDamage:diff()} [gold]Anemo[/gold] damage. [gold]Swirl[/gold] the enemy."),
     };
-
-    /// <summary>On Kokomi, this Companion card can also be written as a Plan on
-    /// the Bake-Kurage (the re-founding, 2026-10-12).</summary>
-    public override TargetType TargetType =>
-        KokomiCompanionPlan.TargetFor(this, base.TargetType);
-
-    /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
-    public TargetType PrintedTargetType => base.TargetType;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
@@ -87,11 +81,6 @@ public sealed class ProtoMcJeanGaleBlade : CustomCardModel, IElementalCard, ICom
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (KokomiPlan.PlayedOnPet(cardPlay))
-        {
-            await KokomiCompanionPlan.Write(choiceContext, this, cardPlay);
-            return;
-        }
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)

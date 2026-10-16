@@ -44,7 +44,9 @@ public sealed class ProtoKkAllStreamsFlow : CustomCardModel, IElementalCard, ICh
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForElementalReaction(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro), this);
+        TipAudience.Seat
+            ? ArmKeywordTips.ForElementalReaction(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro), this)
+            : KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_all_streams_flow");
 
@@ -57,7 +59,7 @@ public sealed class ProtoKkAllStreamsFlow : CustomCardModel, IElementalCard, ICh
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(5m),
+            new CalculationBaseVar(10m),
             new ExtraDamageVar(5m),
             new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => KokomiOverhaulLedger.For(card.Owner.Creature).ReactionsThisCombat)
         };

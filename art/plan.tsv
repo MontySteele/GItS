@@ -308,7 +308,9 @@ relic_dodoco_tales	ImageGen/images/relics/dodoco_tales.png	256	256	contain	cente
 # official model by tools/klee_render/pack.py (owner: "a face zoom-in like the base game
 # characters"), which also derives select_portrait_locked.png; art_lint L11 GENERATOR_OWNED.
 # select_portrait	ImageGen/images/ui/select_portrait.png	132	195	cover	top	auto	1	png	Character Klee Full Wish.png		splash
-char_icon	ImageGen/images/ui/char_icon.png	88	88	cover	top	auto	1	png	Klee Icon.png		icon
+# char_icon (retired 2026-10-13): the top-bar icon is cut from the model-rendered select
+# close-up by tools/gen_char_icons.py, framed to the base game's 85x85 icons; art_lint L11.
+# char_icon	ImageGen/images/ui/char_icon.png	88	88	cover	top	auto	1	png	Klee Icon.png		icon
 energy_icon_large	ImageGen/images/ui/energy_icon_74.png	74	74	contain	center	auto	1	svg	Element Pyro.svg		icon
 energy_icon_small	ImageGen/images/ui/energy_icon_22.png	22	22	contain	center	auto	1	svg	Element Pyro.svg		icon
 map_marker	ImageGen/images/ui/map_marker.png	49	64	cover	top	auto	1	png	Klee Side Icon.png		icon
@@ -344,8 +346,6 @@ model_source_full_wish	ImageGen/images/model/character_klee_full_wish.png	0	0	ra
 # ---------- FURINA batch 1 (identity: basics + generic + rares) ----------
 # Sources enumerated from Category:Furina Images via tools/art_hunt.py, not guessed.
 # source_group intentionally BLANK: Furina's own cards stay under strict L1.
-soloists_solicitation	ImageGen/images/cards/furina/soloists_solicitation.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Soloist's Prologue Computer Graphic.png		splash	
-soloists_solicitation	ImageGen/images/cards/furina/soloists_solicitation.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Character Furina Game (Ousia).png		tcg	
 stage_presence	ImageGen/images/cards/furina/stage_presence.png	500	380	cover	y0.20	shortlist	1	png	Furina Portrait.png		splash	
 stage_presence	ImageGen/images/cards/furina/stage_presence.png	500	380	cover_autocrop	cover@0.06	shortlist	2	png	Furina Card.png		splash	
 regal_bearing	ImageGen/images/cards/furina/regal_bearing.png	500	380	cover	y0.20	shortlist	1	png	Furina Character Card.png		tcg	
@@ -582,9 +582,6 @@ guest_list	ImageGen/images/cards/furina/guest_list.png	500	380	cover_autocrop	co
 leading_role	ImageGen/images/cards/furina/leading_role.png	500	380	cover	y0.16	shortlist	1	png	Character Furina Game (Ousia).png		tcg	furina_pool
 leading_role	ImageGen/images/cards/furina/leading_role.png	500	380	cover	y0.30	shortlist	2	png	Opera Epiclese Support Card.png		tcg	furina_pool
 leading_role	ImageGen/images/cards/furina/leading_role.png	500	380	cover_autocrop	contain@0.08	shortlist	3	png	Item Festival Spotlight.png		item	furina_pool
-standing_ovation	ImageGen/images/cards/furina/standing_ovation.png	500	380	cover	y0.30	shortlist	1	png	Astra Carnival Cat's Tail Gathering 2024 S5 Artwork.png		splash	furina_pool
-standing_ovation	ImageGen/images/cards/furina/standing_ovation.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Item Theater Tickets.png		item	furina_pool
-standing_ovation	ImageGen/images/cards/furina/standing_ovation.png	500	380	cover_autocrop	contain@0.08	shortlist	3	png	Item Festival Spotlight.png		item	furina_pool
 supporting_cast	ImageGen/images/cards/furina/supporting_cast.png	500	380	cover	center@1.8	shortlist	1	gif	Salon Solitaire Water Walk Preview.gif	50	vfx	furina_pool
 supporting_cast	ImageGen/images/cards/furina/supporting_cast.png	500	380	cover_autocrop	contain@0.08	shortlist	2	png	Item Movable Small Spotlight.png		item	furina_pool
 supporting_cast	ImageGen/images/cards/furina/supporting_cast.png	500	380	cover_autocrop	contain@0.08	shortlist	3	png	Item Theater Tickets.png		item	furina_pool
@@ -1852,8 +1849,6 @@ proto_fs_interposition	ImageGen/images/cards/furina/proto_fs_interposition.png	5
 proto_fs_scene_change	ImageGen/images/cards/furina/proto_fs_scene_change.png	500	380	cover	y0.35	shortlist	1	png	Fragrant Fantasy Wallpaper.png		splash	
 # proto_fs_grand_entrance <- her full Wish splash: the arrival, at full height
 proto_fs_grand_entrance	ImageGen/images/cards/furina/proto_fs_grand_entrance.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Furina Full Wish.png		splash	
-# proto_fs_ousia_surge <- Furina in her OUSIA arkhe, the card's own word
-proto_fs_ousia_surge	ImageGen/images/cards/furina/proto_fs_ousia_surge.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Furina Game (Ousia).png		splash	
 # proto_fs_pneuma_refrain <- Furina in her PNEUMA arkhe, the card's own word
 proto_fs_pneuma_refrain	ImageGen/images/cards/furina/proto_fs_pneuma_refrain.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Furina Game (Pneuma).png		splash	
 # proto_fs_bis 'Bis!' <- her second TCG card: the encore of the first
@@ -2030,8 +2025,6 @@ proto_fs_held_applause	ImageGen/images/cards/furina/proto_fs_held_applause.png	5
 # proto_fs_echoing_hall <- NEW: the Fontinalia hall under Furina's own portrait, stars hung from the vault
 proto_fs_echoing_hall	ImageGen/images/cards/furina/proto_fs_echoing_hall.png	500	380	cover	center	shortlist	1	png	Fontinalia Festival.png		splash
 # -- 4. Cashing out --
-# proto_fs_spirited_aria <- NEW: Furina mid-song, arm flung wide (the left of her voice-cast card, its text cropped off)
-proto_fs_spirited_aria	ImageGen/images/cards/furina/proto_fs_spirited_aria.png	500	380	cover	x0.22,y0.45@1.5	shortlist	1	png	Furina VA Announcement.png		splash
 # proto_fs_intermission <- NEW: Furina off the stage for a rest in the grass, her Salon crabs round her
 proto_fs_intermission	ImageGen/images/cards/furina/proto_fs_intermission.png	500	380	cover	x0.55,y0.55@1.15	shortlist	1	png	VIP Ace Detective 3.png		splash
 # proto_fs_counterclaim <- NEW: the Cycle of Refutation, the trial's evidence turned back on the accuser
@@ -2540,8 +2533,6 @@ proto_fs_aria_for_one	ImageGen/images/cards/furina/proto_fs_aria_for_one.png	500
 proto_fs_casting_agent	ImageGen/images/cards/furina/proto_fs_casting_agent.png	500	380	cover	x0.53,y0.55@1.1	shortlist	1	png	Astra Carnival Cat's Tail Gathering 2024 S5 Artwork.png		splash	
 # proto_fs_critics_darling <- Furina posing in the clock hall, face in frame
 proto_fs_critics_darling	ImageGen/images/cards/furina/proto_fs_critics_darling.png	500	380	cover	x0.45,y0.38@1.5	shortlist	1	png	VIP Ace Detective Wallpaper.png		splash	
-# proto_fs_interval_bell <- chibi Furina in the clock shop
-proto_fs_interval_bell	ImageGen/images/cards/furina/proto_fs_interval_bell.png	500	380	cover	x0.55,y0.55@1.2	shortlist	1	png	VIP Ace Detective 1.png		splash	
 # proto_fs_leading_lady <- Furina out in front of the 4.1 cast under the flower arch, face in frame (the picked Introduction Banner is L9-banned for its wordmark)
 proto_fs_leading_lady	ImageGen/images/cards/furina/proto_fs_leading_lady.png	500	380	cover	x0.28,y0.36@1.6	shortlist	1	png	Version 4.1 Wallpaper 3.png		splash	
 # proto_fs_opening_number <- Furina in the Masquerade of the Guilty art, face in frame
@@ -2568,12 +2559,8 @@ proto_kk_coral_tithe	ImageGen/images/cards/kokomi/proto_kk_coral_tithe.png	500	3
 proto_kk_drowning_pressure	ImageGen/images/cards/kokomi/proto_kk_drowning_pressure.png	500	380	cover	x0.45,y0.45@1.3	shortlist	1	png	World Quest Orobashi's Legacy Part III.png		splash	kokomi_pool
 # proto_kk_evening_watch <- night on the rock, Kokomi framed
 proto_kk_evening_watch	ImageGen/images/cards/kokomi/proto_kk_evening_watch.png	500	380	cover	x0.55,y0.42@1.5	shortlist	1	png	Sangonomiya Kokomi TPRGT 2024 - Aether.png		splash	kokomi_pool
-# proto_kk_flotsam_surge <- the Hydro Hypostasis cubes
-proto_kk_flotsam_surge	ImageGen/images/cards/kokomi/proto_kk_flotsam_surge.png	500	380	cover	x0.45,y0.52@1.1	shortlist	1	png	Enemy Hydro Hypostasis.png		splash	kokomi_pool
 # proto_kk_grand_design <- sticker: Kokomi reading
 proto_kk_grand_design	ImageGen/images/cards/kokomi/proto_kk_grand_design.png	500	380	cover	y0.55	shortlist	1	png	Paimon's Paintings Set Migration to the Coral Sea 3.png		sticker	kokomi_pool
-# proto_kk_kelp_wall <- the glowing coral forest
-proto_kk_kelp_wall	ImageGen/images/cards/kokomi/proto_kk_kelp_wall.png	500	380	cover	center	shortlist	1	png	Watatsumi Island Concept Art.png		splash	kokomi_pool
 # proto_kk_kurage_canopy <- the Bake-Kurage, bell and trailing tentacles
 proto_kk_kurage_canopy	ImageGen/images/cards/kokomi/proto_kk_kurage_canopy.png	500	380	cover	y0.42	shortlist	1	png	Bake-Kurage Summon.png		splash	kokomi_pool
 # proto_kk_kurage_school <- chibi Kokomi by the shore, Kokomi framed
@@ -2594,8 +2581,6 @@ proto_kk_patient_tide	ImageGen/images/cards/kokomi/proto_kk_patient_tide.png	500
 proto_kk_riptide_ruin	ImageGen/images/cards/kokomi/proto_kk_riptide_ruin.png	500	380	cover	x0.45	shortlist	1	png	Seirai Island Concept Art.png		splash	kokomi_pool
 # proto_kk_salt_in_the_wound <- sticker: Kokomi, arms crossed
 proto_kk_salt_in_the_wound	ImageGen/images/cards/kokomi/proto_kk_salt_in_the_wound.png	500	380	cover	y0.52	shortlist	1	png	Paimon's Paintings Set Migration to the Coral Sea 7.png		sticker	kokomi_pool
-# proto_kk_sea_glass_harvest <- the glowing crystal on the altar
-proto_kk_sea_glass_harvest	ImageGen/images/cards/kokomi/proto_kk_sea_glass_harvest.png	500	380	cover	x0.50,y0.45@1.2	shortlist	1	png	Watatsumi Altar.png		splash	kokomi_pool
 # proto_kk_seas_reproach <- Kokomi and the fish, face in frame
 proto_kk_seas_reproach	ImageGen/images/cards/kokomi/proto_kk_seas_reproach.png	500	380	cover	x0.40,y0.45@1.4	shortlist	1	png	Sangonomiya Kokomi Birthday 2024.png		splash	kokomi_pool
 # proto_kk_shoal_call <- sprite: Kokomi waving
@@ -2618,8 +2603,6 @@ proto_kk_tidal_resonance	ImageGen/images/cards/kokomi/proto_kk_tidal_resonance.p
 proto_kk_tidal_riposte	ImageGen/images/cards/kokomi/proto_kk_tidal_riposte.png	500	380	cover	x0.58,y0.38@1.4	shortlist	1	png	Gorou Birthday 2022.png		splash	kokomi_pool
 # proto_kk_tidal_screen <- the shell shrine
 proto_kk_tidal_screen	ImageGen/images/cards/kokomi/proto_kk_tidal_screen.png	500	380	cover	center	shortlist	1	png	Watatsumi Island Sangonomiya Shrine.png		splash	kokomi_pool
-# proto_kk_tidecleanse <- Kokomi and the butterfly, face in frame
-proto_kk_tidecleanse	ImageGen/images/cards/kokomi/proto_kk_tidecleanse.png	500	380	cover	x0.43,y0.36@1.3	shortlist	1	png	Sangonomiya Kokomi Birthday 2025.png		splash	kokomi_pool
 # proto_kk_turning_tide <- the harbour at sunset
 proto_kk_turning_tide	ImageGen/images/cards/kokomi/proto_kk_turning_tide.png	500	380	cover	x0.45	shortlist	1	png	Archon Quest Setting Sail.png		splash	kokomi_pool
 # proto_kk_undercurrent_snare <- the purple pillar in the water
@@ -2789,7 +2772,6 @@ proto_vk_comrades_of_the_expedition	ImageGen/images/cards/varka/proto_vk_comrade
 proto_vk_west_winds_blessing	ImageGen/images/cards/varka/proto_vk_west_winds_blessing.png	500	380	cover	y0.55@1.2	shortlist	1	png	Facts About Varka II 4.png		splash	
 divine_strategy	ImageGen/images/cards/kokomi/divine_strategy.png	500	380	contain	center	shortlist	1	png	Talent Divine Maiden's Deliverance.png		item	kokomi_pool
 kk_open_the_casket	ImageGen/images/cards/kokomi/kk_open_the_casket.png	500	380	contain	center	shortlist	1	png	Talent Tamakushi Casket.png		item	kokomi_pool
-kk_sea_glass	ImageGen/images/cards/kokomi/kk_sea_glass.png	500	380	contain	center	shortlist	1	png	Item Crystal Marrow.png		item	kokomi_pool
 # Furina card-art picks, 38 rows ([USER] 2026-10-09: "all of the art picks are good enough for now")
 center_of_attention	ImageGen/images/cards/furina/center_of_attention.png	500	380	cover	center	shortlist	1	png	Version 4.2 Wallpaper 1.jpg		splash	
 # The Varka review (2026-10-12): his two Ancients. all_four_winds <- Venti, the god of the winds
@@ -2799,7 +2781,6 @@ dandelion_gale	ImageGen/images/cards/varka/dandelion_gale.png	500	380	cover	cent
 proto_fs_a_five_century_act	ImageGen/images/cards/furina/proto_fs_a_five_century_act.png	500	380	cover	y0.25	shortlist	1	png	NPC Focalors.png		splash	
 proto_fs_against_the_tide	ImageGen/images/cards/furina/proto_fs_against_the_tide.png	500	380	cover	center	shortlist	1	png	Version 4.2 Wallpaper 2.png		splash	
 proto_fs_all_in	ImageGen/images/cards/furina/proto_fs_all_in.png	500	380	cover	x0.50,y0.50@1.3	shortlist	1	png	Tabletop Troupe Pros Furina.png		splash	
-proto_fs_balance_the_books	ImageGen/images/cards/furina/proto_fs_balance_the_books.png	500	380	cover	y0.42	shortlist	1	png	Oratrice Mecanique d'Analyse Cardinale.png		splash	
 proto_fs_casting_call	ImageGen/images/cards/furina/proto_fs_casting_call.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Event Invitation.png		item	
 proto_fs_clean_slate	ImageGen/images/cards/furina/proto_fs_clean_slate.png	500	380	cover	x0.74,y0.62@2	shortlist	1	png	Fragmented Memories Archive 3.png		splash	
 proto_fs_cleansing_torrent	ImageGen/images/cards/furina/proto_fs_cleansing_torrent.png	500	380	cover	center	shortlist	1	png	Namecard Background Fontaine Lucine.png		splash	
@@ -2813,25 +2794,17 @@ proto_fs_fountain_of_lucine	ImageGen/images/cards/furina/proto_fs_fountain_of_lu
 proto_fs_gentle_current	ImageGen/images/cards/furina/proto_fs_gentle_current.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Tea Time Furina Preview.png		splash	
 proto_fs_grand_absolution	ImageGen/images/cards/furina/proto_fs_grand_absolution.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Opera Epiclese (The Final Feast).png		splash	
 proto_fs_guest_star_freminet	ImageGen/images/cards/furina/proto_fs_guest_star_freminet.png	500	380	cover	center	shortlist	1	png	Freminet Birthday 2023.png		splash	
-proto_fs_high_stakes	ImageGen/images/cards/furina/proto_fs_high_stakes.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Calamitous Tread Graphic 3.png		splash	
 proto_fs_hold_the_stage	ImageGen/images/cards/furina/proto_fs_hold_the_stage.png	500	380	cover	y0.16	shortlist	1	png	Furina Profile.png		splash	
-proto_fs_hydro_lance	ImageGen/images/cards/furina/proto_fs_hydro_lance.png	500	380	cover	x0.55,y0.36@1.15	shortlist	1	png	Splendor of Tranquil Waters Equipment Card.png		tcg	
 proto_fs_hymn_of_many_waters	ImageGen/images/cards/furina/proto_fs_hymn_of_many_waters.png	500	380	cover	x0.335,y0.45@1.5	shortlist	1	png	La vaguelette.png		splash	
-proto_fs_hymn_of_renewal	ImageGen/images/cards/furina/proto_fs_hymn_of_renewal.png	500	380	cover	y0.55	shortlist	1	png	Furina Birthday 2024.png		splash	
 proto_fs_ousia_pledge	ImageGen/images/cards/furina/proto_fs_ousia_pledge.png	500	380	cover	y0.22	shortlist	1	png	Furina NPC Ousia.png		splash	
-proto_fs_overdraft	ImageGen/images/cards/furina/proto_fs_overdraft.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	The Opera of Noirceur and Blancheur Ticket.png		item	
 proto_fs_pay_the_tab	ImageGen/images/cards/furina/proto_fs_pay_the_tab.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Rainbow Macarons.png		item	
-proto_fs_pneuma_tides	ImageGen/images/cards/furina/proto_fs_pneuma_tides.png	500	380	cover	y0.22	shortlist	1	png	Furina NPC Pneuma.png		splash	
 proto_fs_prima_donna	ImageGen/images/cards/furina/proto_fs_prima_donna.png	500	380	cover	x0.45	shortlist	1	png	App Store Event Character Wallpaper Furina Version 5.4.png		splash	
 proto_fs_riptide_lunge	ImageGen/images/cards/furina/proto_fs_riptide_lunge.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	On-Hit Effect Furina.png		vfx	
 proto_fs_rising_tide	ImageGen/images/cards/furina/proto_fs_rising_tide.png	500	380	cover	x0.40	shortlist	1	png	Primordial Sea.png		splash	
-proto_fs_salons_encore	ImageGen/images/cards/furina/proto_fs_salons_encore.png	500	380	cover	y0.55	shortlist	1	png	Furina Birthday 2025 - Shorts.png		splash	
 proto_fs_salons_tab	ImageGen/images/cards/furina/proto_fs_salons_tab.png	500	380	cover	x0.62,y0.50@1.3	shortlist	1	png	Chanson of Many Waters 2024-06-25 - Furina Shorts.png		splash	
 proto_fs_showstopper	ImageGen/images/cards/furina/proto_fs_showstopper.png	500	380	cover	x0.33,y0.50@1.5	shortlist	1	png	Version Luna I Wallpaper 3.png		splash	
-proto_fs_soothing_waters	ImageGen/images/cards/furina/proto_fs_soothing_waters.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Savoring the Breeze Wallpaper Furina.png		splash	
 proto_fs_standing_room_only	ImageGen/images/cards/furina/proto_fs_standing_room_only.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	4th Anniversary Wallpaper 1.png		splash	
 proto_fs_surging_waters	ImageGen/images/cards/furina/proto_fs_surging_waters.png	500	380	cover	x0.72,y0.66@1.4	shortlist	1	png	Anniversary Memories Album Wallpaper 12 - Underwater Storm in Fontaine - Aether.png		splash	
-proto_fs_the_deluge	ImageGen/images/cards/furina/proto_fs_the_deluge.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Archon Quest When All Return to the Waters.png		splash	
 proto_fs_undercurrent	ImageGen/images/cards/furina/proto_fs_undercurrent.png	500	380	cover	x0.46,y0.46@1.2	shortlist	1	png	Archon Quest Proof of Guilt.png		splash	
 # ---------- Spiral Abyss icons (2026-10-12): menu emblem, display relics, Shadow badges, Abyss Mage shields -> res://abyss/ ----------
 abyss_ui_spiral_abyss	ImageGen/images/abyss/ui/spiral_abyss.png	256	256	contain	center	auto	1	png	UI Spiral Abyss.png		icon
@@ -2905,8 +2878,6 @@ proto_kk_riptide_guard	ImageGen/images/cards/kokomi/proto_kk_riptide_guard.png	5
 proto_kk_watatsumi_drill	ImageGen/images/cards/kokomi/proto_kk_watatsumi_drill.png	500	380	cover	y0.45	shortlist	1	png	Sangonomiya Kokomi Birthday 2022 - Shorts.png		splash	kokomi_pool
 # proto_fs_private_box <- Furina's own seat at the Opera Epiclese
 proto_fs_private_box	ImageGen/images/cards/furina/proto_fs_private_box.png	500	380	cover	center	shortlist	1	png	Opera Epiclese - Furina's Seat.png		splash	
-# proto_fs_packed_house <- the Opera Epiclese lit for a full house
-proto_fs_packed_house	ImageGen/images/cards/furina/proto_fs_packed_house.png	500	380	cover	y0.45	shortlist	1	png	Opera Epiclese Support Card.png		tcg	
 # proto_fs_the_full_house <- Furina with her guests crowding in
 proto_fs_the_full_house	ImageGen/images/cards/furina/proto_fs_the_full_house.png	500	380	cover	center	shortlist	1	png	Furina Birthday 2024 - Shorts.png		splash	
 # proto_fs_headliner <- Furina beaming in the spotlight
@@ -2949,3 +2920,180 @@ power_furina_fountain_of_lucine	ImageGen/images/furina/powers/fountain_of_lucine
 power_furina_ousia_surge	ImageGen/images/furina/powers/ousia_surge.png	256	256	contain	center	shortlist	1	png	Item Fontaine Attunement.png		icon
 # power_fontaine_masque_red_death <- the companion's face
 power_fontaine_masque_red_death	ImageGen/images/furina/powers/masque_red_death.png	256	256	contain	center	shortlist	1	png	Arlecchino Icon.png		icon
+# ---------- Yae Miko art pass (2026-10-14): her 32 proto_ym_ cards and nine power badges ----------
+# Every row is OFFICIAL wiki art, each title checked against the API's imageinfo
+# before it was written. Cards: one distinct source per card, blank source_group
+# (strict L1), and none is proto_mi_yae_sesshou_sakura's Yae Miko Character Card
+# or its Platinum twin. Skill-preview GIFs are 480x270 (L8) and are not used.
+# Badges sit at ImageGen/images/yae/powers/, which build_pck.ps1 now packs.
+# proto_ym_yakan_evocation <- the Sesshou Sakura itself, her skill's summon (TCG card)
+proto_ym_yakan_evocation	ImageGen/images/cards/yae/proto_ym_yakan_evocation.png	500	380	cover	y0.40@1.15	shortlist	1	png	Sesshou Sakura Summon.png		tcg	
+# proto_ym_proofread <- Yae, book in hand, plotting the next chapter
+proto_ym_proofread	ImageGen/images/cards/yae/proto_ym_proofread.png	500	380	cover	x0.36,y0.55@1.6	shortlist	1	png	Yae Miko TPRGT 2023 - Aether.png		splash	
+# proto_ym_kitsune_flash <- Yae swinging her gohei
+proto_ym_kitsune_flash	ImageGen/images/cards/yae/proto_ym_kitsune_flash.png	500	380	cover	x0.45	shortlist	1	png	Yae Miko Profile.png		splash	
+# proto_ym_thunder_rite <- Yae at the torii before the Sacred Sakura
+proto_ym_thunder_rite	ImageGen/images/cards/yae/proto_ym_thunder_rite.png	500	380	cover	x0.40	shortlist	1	png	Version 2.5 Wallpaper 1.png		splash	
+# proto_ym_shrine_offering <- the Grand Narukami Shrine (TCG support card)
+proto_ym_shrine_offering	ImageGen/images/cards/yae/proto_ym_shrine_offering.png	500	380	cover	y0.45@1.15	shortlist	1	png	Grand Narukami Shrine Support Card.png		tcg	
+# proto_ym_twin_sakura <- her talent card: Sakura blossom and Electro spirit
+proto_ym_twin_sakura	ImageGen/images/cards/yae/proto_ym_twin_sakura.png	500	380	cover	y0.45@1.15	shortlist	1	png	The Shrine's Sacred Shade Equipment Card.png		tcg	
+# proto_ym_deadline <- a vendor pressing something on an unimpressed Yae
+proto_ym_deadline	ImageGen/images/cards/yae/proto_ym_deadline.png	500	380	cover	x0.40,y0.55@1.3	shortlist	1	png	Kitsune's Leisurely Stroll Around Hanamizaka 2.png		splash	
+# proto_ym_fox_fire_draft <- Yae by moonlight under violet sakura
+proto_ym_fox_fire_draft	ImageGen/images/cards/yae/proto_ym_fox_fire_draft.png	500	380	cover	x0.62,y0.40@1.3	shortlist	1	png	Yae Miko Birthday 2024.png		splash	
+# proto_ym_sly_strike <- Yae's sly close-up smile
+proto_ym_sly_strike	ImageGen/images/cards/yae/proto_ym_sly_strike.png	500	380	cover	x0.52,y0.40@1.5	shortlist	1	png	Yae Miko Birthday 2023.png		splash	
+# proto_ym_fox_trick <- a kitsune pulling a trick on a startled man
+proto_ym_fox_trick	ImageGen/images/cards/yae/proto_ym_fox_trick.png	500	380	cover	y0.40	shortlist	1	png	Tales of the Youkai Kitsune 1 Final.png		splash	
+# proto_ym_shrine_maidens_guard <- the shrine's protective omamori charm
+proto_ym_shrine_maidens_guard	ImageGen/images/cards/yae/proto_ym_shrine_maidens_guard.png	500	380	contain	center	shortlist	1	png	Item Grand Narukami Shrine Omamori.png		item	
+# proto_ym_sakura_grove <- the Sacred Sakura
+proto_ym_sakura_grove	ImageGen/images/cards/yae/proto_ym_sakura_grove.png	500	380	cover	y0.55	shortlist	1	png	Sacred Sakura.png		splash	
+# proto_ym_kitsune_rite <- the Sky Kitsune statue on Mt. Yougou
+proto_ym_kitsune_rite	ImageGen/images/cards/yae/proto_ym_kitsune_rite.png	500	380	cover	y0.60	shortlist	1	png	Sky Kitsune Statue Mt Yougou.png		splash	
+# proto_ym_thunderbolt_tithe <- the Sacred Sakura behind its torii
+proto_ym_thunderbolt_tithe	ImageGen/images/cards/yae/proto_ym_thunderbolt_tithe.png	500	380	cover	center	shortlist	1	png	Namecard Background Inazuma Sacred Sakura.png		splash	
+# proto_ym_rooted_shrine <- the shrine rooted on the mountain (concept art)
+proto_ym_rooted_shrine	ImageGen/images/cards/yae/proto_ym_rooted_shrine.png	500	380	cover	x0.60	shortlist	1	png	Grand Narukami Shrine Concept Art.png		splash	
+# proto_ym_edict_of_cleansing <- the Earth Kitsune statues of the Sakura Cleansing Ritual
+proto_ym_edict_of_cleansing	ImageGen/images/cards/yae/proto_ym_edict_of_cleansing.png	500	380	cover	y0.55	shortlist	1	png	Earth Kitsune Statue.png		splash	
+# proto_ym_bestseller <- Yae with a light novel in hand
+proto_ym_bestseller	ImageGen/images/cards/yae/proto_ym_bestseller.png	500	380	cover	x0.68,y0.40	shortlist	1	png	Kitsune's Leisurely Stroll Around Hanamizaka 4.png		splash	
+# proto_ym_print_run <- the deluxe edition of her own light novel
+proto_ym_print_run	ImageGen/images/cards/yae/proto_ym_print_run.png	500	380	contain	center	shortlist	1	png	Item Pretty Please, Kitsune Guuji Limited Deluxe Edition.png		item	
+# proto_ym_footnote <- an annotated kitsune chronicle
+proto_ym_footnote	ImageGen/images/cards/yae/proto_ym_footnote.png	500	380	contain	center	shortlist	1	png	Book New Chronicles of the Six Kitsune.png		item	
+# proto_ym_sakura_seal <- her namecard: the dreaming fox among sakura
+proto_ym_sakura_seal	ImageGen/images/cards/yae/proto_ym_sakura_seal.png	500	380	cover	x0.60	shortlist	1	png	Namecard Background Yae Miko Kitsune Dreaming.png		splash	
+# proto_ym_serialization <- Yae Publishing House, logo cropped out
+proto_ym_serialization	ImageGen/images/cards/yae/proto_ym_serialization.png	500	380	cover	x0.45,y0.45@1.2	shortlist	1	png	Yae Publishing House.png		splash	
+# proto_ym_manuscript_pile <- Yae with a book at the bookstall
+proto_ym_manuscript_pile	ImageGen/images/cards/yae/proto_ym_manuscript_pile.png	500	380	cover	x0.50,y0.55@1.5	shortlist	1	png	Kitsune's Leisurely Stroll Around Hanamizaka 3.png		splash	
+# proto_ym_kitsune_guile <- a kitsune's tail startling two girls
+proto_ym_kitsune_guile	ImageGen/images/cards/yae/proto_ym_kitsune_guile.png	500	380	cover	y0.50	shortlist	1	png	Tales of the Youkai Kitsune 3 Final.png		splash	
+# proto_ym_foxfire_lure <- a fox lured in by fried tofu
+proto_ym_foxfire_lure	ImageGen/images/cards/yae/proto_ym_foxfire_lure.png	500	380	cover	y0.40	shortlist	1	png	Tales of the Youkai Kitsune 2 Final.png		splash	
+# proto_ym_tenko_kenshin <- her wish art: the kitsune spirits loosed
+proto_ym_tenko_kenshin	ImageGen/images/cards/yae/proto_ym_tenko_kenshin.png	500	380	cover_autocrop	cover@0.04	shortlist	1	png	Character Yae Miko Full Wish.png		splash	
+# proto_ym_foxs_mooncall <- her constellation, Divina Vulpes, the fox in the night sky
+proto_ym_foxs_mooncall	ImageGen/images/cards/yae/proto_ym_foxs_mooncall.png	500	380	cover	x0.45,y0.45@1.2	shortlist	1	png	Divina Vulpes.png		splash	
+# proto_ym_yakan_offering <- Yae tending a fox under the sakura
+proto_ym_yakan_offering	ImageGen/images/cards/yae/proto_ym_yakan_offering.png	500	380	cover	y0.45	shortlist	1	png	Yae Miko Birthday 2026.png		splash	
+# proto_ym_the_seven_glamours <- Yae in full glamour, wordmark cropped out
+proto_ym_the_seven_glamours	ImageGen/images/cards/yae/proto_ym_the_seven_glamours.png	500	380	cover	y0.34	shortlist	1	png	Yae Miko Card.png		splash	
+# proto_ym_sakura_channeling <- Yae among falling sakura, logo cropped out
+proto_ym_sakura_channeling	ImageGen/images/cards/yae/proto_ym_sakura_channeling.png	500	380	cover	x0.70,y0.45@1.7	shortlist	1	png	Version 2.5 Wallpaper 2.png		splash	
+# proto_ym_mischievous_teasing <- Yae smirking at her phone, logo cropped out
+proto_ym_mischievous_teasing	ImageGen/images/cards/yae/proto_ym_mischievous_teasing.png	500	380	cover	x0.50,y0.50@1.2	shortlist	1	png	Dia dos Namorados 2024 - Yae Miko.png		splash	
+# proto_ym_reborn_as_guuji_yae <- Yae as the Guuji, her official splash
+proto_ym_reborn_as_guuji_yae	ImageGen/images/cards/yae/proto_ym_reborn_as_guuji_yae.png	500	380	cover	y0.30@1.4	shortlist	1	png	Yae Miko Portrait.png		splash	
+# proto_ym_editor_in_chief <- Yae reading a manuscript on the shrine porch, logo cropped out
+proto_ym_editor_in_chief	ImageGen/images/cards/yae/proto_ym_editor_in_chief.png	500	380	cover	x0.60,y0.42@1.3	shortlist	1	png	Yae Miko Birthday 2022.png		splash	
+# ---------- Yae Miko, the design axes (2026-10-14): batch two's ten cards ----------
+# Official wiki art, one distinct source per card, none used by another row.
+# proto_ym_shrine_bell <- Yae at the spring festival under the shrine's sakura
+proto_ym_shrine_bell	ImageGen/images/cards/yae/proto_ym_shrine_bell.png	500	380	cover	x0.74,y0.50@1.0	shortlist	1	png	Vernal Equinox Day 2024.png		splash	
+# proto_ym_grafted_branch <- Yae beneath a blossoming sakura branch
+proto_ym_grafted_branch	ImageGen/images/cards/yae/proto_ym_grafted_branch.png	500	380	cover	y0.40	shortlist	1	png	Yae Miko Birthday 2023 2.jpg		splash	
+# proto_ym_margin_note <- Yae beside her letter to a reader, the letter half kept
+proto_ym_margin_note	ImageGen/images/cards/yae/proto_ym_margin_note.png	500	380	cover	x0.45,y0.45@1.1	shortlist	1	png	Blessings From Sakura 6.png		splash	
+# proto_ym_kitsune_pounce <- Yae with her fox spirits leaping
+proto_ym_kitsune_pounce	ImageGen/images/cards/yae/proto_ym_kitsune_pounce.png	500	380	cover	x0.42,y0.45@1.3	shortlist	1	png	App Store Event Character Wallpaper Yae Miko Version 2.5.png		splash	
+# proto_ym_foxfire_sweep <- Yae sweeping her gohei across the shrine
+proto_ym_foxfire_sweep	ImageGen/images/cards/yae/proto_ym_foxfire_sweep.png	500	380	cover	x0.62,y0.45@1.2	shortlist	1	png	Version 2.5 Full Wallpaper 2.png		splash	
+# proto_ym_evergreen_charm <- Yae under the ever-blooming sakura
+proto_ym_evergreen_charm	ImageGen/images/cards/yae/proto_ym_evergreen_charm.png	500	380	cover	x0.50,y0.35@1.4	shortlist	1	png	Version 3.7 Wallpaper 2.png		splash	
+# proto_ym_fallen_petals <- Yae among falling petals, the title cropped out
+proto_ym_fallen_petals	ImageGen/images/cards/yae/proto_ym_fallen_petals.png	500	380	cover	x0.72,y0.50@1.25	shortlist	1	png	Everbloom Violet.png		splash	
+# proto_ym_mikage_thunder <- Yae beside the Shogun at the shrine
+proto_ym_mikage_thunder	ImageGen/images/cards/yae/proto_ym_mikage_thunder.png	500	380	cover	x0.55,y0.45@1.1	shortlist	1	png	New Year 2023 JP.png		splash	
+# proto_ym_inked_branches <- Yae with brush and foxes under the branches
+proto_ym_inked_branches	ImageGen/images/cards/yae/proto_ym_inked_branches.png	500	380	cover	y0.45@1.2	shortlist	1	png	Yae Miko Birthday 2025.png		splash	
+# proto_ym_royalties <- Yae at her merchandise stall, the text cropped out
+proto_ym_royalties	ImageGen/images/cards/yae/proto_ym_royalties.png	500	380	cover	x0.75,y0.45@1.4	shortlist	1	png	Fall 2023 Pop-Up Store.png		splash	
+# ---------- Yae Miko, review r3 (2026-10-14): the three signature cards ----------
+# Official wiki art, one distinct source per card, none used by another row.
+# proto_ym_second_printing <- Yae strolling Hanamizaka, the publishing district
+proto_ym_second_printing	ImageGen/images/cards/yae/proto_ym_second_printing.png	500	380	cover	x0.50,y0.45	shortlist	1	png	Kitsune's Leisurely Stroll Around Hanamizaka 1.png		splash	
+# proto_ym_authors_copy <- Yae's gift to the Traveler, a copy signed by the author
+proto_ym_authors_copy	ImageGen/images/cards/yae/proto_ym_authors_copy.png	500	380	cover	x0.60,y0.45@1.2	shortlist	1	png	Yae Miko TPRGT 2022 - Aether.png		splash	
+# proto_ym_serial_novel <- her wish splash, the long-running story
+proto_ym_serial_novel	ImageGen/images/cards/yae/proto_ym_serial_novel.png	500	380	cover	x0.55,y0.40@1.2	shortlist	1	png	Yae Miko Wish.png		splash	
+# power_yae_sakura <- her skill's icon, the Sesshou Sakura
+power_yae_sakura	ImageGen/images/yae/powers/sakura.png	256	256	contain	center	shortlist	1	png	Talent Yakan Evocation Sesshou Sakura.png		icon
+# power_yae_foxfire_lure <- her foxfire attack's icon
+power_yae_foxfire_lure	ImageGen/images/yae/powers/foxfire_lure.png	256	256	contain	center	shortlist	1	png	Talent Spiritfox Sin-Eater.png		icon
+# power_yae_sakura_grove <- the passive that empowers her Sakura
+power_yae_sakura_grove	ImageGen/images/yae/powers/sakura_grove.png	256	256	contain	center	shortlist	1	png	Talent The Shrine's Sacred Shade.png		icon
+# power_yae_edict_of_cleansing <- the Sacred Sakura's emblem
+power_yae_edict_of_cleansing	ImageGen/images/yae/powers/edict_of_cleansing.png	256	256	contain	center	shortlist	1	png	Sacred Sakura Emblem.png		icon
+# power_yae_serialization <- the book-and-refresh talent icon
+power_yae_serialization	ImageGen/images/yae/powers/serialization.png	256	256	contain	center	shortlist	1	png	Talent Meditations of a Yako.png		icon
+# power_yae_foxs_mooncall <- exact name (C2)
+power_yae_foxs_mooncall	ImageGen/images/yae/powers/foxs_mooncall.png	256	256	contain	center	shortlist	1	png	Constellation Fox's Mooncall.png		icon
+# power_yae_yakan_offering <- exact name (C1)
+power_yae_yakan_offering	ImageGen/images/yae/powers/yakan_offering.png	256	256	contain	center	shortlist	1	png	Constellation Yakan Offering.png		icon
+# power_yae_sakura_channeling <- exact name (C4)
+power_yae_sakura_channeling	ImageGen/images/yae/powers/sakura_channeling.png	256	256	contain	center	shortlist	1	png	Constellation Sakura Channeling.png		icon
+# power_yae_editor_in_chief <- her own light novel
+power_yae_editor_in_chief	ImageGen/images/yae/powers/editor_in_chief.png	256	256	contain	center	shortlist	1	png	Item Pretty Please, Kitsune Guuji.png		icon
+# ---------- Furina, the sweep (review/active/furina-sweep-2026-10-14.md sec.3): 13 new card portraits; Opening Number and Plot Twist keep their rows above. Every row is OFFICIAL wiki art and no title is worn by any other plan row (blank source_group, strict L1); six reuse art the first set's cut rows freed.
+# proto_fs_ousia_pneuma 'Ousia / Pneuma' <- her Pneuma TCG card: Furina in one of her two arkhe
+proto_fs_ousia_pneuma	ImageGen/images/cards/furina/proto_fs_ousia_pneuma.png	500	380	cover	y0.25	shortlist	1	png	Furina Pneuma Character Card.png		tcg	
+# proto_fs_objection 'Objection!' <- the Iudex's 2025 birthday art: his hand thrust out, a wave flung back
+proto_fs_objection	ImageGen/images/cards/furina/proto_fs_objection.png	500	380	cover	x0.55,y0.45@1.3	shortlist	1	png	Neuvillette Birthday 2025.png		splash	
+# proto_fs_tearful_monologue <- her 2026 birthday art: an arm over her eyes, the swoon of a tragic aria
+proto_fs_tearful_monologue	ImageGen/images/cards/furina/proto_fs_tearful_monologue.png	500	380	cover	x0.50,y0.38@1.3	shortlist	1	png	Furina Birthday 2026.png		splash	
+# proto_fs_stage_directions <- chibi Furina directing her Salon, 2025 birthday short
+proto_fs_stage_directions	ImageGen/images/cards/furina/proto_fs_stage_directions.png	500	380	cover	y0.55	shortlist	1	png	Furina Birthday 2025 - Shorts.png		splash	
+# proto_fs_facade 'Facade' <- the Royal Masque TCG card: the mask she keeps up
+proto_fs_facade	ImageGen/images/cards/furina/proto_fs_facade.png	500	380	cover	y0.38	shortlist	1	png	Royal Masque Equipment Card.png		tcg	
+# proto_fs_trial_by_water <- the Iudex in the rain: Fontaine's judgment and its water
+proto_fs_trial_by_water	ImageGen/images/cards/furina/proto_fs_trial_by_water.png	500	380	cover	x0.55	shortlist	1	png	Suddenly the Rain Stops Wallpaper.png		splash	
+# proto_fs_rainfall_overture <- rain falling over Fontaine under a rainbow (Neuvillette's chibi short)
+proto_fs_rainfall_overture	ImageGen/images/cards/furina/proto_fs_rainfall_overture.png	500	380	cover	center	shortlist	1	png	Decree of the Deeps 2024-04-02 - Neuvillette Shorts.png		splash	
+# proto_fs_encore_performance <- Furina's curtain call, her voice-cast card
+proto_fs_encore_performance	ImageGen/images/cards/furina/proto_fs_encore_performance.png	500	380	cover	x0.22,y0.45@1.5	shortlist	1	png	Furina VA Announcement.png		splash	
+# proto_fs_arkhe_in_balance <- the Arkhe article art: Pneuma and Ousia side by side
+proto_fs_arkhe_in_balance	ImageGen/images/cards/furina/proto_fs_arkhe_in_balance.png	500	380	cover	center	shortlist	1	png	Arkhe.png		splash	
+# proto_fs_crowd_favorite <- Furina at the front of Fontaine's whole cast, the Version 4.0 wallpaper
+proto_fs_crowd_favorite	ImageGen/images/cards/furina/proto_fs_crowd_favorite.png	500	380	cover	x0.13,y0.45@1.6	shortlist	1	png	Version 4.0 Full Wallpaper 1.png		splash	
+# proto_fs_the_shows_not_over "The Show's Not Over" <- Furina alone on the stage, still performing, Starlight Reverie
+proto_fs_the_shows_not_over	ImageGen/images/cards/furina/proto_fs_the_shows_not_over.png	500	380	cover	x0.40,y0.86@1.6	shortlist	1	png	Starlight Reverie Wallpaper Furina Vertical.png		splash	
+# proto_fs_understudys_debut "Understudy's Debut" <- Yelan dressed as the Hydro Archon: the stand-in takes the stage
+proto_fs_understudys_debut	ImageGen/images/cards/furina/proto_fs_understudys_debut.png	500	380	cover	y0.22	shortlist	1	png	Yelan as Hydro Archon.png		splash	
+# proto_fs_verdict_of_the_oratrice <- the Oratrice Mecanique d'Analyse Cardinale itself
+proto_fs_verdict_of_the_oratrice	ImageGen/images/cards/furina/proto_fs_verdict_of_the_oratrice.png	500	380	cover	y0.42	shortlist	1	png	Oratrice Mecanique d'Analyse Cardinale.png		splash	
+# ---------- Kokomi art pass (2026-10-14): the pool overhaul's six and the five owed rows ----------
+# Every row is OFFICIAL wiki art, each title checked against the API's imageinfo
+# before it was written, and no title is worn by any other plan row (blank
+# source_group, strict L1). Kelp Wall, Tidecleanse, Sea Glass Harvest, Flotsam
+# Surge and Sea Glass are re-picked: their old sources were shared with Watchful
+# Shoal and two cut cards, or were an enemy render.
+# proto_kk_turning_tide_chain <- the Sangonomiya crest in a turning swirl of water (her own namecard family)
+proto_kk_turning_tide_chain	ImageGen/images/cards/kokomi/proto_kk_turning_tide_chain.png	500	380	cover	x0.62	shortlist	1	png	Namecard Background Inazuma Sangonomiya Crest.png		splash	
+# proto_kk_brine_spray <- Kokomi with the water fish leaping from her hand, the announcement text cropped out
+proto_kk_brine_spray	ImageGen/images/cards/kokomi/proto_kk_brine_spray.png	500	380	cover	x0.30,y0.36@1.4	shortlist	1	png	Sangonomiya Kokomi VA Announcement.png		splash	
+# proto_kk_jellyfish_current <- bubbles carried on a blue current
+proto_kk_jellyfish_current	ImageGen/images/cards/kokomi/proto_kk_jellyfish_current.png	500	380	cover	center	shortlist	1	png	Namecard Background Travel Notes Azure Main.png		splash	
+# proto_kk_prepared_retreat <- the dark island of Tokoyo under the moon: falling back to Watatsumi's own ground
+proto_kk_prepared_retreat	ImageGen/images/cards/kokomi/proto_kk_prepared_retreat.png	500	380	cover	center	shortlist	1	png	Namecard Background Inazuma Tokoyo.png		splash	
+# proto_kk_battle_formation <- the Inazuma cast drawn up against the Shogun, Kokomi at the left, wordmark cropped out
+proto_kk_battle_formation	ImageGen/images/cards/kokomi/proto_kk_battle_formation.png	500	380	cover	x0.51,y0.39@1.27	shortlist	1	png	Version 2.1 Full Wallpaper 1.png		splash	
+# proto_kk_turnabout <- her signature set's card: the Ocean-Hued Clam stores what it takes and bursts it back out
+proto_kk_turnabout	ImageGen/images/cards/kokomi/proto_kk_turnabout.png	500	380	cover	y0.62	shortlist	1	png	Ocean-Hued Clam Equipment Card.png		tcg	
+# proto_kk_kelp_wall <- a sea wall standing in the waves
+proto_kk_kelp_wall	ImageGen/images/cards/kokomi/proto_kk_kelp_wall.png	500	380	cover	x0.70	shortlist	1	png	Namecard Background Achievement Mariner.png		splash	
+# proto_kk_tidecleanse <- the clean sea off Watatsumi, wordmark cropped out
+proto_kk_tidecleanse	ImageGen/images/cards/kokomi/proto_kk_tidecleanse.png	500	380	cover	x0.40,y0.45@1.2	shortlist	1	png	Sumeru Coastline from Watatsumi - New.png		splash	
+# proto_kk_sea_glass_harvest <- the pearl in its shell, the Crown of Watatsumi
+proto_kk_sea_glass_harvest	ImageGen/images/cards/kokomi/proto_kk_sea_glass_harvest.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Crown of Watatsumi.png		item	
+# proto_kk_flotsam_surge <- the Hydro Hypostasis cubes tumbling in a surge (its TCG card; the enemy render it wore before is no longer used)
+proto_kk_flotsam_surge	ImageGen/images/cards/kokomi/proto_kk_flotsam_surge.png	500	380	cover	y0.42	shortlist	1	png	Hydro Hypostasis Character Card.png		tcg	
+# kk_sea_glass <- the glowing blue Sea Ganoderma: a thing the tide leaves behind
+kk_sea_glass	ImageGen/images/cards/kokomi/kk_sea_glass.png	500	380	cover_autocrop	contain@0.08	shortlist	1	png	Item Sea Ganoderma.png		item	
+# proto_kk_kurage_vanguard <- a lone jellyfish adrift in the dark water, Kokomi review r6 (2026-10-14)
+proto_kk_kurage_vanguard	ImageGen/images/cards/kokomi/proto_kk_kurage_vanguard.png	500	380	cover	center	shortlist	1	png	Enemy Hat Jellyfish 2.png		splash	
+# proto_kk_following_current <- the Moonglow Jellyfish's bell, lit from within, Kokomi review r6 (2026-10-14)
+proto_kk_following_current	ImageGen/images/cards/kokomi/proto_kk_following_current.png	500	380	cover	y0.30	shortlist	1	png	Wildlife Moonglow Jellyfish Archive.png		splash	

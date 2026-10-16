@@ -119,6 +119,111 @@ public static class FurinaCards
         await CardPileCmd.Add(pick, PileType.Hand, CardPilePosition.Top);
     }
 
+    // ---- THE SWEEP, SECOND SET (review/active/furina-sweep-2026-10-14.md
+    // sec.3) -------------------------------------------------------------
+    // Five verbs the grammar cannot spell. None needs her stage except
+    // Verdict, which reads her Fanfare (zero for anyone else). Sim twin:
+    // `furina_stage.kind`.
+
+    /// <summary>Stage Directions' hand prompt.</summary>
+    public const string DirectionsPromptKey =
+        "KLEEMOD-FURINA_STAGE_DIRECTIONS.selectionScreenPrompt";
+
+    public const string DirectionsPromptText =
+        "Choose a card to put on top of your [gold]Draw Pile[/gold].";
+
+    /// <summary>Ousia / Pneuma: "Flip." The card turns to its other face
+    /// (<see cref="FurinaFlip"/>), after the face it was played on has
+    /// resolved.</summary>
+    public static Task Flip(PlayerChoiceContext choiceContext,
+                            CardModel card, CardPlay cardPlay)
+    {
+        FurinaFlip.Turn(card);
+        return Task.CompletedTask;
+    }
+
+    /// <summary>Stage Directions: "Put a card from your Hand on top of your
+    /// Draw Pile. It costs 0 next turn." Headbutt's move, from the hand; the
+    /// cost is set at the start of her next turn
+    /// (<see cref="FurinaSweep.CostZeroNextTurn"/>), as the base game's
+    /// "this turn" (this turn or until played). One card is taken without a
+    /// screen.</summary>
+    public static async Task StageDirections(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
+    {
+        if (card.Owner is not { } owner) return;
+        var hand = CardPile.Get(PileType.Hand, owner)?.Cards
+                       .Where(c => !ReferenceEquals(c, card)).ToList()
+                   ?? new List<CardModel>();
+        if (hand.Count == 0) return;
+        var pick = hand.Count == 1
+            ? hand[0]
+            : (await CardSelectCmd.FromHand(
+                choiceContext, owner,
+                new CardSelectorPrefs(new LocString(Table, DirectionsPromptKey), 1),
+                c => !ReferenceEquals(c, card), card)).FirstOrDefault();
+        if (pick == null) return;
+        await CardPileCmd.Add(pick, PileType.Draw, CardPilePosition.Top);
+        FurinaSweep.CostZeroNextTurn(owner.Creature, pick);
+    }
+
+    /// <summary>Facade: "Gain Block equal to the HP you have lost this
+    /// combat, up to 12." [16] Any HP loss, a Drain included
+    /// (<see cref="FurinaSweep.LostThisCombat"/>); card Block, so Dexterity
+    /// and Frail fold it.</summary>
+    public static async Task Facade(PlayerChoiceContext choiceContext,
+                                    CardModel card, CardPlay cardPlay)
+    {
+        if (card.Owner?.Creature is not { } creature) return;
+        var amount = System.Math.Min(FurinaSweep.LostThisCombat(creature),
+                                     Amount(card));
+        if (amount <= 0) return;
+        await CreatureCmd.GainBlock(
+            creature,
+            new MegaCrit.Sts2.Core.Localization.DynamicVars.BlockVar(
+                amount, MegaCrit.Sts2.Core.ValueProps.ValueProp.Move),
+            cardPlay);
+    }
+
+    /// <summary>Encore Performance: "Play the top card of your Discard Pile
+    /// for free. Exhaust it." Havoc's body off the Discard Pile
+    /// (<c>CardPileCmd.AutoPlayFromDrawPile</c>: to the play pile, then
+    /// <c>CardCmd.AutoPlay</c> with <c>ExhaustOnNextPlay</c>). The top card
+    /// is the last one discarded.</summary>
+    public static async Task EncorePerformance(
+        PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
+    {
+        if (card.Owner is not { } owner) return;
+        var top = CardPile.Get(PileType.Discard, owner)?.Cards.LastOrDefault();
+        if (top == null || ReferenceEquals(top, card)) return;
+        await CardPileCmd.Add(top, PileType.Play);
+        top.ExhaustOnNextPlay = true;
+        await CardCmd.AutoPlay(choiceContext, top, null);
+    }
+
+    /// <summary>Verdict of the Oratrice: "Choose an enemy. If its HP is no
+    /// higher than your Fanfare, it dies. Otherwise deal damage equal to your
+    /// Fanfare." It does not spend her Fanfare. The death is
+    /// <c>CreatureCmd.Kill</c>, the base game's Doom execute, so it reaches a
+    /// boss as Doom does. The damage is a Skill's card damage
+    /// (<c>ValueProp.Move</c>: her Strength counts), not an Attack.</summary>
+    public static async Task Verdict(PlayerChoiceContext choiceContext,
+                                     CardModel card, CardPlay cardPlay)
+    {
+        if (card.Owner?.Creature is not { } creature) return;
+        if (cardPlay.Target is not { IsAlive: true } target) return;
+        var fanfare = FurinaStage.FanfareOf(creature);
+        if (fanfare <= 0) return;
+        if (target.CurrentHp <= fanfare)
+        {
+            await CreatureCmd.Kill(target);
+            return;
+        }
+        await CreatureCmd.Damage(choiceContext, target, fanfare,
+                                 MegaCrit.Sts2.Core.ValueProps.ValueProp.Move,
+                                 creature, card, cardPlay);
+    }
+
     /// <summary>Final Bow's pick: the seat whose guest the player chose off a
     /// grid of the guests' own Guest Star cards (the card the seat holds, or
     /// a combat copy of its row when it holds none). Seat order.</summary>

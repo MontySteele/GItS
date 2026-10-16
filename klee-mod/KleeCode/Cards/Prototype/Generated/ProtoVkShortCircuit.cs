@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoVkShortCircuit : CustomCardModel, ICharacterCard
+public sealed class ProtoVkShortCircuit : CustomCardModel, ICharacterCard, IVarkaSwitchCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "varka";
@@ -60,6 +60,10 @@ public sealed class ProtoVkShortCircuit : CustomCardModel, ICharacterCard
         description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Electro));
     }
 
+    /// <summary>The element this card makes Varka's current element
+    /// (`VarkaOathDial` previews it).</summary>
+    public Element VarkaSwitchElement => Element.Electro;
+
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
@@ -76,11 +80,14 @@ public sealed class ProtoVkShortCircuit : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         {
+            var handBefore = CardPile.Get(PileType.Hand, Owner)?.Cards.Count ?? 0;
             var picked = (await CardSelectCmd.FromHandForDiscard(
                 choiceContext, Owner,
                 new CardSelectorPrefs(CardSelectorPrefs.DiscardSelectionPrompt, 2),
                 null, this)).ToList();
             await CardCmd.Discard(choiceContext, picked);
+            ResolutionLedger.NoteDiscards(Title, picked.Select(c => c.Title).ToList(),
+                ResolutionLedger.DiscardPickedForYou(handBefore, 2));
         }
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
         await PlayerCmd.GainEnergy(1, Owner);

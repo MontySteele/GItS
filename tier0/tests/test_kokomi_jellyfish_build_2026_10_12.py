@@ -74,7 +74,7 @@ def test_a_0_cost_sting_can_still_be_written_and_carried_out():
 
 @pytest.mark.parametrize("cid,base,up", [
     ("proto_kk_jellyfish_drift", 6, 8),
-    ("proto_kk_watatsumi_drill", 6, 9),
+    ("proto_kk_watatsumi_drill", 7, 10),   # Kokomi review r6 item 1
     # Kokomi round 3 A-list (2026-10-13): 6 [9], Cloak and Dagger's 6.
     ("proto_kk_bubble_ward", 6, 9),
 ])
@@ -180,13 +180,13 @@ def test_the_turn_count_rolls_and_the_combat_count_does_not():
 def test_all_streams_is_a_rare_attack_at_1():
     """The Kokomi pool overhaul (2026-10-13): 5 [7], plus 5 for each
     Elemental Reaction she triggered this combat (was 4 [8] plus 2 per Sting
-    played)."""
+    played). Numbers pass (kokomi-review-r5-2026-10-14): base 10 [12]."""
     row = loader.get_card("proto_kk_all_streams_flow")
     assert (row.type, row.cost, row.rarity) == ("attack", 1, "rare")
     assert row.effects[0]["amount_formula"] == {
-        "base": 5, "per": 5, "count": "reactions_triggered_this_combat"}
+        "base": 10, "per": 5, "count": "reactions_triggered_this_combat"}
     assert _up("proto_kk_all_streams_flow").effects[0]["amount_formula"][
-        "base"] == 7
+        "base"] == 12
 
 
 def test_all_streams_counts_every_sting_played_this_combat():
@@ -205,7 +205,7 @@ def test_all_streams_counts_every_sting_played_this_combat():
     assert st.kk_reactions_this_combat == 2
     hp = st.enemies[0].hp
     _play(st, card("proto_kk_all_streams_flow"))
-    assert hp - st.enemies[0].hp == 5 + 5 * 2
+    assert hp - st.enemies[0].hp == 10 + 5 * 2
 
 
 # --- The Shape of Water ------------------------------------------------------------------

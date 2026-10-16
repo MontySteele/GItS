@@ -44,15 +44,27 @@ public sealed class ProtoVkFourWindsAscension : CustomCardModel, IElementalCard,
         new[] { CardKeyword.Retain, KleeKeywords.AppliesAnemo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCurrentElement(ArmKeywordTips.ForOath(ArmKeywordTips.ForAscensionNoOath(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo), this), this), this);
+        TipAudience.Seat
+            ? ArmKeywordTips.ForCurrentElement(ArmKeywordTips.ForOath(ArmKeywordTips.ForAscensionNoOath(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo), this), this), this)
+            : ArmKeywordTips.ForCurrentElement(ArmKeywordTips.ForOath(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_four_winds_ascension");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Four Winds' Ascension"),
-        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkPer:diff()} damage per [gold]Oath[/gold] of your [gold]current element[/gold], as that element.{InCombat:\n(Deals {VkHit:diff()} damage)|}"),
+        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkPer:diff()} damage per [gold]Oath[/gold] of your [gold]current element[/gold], as that element.{InCombat:\n(Deals {VkHit:diff()} damage)|}{InCombat:{VarkaSwirl}|}"),
     };
+
+    /// <summary>This card's in-combat Oath and Swirl lines
+    /// (`VarkaOath.SwitchLine`, `VarkaOath.WildfireLine`,
+    /// `VarkaOath.SwirlLine`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("VarkaSwirl", VarkaOath.SwirlLine(this));
+    }
 
     /// <summary>Orobas's Archaic Tooth turns this card into its Ancient
     /// (BaseLib's `ArchaicToothTranscendenceUpgradesPatch`).</summary>

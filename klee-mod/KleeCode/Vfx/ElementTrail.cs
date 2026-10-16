@@ -26,7 +26,12 @@ namespace KleeMod.Vfx;
 /// <c>%GroundBurst</c> and <c>%TargetBurst</c>, Sprite2Ds sharing one
 /// ShaderMaterial (local to the scene, so two Varkas strike in two colours).
 /// The clips themselves show and step them; nothing here animates. Inert for
-/// every scene without them, which is every body but his.
+/// every scene without them, which is every body but his and Furina's.
+///
+/// FURINA (2026-10-13, her model art, phase B) carries <c>%AttackFx</c> only:
+/// her phantom rapier's trail and streak, on the same shader. It rests at
+/// Hydro, hers, not at Anemo: the node's <c>rest_element</c> metadata names
+/// the colour a play with no element keeps (<see cref="RestElementMeta"/>).
 ///
 /// THE ELEMENT is the played card's own: <see cref="CardPlayMotion"/> notes
 /// it as the card's play begins (<see cref="ElementHitFx.ElementOf"/>, the
@@ -50,6 +55,7 @@ internal static class ElementTrail
     internal const string GroundBurstNode = "GroundBurst";
     internal const string TargetBurstNode = "TargetBurst";
     internal const string ElementParam = "element";
+    internal const string RestElementMeta = "rest_element";
 
     /// <summary>A note older than this belongs to a play whose clip never
     /// started, not to the clip now starting.</summary>
@@ -70,7 +76,25 @@ internal static class ElementTrail
     /// carries no element. Pure.
     /// </summary>
     internal static string TintHex(Element element)
-        => ReactionFx.ElementFlashHex(element == Element.None ? Element.Anemo : element);
+        => TintHexResting(element, Element.Anemo);
+
+    /// <summary>
+    /// The colour for an element on a layer that rests at
+    /// <paramref name="rest"/>: the element's own, or the rest colour for a
+    /// play that carries none. Pure.
+    /// </summary>
+    internal static string TintHexResting(Element element, Element rest)
+        => ReactionFx.ElementFlashHex(element == Element.None
+            ? (rest == Element.None ? Element.Anemo : rest)
+            : element);
+
+    /// <summary>The element a layer node rests at, from its
+    /// <c>rest_element</c> metadata ("hydro" on Furina's); Anemo, Varka's,
+    /// when it names none. Pure.</summary>
+    internal static Element RestElementOf(string? meta)
+        => meta != null && Enum.TryParse<Element>(meta, ignoreCase: true, out var e) && e != Element.None
+            ? e
+            : Element.Anemo;
 
     /// <summary>
     /// Whether a travel colours the layer: a fresh entry into a clip that
@@ -152,12 +176,15 @@ internal static class ElementTrail
         {
             note = noted;
         }
-        var tint = new Color(TintHex(note?.Element ?? Element.None));
-
         foreach (var name in NodesFor(state))
         {
-            if (visuals.GetNodeOrNull<CanvasItem>("%" + name)?.Material is ShaderMaterial material)
+            var node = visuals.GetNodeOrNull<CanvasItem>("%" + name);
+            if (node?.Material is ShaderMaterial material)
             {
+                var rest = RestElementOf(node.HasMeta(RestElementMeta)
+                    ? node.GetMeta(RestElementMeta).AsString()
+                    : null);
+                var tint = new Color(TintHexResting(note?.Element ?? Element.None, rest));
                 material.SetShaderParameter(ElementParam, tint);
             }
         }

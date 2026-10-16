@@ -123,9 +123,9 @@ def test_the_masquerade_pays_the_hp_drained_past_the_line_too():
     assert st.player.powers[FS.THE_MASQUERADE] == 1
     assert st.player.block == 0
     f.drained_above = 18                        # 1 HP of buffer left (19)
-    _play(st, _card("proto_fs_overdraft"))      # Drain 4: 3 of it past the line
-    assert f.drained_past == 3
-    assert st.player.block == 4
+    _play(st, _card("proto_fs_ousia_pledge"))   # Drain 3: 2 of it past the line
+    assert f.drained_past == 2
+    assert st.player.block == 3
 
 
 def test_the_masquerade_pays_a_guest_acts_drain_stopped_at_the_line():

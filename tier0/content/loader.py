@@ -428,9 +428,9 @@ def prototype_cards(sheet: Path | None = None) -> list[Card]:
     # VARKA owns rows here and nowhere else. His rules are
     # `tier0/engine/varka_oath.py`, which has no switch (he ships nowhere
     # else), so his rows are schema-checked and always resolve.
-    # YAE's rows are `docs/yae-staging.yaml` (`STAGING_SHEETS`), sim only
-    # until her card paper's picks are ruled; the same validators run on
-    # them.
+    # YAE's rows joined the surface when her card paper was ruled
+    # (2026-10-13); her rules are `tier0/engine/yae_shrine.py`, Varka's
+    # arrangement.
     known_characters = {"klee", "furina", "kokomi", "varka", "yae"}
     seen: set[str] = set()
     cards: list[Card] = []
@@ -520,8 +520,9 @@ def prototype_cards(sheet: Path | None = None) -> list[Card]:
 #: SIM-ONLY STAGING SHEETS: a kit whose rows are not yet on the surface
 #: (the surface compiles to the mod). Validated as surface rows are, resolved
 #: by `get_card`, offered by no pool and seen by no codegen. Yae's card stage
-#: (2026-10-13) is the first.
-STAGING_SHEETS = (DOCS_DIR / "yae-staging.yaml",)
+#: (2026-10-13) was the first; her rows moved to the surface with her C#
+#: build the same day, so the tuple is empty until the next kit's paper.
+STAGING_SHEETS: tuple = ()
 
 
 @lru_cache(maxsize=1)

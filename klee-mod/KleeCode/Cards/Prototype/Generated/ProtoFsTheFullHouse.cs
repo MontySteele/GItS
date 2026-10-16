@@ -45,7 +45,7 @@ public sealed class ProtoFsTheFullHouse : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Full House"),
-        ("description", "Whenever a guest's act deals damage, [gold]Spend[/gold] up to {PowerAmount:diff()}: it deals that much more."),
+        ("description", "Whenever a guest's act deals damage, [gold]Spend[/gold] up to {PowerAmount:diff()}, all you can: it deals that much more."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

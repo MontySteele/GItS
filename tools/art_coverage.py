@@ -118,6 +118,15 @@ CARD_DIRS = tuple(IMAGES / name for name in CARD_DIR_NAMES)
 # KNOWN-set pattern (as in tools/art_lint.py): a stale file with a reason on
 # record is a NOTE, not a failure. Never prune an entry without a new reason.
 KNOWN_STALE = {
+    "proto_kk_jellyfish_current": (
+        "The Kokomi review r6 (2026-10-14, review/active/kokomi-review-r6-2026-10-14.md pick 2 (b)) cut this row: Kurage Vanguard takes its slot. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_kk_coordinated_tide": (
+        "The Kokomi review r6 (2026-10-14, review/active/kokomi-review-r6-2026-10-14.md pick 2 (b)) cut this row: Following Current takes its slot. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_vk_windbound_execution": (
+        "Varka starter (a) (2026-10-13, 0c88d4e2c): Four Winds' Ascension replaced this card, and the row left the pool. Its art/plan.tsv row stays, so a full fetch repaints it. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
     "proto_kk_riptide_guard": (
         "The Kokomi pool overhaul (2026-10-13, review/active/kokomi-pool-overhaul-2026-10-13.md sec.4) cut this row: Turning Tide takes its slot. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
@@ -512,6 +521,45 @@ KNOWN_STALE = {
     "proto_fs_sold_out": (
         "Furina's diversity pass (review/ruled/furina-diversity-pass-2026-10-11.md, ruled 2026-10-11, built #1118) cut this card as redundant. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
+    "proto_fs_spirited_aria": (
+        "Furina's sweep (review/active/furina-sweep-2026-10-14.md sec.2) cut this card. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_fs_hydro_lance": (
+        "Furina's sweep (review/active/furina-sweep-2026-10-14.md sec.2) cut this card. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_fs_overdraft": (
+        "Furina's sweep (review/active/furina-sweep-2026-10-14.md sec.2) cut this card. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_fs_packed_house": (
+        "Furina's sweep (review/active/furina-sweep-2026-10-14.md sec.2) cut this card. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_fs_interval_bell": (
+        "Furina's sweep (review/active/furina-sweep-2026-10-14.md sec.2) cut this card. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_fs_soothing_waters": (
+        "Furina's sweep (review/active/furina-sweep-2026-10-14.md sec.2) cut this card. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_fs_balance_the_books": (
+        "Furina's sweep (review/active/furina-sweep-2026-10-14.md sec.2) cut this card. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_fs_salons_encore": (
+        "Furina's sweep (review/active/furina-sweep-2026-10-14.md sec.2) cut this card. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_fs_ousia_surge": (
+        "Furina's sweep (review/active/furina-sweep-2026-10-14.md sec.2) cut this card. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_fs_high_stakes": (
+        "Furina's sweep (review/active/furina-sweep-2026-10-14.md sec.2) cut this card. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_fs_pneuma_tides": (
+        "Furina's sweep (review/active/furina-sweep-2026-10-14.md sec.2) cut this card. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_fs_the_deluge": (
+        "Furina's sweep (review/active/furina-sweep-2026-10-14.md sec.2) cut this card. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_fs_hymn_of_renewal": (
+        "Furina's sweep (review/active/furina-sweep-2026-10-14.md sec.2) cut this card. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
+    ),
     "proto_fs_surging_waters": (
         "Furina's diversity pass (review/ruled/furina-diversity-pass-2026-10-11.md, ruled 2026-10-11, built #1118) cut this card as redundant. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
@@ -543,12 +591,6 @@ KNOWN_STALE = {
         "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_fs_one_woman_show": (
-        "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
-    ),
-    "proto_fs_opening_number": (
-        "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
-    ),
-    "proto_fs_plot_twist": (
         "Furina's Salon's Tab rebuild (2026-10-05, #905) discarded the v2 pool and deleted this row. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_fs_raise_a_toast": (
@@ -588,13 +630,11 @@ KNOWN_MISSING = {
     # and diversity-pass rows) were painted by the missing-art census, whose
     # plan rows are in art/plan.tsv under "Art bill 2026-10-12". An entry here
     # is a card the player sees BLANK; tools/deploy_round.py now names every
-    # one in its summary, so adding one is a visible choice.
-    "proto_kk_turning_tide_chain": "The Kokomi pool overhaul (review/active/kokomi-pool-overhaul-2026-10-13.md, ruled 2026-10-13); no painting yet. The re-founding's cut `proto_kk_turning_tide.png` (a card of the same name) is a candidate, unseen.",
-    "proto_kk_brine_spray": "The Kokomi pool overhaul (review/active/kokomi-pool-overhaul-2026-10-13.md, ruled 2026-10-13); no painting yet.",
-    "proto_kk_jellyfish_current": "The Kokomi pool overhaul (review/active/kokomi-pool-overhaul-2026-10-13.md, ruled 2026-10-13); no painting yet.",
-    "proto_kk_prepared_retreat": "The Kokomi pool overhaul (review/active/kokomi-pool-overhaul-2026-10-13.md, ruled 2026-10-13); no painting yet.",
-    "proto_kk_battle_formation": "The Kokomi pool overhaul (review/active/kokomi-pool-overhaul-2026-10-13.md, ruled 2026-10-13); no painting yet.",
-    "proto_kk_turnabout": "The Kokomi pool overhaul (review/active/kokomi-pool-overhaul-2026-10-13.md, ruled 2026-10-13); no painting yet.",
+    # one in its summary, so adding one is a visible choice. Emptied again
+    # 2026-10-14: the Kokomi pool overhaul's six keys, painted under "Kokomi
+    # art pass (2026-10-14)" in art/plan.tsv.
+    # The Kokomi review r6's two Powers (2026-10-14) were painted in the
+    # same PR, under "Kokomi review r6" in art/plan.tsv.
 }
 
 

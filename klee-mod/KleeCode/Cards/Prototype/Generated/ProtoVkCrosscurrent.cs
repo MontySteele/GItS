@@ -45,8 +45,18 @@ public sealed class ProtoVkCrosscurrent : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Crosscurrent"),
-        ("description", "[gold]Swirl[/gold] the enemy. This [gold]Swirl[/gold] pays your [gold]current element[/gold] twice.{IfUpgraded:show: Draw 1 card.|}"),
+        ("description", "[gold]Swirl[/gold] the enemy. This [gold]Swirl[/gold] pays your [gold]current element[/gold] twice.{IfUpgraded:show: Draw 1 card.|}{InCombat:{VarkaSwirl}|}"),
     };
+
+    /// <summary>This card's in-combat Oath and Swirl lines
+    /// (`VarkaOath.SwitchLine`, `VarkaOath.WildfireLine`,
+    /// `VarkaOath.SwirlLine`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("VarkaSwirl", VarkaOath.SwirlLine(this));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

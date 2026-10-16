@@ -33,8 +33,10 @@ ATTACK = [{"kind": "attack", "amount": 6}]
 CUT = ("proto_kk_riptide_guard", "proto_kk_reserves",
        "proto_kk_brace_for_the_tide", "proto_kk_moons_reflection",
        "proto_kk_ceremonial_garment", "proto_kk_watatsumi_resistance")
+# Jellyfish Current left with the Kokomi review r6 (2026-10-14, pick 2 (b));
+# Kurage Vanguard holds its slot (`test_kokomi_review_r6_2026_10_14`).
 NEW = ("proto_kk_turning_tide_chain", "proto_kk_brine_spray",
-       "proto_kk_jellyfish_current", "proto_kk_prepared_retreat",
+       "proto_kk_prepared_retreat",
        "proto_kk_battle_formation", "proto_kk_turnabout")
 
 
@@ -77,7 +79,6 @@ def test_each_new_card_takes_the_slot_of_the_cut_card_of_its_rarity():
 @pytest.mark.parametrize("cid,rarity,ctype,cost", [
     ("proto_kk_turning_tide_chain", "common", "attack", 1),
     ("proto_kk_brine_spray", "uncommon", "attack", 1),
-    ("proto_kk_jellyfish_current", "uncommon", "power", 1),
     ("proto_kk_prepared_retreat", "uncommon", "skill", 1),
     ("proto_kk_battle_formation", "rare", "power", 1),
     ("proto_kk_turnabout", "rare", "skill", 2),
@@ -90,45 +91,48 @@ def test_the_six_new_cards(cid, rarity, ctype, cost):
 
 def test_the_new_cards_numbers_and_upgrades():
     tide = loader.get_card("proto_kk_turning_tide_chain")
-    assert tide.effects == [{"op": "damage", "amount": 7, "target": "enemy"}]
-    assert tide.plan == [{"op": "damage_per_plan_this_turn", "amount": 4,
+    # Numbers pass (kokomi-review-r5-2026-10-14): 9 [12] / Plan 5 [6];
+    # Retreat 8 [11]; Brine Spray 8 [10].
+    assert tide.effects == [{"op": "damage", "amount": 9, "target": "enemy"}]
+    assert tide.plan == [{"op": "damage_per_plan_this_turn", "amount": 5,
                           "target": "all_enemies"}]
     up = _up("proto_kk_turning_tide_chain")
-    assert (up.effects[0]["amount"], up.plan[0]["amount"]) == (10, 5)
+    assert (up.effects[0]["amount"], up.plan[0]["amount"]) == (12, 6)
     retreat = loader.get_card("proto_kk_prepared_retreat")
-    assert retreat.effects == [{"op": "block", "amount": 7}]
+    assert retreat.effects == [{"op": "block", "amount": 8}]
     assert retreat.plan == [{"op": "energy_if_attacked_since", "amount": 1}]
     up = _up("proto_kk_prepared_retreat")
-    assert (up.effects[0]["amount"], up.plan[0]["amount"]) == (10, 2)
+    assert (up.effects[0]["amount"], up.plan[0]["amount"]) == (11, 2)
     turnabout = loader.get_card("proto_kk_turnabout")
     assert turnabout.effects == [] and turnabout.exhaust
     assert turnabout.plan == [{"op": "damage_taken_since",
                                "target": "all_enemies"}]
     assert _up("proto_kk_turnabout").cost == 1   # the Prototype-stage rule
     spray = loader.get_card("proto_kk_brine_spray")
-    assert spray.effects[0]["amount"] == 5
-    assert _up("proto_kk_brine_spray").effects[0]["amount"] == 7
-    for cid in ("proto_kk_jellyfish_current", "proto_kk_battle_formation",
-                "proto_kk_coordinated_tide"):
-        assert _up(cid).innate, cid
+    assert spray.effects[0]["amount"] == 8
+    assert _up("proto_kk_brine_spray").effects[0]["amount"] == 10
+    assert _up("proto_kk_battle_formation").innate
 
 
 def test_the_rewrites_numbers():
+    # Numbers pass (kokomi-review-r5-2026-10-14): Snare Plan 4 [5]; Brine
+    # Sting 10 [13] / Plan 10 [13]. Kokomi review r8 (2026-10-14, item 3):
+    # Snare's Block 5 -> 8 [11].
     snare = loader.get_card("proto_kk_undercurrent_snare")
-    assert snare.plan == [{"op": "lose_strength_this_turn", "amount": 3,
+    assert snare.effects[0] == {"op": "block", "amount": 8}
+    assert _up("proto_kk_undercurrent_snare").effects[0]["amount"] == 11
+    assert snare.plan == [{"op": "lose_strength_this_turn", "amount": 4,
                            "target": "enemies_intending_attack"}]
-    assert _up("proto_kk_undercurrent_snare").plan[0]["amount"] == 4
+    assert _up("proto_kk_undercurrent_snare").plan[0]["amount"] == 5
     sting = loader.get_card("proto_kk_brine_sting")
-    assert sting.plan == [{"op": "damage", "amount": 8,
+    assert sting.plan == [{"op": "damage", "amount": 10,
                            "target": "enemies_attacked_since"}]
-    assert _up("proto_kk_brine_sting").plan[0]["amount"] == 11
-    tide = loader.get_card("proto_kk_coordinated_tide")
-    assert tide.effects[0] == {"op": "apply_power",
-                               "power": "kk_coordinated_tide", "amount": 1,
-                               "target": "self"}
+    assert _up("proto_kk_brine_sting").plan[0]["amount"] == 13
+    # Coordinated Tide left with the Kokomi review r6 (pick 2 (b)), which
+    # moved Grand Strategist to 6 [8].
     strat = loader.get_card("proto_kk_grand_strategist")
     assert (strat.effects[0]["amount"],
-            _up("proto_kk_grand_strategist").effects[0]["amount"]) == (4, 6)
+            _up("proto_kk_grand_strategist").effects[0]["amount"]) == (6, 8)
 
 
 def test_the_new_clauses_are_plan_only():
@@ -147,7 +151,7 @@ def test_a_lone_chain_line_counts_itself():
     write(st, card("proto_kk_feint"))
     hp = st.enemies[0].hp
     carry_out(st)
-    assert hp - st.enemies[0].hp == 5           # 5 x 1
+    assert hp - st.enemies[0].hp == 6           # 6 x 1
     assert st.kk_plans_carried_out_this_turn == 1
 
 
@@ -159,7 +163,7 @@ def test_a_chain_line_third_in_the_queue_counts_three():
     st.player.draw_pile = [card("proto_kk_coral_bulwark") for _ in range(4)]
     hp = st.enemies[0].hp
     carry_out(st)
-    assert hp - st.enemies[0].hp == 5 * 3
+    assert hp - st.enemies[0].hp == 6 * 3
 
 
 def test_turning_tide_hits_all_per_plan_and_the_turn_roll_clears():
@@ -169,7 +173,7 @@ def test_turning_tide_hits_all_per_plan_and_the_turn_roll_clears():
     st.player.draw_pile = [card("proto_kk_coral_bulwark")]
     before = [e.hp for e in st.enemies]
     carry_out(st)
-    assert [b - e.hp for b, e in zip(before, st.enemies)] == [8, 8]
+    assert [b - e.hp for b, e in zip(before, st.enemies)] == [10, 10]
     kokomi_plan.roll_turn(st)
     assert st.kk_plans_carried_out_this_turn == 0
 
@@ -223,7 +227,7 @@ def test_brine_sting_hits_each_enemy_that_attacked_since():
     kokomi_plan.note_enemy_hit(st, a, blocked=0, incoming=3)   # twice: once
     before = [x.hp for x in st.enemies]
     carry_out(st)
-    assert [p - x.hp for p, x in zip(before, st.enemies)] == [8, 0, 0]
+    assert [p - x.hp for p, x in zip(before, st.enemies)] == [10, 0, 0]
 
 
 def test_prepared_retreat_pays_energy_only_if_attacked():
@@ -264,7 +268,7 @@ def test_undercurrent_snare_takes_strength_this_turn_from_attackers_at_landing()
     write(st, card("proto_kk_undercurrent_snare"))
     a.intents = list(ATTACK)          # the intents when it LANDS are read
     carry_out(st)
-    assert a.powers.get("temp_strength_down") == 3
+    assert a.powers.get("temp_strength_down") == 4
     assert b.powers.get("temp_strength_down") is None
 
 
@@ -283,7 +287,8 @@ def test_read_the_field_puts_a_draw_pile_card_into_the_hand():
 
 # --- Battle Formation ---------------------------------------------------------------
 
-def test_battle_formation_fires_once_when_the_third_plan_finishes():
+def test_battle_formation_fires_once_when_the_second_plan_finishes():
+    """Numbers pass (kokomi-review-r5-2026-10-14): 3 -> 2 Plans, draw 2 -> 1."""
     st = kokomi_state()
     st.player.powers[kokomi_plan.BATTLE_FORMATION] = 1
     for i in range(4):
@@ -292,17 +297,17 @@ def test_battle_formation_fires_once_when_the_third_plan_finishes():
     carry_out(st)
     paid = [e for e in st.log if e["event"] == "plan_battle_formation"]
     assert len(paid) == 1
-    assert paid[0]["energy"] == 1 and paid[0]["cards"] == 2
+    assert paid[0]["energy"] == 1 and paid[0]["cards"] == 1
     events = [e["event"] for e in st.log]
     carried = [i for i, ev in enumerate(events) if ev == "plan_carried_out"]
     at = events.index("plan_battle_formation")
-    assert carried[2] < at < carried[3]
+    assert carried[1] < at < carried[2]
 
 
-def test_battle_formation_waits_for_three():
+def test_battle_formation_waits_for_two():
     st = kokomi_state()
     st.player.powers[kokomi_plan.BATTLE_FORMATION] = 1
-    for i in range(2):
+    for i in range(1):
         kokomi_plan.schedule(st, _draw_plan(i))
     st.player.draw_pile = [card("proto_kk_coral_bulwark") for _ in range(4)]
     carry_out(st)
@@ -372,30 +377,6 @@ def test_coordinated_tide_pays_for_a_companions_own_reaction():
     assert _stings(st) == 1
 
 
-def test_coordinated_tide_pays_for_a_written_companion_reacting_with_the_hydro():
-    """Rule 8: a written Companion reacts with the Bake-Kurage's Hydro, so
-    it makes Stings."""
-    st = kokomi_state()
-    st.player.powers[kokomi_plan.COORDINATED_TIDE] = 1
-    write(st, card("proto_mi_shinobu_thundergrust"))
-    carry_out(st)
-    assert "electrocharged" in reactions(st)
-    assert _stings(st) == 1
-
-
-def test_the_bake_kurages_own_hydro_is_not_the_companions_reaction():
-    """A Companion written into an Electro aura: the pet's Hydro reacts first
-    (hers, not the Companion's) and the Companion's Electro then lands on a
-    bare body."""
-    st = kokomi_state()
-    st.player.powers[kokomi_plan.COORDINATED_TIDE] = 1
-    write(st, card("proto_mi_shinobu_thundergrust"))
-    st.enemies[0].aura, st.enemies[0].aura_turns_left = "electro", 2
-    carry_out(st)
-    assert reactions(st) == ["electrocharged"]
-    assert _stings(st) == 0
-
-
 def test_coordinated_tide_ignores_her_own_cards():
     st = kokomi_state()
     st.player.powers[kokomi_plan.COORDINATED_TIDE] = 1
@@ -426,7 +407,7 @@ def test_all_streams_counts_the_reactions_she_triggered_this_combat():
     st.enemies[0].aura = None
     hp = st.enemies[0].hp
     _play(st, card("proto_kk_all_streams_flow"))
-    assert hp - st.enemies[0].hp == 5 + 5 * 2
+    assert hp - st.enemies[0].hp == 10 + 5 * 2
 
 
 def test_brine_spray_adds_two_stings_only_when_its_hit_reacts():

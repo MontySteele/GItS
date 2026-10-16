@@ -187,12 +187,13 @@ STARTER_IDS: tuple[str, ...] = (
 #: 2026-10-09, with Standing Ovation moved to Uncommon), and the block gap's
 #: four (ruled 2026-10-09), and the diversity pass (ruled 2026-10-11:
 #: Headliner, Leading Lady, Full House and Packed House in; Gentle Current,
-#: Surging Waters, Pay the Tab and Sold Out out): 23 Common, 35 Uncommon,
+#: Surging Waters, Pay the Tab and Sold Out out), and the sweep
+#: (review/active/furina-sweep-2026-10-14.md: fifteen out, fifteen in):
+#: 23 Common, 35 Uncommon,
 #: 20 Rare, 78.
 POOL_IDS: tuple[str, ...] = (
     # Drain (five).
     "proto_fs_mademoiselle_crabaletta",
-    "proto_fs_soloists_solicitation",
     "proto_fs_surintendante_chevalmarin",
     "proto_fs_leading_lady",              # Gentilhomme Usher
     "proto_fs_salons_tab",
@@ -202,13 +203,9 @@ POOL_IDS: tuple[str, ...] = (
     "proto_fs_singer_of_many_waters",
     # Fanfare outlets (six).
     "proto_fs_tidal_flourish",
-    "proto_fs_spirited_aria",
     "proto_fs_quick_cue",                 # Quick Flourish
-    "proto_fs_standing_ovation_all",      # Standing Ovation
-    "proto_fs_interval_bell",
     "proto_fs_bravura",
     # The two Powers (Endless Waltz was cut 2026-10-09).
-    "proto_fs_salons_encore",
     "proto_fs_thunderous_applause",
     # The four guests.
     "proto_fs_guest_star_charlotte",
@@ -220,7 +217,6 @@ POOL_IDS: tuple[str, ...] = (
     "proto_fs_let_the_people_rejoice",
     # The pool to 39. Ousia.
     "proto_fs_grand_deluge",
-    "proto_fs_ousia_surge",
     "proto_fs_guest_star_lyney",
     "proto_fs_a_five_century_act",
     # Pneuma.
@@ -254,23 +250,15 @@ POOL_IDS: tuple[str, ...] = (
     "proto_fs_bring_the_house_down",
     # Ousia, Drain (10).
     "proto_fs_undercurrent",
-    "proto_fs_overdraft",
     "proto_fs_ousia_pledge",
     "proto_fs_against_the_tide",
     "proto_fs_riptide_lunge",
-    "proto_fs_high_stakes",
     "proto_fs_regina_of_all_waters",
-    "proto_fs_the_deluge",
     "proto_fs_all_in",
     # Pneuma, Repay (10).
-    "proto_fs_soothing_waters",
     "proto_fs_clean_slate",
-    "proto_fs_hydro_lance",
     "proto_fs_cleansing_torrent",
-    "proto_fs_balance_the_books",
     "proto_fs_rising_tide",
-    "proto_fs_pneuma_tides",
-    "proto_fs_hymn_of_renewal",
     "proto_fs_grand_absolution",
     # The bridge (1).
     "proto_fs_ebb_and_flow",
@@ -285,7 +273,23 @@ POOL_IDS: tuple[str, ...] = (
     "proto_fs_headliner",
     "proto_fs_the_leading_lady",          # Leading Lady
     "proto_fs_the_full_house",            # Full House
-    "proto_fs_packed_house",
+    # The sweep, second set (review/active/furina-sweep-2026-10-14.md
+    # sec.3): 6 Common, 7 Uncommon, 2 Rare, for the fifteen cut.
+    "proto_fs_ousia_pneuma",
+    "proto_fs_objection",
+    "proto_fs_tearful_monologue",
+    "proto_fs_stage_directions",
+    "proto_fs_opening_number",
+    "proto_fs_facade",
+    "proto_fs_trial_by_water",
+    "proto_fs_rainfall_overture",
+    "proto_fs_encore_performance",
+    "proto_fs_arkhe_in_balance",
+    "proto_fs_crowd_favorite",
+    "proto_fs_the_shows_not_over",
+    "proto_fs_understudys_debut",
+    "proto_fs_verdict_of_the_oratrice",
+    "proto_fs_plot_twist",
 )
 
 #: The loader's older seams, empty since the slice: nothing is substituted
@@ -579,15 +583,25 @@ KINDS = ("act_oldest", "act_all", "final_bow", "tutor_guest",
          "gain_fanfare",
          # The diversity pass (2026-10-11): Ensemble Cast's "Summon a random
          # guest".
-         "summon_random")
+         "summon_random",
+         # The sweep, second set (review/active/furina-sweep-2026-10-14.md
+         # sec.3; `SWEEP_KINDS`), the C# `FurinaCards` twins.
+         "flip", "stage_directions", "facade", "encore_performance",
+         "verdict")
 #: Casting Call's `tutor_guest` carries its floor's draw ("If you can't,
-#: draw 2 cards"; the diversity pass, 2026-10-11).
-KIND_AMOUNT = ("final_bow", "gain_fanfare", "tutor_guest")
+#: draw 2 cards"; the diversity pass, 2026-10-11). Facade carries its cap.
+KIND_AMOUNT = ("final_bow", "gain_fanfare", "tutor_guest", "facade")
+#: The one kind that aims (`target: enemy`): Verdict of the Oratrice.
+AIMED_KINDS = ("verdict",)
+#: The sweep's kinds need no stage, except Verdict, which reads her Fanfare
+#: (0 for anyone else): a card of hers played by anyone does what it prints.
+SWEEP_KINDS = ("flip", "stage_directions", "facade", "encore_performance",
+               "verdict")
 
 
 def validate_op(card_id: str, fx: dict) -> None:
     """The loader's check, the codegen's `FURINA_KINDS` taken here too."""
-    unknown = set(fx) - {"op", "kind", "amount"}
+    unknown = set(fx) - {"op", "kind", "amount", "target"}
     if unknown:
         raise ValueError(f"card {card_id!r}: furina field(s) "
                          f"{sorted(unknown)} not understood")
@@ -596,6 +610,10 @@ def validate_op(card_id: str, fx: dict) -> None:
         raise ValueError(f"card {card_id!r}: furina kind {kind!r}")
     if ("amount" in fx) != (kind in KIND_AMOUNT):
         raise ValueError(f"card {card_id!r}: furina {kind} amount mismatch")
+    want = "enemy" if kind in AIMED_KINDS else None
+    if fx.get("target") != want:
+        raise ValueError(f"card {card_id!r}: furina {kind} takes target "
+                         f"{want!r}")
     amount = fx.get("amount", 1)
     if (not isinstance(amount, int) or isinstance(amount, bool)
             or amount <= 0):
@@ -604,10 +622,14 @@ def validate_op(card_id: str, fx: dict) -> None:
 
 
 def kind(state, fx: dict, card) -> None:
-    """One `furina` kind. Inert for anyone who is not Furina."""
+    """One `furina` kind. Inert for anyone who is not Furina, except the
+    sweep's (`SWEEP_KINDS`)."""
+    k = fx["kind"]
+    if k in SWEEP_KINDS:
+        _sweep_kind(state, fx, card)
+        return
     if not active(state.player):
         return
-    k = fx["kind"]
     if k == "act_oldest":
         T.act_oldest(state)
     elif k == "act_all":
@@ -628,14 +650,194 @@ def kind(state, fx: dict, card) -> None:
         raise ValueError(f"unknown furina kind {k!r}")
 
 
+def _sweep_kind(state, fx: dict, card) -> None:
+    """The sweep's five verbs (review/active/furina-sweep-2026-10-14.md
+    sec.3); the C# is `FurinaCards`. THE PILOT CHOOSES with
+    `effects._worst_card`, this engine's stand-in for the player's screen."""
+    from tier0.engine import effects
+    from tier0.engine.state import remove_instance
+    p = state.player
+    k = fx["kind"]
+    if k == "flip":
+        # Ousia / Pneuma: the card turns to its other face (`FurinaFlip`).
+        card.flipped = not card.flipped
+        state.emit("fs_flip", card=card.id, pneuma=card.flipped)
+    elif k == "stage_directions":
+        # A hand card (the pilot's least wanted now) to the top of the draw
+        # pile, free next turn (`turn_start`).
+        pool = [c for c in p.hand if c is not card]
+        if not pool:
+            return
+        pick = effects._worst_card(pool)
+        remove_instance(p.hand, pick)
+        p.draw_pile.insert(0, pick)
+        pick.free_next_turn = True
+        state.emit("fs_stage_directions", card=pick.id)
+    elif k == "facade":
+        # Block equal to the HP lost this combat, capped; card Block.
+        amount = min(state.hp_lost_this_combat, int(fx["amount"]))
+        if amount > 0:
+            effects._op_block(state, {"op": "block", "amount": amount}, card)
+    elif k == "encore_performance":
+        # Havoc off the Discard Pile: its top card (the last discarded),
+        # played free, then Exhausted.
+        if not p.discard_pile:
+            return
+        top = p.discard_pile.pop()
+        from tier0.engine import combat
+        combat.resolve_free_play(state, top, force_exhaust=True)
+    elif k == "verdict":
+        # Execute at HP <= Fanfare, else damage equal to it; no spend. Any
+        # enemy, a boss included (the C# `CreatureCmd.Kill`).
+        fanfare = T._f(state).fanfare if active(p) else 0
+        targets = effects._pick_targets(state, "enemy")
+        if fanfare <= 0 or not targets:
+            return
+        enemy = targets[0]
+        if enemy.hp <= fanfare:
+            enemy.hp = 0
+            state.emit("fs_verdict", target=enemy.name, executed=True)
+            return
+        # The card's own damage op (its terms, her Strength), so this module
+        # keeps no damage door of its own.
+        effects._op_damage(state, {"op": "damage", "amount": fanfare,
+                                   "target": "enemy"}, card)
+        state.emit("fs_verdict", target=enemy.name, executed=False)
+    else:                                            # pragma: no cover
+        raise ValueError(f"unknown furina kind {k!r}")
+
+
+#: The sweep's Powers (the C# `FurinaSweepPowers.cs`). Arkhe in Balance's
+#: amount is both numbers; Objection!, Rainfall Overture and Crowd Favorite
+#: count stacks; Trial by Water and Plot Twist sit on the enemy.
+ARKHE_IN_BALANCE = "fs_arkhe_in_balance"
+OBJECTION = "fs_objection"
+TRIAL_BY_WATER = "fs_trial_by_water"
+RAINFALL_OVERTURE = "fs_rainfall_overture"
+CROWD_FAVORITE = "fs_crowd_favorite"
+PLOT_TWIST = "fs_plot_twist"
+
+
+def arkhe_in_balance(state, card) -> None:
+    """Arkhe in Balance's trigger after each card play (the C#
+    `ArkheInBalancePower.AfterCardPlayed`): unpowered Block on an Attack, an
+    unpowered hit on a random enemy on a Skill."""
+    n = state.player.powers.get(ARKHE_IN_BALANCE, 0)
+    if n <= 0 or state.over:
+        return
+    from tier0.engine import refpowers
+    if card.type == "attack":
+        refpowers.gain_block(state, state.player, n)
+    elif card.type == "skill" and state.living_enemies:
+        T._hit(state, state.rng.choice(state.living_enemies), n, None)
+
+
+def turn_start(state) -> None:
+    """The top of the player's turn (the C# `FurinaSweepHooks`
+    `BeforeSideTurnStart`): Stage Directions' cards cost 0 this turn, and
+    the windows that lasted through the enemies' turn close (Objection!,
+    Plot Twist)."""
+    p = state.player
+    if state.turn == 1:
+        # A new combat: every Ousia / Pneuma starts on Ousia, and nothing
+        # set aside last fight is free (the C# keeps both per card instance,
+        # and every combat's cards are fresh clones).
+        for pile in (p.hand, p.draw_pile, p.discard_pile, p.exhaust_pile):
+            for held in pile:
+                held.flipped = False
+                held.free_next_turn = False
+    for pile in (p.hand, p.draw_pile, p.discard_pile):
+        for held in pile:
+            if held.free_next_turn:
+                held.free_next_turn = False
+                held.free_this_turn = True
+    p.powers.pop(OBJECTION, None)
+    for enemy in state.enemies:
+        enemy.powers.pop(PLOT_TWIST, None)
+
+
+def turn_end(state) -> None:
+    """The end of the player's turn: Trial by Water's mark and Rainfall
+    Overture's next Attack lapse ("until end of turn", "this turn")."""
+    state.player.powers.pop(RAINFALL_OVERTURE, None)
+    state.rainfall_wide_card = None
+    for enemy in state.enemies:
+        enemy.powers.pop(TRIAL_BY_WATER, None)
+
+
+def crowd_favorite(state) -> int:
+    """Crowd Favorite's Energy at the start of her turn: its stacks while
+    her HP is below half (`hp * 2 < max`), else 0."""
+    p = state.player
+    n = p.powers.get(CROWD_FAVORITE, 0)
+    if n <= 0 or p.hp * 2 >= p.max_hp:
+        return 0
+    state.emit("fs_crowd_favorite", energy=n)
+    return n
+
+
+def objection(state, enemy, hp_loss: int) -> None:
+    """Objection!: an enemy's attack hit that cost HP is answered with twice
+    that, unpowered, once per stack (the C# `ObjectionPower`)."""
+    p = state.player
+    n = p.powers.get(OBJECTION, 0)
+    if n <= 0 or hp_loss <= 0 or not enemy.alive:
+        return
+    if n <= 1:
+        p.powers.pop(OBJECTION, None)
+    else:
+        p.powers[OBJECTION] = n - 1
+    from tier0.engine import refpowers
+    refpowers.unpowered_damage(state, enemy, 2 * hp_loss)
+    state.emit("fs_objection", enemy=enemy.name, amount=2 * hp_loss)
+
+
+def trial_by_water(state, enemy, hp_dmg: int) -> None:
+    """Trial by Water: each time the marked enemy takes damage, she gains
+    its Fanfare (the C# `TrialByWaterPower`, the ledger's gain)."""
+    n = enemy.powers.get(TRIAL_BY_WATER, 0)
+    if n <= 0 or hp_dmg <= 0:
+        return
+    T.gain(state, n, "trial_by_water")
+
+
+def rainfall_arm(state, card) -> None:
+    """Rainfall Overture: the next Attack she plays this turn is widened
+    (`effects._op_damage` reads `state.rainfall_wide_card`), one per
+    stack."""
+    p = state.player
+    n = p.powers.get(RAINFALL_OVERTURE, 0)
+    if n <= 0 or card.type != "attack":
+        return
+    if n <= 1:
+        p.powers.pop(RAINFALL_OVERTURE, None)
+    else:
+        p.powers[RAINFALL_OVERTURE] = n - 1
+    state.rainfall_wide_card = card
+
+
+def plot_twist(state, enemy, dmg: float) -> bool:
+    """Plot Twist: the marked enemy's attack hit lands on itself (its own
+    Vulnerable and Block count). True when the hit was redirected."""
+    if not enemy.powers.get(PLOT_TWIST, 0):
+        return False
+    from tier0.engine import powers
+    hit = int(powers.modify_damage_taken(enemy, dmg, enemy))
+    blocked = min(enemy.block, hit)
+    enemy.block -= blocked
+    enemy.hp -= hit - blocked
+    state.emit("fs_plot_twist", enemy=enemy.name, amount=hit - blocked)
+    return True
+
+
 # ---- the pool to 75's reads (count tokens and predicates) -------------
 def drains_this_combat(player) -> int:
-    """Undercurrent: "for each time you have Drained this combat"."""
+    """Unheard Confession (was Undercurrent): "for each time you have Drained this combat"."""
     return int(player.ftd.drains_this_combat) if active(player) else 0
 
 
 def repays_this_turn(player) -> int:
-    """Rising Tide: "for each time you Repaid this turn"."""
+    """Endless Waltz (was Rising Tide): "for each time you Repaid this turn"."""
     return int(player.ftd.repays_this_turn) if active(player) else 0
 
 
@@ -651,7 +853,7 @@ def repay_left(player) -> int:
 
 
 def drained_this_turn(player) -> bool:
-    """Against the Tide (2026-10-12): "If you Drained this turn" -- 1 or more
+    """Against All Odds (was Against the Tide, 2026-10-12): "If you Drained this turn" -- 1 or more
     HP drained this turn by any Drain, her cards' or a guest's act."""
     return active(player) and T.drained_this_turn(player)
 

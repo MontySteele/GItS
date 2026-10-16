@@ -228,8 +228,9 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
 
         // The badges first (display only, AbyssDisplay): one per Shadow in
         // force on every enemy that starts the fight. A This act Shadow of an
-        // earlier act is not in force, so it wears no badge.
-        var inForce = ShadowsNow;
+        // earlier act is not in force, so it wears no badge; an elite-only or
+        // elite-and-boss Shadow wears none outside its rooms (BadgesFor).
+        var inForce = AbyssRules.BadgesFor(ShadowsNow, isElite, isBoss);
         foreach (var enemy in enemies) AbyssDisplay.ShowShadows(enemy, inForce);
 
         // The combat-start powers, where the base game's Oddly Smooth Stone
@@ -295,7 +296,7 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
         // A summoned enemy wears the badges too (display only). The
         // combat-start Shadows (Frenzy, Thorny Ground, Bulwark) are about
         // starting the combat, so a summon does not take them.
-        AbyssDisplay.ShowShadows(creature, ShadowsNow);
+        AbyssDisplay.ShowShadows(creature, AbyssRules.BadgesFor(ShadowsNow, isElite: false, isBoss: false));
         if (Has(AbyssShadow.Herald)) await HeraldBuff(creature);
     }
 

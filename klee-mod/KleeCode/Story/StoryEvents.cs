@@ -8,15 +8,20 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Players;
+using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.Events;
+using MegaCrit.Sts2.Core.Factories;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Hooks;
 using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.PotionPools;
 using MegaCrit.Sts2.Core.Nodes.CommonUi;
+using MegaCrit.Sts2.Core.Rewards;
 using MegaCrit.Sts2.Core.Runs;
+using MegaCrit.Sts2.Core.Runs.History;
 using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Story;
@@ -40,8 +45,9 @@ namespace KleeMod.Story;
 /// </summary>
 public abstract class StoryEventModel : EventModel
 {
-    /// <summary>This event's row in its character's table.</summary>
-    protected abstract StoryEvent Data { get; }
+    /// <summary>This event's row in its character's table, found by type.</summary>
+    protected virtual StoryEvent Data =>
+        StoryRegistry.All.SelectMany(s => s.Events).First(e => e.EventType == GetType());
 
     internal StoryEvent StoryData => Data;
 
@@ -50,6 +56,12 @@ public abstract class StoryEventModel : EventModel
         StoryRegistry.All.First(s => s.Events.Contains(Data));
 
     internal const string Table = "events";
+
+    /// <summary>The owner's saved story, read as the event begins.</summary>
+    private IReadOnlyList<StoryRecord> _records = Array.Empty<StoryRecord>();
+
+    /// <summary>The line this page opens with for its owner, or null.</summary>
+    private StoryOpening? _opening;
 
     /// <summary>The <c>events</c> rows for one event, keyed off the entry the
     /// game files it under (<see cref="StoryRegistry.EntryOf"/>).</summary>
@@ -60,6 +72,10 @@ public abstract class StoryEventModel : EventModel
             [entry + ".title"] = e.Title,
             [entry + ".pages.INITIAL.description"] = e.Body,
         };
+        foreach (var o in e.Openings)
+        {
+            rows[OpeningKey(entry, o)] = OpeningPage(e, o);
+        }
         foreach (var o in e.Options)
         {
             rows[OptionTitleKey(entry, o)] = o.Title;
@@ -68,6 +84,12 @@ public abstract class StoryEventModel : EventModel
         }
         return rows;
     }
+
+    /// <summary>The page with its opening line: the line, then the body.</summary>
+    public static string OpeningPage(StoryEvent e, StoryOpening o) => o.Line + "\n\n" + e.Body;
+
+    public static string OpeningKey(string entry, StoryOpening o) =>
+        $"{entry}.pages.INITIAL_{o.Key}.description";
 
     public static string OptionTitleKey(string entry, StoryOption o) =>
         $"{entry}.pages.INITIAL.options.{o.Key}.title";
@@ -80,9 +102,41 @@ public abstract class StoryEventModel : EventModel
     public static string ResultKey(string entry, StoryOption o) =>
         $"{entry}.pages.{o.Key}.description";
 
+    private bool IsOwners => StoryRules.IsOwnersEvent(Owner?.Character?.GetType(), GetType());
+
+    /// <summary>The page opens with the line that matches what the owner did
+    /// earlier in the run.</summary>
+    public override LocString InitialDescription =>
+        _opening != null
+            ? new LocString(Table, OpeningKey(Id.Entry, _opening))
+            : base.InitialDescription;
+
+    /// <summary>
+    /// Read the owner's saved story, choose the opening line, and take what
+    /// the opening removes ("Doubt is removed as the event opens"). Only the
+    /// owner's copy: everyone else gets the plain page and Proceed.
+    /// </summary>
+    protected override async Task BeforeEventStarted(bool isPreFinished)
+    {
+        await base.BeforeEventStarted(isPreFinished);
+        if (!IsOwners || Owner == null) return;
+        try
+        {
+            _records = StoryHistory.RecordsFor(Owner.RunState, Owner);
+            _opening = StoryRules.OpeningFor(Data, _records);
+        }
+        catch (Exception e)
+        {
+            Log.Error($"[{KleeMod.ModId}] story: could not read the saved story, the page opens plain: {e}");
+            _records = Array.Empty<StoryRecord>();
+            _opening = null;
+        }
+        if (_opening?.RemovesOnOpen is Type removes) await RemoveEvery(Owner, removes);
+    }
+
     protected override void SetInitialEventState(bool isPreFinished)
     {
-        if (!StoryRules.IsOwnersEvent(Owner?.Character?.GetType(), GetType()))
+        if (!IsOwners)
         {
             SetEventFinished(InitialDescription);
             return;
@@ -93,43 +147,71 @@ public abstract class StoryEventModel : EventModel
     protected override IReadOnlyList<EventOption> GenerateInitialOptions()
     {
         var entry = Id.Entry;
-        return Data.Options.Select(o =>
+        var deck = Owner != null ? DeckView(Owner, Story) : null;
+        return StoryRules.OptionsFor(Data, _records).Select(o =>
             {
+                // A price the owner cannot pay is locked, the base game's way
+                // (Luminous Choir): the row is shown with no action, under
+                // the option's own line.
+                var locked = deck != null && StoryRules.IsLocked(o, deck);
                 var option = new EventOption(
                     this,
-                    () => Choose(o),
+                    locked ? null : () => Choose(o),
                     new LocString(Table, OptionTitleKey(entry, o)),
                     new LocString(Table, OptionDescriptionKey(entry, o)),
-                    InitialOptionKey(o.Key),
-                    TipsFor(o.Effect));
+                    InitialOptionKey(locked ? o.Key + "_LOCKED" : o.Key),
+                    TipsFor(o));
                 // The game's own lethal warning for an HP cost (Brain Leech's).
-                return o.Effect.HpLoss > 0 ? option.ThatDoesDamage(o.Effect.HpLoss) : option;
+                var hp = o.HpCost;
+                return hp > 0 ? option.ThatDoesDamage(hp) : option;
             })
             .ToList();
     }
 
-    private static IEnumerable<IHoverTip> TipsFor(StoryEffect effect)
+    /// <summary>What the locks read off the owner.</summary>
+    internal static StoryDeckView DeckView(Player owner, CharacterStory story)
     {
-        if (effect.Card == null) return Array.Empty<IHoverTip>();
-        try
+        var cards = owner.Deck.Cards;
+        return new StoryDeckView(
+            Gold: owner.Gold,
+            Removable: cards.Count(c => c.IsRemovable),
+            Transformable: cards.Count(c => c.Type != CardType.Quest && c.IsTransformable),
+            RemovableCurses: cards.Count(IsRemovableCurse),
+            UpgradableBombPlacers: cards.Count(c => c.IsUpgradable && StoryRules.PlacesBomb(story, c.Id.Entry)));
+    }
+
+    /// <summary>A hover tip for each card an option adds.</summary>
+    private static IEnumerable<IHoverTip> TipsFor(StoryOption option)
+    {
+        var tips = new List<IHoverTip>();
+        foreach (var effect in option.Effects)
         {
-            var card = ModelDb.GetById<CardModel>(ModelDb.GetId(effect.Card));
-            return new[] { HoverTipFactory.FromCard(card, effect.Kind == StoryEffectKind.AddUpgradedCard) };
+            if (effect.Card == null) continue;
+            if (effect.Kind is not (StoryEffectKind.AddCard or StoryEffectKind.AddUpgradedCard
+                or StoryEffectKind.GainGoldAddCard)) continue;
+            try
+            {
+                var card = ModelDb.GetById<CardModel>(ModelDb.GetId(effect.Card));
+                tips.Add(HoverTipFactory.FromCard(card, effect.Kind == StoryEffectKind.AddUpgradedCard));
+            }
+            catch (Exception e)
+            {
+                Log.Warn($"[{KleeMod.ModId}] story: no hover tip for {effect.Card.Name}: {e.Message}");
+            }
         }
-        catch (Exception e)
-        {
-            Log.Warn($"[{KleeMod.ModId}] story: no hover tip for {effect.Card.Name}: {e.Message}");
-            return Array.Empty<IHoverTip>();
-        }
+        return tips;
     }
 
     private async Task Choose(StoryOption option)
     {
-        await Apply(option.Effect);
+        foreach (var effect in option.Effects)
+        {
+            await Apply(option, effect);
+        }
         SetEventFinished(L10NLookup(ResultKey(Id.Entry, option)));
     }
 
-    private async Task Apply(StoryEffect effect)
+    private async Task Apply(StoryOption option, StoryEffect effect)
     {
         var owner = Owner!;
         switch (effect.Kind)
@@ -168,17 +250,94 @@ public abstract class StoryEventModel : EventModel
                 UpgradeRandom(owner, effect.Amount, _ => true);
                 break;
             case StoryEffectKind.LoseHpUpgradeRandomCards:
-                // Dense Vegetation's HP cost: unblockable, unpowered.
-                await CreatureCmd.Damage(new ThrowingPlayerChoiceContext(), owner.Creature,
-                    effect.HpLoss, ValueProp.Unblockable | ValueProp.Unpowered, null, null);
+                await LoseHp(owner, effect.HpLoss);
                 UpgradeRandom(owner, effect.Amount, _ => true);
                 break;
             case StoryEffectKind.ChooseFromPoolToDeck:
-                await ChooseFromPool(owner, effect);
+                await ChooseFromPool(owner, option, effect);
                 break;
             case StoryEffectKind.Nothing:
                 break;
+            case StoryEffectKind.LoseHp:
+                await LoseHp(owner, effect.Amount);
+                break;
+            case StoryEffectKind.GainGold:
+                await PlayerCmd.GainGold(effect.Amount, owner);
+                break;
+            case StoryEffectKind.LoseGold:
+                await PlayerCmd.LoseGold(effect.Amount, owner);
+                break;
+            case StoryEffectKind.GainRandomRelic:
+                await RelicCmd.Obtain(RelicFactory.PullNextRelicFromFront(owner).ToMutable(), owner);
+                break;
+            case StoryEffectKind.GainRandomRareRelic:
+                await RelicCmd.Obtain(
+                    RelicFactory.PullNextRelicFromFront(owner, RelicRarity.Rare).ToMutable(), owner);
+                break;
+            case StoryEffectKind.GainRandomPotions:
+                await OfferRandomPotions(owner, effect.Amount);
+                break;
+            case StoryEffectKind.TransformCards:
+                await TransformChosen(owner, effect.Amount);
+                break;
+            case StoryEffectKind.RemoveEvery:
+                await RemoveEvery(owner, effect.Card!);
+                break;
+            case StoryEffectKind.RemoveEveryCurseLoseGoldEach:
+                var curses = owner.Deck.Cards.Where(IsRemovableCurse).ToList();
+                if (curses.Count == 0) break;
+                await PlayerCmd.LoseGold(effect.Amount * curses.Count, owner);
+                await CardPileCmd.RemoveFromDeck(curses);
+                break;
+            case StoryEffectKind.UpgradeChosenCard:
+                var chosen = (await CardSelectCmd.FromDeckForUpgrade(
+                        owner, new CardSelectorPrefs(CardSelectorPrefs.UpgradeSelectionPrompt, 1)))
+                    .FirstOrDefault();
+                if (chosen != null) CardCmd.Upgrade(chosen, CardPreviewStyle.EventLayout);
+                break;
         }
+    }
+
+    /// <summary>Dense Vegetation's HP cost: unblockable, unpowered.</summary>
+    private static async Task LoseHp(Player owner, int amount)
+    {
+        await CreatureCmd.Damage(new ThrowingPlayerChoiceContext(), owner.Creature,
+            amount, ValueProp.Unblockable | ValueProp.Unpowered, null, null);
+    }
+
+    /// <summary>"Gain N random potions": N potions from the character's and
+    /// the shared pools, offered as rewards (Suspicious Condiment's draw).</summary>
+    private static async Task OfferRandomPotions(Player owner, int count)
+    {
+        var rewards = new List<Reward>();
+        for (var i = 0; i < count; i++)
+        {
+            var pool = owner.Character.PotionPool.GetUnlockedPotions(owner.UnlockState)
+                .Concat(ModelDb.PotionPool<SharedPotionPool>().GetUnlockedPotions(owner.UnlockState));
+            var potion = owner.PlayerRng.Rewards.NextItem(pool);
+            if (potion != null) rewards.Add(new PotionReward(potion.ToMutable(), owner));
+        }
+        if (rewards.Count > 0) await RewardsCmd.OfferCustom(owner, rewards);
+    }
+
+    /// <summary>"Transform N cards": the player picks (Morphic Grove); with
+    /// fewer than N, the game takes those there are.</summary>
+    private async Task TransformChosen(Player owner, int count)
+    {
+        var chosen = (await CardSelectCmd.FromDeckForTransformation(
+                owner, new CardSelectorPrefs(CardSelectorPrefs.TransformSelectionPrompt, count)))
+            .ToList();
+        foreach (var card in chosen)
+        {
+            await CardCmd.TransformToRandom(card, Rng, CardPreviewStyle.EventLayout);
+        }
+    }
+
+    /// <summary>"Remove every X": every copy in the deck; with none, nothing.</summary>
+    private static async Task RemoveEvery(Player owner, Type cardType)
+    {
+        var copies = owner.Deck.Cards.Where(c => c.GetType() == cardType).ToList();
+        if (copies.Count > 0) await CardPileCmd.RemoveFromDeck(copies);
     }
 
     /// <summary>"Upgrade N random cards": up to N distinct upgradable deck
@@ -197,14 +356,13 @@ public abstract class StoryEventModel : EventModel
     /// the event's Rng), picked on the game's add-to-deck grid (Brain Leech's
     /// Share Knowledge). The screen's prompt is the option's own line.
     /// </summary>
-    private async Task ChooseFromPool(Player owner, StoryEffect effect)
+    private async Task ChooseFromPool(Player owner, StoryOption option, StoryEffect effect)
     {
         var pool = Story.ChoicePool?.Invoke() ?? Array.Empty<CardModel>();
         var offered = StoryRules.PickRandom(pool, effect.Amount, n => Rng.NextInt(n))
             .Select(c => new CardCreationResult(owner.RunState.CreateCard(c, owner)))
             .ToList();
         if (offered.Count == 0) return;
-        var option = Data.Options.First(o => o.Effect == effect);
         var prefs = new CardSelectorPrefs(
             new LocString(Table, OptionDescriptionKey(Id.Entry, option)), 1)
         {
@@ -234,6 +392,35 @@ public abstract class StoryEventModel : EventModel
 }
 
 /// <summary>
+/// THE SAVED STORY IN A LIVE RUN. Nothing new is saved: the game already
+/// keeps the visited events and, per player, every event choice in the run
+/// history (both in the run's save file), and
+/// <see cref="StoryRules.Records"/> reads the story back out of them.
+/// </summary>
+public static class StoryHistory
+{
+    public static IReadOnlyList<StoryRecord> RecordsFor(IRunState run, Player player)
+    {
+        var story = StoryRegistry.For(player.Character);
+        if (story == null || run is not RunState state) return Array.Empty<StoryRecord>();
+        return StoryRules.Records(
+            story, t => state.VisitedEventIds.Contains(ModelDb.GetId(t)),
+            ChoiceKeys(run.MapPointHistory, player.NetId), StoryRegistry.EntryOf);
+    }
+
+    /// <summary>The loc keys of every event option this player chose, in run
+    /// order, from the run history.</summary>
+    public static IEnumerable<string?> ChoiceKeys(
+        IEnumerable<IEnumerable<MapPointHistoryEntry>> history, ulong playerId) =>
+        history
+            .SelectMany(act => act)
+            .SelectMany(point => point.PlayerStats)
+            .Where(stats => stats.PlayerId == playerId)
+            .SelectMany(stats => stats.EventChoices)
+            .Select(choice => choice.Title?.LocEntryKey);
+}
+
+/// <summary>
 /// THE STORY EVENT REACHES THE MAP HERE: the game's own substitution seam,
 /// <c>Hook.ModifyNextEvent</c>, called by <c>ActModel.PullNextEvent</c> once
 /// per event room and BEFORE the pulled event is recorded as visited -- so
@@ -253,9 +440,9 @@ internal static class Hook_ModifyNextEvent_Story_Patch
         {
             if (runState is not RunState run || !ReferenceEquals(__result, currentEvent)) return;
             var story = StoryRules.EventFor(
-                run.Players.Select(p => p.Character.GetType()),
+                run.Players.Select(p => (p.Character.GetType(), StoryHistory.RecordsFor(run, p))),
                 run.CurrentActIndex,
-                t => run.VisitedEventIds.Contains(ModelDb.GetId(t)));
+                (ulong)run.Rng.Seed);
             if (story == null) return;
             __result = ModelDb.GetById<EventModel>(ModelDb.GetId(story.EventType));
         }

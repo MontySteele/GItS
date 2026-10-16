@@ -72,13 +72,14 @@ public class LiveLooks8bTests
         // Feint off the yes/no onto the COUNT ("Deal 4 damage, plus 3 for each
         // Plan carried out this turn"), so the headline is the calculated
         // var over that count -- the preview reads the same ledger the hit
-        // does, which is the property `EB-670` asked for. A base of 6 since
-        // the cleanup pass (2026-09-29).
+        // does, which is the property `EB-670` asked for. Held on Tideturn
+        // (8, plus 8 per Plan waiting) since Kokomi review r8 (2026-10-14)
+        // made Feint's now-line a flat 8.
         var card = Source(Path.Combine(
             "klee-mod", "KleeCode", "Cards", "Prototype", "Generated",
-            "ProtoKkFeint.cs"));
-        Assert.Contains("new CalculationBaseVar(6m)", card);
-        Assert.Contains("new ExtraDamageVar(3m)", card);
+            "ProtoKkTideturn.cs"));
+        Assert.Contains("new CalculationBaseVar(8m)", card);
+        Assert.Contains("new ExtraDamageVar(8m)", card);
         Assert.Contains("new FrontFoldedDamageVar(ValueProp.Move)", card);
         Assert.Contains("DamageCmd.Attack(DynamicVars.CalculatedDamage)", card);
     }
@@ -88,10 +89,11 @@ public class LiveLooks8bTests
     {
         // The face and the play ask one object: the calculated var's
         // multiplier is the queue's count (the re-founding, 2026-10-12: "for
-        // each Plan waiting"), and the play deals that var.
+        // each Plan waiting"), and the play deals that var. Tideturn's
+        // since Kokomi review r8 (2026-10-14) made Feint's now-line flat.
         var card = Source(Path.Combine(
             "klee-mod", "KleeCode", "Cards", "Prototype", "Generated",
-            "ProtoKkFeint.cs"));
+            "ProtoKkTideturn.cs"));
         Assert.Contains("KokomiPlan.PlansHeld(card.Owner.Creature)", card);
 
         var var_ = Source(Path.Combine(

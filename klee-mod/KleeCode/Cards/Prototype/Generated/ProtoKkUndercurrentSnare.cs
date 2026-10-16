@@ -45,7 +45,7 @@ public sealed class ProtoKkUndercurrentSnare : CustomCardModel, ICharacterCard, 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Undercurrent Snare"),
-        ("description", "Apply 2 [gold]Weak[/gold].\nOr [gold]plan[/gold]: Each enemy that intends to attack loses {PlanPowerAmount:diff()} [gold]Strength[/gold] this turn."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Apply 2 [gold]Weak[/gold].\nOr [gold]plan[/gold]: Each enemy that intends to attack loses {PlanPowerAmount:diff()} [gold]Strength[/gold] this turn."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -60,7 +60,8 @@ public sealed class ProtoKkUndercurrentSnare : CustomCardModel, ICharacterCard, 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PlanPowerAmount", 3m)
+            new BlockVar(8m, ValueProp.Move),
+            new DynamicVar("PlanPowerAmount", 4m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -90,12 +91,14 @@ public sealed class ProtoKkUndercurrentSnare : CustomCardModel, ICharacterCard, 
     /// (<see cref="KokomiPlan.ChooseLines"/>).</summary>
     public async Task PlayNowLine(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await PowerCmd.Apply<WeakPower>(choiceContext, cardPlay.Target, 2, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
+        DynamicVars.Block.UpgradeValueBy(3m);
         DynamicVars["PlanPowerAmount"].UpgradeValueBy(1m);
     }
 }

@@ -45,7 +45,7 @@ public sealed class ProtoKkOrdersFromTheShrine : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Orders from the Shrine"),
-        ("description", "Choose 1 of 3 random Common Inazuma [gold]Companions[/gold] to add into your [gold]Hand[/gold]. It is [gold]Ethereal[/gold]."),
+        ("description", "Choose 1 of 3 random Common Inazuma [gold]Companions[/gold] to add into your [gold]Hand[/gold]. It costs 0 this turn and is [gold]Ethereal[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

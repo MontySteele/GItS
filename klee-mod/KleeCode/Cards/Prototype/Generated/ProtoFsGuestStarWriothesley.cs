@@ -41,7 +41,9 @@ public sealed class ProtoFsGuestStarWriothesley : CustomCardModel, ICharacterCar
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForWriothesley(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this);
+        TipAudience.Seat
+            ? ArmKeywordTips.ForWriothesley(ArmKeywordTips.ForGuestStar(ArmKeywordTips.ForSummon(base.ExtraHoverTips, this), this), this)
+            : ArmKeywordTips.ForWriothesley(ArmKeywordTips.ForGuestStar(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_guest_star_wriothesley");
 

@@ -556,22 +556,15 @@ def lint(rows, *, pixel_check: bool = True) -> list[str]:
 # still true; see the "structurally invisible defect" house rule.
 GENERATOR_OWNED = {
     "ImageGen/images/furina/model/combat_model.png":        "gen_furina_stills.py",
-    "ImageGen/images/furina/ui/select_portrait.png":        "gen_furina_stills.py",
-    "ImageGen/images/furina/ui/select_portrait_locked.png": "gen_furina_stills.py",
     "ImageGen/images/furina/ui/selection_splash.png":       "gen_furina_stills.py",
-    "ImageGen/images/furina/ui/char_icon.png":              "gen_furina_stills.py",
     "ImageGen/images/furina/ui/map_marker.png":             "gen_furina_stills.py",
     "ImageGen/images/kokomi/model/combat_model.png":        "gen_kokomi_stills.py",
-    "ImageGen/images/kokomi/ui/select_portrait.png":        "gen_kokomi_stills.py",
-    "ImageGen/images/kokomi/ui/select_portrait_locked.png": "gen_kokomi_stills.py",
     "ImageGen/images/kokomi/ui/selection_splash.png":       "gen_kokomi_stills.py",
-    "ImageGen/images/kokomi/ui/char_icon.png":              "gen_kokomi_stills.py",
     "ImageGen/images/kokomi/ui/map_marker.png":             "gen_kokomi_stills.py",
     # Varka (prototype, 2026-09-29): same six surfaces from his own render,
     # less the roster tile, which his model art took over (below).
     "ImageGen/images/varka/model/combat_model.png":         "gen_varka_stills.py",
     "ImageGen/images/varka/ui/selection_splash.png":        "gen_varka_stills.py",
-    "ImageGen/images/varka/ui/char_icon.png":               "gen_varka_stills.py",
     "ImageGen/images/varka/ui/map_marker.png":              "gen_varka_stills.py",
     "ImageGen/images/furina/salon/glyph_damage.png":        "gen_salon_glyphs.py",
     "ImageGen/images/furina/salon/glyph_block.png":         "gen_salon_glyphs.py",
@@ -612,6 +605,8 @@ GENERATOR_OWNED = {
     "ImageGen/images/model/frames/klee_shadow.png":         "klee_render/pack.py",
     "ImageGen/images/model/klee_rest.png":                  "klee_render/pack.py",
     "ImageGen/images/ui/select_closeup.png":                "klee_render/pack.py",
+    "ImageGen/images/ui/select_loop.png": "select_loop.py",
+    "ImageGen/images/ui/select_closeup_static.png": "select_loop.py",
     # The roster tile and its locked twin (2026-10-13): a face close-up from
     # the same renders, the locked one derived from it by pack.py (as the
     # other kits' stills generators derive theirs). Until then the tile was a
@@ -637,11 +632,91 @@ GENERATOR_OWNED = {
     "ImageGen/images/varka/model/frames/varka_shadow.png":  "char_render/pack.py",
     "ImageGen/images/varka/model/varka_rest.png":           "char_render/pack.py",
     "ImageGen/images/varka/ui/select_closeup.png":          "char_render/pack.py",
+    "ImageGen/images/varka/ui/select_loop.png": "select_loop.py",
+    "ImageGen/images/varka/ui/select_closeup_static.png": "select_loop.py",
     "ImageGen/images/varka/ui/select_portrait.png":         "char_render/pack.py",
     "ImageGen/images/varka/ui/select_portrait_locked.png":  "char_render/pack.py",
+    # Furina's model art (phase B, 2026-10-13): her frame sheets, the attack's
+    # element layer, the Spend/Drain/Repay effects, shadow, rest still, select
+    # close-up, roster tile and the eleven guest stars' stills, rendered from
+    # the official models (which never enter the repo) and packed by one
+    # script; tools/char_render/furina_frames.json is the committed manifest.
+    "ImageGen/images/furina/model/frames/furina_idle.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_idle_low.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_attack.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_cast.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_hurt.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_death.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_rejoice.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_merchant.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_attack_fx.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_spend.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_drain.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_repay.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_shadow.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/furina_rest.png":         "char_render/pack.py",
+    "ImageGen/images/furina/ui/select_closeup.png":         "char_render/pack.py",
+    "ImageGen/images/furina/ui/select_loop.png": "select_loop.py",
+    "ImageGen/images/furina/ui/select_closeup_static.png": "select_loop.py",
+    "ImageGen/images/furina/ui/select_portrait.png":        "char_render/pack.py",
+    "ImageGen/images/furina/ui/select_portrait_locked.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/guests/guest_charlotte.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/guests/guest_chevreuse.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/guests/guest_clorinde.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/guests/guest_escoffier.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/guests/guest_freminet.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/guests/guest_lynette.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/guests/guest_lyney.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/guests/guest_navia.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/guests/guest_neuvillette.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/guests/guest_sigewinne.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/guests/guest_wriothesley.png": "char_render/pack.py",
+    # Kokomi's model art (phase A, 2026-10-14): her frame sheets, the
+    # attack's element layer (the water jet), shadow, rest still, select
+    # close-up and roster tile, rendered from the official model (which never
+    # enters the repo) and packed by one script;
+    # tools/char_render/kokomi_frames.json is the committed manifest.
+    "ImageGen/images/kokomi/model/frames/kokomi_idle.png": "char_render/pack.py",
+    "ImageGen/images/kokomi/model/frames/kokomi_idle_low.png": "char_render/pack.py",
+    "ImageGen/images/kokomi/model/frames/kokomi_attack.png": "char_render/pack.py",
+    "ImageGen/images/kokomi/model/frames/kokomi_cast.png": "char_render/pack.py",
+    "ImageGen/images/kokomi/model/frames/kokomi_hurt.png": "char_render/pack.py",
+    "ImageGen/images/kokomi/model/frames/kokomi_death.png": "char_render/pack.py",
+    "ImageGen/images/kokomi/model/frames/kokomi_merchant.png": "char_render/pack.py",
+    "ImageGen/images/kokomi/model/frames/kokomi_attack_fx.png": "char_render/pack.py",
+    "ImageGen/images/kokomi/model/frames/kokomi_shadow.png": "char_render/pack.py",
+    "ImageGen/images/kokomi/model/kokomi_rest.png":         "char_render/pack.py",
+    "ImageGen/images/kokomi/ui/select_closeup.png":         "char_render/pack.py",
+    "ImageGen/images/kokomi/ui/select_portrait.png":        "char_render/pack.py",
+    "ImageGen/images/kokomi/ui/select_portrait_locked.png": "char_render/pack.py",
+    # Yae Miko's model art (phase A, a temporary model, 2026-10-14): Kokomi's
+    # set, rendered from her official model (which never enters the repo) and
+    # packed by one script; tools/char_render/yae_frames.json is the committed
+    # manifest. Until her first render Klee's files ship at her ui/ paths
+    # (build_pck.ps1 Copy-YaeFallback), which these then replace.
+    "ImageGen/images/yae/model/frames/yae_idle.png": "char_render/pack.py",
+    "ImageGen/images/yae/model/frames/yae_idle_low.png": "char_render/pack.py",
+    "ImageGen/images/yae/model/frames/yae_attack.png": "char_render/pack.py",
+    "ImageGen/images/yae/model/frames/yae_cast.png": "char_render/pack.py",
+    "ImageGen/images/yae/model/frames/yae_hurt.png": "char_render/pack.py",
+    "ImageGen/images/yae/model/frames/yae_death.png": "char_render/pack.py",
+    "ImageGen/images/yae/model/frames/yae_merchant.png": "char_render/pack.py",
+    "ImageGen/images/yae/model/frames/yae_attack_fx.png": "char_render/pack.py",
+    "ImageGen/images/yae/model/frames/yae_shadow.png": "char_render/pack.py",
+    "ImageGen/images/yae/model/yae_rest.png":               "char_render/pack.py",
+    "ImageGen/images/yae/ui/select_closeup.png":            "char_render/pack.py",
+    "ImageGen/images/yae/ui/select_portrait.png":           "char_render/pack.py",
+    "ImageGen/images/yae/ui/select_portrait_locked.png":    "char_render/pack.py",
     "ImageGen/images/ui/transition_wipe.png":               "gen_transition_wipe.py",
     "ImageGen/images/kokomi/ui/transition_wipe.png":        "gen_transition_wipe.py",
     "ImageGen/images/varka/ui/transition_wipe.png":         "gen_transition_wipe.py",
+    # The top-bar icons (2026-10-13): head and shoulders cut from each
+    # character's select art and framed to the base game's 85x85 icons by one
+    # script (Furina's from her model's close-up, PR #1241).
+    "ImageGen/images/ui/char_icon.png":                     "gen_char_icons.py",
+    "ImageGen/images/varka/ui/char_icon.png":               "gen_char_icons.py",
+    "ImageGen/images/kokomi/ui/char_icon.png":              "gen_char_icons.py",
+    "ImageGen/images/furina/ui/char_icon.png":              "gen_char_icons.py",
     # EB-37: derived from each character's own char_icon.png, so a plan row
     # claiming one of these would be sourcing a halo from the wiki instead of
     # from the fill it has to agree with.

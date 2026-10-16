@@ -38,14 +38,14 @@ public sealed class ProtoKkAtWatersEdge : CustomCardModel, ICharacterCard
     public string CharacterId => "kokomi";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForWeak(BaseKeywordTips.ForVulnerable(base.ExtraHoverTips, this), this);
+        BaseKeywordTips.ForWeak(BaseKeywordTips.ForVulnerable(ArmKeywordTips.ForPlanNoLine(base.ExtraHoverTips, this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_at_waters_edge");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "At Water's Edge"),
-        ("description", "The first time each turn you deal [gold]Hydro[/gold] damage to an enemy, apply 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold] to it."),
+        ("description", "The first time each turn you deal [gold]Hydro[/gold] damage to an enemy, apply 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold] to it. [gold]Plans[/gold] count."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

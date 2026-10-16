@@ -35,7 +35,9 @@ namespace KleeMod.Cards.Prototype.Generated;
 public sealed class ProtoKoPartyPoppers : CustomCardModel
 {
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSpark(ArmKeywordTips.ForBomb(base.ExtraHoverTips, this), this);
+        TipAudience.Seat
+            ? ArmKeywordTips.ForSpark(ArmKeywordTips.ForBomb(base.ExtraHoverTips, this), this)
+            : ArmKeywordTips.ForBomb(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_party_poppers");
 

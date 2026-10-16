@@ -41,11 +41,11 @@ public class FurinaHighStakesPreviewTests
     }
 
     [Fact]
-    public void Hydro_lance_in_hand_previews_the_high_stakes_bonus()
+    public void Cleansing_torrent_in_hand_previews_the_high_stakes_bonus()
     {
         InCombat(() =>
         {
-            var b = StakesBoard(new ProtoFsHydroLance());
+            var b = StakesBoard(new ProtoFsCleansingTorrent());
             var formula = b.Card.DynamicVars.CalculatedDamage.Calculate(null);
 
             var preview = Preview(b.Card, null, inHand: true);
@@ -87,7 +87,7 @@ public class FurinaHighStakesPreviewTests
                 null, 6m, ValueProp.Move, me, b.Card, null));
             // Not a Skill's hit, not an unpowered one, not with no card.
             Assert.Equal(0m, stakes.ModifyDamageAdditive(
-                null, 6m, ValueProp.Move, me, new ProtoFsOverdraft(), null));
+                null, 6m, ValueProp.Move, me, new ProtoFsOusiaPledge(), null));
             Assert.Equal(0m, stakes.ModifyDamageAdditive(
                 null, 6m, ValueProp.Unpowered, me, b.Card, null));
             Assert.Equal(0m, stakes.ModifyDamageAdditive(

@@ -40,7 +40,7 @@ public sealed class ProtoVkTailwindStride : CustomCardModel, ICharacterCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Tailwind Stride"),
+        ("title", "A Bard's Tale"),
         ("description", "Draw {Cards:diff()} card{Cards:plural:|s}."),
     };
 

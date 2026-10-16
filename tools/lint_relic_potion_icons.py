@@ -33,7 +33,9 @@ uses: a literal `"ns/relics/x.png"` (or `/potions/`), a helper call
 `ArmPotions.Image("character", "slug")`.
 
 ICON_DEBT has the lint_power_icons semantics: a named, reasoned exception that
-FAILS once it is no longer needed, so the set can only shrink. It is empty.
+FAILS once it is no longer needed, so the set can only shrink. It holds
+Kokomi's ten and Furina's card pass's seven (2026-10-15) until their art
+passes.
 
 Run: python tools/lint_relic_potion_icons.py      (exit 1 with findings)
 """
@@ -51,7 +53,27 @@ ART_PLAN = REPO / "art" / "plan.tsv"
 ROOTS = ("CustomRelicModel", "CustomPotionModel")
 
 # Class name -> reason. Delete the row in the commit that gives it art.
-ICON_DEBT: dict[str, str] = {}
+_KOKOMI_SET = ("Kokomi's own relics and potions (review/active/kokomi-"
+               "relics-potions-2026-10-15.md) shipped on Burning Blood and the "
+               "base potion, as Varka's did before their art pass; the icon "
+               "rows come with her art pass")
+_FURINA_PASS_ART = (
+    "Furina's card pass (2026-10-15, review/active/furina-card-pass-"
+    "2026-10-15.md): built C# first with the icon path wired; it draws "
+    "the base class's placeholder until its art/plan.tsv row lands.")
+ICON_DEBT: dict[str, str] = {
+    **{name: _KOKOMI_SET for name in (
+        "SangoPearl", "ResistanceArmband", "ElectroSigil",
+        "EverlastingMoonglow", "OceanHuedClam", "KurageLantern",
+        "ResistanceMusterRoll", "BottledShoal", "BottledTide",
+        "AStunningStratagem",
+    )},
+    **{name: _FURINA_PASS_ART for name in (
+        "OperaTicketStub", "FontaineTeardrop", "ClaquesLedger",
+        "BouquetOfRoses", "EpicleseSeasonPass", "BottledEncore",
+        "WaterOfLucine",
+    )},
+}
 
 CLASS = re.compile(
     r"^[ \t]*(?:public|internal)\s+(?P<mods>(?:sealed\s+|abstract\s+|static\s+|partial\s+)*)"

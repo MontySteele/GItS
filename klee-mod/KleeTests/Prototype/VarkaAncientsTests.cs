@@ -193,7 +193,7 @@ public class VarkaAncientsTests : IDisposable
     [Fact]
     public void The_switch_line_names_the_element_and_is_empty_off_a_fight()
     {
-        Assert.Equal("\n(Makes Pyro current)", VarkaOath.SwitchWords(Element.Pyro));
+        Assert.Equal("\n(Makes Pyro current: 3 Oath)", VarkaOath.SwitchWords(Element.Pyro, 3));
         Assert.Equal("", VarkaOath.SwitchLine(null, Element.Pyro));
         Assert.Equal("", VarkaOath.SwitchLine(new ProtoVkKindledEdge(), Element.Pyro));
         Assert.Contains("VarkaOath.WouldSwitchTo",

@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoVkGlacialEdict : CustomCardModel, ICharacterCard
+public sealed class ProtoVkGlacialEdict : CustomCardModel, ICharacterCard, IVarkaSwitchCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "varka";
@@ -41,7 +41,9 @@ public sealed class ProtoVkGlacialEdict : CustomCardModel, ICharacterCard
         new[] { KleeKeywords.AppliesCryo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForWeak(BaseKeywordTips.ForVulnerable(ArmKeywordTips.ForOath(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, appliesWithoutHit: true), this, Element.Cryo), this), this), this);
+        TipAudience.Seat
+            ? BaseKeywordTips.ForWeak(BaseKeywordTips.ForVulnerable(ArmKeywordTips.ForOath(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, appliesWithoutHit: true), this, Element.Cryo), this), this), this)
+            : BaseKeywordTips.ForVulnerable(ArmKeywordTips.ForOath(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, appliesWithoutHit: true), this, Element.Cryo), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_glacial_edict");
 
@@ -59,6 +61,10 @@ public sealed class ProtoVkGlacialEdict : CustomCardModel, ICharacterCard
         base.AddExtraArgsToDescription(description);
         description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Cryo));
     }
+
+    /// <summary>The element this card makes Varka's current element
+    /// (`VarkaOathDial` previews it).</summary>
+    public Element VarkaSwitchElement => Element.Cryo;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

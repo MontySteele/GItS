@@ -15,9 +15,10 @@ from understudy import qa_packet
 from understudy.blindplay_faces import (_card_face, _card_title,
                                         _enemy_handles, _enemy_names,
                                         _hook_note, _intents, _meter_max,
-                                        _named_option, _number_faces, _powers,
+                                        _named_option, _powers,
+                                        enchantment_tag,
                                         enemy_replacements, enemy_revivals,
-                                        relic_faces,
+                                        hand_labels, relic_faces,
                                         remember_deck, remember_kills,
                                         remembered_deck,
                                         remembered_enemy_name,
@@ -380,9 +381,6 @@ def _omitted_from_upgrade(state: dict[str, Any]) -> list[dict[str, str]]:
 #: every note on this page is read under: the game spells the screen `select`
 #: for a dozen different asks and the sentence is what tells them apart.
 _REMOVAL_PROMPT = re.compile(r"\b(remove|removal|destroy|purge)\b", re.I)
-#: A face that prints its own Plan line ("Plan:", "Or plan:") says it can be
-#: written; the `writable` mark is for the cards that do not.
-_PLAN_WORD = re.compile(r"\bplan\b", re.I)
 
 
 def is_removal_screen(blob: dict[str, Any]) -> bool:
@@ -482,10 +480,7 @@ def deck_titles(state: dict[str, Any]) -> list[dict[str, Any]]:
             continue
         if card.get("upgraded") and not title.rstrip().endswith("+"):
             title += " (upgraded)"
-        ench = card.get("enchantment")
-        if isinstance(ench, dict) and ench.get("name"):
-            title += (f" ({ench['name']} {ench['amount']})"
-                      if ench.get("amount") else f" ({ench['name']})")
+        title += enchantment_tag(card.get("enchantment"))
         counts[title] = counts.get(title, 0) + 1
     return [{"title": t, "count": n} for t, n in sorted(counts.items())]
 
@@ -610,6 +605,7 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
     # Smith's screen two rooms later has no deck on its own feed. Remembered
     # here, on the one screen that carries it, and read back there.
     remember_deck(state)
+    labels = hand_labels(state)
     combat = {
         "you": {
             "hp": _int(p.get("hp")), "max_hp": _int(p.get("max_hp")),
@@ -654,11 +650,16 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
             "orbs": _orbs(p),
         },
         "round": _int(battle.get("round")),
-        "hand": _number_faces([_card_face(c) for c in _hand(state)], "title"),
+        # Yae seats (2026-10-14): one label per card for as long as it is
+        # in hand (`blindplay_faces.hand_labels`), not a re-count.
+        "hand": [dict(_card_face(c), title=label) for c, label
+                 in zip(_hand(state), labels)],
         # `EB-179`: whether the hand holds two cards printing one name, which
         # is the ONE place the missing enchantment field bites a reader.
-        "hand_repeats": len({_fold(_text(c.get("name")))
-                             for c in _hand(state)}) < len(_hand(state)),
+        # Yae seats (2026-10-14): and wherever a number is printed, which
+        # outlives the repeat that minted it.
+        "hand_repeats": any(label != _text(c.get("name"))
+                            for c, label in zip(_hand(state), labels)),
         "piles": {"draw": _int(p.get("draw_pile_count")),
                   "discard": _int(p.get("discard_pile_count")),
                   "exhaust": _int(p.get("exhaust_pile_count"))},
@@ -824,16 +825,6 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
         # in the Bake-Kurage's receipt as in the enemy list four lines down.
         name_moved_rows(plans, _enemies(state), combat["enemies"])
         combat["plans"] = plans
-        # The Kokomi re-founding (2026-10-12): any Companion card can be
-        # written as a Plan, and its face does not say so. A hand card the
-        # game lets onto the jellyfish (`can_target_pet`, the field `EB-480`
-        # reads) whose face prints no Plan line is marked, so the seat can
-        # see which cards the `on "Bake-Kurage"` form takes.
-        if plans.get("pet"):
-            for raw, face in zip(_hand(state), combat["hand"]):
-                if (raw.get("can_target_pet") is True
-                        and not _PLAN_WORD.search(str(face.get("text") or ""))):
-                    face["writable"] = True
     stage = furina_stage(p)
     if stage is not None:
         # `EB-743`, and it is `EB-329`'s rule a third arm over: the mod names
@@ -862,6 +853,18 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
             if not _OATH_LEFT.match(_text(pw.get("name")))
             and not (_OATH_NAME.match(_text(pw.get("name")))
                      and _int(pw.get("stacks")) == 0)]
+    # YAE MIKO (2026-10-13): her shrine -- each Sakura's Level, what it
+    # strikes for and the strikes it has left, the Lure's enemy, and how many
+    # Annotated cards she holds. Her Sakura badges' lines go: the block says
+    # them in words. (Shrine r2 took the Rite badge, and its `_RITE_NAME`
+    # left the module with it: the filter named it still, so any other
+    # power on her raised NameError. Fixed 2026-10-14.)
+    shrine = yae_shrine(p, combat)
+    if shrine is not None:
+        combat["shrine"] = shrine
+        combat["you"]["powers"] = [
+            pw for pw in combat["you"]["powers"]
+            if not _SAKURA_NAME.match(_text(pw.get("name")))]
     # 2026-09-26 (control seat, Necrobinder): Osty, and any pet no kit block
     # prints, with its HP.
     allies = _allies(p, (plans or {}).get("pet_entity_id"))
@@ -935,6 +938,100 @@ def varka_oath(player: dict[str, Any],
     return {"element": element, "counts": counts,
             "payout": VARKA_SWIRL_PAYOUT.get(element) if element else None,
             "auras": auras}
+
+
+#: YAE MIKO (review/active/yae-card-paper-2026-10-13.md, built 2026-10-13).
+#: Her Sakura badges are titled "Sakura 1" (the oldest) to "Sakura 9", and the
+#: badge sentence (`SakuraBadgePower`'s smart description, review r3) reads
+#: "Foxfire Sakura, Level L (planted at P). Hits ALL enemies for S Electro
+#: damage. Turns left: T." -- the kind first ("Sakura", "Foxfire Sakura",
+#: "Kitsune Sakura"), and a Kitsune's action is "You gain S Block."
+_SAKURA_NAME = re.compile(r"^Sakura (\d)$")
+_SAKURA_LEVEL = re.compile(r"Level (\d+)")
+_SAKURA_PLANTED = re.compile(r"planted at (\d+)")
+_SAKURA_STRIKE = re.compile(r"(?:for|You gain) (\d+)")
+#: Review r3 (ruled 2026-10-14): the three kinds, as the badge names them.
+YAE_SAKURA_KINDS = {"Foxfire Sakura": "foxfire", "Kitsune Sakura": "kitsune"}
+#: The design axes (ruled 2026-10-14): a Sakura's Annotation is named in its
+#: badge sentence. (Shrine r2 took the Rite badge away.)
+YAE_SAKURA_ANNOTATIONS = ("Red Ink", "Deadline Extension", "Fox Fire")
+_SAKURA_TURNS = re.compile(r"(?:Strikes|Turns) left: (\d+)")
+_LURE_NAME = "Foxfire Lure"
+#: How many Sakura may stand: 3, plus Sakura Channeling's stacks ("You can
+#: have 2 more Sakura", 2 per copy; `YaeShrine.MaxSakura`, 2026-10-14).
+YAE_SAKURA_CAP = 3
+_CHANNELING_NAME = "Sakura Channeling"
+YAE_ANNOTATIONS = ("Red Ink", "Footnote", "Deadline Extension", "Fox Fire",
+                   "Sakura Seal", "Royalties", "Reprint",
+                   # Review r3: the one enchantment holding both layers.
+                   "Annotated")
+
+
+def yae_shrine(player: dict[str, Any],
+               combat: dict[str, Any]) -> dict[str, Any] | None:
+    """YAE's block: `{sakura, cap, lure, annotated, edits}`, or None on a
+    board that is not hers (no Sakura badge and a wire that does not name
+    her).
+
+    `sakura` is one row per badge, oldest first: `{slot, level, strike,
+    turns}` read off the badge sentence (the badge amount is the Level where
+    the sentence is missing); `lure` is the name of the enemy wearing
+    Foxfire Lure, or None; `cap` is how many may stand (3, plus Sakura
+    Channeling's stacks); `annotated` counts the hand's cards carrying one
+    of her five Annotations (the hand face's `enchantment`); `edits` is the
+    cards she Edited this combat (`player.yae_shrine`), or None off the wire.
+    """
+    you = combat["you"]
+    badges = []
+    for pw in you["powers"]:
+        m = _SAKURA_NAME.match(_text(pw.get("name")))
+        if m:
+            badges.append((int(m.group(1)), pw))
+    character = _fold(_text(player.get("character")))
+    hers = character in ("yae", "yae miko") or "yae" in character.split()
+    if not (hers or badges):
+        return None
+    sakura = []
+    for slot, pw in sorted(badges, key=lambda b: b[0]):
+        text = _text(pw.get("text"))
+        level = _SAKURA_LEVEL.search(text)
+        strike = _SAKURA_STRIKE.search(text)
+        turns = _SAKURA_TURNS.search(text)
+        lv = int(level.group(1)) if level else _int(pw.get("stacks"))
+        ann = next((a for a in YAE_SAKURA_ANNOTATIONS if a in text), None)
+        kind = next((k for name, k in YAE_SAKURA_KINDS.items()
+                     if text.startswith(name)), "thunder")
+        planted = _SAKURA_PLANTED.search(text)
+        sakura.append({"slot": slot, "level": lv, "kind": kind,
+                       "planted": int(planted.group(1)) if planted else None,
+                       "strike": int(strike.group(1)) if strike else 2 + lv,
+                       "turns": int(turns.group(1)) if turns else None,
+                       "annotation": ann})
+    lure = None
+    for enemy in combat["enemies"]:
+        if any(_text(pw.get("name")) == _LURE_NAME
+               for pw in enemy.get("powers") or []):
+            lure = enemy["name"]
+            break
+    annotated = 0
+    for face in combat.get("hand") or []:
+        ench = face.get("enchantment")
+        if isinstance(ench, dict) and _text(ench.get("name")) in YAE_ANNOTATIONS:
+            annotated += 1
+    cap = YAE_SAKURA_CAP + sum(
+        _int(pw.get("stacks")) for pw in you["powers"]
+        if _text(pw.get("name")) == _CHANNELING_NAME)
+    # Bestseller and Print Run's count (Yae review r5, pick 1 (a)): the cards
+    # she Edited this combat, off `player.yae_shrine` (the bridge's
+    # `gits/GitsYaeShrine.cs`, the mod's `YaeShrine.Snapshot`). None when the
+    # wire does not carry it (an older bridge, or out of a fight), so the page
+    # prints no number it was not given.
+    raw = player.get("yae_shrine")
+    edits = (raw.get("edits_this_combat")
+             if isinstance(raw, dict) and raw.get("live") else None)
+    return {"sakura": sakura, "cap": cap, "lure": lure,
+            "annotated": annotated,
+            "edits": edits if isinstance(edits, int) else None}
 
 
 #: A performer's SHORT name -- the word the glossary rows and the faces use
@@ -1506,6 +1603,20 @@ def resolutions(player: dict[str, Any]) -> list[dict[str, Any]] | None:
                         for ev in (row.get("events") or [])
                         if isinstance(ev, dict)
                         and _text(ev.get("kind")) == "stoked"),
+                    # Varka round 5 (2026-10-13): the cards this play made
+                    # you discard, and whether the game picked them (the hand
+                    # held no more than it asked for).
+                    "discarded": [
+                        _text(ev.get("card"))
+                        for ev in (row.get("events") or [])
+                        if isinstance(ev, dict)
+                        and _text(ev.get("kind")) == "play_discard"
+                        and _text(ev.get("card"))],
+                    "discard_picked_for_you": any(
+                        _text(ev.get("power"))
+                        for ev in (row.get("events") or [])
+                        if isinstance(ev, dict)
+                        and _text(ev.get("kind")) == "play_discard"),
                     "swirl_no_aura": _int(row.get("swirl_no_aura")),
                     "swirl_on_aura": _int(row.get("swirl_on_aura")),
                     "applied": applied,
@@ -1781,7 +1892,31 @@ def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
               # The Kokomi pool overhaul (2026-10-13): a Counter or Chain
               # Plan's number as it stands, in the strip's words. Absent or
               # null on every other entry and on an older bridge.
-              "live": _text(row.get("live")) or None}
+              "live": _text(row.get("live")) or None,
+              # Kokomi review r5 (2026-10-14, A2): what the Plan will land
+              # per body, whatever its aim, and her Strength when it was
+              # written. Absent on an older bridge: 0 and None, and then
+              # nothing is said.
+              "written": _int(row.get("written")),
+              "written_strength": (row.get("written_strength")
+                                   if isinstance(row.get("written_strength"),
+                                                 int)
+                                   and not isinstance(
+                                       row.get("written_strength"), bool)
+                                   else None),
+              # Kokomi review r6 (2026-10-14, item 7): a Counter Plan that
+              # pays only off an enemy Attack ("attackers", "blocked",
+              # "energy"); item 11: the card written is an Attack. Absent on
+              # an older bridge: None and False, and nothing is said.
+              "needs_attack": _text(row.get("needs_attack")) or None,
+              "attack": row.get("attack") is True,
+              # Kokomi round 7 (2026-10-14): the Plan plays a card (a
+              # Companion, Moon's Reflection, Crystal Collapse), which
+              # Ringing counts; and where its Vulnerable lands ("all",
+              # "front"), which a later Plan's hit meets. Absent on an older
+              # bridge: False and "", and nothing is said.
+              "plays_card": row.get("plays_card") is True,
+              "vulnerable_aim": _text(row.get("vulnerable_aim"))}
              for row in (raw.get("queue") or []) if isinstance(row, dict)]
     pet_id = raw.get("pet_entity_id")
     pet_name = _text(raw.get("pet_name")) or "Bake-Kurage"
@@ -1995,6 +2130,10 @@ def _carried_out_row(row: dict[str, Any], pet_name: str) -> dict[str, Any]:
             # Its hit found no living body to aim at: an earlier Plan that
             # morning killed the target (BACKLOG 2026-10-13).
             "no_target": bool(row.get("no_target")),
+            # Kokomi review r8 (2026-10-14, item 9): the reactions the Plan's
+            # own hits set off, by name ("Vaporize"); empty on an older mod.
+            "reactions": [_text(r) for r in (row.get("reactions") or [])
+                          if _text(r)],
             # `EB-440`: A ROW IS A BODY THIS PLAN MOVED SOMETHING ON, and
             # Block is something. The filter existed to drop the mod's
             # zero-delta rows, and a beat that spent itself entirely on a

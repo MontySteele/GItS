@@ -646,7 +646,7 @@ public class FurinaTideTests
         foreach (var (type, gate) in new[]
                  {
                      ("ProtoFsMademoiselleCrabaletta", "FurinaStage.CanDrain"),
-                     ("ProtoFsSoloistsSolicitation", "FurinaStage.CanDrain"),
+                     ("ProtoFsAllIn", "FurinaStage.CanDrain"),
                      ("ProtoFsQuickCue", "FurinaStage.CanSpend"),
                  })
         {
@@ -837,9 +837,8 @@ public class FurinaTideTests
         // conditional Repays included.
         foreach (var card in new CardModel[]
                  {
-                     new ProtoFsPneumaTides(),
                      new ProtoFsFountainOfLucine(), new ProtoFsGrandEntrance(),
-                     new ProtoFsRiptideLunge(), new ProtoFsSoothingWaters(),
+                     new ProtoFsRiptideLunge(), new ProtoFsPneumaRefrain(),
                      new ProtoFsHymnOfManyWaters(),
                  })
         {
@@ -849,7 +848,7 @@ public class FurinaTideTests
         }
         // "I don't think 'Salon's Encore' needs to say 'Copies stack'." ([USER], 2026-10-11)
         Assert.EndsWith("damage to ALL enemies.",
-            new ProtoFsSalonsEncore().Localization!
+            new ProtoFsThunderousApplause().Localization!
                 .Single(r => r.Item1 == "description").Item2);
 
         // Riptide Lunge's Repay reads the board after its own Drain 3: at

@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcVentiGrandOde : CustomCardModel, IElementalCard, ICompanionCard, IWritableCompanion
+public sealed class ProtoMcVentiGrandOde : CustomCardModel, IElementalCard, ICompanionCard
 {
     /// <summary>Sheet applies_element: this companion attack applies its element.</summary>
     public Element Element => Element.Anemo;
@@ -52,7 +52,9 @@ public sealed class ProtoMcVentiGrandOde : CustomCardModel, IElementalCard, ICom
         new[] { CardKeyword.Exhaust, KleeKeywords.AppliesAnemo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSwirl(ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo), this), this);
+        TipAudience.Seat
+            ? ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo), this)
+            : KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_venti_grand_ode");
 
@@ -61,14 +63,6 @@ public sealed class ProtoMcVentiGrandOde : CustomCardModel, IElementalCard, ICom
         ("title", "Venti — Wind's Grand Ode"),
         ("description", "Deal {CalculatedDamage:diff()} [gold]Anemo[/gold] damage to ALL enemies. For {PowerAmount:diff()} turns, at the end of your turn [gold]Swirl[/gold] ALL enemies."),
     };
-
-    /// <summary>On Kokomi, this Companion card can also be written as a Plan on
-    /// the Bake-Kurage (the re-founding, 2026-10-12).</summary>
-    public override TargetType TargetType =>
-        KokomiCompanionPlan.TargetFor(this, base.TargetType);
-
-    /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
-    public TargetType PrintedTargetType => base.TargetType;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
@@ -88,11 +82,6 @@ public sealed class ProtoMcVentiGrandOde : CustomCardModel, IElementalCard, ICom
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (KokomiPlan.PlayedOnPet(cardPlay))
-        {
-            await KokomiCompanionPlan.Write(choiceContext, this, cardPlay);
-            return;
-        }
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)
             .TargetingAllOpponents(CombatState!)

@@ -131,6 +131,23 @@ public sealed record StageMods
     /// upgraded, a copy).</summary>
     public int FullHouse { get; init; }
 
+    // ---- her relics (Furina's card pass, 2026-10-15) ----------------------
+
+    /// <summary>Epiclese Season Pass copies: one more seat each.</summary>
+    public int SeasonPass { get; init; }
+
+    /// <summary>Fontaine Teardrop copies: a Repay of more than she has
+    /// drained gains the rest as Block, per copy.</summary>
+    public int FontaineTeardrop { get; init; }
+
+    /// <summary>Claque's Ledger copies: each guest act gains 1 Fanfare per
+    /// copy.</summary>
+    public int ClaquesLedger { get; init; }
+
+    /// <summary>Bouquet of Roses copies: each Spend of 10 or more gains 1
+    /// Energy per copy.</summary>
+    public int BouquetOfRoses { get; init; }
+
     public static readonly StageMods None = new();
 }
 

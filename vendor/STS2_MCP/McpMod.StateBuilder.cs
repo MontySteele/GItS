@@ -1421,6 +1421,15 @@ public static partial class McpMod
             state["furina_stage"] = furinaStage;
         }
 
+        // GItS LOCAL EDIT (Yae, 2026-10-15). The cards she Edited this
+        // combat -- what Bestseller and Print Run count, kept by the rule and
+        // shown by no card. Same absent/empty contract as the two above.
+        // Implementation and its reflection contract: gits/GitsYaeShrine.cs.
+        if (GitsYaeShrineState(player) is { } yaeShrine)
+        {
+            state["yae_shrine"] = yaeShrine;
+        }
+
         // GItS LOCAL EDIT (`EB-681`). WHAT REACTED THIS TURN, BY NAME. A
         // reaction is what several kits are ABOUT and the feed carried no
         // trace of one: the aura is consumed, the effect lands, and a reader
@@ -1582,7 +1591,7 @@ public static partial class McpMod
     }
 
     /// <summary>
-    /// `{ id, name, description, amount, shows_amount }` for an enchanted
+    /// `{ id, name, description, amount, shows_amount[, disabled] }` for an enchanted
     /// card, or null when the card carries none (`EB-181`). Never throws: it
     /// runs inside every card serialisation on every state poll, including the
     /// compendium's canonical copies.
@@ -1593,7 +1602,7 @@ public static partial class McpMod
         {
             var enchantment = card.Enchantment;
             if (enchantment == null) return null;
-            return new Dictionary<string, object?>
+            var info = new Dictionary<string, object?>
             {
                 ["id"] = enchantment.Id.Entry,
                 ["name"] = SafeGetText(() => enchantment.Title),
@@ -1601,6 +1610,16 @@ public static partial class McpMod
                 ["amount"] = enchantment.DisplayAmount,
                 ["shows_amount"] = enchantment.ShowAmount
             };
+            // GItS LOCAL EDIT (Reprint spent, 2026-10-14). The game greys a
+            // spent enchantment's tab (`Status == Disabled`: Glam, Swift,
+            // Sown, Yae's Reprint after its first play) and the wire did not
+            // say so, so two seats read a spent Reprint as live. Emitted only
+            // when disabled: an absent key means "live", as before.
+            if (enchantment.Status == MegaCrit.Sts2.Core.Entities.Enchantments.EnchantmentStatus.Disabled)
+            {
+                info["disabled"] = true;
+            }
+            return info;
         }
         catch (Exception)
         {
@@ -3189,6 +3208,11 @@ public static partial class McpMod
         CardReward => "card",
         SpecialCardReward => "special_card",
         CardRemovalReward => "card_removal",
+        // GItS LOCAL EDIT (2026-10-14, Yae's Publish after elites and
+        // bosses): her relic's reward row would print its class name,
+        // `yaepublishreward`. Matched by name; this assembly does not
+        // reference the mod's.
+        _ when reward.GetType().Name == "YaePublishReward" => "publish",
         _ => reward.GetType().Name.ToLower()
     };
 
@@ -3246,7 +3270,24 @@ public static partial class McpMod
                 GitsAddPowerFacts(power, row);
                 powers.Add(row);
             }
-            catch { /* skip this power - game engine state may be inconsistent */ }
+            catch (Exception ex)
+            {
+                // GItS LOCAL EDIT (Kokomi review r8, 2026-10-14, item 10):
+                // the row stays when its text throws, instead of the power
+                // vanishing from the list for a screen
+                // (`gits/GitsPowerRow.cs` has the find).
+                try
+                {
+                    powers.Add(GitsPowerRow.Unreadable(
+                        power.Id.Entry,
+                        SafeGetText(() => power.Title),
+                        power.DisplayAmount,
+                        power.StackType.ToString(),
+                        power.TypeForCurrentAmount.ToString(),
+                        ex.GetType().Name));
+                }
+                catch { /* the power's own facts threw too: skip it */ }
+            }
         }
         return powers;
     }

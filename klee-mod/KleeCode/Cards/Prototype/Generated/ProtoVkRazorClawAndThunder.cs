@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoVkRazorClawAndThunder : CustomCardModel, ICompanionCard, IWritableCompanion
+public sealed class ProtoVkRazorClawAndThunder : CustomCardModel, ICompanionCard, IVarkaSwitchCard
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -49,7 +49,7 @@ public sealed class ProtoVkRazorClawAndThunder : CustomCardModel, ICompanionCard
         new[] { KleeKeywords.Knight, KleeKeywords.AppliesElectro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCompanionPlan(ArmKeywordTips.ForElementSwitch(base.ExtraHoverTips, this, Element.Electro), this);
+        ArmKeywordTips.ForElementSwitch(base.ExtraHoverTips, this, Element.Electro);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_razor_claw_and_thunder");
 
@@ -59,14 +59,6 @@ public sealed class ProtoVkRazorClawAndThunder : CustomCardModel, ICompanionCard
         ("description", "Deal {VkBase:diff()} [gold]Electro[/gold] damage to an enemy. If it already has [gold]Electro[/gold], deal {VkAmount:diff()} additional damage.{InCombat:{VarkaSwitch}|}"),
     };
 
-    /// <summary>On Kokomi, this Companion card can also be written as a Plan on
-    /// the Bake-Kurage (the re-founding, 2026-10-12).</summary>
-    public override TargetType TargetType =>
-        KokomiCompanionPlan.TargetFor(this, base.TargetType);
-
-    /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
-    public TargetType PrintedTargetType => base.TargetType;
-
     /// <summary>The element this card makes current, on its in-combat line
     /// (`VarkaOath.SwitchLine`).</summary>
     protected override void AddExtraArgsToDescription(
@@ -75,6 +67,10 @@ public sealed class ProtoVkRazorClawAndThunder : CustomCardModel, ICompanionCard
         base.AddExtraArgsToDescription(description);
         description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Electro));
     }
+
+    /// <summary>The element this card makes Varka's current element
+    /// (`VarkaOathDial` previews it).</summary>
+    public Element VarkaSwitchElement => Element.Electro;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
@@ -92,11 +88,6 @@ public sealed class ProtoVkRazorClawAndThunder : CustomCardModel, ICompanionCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (KokomiPlan.PlayedOnPet(cardPlay))
-        {
-            await KokomiCompanionPlan.Write(choiceContext, this, cardPlay);
-            return;
-        }
         await VarkaCards.Awakening(choiceContext, this, cardPlay);
     }
 

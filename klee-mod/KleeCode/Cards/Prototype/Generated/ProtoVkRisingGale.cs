@@ -44,15 +44,27 @@ public sealed class ProtoVkRisingGale : CustomCardModel, IElementalCard, ICharac
         new[] { KleeKeywords.AppliesAnemo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo), this);
+        TipAudience.Seat
+            ? ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo), this)
+            : KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_rising_gale");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Rising Gale"),
-        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If it [gold]Swirls[/gold], draw 1 card."),
+        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If it [gold]Swirls[/gold], draw 1 card.{InCombat:{VarkaSwirl}|}"),
     };
+
+    /// <summary>This card's in-combat Oath and Swirl lines
+    /// (`VarkaOath.SwitchLine`, `VarkaOath.WildfireLine`,
+    /// `VarkaOath.SwirlLine`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("VarkaSwirl", VarkaOath.SwirlLine(this));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

@@ -10,7 +10,8 @@ python3 tools/art_hunt.py Furina ; python3 tools/art_contact_sheet.py --list
 .venv/Scripts/python tools/cut_combat_layers.py klee [--check]
 .venv/Scripts/python tools/cut_combat_layers.py --all [--check|--verify]   # 10 configs
 .venv/Scripts/python tools/gen_furina_stills.py    # and gen_kokomi_stills.py
-.venv/Scripts/python tools/gen_char_icon_outlines.py [--check]   # all three outline halos
+.venv/Scripts/python tools/gen_char_icons.py [--chars klee,varka,kokomi,furina] [--art-root <checkout>] [--out-root <dir>] [--check]   # top-bar icons, 85x85 like the base cast
+.venv/Scripts/python tools/gen_char_icon_outlines.py [--check]   # every outline halo, after gen_char_icons
 .venv/Scripts/python tools/gen_mod_image.py [--check]      # Mods-screen badge, EB-161
 .venv/Scripts/python tools/gen_multiplayer_hands.py [--check] [--art-root <checkout>]   # co-op treasure hands, from the game pck
 ```
@@ -80,6 +81,24 @@ that `setoff` used to cross-fade to was retired on 2026-10-13 (owner: "I
 regret keeping that around"); its cut layers no longer ship, except Dodoco,
 which `pck-src/klee/vfx/dodoco_pop.tscn` draws.
 
+**Character-select idle loops (`tools/select_loop.py`, stage 2, 2026-10-15).**
+Klee, Varka and Furina's select scenes play a rendered loop of the close-up:
+the same pose, camera, scale and paint as `select_closeup.png`, moved through
+half a breath (`SELECT_LOOP` in each pose library: chest, head, arms, the
+pigtails, coat tails or cloth, all cosines) and played forward then back, so
+there is no seam. Only the box of pixels that moves goes in the sheet
+(`ui/select_loop.png`, 13 frames at 6 fps, about 8 M texels, VRAM-compressed by
+`build_pck.ps1`'s `.import`); the rest is `ui/select_closeup_static.png`. The
+still stays, and `tools/select_bg.py` draws the stage-1 breathing still for a
+character with no entry in the committed `tools/select_loop.json`. Kokomi and
+Yae wait for real models.
+
+```sh
+.venv/Scripts/python tools/select_loop.py build --char klee --pmx <klee pmx> --work <scratch dir> --art-root <main checkout>
+.venv/Scripts/python tools/select_loop.py build --char varka|furina --models <scratch>/models --work <scratch dir> --art-root <main checkout>
+.venv/Scripts/python -m tools.<char>_rig gen     # the scene reads the manifest
+```
+
 **The other kits' model renders (`tools/char_render/`, Varka first, 2026-10-13).**
 The same pipeline for a kit whose `chars.py` entry names a pose library:
 `toon.py` is the Blender half both renderers import (style H1's STYLE, the
@@ -95,9 +114,14 @@ in the clip's cell, an AtlasTexture margin in Godot); a clip too big for one
 4096 sheet continues on `_p2`, `_p3` pages. Pixels under the ground line
 are cut, so planted blades read as driven in. Varka's pose library is
 `varka_clips.py`; his paper is `review/active/varka-visual-paper-2026-10-13.md`.
+Furina's is `furina_clips.py` (phase A, `review/active/furina-visual-paper-2026-10-13.md`):
+no blades, a phantom rapier off her far hand (`PHANTOM`) for the attack's
+trail, her eleven guest stars as one still each (`render.py --guests`, at her
+px per inch: `chars.guest_ppu`), and Spend, Drain and Repay as stage effect
+clips (`fx.STAGE_EFFECTS`).
 
 ```sh
-.venv/Scripts/python tools/char_render/build.py --char varka --models <scratch>/models --work <scratch dir> --art-root <scratch art root>
+.venv/Scripts/python tools/char_render/build.py --char varka|furina|kokomi|yae --models <scratch>/models --work <scratch dir> --art-root <scratch art root>
 .venv/Scripts/python tools/char_render/pack.py --char varka --renders <scratch dir> --art-root <dir> [--check]
 ```
 
@@ -126,6 +150,82 @@ Never hand-edit the scenes:
 
 ```sh
 .venv/Scripts/python -m tools.varka_rig gen [--check]           # write / check both scenes (no art)
+```
+
+**Furina's scenes (`tools/furina_rig/`, phase B, 2026-10-13).** Varka's
+generator is the template and lends its primitives. Her
+`pck-src/furina/model/combat.tscn` and `merchant_character.tscn` come from
+`tools/furina_rig/furina.yaml` and `tools/char_render/furina_frames.json`:
+the router contract plus a `rejoice` state (Let the People Rejoice;
+`CardPlayMotion` sends `Rejoice`, the router absorbs the card's lunge), and
+`%AttackFx`, the phantom rapier's trail, on the element shader resting at
+Hydro (the node's `rest_element`, read by `ElementTrail`). The Spend, Drain
+and Repay effects are sprites under `Visuals/Facing/StageFx` at her chest,
+each on its manifest tint with an AnimationPlayer of its own at the root
+(`%SpendFxPlayer` and so on); `StageDirector` asks the board for one on each
+Spend, Drain and Repay (`IStageBoard.Effect`), and `KleeMod.Vfx.FurinaStageFx`
+plays it without waiting, stretching Drain and Repay along x to the nearest
+seated guest. `tools/furina_rig/guests.py` writes the eleven
+`guest_<name>.tscn` from the manifest's `guests` (the trio's template, the
+still's feet on the origin, Bounds the still's width). `build_pck.ps1` copies
+`ImageGen/images/furina/model/frames/*.png` and `model/guests/*.png` with
+VRAM-compressed imports, switches her rest scene to `furina_rest.png` and her
+select art to `ui/select_closeup.png` when they exist, and no longer ships her
+layer-cut rig or the guests' flat cutouts (`tools/cut_guest_bodies.py`, which
+no longer writes scenes). `char_render/pack.py` is the one producer of all of
+them and of her roster tile. Never hand-edit the scenes:
+
+```sh
+.venv/Scripts/python -m tools.furina_rig gen [--check]          # write / check her two scenes and the eleven guests (no art)
+```
+
+**Kokomi's model art (`kokomi_clips.py`, `tools/kokomi_rig/`, phase A,
+2026-10-14).** Rendered 2026-10-14 (218 px at 1080p against a 217.7 target;
+`kokomi_frames.json` committed, both scenes generated, her layer-cut rig and
+static merchant sprite gone, `AttackAnimDelay` 0.4 s on the push). Her pose library
+on the body PMX `珊瑚宫心海.pmx` (the same bone set and proportions as
+Furina's), 63 in, rest height 1.6261 units read off the PMX's vertices.
+Phase A is the surfaces every kit needs: idle, low-HP idle, attack (a push
+of water whose jet is a phantom off her far hand, Furina's mechanism), cast,
+hurt, death (the router needs it), the shop loop, the rest seat, the select
+close-up, the roster tile (its producer moved here from
+`gen_kokomi_stills.py`) and the shadow. Card clips wait until her build is
+final. Her long sleeves and skirt tails are physics chains, so every pose
+hangs the sleeves from the elbows (`cloth`). `tools/kokomi_rig` generates
+her two scenes from `kokomi_frames.json`; `build_pck.ps1` copies her frames
+and switches her rest and select art when they exist. To re-render:
+
+```sh
+.venv/Scripts/python tools/char_render/build.py --char kokomi --models <scratch>/models --work <scratch dir> --art-root <scratch art root>
+# review the sheets; copy <scratch art root>/ImageGen/images/kokomi into the main checkout's ImageGen
+.venv/Scripts/python -m tools.kokomi_rig gen                    # writes pck-src/kokomi/model/combat.tscn + merchant_character.tscn
+```
+
+**Yae Miko's model art (`yae_clips.py`, `tools/yae_rig/`, phase A, a
+temporary model, 2026-10-14).** Kokomi's phase A, for Yae. Rendered
+2026-10-14 (242.7 px at 1080p against a 241.9 target; `yae_frames.json`
+committed, both scenes generated, her static merchant sprite gone,
+`AttackAnimDelay` 0.4 s on the flick, frame 8). The body PMX is `八重神子.pmx`
+from the official pack (scratch `models/SOURCES.md`); the 观海 bone set at
+about 1.13x Kokomi's frame, rest height 1.8057 units read off the PMX's
+vertices, 70 in (Navia's height: the two packs share a head-bone height to
+0.2%; not yet ruled). The pack has no gohei, so her attack is a flick of
+the open far hand whose fox spirit is a phantom line (`PHANTOM`), tinted
+Electro; her cast plants a Sesshou Sakura (a seal, then a sweep to the
+ground); her rest pose is seiza. Her long robe is twelve skirt chains, laid
+over her lap whenever she kneels or sits (`FRONT`, `cloth(seated_yaw=)`).
+Pose bone names are the imported ones (mmd_tools turns the PMX's 左X into
+X.L), which also fixed Kokomi's sleeve and tail names before her first
+render. `tools/yae_rig` generates her two scenes from `yae_frames.json`
+(her box is Kokomi's x 1.11; every rendered cell sits inside it);
+`build_pck.ps1` copies her frames and switches her rest and select art when
+they exist, and `Yae.cs` loads `yae/model/combat.tscn` first, so Klee's
+borrowed still stays only where her own file is missing. To re-render:
+
+```sh
+.venv/Scripts/python tools/char_render/build.py --char yae --models <scratch>/models --work <scratch dir> --art-root <scratch art root>
+# review the sheets; copy <scratch art root>/ImageGen/images/yae into the main checkout's ImageGen
+.venv/Scripts/python -m tools.yae_rig gen                       # writes pck-src/yae/model/combat.tscn + merchant_character.tscn
 ```
 
 **The edge lint (L13, `art_lint.py --edges`).** `cover` is the wrong default for

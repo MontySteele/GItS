@@ -25,11 +25,15 @@ namespace KleeMod.Powers;
 /// (2026-10-11): the face says "without writing it as a Plan" instead, because
 /// seats read "normally" as jargon.
 ///
-/// KOKOMI ROUND 2 (2026-10-12): any card that can be written as a Plan
-/// (<see cref="KokomiRefounding.CanBeWritten"/>: a Plan line, or a Companion
-/// card) counts, played without writing it. A carry-out is not a play of
-/// hers (<see cref="KokomiPlan.IsCarryingOut"/>): a written Companion's
-/// carried-out copy draws nothing.
+/// KOKOMI ROUND 2 (2026-10-12): a Plan card or a Companion card counts,
+/// played without writing it (the face: "a Plan card or a Companion without
+/// planning it"). Since Kokomi review r9 pick 1 (a) (2026-10-15) a Companion
+/// can be planned only when it prints a Plan line, so the gate names
+/// Companions itself (<see cref="ICompanionCard"/>) rather than reading
+/// <see cref="KokomiRefounding.CanBeWritten"/> alone: the cards that count
+/// are unchanged. A carry-out is not a play of hers
+/// (<see cref="KokomiPlan.IsCarryingOut"/>): Crystal Collapse's copy draws
+/// nothing.
 ///
 /// ONCE PER TURN on the ledger's shared latch
 /// (<see cref="KokomiOverhaulLedger.ClaimOncePerTurn"/>), claimed before the
@@ -57,7 +61,8 @@ public sealed class TreatisePower : PowerModel, ILocalizationProvider
     {
         if (Owner == null || Amount <= 0) return;
         if (cardPlay.Card.Owner?.Creature != Owner) return;
-        if (!KokomiRefounding.CanBeWritten(cardPlay.Card)) return;
+        if (!KokomiRefounding.CanBeWritten(cardPlay.Card)
+            && cardPlay.Card is not ICompanionCard) return;
         if (KokomiPlan.PlayedOnPet(cardPlay)) return;
         var player = Owner.Player;
         if (player == null) return;
@@ -185,4 +190,62 @@ public sealed class NereidsAscensionPower : PowerModel, ILocalizationProvider
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Single;
+}
+
+/// <summary>
+/// A STUNNING STRATAGEM (Kokomi's own potions, 2026-10-15,
+/// <c>review/active/kokomi-relics-potions-2026-10-15.md</c>): "Next turn,
+/// every Plan is carried out twice." Nereid's Ascension's read, widened to
+/// every entry and scoped to one turn: <c>KokomiPlan.StratagemTimes</c> asks
+/// for it inside the drain loop and at Change of Plans' door, so the morning
+/// and any Plan carried out early on that turn are all doubled.
+///
+/// THE TURN IS A ROUND NUMBER, armed by the potion (<see cref="Arm"/>) as the
+/// round after the one it was drunk in. A second potion arms its own next
+/// round. The badge leaves at the end of the last armed turn.
+/// </summary>
+public sealed class StunningStratagemPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "A Stunning Stratagem"),
+        ("description",
+            "Next turn, every [gold]Plan[/gold] is carried out twice."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Single;
+
+    /// <summary>Made on first use, never by the constructor (Andrius's
+    /// Howl's reason: a mutable power is a copy of the canonical one).
+    /// </summary>
+    private HashSet<int>? _rounds;
+
+    private HashSet<int> Rounds => _rounds ??= new();
+
+    /// <summary>The armed rounds. Read by the tests.</summary>
+    public IReadOnlyCollection<int> Armed => Rounds;
+
+    /// <summary>Arm the round after <paramref name="drunkIn"/>.</summary>
+    public void Arm(int drunkIn) => Rounds.Add(drunkIn + 1);
+
+    /// <summary>Is <paramref name="round"/> an armed turn? PURE.</summary>
+    public bool LiveIn(int round) => Rounds.Contains(round);
+
+    /// <summary>Is this turn an armed one?</summary>
+    public bool LiveNow => LiveIn(Owner?.CombatState?.RoundNumber ?? -1);
+
+    /// <summary>Does any armed turn lie after <paramref name="round"/>?
+    /// PURE.</summary>
+    public bool OwedAfter(int round) => Rounds.Any(r => r > round);
+
+    public override async Task AfterSideTurnEnd(
+        PlayerChoiceContext choiceContext, CombatSide side,
+        IEnumerable<Creature> participants)
+    {
+        if (side != CombatSide.Player) return;
+        if (OwedAfter(Owner?.CombatState?.RoundNumber ?? int.MaxValue)) return;
+        await PowerCmd.Remove(this);
+    }
 }

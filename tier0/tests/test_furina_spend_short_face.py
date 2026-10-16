@@ -15,16 +15,14 @@ from tier0.tests.test_arm_keyword_tips import PROTOTYPE_DIR, gen, proto
 
 REPO = Path(__file__).resolve().parents[2]
 POWERS = REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
-SPEND_MODES = {"ProtoFsIntervalBell.cs": "(IsUpgraded ? 2 : 3)",
-               "ProtoFsBubbleAria.cs": "3",
+SPEND_MODES = {"ProtoFsBubbleAria.cs": "3",
                "ProtoFsCommandingGaze.cs": "4"}
 
 
 def test_only_spend_mode_rows_carry_the_line():
     carrying = {row["id"] for row in proto._rows()
                 if gen.stage_spend_short_call(row) is not None}
-    assert carrying == {"proto_fs_interval_bell", "proto_fs_bubble_aria",
-                        "proto_fs_commanding_gaze"}
+    assert carrying == {"proto_fs_bubble_aria", "proto_fs_commanding_gaze"}
 
 
 def test_the_generated_faces_carry_the_token_and_the_gate_s_price():

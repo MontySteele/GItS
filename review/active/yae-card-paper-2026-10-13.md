@@ -90,7 +90,9 @@ Every reading a builder would otherwise choose. The sim takes exactly these.
   returns next fight) and Published again later (the new one replaces it).
 - **In combat** (The Seven Glamours): choose an Annotated card in hand; its
   Annotation is Published.
-- **At a rest site** (the relic, sec.3): see pick 2. Default: the card keeps
+- **After an elite or boss fight** (the relic, sec.3; at a rest site until
+  2026-10-14, `yae-design-axes-2026-10-14.md`, last section): see pick 2.
+  Default: the card keeps
   the Annotation it last carried in a combat this run (its *draft*; the
   game remembers one draft per card), so Publishing is a choice among edits
   she has already played with, not a menu.
@@ -104,15 +106,26 @@ five Annotations; Publish is the relic's word). Pick 6.
 Strike x4, Defend x4 (base game), and:
 - **Yakan Evocation** (Skill, 1): Plant a Sakura. Upgrade: cost 0. Her E;
   the shrine's teaching card.
-- **Proofread** (Skill, 1 [0]): Edit a card in your hand: Red Ink. Ruled
+- **Proofread** (Skill, 1 [0]): Edit a card in your hand: Reprint. Ruled
   2026-10-13 (pick 3): no Block, and the upgrade makes it cost 0, like a
   Defect starter. The sim's plain-Proofread battery read 15.2 HP lost a fight
-  (sec.7); that gap is read again once the pool is built.
+  (sec.7); that gap is read again once the pool is built. **Changed
+  2026-10-14** from Red Ink to Reprint, [USER]: "I actually do think it just
+  needs to be stronger. Let's bump it to 'Play it twice.' AKA the card gets
+  repeated (I think this is a base game enchant?) If Yae starts actually
+  winning, we'll worry if that's OP." **Reprint** is a new Annotation, the
+  base game's Glam: "The first time this card is played each combat, play it
+  twice." Like every Annotation it lasts the combat, a Published one the run
+  (then once per combat, every combat); it reaches any playable card. Red
+  Ink stays in the game on the cards that still grant it (Margin Note,
+  Inked Branches).
 - **Meditations of a Yako** (starting relic, her utility passive's name):
-  "At a rest site you may Publish: a card you Edited this run keeps its last
-  Annotation for the rest of the run." In place of Rest or Smith, the way
-  Shovel adds Dig. Its upgrade, **Enlightened Blessing** (her A4): "You may
-  Publish and then Rest or Smith." No free setup: fight one opens with an
+  "After an elite or boss fight, you may Publish an Annotation." (Ruled
+  2026-10-14, `yae-design-axes-2026-10-14.md`; it was a rest-site choice in
+  place of Rest or Smith.) Its upgrade, **Enlightened Blessing** (her A4):
+  "After an elite or boss fight, you may Publish up to 2 Annotations."
+  (Claude's interim reading; it was "Publish and then Rest or Smith".) No
+  free setup: fight one opens with an
   empty shrine and an unedited deck.
 
 The upgraded starter cards need distinct names (LAW): proposed "Yakan
@@ -308,7 +321,7 @@ Numbers in brackets are the upgrade. "Electro" on an Attack is her cadence.
 
 **Starter**
 - **Yakan Evocation** (Skill, 1 [0]): Plant a Sakura. The shrine, from fight one.
-- **Proofread** (Skill, 1 [0]): Edit a card in your hand: Red Ink. The house, from fight one; ruled pick 3 (no Block, the upgrade costs 0).
+- **Proofread** (Skill, 1 [0]): Edit a card in your hand: Reprint (Red Ink until 2026-10-14; see sec.3). The house, from fight one; ruled pick 3 (no Block, the upgrade costs 0).
 
 **Common (9)**
 - **Kitsune Flash** (Attack, 1): Deal 6 [8] Electro damage. If this card is Annotated, deal 3 [4] more. The Common that asks to be Edited.

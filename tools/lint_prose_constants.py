@@ -207,6 +207,30 @@ PATHISH_RE = re.compile(r"res://|[/\\]|\.png|\.tres|\.ogg")
 # list stays as short as the code makes it.
 # --------------------------------------------------------------------------
 ALLOWED: dict[tuple[str, str, str], str] = {
+    # KOKOMI NUMBERS PASS (kokomi-review-r5-2026-10-14): Battle Formation's
+    # draw went 2 -> 1, so every other "draw 1 card" face joins it.
+    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoFsFinalBow.cs",
+     "BattleFormationPower.Draw", "1"):
+        "the card's own base-game draw, not Battle Formation's",
+    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoFsTutti.cs",
+     "BattleFormationPower.Draw", "1"):
+        "the card's own base-game draw, not Battle Formation's",
+    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoKoBlazingDelight.cs",
+     "BattleFormationPower.Draw", "1"):
+        "the card's own draw, not Battle Formation's",
+    ("klee-mod/KleeCode/Powers/Prototype/LionsFangPower.cs",
+     "BattleFormationPower.Draw", "1"):
+        "the power's own draw, not Battle Formation's",
+    ("klee-mod/KleeCode/Powers/Prototype/YaeAnnotations.cs",
+     "BattleFormationPower.Draw", "1"):
+        "Footnote's own draw 1, not Battle Formation's",
+    # YAE MIKO (2026-10-13): Footnote's own draw, the Annotation's rule.
+    ("klee-mod/KleeCode/Powers/Prototype/YaeAnnotations.cs",
+     "AbyssNumbers.ResonanceDraw", "1"):
+        "Footnote's own draw 1, not the Abyss Blessing's",
+    ("klee-mod/KleeCode/Powers/Prototype/YaeAnnotations.cs",
+     "FurinaStageLaw.CharlotteLineDraw", "1"):
+        "Footnote's own draw 1, not Charlotte's line",
     # The guest package (2026-10-13): Navia's act now Spends a third.
     ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoFsBubbleAria.cs",
      "FurinaStageLaw.NaviaSpendDivisor", "3"):
@@ -230,6 +254,9 @@ ALLOWED: dict[tuple[str, str, str], str] = {
     ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoKoBlazingDelight.cs",
      "WaitForItPower.ReactionEnergy", "1"):
         "the card's own energy, not Wait For It's",
+    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoKoBlazingDelight.cs",
+     "BouquetOfRoses.Energy", "1"):
+        "the card's own energy, not Bouquet of Roses'",
     # KLEE'S STORY (2026-10-12): Confinement's "After 3 combats" is a story
     # Curse's length; these strings print their own numbers.
     ("klee-mod/KleeCode/Cards/Prototype/ArmKeywordTips.cs",
@@ -243,6 +270,21 @@ ALLOWED: dict[tuple[str, str, str], str] = {
     ("klee-mod/KleeCode/Story/KleeStory.cs",
      "KleeOverhaulLaw.BombGrowth", "2"):
         "the story event's upgrade count, not the Bomb's growth",
+    # THE STORY CHAINS (2026-10-15, review/active/klee-varka-story-chains-
+    # 2026-10-14.md): Mom's Last Note's "Upgrade 3 random cards that place a
+    # Bomb" is the event's own count (the ruled paper's text).
+    ("klee-mod/KleeCode/Story/KleeStory.cs",
+     "FurinaStageLaw.EscoffierLineBonusUpgraded", "3"):
+        "the story event's upgrade count, not a Furina guest number",
+    ("klee-mod/KleeCode/Story/KleeStory.cs",
+     "FurinaStageLaw.HighStakesEveryUpgraded", "3"):
+        "the story event's upgrade count, not a Furina guest number",
+    ("klee-mod/KleeCode/Story/KleeStory.cs",
+     "FurinaStageLaw.NaviaLineDiscountUpgraded", "3"):
+        "the story event's upgrade count, not a Furina guest number",
+    ("klee-mod/KleeCode/Story/KleeStory.cs",
+     "FurinaStageLaw.NeuvilletteHydroBonusUpgraded", "3"):
+        "the story event's upgrade count, not a Furina guest number",
     # VARKA'S STORY (2026-10-13, review/active/varka-story-2026-10-13.md):
     # "Upgrade 2 random cards" and "Upgrade 3 random cards" are the story
     # events' own counts (the ruled paper's text), not a Furina number.

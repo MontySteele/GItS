@@ -186,9 +186,10 @@ public class MotionPassTests
 
     [Theory]
     // Klee's one-shots run on the base game's clock since her model frames
-    // (2026-10-12: base casts 0.97-1.8 s); Furina's keep the motion pass's.
+    // (2026-10-12: base casts 0.97-1.8 s), and Furina's since hers
+    // (2026-10-13).
     [InlineData("klee-mod/pck-src/klee/model/combat.tscn", 0.9, 1.1)]
-    [InlineData("klee-mod/pck-src/furina/model/combat.tscn", 0.3, 0.5)]
+    [InlineData("klee-mod/pck-src/furina/model/combat.tscn", 0.9, 1.1)]
     public void Klee_and_Furina_carry_the_three_new_states(string path, double min, double max)
     {
         var scene = RepoFile(path);

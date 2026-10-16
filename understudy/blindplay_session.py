@@ -19,6 +19,7 @@ from understudy import authorship, bridge, offer_log, qa_packet, seat
 from understudy.blindplay_coop import (WAIT_POLL_S, blocked_on_partner,
                                        is_coop, not_waiting_line,
                                        wait_for_partner, wait_line)
+from understudy.blindplay_faces import hand_card_left, hand_card_picked
 from understudy.blindplay_grammar import act
 from understudy.blindplay_observe import observation
 from understudy.blindplay_read import _int, settle, settle_board, _text
@@ -742,6 +743,7 @@ class Session:
             result = post_when_the_room_is_open(
                 self.wire, action, post, tries=self.settle_tries,
                 delay=self.settle_delay_s)
+            card_played(state, action, post, result)
             # The card offer this answered, if any (`offer_log`).
             offer_log.record(state, res, command)
             # `EB-216`, R225's clause. AFTER the POST, because the ledger row
@@ -839,6 +841,16 @@ def post_when_the_room_is_open(wire: Any, action: str,
     return result
 
 
+#: 2026-10-14 (a seat's refused `choose` at Neow). The bridge's refusal names
+#: its own action -- "use advance_dialogue until it ends, then choose" -- and
+#: the redaction below turned the action into "[an internal id]", so the seat
+#: was told to use a thing it could not see. The page's word for that action
+#: is `proceed` (`blindplay_grammar._proceed`), so the sentence says that.
+BRIDGE_VERBS_IN_PAGE_WORDS = (
+    ("use advance_dialogue until it ends", "type `proceed` until it ends"),
+)
+
+
 def _result_line(result: Any) -> str:
     """The wire's answer to a POST, in the tester's vocabulary.
 
@@ -860,6 +872,8 @@ def _result_line(result: Any) -> str:
     text = " ".join(x for x in (_text(result.get("status")),
                                 _text(result.get("message")),
                                 _text(result.get("error"))) if x)
+    for wire_words, page_words in BRIDGE_VERBS_IN_PAGE_WORDS:
+        text = text.replace(wire_words, page_words)
     leaks = qa_packet.leaks(text)
     if leaks:
         # `EB-393`. THE REDACTION NAMES WHAT IT WITHHELD. One leaking token
@@ -886,6 +900,20 @@ def refused(result: Any) -> bool:
     (`vendor/STS2_MCP/McpMod.Helpers.cs`)."""
     return (isinstance(result, dict)
             and _text(result.get("status")) == "error")
+
+
+def card_played(state: dict[str, Any], action: str, post: dict[str, Any],
+                result: Any) -> None:
+    """A sent play the bridge did not refuse: that card has left the hand,
+    so its number goes with it (`blindplay_faces.hand_card_left`). A sent
+    hand-chooser pick: that card keeps its number wherever the pick leaves
+    it (`blindplay_faces.hand_card_picked`)."""
+    if refused(result) or not isinstance(post.get("card_index"), int):
+        return
+    if action == "play_card":
+        hand_card_left(state, post["card_index"])
+    elif action == "combat_select_card":
+        hand_card_picked(state, post["card_index"])
 
 
 def answer_lines(res: dict[str, Any], state: dict[str, Any] | None,
@@ -984,6 +1012,12 @@ def taken_line(res: dict[str, Any], state: dict[str, Any] | None = None) -> str:
     # Kokomi r28 seat a whole batched turn -- and the play now goes through
     # with the clause ignored. The answer has to say so, or a seat learns
     # nothing and keeps typing it.
+    # Kokomi review r6 (2026-10-14, item 13): an ALL-enemies card played
+    # bare that the game still aims at one body went to the front.
+    auto = _text(printed.get("auto_target"))
+    if auto:
+        line += (f" It prints ALL enemies, so no `on` was needed; the game "
+                 f"aims it at one body, and it went to {auto}.")
     ignored = _text(printed.get("ignored_target"))
     if ignored:
         line += (f' Its `on "{ignored}"` was ignored: this card '

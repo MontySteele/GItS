@@ -39,11 +39,11 @@ public class NullTargetPreviewGateTests
     }
 
     [Fact]
-    public void Hydro_lance_in_hand_previews_neuvillettes_hydro_line()
+    public void Cleansing_torrent_in_hand_previews_neuvillettes_hydro_line()
     {
         InCombat(() =>
         {
-            var b = Build(new ProtoFsHydroLance(),
+            var b = Build(new ProtoFsCleansingTorrent(),
                           f => f.WithPower<FanfarePower>(1));
             var formula = b.Card.DynamicVars.CalculatedDamage.Calculate(null);
             Assert.Equal(formula, Preview(b.Card, null, inHand: true));

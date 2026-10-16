@@ -26,6 +26,13 @@ public static class GitsAbyssPage
     /// <c>AbyssOverlay.PageMeta</c>).</summary>
     public const string MetaKey = "gits_abyss_page";
 
+    /// <summary>The meta key on the event ROOM holding the result line once
+    /// the pick has landed (the mod's <c>AbyssOverlay.ResultMeta</c>). It
+    /// outlives the screen, so a seat that looks after the screen has gone
+    /// still reads which Shadow the enemies took (co-op Abyss run,
+    /// 2026-10-14).</summary>
+    public const string ResultMetaKey = "gits_abyss_result";
+
     /// <summary>Card i's clickable (the mod's
     /// <c>AbyssOverlayView.CardNodeName</c>).</summary>
     public static string CardNodeName(int index) => $"AbyssCard{index}";
@@ -80,7 +87,16 @@ public static class GitsAbyssPage
             ["blessings_taken"] = Strings(page, "blessings_taken"),
             ["shadows_in_force"] = Strings(page, "shadows_in_force"),
         };
+        ApplyResult(state, Str(page, "result"));
         return true;
+    }
+
+    /// <summary>The pick's result line as `abyss_result` on the event
+    /// state: what was chosen and the Shadow the enemies took. Nothing for
+    /// an empty line.</summary>
+    public static void ApplyResult(Dictionary<string, object?> state, string? line)
+    {
+        if (!string.IsNullOrWhiteSpace(line)) state["abyss_result"] = line;
     }
 
     /// <summary>Is the page still taking a pick?</summary>

@@ -66,8 +66,8 @@ public sealed class ProtoKkBrineSting : CustomCardModel, IElementalCard, ICharac
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(8m, ValueProp.Move),
-            new KokomiPlan.PlanDamageVar(8m)
+            new DamageVar(10m, ValueProp.Move),
+            new KokomiPlan.PlanDamageVar(10m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

@@ -257,6 +257,14 @@ def test_every_table_row_has_a_method_and_a_registered_title_row(keyword):
     method = keyword.attach.split(".", 1)[1]
     assert f"IEnumerable<IHoverTip> {method}(" in tips, keyword.word
 
+    if method == "ForAnnotation":
+        # Yae (2026-10-14): one key per Annotation (`KeyOf`), each titled by
+        # its name in a loop over `YaeAnnotationText.All`.
+        assert '"KLEEMOD-ARM_YAE_" + annotation' in tips
+        mod = MOD_CS.read_text(encoding="utf-8")
+        assert "foreach (var annotation in Powers.YaeAnnotationText.All)" in mod
+        assert "ArmKeywordTips.KeyOf(annotation) + \".title\"" in mod
+        return
     const = _key_const(keyword)
     assert re.search(rf'\bconst string {const} = "KLEEMOD-ARM_[A-Z_]+";',
                      tips), keyword.word
@@ -316,9 +324,6 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT",
                     # The text pass of 2026-10-08: the Plan tip a plan-only
                     # card carries in ForPlan's place (no line above, no flip).
                     "KLEEMOD-ARM_PLAN_ONLY",
-                    # The Kokomi re-founding (2026-10-12): the Plan tip a
-                    # Companion carries while Kokomi holds it.
-                    "KLEEMOD-ARM_PLAN_COMPANION",
                     # The Kokomi round-1 fixes (2026-10-12): the Plan tip a
                     # card that names Plans with no Plan line carries.
                     "KLEEMOD-ARM_PLAN_NO_LINE",
@@ -338,7 +343,10 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT",
                     "KLEEMOD-ARM_KLEE_BIG_BADDA_BOOM_TOTAL",
                     "KLEEMOD-ARM_KLEE_BOOM_BADGE_TURN",
                     "KLEEMOD-ARM_KLEE_LIONS_FANG_LAST_TURN",
-                    "KLEEMOD-ARM_KLEE_PASS_THE_MATCH_ACTING"}
+                    "KLEEMOD-ARM_KLEE_PASS_THE_MATCH_ACTING",
+                    # Yae review r3 (2026-10-14): the full-shrine rule,
+                    # attached off a planting row's op, not a printed word.
+                    "KLEEMOD-ARM_YAE_FULL_SHRINE"}
 
 
 def test_the_arm_keys_never_collide_with_a_shipped_keyword_id():
@@ -741,7 +749,9 @@ def test_the_four_base_words_the_surface_prints_are_exercised():
     Soothing Waters and Pneuma Tides print Vigor. Seven since the Kokomi
     re-founding (2026-10-12): five faces name Ethereal. Six again since the
     Kokomi level pass (2026-10-12): General's War Banner, the one face that
-    printed Dexterity, gains Block now."""
+    printed Dexterity, gains Block now. The Furina sweep (2026-10-14) cut
+    Soothing Waters and Pneuma Tides, so Vigor leaves; its second set prints
+    no Dexterity."""
     printed = {keyword.word
                for path in _prototype_files()
                for description in _descriptions(
@@ -749,7 +759,7 @@ def test_the_four_base_words_the_surface_prints_are_exercised():
                for keyword in gen.BASE_KEYWORDS
                if keyword.attach in gen.base_keyword_tip_calls(description)}
     assert printed == {"Vulnerable", "Weak", "Strength",
-                       "Frail", "Vigor", "Ethereal"}
+                       "Frail", "Ethereal"}
 
 
 def test_the_row_the_defect_was_filed_against_carries_the_vulnerable_tip():
@@ -911,7 +921,11 @@ CONJUGATIONS = {"Exhausted": "Exhaust",
                 "plan": "Plan",
                 # High Stakes (the Spend round, 2026-10-10): "HP you have
                 # Drained and not Repaid" (the page's Repay row matches it).
-                "Repaid": "Repay"}
+                "Repaid": "Repay",
+                # YAE MIKO (2026-10-13): the Edit row carries Edited,
+                # Annotated and Publish. Tenko and each Annotation are rows
+                # of their own since 2026-10-14.
+                "Edited": "Edit", "Annotated": "Edit", "Publish": "Edit"}
 
 
 def _word_owner(word: str) -> str:
@@ -1253,17 +1267,17 @@ def test_the_summon_and_performer_tips_state_the_ruled_sentences():
             '"acts once and leaves; its card goes to your [gold]Discard "',
             '"Exhausts. Acts at the end of your turn. When it leaves, this "',
             '"card goes to your [gold]Discard Pile[/gold]."',
-            "ActText(StagePerformer.Charlotte, card.IsUpgraded));",
-            "ActText(StagePerformer.Wriothesley, card.IsUpgraded));",
-            "ActText(StagePerformer.Lynette, card.IsUpgraded));",
-            "ActText(StagePerformer.Clorinde, card.IsUpgraded));",
-            "ActText(StagePerformer.Lyney, card.IsUpgraded));",
-            "ActText(StagePerformer.Sigewinne, card.IsUpgraded));",
-            "ActText(StagePerformer.Chevreuse, card.IsUpgraded));",
-            "ActText(StagePerformer.Freminet, card.IsUpgraded));",
-            "ActText(StagePerformer.Navia, card.IsUpgraded));",
-            "ActText(StagePerformer.Neuvillette, card.IsUpgraded));",
-            "ActText(StagePerformer.Escoffier, card.IsUpgraded));"):
+            "ActText(StagePerformer.Charlotte, card.IsUpgraded)));",
+            "ActText(StagePerformer.Wriothesley, card.IsUpgraded)));",
+            "ActText(StagePerformer.Lynette, card.IsUpgraded)));",
+            "ActText(StagePerformer.Clorinde, card.IsUpgraded)));",
+            "ActText(StagePerformer.Lyney, card.IsUpgraded)));",
+            "ActText(StagePerformer.Sigewinne, card.IsUpgraded)));",
+            "ActText(StagePerformer.Chevreuse, card.IsUpgraded)));",
+            "ActText(StagePerformer.Freminet, card.IsUpgraded)));",
+            "ActText(StagePerformer.Navia, card.IsUpgraded)));",
+            "ActText(StagePerformer.Neuvillette, card.IsUpgraded)));",
+            "ActText(StagePerformer.Escoffier, card.IsUpgraded)));"):
         assert clause in tips, clause
     for gone in ("StagePerformer.Usher", "StagePerformer.Chevalmarin",
                  "StagePerformer.Crabaletta", "[gold]Bow[/gold]"):
@@ -1313,7 +1327,7 @@ def test_a_spend_cards_sentence_face_still_splits_into_its_modes():
     # Tidal Flourish and Spirited Aria left the chooser for "Spend up to X"
     # (the Spend paper, 2026-10-10).
     for rid in ("proto_fs_surintendante_chevalmarin", "proto_fs_leading_lady",
-                "proto_fs_salons_tab", "proto_fs_interval_bell"):
+                "proto_fs_salons_tab"):
         assert gen.modal_option_faces(
             rows[rid], gen.modal_effect(rows[rid])["modes"]) is not None, rid
 

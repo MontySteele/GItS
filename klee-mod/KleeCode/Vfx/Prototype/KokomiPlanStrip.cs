@@ -4,6 +4,7 @@ using Godot;
 using HarmonyLib;
 using KleeMod.Powers;
 using MegaCrit.Sts2.Core.Combat;
+using MegaCrit.Sts2.Core.ControllerInput;
 using MegaCrit.Sts2.Core.Context;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
@@ -12,6 +13,7 @@ using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Nodes.CommonUi;
 using MegaCrit.Sts2.Core.Nodes.HoverTips;
 using MegaCrit.Sts2.addons.mega_text;
 using BaseLib.Abstracts;
@@ -40,12 +42,14 @@ namespace KleeMod.Vfx;
 /// (brief sec.3). So this draws a COLUMN, front at the top, one thumbnail per
 /// pending Plan.
 ///
-/// A COLUMN, CAPPED, AND THE CAP IS HONEST. <see cref="MaxDrawn"/> thumbnails
-/// fit the band; a longer queue draws the first four and says "+N" under them
-/// rather than silently dropping the tail. The count under the column is the
-/// queue's whole length, which is the same number
-/// <c>PendingPlansPower</c>'s badge carries -- both read
-/// <c>KokomiPlan.Pending</c>, so the two cannot disagree.
+/// A COLUMN OF FOUR, PAGED. <see cref="MaxDrawn"/> thumbnails fit the band;
+/// a longer queue draws a page of four and says "+N" under them. Clicking
+/// "+N" turns to the next four (release fix, 2026-10-14: seats queued eight
+/// Plans in one turn and a human could inspect and flip only the first
+/// four); the last page says "Back" and returns to the front. Every page's
+/// pictures hover and flip exactly as the first page's do. Both the strip
+/// and <c>PendingPlansPower</c>'s badge read <c>KokomiPlan.Pending</c>, so
+/// the two cannot disagree.
 ///
 /// ON THE JELLYFISH IS WHERE THE SLICE ASKS FOR IT, and the honest report is
 /// that this is a SCREEN-EDGE HUD element, not a node parented to the pet.
@@ -66,9 +70,17 @@ namespace KleeMod.Vfx;
 /// <see cref="KokomiPlan.RequestFlip"/>, which goes through the game's action
 /// queue so a co-op peer flips the same Plan; a second click flips it back.
 /// Under each two-line Plan a caption says the line it will be carried out
-/// as ("Plan line" / "Now-line"), and a flipped picture is tinted. Plans past
-/// <see cref="MaxDrawn"/> have no picture to click; the bridge's `flip` verb
-/// reaches every one.
+/// as ("Plan line" / "Now-line"), and a flipped picture is tinted. A picture
+/// on a later page flips the Plan at its own queue position, read off the
+/// picture when clicked (<see cref="IndexMeta"/>).
+///
+/// NO CONTROLLER FOCUS, still (`EB-300`): the strip, the pager included, is
+/// out of the focus graph. A controller player reaches the Plans through the
+/// Plans view instead (<see cref="KokomiPlanView"/>, 2026-10-14): the game's
+/// "peek" button (the left stick press by default) opens a card grid of every
+/// waiting Plan, where A flips one. While a controller is in use the strip
+/// draws that button's glyph and "Plans" under the column, so the player can
+/// find it; the hint is a picture and a word, out of the walk like the rest.
 ///
 /// QUARANTINED. `Vfx/Prototype/**` is Compile Remove'd without
 /// `-p:PrototypeCards=true`. Revert is the flag.
@@ -84,7 +96,7 @@ internal static class KokomiPlanStrip
     private const int CountFontSize = 30;
 
     /// <summary>How many Plans get a picture. A fifth would run off the band.</summary>
-    internal const int MaxDrawn = 4;
+    internal const int MaxDrawn = KokomiPlanPages.PerPage;
 
     private static readonly Color CountColor = StsColors.cream;
 
@@ -96,6 +108,9 @@ internal static class KokomiPlanStrip
     // 92-pixel picture.
     private const int LineFontSize = 14;
 
+    /// <summary>The button hint's row: the glyph is this square.</summary>
+    private const float HintHeight = 32f;
+
     /// <summary>The caption under a two-line Plan.</summary>
     internal const string PlanLineCaption = "Plan line";
     internal const string NowLineCaption = "Now-line";
@@ -103,6 +118,13 @@ internal static class KokomiPlanStrip
     /// <summary>The mark on the top picture: the Plan carried out first
     /// (Kokomi review 2026-10-13).</summary>
     internal const string FirstCaption = "First";
+
+    /// <summary>The page the strip is showing, on the root node.</summary>
+    private const string PageMeta = "kleemod_plan_page";
+
+    /// <summary>The queue position a picture is drawing, on the picture, so
+    /// a click on any page flips the Plan it shows.</summary>
+    private const string IndexMeta = "kleemod_plan_index";
 
     /// <summary>One element per seat, freed by the shared display skeleton the
     /// way the gauges are.</summary>
@@ -128,6 +150,10 @@ internal static class KokomiPlanStrip
         var root = Build(me);
         ui.AddChildSafely(root);
         Displays.Set(me, root);
+        // THE CONTROLLER'S DOOR (2026-10-14): the peek button opens the Plans
+        // view, bound for exactly this root's life.
+        KokomiPlanView.Bind(root, me);
+        WireDeviceSwitch(root, me);
         Paint(root, me);
     }
 
@@ -151,6 +177,7 @@ internal static class KokomiPlanStrip
             if (root == null) return;
         }
         Paint(root, player);
+        KokomiPlanView.Refresh(player);
     }
 
     /// <summary>Teardown, character-scoped like every other door into a
@@ -159,6 +186,7 @@ internal static class KokomiPlanStrip
     {
         var me = TryGetMe(state);
         if (me == null || !Live(me.Creature)) return;
+        KokomiPlanView.Close();
         Displays.Discard(me);
     }
 
@@ -227,7 +255,7 @@ internal static class KokomiPlanStrip
                 Visible = false,
             };
             WireHover(thumb);
-            WireClick(thumb, me, i);
+            WireClick(thumb, me);
             var line = new Label
             {
                 Name = "Line",
@@ -267,7 +295,9 @@ internal static class KokomiPlanStrip
         var count = new Label
         {
             Name = "Count",
-            MouseFilter = Control.MouseFilterEnum.Ignore,
+            // THE PAGER (release fix, 2026-10-14): "+N" is clickable and
+            // turns to the next four Plans.
+            MouseFilter = Control.MouseFilterEnum.Stop,
             FocusMode = Control.FocusModeEnum.None,
             HorizontalAlignment = HorizontalAlignment.Center,
             Position = new Vector2(
@@ -277,7 +307,44 @@ internal static class KokomiPlanStrip
         count.AddThemeFontSizeOverride(ThemeConstants.Label.FontSize,
                                        CountFontSize);
         count.AddThemeColorOverride(ThemeConstants.Label.FontColor, CountColor);
+        WirePager(count, root, me);
         root.AddChildSafely(count);
+
+        // THE BUTTON HINT (2026-10-14): the peek glyph and "Plans", drawn
+        // only while a controller (or keyboard-only play) is in use. A
+        // picture and a word -- no input, no focus (`EB-300`).
+        var hint = new Control
+        {
+            Name = "PadHint",
+            MouseFilter = Control.MouseFilterEnum.Ignore,
+            FocusMode = Control.FocusModeEnum.None,
+            Size = new Vector2(ThumbWidth, HintHeight),
+            Visible = false,
+        };
+        var glyph = new TextureRect
+        {
+            Name = "Glyph",
+            MouseFilter = Control.MouseFilterEnum.Ignore,
+            FocusMode = Control.FocusModeEnum.None,
+            ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+            StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
+            Size = new Vector2(HintHeight, HintHeight),
+        };
+        hint.AddChildSafely(glyph);
+        var words = new Label
+        {
+            Name = "Words",
+            MouseFilter = Control.MouseFilterEnum.Ignore,
+            FocusMode = Control.FocusModeEnum.None,
+            VerticalAlignment = VerticalAlignment.Center,
+            Position = new Vector2(HintHeight + 4f, 0f),
+            Size = new Vector2(ThumbWidth - HintHeight - 4f, HintHeight),
+        };
+        words.AddThemeFontSizeOverride(ThemeConstants.Label.FontSize,
+                                       LineFontSize + 4);
+        words.AddThemeColorOverride(ThemeConstants.Label.FontColor, CountColor);
+        hint.AddChildSafely(words);
+        root.AddChildSafely(hint);
         // The whole subtree, in one call, AFTER the children exist -- the
         // recursive flag is a property of the node it is set on and is read
         // through the tree, so setting it last covers what was added above and
@@ -305,17 +372,24 @@ internal static class KokomiPlanStrip
         // empty"; this is the half of the repair the HUD owns.
         var pending = KokomiPlan.Showing(player);
         var count = root.GetNodeOrNull<Label>("Count");
+        var page = KokomiPlanPages.ClampPage(
+            root.HasMeta(PageMeta) ? root.GetMeta(PageMeta).AsInt32() : 0,
+            pending.Count);
+        root.SetMeta(PageMeta, page);
+        var start = KokomiPlanPages.PageStart(page, pending.Count);
 
-        for (var i = 0; i < MaxDrawn; i++)
+        for (var slot = 0; slot < MaxDrawn; slot++)
         {
-            var thumb = root.GetNodeOrNull<TextureRect>("Plan" + i);
+            var thumb = root.GetNodeOrNull<TextureRect>("Plan" + slot);
             if (thumb == null) continue;
             var line = thumb.GetNodeOrNull<Label>("Line");
             var first = thumb.GetNodeOrNull<Label>("First");
+            var i = start + slot;
             if (i >= pending.Count)
             {
                 thumb.Visible = false;
                 SetCard(thumb, null);
+                if (thumb.HasMeta(IndexMeta)) thumb.RemoveMeta(IndexMeta);
                 if (line != null) line.Visible = false;
                 if (first != null) first.Visible = false;
                 continue;
@@ -323,6 +397,7 @@ internal static class KokomiPlanStrip
             thumb.Visible = true;
             thumb.Texture = Portrait(pending[i].Source);
             SetCard(thumb, pending[i].Source);
+            thumb.SetMeta(IndexMeta, i);
             // PICK 5 (a): the line a two-line Plan will be carried out as.
             var entry = pending[i];
             var flipped = entry.TwoLine && entry.Now;
@@ -330,7 +405,12 @@ internal static class KokomiPlanStrip
             // THE KOKOMI REVIEW (2026-10-13): the first Plan is marked, and
             // the caption reads the board -- Tide Wall's live total, or the
             // Block an Attack Plan will land in (`KokomiPlan.StripCaption`).
-            if (first != null) first.Visible = i == 0 && pending.Count > 1;
+            if (first != null)
+            {
+                var mark = KokomiPlanPages.PositionCaption(i, page, pending.Count);
+                first.Visible = mark != null;
+                first.Text = mark ?? string.Empty;
+            }
             if (line != null)
             {
                 var kokomi = player.Creature;
@@ -347,12 +427,114 @@ internal static class KokomiPlanStrip
             }
         }
 
+        PaintHint(root, page, pending.Count);
         if (count == null) return;
-        count.Text = pending.Count switch
+        count.Text = KokomiPlanPages.PagerCaption(page, pending.Count);
+    }
+
+    /// <summary>
+    /// THE BUTTON HINT: the peek button's glyph (the game's own, so a
+    /// remapped button shows its new glyph) and "Plans", under the last
+    /// picture or under the pager. Hidden for a mouse player and for an empty
+    /// queue.
+    /// </summary>
+    private static void PaintHint(Control root, int page, int count)
+    {
+        var hint = root.GetNodeOrNull<Control>("PadHint");
+        if (hint == null) return;
+        try
         {
-            0 => string.Empty,
-            var n when n > MaxDrawn => "+" + (n - MaxDrawn),
-            _ => string.Empty,
+            var input = NControllerManager.Instance?.InputType
+                        ?? InputType.MouseAndKeyboard;
+            var key = input == InputType.KeyboardOnlyMode
+                ? NInputManager.Instance?.GetCurrentHotkey(MegaInput.peek)
+                    .ToString()
+                : null;
+            var text = count > 0 ? KokomiPlanViewRows.HintText(input, key) : null;
+            hint.Visible = text != null;
+            if (text == null) return;
+            var glyph = hint.GetNodeOrNull<TextureRect>("Glyph");
+            if (glyph != null)
+            {
+                glyph.Texture = input == InputType.Controller
+                    ? NInputManager.Instance?.GetHotkeyIcon(MegaInput.peek)
+                    : null;
+                glyph.Visible = glyph.Texture != null;
+            }
+            var words = hint.GetNodeOrNull<Label>("Words");
+            if (words != null)
+            {
+                words.Text = text;
+                words.Position = new Vector2(
+                    glyph is { Visible: true } ? HintHeight + 4f : 0f, 0f);
+            }
+            var drawn = Math.Min(
+                count - KokomiPlanPages.PageStart(page, count), MaxDrawn);
+            var row = KokomiPlanViewRows.HintRow(drawn, count);
+            hint.Position = new Vector2(0f, row <= MaxDrawn
+                ? row * (ThumbHeight + ThumbGap)
+                : MaxDrawn * (ThumbHeight + ThumbGap) + CountFontSize + 12f);
+        }
+        catch (Exception e)
+        {
+            hint.Visible = false;
+            Log.Warn($"[{KleeMod.ModId}] plan strip: hint skipped: {e}");
+        }
+    }
+
+    /// <summary>
+    /// Repaint when the player picks up a controller or the mouse, so the
+    /// hint follows the device. Connected to this root and disconnected as it
+    /// leaves the tree, the way the game's own buttons pair the two.
+    /// </summary>
+    private static void WireDeviceSwitch(Control root, Player me)
+    {
+        var devices = NControllerManager.Instance;
+        if (devices == null) return;
+        var repaint = Callable.From(() =>
+        {
+            if (GodotObject.IsInstanceValid(root)) Paint(root, me);
+        });
+        devices.Connect(NControllerManager.SignalName.ControllerDetected, repaint);
+        devices.Connect(NControllerManager.SignalName.MouseDetected, repaint);
+        root.TreeExiting += () =>
+        {
+            if (!GodotObject.IsInstanceValid(devices)) return;
+            devices.Disconnect(NControllerManager.SignalName.ControllerDetected, repaint);
+            devices.Disconnect(NControllerManager.SignalName.MouseDetected, repaint);
+        };
+    }
+
+    /// <summary>
+    /// THE PAGER: a left click on "+N" (or "Back") turns the strip to the next
+    /// page and repaints. Display only -- no Plan moves, so nothing goes
+    /// through the action queue and a co-op peer's strip is untouched.
+    /// </summary>
+    private static void WirePager(Label pager, Control root, Player me)
+    {
+        pager.GuiInput += input =>
+        {
+            if (input is not InputEventMouseButton
+                {
+                    ButtonIndex: MouseButton.Left, Pressed: true,
+                })
+            {
+                return;
+            }
+            try
+            {
+                var queue = KokomiPlan.Showing(me);
+                if (queue.Count <= MaxDrawn) return;
+                var page = root.HasMeta(PageMeta)
+                    ? root.GetMeta(PageMeta).AsInt32() : 0;
+                root.SetMeta(PageMeta, KokomiPlanPages.NextPage(page, queue.Count));
+                Paint(root, me);
+                pager.AcceptEvent();
+            }
+            catch (Exception e)
+            {
+                Log.Warn($"[{KleeMod.ModId}] plan strip: page skipped: {e}");
+            }
         };
     }
 
@@ -373,14 +555,14 @@ internal static class KokomiPlanStrip
 
     /// <summary>
     /// PICK 5 (a): a left click on the picture of a waiting two-line Plan
-    /// flips it. The thumbnail's slot IS the queue position (the strip draws
-    /// the queue front first), and <see cref="KokomiPlan.RequestFlip"/>
+    /// flips it. The picture carries its queue position (<see cref="IndexMeta"/>,
+    /// written by <see cref="Paint"/>, so a later page flips its own Plan), and <see cref="KokomiPlan.RequestFlip"/>
     /// refuses a Plan-only one, a click outside her turn, and a click during
     /// the morning drain (<see cref="KokomiPlan.Showing"/> differs from the
     /// queue then). Any failure is logged and swallowed: a click must never
     /// throw into the UI.
     /// </summary>
-    private static void WireClick(TextureRect thumb, Player me, int slot)
+    private static void WireClick(TextureRect thumb, Player me)
     {
         thumb.GuiInput += input =>
         {
@@ -398,6 +580,8 @@ internal static class KokomiPlanStrip
                 {
                     return;
                 }
+                if (!thumb.HasMeta(IndexMeta)) return;
+                var slot = thumb.GetMeta(IndexMeta).AsInt32();
                 var why = KokomiPlan.RequestFlip(me, slot);
                 if (why == null) thumb.AcceptEvent();
             }
@@ -479,6 +663,57 @@ internal static class KokomiPlanStrip
             return custom.CustomPortrait;
         }
         return card.HasPortrait ? card.Portrait : null;
+    }
+}
+
+/// <summary>
+/// THE STRIP'S PAGES (release fixes, 2026-10-14), the arithmetic alone so it
+/// is pinned headlessly: four Plans a page, "+N" turns to the next four, the
+/// last page says "Back".
+/// </summary>
+public static class KokomiPlanPages
+{
+    /// <summary>Plans on one page of the strip (<c>KokomiPlanStrip.MaxDrawn</c>).</summary>
+    public const int PerPage = 4;
+
+    /// <summary>The pager under the column on its last page.</summary>
+    public const string BackCaption = "Back";
+
+    /// <summary>How many pages a queue of <paramref name="count"/> needs (at
+    /// least one).</summary>
+    public static int PageCount(int count) =>
+        count <= PerPage ? 1 : (count + PerPage - 1) / PerPage;
+
+    /// <summary>A page still on the queue: one past the end (the morning
+    /// drain shortens it) falls back to the front.</summary>
+    public static int ClampPage(int page, int count) =>
+        page >= 0 && page < PageCount(count) ? page : 0;
+
+    /// <summary>The page a click on the pager turns to: the next, and from
+    /// the last back to the front.</summary>
+    public static int NextPage(int page, int count) =>
+        (ClampPage(page, count) + 1) % PageCount(count);
+
+    /// <summary>The queue position of the first picture on a page.</summary>
+    public static int PageStart(int page, int count) =>
+        ClampPage(page, count) * PerPage;
+
+    /// <summary>What the pager says: "+N" for the Plans after this page,
+    /// "Back" on the last page of a long queue, nothing for a short one.</summary>
+    public static string PagerCaption(int page, int count)
+    {
+        if (count <= PerPage) return string.Empty;
+        var after = count - (ClampPage(page, count) + 1) * PerPage;
+        return after > 0 ? "+" + after : BackCaption;
+    }
+
+    /// <summary>The mark at the top of a picture: "First" on the front Plan
+    /// of a queue of two or more, "Plan N" on every picture of a later page
+    /// (its place in the order), nothing otherwise.</summary>
+    public static string? PositionCaption(int index, int page, int count)
+    {
+        if (index == 0) return count > 1 ? KokomiPlanStrip.FirstCaption : null;
+        return ClampPage(page, count) > 0 ? "Plan " + (index + 1) : null;
     }
 }
 

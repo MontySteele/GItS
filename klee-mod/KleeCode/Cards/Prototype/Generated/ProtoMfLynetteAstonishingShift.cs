@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMfLynetteAstonishingShift : CustomCardModel, ICompanionCard, IWritableCompanion
+public sealed class ProtoMfLynetteAstonishingShift : CustomCardModel, ICompanionCard
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -49,7 +49,9 @@ public sealed class ProtoMfLynetteAstonishingShift : CustomCardModel, ICompanion
         new[] { KleeKeywords.AppliesAnemo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSwirl(ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, appliesWithoutHit: true), this), this);
+        TipAudience.Seat
+            ? ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, appliesWithoutHit: true), this)
+            : KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, appliesWithoutHit: true);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("lynette_astonishing_shift");
 
@@ -58,14 +60,6 @@ public sealed class ProtoMfLynetteAstonishingShift : CustomCardModel, ICompanion
         ("title", "Lynette — Magic Trick: Astonishing Shift"),
         ("description", "[gold]Swirl[/gold] the enemy. Deal {CalculatedDamage:diff()} damage to ALL enemies."),
     };
-
-    /// <summary>On Kokomi, this Companion card can also be written as a Plan on
-    /// the Bake-Kurage (the re-founding, 2026-10-12).</summary>
-    public override TargetType TargetType =>
-        KokomiCompanionPlan.TargetFor(this, base.TargetType);
-
-    /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
-    public TargetType PrintedTargetType => base.TargetType;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
@@ -84,11 +78,6 @@ public sealed class ProtoMfLynetteAstonishingShift : CustomCardModel, ICompanion
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (KokomiPlan.PlayedOnPet(cardPlay))
-        {
-            await KokomiCompanionPlan.Write(choiceContext, this, cardPlay);
-            return;
-        }
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await ElementalHit.ApplyOnly(choiceContext, cardPlay.Target, Element.Anemo, Owner.Creature);
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)

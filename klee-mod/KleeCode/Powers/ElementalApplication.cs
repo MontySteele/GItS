@@ -106,6 +106,9 @@ public sealed class KleeElementalHooks : AbstractModel
         {
             await VarkaOath.EndPlay(choiceContext, oathCard);
         }
+        // YAE MIKO: Editor-in-Chief, after the card's own effects and its
+        // Annotation's (the play wrapper runs the Enchantment first).
+        await YaeShrine.AfterCardPlayed(choiceContext, cardPlay);
     }
 
     /// <summary>
@@ -122,6 +125,9 @@ public sealed class KleeElementalHooks : AbstractModel
         // VARKA (the Oath rework): Baron Bunny, Sworn Brotherhood, then Oath
         // of the Knights, after the draw.
         await VarkaOath.TurnStart(choiceContext, player);
+        // YAE MIKO (`yae_shrine.turn_start`): the Lure expires, Yakan
+        // Offering plants, after the draw.
+        await YaeShrine.TurnStart(choiceContext, player);
     }
 
     /// <summary>
@@ -170,6 +176,17 @@ public sealed class KleeElementalHooks : AbstractModel
         // ledger cleared on the wrong window would drop exactly the turn
         // nobody watched.
         ResolutionLedger.MarkPlayerTurnEnd();
+        // YAE MIKO (`yae_shrine.turn_end`, the sim's end-of-turn site beside
+        // Varka's): her Sakura strike, oldest first, then their timers tick.
+        // After the marks above, so a reaction a strike causes files on the
+        // turn the next page prints, as every end-of-turn tenant's does.
+        foreach (var creature in participants.ToList())
+        {
+            if (YaeShrine.Live(creature))
+            {
+                await YaeShrine.TurnEnd(choiceContext, creature);
+            }
+        }
     }
 
     /// <summary>
@@ -240,6 +257,9 @@ public sealed class KleeElementalHooks : AbstractModel
         // the turn-end mark standing, and the opening below then CARRIED the
         // last fight's rows into this one's first turn.
         ReactionLog.ResetFight();
+        // Kokomi review r9 (2026-10-15, item 9): and last fight's carry-out
+        // receipts.
+        KokomiPlan.ResetFight();
         RelicAnswerLog.ResetFight();
         ReactionEvents.ResetFight();
         ReactionEffects.MarkTurnStart();

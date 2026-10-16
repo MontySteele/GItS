@@ -7,10 +7,10 @@ same source as the combat rig, so they cannot drift from each other again.
 
 Outputs (all gitignored Tier F, ledgered in art/SOURCES.tsv):
     ImageGen/images/furina/model/combat_model.png       240x280  static fallback
-    ImageGen/images/furina/ui/select_portrait.png       132x195
-    ImageGen/images/furina/ui/select_portrait_locked.png 132x195
+                                                         (the game draws her
+                                                         model frames)
     ImageGen/images/furina/ui/selection_splash.png     1920x1200
-    ImageGen/images/furina/ui/char_icon.png              88x88
+    (ui/char_icon.png left 2026-10-13: tools/gen_char_icons.py draws it)
     ImageGen/images/furina/ui/map_marker.png             49x64
 
 CENTRING RULE. Every framing here is computed from the render's ALPHA
@@ -20,6 +20,10 @@ anchored per surface (feet-down for the full body, head-down for portraits).
 The rule now lives in tools/char_stills.py, because Kokomi's pass needs the
 same six surfaces and a centring rule duplicated across two files is a
 centring rule that will drift. This script keeps only HER numbers.
+
+The roster tile (ui/select_portrait.png and its locked twin) left this script
+on 2026-10-13: tools/char_render/pack.py cuts it from her model's select pose,
+and one out-path has one producer.
 
 Source: the transparent 227x440 cutout for anything that needs an alpha
 (combat/portrait/icon), and the 1080x2160 full-res twin for the big splash,
@@ -33,7 +37,7 @@ import sys
 from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from char_stills import fit, head_crop, locked_variant  # noqa: E402
+from char_stills import fit, head_crop  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 CUTOUT = ROOT / "ImageGen" / "images" / "furina" / "model" / "furina_wikipedia_cutout.png"
@@ -56,18 +60,10 @@ def main():
     fit(cutout, 240, 280).save(MODEL / "combat_model.png")
     print("  combat_model.png       240x280")
 
-    # Select portraits. Locked is the same crop, desaturated and darkened --
-    # the base game's locked treatment, and it guarantees the two are framed
-    # identically (they were separate crops before, which is how they drifted).
-    portrait = head_crop(cutout, 132, 195)
-    portrait.save(UI / "select_portrait.png")
-    locked_variant(portrait).save(UI / "select_portrait_locked.png")
-    print("  select_portrait.png    132x195 (+ locked, identical framing)")
-
     # Character icon + map marker: tight head crops on transparency.
-    head_crop(cutout, 88, 88, head_frac=0.30).save(UI / "char_icon.png")
+    # (the icon is tools/gen_char_icons.py's, from her model close-up)
     head_crop(cutout, 49, 64, head_frac=0.34).save(UI / "map_marker.png")
-    print("  char_icon.png 88x88, map_marker.png 49x64")
+    print("  map_marker.png 49x64")
 
     # Selection splash: the full-res twin, framed so she sits centred in the
     # left-of-centre third the info panel leaves free.

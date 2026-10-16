@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcFischlNightrider : CustomCardModel, IElementalCard, ICompanionCard, IWritableCompanion
+public sealed class ProtoMcFischlNightrider : CustomCardModel, IElementalCard, ICompanionCard, IVarkaSwitchCard
 {
     /// <summary>Sheet applies_element: this companion attack applies its element.</summary>
     public Element Element => Element.Electro;
@@ -52,7 +52,7 @@ public sealed class ProtoMcFischlNightrider : CustomCardModel, IElementalCard, I
         new[] { KleeKeywords.AppliesElectro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForOz(ArmKeywordTips.ForCompanionPlan(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this, Element.Electro), this), this);
+        ArmKeywordTips.ForOz(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this, Element.Electro), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_fischl_nightrider");
 
@@ -62,14 +62,6 @@ public sealed class ProtoMcFischlNightrider : CustomCardModel, IElementalCard, I
         ("description", "Deal {CalculatedDamage:diff()} damage. If [gold]Oz[/gold] is out, he deals 5 [gold]Electro[/gold] damage to a random enemy.{InCombat:{VarkaSwitch}|}"),
     };
 
-    /// <summary>On Kokomi, this Companion card can also be written as a Plan on
-    /// the Bake-Kurage (the re-founding, 2026-10-12).</summary>
-    public override TargetType TargetType =>
-        KokomiCompanionPlan.TargetFor(this, base.TargetType);
-
-    /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
-    public TargetType PrintedTargetType => base.TargetType;
-
     /// <summary>The element this card makes current, on its in-combat line
     /// (`VarkaOath.SwitchLine`).</summary>
     protected override void AddExtraArgsToDescription(
@@ -78,6 +70,10 @@ public sealed class ProtoMcFischlNightrider : CustomCardModel, IElementalCard, I
         base.AddExtraArgsToDescription(description);
         description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Electro));
     }
+
+    /// <summary>The element this card makes Varka's current element
+    /// (`VarkaOathDial` previews it).</summary>
+    public Element VarkaSwitchElement => Element.Electro;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
@@ -96,11 +92,6 @@ public sealed class ProtoMcFischlNightrider : CustomCardModel, IElementalCard, I
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (KokomiPlan.PlayedOnPet(cardPlay))
-        {
-            await KokomiCompanionPlan.Write(choiceContext, this, cardPlay);
-            return;
-        }
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)

@@ -371,18 +371,18 @@ def test_turn_start_regina_pneuma_tides_and_prima_donna():
 
 
 def test_the_drain_cards_and_their_counts():
+    # Ousia Pledge (Drain 3) stands in for Overdraft, cut in the sweep
+    # (2026-10-14).
     st = _furina()
-    _play(st, _card("proto_fs_overdraft"))
-    # The loop ruling (2026-10-09): its Energy comes next turn.
-    assert st.player.hp == 74 and st.player.energy == 9
-    assert st.player.ftd.energy_next == 1
-    _play(st, _card("proto_fs_overdraft+"))
-    assert st.player.hp == 71
+    _play(st, _card("proto_fs_ousia_pledge"))
+    assert st.player.hp == 75
+    _play(st, _card("proto_fs_ousia_pledge+"))
+    assert st.player.hp == 72
     hp = st.enemies[0].hp
     _play(st, _card("proto_fs_undercurrent"))
     assert hp - st.enemies[0].hp == 5 + 3      # three Drains this combat
     _play(st, _card("proto_fs_all_in"))
-    assert st.player.hp == 61
+    assert st.player.hp == 62
 
 
 def test_against_the_tide_reads_a_drain_this_turn():
@@ -412,10 +412,10 @@ def test_riptide_lunge_repays_on_a_kill():
 def test_the_repay_cards_and_their_counts():
     st = _furina()
     FS.drain(st, 20)
-    hp = st.enemies[0].hp
-    _play(st, _card("proto_fs_balance_the_books"))
-    assert hp - st.enemies[0].hp >= 20         # all 20 (2026-10-11; was half)
-    _play(st, _card("proto_fs_soothing_waters"))
+    # Two Pneuma Refrains (Repay 5) stand in for Balance the Books and
+    # Soothing Waters, cut in the sweep (2026-10-14).
+    _play(st, _card("proto_fs_pneuma_refrain"))
+    _play(st, _card("proto_fs_pneuma_refrain"))
     hp = st.enemies[0].hp
     _play(st, _card("proto_fs_rising_tide"))
     assert hp - st.enemies[0].hp == 6 + 3 * 2

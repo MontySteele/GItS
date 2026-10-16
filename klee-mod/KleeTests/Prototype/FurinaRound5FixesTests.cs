@@ -87,10 +87,10 @@ public class FurinaRound5FixesTests : IDisposable
     {
         var names = (string[])Invoke("SpendCardNames", new List<CardModel>
         {
-            new ProtoFsStandingOvationAll(), new ProtoFsCurtainRise(),
-            new ProtoFsSpiritedAria(), new ProtoFsShowstopper(),
+            new ProtoFsTidalFlourish(), new ProtoFsCurtainRise(),
+            new ProtoFsBravura(), new ProtoFsShowstopper(),
         })!;
-        // Standing Ovation and Spirited Aria; a headless card has no title to
+        // Tidal Flourish and Bravura; a headless card has no title to
         // read, so the names are the fallback and only the count is pinned.
         Assert.Equal(2, names.Length);
         Assert.Empty((string[])Invoke("SpendCardNames",
