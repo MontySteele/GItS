@@ -108,3 +108,7 @@ review/qa/
 
 # Appended by every unseeded harness run (understudy/harness.py); local only.
 understudy/logs/phase0-unseeded.jsonl
+
+# The telemetry Worker's npm install and wrangler's local state (local D1 rows).
+telemetry-worker/node_modules/
+telemetry-worker/.wrangler/

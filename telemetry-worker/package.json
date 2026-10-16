@@ -1,0 +1,22 @@
+{
+  "name": "gits-telemetry-worker",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "dev": "wrangler dev",
+    "db:local": "wrangler d1 migrations apply gits-telemetry --local"
+  },
+  "devDependencies": {
+    "@cloudflare/vitest-plugin": "^1.4.3",
+    "@cloudflare/workers-types": "^5.20261016.1",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11",
+    "wrangler": "^4.151.0"
+  },
+  "dependencies": {
+    "@cfworker/json-schema": "^4.1.1"
+  }
+}
