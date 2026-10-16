@@ -272,7 +272,7 @@ public class KleeStoryTests
         Assert.Null(StoryRules.EventFor(klee, 3, 7UL));
         for (var act = 0; act < 4; act++)
         {
-            Assert.Null(StoryRules.EventFor(Seats(typeof(Kokomi), typeof(Furina)), act, 7UL));
+            Assert.Null(StoryRules.EventFor(Seats(typeof(Kokomi), typeof(Yae)), act, 7UL));
             Assert.Null(StoryRules.EventFor(Seats(typeof(MegaCrit.Sts2.Core.Models.Characters.Ironclad)), act, 7UL));
             Assert.Null(StoryRules.EventFor(Seats(), act, 7UL));
         }

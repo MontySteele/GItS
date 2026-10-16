@@ -12,11 +12,12 @@ namespace KleeMod.Story;
 /// </summary>
 public static class StoryRegistry
 {
-    /// <summary>The tables. Kokomi and Furina add theirs here.</summary>
+    /// <summary>The tables. Kokomi and Yae add theirs here.</summary>
     public static readonly IReadOnlyList<CharacterStory> All = new[]
     {
         KleeStory.Table,
         VarkaStory.Table,
+        FurinaStory.Table,
     };
 
     /// <summary>The table for this character, or null.</summary>
