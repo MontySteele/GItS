@@ -119,3 +119,5 @@ numbers lean slightly better.
    - (b) Do not promote; run paper 3 again on fresh seeds first.
 
 Raw transcripts: `review/qa/blindplay/` (local, gitignored).
+
+**Ruled 2026-10-16.** [USER]: "Awesome! Agreed on promoting the build". Pick 1 (a).

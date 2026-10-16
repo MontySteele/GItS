@@ -201,12 +201,13 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
   [USER]: "Let's promote as-is"): furina-next papers 1 and 2 (Crescendo,
   Standing Room Only, Prima Donna; Bravura and Bring the House Down capped,
   Extended Run for Bis!). Suite 3 mean end floor 42.8, four of five in act 3.
-- **On `furina-next`:** paper 3 (`review/active/furina-next-3-2026-10-16.md`,
-  both picks (a)) is built: any HP a Repay cannot return becomes Block,
-  Pneuma Refrain Repays 4 [6], Endless Waltz Repays 2 first, Fontaine
-  Teardrop doubles the floor.
-- **Next:** suite 4 on the `+next` build against the paper's predictions;
-  the co-op check owed at a finish line.
+- **Promoted 2026-10-16, paper 3** (`review/records/furina-suite-4-2026-10-16.md`,
+  [USER]: "Agreed on promoting the build"): any HP a Repay cannot return
+  becomes Block, Pneuma Refrain Repays 4 [6], Endless Waltz Repays 2 first,
+  Fontaine Teardrop doubles the floor. Suite 4: mean 40.4, two runs won;
+  Block up a third in every act, HP lost still about 1.6 to 1.9 of base.
+- **Next:** a paper on Drain's own cost (the open HP gap); the co-op check
+  owed at a finish line.
 - **Story built** (2026-10-16, `review/active/furina-story-2026-10-15.md`,
   ruled "I like the Furina event PR! Approved!"): her select line, eight
   Ancient exchanges, eight events in three threads (the stage, the prophecy,
