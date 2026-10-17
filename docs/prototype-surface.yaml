@@ -4575,11 +4575,12 @@
 - {id: proto_ym_yakan_evocation, name: "Yakan Evocation", character: yae,
    authored_by: [claude],
    cost: 1, type: skill, rarity: basic,
-   # Review r3: the full-shrine rule is its own tip (ForFullShrine). Yae pass
-   # 2026-10-16 (sec.2): the Archaic Tooth makes it Yakan Evocation: Sesshou
-   # Sakura (`gen_klee_cards.TRANSCENDENCE`). Provenance, "Yae pass".
-   description: "Plant a [gold]Sakura[/gold].",
-   effects: [{op: yae, kind: plant, amount: 1}],
+   # The Archaic Tooth makes it Yakan Evocation: Sesshou Sakura (Yae pass
+   # 2026-10-16). Yae draft pass, 2026-10-17 (sec.1, round 9 pick 1 (a)): "It
+   # strikes now." (`strike_planted`, no aim). Provenance, both passes.
+   description: "Plant a [gold]Sakura[/gold]. It strikes now.",
+   effects: [{op: yae, kind: plant, amount: 1},
+             {op: yae, kind: strike_planted}],
    upgrade: {cost: -1}}
 
 - {id: proto_ym_proofread, name: "Proofread", character: yae,
@@ -4670,9 +4671,12 @@
 - {id: proto_ym_kitsune_pounce, name: "Kitsune Pounce", character: yae,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal 8 [gold]Electro[/gold] damage. If the enemy is [gold]Weak[/gold], a [gold]Sakura[/gold] strikes it.",
-   effects: [{op: damage, amount: 8, target: enemy},
-             {op: yae, kind: strike_if_weak, target: enemy}],
+   # Yae draft pass, 2026-10-17 (sec.3): "deal 5 more" (was "a Sakura strikes
+   # it"). Weak is read before the hit, as Fox's Bargain's, so a kill counts.
+   description: "Deal 8 [gold]Electro[/gold] damage. If the enemy is [gold]Weak[/gold], deal {BranchDamage:diff()} more.",
+   effects: [{op: conditional, if: target_has_power_weak,
+              then: [{op: damage, amount: 5, target: enemy}]},
+             {op: damage, amount: 8, target: enemy}],
    upgrade: {damage: 3}}
 
 - {id: proto_ym_foxfire_sweep, name: "Foxfire Sweep", character: yae,
@@ -4746,12 +4750,12 @@
 - {id: proto_ym_falling_blossom, name: "Falling Blossom", character: yae,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   # The wither plays its Last Bloom at this card's target, one hit,
-   # whatever the Sakura's kind (a Foxfire's included), as an aimed strike
-   # already is. A Kitsune Sakura's Last Bloom is still its Block.
-   description: "Deal 7 [gold]Electro[/gold] damage. Your oldest [gold]Sakura[/gold] withers; its Last Bloom strikes this enemy.",
+   # Yae draft pass, 2026-10-17 (sec.3): no wither, no Last Bloom (was "withers;
+   # its Last Bloom strikes this enemy"). One aimed act, none of its turns, not
+   # a Tenko; a Foxfire's is one hit, a Kitsune's is its Block.
+   description: "Deal 7 [gold]Electro[/gold] damage. Your oldest [gold]Sakura[/gold] strikes this enemy.",
    effects: [{op: damage, amount: 7, target: enemy},
-             {op: yae, kind: wither_oldest_at, target: enemy}],
+             {op: yae, kind: strike_oldest_at, target: enemy}],
    upgrade: {damage: 3}}
 
 - {id: proto_ym_publishers_deadline, name: "Publisher's Deadline", character: yae,
@@ -4800,8 +4804,11 @@
 - {id: proto_ym_dawn_prayer, name: "Dawn Prayer", character: yae,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common,
-   description: "Your newest [gold]Sakura[/gold] gains {YmAmount:diff()} Levels.",
-   effects: [{op: yae, kind: level_newest, amount: 2}],
+   # Yae draft pass, 2026-10-17 (sec.3): "It strikes now.", after the Levels:
+   # one act (random, or Hunting Gaze's), none of its turns, not a Tenko.
+   description: "Your newest [gold]Sakura[/gold] gains {YmAmount:diff()} Levels. It strikes now.",
+   effects: [{op: yae, kind: level_newest, amount: 2},
+             {op: yae, kind: strike_newest}],
    upgrade: {yae_amount: 1}}
 
 # --- Uncommon (38) ---
@@ -4920,8 +4927,10 @@
    cost: 2, type: attack, rarity: uncommon,
    # Yae review r1, pick 2 (ruled 2026-10-14): Levels, then Tenko (was
    # "Tenko. For the rest of this combat, your Sakura strike for 1 more").
-   description: "Each [gold]Sakura[/gold] gains {IfUpgraded:show:2 Levels|a Level}. [gold]Tenko[/gold].",
-   effects: [{op: yae, kind: level_up, amount: 1},
+   # Yae draft pass, 2026-10-17 (sec.3): "Deal 7." first, on its target.
+   description: "Deal 7 [gold]Electro[/gold] damage. Each [gold]Sakura[/gold] gains {IfUpgraded:show:2 Levels|a Level}. [gold]Tenko[/gold].",
+   effects: [{op: damage, amount: 7, target: enemy},
+             {op: yae, kind: level_up, amount: 1},
              {op: yae, kind: tenko}],
    upgrade: {yae_amount: 1}}
 
@@ -5183,10 +5192,10 @@
 
 - {id: proto_ym_the_seven_glamours, name: "The Seven Glamours", character: yae,
    authored_by: [claude],
-   cost: 2, type: attack, rarity: rare, exhaust: true,
-   # 2026-10-15 ([USER]: "it looks obviously OP"): was a 1 [0] Skill Publishing
-   # every Annotated card in hand. The kill is Hand of Greed's Fatal check (no
-   # Minions). Provenance note, "Yae: The Seven Glamours on a kill".
+   cost: 1, type: attack, rarity: rare, exhaust: true,
+   # 2026-10-15 ([USER]: "it looks obviously OP"): was a 1 [0] Skill. The kill
+   # is Hand of Greed's Fatal check (no Minions). Yae draft pass, 2026-10-17:
+   # costs 1 (was 2). Provenance, "Yae: The Seven Glamours on a kill".
    description: "Deal 12 [gold]Electro[/gold] damage. If this kills an enemy, [gold]Publish[/gold] an [gold]Annotated[/gold] card in your hand.",
    effects: [{op: damage, amount: 12, target: enemy},
              {op: conditional, if: killed_target_fatal,

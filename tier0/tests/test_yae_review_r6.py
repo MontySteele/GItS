@@ -248,6 +248,28 @@ def test_kitsune_block_parts_read_the_rows():
     assert blindplay_render._kitsune_block_parts(None) == []
 
 
+def test_kitsune_block_parts_on_its_last_turn_is_its_act_and_its_bloom():
+    # Yae round 8, lane 2: "adds 6 Block first" with one 3-Block Kitsune
+    # standing is its end-of-turn act and its Last Bloom (1 turn left), not a
+    # double count; Sacred Shade is not in it.
+    shrine = _shrine({"kind": "kitsune", "strike": 3, "turns": 1})
+    assert blindplay_render._kitsune_block_parts(shrine) == [
+        ("Kitsune Sakura", 6)]
+    # Yae draft pass, 2026-10-17: Eternity stops the timers, so no bloom.
+    assert blindplay_render._kitsune_block_parts(shrine, eternal=True) == [
+        ("Kitsune Sakura", 3)]
+
+
+def test_the_incoming_line_reads_eternity_off_your_powers():
+    shrine = _shrine({"kind": "kitsune", "strike": 3, "turns": 1})
+    you = _you(2)
+    plain = blindplay_render._incoming_line(_attacker(12), you, shrine=shrine)
+    assert "adds 6 Block first" in plain
+    you = dict(you, powers=[{"name": "Eternity", "stacks": 1}])
+    held = blindplay_render._incoming_line(_attacker(12), you, shrine=shrine)
+    assert "adds 3 Block first" in held
+
+
 def test_kitsune_block_parts_see_deadline_extension_among_several():
     # The pool to 78, pick 2 (a): Deadline Extension need not be the first.
     shrine = _shrine({"kind": "kitsune", "strike": 6, "turns": 1,

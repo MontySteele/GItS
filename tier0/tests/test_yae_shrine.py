@@ -136,10 +136,12 @@ def test_validate_op_refuses_a_wrong_shape(yae):
 # ---------------------------------------------------------------------------
 # 1. The shrine
 # ---------------------------------------------------------------------------
+# Yae draft pass, 2026-10-17: Yakan Evocation's Sakura "strikes now", so the
+# pins that read a plant's own strikes plant with `Y.plant` instead.
 
 def test_a_plant_strikes_at_the_end_of_the_turn_for_base_plus_level(yae):
     st = _state()
-    _play(st, _ym("yakan_evocation"))
+    Y.plant(st, 1)
     assert [s.level for s in _led(st).sakura] == [1]
     Y.turn_end(st)
     hits = _strikes(st)
@@ -153,15 +155,15 @@ def test_a_plant_does_not_level_the_others_and_a_full_shrine_feeds_the_oldest(ya
     # standing the OLDEST refreshes and gains a Level, no cap.
     st = _state()
     for _ in range(3):
-        _play(st, _ym("yakan_evocation"))
+        Y.plant(st, 1)
     assert [s.level for s in _led(st).sakura] == [1, 1, 1]
     _led(st).sakura[0].turns_left = 1
     oldest = _led(st).sakura[0]
-    _play(st, _ym("yakan_evocation"))
+    Y.plant(st, 1)
     assert [s.level for s in _led(st).sakura] == [2, 1, 1]
     assert _led(st).sakura[0] is oldest
     assert oldest.turns_left == Y.SAKURA_TURNS
-    _play(st, _ym("yakan_evocation"))
+    Y.plant(st, 1)
     assert [s.level for s in _led(st).sakura] == [3, 1, 1]
     # 2026-10-14: each full-shrine plant struck the oldest first, at 1 then 2.
     assert [r["amount"] for r in _strikes(st)] == [3, 4]
@@ -184,13 +186,13 @@ def test_twin_sakura_with_two_standing_plants_one_then_feeds_the_oldest(yae):
 
 def test_a_sakura_withers_after_three_strikes_and_tenko_refreshes(yae):
     st = _state()
-    _play(st, _ym("yakan_evocation"))
+    Y.plant(st, 1)
     for _ in range(3):
         Y.turn_end(st)
     assert _led(st).sakura == []
     assert len(_strikes(st)) == 3 + 1                # and its Last Bloom
     assert _strikes(st)[-1]["reason"] == "bloom"
-    _play(st, _ym("yakan_evocation"))
+    Y.plant(st, 1)
     Y.turn_end(st)
     Y.turn_end(st)
     assert _led(st).sakura[0].turns_left == 1
@@ -209,7 +211,7 @@ def test_extend_lengthens_and_narukami_ray_levels(yae):
     # The dedupe (2026-10-16) cut Shrine Offering and Rooted Shrine; the
     # `extend` rule stays (no row) and Narukami Ray levels.
     st = _state()
-    _play(st, _ym("yakan_evocation"))
+    Y.plant(st, 1)
     Y.extend(st, 1)
     assert _led(st).sakura[0].turns_left == 4
     _play(st, _ym("narukami_ray"))               # 5 to ALL, then the Level
@@ -253,7 +255,7 @@ def _hits(st):
 def test_the_powers_pay_on_a_strike(yae):
     st = _state(enemies=[_enemy(name="e0", aura="hydro")])
     _play(st, _ym("edict_of_cleansing"))         # +3 on a reacting aura
-    _play(st, _ym("yakan_evocation"))
+    Y.plant(st, 1)
     Y.turn_end(st)
     assert _strikes(st)[0]["amount"] == 3
     assert _hits(st)[0]["amount"] == 3 + 3
@@ -263,7 +265,7 @@ def test_the_powers_pay_on_a_strike(yae):
 def test_edict_pays_on_a_weak_enemy_solo(yae):
     st = _state()
     _play(st, _ym("edict_of_cleansing"))
-    _play(st, _ym("yakan_evocation"))
+    Y.plant(st, 1)
     st.enemies[0].powers["weak"] = 1
     Y.turn_end(st)
     assert _hits(st)[0]["amount"] == 3 + 3
@@ -282,7 +284,7 @@ def test_the_shrine_has_no_rite_any_more(yae):
 
 def test_thunder_strikes_one_enemy_for_two_plus_level(yae):
     st = _state(n=2)
-    _play(st, _ym("yakan_evocation"))
+    Y.plant(st, 1)
     Y.turn_end(st)
     hits = _hits(st)
     assert len(hits) == 1 and hits[0]["amount"] == 3 and hits[0]["kind"] == Y.THUNDER
@@ -405,7 +407,7 @@ def test_fallen_petals_withers_the_oldest_now_and_pays_energy(yae):
     _play(st, _ym("fallen_petals"))
     assert st.player.energy == 10 and not _strikes(st)   # _play topped it up
     st.player.energy = 0
-    _play(st, _ym("yakan_evocation"))
+    Y.plant(st, 1)
     Y.plant(st, 1, level=3)                      # levels 1 / 3
     st.player.energy = 0
     st.player.draw_pile = [loader.get_card("defend") for _ in range(3)]
@@ -434,15 +436,16 @@ def test_a_plant_at_a_level_keeps_it_and_levels_no_other(yae):
     assert _led(st).sakura[1].turns_left == Y.SAKURA_TURNS + 1
 
 
-def test_kitsune_pounce_strikes_a_weak_enemy(yae):
+def test_kitsune_pounce_deals_5_more_to_a_weak_enemy(yae):
+    # Yae draft pass, 2026-10-17 (review/active/yae-draft-pass-2026-10-17.md
+    # sec.3): "If the enemy is Weak, deal 5 more." (was "a Sakura strikes it").
     st = _state(n=2)
-    _play(st, _ym("yakan_evocation"))
-    _play(st, _ym("kitsune_pounce"))             # e0 not Weak: no strike
-    assert not _strikes(st)
+    Y.plant(st, 1)
+    _play(st, _ym("kitsune_pounce"))             # e0 not Weak: the 8 alone
+    assert st.enemies[0].hp == 92 and not _strikes(st)
     st.enemies[0].powers["weak"] = 1
     _play(st, _ym("kitsune_pounce"))
-    assert _strikes(st)[-1]["reason"] == "pounce"
-    assert _strikes(st)[-1]["target"] == "e0"
+    assert st.enemies[0].hp == 92 - 8 - 5 and not _strikes(st)
 
 
 def test_proofread_edits_reprint_and_the_first_play_each_combat_is_twice(yae):
@@ -513,7 +516,7 @@ def test_count_scaling_is_the_proposals_table_and_tenko_raises_it(yae):
     Y.SCALING = "count"
     st = _state()
     for _ in range(4):
-        _play(st, _ym("yakan_evocation"))
+        Y.plant(st, 1)
     assert len(_led(st).sakura) == 3             # the oldest went
     Y.turn_end(st)
     assert [r["amount"] for r in _strikes(st)] == [5, 5, 5]

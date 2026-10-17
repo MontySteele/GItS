@@ -261,7 +261,6 @@ KIND_FIELDS = {
     # The refill (ruled 2026-10-16).
     "barrage": ("amount",),
     "level_strike": ("base", "amount"),
-    "wither_oldest_at": (),
     "wither_newest_block": ("amount",),
     "rewrite": ("amount",),
     "level_newest": ("amount",),
@@ -273,6 +272,12 @@ KIND_FIELDS = {
     # 2026-10-17.md sec.3): Thunder Petal's "It strikes this enemy." and
     # Foxfire Sweep's "It strikes now." C# twin: `YaeCards.StrikePlanted`.
     "strike_planted": (),
+    # Yae draft pass, 2026-10-17 (review/active/yae-draft-pass-2026-10-17.md
+    # sec.3): Falling Blossom's "Your oldest Sakura strikes this enemy." (was
+    # `wither_oldest_at`) and Dawn Prayer's "It strikes now." C# twins:
+    # `YaeCards.StrikeOldestAt`, `YaeCards.StrikeNewest`.
+    "strike_oldest_at": (),
+    "strike_newest": (),
 }
 KINDS = frozenset(KIND_FIELDS)
 KIND_TARGETS = {
@@ -283,7 +288,9 @@ KIND_TARGETS = {
     "strike_target": "enemy", "strike_all_at": "enemy",
     "daisesshou": "all_enemies",
     # The refill.
-    "barrage": "enemy", "level_strike": "enemy", "wither_oldest_at": "enemy",
+    "barrage": "enemy", "level_strike": "enemy",
+    # The draft pass.
+    "strike_oldest_at": "enemy",
 }
 #: Kinds that take an `annotation:` name.
 ANNOTATION_KINDS = frozenset({"edit", "edit_all", "edit_sakura",
@@ -745,22 +752,50 @@ def grove(state, n: int) -> None:
                    levels=[s.level for s in led.sakura])
 
 
-def wither_oldest(state, reason: str = "fallen_petals", aim=None) -> bool:
+def wither_oldest(state, reason: str = "fallen_petals") -> bool:
     """Fallen Petals (review r3): the oldest Sakura acts once (its Last
-    Bloom) and withers, Deadline Extension or not. Whether one did.
-    Falling Blossom (the refill): its Last Bloom strikes `aim`, one hit
-    whatever the kind, as an aimed strike is."""
-    return _wither_end(state, oldest=True, reason=reason, aim=aim)
+    Bloom) and withers, Deadline Extension or not. Whether one did."""
+    return _wither_end(state, oldest=True, reason=reason)
 
 
-def strike_planted(state) -> bool:
+def strike_oldest_at(state, aim) -> bool:
+    """Yae draft pass, 2026-10-17 (review/active/yae-draft-pass-2026-10-17.md
+    sec.3): Falling Blossom's "Your oldest Sakura strikes this enemy." The
+    oldest acts once at `aim`, one hit whatever its kind (a Foxfire's
+    included; a Kitsune's is its Block), as every aimed strike is. No wither,
+    no Last Bloom; none of its turns; not a Tenko. Whether one acted. C#
+    twin: `YaeShrine.StrikeOldestAt`."""
+    led = ledger(state.player)
+    if led is None or not led.sakura:
+        return False
+    act(state, led.sakura[0], "falling_blossom", aim=aim)
+    return True
+
+
+def strike_newest(state) -> bool:
+    """Yae draft pass, 2026-10-17 (sec.3): Dawn Prayer's "It strikes now.",
+    after its Levels. The newest Sakura acts once as its kind, unaimed (a
+    Sakura on the Lure's, Hunting Gaze's or a random enemy; a Foxfire on
+    ALL), none of its turns, not a Tenko. Whether one acted. C# twin:
+    `YaeShrine.StrikeNewest`."""
+    led = ledger(state.player)
+    if led is None or not led.sakura:
+        return False
+    act(state, led.sakura[-1], "dawn_prayer")
+    return True
+
+
+def strike_planted(state, card=None) -> bool:
     """Yae flat-value pass, 2026-10-17 (review/active/yae-flat-value-
     2026-10-17.md sec.3): "It strikes this enemy." / "It strikes now." The
     Sakura the card just planted (or, into a full shrine, refreshed) acts
     once at its Level: a Sakura on the card's aim, a Foxfire Sakura on ALL.
     It uses none of its turns and is not a Tenko (no refresh, no "whenever
     you Tenko"). Falling Blossom's aimed strike, without the wither. Whether
-    one struck. C# twin: `YaeShrine.StrikePlanted`."""
+    one struck. C# twin: `YaeShrine.StrikePlanted`.
+    Yae draft pass, 2026-10-17: a card with no target (Yakan Evocation's "It
+    strikes now.") aims at nothing, so the Sakura picks a random enemy, or
+    the Lure's or Hunting Gaze's, as C#'s null `cardPlay.Target` does."""
     from tier0.engine import effects                # late: cycle
     led = ledger(state.player)
     if led is None:
@@ -769,7 +804,8 @@ def strike_planted(state) -> bool:
     if s is None or s not in led.sakura:
         return False
     aim = None
-    if s.kind == THUNDER:
+    if s.kind == THUNDER and (card is None
+                              or effects._card_aims_at_enemy(card)):
         targets = effects._pick_targets(state, "enemy")
         aim = targets[0] if targets else None
     act(state, s, "strike_planted", aim=aim)
@@ -782,12 +818,12 @@ def wither_newest(state, reason: str = "hide_behind_the_shrine") -> bool:
     return _wither_end(state, oldest=False, reason=reason)
 
 
-def _wither_end(state, oldest: bool, reason: str, aim=None) -> bool:
+def _wither_end(state, oldest: bool, reason: str) -> bool:
     led = ledger(state.player)
     if led is None or not led.sakura:
         return False
     s = led.sakura[0] if oldest else led.sakura[-1]
-    act(state, s, "bloom", aim=aim)
+    act(state, s, "bloom")
     if s in led.sakura:
         led.sakura.remove(s)
     state.emit("yae_wither", count=1, standing=len(led.sakura),
@@ -1709,10 +1745,9 @@ def op_yae(state, fx: dict, card) -> None:
     elif kind == "level_strike":
         high = any(s.level >= FANG_LEVEL for s in led.sakura)
         _card_hit(state, card, fx["base"] + (fx["amount"] if high else 0))
-    elif kind == "wither_oldest_at":
+    elif kind == "strike_oldest_at":
         targets = effects._pick_targets(state, "enemy")
-        wither_oldest(state, "falling_blossom",
-                      aim=targets[0] if targets else None)
+        strike_oldest_at(state, targets[0] if targets else None)
     elif kind == "wither_newest_block":
         if wither_newest(state):
             _card_block(state, card, fx["amount"])
@@ -1737,7 +1772,9 @@ def op_yae(state, fx: dict, card) -> None:
         if led.sakura:
             led.sakura[0].turns_left += fx["amount"]
     elif kind == "strike_planted":
-        strike_planted(state)
+        strike_planted(state, card)
+    elif kind == "strike_newest":
+        strike_newest(state)
     elif kind == "bless_highest":
         s = highest(led)
         if s is not None:

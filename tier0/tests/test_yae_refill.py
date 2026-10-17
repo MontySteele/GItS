@@ -110,16 +110,18 @@ def test_the_eleven_are_cut_and_the_eleven_added_pool_78():
 
 # --- Falling Blossom ----------------------------------------------------------------
 
-def test_falling_blossom_aims_the_last_bloom_at_its_target():
+def test_falling_blossom_aims_the_oldest_at_its_target():
+    # Yae draft pass, 2026-10-17: no wither (was "withers; its Last Bloom
+    # strikes this enemy"). `test_yae_draft_pass.py` has the rest.
     st = _state(n_enemies=3)
     Y.plant(st, 1)
     _play(st, "falling_blossom", target=st.enemies[2])
-    assert not _led(st).sakura
+    assert len(_led(st).sakura) == 1
     assert _strikes(st)[-1]["target"] == "e2"
     assert _hp(st) == [100, 100, 100 - 7 - (2 + 1)]
 
 
-def test_falling_blossoms_foxfire_last_bloom_hits_only_the_target():
+def test_falling_blossoms_foxfire_hits_only_the_target():
     st = _state(n_enemies=3)
     Y.plant(st, 1, kind=Y.FOXFIRE)
     _play(st, "falling_blossom", target=st.enemies[1])

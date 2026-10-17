@@ -45,7 +45,7 @@ public sealed class ProtoYmYakanEvocation : CustomCardModel, ICharacterCard, ISa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Yakan Evocation"),
-        ("description", "Plant a [gold]Sakura[/gold]."),
+        ("description", "Plant a [gold]Sakura[/gold]. It strikes now."),
     };
 
     /// <summary>Orobas's Archaic Tooth turns this card into its Ancient
@@ -69,6 +69,7 @@ public sealed class ProtoYmYakanEvocation : CustomCardModel, ICharacterCard, ISa
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await YaeCards.Plant(choiceContext, this, cardPlay);
+        await YaeCards.StrikePlanted(choiceContext, this, cardPlay);
     }
 
     protected override void OnUpgrade()

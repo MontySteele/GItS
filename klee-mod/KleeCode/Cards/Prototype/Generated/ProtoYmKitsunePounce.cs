@@ -44,19 +44,20 @@ public sealed class ProtoYmKitsunePounce : CustomCardModel, IElementalCard, ICha
         new[] { KleeKeywords.AppliesElectro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForWeak(ArmKeywordTips.ForSakura(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this), this);
+        BaseKeywordTips.ForWeak(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_kitsune_pounce");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kitsune Pounce"),
-        ("description", "Deal {Damage:diff()} [gold]Electro[/gold] damage. If the enemy is [gold]Weak[/gold], a [gold]Sakura[/gold] strikes it."),
+        ("description", "Deal {Damage:diff()} [gold]Electro[/gold] damage. If the enemy is [gold]Weak[/gold], deal {BranchDamage:diff()} more."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
+            new FoldedDamageVar("BranchDamage", 5m, ValueProp.Move),
             new DamageVar(8m, ValueProp.Move)
         };
 
@@ -69,13 +70,21 @@ public sealed class ProtoYmKitsunePounce : CustomCardModel, IElementalCard, ICha
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        if (cardPlay.Target != null && cardPlay.Target.Powers.OfType<WeakPower>().Any())
+        {
+            ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+            await DamageCmd.Attack(5m)
+                .FromCard(this, cardPlay)
+                .Targeting(cardPlay.Target)
+                .WithElementHitFx(this)
+                .Execute(choiceContext);
+        }
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
             .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
             .WithElementHitFx(this)
             .Execute(choiceContext);
-        await YaeCards.StrikeIfWeak(choiceContext, this, cardPlay);
     }
 
     protected override void OnUpgrade()

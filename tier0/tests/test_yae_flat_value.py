@@ -119,10 +119,12 @@ def test_sesshou_fang_bonus_stays_6_upgraded_8():
     assert _hp(st) == [100 - 10 - 8]
 
 
-def test_the_starters_are_unchanged():
+def test_proofread_is_unchanged():
+    # Yakan Evocation's "It strikes now." is the draft pass's (2026-10-17,
+    # round 9 pick 1 (a)): `test_yae_draft_pass.py`.
     st = _state()
-    _play(st, "yakan_evocation")
-    assert _hp(st) == [100] and len(_led(st).sakura) == 1
+    _play(st, "proofread")
+    assert _hp(st) == [100] and not _led(st).sakura
     assert not _events(st, "yae_sakura_strike")
 
 

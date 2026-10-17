@@ -4035,7 +4035,9 @@ def _incoming_line(enemies: list[dict[str, Any]], you: dict[str, Any],
                 hits += _split_hits(intent, part)
     facts = _turn_end_facts(you, hand or [], pets or [], resolutions,
                             planned_attack)
-    facts["block"] = facts["block"] + _kitsune_block_parts(shrine)
+    eternal = any(_fold(p.get("name")) == "eternity"
+                  for p in you.get("powers") or [])
+    facts["block"] = facts["block"] + _kitsune_block_parts(shrine, eternal)
     not_counted = (INCOMING_NOT_COUNTED.format(
         names=_and_list(facts["unknown"])) if facts["unknown"] else "")
     not_counted += "".join(INCOMING_CONDITIONAL_BLOCK.format(name=name, n=n)
@@ -4092,20 +4094,24 @@ def _incoming_line(enemies: list[dict[str, Any]], you: dict[str, Any],
     return line + not_counted
 
 
-def _kitsune_block_parts(shrine: dict[str, Any] | None
-                         ) -> list[tuple[str, int]]:
+def _kitsune_block_parts(shrine: dict[str, Any] | None,
+                         eternal: bool = False) -> list[tuple[str, int]]:
     """Yae review r6, item 6: the Block each Kitsune Sakura adds at the end
     of your turn, before the enemies act, off the numbers its shrine row
     prints (`strike`, `turns`). Every Sakura acts at the end of the turn;
     one whose last turn this is (1 turn left, no Deadline Extension) acts
-    once more as it withers (`YaeShrine.TurnEnd`)."""
+    once more as it withers (`YaeShrine.TurnEnd`), so one 3-Block Kitsune
+    on its last turn adds 6 (Yae round 8, lane 2: correct, not a double
+    count). Yae draft pass, 2026-10-17: with Eternity held no timer ticks
+    (`YaeShrineLedger.Tick(eternal)`), so none withers and each acts once."""
     out: list[tuple[str, int]] = []
     for row in (shrine or {}).get("sakura") or []:
         if row.get("kind") != "kitsune" or not row.get("strike"):
             continue
         acts = 1
         anns = row.get("annotations") or [row.get("annotation")]
-        if row.get("turns") == 1 and "Deadline Extension" not in anns:
+        if (row.get("turns") == 1 and "Deadline Extension" not in anns
+                and not eternal):
             acts = 2
         out.append(("Kitsune Sakura", int(row["strike"]) * acts))
     return out

@@ -3114,7 +3114,6 @@ YAE_KINDS = {
     # The refill (review/active/yae-refill-2026-10-16.md, ruled 2026-10-16).
     "barrage": "Barrage",
     "level_strike": "LevelStrike",
-    "wither_oldest_at": "WitherOldestAt",
     "wither_newest_block": "WitherNewestBlock",
     "rewrite": "Rewrite",
     "level_newest": "LevelNewest",
@@ -3128,6 +3127,11 @@ YAE_KINDS = {
     # Sakura on the play's aim (no `target:` of its own: Thunder Petal's
     # damage op already aims), a Foxfire on ALL.
     "strike_planted": "StrikePlanted",
+    # Yae draft pass, 2026-10-17 (review/active/yae-draft-pass-2026-10-17.md
+    # sec.3): Falling Blossom's "Your oldest Sakura strikes this enemy." (no
+    # wither, was `wither_oldest_at`) and Dawn Prayer's "It strikes now."
+    "strike_oldest_at": "StrikeOldestAt",
+    "strike_newest": "StrikeNewest",
 }
 YAE_KIND_FIELDS = {
     "plant": ("amount",),
@@ -3164,13 +3168,14 @@ YAE_KIND_FIELDS = {
     "verdict": (),
     "barrage": ("amount",),
     "level_strike": ("base", "amount"),
-    "wither_oldest_at": (),
     "wither_newest_block": ("amount",),
     "rewrite": ("amount",),
     "level_newest": ("amount",),
     "bless_highest": ("amount",),
     "extend_oldest": ("amount",),
     "strike_planted": (),
+    "strike_oldest_at": (),
+    "strike_newest": (),
 }
 #: The kinds that aim at the enemy the player picks (`target: enemy`).
 YAE_AIMED_KINDS = {"lure", "damage_per_sakura", "damage_per_edit",
@@ -3178,9 +3183,9 @@ YAE_AIMED_KINDS = {"lure", "damage_per_sakura", "damage_per_edit",
                    # The pool to 78: "A Sakura strikes it", "Each striking
                    # Sakura strikes it".
                    "strike_target", "strike_all_at",
-                   # The refill: Kitsune Barrage, Sesshou Fang, and Falling
-                   # Blossom's Last Bloom at "this enemy".
-                   "barrage", "level_strike", "wither_oldest_at"}
+                   # The refill: Kitsune Barrage, Sesshou Fang; the draft
+                   # pass: Falling Blossom's oldest Sakura at "this enemy".
+                   "barrage", "level_strike", "strike_oldest_at"}
 #: The kinds that reach ALL enemies (`target: all_enemies`, the card's
 #: TargetType AllEnemies): Forbidden Art: Daisesshou.
 YAE_ALL_KINDS = {"daisesshou"}

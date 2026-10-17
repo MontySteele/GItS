@@ -140,9 +140,10 @@ def _glamours_state(n=2):
 
 def test_seven_glamours_row():
     c = _card("the_seven_glamours")
-    assert (c.rarity, c.type, c.cost, c.exhaust) == ("rare", "attack", 2, True)
+    # Yae draft pass, 2026-10-17 (sec.3): costs 1 (was 2).
+    assert (c.rarity, c.type, c.cost, c.exhaust) == ("rare", "attack", 1, True)
     up = loader.get_card("proto_ym_the_seven_glamours+")
-    assert up.cost == 2
+    assert up.cost == 1
     assert next(e["amount"] for e in up.effects if e["op"] == "damage") == 16
     assert _row("proto_ym_the_seven_glamours")["description"] == (
         "Deal 12 [gold]Electro[/gold] damage. If this kills an enemy, "

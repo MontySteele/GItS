@@ -9512,3 +9512,34 @@ watchlist item." The starters are unchanged.
   ALL. It uses none of its turns and is not a Tenko (no refresh, no Kagura
   Bell). The kind carries no `target:`: Thunder Petal's damage op already
   aims, and Foxfire Sweep stays an ALL card.
+
+## Yae draft pass, 2026-10-17
+
+`review/active/yae-draft-pass-2026-10-17.md` sec.1 and sec.3. [USER] on round
+9's pick: "I agree with the starter change, but let's also scan the draft
+rates and see what cards the seats refuse to take and wherever they are bad
+value or just undervalued by the seats." Sec.1 is the starter pick (round 9,
+pick 1 (a)); sec.3 is the main session's paper for a Prototype kit.
+
+- **Yakan Evocation: "It strikes now."** The flat-value pass's
+  `strike_planted`. The card has no target, so the sim passes no aim
+  (`strike_planted(state, card)` reads `_card_aims_at_enemy`) and C#'s
+  `cardPlay.Target` is null: the Sakura strikes the Lure's, Hunting Gaze's
+  or a random enemy. The Archaic Tooth's card is unchanged.
+- **Falling Blossom: "Your oldest Sakura strikes this enemy."** New kind
+  `strike_oldest_at` (C# `YaeShrine.StrikeOldestAt`), replacing
+  `wither_oldest_at`: one aimed act, a Foxfire's one hit, a Kitsune's its
+  Block; no wither, no Last Bloom, none of its turns, not a Tenko.
+- **Dawn Prayer: "... It strikes now."** New kind `strike_newest` (C#
+  `YaeShrine.StrikeNewest`) after `level_newest`: the newest acts once as its
+  kind, unaimed.
+- **Kitsune Pounce: "If the enemy is Weak, deal 5 more."** Fox's Bargain's
+  shape: the conditional (`target_has_power_weak`, then 5) comes first, so
+  Weak is read before the 8 lands. `upgrade: {damage: 3}` moves the 8 only.
+  The `strike_if_weak` kind stays in both engines with no row.
+- **Mikage Thunder: "Deal 7."** first, on its target (now AnyEnemy).
+- **The Seven Glamours** costs 1.
+- **Sheet comments moved here** (the three-line cap): Yakan Evocation's
+  "Review r3: the full-shrine rule is its own tip (ForFullShrine)"; The Seven
+  Glamours was a 1 [0] Skill "Publishing every Annotated card in hand" before
+  2026-10-15.
