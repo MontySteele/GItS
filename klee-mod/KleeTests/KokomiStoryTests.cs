@@ -16,12 +16,13 @@ namespace KleeMod.Tests;
 /// KOKOMI'S STORY IN THE RUN (<c>review/active/kokomi-story-2026-10-16.md</c>,
 /// ruled 2026-10-16: "I reviewed it myself and I still think it looks a bit
 /// stilted at parts, but nothing that blocks it from a beta launch. ...
-/// Approved!", picks 1 (a) and 2 (a); pick 3, her lines, open).
+/// Approved!", picks 1 (a) and 2 (a); pick 3 (a), her lines: "Ok, I'm good
+/// to approve the full Kokomi paper as-is. The dialogue looks good!").
 ///
 /// The same headless boundary as <see cref="FurinaStoryTests"/>: every string
 /// is held against the paper, every routing decision runs through the pure
 /// function the game calls, and Public Address is a story Curse on the shared
-/// clock. What pick 3 covers is pinned as absent.
+/// clock.
 /// </summary>
 public class KokomiStoryTests
 {
@@ -376,32 +377,46 @@ public class KokomiStoryTests
         }
     }
 
-    // ---- Her lines are pick 3, still open ---------------------------------------
+    // ---- Her lines (pick 3 (a)) ---------------------------------------------
 
     [Fact]
-    public void Her_lines_are_not_built_while_pick_3_is_open()
+    public void Her_lines_are_the_papers_word_for_word()
     {
-        Assert.Null(K.Lines);
-        Assert.Empty(K.Ancients);
-        Assert.Empty(K.Pairs);
-        Assert.Empty(K.SignatureCards);
-        Assert.Equal("", K.IntroTitle);
-        Assert.Equal("", K.IntroLine);
-        // Her select description is still her character's own.
+        var flat = Flat();
+        Assert.Equal("The Pearl of Wisdom.", K.IntroTitle);
+        Assert.Contains(K.IntroLine, flat);
         var description = new global::KleeMod.Kokomi().Localization!.Single(r => r.Item1 == "description").Item2;
-        Assert.Equal("Divine Priestess of Watatsumi Island, a strategist who plans a turn ahead.", description);
-        // No line rows and no Ancient rows under her entry.
-        var own = StoryRegistry.EntryOf(KokomiType);
-        Assert.DoesNotContain(StoryLoc.LineRows().Keys, k => k.StartsWith(own + ".story.", StringComparison.Ordinal));
-        Assert.DoesNotContain(StoryAncients.Rows(_ => "NEXT").Keys, k => k.Contains($".talk.{own}.", StringComparison.Ordinal));
+        Assert.Equal(K.Intro, description);
+
+        Assert.Equal(
+            new[] { "NEOW", "OROBAS", "PAEL", "TEZCATARA", "NONUPEIPE", "TANX", "VAKUU", "DARV" },
+            K.Ancients.Select(a => a.AncientEntry));
+        foreach (var a in K.Ancients)
+        {
+            Assert.Contains(a.AncientLine, flat);
+            Assert.Contains(a.CharacterLine, flat);
+            Assert.Equal(a.Ancient.ToUpperInvariant(), a.AncientEntry);
+        }
+
+        var l = K.Lines!;
+        foreach (var line in new[] { l.BossEntry, l.LowHp, l.Signature, l.BossKill, l.RunLoss, l.RunWin })
+        {
+            Assert.Contains(line, flat);
+        }
+        Assert.Single(K.SignatureCards);
+        Assert.Empty(K.Pairs);
     }
 
     [Fact]
-    public void At_a_boss_she_speaks_only_in_her_partners_pairs()
+    public void Who_speaks_at_a_boss_with_her_at_the_table()
     {
-        // Alone, or with a character who has no pair with her: nothing.
-        Assert.Empty(StoryRules.BossEntryPlan(new[] { KokomiType }));
-        Assert.Empty(StoryRules.BossEntryPlan(new[] { KokomiType, typeof(global::KleeMod.Yae) }));
+        // Alone, or with a character who has no pair with her: her own line.
+        foreach (var seats in new[] { new[] { KokomiType }, new[] { KokomiType, typeof(global::KleeMod.Yae) } })
+        {
+            var s = Assert.Single(StoryRules.BossEntryPlan(seats));
+            Assert.Same(K, s.Story);
+            Assert.Null(s.Pair);
+        }
         // Klee's, Varka's and Furina's pairs with her stay in their tables.
         foreach (var other in new[] { typeof(global::KleeMod.Klee), typeof(global::KleeMod.Varka), typeof(global::KleeMod.Furina) })
         {

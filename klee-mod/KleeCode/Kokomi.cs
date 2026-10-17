@@ -34,9 +34,9 @@ public sealed class Kokomi : CustomCharacterModel, IKokomiCharacter
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kokomi"),
-        ("description",
-            "Divine Priestess of Watatsumi Island, a strategist who plans "
-          + "a turn ahead."),
+        // The intro (review/active/kokomi-story-2026-10-16.md, "Select",
+        // pick 3 (a)), from her story table.
+        ("description", Story.KokomiStory.Table.Intro),
         ("titleObject", "Kokomi"),
         ("pronounSubject", "she"),
         ("pronounObject", "her"),
@@ -46,12 +46,13 @@ public sealed class Kokomi : CustomCharacterModel, IKokomiCharacter
         // CharacterLoc set plus bestiaryQuote). A missing row renders as
         // its raw key: the co-op end-turn ping bubble did (playtest
         // 2026-10-03). CharacterLocCompletenessTests pins the set.
-        ("aromaPrinciple", "[sine][blue]Every move is planned. I will not be rushed.[/blue][/sine]"),
-        ("banter.alive.endTurnPing", "Whenever you're ready. The plan holds."),
+        // Utility lines: review/active/kokomi-story-2026-10-16.md, pick 3 (a).
+        ("aromaPrinciple", "[sine][blue]Give me a moment. I'll find the way through.[/blue][/sine]"),
+        ("banter.alive.endTurnPing", "Whenever you're ready. I'm set."),
         ("banter.dead.endTurnPing", "..."),
         ("bestiaryQuote", "I have no notes on this one yet."),
         ("eventDeathPrevention", "Watatsumi still needs its Priestess."),
-        ("goldMonologue", "[sine]This will keep Watatsumi's army supplied...[/sine]"),
+        ("goldMonologue", "[sine]This will help keep Watatsumi supplied...[/sine]"),
         ("cardsModifierTitle", "Kokomi Cards"),
         ("cardsModifierDescription", "Kokomi cards will now appear in rewards and shops."),
     };

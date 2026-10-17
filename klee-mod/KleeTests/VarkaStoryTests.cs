@@ -490,7 +490,7 @@ public class VarkaStoryTests
         Assert.Same(V, s.Story);
         Assert.Null(s.Pair);
         Assert.Single(StoryRules.BossEntryPlan(new[] { VarkaType, typeof(MegaCrit.Sts2.Core.Models.Characters.Ironclad) }));
-        Assert.Empty(StoryRules.BossEntryPlan(new[] { typeof(Kokomi), typeof(Yae) }));
+        Assert.Empty(StoryRules.BossEntryPlan(new[] { typeof(Yae), typeof(MegaCrit.Sts2.Core.Models.Characters.Ironclad) }));
     }
 
     [Theory]

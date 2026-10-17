@@ -13,18 +13,17 @@ namespace KleeMod.Story;
 /// "I reviewed it myself and I still think it looks a bit stilted at parts,
 /// but nothing that blocks it from a beta launch. ... Approved!", and "That is
 /// for the story events, not the new gaps."): picks 1 (a) and 2 (a), her
-/// eight events in three threads and the Public Address story curse. The
+/// eight events in three threads and the Public Address story curse; and
+/// pick 3 (a), "Ok, I'm good to approve the full Kokomi paper as-is. The
+/// dialogue looks good!": the select intro, the eight Ancients and the
+/// combat lines (the Architect is <c>tools/build_pck.ps1</c>'s, the utility
+/// rows <c>Kokomi.cs</c>'s). The
 /// chain's shape is the story chains' (<c>review/active/klee-varka-story-chains-2026-10-14.md</c>).
 /// <c>KokomiStoryTests</c> holds each one against the paper. Nothing in this
 /// file is authored here.
 ///
-/// HER LINES ARE NOT HERE. The paper's "Her lines (every other surface)" --
-/// the select text, combat lines, Ancient exchanges, the Architect rewrite
-/// and the utility edits -- is pick 3, still open. So her table carries no
-/// intro (her select description stays <c>Kokomi.cs</c>'s own, which reads
-/// none of this), no Ancient exchanges, no combat lines (<see cref="CharacterStory.Lines"/>
-/// null: she says nothing in a fight, as before) and no signature card. Her
-/// pairs with Klee, Varka and Furina stay in their tables.
+/// Her pairs with Klee, Varka and Furina stay in their tables ("The three
+/// co-op exchanges (Klee, Varka, Furina) stay as they are").
 ///
 /// THE PAPER'S MARKUP. Every page is set in italics in the paper as page
 /// text, not emphasis, so it carries none here; an italic word inside a
@@ -37,13 +36,45 @@ public static class KokomiStory
         Character = typeof(Kokomi),
         Name = "Kokomi",
 
-        // Pick 3 (her select line) is open: empty, and read by nothing.
-        IntroTitle = "",
-        IntroLine = "",
+        IntroTitle = "The Pearl of Wisdom.",
+        IntroLine =
+            "Watatsumi's priestess and its strategist. She would rather solve a hard problem quietly than give a speech, and the Spire is the hardest problem she has seen.",
 
-        // Pick 3: no Ancient exchanges and no combat lines until it is ruled.
-        Ancients = Array.Empty<AncientExchange>(),
-        Lines = null,
+        Ancients = new[]
+        {
+            new AncientExchange("Neow", "NEOW",
+                "A strategist. Your mind is very busy.",
+                "It usually is. You're welcome to the quiet parts, if you find any."),
+            new AncientExchange("Orobas", "OROBAS",
+                "Give me what you carry. I will make it stranger.",
+                "Stranger is fine. Tell me what it does first."),
+            new AncientExchange("Pael", "PAEL",
+                "You are smaller than your ambitions.",
+                "Most generals are. That's why we bring friends."),
+            new AncientExchange("Tezcatara", "TEZCATARA",
+                "Warm yourself by my light.",
+                "Thank you. It's been a long climb, and I'll take the warmth."),
+            new AncientExchange("Nonupeipe", "NONUPEIPE",
+                "You carry a whole island on your back.",
+                "Only some days. Today it's mostly a satchel."),
+            new AncientExchange("Tanx", "TANX",
+                "Do you lead from the front?",
+                "When I must. I'd rather stand where I can see everything."),
+            new AncientExchange("Vakuu", "VAKUU",
+                "Trade with me.",
+                "Gladly. Show me the terms, then the small print."),
+            new AncientExchange("Darv", "DARV",
+                "I collect what others leave behind.",
+                "Then you'd get on with quartermasters. We never throw anything away."),
+        },
+
+        Lines = new CombatLines(
+            BossEntry: "So this is what holds the floor. Let's watch how it moves first.",
+            LowHp: "I'm all right. Hold on a little longer.",
+            Signature: "Watatsumi, rise with me.",
+            BossKill: "There. I can breathe again.",
+            RunLoss: "I misjudged it. I hope whoever climbs next finds my notes.",
+            RunWin: "Done. Now I would very much like a quiet afternoon."),
 
         // "The three co-op exchanges (Klee, Varka, Furina) stay as they are",
         // in their own tables.
@@ -403,6 +434,8 @@ public static class KokomiStory
             },
         },
 
+        // "Her signature card is Nereid's Ascension", once a combat.
+        SignatureCards = new[] { typeof(ProtoKkNereidsAscension) },
         ChoicePool = GorouCards,
     };
 
