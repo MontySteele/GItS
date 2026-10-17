@@ -143,7 +143,8 @@ public class YaeReviewR3Tests : IDisposable
         Assert.Equal("Gain {Block:diff()} [gold]Block[/gold]. Plant a [gold]Kitsune Sakura[/gold].",
                      Face(new ProtoYmShrineMaidensGuard()));
         Assert.Equal("Deal {Damage:diff()} [gold]Electro[/gold] damage to ALL enemies. Plant a "
-                     + "[gold]Foxfire Sakura[/gold].", Face(new ProtoYmFoxfireSweep()));
+                     + "[gold]Foxfire Sakura[/gold]. It strikes now.",   // flat-value pass, 2026-10-17
+                     Face(new ProtoYmFoxfireSweep()));
         Assert.Contains("Weak[/gold] to ALL enemies. [gold]Tenko[/gold]", Face(new ProtoYmKitsuneGuile()));
         // Yae review r6, item 2.
         Assert.Equal("Draw {Cards:diff()} cards. [gold]Edit[/gold] a card in your hand: "

@@ -51,7 +51,7 @@ public sealed class ProtoYmFoxfireSweep : CustomCardModel, IElementalCard, IChar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Foxfire Sweep"),
-        ("description", "Deal {Damage:diff()} [gold]Electro[/gold] damage to ALL enemies. Plant a [gold]Foxfire Sakura[/gold]."),
+        ("description", "Deal {Damage:diff()} [gold]Electro[/gold] damage to ALL enemies. Plant a [gold]Foxfire Sakura[/gold]. It strikes now."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -76,6 +76,7 @@ public sealed class ProtoYmFoxfireSweep : CustomCardModel, IElementalCard, IChar
             .SpawningHitVfxOnEachCreature()
             .Execute(choiceContext);
         await YaeCards.Plant(choiceContext, this, cardPlay, YaeSakuraKind.Foxfire);
+        await YaeCards.StrikePlanted(choiceContext, this, cardPlay);
     }
 
     protected override void OnUpgrade()

@@ -57,7 +57,7 @@ public sealed class ProtoYmSlyStrike : CustomCardModel, IElementalCard, ICharact
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(7m, ValueProp.Move),
+            new DamageVar(8m, ValueProp.Move),
             new DynamicVar("PowerAmount", 1m)
         };
 

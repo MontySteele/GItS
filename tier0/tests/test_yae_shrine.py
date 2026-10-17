@@ -201,8 +201,8 @@ def test_a_sakura_withers_after_three_strikes_and_tenko_refreshes(yae):
 
 def test_tenko_with_no_sakura_does_nothing_and_thunder_rite_still_hits(yae):
     st = _state()
-    _play(st, _ym("thunder_rite"))
-    assert st.enemies[0].hp == 92 and not _strikes(st)
+    _play(st, _ym("thunder_rite"))               # 13 (flat-value pass)
+    assert st.enemies[0].hp == 87 and not _strikes(st)
 
 
 def test_extend_lengthens_and_narukami_ray_levels(yae):

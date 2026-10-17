@@ -111,9 +111,10 @@ def test_foxfire_sweep_plants_a_foxfire_sakura_that_hits_all():
     st = _state(n=3)
     _play(st, "foxfire_sweep")                   # 4 to ALL, then the plant
     assert _led(st).sakura[0].kind == Y.FOXFIRE
-    assert _hp(st) == [96, 96, 96]
+    # Yae flat-value pass, 2026-10-17: "It strikes now." (1 + Level 1, each).
+    assert _hp(st) == [94, 94, 94]
     Y.turn_end(st)
-    assert _hp(st) == [94, 94, 94]               # 1 + Level 1, each
+    assert _hp(st) == [92, 92, 92]               # 1 + Level 1, each
 
 
 def test_the_guard_plants_a_kitsune_decoy_that_gives_block():

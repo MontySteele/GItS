@@ -9493,3 +9493,22 @@ if those are as well." The pool stays 78 at 20 / 38 / 20.
   any existing annotations on the starter card carry over to the Ancient
   version"; the vanilla Tooth already clones the starter's enchantment onto
   the Ancient, and a test pins it.
+
+## Yae flat-value pass, 2026-10-17
+
+`review/active/yae-flat-value-2026-10-17.md` sec.3, the main session's paper
+for a Prototype kit. [USER]: "This all looks good" and "let's run just the
+Commons for now and then see where we're at, with Yakan Evocation tagged as a
+watchlist item." The starters are unchanged.
+
+- **Numbers.** Sly Strike 8 [10, 2 Weak], Margin Note 7 [10], Sesshou Fang
+  base 8 [10] (bonus 6 [8]), Thunder Rite 13 [17], Publisher's Deadline 14
+  [18], Galley Proof 14 [18].
+- **"It strikes this enemy." / "It strikes now."** (Thunder Petal, Foxfire
+  Sweep; the new `strike_planted` kind, C# `YaeCards.StrikePlanted`). The
+  Sakura the plant made, or into a full shrine the one it refreshed (the
+  ledger's last planted, as Yakan Evocation: Sesshou Sakura's "Edit it"),
+  acts once at its Level: a Sakura on the card's target, a Foxfire Sakura on
+  ALL. It uses none of its turns and is not a Tenko (no refresh, no Kagura
+  Bell). The kind carries no `target:`: Thunder Petal's damage op already
+  aims, and Foxfire Sweep stays an ALL card.

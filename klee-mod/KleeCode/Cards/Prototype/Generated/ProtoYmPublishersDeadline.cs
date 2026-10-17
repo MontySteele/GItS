@@ -69,7 +69,7 @@ public sealed class ProtoYmPublishersDeadline : CustomCardModel, IElementalCard,
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(12m, ValueProp.Move)
+            new DamageVar(14m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

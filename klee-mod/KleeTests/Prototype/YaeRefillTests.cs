@@ -198,9 +198,10 @@ public class YaeRefillTests : IDisposable
         ledger.Plant(YaeLaw.PlantLevel, 3, kind: YaeSakuraKind.Kitsune);
         Assert.True(ledger.AnyAtLevel(YaeLaw.FangLevel));
         var card = new ProtoYmSesshouFang();
-        Assert.Equal((6, 6), (Var(card, "YmBase"), Var(card, "YmAmount")));
+        // Yae flat-value pass, 2026-10-17: base 8 [10], the bonus stays 6 [8].
+        Assert.Equal((8, 6), (Var(card, "YmBase"), Var(card, "YmAmount")));
         Upgrade(card);
-        Assert.Equal((8, 8), (Var(card, "YmBase"), Var(card, "YmAmount")));
+        Assert.Equal((10, 8), (Var(card, "YmBase"), Var(card, "YmAmount")));
         Assert.Contains(OnPlay<ProtoYmSesshouFang>(), c => c.Contains(nameof(YaeCards.LevelStrike)));
         Assert.Contains(Il.CallSequence(typeof(YaeCards).GetMethod(nameof(YaeCards.LevelStrike))!),
                         c => c.Contains(nameof(YaeShrineLedger.AnyAtLevel)));

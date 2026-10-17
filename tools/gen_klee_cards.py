@@ -3122,6 +3122,12 @@ YAE_KINDS = {
     # The Yae pass (2026-10-16): Evergreen Charm's "Your oldest Sakura lasts
     # 2 more turns".
     "extend_oldest": "ExtendOldest",
+    # Yae flat-value pass, 2026-10-17 (review/active/yae-flat-value-
+    # 2026-10-17.md sec.3): Thunder Petal's "It strikes this enemy." and
+    # Foxfire Sweep's "It strikes now." The planted Sakura acts once; a
+    # Sakura on the play's aim (no `target:` of its own: Thunder Petal's
+    # damage op already aims), a Foxfire on ALL.
+    "strike_planted": "StrikePlanted",
 }
 YAE_KIND_FIELDS = {
     "plant": ("amount",),
@@ -3164,6 +3170,7 @@ YAE_KIND_FIELDS = {
     "level_newest": ("amount",),
     "bless_highest": ("amount",),
     "extend_oldest": ("amount",),
+    "strike_planted": (),
 }
 #: The kinds that aim at the enemy the player picks (`target: enemy`).
 YAE_AIMED_KINDS = {"lure", "damage_per_sakura", "damage_per_edit",
