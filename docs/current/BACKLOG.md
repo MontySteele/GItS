@@ -27,6 +27,9 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - Furina, Archaic Tooth's All the World's a Stage+ loses Rising Applause+'s Retain (suite 4 lane 5).
 - Klee, The Big One prints a bare `{SetOffBombs}`, which the game formats from the var's BaseValue (0), not its preview; check that "(Bombs: N damage)" ever reads live (Marching Orders had this bug, fixed 2026-10-16).
 - Yae round 7 (2026-10-16): Proofread with one card in hand picked it without asking and overwrote that card's Retain (lane 4); Sakura Canopy+ prints "Gains 0 Block" while no Sakura stands (lane 4).
+- Yae round 8 (2026-10-17): Thunder Rite's "Tenko (13 damage)" preview reads as the card's own damage (lane 2); a Block preview said "Kitsune Sakura adds 6 Block first" with one 3-Block Kitsune standing (lane 2): check whether Sacred Shade or a second act is counted.
+- Yae round 8: Saiguu's Lesson says "a Sakura strikes it", but a Kitsune Sakura gives Block instead (lane 3); the Incoming line leaves out The Shrine's Sacred Shade (lane 3); Inked Branches+ with an empty hand does nothing and says nothing (lane 3); Kitsune Pounce's strike silently does nothing with no Sakura standing (lane 4).
+- Yae round 8: Second Printing+ did not list an Annotated Tenko Kenshin+ in the discard pile once (lane 4, no reason printed); Very Hot Cocoa's "+4 Energy" showed as +2 (lane 4): check against the base relic.
 - Ousia Pledge+ in a Yae deck was refused "it would take you to 0 HP" at 44 to 55 HP with Drain 3 (Yae round 7, lane 1): check the Drain gate for a player who is not Furina.
 - Bennett's Passion Overload and Kujou Sara's Crowfeather Cover do not say that an Attack carries one element, or that Sara's Electro lands when both are up (`CompanionOverhaulRiders.ElementFor`, fixed order, not newest); the sentence does not fit the 125-character power ceiling (116 and 119 now). Kokomi review r4, item 4.
 - Kokomi has no loop probe (Furina's is `tier0/harness/furina_loop_probe.py`). Its known set, when one is built: Shoal Call x2 + Watchful Shoal+ + The Shape of Water (review r3), Kurage Canopy + a planned Ward, and a 0-cost Weak and 3 Block a turn (review r4). (Jellyfish Current left the pool with review r6, 2026-10-14.)
@@ -107,6 +110,7 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 ## Seat page (the blind seat's view: `blindplay_*` render and the bridge)
 
 
+- Yae round 8 (2026-10-17): a one-candidate Edit picks its card without asking, so the seat's `choose` and `confirm` are refused and the next `end turn` is held (lane 4); some Edit and Discard choosers need a second `confirm` and show the stale list (lane 5); `proceed` right after `rest` says "No proceed button" (lane 5).
 - The enemy-fold note names "(Deals N damage)" faces, but base Body Slam prints one too and does not fold (#1223).
 - The hand-full discard line for generated Stings and Wards prints only after the Plans resolve (Kokomi round 4, lane 1, fight 16).
 - No receipt says what a Set off detonated, so a Set off that kills reads as a vanished Bomb. Needs a detonation log in the mod like ReactionLog, a bridge read and a page line such as "Sizzle set off Corpse Slug: Mine 3 (3), Bomb 16 (2, killed it). Nothing jumped."
