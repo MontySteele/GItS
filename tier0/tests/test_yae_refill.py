@@ -228,7 +228,7 @@ def test_publishers_deadline_costs_1_less_after_an_edit_this_turn():
     Y.turn_start(st)
     assert combat.card_cost(st, pd) == 2         # this turn only
     _play(st, pd)
-    assert _hp(st) == [100 - 5 - 12]
+    assert _hp(st) == [100 - 7 - 14]             # flat-value pass, 2026-10-17
 
 
 # --- Sesshou Fang and Kitsune Barrage ----------------------------------------------------
@@ -236,13 +236,14 @@ def test_publishers_deadline_costs_1_less_after_an_edit_this_turn():
 def test_sesshou_fang_reads_a_level_3_sakura():
     st = _state()
     Y.plant(st, 1, level=2)
+    # Yae flat-value pass, 2026-10-17: base 8 [10], the bonus stays 6 [8].
     _play(st, "sesshou_fang")
-    assert _hp(st) == [100 - 6]
+    assert _hp(st) == [100 - 8]
     Y.plant(st, 1, level=3, kind=Y.KITSUNE)      # any kind counts
     _play(st, "sesshou_fang")
-    assert _hp(st) == [100 - 6 - 12]
+    assert _hp(st) == [100 - 8 - 14]
     _play(st, "sesshou_fang+")
-    assert _hp(st) == [100 - 6 - 12 - 16]
+    assert _hp(st) == [100 - 8 - 14 - 18]
 
 
 def test_kitsune_barrage_hits_twice_or_three_times_with_3_sakura():

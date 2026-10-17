@@ -51,7 +51,7 @@ public sealed class ProtoYmThunderPetal : CustomCardModel, IElementalCard, IChar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Thunder Petal"),
-        ("description", "Deal {Damage:diff()} [gold]Electro[/gold] damage. Plant a [gold]Sakura[/gold]."),
+        ("description", "Deal {Damage:diff()} [gold]Electro[/gold] damage. Plant a [gold]Sakura[/gold]. It strikes this enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -76,6 +76,7 @@ public sealed class ProtoYmThunderPetal : CustomCardModel, IElementalCard, IChar
             .WithElementHitFx(this)
             .Execute(choiceContext);
         await YaeCards.Plant(choiceContext, this, cardPlay);
+        await YaeCards.StrikePlanted(choiceContext, this, cardPlay);
     }
 
     protected override void OnUpgrade()

@@ -57,7 +57,7 @@ public sealed class ProtoYmSesshouFang : CustomCardModel, IElementalCard, IChara
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("YmBase", 6m),
+            new DynamicVar("YmBase", 8m),
             new DynamicVar("YmAmount", 6m)
         };
 

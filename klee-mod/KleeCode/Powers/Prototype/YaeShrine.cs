@@ -779,6 +779,28 @@ public static class YaeShrine
         return withered;
     }
 
+    /// <summary>
+    /// YAE FLAT-VALUE PASS, 2026-10-17 (review/active/yae-flat-value-
+    /// 2026-10-17.md sec.3): Thunder Petal's "It strikes this enemy." and
+    /// Foxfire Sweep's "It strikes now." The Sakura the card just planted
+    /// (or, into a full shrine, refreshed: <see cref="YaeShrineLedger.LastPlanted"/>)
+    /// acts once at its Level: a Sakura on <paramref name="aim"/>, a Foxfire
+    /// Sakura on ALL. It uses none of its turns and is not a Tenko (no
+    /// refresh, no Kagura Bell). Falling Blossom's aimed strike, without the
+    /// wither. Whether one struck. Sim twin: <c>yae_shrine.strike_planted</c>.
+    /// </summary>
+    public static async Task<bool> StrikePlanted(PlayerChoiceContext choiceContext,
+                                                 Creature? yae, Creature? aim)
+    {
+        if (yae == null || !Live(yae)) return false;
+        var ledger = YaeShrineLedger.For(yae);
+        if (ledger.LastPlanted is not { } sakura || !ledger.Standing.Contains(sakura)) return false;
+        await Act(choiceContext, yae, sakura,
+                  sakura.Kind == YaeSakuraKind.Thunder ? aim : null);
+        await SakuraBadge.Sync(choiceContext, yae);
+        return true;
+    }
+
     /// <summary>HIDE BEHIND THE SHRINE (the refill): "Your newest Sakura
     /// withers", its Last Bloom as every wither's (it acts as its kind:
     /// a Kitsune's Block, a Foxfire's hit on ALL). Whether one did.</summary>
@@ -1491,6 +1513,12 @@ public static class YaeCards
     public static async Task WitherOldestAt(PlayerChoiceContext choiceContext, CardModel card,
                                             CardPlay cardPlay) =>
         await YaeShrine.WitherOldest(choiceContext, card.Owner?.Creature, cardPlay.Target);
+
+    /// <summary>Thunder Petal's "It strikes this enemy." and Foxfire Sweep's
+    /// "It strikes now." (Yae flat-value pass, 2026-10-17).</summary>
+    public static async Task StrikePlanted(PlayerChoiceContext choiceContext, CardModel card,
+                                           CardPlay cardPlay) =>
+        await YaeShrine.StrikePlanted(choiceContext, card.Owner?.Creature, cardPlay.Target);
 
     /// <summary>Hide Behind the Shrine: "Your newest Sakura withers; if one
     /// did, gain 5 more [Block]", the card's own Block (YmAmount).</summary>

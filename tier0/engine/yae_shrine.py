@@ -269,6 +269,10 @@ KIND_FIELDS = {
     # The Yae pass (2026-10-16): Evergreen Charm's "Your oldest Sakura
     # lasts 2 more turns" (Kitsune's Blessing's "lasts N more turns").
     "extend_oldest": ("amount",),
+    # Yae flat-value pass, 2026-10-17 (review/active/yae-flat-value-
+    # 2026-10-17.md sec.3): Thunder Petal's "It strikes this enemy." and
+    # Foxfire Sweep's "It strikes now." C# twin: `YaeCards.StrikePlanted`.
+    "strike_planted": (),
 }
 KINDS = frozenset(KIND_FIELDS)
 KIND_TARGETS = {
@@ -360,6 +364,10 @@ class YaeLedger:
     #: `LastAttacked`.
     edits_this_turn: int = 0
     last_attacked: object = None
+    #: Yae flat-value pass, 2026-10-17: the Sakura the last plant made or,
+    #: into a full shrine of its kind, refreshed (the "It" of "It strikes
+    #: this enemy."). C# twin: `YaeShrineLedger.LastPlanted`.
+    last_planted: object = None
 
 
 # --------------------------------------------------------------------------
@@ -468,6 +476,7 @@ def plant(state, n: int = 1, reason: str = "plant",
                     # goes to the refreshed Sakura, as to a new one (beside
                     # what it carries, the pool to 78, pick 2 (a)).
                     oldest.add(annotation)
+                    led.last_planted = oldest
                     state.emit("yae_level", reason=reason,
                                levels=[s.level for s in led.sakura])
                     continue
@@ -488,6 +497,7 @@ def plant(state, n: int = 1, reason: str = "plant",
                      seq=led.seq, kind=kind, planted_level=start)
         new.add(annotation)
         led.sakura.append(new)
+        led.last_planted = new
         state.emit("yae_plant", reason=reason, count=len(led.sakura),
                    kind=kind, levels=[s.level for s in led.sakura])
 
@@ -741,6 +751,29 @@ def wither_oldest(state, reason: str = "fallen_petals", aim=None) -> bool:
     Falling Blossom (the refill): its Last Bloom strikes `aim`, one hit
     whatever the kind, as an aimed strike is."""
     return _wither_end(state, oldest=True, reason=reason, aim=aim)
+
+
+def strike_planted(state) -> bool:
+    """Yae flat-value pass, 2026-10-17 (review/active/yae-flat-value-
+    2026-10-17.md sec.3): "It strikes this enemy." / "It strikes now." The
+    Sakura the card just planted (or, into a full shrine, refreshed) acts
+    once at its Level: a Sakura on the card's aim, a Foxfire Sakura on ALL.
+    It uses none of its turns and is not a Tenko (no refresh, no "whenever
+    you Tenko"). Falling Blossom's aimed strike, without the wither. Whether
+    one struck. C# twin: `YaeShrine.StrikePlanted`."""
+    from tier0.engine import effects                # late: cycle
+    led = ledger(state.player)
+    if led is None:
+        return False
+    s = led.last_planted
+    if s is None or s not in led.sakura:
+        return False
+    aim = None
+    if s.kind == THUNDER:
+        targets = effects._pick_targets(state, "enemy")
+        aim = targets[0] if targets else None
+    act(state, s, "strike_planted", aim=aim)
+    return True
 
 
 def wither_newest(state, reason: str = "hide_behind_the_shrine") -> bool:
@@ -1703,6 +1736,8 @@ def op_yae(state, fx: dict, card) -> None:
         # C# twin: `YaeShrineLedger.ExtendOldest`.
         if led.sakura:
             led.sakura[0].turns_left += fx["amount"]
+    elif kind == "strike_planted":
+        strike_planted(state)
     elif kind == "bless_highest":
         s = highest(led)
         if s is not None:
