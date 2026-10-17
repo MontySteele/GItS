@@ -95,3 +95,11 @@ Run five seats on the same seeds after the build. The bar:
 - act-1 turn-1 damage within 15% of base (15 today, 20 base);
 - normal-fight length nearer 3.1 turns;
 - no rise in act-2 or act-3 damage beyond base.
+
+## Ruled 2026-10-17
+
+[USER]: "This all looks good." On the starters: "I think you're right...
+let's run just the Commons for now and then see where we're at, with Yakan
+Evocation tagged as a watchlist item." Build sections 3 and 4 as written.
+The starters stay. Yakan Evocation's "Plant a Sakura. It strikes now." is a
+BACKLOG watch line for the next seat round.
