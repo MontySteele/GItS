@@ -260,7 +260,11 @@ the second.
 
 ## Picks
 
-1. **The story and her lines.** (a) Build the events and every line above.
-   **Default.** (b) Change something first; name it.
+1. **The story events.** (a) Build the eight events. **Default.** (b) Change
+   something first; name it.
 2. **The curse.** (a) Public Address, from the promised rite only.
    **Default.** (b) Another name.
+3. **Her lines** (the section above). (a) Build them as written. **Default.**
+   (b) Change something first; name it.
+
+**Ruled 2026-10-16.** [USER]: "I reviewed it myself and I still think it looks a bit stilted at parts, but nothing that blocks it from a beta launch. I think I'll want to do a full review of the writing surfaces before the public launch anyway. Approved!" [USER], 2026-10-16: "That is for the story events, not the new gaps." Picks 1 (a) and 2 (a): build the eight events and Public Address. Pick 3, her lines, is open.
