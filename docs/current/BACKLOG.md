@@ -15,6 +15,7 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 
 ## Kits and display (the mod)
 
+- Before the public launch, [USER] reviews every writing surface (events, Ancient and combat lines, select text, the Architect) for stilted lines (ruled 2026-10-16).
 - Furina, Let the People Rejoice's damage preview ignores an enemy's Hard To Kill cap (face said 34, each Exoskeleton took 9; suite 3 lane 5).
 - Furina's seat page never defines "past your line" in the Drain tip (suite 3 lane 5).
 - Furina's seat page printed a word tip for Charlotte on a screen with no Charlotte card (suite 3 lane 3).
