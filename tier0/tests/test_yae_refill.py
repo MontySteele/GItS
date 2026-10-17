@@ -279,25 +279,26 @@ def test_hide_behind_the_shrine_with_no_sakura_is_7_block():
 
 # --- Rewrite -------------------------------------------------------------------------------
 
-def test_rewrite_discards_up_to_2_draws_as_many_then_edits_red_ink():
+def test_rewrite_draws_2_discards_1_then_edits_red_ink():
+    # The Yae pass (2026-10-16): "Draw 2 cards. Discard 1 card. Edit a card
+    # in your hand: Red Ink." (was discard up to 2, draw that many).
     st = _state()
     st.player.hand = [loader.get_card("strike"), loader.get_card("strike"),
                       loader.get_card("strike")]
     st.player.draw_pile = [loader.get_card("defend") for _ in range(5)]
     _play(st, "rewrite")
-    assert len(st.player.discard_pile) >= 2
-    assert sum(1 for c in st.player.hand if c.id == "defend") == 2
-    assert len(st.player.hand) == 3
+    assert len(st.player.hand) == 3 + 2 - 1
+    assert sum(1 for c in st.player.discard_pile if c.id != "proto_ym_rewrite") == 1
     assert sum(1 for c in st.player.hand if Y.temp(c) == Y.RED_INK) == 1
     assert _led(st).edits == 1
 
 
-def test_rewrite_upgraded_is_up_to_3():
-    st = _state()
-    st.player.hand = [loader.get_card("strike") for _ in range(4)]
-    st.player.draw_pile = [loader.get_card("defend") for _ in range(5)]
-    _play(st, "rewrite+")
-    assert sum(1 for c in st.player.hand if c.id == "defend") == 3
+def test_rewrite_upgrades_to_draw_3():
+    import yaml
+    from pathlib import Path
+    rows = yaml.safe_load(Path("docs/prototype-surface.yaml").read_text(encoding="utf-8"))
+    row = next(r for r in rows if r["id"] == "proto_ym_rewrite")
+    assert row["upgrade"] == {"draw": 1} and "no_upgrade" not in row
 
 
 # --- Dawn Prayer and Kitsune's Blessing --------------------------------------------------

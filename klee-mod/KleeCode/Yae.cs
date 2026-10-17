@@ -5,7 +5,6 @@ using Godot;
 using KleeMod.Powers;
 using MegaCrit.Sts2.Core.Entities.Characters;
 using MegaCrit.Sts2.Core.Models;
-using MegaCrit.Sts2.Core.Models.PotionPools;
 using MegaCrit.Sts2.Core.Nodes.Combat;
 using MegaCrit.Sts2.Core.Nodes.Vfx;
 
@@ -72,8 +71,10 @@ public sealed class Yae : CustomCharacterModel, IYaeCharacter
 
     public override RelicPoolModel RelicPool => ModelDb.RelicPool<YaeRelicPool>();
 
-    /// <summary>The Defect's borrow, as her pool borrows his frame.</summary>
-    public override PotionPoolModel PotionPool => ModelDb.PotionPool<DefectPotionPool>();
+    /// <summary>Her own three (the Yae pass, 2026-10-16,
+    /// <c>review/active/yae-ancients-relics-2026-10-16.md</c> sec.4); the
+    /// Defect's borrow left, as Kokomi's Silent borrow did.</summary>
+    public override PotionPoolModel PotionPool => ModelDb.PotionPool<Potions.YaePotionPool>();
 
     public override IEnumerable<CardModel> StartingDeck => YaeRoster.StartingDeck();
 

@@ -68,6 +68,6 @@ public sealed class ProtoYmEdictOfCleansing : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PowerAmount"].UpgradeValueBy(2m);
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

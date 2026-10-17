@@ -1086,6 +1086,21 @@ CO_TENANCY_LEDGER = {
             "Duty Roster's shape. It shares only the hand with the turn-1 "
             "co-tenants and nothing reads the hand at this broadcast. No sim "
             "counterpart until Balance",
+        ("Relics/YaeArmRelics.cs", "KitsuneMask"):
+            "(Yae's own relics, the Yae pass 2026-10-16). Turn-1-only: "
+            "1 Weak on every enemy, Electro Sigil's shape. Its co-tenant is "
+            "YaeShrine.TurnStart (via KleeElementalHooks), whose turn-start "
+            "Powers cannot be in play before her first card, and Saiguu's "
+            "Lesson (the one reader of a Weak landing) is a Power too, so "
+            "either order lands the same Weak. No sim counterpart until "
+            "Balance",
+        ("Relics/YaeArmRelics.cs", "SacredSakuraBranch"):
+            "(Yae's own relics, the Yae pass 2026-10-16). Turn-1-only: "
+            "plants a Sakura. It shares the shrine with YaeShrine.TurnStart, "
+            "whose plant and Level (Yakan Offering, Sakura Grove) are Powers "
+            "that cannot be in play on turn 1, and Saiguu's Inkstone, which "
+            "Edits a hand card, never a Sakura, so either order leaves one "
+            "plain Sakura. No sim counterpart until Balance",
         ("Powers/TurnEndSequencer.cs", "TurnEndSequencer"):
             "EB-53/N1: redraws the end-of-turn attribution docket, nothing "
             "else. It has NO stake in this broadcast's order because it "

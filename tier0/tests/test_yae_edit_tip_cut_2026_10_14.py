@@ -70,7 +70,8 @@ def test_every_hand_edit_screen_applies_exactly_one_annotation():
     ("ProtoYmRoyalties", "Royalties", "false"),
     ("ProtoYmInkedBranches", "RedInk", "true"),
     ("ProtoYmFoxFireDraft", "FoxFire", "true"),
-    ("ProtoYmEvergreenCharm", "DeadlineExtension", "true"),
+    # Evergreen Charm left this list with the Yae pass (2026-10-16): it
+    # extends the oldest Sakura and applies no Annotation now.
 ])
 def test_a_card_that_applies_one_annotation_carries_only_its_tip(
         stem, member, on_sakura):

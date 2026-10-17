@@ -230,6 +230,7 @@ public sealed class YaeShrineLedger
                 // the refreshed Sakura, as it would to a new one; the pool to
                 // 78, pick 2 (a): beside what it already carries.
                 oldest.Add(inherited);
+                LastPlanted = oldest;
                 return false;
             }
             _sakura.RemoveAt(0);          // another kind: it withers
@@ -246,6 +247,24 @@ public sealed class YaeShrineLedger
         };
         planted.Add(inherited);
         _sakura.Add(planted);
+        LastPlanted = planted;
+        return true;
+    }
+
+    /// <summary>The Sakura the last plant made or, into a full shrine of its
+    /// kind, refreshed: the "it" of "Plant a Foxfire Sakura at Level 3. Edit
+    /// it: Deadline Extension." (Yakan Evocation: Sesshou Sakura, the Yae
+    /// pass 2026-10-16). Null before any plant this combat.</summary>
+    public YaeSakura? LastPlanted { get; private set; }
+
+    /// <summary>"Edit it": one Annotation on <paramref name="sakura"/>, if it
+    /// still stands. Counted as an Edit only when it changes something.
+    /// </summary>
+    public bool EditOne(YaeSakura? sakura, YaeAnnotation annotation)
+    {
+        if (sakura == null || !_sakura.Contains(sakura)) return false;
+        if (!sakura.Add(annotation)) return false;
+        NoteEdit();
         return true;
     }
 
@@ -272,6 +291,17 @@ public sealed class YaeShrineLedger
     public void Extend(int n)
     {
         foreach (var s in _sakura) s.TurnsLeft += n;
+    }
+
+    /// <summary>EVERGREEN CHARM (the Yae pass, 2026-10-16): "Your oldest
+    /// Sakura lasts 2 more turns" (Kitsune's Blessing's reading), +n on the
+    /// oldest's timer. Whether one stood. Sim twin: the `extend_oldest`
+    /// kind.</summary>
+    public bool ExtendOldest(int n)
+    {
+        if (_sakura.Count == 0) return false;
+        _sakura[0].TurnsLeft += Math.Max(0, n);
+        return true;
     }
 
     /// <summary>"Each Sakura gains a Level": +n each, no cap; with
@@ -499,7 +529,10 @@ public static class YaeShrine
     /// plus Sakura Channeling's amount. Sim twin: <c>yae_shrine.sakura_cap</c>.
     /// </summary>
     public static int MaxSakura(Creature yae) =>
-        YaeLaw.SakuraCap + yae.GetPowerAmount<SakuraChannelingPower>();
+        YaeLaw.SakuraCap + yae.GetPowerAmount<SakuraChannelingPower>()
+        // Fox Ofuda (the Yae pass, 2026-10-16): "You can have 1 more Sakura",
+        // Sakura Channeling's words, and it stacks with Channeling.
+        + Relics.FoxOfuda.Extra(yae);
 
     /// <summary>Torii Ward's "If your shrine is full": as many stand as may
     /// (<see cref="MaxSakura"/>). False for anyone not Yae.</summary>
@@ -575,7 +608,11 @@ public static class YaeShrine
     /// <summary>The size of <paramref name="sakura"/>'s action, before Edict.
     /// </summary>
     public static int Size(Creature yae, YaeSakura sakura) =>
-        YaeShrineLedger.ActSize(sakura.Kind, sakura.Level, sakura.Annotations);
+        YaeShrineLedger.ActSize(sakura.Kind, sakura.Level, sakura.Annotations)
+        // Electroculus (the Yae pass, 2026-10-16): "Your Sakura's strikes deal
+        // 1 more damage", added to the strike's size before Edict and Fox
+        // Fire; a Foxfire's hit on ALL counts, a Kitsune's Block does not.
+        + (YaeShrineLedger.DealsDamage(sakura.Kind) ? Relics.Electroculus.Bonus(yae) : 0);
 
     /// <summary>The enemy a single-target strike lands on: the card's aim
     /// (Kitsune Pounce), else this turn's Lure while it lives, else (with
@@ -696,7 +733,27 @@ public static class YaeShrine
         if (ledger.Count == 0) return;
         await ActAll(choiceContext, yae);
         ledger.Refresh();
+        // Kagura Bell (the Yae pass, 2026-10-16): "Whenever you Tenko, each
+        // Sakura gains a Level", after the Tenko's strikes.
+        Relics.KaguraBell.Ring(yae);
         await SakuraBadge.Sync(choiceContext, yae);
+    }
+
+    /// <summary>
+    /// AFTER <paramref name="n"/> EDITS (every Edit's one door: a hand Edit,
+    /// Reborn as Guuji Yae, an "Edit your ... Sakura" card, Yakan Evocation:
+    /// Sesshou Sakura and Saiguu's Inkstone): Serialization pays per Edit
+    /// (Yae review r6, item 1), and Proofreader's Glasses (the Yae pass,
+    /// 2026-10-16) draws on the turn's first. Counted already
+    /// (<see cref="YaeShrineLedger.EditsThisTurn"/>).
+    /// </summary>
+    public static async Task AfterEdits(PlayerChoiceContext choiceContext,
+                                        Creature? yae, int n)
+    {
+        if (yae == null || n <= 0) return;
+        await SerializationPower.Pay(yae, n);
+        if (Live(yae) && YaeShrineLedger.For(yae).EditsThisTurn == n)
+            await Relics.ProofreadersGlasses.FirstEdit(choiceContext, yae);
     }
 
     /// <summary>
@@ -829,6 +886,10 @@ public static class YaeShrine
         ledger.PriorityUsed = false;
         ledger.EditsThisTurn = 0;
         await FoxfireLurePower.ClearAll(yae);
+        // Saiguu's Inkstone (the Yae pass, 2026-10-16): "At the start of your
+        // turn, Edit a random card in your hand: Red Ink", after the draw and
+        // after the turn's Edit count is cleared, so it is the turn's first.
+        await Relics.SaiguusInkstone.Edit(choiceContext, player);
         var serial = yae.GetPowerAmount<SerialNovelPower>();
         if (serial > 0)
         {
@@ -1017,10 +1078,17 @@ public static class YaeShrineFace
     /// <summary>A Tenko card's live clause.</summary>
     public static string TenkoLine(CardModel? card) =>
         Owner(card) is { } yae
-            ? TenkoWords(Total(YaeShrineLedger.For(yae).Standing, YaeSakuraKind.Thunder),
-                         Total(YaeShrineLedger.For(yae).Standing, YaeSakuraKind.Foxfire),
+            ? TenkoWords(Total(YaeShrineLedger.For(yae).Standing, YaeSakuraKind.Thunder)
+                         + Bonus(yae, YaeSakuraKind.Thunder),
+                         Total(YaeShrineLedger.For(yae).Standing, YaeSakuraKind.Foxfire)
+                         + Bonus(yae, YaeSakuraKind.Foxfire),
                          Total(YaeShrineLedger.For(yae).Standing, YaeSakuraKind.Kitsune))
             : "";
+
+    /// <summary>Electroculus's +1 on each Sakura of a damage kind.</summary>
+    private static int Bonus(Creature yae, YaeSakuraKind kind) =>
+        Relics.Electroculus.Bonus(yae)
+        * YaeShrineLedger.For(yae).Standing.Count(s => s.Kind == kind);
 
     /// <summary>What every Sakura of <paramref name="kind"/> would do,
     /// summed, off the numbers alone. PURE.</summary>
@@ -1108,6 +1176,40 @@ public static class YaeCards
         var yae = card.Owner?.Creature;
         if (yae == null || !YaeShrine.Live(yae)) return;
         YaeShrineLedger.For(yae).Extend(Var(card, "YmAmount"));
+        await SakuraBadge.Sync(choiceContext, yae);
+    }
+
+    /// <summary>Evergreen Charm (the Yae pass, 2026-10-16): "Your oldest
+    /// Sakura lasts 2 more turns" (YmAmount).</summary>
+    public static async Task ExtendOldest(PlayerChoiceContext choiceContext,
+                                          CardModel card, CardPlay cardPlay)
+    {
+        var yae = card.Owner?.Creature;
+        if (yae == null || !YaeShrine.Live(yae)) return;
+        if (YaeShrineLedger.For(yae).ExtendOldest(Var(card, "YmAmount")))
+            await SakuraBadge.Sync(choiceContext, yae);
+    }
+
+    /// <summary>
+    /// YAKAN EVOCATION: SESSHOU SAKURA (the Yae pass, 2026-10-16, the
+    /// Archaic Tooth's): "Plant a Foxfire Sakura at Level 3 (YmAmount). Edit
+    /// it: Deadline Extension." The plant is every plant: into a full shrine
+    /// whose oldest is a Foxfire Sakura it refreshes and Levels that one, and
+    /// "it" is the Sakura refreshed. The Edit counts only when it changes
+    /// something (a second Deadline Extension does not).
+    /// </summary>
+    public static async Task SesshouSakura(PlayerChoiceContext choiceContext,
+                                           CardModel card, CardPlay cardPlay)
+    {
+        var yae = card.Owner?.Creature;
+        if (yae == null || !YaeShrine.Live(yae)) return;
+        await YaeShrine.Plant(choiceContext, yae, 1, Var(card, "YmAmount"),
+                              YaeAnnotationReach.Inherited(card), YaeSakuraKind.Foxfire);
+        var ledger = YaeShrineLedger.For(yae);
+        if (ledger.EditOne(ledger.LastPlanted, YaeAnnotation.DeadlineExtension))
+        {
+            await YaeShrine.AfterEdits(choiceContext, yae, 1);
+        }
         await SakuraBadge.Sync(choiceContext, yae);
     }
 
@@ -1215,7 +1317,7 @@ public static class YaeCards
         // each half. One that Edited a Sakura says nothing about the hand.
         var hand = handIfUpgraded && card.IsUpgraded;
         var edited = YaeShrineLedger.For(yae).EditSakura(end, Var(card, "YmAmount"), annotation);
-        await SerializationPower.Pay(yae, edited);
+        await YaeShrine.AfterEdits(choiceContext, yae, edited);
         if (edited == 0 && !hand)
             YaeEditing.SayNothing(yae, YaeEditing.NoSakuraToEditKey);
         await SakuraBadge.Sync(choiceContext, yae);

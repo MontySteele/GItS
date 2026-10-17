@@ -89,8 +89,19 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   line. **The dedupe and the refill built** (2026-10-16,
   `review/active/yae-dedupe-2026-10-16.md` and `yae-refill-2026-10-16.md`):
   eleven near-copies cut and eleven new cards added, pool still 78 (20 / 38 /
-  20); the eleven have official Inazuma art (refill art pass, 2026-10-16). Next: five seats
-  on the full pool, then [USER]'s run (pick 4 (a)).
+  20); the eleven have official Inazuma art (refill art pass, 2026-10-16).
+  **The Yae pass built** (2026-10-16,
+  `review/active/yae-ancients-relics-2026-10-16.md`, no pick): the rate pass
+  (Evergreen Charm extends the oldest Sakura 2 turns, Fox Fire Draft+ the 2
+  newest, Thunderbolt Tithe+ 4 plus 5 each, Edict+ +4, Rewrite draws 2 and
+  discards 1, Fox Trick draws 2, Editorial Priority Rare and Mischievous
+  Teasing Uncommon; pool still 78 at 20 / 38 / 20); her two Ancients (Yakan
+  Evocation: Sesshou Sakura on the Archaic Tooth, keeping the starter's
+  Annotations; Yae Publishing House from the Dusty Tome), so the Darv guard
+  is gone; seven relics and three potions of her own, the offer Meditations,
+  her seven and Enlightened Blessing, the Defect's potions gone. Rewrite has
+  no upgrade yet (the paper names none). Next: five seats on the full pool,
+  then [USER]'s run (pick 4 (a)).
 
 ## The kits
 

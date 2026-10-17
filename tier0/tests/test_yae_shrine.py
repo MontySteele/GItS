@@ -360,11 +360,14 @@ def test_newest_oldest_and_every(yae):
         _play(st, _ym("yakan_evocation"))
     _play(st, _ym("fox_fire_draft"))
     assert [s.annotations for s in _led(st).sakura] == [[], [], [Y.FOX_FIRE]]
-    _play(st, _ym("evergreen_charm"))
+    Y.edit_sakura(st, "oldest", 1, Y.DEADLINE)
     assert [s.annotations for s in _led(st).sakura] == [
         [Y.DEADLINE], [], [Y.FOX_FIRE]]
     up = loader.get_card(_ym("fox_fire_draft") + "+")
-    _play(st, up)                                # upgraded: every Sakura
+    _play(st, up)                                # upgraded: the 2 newest
+    assert [s.annotations for s in _led(st).sakura] == [
+        [Y.DEADLINE], [Y.FOX_FIRE], [Y.FOX_FIRE]]
+    Y.edit_sakura(st, "every", 1, Y.FOX_FIRE)
     assert [s.annotations for s in _led(st).sakura] == [
         [Y.DEADLINE, Y.FOX_FIRE], [Y.FOX_FIRE], [Y.FOX_FIRE]]
 
@@ -372,8 +375,7 @@ def test_newest_oldest_and_every(yae):
 def test_deadline_extension_never_withers(yae):
     st = _state()
     _play(st, _ym("yakan_evocation"))
-    _play(st, _ym("evergreen_charm"))
-    assert st.player.block == 7
+    Y.edit_sakura(st, "oldest", 1, Y.DEADLINE)   # Evergreen Charm's, until the Yae pass
     for _ in range(6):
         Y.turn_end(st)
         Y.turn_start(st)

@@ -61,7 +61,9 @@ internal static class YaeRoster
     /// refill's eleven (<c>review/active/yae-dedupe-2026-10-16.md</c>,
     /// <c>review/active/yae-refill-2026-10-16.md</c>, ruled 2026-10-16):
     /// SEVENTY-EIGHT, twenty Commons, thirty-eight Uncommons and twenty
-    /// Rares, in the sheet's order. No Ancients and no co-op tier yet.
+    /// Rares, in the sheet's order (the Yae pass, 2026-10-16, swapped
+    /// Editorial Priority and Mischievous Teasing). Her Ancients ride
+    /// <see cref="OfferablePool"/>; no co-op tier yet.
     /// </summary>
     internal static IReadOnlyList<CardModel> Pool() => new CardModel[]
     {
@@ -121,7 +123,7 @@ internal static class YaeRoster
         ModelDb.Card<ProtoYmEnlightenedBlessing>(),
         ModelDb.Card<ProtoYmSaiguusLesson>(),
         ModelDb.Card<ProtoYmShrinesSacredShade>(),
-        ModelDb.Card<ProtoYmEditorialPriority>(),
+        ModelDb.Card<ProtoYmMischievousTeasing>(),
         ModelDb.Card<ProtoYmHuntingGaze>(),
         ModelDb.Card<ProtoYmInscribedThunder>(),
         ModelDb.Card<ProtoYmKitsunesBlessing>(),
@@ -130,7 +132,7 @@ internal static class YaeRoster
         ModelDb.Card<ProtoYmYakanOffering>(),
         ModelDb.Card<ProtoYmTheSevenGlamours>(),
         ModelDb.Card<ProtoYmSakuraChanneling>(),
-        ModelDb.Card<ProtoYmMischievousTeasing>(),
+        ModelDb.Card<ProtoYmEditorialPriority>(),
         ModelDb.Card<ProtoYmRebornAsGuujiYae>(),
         ModelDb.Card<ProtoYmEditorInChief>(),
         ModelDb.Card<ProtoYmRoyalties>(),
@@ -148,9 +150,12 @@ internal static class YaeRoster
         ModelDb.Card<ProtoYmEternity>(),
     };
 
-    /// <summary>THE OFFER (<c>YaeCardPool.FilterThroughEpochs</c>): the pool.
-    /// No Ancients and no co-op tier yet (the paper's "next batch").</summary>
-    internal static IEnumerable<CardModel> OfferablePool() => Pool();
+    /// <summary>THE OFFER (<c>YaeCardPool.FilterThroughEpochs</c>): the pool
+    /// and her two Ancients (the Yae pass, 2026-10-16), which the Dusty Tome
+    /// draws from (an empty draw softlocks Darv); Ancient rarity never rolls
+    /// anywhere else. No co-op tier yet.</summary>
+    internal static IEnumerable<CardModel> OfferablePool() =>
+        Pool().Concat(RosterAncientCards.Yae);
 
     /// <summary>Every card of hers that must resolve <c>CardModel.Pool</c> to
     /// her pool: her generated rows. The five Annotation faces ride

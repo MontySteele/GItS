@@ -310,6 +310,9 @@ MORE_COUNTERS = {"proto_kk_kurage_swarm", "KurageSwarmPower.description",
                  # Sakura Channeling (2026-10-14): "You can have N more
                  # Sakura", the shrine's cap growing.
                  "SakuraChannelingPower.description",
+                 # Fox Ofuda (the Yae pass, 2026-10-16): Channeling's words,
+                 # "You can have 1 more Sakura", the cap growing.
+                 "FoxOfuda.description",
                  # Epiclese Season Pass (Furina's card pass, 2026-10-15):
                  # "You have 1 more guest seat", the seat count growing.
                  "EpicleseSeasonPass.description",
@@ -917,6 +920,8 @@ ANCIENT_CARD_FILES = (
     MOD / "Cards" / "Kokomi" / "PrincessOfWatatsumi.cs",
     MOD / "Cards" / "Varka" / "AllFourWinds.cs",
     MOD / "Cards" / "Varka" / "DandelionGale.cs",
+    MOD / "Cards" / "Yae" / "YakanEvocationSesshouSakura.cs",
+    MOD / "Cards" / "Yae" / "YaePublishingHouse.cs",
 )
 
 
@@ -933,7 +938,7 @@ KIT_RELIC_FILES = ("PoundingSurprise.cs", "PoundingSurpriseNext.cs",
                    "TamakushiCasket.cs", "KleeArmRelics.cs",
                    "UpgradedStarterRelics.cs", "FurinaStageRelics.cs",
                    "SalonSolitaire.cs", "BoreasFang.cs", "VarkaArmRelics.cs",
-                   "KokomiArmRelics.cs")
+                   "KokomiArmRelics.cs", "YaeArmRelics.cs")
 
 
 def prototype_rows() -> list[Row]:

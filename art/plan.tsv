@@ -3126,6 +3126,31 @@ power_yae_yakan_offering	ImageGen/images/yae/powers/yakan_offering.png	256	256	c
 power_yae_sakura_channeling	ImageGen/images/yae/powers/sakura_channeling.png	256	256	contain	center	shortlist	1	png	Constellation Sakura Channeling.png		icon
 # power_yae_editor_in_chief <- her own light novel
 power_yae_editor_in_chief	ImageGen/images/yae/powers/editor_in_chief.png	256	256	contain	center	shortlist	1	png	Item Pretty Please, Kitsune Guuji.png		icon
+# ---------- Yae pass (2026-10-16, review/active/yae-ancients-relics-2026-10-16.md): her two Ancient portraits, seven relic and three potion icons; Inazuma sources only ----------
+# yakan_evocation_sesshou_sakura <- Yae's introduction card, her name banner cropped out
+yakan_evocation_sesshou_sakura	ImageGen/images/cards/yae/yakan_evocation_sesshou_sakura.png	500	380	cover	x0.46,y0.40@1.3	shortlist	1	png	Yae Miko Introduction Card.png		splash
+# yae_publishing_house <- the Yae Publishing House itself, Inazuma City, the corner mark cropped out
+yae_publishing_house	ImageGen/images/cards/yae/yae_publishing_house.png	500	380	cover	x0.48,y0.45@1.12	shortlist	1	png	Yae Publishing House.png		splash
+# relic_kitsune_mask <- NEW: a red kitsune doll from Mt. Yougou's night walk
+relic_kitsune_mask	ImageGen/images/yae/relics/kitsune_mask.png	256	256	contain	center	shortlist	1	png	Item Mt. Yougou Night Walk Red Kitsune Doll.png		icon
+# relic_sacred_sakura_branch <- NEW: a Thunder Sakura Bough
+relic_sacred_sakura_branch	ImageGen/images/yae/relics/sacred_sakura_branch.png	256	256	contain	center	shortlist	1	png	Item Thunder Sakura Bough.png		icon
+# relic_proofreaders_glasses <- NEW: an Inazuma light novel, the proofreader's work
+relic_proofreaders_glasses	ImageGen/images/yae/relics/proofreaders_glasses.png	256	256	contain	center	shortlist	1	png	Book Toki Alley Tales.png		icon
+# relic_electroculus <- NEW: the oculus of that name
+relic_electroculus	ImageGen/images/yae/relics/electroculus.png	256	256	contain	center	shortlist	1	png	Item Electroculus Wild.png		icon
+# relic_saiguus_inkstone <- NEW: her own talent book, Guide to Light
+relic_saiguus_inkstone	ImageGen/images/yae/relics/saiguus_inkstone.png	256	256	contain	center	shortlist	1	png	Item Guide to Light.png		icon
+# relic_kagura_bell <- NEW: Kagura's Verity, the shrine's bell catalyst
+relic_kagura_bell	ImageGen/images/yae/relics/kagura_bell.png	256	256	contain	center	shortlist	1	png	Weapon Kagura's Verity.png		icon
+# relic_fox_ofuda <- NEW: a Grand Narukami Shrine omamori
+relic_fox_ofuda	ImageGen/images/yae/relics/fox_ofuda.png	256	256	contain	center	shortlist	1	png	Item Grand Narukami Shrine Omamori.png		icon
+# potion_bottled_sakura <- NEW: a Sakura Bloom
+potion_bottled_sakura	ImageGen/images/yae/potions/bottled_sakura.png	256	256	contain	center	shortlist	1	png	Item Sakura Bloom.png		icon
+# potion_foxs_inkwell <- NEW: her namecard's kitsune dream
+potion_foxs_inkwell	ImageGen/images/yae/potions/foxs_inkwell.png	256	256	contain	center	shortlist	1	png	Item Yae Miko Kitsune Dreaming.png		icon
+# potion_narukami_sake <- NEW: Ako's sake vessel
+potion_narukami_sake	ImageGen/images/yae/potions/narukami_sake.png	256	256	contain	center	shortlist	1	png	Item Ako's Sake Vessel.png		icon
 # ---------- Furina, the sweep (review/active/furina-sweep-2026-10-14.md sec.3): 13 new card portraits; Opening Number and Plot Twist keep their rows above. Every row is OFFICIAL wiki art and no title is worn by any other plan row (blank source_group, strict L1); six reuse art the first set's cut rows freed.
 # proto_fs_ousia_pneuma 'Ousia / Pneuma' <- her Pneuma TCG card: Furina in one of her two arkhe
 proto_fs_ousia_pneuma	ImageGen/images/cards/furina/proto_fs_ousia_pneuma.png	500	380	cover	y0.25	shortlist	1	png	Furina Pneuma Character Card.png		tcg	

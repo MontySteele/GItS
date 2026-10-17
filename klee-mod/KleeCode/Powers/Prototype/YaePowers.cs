@@ -619,3 +619,23 @@ public sealed class EternityPower : PowerModel, ILocalizationProvider
 
     public override PowerStackType StackType => PowerStackType.Single;
 }
+
+/// <summary>Yae Publishing House (the Yae pass, 2026-10-16, her Dusty Tome
+/// Ancient): "Your Edits write their Annotation twice." Read by
+/// <see cref="YaeEditing.WriteTimes"/> at each Edit of a card: the temporary
+/// slot holds two layers, which add up. On a Sakura twice is once (its
+/// Annotations are distinct), so Deadline Extension twice is once. Copies do
+/// not stack.</summary>
+public sealed class YaePublishingHousePower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Yae Publishing House"),
+        ("description",
+            "Your [gold]Edits[/gold] write their Annotation twice."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Single;
+}

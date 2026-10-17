@@ -4575,8 +4575,9 @@
 - {id: proto_ym_yakan_evocation, name: "Yakan Evocation", character: yae,
    authored_by: [claude],
    cost: 1, type: skill, rarity: basic,
-   # Review r3 (ruled 2026-10-14): the full-shrine rule moved off the face
-   # into its own tip (ForFullShrine). Provenance, "Yae review r3".
+   # Review r3: the full-shrine rule is its own tip (ForFullShrine). Yae pass
+   # 2026-10-16 (sec.2): the Archaic Tooth makes it Yakan Evocation: Sesshou
+   # Sakura (`gen_klee_cards.TRANSCENDENCE`). Provenance, "Yae pass".
    description: "Plant a [gold]Sakura[/gold].",
    effects: [{op: yae, kind: plant, amount: 1}],
    upgrade: {cost: -1}}
@@ -4615,11 +4616,12 @@
 - {id: proto_ym_fox_fire_draft, name: "Fox Fire Draft", character: yae,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common, exhaust: true,
-   # Design axes, Ruled 2026-10-14: it writes on Sakura now. Upgraded, the
-   # three newest: every Sakura, since three is the cap.
-   description: "[gold]Edit[/gold] {IfUpgraded:show:every|your newest} [gold]Sakura[/gold]: [gold]Fox Fire[/gold].",
+   # Design axes, Ruled 2026-10-14: it writes on Sakura now. Yae pass
+   # 2026-10-16 (review/active/yae-ancients-relics-2026-10-16.md sec.1): the
+   # upgrade is the 2 newest (was every Sakura, up to 36 for 0 at Common).
+   description: "[gold]Edit[/gold] {IfUpgraded:show:your 2 newest|your newest} [gold]Sakura[/gold]: [gold]Fox Fire[/gold].",
    effects: [{op: yae, kind: edit_sakura, which: newest, annotation: fox_fire, amount: 1}],
-   upgrade: {yae_amount: 2}}
+   upgrade: {yae_amount: 1}}
 
 - {id: proto_ym_sly_strike, name: "Sly Strike", character: yae,
    authored_by: [claude],
@@ -4633,9 +4635,10 @@
 - {id: proto_ym_fox_trick, name: "Fox Trick", character: yae,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Apply 2 [gold]Weak[/gold] to an enemy. Draw 1 card.",
+   # Yae pass 2026-10-16 (sec.1): draws 2 (was 1, below Backflip).
+   description: "Apply 2 [gold]Weak[/gold] to an enemy. Draw 2 cards.",
    effects: [{op: apply_power, power: weak, amount: 2, target: enemy},
-             {op: draw, amount: 1}],
+             {op: draw, amount: 2}],
    upgrade: {power_amount: 1}}
 
 - {id: proto_ym_shrine_maidens_guard, name: "Shrine Maiden's Guard", character: yae,
@@ -4679,11 +4682,12 @@
 - {id: proto_ym_evergreen_charm, name: "Evergreen Charm", character: yae,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   # Yae review r4 item 4: 7 [10]. The pool to 78, pick 2 (a): Annotations
-   # coexist on a Sakura, so "It keeps its Red Ink." went.
-   description: "Gain 7 [gold]Block[/gold]. [gold]Edit[/gold] your oldest [gold]Sakura[/gold]: [gold]Deadline Extension[/gold].",
+   # Yae review r4 item 4: 7 [10]. Yae pass 2026-10-16 (sec.1): "Your oldest
+   # Sakura lasts 2 more turns" (Kitsune's Blessing's reading), was Edit your
+   # oldest Sakura: Deadline Extension, Eternity for one Sakura at Common.
+   description: "Gain 7 [gold]Block[/gold]. Your oldest [gold]Sakura[/gold] lasts {YmAmount:diff()} more turns.",
    effects: [{op: block, amount: 7},
-             {op: yae, kind: edit_sakura, which: oldest, annotation: deadline, amount: 1}],
+             {op: yae, kind: extend_oldest, amount: 2}],
    upgrade: {block: 3}}
 
 # The pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, ruled 2026-10-15,
@@ -4769,11 +4773,14 @@
 - {id: proto_ym_rewrite, name: "Rewrite", character: yae,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   # Discard 0 to 2 [3] chosen cards, draw as many, then the Edit (it can
-   # reach a card just drawn).
-   description: "Discard up to {YmAmount:diff()} cards, then draw that many. [gold]Edit[/gold] a card in your hand: [gold]Red Ink[/gold].",
-   effects: [{op: yae, kind: rewrite, amount: 2, annotation: red_ink}],
-   upgrade: {yae_amount: 1}}
+   # Yae pass 2026-10-16 (sec.1): draw 2, discard 1, then the Edit (was
+   # discard up to 2, draw that many). Upgrade draw 3 (design session,
+   # 2026-10-17, after the build).
+   description: "Draw {Cards:diff()} cards. Discard 1 card. [gold]Edit[/gold] a card in your hand: [gold]Red Ink[/gold].",
+   effects: [{op: draw, amount: 2},
+             {op: discard, amount: 1, select: chosen},
+             {op: yae, kind: edit, annotation: red_ink, amount: 1}],
+   upgrade: {draw: 1}}
 
 - {id: proto_ym_dawn_prayer, name: "Dawn Prayer", character: yae,
    authored_by: [claude],
@@ -4798,17 +4805,20 @@
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
    # Design axes sec.4: 3 [4] plus 4 [6] per Sakura (was 4 [6] per Sakura).
+   # Yae pass 2026-10-16 (sec.1): the upgrade is 4 plus 5 each (was 6 each,
+   # 22 for 1 with a full shrine).
    description: "Deal 3 [gold]Electro[/gold] damage, plus 4 for each [gold]Sakura[/gold] standing.",
    effects: [{op: yae, kind: damage_per_sakura, base: 3, per: 4, target: enemy}],
-   upgrade: {yae_base: 1, yae_per: 2}}
+   upgrade: {yae_base: 1, yae_per: 1}}
 
 - {id: proto_ym_edict_of_cleansing, name: "Edict of Cleansing", character: yae,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   # Design axes sec.4: 3 [5], and Weak counts, so it works solo.
+   # Design axes sec.4: 3 [5], and Weak counts, so it works solo. Yae pass
+   # 2026-10-16 (sec.1): the upgrade is +4 (was +5, nearly triple a strike).
    description: "Your [gold]Sakura[/gold] strikes deal 3 more to an enemy that is [gold]Weak[/gold] or has a [gold]Pyro[/gold], [gold]Hydro[/gold] or [gold]Cryo[/gold] aura.",
    effects: [{op: apply_power, power: ym_edict_of_cleansing, amount: 3, target: self}],
-   upgrade: {power_amount: 2}}
+   upgrade: {power_amount: 1}}
 
 - {id: proto_ym_bestseller, name: "Bestseller", character: yae,
    authored_by: [claude],
@@ -5095,12 +5105,15 @@
    effects: [{op: apply_power, power: ym_sacred_shade, amount: 2, target: self}],
    upgrade: {power_amount: 1}}
 
-- {id: proto_ym_editorial_priority, name: "Editorial Priority", character: yae,
+- {id: proto_ym_mischievous_teasing, name: "Mischievous Teasing", character: yae,
    authored_by: [claude],
-   cost: 1, type: power, rarity: uncommon,
-   description: "The first [gold]Annotated[/gold] card you play each turn costs 0.",
-   effects: [{op: apply_power, power: ym_editorial_priority, amount: 1, target: self}],
-   upgrade: {innate: true}}
+   # Yae pass 2026-10-16 (sec.1): an Uncommon, unchanged (was Rare, an
+   # Uncommon's effect), swapped with Editorial Priority.
+   cost: 0, type: skill, rarity: uncommon, exhaust: true,
+   description: "Apply 2 [gold]Weak[/gold] to ALL enemies. Draw {Cards:diff()} cards.",
+   effects: [{op: apply_power, power: weak, amount: 2, target: all_enemies},
+             {op: draw, amount: 2}],
+   upgrade: {draw: 1}}
 
 # The refill (review/active/yae-refill-2026-10-16.md): three Uncommons for
 # the three cut.
@@ -5171,13 +5184,15 @@
    effects: [{op: apply_power, power: ym_sakura_channeling, amount: 2, target: self}],
    upgrade: {cost: -1}}
 
-- {id: proto_ym_mischievous_teasing, name: "Mischievous Teasing", character: yae,
+- {id: proto_ym_editorial_priority, name: "Editorial Priority", character: yae,
    authored_by: [claude],
-   cost: 0, type: skill, rarity: rare, exhaust: true,
-   description: "Apply 2 [gold]Weak[/gold] to ALL enemies. Draw {Cards:diff()} cards.",
-   effects: [{op: apply_power, power: weak, amount: 2, target: all_enemies},
-             {op: draw, amount: 2}],
-   upgrade: {draw: 1}}
+   # Yae pass 2026-10-16 (sec.1): a Rare (was Uncommon: about 1 Energy a
+   # turn, and no base Uncommon Power is an Energy engine), swapped with
+   # Mischievous Teasing.
+   cost: 1, type: power, rarity: rare,
+   description: "The first [gold]Annotated[/gold] card you play each turn costs 0.",
+   effects: [{op: apply_power, power: ym_editorial_priority, amount: 1, target: self}],
+   upgrade: {innate: true}}
 
 - {id: proto_ym_reborn_as_guuji_yae, name: "Reborn as Guuji Yae", character: yae,
    authored_by: [claude],

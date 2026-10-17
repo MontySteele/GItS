@@ -2432,7 +2432,7 @@
       "formula_per": 1
     },
     "proto_ym_edict_of_cleansing": {
-      "power_amount": 2
+      "power_amount": 1
     },
     "proto_ym_editor_in_chief": {
       "cost": -1
@@ -2462,7 +2462,7 @@
       "yae_per": 3
     },
     "proto_ym_fox_fire_draft": {
-      "yae_amount": 2
+      "yae_amount": 1
     },
     "proto_ym_fox_trick": {
       "power_amount": 1
@@ -2579,7 +2579,7 @@
       "yae_amount": 1
     },
     "proto_ym_rewrite": {
-      "yae_amount": 1
+      "draw": 1
     },
     "proto_ym_royalties": {
       "cost": -1
@@ -2646,7 +2646,7 @@
     },
     "proto_ym_thunderbolt_tithe": {
       "yae_base": 1,
-      "yae_per": 2
+      "yae_per": 1
     },
     "proto_ym_torii_ward": {
       "block": 3

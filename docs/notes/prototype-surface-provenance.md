@@ -9461,3 +9461,35 @@ on the Yae paper picks!"), built together. The pool stays 78 at 20 / 38 / 20
   the Edit can reach a card it drew; Inscribed Thunder's Annotations are
   distinct ones, Published included; Dawn Prayer and Kitsune's Blessing do
   nothing with no Sakura.
+
+## Yae pass, 2026-10-16
+
+`review/active/yae-ancients-relics-2026-10-16.md`, the main session's paper
+for a Prototype kit (no pick). [USER]: "Let's do a design pass over the
+current Yae pool. Does anything look too obviously weak or strong for its
+rarity / energy rate? And let's design the two Yae Ancient cards, as well as
+the Ancient relic if that's still missing. Plus potions and regular relics
+if those are as well." The pool stays 78 at 20 / 38 / 20.
+
+- **The rate pass (sec.1).** Evergreen Charm: "Your oldest Sakura lasts 2
+  more turns" (Kitsune's Blessing's reading, the new `extend_oldest` kind),
+  was Edit your oldest Sakura: Deadline Extension. Fox Fire Draft+: the 2
+  newest (was every Sakura). Thunderbolt Tithe+: 4 plus 5 each (was 6
+  each). Edict of Cleansing+: +4 (was +5). Rewrite: draw 2, discard 1
+  (chosen), then the Edit (was discard up to 2, draw that many; the
+  `rewrite` kind keeps no row). Fox Trick draws 2 (was 1). Editorial
+  Priority to Rare, Mischievous Teasing to Uncommon, unchanged.
+- **Rewrite's upgrade.** The paper names none, and the Prototype default
+  withholds one because the row already draws, so the row carries
+  `no_upgrade:` until the design pass names one.
+- **The Ancients (sec.2)** are hand-written, game-side only (Varka's):
+  `Cards/Yae/YakanEvocationSesshouSakura.cs` (the Archaic Tooth's, on
+  Yakan Evocation's `ITranscendenceCard`) and `Cards/Yae/YaePublishingHouse.cs`
+  (the Dusty Tome's). "Edit it" is the Sakura the plant made, or, into a full
+  shrine whose oldest is a Foxfire Sakura, the one it refreshed. Publishing
+  House doubles the temporary slot (two layers); a Publish still moves one
+  layer, so the after-elite Publish adds one, and an in-combat Publish leaves
+  the other layer for the combat. [USER] (2026-10-16): "let's make it so that
+  any existing annotations on the starter card carry over to the Ancient
+  version"; the vanilla Tooth already clones the starter's enchantment onto
+  the Ancient, and a test pins it.

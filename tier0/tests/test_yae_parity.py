@@ -108,6 +108,11 @@ def test_every_power_her_rows_apply_is_a_class():
         assert f"class {cls} " in text, cls
 
 
+#: Rows that say `no_upgrade:` (the Yae pass, 2026-10-16: Rewrite's new
+#: face names no upgrade yet).
+NO_UPGRADE_YET = {"proto_ym_rewrite"}
+
+
 def _class_file(card_id: str) -> str:
     return (GENERATED / f"{gen.pascal(card_id)}.cs").read_text(encoding="utf-8")
 
@@ -125,6 +130,8 @@ def test_each_row_carries_its_numbers_and_upgrade_into_the_class(card):
                 assert fx[field] == gen.YAE_FIELD_DEFAULTS[field], (var, fx)
                 continue
             assert f'new DynamicVar("{var}", {fx[field]}m)' in text, (var, fx)
+    if card.id in NO_UPGRADE_YET:
+        return
     up = loader.get_card(card.id + "+")
     for base, plus in zip(card.effects, up.effects):
         if base.get("op") != "yae":

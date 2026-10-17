@@ -11,7 +11,7 @@ namespace KleeMod.Relics;
 /// a character's pool is the starter, its own seven and the Ancient; the
 /// Silent borrow is gone. Kokomi's joined on 2026-10-15
 /// (<c>review/active/kokomi-relics-potions-2026-10-15.md</c>, kit census
-/// picks 1 and 2).
+/// picks 1 and 2), Yae's on 2026-10-16 (the Yae pass).
 ///
 /// Pure, over the pool's own members, so the tests run it on the real
 /// relic types without a booted <c>ModelDb</c>.
@@ -49,6 +49,15 @@ public static class ArmRelicPools
         new[] { typeof(TamakushiCasket) }
             .Concat(KokomiArmRelics.Types)
             .Append(typeof(WatatsumiCasket))
+            .ToArray();
+
+    /// <summary>Yae's pool: Meditations of a Yako, her seven, Enlightened
+    /// Blessing (the Yae pass, 2026-10-16,
+    /// <c>review/active/yae-ancients-relics-2026-10-16.md</c> sec.3).</summary>
+    public static readonly IReadOnlyList<Type> YaeArmPool =
+        new[] { typeof(MeditationsOfAYako) }
+            .Concat(YaeArmRelics.Types)
+            .Append(typeof(EnlightenedBlessing))
             .ToArray();
 
     /// <summary>What the pool offers: the members in the arm pool.</summary>

@@ -45,13 +45,13 @@ public sealed class ProtoYmRewrite : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Rewrite"),
-        ("description", "Discard up to {YmAmount:diff()} cards, then draw that many. [gold]Edit[/gold] a card in your hand: [gold]Red Ink[/gold]."),
+        ("description", "Draw {Cards:diff()} cards. Discard 1 card. [gold]Edit[/gold] a card in your hand: [gold]Red Ink[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("YmAmount", 2m)
+            new CardsVar(2)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -63,11 +63,19 @@ public sealed class ProtoYmRewrite : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await YaeCards.Rewrite(choiceContext, this, cardPlay, YaeAnnotation.RedInk);
+        await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
+        {
+            var picked = (await CardSelectCmd.FromHandForDiscard(
+                choiceContext, Owner,
+                new CardSelectorPrefs(CardSelectorPrefs.DiscardSelectionPrompt, 1),
+                null, this)).ToList();
+            await CardCmd.Discard(choiceContext, picked);
+        }
+        await YaeCards.Edit(choiceContext, this, cardPlay, YaeAnnotation.RedInk);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["YmAmount"].UpgradeValueBy(1m);
+        DynamicVars.Cards.UpgradeValueBy(1m);
     }
 }
