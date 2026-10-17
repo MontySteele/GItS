@@ -44,7 +44,7 @@ public sealed class ProtoFsUndercurrent : CustomCardModel, ICharacterCard, IUnpl
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Undercurrent"),
+        ("title", "Unheard Confession"),
         ("description", "[gold]Drain[/gold] 2. Deal {CalculationBase:diff()} damage, plus 1 for each time you have Drained this combat.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}{InCombat:{StageDrainLine}|}"),
     };
 

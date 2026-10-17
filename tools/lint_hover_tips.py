@@ -25,8 +25,7 @@ guest half `PlayerTips.Guest` picks off the face, and the Applies-X rows in
 of the base game's own length and is counted, not measured.
 
 NOT COUNTED: a tip that shows only on a board in the state it names
-(`ForEmptyField`, `ForElementSwitch`) or only to one owner (a Companion's
-Plan line, to a Kokomi: `ForCompanionPlan`), and the reaction previews inside
+(`ForEmptyField`, `ForElementSwitch`), and the reaction previews inside
 `KleeCardTooltips.ForCard`, which a player sees only while aiming.
 
 A structurally invisible defect ("structurally invisible defects" in memory):
@@ -53,12 +52,10 @@ PLAYER = MOD / "Cards" / "Prototype" / "PlayerTips.cs"
 CAP_BOXES = 3
 CAP_CHARS = 100
 
-#: Shown only on a board in the state the tip names, or only to one owner
-#: (a Companion's Plan line, to a Kokomi): not a static box.
+#: Shown only on a board in the state the tip names: not a static box.
 BOARD_ONLY = frozenset({
     "ArmKeywordTips.ForEmptyField",
     "ArmKeywordTips.ForElementSwitch",
-    "ArmKeywordTips.ForCompanionPlan",
 })
 
 #: Cards whose own mod keywords alone pass the cap, curated: the generator
@@ -70,10 +67,7 @@ BOX_DEBT = {
 }
 
 #: Long tips a ruled pick keeps, curated. An entry no card raises FAILS.
-LONG_OK = {
-    "YaeSakuraTip": "Yae paper pick 6 (a): Tenko lives in the Sakura tip",
-    "YaeEditTip": "Yae paper pick 6 (a): the Edit tip lists the five "
-                  "Annotations",
+LONG_OK: dict[str, str] = {
 }
 
 _GOLD = re.compile(r"\[/?(gold|blue)\]")
@@ -184,6 +178,39 @@ def method_keys() -> dict[str, str]:
     return out
 
 
+def arm_statics() -> dict[str, str]:
+    """`static readonly string` tip bodies in `ArmKeywordTips`, rendered."""
+    src = re.sub(r"^\s*//.*$", "", tc.read(ARM), flags=re.M)
+    return {name: tc.csharp_text(expr) for name, expr in re.findall(
+        r"static readonly string (\w+) =\s*(.*?);", src, re.S)}
+
+
+def annotation_rules() -> dict[tuple[str, str], str]:
+    """`YaeAnnotationText.Rule` and `.SakuraRule`'s arms, rendered, keyed
+    (method, member)."""
+    src = tc.read(MOD / "Powers" / "Prototype" / "YaeAnnotations.cs")
+    out: dict[tuple[str, str], str] = {}
+    for method in ("Rule", "SakuraRule"):
+        body = src[src.index(f"public static string {method}("):]
+        body = body[:body.index("_ =>")]
+        arms = re.split(r"YaeAnnotation\.(\w+) =>", body)[1:]
+        for member, expr in zip(arms[::2], arms[1::2]):
+            out[(method, member)] = tc.csharp_text(expr)
+    return out
+
+
+def annotation_body(args: str) -> str:
+    """`ForAnnotation(..., this, YaeAnnotation.X, onSakura)`'s body, as
+    `YaeAnnotationText.TipBody` picks it."""
+    m = re.search(r"YaeAnnotation\.(\w+),\s*(true|false)", args)
+    if not m:
+        return ""
+    rules = annotation_rules()
+    if m.group(2) == "true" and rules.get(("SakuraRule", m.group(1))):
+        return rules[("SakuraRule", m.group(1))]
+    return rules.get(("Rule", m.group(1)), "")
+
+
 def keyword_bodies() -> dict[str, str]:
     rows = {row.ident: row.raw for row in tc.keyword_fallback_rows()}
     consts = tc._consts(re.sub(r"^\s*//.*$", "", tc.read(ARM), flags=re.M))
@@ -258,8 +285,12 @@ class Bodies:
         if owner != "ArmKeywordTips":
             # Base-game tips and card previews: one box, base length.
             return 1, None, method
+        if method == "ForAnnotation":
+            return 1, visible(annotation_body(args)), method
+        if method == "ForTenko":
+            return 1, visible(arm_statics()["YaeTenkoTip"]), method
         if method == "ForEdit":
-            return 1, "@YaeEditTip", method
+            return 1, visible(arm_statics()["YaeEditTip"]), method
         if method == "ForSakura" and cls.startswith("ProtoYm"):
             return 1, "@YaeSakuraTip", method
         if method == "ForSpark":

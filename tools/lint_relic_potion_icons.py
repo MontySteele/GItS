@@ -33,7 +33,18 @@ uses: a literal `"ns/relics/x.png"` (or `/potions/`), a helper call
 `ArmPotions.Image("character", "slug")`.
 
 ICON_DEBT has the lint_power_icons semantics: a named, reasoned exception that
-FAILS once it is no longer needed, so the set can only shrink. It is empty.
+FAILS once it is no longer needed, so the set can only shrink. It is empty
+since 2026-10-16.
+
+THE OUTLINE (2026-10-16, the in-game model check). A relic draws two
+textures: its icon, which the mod overrides, and an OUTLINE that the base
+`RelicModel.PackedIconOutlinePath` still derives from `IconBaseName`
+(`relic_outline_atlas.sprites/<name>.tres`). A name the base atlas lacks
+draws the game's "NO PE" placeholder behind the icon. Varka's, Furina's and
+Kokomi's starters named "snake_ring" (the base sprite is
+"ring_of_the_snake") and showed it on the select screen and the relic bar.
+`outline_findings` holds every relic's chain to a sprite in OUTLINE_SPRITES,
+each read out of the base game's pck (`grep -a` on SlayTheSpire2.pck).
 
 Run: python tools/lint_relic_potion_icons.py      (exit 1 with findings)
 """
@@ -51,7 +62,15 @@ ART_PLAN = REPO / "art" / "plan.tsv"
 ROOTS = ("CustomRelicModel", "CustomPotionModel")
 
 # Class name -> reason. Delete the row in the commit that gives it art.
+# Empty since 2026-10-16: Kokomi's ten and Furina's card pass's seven got
+# their art/plan.tsv rows (godot.log's 12 "pck resource missing" lines).
 ICON_DEBT: dict[str, str] = {}
+
+# Base relic_outline_atlas sprites a mod relic may borrow, each checked
+# present in SlayTheSpire2.pck (0.111.x) on 2026-10-16. Add one only after
+# the same check.
+OUTLINE_SPRITES = frozenset({"burning_blood", "ring_of_the_snake"})
+ICON_BASE = re.compile(r'IconBaseName\s*=>\s*"(?P<name>[a-z0-9_]+)"')
 
 CLASS = re.compile(
     r"^[ \t]*(?:public|internal)\s+(?P<mods>(?:sealed\s+|abstract\s+|static\s+|partial\s+)*)"
@@ -179,8 +198,29 @@ def findings(known: dict[str, dict] | None = None,
     return out
 
 
+def outline_findings(known: dict[str, dict] | None = None) -> list[str]:
+    """Every concrete relic names an outline sprite the base atlas holds."""
+    known = classes() if known is None else known
+    out: list[str] = []
+    for name in sorted(n for n, r in known.items()
+                       if not r["abstract"] and not r["static"]
+                       and root_of(n, known) == "CustomRelicModel"):
+        base = next((m.group("name") for c in lineage(name, known)
+                     if (m := ICON_BASE.search(known[c]["body"]))), None)
+        if base in OUTLINE_SPRITES:
+            continue
+        rel = known[name]["file"]
+        rel = rel.relative_to(REPO) if rel.is_relative_to(REPO) else rel
+        said = f'IconBaseName "{base}"' if base else "no IconBaseName override"
+        out.append(f"{name} ({rel}): {said} -- its outline sprite is not in "
+                   f"the base relic_outline_atlas, so the game draws its "
+                   f"\"NO PE\" placeholder behind the icon; use one of "
+                   f"{sorted(OUTLINE_SPRITES)}")
+    return out
+
+
 def main() -> int:
-    found = findings()
+    found = findings() + outline_findings()
     for f in found:
         print("  " + f)
     known = classes()

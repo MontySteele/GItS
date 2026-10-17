@@ -21,9 +21,10 @@ namespace KleeMod.Powers;
 // twin: `tier0/engine/furina_tide.py`, through `furina_stage.ARM_POWER_IDS`.
 // ======================================================================
 
-/// <summary><i>Grand Entrance</i>: "Whenever you play a Guest Star, Repay 4.
-/// Gain 1 Block for any HP it could not Repay." [6] (The Repay floor,
-/// 2026-10-09.) Copies add.</summary>
+/// <summary><i>Grand Entrance</i>: "Whenever you play a Guest Star, Repay 4."
+/// [6] Its Block floor is the rule's since furina-next paper 3 (2026-10-16),
+/// so the face drops the clause it printed (the Repay floor, 2026-10-09).
+/// Copies add.</summary>
 public sealed class GrandEntrancePower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
@@ -31,8 +32,7 @@ public sealed class GrandEntrancePower : PowerModel, ILocalizationProvider
         ("title", "Grand Entrance"),
         ("description",
             "Whenever you play a Guest Star, [gold]Repay[/gold] "
-          + "[blue]{Amount}[/blue]. Gain 1 [gold]Block[/gold] for any HP it "
-          + "could not [gold]Repay[/gold]."),
+          + "[blue]{Amount}[/blue]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -74,16 +74,21 @@ public sealed class EnsembleCastPower : PowerModel, ILocalizationProvider
     public override PowerStackType StackType => PowerStackType.Counter;
 }
 
-/// <summary><i>Crescendo</i>: "The first time you Spend each turn, draw 1
-/// card." [Innate] Copies add cards.</summary>
+/// <summary><i>Crescendo</i> (furina-next, 2026-10-16): "At the start of
+/// your turn, gain 2 [3] Fanfare, then 2 [3] more each turn after." It counts
+/// from the turn it is played: played on turn 1 it pays 2, 4, 6 on turns 2
+/// to 4. The amount is the step; what each copy has paid is the ledger's
+/// (<see cref="StageDirector.Crescendo"/>), so a later copy starts small.
+/// </summary>
 public sealed class CrescendoPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
         ("title", "Crescendo"),
         ("description",
-            "The first time each turn you [gold]Spend[/gold], draw "
-          + "[blue]{Amount}[/blue] card."),
+            "At the start of your turn, gain [blue]{Amount}[/blue] "
+          + "[gold]Fanfare[/gold], then [blue]{Amount}[/blue] more each "
+          + "turn after."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -91,16 +96,18 @@ public sealed class CrescendoPower : PowerModel, ILocalizationProvider
     public override PowerStackType StackType => PowerStackType.Counter;
 }
 
-/// <summary><i>Prima Donna</i>: "At the start of your turn, if you have 10
-/// or more Fanfare, gain 1 Energy." Copies add Energy.</summary>
+/// <summary><i>Prima Donna</i> (furina-next, 2026-10-16): "At the start of
+/// your turn, if you Spent last turn, gain 1 Energy." Last turn is her
+/// previous turn, its end-of-turn Spends included; a Spend of 0 is no Spend
+/// (<see cref="StageDirector.PrimaDonna"/>). Copies add Energy.</summary>
 public sealed class PrimaDonnaPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
         ("title", "Prima Donna"),
         ("description",
-            "At the start of your turn, if you have 10 or more "
-          + "[gold]Fanfare[/gold], gain {Amount:energyIcons()}."),
+            "At the start of your turn, if you [gold]Spent[/gold] last turn, "
+          + "gain {Amount:energyIcons()}."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -108,16 +115,36 @@ public sealed class PrimaDonnaPower : PowerModel, ILocalizationProvider
     public override PowerStackType StackType => PowerStackType.Counter;
 }
 
-/// <summary><i>Standing Room Only</i>: "Whenever you Spend all your Fanfare
-/// (at least 1), gain 1 Strength." Copies add.</summary>
+/// <summary>The upgraded <i>Prima Donna</i>: "... gain 1 Energy and draw 1
+/// card." The upgraded card installs this one (`upgraded_power`). Copies add
+/// Energy and cards.</summary>
+public sealed class PrimaDonnaPlusPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Prima Donna+"),
+        ("description",
+            "At the start of your turn, if you [gold]Spent[/gold] last turn, "
+          + "gain {Amount:energyIcons()} and draw [blue]{Amount}[/blue] "
+          + "card."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+}
+
+/// <summary><i>Standing Room Only</i> (furina-next, 2026-10-16): "Whenever
+/// you Spend, gain 1 Strength." Every Spend of at least 1 counts, whoever
+/// makes it: her cards, Full House, Navia's and Freminet's acts, Showstopper
+/// (<see cref="StageDirector"/>'s one after-Spend hook). Copies add.</summary>
 public sealed class StandingRoomOnlyPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
         ("title", "Standing Room Only"),
         ("description",
-            "Whenever you [gold]Spend[/gold] all your [gold]Fanfare[/gold] "
-          + "and it is at least 1, gain [blue]{Amount}[/blue] "
+            "Whenever you [gold]Spend[/gold], gain [blue]{Amount}[/blue] "
           + "[gold]Strength[/gold]."),
     };
 
@@ -385,7 +412,7 @@ public sealed class FullHousePower : PowerModel, ILocalizationProvider
         ("title", StageDirector.FullHouseTitle),
         ("description",
             "Whenever a guest's act deals damage, [gold]Spend[/gold] up to "
-          + "[blue]{Amount}[/blue]: it deals that much more."),
+          + "[blue]{Amount}[/blue], all you can: it deals that much more."),
     };
 
     public override PowerType Type => PowerType.Buff;

@@ -54,13 +54,13 @@ public sealed class ProtoFsPneumaRefrain : CustomCardModel, ICharacterCard
         MegaCrit.Sts2.Core.Localization.LocString description)
     {
         base.AddExtraArgsToDescription(description);
-        description.Add("StageRepay", FurinaStageFacePreview.Repay(this, DynamicVars["RepayAmount"].IntValue));
+        description.Add("StageRepay", FurinaStageFacePreview.Repay(this, DynamicVars["RepayAmount"].IntValue, FurinaStageFacePreview.PayBlock));
     }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("RepayAmount", 5m),
+            new DynamicVar("RepayAmount", 4m),
             new CardsVar(2)
         };
 

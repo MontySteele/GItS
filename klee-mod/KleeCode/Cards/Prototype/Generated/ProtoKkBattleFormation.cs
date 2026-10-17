@@ -45,7 +45,7 @@ public sealed class ProtoKkBattleFormation : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Battle Formation"),
-        ("description", "Whenever 2 or more [gold]Plans[/gold] are carried out in one turn, gain {energyPrefix:energyIcons(1)} and draw 1 card."),
+        ("description", "The first time each turn 2 or more [gold]Plans[/gold] are carried out, gain {energyPrefix:energyIcons(1)} and draw 1 card."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

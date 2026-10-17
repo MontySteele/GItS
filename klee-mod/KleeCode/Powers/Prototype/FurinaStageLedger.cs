@@ -93,8 +93,10 @@ public sealed record StageMods
     /// copy to a random enemy.</summary>
     public int CriticsDarling { get; init; }
 
-    /// <summary>Bis! copies: any keeps half of a spend-all.</summary>
-    public int Bis { get; init; }
+    /// <summary>Extended Run (furina-next paper 2, 2026-10-16): the applied
+    /// total (8 a copy, 12 upgraded) an Attack's or Skill's "Spend up to"
+    /// cap rises by, once a play.</summary>
+    public int ExtendedRun { get; init; }
 
     /// <summary>Salon's Encore: damage to ALL enemies per Drain.</summary>
     public int SalonsEncore { get; init; }
@@ -112,11 +114,22 @@ public sealed record StageMods
     /// end of her turn for Spend 5.</summary>
     public int Showstopper { get; init; }
 
-    /// <summary>Crescendo: cards drawn on the first Spend each turn.</summary>
+    /// <summary>Crescendo (furina-next, 2026-10-16): the applied total of its
+    /// steps (2 a copy, 3 upgraded). What each copy has paid is the ledger's
+    /// (<see cref="FurinaStageLedger.CrescendoDue"/>).</summary>
     public int Crescendo { get; init; }
 
-    /// <summary>Standing Room Only: Strength per spend-all of at least 1.
+    /// <summary>Prima Donna (furina-next, 2026-10-16): Energy at turn start
+    /// when she Spent last turn, every copy (upgraded or not) adding 1.
     /// </summary>
+    public int PrimaDonna { get; init; }
+
+    /// <summary>The upgraded Prima Donna's cards drawn with that Energy.
+    /// </summary>
+    public int PrimaDonnaDraw { get; init; }
+
+    /// <summary>Standing Room Only (furina-next, 2026-10-16): Strength per
+    /// Spend of at least 1, whoever makes it.</summary>
     public int StandingRoomOnly { get; init; }
 
     /// <summary>Hymn of Renewal: Strength per Repay of 4 or more HP.</summary>
@@ -130,6 +143,23 @@ public sealed record StageMods
     /// to" cap an act that deals damage takes, copies' caps added (4, 6
     /// upgraded, a copy).</summary>
     public int FullHouse { get; init; }
+
+    // ---- her relics (Furina's card pass, 2026-10-15) ----------------------
+
+    /// <summary>Epiclese Season Pass copies: one more seat each.</summary>
+    public int SeasonPass { get; init; }
+
+    /// <summary>Fontaine Teardrop copies: a Repay of more than she has
+    /// drained gains the rest as Block, per copy.</summary>
+    public int FontaineTeardrop { get; init; }
+
+    /// <summary>Claque's Ledger copies: each guest act gains 1 Fanfare per
+    /// copy.</summary>
+    public int ClaquesLedger { get; init; }
+
+    /// <summary>Bouquet of Roses copies: each Spend of 10 or more gains 1
+    /// Energy per copy.</summary>
+    public int BouquetOfRoses { get; init; }
 
     public static readonly StageMods None = new();
 }
@@ -329,6 +359,9 @@ public sealed class FurinaStageLedger
         Opened = false;
         _fountains.Clear();
         FountainSeen = 0;
+        _crescendos.Clear();
+        CrescendoSeen = 0;
+        SpentLastTurn = false;
         _spends.Clear();
         PeakFanfare = 0;
         PlayingCard = "";
@@ -505,7 +538,13 @@ public sealed class FurinaStageLedger
 
     /// <summary>The end of her turn, after the guests act: the
     /// since-her-last-turn window opens again.</summary>
-    public void CloseTurn() => HpLostSinceLastTurn = 0;
+    public void CloseTurn()
+    {
+        HpLostSinceLastTurn = 0;
+        // Prima Donna (furina-next, 2026-10-16): the turn that just closed
+        // is "last turn" at her next turn start.
+        SpentLastTurn = SpendsThisTurn > 0;
+    }
 
     /// <summary>Rule 2: how much a Repay of <paramref name="amount"/> returns
     /// at this HP: never more than she drained, never past Max HP. Clamps the
@@ -665,7 +704,7 @@ public sealed class FurinaStageLedger
     }
 
     /// <summary>Spends made this turn (the "first Spend each turn" of
-    /// Navia's line and Crescendo).</summary>
+    /// Navia's line; Prima Donna reads it at the turn's close).</summary>
     public int SpendsThisTurn { get; private set; }
 
     /// <summary>Navia's line (the pool to 75): what the next Spend is
@@ -716,11 +755,18 @@ public sealed class FurinaStageLedger
     public int UpToOf(int cap) =>
         cap <= 0 ? 0 : System.Math.Min(cap, Fanfare + NaviaDiscount);
 
+    /// <summary>Extended Run (furina-next paper 2, 2026-10-16): "Attacks and
+    /// Skills that Spend up to a number can Spend 8 [12] more." A played
+    /// card's whole printed cap rises once by every copy's amount (Bring the
+    /// House Down with three guests and one copy: 30 + 8). Full House, a
+    /// guest's share-Spend and Spend half never read it.</summary>
+    public int CardUpToCap(int printed) =>
+        System.Math.Max(0, printed) + System.Math.Max(0, Mods.ExtendedRun);
+
     /// <summary>
     /// "Spend up to X" (the Spend paper, 2026-10-10, pick 1): spends X, or
     /// all she holds if that is less, and never fails. It is a Spend only
-    /// when at least 1 was spent; it is not a spend-all, so Bis! and Standing
-    /// Room Only ignore it. Navia's line makes the first 2 [3] points of the
+    /// when at least 1 was spent; it is not a spend-all. Navia's line makes the first 2 [3] points of the
     /// first Spend each turn free: they count as spent and are not taken.
     /// Returns what counts as spent (0: no Spend).
     /// <paramref name="forPlay"/> records it as this card play's
@@ -767,9 +813,7 @@ public sealed class FurinaStageLedger
                            SeatKey: seat?.Key ?? -1));
     }
 
-    /// <summary>"Spend all your Fanfare." Nothing held is no Spend. Bis!
-    /// keeps half of it, rounded down: the spend and what it pays for are
-    /// the whole bank, and half the bank is back after. Navia's first Spend
+    /// <summary>"Spend all your Fanfare." Nothing held is no Spend. Navia's first Spend
     /// each turn keeps 2 (3 upgraded): the card reads the whole bank, and
     /// that much stays.</summary>
     public int SpendAll()
@@ -785,12 +829,6 @@ public sealed class FurinaStageLedger
         Note(new StageBeat(SpendEvent, default, -1, Fanfare, pay, ""));
         if (keep > 0) NoteLine(StagePerformer.Navia, keep);
         SpentThisPlay = held;
-        var kept = Mods.Bis > 0 ? held / 2 : 0;
-        if (kept > 0)
-        {
-            Fanfare += kept;
-            Note(new StageBeat(GainEvent, default, -1, Fanfare, kept, "Bis!"));
-        }
         return held;
     }
 
@@ -827,6 +865,42 @@ public sealed class FurinaStageLedger
 
     /// <summary>Is any Repay still owed?</summary>
     public bool OwesRepays => _fountains.Count > 0;
+
+    // ---- Crescendo: a Fanfare gain that grows each turn (furina-next) -----
+
+    /// <summary>Each Crescendo taken in: { step, payments made }.</summary>
+    private readonly List<int[]> _crescendos = new();
+
+    /// <summary>How much of Crescendo's applied total (its steps) has been
+    /// taken in. Like Fountain of Lucine it is read lazily at her turn start,
+    /// so a copy played this turn first pays at the next.</summary>
+    public int CrescendoSeen { get; private set; }
+
+    /// <summary>Crescendo at this turn start: "gain 2 [3] Fanfare, then 2 [3]
+    /// more each turn after", counted from the turn it was played. The steps
+    /// applied since the last turn start become one new voice; each voice
+    /// then pays its step times the turns it has paid, this one included
+    /// (2, 4, 6 ...). Returns the Fanfare due (0 with none).</summary>
+    public int CrescendoDue(int applied)
+    {
+        if (applied > CrescendoSeen)
+        {
+            _crescendos.Add(new[] { applied - CrescendoSeen, 0 });
+            CrescendoSeen = applied;
+        }
+        var due = 0;
+        foreach (var voice in _crescendos)
+        {
+            voice[1]++;
+            due += voice[0] * voice[1];
+        }
+        return due;
+    }
+
+    /// <summary>Did she Spend (at least 1) during her previous turn, its
+    /// end-of-turn Spends included? Prima Donna's "if you Spent last turn";
+    /// latched when her turn closes (<see cref="CloseTurn"/>).</summary>
+    public bool SpentLastTurn { get; private set; }
 
     /// <summary>A fresh per-play spend record (every card play).
     /// <paramref name="card"/> is the card's name as the play telemetry
@@ -955,7 +1029,7 @@ public sealed class FurinaStageLedger
     //
     // THE SPEND ROUND (2026-10-10, "Next round: telemetry first"): per fight,
     // her peak Fanfare and every Spend with the bank before it. Read off the
-    // beats every Fanfare move already files (a gain, Bis!'s return and each
+    // beats every Fanfare move already files (a gain and each
     // Spend all go through `Note`), so no Spend path needs a second call and
     // a new one is counted the day it files its beat. The ledger lives one
     // combat, so these are per fight. A read for `PlayTelemetry`; nothing

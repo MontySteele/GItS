@@ -7,7 +7,7 @@
   * Four Winds' Ascension's once-per-combat rule under the card in the hand;
   * Sucrose on a bare board says "no aura to Swirl";
   * the current-element block sits directly above the hand;
-  * Wolfpack firing and what each Swirl paid under Twin Gales are said.
+  * Lupical firing and what each Swirl paid under Twin Gales are said.
 
 The fixture is `test_varka_seat_page.varka_state` (a recorded turn, re-dressed
 as his).
@@ -148,7 +148,7 @@ def test_wolfpack_and_twin_gales_are_said_since_last_page():
     state["player"]["resolutions"] = [
         _row("Four Winds' Ascension", hits=True, events=[
             _ev("wolfpack", 9001, card="Four Winds' Ascension",
-                power="Wolfpack", amount=1)]),
+                power="Lupical", amount=1)]),
         _row("Storm Surge", hits=True, events=[
             _ev("paid", 9002, card="Cryo", target="Hilichurl 1",
                 power="Pyro (3 damage) and Cryo (1 Vulnerable)")]),
@@ -156,36 +156,36 @@ def test_wolfpack_and_twin_gales_are_said_since_last_page():
     page = blindplay.observe(state)
     line = next(ln for ln in page.splitlines()
                 if ln.startswith("- Since last page: "))
-    # Design-session call (2026-10-13): Wolfpack on the Ascension's row moved
+    # Design-session call (2026-10-13): Lupical on the Ascension's row moved
     # to its play line (below), so the since-last-page line no longer
     # repeats it.
-    assert "Wolfpack" not in line
+    assert "Lupical" not in line
     assert ("Twin Gales: the Swirl of Cryo on Hilichurl 1 paid Pyro (3 "
             "damage) and Cryo (1 Vulnerable)") in line
 
 
 def test_wolfpack_prints_on_the_ascensions_play_line():
-    """Design-session call (2026-10-13): Wolfpack's copy went into the draw
+    """Design-session call (2026-10-13): Lupical's copy went into the draw
     pile unseen, and two seats never knew it worked. It prints under the
     Ascension's own row."""
     state = varka_state()
     state["player"]["resolutions"] = [
         _row("Four Winds' Ascension", hits=True, events=[
             _ev("wolfpack", 9001, card="Four Winds' Ascension",
-                power="Wolfpack", amount=1)]),
+                power="Lupical", amount=1)]),
         _row("Strike", hits=True)]
     page = blindplay.observe(state)
     section = page.split("- **Four Winds' Ascension**", 1)[1]
     row = section.split("- **Strike**", 1)[0]
-    assert ("  Wolfpack: shuffled a copy of Four Winds' Ascension into your "
+    assert ("  Lupical: shuffled a copy of Four Winds' Ascension into your "
             "Draw Pile.") in row
-    assert page.count("Wolfpack") == 1
+    assert page.count("Lupical") == 1
     two = varka_state()
     two["player"]["resolutions"] = [
         _row("Four Winds' Ascension", hits=True, events=[
             _ev("wolfpack", 9002, card="Four Winds' Ascension",
-                power="Wolfpack", amount=2)])]
-    assert ("Wolfpack: shuffled 2 copies of Four Winds' Ascension into your "
+                power="Lupical", amount=2)])]
+    assert ("Lupical: shuffled 2 copies of Four Winds' Ascension into your "
             "Draw Pile.") in blindplay.observe(two)
 
 
@@ -193,11 +193,11 @@ def test_wolfpack_outside_any_play_still_says_since_last_page():
     state = varka_state()
     between = _row("", events=[
         _ev("wolfpack", 9003, card="Four Winds' Ascension",
-            power="Wolfpack", amount=1)])
+            power="Lupical", amount=1)])
     between["between"] = True
     state["player"]["resolutions"] = [between]
     page = blindplay.observe(state)
-    assert ("Wolfpack shuffled a copy of Four Winds' Ascension into your "
+    assert ("Lupical shuffled a copy of Four Winds' Ascension into your "
             "draw pile") in page
 
 

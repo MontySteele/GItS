@@ -30,12 +30,17 @@ public class FurinaDrainLineRoundTests
     [Fact]
     public void A_short_repay_names_its_payout_on_one_line()
     {
-        Assert.Equal("\n(Repays 0, +3 Block)",
+        // furina-next paper 3 (2026-10-16): the floor first, "Repay 0: gain
+        // 3 Block", not "Repays 0".
+        Assert.Equal("\n(Repay 0: gain 3 Block)",
                      FurinaStageFacePreview.Line(0, 3, "Block"));
-        Assert.Equal("\n(Repays 1, +1 Vigor)",
+        Assert.Equal("\n(Repay 1: gain 1 Vigor)",
                      FurinaStageFacePreview.Line(1, 2, "Vigor"));
-        Assert.Equal("\n(Repays 2, +2 damage)",
+        Assert.Equal("\n(Repay 2: +2 damage)",
                      FurinaStageFacePreview.Line(2, 4, "damage"));
+        // Fontaine Teardrop: 2 Block for each HP.
+        Assert.Equal("\n(Repay 0: gain 6 Block)",
+                     FurinaStageFacePreview.Line(0, 3, "Block", 2));
         // A full Repay, and a card with no payout, keep the plain line.
         Assert.Equal("\n(Repays 3)", FurinaStageFacePreview.Line(3, 3, "Block"));
         Assert.Equal("\n(Repays 0)", FurinaStageFacePreview.Line(0, 2, ""));
@@ -49,15 +54,21 @@ public class FurinaDrainLineRoundTests
                      ("ProtoFsHymnOfManyWaters", "PayBlock"),
                      ("ProtoFsGrandEntrance", "PayBlock"),
                      ("ProtoFsCleansingTorrent", "PayDamage"),
+                     // Paper 3 (2026-10-16): every numbered Repay.
+                     ("ProtoFsPneumaRefrain", "PayBlock"),
+                     ("ProtoFsRiptideLunge", "PayBlock"),
+                     ("ProtoFsFountainOfLucine", "PayBlock"),
+                     ("ProtoFsCleanSlate", "PayBlock"),
+                     ("ProtoFsEbbAndFlow", "PayBlock"),
+                     ("ProtoFsOusiaPneuma", "PayBlock"),
+                     ("ProtoFsRisingTide", "PayBlock"),
                  })
         {
             Assert.Contains($"FurinaStageFacePreview.{pay})", Generated(type));
         }
-        foreach (var type in new[] { "ProtoFsPneumaRefrain",
-                                     "ProtoFsGrandAbsolution",
-                                     "ProtoFsSingerOfManyWaters",
-                                     "ProtoFsRiptideLunge",
-                                     "ProtoFsFountainOfLucine" })
+        // "Repay all" has no number and no floor.
+        foreach (var type in new[] { "ProtoFsGrandAbsolution",
+                                     "ProtoFsSingerOfManyWaters" })
         {
             Assert.DoesNotContain("FurinaStageFacePreview.Pay", Generated(type));
         }

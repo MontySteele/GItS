@@ -21,8 +21,9 @@ public sealed class Furina : CustomCharacterModel, IFurinaCharacter
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Furina"),
-        ("description",
-            "The Regina of All Waters, Kindreds, Peoples and Laws."),
+        // The intro (review/active/furina-story-2026-10-15.md sec.3), from
+        // her story table.
+        ("description", Story.FurinaStory.Table.Intro),
         ("titleObject", "Furina"),
         ("pronounSubject", "she"),
         ("pronounObject", "her"),
@@ -65,7 +66,7 @@ public sealed class Furina : CustomCharacterModel, IFurinaCharacter
     public override RelicPoolModel RelicPool =>
         ModelDb.RelicPool<FurinaRelicPool>();
 
-    // Her own three potions (review/active/relics-potions-klee-furina-2026-09-27.md,
+    // Her own potion pool, one potion (Bottled Applause; review/active/relics-potions-klee-furina-2026-09-27.md,
     // pick 1(a)); the Silent borrow is gone.
     public override PotionPoolModel PotionPool =>
         ModelDb.PotionPool<Potions.FurinaPotionPool>();

@@ -629,12 +629,10 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # THE RE-FOUNDING (2026-10-12). Kurage's Wake's Plan line hands Stings to
     # the hand; Gorou's two Plan lines are a Strength (permanent since the
     # Kokomi level pass) and a Block
-    # clock; a written Companion's clause plays the card -- each on the
-    # queue that carries it out.
+    # clock -- each on the queue that carries it out.
     "add_stings": [_hook("shared", "hand_contents", "write")],
     "gain_strength": [_hook("private", "kurage", "use")],
     "juuga_guard": [_hook("shared", "block_held", "write")],
-    "play_companion": [_hook("private", "kurage", "use")],
     # THE KOKOMI POOL OVERHAUL (2026-10-13). Chain reads the carry-outs this
     # turn; Counter reads the enemy turn the Plan sat through (Block held,
     # damage taken, who attacked); Intent reads the intents and takes
@@ -981,18 +979,22 @@ POWER_HOOKS: dict[str, list[tuple[str, str, str]]] = {
                               _hook("shared", "hp_ledger", "write")],
     "fs_fountain_of_lucine": [_hook("private", "stage", "write")],
     "fs_critics_darling": [_hook("private", "stage", "read")],
-    "fs_bis": [_hook("private", "stage", "read"),
-               _hook("private", "stage", "write")],
+    # furina-next paper 2 (2026-10-16): Extended Run raises a played card's
+    # "Spend up to" cap.
+    "fs_extended_run": [_hook("private", "stage", "read")],
     "fs_grand_entrance": [_hook("shared", "plays_this_turn", "read"),
                           _hook("shared", "card_identity", "read"),
                           _hook("private", "stage", "write"),
                           _hook("shared", "block_held", "write")],
     "fs_showstopper": [_hook("private", "stage", "use")],
     "fs_ensemble_cast": [_hook("private", "stage", "write")],
-    "fs_crescendo": [_hook("private", "stage", "read"),
-                     _hook("shared", "draw_pile", "use"),
-                     _hook("shared", "hand_contents", "write")],
+    # furina-next (2026-10-16): Crescendo writes Fanfare at turn start; the
+    # upgraded Prima Donna draws.
+    "fs_crescendo": [_hook("private", "stage", "write")],
     "fs_prima_donna": [_hook("private", "stage", "read")],
+    "fs_prima_donna_plus": [_hook("private", "stage", "read"),
+                            _hook("shared", "draw_pile", "use"),
+                            _hook("shared", "hand_contents", "write")],
     "fs_standing_room_only": [_hook("private", "stage", "read")],
     "fs_high_stakes": [_hook("private", "stage", "read"),
                        _hook("shared", "card_identity", "write")],
@@ -1210,6 +1212,14 @@ CARD_FIELD_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # v4. Star Turn's printed discount reads the Stage's Fanfare.
     "cost_reduction_per_fanfare": [_hook("private", "stage", "read"),
                                    _hook("shared", "card_identity", "write")],
+    # Tempest Charge's printed discount reads his Swirls this turn.
+    "cost_reduction_per_swirl_this_turn": [
+        _hook("shared", "aura_reaction", "read"),
+        _hook("shared", "card_identity", "write")],
+    # Publisher's Deadline's discount reads her Edits this turn.
+    "cost_reduction_if_edited_this_turn": [
+        _hook("shared", "card_timing", "read"),
+        _hook("shared", "card_identity", "write")],
     # v4. A `plan:` line WRITES the Plan queue (filed on `kurage`); its
     # effects are walked by `classify_row` like `effects:`.
     "plan": [_hook("private", "kurage", "write")],

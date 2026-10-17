@@ -6635,7 +6635,9 @@ From the combo pass's seat round (review/records/varka-combo-round-2026-10-05.md
   which counts it on the dealer, the card's Owner.Creature) before the
   `swirled_by_this` re-read, so the draw fires. The seat page carries no draw
   event, only the hand after the play, which is why the seat could not see it.
-  Pinned by `Tempest_charge_reads_its_swirl_after_the_hit_and_before_the_draw`.
+  Pinned by `Tempest_charge_reads_its_swirl_after_the_hit_and_before_the_draw`,
+  now `Rising_gale_reads_its_swirl_after_the_hit_and_before_the_draw`: Tempest
+  Charge stopped drawing on 2026-10-15 (below).
 
 ## Kokomi kit review, 2026-10-05
 
@@ -8366,7 +8368,9 @@ What the move changed on the faces, and only on the faces:
   `{IfUpgraded:show:2 cards|a card}` swap (the `yae_amount: 1` delta).
 - The "Exhaust." the staging faces printed went: the keyword prints it.
 - `proto_ym_proofread`: pick 3, ruled. "Edit a card in your hand: Red Ink."
-  at 1 [0], no Block.
+  at 1 [0], no Block. 2026-10-14, [USER]: "Let's bump it to 'Play it
+  twice.'" The Annotation is now Reprint (the base game's Glam: the first
+  play each combat is played twice); cost and upgrade unchanged.
 - `proto_ym_reborn_as_guuji_yae`: the row's `annotation: sakura_seal` is the
   sim pilot's choice; in game the player chooses from the five
   (`YaeModalOptions`).
@@ -8478,6 +8482,195 @@ as a combat-reward row (`Relics.YaePublishReward`, added by
   read; open to change.
 - The harness (`tools/yae_expansion_sim`) rests at every R and Publishes
   after E and B.
+
+## Yae Miko, shrine r2, 2026-10-14
+
+Ruled by [USER] (`review/active/yae-design-axes-2026-10-14.md`, "Shrine r2,
+ruled 2026-10-14"). Built in both engines (`YaeShrine.cs`,
+`tier0/engine/yae_shrine.py`). The Rite is gone; typed Tenko replaces each
+"Rite: X".
+- Planting: a plant creates a Sakura at the Level the card prints (1;
+  Grafted Branch 2 [3]), +1 per Fox's Mooncall, and no longer levels the
+  others. With 3 standing a plant makes the oldest refresh (3 turns) and gain
+  1 Level instead; a two-plant does this one plant at a time. Reading:
+  Mooncall raises a planted Level only, not the full-shrine Level.
+  Yakan Evocation and Twin Sakura print "(with 3 standing, your oldest
+  refreshes and gains a Level)".
+- Every end-of-turn strike, Last Bloom, Editor-in-Chief and Kitsune Pounce
+  strike as Thunder. Tenko (every Sakura strikes now) still resets every
+  timer to 3 ([USER]: "make Tenko keep resetting the duration"). Typed:
+  Tenko (Warding) Block 2 + Level, Tenko (Wildfire) Level to ALL, Tenko
+  (Offering) a card next turn; Red Ink +3 except Offering; Fox Fire rides
+  every strike; Edict on damage strikes. Op: `{op: yae, kind: tenko, as:
+  warding}` (C# `YaeTenkoKind`).
+- Rows: Shrine Maiden's Guard "Tenko (Warding)", Foxfire Sweep and Kitsune
+  Guile "Tenko (Wildfire)", Manuscript Pile "Tenko (Offering)", Thunder Rite
+  "Deal 8 [11] Electro damage. Tenko." Numbers unchanged.
+- Sakura Grove: "each Sakura gains a Level" (was the newest), upgrade
+  Innate. Serialization: "Whenever you play an Annotated card, gain 3 [4]
+  Block" (was per Edit).
+- Sakura Channeling lost its job with the Rite. **Replaced the same day**
+  (2026-10-14): the main session designed it as the Rare that bends the
+  3-Sakura limit, because [USER] judged Yae "generally underpowered right
+  now". Text: "You can have 2 more Sakura." Rare Power, 2 [1]. Rule: its
+  amount, 2 per copy, raises the shrine's cap for this combat
+  (`YaeShrine.MaxSakura`, sim `yae_shrine.sakura_cap`: 3 + Channeling), and
+  the full-shrine plant (the oldest refreshes and gains a Level) fires at
+  the new cap. Her status bar has a badge per Sakura up to nine
+  (three copies); a tenth stands and strikes without one. The seat page's
+  count line reads "N of cap".
+- The full-shrine plant strikes first, the same day. [USER]: "when you plant
+  a Sakura with 3 already on the field, do you think the outgoing Sakura
+  should strike as though withered?" The main session ruled yes: a plant
+  into a full shrine (at its cap, Channeling's raised cap included) makes
+  the oldest Sakura strike once exactly as its Last Bloom would (Thunder;
+  the Lure, Red Ink and Fox Fire as usual), THEN refresh to 3 turns and gain
+  a Level. Twin Sakura into a full shrine does it per plant. Yakan Evocation
+  and Twin Sakura now print "(with the shrine full, your oldest strikes,
+  refreshes and gains a Level)"; the number left the face, so it needs no
+  live cap. Door: `YaeShrine.Plant` strikes before `YaeShrineLedger.Plant`;
+  sim: `yae_shrine.plant`, strike reason "full_shrine". The seat page adds
+  "Shrine full: your next plant makes Sakura 1 strike, then refresh and gain
+  a Level." when the shrine is at its cap.
+- The Sakura tip, condensed the same day ([USER]: "I still feel like that
+  Sakura tooltip can be condensed further somehow"): "At the end of your
+  turn, strikes an enemy for 2 + its Level. Lasts 3 turns, then strikes once
+  more." The full-shrine rule is printed on the plant cards and moves with
+  Channeling, so it left the tip, as did the cap; "random" went to fit the
+  100-character tip cap (its LONG_OK exception is gone).
+- Faces: the Rite clause, the Rite badge and the seat page's Rite line are
+  gone. A Tenko row's live clause is "Tenko (12 damage)" / "Tenko (Warding:
+  12 damage, 12 Block)" (since the double strike, below), and "(no Sakura)" / "(Warding, no Sakura)" with none standing
+  (`YaeShrineFace.TenkoLine`, sim `tenko_line`). The Tenko tip
+  (`ArmKeywordTips.YaeTenkoTip`) names the three kinds; the Rite tip is
+  gone.
+- Two fixes from the shrine-r2 seat (lane 4, 2026-10-14), both main-session
+  decisions. (1) A Wildfire Tenko's live clause reads per enemy, "Tenko
+  (Wildfire: 18 to each enemy)" (was "18 to ALL", which the seat read as
+  one volley split across enemies; each enemy takes the full amount).
+  `YaeShrineFace.Amount`, sim `TENKO_FACE`. Plain Tenko ("Tenko (12
+  damage)") and the Tenko tip are unchanged. (2) An Edit never targets a
+  card with a Published Annotation: the Edit chooser and Reborn as Guuji
+  Yae skip it (they used to override it for the combat). With no other
+  target the Edit does nothing, as a dead Edit does. Fox Fire Draft's
+  "Edit your newest Sakura" targets a Sakura and is untouched; Publish
+  itself is untouched. `YaeEditing.EditReaches` / `Published`, sim
+  `yae_shrine._edit_reaches`.
+- A typed Tenko strikes AND adds its kind, ruled the same day. [USER]: "Hmm,
+  the double strike makes Tenko effects quite strong, but let's try it and
+  see what happens." Every Sakura strikes now as Thunder (2 + Level at one
+  enemy; the aim, the Lure, Red Ink, Fox Fire and Edict as for any strike),
+  and a typed Tenko adds per Sakura: Warding, Block equal to 2 + Level (+3
+  Red Ink); Wildfire, its Level (+3 Red Ink) to ALL enemies; Offering, 1
+  card next turn. Fox Fire fires once per Sakura. Then every timer resets
+  to 3. Plain Tenko and the end-of-turn strike are unchanged. The live
+  clause reads "Tenko (Warding: 12 damage, 12 Block)", "Tenko (Wildfire:
+  12 damage, 3 to each enemy)", "Tenko (Offering: 12 damage, draw 3)". The
+  Tenko tip: "Sakura strike now, reset to 3 turns. Warding: +Block.
+  Wildfire: +Level to ALL. Offering: +draw 1." (97 characters). Card faces
+  keep "Tenko (Warding)" and the rest. `YaeShrine.Strike`,
+  `YaeShrineFace.TenkoWords`, sim `yae_shrine.strike` / `tenko_words`.
+- Reprint, spent, the same day (seat fix): after its first play the card's
+  enchantment tab greys (Glam's `Status = Disabled`), its hover adds "Used
+  this combat." and drops the Replay tip, and the seat page prints
+  "(Reprint: used)" off the bridge's new `disabled` flag.
+- Two main-session decisions, 2026-10-14, after a GPT design review flagged
+  that Twin Sakura's upgrade weakened Red Ink and that Tenko could shorten
+  an extended timer. (1) Red Ink on any card that plants reaches every
+  Sakura it plants, and the card's own damage and Block still take +3 (it
+  used to pass only off a card that "only plants", so Twin Sakura+, which
+  gains Block, kept Red Ink on the card and lost the Sakura bonus). A
+  planting card is never a dead Red Ink target. The Red Ink tip: "This card
+  deals 3 more damage and gives 3 more Block. If it plants, its Sakura get
+  it too." (90 characters); the seat glossary's Red Ink row carries the same
+  clause. `YaeAnnotationReach.Inherits`, sim `yae_shrine.inherits`. (2)
+  Tenko refreshes each timer to at least 3, never shorter: a Sakura extended
+  past 3 ("each Sakura lasts 1 more turn") keeps its turns. The full-shrine
+  plant's refresh of the oldest follows the same rule. The Tenko tip reads
+  "Sakura strike now, refresh to 3 turns. Warding: +Block. Wildfire: +Level
+  to ALL. Offering: +draw 1." (99 characters). `YaeShrineLedger.Refresh` /
+  `.Plant`, sim `yae_shrine.tenko` / `plant`.
+
+## Yae review r3, 2026-10-14
+
+Ruled by [USER] (`review/active/yae-review-r3-2026-10-14.md`): "**Ruled
+2026-10-14: both picks (a), as amended.** [USER]: "Let's send it."" On the
+bound: "I do think that the masterpiece strategy will scale more than you
+think... an aggressive run can do 3 elites per act + 2 bosses = 11 mods
+before the final fight before a Power gives anything more. But as a payoff
+strategy, that might also just be 'fine.'" Built in both engines
+(`YaeShrine.cs`, `YaeAnnotations.cs`, `tier0/engine/yae_shrine.py`) and the
+Yae sim pilot (`tools/yae_expansion_sim.py`). Tests:
+`KleeTests/Prototype/YaeReviewR3Tests.cs`, `tier0/tests/test_yae_review_r3.py`.
+
+- **Sakura kinds.** Sakura (Thunder, the default) strikes an enemy for 2 +
+  Level; Foxfire Sakura hits ALL for 1 + Level; Kitsune Sakura (the decoy)
+  gives 2 + Level Block (unpowered). A Sakura acts at the end of the turn,
+  at Last Bloom and on Tenko. Red Ink adds 3 to any kind; Edict pays on the
+  two damage kinds only; Fox Fire and Deadline Extension as before.
+- **Tenko** is one plain rule: "Every Sakura acts now. Refresh them to at
+  least 3 turns." The typed Tenko (Warding, Wildfire, Offering) is gone.
+  The live clause sums by kind: "Tenko (8 damage, 4 to each enemy, 5
+  Block)", or "(no Sakura)".
+- **Full shrine, by kind.** The oldest acts; the same kind as the new plant
+  refreshes it to at least 3 and gives it a Level (none added); another kind
+  withers it and the new Sakura takes its place at its printed Level. The
+  rule left the plant faces (it has two branches now) for a "Full shrine"
+  tip every planting card carries: "Shrine full: your oldest acts. Same
+  kind: it refreshes and gains a Level. Other kind: it withers." (97).
+  Yakan Evocation reads "Plant a Sakura." and Twin Sakura "Plant 2 [2]
+  Sakura." The kinds carry tips: "A Sakura that hits ALL enemies for 1 + its
+  Level when it acts." and "A fox decoy Sakura. When it acts, you gain 2 +
+  its Level Block."
+- **The four cards:** Shrine Maiden's Guard "Gain 6 [9] Block. Plant a
+  Kitsune Sakura."; Foxfire Sweep "Deal 4 [6] Electro damage to ALL enemies.
+  Plant a Foxfire Sakura."; Kitsune Guile "Apply 2 [3] Weak to ALL enemies.
+  Tenko."; Manuscript Pile "Draw 2 [3] cards. Each Sakura lasts 1 more turn."
+- **The Masterpiece.** One enchantment, `YaeMasterpiece` (title
+  "Annotated"), holds both layers: the permanent stack (a saved `int[]`)
+  and one temporary slot. An Edit fills or replaces the temporary slot, a
+  Published card included (this replaces #1308's skip, pick 2 (a)); Publish
+  moves the temporary layer onto the stack once. Stacked layers add up: Red
+  Ink +3 each, Footnote 1 card each, Fox Fire once each, Sakura Seal a
+  plant each, Royalties 1 Energy each. Reprint: first play each combat
+  replays once per stacked Reprint, then those are inert; a new temporary
+  Reprint arms one fresh replay; a copy's Reprints are armed. The after-elite
+  Publish and The Seven Glamours both add to the stack; the offer includes
+  Published cards. The hover lists the layers ("Published: Red Ink x2,
+  Reprint. This combat: Footnote.", plus "Reprint: used this combat." once
+  spent) and one tip per Annotation's rule; the card face shows the play
+  riders ("[gold]Sakura Seal[/gold] x2."). The icon shows the layer count
+  from two. The Edit tip: "Give a card an Annotation for this combat,
+  replacing its last. Published ones stay and add up." (91).
+- **Signature cards.** Second Printing (U Skill, 0, Exhaust): "Put an
+  Annotated card from your Discard Pile into your hand. [It costs 0 this
+  turn.]" Author's Copy (U Skill, 1 [0], Exhaust): "Add a copy of an
+  Annotated card in your hand (not an Author's Copy) to your hand. It keeps
+  its Annotations." Serial Novel (R Power, 2 [1]): "At the start of your
+  turn, put a random Annotated card from your Discard Pile into your hand."
+  Pool 43 (15 / 18 / 10). Art: official wiki rows in `art/plan.tsv`
+  (Hanamizaka 1, TPRGT 2022 Aether, her Wish splash), crops not yet seen.
+- **Fallen Petals** (U Skill, 0): "Your oldest Sakura withers (it acts once,
+  its Last Bloom). If one did, gain 1 Energy [and draw 1 card]." Its two
+  powers are gone.
+- **Seat page.** Each Sakura row names its kind, its action and the Level
+  it was planted at ("Level 5 (planted at 2, +3 since)"); a Published card
+  shows its stack beside its title; an Edit chooser says a two-card Edit
+  opens it again.
+
+Builder's readings (Claude, 2026-10-14; each open to change):
+- Editor-in-Chief's "a Sakura strikes" makes the highest-Level Sakura act as
+  its kind (a Kitsune gives Block). Kitsune Pounce's "a Sakura strikes it"
+  takes the highest-Level damage Sakura (Sakura or Foxfire), aimed.
+- A full-shrine replacement puts the new Sakura in the NEWEST place.
+- Fallen Petals and a different-kind replacement wither the oldest even
+  under Deadline Extension (an active wither, not a timer).
+- A planting card's Red Ink passes to its Sakura once (+3), however many Red
+  Ink layers it carries (a Sakura holds one Annotation).
+- Publishing a temporary Reprint before the card's first play drops its
+  armed replay (the stack counts it); after the first play it stays armed.
+- Old saves: the seven per-Annotation enchantments are gone, so a mid-run
+  save with Published cards from an earlier build loses them.
 
 ## Kokomi pool overhaul, 2026-10-13
 
@@ -8646,7 +8839,11 @@ marked enemy's attack aims at itself). New predicates `ousia_face`,
 
 - Ousia / Pneuma shows the face it is on in combat (title and text); off the
   board it prints both faces. Built as two one-armed conditionals and a
-  flip, so both numbers are live vars.
+  flip, so both numbers are live vars. Furina's card pass (2026-10-15,
+  `review/active/furina-card-pass-2026-10-15.md` sec.1) gave each face one
+  half of her kit: Ousia "Drain 2. Deal 10 [13] damage." (was 8 [11]),
+  Pneuma "Repay 2. Gain 8 [11] Block." (was 7 [10]). Each face carries its
+  op's in-combat line on that face only (`gen_klee_cards.flip_face_args`).
 - Tearful Monologue's "last turn" is the round before this one: her last
   turn and the enemies' turn after it, any HP loss (a Drain included).
 - Text to the conventions lint: Opening Number and Understudy's Debut say
@@ -8777,3 +8974,490 @@ base-five rates, with damage a turn within 15%.
 
 Pins: `tier0/tests/test_klee_cleanup_2026_10_14.py`,
 `klee-mod/KleeTests/Prototype/KleeCleanup20261014Tests.cs`.
+## Kokomi review r8, 2026-10-14
+
+Built from `review/active/kokomi-review-r8-2026-10-14.md`, items 1 to 12
+(Claude's; Kokomi is at Prototype). Seven seats, 0 wins; five of the seven
+deaths were a long fight ending on a hand with no Block card. A Plan's Block
+lands next turn by design, so the cards pay Block now.
+
+- **Shell of Sanctuary** (item 1): "Gain 7 [10] Block. Gain 2 more for each
+  Plan waiting." (was 6 [9] Block, draw 1, a worse Kelp Wall). Breakwater's
+  shape (`amount_formula`, `plans_held`), so no new op; the face shows the
+  total in combat.
+- **Evening Watch** (item 2): 6 [8] Block per enemy intending to attack
+  (was 4 [6]); draw 1 unchanged.
+- **Undercurrent Snare** (item 3): Block 8 [11] (was 5, no upgrade); Weak 2
+  and the Plan (4 [5] Strength off each attacker this turn) unchanged.
+- **Surging Shoal** (item 4): "Deal 10 [13] Hydro damage to ALL enemies.
+  Gain 10 [13] Block." No Plan (was 14 [18], Plan 12 [16] to ALL).
+- **Feint** (item 5): the now-line is a flat "Deal 8 [10] Hydro damage."
+  (was 8 [11] plus 3 per Plan waiting); the Plan (6 [8] per Plan carried out
+  this turn) unchanged.
+- **Mend's "(N will land)"** (item 6): the face token `{MendLands}` has no
+  `:diff()`, and the game formats a bare token through `ToString()` /
+  `IConvertible`, which read the printed number and never the preview. So
+  every face written without a preview pass (the hand on the wire, a waiting
+  Plan's line) said "6 will land". `MendLandsVar` now reads
+  `KokomiRules.MendWouldLand` at format time (`BlockMarkVar`'s shape).
+- **Sucrose** (item 7): the three Sucrose Swirl rows carry
+  `{InCombat:{SwirlAura}|}` right after "Swirl the enemy" / "Swirl ALL
+  enemies"; in combat it reads " (no aura: no Swirl)" while the aimed enemy,
+  or unaimed every enemy, has no aura (`SwirlAuraFace`,
+  `gen_klee_cards.swirl_aura_face_lines`). Varka's rows keep their own
+  "(No aura to Swirl)".
+- **When Plans happen** (item 8): the panel's Block note loses "before you
+  play anything"; "Plans carry out after your draw" is the one wording.
+- **Masterstroke 42 / 63** (item 9): not Vulnerable. The lane log shows the
+  carry-out Vaporized the Louse Progenitor (Hydro onto its Pyro aura, x1.5:
+  42 to 63); the body had no Vulnerable. The strip leaves the reaction out
+  of a waiting Plan's number on purpose (`KokomiPlan.PlannedDamage`: a
+  reaction is one-shot and an ALL Plan uses the aura up). The receipt could
+  not name it because the target died. A carry-out now carries the
+  reactions its own hits set off (`reactions`, `KokomiPlan.NoteReaction`),
+  and the receipt reads "asked for 42, 63 landed: Vaporize."
+- **At Water's Edge vanished** (item 10): not Hunter Killer, whose only
+  debuff is Tender (Strength and Dexterity, removes nothing), and nothing in
+  the mod removes the power; the log shows it played once that fight. The
+  one path that drops a power from the page while it stays on you is the
+  bridge's per-power catch, which skipped a row whose text threw (that turn
+  opened two potion choose-a-card screens). The row now stays, flagged
+  `unreadable` (`gits/GitsPowerRow.cs`), and the page says "still on you;
+  the game would not give its text on this screen".
+- **Seat page** (items 11, 12): under Sloth (any "play more than N cards"
+  power) the page lists the cards it counted this turn, a card the game
+  played for you marked so; a Power with nothing to measure says "It is a
+  Power: it is now on you and works from there."
+
+Pins: `tier0/tests/test_kokomi_review_r8_2026_10_14.py`,
+`klee-mod/KleeTests/Prototype/KokomiReviewR8Tests.cs`.
+
+## Kokomi review r9 (2026-10-15)
+
+`review/active/kokomi-review-r9-2026-10-15.md`, items 1 to 10, Claude's
+(Kokomi is at Prototype). Five seats, 2 wins in 5, build 0.2.5538.
+
+- **Tidecleanse** (`proto_kk_tidecleanse`, item 1): "Exhaust up to 2 [3]
+  Statuses or Curses in your Hand. **Draw 1 card for each.** Apply 1 Weak."
+  Taken 1 of 18 (0 of 7 in r8). The draw is inside the `exhaust_statuses`
+  kind: one card per card exhausted, so with no Status in hand nothing is
+  drawn. Both engines (`kokomi_plan.exhaust_statuses`,
+  `KokomiCards.ExhaustStatuses`).
+- **Orders from the Shrine** (`proto_kk_orders_from_the_shrine`, item 2):
+  the pick "costs 0 this turn and is Ethereal". Cost 1 [0] is unchanged.
+- **Sangonomiya's Orders** (`proto_kk_sangonomiyas_orders`, item 3): the Power
+  costs 2 (was 1); the card it adds each turn "costs 0 and is Ethereal". The
+  Power's own text says so (`SangonomiyasOrdersPower`). Upgrade stays Innate.
+- **Shell of Sanctuary** (`proto_kk_shell_of_sanctuary`, item 4): "Gain 6
+  [9] Block. Retain." The per-Plan formula goes (it duplicated Breakwater);
+  Retain is a different job: defence kept in hand for the turn that needs
+  it. Both engines. Upgrade +3 Block.
+- **Opening Gambit's doubling** (item 5, was 4 in the first draft): a waiting Plan the rider will reach
+  shows the doubled written number (`KokomiPlan.DoubledBy`, `QueueRow`), and
+  a card about to be written behind a Gambit previews it
+  (`PlanDamageVar.UpdateCardPreview`). The rider is spent by the next entry
+  of the same drain, so a flipped two-line Plan is not doubled.
+- **Overridden element** (item 5): the finished face swaps the printed
+  element word for the applied one ("[element] damage", "Apply [element]"),
+  `OverriddenElementFace`, a postfix on `GetDescriptionForPile`.
+- **Summon receipts** (item 6): a summon's volley files its reactions under
+  its own name and its row carries them; the page says "It set off
+  Electro-Charged."
+- **No aura** (item 7): Varka's face reads "(no aura: no Swirl)" on its own
+  line, Sucrose's wording. Varka's numbers do not change.
+- **Seat page** (items 8 to 10): a card limit says writing a Plan counts as
+  playing the card and that a planned Companion is played again when its
+  Plan lands (the Companion Plan hover says the same in one sentence); the last carry-out receipts clear when a combat opens;
+  a combat-opening Energy relic is named on round 1 only.
+
+Pins: `tier0/tests/test_kokomi_review_r9_2026_10_15.py`,
+`klee-mod/KleeTests/Prototype/KokomiReviewR9Tests.cs`.
+
+## Yae review r4, items 1 to 8, 2026-10-15
+
+Source: `review/active/yae-review-r4-2026-10-15.md` (PR #1319), "Changes
+Claude builds (no pick)". Pick 1 (the publishing half) is not built here.
+
+- **Item 1, the Publish reward.** Cause (inferred from the records; the
+  game's grid code is not in the repo): the chooser asked for exactly one of
+  one card (`Prefs(1)` = min 1, max 1), which the game answers itself. It
+  now always opens a 0..max grid, confirmed by hand and closable, and at most
+  `max` picks resolve. `Relics/MeditationsOfAYako.cs`.
+- **Item 2, Red Ink into a full shrine.** The refreshed oldest Sakura takes
+  the planting card's Red Ink (`YaeShrineLedger.Plant`, `yae_shrine.plant`).
+- **Item 3, Deadline** `proto_ym_deadline`: Block 5 to 8, upgrade +3 (8 [11]).
+- **Item 4, Evergreen Charm** `proto_ym_evergreen_charm`: Block 7 [10]; new
+  sheet key `keeps: red_ink` on its `edit_sakura`. A Sakura holds one
+  Annotation, so a kept Red Ink is a flag (`KeepsRedInk` / `red_ink_kept`)
+  that leaves the +3 on the strike; any later Edit that does not keep it, or
+  a Red Ink plant refresh, clears it.
+- **Item 5, The Seven Glamours** `proto_ym_the_seven_glamours`: was
+  "Publish every Annotated card in your hand." (Rare, 1 [0], Exhaust).
+  Replaced the same day: "Yae: The Seven Glamours on a kill" below.
+- **Item 6, Edit choosers.** In game the hand shows each card's Annotation;
+  the prompt now ends "It replaces any unpublished Annotation the card
+  carries." (a per-card warning needs a custom screen). The seat page tags a
+  card that holds a temporary Annotation: "the Edit replaces Footnote".
+- **Item 7, Foxfire Lure:** "your striking Sakura strike it" (card and mark).
+  Fox Trick prints no Sakura clause, so it is unchanged.
+- **Item 8, nothing to Edit:** a bubble over Yae ("Nothing to Edit." / "No
+  Sakura to Edit.") in game; the sim emits `yae_edit_nothing`.
+
+Pins: `tier0/tests/test_yae_review_r4.py`,
+`klee-mod/KleeTests/Prototype/YaeReviewR4Tests.cs`.
+
+## Wording pass (2026-10-15, kit census pick 3)
+
+Source: `review/active/kit-census-2026-10-15.md`, pick 3 (a). Faces only,
+no number moves, on `proto_ko_simmer`, `proto_ko_taste_test`,
+`proto_mc_albedo_dust_of_purification`, `proto_mi_gorou_juuga` (Plan: "Gain
+6 Block instead", still for 3 turns) and `proto_kk_call_the_generals` (Orders
+from the Shrine's word order). One behaviour change, decided with the pass:
+`proto_kk_read_the_field` reads "Take 1 of your top 3 [4] cards." and the
+cards not taken stay on top of the Draw Pile in their order (the `scry_take`
+op, both engines; were bottomed). Pins: `tier0/tests/test_kokomi_plan.py`,
+`klee-mod/KleeTests/Prototype/KokomiPoolPassFourTests.cs`.
+
+## Yae: The Seven Glamours on a kill (2026-10-15)
+
+[USER]: "Reading The Seven Glamours more carefully, it looks obviously OP - I
+thought it was Publishing one card per fight, not the whole hand. There is
+precedent for this cards giving permanent benefits, such as The Hunt or Hand
+of Gold, but they generally require a condition of some kind."
+
+`proto_ym_the_seven_glamours` is now a Rare Attack, 2, Exhaust: "Deal 12 [16]
+Electro damage. If this kills an enemy, Publish an Annotated card in your
+hand." (no cost upgrade).
+
+- **The kill** is Hand of Greed's Fatal check (decompiled `HandOfGreed.OnPlay`:
+  `Target.Powers.All(p => p.ShouldOwnerDeathTriggerFatal())`, read before the
+  hit). A Minion's death does not count (`MinionPower` answers false). New
+  codegen predicate `killed_target_fatal` (C# snapshot `fatalAtStart`), which
+  the sim already had for Feed (`fatal_kills_this_card`,
+  `Enemy.counts_for_fatal`).
+- **One card, chosen.** `YaeEditing.PublishFromHand` opens the hand chooser
+  over the cards with a temporary layer (`PublishReaches`), skipped when only
+  one qualifies; none does nothing. The sim reads the pick as the best by
+  `PUBLISH_ORDER`. The `yae` op is legal in a conditional branch for the
+  `publish` kind only (`YAE_BRANCH_KINDS`).
+- **Art:** the row keeps its portrait; the Attack frame comes from the type.
+
+Pins: `tier0/tests/test_yae_review_r4.py` (kill, no kill, Minion),
+`klee-mod/KleeTests/Prototype/YaeReviewR4Tests.cs`.
+
+## Yae: Bestseller and Print Run show their total (2026-10-15)
+
+`proto_ym_bestseller`, `proto_ym_print_run`. Hygiene, no number moved. Since
+Yae review r5, pick 1 (a) both count the cards she Edited this combat, and the
+face printed only the per-card number. Both rows now ride the calculated rail
+the base game's Perfected Strike uses (`CalculatedDamageVar` /
+`CalculatedBlockVar` with a multiplier; decompiled `PerfectedStrike.cs` line
+25, `ExpectAFight.cs` line 23): `{op: damage | block, amount_formula: {base,
+per, count: edits_this_combat}}`, upgrade `formula_base` / `formula_per`. In
+combat the face adds the house clause every calculated card prints,
+`{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}` and `(Gains
+{CalculatedBlock:diff()} [gold]Block[/gold])`; out of combat it reads as
+before. The count is `YaeShrine.Edits` (C#) and the `edits_this_combat`
+runtime count (sim).
+
+One engine fact moves with it: Print Run now declares a `CalculatedBlockVar`,
+so the game's `GainsBlock` is true (Nimble may enchant it, as it may Expect a
+Fight), in both engines. Red Ink still rides its Block.
+
+The seat page prints "Cards Edited this combat: N" in her shrine block, off
+`player.yae_shrine` (bridge `gits/GitsYaeShrine.cs`, mod `YaeShrine.Snapshot`).
+
+Pins: `tier0/tests/test_yae_review_r5.py`, `tier0/tests/test_yae_seat_page.py`,
+`klee-mod/KleeTests/Prototype/YaeReviewR5Tests.cs`.
+
+## Yae review r6: Serialization and Manuscript Pile (2026-10-15)
+
+`proto_ym_serialization`, `proto_ym_manuscript_pile`. Yae is at Prototype, so
+these are Claude's (`review/active/yae-review-r6-2026-10-15.md`, items 1 and
+2, no pick); neither card was taken in two seat rounds (0 / 5 and 0 / 8; 0 / 7
+and 0 / 5).
+
+- **Serialization:** "Whenever you [gold]Edit[/gold] a card, gain 3 [4]
+  [gold]Block[/gold]." (was: whenever you play an Annotated card). It pays on
+  the events the per-combat Edit count records (`YaeShrineLedger.Edits`, sim
+  `edits`): each card in hand an Edit or Reborn Annotates, and each Sakura an
+  "Edit your ... Sakura" card Annotates (Inked Branches counts every one). A
+  Publish is not an Edit, and playing an Annotated card no longer pays. C#
+  `SerializationPower.Pay` from `YaeEditing.Edit`, `YaeEditing.EditAll` and
+  `YaeCards.EditSakura`; sim `yae_shrine._note_edits`. One Block gain per
+  Edit action (per x cards Edited), unpowered as before.
+- **Manuscript Pile:** "Draw 2 [3] cards. [gold]Edit[/gold] a card in your
+  hand: [gold]Red Ink[/gold]." (was: each Sakura lasts 1 more turn). The
+  draw lands first, then the one-card Edit chooser
+  (`{op: yae, kind: edit, annotation: red_ink, amount: 1}`).
+
+Pins: `tier0/tests/test_yae_review_r6.py`,
+`klee-mod/KleeTests/Prototype/YaeReviewR6Tests.cs`.
+
+## Lore renames (2026-10-15)
+
+Names only; ids, text and numbers unchanged
+(`review/active/lore-review-2026-10-15.md`, picks 1 and 3). [USER]: "Varka is
+the current Wolf of the North; the current Lion of the South is Jean.
+Otherwise these all make sense." and "I think that at one point, Kaboom! was
+in use for something else; we can rename that now."
+
+| id | was | now |
+|---|---|---|
+| `proto_vk_sworn_brotherhood` | Sworn Brotherhood | Knight of Boreas |
+| `proto_vk_oath_unto_death` | Oath Unto Death | Azure Fang's Oath |
+| `proto_vk_wolfpack` | Wolfpack | Lupical |
+| `proto_vk_thundering_verdict` | Thundering Verdict | Lightning Fang |
+| `proto_vk_dawn_patrol` | Dawn Patrol | Leave It for Jean |
+| `proto_vk_tailwind_stride` | Tailwind Stride | A Bard's Tale |
+| `proto_vk_pyre_oath` | Ashen Oath | For Crepus |
+| `proto_fs_crashing_waves` | Crashing Waves | Soloist's Solicitation |
+| `proto_fs_rising_tide` | Rising Tide | Endless Waltz |
+| `proto_fs_undercurrent` | Undercurrent | Unheard Confession |
+| `proto_fs_riptide_lunge` | Riptide Lunge | Coup de Théâtre |
+| `proto_fs_against_the_tide` | Against the Tide | Against All Odds |
+| `proto_ko_kapow` | Ka-pow! | Kaboom! |
+
+The Varka Powers named after their cards (`SwornBrotherhoodPower`,
+`SwornBrotherhoodCurrentPower`, `OathUntoDeathPower`, `WolfpackPower`) carry
+the new names, and so do the seat page's Lupical lines. Older entries above
+keep the names the cards had when they were written. Art is keyed by id, so
+every card keeps its picture.
+
+## Tempest Charge, 2026-10-15
+
+Klee and Varka cleanup review, pick 1 (a), Tempo. **Tempest Charge**
+(`proto_vk_tempest_charge`, Varka Uncommon Attack, 1) was Rising Gale's text
+at a higher cost ("Deal 8 [11] Anemo damage. If it Swirls, draw 1 card.") and
+is now "Deal 12 [16] Anemo damage. Costs 1 less for each Swirl this turn."
+New card field `cost_reduction_per_swirl_this_turn` (Varka rows, numeric
+cost): the sim reads his ledger's `swirls_this_turn` in `combat.card_cost`;
+the mod emits the card's own `TryModifyEnergyCostInCombat` over
+`VarkaOath.SwirlsThisTurn`, which reads the ledger's per-round count. Floored
+at 0; the count clears at his next turn. Pins:
+`test_tempest_charge_deals_12_and_costs_1_less_per_swirl_this_turn`
+(`tier0/tests/test_varka_oath.py`) and
+`Tempest_charge_deals_12_and_costs_1_less_per_swirl_this_turn`
+(`klee-mod/KleeTests/Prototype/VarkaPrototypeTests.cs`). It leaves
+`varka_expansion_sim.GENERIC_DRAW`. Untested in game until a deploy.
+
+## Furina's engines, furina-next 2026-10-16
+
+`review/active/furina-next-2026-10-15.md`, pick 1 (a), as revised after
+GPT's review. [USER]: "On Furina's powers - I'm good with this now, ship
+it!" Three Powers keep their names, rarities and roles and each loses the
+condition that kept it from firing. Built on `furina-next`; it reaches `main`
+in the promotion PR with suite 2's record.
+
+| id | was | now |
+|---|---|---|
+| `proto_fs_crescendo` (Uncommon, 1) | The first time each turn you Spend, draw 1 card. (upg: Innate) | At the start of your turn, gain 2 [3] Fanfare, then 2 [3] more each turn after. |
+| `proto_fs_standing_room_only` (Rare) | 2 [1]. Whenever you Spend all your Fanfare and it is at least 1, gain 1 Strength. | 1. Whenever you Spend, gain 1 Strength. (upg: Innate) |
+| `proto_fs_prima_donna` (Rare) | 2 [1]. At the start of your turn, if you have 10 or more Fanfare, gain [E]. | 2. At the start of your turn, if you Spent last turn, gain [E] [and draw 1 card]. |
+
+- **Crescendo** counts from the turn it is played: its first payment is at
+  the next turn start (2, then 4, 6 ...; upgraded 3, 6, 9). The ledger keeps
+  each copy taken in and what it has paid (`FurinaStageLedger.CrescendoDue`,
+  read lazily at turn start as Fountain of Lucine is), so a later copy starts
+  small. It pays beside Grand Theater Program, before Regina.
+- **Standing Room Only** answers every Spend that counts at least 1, from the
+  director's one after-Spend hook (`StageDirector.AfterSpend`): her cards,
+  Full House, Navia's and Freminet's acts and Showstopper. A Spend of 0 is no
+  Spend. A Spend Navia's line discounts counts what the card counts (the
+  price), as every other Spend reader does.
+- **Prima Donna**'s "last turn" is latched when her turn closes
+  (`FurinaStageLedger.CloseTurn`, after the guests act), so end-of-turn
+  Spends (Full House, Showstopper) count and a Spend this turn never pays
+  this turn. The upgraded card installs `PrimaDonnaPlusPower`
+  (`upgraded_power: fs_prima_donna_plus`), which also draws 1. The 10-Fanfare
+  constant (`PrimaDonnaFanfare`) is gone. The Spend tip now also reads the
+  past tense, `[gold]Spent[/gold]`.
+- **The runaway check** (sec.3): Standing Room Only with Full House (4),
+  Showstopper and three damaging guests (Wriothesley, Clorinde, Lynette) on a
+  200 bank gives 7 Strength in one end of turn (three Full House Spends,
+  Showstopper's Spend 5, three more): `Full_house_showstopper_and_three_damaging_guests_give_seven_strength_a_turn`.
+
+Pins: `klee-mod/KleeTests/Prototype/FurinaEnginesTests.cs`; sim twin
+(`tier0/engine/furina_tide.py`) in `tier0/tests/test_furina_pool75.py` and
+`test_furina_spend_up_to.py`. Untested in game until a `+next` deploy.
+
+## Spending the bank, furina-next paper 2, 2026-10-16
+
+`review/active/furina-next-2-2026-10-16.md` sec.2, picks 1 (a) and 2 (a).
+[USER]: "Agreed on both picks. I still think that we should eventually
+change the starter, but for now it's fine." One spend-all in the starter
+(Rising Applause, unchanged), one in the pool (Let the People Rejoice,
+unchanged); the other two are capped, and a Power raises every cap. Built on
+`furina-next`; it reaches `main` in the promotion PR with suite 3's record.
+
+| id | was | now |
+|---|---|---|
+| `proto_fs_bravura` (Uncommon Attack, 1) | Spend all your Fanfare. Deal 7 [9] Hydro damage for every 3 spent. | Spend up to 18, all you can. Deal 7 [9] Hydro damage for every 3 spent. |
+| `proto_fs_bring_the_house_down` (Rare Attack, 2) | Spend all your Fanfare. Deal that much damage. Each guest acts. | Spend up to 10 for each guest on stage, all you can. Deal that much damage. Each guest acts. |
+| `proto_fs_bis` (Rare Power, 1) | Bis!: Whenever a card Spends all your Fanfare, keep half of it. (upg: Innate) | Extended Run: Attacks and Skills that Spend up to a number can Spend 8 [12] more. |
+
+- **Extended Run is renamed on Bis!'s old id** (the re-founding's
+  convention), so it keeps Bis!'s art row and painting, which still shows
+  the old card. Pool 78 and the rarity counts do not move. Bis!'s power,
+  its keep-half rule in `SpendAll` and its seat-only hover rider
+  (`ForBisSpendUpTo`) are gone.
+- **Scope.** `ExtendedRunPower`'s amount (8 a copy, 12 upgraded; copies
+  add) is added once, flat, to a played card's whole printed cap
+  (`FurinaStageLedger.CardUpToCap`, called only by the card verb
+  `FurinaStage.SpendUpTo` and its preview `SpentOrUpTo`). Bring the House
+  Down with three guests and one copy spends up to 38, in one Spend. It
+  reaches the five capped Attacks and Skills (Soloist's Solicitation and Hold
+  the Stage 16, Tidal Flourish 10, Bravura 18, Bring the House Down 10 a
+  guest). It does not reach Full House (`StageDirector.FullHouse`), Navia's
+  and Freminet's share-Spends (`SpendShare`), Standing Ovation's Spend half
+  (`SpendHalf`, no printed number) or a fixed Spend (Quick Flourish).
+- **The sheet.** `stage_spend_up_to` takes `per: stage_guests` (the cap is
+  `amount` times the guests on stage; C# `10 * FurinaStage.Of(..).Count`);
+  Bravura's preview reads `SpentOrUpTo(card, 18)` in threes.
+- **One reading the paper does not state:** with no guest on stage Bring the
+  House Down's own cap is 0, and Extended Run still adds its 8 (it adds to
+  the whole cap, whatever the cap is).
+
+Pins: `klee-mod/KleeTests/Prototype/FurinaExtendedRunTests.cs` (BHtD 3
+guests + one copy = 38; Bravura on 200 with two upgraded copies spends 42,
+14 hits of 7, two plain copies 34, 11 hits; Full House cap and Quick
+Flourish's fixed cost unchanged); sim twin (`furina_tide.spend_up_to_card`)
+in `tier0/tests/test_furina_extended_run.py`. Untested in game until a
+`+next` deploy.
+
+## The Repay floor, furina-next paper 3, 2026-10-16
+
+`review/active/furina-next-3-2026-10-16.md` sec.2 as amended, picks 1 (a)
+and 2 (a). [USER]: "Overall I agree with the paper, but as per usual with
+Furina, I'd like to sanity check that we don't turn any of her cards into
+overly-verbose Yugioh cards. Agreed on both counts, but let's also ask that
+the agent scan the modified cars and make sure that the relevant text and
+tooltips are clear and concise." Built on `furina-next`; it reaches `main`
+in a promotion PR with suite 4's record.
+
+**The rule.** A Repay with a number that cannot return all its HP gains 1
+Block for each HP it could not return (`StageDirector.RepayFloor` with
+`StageFloor.Block`, now `FurinaStage.Repay`'s default; sim
+`furina_tide.repay_floor`, `card_repay`'s default). The Repay tip carries it
+as one line: "Any HP a Repay cannot return becomes Block."
+
+| id | was | now |
+|---|---|---|
+| `proto_fs_pneuma_refrain` (Uncommon Skill, 1) | Repay 5 [7]. Draw 2 cards. | Repay 4 [6]. Draw 2 cards. |
+| `proto_fs_rising_tide` (Endless Waltz, Uncommon Attack, 1) | Deal 6 damage, plus 3 [4] for each time you Repaid this turn. | Repay 2. Deal 6 damage, plus 3 [4] for each time you Repaid this turn. |
+| `proto_fs_hymn_of_many_waters` (Common Skill, 1) | Gain 6 [8] Block. Repay 3 [4]. Gain 1 Block for any HP it could not Repay. | Gain 6 [8] Block. Repay 3 [4]. |
+| `proto_fs_grand_entrance` (Uncommon Power, 1) | Whenever you play a Guest Star, Repay 4 [6]. Gain 1 Block for any HP it could not Repay. | Whenever you play a Guest Star, Repay 4 [6]. |
+| Fontaine Teardrop (Uncommon relic) | Whenever you Repay more than you have drained, gain the rest as Block. | An unreturned Repay gains 2 Block for each HP instead of 1. |
+
+- **Newly covered, text unchanged:** Clean Slate, Ebb and Flow, Fountain of
+  Lucine's next-turn Repay, Coup de Théâtre's kill Repay, Ousia / Pneuma's
+  Pneuma face, Endless Waltz, and Salon Solitaire's turn-end Repay 1 (The
+  Curtain Never Falls' 2). A won combat pays no floor (the director stops on
+  `Over`), so a kill Repay that ends the fight gives no Block.
+- **Applied once:** Hymn of Many Waters, Grand Entrance, Charlotte and
+  Sigewinne were already `StageFloor.Block`; the rule adds none. Charlotte's
+  and Sigewinne's act tips drop the same clause (the build condition: no
+  clause the rule covers).
+- **Its own floor:** Cleansing Torrent's row says `floor: none` (its damage
+  reads `stage_repay_left`); the generator refuses a damage-floor Repay
+  without it. "Repay all" (Singer of Many Waters, Grand Absolution, Water of
+  Lucine) has no floor. Pneuma Tides' Vigor floor is unchanged code; no row
+  prints it.
+- **Fontaine Teardrop** is paid inside the Block floor
+  (`StageDirector.FloorBlock`: 1 + copies a HP), so it reaches every Block
+  floor and nothing else: it no longer pays beside Cleansing Torrent's
+  damage, which it did. Each extra copy adds 1 more a HP (a reading; the
+  paper names one copy). The sim models none of her relics.
+- **Endless Waltz** keeps its count, Repays that returned HP this turn; its
+  in-combat damage line reads its own Repay before the play
+  (`FurinaStage.RepaysThisTurnWith`).
+- **The readers** (Universal Revelry, Critics' Darling, Clorinde,
+  Sigewinne's line) read the HP returned; the Block is not HP.
+- **The preview** leads with the floor: "(Repay 0: gain 3 Block)", "(Repay
+  1: gain 2 Block)", "(Repay 0: +4 damage)" for Cleansing Torrent; a full
+  return still reads "(Repays 3)". With Fontaine Teardrop the face shows the
+  doubled Block. The seat page's guest forecast reads the same way.
+
+Pins: `klee-mod/KleeTests/Prototype/FurinaNextThreeRepayFloorTests.cs` and
+`tier0/tests/test_furina_next_3_repay_floor.py`. Untested in game until a
+`+next` deploy.
+
+## Yae: the pool to 78 (2026-10-15)
+
+`review/active/yae-pool-to-78-2026-10-15.md`, ruled 2026-10-15, all picks
+(a) ([USER]: "it's 'good enough' to merge the PR ... we can take it as-is and
+then start removing the less interesting cards as we playtest with a
+full-sized deck"). Thirty-five rows (5 / 20 / 10; 16 Attacks, 13 Skills, 6
+Powers) take her pool from 43 to 78 at 20 / 38 / 20. The texts are the
+paper's revised ones (Genre Shift at 2, Torii Ward drawing on a full shrine)
+and the four upgrades the Ruled section changed (Saiguu's Lesson and Stellar
+Conduct gain Innate, Fox's Verdict gains Retain, Fox's Mooncall plants 2
+Levels higher).
+
+- **Sec.3.** Sakura Grove becomes the Rare ([USER]: "Sakura grove seems
+  better than Fox's Mooncall at a lower rarity"; it compounds like Demon
+  Form) and Fox's Mooncall the Uncommon at 1. Grafted Branch is Level 3 [4]
+  and lasts 1 more turn ([USER]: "Grafted Branch looks a little
+  underpowered"). Evergreen Charm loses "It keeps its Red Ink." ([USER]:
+  "what does it have to do with Red Ink?"), because pick 2 (a) makes it the
+  rule.
+- **Pick 2 (a).** Distinct Annotations coexist on a Sakura; a duplicate does
+  nothing; an Edit that changes nothing is not an Edit (no Bestseller, Print
+  Run or Serialization pay); they survive Tenko and same-kind refreshes and
+  go when the Sakura withers or is replaced.
+- **Targeting.** A strike aimed at a chosen enemy is one hit on it, a
+  Foxfire Sakura's included; only a Sakura's own act hits ALL.
+- **Builder's readings** (named in the PR): "A Sakura strikes it" is the
+  highest-Level striking Sakura (Kitsune Pounce's reading), and the
+  one-hit targeting rule covers Kitsune Pounce too; Petal Storm, Sakura
+  Canopy and Daisesshou are one hit (or one Block gain) of N times the per
+  number; Daisesshou's and Replanting's withers act as their Last Bloom;
+  Replanting's new Sakura starts at the withered one's Level plus 1 [2], and
+  Fox's Mooncall still adds; Late Night Reading's "3 Sakura" is 3 or more;
+  Eternity stops every timer; Scattered Blossoms draws on every wither,
+  a replacing plant's included; The Shrine's Sacred Shade counts the Sakura
+  standing as the turn ends, before they act; Editorial Priority frees one
+  card a turn however many copies.
+- **Renamed on build.** The paper's "Enlightened Blessing" Power ships as
+  Scattered Blossoms (coordinator, on #1347): her starter relic's Orobas
+  upgrade already carries the name. The id stays `proto_ym_enlightened_blessing`.
+
+## Yae: the dedupe and the refill (2026-10-16)
+
+`review/active/yae-dedupe-2026-10-16.md` and
+`review/active/yae-refill-2026-10-16.md`, ruled 2026-10-16 ([USER]: "Agreed
+on the Yae paper picks!"), built together. The pool stays 78 at 20 / 38 / 20
+(29 Attacks, 34 Skills, 15 Powers).
+
+- **Cut (dedupe pick 1 (a)).** Kitsune Flick, Shrine Lantern, Grafted
+  Branch, Shrine Bell, Shrine Offering, Deadline, Sacred Spark, Kitsune Flash
+  (Commons); Print Run, Rooted Shrine, Omikuji (Uncommons). Their rows,
+  generated classes, art plan rows and blank-portrait entries go. The rules
+  they used stay, with no row (`extend`, `annotated_strike`,
+  `strike_target`, a plant_level's `lasts`), as `damage_per_edit` did.
+- **Added (dedupe pick 2 (a)).** Kitsune Barrage, Sesshou Fang, Falling
+  Blossom, Publisher's Deadline, Fox's Shade, Hide Behind the Shrine,
+  Rewrite, Dawn Prayer (Commons); Hunting Gaze, Inscribed Thunder, Kitsune's
+  Blessing (Uncommons), at the refill paper's numbers and upgrades. They
+  draw blank portraits until her art pass (`tools/art_coverage.py`).
+- **Rules added.** Seven `yae` kinds (`barrage`, `level_strike`,
+  `wither_oldest_at`, `wither_newest_block`, `rewrite`, `level_newest`,
+  `bless_highest`), the Hunting Gaze power, the predicate `any_enemy_weak`,
+  the count `annotations_on_card`, and the card field
+  `cost_reduction_if_edited_this_turn`. The ledger keeps Edits this turn
+  (cleared at her turn start) and the last enemy one of her Attack cards
+  hit (kept with or without Hunting Gaze). The seat's Sakura target sentence
+  names Hunting Gaze.
+- **Builder's readings** (named in the PR): Falling Blossom's Last Bloom at a
+  target its own hit killed acts as usual (random, or a Foxfire's ALL);
+  Hunting Gaze yields to the Lure and an aimed strike, its "attacked" is the
+  last enemy any hit of her Attack card landed on (an AoE's last body), and
+  Fox Fire's 4 damage is not a Sakura strike, so stays random; Kitsune's
+  Blessing breaks a Level tie by the oldest (Editor-in-Chief's reading);
+  Sesshou Fang's bonus is one hit with the base, as Kitsune Flash's was;
+  Kitsune Barrage is one attack of 2 or 3 hits; Hide Behind the Shrine's 5
+  more is the card's own Block (Dexterity applies); Rewrite discards 0 to N
+  chosen cards (the base game's Gambler's Brew chooser) and then Edits, so
+  the Edit can reach a card it drew; Inscribed Thunder's Annotations are
+  distinct ones, Published included; Dawn Prayer and Kitsune's Blessing do
+  nothing with no Sakura.

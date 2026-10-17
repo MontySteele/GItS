@@ -184,6 +184,10 @@ internal static class KleePowerIcons
         JuugaGuardPower => KleePck.Path("klee/powers/oz_summon.png"),
         NereidsAscensionPower => KleePck.Path(
             "kokomi/powers/before_sun_and_moon.png"),
+        // Kokomi's own potions (2026-10-15): A Stunning Stratagem is Nereid's
+        // read widened to every Plan for a turn, so it wears Nereid's badge.
+        StunningStratagemPower => KleePck.Path(
+            "kokomi/powers/before_sun_and_moon.png"),
         // The four with no shipped Kokomi power to borrow from -- the Plan
         // badge, its draw rider and the two Commander powers -- take
         // the nearest shipped SHAPE instead: a Klee companion power for the
@@ -402,6 +406,8 @@ internal static class KleePowerIcons
         PneumaTidesPower => KleePck.Path("furina/powers/ovation_trickle.png"),
         PrimaDonnaPower =>
             KleePck.Path("furina/powers/star_of_the_show.png"),
+        PrimaDonnaPlusPower =>
+            KleePck.Path("furina/powers/star_of_the_show.png"),
         ReginaOfAllWatersPower =>
             KleePck.Path("furina/powers/limelight.png"),
         ShowstopperPower => KleePck.Path("furina/powers/top_billing.png"),
@@ -411,7 +417,8 @@ internal static class KleePowerIcons
             KleePck.Path("furina/powers/unheard_confession.png"),
         CriticsDarlingPower =>
             KleePck.Path("furina/powers/the_gallery_stirs.png"),
-        BisPower => KleePck.Path("furina/powers/stagehands_encore.png"),
+        ExtendedRunPower =>
+            KleePck.Path("furina/powers/stagehands_encore.png"),
         // THE SUPPORTING POOL (2026-09-26): the two new guests' faces, from
         // the same art pass, and the batch's nine powers borrowing the
         // shipped Furina sigil nearest their job, on the terms every borrow
@@ -507,21 +514,31 @@ internal static class KleePowerIcons
             ?? KleePck.Path("klee/powers/passion_overload.png"),
         EditorInChiefPower => KleePck.Path("yae/powers/editor_in_chief.png")
             ?? KleePck.Path("varka/powers/electro_wind.png"),
-        // THE DESIGN AXES (2026-10-14): the four Rite badges and batch two's
-        // three powers borrow her own badges nearest their rule until their
-        // art lands (the art debt in the PR that built them).
-        ThunderRitePower => KleePck.Path("yae/powers/editor_in_chief.png")
+        // Review r3 (2026-10-14): Serial Novel borrows Editor-in-Chief's
+        // badge, the nearest rule, until its art lands. (Fallen Petals'
+        // two powers left when it became a Skill; the four Rite badges left
+        // with the Rite, shrine r2.)
+        SerialNovelPower => KleePck.Path("yae/powers/editor_in_chief.png")
             ?? KleePck.Path("varka/powers/electro_wind.png"),
-        WardingRitePower => KleePck.Path("yae/powers/serialization.png")
-            ?? KleePck.Path("klee/powers/passion_overload.png"),
-        WildfireRitePower => KleePck.Path("yae/powers/foxfire_lure.png")
+        // The pool to 78 (2026-10-15): no new art (the build generated
+        // none), so each new Power borrows her badge nearest its rule until
+        // its art pass (a BACKLOG line).
+        EnlightenedBlessingPower => KleePck.Path("yae/powers/sakura.png")
+            ?? KleePck.Path("klee/powers/oz_summon.png"),
+        SaiguusLessonPower => KleePck.Path("yae/powers/foxfire_lure.png")
             ?? KleePck.Path("klee/powers/detonation_vuln.png"),
-        OfferingRitePower => KleePck.Path("yae/powers/yakan_offering.png")
+        SacredShadePower => KleePck.Path("yae/powers/yakan_offering.png")
             ?? KleePck.Path("klee/powers/oz_summon.png"),
-        FallenPetalsPower => KleePck.Path("yae/powers/sakura.png")
-            ?? KleePck.Path("klee/powers/oz_summon.png"),
-        FallenPetalsPlusPower => KleePck.Path("yae/powers/sakura.png")
-            ?? KleePck.Path("klee/powers/oz_summon.png"),
+        EditorialPriorityPower => KleePck.Path("yae/powers/serialization.png")
+            ?? KleePck.Path("klee/powers/passion_overload.png"),
+        StellarConductPower => KleePck.Path("yae/powers/edict_of_cleansing.png")
+            ?? KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
+        EternityPower => KleePck.Path("yae/powers/sakura_grove.png")
+            ?? KleePck.Path("klee/powers/bomb_damage_up.png"),
+        // The refill (2026-10-16): no new art; Hunting Gaze borrows the
+        // Lure's badge, the other aim.
+        HuntingGazePower => KleePck.Path("yae/powers/foxfire_lure.png")
+            ?? KleePck.Path("klee/powers/detonation_vuln.png"),
         UnwaveringBannerPower =>
             KleePck.Path("varka/powers/stormward_stance.png"),
         CycleOfSeasonsPower => KleePck.Path("varka/powers/boreas_unbound.png"),

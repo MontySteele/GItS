@@ -217,7 +217,7 @@ def test_ember_cleave_is_setup_strike_in_pyro(varka):
 def test_ashen_oath_gains_2_strength_and_2_pyro_oath(varka):
     # The Pyro pass (2026-10-11): "Gain 2 [3] Strength. Gain 2 Pyro Oath."
     # Its gain switches nothing; the Exhaust-trigger power left with it.
-    assert loader.get_card(_vk("pyre_oath")).name == "Ashen Oath"
+    assert loader.get_card(_vk("pyre_oath")).name == "For Crepus"
     assert not hasattr(V, "PYRE_OATH")
     st = _state(element="hydro")
     led = _led(st)

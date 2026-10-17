@@ -397,7 +397,56 @@ def _enchantment(blob: Any) -> dict[str, Any] | None:
                            "text": _text(blob.get("description"))}
     if blob.get("shows_amount") and _int(blob.get("amount")):
         row["amount"] = _int(blob.get("amount"))
+    # Reprint spent (two seats, 2026-10-14): the bridge's `disabled` is the
+    # game's `Status == Disabled`, the greyed tab (Glam, Swift, Sown, Yae's
+    # Reprint after its first play). Absent means live.
+    if blob.get("disabled"):
+        row["used"] = True
     return row
+
+
+#: The title of Yae's one enchantment (`YaeMasterpiece.Title`).
+MASTERPIECE_NAME = "Annotated"
+
+
+#: Yae review r4, item 6: an Edit's prompt reads "Choose a card to Edit: Red
+#: Ink (...)", and the Masterpiece's text lists "... This combat: Footnote."
+# Yae review r5: the one-card chooser and the "up to N" one (#1330).
+_EDIT_PROMPT = re.compile(r"^Choose (a card|up to \d+ cards) to Edit")
+_THIS_COMBAT = re.compile(r"This combat:\s*([^.]+)")
+
+
+def mark_edit_replaces(prompt: str, faces: list[dict[str, Any]]) -> None:
+    """On an Edit chooser, tag each offered card that already carries a
+    temporary Annotation with `replaces` (the Edit overwrites it; a Published
+    stack stays). PURE over its arguments; mutates the faces."""
+    if not _EDIT_PROMPT.match(prompt or ""):
+        return
+    for face in faces:
+        ench = face.get("enchantment")
+        if not isinstance(ench, dict):
+            continue
+        m = _THIS_COMBAT.search(_text(ench.get("text")))
+        if m:
+            face["replaces"] = m.group(1).strip()
+
+
+def enchantment_tag(ench: dict[str, Any] | None) -> str:
+    """The enchantment beside a title: " (Sharp 3)", " (Reprint)", or
+    " (Reprint: used)" once the game has greyed it this combat. PURE."""
+    if not isinstance(ench, dict) or not ench.get("name"):
+        return ""
+    # Review r3: Yae's Masterpiece is ONE enchantment holding both layers,
+    # titled "Annotated"; its description is the list ("Published: Red Ink
+    # x2, Reprint. This combat: Footnote."), so a Published card shows its
+    # stack beside its title.
+    if ench["name"] == MASTERPIECE_NAME and ench.get("text"):
+        return f" ({_text(ench['text']).rstrip('.')})"
+    if ench.get("used"):
+        return f" ({ench['name']}: used)"
+    if ench.get("amount"):
+        return f" ({ench['name']} {ench['amount']})"
+    return f" ({ench['name']})"
 
 
 # `EB-262`, AND IT IS THE WHOLE ROW. A SHOP ITEM CARRIES ITS NAME UNDER ITS
@@ -1731,7 +1780,28 @@ def hand_card_left(state: dict[str, Any], index: int) -> None:
 def _chooser_rows(state: dict[str, Any], entries: list[dict[str, Any]]
                   ) -> list[tuple[str, int, str]] | None:
     """`(key, number, label)` per offered card: the hand card it IS, found by
-    face, or `None` where one cannot be placed.
+    face, or `None` where one cannot be placed (`_chooser_match`)."""
+    rows = _chooser_match(state, entries)
+    return None if rows is None else [r[1:] for r in rows]
+
+
+def chooser_order(state: dict[str, Any], entries: list[dict[str, Any]]
+                  ) -> list[int]:
+    """The offered cards' indices in HAND order, the order the fight page
+    printed them in (a Yae seat, 2026-10-14: the chooser listed the holders'
+    order and the seat picked the wrong card twice). The page prints the
+    chooser in this order; a pick still posts the bridge's own index. Where a
+    card cannot be placed in the hand, the bridge's order. PURE over the
+    memory."""
+    rows = _chooser_match(state, entries)
+    if rows is None:
+        return list(range(len(entries)))
+    return sorted(range(len(entries)), key=lambda i: rows[i][0])
+
+
+def _chooser_match(state: dict[str, Any], entries: list[dict[str, Any]]
+                   ) -> list[tuple[int, str, int, str]] | None:
+    """`(hand position, key, number, label)` per offered card, or `None`.
 
     YAE BLOOM SEAT (2026-10-14, after #1290). A chooser's list is NOT the
     hand in order: the bridge lists the hand's UI holders
@@ -1759,14 +1829,14 @@ def _chooser_rows(state: dict[str, Any], entries: list[dict[str, Any]]
         pool.setdefault(r["f"], []).append(j)
     for js in pool.values():
         js.sort(key=lambda j: (rows[j]["k"], rows[j]["n"]) in picked)
-    out: list[tuple[str, int, str]] = []
+    out: list[tuple[int, str, int, str]] = []
     for e in entries:
         js = pool.get(_hand_face(e)) or []
         if not js:
             return None
         j = js.pop(0)
-        out.append((rows[j]["k"], rows[j]["n"], labels[j]))
-    if len({_fold(x[2]) for x in out}) != len(out):
+        out.append((j, rows[j]["k"], rows[j]["n"], labels[j]))
+    if len({_fold(x[3]) for x in out}) != len(out):
         return None
     return out
 
@@ -2419,6 +2489,11 @@ def _powers(blob: dict[str, Any]) -> list[dict[str, Any]]:
         # the page prints no number where it says `Single`. Absent (an older
         # bridge) prints the number as before.
         power["numbered"] = _text(row.get("stack")) != "Single"
+        # Kokomi review r8 (2026-10-14, item 10): the bridge keeps a power
+        # whose text threw (`GitsPowerRow.Unreadable`) instead of dropping
+        # it; At Water's Edge vanished from a seat's list for a screen.
+        if _text(row.get("unreadable")):
+            power["unreadable"] = True
         # `EB-340`: the tips the wire hangs on the status row, carried through
         # so the glossary can define a word an enemy's buff line announced.
         # `Galvanic 6 -- Powers are afflicted with Galvanized` reached a blind

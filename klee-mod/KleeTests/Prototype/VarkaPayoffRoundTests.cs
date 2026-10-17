@@ -82,9 +82,13 @@ public class VarkaPayoffRoundTests : IDisposable
         Assert.Equal("Pyro (" + VarkaLaw.SwirlPyroDamage + " damage) and Cryo ("
                      + VarkaLaw.SwirlCryoVulnerable + " Vulnerable)",
                      VarkaOath.TwinGalesPaid(Element.Pyro, Element.Cryo, 1));
-        // The Swirled element is the current one: it pays once.
-        Assert.Equal("Hydro (" + VarkaLaw.SwirlHydroBlock + " Block)",
+        // The Swirled element is the current one: it pays twice (Varka
+        // round 5, 2026-10-13, varka-next).
+        Assert.Equal("Hydro (" + VarkaLaw.SwirlHydroBlock + " Block) twice",
                      VarkaOath.TwinGalesPaid(Element.Hydro, Element.Hydro, 1));
+        Assert.Equal("Cryo (" + VarkaLaw.SwirlCryoVulnerable
+                     + " Vulnerable) twice, x2",
+                     VarkaOath.TwinGalesPaid(Element.Cryo, Element.Cryo, 2));
         // No current element: only the Swirled one pays.
         Assert.Equal("Electro (" + VarkaLaw.SwirlElectroDamageAll
                      + " damage to ALL), x2",

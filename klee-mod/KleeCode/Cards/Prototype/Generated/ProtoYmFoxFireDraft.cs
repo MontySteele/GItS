@@ -41,7 +41,7 @@ public sealed class ProtoYmFoxFireDraft : CustomCardModel, ICharacterCard
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForEdit(ArmKeywordTips.ForSakura(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForEdit(ArmKeywordTips.ForAnnotation(ArmKeywordTips.ForSakura(base.ExtraHoverTips, this), this, YaeAnnotation.FoxFire, true), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_fox_fire_draft");
 

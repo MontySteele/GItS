@@ -40,7 +40,7 @@ public sealed class ProtoVkWolfpack : CustomCardModel, ICharacterCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Wolfpack"),
+        ("title", "Lupical"),
         ("description", "Whenever you play [gold]Four Winds' Ascension[/gold], shuffle a copy of it into your [gold]Draw Pile[/gold]. The copy [gold]Exhausts[/gold]."),
     };
 

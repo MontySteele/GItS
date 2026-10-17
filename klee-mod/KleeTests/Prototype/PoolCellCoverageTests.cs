@@ -267,7 +267,8 @@ public class PoolCellCoverageTests
             //
             // THE POOL TO 39 (review/ruled/furina-pool-40-2026-10-05.md
             // sec.3) filled two: Rare/Power is four deep (Revelry, A
-            // Five-Century Act, Critics' Darling, Bis!), and Rare/* is seven.
+            // Five-Century Act, Critics' Darling, Bis!, now Extended Run),
+            // and Rare/* is seven.
             // Rare/Attack (Let the People Rejoice), Rare/Skill (Singer,
             // Clorinde) and Uncommon/Attack (Bravura, Grand Deluge) stay
             // short and seamed.

@@ -14,7 +14,7 @@ namespace KleeMod.Tests.Prototype;
 /// <summary>
 /// Varka round 5 (<c>review/records/varka-round-5-2026-10-13.md</c>, "What to
 /// change" 1 and 2), display and log only: the switch line says the Oath the
-/// new element holds, a Swirl card says "(No aura to Swirl)" in hand, and
+/// new element holds, a Swirl card says "(no aura: no Swirl)" in hand, and
 /// Chain Lightning and Short Circuit name what they discarded. The suite is
 /// headless, so the pure words and the ledger are pinned by value and the
 /// wiring off the compiled methods; the page half is
@@ -58,7 +58,7 @@ public class VarkaRound5LegibilityTests
     [Fact]
     public void No_aura_reads_no_aura_to_swirl()
     {
-        Assert.Equal("\n(No aura to Swirl)", VarkaOath.SwirlWords(aura: false));
+        Assert.Equal("\n(no aura: no Swirl)", VarkaOath.SwirlWords(aura: false));
         Assert.Equal("", VarkaOath.SwirlWords(aura: true));
         // Off a fight the face adds nothing.
         Assert.Equal("", VarkaOath.SwirlLine(null));

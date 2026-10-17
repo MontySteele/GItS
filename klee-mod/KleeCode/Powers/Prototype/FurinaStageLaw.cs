@@ -208,10 +208,6 @@ public static class FurinaStageLaw
     /// gain 1 Strength." (HP actually repaid.)</summary>
     public const int HymnThreshold = 4;
 
-    /// <summary>Prima Donna: "if you have 10 or more Fanfare, gain 1
-    /// Energy."</summary>
-    public const int PrimaDonnaFanfare = 10;
-
     /// <summary>Regina of All Waters: "At the start of your turn, Drain 3,
     /// never past your line. If you do, gain 1 Strength." (2026-10-10)
     /// </summary>
@@ -252,6 +248,14 @@ public static class FurinaStageLaw
     public static int BufferOf(int maxHp, bool lyney = false) =>
         System.Math.Max(0, maxHp) / LineMaxHpDivisor
       + (lyney ? LyneyLineDrop : 0);
+
+    /// <summary>Epiclese Season Pass (Furina's card pass, 2026-10-15): "You
+    /// have 1 more guest seat." Copies add.</summary>
+    public const int SeasonPassSeats = 1;
+
+    /// <summary>Bouquet of Roses: "Whenever you Spend 10 or more at once,
+    /// gain [E]."</summary>
+    public const int BouquetSpend = 10;
 
     /// <summary>The buffer is 1/4 of her Max HP, rounded down. Mirrors
     /// <c>furina_tide.LINE_MAX_HP_DIVISOR</c>.</summary>

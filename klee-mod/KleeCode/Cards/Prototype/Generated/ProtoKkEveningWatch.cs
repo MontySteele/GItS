@@ -47,7 +47,7 @@ public sealed class ProtoKkEveningWatch : CustomCardModel, ICharacterCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("KkAmount", 4m),
+            new DynamicVar("KkAmount", 6m),
             new CardsVar(1)
         };
 

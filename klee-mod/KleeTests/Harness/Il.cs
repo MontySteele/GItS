@@ -211,6 +211,41 @@ internal static class Il
     }
 
     /// <summary>
+    /// The static fields this body READS (ldsfld), by name -- how a hotkey's
+    /// action, a <c>MegaInput</c> <c>StringName</c>, reaches a binding call
+    /// (<c>KokomiPlanViewTests</c>, the peek key). The same byte-scan caveat
+    /// as <see cref="FieldsWritten"/>: assert "does read X", never an absence.
+    /// </summary>
+    internal static IReadOnlyCollection<string> StaticFieldsRead(MethodBase method)
+    {
+        var found = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var body in Bodies(method))
+        {
+            var il = body.GetMethodBody()?.GetILAsByteArray();
+            if (il == null) continue;
+
+            for (var i = 0; i < il.Length - 4; i++)
+            {
+                if (il[i] != 0x7E) continue; // ldsfld
+                try
+                {
+                    var target = body.Module.ResolveField(
+                        BitConverter.ToInt32(il, i + 1),
+                        body.DeclaringType?.GetGenericArguments(),
+                        null);
+                    if (target != null) found.Add(target.Name);
+                }
+                catch
+                {
+                    // Not a field token. Expected while byte-scanning.
+                }
+            }
+        }
+
+        return found;
+    }
+
+    /// <summary>
     /// The methods this body calls, as RESOLVED methods rather than names, so a
     /// caller can walk a closure (<c>KleeOffCharacterSweepTests</c>). Same
     /// byte-scan and the same caveat as <see cref="Calls"/>.

@@ -756,11 +756,12 @@ def on_swirl(state, enemy, aura: str) -> None:
     # payout. C# twin: `BoreasFang.PaysSwirls`.
     cur = led.current if pays_swirls(p) else None
     # Crosscurrent: "This Swirl pays twice." Twin Gales: the element Swirled
-    # pays too, once, when it is not already the current one.
+    # pays too; when it is the current one it pays again, so a matched element
+    # pays twice (Varka round 5, 2026-10-13, varka-next).
     for _ in range(2 if led.pays_twice else 1):
         if cur is not None:
             _pay(state, enemy, cur)
-        if (_power(p, TWIN_GALES) and aura in ELEMENTS and aura != cur):
+        if _power(p, TWIN_GALES) and aura in ELEMENTS:
             _pay(state, enemy, aura)
     # EYE WALL: "Whenever you Swirl this turn, gain 3 Block."
     _block(state, _power(p, EYE_WALL), "eye_wall")

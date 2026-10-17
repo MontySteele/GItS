@@ -190,4 +190,22 @@ public class ShopAndArtLoaderTests
         var handlers = blank.GetMethodBody()!.ExceptionHandlingClauses;
         Assert.NotEmpty(handlers);
     }
+
+    // ---- Workshop package: card art ships as lossless WebP ----------------
+
+    [Fact]
+    public void A_portrait_tries_webp_before_png()
+    {
+        // tools/package_workshop.py converts images/cards/*.png to lossless
+        // .webp; deploy.ps1 stages .png. The loader must find either, WebP
+        // first, under images/cards/<id>.
+        var candidates = (string[])Type("RosterArt")
+            .GetMethod("PortraitCandidates", HeadlessGame.All)!
+            .Invoke(null, new object[] { "root", "klee_jumpy_dumpty" })!;
+        Assert.Equal(new[]
+        {
+            System.IO.Path.Combine("root", "cards", "klee_jumpy_dumpty.webp"),
+            System.IO.Path.Combine("root", "cards", "klee_jumpy_dumpty.png"),
+        }, candidates);
+    }
 }

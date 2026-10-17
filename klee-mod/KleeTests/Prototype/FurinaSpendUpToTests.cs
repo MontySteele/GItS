@@ -66,34 +66,34 @@ public class FurinaSpendUpToTests
     [Fact]
     public void It_is_a_spend_only_when_at_least_one_is_spent()
     {
-        var mods = new StageMods { Thunderous = 3, Crescendo = 1 };
+        var mods = new StageMods { Thunderous = 3, StandingRoomOnly = 1 };
         var none = StageKit.With(mods, 0, StagePerformer.Chevreuse);
         Assert.Equal(0, Run(none.Director.SpendUpTo(10)));
         Assert.Equal(0, none.Stage.SpendsThisTurn);
         Assert.Equal(0, Count(none, "power "));
         Assert.Equal(0, Count(none, "vulnerable "));
-        Assert.Equal(0, Count(none, "draw "));
+        Assert.Equal(0, Count(none, "strength "));
 
         var one = StageKit.With(mods, 1, StagePerformer.Chevreuse);
         Assert.Equal(1, Run(one.Director.SpendUpTo(10)));
         Assert.Equal(1, one.Stage.SpendsThisTurn);
         Assert.Equal(1, Count(one, "power "));            // Thunderous Applause
         Assert.Contains("vulnerable Random 1", one.Board.Log);   // Chevreuse
-        Assert.Contains("draw 1", one.Board.Log);               // Crescendo
+        Assert.Contains("strength 1", one.Board.Log);   // Standing Room Only
     }
 
     [Fact]
-    public void Bis_and_standing_room_only_ignore_an_up_to_spend()
+    public void Standing_room_only_answers_an_up_to_spend_and_a_spend_all()
     {
-        var mods = new StageMods { Bis = 1, StandingRoomOnly = 2 };
+        // furina-next (2026-10-16): Standing Room Only answers every Spend.
+        var mods = new StageMods { StandingRoomOnly = 2 };
         var kit = StageKit.With(mods, 20);
         Assert.Equal(12, Run(kit.Director.SpendUpTo(12)));
-        Assert.Equal(8, kit.Stage.Fanfare);                 // no half back
-        Assert.Equal(0, Count(kit, "strength "));
-        // The same bank through a spend-all: Bis! keeps half, SRO answers.
+        Assert.Equal(8, kit.Stage.Fanfare);
+        Assert.Contains("strength 2", kit.Board.Log);
         var all = StageKit.With(mods, 20);
         Assert.Equal(20, Run(all.Director.SpendAll()));
-        Assert.Equal(10, all.Stage.Fanfare);
+        Assert.Equal(0, all.Stage.Fanfare);
         Assert.Contains("strength 2", all.Board.Log);
     }
 
@@ -282,18 +282,18 @@ public class FurinaSpendUpToTests
     {
         Assert.StartsWith(
             "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage to ALL "
-            + "enemies. [gold]Spend[/gold] up to 10: deal 1 more for each.",
+            + "enemies. [gold]Spend[/gold] up to 10, all you can: deal 1 more for each.",
             Face(new ProtoFsTidalFlourish()));
         // The Furina wave (2026-10-13): and its in-combat line, what the
         // bank buys now (`FurinaWaveTests`).
         Assert.Equal(
             "Deal {Damage:diff()} [gold]Hydro[/gold] damage twice. "
-            + "[gold]Spend[/gold] up to 16: hit once more for every 4."
+            + "[gold]Spend[/gold] up to 16, all you can: hit once more for every 4."
             + "{InCombat:{StageSpendHits}|}",
             Face(new ProtoFsCrashingWaves()));
         Assert.StartsWith(
             "Gain {CalculationBase:diff()} [gold]Block[/gold]. "
-            + "[gold]Spend[/gold] up to 16: gain 1 more for each.",
+            + "[gold]Spend[/gold] up to 16, all you can: gain 1 more for each.",
             Face(new ProtoFsHoldTheStage()));
 
         Assert.Equal(5m, new ProtoFsTidalFlourish().DynamicVars.CalculationBase.BaseValue);

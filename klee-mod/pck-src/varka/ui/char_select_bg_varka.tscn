@@ -1,0 +1,206 @@
+[gd_scene load_steps=17 format=3]
+
+[ext_resource type="Texture2D" path="res://varka/ui/select_closeup_static.png" id="1_art"]
+[ext_resource type="Texture2D" path="res://varka/ui/select_bg.png" id="2_bg"]
+[ext_resource type="Texture2D" path="res://varka/ui/select_loop.png" id="3_loop"]
+
+[sub_resource type="Gradient" id="Gradient_Tex_dot"]
+offsets = PackedFloat32Array(0, 0.35, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.55, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="Tex_dot"]
+gradient = SubResource("Gradient_Tex_dot")
+width = 32
+height = 32
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="Gradient" id="Gradient_Tex_streak"]
+offsets = PackedFloat32Array(0, 0.35, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.55, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="Tex_streak"]
+gradient = SubResource("Gradient_Tex_streak")
+width = 128
+height = 6
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="Gradient" id="Gradient_Tex_leaf"]
+offsets = PackedFloat32Array(0, 0.6, 1)
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0.9, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="Tex_leaf"]
+gradient = SubResource("Gradient_Tex_leaf")
+width = 24
+height = 12
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="CanvasItemMaterial" id="Material_additive"]
+blend_mode = 1
+
+[sub_resource type="Gradient" id="Ramp_Streaks"]
+offsets = PackedFloat32Array(0, 0.3, 1)
+colors = PackedColorArray(0.56, 1, 0.84, 0, 0.56, 1, 0.84, 0.45, 0.56, 1, 0.84, 0)
+
+[sub_resource type="Gradient" id="Ramp_Leaves"]
+offsets = PackedFloat32Array(0, 0.1, 0.85, 1)
+colors = PackedColorArray(0.5, 0.82, 0.42, 0, 0.5, 0.82, 0.42, 0.95, 0.62, 0.86, 0.4, 0.9, 0.62, 0.86, 0.4, 0)
+
+[sub_resource type="Gradient" id="Ramp_Motes"]
+offsets = PackedFloat32Array(0, 0.3, 1)
+colors = PackedColorArray(0.56, 1, 0.84, 0, 0.6, 1, 0.86, 0.8, 0.56, 1, 0.84, 0)
+
+[sub_resource type="Animation" id="Animation_reset"]
+resource_name = "RESET"
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("LoopSprite:frame")
+tracks/0/interp = 0
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0.0),
+"transitions": PackedFloat32Array(1.0),
+"update": 1,
+"values": [0]
+}
+
+[sub_resource type="Animation" id="Animation_select_idle"]
+resource_name = "select_idle"
+length = 4.0
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("LoopSprite:frame")
+tracks/0/interp = 0
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0.0, 0.166667, 0.333333, 0.5, 0.666667, 0.833333, 1.0, 1.166667, 1.333333, 1.5, 1.666667, 1.833333, 2.0, 2.166667, 2.333333, 2.5, 2.666667, 2.833333, 3.0, 3.166667, 3.333333, 3.5, 3.666667, 3.833333),
+"transitions": PackedFloat32Array(1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0),
+"update": 1,
+"values": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_select"]
+_data = {
+&"RESET": SubResource("Animation_reset"),
+&"select_idle": SubResource("Animation_select_idle")
+}
+
+[node name="VarkaBg" type="Control"]
+layout_mode = 3
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -960.0
+offset_top = -540.0
+offset_right = 960.0
+offset_bottom = 540.0
+grow_horizontal = 2
+grow_vertical = 2
+pivot_offset = Vector2(960, 540)
+
+[node name="Backdrop" type="TextureRect" parent="."]
+layout_mode = 0
+offset_right = 1920.0
+offset_bottom = 1080.0
+texture = ExtResource("2_bg")
+expand_mode = 1
+stretch_mode = 6
+self_modulate = Color(0.36, 0.76, 0.66, 1)
+
+[node name="Streaks" type="CPUParticles2D" parent="."]
+material = SubResource("Material_additive")
+position = Vector2(-120, 520)
+amount = 12
+texture = SubResource("Tex_streak")
+lifetime = 5.0
+preprocess = 5.0
+local_coords = true
+emission_shape = 3
+emission_rect_extents = Vector2(40, 440)
+direction = Vector2(1, -0.05)
+spread = 4.0
+gravity = Vector2(0, -6)
+initial_velocity_min = 380.0
+initial_velocity_max = 560.0
+scale_amount_min = 0.8
+scale_amount_max = 1.6
+color_ramp = SubResource("Ramp_Streaks")
+
+[node name="Splash" type="TextureRect" parent="."]
+layout_mode = 0
+offset_right = 1920.0
+offset_bottom = 1080.0
+pivot_offset = Vector2(1175, 1080)
+texture = ExtResource("1_art")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="LoopSprite" type="Sprite2D" parent="."]
+position = Vector2(848, 28)
+scale = Vector2(1.3333, 1.3333)
+texture = ExtResource("3_loop")
+centered = false
+hframes = 2
+vframes = 7
+
+[node name="Leaves" type="CPUParticles2D" parent="."]
+position = Vector2(-60, 500)
+amount = 7
+texture = SubResource("Tex_leaf")
+lifetime = 9.0
+preprocess = 9.0
+local_coords = true
+emission_shape = 3
+emission_rect_extents = Vector2(30, 480)
+direction = Vector2(1, -0.15)
+spread = 12.0
+gravity = Vector2(0, 22)
+initial_velocity_min = 150.0
+initial_velocity_max = 240.0
+angular_velocity_min = -180.0
+angular_velocity_max = 180.0
+tangential_accel_min = -15.0
+tangential_accel_max = 15.0
+angle_min = 0.0
+angle_max = 360.0
+scale_amount_min = 0.8
+scale_amount_max = 1.3
+color_ramp = SubResource("Ramp_Leaves")
+hue_variation_min = -0.04
+hue_variation_max = 0.04
+
+[node name="Motes" type="CPUParticles2D" parent="."]
+material = SubResource("Material_additive")
+position = Vector2(960, 560)
+amount = 16
+texture = SubResource("Tex_dot")
+lifetime = 10.0
+preprocess = 10.0
+local_coords = true
+emission_shape = 3
+emission_rect_extents = Vector2(1100, 480)
+direction = Vector2(1, 0)
+spread = 20.0
+gravity = Vector2(0, 0)
+initial_velocity_min = 20.0
+initial_velocity_max = 50.0
+scale_amount_min = 0.08
+scale_amount_max = 0.2
+color_ramp = SubResource("Ramp_Motes")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("AnimationLibrary_select")
+}
+autoplay = "select_idle"

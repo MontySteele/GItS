@@ -29,7 +29,8 @@ from understudy.blindplay_board import (_bundle_cards, _combat, deck_titles,
                                         map_floor,
                                         upgrade_deck_floor)
 from understudy.blindplay_faces import (SEAT_FACE_ID, _card_face,
-                                        _dedupe_text, _hazard, chooser_labels,
+                                        _dedupe_text, _hazard, chooser_labels, mark_edit_replaces,
+                                        chooser_order,
                                         _named_option, _number_faces,
                                         _reward_option, _shop_items,
                                         _shop_options,
@@ -404,10 +405,16 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
             [_card_face(c) for c in _screen_cards(state)], "title")
         # Yae seats (2026-10-14): a hand chooser (an Edit's pick) prints each
         # card under the label the fight page gave it (`chooser_labels`).
+        # And in HAND order, as the fight page listed them (a Yae seat,
+        # 2026-10-14, picked the wrong card twice off the holders' order);
+        # `choose` still posts the bridge's own index (`chooser_order`).
         if st == "hand_select":
             for face, label in zip(obs["offers"], chooser_labels(
                     state, _screen_cards(state))):
                 face["title"] = label
+            obs["offers"] = [obs["offers"][i] for i in chooser_order(
+                state, _screen_cards(state))]
+        mark_edit_replaces(obs["prompt"], obs["offers"])
         # `EB-263`. WHAT THE SCREEN SAYS IS PICKED. Two channels now, and the
         # older one first: `BuildCardSelectState` puts the chosen card(s) in
         # `preview_cards` while a preview container is open, which the upgrade
@@ -751,6 +758,11 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         # line on either screen saying the claim had failed. Both numbers are
         # on the feed and neither was printed.
         obs["potions_held"] = len(_potions(state))
+        # Yae review r6, item 3: Meditations of a Yako found nothing to
+        # Publish after this fight (`YaeShrine.Snapshot`).
+        shrine = _player(state).get("yae_shrine")
+        obs["nothing_to_publish"] = (isinstance(shrine, dict)
+                                     and shrine.get("nothing_to_publish") is True)
         obs["potion_slots"] = _potion_slots(state)
         obs["potion_offered"] = any(
             _fold(r.get("type")) == "potion"

@@ -207,7 +207,8 @@ def test_the_pack_imports_his_sheets_vram_compressed_and_switches_rest_and_selec
     block = ps.split("$varkaFrames = Join-Path $src 'varka\\model\\frames'", 1)[1].split("\n}\n", 1)[0]
     assert "Write-TextureImport" in block
     assert "'varka_rest.png'" in ps and "res://varka/model/$varkaRestArt" in ps
-    assert "'select_closeup.png'" in ps and "res://varka/ui/$varkaSelectArt" in ps
+    # the select scene is his rig's (tier0/tests/test_select_bg.py), not the pack's
+    assert "varka\\ui\\char_select_bg_varka.tscn" not in ps
     # his old rig's layers no longer ship, and the merchant scene is the generated one
     assert "varka\\model\\layers" not in ps
     assert "'varka\\model\\merchant_character.tscn'" not in ps

@@ -43,13 +43,15 @@ public sealed class FurinaCardPool : CardPoolModel
     /// stage 4, 2026-10-01): every `proto_` row she owns (the Stage's rows,
     /// its mode faces and the three Fontaine guest stars), then her Ancients
     /// (<c>tools/lint_ancient_coverage.py</c>), then the never-offered members
-    /// (<see cref="FurinaOffPoolCards"/>). The shipped rows follow as members
-    /// only until stage 5 deletes them.
+    /// (<see cref="FurinaOffPoolCards"/>), then her story Curse. The shipped
+    /// rows follow as members only until stage 5 deletes them.
     /// </summary>
     protected override CardModel[] GenerateAllCards() =>
         PrototypeCards.For("furina")
             .Concat(RosterAncientCards.Furina)
             .Concat(FurinaOffPoolCards.All)
+            // Her story Curse (Stage Fright), which only her story events give.
+            .Append(ModelDb.Card<Cards.StageFright>())
             .Distinct()
             .ToArray();
 }

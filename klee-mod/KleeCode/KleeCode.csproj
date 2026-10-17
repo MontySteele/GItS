@@ -58,6 +58,61 @@
   <PropertyGroup Condition="'$(TeyvatFrame)' == 'true'">
     <DefineConstants>$(DefineConstants);TEYVAT_FRAME</DefineConstants>
   </PropertyGroup>
+  <!-- THE WORKSHOP RELEASE BUILD (2026-10-16; ReleaseVariant.cs,
+       docs/current/operations/workshop.md). Both off unless named, so dev
+       deploys, seat deploys and dotnet test are unchanged. Only
+       tools/package_workshop.py names them.
+
+           -p:WorkshopRelease=true        play telemetry writes only when
+                                          GITS_TELEMETRY_FEED is set
+           -p:GitsKits=klee+kokomi+...    the kits that ship ('+'-separated,
+                                          since ';' and ',' split -p: values);
+                                          empty ships every kit -->
+  <PropertyGroup Condition="'$(WorkshopRelease)' == 'true'">
+    <DefineConstants>$(DefineConstants);WORKSHOP_RELEASE</DefineConstants>
+  </PropertyGroup>
+  <!-- The same fact as metadata, so the packager can read it back off the
+       built dll before it ships one. -->
+  <ItemGroup Condition="'$(WorkshopRelease)' == 'true'">
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>GitsWorkshopRelease</_Parameter1>
+      <_Parameter2>true</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+  <ItemGroup Condition="'$(GitsKits)' != ''">
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>GitsKits</_Parameter1>
+      <_Parameter2>$(GitsKits)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+  <ItemGroup Condition="'$(GitsVariant)' != ''">
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>GitsVariant</_Parameter1>
+      <_Parameter2>$(GitsVariant)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+  <!-- OPT-IN RUN STATS (2026-10-16; RunStats/RunStatsHook.cs,
+       docs/current/operations/workshop.md). Compiled in ONLY when an
+       endpoint is named:
+
+           -p:GitsTelemetryEndpoint=https://.../v1/run
+
+       tools/package_workshop.py passes it for a beta package given a
+       telemetry endpoint, and for nothing else. Every other build
+       (dev, seat, dotnet test, the public package) compiles no RunStats file
+       at all: no uploader, no setting, no install id. -->
+  <PropertyGroup Condition="'$(GitsTelemetryEndpoint)' != ''">
+    <DefineConstants>$(DefineConstants);GITS_RUN_STATS</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(GitsTelemetryEndpoint)' != ''">
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>GitsTelemetryEndpoint</_Parameter1>
+      <_Parameter2>$(GitsTelemetryEndpoint)</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+  <ItemGroup Condition="'$(GitsTelemetryEndpoint)' == ''">
+    <Compile Remove="RunStats/**" />
+  </ItemGroup>
   <!-- Reference the game assembly + Harmony directly. Private=false: the game
        loads these from its own data folder, we must not ship copies. -->
   <ItemGroup>

@@ -889,7 +889,10 @@ ARM_KEYWORDS = (
     # `lead performer` became `front performer` everywhere. `Bow` is printed
     # as a verb, `[gold]Bow[/gold]s`, so the golded span is still the bare
     # word and the one token covers it.
-    ArmKeyword("Spend", ("Spend", "Spends"), "ArmKeywordTips.ForSpend"),
+    # Prima Donna (furina-next, 2026-10-16) prints the past tense: "if you
+    # Spent last turn".
+    ArmKeyword("Spend", ("Spend", "Spends", "Spent"),
+               "ArmKeywordTips.ForSpend"),
     ArmKeyword("Fanfare", ("Fanfare",), "ArmKeywordTips.ForFanfare"),
     # THE SALON'S TAB (2026-10-05): the HP loan's two verbs. `Bow`, `front
     # performer`, `Cue`, `Rehearsal`, `Ousia` and `Pneuma` left with the v2
@@ -923,17 +926,33 @@ ARM_KEYWORDS = (
                "ArmKeywordTips.ForElementalReaction"),
     # YAE MIKO (2026-10-13), pick 6 (a): "two tips, Sakura and Edit; Tenko
     # lives in the Sakura tip and the five Annotation names in the Edit tip".
-    # So a face printing Tenko hovers the Sakura tip, and one printing an
-    # Annotation's name, "Annotated" or "Publish" hovers the Edit tip.
+    # A face printing "Edit", "Annotated" or "Publish" hovers the Edit tip.
     # `Sakura` is the companion Sesshou Sakura's word too; `ForSakura` prints
     # her tip on her own cards.
-    ArmKeyword("Sakura", ("Sakura", "Tenko"), "ArmKeywordTips.ForSakura"),
-    ArmKeyword("Edit", ("Edit", "Edited", "Annotated", "Publish", "Red Ink",
-                        "Footnote", "Deadline Extension", "Fox Fire",
-                        "Sakura Seal", "Royalties"), "ArmKeywordTips.ForEdit"),
-    # YAE MIKO, THE DESIGN AXES (ruled 2026-10-14): the shrine's Rite, one
-    # tip naming the four.
-    ArmKeyword("Rite", ("Rite",), "ArmKeywordTips.ForRite"),
+    # [USER] (2026-10-14): "no need to show the text for every possible edit
+    # if the card can only apply one." The Edit tip is the general rule, and
+    # each Annotation a face golds is its own tip (`annotation_tip_args`, one
+    # call per name, its Sakura reading on a row that Edits a Sakura). Read
+    # before the Edit tip: it is what this card does.
+    # [USER] (2026-10-14): "Sakura and Tenko should be cut into separate
+    # tips." A face printing Tenko hovers the Tenko tip, and the Sakura tip
+    # only if it names Sakura too.
+    ArmKeyword("Sakura", ("Sakura",), "ArmKeywordTips.ForSakura"),
+    # Shrine r2 (ruled 2026-10-14): the Tenko tip names its three kinds,
+    # and the Rite's tip left with the Rite.
+    ArmKeyword("Tenko", ("Tenko",), "ArmKeywordTips.ForTenko"),
+    # Review r3 (ruled 2026-10-14): the two Sakura kinds a card names.
+    ArmKeyword("Foxfire Sakura", ("Foxfire Sakura",),
+               "ArmKeywordTips.ForFoxfireSakura"),
+    ArmKeyword("Kitsune Sakura", ("Kitsune Sakura",),
+               "ArmKeywordTips.ForKitsuneSakura"),
+    ArmKeyword("Annotation", ("Red Ink", "Footnote", "Deadline Extension",
+                              "Fox Fire", "Sakura Seal", "Royalties",
+                              "Reprint"),
+               "ArmKeywordTips.ForAnnotation"),
+    ArmKeyword("Edit", ("Edit", "Edited", "Annotated", "Annotation",
+                        "Publish"),
+               "ArmKeywordTips.ForEdit"),
     ArmKeyword("Lightfall Sword", ("Lightfall Sword",),
                "ArmKeywordTips.ForLightfallSword"),
 )
@@ -1357,14 +1376,6 @@ def final_bow_acts_in_turn(card: dict) -> bool:
                for e in card.get("effects") or [])
 
 
-def keeps_half_a_spend_all(card: dict) -> bool:
-    """Design-session call (2026-10-13): does this row apply Bis!, which
-    keeps half of a spend-all and never of a "Spend up to"? Asked of the
-    effect, so the tip follows the power, not an id."""
-    return any(e.get("op") == "apply_power" and e.get("power") == "fs_bis"
-               for e in card.get("effects") or [])
-
-
 def ascension_hit_gains_no_oath(card: dict) -> bool:
     """Design-session call (2026-10-13): does this row deal Four Winds'
     Ascension's element hit, which gains no Oath (a payoff does not feed its
@@ -1495,7 +1506,6 @@ SEAT_ONLY_TIP_CALLS = frozenset({
     "ArmKeywordTips.ForPlanTwice",
     "ArmKeywordTips.ForNereidsTwice",
     "ArmKeywordTips.ForBankDamage",
-    "ArmKeywordTips.ForBisSpendUpTo",
     "ArmKeywordTips.ForAscensionNoOath",
     "ArmKeywordTips.ForFinalBowInTurn",
     "ArmKeywordTips.ForOldestGuest",
@@ -1506,13 +1516,14 @@ SEAT_ONLY_TIP_CALLS = frozenset({
 })
 
 #: Tips that show only on a board in the state they name (no Bomb out, an
-#: element switch pending) or only to one owner (a Companion's Plan line, to
-#: a Kokomi): not part of the static hover the cap counts, the census's own
+#: element switch pending, a Companion already played): not part of the static hover the cap counts, the census's own
 #: "conditional" column.
 BOARD_ONLY_TIP_CALLS = frozenset({
     "ArmKeywordTips.ForEmptyField",
     "ArmKeywordTips.ForElementSwitch",
-    "ArmKeywordTips.ForCompanionPlan",
+    # Kokomi wording pass (2026-10-14): Crystal Collapse's preview of the
+    # Companion it copies shows only in combat, once one has been played.
+    "KokomiCards.WithCopiedCompanionPreview",
 })
 
 
@@ -1755,6 +1766,20 @@ def card_needs_an_exhausted_card(card: dict) -> bool:
                for eff in card.get("effects", []))
 
 
+def card_needs_a_played_companion(card: dict) -> bool:
+    """Is this row unplayable while no Companion has been played this combat?
+    (Kokomi wording pass, 2026-10-14, [USER]: "Yep, please proceed".) Crystal
+    Collapse copies the last Companion played, captured when the Plan is
+    written; with none it was written and carried out as nothing. Derived
+    from a PLAN-ONLY row's `play_copy_of_companion` clause, so a row with a
+    now-line of its own would gate only its Plan (none exists). Twin:
+    `kokomi_plan.needs_a_played_companion`."""
+    if card.get("effects"):
+        return False
+    return any(clause.get("op") == "play_copy_of_companion"
+               for clause in (card.get("plan") or []))
+
+
 def card_needs_a_plannable_card(card: dict) -> bool:
     """Is this row unplayable while no OTHER card in hand can be planned?
     (Kokomi review 2026-10-13.) Grand Design: "Plan up to 3 cards from your
@@ -1840,6 +1865,11 @@ PREDICATES_CS = {
     # window as a snapshot of the same monotonic counter.
     "reaction_triggered_this_turn": "ReactionEffects.ReactionTriggeredThisTurn",
     "killed_target": "enemiesAtStart.Any(e => e.IsDead)",
+    # Hand of Greed's Fatal gate (2026-10-15, The Seven Glamours): only an
+    # enemy none of whose powers refuse it (`ShouldOwnerDeathTriggerFatal`;
+    # MinionPower does), read before the hit. Sim twin: tier0's
+    # `fatal_kills_this_card` / `Enemy.counts_for_fatal`.
+    "killed_target_fatal": "fatalAtStart.Any(e => e.IsDead)",
     # fanfare_at_least_N is PARAMETRIC (see predicate_cs / predicate_text):
     # the bar is authored per card and moves at red-pen, so a literal map
     # turned every new threshold into a codegen KeyError.
@@ -1970,6 +2000,15 @@ PREDICATES_CS = {
     "pneuma_face": "FurinaFlip.OnPneuma(this)",
     "hp_lost_last_turn": "FurinaSweep.LostHpLastTurn(Owner.Creature)",
     "first_turn_of_combat": "FurinaSweep.FirstTurnOfCombat(Owner.Creature)",
+    # YAE, THE POOL TO 78 (2026-10-15): Torii Ward's "If your shrine is
+    # full" and Late Night Reading's "If you have 3 Sakura" (3 or more, so a
+    # Sakura Channeling shrine still reads it). Sim twins:
+    # `effects._predicate` via `yae_shrine.shrine_full` / `sakura_count`.
+    "shrine_full": "YaeShrine.Full(Owner.Creature)",
+    "three_sakura": "YaeShrine.Count(Owner.Creature) >= 3",
+    # YAE, THE REFILL (2026-10-16): Fox's Shade's "If any enemy is Weak".
+    # Sim twin: `effects._predicate` via `yae_shrine.weak_enemies`.
+    "any_enemy_weak": "YaeShrine.WeakEnemies(Owner.Creature) > 0",
 }
 
 # The if-clause each predicate renders on the card.
@@ -1979,6 +2018,7 @@ PREDICATE_TEXT = {
     "reaction_triggered_by_this": "If it triggered an [gold]Elemental Reaction[/gold]",
     "reaction_triggered_this_turn": "If an [gold]Elemental Reaction[/gold] triggered this turn",
     "killed_target": "If it kills",
+    "killed_target_fatal": "If it kills",
     "has_salon_members": "If you have a [gold]Salon Member[/gold]",
     # (`EB-723`). The FALLBACK wording only: every Spend row states
     # its own face with `description:`, because rule 8's rider is printed as
@@ -2018,6 +2058,9 @@ PREDICATE_TEXT = {
     "pneuma_face": "On Pneuma",
     "hp_lost_last_turn": "If you lost HP last turn",
     "first_turn_of_combat": "On your first turn",
+    "shrine_full": "If your shrine is full",
+    "three_sakura": "If you have 3 [gold]Sakura[/gold]",
+    "any_enemy_weak": "If any enemy is [gold]Weak[/gold]",
 }
 
 _FANFARE_BAR = re.compile(r"^fanfare_at_least_(\d+)$")
@@ -2309,6 +2352,16 @@ def negated_predicate_text(name: str) -> str | None:
 #: conditional branch (`BRANCH_OPS`): Brine Spray's add-N-Stings.
 KOKOMI_BRANCH_KINDS = frozenset(("shoal_call",))
 
+#: YAE MIKO (2026-10-15): the kinds legal inside a conditional branch: The
+#: Seven Glamours' "If this kills an enemy, Publish an Annotated card in your
+#: hand". Numberless, one awaited `YaeCards` call with no locals.
+YAE_BRANCH_KINDS = frozenset(("publish",
+                              # "Each Sakura gains a Level" in a mode, its
+                              # count the default 1 (no var,
+                              # `YAE_FIELD_DEFAULTS`); no row since Omikuji
+                              # was cut (the dedupe, 2026-10-16).
+                              "level_up"))
+
 CONDITIONAL_FIELDS = {"op", "if", "then", "else"}
 
 # Ops legal inside a conditional branch: plain resolvers with literal (or
@@ -2404,6 +2457,9 @@ BRANCH_OPS = {"damage", "block", "draw", "gain_spark", "gain_encore",
               # awaited `KokomiCards` call with no locals, which is the whole
               # branch-legality criterion.
               "kokomi",
+              # YAE MIKO (2026-10-15): The Seven Glamours' Publish on a kill,
+              # the `publish` kind alone (`YAE_BRANCH_KINDS`).
+              "yae",
               # THE KOKOMI OVERHAUL. Sango Isshin's redesigned
               # payoff, "...deal a quarter of your Max HP to ALL enemies
               # instead". ALL-ENEMIES ONLY, and `_branch_op_reason` blocks the
@@ -2447,6 +2503,10 @@ BRANCH_FIELDS = {
     "varka": {"op", "kind"},
     # THE KOKOMI POOL OVERHAUL: an add-N-Stings kind and its literal N.
     "kokomi": {"op", "kind", "amount"},
+    # YAE: a numberless kind (The Seven Glamours' publish), or one whose
+    # count is the reader's default (a level_up of 1; no row since Omikuji
+    # was cut, 2026-10-16).
+    "yae": {"op", "kind", "amount"},
     "spend_spark": {"op", "amount"},
     # Same key set the top-level `mend` validator enforces, so the two cannot
     # disagree about what a Mend is.
@@ -2533,10 +2593,14 @@ def _branch_op_reason(eff: dict, where: str) -> str | None:
         # and for their original reason: both declare locals inside their own
         # blocks, and emitting either a second, subtly different way is the
         # drift this table exists to prevent.
-        if eff.get("target") == "enemy":
+        if eff.get("target") in ("enemy", "all_enemies"):
+            # YAE, THE POOL TO 78 (2026-10-15): an "apply 2 Weak to ALL
+            # enemies" mode (Omikuji's, cut 2026-10-16). The all-enemies arm is the top-level arm's
+            # own `foreach`, whose loop variable is scoped to the loop, so it
+            # declares nothing in the branch's scope.
             if eff["power"] not in ENEMY_APPLY_POWERS:
-                return ("branch apply_power target 'enemy' for self power "
-                        f"'{eff['power']}'")
+                return (f"branch apply_power target '{eff['target']}' for "
+                        f"self power '{eff['power']}'")
         elif eff.get("target") != "self":
             return f"branch apply_power target '{eff.get('target')}'"
     if eff["op"] == "damage_quarter_max_hp":
@@ -2573,6 +2637,17 @@ def _branch_op_reason(eff: dict, where: str) -> str | None:
             return f"branch kokomi kind {eff.get('kind')!r}"
         if not isinstance(eff.get("amount"), int) or eff["amount"] <= 0:
             return "branch kokomi amount must be a positive literal int"
+        return None
+    if eff["op"] == "yae":
+        # YAE MIKO (2026-10-15): a numberless kind (`YAE_BRANCH_KINDS`).
+        if eff.get("kind") not in YAE_BRANCH_KINDS:
+            return f"branch yae kind {eff.get('kind')!r}"
+        # A branch declares no var, so a count must be the default the
+        # reader falls back on (`YaeCards.Var`).
+        for field in YAE_KIND_FIELDS[eff["kind"]]:
+            if eff.get(field) != YAE_FIELD_DEFAULTS[field]:
+                return (f"branch yae {eff['kind']} {field} must be "
+                        f"{YAE_FIELD_DEFAULTS[field]}")
         return None
     if eff["op"] == "varka":
         # VARKA (the Oath rework): only a NUMBERLESS kind, whose one call
@@ -3010,15 +3085,40 @@ YAE_KINDS = {
     "lure": "Lure",
     "damage_per_sakura": "DamagePerSakura",
     "block_per_sakura": "BlockPerSakura",
-    "damage_per_annotated": "DamagePerAnnotated",
-    "block_per_annotated": "BlockPerAnnotated",
+    "damage_per_edit": "DamagePerEdit",
+    "block_per_edit": "BlockPerEdit",
     "annotated_strike": "AnnotatedStrike",
     "fox_fire": "FoxFire",
     # The design axes (ruled 2026-10-14).
-    "rite": "Rite",
     "edit_sakura": "EditSakura",
     "plant_level": "PlantLevel",
     "strike_if_weak": "StrikeIfWeak",
+    # Review r3 (ruled 2026-10-14).
+    "fallen_petals": "FallenPetals",
+    "second_printing": "SecondPrinting",
+    "authors_copy": "AuthorsCopy",
+    # The pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, ruled
+    # 2026-10-15, all picks (a)).
+    "strike_target": "StrikeTarget",
+    "strike_all_at": "StrikeAllAt",
+    "kitsune_act": "KitsuneAct",
+    "level_kitsune": "LevelKitsune",
+    "retain_hand": "RetainHand",
+    "replant": "Replant",
+    "plant_missing": "PlantMissing",
+    "plant_until_full": "PlantUntilFull",
+    "daisesshou": "Daisesshou",
+    "energy_per_sakura": "EnergyPerSakura",
+    "afterword": "Afterword",
+    "verdict": "Verdict",
+    # The refill (review/active/yae-refill-2026-10-16.md, ruled 2026-10-16).
+    "barrage": "Barrage",
+    "level_strike": "LevelStrike",
+    "wither_oldest_at": "WitherOldestAt",
+    "wither_newest_block": "WitherNewestBlock",
+    "rewrite": "Rewrite",
+    "level_newest": "LevelNewest",
+    "bless_highest": "BlessHighest",
 }
 YAE_KIND_FIELDS = {
     "plant": ("amount",),
@@ -3031,21 +3131,54 @@ YAE_KIND_FIELDS = {
     "lure": (),
     "damage_per_sakura": ("base", "per"),
     "block_per_sakura": ("base", "per"),
-    "damage_per_annotated": ("base", "per"),
-    "block_per_annotated": ("base", "per"),
+    "damage_per_edit": ("base", "per"),
+    "block_per_edit": ("base", "per"),
     "annotated_strike": ("base", "amount"),
     "fox_fire": (),
-    "rite": (),
     "edit_sakura": ("amount",),
     "plant_level": ("amount",),
     "strike_if_weak": (),
+    "fallen_petals": (),
+    "second_printing": (),
+    "authors_copy": (),
+    "strike_target": (),
+    "strike_all_at": (),
+    "kitsune_act": (),
+    "level_kitsune": ("amount",),
+    "retain_hand": (),
+    "replant": ("amount",),
+    "plant_missing": (),
+    "plant_until_full": (),
+    "daisesshou": ("per",),
+    "energy_per_sakura": (),
+    "afterword": (),
+    "verdict": (),
+    "barrage": ("amount",),
+    "level_strike": ("base", "amount"),
+    "wither_oldest_at": (),
+    "wither_newest_block": ("amount",),
+    "rewrite": ("amount",),
+    "level_newest": ("amount",),
+    "bless_highest": ("amount",),
 }
 #: The kinds that aim at the enemy the player picks (`target: enemy`).
-YAE_AIMED_KINDS = {"lure", "damage_per_sakura", "damage_per_annotated",
-                   "annotated_strike", "strike_if_weak"}
+YAE_AIMED_KINDS = {"lure", "damage_per_sakura", "damage_per_edit",
+                   "annotated_strike", "strike_if_weak",
+                   # The pool to 78: "A Sakura strikes it", "Each striking
+                   # Sakura strikes it".
+                   "strike_target", "strike_all_at",
+                   # The refill: Kitsune Barrage, Sesshou Fang, and Falling
+                   # Blossom's Last Bloom at "this enemy".
+                   "barrage", "level_strike", "wither_oldest_at"}
+#: The kinds that reach ALL enemies (`target: all_enemies`, the card's
+#: TargetType AllEnemies): Forbidden Art: Daisesshou.
+YAE_ALL_KINDS = {"daisesshou"}
 #: The kinds that name an Annotation (`annotation:`), and the C#
 #: `YaeAnnotation` member each sheet name is.
-YAE_ANNOTATION_KINDS = {"edit", "edit_all", "edit_sakura"}
+YAE_ANNOTATION_KINDS = {"edit", "edit_all", "edit_sakura",
+                        # The refill: Rewrite's "Edit a card in your hand:
+                        # Red Ink", after its discard and draw.
+                        "rewrite"}
 YAE_ANNOTATIONS = {
     "red_ink": "RedInk",
     "footnote": "Footnote",
@@ -3053,14 +3186,47 @@ YAE_ANNOTATIONS = {
     "fox_fire": "FoxFire",
     "sakura_seal": "SakuraSeal",
     "royalties": "Royalties",
+    "reprint": "Reprint",
 }
-#: The design axes (ruled 2026-10-14): the shrine's four Rites (`rite:`,
-#: the C# `YaeRite` member), the Annotations a Sakura can carry, and the end
-#: an `edit_sakura` counts from (`which:`, the C# `YaeSakuraEnd`).
-YAE_RITES = {"thunder": "Thunder", "warding": "Warding",
-             "wildfire": "Wildfire", "offering": "Offering"}
+#: Review r3 (ruled 2026-10-14): the kind of Sakura a plant makes (`as:` on
+#: a `plant` / `plant_level` op, the C# `YaeSakuraKind` member; absent, a
+#: plain Sakura). The typed Tenko is gone. The design axes (ruled
+#: 2026-10-14): the Annotations a Sakura can carry, and the end an
+#: `edit_sakura` counts from (`which:`, the C# `YaeSakuraEnd`).
+YAE_SAKURA_KINDS = {"foxfire": "Foxfire", "kitsune": "Kitsune"}
+YAE_PLANT_AS_KINDS = {"plant", "plant_level"}
+#: The kinds that read `IsUpgraded` at play time (`yae_upgraded`).
+#: Yae review r4, pick 1 (a): Inked Branches+ also Edits a card in your hand
+#: (`hand_if_upgraded: true` on its `edit_sakura`).
+YAE_UPGRADED_KINDS = {"fallen_petals", "second_printing", "edit_sakura"}
 YAE_SAKURA_ANNOTATIONS = {"red_ink", "fox_fire", "deadline"}
 YAE_SAKURA_ENDS = {"newest": "Newest", "oldest": "Oldest", "every": "Every"}
+#: The printed name of each `YaeAnnotation` member (`YaeAnnotationText.Name`).
+YAE_ANNOTATION_NAMES = {
+    "RedInk": "Red Ink",
+    "Footnote": "Footnote",
+    "DeadlineExtension": "Deadline Extension",
+    "FoxFire": "Fox Fire",
+    "SakuraSeal": "Sakura Seal",
+    "Royalties": "Royalties",
+    "Reprint": "Reprint",
+}
+
+
+def annotation_tip_args(card: dict, description: str) -> list[str]:
+    """The `ForAnnotation` calls' trailing arguments a face owes, one per
+    Annotation it golds, in the sheet's order: the member and whether this
+    row Edits a SAKURA with it (`edit_sakura`), which takes the Sakura
+    reading. [USER] (2026-10-14): "no need to show the text for every
+    possible edit if the card can only apply one"."""
+    printed = set(golded_tokens(description))
+    on_sakura = {YAE_ANNOTATIONS[e["annotation"]]
+                 for e in iter_effects(card.get("effects") or [])
+                 if e.get("op") == "yae" and e.get("kind") == "edit_sakura"}
+    return [f", this, YaeAnnotation.{member}, "
+            f"{'true' if member in on_sakura else 'false'}"
+            for member, name in YAE_ANNOTATION_NAMES.items()
+            if name in printed]
 YAE_VAR_FIELDS = {"per": "YmPer", "base": "YmBase", "amount": "YmAmount"}
 #: The value `YaeCards` reads for a field the card declares no var for: a
 #: count of 1 ("Plant a Sakura") and a base of 0 (Thunderbolt Tithe) print
@@ -3075,7 +3241,38 @@ def yae_needs_var(card: dict, eff: dict, field: str) -> bool:
         return True
     return int(eff[field]) != YAE_FIELD_DEFAULTS[field]
 YAE_FIELDS = {"op", "kind", "target", "per", "base", "amount", "annotation",
-              "rite", "which"}
+              "as", "which", "hand_if_upgraded", "lasts"}
+#: The kinds that take `lasts:` ("lasts N more turns"): a plant_level (no
+#: row since Grafted Branch was cut, 2026-10-16) and Kitsune's Blessing.
+YAE_LASTS_KINDS = frozenset({"plant_level", "bless_highest"})
+
+
+#: The `yae` kinds whose play plants a Sakura (`ISakuraPlanterCard`).
+YAE_PLANT_KINDS = frozenset({"plant", "plant_level",
+                             # The pool to 78: Replanting, Genre Shift,
+                             # Narukami Bloom.
+                             "replant", "plant_missing", "plant_until_full"})
+
+
+def yae_plants_sakura(card: dict) -> bool:
+    """Does this row's own play plant a Sakura? Sim twin:
+    `yae_shrine.plants_sakura`."""
+    return any(fx.get("op") == "yae" and fx.get("kind") in YAE_PLANT_KINDS
+               for fx in iter_effects(card.get("effects") or []))
+
+
+#: The `yae` kinds that give the card's own Block (`IYaeBlockCard`).
+YAE_BLOCK_KINDS = frozenset({"block_per_sakura", "block_per_edit",
+                             # The refill: Hide Behind the Shrine's "gain 5
+                             # more", the card's own Block.
+                             "wither_newest_block"})
+
+
+def yae_gives_block(card: dict) -> bool:
+    """Does a `yae` kind on this row give the card's own Block? Sim twin:
+    `yae_shrine.gives_block`."""
+    return any(fx.get("op") == "yae" and fx.get("kind") in YAE_BLOCK_KINDS
+               for fx in iter_effects(card.get("effects") or []))
 
 
 def yae_call(eff: dict) -> str:
@@ -3085,8 +3282,15 @@ def yae_call(eff: dict) -> str:
         args += f", YaeSakuraEnd.{YAE_SAKURA_ENDS[eff['which']]}"
     if eff.get("kind") in YAE_ANNOTATION_KINDS:
         args += f", YaeAnnotation.{YAE_ANNOTATIONS[eff['annotation']]}"
-    if eff.get("kind") == "rite":
-        args += f", YaeRite.{YAE_RITES[eff['rite']]}"
+    if eff.get("hand_if_upgraded") is True:
+        args += ", handIfUpgraded: true"
+    if eff.get("kind") in YAE_PLANT_AS_KINDS and "as" in eff:
+        args += f", YaeSakuraKind.{YAE_SAKURA_KINDS[eff['as']]}"
+    if eff.get("lasts"):
+        # "lasts N more turns" (Kitsune's Blessing, the refill; a
+        # plant_level's, no row since Grafted Branch was cut). Named, and
+        # after the kind, so it never precedes a positional argument.
+        args += f", lasts: {int(eff['lasts'])}"
     return f"await YaeCards.{YAE_KINDS[eff['kind']]}({args});"
 #: `kokomi` (THE KOKOMI EXPANSION, BATCH ONE, 2026-09-29): one kind per
 #: now-line verb, each ONE awaited `KokomiCards.<method>` call
@@ -3711,9 +3915,10 @@ APPLY_POWERS = {
     "fs_critics_darling": ("CriticsDarlingPower", None,
         "Whenever you [gold]Drain[/gold] or [gold]Repay[/gold], deal that "
         "much damage to a random enemy."),
-    "fs_bis": ("BisPower", None,
-        "Whenever a card [gold]Spends[/gold] all your [gold]Fanfare[/gold], "
-        "keep half of it."),
+    # furina-next paper 2 (2026-10-16): Extended Run takes Bis!'s slot.
+    "fs_extended_run": ("ExtendedRunPower", None,
+        "Attacks and Skills that [gold]Spend[/gold] up to a number can "
+        "[gold]Spend[/gold] {X} more."),
     # THE POOL TO 75 (review/ruled/furina-pool-growth-2026-10-09.md sec.5).
     # Every class lives in klee-mod/KleeCode/Powers/Prototype/
     # FurinaPool75Powers.cs.
@@ -3724,14 +3929,20 @@ APPLY_POWERS = {
         "again."),
     "fs_ensemble_cast": ("EnsembleCastPower", None,
         "You have 4 guest seats."),
+    # Furina's engines (furina-next, 2026-10-16): Crescendo counts from the
+    # turn it is played; Prima Donna's upgraded card installs the Plus power
+    # (`upgraded_power`), which also draws.
     "fs_crescendo": ("CrescendoPower", None,
-        "The first time you [gold]Spend[/gold] each turn, draw {X} card."),
+        "At the start of your turn, gain {X} [gold]Fanfare[/gold], then {X} "
+        "more each turn after."),
     "fs_prima_donna": ("PrimaDonnaPower", None,
-        "At the start of your turn, if you have 10 or more "
-        "[gold]Fanfare[/gold], gain 1 Energy."),
+        "At the start of your turn, if you [gold]Spent[/gold] last turn, "
+        "gain 1 Energy."),
+    "fs_prima_donna_plus": ("PrimaDonnaPlusPower", None,
+        "At the start of your turn, if you [gold]Spent[/gold] last turn, "
+        "gain 1 Energy and draw 1 card."),
     "fs_standing_room_only": ("StandingRoomOnlyPower", None,
-        "Whenever you [gold]Spend[/gold] all your [gold]Fanfare[/gold] and it "
-        "is at least 1, gain 1 [gold]Strength[/gold]."),
+        "Whenever you [gold]Spend[/gold], gain 1 [gold]Strength[/gold]."),
     "fs_high_stakes": ("HighStakesPower", None,
         "Your Attacks deal 1 additional damage for every {X} HP you have "
         "[gold]Drained[/gold] and not [gold]Repaid[/gold]."),
@@ -3775,8 +3986,8 @@ APPLY_POWERS = {
     "fs_plot_twist": ("PlotTwistPower", None,
         "This turn, this enemy's attack hits itself."),
     "fs_full_house": ("FullHousePower", None,
-        "Whenever a guest's act deals damage, [gold]Spend[/gold] up to {X}: "
-        "it deals that much more."),
+        "Whenever a guest's act deals damage, [gold]Spend[/gold] up to {X}, "
+        "all you can: it deals that much more."),
     # THE CO-OP SET (review/records/coop-set-2026-09-25.md). Every class lives
     # in klee-mod/KleeCode/Powers/Prototype/CoopSet.cs, compiled only under
     # `-p:PrototypeCards=true`; every row states its own face (`EB-215`). The
@@ -3880,7 +4091,7 @@ APPLY_POWERS = {
     # sec.2). Every class lives in Powers/Prototype/KokomiRefounding.cs.
     "kk_sangonomiyas_orders": ("SangonomiyasOrdersPower", None,
         "At the start of your turn, add a random Common Inazuma "
-        "[gold]Companion[/gold] card to your hand. It is "
+        "[gold]Companion[/gold] card to your hand. It costs 0 and is "
         "[gold]Ethereal[/gold]."),
     "kk_kurage_bloom": ("KurageBloomPower", None,
         "At the start of your turn, add a [gold]Sting[/gold] to your hand."),
@@ -4211,7 +4422,7 @@ APPLY_POWERS = {
     # klee-mod/KleeCode/Powers/Prototype/YaePowers.cs; each row carries its
     # own `description:`. Sim twins: tier0/engine/yae_shrine.py.
     "ym_sakura_grove": ("SakuraGrovePower", None,
-        "At the start of your turn, your newest [gold]Sakura[/gold] gains {X} "
+        "At the start of your turn, each [gold]Sakura[/gold] gains {X} "
         "Level."),
     "ym_edict_of_cleansing": ("EdictOfCleansingPower", None,
         "Your [gold]Sakura[/gold] strikes deal {X} additional damage to an "
@@ -4219,27 +4430,49 @@ APPLY_POWERS = {
         "[gold]Weak[/gold] or has a [gold]Pyro[/gold], [gold]Hydro[/gold] "
         "or [gold]Cryo[/gold] aura."),
     "ym_serialization": ("SerializationPower", None,
-        "Whenever you [gold]Edit[/gold] a card, gain {X} [gold]Block[/gold]."),
+        "Whenever you play an [gold]Annotated[/gold] card, gain {X} "
+        "[gold]Block[/gold]."),
     "ym_foxs_mooncall": ("FoxsMooncallPower", None,
         "Your [gold]Sakura[/gold] are planted {X} Level higher."),
     "ym_yakan_offering": ("YakanOfferingPower", None,
         "At the start of your turn, plant {X} [gold]Sakura[/gold]."),
     "ym_sakura_channeling": ("SakuraChannelingPower", None,
-        "Your [gold]Sakura[/gold] also strike as Thunder, whatever the "
-        "[gold]Rite[/gold]."),
-    # The design axes, batch two (2026-10-14).
-    "ym_fallen_petals": ("FallenPetalsPower", None,
-        "Whenever a [gold]Sakura[/gold] withers, gain {X} Energy on your "
-        "next turn."),
-    "ym_fallen_petals_plus": ("FallenPetalsPlusPower", None,
-        "Whenever a [gold]Sakura[/gold] withers, gain {X} Energy and draw "
-        "{X} card on your next turn."),
+        "You can have {X} more [gold]Sakura[/gold]."),
+    # The design axes, batch two (2026-10-14). Fallen Petals' two powers
+    # left with review r3 (it is an active Skill now).
     "ym_editor_in_chief": ("EditorInChiefPower", None,
         "Whenever you play an [gold]Annotated[/gold] card, a "
         "[gold]Sakura[/gold] strikes."),
+    # Review r3 (ruled 2026-10-14), a signature card.
+    "ym_serial_novel": ("SerialNovelPower", None,
+        "At the start of your turn, put {X} random [gold]Annotated[/gold] "
+        "card from your [gold]Discard Pile[/gold] into your [gold]Hand[/gold]."),
+    # The pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, ruled
+    # 2026-10-15).
+    "ym_enlightened_blessing": ("EnlightenedBlessingPower", None,
+        "Whenever a [gold]Sakura[/gold] withers, draw {X} card."),
+    "ym_saiguus_lesson": ("SaiguusLessonPower", None,
+        "Whenever you apply [gold]Weak[/gold] to an enemy, a "
+        "[gold]Sakura[/gold] strikes it."),
+    "ym_sacred_shade": ("SacredShadePower", None,
+        "At the end of your turn, gain {X} [gold]Block[/gold] for each "
+        "[gold]Sakura[/gold]."),
+    "ym_editorial_priority": ("EditorialPriorityPower", None,
+        "The first [gold]Annotated[/gold] card you play each turn costs 0."),
+    "ym_stellar_conduct": ("StellarConductPower", None,
+        "Whenever a [gold]Sakura[/gold]'s strike triggers an "
+        "[gold]Elemental Reaction[/gold], it strikes again."),
+    "ym_eternity": ("EternityPower", None,
+        "Your [gold]Sakura[/gold] no longer wither when their turns run "
+        "out."),
+    # The refill (review/active/yae-refill-2026-10-16.md, ruled 2026-10-16).
+    "ym_hunting_gaze": ("HuntingGazePower", None,
+        "Your [gold]Sakura[/gold] strike the last enemy you attacked, while "
+        "it lives."),
     "vk_twin_gales": ("TwinGalesPower", None,
-        "Your [gold]Swirls[/gold] pay both your [gold]current element[/gold] "
-        "and the element they [gold]Swirl[/gold]."),
+        "Your [gold]Swirls[/gold] also pay the element they "
+        "[gold]Swirl[/gold]. If it's your [gold]current element[/gold], it "
+        "pays twice."),
     "vk_eye_of_stormterror": ("EyeOfStormterrorPower", None,
         "The first 3 times you [gold]Swirl[/gold] each turn, draw {X} card."),
     "vk_the_order_answers": ("TheOrderAnswersPower", None,
@@ -4668,6 +4901,10 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark",
                        # YAE MIKO: a `yae` op's own number, its `Ym<Field>`
                        # var.
                        "yae_per", "yae_base", "yae_amount",
+                       # YAE MIKO (review r3): the row's `yae` op reads
+                       # `IsUpgraded` at play time (Fallen Petals, Second
+                       # Printing); the face carries its own swap.
+                       "yae_upgraded",
                        # VARKA (the expansion, Pathfinder's Mark+): the row's
                        # `varka` op reads `IsUpgraded` at play time, and the
                        # face carries its own `{IfUpgraded:show:...}` swap.
@@ -5064,6 +5301,19 @@ CARD_FIELDS = {
     # card's own `TryModifyEnergyCostInCombat` over `FurinaStage.FanfareOf`.
     # Sim twin: `combat.card_cost`'s `cost_reduction_per_fanfare`.
     "cost_reduction_per_fanfare",
+    # VARKA, TEMPEST CHARGE (Klee and Varka cleanup review, pick 1 (a),
+    # 2026-10-15): "Costs 1 less for each Swirl this turn." The value is the
+    # Energy off per Swirl; emitted as the card's own
+    # `TryModifyEnergyCostInCombat` over `VarkaOath.SwirlsThisTurn` (Eye of
+    # Stormterror's count). Sim twin: `combat.card_cost`'s
+    # `cost_reduction_per_swirl_this_turn`.
+    "cost_reduction_per_swirl_this_turn",
+    # YAE, THE REFILL (review/active/yae-refill-2026-10-16.md): Publisher's
+    # Deadline's "Costs 1 less if you Edited a card this turn." The value is
+    # the Energy off; emitted as the card's own `TryModifyEnergyCostInCombat`
+    # over `YaeShrine.EditsThisTurn`. Sim twin: `combat.card_cost`'s
+    # `cost_reduction_if_edited_this_turn`.
+    "cost_reduction_if_edited_this_turn",
     # FURINA, THE SWEEP (2026-10-14): "Can be played only if ..." -- a
     # predicate (`PREDICATES_CS`) the card is unplayable without (The Show's
     # Not Over, Plot Twist). Sim twin: `combat.card_playable`.
@@ -5141,6 +5391,30 @@ def card_level_reason(
         if not isinstance(card.get("cost"), int):
             return ("cost_reduction_per_fanfare on an X or unprinted cost -- "
                     "there is no number to discount")
+    per_swirl = card.get("cost_reduction_per_swirl_this_turn")
+    if per_swirl is not None:
+        if (not isinstance(per_swirl, int) or isinstance(per_swirl, bool)
+                or per_swirl <= 0):
+            return ("cost_reduction_per_swirl_this_turn must be a positive "
+                    "literal int")
+        if card.get("character") != "varka":
+            return ("cost_reduction_per_swirl_this_turn on a non-Varka row -- "
+                    "the count is his Oath ledger's")
+        if not isinstance(card.get("cost"), int):
+            return ("cost_reduction_per_swirl_this_turn on an X or unprinted "
+                    "cost -- there is no number to discount")
+    if_edited = card.get("cost_reduction_if_edited_this_turn")
+    if if_edited is not None:
+        if (not isinstance(if_edited, int) or isinstance(if_edited, bool)
+                or if_edited <= 0):
+            return ("cost_reduction_if_edited_this_turn must be a positive "
+                    "literal int")
+        if card.get("character") != "yae":
+            return ("cost_reduction_if_edited_this_turn on a non-Yae row -- "
+                    "the count is her shrine ledger's")
+        if not isinstance(card.get("cost"), int):
+            return ("cost_reduction_if_edited_this_turn on an X or unprinted "
+                    "cost -- there is no number to discount")
     rate = card.get("cost_reduction_per_discard_this_turn")
     if rate is not None:
         if not isinstance(rate, int) or isinstance(rate, bool) or rate <= 0:
@@ -5840,7 +6114,9 @@ def blocked_reason(
             kind = eff.get("kind")
             if kind not in YAE_KINDS:
                 return f"yae kind {kind!r}"
-            want_target = "enemy" if kind in YAE_AIMED_KINDS else None
+            want_target = ("enemy" if kind in YAE_AIMED_KINDS
+                           else "all_enemies" if kind in YAE_ALL_KINDS
+                           else None)
             if eff.get("target") != want_target:
                 return (f"yae {kind} takes target {want_target!r}, "
                         f"row gives {eff.get('target')!r}")
@@ -5857,10 +6133,22 @@ def blocked_reason(
                 return f"yae {kind} annotation mismatch"
             if "annotation" in eff and eff["annotation"] not in YAE_ANNOTATIONS:
                 return f"yae annotation {eff['annotation']!r}"
-            if (kind == "rite") != ("rite" in eff):
-                return f"yae {kind} rite mismatch"
-            if "rite" in eff and eff["rite"] not in YAE_RITES:
-                return f"yae rite {eff['rite']!r}"
+            if "as" in eff and kind not in YAE_PLANT_AS_KINDS:
+                return f"yae {kind} takes no as:"
+            if "as" in eff and eff["as"] not in YAE_SAKURA_KINDS:
+                return f"yae Sakura kind {eff['as']!r}"
+            if "lasts" in eff and (kind not in YAE_LASTS_KINDS
+                                   or not isinstance(eff["lasts"], int)
+                                   or isinstance(eff["lasts"], bool)
+                                   or eff["lasts"] <= 0):
+                return ("yae lasts: is a positive int, on a plant_level or "
+                        "a bless_highest")
+            if kind == "bless_highest" and "lasts" not in eff:
+                return "yae bless_highest needs lasts:"
+            if "hand_if_upgraded" in eff and (
+                    kind != "edit_sakura"
+                    or eff["hand_if_upgraded"] is not True):
+                return "yae hand_if_upgraded: is true, on an edit_sakura"
             if (kind == "edit_sakura") != ("which" in eff):
                 return f"yae {kind} which mismatch"
             if "which" in eff and eff["which"] not in YAE_SAKURA_ENDS:
@@ -6851,7 +7139,30 @@ KLEE_COUNTS = {
                          "EnemiesHoldingChargeFrom(card.Owner.Creature)",
 }
 
-RUNTIME_COUNTS = {**KOKOMI_CASKET_COUNTS, **VARKA_COUNTS, **KLEE_COUNTS}
+#: YAE: Bestseller, "for each card you Edited this combat"
+#: (Yae review r5, pick 1 (a); `YaeShrineLedger.Edits`). On the calculated
+#: rail so the face shows the running total in combat, the way Perfected
+#: Strike does. Sim twin: the `edits_this_combat` runtime count.
+YAE_COUNTS = {
+    "edits_this_combat": "static (card, _) => YaeShrine.Edits("
+                         "card.Owner.Creature)",
+    # The pool to 78 (2026-10-15): Petal Storm's and Sakura Canopy's "for
+    # each Sakura", Disarming Smile's "for each enemy that is Weak" (read
+    # when the Block is gained, after its own Weak). Sim twins: the
+    # `sakura_count` and `weak_enemies` runtime counts.
+    "sakura_count": "static (card, _) => YaeShrine.Count("
+                       "card.Owner.Creature)",
+    "weak_enemies": "static (card, _) => YaeShrine.WeakEnemies("
+                    "card.Owner.Creature)",
+    # The refill (2026-10-16): Inscribed Thunder's "for each Annotation on
+    # this card", the distinct Annotations on the card itself, Published
+    # ones included. Sim twin: the `annotations_on_card` runtime count.
+    "annotations_on_card": "static (card, _) => YaeEditing.DistinctLayers("
+                           "card)",
+}
+
+RUNTIME_COUNTS = {**KOKOMI_CASKET_COUNTS, **VARKA_COUNTS, **KLEE_COUNTS,
+                  **YAE_COUNTS}
 
 
 def kokomi_casket_calc_rider(
@@ -7148,6 +7459,28 @@ STAGE_AMOUNT_VARS: dict[str, str] = {
 }
 
 
+#: furina-next paper 2 (2026-10-16): a `stage_spend_up_to`'s `per:` -- the
+#: count its `amount` is multiplied by -- as a C# expression over an owner.
+STAGE_UP_TO_PER_CS = {
+    # Bring the House Down: "Spend up to 10 for each guest on stage".
+    "stage_guests": "FurinaStage.Of({owner}).Count",
+}
+
+
+def stage_up_to_cap_cs(eff: dict, owner: str) -> str:
+    """A "Spend up to X" row's printed cap as C#: the literal, or the
+    literal times its `per:` count read off `owner`. Extended Run is not
+    here: `FurinaStage.SpendUpTo` / `SpentOrUpTo` add it to the whole cap."""
+    n = str(int(eff.get("amount", 1)))
+    per = eff.get("per")
+    if per is None:
+        return n
+    if per not in STAGE_UP_TO_PER_CS:
+        raise SystemExit(f"gen_klee_cards: stage_spend_up_to per {per!r} "
+                         "has no C# count")
+    return f"{n} * {STAGE_UP_TO_PER_CS[per].format(owner=owner)}"
+
+
 def stage_stmt(eff: dict, amount: str | None = None) -> str:
     """One stage op -> the one awaited statement it emits."""
     op = eff["op"]
@@ -7175,12 +7508,15 @@ def stage_stmt(eff: dict, amount: str | None = None) -> str:
     if op == "stage_spend_up_to":
         # The Spend paper (2026-10-10): spends X or all she holds, never
         # fails; the play's `stage_spent` is what it counted.
-        n = str(int(eff.get("amount", 1)))
+        # furina-next paper 2 (2026-10-16): a row's cap may be per guest
+        # ("Spend up to 10 for each guest on stage"), and Extended Run adds
+        # to the whole cap inside `FurinaStage.SpendUpTo`.
+        n = stage_up_to_cap_cs(eff, "Owner.Creature")
         return ("await FurinaStage.SpendUpTo(choiceContext, Owner.Creature, "
                 f"{n});")
     if op == "stage_spend_half":
         # Standing Ovation (2026-10-11): a "Spend up to" half the bank,
-        # rounded down; not a spend-all, so no Bis!.
+        # rounded down; not "up to a number", so no Extended Run.
         return ("await FurinaStage.SpendHalf(choiceContext, "
                 "Owner.Creature);")
     if op == "stage_drain":
@@ -7189,11 +7525,14 @@ def stage_stmt(eff: dict, amount: str | None = None) -> str:
                 f"{n});")
     if op == "stage_repay":
         n = amount if amount is not None else str(int(eff.get("amount", 1)))
-        # THE REPAY FLOOR (ruled 2026-10-09): "Repay N. Gain 1 Block [Vigor]
-        # for any HP it could not Repay." The floor is the director's
-        # (`StageDirector.RepayFloor`); a row with none is a plain Repay.
-        floor = STAGE_REPAY_FLOORS[str(eff.get("floor", "none"))]
-        tail = "" if floor == "None" else f", StageFloor.{floor}"
+        # THE REPAY FLOOR (ruled 2026-10-09; every numbered Repay's since
+        # furina-next paper 3, 2026-10-16: "Any HP a Repay cannot return
+        # becomes Block"). The floor is the director's
+        # (`StageDirector.RepayFloor`); Block is `FurinaStage.Repay`'s
+        # default, and `floor: none` marks a card whose floor is its own
+        # damage (Cleansing Torrent).
+        floor = STAGE_REPAY_FLOORS[stage_repay_floor(eff)]
+        tail = "" if floor == "Block" else f", StageFloor.{floor}"
         return ("await FurinaStage.Repay(choiceContext, Owner.Creature, "
                 f"{n}{tail});")
     if op == "stage_repay_all":
@@ -7203,8 +7542,18 @@ def stage_stmt(eff: dict, amount: str | None = None) -> str:
 
 #: THE REPAY FLOOR (ruled 2026-10-09): a `stage_repay`'s `floor:` -- what
 #: it pays for the part of N it could not return -- to the C# `StageFloor`.
-#: The damage cards' floor is their own damage (`stage_repay_left`).
+#: Block by default since furina-next paper 3 (2026-10-16). The damage
+#: card's floor is its own damage (`stage_repay_left`), so its row says
+#: `floor: none`.
 STAGE_REPAY_FLOORS = {"none": "None", "block": "Block", "vigor": "Vigor"}
+
+#: The floor a `stage_repay` names when its row says none (paper 3).
+STAGE_REPAY_DEFAULT_FLOOR = "block"
+
+
+def stage_repay_floor(eff: dict) -> str:
+    """A `stage_repay`'s floor key: its `floor:`, else Block (paper 3)."""
+    return str(eff.get("floor", STAGE_REPAY_DEFAULT_FLOOR))
 
 
 #: One C# expression per STAGE count token, read through a CalculatedVar so
@@ -7275,6 +7624,25 @@ def stage_repay_left_cs(card: dict, eff: dict) -> str | None:
     return STAGE_COUNT_CS["stage_repay_left"].replace("{n}", n)
 
 
+#: Endless Waltz (furina-next paper 3, 2026-10-16): "Repay 2. Deal X damage,
+#: plus Y for each time you Repaid this turn." Its own Repay counts when it
+#: returns HP, so the face reads it before the play. The N is filled per card.
+STAGE_REPAYS_TURN_OWN_CS = ("static (card, _) => "
+                            "FurinaStage.RepaysThisTurnWith(card, {n})")
+
+
+def stage_repays_turn_cs(card: dict, eff: dict) -> str:
+    """Endless Waltz's count when its own Repay comes first (paper 3): the
+    N read the way `stage_repay_left_cs` reads it."""
+    repay = _stage_repay_before(card, eff)
+    assert repay is not None
+    if (upgrade_deltas().get(card["id"]) or {}).get("stage_repay"):
+        n = f'card.DynamicVars["{STAGE_AMOUNT_VARS["stage_repay"]}"].IntValue'
+    else:
+        n = str(int(repay.get("amount", 1)))
+    return STAGE_REPAYS_TURN_OWN_CS.replace("{n}", n)
+
+
 def _stage_spender_before(card: dict, eff: dict) -> str | None:
     """WHICH op spends before `eff` resolves, or None. Structural, by
     position in the emitted `OnPlay` body: a row that read `stage_spent`
@@ -7317,8 +7685,8 @@ def stage_spent_cs(card: dict, eff: dict) -> str:
     if up_to is not None:
         # The Spend paper (2026-10-10): before the play, what "Spend up to
         # X" would count now; during it, what it counted.
-        return ("static (card, _) => FurinaStage.SpentOrUpTo(card, "
-                f"{int(up_to.get('amount', 1))})")
+        cap = stage_up_to_cap_cs(up_to, "card.Owner?.Creature")
+        return f"static (card, _) => FurinaStage.SpentOrUpTo(card, {cap})"
     return STAGE_COUNT_CS["stage_spent"]
 
 
@@ -7345,6 +7713,8 @@ def stage_count_calc_rider(card: dict,
         expr = stage_repay_left_cs(card, eff)
         if expr is None:
             return None
+    elif token == "stage_repays_turn" and _stage_repay_before(card, eff):
+        expr = stage_repays_turn_cs(card, eff)
     else:
         expr = (stage_spent_cs(card, eff) if token == "stage_spent"
                 else STAGE_COUNT_CS[token])
@@ -8110,8 +8480,15 @@ def _preview_hit_count(card: dict) -> str:
                 formula.get("count")) in PREVIEW_HIT_COUNTS:
             base = int(formula.get("base", 0))
             per = int(formula.get("per", 1))
-            return (f"{base} + {per} * "
-                    f"({PREVIEW_HIT_COUNTS[str(formula['count'])]})")
+            count = PREVIEW_HIT_COUNTS[str(formula["count"])]
+            up_to = _stage_up_to_before(card, eff)
+            if formula["count"] == "stage_spent_threes" and up_to is not None:
+                # furina-next paper 2 (2026-10-16): Bravura's "Spend up to
+                # 18" previews what the cap (Extended Run's included) takes.
+                cap = stage_up_to_cap_cs(up_to, "card.Owner?.Creature")
+                count = (f"FurinaStage.SpentOrUpTo(card, {cap}) / "
+                         "FurinaStageLaw.BravuraSpentPer")
+            return f"{base} + {per} * ({count})"
     raise SystemExit(
         f"gen_klee_cards: {card['id']}: the face prints {{TotalDamage}} but "
         "no damage op has a hit count PREVIEW_HIT_COUNTS can read")
@@ -8982,6 +9359,11 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
            for key in MODE_UPGRADE_KEYS if key in deltas},
         # VARKA (the expansion): the `varka` op reads IsUpgraded itself.
         "varka_upgraded": any(e["op"] == "varka" for e in effects),
+        # YAE MIKO (review r3): the same play-time read, on a kind that
+        # reads it.
+        "yae_upgraded": any(e["op"] == "yae"
+                            and e.get("kind") in YAE_UPGRADED_KINDS
+                            for e in effects),
         # Power cost sweep, 2026-09-30: binds to the first top-level
         # apply_power on the card's owner, and the named power must exist.
         "upgraded_power": (
@@ -9749,6 +10131,12 @@ BRANCH_UNNUMBERED_OPS = frozenset({"apply_aura"})
 #: damage number; the draw's number is the draw's.
 BRANCH_BESIDE_DAMAGE_OPS = frozenset({"draw"})
 
+#: Furina's card pass (2026-10-15). A clause a branch may carry beside its
+#: BLOCK number that prints a number of a different kind (Pneuma's "Repay 2.
+#: Gain 8 Block."). The Block var is still the one Block number; the Repay
+#: prints its own literal.
+BRANCH_BESIDE_BLOCK_OPS = frozenset({"stage_repay"})
+
 
 def mode_hit_carries(card: dict, eff: dict) -> dict[str, str]:
     """`{var token: C# element}` for each mode of a two-mode `choose_one`
@@ -9891,7 +10279,8 @@ def folded_branch_damage(card: dict, eff: dict) -> list[tuple[str, int, int,
         # the damage var's place, so the damage is still the one damage
         # number the branch prints.
         beside = BRANCH_PRICE_OPS | BRANCH_UNNUMBERED_OPS | (
-            BRANCH_BESIDE_DAMAGE_OPS if op == "damage" else frozenset())
+            BRANCH_BESIDE_DAMAGE_OPS if op == "damage"
+            else BRANCH_BESIDE_BLOCK_OPS if op == "block" else frozenset())
         if any(c.get("op") not in beside
                for c in branch if c is not clause):
             return None
@@ -11270,6 +11659,15 @@ def _emit_branch_op(
                 f'{amount}, applier: Owner.Creature, '
                 "cardSource: this);"
             )
+        elif eff.get("target") == "all_enemies":
+            # Byte-for-byte the top-level all-enemies arm (2026-10-15).
+            lines.append(
+                "foreach (var debuffTarget in CombatState!.HittableEnemies.ToList())\n"
+                "        {\n"
+                f"            await PowerCmd.Apply<{cls}>(choiceContext, debuffTarget, "
+                f"{amount}, applier: Owner.Creature, cardSource: this);\n"
+                "        }"
+            )
         else:
             lines.append(
                 f"await PowerCmd.Apply<{cls}>("
@@ -11799,6 +12197,11 @@ def build_body(
             "var swirlsAtStart = VarkaOath.SwirlsMadeBy(Owner.Creature);")
     if "killed_target" in preds:
         lines.append("var enemiesAtStart = CombatState!.HittableEnemies.ToList();")
+    if "killed_target_fatal" in preds:
+        lines.append(
+            "var fatalAtStart = CombatState!.HittableEnemies"
+            ".Where(e => e.Powers.All(p => p.ShouldOwnerDeathTriggerFatal()))"
+            ".ToList();")
     if "target_has_pyro" in preds:
         # VARKA (the expansion): Amber: Sharpshooter's snapshot, the
         # `targetHadAura` shape on one element, fresh or spent.
@@ -13221,14 +13624,14 @@ def build_body(
 
         elif op == "scry_take":
             # `EB-679` (Read the Field, pool pass four). `scry_bottom`'s screen
-            # with the pick going the OTHER way: the player is shown the top N,
-            # the one they choose is added to the HAND and everything else they
-            # were shown goes to the bottom of the draw pile. Nothing leaves the
+            # with the pick going the OTHER way: the player is shown the top N
+            # and the one they choose is added to the HAND. Nothing leaves the
             # deck, which is `scry_bottom`'s promise kept one verb over.
             #
-            # THE UNPICKED ARE BOTTOMED IN THE ORDER THEY WERE SEEN, so the
-            # pile under them is untouched and both engines agree about what
-            # the next draw is (`effects._op_scry_take`).
+            # THE UNPICKED STAY ON TOP IN THE ORDER THEY WERE SEEN (wording
+            # pass 2026-10-15, kit census pick 3; they were bottomed), so
+            # nothing else moves and both engines agree about what the next
+            # draw is (`effects._op_scry_take`).
             #
             # THE SIM HAS NO SCREEN and takes the lowest-cost card of the N,
             # stated there as the stand-in for player choice it is.
@@ -13237,8 +13640,7 @@ def build_body(
             # the one branch this arm does not own: a grid of ONE holds no
             # decision, so the game opens no screen, and the r28 lane "spent a
             # turn unsure it had whiffed" because nothing said the card had
-            # been taken. The take and the bottoming stay here; only the
-            # picking moved.
+            # been taken. The take stays here; only the picking moved.
             n = ('DynamicVars["Scry"].IntValue' if scry_upgrade(card)
                  else int(eff["amount"]))
             lines.append(
@@ -13251,11 +13653,6 @@ def build_body(
                 "                foreach (var taken in takePick)" + "\n" +
                 "                {" + "\n" +
                 "                    await CardPileCmd.Add(taken, PileType.Hand);" + "\n" +
-                "                }" + "\n" +
-                "                foreach (var seen in top)" + "\n" +
-                "                {" + "\n" +
-                "                    if (takePick.Contains(seen)) continue;" + "\n" +
-                "                    await CardPileCmd.Add(seen, PileType.Draw, CardPilePosition.Bottom);" + "\n" +
                 "                }" + "\n" +
                 "            }" + "\n" +
                 "        }"
@@ -15288,9 +15685,7 @@ def build_description(card: dict, *,
             # otherwise print "top 3" forever while the upgraded one showed 4.
             n = ("{Scry:diff()}" if scry_upgrade(card)
                  else str(int(eff["amount"])))
-            parts.append(
-                f"Look at the top {n} cards of your draw pile; put one into "
-                "your hand and the rest on the bottom.")
+            parts.append(f"Take 1 of your top {n} cards.")
 
         elif op == "exhaust_from" and eff.get("select") == "chosen":
             n = ("{Exhausts:diff()}" if exhaust_upgrade(card)
@@ -16050,6 +16445,11 @@ def build_upgrade(card: dict) -> list[str]:
         done.add("upgraded_knight")
         lines.append("// upgraded_knight: the chosen Knight arrives upgraded, "
                      "read off IsUpgraded when the card is played.")
+    if "yae_upgraded" in deltas:
+        # YAE MIKO (review r3). The same play-time read.
+        done.add("yae_upgraded")
+        lines.append("// yae_upgraded: the yae op reads IsUpgraded when "
+                     "the card is played.")
     if "varka_upgraded" in deltas:
         # VARKA (the expansion, Pathfinder's Mark+). The same play-time read.
         done.add("varka_upgraded")
@@ -16525,34 +16925,50 @@ def stage_repay_call(card: dict) -> str | None:
             f'DynamicVars["RepayAmount"].IntValue{pay})')
 
 
-#: THE REPAY FLOOR'S PAYOUT ON THE FACE (the drain-line round, 2026-10-09):
-#: "(Repays 0, +3 Block)". A `floor:` names its payout; a power whose whole
-#: job is a floored Repay names its own.
+#: THE REPAY FLOOR'S PAYOUT ON THE FACE (the drain-line round, 2026-10-09;
+#: the floor first since furina-next paper 3, 2026-10-16): "(Repay 0: gain
+#: 3 Block)". A `floor:` names its payout, Block by default; a power whose
+#: whole job is a Repay names its own.
 STAGE_REPAY_PAYOUT_CS = {
     "block": "FurinaStageFacePreview.PayBlock",
     "vigor": "FurinaStageFacePreview.PayVigor",
     "damage": "FurinaStageFacePreview.PayDamage",
 }
 STAGE_REPAY_POWER_PAYOUTS = {
-    "fs_pneuma_tides": "vigor", "fs_fountain_of_lucine": "",
+    "fs_pneuma_tides": "vigor", "fs_fountain_of_lucine": "block",
     "fs_grand_entrance": "block"}
 
+#: The Repay powers whose face reads a `PowerAmount` var (an upgrade moves
+#: their number); Fountain of Lucine's Repay is fixed (2026-10-13).
+STAGE_REPAY_POWER_VARS = frozenset({"fs_pneuma_tides", "fs_grand_entrance"})
 
-def stage_repay_payout_cs(card: dict, repay: dict) -> str:
-    """The `, payout` argument of a top-level Repay's preview, or "".
 
-    A `floor:` of block or vigor pays that; a Repay whose card's damage
-    reads `stage_repay_left` (Surging Waters, Hydro Lance, Cleansing
-    Torrent) pays damage. A plain Repay (Soothing Waters, Pneuma Refrain)
-    pays nothing and keeps the plain line."""
-    floor = str(repay.get("floor", "none"))
-    if floor in STAGE_REPAY_PAYOUT_CS:
-        return ", " + STAGE_REPAY_PAYOUT_CS[floor]
+def _damage_reads_repay_left(card: dict) -> bool:
+    """Does the card's damage read `stage_repay_left` (Cleansing Torrent's
+    "plus 1 for any HP it could not Repay")?"""
     for fx in card.get("effects") or []:
         formula = fx.get("amount_formula") or {}
         if (fx.get("op") == "damage"
                 and formula.get("count") == "stage_repay_left"):
-            return ", " + STAGE_REPAY_PAYOUT_CS["damage"]
+            return True
+    return False
+
+
+def stage_repay_payout_cs(card: dict, repay: dict) -> str:
+    """The `, payout` argument of a Repay's preview, or "".
+
+    A Repay whose card's damage reads `stage_repay_left` (Cleansing
+    Torrent) pays damage, and its row must say `floor: none` so it never
+    pays Block beside it; otherwise its floor pays (Block by default, paper
+    3)."""
+    floor = stage_repay_floor(repay)
+    if _damage_reads_repay_left(card):
+        if floor != "none":
+            raise ValueError(f"{card['id']}: a Repay whose damage is its "
+                             "floor says `floor: none`")
+        return ", " + STAGE_REPAY_PAYOUT_CS["damage"]
+    if floor in STAGE_REPAY_PAYOUT_CS:
+        return ", " + STAGE_REPAY_PAYOUT_CS[floor]
     return ""
 
 
@@ -16579,7 +16995,7 @@ def stage_later_repay_call(card: dict) -> str | None:
             pay = (", " + STAGE_REPAY_PAYOUT_CS[kind]) if kind else ""
             # A fixed Repay (Fountain of Lucine, 2026-10-13) has no
             # PowerAmount variable: its number is the printed one.
-            uses_var = bool(kind)    # only the floored powers keep the var
+            uses_var = fx["power"] in STAGE_REPAY_POWER_VARS
             amount = ('DynamicVars["PowerAmount"].IntValue' if uses_var
                       else str(int(fx["amount"])))
             return ('FurinaStageFacePreview.Repay(this, '
@@ -16593,8 +17009,10 @@ def stage_later_repay_call(card: dict) -> str | None:
         raise ValueError(f"{card['id']}: a Repay preview reads one Repay")
     drain = stage_fixed_price(card)
     first = drain[1] if drain and drain[0] == "stage_drain" else 0
+    # Paper 3 (2026-10-16): the kill Repay has the Block floor too.
+    pay = stage_repay_payout_cs(card, nested[0])
     return ('FurinaStageFacePreview.RepayAfterDrain(this, '
-            f'{int(nested[0].get("amount", 1))}, {first})')
+            f'{int(nested[0].get("amount", 1))}, {first}{pay})')
 
 
 #: THE FURINA WAVE (2026-10-13, `review/records/furina-wave-2026-10-13.md`,
@@ -16658,8 +17076,49 @@ def stage_spend_short_call(card: dict) -> str | None:
     return f"FurinaStageFacePreview.SpendShort(this, {amount})"
 
 
+def is_flip_row(card: dict) -> bool:
+    """Does this row turn over (`{op: furina, kind: flip}`, Ousia / Pneuma)?"""
+    return any(e.get("op") == "furina" and e.get("kind") == "flip"
+               for e in card.get("effects") or [])
+
+
+#: A two-faced row's face predicates, and whether each is the Pneuma face.
+FLIP_FACES = {"ousia_face": False, "pneuma_face": True}
+
+
+def flip_face_args(card: dict) -> list[tuple[str, str]]:
+    """A two-faced row's in-combat Stage lines, each on its own face only.
+
+    Furina's card pass (2026-10-15, `review/active/furina-card-pass-
+    2026-10-15.md` sec.1): Ousia Drains and Pneuma Repays, so each face
+    carries the line its op carries on any other card -- the Drain line on
+    Ousia, "(Repays N)" on Pneuma -- read off that face's `then:` as if it
+    were the row's top level, and blank while the card shows the other face.
+    """
+    args = []
+    for fx in card.get("effects") or []:
+        if fx.get("op") != "conditional" or fx.get("if") not in FLIP_FACES:
+            continue
+        face = dict(card, effects=list(fx.get("then") or []))
+        pneuma = FLIP_FACES[fx["if"]]
+        for token, call in ((STAGE_DRAIN_LINE_TOKEN,
+                             stage_drain_line_call(face)),
+                            (STAGE_REPAY_TOKEN, stage_repay_call(face))):
+            if not call:
+                continue
+            if any(t == token for t, _ in args):
+                raise ValueError(f"{card['id']}: both faces print the same "
+                                 "Stage line")
+            gated = (f'(FurinaFlip.OnPneuma(this) ? {call} : "")' if pneuma
+                     else f'(FurinaFlip.OnPneuma(this) ? "" : {call})')
+            args.append((token, gated))
+    return args
+
+
 def stage_face_args(card: dict) -> list[tuple[str, str]]:
     """Every in-combat Stage line a row's face carries, as (token, C#)."""
+    if is_flip_row(card):
+        return flip_face_args(card)
     args = []
     for token, call in ((STAGE_BOW_TOKEN, stage_bow_preview_call(card)),
                         (STAGE_DRAIN_LINE_TOKEN, stage_drain_line_call(card)),
@@ -16745,7 +17204,7 @@ def varka_wildfire_face_arg(card: dict, profile: "CharacterProfile"
     return (VARKA_WILDFIRE_TOKEN, "VarkaOath.WildfireLine(this)")
 
 
-#: The token of a Varka Swirl card's in-combat "(No aura to Swirl)" line
+#: The token of a Varka Swirl card's in-combat "(no aura: no Swirl)" line
 #: (`VarkaOath.SwirlLine`).
 VARKA_SWIRL_TOKEN = "VarkaSwirl"
 
@@ -16755,7 +17214,7 @@ VARKA_SWIRL_KINDS = frozenset({"crosscurrent", "swirl_fresh_auras"})
 
 def varka_swirl_face_arg(card: dict, profile: "CharacterProfile",
                          aura_elements: list[str]) -> tuple[str, str] | None:
-    """`(token, C#)` for a Varka Swirl card's "(No aura to Swirl)" line, or
+    """`(token, C#)` for a Varka Swirl card's "(no aura: no Swirl)" line, or
     None.
 
     Varka round 5 (2026-10-13, "What to change" 1): "Swirl cards whose target
@@ -16775,49 +17234,109 @@ def varka_swirl_face_arg(card: dict, profile: "CharacterProfile",
     return (VARKA_SWIRL_TOKEN, "VarkaOath.SwirlLine(this)")
 
 
-#: YAE REVIEW R1 (Claude, 2026-10-14, no pick): the tokens of her two live
-#: clauses (`YaeShrineFace.RiteToken`, `YaeShrineFace.TenkoToken`).
-YAE_RITE_TOKEN = "YaeRite"
+#: SHRINE R2 (2026-10-14): the token of her live Tenko clause
+#: (`YaeShrineFace.TenkoToken`); the Rite's left with the Rite.
 YAE_TENKO_TOKEN = "YaeTenko"
 
 
 def yae_face_lines(card: dict, profile: "CharacterProfile",
                    desc: str) -> tuple[str, list[tuple[str, str]]]:
-    """A Yae row's face with its live clauses placed, and their (token, C#).
+    """A Yae row's face with its live Tenko clause placed, and (token, C#).
 
-    A "Rite: X" row says in combat what the shrine would do under X, summed
-    over the Sakura standing: "Rite: Warding (your Sakura: 5 Block)", the
-    `{InCombat:{YaeRite}|}` right after the Rite's name. A row that Tenkos
-    says "Tenko (no Sakura)" while none stands. DERIVED FROM THE OPS, so a
-    new Rite or Tenko row carries its clause the day it exists. Sim twins:
-    `yae_shrine.rite_line`, `yae_shrine.tenko_line`.
+    A row that Tenkos says in combat what its Tenko would do now, summed by
+    kind over the Sakura standing: "Tenko (8 damage, 4 to each enemy, 5
+    Block)"; with none standing "Tenko (no Sakura)". The
+    `{InCombat:{YaeTenko}|}` goes right after "Tenko". Review r3 (ruled
+    2026-10-14): Tenko is one plain rule again, so a row prints it
+    unbracketed. DERIVED FROM THE OPS, so a new Tenko row carries its
+    clause the day it exists. Sim twin: `yae_shrine.tenko_line`.
     """
     if profile.character_id != "yae" or card.get("character") != "yae":
         return desc, []
     ops = [e for e in card.get("effects") or [] if e.get("op") == "yae"]
-    args: list[tuple[str, str]] = []
-    rites = [e for e in ops if e.get("kind") == "rite"]
-    if rites:
-        if len(rites) != 1:
-            raise ValueError(f"{card['id']}: a face reads one Rite")
-        name = YAE_RITES[rites[0]["rite"]]
-        clause = f"[gold]Rite[/gold]: {name}"
-        if desc.count(clause) != 1:
-            raise ValueError(f"{card['id']}: a Rite row prints {clause!r} "
-                             "once")
-        desc = desc.replace(clause,
-                            clause + "{InCombat:{" + YAE_RITE_TOKEN + "}|}")
-        args.append((YAE_RITE_TOKEN,
-                     f"YaeShrineFace.RiteLine(this, YaeRite.{name})"))
-    if any(e.get("kind") == "tenko" for e in ops):
-        clause = "[gold]Tenko[/gold]"
-        if desc.count(clause) != 1:
-            raise ValueError(f"{card['id']}: a Tenko row prints {clause!r} "
-                             "once")
-        desc = desc.replace(clause,
-                            clause + "{InCombat:{" + YAE_TENKO_TOKEN + "}|}")
-        args.append((YAE_TENKO_TOKEN, "YaeShrineFace.TenkoLine(this)"))
-    return desc, args
+    tenkos = [e for e in ops if e.get("kind") == "tenko"]
+    if not tenkos:
+        return desc, []
+    # The pool to 78 (2026-10-15): Kagura's Verity prints "Tenko twice",
+    # one clause for its two ops (the first Tenko's, what it does now).
+    twice = len(tenkos) == 2 and "[gold]Tenko[/gold] twice" in desc
+    if len(tenkos) != 1 and not twice:
+        raise ValueError(f"{card['id']}: a face reads one Tenko")
+    token = "{InCombat:{" + YAE_TENKO_TOKEN + "}|}"
+    clause = "[gold]Tenko[/gold]"
+    if desc.count(clause) != 1 or desc.count(clause + " (") != 0:
+        raise ValueError(f"{card['id']}: a Tenko row prints {clause!r} "
+                         "once, unbracketed")
+    return (desc.replace(clause, clause + token),
+            [(YAE_TENKO_TOKEN, "YaeShrineFace.TenkoLine(this)")])
+
+
+#: THE RELEASE FIXES (2026-10-14): the token of a "below half" face's
+#: in-combat threshold, "below half (39 HP)".
+HALF_HP_TOKEN = "HalfHp"
+
+
+def half_hp_face_lines(card: dict, desc: str
+                       ) -> tuple[str, list[tuple[str, str]]]:
+    """A "below half" face with its threshold placed, and its (token, C#).
+
+    Release fixes (2026-10-14): Understudy's Debut and Crowd Favorite said
+    "below half" and a player had to work out the number. In combat the face
+    reads "below half (39 HP)": below half is `hp * 2 < max`, so the number
+    is half of Max HP rounded up (`HalfHpFace.Threshold`). "below half HP"
+    reads the same in combat and keeps its word out of it. DERIVED FROM THE
+    FACE, so any row that prints the words carries the number.
+    """
+    for words, rest in (("below half HP", " HP"), ("below half", "")):
+        if words in desc:
+            if desc.count(words) != 1:
+                raise ValueError(f"{card['id']}: a face prints {words!r} "
+                                 "once")
+            desc = desc.replace(
+                words,
+                "below half{InCombat:{" + HALF_HP_TOKEN + "}|" + rest + "}")
+            return desc, [(HALF_HP_TOKEN, "HalfHpFace.Line(this)")]
+    return desc, []
+
+
+#: KOKOMI REVIEW R8 (2026-10-14, item 7): the token of a Sucrose Swirl face's
+#: in-combat "(no aura: no Swirl)" clause (`SwirlAuraFace.Token`), and the
+#: words, the C# `SwirlAuraFace.NoAura`.
+SWIRL_AURA_TOKEN = "SwirlAura"
+SWIRL_AURA_WORDS = " (no aura: no Swirl)"
+
+#: The Swirl phrases the clause follows, in the order they are tried.
+SWIRL_AURA_PHRASES = ("[gold]Swirl[/gold] ALL enemies",
+                      "[gold]Swirl[/gold] the enemy")
+
+
+def swirl_aura_face_lines(card: dict, desc: str
+                          ) -> tuple[str, list[tuple[str, str]]]:
+    """A Sucrose Swirl face with its "(no aura: no Swirl)" clause placed, and
+    its (token, C#).
+
+    Kokomi review r8 (2026-10-14, item 7): two seat plays were wasted on a
+    Sucrose Swirl with no element on the board. The way Tenko says "(no
+    Sakura)", the clause goes right after "Swirl the enemy" / "Swirl ALL
+    enemies" and prints in combat while the aimed enemy (or, unaimed, every
+    enemy) has no aura (`SwirlAuraFace.Line`). Sucrose's shared Companion
+    rows only, the ones the review names: a row whose name starts "Sucrose"
+    and whose effects Swirl. Varka's own rows keep `VarkaOath.SwirlLine`.
+    """
+    if not str(card.get("name") or "").startswith("Sucrose"):
+        return desc, []
+    if not any(e.get("op") == "swirl" for e in _effects_everywhere(card)):
+        return desc, []
+    token = "{InCombat:{" + SWIRL_AURA_TOKEN + "}|}"
+    for phrase in SWIRL_AURA_PHRASES:
+        if phrase in desc:
+            if desc.count(phrase) != 1:
+                raise ValueError(f"{card['id']}: a face prints {phrase!r} "
+                                 "once")
+            return (desc.replace(phrase, phrase + token),
+                    [(SWIRL_AURA_TOKEN, "SwirlAuraFace.Line(this)")])
+    raise ValueError(f"{card['id']}: a Sucrose Swirl row prints none of "
+                     f"{SWIRL_AURA_PHRASES!r}")
 
 
 #: THE ARCHAIC TOOTH (Varka review, ruled 2026-10-12: "Dandelion Gale could be
@@ -16993,6 +17512,11 @@ def emit(
         if eff["op"] == "kokomi" and eff.get("target") == "enemy":
             target_type = TARGET_CS["enemy"]
             break
+        # YAE, THE POOL TO 78: Forbidden Art: Daisesshou's hit reaches ALL
+        # enemies (`YAE_ALL_KINDS`), as a damage op to all_enemies does.
+        if eff["op"] == "yae" and eff.get("target") == "all_enemies":
+            target_type = TARGET_CS["all_enemies"]
+            break
         # EB-118: a modal's aiming verb sits inside a mode body, so a card
         # whose only enemy-facing effect is modal would declare TargetType.Self
         # and be unaimable. blocked_reason has already refused modes that
@@ -17085,22 +17609,13 @@ def emit(
                     "await PlayNowLine(choiceContext, cardPlay);"]
         else:
             body = [schedule]
-    # THE KOKOMI RE-FOUNDING (2026-10-12, review/active/kokomi-design-pass-
-    # 2026-10-11.md pick 4 (a), ruled): ANY Companion card can be written as a
-    # Plan. A Companion row with no Plan line of its own takes the same one
-    # `if` at the top: played on the Bake-Kurage, it is written
-    # (`KokomiCompanionPlan.Write`) and carried out next turn at its printed
-    # rate, after the Bake-Kurage applies Hydro to its target. Its TargetType
-    # accepts the jellyfish only on Kokomi (`KokomiCompanionPlan.TargetFor`),
-    # so every other character plays it exactly as before.
-    companion_plan = is_companion(card) and not plan_body
-    if companion_plan:
-        body = ["if (KokomiPlan.PlayedOnPet(cardPlay))",
-                "{",
-                "    await KokomiCompanionPlan.Write(choiceContext, this, "
-                "cardPlay);",
-                "    return;",
-                "}"] + body
+    # A COMPANION IS PLANNED ONLY THROUGH A PLAN LINE IT PRINTS (Kokomi
+    # review r9 pick 1 (a), 2026-10-15; [USER]: "let's get rid of Companions
+    # as Plans unless we make a card that specifically has a Plan line."). The
+    # re-founding's general rule (design pass pick 4 (a)) wrote any Companion
+    # row as a Plan; it is gone, so a Companion row with no `plan:` prints its
+    # own target and the Bake-Kurage refuses it as it refuses any card with no
+    # Plan line. A Companion row that prints one takes the Plan path above.
     upgrade = build_upgrade(card)
     _, no_upgrade_reason = upgrade_plan(card)
     desc = build_description(card)
@@ -17149,6 +17664,11 @@ def emit(
     # after the words they qualify, so they are placed here, not appended.
     desc, yae_args = yae_face_lines(card, profile, desc)
     face_args.extend(yae_args)
+    desc, half_args = half_hp_face_lines(card, desc)
+    face_args.extend(half_args)
+    # Kokomi review r8 (2026-10-14, item 7): Sucrose's "(no aura: no Swirl)".
+    desc, swirl_aura_args = swirl_aura_face_lines(card, desc)
+    face_args.extend(swirl_aura_args)
     desc_cs = desc.replace("\n", "\\n")
     desc_expr = f'"{desc_cs}"'
     if blanks_burst:
@@ -17167,9 +17687,6 @@ def emit(
         interfaces += ", IElementalCard"
     if is_companion(card):
         interfaces += ", ICompanionCard"
-        # THE KOKOMI RE-FOUNDING (2026-10-12): writable as a Plan on Kokomi.
-        if companion_plan:
-            interfaces += ", IWritableCompanion"
     elif profile.emit_character_identity:
         interfaces += ", ICharacterCard"
     # `EB-637` / `EB-644`. A row that fields a Salon member says so on the
@@ -17179,6 +17696,20 @@ def emit(
     # same figure `WillReplace` is asked with.
     if salon_deploy_card(card):
         interfaces += ", ISalonDeployCard"
+    # THE OATH DIAL (Varka, 2026-10-14). A row whose play makes an element
+    # his current one says WHICH on the class, the same element its switch
+    # line and switch tip are emitted with (`varka_switch_element`), so the
+    # dial by the Energy orb can preview the switch for the card in hand.
+    # Display only; `VarkaOath.WouldSwitchTo` still asks whether it would.
+    varka_switch_member = ""
+    varka_switch = varka_switch_element(card, profile)
+    if varka_switch is not None:
+        interfaces += ", IVarkaSwitchCard"
+        varka_switch_member = (
+            "\n\n    /// <summary>The element this card makes Varka's current "
+            "element\n    /// (`VarkaOathDial` previews it).</summary>\n"
+            "    public Element VarkaSwitchElement => "
+            f"{ELEMENT_CS[varka_switch]};")
     # (R276, Where Did I Put It?). A row that prints a Set off
     # declares it on the class: `ISetOffCard` is a MARKER with no members, and
     # the one question it answers is "is this a Set off card", which the look
@@ -17189,6 +17720,19 @@ def emit(
     if any(fx.get("op") == "set_off"
            for fx in iter_effects(card.get("effects") or [])):
         interfaces += ", ISetOffCard"
+    # YAE MIKO, RED INK ON A PLANTING CARD (ruled 2026-10-14): a row whose own
+    # play plants a Sakura (`yae` plant / plant_level) says so on the class,
+    # a MARKER read by `YaeAnnotationReach.Plants` (the Edit filter, and Red
+    # Ink passing to the Sakura it plants). Sim twin:
+    # `yae_shrine.plants_sakura`, off the same ops.
+    if yae_plants_sakura(card):
+        interfaces += ", ISakuraPlanterCard"
+    # The same rule's Block fact: a `yae` kind that gives the card's own
+    # Block (Hide Behind the Shrine's "gain 5 more", the refill) declares no
+    # BlockVar, so `GainsBlock` cannot see it
+    # (and Nimble stays as it was); Red Ink still rides it.
+    if yae_gives_block(card):
+        interfaces += ", IYaeBlockCard"
     # The Furina whole-run round 2 (2026-10-10): a row whose own play pays
     # Fanfare declares it, so telemetry can count the Spend cards in hand.
     # DERIVED from the row's `stage_spend*` ops, modes included; a Power
@@ -17324,6 +17868,7 @@ def emit(
     if (card_is_set_off_only(card) or card_needs_a_waiting_plan(card)
             or card_needs_a_plannable_card(card)
             or card_needs_an_exhausted_card(card)
+            or card_needs_a_played_companion(card)
             or stage_fixed_price(card) is not None
             or card.get("playable_if")):
         interfaces += ", IUnplayableReasonCard"
@@ -17915,13 +18460,9 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             tips_expr = (
                 "ArmKeywordTips.ForNereidsTwice("
                 f"{tips_expr or 'base.ExtraHoverTips'}, this)")
-        # Design-session calls (2026-10-13): Bis! says a "Spend up to" does
-        # not count, and Four Winds' Ascension's element hit gains no Oath.
-        # The same rider shape.
-        if keeps_half_a_spend_all(card):
-            tips_expr = (
-                "ArmKeywordTips.ForBisSpendUpTo("
-                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
+        # Design-session call (2026-10-13): Four Winds' Ascension's element
+        # hit gains no Oath. (Bis!'s rider left with Bis!, furina-next paper
+        # 2, 2026-10-16.)
         if ascension_hit_gains_no_oath(card):
             tips_expr = (
                 "ArmKeywordTips.ForAscensionNoOath("
@@ -17974,13 +18515,6 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
                 "ArmKeywordTips.ForElementSwitch("
                 f"{tips_expr or 'base.ExtraHoverTips'}, this, "
                 f"{ELEMENT_CS[switch_element]})")
-        # THE KOKOMI RE-FOUNDING (2026-10-12): a Companion she can write as a
-        # Plan says so while she holds it. A fact about THIS card on THIS
-        # board, so it sits with the riders above (live, Kokomi's only).
-        if companion_plan:
-            tips_expr = (
-                "ArmKeywordTips.ForCompanionPlan("
-                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
         spark_priced = any(eff.get("op") == "spend_spark"
                            for eff in card["effects"])
         for attach in arm_keyword_tip_calls(desc, spark_priced):
@@ -17995,8 +18529,23 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             # Advantage, refused by the jellyfish).
             elif attach == "ArmKeywordTips.ForPlan" and not card.get("plan"):
                 attach = "ArmKeywordTips.ForPlanNoLine"
+            # Yae (2026-10-14): one tip per Annotation the face names.
+            if attach == "ArmKeywordTips.ForAnnotation":
+                for args in annotation_tip_args(card, desc):
+                    tips_expr = (
+                        f"{attach}({tips_expr or 'base.ExtraHoverTips'}"
+                        f"{args})")
+                continue
             tips_expr = (
                 f"{attach}({tips_expr or 'base.ExtraHoverTips'}, this)")
+        # YAE MIKO, review r3 (ruled 2026-10-14): every row whose own play
+        # plants carries the full-shrine rule, which has two branches with
+        # kinds and left the plant faces. Off the op, read after the words.
+        if (profile.character_id == "yae" and card.get("character") == "yae"
+                and yae_plants_sakura(card)):
+            tips_expr = (
+                "ArmKeywordTips.ForFullShrine("
+                f"{tips_expr or 'base.ExtraHoverTips'}, this)")
         # `EB-377`, and it is last of the last for the reason the block above
         # is last at all: an arm's invented word is the one the reader has
         # never met, and a base-game word restated is read after it.
@@ -18021,6 +18570,13 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     if "[gold]Ward" in desc:
         tips_expr = ("KokomiCards.WithWardPreview("
                      f"{tips_expr or 'base.ExtraHoverTips'})")
+    # Kokomi wording pass (2026-10-14): Crystal Collapse previews the
+    # Companion it copies -- the one a waiting Plan caught, or the one it
+    # would catch now -- the same Blade Dance shape, live.
+    if any(clause.get("op") == "play_copy_of_companion"
+           for clause in (card.get("plan") or [])):
+        tips_expr = ("KokomiCards.WithCopiedCompanionPreview("
+                     f"{tips_expr or 'base.ExtraHoverTips'}, this)")
     # THE KLEE STATUS PACKAGE: Klee Can Explain! previews the card it makes,
     # Compact's Fuel tip.
     for eff in card.get("effects", []):
@@ -18186,7 +18742,13 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
                                VARKA_SWIRL_TOKEN} else
             "This card's in-combat shrine clauses\n"
             "    /// (`YaeShrineFace`)."
-            if set(tokens) <= {YAE_RITE_TOKEN, YAE_TENKO_TOKEN} else
+            if set(tokens) <= {YAE_TENKO_TOKEN} else
+            "The HP this card's \"below half\" means, in combat\n"
+            "    /// (`HalfHpFace`)."
+            if tokens == [HALF_HP_TOKEN] else
+            "Whether this card's Swirl has an aura to Swirl, in combat\n"
+            "    /// (`SwirlAuraFace`)."
+            if tokens == [SWIRL_AURA_TOKEN] else
             "This card's in-combat Stage line\n"
             "    /// (`FurinaStageFacePreview`).")
         adds = "".join(f'        description.Add("{token}", {call});\n'
@@ -18205,12 +18767,20 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     # its Block face, and hands its face to the description as `Pneuma` (the
     # base game's description-argument seam). Sim twin: `Card.flipped`.
     flip_member = ""
-    if any(e.get("op") == "furina" and e.get("kind") == "flip"
-           for e in card["effects"]):
-        if face_args or wide_aim is not None:
+    if is_flip_row(card):
+        # Furina's card pass (2026-10-15): a face's own Stage lines
+        # (`flip_face_args`) ride the same description-argument override;
+        # any other line, or a live TargetType, still refuses.
+        if (wide_aim is not None
+                or any(t not in (STAGE_DRAIN_LINE_TOKEN, STAGE_REPAY_TOKEN)
+                       for t, _ in face_args)):
             raise ValueError(
                 f"{card['id']}: a two-faced row cannot also carry an "
-                "in-combat Stage line or a live TargetType")
+                "in-combat line other than its faces' Stage lines, or a "
+                "live TargetType")
+        face_adds = "".join(f'        description.Add("{token}", {call});\n'
+                            for token, call in face_args)
+        stage_bow_member = ""
         flip_member = (
             "\n\n    /// <summary>Two faces (`FurinaFlip`): the face's name in"
             " combat,\n    /// no target on the Pneuma face, and the face as"
@@ -18225,6 +18795,7 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             "    {\n"
             "        base.AddExtraArgsToDescription(description);\n"
             '        description.Add("Pneuma", FurinaFlip.OnPneuma(this));\n'
+            f"{face_adds}"
             "    }")
     per_fanfare = card.get("cost_reduction_per_fanfare")
     if per_fanfare:
@@ -18240,6 +18811,36 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             "        modifiedCost = System.Math.Max(0m, originalCost\n"
             "            - FurinaStage.FanfareOf(Owner?.Creature) / "
             f"{int(per_fanfare)});\n"
+            "        return true;\n"
+            "    }")
+    per_swirl = card.get("cost_reduction_per_swirl_this_turn")
+    if per_swirl:
+        discard_discount_member = (
+            "\n\n    /// <summary>Sheet `cost_reduction_per_swirl_this_turn: "
+            f"{int(per_swirl)}`: this card\n    /// costs {int(per_swirl)} less for each "
+            "Swirl its owner made this turn.</summary>\n"
+            "    public override bool TryModifyEnergyCostInCombat(\n"
+            "        CardModel card, decimal originalCost, out decimal modifiedCost)\n"
+            "    {\n"
+            "        modifiedCost = originalCost;\n"
+            "        if (!ReferenceEquals(card, this) || originalCost <= 0m) return false;\n"
+            f"        modifiedCost = System.Math.Max(0m, originalCost - {int(per_swirl)}m\n"
+            "            * VarkaOath.SwirlsThisTurn(Owner?.Creature));\n"
+            "        return true;\n"
+            "    }")
+    if_edited = card.get("cost_reduction_if_edited_this_turn")
+    if if_edited:
+        discard_discount_member = (
+            "\n\n    /// <summary>Sheet `cost_reduction_if_edited_this_turn: "
+            f"{int(if_edited)}`: this card\n    /// costs {int(if_edited)} less "
+            "if its owner Edited a card this turn.</summary>\n"
+            "    public override bool TryModifyEnergyCostInCombat(\n"
+            "        CardModel card, decimal originalCost, out decimal modifiedCost)\n"
+            "    {\n"
+            "        modifiedCost = originalCost;\n"
+            "        if (!ReferenceEquals(card, this) || originalCost <= 0m) return false;\n"
+            "        if (YaeShrine.EditsThisTurn(Owner?.Creature) <= 0) return false;\n"
+            f"        modifiedCost = System.Math.Max(0m, originalCost - {int(if_edited)}m);\n"
             "        return true;\n"
             "    }")
     discount_rate = card.get("cost_reduction_per_discard_this_turn")
@@ -18282,23 +18883,6 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             " for no\n    /// target (the Varka expansion).</summary>\n"
             "    public override TargetType TargetType =>\n"
             "        IsUpgraded ? TargetType.AllEnemies : base.TargetType;")
-    # THE KOKOMI RE-FOUNDING (2026-10-12): a Companion row's target accepts
-    # the Bake-Kurage on Kokomi, and only there (`KokomiCompanionPlan`).
-    if companion_plan:
-        if wide_target_member:
-            raise SystemExit(
-                f"{card['id']}: a Companion row with its own live TargetType "
-                "cannot also take the Companion Plan's -- the two overrides "
-                "would collide")
-        wide_target_member = (
-            "\n\n    /// <summary>On Kokomi, this Companion card can also be"
-            " written as a Plan on\n    /// the Bake-Kurage (the re-founding,"
-            " 2026-10-12).</summary>\n"
-            "    public override TargetType TargetType =>\n"
-            "        KokomiCompanionPlan.TargetFor(this, base.TargetType);\n\n"
-            "    /// <summary>The target this Companion prints, which its"
-            " carry-out aims by.</summary>\n"
-            "    public TargetType PrintedTargetType => base.TargetType;")
     # EB-118 §4.5, the Spark cost line. Sparks are a PowerModel and not a
     # CustomResource, so BaseLib's SetCanonicalCost rail below cannot carry
     # this price: the gate is CardModel.IsPlayable, the extension point the
@@ -18399,8 +18983,16 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     # while the Exhaust Pile is empty.
     plan_gated = (card_needs_a_waiting_plan(card)
                   or card_needs_a_plannable_card(card)
-                  or card_needs_an_exhausted_card(card))
-    if card_needs_an_exhausted_card(card):
+                  or card_needs_an_exhausted_card(card)
+                  or card_needs_a_played_companion(card))
+    if card_needs_a_played_companion(card):
+        plan_gate_expr = "KokomiRefounding.AnyCompanionPlayed(this)"
+        plan_gate_why = "no Companion has been played this combat"
+        plan_gate_note = (
+            "    // Kokomi wording pass (2026-10-14): unplayable until a\n"
+            "    // Companion has been played this combat, rather than\n"
+            "    // writing a Plan that copies nothing.\n")
+    elif card_needs_an_exhausted_card(card):
         plan_gate_expr = "KokomiRefounding.AnyExhausted(this)"
         plan_gate_why = "your Exhaust Pile is empty"
         plan_gate_note = (
@@ -18723,7 +19315,7 @@ public sealed class {cls} : {interfaces}
     {{
         ("title", "{title_cs}"),
         ("description", {desc_expr}),
-    }};{tags_member}{wide_target_member}{flip_member}{discard_discount_member}{stage_bow_member}{transcendence_member}{return_to_hand_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{plan_gate_member}{plan_reason_member}{stage_gate_member}{stage_reason_member}{playable_gate_member}{playable_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}{homework_member}
+    }};{tags_member}{wide_target_member}{flip_member}{discard_discount_member}{stage_bow_member}{transcendence_member}{varka_switch_member}{return_to_hand_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{plan_gate_member}{plan_reason_member}{stage_gate_member}{stage_reason_member}{playable_gate_member}{playable_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}{homework_member}
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

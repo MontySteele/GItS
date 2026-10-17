@@ -167,16 +167,13 @@ public static class KokomiPlan
         // 2026-10-12.md). Kurage's Wake's "Add 2 Stings to your hand";
         // Gorou's War Banner "Gain 1 Strength" (permanent since the Kokomi
         // level pass, 2026-10-12) and Juuga "For 3
-        // turns, at the end of your turn gain 6 Block" (amount = the turns);
-        // and a written Companion (design pass pick 4 (a)), whose clause
-        // holds the card and is carried out at its printed rate after the
-        // Bake-Kurage applies Hydro to its target
-        // (<see cref="KokomiCompanionPlan.CarryOut"/>). Sim twins
-        // `kokomi_plan`, the same names.
+        // turns, at the end of your turn gain 6 Block" (amount = the turns).
+        // Sim twins `kokomi_plan`, the same names. (A written Companion's
+        // PlayCompanion left with Kokomi review r9 pick 1 (a), 2026-10-15:
+        // only a Companion that prints a Plan line can be planned.)
         AddStings,
         GainStrength,
         JuugaGuard,
-        PlayCompanion,
         // THE POOL OVERHAUL (2026-10-13, review/active/kokomi-pool-overhaul-
         // 2026-10-13.md sec.2-4; [USER]: "On Kokomi, I'm good with default on
         // 1 and 2."). Three things only a Plan can do:
@@ -236,9 +233,8 @@ public static class KokomiPlan
     /// <summary>
     /// One scheduled clause. <paramref name="Card"/> is set for
     /// <see cref="Kind.ReplayExhausted"/> (Moon's Reflection's chosen card),
-    /// for <see cref="Kind.PlayCopyOfCompanion"/> (Crystal Collapse's
-    /// captured Companion) and for <see cref="Kind.PlayCompanion"/> (the
-    /// written Companion itself), and is the one place a Plan holds an object
+    /// and for <see cref="Kind.PlayCopyOfCompanion"/> (Crystal Collapse's
+    /// captured Companion), and is the one place a Plan holds an object
     /// rather than a number. Both are filled in when the Plan is written, never read
     /// off the board at carry-out.
     ///
@@ -368,7 +364,57 @@ public static class KokomiPlan
         IReadOnlyList<MovedOn>? Moved, bool OnPlay,
         string? Kind = null, int? Asked = null,
         IReadOnlyList<Rider>? Riders = null, bool Unfinished = false,
-        bool NoTarget = false);
+        bool NoTarget = false, IReadOnlyList<string>? Reactions = null);
+
+    /// <summary>KOKOMI REVIEW R8 (2026-10-14, item 9): the Elemental
+    /// Reactions a carry-out's own hits set off, by name, in order. A
+    /// Masterstroke written for 42 landed 63 on a Pyro body: the Plan's Hydro
+    /// Vaporized it, and the receipt said only "the clause asked for 42",
+    /// because the target died and nothing on the next board could name the
+    /// bonus. Filled inside the carrying window (<see cref="NoteReaction"/>)
+    /// and read onto the row as <c>reactions</c>.</summary>
+    private static readonly Dictionary<Player, List<string>> _reactions = new();
+
+    /// <summary>KOKOMI REVIEW R9 (2026-10-15, item 6): the seats inside an
+    /// end-of-turn summon's volley now, and the reactions each volley set
+    /// off. <see cref="Summon"/> opens and closes the window.</summary>
+    private static readonly HashSet<Player> _summoning = new();
+    private static readonly Dictionary<Player, List<string>> _summonReactions
+        = new();
+
+    /// <summary>A reaction just resolved with <paramref name="dealer"/> as
+    /// its dealer. Inside a carry-out of hers it is the Plan's, and its name
+    /// goes on that carry-out's receipt; anywhere else nothing. Called by
+    /// <c>CompanionOverhaulReactions.Note</c>. Display only.</summary>
+    public static void NoteReaction(Creature? dealer, Reaction reaction)
+    {
+        var seat = dealer?.Player;
+        if (seat == null || reaction == Reaction.None) return;
+        // KOKOMI REVIEW R9 (2026-10-15, item 6): and inside an end-of-turn
+        // summon's volley (Sanctifying Ring), whose row names it.
+        if (_summoning.Contains(seat))
+        {
+            if (!_summonReactions.TryGetValue(seat, out var said))
+            {
+                _summonReactions[seat] = said = new List<string>();
+            }
+            said.Add(ReactionName(reaction));
+        }
+        if (!IsCarryingOut(seat)) return;
+        if (!_reactions.TryGetValue(seat, out var names))
+        {
+            _reactions[seat] = names = new List<string>();
+        }
+        names.Add(ReactionName(reaction));
+    }
+
+    /// <summary>A reaction as the page prints it. PURE.</summary>
+    public static string ReactionName(Reaction reaction) => reaction switch
+    {
+        Reaction.ElectroCharged => "Electro-Charged",
+        Reaction.Overload => "Overloaded",
+        _ => reaction.ToString(),
+    };
 
     /// <summary>
     /// SOMETHING ELSE THAT LANDED INSIDE ONE PLAN'S WINDOW, by name and by
@@ -592,7 +638,7 @@ public static class KokomiPlan
     /// <summary>Is a Plan of this seat being carried out right now? Grand
     /// Strategist's "Whenever a Plan causes an Elemental Reaction": a
     /// reaction inside this window was caused by the Plan -- its own hit, or
-    /// a written Companion's Hydro and hit. Sim twin:
+    /// the hit of a card it plays (Crystal Collapse's copy). Sim twin:
     /// `state.kk_carrying_out`.</summary>
     public static bool IsCarryingOut(Player? player) =>
         player != null && _carrying.Contains(player);
@@ -637,10 +683,25 @@ public static class KokomiPlan
         _showing.Clear();
         _carriedOut.Clear();
         _summonHits.Clear();
+        _summoning.Clear();
+        _summonReactions.Clear();
         _carrying.Clear();
         // `EB-643`: the cached environment read too, so a test that declares a
         // cap and one that does not cannot see each other's answer.
         _planCap = null;
+    }
+
+    /// <summary>KOKOMI REVIEW R9 (2026-10-15, item 9): the "last carry-out"
+    /// box clears when a combat OPENS. <see cref="Rebase"/> ran only when a
+    /// Plan was first written or carried out, so a fight that ended before
+    /// either left the fight before it on the page: a Sludge Spinner Plan
+    /// showed at a rest site two fights later. Only the two receipt lists;
+    /// the queues belong to <see cref="Rebase"/>. Called from
+    /// <c>ElementalApplication.BeforeCombatStart</c>.</summary>
+    public static void ResetFight()
+    {
+        _carriedOut.Clear();
+        _summonHits.Clear();
     }
 
     private static void Rebase(Creature kokomi)
@@ -655,6 +716,23 @@ public static class KokomiPlan
         // volley that landed in the fight before owes this one no receipt.
         _summonHits.Clear();
     }
+
+    /// <summary>Kokomi review r9 (2026-10-15, item 4): does this entry write
+    /// Opening Gambit's rider ("the next Plan deals double damage") when it
+    /// is carried out? Not a flipped two-line Plan, which carries out its
+    /// now-line and writes no rider. PURE.</summary>
+    public static bool WritesDoubleRider(Entry? entry) =>
+        entry != null
+        && !(entry.Now && entry.TwoLine)
+        && entry.Clauses.Any(c => c.Kind == Kind.NextPlanDoubleDamage);
+
+    /// <summary>Kokomi review r9 (2026-10-15, item 4): will the drain hand
+    /// <paramref name="entry"/> the double-damage rider the entry
+    /// <paramref name="previous"/> before it wrote? A flipped two-line Plan
+    /// carries out its now-line at printed size, so the rider does not reach
+    /// it. PURE; <c>Drain</c> is the rule, this is its display twin.</summary>
+    public static bool DoubledBy(Entry? previous, Entry entry) =>
+        WritesDoubleRider(previous) && !(entry.Now && entry.TwoLine);
 
     /// <summary>This seat's queue, front first. Never null.</summary>
     public static IReadOnlyList<Entry> Pending(Player? player) =>
@@ -762,22 +840,32 @@ public static class KokomiPlan
             return;
         }
         var before = BoardHp(owner);
+        // KOKOMI REVIEW R9 (2026-10-15, item 6): "Poison appeared on enemies
+        // after the Ring's tick with no reaction named." The volley's
+        // reactions are filed under the summon's own name (the reaction log
+        // read "off Kokomi") and ride its row.
+        var seat = owner.Player;
+        _summoning.Add(seat);
+        _summonReactions.Remove(seat);
+        using var attribution = ReactionLog.Attribute(source);
         try
         {
             await volley();
         }
         finally
         {
+            _summoning.Remove(seat);
+            _summonReactions.Remove(seat, out var reactions);
             var moved = Moved(before, owner);
             var lost = moved?.Sum(row => row.Amount) ?? 0;
-            if (moved != null && lost > 0)
+            if (moved != null && (lost > 0 || reactions is { Count: > 0 }))
             {
                 RecordSummon(owner, new CarriedOutPlan(
                     source, lost, SummonLine(source, lost), moved, false,
                     // The word the page prints after the figure, and it is
                     // `NumberKind(Kind.Damage)`'s: what a reader wants to know
                     // is what the number IS, not how it was derived.
-                    "damage"));
+                    "damage", Reactions: reactions));
             }
         }
     }
@@ -1171,7 +1259,9 @@ public static class KokomiPlan
         // the FIRST entry alone, so a three-Plan morning under it is four
         // carry-outs and not six. `kokomi_plan.resolve_all` counts the same.
         KokomiOverhaulLedger.For(kokomi).NoteMorning(
-            due.Count + (CarryOutTimes(kokomi) > 1 ? 1 : 0));
+            StratagemTimes(kokomi) > 1
+                ? due.Count * StratagemTimes(kokomi)
+                : due.Count + (CarryOutTimes(kokomi) > 1 ? 1 : 0));
         // The display list is handed over BEFORE the sync, because `Sync`
         // refreshes the strip and the strip reads `Showing`: the badge goes
         // away in the same beat the column stays up, which is the true
@@ -1307,7 +1397,11 @@ public static class KokomiPlan
             // entry. That is the drain-local reading every other positional
             // rule in this arm already takes -- "the next Plan" means "in this
             // drain" -- and it is what lets the Rare pay a one-Plan morning.
-            var times = (index == 0 ? firstTimes : 1)
+            // A STUNNING STRATAGEM (Kokomi's own potions, 2026-10-15): "Next
+            // turn, every Plan is carried out twice." Read per entry like
+            // Nereid's, and twice said twice is still twice.
+            var times = System.Math.Max(index == 0 ? firstTimes : 1,
+                                        StratagemTimes(kokomi))
                       + (extraThis ? 1 : 0)
                       + System.Math.Max(0, entry.Extra);
             for (var i = 0; i < times; i++)
@@ -1490,7 +1584,7 @@ public static class KokomiPlan
     /// <summary>
     /// The lines the due entries are carried out as: each keeps the line it
     /// was flipped to while it waited, and an entry that cannot offer the
-    /// choice (Plan-only, a written Companion) is always its Plan line. No
+    /// choice (Plan-only) is always its Plan line. No
     /// screen (pick 5a).
     /// Returns the entries in the same order.
     /// </summary>
@@ -1677,12 +1771,41 @@ public static class KokomiPlan
         // card says so in as many words -- "carries out your front Plan NOW".
         // THE EXPANSION: an All Streams gift rides the entry, so a hurried
         // Plan is carried out its full number of times too.
-        for (var i = 0; i <= System.Math.Max(0, front.Extra); i++)
+        // A Stunning Stratagem's turn carries it out twice here too.
+        var times = StratagemTimes(kokomi) + System.Math.Max(0, front.Extra);
+        for (var i = 0; i < times; i++)
         {
             if (kokomi.IsDead) return;
             await ResolveNow(choiceContext, kokomi, front);
         }
     }
+
+    /// <summary>
+    /// Bottled Tide (Kokomi's own potions, 2026-10-15): "The Bake-Kurage
+    /// carries out every waiting Plan now." Change of Plans' door
+    /// (<see cref="ResolveFront"/>) once for each Plan waiting when it is
+    /// drunk, front first. A Plan written by one of those carry-outs waits
+    /// for the next morning like every other; the cap does not apply, since
+    /// the face says every Plan.
+    /// </summary>
+    public static async Task ResolveEveryNow(
+        PlayerChoiceContext choiceContext, Creature? kokomi)
+    {
+        if (!KokomiOverhaul.LiveFor(kokomi)) return;
+        var waiting = Pending(kokomi!.Player).Count;
+        for (var i = 0; i < waiting; i++)
+        {
+            if (kokomi.IsDead || kokomi.CombatState == null) return;
+            await ResolveFront(choiceContext, kokomi);
+        }
+    }
+
+    /// <summary>How many times every Plan is carried out right now: two on
+    /// the turn A Stunning Stratagem armed, one otherwise
+    /// (<see cref="StunningStratagemPower.LiveNow"/>).</summary>
+    public static int StratagemTimes(Creature kokomi) =>
+        kokomi.Powers.OfType<StunningStratagemPower>().Any(p => p.LiveNow)
+            ? 2 : 1;
 
     /// <summary>"Each player" (pool completion, Tactical Relay): every living
     /// player creature on her side, herself included -- the base game's
@@ -1790,6 +1913,7 @@ public static class KokomiPlan
         // hit, its one rider, left with the pool overhaul, 2026-10-13.)
         var riders = new List<Rider>();
         if (seat != null) _aimedAtNoOne.Remove(seat);
+        if (seat != null) _reactions.Remove(seat);
         if (seat != null) _carrying.Add(seat);
         try
         {
@@ -1840,11 +1964,17 @@ public static class KokomiPlan
             // nothing, which is the honest reading.
             var noTarget = seat != null && _aimedAtNoOne.Remove(seat)
                            && number == null;
+            // Item 9 (Kokomi review r8): the reactions its hits set off.
+            List<string>? reactions = null;
+            if (seat != null && _reactions.Remove(seat, out var noted))
+            {
+                reactions = noted;
+            }
             Announce(kokomi,
                      entry.Now && entry.TwoLine
                          ? NowLineTitle(entry.Title) : entry.Title,
                      number, Moved(before, kokomi),
-                     onPlay, kind, asked, riders, noTarget);
+                     onPlay, kind, asked, riders, noTarget, reactions);
         }
 
         // SANGO ISSHIN's condition, written HERE because this is the one place
@@ -1866,6 +1996,10 @@ public static class KokomiPlan
         // `kokomi_plan.note_carried_out`.
         await KokomiRefounding.OnCarriedOut(choiceContext, kokomi,
                                             entry.Returns);
+        // KOKOMI'S OWN RELICS (2026-10-15): Everlasting Moonglow, after the
+        // turn's first carry-out, through either door.
+        await Relics.KokomiArmRelics.AfterPlanCarriedOut(kokomi,
+                                                        entry.Returns);
         return (wroteDouble, wroteExtra);
     }
 
@@ -1886,13 +2020,15 @@ public static class KokomiPlan
                                  IReadOnlyList<MovedOn>? moved, bool onPlay,
                                  string? kind = null, int? asked = null,
                                  IReadOnlyList<Rider>? riders = null,
-                                 bool noTarget = false)
+                                 bool noTarget = false,
+                                 IReadOnlyList<string>? reactions = null)
     {
         var line = Vfx.KurageBeat.Line(card, number);
         Vfx.KurageBeat.Say(BakeKuragePet.Of(kokomi) ?? kokomi, line);
         Record(kokomi, new CarriedOutPlan(card, number, line, moved, onPlay,
                                           kind, asked, riders,
-                                          NoTarget: noTarget));
+                                          NoTarget: noTarget,
+                                          Reactions: reactions));
     }
 
     /// <summary>
@@ -2104,14 +2240,6 @@ public static class KokomiPlan
                 await PowerCmd.Apply<JuugaGuardPower>(
                     choiceContext, kokomi, plan.Amount, applier: kokomi,
                     cardSource: null);
-                return null;
-
-            case Kind.PlayCompanion:
-                // The Companion prints its own numbers as it resolves; this
-                // clause produced none of its own (`EB-317`'s line names the
-                // card alone).
-                await KokomiCompanionPlan.CarryOut(choiceContext, kokomi,
-                                                   plan.Card);
                 return null;
 
             case Kind.AllyDraw:
@@ -2751,6 +2879,10 @@ public static class KokomiPlan
             ["unfinished"] = said.Unfinished,
             // A hit that found no living body to aim at (BACKLOG 2026-10-13).
             ["no_target"] = said.NoTarget,
+            // Kokomi review r8 (2026-10-14, item 9): the reactions its own
+            // hits set off, which the receipt names beside a number above
+            // its ask (a Vaporize). Null where none.
+            ["reactions"] = said.Reactions?.ToList(),
         };
 
     /// One named rider inside one Plan's window (`EB-453`). A named method for
@@ -2829,9 +2961,13 @@ public static class KokomiPlan
     /// Tide has stamped at another body keeps its written number, since the
     /// front is not where it lands.
     /// </summary>
-    public static int ForecastFrontDamage(Entry entry, Creature? kokomi)
+    public static int ForecastFrontDamage(Entry entry, Creature? kokomi,
+                                          bool doubled = false)
     {
         var written = WrittenFrontDamage(entry);
+        // Kokomi review r9 (2026-10-15, item 4): Opening Gambit's rider
+        // doubles the written number BEFORE the board, as `Hit` does.
+        if (doubled) written *= 2;
         if (written <= 0 || entry.AimOverride != null) return written;
         return PlannedDamage(FrontEnemy(kokomi), written);
     }
@@ -2842,7 +2978,8 @@ public static class KokomiPlan
     /// card prints <see cref="PlanDamageVar"/>, and not for one aimed
     /// elsewhere by Converging Tide. Display only.
     /// </summary>
-    private static void ShowQueuedPlanDamage(Entry entry, Creature? kokomi)
+    private static void ShowQueuedPlanDamage(Entry entry, Creature? kokomi,
+                                             bool doubled = false)
     {
         if (entry.AimOverride != null || entry.Source == null) return;
         var front = entry.Clauses
@@ -2852,7 +2989,8 @@ public static class KokomiPlan
         if (!entry.Source.DynamicVars.TryGetValue(PlanDamageVar.VarName,
                                                   out var v)
             || v is not PlanDamageVar planVar) return;
-        planVar.ShowQueued(PlannedDamage(FrontEnemy(kokomi), front[0].Amount));
+        planVar.ShowQueued(PlannedDamage(FrontEnemy(kokomi),
+            doubled ? front[0].Amount * 2 : front[0].Amount));
     }
 
     /// <summary>
@@ -2904,7 +3042,9 @@ public static class KokomiPlan
         snapshot["twice"] =
             creature!.Powers.OfType<NereidsAscensionPower>().Any();
         snapshot["queue"] = pending
-            .Select((entry, index) => (object?)QueueRow(entry, creature, index))
+            .Select((entry, index) => (object?)QueueRow(
+                entry, creature, index,
+                index > 0 && DoubledBy(pending[index - 1], entry)))
             .ToList();
         // `EB-317`. WHAT THE JELLYFISH HAS ALREADY DONE THIS TURN, in the
         // order it did it, and in the WORDS IT SAID: `line` is the very string
@@ -2935,7 +3075,7 @@ public static class KokomiPlan
     /// <see cref="CarriedOutRow"/>'s reason: the key names are the contract
     /// with `understudy/blindplay_board.kokomi_plans`.</summary>
     private static Dictionary<string, object?> QueueRow(
-        Entry entry, Creature? kokomi, int index = 0)
+        Entry entry, Creature? kokomi, int index = 0, bool doubled = false)
     {
         // A PLAN STAYS OPEN (2026-10-01): a two-line Plan carries both lines
         // while it waits, so the choice is readable a turn early (sec.3).
@@ -2943,7 +3083,9 @@ public static class KokomiPlan
         // no pile, so the game never refreshes its face, and the plan line
         // is set here to the written number with the front body's Vulnerable
         // folded (`PlannedDamage`), before the face is read.
-        if (entry.TwoLine) ShowQueuedPlanDamage(entry, kokomi);
+        // Kokomi review r9 (2026-10-15, item 4): the Plan Opening Gambit's
+        // rider reaches shows the doubled number, the one that will land.
+        if (entry.TwoLine) ShowQueuedPlanDamage(entry, kokomi, doubled);
         var (now, plan) = entry.TwoLine ? LineTexts(entry.Source)
             : ("", "");
         return new Dictionary<string, object?>
@@ -2974,7 +3116,9 @@ public static class KokomiPlan
                 // And the number is what the morning will deal: the front
                 // body's Vulnerable folded, the face's own `PlannedDamage`.
                 ["damage"] = entry.Now && entry.TwoLine
-                    ? 0 : ForecastFrontDamage(entry, kokomi),
+                    ? 0 : ForecastFrontDamage(entry, kokomi, doubled),
+                // Item 4: the number above already carries the rider.
+                ["doubled"] = doubled && !(entry.Now && entry.TwoLine),
                 ["aim"] = entry.Now && entry.TwoLine ? "" : WrittenAim(entry),
                 // Kokomi whole-run round 2 (2026-10-10): the printed Plan
                 // line folds the front body's Vulnerable (`PlanDamageVar`),
@@ -2995,7 +3139,7 @@ public static class KokomiPlan
                 // Strength when it was written. Zero and null on a Plan with
                 // no flat hit, and on a flipped one.
                 ["written"] = entry.Now && entry.TwoLine
-                    ? 0 : WrittenDamage(entry),
+                    ? 0 : WrittenDamage(entry) * (doubled ? 2 : 1),
                 ["written_strength"] = entry.Now && entry.TwoLine
                     ? null : entry.WrittenStrength,
                 // KOKOMI REVIEW R6 (2026-10-14, item 7): a Counter Plan that
@@ -3021,15 +3165,14 @@ public static class KokomiPlan
     }
 
     /// <summary>KOKOMI ROUND 7 (2026-10-14): does carrying this entry out
-    /// play a card? A Companion (<see cref="KokomiRefounding.CarryOut"/>),
-    /// Moon's Reflection (<see cref="Replay"/>) and Crystal Collapse
+    /// play a card? Moon's Reflection (<see cref="Replay"/>) and Crystal Collapse
     /// (<see cref="PlayCopy"/>) go through <c>CardCmd.AutoPlay</c>, which
     /// logs a card play the way the base game's own auto-plays do, so
     /// <c>RingingPower.ShouldPlay</c> counts it. Every other clause plays no
     /// card. Display only.</summary>
     public static bool PlaysACard(Entry entry) =>
-        entry.Clauses.Any(clause => clause.Kind is Kind.PlayCompanion
-            or Kind.ReplayExhausted or Kind.PlayCopyOfCompanion);
+        entry.Clauses.Any(clause => clause.Kind is Kind.ReplayExhausted
+            or Kind.PlayCopyOfCompanion);
 
     /// <summary>KOKOMI ROUND 7 (2026-10-14): where this entry's Vulnerable
     /// lands, in <see cref="WrittenAim"/>'s words ("all", "front", "other"),
@@ -3107,6 +3250,10 @@ public static class KokomiPlan
             {
                 switch (clause.Kind)
                 {
+                    // Kokomi wording pass (2026-10-14): Crystal Collapse's
+                    // picture names the Companion it caught.
+                    case Kind.PlayCopyOfCompanion:
+                        return CopiesCaption(clause.Card?.Title.ToString());
                     case Kind.DamagePerPlanThisTurn:
                         var twice = index > 0
                             && kokomi.Powers.OfType<NereidsAscensionPower>()
@@ -3143,6 +3290,23 @@ public static class KokomiPlan
         {
             return null;
         }
+    }
+
+    /// <summary>Crystal Collapse's caption (Kokomi wording pass,
+    /// 2026-10-14): "Copies Juuga", the caught card's own name -- the half
+    /// after a Companion's em dash, cut at a colon so it fits the picture --
+    /// or "Copies nothing". PURE. The full name is the entry's
+    /// <see cref="Entry.Title"/>.</summary>
+    public static string CopiesCaption(string? title)
+    {
+        if (string.IsNullOrWhiteSpace(title)) return "Copies nothing";
+        var name = title!;
+        var dash = name.LastIndexOf('—');
+        if (dash >= 0) name = name.Substring(dash + 1).Trim();
+        var colon = name.IndexOf(':');
+        if (colon > 0) name = name.Substring(0, colon).Trim();
+        if (name.Length == 0) name = title!.Trim();
+        return "Copies " + name;
     }
 
     /// <summary>The strip's damage caption, "Deals N".</summary>
@@ -3633,6 +3797,12 @@ public static class KokomiPlan
             // folded at WRITING time -- `Schedule` puts `Hers` onto the queued
             // clause -- so the face previews the same call the queue holds.
             PreviewValue = Hers(kokomi, card, (int)BaseValue, _strengthTimes);
+            // Kokomi review r9 (2026-10-15, item 4): the Plan written now
+            // goes behind the queue's last entry, and when that one is
+            // Opening Gambit's the rider reaches this one. The face prints
+            // the doubled number, the one that will land.
+            var tail = Pending(card.Owner).LastOrDefault();
+            if (WritesDoubleRider(tail)) PreviewValue *= 2;
             // AND THEN THE TARGET'S, WHICH `EB-599` HAD TAKEN OFF (live look
             // 8b, `EB-334`). A Plan printed "Deal 10" and carried out 15
             // against a body wearing Vulnerable 2, so the line and the

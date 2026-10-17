@@ -32,20 +32,20 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoYmYakanEvocation : CustomCardModel, ICharacterCard
+public sealed class ProtoYmYakanEvocation : CustomCardModel, ICharacterCard, ISakuraPlanterCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "yae";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSakura(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForFullShrine(ArmKeywordTips.ForSakura(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_yakan_evocation");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Yakan Evocation"),
-        ("description", "Plant a [gold]Sakura[/gold] (with 3 standing, each gains a Level instead)."),
+        ("description", "Plant a [gold]Sakura[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

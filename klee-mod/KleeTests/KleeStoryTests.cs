@@ -103,15 +103,19 @@ public class KleeStoryTests
     [Fact]
     public void Starsnatch_Cliff_is_the_papers_page_and_table()
     {
+        // Its options and effects are batch 1's; its page (now a memory) and
+        // its result lines are the story chains'.
         var paper = Paper(1);
+        var chains = StoryChainTests.Paper();
         var e = Klee.Events[0];
         Assert.Contains($"## 3. Act 1's story event: {e.Title}", paper);
-        Assert.Contains($"> {e.Body}", paper);
+        Assert.Contains($"> {e.Body}", chains);
         Assert.Equal(3, e.Options.Count);
         foreach (var o in e.Options)
         {
             Assert.Contains($"| **{o.Title}** | {ToPaper(o.Description)} |", paper);
-            Assert.Null(o.Result);
+            Assert.Contains($"| {o.Title} | ", chains);
+            Assert.Contains($" | {o.Result} |", chains);
         }
         Assert.Contains(
             $"**{Confinement.TitleText}** is a Klee-only curse: \"Unplayable. {Confinement.DescriptionText}\"",
@@ -130,7 +134,11 @@ public class KleeStoryTests
         foreach (var o in e.Options)
         {
             Assert.Contains($"| **{o.Title}** | {ToPaper(o.Description)} |", paper);
-            Assert.Null(o.Result);
+        }
+        // The story chains give it result lines.
+        foreach (var o in e.Options)
+        {
+            Assert.Contains("\"" + o.Result + "\"", StoryChainTests.Flat());
         }
     }
 
@@ -142,7 +150,8 @@ public class KleeStoryTests
         Assert.Contains($"## Act 3: {e.Title}", paper);
         Assert.Contains($"> {e.Body}", paper);
         Assert.Contains($"Klee answers whichever knight she picks: \"{KleeStory.KnightsAnswer}\"", paper);
-        foreach (var o in e.Options)
+        Assert.Equal(4, e.Options.Count);
+        foreach (var o in e.Options.Take(3))
         {
             var lines = o.Result!.Split('\n');
             Assert.Equal(2, lines.Length);
@@ -158,7 +167,11 @@ public class KleeStoryTests
     {
         foreach (var o in Klee.Events.SelectMany(e => e.Options))
         {
-            if (o.Effect.Amount > 0) Assert.Contains(o.Effect.Amount.ToString(), o.Description);
+            foreach (var step in o.Effects)
+            {
+                // "Transform a card", "Gain a random potion": one is "a".
+                if (step.Amount > 1) Assert.Contains(step.Amount.ToString(), o.Description);
+            }
         }
         Assert.Equal("Fish Blasting", new ProtoKoFishBlasting().Localization!.Single(r => r.Item1 == "title").Item2);
         Assert.Equal("Kaeya — Glacial Waltz", new ProtoMcKaeyaGlacialWaltz().Localization!.Single(r => r.Item1 == "title").Item2);
@@ -244,31 +257,37 @@ public class KleeStoryTests
 
     // ---- The event is Klee's, act by act ---------------------------------------
 
-    private static readonly Func<Type, bool> NothingSeen = _ => false;
+    private static readonly IReadOnlyList<StoryRecord> Nothing = Array.Empty<StoryRecord>();
+
+    private static (Type, IReadOnlyList<StoryRecord>)[] Seats(params Type[] characters) =>
+        characters.Select(c => (c, Nothing)).ToArray();
 
     [Fact]
     public void Each_act_offers_Klee_her_own_event_and_no_one_else_any()
     {
-        Assert.Equal(typeof(KleeStarsnatchCliff), StoryRules.EventFor(new[] { typeof(global::KleeMod.Klee) }, 0, NothingSeen)!.EventType);
-        Assert.Equal(typeof(KleeLetterFromJean), StoryRules.EventFor(new[] { typeof(global::KleeMod.Klee) }, 1, NothingSeen)!.EventType);
-        Assert.Equal(typeof(KleeKnightsComeLooking), StoryRules.EventFor(new[] { typeof(global::KleeMod.Klee) }, 2, NothingSeen)!.EventType);
-        Assert.Null(StoryRules.EventFor(new[] { typeof(global::KleeMod.Klee) }, 3, NothingSeen));
+        var klee = Seats(typeof(global::KleeMod.Klee));
+        Assert.Equal(0, StoryRules.EventFor(klee, 0, 7UL)!.ActIndex);
+        Assert.Equal(typeof(KleeLetterFromJean), StoryRules.EventFor(klee, 1, 7UL)!.EventType);
+        Assert.Equal(typeof(KleeKnightsComeLooking), StoryRules.EventFor(klee, 2, 7UL)!.EventType);
+        Assert.Null(StoryRules.EventFor(klee, 3, 7UL));
         for (var act = 0; act < 4; act++)
         {
-            Assert.Null(StoryRules.EventFor(new[] { typeof(Kokomi), typeof(Furina) }, act, NothingSeen));
-            Assert.Null(StoryRules.EventFor(new[] { typeof(MegaCrit.Sts2.Core.Models.Characters.Ironclad) }, act, NothingSeen));
-            Assert.Null(StoryRules.EventFor(Array.Empty<Type>(), act, NothingSeen));
+            Assert.Null(StoryRules.EventFor(Seats(typeof(Kokomi), typeof(Yae)), act, 7UL));
+            Assert.Null(StoryRules.EventFor(Seats(typeof(MegaCrit.Sts2.Core.Models.Characters.Ironclad)), act, 7UL));
+            Assert.Null(StoryRules.EventFor(Seats(), act, 7UL));
         }
-        // Starsnatch Cliff is act 1's, and only act 1's.
-        Assert.Equal(new[] { 0, 1, 2 }, Klee.Events.Select(e => e.ActIndex));
+        Assert.Equal(new[] { 0, 1, 2, 0, 1, 0, 1, 2 }, Klee.Events.Select(e => e.ActIndex));
     }
 
     [Fact]
     public void Klee_at_a_co_op_table_still_gets_hers_and_only_once()
     {
-        var table = new[] { typeof(Kokomi), typeof(global::KleeMod.Klee) };
-        Assert.Equal(typeof(KleeStarsnatchCliff), StoryRules.EventFor(table, 0, NothingSeen)!.EventType);
-        Assert.Null(StoryRules.EventFor(table, 0, t => t == typeof(KleeStarsnatchCliff)));
+        var first = StoryRules.EventFor(Seats(typeof(Kokomi), typeof(global::KleeMod.Klee)), 0, 7UL)!;
+        Assert.Contains(first, Klee.Events);
+        var fired = new[] { new StoryRecord(0, first.EventType, null) };
+        Assert.Null(StoryRules.EventFor(
+            new (Type, IReadOnlyList<StoryRecord>)[] { (typeof(Kokomi), Nothing), (typeof(global::KleeMod.Klee), fired) },
+            0, 7UL));
     }
 
     [Fact]
@@ -290,7 +309,9 @@ public class KleeStoryTests
         var patch = typeof(StoryEventModel).Assembly.GetTypes()
             .Single(t => t.Name == "Hook_ModifyNextEvent_Story_Patch");
         var calls = Il.Calls(patch.GetMethod("Postfix", HeadlessGame.All)!);
-        Assert.Contains("StoryRules.EventFor", calls);
+        Assert.Contains("StoryRules.RoomEventFor", calls);
+        Assert.Contains("StoryRules.EventFor",
+            Il.Calls(typeof(StoryRules).GetMethod(nameof(StoryRules.RoomEventFor))!));
         // No act class in the mod names a story event.
         foreach (var t in typeof(StoryEventModel).Assembly.GetTypes()
                      .Where(t => typeof(ActModel).IsAssignableFrom(t)))

@@ -324,7 +324,6 @@ MIRRORED: dict[str, object] = {
     "FurinaStageLaw.HighStakesEvery": _stage("HIGH_STAKES_EVERY"),
     "FurinaStageLaw.HighStakesEveryUpgraded": _stage("HIGH_STAKES_EVERY_UPGRADED"),
     "FurinaStageLaw.HymnThreshold": _stage("HYMN_THRESHOLD"),
-    "FurinaStageLaw.PrimaDonnaFanfare": _stage("PRIMA_DONNA_FANFARE"),
     "FurinaStageLaw.ReginaDrain": _stage("REGINA_DRAIN"),
     "FurinaStageLaw.StarTurnFanfarePer": _stage("STAR_TURN_FANFARE_PER"),
     # The diversity pass (2026-10-11): Bravura's "for every 3 spent" and
@@ -343,8 +342,16 @@ MIRRORED: dict[str, object] = {
     "YaeLaw.PlantLevel": _yae("PLANT_LEVEL"),
     "YaeLaw.RedInkAmount": _yae("RED_INK_AMOUNT"),
     "YaeLaw.FoxFireDamage": _yae("FOX_FIRE_DAMAGE"),
-    "YaeLaw.OfferingPerStrike": _yae("OFFERING_DRAW"),
+    # Review r3 (ruled 2026-10-14): the Sakura kinds' bases; Offering left
+    # with the typed Tenko.
+    "YaeLaw.FoxfireBase": _yae("FOXFIRE_BASE"),
+    "YaeLaw.KitsuneBase": _yae("KITSUNE_BASE"),
     "YaeLaw.RoyaltiesPayout": _yae("ROYALTIES_ENERGY"),
+    # The refill (ruled 2026-10-16): Kitsune Barrage, Sesshou Fang.
+    "YaeLaw.BarrageHits": _yae("BARRAGE_HITS"),
+    "YaeLaw.BarrageFullHits": _yae("BARRAGE_FULL_HITS"),
+    "YaeLaw.BarrageSakura": _yae("BARRAGE_SAKURA"),
+    "YaeLaw.FangLevel": _yae("FANG_LEVEL"),
     "VarkaLaw.SwirlPyroDamage": _varka("SWIRL_PYRO_DAMAGE"),
     "VarkaLaw.SwirlHydroBlock": _varka("SWIRL_HYDRO_BLOCK"),
     "VarkaLaw.SwirlCryoVulnerable": _varka("SWIRL_CRYO_VULNERABLE"),
@@ -380,6 +387,15 @@ _VARKA_ITEMS_REASON = (
     "VARKA'S OWN RELICS AND POTIONS (review/active/varka-expansion-2026-10-01.md "
     "sec.4). A printed number on a Prototype-stage relic or potion of his, "
     "built C# first (operations/prototype.md); no sim twin exists until "
+    "Balance.")
+
+#: Kokomi's own relics and potions (review/active/kokomi-relics-potions-
+#: 2026-10-15.md), built C# first like Varka's: tier0's Kokomi twin models
+#: no relic but the Casket.
+_KOKOMI_ITEMS_REASON = (
+    "KOKOMI'S OWN RELICS AND POTIONS (review/active/kokomi-relics-potions-"
+    "2026-10-15.md). A printed number on a Prototype-stage relic or potion of "
+    "hers, built C# first (operations/prototype.md); no sim twin exists until "
     "Balance.")
 
 #: THE SPIRAL ABYSS MODE (review/active/spiral-abyss-pools-2026-10-12.md):
@@ -460,6 +476,9 @@ UNMIRRORED: dict[str, str] = {
     "AbyssDraft.OptionCount": _ABYSS_REASON,
     "AlicesGuidebook.Growth": _ARM_ITEMS_REASON,
     "BottledResolve.Oath": _VARKA_ITEMS_REASON,
+    "BottledShoal.Stings": _KOKOMI_ITEMS_REASON,
+    "OceanHuedClam.MendAmount": _KOKOMI_ITEMS_REASON,
+    "ResistanceArmband.Block": _KOKOMI_ITEMS_REASON,
     "KnightsCommission.Oath": _VARKA_ITEMS_REASON,
     "WindblumeGarland.Block": _VARKA_ITEMS_REASON,
     "BlastingPowder.Growth": _ARM_ITEMS_REASON,
@@ -476,6 +495,13 @@ UNMIRRORED: dict[str, str] = {
     "FireworksStand.Threshold": _ARM_ITEMS_REASON,
     "OperaGlasses.Fanfare": _ARM_ITEMS_REASON,
     "GrandTheaterProgram.Fanfare": _ARM_ITEMS_REASON,
+    # Furina's card pass (2026-10-15, review/active/furina-card-pass-
+    # 2026-10-15.md): her five relics' numbers, built C# first like the two
+    # above; tier0's Stage twin models none of her relics.
+    "ClaquesLedger.Fanfare": _ARM_ITEMS_REASON,
+    "BouquetOfRoses.Energy": _ARM_ITEMS_REASON,
+    "FurinaStageLaw.BouquetSpend": _ARM_ITEMS_REASON,
+    "FurinaStageLaw.SeasonPassSeats": _ARM_ITEMS_REASON,
     "WatatsumiCasket.WatatsumiBlock":
         "THE KOKOMI OVERHAUL'S TOUCH OF OROBAS UPGRADE (2026-09-30, main-"
         "session design from the co-op playtest; 3 Block for each Plan "
@@ -732,11 +758,20 @@ UNMIRRORED: dict[str, str] = {
         "presentation: the overflow count's font size.",
     "KokomiPlanStrip.LineFontSize":
         "presentation: the Plan line / Now-line caption's font size (pick 5a).",
+    "KokomiPlanStrip.HintHeight":
+        "presentation: the controller button hint's row height and glyph "
+        "size, in pixels (the Plans view, 2026-10-14).",
+    "KokomiPlanView.CaptionFontSize":
+        "presentation: the Plans view's caption font size.",
     "KokomiPlanStrip.MaxDrawn":
         "presentation: how many pending Plans get a picture before the column "
         "runs off the band. Not a cap on the queue -- nothing limits how many "
-        "Plans she may write -- and the overflow is printed as `+N`, so the "
-        "sim has nothing to compare and no rule is hiding here.",
+        "Plans she may write -- and the overflow is paged behind `+N` "
+        "(release fixes, 2026-10-14), so the sim has nothing to compare and "
+        "no rule is hiding here.",
+    "KokomiPlanPages.PerPage":
+        "presentation: Plans on one page of the strip, `MaxDrawn`'s source; "
+        "`+N` turns to the next page.",
     # The Spark counter in the energy area (`EB-621`), on the same terms. Its
     # A POSITION is deliberately not here: the element derives its placement
     # from `%EnergyCounterContainer`'s own rect at runtime rather than writing
@@ -779,6 +814,16 @@ UNMIRRORED: dict[str, str] = {
         "panel's own units. It is a MARGIN rather than a position -- it is "
         "added to the panel's own edge at runtime -- and the sim has no "
         "energy panel, no viewport and nothing that could overlap.",
+    # Varka's Oath dial by the energy orb (2026-10-14, [USER]'s option 2).
+    "VarkaOathDial.SmallScale":
+        "presentation: a dimmed pip's size as a fraction of the current "
+        "element's pip. The numbers it draws are the ledger's Oath counts.",
+    "VarkaOathDial.PipGap":
+        "presentation: the gap between the dial's pips, in the energy "
+        "panel's own units. The sim draws no dial.",
+    "VarkaOathDial.Margin":
+        "presentation: the Spark counter's panel margin, named on the dial "
+        "for its tests. The sim has no energy panel.",
     # The Bake-Kurage's beat (`EB-316`, `EB-317`). Both numbers are SCREEN
     # TIME. They decide how long an animation and a speech bubble occupy the
     # frame and nothing else: no hit is added, removed, resized or reordered by
@@ -842,6 +887,9 @@ UNMIRRORED: dict[str, str] = {
         "presentation: narrowest x stretch of a Drain/Repay effect.",
     "FurinaStageFx.MaxStretch":
         "presentation: widest x stretch of a Drain/Repay effect.",
+    # Furina's guest effects (2026-10-16): a straggler node is freed after this.
+    "FurinaGuestFx.LeakSeconds":
+        "presentation: leak guard on a guest effect node, in seconds.",
     "ThrownProjectile.FlightSeconds":
         "presentation: hand-to-target flight of the thrown bomb in seconds.",
     "ThrownProjectile.ArcLift":

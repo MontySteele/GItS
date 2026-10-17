@@ -155,7 +155,10 @@ public class FurinaSweepTests
         // Out of combat it keeps its two-faced name.
         Assert.Equal("Ousia / Pneuma", FurinaFlip.TitleOf(card, "Ousia / Pneuma"));
         var face = Face(new ProtoFsOusiaPneuma());
-        Assert.StartsWith("{Pneuma:Gain {BranchBlock:diff()}", face);
+        // Furina's card pass (2026-10-15): each face does one half of her
+        // kit, Ousia a Drain and Pneuma a Repay.
+        Assert.StartsWith("{Pneuma:[gold]Repay[/gold] 2. Gain {BranchBlock:diff()}", face);
+        Assert.Contains("{InCombat:[gold]Drain[/gold] 2. Deal {BranchDamage:diff()} damage.", face);
         Assert.Contains("[gold]Flip[/gold]", face);
         Assert.Contains("ArmKeywordTips.ForFlip", Generated("ProtoFsOusiaPneuma"));
     }
@@ -163,8 +166,9 @@ public class FurinaSweepTests
     [Fact]
     public void The_upgrades_move_the_printed_numbers()
     {
-        Assert.Equal(11m, Upgraded(new ProtoFsOusiaPneuma()).DynamicVars["BranchDamage"].BaseValue);
-        Assert.Equal(10m, Upgraded(new ProtoFsOusiaPneuma()).DynamicVars["BranchBlock"].BaseValue);
+        // Furina's card pass (2026-10-15): 10 [13] and 8 [11].
+        Assert.Equal(13m, Upgraded(new ProtoFsOusiaPneuma()).DynamicVars["BranchDamage"].BaseValue);
+        Assert.Equal(11m, Upgraded(new ProtoFsOusiaPneuma()).DynamicVars["BranchBlock"].BaseValue);
         Assert.Equal(8m, Upgraded(new ProtoFsObjection()).DynamicVars.Block.BaseValue);
         Assert.Equal(9m, Upgraded(new ProtoFsTearfulMonologue()).DynamicVars.Block.BaseValue);
         Assert.Equal(8m, Upgraded(new ProtoFsStageDirections()).DynamicVars.Block.BaseValue);

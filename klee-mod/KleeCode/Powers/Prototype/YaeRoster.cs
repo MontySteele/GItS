@@ -51,40 +51,46 @@ internal static class YaeRoster
         };
 
     /// <summary>
-    /// The pool: batch one's thirty (sec.5) realigned, and batch two's ten
+    /// The pool: batch one's thirty (sec.5) realigned, batch two's ten
     /// (<c>review/active/yae-design-axes-2026-10-14.md</c> sec.5 and its
-    /// Ruled section): FORTY, fifteen Commons, sixteen Uncommons and nine
-    /// Rares, in the sheet's order. A STAGED KIT BELOW 78:
-    /// the second half of the pool waits on [USER]'s first play and the audit
-    /// that follows it (the paper's "Not in this batch, said so"), as
-    /// Furina's 24-row slice and Varka's 41 waited before theirs.
+    /// Ruled section) and review r3's three signature cards
+    /// (<c>review/active/yae-review-r3-2026-10-14.md</c> sec.3), and the
+    /// pool to 78's thirty-five (<c>review/active/yae-pool-to-78-2026-10-15.md</c>
+    /// sec.2, ruled 2026-10-15; Sakura Grove and Fox's Mooncall swapped
+    /// rarities, sec.3), less the dedupe's eleven near-copies and plus the
+    /// refill's eleven (<c>review/active/yae-dedupe-2026-10-16.md</c>,
+    /// <c>review/active/yae-refill-2026-10-16.md</c>, ruled 2026-10-16):
+    /// SEVENTY-EIGHT, twenty Commons, thirty-eight Uncommons and twenty
+    /// Rares, in the sheet's order. No Ancients and no co-op tier yet.
     /// </summary>
     internal static IReadOnlyList<CardModel> Pool() => new CardModel[]
     {
-        // Common (15)
-        ModelDb.Card<ProtoYmKitsuneFlash>(),
+        // Common (20)
         ModelDb.Card<ProtoYmThunderRite>(),
-        ModelDb.Card<ProtoYmShrineOffering>(),
         ModelDb.Card<ProtoYmTwinSakura>(),
-        ModelDb.Card<ProtoYmDeadline>(),
         ModelDb.Card<ProtoYmFoxFireDraft>(),
         ModelDb.Card<ProtoYmSlyStrike>(),
         ModelDb.Card<ProtoYmFoxTrick>(),
         ModelDb.Card<ProtoYmShrineMaidensGuard>(),
-        ModelDb.Card<ProtoYmShrineBell>(),
-        ModelDb.Card<ProtoYmGraftedBranch>(),
         ModelDb.Card<ProtoYmMarginNote>(),
         ModelDb.Card<ProtoYmKitsunePounce>(),
         ModelDb.Card<ProtoYmFoxfireSweep>(),
         ModelDb.Card<ProtoYmEvergreenCharm>(),
-        // Uncommon (16)
-        ModelDb.Card<ProtoYmSakuraGrove>(),
+        ModelDb.Card<ProtoYmThunderPetal>(),
+        ModelDb.Card<ProtoYmCliffhanger>(),
+        ModelDb.Card<ProtoYmKitsuneBarrage>(),
+        ModelDb.Card<ProtoYmSesshouFang>(),
+        ModelDb.Card<ProtoYmFallingBlossom>(),
+        ModelDb.Card<ProtoYmPublishersDeadline>(),
+        ModelDb.Card<ProtoYmFoxsShade>(),
+        ModelDb.Card<ProtoYmHideBehindTheShrine>(),
+        ModelDb.Card<ProtoYmRewrite>(),
+        ModelDb.Card<ProtoYmDawnPrayer>(),
+        // Uncommon (38)
         ModelDb.Card<ProtoYmKitsuneRite>(),
         ModelDb.Card<ProtoYmThunderboltTithe>(),
-        ModelDb.Card<ProtoYmRootedShrine>(),
         ModelDb.Card<ProtoYmEdictOfCleansing>(),
         ModelDb.Card<ProtoYmBestseller>(),
-        ModelDb.Card<ProtoYmPrintRun>(),
         ModelDb.Card<ProtoYmFootnote>(),
         ModelDb.Card<ProtoYmSakuraSeal>(),
         ModelDb.Card<ProtoYmSerialization>(),
@@ -94,9 +100,33 @@ internal static class YaeRoster
         ModelDb.Card<ProtoYmFallenPetals>(),
         ModelDb.Card<ProtoYmMikageThunder>(),
         ModelDb.Card<ProtoYmInkedBranches>(),
-        // Rare (9)
-        ModelDb.Card<ProtoYmTenkoKenshin>(),
+        ModelDb.Card<ProtoYmSecondPrinting>(),
+        ModelDb.Card<ProtoYmAuthorsCopy>(),
         ModelDb.Card<ProtoYmFoxsMooncall>(),
+        ModelDb.Card<ProtoYmNarukamiRay>(),
+        ModelDb.Card<ProtoYmGalleyProof>(),
+        ModelDb.Card<ProtoYmPetalStorm>(),
+        ModelDb.Card<ProtoYmFoxsBargain>(),
+        ModelDb.Card<ProtoYmSpiritfoxPrank>(),
+        ModelDb.Card<ProtoYmGenreShift>(),
+        ModelDb.Card<ProtoYmNarukamiJudgment>(),
+        ModelDb.Card<ProtoYmKitsunesShelter>(),
+        ModelDb.Card<ProtoYmToriiWard>(),
+        ModelDb.Card<ProtoYmKitsuneVeil>(),
+        ModelDb.Card<ProtoYmHoldThePresses>(),
+        ModelDb.Card<ProtoYmSakuraCanopy>(),
+        ModelDb.Card<ProtoYmDisarmingSmile>(),
+        ModelDb.Card<ProtoYmReplanting>(),
+        ModelDb.Card<ProtoYmLateNightReading>(),
+        ModelDb.Card<ProtoYmEnlightenedBlessing>(),
+        ModelDb.Card<ProtoYmSaiguusLesson>(),
+        ModelDb.Card<ProtoYmShrinesSacredShade>(),
+        ModelDb.Card<ProtoYmEditorialPriority>(),
+        ModelDb.Card<ProtoYmHuntingGaze>(),
+        ModelDb.Card<ProtoYmInscribedThunder>(),
+        ModelDb.Card<ProtoYmKitsunesBlessing>(),
+        // Rare (20)
+        ModelDb.Card<ProtoYmTenkoKenshin>(),
         ModelDb.Card<ProtoYmYakanOffering>(),
         ModelDb.Card<ProtoYmTheSevenGlamours>(),
         ModelDb.Card<ProtoYmSakuraChanneling>(),
@@ -104,6 +134,18 @@ internal static class YaeRoster
         ModelDb.Card<ProtoYmRebornAsGuujiYae>(),
         ModelDb.Card<ProtoYmEditorInChief>(),
         ModelDb.Card<ProtoYmRoyalties>(),
+        ModelDb.Card<ProtoYmSerialNovel>(),
+        ModelDb.Card<ProtoYmSakuraGrove>(),
+        ModelDb.Card<ProtoYmForbiddenArtDaisesshou>(),
+        ModelDb.Card<ProtoYmKagurasVerity>(),
+        ModelDb.Card<ProtoYmNarukamiBloom>(),
+        ModelDb.Card<ProtoYmSacredThunderbolt>(),
+        ModelDb.Card<ProtoYmOffertoryBox>(),
+        ModelDb.Card<ProtoYmAfterword>(),
+        ModelDb.Card<ProtoYmFoxsVerdict>(),
+        ModelDb.Card<ProtoYmGuardianOfNarukami>(),
+        ModelDb.Card<ProtoYmStellarConduct>(),
+        ModelDb.Card<ProtoYmEternity>(),
     };
 
     /// <summary>THE OFFER (<c>YaeCardPool.FilterThroughEpochs</c>): the pool.

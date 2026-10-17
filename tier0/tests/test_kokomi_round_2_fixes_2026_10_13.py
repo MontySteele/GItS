@@ -35,7 +35,7 @@ def _upgraded(card):
         return None
 
 
-def test_grand_design_counts_every_plan_card_and_companion_and_nothing_else():
+def test_grand_design_counts_every_plan_card_and_nothing_else():
     rows = loader.prototype_cards()
     checked = 0
     wrong = []
@@ -47,7 +47,9 @@ def test_grand_design_counts_every_plan_card_and_companion_and_nothing_else():
             st.player.energy = 3
             gd = copy.deepcopy(loader.get_card("proto_kk_grand_design"))
             st.player.hand = [gd, card]
-            want = ((bool(card.plan) or card.is_companion)
+            # Kokomi review r9 pick 1 (a), 2026-10-15: a Companion counts
+            # only when it prints a Plan line.
+            want = (bool(card.plan)
                     and card.id != "proto_kk_grand_design")
             if combat.card_playable(st, gd) != want:
                 wrong.append((card.id, card.upgraded))

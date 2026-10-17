@@ -12,11 +12,12 @@ namespace KleeMod.Story;
 /// </summary>
 public static class StoryRegistry
 {
-    /// <summary>The tables. Kokomi and Furina add theirs here.</summary>
+    /// <summary>The tables. Kokomi and Yae add theirs here.</summary>
     public static readonly IReadOnlyList<CharacterStory> All = new[]
     {
         KleeStory.Table,
         VarkaStory.Table,
+        FurinaStory.Table,
     };
 
     /// <summary>The table for this character, or null.</summary>
@@ -38,33 +39,191 @@ public static class StoryRules
     /// <summary>
     /// The story event an event room in this act becomes, or null.
     ///
-    /// THE FIRST EVENT ROOM OF THE ACT. The paper calls each one "Act N's
-    /// story event", so it is guaranteed rather than one more draw in a pool
-    /// of thirty: the first event a story character's run pulls in the act is
-    /// her event, once (an event already seen is never offered again). With
-    /// two story characters at one table the first player's event comes
-    /// first, and the next player's at the act's next event room.
+    /// THE FIRST EVENT ROOM OF THE ACT. The first event a story character's
+    /// run pulls in the act is her event, and at most one of hers fires an
+    /// act (<see cref="Route"/>). The solo rule; a co-op table goes through
+    /// <see cref="RoomEventFor"/>, where every player's event shares the
+    /// act's story room.
     /// </summary>
-    /// <param name="characters">The run's players' characters, in seat order.</param>
+    /// <param name="seats">Each player's character and that player's saved
+    /// story (<see cref="Records"/>), in seat order.</param>
     /// <param name="actIndex">The act, 0 for act 1.</param>
-    /// <param name="alreadySeen">Whether an event type has been visited this run.</param>
+    /// <param name="seed">The run's seed: act 1's draw.</param>
     public static StoryEvent? EventFor(
-        IEnumerable<Type> characters, int actIndex, Func<Type, bool> alreadySeen)
+        IEnumerable<(Type Character, IReadOnlyList<StoryRecord> Records)> seats,
+        int actIndex, ulong seed)
     {
-        foreach (var character in characters)
+        foreach (var (character, records) in seats)
         {
             var story = StoryRegistry.For(character);
             if (story == null) continue;
-            foreach (var e in story.Events)
-            {
-                if (e.ActIndex == actIndex && !alreadySeen(e.EventType)) return e;
-            }
+            var e = Route(story, actIndex, records, seed);
+            if (e != null) return e;
         }
         return null;
     }
 
+    /// <summary>
+    /// THE MODEL AN EVENT ROOM BECOMES, or null for the drawn event.
+    ///
+    /// SOLO: her own event type (<see cref="EventFor"/>), unchanged.
+    ///
+    /// CO-OP (ruled 2026-10-16, the chains paper's "Co-op"): the act's story
+    /// room is a story room for every player at once. Where any seat's story
+    /// would claim this room (<see cref="CoopRoom"/>), the room becomes
+    /// <see cref="StoryCoopRoomEvent"/>, whose copy for each player shows
+    /// that player's own event or the placeholder.
+    /// </summary>
+    public static Type? RoomEventFor(
+        IReadOnlyList<(Type Character, IReadOnlyList<StoryRecord> Records)> seats,
+        int actIndex, ulong seed)
+    {
+        if (seats.Count <= 1) return EventFor(seats, actIndex, seed)?.EventType;
+        return CoopRoom(seats, actIndex, seed) == null ? null : typeof(StoryCoopRoomEvent);
+    }
+
+    /// <summary>
+    /// THE CO-OP STORY ROOM, seat by seat, or null when no seat's story has
+    /// an event this act (the room stays the drawn event). Each seat gets its
+    /// own routed event (<see cref="CoopEventFor"/>), or null: the
+    /// placeholder, for a character with no story table, a story with no
+    /// event this act, or a story that already fired this act.
+    /// </summary>
+    public static IReadOnlyList<StoryEvent?>? CoopRoom(
+        IReadOnlyList<(Type Character, IReadOnlyList<StoryRecord> Records)> seats,
+        int actIndex, ulong seed)
+    {
+        var room = seats.Select(s => CoopEventFor(s.Character, s.Records, actIndex, seed)).ToList();
+        return room.Any(e => e != null) ? room : null;
+    }
+
+    /// <summary>One player's page in the co-op story room: her own routed
+    /// event, by the solo rules (<see cref="Route"/>) on her own saved story,
+    /// or null for the placeholder.</summary>
+    public static StoryEvent? CoopEventFor(
+        Type? character, IReadOnlyList<StoryRecord> records, int actIndex, ulong seed)
+    {
+        var story = StoryRegistry.For(character);
+        return story == null ? null : Route(story, actIndex, records, seed);
+    }
+
+    /// <summary>
+    /// THE CHAIN (review/active/klee-varka-story-chains-2026-10-14.md, "The
+    /// shape"). Act 1 offers one of its events at random (drawn from the
+    /// seed, so a reload draws the same one). Act 2 follows the thread act 1
+    /// started; with no act-1 event it offers the home thread. Act 3 closes
+    /// the thread act 2 followed; with no act-2 event it offers the home
+    /// finale. Null once one of hers fired this act.
+    /// </summary>
+    public static StoryEvent? Route(
+        CharacterStory story, int actIndex, IReadOnlyList<StoryRecord> records, ulong seed)
+    {
+        if (records.Any(r => r.ActIndex == actIndex)) return null;
+        var inAct = story.Events.Where(e => e.ActIndex == actIndex).ToList();
+        if (inAct.Count == 0) return null;
+        if (actIndex == 0)
+        {
+            return inAct[Draw(seed, story.Name + ".act1", inAct.Count)];
+        }
+        var before = records.FirstOrDefault(r => r.ActIndex == actIndex - 1);
+        if (before != null)
+        {
+            var next = inAct.FirstOrDefault(e => e.Follows.Contains(before.EventType));
+            if (next != null) return next;
+        }
+        return inAct.FirstOrDefault(e => e.Home);
+    }
+
+    /// <summary>A draw in [0, n) from the seed and a salt, without touching
+    /// any of the run's own rngs (so every later roll stays where it was).</summary>
+    public static int Draw(ulong seed, string salt, int n)
+    {
+        ulong h = 14695981039346656037UL; // FNV-1a
+        foreach (var ch in salt)
+        {
+            h ^= ch;
+            h *= 1099511628211UL;
+        }
+        var z = seed ^ h;
+        z += 0x9E3779B97F4A7C15UL; // splitmix64
+        z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9UL;
+        z = (z ^ (z >> 27)) * 0x94D049BB133111EBUL;
+        z ^= z >> 31;
+        return (int)(z % (ulong)n);
+    }
+
+    /// <summary>
+    /// THE SAVED STORY, read from what the game already saves: the run's
+    /// visited events (each story event belongs to one act) and the player's
+    /// event choices in the run history, whose titles are the options' loc
+    /// keys (<c>ENTRY.pages.INITIAL.options.KEY.title</c>).
+    ///
+    /// A CHOICE IS ALSO A VISIT. In a co-op story room
+    /// (<see cref="StoryCoopRoomEvent"/>) the run visits the room's model,
+    /// not a player's event; her choice under that event's keys, in HER run
+    /// history, is what says it fired, and fired for her alone.
+    /// </summary>
+    public static List<StoryRecord> Records(
+        CharacterStory story, Func<Type, bool> visited, IEnumerable<string?> choiceKeys,
+        Func<Type, string> entryOf)
+    {
+        var keys = choiceKeys.Where(k => k != null).Select(k => k!).ToList();
+        var records = new List<StoryRecord>();
+        foreach (var e in story.Events)
+        {
+            var prefix = entryOf(e.EventType) + ".pages.INITIAL.options.";
+            string? option = null;
+            foreach (var k in keys)
+            {
+                if (k.StartsWith(prefix, StringComparison.Ordinal) && k.EndsWith(".title", StringComparison.Ordinal))
+                {
+                    option = k[prefix.Length..^".title".Length];
+                }
+            }
+            if (option == null && !visited(e.EventType)) continue;
+            records.Add(new StoryRecord(e.ActIndex, e.EventType, option));
+        }
+        return records;
+    }
+
+    /// <summary>The line the page opens with, or null: the first of the
+    /// event's openings that holds.</summary>
+    public static StoryOpening? OpeningFor(StoryEvent e, IReadOnlyList<StoryRecord> records) =>
+        e.Openings.FirstOrDefault(o => o.When.Holds(records));
+
+    /// <summary>The options offered: those whose condition holds.</summary>
+    public static List<StoryOption> OptionsFor(StoryEvent e, IReadOnlyList<StoryRecord> records) =>
+        e.Options.Where(o => o.ShownIf == null || o.ShownIf.Holds(records)).ToList();
+
+    /// <summary>
+    /// "Empty and unaffordable cases follow the base game, which locks an
+    /// option it cannot pay (Luminous Choir)": a Gold price above the
+    /// player's Gold; "Remove every Curse" with no Curse; Remove or Transform
+    /// with no eligible card; "Upgrade N random cards that place a Bomb" with
+    /// none. "Remove every X" with none is not a lock: that part does nothing.
+    /// </summary>
+    public static bool IsLocked(StoryOption option, StoryDeckView deck)
+    {
+        foreach (var e in option.Effects)
+        {
+            switch (e.Kind)
+            {
+                case StoryEffectKind.LoseGold when deck.Gold < e.Amount:
+                case StoryEffectKind.RemoveCard when deck.Removable == 0:
+                case StoryEffectKind.TransformCards when deck.Transformable == 0:
+                case StoryEffectKind.UpgradeRandomBombCards when deck.UpgradableBombPlacers == 0:
+                case StoryEffectKind.RemoveEveryCurseLoseGoldEach
+                    when deck.RemovableCurses == 0 || deck.Gold < e.Amount * deck.RemovableCurses:
+                    return true;
+            }
+        }
+        return false;
+    }
+
     /// <summary>Whether this player may take the event's options: it is
-    /// HER event. Everyone else at the table gets the page and Proceed.</summary>
+    /// HER event. Everyone else at the table gets the page and Proceed (a
+    /// co-op room saved before the co-op story rooms; since then a co-op
+    /// table draws <see cref="StoryCoopRoomEvent"/>, where everyone plays).</summary>
     public static bool IsOwnersEvent(Type? ownerCharacter, Type eventType) =>
         StoryRegistry.For(ownerCharacter)?.Events.Any(e => e.EventType == eventType) ?? false;
 
@@ -104,9 +263,10 @@ public static class StoryRules
         combatsServed >= StoryCurseCombats;
 
     /// <summary>Whether this card's play is the character's signature
-    /// moment (Varka: Four Winds' Ascension), by her table.</summary>
+    /// moment (Varka: Four Winds' Ascension or Dandelion Gale), by her
+    /// table.</summary>
     public static bool IsSignaturePlay(CharacterStory story, Type? card) =>
-        card != null && story.SignatureCard == card;
+        card != null && story.SignatureCards.Contains(card);
 
     /// <summary>
     /// WHO SPEAKS AT A BOSS'S ENTRY, by seat. Each story character speaks
@@ -198,6 +358,12 @@ public static class StoryRules
         return picked;
     }
 }
+
+/// <summary>What a lock reads off the owner: Gold, and how many deck cards
+/// can be removed, transformed, are removable Curses, and are upgradable
+/// cards that place a Bomb.</summary>
+public sealed record StoryDeckView(
+    int Gold, int Removable, int Transformable, int RemovableCurses, int UpgradableBombPlacers);
 
 /// <summary>One speech at a boss's entry: the table <see cref="Story"/> whose
 /// rows are spoken, the seat that owns it, and either a pair exchange with

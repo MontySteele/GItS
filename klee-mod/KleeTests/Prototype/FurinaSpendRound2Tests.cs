@@ -139,12 +139,12 @@ public class FurinaSpendRound2Tests : IDisposable
         Assert.Null(typeof(HighStakesPower).Assembly.GetType(
             "KleeMod.Cards.Prototype.Generated.ProtoFsGentleCurrent"));
         // The house preview it shared with Hymn of Many Waters:
-        // "(Repays N, +M Block)".
+        // "(Repay N: gain M Block)" since furina-next paper 3.
         Assert.Contains("FurinaStageFacePreview.Repay(this, "
                         + "DynamicVars[\"RepayAmount\"].IntValue, "
                         + "FurinaStageFacePreview.PayBlock)",
                         Generated("ProtoFsHymnOfManyWaters"));
-        Assert.Equal("\n(Repays 1, +2 Block)",
+        Assert.Equal("\n(Repay 1: gain 2 Block)",
                      FurinaStageFacePreview.Line(1, 3, "Block"));
     }
 

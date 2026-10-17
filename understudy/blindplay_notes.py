@@ -115,16 +115,11 @@ NOTHING_BEHIND_CLAUSE = " No enemy is behind you now."
 #: does not mark which cards turn her to face their target." Beside each
 #: hand card that takes `on`, only while you are Surrounded.
 TURNS_YOU_TAG = " (turns you)"
-#: The Kokomi re-founding (2026-10-12): "Any Companion card can be written
-#: as a Plan", and no face says so. Beside each hand card the jellyfish takes
-#: whose own face prints no Plan line.
-WRITABLE_TAG = " (can be written as a Plan)"
-#: And the Plan row says it on a Kokomi page, in step with the cards' tip
-#: (`ArmKeywordTips.ForCompanionPlan`), with what the carry-out does.
-PLAN_COMPANION_CLAUSE = (
-    " Any Companion card can be written too: next turn the Bake-Kurage "
-    "applies Hydro to the front enemy first, then the Companion plays free "
-    "and Exhausts.")
+#: (The re-founding's "(can be written as a Plan)" hand tag and the Plan
+#: row's "Any Companion card can be written too" clause left with Kokomi
+#: review r9 pick 1 (a), 2026-10-15: "let's get rid of Companions as Plans
+#: unless we make a card that specifically has a Plan line." A card the
+#: jellyfish takes now always prints its Plan line.)
 
 #: 2026-09-26 (control seat, Ironclad): "Sozu: the tool said 'Took: Power
 #: Potion' and nothing arrived." Said beside the offer, before the claim.
@@ -417,6 +412,22 @@ CARD_OFFER_AFTER_SKIP_NOTE = (
 TREASURE_PROCEED_NOTE = (
     "*The relic stays in the chest until you `choose` it; `proceed` leaves "
     "it behind.*")
+
+# Yae review r6, item 3. A seat took two Elites and could not tell why no
+# Publish came. Meditations of a Yako says so in game ("Nothing to Publish")
+# and the mod hands the page the same fact (`player.yae_shrine`
+# `nothing_to_publish`); printed only on that reward screen.
+NOTHING_TO_PUBLISH_NOTE = (
+    "*No Publish was offered: you made no Annotation that fight.*")
+
+# Yae review r6, item 5. Three seats could not tell which enemy a Sakura
+# strikes. The mod's rule (`YaeShrine.Aim`) in one sentence, word for word
+# the seat hover's (`ArmKeywordTips.YaeSakuraTargetRule`); Hunting Gaze
+# joined it with the refill (2026-10-16).
+SAKURA_TARGET_RULE = (
+    "A Sakura strikes Kitsune Pounce's target when Pounce makes it strike, "
+    "else the enemy Foxfire Lure marked this turn, else (with Hunting Gaze) "
+    "the last enemy your Attacks hit, else a random enemy.")
 
 # `EB-393`, the decline half. A ROOM WITH NO WAY OUT BUT THROUGH.
 #
@@ -1169,9 +1180,14 @@ PLAN_AIM_NOTE = ("- A Plan with one target (damage or a debuff like Weak) "
 # keyword is at its 135-character ceiling and cannot carry this
 # (`PLAN_AIM_NOTE`'s argument, whole); the panel has no ceiling, and it is the
 # screen every Plan is written from.
-PLAN_BLOCK_NOTE = ("- A Plan is carried out before you play anything, so it "
-                   "lands in whatever Block the enemy is still standing in "
-                   "from its own turn -- you cannot strip that Block first.")
+#
+# KOKOMI REVIEW R8 (2026-10-14, item 8): ONE WORDING FOR WHEN PLANS HAPPEN.
+# The strip says "Plans carry out after your draw" (`PLAN_AFTER_DRAW_NOTE`),
+# and this note said "before you play anything" on the same page, which a
+# seat read as two rules. The timing clause goes; the Block fact stays.
+PLAN_BLOCK_NOTE = ("- A Plan lands in whatever Block the enemy is still "
+                   "standing in from its own turn -- you cannot strip that "
+                   "Block first.")
 
 PLAN_HYDRO_NOTE = ("- Every planned HIT is the jellyfish's, and it is a Hydro "
                    "hit: it leaves a Hydro aura, or reacts with the aura "
@@ -1282,10 +1298,10 @@ PLAN_COUNT_CAPPED_NOTE = ("- The jellyfish carries out at most {n} Plans at "
 # yours and Frail does cut it. Two clauses, one rule, both predictable from
 # the sentence.
 #
-# KOKOMI PRE-RUN FIXES (2026-10-12): AND THE EXCEPTION. A written Companion is
-# not a clause the jellyfish deals: `KokomiCompanionPlan.CarryOut` auto-plays
-# a clone of the card, a real play of hers, so her Weak and Strength at that
-# moment move it (round 3 lane 5: Shinobu written as "Deal 8" landed 6).
+# (KOKOMI PRE-RUN FIXES, 2026-10-12, added the exception for a written
+# Companion, played as a card at its carry-out; it left with Kokomi review r9
+# pick 1 (a), 2026-10-15, when a Companion stopped being plannable without a
+# Plan line of its own.)
 # KOKOMI REVIEW R5 (2026-10-14, A2): reworded. "Shrink or Weak on you never
 # cuts it" read as "nothing on me cuts it", and Tender cut a planned Oath+
 # (run 1); the Strength-at-writing rule (the 2026-10-10 line it replaces) was
@@ -1295,9 +1311,7 @@ PLAN_WRITTEN_NUMBER_NOTE = ("- Your Strength when you write it counts, a loss "
                             "you never does. A Plan that reads an intent "
                             "(Tide Wall, Flank, Undercurrent Snare) reads it "
                             "when it lands. A planned Block is yours, so "
-                            "Frail cuts it. A written Companion is played as "
-                            "a card next turn, so your Strength and Weak "
-                            "then count.")
+                            "Frail cuts it.")
 #: Kokomi review r5 (2026-10-14, A2): so Spearhead before Masterstroke is
 #: visible.
 PLAN_ORDER_NOTE = "- Plans carry out in the order written."
@@ -1699,26 +1713,51 @@ ARM_KEYWORDS: dict[str, str] = {
                         "Vulnerable, Electro 3 to ALL."),
     "Knight": ("One of Varka's Companions. Playing one makes its element "
                "your current element. Geo does not."),
-    # YAE MIKO (2026-10-13), in step with `ArmKeywordTips.YaeSakuraTip` and
-    # `YaeEditTip`, markup folded out and the numbers written out (`YaeLaw`).
-    "Sakura": ("Up to 3 stand beside you. At the end of your turn each "
-               "strikes under the shrine's Rite (Thunder at the start of "
-               "combat), oldest first. Each lasts 3 turns; when it withers, "
-               "it strikes once more. Planting one raises the others' Level "
-               "by 1. Tenko: every Sakura strikes now "
-               "and lasts 3 turns again."),
-    "Edit": ("Give a card in your hand an Annotation for this combat, "
-             "replacing any it had: Red Ink (+3 damage and Block), Footnote "
-             "(draw 1), Deadline Extension (Retain), Fox Fire (4 Electro "
-             "damage to a random enemy), Sakura Seal (plant a Sakura), "
-             "Royalties (gain 1 Energy). On a Sakura: Red Ink makes its "
-             "strike 3 bigger (not in Offering), Fox Fire adds 4 damage, "
-             "Deadline Extension "
-             "stops it withering. A Published Annotation lasts the run."),
-    # YAE MIKO, THE DESIGN AXES (ruled 2026-10-14), in step with
-    # `ArmKeywordTips.YaeRiteTip`.
-    "Rite": ("Sets what Sakura strikes do. Thunder: damage. Warding: Block. "
-             "Wildfire: ALL enemies. Offering: draw."),
+    # YAE MIKO (2026-10-13), in step with `ArmKeywordTips.YaeSakuraTip`,
+    # `YaeTenkoTip` and `YaeEditTip`, markup folded out and the numbers
+    # written out (`YaeLaw`). [USER] (2026-10-14): "Sakura and Tenko should
+    # be cut into separate tips", and "no need to show the text for every
+    # possible edit if the card can only apply one": each Annotation is its
+    # own row (`YaeAnnotationText.Rule`, and `.SakuraRule` where it has one),
+    # printed only where a face names it.
+    # Shrine r2 (ruled 2026-10-14): no Rite; a full-shrine plant feeds the
+    # oldest; Tenko names its three kinds.
+    # Review r3 (ruled 2026-10-14): Tenko is one plain rule; the two kinds a
+    # card names have their own rows; the full-shrine rule is its own row
+    # (`ArmKeywordTips.YaeFullShrineTip`); an Edit fills the temporary slot.
+    # Yae review r6, item 5: which enemy it strikes (`YaeShrine.Aim`).
+    "Sakura": ("At the end of your turn, strikes an enemy for 2 + its "
+               "Level. Lasts 3 turns, then strikes once more. "
+               + SAKURA_TARGET_RULE),
+    "Tenko": "Every Sakura acts now. Refresh them to at least 3 turns.",
+    "Foxfire Sakura": ("A Sakura that hits ALL enemies for 1 + its Level "
+                       "when it acts."),
+    "Kitsune Sakura": ("A fox decoy Sakura. When it acts, you gain 2 + its "
+                       "Level Block."),
+    # Yae review r5, item 5.
+    "Full shrine": ("Planting makes your oldest Sakura act. If the new Sakura "
+                    "is the same kind, the oldest stays and gains a Level. If "
+                    "not, the oldest withers and the new one takes its "
+                    "place."),
+    "Edit": ("Give a card an Annotation for this combat, replacing its "
+             "last. Published ones stay and add up. A card that Edits up "
+             "to 2 cards opens one chooser: pick up to 2 different cards, "
+             "fewer or none."),
+    # 2026-10-14: Red Ink on a planting card reaches its Sakura too.
+    "Red Ink": ("This card deals 3 more damage and gives 3 more Block. If it "
+                "plants, its Sakura get it too. On a Sakura: the Sakura's "
+                "action is 3 bigger."),
+    "Footnote": "When this card is played, draw 1 card.",
+    "Deadline Extension": ("This card has Retain. On a Sakura: the Sakura "
+                           "does not wither."),
+    "Fox Fire": ("When this card is played, deal 4 Electro damage to a "
+                 "random enemy. On a Sakura: when the Sakura acts, it "
+                 "also deals 4 Electro damage to a random enemy."),
+    "Sakura Seal": "When this card is played, plant a Sakura.",
+    "Royalties": "When this card is played, gain 1 Energy.",
+    # Yae review r6, item 4: each Reprint adds one play.
+    "Reprint": ("The first time this card is played each combat, play it "
+                "once more for each Reprint."),
     # `EB-625`. THE RELIC A FACE IS WRITTEN AGAINST. Shell Guard says
     # "whenever the Tamakushi Casket strikes" and nothing on the page said
     # what the Casket is or what makes it strike -- [USER]'s act-1 run read
@@ -1800,9 +1839,10 @@ ARM_KEYWORDS: dict[str, str] = {
               "drained returns after combat; more than that only Repay "
               "returns."),
     # THE POOL TO 75 (2026-10-09): a Repay counts the HP it returns; a
-    # Guest Star exhausts and comes back when its guest leaves.
-    "Repay": ("Regain that much drained HP, never more than you drained. A "
-              "Repay counts the HP it returns."),
+    # Guest Star exhausts and comes back when its guest leaves. furina-next
+    # paper 3 (2026-10-16): the Block floor is the rule's one line.
+    "Repay": ("Regain that much drained HP; a Repay counts the HP it "
+              "returns. Any HP a Repay cannot return becomes Block."),
     # THE SWEEP (2026-10-14): Ousia / Pneuma's word, `ArmKeywordTips.ForFlip`.
     "Flip": "Turn this card to its other face; it starts each combat on Ousia.",
     "Summon": ("A guest joins at the back. On a full stage, the oldest guest "
@@ -1813,8 +1853,7 @@ ARM_KEYWORDS: dict[str, str] = {
     "oldest guest": ("The guest on stage longest: the one a fourth summon "
                      "would remove."),
     "Charlotte": ("The first time each turn one of your cards Repays, draw 1 "
-                  "card. Act: Repay 3. Gain 1 Block for any HP it could not "
-                  "Repay."),
+                  "card. Act: Repay 3."),
     "Wriothesley": ("Whenever you Drain, deal that much Cryo damage to a random "
                     "enemy. Act: deal 5 Cryo damage to a random enemy."),
     "Lynette": ("The first time each turn you lose HP to an enemy, gain "
@@ -2079,7 +2118,14 @@ _ARM_KEYWORD_ARM: dict[str, str] = {
     # Inazuma Universal "Yae Miko -- Sesshou Sakura", a different object, so
     # her row prints only on her runs. (The wire names her by her title,
     # "Yae Miko", which `_fold`s to the two words.)
-    "Sakura": "yae miko", "Edit": "yae miko", "Rite": "yae miko",
+    "Sakura": "yae miko", "Edit": "yae miko",
+    # 2026-10-14: Tenko and the six Annotations, split out of those two.
+    "Tenko": "yae miko", "Red Ink": "yae miko", "Footnote": "yae miko",
+    "Deadline Extension": "yae miko", "Fox Fire": "yae miko",
+    "Sakura Seal": "yae miko", "Royalties": "yae miko", "Reprint": "yae miko",
+    # Review r3 (2026-10-14).
+    "Foxfire Sakura": "yae miko", "Kitsune Sakura": "yae miko",
+    "Full shrine": "yae miko",
     # THE SALON'S TAB (2026-10-05): the summon and the four guests.
     "Summon": "furina", "Guest Star": "furina", "oldest guest": "furina",
     "Clorinde": "furina",
@@ -2165,15 +2211,25 @@ _ARM_KEYWORD_RE = {
     "Oath": re.compile(r"\bOath\b"),
     "current element": re.compile(r"\bcurrent element\b"),
     "Knight": re.compile(r"\bKnights?\b"),
-    # YAE MIKO: `Sakura` takes no plural, and its row carries Tenko (pick 6
-    # (a)); `Edit` conjugates ("Edited") and its row carries the five
-    # Annotations, "Annotated" and "Publish".
-    "Sakura": re.compile(r"\bSakura\b|\bTenko\b"),
+    # YAE MIKO: `Sakura` takes no plural; `Edit` conjugates ("Edited") and
+    # its row carries "Annotated" and "Publish". Tenko and each Annotation
+    # are their own rows (2026-10-14).
+    "Sakura": re.compile(r"\bSakura\b"),
+    "Tenko": re.compile(r"\bTenko\b"),
+    # Review r3 (2026-10-14): the two kinds a face names, and the
+    # full-shrine rule (the shrine block's "Shrine full" line prints it).
+    "Foxfire Sakura": re.compile(r"\bFoxfire Sakura\b"),
+    "Kitsune Sakura": re.compile(r"\bKitsune Sakura\b"),
+    "Full shrine": re.compile(r"\b[Ff]ull shrine\b|\bShrine full\b"),
     "Edit": re.compile(r"\bEdit(?:ed|s)?\b|\bAnnotat(?:ed|ions?)\b"
-                       r"|\bPublish(?:ed)?\b|\bRed Ink\b|\bFootnote\b"
-                       r"|\bDeadline Extension\b|\bFox Fire\b"
-                       r"|\bRoyalties\b"),
-    "Rite": re.compile(r"\bRite\b"),
+                       r"|\bPublish(?:ed)?\b"),
+    "Red Ink": re.compile(r"\bRed Ink\b"),
+    "Footnote": re.compile(r"\bFootnote\b"),
+    "Deadline Extension": re.compile(r"\bDeadline Extension\b"),
+    "Fox Fire": re.compile(r"\bFox Fire\b"),
+    "Sakura Seal": re.compile(r"\bSakura Seal\b"),
+    "Royalties": re.compile(r"\bRoyalties\b"),
+    "Reprint": re.compile(r"\bReprint\b"),
     # `EB-446`. NO PLURAL: there is one raven. It fires on Nightrider's face,
     # which names him and cannot grant him, and on the Power card that does --
     # every screen a reader can meet the word on, whether or not the run holds
@@ -3472,10 +3528,6 @@ def _keyword_rows(obs: dict[str, Any],
     for row in rows:
         if row["name"] == "Summon" and _arm_owns("Summon", who):
             row["text"] = _summon_row(hay)
-        # The Kokomi re-founding (2026-10-12): her Plan row also says any
-        # Companion can be written. On her row only, never the off-arm one.
-        if row["name"] == "Plan" and row["text"] == ARM_KEYWORDS["Plan"]:
-            row["text"] += PLAN_COMPANION_CLAUSE
     # 2026-09-26: the base game's words, off a haystack with the names of
     # the shelves, options, relics and potions struck (`_NAMED_ROW_KEYS`).
     names = _item_names(obs)
@@ -3679,6 +3731,11 @@ RESOLUTION_HIT_SELF = ", your own HP cost"
 #: The power name the page names as the source of a hit on you.
 THORNS_POWER = "Thorns"
 RESOLUTION_NO_HITS = "  Nothing this page can count landed off it."
+#: Kokomi review r8 (2026-10-14, item 12): a Power with nothing to measure on
+#: the turn it is played (Resolve, Sea's Reproach) printed the line above, and
+#: a seat read it as the Power having failed.
+RESOLUTION_POWER_PLAYED = ("  It is a Power: it is now on you and works "
+                           "from there.")
 #: 2026-09-26 (the Silent control seat): "Poison applied is never shown in
 #: 'what it did'." A power the card put on an enemy, or took off one.
 RESOLUTION_APPLIED = "  Put **{power} {n}** on **{target}**."
@@ -3706,7 +3763,7 @@ RESOLUTION_FANG_DEFAULT = "Boreas's Fang"
 #: Design-session call (2026-10-13): Wolfpack's copy, on the Ascension's own
 #: play line. It went into the draw pile unseen, and two seats never knew it
 #: worked. `{n}` is "a copy" or "2 copies".
-RESOLUTION_WOLFPACK = ("  Wolfpack: shuffled {n} of Four Winds' Ascension "
+RESOLUTION_WOLFPACK = ("  Lupical: shuffled {n} of Four Winds' Ascension "
                        "into your Draw Pile.")
 #: The Varka wave (2026-10-13): Stoke the Flames' bonus, on the Attack that
 #: took it. A seat "never saw the number change in the log, and could not tell
@@ -3758,6 +3815,16 @@ RESOLUTION_OVERFLOW_CLAUSE = " *(more hits landed than this page will list)*"
 #: once (First Strike, Echo Form). Its hits from every play are listed under
 #: it; without this a seat holding First Strike read "never doubled".
 RESOLUTION_REPLAYED_CLAUSE = " *(played {times} times; the hits of every play are below)*"
+#: Yae review r5, item 3 (lane 2: a Reprinted attack killed its target with
+#: its first play, and the page said "played two times" over one hit). The
+#: second play does run, but the base game keeps the play's target and an
+#: attack on a dead target hits nothing (`CardModel.OnPlayWrapper` passes
+#: the same `target` to every play; `AttackCommand.Execute` drops dead
+#: targets and stops). Printed when the card killed something.
+RESOLUTION_REPLAYED_KILL_CLAUSE = (
+    " *(played {times} times; the hits of every play are below. A play "
+    "aimed at an enemy that had already died hits nothing: the game does not "
+    "pick a new target)*")
 #: The co-op partner's plays this turn, under the other-player section and
 #: never under yours (the same seat round: "What you played" listed them).
 PARTNER_RESOLUTIONS_HEADING = "### What {partner} played this turn"

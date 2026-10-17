@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoVkDilucSearingOnslaught : CustomCardModel, IElementalCard, ICompanionCard, IWritableCompanion
+public sealed class ProtoVkDilucSearingOnslaught : CustomCardModel, IElementalCard, ICompanionCard, IVarkaSwitchCard
 {
     /// <summary>Sheet applies_element: this companion attack applies its element.</summary>
     public Element Element => Element.Pyro;
@@ -53,8 +53,8 @@ public sealed class ProtoVkDilucSearingOnslaught : CustomCardModel, IElementalCa
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         TipAudience.Seat
-            ? ArmKeywordTips.ForElementalReaction(ArmKeywordTips.ForCompanionPlan(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro), this, Element.Pyro), this), this)
-            : ArmKeywordTips.ForCompanionPlan(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro), this, Element.Pyro), this);
+            ? ArmKeywordTips.ForElementalReaction(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro), this, Element.Pyro), this)
+            : ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro), this, Element.Pyro);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_vk_diluc_searing_onslaught");
 
@@ -63,14 +63,6 @@ public sealed class ProtoVkDilucSearingOnslaught : CustomCardModel, IElementalCa
         ("title", "Diluc: Searing Onslaught"),
         ("description", "Deal {CalculatedDamage:diff()} [gold]Pyro[/gold] damage twice. If either hit triggers an [gold]Elemental Reaction[/gold], gain {energyPrefix:energyIcons(1)}.{InCombat:{VarkaSwitch}|}{InCombat:{VarkaWildfire}|}"),
     };
-
-    /// <summary>On Kokomi, this Companion card can also be written as a Plan on
-    /// the Bake-Kurage (the re-founding, 2026-10-12).</summary>
-    public override TargetType TargetType =>
-        KokomiCompanionPlan.TargetFor(this, base.TargetType);
-
-    /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
-    public TargetType PrintedTargetType => base.TargetType;
 
     /// <summary>This card's in-combat Oath lines
     /// (`VarkaOath.SwitchLine`, `VarkaOath.WildfireLine`).</summary>
@@ -81,6 +73,10 @@ public sealed class ProtoVkDilucSearingOnslaught : CustomCardModel, IElementalCa
         description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Pyro));
         description.Add("VarkaWildfire", VarkaOath.WildfireLine(this));
     }
+
+    /// <summary>The element this card makes Varka's current element
+    /// (`VarkaOathDial` previews it).</summary>
+    public Element VarkaSwitchElement => Element.Pyro;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
@@ -99,11 +95,6 @@ public sealed class ProtoVkDilucSearingOnslaught : CustomCardModel, IElementalCa
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (KokomiPlan.PlayedOnPet(cardPlay))
-        {
-            await KokomiCompanionPlan.Write(choiceContext, this, cardPlay);
-            return;
-        }
         var reactionsAtStart = ReactionEffects.TotalResolved;
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)

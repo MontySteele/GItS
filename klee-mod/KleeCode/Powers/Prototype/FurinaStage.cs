@@ -129,7 +129,18 @@ public static class FurinaStage
     /// it would count now (the cap under Center of Attention's free Spend,
     /// else the cap or all she holds plus Navia's free points). One
     /// expression, so preview and resolution agree.</summary>
+    /// Extended Run (furina-next paper 2, 2026-10-16) adds to the card's
+    /// printed cap, as the play's Spend does.
     public static int SpentOrUpTo(CardModel? card, int cap)
+    {
+        var owner = card?.Owner?.Creature;
+        return SpentOrUpToCap(card, LiveFor(owner)
+            ? FurinaStageLedger.For(owner!).CardUpToCap(cap) : cap);
+    }
+
+    /// <summary>`SpentOrUpTo` over a cap no power raises (Spend half).
+    /// </summary>
+    private static int SpentOrUpToCap(CardModel? card, int cap)
     {
         var spent = Spent(card);
         if (spent > 0) return spent;
@@ -145,7 +156,7 @@ public static class FurinaStage
     /// counted; before it, what a "Spend up to" half the bank (rounded down)
     /// would count now.</summary>
     public static int SpentOrHalf(CardModel? card) =>
-        SpentOrUpTo(card, FanfareOf(card?.Owner?.Creature) / 2);
+        SpentOrUpToCap(card, FanfareOf(card?.Owner?.Creature) / 2);
 
     /// <summary>`stage_spent_fours`: this play's "Spend up to X" in fours,
     /// rounded down ("Draw 1 for every 4 spent", "hit once more for every
@@ -179,13 +190,25 @@ public static class FurinaStage
     {
         int Sum<T>() where T : PowerModel =>
             (int)owner.Powers.OfType<T>().Sum(p => p.Amount);
+        // Her relics (Furina's card pass, 2026-10-15), counted off the
+        // player; none headless.
+        int Held<T>() where T : RelicModel =>
+            owner.Player?.Relics.OfType<T>().Count() ?? 0;
+        var seasonPass = Held<Relics.EpicleseSeasonPass>();
         return new StageMods
         {
-            Capacity = owner.Powers.OfType<EnsembleCastPower>().Any()
-                ? FurinaStageLaw.EnsembleSeats : FurinaStageLaw.Seats,
+            Capacity = (owner.Powers.OfType<EnsembleCastPower>().Any()
+                ? FurinaStageLaw.EnsembleSeats : FurinaStageLaw.Seats)
+              + seasonPass * FurinaStageLaw.SeasonPassSeats,
+            SeasonPass = seasonPass,
+            FontaineTeardrop = Held<Relics.FontaineTeardrop>(),
+            ClaquesLedger = Held<Relics.ClaquesLedger>(),
+            BouquetOfRoses = Held<Relics.BouquetOfRoses>(),
             GrandEntrance = Sum<GrandEntrancePower>(),
             Showstopper = Sum<ShowstopperPower>(),
             Crescendo = Sum<CrescendoPower>(),
+            PrimaDonna = Sum<PrimaDonnaPower>() + Sum<PrimaDonnaPlusPower>(),
+            PrimaDonnaDraw = Sum<PrimaDonnaPlusPower>(),
             StandingRoomOnly = Sum<StandingRoomOnlyPower>(),
             HymnOfRenewal = Sum<HymnOfRenewalPower>(),
             Revelry = Sum<UniversalRevelryPower>(),
@@ -194,7 +217,7 @@ public static class FurinaStage
             OusiaSurge = Sum<OusiaSurgePower>(),
             FiveCenturyAct = owner.Powers.OfType<FiveCenturyActPower>().Count(),
             CriticsDarling = Sum<CriticsDarlingPower>(),
-            Bis = owner.Powers.OfType<BisPower>().Count(),
+            ExtendedRun = Sum<ExtendedRunPower>(),
             Masquerade = Sum<TheMasqueradePower>(),
             FullHouse = Sum<FullHousePower>(),
         };
@@ -263,9 +286,20 @@ public static class FurinaStage
     /// all she holds, never fails, and is a Spend when at least 1 counts.
     /// Center of Attention's free Spend counts the full X and takes nothing
     /// (and, like its free Spend N, is no Spend). Returns what counts as
-    /// spent, which the card's payoff reads as `stage_spent`.</summary>
-    public static async Task<int> SpendUpTo(PlayerChoiceContext choiceContext,
-                                            Creature? owner, int cap)
+    /// spent, which the card's payoff reads as `stage_spent`. The verb an
+    /// Attack or Skill calls: Extended Run (furina-next paper 2, 2026-10-16)
+    /// adds to its whole printed cap, once
+    /// (<see cref="FurinaStageLedger.CardUpToCap"/>).</summary>
+    public static Task<int> SpendUpTo(PlayerChoiceContext choiceContext,
+                                      Creature? owner, int cap) =>
+        LiveFor(owner)
+            ? SpendUpToCap(choiceContext, owner,
+                           FurinaStageLedger.For(owner!).CardUpToCap(cap))
+            : Task.FromResult(0);
+
+    /// <summary>A "Spend up to" over a cap no power raises.</summary>
+    private static async Task<int> SpendUpToCap(
+        PlayerChoiceContext choiceContext, Creature? owner, int cap)
     {
         if (!LiveFor(owner)) return 0;
         if (cap > 0 && CenterOfAttentionPower.TryClaim(owner!))
@@ -281,11 +315,11 @@ public static class FurinaStage
 
     /// <summary>"Spend half your Fanfare" (Standing Ovation, 2026-10-11): a
     /// "Spend up to" half the bank, rounded down, so 0 or 1 held spends
-    /// nothing. Not a spend-all: Bis! and Standing Room Only ignore it.
-    /// Returns what counts as spent.</summary>
+    /// nothing. It Spends no printed number, so Extended Run does not
+    /// raise it. Returns what counts as spent.</summary>
     public static Task<int> SpendHalf(PlayerChoiceContext choiceContext,
                                       Creature? owner) =>
-        SpendUpTo(choiceContext, owner, FanfareOf(owner) / 2);
+        SpendUpToCap(choiceContext, owner, FanfareOf(owner) / 2);
 
     /// <summary>"Spend all your Fanfare." Returns what was spent.</summary>
     public static async Task<int> SpendAll(PlayerChoiceContext choiceContext,
@@ -308,15 +342,16 @@ public static class FurinaStage
         return drained;
     }
 
-    /// <summary>Rule 2: Repay N, a card's. With a
-    /// <paramref name="floor"/>, the part of N it could not return is paid
-    /// as Block or Vigor (the Repay floor, 2026-10-09); either way the
-    /// leftover is recorded for the play
-    /// (<see cref="FurinaStageLedger.RepayLeftThisPlay"/>, the damage cards'
-    /// floor). Returns HP repaid.</summary>
+    /// <summary>Rule 2: Repay N, a card's. The part of N it could not
+    /// return is paid as Block (furina-next paper 3, 2026-10-16: "Any HP a
+    /// Repay cannot return becomes Block"); a card whose floor is its own
+    /// damage (Cleansing Torrent) passes <see cref="StageFloor.None"/>.
+    /// Either way the leftover is recorded for the play
+    /// (<see cref="FurinaStageLedger.RepayLeftThisPlay"/>, the damage
+    /// card's floor). Returns HP repaid.</summary>
     public static async Task<int> Repay(PlayerChoiceContext choiceContext,
                                         Creature? owner, int amount,
-                                        StageFloor floor = StageFloor.None)
+                                        StageFloor floor = StageFloor.Block)
     {
         if (!LiveFor(owner)) return 0;
         var director = Director(choiceContext, owner!);
@@ -353,6 +388,15 @@ public static class FurinaStage
         return back;
     }
 
+    /// <summary>Bottled Encore: "Each guest acts twice."</summary>
+    public static async Task ActEachTwice(PlayerChoiceContext choiceContext,
+                                          Creature? owner)
+    {
+        if (!LiveFor(owner)) return;
+        await Director(choiceContext, owner!).ActEachTwice();
+        await Done(owner);
+    }
+
     /// <summary>"Gain N Energy next turn" (`stage_energy_next`, Interval Bell
     /// and Salon's Tab): the game's <c>EnergyNextTurnPower</c>.</summary>
     public static async Task EnergyNextTurn(PlayerChoiceContext choiceContext,
@@ -384,7 +428,7 @@ public static class FurinaStage
         {
             using (director.Stage.CausedBy(StageDirector.GrandEntranceTitle))
             {
-                // "Repay 4. Gain 1 Block for any HP it could not Repay."
+                // "Repay 4." with the rule's Block floor (paper 3).
                 await director.RepayFloor(entrance, StageFloor.Block);
             }
         }
@@ -457,6 +501,24 @@ public static class FurinaStage
     /// </summary>
     public static int RepaysThisTurn(Creature? owner) =>
         LiveFor(owner) ? FurinaStageLedger.For(owner!).RepaysThisTurn : 0;
+
+    /// <summary>Endless Waltz (furina-next paper 3, 2026-10-16): "Repay 2.
+    /// Deal X damage, plus Y for each time you Repaid this turn." Its own
+    /// Repay counts only when it returns HP. During the play, after that
+    /// Repay, the count as it stands; before the play, the count plus 1 if
+    /// a Repay of <paramref name="amount"/> would return HP now. One
+    /// expression, so preview and resolution agree.</summary>
+    public static int RepaysThisTurnWith(CardModel? card, int amount)
+    {
+        if (card?.Owner?.Creature is not { } owner || !LiveFor(owner))
+        {
+            return 0;
+        }
+        var ledger = FurinaStageLedger.For(owner);
+        if (ledger.RepayedThisPlay) return ledger.RepaysThisTurn;
+        return ledger.RepaysThisTurn
+             + (FurinaStageFacePreview.Room(owner, amount) > 0 ? 1 : 0);
+    }
 
     /// <summary>Grand Absolution's "that much": HP THIS play's Repays
     /// returned.</summary>
@@ -544,11 +606,25 @@ public static class FurinaStage
                 await Gain(choiceContext, furina, program, "Grand Theater Program");
             }
         }
+        CrescendoGains(choiceContext, furina);
         await ReginaDrains(choiceContext, furina);
         await FountainRepays(choiceContext, furina);
         await PneumaTidesRepays(choiceContext, furina);
-        await PrimaDonnaEnergy(furina);
+        await PrimaDonnaEnergy(choiceContext, furina);
         RefreshBadges(furina);
+    }
+
+    /// <summary>Crescendo (furina-next, 2026-10-16): "At the start of your
+    /// turn, gain 2 [3] Fanfare, then 2 [3] more each turn after", counted
+    /// from the turn it was played. Beside Grand Theater Program, the other
+    /// turn-start Fanfare.</summary>
+    private static void CrescendoGains(PlayerChoiceContext choiceContext,
+                                       Creature furina)
+    {
+        using (FurinaStageLedger.For(furina).CausedBy(StageDirector.CrescendoTitle))
+        {
+            Director(choiceContext, furina).Crescendo();
+        }
     }
 
     /// <summary>Regina of All Waters: "At the start of your turn, Drain 3,
@@ -580,16 +656,13 @@ public static class FurinaStage
         }
     }
 
-    /// <summary>Prima Donna: "At the start of your turn, if you have 10 or
-    /// more Fanfare, gain 1 Energy." Last of her turn-start Powers, so it
-    /// reads the Fanfare they printed. Copies add.</summary>
-    private static async Task PrimaDonnaEnergy(Creature furina)
+    /// <summary>Prima Donna (furina-next, 2026-10-16): "At the start of your
+    /// turn, if you Spent last turn, gain 1 Energy [and draw 1 card]." Last
+    /// of her turn-start Powers. Copies add.</summary>
+    private static async Task PrimaDonnaEnergy(
+        PlayerChoiceContext choiceContext, Creature furina)
     {
-        var copies = (int)furina.Powers.OfType<PrimaDonnaPower>()
-            .Sum(p => p.Amount);
-        if (copies <= 0 || furina.Player is not { } player) return;
-        if (FanfareOf(furina) < FurinaStageLaw.PrimaDonnaFanfare) return;
-        await PlayerCmd.GainEnergy(copies, player);
+        await Director(choiceContext, furina).PrimaDonna();
     }
 
     /// <summary>Fountain of Lucine: what the power took in since the last
@@ -940,7 +1013,7 @@ public sealed class GameStageBoard : IStageBoard
         if (amount <= 0) return;
         using var credit = Diagnostics.DamageCredit.Open(
             _owner, Diagnostics.DamageCredit.Pet, who.ToString());
-        await Hit(target, amount, element);
+        await Hit(target, amount, element, who);
     }
 
     public async Task PowerHit(string source, StageTarget target, int amount)
@@ -1003,6 +1076,8 @@ public sealed class GameStageBoard : IStageBoard
     public Task LineCue(StageSeat? seat)
     {
         Vfx.StagePerformerBeat.Line(seat?.Pet);
+        // The guest effects (2026-10-16): Navia's discount, Chevreuse's line.
+        Vfx.FurinaGuestFx.OnLine(seat);
         return Task.CompletedTask;
     }
 
@@ -1021,7 +1096,11 @@ public sealed class GameStageBoard : IStageBoard
         seat.Cards.Clear();
     }
 
-    private async Task Hit(StageTarget target, int amount, Element element)
+    /// <summary><paramref name="who"/> is the guest whose act this is
+    /// (null for a Power's hit): its effect plays on each enemy it lands on
+    /// (the guest effects, 2026-10-16).</summary>
+    private async Task Hit(StageTarget target, int amount, Element element,
+                           StagePerformer? who = null)
     {
         var enemies = FurinaStage.Enemies(_owner).ToList();
         if (enemies.Count == 0) return;
@@ -1030,7 +1109,7 @@ public sealed class GameStageBoard : IStageBoard
             foreach (var enemy in enemies)
             {
                 if (Over) return;
-                await One(enemy, amount, element);
+                await One(enemy, amount, element, who);
             }
             return;
         }
@@ -1044,16 +1123,20 @@ public sealed class GameStageBoard : IStageBoard
         }
         if (FurinaStage.RandomOf(_owner, pool) is { } body)
         {
-            await One(body, amount, element);
+            await One(body, amount, element, who);
         }
     }
 
-    private Task<int> One(Creature enemy, int amount, Element element) =>
-        element == Element.None
+    private Task<int> One(Creature enemy, int amount, Element element,
+                          StagePerformer? who)
+    {
+        if (who is { } guest) Vfx.FurinaGuestFx.OnHit(guest, enemy);
+        return element == Element.None
             ? ElementalHit.DealUnelemented(_context, enemy, amount, _owner,
                                            powered: false)
             : ElementalHit.Deal(_context, enemy, element, amount, _owner,
                                 powered: false);
+    }
 
     public async Task Draw(int amount)
     {
@@ -1061,8 +1144,15 @@ public sealed class GameStageBoard : IStageBoard
         await CardPileCmd.Draw(_context, amount, player);
     }
 
-    public Task Lunge(StageSeat? seat) =>
-        Vfx.StagePerformerBeat.Act(seat?.Pet);
+    /// <summary>The act's lunge, then (the guest effects, 2026-10-16) the
+    /// effect of a guest whose act lands on Furina: Charlotte's flash,
+    /// Sigewinne's bubbles, Freminet's plate. Not awaited past the lunge.
+    /// </summary>
+    public async Task Lunge(StageSeat? seat)
+    {
+        await Vfx.StagePerformerBeat.Act(seat?.Pet);
+        Vfx.FurinaGuestFx.OnAct(_owner, seat);
+    }
 
     /// <summary>Her model art, phase B (2026-10-13): the Spend, Drain or
     /// Repay effect on her body, fire-and-forget.</summary>
@@ -1073,6 +1163,21 @@ public sealed class GameStageBoard : IStageBoard
     {
         await FurinaStagePets.Sync(_owner);
         FurinaStage.RefreshBadges(_owner);
+    }
+
+    public async Task Energy(int amount)
+    {
+        if (amount <= 0 || _owner.IsDead || _owner.Player is not { } player) return;
+        await PlayerCmd.GainEnergy(amount, player);
+    }
+
+    public void FlashRelic(System.Type relic)
+    {
+        if (_owner.Player is not { } player) return;
+        foreach (var held in player.Relics.Where(r => r.GetType() == relic))
+        {
+            held.Flash();
+        }
     }
 }
 

@@ -331,17 +331,53 @@ def test_star_turn_costs_one_less_per_six_fanfare():
     assert combat.card_cost(st, card) == 0
 
 
-def test_crescendo_and_standing_room_only():
+def test_standing_room_only_answers_every_spend_of_at_least_one():
+    # furina-next (2026-10-16): "Whenever you Spend, gain 1 Strength."
     st = _furina()
-    st.player.powers[FS.CRESCENDO] = 1
     st.player.powers[FS.STANDING_ROOM_ONLY] = 1
-    st.player.draw_pile = [_card("proto_fs_bubble_aria") for _ in range(3)]
     st.player.ftd.fanfare = 6
     FS.spend(st, 2)
-    FS.spend(st, 2)
-    assert len(st.player.hand) == 1
+    FS.spend_up_to(st, 2)
     FS.spend_all(st)
-    assert st.player.powers.get("strength", 0) == 1
+    assert st.player.powers.get("strength", 0) == 3
+    FS.spend_all(st)                             # nothing held: no Spend
+    FS.spend_up_to(st, 4)
+    assert st.player.powers.get("strength", 0) == 3
+
+
+def test_crescendo_counts_from_the_turn_it_is_played():
+    # furina-next (2026-10-16): 2, then 4, 6 ...; a later copy starts at 2.
+    st = _furina()
+    st.player.powers[FS.CRESCENDO] = 2           # played this turn
+    paid = []
+    for _ in range(3):
+        before = st.player.ftd.fanfare
+        T.turn_start(st)
+        paid.append(st.player.ftd.fanfare - before)
+    assert paid == [2, 4, 6]
+    st.player.powers[FS.CRESCENDO] = 2 + 3       # an upgraded copy joins
+    before = st.player.ftd.fanfare
+    T.turn_start(st)
+    assert st.player.ftd.fanfare - before == 8 + 3
+
+
+def test_prima_donna_pays_when_she_spent_last_turn():
+    st = _furina()
+    p = st.player
+    p.powers[FS.PRIMA_DONNA] = 1
+    p.energy = 3
+    T.turn_start(st)                             # no turn closed yet
+    assert p.energy == 3
+    p.ftd.fanfare = 4
+    FS.spend(st, 2)
+    T.end_of_turn(st)
+    T.turn_open(st)
+    T.turn_start(st)
+    assert p.energy == 4
+    T.end_of_turn(st)                            # a turn with no Spend
+    T.turn_open(st)
+    T.turn_start(st)
+    assert p.energy == 4
 
 
 def test_hymn_of_renewal_counts_hp_actually_repaid():
@@ -360,14 +396,16 @@ def test_turn_start_regina_pneuma_tides_and_prima_donna():
     p = st.player
     p.powers[FS.REGINA_OF_ALL_WATERS] = 1
     p.powers[FS.PNEUMA_TIDES] = 2
-    p.powers[FS.PRIMA_DONNA] = 1
-    p.ftd.fanfare = 10
+    p.powers[FS.PRIMA_DONNA_PLUS] = 1
+    p.ftd.spent_last_turn = True
+    p.draw_pile = [_card("proto_fs_bubble_aria") for _ in range(3)]
     p.energy = 3
     FS.drain(st, 6)
     T.turn_start(st)
     assert p.powers.get("strength", 0) == 1          # Regina drained 3
     assert p.ftd.drained == 6 + 3 - 2
     assert p.energy == 4
+    assert len(p.hand) == 1                          # Prima Donna+ draws
 
 
 def test_the_drain_cards_and_their_counts():
@@ -412,13 +450,14 @@ def test_riptide_lunge_repays_on_a_kill():
 def test_the_repay_cards_and_their_counts():
     st = _furina()
     FS.drain(st, 20)
-    # Two Pneuma Refrains (Repay 5) stand in for Balance the Books and
+    # Two Pneuma Refrains (Repay 4) stand in for Balance the Books and
     # Soothing Waters, cut in the sweep (2026-10-14).
     _play(st, _card("proto_fs_pneuma_refrain"))
     _play(st, _card("proto_fs_pneuma_refrain"))
     hp = st.enemies[0].hp
     _play(st, _card("proto_fs_rising_tide"))
-    assert hp - st.enemies[0].hp == 6 + 3 * 2
+    # Endless Waltz's own Repay 2 returns HP, so it counts (paper 3).
+    assert hp - st.enemies[0].hp == 6 + 3 * 3
     left = st.player.ftd.drained
     hp = st.enemies[0].hp
     _play(st, _card("proto_fs_grand_absolution"))

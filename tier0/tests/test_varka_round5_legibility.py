@@ -2,7 +2,7 @@
 (review/records/varka-round-5-2026-10-13.md, "What to change" 1 and 2):
 
   * a hand card's switch line, now "(Makes Cryo current: 2 Oath)", and a
-    Swirl card's "(No aura to Swirl)" are the game's own face text, so the
+    Swirl card's "(no aura: no Swirl)" are the game's own face text, so the
     page prints them unchanged;
   * Chain Lightning and Short Circuit name what they discarded on their own
     play line, and say when the game picked the cards because the hand held
@@ -48,9 +48,9 @@ def test_the_no_aura_line_prints_as_the_game_renders_it():
     state = varka_state()
     _hand(state, _card(state, "Crosscurrent",
                        "Swirl the enemy. This Swirl pays your current "
-                       "element twice.\n(No aura to Swirl)", "Anemo"))
+                       "element twice.\n(no aura: no Swirl)", "Anemo"))
     rows = _rows_after(blindplay.observe(state), "Crosscurrent")
-    assert "(No aura to Swirl)" in "\n".join(rows)
+    assert "(no aura: no Swirl)" in "\n".join(rows)
 
 
 def _discard(seq, card, picked=False):

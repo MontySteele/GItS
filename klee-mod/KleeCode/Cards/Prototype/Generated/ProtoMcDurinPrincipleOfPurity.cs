@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcDurinPrincipleOfPurity : CustomCardModel, ICompanionCard, IWritableCompanion, IModalCard
+public sealed class ProtoMcDurinPrincipleOfPurity : CustomCardModel, ICompanionCard, IModalCard
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -46,7 +46,7 @@ public sealed class ProtoMcDurinPrincipleOfPurity : CustomCardModel, ICompanionC
     public string? Nation => "mondstadt";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForElementalReaction(ArmKeywordTips.ForCompanionPlan(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForElementalReaction(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_durin_binary_form");
 
@@ -55,14 +55,6 @@ public sealed class ProtoMcDurinPrincipleOfPurity : CustomCardModel, ICompanionC
         ("title", "Durin — Principle of Purity"),
         ("description", "At the start of your turn, deal {PowerAmount:diff()} [gold]Pyro[/gold] damage to a random enemy. Choose one for the combat. [gold]White[/gold]: Enemies take {IfUpgraded:show:75|50}% more damage from [gold]Elemental Reactions[/gold]. [gold]Dark[/gold]: Your [gold]Pyro[/gold] hits deal {IfUpgraded:show:6|4} additional damage."),
     };
-
-    /// <summary>On Kokomi, this Companion card can also be written as a Plan on
-    /// the Bake-Kurage (the re-founding, 2026-10-12).</summary>
-    public override TargetType TargetType =>
-        KokomiCompanionPlan.TargetFor(this, base.TargetType);
-
-    /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
-    public TargetType PrintedTargetType => base.TargetType;
 
     // EB-184: what each mode does about AIMING, in sheet order.
     // The card's own TargetType is fixed before a mode is chosen (the
@@ -91,11 +83,6 @@ public sealed class ProtoMcDurinPrincipleOfPurity : CustomCardModel, ICompanionC
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (KokomiPlan.PlayedOnPet(cardPlay))
-        {
-            await KokomiCompanionPlan.Write(choiceContext, this, cardPlay);
-            return;
-        }
         await PowerCmd.Apply<PurityStrikePower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
         var modeOptions = new List<CardModel>
         {

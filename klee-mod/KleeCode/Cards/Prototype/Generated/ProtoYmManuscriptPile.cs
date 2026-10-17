@@ -38,24 +38,15 @@ public sealed class ProtoYmManuscriptPile : CustomCardModel, ICharacterCard
     public string CharacterId => "yae";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForRite(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForEdit(ArmKeywordTips.ForAnnotation(base.ExtraHoverTips, this, YaeAnnotation.RedInk, false), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_manuscript_pile");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Manuscript Pile"),
-        ("description", "Draw {Cards:diff()} cards. [gold]Rite[/gold]: Offering{InCombat:{YaeRite}|}."),
+        ("description", "Draw {Cards:diff()} cards. [gold]Edit[/gold] a card in your hand: [gold]Red Ink[/gold]."),
     };
-
-    /// <summary>This card's in-combat shrine clauses
-    /// (`YaeShrineFace`).</summary>
-    protected override void AddExtraArgsToDescription(
-        MegaCrit.Sts2.Core.Localization.LocString description)
-    {
-        base.AddExtraArgsToDescription(description);
-        description.Add("YaeRite", YaeShrineFace.RiteLine(this, YaeRite.Offering));
-    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
@@ -73,7 +64,7 @@ public sealed class ProtoYmManuscriptPile : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
-        await YaeCards.Rite(choiceContext, this, cardPlay, YaeRite.Offering);
+        await YaeCards.Edit(choiceContext, this, cardPlay, YaeAnnotation.RedInk);
     }
 
     protected override void OnUpgrade()

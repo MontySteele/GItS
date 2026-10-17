@@ -1421,6 +1421,15 @@ public static partial class McpMod
             state["furina_stage"] = furinaStage;
         }
 
+        // GItS LOCAL EDIT (Yae, 2026-10-15). The cards she Edited this
+        // combat -- what Bestseller counts, kept by the rule and
+        // shown by no card. Same absent/empty contract as the two above.
+        // Implementation and its reflection contract: gits/GitsYaeShrine.cs.
+        if (GitsYaeShrineState(player) is { } yaeShrine)
+        {
+            state["yae_shrine"] = yaeShrine;
+        }
+
         // GItS LOCAL EDIT (`EB-681`). WHAT REACTED THIS TURN, BY NAME. A
         // reaction is what several kits are ABOUT and the feed carried no
         // trace of one: the aura is consumed, the effect lands, and a reader
@@ -1582,7 +1591,7 @@ public static partial class McpMod
     }
 
     /// <summary>
-    /// `{ id, name, description, amount, shows_amount }` for an enchanted
+    /// `{ id, name, description, amount, shows_amount[, disabled] }` for an enchanted
     /// card, or null when the card carries none (`EB-181`). Never throws: it
     /// runs inside every card serialisation on every state poll, including the
     /// compendium's canonical copies.
@@ -1593,7 +1602,7 @@ public static partial class McpMod
         {
             var enchantment = card.Enchantment;
             if (enchantment == null) return null;
-            return new Dictionary<string, object?>
+            var info = new Dictionary<string, object?>
             {
                 ["id"] = enchantment.Id.Entry,
                 ["name"] = SafeGetText(() => enchantment.Title),
@@ -1601,6 +1610,16 @@ public static partial class McpMod
                 ["amount"] = enchantment.DisplayAmount,
                 ["shows_amount"] = enchantment.ShowAmount
             };
+            // GItS LOCAL EDIT (Reprint spent, 2026-10-14). The game greys a
+            // spent enchantment's tab (`Status == Disabled`: Glam, Swift,
+            // Sown, Yae's Reprint after its first play) and the wire did not
+            // say so, so two seats read a spent Reprint as live. Emitted only
+            // when disabled: an absent key means "live", as before.
+            if (enchantment.Status == MegaCrit.Sts2.Core.Entities.Enchantments.EnchantmentStatus.Disabled)
+            {
+                info["disabled"] = true;
+            }
+            return info;
         }
         catch (Exception)
         {
@@ -1910,7 +1929,15 @@ public static partial class McpMod
         var eventModel = eventRoom.CanonicalEvent;
         bool isAncient = eventModel is AncientEventModel;
         state["event_id"] = eventModel.Id.Entry;
-        state["event_name"] = SafeGetText(() => eventModel.Title);
+        // GItS LOCAL EDIT (co-op story rooms, 2026-10-16). The heading is
+        // read off the local player's copy, the one the game's own screen
+        // titles (`EventRoom.EnterInternal` hands `GetLocalEvent()` to
+        // `NEventRoom.Create`, whose `SetupLayout` calls `SetTitle(_event
+        // .Title)`) and the one the options come from. A co-op story room's
+        // canonical copy is never routed to a player, so its Title is the
+        // placeholder's ("A Quiet Landing") on every player's page.
+        var titleModel = GitsLocalEvent.OrNothing(() => eventRoom.LocalMutableEvent) ?? eventModel;
+        state["event_name"] = SafeGetText(() => titleModel.Title);
         state["is_ancient"] = isAncient;
 
         // Check dialogue state for ancients
@@ -3251,7 +3278,24 @@ public static partial class McpMod
                 GitsAddPowerFacts(power, row);
                 powers.Add(row);
             }
-            catch { /* skip this power - game engine state may be inconsistent */ }
+            catch (Exception ex)
+            {
+                // GItS LOCAL EDIT (Kokomi review r8, 2026-10-14, item 10):
+                // the row stays when its text throws, instead of the power
+                // vanishing from the list for a screen
+                // (`gits/GitsPowerRow.cs` has the find).
+                try
+                {
+                    powers.Add(GitsPowerRow.Unreadable(
+                        power.Id.Entry,
+                        SafeGetText(() => power.Title),
+                        power.DisplayAmount,
+                        power.StackType.ToString(),
+                        power.TypeForCurrentAmount.ToString(),
+                        ex.GetType().Name));
+                }
+                catch { /* the power's own facts threw too: skip it */ }
+            }
         }
         return powers;
     }

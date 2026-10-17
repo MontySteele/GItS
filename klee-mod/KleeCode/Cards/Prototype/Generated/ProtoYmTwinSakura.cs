@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoYmTwinSakura : CustomCardModel, ICharacterCard
+public sealed class ProtoYmTwinSakura : CustomCardModel, ICharacterCard, ISakuraPlanterCard
 {
     /// <summary>Block arrives only from the ruled upgrade (`add: block`), so the
     /// claim moves with it -- see gen_klee_cards `_upgrade_add_lines` (EB-122).</summary>
@@ -42,14 +42,14 @@ public sealed class ProtoYmTwinSakura : CustomCardModel, ICharacterCard
     public string CharacterId => "yae";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForSakura(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForFullShrine(ArmKeywordTips.ForSakura(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_twin_sakura");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Twin Sakura"),
-        ("description", "Plant {YmAmount:diff()} [gold]Sakura[/gold] (with 3 standing, each gains a Level instead).{IfUpgraded:show: Gain 4 [gold]Block[/gold].|}"),
+        ("description", "Plant {YmAmount:diff()} [gold]Sakura[/gold].{IfUpgraded:show: Gain 4 [gold]Block[/gold].|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

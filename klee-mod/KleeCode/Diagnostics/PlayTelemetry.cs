@@ -172,6 +172,7 @@ internal static class PlayTelemetry
     /// still a demand-curve sample for the turns it did record.</summary>
     internal static void OpenFight()
     {
+        if (!Enabled) return;
         try
         {
             // A won fight still waiting for its HP after the end-of-combat
@@ -1739,9 +1740,20 @@ internal static class PlayTelemetry
 
     // ------------------------------------------------------------- write ---
 
+    /// <summary>THE WORKSHOP RELEASE GATE (2026-10-16, workshop checklist
+    /// item 4). A dev build writes for everyone, [USER]'s own play included
+    /// (the `human` feed). A `-p:WorkshopRelease=true` build writes only
+    /// when a harness set `GITS_TELEMETRY_FEED` (the seat lanes do), so a
+    /// player's profile never gains a `gits_telemetry` folder.
+    /// <see cref="WorkshopRelease.TelemetryWrites"/> is the rule.</summary>
+    internal static bool Enabled =>
+        WorkshopRelease.TelemetryWrites(
+            WorkshopRelease.IsRelease,
+            System.Environment.GetEnvironmentVariable(FeedEnvVar));
+
     private static void Write(FightRecord record)
     {
-        if (_writeFailed) return;
+        if (_writeFailed || !Enabled) return;
         try
         {
             var path = LogPath();

@@ -350,7 +350,7 @@ def main():
     meta_all = {}
     clip_names = [c for c in args.clips.split(",") if c]
     for name in clip_names:
-        spec = C.CLIPS[name]
+        spec = C.CLIPS.get(name) or C.SELECT_LOOPS[name]
         keys = spec["keys"]
         caps = [capture(root, arm, mesh, k[1]) for k in keys]
         is_cradle = bool(spec.get("cradle"))

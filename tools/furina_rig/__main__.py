@@ -1,6 +1,6 @@
 """Furina's combat, merchant and guest scenes: generate or check.
 
-    python -m tools.furina_rig gen            # write every scene
+    python -m tools.furina_rig gen            # write every scene (hers, the guests', their effects')
     python -m tools.furina_rig gen --check    # exit 1 if any scene is stale
 
 Needs no art and no engine: the scenes are text from furina.yaml and the
@@ -11,12 +11,14 @@ from __future__ import annotations
 import argparse
 import sys
 
-from . import guests, rig
+from . import guest_fx, guests, rig
 
 
 def scenes() -> list[tuple]:
-    out = [(rig.SCENE, rig.render_scene()), (rig.MERCHANT_SCENE, rig.render_merchant_scene())]
+    out = [(rig.SCENE, rig.render_scene()), (rig.MERCHANT_SCENE, rig.render_merchant_scene()),
+           (rig.SELECT_SCENE, rig.render_select_scene())]
     out += [(guests.scene_path(name), text) for name, text in guests.render_guests().items()]
+    out += [(guest_fx.scene_path(name), text) for name, text in guest_fx.render_guest_fx().items()]
     return out
 
 
@@ -37,6 +39,7 @@ def main(argv: list[str] | None = None) -> int:
             else:
                 print(f"{path.name} is current.")
             continue
+        path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(text, encoding="utf-8", newline="\n")
         print(f"wrote {path.relative_to(rig.ROOT)} ({len(text)} bytes)")
     return stale

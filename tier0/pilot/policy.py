@@ -330,6 +330,16 @@ BLIND_PREDICATES = frozenset({
     # moves no measured number.
     "stage_drained_this_turn",
     "stage_none_drained",
+    # YAE, THE POOL TO 78 (2026-10-15): Torii Ward's "If your shrine is full"
+    # and Late Night Reading's "If you have 3 Sakura". `effects._predicate`
+    # answers both live for a Yae seat; her rows are piloted by
+    # `tools/yae_expansion_sim`, and no published world drafts a `proto_ym_`
+    # row through this pilot, so blind moves no measured number.
+    "shrine_full",
+    "three_sakura",
+    # YAE, THE REFILL (2026-10-16): Fox's Shade's "If any enemy is Weak".
+    # Same reason as the two above.
+    "any_enemy_weak",
 })
 BLIND_PREDICATE_PREFIXES: tuple[str, ...] = ()
 

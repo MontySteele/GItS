@@ -24,7 +24,8 @@ from understudy.blindplay_faces import (_card_face, _card_title,
                                         _enemy_handles, _enemy_names,
                                         _named_option, _reward_option,
                                         _shop_items, _shop_options,
-                                        chooser_labels, hand_labels)
+                                        chooser_labels, chooser_order,
+                                        hand_labels)
 from understudy.blindplay_notes import (NO_ALTERNATIVE_AT_ALL,
                                         NO_SACRIFICE_HERE, PREVIEW_LOCKED,
                                         SKIPPED_CARD_REWARD)
@@ -1190,11 +1191,17 @@ def _choose(state: dict[str, Any], cmd: Command) -> Resolution:
         names = (chooser_labels(state, entries) if st == "hand_select"
                  else _numbered_titles(entries))
         label = {id(e): t for e, t in zip(entries, names)}
-        idx, why = _match(entries, cmd.name, key=lambda e: label[id(e)],
+        # Matched in the order the page printed (hand order on a hand
+        # chooser, `chooser_order`), posted at the bridge's own index.
+        order = (chooser_order(state, entries) if st == "hand_select"
+                 else list(range(len(entries))))
+        shown = [entries[i] for i in order]
+        idx, why = _match(shown, cmd.name, key=lambda e: label[id(e)],
                           face=_card_face_key, ordinal=cmd.ordinal,
                           labelled=True)
         if idx < 0:
             return _refuse(why)
+        idx = order[idx]
         verb = "select_card" if st == "card_select" else "combat_select_card"
         key = "index" if st == "card_select" else "card_index"
         return Resolution(True, "choose", {"action": verb, key: idx},

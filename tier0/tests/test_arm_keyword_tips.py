@@ -257,6 +257,14 @@ def test_every_table_row_has_a_method_and_a_registered_title_row(keyword):
     method = keyword.attach.split(".", 1)[1]
     assert f"IEnumerable<IHoverTip> {method}(" in tips, keyword.word
 
+    if method == "ForAnnotation":
+        # Yae (2026-10-14): one key per Annotation (`KeyOf`), each titled by
+        # its name in a loop over `YaeAnnotationText.All`.
+        assert '"KLEEMOD-ARM_YAE_" + annotation' in tips
+        mod = MOD_CS.read_text(encoding="utf-8")
+        assert "foreach (var annotation in Powers.YaeAnnotationText.All)" in mod
+        assert "ArmKeywordTips.KeyOf(annotation) + \".title\"" in mod
+        return
     const = _key_const(keyword)
     assert re.search(rf'\bconst string {const} = "KLEEMOD-ARM_[A-Z_]+";',
                      tips), keyword.word
@@ -316,9 +324,6 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT",
                     # The text pass of 2026-10-08: the Plan tip a plan-only
                     # card carries in ForPlan's place (no line above, no flip).
                     "KLEEMOD-ARM_PLAN_ONLY",
-                    # The Kokomi re-founding (2026-10-12): the Plan tip a
-                    # Companion carries while Kokomi holds it.
-                    "KLEEMOD-ARM_PLAN_COMPANION",
                     # The Kokomi round-1 fixes (2026-10-12): the Plan tip a
                     # card that names Plans with no Plan line carries.
                     "KLEEMOD-ARM_PLAN_NO_LINE",
@@ -328,8 +333,8 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT",
                     # Design-session calls (2026-10-13): Four Winds'
                     # Ascension's rider, its element hit gains no Oath.
                     "KLEEMOD-ARM_VARKA_ASCENSION_NO_OATH",
-                    # And Bis!'s rider: a "Spend up to" does not count.
-                    "KLEEMOD-ARM_STAGE_BIS_SPEND_UP_TO",
+                    # (Bis!'s rider left with Bis!, furina-next paper 2,
+                    # 2026-10-16.)
                     # The Furina wave (2026-10-13): Final Bow's rider, its
                     # acts happen one after another.
                     "KLEEMOD-ARM_STAGE_FINAL_BOW_IN_TURN",
@@ -338,7 +343,10 @@ NON_KEYWORD_KEYS = {"KLEEMOD-ARM_PLAN_ELEMENT",
                     "KLEEMOD-ARM_KLEE_BIG_BADDA_BOOM_TOTAL",
                     "KLEEMOD-ARM_KLEE_BOOM_BADGE_TURN",
                     "KLEEMOD-ARM_KLEE_LIONS_FANG_LAST_TURN",
-                    "KLEEMOD-ARM_KLEE_PASS_THE_MATCH_ACTING"}
+                    "KLEEMOD-ARM_KLEE_PASS_THE_MATCH_ACTING",
+                    # Yae review r3 (2026-10-14): the full-shrine rule,
+                    # attached off a planting row's op, not a printed word.
+                    "KLEEMOD-ARM_YAE_FULL_SHRINE"}
 
 
 def test_the_arm_keys_never_collide_with_a_shipped_keyword_id():
@@ -543,8 +551,10 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # unless Repaid. One sentence since the 2026-10-11 playtest.
             "Lose N HP. Each combat, the first 1/4 of your Max HP drained returns ",
             "after combat; more than that only [gold]Repay[/gold] returns.",
-            # The pool to 75 (2026-10-09): the guest rule's words.
-            "Regain that much drained HP, never more than you drained. A ",
+            # The pool to 75 (2026-10-09): the guest rule's words; the Block
+            # floor's one line since furina-next paper 3 (2026-10-16).
+            "Regain that much drained HP; a Repay counts the HP it returns. ",
+            "Any HP a Repay cannot return becomes [gold]Block[/gold].",
             "A guest joins at the back. On a full stage, the oldest guest ",
             "Exhausts. Acts at the end of your turn. When it leaves, this ",
     ):
@@ -914,13 +924,16 @@ CONJUGATIONS = {"Exhausted": "Exhaust",
                 # High Stakes (the Spend round, 2026-10-10): "HP you have
                 # Drained and not Repaid" (the page's Repay row matches it).
                 "Repaid": "Repay",
-                # YAE MIKO (2026-10-13), pick 6 (a): her two rows carry the
-                # words her faces gold (Tenko in Sakura; the five
-                # Annotations, Annotated and Publish in Edit).
-                "Tenko": "Sakura", "Edited": "Edit", "Annotated": "Edit",
-                "Publish": "Edit", "Red Ink": "Edit", "Footnote": "Edit",
-                "Deadline Extension": "Edit", "Fox Fire": "Edit",
-                "Sakura Seal": "Edit", "Royalties": "Edit"}
+                # Prima Donna (furina-next, 2026-10-16): "if you Spent last
+                # turn" (the page's Spend row matches it).
+                "Spent": "Spend",
+                # YAE MIKO (2026-10-13): the Edit row carries Edited,
+                # Annotated and Publish. Tenko and each Annotation are rows
+                # of their own since 2026-10-14.
+                "Edited": "Edit", "Annotated": "Edit", "Publish": "Edit",
+                # The Yae refill (2026-10-16): Inscribed Thunder's "for each
+                # Annotation on this card".
+                "Annotation": "Edit"}
 
 
 def _word_owner(word: str) -> str:
@@ -1298,7 +1311,7 @@ def test_the_page_glossary_says_what_the_summon_and_performer_tips_say():
         "goes to your Discard Pile.")
     assert rows["Charlotte"] == (
         "The first time each turn one of your cards Repays, draw 1 card. "
-        "Act: Repay 3. Gain 1 Block for any HP it could not Repay.")
+        "Act: Repay 3.")
     for gone in ("Bow", "Gentilhomme Usher", "Surintendante Chevalmarin",
                  "Mademoiselle Crabaletta", "Ousia", "Pneuma"):
         assert gone not in rows, gone

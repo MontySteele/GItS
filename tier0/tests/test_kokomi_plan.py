@@ -140,7 +140,9 @@ def test_every_shipped_plan_line_passes_the_shape_check():
     # line gone, cut rows out, Kurage's Wake and Gorou's three Plan lines in.
     # THIRTY-NINE with the pool overhaul (2026-10-13): Turning Tide, Prepared
     # Retreat and Turnabout in, Riptide Guard out.
-    assert len(planned) == 39
+    # THIRTY-EIGHT with Kokomi review r8 (2026-10-14): Surging Shoal attacks
+    # and blocks now, with no Plan line.
+    assert len(planned) == 38
     for card in planned:
         assert kokomi_plan.plan_shape_reason(card.plan) is None, card.id
 
@@ -2038,17 +2040,14 @@ def test_the_new_clauses_are_plan_only_from_a_body(overhaul):
 # docs/notes/prototype-surface-provenance.md, "Kokomi pool pass three".
 # =============================================================================
 
-def test_feint_pays_three_per_plan_waiting(overhaul):
-    """THE RE-FOUNDING (2026-10-12, card paper sec.2): "Deal 6 damage, plus 3
-    for each Plan waiting." (Per Plan carried out this turn before.) The
-    count is Breakwater's, the queue's depth. Its Plan line is the pool
-    overhaul's Chain (2026-10-13): 5 per Plan carried out this turn. The
-    numbers pass (kokomi-review-r5-2026-10-14): base 6 -> 8, Plan 5 -> 6."""
+def test_feint_deals_a_flat_8_now(overhaul):
+    """Kokomi review r8 (2026-10-14, item 5): the now-line is a flat "Deal 8
+    Hydro damage." (it was 8, plus 3 for each Plan waiting, which paid only
+    when Plans were already waiting -- when Feint is played as a Plan
+    anyway). Its Plan line is the pool overhaul's Chain (2026-10-13), 6 per
+    Plan carried out this turn since review r5, unchanged."""
     row = _row("proto_kk_feint")
-    assert row.effects == [{"op": "damage", "target": "enemy",
-                            "amount_formula": {
-                                "base": 8, "per": 3,
-                                "count": "plans_held"}}]
+    assert row.effects == [{"op": "damage", "amount": 8, "target": "enemy"}]
     assert row.plan == [{"op": "damage_per_plan_this_turn", "amount": 6,
                          "target": "front_enemy"}]
     enemy = make_enemy(hp=100)
@@ -2060,7 +2059,7 @@ def test_feint_pays_three_per_plan_waiting(overhaul):
                                            cid=f"proto_kk_p{i}"))
     before = enemy.hp
     effects.resolve_card(st, row)
-    assert before - enemy.hp == 8 + 3 * 2
+    assert before - enemy.hp == 8
 
 def test_feints_upgrade_moves_the_base_and_the_plans_vulnerable(overhaul):
     """Base 6 -> 9 (the cleanup pass, 2026-09-29), 3 per Plan waiting
@@ -2070,10 +2069,10 @@ def test_feints_upgrade_moves_the_base_and_the_plans_vulnerable(overhaul):
     from tier0.content import upgrades
 
     row = _row("proto_kk_feint")
-    assert row.upgrade == {"formula_base": 3, "plan_damage": 2}
+    # Kokomi review r8 (2026-10-14, item 5): 8 [10] flat, Plan 6 [8].
+    assert row.upgrade == {"damage": 2, "plan_damage": 2}
     up = upgrades.apply_upgrade(_row("proto_kk_feint"))
-    assert up.effects[0]["amount_formula"]["base"] == 11
-    assert up.effects[0]["amount_formula"]["per"] == 3
+    assert up.effects[0]["amount"] == 10
     assert up.plan[0]["amount"] == 8
 
 def test_feints_face_prints_the_plan_line_it_can_write(overhaul):
@@ -2116,10 +2115,10 @@ def test_scry_bottom_on_an_empty_pile_is_a_printed_no_op(overhaul):
 # docs/notes/prototype-surface-provenance.md, "Kokomi pool pass four".
 # =============================================================================
 
-def test_read_the_field_takes_one_card_and_bottoms_what_it_saw(overhaul):
+def test_read_the_field_takes_one_card_and_leaves_the_rest_on_top(overhaul):
     """`EB-679`. SELECTION AND NOT A LOOK: the chosen card goes to the HAND
-    and every other card the player was shown goes to the bottom, in the order
-    it was seen. The pilot takes the LOWEST-cost card of the N, which is
+    and every other card the player was shown stays on top, in the order it
+    was seen (wording pass 2026-10-15; they were bottomed). The pilot takes the LOWEST-cost card of the N, which is
     `_op_scry_bottom`'s stand-in read the other way round -- the card wanted
     now is the one that can be paid for now."""
     st = kokomi_state()
@@ -2131,7 +2130,7 @@ def test_read_the_field_takes_one_card_and_bottoms_what_it_saw(overhaul):
     effects.OPS["scry_take"](st, {"op": "scry_take", "amount": 3},
                              _row("proto_kk_read_the_field"))
     assert [c.id for c in st.player.hand] == ["cheap"]
-    assert [c.id for c in st.player.draw_pile] == ["tail", "dear", "mid"]
+    assert [c.id for c in st.player.draw_pile] == ["dear", "mid", "tail"]
     assert any(e["event"] == "scry_take" for e in st.log)
 
 

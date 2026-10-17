@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcAmberExplosivePuppet : CustomCardModel, ICompanionCard, IWritableCompanion
+public sealed class ProtoMcAmberExplosivePuppet : CustomCardModel, ICompanionCard
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -46,7 +46,7 @@ public sealed class ProtoMcAmberExplosivePuppet : CustomCardModel, ICompanionCar
     public string? Nation => "mondstadt";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForStrength(ArmKeywordTips.ForCompanionPlan(base.ExtraHoverTips, this), this);
+        BaseKeywordTips.ForStrength(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_amber_explosive_puppet");
 
@@ -55,14 +55,6 @@ public sealed class ProtoMcAmberExplosivePuppet : CustomCardModel, ICompanionCar
         ("title", "Amber — Explosive Puppet"),
         ("description", "Enemy loses 3 [gold]Strength[/gold] this turn. The next time an enemy attacks you, deal 8 [gold]Pyro[/gold] damage to ALL enemies.{IfUpgraded:show: Draw 1 card.|}"),
     };
-
-    /// <summary>On Kokomi, this Companion card can also be written as a Plan on
-    /// the Bake-Kurage (the re-founding, 2026-10-12).</summary>
-    public override TargetType TargetType =>
-        KokomiCompanionPlan.TargetFor(this, base.TargetType);
-
-    /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
-    public TargetType PrintedTargetType => base.TargetType;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
@@ -80,11 +72,6 @@ public sealed class ProtoMcAmberExplosivePuppet : CustomCardModel, ICompanionCar
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (KokomiPlan.PlayedOnPet(cardPlay))
-        {
-            await KokomiCompanionPlan.Write(choiceContext, this, cardPlay);
-            return;
-        }
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await PowerCmd.Apply<ProtoMcAmberExplosivePuppetPower>(choiceContext, cardPlay.Target, DynamicVars["StrengthLoss"].IntValue, applier: Owner.Creature, cardSource: this);
         await PowerCmd.Apply<BaronBunnyPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);

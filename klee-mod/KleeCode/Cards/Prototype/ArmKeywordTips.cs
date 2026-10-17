@@ -59,6 +59,11 @@ public static class ArmKeywordTips
     /// mod titles itself from.</summary>
     private const string Table = "card_keywords";
 
+    /// <summary>The loc table every arm tip title lives in, for the
+    /// Masterpiece's per-layer tips (review r3). A property, so the key scan
+    /// (public string constants) never counts it as a key.</summary>
+    public static string KeywordTable => Table;
+
     // The keys. `KLEEMOD-ARM_` and not the bare word, because two of these
     // words already have a SHIPPED keyword with a DIFFERENT rule: `Bomb` is
     // `KLEEMOD-BOMB` (the shipped Bomb, whose keyword left with the text pass
@@ -90,9 +95,6 @@ public static class ArmKeywordTips
     // Design-session call (2026-10-13), A RIDER AND NOT A KEYWORD: Four
     // Winds' Ascension's element hit gains no Oath, and that is the rule.
     public const string AscensionNoOathKey = "KLEEMOD-ARM_VARKA_ASCENSION_NO_OATH";
-    // Design-session call (2026-10-13), A RIDER AND NOT A KEYWORD: Bis!
-    // keeps half of a spend-all only, never of a "Spend up to".
-    public const string BisSpendUpToKey = "KLEEMOD-ARM_STAGE_BIS_SPEND_UP_TO";
     // The Furina wave (2026-10-13), A RIDER AND NOT A KEYWORD: Final Bow's
     // acts happen one after another.
     public const string FinalBowInTurnKey = "KLEEMOD-ARM_STAGE_FINAL_BOW_IN_TURN";
@@ -143,9 +145,15 @@ public static class ArmKeywordTips
     /// <summary>YAE MIKO (2026-10-13): her two words, Sakura (on
     /// <see cref="SakuraKey"/>, read for her cards) and Edit.</summary>
     public const string EditKey = "KLEEMOD-ARM_YAE_EDIT";
-    /// <summary>YAE MIKO, THE DESIGN AXES (ruled 2026-10-14): the shrine's
-    /// Rite.</summary>
-    public const string RiteKey = "KLEEMOD-ARM_YAE_RITE";
+    /// <summary>YAE MIKO (2026-10-14): Tenko, split out of her Sakura tip;
+    /// review r3 (ruled 2026-10-14) made it one plain rule again.</summary>
+    public const string TenkoKey = "KLEEMOD-ARM_YAE_TENKO";
+    /// <summary>YAE MIKO, REVIEW R3 (ruled 2026-10-14): the two Sakura kinds
+    /// a card names, and the full-shrine plant every planting card carries.
+    /// </summary>
+    public const string FoxfireSakuraKey = "KLEEMOD-ARM_YAE_FOXFIRE_SAKURA";
+    public const string KitsuneSakuraKey = "KLEEMOD-ARM_YAE_KITSUNE_SAKURA";
+    public const string FullShrineKey = "KLEEMOD-ARM_YAE_FULL_SHRINE";
     public const string LightfallSwordKey = "KLEEMOD-ARM_LIGHTFALL_SWORD";
 
     // THE TEXT PASS OF 2026-10-08, and NOT A KEYWORD ROW: the Plan tip a
@@ -154,11 +162,6 @@ public static class ArmKeywordTips
     // plan-only card has no line above and nothing to flip (Kokomi review,
     // 2026-10-08, sec.5). Same title, so the hover still reads "Plan".
     public const string PlanOnlyKey = "KLEEMOD-ARM_PLAN_ONLY";
-
-    // THE KOKOMI RE-FOUNDING (2026-10-12), and NOT A KEYWORD ROW: the Plan tip
-    // a Companion card carries while Kokomi holds it. Any Companion can be
-    // written, and no face or tip said so. Same title, so it reads "Plan".
-    public const string CompanionPlanKey = "KLEEMOD-ARM_PLAN_COMPANION";
 
     // THE KOKOMI ROUND-1 FIXES (2026-10-12), and NOT A KEYWORD ROW: the Plan
     // tip a card carries when its face NAMES Plans but prints no Plan line of
@@ -400,39 +403,6 @@ public static class ArmKeywordTips
           + "Plan line.");
 
     /// <summary>
-    /// THE KOKOMI RE-FOUNDING (2026-10-12): "Any Companion card can be
-    /// written as a Plan" (design pass pick 4 (a)), and nothing on screen
-    /// said so. Attached by <c>gen_klee_cards.emit</c> to every
-    /// <see cref="IWritableCompanion"/> row, and printed only while the card's
-    /// owner is Kokomi (<see cref="KokomiCompanionPlan.OnKokomi"/>), the
-    /// same test that lets it target the Bake-Kurage.
-    /// </summary>
-    public static IEnumerable<IHoverTip> ForCompanionPlan(
-        IEnumerable<IHoverTip> inherited, CardModel card)
-    {
-        if (!KokomiCompanionPlan.OnKokomi(card)) return inherited;
-        return With(inherited, CompanionPlanKey,
-            card is Prototype.Generated.ProtoMcAlbedoDustOfPurification
-                ? CompanionPlanText + " " + DustPlanText
-                : CompanionPlanText);
-    }
-
-    /// <summary>BACKLOG (Albedo -- Dust of Purification): planned, its exhaust
-    /// reads the Draw Pile, as Sea Glass Harvest's Plan does
-    /// (<c>KleeStatusPackage.ExhaustStatusesGrowLargest</c>).</summary>
-    internal const string DustPlanText =
-        "Planned, it reads your [gold]Draw Pile[/gold] instead of your "
-      + "[gold]Hand[/gold].";
-
-    /// <summary><see cref="ForCompanionPlan"/>'s sentence. INTERNAL, as
-    /// <see cref="KnightTipText"/> is: every public string constant here is a
-    /// tip key.</summary>
-    internal const string CompanionPlanText =
-        "Play it on the [gold]Bake-Kurage[/gold] to plan it. Next turn the Kurage applies [gold]Hydro[/gold], "
-      + "then it is played: [gold]Strength[/gold] and [gold]Weak[/gold] "
-      + "count.";
-
-    /// <summary>
     /// `EB-378`: WHERE THE AURA CAME FROM, on the rows whose element is the
     /// jellyfish's and not the card's.
     ///
@@ -635,60 +605,128 @@ public static class ArmKeywordTips
     ///
     /// YAE MIKO (2026-10-13): the same word on her own cards is her shrine,
     /// a different object (it levels and withers), so her cards and her
-    /// Sakura badge carry her tip (<see cref="YaeSakuraTip"/>). Pick 6 (a):
-    /// Tenko lives in this tip.
+    /// Sakura badge carry her tip (<see cref="YaeSakuraTip"/>). Tenko was
+    /// in this tip (pick 6 (a)) until [USER] (2026-10-14): "I think the
+    /// Sakura tooltip is overly verbose, and Sakura and Tenko should be cut
+    /// into separate tips" (<see cref="ForTenko"/>).
     public static IEnumerable<IHoverTip> ForSakura(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, SakuraKey,
             card is ICharacterCard { CharacterId: Powers.YaePrototype.CharacterId }
-                ? YaeSakuraTip
+                ? (TipAudience.Seat ? YaeSakuraTip + " " + YaeSakuraTargetRule : YaeSakuraTip)
                 : "A totem that stays at your side all combat. At most 3 fire "
                 + "each turn.");
 
-    /// <summary>Yae's Sakura, plant, Level, the timer and Tenko, one tip
-    /// (paper sec.2; the numbers are <see cref="Powers.YaeLaw"/>'s).</summary>
+    /// <summary>Yae's Sakura: the strike, the timer, the cap and the
+    /// full-shrine plant (paper sec.2, shrine r2; the numbers are
+    /// <see cref="Powers.YaeLaw"/>'s). [USER] (2026-10-14): "I still feel
+    /// like that Sakura tooltip can be condensed further somehow". Shrine r2:
+    /// a plant no longer levels the others; with 3 standing it refreshes and
+    /// levels the oldest (<c>YaeShrineLedger.Plant</c>). Condensed
+    /// 2026-10-14: the full-shrine rule is printed on the plant cards, and the
+    /// cap moves with Sakura Channeling, so both leave the tip; "random"
+    /// went to fit the 100-character cap.</summary>
     public static readonly string YaeSakuraTip =
-        $"Up to {Powers.YaeLaw.SakuraCap} stand beside you. At the end of your "
-      + "turn each strikes under the shrine's [gold]Rite[/gold] (Thunder at "
-      + "the start of combat), oldest first. Each lasts "
-      + $"{Powers.YaeLaw.SakuraTurns} turns; when it withers, it strikes once "
-      + "more. Planting one raises the others' Level by 1. [gold]Tenko[/gold]: "
-      + $"every Sakura strikes now and lasts {Powers.YaeLaw.SakuraTurns} turns "
-      + "again.";
+        $"At the end of your turn, strikes an enemy for {Powers.YaeLaw.SakuraBase} "
+      + $"+ its Level. Lasts {Powers.YaeLaw.SakuraTurns} turns, then strikes "
+      + "once more.";
+
+    /// <summary>Yae review r6, item 5: which enemy a Sakura strikes
+    /// (<c>YaeShrine.Aim</c>: the aim Kitsune Pounce passes, else the Lure,
+    /// else Hunting Gaze's last enemy attacked (the refill, 2026-10-16), else
+    /// random), in one sentence. The seat's hover adds it to
+    /// <see cref="YaeSakuraTip"/>; the player's hover stays under the
+    /// 100-character cap (<c>tools/lint_hover_tips.py</c>), where Foxfire
+    /// Lure's and Kitsune Pounce's own faces say it. The page's twin is
+    /// <c>blindplay_notes.SAKURA_TARGET_RULE</c>.</summary>
+    public static readonly string YaeSakuraTargetRule =
+        "A Sakura strikes Kitsune Pounce's target when Pounce makes it strike, "
+      + "else the enemy Foxfire Lure marked this turn, else (with Hunting Gaze) "
+      + "the last enemy your Attacks hit, else a random enemy.";
 
     /// <summary>
-    /// YAE MIKO (2026-10-13), pick 6 (a): the Edit tip lists the five
-    /// Annotations; Publish is the relic's word, said here once.
+    /// YAE MIKO (2026-10-13): the Edit tip; Publish is the relic's word,
+    /// said here once. It is the general rule only. [USER] (2026-10-14):
+    /// "the 'Edit' tooltip seems unnecessarily long; no need to show the
+    /// text for every possible edit if the card can only apply one." The
+    /// Annotation a card applies is its own tip (<see cref="ForAnnotation"/>)
+    /// and its own selection prompt (<c>YaeEditing.EditPromptTextFor</c>).
     /// </summary>
     public static IEnumerable<IHoverTip> ForEdit(
         IEnumerable<IHoverTip> inherited, CardModel? card) =>
         With(inherited, EditKey, YaeEditTip);
 
     public static readonly string YaeEditTip =
-        "Give a card in your hand an Annotation for this combat, replacing "
-      + "any it had: [gold]Red Ink[/gold] (+"
-      + Powers.YaeLaw.RedInkAmount + " damage and [gold]Block[/gold]), "
-      + "[gold]Footnote[/gold] (draw 1), [gold]Deadline Extension[/gold] "
-      + "([gold]Retain[/gold]), [gold]Fox Fire[/gold] ("
-      + Powers.YaeLaw.FoxFireDamage + " [gold]Electro[/gold] damage to a random "
-      + "enemy), [gold]Sakura Seal[/gold] (plant a [gold]Sakura[/gold]), "
-      + "[gold]Royalties[/gold] (gain " + Powers.YaeLaw.RoyaltiesPayout
-      + " Energy). On a [gold]Sakura[/gold]: Red Ink makes its strike "
-      + Powers.YaeLaw.RedInkAmount + " bigger (not in Offering), Fox Fire adds "
-      + Powers.YaeLaw.FoxFireDamage + " damage, Deadline Extension stops it "
-      + "withering. A Published Annotation lasts the run.";
+        "Give a card an Annotation for this combat, replacing its last. "
+      + "Published ones stay and add up.";
+
+    /// <summary>One Annotation's tip key, titled by its name.</summary>
+    public static string KeyOf(Powers.YaeAnnotation annotation) =>
+        "KLEEMOD-ARM_YAE_" + annotation.ToString().ToUpperInvariant();
 
     /// <summary>
-    /// YAE MIKO, THE DESIGN AXES (ruled 2026-10-14): the shrine's Rite, what
-    /// every Sakura strike does. One sentence, the four named.
+    /// The one Annotation a face names, titled by its name: its card reading
+    /// (<c>YaeAnnotationText.Rule</c>), or its Sakura reading on a card that
+    /// Edits a Sakura (<paramref name="onSakura"/>, from the row's own
+    /// effect). Codegen attaches one per Annotation the face golds.
     /// </summary>
-    public static IEnumerable<IHoverTip> ForRite(
-        IEnumerable<IHoverTip> inherited, CardModel? card) =>
-        With(inherited, RiteKey, YaeRiteTip);
+    public static IEnumerable<IHoverTip> ForAnnotation(
+        IEnumerable<IHoverTip> inherited, CardModel? card,
+        Powers.YaeAnnotation annotation, bool onSakura) =>
+        With(inherited, KeyOf(annotation),
+             Powers.YaeAnnotationText.TipBody(annotation, onSakura));
 
-    public static readonly string YaeRiteTip =
-        "Sets what [gold]Sakura[/gold] strikes do. Thunder: damage. Warding: "
-      + "[gold]Block[/gold]. Wildfire: ALL enemies. Offering: draw.";
+    /// <summary>
+    /// YAE MIKO, REVIEW R3 (ruled 2026-10-14): Tenko is one plain rule
+    /// again, the paper's words. The typed Tenko and its double effect left:
+    /// one action per Sakura, and the mix of kinds decides what it does.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForTenko(
+        IEnumerable<IHoverTip> inherited, CardModel? card) =>
+        With(inherited, TenkoKey, YaeTenkoTip);
+
+    public static readonly string YaeTenkoTip =
+        "Every [gold]Sakura[/gold] acts now. Refresh them to at least "
+      + $"{Powers.YaeLaw.SakuraTurns} turns.";
+
+    /// <summary>Review r3: a Foxfire Sakura, named on the card that plants
+    /// one (Foxfire Sweep).</summary>
+    public static IEnumerable<IHoverTip> ForFoxfireSakura(
+        IEnumerable<IHoverTip> inherited, CardModel? card) =>
+        With(inherited, FoxfireSakuraKey, YaeFoxfireSakuraTip);
+
+    public static readonly string YaeFoxfireSakuraTip =
+        "A [gold]Sakura[/gold] that hits ALL enemies for "
+      + $"{Powers.YaeLaw.FoxfireBase} + its Level when it acts.";
+
+    /// <summary>Review r3: the decoy ("Yae does not shield. A fox illusion
+    /// draws the blow."), named on Shrine Maiden's Guard.</summary>
+    public static IEnumerable<IHoverTip> ForKitsuneSakura(
+        IEnumerable<IHoverTip> inherited, CardModel? card) =>
+        With(inherited, KitsuneSakuraKey, YaeKitsuneSakuraTip);
+
+    public static readonly string YaeKitsuneSakuraTip =
+        "A fox decoy [gold]Sakura[/gold]. When it acts, you gain "
+      + $"{Powers.YaeLaw.KitsuneBase} + its Level [gold]Block[/gold].";
+
+    /// <summary>
+    /// Review r3 (amended after GPT's review): the full-shrine plant by
+    /// kind. It was printed on the plant cards ("with the shrine full, your
+    /// oldest strikes, refreshes and gains a Level"); with kinds it has two
+    /// branches, so every planting card carries it as a tip (codegen,
+    /// off the row's plant op) instead.
+    /// </summary>
+    public static IEnumerable<IHoverTip> ForFullShrine(
+        IEnumerable<IHoverTip> inherited, CardModel? card) =>
+        With(inherited, FullShrineKey, YaeFullShrineTip);
+
+    /// <summary>Yae review r5, item 5: four of five seats could not read
+    /// the short form until it bit them. The title says "Full shrine".
+    /// </summary>
+    public static readonly string YaeFullShrineTip =
+        "Planting makes your oldest Sakura act. If the new Sakura is the same "
+      + "kind, the oldest stays and gains a Level. If not, the oldest withers "
+      + "and the new one takes its place.";
 
     /// <summary>The text pass of 2026-10-08: Eula's blade, a counter on the
     /// enemy (<c>LightfallSwordPower</c>) with a badge and no tip.</summary>
@@ -733,19 +771,6 @@ public static class ArmKeywordTips
     /// its own scaling. `gen_klee_cards.emit` raises it off the row's
     /// <c>ascension_hit</c> effect.
     /// </summary>
-    /// <summary>
-    /// Design-session call (2026-10-13): Bis! keeps half of a spend-all only
-    /// (<see cref="KleeMod.Powers.FurinaStageLedger.SpendAll"/>); a "Spend up
-    /// to" card is not one even when it empties the bank, and a seat read it
-    /// the other way. `gen_klee_cards.emit` raises it off the row's
-    /// <c>fs_bis</c> power.
-    /// </summary>
-    public static IEnumerable<IHoverTip> ForBisSpendUpTo(
-        IEnumerable<IHoverTip> inherited, CardModel card) =>
-        With(inherited, BisSpendUpToKey,
-            "A card that [gold]Spends[/gold] up to an amount does not count, "
-          + "even if it empties your [gold]Fanfare[/gold].");
-
     /// <summary>
     /// The Furina wave (2026-10-13, "To change now" 4): Final Bow's guest
     /// acts one act at a time, each resolving before the next
@@ -1070,10 +1095,12 @@ public static class ArmKeywordTips
 
     /// <summary>Rule 2: Repay N. The pool to 75 (Hymn of Renewal's reading,
     /// the paper's Review section): a Repay counts the HP it returns.
+    /// furina-next paper 3 (2026-10-16): the rule is one line, "Any HP a
+    /// Repay cannot return becomes Block."
     /// </summary>
     internal const string RepayBody =
-        "Regain that much drained HP, never more than you drained. A Repay "
-      + "counts the HP it returns.";
+        "Regain that much drained HP; a Repay counts the HP it returns. "
+      + "Any HP a Repay cannot return becomes [gold]Block[/gold].";
 
     public static IEnumerable<IHoverTip> ForRepay(
         IEnumerable<IHoverTip> inherited, CardModel card) =>

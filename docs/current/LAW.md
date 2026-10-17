@@ -28,7 +28,10 @@ cooldowns; any open-world system.
 
 - **No character card applies an off-element aura.** Off-element access comes
   only from Companions, a co-op partner, or a guest on Furina's stage, which
-  costs a seat and a card.
+  costs a seat and a card. **Varka is the exception:** his own deck carries all
+  five of his elements by design ([USER], 2026-10-15: "Varka has many
+  'off-element' cards by design as his deck has anemo, pyro, hydro, electro and
+  cryo in it").
 - **Amplifiers are per-hit and consume the aura.** No reaction ever produces a
   persistent or compounding damage multiplier.
 - **One aura per enemy, lasting 2 player turns,** refreshed by a same-element

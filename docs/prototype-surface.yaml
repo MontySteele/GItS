@@ -19,7 +19,7 @@
 # BASE GAME's cards and have no row here. Kaboom! and Duck and Cover deleted;
 # Pop! and Dig In are in the pool below. ---
 
-- {id: proto_ko_kapow, name: "Ka-pow!", character: klee,
+- {id: proto_ko_kapow, name: "Kaboom!", character: klee,
    authored_by: [claude],
    cost: 0, type: attack, rarity: basic, retain: true,
    description: "[gold]Set off[/gold] the enemy. Deal 4 [gold]Pyro[/gold] damage.",
@@ -801,7 +801,7 @@
 - {id: proto_ko_simmer, name: "Simmer", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal 6 [gold]Pyro[/gold] damage, plus your largest [gold]Bomb[/gold]'s size on any enemy. It does not go off. Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].{InCombat:\n(Deals {BombHit:diff()} damage)|}",
+   description: "Deal 6 [gold]Pyro[/gold] damage plus your largest [gold]Bomb[/gold]'s size, on any enemy, not setting it off. Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].{InCombat:\n(Deals {BombHit:diff()} damage)|}",
    upgrade: {damage: +3},
    effects: [{op: damage_from_bombs, read: largest, amount: 6, target: enemy},
              {op: add_card, card: status_dazed, zone: discard, amount: 1}]}
@@ -1241,15 +1241,14 @@
 - {id: proto_kk_feint, name: "Feint", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   # The re-founding (2026-10-12): per Plan waiting. The pool overhaul
-   # (2026-10-13): a Chain Plan (was Apply 1 [2] Vulnerable). Provenance note.
-   # kokomi-review-r5-2026-10-14 numbers pass: base 6 -> 8, Plan 5 -> 6 per Plan.
-   description: "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus {ExtraDamage:diff()} for each [gold]Plan[/gold] waiting. [gold]Plan[/gold]: Deal 6 [gold]Hydro[/gold] damage for each [gold]Plan[/gold] carried out this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
-   effects: [{op: damage, target: enemy,
-              amount_formula: {base: 8, per: 3, count: plans_held}}],
+   # Pool overhaul (2026-10-13): a Chain Plan. Review r5: Plan 5 -> 6.
+   # Kokomi review r8 (2026-10-14) item 5: the now-line is a flat 8 (was
+   # 8, plus 3 per Plan waiting). Provenance notes.
+   description: "Deal 8 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 6 [gold]Hydro[/gold] damage for each [gold]Plan[/gold] carried out this turn.",
+   effects: [{op: damage, amount: 8, target: enemy}],
    plan: [{op: damage_per_plan_this_turn, amount: 6, target: front_enemy}],
-   # 11, plus 3 each / Plan 8 per Plan.
-   upgrade: {formula_base: 3, plan_damage: 2}}
+   # 10 / Plan 8 per Plan.
+   upgrade: {damage: 2, plan_damage: 2}}
 
 - {id: proto_kk_ambush, name: "Ambush", character: kokomi,
    authored_by: [claude],
@@ -1274,7 +1273,7 @@
    cost: 1, type: skill, rarity: uncommon,
    # Pool overhaul (2026-10-13) and Kokomi review r6 pick 3 (a): the Plan
    # fetches a card that costs 0 this turn. Provenance note.
-   description: "Take 1 of your top {Scry:diff()}. Put the rest on the bottom. [gold]Plan[/gold]: Put a [gold]Draw Pile[/gold] card into your [gold]Hand[/gold]. It costs 0 this turn.",
+   description: "Take 1 of your top {Scry:diff()} cards. [gold]Plan[/gold]: Put a [gold]Draw Pile[/gold] card into your [gold]Hand[/gold]. It costs 0 this turn.",
    effects: [{op: scry_take, amount: 3}],
    plan: [{op: draw_pile_to_hand}],
    # 4 seen; the Plan line prints no number.
@@ -1455,7 +1454,8 @@
    cost: 1, type: attack, rarity: uncommon,
    # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
    # Plan line buys what only a head start can buy.
-   description: "Deal 5 [gold]Hydro[/gold] damage twice. [gold]Plan[/gold]: Next turn, your first Attack is played twice.",
+   # Wording pass 2026-10-14: "Next turn" read as a second turn of delay.
+   description: "Deal 5 [gold]Hydro[/gold] damage twice. [gold]Plan[/gold]: Your first Attack that turn is played twice.",
    effects: [{op: damage, amount: 5, target: enemy, times: 2}],
    plan: [{op: first_attack_twice}],
    # 2026-10-11 Kokomi card pass (review/ruled/kokomi-card-pass-2026-10-11.md):
@@ -1544,13 +1544,13 @@
 - {id: proto_kk_surging_shoal, name: "Surging Shoal", character: kokomi,
    authored_by: [claude],
    cost: 2, type: attack, rarity: uncommon,
-   # The re-founding (2026-10-12): the Plan line goes to ALL enemies, with
-   # no Strength rider (it was written for the Casket's Strength).
-   description: "Deal 14 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 12 [gold]Hydro[/gold] damage to ALL enemies.",
-   effects: [{op: damage, amount: 14, target: enemy}],
-   plan: [{op: damage, amount: 12, target: all_enemies}],
-   # 18 / Plan 16.
-   upgrade: {damage: 4, plan_damage: 4}}
+   # Kokomi review r8 (2026-10-14) item 4: attacks and defends now, no Plan
+   # (was 14 damage, Plan 12 to ALL enemies).
+   description: "Deal 10 [gold]Hydro[/gold] damage to ALL enemies. Gain 10 [gold]Block[/gold].",
+   effects: [{op: damage, amount: 10, target: all_enemies},
+             {op: block, amount: 10}],
+   # 13 / 13.
+   upgrade: {damage: 3, block: 3}}
 
 # PEARL DIVER IS CUT (the status batch, 2026-10-01,
 # review/active/kokomi-status-batch-2026-10-01.md sec.2). Provenance
@@ -1570,11 +1570,10 @@
 
 - {id: proto_kk_shell_of_sanctuary, name: "Shell of Sanctuary", character: kokomi,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: common,
-   # The re-founding (2026-10-12): Dusk is retired; Block now, then the draw.
-   description: "Gain 6 [gold]Block[/gold]. Draw 1 card.",
-   effects: [{op: block, amount: 6}, {op: draw, amount: 1}],
-   # 9 Block.
+   cost: 1, type: skill, rarity: common, retain: true,
+   # Kokomi review r9 item 4: Retain, a different job from Breakwater.
+   description: "Gain {Block:diff()} [gold]Block[/gold].",
+   effects: [{op: block, amount: 6}],
    upgrade: {block: 3}}
 
 - {id: proto_kk_tideturn, name: "Tideturn", character: kokomi,
@@ -1707,12 +1706,13 @@
    # enemies). Provenance note.
    cost: 1, type: skill, rarity: uncommon,
    # kokomi-review-r5-2026-10-14 numbers pass: Gain 5 Block added; Plan 3 -> 4 Strength.
-   description: "Gain 5 [gold]Block[/gold]. Apply 2 [gold]Weak[/gold]. [gold]Plan[/gold]: Each enemy that intends to attack loses 4 [gold]Strength[/gold] this turn.",
-   effects: [{op: block, amount: 5},
+   # Kokomi review r8 (2026-10-14) item 3: Block 5 -> 8 [11]. Plan unchanged.
+   description: "Gain 8 [gold]Block[/gold]. Apply 2 [gold]Weak[/gold]. [gold]Plan[/gold]: Each enemy that intends to attack loses 4 [gold]Strength[/gold] this turn.",
+   effects: [{op: block, amount: 8},
              {op: apply_power, power: weak, amount: 2, target: enemy}],
    plan: [{op: lose_strength_this_turn, amount: 4, target: enemies_intending_attack}],
-   # Plan 5 Strength; the now-line does not upgrade.
-   upgrade: {plan_power_amount: 1}}
+   # 11 Block / Plan 5 Strength.
+   upgrade: {block: 3, plan_power_amount: 1}}
 
 - {id: proto_kk_at_waters_edge, name: "At Water's Edge", character: kokomi,
    authored_by: [claude],
@@ -1734,7 +1734,9 @@
    authored_by: [claude],
    cost: 1, type: power, rarity: rare,
    # kokomi-review-r5-2026-10-14 numbers pass: 3 -> 2 Plans, draw 2 -> 1.
-   description: "Whenever 2 or more [gold]Plans[/gold] are carried out in one turn, gain {energyPrefix:energyIcons(1)} and draw 1 card.",
+   # Kokomi wording pass (2026-10-14): the face says once a turn, as the
+   # power already paid (`BattleFormationPower`, the ledger's Claim).
+   description: "The first time each turn 2 or more [gold]Plans[/gold] are carried out, gain {energyPrefix:energyIcons(1)} and draw 1 card.",
    effects: [{op: apply_power, power: kk_battle_formation, amount: 1, target: self}],
    upgrade: {innate: true}}
 
@@ -1769,9 +1771,10 @@
    # The re-founding (2026-10-12): Dusk is retired; the Block per attacker is
    # the now-line, counted when it is played.
    description: "Gain {KkAmount:diff()} [gold]Block[/gold] for each enemy intending to attack. Draw 1 card.",
-   effects: [{op: kokomi, kind: block_per_attacker, amount: 4},
+   # Kokomi review r8 (2026-10-14) item 2: 4 [6] -> 6 [8] per attacker.
+   effects: [{op: kokomi, kind: block_per_attacker, amount: 6},
              {op: draw, amount: 1}],
-   # 6 each.
+   # 8 each.
    upgrade: {kokomi_amount: 2}}
 
 # BRACE FOR THE TIDE IS CUT (the pool overhaul, 2026-10-13, sec.4): Jellyfish
@@ -1924,9 +1927,10 @@
 - {id: proto_kk_tidecleanse, name: "Tidecleanse", character: kokomi,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common,
-   # The re-founding (2026-10-12): no Plan line; the Exhaust is the
-   # now-line, first. "Up to": she chooses which when she holds more.
-   description: "[gold]Exhaust[/gold] up to {KkAmount:diff()} Statuses or Curses in your [gold]Hand[/gold]. Apply 1 [gold]Weak[/gold].",
+   # Re-founding (2026-10-12): no Plan line; "up to": she chooses which.
+   # Kokomi review r9 (2026-10-15, item 1): the draw is inside the
+   # exhaust_statuses kind, one per card exhausted; none with no Status.
+   description: "[gold]Exhaust[/gold] up to {KkAmount:diff()} Statuses or Curses in your [gold]Hand[/gold]. Draw 1 card for each. Apply 1 [gold]Weak[/gold].",
    effects: [{op: kokomi, kind: exhaust_statuses, amount: 2},
              {op: apply_power, power: weak, amount: 1, target: enemy}],
    # Up to 3 (the old Plan line's upgrade, carried over).
@@ -2024,7 +2028,9 @@
    # Kokomi level pass (2026-10-12, sec.2): choose 1 of 3, cost 1 [0]. The
    # upgraded grant goes: the cost is the upgrade, one axis.
    cost: 1, type: skill, rarity: common,
-   description: "Choose 1 of 3 random Common Inazuma [gold]Companions[/gold] to add into your [gold]Hand[/gold]. It is [gold]Ethereal[/gold].",
+   # Kokomi review r9 (2026-10-15, item 2): the pick costs 0 this turn
+   # (Call the Generals' rider); taken 1 of 9.
+   description: "Choose 1 of 3 random Common Inazuma [gold]Companions[/gold] to add into your [gold]Hand[/gold]. It costs 0 this turn and is [gold]Ethereal[/gold].",
    effects: [{op: kokomi, kind: choose_common_companion}],
    upgrade: {cost: -1}}
 
@@ -2051,8 +2057,10 @@
 
 - {id: proto_kk_sangonomiyas_orders, name: "Sangonomiya's Orders", character: kokomi,
    authored_by: [claude],
-   cost: 1, type: power, rarity: uncommon,
-   description: "At the start of your turn, add a random Common Inazuma [gold]Companion[/gold] to your [gold]Hand[/gold]. It is [gold]Ethereal[/gold].",
+   # Kokomi review r9 (2026-10-15, item 3): the card costs 0 and the Power
+   # costs 2 (was 1); taken 0 of 7, 0 of 6 in r8.
+   cost: 2, type: power, rarity: uncommon,
+   description: "At the start of your turn, add a random Common Inazuma [gold]Companion[/gold] to your [gold]Hand[/gold]. It costs 0 and is [gold]Ethereal[/gold].",
    effects: [{op: apply_power, power: kk_sangonomiyas_orders, amount: 1, target: self}],
    upgrade: {innate: true}}
 
@@ -2157,7 +2165,7 @@
    # Kokomi round 2 (2026-10-12): the chosen card costs 0 this turn (the base game's
    # Discovery template).
    cost: 1, type: skill, rarity: rare, exhaust: true,
-   description: "Choose 1 of 3 random Rare Inazuma [gold]Companions[/gold] to add into your [gold]Hand[/gold]. It is [gold]Ethereal[/gold] and costs 0 this turn.",
+   description: "Choose 1 of 3 random Rare Inazuma [gold]Companions[/gold] to add into your [gold]Hand[/gold]. It costs 0 this turn and is [gold]Ethereal[/gold].",
    effects: [{op: kokomi, kind: call_the_generals}],
    upgrade: {cost: -1}}
 
@@ -2276,9 +2284,9 @@
    # Kokomi's own card since the re-founding (2026-10-12, card paper sec.3).
    nation: inazuma, star: 4, rarity: uncommon, role_c: trigger, element: geo,
    cost: 1, type: skill, exhaust: true,
-   # The paper's Plan line ("For 3 turns, at the end of your turn gain 6
-   # Block") shortened to the 120-character card ceiling.
-   description: "For 3 turns, at the end of your turn deal 7 [gold]Geo[/gold] damage to a random enemy. [gold]Plan[/gold]: Gain 6 [gold]Block[/gold].",
+   # Plan: for 3 turns, 6 Block at the end of your turn instead of the
+   # damage (wording pass 2026-10-15; provenance note).
+   description: "For 3 turns, deal 7 [gold]Geo[/gold] damage to a random enemy at the end of your turn. [gold]Plan[/gold]: Gain 6 [gold]Block[/gold] instead.",
    effects: [{op: apply_power, power: mi_juuga, amount: 3, target: self}],
    plan: [{op: juuga_guard, amount: 3}]}
 
@@ -2691,7 +2699,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: geo,
    cost: 1, type: skill,
-   description: "[gold]Exhaust[/gold] every Status in your [gold]Hand[/gold]. Your largest [gold]Bomb[/gold], on any enemy, grows by 6 for each. Draw 1 card for each.",
+   description: "[gold]Exhaust[/gold] every Status in your [gold]Hand[/gold]. For each, draw 1 card and your largest [gold]Bomb[/gold], on any enemy, grows by 6.",
    upgrade: {grow: +2},
    effects: [{op: exhaust_statuses_grow_largest, amount: 6, draw_each: 1}]}
 
@@ -2806,22 +2814,25 @@
 
 # --- REPAY (four) ---
 
-# Hymn of Many Waters: Block 8 [11] -> 6 [8], Repay 3 [4] kept ([USER],
-# 2026-10-11: "Yeah, I think Hymn needs a trim."; provenance note).
+# Hymn of Many Waters: Block 8 [11] -> 6 [8], Repay 3 [4] kept (2026-10-11);
+# its floor clause dropped, the rule's now (furina-next paper 3, 2026-10-16;
+# provenance note).
 - {id: proto_fs_hymn_of_many_waters, name: "Hymn of Many Waters", character: furina,
    upgrade: {block: +2, stage_repay: +1},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: common,
-   description: "Gain 6 [gold]Block[/gold]. [gold]Repay[/gold] 3. Gain 1 [gold]Block[/gold] for any HP it could not [gold]Repay[/gold].",
+   description: "Gain 6 [gold]Block[/gold]. [gold]Repay[/gold] 3.",
    effects: [{op: block, amount: 6},
-             {op: stage_repay, amount: 3, floor: block}]}
+             {op: stage_repay, amount: 3}]}
 
+# Pneuma Refrain: Repay 5 [7] -> 4 [6] (furina-next paper 3, 2026-10-16:
+# "One less, because it now always pays 4 Block when healthy.").
 - {id: proto_fs_pneuma_refrain, name: "Pneuma Refrain", character: furina,
    upgrade: {stage_repay: +2},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "[gold]Repay[/gold] 5. Draw 2 cards.",
-   effects: [{op: stage_repay, amount: 5},
+   description: "[gold]Repay[/gold] 4. Draw 2 cards.",
+   effects: [{op: stage_repay, amount: 4},
              {op: draw, amount: 2}]}
 
 # Singer of Many Waters: Retain added ([USER], 2026-10-11: "Singer of Many
@@ -2843,7 +2854,7 @@
    upgrade: {formula_base: +3},
    authored_by: [claude],
    register: salon, cost: 1, type: attack, rarity: uncommon,
-   description: "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage to ALL enemies. [gold]Spend[/gold] up to 10: deal 1 more for each.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   description: "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage to ALL enemies. [gold]Spend[/gold] up to 10, all you can: deal 1 more for each.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: stage_spend_up_to, amount: 10},
              {op: damage,
               amount_formula: {base: 5, per: 1, count: stage_spent},
@@ -2859,13 +2870,13 @@
 
 # Bravura: one Hydro hit of 7 [9] for every 3 spent (the diversity pass,
 # review/ruled/furina-diversity-pass-2026-10-11.md sec.2, ruled 2026-10-11;
-# was 6, plus 2 a point, one hit).
+# was 6, plus 2 a point, one hit). Spend up to 18: furina-next paper 2.
 - {id: proto_fs_bravura, name: "Bravura", character: furina,
    upgrade: {damage: +2},
    authored_by: [claude],
    register: salon, cost: 1, type: attack, rarity: uncommon,
-   description: "[gold]Spend[/gold] all your [gold]Fanfare[/gold]. Deal {Damage:diff()} [gold]Hydro[/gold] damage for every 3 spent.{InCombat:\n(Deals {TotalDamage:diff()} damage)|}",
-   effects: [{op: stage_spend_all},
+   description: "[gold]Spend[/gold] up to 18, all you can. Deal {Damage:diff()} [gold]Hydro[/gold] damage for every 3 spent.{InCombat:\n(Deals {TotalDamage:diff()} damage)|}",
+   effects: [{op: stage_spend_up_to, amount: 18},
              {op: damage, amount: 7, target: enemy, applies_element: true,
               times_formula: {base: 0, per: 1, count: stage_spent_threes}}]}
 
@@ -2978,8 +2989,8 @@
    effects: [{op: stage_guest, member: sigewinne}]}
 
 # Fountain of Lucine: Block now, and a Power owing one Repay at the start of
-# the next turn (`FountainOfLucinePower`; sim `furina_tide`'s schedule). Ruled
-# 2026-10-13: 8 [11] Block, Repay 3, no Block floor, no three turns.
+# the next turn (`FountainOfLucinePower`). 8 [11] Block, Repay 3 (2026-10-13),
+# the Block floor since furina-next paper 3 (2026-10-16).
 - {id: proto_fs_fountain_of_lucine, name: "Fountain of Lucine", character: furina,
    upgrade: {block: +3},
    authored_by: [claude],
@@ -3002,7 +3013,7 @@
    upgrade: {formula_base: +2},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: uncommon,
-   description: "Gain {CalculationBase:diff()} [gold]Block[/gold]. [gold]Spend[/gold] up to 16: gain 1 more for each.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
+   description: "Gain {CalculationBase:diff()} [gold]Block[/gold]. [gold]Spend[/gold] up to 16, all you can: gain 1 more for each.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
    effects: [{op: stage_spend_up_to, amount: 16},
              {op: block,
               amount_formula: {base: 6, per: 1, count: stage_spent}}]}
@@ -3014,12 +3025,14 @@
    description: "[gold]Summon[/gold] Chevreuse{IfUpgraded:show:+|}.{IfUpgraded:show: Also applies [gold]Weak[/gold].|}",
    effects: [{op: stage_guest, member: chevreuse}]}
 
-- {id: proto_fs_bis, name: "Bis!", character: furina,
-   upgrade: {innate: true},
+# Extended Run, on Bis!'s old id and painting (furina-next paper 2,
+# 2026-10-16). Scope: provenance note, "Spending the bank".
+- {id: proto_fs_bis, name: "Extended Run", character: furina,
+   upgrade: {power_amount: +4},
    authored_by: [claude],
    register: salon, cost: 1, type: power, rarity: rare,
-   description: "Whenever a card [gold]Spends[/gold] all your [gold]Fanfare[/gold], keep half of it.",
-   effects: [{op: apply_power, power: fs_bis, amount: 1,
+   description: "Attacks and Skills that [gold]Spend[/gold] up to a number can [gold]Spend[/gold] {PowerAmount:diff()} more.",
+   effects: [{op: apply_power, power: fs_extended_run, amount: 8,
               target: self}]}
 
 # --- THE POOL TO 75 (review/ruled/furina-pool-growth-2026-10-09.md sec.5,
@@ -3071,7 +3084,7 @@
    upgrade: {power_amount: +2},
    authored_by: [claude],
    register: salon, cost: 1, type: power, rarity: uncommon,
-   description: "Whenever you play a Guest Star, [gold]Repay[/gold] 4. Gain 1 [gold]Block[/gold] for any HP it could not [gold]Repay[/gold].",
+   description: "Whenever you play a Guest Star, [gold]Repay[/gold] 4.",
    effects: [{op: apply_power, power: fs_grand_entrance, amount: 4,
               target: self}]}
 
@@ -3125,11 +3138,11 @@
 
 # The Crowd (9): 3 Common, 3 Uncommon, 3 Rare.
 
-- {id: proto_fs_crashing_waves, name: "Crashing Waves", character: furina,
+- {id: proto_fs_crashing_waves, name: "Soloist's Solicitation", character: furina,
    upgrade: {damage: +1},
    authored_by: [claude],
    register: salon, cost: 1, type: attack, rarity: common,
-   description: "Deal {Damage:diff()} [gold]Hydro[/gold] damage twice. [gold]Spend[/gold] up to 16: hit once more for every 4.",
+   description: "Deal {Damage:diff()} [gold]Hydro[/gold] damage twice. [gold]Spend[/gold] up to 16, all you can: hit once more for every 4.",
    effects: [{op: stage_spend_up_to, amount: 16},
              {op: damage, amount: 4, target: enemy, applies_element: true,
               times_formula: {base: 2, per: 1, count: stage_spent_fours}}]}
@@ -3173,36 +3186,46 @@
    description: "Deal 15 damage. Costs 1 less for every 6 [gold]Fanfare[/gold] you have.",
    effects: [{op: damage, amount: 15, target: enemy}]}
 
+# Furina's engines (review/active/furina-next-2026-10-15.md, ruled
+# 2026-10-16): counts from the turn it is played, 2, 4, 6 ... [3, 6, 9].
+# Provenance note, "Furina's engines, furina-next 2026-10-16".
 - {id: proto_fs_crescendo, name: "Crescendo", character: furina,
-   upgrade: {innate: true},
+   upgrade: {power_amount: +1},
    authored_by: [claude],
    register: salon, cost: 1, type: power, rarity: uncommon,
-   description: "The first time each turn you [gold]Spend[/gold], draw 1 card.",
-   effects: [{op: apply_power, power: fs_crescendo, amount: 1,
+   description: "At the start of your turn, gain {PowerAmount:diff()} [gold]Fanfare[/gold], then {PowerAmount:diff()} more each turn after.",
+   effects: [{op: apply_power, power: fs_crescendo, amount: 2,
               target: self}]}
 
+# "Last turn" is her previous turn, its end-of-turn Spends included; a Spend
+# of 0 is no Spend. The upgraded card installs the Plus power, which draws.
 - {id: proto_fs_prima_donna, name: "Prima Donna", character: furina,
-   upgrade: {cost: -1},
+   upgrade: {upgraded_power: fs_prima_donna_plus},
    authored_by: [claude],
    register: salon, cost: 2, type: power, rarity: rare,
-   description: "At the start of your turn, if you have 10 or more [gold]Fanfare[/gold], gain {energyPrefix:energyIcons(1)}.",
+   description: "At the start of your turn, if you [gold]Spent[/gold] last turn, gain {energyPrefix:energyIcons(1)}{IfUpgraded:show: and draw 1 card|}.",
    effects: [{op: apply_power, power: fs_prima_donna, amount: 1,
               target: self}]}
 
+# Every Spend of at least 1 counts: her cards', a guest's (Full House, Navia,
+# Freminet) and Showstopper's.
 - {id: proto_fs_standing_room_only, name: "Standing Room Only", character: furina,
-   upgrade: {cost: -1},
+   upgrade: {innate: true},
    authored_by: [claude],
-   register: salon, cost: 2, type: power, rarity: rare,
-   description: "Whenever you [gold]Spend[/gold] all your [gold]Fanfare[/gold] and it is at least 1, gain 1 [gold]Strength[/gold].",
+   register: salon, cost: 1, type: power, rarity: rare,
+   description: "Whenever you [gold]Spend[/gold], gain 1 [gold]Strength[/gold].",
    effects: [{op: apply_power, power: fs_standing_room_only, amount: 1,
               target: self}]}
 
+# Bring the House Down: Spend up to 10 for each guest on stage, in one Spend
+# (furina-next paper 2, review/active/furina-next-2-2026-10-16.md sec.2,
+# ruled 2026-10-16; was Spend all).
 - {id: proto_fs_bring_the_house_down, name: "Bring the House Down", character: furina,
    upgrade: {cost: -1},
    authored_by: [claude],
    register: salon, cost: 2, type: attack, rarity: rare,
-   description: "[gold]Spend[/gold] all your [gold]Fanfare[/gold]. Deal that much damage. Each guest acts.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
-   effects: [{op: stage_spend_all},
+   description: "[gold]Spend[/gold] up to 10 for each guest on stage, all you can. Deal that much damage. Each guest acts.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: stage_spend_up_to, amount: 10, per: stage_guests},
              {op: damage,
               amount_formula: {base: 0, per: 1, count: stage_spent},
               target: enemy},
@@ -3212,8 +3235,8 @@
 # the "Drain down to your line" cards: The Deluge, All In and Pay the Tab
 # Drain fixed amounts.
 
-# Undercurrent: the count includes its own Drain (it Drains first).
-- {id: proto_fs_undercurrent, name: "Undercurrent", character: furina,
+# Unheard Confession: the count includes its own Drain (it Drains first).
+- {id: proto_fs_undercurrent, name: "Unheard Confession", character: furina,
    upgrade: {formula_base: +2},
    authored_by: [claude],
    register: salon, cost: 1, type: attack, rarity: common,
@@ -3231,9 +3254,9 @@
    effects: [{op: stage_drain, amount: 3},
              {op: draw, amount: 2}]}
 
-# Against the Tide: "If you Drained this turn", any Drain of 1+ HP (2026-10-12;
+# Against All Odds: "If you Drained this turn", any Drain of 1+ HP (2026-10-12;
 # was "within 5 HP of your Drain line"; see the provenance notes).
-- {id: proto_fs_against_the_tide, name: "Against the Tide", character: furina,
+- {id: proto_fs_against_the_tide, name: "Against All Odds", character: furina,
    upgrade: {conditional_damage: +3, conditional_then_damage: +1},
    authored_by: [claude],
    register: salon, cost: 1, type: attack, rarity: uncommon,
@@ -3242,7 +3265,7 @@
               then: [{op: damage, amount: 14, target: enemy}],
               else: [{op: damage, amount: 8, target: enemy}]}]}
 
-- {id: proto_fs_riptide_lunge, name: "Riptide Lunge", character: furina,
+- {id: proto_fs_riptide_lunge, name: "Coup de Théâtre", character: furina,
    upgrade: {damage: +3},
    authored_by: [claude],
    register: salon, cost: 1, type: attack, rarity: uncommon,
@@ -3286,17 +3309,22 @@
    authored_by: [claude],
    register: salon, cost: 2, type: attack, rarity: uncommon,
    description: "[gold]Repay[/gold] 4. Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage to ALL enemies, plus 1 for any HP it could not [gold]Repay[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
-   effects: [{op: stage_repay, amount: 4},
+   # furina-next paper 3 (2026-10-16): it prints its own floor, damage, so
+   # its Repay pays no Block (`floor: none`).
+   effects: [{op: stage_repay, amount: 4, floor: none},
               {op: damage,
                amount_formula: {base: 10, per: 1, count: stage_repay_left},
                target: all_enemies, applies_element: true}]}
 
-- {id: proto_fs_rising_tide, name: "Rising Tide", character: furina,
+# Endless Waltz: "Repay 2." first (furina-next paper 3, 2026-10-16); its own
+# Repay counts only when it returns HP (provenance note).
+- {id: proto_fs_rising_tide, name: "Endless Waltz", character: furina,
    upgrade: {formula_per: +1},
    authored_by: [claude],
    register: salon, cost: 1, type: attack, rarity: uncommon,
-   description: "Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} for each time you Repaid this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
-   effects: [{op: damage,
+   description: "[gold]Repay[/gold] 2. Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} for each time you Repaid this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: stage_repay, amount: 2},
+             {op: damage,
               amount_formula: {base: 6, per: 3, count: stage_repays_turn},
               target: enemy}]}
 
@@ -3391,7 +3419,7 @@
    upgrade: {power_amount: +2},
    authored_by: [claude],
    register: salon, cost: 1, type: power, rarity: uncommon,
-   description: "Whenever a guest's act deals damage, [gold]Spend[/gold] up to {PowerAmount:diff()}: it deals that much more.",
+   description: "Whenever a guest's act deals damage, [gold]Spend[/gold] up to {PowerAmount:diff()}, all you can: it deals that much more.",
    effects: [{op: apply_power, power: fs_full_house, amount: 4,
               target: self}]}
 
@@ -3400,16 +3428,19 @@
 # Provenance note, "Furina: the sweep, 2026-10-14". ---
 
 # Ousia / Pneuma: two faces, starts each combat on Ousia; playing a face does
-# it, then the card turns over (`furina` kind `flip`, `FurinaFlip`).
+# it, then the card turns over (`furina` kind `flip`, `FurinaFlip`). Each face
+# does one half of her kit since her card pass (2026-10-15; provenance note).
 - {id: proto_fs_ousia_pneuma, name: "Ousia / Pneuma", character: furina,
    upgrade: {conditional_damage: +3, conditional_block: +3},
    authored_by: [claude],
    register: salon, cost: 1, type: attack, rarity: common,
-   description: "{Pneuma:Gain {BranchBlock:diff()} [gold]Block[/gold].|{InCombat:Deal {BranchDamage:diff()} damage.|Ousia: Deal {BranchDamage:diff()} damage.\nPneuma: Gain {BranchBlock:diff()} [gold]Block[/gold].}}\n[gold]Flip[/gold].",
+   description: "{Pneuma:[gold]Repay[/gold] 2. Gain {BranchBlock:diff()} [gold]Block[/gold].|{InCombat:[gold]Drain[/gold] 2. Deal {BranchDamage:diff()} damage.|Ousia: [gold]Drain[/gold] 2. Deal {BranchDamage:diff()} damage.\nPneuma: [gold]Repay[/gold] 2. Gain {BranchBlock:diff()} [gold]Block[/gold].}}\n[gold]Flip[/gold].",
    effects: [{op: conditional, if: ousia_face,
-              then: [{op: damage, amount: 8, target: enemy}]},
+              then: [{op: stage_drain, amount: 2},
+                     {op: damage, amount: 10, target: enemy}]},
              {op: conditional, if: pneuma_face,
-              then: [{op: block, amount: 7}]},
+              then: [{op: stage_repay, amount: 2},
+                     {op: block, amount: 8}]},
              {op: furina, kind: flip}]}
 
 # Objection!: Flame Barrier's window, once, for twice the HP the hit cost.
@@ -3914,11 +3945,10 @@
 - {id: proto_vk_tempest_charge, name: "Tempest Charge", character: varka,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. If it [gold]Swirls[/gold], draw 1 card.",
-   effects: [{op: damage, amount: 8, target: enemy},
-             {op: conditional, if: swirled_by_this,
-              then: [{op: draw, amount: 1}]}],
-   upgrade: {damage: 3}}
+   cost_reduction_per_swirl_this_turn: 1,
+   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Costs 1 less for each [gold]Swirl[/gold] this turn.",
+   effects: [{op: damage, amount: 12, target: enemy}],
+   upgrade: {damage: 4}}
 
 - {id: proto_vk_favonius_cut, name: "Favonius Cut", character: varka,
    authored_by: [claude],
@@ -3943,7 +3973,7 @@
    effects: [{op: add_knight}],
    upgrade: {upgraded_knight: true}}
 
-- {id: proto_vk_tailwind_stride, name: "Tailwind Stride", character: varka,
+- {id: proto_vk_tailwind_stride, name: "A Bard's Tale", character: varka,
    authored_by: [claude],
    # Unconditional 3 [4] (user 2026-10-13: "When do you not have an
    # element outside turn 1?"); was 2, +1 [2] with a current element.
@@ -3991,8 +4021,9 @@
    authored_by: [claude],
    nation: mondstadt, star: 5, rarity: uncommon, role_c: applier, element: cryo,
    # Varka pool audit (2026-10-13), ruled (a): costs 1, was 2; 8 [11], was
-   # 10 [14].
-   cost: 1, type: skill, personal_pool: varka,
+   # 10 [14]. Varka round 5 (varka-next, review/active/varka-next-2026-10-13.md):
+   # an Attack, was a Skill; same cost and numbers.
+   cost: 1, type: attack, personal_pool: varka,
    description: "Deal {CalculatedDamage:diff()} [gold]Cryo[/gold] damage. Gain 1 [gold]Cryo[/gold] [gold]Oath[/gold] for each enemy with a [gold]Cryo[/gold] aura.",
    effects: [{op: damage, amount: 8, target: enemy, applies_element: true},
              {op: varka, kind: oath_per_cryo_enemy}],
@@ -4091,7 +4122,7 @@
    effects: [{op: varka, kind: violet_storm, target: random_enemy, base: 6}],
    upgrade: {varka_base: 2}}
 
-- {id: proto_vk_sworn_brotherhood, name: "Sworn Brotherhood", character: varka,
+- {id: proto_vk_sworn_brotherhood, name: "Knight of Boreas", character: varka,
    authored_by: [claude],
    cost: 1, type: power, rarity: rare,
    # Varka round 3 (2026-10-10): 2 [3] of the current element; one Oath a
@@ -4325,7 +4356,7 @@
    effects: [{op: apply_power, power: vk_assembly_at_the_cathedral, amount: 2, target: self}],
    upgrade: {power_amount: 1}}
 
-- {id: proto_vk_dawn_patrol, name: "Dawn Patrol", character: varka,
+- {id: proto_vk_dawn_patrol, name: "Leave It for Jean", character: varka,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon, exhaust: true,
    description: "Gain {energyPrefix:energyIcons(1)}. Draw {Cards:diff()} card{Cards:plural:|s}.",
@@ -4363,7 +4394,7 @@
    effects: [{op: apply_power, power: vk_absolute_zero, amount: 1, target: self}],
    upgrade: {innate: true}}
 
-- {id: proto_vk_thundering_verdict, name: "Thundering Verdict", character: varka,
+- {id: proto_vk_thundering_verdict, name: "Lightning Fang", character: varka,
    authored_by: [claude],
    # Element identities (sec.3): re-aimed to X, Whirlwind's spend-it-all.
    cost: X, type: attack, rarity: rare,
@@ -4374,7 +4405,7 @@
    effects: [{op: varka, kind: thundering_verdict, target: all_enemies, base: 6, per: 1}],
    upgrade: {varka_base: 2}}
 
-- {id: proto_vk_oath_unto_death, name: "Oath Unto Death", character: varka,
+- {id: proto_vk_oath_unto_death, name: "Azure Fang's Oath", character: varka,
    authored_by: [claude],
    # Varka forced-Amber round (2026-10-10): costs 2, was 3.
    cost: 2, type: power, rarity: rare,
@@ -4391,7 +4422,7 @@
              {op: varka, kind: double_current_oath}],
    upgrade: {damage: 5}}
 
-- {id: proto_vk_wolfpack, name: "Wolfpack", character: varka,
+- {id: proto_vk_wolfpack, name: "Lupical", character: varka,
    authored_by: [claude],
    cost: 1, type: power, rarity: rare,
    # Varka payoff round, 2026-10-10: shuffled in, the copy Exhausts (was: to
@@ -4427,8 +4458,11 @@
 
 - {id: proto_vk_twin_gales, name: "Twin Gales", character: varka,
    authored_by: [claude],
+   # Varka round 5 (varka-next, review/active/varka-next-2026-10-13.md): a
+   # matched element pays twice. Was "Your Swirls pay both your current
+   # element and the element they Swirl." (paid once when they matched).
    cost: 1, type: power, rarity: rare,
-   description: "Your [gold]Swirls[/gold] pay both your [gold]current element[/gold] and the element they [gold]Swirl[/gold].",
+   description: "Your [gold]Swirls[/gold] also pay the element they [gold]Swirl[/gold]. If it's your [gold]current element[/gold], it pays twice.",
    effects: [{op: apply_power, power: vk_twin_gales, amount: 1, target: self}],
    upgrade: {innate: true}}
 
@@ -4508,7 +4542,7 @@
 
 # --- Uncommon (2) ---
 
-- {id: proto_vk_pyre_oath, name: "Ashen Oath", character: varka,
+- {id: proto_vk_pyre_oath, name: "For Crepus", character: varka,
    authored_by: [claude],
    # Forced-Amber round (2026-10-10): was Pyre Oath, paid 1. The Pyro pass
    # (2026-10-11): Inflame plus 2 Pyro Oath, a gain that switches nothing.
@@ -4532,18 +4566,18 @@
              {op: varka, kind: deep_freeze, target: enemy}],
    upgrade: {cost: -1}}
 
-# YAE MIKO: review/active/yae-card-paper-2026-10-13.md and
-# review/active/yae-design-axes-2026-10-14.md (Rites, Sakura Annotations).
-# Rules: YaeShrine.cs, yae_shrine.py; reasoning: provenance note "Yae Miko".
+# YAE MIKO: review/active/yae-card-paper-2026-10-13.md, yae-design-axes, review-r3,
+# pool-to-78, dedupe and refill (2026-10-14 to 16). Rules: YaeShrine.cs,
+# yae_shrine.py; reasoning: provenance note "Yae Miko".
 
 # --- the starter (paper sec.3): base Strike x4 + Defend x4 have no row ---
 
 - {id: proto_ym_yakan_evocation, name: "Yakan Evocation", character: yae,
    authored_by: [claude],
    cost: 1, type: skill, rarity: basic,
-   # Design axes sec.4 (2026-10-14): the full-shrine reading printed; the
-   # behaviour is unchanged.
-   description: "Plant a [gold]Sakura[/gold] (with 3 standing, each gains a Level instead).",
+   # Review r3 (ruled 2026-10-14): the full-shrine rule moved off the face
+   # into its own tip (ForFullShrine). Provenance, "Yae review r3".
+   description: "Plant a [gold]Sakura[/gold].",
    effects: [{op: yae, kind: plant, amount: 1}],
    upgrade: {cost: -1}}
 
@@ -4552,53 +4586,31 @@
    cost: 1, type: skill, rarity: basic,
    # [USER] 2026-10-13, pick 3: "proofread by itself and having the upgrade
    # make the effect 0 cost, like a Defect starter."
-   description: "[gold]Edit[/gold] a card in your hand: [gold]Red Ink[/gold].",
-   effects: [{op: yae, kind: edit, annotation: red_ink, amount: 1}],
+   # 2026-10-14: Red Ink -> Reprint, "Let's bump it to 'Play it twice.'"
+   description: "[gold]Edit[/gold] a card in your hand: [gold]Reprint[/gold].",
+   effects: [{op: yae, kind: edit, annotation: reprint, amount: 1}],
    upgrade: {cost: -1}}
 
-# --- Common (15) ---
-
-- {id: proto_ym_kitsune_flash, name: "Kitsune Flash", character: yae,
-   authored_by: [claude],
-   cost: 1, type: attack, rarity: common,
-   description: "Deal 6 [gold]Electro[/gold] damage. If this card is [gold]Annotated[/gold], deal 3 more.",
-   effects: [{op: yae, kind: annotated_strike, base: 6, amount: 3, target: enemy}],
-   upgrade: {yae_base: 2, yae_amount: 1}}
+# --- Common (20) ---
 
 - {id: proto_ym_thunder_rite, name: "Thunder Rite", character: yae,
    authored_by: [claude],
    cost: 2, type: attack, rarity: common,
-   # Design axes sec.4: carries Rite: Thunder, the way back to damage.
-   description: "Deal 8 [gold]Electro[/gold] damage. [gold]Rite[/gold]: Thunder. [gold]Tenko[/gold].",
+   # Shrine r2 (ruled 2026-10-14): "Rite: Thunder" went with the Rite.
+   description: "Deal 8 [gold]Electro[/gold] damage. [gold]Tenko[/gold].",
    effects: [{op: damage, amount: 8, target: enemy},
-             {op: yae, kind: rite, rite: thunder},
              {op: yae, kind: tenko}],
    upgrade: {damage: 3}}
-
-- {id: proto_ym_shrine_offering, name: "Shrine Offering", character: yae,
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: common,
-   description: "Gain 6 [gold]Block[/gold]. Each [gold]Sakura[/gold] lasts 1 more turn.",
-   effects: [{op: block, amount: 6},
-             {op: yae, kind: extend, amount: 1}],
-   upgrade: {block: 3}}
 
 - {id: proto_ym_twin_sakura, name: "Twin Sakura", character: yae,
    authored_by: [claude],
    # Design axes sec.4: costs 1 (was 2 [1]); the upgrade adds Gain 4 Block.
+   # Shrine r2: both at Level 1. Review r3: the full-shrine rule is the
+   # Full shrine tip's.
    cost: 1, type: skill, rarity: common,
-   description: "Plant {YmAmount:diff()} [gold]Sakura[/gold] (with 3 standing, each gains a Level instead).",
+   description: "Plant {YmAmount:diff()} [gold]Sakura[/gold].",
    effects: [{op: yae, kind: plant, amount: 2}],
    upgrade: {add: {op: block, amount: 4}}}
-
-- {id: proto_ym_deadline, name: "Deadline", character: yae,
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: common,
-   # Design axes sec.4: Block floor 5 [8] (was 4 [6]).
-   description: "Gain 5 [gold]Block[/gold]. [gold]Edit[/gold] a card in your hand: [gold]Deadline Extension[/gold].",
-   effects: [{op: block, amount: 5},
-             {op: yae, kind: edit, annotation: deadline, amount: 1}],
-   upgrade: {block: 3}}
 
 - {id: proto_ym_fox_fire_draft, name: "Fox Fire Draft", character: yae,
    authored_by: [claude],
@@ -4629,28 +4641,14 @@
 - {id: proto_ym_shrine_maidens_guard, name: "Shrine Maiden's Guard", character: yae,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   # Design axes sec.4: the per-Sakura Block is now the Rite's job.
-   description: "Gain 6 [gold]Block[/gold]. [gold]Rite[/gold]: Warding.",
+   # Review r3 (ruled 2026-10-14): the Common Guard leaves a Block source
+   # behind (was Tenko (Warding)).
+   description: "Gain 6 [gold]Block[/gold]. Plant a [gold]Kitsune Sakura[/gold].",
    effects: [{op: block, amount: 6},
-             {op: yae, kind: rite, rite: warding}],
+             {op: yae, kind: plant, amount: 1, as: kitsune}],
    upgrade: {block: 3}}
 
 # Batch two (design axes sec.5 and the Ruled section).
-
-- {id: proto_ym_shrine_bell, name: "Shrine Bell", character: yae,
-   authored_by: [claude],
-   cost: 1, type: attack, rarity: common,
-   description: "Deal 7 [gold]Electro[/gold] damage. Each [gold]Sakura[/gold] lasts 1 more turn.",
-   effects: [{op: damage, amount: 7, target: enemy},
-             {op: yae, kind: extend, amount: 1}],
-   upgrade: {damage: 3}}
-
-- {id: proto_ym_grafted_branch, name: "Grafted Branch", character: yae,
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: common,
-   description: "Plant a [gold]Sakura[/gold]. It starts at Level {YmAmount:diff()}.",
-   effects: [{op: yae, kind: plant_level, amount: 2}],
-   upgrade: {yae_amount: 1}}
 
 - {id: proto_ym_margin_note, name: "Margin Note", character: yae,
    authored_by: [claude],
@@ -4671,30 +4669,120 @@
 - {id: proto_ym_foxfire_sweep, name: "Foxfire Sweep", character: yae,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal 4 [gold]Electro[/gold] damage to ALL enemies. [gold]Rite[/gold]: Wildfire.",
+   # Review r3 (ruled 2026-10-14): plants a Foxfire Sakura (was Tenko
+   # (Wildfire), which "ended fights in 1-2 turns").
+   description: "Deal 4 [gold]Electro[/gold] damage to ALL enemies. Plant a [gold]Foxfire Sakura[/gold].",
    effects: [{op: damage, amount: 4, target: all_enemies},
-             {op: yae, kind: rite, rite: wildfire}],
+             {op: yae, kind: plant, amount: 1, as: foxfire}],
    upgrade: {damage: 2}}
 
 - {id: proto_ym_evergreen_charm, name: "Evergreen Charm", character: yae,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Gain 5 [gold]Block[/gold]. [gold]Edit[/gold] your oldest [gold]Sakura[/gold]: [gold]Deadline Extension[/gold].",
-   effects: [{op: block, amount: 5},
+   # Yae review r4 item 4: 7 [10]. The pool to 78, pick 2 (a): Annotations
+   # coexist on a Sakura, so "It keeps its Red Ink." went.
+   description: "Gain 7 [gold]Block[/gold]. [gold]Edit[/gold] your oldest [gold]Sakura[/gold]: [gold]Deadline Extension[/gold].",
+   effects: [{op: block, amount: 7},
              {op: yae, kind: edit_sakura, which: oldest, annotation: deadline, amount: 1}],
    upgrade: {block: 3}}
 
-# --- Uncommon (16) ---
+# The pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, ruled 2026-10-15,
+# all picks (a)), sec.2: each kind gets an Attack that plants it, so a
+# Skill-locked turn still builds the shrine.
 
-- {id: proto_ym_sakura_grove, name: "Sakura Grove", character: yae,
+- {id: proto_ym_thunder_petal, name: "Thunder Petal", character: yae,
    authored_by: [claude],
-   cost: 1, type: power, rarity: uncommon,
-   # Yae review r1, pick 2 (ruled 2026-10-14): per-Sakura, not global (was
-   # "strike for 2 [3] more in Thunder, Warding and Wildfire"). Each copy
-   # raises once.
-   description: "At the start of your turn, your newest [gold]Sakura[/gold] gains a Level.",
-   effects: [{op: apply_power, power: ym_sakura_grove, amount: 1, target: self}],
-   upgrade: {innate: true}}
+   cost: 1, type: attack, rarity: common,
+   description: "Deal 5 [gold]Electro[/gold] damage. Plant a [gold]Sakura[/gold].",
+   effects: [{op: damage, amount: 5, target: enemy},
+             {op: yae, kind: plant, amount: 1}],
+   upgrade: {damage: 3}}
+
+- {id: proto_ym_cliffhanger, name: "Cliffhanger", character: yae,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: common,
+   description: "Deal 8 [gold]Electro[/gold] damage. [gold]Edit[/gold] a card in your hand: [gold]Deadline Extension[/gold].",
+   effects: [{op: damage, amount: 8, target: enemy},
+             {op: yae, kind: edit, annotation: deadline, amount: 1}],
+   upgrade: {damage: 3}}
+
+# The refill (review/active/yae-refill-2026-10-16.md, ruled 2026-10-16): eight
+# Commons for the eight the dedupe cut. Provenance note, "Yae: the dedupe and
+# the refill".
+
+- {id: proto_ym_kitsune_barrage, name: "Kitsune Barrage", character: yae,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: common,
+   # Reads the shrine when played: 2 hits, 3 with 3 or more Sakura standing.
+   description: "Deal 4 [gold]Electro[/gold] damage twice. If you have 3 or more [gold]Sakura[/gold], deal it 3 times.",
+   effects: [{op: yae, kind: barrage, amount: 4, target: enemy}],
+   upgrade: {yae_amount: 1}}
+
+- {id: proto_ym_sesshou_fang, name: "Sesshou Fang", character: yae,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: common,
+   # One hit, read when played: any Sakura of any kind at Level 3 or higher.
+   description: "Deal 6 [gold]Electro[/gold] damage. If a [gold]Sakura[/gold] is Level 3 or higher, deal 6 more.",
+   effects: [{op: yae, kind: level_strike, base: 6, amount: 6, target: enemy}],
+   upgrade: {yae_base: 2, yae_amount: 2}}
+
+- {id: proto_ym_falling_blossom, name: "Falling Blossom", character: yae,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: common,
+   # The wither plays its Last Bloom at this card's target, one hit,
+   # whatever the Sakura's kind (a Foxfire's included), as an aimed strike
+   # already is. A Kitsune Sakura's Last Bloom is still its Block.
+   description: "Deal 7 [gold]Electro[/gold] damage. Your oldest [gold]Sakura[/gold] withers; its Last Bloom strikes this enemy.",
+   effects: [{op: damage, amount: 7, target: enemy},
+             {op: yae, kind: wither_oldest_at, target: enemy}],
+   upgrade: {damage: 3}}
+
+- {id: proto_ym_publishers_deadline, name: "Publisher's Deadline", character: yae,
+   authored_by: [claude],
+   cost: 2, type: attack, rarity: common,
+   # Any Edit this turn, any card, any Annotation (Bestseller's count, per
+   # turn): `cost_reduction_if_edited_this_turn`.
+   cost_reduction_if_edited_this_turn: 1,
+   description: "Deal 12 [gold]Electro[/gold] damage. Costs 1 less if you [gold]Edited[/gold] a card this turn.",
+   effects: [{op: damage, amount: 12, target: enemy}],
+   upgrade: {damage: 4}}
+
+- {id: proto_ym_foxs_shade, name: "Fox's Shade", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   description: "Gain 8 [gold]Block[/gold]. If any enemy is [gold]Weak[/gold], gain {BranchBlock:diff()} more.",
+   effects: [{op: block, amount: 8},
+             {op: conditional, if: any_enemy_weak,
+              then: [{op: block, amount: 4}]}],
+   upgrade: {block: 3}}
+
+- {id: proto_ym_hide_behind_the_shrine, name: "Hide Behind the Shrine", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   # The newest withers as every Sakura does (its Last Bloom still acts);
+   # the 5 more is the card's own Block.
+   description: "Gain 7 [gold]Block[/gold]. Your newest [gold]Sakura[/gold] withers; if one did, gain {YmAmount:diff()} more.",
+   effects: [{op: block, amount: 7},
+             {op: yae, kind: wither_newest_block, amount: 5}],
+   upgrade: {block: 2}}
+
+- {id: proto_ym_rewrite, name: "Rewrite", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: common,
+   # Discard 0 to 2 [3] chosen cards, draw as many, then the Edit (it can
+   # reach a card just drawn).
+   description: "Discard up to {YmAmount:diff()} cards, then draw that many. [gold]Edit[/gold] a card in your hand: [gold]Red Ink[/gold].",
+   effects: [{op: yae, kind: rewrite, amount: 2, annotation: red_ink}],
+   upgrade: {yae_amount: 1}}
+
+- {id: proto_ym_dawn_prayer, name: "Dawn Prayer", character: yae,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: common,
+   description: "Your newest [gold]Sakura[/gold] gains {YmAmount:diff()} Levels.",
+   effects: [{op: yae, kind: level_newest, amount: 2}],
+   upgrade: {yae_amount: 1}}
+
+# --- Uncommon (38) ---
 
 - {id: proto_ym_kitsune_rite, name: "Kitsune Rite", character: yae,
    authored_by: [claude],
@@ -4714,16 +4802,6 @@
    effects: [{op: yae, kind: damage_per_sakura, base: 3, per: 4, target: enemy}],
    upgrade: {yae_base: 1, yae_per: 2}}
 
-- {id: proto_ym_rooted_shrine, name: "Rooted Shrine", character: yae,
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: uncommon,
-   # Design axes sec.4: "Gain 6 [9] Block. Each Sakura gains a Level." (was
-   # 3 Block, after the Level).
-   description: "Gain 6 [gold]Block[/gold]. Each [gold]Sakura[/gold] gains a Level.",
-   effects: [{op: block, amount: 6},
-             {op: yae, kind: level_up, amount: 1}],
-   upgrade: {block: 3}}
-
 - {id: proto_ym_edict_of_cleansing, name: "Edict of Cleansing", character: yae,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
@@ -4735,37 +4813,39 @@
 - {id: proto_ym_bestseller, name: "Bestseller", character: yae,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "Deal 5 [gold]Electro[/gold] damage, plus 3 for each [gold]Annotated[/gold] card in your hand.",
-   effects: [{op: yae, kind: damage_per_annotated, base: 5, per: 3, target: enemy}],
-   upgrade: {yae_base: 2, yae_per: 1}}
-
-- {id: proto_ym_print_run, name: "Print Run", character: yae,
-   authored_by: [claude],
-   cost: 1, type: skill, rarity: uncommon,
-   # Design axes sec.4: 6 [8] + 2 [3] per Annotated card (was 4 + 2).
-   description: "Gain 6 [gold]Block[/gold], plus 2 for each [gold]Annotated[/gold] card in your hand.",
-   effects: [{op: yae, kind: block_per_annotated, base: 6, per: 2}],
-   upgrade: {yae_base: 2, yae_per: 1}}
+   # Yae review r4, pick 1 (a): 8 [10]. Yae review r5, pick 1 (a) (ruled
+   # 2026-10-15, "For 1332 - agreed on (a)"): plus 2 [3] per card Edited
+   # this combat (was plus 3 [4] per Annotated card in hand).
+   description: "Deal {CalculationBase:diff()} [gold]Electro[/gold] damage, plus {ExtraDamage:diff()} for each card you [gold]Edited[/gold] this combat.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: damage, target: enemy,
+              amount_formula: {base: 8, per: 2, count: edits_this_combat}}],
+   upgrade: {formula_base: 2, formula_per: 1}}
 
 - {id: proto_ym_footnote, name: "Footnote", character: yae,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon, exhaust: true,
-   description: "[gold]Edit[/gold] {IfUpgraded:show:2 cards|a card} in your hand: [gold]Footnote[/gold].",
-   effects: [{op: yae, kind: edit, annotation: footnote, amount: 1}],
+   # Yae review r4, pick 1 (a) (ruled 2026-10-15): up to 2 [3] cards (was
+   # 1 [2]), one chooser of different cards. Yae review r5, item 7: the
+   # Annotation says what it does, as Royalties does.
+   description: "[gold]Edit[/gold] up to 2 cards in your hand: [gold]Footnote[/gold] (when played, draw 1 card).",
+   effects: [{op: yae, kind: edit, annotation: footnote, amount: 2}],
    upgrade: {yae_amount: 1}}
 
 - {id: proto_ym_sakura_seal, name: "Sakura Seal", character: yae,
    authored_by: [claude],
-   # Claude, 2026-10-14 (Yae review r1, no pick): 0 Energy (was 1 [0]). Its
-   # upgrade was the cost cut, so it takes Footnote's: Edit 2 cards.
-   cost: 0, type: skill, rarity: uncommon,
-   description: "[gold]Edit[/gold] {IfUpgraded:show:2 cards|a card} in your hand: [gold]Sakura Seal[/gold].",
-   effects: [{op: yae, kind: edit, annotation: sakura_seal, amount: 1}],
+   # Yae review r1 (2026-10-14): 0 Energy (was 1 [0]). Review r4, pick 1 (a)
+   # (ruled 2026-10-15): up to 2 [3] cards (was 1 [2]), and it Exhausts.
+   # Yae review r5, item 7: the Annotation says what it does.
+   cost: 0, type: skill, rarity: uncommon, exhaust: true,
+   description: "[gold]Edit[/gold] up to 2 cards in your hand: [gold]Sakura Seal[/gold] (when played, plant a [gold]Sakura[/gold]).",
+   effects: [{op: yae, kind: edit, annotation: sakura_seal, amount: 2}],
    upgrade: {yae_amount: 1}}
 
 - {id: proto_ym_serialization, name: "Serialization", character: yae,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
+   # Yae review r6 item 1: per Edit, the Edit count's events (was per
+   # Annotated card played, shrine r2).
    description: "Whenever you [gold]Edit[/gold] a card, gain 3 [gold]Block[/gold].",
    effects: [{op: apply_power, power: ym_serialization, amount: 3, target: self}],
    upgrade: {power_amount: 1}}
@@ -4773,26 +4853,28 @@
 - {id: proto_ym_manuscript_pile, name: "Manuscript Pile", character: yae,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   # Design axes sec.4: carries Rite: Offering; its Retain Edit went.
-   description: "Draw {Cards:diff()} cards. [gold]Rite[/gold]: Offering.",
+   # Yae review r6 item 2: Edit a card in your hand: Red Ink (was each
+   # Sakura lasts 1 more turn, review r3).
+   description: "Draw {Cards:diff()} cards. [gold]Edit[/gold] a card in your hand: [gold]Red Ink[/gold].",
    effects: [{op: draw, amount: 2},
-             {op: yae, kind: rite, rite: offering}],
+             {op: yae, kind: edit, annotation: red_ink, amount: 1}],
    upgrade: {draw: 1}}
 
 - {id: proto_ym_kitsune_guile, name: "Kitsune Guile", character: yae,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   # Design axes sec.4: carries Rite: Wildfire.
-   description: "Apply 2 [gold]Weak[/gold] to ALL enemies. [gold]Rite[/gold]: Wildfire.",
+   # Review r3 (ruled 2026-10-14): plain Tenko (was Tenko (Wildfire)).
+   description: "Apply 2 [gold]Weak[/gold] to ALL enemies. [gold]Tenko[/gold].",
    effects: [{op: apply_power, power: weak, amount: 2, target: all_enemies},
-             {op: yae, kind: rite, rite: wildfire}],
+             {op: yae, kind: tenko}],
    upgrade: {power_amount: 1}}
 
 - {id: proto_ym_foxfire_lure, name: "Foxfire Lure", character: yae,
    authored_by: [claude],
    # Design axes sec.4: 0 Energy (was 1).
    cost: 0, type: skill, rarity: uncommon,
-   description: "Apply 1 [gold]Weak[/gold] to an enemy. This turn, your [gold]Sakura[/gold] strike it.",
+   # Yae review r4 item 7: a Kitsune Sakura does not strike.
+   description: "Apply 1 [gold]Weak[/gold] to an enemy. This turn, your striking [gold]Sakura[/gold] strike it.",
    effects: [{op: apply_power, power: weak, amount: 1, target: enemy},
              {op: yae, kind: lure, target: enemy}],
    upgrade: {power_amount: 1}}
@@ -4801,12 +4883,12 @@
 
 - {id: proto_ym_fallen_petals, name: "Fallen Petals", character: yae,
    authored_by: [claude],
-   cost: 1, type: power, rarity: uncommon,
-   # A Sakura withers at the end of her turn, so the Energy (and the
-   # upgrade's card) are paid at the start of her next turn.
-   description: "Whenever a [gold]Sakura[/gold] withers, gain {energyPrefix:energyIcons(1)}{IfUpgraded:show: and draw 1 card|} on your next turn.",
-   effects: [{op: apply_power, power: ym_fallen_petals, amount: 1, target: self}],
-   upgrade: {upgraded_power: ym_fallen_petals_plus}}
+   # Review r3, sec.4 (ruled 2026-10-14): an active evoke (was a Power, the
+   # "never again" card in four records). Provenance, "Yae review r3".
+   cost: 0, type: skill, rarity: uncommon,
+   description: "Your oldest [gold]Sakura[/gold] withers (it acts once, its Last Bloom). If one did, gain {energyPrefix:energyIcons(1)}{IfUpgraded:show:, and draw 1 card|}.",
+   effects: [{op: yae, kind: fallen_petals}],
+   upgrade: {yae_upgraded: true}}
 
 - {id: proto_ym_mikage_thunder, name: "Mikage Thunder", character: yae,
    authored_by: [claude],
@@ -4820,12 +4902,237 @@
 
 - {id: proto_ym_inked_branches, name: "Inked Branches", character: yae,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: uncommon,
-   description: "[gold]Edit[/gold] every [gold]Sakura[/gold]: [gold]Red Ink[/gold].",
-   effects: [{op: yae, kind: edit_sakura, which: every, annotation: red_ink, amount: 1}],
+   # Yae review r4, pick 1 (a) (ruled 2026-10-15): 0 Energy (was 1 [0]),
+   # Exhausts; the upgrade also Edits a card in your hand.
+   cost: 0, type: skill, rarity: uncommon, exhaust: true,
+   description: "[gold]Edit[/gold] every [gold]Sakura[/gold]{IfUpgraded:show: and a card in your hand|}: [gold]Red Ink[/gold].",
+   effects: [{op: yae, kind: edit_sakura, which: every, annotation: red_ink, amount: 1,
+              hand_if_upgraded: true}],
+   upgrade: {yae_upgraded: true}}
+
+# Review r3, sec.3 (ruled 2026-10-14): the signature Uncommons.
+
+- {id: proto_ym_second_printing, name: "Second Printing", character: yae,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: uncommon, exhaust: true,
+   description: "Put an [gold]Annotated[/gold] card from your [gold]Discard Pile[/gold] into your [gold]Hand[/gold].{IfUpgraded:show: It costs 0 this turn.|}",
+   effects: [{op: yae, kind: second_printing}],
+   upgrade: {yae_upgraded: true}}
+
+- {id: proto_ym_authors_copy, name: "Author's Copy", character: yae,
+   authored_by: [claude],
+   # Never copies an Author's Copy: GPT found a +1 Energy loop through
+   # Royalties, and LAW forbids energy-positive copy loops.
+   cost: 1, type: skill, rarity: uncommon, exhaust: true,
+   description: "Add a copy of an [gold]Annotated[/gold] card in your [gold]Hand[/gold] (not an Author's Copy) to your [gold]Hand[/gold]. It keeps its Annotations.",
+   effects: [{op: yae, kind: authors_copy}],
    upgrade: {cost: -1}}
 
-# --- Rare (9) ---
+# The pool to 78, sec.2 (Uncommon, 20).
+
+- {id: proto_ym_foxs_mooncall, name: "Fox's Mooncall", character: yae,
+   authored_by: [claude],
+   # Yae review r1, pick 2: each copy plants 1 Level higher. The pool to 78:
+   # an Uncommon at 1 (was a Rare at 2 [1]) upgrading to 2 Levels higher.
+   cost: 1, type: power, rarity: uncommon,
+   description: "Your [gold]Sakura[/gold] are planted {IfUpgraded:show:2 Levels|1 Level} higher.",
+   effects: [{op: apply_power, power: ym_foxs_mooncall, amount: 1, target: self}],
+   upgrade: {power_amount: 1}}
+
+- {id: proto_ym_narukami_ray, name: "Narukami Ray", character: yae,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: uncommon,
+   description: "Deal 5 [gold]Electro[/gold] damage to ALL enemies. Each [gold]Sakura[/gold] gains a Level.",
+   effects: [{op: damage, amount: 5, target: all_enemies},
+             {op: yae, kind: level_up, amount: 1}],
+   upgrade: {damage: 2}}
+
+- {id: proto_ym_galley_proof, name: "Galley Proof", character: yae,
+   authored_by: [claude],
+   cost: 2, type: attack, rarity: uncommon,
+   description: "Deal 11 [gold]Electro[/gold] damage. [gold]Edit[/gold] a card in your hand: [gold]Reprint[/gold].",
+   effects: [{op: damage, amount: 11, target: enemy},
+             {op: yae, kind: edit, annotation: reprint, amount: 1}],
+   upgrade: {damage: 4}}
+
+- {id: proto_ym_petal_storm, name: "Petal Storm", character: yae,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: uncommon,
+   # One hit to ALL of 3 [4] per Sakura standing, the calculated rail.
+   description: "Deal {ExtraDamage:diff()} [gold]Electro[/gold] damage to ALL enemies for each [gold]Sakura[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: damage, target: all_enemies,
+              amount_formula: {base: 0, per: 3, count: sakura_count}}],
+   upgrade: {formula_per: 1}}
+
+- {id: proto_ym_foxs_bargain, name: "Fox's Bargain", character: yae,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: uncommon,
+   description: "Deal 9 [gold]Electro[/gold] damage. If the enemy is [gold]Weak[/gold], gain {energyPrefix:energyIcons(1)}.",
+   effects: [{op: damage, amount: 9, target: enemy},
+             {op: conditional, if: target_has_power_weak,
+              then: [{op: energy, amount: 1}]}],
+   upgrade: {damage: 3}}
+
+- {id: proto_ym_spiritfox_prank, name: "Spiritfox Prank", character: yae,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: uncommon,
+   description: "Deal 6 [gold]Electro[/gold] damage to ALL enemies. Apply 1 [gold]Weak[/gold] to ALL enemies.",
+   effects: [{op: damage, amount: 6, target: all_enemies},
+             {op: apply_power, power: weak, amount: 1, target: all_enemies}],
+   upgrade: {damage: 2}}
+
+- {id: proto_ym_genre_shift, name: "Genre Shift", character: yae,
+   authored_by: [claude],
+   # Revised after GPT's review: costs 2 (it planted three Sakura for 1
+   # from an empty shrine).
+   cost: 2, type: attack, rarity: uncommon,
+   description: "Deal 8 [gold]Electro[/gold] damage. Plant one of each kind of [gold]Sakura[/gold] you do not have.",
+   effects: [{op: damage, amount: 8, target: enemy},
+             {op: yae, kind: plant_missing}],
+   upgrade: {damage: 3}}
+
+- {id: proto_ym_narukami_judgment, name: "Narukami Judgment", character: yae,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: uncommon,
+   description: "Deal 6 [gold]Electro[/gold] damage. Each striking [gold]Sakura[/gold] strikes it.",
+   effects: [{op: damage, amount: 6, target: enemy},
+             {op: yae, kind: strike_all_at, target: enemy}],
+   upgrade: {damage: 3}}
+
+- {id: proto_ym_kitsunes_shelter, name: "Kitsune's Shelter", character: yae,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: uncommon,
+   description: "Deal 7 [gold]Electro[/gold] damage. Each [gold]Kitsune Sakura[/gold] acts.",
+   effects: [{op: damage, amount: 7, target: enemy},
+             {op: yae, kind: kitsune_act}],
+   upgrade: {damage: 3}}
+
+- {id: proto_ym_torii_ward, name: "Torii Ward", character: yae,
+   authored_by: [claude],
+   # Revised after GPT's review: it rewards a full shrine (it repeated
+   # Shrine Offering's job).
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Gain 8 [gold]Block[/gold]. If your shrine is full, draw 2 cards.",
+   effects: [{op: block, amount: 8},
+             {op: conditional, if: shrine_full,
+              then: [{op: draw, amount: 2}]}],
+   upgrade: {block: 3}}
+
+- {id: proto_ym_kitsune_veil, name: "Kitsune Veil", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Gain 5 [gold]Block[/gold]. Each [gold]Kitsune Sakura[/gold] gains {YmAmount:diff()} Levels.",
+   effects: [{op: block, amount: 5},
+             {op: yae, kind: level_kitsune, amount: 2}],
+   upgrade: {block: 3}}
+
+- {id: proto_ym_hold_the_presses, name: "Hold the Presses", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   # The base game's Equilibrium rider (RetainHandPower).
+   description: "Gain 6 [gold]Block[/gold]. Retain your hand this turn.",
+   effects: [{op: block, amount: 6},
+             {op: yae, kind: retain_hand}],
+   upgrade: {block: 3}}
+
+- {id: proto_ym_sakura_canopy, name: "Sakura Canopy", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Gain {CalculationExtra:diff()} [gold]Block[/gold] for each [gold]Sakura[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
+   effects: [{op: block,
+              amount_formula: {base: 0, per: 4, count: sakura_count}}],
+   upgrade: {formula_per: 1}}
+
+- {id: proto_ym_disarming_smile, name: "Disarming Smile", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   # The Block counts after its own Weak lands.
+   description: "Apply 1 [gold]Weak[/gold] to ALL enemies. Gain {CalculationExtra:diff()} [gold]Block[/gold] for each enemy that is [gold]Weak[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
+   effects: [{op: apply_power, power: weak, amount: 1, target: all_enemies},
+             {op: block,
+              amount_formula: {base: 0, per: 3, count: weak_enemies}}],
+   upgrade: {formula_per: 1}}
+
+- {id: proto_ym_replanting, name: "Replanting", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   # It withers as every Sakura does (its Last Bloom), and the new one is
+   # planted at that Sakura's Level plus 1 [2] (Fox's Mooncall still adds).
+   description: "Your oldest [gold]Sakura[/gold] withers. Plant one of its kind, {IfUpgraded:show:2 Levels|1 Level} higher.",
+   effects: [{op: yae, kind: replant, amount: 1}],
+   upgrade: {yae_amount: 1}}
+
+- {id: proto_ym_late_night_reading, name: "Late Night Reading", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   # One draw in each arm (3 [4] with 3 Sakura, else 2 [3]): the upgrade
+   # moves every draw op, so "1 more" stays 1.
+   description: "Draw {DrawElse:diff()} cards. If you have 3 [gold]Sakura[/gold], draw 1 more.",
+   effects: [{op: conditional, if: three_sakura,
+              then: [{op: draw, amount: 3}],
+              else: [{op: draw, amount: 2}]}],
+   upgrade: {draw: 1}}
+
+- {id: proto_ym_enlightened_blessing, name: "Scattered Blossoms", character: yae,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   description: "Whenever a [gold]Sakura[/gold] withers, draw 1 card.",
+   effects: [{op: apply_power, power: ym_enlightened_blessing, amount: 1, target: self}],
+   upgrade: {innate: true}}
+
+- {id: proto_ym_saiguus_lesson, name: "Saiguu's Lesson", character: yae,
+   authored_by: [claude],
+   # Ruled 2026-10-15: the upgrade gains Innate (not a cost cut).
+   cost: 1, type: power, rarity: uncommon,
+   description: "Whenever you apply [gold]Weak[/gold] to an enemy, a [gold]Sakura[/gold] strikes it.",
+   effects: [{op: apply_power, power: ym_saiguus_lesson, amount: 1, target: self}],
+   upgrade: {innate: true}}
+
+- {id: proto_ym_shrines_sacred_shade, name: "The Shrine's Sacred Shade", character: yae,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   description: "At the end of your turn, gain 2 [gold]Block[/gold] for each [gold]Sakura[/gold].",
+   effects: [{op: apply_power, power: ym_sacred_shade, amount: 2, target: self}],
+   upgrade: {power_amount: 1}}
+
+- {id: proto_ym_editorial_priority, name: "Editorial Priority", character: yae,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   description: "The first [gold]Annotated[/gold] card you play each turn costs 0.",
+   effects: [{op: apply_power, power: ym_editorial_priority, amount: 1, target: self}],
+   upgrade: {innate: true}}
+
+# The refill (review/active/yae-refill-2026-10-16.md): three Uncommons for
+# the three cut.
+
+- {id: proto_ym_hunting_gaze, name: "Hunting Gaze", character: yae,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: uncommon,
+   # Aims each strike that would pick a random enemy; an aimed strike, the
+   # Lure and a Foxfire's hit on ALL are unchanged. Copies do not stack.
+   description: "Your [gold]Sakura[/gold] strike the last enemy you attacked, while it lives.",
+   effects: [{op: apply_power, power: ym_hunting_gaze, amount: 1, target: self}],
+   upgrade: {innate: true}}
+
+- {id: proto_ym_inscribed_thunder, name: "Inscribed Thunder", character: yae,
+   authored_by: [claude],
+   cost: 1, type: attack, rarity: uncommon,
+   # Distinct Annotations on the played card, Published ones included.
+   description: "Deal {CalculationBase:diff()} [gold]Electro[/gold] damage, plus {ExtraDamage:diff()} for each [gold]Annotation[/gold] on this card.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: damage, target: enemy,
+              amount_formula: {base: 7, per: 5, count: annotations_on_card}}],
+   upgrade: {formula_base: 3}}
+
+- {id: proto_ym_kitsunes_blessing, name: "Kitsune's Blessing", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: uncommon,
+   # The highest-Level Sakura of any kind; on a tie, the oldest (Editor-in-
+   # Chief's reading).
+   description: "Your highest-Level [gold]Sakura[/gold] gains {YmAmount:diff()} Levels and lasts 2 more turns.",
+   effects: [{op: yae, kind: bless_highest, amount: 3, lasts: 2}],
+   upgrade: {yae_amount: 1}}
+
+# --- Rare (20) ---
 
 - {id: proto_ym_tenko_kenshin, name: "Great Secret Art: Tenko Kenshin", character: yae,
    authored_by: [claude],
@@ -4834,15 +5141,6 @@
    effects: [{op: damage, amount: 12, target: all_enemies},
              {op: yae, kind: tenko}],
    upgrade: {damage: 4}}
-
-- {id: proto_ym_foxs_mooncall, name: "Fox's Mooncall", character: yae,
-   authored_by: [claude],
-   cost: 2, type: power, rarity: rare,
-   # Yae review r1, pick 2 (ruled 2026-10-14): Levels have no cap; each copy
-   # plants 1 Level higher (was "planted at Level 2 and can reach Level 4").
-   description: "Your [gold]Sakura[/gold] are planted 1 Level higher.",
-   effects: [{op: apply_power, power: ym_foxs_mooncall, amount: 1, target: self}],
-   upgrade: {cost: -1}}
 
 - {id: proto_ym_yakan_offering, name: "Yakan Offering", character: yae,
    authored_by: [claude],
@@ -4853,18 +5151,24 @@
 
 - {id: proto_ym_the_seven_glamours, name: "The Seven Glamours", character: yae,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: rare, exhaust: true,
-   description: "[gold]Publish[/gold] an [gold]Annotated[/gold] card in your hand: its Annotation lasts the rest of the run.",
-   effects: [{op: yae, kind: publish}],
-   upgrade: {cost: -1}}
+   cost: 2, type: attack, rarity: rare, exhaust: true,
+   # 2026-10-15 ([USER]: "it looks obviously OP"): was a 1 [0] Skill Publishing
+   # every Annotated card in hand. The kill is Hand of Greed's Fatal check (no
+   # Minions). Provenance note, "Yae: The Seven Glamours on a kill".
+   description: "Deal 12 [gold]Electro[/gold] damage. If this kills an enemy, [gold]Publish[/gold] an [gold]Annotated[/gold] card in your hand.",
+   effects: [{op: damage, amount: 12, target: enemy},
+             {op: conditional, if: killed_target_fatal,
+              then: [{op: yae, kind: publish}]}],
+   upgrade: {damage: 4}}
 
 - {id: proto_ym_sakura_channeling, name: "Sakura Channeling", character: yae,
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
-   # Design axes sec.4, the bend: the shrine does two jobs (was 2 [3] Block
-   # per strike).
-   description: "Your [gold]Sakura[/gold] also strike as Thunder, whatever the [gold]Rite[/gold].",
-   effects: [{op: apply_power, power: ym_sakura_channeling, amount: 1, target: self}],
+   # The Rare that bends the 3-Sakura limit (2026-10-14). Amount 2 per copy
+   # adds to the cap this combat (YaeShrine.MaxSakura); the full-shrine plant
+   # fires at the new cap. Why: provenance note, "Yae Miko, shrine r2".
+   description: "You can have 2 more [gold]Sakura[/gold].",
+   effects: [{op: apply_power, power: ym_sakura_channeling, amount: 2, target: self}],
    upgrade: {cost: -1}}
 
 - {id: proto_ym_mischievous_teasing, name: "Mischievous Teasing", character: yae,
@@ -4894,6 +5198,111 @@
 - {id: proto_ym_royalties, name: "Royalties", character: yae,
    authored_by: [claude],
    cost: 1, type: skill, rarity: rare, exhaust: true,
-   description: "[gold]Edit[/gold] a card in your hand: [gold]Royalties[/gold] (when played, gain {energyPrefix:energyIcons(1)}).",
-   effects: [{op: yae, kind: edit, annotation: royalties, amount: 1}],
+   # Yae review r4, pick 1 (a) (ruled 2026-10-15): up to 2 cards (was 1).
+   description: "[gold]Edit[/gold] up to {YmAmount:diff()} cards in your hand: [gold]Royalties[/gold] (when played, gain {energyPrefix:energyIcons(1)}).",
+   effects: [{op: yae, kind: edit, annotation: royalties, amount: 2}],
+   upgrade: {cost: -1}}
+
+# Review r3, sec.3 (ruled 2026-10-14): the signature Rare.
+
+- {id: proto_ym_serial_novel, name: "Serial Novel", character: yae,
+   authored_by: [claude],
+   cost: 2, type: power, rarity: rare,
+   description: "At the start of your turn, put a random [gold]Annotated[/gold] card from your [gold]Discard Pile[/gold] into your [gold]Hand[/gold].",
+   effects: [{op: apply_power, power: ym_serial_novel, amount: 1, target: self}],
+   upgrade: {cost: -1}}
+
+# The pool to 78, sec.2 (Rare, 10): each bends a rule rather than adding a
+# bigger number. Sakura Grove leads them (sec.3).
+
+- {id: proto_ym_sakura_grove, name: "Sakura Grove", character: yae,
+   authored_by: [claude],
+   cost: 1, type: power, rarity: rare,
+   # Shrine r2: each Sakura. The pool to 78, sec.3: a Rare (was Uncommon),
+   # swapped with Fox's Mooncall. Provenance note, "Yae: the pool to 78".
+   description: "At the start of your turn, each [gold]Sakura[/gold] gains a Level.",
+   effects: [{op: apply_power, power: ym_sakura_grove, amount: 1, target: self}],
+   upgrade: {innate: true}}
+
+- {id: proto_ym_forbidden_art_daisesshou, name: "Forbidden Art: Daisesshou", character: yae,
+   authored_by: [claude],
+   cost: 2, type: attack, rarity: rare,
+   # Each Sakura acts once as it withers (its Last Bloom), then ONE hit to
+   # ALL of 9 [12] for each that withered.
+   description: "Every [gold]Sakura[/gold] withers. Deal {YmPer:diff()} [gold]Electro[/gold] damage to ALL enemies for each one.",
+   effects: [{op: yae, kind: daisesshou, per: 9, target: all_enemies}],
+   upgrade: {yae_per: 3}}
+
+- {id: proto_ym_kaguras_verity, name: "Kagura's Verity", character: yae,
+   authored_by: [claude],
+   cost: 2, type: attack, rarity: rare,
+   description: "Deal 8 [gold]Electro[/gold] damage. [gold]Tenko[/gold] twice.",
+   effects: [{op: damage, amount: 8, target: enemy},
+             {op: yae, kind: tenko},
+             {op: yae, kind: tenko}],
+   upgrade: {damage: 3}}
+
+- {id: proto_ym_narukami_bloom, name: "Narukami Bloom", character: yae,
+   authored_by: [claude],
+   cost: 2, type: attack, rarity: rare,
+   description: "Deal 7 [gold]Electro[/gold] damage to ALL enemies. Plant [gold]Sakura[/gold] until your shrine is full.",
+   effects: [{op: damage, amount: 7, target: all_enemies},
+             {op: yae, kind: plant_until_full}],
+   upgrade: {damage: 3}}
+
+- {id: proto_ym_sacred_thunderbolt, name: "Sacred Thunderbolt", character: yae,
+   authored_by: [claude],
+   cost: 2, type: attack, rarity: rare,
+   # "If it triggers" is this card's own hit reacting (Brine Spray's read).
+   description: "Deal 13 [gold]Electro[/gold] damage. If it triggers an [gold]Elemental Reaction[/gold], deal {BranchDamage:diff()} more.",
+   effects: [{op: damage, amount: 13, target: enemy},
+             {op: conditional, if: reaction_triggered_by_this,
+              then: [{op: damage, amount: 13, target: enemy}]}],
+   upgrade: {damage: 4, conditional_then_damage: 4}}
+
+- {id: proto_ym_offertory_box, name: "Offertory Box", character: yae,
+   authored_by: [claude],
+   cost: 0, type: skill, rarity: rare, exhaust: true,
+   description: "Gain {energyPrefix:energyIcons(1)} for each [gold]Sakura[/gold].",
+   effects: [{op: yae, kind: energy_per_sakura}],
+   upgrade: {add: {op: draw, amount: 1}}}
+
+- {id: proto_ym_afterword, name: "Afterword", character: yae,
+   authored_by: [claude],
+   cost: 1, type: skill, rarity: rare, exhaust: true,
+   description: "Put every [gold]Annotated[/gold] card from your [gold]Discard Pile[/gold] into your [gold]Hand[/gold].",
+   effects: [{op: yae, kind: afterword}],
+   upgrade: {cost: -1}}
+
+- {id: proto_ym_foxs_verdict, name: "Fox's Verdict", character: yae,
+   authored_by: [claude],
+   # Ruled 2026-10-15: the upgrade gains Retain (not a cost cut). One hit
+   # per striking Sakura on each Weak enemy, a Foxfire Sakura's included.
+   cost: 1, type: skill, rarity: rare,
+   description: "Each striking [gold]Sakura[/gold] strikes each enemy that is [gold]Weak[/gold].",
+   effects: [{op: yae, kind: verdict}],
+   upgrade: {retain: true}}
+
+- {id: proto_ym_guardian_of_narukami, name: "Guardian of Narukami", character: yae,
+   authored_by: [claude],
+   cost: 2, type: skill, rarity: rare,
+   description: "Gain 14 [gold]Block[/gold]. Plant a [gold]Kitsune Sakura[/gold]. It starts at Level {YmAmount:diff()}.",
+   effects: [{op: block, amount: 14},
+             {op: yae, kind: plant_level, amount: 3, as: kitsune}],
+   upgrade: {block: 4}}
+
+- {id: proto_ym_stellar_conduct, name: "Stellar Conduct", character: yae,
+   authored_by: [claude],
+   # The parked nod (proposal pick 3), any reaction. Ruled 2026-10-15: the
+   # upgrade gains Innate (not a cost cut).
+   cost: 2, type: power, rarity: rare,
+   description: "Whenever a [gold]Sakura[/gold]'s strike triggers an [gold]Elemental Reaction[/gold], it strikes again.",
+   effects: [{op: apply_power, power: ym_stellar_conduct, amount: 1, target: self}],
+   upgrade: {innate: true}}
+
+- {id: proto_ym_eternity, name: "Eternity", character: yae,
+   authored_by: [claude],
+   cost: 3, type: power, rarity: rare,
+   description: "Your [gold]Sakura[/gold] no longer wither when their turns run out.",
+   effects: [{op: apply_power, power: ym_eternity, amount: 1, target: self}],
    upgrade: {cost: -1}}

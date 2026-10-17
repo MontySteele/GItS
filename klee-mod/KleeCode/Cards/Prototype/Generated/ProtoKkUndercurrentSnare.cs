@@ -60,7 +60,7 @@ public sealed class ProtoKkUndercurrentSnare : CustomCardModel, ICharacterCard, 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(5m, ValueProp.Move),
+            new BlockVar(8m, ValueProp.Move),
             new DynamicVar("PlanPowerAmount", 4m)
         };
 
@@ -98,6 +98,7 @@ public sealed class ProtoKkUndercurrentSnare : CustomCardModel, ICharacterCard, 
 
     protected override void OnUpgrade()
     {
+        DynamicVars.Block.UpgradeValueBy(3m);
         DynamicVars["PlanPowerAmount"].UpgradeValueBy(1m);
     }
 }

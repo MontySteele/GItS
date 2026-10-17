@@ -149,6 +149,13 @@ public static class KleeMod
                     // table.
                     .Concat(Story.StoryCombatHooks.Subscribe(combatState)));
 
+        // OPT-IN RUN STATS (RunStats/RunStatsHook.cs): only in a build with a
+        // telemetry endpoint (the beta package made with --telemetry-endpoint).
+        // Every other build compiles no RunStats file and has nothing here.
+#if GITS_RUN_STATS
+        RunStats.RunStatsHook.Install();
+#endif
+
         Log.Info($"[{ModId}] Klee, Furina and Kokomi registered"
                  + ", Varka and Yae Miko (prototype)"
                  + ".");
@@ -239,6 +246,10 @@ public static class KleeMod
                 // Plan line, a pick from the Draw Pile, on the same terms.
                 [Powers.KokomiPlan.DrawPilePromptKey] =
                     Powers.KokomiPlan.DrawPilePromptText,
+                // THE PLANS VIEW (2026-10-14): the controller's grid of
+                // waiting Plans, on the same terms.
+                [Vfx.KokomiPlanView.PromptKey] =
+                    Vfx.KokomiPlanView.PromptText,
                 // R276, the Klee pool expansion's two discard-pile picks
                 // (Treasure Map, Come Back and Play!), on the same terms.
                 [Powers.KleeExpansion.SetOffPromptKey] =
@@ -270,7 +281,37 @@ public static class KleeMod
                     Powers.YaeEditing.PublishPromptText,
                 [Powers.YaeEditing.AnnotationPromptKey] =
                     Powers.YaeEditing.AnnotationPromptText,
+                // Review r3 (2026-10-14): Second Printing and Author's Copy.
+                [Powers.YaeEditing.RecallPromptKey] =
+                    Powers.YaeEditing.RecallPromptText,
+                [Powers.YaeEditing.CopyPromptKey] =
+                    Powers.YaeEditing.CopyPromptText,
             });
+
+            // YAE MIKO (2026-10-14): each Annotation's Edit prompt, which
+            // names it and what it does (`YaeEditing.EditPromptTextFor`).
+            LocManager.Instance.GetTable("cards").MergeWith(
+                Powers.YaeAnnotationText.All.ToDictionary(
+                    Powers.YaeEditing.EditPromptKeyFor,
+                    Powers.YaeEditing.EditPromptTextFor));
+            // Yae review r4, pick 1 (a): a multi-card Edit's one chooser.
+            LocManager.Instance.GetTable("cards").MergeWith(
+                Powers.YaeAnnotationText.All.ToDictionary(
+                    Powers.YaeEditing.EditUpToPromptKeyFor,
+                    Powers.YaeEditing.EditUpToPromptTextFor));
+            LocManager.Instance.GetTable("cards").MergeWith(
+                new Dictionary<string, string>
+                {
+                    [Powers.YaeEditing.NothingToEditKey] =
+                        Powers.YaeEditing.NothingToEditText,
+                    [Powers.YaeEditing.NoSakuraToEditKey] =
+                        Powers.YaeEditing.NoSakuraToEditText,
+                    // The refill (2026-10-16): Rewrite's discard chooser.
+                    [Powers.YaeCards.RewritePromptKey] =
+                        Powers.YaeCards.RewritePromptText,
+                    [Powers.YaeEditing.NothingToPublishKey] =
+                        Powers.YaeEditing.NothingToPublishText,
+                });
 
             // YAE MIKO (2026-10-14, Publish after elites and bosses):
             // Meditations of a Yako's reward-screen row. A Reward's
@@ -516,10 +557,6 @@ public static class KleeMod
                     // Ascension's element hit, which gains no Oath.
                     [Cards.ArmKeywordTips.AscensionNoOathKey + ".title"] =
                         "The second hit",
-                    // Design-session call (2026-10-13): the rider on Bis!,
-                    // which Spends count.
-                    [Cards.ArmKeywordTips.BisSpendUpToKey + ".title"] =
-                        "Bis!",
                     // The Furina wave (2026-10-13): the rider on Final Bow,
                     // whose acts happen one after another.
                     [Cards.ArmKeywordTips.FinalBowInTurnKey + ".title"] =
@@ -563,15 +600,20 @@ public static class KleeMod
                     [Cards.ArmKeywordTips.SakuraKey + ".title"] = "Sakura",
                     // YAE MIKO (2026-10-13): her second word.
                     [Cards.ArmKeywordTips.EditKey + ".title"] = "Edit",
-                    // The design axes (2026-10-14): the shrine's Rite.
-                    [Cards.ArmKeywordTips.RiteKey + ".title"] = "Rite",
+                    // Shrine r2 (2026-10-14): Tenko's own tip, which
+                    // replaced the Rite's.
+                    [Cards.ArmKeywordTips.TenkoKey + ".title"] = "Tenko",
+                    // Review r3 (2026-10-14): the two kinds and the
+                    // full-shrine plant.
+                    [Cards.ArmKeywordTips.FoxfireSakuraKey + ".title"] =
+                        "Foxfire Sakura",
+                    [Cards.ArmKeywordTips.KitsuneSakuraKey + ".title"] =
+                        "Kitsune Sakura",
+                    [Cards.ArmKeywordTips.FullShrineKey + ".title"] =
+                        "Full shrine",
                     [Cards.ArmKeywordTips.LightfallSwordKey + ".title"] =
                         "Lightfall Sword",
                     [Cards.ArmKeywordTips.PlanOnlyKey + ".title"] = "Plan",
-                    // The Kokomi re-founding (2026-10-12): the Plan tip a
-                    // Companion carries while Kokomi holds it.
-                    [Cards.ArmKeywordTips.CompanionPlanKey + ".title"] =
-                        "Plan",
                     // The Kokomi round-1 fixes (2026-10-12): the Plan tip on
                     // a card that names Plans and has no Plan line.
                     [Cards.ArmKeywordTips.PlanNoLineKey + ".title"] = "Plan",
@@ -632,6 +674,13 @@ public static class KleeMod
                     [Cards.BaseKeywordTips.EtherealKey + ".title"] =
                         "Ethereal",
                 };
+            // YAE MIKO (2026-10-14): each Annotation's own tip, titled by
+            // its name (`ArmKeywordTips.ForAnnotation`).
+            foreach (var annotation in Powers.YaeAnnotationText.All)
+            {
+                keywordFallback[Cards.ArmKeywordTips.KeyOf(annotation) + ".title"] =
+                    Powers.YaeAnnotationText.Name(annotation);
+            }
             keywordTable.MergeWith(keywordFallback
                 .Where(pair => !keywordTable.HasEntry(pair.Key))
                 .ToDictionary(pair => pair.Key, pair => pair.Value));
@@ -855,6 +904,11 @@ internal static class LocManager_Initialize_Patch
         // Ancient exchanges and spoken lines. Disjoint keys from both merges
         // above, and its own try/catch.
         Story.StoryLoc.Inject();
+
+#if GITS_RUN_STATS
+        // The run-stats setting's label (settings_ui), its own try/catch.
+        RunStats.RunStatsHook.InjectLoc();
+#endif
     }
 }
 

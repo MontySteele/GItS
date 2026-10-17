@@ -165,9 +165,11 @@ def test_tidecleanse_now_line_applies_weak(overhaul):
     assert not st.kk_plan_queue
 
 
-def test_tidecleanse_draws_nothing(overhaul):
+def test_tidecleanse_draws_per_status_in_the_kind_not_a_row_op(overhaul):
     """[USER]'s run (2026-10-11): "Tidecleanse as a cycling card at Common is
-    too good" -- the card pass's "Draw 1 card." comes off."""
+    too good" -- the card pass's "Draw 1 card." comes off. Kokomi review r9
+    (2026-10-15, item 1) gives it back as "Draw 1 card for each" Status
+    exhausted, inside the `exhaust_statuses` kind, so the rows are the same."""
     assert _row("proto_kk_tidecleanse").effects == [
         {"op": "kokomi", "kind": "exhaust_statuses", "amount": 2},
         {"op": "apply_power", "power": "weak", "amount": 1,

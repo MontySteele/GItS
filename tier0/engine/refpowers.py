@@ -1206,6 +1206,12 @@ def retain_at_flush(state: CombatState, flushing: list[Card]) -> list[Card]:
     keep: list[Card] = []
     if not flushing:
         return keep
+    # YAE, THE POOL TO 78: Hold the Presses, "Retain your hand this turn"
+    # (the base game's RetainHandPower): every card that would flush stays.
+    from tier0.engine import yae_shrine          # late import avoids cycle
+    if yae_shrine.retains_hand(state):
+        state.emit("yae_retain_hand", kept=[c.id for c in flushing])
+        return list(flushing)
 
     # PhantomBladesPower gives Retain to every tagged card it owns
     # (AfterApplied over AllCards, then AfterCardEnteredCombat for each new

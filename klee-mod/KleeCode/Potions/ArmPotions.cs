@@ -38,7 +38,7 @@ public static class ArmPotions
 
     public static readonly IReadOnlyList<Type> Furina = new[]
     {
-        typeof(BottledApplause),
+        typeof(BottledApplause), typeof(BottledEncore), typeof(WaterOfLucine),
     };
 
     internal static string Image(string character, string slug) =>
@@ -214,9 +214,10 @@ public sealed class KleePotionPool : PotionPoolModel
     };
 }
 
-/// <summary>Furina's potion pool: Bottled Applause, and nothing borrowed
-/// (the Salon's Tab, 2026-10-05: Curtain Water and Encore Elixir left with
-/// Rehearsal and the performers).</summary>
+/// <summary>Furina's potion pool: Bottled Applause, Bottled Encore and Water
+/// of Lucine (`FurinaPotions.cs`, the card pass, 2026-10-15), and nothing
+/// borrowed (the Salon's Tab, 2026-10-05: Curtain Water and Encore Elixir
+/// left with Rehearsal and the performers).</summary>
 public sealed class FurinaPotionPool : PotionPoolModel
 {
     public override string EnergyColorName => "silent";
@@ -226,5 +227,7 @@ public sealed class FurinaPotionPool : PotionPoolModel
     protected override IEnumerable<PotionModel> GenerateAllPotions() => new PotionModel[]
     {
         ModelDb.Potion<BottledApplause>(),
+        ModelDb.Potion<BottledEncore>(),
+        ModelDb.Potion<WaterOfLucine>(),
     };
 }

@@ -335,7 +335,7 @@ public sealed class CurtainNeverFalls : CustomRelicModel
           + Powers.FurinaStageLaw.SingerRepayUpgraded + "[/blue]."),
     };
 
-    protected override string IconBaseName => "snake_ring";
+    protected override string IconBaseName => "ring_of_the_snake";
 
     public override string PackedIconPath =>
         KleePck.Path("furina/relics/ethereal_spotlight.png")

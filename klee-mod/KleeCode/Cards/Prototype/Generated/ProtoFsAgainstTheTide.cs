@@ -44,7 +44,7 @@ public sealed class ProtoFsAgainstTheTide : CustomCardModel, ICharacterCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Against the Tide"),
+        ("title", "Against All Odds"),
         ("description", "Deal {PlainDamage:diff()} damage. If you [gold]Drained[/gold] this turn, deal {BranchDamage:diff()} instead."),
     };
 

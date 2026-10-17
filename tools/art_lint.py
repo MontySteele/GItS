@@ -156,7 +156,6 @@ PENDING_UNDERSIZE = {
     # (same 480x270 the user accepted for bombs_away). Surfaced for the red-pen
     # session, not self-approved.
     "gentilhomme_usher",        # Salon Solitaire Ousia Preview.gif
-    "mademoiselle_crabaletta",  # Salon Solitaire Plunging Water Preview.gif
     "full_ensemble",            # Salon Solitaire Pneuma Preview.gif (all Members)
     # 447x328 applause-crowd art -- a genuine content match for "Rapturous
     # Applause", short of 500x380 by 11%/14%. Mild upscale, user's call.
@@ -306,6 +305,27 @@ APPROVED_FAMILY_EXCEPTIONS = {
         "R151 (2026-08-10, M8.3): [USER] approved exactly one hand-cropped "
         "`Character Details` Rare for Kokomi. Details 1 only -- the rest of "
         "the family stays banned.",
+    # Art redo, Varka and Furina (2026-10-16,
+    # review/active/art-redo-varka-furina-2026-10-16.md): Claude picked these
+    # three from a contact sheet of the actual crops; [USER] ruled pick 1. Each crop clears the
+    # family's disqualifier: the banners' text sits on the far left, outside
+    # the right-hand crop, and the concept-art page's wordmark and border sit
+    # outside the zoomed seahorse.
+    "splashscreen chanson of many waters tempestuous destiny":
+        "art redo 2026-10-16: picked for Tidal Flourish from the "
+        "crop (`x0.76,y0.45@1.35`), which cuts the banner text.",
+    "splashscreen romaritime meluserenity chanson of many waters":
+        "art redo 2026-10-16: picked for Bubble Aria from the crop "
+        "(`x0.84,y0.5@1.3`), which cuts the banner text.",
+    "ride the waves to a rendezvous in fontaine bubbler seahorse concept art":
+        "art redo 2026-10-16: picked for Surintendante Chevalmarin "
+        "from the crop (`x0.36,y0.62@1.8`), which shows only the seahorse "
+        "studies, no wordmark or page border.",
+    # Yae art pass 2026-10-16 (Yae is Prototype; Claude chose the picture):
+    # proto_ym_saiguus_lesson takes Yae's own figure out of this splash.
+    "splashscreen when the sakura bloom":
+        "Yae art pass 2026-10-16: picked from the crop (`x0.62,y0.2@1.8`), "
+        "which leaves out the banner text.",
 }
 
 
@@ -605,6 +625,8 @@ GENERATOR_OWNED = {
     "ImageGen/images/model/frames/klee_shadow.png":         "klee_render/pack.py",
     "ImageGen/images/model/klee_rest.png":                  "klee_render/pack.py",
     "ImageGen/images/ui/select_closeup.png":                "klee_render/pack.py",
+    "ImageGen/images/ui/select_loop.png": "select_loop.py",
+    "ImageGen/images/ui/select_closeup_static.png": "select_loop.py",
     # The roster tile and its locked twin (2026-10-13): a face close-up from
     # the same renders, the locked one derived from it by pack.py (as the
     # other kits' stills generators derive theirs). Until then the tile was a
@@ -630,6 +652,8 @@ GENERATOR_OWNED = {
     "ImageGen/images/varka/model/frames/varka_shadow.png":  "char_render/pack.py",
     "ImageGen/images/varka/model/varka_rest.png":           "char_render/pack.py",
     "ImageGen/images/varka/ui/select_closeup.png":          "char_render/pack.py",
+    "ImageGen/images/varka/ui/select_loop.png": "select_loop.py",
+    "ImageGen/images/varka/ui/select_closeup_static.png": "select_loop.py",
     "ImageGen/images/varka/ui/select_portrait.png":         "char_render/pack.py",
     "ImageGen/images/varka/ui/select_portrait_locked.png":  "char_render/pack.py",
     # Furina's model art (phase B, 2026-10-13): her frame sheets, the attack's
@@ -649,9 +673,23 @@ GENERATOR_OWNED = {
     "ImageGen/images/furina/model/frames/furina_spend.png": "char_render/pack.py",
     "ImageGen/images/furina/model/frames/furina_drain.png": "char_render/pack.py",
     "ImageGen/images/furina/model/frames/furina_repay.png": "char_render/pack.py",
+    # her guest stars' effects (2026-10-16, fx.GUEST_EFFECTS; no render needed)
+    "ImageGen/images/furina/model/frames/furina_gfx_charlotte.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_gfx_chevreuse.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_gfx_clorinde.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_gfx_escoffier.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_gfx_freminet.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_gfx_lynette.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_gfx_lyney.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_gfx_navia.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_gfx_neuvillette.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_gfx_sigewinne.png": "char_render/pack.py",
+    "ImageGen/images/furina/model/frames/furina_gfx_wriothesley.png": "char_render/pack.py",
     "ImageGen/images/furina/model/frames/furina_shadow.png": "char_render/pack.py",
     "ImageGen/images/furina/model/furina_rest.png":         "char_render/pack.py",
     "ImageGen/images/furina/ui/select_closeup.png":         "char_render/pack.py",
+    "ImageGen/images/furina/ui/select_loop.png": "select_loop.py",
+    "ImageGen/images/furina/ui/select_closeup_static.png": "select_loop.py",
     "ImageGen/images/furina/ui/select_portrait.png":        "char_render/pack.py",
     "ImageGen/images/furina/ui/select_portrait_locked.png": "char_render/pack.py",
     "ImageGen/images/furina/model/guests/guest_charlotte.png": "char_render/pack.py",

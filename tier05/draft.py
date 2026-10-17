@@ -703,10 +703,11 @@ KOKOMI_OVERHAUL_OPS = frozenset((
     # THE STATUS BATCH (2026-10-01): four plan clauses that read the hand
     # just drawn, priced ZERO in `_op_price` (a hand fact).
     "block_per_status_in_hand", "transform_statuses_you_have",
-    # THE RE-FOUNDING (2026-10-12): Kurage's Wake's Stings, Gorou's two Plan
-    # lines and a written Companion's clause, each with its own branch in
-    # `_op_price` on this set's terms.
-    "add_stings", "gain_strength", "juuga_guard", "play_companion",
+    # THE RE-FOUNDING (2026-10-12): Kurage's Wake's Stings and Gorou's two
+    # Plan lines, each with its own branch in `_op_price` on this set's terms.
+    # (A written Companion's `play_companion` left with Kokomi review r9
+    # pick 1 (a), 2026-10-15; it was on no sheet row, so no price moves.)
+    "add_stings", "gain_strength", "juuga_guard",
     # THE POOL OVERHAUL (2026-10-13): the Chain, Counter and Intent clauses
     # and Read the Field's fetch, each with its own branch in `_op_price` on
     # this set's terms.
@@ -977,11 +978,6 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
     if op == "draw_pile_to_hand":
         # Read the Field: one card of her choice, a generated card's price.
         return STATIC_GENERATED_CARD_VALUE
-    if op == "play_companion":
-        # A written Companion: one neutral card resolved without being paid
-        # for again, `play_copy_of_companion`'s price. Never on a sheet row
-        # (the writer mints it), so this is the price of the rule.
-        return STATIC_AUTOPLAY_VALUE
     if op in ("ally_draw", "others_attack_damage_this_turn",
               "each_player_energy", "each_player_draw"):
         # THE CO-OP SET: paid to ANOTHER player, and tier 0.5 seats one. A
@@ -2248,10 +2244,6 @@ STATIC_OP_PRICING: dict[str, str] = {
                                "to attack when it lands, a board fact",
     "draw_pile_to_hand": "STATIC_GENERATED_CARD_VALUE: one card of her "
                          "choice into the hand",
-    "play_companion": "STATIC_AUTOPLAY_VALUE: a written Companion is one "
-                      "neutral card resolved free next turn, "
-                      "play_copy_of_companion's price; the writer mints the "
-                      "clause, so it is on no sheet row",
     # --- the Kokomi status batch (2026-10-01) ---
     "block_per_status_in_hand": "ZERO: a rate per status or curse in the "
                                 "hand a Plan sees, a fight fact an offer "

@@ -38,22 +38,20 @@ public sealed class ProtoFsBis : CustomCardModel, ICharacterCard
     public string CharacterId => "furina";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        TipAudience.Seat
-            ? ArmKeywordTips.ForFanfare(ArmKeywordTips.ForSpend(ArmKeywordTips.ForBisSpendUpTo(base.ExtraHoverTips, this), this), this)
-            : ArmKeywordTips.ForFanfare(ArmKeywordTips.ForSpend(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForSpend(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_bis");
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Bis!"),
-        ("description", "Whenever a card [gold]Spends[/gold] all your [gold]Fanfare[/gold], keep half of it."),
+        ("title", "Extended Run"),
+        ("description", "Attacks and Skills that [gold]Spend[/gold] up to a number can [gold]Spend[/gold] {PowerAmount:diff()} more."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("PowerAmount", 8m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -65,11 +63,11 @@ public sealed class ProtoFsBis : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<BisPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<ExtendedRunPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        AddKeyword(CardKeyword.Innate);
+        DynamicVars["PowerAmount"].UpgradeValueBy(4m);
     }
 }

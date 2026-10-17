@@ -13,6 +13,7 @@ from typing import Any
 
 from understudy import qa_packet
 from understudy.blindplay_board import PHASE_FLIP_LINE, enchant_moves_line
+from understudy.blindplay_faces import enchantment_tag
 from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         ENEMY_FOLD_NOTE,
                                         ENEMY_FOLD_NOTE_EXCEPT,
@@ -45,6 +46,8 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         ENEMY_SIZE_NOTE,
                                         EVENT_NO_DECLINE_NOTE,
                                         TREASURE_PROCEED_NOTE,
+                                        NOTHING_TO_PUBLISH_NOTE,
+                                        SAKURA_TARGET_RULE,
                                         FRONT_ENEMY_NOTE,
                                         HAND_REPEAT_NOTE,
                                         LAST_MORNING_NOTE,
@@ -66,6 +69,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         RESOLUTION_HIT_THORNS, THORNS_POWER,
                                         RESOLUTION_HIT_SELF,
                                         RESOLUTION_NO_HITS,
+                                        RESOLUTION_POWER_PLAYED,
                                         RESOLUTION_NO_HITS_STAGE,
                                         RESOLUTION_SUMMONED,
                                         RESOLUTION_OATH, RESOLUTION_FANG,
@@ -83,6 +87,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         RESOLUTION_CARRIED_CLAUSE,
                                         RESOLUTION_OVERFLOW_CLAUSE,
                                         RESOLUTION_REPLAYED_CLAUSE,
+                                        RESOLUTION_REPLAYED_KILL_CLAUSE,
                                         PARTNER_RESOLUTIONS_HEADING,
                                         RESOLUTION_AUTO_TURN_NOTE,
                                         NO_RESOLUTIONS_THIS_TURN,
@@ -145,7 +150,6 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         BEHIND_CLAUSE, MAP_PATHS_HEAD,
                                         NOTHING_BEHIND_CLAUSE, ORB_ORDER_NOTE,
                                         TURNS_YOU_TAG,
-                                        WRITABLE_TAG,
                                         CONFIRM_TAKES_NOTHING_NOTE,
                                         POTION_BARRED_NOTE,
                                         RESOLUTION_APPLIED,
@@ -324,18 +328,14 @@ def _render_card(c: dict[str, Any], bullet: str = "-",
     # that takes `on` turns you to face its target (the board sets it).
     if c.get("turns_you"):
         head += TURNS_YOU_TAG
-    # The Kokomi re-founding (2026-10-12): a card the jellyfish takes whose
-    # face prints no Plan line (any Companion).
-    if c.get("writable"):
-        head += WRITABLE_TAG
     # `EB-181`: the enchantment beside the title, where the game paints it and
     # where `(upgraded)` already sits -- the two facts a copy of a card can
     # differ by, on one line, so two copies of one title are told apart at a
     # glance instead of by a paragraph explaining that they cannot be.
-    ench = c.get("enchantment")
-    if ench:
-        head += (f" ({ench['name']} {ench['amount']})" if ench.get("amount")
-                 else f" ({ench['name']})")
+    head += enchantment_tag(c.get("enchantment"))
+    # Yae review r4, item 6: an Edit chooser says what the Edit would erase.
+    if c.get("replaces"):
+        head += f" -- the Edit replaces {c['replaces']}"
     # `EB-286`: the COST SLOT as the game paints it, energy and Spark
     # together, through the one formatter the staged page already uses.
     # `qa_packet.cost_label` answers `-` when the wire sent no cost at all,
@@ -607,7 +607,8 @@ def _render_carry_out(pl: dict[str, Any],
     if pl.get("summon_hits"):
         out.append("- These fired at the end of your last turn, before the "
                    "enemies acted:")
-        out += _carry_out_rows(pl["summon_hits"], enemies, you)
+        out += _carry_out_rows(pl["summon_hits"], enemies, you,
+                               name_reactions=True)
     # (`EB-680`'s Dusk heading left with Dusk, the Kokomi re-founding,
     # 2026-10-12: every carry-out is a morning one again.)
     if pl["carried_out"]:
@@ -830,7 +831,7 @@ def _ringing_on_or_coming(you: dict[str, Any],
 def _ringing_used_lines(you: dict[str, Any],
                         rows: list[dict[str, Any]]) -> list[str]:
     """Kokomi round 7 (2026-10-14): under Ringing, the cards the game played
-    for her this turn (a carried-out Companion Plan among them), which
+    for her this turn (a Plan's played card among them), which
     `RingingPower.ShouldPlay` counts as the turn's one card play."""
     if not _wears_ringing(you):
         return []
@@ -866,9 +867,16 @@ def _plan_no_attack_lines(entry: dict[str, Any],
         plan=entry["name"], what=what)]
 
 
+#: Kokomi review r9 (2026-10-15, item 6): an end-of-turn summon's row names
+#: the reactions its hit set off ("Poison appeared on enemies after the
+#: Ring's tick with no reaction named").
+SUMMON_REACTION_CLAUSE = " It set off {names}."
+
+
 def _carry_out_rows(rows: list[dict[str, Any]],
                     enemies: list[dict[str, Any]] | None = None,
-                    you: dict[str, Any] | None = None) -> list[str]:
+                    you: dict[str, Any] | None = None,
+                    name_reactions: bool = False) -> list[str]:
     """One heading's worth of Plans, in the order the jellyfish took them.
 
     `EB-453` PUT THE UNRUN PLANS IN THE SAME LIST. A kill inside the first
@@ -885,9 +893,26 @@ def _carry_out_rows(rows: list[dict[str, Any]],
             continue
         out.append(
             f"  - {said['line']}{_kind_clause(said, enemies, you)}"
-            f"{_rider_clause(said)}")
+            f"{_rider_clause(said)}"
+            f"{_summon_reaction_clause(said) if name_reactions else ''}")
         out += _render_moved(said)
     return out
+
+
+def _summon_reaction_clause(said: dict[str, Any]) -> str:
+    """The reactions a summon's volley set off, by name, once each, unless the
+    receipt already named them as the bonus on its number. `""` for none."""
+    names: list[str] = []
+    for name in said.get("reactions") or []:
+        if name not in names:
+            names.append(name)
+    if not names or all(n in _kind_clause_text(said) for n in names):
+        return ""
+    return SUMMON_REACTION_CLAUSE.format(names=_and_list(names))
+
+
+def _kind_clause_text(said: dict[str, Any]) -> str:
+    return _kind_clause(said)
 
 
 def _rider_clause(said: dict[str, Any]) -> str:
@@ -979,9 +1004,19 @@ def _receipt_bonus_names(said: dict[str, Any],
                          you: dict[str, Any] | None) -> list[str]:
     """The powers on the board that can account for a number ABOVE what the
     clause asked for: the bodies it moved for a hit (Vulnerable), her own for
-    Block (Dexterity, Watchful Shoal on a Ward). Named as printed."""
+    Block (Dexterity, Watchful Shoal on a Ward). Named as printed.
+
+    Kokomi review r8 (2026-10-14, item 9): and, for a hit, the reactions the
+    Plan's own hits set off, off the wire (`reactions`). Masterstroke asked
+    for 42 and landed 63 on a Pyro body: the Plan's Hydro Vaporized it. The
+    body died, so no power on the next board could name the bonus, and the
+    receipt said only "the clause asked for 42"."""
     wanted = RECEIPT_BONUS_POWERS.get(str(said.get("kind") or ""), ())
     names: list[str] = []
+    if said.get("kind") == "damage":
+        for reaction in said.get("reactions") or []:
+            if reaction not in names:
+                names.append(reaction)
     if said.get("kind") == "damage":
         moved = {_fold(m.get("target")) for m in said.get("moved") or []}
         holders = [e for e in enemies or [] if _fold(e.get("name")) in moved]
@@ -1148,6 +1183,56 @@ def _turn_allowance(power: dict[str, Any]) -> tuple[int, str] | None:
     if not 0 <= stacks <= cap:
         return None
     return cap, ("played" if _PLAYED_CAP.search(text) else "left")
+
+
+#: Kokomi review r8 (2026-10-14, item 11): under a cap on the cards you play
+#: each turn (Sloth), the cards it counted. A seat's Sloth refused Resolve
+#: with 2 Energy left, and the screen did not say a Companion the Bake-Kurage
+#: played for a Plan (twice, under Nereid) had counted: Sloth counts every
+#: card play of yours (`SlothPower.BeforeCardPlayed`), the game's own
+#: auto-plays included.
+PLAYED_CAP_COUNTED = "    - Counted this turn: {cards}."
+PLAYED_CAP_FOR_YOU = " (played for you)"
+
+
+#: Kokomi review r9 (2026-10-15, item 8): Smoggy (one Skill) and Sloth (three
+#: cards) both counted a Plan WRITTEN as the card played; a seat found Defend+
+#: locked after Oath-planning a Skill. Said once under the limit, on a page
+#: that has Plans.
+#: Kokomi review r9 pick 1 (a) (2026-10-15) took the Companion sentence
+#: out: a plain Companion can no longer be planned, so no Plan plays its own
+#: card again.
+PLAYED_CAP_PLAN_NOTE = ("    - Writing a Plan counts as playing that card, "
+                        "so a card you write uses this limit.")
+
+
+def _played_cap_lines(power: dict[str, Any],
+                      resolutions: list[dict[str, Any]] | None,
+                      plans: bool = False) -> list[str]:
+    """The cards a "play more than N cards" power counted this turn, off the
+    turn's ledger, or nothing (no such power, no ledger, nothing played).
+    On a page with Plans (`plans`) the limit also says writing a Plan counts
+    as playing the card (Kokomi review r9, item 8)."""
+    cap = _turn_allowance(power)
+    if cap is None or cap[1] != "played":
+        return []
+    note = [PLAYED_CAP_PLAN_NOTE] if plans else []
+    if not resolutions:
+        return note
+    names: list[str] = []
+    for row in resolutions:
+        if row.get("carried") or row.get("is_local") is False:
+            continue
+        name = f"**{row['card']}**"
+        if row.get("auto_played"):
+            name += PLAYED_CAP_FOR_YOU
+        plays = max(1, int(row.get("play_count") or 1))
+        if plays > 1:
+            name += f" x{plays}"
+        names.append(name)
+    if not names:
+        return note
+    return [PLAYED_CAP_COUNTED.format(cards=", ".join(names))] + note
 
 
 # `EB-525`. THE STEP THE SENTENCE DOES NOT SAY IT LEAVES OUT.
@@ -1327,6 +1412,12 @@ RELIC_USED_UP = " (used up: it has done its job and does nothing more)"
 #: prints it once and says so.
 POWER_LISTED_TWICE_CLAUSE = " (the game lists this twice)"
 
+#: Kokomi review r8 (2026-10-14, item 10): a power the bridge could not read
+#: the text of on this screen. It used to vanish from the list for that
+#: screen (At Water's Edge against Hunter Killer); it is still on you.
+POWER_UNREADABLE_CLAUSE = (" — still on you; the game would not give its text "
+                           "on this screen")
+
 
 def _once(powers: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """The powers with a second row of the same name and amount folded
@@ -1395,6 +1486,8 @@ def _render_power(power: dict[str, Any], indent: str) -> str:
                  if power["behind"] else NOTHING_BEHIND_CLAUSE)
     if power.get("listed_twice"):
         line += POWER_LISTED_TWICE_CLAUSE
+    if power.get("unreadable") and not power.get("text"):
+        line += POWER_UNREADABLE_CLAUSE
     return line
 
 
@@ -2132,7 +2225,10 @@ def _resolution_lines(rows: list[dict[str, Any]],
         if row.get("overflowed"):
             clauses += RESOLUTION_OVERFLOW_CLAUSE
         if (row.get("play_count") or 1) > 1:
-            clauses += RESOLUTION_REPLAYED_CLAUSE.format(
+            # Yae review r5, item 3: a replay whose target died hits nothing.
+            replayed = (RESOLUTION_REPLAYED_KILL_CLAUSE if row.get("killed")
+                        else RESOLUTION_REPLAYED_CLAUSE)
+            clauses += replayed.format(
                 times=_TIMES.get(row["play_count"], str(row["play_count"])))
         out.append(RESOLUTION_ROW.format(card=row["card"], clauses=clauses))
         # 2026-09-25 evening: the performer a random summon rolled.
@@ -2178,6 +2274,10 @@ def _resolution_lines(rows: list[dict[str, Any]],
             # Swirl says so (Sucrose on a bare board).
             if row.get("swirl_no_aura") and not row.get("swirl_on_aura"):
                 out.append(RESOLUTION_NO_AURA)
+            # Kokomi review r8 (2026-10-14, item 12): a Power with nothing
+            # to measure says it is on you, not that nothing landed.
+            elif _fold(row.get("card_type")) == "power":
+                out.append(RESOLUTION_POWER_PLAYED)
             else:
                 out.append(RESOLUTION_NO_HITS_STAGE if stage
                            else RESOLUTION_NO_HITS)
@@ -2617,12 +2717,12 @@ STAGE_FORECAST_TWICE = ", twice"
 STAGE_FORECAST_TIMES = ", {n} times"
 STAGE_FORECAST_AFTER = "- After the acts: Fanfare {fanfare}."
 #: FURINA ROUND 3 (2026-10-11, review change 2): a Repay act names its floor
-#: as the card face does ("(Repays 0, +2 Block)",
-#: `FurinaStageBowPreview.Line`). A seat read Charlotte's act that gave 2
+#: as the card face does (`FurinaStageBowPreview.Line`; the floor first,
+#: "(Repay 0: gain 2 Block)", since furina-next paper 3, 2026-10-16). A seat read Charlotte's act that gave 2
 #: Block as "Repay 0". Printed only when the Repay returns less than its
 #: number; what it returns is read the face's way (`Room`): never more than
 #: she has drained, never past her Max HP, walked front to back.
-STAGE_FORECAST_REPAY_FLOOR = " (repays {back}, +{floor} Block)"
+STAGE_FORECAST_REPAY_FLOOR = " (Repay {back}: gain {floor} Block)"
 STAGE_LOG_REPAY_FLOOR = ", +{floor} Block"
 #: What one act of each kind does, as the forecast names it.
 STAGE_KIND_WORDS = {
@@ -2783,9 +2883,15 @@ _RELIC_ENERGY = re.compile(
 #: "Energy 7 (4 a turn, +1 Prismatic Gem, +2 from this turn's plays)" on a
 #: turn 1 whose 3 extra were Lantern's 1 and the Tea Set's 2.
 _EVERY_TURN = re.compile(r"\b(?:each|every) turn\b", re.I)
+#: Kokomi review r9 (2026-10-15, item 10): a face that pays Energy once, when
+#: a combat opens. It is a source on round 1 only; "(3 a turn, +1 Lantern, +1
+#: Seal of Gold)" on a later round named a relic that had paid nothing.
+_COMBAT_OPENING = re.compile(
+    r"\bstart(?: of| the)?(?: each| the| next)? combat\b|\bfirst turn\b",
+    re.I)
 
 
-def _energy_line(you: dict[str, Any]) -> str:
+def _energy_line(you: dict[str, Any], round_number: int | None = None) -> str:
     """`Energy 2 left of 3`, or, where she holds more than a turn's, what
     gave the rest: `Energy 4 (3 a turn, +1 Lantern)` (Kokomi review r6,
     2026-10-14, item 10; "4 left of 3" read as a bug). The relics are named
@@ -2801,6 +2907,11 @@ def _energy_line(you: dict[str, Any]) -> str:
     for relic in you.get("relics") or []:
         text = str(relic.get("text") or "")
         if relic.get("used_up") or _EVERY_TURN.search(text):
+            continue
+        # Item 10: a combat-opening Energy is this turn's source on round 1
+        # only (`round_number` None reads an older caller: as before).
+        if (isinstance(round_number, int) and round_number > 1
+                and _COMBAT_OPENING.search(text)):
             continue
         found = _RELIC_ENERGY.search(text)
         if found and surplus > 0:
@@ -2824,7 +2935,7 @@ def _render_board_behind(c: dict[str, Any]) -> list[str]:
     you = c["you"]
     out = ["", BOARD_BEHIND_HEADING, "",
            f"- HP {you['hp']}/{you['max_hp']} · Block {you['block']} · "
-           + _energy_line(you)
+           + _energy_line(you, c.get("round"))
            + (f" · Stars {you['stars']}" if you.get("stars") is not None
               else "")]
     hand = [card["title"] for card in c.get("hand") or []]
@@ -2913,11 +3024,72 @@ OATH_NO_PAYOUT_LINE = ("- Your Swirls pay nothing until you apply Pyro, "
                        "Hydro, Cryo or Electro.")
 AURA_LINE = "{element}: an Anemo hit Swirls it."
 AURA_NONE = "no aura."
+#: Varka round 5 (2026-10-13, review/records/varka-round-5-2026-10-13.md):
+#: "A reaction that uses up an aura leaves a later Swirl card with nothing
+#: to Swirl, and the screen does not say the aura is gone." Where a reaction
+#: this turn's log names used the body's aura and a Swirl card is in hand.
+AURA_USED_UP = "no aura to Swirl ({reaction} used it up)."
+#: And the switch itself: "Kaeya, Barbara and Short Circuit switch the
+#: current element and silently lower Ascension's Oath." Under each hand
+#: card whose play would make another element current. The page layer only:
+#: [USER] ruled no more text on the cards themselves. The new count is the
+#: Oath that element holds NOW; the play's own Oath gain comes on top.
+OATH_SWITCH_NOTE = ("    - Switches you to {element} "
+                    "(Oath {old} → {new}, plus what it gains).")
+UNWAVERING_BANNER_TITLE = "Unwavering Banner"
+ALL_FOUR_WINDS_TITLE = "All Four Winds"
+_SWIRL_WORD = re.compile(r"Swirl")
 
 
-def _render_oath(oath: dict[str, Any]) -> list[str]:
+def _holds_a_swirl(hand: list[dict[str, Any]]) -> bool:
+    """Is a card in hand a Swirl card: an Anemo face, or one that says
+    Swirl (not "Swirls", a payout power's word)."""
+    return any(card.get("element") == "Anemo"
+               or _SWIRL_WORD.search(str(card.get("text") or ""))
+               for card in hand)
+
+
+def _has_power(you: dict[str, Any], title: str) -> bool:
+    return any(_fold(pw.get("name")) == _fold(title)
+               for pw in you.get("powers") or [])
+
+
+def _oath_switch(card: dict[str, Any], oath: dict[str, Any] | None,
+                 you: dict[str, Any]) -> str:
+    """The note under a hand card whose play makes another element his
+    current one, or `""`.
+
+    A Knight sets its printed element when played (`VarkaOath.BeginPlay`);
+    any other card makes current the Oath element it applies (the open Oath,
+    `VarkaOath.NoteApplication`) -- the element indicator, which follows an
+    override row -- unless Unwavering Banner holds the element. Under All
+    Four Winds every card reads all four Oaths, so a switch moves nothing.
+    """
+    if not oath or _has_power(you, ALL_FOUR_WINDS_TITLE):
+        return ""
+    knight = bool(_KNIGHT_HEAD.match(str(card.get("text") or "")))
+    element = ((card.get("printed_element") or card.get("element")) if knight
+               else card.get("element"))
+    if element not in oath["counts"] or element == oath["element"]:
+        return ""
+    if not knight and _has_power(you, UNWAVERING_BANNER_TITLE):
+        return ""
+    old = oath["counts"].get(oath["element"], 0) if oath["element"] else 0
+    return OATH_SWITCH_NOTE.format(element=element, old=old,
+                                   new=oath["counts"][element])
+
+
+def _render_oath(oath: dict[str, Any],
+                 reactions: list[dict[str, Any]] | None = None,
+                 swirl_in_hand: bool = False) -> list[str]:
     """His block: current element, the four Oath counts, what a Swirl pays,
-    and each enemy's aura, one fact a line."""
+    and each enemy's aura, one fact a line. With a Swirl card in hand, a
+    bare body whose aura a logged reaction used up says so."""
+    used_up: dict[str, str] = {}
+    if swirl_in_hand:
+        for row in reactions or []:
+            if row.get("target") and row.get("reaction"):
+                used_up[row["target"]] = row["reaction"]
     element = oath["element"]
     out = [OATH_ELEMENT_LINE.format(element=element) if element
            else OATH_NO_ELEMENT_LINE]
@@ -2927,7 +3099,8 @@ def _render_oath(oath: dict[str, Any]) -> list[str]:
                else OATH_NO_PAYOUT_LINE)
     for row in oath["auras"]:
         if row["element"] is None:
-            clause = AURA_NONE
+            clause = (AURA_USED_UP.format(reaction=used_up[row["name"]])
+                      if row["name"] in used_up else AURA_NONE)
         else:
             clause = AURA_LINE.format(element=row["element"])
         out.append(f"- **{row['name']}**: {clause}")
@@ -2935,60 +3108,88 @@ def _render_oath(oath: dict[str, Any]) -> list[str]:
 
 
 SHRINE_HEADING = "## Your shrine"
-SHRINE_COUNT_LINE = ("- Sakura: {n} of 3. At the end of your turn each "
-                     "strikes, oldest first.")
-#: The design axes (ruled 2026-10-14): what every strike does under the
-#: shrine's Rite.
-SHRINE_RITE_LINE = "- Rite: {rite}. {rule}"
-SHRINE_RITE_RULES = {
-    "Thunder": "Each strike hits a random enemy for its number.",
-    "Warding": "Each strike gives you its number in Block.",
-    "Wildfire": "Each strike hits ALL enemies for its number.",
-    "Offering": "Each strike draws you its number of cards next turn.",
-}
-#: Yae review r1 (2026-10-14): the badge's live sentence, the sum of the
-#: rows' strikes in the Rite's words (C# `YaeRiteText.Now`, sim
-#: `yae_shrine.RITE_FACE`).
-SHRINE_RITE_NOW = " Your Sakura now: {what}."
-SHRINE_RITE_AMOUNTS = {
-    "Thunder": "{n} damage",
-    "Warding": "{n} Block",
-    "Wildfire": "{n} to ALL",
-    "Offering": "draw {n}",
-}
+#: An Edit's chooser (`YaeEditing.EditPromptTextFor`).
+EDIT_PROMPT_HEAD = "Choose a card to Edit"
+#: Yae review r5, item 1: since #1330 a multi-card Edit is ONE chooser of up
+#: to N different cards (`YaeEditing.EditUpToPromptTextFor`, "Choose up to
+#: {Amount} cards to Edit"), and the player may stop short, none included.
+EDIT_UP_TO_PROMPT = re.compile(r"^Choose up to (\d+) cards to Edit")
+EDIT_UP_TO_NOTE = ("*Pick up to {n} different cards on this one screen, then "
+                   "confirm. Fewer, or none, is allowed.*")
+SHRINE_COUNT_LINE = ("- Sakura: {n} of {cap}. At the end of your turn each "
+                     "acts, oldest first.")
 SHRINE_NONE_LINE = "- Sakura: none. Plant one to start your shrine."
-SHRINE_ROW = ("- Sakura {slot}: Level {level}, strikes for {strike}"
+#: Review r3 (ruled 2026-10-14): a plant into a full shrine makes the oldest
+#: act as its Last Bloom would; the same kind then refreshes and gains a
+#: Level, another kind withers it and takes its place (`YaeShrine.Plant`).
+#: Yae review r5, item 5: the hover's own sentences
+#: (`ArmKeywordTips.YaeFullShrineTip`).
+SHRINE_FULL_LINE = ("- Shrine full: planting makes your oldest Sakura act. "
+                    "If the new Sakura is the same kind, the oldest stays and "
+                    "gains a Level. If not, the oldest withers and the new "
+                    "one takes its place.")
+SHRINE_ROW = ("- Sakura {slot}: {kind}, Level {level}{origin}, {action}"
               "{turns}.")
+#: Each kind's action on the row (review r3).
+SHRINE_KIND = {"thunder": ("Sakura", "strikes an enemy for {n}"),
+               "foxfire": ("Foxfire Sakura", "hits ALL enemies for {n} each"),
+               "kitsune": ("Kitsune Sakura", "gives you {n} Block")}
 SHRINE_LURE_LINE = "- Foxfire Lure: your Sakura strike **{name}** this turn."
+#: Yae review r6, item 5: which enemy a Sakura strikes, the mod's own rule
+#: (`YaeShrine.Aim`) in the hover's sentence (`ArmKeywordTips.
+#: YaeSakuraTargetRule`). Printed under the rows where a striking Sakura
+#: stands.
+SHRINE_TARGET_LINE = "- " + SAKURA_TARGET_RULE
 SHRINE_ANNOTATED_LINE = "- Annotated cards in your hand: {n}."
+#: Bestseller's count (Yae review r5, pick 1 (a)), which no card
+#: on the board shows (`YaeShrine.Snapshot`, via `player.yae_shrine`).
+SHRINE_EDITS_LINE = "- Cards Edited this combat: {n}."
 
 
 def _render_shrine(shrine: dict[str, Any]) -> list[str]:
     """Her block: each Sakura's Level, strike and strikes left, the Lure's
-    enemy, the Annotated count, one fact a line."""
+    enemy, the Annotated count, the cards Edited this combat, one fact a
+    line."""
     rows = shrine["sakura"]
-    out = [SHRINE_COUNT_LINE.format(n=len(rows)) if rows else SHRINE_NONE_LINE]
-    if shrine.get("rite") in SHRINE_RITE_RULES:
-        line = SHRINE_RITE_LINE.format(
-            rite=shrine["rite"], rule=SHRINE_RITE_RULES[shrine["rite"]])
-        # Yae review r1 (2026-10-14): what the Sakura standing do now under
-        # it, summed -- the Rite badge's and the "Rite: X" cards' clause.
-        total = sum(int(row.get("strike") or 0) for row in rows)
-        if total > 0:
-            line += SHRINE_RITE_NOW.format(
-                what=SHRINE_RITE_AMOUNTS[shrine["rite"]].format(n=total))
-        out.append(line)
+    # Sakura Channeling (2026-10-14) raises the cap: 3, plus 2 per copy.
+    cap = shrine.get("cap", 3)
+    out = [SHRINE_COUNT_LINE.format(n=len(rows), cap=cap) if rows
+           else SHRINE_NONE_LINE]
     for row in rows:
         turns = row.get("turns")
         tail = ("" if turns is None else
-                f", {turns} strike{'s' if turns != 1 else ''} left")
-        if row.get("annotation"):
-            tail += f", {row['annotation']}"
-        out.append(SHRINE_ROW.format(slot=row["slot"], level=row["level"],
-                                     strike=row["strike"], turns=tail))
+                f", {turns} turn{'s' if turns != 1 else ''} left")
+        # The pool to 78, pick 2 (a): every Annotation it carries, by name,
+        # in the order applied (`annotation` alone on an older row).
+        anns = row.get("annotations")
+        if anns is None:
+            anns = [row["annotation"]] if row.get("annotation") else []
+        for ann in anns:
+            tail += f", {ann}"
+        name, action = SHRINE_KIND.get(row.get("kind") or "thunder",
+                                       SHRINE_KIND["thunder"])
+        # Review r3, seat cleanup: where the Levels came from. The badge
+        # names the Level it was planted at; the rest came since (Sakura
+        # Grove, Narukami Ray, Mikage Thunder, a full-shrine plant).
+        planted = row.get("planted")
+        origin = ""
+        if planted is not None:
+            gained = row["level"] - planted
+            origin = (f" (planted at {planted}, +{gained} since)" if gained > 0
+                      else f" (planted at {planted})")
+        out.append(SHRINE_ROW.format(slot=row["slot"], kind=name,
+                                     level=row["level"], origin=origin,
+                                     action=action.format(n=row["strike"]),
+                                     turns=tail))
+    if rows and len(rows) >= cap:
+        out.append(SHRINE_FULL_LINE)
+    if any((row.get("kind") or "thunder") == "thunder" for row in rows):
+        out.append(SHRINE_TARGET_LINE)
     if shrine.get("lure"):
         out.append(SHRINE_LURE_LINE.format(name=shrine["lure"]))
     out.append(SHRINE_ANNOTATED_LINE.format(n=shrine.get("annotated", 0)))
+    if shrine.get("edits") is not None:
+        out.append(SHRINE_EDITS_LINE.format(n=shrine["edits"]))
     return out
 
 
@@ -3407,7 +3608,7 @@ EVENT_HP_RETURNED_PAST = "Drained {n} HP returned, {past} of it past your line"
 #: what Ethereal Exhausted at the turn's end. Seats read both as "vanished".
 EVENT_TO_DISCARD = "{n} {card} to the discard pile (hand full)"
 EVENT_ETHEREAL = "exhausted (Ethereal): {cards}"
-EVENT_WOLFPACK = ("Wolfpack shuffled {n} of Four Winds' Ascension into your "
+EVENT_WOLFPACK = ("Lupical shuffled {n} of Four Winds' Ascension into your "
                   "draw pile (it Exhausts when played)")
 #: And under Twin Gales, what each Swirl paid ("Numbers held"; a line, not a
 #: rule): `{paid}` is the mod's own words, `VarkaOath.TwinGalesPaid`.
@@ -3801,7 +4002,8 @@ def _incoming_line(enemies: list[dict[str, Any]], you: dict[str, Any],
                    hand: list[dict[str, Any]] | None = None,
                    pets: list[dict[str, Any]] | None = None,
                    resolutions: list[dict[str, Any]] | None = None,
-                   planned_attack: bool = False) -> str:
+                   planned_attack: bool = False,
+                   shrine: dict[str, Any] | None = None) -> str:
     """`- Incoming this turn: N (your Block B): you would take T.`
 
     The sum of every attack part shown; a part it cannot count is named as
@@ -3833,6 +4035,7 @@ def _incoming_line(enemies: list[dict[str, Any]], you: dict[str, Any],
                 hits += _split_hits(intent, part)
     facts = _turn_end_facts(you, hand or [], pets or [], resolutions,
                             planned_attack)
+    facts["block"] = facts["block"] + _kitsune_block_parts(shrine)
     not_counted = (INCOMING_NOT_COUNTED.format(
         names=_and_list(facts["unknown"])) if facts["unknown"] else "")
     not_counted += "".join(INCOMING_CONDITIONAL_BLOCK.format(name=name, n=n)
@@ -3887,6 +4090,25 @@ def _incoming_line(enemies: list[dict[str, Any]], you: dict[str, Any],
         line += INCOMING_LEAVES.format(after=max(0, you["hp"] - take),
                                        max_hp=you["max_hp"])
     return line + not_counted
+
+
+def _kitsune_block_parts(shrine: dict[str, Any] | None
+                         ) -> list[tuple[str, int]]:
+    """Yae review r6, item 6: the Block each Kitsune Sakura adds at the end
+    of your turn, before the enemies act, off the numbers its shrine row
+    prints (`strike`, `turns`). Every Sakura acts at the end of the turn;
+    one whose last turn this is (1 turn left, no Deadline Extension) acts
+    once more as it withers (`YaeShrine.TurnEnd`)."""
+    out: list[tuple[str, int]] = []
+    for row in (shrine or {}).get("sakura") or []:
+        if row.get("kind") != "kitsune" or not row.get("strike"):
+            continue
+        acts = 1
+        anns = row.get("annotations") or [row.get("annotation")]
+        if row.get("turns") == 1 and "Deadline Extension" not in anns:
+            acts = 2
+        out.append(("Kitsune Sakura", int(row["strike"]) * acts))
+    return out
 
 
 #: SEAT PAGE 3: the end-of-turn acts' Block, beside the incoming line on a
@@ -4072,7 +4294,7 @@ def render(obs: dict[str, Any]) -> str:
         out += [f"# Battle — round {c['round']}", "",
                 f"- HP {you['hp']}/{you['max_hp']}",
                 f"- Block {you['block']}",
-                "- " + _energy_line(you)]
+                "- " + _energy_line(you, c.get("round"))]
         out += _stars_line(you)
         defined = {row["name"] for row in (obs.get("keywords") or [])}
         spark_named = False
@@ -4153,6 +4375,10 @@ def render(obs: dict[str, Any]) -> str:
                 spark_named = True
         for pw in _once(you["powers"]):
             out.append(_render_power(pw, "- "))
+            # Kokomi review r8 (2026-10-14, item 11): under a card-limit
+            # curse (Sloth), the cards it counted this turn.
+            out += _played_cap_lines(pw, c.get("resolutions"),
+                                     plans=c.get("plans") is not None)
             # `EB-610`, THE OTHER SHAPE SPARK ARRIVES IN. The clause above is
             # emitted inside the METERS loop, and the live look of 2026-09-16
             # read a build whose wire carried Spark POWER-shaped -- a
@@ -4444,7 +4670,8 @@ def render(obs: dict[str, Any]) -> str:
         # (2026-10-10) moved it here from under the stage, where it sat after
         # the powers, the receipts and the potions, far from the hand.
         if c.get("oath") is not None:
-            out += ["", OATH_HEADING, ""] + _render_oath(c["oath"])
+            out += ["", OATH_HEADING, ""] + _render_oath(
+                c["oath"], c.get("reactions"), _holds_a_swirl(c["hand"]))
         # YAE MIKO (2026-10-13): her shrine, above the hand, Varka's place.
         if c.get("shrine") is not None:
             out += ["", SHRINE_HEADING, ""] + _render_shrine(c["shrine"])
@@ -4464,6 +4691,9 @@ def render(obs: dict[str, Any]) -> str:
                                 if i in exhausting else "", you=you)
             if wildfire is not None and _applies_pyro(card):
                 out.append(WILDFIRE_NOTE.format(n=wildfire))
+            switch = _oath_switch(card, c.get("oath"), you)
+            if switch:
+                out.append(switch)
             # The Varka payoff round (2026-10-10): where Four Winds'
             # Ascension came from, and that it comes once a combat (a seat
             # tried to play a second one that never came).
@@ -4542,7 +4772,8 @@ def render(obs: dict[str, Any]) -> str:
         if c["enemies"] and not obs.get("coop"):
             out += ["", _incoming_line(c["enemies"], you, c["hand"],
                                        c.get("pets"), c.get("resolutions"),
-                                       _planned_attack(c.get("plans")))
+                                       _planned_attack(c.get("plans")),
+                                       c.get("shrine"))
                     + _stage_block_clause(c.get("stage"))]
         # `EB-496`: and the rule about both handles, under the list they are
         # handles for. The hand's own note is about cards and says the
@@ -4669,6 +4900,11 @@ def render(obs: dict[str, Any]) -> str:
                         "run has been read.*"]
     elif obs["screen"] in ("card_reward", "card_select"):
         out += [f"# {obs['prompt']}", ""]
+        # Yae review r5, item 1: a multi-card Edit is one chooser of up to
+        # N different cards, which the seat may stop short of.
+        up_to = EDIT_UP_TO_PROMPT.match(str(obs.get("prompt") or ""))
+        if up_to:
+            out += [EDIT_UP_TO_NOTE.format(n=up_to.group(1)), ""]
         for card in obs["offers"]:
             out += _render_card(card)
         if obs["screen"] == "card_select":
@@ -4907,6 +5143,8 @@ def render(obs: dict[str, Any]) -> str:
         if obs["screen"] == "treasure" and any(
                 i["enabled"] for i in obs["items"]):
             out += ["", TREASURE_PROCEED_NOTE]
+        if obs.get("nothing_to_publish"):
+            out += ["", NOTHING_TO_PUBLISH_NOTE]
         if obs.get("potion_barred"):
             out += ["", POTION_BARRED_NOTE.format(relic=obs["potion_barred"])]
         # `EB-341`: said on the screen where the claim is made, and only where

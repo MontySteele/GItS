@@ -291,6 +291,9 @@ def card_cost(state: CombatState, card: Card) -> int:
     # modifier and floored at 0 like they are.
     if card.free_this_turn:
         return 0
+    # YAE, THE POOL TO 78: Editorial Priority's first Annotated card a turn.
+    if yae_shrine.editorial_free(state, card):
+        return 0
     cost = max(0, cost + card.cost_delta_this_turn
                + card.cost_delta_this_combat)
     if card.cost_reduction_per_attack_this_turn:
@@ -305,6 +308,17 @@ def card_cost(state: CombatState, card: Card) -> int:
     if card.cost_reduction_per_fanfare:
         cost = max(0, cost - furina_stage.fanfare(state.player)
                    // card.cost_reduction_per_fanfare)
+    if card.cost_reduction_per_swirl_this_turn:
+        led = varka_oath.ledger(state.player)
+        swirls = led.swirls_this_turn if led is not None else 0
+        cost = max(0, cost - card.cost_reduction_per_swirl_this_turn * swirls)
+    if card.cost_reduction_if_edited_this_turn:
+        # YAE, THE REFILL: Publisher's Deadline, "Costs 1 less if you Edited
+        # a card this turn". C# twin: the card's own
+        # `TryModifyEnergyCostInCombat` over `YaeShrine.EditsThisTurn`.
+        led = yae_shrine.ledger(state.player)
+        if led is not None and led.edits_this_turn > 0:
+            cost = max(0, cost - card.cost_reduction_if_edited_this_turn)
     if card.is_companion and state.companion_cost_delta_this_turn:
         cost = max(0, cost + state.companion_cost_delta_this_turn)
     # (R276): Playdate's discount on the next Companion card.
@@ -446,6 +460,9 @@ def _finish_play(state: CombatState, card: Card,
     # scope and the current-element step open per resolution, in
     # `effects.resolve_card`). 0 for anyone who is not Varka.
     replays += varka_oath.gmo_replays(state, card)
+    # YAE's Reprint (Glam's rule): the first play each combat is played
+    # twice. 0 for any card not carrying it.
+    replays += yae_shrine.reprint_replays(state, card)
     for replay_index in range(replays):
         snap = refpowers.before_card_played(state, card)
         # Rainfall Overture (the Furina sweep): `BeforeCardPlayed` marks the
@@ -668,10 +685,11 @@ def resolve_free_play(state: CombatState, card: Card,
         # drawn. A Sly discard IS a hand card, and does carry its context.
         drawn_turn, first_copy = state.drawn_context(card)
         state.drawn_in_hand.pop(id(card), None)
-        # THE KOKOMI RE-FOUNDING (2026-10-12): a written Companion is played
-        # by the Bake-Kurage's carry-out, and that play is the PLAN's -- the
-        # card was already counted as played when she wrote it. `plan_carry`
-        # tells EB-17's per-id tally so (`metrics`), and nothing else.
+        # THE KOKOMI RE-FOUNDING (2026-10-12): a card a Plan plays at its
+        # carry-out (Crystal Collapse's copy, Moon's Reflection's replay) is
+        # the PLAN's play -- the Plan card was counted when she wrote it.
+        # `plan_carry` tells EB-17's per-id tally so (`metrics`), and nothing
+        # else.
         state.emit("play", card=card.id, cost=0, energy_left=p.energy,
                    free=True, drawn_turn=drawn_turn, first_copy=first_copy,
                    plan_carry=bool(getattr(state, "kk_carrying_out", False)))

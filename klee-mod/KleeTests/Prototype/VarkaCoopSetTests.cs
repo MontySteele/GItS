@@ -91,7 +91,7 @@ public class VarkaCoopSetTests : IDisposable
         Assert.Equal(
             "[gold]Swirl[/gold] the enemy. This turn, other players' Attacks "
             + "deal 50% more damage to it."
-            // Varka round 5 (2026-10-13): a Swirl card's "(No aura to Swirl)".
+            // Varka round 5 (2026-10-13): a Swirl card's "(no aura: no Swirl)".
             + "{InCombat:{VarkaSwirl}|}",
             Face(new ProtoVkWindwardFlank()));
         Assert.Equal(

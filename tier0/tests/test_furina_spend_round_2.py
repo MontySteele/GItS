@@ -86,7 +86,8 @@ def test_the_next_turn_repay_is_gone_everywhere():
         assert "RepayNextTurn" not in path.read_text(encoding="utf-8"), path
     src = (GENERATED / "ProtoFsHymnOfManyWaters.cs").read_text(encoding="utf-8")
     assert "FurinaStageFacePreview.PayBlock" in src
-    assert 'DynamicVars["RepayAmount"].IntValue, StageFloor.Block)' in src
+    # Block is the default floor since furina-next paper 3 (2026-10-16).
+    assert 'DynamicVars["RepayAmount"].IntValue);' in src
 
 
 # ---- 3. Charlotte's line reads a card's Repay ------------------------------------

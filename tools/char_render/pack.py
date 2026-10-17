@@ -23,6 +23,12 @@ tools/char_render/render.py's raw frames and writes, under
                                       Ascension: at the blade's point and,
                                       mirrored, under the target)
   model/frames/<char>_shadow.png      the ground shadow (Klee's look)
+  model/frames/furina_gfx_<guest>.png one effect per guest star (fx.GUEST_EFFECTS:
+                                      Furina's "guest-star pizazz", 2026-10-16),
+                                      the manifest's `guest_fx`; no render needed:
+                                      `--guest-fx-only` repacks just these into the
+                                      committed manifest, `--guest-fx-sheet <png>`
+                                      draws their review sheet
   model/<char>_rest.png               the seated rest-site still, padded so
                                       BaseLib's centred sprite puts his seat on
                                       the rest-site anchor
@@ -104,6 +110,19 @@ EFFECT_FILES = {"varka": {"ground_burst": "varka_ground_burst.png"}}
 #: effect sprite clips no clip places, played by the game on a stage event
 #: (fx.STAGE_EFFECTS: Furina's Spend, Drain and Repay)
 STAGE_FILES = {"furina": {"spend": "furina_spend.png", "drain": "furina_drain.png", "repay": "furina_repay.png"}}
+#: one effect sprite clip per guest star, played by the game when the guest
+#: acts (fx.GUEST_EFFECTS; KleeMod.Vfx.FurinaGuestFx)
+GUEST_FX_FILES = {"furina": {"charlotte": "furina_gfx_charlotte.png",
+                             "chevreuse": "furina_gfx_chevreuse.png",
+                             "clorinde": "furina_gfx_clorinde.png",
+                             "escoffier": "furina_gfx_escoffier.png",
+                             "freminet": "furina_gfx_freminet.png",
+                             "lynette": "furina_gfx_lynette.png",
+                             "lyney": "furina_gfx_lyney.png",
+                             "navia": "furina_gfx_navia.png",
+                             "neuvillette": "furina_gfx_neuvillette.png",
+                             "sigewinne": "furina_gfx_sigewinne.png",
+                             "wriothesley": "furina_gfx_wriothesley.png"}}
 SHADOW_FILES = {"varka": "varka_shadow.png", "furina": "furina_shadow.png", "kokomi": "kokomi_shadow.png",
                 "yae": "yae_shadow.png"}
 REST_FILES = {"varka": "varka_rest.png", "furina": "furina_rest.png", "kokomi": "kokomi_rest.png",
@@ -263,13 +282,92 @@ def effect_uses(meta: dict, clip: str) -> list[dict]:
     return out
 
 
+def guest_fx(char: str, ppu: float):
+    """The guest effects (fx.GUEST_EFFECTS) at `ppu`, Furina's combat ppu:
+    ({guest: record}, [(file, sheet)]). Each record is a packed clip as the
+    stage effects' (cell, frames, pages, origin, fps, length) plus its tint
+    and its anchor ("feet": the origin goes on the bottom of the creature's
+    hitbox; "center": on its effect spawn point)."""
+    recs, writes = {}, []
+    for name, file in GUEST_FX_FILES.get(char, {}).items():
+        frames, origin = FX.GUEST_EFFECTS[name](ppu, FX.STAGE_FPS)
+        esheets, erec = sheets_for(frames, origin, file)
+        erec.update({"fps": FX.STAGE_FPS, "ppu": ppu, "length": round(len(frames) / FX.STAGE_FPS, 4), "loop": False,
+                     "heat": "R=G=B heat (1 core, ~0.5 glow), A coverage; tint per element",
+                     "tint": FX.GUEST_TINTS[name], "anchor": FX.GUEST_ANCHOR[name]})
+        recs[name] = erec
+        writes += esheets
+    return recs, writes
+
+
+#: the review sheet: six key frames per guest, one row each, at game scale
+SHEET_CELL = 330
+SHEET_BACKDROP = (22, 24, 32, 255)
+
+
+def guest_fx_sheet(char: str, ppu: float) -> Image.Image:
+    """Every guest effect's six key frames (first to last, evenly), tinted as
+    the game tints them, at the combat scale on a dark backdrop. A red tick
+    marks the anchor (a "feet" effect's anchor sits lower in its row)."""
+    from PIL import ImageDraw
+    names = list(GUEST_FX_FILES[char])
+    sheet = Image.new("RGBA", (120 + 6 * SHEET_CELL, len(names) * SHEET_CELL), SHEET_BACKDROP)
+    d = ImageDraw.Draw(sheet)
+    for r, name in enumerate(names):
+        frames, origin = FX.GUEST_EFFECTS[name](ppu, FX.STAGE_FPS)
+        n = len(frames)
+        d.text((8, r * SHEET_CELL + SHEET_CELL // 2 - 6), f"{name}\n{n / FX.STAGE_FPS:.2f} s",
+               fill=(220, 220, 220, 255))
+        for j, fi in enumerate(round(i * (n - 1) / 5) for i in range(6)):
+            im = FX.tint(frames[fi], FX.hex_rgb(FX.GUEST_TINTS[name]))
+            im = im.resize((round(im.width * COMBAT_SCALE), round(im.height * COMBAT_SCALE)), Image.LANCZOS)
+            ox, oy = origin[0] * COMBAT_SCALE, origin[1] * COMBAT_SCALE
+            ax = 120 + j * SHEET_CELL + SHEET_CELL // 2
+            ay = r * SHEET_CELL + SHEET_CELL // 2 + (60 if FX.GUEST_ANCHOR[name] == "feet" else 0)
+            sheet.alpha_composite(im, (max(0, round(ax - ox)), max(0, round(ay - oy))))
+            d.line((ax - 5, ay, ax + 5, ay), fill=(255, 80, 80, 255))
+            d.line((ax, ay - 5, ax, ay + 5), fill=(255, 80, 80, 255))
+            d.text((120 + j * SHEET_CELL + 4, r * SHEET_CELL + 4), f"frame {fi}", fill=(150, 150, 150, 255))
+    return sheet.convert("RGB")
+
+
+def guest_fx_only(char: str, art: Path, check: bool) -> int:
+    """Repack the guest effects alone into the committed manifest, which keeps
+    every other record: they need no render."""
+    mpath = manifest_path(char)
+    manifest = json.loads(mpath.read_text(encoding="utf-8"))
+    recs, sheets = guest_fx(char, manifest["sheets"]["idle"]["ppu"])
+    manifest["guest_fx"] = recs
+    text = json.dumps(manifest, indent=1, ensure_ascii=False) + "\n"
+    if check:
+        if mpath.read_text(encoding="utf-8") != text:
+            print(f"STALE: {mpath.name}'s guest_fx differs from fx.GUEST_EFFECTS")
+            return 1
+        print(f"{mpath.name}'s guest_fx is current")
+        return 0
+    for name, im in sheets:
+        path = art / "model" / "frames" / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        im.save(path, optimize=True)
+        print("wrote", path)
+    mpath.write_text(text, encoding="utf-8", newline="\n")
+    print("wrote", mpath.relative_to(ROOT))
+    return 0
+
+
 def rest_still(R: Path):
     """BaseLib centres the texture at y = -0.1 h inside a 0.5 container, so a
     point at (w/2, 0.6 h) of the texture lands on the anchor: pad so the seat
-    (the hips' head) is that point (Klee's rule)."""
+    (the hips' head) is that point (Klee's rule).
+
+    NO GROUND CLIP. The combat clips cut below the feet anchor so planted
+    blades read as driven into the floor; a seated still has no floor at that
+    line (the rig's origin sits above the boots and the hem), and the cut drew
+    Varka's sword tips, cloak and seat, and Furina's coat hem, on one flat
+    edge, so he seemed to float in front of the log (in-game check
+    2026-10-16). The still keeps every texel it rendered."""
     meta = json.loads((R / "rest.json").read_text(encoding="utf-8"))
-    s = float(meta["ppu"]) / FX.REF_PPU
-    rest = ground_clip(Image.open(R / "rest.png").convert("RGBA"), meta["origin_px"][1], s)
+    rest = Image.open(R / "rest.png").convert("RGBA")
     rb = KP.alpha_box([rest])
     rest = rest.crop(rb)
     hx, hy = meta["hips_px"][0] - rb[0], meta["hips_px"][1] - rb[1]
@@ -287,46 +385,82 @@ def rest_still(R: Path):
 SELECT_TOP, SELECT_KEEP, SELECT_SIDE = 36, 48, 24
 
 
+def select_placer(R: Path, target_h: int = 2150):
+    """The close-up's framing as a function: (place, rec). `place(im, at=(0, 0))`
+    puts an image rendered at the select still's camera and scale (its pixel
+    (0, 0) at `at` on the still's canvas) onto the 1920x1080 close-up, ground
+    clip, crop, scale and position exactly as the still's. The still itself
+    is `place(still)`; tools/select_loop.py places the loop's frames the same
+    way, so frame 0 is the still."""
+    meta = json.loads((R / "select.json").read_text(encoding="utf-8"))
+    s = float(meta["ppu"]) / FX.REF_PPU
+    sel = Image.open(R / "select.png").convert("RGBA")
+    sel = ground_clip(sel, meta["origin_px"][1], s)
+    bx, by, bx1, by1 = KP.alpha_box([sel])
+    sel = sel.crop((bx, by, bx1, by1))
+    guards = {g: v["guard_box_px"] for g, v in ((meta.get("arms_crossed") or {}).get("hilts") or {}).items()}
+    if guards:
+        low = max(g[3] for g in guards.values()) - by
+        target_h = min(target_h, math.floor((1080 - SELECT_KEEP - SELECT_TOP) * sel.height / low))
+    k = target_h / sel.height
+    new_w = round(sel.width * k)
+    cx = min(1260, 1920 - SELECT_SIDE - (new_w - new_w // 2))
+    x0 = cx - new_w // 2
+    rec = {"size": [1920, 1080], "figure_h": target_h}
+
+    def to_canvas(x, y):
+        return [round((x - bx) * k + x0, 1), round((y - by) * k + SELECT_TOP, 1)]
+    if guards:
+        rec["guards_px"] = {g: to_canvas(v[0], v[1]) + to_canvas(v[2], v[3]) for g, v in sorted(guards.items())}
+        rec["chin_px"] = to_canvas(0, meta["arms_crossed"]["chin_px"])[1]
+
+    def place(im: Image.Image, at=(0, 0)) -> Image.Image:
+        pad = 96            # a moving frame may reach past the still's canvas
+        base = Image.new("RGBA", (sel.width + bx + pad * 2 + im.width, sel.height + by + pad * 2 + im.height),
+                         (0, 0, 0, 0))
+        # the still's canvas, shifted by `pad`, holds the frame at `at`
+        base.paste(im, (round(at[0]) + pad, round(at[1]) + pad))
+        base = ground_clip(base, meta["origin_px"][1] + pad, s)
+        part = base.crop((bx + pad, by + pad, bx1 + pad, by1 + pad))
+        part = part.resize((new_w, target_h), Image.LANCZOS)
+        canvas = Image.new("RGBA", (1920, 1080), (0, 0, 0, 0))
+        canvas.paste(part, (x0, SELECT_TOP), part)
+        return canvas
+    return place, rec
+
+
 def select_closeup(R: Path, target_h: int = 2150):
     """1920x1080, the figure right of centre, bleeding off the bottom (Klee's
     framing). When the still records its blades' crossguards (render.py
     arms_crossed, stance B), the figure is drawn smaller if it must be, so
     both crossguards sit inside the frame, and moved left if its right edge
     would leave it. The manifest gets where the crossguards and the chin land."""
-    meta = json.loads((R / "select.json").read_text(encoding="utf-8"))
-    sel = Image.open(R / "select.png").convert("RGBA")
-    sel = ground_clip(sel, meta["origin_px"][1], float(meta["ppu"]) / FX.REF_PPU)
-    bx, by, bx1, by1 = KP.alpha_box([sel])
-    sel = sel.crop((bx, by, bx1, by1))
-    guards = {s: g["guard_box_px"] for s, g in ((meta.get("arms_crossed") or {}).get("hilts") or {}).items()}
-    if guards:
-        low = max(g[3] for g in guards.values()) - by
-        target_h = min(target_h, math.floor((1080 - SELECT_KEEP - SELECT_TOP) * sel.height / low))
-    k = target_h / sel.height
-    sel = sel.resize((round(sel.width * k), target_h), Image.LANCZOS)
-    cx = min(1260, 1920 - SELECT_SIDE - (sel.width - sel.width // 2))
-    x0 = cx - sel.width // 2
-    canvas = Image.new("RGBA", (1920, 1080), (0, 0, 0, 0))
-    canvas.paste(sel, (x0, SELECT_TOP), sel)
-    rec = {"size": [1920, 1080], "figure_h": target_h}
-
-    def to_canvas(x, y):
-        return [round((x - bx) * k + x0, 1), round((y - by) * k + SELECT_TOP, 1)]
-    if guards:
-        rec["guards_px"] = {s: to_canvas(g[0], g[1]) + to_canvas(g[2], g[3]) for s, g in sorted(guards.items())}
-        rec["chin_px"] = to_canvas(0, meta["arms_crossed"]["chin_px"])[1]
-    return canvas, rec
+    place, rec = select_placer(R, target_h)
+    return place(Image.open(R / "select.png").convert("RGBA")), rec
 
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--char", default="varka", choices=sorted(SHEET_FILES))
-    ap.add_argument("--renders", required=True, help="render.py --out dir, painted by post.py")
+    ap.add_argument("--renders", help="render.py --out dir, painted by post.py")
     ap.add_argument("--art-root", default=str(ROOT))
     ap.add_argument("--check", action="store_true", help="only report; write nothing")
+    ap.add_argument("--guest-fx-only", action="store_true",
+                    help="repack only the guest effects into the committed manifest (no renders)")
+    ap.add_argument("--guest-fx-sheet", metavar="PNG", help="draw the guest effects' review sheet and exit")
     args = ap.parse_args(argv)
-    char, R = args.char, Path(args.renders)
+    char = args.char
     art = Path(args.art_root) / "ImageGen" / "images" / char
+    if args.guest_fx_sheet:
+        ppu = json.loads(manifest_path(char).read_text(encoding="utf-8"))["sheets"]["idle"]["ppu"]
+        guest_fx_sheet(char, ppu).save(args.guest_fx_sheet, optimize=True)
+        print("wrote", args.guest_fx_sheet)
+        return 0
+    if args.guest_fx_only:
+        return guest_fx_only(char, art, args.check)
+    if not args.renders:
+        ap.error("--renders is required")
+    R = Path(args.renders)
     out_frames = art / "model" / "frames"
     files = SHEET_FILES[char]
     manifest = {"_doc": f"Generated by tools/char_render/pack.py from renders of the official {char} model "
@@ -478,6 +612,12 @@ def main(argv=None) -> int:
                 "forearms_visible": gm.get("forearms_visible")}
             print(f"guest {g:12s} {gm['height_in']:5.1f} in  full {metrics['full_px']:6.1f} px  "
                   f"head {manifest['guests'][g]['head_px']:6.1f} px  width {manifest['guests'][g]['width_px']} px")
+
+    # the guest stars' effects (fx.GUEST_EFFECTS), at the combat ppu
+    if GUEST_FX_FILES.get(char):
+        recs, gsheets = guest_fx(char, manifest["sheets"]["idle"]["ppu"])
+        manifest["guest_fx"] = recs
+        writes += [(out_frames / n, im) for n, im in gsheets]
 
     text = json.dumps(manifest, indent=1, ensure_ascii=False) + "\n"
     mpath = manifest_path(char)

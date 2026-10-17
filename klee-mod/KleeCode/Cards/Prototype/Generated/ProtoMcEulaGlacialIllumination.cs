@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcEulaGlacialIllumination : CustomCardModel, ICompanionCard, IWritableCompanion
+public sealed class ProtoMcEulaGlacialIllumination : CustomCardModel, ICompanionCard
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -49,7 +49,7 @@ public sealed class ProtoMcEulaGlacialIllumination : CustomCardModel, ICompanion
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForLightfallSword(ArmKeywordTips.ForCompanionPlan(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForLightfallSword(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_eula_glacial_illumination");
 
@@ -58,14 +58,6 @@ public sealed class ProtoMcEulaGlacialIllumination : CustomCardModel, ICompanion
         ("title", "Eula — Glacial Illumination"),
         ("description", "Place a [gold]Lightfall Sword[/gold]. In {PowerAmount:diff()} turns it deals 8 damage, and 5 additional damage for each Attack you play before then."),
     };
-
-    /// <summary>On Kokomi, this Companion card can also be written as a Plan on
-    /// the Bake-Kurage (the re-founding, 2026-10-12).</summary>
-    public override TargetType TargetType =>
-        KokomiCompanionPlan.TargetFor(this, base.TargetType);
-
-    /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
-    public TargetType PrintedTargetType => base.TargetType;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
@@ -82,11 +74,6 @@ public sealed class ProtoMcEulaGlacialIllumination : CustomCardModel, ICompanion
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (KokomiPlan.PlayedOnPet(cardPlay))
-        {
-            await KokomiCompanionPlan.Write(choiceContext, this, cardPlay);
-            return;
-        }
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await PowerCmd.Apply<LightfallSwordPower>(choiceContext, cardPlay.Target, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }

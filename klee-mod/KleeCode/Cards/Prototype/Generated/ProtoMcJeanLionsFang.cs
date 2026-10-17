@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcJeanLionsFang : CustomCardModel, ICompanionCard, IWritableCompanion
+public sealed class ProtoMcJeanLionsFang : CustomCardModel, ICompanionCard
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -47,8 +47,8 @@ public sealed class ProtoMcJeanLionsFang : CustomCardModel, ICompanionCard, IWri
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         TipAudience.Seat
-            ? ArmKeywordTips.ForBomb(ArmKeywordTips.ForCompanionPlan(ArmKeywordTips.ForLionsFangLastTurn(base.ExtraHoverTips, this), this), this)
-            : ArmKeywordTips.ForBomb(ArmKeywordTips.ForCompanionPlan(base.ExtraHoverTips, this), this);
+            ? ArmKeywordTips.ForBomb(ArmKeywordTips.ForLionsFangLastTurn(base.ExtraHoverTips, this), this)
+            : ArmKeywordTips.ForBomb(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_jean_lions_fang");
 
@@ -57,14 +57,6 @@ public sealed class ProtoMcJeanLionsFang : CustomCardModel, ICompanionCard, IWri
         ("title", "Jean — Lion's Fang, Fair Protector"),
         ("description", "At the start of your turn, if none of your [gold]Bombs[/gold] went off last turn, gain 8 [gold]Block[/gold] and draw 1 card."),
     };
-
-    /// <summary>On Kokomi, this Companion card can also be written as a Plan on
-    /// the Bake-Kurage (the re-founding, 2026-10-12).</summary>
-    public override TargetType TargetType =>
-        KokomiCompanionPlan.TargetFor(this, base.TargetType);
-
-    /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
-    public TargetType PrintedTargetType => base.TargetType;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
@@ -81,11 +73,6 @@ public sealed class ProtoMcJeanLionsFang : CustomCardModel, ICompanionCard, IWri
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (KokomiPlan.PlayedOnPet(cardPlay))
-        {
-            await KokomiCompanionPlan.Write(choiceContext, this, cardPlay);
-            return;
-        }
         await PowerCmd.Apply<LionsFangPower>(choiceContext, Owner.Creature, 8, applier: Owner.Creature, cardSource: this);
     }
 

@@ -45,7 +45,7 @@ public sealed class ProtoYmFoxfireLure : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Foxfire Lure"),
-        ("description", "Apply {PowerAmount:diff()} [gold]Weak[/gold] to an enemy. This turn, your [gold]Sakura[/gold] strike it."),
+        ("description", "Apply {PowerAmount:diff()} [gold]Weak[/gold] to an enemy. This turn, your striking [gold]Sakura[/gold] strike it."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
