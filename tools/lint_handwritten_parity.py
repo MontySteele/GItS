@@ -361,7 +361,7 @@ def furina_number_findings(exp: "Expected", got: dict, where) -> list[str]:
 # Where a hand-written card can live. Furina's sit in a per-character
 # subdirectory; Klee's sit directly in Cards/.
 CS_SEARCH_DIRS = (CARDS_DIR, CARDS_DIR / "Furina", CARDS_DIR / "Kokomi",
-                  CARDS_DIR / "Varka")
+                  CARDS_DIR / "Varka", CARDS_DIR / "Yae")
 
 
 def kit_no_pile() -> list[str]:
@@ -695,7 +695,9 @@ ANCIENT_WITNESS: dict[str, dict] = {
 ARM_ONLY_ANCIENTS = frozenset((
     "AlicesMasterpiece", "DivineStrategy", "CenterOfAttention",
     # The Varka review (ruled 2026-10-12): both of his, game-side only.
-    "AllFourWinds", "DandelionGale"))
+    "AllFourWinds", "DandelionGale",
+    # The Yae pass (2026-10-16): both of hers, game-side only.
+    "YakanEvocationSesshouSakura", "YaePublishingHouse"))
 ANCIENT_WITNESS.update({
     "AlicesMasterpiece": {
         "why": "Klee's Dusty Tome Ancient (pool completion, 2026-10-01): a "
@@ -747,6 +749,33 @@ ANCIENT_WITNESS.update({
                "element to each.",
         "cost": [2],
         "vars": [10, 3],
+        "hits": [],
+        "upgrade_vars": [],
+        "upgrade_cost": [-1],
+        "encore": [],
+        "fanfare_div": [],
+        "fanfare_tip": [],
+    },
+    "YakanEvocationSesshouSakura": {
+        "why": "Yae's Archaic Tooth Ancient, Yakan Evocation's replacement "
+               "(the Yae pass, 2026-10-16): a Skill, 1 Energy, 0 upgraded; "
+               "plant a Foxfire Sakura at Level 3 and Edit it: Deadline "
+               "Extension.",
+        "cost": [1],
+        "vars": [3],
+        "hits": [],
+        "upgrade_vars": [],
+        "upgrade_cost": [-1],
+        "encore": [],
+        "fanfare_div": [],
+        "fanfare_tip": [],
+    },
+    "YaePublishingHouse": {
+        "why": "Yae's Dusty Tome Ancient (the Yae pass, 2026-10-16): a "
+               "Power, 2 Energy, 1 upgraded; her Edits write their "
+               "Annotation twice. No number on the face but the cost.",
+        "cost": [2],
+        "vars": [],
         "hits": [],
         "upgrade_vars": [],
         "upgrade_cost": [-1],

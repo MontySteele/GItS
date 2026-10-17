@@ -75,7 +75,7 @@ public sealed class ProtoYmThunderboltTithe : CustomCardModel, IElementalCard, I
 
     protected override void OnUpgrade()
     {
-        DynamicVars["YmPer"].UpgradeValueBy(2m);
+        DynamicVars["YmPer"].UpgradeValueBy(1m);
         DynamicVars["YmBase"].UpgradeValueBy(1m);
     }
 }

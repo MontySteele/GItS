@@ -36,10 +36,12 @@ public sealed class YaeCardPool : CardPoolModel
         UnlockState unlockState, IEnumerable<CardModel> cards) =>
         YaeRoster.OfferablePool();
 
-    /// <summary>MEMBERSHIP: her generated rows, then the five Annotation
-    /// faces.</summary>
+    /// <summary>MEMBERSHIP: her generated rows, the five Annotation faces,
+    /// then her two Ancients (<c>RosterAncientCards.Yae</c>, the Yae pass
+    /// 2026-10-16; <c>tools/lint_ancient_coverage.py</c>).</summary>
     protected override CardModel[] GenerateAllCards() =>
         YaeRoster.Members()
             .Concat(YaeModalOptions.All)
+            .Concat(RosterAncientCards.Yae)
             .ToArray();
 }

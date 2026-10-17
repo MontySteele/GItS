@@ -392,6 +392,12 @@ _VARKA_ITEMS_REASON = (
 #: Kokomi's own relics and potions (review/active/kokomi-relics-potions-
 #: 2026-10-15.md), built C# first like Varka's: tier0's Kokomi twin models
 #: no relic but the Casket.
+_YAE_ITEMS_REASON = (
+    "YAE'S OWN RELICS AND POTIONS (the Yae pass, review/active/yae-ancients-"
+    "relics-2026-10-16.md). A printed number on a Prototype-stage relic or "
+    "potion of hers, built C# first (operations/prototype.md); no sim twin "
+    "exists until Balance.")
+
 _KOKOMI_ITEMS_REASON = (
     "KOKOMI'S OWN RELICS AND POTIONS (review/active/kokomi-relics-potions-"
     "2026-10-15.md). A printed number on a Prototype-stage relic or potion of "
@@ -477,6 +483,11 @@ UNMIRRORED: dict[str, str] = {
     "AlicesGuidebook.Growth": _ARM_ITEMS_REASON,
     "BottledResolve.Oath": _VARKA_ITEMS_REASON,
     "BottledShoal.Stings": _KOKOMI_ITEMS_REASON,
+    "BottledSakura.Sakura": _YAE_ITEMS_REASON,
+    "Electroculus.Damage": _YAE_ITEMS_REASON,
+    "FoxOfuda.More": _YAE_ITEMS_REASON,
+    "KitsuneMask.Weak": _YAE_ITEMS_REASON,
+    "NarukamiSake.Levels": _YAE_ITEMS_REASON,
     "OceanHuedClam.MendAmount": _KOKOMI_ITEMS_REASON,
     "ResistanceArmband.Block": _KOKOMI_ITEMS_REASON,
     "KnightsCommission.Oath": _VARKA_ITEMS_REASON,

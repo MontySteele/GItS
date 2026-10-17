@@ -3,6 +3,7 @@ using KleeMod.Cards;
 using KleeMod.Cards.Furina;
 using KleeMod.Cards.Kokomi;
 using KleeMod.Cards.Varka;
+using KleeMod.Cards.Yae;
 using MegaCrit.Sts2.Core.Models;
 
 namespace KleeMod;
@@ -33,6 +34,7 @@ public static class RosterAncientCards
     private static List<CardModel>? _furina;
     private static List<CardModel>? _kokomi;
     private static List<CardModel>? _varka;
+    private static List<CardModel>? _yae;
 
     // THE ANCIENT AUDIT (review/ruled/ancient-audit-2026-10-12.md, ruled
     // 2026-10-12: "Otherwise agreed.- let's fix them all"): every kit has one
@@ -79,5 +81,19 @@ public static class RosterAncientCards
         ModelDb.Card<AllFourWinds>(),
         ModelDb.Card<DandelionGale>(),
     };
-}
 
+    /// <summary>
+    /// YAE'S TWO (the Yae pass, 2026-10-16,
+    /// <c>review/active/yae-ancients-relics-2026-10-16.md</c> sec.2). The
+    /// Archaic Tooth's first, on Yakan Evocation; then the Dusty Tome's, Yae
+    /// Publishing House, which bends the Edit rule. They replace the Darv
+    /// guard she had while her pool held no Ancient.
+    /// </summary>
+    public static IReadOnlyList<CardModel> Yae => _yae ??= new List<CardModel>
+    {
+        // The Tooth's, on Yakan Evocation.
+        ModelDb.Card<YakanEvocationSesshouSakura>(),
+        // The Tome's: bends the Edit rule.
+        ModelDb.Card<YaePublishingHouse>(),
+    };
+}

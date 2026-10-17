@@ -38,20 +38,21 @@ public sealed class ProtoYmEvergreenCharm : CustomCardModel, ICharacterCard
     public string CharacterId => "yae";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForEdit(ArmKeywordTips.ForAnnotation(ArmKeywordTips.ForSakura(base.ExtraHoverTips, this), this, YaeAnnotation.DeadlineExtension, true), this);
+        ArmKeywordTips.ForSakura(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_evergreen_charm");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Evergreen Charm"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Edit[/gold] your oldest [gold]Sakura[/gold]: [gold]Deadline Extension[/gold]."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Your oldest [gold]Sakura[/gold] lasts {YmAmount:diff()} more turns."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(7m, ValueProp.Move)
+            new BlockVar(7m, ValueProp.Move),
+            new DynamicVar("YmAmount", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -64,7 +65,7 @@ public sealed class ProtoYmEvergreenCharm : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
-        await YaeCards.EditSakura(choiceContext, this, cardPlay, YaeSakuraEnd.Oldest, YaeAnnotation.DeadlineExtension);
+        await YaeCards.ExtendOldest(choiceContext, this, cardPlay);
     }
 
     protected override void OnUpgrade()

@@ -3119,6 +3119,9 @@ YAE_KINDS = {
     "rewrite": "Rewrite",
     "level_newest": "LevelNewest",
     "bless_highest": "BlessHighest",
+    # The Yae pass (2026-10-16): Evergreen Charm's "Your oldest Sakura lasts
+    # 2 more turns".
+    "extend_oldest": "ExtendOldest",
 }
 YAE_KIND_FIELDS = {
     "plant": ("amount",),
@@ -3160,6 +3163,7 @@ YAE_KIND_FIELDS = {
     "rewrite": ("amount",),
     "level_newest": ("amount",),
     "bless_highest": ("amount",),
+    "extend_oldest": ("amount",),
 }
 #: The kinds that aim at the enemy the player picks (`target: enemy`).
 YAE_AIMED_KINDS = {"lure", "damage_per_sakura", "damage_per_edit",
@@ -17369,6 +17373,10 @@ TRANSCENDENCE = {
         "global::KleeMod.Cards.Kokomi.PrincessOfWatatsumi",
     "proto_fs_standing_ovation":
         "global::KleeMod.Cards.Furina.AllTheWorldsAStage",
+    # Yae pass 2026-10-16 (review/active/yae-ancients-relics-2026-10-16.md
+    # sec.2): her Elemental Skill's full name.
+    "proto_ym_yakan_evocation":
+        "global::KleeMod.Cards.Yae.YakanEvocationSesshouSakura",
 }
 
 

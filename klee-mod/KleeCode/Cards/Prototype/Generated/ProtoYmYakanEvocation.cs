@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoYmYakanEvocation : CustomCardModel, ICharacterCard, ISakuraPlanterCard
+public sealed class ProtoYmYakanEvocation : CustomCardModel, ICharacterCard, ISakuraPlanterCard, ITranscendenceCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "yae";
@@ -47,6 +47,11 @@ public sealed class ProtoYmYakanEvocation : CustomCardModel, ICharacterCard, ISa
         ("title", "Yakan Evocation"),
         ("description", "Plant a [gold]Sakura[/gold]."),
     };
+
+    /// <summary>Orobas's Archaic Tooth turns this card into its Ancient
+    /// (BaseLib's `ArchaicToothTranscendenceUpgradesPatch`).</summary>
+    public CardModel GetTranscendenceTransformedCard() =>
+        ModelDb.Card<global::KleeMod.Cards.Yae.YakanEvocationSesshouSakura>();
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

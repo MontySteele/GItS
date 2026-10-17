@@ -224,12 +224,17 @@ public class YaePrototypeTests : IDisposable
         // Yae review r6, item 1 (was per Annotated card played, shrine r2).
         Assert.DoesNotContain(Il.CallSequence(typeof(YaeShrine).GetMethod(nameof(YaeShrine.AfterCardPlayed))!),
                               c => c.Contains("SerializationPower.Pay"));
+        // The Yae pass (2026-10-16): every Edit's one door is
+        // YaeShrine.AfterEdits, which pays Serialization (and Proofreader's
+        // Glasses).
+        Assert.Contains(Il.CallSequence(typeof(YaeShrine).GetMethod(nameof(YaeShrine.AfterEdits))!),
+                        c => c.Contains("SerializationPower.Pay"));
         Assert.Contains(Il.CallSequence(typeof(YaeEditing).GetMethod(nameof(YaeEditing.Edit))!),
-                        c => c.Contains("SerializationPower.Pay"));
+                        c => c.Contains("YaeShrine.AfterEdits"));
         Assert.Contains(Il.CallSequence(typeof(YaeEditing).GetMethod(nameof(YaeEditing.EditAll))!),
-                        c => c.Contains("SerializationPower.Pay"));
+                        c => c.Contains("YaeShrine.AfterEdits"));
         Assert.Contains(Il.CallSequence(typeof(YaeCards).GetMethod(nameof(YaeCards.EditSakura))!),
-                        c => c.Contains("SerializationPower.Pay"));
+                        c => c.Contains("YaeShrine.AfterEdits"));
     }
 
     [Fact]

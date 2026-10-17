@@ -168,12 +168,14 @@ public static class YaeAnnotationText
     /// reads these three heads. PURE.
     /// </summary>
     public static string Summary(IReadOnlyList<YaeAnnotation> stack,
-                                 YaeAnnotation temporary, bool reprintUsed)
+                                 YaeAnnotation temporary, bool reprintUsed,
+                                 int temporaryCount = 1)
     {
         var parts = new List<string>();
         if (stack.Count > 0) parts.Add(PublishedHead + List(stack) + ".");
         if (temporary != YaeAnnotation.None)
-            parts.Add(ThisCombatHead + Name(temporary) + ".");
+            parts.Add(ThisCombatHead + Name(temporary)
+                      + (temporaryCount > 1 ? " x" + temporaryCount : "") + ".");
         if (reprintUsed) parts.Add(ReprintUsed);
         return string.Join(" ", parts);
     }
@@ -205,16 +207,22 @@ public static class YaeLayers
 {
     /// <summary>Every layer: the stack first, then the temporary slot.
     /// </summary>
+    /// <paramref name="temporaryCount"/>: how many times the temporary slot
+    /// holds its Annotation (Yae Publishing House, the Yae pass 2026-10-16:
+    /// "Your Edits write their Annotation twice"); 1 otherwise.
     public static IReadOnlyList<YaeAnnotation> All(IReadOnlyList<YaeAnnotation> stack,
-                                                   YaeAnnotation temporary) =>
+                                                   YaeAnnotation temporary,
+                                                   int temporaryCount = 1) =>
         temporary == YaeAnnotation.None
             ? stack
-            : stack.Concat(new[] { temporary }).ToList();
+            : stack.Concat(Enumerable.Repeat(temporary, Math.Max(1, temporaryCount))).ToList();
 
     /// <summary>How many layers of <paramref name="annotation"/>.</summary>
     public static int Count(IReadOnlyList<YaeAnnotation> stack, YaeAnnotation temporary,
-                            YaeAnnotation annotation) =>
-        stack.Count(a => a == annotation) + (temporary == annotation ? 1 : 0);
+                            YaeAnnotation annotation, int temporaryCount = 1) =>
+        stack.Count(a => a == annotation)
+        + (temporary == annotation && temporary != YaeAnnotation.None
+            ? Math.Max(1, temporaryCount) : 0);
 
     /// <summary>
     /// REPRINT, EXACTLY: the replays this play adds. On the card's first
@@ -227,11 +235,13 @@ public static class YaeLayers
 
     /// <summary>
     /// What Publishing a temporary Reprint does to its armed replay: before
-    /// the card's first play this combat the stack now counts it, so it is
-    /// dropped (never counted twice); after, it stays armed.
+    /// the card's first play this combat the stack now counts it, so one is
+    /// dropped (never counted twice); after, it stays armed. A Publish moves
+    /// one layer, so a doubled slot (Yae Publishing House) keeps its other
+    /// replay.
     /// </summary>
     public static int ArmedAfterPublish(YaeAnnotation published, bool playedOnce, int armed) =>
-        published == YaeAnnotation.Reprint && !playedOnce ? 0 : armed;
+        published == YaeAnnotation.Reprint && !playedOnce ? Math.Max(0, armed - 1) : armed;
 
     /// <summary>"Reprint: used": the card carries a Reprint and has no
     /// replay left this combat.</summary>
@@ -296,6 +306,7 @@ public sealed class YaeMasterpiece : CustomEnchantmentModel, ILocalizationProvid
 
     private int[] _published = Array.Empty<int>();
     private YaeAnnotation _temporary;
+    private int _temporaryCount = 1;
     private bool _playedOnce;
     private int _armed;
 
@@ -336,6 +347,11 @@ public sealed class YaeMasterpiece : CustomEnchantmentModel, ILocalizationProvid
         }
     }
 
+    /// <summary>How many times the temporary slot holds its Annotation: 2
+    /// when Yae Publishing House wrote it (the Yae pass, 2026-10-16), else 1;
+    /// 0 with the slot empty. Combat state, never saved.</summary>
+    public int TemporaryCount => _temporary == YaeAnnotation.None ? 0 : _temporaryCount;
+
     /// <summary>Played this combat: the stack's Reprints are inert.</summary>
     public bool PlayedOnce => _playedOnce;
 
@@ -343,11 +359,12 @@ public sealed class YaeMasterpiece : CustomEnchantmentModel, ILocalizationProvid
     public int Armed => _armed;
 
     /// <summary>Every layer, the stack first.</summary>
-    public IReadOnlyList<YaeAnnotation> Layers => YaeLayers.All(Stack, _temporary);
+    public IReadOnlyList<YaeAnnotation> Layers =>
+        YaeLayers.All(Stack, _temporary, _temporaryCount);
 
     /// <summary>How many layers of <paramref name="annotation"/>.</summary>
     public int Count(YaeAnnotation annotation) =>
-        YaeLayers.Count(Stack, _temporary, annotation);
+        YaeLayers.Count(Stack, _temporary, annotation, _temporaryCount);
 
     /// <summary>"Reprint: used this combat."</summary>
     public bool ReprintSpent =>
@@ -356,11 +373,12 @@ public sealed class YaeMasterpiece : CustomEnchantmentModel, ILocalizationProvid
     /// <summary>Set the layers and the Reprint state (a fresh model only).
     /// </summary>
     internal void Set(IEnumerable<YaeAnnotation> stack, YaeAnnotation temporary,
-                      bool playedOnce, int armed)
+                      bool playedOnce, int armed, int temporaryCount = 1)
     {
         AssertMutable();
         _published = stack.Where(a => a != YaeAnnotation.None).Select(a => (int)a).ToArray();
         _temporary = temporary;
+        _temporaryCount = Math.Max(1, temporaryCount);
         _playedOnce = playedOnce;
         _armed = Math.Max(0, armed);
     }
@@ -371,7 +389,7 @@ public sealed class YaeMasterpiece : CustomEnchantmentModel, ILocalizationProvid
     {
         AssertMutable();
         _playedOnce = false;
-        _armed = _temporary == YaeAnnotation.Reprint ? 1 : 0;
+        _armed = _temporary == YaeAnnotation.Reprint ? _temporaryCount : 0;
         Status = EnchantmentStatus.Normal;
     }
 
@@ -383,7 +401,7 @@ public sealed class YaeMasterpiece : CustomEnchantmentModel, ILocalizationProvid
 
     /// <summary>The hover's words.</summary>
     public string SummaryText =>
-        YaeAnnotationText.Summary(Stack, _temporary, ReprintSpent);
+        YaeAnnotationText.Summary(Stack, _temporary, ReprintSpent, _temporaryCount);
 
     /// <summary>The face shows the layers that act when it is played.
     /// </summary>
@@ -757,13 +775,14 @@ public static class YaeEditing
     /// No layer at all leaves the card plain.
     /// </summary>
     public static bool Apply(CardModel card, IEnumerable<YaeAnnotation> stack,
-                             YaeAnnotation temporary, bool playedOnce, int armed)
+                             YaeAnnotation temporary, bool playedOnce, int armed,
+                             int temporaryCount = 1)
     {
         var layers = stack.Where(a => a != YaeAnnotation.None).ToList();
         Clear(card);
         if (layers.Count == 0 && temporary == YaeAnnotation.None) return true;
         var model = (YaeMasterpiece)ModelDb.Enchantment<YaeMasterpiece>().ToMutable();
-        model.Set(layers, temporary, playedOnce, armed);
+        model.Set(layers, temporary, playedOnce, armed, temporaryCount);
         if (!model.CanEnchant(card)) return false;
         CardCmd.Enchant(model, card, 1m);
         return true;
@@ -774,14 +793,21 @@ public static class YaeEditing
     /// slot, replacing what was there; the stack is never touched. A
     /// temporary Reprint arms one fresh replay. A combat card also writes
     /// its deck card's draft, which is what the after-elite Publish reads.
+    /// YAE PUBLISHING HOUSE (the Yae pass, 2026-10-16): "Your Edits write
+    /// their Annotation twice": an Edit by its holder fills the slot with two
+    /// layers (<paramref name="times"/>, <see cref="WriteTimes"/>). Layers
+    /// add up, so Red Ink gives 6, Fox Fire 8, Footnote draws 2, Royalties 2
+    /// Energy, and a Reprint arms two replays. The draft names the
+    /// Annotation, so the after-elite Publish still adds one layer.
     /// </summary>
     public static bool Annotate(CardModel card, YaeAnnotation annotation,
-                                bool recordDraft = true)
+                                bool recordDraft = true, int times = 1)
     {
         if (annotation == YaeAnnotation.None) return false;
         var had = Masterpiece(card);
+        times = Math.Max(1, times);
         if (!Apply(card, Stack(card), annotation, had?.PlayedOnce ?? false,
-                   annotation == YaeAnnotation.Reprint ? 1 : 0))
+                   annotation == YaeAnnotation.Reprint ? times : 0, times))
         {
             return false;
         }
@@ -820,12 +846,44 @@ public static class YaeEditing
         var n = 0;
         foreach (var card in EditTargets(picked, times))
         {
-            if (!Annotate(card, annotation)) continue;
+            if (!Annotate(card, annotation, times: WriteTimes(owner.Creature))) continue;
             YaeShrineLedger.For(owner.Creature).NoteEdit();
             n++;
         }
-        // Serialization pays per Edit (Yae review r6, item 1).
-        await SerializationPower.Pay(owner.Creature, n);
+        // Serialization pays per Edit (Yae review r6, item 1); Proofreader's
+        // Glasses reads the turn's first.
+        await YaeShrine.AfterEdits(choiceContext, owner.Creature, n);
+    }
+
+    /// <summary>
+    /// FOX'S INKWELL (the Yae pass, 2026-10-16): "Edit a card in your hand
+    /// with an Annotation of your choice", one Edit with no card doing it,
+    /// so every card in hand an Edit reaches is a candidate;
+    /// <paramref name="source"/> (the potion) is what the chooser names. An
+    /// Edit like any other: counted, Serialization, Proofreader's Glasses and
+    /// Yae Publishing House read it.
+    /// </summary>
+    public static async Task EditOneFor(PlayerChoiceContext choiceContext, Player owner,
+                                        AbstractModel source, YaeAnnotation annotation)
+    {
+        if (owner.Creature == null || annotation == YaeAnnotation.None) return;
+        if (!PileType.Hand.GetPile(owner).Cards.Any(c => EditReaches(c, null, annotation)))
+        {
+            SayNothing(owner.Creature, NothingToEditKey);
+            return;
+        }
+        var picked = await CardSelectCmd.FromHand(
+            choiceContext, owner, EditPrefs(annotation, 1),
+            c => EditReaches(c, null, annotation),
+            source);
+        var n = 0;
+        foreach (var card in EditTargets(picked, 1))
+        {
+            if (!Annotate(card, annotation, times: WriteTimes(owner.Creature))) continue;
+            YaeShrineLedger.For(owner.Creature).NoteEdit();
+            n++;
+        }
+        await YaeShrine.AfterEdits(choiceContext, owner.Creature, n);
     }
 
     /// <summary>
@@ -848,10 +906,10 @@ public static class YaeEditing
         var n = 0;
         foreach (var card in cards)
         {
-            if (Annotate(card, chosen)) n++;
+            if (Annotate(card, chosen, times: WriteTimes(owner.Creature))) n++;
         }
         for (var i = 0; i < n; i++) YaeShrineLedger.For(owner.Creature).NoteEdit();
-        await SerializationPower.Pay(owner.Creature, n);
+        await YaeShrine.AfterEdits(choiceContext, owner.Creature, n);
     }
 
     /// <summary>
@@ -873,10 +931,23 @@ public static class YaeEditing
         var m = Masterpiece(card);
         if (m == null || m.Temporary == YaeAnnotation.None) return YaeAnnotation.None;
         var moved = m.Temporary;
-        Apply(card, m.Stack.Concat(new[] { moved }), YaeAnnotation.None,
-              m.PlayedOnce, YaeLayers.ArmedAfterPublish(moved, m.PlayedOnce, m.Armed));
+        // One layer moves; a doubled slot (Yae Publishing House) keeps the
+        // other as this combat's.
+        var left = m.TemporaryCount - 1;
+        Apply(card, m.Stack.Concat(new[] { moved }),
+              left > 0 ? moved : YaeAnnotation.None,
+              m.PlayedOnce, YaeLayers.ArmedAfterPublish(moved, m.PlayedOnce, m.Armed),
+              Math.Max(1, left));
         return moved;
     }
+
+    /// <summary>How many times an Edit by <paramref name="yae"/> writes its
+    /// Annotation on a card: 2 while she has Yae Publishing House (the Yae
+    /// pass, 2026-10-16: "Your Edits write their Annotation twice"), else 1.
+    /// A Sakura's Annotations are distinct, so on a Sakura twice is once.
+    /// </summary>
+    public static int WriteTimes(Creature? yae) =>
+        yae != null && yae.GetPowerAmount<YaePublishingHousePower>() > 0 ? 2 : 1;
 
     /// <summary>
     /// The Seven Glamours (2026-10-15): "If this kills an enemy, Publish an

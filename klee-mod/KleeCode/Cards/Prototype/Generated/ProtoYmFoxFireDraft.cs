@@ -48,7 +48,7 @@ public sealed class ProtoYmFoxFireDraft : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Fox Fire Draft"),
-        ("description", "[gold]Edit[/gold] {IfUpgraded:show:every|your newest} [gold]Sakura[/gold]: [gold]Fox Fire[/gold]."),
+        ("description", "[gold]Edit[/gold] {IfUpgraded:show:your 2 newest|your newest} [gold]Sakura[/gold]: [gold]Fox Fire[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -71,6 +71,6 @@ public sealed class ProtoYmFoxFireDraft : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars["YmAmount"].UpgradeValueBy(2m);
+        DynamicVars["YmAmount"].UpgradeValueBy(1m);
     }
 }

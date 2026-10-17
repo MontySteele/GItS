@@ -87,6 +87,14 @@ bends one of the kit's rules.
 
 With both cards in, `YaeDustyTomeGuardPatch` and its BACKLOG line are deleted.
 
+**The starter's Annotations carry over.** [USER] (2026-10-16): "let's make
+it so that any existing annotations on the starter card carry over to the
+Ancient version. I can already see that being a complaint." The base game's
+Archaic Tooth already does this: it makes the Ancient, upgrades it if the
+starter was upgraded, and enchants it with a copy of the starter's
+enchantment, so every Annotation Published on Yakan Evocation stays on
+Yakan Evocation: Sesshou Sakura (`YaeAncientsRelicsTests` pins it).
+
 ## 3. Her relics (the base shape: 1 Common, 2 Uncommon, 3 Rare, 1 Shop)
 
 | Rarity | Name | Text | Lane | Sized against |

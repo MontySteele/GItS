@@ -45,14 +45,14 @@ public sealed class ProtoYmFoxTrick : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Fox Trick"),
-        ("description", "Apply {PowerAmount:diff()} [gold]Weak[/gold] to an enemy. Draw 1 card."),
+        ("description", "Apply {PowerAmount:diff()} [gold]Weak[/gold] to an enemy. Draw 2 cards."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new DynamicVar("PowerAmount", 2m),
-            new CardsVar(1)
+            new CardsVar(2)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

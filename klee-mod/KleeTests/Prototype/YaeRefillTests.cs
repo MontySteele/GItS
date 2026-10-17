@@ -252,19 +252,16 @@ public class YaeRefillTests : IDisposable
     // ---- Rewrite --------------------------------------------------------------------------------
 
     [Fact]
-    public void Rewrite_discards_up_to_2_draws_as_many_then_edits_red_ink()
+    public void Rewrite_draws_2_discards_1_then_edits_red_ink()
     {
-        var calls = Il.CallSequence(typeof(YaeCards).GetMethod(nameof(YaeCards.Rewrite))!).ToList();
-        var choose = calls.FindIndex(c => c.Contains("FromHandForDiscard"));
-        var swap = calls.FindIndex(c => c.Contains("DiscardAndDraw"));
-        var edit = calls.FindIndex(c => c.Contains("YaeEditing.Edit"));
-        Assert.True(choose >= 0 && swap > choose && edit > swap, string.Join(", ", calls));
+        // The Yae pass (2026-10-16, review/active/yae-ancients-relics-2026-10-16.md
+        // sec.1): "Draw 2 cards. Discard 1 card. Edit a card in your hand: Red
+        // Ink." (was discard up to 2, draw that many). The `rewrite` verb has
+        // no row now; YaeAncientsRelicsTests pins the card's order.
         var card = new ProtoYmRewrite();
-        Assert.Equal(2, Var(card, "YmAmount"));
-        Upgrade(card);
-        Assert.Equal(3, Var(card, "YmAmount"));
-        Assert.Contains(OnPlay<ProtoYmRewrite>(), c => c.Contains(nameof(YaeCards.Rewrite)));
-        Assert.Equal("Choose up to {Amount} cards to discard.", YaeCards.RewritePromptText);
+        Assert.Equal(2, Var(card, "Cards"));
+        Assert.DoesNotContain(OnPlay<ProtoYmRewrite>(), c => c.Contains(nameof(YaeCards.Rewrite)));
+        Assert.Contains(OnPlay<ProtoYmRewrite>(), c => c.Contains("FromHandForDiscard"));
     }
 
     // ---- Dawn Prayer and Kitsune's Blessing ------------------------------------------------------

@@ -539,6 +539,10 @@ internal static class KleePowerIcons
         // Lure's badge, the other aim.
         HuntingGazePower => KleePck.Path("yae/powers/foxfire_lure.png")
             ?? KleePck.Path("klee/powers/detonation_vuln.png"),
+        // The Yae pass (2026-10-16): Yae Publishing House, her Dusty Tome
+        // Ancient, borrows Serialization's badge (the Edit's) until its art.
+        YaePublishingHousePower => KleePck.Path("yae/powers/serialization.png")
+            ?? KleePck.Path("klee/powers/passion_overload.png"),
         UnwaveringBannerPower =>
             KleePck.Path("varka/powers/stormward_stance.png"),
         CycleOfSeasonsPower => KleePck.Path("varka/powers/boreas_unbound.png"),

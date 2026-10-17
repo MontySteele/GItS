@@ -164,7 +164,6 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 ## Parked: start only when the named trigger fires
 
 - `EB-70` the starter-offer retune (`EB-27p`); wakes when a kit's design sweep reaches the Wings / Little Hexenzirkul class (R134).
-- Yae's Ancient gap: design her two Ancient cards (one Darv's Dusty Tome adds, one Orobas's Archaic Tooth makes from a starter, as Varka's do) in the next Yae card pass. Until then a stopgap guard (`Patches/YaeDustyTomeGuardPatch.cs`: Darv offers her no Dusty Tome while her pool holds no Ancient) stands against LAW's "real content" line, ruled by [USER] 2026-10-13: "(a). Yeah, I think that's fine." Delete the guard in the commit that lands her two Ancients, with a `RosterAncientCards.Yae` ledger and a `lint_ancient_coverage.py` row.
 - `EB-80` Kokomi prevention-on-curve review; wakes if a Kokomi playtest shows she needs more warding.
 - `EB-651` a doubled `The other side` heading seen once and not reproduced; wakes on a sighting carrying the page sha.
 - `EB-12` `bridge_unreachable` with the game alive, seen once; wakes on a second observation (`hangwatch` now classifies it).
@@ -174,6 +173,7 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - Yae pool expansion: several Tenko cards that carry their own scaling (paper pick 1 (b): +1 a strike per Tenko; (c): a bonus when a strike reacts), per [USER] 2026-10-13.
 - Before the Workshop release: check The First Exam and A Song on the Wind against Varka's in-game character story text (`review/active/klee-varka-story-chains-2026-10-14.md`, "Exam lore"); move both to his Knight of Boreas years if it differs.
 - Yae's Sakura display (`review/active/yae-pool-to-78-2026-10-15.md`, pick 3 (a), ruled 2026-10-15): a row of slots beside her, one per shrine slot with empty slots shown; per Sakura its kind by colour and icon, Level as the big number, turns as pips (a number past three, an infinity mark under Eternity), a mark per Annotation; the oldest outlined; a planting card's hover previews "refreshes / replaces this Sakura"; hover on a slot gives the one-line rules. Today the badges' tooltips are the display.
+- Rewrite (Yae) has no upgrade: the Yae pass (2026-10-16) gave it a new face and named none, and the Prototype default withholds one because it already draws. The row says `no_upgrade:` until a card pass names one.
 - Yae's six pool-to-78 Powers and Hunting Gaze borrow her nearest badges (`KleePowerIcons.cs`): an art pass for them.
 - The seat page reads one Annotation per Sakura (`understudy/blindplay_board.yae_shrine`, `annotation`), but since the pool to 78 (pick 2 (a)) a Sakura may carry several: read the list off the badge sentence (it names each).
 - Kokomi relic check (2026-10-16): Sango Pearl does not show that its discount is spent; Ocean-Hued Clam's Mend prints no page line; Everlasting Moonglow's skipped return at a full hand prints nothing.

@@ -266,6 +266,9 @@ KIND_FIELDS = {
     "rewrite": ("amount",),
     "level_newest": ("amount",),
     "bless_highest": ("amount",),
+    # The Yae pass (2026-10-16): Evergreen Charm's "Your oldest Sakura
+    # lasts 2 more turns" (Kitsune's Blessing's "lasts N more turns").
+    "extend_oldest": ("amount",),
 }
 KINDS = frozenset(KIND_FIELDS)
 KIND_TARGETS = {
@@ -1695,6 +1698,11 @@ def op_yae(state, fx: dict, card) -> None:
             led.sakura[-1].level += fx["amount"]
             state.emit("yae_level", reason="dawn_prayer",
                        levels=[s.level for s in led.sakura])
+    elif kind == "extend_oldest":
+        # The Yae pass (2026-10-16): "Your oldest Sakura lasts 2 more turns."
+        # C# twin: `YaeShrineLedger.ExtendOldest`.
+        if led.sakura:
+            led.sakura[0].turns_left += fx["amount"]
     elif kind == "bless_highest":
         s = highest(led)
         if s is not None:

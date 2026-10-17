@@ -120,13 +120,15 @@ public class PoolCountTests
     /// YAE MIKO: the pool to 78 (review/active/yae-pool-to-78-2026-10-15.md,
     /// ruled 2026-10-15) took her staged 43 (15 / 18 / 10) to 78 at
     /// 20 / 38 / 20 with thirty-five cards (5 / 20 / 10), Sakura Grove and
-    /// Fox's Mooncall swapping rarities. No Ancients or co-op tier yet.
+    /// Fox's Mooncall swapping rarities. Her two Ancients since the Yae pass
+    /// (2026-10-16), which also swapped Editorial Priority and Mischievous
+    /// Teasing; no co-op tier yet.
     /// </summary>
     [Fact]
-    public void Yae_is_78_and_20_38_20_with_no_ancients_yet()
+    public void Yae_is_78_and_20_38_20_with_her_two_ancients()
     {
         AssertPool("YaeRoster", "Pool", 20, 38, 20);
-        Assert.DoesNotContain(typeof(global::KleeMod.RosterAncientCards).GetProperties(),
+        Assert.Contains(typeof(global::KleeMod.RosterAncientCards).GetProperties(),
             p => p.Name == "Yae");
     }
 

@@ -94,31 +94,28 @@ def test_a_plant_with_no_red_ink_leaves_a_refreshed_annotation_alone():
 # 3, 4. Evergreen Charm (Deadline was cut by the dedupe, 2026-10-16) --------
 
 def test_evergreen_charm_is_7_and_10_and_its_red_ink_sentence_is_gone():
-    # The pool to 78, pick 2 (a): Annotations coexist on a Sakura, so the
-    # sentence "It keeps its Red Ink." went and the +3 stays by the rule.
+    # The Yae pass (2026-10-16): "Your oldest Sakura lasts 2 more turns"
+    # (was Edit it: Deadline Extension); the Block is still 7 [10].
     c = _card("evergreen_charm")
     assert _block(c) == 7
     assert "Red Ink" not in _row("proto_ym_evergreen_charm")["description"]
-    assert "keeps" not in _row("proto_ym_evergreen_charm")["effects"][1]
     assert _block(loader.get_card("proto_ym_evergreen_charm+")) == 10
     st = _state()
     Y.plant(st, 1)
     s = Y.ledger(st.player).sakura[0]
     s.add(Y.RED_INK)
-    plain = Y.act_size(st, s)
     _play(st, c)
-    assert s.annotations == [Y.RED_INK, Y.DEADLINE]
-    assert Y.act_size(st, s) == plain                # the +3 stays
-    Y.edit_sakura(st, "oldest", 1, Y.FOX_FIRE)
-    assert s.annotations == [Y.RED_INK, Y.DEADLINE, Y.FOX_FIRE]
+    assert s.annotations == [Y.RED_INK]              # it Edits nothing now
+    assert s.turns_left == Y.SAKURA_TURNS + 2
 
 
-def test_evergreen_charm_on_a_plain_sakura_writes_deadline_alone():
+def test_evergreen_charm_on_a_plain_sakura_extends_it_alone():
     st = _state()
-    Y.plant(st, 1)
-    s = Y.ledger(st.player).sakura[0]
+    Y.plant(st, 2)
+    first, second = Y.ledger(st.player).sakura
     _play(st, _card("evergreen_charm"))
-    assert s.annotations == [Y.DEADLINE]
+    assert first.annotations == [] and first.turns_left == Y.SAKURA_TURNS + 2
+    assert second.turns_left == Y.SAKURA_TURNS
 
 
 # 5. The Seven Glamours ------------------------------------------------------
@@ -216,10 +213,11 @@ def test_margin_note_with_no_card_says_so():
     assert any(e.get("what") == "hand" for e in _events(st, "yae_edit_nothing"))
 
 
-def test_evergreen_charm_with_no_sakura_says_so():
+def test_evergreen_charm_with_no_sakura_is_its_block():
+    # The Yae pass: it no longer Edits, so it has nothing to say.
     st = _state()
     _play(st, _card("evergreen_charm"))
-    assert any(e.get("what") == "sakura" for e in _events(st, "yae_edit_nothing"))
+    assert st.player.block == 7
 
 
 # 7. Foxfire Lure --------------------------------------------------------------
