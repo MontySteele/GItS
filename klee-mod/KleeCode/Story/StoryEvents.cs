@@ -291,7 +291,15 @@ public abstract class StoryEventModel : EventModel
                 UpgradeRandom(owner, effect.Amount, _ => true);
                 break;
             case StoryEffectKind.ChooseFromPoolToDeck:
-                await ChooseFromPool(owner, option, effect);
+                await ChooseFromPool(owner, option, effect,
+                    Story?.ChoicePool?.Invoke() ?? Array.Empty<CardModel>());
+                break;
+            case StoryEffectKind.ChooseRareCardToDeck:
+                await ChooseFromPool(owner, option, effect, RareOffer(owner));
+                break;
+            case StoryEffectKind.LoseMaxHp:
+                await CreatureCmd.LoseMaxHp(new ThrowingPlayerChoiceContext(), owner.Creature,
+                    effect.Amount, isFromCard: false);
                 break;
             case StoryEffectKind.Nothing:
                 break;
@@ -388,14 +396,15 @@ public abstract class StoryEventModel : EventModel
 
     /// <summary>
     /// "Choose 1 of 3 random Knights to add to your deck": <c>Amount</c>
-    /// distinct cards from the table's <see cref="CharacterStory.ChoicePool"/>
-    /// (Knights' Roll Call's draw, <c>VarkaRules.DrawDistinct</c>'s shape, on
-    /// the event's Rng), picked on the game's add-to-deck grid (Brain Leech's
+    /// distinct cards from <paramref name="pool"/> (the table's
+    /// <see cref="CharacterStory.ChoicePool"/>, or her Rare offer) by Knights'
+    /// Roll Call's draw (<c>VarkaRules.DrawDistinct</c>'s shape, on the
+    /// event's Rng), picked on the game's add-to-deck grid (Brain Leech's
     /// Share Knowledge). The screen's prompt is the option's own line.
     /// </summary>
-    private async Task ChooseFromPool(Player owner, StoryOption option, StoryEffect effect)
+    private async Task ChooseFromPool(
+        Player owner, StoryOption option, StoryEffect effect, IReadOnlyList<CardModel> pool)
     {
-        var pool = Story?.ChoicePool?.Invoke() ?? Array.Empty<CardModel>();
         var offered = StoryRules.PickRandom(pool, effect.Amount, n => Rng.NextInt(n))
             .Select(c => new CardCreationResult(owner.RunState.CreateCard(c, owner)))
             .ToList();
@@ -407,6 +416,15 @@ public abstract class StoryEventModel : EventModel
         };
         await SelectCardsToAddToDeckFromGrid(offered, prefs);
     }
+
+    /// <summary>"Choose 1 of 3 random Rare cards": the Rare cards of her
+    /// offer, the set her card rewards roll from
+    /// (<c>CardPoolModel.GetUnlockedCards</c>, in its own fixed order).</summary>
+    private static IReadOnlyList<CardModel> RareOffer(Player owner) =>
+        owner.Character.CardPool
+            .GetUnlockedCards(owner.UnlockState, owner.RunState.CardMultiplayerConstraint)
+            .Where(c => c.Rarity == CardRarity.Rare)
+            .ToList();
 
     public static bool IsRemovableCurse(CardModel card) =>
         card.Type == CardType.Curse && card.IsRemovable;

@@ -55,12 +55,15 @@ public sealed class KokomiCardPool : CardPoolModel
     /// stage 4, 2026-10-01): every `proto_` row she owns, then her Ancients
     /// (a character whose pool holds no Ancient softlocks Darv's Dusty Tome;
     /// <c>tools/lint_ancient_coverage.py</c>), then the never-offered members
-    /// (<see cref="KokomiOffPoolCards"/>: the kit's hand-written tokens).
+    /// (<see cref="KokomiOffPoolCards"/>: the kit's hand-written tokens), then
+    /// her story Curse.
     /// </summary>
     protected override CardModel[] GenerateAllCards() =>
         PrototypeCards.For("kokomi")
             .Concat(RosterAncientCards.Kokomi)
             .Concat(KokomiOffPoolCards.All)
+            // Her story Curse (Public Address), which only her story events give.
+            .Append(ModelDb.Card<Cards.PublicAddress>())
             .Distinct()
             .ToArray();
 }

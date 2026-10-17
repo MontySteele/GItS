@@ -22,13 +22,16 @@ public static class StoryLoc
         foreach (var story in StoryRegistry.All)
         {
             var own = StoryRegistry.EntryOf(story.Character);
-            var l = story.Lines;
-            rows[StoryLines.Key(own, StoryLines.BossEntry)] = l.BossEntry;
-            rows[StoryLines.Key(own, StoryLines.LowHp)] = l.LowHp;
-            rows[StoryLines.Key(own, StoryLines.Signature)] = l.Signature;
-            rows[StoryLines.Key(own, StoryLines.BossKill)] = l.BossKill;
-            rows[StoryLines.Key(own, StoryLines.RunLoss)] = l.RunLoss;
-            rows[StoryLines.Key(own, StoryLines.RunWin)] = l.RunWin;
+            // No combat lines (Kokomi's, an open pick): no rows.
+            if (story.Lines is CombatLines l)
+            {
+                rows[StoryLines.Key(own, StoryLines.BossEntry)] = l.BossEntry;
+                rows[StoryLines.Key(own, StoryLines.LowHp)] = l.LowHp;
+                rows[StoryLines.Key(own, StoryLines.Signature)] = l.Signature;
+                rows[StoryLines.Key(own, StoryLines.BossKill)] = l.BossKill;
+                rows[StoryLines.Key(own, StoryLines.RunLoss)] = l.RunLoss;
+                rows[StoryLines.Key(own, StoryLines.RunWin)] = l.RunWin;
+            }
             foreach (var p in story.Pairs)
             {
                 var partner = StoryRegistry.EntryOf(p.Partner);

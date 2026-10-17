@@ -336,7 +336,7 @@ public class VarkaStoryTests
         Assert.Null(StoryRules.EventFor(solo, 3, 7UL));
         Assert.Equal(new[] { 0, 1, 2, 1, 2, 0, 0, 1 }, V.Events.Select(e => e.ActIndex));
         Assert.Null(StoryRules.EventFor(
-            new (Type, IReadOnlyList<StoryRecord>)[] { (typeof(Kokomi), Nothing), (typeof(Yae), Nothing) }, 0, 7UL));
+            new (Type, IReadOnlyList<StoryRecord>)[] { (typeof(MegaCrit.Sts2.Core.Models.Characters.Ironclad), Nothing), (typeof(Yae), Nothing) }, 0, 7UL));
     }
 
     [Fact]
@@ -490,7 +490,7 @@ public class VarkaStoryTests
         Assert.Same(V, s.Story);
         Assert.Null(s.Pair);
         Assert.Single(StoryRules.BossEntryPlan(new[] { VarkaType, typeof(MegaCrit.Sts2.Core.Models.Characters.Ironclad) }));
-        Assert.Empty(StoryRules.BossEntryPlan(new[] { typeof(Kokomi), typeof(Yae) }));
+        Assert.Empty(StoryRules.BossEntryPlan(new[] { typeof(Yae), typeof(MegaCrit.Sts2.Core.Models.Characters.Ironclad) }));
     }
 
     [Theory]

@@ -12,12 +12,13 @@ namespace KleeMod.Story;
 /// </summary>
 public static class StoryRegistry
 {
-    /// <summary>The tables. Kokomi and Yae add theirs here.</summary>
+    /// <summary>The tables. Yae adds hers here.</summary>
     public static readonly IReadOnlyList<CharacterStory> All = new[]
     {
         KleeStory.Table,
         VarkaStory.Table,
         FurinaStory.Table,
+        KokomiStory.Table,
     };
 
     /// <summary>The table for this character, or null.</summary>
@@ -309,8 +310,10 @@ public static class StoryRules
                 spoken.Add(pair.OwnerSeat);
                 spoken.Add(pair.PartnerSeat);
             }
-            else if (own != null)
+            else if (own?.Lines != null)
             {
+                // A table with no combat lines (Kokomi's, while her lines
+                // are an open pick) has no solo line to speak.
                 plan.Add(new BossEntrySpeech(own, i, null, -1));
                 spoken.Add(i);
             }

@@ -145,7 +145,7 @@ public static class StoryLines
     /// <summary>The signature line over this speaker, once a combat.</summary>
     internal static void SaySignature(Creature speaker, CharacterStory story)
     {
-        if (speaker.CombatState == null) return;
+        if (speaker.CombatState == null || story.Lines == null) return;
         if (!LatchFor(speaker.CombatState).TryTake(speaker, Signature)) return;
         Say(speaker, Key(StoryRegistry.EntryOf(story.Character), Signature));
     }
@@ -238,7 +238,7 @@ public sealed class StoryCombatHooks : AbstractModel
         {
             if (delta >= 0m || creature.CombatState == null) return Task.CompletedTask;
             var story = StoryRegistry.For(creature.Player?.Character);
-            if (story == null) return Task.CompletedTask;
+            if (story?.Lines == null) return Task.CompletedTask;
             var after = creature.CurrentHp;
             var before = after + (int)Math.Ceiling(-delta);
             if (!StoryRules.CrossedBelowThird(before, after, creature.MaxHp)) return Task.CompletedTask;
@@ -280,7 +280,7 @@ public sealed class StoryCombatHooks : AbstractModel
             foreach (var player in room.CombatState.Players)
             {
                 var story = StoryRegistry.For(player.Character);
-                if (story == null) continue;
+                if (story?.Lines == null) continue;
                 StoryLines.Say(player.Creature,
                     StoryLines.Key(StoryRegistry.EntryOf(story.Character), StoryLines.BossKill));
             }
@@ -328,7 +328,7 @@ internal static class NGameOverScreen_Quote_Story_Patch
         {
             if (PlayerField?.GetValue(__instance) is not Player player) return;
             var story = StoryRegistry.For(player.Character);
-            if (story == null) return;
+            if (story?.Lines == null) return;
             if (HistoryField?.GetValue(__instance) is not RunHistory history) return;
             if (QuoteField?.GetValue(__instance) is not RichTextLabel quote) return;
             var line = history.Win ? StoryLines.RunWin : StoryLines.RunLoss;

@@ -14,7 +14,7 @@ namespace KleeMod.Story;
 /// and every option's effect is a value in a <see cref="CharacterStory"/>;
 /// the machinery (<see cref="StoryAncients"/>, <see cref="StoryEventModel"/>,
 /// <see cref="StoryLines"/>, <see cref="StoryLoc"/>) reads the table and names
-/// no character. Kokomi and Yae get their lines (Varka and Furina have theirs, VarkaStory.cs and FurinaStory.cs) by adding a table
+/// no character. Yae gets her lines (Varka, Furina and Kokomi have theirs, VarkaStory.cs, FurinaStory.cs and KokomiStory.cs) by adding a table
 /// to <see cref="StoryRegistry.All"/> and, for an event, a one-line
 /// <see cref="StoryEventModel"/> subclass (the game's ModelDb needs one type
 /// per event).
@@ -45,8 +45,10 @@ public sealed class CharacterStory
     /// <summary>One exchange per Ancient, on her first visit to it.</summary>
     public required IReadOnlyList<AncientExchange> Ancients { get; init; }
 
-    /// <summary>Speech bubbles in combat, and the run's last word.</summary>
-    public required CombatLines Lines { get; init; }
+    /// <summary>Speech bubbles in combat, and the run's last word. Null: she
+    /// says nothing in a fight and the run's last word is the game's (Kokomi,
+    /// while her lines are an open pick).</summary>
+    public required CombatLines? Lines { get; init; }
 
     /// <summary>A two-character exchange at each boss, partner first.</summary>
     public required IReadOnlyList<PairExchange> Pairs { get; init; }
@@ -169,6 +171,16 @@ public enum StoryEffectKind
 
     /// <summary>Upgrade a card of the player's choice.</summary>
     UpgradeChosenCard,
+
+    // ---- Kokomi's story (review/active/kokomi-story-2026-10-16.md)
+
+    /// <summary>Lose <c>Amount</c> Max HP (The Serpent's Bones).</summary>
+    LoseMaxHp,
+
+    /// <summary>Choose 1 of <c>Amount</c> distinct random Rare cards from the
+    /// owner's card offer (her pool's unlocked cards, what her rewards roll
+    /// from) and add it to the deck (The Other Commander).</summary>
+    ChooseRareCardToDeck,
 }
 
 /// <summary>One option's effect.</summary>

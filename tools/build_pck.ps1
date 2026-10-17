@@ -1373,7 +1373,7 @@ if (-not (Test-Path $keywordSrc)) {
 # game's own finale (character VFX barrage + Architect's counter).
 # Klee and Varka: dialogue cleanup, review/active/klee-varka-dialogue-review-2026-10-13.md.
 # Yae Miko (2026-10-13): placeholder lines with her prototype; outside that pass.
-# Furina and Kokomi remain outside that pass.
+# Furina remains outside that pass. Kokomi's (2026-10-16): review/active/kokomi-story-2026-10-16.md, pick 3 (a).
 [IO.File]::WriteAllText((Join-Path $locDir 'ancients.json'), @'
 {
   "THE_ARCHITECT.talk.KLEEMOD-KLEE.0-0r.ancient": "You have climbed far, little spark. Show me what you carried up my Spire.",
@@ -1382,9 +1382,9 @@ if (-not (Test-Path $keywordSrc)) {
   "THE_ARCHITECT.talk.KLEEMOD-FURINA.0-0r.ancient": "The curtain falls at last, Regina of All Waters. Was it a performance, or was it real?",
   "THE_ARCHITECT.talk.KLEEMOD-FURINA.0-0r.next": "Respond",
   "THE_ARCHITECT.talk.KLEEMOD-FURINA.0-1r.char": "Both. It was always both. Now - the people rejoice, and their Regina takes her bow.",
-  "THE_ARCHITECT.talk.KLEEMOD-KOKOMI.0-0r.ancient": "Priestess. You spent no blood on my stairs, only paper and patience. Tell me what that bought you.",
+  "THE_ARCHITECT.talk.KLEEMOD-KOKOMI.0-0r.ancient": "Priestess. You could have stayed on your island. Why climb so far from the people who need you?",
   "THE_ARCHITECT.talk.KLEEMOD-KOKOMI.0-0r.next": "Respond",
-  "THE_ARCHITECT.talk.KLEEMOD-KOKOMI.0-1r.char": "Every plan I burned on the way up. Read them, and you will find the last one already written.",
+  "THE_ARCHITECT.talk.KLEEMOD-KOKOMI.0-1r.char": "Because I couldn't be sure this place would never reach them. I'd rather find out myself than wait at home.",
   "THE_ARCHITECT.talk.KLEEMOD-VARKA.0-0r.ancient": "Grand Master. You have brought your people far. Will you turn back now?",
   "THE_ARCHITECT.talk.KLEEMOD-VARKA.0-0r.next": "Respond",
   "THE_ARCHITECT.talk.KLEEMOD-VARKA.0-1r.char": "After all those stairs? Come on, let's finish this. My people are waiting.",
