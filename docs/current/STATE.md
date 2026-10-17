@@ -108,6 +108,11 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
   `main` directly (`docs/current/operations/stage-gate.md`, 2026-10-13).
 - **Records:** `review/records/klee-suite-4-2026-10-08.md` and
   `review/records/klee-user-run-2026-10-11.md`.
+- **Promoted 2026-10-16, the cleanup** (`review/records/klee-suite-6-2026-10-16.md`,
+  [USER]: "agreed on promotion! (a)"): Lizard-Tail Gunpowder draws 1, Taste
+  Test exhausts in place of its Confiscated, Exquisite Compound grows Bombs
+  7 [10]. Suite 6: mean 41.0, two runs won. Exquisite Compound is still not
+  taken (0 of 7) and is first on her next card pass.
 - **Visuals** (`review/active/klee-visual-paper-2026-10-12.md`): rendered
   from the official model, which never leaves the scratchpad
   (`tools/klee_render`, `tools/klee_rig`). Stance A in combat, stance B at
