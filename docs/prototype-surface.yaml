@@ -5121,8 +5121,10 @@
 - {id: proto_ym_saiguus_lesson, name: "Saiguu's Lesson", character: yae,
    authored_by: [claude],
    # Ruled 2026-10-15: the upgrade gains Innate (not a cost cut).
+   # Yae round 8 (2026-10-17, lane 3): "a striking Sakura", Narukami
+   # Judgment's words; the code never asks a Kitsune Sakura (hygiene).
    cost: 1, type: power, rarity: uncommon,
-   description: "Whenever you apply [gold]Weak[/gold] to an enemy, a [gold]Sakura[/gold] strikes it.",
+   description: "Whenever you apply [gold]Weak[/gold] to an enemy, a striking [gold]Sakura[/gold] strikes it.",
    effects: [{op: apply_power, power: ym_saiguus_lesson, amount: 1, target: self}],
    upgrade: {innate: true}}
 

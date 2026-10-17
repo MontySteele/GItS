@@ -45,7 +45,7 @@ public sealed class ProtoYmSaiguusLesson : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Saiguu's Lesson"),
-        ("description", "Whenever you apply [gold]Weak[/gold] to an enemy, a [gold]Sakura[/gold] strikes it."),
+        ("description", "Whenever you apply [gold]Weak[/gold] to an enemy, a striking [gold]Sakura[/gold] strikes it."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

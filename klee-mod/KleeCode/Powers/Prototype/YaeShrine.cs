@@ -513,6 +513,9 @@ public static class YaeShrine
         if (yae == null || !Live(yae) || yae.CombatState == null) return snapshot;
         snapshot["live"] = true;
         snapshot["edits_this_combat"] = Edits(yae);
+        // Yae round 10 (lane 1): how many may stand, Torii Ward's "full"
+        // (Channeling and Fox Ofuda both), so the page's count is the game's.
+        snapshot["max_sakura"] = MaxSakura(yae);
         // The pool to 78, pick 2 (a): a Sakura carries several Annotations,
         // and the page lists them in the order applied (the badge sentence
         // keeps its fixed-order flags, which an older page still reads).
@@ -1116,7 +1119,7 @@ public static class YaeShrine
 /// THE LIVE TENKO CLAUSE. A Tenko card's face carries
 /// <c>{InCombat:{YaeTenko}|}</c> right after "Tenko". In combat it says
 /// what the Tenko would do now, summed by kind over the Sakura standing
-/// (review r3): "Tenko (8 damage, 4 to each enemy, 5 Block)", a kind with
+/// (review r3): "Tenko (Sakura: 8 damage, 4 to each enemy, 5 Block)", a kind with
 /// none standing left out; with none at all "Tenko (no Sakura)". Empty off
 /// a combat, on a canonical card, and for anyone but a live Yae. The
 /// Tenko's own job only: before Edict and Fox Fire. Display only. Sim twin:
@@ -1129,6 +1132,11 @@ public static class YaeShrineFace
 
     /// <summary>The clause with no Sakura standing.</summary>
     public const string NoSakura = " (no Sakura)";
+
+    /// <summary>Yae round 8 (2026-10-17, lane 2): the clause names whose
+    /// numbers they are. "Deal 13 damage. Tenko (13 damage)" on Thunder Rite
+    /// read as the card's own damage.</summary>
+    public const string TenkoPrefix = "Sakura: ";
 
     /// <summary>A Tenko card's live clause.</summary>
     public static string TenkoLine(CardModel? card) =>
@@ -1152,7 +1160,7 @@ public static class YaeShrineFace
             .Sum(s => YaeShrineLedger.ActSize(s.Kind, s.Level, s.Annotations));
 
     /// <summary>The clause for each kind's sum, in kind order, zeros left
-    /// out: " (8 damage, 4 to each enemy, 5 Block)"; all zero is the "no
+    /// out: " (Sakura: 8 damage, 4 to each enemy, 5 Block)"; all zero is the "no
     /// Sakura" words. PURE.</summary>
     public static string TenkoWords(int damage, int toEach = 0, int block = 0)
     {
@@ -1160,7 +1168,7 @@ public static class YaeShrineFace
         if (damage > 0) parts.Add(Amount(YaeSakuraKind.Thunder, N(damage)));
         if (toEach > 0) parts.Add(Amount(YaeSakuraKind.Foxfire, N(toEach)));
         if (block > 0) parts.Add(Amount(YaeSakuraKind.Kitsune, N(block)));
-        return parts.Count == 0 ? NoSakura : $" ({string.Join(", ", parts)})";
+        return parts.Count == 0 ? NoSakura : $" ({TenkoPrefix}{string.Join(", ", parts)})";
     }
 
     private static string N(int n) =>
@@ -1372,6 +1380,8 @@ public static class YaeCards
         // each half. One that Edited a Sakura says nothing about the hand.
         var hand = handIfUpgraded && card.IsUpgraded;
         var edited = YaeShrineLedger.For(yae).EditSakura(end, Var(card, "YmAmount"), annotation);
+        // Yae round 8 (lane 3): the seat page names what the Edit reached.
+        YaeEditing.NoteSakuraEdited(card.Title, edited, annotation);
         await YaeShrine.AfterEdits(choiceContext, yae, edited);
         if (edited == 0 && !hand)
             YaeEditing.SayNothing(yae, YaeEditing.NoSakuraToEditKey);

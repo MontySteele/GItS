@@ -43,9 +43,9 @@ public class YaeReviewR1Tests : IDisposable
     public void The_tenko_clause_names_each_kinds_sum()
     {
         // Review r3: one plain Tenko; each kind's sum in its own words.
-        Assert.Equal(" (12 damage)", YaeShrineFace.TenkoWords(12));
-        Assert.Equal(" (5 damage, 2 to each enemy, 5 Block)", YaeShrineFace.TenkoWords(5, 2, 5));
-        Assert.Equal(" (5 Block)", YaeShrineFace.TenkoWords(0, 0, 5));
+        Assert.Equal(" (Sakura: 12 damage)", YaeShrineFace.TenkoWords(12));
+        Assert.Equal(" (Sakura: 5 damage, 2 to each enemy, 5 Block)", YaeShrineFace.TenkoWords(5, 2, 5));
+        Assert.Equal(" (Sakura: 5 Block)", YaeShrineFace.TenkoWords(0, 0, 5));
         Assert.Equal(" (no Sakura)", YaeShrineFace.TenkoWords(0));
     }
     [Fact]

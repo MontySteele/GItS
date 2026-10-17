@@ -526,11 +526,14 @@ def act_size(state, s: Sakura) -> int:
 
 #: THE LIVE TENKO CLAUSE (C# twin `YaeShrineFace`). In combat a Tenko card
 #: says what its Tenko would do now, summed by kind over the Sakura
-#: standing: "Tenko (8 damage, 4 to each enemy, 5 Block)"; with none
+#: standing: "Tenko (Sakura: 8 damage, 4 to each enemy, 5 Block)"; with none
 #: standing "Tenko (no Sakura)". Before Edict and Fox Fire.
 TENKO_FACE = {THUNDER: "{n} damage", FOXFIRE: "{n} to each enemy",
               KITSUNE: "{n} Block"}
 NO_SAKURA = " (no Sakura)"
+#: Yae round 8 (2026-10-17, lane 2): whose numbers they are (C#
+#: `YaeShrineFace.TenkoPrefix`).
+TENKO_PREFIX = "Sakura: "
 
 
 def tenko_totals(state) -> dict:
@@ -547,7 +550,7 @@ def tenko_words(totals: dict) -> str:
     nothing standing the "no Sakura" words. PURE."""
     parts = [TENKO_FACE[k].format(n=totals.get(k, 0)) for k in SAKURA_KINDS
              if totals.get(k, 0) > 0]
-    return f" ({', '.join(parts)})" if parts else NO_SAKURA
+    return f" ({TENKO_PREFIX}{', '.join(parts)})" if parts else NO_SAKURA
 
 
 def tenko_line(state) -> str:

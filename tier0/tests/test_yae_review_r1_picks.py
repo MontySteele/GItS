@@ -136,7 +136,7 @@ def test_levels_go_past_three():
         _play(st, _ym("narukami_ray"))           # Rooted Shrine's until cut
     assert _led(st).sakura[0].level == 5
     assert Y.tenko_totals(st)[Y.THUNDER] == 2 + 5
-    assert Y.tenko_line(st) == " (7 damage)"
+    assert Y.tenko_line(st) == " (Sakura: 7 damage)"
 
 
 def test_mooncall_copies_stack():

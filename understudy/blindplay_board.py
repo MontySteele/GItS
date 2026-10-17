@@ -961,6 +961,11 @@ _LURE_NAME = "Foxfire Lure"
 #: have 2 more Sakura", 2 per copy; `YaeShrine.MaxSakura`, 2026-10-14).
 YAE_SAKURA_CAP = 3
 _CHANNELING_NAME = "Sakura Channeling"
+#: Yae round 10 (2026-10-17, lane 1): Fox Ofuda, "You can have 1 more
+#: Sakura" (`Relics.FoxOfuda.Extra`), raises the same cap; the count line
+#: left it out. The wire's `max_sakura` is the game's own number.
+_FOX_OFUDA_NAME = "Fox Ofuda"
+FOX_OFUDA_MORE = 1
 YAE_ANNOTATIONS = ("Red Ink", "Footnote", "Deadline Extension", "Fox Fire",
                    "Sakura Seal", "Royalties", "Reprint",
                    # Review r3: the one enchantment holding both layers.
@@ -1052,7 +1057,12 @@ def yae_shrine(player: dict[str, Any],
             annotated += 1
     cap = YAE_SAKURA_CAP + sum(
         _int(pw.get("stacks")) for pw in you["powers"]
-        if _text(pw.get("name")) == _CHANNELING_NAME)
+        if _text(pw.get("name")) == _CHANNELING_NAME) + FOX_OFUDA_MORE * sum(
+        1 for r in you.get("relics") or []
+        if isinstance(r, dict) and _text(r.get("name")) == _FOX_OFUDA_NAME)
+    if isinstance(raw, dict) and raw.get("live") \
+            and isinstance(raw.get("max_sakura"), int):
+        cap = raw["max_sakura"]
     # Bestseller's count (Yae review r5, pick 1 (a)): the cards
     # she Edited this combat, off `player.yae_shrine` (the bridge's
     # `gits/GitsYaeShrine.cs`, the mod's `YaeShrine.Snapshot`). None when the
@@ -1634,6 +1644,10 @@ def resolutions(player: dict[str, Any]) -> list[dict[str, Any]] | None:
                         for ev in (row.get("events") or [])
                         if isinstance(ev, dict)
                         and _text(ev.get("kind")) == "stoked"),
+                    # Yae rounds 7, 8 and 10 (2026-10-17): what this play's
+                    # Edit reached (`YaeEditing.NoteEdited` and its two
+                    # siblings), in order. Empty on an older mod.
+                    "edits": _yae_edit_receipts(row.get("events") or []),
                     # Varka round 5 (2026-10-13): the cards this play made
                     # you discard, and whether the game picked them (the hand
                     # held no more than it asked for).
@@ -1686,6 +1700,32 @@ PAGE_EVENT_KINDS = ("drawn", "negated", "triggered", "stolen", "returned",
                     "discarded", "ethereal")
 #: The event kinds a page OUTSIDE a fight prints (the reward screen after it).
 OUTSIDE_FIGHT_EVENTS = frozenset({"curtain"})
+
+#: Yae's Edit receipts (`YaeEditing.EditedEvent` and its siblings), printed
+#: on the play line of the card that Edited, never under "since last page".
+#: Each is renamed to a plain word on the page's side, so no mod id
+#: crosses into the packet.
+YAE_EDIT_EVENTS = {"yae_edit": "card", "yae_edit_sakura": "sakura",
+                   "yae_edit_none": "none"}
+
+
+def _yae_edit_receipts(events: list[Any]) -> list[dict[str, Any]]:
+    """One `{kind, card, annotation, n}` per Edit receipt on a play's row:
+    kind `card` names the card (`n` 1 when the game picked it, the only card
+    the Edit could reach), `sakura` counts the Sakura in `n`, and `none` is a
+    hand Edit that found nothing it could reach."""
+    out: list[dict[str, Any]] = []
+    for ev in events:
+        if not isinstance(ev, dict):
+            continue
+        kind = _text(ev.get("kind"))
+        if kind not in YAE_EDIT_EVENTS:
+            continue
+        out.append({"kind": YAE_EDIT_EVENTS[kind],
+                    "card": _text(ev.get("card")),
+                    "annotation": _text(ev.get("power")),
+                    "n": _int(ev.get("amount"))})
+    return out
 
 
 def page_events(player: dict[str, Any]) -> list[dict[str, Any]] | None:

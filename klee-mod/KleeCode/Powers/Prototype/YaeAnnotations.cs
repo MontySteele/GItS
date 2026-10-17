@@ -644,6 +644,51 @@ public static class YaeEditing
         }
     }
 
+    /// <summary>The seat page's Edit receipts (Yae rounds 7, 8 and 10,
+    /// 2026-10-16/17), filed on the play line of the card that Edited
+    /// (<see cref="ResolutionLedger.NoteEventOnPlay"/>): which card took
+    /// which Annotation (`amount` 1 when the game picked it), how many
+    /// Sakura an "Edit your ... Sakura" card reached, and an Edit that
+    /// found nothing. A blind seat sees no bubble and no chooser that did
+    /// not open.</summary>
+    public const string EditedEvent = "yae_edit";
+    public const string SakuraEditedEvent = "yae_edit_sakura";
+    public const string NothingEditedEvent = "yae_edit_none";
+
+    /// <summary>Did the game pick the Edit's card without asking?
+    /// <c>CardSelectCmd.FromHand</c> takes the candidates without opening
+    /// the chooser when there are no more than its <c>MinSelect</c> and no
+    /// manual confirm is asked: a one-card Edit (min 1) with one card it
+    /// can reach. An "up to N" Edit (min 0) always asks. PURE.</summary>
+    public static bool EditPickedForYou(int reach, int times) =>
+        times <= 1 && reach == 1;
+
+    /// <summary>"<paramref name="card"/> took <paramref name="annotation"/>".
+    /// </summary>
+    public static void NoteEdited(string? played, string? card,
+                                  YaeAnnotation annotation, bool pickedForYou) =>
+        ResolutionLedger.NoteEventOnPlay(EditedEvent, played ?? string.Empty,
+                                         card ?? string.Empty,
+                                         YaeAnnotationText.Name(annotation),
+                                         pickedForYou ? 1 : 0);
+
+    /// <summary>"<paramref name="n"/> Sakura took <paramref name="annotation"/>".
+    /// </summary>
+    public static void NoteSakuraEdited(string? played, int n,
+                                        YaeAnnotation annotation)
+    {
+        if (n <= 0) return;
+        ResolutionLedger.NoteEventOnPlay(SakuraEditedEvent, played ?? string.Empty,
+                                         string.Empty,
+                                         YaeAnnotationText.Name(annotation), n);
+    }
+
+    /// <summary>The hand Edit found no card it could reach.</summary>
+    public static void NoteNothingEdited(string? played, YaeAnnotation annotation) =>
+        ResolutionLedger.NoteEventOnPlay(NothingEditedEvent, played ?? string.Empty,
+                                         string.Empty,
+                                         YaeAnnotationText.Name(annotation));
+
     /// <summary>The Seven Glamours' prompt.</summary>
     public const string PublishPromptKey = "KLEEMOD-YAE_PUBLISH.selectionScreenPrompt";
 
@@ -834,11 +879,15 @@ public static class YaeEditing
     {
         var owner = editor.Owner;
         if (owner?.Creature == null || times <= 0) return;
-        if (!PileType.Hand.GetPile(owner).Cards.Any(c => EditReaches(c, editor, annotation)))
+        var reach = PileType.Hand.GetPile(owner).Cards
+            .Count(c => EditReaches(c, editor, annotation));
+        if (reach == 0)
         {
             if (sayNothing) SayNothing(owner.Creature, NothingToEditKey);
+            NoteNothingEdited(editor.Title, annotation);
             return;
         }
+        var forYou = EditPickedForYou(reach, times);
         var picked = await CardSelectCmd.FromHand(
             choiceContext, owner, EditPrefs(annotation, times),
             c => EditReaches(c, editor, annotation),
@@ -848,6 +897,7 @@ public static class YaeEditing
         {
             if (!Annotate(card, annotation, times: WriteTimes(owner.Creature))) continue;
             YaeShrineLedger.For(owner.Creature).NoteEdit();
+            NoteEdited(editor.Title, card.Title, annotation, forYou);
             n++;
         }
         // Serialization pays per Edit (Yae review r6, item 1); Proofreader's
@@ -867,11 +917,14 @@ public static class YaeEditing
                                         AbstractModel source, YaeAnnotation annotation)
     {
         if (owner.Creature == null || annotation == YaeAnnotation.None) return;
-        if (!PileType.Hand.GetPile(owner).Cards.Any(c => EditReaches(c, null, annotation)))
+        var reach = PileType.Hand.GetPile(owner).Cards
+            .Count(c => EditReaches(c, null, annotation));
+        if (reach == 0)
         {
             SayNothing(owner.Creature, NothingToEditKey);
             return;
         }
+        var forYou = EditPickedForYou(reach, 1);
         var picked = await CardSelectCmd.FromHand(
             choiceContext, owner, EditPrefs(annotation, 1),
             c => EditReaches(c, null, annotation),
@@ -881,6 +934,7 @@ public static class YaeEditing
         {
             if (!Annotate(card, annotation, times: WriteTimes(owner.Creature))) continue;
             YaeShrineLedger.For(owner.Creature).NoteEdit();
+            NoteEdited(string.Empty, card.Title, annotation, forYou);
             n++;
         }
         await YaeShrine.AfterEdits(choiceContext, owner.Creature, n);
