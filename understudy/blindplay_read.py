@@ -91,6 +91,11 @@ _RES_PATH = re.compile(
     r"res://(?:[A-Za-z0-9_]+/)*([A-Za-z0-9_]+)\.(png|jpg|jpeg|svg|webp)", re.I)
 
 
+# A number, then one counting word, then the pip: the pip is that number's
+# unit ("Gain 2 additional [pip] next turn").
+_COUNTED_PIP = re.compile(r"\d\s+(?:additional|more|extra)$", re.I)
+
+
 def _icon_name(stem: str) -> str:
     words = [w for w in stem.split("_") if w]
     for w in words:
@@ -143,8 +148,13 @@ def _spaced(text: str) -> str:
         # number then a pip), so a lone pip is a count of one and says so. A
         # pip that follows a number ("costs 0", "an additional 4") is that
         # number's unit and stays a bare word.
+        # 2026-10-16 (co-op seat, Furina): the game's next-turn Energy power
+        # reads "Gain 2 additional [pip] next turn", and the pip is the 2's
+        # unit there too; a "1" in front printed "2 additional 1 Energy".
+        lead = text[:m.start()].rstrip()
         if (rendered in _ICON_SUBJECTS.values()
-                and not text[:m.start()].rstrip()[-1:].isdigit()):
+                and not lead[-1:].isdigit()
+                and not _COUNTED_PIP.search(lead)):
             rendered = "1 " + rendered
         before = text[m.start() - 1] if m.start() else ""
         after = text[m.end()] if m.end() < len(text) else ""

@@ -16918,11 +16918,21 @@ def stage_repay_call(card: dict) -> str | None:
     # (Clean Slate, Hydro Lance, Cleansing Torrent), so it previews its
     # literal.
     pay = stage_repay_payout_cs(card, ops[0])
-    if stage_raise_amount(card, ops[0]) is None:
-        return ('FurinaStageFacePreview.Repay(this, '
-                f'{int(ops[0].get("amount", 1))}{pay})')
-    return ('FurinaStageFacePreview.Repay(this, '
-            f'DynamicVars["RepayAmount"].IntValue{pay})')
+    amount = (str(int(ops[0].get("amount", 1)))
+              if stage_raise_amount(card, ops[0]) is None
+              else 'DynamicVars["RepayAmount"].IntValue')
+    # Suite 4 lane 4 (2026-10-16): Ebb and Flow Drains 4, THEN Repays 2, so
+    # its Repay returns HP the card itself drained. The face read the board
+    # before the Drain and printed "(Repay 0: gain 2 Block)".
+    top = card.get("effects") or []
+    first = stage_fixed_price_cs(card)
+    drain = stage_fixed_price(card)
+    if (drain and drain[0] == "stage_drain"
+            and any(fx.get("op") == "stage_drain"
+                    for fx in top[:top.index(ops[0])])):
+        return ('FurinaStageFacePreview.RepayAfterDrain(this, '
+                f'{amount}, {first}{pay})')
+    return f'FurinaStageFacePreview.Repay(this, {amount}{pay})'
 
 
 #: THE REPAY FLOOR'S PAYOUT ON THE FACE (the drain-line round, 2026-10-09;
