@@ -22,6 +22,9 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
+- **Kokomi's story** (`kokomi-story-2026-10-16.md`, two picks, defaults
+  (a)): eight events in three threads, home thread Gorou's report; story
+  curse Public Address.
 - **Distribution readiness** (`distribution-readiness-2026-10-12.md`, two picks,
   defaults (a)): a closed beta now, public early access once Varka and Furina
   reach Balance; a GitHub release first. (The `LAW.md` art line, #1145, is
