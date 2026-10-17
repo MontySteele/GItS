@@ -18,6 +18,11 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - Furina, Let the People Rejoice's damage preview ignores an enemy's Hard To Kill cap (face said 34, each Exoskeleton took 9; suite 3 lane 5).
 - Furina's seat page never defines "past your line" in the Drain tip (suite 3 lane 5).
 - Furina's seat page printed a word tip for Charlotte on a screen with no Charlotte card (suite 3 lane 3).
+- Klee, Chain Fuse also grows Mines; its text does not say so (suite 6 lane 2).
+- Klee, Stoke the Fuse resolves before Party Poppers places its Bomb, so on an empty field it burns every Spark for nothing (suite 6 lane 4).
+- Mika's "next Attack costs 1 less" is an Energy discount and does nothing on Klee's Spark-cost attacks; say so, or make it apply (suite 6 lane 3).
+- Klee, enemy Vulnerable raises Bomb damage and no page says so (suite 6 lane 5).
+- An offer title printed "Prune - Ring-A-Ding-Ding! Hexhunter Chime" (suite 6 lane 1): check Prune's companion title.
 - Furina, Ebb and Flow's "Repay 0: gain 2 Block" never showed as live Block (suite 4 lane 4): check the floor on a Drain-then-Repay card.
 - Furina, Archaic Tooth's All the World's a Stage+ loses Rising Applause+'s Retain (suite 4 lane 5).
 - Furina, Clorinde's Night Vigil +6 reads as if it covers her own hit; it applies after (suite 4 lane 5).
