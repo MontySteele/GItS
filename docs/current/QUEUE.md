@@ -22,6 +22,9 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
+- **Kokomi's lines** (`kokomi-story-2026-10-16.md`, pick 3, default (a)):
+  select text, combat lines, eight Ancient exchanges, the Architect rewrite,
+  three utility edits. Her events are ruled and building.
 - **Distribution readiness** (`distribution-readiness-2026-10-12.md`, two picks,
   defaults (a)): a closed beta now, public early access once Varka and Furina
   reach Balance; a GitHub release first. (The `LAW.md` art line, #1145, is
