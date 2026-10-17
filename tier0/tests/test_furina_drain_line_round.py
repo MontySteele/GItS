@@ -69,6 +69,18 @@ def test_a_card_with_a_floor_previews_its_payout(cid, pay):
     assert call.endswith(f", FurinaStageFacePreview.{pay})"), call
 
 
+def test_a_drain_then_repay_previews_after_its_own_drain():
+    # Suite 4 lane 4 (2026-10-16): Ebb and Flow Drains first, so its Repay
+    # returns HP and pays no Block; the face read "(Repay 0: gain 2 Block)".
+    call = gen.stage_repay_call(_rows()["proto_fs_ebb_and_flow"])
+    assert call.startswith("FurinaStageFacePreview.RepayAfterDrain(this, "), call
+    src = (Path(__file__).resolve().parents[2] / "klee-mod" / "KleeCode"
+           / "Cards" / "Prototype" / "Generated"
+           / "ProtoFsEbbAndFlow.cs").read_text(encoding="utf-8")
+    assert ("RepayAfterDrain(this, DynamicVars[\"RepayAmount\"].IntValue, "
+            "(IsUpgraded ? 6 : 4), FurinaStageFacePreview.PayBlock)") in src
+
+
 @pytest.mark.parametrize("cid", NO_PAYOUT)
 def test_a_card_with_no_payout_keeps_the_plain_line(cid):
     call = gen.stage_repay_call(_rows()[cid])

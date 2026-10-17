@@ -3155,6 +3155,25 @@ def test_a_pip_between_a_number_and_a_word_keeps_its_space():
     assert "Gain 2[boss relic icon]." in blindplay.observe(unknown)
 
 
+def test_a_pip_after_a_counted_word_takes_no_stray_one():
+    """2026-10-16 co-op seat (Furina): the game's next-turn Energy power
+    reads "Gain 2 additional [pip] next turn" and printed "Gain 2 additional
+    1 Energy next turn". The pip is the 2's unit, as after a bare number.
+    """
+    state = copy.deepcopy(combat_state())
+    state["player"]["relics"] = [
+        {"id": "energy_next_turn", "name": "Energized",
+         "description": "Gain 2 additional [ironclad_energy_icon.png] "
+                        "next turn."},
+        {"id": "lone_pip", "name": "Conch",
+         "description": "Draw 2 additional cards and gain "
+                        "[ironclad_energy_icon.png]."}]
+    page = blindplay.observe(state)
+    assert "Gain 2 additional Energy next turn." in page
+    assert "additional 1 Energy" not in page
+    assert "Draw 2 additional cards and gain 1 Energy." in page
+
+
 def test_a_live_face_prints_the_energy_pip_as_a_word_and_not_a_token():
     """`EB-651`(a), ON THE WIRE'S OWN BYTES.
 

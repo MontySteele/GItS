@@ -816,17 +816,23 @@ FULL_HAND_DISCARD_CLAUSE = (
     f"{MAX_HAND} cards goes to your discard pile instead")
 
 
+#: Furina suite 4 lane 3 (2026-10-16): Ousia / Pneuma flips as it is
+#: played, so `play "Pneuma"` named the card it had just sent to the discard
+#: pile and was told only "nothing here is called 'Pneuma'".
+DISCARD_CLAUSE = ". {name} is in your discard pile"
+
+
 def _full_hand_clause(state: dict[str, Any], name: str,
                       hand: list[dict[str, Any]]) -> str:
-    """Where a named card not in hand went, if a full hand sent it to the
-    discard pile. `""` otherwise."""
-    if len(hand) < MAX_HAND:
-        return ""
+    """Where a named card not in hand went, if it is in the discard pile
+    (and why, when a full hand sent it there). `""` otherwise."""
     want = _fold(_split_qualifier(name)[0])
     for entry in _player(state).get("discard_pile") or []:
         if isinstance(entry, dict) and want \
                 and _fold(_card_title(entry)) == want:
-            return FULL_HAND_DISCARD_CLAUSE.format(name=_card_title(entry))
+            clause = (FULL_HAND_DISCARD_CLAUSE if len(hand) >= MAX_HAND
+                      else DISCARD_CLAUSE)
+            return clause.format(name=_card_title(entry))
     return ""
 
 

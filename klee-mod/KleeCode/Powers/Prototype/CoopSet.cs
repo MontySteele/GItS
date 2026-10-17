@@ -644,6 +644,38 @@ public sealed class VarkaCurrentOathVar : DynamicVar
         if (!DamagePreview.Live(card, runGlobalHooks)) return;
         PreviewValue = VarkaCards.MarchingOrdersBonus(card.Owner!.Creature);
     }
+
+    /// <summary>
+    /// CO-OP SEAT (2026-10-16): "+0 damage" every time. The face prints a
+    /// bare <c>{VkOath}</c>, and the game formats a bare token through
+    /// <c>ToString()</c> / <c>IConvertible</c>, which read
+    /// <see cref="DynamicVar.BaseValue"/> (0) and never the preview. Both
+    /// answer the live bonus instead (<see cref="MendLandsVar"/>'s fix); 0
+    /// with no owner in a combat.
+    /// </summary>
+    internal int Live
+    {
+        get
+        {
+            if (_owner is not CardModel card) return 0;
+            Creature? owner;
+            try
+            {
+                owner = card.Owner?.Creature;
+            }
+            catch (System.Exception)
+            {
+                return 0;
+            }
+            if (owner?.CombatState == null) return 0;
+            return VarkaCards.MarchingOrdersBonus(owner);
+        }
+    }
+
+    protected override decimal GetBaseValueForIConvertible() => Live;
+
+    public override string ToString() =>
+        Live.ToString(System.Globalization.CultureInfo.InvariantCulture);
 }
 
 /// <summary>

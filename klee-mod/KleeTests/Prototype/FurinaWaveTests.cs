@@ -117,6 +117,9 @@ public class FurinaWaveTests
                      FurinaStageFacePreview.SpendUpToHitsWords(6));
         Assert.Equal("\n(Spends 16: 4 more hits)",
                      FurinaStageFacePreview.SpendUpToHitsWords(16));
+        // Co-op seat (2026-10-16): a spend that empties the bank says so.
+        Assert.Equal("\n(Spends all 6: 1 more hit)",
+                     FurinaStageFacePreview.SpendUpToHitsWords(6, all: true));
         // Off a combat the face adds nothing.
         Assert.Equal("", FurinaStageFacePreview.SpendUpToHits(
             new ProtoFsCrashingWaves(), 16));

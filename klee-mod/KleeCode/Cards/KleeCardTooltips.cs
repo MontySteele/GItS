@@ -141,9 +141,14 @@ public static class KleeCardTooltips
         if (aimed == null && !TipAudience.Seat) yield break;
 
         var previews = new List<IHoverTip>();
-        var seen = new HashSet<Reaction>();
+        // Co-op seat (2026-10-16): Kaeya's Frozen preview missed an Artifact
+        // that ate the freeze. A Frozen an Artifact will block is its own row,
+        // so a plain Frozen on another enemy cannot hide it.
+        var seen = new HashSet<(Reaction, bool)>();
         var printedTrigger = trigger;
-        foreach (var enemy in PreviewOrder(card, card.CombatState.HittableEnemies))
+        var hittable = card.CombatState.HittableEnemies;
+        var several = hittable.Count() > 1;
+        foreach (var enemy in PreviewOrder(card, hittable))
         {
             if (aimed != null && !ReferenceEquals(enemy, aimed)) continue;
             var aura = AuraCmd.Find(enemy);
@@ -151,7 +156,12 @@ public static class KleeCardTooltips
             trigger = printedTrigger;
 
             var reaction = ReactionTable.Lookup(aura.Element, trigger);
-            if (reaction == Reaction.None || !seen.Add(reaction)) continue;
+            var blocked = reaction == Reaction.Frozen
+                && ReactionEffects.ArtifactWillBlockFrozen(enemy);
+            if (reaction == Reaction.None || !seen.Add((reaction, blocked)))
+            {
+                continue;
+            }
 
             // `EB-366`. THE PREVIEW READS THE FREEZE'S OWN PREDICATE, and it
             // used to read HALF of it. The substitution is per-CREATURE inside
@@ -185,15 +195,18 @@ public static class KleeCardTooltips
                 : AmplifiedBody(card, reaction, enemy, aura.Element);
             // 2026-10-01 (a Varka seat): Kaeya's Cryo on a Hydro Cubex
             // Construct promised Frozen, and its Artifact ate the freeze.
-            if (reaction == Reaction.Frozen
-                && ReactionEffects.FrozenArtifactDetail(enemy) != null)
+            // The preview asks the Artifact alone: the log's detail also
+            // reads a mark one hit scopes, and a mark left by the last hit
+            // hid the warning (co-op seat, 2026-10-16).
+            if (blocked)
             {
                 var boss = ReactionEffects.FrozenBossVulnWillApply(enemy);
                 previews.Add(new HoverTip(
                     new LocString(Table, (boss ? FrozenBossPreviewKey
                                                : FrozenPreviewKey) + ".title"),
                     (elementOnlyOnSpend ? SpendOnlyPrefix : "")
-                        + FrozenArtifactBody(boss)));
+                        + FrozenArtifactBody(boss,
+                              several ? enemy.Name : null)));
                 continue;
             }
             // 2026-10-04 (Furina v2 seat round): Tidal Flourish previewed
@@ -600,10 +613,12 @@ public static class KleeCardTooltips
 
     /// <summary>2026-10-01: the Frozen preview over a target whose Artifact
     /// will negate what the reaction applies. The aura is still used up.
+    /// With several enemies, <paramref name="who"/> names the one.
     /// </summary>
-    public static string FrozenArtifactBody(bool boss) =>
+    public static string FrozenArtifactBody(bool boss, string? who = null) =>
         "[gold]Hydro[/gold] meets [gold]Cryo[/gold] and the aura is used up, "
-      + "but its [gold]Artifact[/gold] blocks the "
+      + "but " + (string.IsNullOrEmpty(who) ? "its" : who + "'s")
+      + " [gold]Artifact[/gold] blocks the "
       + (boss ? "[gold]Vulnerable[/gold]." : "Frozen.");
 
     /// <summary>2026-10-04: the condition a Spend-gated element's

@@ -235,6 +235,18 @@ def test_a_card_a_full_hand_sent_to_the_discard_pile_is_found():
     assert "hand of 10 cards" in res.refusal
 
 
+def test_a_card_played_this_turn_is_found_in_the_discard_pile():
+    # Furina suite 4 lane 3 (2026-10-16): Ousia flipped to Pneuma as it was
+    # played, and `play "Pneuma"` did not say where the card had gone.
+    state = copy.deepcopy(combat_state())
+    state["player"]["discard_pile"] = [
+        {"name": "Pneuma", "id": "PROTO_FS_OUSIA_PNEUMA", "description": "x"}]
+    res = _play(state, parse_command('play "Pneuma"'))
+    assert not res.ok
+    assert "Pneuma is in your discard pile" in res.refusal
+    assert "hand of 10 cards" not in res.refusal
+
+
 # ---- 10. The seat brief ------------------------------------------------------
 
 def test_the_brief_tells_seats_to_keep_to_their_lane():

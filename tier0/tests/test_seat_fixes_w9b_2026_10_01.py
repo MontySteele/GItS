@@ -109,7 +109,11 @@ def test_a_frozen_artifact_blocked_is_said_on_the_row_and_the_preview():
     assert "FrozenArtifactDetail(target)" in effects[note - 600:note]
     assert "OfType<ArtifactPower>()" in effects
     tips = _read("klee-mod", "KleeCode", "Cards", "KleeCardTooltips.cs")
-    assert "ReactionEffects.FrozenArtifactDetail(enemy) != null" in tips
+    assert "ReactionEffects.ArtifactWillBlockFrozen(enemy)" in tips
+    # Co-op seat (2026-10-16): a blocked Frozen is its own row, and the
+    # preview never reads the hit-scoped Shatter mark.
+    assert "new HashSet<(Reaction, bool)>()" in tips
+    assert "FrozenArtifactDetail(enemy)" not in tips
     assert "blocks the" in tips
 
 
