@@ -20,12 +20,6 @@ line leaves this file. Closed picks are in git
   (`review/active/klee-visual-paper-2026-10-12.md`); the bomb size is being
   fixed. What is left is [USER]'s look at them in motion in the game.
 
-- **Furina's three weak card pictures** (2026-10-16): Pneuma Refrain,
-  Arkhe in Balance and Coup de Théâtre each have two Fontaine candidates
-  staged as rank-2/3 rows in `art/plan.tsv` (the sheet path and the list are
-  in the PR that staged them). Pick (a), (b) or keep the current picture per
-  card; default keep.
-
 ## Open packets in `review/active/`
 
 - **Distribution readiness** (`distribution-readiness-2026-10-12.md`, two picks,
