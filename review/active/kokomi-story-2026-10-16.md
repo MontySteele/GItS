@@ -201,9 +201,9 @@ the second.
 | Boss entry | "So this is what holds the floor. Let's watch how it moves first." |
 | Low HP | "I'm all right. Hold on a little longer." |
 | Signature | "Watatsumi, rise with me." |
-| Boss kill | "There. That went better than my second plan would have." |
-| Run lost | "I misjudged it. Write it down, so the next one doesn't." |
-| Run won | "Everyone's still here. Now I would very much like a quiet afternoon." |
+| Boss kill | "There. I can breathe again." |
+| Run lost | "I misjudged it. I hope whoever climbs next finds my notes." |
+| Run won | "Done. Now I would very much like a quiet afternoon." |
 
 **Ancients.**
 
@@ -221,9 +221,8 @@ the second.
 **The Architect** replaces the current exchange:
 - **Architect:** "Priestess. You could have stayed on your island. Why climb
   so far from the people who need you?"
-- **Kokomi:** "Because whatever waits up here would reach them in time. I'd
-  rather meet it now, on ground I've studied, than at home, on ground I
-  love."
+- **Kokomi:** "Because I couldn't be sure this place would never reach them.
+  I'd rather find out myself than wait at home."
 
 **Utility lines** (`Kokomi.cs`):
 
@@ -233,6 +232,14 @@ the second.
 | endTurnPing | "Whenever you're ready. The plan holds." | "Whenever you're ready. I'm set." |
 | goldMonologue | "This will keep Watatsumi's army supplied..." | "This will help keep Watatsumi supplied..." |
 | bestiaryQuote, eventDeathPrevention | | Kept. |
+
+GPT's review of these lines (relayed by [USER], 2026-10-16) kept the select
+text, the Ancients and the utility edits. It asked for four simpler lines:
+- The boss kill drops its planner joke.
+- The run loss now speaks to whoever comes next.
+- The run win no longer claims everyone survived.
+- The Architect reply states her concern without claiming that the Spire
+  threatens Watatsumi.
 
 ## What I would check before building
 
@@ -267,4 +274,4 @@ the second.
 3. **Her lines** (the section above). (a) Build them as written. **Default.**
    (b) Change something first; name it.
 
-**Ruled 2026-10-16.** [USER]: "I reviewed it myself and I still think it looks a bit stilted at parts, but nothing that blocks it from a beta launch. I think I'll want to do a full review of the writing surfaces before the public launch anyway. Approved!" [USER], 2026-10-16: "That is for the story events, not the new gaps." Picks 1 (a) and 2 (a): build the eight events and Public Address. Pick 3, her lines, is open.
+**Ruled 2026-10-16.** [USER]: "I reviewed it myself and I still think it looks a bit stilted at parts, but nothing that blocks it from a beta launch. I think I'll want to do a full review of the writing surfaces before the public launch anyway. Approved!" [USER], 2026-10-16: "That is for the story events, not the new gaps." Picks 1 (a) and 2 (a): build the eight events and Public Address. [USER], 2026-10-16, after GPT's dialogue review and the four edits: "Ok, I'm good to approve the full Kokomi paper as-is. The dialogue looks good!" Pick 3 (a): build her lines as written.
