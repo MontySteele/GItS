@@ -170,6 +170,70 @@ same pull she uses to shape her Bake-Kurage, and the water answers her.*
 | Ride the tide up. | Heal 20 HP. | She lets the water carry her a floor and a half, eyes closed, like floating off the reef at home. |
 | Send the water home to the sea. | Remove a card. | She sends it down towards the sea, with a message folded into the current for whoever on Watatsumi is listening. |
 
+## Her lines (every other surface)
+
+GPT's dialogue audit, relayed by [USER] on 2026-10-16, found what she still
+lacks:
+- She is not in `StoryRegistry.All`, so she has no combat lines and no
+  Ancient exchanges.
+- The Architect exchange claims something about the run that can be false
+  ("no blood") and answers nothing.
+- Her select line reads like a class description.
+
+The voice follows the events above:
+- practical reassurance in a fight;
+- curiosity and judgement with the Ancients;
+- warmth with friends;
+- confidence that never claims she foresaw everything.
+
+The three co-op exchanges (Klee, Varka, Furina) stay as they are.
+
+**Select.** The title is *The Pearl of Wisdom.* (her canon epithet). The
+line: *"Watatsumi's priestess and its strategist. She would rather solve a
+hard problem quietly than give a speech, and the Spire is the hardest problem
+she has seen."* The character description keeps its first sentence and gains
+the second.
+
+**Combat.** Her signature card is Nereid's Ascension.
+
+| Moment | Line |
+|---|---|
+| Boss entry | "So this is what holds the floor. Let's watch how it moves first." |
+| Low HP | "I'm all right. Hold on a little longer." |
+| Signature | "Watatsumi, rise with me." |
+| Boss kill | "There. That went better than my second plan would have." |
+| Run lost | "I misjudged it. Write it down, so the next one doesn't." |
+| Run won | "Everyone's still here. Now I would very much like a quiet afternoon." |
+
+**Ancients.**
+
+| Ancient | Ancient says | Kokomi |
+|---|---|---|
+| Neow | "A strategist. Your mind is very busy." | "It usually is. You're welcome to the quiet parts, if you find any." |
+| Orobas | "Give me what you carry. I will make it stranger." | "Stranger is fine. Tell me what it does first." |
+| Pael | "You are smaller than your ambitions." | "Most generals are. That's why we bring friends." |
+| Tezcatara | "Warm yourself by my light." | "Thank you. It's been a long climb, and I'll take the warmth." |
+| Nonupeipe | "You carry a whole island on your back." | "Only some days. Today it's mostly a satchel." |
+| Tanx | "Do you lead from the front?" | "When I must. I'd rather stand where I can see everything." |
+| Vakuu | "Trade with me." | "Gladly. Show me the terms, then the small print." |
+| Darv | "I collect what others leave behind." | "Then you'd get on with quartermasters. We never throw anything away." |
+
+**The Architect** replaces the current exchange:
+- **Architect:** "Priestess. You could have stayed on your island. Why climb
+  so far from the people who need you?"
+- **Kokomi:** "Because whatever waits up here would reach them in time. I'd
+  rather meet it now, on ground I've studied, than at home, on ground I
+  love."
+
+**Utility lines** (`Kokomi.cs`):
+
+| Row | Today | Change |
+|---|---|---|
+| aromaPrinciple | "Every move is planned. I will not be rushed." | "Give me a moment. I'll find the way through." |
+| endTurnPing | "Whenever you're ready. The plan holds." | "Whenever you're ready. I'm set." |
+| goldMonologue | "This will keep Watatsumi's army supplied..." | "This will help keep Watatsumi supplied..." |
+| bestiaryQuote, eventDeathPrevention | | Kept. |
+
 ## What I would check before building
 
 - **Lore:**
@@ -196,7 +260,7 @@ same pull she uses to shape her Bake-Kurage, and the water answers her.*
 
 ## Picks
 
-1. **The story.** (a) Build this second draft. **Default.** (b) Change
-   something first; name it.
+1. **The story and her lines.** (a) Build the events and every line above.
+   **Default.** (b) Change something first; name it.
 2. **The curse.** (a) Public Address, from the promised rite only.
    **Default.** (b) Another name.
