@@ -48,7 +48,7 @@ How the eight events are priced, against the base game:
 
 | | All options free | A price, with a free way out | Every option priced |
 |---|---|---|---|
-| These eight | 2 (25%) | 4 (50%) | 2 (25%) |
+| These eight | 2 (25%) | 5 (63%) | 1 (13%) |
 | Base game | 25% | 39% | 37% |
 
 **Her story curse: Public Address.** It is Unplayable and leaves after 3
@@ -64,11 +64,11 @@ jellyfish. It is standing exactly where Kokomi is standing.*
 
 | Option | Effect | Result |
 |---|---|---|
-| Play it out until the candles go out. | Lose 7 HP. Upgrade 2 random cards. | She plays the next three floors four different ways and loses twice. By the end she is smiling, and her fingers are numb with cold. |
+| Play it out until the candles go out. | Lose 7 HP. Upgrade 2 random cards. | She plays the next three floors four different ways and loses twice. By the end the candles are stubs, and she is smiling. |
 | Move her piece up one floor. | Remove a card. | She moves it gently, as if it might be watching. Something in her pack feels lighter. |
 | Pocket the enemy's general. | Gain a random potion. | It is a very small piece, and nobody said she couldn't. |
 
-**Act 1. Coral Light** (a memory; every option priced).
+**Act 1. Coral Light** (a memory; a price, with a free way out).
 *Pale coral glows in a crack in the stone, the colour of the reefs off
 Watatsumi. On afternoons the shrine let her keep for herself, she used to
 swim out to coral like this and stay until someone came looking.*
@@ -76,8 +76,9 @@ swim out to coral like this and stay until someone came looking.*
 | Option | Effect | Result |
 |---|---|---|
 | Reach in for a piece. | Lose 10 HP. Gain a random relic. | The coral cuts, as coral does. She would have done it at ten as well. |
-| Kneel at the water and say the sea prayer. | Lose 6 HP. Upgrade 2 random cards. | The water is cold to the knee. She says the old island words softly, as fishing families say them before a voyage. Nobody asked her to, and that makes it hers. |
+| Kneel at the water and say the sea prayer. | Lose 6 HP. Upgrade 2 random cards. | The water is cold to the knee. She says the old island words softly, as fishing families say them before a voyage. |
 | Leave a pearl for it. | Lose 50 Gold. Remove a card. Locked under 50 Gold. | On Watatsumi you pay the sea back. She picks her best pearl. |
+| Leave the coral undisturbed. | Nothing. | She watches it glow for a while, then climbs on. |
 
 **Act 1. A Room with No One In It** (all free).
 *Behind a door with nothing written on it is a small room: one cushion, one
@@ -88,7 +89,7 @@ first time since the Spire began, nobody needs her to decide anything.*
 |---|---|---|
 | Take an hour to herself. | Heal 15 HP. | She does nothing at all, carefully, for a whole hour. |
 | Read the top book. | Add an upgraded **Treatise**. | A treatise on naval supply. On page forty the author is wrong about tides, and she fills three margins explaining why. |
-| Plan a holiday. | Gain a random potion. | Three days off, two fallbacks, one beach. She is almost as pleased with it as with the treatise. |
+| Plan a holiday. | Gain a random potion. | Three days off, two fallbacks, one beach. She files it under *urgent*. |
 
 **Act 2. The Other Commander** (follows The Sand Table; a price, with a
 free way out). Each route shows the same habit, which Endgame uses. It opens
@@ -102,7 +103,7 @@ a patient line. It opens a hand: your move.*
 
 | Option | Effect | Result |
 |---|---|---|
-| Play the full game. | Lose 12 HP. Gain a random relic. | It takes every piece she offers, even the bad ones. She wins by one piece, hours later, aching from the cold stone. |
+| Play the full game. | Lose 12 HP. Gain a random relic. | It takes every piece she offers, even the bad ones. She wins by one piece, hours later. |
 | Offer a draw. | Transform a card. | It agrees only once she offers it a piece to keep. It cannot leave a piece on the table. |
 | Concede and study its opening. | Add **Doubt**. Choose 1 of 3 random Rare cards. | She plays its first ten moves against herself until she sees it: it takes every piece left in reach. |
 
@@ -145,26 +146,27 @@ out). It opens with a line from her act 2 choice:
 - *conceded:* "She knows its opening by heart now."
 
 *The faceless commander waits at the top of the stairs without its board. It
-has one piece left. So does she.*
+has one piece left. So does she. The step between them is split down the
+middle, like the fold in a game board.*
 
 | Option | Effect | Result |
 |---|---|---|
-| Offer it her last piece. | Lose 15 HP. Gain a random Rare relic. | It takes the piece, as it always does, and steps onto the square she cleared for it. The stair folds shut over it like a closing board, and the jolt throws her hard against the wall. |
-| Pay its stake and trade pieces. | Lose 50 Gold. Transform 2 cards. Locked under 50 Gold. | It will not trade for nothing. She counts out its stake in Mora, and they swap two pieces each. |
+| Offer it her last piece. | Lose 15 HP. Gain a random Rare relic. | She sets her piece on the split step. It takes the piece, as it always does, and the stair folds shut over it like a closing board. The jolt throws her hard against the wall. |
+| Pay its stake and trade pieces. | Lose 50 Gold. Transform 2 cards. Locked under 50 Gold. | It will not trade for nothing. She counts out its stake in Mora, and they trade their last pieces. |
 | Bow and walk past. | Nothing. | A commander's bow, one to another. She takes the stairs, and it does not follow. |
 
 **Act 3. The Tide Comes In** (the finale of the other two threads; a price,
 with free ways out). It opens with a line from the act 2 event:
 - *Serpent's Bones:* "The water smells of salt and incense, like the shrine on festival days."
 - *Gorou's report, reinforcements:* "Somewhere below, she can hear Gorou's soldiers singing."
-- *otherwise:* "The water is warm, and it moves when she does."
+- *otherwise:* "The water moves when she does."
 
 *Water rises up the stairs: real sea water, salt and cold. Kokomi feels the
 same pull she uses to shape her Bake-Kurage, and the water answers her.*
 
 | Option | Effect | Result |
 |---|---|---|
-| Shape a whole shoal. | Lose 6 HP. Add an upgraded **Kurage Canopy**. | A dozen Bake-Kurage, more than she has ever held at once. Her arms shake from holding them together, and she holds them anyway. |
+| Shape a whole shoal. | Lose 6 HP. Add an upgraded **Kurage Canopy**. | A dozen Bake-Kurage, more than she has ever held at once. The whole stairwell turns blue with their light. |
 | Ride the tide up. | Heal 20 HP. | She lets the water carry her a floor and a half, eyes closed, like floating off the reef at home. |
 | Send the water home to the sea. | Remove a card. | She sends it down towards the sea, with a message folded into the current for whoever on Watatsumi is listening. |
 
@@ -177,8 +179,20 @@ same pull she uses to shape her Bake-Kurage, and the water answers her.*
   - Her childhood swimming is ours, framed as a memory.
 - **Every reward card exists in her pool:** Treatise, Kurage Canopy and the
   four Gorou cards.
-- **No forced lethal choice.** Every event has an option that costs no HP,
-  though a player can still choose an HP price at low HP.
+- **No forced lethal choice.** Every event has an option that costs no HP
+  and needs no Gold (Coral Light gained "Leave the coral undisturbed" in the
+  third pass), though a player can still choose an HP price at low HP.
+
+**Third pass** (GPT's second review, relayed by [USER], 2026-10-16):
+- Coral Light gains a free way out, so it can no longer force a death at 6
+  HP and 49 Gold.
+- Two explaining endings are trimmed: the prayer's, and the shoal's.
+- The physical descriptions are varied.
+- Three continuity fixes:
+  - The holiday no longer mentions the treatise.
+  - Endgame trades their last pieces.
+  - The tide's temperature no longer contradicts itself.
+- Endgame's split step is set up before she uses it.
 
 ## Picks
 
