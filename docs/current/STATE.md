@@ -107,8 +107,16 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   six attacks up to the base rate (Sly Strike 8, Margin Note 7, Sesshou Fang
   8, Thunder Rite 13, Publisher's Deadline 14, Galley Proof 14) and Thunder
   Petal's and Foxfire Sweep's Sakura strike once as they land; the starters
-  unchanged, Yakan Evocation a BACKLOG watch line. Next: [USER]'s run (pick
-  4 (a)).
+  unchanged, Yakan Evocation a BACKLOG watch line. **Round 9** (2026-10-17,
+  `review/records/yae-round-9-2026-10-17.md`): end floors 17 / 48 / 33 / 33 /
+  40, mean 34.2; act-1 turn-1 damage at base (20.5 vs 20), fight length
+  unchanged; starters are 59% of her act-1 plays (the starter pick is in
+  QUEUE). **The draft pass built** (2026-10-17,
+  `review/active/yae-draft-pass-2026-10-17.md`): Yakan Evocation's Sakura
+  strikes as it lands (round 9, pick 1 (a)), and the five refused cards fixed
+  (Falling Blossom no longer withers, Dawn Prayer and Mikage Thunder pay on
+  the turn, Kitsune Pounce deals 5 more to a Weak enemy, The Seven Glamours
+  costs 1). Next: [USER]'s run (pick 4 (a)).
 
 ## The kits
 

@@ -51,7 +51,7 @@ public sealed class ProtoYmFallingBlossom : CustomCardModel, IElementalCard, ICh
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Falling Blossom"),
-        ("description", "Deal {Damage:diff()} [gold]Electro[/gold] damage. Your oldest [gold]Sakura[/gold] withers; its Last Bloom strikes this enemy."),
+        ("description", "Deal {Damage:diff()} [gold]Electro[/gold] damage. Your oldest [gold]Sakura[/gold] strikes this enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -75,7 +75,7 @@ public sealed class ProtoYmFallingBlossom : CustomCardModel, IElementalCard, ICh
             .Targeting(cardPlay.Target)
             .WithElementHitFx(this)
             .Execute(choiceContext);
-        await YaeCards.WitherOldestAt(choiceContext, this, cardPlay);
+        await YaeCards.StrikeOldestAt(choiceContext, this, cardPlay);
     }
 
     protected override void OnUpgrade()

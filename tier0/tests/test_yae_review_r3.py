@@ -102,7 +102,7 @@ def test_every_plain_planter_plants_a_plain_sakura():
 
 def test_a_sakura_strikes_one_enemy_for_two_plus_level():
     st = _state(n=2)
-    _play(st, "yakan_evocation")
+    Y.plant(st, 1)          # the draft pass: Yakan Evocation strikes now
     Y.turn_end(st)
     assert sum(100 - h for h in _hp(st)) == 2 + 1
 
@@ -187,7 +187,7 @@ def test_tenko_is_one_action_per_sakura_and_refreshes_to_three():
 
 def test_kitsune_guile_tenkos_and_manuscript_pile_draws_then_edits():
     st = _state()
-    _play(st, "yakan_evocation")
+    Y.plant(st, 1)          # the draft pass: Yakan Evocation strikes now
     _play(st, "kitsune_guile")
     assert int(st.enemies[0].powers.get("weak", 0)) == 2
     assert _acts(st, "tenko")
@@ -436,17 +436,6 @@ def test_editor_in_chief_makes_the_highest_act_as_its_kind():
     assert st.player.block == 2 + 3              # the Kitsune acted
 
 
-def test_kitsune_pounce_takes_the_highest_damage_kind():
-    st = _state()
-    _play(st, "shrine_maidens_guard")
-    Y.level_up(st, 5)                            # the Kitsune is highest
-    _play(st, "foxfire_sweep")
-    st.enemies[0].powers["weak"] = 1
-    _play(st, "kitsune_pounce")
-    pounce = _acts(st, "pounce")
-    assert len(pounce) == 1 and pounce[0]["kind"] == Y.FOXFIRE
-
-
 def test_the_dead_edit_filter_still_reads_the_card():
     st = _state()
     lure = _card("foxfire_lure")
@@ -557,7 +546,7 @@ def test_serial_novel_returns_a_random_annotated_card_each_turn_start():
 
 def test_fallen_petals_withers_even_a_deadline_extension_sakura():
     st = _state()
-    _play(st, "yakan_evocation")
+    Y.plant(st, 1)          # the draft pass: Yakan Evocation strikes now
     _play(st, "evergreen_charm")                 # Deadline Extension
     st.player.energy = 0
     c = _card("fallen_petals")

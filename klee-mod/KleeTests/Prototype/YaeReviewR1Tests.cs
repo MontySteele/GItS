@@ -100,7 +100,8 @@ public class YaeReviewR1Tests : IDisposable
         // Review r3: with kinds the rule has two branches, so it left the
         // plant faces for its own tip.
         Assert.DoesNotContain("oldest", ArmKeywordTips.YaeSakuraTip);
-        Assert.Equal("Plant a [gold]Sakura[/gold].", Face(new ProtoYmYakanEvocation()));
+        // Yae draft pass, 2026-10-17: "It strikes now." (round 9, pick 1 (a)).
+        Assert.Equal("Plant a [gold]Sakura[/gold]. It strikes now.", Face(new ProtoYmYakanEvocation()));
         Assert.DoesNotContain("Warding", ArmKeywordTips.YaeTenkoTip);
         Assert.DoesNotContain("Rite", ArmKeywordTips.YaeSakuraTip);
         // Yae review r5, item 5: the long form (170) replaced the 97-character

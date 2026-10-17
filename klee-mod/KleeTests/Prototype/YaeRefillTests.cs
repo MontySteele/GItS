@@ -87,25 +87,21 @@ public class YaeRefillTests : IDisposable
     // ---- Falling Blossom ------------------------------------------------------------
 
     [Fact]
-    public void Falling_blossom_hits_then_its_oldest_blooms_at_the_target()
+    public void Falling_blossom_hits_then_its_oldest_strikes_the_target()
     {
+        // Yae draft pass, 2026-10-17: no wither (was "withers; its Last Bloom
+        // strikes this enemy"). YaeDraftPassTests has the rest.
         var card = new ProtoYmFallingBlossom();
         Assert.Equal((1, 7), (card.EnergyCost.Canonical, Var(card, "Damage")));
         Upgrade(card);
         Assert.Equal(10, Var(card, "Damage"));
         var calls = OnPlay<ProtoYmFallingBlossom>();
         var hit = calls.FindIndex(c => c.Contains("DamageCmd.Attack"));
-        var bloom = calls.FindIndex(c => c.Contains(nameof(YaeCards.WitherOldestAt)));
-        Assert.True(hit >= 0 && bloom > hit, string.Join(", ", calls));
-        // The card's target is the Last Bloom's aim, one hit whatever the
-        // kind: the same aimed Act a Foxfire's aimed strike takes.
-        var at = Il.CallSequence(typeof(YaeCards).GetMethod(nameof(YaeCards.WitherOldestAt))!).ToList();
+        var strike = calls.FindIndex(c => c.Contains(nameof(YaeCards.StrikeOldestAt)));
+        Assert.True(hit >= 0 && strike > hit, string.Join(", ", calls));
+        var at = Il.CallSequence(typeof(YaeCards).GetMethod(nameof(YaeCards.StrikeOldestAt))!).ToList();
         Assert.Contains(at, c => c.Contains("get_Target"));
-        Assert.Contains(at, c => c.Contains(nameof(YaeShrine.WitherOldest)));
-        var aim = typeof(YaeShrine).GetMethod(nameof(YaeShrine.WitherOldest))!.GetParameters();
-        Assert.Equal("aim", aim.Last().Name);
-        Assert.Contains(Il.CallSequence(typeof(YaeShrine).GetMethod(nameof(YaeShrine.WitherOldest))!),
-                        c => c.Contains("YaeShrine.Act"));
+        Assert.Contains(at, c => c.Contains(nameof(YaeShrine.StrikeOldestAt)));
     }
 
     // ---- Hunting Gaze -------------------------------------------------------------------

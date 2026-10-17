@@ -174,9 +174,10 @@ public class YaeFlatValueTests : IDisposable
     }
 
     [Fact]
-    public void The_starters_are_unchanged()
+    public void Proofread_is_unchanged()
     {
-        Assert.DoesNotContain(OnPlay<ProtoYmYakanEvocation>(), c => c.Contains(nameof(YaeCards.StrikePlanted)));
+        // Yakan Evocation's "It strikes now." is the draft pass's (2026-10-17,
+        // round 9 pick 1 (a)): YaeDraftPassTests.
         Assert.DoesNotContain(OnPlay<ProtoYmProofread>(), c => c.Contains(nameof(YaeCards.StrikePlanted)));
     }
 }

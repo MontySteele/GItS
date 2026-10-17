@@ -51,7 +51,7 @@ public sealed class ProtoYmMikageThunder : CustomCardModel, IElementalCard, ICha
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Mikage Thunder"),
-        ("description", "Each [gold]Sakura[/gold] gains {IfUpgraded:show:2 Levels|a Level}. [gold]Tenko[/gold]{InCombat:{YaeTenko}|}."),
+        ("description", "Deal {Damage:diff()} [gold]Electro[/gold] damage. Each [gold]Sakura[/gold] gains {IfUpgraded:show:2 Levels|a Level}. [gold]Tenko[/gold]{InCombat:{YaeTenko}|}."),
     };
 
     /// <summary>This card's in-combat shrine clauses
@@ -66,18 +66,25 @@ public sealed class ProtoYmMikageThunder : CustomCardModel, IElementalCard, ICha
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
+            new DamageVar(7m, ValueProp.Move),
             new DynamicVar("YmAmount", 1m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoYmMikageThunder()
-        : base(2, CardType.Attack, CardRarity.Uncommon, TargetType.Self, autoAdd: false)
+        : base(2, CardType.Attack, CardRarity.Uncommon, TargetType.AnyEnemy, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+        await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
+            .FromCard(this, cardPlay)
+            .Targeting(cardPlay.Target)
+            .WithElementHitFx(this)
+            .Execute(choiceContext);
         await YaeCards.LevelUp(choiceContext, this, cardPlay);
         await YaeCards.Tenko(choiceContext, this, cardPlay);
     }

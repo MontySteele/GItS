@@ -760,19 +760,15 @@ public static class YaeShrine
     /// FALLEN PETALS (review r3, sec.4): "Your oldest Sakura withers (it acts
     /// once, its Last Bloom)." Deadline Extension does not stop it (an
     /// active wither, not a timer). Whether one did.
-    /// FALLING BLOSSOM (the refill): "its Last Bloom strikes this enemy",
-    /// <paramref name="aim"/>, one hit whatever the kind (a Foxfire's
-    /// included), as every aimed strike is; a dead aim falls back to the
-    /// plain act.
     /// </summary>
     public static async Task<bool> WitherOldest(PlayerChoiceContext choiceContext,
-                                                Creature? yae, Creature? aim = null)
+                                                Creature? yae)
     {
         if (yae == null || !Live(yae)) return false;
         var ledger = YaeShrineLedger.For(yae);
         if (ledger.Count == 0) return false;
         var oldest = ledger.Standing[0];
-        await Act(choiceContext, yae, oldest, aim);
+        await Act(choiceContext, yae, oldest);
         var withered = ledger.Wither(oldest);
         if (withered) await Withered(choiceContext, yae, 1);
         await SakuraBadge.Sync(choiceContext, yae);
@@ -797,6 +793,43 @@ public static class YaeShrine
         if (ledger.LastPlanted is not { } sakura || !ledger.Standing.Contains(sakura)) return false;
         await Act(choiceContext, yae, sakura,
                   sakura.Kind == YaeSakuraKind.Thunder ? aim : null);
+        await SakuraBadge.Sync(choiceContext, yae);
+        return true;
+    }
+
+    /// <summary>
+    /// YAE DRAFT PASS, 2026-10-17 (review/active/yae-draft-pass-2026-10-17.md
+    /// sec.3): Falling Blossom's "Your oldest Sakura strikes this enemy." The
+    /// oldest acts once at <paramref name="aim"/>, one hit whatever its kind
+    /// (a Foxfire's included; a Kitsune's is its Block), as every aimed strike
+    /// is; a dead aim falls back to the plain act. No wither and no Last
+    /// Bloom; none of its turns; not a Tenko. Whether one acted. Sim twin:
+    /// <c>yae_shrine.strike_oldest_at</c>.
+    /// </summary>
+    public static async Task<bool> StrikeOldestAt(PlayerChoiceContext choiceContext,
+                                                  Creature? yae, Creature? aim)
+    {
+        if (yae == null || !Live(yae)) return false;
+        var ledger = YaeShrineLedger.For(yae);
+        if (ledger.Count == 0) return false;
+        await Act(choiceContext, yae, ledger.Standing[0], aim);
+        await SakuraBadge.Sync(choiceContext, yae);
+        return true;
+    }
+
+    /// <summary>
+    /// YAE DRAFT PASS, 2026-10-17 (sec.3): Dawn Prayer's "It strikes now.",
+    /// after its Levels. The newest Sakura acts once as its kind, unaimed (a
+    /// Sakura on the Lure's, Hunting Gaze's or a random enemy; a Foxfire on
+    /// ALL; a Kitsune's Block), none of its turns, not a Tenko. Whether one
+    /// acted. Sim twin: <c>yae_shrine.strike_newest</c>.
+    /// </summary>
+    public static async Task<bool> StrikeNewest(PlayerChoiceContext choiceContext, Creature? yae)
+    {
+        if (yae == null || !Live(yae)) return false;
+        var ledger = YaeShrineLedger.For(yae);
+        if (ledger.Count == 0) return false;
+        await Act(choiceContext, yae, ledger.Standing[ledger.Count - 1]);
         await SakuraBadge.Sync(choiceContext, yae);
         return true;
     }
@@ -1442,7 +1475,8 @@ public static class YaeCards
                                  CardPlay cardPlay) =>
         card.Owner is { } owner ? YaeEditing.RecallAllAnnotated(owner) : Task.CompletedTask;
 
-    /// <summary>Kitsune Pounce's rider.</summary>
+    /// <summary>Kitsune Pounce's rider until the Yae draft pass (2026-10-17);
+    /// no row carries it now.</summary>
     public static Task StrikeIfWeak(PlayerChoiceContext choiceContext, CardModel card,
                                     CardPlay cardPlay) =>
         YaeShrine.StrikeIfWeak(choiceContext, card.Owner?.Creature, cardPlay.Target);
@@ -1508,14 +1542,23 @@ public static class YaeCards
                        Var(card, "YmBase") + (high ? Var(card, "YmAmount") : 0));
     }
 
-    /// <summary>Falling Blossom: "Your oldest Sakura withers; its Last Bloom
-    /// strikes this enemy."</summary>
-    public static async Task WitherOldestAt(PlayerChoiceContext choiceContext, CardModel card,
+    /// <summary>Falling Blossom: "Your oldest Sakura strikes this enemy."
+    /// (Yae draft pass, 2026-10-17; was a wither and its Last Bloom.)</summary>
+    public static async Task StrikeOldestAt(PlayerChoiceContext choiceContext, CardModel card,
                                             CardPlay cardPlay) =>
-        await YaeShrine.WitherOldest(choiceContext, card.Owner?.Creature, cardPlay.Target);
+        await YaeShrine.StrikeOldestAt(choiceContext, card.Owner?.Creature, cardPlay.Target);
+
+    /// <summary>Dawn Prayer's "It strikes now.", after its Levels (Yae draft
+    /// pass, 2026-10-17).</summary>
+    public static async Task StrikeNewest(PlayerChoiceContext choiceContext, CardModel card,
+                                          CardPlay cardPlay) =>
+        await YaeShrine.StrikeNewest(choiceContext, card.Owner?.Creature);
 
     /// <summary>Thunder Petal's "It strikes this enemy." and Foxfire Sweep's
-    /// "It strikes now." (Yae flat-value pass, 2026-10-17).</summary>
+    /// "It strikes now." (Yae flat-value pass, 2026-10-17); Yakan Evocation's
+    /// "It strikes now." (Yae draft pass, 2026-10-17): no target, so a null
+    /// aim and the Sakura picks the Lure's, Hunting Gaze's or a random enemy.
+    /// </summary>
     public static async Task StrikePlanted(PlayerChoiceContext choiceContext, CardModel card,
                                            CardPlay cardPlay) =>
         await YaeShrine.StrikePlanted(choiceContext, card.Owner?.Creature, cardPlay.Target);

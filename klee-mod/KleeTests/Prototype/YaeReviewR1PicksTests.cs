@@ -163,7 +163,9 @@ public class YaeReviewR1PicksTests : IDisposable
         var level = calls.FindIndex(c => c.Contains("YaeCards.LevelUp"));
         var tenko = calls.FindIndex(c => c.Contains("YaeCards.Tenko"));
         Assert.True(level >= 0 && tenko > level, string.Join(", ", calls));
-        Assert.StartsWith("Each [gold]Sakura[/gold] gains {IfUpgraded:show:2 Levels|a Level}. ",
+        // Yae draft pass, 2026-10-17: "Deal 7." first (YaeDraftPassTests).
+        Assert.StartsWith("Deal {Damage:diff()} [gold]Electro[/gold] damage. "
+                          + "Each [gold]Sakura[/gold] gains {IfUpgraded:show:2 Levels|a Level}. ",
                           Face(new ProtoYmMikageThunder()));
     }
 }
