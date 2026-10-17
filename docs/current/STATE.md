@@ -99,9 +99,10 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   Evocation: Sesshou Sakura on the Archaic Tooth, keeping the starter's
   Annotations; Yae Publishing House from the Dusty Tome), so the Darv guard
   is gone; seven relics and three potions of her own, the offer Meditations,
-  her seven and Enlightened Blessing, the Defect's potions gone. Rewrite has
-  no upgrade yet (the paper names none). Next: five seats on the full pool,
-  then [USER]'s run (pick 4 (a)).
+  her seven and Enlightened Blessing, the Defect's potions gone; Rewrite+
+  draws 3. **Round 8** (2026-10-17, `review/records/yae-round-8-2026-10-17.md`):
+  her first win, end floors 48 / 17 / 48 (won) / 33 / 48, mean 38.8 (round 7
+  31.2); damage 0.78 / 0.84 / 0.79 of base. Next: [USER]'s run (pick 4 (a)).
 
 ## The kits
 
@@ -298,7 +299,7 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
   `C.SWIRL_PAYS`).
 - **Next:** phase two, Burning and Dendro (`BACKLOG.md`).
 
-## The Spiral Abyss mode: built, not yet played
+## The Spiral Abyss mode: built, seat-played, not yet played by [USER]
 
 A fourth main-menu mode (`klee-mod/KleeCode/Abyss/`).
 - **Entry:** a Spiral Abyss button opens the normal character select; runs
@@ -313,8 +314,11 @@ A fourth main-menu mode (`klee-mod/KleeCode/Abyss/`).
   relic and as badges on enemies.
 - **Tests:** `KleeTests/SpiralAbyss*Tests.cs`, `AbyssOverlayTests.cs`,
   `AbyssPoolsTwoTests.cs`.
-- **Next:** [USER]'s live checks of the screen and the act change, then one
-  solo and one co-op seat; Klee and Varka are the test pair. The old Teyvat
+- **Seats:** two rounds (`review/records/spiral-abyss-round-2026-10-12.md`,
+  `spiral-abyss-round-2-2026-10-14.md`): five solos, a base Ironclad control
+  and three co-op pairs; Kokomi and Varka won solo, Klee + Varka reached the
+  final boss in co-op. Both on builds of 2026-10-14 or earlier.
+- **Next:** [USER]'s live checks of the screen and the act change. The old Teyvat
   frame stays off behind `TeyvatFrame` (`operations/teyvat-frame.md`).
 
 ## Live cell
