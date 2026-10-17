@@ -4774,13 +4774,13 @@
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
    # Yae pass 2026-10-16 (sec.1): draw 2, discard 1, then the Edit (was
-   # discard up to 2, draw that many). No upgrade yet: provenance note,
-   # "Yae pass, 2026-10-16".
+   # discard up to 2, draw that many). Upgrade draw 3 (design session,
+   # 2026-10-17, after the build).
    description: "Draw {Cards:diff()} cards. Discard 1 card. [gold]Edit[/gold] a card in your hand: [gold]Red Ink[/gold].",
    effects: [{op: draw, amount: 2},
              {op: discard, amount: 1, select: chosen},
              {op: yae, kind: edit, annotation: red_ink, amount: 1}],
-   no_upgrade: "The Yae pass (2026-10-16) names no upgrade for the new Rewrite and the Prototype default withholds one; the design pass owes it."}
+   upgrade: {draw: 1}}
 
 - {id: proto_ym_dawn_prayer, name: "Dawn Prayer", character: yae,
    authored_by: [claude],

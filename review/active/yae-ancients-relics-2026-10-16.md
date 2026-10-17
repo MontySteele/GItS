@@ -45,7 +45,7 @@ Common is about 9 damage or 8 Block) and against her own cards.
 | Card | Today | Why | Change |
 |---|---|---|---|
 | **Mischievous Teasing** (R Skill 0) | Apply 2 Weak to ALL enemies. Draw 2. Exhaust. | Flagged in the dedupe paper: an Uncommon's effect. Taken 0 of 2. | Moves to Uncommon, unchanged. That keeps the pool at 20 / 38 / 20. |
-| **Rewrite** (C Skill 1) | Discard up to 2, draw that many. Edit: Red Ink. | 1 Energy to swap two cards. The Silent's Acrobatics draws 3 for 1. | Draw 2 cards. Discard 1 card. Edit a card in your hand: Red Ink. |
+| **Rewrite** (C Skill 1) | Discard up to 2, draw that many. Edit: Red Ink. | 1 Energy to swap two cards. The Silent's Acrobatics draws 3 for 1. | Draw 2 cards. Discard 1 card. Edit a card in your hand: Red Ink. (Upgrade: draw 3.) |
 | **Fox Trick** (C Skill 1) | Apply 2 Weak. Draw 1. | Below Backflip (5 Block, draw 2), and Weak is her fuel. | Apply 2 Weak. Draw 2 cards. (Upgrade: 3 Weak.) |
 
 **Looked at and left alone:**
@@ -137,3 +137,5 @@ Furina and Varka (`Relics.ArmRelicPools.Offer`).
   Fanfare") reads small for a Rare. She prints about one Fanfare per HP she
   drains. She is at Balance, so a number change there is [USER]'s pick, for
   her next paper.
+
+**Approved 2026-10-17.** [USER]: "That all works for me; ship it!"

@@ -2578,6 +2578,9 @@
     "proto_ym_replanting": {
       "yae_amount": 1
     },
+    "proto_ym_rewrite": {
+      "draw": 1
+    },
     "proto_ym_royalties": {
       "cost": -1
     },
@@ -2664,7 +2667,6 @@
   "no_upgrade": {
     "proto_mf_guest_neuvillette_droplets": "A Guest Star is made for one fight and never upgraded, as the shipped row.",
     "proto_mf_guest_neuvillette_judgment": "A Guest Star is made for one fight and never upgraded, as the shipped row.",
-    "proto_mf_guest_neuvillette_tears": "A Guest Star is made for one fight and never upgraded, as the shipped row.",
-    "proto_ym_rewrite": "The Yae pass (2026-10-16) names no upgrade for the new Rewrite and the Prototype default withholds one; the design pass owes it."
+    "proto_mf_guest_neuvillette_tears": "A Guest Star is made for one fight and never upgraded, as the shipped row."
   }
 }

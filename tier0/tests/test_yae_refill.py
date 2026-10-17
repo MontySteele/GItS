@@ -293,12 +293,12 @@ def test_rewrite_draws_2_discards_1_then_edits_red_ink():
     assert _led(st).edits == 1
 
 
-def test_rewrite_says_it_has_no_upgrade_yet():
+def test_rewrite_upgrades_to_draw_3():
     import yaml
     from pathlib import Path
     rows = yaml.safe_load(Path("docs/prototype-surface.yaml").read_text(encoding="utf-8"))
     row = next(r for r in rows if r["id"] == "proto_ym_rewrite")
-    assert "upgrade" not in row and row["no_upgrade"]
+    assert row["upgrade"] == {"draw": 1} and "no_upgrade" not in row
 
 
 # --- Dawn Prayer and Kitsune's Blessing --------------------------------------------------
