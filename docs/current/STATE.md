@@ -89,7 +89,7 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   line. **The dedupe and the refill built** (2026-10-16,
   `review/active/yae-dedupe-2026-10-16.md` and `yae-refill-2026-10-16.md`):
   eleven near-copies cut and eleven new cards added, pool still 78 (20 / 38 /
-  20); the eleven draw blank portraits until her art pass. Next: five seats
+  20); the eleven have official Inazuma art (refill art pass, 2026-10-16). Next: five seats
   on the full pool, then [USER]'s run (pick 4 (a)).
 
 ## The kits

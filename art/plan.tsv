@@ -1856,6 +1856,10 @@ proto_fs_scene_change	ImageGen/images/cards/furina/proto_fs_scene_change.png	500
 proto_fs_grand_entrance	ImageGen/images/cards/furina/proto_fs_grand_entrance.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Furina Full Wish.png		splash	
 # proto_fs_pneuma_refrain <- Furina in her Pneuma arkhe, head and shoulders (art redo 2026-10-16)
 proto_fs_pneuma_refrain	ImageGen/images/cards/furina/proto_fs_pneuma_refrain.png	500	380	cover	x0.5,y0.20	shortlist	1	png	Character Furina Game (Pneuma).png		splash	
+# proto_fs_pneuma_refrain r2 <- Furina reaching through bubbles (candidate for [USER]'s pick, 2026-10-16)
+proto_fs_pneuma_refrain	ImageGen/images/cards/furina/proto_fs_pneuma_refrain.png	500	380	cover	x0.4,y0.4@1.5	shortlist	2	png	App Store Event Character Wallpaper Furina Version 4.2.png		splash	
+# proto_fs_pneuma_refrain r3 <- Neuvillette reading (the draw) (candidate for [USER]'s pick, 2026-10-16)
+proto_fs_pneuma_refrain	ImageGen/images/cards/furina/proto_fs_pneuma_refrain.png	500	380	cover	x0.5,y0.45@1.2	shortlist	3	png	Neuvillette Birthday 2024.png		splash	
 # proto_fs_bis 'Bis!' <- the cast's curtain call under confetti: the encore (art redo 2026-10-16)
 proto_fs_bis	ImageGen/images/cards/furina/proto_fs_bis.png	500	380	cover	x0.5,y0.55	shortlist	1	png	The Two Musketeers' Triumph Quest Still 1 Lumine.png		splash	
 # proto_fs_final_bow <- a still from Furina's farewell story quest (art redo 2026-10-16)
@@ -2812,6 +2816,10 @@ proto_fs_pay_the_tab	ImageGen/images/cards/furina/proto_fs_pay_the_tab.png	500	3
 proto_fs_prima_donna	ImageGen/images/cards/furina/proto_fs_prima_donna.png	500	380	cover	x0.45	shortlist	1	png	App Store Event Character Wallpaper Furina Version 5.4.png		splash	
 # proto_fs_riptide_lunge <- Furina's rapier through a water arc (art redo 2026-10-16)
 proto_fs_riptide_lunge	ImageGen/images/cards/furina/proto_fs_riptide_lunge.png	500	380	cover	x0.5,y0.45	shortlist	1	png	Weapon Splendor of Tranquil Waters Ousia.png		splash	
+# proto_fs_riptide_lunge r2 <- Furina and Neuvillette on the stage, curtain and spotlights (candidate for [USER]'s pick, 2026-10-16)
+proto_fs_riptide_lunge	ImageGen/images/cards/furina/proto_fs_riptide_lunge.png	500	380	cover	x0.5,y0.5	shortlist	2	png	Version 4.2 Full Wallpaper 1.png		splash	
+# proto_fs_riptide_lunge r3 <- Lyney's flourish on stage (candidate for [USER]'s pick, 2026-10-16)
+proto_fs_riptide_lunge	ImageGen/images/cards/furina/proto_fs_riptide_lunge.png	500	380	cover	x0.55,y0.45@1.2	shortlist	3	png	App Store Event Character Wallpaper Lyney Version 4.0.png		splash	
 proto_fs_rising_tide	ImageGen/images/cards/furina/proto_fs_rising_tide.png	500	380	cover	x0.40	shortlist	1	png	Primordial Sea.png		splash	
 proto_fs_salons_tab	ImageGen/images/cards/furina/proto_fs_salons_tab.png	500	380	cover	x0.62,y0.50@1.3	shortlist	1	png	Chanson of Many Waters 2024-06-25 - Furina Shorts.png		splash	
 proto_fs_showstopper	ImageGen/images/cards/furina/proto_fs_showstopper.png	500	380	cover	x0.33,y0.50@1.5	shortlist	1	png	Version Luna I Wallpaper 3.png		splash	
@@ -3081,6 +3089,29 @@ proto_ym_stellar_conduct	ImageGen/images/cards/yae/proto_ym_stellar_conduct.png	
 proto_ym_thunder_petal	ImageGen/images/cards/yae/proto_ym_thunder_petal.png	500	380	cover	x0.3,y0.45@1.35	shortlist	1	png	Sakura Arborism Thunder Sakura 4.png		splash	
 # proto_ym_torii_ward <- neko shrine torii (Yae art pass 2026-10-16)
 proto_ym_torii_ward	ImageGen/images/cards/yae/proto_ym_torii_ward.png	500	380	cover	x0.4,y0.5@1.0	shortlist	1	png	World Quest Neko Is a Cat Shrine Canteen.png		splash	
+# ---------- Yae refill art (2026-10-16): the refill's 11 blank portraits, Inazuma official art chosen by Claude (Prototype) ----------
+# proto_ym_kitsune_barrage <- Kazuha mid-swing among foes (Yae refill art 2026-10-16)
+proto_ym_kitsune_barrage	ImageGen/images/cards/yae/proto_ym_kitsune_barrage.png	500	380	cover	x0.5,y0.6@1.4	shortlist	1	png	Character Teaser - "Kaedehara Kazuha- Moonlit Breeze" Wallpaper 3.png		splash	
+# proto_ym_sesshou_fang <- Raiden's strike, a fox at her feet (Yae refill art 2026-10-16)
+proto_ym_sesshou_fang	ImageGen/images/cards/yae/proto_ym_sesshou_fang.png	500	380	cover	x0.65,y0.5@1.1	shortlist	1	png	Ioroi Raiden Shogun Character Teaser.jpg		splash	
+# proto_ym_falling_blossom <- Yae under falling sakura (Yae refill art 2026-10-16)
+proto_ym_falling_blossom	ImageGen/images/cards/yae/proto_ym_falling_blossom.png	500	380	cover	x0.5,y0.42	shortlist	1	png	Yae Miko Birthday 2023 2.jpg		splash	
+# proto_ym_publishers_deadline <- Ayaka writing at her desk, pen in hand (Yae refill art 2026-10-16)
+proto_ym_publishers_deadline	ImageGen/images/cards/yae/proto_ym_publishers_deadline.png	500	380	cover	x0.55,y0.45@1.2	shortlist	1	png	Kamisato Ayaka Birthday 2024.png		splash	
+# proto_ym_foxs_shade <- the white fox spirit Kitsune Saiguu (Yae refill art 2026-10-16)
+proto_ym_foxs_shade	ImageGen/images/cards/yae/proto_ym_foxs_shade.png	500	380	cover	x0.5,y0.45	shortlist	1	png	NPC Kitsune Saiguu.png		splash	
+# proto_ym_hide_behind_the_shrine <- the shrine at night (Yae refill art 2026-10-16)
+proto_ym_hide_behind_the_shrine	ImageGen/images/cards/yae/proto_ym_hide_behind_the_shrine.png	500	380	cover	x0.5,y0.5@1.1	shortlist	1	png	Grand Narukami Shrine Concept Art.png		splash	
+# proto_ym_rewrite <- a kitsune manga draft (Yae refill art 2026-10-16)
+proto_ym_rewrite	ImageGen/images/cards/yae/proto_ym_rewrite.png	500	380	cover	x0.5,y0.38	shortlist	1	png	Tales of the Youkai Kitsune 1 Draft.png		splash	
+# proto_ym_dawn_prayer <- Yae's prayer pose (Yae refill art 2026-10-16)
+proto_ym_dawn_prayer	ImageGen/images/cards/yae/proto_ym_dawn_prayer.png	500	380	cover	x0.45,y0.4	shortlist	1	png	Prayer Time Yae Miko Preview.png		splash	
+# proto_ym_hunting_gaze <- Sara's sharp look (Yae refill art 2026-10-16)
+proto_ym_hunting_gaze	ImageGen/images/cards/yae/proto_ym_hunting_gaze.png	500	380	cover	x0.58,y0.44@1.5	shortlist	1	png	Kujou Sara Birthday 2023.png		splash	
+# proto_ym_inscribed_thunder <- Raiden amid Electro (Yae refill art 2026-10-16)
+proto_ym_inscribed_thunder	ImageGen/images/cards/yae/proto_ym_inscribed_thunder.png	500	380	cover	x0.5,y0.35	shortlist	1	png	Raiden Shogun Birthday 2023 2.png		splash	
+# proto_ym_kitsunes_blessing <- fox spirits round Shinobu (Yae refill art 2026-10-16)
+proto_ym_kitsunes_blessing	ImageGen/images/cards/yae/proto_ym_kitsunes_blessing.png	500	380	cover	x0.45,y0.45@1.2	shortlist	1	png	Kuki Shinobu Birthday 2024.png		splash	
 # power_yae_sakura <- her skill's icon, the Sesshou Sakura
 power_yae_sakura	ImageGen/images/yae/powers/sakura.png	256	256	contain	center	shortlist	1	png	Talent Yakan Evocation Sesshou Sakura.png		icon
 # power_yae_foxfire_lure <- her foxfire attack's icon
@@ -3118,6 +3149,10 @@ proto_fs_rainfall_overture	ImageGen/images/cards/furina/proto_fs_rainfall_overtu
 proto_fs_encore_performance	ImageGen/images/cards/furina/proto_fs_encore_performance.png	500	380	cover	x0.22,y0.45@1.5	shortlist	1	png	Furina VA Announcement.png		splash	
 # proto_fs_arkhe_in_balance <- the Ousia outfit turnaround, front view (art redo 2026-10-16)
 proto_fs_arkhe_in_balance	ImageGen/images/cards/furina/proto_fs_arkhe_in_balance.png	500	380	cover	x0.125,y0.32@2.4	shortlist	1	png	Coronated Prima Donna Ousia Turnaround.png		splash	
+# proto_fs_arkhe_in_balance r2 <- Furina in her Ousia arkhe (candidate for [USER]'s pick, 2026-10-16)
+proto_fs_arkhe_in_balance	ImageGen/images/cards/furina/proto_fs_arkhe_in_balance.png	500	380	cover	x0.5,y0.3@1.6	shortlist	2	png	Furina Ousia Portrait.png		splash	
+# proto_fs_arkhe_in_balance r3 <- Furina in her Pneuma arkhe, the other half of the pair (candidate for [USER]'s pick, 2026-10-16)
+proto_fs_arkhe_in_balance	ImageGen/images/cards/furina/proto_fs_arkhe_in_balance.png	500	380	cover	x0.5,y0.22@1.4	shortlist	3	png	Furina Pneuma Portrait.png		splash	
 # proto_fs_crowd_favorite <- Furina leading a parade of Teyvat's stars under balloons (art redo 2026-10-16)
 proto_fs_crowd_favorite	ImageGen/images/cards/furina/proto_fs_crowd_favorite.png	500	380	cover	x0.45,y0.6@1.25	shortlist	1	png	Version 4.1 Full Wallpaper 3.jpg		splash	
 # proto_fs_the_shows_not_over "The Show's Not Over" <- Furina alone on the stage, still performing, Starlight Reverie
