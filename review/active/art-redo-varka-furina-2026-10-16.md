@@ -114,3 +114,21 @@ great!"
    characters." On the re-picks: "the Mondstadt repicks are all good too!"
    The five re-picks are in the table; Knights' Muster's title
    crop was fixed alongside.
+
+## Furina's three weak pictures (ruled 2026-10-16, #1384)
+
+[USER]: "On Furina- I'm good with the 3 new ones. We can keep the current
+Arkhe in Balance if it's the last remaining shot of her in the character
+menu; we used that photo a lot from various angles and I wanted to dedupe
+that."
+
+- **Pneuma Refrain** ships App Store Event Character Wallpaper Furina
+  Version 4.2.png (`x0.4,y0.4@1.5`); Character Furina Game (Pneuma).png is
+  rank 2.
+- **Coup de Théâtre** (`proto_fs_riptide_lunge`) ships Version 4.2 Full
+  Wallpaper 1.png (`x0.5,y0.5`); Weapon Splendor of Tranquil Waters
+  Ousia.png is rank 2.
+- **Arkhe in Balance** keeps Coronated Prima Donna Ousia Turnaround.png:
+  after the Pneuma Refrain swap it is the last card picture from the
+  character-menu shot family (Leading Role and Top Billing use it only as
+  power icons). Its candidates were dropped.
