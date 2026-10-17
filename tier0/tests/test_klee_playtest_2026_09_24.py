@@ -295,7 +295,8 @@ def test_the_two_companion_rows_upgrade_to_draw_two(companions, cid):
 def test_hair_trigger_then_the_enemy_attacks_klee_and_every_mine_fires(overhaul):
     """The owner's board, end to end: charges placed at different times, two
     of them gathered by Exquisite Compound (each moved and grown as itself
-    since the Klee upper pass, 2026-10-11) and one carrying
+    since the Klee upper pass, 2026-10-11; 7 each since the Klee/Varka
+    cleanup, 2026-10-14) and one carrying
     Jumpy Dumpty's rider, all converted by Hair Trigger. The enemy's attack
     lands on Klee and every converted Mine goes off before it."""
     enemy = make_enemy(hp=300, name="attacker", intents=ATTACKER)
@@ -306,7 +307,7 @@ def test_hair_trigger_then_the_enemy_attacks_klee_and_every_mine_fires(overhaul)
     klee_overhaul.place(state, enemy, 4)
     play(state, load("proto_ko_careful_arrangement"), aim=enemy)
     merged = sizes(enemy)
-    assert sorted(merged) == [4 + 4, 6 + 4] and sizes(other) == []
+    assert sorted(merged) == [4 + 7, 6 + 7] and sizes(other) == []
     klee_overhaul.place(state, enemy, 3)
     klee_overhaul.place(state, enemy, 8, payload_mine_all=2)
     play(state, load("proto_ko_hair_trigger"), aim=enemy)

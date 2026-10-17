@@ -100,7 +100,8 @@ def test_taste_test_deals_twice_every_bomb_on_the_enemy_and_keeps_them(overhaul)
     assert a.hp == 200 - 2 * 17             # 12 + the Mine 5; b's not read
     assert sizes(a) == [12, 5] and sizes(b) == [30]
     assert state.player.sparks == 0
-    assert len(_statuses(state, klee_overhaul.CONFISCATED_ID)) == 2
+    # The Klee/Varka cleanup (2026-10-14): Exhaust replaced the 2 Confiscated.
+    assert _statuses(state, klee_overhaul.CONFISCATED_ID) == []
 
 
 def test_taste_test_on_a_bare_enemy_deals_nothing(overhaul):
@@ -108,16 +109,20 @@ def test_taste_test_on_a_bare_enemy_deals_nothing(overhaul):
     state = klee_state([enemy])
     play(state, load("proto_ko_taste_test"), aim=enemy)
     assert enemy.hp == 200
-    assert len(_statuses(state, klee_overhaul.CONFISCATED_ID)) == 2
+    assert _statuses(state, klee_overhaul.CONFISCATED_ID) == []
 
 
-def test_taste_test_upgraded_adds_one_confiscated(overhaul):
+def test_taste_test_upgraded_costs_one_and_deals_the_same(overhaul):
+    # The Klee/Varka cleanup (2026-10-14): the upgrade was one fewer
+    # Confiscated; with none left to drop it is cost 2 -> 1.
     enemy = make_enemy(hp=200)
     state = klee_state([enemy])
     klee_overhaul.place(state, enemy, 9)
-    play(state, load("proto_ko_taste_test+"), aim=enemy)
+    up = load("proto_ko_taste_test+")
+    assert up.cost == 1 and up.exhaust
+    play(state, up, aim=enemy)
     assert enemy.hp == 200 - 2 * 9
-    assert len(_statuses(state, klee_overhaul.CONFISCATED_ID)) == 1
+    assert _statuses(state, klee_overhaul.CONFISCATED_ID) == []
 
 
 # --- Tinkering, Dodoco Tag, Explosive Spark --------------------------------------

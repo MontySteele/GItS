@@ -38,23 +38,22 @@ public sealed class ProtoKoTasteTest : CustomCardModel, IElementalCard
     public Element Element => Element.Pyro;
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { KleeKeywords.AppliesPyro };
+        new[] { CardKeyword.Exhaust, KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBomb(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro, includesConfiscatedRules: true), this);
+        ArmKeywordTips.ForBomb(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_taste_test");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Taste Test"),
-        ("description", "Deal [gold]Pyro[/gold] damage equal to twice your [gold]Bombs[/gold] on the enemy, not setting them off. Add {Stash:diff()} [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold].{InCombat:\n(Deals {BombHit:diff()} damage)|}"),
+        ("description", "Deal [gold]Pyro[/gold] damage equal to twice your [gold]Bombs[/gold] on the enemy. They do not go off.{InCombat:\n(Deals {BombHit:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("Stash", 2m),
             new BombReadDamageVar(ProtoBombPower.BombRead.TargetTotalDouble)
         };
 
@@ -69,17 +68,10 @@ public sealed class ProtoKoTasteTest : CustomCardModel, IElementalCard
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await ProtoBombPower.DealFromBombs(choiceContext, cardPlay.Target, Owner.Creature, 0m, ProtoBombPower.BombRead.TargetTotalDouble, this, cardPlay);
-        {
-            for (var i = 0; i < DynamicVars["Stash"].IntValue; i++)
-            {
-                var token = CombatState!.CreateCard<Confiscated>(Owner);
-                await CardPileCmd.AddGeneratedCardToCombat(token, PileType.Discard, Owner);
-            }
-        }
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["Stash"].UpgradeValueBy(-1m);
+        EnergyCost.UpgradeBy(-1);
     }
 }

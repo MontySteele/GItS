@@ -55,9 +55,9 @@
 - {id: proto_ko_careful_arrangement, name: "Exquisite Compound", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Move all your [gold]Bombs[/gold] onto the enemy. Each grows by 4.",
-   upgrade: {grow: +2},
-   effects: [{op: gather_bombs, target: enemy, growth: 4}]}
+   description: "Move all your [gold]Bombs[/gold] onto the enemy. Each grows by 7.",
+   upgrade: {grow: +3},
+   effects: [{op: gather_bombs, target: enemy, growth: 7}]}
 
 - {id: proto_ko_big_badda_boom, name: "Big Badda Boom", character: klee,
    authored_by: [claude],
@@ -183,10 +183,10 @@
 - {id: proto_ko_ammo_scavenging, name: "Lizard-Tail Gunpowder", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Place a [gold]Bomb[/gold] 8. Draw 1 card for each of your [gold]Bombs[/gold] that went off this turn.",
+   description: "Place a [gold]Bomb[/gold] 8. Draw 1 card.",
    upgrade: {bomb_size: +3},
    effects: [{op: plant_bomb, target: enemy, size: 8},
-             {op: draw_per_set_off}]}
+             {op: draw, amount: 1}]}
 
 # R271 sec.4 item 3 and sec.7 batch one, row 1: Powder Charge's shape, a Mine
 # in its body. It reuses Mine Toss's machinery with a single target and invents
@@ -808,11 +808,10 @@
 
 - {id: proto_ko_taste_test, name: "Taste Test", character: klee,
    authored_by: [claude],
-   cost: 2, type: attack, rarity: uncommon,
-   description: "Deal [gold]Pyro[/gold] damage equal to twice your [gold]Bombs[/gold] on the enemy, not setting them off. Add 2 [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold].{InCombat:\n(Deals {BombHit:diff()} damage)|}",
-   upgrade: {cards: -1},
-   effects: [{op: damage_from_bombs, read: target_total_double, target: enemy},
-             {op: add_card, card: confiscated, zone: discard, amount: 2}]}
+   cost: 2, type: attack, rarity: uncommon, exhaust: true,
+   description: "Deal [gold]Pyro[/gold] damage equal to twice your [gold]Bombs[/gold] on the enemy. They do not go off.{InCombat:\n(Deals {BombHit:diff()} damage)|}",
+   upgrade: {cost: -1},
+   effects: [{op: damage_from_bombs, read: target_total_double, target: enemy}]}
 
 - {id: proto_ko_tinkering, name: "Tinkering", character: klee,
    authored_by: [claude],

@@ -42,13 +42,14 @@ public sealed class ProtoKoAmmoScavenging : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Lizard-Tail Gunpowder"),
-        ("description", "Place a [gold]Bomb[/gold] {BombSize:diff()}. Draw 1 card for each of your [gold]Bombs[/gold] that went off this turn."),
+        ("description", "Place a [gold]Bomb[/gold] {BombSize:diff()}. Draw 1 card."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("BombSize", 8m)
+            new DynamicVar("BombSize", 8m),
+            new CardsVar(1)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -62,7 +63,7 @@ public sealed class ProtoKoAmmoScavenging : CustomCardModel
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await ProtoBombPower.Place(choiceContext, cardPlay.Target, DynamicVars["BombSize"].IntValue, isMine: false, payloadMineAll: 0, Owner.Creature, this);
-        await ProtoBombPower.DrawPerSetOff(choiceContext, Owner);
+        await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
     }
 
     protected override void OnUpgrade()

@@ -48,7 +48,7 @@ public sealed class ProtoKoCarefulArrangement : CustomCardModel
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("Grow", 4m)
+            new DynamicVar("Grow", 7m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -66,6 +66,6 @@ public sealed class ProtoKoCarefulArrangement : CustomCardModel
 
     protected override void OnUpgrade()
     {
-        DynamicVars["Grow"].UpgradeValueBy(2m);
+        DynamicVars["Grow"].UpgradeValueBy(3m);
     }
 }

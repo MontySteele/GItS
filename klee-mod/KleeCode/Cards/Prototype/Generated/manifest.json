@@ -1637,7 +1637,7 @@
       "draw": 1
     },
     "proto_ko_careful_arrangement": {
-      "grow": 2
+      "grow": 3
     },
     "proto_ko_chain_fuse": {
       "grow": 3
@@ -1811,7 +1811,7 @@
       "remove": "exhaust"
     },
     "proto_ko_taste_test": {
-      "cards": -1
+      "cost": -1
     },
     "proto_ko_team_effort": {
       "damage": 3
