@@ -22,9 +22,6 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
-- **Yae's starter** (`review/records/yae-round-9-2026-10-17.md`, pick 1, default (a)):
-  Yakan Evocation becomes "Plant a Sakura. It strikes now." Starters are
-  59% of her act-1 plays; it is the one that does nothing on the turn.
 - **Distribution readiness** (`distribution-readiness-2026-10-12.md`, two picks,
   defaults (a)): a closed beta now, public early access once Varka and Furina
   reach Balance; a GitHub release first. (The `LAW.md` art line, #1145, is
