@@ -452,7 +452,7 @@ public sealed class SaiguusLessonPower : PowerModel, ILocalizationProvider
     {
         ("title", "Saiguu's Lesson"),
         ("description",
-            "Whenever you apply [gold]Weak[/gold] to an enemy, a "
+            "Whenever you apply [gold]Weak[/gold] to an enemy, a striking "
           + "[gold]Sakura[/gold] strikes it."),
     };
 

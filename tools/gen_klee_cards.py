@@ -17270,7 +17270,7 @@ def yae_face_lines(card: dict, profile: "CharacterProfile",
     """A Yae row's face with its live Tenko clause placed, and (token, C#).
 
     A row that Tenkos says in combat what its Tenko would do now, summed by
-    kind over the Sakura standing: "Tenko (8 damage, 4 to each enemy, 5
+    kind over the Sakura standing: "Tenko (Sakura: 8 damage, 4 to each enemy, 5
     Block)"; with none standing "Tenko (no Sakura)". The
     `{InCombat:{YaeTenko}|}` goes right after "Tenko". Review r3 (ruled
     2026-10-14): Tenko is one plain rule again, so a row prints it

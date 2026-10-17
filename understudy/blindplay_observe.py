@@ -415,6 +415,17 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
             obs["offers"] = [obs["offers"][i] for i in chooser_order(
                 state, _screen_cards(state))]
         mark_edit_replaces(obs["prompt"], obs["offers"])
+        # Yae round 10 (2026-10-17, lane 4): A HAND PICK LEAVES THE LIST. The
+        # game moves a picked hand card out of the hand into the selected row
+        # (`NPlayerHand.SelectCardInSimpleMode`), so the list no longer shows
+        # it and the pick waits for `confirm`. The seat saw only Scattered
+        # Blossoms listed, confirmed, and the Edit went on the Tenko Kenshin
+        # it had picked. The bridge names the held picks
+        # (`BuildHandSelectState`, `selected_cards`).
+        obs["hand_picked"] = ([_text(c.get("name"))
+                               for c in blob.get("selected_cards") or []
+                               if isinstance(c, dict) and _text(c.get("name"))]
+                              if st == "hand_select" else [])
         # `EB-263`. WHAT THE SCREEN SAYS IS PICKED. Two channels now, and the
         # older one first: `BuildCardSelectState` puts the chosen card(s) in
         # `preview_cards` while a preview container is open, which the upgrade

@@ -2260,6 +2260,8 @@ def _resolution_lines(rows: list[dict[str, Any]],
                                if row.get("discard_picked_for_you")
                                else RESOLUTION_DISCARDED).format(
                 cards=_and_list([f"**{c}**" for c in discarded])))
+        # Yae rounds 7, 8 and 10 (2026-10-17): what the card's Edit reached.
+        oath_lines += _edit_receipt_lines(row.get("edits") or [])
         killed = row.get("killed") or []
         applied = row.get("applied") or []
         if not row["hits"] and not killed and not applied and oath_lines:
@@ -2891,6 +2893,12 @@ _COMBAT_OPENING = re.compile(
     re.I)
 
 
+#: Yae round 8 (2026-10-17): a face that pays on one numbered turn, and
+#: (group 2) on every turn after it.
+_NTH_TURN = re.compile(r"\byour (\d+)(?:st|nd|rd|th) turn\b"
+                       r"(,? and every turn after)?", re.I)
+
+
 def _energy_line(you: dict[str, Any], round_number: int | None = None) -> str:
     """`Energy 2 left of 3`, or, where she holds more than a turn's, what
     gave the rest: `Energy 4 (3 a turn, +1 Lantern)` (Kokomi review r6,
@@ -2913,6 +2921,17 @@ def _energy_line(you: dict[str, Any], round_number: int | None = None) -> str:
         if (isinstance(round_number, int) and round_number > 1
                 and _COMBAT_OPENING.search(text)):
             continue
+        # Yae round 8 (2026-10-17, lane 4): a face that pays on one named
+        # turn ("At the start of your 2nd turn": Candelabra, Chandelier;
+        # "3rd turn, and every turn after that": Pael's Flesh) is a source on
+        # that turn only. Candelabra took +2 of turn 1's surplus and Very Hot
+        # Cocoa's +4 printed as +2.
+        nth = _NTH_TURN.search(text)
+        if nth and isinstance(round_number, int):
+            on = int(nth.group(1))
+            if (round_number < on if nth.group(2)
+                    else round_number != on):
+                continue
         found = _RELIC_ENERGY.search(text)
         if found and surplus > 0:
             n = min(int(found.group(1)), surplus)
@@ -3116,6 +3135,41 @@ EDIT_PROMPT_HEAD = "Choose a card to Edit"
 EDIT_UP_TO_PROMPT = re.compile(r"^Choose up to (\d+) cards to Edit")
 EDIT_UP_TO_NOTE = ("*Pick up to {n} different cards on this one screen, then "
                    "confirm. Fewer, or none, is allowed.*")
+#: Yae round 10 (2026-10-17, lane 4): a picked hand card leaves the hand's
+#: list and waits in the selected row until `confirm`
+#: (`NPlayerHand.SelectCardInSimpleMode`; the bridge's `selected_cards`).
+#: Yae rounds 7, 8 and 10 (2026-10-17): an Edit's receipt on the play line
+#: (`YaeEditing.NoteEdited`). A one-card Edit with one card it can reach
+#: takes it without a chooser (`CardSelectCmd.FromHand`), and two seats sent
+#: a `choose` the game then refused; Inked Branches+ on an empty hand said
+#: nothing about its hand half.
+RESOLUTION_EDITED = "  Edited **{card}**: {annotation}."
+RESOLUTION_EDITED_FOR_YOU = ("  Edited **{card}**: {annotation}. It was the "
+                             "only card this Edit could reach, so no chooser "
+                             "opened.")
+RESOLUTION_EDITED_SAKURA = "  Edited {n} Sakura: {annotation}."
+RESOLUTION_EDITED_NONE = "  No card in your hand that this Edit could reach."
+
+
+def _edit_receipt_lines(edits: list[dict[str, Any]]) -> list[str]:
+    """The play line's Edit receipts, in the order the mod filed them."""
+    out: list[str] = []
+    for e in edits:
+        if e["kind"] == "card" and e["card"]:
+            out.append((RESOLUTION_EDITED_FOR_YOU if e["n"] == 1
+                        else RESOLUTION_EDITED).format(
+                card=e["card"], annotation=e["annotation"]))
+        elif e["kind"] == "sakura" and e["n"] > 0:
+            out.append(RESOLUTION_EDITED_SAKURA.format(
+                n=e["n"], annotation=e["annotation"]))
+        elif e["kind"] == "none":
+            out.append(RESOLUTION_EDITED_NONE)
+    return out
+
+
+HAND_PICKED_HEADING = "## What you have picked"
+HAND_PICKED_NOTE = ("*A picked card leaves the list above and waits here. "
+                    "`confirm` takes it.*")
 SHRINE_COUNT_LINE = ("- Sakura: {n} of {cap}. At the end of your turn each "
                      "acts, oldest first.")
 SHRINE_NONE_LINE = "- Sakura: none. Plant one to start your shrine."
@@ -4038,6 +4092,16 @@ def _incoming_line(enemies: list[dict[str, Any]], you: dict[str, Any],
     eternal = any(_fold(p.get("name")) == "eternity"
                   for p in you.get("powers") or [])
     facts["block"] = facts["block"] + _kitsune_block_parts(shrine, eternal)
+    # Yae round 8 (2026-10-17, lane 3): The Shrine's Sacred Shade, "gain N
+    # Block for each Sakura" at the end of your turn (`YaeShrine.TurnEnd`,
+    # before the Sakura act), counted off the shrine block, not named.
+    if shrine is not None:
+        shade = _sacred_shade_block(you, shrine)
+        if shade is not None:
+            facts["unknown"] = [n for n in facts["unknown"]
+                                if _fold(n) != _fold(SACRED_SHADE_NAME)]
+            if shade:
+                facts["block"] = facts["block"] + [(SACRED_SHADE_NAME, shade)]
     not_counted = (INCOMING_NOT_COUNTED.format(
         names=_and_list(facts["unknown"])) if facts["unknown"] else "")
     not_counted += "".join(INCOMING_CONDITIONAL_BLOCK.format(name=name, n=n)
@@ -4092,6 +4156,23 @@ def _incoming_line(enemies: list[dict[str, Any]], you: dict[str, Any],
         line += INCOMING_LEAVES.format(after=max(0, you["hp"] - take),
                                        max_hp=you["max_hp"])
     return line + not_counted
+
+
+SACRED_SHADE_NAME = "The Shrine's Sacred Shade"
+
+
+def _sacred_shade_block(you: dict[str, Any],
+                        shrine: dict[str, Any]) -> int | None:
+    """The Block The Shrine's Sacred Shade gains at the end of your turn:
+    its stacks for each Sakura standing (`SacredShadePower`'s Amount), or
+    None where you do not hold it."""
+    for pw in you.get("powers") or []:
+        if _fold(pw.get("name")) == _fold(SACRED_SHADE_NAME):
+            stacks = pw.get("stacks")
+            if not isinstance(stacks, int):
+                return None
+            return max(0, stacks) * len(shrine.get("sakura") or [])
+    return None
 
 
 def _kitsune_block_parts(shrine: dict[str, Any] | None,
@@ -4914,6 +4995,12 @@ def render(obs: dict[str, Any]) -> str:
         for card in obs["offers"]:
             out += _render_card(card)
         if obs["screen"] == "card_select":
+            # Yae round 10 (2026-10-17): a hand pick leaves the list above.
+            if obs.get("hand_picked"):
+                out += ["", HAND_PICKED_HEADING, "",
+                        HAND_PICKED_NOTE, ""]
+                out += [f"- **{name}** — {PICKED_MARK}"
+                        for name in obs["hand_picked"]]
             if obs.get("selected"):
                 # `EB-329`: the note FIRST, because the misread it prevents is
                 # a count, and a reader who has already counted sixteen rows
