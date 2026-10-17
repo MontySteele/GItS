@@ -156,6 +156,13 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
   Field's card costs 0. Both new cards wear official wiki art.
 - **Next:** five to eight seats overnight on this build, then [USER]'s run
   (pick 4 (b)).
+- **Story built** (2026-10-16, `review/active/kokomi-story-2026-10-16.md`,
+  picks 1 (a) and 2 (a), ruled "nothing that blocks it from a beta launch.
+  ... Approved!"): eight events in three threads (the strategist, Watatsumi,
+  her friends; `Story/KokomiStory.cs`) and the Public Address story curse.
+  In co-op her story room now shows her own event, not the placeholder. Her
+  lines (select text, combat, Ancients, the Architect) are pick 3, open, and
+  not built. Unseen in game until a deploy.
 - **Possible change, parked:** Nereid's Ascension carries her burst's name
   only (no HP scaling, healing or jellyfish refresh, unlike the other three
   kits' bursts). [USER]: "Let's flag this as a possible change on Kokomi and

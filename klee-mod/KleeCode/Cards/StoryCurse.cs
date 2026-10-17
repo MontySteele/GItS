@@ -36,10 +36,14 @@ public abstract class StoryCurse : CustomCardModel
     /// <summary>The card's name, the paper's.</summary>
     protected abstract string CurseTitle { get; }
 
+    /// <summary>The paper's own text for the card, set above the clock's
+    /// sentence (Kokomi's Public Address). Null: the clock's sentence alone.</summary>
+    protected virtual string? FlavorLine => null;
+
     public override List<(string, string)>? Localization => new()
     {
         ("title", CurseTitle),
-        ("description", DescriptionText),
+        ("description", FlavorLine == null ? DescriptionText : FlavorLine + "\n" + DescriptionText),
     };
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>

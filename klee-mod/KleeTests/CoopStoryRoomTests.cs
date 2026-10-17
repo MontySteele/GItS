@@ -24,6 +24,7 @@ public class CoopStoryRoomTests
     private static readonly Type VarkaType = typeof(global::KleeMod.Varka);
     private static readonly Type FurinaType = typeof(global::KleeMod.Furina);
     private static readonly Type KokomiType = typeof(global::KleeMod.Kokomi);
+    private static readonly Type YaeType = typeof(global::KleeMod.Yae);
     private static readonly Type Ironclad = typeof(MegaCrit.Sts2.Core.Models.Characters.Ironclad);
 
     private static readonly IReadOnlyList<StoryRecord> None = Array.Empty<StoryRecord>();
@@ -54,12 +55,12 @@ public class CoopStoryRoomTests
     }
 
     [Fact]
-    public void Klee_gets_her_event_and_Kokomi_the_placeholder()
+    public void Klee_gets_her_event_and_Yae_the_placeholder()
     {
         foreach (var seats in new[]
                  {
-                     Seats((KleeType, None), (KokomiType, None)),
-                     Seats((KokomiType, None), (KleeType, None)),
+                     Seats((KleeType, None), (YaeType, None)),
+                     Seats((YaeType, None), (KleeType, None)),
                  })
         {
             Assert.Equal(typeof(StoryCoopRoomEvent), StoryRules.RoomEventFor(seats, 0, 7UL));
@@ -68,9 +69,49 @@ public class CoopStoryRoomTests
             Assert.Contains(room[klee]!, T(KleeType).Events);
             Assert.Null(room[1 - klee]); // the placeholder
         }
-        Assert.Null(StoryRules.CoopEventFor(KokomiType, None, 0, 7UL));
+        Assert.Null(StoryRules.CoopEventFor(YaeType, None, 0, 7UL));
         Assert.Null(StoryRules.CoopEventFor(Ironclad, None, 1, 7UL));
         Assert.Null(StoryRules.CoopEventFor(null, None, 0, 7UL));
+    }
+
+    /// <summary>Kokomi's story (review/active/kokomi-story-2026-10-16.md):
+    /// in the co-op story room she gets her own routed event every act, not
+    /// "A Quiet Landing".</summary>
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    public void Kokomi_gets_her_own_event_not_the_placeholder(int act)
+    {
+        foreach (var other in new[] { KleeType, Ironclad, YaeType })
+        {
+            foreach (var seats in new[]
+                     {
+                         Seats((KokomiType, None), (other, None)),
+                         Seats((other, None), (KokomiType, None)),
+                     })
+            {
+                Assert.Equal(typeof(StoryCoopRoomEvent), StoryRules.RoomEventFor(seats, act, 7UL));
+                var room = StoryRules.CoopRoom(seats, act, 7UL)!;
+                var kokomi = seats[0].Item1 == KokomiType ? 0 : 1;
+                Assert.Contains(room[kokomi]!, KokomiStory.Table.Events);
+                Assert.Equal(act, room[kokomi]!.ActIndex);
+                Assert.Same(StoryRules.Route(KokomiStory.Table, act, None, 7UL), room[kokomi]);
+            }
+        }
+        var own = StoryRules.CoopEventFor(KokomiType, None, act, 7UL);
+        Assert.NotNull(own);
+        Assert.NotSame(StoryCoop.QuietLanding, own);
+
+        // Her chain runs on her own saved story: act 1's Sand Table leads her
+        // to The Other Commander in act 2, opening on her choice.
+        var keys = new string?[] { Choice(typeof(KokomiSandTable), "MOVE_HER_PIECE") };
+        var records = StoryRules.Records(KokomiStory.Table, _ => false, keys, StoryRegistry.EntryOf);
+        var act2 = StoryRules.CoopRoom(Seats((KleeType, None), (KokomiType, records)), 1, 7UL)!;
+        Assert.Equal(typeof(KokomiOtherCommander), act2[1]!.EventType);
+        Assert.Equal("MOVED", StoryRules.OpeningFor(act2[1]!, records)!.Key);
+        // Once hers fired this act, the placeholder.
+        Assert.Null(StoryRules.CoopEventFor(KokomiType, records, 0, 7UL));
     }
 
     [Fact]
@@ -93,7 +134,7 @@ public class CoopStoryRoomTests
     [Fact]
     public void A_table_with_no_story_this_act_keeps_the_drawn_event()
     {
-        Assert.Null(StoryRules.RoomEventFor(Seats((KokomiType, None), (Ironclad, None)), 0, 7UL));
+        Assert.Null(StoryRules.RoomEventFor(Seats((YaeType, None), (Ironclad, None)), 0, 7UL));
         Assert.Null(StoryRules.RoomEventFor(Seats((KleeType, None), (VarkaType, None)), 3, 7UL));
     }
 
@@ -116,7 +157,7 @@ public class CoopStoryRoomTests
     [Fact]
     public void Solo_still_draws_her_own_event_type()
     {
-        foreach (var c in new[] { KleeType, VarkaType, FurinaType })
+        foreach (var c in new[] { KleeType, VarkaType, FurinaType, KokomiType })
         {
             for (var act = 0; act < 4; act++)
             {
@@ -129,7 +170,7 @@ public class CoopStoryRoomTests
             }
             Assert.NotEqual(typeof(StoryCoopRoomEvent), StoryRules.RoomEventFor(Seats((c, None)), 0, 7UL));
         }
-        Assert.Null(StoryRules.RoomEventFor(Seats((KokomiType, None)), 0, 7UL));
+        Assert.Null(StoryRules.RoomEventFor(Seats((YaeType, None)), 0, 7UL));
     }
 
     // ---- The chain, per player -------------------------------------------------

@@ -272,7 +272,7 @@ public class KleeStoryTests
         Assert.Null(StoryRules.EventFor(klee, 3, 7UL));
         for (var act = 0; act < 4; act++)
         {
-            Assert.Null(StoryRules.EventFor(Seats(typeof(Kokomi), typeof(Yae)), act, 7UL));
+            Assert.Null(StoryRules.EventFor(Seats(typeof(MegaCrit.Sts2.Core.Models.Characters.Ironclad), typeof(Yae)), act, 7UL));
             Assert.Null(StoryRules.EventFor(Seats(typeof(MegaCrit.Sts2.Core.Models.Characters.Ironclad)), act, 7UL));
             Assert.Null(StoryRules.EventFor(Seats(), act, 7UL));
         }
@@ -282,11 +282,11 @@ public class KleeStoryTests
     [Fact]
     public void Klee_at_a_co_op_table_still_gets_hers_and_only_once()
     {
-        var first = StoryRules.EventFor(Seats(typeof(Kokomi), typeof(global::KleeMod.Klee)), 0, 7UL)!;
+        var first = StoryRules.EventFor(Seats(typeof(Yae), typeof(global::KleeMod.Klee)), 0, 7UL)!;
         Assert.Contains(first, Klee.Events);
         var fired = new[] { new StoryRecord(0, first.EventType, null) };
         Assert.Null(StoryRules.EventFor(
-            new (Type, IReadOnlyList<StoryRecord>)[] { (typeof(Kokomi), Nothing), (typeof(global::KleeMod.Klee), fired) },
+            new (Type, IReadOnlyList<StoryRecord>)[] { (typeof(Yae), Nothing), (typeof(global::KleeMod.Klee), fired) },
             0, 7UL));
     }
 
@@ -600,7 +600,7 @@ public class KleeStoryTests
     {
         var rows = StoryLoc.LineRows();
         var own = StoryRegistry.EntryOf(typeof(global::KleeMod.Klee));
-        Assert.Equal(StoryRegistry.All.Sum(s => 6 + 2 * s.Pairs.Count), rows.Count);
+        Assert.Equal(StoryRegistry.All.Sum(s => (s.Lines == null ? 0 : 6) + 2 * s.Pairs.Count), rows.Count);
         Assert.Equal(Klee.Lines.Signature, rows[StoryLines.Key(own, StoryLines.Signature)]);
         foreach (var p in Klee.Pairs)
         {

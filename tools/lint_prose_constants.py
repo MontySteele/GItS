@@ -297,6 +297,23 @@ ALLOWED: dict[tuple[str, str, str], str] = {
     ("klee-mod/KleeCode/Story/FurinaStory.cs",
      "FurinaStageLaw.SingerRepayUpgraded", "2"):
         "the story event's upgrade count, not the Singer's repay",
+    # KOKOMI'S STORY (2026-10-16, review/active/kokomi-story-2026-10-16.md):
+    # The Sand Table's "Lose 7 HP. Upgrade 2 random cards.", Coral Light's
+    # "Lose 6 HP. Upgrade 2 random cards." and Gorou's report's "Upgrade 2
+    # random cards." are the events' own prices and counts (the ruled
+    # paper's text), not Furina guest numbers.
+    ("klee-mod/KleeCode/Story/KokomiStory.cs",
+     "FurinaStageLaw.FreminetActBlockUpgraded", "7"):
+        "the story event's HP price, not Freminet's act Block",
+    ("klee-mod/KleeCode/Story/KokomiStory.cs",
+     "FurinaStageLaw.LyneyActDamageUpgraded", "7"):
+        "the story event's HP price, not Lyney's act damage",
+    ("klee-mod/KleeCode/Story/KokomiStory.cs",
+     "FurinaStageLaw.EscoffierActDamageUpgraded", "6"):
+        "the story event's HP price, not Escoffier's act damage",
+    ("klee-mod/KleeCode/Story/KokomiStory.cs",
+     "FurinaStageLaw.SingerRepayUpgraded", "2"):
+        "the story event's upgrade count, not the Singer's repay",
     # VARKA'S STORY (2026-10-13, review/active/varka-story-2026-10-13.md):
     # "Upgrade 2 random cards" and "Upgrade 3 random cards" are the story
     # events' own counts (the ruled paper's text), not a Furina number.
