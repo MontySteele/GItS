@@ -116,7 +116,7 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   strikes as it lands (round 9, pick 1 (a)), and the five refused cards fixed
   (Falling Blossom no longer withers, Dawn Prayer and Mikage Thunder pay on
   the turn, Kitsune Pounce deals 5 more to a Weak enemy, The Seven Glamours
-  costs 1). Next: [USER]'s run (pick 4 (a)).
+  costs 1). **The draft pass and starter change built** (#1393, `review/active/yae-draft-pass-2026-10-17.md`). **Round 10** (`review/records/yae-round-10-2026-10-17.md`): end floors 38 / 48 / 17 / 48 / 28, mean 35.8; damage 0.95 / 0.95 / 0.86 of base and act-1 fight length 3.25 turns (base 3.09); act-1 HP lost per fight 7.8 against 5.9 is what is left. Next: [USER]'s run (pick 4 (a)).
 
 ## The kits
 
