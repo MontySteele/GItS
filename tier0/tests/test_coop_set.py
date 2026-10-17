@@ -318,6 +318,20 @@ def test_marching_orders_lands_on_no_one(arms):
     assert not st.player.powers.get("attack_up_this_turn")
 
 
+def test_marching_orders_face_reads_the_live_oath():
+    # Co-op seat (2026-10-16): "+0 damage" every time. The face's bare
+    # `{VkOath}` formats through ToString / IConvertible, which read the
+    # var's BaseValue (0); both answer the live bonus now.
+    src = (Path(__file__).resolve().parents[2] / "klee-mod" / "KleeCode"
+           / "Powers" / "Prototype" / "CoopSet.cs").read_text(encoding="utf-8")
+    var = src[src.index("public sealed class VarkaCurrentOathVar"):]
+    var = var[:var.index("\n}\n")]
+    assert ("protected override decimal GetBaseValueForIConvertible() => Live;"
+            in var)
+    assert "public override string ToString() =>" in var
+    assert "VarkaCards.MarchingOrdersBonus(owner)" in var
+
+
 def test_windward_flank_swirls_and_shreds_the_enemy(arms):
     st = _varka()
     st.enemies[0].aura = "pyro"

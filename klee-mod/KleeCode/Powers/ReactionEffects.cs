@@ -247,6 +247,15 @@ internal static class ReactionEffects
         return ShatteredThisHit(body) ? null : FrozenBlockedByArtifact;
     }
 
+    /// <summary>The card preview's read (co-op seat, 2026-10-16): will the
+    /// body's Artifact negate the Frozen (or a boss's Vulnerable)? The
+    /// Artifact alone; <see cref="FrozenArtifactDetail"/> also reads this
+    /// hit's Shatter mark, which a preview between hits must not see.
+    /// </summary>
+    public static bool ArtifactWillBlockFrozen(Creature? body) =>
+        body != null
+        && body.Powers.OfType<ArtifactPower>().Any(a => a.Amount > 0);
+
     public const string FrozenBlockedByArtifact =
         "Its Artifact blocked the Frozen, so it is not Frozen.";
 

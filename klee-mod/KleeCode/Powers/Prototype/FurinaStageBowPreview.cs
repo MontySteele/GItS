@@ -156,13 +156,30 @@ public static class FurinaStageFacePreview
     /// <see cref="FurinaStage.SpentOrUpTo"/>, the count the play takes, so
     /// the face and the play agree. Empty with nothing to spend, off a
     /// combat or a Furina board.</summary>
-    public static string SpendUpToHits(CardModel card, int cap) =>
-        Owner(card) is null
-            ? ""
-            : SpendUpToHitsWords(FurinaStage.SpentOrUpTo(card, cap));
+    public static string SpendUpToHits(CardModel card, int cap)
+    {
+        if (Owner(card) is not { } owner) return "";
+        var spend = FurinaStage.SpentOrUpTo(card, cap);
+        return SpendUpToHitsWords(spend, EmptiesBank(card, owner, spend));
+    }
 
-    /// <summary>The words, for the pins.</summary>
-    public static string SpendUpToHitsWords(int spend)
+    /// <summary>Co-op seat (2026-10-16): "(Spends 6: 1 more hit)" took the
+    /// whole bank of 6 and the next Spend card had nothing. Before the
+    /// play, a spend that takes all she holds says so.</summary>
+    private static bool EmptiesBank(
+        CardModel card, MegaCrit.Sts2.Core.Entities.Creatures.Creature owner,
+        int spend)
+    {
+        if (FurinaStage.Spent(card) > 0) return false;
+        if (CenterOfAttentionPower.Covers(owner)) return false;
+        var ledger = FurinaStageLedger.For(owner);
+        return ledger.Fanfare > 0
+            && spend >= ledger.Fanfare + ledger.NaviaDiscount;
+    }
+
+    /// <summary>The words, for the pins: "(Spends all 6: 1 more hit)" when
+    /// <paramref name="all"/> says the spend empties the bank.</summary>
+    public static string SpendUpToHitsWords(int spend, bool all = false)
     {
         if (spend <= 0) return "";
         var more = spend / FurinaStageLaw.SpendUpToEvery;
@@ -173,7 +190,7 @@ public static class FurinaStageFacePreview
             _ => more.ToString(System.Globalization.CultureInfo.InvariantCulture)
                  + " more hits",
         };
-        return "\n(Spends "
+        return "\n(Spends " + (all ? "all " : "")
              + spend.ToString(System.Globalization.CultureInfo.InvariantCulture)
              + ": " + buys + ")";
     }

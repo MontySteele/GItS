@@ -2591,7 +2591,7 @@
    authored_by: [claude],
    art_of: clorinde_impale_the_night,
    nation: fontaine, star: 5, rarity: rare, role_c: applier, element: electro, cost: 2, type: attack,
-   description: "Deal 20 [gold]Electro[/gold] damage. Your Attacks against enemies holding an aura deal 6 additional damage.",
+   description: "Deal 20 [gold]Electro[/gold] damage. Your later Attacks against enemies holding an aura deal 6 additional damage.",
    effects: [{op: damage, amount: 20, target: enemy, applies_element: true}, {op: apply_power, power: night_vigil, amount: 6, target: self, note: "your Attacks against enemies that have an aura deal +6"}]}
 
 - {id: proto_mf_neuvillette_ancient_sea_authority, name: "Neuvillette — Heir to the Ancient Sea's Authority", character: klee,
