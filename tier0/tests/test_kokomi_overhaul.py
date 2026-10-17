@@ -56,9 +56,9 @@ OVERHAUL_OPS = ("mend", "remove_debuff",
 #: vocabulary check the body takes, and they refuse from a body always -- with
 #: the flag on as well as off, which is what separates them from the rest.
 #: (Breakwater's `block_per_plan_held` left with Dusk, the re-founding,
-#: 2026-10-12; a written Companion's `play_companion` is the second now.)
-PLAN_ONLY_OPS = ("play_copy_of_companion",
-                 "play_companion")
+#: 2026-10-12; a written Companion's `play_companion` left with Kokomi review
+#: r9 pick 1 (a), 2026-10-15.)
+PLAN_ONLY_OPS = ("play_copy_of_companion",)
 
 
 @pytest.fixture

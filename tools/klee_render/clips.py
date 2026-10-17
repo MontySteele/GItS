@@ -451,9 +451,33 @@ REST = pose(
 # --------------------------------------------------------------------- character select
 # A waist-up close-up of stance B: grinning, the bomb cradled at her chest,
 # the face turned further toward the viewer than in combat.
-SELECT = cradle(1.0) | {"morphs": {"にやり": 0.9, "あ": 0.25}, "cradle": True}
-SELECT["ops"] = [op if op[1] not in ("首", "頭") or op[0] != "rotw" or op[2] != Z
-                 else (op[0], op[1], op[2], op[3] * 0.55) for op in SELECT["ops"]]
+
+
+def select_pose(breath=1.0, swing=0.0):
+    """The close-up's pose at a point of its breath (1.0 and 0 swing: the still)."""
+    p = cradle(breath, swing) | {"morphs": {"にやり": 0.9, "あ": 0.25}, "cradle": True}
+    p["ops"] = [op if op[1] not in ("首", "頭") or op[0] != "rotw" or op[2] != Z
+                else (op[0], op[1], op[2], op[3] * 0.55) for op in p["ops"]]
+    return p
+
+
+SELECT = select_pose()
+
+#: The close-up's idle loop (select stage 2, 2026-10-15): HALF a breath, from
+#: the still's pose (full breath, pigtails at rest) out to the exhale with the
+#: pigtails swung. The game plays it forward then back, so every motion is a
+#: cosine of the loop (eased at both ends) and the loop has no seam.
+#: tools/select_loop.py renders it at the still's framing; frame 0 IS the still.
+SELECT_LOOP = {
+    "length": 2.0, "fps": 6, "loop": True, "cradle": True, "motion_end": 2.0,
+    "keys": [
+        (0.0, select_pose(1.0, 0.0), "io"),
+        (2.0, select_pose(0.0, 3.0), "io"),
+    ],
+}
+#: not in CLIPS: a half loop that does not close on its own (the game plays it
+#: forward then back); only tools/select_loop.py renders it
+SELECT_LOOPS = {"select_loop": SELECT_LOOP}
 
 # --------------------------------------------------------------------- roster tile
 # The character-select roster tile (132x195): a face close-up like the base

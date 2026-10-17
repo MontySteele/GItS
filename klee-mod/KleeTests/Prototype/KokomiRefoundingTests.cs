@@ -80,58 +80,62 @@ public class KokomiRefoundingTests
     }
 
     // ---- Companions as Plans -----------------------------------------------
+    //
+    // Kokomi review r9 pick 1 (a), 2026-10-15; [USER]: "let's get rid of
+    // Companions as Plans unless we make a card that specifically has a Plan
+    // line." The re-founding's general rule (any Companion card can be
+    // written) is gone: a Companion is planned only through a Plan line it
+    // prints, on the Plan path every Plan card takes.
 
     [Fact]
-    public void A_companion_without_a_plan_line_is_writable_and_gorous_carry_their_own()
+    public void A_companion_with_no_plan_line_cannot_be_planned()
     {
-        Assert.IsAssignableFrom<IWritableCompanion>(
-            new ProtoMiShinobuThundergrust());
-        Assert.IsAssignableFrom<IWritableCompanion>(
-            new ProtoMiShinobuGrassRing());
-        Assert.False(new ProtoMiGorouInuzaka() is IWritableCompanion);
-        Assert.True(KokomiRefounding.CanBeWritten(new ProtoMiGorouInuzaka()));
-        Assert.True(KokomiRefounding.CanBeWritten(
-            new ProtoMiShinobuThundergrust()));
+        foreach (var card in new CardModel[]
+                 { new ProtoMiShinobuThundergrust(), new ProtoMiShinobuGrassRing(),
+                   new ProtoMiKiraraSurpriseDispatch() })
+        {
+            var name = card.GetType().Name;
+            Assert.IsAssignableFrom<global::KleeMod.Cards.ICompanionCard>(card);
+            Assert.False(card is IPlannedCard, name);
+            Assert.False(KokomiRefounding.CanBeWritten(card), name);
+            // No target override, so the Bake-Kurage refuses it as it
+            // refuses any card with no Plan line, and its play never asks
+            // whether it was dropped on the jellyfish.
+            Assert.NotEqual(card.GetType(),
+                            card.GetType().GetProperty("TargetType")!.DeclaringType);
+            Assert.DoesNotContain(Il.Calls(Il.Method(name, "OnPlay")),
+                                  c => c.Contains("PlayedOnPet")
+                                       || c.Contains("KokomiCompanionPlan"));
+        }
+        // The rule's machinery left with it.
+        var asm = typeof(KokomiCompanionPlan).Assembly;
+        Assert.Null(asm.GetType("KleeMod.Powers.IWritableCompanion"));
+        foreach (var gone in new[] { "Write", "CarryOut", "TargetFor",
+                                     "OnKokomi", "AimsAtAnEnemy" })
+        {
+            Assert.Null(typeof(KokomiCompanionPlan).GetMethod(gone));
+        }
+        Assert.DoesNotContain("PlayCompanion",
+                              System.Enum.GetNames(typeof(KokomiPlan.Kind)));
+    }
+
+    [Fact]
+    public void A_companion_that_prints_a_plan_line_is_still_planned_by_it()
+    {
+        // Gorou's Inuzaka: "Plan: Gain 11 Block" (the sim twin carries it out:
+        // test_gorou_inuzaka_written_carries_out_its_own_plan_line).
+        var gorou = new ProtoMiGorouInuzaka();
+        Assert.IsAssignableFrom<global::KleeMod.Cards.ICompanionCard>(gorou);
+        Assert.True(KokomiRefounding.CanBeWritten(gorou));
+        var plan = Assert.Single(((IPlannedCard)gorou).PlanClauses);
+        Assert.Equal(KokomiPlan.Kind.Block, plan.Kind);
+        Assert.Equal(KokomiPlan.Aim.Self, plan.Aim);
+        // Its play writes its own Plan line on the jellyfish.
+        var seq = Seq(nameof(ProtoMiGorouInuzaka), "OnPlay");
+        var onPet = seq.FindIndex(c => c.Contains("KokomiPlan.PlayedOnPet"));
+        var schedule = seq.FindIndex(c => c.Contains("KokomiPlan.Schedule"));
+        Assert.True(onPet >= 0 && schedule > onPet, string.Join(" ", seq));
         Assert.False(KokomiRefounding.CanBeWritten(new ProtoKkEveningWatch()));
-    }
-
-    [Fact]
-    public void A_writable_companion_carries_the_companion_plan_tip_on_kokomi_only()
-    {
-        // Pre-round fix (2026-10-12): nothing said a Companion can be written.
-        // Every writable row attaches the tip; it is live off the same test
-        // that lets the card target the jellyfish, so a canonical copy (no
-        // owner) and every other character see nothing.
-        Assert.Contains("ArmKeywordTips.ForCompanionPlan",
-            Il.Calls(Il.Method("ProtoMiShinobuThundergrust", "get_ExtraHoverTips")));
-        Assert.False(KokomiCompanionPlan.OnKokomi(new ProtoMiShinobuThundergrust()));
-        Assert.Contains("KokomiCompanionPlan.OnKokomi",
-            Il.Calls(Il.Method("ArmKeywordTips", "ForCompanionPlan")));
-        Assert.Contains("KokomiCompanionPlan.OnKokomi",
-            Il.Calls(Il.Method("KokomiCompanionPlan", "TargetFor")));
-    }
-
-    [Fact]
-    public void A_canonical_companion_prints_its_own_target()
-    {
-        var card = new ProtoMiShinobuThundergrust();
-        Assert.Equal(TargetType.AnyEnemy, card.PrintedTargetType);
-        Assert.Equal(TargetType.AnyEnemy, card.TargetType);
-        Assert.True(KokomiCompanionPlan.AimsAtAnEnemy(card));
-        Assert.False(KokomiCompanionPlan.AimsAtAnEnemy(
-            new ProtoMiShinobuGrassRing()));
-    }
-
-    [Fact]
-    public void The_carry_out_lays_hydro_first_then_auto_plays_an_exhausting_clone()
-    {
-        var seq = Seq(nameof(KokomiCompanionPlan), "CarryOut");
-        var hydro = seq.IndexOf("ElementalHit.ApplyOnly");
-        var clone = seq.IndexOf("ICombatState.CloneCard");
-        var exhaust = seq.IndexOf("CardModel.set_ExhaustOnNextPlay");
-        var play = seq.IndexOf("CardCmd.AutoPlay");
-        Assert.True(hydro >= 0 && clone > hydro && exhaust > clone
-                    && play > exhaust, string.Join(" ", seq));
     }
 
     [Fact]

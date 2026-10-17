@@ -534,7 +534,19 @@ def remember_look(room: str, living: list[str], lane: object = None,
                   now: float | None = None, screen: str = "") -> None:
     """Remember the room the seat last looked at, the enemies alive on it
     (printed names and letters, folded), and the screen kind the page was
-    rendered on (`state_type`), so a chooser that opened since is seen."""
+    rendered on (`state_type`), so a chooser that opened since is seen.
+
+    Yae review r6, item 7 (lane 2, Aeonglass). A look at a fight OVERLAY
+    (`room_of` gives `""`) keeps the room the last look held, as
+    `mark_sent` does. The seat looked at a turn-start chooser (Stratagem)
+    with the boss at 51; its `choose` let the turn start finish, a
+    full-shrine plant killed the boss, and the chained `play` was refused
+    as a counted refusal, because a look with no room could not see that
+    the fight had ended since (`blindplay.changed_under`). The page was not
+    behind: the kill came after the pick."""
+    if not room:
+        held = read_state_json(look_path(lane))
+        room = str(held.get("room") or "") if isinstance(held, dict) else ""
     row = {"room": room, "living": list(living), "screen": screen,
            "at": time.time() if now is None else now}
     write_atomic(look_path(lane), json.dumps(row))

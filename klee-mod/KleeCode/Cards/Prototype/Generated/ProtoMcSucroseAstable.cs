@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMcSucroseAstable : CustomCardModel, ICompanionCard, IWritableCompanion
+public sealed class ProtoMcSucroseAstable : CustomCardModel, ICompanionCard
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -50,24 +50,25 @@ public sealed class ProtoMcSucroseAstable : CustomCardModel, ICompanionCard, IWr
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         TipAudience.Seat
-            ? ArmKeywordTips.ForSwirl(ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, appliesWithoutHit: true), this), this)
-            : ArmKeywordTips.ForCompanionPlan(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, appliesWithoutHit: true), this);
+            ? ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, appliesWithoutHit: true), this)
+            : KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, appliesWithoutHit: true);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_sucrose_astable");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sucrose — Astable Anemohypostasis"),
-        ("description", "[gold]Swirl[/gold] ALL enemies."),
+        ("description", "[gold]Swirl[/gold] ALL enemies{InCombat:{SwirlAura}|}."),
     };
 
-    /// <summary>On Kokomi, this Companion card can also be written as a Plan on
-    /// the Bake-Kurage (the re-founding, 2026-10-12).</summary>
-    public override TargetType TargetType =>
-        KokomiCompanionPlan.TargetFor(this, base.TargetType);
-
-    /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
-    public TargetType PrintedTargetType => base.TargetType;
+    /// <summary>Whether this card's Swirl has an aura to Swirl, in combat
+    /// (`SwirlAuraFace`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("SwirlAura", SwirlAuraFace.Line(this));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
@@ -84,11 +85,6 @@ public sealed class ProtoMcSucroseAstable : CustomCardModel, ICompanionCard, IWr
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (KokomiPlan.PlayedOnPet(cardPlay))
-        {
-            await KokomiCompanionPlan.Write(choiceContext, this, cardPlay);
-            return;
-        }
         foreach (var auraTarget in CombatState!.HittableEnemies.ToList())
         {
             await ElementalHit.ApplyOnly(choiceContext, auraTarget, Element.Anemo, Owner.Creature);

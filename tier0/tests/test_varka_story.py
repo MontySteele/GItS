@@ -42,9 +42,9 @@ def test_the_cards_the_events_add_are_the_sheets_rows_under_the_papers_names():
 
 def test_every_borrowed_picture_has_a_plan_row():
     keys = re.findall(r'Art\.CardPortrait\("([a-z0-9_]+)"\)', TABLE.read_text(encoding="utf-8"))
-    assert len(keys) == 3
+    assert len(keys) == 8  # his eight events (the story chains, 2026-10-15)
     keys += re.findall(r'Art\.CardPortrait\("([a-z0-9_]+)"\)', CURSE.read_text(encoding="utf-8"))
-    assert len(keys) == 4
+    assert len(keys) == 9
     plan = {line.split("\t", 1)[0] for line in PLAN.read_text(encoding="utf-8").splitlines()
             if line and not line.startswith("#")}
     for key in keys:

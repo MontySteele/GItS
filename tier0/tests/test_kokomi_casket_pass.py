@@ -86,15 +86,16 @@ def test_the_moved_numbers(overhaul):
 # --- G. the thirteen ------------------------------------------------------------
 
 def test_the_commons(overhaul):
-    # The re-founding (2026-10-12): the Plan is 12 to ALL enemies (16
-    # upgraded), with no Strength rider.
+    # Kokomi review r8 (2026-10-14, item 4): 10 [13] to ALL and 10 [13]
+    # Block now, no Plan (was 14, Plan 12 to ALL).
     shoal = _row("proto_kk_surging_shoal")
-    assert (shoal.cost, shoal.effects[0]["amount"]) == (2, 14)
-    assert shoal.plan == [{"op": "damage", "amount": 12,
-                           "target": "all_enemies"}]
+    assert shoal.cost == 2 and shoal.plan == []
+    assert shoal.effects == [{"op": "damage", "amount": 10,
+                              "target": "all_enemies"},
+                             {"op": "block", "amount": 10}]
     shoal_up = _up("proto_kk_surging_shoal")
-    assert (shoal_up.effects[0]["amount"], shoal_up.plan[0]["amount"]) == \
-        (18, 16)
+    assert (shoal_up.effects[0]["amount"],
+            shoal_up.effects[1]["amount"]) == (13, 13)
 
     # Pearl Diver left the pool in the status batch (2026-10-01).
     # The cleanup pass (2026-09-29): 7 / 11, upgraded 9 / 14.
@@ -107,11 +108,10 @@ def test_the_commons(overhaul):
     assert press_up.effects[0]["else"][0]["amount"] == 9
     assert press_up.effects[0]["then"][0]["amount"] == 14
 
-    # The re-founding (2026-10-12): Dusk retired; 6 Block now, then the draw.
+    # Kokomi review r9 (2026-10-15, item 4): 6 [9] Block, Retain.
     shell = _row("proto_kk_shell_of_sanctuary")
     assert shell.plan == []
-    assert shell.effects == [{"op": "block", "amount": 6},
-                             {"op": "draw", "amount": 1}]
+    assert shell.effects == [{"op": "block", "amount": 6}]
     assert _up("proto_kk_shell_of_sanctuary").effects[0]["amount"] == 9
 
 

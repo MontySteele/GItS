@@ -24,7 +24,6 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
-using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -32,7 +31,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMiAyakaSoumetsu : CustomCardModel, ICompanionCard, IWritableCompanion
+public sealed class ProtoMiAyakaSoumetsu : CustomCardModel, ICompanionCard
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -48,9 +47,6 @@ public sealed class ProtoMiAyakaSoumetsu : CustomCardModel, ICompanionCard, IWri
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
         new[] { CardKeyword.Exhaust };
 
-    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCompanionPlan(base.ExtraHoverTips, this);
-
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mi_ayaka_soumetsu");
 
     public override List<(string, string)>? Localization => new()
@@ -58,14 +54,6 @@ public sealed class ProtoMiAyakaSoumetsu : CustomCardModel, ICompanionCard, IWri
         ("title", "Kamisato Ayaka — Soumetsu"),
         ("description", "For {PowerAmount:diff()} turns, at the end of your turn deal 8 [gold]Cryo[/gold] damage to ALL enemies. The last one deals 16 additional damage."),
     };
-
-    /// <summary>On Kokomi, this Companion card can also be written as a Plan on
-    /// the Bake-Kurage (the re-founding, 2026-10-12).</summary>
-    public override TargetType TargetType =>
-        KokomiCompanionPlan.TargetFor(this, base.TargetType);
-
-    /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
-    public TargetType PrintedTargetType => base.TargetType;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
@@ -82,11 +70,6 @@ public sealed class ProtoMiAyakaSoumetsu : CustomCardModel, ICompanionCard, IWri
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (KokomiPlan.PlayedOnPet(cardPlay))
-        {
-            await KokomiCompanionPlan.Write(choiceContext, this, cardPlay);
-            return;
-        }
         await PowerCmd.Apply<SoumetsuPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 

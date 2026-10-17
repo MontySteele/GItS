@@ -171,7 +171,7 @@ DECKS = {
     "muster": _deck(MUSTER, ALL_KNIGHTS),
 }
 #: Rebalance sec.4's "borrows" for Electro: the generic draw cards.
-GENERIC_DRAW = ["rising_gale", "tempest_charge", "tailwind_stride",
+GENERIC_DRAW = ["rising_gale", "tailwind_stride",
                 "change_of_guard", "vow_of_the_blade", "dawn_patrol",
                 "eye_of_stormterror", "noelle_steadfast_maid"]
 

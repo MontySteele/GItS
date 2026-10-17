@@ -22,7 +22,7 @@ bake-off, commit 09864c273): scalar animation keys must be spelled as floats
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 import yaml
@@ -167,12 +167,34 @@ def sheet_tracks(spec: dict, frames: dict, anim: dict) -> list[Track]:
     return out
 
 
+def shadow_fade(tracks: list, model: str, shadow: str):
+    """The ground shadow's copy of the model's alpha, or None.
+
+    The shadow is a sibling of the model under %Facing (so the hurt flash
+    and the power glow on the model never tint it), which also meant the
+    death clip's fade-out on the model left it behind: in-game check
+    2026-10-16, "a dark oval stays on the ground where they stood" for Klee,
+    Varka and Furina. Any clip whose model modulate track drops below full
+    alpha now drives the shadow's alpha on the same keys; the colour stays
+    white, so only the fade is shared. Works on any rig's Track dataclass.
+    """
+    src = next((t for t in tracks if t.path == f"{model}:modulate"), None)
+    if src is None or all(float(v[3]) >= 1.0 for v in src.values):
+        return None
+    return replace(src, path=f"{shadow}:modulate",
+                   values=[(1.0, 1.0, 1.0, float(v[3])) for v in src.values])
+
+
 def build_animations(spec: dict, frames: dict | None = None) -> dict[str, tuple[dict, list[Track]]]:
     frames = frames or load_frames()
     out = {}
     for name in ANIMATION_ORDER:
         anim = spec["animations"][name]
         tracks = [_expand(anim, tr) for tr in anim.get("tracks", ())]
+        if shadow_of(frames) is not None:
+            fade = shadow_fade(tracks, MODEL, f"Visuals/Facing/{SHADOW_NODE}")
+            if fade is not None:
+                tracks.append(fade)
         tracks += sheet_tracks(spec, frames, anim)
         paths = [t.path for t in tracks]
         assert len(paths) == len(set(paths)), f"{name}: duplicate track"
@@ -424,8 +446,8 @@ def _projectile_node(frames: dict, clip: str = "attack") -> list[str]:
 #: The base cast each draw theirs as a `shadow` region inside their own Spine
 #: skeleton, under the figure, at the feet; Klee's figure is sprites, so hers
 #: is a Sprite2D at the feet anchor, first under %Facing so it draws behind her
-#: and mirrors with her. Nothing animates it: it holds through the attack, the
-#: death sit and the flip, as the base shadows (on the root) do.
+#: and mirrors with her. It holds through the attack and the flip, as the
+#: base shadows (on the root) do, and fades with her at death (shadow_fade).
 SHADOW_ID = "9_shadow"
 SHADOW_NODE = "Shadow"
 
@@ -555,3 +577,25 @@ def render_merchant_scene(frames: dict | None = None) -> str:
         ]),
     ]
     return NL.join(out) + NL
+
+
+# ---------------------------------------------------------------------------
+# the character-select background
+# ---------------------------------------------------------------------------
+
+#: The select scene this generator is the one producer of (build_pck.ps1 only
+#: overlays it): the backdrop, the close-up breathing on a loop and the
+#: Pyro emitters (tools/select_bg.py, 2026-10-14).
+SELECT_SCENE = ROOT / "klee-mod" / "pck-src" / "klee" / "ui" / "char_select_bg_klee.tscn"
+#: The backdrop tint (as the scene carried it in build_pck.ps1).
+SELECT_TINT = (0.52, 0.42, 0.42, 1.0)
+SELECT_ELEMENT = "pyro"
+#: The figure's horizontal centre in select_closeup.png (its opaque columns
+#: span x 883-1616 in the 2026-10-14 render): the breath's pivot and the glow.
+SELECT_FIGURE_X = 1250.0
+
+
+def render_select_scene() -> str:
+    from tools.select_bg import load_loop, render_select_scene as _render
+
+    return _render("klee", "KleeBg", SELECT_TINT, SELECT_ELEMENT, SELECT_FIGURE_X, load_loop("klee"))

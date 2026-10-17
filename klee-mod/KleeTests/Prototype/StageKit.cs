@@ -104,7 +104,17 @@ internal sealed class RecordingBoard : IStageBoard
         return Task.CompletedTask;
     }
 
-    public Task Lunge(StageSeat? seat) => Task.CompletedTask;
+    /// <summary>The acts' lunges, by who lunged, in order: kept apart from
+    /// <see cref="Log"/>. The game board plays the guest effects off the
+    /// lunge (Charlotte, Sigewinne, Freminet) and off the act's hit
+    /// (<c>KleeMod.Vfx.FurinaGuestFx</c>, 2026-10-16).</summary>
+    internal readonly List<StagePerformer?> Lunges = new();
+
+    public Task Lunge(StageSeat? seat)
+    {
+        Lunges.Add(seat?.Who);
+        return Task.CompletedTask;
+    }
 
     /// <summary>The pool to 75: a line's cue, recorded by who fired.</summary>
     public Task LineCue(StageSeat? seat)
@@ -126,6 +136,22 @@ internal sealed class RecordingBoard : IStageBoard
     }
 
     public Task Sync() => Task.CompletedTask;
+
+    /// <summary>Furina's card pass (2026-10-15): Bouquet of Roses' Energy.
+    /// </summary>
+    internal int Energy;
+
+    Task IStageBoard.Energy(int amount)
+    {
+        Log.Add($"energy {amount}");
+        Energy += amount;
+        return Task.CompletedTask;
+    }
+
+    /// <summary>The relics that flashed, by type name, in order.</summary>
+    internal readonly List<string> Flashed = new();
+
+    public void FlashRelic(Type relic) => Flashed.Add(relic.Name);
 
     public void Effect(StageEffect effect) => Effects.Add(effect);
 

@@ -33,7 +33,9 @@ namespace KleeMod.Relics;
 /// screen. After an elite or boss win the relic adds one
 /// <see cref="YaePublishReward"/> to the combat reward screen
 /// (<see cref="TryModifyRewards"/>, the hook Prayer Wheel uses), only when
-/// some card is Annotated and not yet Published.
+/// the fight left some card a temporary layer to Publish. Review r3 (ruled
+/// 2026-10-14): a Published card may be offered again, and the pick joins
+/// its permanent stack (the Masterpiece).
 ///
 /// No free setup ([USER]'s rule): fight one opens with an empty shrine and
 /// an unedited deck, and the relic holds no state of its own, so its Orobas
@@ -57,22 +59,40 @@ public class MeditationsOfAYako : CustomRelicModel
     /// <summary>How many Annotations one reward may Publish.</summary>
     public virtual int PublishCount => 1;
 
+    public const string DescriptionText =
+        "After an elite or boss fight, you may [gold]Publish[/gold] an "
+      + "Annotation you made that fight.";
+
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Meditations of a Yako"),
-        ("description",
-            "After an elite or boss fight, you may [gold]Publish[/gold] an "
-          + "Annotation."),
+        // Yae review r5, item 6: the reward is offered only when the fight
+        // left an Annotation to Publish, so the text says whose.
+        ("description", DescriptionText),
     };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForEdit(System.Array.Empty<IHoverTip>(), null);
 
+    /// <summary>Yae review r6, item 3: this fight was one that offers a
+    /// Publish and left no Annotation to Publish, so the relic flashed and
+    /// said "Nothing to Publish". Not saved; cleared when a fight ends and
+    /// when a room is entered. The seat page reads it through
+    /// <see cref="YaeShrine.Snapshot"/>.</summary>
+    public bool NothingToPublish { get; private set; }
+
     /// <summary>The fight's evidence: every deck card's draft becomes the
     /// Annotation its combat copy carries now.</summary>
     public override Task AfterCombatEnd(CombatRoom room)
     {
+        NothingToPublish = false;
         YaeEditing.SnapshotDrafts(Owner);
+        return Task.CompletedTask;
+    }
+
+    public override Task AfterRoomEntered(AbstractRoom room)
+    {
+        NothingToPublish = false;
         return Task.CompletedTask;
     }
 
@@ -80,6 +100,7 @@ public class MeditationsOfAYako : CustomRelicModel
                                           AbstractRoom? room)
     {
         if (player != Owner || room is not CombatRoom combat) return false;
+        NothingToPublish = false;
         var runState = player.RunState;
         var finalBoss = room.RoomType == RoomType.Boss
             && runState.CurrentActIndex >= runState.Acts.Count - 1;
@@ -88,10 +109,21 @@ public class MeditationsOfAYako : CustomRelicModel
         {
             return false;
         }
-        if (!YaeEditing.PublishChoices(player).Any()) return false;
+        if (!YaeEditing.PublishChoices(player).Any())
+        {
+            // Yae review r6, item 3: say why no Publish came.
+            NothingToPublish = true;
+            Flash();
+            YaeEditing.SayNothing(player.Creature, YaeEditing.NothingToPublishKey);
+            return false;
+        }
         rewards.Add(new YaePublishReward(player, this));
         return true;
     }
+
+    /// <summary>The outline atlas sprite (see SalonSolitaire): without an
+    /// override it derives from the mod id, which the atlas lacks.</summary>
+    protected override string IconBaseName => "ring_of_the_snake";
 
     /// <summary>Placeholder art: Kokomi's Pearl of Wisdom icon, borrowed
     /// until her art pass plans her own.</summary>
@@ -115,12 +147,14 @@ public sealed class EnlightenedBlessing : MeditationsOfAYako
 
     public override int PublishCount => 2;
 
+    public new const string DescriptionText =
+        "After an elite or boss fight, you may [gold]Publish[/gold] up to "
+      + "2 Annotations you made that fight.";
+
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Enlightened Blessing"),
-        ("description",
-            "After an elite or boss fight, you may [gold]Publish[/gold] up to "
-          + "2 Annotations."),
+        ("description", DescriptionText),
     };
 
     /// <summary>Already the upgrade.</summary>
@@ -129,9 +163,9 @@ public sealed class EnlightenedBlessing : MeditationsOfAYako
 
 /// <summary>
 /// PUBLISH, THE REWARD-SCREEN ROW. Claiming it opens a grid of the cards the
-/// fight left Annotated, each shown as a copy wearing that Annotation; the
-/// one picked is that exact deck card, and its Annotation becomes the deck
-/// card's Enchantment, which the run save keeps. The grid can be closed
+/// fight left a temporary layer on, each shown as a copy wearing its stack
+/// and that layer; the one picked is that exact deck card, and the layer
+/// joins the deck card's permanent stack, which the run save keeps. The grid can be closed
 /// without a pick (the row stays, as a full-belt potion's does), and leaving
 /// the reward screen skips it. Not serialised: the reward screen is rebuilt
 /// from the room and the hooks on a reload, and the drafts it reads are
@@ -183,14 +217,13 @@ public sealed class YaePublishReward : Reward
         return rect;
     }
 
-    /// <summary>The grid's terms: one pick (two under Enlightened
-    /// Blessing), and it may be closed without one. PURE.</summary>
-    public static CardSelectorPrefs Prefs(int max) => max <= 1
-        ? new CardSelectorPrefs(new LocString("cards", YaeEditing.PublishPromptKey), 1)
-        {
-            Cancelable = true,
-        }
-        : new CardSelectorPrefs(new LocString("cards", YaeEditing.PublishPromptKey), 0, max)
+    /// <summary>The grid's terms: up to `max` picks (one, or two under
+    /// Enlightened Blessing), confirmed by hand, and it may be closed without
+    /// one. The minimum is ZERO even for one pick: a grid that must pick one
+    /// of exactly one card is auto-answered by the game, which published a card
+    /// nobody chose (Yae review r4, item 1). PURE.</summary>
+    public static CardSelectorPrefs Prefs(int max) =>
+        new CardSelectorPrefs(new LocString("cards", YaeEditing.PublishPromptKey), 0, max)
         {
             Cancelable = true,
             RequireManualConfirmation = true,
@@ -213,7 +246,7 @@ public sealed class YaePublishReward : Reward
             foreach (var preview in previews) Player.RunState.RemoveCard(preview);
         }
         var n = 0;
-        foreach (var deck in YaeEditing.ResolvePicks(previews, decks, picked))
+        foreach (var deck in YaeEditing.ResolvePicks(previews, decks, picked).Take(max))
         {
             if (YaeEditing.PublishToDeck(deck, YaeEditing.Draft(deck))) n++;
         }

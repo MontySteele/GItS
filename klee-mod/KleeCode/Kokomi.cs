@@ -79,8 +79,10 @@ public sealed class Kokomi : CustomCharacterModel, IKokomiCharacter
     public override RelicPoolModel RelicPool =>
         ModelDb.RelicPool<KokomiRelicPool>();
 
+    /// <summary>Her own three (<c>review/active/kokomi-relics-potions-2026-10-15.md</c>).
+    /// </summary>
     public override PotionPoolModel PotionPool =>
-        ModelDb.PotionPool<SilentPotionPool>();
+        ModelDb.PotionPool<Potions.KokomiPotionPool>();
 
     /// <summary>
     /// The base Strike x4, Defend x4, Kurage's Oath and Slack Water

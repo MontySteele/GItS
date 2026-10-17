@@ -392,6 +392,16 @@ public sealed class KokomiOverhaulLedger
     public bool Claim(string key) => _claimed.Add(key);
 
     /// <summary>
+    /// THE ONCE-PER-COMBAT LATCH (Kokomi's own relics, 2026-10-15): Sango
+    /// Pearl's "the first card you plan each combat". True the first time
+    /// <paramref name="key"/> is claimed in this combat. Never rolled: the
+    /// ledger itself is made fresh for each combat (<see cref="For"/>).
+    /// </summary>
+    public bool ClaimOncePerCombat(string key) => _claimedCombat.Add(key);
+
+    private readonly HashSet<string> _claimedCombat = new();
+
+    /// <summary>
     /// Roll the per-turn state to <paramref name="round"/>. Public to the pins
     /// so a turn boundary can be exercised without a combat.
     ///

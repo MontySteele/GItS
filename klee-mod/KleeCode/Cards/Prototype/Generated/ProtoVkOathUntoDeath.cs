@@ -44,7 +44,7 @@ public sealed class ProtoVkOathUntoDeath : CustomCardModel, ICharacterCard
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Oath Unto Death"),
+        ("title", "Azure Fang's Oath"),
         ("description", "Whenever you gain [gold]Oath[/gold] of your [gold]current element[/gold], gain 1 more."),
     };
 

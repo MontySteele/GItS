@@ -176,3 +176,44 @@ def test_a_card_picked_to_leave_the_hand_takes_its_number_with_it(lane):
     after = copy.deepcopy(state)
     del after["player"]["hand"][1]
     assert blindplay_faces.hand_labels(after) == ["Defend (1)", "Defend (3)"]
+
+
+def test_the_chooser_lists_the_hand_in_hand_order(lane, capsys):
+    """A Yae seat (2026-10-14): the Edit chooser listed the holders' order,
+    not the hand's, and the seat picked the wrong card twice. The page now
+    prints a hand chooser in the order the fight page printed the hand, with
+    the same labels, and `choose` still posts the bridge's own index."""
+    screen, posted = lane
+    game = _Game([_card("Sakura Seal", "Edit a card in your hand: "
+                                       "Sakura Seal."),
+                  _card("Proofread", "Edit a card in your hand: Red Ink."),
+                  _defend(), _card("Strike", "Deal 6 damage.", cost="1"),
+                  _defend()], pile_moves=False)
+    base = _hand_of([])
+    screen["now"] = game.combat(base)
+    _look(capsys)
+    d1, strike, d2 = game.pile[2:]
+    assert blindplay.cmd_act(_act('play "Sakura Seal"')) == 0
+    seal = game.play(posted[-1][2]["card_index"])
+    screen["now"] = game.chooser(base, seal)
+    _look(capsys)
+    assert blindplay.cmd_act(_act('choose "Defend (1)"')) == 0
+    assert game.chooser_uid(seal, posted[-1][2]["card_index"]) == d1
+    assert blindplay.cmd_act(_act("confirm")) == 0
+    game.edit(d1, "Sakura Seal")          # its holder moves to the end
+    screen["now"] = game.combat(base)
+    _look(capsys)
+
+    assert blindplay.cmd_act(_act('play "Proofread"')) == 0
+    proof = game.play(posted[-1][2]["card_index"])
+    screen["now"] = game.chooser(base, proof)
+    # The holders' order is Strike, Defend (2), Defend (1); the hand's is
+    # Defend (1), Strike, Defend (2).
+    assert [u for u in game.ui if u != proof] == [strike, d2, d1]
+    page = _look(capsys)
+    at = [page.index(t) for t in ("Defend (1)", "Strike", "Defend (2)")]
+    assert at == sorted(at)
+    for name, uid in (("Defend (1)", d1), ("Strike", strike),
+                      ("Defend (2)", d2)):
+        assert blindplay.cmd_act(_act(f'choose "{name}"')) == 0
+        assert game.chooser_uid(proof, posted[-1][2]["card_index"]) == uid

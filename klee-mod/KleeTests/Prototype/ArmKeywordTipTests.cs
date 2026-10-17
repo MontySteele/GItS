@@ -151,8 +151,9 @@ public class ArmKeywordTipTests
             .Select(f => (string)f.GetRawConstantValue()!)
             .ToList();
 
-        // One key per attach, the rider included (`EB-378`).
-        Assert.Equal(Attaches().Count(), keys.Count);
+        // One key per attach, the rider included (`EB-378`), but for
+        // `ForAnnotation`, whose six keys are `KeyOf`'s (2026-10-14).
+        Assert.Equal(Attaches().Count() - 1, keys.Count);
         Assert.Equal(keys.Count, keys.Distinct().Count());
         Assert.All(keys, k => Assert.StartsWith("KLEEMOD-ARM_", k));
         Assert.DoesNotContain("KLEEMOD-BOMB", keys);
@@ -407,6 +408,8 @@ public class ArmKeywordTipTests
         // `ForAscensionNoOath`, the rider on Four Winds' Ascension's element
         // hit (it gains no Oath), and `ForBisSpendUpTo`, Bis!'s (a "Spend up
         // to" does not count).
+        // 55 with furina-next paper 2 (2026-10-16): `ForBisSpendUpTo` left
+        // with Bis!.
         // 47 with the Furina wave (2026-10-13): `ForFinalBowInTurn`, Final
         // Bow's (its acts happen one after another).
         // 50 with the Klee text-only fixes (2026-10-13): four riders,
@@ -419,8 +422,23 @@ public class ArmKeywordTipTests
         // word.
         // 53 with Yae's design axes (2026-10-14): `ForRite`, the shrine's
         // Rite.
-        Assert.Equal(53, attaches.Count);
-        Assert.Contains(attaches, m => m.Name == "ForRite");
+        // 55 with Yae's tip cut (2026-10-14): `ForAnnotation`, one tip per
+        // Annotation a face names, and `ForTenko`, split out of her Sakura
+        // tip.
+        // 54 with Yae's shrine r2 (2026-10-14): `ForRite` left with the Rite.
+        // 57 with Yae's review r3 (2026-10-14): `ForFoxfireSakura`,
+        // `ForKitsuneSakura` (the two kinds a card names) and
+        // `ForFullShrine` (every planting card's full-shrine rule).
+        // 56 with Kokomi review r9 pick 1 (a) (2026-10-15):
+        // `ForCompanionPlan` left with the rule that any Companion can be
+        // written as a Plan.
+        Assert.Equal(55, attaches.Count);
+        Assert.Contains(attaches, m => m.Name == "ForFoxfireSakura");
+        Assert.Contains(attaches, m => m.Name == "ForKitsuneSakura");
+        Assert.Contains(attaches, m => m.Name == "ForFullShrine");
+        Assert.Contains(attaches, m => m.Name == "ForAnnotation");
+        Assert.Contains(attaches, m => m.Name == "ForTenko");
+        Assert.DoesNotContain(attaches, m => m.Name == "ForRite");
         Assert.Contains(attaches, m => m.Name == "ForFlip");
         Assert.Contains(attaches, m => m.Name == "ForEdit");
         Assert.Contains(attaches, m => m.Name == "ForBigBaddaBoomTotal");
@@ -429,11 +447,11 @@ public class ArmKeywordTipTests
         Assert.Contains(attaches, m => m.Name == "ForPassTheMatchActing");
         Assert.Contains(attaches, m => m.Name == "ForFinalBowInTurn");
         Assert.Contains(attaches, m => m.Name == "ForAscensionNoOath");
-        Assert.Contains(attaches, m => m.Name == "ForBisSpendUpTo");
+        Assert.DoesNotContain(attaches, m => m.Name == "ForBisSpendUpTo");
         Assert.Contains(attaches, m => m.Name == "ForAscensionReturn");
         Assert.Contains(attaches, m => m.Name == "ForNereidsTwice");
         Assert.Contains(attaches, m => m.Name == "ForPlanNoLine");
-        Assert.Contains(attaches, m => m.Name == "ForCompanionPlan");
+        Assert.DoesNotContain(attaches, m => m.Name == "ForCompanionPlan");
         Assert.Contains(attaches, m => m.Name == "ForBankDamage");
         Assert.Contains(attaches, m => m.Name == "ForElementSwitch");
         Assert.Contains(attaches, m => m.Name == "ForOath");

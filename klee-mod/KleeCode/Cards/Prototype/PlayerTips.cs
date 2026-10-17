@@ -62,9 +62,6 @@ internal static class PlayerTips
         [ArmKeywordTips.PlanNoLineKey] =
             "This card has no Plan line, so it cannot be played on the "
           + "[gold]Bake-Kurage[/gold].",
-        [ArmKeywordTips.CompanionPlanKey] =
-            "Play it on the [gold]Bake-Kurage[/gold] to carry it out next "
-          + "turn.",
 
         // Shared element words.
         [ArmKeywordTips.SwirlKey] =
@@ -95,8 +92,10 @@ internal static class PlayerTips
         [ArmKeywordTips.DrainKey] =
             "Lose N HP. After combat, up to 1/4 of your Max HP drained comes "
           + "back; [gold]Repay[/gold] the rest.",
+        // furina-next paper 3 (2026-10-16): the rule's one line.
         [ArmKeywordTips.RepayKey] =
-            "Regain that much drained HP, never more than you drained.",
+            "Regain that much drained HP. Any HP a Repay cannot return becomes "
+          + "[gold]Block[/gold].",
         [ArmKeywordTips.SummonKey] = GuestStarBody,
         [ArmKeywordTips.GuestStarKey] = GuestStarBody,
     };

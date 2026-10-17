@@ -38,7 +38,7 @@ from pathlib import Path
 
 import yaml
 
-from tools.klee_rig.rig import color, fnum, num, vec2
+from tools.klee_rig.rig import color, fnum, num, shadow_fade, vec2
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
@@ -318,6 +318,9 @@ def build_animations(spec: dict, frames: dict, clips: dict[str, Clip]) -> dict[s
     for name in ANIMATION_ORDER:
         anim = spec["animations"][name]
         tracks = [_expand(anim, tr) for tr in anim.get("tracks", ())]
+        fade = shadow_fade(tracks, MODEL, f"{FACING}/{SHADOW_NODE}")   # the shadow fades with him at death
+        if fade is not None:
+            tracks.append(fade)
         tracks += state_tracks(spec, frames, clips, anim)
         paths = [t.path for t in tracks]
         assert len(paths) == len(set(paths)), f"{name}: duplicate track"
@@ -695,3 +698,25 @@ def render_merchant_scene(frames: dict | None = None) -> str:
         ]),
     ]
     return NL.join(out) + NL
+
+
+# ---------------------------------------------------------------------------
+# the character-select background
+# ---------------------------------------------------------------------------
+
+#: The select scene this generator is the one producer of (build_pck.ps1 only
+#: overlays it): the backdrop, the close-up breathing on a loop and the
+#: Anemo emitters (tools/select_bg.py, 2026-10-14).
+SELECT_SCENE = ROOT / "klee-mod" / "pck-src" / "varka" / "ui" / "char_select_bg_varka.tscn"
+#: The backdrop tint (as the scene carried it in build_pck.ps1).
+SELECT_TINT = (0.36, 0.76, 0.66, 1.0)
+SELECT_ELEMENT = "anemo"
+#: The figure's horizontal centre in select_closeup.png (its opaque columns
+#: span x 454-1895 in the 2026-10-14 render): the breath's pivot and the glow.
+SELECT_FIGURE_X = 1175.0
+
+
+def render_select_scene() -> str:
+    from tools.select_bg import load_loop, render_select_scene as _render
+
+    return _render("varka", "VarkaBg", SELECT_TINT, SELECT_ELEMENT, SELECT_FIGURE_X, load_loop("varka"))

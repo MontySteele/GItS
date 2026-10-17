@@ -91,8 +91,9 @@ public abstract class StagePerformerBadge : PowerModel
                 "The first time each turn one of your cards "
               + "[gold]Repays[/gold], draw "
               + FurinaStageLaw.CharlotteLineDraw + " card. Act: "
-              + "[gold]Repay[/gold] " + act + ". Gain 1 [gold]Block[/gold] "
-              + "for any HP it could not [gold]Repay[/gold].",
+              // furina-next paper 3 (2026-10-16): the Block floor is the
+              // Repay rule, so the act drops the clause.
+              + "[gold]Repay[/gold] " + act + ".",
             StagePerformer.Wriothesley =>
                 "Whenever you [gold]Drain[/gold], deal that much "
               + "[gold]Cryo[/gold] damage to a random enemy. Act: deal " + act
@@ -115,9 +116,7 @@ public abstract class StagePerformerBadge : PowerModel
               + "It never [gold]Drains[/gold] past your line.",
             StagePerformer.Sigewinne =>
                 "Whenever you [gold]Repay[/gold], gain that much "
-              + "[gold]Block[/gold]. Act: [gold]Repay[/gold] " + act + ". "
-              + "Gain 1 [gold]Block[/gold] for any HP it could not "
-              + "[gold]Repay[/gold].",
+              + "[gold]Block[/gold]. Act: [gold]Repay[/gold] " + act + ".",
             StagePerformer.Chevreuse =>
                 "Whenever you [gold]Spend[/gold], apply "
               + FurinaStageLaw.ChevreuseLineVulnerable

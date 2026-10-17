@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMiGorouCrystalCollapse : CustomCardModel, ICompanionCard, IPlannedCard
+public sealed class ProtoMiGorouCrystalCollapse : CustomCardModel, ICompanionCard, IUnplayableReasonCard, IPlannedCard
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -46,7 +46,7 @@ public sealed class ProtoMiGorouCrystalCollapse : CustomCardModel, ICompanionCar
     public string? Nation => "inazuma";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForCompanion(ArmKeywordTips.ForPlanOnly(base.ExtraHoverTips, this), this);
+        KokomiCards.WithCopiedCompanionPreview(ArmKeywordTips.ForCompanion(ArmKeywordTips.ForPlanOnly(base.ExtraHoverTips, this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_mi_gorou_crystal_collapse");
 
@@ -55,6 +55,17 @@ public sealed class ProtoMiGorouCrystalCollapse : CustomCardModel, ICompanionCar
         ("title", "Gorou — Crystal Collapse"),
         ("description", "Play on the [gold]Bake-Kurage[/gold].\n[gold]Plan[/gold]: Play a copy of the last [gold]Companion[/gold] card you played."),
     };
+
+    // Kokomi wording pass (2026-10-14): unplayable until a
+    // Companion has been played this combat, rather than
+    // writing a Plan that copies nothing.
+    protected override bool IsPlayable =>
+        KokomiRefounding.AnyCompanionPlayed(this);
+
+    public string? UnplayableReason =>
+        KokomiRefounding.AnyCompanionPlayed(this)
+            ? null
+            : "no Companion has been played this combat";
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
     /// was written. Carried out by the Bake-Kurage at the start of her next

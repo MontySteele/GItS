@@ -37,21 +37,24 @@ public sealed class ProtoYmSakuraSeal : CustomCardModel, ICharacterCard
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "yae";
 
+    public override IEnumerable<CardKeyword> CanonicalKeywords =>
+        new[] { CardKeyword.Exhaust };
+
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForEdit(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForEdit(ArmKeywordTips.ForAnnotation(ArmKeywordTips.ForSakura(base.ExtraHoverTips, this), this, YaeAnnotation.SakuraSeal, false), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_sakura_seal");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sakura Seal"),
-        ("description", "[gold]Edit[/gold] {IfUpgraded:show:2 cards|a card} in your hand: [gold]Sakura Seal[/gold]."),
+        ("description", "[gold]Edit[/gold] up to {YmAmount:diff()} cards in your hand: [gold]Sakura Seal[/gold] (when played, plant a [gold]Sakura[/gold])."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("YmAmount", 1m)
+            new DynamicVar("YmAmount", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

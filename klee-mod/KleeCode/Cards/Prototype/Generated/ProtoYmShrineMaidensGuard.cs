@@ -32,30 +32,21 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoYmShrineMaidensGuard : CustomCardModel, ICharacterCard
+public sealed class ProtoYmShrineMaidensGuard : CustomCardModel, ICharacterCard, ISakuraPlanterCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "yae";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForRite(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForFullShrine(ArmKeywordTips.ForKitsuneSakura(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_shrine_maidens_guard");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Shrine Maiden's Guard"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. [gold]Rite[/gold]: Warding{InCombat:{YaeRite}|}."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Plant a [gold]Kitsune Sakura[/gold]."),
     };
-
-    /// <summary>This card's in-combat shrine clauses
-    /// (`YaeShrineFace`).</summary>
-    protected override void AddExtraArgsToDescription(
-        MegaCrit.Sts2.Core.Localization.LocString description)
-    {
-        base.AddExtraArgsToDescription(description);
-        description.Add("YaeRite", YaeShrineFace.RiteLine(this, YaeRite.Warding));
-    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
@@ -73,7 +64,7 @@ public sealed class ProtoYmShrineMaidensGuard : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
-        await YaeCards.Rite(choiceContext, this, cardPlay, YaeRite.Warding);
+        await YaeCards.Plant(choiceContext, this, cardPlay, YaeSakuraKind.Kitsune);
     }
 
     protected override void OnUpgrade()

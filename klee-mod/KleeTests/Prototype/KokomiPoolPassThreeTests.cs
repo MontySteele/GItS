@@ -45,34 +45,32 @@ public class KokomiPoolPassThreeTests
     // ======================================================================
 
     [Fact]
-    public void Feints_now_line_reads_the_plans_waiting_and_not_the_flag()
+    public void Feints_now_line_reads_neither_count_nor_flag()
     {
-        // The re-founding (2026-10-12): "plus 3 for each Plan waiting", the
-        // queue's own count (`KokomiPlan.PlansHeld`).
+        // Kokomi review r8 (2026-10-14, item 5): the now-line is a flat 8; it
+        // read the Plans waiting (`KokomiPlan.PlansHeld`) from the
+        // re-founding (2026-10-12) until then.
         var source = Source("ProtoKkFeint");
-        Assert.Contains("KokomiPlan.PlansHeld", source);
+        Assert.DoesNotContain("KokomiPlan.PlansHeld", source);
         Assert.DoesNotContain(Il.Calls(Il.Method("ProtoKkFeint", "OnPlay")),
                               c => c.Contains("PlanCarriedOutThisTurn"));
     }
 
     [Fact]
-    public void Feint_prints_six_plus_three_per_carry_out_and_upgrades_the_base()
+    public void Feint_prints_a_flat_eight_and_upgrades_it()
     {
-        // THE CASKET PASS (2026-09-28): "Deal 4 damage, plus 3 for each Plan
-        // carried out this turn. Plan: Apply 1 Vulnerable." Upgraded: base 6,
-        // Plan 2 Vulnerable. Both printed numbers are live vars (`EB-657`),
-        // and the in-combat line prints the total. The cleanup pass
-        // (2026-09-29) moved the base to 6, upgraded 9; the numbers pass
-        // (kokomi-review-r5-2026-10-14) to 8 [11].
+        // Kokomi review r8 (2026-10-14, item 5): "Deal 8 [10] Hydro damage."
+        // (was 8 [11], plus 3 for each Plan waiting). One live var, no
+        // calculated total.
         var face = Face(new ProtoKkFeint());
-        Assert.Contains("{CalculationBase:diff()}", face);
-        Assert.Contains("{ExtraDamage:diff()}", face);
-        Assert.Contains("{CalculatedDamage:diff()}", face);
+        Assert.StartsWith("Deal {Damage:diff()} [gold]Hydro[/gold] damage.",
+                          face);
+        Assert.DoesNotContain("{CalculationBase:diff()}", face);
+        Assert.DoesNotContain("{CalculatedDamage:diff()}", face);
         Assert.DoesNotContain("{IfUpgraded:show:", face);
         var source = Source("ProtoKkFeint");
-        Assert.Contains("new CalculationBaseVar(8m)", source);
-        Assert.Contains("new ExtraDamageVar(3m)", source);
-        Assert.Contains("DynamicVars.CalculationBase.UpgradeValueBy(3m);", source);
+        Assert.Contains("new DamageVar(8m, ValueProp.Move)", source);
+        Assert.Contains("DynamicVars.Damage.UpgradeValueBy(2m);", source);
         // The pool overhaul (2026-10-13): the Plan's rate upgrades, 5 -> 7.
         Assert.Contains("DynamicVars[\"PlanDamage\"].UpgradeValueBy(2m);",
                         source);

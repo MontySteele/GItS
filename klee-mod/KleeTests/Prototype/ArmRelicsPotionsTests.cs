@@ -57,13 +57,12 @@ public class ArmRelicsPotionsTests
         Assert.Equal(
             new[] { PotionRarity.Common, PotionRarity.Uncommon, PotionRarity.Rare },
             klee.Select(p => p.Rarity).ToArray());
-        // THE SALON'S TAB (2026-10-05, proposal sec.16): Furina keeps Opera
-        // Glasses (Common), Grand Theater Program (Rare) and Bottled Applause
-        // (Common); the rest left with the v2 Stage.
-        Assert.Equal(new[] { RelicRarity.Common, RelicRarity.Rare },
-                     FurinaStageRelics.Types
-                         .Select(t => Canon<RelicModel>(t).Rarity).ToArray());
-        Assert.Equal(new[] { typeof(BottledApplause) }, ArmPotions.Furina);
+        // THE SALON'S TAB (2026-10-05, proposal sec.16) kept Opera Glasses
+        // (Common), Grand Theater Program (Rare) and Bottled Applause
+        // (Common); Furina's card pass (2026-10-15) adds five relics and two
+        // potions (`FurinaRelicsPotionsTests` pins the set).
+        Assert.Equal(7, FurinaStageRelics.Types.Count);
+        Assert.Equal(3, ArmPotions.Furina.Count);
         foreach (var set in new[] { ArmPotions.Klee, ArmPotions.Furina })
         {
             var potions = set.Select(t => Canon<PotionModel>(t)).ToList();
@@ -130,14 +129,16 @@ public class ArmRelicsPotionsTests
     }
 
     [Fact]
-    public void Kokomi_keeps_the_silent_borrow_for_relics_and_potions()
+    public void Kokomi_drops_the_silent_borrow_for_her_own_relics_and_potions()
     {
-        // No offer override: `RelicPoolModel`'s own, which is every member.
-        Assert.Equal(typeof(RelicPoolModel),
+        // Her own set (review/active/kokomi-relics-potions-2026-10-15.md,
+        // kit census picks 1 and 2): the offer is overridden, and the potion
+        // pool is hers. KokomiRelicsPotionsTests pins both in full.
+        Assert.Equal(typeof(KokomiRelicPool),
             typeof(KokomiRelicPool).GetMethod("GetUnlockedRelics")!.DeclaringType);
         var potions = Il.CallSequence(
             typeof(Kokomi).GetProperty("PotionPool")!.GetGetMethod()!);
-        Assert.Equal(new[] { "ModelDb.PotionPool<SilentPotionPool>" },
+        Assert.Equal(new[] { "ModelDb.PotionPool<KokomiPotionPool>" },
                      potions.Where(c => c.StartsWith("ModelDb.")).ToArray());
     }
 

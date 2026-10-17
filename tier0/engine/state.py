@@ -357,6 +357,20 @@ class Card:
     # the card's own `TryModifyEnergyCostInCombat` over
     # `FurinaStage.FanfareOf`. A sheet field (`gen_klee_cards.CARD_FIELDS`).
     cost_reduction_per_fanfare: int = 0
+    # VARKA, TEMPEST CHARGE (Klee and Varka cleanup review, pick 1 (a),
+    # 2026-10-15): "Costs 1 less for each Swirl this turn." The value is the
+    # Energy off per Swirl, read at cost time off his ledger's
+    # `swirls_this_turn` (cleared at his turn start); the mod's twin is the
+    # card's own `TryModifyEnergyCostInCombat` over `VarkaOath.SwirlsThisTurn`.
+    # A sheet field (`gen_klee_cards.CARD_FIELDS`).
+    cost_reduction_per_swirl_this_turn: int = 0
+    # YAE, THE REFILL (review/active/yae-refill-2026-10-16.md): Publisher's
+    # Deadline's "Costs 1 less if you Edited a card this turn." The Energy
+    # off, read at cost time off her ledger's `edits_this_turn` (cleared at
+    # her turn start); the mod's twin is the card's own
+    # `TryModifyEnergyCostInCombat` over `YaeShrine.EditsThisTurn`. A sheet
+    # field (`gen_klee_cards.CARD_FIELDS`).
+    cost_reduction_if_edited_this_turn: int = 0
     # EnergyCost.AddThisTurn / AddThisCombat / SetToFreeThisTurn -- state the
     # base game keeps on the CARD INSTANCE, not on its owner. Two copies of
     # the same card discount themselves independently, and the combat-scoped
@@ -1096,8 +1110,8 @@ class PlanEntry:
     # kokomi-delay-pays-2026-10-01.md sec.2). `now_card` is the card whose
     # now-line this Plan may be carried out as instead: set by `schedule`
     # only for a Plan written from a TWO-LINE card's own line (Moon's
-    # Reflection's found card included), never for a Plan-only card or a
-    # written Companion. `line` is the line it will be carried out as, "plan" (the
+    # Reflection's found card included), never for a Plan-only card. `line`
+    # is the line it will be carried out as, "plan" (the
     # default) or "now" once the player has flipped it while it waits
     # (`kokomi_plan.flip`, pick 5a).
     # `KokomiPlan.Entry.Now` is the twin of `line`.

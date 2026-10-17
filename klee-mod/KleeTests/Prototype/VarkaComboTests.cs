@@ -207,7 +207,7 @@ public class VarkaComboTests : IDisposable
         // nothing.
         string Title(BaseLib.Abstracts.ILocalizationProvider m) =>
             m.Localization!.Single(r => r.Item1 == "title").Item2;
-        Assert.Equal("Ashen Oath", Title(new ProtoVkPyreOath()));
+        Assert.Equal("For Crepus", Title(new ProtoVkPyreOath()));
         Assert.Null(typeof(WildfireOathPower).Assembly.GetType(
             "KleeMod.Powers.PyreOathPower"));
         Assert.DoesNotContain(CardKeyword.Innate, Upgraded<ProtoVkPyreOath>().Keywords);

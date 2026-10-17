@@ -1434,6 +1434,17 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             ok = _bump_first((fx for fx in everywhere
                               if fx.get("op") == "yae"),
                              key[len("yae_"):], val)
+        elif key == "yae_upgraded":
+            # YAE MIKO (review r3): the row's `yae` op reads its upgrade at
+            # play time (`IsUpgraded` in C#): Fallen Petals+ draws, Second
+            # Printing+'s card costs 0. Boolean, only True is a ruling.
+            if val is not True:
+                raise ValueError(
+                    f"yae_upgraded delta on {base_id!r} must be true")
+            hit = next((fx for fx in top if fx.get("op") == "yae"), None)
+            ok = hit is not None
+            if hit:
+                hit["upgraded"] = True
         elif key == "varka_upgraded":
             # VARKA (the expansion, Pathfinder's Mark+): the row's `varka`
             # op reads its upgrade at play time (`IsUpgraded` in C#).

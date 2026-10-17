@@ -41,8 +41,17 @@ public sealed class ProtoFsUnderstudysDebut : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Understudy's Debut"),
-        ("description", "Deal {Damage:diff()} damage. If your HP is below half, deal {BranchDamage:diff()} additional damage and gain {BranchBlock:diff()} [gold]Block[/gold]."),
+        ("description", "Deal {Damage:diff()} damage. If your HP is below half{InCombat:{HalfHp}|}, deal {BranchDamage:diff()} additional damage and gain {BranchBlock:diff()} [gold]Block[/gold]."),
     };
+
+    /// <summary>The HP this card's "below half" means, in combat
+    /// (`HalfHpFace`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("HalfHp", HalfHpFace.Line(this));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

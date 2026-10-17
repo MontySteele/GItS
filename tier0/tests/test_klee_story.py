@@ -17,6 +17,7 @@ import yaml
 ROOT = Path(__file__).resolve().parents[2]
 SHEET = ROOT / "docs" / "prototype-surface.yaml"
 TABLE = ROOT / "klee-mod" / "KleeCode" / "Story" / "KleeStory.cs"
+VARKA = ROOT / "klee-mod" / "KleeCode" / "Story" / "VarkaStory.cs"
 PLAN = ROOT / "art" / "plan.tsv"
 
 
@@ -62,12 +63,20 @@ def test_the_cards_the_events_add_are_the_sheets_rows_under_the_papers_names():
     assert names["proto_mc_kaeya_glacial_waltz"] == "Kaeya — Glacial Waltz"
     assert names["proto_mc_noelle_breastplate"] == "Noelle — Breastplate"
     assert names["proto_mc_albedo_solar_isotoma"] == "Albedo — Solar Isotoma"
+    # The story chains (review/active/klee-varka-story-chains-2026-10-14.md).
+    assert names["proto_ko_dodoco_tag"] == "Dodoco Tag"
+    assert names["proto_ko_alices_recipe"] == "Alice's Recipe"
+    assert names["proto_ko_alices_introduction_magic"] == "Alice's Introduction Magic"
+    assert names["proto_vk_four_winds_ascension"] == "Four Winds' Ascension"
+    assert names["proto_mc_jean_dandelion_breeze"] == "Jean — Dandelion Breeze"
 
 
 def test_every_borrowed_event_picture_has_a_plan_row():
-    text = TABLE.read_text(encoding="utf-8")
+    # Klee's eight events and Varka's eight (the story chains): each borrows
+    # a card's picture until it has its own (BACKLOG "Art owed, story chains").
+    text = TABLE.read_text(encoding="utf-8") + VARKA.read_text(encoding="utf-8")
     keys = re.findall(r'Art\.CardPortrait\("([a-z0-9_]+)"\)', text)
-    assert len(keys) == 3
+    assert len(keys) == 16
     plan = {line.split("\t", 1)[0] for line in PLAN.read_text(encoding="utf-8").splitlines()
             if line and not line.startswith("#")}
     for key in keys:

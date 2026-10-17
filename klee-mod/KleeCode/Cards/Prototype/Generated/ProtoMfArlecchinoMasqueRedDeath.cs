@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMfArlecchinoMasqueRedDeath : CustomCardModel, ICompanionCard, IWritableCompanion
+public sealed class ProtoMfArlecchinoMasqueRedDeath : CustomCardModel, ICompanionCard
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -46,7 +46,7 @@ public sealed class ProtoMfArlecchinoMasqueRedDeath : CustomCardModel, ICompanio
     public string? Nation => "fontaine";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForStrength(ArmKeywordTips.ForCompanionPlan(base.ExtraHoverTips, this), this);
+        BaseKeywordTips.ForStrength(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("arlecchino_masque_red_death");
 
@@ -55,14 +55,6 @@ public sealed class ProtoMfArlecchinoMasqueRedDeath : CustomCardModel, ICompanio
         ("title", "Arlecchino — Masque of the Red Death"),
         ("description", "At the start of your turn, lose 1 HP and gain {PowerAmount:diff()} [gold]Strength[/gold]."),
     };
-
-    /// <summary>On Kokomi, this Companion card can also be written as a Plan on
-    /// the Bake-Kurage (the re-founding, 2026-10-12).</summary>
-    public override TargetType TargetType =>
-        KokomiCompanionPlan.TargetFor(this, base.TargetType);
-
-    /// <summary>The target this Companion prints, which its carry-out aims by.</summary>
-    public TargetType PrintedTargetType => base.TargetType;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
@@ -79,11 +71,6 @@ public sealed class ProtoMfArlecchinoMasqueRedDeath : CustomCardModel, ICompanio
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (KokomiPlan.PlayedOnPet(cardPlay))
-        {
-            await KokomiCompanionPlan.Write(choiceContext, this, cardPlay);
-            return;
-        }
         await PowerCmd.Apply<MasqueRedDeathPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 

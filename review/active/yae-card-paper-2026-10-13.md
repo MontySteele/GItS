@@ -106,10 +106,19 @@ five Annotations; Publish is the relic's word). Pick 6.
 Strike x4, Defend x4 (base game), and:
 - **Yakan Evocation** (Skill, 1): Plant a Sakura. Upgrade: cost 0. Her E;
   the shrine's teaching card.
-- **Proofread** (Skill, 1 [0]): Edit a card in your hand: Red Ink. Ruled
+- **Proofread** (Skill, 1 [0]): Edit a card in your hand: Reprint. Ruled
   2026-10-13 (pick 3): no Block, and the upgrade makes it cost 0, like a
   Defect starter. The sim's plain-Proofread battery read 15.2 HP lost a fight
-  (sec.7); that gap is read again once the pool is built.
+  (sec.7); that gap is read again once the pool is built. **Changed
+  2026-10-14** from Red Ink to Reprint, [USER]: "I actually do think it just
+  needs to be stronger. Let's bump it to 'Play it twice.' AKA the card gets
+  repeated (I think this is a base game enchant?) If Yae starts actually
+  winning, we'll worry if that's OP." **Reprint** is a new Annotation, the
+  base game's Glam: "The first time this card is played each combat, play it
+  twice." Like every Annotation it lasts the combat, a Published one the run
+  (then once per combat, every combat); it reaches any playable card. Red
+  Ink stays in the game on the cards that still grant it (Margin Note,
+  Inked Branches).
 - **Meditations of a Yako** (starting relic, her utility passive's name):
   "After an elite or boss fight, you may Publish an Annotation." (Ruled
   2026-10-14, `yae-design-axes-2026-10-14.md`; it was a rest-site choice in
@@ -312,7 +321,7 @@ Numbers in brackets are the upgrade. "Electro" on an Attack is her cadence.
 
 **Starter**
 - **Yakan Evocation** (Skill, 1 [0]): Plant a Sakura. The shrine, from fight one.
-- **Proofread** (Skill, 1 [0]): Edit a card in your hand: Red Ink. The house, from fight one; ruled pick 3 (no Block, the upgrade costs 0).
+- **Proofread** (Skill, 1 [0]): Edit a card in your hand: Reprint (Red Ink until 2026-10-14; see sec.3). The house, from fight one; ruled pick 3 (no Block, the upgrade costs 0).
 
 **Common (9)**
 - **Kitsune Flash** (Attack, 1): Deal 6 [8] Electro damage. If this card is Annotated, deal 3 [4] more. The Common that asks to be Edited.

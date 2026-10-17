@@ -464,6 +464,25 @@ def _runtime_count(state: CombatState, token: str,
             or token == "knights_played_this_combat"
             or token == "half_total_oath"):
         return varka_oath.count(state, token)
+    if token == "edits_this_combat":
+        # YAE (Bestseller; Yae review r5, pick 1 (a)): the cards
+        # she Edited this combat. 0 for anyone who is not Yae. C# twin
+        # `YaeShrine.Edits`.
+        led = yae_shrine.ledger(state.player)
+        return led.edits if led is not None else 0
+    if token == "sakura_count":
+        # YAE, THE POOL TO 78: Petal Storm's and Sakura Canopy's "for each
+        # Sakura". C# twin `YaeShrine.Count`.
+        return yae_shrine.sakura_count(state.player)
+    if token == "weak_enemies":
+        # YAE, THE POOL TO 78: Disarming Smile's "for each enemy that is
+        # Weak". C# twin `YaeShrine.WeakEnemies`.
+        return yae_shrine.weak_enemies(state)
+    if token == "annotations_on_card":
+        # YAE, THE REFILL (2026-10-16): Inscribed Thunder's "for each
+        # Annotation on this card", distinct, Published ones included. C#
+        # twin `YaeEditing.DistinctLayers`.
+        return yae_shrine.annotations_on_card(current_card)
     raise ValueError(f"unknown runtime count {token!r}")
 
 
@@ -920,6 +939,9 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     state.last_hit_landed = 0
     if not enemy.alive:
         return 0.0
+    # YAE, THE REFILL (2026-10-16): Hunting Gaze remembers the last enemy one
+    # of her Attack cards hit. A no-op for anyone not Yae.
+    yae_shrine.note_attacked(state, enemy, source)
     # Solar Isotoma (Crystallize engine): attack hits vs aura'd enemies
     # grant block — checked before the hit can consume the aura.
     if (source == "attack" and enemy.aura
@@ -2955,15 +2977,16 @@ def _op_scry_bottom(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_scry_take(state: CombatState, fx: dict, card: Card) -> None:
-    """`EB-679` (pool pass four), READ THE FIELD: "look at the top N cards of
-    your draw pile; put one into your hand and the rest on the bottom".
+    """`EB-679` (pool pass four), READ THE FIELD: "Take 1 of your top N
+    cards." Since the wording pass (2026-10-15, kit census pick 3) the cards
+    not taken STAY on top of the draw pile in their order; they were bottomed.
 
     SELECTION AND NOT A LOOK, which is the whole redesign. `scry_bottom` asked
     the player to bury one card of two and r26's lane never made a decision off
     it -- burying the card you like least is a choice about the card you did
     not want, and the seats valued taking the card they DID. So the pick comes
-    to hand and everything it was seen beside goes to the bottom, which is what
-    makes the number on the face worth moving (3, and 4 upgraded).
+    to hand, which is what makes the number on the face worth moving (3, and
+    4 upgraded).
 
     THE PILOT TAKES THE LOWEST-COST CARD, this engine's stand-in for player
     choice, stated rather than hidden -- `_op_scry_bottom`'s convention read
@@ -2971,8 +2994,8 @@ def _op_scry_take(state: CombatState, fx: dict, card: Card) -> None:
     paid for now.  The mod puts a real selection screen here instead
     (`ScryBottom.TakePrompt`, and `gen_klee_cards`'s emitter).
 
-    THE REST GO TO THE BOTTOM IN THE ORDER THEY WERE SEEN, so nothing leaves
-    the deck and the pile beneath them is untouched. A pile shorter than N is
+    THE REST STAY WHERE THEY WERE, on top in the order they were seen, so
+    nothing leaves the deck and nothing else moves. A pile shorter than N is
     read short rather than refused, and an empty pile is a printed no-op --
     the shape `_op_scry_bottom` already keeps.
     """
@@ -2981,12 +3004,8 @@ def _op_scry_take(state: CombatState, fx: dict, card: Card) -> None:
     if not top:
         return
     pick = min(top, key=lambda c: (c.cost if isinstance(c.cost, int) else 0))
-    for seen in top:
-        remove_instance(state.player.draw_pile, seen)
+    remove_instance(state.player.draw_pile, pick)
     state.player.hand.append(pick)
-    for seen in top:
-        if seen is not pick:
-            state.player.draw_pile.append(seen)
     state.emit("scry_take", card=pick.id, seen=len(top))
 
 
@@ -3284,6 +3303,12 @@ PREDICATE_NAMES = frozenset({
     # THE EXPANSION (2026-10-01): Amber: Sharpshooter, Shifting Gale.
     "target_has_pyro",
     "element_changed_this_turn",
+    # YAE, THE POOL TO 78 (2026-10-15): Torii Ward's "If your shrine is
+    # full", Late Night Reading's "If you have 3 Sakura" (3 or more).
+    "shrine_full",
+    "three_sakura",
+    # YAE, THE REFILL (2026-10-16): Fox's Shade's "If any enemy is Weak".
+    "any_enemy_weak",
 })
 
 # Parameterised predicates: prefix + an argument the branch parses itself.
@@ -3449,6 +3474,14 @@ RUNTIME_COUNT_NAMES = frozenset({
     "half_total_oath",
     # AoE trim, 2026-10-03: Bombs Away!'s "for each enemy with a Bomb".
     "enemies_with_bomb",
+    # Yae review r5, pick 1 (a): Bestseller's "for each card
+    # you Edited this combat".
+    "edits_this_combat",
+    # The Yae pool to 78 (2026-10-15).
+    "sakura_count",
+    "weak_enemies",
+    # The Yae refill (2026-10-16): Inscribed Thunder.
+    "annotations_on_card",
 })
 
 # The one prefix family, exactly as `PREDICATE_PREFIXES` carries its own.
@@ -3552,6 +3585,12 @@ def _predicate(state: CombatState, name: str) -> bool:
         return state.target_had_aura
     if name == "reaction_triggered_by_this":
         return state.reactions_this_card > 0
+    if name == "shrine_full":
+        return yae_shrine.shrine_full(state)
+    if name == "three_sakura":
+        return yae_shrine.sakura_count(state.player) >= 3
+    if name == "any_enemy_weak":
+        return yae_shrine.weak_enemies(state) > 0
     if name == "reaction_triggered_this_turn":
         # Chevreuse Vanguard's Valor. RULED: ANY reaction counts, not
         # Overload-only -- must never be a dead draw off-Pyro/Electro.
@@ -4914,11 +4953,12 @@ def _op_stage_drain(state: CombatState, fx: dict, card: Card) -> None:
 
 
 def _op_stage_repay(state: CombatState, fx: dict, card: Card) -> None:
-    """"Repay N": regain up to N drained HP. With a `floor:` (block or
-    vigor), "Gain 1 Block [Vigor] for any HP it could not Repay" (the Repay
-    floor, ruled 2026-10-09)."""
+    """"Repay N": regain up to N drained HP. Any HP it cannot return
+    becomes Block (furina-next paper 3, 2026-10-16; the Repay floor of
+    2026-10-09); `floor: none` is a card whose floor is its own damage
+    (Cleansing Torrent)."""
     furina_stage.repay(state, _amount(state, fx.get("amount", 1)),
-                       fx.get("floor", "none"))
+                       fx.get("floor", "block"))
 
 
 def _op_stage_repay_all(state: CombatState, fx: dict, card: Card) -> None:
@@ -4957,8 +4997,14 @@ def _op_stage_spend_all(state: CombatState, fx: dict, card: Card) -> None:
 def _op_stage_spend_up_to(state: CombatState, fx: dict, card: Card) -> None:
     """"Spend up to X" (the Spend paper, 2026-10-10): X or all she holds,
     never fails. What it counted is this play's `stage_spent`."""
-    state.stage_spent_this_card = furina_stage.spend_up_to(
-        state, _amount(state, fx.get("amount", 1)))
+    cap = _amount(state, fx.get("amount", 1))
+    # furina-next paper 2 (2026-10-16): Bring the House Down's "Spend up to
+    # 10 for each guest on stage" (the C# `10 * FurinaStage.Of(..).Count`).
+    if fx.get("per") == "stage_guests":
+        cap *= len(furina_stage.stage(state.player))
+    elif fx.get("per") is not None:
+        raise ValueError(f"stage_spend_up_to per {fx['per']!r}")
+    state.stage_spent_this_card = furina_stage.spend_up_to(state, cap)
 
 
 def _op_stage_spend_half(state: CombatState, fx: dict, card: Card) -> None:
@@ -5177,12 +5223,11 @@ OPS = {
     # just drawn.
     "block_per_status_in_hand": _op_kokomi_plan_only,
     "transform_statuses_you_have": _op_kokomi_plan_only,
-    # THE KOKOMI RE-FOUNDING (2026-10-12): Kurage's Wake's Stings, Gorou's
-    # two Plan lines and a written Companion's clause.
+    # THE KOKOMI RE-FOUNDING (2026-10-12): Kurage's Wake's Stings and
+    # Gorou's two Plan lines.
     "add_stings": _op_kokomi_plan_only,
     "gain_strength": _op_kokomi_plan_only,
     "juuga_guard": _op_kokomi_plan_only,
-    "play_companion": _op_kokomi_plan_only,
     # THE KOKOMI POOL OVERHAUL (2026-10-13): the Chain, Counter and Intent
     # lines and Read the Field's fetch, each naming the carry-out turn or the
     # enemy turn the Plan sat through.

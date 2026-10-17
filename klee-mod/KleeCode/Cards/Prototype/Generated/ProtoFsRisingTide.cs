@@ -24,6 +24,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -36,20 +37,32 @@ public sealed class ProtoFsRisingTide : CustomCardModel, ICharacterCard
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
 
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        ArmKeywordTips.ForRepay(base.ExtraHoverTips, this);
+
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_fs_rising_tide");
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Rising Tide"),
-        ("description", "Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} for each time you Repaid this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("title", "Endless Waltz"),
+        ("description", "[gold]Repay[/gold] 2. Deal {CalculationBase:diff()} damage, plus {ExtraDamage:diff()} for each time you Repaid this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}{InCombat:{StageRepay}|}"),
     };
+
+    /// <summary>This card's in-combat Stage line
+    /// (`FurinaStageFacePreview`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("StageRepay", FurinaStageFacePreview.Repay(this, 2, FurinaStageFacePreview.PayBlock));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new CalculationBaseVar(6m),
             new ExtraDamageVar(3m),
-            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.RepaysThisTurn(card.Owner?.Creature))
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => FurinaStage.RepaysThisTurnWith(card, 2))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -61,6 +74,7 @@ public sealed class ProtoFsRisingTide : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        await FurinaStage.Repay(choiceContext, Owner.Creature, 2);
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)

@@ -448,23 +448,43 @@ REST = pose(
 # small flourish at hip height, palm up.
 
 
-def select_pose(head_turn=16.0):
-    return pose([("move", "センター", (0, 0, -0.01)),
+def select_pose(head_turn=16.0, breath=1.0, swing=0.0):
+    """breath 1.0 and swing 0 is the still; the loop (SELECT_LOOP) breathes out
+    from there."""
+    b = breath
+    return pose([("move", "センター", (0, 0, -0.01 - 0.005 * (1 - b))),
                  ("movew", "足ＩＫ.L", (0.07, 0.02, 0)),
                  ("movew", "足ＩＫ.R", (-0.06, -0.02, 0.02)),
-                 ("rotw", "上半身", Y, -4.0),
+                 ("rotw", "上半身", Y, -4.0 + 1.0 * (1 - b)),
                  ("rotw", "上半身", Z, -16),
                  ("rotw", "首", Z, head_turn * 0.4),
                  ("rotw", "頭", Z, head_turn * 0.6),
-                 ("rot", "頭", X, -12),
+                 ("rot", "頭", X, -12 + 1.5 * (1 - b)),
                  ("rotw", "頭", Y, -6)]
-                + hands(far=(0.30, -0.10, -0.20), near=NEAR, far_pole=(0.3, 0.6, -1.0), near_pole=NEAR_POLE,
-                        far_curl=(10, 0), near_curl=(30, 10), far_aim=((0.8, -0.3, -0.2), -90.0), near_aim=NEAR_AIM)
-                + cloth(0),
+                + hands(far=(0.30, -0.10, -0.20 - 0.012 * (1 - b)), near=NEAR, far_pole=(0.3, 0.6, -1.0),
+                        near_pole=NEAR_POLE, far_curl=(10, 0), near_curl=(30, 10),
+                        far_aim=((0.8, -0.3, -0.2), -90.0), near_aim=NEAR_AIM)
+                + cloth(swing),
                 {"あ": 0.3, "口角上げ": 1.0, "にやり２": 0.5, "眼角上": 0.2})
 
 
 SELECT = select_pose()
+
+#: The close-up's idle loop (select stage 2, 2026-10-15): HALF a breath, from
+#: the still's pose out to the exhale with the coat tails swung. The game
+#: plays it forward then back, so every motion is a cosine of the loop (eased
+#: at both ends) and the loop has no seam. tools/select_loop.py renders it at
+#: the still's framing; frame 0 IS the still.
+SELECT_LOOP = {
+    "length": 2.0, "fps": 6, "loop": True, "motion_end": 2.0,
+    "keys": [
+        (0.0, select_pose(), "io"),
+        (2.0, select_pose(breath=0.0, swing=3.0), "io"),
+    ],
+}
+#: not in CLIPS: a half loop that does not close on its own (the game plays it
+#: forward then back); only tools/select_loop.py renders it
+SELECT_LOOPS = {"select_loop": SELECT_LOOP}
 
 # ------------------------------------------------------------------ roster tile
 # The face close-up is cut from the same confident pose.

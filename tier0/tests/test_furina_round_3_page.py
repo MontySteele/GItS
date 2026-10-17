@@ -148,23 +148,24 @@ def _forecast(drained: int, hp: int, *amounts: int) -> list[str]:
 
 
 def test_the_forecast_names_the_floor_the_face_way():
-    # Nothing drained: Repay 2 returns 0, +2 Block.
+    # Nothing drained: Repay 2 returns 0 and gains 2 Block (the floor first
+    # since furina-next paper 3, 2026-10-16).
     assert _forecast(0, 78, 2) == [
-        "  - **Charlotte**: Repay 2 (repays 0, +2 Block)"]
+        "  - **Charlotte**: Repay 2 (Repay 0: gain 2 Block)"]
     # Drained 1: it returns 1, +1 Block.
     assert _forecast(1, 70, 2) == [
-        "  - **Charlotte**: Repay 2 (repays 1, +1 Block)"]
+        "  - **Charlotte**: Repay 2 (Repay 1: gain 1 Block)"]
     # Enough drained: the plain words.
     assert _forecast(6, 70, 2) == ["  - **Charlotte**: Repay 2"]
     # Never past her Max HP: 6 drained but 1 HP of room.
     assert _forecast(6, 77, 2) == [
-        "  - **Charlotte**: Repay 2 (repays 1, +1 Block)"]
+        "  - **Charlotte**: Repay 2 (Repay 1: gain 1 Block)"]
 
 
 def test_the_forecast_walks_two_repays_front_to_back():
     assert _forecast(3, 70, 2, 2) == [
         "  - **Charlotte**: Repay 2",
-        "  - **Charlotte**: Repay 2 (repays 1, +1 Block)"]
+        "  - **Charlotte**: Repay 2 (Repay 1: gain 1 Block)"]
 
 
 # ---- 3. "first" ----------------------------------------------------------------

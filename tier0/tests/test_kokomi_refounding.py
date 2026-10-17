@@ -122,23 +122,22 @@ def carry_out(st):
     kokomi_plan.resolve_all(st)
 
 
-def test_shinobu_thundergrust_written_reacts_electro_charged():
+def test_a_companion_with_no_plan_line_cannot_be_planned():
+    """Kokomi review r9 pick 1 (a), 2026-10-15; [USER]: "let's get rid of
+    Companions as Plans unless we make a card that specifically has a Plan
+    line." Shinobu prints none: the jellyfish refuses it, so it plays at the
+    enemy as printed and nothing is queued."""
     st = kokomi_state()
-    write(st, card("proto_mi_shinobu_thundergrust"))
-    assert len(st.kk_plan_queue) == 1
+    c = card("proto_mi_shinobu_thundergrust")
+    assert c.is_companion and not c.plan
+    assert not kokomi_plan.can_be_written(c)
+    st.player.hand.append(c)
+    assert not kokomi_plan.plan_aimed_at_pet(st, c)
     hp = st.enemies[0].hp
-    carry_out(st)
-    assert "electrocharged" in reactions(st)
+    combat.play_card(st, c)
+    assert st.kk_plan_queue == []
     assert st.enemies[0].hp < hp
-
-
-def test_a_geo_companion_written_crystallizes():
-    """The task named Gorou's Inuzaka; Inuzaka prints its own Plan line since
-    the re-founding (Block 11), so the Geo Companion without one is Itto's."""
-    st = kokomi_state()
-    write(st, card("proto_mi_itto_superlative_superstrength"))
-    carry_out(st)
-    assert "crystallize" in reactions(st)
+    assert not any(e["event"] == "plan_written" for e in st.log)
 
 
 def test_gorou_inuzaka_written_carries_out_its_own_plan_line():
@@ -148,43 +147,6 @@ def test_gorou_inuzaka_written_carries_out_its_own_plan_line():
     carry_out(st)
     assert st.player.block == 11
     assert reactions(st) == []
-
-
-def test_a_block_only_companion_written_leaves_just_the_hydro():
-    st = kokomi_state()
-    write(st, card("proto_mi_shinobu_grass_ring"))
-    st.player.block = 0
-    carry_out(st)
-    assert st.enemies[0].aura == "hydro"
-    assert reactions(st) == []
-    assert st.player.block >= 4
-
-
-def test_the_hydro_lands_before_the_companion_plays():
-    st = kokomi_state()
-    write(st, card("proto_mi_shinobu_thundergrust"))
-    carry_out(st)
-    events = [e["event"] for e in st.log]
-    assert events.index("plan_companion") < events.index("reaction")
-
-
-def test_a_written_companions_carry_out_plays_a_copy_that_exhausts():
-    st = kokomi_state()
-    original = card("proto_mi_shinobu_thundergrust")
-    write(st, original)
-    assert any(c is original for c in st.player.discard_pile)
-    carry_out(st)
-    assert any(c.id == original.id for c in st.player.exhaust_pile)
-    assert sum(c.id == original.id for c in st.player.discard_pile) == 1
-
-
-def test_the_carry_out_is_not_a_second_play_of_the_card_in_the_tally():
-    st = kokomi_state()
-    write(st, card("proto_mi_shinobu_thundergrust"))
-    carry_out(st)
-    plays = [e for e in st.log if e["event"] == "play"]
-    assert len(plays) == 2
-    assert [bool(e.get("plan_carry")) for e in plays] == [False, True]
 
 
 # --- the relic --------------------------------------------------------------
@@ -267,16 +229,20 @@ def test_the_generators_offer_common_inazuma_and_the_generals_rare():
 
 
 def test_watatsumi_resistance_hands_a_sting_for_a_written_companion():
+    """A Companion that prints a Plan line (Gorou's) is the only one written
+    since Kokomi review r9 pick 1 (a)."""
     st = kokomi_state()
     st.player.powers[kokomi_plan.WATATSUMI_RESISTANCE] = 1
-    write(st, card("proto_mi_shinobu_thundergrust"))
+    write(st, card("proto_mi_gorou_inuzaka"))
     assert [c.id for c in st.player.hand] == [kokomi_plan.STING_ID]
 
 
 def test_grand_strategist_answers_a_reaction_a_plan_caused():
     st = kokomi_state(n_enemies=2)
     st.player.powers[kokomi_plan.GRAND_STRATEGIST] = 5
-    write(st, card("proto_mi_shinobu_thundergrust"))
+    for enemy in st.enemies:
+        enemy.aura = "electro"
+    write(st, card("proto_kk_kurages_oath"))
     back = st.enemies[1].hp
     carry_out(st)
     assert "electrocharged" in reactions(st)

@@ -1,0 +1,160 @@
+[gd_scene load_steps=20 format=3]
+
+[ext_resource type="Texture2D" path="res://furina/model/frames/furina_gfx_escoffier.png" id="1_escoffier"]
+
+[sub_resource type="AtlasTexture" id="Atlas_escoffier_0"]
+atlas = ExtResource("1_escoffier")
+region = Rect2(0, 0, 126, 119)
+margin = Rect2(230, 203, 461, 257)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_escoffier_1"]
+atlas = ExtResource("1_escoffier")
+region = Rect2(126, 0, 337, 322)
+margin = Rect2(185, 0, 250, 54)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_escoffier_2"]
+atlas = ExtResource("1_escoffier")
+region = Rect2(463, 0, 379, 328)
+margin = Rect2(147, 5, 208, 48)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_escoffier_3"]
+atlas = ExtResource("1_escoffier")
+region = Rect2(842, 0, 413, 339)
+margin = Rect2(114, 4, 174, 37)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_escoffier_4"]
+atlas = ExtResource("1_escoffier")
+region = Rect2(0, 339, 441, 340)
+margin = Rect2(86, 10, 146, 36)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_escoffier_5"]
+atlas = ExtResource("1_escoffier")
+region = Rect2(441, 339, 462, 341)
+margin = Rect2(63, 16, 125, 35)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_escoffier_6"]
+atlas = ExtResource("1_escoffier")
+region = Rect2(903, 339, 498, 340)
+margin = Rect2(44, 22, 89, 36)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_escoffier_7"]
+atlas = ExtResource("1_escoffier")
+region = Rect2(0, 680, 528, 336)
+margin = Rect2(29, 30, 59, 40)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_escoffier_8"]
+atlas = ExtResource("1_escoffier")
+region = Rect2(528, 680, 550, 333)
+margin = Rect2(18, 37, 37, 43)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_escoffier_9"]
+atlas = ExtResource("1_escoffier")
+region = Rect2(0, 1016, 566, 328)
+margin = Rect2(10, 45, 21, 48)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_escoffier_10"]
+atlas = ExtResource("1_escoffier")
+region = Rect2(566, 1016, 578, 321)
+margin = Rect2(4, 54, 9, 55)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_escoffier_11"]
+atlas = ExtResource("1_escoffier")
+region = Rect2(0, 1344, 584, 313)
+margin = Rect2(1, 63, 3, 63)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_escoffier_12"]
+atlas = ExtResource("1_escoffier")
+region = Rect2(584, 1344, 587, 305)
+margin = Rect2(0, 71, 0, 71)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_escoffier_13"]
+atlas = ExtResource("1_escoffier")
+region = Rect2(0, 1657, 583, 244)
+margin = Rect2(2, 130, 4, 132)
+filter_clip = true
+
+[sub_resource type="Shader" id="Shader_element"]
+code = "shader_type canvas_item;
+
+uniform vec4 element : source_color = vec4(0.560784, 1.0, 0.839216, 1.0);
+varying vec4 tint;
+
+void vertex() {
+	tint = COLOR;
+}
+
+void fragment() {
+	vec4 heat = texture(TEXTURE, UV);
+	COLOR = vec4(mix(element.rgb, vec3(1.0), smoothstep(0.72, 1.0, heat.r)), heat.a) * tint;
+}"
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_tint"]
+shader = SubResource("Shader_element")
+shader_parameter/element = Color(0.6588, 0.9412, 1, 1)
+
+[sub_resource type="Animation" id="Animation_escoffier"]
+resource_name = "escoffier"
+length = 0.7
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Fx:self_modulate")
+tracks/0/interp = 0
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.7),
+"transitions": PackedFloat32Array(1, 1),
+"update": 1,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Fx:texture")
+tracks/1/interp = 0
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [SubResource("Atlas_escoffier_0"), SubResource("Atlas_escoffier_1"), SubResource("Atlas_escoffier_2"), SubResource("Atlas_escoffier_3"), SubResource("Atlas_escoffier_4"), SubResource("Atlas_escoffier_5"), SubResource("Atlas_escoffier_6"), SubResource("Atlas_escoffier_7"), SubResource("Atlas_escoffier_8"), SubResource("Atlas_escoffier_9"), SubResource("Atlas_escoffier_10"), SubResource("Atlas_escoffier_11"), SubResource("Atlas_escoffier_12"), SubResource("Atlas_escoffier_13")]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_escoffier"]
+_data = {
+&"escoffier": SubResource("Animation_escoffier")
+}
+
+[node name="GuestFx" type="Node2D"]
+metadata/guest = "escoffier"
+metadata/anchor = "feet"
+metadata/length = 0.7
+
+[node name="Fx" type="Sprite2D" parent="."]
+unique_name_in_owner = true
+self_modulate = Color(1, 1, 1, 0)
+material = SubResource("ShaderMaterial_tint")
+texture = SubResource("Atlas_escoffier_0")
+centered = false
+offset = Vector2(-293, -272)
+scale = Vector2(0.5, 0.5)
+
+[node name="FxPlayer" type="AnimationPlayer" parent="."]
+unique_name_in_owner = true
+libraries = {
+&"": SubResource("AnimationLibrary_escoffier")
+}
+autoplay = "escoffier"

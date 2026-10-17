@@ -82,19 +82,24 @@ def test_the_pool_is_78_at_23_35_20_with_17_powers():
 # ---- Ousia / Pneuma --------------------------------------------------------
 
 def test_ousia_pneuma_hits_then_blocks_then_hits():
+    # Furina's card pass (2026-10-15): Ousia "Drain 2. Deal 10 [13] damage.",
+    # Pneuma "Repay 2. Gain 8 [11] Block." (was 8 [11] and 7 [10]).
     st = _furina()
     card = _card("proto_fs_ousia_pneuma")
     hp = st.enemies[0].hp
+    mine = st.player.hp
     _play(st, card)
-    assert hp - st.enemies[0].hp == 8 and st.player.block == 0
+    assert hp - st.enemies[0].hp == 10 and st.player.block == 0
+    assert st.player.hp == mine - 2
     assert card.flipped
     _pull(st, card)
     _play(st, card)
-    assert st.player.block == 7 and not card.flipped
+    assert st.player.block == 8 and not card.flipped
+    assert st.player.hp == mine
     st = _furina()
     hp = st.enemies[0].hp
     _play(st, _card("proto_fs_ousia_pneuma+"))
-    assert hp - st.enemies[0].hp == 11
+    assert hp - st.enemies[0].hp == 13
 
 
 def test_a_new_combat_starts_every_card_on_ousia():

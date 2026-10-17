@@ -98,7 +98,8 @@ internal static class ElementalHit
         // FURINA'S NEUVILLETTE (the pool to 75): "Your Hydro damage deals 2
         // more", on this door too (a guest's act, his own included). The
         // sim's `furina_tide._hit` adds the same bonus.
-        dealt += FurinaStage.HydroBonus(applier, element);
+        var hydroBonus = FurinaStage.HydroBonus(applier, element);
+        dealt += hydroBonus;
 
         // VARKA (the Oath rework, sec.3): an application of his credits Oath.
         await VarkaOath.NoteApplication(choiceContext, applier, element,
@@ -137,6 +138,9 @@ internal static class ElementalHit
         // 2026-10-02 (combat visual audit, gap 3): the element's hit effect,
         // the same one an Attack card of that element draws. Visual only.
         ElementHitFx.SpawnOn(target, element);
+        // Furina's guest effects (2026-10-16): Neuvillette's ring when his
+        // bonus is in this hit. Visual only, never awaited.
+        Vfx.FurinaGuestFx.OnHydroBonus(hydroBonus, element, target);
         var results = await CreatureCmd.Damage(
             choiceContext, target, landed,
             ignoreBlock ? ValueProp.Unpowered | ValueProp.Unblockable

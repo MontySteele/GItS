@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Threading.Tasks;
 using BaseLib.Abstracts;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Powers;
+using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.ValueProps;
@@ -96,6 +98,23 @@ public sealed class FanfarePower : PowerModel, ILocalizationProvider
         if (cardSource == null || !props.IsPoweredAttack()) return 0m;
         var element = CompanionOverhaulRiders.ElementFor(cardSource, dealer);
         return FurinaStage.HydroBonus(dealer, element);
+    }
+
+    /// <summary>
+    /// Furina's guest effects (2026-10-16): Neuvillette's ring on the enemy
+    /// a card hit of hers landed on, when his bonus was in it -- the same
+    /// test as <see cref="ModifyDamageAdditive"/>, read after the hit, so a
+    /// card face's preview never plays it. Visual only.
+    /// </summary>
+    public override Task AfterDamageGiven(
+        PlayerChoiceContext choiceContext, Creature? dealer, DamageResult result,
+        ValueProp props, Creature target, CardModel? cardSource)
+    {
+        if (dealer == null || dealer != Owner || target == Owner) return Task.CompletedTask;
+        if (cardSource == null || !props.IsPoweredAttack()) return Task.CompletedTask;
+        var element = CompanionOverhaulRiders.ElementFor(cardSource, dealer);
+        Vfx.FurinaGuestFx.OnHydroBonus(FurinaStage.HydroBonus(dealer, element), element, target);
+        return Task.CompletedTask;
     }
 
     /// <summary>A number read off her ledger when the tip is drawn.</summary>
@@ -239,20 +258,19 @@ public sealed class CriticsDarlingPower : PowerModel, ILocalizationProvider
     public override PowerStackType StackType => PowerStackType.Counter;
 }
 
-/// <summary><i>Bis!</i>: "Whenever a card Spends all your Fanfare, keep half
-/// of it." [Innate] Half rounds down; a second copy adds nothing
-/// (<see cref="FurinaStageLedger.SpendAll"/>). A "Spend up to" card is not a
-/// spend-all even when it empties the bank; the card's hover says so
-/// (<see cref="KleeMod.Cards.ArmKeywordTips.ForBisSpendUpTo"/>, design-session
-/// call, 2026-10-13).</summary>
-public sealed class BisPower : PowerModel, ILocalizationProvider
+/// <summary><i>Extended Run</i> (furina-next paper 2, 2026-10-16; Bis!'s
+/// slot): "Attacks and Skills that Spend up to a number can Spend 8 [12]
+/// more." Its amount is what a played card's whole printed cap rises by, so
+/// copies add (<see cref="FurinaStageLedger.CardUpToCap"/>). Full House, a
+/// guest's share-Spend, Spend half and fixed Spends never read it.</summary>
+public sealed class ExtendedRunPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
-        ("title", "Bis!"),
+        ("title", "Extended Run"),
         ("description",
-            "Whenever a card [gold]Spends[/gold] all your "
-          + "[gold]Fanfare[/gold], keep half of it."),
+            "Attacks and Skills that [gold]Spend[/gold] up to a number can "
+          + "[gold]Spend[/gold] [blue]{Amount}[/blue] more."),
     };
 
     public override PowerType Type => PowerType.Buff;

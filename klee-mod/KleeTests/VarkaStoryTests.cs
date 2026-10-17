@@ -80,7 +80,7 @@ public class VarkaStoryTests
         Assert.Contains($"| Losing the run | \"{l.RunLoss}\" |", paper);
         Assert.Contains($"| Winning the run | \"{l.RunWin}\" |", paper);
         // The signature moment is that card.
-        Assert.Equal(typeof(ProtoVkFourWindsAscension), V.SignatureCard);
+        Assert.Contains(typeof(ProtoVkFourWindsAscension), V.SignatureCards);
         Assert.Equal("Four Winds' Ascension", Title(new ProtoVkFourWindsAscension()));
     }
 
@@ -120,7 +120,9 @@ public class VarkaStoryTests
         foreach (var o in e.Options)
         {
             Assert.Contains($"| **{o.Title}** | {ToPaper(o.Description)} |", paper);
-            Assert.Null(o.Result);
+            // The story chains give each option its result line.
+            Assert.Contains($"| {(o.Title.StartsWith("Request") ? "Request reinforcements." : o.Title)} | {o.Result} |",
+                StoryChainTests.Paper());
         }
         Assert.Contains(
             $"**{OverdueReports.TitleText}** is a Varka-only curse built like Klee's Confinement: "
@@ -141,7 +143,7 @@ public class VarkaStoryTests
         foreach (var o in e.Options)
         {
             Assert.Contains($"| **{o.Title}** | {ToPaper(o.Description)} |", paper);
-            Assert.Null(o.Result);
+            Assert.Contains($"| {o.Title} | {o.Result} |", StoryChainTests.Paper());
         }
     }
 
@@ -152,16 +154,21 @@ public class VarkaStoryTests
         var e = V.Events[2];
         Assert.Contains($"## 5. Act 3: {e.Title}", paper);
         Assert.Contains($"> {e.Body}", paper);
-        Assert.Contains($"When one steps out, Varka answers: \"{VarkaStory.HomeAnswer}\"", paper);
         Assert.Equal(4, e.Options.Count);
-        foreach (var o in e.Options.Take(3))
+        // One reply per knight (the story chains).
+        var answers = new[] { VarkaStory.EulaAnswer, VarkaStory.NoelleAnswer, VarkaStory.DilucAnswer };
+        var chains = StoryChainTests.Flat();
+        for (var i = 0; i < 3; i++)
         {
+            var o = e.Options[i];
             var lines = o.Result!.Split('\n');
             Assert.Equal(2, lines.Length);
             Assert.StartsWith(o.Title + ": \"", lines[0]);
             var line = lines[0][(o.Title.Length + 3)..^1];
             Assert.Contains($"| **{o.Title}** | {ToPaper(o.Description)} | \"{line}\" |", paper);
-            Assert.Equal($"Varka: \"{VarkaStory.HomeAnswer}\"", lines[1]);
+            Assert.Equal($"Varka: \"{answers[i]}\"", lines[1]);
+            Assert.Contains($"{o.Title}, \"", chains);
+            Assert.Contains($": \"{answers[i]}\"", chains);
         }
         var skip = e.Options[3];
         Assert.Contains(
@@ -174,12 +181,17 @@ public class VarkaStoryTests
     {
         foreach (var o in V.Events.SelectMany(e => e.Options))
         {
-            if (o.Effect.Amount > 0) Assert.Contains(o.Effect.Amount.ToString(), o.Description);
-            if (o.Effect.HpLoss > 0) Assert.Contains($"Lose {o.Effect.HpLoss} HP", o.Description);
-            if (o.Effect.Card != null && o.Effect.Card != typeof(OverdueReports))
+            foreach (var step in o.Effects)
             {
-                var card = (BaseLib.Abstracts.CustomCardModel)Activator.CreateInstance(o.Effect.Card)!;
-                Assert.Contains($"[gold]{Title(card)}[/gold]", o.Description);
+                // "Gain a random potion": one is "a".
+                if (step.Amount > 1) Assert.Contains(step.Amount.ToString(), o.Description);
+                if (step.HpLoss > 0) Assert.Contains($"Lose {step.HpLoss} HP", o.Description);
+                if (step.Kind == StoryEffectKind.LoseHp) Assert.Contains($"Lose {step.Amount} HP", o.Description);
+                if (step.Card != null && step.Card != typeof(OverdueReports))
+                {
+                    var card = (BaseLib.Abstracts.CustomCardModel)Activator.CreateInstance(step.Card)!;
+                    Assert.Contains($"[gold]{Title(card)}[/gold]", o.Description);
+                }
             }
         }
         Assert.Equal("Razor: Awakening", Title(new ProtoVkRazorClawAndThunder()));
@@ -231,7 +243,8 @@ public class VarkaStoryTests
     {
         // STRUCTURAL: an option's effect is a command against a live run.
         var apply = Il.Calls(Il.Method(nameof(StoryEventModel), "Apply"));
-        Assert.Contains("CreatureCmd.Damage", apply);
+        Assert.Contains("StoryEventModel.LoseHp", apply);
+        Assert.Contains("CreatureCmd.Damage", Il.Calls(Il.Method(nameof(StoryEventModel), "LoseHp")));
         Assert.Contains("StoryEventModel.UpgradeRandom", apply);
         Assert.Contains("StoryEventModel.ChooseFromPool", apply);
         var upgrade = Il.Calls(Il.Method(nameof(StoryEventModel), "UpgradeRandom"));
@@ -311,29 +324,34 @@ public class VarkaStoryTests
 
     // ---- The events are his, act by act ----------------------------------------
 
-    private static readonly Func<Type, bool> NothingSeen = _ => false;
+    private static readonly IReadOnlyList<StoryRecord> Nothing = Array.Empty<StoryRecord>();
 
     [Fact]
     public void Each_act_offers_Varka_his_own_event_and_no_one_else_any()
     {
-        var solo = new[] { VarkaType };
-        Assert.Equal(typeof(VarkaDispatchFromMondstadt), StoryRules.EventFor(solo, 0, NothingSeen)!.EventType);
-        Assert.Equal(typeof(VarkaWolfOfTheNorth), StoryRules.EventFor(solo, 1, NothingSeen)!.EventType);
-        Assert.Equal(typeof(VarkaLongWayHome), StoryRules.EventFor(solo, 2, NothingSeen)!.EventType);
-        Assert.Null(StoryRules.EventFor(solo, 3, NothingSeen));
-        Assert.Equal(new[] { 0, 1, 2 }, V.Events.Select(e => e.ActIndex));
-        Assert.Null(StoryRules.EventFor(new[] { typeof(Kokomi), typeof(Furina) }, 0, NothingSeen));
+        var solo = new (Type, IReadOnlyList<StoryRecord>)[] { (VarkaType, Nothing) };
+        Assert.Equal(0, StoryRules.EventFor(solo, 0, 7UL)!.ActIndex);
+        Assert.Equal(typeof(VarkaWolfOfTheNorth), StoryRules.EventFor(solo, 1, 7UL)!.EventType);
+        Assert.Equal(typeof(VarkaLongWayHome), StoryRules.EventFor(solo, 2, 7UL)!.EventType);
+        Assert.Null(StoryRules.EventFor(solo, 3, 7UL));
+        Assert.Equal(new[] { 0, 1, 2, 1, 2, 0, 0, 1 }, V.Events.Select(e => e.ActIndex));
+        Assert.Null(StoryRules.EventFor(
+            new (Type, IReadOnlyList<StoryRecord>)[] { (typeof(Kokomi), Nothing), (typeof(Yae), Nothing) }, 0, 7UL));
     }
 
     [Fact]
     public void Varka_and_Klee_at_one_table_each_get_their_own_once()
     {
-        var table = new[] { KleeType, VarkaType };
-        Assert.Equal(typeof(KleeStarsnatchCliff), StoryRules.EventFor(table, 0, NothingSeen)!.EventType);
-        Assert.Equal(typeof(VarkaDispatchFromMondstadt),
-            StoryRules.EventFor(table, 0, t => t == typeof(KleeStarsnatchCliff))!.EventType);
-        Assert.Null(StoryRules.EventFor(table, 0,
-            t => t == typeof(KleeStarsnatchCliff) || t == typeof(VarkaDispatchFromMondstadt)));
+        var kleeFirst = StoryRules.EventFor(
+            new (Type, IReadOnlyList<StoryRecord>)[] { (KleeType, Nothing), (VarkaType, Nothing) }, 0, 7UL)!;
+        Assert.Contains(kleeFirst, KleeStory.Table.Events);
+        var kleeFired = new[] { new StoryRecord(0, kleeFirst.EventType, null) };
+        var varkas = StoryRules.EventFor(
+            new (Type, IReadOnlyList<StoryRecord>)[] { (KleeType, kleeFired), (VarkaType, Nothing) }, 0, 7UL)!;
+        Assert.Contains(varkas, V.Events);
+        var varkaFired = new[] { new StoryRecord(0, varkas.EventType, null) };
+        Assert.Null(StoryRules.EventFor(
+            new (Type, IReadOnlyList<StoryRecord>)[] { (KleeType, kleeFired), (VarkaType, varkaFired) }, 0, 7UL));
     }
 
     [Fact]
@@ -411,6 +429,19 @@ public class VarkaStoryTests
     // ---- Combat lines ---------------------------------------------------------
 
     [Fact]
+    public void Dandelion_Gale_speaks_the_signature_line_too()
+    {
+        // Orobas's Archaic Tooth replaces the Ascension with the Gale; the
+        // bark follows it (release fix, 2026-10-14).
+        Assert.True(StoryRules.IsSignaturePlay(V, typeof(global::KleeMod.Cards.Varka.DandelionGale)));
+        Assert.Equal(2, V.SignatureCards.Count);
+        // Data on the table, not a special case in the rule.
+        Assert.DoesNotContain(
+            Il.Calls(Il.Method(nameof(StoryRules), nameof(StoryRules.IsSignaturePlay))),
+            c => c.Contains("DandelionGale"));
+    }
+
+    [Fact]
     public void Four_Winds_Ascension_is_his_signature_once_a_combat()
     {
         Assert.True(StoryRules.IsSignaturePlay(V, typeof(ProtoVkFourWindsAscension)));
@@ -418,7 +449,7 @@ public class VarkaStoryTests
         Assert.False(StoryRules.IsSignaturePlay(V, null));
         // Klee's signature is her Bomb's, never a card play.
         Assert.False(StoryRules.IsSignaturePlay(KleeStory.Table, typeof(ProtoVkFourWindsAscension)));
-        Assert.Null(KleeStory.Table.SignatureCard);
+        Assert.Empty(KleeStory.Table.SignatureCards);
 
         // Structural: the card-play hook asks the rule and speaks once a combat.
         var hook = Il.Calls(Il.Method(nameof(StoryCombatHooks), "AfterCardPlayed"));
@@ -459,7 +490,7 @@ public class VarkaStoryTests
         Assert.Same(V, s.Story);
         Assert.Null(s.Pair);
         Assert.Single(StoryRules.BossEntryPlan(new[] { VarkaType, typeof(MegaCrit.Sts2.Core.Models.Characters.Ironclad) }));
-        Assert.Empty(StoryRules.BossEntryPlan(new[] { typeof(Kokomi), typeof(Furina) }));
+        Assert.Empty(StoryRules.BossEntryPlan(new[] { typeof(Kokomi), typeof(Yae) }));
     }
 
     [Theory]

@@ -170,7 +170,10 @@ def test_nimble_is_not_skill_only_and_takes_a_block_granting_attack():
                     # The Furina sweep (2026-10-14): Ousia / Pneuma's Pneuma
                     # face and Understudy's Debut's below-half Block.
                     "proto_fs_ousia_pneuma",
-                    "proto_fs_understudys_debut"}
+                    "proto_fs_understudys_debut",
+                    # Kokomi review r8 (2026-10-14): Surging Shoal deals 10
+                    # to ALL and gains 10 Block.
+                    "proto_kk_surging_shoal"}
     reference = {c.id for c in loader._card_index().values()
                  if c.type == "attack"
                  and c.character in roster.REFERENCE_IDS
