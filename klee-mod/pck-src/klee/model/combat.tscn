@@ -1700,7 +1700,7 @@ vframes = 5
 [node name="ThrownProjectile" type="Sprite2D" parent="Visuals/Facing"]
 unique_name_in_owner = true
 visible = false
-position = Vector2(67.5, -138.25)
+position = Vector2(67.5, -138.5)
 scale = Vector2(0.5, 0.5)
 texture = ExtResource("8_bomb")
 metadata/release = 0.45

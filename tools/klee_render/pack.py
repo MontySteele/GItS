@@ -85,6 +85,11 @@ SHADOW_ASPECT = 0.24              # height / width, between Ironclad and Silent
 SHADOW_SPAN = 1.9                 # width over her boots' span in stance A
 SHADOW_MIN_W = 0.55               # ... but at least this much of her full height
 SHADOW_FOOT_ROWS = 14             # texture px above the feet anchor that count as boots
+#: The rest still's shadows (painted into klee_rest.png; rest_with_shadow):
+#: her crouch's footprint, coat hem to boot toes, and the bomb beside her,
+#: each over the width of its silhouette below her hips.
+REST_SHADOW_SPAN = 1.1
+REST_PROP_SPAN = 1.2
 
 #: The roster tile (the character-select screen's small cutout; owner,
 #: 2026-10-13: "a face zoom-in like the base game characters"). Framed like
@@ -293,6 +298,42 @@ def shadow_for(im: Image.Image, origin, full_h: float, tex_scale: float) -> dict
             "size": [round(w, 1), round(w * SHADOW_ASPECT, 1)]}
 
 
+def rest_with_shadow(im: Image.Image, meta: dict):
+    """Paint the ground shadow into the rest still (the base rest-site
+    skeletons carry one; BaseLib draws ours from this one texture, so it goes
+    in the pixels). The figure and the bomb beside her are the column runs below
+    her hips; each gets the combat shadow's look (shadow_texture), as wide as
+    its run (her a little wider), centred on the ground line between the feet
+    anchor and her lowest texel. The canvas grows so no shadow is clipped.
+    Returns (image, meta with hips_px moved by the growth, the shadows' boxes)."""
+    a = im.getchannel("A")
+    hips_y = round(meta["hips_px"][1])
+    band = a.crop((0, hips_y, a.width, a.height)).point(lambda v: 255 if v > 128 else 0)
+    runs = column_runs(band)
+    figure = max(runs, key=lambda r: r[1] - r[0])
+    ground_y = meta["origin_px"][1]
+    boxes = []
+    for x0, x1 in runs:
+        if x1 - x0 < 6:
+            continue
+        low = band.crop((x0, 0, x1, band.height)).getbbox()[3] + hips_y
+        k = REST_SHADOW_SPAN if (x0, x1) == figure else REST_PROP_SPAN
+        w = (x1 - x0) * k
+        boxes.append(((x0 + x1) / 2, (ground_y + low) / 2, w, w * SHADOW_ASPECT))
+    grow = math.ceil(max([0.0] + [max(w / 2 - cx, cx + w / 2 - im.width, cy + h / 2 - im.height)
+                                  for cx, cy, w, h in boxes])) + PAD
+    out = Image.new("RGBA", (im.width + 2 * grow, im.height + grow), (0, 0, 0, 0))
+    placed = []
+    for i, (cx, cy, w, h) in enumerate(boxes):
+        tex = shadow_texture(round(w), round(h), seed=23 + i)
+        x, y = round(cx + grow - tex.width / 2), round(cy - tex.height / 2)
+        out.alpha_composite(tex, (x, y))
+        placed.append([x - grow, y, tex.width, tex.height])
+    out.alpha_composite(im, (grow, 0))
+    meta = dict(meta, hips_px=[meta["hips_px"][0] + grow, meta["hips_px"][1]])
+    return out, meta, placed
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--renders", help="render.py --out dir (combat + merchant + stills)")
@@ -353,7 +394,7 @@ def main(argv=None) -> int:
     # so a point at (w/2, 0.6 h) of the texture lands on the anchor. Pad so
     # her seat (the hips' head) is that point.
     rest_meta = json.loads((R / "rest.json").read_text(encoding="utf-8"))
-    rest = Image.open(R / "rest.png").convert("RGBA")
+    rest, rest_meta, rest_shadow = rest_with_shadow(Image.open(R / "rest.png").convert("RGBA"), rest_meta)
     rb = alpha_box([rest])
     rest = rest.crop(rb)
     hx, hy = rest_meta["hips_px"][0] - rb[0], rest_meta["hips_px"][1] - rb[1]
@@ -365,7 +406,7 @@ def main(argv=None) -> int:
     canvas.paste(rest, (round(half_w - hx), top))
     writes.append((art / "model" / "klee_rest.png", canvas))
     manifest["rest"] = {"file": "klee_rest.png", "size": list(canvas.size), "ppu": rest_meta["ppu"],
-                        "seat_px": [half_w, round(0.6 * H)]}
+                        "seat_px": [half_w, round(0.6 * H)], "shadow": rest_shadow}
     print("rest     ", canvas.size, "seat at", manifest["rest"]["seat_px"])
 
     # select: a 1920x1080 close-up, figure right of centre, bleeding off the bottom

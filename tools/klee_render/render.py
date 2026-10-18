@@ -312,10 +312,11 @@ def main():
     body_outline.thickness = t_world
 
     # the held bomb rides the near wrist; its offset is set once, in the
-    # stance-A pose (clips.HELD_AT: on her palm, held out toward the enemy),
+    # grip reference pose (clips.HOLD_REF, the old stance A; clips.HELD_AT: on
+    # her palm, held out toward the enemy),
     # so it sits in her hand in every clip
     held, held_parts, held_lines = make_jumpy_dumpty(C.BOMB_R, mats, line)
-    apply_pose(root, arm, mesh, C.STILLS["stance_a"])
+    apply_pose(root, arm, mesh, C.HOLD_REF)
     tip = arm.matrix_world @ arm.pose.bones["手先.R"].head
     want = (Matrix.Translation(tip + Vector(C.HELD_AT)) @ Matrix.Rotation(math.radians(C.HELD_YAW), 4, "Z"))
     held.parent = arm
