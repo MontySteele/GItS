@@ -1004,6 +1004,9 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     furina_tide.end_of_turn(state)
     # The Furina sweep: Trial by Water's mark and Rainfall Overture lapse.
     furina_stage.turn_end(state)
+    # THE INAZUMA POOL REWORK (2026-10-18): the end-of-turn phase that
+    # `effects.player_turn_end_triggers` opened closes after its last tenant.
+    state.turn_end_window = False
     _settle_phases(state)        # turn-end burst (Sparks 'n' Splash) can
     #                              drop a phased boss
     # Injected Burn/Wither (§10.2): end-of-turn damage while in hand,

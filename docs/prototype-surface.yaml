@@ -2635,18 +2635,17 @@
    upgrade: {damage: 2, conditional_then_damage: 2}}
 
 # A multi-hit Attack is one whose printed hit count is 2 or more, a Plan
-# line's included. "2 more damage per hit" is printed "2 additional damage
-# per hit" (rule 8).
+# line's included. The review (2026-10-18): one more hit, Innate upgraded.
 - {id: proto_mi_chiori_twin_blades, name: "Chiori — Hiyoku: Twin Blades", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 5, rarity: rare, role_c: trigger, element: geo,
    cost: 1, type: power,
-   description: "Your Attacks that hit more than once deal 2 additional damage per hit.",
-   effects: [{op: apply_power, power: mi_twin_blades, amount: 2, target: self}],
-   upgrade: {power_amount: +1}}
+   description: "Your Attacks that hit more than once hit one additional time.",
+   effects: [{op: apply_power, power: mi_twin_blades, amount: 1, target: self}],
+   upgrade: {innate: true}}
 
-# Hidden from Yae, like Sesshou Sakura. "At the end of your turn" is the
-# companion end-of-turn walk (`CompanionOverhaulTurnEnd`). Provenance notes.
+# "At the end of your turn" is the game's End phase (provenance notes).
+# Offered to Yae too since the review (2026-10-18).
 - {id: proto_mi_yae_sacred_sakuras_favor, name: "Yae Miko — Sacred Sakura's Favor", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 5, rarity: rare, role_c: trigger, element: electro,

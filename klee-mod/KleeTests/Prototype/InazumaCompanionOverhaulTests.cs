@@ -8,7 +8,10 @@ using KleeMod.Elements;
 using KleeMod.Powers;
 using KleeMod.Tests.Harness;
 using BaseLib.Abstracts;
+using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Entities.Cards;
+using MegaCrit.Sts2.Core.Entities.Creatures;
+using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -550,8 +553,10 @@ public class InazumaCompanionOverhaulTests
         var power = seat.Creature.Powers.OfType<HanegaPower>().Single();
         // Owned by this seat, so the card is "a card that gives you Block".
         var defend = Owned<ProtoMiThomaBlazingBarrier>(seat);
-        Assert.Equal(-CompanionOverhaulLaw.HanegaBlockLoss,
+        // Two copies: 3 less each (the review, 2026-10-18).
+        Assert.Equal(-2 * CompanionOverhaulLaw.HanegaBlockLoss,
             power.ModifyBlockAdditive(seat.Creature, 6m, ValueProp.Move, defend, null));
+        Assert.Equal(6, HanegaPower.BlockLoss(2));
         // Power and relic Block (no card source, or unpowered) are untouched.
         Assert.Equal(0m, power.ModifyBlockAdditive(
             seat.Creature, 6m, ValueProp.Move, null, null));
@@ -734,82 +739,108 @@ public class InazumaCompanionOverhaulTests
         Assert.Contains("If you have no [gold]Block[/gold], deal {BranchDamage:diff()} additional damage.",
                         Face(new ProtoMiWandererKyougen()));
         Assert.Contains("damage 3 times.", Face(new ProtoMiYoimiyaRyuukinSaxifrage()));
-        Assert.Contains("additional damage per hit.", Face(new ProtoMiChioriTwinBlades()));
+        Assert.Equal("Your Attacks that hit more than once hit one additional time.",
+                     Face(new ProtoMiChioriTwinBlades()));
         Assert.Equal("Damage you deal at the end of your turn is increased by 50%.",
                      Face(new ProtoMiYaeSacredSakurasFavor()));
         Assert.Equal(CardRarity.Uncommon, new ProtoMiAyakaHyouka().Rarity);
     }
 
     [Fact]
-    public void Twin_blades_pays_per_hit_on_a_multi_hit_attack_only()
+    public void Twin_blades_adds_a_hit_to_a_multi_hit_attack_only()
     {
-        var seat = Seat.Klee().WithCombatState().WithPower<TwinBladesPower>(2);
+        var seat = Seat.Klee().WithCombatState().WithPower<TwinBladesPower>(1);
         var power = seat.Creature.Powers.OfType<TwinBladesPower>().Single();
-        var target = Seat.Klee().Creature;
         var ryuukin = Owned<ProtoMiYoimiyaRyuukinSaxifrage>(seat);
-        // No Attack in flight: nothing.
-        Assert.Equal(0m, power.ModifyDamageAdditive(
-            target, 4m, Attack, seat.Creature, ryuukin, null));
         var three = new MegaCrit.Sts2.Core.Commands.Builders.AttackCommand(4m)
             .WithHitCount(3).FromCard(ryuukin, null);
         Assert.Equal(3, TwinBladesPower.PrintedHits(three));
-        power.BeforeAttack(three);
-        Assert.Equal(2m, power.ModifyDamageAdditive(
-            target, 4m, Attack, seat.Creature, ryuukin, null));
-        Assert.Equal(0m, power.ModifyDamageAdditive(
-            target, 4m, ValueProp.Unpowered, seat.Creature, ryuukin, null));
-        power.AfterAttack(null!, three);
-        Assert.Equal(0m, power.ModifyDamageAdditive(
-            target, 4m, Attack, seat.Creature, ryuukin, null));
-        // One printed hit is not "more than once".
+        Assert.Equal(4, power.ModifyAttackHitCount(three, 3));
+        // The printed count decides, not the running one: Niwabi's replay
+        // or another modifier does not make a single hit multi-hit.
         var kick = Owned<ProtoMiKiraraMeowteorKick>(seat);
         var one = new MegaCrit.Sts2.Core.Commands.Builders.AttackCommand(9m)
             .FromCard(kick, null);
-        power.BeforeAttack(one);
-        Assert.Equal(0m, power.ModifyDamageAdditive(
-            target, 9m, Attack, seat.Creature, kick, null));
-        // A Plan line: an Attack's multi-hit takes it, a single hit does not.
-        Assert.Equal(2, TwinBladesPower.PlanBonus(seat.Creature, ryuukin, 3));
-        Assert.Equal(0, TwinBladesPower.PlanBonus(seat.Creature, ryuukin, 1));
-        Assert.Equal(0, TwinBladesPower.PlanBonus(
+        Assert.Equal(2, power.ModifyAttackHitCount(one, 2));
+        // Someone else's Attack: nothing.
+        var other = Seat.Klee().WithCombatState();
+        var theirs = new MegaCrit.Sts2.Core.Commands.Builders.AttackCommand(4m)
+            .WithHitCount(3).FromCard(Owned<ProtoMiYoimiyaRyuukinSaxifrage>(other), null);
+        Assert.Equal(3, power.ModifyAttackHitCount(theirs, 3));
+        // A Plan line: an Attack's multi-hit gains one, a single hit or a
+        // Skill does not.
+        Assert.Equal(1, TwinBladesPower.PlanExtraHits(seat.Creature, ryuukin, 3));
+        Assert.Equal(0, TwinBladesPower.PlanExtraHits(seat.Creature, ryuukin, 1));
+        Assert.Equal(0, TwinBladesPower.PlanExtraHits(
             seat.Creature, new ProtoMiSayuNaptime(), 2));
-        Assert.Contains("TwinBladesPower.PlanBonus",
+        Assert.Contains("TwinBladesPower.PlanExtraHits",
             Il.Calls(Il.Method("KokomiPlan", "Hit")));
+        // Upgraded, the card is Innate and still costs 1.
+        var card = new ProtoMiChioriTwinBlades();
+        Assert.Contains("AddKeyword", string.Join(" ", Il.Calls(
+            typeof(ProtoMiChioriTwinBlades).GetMethod("OnUpgrade", All)!)));
+        Assert.Equal(1, card.EnergyCost.Canonical);
+    }
+
+    private static Creature EnemyBody()
+    {
+        var body = Seat.Klee(40).Creature;
+        Seat.Force(body, "Side", CombatSide.Enemy);
+        return body;
     }
 
     [Fact]
-    public void Sacred_sakuras_favor_multiplies_only_inside_the_end_of_turn_window()
+    public void Sacred_sakuras_favor_multiplies_only_in_the_end_of_turn_phase()
     {
-        var seat = Seat.Klee().WithPower<SacredSakurasFavorPower>(1);
-        var bare = Seat.Klee();
-        Assert.Equal(1m, SacredSakurasFavorPower.Multiplier(seat.Creature));
-        Assert.Equal(7m, SimDamagePipeline.DealerMods(seat.Creature, 7m));
-        var outer = SacredSakurasFavorPower.OpenWindow(seat.Creature);
-        try
+        var seat = Seat.Klee().WithCombatState().WithPower<SacredSakurasFavorPower>(1);
+        var power = seat.Creature.Powers.OfType<SacredSakurasFavorPower>().Single();
+        var enemy = EnemyBody();
+        var state = seat.Player.PlayerCombatState!;
+        foreach (var phase in new[] { PlayerTurnPhase.Start, PlayerTurnPhase.Play,
+                                      PlayerTurnPhase.AutoPostPlay })
+        {
+            Seat.Force(state, "Phase", phase);
+            Assert.Equal(1m, power.ModifyDamageMultiplicative(
+                enemy, 10m, ValueProp.Unpowered, seat.Creature, null, null));
+        }
+        Seat.Force(state, "Phase", PlayerTurnPhase.End);
+        var combat = ProtoBombs.Board(seat.Creature, enemy);
+        seat.Creature.CombatState = combat;
+        // The enemy side's turn (after the switch) is not hers.
+        combat.CurrentSide = CombatSide.Enemy;
+        Assert.False(SacredSakurasFavorPower.InEndOfTurn(seat.Creature));
+        combat.CurrentSide = CombatSide.Player;
+        Assert.True(SacredSakurasFavorPower.InEndOfTurn(seat.Creature));
+        // Her own hit on an enemy: x1.5.
+        Assert.Equal(CompanionOverhaulLaw.SacredSakuraMult,
+            power.ModifyDamageMultiplicative(
+                enemy, 10m, ValueProp.Unpowered, seat.Creature, null, null));
+        // A dealer-less door names her seat through its credit scope.
+        Assert.Equal(1m, power.ModifyDamageMultiplicative(
+            enemy, 10m, ValueProp.Unpowered, null, null, null));
+        using (Diagnostics.DamageCredit.Open(seat.Creature,
+                   Diagnostics.DamageCredit.Power))
         {
             Assert.Equal(CompanionOverhaulLaw.SacredSakuraMult,
-                         SacredSakurasFavorPower.Multiplier(seat.Creature));
-            Assert.Equal(10.5m, SimDamagePipeline.DealerMods(seat.Creature, 7m));
-            // Someone else's window, or no Favor: nothing.
-            Assert.Equal(1m, SacredSakurasFavorPower.Multiplier(bare.Creature));
+                power.ModifyDamageMultiplicative(
+                    enemy, 10m, ValueProp.Unpowered, null, null, null));
         }
-        finally
-        {
-            SacredSakurasFavorPower.CloseWindow(outer);
-        }
-        Assert.Equal(1m, SacredSakurasFavorPower.Multiplier(seat.Creature));
-        // STRUCTURAL: the walk's one door holds the window open.
-        var act = Il.Calls(Il.Method("CompanionOverhaulTurnEnd", "Act"));
-        Assert.Contains("SacredSakurasFavorPower.OpenWindow", act);
+        // Another player's hit, or a hit on a player, is not hers.
+        var partner = Seat.Klee().WithCombatState();
+        Assert.Equal(1m, power.ModifyDamageMultiplicative(
+            enemy, 10m, ValueProp.Unpowered, partner.Creature, null, null));
+        Assert.Equal(1m, power.ModifyDamageMultiplicative(
+            seat.Creature, 10m, ValueProp.Unpowered, enemy, null, null));
+        // STRUCTURAL: no actor list is involved. Lisa's start-of-turn
+        // Lightning Rose fires in the Start phase, which is not End.
+        Assert.DoesNotContain("SacredSakurasFavorPower", string.Join(" ",
+            Il.Calls(Il.Method("CompanionOverhaulTurnEnd", "Act"))));
     }
 
     [Fact]
-    public void Sacred_sakuras_favor_is_hidden_from_yae_alone()
+    public void Sacred_sakuras_favor_is_offered_to_yae()
     {
-        var card = new ProtoMiYaeSacredSakurasFavor();
-        Assert.True(CompanionPool.IsHiddenFrom(card, "yae"));
-        Assert.False(CompanionPool.IsHiddenFrom(card, "kokomi"));
+        Assert.False(CompanionPool.IsHiddenFrom(new ProtoMiYaeSacredSakurasFavor(), "yae"));
         Assert.True(CompanionPool.IsHiddenFrom(new ProtoMiYaeSesshouSakura(), "yae"));
-        Assert.False(CompanionPool.IsHiddenFrom(new ProtoMiChioriTwinBlades(), "yae"));
     }
 }

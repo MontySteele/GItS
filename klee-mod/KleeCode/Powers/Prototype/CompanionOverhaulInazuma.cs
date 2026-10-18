@@ -99,6 +99,10 @@ internal static class InazumaCompanion
         Creature applier)
     {
         var dealt = SimDamagePipeline.DealerMods(applier, amount);
+        // The seat this card-less hit is credited to, as on
+        // `ElementalHit.DealUnelemented` (Sacred Sakura's Favor reads it).
+        using var credit = Diagnostics.DamageCredit.OpenIfNone(
+            applier, Diagnostics.DamageCredit.Power);
         await CreatureCmd.Damage(
             choiceContext, target,
             (int)SimDamagePipeline.TargetMods(target, dealt),
@@ -864,20 +868,36 @@ public sealed class ChihayaburuPower : PowerModel, ILocalizationProvider
 /// Block is Dexterity's own filter turned down (<c>ModifyBlockAdditive</c> on
 /// powered card Block only, <c>IsPoweredCardOrMonsterMoveBlock</c> with a card
 /// source), so relic and power Block are untouched, and the game's
-/// <c>Hook.ModifyBlock</c> floors the total at 0. Amount is the Energy, so a
-/// second copy adds an Energy; the Block loss is the printed 3, once. Sim twins: `effects.hanega_energy` and
-/// `powers.modify_block_gained`.
+/// <c>Hook.ModifyBlock</c> floors the total at 0. Amount is copies, and both
+/// halves stack with it (the review, 2026-10-18): each copy gives 1 Energy
+/// and 3 less Block, so two give 2 Energy and 6 less. The badge prints the
+/// live total (<see cref="HanegaBlockLossVar"/>). Sim twins:
+/// `effects.hanega_energy` and `powers.modify_block_gained`.
 /// </summary>
 public sealed class HanegaPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
         ("title", "Hanega: Song of the Wind"),
+        // The static (compendium) row binds only the game's dumb vars, so
+        // it prints the one-copy 3; the badge prints the stacked total
+        // (`BlazingBarrierPower`'s split).
         ("description",
             "At the start of your turn, gain {Amount:energyIcons()}. Cards "
           + $"give you [blue]{CompanionOverhaulLaw.HanegaBlockLoss}[/blue] "
           + "less [gold]Block[/gold]."),
+        ("smartDescription",
+            "At the start of your turn, gain {Amount:energyIcons()}. Cards "
+          + "give you [blue]{" + HanegaBlockLossVar.Token + "}[/blue] "
+          + "less [gold]Block[/gold]."),
     };
+
+    protected override IEnumerable<DynamicVar> CanonicalVars =>
+        new DynamicVar[] { new HanegaBlockLossVar() };
+
+    /// <summary>The Block cards give you less, all copies: 3 per copy.</summary>
+    public static int BlockLoss(int copies) =>
+        CompanionOverhaulLaw.HanegaBlockLoss * System.Math.Max(0, copies);
 
     public override PowerType Type => PowerType.Buff;
 
@@ -896,8 +916,29 @@ public sealed class HanegaPower : PowerModel, ILocalizationProvider
         if (cardSource == null || target != Owner) return 0m;
         if (cardSource.Owner?.Creature != Owner) return 0m;
         if (!props.IsPoweredCardOrMonsterMoveBlock()) return 0m;
-        return -CompanionOverhaulLaw.HanegaBlockLoss;
+        return -BlockLoss((int)Amount);
     }
+}
+
+/// <summary>Hanega's badge number, "{BlockLoss}": 3 per copy, read live off
+/// the power (<see cref="BlockMarkVar"/>'s shape).</summary>
+internal sealed class HanegaBlockLossVar : DynamicVar
+{
+    internal const string Token = "BlockLoss";
+
+    internal HanegaBlockLossVar()
+        : base(Token, CompanionOverhaulLaw.HanegaBlockLoss)
+    {
+    }
+
+    private int Live => _owner is PowerModel power
+        ? HanegaPower.BlockLoss((int)power.Amount)
+        : (int)BaseValue;
+
+    protected override decimal GetBaseValueForIConvertible() => Live;
+
+    public override string ToString() =>
+        Live.ToString(System.Globalization.CultureInfo.InvariantCulture);
 }
 
 /// <summary>
@@ -929,20 +970,21 @@ public sealed class ProtoMiRaidenBalefulOmenPower : TemporaryStrengthPower, ILoc
 // [USER]: "Agreed on (a)! And also on growing the pool". Two Rare Powers.
 
 /// <summary>
-/// Chiori, Hiyoku: Twin Blades (Rare Power, 1): "Your Attacks that hit more
-/// than once deal 2 [3] additional damage per hit."
+/// Chiori, Hiyoku: Twin Blades (Rare Power, 1; the review's text,
+/// 2026-10-18): "Your Attacks that hit more than once hit one additional
+/// time." Upgraded, it is Innate.
 ///
 /// A MULTI-HIT ATTACK IS ONE WHOSE PRINTED HIT COUNT IS 2 OR MORE: the
 /// <c>WithHitCount</c> the card's own <c>AttackCommand</c> was built with
-/// (its private <c>_hitCount</c>, read in <c>BeforeAttack</c>, before
-/// <c>Hook.ModifyAttackHitCount</c> has its say), so a single-hit Attack
-/// played twice by Niwabi is not one. The command is latched for its own
-/// hits and released in <c>AfterAttack</c>; the modifier only reads the latch.
-/// A Plan line's multi-hit (Pearl Current, Kyouka Fuushi) is paid in
-/// <see cref="KokomiPlan"/>'s <c>Hit</c> through <see cref="PlanBonus"/>,
-/// since a planned hit is no <c>AttackCommand</c>. Amount is the bonus, so
-/// copies add. Sim twin: `mi_twin_blades` in `effects._op_damage` (an Attack
-/// with `times` of 2 or more) and `kokomi_plan._hit`.
+/// (its private <c>_hitCount</c>, read before <c>Hook.ModifyAttackHitCount</c>
+/// has its say), so a single-hit Attack played twice by Niwabi is not one.
+/// The extra hit is the base game's own hit-count hook
+/// (<c>ModifyAttackHitCount</c>), the surface Niwabi's replay sits beside: a
+/// pure read, one more hit per stack. A Plan line's multi-hit (Pearl Current,
+/// Kyouka Fuushi) is no <c>AttackCommand</c>, so it takes its extra hit in
+/// <see cref="KokomiPlan"/>'s <c>Hit</c> through <see cref="PlanExtraHits"/>.
+/// Sim twin: `mi_twin_blades` in `effects._op_damage` (an Attack with `times`
+/// of 2 or more) and `kokomi_plan._hit`.
 /// </summary>
 public sealed class TwinBladesPower : PowerModel, ILocalizationProvider
 {
@@ -950,8 +992,8 @@ public sealed class TwinBladesPower : PowerModel, ILocalizationProvider
     {
         ("title", "Hiyoku: Twin Blades"),
         ("description",
-            "Your Attacks that hit more than once deal [blue]{Amount}[/blue] "
-          + "additional damage per hit."),
+            "Your Attacks that hit more than once hit [blue]{Amount}[/blue] "
+          + "additional {Amount:plural:time|times}."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -964,10 +1006,6 @@ public sealed class TwinBladesPower : PowerModel, ILocalizationProvider
             System.Reflection.BindingFlags.NonPublic
             | System.Reflection.BindingFlags.Instance);
 
-    /// <summary>The Attack this power is paying on, between its
-    /// <c>BeforeAttack</c> and its <c>AfterAttack</c>.</summary>
-    private AttackCommand? _multiHit;
-
     /// <summary>The hit count an <c>AttackCommand</c> was printed with, or 1
     /// where it cannot be read.</summary>
     public static int PrintedHits(AttackCommand command) =>
@@ -977,35 +1015,19 @@ public sealed class TwinBladesPower : PowerModel, ILocalizationProvider
     public static bool IsMultiHitAttack(CardModel? card, int hits) =>
         card is { Type: CardType.Attack } && hits >= 2;
 
-    public override Task BeforeAttack(AttackCommand command)
+    public override int ModifyAttackHitCount(AttackCommand attack, int hitCount)
     {
-        if (command.Attacker != Owner) return Task.CompletedTask;
-        _multiHit = IsMultiHitAttack(command.ModelSource as CardModel,
-                                     PrintedHits(command))
-            ? command : null;
-        return Task.CompletedTask;
+        if (Owner == null || attack.Attacker != Owner || Amount <= 0) return hitCount;
+        if (!IsMultiHitAttack(attack.ModelSource as CardModel, PrintedHits(attack)))
+        {
+            return hitCount;
+        }
+        return hitCount + (int)Amount;
     }
 
-    public override Task AfterAttack(
-        PlayerChoiceContext choiceContext, AttackCommand command)
-    {
-        if (command == _multiHit) _multiHit = null;
-        return Task.CompletedTask;
-    }
-
-    public override decimal ModifyDamageAdditive(
-        Creature? target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource, CardPlay? cardPlay)
-    {
-        if (_multiHit == null || dealer != Owner || target == Owner) return 0m;
-        if (!props.IsPoweredAttack()) return 0m;
-        if (cardSource == null || cardSource != _multiHit.ModelSource) return 0m;
-        return Amount;
-    }
-
-    /// <summary>A planned hit's bonus: an Attack's Plan line of 2 or more
-    /// hits takes the owner's Twin Blades per hit, else 0.</summary>
-    public static int PlanBonus(Creature? owner, CardModel? source, int times)
+    /// <summary>A planned hit's extra hits: an Attack's Plan line of 2 or
+    /// more hits takes one per stack of the owner's Twin Blades, else 0.</summary>
+    public static int PlanExtraHits(Creature? owner, CardModel? source, int times)
     {
         if (owner == null || !IsMultiHitAttack(source, times)) return 0;
         return owner.Powers.OfType<TwinBladesPower>().Sum(p => (int)p.Amount);
@@ -1014,17 +1036,26 @@ public sealed class TwinBladesPower : PowerModel, ILocalizationProvider
 
 /// <summary>
 /// Yae Miko, Sacred Sakura's Favor (Rare Power, 2 [1]): "Damage you deal at
-/// the end of your turn is increased by 50%." Hidden from Yae, as Sesshou
-/// Sakura is (<see cref="CompanionPool.IsHiddenFrom"/>).
+/// the end of your turn is increased by 50%." Offered to Yae too (the review,
+/// 2026-10-18); her Sesshou Sakura stays hidden from her.
 ///
-/// "AT THE END OF YOUR TURN" IS THE COMPANION END-OF-TURN WALK: every actor
-/// <see cref="CompanionOverhaulTurnEnd"/> runs (Glacial Waltz, Oz, Grand Ode,
-/// Dandelion Breeze, Solar Isotoma, Lightfall Sword, Juuga, Sanctifying Ring,
-/// Sesshou Sakura, Soumetsu) runs inside a window this class holds open for
-/// that creature, and <see cref="SimDamagePipeline.DealerMods"/> multiplies
-/// the dealer's damage by 1.5 while it is open and the dealer wears this. A
-/// marker: a second copy adds nothing. After the dealer's Strength and Weak,
-/// floored first, as the sim floors `modify_damage_dealt`. Sim twin:
+/// "AT THE END OF YOUR TURN" IS THE GAME'S OWN END-OF-TURN PHASE, read off
+/// the turn state and not off a list of actors (<see cref="InEndOfTurn"/>):
+/// <c>CombatManager.EndPlayerTurnPhaseOneInternal</c> sets the player's
+/// <c>PlayerTurnPhase.End</c> after the AutoPostPlay phase and before
+/// <c>BeforeSideTurnEnd</c>, and it stays End through the hand flush and
+/// <c>AfterSideTurnEnd</c> until the side switches to the enemy. So every
+/// end-of-turn power, pet, summon, orb or guest that acts in that window is
+/// in it (the companion walk, Furina's guests, Yae's Sakura strikes, a
+/// base-game power such as Combust), and Lisa's Lightning Rose, which fires
+/// at the start of the turn, is not.
+///
+/// "DAMAGE YOU DEAL" IS A HIT ON AN ENEMY THAT IS THIS PLAYER'S: the dealer
+/// is the owner or the owner's pet, or, for the mod's power-sourced doors
+/// that pass no dealer, the damage credit scope those doors open names this
+/// seat (<see cref="Diagnostics.DamageCredit.Current"/>). One multiplicative
+/// hook on the engine's own damage call, so every door is covered once. A
+/// marker: a second copy adds nothing. Sim twin:
 /// `effects.sacred_sakuras_favor_mult`, read in `deal_damage_to_enemy` while
 /// `state.turn_end_window` is open.
 /// </summary>
@@ -1042,28 +1073,38 @@ public sealed class SacredSakurasFavorPower : PowerModel, ILocalizationProvider
 
     public override PowerStackType StackType => PowerStackType.Single;
 
-    /// <summary>The creature whose end-of-turn actor is running, or null.</summary>
-    private static Creature? _window;
-
-    /// <summary>Open the window for <paramref name="owner"/>; returns the
-    /// window it replaced, for <see cref="CloseWindow"/>.</summary>
-    public static Creature? OpenWindow(Creature owner)
+    /// <summary>Is it <paramref name="creature"/>'s player's end-of-turn
+    /// phase? PURE.</summary>
+    public static bool InEndOfTurn(Creature? creature)
     {
-        var outer = _window;
-        _window = owner;
-        return outer;
+        var player = creature?.Player ?? creature?.PetOwner;
+        if (player?.PlayerCombatState?.Phase != PlayerTurnPhase.End) return false;
+        return creature!.CombatState?.CurrentSide == CombatSide.Player;
     }
 
-    public static void CloseWindow(Creature? outer) => _window = outer;
+    /// <summary>Is this hit the owner's? The dealer's seat, else the open
+    /// damage credit's seat. PURE.</summary>
+    public static bool IsOwners(Creature owner, Creature? dealer)
+    {
+        var seat = Diagnostics.DamageCredit.OwnerOf(dealer)
+                   ?? Diagnostics.DamageCredit.Current?.Owner;
+        return seat != null && seat == owner.Player;
+    }
 
-    /// <summary>Is <paramref name="dealer"/>'s end-of-turn window open?</summary>
-    public static bool InWindow(Creature? dealer) =>
-        dealer != null && dealer == _window;
+    /// <summary>The rule, as one multiplier. PURE.</summary>
+    public static decimal Multiplier(Creature owner, Creature? target,
+                                     Creature? dealer)
+    {
+        if (target == null || target.Side == owner.Side) return 1m;
+        if (!InEndOfTurn(owner) || !IsOwners(owner, dealer)) return 1m;
+        return CompanionOverhaulLaw.SacredSakuraMult;
+    }
 
-    /// <summary>The multiplier on <paramref name="dealer"/>'s damage right
-    /// now: 1.5 in its window while it wears this, else 1. PURE.</summary>
-    public static decimal Multiplier(Creature? dealer) =>
-        InWindow(dealer) && dealer!.Powers.OfType<SacredSakurasFavorPower>().Any()
-            ? CompanionOverhaulLaw.SacredSakuraMult
-            : 1m;
+    public override decimal ModifyDamageMultiplicative(
+        Creature? target, decimal amount, ValueProp props, Creature? dealer,
+        CardModel? cardSource, CardPlay? cardPlay)
+    {
+        if (Owner == null) return 1m;
+        return Multiplier(Owner, target, dealer);
+    }
 }

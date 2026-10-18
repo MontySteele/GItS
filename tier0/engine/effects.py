@@ -970,13 +970,6 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     #                                 freeze it applies
     dmg = (powers.modify_damage_dealt(state.player, base) if powered
            else float(base))
-    # THE INAZUMA POOL REWORK (2026-10-18), Yae's Sacred Sakura's Favor:
-    # "Damage you deal at the end of your turn is increased by 50%." A hit in
-    # the companion end-of-turn walk (`turn_end_window`, set by
-    # `companion_overhaul_turn_end`), after the dealer's Strength and Weak.
-    # C# twin: `SimDamagePipeline.DealerMods`.
-    if powered and state.turn_end_window:
-        dmg *= sacred_sakuras_favor_mult(state)
     unamped = dmg                   # EB-57: the pre-amplifier counterfactual
     # Durin, Principle of Purity / DARK (AoE trim, 2026-10-03): "Your Pyro
     # damage deals 4 more." EVERY Pyro hit she deals -- card, Bomb, Mine,
@@ -1017,6 +1010,14 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
                  if enemy.slow and source == "attack" else 1.0)
     if slow_mult != 1.0:
         dmg *= slow_mult
+    # THE INAZUMA POOL REWORK (2026-10-18), Yae's Sacred Sakura's Favor:
+    # "Damage you deal at the end of your turn is increased by 50%." Any hit
+    # on an enemy while `turn_end_window` is open (`player_turn_end_triggers`
+    # to the end of the end-of-turn tenants in `combat`), powered or not, on
+    # the hit's final number. C# twin: `SacredSakurasFavorPower`'s
+    # multiplicative hook, in the game's End phase.
+    if state.turn_end_window:
+        dmg *= sacred_sakuras_favor_mult(state)
     dmg = int(dmg)
     # WHAT THE HIT LANDED FOR, before Block takes its share: the number the
     # C#'s `ElementalHit.Deal` returns (the truncated amount it hands
@@ -1593,6 +1594,13 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
             # the card counts.
             times = 2 + state.sparks_at_play  # Gleeful Barrage
     times = _amount(state, times)
+    # THE INAZUMA POOL REWORK (2026-10-18), Chiori's Twin Blades: "Your
+    # Attacks that hit more than once hit one additional time." An Attack
+    # whose hit count is 2 or more, one more per stack. C# twin:
+    # `TwinBladesPower.ModifyAttackHitCount`, read off the AttackCommand's
+    # printed hit count.
+    if card.type == "attack" and times >= 2:
+        times += state.player.powers.get("mi_twin_blades", 0)
 
     if "amount_formula" in fx:                # AshenStrike, BodySlam
         base = _calc_amount(state, fx["amount_formula"], card)
@@ -1639,13 +1647,7 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
     # tag_damage_<tag> powers (Accuracy-like -> shiv) add per-hit.
     base += sum(state.player.powers.get(f"tag_damage_{t}", 0)
                 for t in card.tags)
-    # THE INAZUMA POOL REWORK (2026-10-18), Chiori's Twin Blades: "Your
-    # Attacks that hit more than once deal 2 additional damage per hit." An
-    # Attack whose hit count is 2 or more, per hit. C# twin:
-    # `TwinBladesPower.ModifyDamageAdditive`, read off the AttackCommand's
-    # printed hit count.
-    if card.type == "attack" and times >= 2:
-        base += state.player.powers.get("mi_twin_blades", 0)
+
     # Watchful Shoal (Kokomi round-3 changes): Kokomi's Accuracy on a Sting.
     base += kokomi_plan.watchful_shoal_bonus(state, card, kokomi_plan.STING_ID)
     # PhantomBladesPower pays only on the FIRST tagged card played each turn
@@ -5922,6 +5924,11 @@ def player_turn_end_triggers(state: CombatState) -> None:
     # plays and before turn end, so the free play resolves ahead of the
     # other end-of-turn triggers and well ahead of the enemy turn.
     _exhaust_autoplay_sweep(state)
+    # THE INAZUMA POOL REWORK (2026-10-18): the end-of-turn phase opens here,
+    # after the AutoPostPlay sweep, as the game sets `PlayerTurnPhase.End`
+    # after AutoPostPlay. `combat` closes it after the last end-of-turn
+    # tenant. Sacred Sakura's Favor reads it.
+    state.turn_end_window = True
     if p.powers.get("sparks_n_splash", 0):              # the Burst
         for _ in range(C.SPARKS_N_SPLASH_HITS):
             if not state.living_enemies:
@@ -5985,12 +5992,6 @@ def companion_overhaul_turn_end(state: CombatState) -> None:
     Kokomi's pulse, which are the shipped tenants a flagged run can still hold.
     """
     p = state.player
-    # THE INAZUMA POOL REWORK (2026-10-18): the end-of-turn window Sacred
-    # Sakura's Favor reads (`sacred_sakuras_favor_mult`), open for this walk's
-    # actors as the C#'s `CompanionOverhaulTurnEnd.Act` holds it open for its
-    # own; closed before Klee's coven personals, which run outside that walk.
-    state.turn_end_window = True
-
     # Kaeya, Glacial Waltz -- stacks are TURNS REMAINING. FIRE, THEN TICK (the
     # AuraPower own-decay idiom the shipped volleys use), so a stack count
     # still means "this many more turns, including this one".
@@ -6116,7 +6117,6 @@ def companion_overhaul_turn_end(state: CombatState) -> None:
     # block rather than after the latch precisely so Nicole's question is
     # asked of the board the player really ended the turn holding.
     inazuma_overhaul_turn_end(state)
-    state.turn_end_window = False
     # ---- KLEE'S COVEN PERSONALS, still before the latch (R236) -------------
     # Yaoyao's Yuegui draws a target from `state.rng`, so its position decides
     # every later roll; it grants no Block, so it cannot change the answer

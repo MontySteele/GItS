@@ -111,14 +111,13 @@ public static class CompanionPool
     /// A Universal that is never offered to one character: the Inazuma
     /// roster's "Yae Miko -- Sesshou Sakura" stays for the others and is
     /// hidden from Yae's own offers (her card paper, pick 5 (a), ruled
-    /// 2026-10-13: "her Sakura are her kit's"), and so is her second card,
-    /// "Yae Miko -- Sacred Sakura's Favor" (growing the Inazuma pool,
-    /// 2026-10-18). Sim twin: <c>yae_shrine.hidden_from</c>. PURE.
+    /// 2026-10-13: "her Sakura are her kit's"). Her second card, Sacred
+    /// Sakura's Favor, is offered to her (the Inazuma review, 2026-10-18).
+    /// Sim twin: <c>yae_shrine.hidden_from</c>. PURE.
     /// </summary>
     public static bool IsHiddenFrom(CardModel card, string? characterId) =>
         characterId == Powers.YaePrototype.CharacterId
-        && card is Cards.Prototype.Generated.ProtoMiYaeSesshouSakura
-            or Cards.Prototype.Generated.ProtoMiYaeSacredSakurasFavor;
+        && card is Cards.Prototype.Generated.ProtoMiYaeSesshouSakura;
 
     /// <summary>
     /// The eligible set for one shop slot. <paramref name="nation"/> null means

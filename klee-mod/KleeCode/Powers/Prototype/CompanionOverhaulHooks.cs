@@ -1333,6 +1333,10 @@ public sealed class LightfallSwordPower : PowerModel, ILocalizationProvider
         var host = Owner;
         await PowerCmd.Remove(this);
         var dealt = SimDamagePipeline.DealerMods(Applier, damage);
+        // The seat this card-less hit is credited to (telemetry), which
+        // Sacred Sakura's Favor also reads: the dealer is null on this door.
+        using var credit = Diagnostics.DamageCredit.OpenIfNone(
+            Applier, Diagnostics.DamageCredit.Power);
         await CreatureCmd.Damage(
             choiceContext, host,
             (int)SimDamagePipeline.TargetMods(host, dealt),
