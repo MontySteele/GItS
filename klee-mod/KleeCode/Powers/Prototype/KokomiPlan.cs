@@ -702,6 +702,15 @@ public static class KokomiPlan
     {
         _carriedOut.Clear();
         _summonHits.Clear();
+        // Co-op state divergence (2026-10-17): a drain or carry-out the last
+        // fight left suspended (paused on a choice that never came) never ran
+        // its `finally`, so its seat stayed "in the morning" / "carrying out"
+        // into the next fight on that machine alone. Cleared on every machine.
+        _morning.Clear();
+        _carrying.Clear();
+        _aimedAtNoOne.Clear();
+        _summoning.Clear();
+        KokomiRefounding.ResetFight();
     }
 
     private static void Rebase(Creature kokomi)
@@ -1276,14 +1285,14 @@ public static class KokomiPlan
         // other door an aura is touched through, so a card Moon's Reflection
         // replays (<see cref="Replay"/>) keeps its Hydro whole too.
         _morning.Add(player);
-        AuraPower.MorningWindow++;
+        AuraPower.OpenMorning(kokomi);
         try
         {
             await Drain(choiceContext, kokomi, due);
         }
         finally
         {
-            AuraPower.MorningWindow--;
+            AuraPower.CloseMorning(kokomi);
             _morning.Remove(player);
             // `EB-453`: WHAT THE FIGHT CUT OFF, recorded before the display
             // list that holds it is torn down. On the ordinary path this loop
