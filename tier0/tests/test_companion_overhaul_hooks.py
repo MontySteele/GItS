@@ -643,6 +643,44 @@ def test_mika_does_not_discount_her_own_card(overhaul):
     assert st.player.powers["mc_starfrost_discount"] == 1
 
 
+# A 0-ENERGY ATTACK DOES NOT USE IT UP (2026-10-18): it saved nothing, a
+# Spark-priced Attack included, so the discount waits for an Attack that
+# costs Energy. Twin of `StarfrostDiscountPower.SpentBy`.
+
+def test_a_zero_energy_attack_leaves_the_discount(overhaul):
+    st = make_state(enemies=[make_enemy(hp=90)])
+    st.player.powers["mc_starfrost_discount"] = 1
+    effects.resolve_card(st, _attack(cost=0))
+    assert st.player.powers["mc_starfrost_discount"] == 1
+    freed = _attack(cost=2)
+    freed.free_this_turn = True
+    effects.resolve_card(st, freed)
+    assert st.player.powers["mc_starfrost_discount"] == 1
+    # The next Attack that costs Energy takes it.
+    effects.resolve_card(st, _attack(cost=1))
+    assert "mc_starfrost_discount" not in st.player.powers
+
+
+def test_a_spark_priced_attack_leaves_the_discount(overhaul):
+    st = make_state(enemies=[make_enemy(hp=90)])
+    st.player.powers["mc_starfrost_discount"] = 1
+    spark = _attack(cost=0)
+    spark.effects.insert(0, {"op": "spend_spark", "amount": 1})
+    assert combat.spark_cost(spark) == 1
+    assert effects._spends_next_attack_rider(spark) is False
+
+
+def test_an_attack_the_discount_brings_to_zero_spends_it(overhaul):
+    st = make_state(enemies=[make_enemy(hp=90)])
+    st.player.powers["mc_starfrost_discount"] = 1
+    attack = _attack(cost=1)
+    assert combat.card_cost(st, attack) == 0
+    effects.resolve_card(st, attack)
+    assert "mc_starfrost_discount" not in st.player.powers
+    assert effects._spends_next_attack_rider(
+        Card(id="x", name="x", cost="X", type="attack")) is False
+
+
 # "THIS TURN" (the user's ruling, 2026-10-13: a discount that banked across
 # turns was too much at Common). The unused discount is popped at turn end
 # beside Bennett's Passion Overload, the rider whose shape it mirrors.

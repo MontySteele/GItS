@@ -1695,9 +1695,10 @@ ARM_KEYWORDS: dict[str, str] = {
     # word for word, markup and interpolation folded out. The growth is
     # `{growth}`, filled from the screen's own tip (`_BOMB_GROWTH_RE`). The
     # long history of both rows is in git.
-    "Bomb": ("Deals its size in Pyro damage when Set off. Grows {growth} at "
-             "the start of your turn. If its enemy dies, it jumps to "
-             "another."),
+    # 2026-10-18: Vulnerable raises it (suite 6 lane 5), and the jump short.
+    "Bomb": ("Deals its size in Pyro damage when Set off. Vulnerable raises "
+             "it. Grows {growth} at the start of your turn. If its enemy "
+             "dies, it jumps."),
     # 2026-10-13 (text-only fix): the other enemies' Bombs stay.
     "Set off": ("Every Bomb on the enemy goes off, oldest first. Bombs on "
                 "other enemies stay. A random Set off picks an enemy with "

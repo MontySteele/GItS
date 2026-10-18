@@ -6490,7 +6490,7 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # anchors are the prose either side of the golded spans and the
         # interpolated growth.
         "Bomb": ["Deals its size in ", " damage when ",
-                 " at the start of your turn. If its enemy dies, it jumps to "],
+                 " at the start of your turn. If its enemy dies, it jumps."],
         # `EB-432`: the pile's own order, and which charge meets the aura.
         # `EB-490` renamed the class and not the claim: "Attack trigger" read
         # as something on the player's own side of the board, beside a Block
@@ -7727,6 +7727,7 @@ def test_the_bomb_glossary_carries_the_growth_number_and_says_each():
     page = blindplay.observe(keyword_hand_state(["Set off. Place a Bomb 4."],
                                                 "Klee"))
     assert (f"- **Bomb** — Deals its size in Pyro damage when Set off. "
+            f"Vulnerable raises it. "
             f"Grows {blindplay.BOMB_GROWTH} at the start of your turn.") in page
     # LIVE FIRST: where the screen's own tip carries the number, that number is
     # what the glossary prints -- the fallback is for a screen that prints the

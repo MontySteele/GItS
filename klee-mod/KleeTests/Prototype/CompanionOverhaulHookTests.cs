@@ -403,6 +403,31 @@ public class CompanionOverhaulHookTests
         Assert.False(power.TryModifyEnergyCostInCombat(attack, 0m, out _));
     }
 
+    // A 0-ENERGY ATTACK DOES NOT USE IT UP (2026-10-18): the discount waits
+    // for an Attack that costs Energy, its own cost before any power's cut.
+    // Mika's is the one rider that asks; the others are spent by any Attack.
+    // Sim twin: `effects._spends_next_attack_rider`.
+    [Fact]
+    public void A_zero_energy_attack_does_not_spend_the_discount()
+    {
+        Assert.False(StarfrostDiscountPower.CostsEnergy(0m));
+        Assert.True(StarfrostDiscountPower.CostsEnergy(1m));
+        Assert.Contains(Il.Calls(Il.Method("NextAttackRiderPower",
+                                           "BeforeCardPlayed")),
+                        c => c.Contains("SpentBy"));
+        var spentBy = typeof(StarfrostDiscountPower).GetMethod("SpentBy", All)!;
+        Assert.Equal(typeof(StarfrostDiscountPower), spentBy.DeclaringType);
+        Assert.Contains(Il.Calls(spentBy), c => c.Contains("GetWithModifiers"));
+        foreach (var other in new[] { typeof(PassionOverloadPower),
+                                      typeof(SwirlChargePower),
+                                      typeof(CrowfeatherCoverPower),
+                                      typeof(NextAttackElectroPower) })
+        {
+            Assert.Equal(typeof(NextAttackRiderPower),
+                         other.GetMethod("SpentBy", All)!.DeclaringType);
+        }
+    }
+
     // "THIS TURN" (the user's ruling, 2026-10-13): the discount no longer
     // banks across turns. The removal is Passion Overload's own, so the two
     // riders' AfterSideTurnEnd bodies are asserted identical in shape: the

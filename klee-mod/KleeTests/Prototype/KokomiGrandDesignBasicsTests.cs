@@ -105,6 +105,56 @@ public class KokomiGrandDesignBasicsTests
                                             false));
     }
 
+    private static KokomiPlan.Entry AsItself(CardModel card) =>
+        new(card, new[]
+        {
+            new KokomiPlan.Planned(KokomiPlan.Kind.PlayAsItself, 1,
+                                   KokomiPlan.Aim.FrontEnemy, card),
+        });
+
+    private static string WrittenAim(KokomiPlan.Entry entry) =>
+        (string)typeof(KokomiPlan).GetMethod("WrittenAim",
+                System.Reflection.BindingFlags.NonPublic
+                | System.Reflection.BindingFlags.Static)!
+            .Invoke(null, new object[] { entry })!;
+
+    [Fact]
+    public void A_planned_strike_forecasts_its_own_damage_at_the_front()
+    {
+        // The Plan list read 0 for a planned Strike: the forecast counted
+        // Plan-line damage only (2026-10-18).
+        var strike = AsItself(new StrikeSilent());
+        Assert.Equal(6, KokomiPlan.AsItselfDamage(strike, null));
+        Assert.Equal(6, KokomiPlan.ForecastFrontDamage(strike, null));
+        // Nereid's Ascension's double, as any planned hit.
+        Assert.Equal(12, KokomiPlan.ForecastFrontDamage(strike, null, true));
+        Assert.Equal("front", WrittenAim(strike));
+        // Converging Tide's stamp lands it elsewhere, as any planned hit.
+        Assert.Equal("other", WrittenAim(strike with { AimOverride = "1" }));
+    }
+
+    [Fact]
+    public void A_planned_defend_forecasts_no_damage_and_its_block_only_in_combat()
+    {
+        var defend = AsItself(new DefendSilent());
+        Assert.Equal(0, KokomiPlan.AsItselfDamage(defend, null));
+        Assert.Equal(0, KokomiPlan.ForecastFrontDamage(defend, null));
+        Assert.Equal("", WrittenAim(defend));
+        // No combat to fold Dexterity and Frail against: no number.
+        Assert.Null(KokomiPlan.AsItselfBlock(defend, null));
+        Assert.Null(KokomiPlan.AsItselfBlock(AsItself(new StrikeSilent()), null));
+    }
+
+    [Fact]
+    public void The_queue_row_reads_the_as_itself_forecast()
+    {
+        var calls = Il.Calls(Il.Method("KokomiPlan", "QueueRow"));
+        Assert.Contains(calls, c => c.Contains("AsItselfBlock"));
+        Assert.Contains(calls, c => c.Contains("AsItselfDamage"));
+        Assert.Contains(Il.Calls(Il.Method("KokomiPlan", "ForecastFrontDamage")),
+                        c => c.Contains("AsItselfDamage"));
+    }
+
     [Fact]
     public void Grand_designs_face_says_basic_cards_included()
     {

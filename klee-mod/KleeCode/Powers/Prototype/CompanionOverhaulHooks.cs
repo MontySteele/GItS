@@ -734,10 +734,16 @@ public abstract class NextAttackRiderPower : PowerModel
         _spending = 0;
         if (cardPlay.Card?.Type != CardType.Attack) return Task.CompletedTask;
         if (cardPlay.Card?.Owner?.Creature != Owner) return Task.CompletedTask;
+        if (!SpentBy(cardPlay.Card!)) return Task.CompletedTask;
         _spendingOn = cardPlay;
         _spending = (int)Amount;
         return Task.CompletedTask;
     }
+
+    /// <summary>Does this Attack spend the rider? Every Attack of hers, for
+    /// every rider but Mika's discount (<see cref="StarfrostDiscountPower"/>),
+    /// which waits for an Attack that costs Energy.</summary>
+    protected virtual bool SpentBy(CardModel card) => true;
 
     /// <summary>What a rider does once the Attack it was spent on has
     /// resolved, before the bank drops by <paramref name="spent"/>. Nothing,
@@ -916,6 +922,19 @@ public sealed class StarfrostDiscountPower : NextAttackRiderPower, ILocalization
         if (side != CombatSide.Player) return;
         await PowerCmd.Remove(this);
     }
+
+    /// <summary>
+    /// A 0-ENERGY ATTACK DOES NOT USE IT UP (2026-10-18). It saved nothing on
+    /// one, a Spark-priced Attack included, so the discount waits for an
+    /// Attack that costs Energy: the card's own cost, before any power's cut
+    /// (Draft the Orders' read, <c>CostModifiers.Local</c>). An Attack the
+    /// discount itself takes to 0 still spends it. PURE over its input.
+    /// Sim twin: `effects._spends_next_attack_rider`.
+    /// </summary>
+    public static bool CostsEnergy(decimal ownCost) => ownCost > 0m;
+
+    protected override bool SpentBy(CardModel card) =>
+        CostsEnergy(card.EnergyCost.GetWithModifiers(CostModifiers.Local));
 
     public override bool TryModifyEnergyCostInCombat(
         CardModel card, decimal originalCost, out decimal modifiedCost)

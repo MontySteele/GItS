@@ -429,9 +429,9 @@ def test_the_klee_tips_and_the_page_say_the_same_three_rules():
     page = blindplay_notes.ARM_KEYWORDS
     growth = ltc.render("{BombGrowth}")
     assert tips["BombKey"] == (
-        "Deals its size in Pyro damage when Set off. Grows " + growth
-        + " at the start of your turn. If its enemy dies, it jumps to "
-        "another.")
+        "Deals its size in Pyro damage when Set off. Vulnerable raises "
+        "it. Grows " + growth
+        + " at the start of your turn. If its enemy dies, it jumps.")
     assert page["Bomb"] == tips["BombKey"].replace(
         "Grows " + growth, "Grows {growth}")
     assert tips["SetOffKey"] == ("Every Bomb on the enemy goes off, oldest "
@@ -487,8 +487,8 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # TEXT PASS 2026-09-25: the three Klee words, rewritten short.
             # The growth is still interpolated (`EB-89`).
             "Deals its size in [gold]Pyro[/gold] damage when ",
-            "[gold]Set off[/gold]. Grows ",
-            " at the start of your turn. If its enemy dies, it jumps to ",
+            "[gold]Set off[/gold]. [gold]Vulnerable[/gold] raises it. Grows ",
+            " at the start of your turn. If its enemy dies, it jumps.",
             "Every [gold]Bomb[/gold] on the enemy goes off, oldest first. ",
             "A random Set off picks an enemy with Bombs.",
             "Some cards cost [gold]Sparks[/gold] instead of Energy, with no cap. ",

@@ -2433,6 +2433,25 @@ def test_r276_pincer_plays_the_first_face_up_attack_twice(overhaul):
     assert enemy.hp == 200 - 3 * 5, "only the FIRST Attack is doubled"
 
 
+def test_pincer_is_spent_by_an_attack_a_plan_plays(overhaul):
+    """Pincer parity (2026-10-18; the mod is right, base-faithful: a played
+    card is a played card). A card a Plan's carry-out auto-plays -- here a
+    Basic Grand Design planned, played as itself; Crystal Collapse's copy and
+    Moon's Reflection's replay take the same `_free_play` door -- is doubled
+    by Pincer and spends it, as `CardModel.GeneratePlayCount` does for the
+    mod's auto-play. `resolve_free_play` enters `_finish_play`'s replay loop."""
+    enemy = make_enemy(hp=200, intents=ATTACKER)
+    st = kokomi_state(enemies=[enemy])
+    kokomi_plan.schedule(st, _arm_card("proto_kk_pincer"))
+    strike = _attack(5)
+    kokomi_plan.schedule(st, strike,
+                         clauses=[{"op": kokomi_plan.PLAY_AS_ITSELF}],
+                         replay=strike)
+    kokomi_plan.resolve_all(st)
+    assert enemy.hp == 200 - 2 * 5
+    assert kokomi_plan.FIRST_ATTACK_TWICE not in st.player.powers
+
+
 def test_r276_tide_wall_blocks_the_largest_intent(overhaul):
     """Tide Wall's Plan: 6 Block (9 upgraded) plus the most damage any one
     enemy intends to deal -- every hit of a multi-hit intent (Kokomi round-3

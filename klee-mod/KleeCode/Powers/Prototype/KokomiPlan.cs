@@ -3055,6 +3055,46 @@ public static class KokomiPlan
     public static bool PlaysAsItself(Entry entry) =>
         entry.Clauses.Any(clause => clause.Kind == Kind.PlayAsItself);
 
+    /// <summary>
+    /// GRAND DESIGN'S FORECAST (2026-10-18): the damage a planned Basic
+    /// Attack (<see cref="Kind.PlayAsItself"/>) will deal as itself, before
+    /// the target: its own Damage plus her Strength now, since the copy reads
+    /// her Strength as it is played. 0 for any other entry, a card with no
+    /// single-enemy hit, or no Damage. The Plan list folds the front body
+    /// into it as every planned hit is (<see cref="ForecastFrontDamage"/>).
+    /// Display only.
+    /// </summary>
+    public static int AsItselfDamage(Entry entry, Creature? kokomi)
+    {
+        if (!PlaysAsItself(entry) || entry.Source is not { } card) return 0;
+        if (card.TargetType != TargetType.AnyEnemy) return 0;
+        if (!card.DynamicVars.TryGetValue("Damage", out var damage)) return 0;
+        var strength = kokomi?.Powers.OfType<StrengthPower>()
+            .FirstOrDefault()?.Amount ?? 0;
+        return System.Math.Max(0, (int)damage.BaseValue + (int)strength);
+    }
+
+    /// <summary>
+    /// GRAND DESIGN'S FORECAST (2026-10-18): the Block a planned Basic card
+    /// with Block will give as itself, Dexterity and Frail folded as a Block
+    /// Plan's are (<see cref="FoldUnsourcedBlock"/>), or null for any other
+    /// entry, a card with no Block, or no combat. Display only.
+    /// </summary>
+    public static int? AsItselfBlock(Entry entry, Creature? kokomi)
+    {
+        if (!PlaysAsItself(entry) || entry.Source is not { } card) return null;
+        if (!card.DynamicVars.TryGetValue("Block", out var block)) return null;
+        if (kokomi?.CombatState is not { } combat) return null;
+        try
+        {
+            return (int)FoldUnsourcedBlock(combat, kokomi, block.BaseValue);
+        }
+        catch (System.Exception)
+        {
+            return null;
+        }
+    }
+
     /// One carried-out Plan on the wire (`EB-317`, widened by `EB-329`).
     ///
     /// A NAMED METHOD RATHER THAN A LAMBDA INSIDE <see cref="Snapshot"/>, and
@@ -3190,7 +3230,9 @@ public static class KokomiPlan
     public static int ForecastFrontDamage(Entry entry, Creature? kokomi,
                                           bool doubled = false)
     {
-        var written = WrittenFrontDamage(entry);
+        // Grand Design's forecast (2026-10-18): a planned Basic Attack's own
+        // hit is a planned hit at the front, folded the same way.
+        var written = WrittenFrontDamage(entry) + AsItselfDamage(entry, kokomi);
         // Kokomi review r9 (2026-10-15, item 4): Opening Gambit's rider
         // doubles the written number BEFORE the board, as `Hit` does.
         if (doubled) written *= 2;
@@ -3234,7 +3276,12 @@ public static class KokomiPlan
     {
         var damage = entry.Clauses.Where(clause =>
             clause.Kind == Kind.Damage
-            || clause.Kind == Kind.DamageQuarterMaxHp).ToList();
+            || clause.Kind == Kind.DamageQuarterMaxHp
+            // Grand Design's forecast (2026-10-18): a planned Basic Attack
+            // hits as itself, at the front unless Converging Tide stamped it.
+            || (clause.Kind == Kind.PlayAsItself
+                && clause.Card?.TargetType == TargetType.AnyEnemy
+                && clause.Card.DynamicVars.ContainsKey("Damage"))).ToList();
         if (damage.Count == 0) return "";
         if (entry.AimOverride != null) return "other";
         if (damage.Any(clause => clause.Aim == Aim.AllEnemies)) return "all";
@@ -3368,7 +3415,10 @@ public static class KokomiPlan
                 // board (Tide Wall) carries its total against the board as it
                 // stands, Frail and Dexterity folded; null for every other
                 // entry. The page prints it beside the name.
-                ["block_now"] = LiveBlock(entry, kokomi),
+                // Grand Design's forecast (2026-10-18): a planned Defend's
+                // own Block, folded the same way.
+                ["block_now"] = LiveBlock(entry, kokomi)
+                                ?? AsItselfBlock(entry, kokomi),
                 // THE POOL OVERHAUL (2026-10-13): a Counter or Chain Plan's
                 // number as it stands, the strip's caption ("Deals 14",
                 // "2 attackers", "Energy 1"); null for every other entry.
@@ -3378,7 +3428,8 @@ public static class KokomiPlan
                 // Strength when it was written. Zero and null on a Plan with
                 // no flat hit, and on a flipped one.
                 ["written"] = entry.Now && entry.TwoLine
-                    ? 0 : WrittenDamage(entry) * (doubled ? 2 : 1),
+                    ? 0 : (WrittenDamage(entry)
+                           + AsItselfDamage(entry, kokomi)) * (doubled ? 2 : 1),
                 ["written_strength"] = entry.Now && entry.TwoLine
                     ? null : entry.WrittenStrength,
                 // KOKOMI REVIEW R6 (2026-10-14, item 7): a Counter Plan that
@@ -3780,7 +3831,7 @@ public static class KokomiPlan
     /// (<see cref="PlannedDamage"/>).</summary>
     public static bool RaisedByVulnerable(Entry entry, Creature? kokomi)
     {
-        var written = WrittenFrontDamage(entry);
+        var written = WrittenFrontDamage(entry) + AsItselfDamage(entry, kokomi);
         if (written <= 0) return false;
         var front = FrontEnemy(kokomi);
         if (front == null || !VulnerableAtMorning(front))
