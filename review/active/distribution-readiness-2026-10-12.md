@@ -49,3 +49,9 @@ All four are playable start to finish, and none of them crashes the game in seat
 2. **Where it lists, when it does.**
    - **(a) Default:** a GitHub release first (no account friction, easy to pull), with Nexus and the Workshop later.
    - (b) The Steam Workshop first: the most players and one-click co-op, but uploading vouches to Valve that you hold the rights.
+
+**Ruled 2026-10-18.** The user: "On distribution readiness - we're already in closed beta, and we're going
+public once one more character hits balance."
+- Pick 1 is (a) in substance. The closed beta is the friends-only Steam Workshop item, live since 2026-10-16.
+  The public listing follows once one more kit reaches Balance; Varka has been at Balance since 2026-10-13.
+- Pick 2 is settled by what was done: the Workshop came first, as the friends-only beta.
