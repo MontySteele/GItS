@@ -67,8 +67,10 @@ In none of the 24 examples does an effect last several floors without lasting th
 | Name | Text |
 |---|---|
 | **Thorny Ground** | This act, enemies start each combat with 2 Thorns. |
-| **Bulwark** | This act, enemies start each combat with 6 Block. |
+| **Bulwark** | This act, at the start of your turn, each enemy gains 4 Block. |
 | **Frenzy** | This act, enemies start each combat with 2 Strength. |
+
+Bulwark amended 2026-10-17 (was "enemies start each combat with 6 Block", which cleared at the enemies' first turn). The user: "Bulwark looks pretty weak"; "4 is fine for now, but we probably need to make per-act effects scale by act."
 
 Frenzy was "enemy Attacks deal 1 additional damage". [USER]: "Frenzy sounds like +1 strength for an act which might be too low", then "Why the extra words? Just give enemies 2 Strength."
 
