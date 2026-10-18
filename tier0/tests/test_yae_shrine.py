@@ -145,7 +145,7 @@ def test_a_plant_strikes_at_the_end_of_the_turn_for_base_plus_level(yae):
     assert [s.level for s in _led(st).sakura] == [1]
     Y.turn_end(st)
     hits = _strikes(st)
-    assert len(hits) == 1 and hits[0]["amount"] == Y.SAKURA_BASE + 1
+    assert len(hits) == 1 and hits[0]["amount"] == Y.SAKURA_BASE + Y.SAKURA_PER_LEVEL
     assert st.enemies[0].hp == 100 - 3
     assert st.enemies[0].aura == "electro"
 
@@ -165,11 +165,12 @@ def test_a_plant_does_not_level_the_others_and_a_full_shrine_feeds_the_oldest(ya
     assert oldest.turns_left == Y.SAKURA_TURNS
     Y.plant(st, 1)
     assert [s.level for s in _led(st).sakura] == [3, 1, 1]
-    # 2026-10-14: each full-shrine plant struck the oldest first, at 1 then 2.
-    assert [r["amount"] for r in _strikes(st)] == [3, 4]
+    # 2026-10-14: each full-shrine plant struck the oldest first, at 1 then 2
+    # (1 + 2 per Level, the Sakura Levels paper, 2026-10-17).
+    assert [r["amount"] for r in _strikes(st)] == [3, 5]
     Y.turn_end(st)
     assert sum(r["amount"] for r in _strikes(st)
-               if r["reason"] != "full_shrine") == 5 + 3 + 3
+               if r["reason"] != "full_shrine") == 7 + 3 + 3
 
 
 def test_twin_sakura_with_two_standing_plants_one_then_feeds_the_oldest(yae):

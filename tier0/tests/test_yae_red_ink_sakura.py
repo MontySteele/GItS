@@ -95,7 +95,7 @@ def test_red_ink_yakan_evocation_plants_a_red_ink_sakura():
     _play(st, evo)
     (s,) = _sakura(st)
     assert s.annotations == [Y.RED_INK]
-    assert Y.act_size(st, s) == Y.SAKURA_BASE + s.level + Y.RED_INK_AMOUNT
+    assert Y.act_size(st, s) == Y.SAKURA_BASE + Y.SAKURA_PER_LEVEL * s.level + Y.RED_INK_AMOUNT
 
 
 def test_twin_sakura_gives_red_ink_to_both():

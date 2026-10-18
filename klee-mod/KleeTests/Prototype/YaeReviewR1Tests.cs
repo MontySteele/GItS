@@ -56,9 +56,10 @@ public class YaeReviewR1Tests : IDisposable
         Assert.Equal(9, YaeShrineFace.Total(ledger.Standing, YaeSakuraKind.Thunder));
         Assert.Equal(0, YaeShrineFace.Total(ledger.Standing, YaeSakuraKind.Kitsune));
         ledger.LevelUp(3);                    // 4, 4, 4: no cap
-        Assert.Equal(9 + 3 * 3, YaeShrineFace.Total(ledger.Standing, YaeSakuraKind.Thunder));
+        // The Sakura Levels paper (2026-10-17): each Level adds 2.
+        Assert.Equal(9 + 3 * 6, YaeShrineFace.Total(ledger.Standing, YaeSakuraKind.Thunder));
         ledger.EditSakura(YaeSakuraEnd.Every, 1, YaeAnnotation.RedInk);
-        Assert.Equal(18 + 3 * 3, YaeShrineFace.Total(ledger.Standing, YaeSakuraKind.Thunder));
+        Assert.Equal(27 + 3 * 3, YaeShrineFace.Total(ledger.Standing, YaeSakuraKind.Thunder));
     }
     [Fact]
     public void Off_a_fight_the_clause_is_empty()

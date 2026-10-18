@@ -106,7 +106,7 @@ def test_the_clause_reads_levels_and_red_ink_as_the_action_does():
     _play(st, _ym("yakan_evocation"))            # Level 1
     Y.level_up(st, 3)                            # Level 4: no cap
     Y.edit_sakura(st, "every", 1, Y.RED_INK)
-    assert Y.tenko_totals(st)[Y.THUNDER] == 2 + 4 + Y.RED_INK_AMOUNT
+    assert Y.tenko_totals(st)[Y.THUNDER] == 1 + 2 * 4 + Y.RED_INK_AMOUNT
 
 
 def test_the_clause_is_what_the_tenko_then_does():

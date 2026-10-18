@@ -416,7 +416,7 @@ public class YaeAncientsRelicsTests : IDisposable
         ledger.Plant(1);
         ledger.Plant(1, null, kind: YaeSakuraKind.Foxfire);
         ledger.Plant(1, null, kind: YaeSakuraKind.Kitsune);
-        Assert.Equal(YaeLaw.SakuraBase + 1 + 1, YaeShrine.Size(yae.Creature, ledger.Standing[0]));
+        Assert.Equal(YaeLaw.SakuraBase + YaeLaw.SakuraPerLevel * 1 + 1, YaeShrine.Size(yae.Creature, ledger.Standing[0]));
         Assert.Equal(YaeLaw.FoxfireBase + 1 + 1, YaeShrine.Size(yae.Creature, ledger.Standing[1]));
         Assert.Equal(YaeLaw.KitsuneBase + 1, YaeShrine.Size(yae.Creature, ledger.Standing[2]));
         // Before Edict: the act's hit adds Edict on top of Size.

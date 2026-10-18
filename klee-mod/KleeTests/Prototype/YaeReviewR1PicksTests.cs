@@ -89,9 +89,11 @@ public class YaeReviewR1PicksTests : IDisposable
     }
 
     [Fact]
-    public void The_sakura_tip_says_it_strikes_once_more()
+    public void The_sakura_tip_says_it_strikes_again()
     {
-        Assert.Contains("then strikes once more", ArmKeywordTips.YaeSakuraTip);
+        // "once more" became "again" with the Sakura Levels paper's longer
+        // formula, to stay under the 100-character cap.
+        Assert.Contains("then strikes again", ArmKeywordTips.YaeSakuraTip);
         Assert.DoesNotContain("(up to", ArmKeywordTips.YaeSakuraTip);
     }
 
@@ -106,7 +108,8 @@ public class YaeReviewR1PicksTests : IDisposable
         Assert.Equal(new[] { 3, 1, 1 }, ledger.Standing.Select(s => s.Level));
         ledger.LevelUp(2);
         Assert.Equal(new[] { 5, 3, 3 }, ledger.Standing.Select(s => s.Level));
-        Assert.Equal(7 + 5 + 5, YaeShrineFace.Total(ledger.Standing, YaeSakuraKind.Thunder));
+        // The Sakura Levels paper (2026-10-17): 1 + 2 per Level.
+        Assert.Equal(11 + 7 + 7, YaeShrineFace.Total(ledger.Standing, YaeSakuraKind.Thunder));
     }
 
     [Fact]

@@ -21,11 +21,12 @@ public interface IYaeCharacter
 ///     3 beside her, each with a KIND (review r3: Sakura, Foxfire, Kitsune),
 ///     a Level and a 3-action timer. A Sakura acts at the end of her turn
 ///     (oldest first), once more when it withers (Last Bloom), and on
-///     Tenko: a Sakura strikes an enemy for 2 + its Level, a Foxfire Sakura
-///     hits ALL for 1 + its Level, a Kitsune Sakura gives 2 + its Level
-///     Block. A plant into a full shrine makes the oldest act; the same
-///     kind refreshes and levels it, another kind withers it and takes its
-///     place. Tenko: every Sakura acts now, then refreshes to at least 3.
+///     Tenko: a Sakura strikes an enemy for 1 + 2 per Level, a Foxfire
+///     Sakura hits ALL for 1 + its Level, a Kitsune Sakura gives 2 + its
+///     Level Block. A plant into a full shrine makes the Sakura closest to
+///     withering act; the same kind refreshes and levels it, another kind
+///     withers it and takes its place at the higher of the two Levels.
+///     Tenko: every Sakura acts now, then refreshes to at least 3.
 ///   * EDIT (<see cref="YaeEditing"/>): a card in hand gains an Annotation
 ///     in its one temporary slot for the combat. PUBLISH moves it onto the
 ///     card's permanent stack (the Masterpiece, <see cref="YaeMasterpiece"/>,
@@ -64,16 +65,29 @@ public static class YaeLaw
     /// (pick 4 (a)).</summary>
     public const int SakuraTurns = 3;
 
-    /// <summary>A Sakura (Thunder) strikes for this plus its Level.</summary>
-    public const int SakuraBase = 2;
+    /// <summary>A Sakura (Thunder) strikes for this plus
+    /// <see cref="SakuraPerLevel"/> per Level: 1 + 2 per Level
+    /// (<c>review/active/yae-sakura-levels-2026-10-17.md</c>, pick 1 (a),
+    /// [USER]: "Agreed on both of these").</summary>
+    public const int SakuraBase = 1;
+
+    /// <summary>What one Level adds to a Sakura's (Thunder) strike: 2
+    /// (the Sakura Levels paper, pick 1 (a)).</summary>
+    public const int SakuraPerLevel = 2;
 
     /// <summary>A Foxfire Sakura hits ALL enemies for this plus its Level
     /// (review r3, ruled 2026-10-14).</summary>
     public const int FoxfireBase = 1;
 
+    /// <summary>What one Level adds to a Foxfire Sakura's hit: 1.</summary>
+    public const int FoxfirePerLevel = 1;
+
     /// <summary>A Kitsune Sakura, the decoy, gives this plus its Level
     /// Block (review r3).</summary>
     public const int KitsuneBase = 2;
+
+    /// <summary>What one Level adds to a Kitsune Sakura's Block: 1.</summary>
+    public const int KitsunePerLevel = 1;
 
     /// <summary>A Sakura is planted at Level 1, plus 1 for each Fox's
     /// Mooncall. Levels have no cap (Yae review r1, pick 2, ruled

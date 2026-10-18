@@ -188,8 +188,9 @@ def test_into_a_full_shrine_the_refreshed_sakura_strikes():
     assert len(led.sakura) == 3 and led.last_planted is oldest
     assert oldest.level == 2
     # 5, the full shrine's act of the oldest at Level 1 (3), then the
-    # refreshed Sakura's strike at Level 2 (4).
-    assert _hp(st) == [100 - 5 - 3 - 4]
+    # refreshed Sakura's strike at Level 2 (5: 1 + 2 per Level, the Sakura
+    # Levels paper).
+    assert _hp(st) == [100 - 5 - 3 - 5]
 
 
 def test_into_a_full_shrine_of_another_kind_the_new_sakura_strikes():

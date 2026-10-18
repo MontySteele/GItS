@@ -20,7 +20,8 @@ namespace KleeMod.Powers;
 /// THE SAKURA KINDS (review r3, ruled 2026-10-14,
 /// <c>review/active/yae-review-r3-2026-10-14.md</c> sec.1). Set when a
 /// Sakura is planted. A Sakura (Thunder, the default) strikes an enemy for
-/// 2 + its Level; a Foxfire Sakura hits ALL enemies for 1 + its Level; a
+/// 1 + 2 per Level (the Sakura Levels paper, 2026-10-17); a Foxfire Sakura
+/// hits ALL enemies for 1 + its Level; a
 /// Kitsune Sakura, the decoy, gives Yae 2 + its Level Block ("Yae does not
 /// shield. A fox illusion draws the blow."). Sim twin:
 /// <c>yae_shrine.SAKURA_KINDS</c>.
@@ -209,7 +210,10 @@ public sealed class YaeShrineLedger
     /// already made <see cref="NextToWither"/> act): the SAME KIND as that
     /// Sakura refreshes it (to at least <see cref="YaeLaw.SakuraTurns"/>) and
     /// gives it a Level, and none is added; ANOTHER KIND withers it and the
-    /// new Sakura takes its place, as the newest, at its printed Level.
+    /// new Sakura takes its place, as the newest, at the HIGHER of its own
+    /// plant Level and the withered one's Level (LEVELS CARRY OVER,
+    /// <c>review/active/yae-sakura-levels-2026-10-17.md</c>, pick 1 (a),
+    /// [USER]: "Agreed on both of these").
     /// [USER], 2026-10-17: the target is the Sakura closest to withering,
     /// not the first planted ("I think that's closest to the expectation");
     /// a run of Sakura Seals had refreshed slot 1 again and again while the
@@ -238,6 +242,8 @@ public sealed class YaeShrineLedger
                 return false;
             }
             _sakura.Remove(target);       // another kind: it withers
+            // ...and its Levels carry over to the one taking its place.
+            plantLevel = Math.Max(plantLevel, target.Level);
         }
         Seq++;
         var planted = new YaeSakura
@@ -439,13 +445,23 @@ public sealed class YaeShrineLedger
     /// <summary>Does this kind deal damage (Edict, the Lure)? PURE.</summary>
     public static bool DealsDamage(YaeSakuraKind kind) => kind != YaeSakuraKind.Kitsune;
 
-    /// <summary>What a kind adds to its Level: Thunder 2, Foxfire 1,
-    /// Kitsune 2 (<see cref="YaeLaw"/>). PURE.</summary>
+    /// <summary>A kind's flat part: Thunder 1, Foxfire 1, Kitsune 2
+    /// (<see cref="YaeLaw"/>). PURE.</summary>
     public static int KindBase(YaeSakuraKind kind) => kind switch
     {
         YaeSakuraKind.Foxfire => YaeLaw.FoxfireBase,
         YaeSakuraKind.Kitsune => YaeLaw.KitsuneBase,
         _ => YaeLaw.SakuraBase,
+    };
+
+    /// <summary>What one Level adds to a kind's action: Thunder 2, Foxfire 1,
+    /// Kitsune 1 (the Sakura Levels paper, pick 1 (a)). PURE. Sim twin:
+    /// <c>yae_shrine.kind_per_level</c>.</summary>
+    public static int KindPerLevel(YaeSakuraKind kind) => kind switch
+    {
+        YaeSakuraKind.Foxfire => YaeLaw.FoxfirePerLevel,
+        YaeSakuraKind.Kitsune => YaeLaw.KitsunePerLevel,
+        _ => YaeLaw.SakuraPerLevel,
     };
 
     /// <summary>
@@ -455,7 +471,7 @@ public sealed class YaeShrineLedger
     /// </summary>
     public static int ActSize(YaeSakuraKind kind, int level,
                               IEnumerable<YaeAnnotation> annotations) =>
-        KindBase(kind) + level
+        KindBase(kind) + KindPerLevel(kind) * level
         + (annotations.Contains(YaeAnnotation.RedInk) ? YaeLaw.RedInkAmount : 0);
 
     /// <summary>The same, for a Sakura carrying one Annotation (or none).
@@ -464,7 +480,7 @@ public sealed class YaeShrineLedger
         ActSize(kind, level, new[] { annotation });
 
     /// <summary>A Sakura (Thunder) strike's printed amount at an enemy:
-    /// 2 + its Level, and Edict of Cleansing's when it applies. PURE.
+    /// 1 + 2 per Level, and Edict of Cleansing's when it applies. PURE.
     /// </summary>
     public static int StrikeDamage(int level, bool reacts, int edict) =>
         ActSize(YaeSakuraKind.Thunder, level, YaeAnnotation.None)
@@ -696,7 +712,8 @@ public static class YaeShrine
 
     /// <summary>
     /// ONE SAKURA ACTS AS ITS KIND (review r3, ruled 2026-10-14): a Sakura
-    /// strikes one enemy (the aim, the Lure, else random) for 2 + its Level;
+    /// strikes one enemy (the aim, the Lure, else random) for 1 + 2 per
+    /// Level;
     /// a Foxfire Sakura hits ALL enemies for 1 + its Level; a Kitsune Sakura
     /// gives her 2 + its Level Block (unpowered). Red Ink adds 3 to any of
     /// them. Then the Sakura's own Fox Fire, once.

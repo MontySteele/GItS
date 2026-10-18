@@ -53,6 +53,10 @@ def test_the_law_numbers_mirror_the_sim():
         "RedInkAmount": Y.RED_INK_AMOUNT, "FoxFireDamage": Y.FOX_FIRE_DAMAGE,
         # Review r3 (2026-10-14): the kinds' bases; Offering left.
         "FoxfireBase": Y.FOXFIRE_BASE, "KitsuneBase": Y.KITSUNE_BASE,
+        # The Sakura Levels paper (2026-10-17): each kind's per-Level part.
+        "SakuraPerLevel": Y.SAKURA_PER_LEVEL,
+        "FoxfirePerLevel": Y.FOXFIRE_PER_LEVEL,
+        "KitsunePerLevel": Y.KITSUNE_PER_LEVEL,
         "RoyaltiesPayout": Y.ROYALTIES_ENERGY,
         # The refill (2026-10-16): Kitsune Barrage's hits, Sesshou Fang's
         # Level.

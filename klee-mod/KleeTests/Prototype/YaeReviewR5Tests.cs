@@ -37,9 +37,10 @@ public class YaeReviewR5Tests
     [Fact]
     public void The_full_shrine_tip_is_the_long_form()
     {
-        Assert.Equal("Planting makes the Sakura closest to withering act. If the "
-                     + "new one is the same kind, that Sakura refreshes and gains a "
-                     + "Level. If not, it withers and is replaced.",
+        // The Sakura Levels paper (2026-10-17): Levels carry over.
+        Assert.Equal("Planting makes the Sakura closest to withering act. Same "
+                     + "kind: it refreshes and gains a Level. Other kind: it "
+                     + "withers, and the new one takes its Level if higher.",
                      ArmKeywordTips.YaeFullShrineTip);
     }
 

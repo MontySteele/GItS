@@ -625,11 +625,14 @@ public static class ArmKeywordTips
     /// levels the oldest (<c>YaeShrineLedger.Plant</c>). Condensed
     /// 2026-10-14: the full-shrine rule is printed on the plant cards, and the
     /// cap moves with Sakura Channeling, so both leave the tip; "random"
-    /// went to fit the 100-character cap.</summary>
+    /// went to fit the 100-character cap. The Sakura Levels paper
+    /// (<c>review/active/yae-sakura-levels-2026-10-17.md</c>, pick 1 (a),
+    /// 2026-10-17): 1 + 2 per Level; "once more" became "again" to stay
+    /// under the cap.</summary>
     public static readonly string YaeSakuraTip =
         $"At the end of your turn, strikes an enemy for {Powers.YaeLaw.SakuraBase} "
-      + $"+ its Level. Lasts {Powers.YaeLaw.SakuraTurns} turns, then strikes "
-      + "once more.";
+      + $"+ {Powers.YaeLaw.SakuraPerLevel} per Level. Lasts "
+      + $"{Powers.YaeLaw.SakuraTurns} turns, then strikes again.";
 
     /// <summary>Yae review r6, item 5: which enemy a Sakura strikes
     /// (<c>YaeShrine.Aim</c>: the aim Kitsune Pounce passes, else the Lure,
@@ -722,11 +725,13 @@ public static class ArmKeywordTips
 
     /// <summary>Yae review r5, item 5: four of five seats could not read
     /// the short form until it bit them. The title says "Full shrine".
+    /// The Sakura Levels paper (pick 1 (a), 2026-10-17): Levels carry over
+    /// on a replace, so the new one starts at the higher of the two Levels.
     /// </summary>
     public static readonly string YaeFullShrineTip =
-        "Planting makes the Sakura closest to withering act. If the new one "
-      + "is the same kind, that Sakura refreshes and gains a Level. If not, "
-      + "it withers and is replaced.";
+        "Planting makes the Sakura closest to withering act. Same kind: it "
+      + "refreshes and gains a Level. Other kind: it withers, and the new "
+      + "one takes its Level if higher.";
 
     /// <summary>The text pass of 2026-10-08: Eula's blade, a counter on the
     /// enemy (<c>LightfallSwordPower</c>) with a badge and no tip.</summary>

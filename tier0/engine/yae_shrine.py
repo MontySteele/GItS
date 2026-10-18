@@ -20,9 +20,10 @@ THE RULES AS MODELLED (review r3, ruled 2026-10-14,
     card prints (`PLANT_LEVEL`, Guardian of Narukami its own), +1 per Fox's
     Mooncall, with 3 actions left, and does not level the others.
   * KINDS (review r3, sec.1): set when planted. Sakura (Thunder, the
-    default) strikes one enemy for 2 + Level; a Foxfire Sakura hits ALL
-    enemies for 1 + Level; a Kitsune Sakura (the decoy) gives her 2 + Level
-    Block. Every planter plants a plain Sakura unless its card names a kind
+    default) strikes one enemy for 1 + 2 per Level (the Sakura Levels
+    paper, 2026-10-17); a Foxfire Sakura hits ALL enemies for 1 + Level; a
+    Kitsune Sakura (the decoy) gives her 2 + Level Block. Every planter
+    plants a plain Sakura unless its card names a kind
     (`as:` on the `plant` op: Foxfire Sweep, Shrine Maiden's Guard).
   * A SAKURA ACTS (`act`) at the end of her turn (oldest first), once more
     when it withers (Last Bloom), and on Tenko. A damage action is Electro,
@@ -140,9 +141,15 @@ CADENCE = "catalyst"
 # --- the shrine (C# twin: `YaeLaw`, Powers/Prototype/YaeShrine.cs) ---
 SAKURA_CAP = 3
 SAKURA_TURNS = 3            # actions a Sakura has when planted or refreshed
-SAKURA_BASE = 2             # a Sakura (Thunder) strikes for this + Level
+# The Sakura Levels paper (review/active/yae-sakura-levels-2026-10-17.md,
+# pick 1 (a), the user: "Agreed on both of these"): a Thunder Level is worth
+# 2, so a Sakura strikes for 1 + 2 per Level.
+SAKURA_BASE = 1             # a Sakura (Thunder) strikes for this + 2/Level
+SAKURA_PER_LEVEL = 2        # what one Level adds to a Sakura's strike
 FOXFIRE_BASE = 1            # a Foxfire Sakura hits ALL for this + Level
+FOXFIRE_PER_LEVEL = 1
 KITSUNE_BASE = 2            # a Kitsune Sakura gives this + Level Block
+KITSUNE_PER_LEVEL = 1
 PLANT_LEVEL = 1             # +1 per Fox's Mooncall; Levels have no cap
 #: Pick 1 (b): the proposal's placeholder, a strike by the COUNT standing.
 COUNT_TABLE = {1: 3, 2: 4, 3: 5}   # the same ceiling as (a), paired
@@ -443,11 +450,18 @@ def sakura_cap(player) -> int:
 
 
 def kind_base(kind: str) -> int:
-    """What a kind's action adds to its Level: Thunder 2, Foxfire 1,
-    Kitsune 2 (read at call time, so a knob moves it). C#
-    `YaeShrineLedger.KindBase`."""
+    """A kind's flat part: Thunder 1, Foxfire 1, Kitsune 2 (read at call
+    time, so a knob moves it). C# `YaeShrineLedger.KindBase`."""
     return {THUNDER: SAKURA_BASE, FOXFIRE: FOXFIRE_BASE,
             KITSUNE: KITSUNE_BASE}[kind]
+
+
+def kind_per_level(kind: str) -> int:
+    """What one Level adds to a kind's action: Thunder 2, Foxfire 1,
+    Kitsune 1 (the Sakura Levels paper, pick 1 (a)). C#
+    `YaeShrineLedger.KindPerLevel`."""
+    return {THUNDER: SAKURA_PER_LEVEL, FOXFIRE: FOXFIRE_PER_LEVEL,
+            KITSUNE: KITSUNE_PER_LEVEL}[kind]
 
 
 def _plant_level(player) -> int:
@@ -484,8 +498,10 @@ def plant(state, n: int = 1, reason: str = "plant",
     to withering, `next_to_wither`, in place of the oldest): it acts first; if it is
     the same kind it refreshes (to at least 3) and gains 1 Level and none is
     added; if not, it withers and the new Sakura takes its place, as the
-    newest, at its printed Level. `annotation`: what each NEW Sakura
-    inherits from the planting card (Red Ink, `inherited`)."""
+    newest, at the HIGHER of its own plant Level and the withered one's
+    Level (LEVELS CARRY OVER, the Sakura Levels paper, 2026-10-17, pick 1
+    (a)). `annotation`: what each NEW Sakura inherits from the planting
+    card (Red Ink, `inherited`)."""
     if kind not in SAKURA_KINDS:
         raise ValueError(f"unknown Sakura kind {kind!r}")
     led = ledger(state.player)
@@ -493,6 +509,7 @@ def plant(state, n: int = 1, reason: str = "plant",
         return
     cap = sakura_cap(state.player)
     for _ in range(n):
+        carried = 0                 # a replaced Sakura's Level, carried over
         if len(led.sakura) >= cap and led.sakura:
             # 2026-10-17 (the user: "closest to the expectation"): the
             # Sakura closest to withering, not the first planted.
@@ -510,10 +527,12 @@ def plant(state, n: int = 1, reason: str = "plant",
                     state.emit("yae_level", reason=reason,
                                levels=[s.level for s in led.sakura])
                     continue
-                # A different kind: the oldest withers, the new one takes
-                # its place (changing the mix costs an established Sakura).
+                # A different kind: it withers, the new one takes its place
+                # and its Levels (the Sakura Levels paper: "let levels carry
+                # over so that mixing types doesn't brick you").
                 if oldest in led.sakura:
                     led.sakura.remove(oldest)
+                carried = oldest.level
                 state.emit("yae_wither", count=1, standing=len(led.sakura),
                            reason="replaced")
                 _withered(state, 1)
@@ -523,6 +542,7 @@ def plant(state, n: int = 1, reason: str = "plant",
         start = _plant_level(state.player)
         if level is not None:
             start = max(start, level + start - PLANT_LEVEL)   # Mooncall too
+        start = max(start, carried)
         new = Sakura(level=start, turns_left=SAKURA_TURNS + max(0, lasts),
                      seq=led.seq, kind=kind, planted_level=start)
         new.add(annotation)
@@ -533,15 +553,18 @@ def plant(state, n: int = 1, reason: str = "plant",
 
 
 def act_size(state, s: Sakura) -> int:
-    """One action's size, before Edict: Thunder 2 + Level damage, Foxfire
-    1 + Level to each enemy, Kitsune 2 + Level Block; a Red Ink Sakura's 3
-    adds to any kind (review r3)."""
+    """One action's size, before Edict: Thunder 1 + 2 per Level damage (the
+    Sakura Levels paper), Foxfire 1 + Level to each enemy, Kitsune 2 + Level
+    Block; a Red Ink Sakura's 3 adds to any kind (review r3)."""
     led = ledger(state.player)
     if SCALING == "level":
-        size = kind_base(s.kind) + s.level
+        size = kind_base(s.kind) + kind_per_level(s.kind) * s.level
     else:
         size = (COUNT_TABLE[min(SAKURA_CAP, len(led.sakura))]
-                + led.shrine_bonus + kind_base(s.kind) - SAKURA_BASE)
+                + led.shrine_bonus
+                # each kind's Level-1 gap to a Sakura's (Foxfire -1)
+                + kind_base(s.kind) + kind_per_level(s.kind)
+                - SAKURA_BASE - SAKURA_PER_LEVEL)
     if s.has(RED_INK):
         size += RED_INK_AMOUNT
     return size
