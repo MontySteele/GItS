@@ -37,7 +37,7 @@ made by `tools/make_workshop_preview.py`; a placeholder if absent) and `content/
 `manifest.json` and `images/cards/`. Card portraits go up as lossless WebP
 (same pixels, about 29% smaller, checked file by file; a file that fails the
 check ships as its png), and `RosterArt.CardPortrait` tries `<id>.webp`, then
-`<id>.png`. The dev deploy and the art tools stay on png. Never the seat
+`<id>.png`. Verified encodes are cached in `.workshop/_webp_cache/` by the sha256 of the source png, and misses encode on every core, so a repackage with no new art copies instead of re-encoding (2026-10-17). The dev deploy and the art tools stay on png. Never the seat
 bridge, never an auto-play mod. A left-out kit's own card art stays out. `mod_id.txt`, which
 ModUploader writes on the first upload, is kept by every later run.
 
