@@ -33,8 +33,6 @@ def _caches_clear():
     loader.reset_arm_caches()
     rewards._companion_roster.cache_clear()
     rewards.companion_pool.cache_clear()
-    rewards.five_star_roster.cache_clear()
-    rewards.designed_nations.cache_clear()
 
 
 @pytest.fixture
@@ -73,16 +71,6 @@ def test_flag_off_an_explosion_is_still_pyro():
     every explosion, so its flag-off answer is the acceptance condition on
     `klee_overhaul._explode` staying what it was."""
     assert companion_coven.bomb_element(_klee_state()) == "pyro"
-
-
-def test_flag_off_a_five_star_personal_clause_is_unreachable():
-    """`rewards._banner_filtered` grew a `personal_pool` clause for Qiqi. It
-    cannot fire on any shipped tree, because no shipped companion is both a
-    five-star and a Personal -- pinned rather than assumed, so the day one
-    ships this test asks about it."""
-    both = [c for c in loader._card_index().values()
-            if c.is_companion and c.star == 5 and c.personal_pool is not None]
-    assert both == []
 
 
 # ---------------------------------------------------------------------------

@@ -150,15 +150,14 @@ public class CompanionOverhaulTests
     public void Both_offer_surfaces_read_the_one_door()
     {
         // STRUCTURAL, and it is the whole reason the seam is on CompanionPool
-        // rather than on the reward slot: the Featured Banner and the slot
-        // have to see ONE roster, or a run features five-stars it cannot be
-        // offered -- the split R64 shipped the banner to close. Reading
-        // CompanionRoster directly is what would re-open it, so that is what
-        // this refuses.
+        // rather than on the reward slot: the slot and the shop have to see ONE
+        // roster, or the two channels disagree about which companions exist.
+        // Reading CompanionRoster directly is what would split them, so that
+        // is what this refuses.
         foreach (var method in new MethodBase[]
                  {
                      typeof(CompanionSlot).GetMethod("Roll", All)!,
-                     typeof(CompanionBanner).GetMethod("Roll", All)!,
+                     typeof(CompanionPool).GetMethod("Eligible", All)!,
                  })
         {
             var calls = Il.Calls(method);

@@ -102,6 +102,7 @@ fixture (`tier05/tests/conftest.py:17-38`), which patches `model.build_act_map`.
 - **R64** — the Banner went live and `roll_banner`'s `nations` must be passed
   explicitly from the sheets; the argument-free default had filtered every
   non-Mondstadt 5-star out of every run (`:1922-1949`; `model.py:284-295`).
+  Superseded 2026-10-18: the banner is scrapped everywhere.
 - **R66** — archetype vocabulary is the sheet's; adaptive numbers taken through
   the broken registry are archived, assigned-plan ones stand because they route
   through `runner.py`'s registry (`:1989-2060`; `draft.py:1284-1314`).

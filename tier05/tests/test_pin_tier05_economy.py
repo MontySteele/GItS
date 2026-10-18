@@ -1,25 +1,20 @@
-"""Pin tests for the tier 0.5 economy seams: event options and the banner roll.
+"""Pin tests for the tier 0.5 economy seams: event options.
 
-Three boundaries that no other test in the suite touched, all of them the kind
+Two boundaries that no other test in the suite touched, all of them the kind
 that a one-character edit moves without turning anything red:
 
   - an option that LOWERS max HP re-clips current HP, so a run can never walk
     out of an event room with hp above max_hp;
   - an option that would take the run to EXACTLY 0 HP is illegal, not merely
-    the ones that go below;
-  - a 5-star roster sitting exactly at BANNER_FEATURED_SLOTS features all of
-    it without touching the run's Random, so seeded runs stay replayable.
+    the ones that go below.
 """
 
 from __future__ import annotations
 
 import random
-from unittest import mock
 
-from tier0 import constants as C
 from tier0.content import loader
-from tier0.engine.state import Card
-from tier05 import events, rewards
+from tier05 import events
 
 
 def _deck(n=8):
@@ -84,39 +79,3 @@ def test_option_that_leaves_one_hp_is_still_available():
     ]}
     labels = [o["label"] for o in events.available(event, _st(hp=6))]
     assert labels == ["Walk Away", "Reach Deeper"]
-
-
-# --- the banner roll at exactly the slot count -----------------------------
-
-
-def _fake_roster(n: int, nation: str = "mondstadt") -> list[Card]:
-    return [Card(id=f"star5_{i}", name=f"Five Star {i}", cost=2, type="power",
-                 rarity="rare", role_c="buffer", star=5, nation=nation)
-            for i in range(n)]
-
-
-def test_roster_exactly_at_the_slot_count_features_all_without_consuming_rng():
-    """A nation with exactly BANNER_FEATURED_SLOTS designed 5-stars features
-    all of them directly -- it does not go through the sampler. The featured
-    set would be identical either way, but sampling would advance the run's
-    single Random, so every downstream roll of a seeded run depends on this
-    boundary staying where it is."""
-    fake = _fake_roster(C.BANNER_FEATURED_SLOTS)
-    with mock.patch.object(rewards, "five_star_roster", lambda n: fake):
-        rng = random.Random(7)
-        banner = rewards.roll_banner(rng, nations=("mondstadt",))
-    assert banner == frozenset(c.id for c in fake)
-    assert rng.random() == random.Random(7).random(), \
-        "the roll consumed rng at the feature-all boundary"
-
-
-def test_roster_one_over_the_slot_count_samples_and_consumes_rng():
-    """The control for the boundary above: one 5-star past the cap and the
-    roll does sample -- exactly BANNER_FEATURED_SLOTS featured, and the run's
-    Random has moved."""
-    fake = _fake_roster(C.BANNER_FEATURED_SLOTS + 1)
-    with mock.patch.object(rewards, "five_star_roster", lambda n: fake):
-        rng = random.Random(7)
-        banner = rewards.roll_banner(rng, nations=("mondstadt",))
-    assert len(banner) == C.BANNER_FEATURED_SLOTS
-    assert rng.random() != random.Random(7).random()

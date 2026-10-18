@@ -56,12 +56,12 @@ public static class CompanionPool
     /// draws from -- ONE roster, two channels (§4.7's whole point is that the
     /// channels differ in economy, not in contents).
     ///
-    /// AND IT IS THE ONE DOOR. <see cref="CompanionSlot"/> and
-    /// <see cref="CompanionBanner"/> read this property rather than
+    /// AND IT IS THE ONE DOOR. <see cref="CompanionSlot"/> and the shop's
+    /// <see cref="Eligible"/> read this property rather than
     /// <c>CompanionRoster.All</c> directly, so "which companions exist for this
-    /// run" has a single definition and the reward slot, the banner and the
-    /// shop cannot be given different answers. That was already true by
-    /// coincidence -- all three read the same generated list -- and it is now
+    /// run" has a single definition and the reward slot and the shop cannot be
+    /// given different answers. That was already true by coincidence -- both
+    /// read the same generated list -- and it is now
     /// true by construction, because the Mondstadt companion overhaul
     /// (QUARANTINED, R213 B) redirects exactly this property.
     ///
@@ -122,18 +122,15 @@ public static class CompanionPool
     /// The eligible set for one shop slot. <paramref name="nation"/> null means
     /// wildcard (slot 2); a nation string means the home-region filter (slot 1).
     ///
-    /// BANNER GATING WENT LIVE 2026-07-25 (R64). This used to read "NO BANNER
-    /// GATING", because BANNER_FEATURED_SLOTS is 3 and no nation designed more
-    /// than 3 Rare companions (Mondstadt 3, Inazuma 2, Fontaine 0) -- the
-    /// Featured Banner featured every 5-star in every nation and was EXACTLY a
-    /// no-op. That ruling named its own trigger: "It goes live in both channels
-    /// together, when a nation ships a 4th Rare." Fontaine shipped its fourth,
-    /// so it does, and the reward slot gained the same filter in the same
-    /// change -- wiring the shop alone is precisely what that ruling forbade.
+    /// NO BANNER. Every offerable companion is eligible in every run: the
+    /// Featured Banner, which once let only three five-stars per nation be
+    /// offered in a given run, was scrapped everywhere ([USER] 2026-10-18,
+    /// "Agreed on (a)!"). Personal pools and <see cref="IsHiddenFrom"/> still
+    /// apply through <see cref="IsOfferable"/>.
     ///
-    /// §4.7: if the banner has emptied the nation's Rare tier, slot 1 falls
-    /// through to Uncommon exactly as the reward slot does. That fallthrough is
-    /// the ladder's job, not this method's -- Eligible just returns fewer cards.
+    /// §4.7: if the nation has no card at this rarity, slot 1 falls through on
+    /// the merchant patch's ladder -- that is the ladder's job, not this
+    /// method's; Eligible just returns fewer cards.
     /// </summary>
     public static List<CardModel> Eligible(
         Player player, CardRarity rarity, string? nation)
@@ -141,7 +138,6 @@ public static class CompanionPool
         return All
             .Where(c => c.Rarity == rarity)
             .Where(c => IsOfferable(c, player))
-            .Where(c => CompanionBanner.IsOffered(c, player))
             .Where(c => nation == null || (c as ICompanionCard)?.Nation == nation)
             .ToList();
     }

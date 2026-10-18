@@ -1287,11 +1287,9 @@ def companion_roster_replacement() -> list[Card]:
     roster.
 
     THE ONE DOOR, and its C# twin is `KleeMod.CompanionPool.All`. Both offer
-    surfaces in the sim read it -- `tier05.rewards.companion_pool` (the reward
-    slot and the shop) and `tier05.rewards.five_star_roster` (the Featured
-    Banner) -- so a build cannot feature a five-star the reward slot has no
-    way to hand out, which is precisely the split R64 shipped the banner to
-    close.
+    surfaces in the sim read it through `tier05.rewards.companion_pool` (the
+    reward slot and the shop), so the two cannot disagree about which
+    companions exist in a run.
 
     A REPLACEMENT OF TWO NATIONS, NOT OF THE ROSTER. Two approved workshops,
     one per nation, both Paper artefacts on the companion-workshop branches and

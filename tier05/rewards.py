@@ -101,8 +101,8 @@ def _companion_roster() -> list[Card]:
     """Every companion an offer surface may see -- the ONE reader of the
     Mondstadt companion overhaul's seam (`C.COMPANION_OVERHAUL`).
 
-    Both companion surfaces below go through this, so a build cannot feature a
-    five-star on the banner that the reward slot has no way to hand out. The
+    Both companion surfaces (the reward slot and the shop) go through this, so
+    they cannot disagree about which companions exist in a run. The
     seam is `loader.companion_roster_replacement`, whose C# twin is
     `KleeMod.CompanionPool.All`; it returns None on every flag-off tree and
     this is then the shipped index filtered exactly as it always was.
@@ -131,99 +131,6 @@ def companion_pool() -> dict[str, list[Card]]:
                 and c.rarity in C.RARITY_ODDS):
             pool.setdefault(c.rarity, []).append(c)
     return {r: sorted(cs, key=lambda c: c.id) for r, cs in pool.items()}
-
-
-@lru_cache(maxsize=8)
-def five_star_roster(nation: str) -> list[Card]:
-    """Every designed 5-star companion for a nation, banner-eligible.
-
-    Standard-banner 5-stars are NOT excluded: per principles v1.8 they
-    participate in the roll like anyone else, and the `standard` flag is
-    only the escape hatch if banner variance turns out to brick runs.
-    """
-    return sorted(
-        (c for c in _companion_roster()
-         if c.is_companion and c.star == 5 and c.nation == nation
-         and c.personal_pool is None and not c.guest_star),
-        key=lambda c: c.id)
-
-
-@lru_cache(maxsize=1)
-def designed_nations() -> tuple[str, ...]:
-    """Every nation with at least one banner-eligible 5-star, sorted.
-
-    DERIVED, never listed. The literal default this replaced -- roll_banner's
-    ``nations=("mondstadt",)`` -- was correct on the day it was written and
-    silently wrong from the day Inazuma got its first 5-star: the run model's
-    one call site never passed an argument, so every run of every character
-    rolled a MONDSTADT-ONLY banner, and `_banner_filtered` then dropped every
-    other nation's 5-stars from both the reward slot and the shop. Measured
-    before the fix: across 400 seeds a Kokomi run was offered Albedo, Durin and
-    Nicole and never Itto or Raiden -- Inazuma's own Rares, one of them written
-    as "the conscription jackpot", unreachable in her own runs.
-
-    A hardcoded nation list is a thing someone must remember to update. This is
-    not.
-    """
-    nations = {c.nation for c in _companion_roster()
-               if c.is_companion and c.star == 5 and c.nation
-               and c.personal_pool is None and not c.guest_star}
-    return tuple(sorted(nations))
-
-
-def roll_banner(rng: random.Random,
-                nations: tuple[str, ...] | None = None) -> frozenset[str]:
-    """The run's Featured Banner: BANNER_FEATURED_SLOTS limited 5-stars per
-    nation, drawn once per run and fixed for its duration.
-
-    Returns the set of featured 5-star card ids. Nations with no more
-    designed 5-stars than slots feature all of them, which is why this is a
-    no-op at the v0.1 roster and why the roll is still worth having: the
-    governor exists before the roster needs it.
-
-    In co-op each player rolls their own banner -- divergent lineups are the
-    point -- so this deliberately takes an rng rather than reading a global.
-
-    ``nations=None`` means EVERY designed nation, which is what §4.2 describes
-    ("3 limited 5-stars per nation") and the only correct setting for a run:
-    the reward slot's uniform half and the shop's wildcard slot both offer
-    off-nation 5-stars, so a banner that omits a nation does not thin that
-    nation -- it DELETES it. See designed_nations().
-    """
-    if nations is None:
-        nations = designed_nations()
-    featured: set[str] = set()
-    for nation in nations:
-        roster = five_star_roster(nation)
-        if len(roster) <= C.BANNER_FEATURED_SLOTS:
-            featured.update(c.id for c in roster)
-        else:
-            featured.update(c.id for c in
-                            rng.sample(roster, C.BANNER_FEATURED_SLOTS))
-    return frozenset(featured)
-
-
-def _banner_filtered(cards: list[Card],
-                     banner: frozenset[str] | None) -> list[Card]:
-    """Drop off-banner 5-stars from an offer pool. 4-stars are never gated,
-    and neither is a PERSONAL.
-
-    THE PERSONAL CLAUSE IS A CONTRADICTION CLOSED, not a new rule. The banner
-    is rolled from `five_star_roster`, which excludes `personal_pool` cards by
-    name -- a Personal is a character's kit, not a draw somebody can be lucky
-    into -- so a five-star Personal can never be ON a banner and gating it by
-    one made it unofferable everywhere rather than rarely. The C# twin
-    (`CompanionBanner.Roll` / `IsOffered`) argued the same two halves and
-    reached the same split. NOTHING SHIPPED MOVES: `prune_witch_hunt` is the
-    only `personal_pool` companion in the index and it is a four-star, so this
-    clause is unreachable on any flag-off tree (pinned, not assumed, by
-    `test_companion_overhaul.py`). It is reachable under `C.COMPANION_OVERHAUL`,
-    where Klee's coven gives Qiqi -- a five-star character -- a Personal.
-    """
-    if banner is None:
-        return cards
-    return [c for c in cards
-            if c.star != 5 or c.personal_pool is not None or c.id in banner]
 
 
 def _roll_rarity(rng: random.Random) -> str:
@@ -447,7 +354,6 @@ def _nation_weighted_choice(rng: random.Random, cards: list[Card],
 
 def roll_rewards(rng: random.Random, character_id: str,
                  companion_offers: int = 1,
-                 banner: frozenset[str] | None = None,
                  companion_rarity: str | None = None,
                  card_rarity: str | None = None,
                  floor: int | None = None) -> list[Card]:
@@ -455,11 +361,9 @@ def roll_rewards(rng: random.Random, character_id: str,
     companion_offers > 1 is the pity/choose-3 slot (triage ruling 4
     pulled the mechanism forward from M7; the run model decides when).
 
-    banner is the run's Featured Banner (v1.8); None means unrestricted,
-    which is the pre-v1.8 behaviour and what the Tier 0 fight-level tests
-    still want. Off-banner 5-stars are removed before the rarity roll, so a
-    banner that empties the rare tier falls through to uncommon exactly as a
-    naturally rare-less pool already does. ``companion_rarity="rare"`` is
+    Every companion in the pool is offerable in every run: there is no
+    Featured Banner ([USER] 2026-10-18, "Agreed on (a)!" -- scrap the banner
+    everywhere). ``companion_rarity="rare"`` is
     the post-boss rule for the Companion slot; ``card_rarity="rare"`` forces
     the ordinary card offers, which is §10.1's boundary reward ("choice-of-3
     Rare cards"). The Ironclad-0.6% diagnosis (2026-07-23) found the shipped
@@ -493,7 +397,7 @@ def roll_rewards(rng: random.Random, character_id: str,
         # a no-op while Klee is the only character, load-bearing the moment
         # a second one exists (Prune must not show up in Furina's rewards).
         comps = {r: cs for r, cs in
-                 ((r, [c for c in _banner_filtered(cs, banner)
+                 ((r, [c for c in cs
                        if c.personal_pool in (None, character_id)
                        and not yae_shrine.hidden_from(c.id, character_id)])
                   for r, cs in companion_pool().items()) if cs}

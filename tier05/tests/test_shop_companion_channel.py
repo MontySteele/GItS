@@ -166,19 +166,28 @@ def test_furinas_slot_one_now_answers_a_rare_roll_from_her_own_nation():
         "this sprint closed is still closed in the sheet but not in the shop")
 
 
-def test_the_widening_rung_still_works_when_the_banner_thins_her_tier():
-    """The rung the test above stopped exercising, exercised deliberately.
-
-    A banner that features NO Fontaine Rare is now a reachable run state (four
-    Rares, three slots, and slot 1 draws home nation). The ladder must widen
-    the nation rather than drop the rarity or crash -- the R59 floor.
+def test_every_five_star_is_offerable_whatever_the_seed():
+    """No Featured Banner ([USER] 2026-10-18, "Agreed on (a)!" -- scrap the
+    banner everywhere). It used to let only three five-stars per nation be
+    offered in a given run, so one of Fontaine's four was missing from every
+    Furina run. Now each of them reaches both the reward slot and the shop
+    under every seed; rarity, nation weighting and personal pools still apply.
     """
-    empty = frozenset()          # nothing featured at all: the hardest case
-    for seed in range(100):
-        offers = shop.companion_shop_offer(random.Random(seed), "furina", empty)
-        assert len(offers) == C.SHOP_COMPANION_SLOTS
-        for card, _ in offers:
-            assert card.star != 5, "an off-banner 5-star reached the shop"
+    fives = {c.id for cs in rewards.companion_pool().values() for c in cs
+             if c.nation == "fontaine" and c.star == 5
+             and c.personal_pool is None}
+    assert len(fives) == 4
+    for seed in range(5):
+        rng = random.Random(seed)
+        slot = {c.id for _ in range(200)
+                for c in rewards.roll_rewards(rng, "furina",
+                                              companion_rarity="rare")
+                if c.is_companion}
+        assert fives <= slot, f"seed {seed}: reward slot missed {fives - slot}"
+        rng = random.Random(seed)
+        shelf = {card.id for _ in range(300)
+                 for card, _ in shop.companion_shop_offer(rng, "furina")}
+        assert fives <= shelf, f"seed {seed}: shop missed {fives - shelf}"
 
 
 def test_a_nation_with_no_companions_at_all_still_fills_both_slots():

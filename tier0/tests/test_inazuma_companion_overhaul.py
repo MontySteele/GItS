@@ -37,8 +37,6 @@ def _caches_clear():
     loader.reset_arm_caches()
     rewards._companion_roster.cache_clear()
     rewards.companion_pool.cache_clear()
-    rewards.five_star_roster.cache_clear()
-    rewards.designed_nations.cache_clear()
 
 
 @pytest.fixture
@@ -134,13 +132,11 @@ def test_mondstadt_still_moves_too(overhaul):
     assert set(C.MONDSTADT_OVERHAUL_POOL_IDS) <= offerable
 
 
-def test_the_banner_roster_moves_with_the_pool(overhaul):
-    featured = {c.id for c in rewards.five_star_roster("inazuma")}
-    assert featured
-    assert all(i.startswith("proto_mi_") for i in featured)
-    offerable = {c.id for cards in rewards.companion_pool().values()
-                 for c in cards}
-    assert featured <= offerable
+def test_the_offerable_five_stars_are_the_overhaul_rows(overhaul):
+    fives = {c.id for cs in rewards.companion_pool().values() for c in cs
+             if c.nation == "inazuma" and c.star == 5}
+    assert fives
+    assert all(i.startswith("proto_mi_") for i in fives)
 
 
 def test_every_row_resolves_without_raising(overhaul):

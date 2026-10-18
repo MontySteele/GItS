@@ -41,8 +41,6 @@ def companions(monkeypatch):
         loader.reset_arm_caches()
         rewards._companion_roster.cache_clear()
         rewards.companion_pool.cache_clear()
-        rewards.five_star_roster.cache_clear()
-        rewards.designed_nations.cache_clear()
     clear()
     yield
     clear()

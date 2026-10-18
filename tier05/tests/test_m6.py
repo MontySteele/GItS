@@ -176,10 +176,9 @@ def test_ab_runs_both_policies_over_identical_seeds():
     assert set(out) == {"assigned", "adaptive"}
     for name in out:
         assert len(out[name]["results"]) == 15
-    # Same seeds => same banner and same node layout per run index.
+    # Same seeds => same node layout per run index.
     for x, y in zip(out["assigned"]["results"], out["adaptive"]["results"]):
         assert x.seed == y.seed
-        assert x.banner == y.banner
         # §11: NOT node_kinds. Both policies get the same generated map for
         # act 1 (same seed, same rng prefix), but a different deck means
         # different fight outcomes, different HP, and therefore a different

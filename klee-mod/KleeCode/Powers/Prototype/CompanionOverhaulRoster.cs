@@ -13,11 +13,9 @@ namespace KleeMod.Powers;
 /// through one door, so the two cannot disagree about what a companion pool is.
 ///
 /// The C# door is <see cref="CompanionPool.All"/>, which
-/// <see cref="CompanionSlot"/> (the fourth reward slot),
-/// <see cref="CompanionBanner"/> (the Featured Banner's five-star roster) and
-/// the shop channel all read. Redirecting that one property moves all three at
-/// once, which is the point of putting the seam at the source rather than at
-/// the three mouths.
+/// <see cref="CompanionSlot"/> (the fourth reward slot) and the shop channel
+/// both read. Redirecting that one property moves both at once, which is the
+/// point of putting the seam at the source rather than at the mouths.
 ///
 /// A REPLACEMENT OF EVERY NATION, LISTED BY TYPE. Mondstadt's and Inazuma's
 /// approved workshops rewrote their Universals; Fontaine's rows were ported as
