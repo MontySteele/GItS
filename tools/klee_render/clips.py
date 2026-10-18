@@ -101,8 +101,8 @@ def pose(ops, morphs=None, yaw=YAW, held=1.0, thrown=None, thrown_spin=0.0, root
 # Battle idle ([USER], 2026-10-13: "Agreed on the Silhouette change"): a wider,
 # lower stance than milestone 2's, the upper body leaning toward the enemy
 # (screen right), the chest still turned a little off-centre toward the viewer
-# as the base cast's are; the near (right) hand holds her bomb out in front of
-# her, the far hand forward beside it. The bomb is her normal-attack size, about
+# as the base cast's are; the near (right) hand holds her bomb at her hip
+# (2026-10-18, below), the far hand forward toward the enemy. The bomb is her normal-attack size, about
 # 60% of her head's width ([USER], 2026-10-13: "the new attack is probably too
 # big. ... It's noticeably smaller than her head. I think the increased size
 # would be fitting for her Jumpty Dumpty skill usage."); the head-sized one is
@@ -110,10 +110,17 @@ def pose(ops, morphs=None, yaw=YAW, held=1.0, thrown=None, thrown_spin=0.0, root
 # Every combat clip plants her feet where stance A does (A_FRONT / A_BACK), so
 # a clip that starts or ends in idle never slides them.
 #
-# The near hand is placed in FRONT of her chest, the arm reaching toward the
-# enemy, so it reads on its own: milestone 2 placed it across her belly from the
+# The near hand was then placed in FRONT of her chest, the arm reaching toward
+# the enemy, so it would read on its own: milestone 2 placed it across her belly from the
 # chest, the upper arm hid behind the coat, and screen-left read as armless
 # ([USER], 2026-10-13: "why do the idle loop ones have no right arm (Left side)?").
+# That still bent the arm across her body and the upper arm vanished inside her
+# coat, so on the Workshop preview the forearm seemed to come out of her chest
+# ([USER], 2026-10-18). Both idle loops now let the near arm hang relaxed at her
+# side, the bomb held in front of her hip (NEAR_REST from HIP): the red sleeve
+# runs from the shoulder down outside the coat to the white cuff. The bomb's
+# grip on her wrist is still set on the old forward hold (HOLD_REF), so every
+# throw and cheer carries it exactly as before.
 A_DROP = 0.12           # hips lowered (milestone 2: 0.055)
 A_LEAN = 13.0           # upper body toward the enemy, degrees (milestone 2: 4)
 A_FRONT = 0.17          # far foot toward the enemy (milestone 2: 0.11)
@@ -121,6 +128,8 @@ A_BACK = 0.15           # near foot back (milestone 2: 0.10)
 A_HEAD_TILT = -4.0      # the head takes back part of the lean
 NEAR_HOLD = (0.12, -0.065, -0.13)     # the bomb hand, from the chest
 HOLD_POLE = (-0.4, 0.6, -1.0)
+NEAR_REST = (0.03, -0.10, 0.06)       # the idle bomb hand, from her right hip (HIP)
+REST_POLE = (-1.0, 0.4, 0.0)          # its elbow out to her side, so the upper arm shows
 NEAR_HOLD_CURL = (34, 16)             # closed in around the smaller bomb (the head-sized one: 22, 12)
 #: Her head's width at render, model units: the hair and face (the vertices the
 #: 頭 bone carries; hat brim and pigtails left out) across the screen in
@@ -162,11 +171,25 @@ def idle_pose(breath=0.0, sway=0.0, blink=0.0, swing=0.0):
     return pose(
         stance(drop=A_DROP + 0.006 * (1 - b), lean=A_LEAN + 1.5 * (1 - b), head_nod=3.0 + 1.5 * (1 - b),
                head_tilt=A_HEAD_TILT, front=A_FRONT, back=A_BACK, sway=0.004 * sway)
-        + arms((NEAR_HOLD[0], NEAR_HOLD[1], NEAR_HOLD[2] - 0.010 * (1 - b)),
+        + arms((NEAR_REST[0], NEAR_REST[1], NEAR_REST[2] - 0.010 * (1 - b)),
                (FAR_READY[0] - 0.006 * (1 - b), FAR_READY[1], FAR_READY[2] - 0.014 * (1 - b)),
-               near_pole=HOLD_POLE, near_curl=NEAR_HOLD_CURL, far_curl=FAR_CURL)
+               near_pole=REST_POLE, near_curl=NEAR_HOLD_CURL, far_curl=FAR_CURL, near_anchor=HIP)
         + pigtails(swing=swing),
         m)
+
+
+#: The pose render.py seats the held bomb on her near wrist in (its offset is
+#: HELD_AT from the fingertips here, facing the camera): stance A's old forward
+#: hold, kept as the grip reference when the idle arm moved to her side
+#: (2026-10-18), so the bomb sits in her hand in every clip as it did.
+HOLD_REF = pose(
+    stance(drop=A_DROP + 0.006, lean=A_LEAN + 1.5, head_nod=4.5, head_tilt=A_HEAD_TILT,
+           front=A_FRONT, back=A_BACK)
+    + arms((NEAR_HOLD[0], NEAR_HOLD[1], NEAR_HOLD[2] - 0.010),
+           (FAR_READY[0] - 0.006, FAR_READY[1], FAR_READY[2] - 0.014),
+           near_pole=HOLD_POLE, near_curl=NEAR_HOLD_CURL, far_curl=FAR_CURL)
+    + pigtails(swing=-3),
+    SMIRK)
 
 
 IDLE = {
@@ -187,9 +210,10 @@ def low_pose(breath=0.0, swing=0.0):
     return pose(
         stance(drop=A_DROP + 0.02 + 0.006 * (1 - b), lean=A_LEAN + 7 + 2 * (1 - b), twist=-12, head_turn=40,
                head_nod=13 + 2 * (1 - b), head_tilt=A_HEAD_TILT, front=A_FRONT, back=A_BACK)
-        + arms((NEAR_HOLD[0] - 0.01, NEAR_HOLD[1], NEAR_HOLD[2] - 0.05 - 0.006 * (1 - b)),
+        + arms((NEAR_REST[0] - 0.01, NEAR_REST[1], NEAR_REST[2] - 0.03 - 0.006 * (1 - b)),
                (FAR_READY[0] - 0.03, FAR_READY[1], FAR_READY[2] - 0.08 - 0.01 * (1 - b)),
-               near_pole=HOLD_POLE, near_curl=NEAR_HOLD_CURL, far_pole=(0.4, 0.4, -1.0), far_curl=(55, 28))
+               near_pole=REST_POLE, near_curl=NEAR_HOLD_CURL, far_pole=(0.4, 0.4, -1.0), far_curl=(55, 28),
+               near_anchor=HIP)
         + pigtails(swing=swing),
         {"困る": 0.8, "Eye_Tired": 0.7, "あ": 0.15})
 

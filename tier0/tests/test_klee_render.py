@@ -86,8 +86,19 @@ def test_stance_a_is_wide_low_and_leans_toward_the_enemy():
     twist = [op for op in idle["ops"] if op[:3] == ("rotw", "上半身", clips.Z)][0][3]
     assert twist < 0 and idle["yaw"] == clips.YAW, "chest still off-centre toward the viewer"
     assert idle["held"] == 1.0 and idle["big"] == 0.0
-    near = next(op for op in idle["ops"] if op[:2] == ("hand", "R"))
-    assert near[2] == clips.CH and near[3][0] > 0, "the bomb hand reaches toward the enemy"
+    # [USER], 2026-10-18: the arm bent across her body hid its upper half inside
+    # the coat ("the forearm looks like it comes out of her chest"). Both idle
+    # loops hang the near arm at her side, elbow out, the bomb in front of her hip.
+    for p in (idle, clips.low_pose(0.0)):
+        near = next(op for op in p["ops"] if op[:2] == ("hand", "R"))
+        assert near[2] == clips.HIP and near[3][0] >= 0, "the bomb hand in front of her hip"
+        assert near[4][0] < 0, "the elbow out to her side, so the upper arm shows"
+    # the held bomb's grip is still set on the old forward hold, so every throw
+    # and cheer carries it as before
+    ref = next(op for op in clips.HOLD_REF["ops"] if op[:2] == ("hand", "R"))
+    assert ref[2] == clips.CH and ref[3][0] > 0
+    render = (ROOT / "tools" / "klee_render" / "render.py").read_text(encoding="utf-8")
+    assert "apply_pose(root, arm, mesh, C.HOLD_REF)" in render
 
 
 def test_the_normal_bomb_is_60_percent_of_her_head_and_jumpy_dumptys_is_head_sized():

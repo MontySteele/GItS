@@ -62,7 +62,7 @@ forbid redistribution); only the renders do.
 
 `pack.py` is the one producer of `ImageGen/images/model/frames/*.png` (her
 ground shadow `klee_shadow.png` among them),
-`model/klee_rest.png`, `ui/select_closeup.png` and the roster tile
+`model/klee_rest.png` (her ground shadow painted in, 2026-10-18), `ui/select_closeup.png` and the roster tile
 `ui/select_portrait.png` (+ `_locked`, derived from it), and writes the committed
 manifest `tools/klee_rig/klee_frames.json` (cells, counts, times, feet
 anchors, no pixels) that `gen` reads for `combat.tscn` and the merchant scene
