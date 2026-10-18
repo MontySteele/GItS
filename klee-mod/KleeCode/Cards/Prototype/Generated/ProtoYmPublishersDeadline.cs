@@ -51,7 +51,7 @@ public sealed class ProtoYmPublishersDeadline : CustomCardModel, IElementalCard,
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Publisher's Deadline"),
-        ("description", "Deal {Damage:diff()} [gold]Electro[/gold] damage. Costs 1 less if you [gold]Edited[/gold] a card this turn."),
+        ("description", "Deal {Damage:diff()} [gold]Electro[/gold] damage. Costs 1 if you [gold]Edited[/gold] a card this turn."),
     };
 
     /// <summary>Sheet `cost_reduction_if_edited_this_turn: 1`: this card

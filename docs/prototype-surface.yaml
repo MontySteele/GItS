@@ -4766,7 +4766,7 @@
    cost_reduction_if_edited_this_turn: 1,
    # Yae flat-value pass, 2026-10-17 (review/active/yae-flat-value-2026-10-17.md
    # sec.3): 14 [18] (was 12 [16]).
-   description: "Deal 14 [gold]Electro[/gold] damage. Costs 1 less if you [gold]Edited[/gold] a card this turn.",
+   description: "Deal 14 [gold]Electro[/gold] damage. Costs 1 if you [gold]Edited[/gold] a card this turn.",
    effects: [{op: damage, amount: 14, target: enemy}],
    upgrade: {damage: 4}}
 
