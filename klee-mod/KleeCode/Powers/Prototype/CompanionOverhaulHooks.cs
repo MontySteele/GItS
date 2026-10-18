@@ -882,7 +882,7 @@ public sealed class SwirlChargePower : NextAttackRiderPower, ILocalizationProvid
 }
 
 /// <summary>
-/// Mika, Starfrost Swirl: "Your next Attack this turn costs 1 less."
+/// Mika, Starfrost Swirl: "Your next Attack this turn costs [E] less."
 ///
 /// "THIS TURN" is the removal in <c>AfterSideTurnEnd</c>, mirrored exactly from
 /// <see cref="PassionOverloadPower"/> (the user's ruling, 2026-10-13: a
@@ -898,7 +898,10 @@ public sealed class StarfrostDiscountPower : NextAttackRiderPower, ILocalization
     {
         ("title", "Starfrost Swirl"),
         ("description",
-            "Your next Attack this turn costs [blue]{Amount}[/blue] less."
+            // Kit display pass (2026-10-18), Klee suite 6 lane 3: the
+            // discount is Energy, so it prints the Energy icon (a Spark-priced
+            // Attack costs no Energy to take it off).
+            "Your next Attack this turn costs {Amount:energyIcons()} less."
           + CardTypeClause),
     };
 

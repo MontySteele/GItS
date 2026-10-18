@@ -156,8 +156,10 @@ public static class KleeCardTooltips
             trigger = printedTrigger;
 
             var reaction = ReactionTable.Lookup(aura.Element, trigger);
-            var blocked = reaction == Reaction.Frozen
-                && ReactionEffects.ArtifactWillBlockFrozen(enemy);
+            // Kit display pass (2026-10-18), the Varka combo round's item 4:
+            // an Artifact also eats Overloaded's Weak, Superconduct's
+            // Vulnerable and Electro-Charged's Poison, so those rows say so.
+            var blocked = ReactionEffects.ArtifactWillBlock(reaction, enemy);
             if (reaction == Reaction.None || !seen.Add((reaction, blocked)))
             {
                 continue;
@@ -198,6 +200,19 @@ public static class KleeCardTooltips
             // The preview asks the Artifact alone: the log's detail also
             // reads a mark one hit scopes, and a mark left by the last hit
             // hid the warning (co-op seat, 2026-10-16).
+            if (blocked && reaction != Reaction.Frozen)
+            {
+                var debuffKey = PreviewKey(reaction, false);
+                previews.Add(new HoverTip(
+                    new LocString(Table, debuffKey + ".title"),
+                    (elementOnlyOnSpend ? SpendOnlyPrefix : "")
+                        + new LocString(Table, debuffKey + ".description")
+                            .GetFormattedText()
+                        + " " + DebuffArtifactSentence(
+                            ReactionEffects.ArtifactBlockedDebuff(reaction)!,
+                            several ? enemy.Name : null)));
+                continue;
+            }
             if (blocked)
             {
                 var boss = ReactionEffects.FrozenBossVulnWillApply(enemy);
@@ -620,6 +635,14 @@ public static class KleeCardTooltips
       + "but " + (string.IsNullOrEmpty(who) ? "its" : who + "'s")
       + " [gold]Artifact[/gold] blocks the "
       + (boss ? "[gold]Vulnerable[/gold]." : "Frozen.");
+
+    /// <summary>Kit display pass (2026-10-18): the sentence a debuffing
+    /// reaction's preview ends with when the target's Artifact will negate
+    /// the debuff. The reaction still happens and the aura is still used up.
+    /// With several enemies, <paramref name="who"/> names the one.</summary>
+    public static string DebuffArtifactSentence(string debuff, string? who = null) =>
+        "But " + (string.IsNullOrEmpty(who) ? "its" : who + "'s")
+      + " [gold]Artifact[/gold] blocks the [gold]" + debuff + "[/gold].";
 
     /// <summary>2026-10-04: the condition a Spend-gated element's
     /// reaction preview opens with.</summary>

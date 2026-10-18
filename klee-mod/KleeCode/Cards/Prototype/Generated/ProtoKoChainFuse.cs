@@ -35,14 +35,14 @@ namespace KleeMod.Cards.Prototype.Generated;
 public sealed class ProtoKoChainFuse : CustomCardModel
 {
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBomb(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForMine(ArmKeywordTips.ForBomb(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_chain_fuse");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Chain Fuse"),
-        ("description", "Each [gold]Bomb[/gold] on the enemy grows by {Grow:diff()}."),
+        ("description", "Each [gold]Bomb[/gold] and [gold]Mine[/gold] on the enemy grows by {Grow:diff()}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

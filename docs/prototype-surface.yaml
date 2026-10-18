@@ -48,7 +48,7 @@
 - {id: proto_ko_chain_fuse, name: "Chain Fuse", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Each [gold]Bomb[/gold] on the enemy grows by 9.",
+   description: "Each [gold]Bomb[/gold] and [gold]Mine[/gold] on the enemy grows by 9.",
    upgrade: {grow: +3},
    effects: [{op: grow_bombs, target: enemy, amount: 9}]}
 
@@ -70,7 +70,7 @@
 - {id: proto_ko_the_big_one, name: "The Big One", character: klee,
    authored_by: [claude],
    cost: 3, type: attack, rarity: rare,
-   description: "[gold]Set off[/gold] the enemy. Your [gold]Bombs[/gold] deal quadruple damage.{InCombat:\n([gold]Bombs[/gold]: {SetOffBombs} damage)|}",
+   description: "[gold]Set off[/gold] the enemy. Your [gold]Bombs[/gold] deal quadruple damage.{InCombat:\n([gold]Bombs[/gold]: {SetOffBombs:diff()} damage)|}",
    upgrade: {cost: -1},
    effects: [{op: multiply_set_off, multiplier: 4},
              {op: set_off, target: enemy}]}
@@ -1169,7 +1169,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: applier, element: cryo,
    cost: 1, type: attack,
-   description: "Deal 5 [gold]Cryo[/gold] damage to ALL enemies. Your next Attack this turn costs 1 less.",
+   description: "Deal 5 [gold]Cryo[/gold] damage to ALL enemies. Your next Attack this turn costs {energyPrefix:energyIcons(1)} less.",
    effects: [{op: damage, amount: 5, target: all_enemies, applies_element: true},
              {op: apply_power, power: mc_starfrost_discount, amount: 1, target: self}]}
 
