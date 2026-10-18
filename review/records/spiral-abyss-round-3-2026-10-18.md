@@ -89,3 +89,5 @@ character two-thirds of it from act 1 on.
    - **(a, default)** 2 / 3 / 5. Its whole-run total comes to about Spring's one act. The difference is spread
      against burst.
    - (b) Keep 4 / 6 / 8.
+
+**Ruled 2026-10-18: 3 (a).** The user: "Agreed on (a)!" Moonlit Rest becomes 2 / 3 / 5.
