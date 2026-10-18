@@ -96,5 +96,5 @@ file. Most of these rules came from July and August, when the Python sim decided
    them.
 6. **Hair Trigger.** **(a, default)** It becomes Uncommon, as LAW and your "no cycling at Common" rule say. (b) Leave
    it as a noted exception.
-7. **Varka's Knights.** **(a, default)** They stay Companions; STATE is corrected to say his Knights are his kit's
-   own Companions. (b) Remove their Companion tag.
+7. **Varka's Knights.** Ruled 2026-10-18 (a). The user: "Varka's Knight are actually supposed to count as
+   companion cards to make relevant synergies work. That one is not a bug." STATE is corrected in this PR.
