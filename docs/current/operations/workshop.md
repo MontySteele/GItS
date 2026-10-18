@@ -97,14 +97,13 @@ logged (`run stats:` in godot.log) and dropped, no retry queue.
 the pins; `tools/telemetry_remote.py` reads what arrived. The public variant
 still compiles no uploader, and what is sent is unchanged.
 
-Existing beta installs: BaseLib keeps a saved value over a changed default
-(`ModConfig.Init` captures the code default, then `Load` applies the file),
-and every install that ran the opt-in beta has `"ShareAnonymousRunStats":
-"False"` written whether the player chose it or not; the file cannot tell
-the two apart. So `RunStatsUpload.MigrateDefault` turns the setting on
-**once** for a config whose hidden `RunStatsDefaultVersion` is below 1, then
-stamps 1; a player who turns it off after that stays off. Restore Defaults
-now restores on.
+Existing beta installs keep their saved choice ([USER]: "2) is fine on the
+telemetry flip - we currently only have 2 people testing it."). BaseLib keeps
+a saved value over a changed default (`ModConfig.Init` captures the code
+default, then `Load` applies the file), so the new default reaches new
+installs only; an install that ran the opt-in beta stays at its saved
+`"ShareAnonymousRunStats"` value until the player changes it. Restore
+Defaults now restores on.
 
 The page's run-data paragraph (default on), as `PRIVACY_PARAGRAPH` in
 `tools/package_workshop.py` writes it (paste it over the old "Run data

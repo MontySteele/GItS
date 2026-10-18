@@ -285,31 +285,6 @@ public class RunStatsTests
             _ => throw new InvalidOperationException("send"), null));
     }
 
-    // ------------------------------------------------- default on, once ---
-
-    [Theory]
-    [InlineData(false)] // the old default, saved by BaseLib, never touched
-    [InlineData(true)]  // already ticked under the opt-in beta
-    public void A_config_from_before_default_on_is_switched_on_once(bool saved)
-    {
-        var (share, version, save) = RunStatsUpload.MigrateDefault(saved, savedVersion: 0);
-        Assert.True(share);
-        Assert.Equal(RunStatsUpload.DefaultOnVersion, version);
-        Assert.True(save);
-    }
-
-    [Theory]
-    [InlineData(false)] // turned off after the move: stays off
-    [InlineData(true)]
-    public void After_the_move_the_players_choice_is_kept(bool saved)
-    {
-        var (share, version, save) =
-            RunStatsUpload.MigrateDefault(saved, RunStatsUpload.DefaultOnVersion);
-        Assert.Equal(saved, share);
-        Assert.Equal(RunStatsUpload.DefaultOnVersion, version);
-        Assert.False(save);
-    }
-
     // ---------------------------------------------- the build has none ---
 
     [Fact]

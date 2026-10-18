@@ -23,29 +23,6 @@ namespace KleeMod.RunStats;
 /// </summary>
 public static class RunStatsUpload
 {
-    /// <summary>
-    /// The default-on generation. A config whose saved
-    /// <c>RunStatsDefaultVersion</c> is below this was written while the
-    /// default was off.
-    /// </summary>
-    public const int DefaultOnVersion = 1;
-
-    /// <summary>
-    /// PURE: the one-time move to default on (2026-10-18). BaseLib keeps a
-    /// saved value over a changed default (<c>ModConfig.Init</c> captures the
-    /// code default, then <c>Load</c> applies the file), and every install
-    /// that ran the old beta has <c>"ShareAnonymousRunStats": "False"</c>
-    /// written, whether the player chose it or not: the file stores no
-    /// "touched" flag, so the two cannot be told apart. So a config from
-    /// before default-on is switched on once, and the version is stamped so
-    /// a player who turns it off afterwards stays off. Returns the setting,
-    /// the version to store, and whether the file must be saved.
-    /// </summary>
-    public static (bool Share, int Version, bool Save) MigrateDefault(bool share, int savedVersion) =>
-        savedVersion >= DefaultOnVersion
-            ? (share, savedVersion, false)
-            : (true, DefaultOnVersion, true);
-
     /// <summary>PURE: may this run go up?</summary>
     public static bool ShouldSend(bool gameUploadData, bool modOptIn, string? endpoint) =>
         gameUploadData && modOptIn && !string.IsNullOrWhiteSpace(endpoint);
