@@ -21,12 +21,20 @@ a v2 on the Kokomi paper." I checked GPT's claims against the sheet, and they ho
 v2 keeps Plan, the three archetypes and Stings' Plan lines. It changes fewer cards, and each change asks for
 a choice.
 
+**Ruled 2026-10-18.** GPT reviewed v2 as well, and recommended picks 1 (b), 2 (a) and 3 (a), with three
+corrections. The user: "On Kokomi, I'm good with all three - let's try that and see if it works." The
+corrections are made in place below:
+- Nereid's Ascension (sec.2, change 2);
+- the stored Riposte's rules (change 4);
+- flipping and healing (secs. 1 and 3).
+
 ## 1. What Kokomi promises
 
 **She makes room to prepare, protects the preparation, and chooses the moment to take control.** This is
 GPT's line, adopted here. In Genshin her kit is protection (the jellyfish's healing and Hydro) and
-stepping in personally (her Burst). Here, with no healing outside the Ironclad, protection is Block, Weak and
-support.
+stepping in personally (her Burst). Here protection is mostly Block, Weak and
+support. True healing is allowed only on a Rare that Exhausts (`LAW.md`, card authoring), which is
+where her Mend cards already sit.
 
 Each archetype gets one **winning turn** and one **cost**:
 
@@ -42,17 +50,19 @@ Each archetype gets one **winning turn** and one **cost**:
 1. **Shell of Sanctuary → Draft the Orders** (Common Skill, 1): "Gain 5 [8] Block. The next card you plan
    this turn costs 1 less." This is unchanged from v1. It pays for a setup turn and protects it, and Shell
    of Sanctuary was plain Block.
-2. **Nereid's Ascension** (Rare, 2 [1]) becomes her Burst, a Skill with Exhaust: "Carry out all your
-   waiting Plans now. This turn, your Attacks deal double damage." This is the "take control" moment. The
-   carry-out uses the verb Change of Plans already has. The Plans fire first and are not doubled; your
-   Attacks after them are. Every archetype has a reason to take it:
-   - Grand Strategy cashes its arranged sequence a turn early.
-   - The Shoal doubles a turn of Stings.
-   - Read the Tide gets a real trade-off: Brine Sting and Turnabout pay for attacks "since you planned
-     this", so cashing them early pays less.
+2. **Nereid's Ascension: kept as it is for this prototype** (pick 1 (b)). v2's version ("Carry out all your
+   waiting Plans now. This turn, your Attacks deal double damage") had its timing wrong:
+   - Yesterday's Plans fire at the start of your turn (`KokomiPlan.cs`), before you could play it. So
+     "waiting Plans" would be the ones you wrote that same turn. That makes it a one-turn combo, not
+     prepare, survive, take command.
+   - Read the Tide's example fails for the same reason: a Plan written this turn has seen no attack yet.
+   - The current version ("your first Plan is carried out twice") isn't free-standing after all: it makes
+     the order of your Plans matter.
 
-   The current version ("your first Plan is carried out twice") is a free-standing engine that rewards
-   any Kokomi deck.
+   **Next to try** is a card with only a Plan line, like Masterstroke: "Plan: This turn, your Attacks deal
+   double damage." You write it, the enemy takes its turn, and the morning is Kokomi's counteroffensive.
+   It needs a no-stacking clause, or Second Wave would make it quadruple. This version is not in this
+   build.
 
 **Read the Tide: trade safety for the counterattack.**
 
@@ -62,9 +72,15 @@ Each archetype gets one **winning turn** and one **cost**:
    - Watatsumi's Grace ("keep up to 10 [15] Block") gains a purpose: bank Block across a turn, then spend
      it.
    - Coral Crash stays the Common Body Slam that keeps your Block.
-4. **Tidal Riposte** (Rare Power, 1): "Whenever an enemy's attack is fully blocked, your next Attack deals
+4. **Tidal Riposte** (Rare Power, 1): "Whenever you fully Block an enemy's attack, your next Attack deals
    8 [11] more damage." Today it deals 8 back automatically. Now the bonus stacks until you attack, so the
-   deck wins only by choosing to strike.
+   deck wins only by choosing to strike. The rules, so it doesn't compound the way the old per-hit version
+   would:
+   - **It triggers once per enemy attack** whose hits are all blocked, not once per hit.
+   - **It applies like Vigor:** the stored total adds to every hit of the next Attack card you play, then
+     clears.
+   - **A Plan carried out in the morning doesn't spend it.** You choose which card gets it.
+   - Pearl Current (2 damage, 4 hits) is the biggest multiplier. Seats watch it.
 
 **The Shoal: playing now and planning stop collecting the same rewards.**
 
@@ -72,23 +88,25 @@ Each archetype gets one **winning turn** and one **cost**:
    or Ward, add a Sting to your Hand." The bridge from Grand Strategy into the Shoal stays. A planned Sting
    no longer replaces itself. Kurage Canopy gets the same clause for Wards.
 
+So **four changes are built**: 1, 3, 4 and 5.
+
 **What v1 changed that v2 does not:**
 - Undertide Lance and Coral Bulwark stay as they are.
 - Kurage Vanguard, Pearl Current and Suffocating Deep are not replaced. A good attack is allowed to be a
   good attack.
 
-The numbers on Nereid's Ascension and Tidal Rebuke are first guesses for the seats to test.
+Tidal Rebuke's and Tidal Riposte's numbers are first guesses for the seats to test.
 
 ## 3. Exhaust: held
 
-In our kits, 80 cards Exhaust and none rewards it. The user is right that this is a gap. But Kokomi isn't
-the place to fill it: her cards that Exhaust are throwaways she gets for free, so any payoff for Exhaust is a
-bonus on top of things she already does. The base game's Exhaust archetype works because Ironclad has to
-give up real cards to feed it.
+In our kits, 80 cards Exhaust and none rewards it. The user is right that this is a gap. v1's package is
+held (pick 2 (a)) because it let one action answer every need: offense, Block, draw and a finisher, all
+from free Stings. It is not held because Kokomi can't have Exhaust. Rewarding disposable cards can be good
+design: generators and payoff Powers still cost a draft pick, a draw and Energy.
 
-The closest Kokomi idea is salvaging a failed Plan: Exhaust a waiting Plan for an immediate effect. But
-flipping a Plan to its now-line already does that job. A Kokomi Exhaust payoff would need a cost of its own
-first. This goes in BACKLOG as "the first Exhaust archetype needs a kit whose Exhaust costs something".
+One idea is still open: **salvage a failed Plan**, by Exhausting a waiting Plan for an immediate effect.
+Flipping a Plan doesn't do this. A flip changes which line fires, not when it fires. It goes in BACKLOG for
+a later look.
 
 ## 4. Where every card goes
 
@@ -110,11 +128,18 @@ still a count that every deck meets. If the seats show it as an automatic pick, 
 
 ## 5. Next
 
-Build the five changes, with their sim twins and tips. Then run five Kokomi seats, one briefed per archetype
-and two left free. Each seat record answers: what was the winning turn, and what did you give up for it? A
-run of yours follows.
+Build the four changes, with their sim twins and tips. Then run five Kokomi seats:
+- **three draft freely.** They show whether ordinary drafting finds different decks, or the same pile of
+  Powers.
+- **two are briefed** toward Grand Strategy and Read the Tide. They show that those two can win.
+
+Each seat record answers: what was the winning turn, and what did you give up for it? A run of yours
+follows.
 
 ## Picks
+
+**All three ruled 2026-10-18: 1 (b), 2 (a), 3 (a).** The user: "On Kokomi, I'm good with all three - let's
+try that and see if it works."
 
 1. **The five changes.**
    - **(a, default)** Build all five.
