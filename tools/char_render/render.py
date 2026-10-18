@@ -114,7 +114,7 @@ def shade(mesh, cfg=None):
             lines.append(T.line_material(m, None, False))
             continue
         img = T.base_image(m)
-        T.toon_material(m, img, m.name in face)
+        T.toon_material(m, img, m.name in face, m.name in cfg.get("alpha_mats", ()))
         lines.append(T.line_material(m, img, m.name in face))
     hull = T.add_outline(mesh, lines, no_line)
     if CFG.get("mouth_mat"):

@@ -75,6 +75,19 @@ def test_overlay_shells_are_hidden_and_face_parts_unlined():
     assert chars.NO_LINE_MATS <= chars.FACE_MATS
 
 
+def test_kokomis_alpha_cut_skin_renders_blended_not_black():
+    """Her hands (手) and hip skin (肌) are cut by their textures' alpha;
+    under DITHERED the toon ramp drew the cut texels flat black (BACKLOG,
+    2026-10-16). They are lit, never hidden (the wrists and the stockings'
+    windows are only in them), and the renderer reads `alpha_mats`."""
+    cfg = chars.CHARS["kokomi"]
+    assert cfg["alpha_mats"] == {"手", "肌"}
+    assert not cfg["alpha_mats"] & (cfg["face_mats"] | cfg["hide_mats"])
+    src = (HERE / "render.py").read_text(encoding="utf-8")
+    assert 'cfg.get("alpha_mats", ())' in src
+    assert '"BLENDED" if cutout' in (HERE / "toon.py").read_text(encoding="utf-8")
+
+
 # ------------------------------------------------------------------ Varka's clips
 def _op(pose, kind, bone):
     return next(op for op in pose["ops"] if op[0] == kind and op[1] == bone)

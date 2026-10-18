@@ -236,6 +236,11 @@ CHARS = {
         # (kokomi_clips.PHANTOM), as Furina's rapier does.
         "clips": "kokomi_clips",
         "blades": {},
+        # her two skin layers (手, 肌) are cut by their textures' alpha: the
+        # fingers are left to the white gloves (手套) and the hips show skin
+        # only through the stockings' windows. Rendered DITHERED they drew
+        # flat black there (toon.toon_material, `cutout`; 2026-10-18).
+        "alpha_mats": {"手", "肌"},
         "hide_mats": set(),
         "camera_height": 0.8,
     },

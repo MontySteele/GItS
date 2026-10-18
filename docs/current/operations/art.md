@@ -211,7 +211,7 @@ hurt, death (the router needs it), the shop loop, the rest seat, the select
 close-up, the roster tile (its producer moved here from
 `gen_kokomi_stills.py`) and the shadow. Card clips wait until her build is
 final. Her long sleeves and skirt tails are physics chains, so every pose
-hangs the sleeves from the elbows (`cloth`). `tools/kokomi_rig` generates
+hangs the sleeves from the elbows (`cloth`). Her skin layers 手 (hands) and 肌 (hips) are cut by their textures' alpha, so they are her `alpha_mats` and render BLENDED: under DITHERED the toon ramp's Shader to RGB drew every cut texel opaque black (2026-10-18). `tools/kokomi_rig` generates
 her two scenes from `kokomi_frames.json`; `build_pck.ps1` copies her frames
 and switches her rest and select art when they exist. To re-render:
 
