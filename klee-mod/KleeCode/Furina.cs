@@ -138,8 +138,10 @@ public sealed class Furina : CustomCharacterModel, IFurinaCharacter
     public override string? CustomEnergyCounterPath =>
         KleePck.Path("furina/ui/energy_counter.tscn")
         ?? "res://scenes/combat/energy_counters/ironclad_energy_counter.tscn";
+    // The flying-card trail: the Defect's cyan, the base trail nearest Hydro
+    // (Varka moved off the Ironclad's orange on 2026-10-16).
     public override string? CustomTrailPath =>
-        "res://scenes/vfx/card_trail_ironclad.tscn";
+        "res://scenes/vfx/card_trail_defect.tscn";
     public override string? CustomMapMarkerPath =>
         KleePck.Path("furina/ui/map_marker.png");
     public override string? CustomCharacterSelectBg =>

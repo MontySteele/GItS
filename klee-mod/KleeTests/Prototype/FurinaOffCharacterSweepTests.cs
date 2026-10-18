@@ -242,6 +242,27 @@ public class FurinaOffCharacterSweepTests
         }
     }
 
+    [Theory]
+    [InlineData(44)]
+    [InlineData(55)]
+    public void Ousia_pledge_drains_3_in_a_yae_deck(int hp)
+    {
+        // Yae round 7, lane 1: Ousia Pledge+ in a Yae deck was refused "it
+        // would take you to 0 HP" at 44 to 55 HP with Drain 3. Fixed by the
+        // off-character fix (2026-10-18); this pins it.
+        FurinaStageLedger.ResetAll();
+        try
+        {
+            var card = OffCharacterSweep.HeldBy(typeof(ProtoFsOusiaPledge), Seat.Yae(hp));
+            Assert.Equal("True", OffCharacterSweep.Ask(card));
+            Assert.Null(((ProtoFsOusiaPledge)card).UnplayableReason);
+        }
+        finally
+        {
+            FurinaStageLedger.ResetAll();
+        }
+    }
+
     // --- the Stage itself: anyone's, from first use, and their own --------
 
     [Fact]
