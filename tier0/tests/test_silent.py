@@ -5,7 +5,7 @@ import pytest
 
 from tier0.engine import effects
 from tier0.engine.state import Card
-from tier0.harness.runner import score_config
+from tier0.harness.runner import BASELINE, run_full_battery, score_config
 from tier0.tests.conftest import make_state
 
 FIGHTS = 150
@@ -13,14 +13,21 @@ SEED = 11
 
 
 @pytest.fixture(scope="module")
-def silent():
-    return score_config("ref_silent", "shiv_package", "generic", FIGHTS, SEED)
+def anchor():
+    """The anchor battery, once for the module (2026-10-18, the user:
+    "reuse the result"); score_config's own default computes the same."""
+    return run_full_battery(*BASELINE, "generic", FIGHTS, SEED)
 
 
 @pytest.fixture(scope="module")
-def ironclad_pkg():
+def silent(anchor):
+    return score_config("ref_silent", "shiv_package", "generic", FIGHTS, SEED, anchor)
+
+
+@pytest.fixture(scope="module")
+def ironclad_pkg(anchor):
     return score_config("ref_ironclad", "archetype_package", "generic",
-                        FIGHTS, SEED)
+                        FIGHTS, SEED, anchor)
 
 
 @pytest.mark.battery
