@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoYmReplanting : CustomCardModel, ICharacterCard, ISakuraPlanterCard
+public sealed class ProtoYmReplanting : CustomCardModel, ICharacterCard, ISakuraPlanterCard, ISakuraPlantShapeCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "yae";
@@ -47,6 +47,12 @@ public sealed class ProtoYmReplanting : CustomCardModel, ICharacterCard, ISakura
         ("title", "Replanting"),
         ("description", "Your oldest [gold]Sakura[/gold] withers. Plant one of its kind, {IfUpgraded:show:2 Levels|1 Level} higher."),
     };
+
+    /// <summary>How this card plants (the Sakura display's preview).</summary>
+    public YaePlantShape SakuraPlantShape => YaePlantShape.Replant;
+
+    /// <summary>The kind it plants (Replanting's and Genre Shift's are read off the shrine).</summary>
+    public YaeSakuraKind SakuraPlantKind => YaeSakuraKind.Thunder;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

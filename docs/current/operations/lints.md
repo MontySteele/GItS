@@ -45,6 +45,11 @@ Notes on individual lints:
   `ExtraHoverTips` is `TipAudience.Seat ? <seat chain> : <player chain>`;
   the seat chain keeps every rider for the blind page (the bridge reads as a
   seat) and is not measured. `--census` prints boxes and characters per card.
+- `tools/player_text_census.py --out <file>.json [--summary]` is not a lint:
+  it writes every piece of player-facing text (cards resolved to "8 [11]",
+  relics, powers, tips, story, Abyss by act, Teyvat frame, Architect lines)
+  per character with `source` file:line, plus a `gaps` list of what it could
+  not resolve; `tier0/tests/test_player_text_census.py` pins its coverage.
 - `lint_recall_exhaust.py` (`EB-118`) is suite-gated through
   `tier0/tests/test_eb118_recall_exhaust.py`; its three sweeps and why leg (a)
   is vacuous are in its docstring.

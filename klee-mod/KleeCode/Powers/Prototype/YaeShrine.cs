@@ -298,13 +298,20 @@ public sealed class YaeShrineLedger
         }
         return best;
 
-        static bool Sooner(YaeSakura a, YaeSakura b)
-        {
-            var ae = a.Has(YaeAnnotation.DeadlineExtension);
-            var be = b.Has(YaeAnnotation.DeadlineExtension);
-            if (ae != be) return !ae;
-            return a.TurnsLeft < b.TurnsLeft;   // a tie keeps the older
-        }
+        static bool Sooner(YaeSakura a, YaeSakura b) =>
+            WithersSooner(a.Has(YaeAnnotation.DeadlineExtension), a.TurnsLeft,
+                          b.Has(YaeAnnotation.DeadlineExtension), b.TurnsLeft);
+    }
+
+    /// <summary><see cref="NextToWither"/>'s order, on the two facts it
+    /// reads, so the Sakura display's plant preview walks the same rule:
+    /// a Sakura without Deadline Extension before one with it, then the
+    /// fewer turns left; a tie keeps the older (false). PURE.</summary>
+    public static bool WithersSooner(bool aDeadline, int aTurns,
+                                     bool bDeadline, int bTurns)
+    {
+        if (aDeadline != bDeadline) return !aDeadline;
+        return aTurns < bTurns;   // a tie keeps the older
     }
 
     /// <summary>Genre Shift: the kinds with none standing, in kind order
@@ -1255,7 +1262,7 @@ public static class YaeCards
     /// <summary>A card's `Ym*` number. A row's count of 1 and base of 0
     /// carry no var (`gen_klee_cards.YAE_FIELD_DEFAULTS`), so a missing
     /// YmAmount reads 1 and a missing YmBase or YmPer reads 0.</summary>
-    private static int Var(CardModel card, string name) =>
+    internal static int Var(CardModel card, string name) =>
         card.DynamicVars.TryGetValue(name, out var v) ? (int)v.BaseValue
             : name == "YmAmount" ? 1 : 0;
 

@@ -34,7 +34,7 @@ CASES = [
     ("proto_ko_simmer", "ProtoKoSimmer", _deals("BombHit"),
      "new BombReadDamageVar(ProtoBombPower.BombRead.Largest)"),
     ("proto_ko_the_big_one", "ProtoKoTheBigOne",
-     "{InCombat:\\n([gold]Bombs[/gold]: {SetOffBombs} damage)|}",
+     "{InCombat:\\n([gold]Bombs[/gold]: {SetOffBombs:diff()} damage)|}",
      "new SetOffBombsVar(4)"),
     ("proto_ko_team_effort", "ProtoKoTeamEffort", _deals("BonusHit"),
      "new CompanionBonusDamageVar(6)"),

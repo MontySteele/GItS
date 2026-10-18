@@ -256,6 +256,31 @@ internal static class ReactionEffects
         body != null
         && body.Powers.OfType<ArtifactPower>().Any(a => a.Amount > 0);
 
+    /// <summary>Kit display pass (2026-10-18), the Varka combo round's item
+    /// 4: the debuff a reaction lays on the reacted enemy that an Artifact
+    /// negates, or null. Frozen is <see cref="FrozenArtifactDetail"/>'s.
+    /// </summary>
+    public static string? ArtifactBlockedDebuff(Reaction reaction) =>
+        reaction switch
+        {
+            Reaction.Overload => "Weak",
+            Reaction.Superconduct => "Vulnerable",
+            Reaction.ElectroCharged => "Poison",
+            _ => null,
+        };
+
+    /// <summary>Will the body's Artifact negate what
+    /// <paramref name="reaction"/> applies (Frozen, or the debuff of
+    /// <see cref="ArtifactBlockedDebuff"/>)? The Artifact alone, as
+    /// <see cref="ArtifactWillBlockFrozen"/>.</summary>
+    public static bool ArtifactWillBlock(Reaction reaction, Creature? body) =>
+        (reaction == Reaction.Frozen || ArtifactBlockedDebuff(reaction) != null)
+        && ArtifactWillBlockFrozen(body);
+
+    /// <summary>The log row's detail for a blocked debuff.</summary>
+    public static string DebuffBlockedByArtifact(string debuff) =>
+        "Its Artifact blocked the " + debuff + ".";
+
     public const string FrozenBlockedByArtifact =
         "Its Artifact blocked the Frozen, so it is not Frozen.";
 
@@ -429,6 +454,11 @@ internal static class ReactionEffects
                 && FrozenArtifactDetail(target) is { } blocked)
             {
                 ReactionLog.DetailNext(blocked);
+            }
+            else if (ArtifactBlockedDebuff(reaction) is { } debuff
+                     && ArtifactWillBlock(reaction, target))
+            {
+                ReactionLog.DetailNext(DebuffBlockedByArtifact(debuff));
             }
             ReactionLog.Note(reaction, target, dealer, cardSource);
 

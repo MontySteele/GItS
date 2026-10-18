@@ -75,7 +75,7 @@ public class DamagePreviews20261013Tests
                         v => v is SetOffEchoDamageVar);
 
         var bigOne = new ProtoKoTheBigOne();
-        Assert.EndsWith("{InCombat:\n([gold]Bombs[/gold]: {SetOffBombs} "
+        Assert.EndsWith("{InCombat:\n([gold]Bombs[/gold]: {SetOffBombs:diff()} "
                         + "damage)|}", Face(bigOne));
         Assert.Equal(4, bigOne.DynamicVars.Values.OfType<SetOffBombsVar>()
                              .Single().Multiplier);

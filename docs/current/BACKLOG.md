@@ -16,15 +16,10 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 ## Kits and display (the mod)
 
 - Before the public launch, [USER] reviews every writing surface (events, Ancient and combat lines, select text, the Architect) for stilted lines (ruled 2026-10-16).
-- Furina, Let the People Rejoice's damage preview ignores an enemy's Hard To Kill cap (face said 34, each Exoskeleton took 9; suite 3 lane 5).
 - Furina's seat page printed a word tip for Charlotte on a screen with no Charlotte card (suite 3 lane 3).
-- Klee, Chain Fuse also grows Mines; its text does not say so (suite 6 lane 2).
 - Klee, Stoke the Fuse resolves before Party Poppers places its Bomb, so on an empty field it burns every Spark for nothing (suite 6 lane 4).
-- Mika's "next Attack costs 1 less" is an Energy discount and does nothing on Klee's Spark-cost attacks; say so, or make it apply (suite 6 lane 3).
 - Klee, enemy Vulnerable raises Bomb damage and no page says so (suite 6 lane 5).
-- An offer title printed "Prune - Ring-A-Ding-Ding! Hexhunter Chime" (suite 6 lane 1): check Prune's companion title.
 - Furina, Archaic Tooth's All the World's a Stage+ loses Rising Applause+'s Retain (suite 4 lane 5).
-- Klee, The Big One prints a bare `{SetOffBombs}`, which the game formats from the var's BaseValue (0), not its preview; check that "(Bombs: N damage)" ever reads live (Marching Orders had this bug, fixed 2026-10-16).
 - Yae round 9 (2026-10-17): "Replay 2" beside "Reprint: used this combat" left lane 5 unsure what the next play does.
 - Yae round 10 (2026-10-17): Second Printing's chooser said it closes after one pick but needed two (lane 2). Not reproducible headless: the base pile screen closes on one pick with these prefs; a Reprinted Second Printing would open a second chooser at once. Needs a live look.
 - Bennett's Passion Overload and Kujou Sara's Crowfeather Cover do not say that an Attack carries one element, or that Sara's Electro lands when both are up (`CompanionOverhaulRiders.ElementFor`, fixed order, not newest); the sentence does not fit the 125-character power ceiling (116 and 119 now). Kokomi review r4, item 4.
@@ -49,8 +44,6 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - Kokomi's story (`klee-mod/KleeCode/Story/KokomiStory.cs`, 2026-10-16): unseen in game. Watch the Gorou pick grid, the Rare pick grid after Doubt on "Concede and study its opening.", the 4 Max HP loss at The Serpent's Bones, the pearl and stake locks under 50 Gold, Public Address's two-line text, and her co-op story room showing her own event.
 - Furina's story (`klee-mod/KleeCode/Story/FurinaStory.cs`, 2026-10-16): unseen in game. Watch the Guest Star pick grid, the Oratrice lock under 50 Gold, Doubt leaving on "Break it.", and her Let the People Rejoice line.
 - Story chains (`klee-mod/KleeCode/Story/`, 2026-10-15): seen in the mixed round (2026-10-15) for Klee act 1 to 2 (Mom's Marks, Alice's Cache) and Varka acts 1 to 3 (Dispatch from Mondstadt, The Second Satchel, The Acting Grand Master, with the report option locked). Still unseen: Klee's act 3, routing after a save and reload, Doubt leaving as The Knights Come Looking opens, the potion reward screen mid-event, and the co-op story room (2026-10-16: each player gets their own character's event in the act's story room, and a character with no event that act gets A Quiet Landing, Heal 10 HP or Gain 50 Gold).
-- Kokomi, Kirara — Surprise Dispatch: a seat read its "next turn, deal 10" as landing in the enemy turn, not at her turn start (mixed round 2026-10-15, lane 1); check the timing and the page line.
-- Kokomi: Louse Progenitor's Curl Up did not trigger on a carried-out Plan's Hydro hit, only on the next card hit (mixed round, lane 2); check against the base game's hit rules.
 - Kokomi's seven relics and three potions and Furina's five relics and two potions (#1324, #1325) were not met in five seats; check them with `understudy.embark --relic` on a seat each, or in a play.
 - Klee's rest-site pose is a still: BaseLib rebuilds the rest sprite from the texture alone, so an idle loop there needs code.
 - Durin, Principle of Purity's turn-start Pyro hit (`PurityStrikePower`) shares `AfterPlayerTurnStart` with Melody Loop's Hydro, Herald of Frost's Cryo and Surprise Dispatch's roll, so the mod gives it no order where the sim runs it after Melody Loop; stage it into its own broadcast if a seat sees the two disagree.
@@ -63,8 +56,7 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - Varka's Architect finale lines in `tools/build_pck.ps1` are placeholders for a writing pass, like the other three characters'.
 - The tooltip trim (2026-10-14) is unseen in game: the aimed reaction preview (`Cards/ReactionAim.cs`, a hover-tip set on the held card while it is dragged onto an enemy, cleared on unhover, cancel and finish), the base game's own Weak/Vulnerable/Strength tips on the trimmed cards, and the bridge still serving the seat's full tips (`gits/GitsSeatTips.cs`). Look at all three on the next play and the next seat round.
 - Varka's element-switch hover, the left-element icon (`OathLeftPower`), the Fang's turn-one element, Windborne Resolve and Weathervane's start-of-turn grid (also in co-op) are still unconfirmed in game and through the bridge; the next Varka seat record says whether each was seen.
-- Varka's screen: Artifact silently eats Frozen, Weak and Electro-Charged's Poison, and the reaction text should say "blocked by Artifact"; Bottled Gale with no aura on the board does nothing and nothing warns; Diluc printed 9 against the card's 6 with no reason shown (`review/records/varka-combo-round-2026-10-05.md`, items 4-6).
-- Kaeya — Frostgnaw (`ProtoMcKaeyaFrostgnaw.cs`, the shared Mondstadt card) printed 12 against a written 8, and its own Superconduct's Vulnerable (the tip says it "applies before this hit") did not multiply the hit; trace the order and the printed number.
+- Varka's screen: Bottled Gale with no aura on the board does nothing and nothing warns; Diluc printed 9 against the card's 6 with no reason shown (`review/records/varka-combo-round-2026-10-05.md`, items 5-6).
 - Card reward card off screen but still selectable by controller (user, co-op). Cause not found; `Diagnostics/RewardRowProbe.cs` writes a "reward row OFF SCREEN" WARN to godot.log naming the card and where its holder and body are; read that line after the next sighting and fix from it.
 - Element port, phase two (`review/ruled/element-home-review-2026-09-28.md` §7.2, §7.4): Burning, where a Swirl or Crystallize on a burning enemy consumes the held Pyro and Burning keeps ticking; and Dendro ported as ruled (the non-reacting pairs, the Core rules and their previews), tested on Kirara and Emilie. Neither engine has Burning or Dendro today.
 - Show the amplifier: a Melt or Vaporize prints no factor on the face or in the seat log (Rosaria's Melt printed "Deal 15" from a written 9; "Vaporize on X" with no x1.5; Klee's log printed "nothing to amplify" beside a hit multiplied by 1.75); a hit carrying an element chosen at play (Four Winds' Ascension, Northwind Avatar) previews no amplifier either (multiplier pinned by `A_current_element_hit_amplifies_like_any_hit`).
@@ -76,15 +68,13 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - `EB-159` [USER] at the machine: listen for the modded player's death sound (`set_hp player 1`, end turn into a hit).
 - `EB-38` [USER] at a shop: the spine-less character portrait idles (the rest-site half is seen).
 - `EB-160` verify a live locale switch: the injected loc tables survive it, or a `LocException` names the seam.
-- Furina screen (wave 2026-10-12): Hymn's "(Repays 0)" preview is wrong after a Drain; Spend damage never shows Vulnerable; a boss shows "Frozen 1".
+- Furina screen (wave 2026-10-12): Hymn's "(Repays 0)" preview is wrong after a Drain; a boss shows "Frozen 1".
 - Furina suite 1: the Lynette glossary line does not match her card.
 - Kaiser Crab (Varka wave 2026-10-13, lane 5 fight 16): when Baron Bunny's turn-start hit killed Rocket, Crab Rage's 99 Block never reached Crusher (telemetry: 18 enemy Block all fight, Crusher's own Guarded Strike; Crusher then died to Tidal Bulwark and Blazing Charge). The base game grants it in `CrabRagePower.AfterDeath` and no mod code was found that removes it; reproduce live (`set_hp` Rocket low, Baron Bunny).
 - Kokomi round 3 (lane 4 F6): Change of Plans was refused "no Energy" with four Plans waiting. Not reproduced: it costs 0, its gate reads only the queue, and the sim plays it at 0 Energy with four waiting (`test_kokomi_round3_alist_2026_10_13`). The game's refusal enum ("EnergyCostTooHigh") is what prints "not enough energy"; have the next seat record the hand and Energy on any such refusal.
-- Varka text (ascension check 2026-10-12): a Knight Companion's element switch (Team Effort) shows only after the play; Kindled Edge switched him to Pyro with no "Element switch" line; Four Winds' Ascension returns after a mid-fight reshuffle, unprinted.
 
 ### Klee faces (under the freeze: fix on `klee-next`)
 
-- The printed Bomb number leaves out Hardened Shell's cap (its own badge shows the cap) and The Big One's x4; the test relic's "Bomb 6" shows as 10 on her first turn (turn-start growth; grant-only relic). Boom Badge and Durin's Dark are folded since #1226.
 - Mine text does not say it consumes the aura set for the big Bomb (the Mine tip is at its 135-character ceiling; the plain-Bombs half is in the tip since #1226).
 - Perfect Timing's replay did not visibly fire when its first Set off killed the target.
 - "Witch's Homework" and "Witch's Homework II" read alike in hand lists (a naming pick for [USER]; the Retain half is a tip since #1226).
@@ -157,7 +147,7 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - `SKIP-10.9` mechanics the sim does not model, promoted only on demand. Enemy: Back Attack, untargetable Burrow, Ethereal/Hex auras, pick-your-poison curses, damage caps (Hard to Kill, Plating, Hardened Shell), Artifact, Thorns, on-hit status injection, every-N-cards intents, buff-all-enemies, block-an-ally, random-no-repeat AI, self-stun, Slimed self-exhaust, the minor powers, Soul Siphon stat theft, Blessed Antler, Philosopher's Stone. C# with no sim twin: the deferred-settle machinery (`SpotlightSystem`, `FurinaResources`) and per-dealer reaction windows (R1).
 - Yae pool expansion: several Tenko cards that carry their own scaling (paper pick 1 (b): +1 a strike per Tenko; (c): a bonus when a strike reacts), per [USER] 2026-10-13.
 - Before the Workshop release: check The First Exam and A Song on the Wind against Varka's in-game character story text (`review/active/klee-varka-story-chains-2026-10-14.md`, "Exam lore"); move both to his Knight of Boreas years if it differs.
-- Yae's Sakura display (`review/active/yae-pool-to-78-2026-10-15.md`, pick 3 (a), ruled 2026-10-15): a row of slots beside her, one per shrine slot with empty slots shown; per Sakura its kind by colour and icon, Level as the big number, turns as pips (a number past three, an infinity mark under Eternity), a mark per Annotation; the oldest outlined; a planting card's hover previews "refreshes / replaces this Sakura"; hover on a slot gives the one-line rules. Today the badges' tooltips are the display.
+- Yae's Sakura display: unseen in game; check placement, overlap with the guest/plan views, controller focus (`Vfx/Prototype/YaeSakuraDisplay.cs`).
 - The seat page reads one Annotation per Sakura (`understudy/blindplay_board.yae_shrine`, `annotation`), but since the pool to 78 (pick 2 (a)) a Sakura may carry several: read the list off the badge sentence (it names each).
 - Kokomi relic check (2026-10-16): Sango Pearl does not show that its discount is spent; Ocean-Hued Clam's Mend prints no page line; Everlasting Moonglow's skipped return at a full hand prints nothing.
 - Furina relic check (2026-10-16): Claque's Ledger's Fanfare gain is not its own line in the Fanfare log, so a seat cannot confirm it fires.
