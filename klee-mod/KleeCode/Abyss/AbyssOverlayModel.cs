@@ -88,24 +88,29 @@ public sealed class AbyssOverlayContent
 
     /// <summary>The screen for <paramref name="offer"/>'s act. The strip
     /// lists what is in force in that act: a This act entry of an earlier act
-    /// has dropped off by the time the next act's page is up.</summary>
+    /// has dropped off by the time the next act's page is up.
+    ///
+    /// NUMBERS BY ACT (<c>review/active/abyss-act-scaling-2026-10-18.md</c>):
+    /// a card prints the numbers of this page's act, the act it would be
+    /// taken in; a strip entry those of the act it was taken in.</summary>
     public static AbyssOverlayContent For(AbyssOffer offer, AbyssRecord record)
     {
+        var act = offer.ActIndex;
         var cards = offer.Options.Select((o, i) => new AbyssOverlayCard(
             i, o.Blessing, o.Shadow,
-            AbyssText.Name(o.Blessing), AbyssText.Text(o.Blessing),
-            AbyssText.Name(o.Shadow), AbyssText.Text(o.Shadow),
+            AbyssText.Name(o.Blessing), AbyssText.Text(o.Blessing, act),
+            AbyssText.Name(o.Shadow), AbyssText.Text(o.Shadow, act),
             BlessingIconFile(o.Blessing), ShadowIconFile(o.Shadow),
             AbyssDurations.Tag(AbyssDurations.Of(o.Blessing)),
             AbyssDurations.Tag(AbyssDurations.Of(o.Shadow)))).ToList();
         var blessings = record.BlessingsInForce(offer.ActIndex)
             .Select(b => new AbyssOverlayStripEntry(
-                AbyssText.Name(b), AbyssText.Text(b), BlessingIconFile(b),
+                AbyssText.Name(b), AbyssText.Text(b, record.ActTaken(b)), BlessingIconFile(b),
                 AbyssDurations.Tag(AbyssDurations.Of(b))))
             .ToList();
         var shadows = record.ShadowsInForce(offer.ActIndex)
             .Select(s => new AbyssOverlayStripEntry(
-                AbyssText.Name(s), AbyssText.Text(s), ShadowIconFile(s),
+                AbyssText.Name(s), AbyssText.Text(s, record.ActTaken(s)), ShadowIconFile(s),
                 AbyssDurations.Tag(AbyssDurations.Of(s))))
             .ToList();
         return new AbyssOverlayContent(TitleFor(offer.ActIndex), cards, blessings, shadows);

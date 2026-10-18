@@ -48,7 +48,12 @@ public class SpiralAbyssDisplayTests
             Assert.Equal(b, relic.Blessing);
             var loc = relic.Localization!.ToDictionary(r => r.Item1, r => r.Item2);
             Assert.Equal(AbyssText.Name(b), loc["title"]);
-            Assert.Equal(AbyssText.Text(b), loc["description"]);
+            // The text is a StringVar, act 1's until the record sets the act
+            // the Blessing was taken in (review/active/abyss-act-scaling-2026-10-18.md).
+            Assert.Equal("{" + AbyssBlessingRelic.TextVar + "}", loc["description"]);
+            Assert.Equal(AbyssText.Text(b, 0), relic.ShownText);
+            relic.ShowAct(2);
+            Assert.Equal(AbyssText.Text(b, 2), relic.ShownText);
         }
         Assert.Equal(types.Append(typeof(AbyssShadowsRelic)).ToHashSet(),
                      AbyssDisplay.RelicTypes.ToHashSet());
@@ -178,10 +183,12 @@ public class SpiralAbyssDisplayTests
     [Fact]
     public void The_Shadows_relic_lists_each_Shadow_by_name_and_text()
     {
-        var text = AbyssDisplay.ShadowsText(new[] { AbyssShadow.Clock, AbyssShadow.Rally });
-        Assert.Contains($"[gold]{AbyssText.Name(AbyssShadow.Clock)}[/gold]: {AbyssText.Text(AbyssShadow.Clock)}", text);
-        Assert.Contains($"[gold]{AbyssText.Name(AbyssShadow.Rally)}[/gold]: {AbyssText.Text(AbyssShadow.Rally)}", text);
-        Assert.Equal("None yet.", AbyssDisplay.ShadowsText(Array.Empty<AbyssShadow>()));
+        // Each at the act it was taken in: the Clock act 1's, Rally act 3's.
+        var text = AbyssDisplay.ShadowsText(new[] { (AbyssShadow.Clock, 0), (AbyssShadow.Rally, 2) });
+        Assert.Contains($"[gold]{AbyssText.Name(AbyssShadow.Clock)}[/gold]: {AbyssText.Text(AbyssShadow.Clock, 0)}", text);
+        Assert.Contains($"[gold]{AbyssText.Name(AbyssShadow.Rally)}[/gold]: {AbyssText.Text(AbyssShadow.Rally, 2)}", text);
+        Assert.Contains("every other enemy gains 3 Strength", text);
+        Assert.Equal("None yet.", AbyssDisplay.ShadowsText(Array.Empty<(AbyssShadow, int)>()));
 
         var relic = (AbyssShadowsRelic)Uninit(typeof(AbyssShadowsRelic));
         var loc = relic.Localization!.ToDictionary(r => r.Item1, r => r.Item2);
@@ -240,7 +247,12 @@ public class SpiralAbyssDisplayTests
             Assert.Equal(type, AbyssDisplay.PowerTypeFor(power.Shadow));
             var loc = power.Localization!.ToDictionary(r => r.Item1, r => r.Item2);
             Assert.Equal(AbyssText.Name(power.Shadow), loc["title"]);
-            Assert.Equal(AbyssText.Text(power.Shadow), loc["description"]);
+            Assert.Equal(AbyssText.Text(power.Shadow, 0), loc["description"]);
+            // The live badge's tooltip is the act the Shadow was taken in.
+            Assert.Equal("{" + AbyssShadowPower.TextVar + "}", loc["smartDescription"]);
+            Assert.Equal(AbyssText.Text(power.Shadow, 0), power.ShownText);
+            power.ShowAct(1);
+            Assert.Equal(AbyssText.Text(power.Shadow, 1), power.ShownText);
         }
         Assert.Equal(12, AbyssDisplay.PowerTypes.Distinct().Count());
 
@@ -281,7 +293,7 @@ public class SpiralAbyssDisplayTests
         // "Elites and bosses enter combat with 3 Plated Armor." The effect
         // already followed it; the badge now does too.
         Assert.Equal("Elites and bosses enter combat with 3 Plated Armor.",
-                     AbyssText.Text(AbyssShadow.FatuiSkirmishers));
+                     AbyssText.Text(AbyssShadow.FatuiSkirmishers, 0));
         var inForce = new[] { AbyssShadow.Bulwark, AbyssShadow.FatuiSkirmishers, AbyssShadow.MageShield };
         Assert.Equal(new[] { AbyssShadow.Bulwark },
                      AbyssRules.BadgesFor(inForce, isElite: false, isBoss: false));

@@ -57,9 +57,9 @@ public class AbyssOverlayTests
         Assert.Equal(3, content.Cards.Count);
         var card = content.Cards[0];
         Assert.Equal("The Ley Line", card.BlessingName);
-        Assert.Equal(AbyssText.Text(AbyssBlessing.LeyLine), card.BlessingText);
+        Assert.Equal(AbyssText.Text(AbyssBlessing.LeyLine, 0), card.BlessingText);
         Assert.Equal("Abyss Mage Shield", card.ShadowName);
-        Assert.Equal(AbyssText.Text(AbyssShadow.MageShield), card.ShadowText);
+        Assert.Equal(AbyssText.Text(AbyssShadow.MageShield, 0), card.ShadowText);
         Assert.Equal(new[] { 0, 1, 2 }, content.Cards.Select(c => c.Index));
         Assert.Equal("The Ley Line text\nIf you pass this, the enemies may take its Shadow: Rally — Rally text",
             AbyssOverlayContent.BridgeDescription(card with
@@ -80,7 +80,11 @@ public class AbyssOverlayTests
         Assert.True(content.HasStrip);
         Assert.Equal(new[] { "Jade Shield", "Resonance" }, content.BlessingsTaken.Select(e => e.Name));
         Assert.Equal(new[] { "Abyss Herald", "The Clock" }, content.ShadowsInForce.Select(e => e.Name));
-        Assert.Equal(AbyssText.Text(AbyssShadow.Clock), content.ShadowsInForce[1].Text);
+        // Each strip entry prints the numbers of the act it was taken in
+        // (review/active/abyss-act-scaling-2026-10-18.md): Jade Shield and the
+        // Herald act 1's, the Clock act 2's, on act 3's page.
+        Assert.Equal(AbyssText.Text(AbyssShadow.Clock, 1), content.ShadowsInForce[1].Text);
+        Assert.Equal("Start each combat with 8 Block.", content.BlessingsTaken[0].Text);
     }
 
     [Fact]
@@ -358,8 +362,8 @@ public class AbyssOverlayTests
         var options = (List<Dictionary<string, object?>>)state["options"]!;
         Assert.Equal(new[] { "The Ley Line", "Moonlit Rest", "First Strike" }, options.Select(o => o["title"]));
         Assert.Equal(new object?[] { 0, 1, 2 }, options.Select(o => o["index"]));
-        Assert.Equal(AbyssText.Text(AbyssBlessing.MoonlitRest) + "\nIf you pass this, the enemies may take its Shadow: Sheer Cold — "
-                     + AbyssText.Text(AbyssShadow.SheerCold), options[1]["description"]);
+        Assert.Equal(AbyssText.Text(AbyssBlessing.MoonlitRest, 0) + "\nIf you pass this, the enemies may take its Shadow: Sheer Cold — "
+                     + AbyssText.Text(AbyssShadow.SheerCold, 0), options[1]["description"]);
         var screen = (Dictionary<string, object?>)state["abyss_screen"]!;
         Assert.Equal("The Spiral Abyss · Act 1", screen["subtitle"]);
         Assert.Equal(false, screen["resolved"]);

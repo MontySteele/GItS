@@ -96,6 +96,8 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
         _record = copy;
         _moonCounts = new Dictionary<Player, int>();
         _heraldDone = new HashSet<Creature>();
+        _riptide = new AbyssTurnLedger<Creature>();
+        _elementalMark = new AbyssTurnLedger<Creature>();
     }
 
     /// <summary>A NEW run starts with nothing taken. The Custom screen keeps
@@ -127,6 +129,13 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
     public int? ActForTests;
 
     private int CurrentAct => ActForTests ?? RunState.CurrentActIndex;
+
+    /// <summary>The act Blessing <paramref name="b"/> was taken in: the act
+    /// its numbers come from (<c>review/active/abyss-act-scaling-2026-10-18.md</c>).
+    /// An entry taken early keeps its number.</summary>
+    public int ActOf(AbyssBlessing b) => Record.ActTaken(b);
+
+    public int ActOf(AbyssShadow s) => Record.ActTaken(s);
 
     /// <summary>The Shadows on the enemies now, in the order applied.</summary>
     public IReadOnlyList<AbyssShadow> ShadowsNow => Record.ShadowsInForce(CurrentAct);
@@ -178,13 +187,20 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
         var enemies = dealer.CombatState.HittableEnemies.ToList();
         if (enemies.Count == 0) return;
         await CreatureCmd.Damage(
-            choiceContext, enemies, AbyssNumbers.WaveringMoonDamage, ValueProp.Unpowered, dealer);
+            choiceContext, enemies, AbyssNumbers.WaveringMoonDamage(abyss.ActOf(AbyssBlessing.WaveringMoon)),
+            ValueProp.Unpowered, dealer);
     }
 
     // ---- Per-combat scratch, never saved: a combat restarts on reload. ----
 
     private Dictionary<Player, int> _moonCounts = new();
     private HashSet<Creature> _heraldDone = new();
+    // Riptide's and Elemental Mark's "first time each turn" ledgers. Lazily
+    // built, so a modifier the headless suite builds uninitialized has them.
+    private AbyssTurnLedger<Creature>? _riptide;
+    private AbyssTurnLedger<Creature>? _elementalMark;
+    private AbyssTurnLedger<Creature> RiptideLedger => _riptide ??= new AbyssTurnLedger<Creature>();
+    private AbyssTurnLedger<Creature> ElementalMarkLedger => _elementalMark ??= new AbyssTurnLedger<Creature>();
 
     private static PlayerChoiceContext NoChoice() => new ThrowingPlayerChoiceContext();
 
@@ -192,6 +208,8 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
     {
         _moonCounts.Clear();
         _heraldDone.Clear();
+        RiptideLedger.Clear();
+        ElementalMarkLedger.Clear();
 
         if (Has(AbyssBlessing.Crystallize))
         {
@@ -200,7 +218,8 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
                 var creature = player.Creature;
                 if (creature == null || creature.IsDead) continue;
                 await CreatureCmd.GainBlock(
-                    creature, AbyssNumbers.CrystallizeBlock, ValueProp.Unpowered, null);
+                    creature, AbyssNumbers.CrystallizeBlock(ActOf(AbyssBlessing.Crystallize)),
+                    ValueProp.Unpowered, null);
             }
         }
     }
@@ -209,6 +228,11 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
 
     public override async Task AfterRoomEntered(AbstractRoom room)
     {
+        // Display only: each player's Abyss relics print the numbers of the
+        // act each entry was taken in. A reloaded relic comes back with the
+        // act 1 text, so every room puts the right one back.
+        foreach (var player in RunState.Players) AbyssDisplay.RefreshTexts(player, Record);
+
         if (room is not CombatRoom combatRoom) return;
         var enemies = combatRoom.CombatState.Enemies.Where(e => e.IsAlive).ToList();
         var isElite = combatRoom.RoomType == RoomType.Elite;
@@ -219,20 +243,20 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
         // earlier act is not in force, so it wears no badge; an elite-only or
         // elite-and-boss Shadow wears none outside its rooms (BadgesFor).
         var inForce = AbyssRules.BadgesFor(ShadowsNow, isElite, isBoss);
-        foreach (var enemy in enemies) AbyssDisplay.ShowShadows(enemy, inForce);
+        foreach (var enemy in enemies) AbyssDisplay.ShowShadows(enemy, inForce, Record);
 
         // The combat-start powers, where the base game's Oddly Smooth Stone
         // and Philosopher's Stone put theirs.
         if (Has(AbyssShadow.Frenzy) && enemies.Count > 0)
         {
             await PowerCmd.Apply<StrengthPower>(
-                NoChoice(), enemies, AbyssNumbers.FrenzyStrength, null, null);
+                NoChoice(), enemies, AbyssNumbers.FrenzyStrength(ActOf(AbyssShadow.Frenzy)), null, null);
         }
 
         if (Has(AbyssShadow.ThornyGround) && enemies.Count > 0)
         {
             await PowerCmd.Apply<ThornsPower>(
-                NoChoice(), enemies, AbyssNumbers.ThornyGroundThorns, null, null);
+                NoChoice(), enemies, AbyssNumbers.ThornyGroundThorns(ActOf(AbyssShadow.ThornyGround)), null, null);
         }
 
         var players = RunState.Players
@@ -241,10 +265,11 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
         {
             if (Has(AbyssBlessing.BattleRhythm))
             {
+                var rhythmAct = ActOf(AbyssBlessing.BattleRhythm);
                 await PowerCmd.Apply<StrengthPower>(
-                    NoChoice(), players, AbyssNumbers.BattleRhythmStrength, null, null);
+                    NoChoice(), players, AbyssNumbers.BattleRhythmStrength(rhythmAct), null, null);
                 await PowerCmd.Apply<DexterityPower>(
-                    NoChoice(), players, AbyssNumbers.BattleRhythmDexterity, null, null);
+                    NoChoice(), players, AbyssNumbers.BattleRhythmDexterity(rhythmAct), null, null);
             }
 
             if (Has(AbyssShadow.Withering))
@@ -262,7 +287,7 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
         if (Has(AbyssShadow.FatuiSkirmishers) && AbyssRules.FatuiRoom(isElite, isBoss))
         {
             await PowerCmd.Apply<PlatingPower>(
-                NoChoice(), enemies, AbyssNumbers.FatuiPlating, null, null);
+                NoChoice(), enemies, AbyssNumbers.FatuiPlating(ActOf(AbyssShadow.FatuiSkirmishers)), null, null);
         }
 
         if (Has(AbyssShadow.MageShield) && AbyssRules.MageShieldRoom(isElite))
@@ -284,7 +309,7 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
         // A summoned enemy wears the badges too (display only). The
         // combat-start Shadows (Frenzy, Thorny Ground, Bulwark) are about
         // starting the combat, so a summon does not take them.
-        AbyssDisplay.ShowShadows(creature, AbyssRules.BadgesFor(ShadowsNow, isElite: false, isBoss: false));
+        AbyssDisplay.ShowShadows(creature, AbyssRules.BadgesFor(ShadowsNow, isElite: false, isBoss: false), Record);
         if (Has(AbyssShadow.Herald)) await HeraldBuff(creature);
     }
 
@@ -305,14 +330,16 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
         if (side == CombatSide.Player)
         {
             // Bulwark (2026-10-17; the user: "Bulwark looks pretty weak"):
-            // each enemy gains 4 Block at the start of every player turn, so
+            // each enemy gains Block at the start of every player turn, so
             // it soaks each turn's damage. It was 6 Block once, at combat
-            // start, which cleared at the enemies' first turn.
+            // start, which cleared at the enemies' first turn. 4 / 6 / 8 by
+            // the act it was taken in (2026-10-18).
             if (Has(AbyssShadow.Bulwark))
             {
+                var block = AbyssNumbers.BulwarkBlock(ActOf(AbyssShadow.Bulwark));
                 foreach (var enemy in combatState.Enemies.Where(e => e.IsAlive).ToList())
                 {
-                    await CreatureCmd.GainBlock(enemy, AbyssNumbers.BulwarkBlock, ValueProp.Unpowered, null);
+                    await CreatureCmd.GainBlock(enemy, block, ValueProp.Unpowered, null);
                 }
             }
             if (!Has(AbyssBlessing.Resonance)) return;
@@ -347,7 +374,7 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
         {
             var alive = combatState.Enemies.Where(e => e.IsAlive).ToList();
             await PowerCmd.Apply<StrengthPower>(
-                NoChoice(), alive, AbyssNumbers.ClockStrength, null, null);
+                NoChoice(), alive, AbyssNumbers.ClockStrength(ActOf(AbyssShadow.Clock)), null, null);
         }
     }
 
@@ -384,7 +411,7 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
                 continue;
             }
             await CreatureCmd.Damage(
-                choiceContext, creature, AbyssNumbers.SheerColdHpLoss,
+                choiceContext, creature, AbyssNumbers.SheerColdHpLoss(ActOf(AbyssShadow.SheerCold)),
                 ValueProp.Unblockable | ValueProp.Unpowered, null, null, null);
         }
     }
@@ -448,7 +475,7 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
             {
                 await CreatureCmd.Damage(
                     choiceContext, creature.CombatState.HittableEnemies.ToList(),
-                    AbyssNumbers.AbyssalMoonDamage, ValueProp.Unpowered, creature);
+                    AbyssNumbers.AbyssalMoonDamage(ActOf(AbyssBlessing.AbyssalMoon)), ValueProp.Unpowered, creature);
             }
         }
 
@@ -458,7 +485,7 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
         {
             await CreatureCmd.Damage(
                 choiceContext, creature.CombatState.HittableEnemies.ToList(),
-                AbyssNumbers.ElementalBurstDamage, ValueProp.Unpowered, creature);
+                AbyssNumbers.ElementalBurstDamage(ActOf(AbyssBlessing.ElementalBurst)), ValueProp.Unpowered, creature);
         }
     }
 
@@ -487,7 +514,8 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
         if (Has(AbyssBlessing.VigorOfTheAbyss))
         {
             delta += AbyssRules.VigorDamageDelta(
-                dealer.Player != null, props.IsPoweredAttack(), dealer.CurrentHp, dealer.MaxHp);
+                dealer.Player != null, props.IsPoweredAttack(), dealer.CurrentHp, dealer.MaxHp,
+                ActOf(AbyssBlessing.VigorOfTheAbyss));
         }
         return delta;
     }
@@ -504,16 +532,46 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
             return;
         }
 
-        if (Has(AbyssShadow.ElementalMark) && !target.IsDead)
+        var round = target.CombatState?.RoundNumber ?? 0;
+
+        // Elemental Mark (2026-10-18): the first landed hit each turn, per
+        // player, so a multi-hit attack adds one Burn, not one per hit.
+        if (Has(AbyssShadow.ElementalMark) && !target.IsDead && TakeElementalMark(target, round))
         {
             await CardPileCmd.AddToCombatAndPreview<Burn>(target, PileType.Discard, 1, null);
         }
 
-        if (Has(AbyssShadow.Riptide) && dealer is { IsAlive: true })
+        // Riptide (2026-10-18): per enemy, its first landed hit each turn,
+        // up to the cap of the act it was taken in, per combat.
+        if (Has(AbyssShadow.Riptide) && dealer is { IsAlive: true } && TakeRiptide(dealer, round))
         {
             await PowerCmd.Apply<StrengthPower>(
                 choiceContext, dealer, AbyssNumbers.RiptideStrength, dealer, null);
         }
+    }
+
+    /// <summary>Riptide's decision and its count, together: does this
+    /// enemy's landed hit in round <paramref name="round"/> feed it? Counts
+    /// it if so. Public so the headless suite drives the real ledger.</summary>
+    public bool TakeRiptide(Creature dealer, int round)
+    {
+        if (!AbyssRules.RiptideFeeds(
+                RiptideLedger.CountedThisTurn(dealer, round), RiptideLedger.CountThisCombat(dealer),
+                AbyssNumbers.RiptideCap(ActOf(AbyssShadow.Riptide))))
+        {
+            return false;
+        }
+        RiptideLedger.Count(dealer, round);
+        return true;
+    }
+
+    /// <summary>Elemental Mark's decision and its count, on
+    /// <see cref="TakeRiptide"/>'s terms, per player.</summary>
+    public bool TakeElementalMark(Creature player, int round)
+    {
+        if (!AbyssRules.ElementalMarkFires(ElementalMarkLedger.CountedThisTurn(player, round))) return false;
+        ElementalMarkLedger.Count(player, round);
+        return true;
     }
 
     public override async Task AfterDeath(
@@ -526,13 +584,16 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
             .Where(e => e != creature && e.IsAlive).ToList();
         if (others.Count == 0) return;
         await PowerCmd.Apply<StrengthPower>(
-            choiceContext, others, AbyssNumbers.RallyStrength, null, null);
+            choiceContext, others, AbyssNumbers.RallyStrength(ActOf(AbyssShadow.Rally)), null, null);
     }
 
     public override async Task AfterCombatVictory(CombatRoom room)
     {
-        // Moonlit Rest (4, whole run) and Moonlit Spring (8, this act) stack.
-        var heal = AbyssRules.CombatEndHeal(Has(AbyssBlessing.MoonlitRest), Has(AbyssBlessing.MoonlitSpring));
+        // Moonlit Rest (whole run) and Moonlit Spring (this act) stack, each
+        // at the number of the act it was taken in.
+        var heal = AbyssRules.CombatEndHeal(
+            Has(AbyssBlessing.MoonlitRest) ? ActOf(AbyssBlessing.MoonlitRest) : null,
+            Has(AbyssBlessing.MoonlitSpring) ? ActOf(AbyssBlessing.MoonlitSpring) : null);
         if (heal <= 0) return;
         foreach (var player in RunState.Players)
         {

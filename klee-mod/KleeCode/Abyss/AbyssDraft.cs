@@ -181,6 +181,28 @@ public sealed class AbyssRecord
         _shadows.Where((s, i) => s != AbyssShadow.None
             && AbyssDurations.InForce(AbyssDurations.Of(s), ActAt(i), currentAct)).ToList();
 
+    /// <summary>The act Blessing <paramref name="b"/> was taken in, or -1 if
+    /// it was not taken. An entry is taken at most once a run (no repeats), so
+    /// this is the act its numbers come from (<see cref="AbyssNumbers"/>).</summary>
+    public int ActTaken(AbyssBlessing b)
+    {
+        for (var i = 0; i < _blessings.Count; i++)
+        {
+            if (_blessings[i] == b) return ActAt(i);
+        }
+        return -1;
+    }
+
+    /// <summary>The act Shadow <paramref name="s"/> was applied in, or -1.</summary>
+    public int ActTaken(AbyssShadow s)
+    {
+        for (var i = 0; i < _shadows.Count; i++)
+        {
+            if (_shadows[i] == s) return ActAt(i);
+        }
+        return -1;
+    }
+
     /// <summary>The act entry <paramref name="i"/> was taken in. The three
     /// lists are saved in step; a short acts list (never written by this
     /// build) reads as act -1, so a This act entry it cannot place is out of
@@ -328,24 +350,39 @@ public static class AbyssRules
             _ => true,
         }).ToList();
 
-    /// <summary>The shield after one hit: the counter element breaks it
-    /// whole, any other hit removes 1.</summary>
+    /// <summary>The shield after one hit: a counter-element hit removes 3
+    /// (a reaction's share; 2026-10-18, it no longer breaks the shield
+    /// outright), any other hit removes 1.</summary>
     public static int ShieldAfterHit(int hits, Element hitElement, Element shieldElement)
     {
         if (hits <= 0) return 0;
         var counter = AbyssElements.CounterOf(shieldElement);
-        if (counter != Element.None && hitElement == counter) return 0;
-        return Math.Max(0, hits - AbyssNumbers.MageShieldPerHit);
+        var removed = counter != Element.None && hitElement == counter
+            ? AbyssNumbers.MageShieldPerReaction
+            : AbyssNumbers.MageShieldPerHit;
+        return Math.Max(0, hits - removed);
     }
+
+    /// <summary>Riptide (2026-10-18): "the first time each turn an enemy's
+    /// attack deals you unblocked damage, it gains 1 Strength, up to N times
+    /// per combat". Does this landed hit feed it? Per enemy: its first landed
+    /// hit of the turn, while it has gained fewer than the cap this combat.</summary>
+    public static bool RiptideFeeds(bool enemyAlreadyFedThisTurn, int gainsThisCombat, int cap) =>
+        !enemyAlreadyFedThisTurn && gainsThisCombat < cap;
+
+    /// <summary>Elemental Mark (2026-10-18): "The first time each turn an
+    /// enemy attack deals you unblocked damage, add a Burn". Per player.</summary>
+    public static bool ElementalMarkFires(bool playerAlreadyMarkedThisTurn) => !playerAlreadyMarkedThisTurn;
 
     // ---- Round two (review/ruled/abyss-pools-2-2026-10-12.md) -------------
 
     /// <summary>Vigor of the Abyss: "while you are above half HP, your
     /// Attacks deal 3 additional damage". A player's powered attack (the hits
     /// Strength adds to), while current HP is strictly more than half of max.</summary>
-    public static decimal VigorDamageDelta(bool dealerIsPlayer, bool isPoweredAttack, int currentHp, int maxHp) =>
+    public static decimal VigorDamageDelta(
+        bool dealerIsPlayer, bool isPoweredAttack, int currentHp, int maxHp, int actTaken) =>
         dealerIsPlayer && isPoweredAttack && maxHp > 0 && currentHp * 2 > maxHp
-            ? AbyssNumbers.VigorDamage
+            ? AbyssNumbers.VigorDamage(actTaken)
             : 0m;
 
     /// <summary>Overflow: "Elemental Reactions deal double damage". The
@@ -356,10 +393,12 @@ public static class AbyssRules
     public static decimal OverflowFactor(bool dealerIsPlayer) =>
         dealerIsPlayer ? AbyssNumbers.OverflowMultiplier : 1m;
 
-    /// <summary>The end-of-combat heal: Moonlit Rest's 4 (whole run) and
-    /// Moonlit Spring's 8 (this act), which stack.</summary>
-    public static int CombatEndHeal(bool moonlitRest, bool moonlitSpring) =>
-        (moonlitRest ? AbyssNumbers.MoonlitRestHeal : 0) + (moonlitSpring ? AbyssNumbers.MoonlitSpringHeal : 0);
+    /// <summary>The end-of-combat heal: Moonlit Rest (whole run) and
+    /// Moonlit Spring (this act), which stack. Each argument is the act the
+    /// Blessing was taken in, or null when it is not in force.</summary>
+    public static int CombatEndHeal(int? moonlitRestAct, int? moonlitSpringAct) =>
+        (moonlitRestAct is { } rest ? AbyssNumbers.MoonlitRestHeal(rest) : 0)
+        + (moonlitSpringAct is { } spring ? AbyssNumbers.MoonlitSpringHeal(spring) : 0);
 
     /// <summary>Wavering Moon: "Whenever you trigger an Elemental Reaction":
     /// a reaction a player dealt.</summary>
@@ -374,4 +413,38 @@ public static class AbyssRules
     /// <summary>The shield after one reaction on its wearer.</summary>
     public static int ShieldAfterReaction(int hits) =>
         Math.Max(0, hits - AbyssNumbers.MageShieldPerReaction);
+}
+
+/// <summary>
+/// "THE FIRST TIME EACH TURN", per key, with a cap per combat: Riptide's
+/// ledger (per enemy) and Elemental Mark's (per player). Per-combat scratch on
+/// the modifier, never saved (a combat restarts on reload). A turn is the
+/// combat's round number: every hit of one enemy turn shares it.
+/// </summary>
+public sealed class AbyssTurnLedger<TKey> where TKey : notnull
+{
+    private readonly Dictionary<TKey, int> _lastRound = new();
+    private readonly Dictionary<TKey, int> _count = new();
+
+    /// <summary>Has <paramref name="key"/> already been counted in
+    /// <paramref name="round"/>?</summary>
+    public bool CountedThisTurn(TKey key, int round) =>
+        _lastRound.TryGetValue(key, out var r) && r == round;
+
+    /// <summary>How many times <paramref name="key"/> has been counted this
+    /// combat.</summary>
+    public int CountThisCombat(TKey key) => _count.TryGetValue(key, out var n) ? n : 0;
+
+    /// <summary>Count <paramref name="key"/> once in <paramref name="round"/>.</summary>
+    public void Count(TKey key, int round)
+    {
+        _lastRound[key] = round;
+        _count[key] = CountThisCombat(key) + 1;
+    }
+
+    public void Clear()
+    {
+        _lastRound.Clear();
+        _count.Clear();
+    }
 }

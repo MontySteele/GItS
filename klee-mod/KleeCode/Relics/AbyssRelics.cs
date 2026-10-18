@@ -61,9 +61,14 @@ public abstract class AbyssDisplayRelic : CustomRelicModel
 }
 
 /// <summary>One per Blessing: the Blessing's name and its text, word for word
-/// <see cref="AbyssText"/>'s.</summary>
+/// <see cref="AbyssText"/>'s, for the act the Blessing was taken in
+/// (<c>review/active/abyss-act-scaling-2026-10-18.md</c>). The text is a
+/// <see cref="StringVar"/>, set by <see cref="ShowAct"/> from the run's
+/// record (<see cref="AbyssDisplay.RefreshTexts"/>); nothing new is saved.</summary>
 public abstract class AbyssBlessingRelic : AbyssDisplayRelic
 {
+    public const string TextVar = "Text";
+
     public abstract AbyssBlessing Blessing { get; }
 
     protected abstract string Title { get; }
@@ -71,8 +76,22 @@ public abstract class AbyssBlessingRelic : AbyssDisplayRelic
     public override List<(string, string)>? Localization => new()
     {
         ("title", Title),
-        ("description", AbyssText.Text(Blessing)),
+        ("description", "{" + TextVar + "}"),
     };
+
+    protected override IEnumerable<DynamicVar> CanonicalVars => new DynamicVar[]
+    {
+        new StringVar(TextVar, AbyssText.Text(Blessing, 0)),
+    };
+
+    /// <summary>The text this relic prints now.</summary>
+    public string ShownText => DynamicVars[TextVar] is StringVar text ? text.StringValue : "";
+
+    /// <summary>Print the text for act <paramref name="act"/>. Display only.</summary>
+    public void ShowAct(int act)
+    {
+        if (DynamicVars[TextVar] is StringVar text) text.StringValue = AbyssText.Text(Blessing, act);
+    }
 }
 
 public sealed class AbyssLeyLineRelic : AbyssBlessingRelic
@@ -205,7 +224,7 @@ public sealed class AbyssShadowsRelic : AbyssDisplayRelic
 
     protected override IEnumerable<DynamicVar> CanonicalVars => new DynamicVar[]
     {
-        new StringVar(ShadowsVar, AbyssDisplay.ShadowsText(Array.Empty<AbyssShadow>())),
+        new StringVar(ShadowsVar, AbyssDisplay.ShadowsText(Array.Empty<(AbyssShadow, int)>())),
     };
 
     /// <summary>The Shadows this relic lists, as the record stores them. Saved
@@ -223,14 +242,32 @@ public sealed class AbyssShadowsRelic : AbyssDisplayRelic
 
     public IReadOnlyList<AbyssShadow> Shadows => SpiralAbyssShadowsShown.Select(s => (AbyssShadow)s).ToList();
 
+    /// <summary>The act each listed Shadow was taken in, for its numbers
+    /// (<c>review/active/abyss-act-scaling-2026-10-18.md</c>). Not saved: the
+    /// run's record keeps the acts, and <see cref="AbyssDisplay.RefreshTexts"/>
+    /// sets them again after a reload. A Shadow with no act here prints act 1's.</summary>
+    private Dictionary<AbyssShadow, int>? _acts;
+
     public void SetShadows(IEnumerable<AbyssShadow> shadows) =>
         SpiralAbyssShadowsShown = shadows.Where(s => s != AbyssShadow.None).Select(s => (int)s).ToArray();
+
+    /// <summary>Set the listed Shadows and the act each was taken in.</summary>
+    public void SetShadows(IEnumerable<AbyssShadow> shadows, AbyssRecord record)
+    {
+        var list = shadows.Where(s => s != AbyssShadow.None).ToList();
+        _acts = list.Distinct().ToDictionary(s => s, record.ActTaken);
+        SetShadows(list);
+    }
+
+    /// <summary>The text this relic prints now.</summary>
+    public string ShownText => DynamicVars[ShadowsVar] is StringVar text ? text.StringValue : "";
 
     private void RefreshText()
     {
         if (DynamicVars[ShadowsVar] is StringVar text)
         {
-            text.StringValue = AbyssDisplay.ShadowsText(Shadows);
+            text.StringValue = AbyssDisplay.ShadowsText(
+                Shadows.Select(s => (s, _acts != null && _acts.TryGetValue(s, out var act) ? act : 0)));
         }
     }
 }

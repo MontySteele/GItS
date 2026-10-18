@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using BaseLib.Abstracts;
 using MegaCrit.Sts2.Core.Entities.Powers;
+using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 
 namespace KleeMod.Abyss;
@@ -26,11 +27,33 @@ public abstract class AbyssShadowPower : PowerModel, ILocalizationProvider
     /// <c>validate.ps1</c> S12 can see it (read by <c>KleePowerIcons</c>).</summary>
     public abstract string IconFile { get; }
 
+    /// <summary>The badge's text, in a <see cref="StringVar"/> so it can
+    /// print the number of the act the Shadow was taken in
+    /// (<c>review/active/abyss-act-scaling-2026-10-18.md</c>). The plain
+    /// description is the act 1 text, for a badge no combat has set.</summary>
+    public const string TextVar = "Text";
+
     public List<(string, string)>? Localization => new()
     {
         ("title", AbyssText.Name(Shadow)),
-        ("description", AbyssText.Text(Shadow)),
+        ("description", AbyssText.Text(Shadow, 0)),
+        ("smartDescription", "{" + TextVar + "}"),
     };
+
+    protected override IEnumerable<DynamicVar> CanonicalVars => new DynamicVar[]
+    {
+        new StringVar(TextVar, AbyssText.Text(Shadow, 0)),
+    };
+
+    /// <summary>The text this badge prints now.</summary>
+    public string ShownText => DynamicVars[TextVar] is StringVar text ? text.StringValue : "";
+
+    /// <summary>Print the text for act <paramref name="act"/>, the act the
+    /// Shadow was taken in. Display only.</summary>
+    public void ShowAct(int act)
+    {
+        if (DynamicVars[TextVar] is StringVar text) text.StringValue = AbyssText.Text(Shadow, act);
+    }
 
     public override PowerType Type => PowerType.Buff;
 

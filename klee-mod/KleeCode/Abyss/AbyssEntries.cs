@@ -93,39 +93,81 @@ public static class AbyssDurations
 }
 
 /// <summary>Every number the paper prints, in one place. First guesses,
-/// tuned by play (paper sec.1).</summary>
+/// tuned by play (paper sec.1).
+///
+/// NUMBERS BY ACT (<c>review/active/abyss-act-scaling-2026-10-18.md</c>, ruled
+/// 2026-10-18): an entry the paper gives three numbers carries a table of
+/// three, one per act (act 1 is index 0; an act past the third takes the
+/// last). The number an entry uses -- in its text and in its effect -- is the
+/// one for the act it was TAKEN in (<see cref="AbyssRecord.ActTaken(AbyssBlessing)"/>),
+/// so an entry taken early keeps its number and nothing grows by itself.
+/// The run save is unchanged: it already keeps each pick's act.</summary>
 public static class AbyssNumbers
 {
+    /// <summary>The number of rows in every by-act table.</summary>
+    public const int ActRows = 3;
+
+    /// <summary>The row of a by-act table for act index <paramref name="act"/>:
+    /// clamped, so an act past the third takes the last row and an act the
+    /// record cannot place (-1) takes the first.</summary>
+    public static int Row(int act) => Math.Clamp(act, 0, ActRows - 1);
+
+    private static int At(IReadOnlyList<int> table, int act) => table[Row(act)];
+
     public const int LeyLineDamageReduction = 1;
     public const int AbyssalMoonEvery = 3;
-    public const int AbyssalMoonDamage = 4;
-    public const int MoonlitRestHeal = 4;
-    public const int ElementalBurstDamage = 6;
+    public static IReadOnlyList<int> AbyssalMoonDamageByAct { get; } = new[] { 4, 5, 6 };
+    public static int AbyssalMoonDamage(int act) => At(AbyssalMoonDamageByAct, act);
+    public static IReadOnlyList<int> MoonlitRestHealByAct { get; } = new[] { 4, 6, 8 };
+    public static int MoonlitRestHeal(int act) => At(MoonlitRestHealByAct, act);
+    public static IReadOnlyList<int> ElementalBurstDamageByAct { get; } = new[] { 6, 9, 12 };
+    public static int ElementalBurstDamage(int act) => At(ElementalBurstDamageByAct, act);
     public const int ResonanceEnergy = 1;
     public const int ResonanceDraw = 1;
     public const int ResonanceTurn = 1;
-    public const int CrystallizeBlock = 8;
-    public const int FatefulFortuneMaxHp = 12;
+    public static IReadOnlyList<int> CrystallizeBlockByAct { get; } = new[] { 8, 12, 16 };
+    public static int CrystallizeBlock(int act) => At(CrystallizeBlockByAct, act);
+    public static IReadOnlyList<int> FatefulFortuneMaxHpByAct { get; } = new[] { 12, 16, 20 };
+    public static int FatefulFortuneMaxHp(int act) => At(FatefulFortuneMaxHpByAct, act);
     public const int OverflowMultiplier = 2;
-    public const int VigorDamage = 3;
-    public const int MoonlitSpringHeal = 8;
-    public const int BattleRhythmStrength = 1;
-    public const int BattleRhythmDexterity = 1;
-    public const int WaveringMoonDamage = 3;
+    public static IReadOnlyList<int> VigorDamageByAct { get; } = new[] { 3, 4, 5 };
+    public static int VigorDamage(int act) => At(VigorDamageByAct, act);
+    public static IReadOnlyList<int> MoonlitSpringHealByAct { get; } = new[] { 8, 8, 8 };
+    public static int MoonlitSpringHeal(int act) => At(MoonlitSpringHealByAct, act);
+    public static IReadOnlyList<int> BattleRhythmStrengthByAct { get; } = new[] { 1, 2, 2 };
+    public static int BattleRhythmStrength(int act) => At(BattleRhythmStrengthByAct, act);
+    public static IReadOnlyList<int> BattleRhythmDexterityByAct { get; } = new[] { 1, 2, 2 };
+    public static int BattleRhythmDexterity(int act) => At(BattleRhythmDexterityByAct, act);
+    public static IReadOnlyList<int> WaveringMoonDamageByAct { get; } = new[] { 3, 4, 5 };
+    public static int WaveringMoonDamage(int act) => At(WaveringMoonDamageByAct, act);
 
     public const int ClockFromRound = 5;
-    public const int ClockStrength = 2;
-    public const int MageShieldHits = 8;
+    public static IReadOnlyList<int> ClockStrengthByAct { get; } = new[] { 2, 2, 3 };
+    public static int ClockStrength(int act) => At(ClockStrengthByAct, act);
+    /// <summary>Abyss Mage Shield (2026-10-18): 6 hits deep; a hit removes
+    /// <see cref="MageShieldPerHit"/>, and a reaction or a counter-element hit
+    /// removes <see cref="MageShieldPerReaction"/>.</summary>
+    public const int MageShieldHits = 6;
     public const int MageShieldPerHit = 1;
     public const int MageShieldPerReaction = 3;
-    public const int SheerColdHpLoss = 3;
+    public static IReadOnlyList<int> SheerColdHpLossByAct { get; } = new[] { 3, 4, 5 };
+    public static int SheerColdHpLoss(int act) => At(SheerColdHpLossByAct, act);
     public const decimal HeraldHpBonus = 0.15m;
-    public const int RallyStrength = 2;
+    public static IReadOnlyList<int> RallyStrengthByAct { get; } = new[] { 2, 3, 3 };
+    public static int RallyStrength(int act) => At(RallyStrengthByAct, act);
     public const int RiptideStrength = 1;
-    public const int FatuiPlating = 3;
-    public const int ThornyGroundThorns = 2;
-    public const int BulwarkBlock = 4;
-    public const int FrenzyStrength = 2;
+    /// <summary>Riptide's bound (2026-10-18): at most this many Strength
+    /// gains per enemy per combat.</summary>
+    public static IReadOnlyList<int> RiptideCapByAct { get; } = new[] { 3, 4, 5 };
+    public static int RiptideCap(int act) => At(RiptideCapByAct, act);
+    public static IReadOnlyList<int> FatuiPlatingByAct { get; } = new[] { 3, 4, 6 };
+    public static int FatuiPlating(int act) => At(FatuiPlatingByAct, act);
+    public static IReadOnlyList<int> ThornyGroundThornsByAct { get; } = new[] { 2, 2, 3 };
+    public static int ThornyGroundThorns(int act) => At(ThornyGroundThornsByAct, act);
+    public static IReadOnlyList<int> BulwarkBlockByAct { get; } = new[] { 4, 6, 8 };
+    public static int BulwarkBlock(int act) => At(BulwarkBlockByAct, act);
+    public static IReadOnlyList<int> FrenzyStrengthByAct { get; } = new[] { 2, 3, 4 };
+    public static int FrenzyStrength(int act) => At(FrenzyStrengthByAct, act);
     public const int WitheringWeak = 1;
 }
 
@@ -154,30 +196,33 @@ public static class AbyssText
         _ => throw new ArgumentOutOfRangeException(nameof(b)),
     };
 
-    public static string Text(AbyssBlessing b) => b switch
+    /// <summary>A Blessing's text for one act: the numbers are the ones for
+    /// <paramref name="act"/>, the act it is offered or was taken in
+    /// (<see cref="AbyssNumbers"/>), so the text prints one number.</summary>
+    public static string Text(AbyssBlessing b, int act) => b switch
     {
         AbyssBlessing.LeyLine =>
             "Each enemy turn, every enemy without an aura takes this act's element. "
           + $"An enemy wearing an aura deals {AbyssNumbers.LeyLineDamageReduction} less damage.",
         AbyssBlessing.AbyssalMoon =>
-            $"Every third card you play in a turn deals {AbyssNumbers.AbyssalMoonDamage} damage to ALL enemies.",
-        AbyssBlessing.MoonlitRest => $"Heal {AbyssNumbers.MoonlitRestHeal} HP at the end of each combat.",
+            $"Every third card you play in a turn deals {AbyssNumbers.AbyssalMoonDamage(act)} damage to ALL enemies.",
+        AbyssBlessing.MoonlitRest => $"Heal {AbyssNumbers.MoonlitRestHeal(act)} HP at the end of each combat.",
         AbyssBlessing.FirstStrike => "Your first Attack each combat is played twice.",
         AbyssBlessing.ElementalBurst =>
-            $"Whenever you play a Power, deal {AbyssNumbers.ElementalBurstDamage} damage to ALL enemies.",
+            $"Whenever you play a Power, deal {AbyssNumbers.ElementalBurstDamage(act)} damage to ALL enemies.",
         AbyssBlessing.Resonance =>
             $"On turn {AbyssNumbers.ResonanceTurn} of each combat, gain {AbyssNumbers.ResonanceEnergy} Energy and draw {AbyssNumbers.ResonanceDraw} card.",
-        AbyssBlessing.Crystallize => $"Start each combat with {AbyssNumbers.CrystallizeBlock} Block.",
-        AbyssBlessing.FatefulFortune => $"Gain {AbyssNumbers.FatefulFortuneMaxHp} Max HP.",
+        AbyssBlessing.Crystallize => $"Start each combat with {AbyssNumbers.CrystallizeBlock(act)} Block.",
+        AbyssBlessing.FatefulFortune => $"Gain {AbyssNumbers.FatefulFortuneMaxHp(act)} Max HP.",
         AbyssBlessing.Overflow => "This act, Elemental Reactions deal double damage.",
         AbyssBlessing.VigorOfTheAbyss =>
-            $"This act, while you are above half HP, your Attacks deal {AbyssNumbers.VigorDamage} additional damage.",
+            $"This act, while you are above half HP, your Attacks deal {AbyssNumbers.VigorDamage(act)} additional damage.",
         AbyssBlessing.MoonlitSpring =>
-            $"This act, heal {AbyssNumbers.MoonlitSpringHeal} HP at the end of each combat.",
+            $"This act, heal {AbyssNumbers.MoonlitSpringHeal(act)} HP at the end of each combat.",
         AbyssBlessing.BattleRhythm =>
-            $"This act, start each combat with {AbyssNumbers.BattleRhythmStrength} Strength and {AbyssNumbers.BattleRhythmDexterity} Dexterity.",
+            $"This act, start each combat with {AbyssNumbers.BattleRhythmStrength(act)} Strength and {AbyssNumbers.BattleRhythmDexterity(act)} Dexterity.",
         AbyssBlessing.WaveringMoon =>
-            $"Whenever you trigger an Elemental Reaction, deal {AbyssNumbers.WaveringMoonDamage} damage to ALL enemies.",
+            $"Whenever you trigger an Elemental Reaction, deal {AbyssNumbers.WaveringMoonDamage(act)} damage to ALL enemies.",
         AbyssBlessing.StarfellDraft =>
             // A word, not a tunable: "1 additional card" is the Blessing.
             // (Kept off AbyssNumbers so the prose lint does not pair every
@@ -203,33 +248,39 @@ public static class AbyssText
         _ => throw new ArgumentOutOfRangeException(nameof(s)),
     };
 
-    public static string Text(AbyssShadow s) => s switch
+    /// <summary>A Shadow's text for one act, on <see cref="Text(AbyssBlessing, int)"/>'s
+    /// terms.</summary>
+    public static string Text(AbyssShadow s, int act) => s switch
     {
         AbyssShadow.Clock =>
-            $"From turn {AbyssNumbers.ClockFromRound}, every enemy gains {AbyssNumbers.ClockStrength} Strength at the start of its turn.",
+            $"From turn {AbyssNumbers.ClockFromRound}, every enemy gains {AbyssNumbers.ClockStrength(act)} Strength at the start of its turn.",
+        // 2026-10-18 (review/active/abyss-act-scaling-2026-10-18.md): 6 hits,
+        // and the counter element removes 3 rather than breaking it.
         AbyssShadow.MageShield =>
             $"Elites enter combat with a shield of this act's element, {AbyssNumbers.MageShieldHits} hits deep, "
-          + $"that stops all damage. Each hit removes {AbyssNumbers.MageShieldPerHit}, a reaction removes {AbyssNumbers.MageShieldPerReaction}, and "
-          + "the counter element breaks it.",
-        AbyssShadow.SheerCold => $"If you end your turn with no Block, lose {AbyssNumbers.SheerColdHpLoss} HP.",
+          + $"that stops all damage. A hit removes {AbyssNumbers.MageShieldPerHit}. "
+          + $"A reaction or a counter-element hit removes {AbyssNumbers.MageShieldPerReaction}.",
+        AbyssShadow.SheerCold => $"If you end your turn with no Block, lose {AbyssNumbers.SheerColdHpLoss(act)} HP.",
+        // 2026-10-18: once per turn, so a multi-hit attack adds one Burn.
         AbyssShadow.ElementalMark =>
-            "Whenever an enemy attack deals you unblocked damage, add a Burn to "
+            "The first time each turn an enemy attack deals you unblocked damage, add a Burn to "
           + "your discard pile.",
         AbyssShadow.Herald => $"Enemies have {(int)(AbyssNumbers.HeraldHpBonus * 100)}% more HP.",
-        AbyssShadow.Rally => $"When an enemy dies, every other enemy gains {AbyssNumbers.RallyStrength} Strength.",
-        // This act from round 2 (pick 1 (a)), so its text says so.
+        AbyssShadow.Rally => $"When an enemy dies, every other enemy gains {AbyssNumbers.RallyStrength(act)} Strength.",
+        // This act from round 2 (pick 1 (a)), so its text says so. Bounded
+        // 2026-10-18: once per turn per enemy, and a cap per combat.
         AbyssShadow.Riptide =>
-            "This act, whenever an enemy attack deals you unblocked damage, that enemy gains "
-          + $"{AbyssNumbers.RiptideStrength} Strength.",
+            "This act, the first time each turn an enemy's attack deals you unblocked damage, it gains "
+          + $"{AbyssNumbers.RiptideStrength} Strength, up to {AbyssNumbers.RiptideCap(act)} times per combat.",
         AbyssShadow.FatuiSkirmishers =>
-            $"Elites and bosses enter combat with {AbyssNumbers.FatuiPlating} Plated Armor.",
+            $"Elites and bosses enter combat with {AbyssNumbers.FatuiPlating(act)} Plated Armor.",
         AbyssShadow.ThornyGround =>
-            $"This act, enemies start each combat with {AbyssNumbers.ThornyGroundThorns} Thorns.",
+            $"This act, enemies start each combat with {AbyssNumbers.ThornyGroundThorns(act)} Thorns.",
         AbyssShadow.Bulwark =>
-            $"This act, at the start of your turn, each enemy gains {AbyssNumbers.BulwarkBlock} Block.",
+            $"This act, at the start of your turn, each enemy gains {AbyssNumbers.BulwarkBlock(act)} Block.",
         // [USER], 2026-10-12: "Why the extra words? Just give enemies 2 Strength."
         AbyssShadow.Frenzy =>
-            $"This act, enemies start each combat with {AbyssNumbers.FrenzyStrength} Strength.",
+            $"This act, enemies start each combat with {AbyssNumbers.FrenzyStrength(act)} Strength.",
         AbyssShadow.Withering => $"You start each combat with {AbyssNumbers.WitheringWeak} Weak.",
         _ => throw new ArgumentOutOfRangeException(nameof(s)),
     };
