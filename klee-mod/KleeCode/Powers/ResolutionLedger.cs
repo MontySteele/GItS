@@ -258,6 +258,12 @@ public static class ResolutionLedger
     /// to the Pyro hits of the Attack `Card`, on that play's own line.
     /// </summary>
     public const string Stoked = "stoked";
+    /// <summary>Kokomi v2 seats (2026-10-18): a stored bonus the Attack
+    /// `Card` spent, `Amount` per hit, `Power` its source (Tidal Riposte's
+    /// Riposte); and the power that played the Attack `Card` twice (`Power`,
+    /// Pincer's Plan). Both on that play's own line.</summary>
+    public const string PlayBonus = "play_bonus";
+    public const string DoubledBy = "doubled_by";
     /// <summary>Kokomi round 3 A-list (2026-10-13): a generated card (a
     /// Sting or a Ward) went to the discard pile because the hand was full,
     /// the base game's rule; and a card Ethereal Exhausted at the end of the

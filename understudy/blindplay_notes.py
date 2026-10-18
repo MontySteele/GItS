@@ -1716,8 +1716,10 @@ ARM_KEYWORDS: dict[str, str] = {
     # and the tip opens "Instead of the line above". A PLAN STAYS OPEN
     # (2026-10-01), pick 5 (a): "click a waiting Plan to flip it".
     # Kokomi round 3 review (2026-10-11), change 3: when Plan Block lands.
-    "Plan": ("Instead of the line above, play it on the Bake-Kurage; "
-             "click to flip. Plans happen next turn in order, and their "
+    # Kokomi v2 seats (2026-10-18): "and read enemies then"; the flip
+    # instruction is on the Bake-Kurage's own text.
+    "Plan": ("Instead of the line above, play it on the Bake-Kurage. "
+             "Plans happen next turn in order and read enemies then; "
              "Block lasts that turn."),
     # (`EB-643`'s Dusk row left with the word in the Kokomi re-founding,
     # 2026-10-12.)
@@ -3802,6 +3804,11 @@ RESOLUTION_WOLFPACK = ("  Lupical: shuffled {n} of Four Winds' Ascension "
 #: took it. A seat "never saw the number change in the log, and could not tell
 #: if Four Winds' Pyro half qualified" (it does).
 RESOLUTION_STOKED = ("  Stoke the Flames: its Pyro damage was {n} higher.")
+#: Kokomi v2 seats (2026-10-18): Tidal Riposte's stored bonus, on the Attack
+#: that spent it ("it never visibly paid off"), and Pincer's Plan on the
+#: Attack it played twice ("I never knew whether it triggered").
+RESOLUTION_PLAY_BONUS = "  {source}: each of its hits dealt {n} more damage."
+RESOLUTION_DOUBLED_BY = "  {source}: this Attack was played twice."
 #: Varka round 5 (2026-10-13, "What to change" 2): what the card made you
 #: discard (Chain Lightning, Short Circuit), on its own play line, and when
 #: the game picked them because the hand held no more than it asked for.

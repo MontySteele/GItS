@@ -1649,6 +1649,24 @@ def resolutions(player: dict[str, Any]) -> list[dict[str, Any]] | None:
                         for ev in (row.get("events") or [])
                         if isinstance(ev, dict)
                         and _text(ev.get("kind")) == "stoked"),
+                    # Kokomi v2 seats (2026-10-18): a stored bonus this
+                    # Attack spent (Tidal Riposte's), by source and per-hit
+                    # amount, and the power that played it twice (Pincer's
+                    # Plan). Seats could not tell either had happened.
+                    "play_bonus": [
+                        {"source": _text(ev.get("power")),
+                         "amount": _int(ev.get("amount"))}
+                        for ev in (row.get("events") or [])
+                        if isinstance(ev, dict)
+                        and _text(ev.get("kind")) == "play_bonus"
+                        and _text(ev.get("power"))
+                        and _int(ev.get("amount")) > 0],
+                    "doubled_by": [
+                        _text(ev.get("power"))
+                        for ev in (row.get("events") or [])
+                        if isinstance(ev, dict)
+                        and _text(ev.get("kind")) == "doubled_by"
+                        and _text(ev.get("power"))],
                     # Yae rounds 7, 8 and 10 (2026-10-17): what this play's
                     # Edit reached (`YaeEditing.NoteEdited` and its two
                     # siblings), in order. Empty on an older mod.
@@ -2210,6 +2228,10 @@ def _carried_out_row(row: dict[str, Any], pet_name: str) -> dict[str, Any]:
             # own hits set off, by name ("Vaporize"); empty on an older mod.
             "reactions": [_text(r) for r in (row.get("reactions") or [])
                           if _text(r)],
+            # Kokomi v2 seats (2026-10-18): a carry-out past an entry's
+            # first, and the card that bought it ("Nereid's Ascension");
+            # "" on the first and on an older mod.
+            "again": _text(row.get("again")),
             # `EB-440`: A ROW IS A BODY THIS PLAN MOVED SOMETHING ON, and
             # Block is something. The filter existed to drop the mod's
             # zero-delta rows, and a beat that spent itself entirely on a
