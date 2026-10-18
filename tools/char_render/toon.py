@@ -91,11 +91,15 @@ def add_aovs(nt, protect, seed, coord="UV"):
     nt.links.new(cc.outputs["Color"], aov.inputs["Color"])
 
 
-def toon_material(mat, img, unlit):
+def toon_material(mat, img, unlit, cutout=False):
     """Style H1's shader: a three-step constant ramp (deep, half, light)
     whose terminators are wobbled by stretched UV-space noise, times
     UV-space value grain. `unlit` (the face materials) skips the ramp and is
-    protected in the `style` pass."""
+    protected in the `style` pass. `cutout` is a lit material whose texture's
+    alpha cuts real holes in it (chars `alpha_mats`): it renders BLENDED,
+    because under DITHERED the Shader-to-RGB ramp draws every transparent
+    texel as opaque black (Blender 5.2, measured 2026-10-18 on Kokomi's
+    hands and hips). The surface behind it writes the `style` pass there."""
     nt = mat.node_tree
     for n in list(nt.nodes):
         nt.nodes.remove(n)
@@ -166,7 +170,7 @@ def toon_material(mat, img, unlit):
     # DITHERED for every material, Klee's expression overlay (表情: the drawn
     # > < eyes of はぅ) included: EEVEE writes no AOV from a BLENDED surface,
     # so the overlay fell out of the protect mask and post.py faded its lines
-    mat.surface_render_method = "DITHERED"
+    mat.surface_render_method = "BLENDED" if cutout and not unlit else "DITHERED"
     mat.use_backface_culling = False
 
 
