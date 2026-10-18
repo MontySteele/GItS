@@ -1,4 +1,13 @@
-"""M2: axis computation, gauntlet stage-merge, frozen-battery regression."""
+"""M2: axis computation, gauntlet stage-merge, frozen-battery regression.
+
+REUSE (2026-10-18; the user: "let's leave them then but reuse the result"):
+a battery is a pure function of (character, deck, encounter, pilot, fights,
+seed), so each identical one is computed once per module and shared. No
+sample size moved. `package` still builds its own anchor, so
+test_shared_anchor_battery_scores_identically still compares a passed-in
+anchor against a computed one."""
+
+import functools
 
 import pytest
 
@@ -11,8 +20,20 @@ SEED = 11
 
 
 @pytest.fixture(scope="module")
-def baseline():
-    return score_config("ref_ironclad", "starter", "generic", FIGHTS, SEED)
+def anchor():
+    """The anchor battery, once for the module."""
+    return run_full_battery(*BASELINE, "generic", FIGHTS, SEED)
+
+
+@pytest.fixture(scope="module")
+def baseline(anchor):
+    return score_config("ref_ironclad", "starter", "generic", FIGHTS, SEED, anchor)
+
+
+@functools.cache
+def _frozen(enc: str) -> tuple:
+    """A frozen 300-fight starter battery, once per encounter per module."""
+    return tuple(run_battery("ref_ironclad", "starter", enc, "generic", 300, SEED))
 
 
 @pytest.fixture(scope="module")
@@ -22,13 +43,13 @@ def package():
 
 
 @pytest.mark.battery
-def test_shared_anchor_battery_scores_identically(package):
+def test_shared_anchor_battery_scores_identically(package, anchor):
     """score_character hands ONE baseline battery to every deck it scores
     instead of re-running it per deck. The anchor is a deterministic
     function of (fights, seed) and nothing mutates it, so that must be a
     pure saving -- if it ever is not, every archived scorecard silently
     depends on how many decks were scored beside it."""
-    shared = run_full_battery(*BASELINE, "generic", FIGHTS, SEED)
+    shared = anchor
     passed_in = score_config("ref_ironclad", "archetype_package", "generic",
                              FIGHTS, SEED, shared)
     assert passed_in["scores"] == package["scores"]
@@ -90,21 +111,18 @@ def test_gauntlet_merges_stages():
     ("tank_boss", -0.01, 0.10),    # starter loses to the boss by design
 ])
 def test_frozen_battery_starter_winrates(enc, lo, hi):
-    stats = run_battery("ref_ironclad", "starter", enc, "generic", 300, SEED)
+    stats = list(_frozen(enc))
     wr = metrics.summarize(stats)["winrate"]
     assert lo < wr < hi, f"{enc}: {wr} outside frozen calibration band"
 
 
 @pytest.mark.battery
 def test_frozen_battery_fight_lengths():
-    swarm = metrics.summarize(run_battery(
-        "ref_ironclad", "starter", "swarm", "generic", 300, SEED))
+    swarm = metrics.summarize(list(_frozen("swarm")))
     assert 5 <= swarm["avg_turns"] <= 7.5
-    attr = metrics.summarize(run_battery(
-        "ref_ironclad", "starter", "attrition", "generic", 300, SEED))
+    attr = metrics.summarize(list(_frozen("attrition")))
     assert attr["avg_turns"] >= 12
-    boss = metrics.summarize(run_battery(
-        "ref_ironclad", "starter", "tank_boss", "generic", 300, SEED))
+    boss = metrics.summarize(list(_frozen("tank_boss")))
     assert boss["avg_turns"] >= 10     # A2 needs turn-10 data
 
 
