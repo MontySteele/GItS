@@ -26,9 +26,6 @@ namespace KleeMod.Tests.Prototype;
 /// Kokomi's own cards; the Universals are the Inazuma pool rework's
 /// thirty-four (2026-10-18, <c>review/active/inazuma-companions-2026-10-18.md</c>).
 ///
-/// Compiled only under <c>-p:PrototypeCards=true</c>, the same switch that
-/// compiles the arm.
-///
 /// WHAT IS REAL HERE AND WHAT IS STRUCTURAL, on the terms
 /// <c>CompanionOverhaulHookTests</c> sets: a PURE reader can be called
 /// headlessly against a <see cref="Seat"/> holding real powers and is asserted

@@ -42,7 +42,7 @@ public sealed class ProtoMcQiqiHeraldOfFrost : CustomCardModel, ICompanionCard
 
     public string? PersonalPool => null;
 
-    public string? Nation => "liyue";
+    public string? Nation => "mondstadt";
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
         new[] { CardKeyword.Exhaust };

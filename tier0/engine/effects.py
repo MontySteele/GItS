@@ -1291,8 +1291,7 @@ def gain_sparks(state: CombatState, n: int, source: str) -> None:
     `source` IS REQUIRED, and it is required because the r11 Opus seat could
     not name one: "My Spark went 1 to 2 with no bomb going off... This is the
     one number in the kit I could not read off the screen." The grant was
-    `klee_companion_spark`, which is a real kit rule and was printed
-    nowhere; the mod prints it now, and this argument is the pin that stops the
+    Klee's Companion Spark (since retired), printed nowhere; this argument is the pin that stops the
     NEXT unnamed income arriving. The C# twin is `SparkPower.Gain`'s own
     `source` parameter, which has carried exactly these strings into
     `MeterLedger` since `EB-216` -- the two vocabularies are the same
@@ -1313,114 +1312,6 @@ def gain_sparks(state: CombatState, n: int, source: str) -> None:
     # (R276): Spark Knight rides this chokepoint, as its C# twin
     # rides `SparkPower.Gain` -- every Spark any source grants passes here.
     klee_overhaul.spark_knight(state, state.player.sparks - before)
-
-
-def klee_companion_spark(state: CombatState, card: Card) -> None:
-    """"Little Hexenzirkul" -- Klee's kit answering a COMPANION play.
-
-    UNDER THE ARM IT PAYS NOTHING (2026-09-23). R276 pick 2 had widened it to
-    any card that counts as a Companion, Alice-marked plays included, and
-    [USER] turned it off: "It sounds like we've massively increased the Spark
-    generation and it's worth decreasing now to go back to the old levels and
-    then see if play is Spark-constrained." The readers still ask
-    `companion_hexerei.counts_as_companion`; only the Spark stops. Off the arm
-    the shipped Personal-Companion gate and the amounts are unchanged, so the
-    paragraphs below now describe the off-arm world and the history.
-
-    THE DECLARATION LAW:145 REQUIRES, and the ONLY place a Companion play mints
-    Sparks. The clause (countersigned R224, 2026-08-30) reads: "Companion cards
-    may not themselves grant signature resources. A character-owned engine may
-    respond to a Companion play and generate its resource where that
-    character's kit explicitly declares the trigger and bounds the amount
-    generated per Companion play." So the grant is HERE, in Klee's kit -- and
-    `prune_witch_hunt`'s face, which used to print two `gain_spark` ops, prints
-    none (EB-219).
-
-    WHAT THE KIT DECLARES IS NOW THE PRINTED WORD (`EB-642`, R265 pick 1).
-    [USER] played act 1 and read the second mark as noise: "the 'Klee's own'
-    text on the Personals is not needed". So the trigger is the FAMILY MARK --
-    one word, one rule -- and a Universal printing `Hexerei` grants exactly as a
-    Personal printing it does. The ownership half leaves the faces in the same
-    commit (`gen_klee_cards._family_tags`), because the mark and the payment
-    have to say the same thing or the r20 defect returns pointing the other way.
-
-    THE CHARACTER GATE IS EXPLICIT NOW, and it is `EB-434`: the old test was
-    "the player's own Personal Companion" with no character in it, so Kokomi
-    playing Gorou banked a Spark she has no surface to read. Sparks are Klee's
-    resource and the tip says "gives Klee"; nobody else is paid.
-
-    THE COMPANION GATE IS GONE UNDER THE ARM (`EB-663`, r24 lane 1). The rule
-    tested COMPANION *and* Hexerei, so a Klee card carrying the mark -- Alice's
-    Introduction Magic itself, or any card her this-turn window marks -- printed
-    the keyword, fired the family's readers (Coven Errand, Witches' Circle) and
-    paid nothing. One word cannot mean two sets on one screen. Under the arm the
-    test is exactly "does this card count as Hexerei", which is the readers'
-    own question; the character gate below is untouched.
-
-    THE ARM DECIDES WHICH TEST, and that is R213 B rather than taste: no
-    SHIPPED sheet row carries the family key at all, so a Hexerei-only rule
-    would silently retire the grant `EB-219` moved into the kit at parity. With
-    the arm off the shipped Personal-Companion pool answers, exactly as it has
-    since `EB-219` -- Companion gate included, because that is the world the
-    clause was countersigned over; with the arm on the printed mark answers,
-    which is the world R265 ruled on. The Balance surface does not move for a
-    prototype arm.
-
-    WHAT THE ARM'S PERSONALS LOSE, said out loud: eight prototype coven rows
-    (Barbara, Diona, Noelle, Kaeya, Jean, Sayu, Qiqi, YaoYao) carry
-    `personal_pool: klee` and no family key, so under the arm they stop
-    granting. That is the rule as ruled -- they print no word, so they pay no
-    Spark -- and the fix, if the coven is meant to pay, is to mark those rows
-    as family on the sheet, which is a design call and not this build's.
-
-    WHY `companion_hexerei.counts_as_companion` AND NOT `is_companion`
-    DIRECTLY: the readers (Coven Errand, Witches' Circle) ask that function,
-    and Alice's Introduction Magic's this-turn window is part of the set for
-    them. A rule that paid on a narrower set than the readers count would be a
-    second definition of one question.
-
-    WHY THE CALL SITE IS WHERE IT IS (`combat._finish_play`, after the FIRST
-    resolution of the play):
-      * ONCE PER PLAY. `_finish_play` is the shared half of every card play --
-        manual and auto -- and the replay loop sits inside it, so minting on the
-        first pass is "once per Companion play" by construction rather than by
-        discipline. A replay (Study Buddy) is one card being resolved twice, and
-        a per-play bound a replay can double is not a bound.
-      * AFTER a resolution, because `reactions_this_card` is the answer to "did
-        this play trigger a reaction" and it does not exist before one.
-    C# says the same thing at the twin site (`KleeElementalHooks`), where
-    `CompanionPlays.Record` already means "once per Companion play".
-
-    PARITY IS THE WHOLE SPEC. See the constants block: 1 / 2 / 2 / 3 are the
-    four numbers Prune's face paid and the three limbs reproduce them.
-    """
-    from tier0.content import upgrades          # late import avoids cycle
-    if state.player.character_id != "klee":
-        # `EB-434`. It is KLEE's kit that declared the trigger, and hers is the
-        # only Spark surface in the game; a grant nobody can read is not a
-        # grant. The old spelling of this line asked the card's pool instead of
-        # the player, so Gorou paid Kokomi.
-        return
-    # 2026-09-23: no Companion play mints a Spark under the arm. The
-    # readers (`companion_hexerei.counts_as_companion`) are untouched.
-    return
-    if not card.is_companion:
-        return
-    if card.personal_pool != "klee":
-        return
-    n = C.KLEE_COMPANION_SPARK_BASE
-    if state.reactions_this_card > 0:
-        n += C.KLEE_COMPANION_SPARK_REACTION_BONUS
-    if card.id.endswith(upgrades.SUFFIX):
-        # The upgrade is expressed at play time as an upgraded-flag read, which
-        # is what the sheet's `kit_spark` key declares: a Companion may not
-        # print a signature-resource number, upgraded or not.
-        n += C.KLEE_COMPANION_SPARK_UPGRADED_BONUS
-    n = min(n, C.KLEE_COMPANION_SPARK_MAX_PER_PLAY)
-    if n <= 0:
-        return
-    state.emit("klee_companion_spark", card=card.id, amount=n)
-    gain_sparks(state, n, source="companion:personal/play")
 
 
 #: The one non-literal a Spark price may be spelled with: X, "spend all your
@@ -5684,15 +5575,6 @@ def player_turn_start_triggers(state: CombatState) -> None:
     n = p.powers.get("spark_per_turn", 0)               # Endless Fireworks
     if n:
         gain_sparks(state, n, source="power:endless_fireworks/turn_start")
-    n = p.powers.get("bomb_and_spark_per_turn", 0)      # Playtime Forever
-    for _ in range(n):
-        if state.living_enemies:
-            enemy = state.rng.choice(state.living_enemies)
-            enemy.bombs.append(Bomb(damage=C.PLAYTIME_BOMB_DAMAGE,
-                                    turn_placed=state.turn))
-            state.emit("bomb_placed", target=enemy.name,
-                       damage=C.PLAYTIME_BOMB_DAMAGE)
-        gain_sparks(state, 1, source="power:playtime_forever/turn_start")
     companion_overhaul_turn_start(state)
 
 

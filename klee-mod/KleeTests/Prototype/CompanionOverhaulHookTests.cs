@@ -22,9 +22,6 @@ namespace KleeMod.Tests.Prototype;
 /// printed text needed an engine hook, and the hooks (sim twin
 /// <c>tier0/tests/test_companion_overhaul_hooks.py</c>).
 ///
-/// Compiled only under <c>-p:PrototypeCards=true</c>, the same switch that
-/// compiles the arm.
-///
 /// WHAT IS REAL HERE AND WHAT IS STRUCTURAL. More is real than in the first
 /// pass's file, because this wave's work is mostly in PURE readers -- a damage
 /// modifier, a cost modifier, an element funnel, a ledger -- and a pure reader
@@ -692,8 +689,7 @@ public class CompanionOverhaulHookTests
     [Fact]
     public void The_arm_does_not_edit_the_shipped_next_attack_powers()
     {
-        // A flag-off build has to keep meaning what it printed. Bennett's
-        // shipped Passion Overload carries no element clause, so the rewrite
+        // Bennett's shipped Passion Overload carries no element clause, so the rewrite
         // is a SECOND class rather than a retune -- the standing rule of this
         // arm, met a second time.
         var shipped = new[] { typeof(NextAttackUpPower),

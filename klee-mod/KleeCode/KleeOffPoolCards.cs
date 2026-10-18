@@ -7,8 +7,10 @@ namespace KleeMod;
 
 /// <summary>
 /// Klee cards that BELONG to her pool but must never be GENERATED from it:
-/// the companion roster (the 4th reward slot is their only door) and the
-/// token statuses (created at play).
+/// the token statuses (created at play) and her story Curse. The companions
+/// it used to hold are kept out of her rolls by her roster
+/// (<c>KleeOverhaulRoster.OfferablePool</c>, <c>PrototypeCards.cs</c>); the
+/// history below is about them.
 ///
 /// WHY THIS SHAPE (playtest 2026-07-21, two attempts).
 ///
@@ -69,7 +71,6 @@ public static class KleeOffPoolCards
 
     private static List<CardModel> BuildAll()
     {
-        // Companions: the reward slot (CompanionSlot.Roll) is their only door.
         var cards = new List<CardModel>
         {
             // The status package's token (Confiscated), created at play.

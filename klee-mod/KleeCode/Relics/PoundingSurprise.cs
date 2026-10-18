@@ -30,10 +30,9 @@ namespace KleeMod.Relics;
 /// registers the type itself, which is all StartingRelics needs.
 /// </summary>
 public sealed class PoundingSurprise : CustomRelicModel, IBombDetonationListener
-    // QUARANTINED. Under the Klee overhaul the relic IS the Spark rule (the
+    // Under the Klee overhaul the relic IS the Spark rule (the
     // ruled brief sec.8), so it listens to the arm's explosion bus as well as
-    // to the shipped detonation bus. The seam is inside the switch, so a
-    // release build neither compiles the interface nor references it.
+    // to the shipped detonation bus.
     , Powers.IProtoExplosionListener
 {
     public PoundingSurprise()
@@ -117,9 +116,9 @@ public sealed class PoundingSurprise : CustomRelicModel, IBombDetonationListener
     ///
     /// Source == Encounter is the "post-fight reward" gate (the enum's own
     /// doc); Shop and Other (events, relic-granted picks) get no companion,
-    /// matching roll_rewards being the post-fight function. BossEncounter
-    /// odds identify the end-of-act reward and force this fourth slot to the
-    /// Rare companion tier.
+    /// matching roll_rewards being the post-fight function. The companion
+    /// rolls on the reward's own odds (CompanionSlot.Roll), so after a boss it
+    /// is a Rare.
     /// </summary>
     public override bool TryModifyCardRewardOptions(
         Player player, List<CardCreationResult> cardRewardOptions,
@@ -127,10 +126,7 @@ public sealed class PoundingSurprise : CustomRelicModel, IBombDetonationListener
     {
         if (!OffersCompanionTo(player, creationOptions)) return false;
 
-        var companionRarity = creationOptions.RarityOdds == CardRarityOddsType.BossEncounter
-            ? CardRarity.Rare
-            : (CardRarity?)null;
-        var offer = CompanionSlot.Roll(player, companionRarity);
+        var offer = CompanionSlot.Roll(player, creationOptions);
         if (offer == null) return false;
         cardRewardOptions.Add(new CardCreationResult(offer));
         return true;

@@ -22,9 +22,6 @@ namespace KleeMod.Vfx;
 ///
 /// HEADLESS-SAFE BY THE ENGINE'S OWN GUARD: <c>TriggerAnim</c> returns early
 /// when the creature has no node, which is always in KleeTests and the sim.
-///
-/// QUARANTINED with the stage. `Vfx/Prototype/**` is Compile Remove'd without
-/// `-p:PrototypeCards=true`.
 /// </summary>
 internal static class StagePerformerBeat
 {

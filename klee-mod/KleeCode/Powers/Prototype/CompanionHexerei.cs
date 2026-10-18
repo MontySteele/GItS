@@ -18,7 +18,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 namespace KleeMod.Powers;
 
 /// <summary>
-/// THE COMPANION READERS AND THE WITCH FAMILY STAND-INS (QUARANTINED, two arms).
+/// THE COMPANION READERS AND THE WITCH FAMILY STAND-INS (two arms).
 ///
 /// Four former stand-ins (the stand-in seam was emptied 2026-10-03 and deleted
 /// 2026-10-08), and this file exists so an arm's whole behaviour is greppable

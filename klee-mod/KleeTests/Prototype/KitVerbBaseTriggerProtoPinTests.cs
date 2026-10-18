@@ -7,10 +7,8 @@ namespace KleeMod.Tests.Prototype;
 /// <summary>
 /// `EB-495`, the PROTOTYPE arm's verb rows of the kit-verb / base-game-trigger
 /// matrix (`docs/current/atlas/kit-verbs-vs-base-triggers.md`). Split from
-/// `KitVerbBaseTriggerPinTests` for the reason the whole `Prototype/` folder
-/// exists: `ProtoBombPower`, `KokomiPlan` and `FurinaStage` are not compiled
-/// without `-p:PrototypeCards=true`, so a pin against them would not compile
-/// either.
+/// `KitVerbBaseTriggerPinTests` when `ProtoBombPower`, `KokomiPlan` and
+/// `FurinaStage` were not compiled in every build.
 ///
 /// The base-game TRIGGER half is not repeated here -- it is a fact about
 /// `sts2.dll` and is pinned once, in the shipped class. What is here is the

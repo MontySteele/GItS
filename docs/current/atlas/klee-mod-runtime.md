@@ -141,9 +141,10 @@ In-game there is no CLI: `KleeMod.Initialize` is the only entry
 - **R52** (`tier0/DECISIONS.md:1314`) — Kokomi heals no HP, ever; her sustain is
   prevention. Binds every Kokomi power that would otherwise grant healing.
 - **R59 / R60 / R61** (`tier0/DECISIONS.md:1777`, `:1796`, `:1813`) — the shop's two
-  colorless slots carry companions: BOTH slots are Uncommon-or-Rare at renormalized
-  odds (`SlotOneUncommonOdds` / `SlotTwoUncommonOdds`, both mirroring
-  `SHOP_COMPANION_RARITY_ODDS`) and differ by nation only; the patch REDIRECTS only,
+  colorless slots carry companions, in the base shape since **[USER] 2026-10-18**
+  (legacy review pick 2): slot 1 a fixed home-nation Uncommon, slot 2 a fixed
+  any-nation Rare that falls back to Uncommon (`SlotOneRarities` / `SlotTwoRarities`,
+  mirroring `SHOP_COMPANION_SLOT_RARITIES`); the patch REDIRECTS only,
   so `ColorlessCardPool` stays populated for its six non-shop consumers; and pricing
   must match tier 0.5's model of the same channel —
   `Patches/MerchantCompanionSlots.cs`. **[USER] 2026-08-10** restored slot 2's floor

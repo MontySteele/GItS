@@ -1,8 +1,12 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using HarmonyLib;
 using KleeMod.Cards;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Players;
+using MegaCrit.Sts2.Core.Factories;
+using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Random;
 using MegaCrit.Sts2.Core.Runs;
@@ -16,11 +20,16 @@ namespace KleeMod;
 /// ([USER] 2026-10-18, "Agreed on (a)!" -- scrap the banner everywhere), in
 /// this slot and in the shop alike.
 ///
-/// Law mirrored exactly: roll a rarity on RARITY_ODDS, fall through
-/// rare -> uncommon -> common when a tier is empty, then a NATION-WEIGHTED
-/// pick inside the tier. Rarity is the sheet's rarity field (codegen'd as
-/// CardRarity); Star is a separate 4/5 label -- the two happen to coincide at
-/// rare/5-star today, but nothing here reads Star.
+/// THE COMPANION ROLLS LIKE THE CARDS BESIDE IT ([USER] 2026-10-18, legacy
+/// review pick 3: "Agreed on all 6 legacy picks"). Its rarity is rolled by the
+/// base game's own <c>CardFactory.RollForRarity</c> on the reward's own
+/// <c>RarityOdds</c> -- regular, elite or boss odds and the run's rare pity
+/// counter, exactly as each native reward card is rolled -- and it then gets
+/// the native reward card's upgrade roll, <c>CardFactory.RollForUpgrade</c>
+/// at base chance 0. After a boss it is a Rare, an Uncommon when no Rare
+/// companion can be offered. Then a NATION-WEIGHTED pick inside the tier.
+/// Rarity is the sheet's rarity field (codegen'd as CardRarity); Star is a
+/// separate 4/5 label, and nothing here reads Star.
 ///
 /// Nation weighting went live with the Fontaine roster (2026-07-21 ruling:
 /// "it's fine for Fontaine companions to show up as long as the 50%
@@ -50,9 +59,44 @@ public static class CompanionSlot
     // CardCreationSource.Encounter gate, which the enum's own doc defines as
     // the post-fight reward -- shops and events get no companion.
 
-    // tier0 constants.RARITY_ODDS: common 0.60 / uncommon 0.35 / rare 0.05.
-    private const float CommonOdds = 0.60f;
-    private const float UncommonOdds = 0.35f;
+    private delegate CardRarity RollForRarityFn(Player player,
+        CardRarityOddsType rollMethod, CardCreationSource source,
+        HashSet<CardRarity> allowedRarities, bool forceRarityOddsChange);
+
+    private delegate void RollForUpgradeFn(Player player, CardModel card,
+        decimal baseChance, Rng rng);
+
+    /// <summary>
+    /// The base game's own reward rarity roll and upgrade roll, both private
+    /// to <c>CardFactory</c>. Reused, not re-implemented, so the companion's
+    /// odds, pity and upgrade chance cannot drift from the native cards'.
+    /// Resolved with their own catch so a renamed method degrades (logged)
+    /// rather than throwing a TypeInitializationException into a reward
+    /// screen -- the MerchantCompanionSlots F2 pattern.
+    /// </summary>
+    private static readonly Delegate? BaseRollForRarity = Resolve(
+        "RollForRarity", typeof(RollForRarityFn),
+        typeof(Player), typeof(CardRarityOddsType), typeof(CardCreationSource),
+        typeof(HashSet<CardRarity>), typeof(bool));
+
+    private static readonly Delegate? BaseRollForUpgrade = Resolve(
+        "RollForUpgrade", typeof(RollForUpgradeFn),
+        typeof(Player), typeof(CardModel), typeof(decimal), typeof(Rng));
+
+    private static Delegate? Resolve(string name, Type delegateType, params Type[] args)
+    {
+        try
+        {
+            var method = AccessTools.Method(typeof(CardFactory), name, args);
+            return method == null ? null : Delegate.CreateDelegate(delegateType, method);
+        }
+        catch (Exception e)
+        {
+            Log.Error($"[{KleeMod.ModId}] CardFactory.{name} did not resolve "
+                    + $"({e.GetType().Name}); the companion reward slot falls back.");
+            return null;
+        }
+    }
 
     /// <summary>tier0 SAME_NATION_REWARD_SHARE.</summary>
     private const double SameNationShare = 0.5;
@@ -76,14 +120,13 @@ public static class CompanionSlot
         && homeCharacter
         && ReferenceEquals(host.Owner, player);
 
-    public static CardModel? Roll(Player player, CardRarity? forcedRarity = null)
+    public static CardModel? Roll(Player player, CardCreationOptions creationOptions)
     {
         // rarity tier -> canonical companion models. personal_pool cards are
         // only offered to their own character (tier05: "load-bearing the
-        // moment a second character exists"). That moment has arrived twice
-        // over: three characters host this slot now, each from its own
-        // starter relic, so CharacterId below has three live arms and the
-        // filter is doing real work.
+        // moment a second character exists"). It has: five characters host
+        // this slot now, each from its own starter relic, so the filter is
+        // doing real work.
         var tiers = new Dictionary<CardRarity, List<CardModel>>();
         // CompanionPool.All, not CompanionRoster.All: the pool class is the ONE
         // door to "which companions exist for this run", and the Mondstadt
@@ -103,32 +146,58 @@ public static class CompanionSlot
         }
         if (tiers.Count == 0) return null;
 
-        // Sim _roll_rarity: cumulative walk of RARITY_ODDS in sheet order.
-        var rng = player.PlayerRng.Rewards;
-        var rarity = forcedRarity ?? RollRarity(rng);
-        // Ordinary rolls fall through when a tier is empty (tier0
-        // roll_rewards). Forced post-boss rarity is strict: no lower-tier
-        // substitute may occupy the Rare-only slot.
-        if (forcedRarity == null && !tiers.ContainsKey(rarity)) rarity = CardRarity.Uncommon;
-        if (forcedRarity == null && !tiers.ContainsKey(rarity)) rarity = CardRarity.Common;
+        var rarity = RollRarity(player, creationOptions, tiers);
         if (!tiers.TryGetValue(rarity, out var pool)) return null;
 
+        var rng = creationOptions.RngOverride ?? player.PlayerRng.Rewards;
         var pick = NationWeightedChoice(rng, pool, HomeNation(player));
         if (pick == null) return null;
         // Same instantiation the native reward path uses for its own rolled
-        // cards (CardFactory.CreateForReward ends in exactly this call), so
-        // the appended 4th option is indistinguishable from the other three.
-        // No upgrade roll here: the native path rolls one per reward card,
-        // and the sim's companion slot does not.
-        return ((ICardScope)player.RunState).CreateCard(pick, player);
+        // cards (CardFactory.CreateForReward ends in exactly this call), then
+        // the same upgrade roll it gives each of them, on the same stream and
+        // under the same NoUpgradeRoll flag.
+        var card = ((ICardScope)player.RunState).CreateCard(pick, player);
+        if (!creationOptions.Flags.HasFlag(CardCreationFlags.NoUpgradeRoll)
+            && BaseRollForUpgrade is RollForUpgradeFn upgrade)
+        {
+            upgrade(player, card, 0m, rng);
+        }
+        return card;
     }
 
-    private static CardRarity RollRarity(Rng rng)
+    /// <summary>
+    /// The reward's own rarity roll (<c>CardFactory.RollForRarity</c>), over
+    /// the tiers this player can be offered: an Encounter reward on regular,
+    /// elite or boss odds rolls with the pity counter and moves it, exactly
+    /// as a native reward card does, and an empty tier wraps the way the base
+    /// game's <c>GetNextAllowedRarity</c> does. After a boss the slot is a
+    /// Rare, or an Uncommon when no Rare companion can be offered.
+    /// </summary>
+    private static CardRarity RollRarity(Player player,
+        CardCreationOptions creationOptions,
+        Dictionary<CardRarity, List<CardModel>> tiers)
     {
-        var roll = rng.NextFloat();
-        return roll < CommonOdds ? CardRarity.Common
-            : roll < CommonOdds + UncommonOdds ? CardRarity.Uncommon
-            : CardRarity.Rare;
+        var odds = creationOptions.RarityOdds;
+        CardRarity rarity;
+        if (BaseRollForRarity is RollForRarityFn roll)
+        {
+            rarity = roll(player, odds, creationOptions.Source,
+                tiers.Keys.ToHashSet(),
+                creationOptions.Flags.HasFlag(CardCreationFlags.ForceRarityOddsChange));
+        }
+        else
+        {
+            rarity = player.PlayerOdds.CardRarity.Roll(odds);
+            if (!tiers.ContainsKey(rarity)) rarity = CardRarity.Uncommon;
+            if (!tiers.ContainsKey(rarity)) rarity = CardRarity.Common;
+        }
+        if (odds == CardRarityOddsType.BossEncounter)
+        {
+            rarity = tiers.ContainsKey(CardRarity.Rare)
+                ? CardRarity.Rare
+                : CardRarity.Uncommon;
+        }
+        return rarity;
     }
 
     // Delegated to CompanionPool (§4.7 shop sprint, Track A) so the reward
@@ -176,8 +245,8 @@ public static class CompanionSlot
                 .ToArray();
         }
 
-        // Weighted draw off the same Rewards stream the rarity roll used, so
-        // the slot still consumes exactly two numbers per offer.
+        // Weighted draw off the reward's own stream (Rewards unless the
+        // reward overrides it), the stream the native card draw uses.
         var cutoff = rng.NextFloat() * weights.Sum();
         double running = 0;
         for (var i = 0; i < cards.Count; i++)

@@ -59,7 +59,7 @@ def test_two_out_two_in_and_the_split_holds(overhaul):
     assert ids[-5:-3] == C.KLEE_DESIGN_REVIEW_IDS == (
         "proto_ko_fire_fire", "proto_ko_blasting_spree")
     rarity = collections.Counter(load(cid).rarity for cid in ids)
-    assert rarity == {"common": 25, "uncommon": 32, "rare": 21}
+    assert rarity == {"common": 24, "uncommon": 33, "rare": 21}
     shapes = {cid: (load(cid).type, load(cid).cost, load(cid).rarity)
               for cid in C.KLEE_DESIGN_REVIEW_IDS}
     assert shapes == {

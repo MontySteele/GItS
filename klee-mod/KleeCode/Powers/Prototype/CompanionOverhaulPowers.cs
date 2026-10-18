@@ -16,7 +16,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 namespace KleeMod.Powers;
 
 /// <summary>
-/// THE MONDSTADT COMPANION OVERHAUL'S POWERS (QUARANTINED, R213 B).
+/// THE MONDSTADT COMPANION OVERHAUL'S POWERS (R213 B).
 ///
 /// Eight powers, in two shapes the engine already runs: a START-OF-TURN payout
 /// (<c>CelestialGiftPower</c> (retired)'s shape) and an END-OF-TURN volley
@@ -222,9 +222,7 @@ public sealed class GlacialWaltzPower : PowerModel, ILocalizationProvider
 /// damage to a random enemy." NO TURN LIMIT -- the workshop's sec.1 rule, and
 /// its sec.3 note: "a Power cannot be reapplied, so Oz stays out, which is his
 /// C1." That is the whole difference from the shipped
-/// <c>OzSummonPower</c> (retired), which is a three-turn Counter, and it is why
-/// this is a separate class rather than a retune of that one: the shipped row
-/// has to keep meaning what it printed on a flag-off build.
+/// <c>OzSummonPower</c> (retired), which is a three-turn Counter.
 ///
 /// Amount is the number of COPIES: two Ozes, two volleys.
 /// </summary>
@@ -502,7 +500,7 @@ public sealed class SolarIsotomaBloomPower : PowerModel, ILocalizationProvider
 /// here puts this arm's block strictly after the shipped chain -- which is
 /// exactly where tier0 puts it. The one other AfterSideTurnEnd tenant is
 /// <c>WitchsFlamePower</c> (retired), and Durin's Witch's Flame is one of the
-/// seventeen Mondstadt rows this arm takes out of the pool, so with the arm on
+/// seventeen Mondstadt rows this arm takes out of the pool, so
 /// it cannot be drafted and the co-tenancy cannot arise. Stated rather than
 /// assumed: if a later slice puts that row back, this comment is the note that
 /// says the two now share a broadcast.

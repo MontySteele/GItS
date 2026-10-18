@@ -26,7 +26,7 @@ namespace KleeMod.Relics;
 /// the Tamakushi Casket. They, the Casket and the Watatsumi Casket are her
 /// whole relic offer; the Silent borrow leaves the offer (census pick 2).
 ///
-/// QUARANTINED for Salon Solitaire's reason: under <c>Relics/</c>, so the
+/// UNDER <c>Relics/</c>, so the
 /// titles stay in <c>tools/lint_unique_names.py</c>'s namespace. Every effect
 /// asks <see cref="KokomiOverhaul.IsHers"/>, so a relic held by anyone else
 /// does nothing. No relic writes or carries out a Plan by itself (brief rule

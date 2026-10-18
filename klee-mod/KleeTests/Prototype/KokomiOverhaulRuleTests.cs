@@ -19,7 +19,7 @@ namespace KleeMod.Tests.Prototype;
 /// THE KOKOMI OVERHAUL, SLICE ONE, DRAFT 6: the four rules of the ruled brief
 /// (`review/active/kokomi-brief-2026-09-01.md` draft 6 sec.2 -- the pet, the
 /// Plan, where a planned clause lands, and "nothing happens by itself"), plus
-/// Mend and the flag-off pin.
+/// Mend and the wiring pin.
 ///
 /// WHAT IS REAL HERE AND WHAT IS STRUCTURAL, said once, the same split
 /// <c>KleeOverhaulRuleTests</c> makes and for the same reason. Draft 6's rules
@@ -50,10 +50,8 @@ public class KokomiOverhaulRuleTests
     [Fact]
     public void The_arm_is_hers_alone()
     {
-        // In co-op the other seat may be Klee, and a bare flag read would hand
-        // him a Tide counter. Every rule in the arm asks through `LiveFor`.
-        // BOTH SIDES OF THE SWITCH IN ONE BUILD, which is what `Enabled` is
-        // settable for -- and restored, so no other pin reads a moved default.
+        // In co-op the other seat may be Klee. Every rule in the arm asks
+        // through `LiveFor`.
         try
         {
             Assert.False(KokomiOverhaul.LiveFor(Seat.Klee().Creature));
@@ -69,10 +67,7 @@ public class KokomiOverhaulRuleTests
     [Fact]
     public void The_five_wiring_seams_read_the_flag_and_nothing_else()
     {
-        // FLAG OFF IS BYTE-IDENTICAL, pinned where it is decided rather than
-        // asserted in prose. Each seam is one `if` on the same property, so
-        // with the arm off her starter, her relic and her pool fall through to
-        // exactly what they were.
+        // STRUCTURAL: each seam reads the overhaul roster.
         var deck = typeof(global::KleeMod.Kokomi)
             .GetProperty("StartingDeck", HeadlessGame.All)!.GetGetMethod(true)!;
         Assert.Contains("KokomiOverhaulRoster.StartingDeck", Il.Calls(deck));

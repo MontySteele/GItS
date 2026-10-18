@@ -157,11 +157,11 @@ public class CrystalCollapseTests
     // ---- THE POOL --------------------------------------------------------
 
     [Fact]
-    public void Crystal_collapse_is_her_own_card_and_the_personal_seam_stays()
+    public void Crystal_collapse_is_her_own_card()
     {
         // The Kokomi re-founding (2026-10-12): Crystal Collapse is in her own
-        // pool, so it is no Personal any more; the Inazuma Personal list is
-        // empty and the seam stays.
+        // pool, so it is no Personal any more (the empty Inazuma Personal
+        // list was deleted 2026-10-18).
         var card = new ProtoMiGorouCrystalCollapse();
         Assert.Null(card.PersonalPool);
         Assert.Equal("inazuma", card.Nation);
@@ -173,13 +173,8 @@ public class CrystalCollapseTests
             ?? throw new System.InvalidOperationException(
                 "CompanionOverhaulRoster is gone -- the one wiring seam moved.");
         Assert.NotNull(rosterType.GetMethod("InazumaUniversals", HeadlessGame.All));
-        Assert.NotNull(rosterType.GetMethod("InazumaPersonals", HeadlessGame.All));
-        // The two lists are separate methods on purpose, and `Roster` reads
-        // both -- tier0's `INAZUMA_OVERHAUL_POOL_IDS` /
-        // `INAZUMA_OVERHAUL_PERSONAL_IDS` split is the same split.
         var roster = rosterType.GetMethod("Roster", HeadlessGame.All)!;
         var calls = Il.Calls(roster);
         Assert.Contains(calls, c => c.Contains("InazumaUniversals"));
-        Assert.Contains(calls, c => c.Contains("InazumaPersonals"));
     }
 }

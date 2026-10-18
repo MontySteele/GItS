@@ -17,7 +17,7 @@ using MegaCrit.Sts2.Core.Models.Powers;
 namespace KleeMod.Powers;
 
 /// <summary>
-/// KOKOMI POOL COMPLETION (2026-10-01, QUARANTINED under the Kokomi arm):
+/// KOKOMI POOL COMPLETION (2026-10-01, the Kokomi arm):
 /// the now-line verbs of paper sec.4's new rows
 /// (<c>review/active/pool-completion-2026-10-01.md</c>), one awaited call per
 /// `kind:` of the `kokomi` op. Sim twin: <c>tier0/engine/kokomi_plan.kind</c>.
@@ -134,7 +134,7 @@ public sealed class WatatsumiResistancePower : PowerModel, ILocalizationProvider
 /// The answer is the play re-aimed where the now-line aims -- the front enemy
 /// for a row that aims at an enemy (a planned hit's own reader), the Plan's
 /// ally for one that aims at a player -- or null: no Power, the once already
-/// spent, the arm off, or nobody to aim at (then the once is NOT spent).
+/// spent, the kit not live, or nobody to aim at (then the once is NOT spent).
 /// Game-side only, like every Ancient (the sim models no events).
 /// </summary>
 public sealed class DivineStrategyPower : PowerModel, ILocalizationProvider

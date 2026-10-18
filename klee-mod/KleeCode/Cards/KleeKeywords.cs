@@ -38,7 +38,7 @@ public static class KleeKeywords
     // plaque. One declaration, so the gem and the tip cannot disagree.
     //
     // ONE SWITCH, EVERY SHEET. There is one keyword per element and all four
-    // sheets plus both quarantined arms declare the same four, so this flip is
+    // sheets plus both prototype arms declare the same four, so this flip is
     // the whole of the removal on 114 faces (Klee 36 generated + 5 written,
     // Furina 9, Kokomi 20, the prototype surface 44).
     [CustomEnum("applies_pyro")]

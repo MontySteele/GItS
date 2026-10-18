@@ -326,8 +326,6 @@ class _RunCtx:
     seed_ids: set
     grant_relics: bool = False
     grant_potions: bool = False
-    always_choose3: bool = False
-    pity_k: Optional[int] = None
     held: "Optional[relic_pool.HeldRelics]" = None
     bag: "Optional[potion_pool.PotionBag]" = None
     removal_uses: int = 0
@@ -336,7 +334,6 @@ class _RunCtx:
     # log can be joined back together -- see shop.ShopOutcome. Bookkeeping
     # only: nothing branches on it and it draws no rng.
     shop_visits: int = 0
-    screens_since_companion: int = 0
     just_rested: bool = False
     fights: int = 0
     seen_events: set = field(default_factory=set)
@@ -746,21 +743,12 @@ class _RunCtx:
         only the companion slot; a no-companion character got ordinary
         commons at the boundary -- the Ironclad-0.6% diagnosis, 2026-07-23.)"""
         n_comp = 1
-        if self.always_choose3:
-            n_comp = 3                  # choose3: every slot is
-            #             a pick of three (spec §3). Applies to
-            #             the act-boundary screen too -- it is a
-            #             companion slot like any other, forced
-            #             to Rare rather than exempted.
-        elif (self.pity_k is not None
-                and self.screens_since_companion >= self.pity_k):
-            n_comp = 3                  # pity fires: choose-3 slot
         # THE FIGHT'S OWN SCREEN, then any screen the fight EARNED.
         # The Hunt's extra reward is granted here and only here:
         # combat recorded that it happened (state.extra_card_screens)
         # and the run layer is what owns rolling and drafting, the
         # same division the Burning Blood heal keeps above. An extra
-        # screen is CARD-ONLY -- no companion slot, no pity credit,
+        # screen is CARD-ONLY -- no companion slot,
         # and never the boss's forced-Rare tier, because it is an
         # ordinary CardReward the room hands over after the fight.
         # (Lost fights never reach here at all, so a Hunt that fires
@@ -772,13 +760,7 @@ class _RunCtx:
             offers = rewards.roll_rewards(
                 self.rng, self.character, companion_offers=n_comp_i,
                 companion_rarity=forced,
-                card_rarity=forced,
-                # `EB-577`: the floor this screen is on, 1-based. `i` is the
-                # index this node took in `res.node_kinds` BEFORE the append,
-                # so the first room of a run is `i == 0` and floor 1. The only
-                # reader is the Klee arm's Spark seed, and it is the identity
-                # everywhere else.
-                floor=i + 1)
+                card_rarity=forced)
             # Read-only: the drafter, the relevance probes and the core
             # check below only SCORE the deck. Copying it three times per
             # screen was the run layer's single biggest cost.
@@ -809,16 +791,6 @@ class _RunCtx:
                 if self.held is not None:      # Book of Five Rings tally
                     self.hp = self.held.note_cards_added(1, self.hp,
                                                          self.max_hp)
-            if n_comp_i == 0:
-                # A card-only screen cannot produce a companion, so
-                # counting it toward the pity clock would let The
-                # Hunt accelerate the companion pity timer -- an
-                # interaction nobody designed and nothing prints.
-                pass
-            elif pick is not None and pick.is_companion:
-                self.screens_since_companion = 0
-            else:
-                self.screens_since_companion += 1
             if (self.res.time_to_online is None
                     and draft.core_complete(
                         [loader.peek_card(cid) for cid in self.deck_ids],
@@ -849,11 +821,7 @@ def _setup_run(character: str, archetype: str, pilot_id: str,
     """Run start: the slot mode, the three rng streams, the starting deck and
     the seeded/Neow relics and the potion bag. Everything up to the first
     node. Argument meanings are documented on run_one, the public entry."""
-    pity_k = None
-    always_choose3 = slot_mode == "choose3"
-    if slot_mode.startswith("pity(") and slot_mode.endswith(")"):
-        pity_k = int(slot_mode[5:-1])
-    elif slot_mode not in ("standard", "choose3"):
+    if slot_mode != "standard":
         raise ValueError(f"unknown slot mode {slot_mode!r}")
     rng = random.Random(seed)
     # No Featured Banner ([USER] 2026-10-18, "Agreed on (a)!"). It drew from
@@ -936,7 +904,6 @@ def _setup_run(character: str, archetype: str, pilot_id: str,
                    deck_ids=deck_ids, hp=hp, max_hp=max_hp, gold=gold, n=n,
                    seed_ids=seed_ids, grant_relics=grant_relics,
                    grant_potions=grant_potions,
-                   always_choose3=always_choose3, pity_k=pity_k,
                    held=held, bag=bag)
 
 
@@ -949,15 +916,9 @@ def run_one(character: str, archetype: str, pilot_id: str,
             n_acts: int | None = None,
             route_name: str = "hunter",
             force_cards: list[str] | None = None) -> RunResult:
-    """slot_mode: the draft-sim spec's three modes (§3, "build all three
-    now") -- 'standard' (1 companion offer), 'choose3' (every companion slot
-    is a pick of three), or 'pity(k)' (k screens without taking a companion
-    make the NEXT slot a choose-3). Mode set per-config; default standard.
-    `choose3` is the standalone mode EB-27 found never built: the mechanism
-    existed only as pity's payload, so the fishable arm of the dream-team
-    metric (spec §5, "deliberately fishable under choose3/pity") had no
-    choose3 half to read. It is INERT until a caller asks for it -- nothing
-    in the live instruments passes it, and `standard` is byte-identical.
+    """slot_mode: 'standard' (one companion offer) is the only mode. The
+    spec's 'choose3' and 'pity(k)' modes were ruled out and deleted
+    (2026-10-18); anything else raises.
 
     n_acts (§10.1): how many acts the run spans -- None (default) spans every
     act registered in constants.RUN_ACTS; an explicit count must not exceed

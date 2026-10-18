@@ -8,7 +8,7 @@ using MegaCrit.Sts2.Core.Models.Powers;
 namespace KleeMod.Cards;
 
 /// <summary>
-/// `EB-377`: the BASE GAME'S words a quarantined face names, defined on the
+/// `EB-377`: the BASE GAME'S words a prototype face names, defined on the
 /// face that names them.
 ///
 /// THE GAP, AND WHY IT LOOKED LIKE ONLY ONE WORD. The round-9 Kokomi seat
@@ -31,13 +31,8 @@ namespace KleeMod.Cards;
 /// that prints one of these words carries its definition because it printed the
 /// word and not because somebody remembered.
 ///
-/// QUARANTINED, LIKE ITS SIBLING, and that is a scope decision rather than a
-/// technical one. The file sits under `Cards/Prototype/`, which
-/// `KleeCode.csproj` Compile-Removes from a release build, and the attach is
-/// gated on `CharacterProfile.arm_keyword_tips` -- true only on the prototype
-/// surface. A release build is untouched: eighty shipped faces print `Weak`
-/// today and widening the attach to them is a change to the shipped surface,
-/// which this row was not filed against.
+/// SCOPED, LIKE ITS SIBLING: the attach is gated on
+/// `CharacterProfile.arm_keyword_tips`, true only on the prototype surface.
 ///
 /// THE NUMBERS ARE THE BASE GAME'S STRUCTURAL RATES, not this mod's dials, so
 /// they are written out rather than interpolated from a `*OverhaulLaw`: there
@@ -162,7 +157,7 @@ public static class BaseKeywordTips
             "Every hit the wearer lands, a Skill's too, deals 25% less. Loses "
           + "1 stack at the end of its turn.");
 
-    /// <summary>The third duration debuff. No quarantined face prints it
+    /// <summary>The third duration debuff. No prototype face prints it
     /// today; the row exists because the attach is derived and a face that
     /// prints it tomorrow must not have to remember this.</summary>
     public static IEnumerable<IHoverTip> ForFrail(

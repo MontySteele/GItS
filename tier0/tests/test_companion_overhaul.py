@@ -105,7 +105,6 @@ def test_flag_on_fontaine_is_its_rows_ported_as_they_are(overhaul):
     shipped rows to the prototype surface AS THEY ARE: the roster's Fontaine
     half is the `proto_mf_` twins of the shipped rows, one for one, and the
     shipped rows themselves are gone (stage 6)."""
-    assert "fontaine" in C.COMPANION_OVERHAUL_NATIONS
     after = {c.id for c in rewards._companion_roster()
              if c.nation == "fontaine"}
     assert all(cid.startswith("proto_mf_") for cid in after)
@@ -116,10 +115,9 @@ def test_every_overhaul_id_resolves_to_a_mondstadt_companion(overhaul):
     for cid in C.MONDSTADT_OVERHAUL_POOL_IDS:
         card = loader.peek_card(cid)
         assert card.is_companion, cid
-        # Qiqi (Liyue) joined with the Klee-only companions, 2026-10-03.
-        expected = ("liyue" if cid == "proto_mc_qiqi_herald_of_frost"
-                    else C.COMPANION_OVERHAUL_NATION)
-        assert card.nation == expected, cid
+        # Qiqi joined with the Klee-only companions (2026-10-03) and sits in
+        # Mondstadt until Liyue has a sheet (LAW, 2026-10-18).
+        assert card.nation == C.COMPANION_OVERHAUL_NATION, cid
         assert card.personal_pool is None, cid
         assert card.rarity in C.RARITY_ODDS, cid
 
@@ -139,12 +137,9 @@ def test_the_pool_ids_and_the_sheet_agree(overhaul):
     on_sheet = {c.id for c in loader.prototype_cards()
                 if c.id.startswith("proto_mc_")}
     assert on_sheet == (
-        set(C.MONDSTADT_OVERHAUL_POOL_IDS) | set(C.COVEN_PERSONAL_POOL_IDS)
-        | set(C.KLEE_OWN_COMPANION_IDS))
+        set(C.MONDSTADT_OVERHAUL_POOL_IDS) | set(C.KLEE_OWN_COMPANION_IDS))
     assert not (set(C.MONDSTADT_OVERHAUL_POOL_IDS)
                 & set(C.KLEE_OWN_COMPANION_IDS))
-    assert not (set(C.MONDSTADT_OVERHAUL_POOL_IDS)
-                & set(C.COVEN_PERSONAL_POOL_IDS))
 
 
 def test_the_offerable_five_stars_are_the_overhaul_rows(overhaul):

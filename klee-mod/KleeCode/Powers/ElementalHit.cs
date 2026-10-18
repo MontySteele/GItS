@@ -27,14 +27,13 @@ internal static class ElementalHit
 {
     /// <summary>Element-tagged damage hit (tier0 deal_damage_to_enemy).
     ///
-    /// <paramref name="ignoreBlock"/> is QUARANTINED (the Inazuma companion
-    /// overhaul) and has exactly one caller: Chiori's Tamoto, whose printed
+    /// <paramref name="ignoreBlock"/> (the Inazuma companion
+    /// overhaul) has exactly one caller: Chiori's Tamoto, whose printed
     /// text is "deal 6 Geo damage to a random enemy, IGNORING BLOCK". It adds
     /// <c>ValueProp.Unblockable</c> to the <c>Unpowered</c> every hit through
     /// here already carries, and changes nothing else -- the hit still reacts,
     /// still counts as a hit, and is still capped by Intangible, because
-    /// unblockable is not uncappable (R128). Defaulted false, so every shipped
-    /// caller is byte-identical. Sim twin: `deal_damage_to_enemy(...,
+    /// unblockable is not uncappable (R128). Defaulted false. Sim twin: `deal_damage_to_enemy(...,
     /// ignore_block=True)`.
     ///
     /// IT RETURNS THE NUMBER IT DEALT -- the truncated amount handed to
@@ -47,7 +46,7 @@ internal static class ElementalHit
     /// arithmetic and disagreeing under Weak. Every existing caller ignores the
     /// result and is behaviour-identical; nothing in the pipeline moved.
     ///
-    /// <paramref name="powered"/> is QUARANTINED and, since `EB-343`,
+    /// <paramref name="powered"/>, since `EB-343`,
     /// has TWO callers -- one per Klee-and-Kokomi prototype arm, asking
     /// the same thing for two different reasons. False skips
     /// <see cref="SimDamagePipeline.DealerMods"/> -- the dealer's Strength
@@ -55,8 +54,7 @@ internal static class ElementalHit
     /// and changes nothing else: the aura still lands, the reaction still
     /// fires and its amplifier is still read off the applier, and the
     /// target's Vulnerable still multiplies through
-    /// <see cref="SimDamagePipeline.TargetMods"/>. Defaulted true, so every
-    /// shipped caller is byte-identical.
+    /// <see cref="SimDamagePipeline.TargetMods"/>. Defaulted true.
     ///
     ///   * <c>KokomiPlan.Hit</c>, since <c>EB-334</c> ruled (R246 pick 1)
     ///     that the BAKE-KURAGE deals a Plan's damage.
@@ -232,17 +230,16 @@ internal static class ElementalHit
     /// (<c>CompanionPowers.WitchsFlamePower</c>) is the same arithmetic written
     /// inline.
     ///
-    /// QUARANTINED CALLERS, two: the Klee overhaul's Spark Knight (R276), and
+    /// CALLERS, two: the Klee overhaul's Spark Knight (R276), and
     /// since draft 3 (2026-09-25) the Furina Stage's two damage acts, which
     /// pass <paramref name="powered"/> false exactly as <see cref="Deal"/>'s
     /// callers do (a performance carries no Strength, `EB-495` D3). A named
     /// door rather than <c>Element.None</c> passed to <see cref="Deal"/>,
     /// which would hand <c>None</c> to the reaction table as a trigger, and
-    /// because a call site is what the headless suite can pin. Defaulted true,
-    /// so Spark Knight is byte-identical.
+    /// because a call site is what the headless suite can pin. Defaulted true.
     /// </summary>
     /// <summary>
-    /// QUARANTINED (the Klee arm's Alice's Teapot): a hit that reacts as if
+    /// The Klee arm's Alice's Teapot: a hit that reacts as if
     /// the target held <paramref name="assumedAura"/>, and touches the aura it
     /// really holds not at all -- nothing real is consumed, refreshed or
     /// applied. The reaction still resolves through the one site every

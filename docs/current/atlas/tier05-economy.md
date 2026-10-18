@@ -107,8 +107,10 @@ character_pool`, `shop.visit_shop / companion_shop_offer`,
 - **R59** (`tier0/DECISIONS.md:1777`) — shop companion slot 2 is wildcard-nation
   at an **Uncommon floor** on renormalized reward odds; guaranteed-Rare rejected
   as brittle against banner thinning. R116/NC-10 removed that floor; **[USER]
-  restored it 2026-08-10** (S4-G10 close-out, `CONSTANTS_VERSION` 9), so both
-  slots read `SHOP_COMPANION_RARITY_ODDS` and differ by nation only.
+  restored it 2026-08-10** (S4-G10 close-out, `CONSTANTS_VERSION` 9). **[USER]
+  2026-10-18** (legacy review pick 2) moved both slots to the base shape: slot 1
+  a fixed Uncommon, slot 2 a fixed Rare with an Uncommon fallback
+  (`SHOP_COMPANION_SLOT_RARITIES`).
 - **R60** (`:1796`) — the C# `ColorlessCardPool` stays populated for its six
   non-shop consumers. It is **no longer the shop's last fallback rung**: [USER]
   ruled on 2026-08-10 that the mod matches the sim and **omits** an unfillable

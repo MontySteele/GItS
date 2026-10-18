@@ -41,8 +41,7 @@ namespace KleeMod.Tests.Prototype;
 /// the game's boot (README, "The headless boundary"), so every
 /// <c>ModelDb.Card&lt;T&gt;()</c> in these lists throws if called -- the ids are
 /// read off the compiled methods instead. What IS real: the shipped basics'
-/// own rarity and tags, the game method the patch targets, and the seam
-/// answering null with the arms off.
+/// own rarity and tags, and the game method the patch targets.
 ///
 /// `EB-352`: THE SECOND DOOR. `EB-351` closed on "everything else goes through
 /// `GetUnlockedCards`, which the arm already owns". That is true of every
@@ -221,7 +220,4 @@ public class ArmStarterBasicsTests
         Assert.DoesNotContain("KokomiOverhaulRoster.StarterDefend", calls);
         Assert.DoesNotContain("FurinaStageRoster.StarterDefend", calls);
     }
-
-    // ---- flag off ---------------------------------------------------------
-
 }

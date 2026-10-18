@@ -110,7 +110,7 @@ public static class FurinaStageCues
     }
 
     /// <summary>
-    /// What to draw now, or null for nothing: the arm off, her turn over, or
+    /// What to draw now, or null for nothing: no stage, her turn over, or
     /// a forecast that could not be made (a preview never throws at its
     /// caller).
     /// </summary>

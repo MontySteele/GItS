@@ -25,11 +25,8 @@ namespace KleeMod.Relics;
 /// they and the starter and the Ancient are her whole relic pool, and the
 /// Silent borrow goes (<see cref="KleeRelicPool"/>).
 ///
-/// QUARANTINED for Salon Solitaire's reason: the whole file is inside
-/// <c>#if PROTOTYPE_CARDS</c> and lives under <c>Relics/</c>, so the relic
-/// names stay in <c>tools/lint_unique_names.py</c>'s namespace. Every effect
-/// early-returns with the arm off, so a relic granted by hand to an arm-off
-/// Klee does nothing it does not print.
+/// UNDER <c>Relics/</c>, so the relic
+/// names stay in <c>tools/lint_unique_names.py</c>'s namespace.
 /// </summary>
 public static class KleeArmRelics
 {
@@ -42,8 +39,8 @@ public static class KleeArmRelics
         typeof(DodocoArmy),
     };
 
-    /// <summary>How many copies of <typeparamref name="T"/> this Klee holds,
-    /// with the arm on; 0 otherwise.</summary>
+    /// <summary>How many copies of <typeparamref name="T"/> this Klee holds;
+    /// 0 for a creature with no player.</summary>
     internal static int Held<T>(Creature? klee) where T : RelicModel =>
         klee?.Player is { } player
             ? player.Relics.OfType<T>().Count()
@@ -144,7 +141,7 @@ public sealed class FreshCatch : CustomRelicModel
     };
 
     /// <summary>The turn-one gate, shared with <see cref="DodocoArmy"/>: her
-    /// own first turn, with the arm on.</summary>
+    /// own first turn.</summary>
     public static bool FirstTurnOf(RelicModel relic, Player player) =>
         player == relic.Owner
         && player.PlayerCombatState?.TurnNumber == 1

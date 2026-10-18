@@ -308,9 +308,6 @@
     "proto_mf_freminet_pers_deploy",
     "proto_mf_freminet_pressurized_floe",
     "proto_mf_freminet_shattering_pressure",
-    "proto_mf_guest_neuvillette_droplets",
-    "proto_mf_guest_neuvillette_judgment",
-    "proto_mf_guest_neuvillette_tears",
     "proto_mf_lynette_astonishing_shift",
     "proto_mf_lynette_box_trick",
     "proto_mf_lynette_enigmatic_feint",
@@ -826,9 +823,6 @@
     "proto_mf_freminet_pers_deploy": "klee",
     "proto_mf_freminet_pressurized_floe": "klee",
     "proto_mf_freminet_shattering_pressure": "klee",
-    "proto_mf_guest_neuvillette_droplets": "furina",
-    "proto_mf_guest_neuvillette_judgment": "furina",
-    "proto_mf_guest_neuvillette_tears": "furina",
     "proto_mf_lynette_astonishing_shift": "klee",
     "proto_mf_lynette_box_trick": "klee",
     "proto_mf_lynette_enigmatic_feint": "klee",
@@ -2734,9 +2728,5 @@
       "cost": -1
     }
   },
-  "no_upgrade": {
-    "proto_mf_guest_neuvillette_droplets": "A Guest Star is made for one fight and never upgraded, as the shipped row.",
-    "proto_mf_guest_neuvillette_judgment": "A Guest Star is made for one fight and never upgraded, as the shipped row.",
-    "proto_mf_guest_neuvillette_tears": "A Guest Star is made for one fight and never upgraded, as the shipped row."
-  }
+  "no_upgrade": {}
 }

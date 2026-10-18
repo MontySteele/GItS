@@ -110,10 +110,8 @@ public static class HitOrder
     /// Otherwise <paramref name="frontEnemy"/>, which is `EB-598`'s rule and
     /// <c>KokomiPlan.FrontEnemy</c>'s definition: a hand face is about the
     /// body it is going to hit, and a blind page reads the face exactly there.
-    /// It is a PARAMETER rather than a call because that reader lives under
-    /// <c>Powers/Prototype/</c>, which <c>KleeCode.csproj</c> Compile-Removes
-    /// from a release build, and the order recorded in this file is the
-    /// shipped game's whether an arm is compiled or not.
+    /// It is a PARAMETER rather than a call, a leftover from when that reader
+    /// (under <c>Powers/Prototype/</c>) was not compiled in every build.
     /// </summary>
     public static Creature? BodyForPreview(
         CardModel card, CardPreviewMode previewMode, Creature? target,

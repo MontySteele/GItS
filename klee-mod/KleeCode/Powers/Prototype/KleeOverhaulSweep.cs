@@ -61,11 +61,9 @@ namespace KleeMod.Powers;
 /// and the existing sweeps are untouched -- they are kept, not replaced,
 /// because each of them is the earliest moment for the death IT is about.
 ///
-/// INERT WITH THE ARM OFF, and it says so rather than relying on it: with
-/// <c>KleeOverhaul.Enabled</c> false no card places a
-/// <see cref="ProtoBombPower"/>, so the register is empty and the sweep is a
-/// no-op -- but the flag is read anyway, for the reason
-/// <c>PoundingSurprise.OnBombExploded</c> reads it.
+/// INERT WITH NO BOMB: when no card has placed a
+/// <see cref="ProtoBombPower"/> the register is empty and the sweep is a
+/// no-op.
 /// </summary>
 public sealed class KleeOverhaulSweepHooks : AbstractModel
 {

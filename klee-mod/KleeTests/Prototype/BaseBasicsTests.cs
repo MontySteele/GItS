@@ -34,8 +34,8 @@ namespace KleeMod.Tests.Prototype;
 /// as a symbol on relevant elemental cards"), so <see cref="CatalystCadence"/>
 /// reads the card alone and who plays it never matters.
 ///
-/// THE COLLECTION IS LOAD-BEARING: <c>KleeOverhaul.Enabled</c> and
-/// <c>KokomiOverhaul.Enabled</c> are one static apiece for the whole process.
+/// THE COLLECTION is a leftover from the retired arm switch; it only keeps
+/// these tests serial.
 /// </summary>
 [Collection(KleeOverhaulArm.Name)]
 public class BaseBasicsTests

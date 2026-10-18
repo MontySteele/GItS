@@ -18,7 +18,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 namespace KleeMod.Powers;
 
 /// <summary>
-/// KOKOMI EXPANSION, BATCH ONE (2026-09-29, QUARANTINED under the Kokomi arm):
+/// KOKOMI EXPANSION, BATCH ONE (2026-09-29, the Kokomi arm):
 /// the now-line verbs of the 22 new rows, one awaited call per `kind:` of the
 /// `kokomi` op (<c>tools/gen_klee_cards.KOKOMI_KINDS</c>). Paper
 /// <c>review/active/kokomi-expansion-2026-09-29.md</c>. Every damaging card of

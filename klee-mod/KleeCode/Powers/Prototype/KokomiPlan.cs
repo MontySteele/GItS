@@ -3147,9 +3147,8 @@ public static class KokomiPlan
     /// A PLAIN DICTIONARY OF PRIMITIVES, and the shape is
     /// <c>KurageMemory.Snapshot</c>'s for the reason that one is: the bridge
     /// (<c>vendor/STS2_MCP/gits/GitsKokomiPlan.cs</c>) reaches it by
-    /// REFLECTION, because the whole arm is Compile Remove'd from a release
-    /// build and a compile-time reference would make the bridge refuse to load
-    /// without it. The field names here ARE the contract, and
+    /// REFLECTION, a leftover from when the arm was not compiled in every
+    /// build. The field names here ARE the contract, and
     /// <c>understudy/blindplay.kokomi_plans</c> reads them.
     ///
     /// THREE STATES, NOT TWO. An ABSENT key means "no Plan rule in this build";

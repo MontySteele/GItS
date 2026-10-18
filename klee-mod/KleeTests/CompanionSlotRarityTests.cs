@@ -8,74 +8,57 @@ using Xunit;
 namespace KleeMod.Tests;
 
 /// <summary>
-/// `EB-620` -- THE COMPANION SLOT'S RARITY ROLL, PINNED WHERE THE ROW SAID
-/// THERE WAS NONE.
-///
-/// The row was raised off [USER]'s Klee act-1 run ("a LOT of rares": four
-/// Rares in ten picks) on the reading that the fourth reward slot draws a
-/// Companion from the roster with no rarity roll at all, so 11 Rare rows of 47
-/// would surface at roughly a fifth of offers. THAT PREMISE IS FALSE in both
-/// engines and always was: <see cref="CompanionSlot.Roll"/> rolls a
-/// rarity on tier0's `RARITY_ODDS` (common .60 / uncommon .35 / rare .05) and
-/// draws only inside the rolled tier, and `tier05.rewards.roll_rewards` does
-/// the same with `_roll_rarity`. What was missing was a PIN saying so -- the
-/// odds constants were already compared by value against tier0
-/// (`tools/lint_constant_parity.py`), but nothing asserted that `Roll` spends
-/// them, so the roll could have been deleted without a red test.
+/// THE COMPANION SLOT ROLLS LIKE THE CARDS BESIDE IT ([USER] 2026-10-18,
+/// legacy review pick 3: "Agreed on all 6 legacy picks"). Its rarity comes
+/// from the base game's own <c>CardFactory.RollForRarity</c> on the reward's
+/// own odds (regular, elite or boss, with the rare pity counter), and it gets
+/// the native reward card's upgrade roll (<c>CardFactory.RollForUpgrade</c>).
+/// After a boss it is a Rare, an Uncommon when no Rare can be offered.
 ///
 /// STRUCTURAL, and it has to be: `Roll` needs a live `Player` and `RunState`
 /// to hand back a card, which is outside the headless boundary (KleeTests
-/// README). What is real here is the call graph and the source of the one
-/// branch, which is exactly the claim the row disputed.
-///
-/// WHAT THIS DOES NOT SAY. The odds are tier0's flat table; the base game logs
-/// its own card-reward roll with a rising offset ("Card rarity: Rolled X, need
-/// &lt; Y for rare (offset = Z)"). Whether the slot should mirror that pity
-/// shape instead is a separate question, and it needs the decompile and a
-/// run's `godot.log` to answer -- neither is readable from here.
+/// README). What is real here is that both base methods resolve on the
+/// shipped assembly and that `Roll` spends them.
 /// </summary>
 public class CompanionSlotRarityTests
 {
     private const BindingFlags All = HeadlessGame.All;
 
     [Fact]
-    public void The_slot_rolls_a_rarity_before_it_draws()
+    public void Both_base_rolls_resolve_on_the_shipped_assembly()
     {
-        var roll = typeof(CompanionSlot).GetMethod("Roll", All)!;
-        var calls = Il.Calls(roll);
-
-        // The roll happens, off the run's own Rewards stream.
-        Assert.Contains(calls, c => c.Contains("CompanionSlot.RollRarity"));
-        Assert.Contains(calls, c => c.Contains("get_Rewards"));
-
-        // And the rarity it produced is what selects the candidate list: the
-        // draw reads `tiers[rarity]`, never the whole roster.
-        var body = Source("CompanionSlot.cs").Replace("\r\n", "\n");
-        Assert.Contains("var rarity = forcedRarity ?? RollRarity(rng);", body);
-        Assert.Contains("if (!tiers.TryGetValue(rarity, out var pool)) "
-                      + "return null;", body);
-        Assert.Contains("NationWeightedChoice(rng, pool, HomeNation(player))",
-                        body);
+        foreach (var (field, method) in new[]
+                 {
+                     ("BaseRollForRarity", "RollForRarity"),
+                     ("BaseRollForUpgrade", "RollForUpgrade"),
+                 })
+        {
+            var resolved = (Delegate?)typeof(CompanionSlot)
+                .GetField(field, All)!.GetValue(null);
+            Assert.NotNull(resolved);
+            Assert.Equal(method, resolved!.Method.Name);
+            Assert.Equal("CardFactory", resolved.Method.DeclaringType!.Name);
+        }
     }
 
     [Fact]
-    public void The_rarity_roll_walks_the_three_tiers_in_sheet_order()
+    public void The_slot_rolls_the_rewards_own_rarity_then_upgrades()
     {
-        // The odds themselves are compared by value against tier0 by
-        // `lint_constant_parity`; what is asserted here is the WALK -- a
-        // cumulative common -> uncommon -> rare comparison, so Rare is the
-        // tail of the distribution rather than a third of it.
-        var body = Source("CompanionSlot.cs").Replace("\r\n", "\n");
-        var start = body.IndexOf("private static CardRarity RollRarity",
-                                 StringComparison.Ordinal);
-        Assert.True(start > 0, "RollRarity is where the odds are spent");
-        var method = body[start..(body.IndexOf("\n    }", start,
-                                               StringComparison.Ordinal))];
+        var roll = typeof(CompanionSlot).GetMethod("Roll", All)!;
+        var calls = Il.Calls(roll);
+        Assert.Contains(calls, c => c.Contains("CompanionSlot.RollRarity"));
+        Assert.Contains(calls, c => c.Contains("get_RngOverride"));
+        Assert.Contains(calls, c => c.Contains("RollForUpgradeFn.Invoke"));
 
-        Assert.Contains("roll < CommonOdds ? CardRarity.Common", method);
-        Assert.Contains("roll < CommonOdds + UncommonOdds "
-                      + "? CardRarity.Uncommon", method);
-        Assert.Contains(": CardRarity.Rare", method);
+        var rarity = Il.Calls(typeof(CompanionSlot).GetMethod("RollRarity", All)!);
+        Assert.Contains(rarity, c => c.Contains("get_RarityOdds"));
+        Assert.Contains(rarity, c => c.Contains("RollForRarityFn.Invoke"));
+
+        var body = Source("CompanionSlot.cs").Replace("\r\n", "\n");
+        Assert.Contains("upgrade(player, card, 0m, rng);", body);
+        Assert.Contains("CardCreationFlags.NoUpgradeRoll", body);
+        Assert.Contains("odds == CardRarityOddsType.BossEncounter", body);
+        Assert.Contains(": CardRarity.Uncommon;", body);
     }
 
     [Fact]

@@ -160,14 +160,6 @@ KLEE_OVERHAUL_OPENING_SPARK = 3
 # Damage Report's Spark per status drawn (Klee pre-Balance sweep, 2026-10-03);
 # flat at both levels. `KleeOverhaulLaw.DamageReportSpark`.
 KLEE_OVERHAUL_DAMAGE_REPORT_SPARK = 1
-# THE SPARK SEED (`EB-577`, D default off the Klee r21 packet sec.5). Sparks
-# read as inert until a sink is drafted, six rounds running (r17-r21): r21 lane
-# 2 ended fights holding 3, 4 and 5 Sparks with Dig In the deck's only reader.
-# So the ARM's first card rewards guarantee a Spark-priced row -- floors 1 to 3,
-# which is the first two card rewards of a run. NOT A SHEET CHANGE: no card's
-# rarity, price or text moves, only which cards a reward screen may show while
-# the deck has no reader at all. C# twin `KleeOverhaulLaw.SparkSeedFloors`.
-KLEE_OVERHAUL_SPARK_SEED_FLOORS = 3
 
 # R276, Wait For It...'s Energy: "draw 2 cards and gain 1 Energy" the next
 # time one of her Bombs reacts this turn. Mirrored by value from
@@ -739,22 +731,11 @@ INAZUMA_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_mi_yae_sacred_sakuras_favor",
 )
 
-# THE INAZUMA WORKSHOP'S ONE PERSONAL, and it is a SEPARATE list because it is
-# a different kind of row (R236, sec.3 Gorou; the workshop's own sec.4 counts
-# it among the Uncommons and its sec.3 enumerates it apart from the 24).
-#
-# A PERSONAL IS NOT A UNIVERSAL. `INAZUMA_OVERHAUL_POOL_IDS` above is the pool
-# every character may be offered from, and `test_every_row_is_an_inazuma_-
-# universal` asserts `personal_pool is None` of every id on it. Crystal
-# Collapse carries `personal_pool: kokomi`, so it goes in the ROSTER (a
-# Personal that never entered it could not be offered to its own character
-# either) and the offer layer's `personal_pool in (None, character_id)` filter
-# is what keeps it out of anybody else's slot -- the same door Prune has come
-# through since the shipped Mondstadt sheet.
-INAZUMA_OVERHAUL_PERSONAL_IDS: tuple[str, ...] = (
-    # EMPTY SINCE THE RE-FOUNDING (2026-10-12): Crystal Collapse is in
-    # Kokomi's own pool (`KOKOMI_OWN_COMPANION_IDS`). The seam stays.
-)
+# THE INAZUMA WORKSHOP'S ONE PERSONAL list (R236, sec.3 Gorou). EMPTY SINCE
+# THE RE-FOUNDING (2026-10-12): Crystal Collapse is in Kokomi's own pool
+# (`KOKOMI_OWN_COMPANION_IDS`). Read by the tests only; its C# twin was
+# deleted 2026-10-18 and this goes once the Inazuma pool rework lands.
+INAZUMA_OVERHAUL_PERSONAL_IDS: tuple[str, ...] = ()
 
 # The nation this second replacement owns.
 INAZUMA_OVERHAUL_NATION = "inazuma"
@@ -763,8 +744,7 @@ INAZUMA_OVERHAUL_NATION = "inazuma"
 # Fontaine has no workshop; its shipped rows moved to the prototype surface
 # unchanged (`proto_mf_` rows, bodies and upgrades as shipped), so the
 # companion pool is prototype rows only and the shipped sheet can go. In the
-# sheet's order. The three Neuvillette guest stars are ported too but are not
-# companions: they are Furina's generation targets and in no offer list.
+# sheet's order.
 FONTAINE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_mf_chevreuse_interdiction_fire",
     "proto_mf_chevreuse_vanguards_valor",
@@ -784,48 +764,12 @@ FONTAINE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_mf_arlecchino_masque_red_death",
 )
 
-FONTAINE_OVERHAUL_NATION = "fontaine"
-
-# THE NATIONS THE ARM REPLACES, and the one list `companion_roster_replacement`
-# filters the kept half against. All three since Fontaine's port (legacy
-# cleanup pick 4): no shipped companion row comes through.
-COMPANION_OVERHAUL_NATIONS: tuple[str, ...] = (
-    COMPANION_OVERHAUL_NATION, INAZUMA_OVERHAUL_NATION,
-    FONTAINE_OVERHAUL_NATION)
-
 # =============================================================================
-# KLEE'S COVEN PERSONALS -- SAME FLAG AGAIN, THIRD LIST (R236).
+# KLEE'S COVEN (R236). The Mondstadt workshop gave Klee four Personal
+# companions; since the Klee-only companions (2026-10-03) none is a Personal:
+# Prune's Chime is in Klee's own pool (`KLEE_OWN_COMPANION_IDS`), Qiqi is a
+# shared Universal (`MONDSTADT_OVERHAUL_POOL_IDS`), Sayu and Yaoyao are cut.
 #
-# The approved Mondstadt workshop's sec.4 (and its sec.3 Prune entry) gives
-# Klee four PERSONAL companions -- her coven. A Personal is not a Universal: it
-# is offered only to its own character, through the channel `prune_witch_hunt`
-# already rides (`Card.personal_pool`, filtered at every offer site), so these
-# four are NOT in either nation's pool list and neither pool list's count moves.
-#
-# WHAT MOVES WHEN THE FLAG IS ON, and it is the same two sites the two nation
-# blocks name:
-#   * loader.companion_roster_replacement -- these ids join the replacement
-#     roster beside the two nations' Universals, and the per-character filter
-#     at the offer site is what keeps them Klee's.
-#   * loader._card_prototype -- the `proto_mc_` ids resolve, the same door.
-# `prune_witch_hunt` needs no exclusion of its own: it is a MONDSTADT companion,
-# and the kept half of the replacement drops every row of a replaced nation. So
-# the Chime SUPERSEDES it by the rule that was already there, and with the flag
-# off the shipped row is byte-identical (`test_companion_overhaul.py`).
-#
-# THE NATIONS ARE THE CHARACTERS' OWN. Sayu is Inazuma and Qiqi and Yaoyao are
-# Liyue, which has no workshop and no shipped companion row; a Personal is
-# offered through the Personal channel rather than through a nation's pool, so
-# an off-region Personal is only ever weighted differently (the reward slot's
-# `_nation_weighted_choice`) or filtered out of the shop's HOME slot and
-# reachable in its any-region slot. That is today's behaviour, unchanged.
-COVEN_PERSONAL_POOL_IDS: tuple[str, ...] = (
-    # EMPTY SINCE THE KLEE-ONLY COMPANIONS (2026-10-03, sec.4): Prune's Chime
-    # is in Klee's own draftable pool (`KLEE_OWN_COMPANION_IDS`), Qiqi is a
-    # shared Universal (`MONDSTADT_OVERHAUL_POOL_IDS`), Sayu and Yaoyao are
-    # cut.
-)
-
 # THE NUMBERS THE COVEN'S POWERS CARRY, on the same terms as the two blocks
 # above: a number the CARD prints stays on the card row, and only a number a
 # POWER carries lands here, because the C# mirrors are compared BY VALUE
@@ -1132,53 +1076,15 @@ PLAN_DELAY_DISCOUNT = 0.75
 
 BURST_PER_SKILL_TAG = 5       # burst energy per Skill-tagged card played
 
-# =============================================================================
-# KLEE'S COMPANION SPARK TRIGGER -- "Little Hexenzirkul" (EB-219, retargeted
-# onto the Hexerei mark by EB-642 / R265 pick 1).
-#
-# LAW:145, countersigned R224 (2026-08-30): "Companion cards may not themselves
-# grant signature resources. A character-owned engine may respond to a
-# Companion play and generate its resource where that character's kit
-# explicitly declares the trigger and bounds the amount generated per Companion
-# play." THIS BLOCK IS THAT DECLARATION, and it is the only place either engine
-# says what a Companion play is worth in Sparks.
-#
-# THE TRIGGER: Klee plays a Companion card carrying the HEXEREI mark
-# (the sheet's own family key, R265 pick 1) -- one word, one rule,
-# Universals included.
-# Off the overhaul arm no shipped row carries the key, so the shipped Personal
-# pool (`personal_pool: klee`) answers there instead and `EB-219`'s parity
-# stands: a Balance surface does not move for a prototype arm (R213 B).
-# WHO IS PAID: Klee, and nobody else (`EB-434`) -- hers is the only Spark
-# surface in the game, so the character test is written out rather than implied
-# by the pool.
-# THE BOUND: at most MAX_PER_PLAY, once per CARD PLAY -- a Companion resolved a
-# second time by a replay (Study Buddy) is one play, not two. A per-play bound a
-# replay can double is not a bound.
-#
-# NOTHING HERE IS PICKED. All four numbers are lifted off `prune_witch_hunt`'s
-# committed face so that the player's yield does not move (R212(6),
-# derived-not-picked): her row printed `gain_spark 1` inside a
-# `reaction_triggered_by_this` conditional AND `gain_spark 1` unconditionally at
-# top level, with `{spark: +1}` on the upgrade bumping the unconditional one.
-# So she paid 1 / 2 / 2 / 3 (base-no-reaction / base-reaction / upgraded-no-
-# reaction / upgraded-reaction) and BASE + REACTION + UPGRADED reproduces all
-# four. The cap is the arithmetic ceiling of the three, not a fifth number.
-#
-# REACH: general in form, and on the shipped sheets Prune-only in fact --
-# exactly one row in the four committed companion sheets carries
-# `personal_pool`. Under the arm the reach is every row printing the word, which
-# is the point of R265: a row joins the family by carrying the key, and the
-# trigger is declared over a SET and never over a list of cards.
-KLEE_COMPANION_SPARK_BASE = 1              # any paying Companion play
-KLEE_COMPANION_SPARK_REACTION_BONUS = 1    # ...that triggered a reaction
-KLEE_COMPANION_SPARK_UPGRADED_BONUS = 1    # ...and/or is upgraded
-KLEE_COMPANION_SPARK_MAX_PER_PLAY = 3      # the bound LAW:145 requires
+# KLEE'S COMPANION SPARK TRIGGER (EB-219) pays nothing since 2026-09-23 and
+# its reader is deleted (2026-10-18). One number stays because the `kit_spark`
+# upgrade key in `content/upgrades.py` still checks against it (no live row
+# carries that key).
+KLEE_COMPANION_SPARK_UPGRADED_BONUS = 1
 
 # --- Klee power tunables (notes in klee-cards.yaml / companions sheet) ---
 SPARKS_N_SPLASH_HITS = 4          # end of turn: N hits...
 SPARKS_N_SPLASH_HIT_DMG = 5       # ...of this damage, each applies pyro
-PLAYTIME_BOMB_DAMAGE = 5          # Playtime Forever's per-turn bomb
 DETONATION_SPLASH_PROC_CAP = 3     # max splash procs/turn. ARMED by the
                                    # errata/M5 triage (ruling 1): sanctioned
                                    # demolition ceiling knob for band
@@ -1708,52 +1614,19 @@ SHOP_REMOVAL_PRICE_STEP = 25     # §5: "rising per use" -- +25 each removal
 #                                  only bites once multi-act adds a 2nd shop.
 SHOP_CARD_OFFERS = 3             # "a few cards" (§5). OPEN NUMBER -- §8 does
 #                                  not fix a count; 3 mirrors REWARD_CARD_OFFERS.
-# --- §4.7 companion channel (R59/R61, respecified by R116/NC-10, slot-2
-# --- floor RESTORED by [USER] 2026-08-10) ---------------------------------
-# The shop's TWO colorless slots carry companions.
-#
-# WHERE THE SLOTS STAND TODAY. Slot 1 = home region, Uncommon-or-higher.
-# Slot 2 = any nation, Uncommon-or-higher. The NATION is what separates the
-# slots; the RARITY FLOOR is common to both.
-#
-# HISTORY, kept because it is the reasoning that moved. R59 read the floor as
-# covering both slots, on the argument that a wildcard at full reward odds
-# (~60% Common) makes this shop worse than base's guaranteed-Rare slot 2.
-# R116/NC-10 respecified slot 2 as "any companion card" -- no nation, no
-# floor -- and Commons became drawable at the 50-gold band. [USER] closed
-# that out on 2026-08-10 (S4-G10 agenda item "should slot 2 carry a rarity
-# floor at all?") by RESTORING the floor per R59's original rationale: the
-# paid premium channel is not a place to sell Commons. Slot 2 therefore reads
-# SHOP_COMPANION_RARITY_ODDS again, exactly as it did before R116.
-# This changes the shop world in both engines -> CONSTANTS_VERSION 8 -> 9.
+# --- §4.7 companion channel: the shop's TWO colorless slots carry companions.
+# THE BASE GAME'S SHAPE ([USER] 2026-10-18, legacy review pick 2: "Agreed on
+# all 6 legacy picks"). Base stocks a fixed Uncommon and a fixed Rare colorless
+# card; so do these slots. Slot 1 = home nation, a fixed Uncommon. Slot 2 = any
+# nation, a fixed Rare, Uncommon when no Rare companion can be offered. No
+# rarity is rolled: the 0.875 / 0.125 conditioned table both slots read from
+# R116 to this ruling is gone. History: `git show a943cc7cb:tier0/constants.py`.
 SHOP_COMPANION_SLOTS = 2
-# BOTH SLOTS' odds: RARITY_ODDS CONDITIONED on >= Uncommon, i.e. renormalized
-# over the rarities that survive the floor -- 0.35/0.40 and 0.05/0.40. That
-# is the only reading of "Uncommon or higher" that introduces no new number,
-# and the values below are unchanged from when the floor covered both slots
-# the first time.
-#
-# THE ALTERNATIVE READING, surfaced and NOT chosen (R116 required this
-# explicitly: "a renormalization chosen by an implementer is a balance value
-# chosen by an implementer"): the floor could instead carry its own STATED
-# SPLIT, a fresh pair of odds designed for the premium slot rather than
-# inherited from the reward table. That is a balance decision with a
-# defensible case -- slot 1 is the "buy your dream support" slot and 12.5%
-# Rare may be the wrong price for it -- and it is a [USER] call, not this
-# one. Nothing below was tuned; conditioning was applied and the result is
-# the identity on the existing values.
-# RESOLVED BY Q16, 2026-08-06 (R117 rider, answered R118, verbatim
-# "Condition."): [USER] chose the CONDITION reading -- the odds below ARE
-# RARITY_ODDS renormalized over the >=Uncommon pool, exactly as shipped.
-# The stated-split alternative above was declined; a fresh split would be
-# its own row in its own window. No value changed by the ruling: the
-# conditioning was already the identity on these numbers.
-SHOP_COMPANION_RARITY_ODDS = {"uncommon": 0.875, "rare": 0.125}
-# SLOT 2 reads THIS SAME TABLE ([USER] 2026-08-10). Between R116 and that
-# ruling it read RARITY_ODDS itself, unconditioned, and could offer a Common
-# at the Common band; the floor's restoration puts both slots back on one
-# table. There is still no second constant -- the two slots differ by NATION
-# only, and one table is what makes that visible.
+# Per slot, the slot's rarity FIRST and then its fallback band. Slot 1's Rare
+# rung is the roster-gap fallback only. C# twin:
+# `MerchantInventory_CompanionColorlessSlots_Patch.SlotOneRarities` /
+# `SlotTwoRarities` (`tier0/tests/test_shop_slot_rarities_parity.py`).
+SHOP_COMPANION_SLOT_RARITIES = (("uncommon", "rare"), ("rare", "uncommon"))
 # Priced by DRAWN RARITY (§4.7: gold is the balance governor, not a stat nerf).
 # These are the REAL StS2 shop bands, read off MerchantCardEntry.GetCost, so
 # the sim and the mod charge the same gold for the same companion. They are
@@ -1770,9 +1643,8 @@ SHOP_COMPANION_RARITY_ODDS = {"uncommon": 0.875, "rare": 0.125}
 # METHOD as the other two, not invented: `MerchantCardEntry.GetCost`'s IL
 # carries `ldc.i4 150`, `ldc.i4.s 75`, `ldc.i4.s 50` and the 1.15 colorless
 # multiplier, in that order. Same provenance, same paragraph, no new number.
-# INERT since the floor was restored ([USER] 2026-08-10): with both slots on
-# SHOP_COMPANION_RARITY_ODDS no shop draw can be a Common, so nothing indexes
-# this entry today. It is KEPT rather than deleted because it is a fact about
+# INERT since the floor was restored ([USER] 2026-08-10): no shop slot draws
+# a Common, so nothing indexes this entry today. It is KEPT rather than deleted because it is a fact about
 # `GetCost`, not a choice of ours -- deleting it would mean re-reading the IL
 # to bring the band back, and both engines still price by drawn rarity.
 SHOP_COMPANION_PRICE = {"common": 50, "uncommon": 75, "rare": 150}

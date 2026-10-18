@@ -32,8 +32,7 @@ namespace KleeMod.Powers;
 /// itself ("this is the single site a reaction resolves in the mod"), so a
 /// reaction cannot happen off this list -- which is the row's acceptance.
 ///
-/// SHIPPED CODE AND NOT QUARANTINED, unlike the Plan queue beside it: every
-/// arm reacts, and a Klee lane's Overloaded is as unnamed as a Kokomi lane's
+/// EVERY ARM REACTS, and a Klee lane's Overloaded is as unnamed as a Kokomi lane's
 /// Electro-Charged was. Read onto the wire by
 /// `vendor/STS2_MCP/gits/GitsReactionLog.cs` and printed by
 /// `understudy/blindplay_render`.

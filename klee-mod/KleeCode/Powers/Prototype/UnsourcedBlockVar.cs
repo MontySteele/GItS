@@ -59,8 +59,6 @@ namespace KleeMod.Powers;
 /// Nimble ELIGIBILITY is exactly what it was before this class existed, in
 /// both engines and under `tools/lint_enchant_parity.py`. This row moved one
 /// printed number and no rule.
-///
-/// QUARANTINED, in this directory and by this file's csproj rule.
 /// </summary>
 public sealed class UnsourcedBlockVar : BlockVar
 {

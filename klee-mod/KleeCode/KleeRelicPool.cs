@@ -54,10 +54,9 @@ public sealed class KleeRelicPool : RelicPoolModel
             // `ArmRelicPools.KleeArmPool` does not list it. Embark's
             // `--relic` grant is its only door.
             .Append(ModelDb.Relic<Relics.PoundingSurpriseNext>());
-        // QUARANTINED: KLEE'S OWN SEVEN (review/active/relics-potions-klee-
-        // furina-2026-09-27.md, pick 1(a)). MEMBERSHIP under the compile flag,
-        // for the Casket's reason (`KokomiRelicPool`): this runs once, before
-        // anything reads the arm, and `RelicModel.Pool` throws for a relic in
+        // KLEE'S OWN SEVEN (review/active/relics-potions-klee-
+        // furina-2026-09-27.md, pick 1(a)). MEMBERSHIP, for the Casket's
+        // reason (`KokomiRelicPool`): `RelicModel.Pool` throws for a relic in
         // no pool. What may be ROLLED is `GetUnlockedRelics` below.
         relics = relics
             .Append(ModelDb.Relic<Relics.DodocoCharm>())
@@ -72,9 +71,8 @@ public sealed class KleeRelicPool : RelicPoolModel
 
     /// <summary>
     /// THE OFFER, the one seam the relic grab bag reads
-    /// (<c>RelicGrabBag.Populate</c>). Under the Klee arm her pool is the
-    /// starter, her seven and the Ancient -- the Silent borrow goes. Arm off,
-    /// it is every member but the seven, which is the pool as it shipped.
+    /// (<c>RelicGrabBag.Populate</c>): the starter, her seven and the
+    /// Ancient. The Silent borrow is a member and is not offered.
     /// </summary>
     public override IEnumerable<RelicModel> GetUnlockedRelics(
         MegaCrit.Sts2.Core.Unlocks.UnlockState unlockState) =>

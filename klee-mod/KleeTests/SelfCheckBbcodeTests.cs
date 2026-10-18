@@ -149,11 +149,8 @@ public class SelfCheckBbcodeTests
         // Named, because a fix to a list is only as good as the strings it was
         // supposed to be about. Each is checked BY ITS OWN Localization, so a
         // reworded description is read here rather than a copy of one.
-        // Five of the seven are the Inazuma companion arm, which a release
-        // build Compile-Removes -- so the two SHIPPED ones are required and
-        // the arm's five are checked wherever the build has them. Under
-        // `-p:PrototypeCards=true`, which is the configuration the gate runs
-        // and the configuration [USER]'s run was in, that is all seven.
+        // Five of the seven are the Inazuma companion arm, checked where the
+        // build has them; every build has all seven.
         var required = new[] { "MasqueRedDeathPower" };
         foreach (var name in required.Concat(new[]
                  {

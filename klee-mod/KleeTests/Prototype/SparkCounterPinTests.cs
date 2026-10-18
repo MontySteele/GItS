@@ -17,8 +17,7 @@ namespace KleeMod.Tests.Prototype;
 /// on the local seat only.
 ///
 /// WHAT IS REAL HERE. Every DECISION the change takes runs for real: who gets
-/// the badge, what number it draws, and that with the arm off nothing at all
-/// happens.
+/// the badge and what number it draws.
 ///
 /// WHAT IS STRUCTURAL, and labelled. The element itself is a Godot node tree,
 /// and Godot nodes are process death in this host (KleeTests README, the

@@ -21,9 +21,9 @@ rarity below the R59 floor. The player cannot see that; only this can.
 
 CHECKS
   1. DATA (the sheets, where the defect actually lives). For every roster
-     character, at each rarity the ladder can request, the WILDCARD pool must
-     hold at least SHOP_COMPANION_SLOTS cards -- two slots draw without
-     replacement, so a tier with one card can strand the second slot.
+     character, at each rarity, the WILDCARD pool must hold as many cards as
+     there are slots whose ladder can draw that rarity -- the slots draw
+     without replacement, so a thin tier can strand the second slot.
   2. DATA. Every character's HOME nation must supply the Uncommon floor, or
      slot 1 -- the targeted "buy your dream support" slot, and the whole
      reason the channel is priced as premium -- widens to wildcard on every
@@ -33,9 +33,9 @@ CHECKS
      one-line change that reintroduces the softlock and that nothing else in
      the repo would notice.
 
-REPORTED BUT NOT FAILED: a home nation with no RARE companion. The ladder
-handles it by widening the nation. It is a roster fact worth seeing on every
-run of this lint, not a build break.
+THE SLOTS' BANDS ([USER] 2026-10-18, legacy review pick 2): slot 1 is a fixed
+home-nation Uncommon, slot 2 a fixed any-nation Rare that falls back to
+Uncommon (`C.SHOP_COMPANION_SLOT_RARITIES`).
 
 NO BANNER. The Featured Banner, which once thinned each nation's five-stars to
 three per run, was scrapped everywhere on 2026-10-18 ([USER]: "Agreed on
@@ -106,15 +106,14 @@ def eligible(character: str, rarity: str, nation: str | None) -> list:
 
 def main() -> int:
     findings: list[str] = []
-    notes: list[str] = []
-    slots = C.SHOP_COMPANION_SLOTS
-    rarities = list(C.SHOP_COMPANION_RARITY_ODDS)
-
-    # The wildcard side reads the SAME bands as the home-region side again:
-    # [USER] restored slot 2's Uncommon floor on 2026-08-10, so Commons are
-    # no longer a shop draw and a thin Common tier is no longer this lint's
-    # problem. Between R116 and that ruling this read `C.RARITY_ODDS`.
-    wild_rarities = list(C.SHOP_COMPANION_RARITY_ODDS)
+    ladders = C.SHOP_COMPANION_SLOT_RARITIES
+    # How many slots' ladders reach each rarity: both reach Uncommon, only
+    # slot 1's roster-gap rung and slot 2 reach Rare.
+    reach: dict[str, int] = {}
+    for ladder in ladders:
+        for rarity in ladder:
+            reach[rarity] = reach.get(rarity, 0) + 1
+    home_rarity = ladders[0][0]
 
     for character in CHARACTERS:
         home = loader.character_nation(character)
@@ -124,28 +123,19 @@ def main() -> int:
                 "slot 1 can never be home-region")
             continue
 
-        for rarity in wild_rarities:
+        for rarity, need in reach.items():
             wild = eligible(character, rarity, None)
-            if len(wild) < slots:
+            if len(wild) < need:
                 findings.append(
                     f"{character}: only {len(wild)} {rarity} companion(s) "
-                    f"offerable at ANY nation, but the shop stocks {slots} "
-                    "slots without replacement -- a slot can strand")
+                    f"offerable at ANY nation, but {need} shop slot(s) can "
+                    "draw that band without replacement -- a slot can strand")
 
-        for rarity in rarities:
-            home_tier = eligible(character, rarity, home)
-            if home_tier:
-                continue
-            if rarity == "uncommon":
-                findings.append(
-                    f"{character}: {home} supplies no Uncommon companion, so "
-                    "slot 1 widens to wildcard on EVERY visit -- the "
-                    "home-region slot does not exist for this character")
-            else:
-                notes.append(
-                    f"{character}: {home} designs no {rarity} companion; "
-                    "slot 1 widens the nation when it rolls one (known, "
-                    "handled by the ladder -- see R59)")
+        if not eligible(character, home_rarity, home):
+            findings.append(
+                f"{character}: {home} supplies no {home_rarity} companion, so "
+                "slot 1 widens to wildcard on EVERY visit -- the "
+                "home-region slot does not exist for this character")
 
     if not PATCH.exists():
         findings.append(f"missing merchant patch: {PATCH.relative_to(REPO)}")
@@ -166,16 +156,13 @@ def main() -> int:
                     "different games on the same rung; re-adding it needs a "
                     "ruling of its own, and the sim would have to move too")
 
-    for note in notes:
-        print(f"note: {note}")
     for f in findings:
         print(f"FINDING: {f}")
     if findings:
         print(f"\ncompanion shop coverage: {len(findings)} finding(s)")
         return 1
     print(f"companion shop coverage OK: {len(CHARACTERS)} characters x "
-          f"{len(wild_rarities)} wildcard rarities and {len(rarities)} "
-          f"home-region rarities x {C.SHOP_COMPANION_SLOTS} slots")
+          f"{len(reach)} wildcard rarities x {C.SHOP_COMPANION_SLOTS} slots")
     return 0
 
 

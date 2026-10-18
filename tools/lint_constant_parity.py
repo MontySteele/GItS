@@ -122,26 +122,13 @@ MIRRORED: dict[str, object] = {
     "ReactionConstants.VulnerableTakenMult": C.VULNERABLE_TAKEN_MULT,
     "ReactionConstants.AmpStackLimit": C.AMP_STACK_LIMIT,
 
-    # Companion reward slot (§4.1) -- the rarity walk and the nation weighting
-    # CompanionSlot ports from tier05 rewards.
-    "CompanionSlot.CommonOdds": C.RARITY_ODDS["common"],
-    "CompanionSlot.UncommonOdds": C.RARITY_ODDS["uncommon"],
+    # Companion reward slot (§4.1) -- the nation weighting CompanionSlot ports
+    # from tier05 rewards (its rarity is the base reward roll since 2026-10-18).
     "CompanionSlot.SameNationShare": C.SAME_NATION_REWARD_SHARE,
     "CompanionSlot.NationWeight": C.NATION_WEIGHTS["mondstadt"],
-    # §4.7 shop channel. BOTH slots read the reward odds CONDITIONED on
-    # >= Uncommon since [USER] restored slot 2's floor on 2026-08-10
-    # (CONSTANTS_VERSION 9), so both mirrors point at the same tier0 entry.
-    #
-    # SlotTwoUncommonOdds has now held both readings: the conditioned value
-    # before R116, the unconditioned 0.35 between R116 and the restoration,
-    # and the conditioned value again. `SlotTwoCommonOdds` was its companion
-    # in the middle period and is DELETED from the patch -- a Common is no
-    # longer a reachable shop draw, so a mirror for it would pin a number the
-    # mod does not use.
-    "MerchantInventory_CompanionColorlessSlots_Patch.SlotOneUncommonOdds":
-        C.SHOP_COMPANION_RARITY_ODDS["uncommon"],
-    "MerchantInventory_CompanionColorlessSlots_Patch.SlotTwoUncommonOdds":
-        C.SHOP_COMPANION_RARITY_ODDS["uncommon"],
+    # §4.7 shop channel: no odds since the base-shape ruling (2026-10-18);
+    # the per-slot rarity ladders are pinned by
+    # tier0/tests/test_shop_slot_rarities_parity.py.
 
     # Furina.
     # New to the map on 2026-08-13 (EB-97), and the reason it is here is the
@@ -185,7 +172,6 @@ MIRRORED: dict[str, object] = {
     # left with the cut card's power (2026-10-13).
     "KleeOverhaulLaw.OpeningSpark": C.KLEE_OVERHAUL_OPENING_SPARK,
     "KleeOverhaulLaw.DamageReportSpark": C.KLEE_OVERHAUL_DAMAGE_REPORT_SPARK,
-    "KleeOverhaulLaw.SparkSeedFloors": C.KLEE_OVERHAUL_SPARK_SEED_FLOORS,
     # R276, Wait For It...'s printed payout, on the same terms.
     "WaitForItPower.ReactionEnergy": C.KLEE_OVERHAUL_WAIT_FOR_IT_ENERGY,
     # THE MONDSTADT COMPANION OVERHAUL (`C.COMPANION_OVERHAUL`).
