@@ -1726,8 +1726,9 @@ ARM_KEYWORDS: dict[str, str] = {
     # card names have their own rows; the full-shrine rule is its own row
     # (`ArmKeywordTips.YaeFullShrineTip`); an Edit fills the temporary slot.
     # Yae review r6, item 5: which enemy it strikes (`YaeShrine.Aim`).
-    "Sakura": ("At the end of your turn, strikes an enemy for 2 + its "
-               "Level. Lasts 3 turns, then strikes once more. "
+    # The Sakura Levels paper (2026-10-17, pick 1 (a)): 1 + 2 per Level.
+    "Sakura": ("At the end of your turn, strikes an enemy for 1 + 2 per "
+               "Level. Lasts 3 turns, then strikes again. "
                + SAKURA_TARGET_RULE),
     "Tenko": "Every Sakura acts now. Refresh them to at least 3 turns.",
     "Foxfire Sakura": ("A Sakura that hits ALL enemies for 1 + its Level "
@@ -1735,10 +1736,11 @@ ARM_KEYWORDS: dict[str, str] = {
     "Kitsune Sakura": ("A fox decoy Sakura. When it acts, you gain 2 + its "
                        "Level Block."),
     # Yae review r5, item 5.
-    # 2026-10-17: the Sakura closest to withering, not the first planted.
-    "Full shrine": ("Planting makes the Sakura closest to withering act. If "
-                    "the new one is the same kind, that Sakura refreshes and "
-                    "gains a Level. If not, it withers and is replaced."),
+    # 2026-10-17: the Sakura closest to withering, not the first planted;
+    # the Sakura Levels paper (pick 1 (a)): Levels carry over on a replace.
+    "Full shrine": ("Planting makes the Sakura closest to withering act. "
+                    "Same kind: it refreshes and gains a Level. Other kind: "
+                    "it withers, and the new one takes its Level if higher."),
     "Edit": ("Give a card an Annotation for this combat, replacing its "
              "last. Published ones stay and add up. A card that Edits up "
              "to 2 cards opens one chooser: pick up to 2 different cards, "

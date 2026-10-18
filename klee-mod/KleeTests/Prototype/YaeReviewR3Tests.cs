@@ -48,7 +48,8 @@ public class YaeReviewR3Tests : IDisposable
     [Fact]
     public void Each_kind_acts_for_its_base_plus_level_and_red_ink_adds_three()
     {
-        Assert.Equal(2 + 4, YaeShrineLedger.ActSize(YaeSakuraKind.Thunder, 4, YaeAnnotation.None));
+        // The Sakura Levels paper (2026-10-17): Sakura 1 + 2 per Level.
+        Assert.Equal(1 + 2 * 4, YaeShrineLedger.ActSize(YaeSakuraKind.Thunder, 4, YaeAnnotation.None));
         Assert.Equal(1 + 4, YaeShrineLedger.ActSize(YaeSakuraKind.Foxfire, 4, YaeAnnotation.None));
         Assert.Equal(2 + 4, YaeShrineLedger.ActSize(YaeSakuraKind.Kitsune, 4, YaeAnnotation.None));
         Assert.Equal(1 + 4 + 3, YaeShrineLedger.ActSize(YaeSakuraKind.Foxfire, 4, YaeAnnotation.RedInk));
@@ -95,9 +96,11 @@ public class YaeReviewR3Tests : IDisposable
         Assert.Equal(3, ledger.Count);
         var newest = ledger.Standing[^1];
         Assert.Equal(YaeSakuraKind.Foxfire, newest.Kind);
-        Assert.Equal(1, newest.Level);                 // its printed Level
+        // The Sakura Levels paper (2026-10-17, pick 1 (a)): the withered
+        // Sakura's Level 5 carries over to the one taking its place.
+        Assert.Equal(5, newest.Level);
         Assert.Equal(new[] { YaeAnnotation.RedInk }, newest.Annotations);
-        Assert.Equal(new[] { 5, 5, 1 }, ledger.Standing.Select(s => s.Level));
+        Assert.Equal(new[] { 5, 5, 5 }, ledger.Standing.Select(s => s.Level));
     }
 
     [Fact]

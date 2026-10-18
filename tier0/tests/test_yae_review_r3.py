@@ -221,7 +221,10 @@ def test_full_shrine_another_kind_withers_the_oldest_and_takes_its_place():
     _play(st, "shrine_maidens_guard")
     assert [s.kind for s in _led(st).sakura] == [Y.THUNDER, Y.THUNDER,
                                                  Y.KITSUNE]
-    assert [s.level for s in _led(st).sakura] == [5, 5, 1]   # printed Level
+    # The Sakura Levels paper (2026-10-17, pick 1 (a)): the replaced
+    # Sakura's Level 5 carries over to the Kitsune Sakura taking its place.
+    assert [s.level for s in _led(st).sakura] == [5, 5, 5]
+    assert _led(st).sakura[-1].planted_level == 5
     assert [r["reason"] for r in _acts(st)] == ["full_shrine"]
     assert any(r["event"] == "yae_wither" and r.get("reason") == "replaced"
                for r in st.log)

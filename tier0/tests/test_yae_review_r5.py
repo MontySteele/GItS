@@ -111,16 +111,17 @@ def test_a_replayed_card_that_killed_says_a_dead_target_is_not_hit_again():
 
 # 5. Full shrine ---------------------------------------------------------------
 
-FULL_SHRINE = ("planting makes the Sakura closest to withering act. If the "
-               "new one is the same kind, that Sakura refreshes and gains a "
-               "Level. If not, it withers and is replaced.")
+# The Sakura Levels paper (2026-10-17): Levels carry over on a replace.
+FULL_SHRINE = ("planting makes the Sakura closest to withering act. Same "
+               "kind: it refreshes and gains a Level. Other kind: it "
+               "withers, and the new one takes its Level if higher.")
 
 
 def test_full_shrine_text_on_the_page_and_the_hover():
     assert blindplay_render.SHRINE_FULL_LINE == "- Shrine full: " + FULL_SHRINE
     tips = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
             / "ArmKeywordTips.cs").read_text(encoding="utf-8")
-    assert '"Planting makes the Sakura closest to withering act. If the new one "' in tips
+    assert '"Planting makes the Sakura closest to withering act. Same kind: it "' in tips
 
 
 # 6. Meditations of a Yako -----------------------------------------------------

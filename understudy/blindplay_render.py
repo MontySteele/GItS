@@ -3178,11 +3178,12 @@ SHRINE_NONE_LINE = "- Sakura: none. Plant one to start your shrine."
 #: Level, another kind withers it and takes its place (`YaeShrine.Plant`).
 #: Yae review r5, item 5: the hover's own sentences
 #: (`ArmKeywordTips.YaeFullShrineTip`). 2026-10-17: the Sakura closest to
-#: withering, not the oldest (`YaeShrineLedger.NextToWither`).
+#: withering, not the oldest (`YaeShrineLedger.NextToWither`). The Sakura
+#: Levels paper (2026-10-17, pick 1 (a)): Levels carry over on a replace.
 SHRINE_FULL_LINE = ("- Shrine full: planting makes the Sakura closest to "
-                    "withering act. If the new one is the same kind, that "
-                    "Sakura refreshes and gains a Level. If not, it withers "
-                    "and is replaced.")
+                    "withering act. Same kind: it refreshes and gains a "
+                    "Level. Other kind: it withers, and the new one takes "
+                    "its Level if higher.")
 SHRINE_ROW = ("- Sakura {slot}: {kind}, Level {level}{origin}, {action}"
               "{turns}.")
 #: Each kind's action on the row (review r3).

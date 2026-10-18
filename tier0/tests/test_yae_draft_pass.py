@@ -94,7 +94,7 @@ def test_yakan_evocation_plants_and_its_sakura_strikes_now():
     assert len(led.sakura) == 1 and led.sakura[0].level == Y.PLANT_LEVEL
     strikes = _strikes(st)
     assert len(strikes) == 1 and strikes[0]["reason"] == "strike_planted"
-    assert _hp(st) == [100 - (Y.SAKURA_BASE + 1)]
+    assert _hp(st) == [100 - (Y.SAKURA_BASE + Y.SAKURA_PER_LEVEL * 1)]
     assert led.sakura[0].turns_left == Y.SAKURA_TURNS   # none of its turns
     assert not [r for r in st.log if r["event"] == "yae_tenko"]
 
@@ -143,7 +143,7 @@ def test_falling_blossom_the_oldest_strikes_this_enemy_and_stays():
     assert not [r for r in st.log if r["event"] == "yae_wither"]
     strikes = _strikes(st)
     assert len(strikes) == 1 and strikes[0]["target"] == "e1"
-    assert _hp(st) == [100, 100 - 7 - (Y.SAKURA_BASE + 1), 100]
+    assert _hp(st) == [100, 100 - 7 - (Y.SAKURA_BASE + Y.SAKURA_PER_LEVEL * 1), 100]
 
 
 def test_falling_blossom_upgrade_is_10():
@@ -162,7 +162,7 @@ def test_dawn_prayer_levels_the_newest_then_it_strikes_now():
     assert [s.level for s in led.sakura] == [1, 3]
     strikes = _strikes(st)
     assert len(strikes) == 1 and strikes[0]["level"] == 3   # Levels first
-    assert _hp(st) == [100 - (Y.SAKURA_BASE + 3)]
+    assert _hp(st) == [100 - (Y.SAKURA_BASE + Y.SAKURA_PER_LEVEL * 3)]
     assert led.sakura[-1].turns_left == Y.SAKURA_TURNS
     assert not [r for r in st.log if r["event"] == "yae_tenko"]
 
@@ -172,7 +172,7 @@ def test_dawn_prayer_upgraded_gains_3_and_strikes():
     Y.plant(st, 1)
     _play(st, "dawn_prayer+")
     assert _led(st).sakura[0].level == 4
-    assert _hp(st) == [100 - (Y.SAKURA_BASE + 4)]
+    assert _hp(st) == [100 - (Y.SAKURA_BASE + Y.SAKURA_PER_LEVEL * 4)]
 
 
 def test_dawn_prayer_strikes_the_lures_target():
@@ -229,7 +229,7 @@ def test_mikage_thunder_deals_7_first_then_levels_then_tenko():
     tenko = [r for r in _strikes(st) if r["reason"] == "tenko"]
     assert len(tenko) == 1 and tenko[0]["level"] == 2
     # 7 on its target; the Tenko's strike (Level 2) on a random enemy.
-    assert sum(100 - h for h in _hp(st)) == 7 + (Y.SAKURA_BASE + 2)
+    assert sum(100 - h for h in _hp(st)) == 7 + (Y.SAKURA_BASE + Y.SAKURA_PER_LEVEL * 2)
     assert st.enemies[1].hp <= 100 - 7
     events = [r["event"] for r in st.log]
     assert events.index("damage") < events.index("yae_tenko")
@@ -240,7 +240,7 @@ def test_mikage_thunder_upgrade_is_2_levels_and_still_7():
     Y.plant(st, 1)
     _play(st, "mikage_thunder+")
     assert _led(st).sakura[0].level == 3
-    assert _hp(st) == [100 - 7 - (Y.SAKURA_BASE + 3)]
+    assert _hp(st) == [100 - 7 - (Y.SAKURA_BASE + Y.SAKURA_PER_LEVEL * 3)]
 
 
 def test_mikage_thunder_with_an_empty_shrine_still_deals_7():

@@ -346,6 +346,11 @@ MIRRORED: dict[str, object] = {
     # with the typed Tenko.
     "YaeLaw.FoxfireBase": _yae("FOXFIRE_BASE"),
     "YaeLaw.KitsuneBase": _yae("KITSUNE_BASE"),
+    # The Sakura Levels paper (ruled 2026-10-17): what one Level adds, by
+    # kind (a Thunder Level is worth 2).
+    "YaeLaw.SakuraPerLevel": _yae("SAKURA_PER_LEVEL"),
+    "YaeLaw.FoxfirePerLevel": _yae("FOXFIRE_PER_LEVEL"),
+    "YaeLaw.KitsunePerLevel": _yae("KITSUNE_PER_LEVEL"),
     "YaeLaw.RoyaltiesPayout": _yae("ROYALTIES_ENERGY"),
     # The refill (ruled 2026-10-16): Kitsune Barrage, Sesshou Fang.
     "YaeLaw.BarrageHits": _yae("BARRAGE_HITS"),

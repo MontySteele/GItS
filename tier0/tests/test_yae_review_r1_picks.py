@@ -135,8 +135,9 @@ def test_levels_go_past_three():
     for _ in range(4):
         _play(st, _ym("narukami_ray"))           # Rooted Shrine's until cut
     assert _led(st).sakura[0].level == 5
-    assert Y.tenko_totals(st)[Y.THUNDER] == 2 + 5
-    assert Y.tenko_line(st) == " (Sakura: 7 damage)"
+    # The Sakura Levels paper (2026-10-17): 1 + 2 per Level.
+    assert Y.tenko_totals(st)[Y.THUNDER] == 1 + 2 * 5
+    assert Y.tenko_line(st) == " (Sakura: 11 damage)"
 
 
 def test_mooncall_copies_stack():
@@ -173,7 +174,7 @@ def test_grove_levels_every_sakura_each_turn_start():
     _play(st, _ym("sakura_grove"))                   # a second copy
     Y.turn_start(st)
     assert [s.level for s in _led(st).sakura] == [4, 6]
-    assert Y.act_size(st, _led(st).sakura[0]) == 2 + 4
+    assert Y.act_size(st, _led(st).sakura[0]) == 1 + 2 * 4
 
 
 def test_grove_upgrade_is_innate():
@@ -187,8 +188,8 @@ def test_mikage_levels_then_tenkos():
     _play(st, _ym("mikage_thunder"))
     assert _led(st).sakura[0].level == 2
     assert _strikes(st)[-1]["reason"] == "tenko"
-    assert _strikes(st)[-1]["amount"] == 2 + 2       # the Level came first
+    assert _strikes(st)[-1]["amount"] == 1 + 2 * 2   # the Level came first
     assert _led(st).sakura[0].turns_left == Y.SAKURA_TURNS
     _play(st, _ym("mikage_thunder") + "+")           # 2 Levels
     assert _led(st).sakura[0].level == 4
-    assert _strikes(st)[-1]["amount"] == 2 + 4
+    assert _strikes(st)[-1]["amount"] == 1 + 2 * 4

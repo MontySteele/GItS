@@ -6622,9 +6622,10 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # `YaeLaw` numbers; split and cut 2026-10-14.
         # Shrine r2 (2026-10-14): no Rite, the full-shrine plant, the kinds.
         # Condensed 2026-10-14: the full-shrine rule is on the plant cards.
+        # The Sakura Levels paper (2026-10-17): 1 + 2 per Level.
         "Sakura": ["At the end of your turn, strikes an enemy for ",
-                   "+ its Level. Lasts ",
-                   " turns, then strikes ",
+                   " per Level. Lasts ",
+                   " turns, then strikes again.",
                    "A Sakura strikes Kitsune Pounce's target when Pounce "
                    "makes it strike, ",
                    "else the enemy Foxfire Lure marked this turn, else "
@@ -6637,11 +6638,12 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                            " + its Level when it acts."],
         "Kitsune Sakura": ["A fox decoy ", ". When it acts, you gain "],
         # Yae review r5, item 5: the long form.
+        # The Sakura Levels paper (2026-10-17): Levels carry over.
         "Full shrine": ["Planting makes the Sakura closest to withering "
-                        "act. If the new one ",
-                        "is the same kind, that Sakura refreshes and gains a "
-                        "Level. If not, ",
-                        "it withers and is replaced."],
+                        "act. Same kind: it ",
+                        "refreshes and gains a Level. Other kind: it "
+                        "withers, and the new ",
+                        "one takes its Level if higher."],
         "Edit": ["Give a card an Annotation for this combat, replacing "
                  "its last. ", "Published ones stay and add up."],
         # 2026-10-14: each Annotation's own row, `YaeAnnotationText.Rule`

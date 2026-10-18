@@ -66,7 +66,7 @@ public class YaeRedInkSakuraTests : IDisposable
         Assert.True(ledger.Plant(YaeLaw.PlantLevel, null, YaeAnnotation.RedInk));
         var s = Assert.Single(ledger.Standing);
         Assert.Equal(new[] { YaeAnnotation.RedInk }, s.Annotations);
-        Assert.Equal(YaeLaw.SakuraBase + s.Level + YaeLaw.RedInkAmount,
+        Assert.Equal(YaeLaw.SakuraBase + YaeLaw.SakuraPerLevel * s.Level + YaeLaw.RedInkAmount,
                      YaeShrineLedger.ActSize(s.Kind, s.Level, s.Annotations));
     }
 

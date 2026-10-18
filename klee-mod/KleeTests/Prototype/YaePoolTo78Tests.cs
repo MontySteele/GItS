@@ -42,7 +42,7 @@ public class YaePoolTo78Tests : IDisposable
         Assert.Equal(new[] { YaeAnnotation.RedInk, YaeAnnotation.FoxFire,
                              YaeAnnotation.DeadlineExtension }, s.Annotations);
         var size = YaeShrineLedger.ActSize(s.Kind, s.Level, s.Annotations);
-        Assert.Equal(YaeLaw.SakuraBase + s.Level + YaeLaw.RedInkAmount, size);
+        Assert.Equal(YaeLaw.SakuraBase + YaeLaw.SakuraPerLevel * s.Level + YaeLaw.RedInkAmount, size);
         // A second Red Ink changes nothing: no second +3.
         Assert.Equal(0, ledger.EditSakura(YaeSakuraEnd.Oldest, 1, YaeAnnotation.RedInk));
         Assert.Equal(size, YaeShrineLedger.ActSize(s.Kind, s.Level, s.Annotations));

@@ -49,6 +49,10 @@ draws the blow.
     Sakura last), not the first planted. A run of Sakura Seals had refreshed
     slot 1 again and again while the other two ran out. [USER]: "I think
     that's closest to the expectation."
+  - **Amended 2026-10-17 (Levels carry over):** the new Sakura takes the
+    higher of its own Level and the replaced one's, and a Sakura (Thunder)
+    now strikes for 1 + 2 per Level (`review/active/yae-sakura-levels-2026-10-17.md`,
+    picks 1 (a) and 2 (a)).
 - **Tenko** becomes one plain rule again: "Every Sakura acts now. Refresh them
   to at least 3 turns." The typed Tenko and its double effect go. This is the
   power cut: one action per Sakura, not two. The mix of kinds you planted

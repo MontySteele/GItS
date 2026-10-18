@@ -52,7 +52,8 @@ def _badge(slot: int, level: int, strike: int, turns: int,
         level, "Counter")
 
 
-def yae_state(badges=((1, 3, 5, 1), (2, 2, 4, 2), (3, 1, 3, 3)),
+# The Sakura Levels paper (2026-10-17): a Sakura strikes for 1 + 2 per Level.
+def yae_state(badges=((1, 3, 7, 1), (2, 2, 5, 2), (3, 1, 3, 3)),
               lure_on: int | None = None, annotate: int = 0,
               character: str = "Yae Miko") -> dict:
     state = json.loads(RECORDED_COMBAT.read_text(encoding="utf-8"))["state"]
@@ -92,17 +93,18 @@ def test_the_page_prints_every_sakura_oldest_first():
     assert lines[0] == ("- Sakura: 3 of 3. At the end of your turn each "
                         "acts, oldest first.")
     assert lines[1] == ("- Sakura 1: Sakura, Level 3 (planted at 3), strikes "
-                        "an enemy for 5, 1 turn left.")
+                        "an enemy for 7, 1 turn left.")
     assert lines[2] == ("- Sakura 2: Sakura, Level 2 (planted at 2), strikes "
-                        "an enemy for 4, 2 turns left.")
+                        "an enemy for 5, 2 turns left.")
     assert lines[3] == ("- Sakura 3: Sakura, Level 1 (planted at 1), strikes "
                         "an enemy for 3, 3 turns left.")
     # Review r3: full, so the next plant makes the oldest act first.
     # Yae review r5, item 5: the hover's sentences.
+    # The Sakura Levels paper (2026-10-17): Levels carry over on a replace.
     assert lines[4] == ("- Shrine full: planting makes the Sakura closest "
-                        "to withering act. If the new one is the same kind, "
-                        "that Sakura refreshes and gains a Level. If not, it "
-                        "withers and is replaced.")
+                        "to withering act. Same kind: it refreshes and gains "
+                        "a Level. Other kind: it withers, and the new one "
+                        "takes its Level if higher.")
     assert lines[-1] == "- Annotated cards in your hand: 0."
 
 

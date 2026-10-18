@@ -110,7 +110,10 @@ public class YaePrototypeTests : IDisposable
     {
         Assert.Equal(3, YaeLaw.SakuraCap);
         Assert.Equal(3, YaeLaw.SakuraTurns);
-        Assert.Equal(2, YaeLaw.SakuraBase);
+        Assert.Equal(1, YaeLaw.SakuraBase);      // the Sakura Levels paper
+        Assert.Equal(2, YaeLaw.SakuraPerLevel);
+        Assert.Equal(1, YaeLaw.FoxfirePerLevel);
+        Assert.Equal(1, YaeLaw.KitsunePerLevel);
         Assert.Equal(1, YaeLaw.FoxfireBase);     // review r3
         Assert.Equal(2, YaeLaw.KitsuneBase);     // review r3
         Assert.Equal(1, YaeLaw.PlantLevel);
@@ -169,11 +172,12 @@ public class YaePrototypeTests : IDisposable
     }
 
     [Fact]
-    public void A_strike_is_two_plus_level_so_a_mature_shrine_is_fifteen()
+    public void A_strike_is_one_plus_two_per_level_so_a_mature_shrine_is_twenty_one()
     {
+        // The Sakura Levels paper (2026-10-17): 1 + 2 per Level.
         Assert.Equal(3, YaeShrineLedger.StrikeDamage(1, false, 0));
-        Assert.Equal(5, YaeShrineLedger.StrikeDamage(3, false, 0));
-        Assert.Equal(15, 3 * YaeShrineLedger.StrikeDamage(3, false, 0));
+        Assert.Equal(7, YaeShrineLedger.StrikeDamage(3, false, 0));
+        Assert.Equal(21, 3 * YaeShrineLedger.StrikeDamage(3, false, 0));
     }
 
     [Fact]
@@ -202,8 +206,9 @@ public class YaePrototypeTests : IDisposable
     [Fact]
     public void Each_sakura_kinds_action_size()
     {
-        // Review r3: Sakura 2 + Level, Foxfire 1 + Level, Kitsune 2 + Level.
-        Assert.Equal(5, YaeShrineLedger.ActSize(YaeSakuraKind.Thunder, 3, YaeAnnotation.None));
+        // Review r3: Foxfire 1 + Level, Kitsune 2 + Level; the Sakura Levels
+        // paper (2026-10-17): Sakura 1 + 2 per Level.
+        Assert.Equal(7, YaeShrineLedger.ActSize(YaeSakuraKind.Thunder, 3, YaeAnnotation.None));
         Assert.Equal(4, YaeShrineLedger.ActSize(YaeSakuraKind.Foxfire, 3, YaeAnnotation.None));
         Assert.Equal(5, YaeShrineLedger.ActSize(YaeSakuraKind.Kitsune, 3, YaeAnnotation.None));
         Assert.True(YaeShrineLedger.DealsDamage(YaeSakuraKind.Foxfire));
@@ -803,8 +808,8 @@ public class YaePrototypeTests : IDisposable
     [Fact]
     public void Her_sakura_tip_is_her_shrines_and_the_companions_stays_its_own()
     {
-        Assert.Equal("At the end of your turn, strikes an enemy for 2 + its "
-                     + "Level. Lasts 3 turns, then strikes once more.",
+        Assert.Equal("At the end of your turn, strikes an enemy for 1 + 2 per "
+                     + "Level. Lasts 3 turns, then strikes again.",
                      ArmKeywordTips.YaeSakuraTip);
         Assert.True(ArmKeywordTips.YaeSakuraTip.Length <= 100);
         Assert.DoesNotContain("Tenko", ArmKeywordTips.YaeSakuraTip);
@@ -828,9 +833,11 @@ public class YaePrototypeTests : IDisposable
         Assert.True(ledger.Plant(YaeLaw.PlantLevel, null, kind: YaeSakuraKind.Kitsune));
         Assert.Equal(YaeLaw.SakuraCap, ledger.Count);
         Assert.Equal(YaeSakuraKind.Kitsune, ledger.Standing[^1].Kind);
-        Assert.Equal("Planting makes the Sakura closest to withering act. If "
-                     + "the new one is the same kind, that Sakura refreshes "
-                     + "and gains a Level. If not, it withers and is replaced.",
+        // The Sakura Levels paper (2026-10-17): Levels carry over.
+        Assert.Equal(before[0] + 1, ledger.Standing[^1].Level);
+        Assert.Equal("Planting makes the Sakura closest to withering act. Same "
+                     + "kind: it refreshes and gains a Level. Other kind: it "
+                     + "withers, and the new one takes its Level if higher.",
                      ArmKeywordTips.YaeFullShrineTip);
     }
     // ---- the Edit tip and each Annotation's own (2026-10-14) ----------------
