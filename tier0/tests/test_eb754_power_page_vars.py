@@ -121,11 +121,8 @@ def test_the_two_summon_rows_say_their_number_twice_over():
 
     bunny = text["CompanionOverhaulHooks.cs"].split(
         "class BaronBunnyPower")[1].split("class ")[0]
-    tamoto = text["CompanionOverhaulInazuma.cs"].split(
-        "class TamotoPower")[1].split("class ")[0]
-
-    for body, constant in ((bunny, "CompanionOverhaulLaw.BaronBunnyDamage"),
-                           (tamoto, "CompanionOverhaulLaw.TamotoDamage")):
+    # (Chiori's Tamoto left with the Inazuma pool rework, 2026-10-18.)
+    for body, constant in ((bunny, "CompanionOverhaulLaw.BaronBunnyDamage"),):
         assert '("smartDescription",' in body
         assert "{Damage}" in body
         # The static row prints the constant the var is SEEDED from, so an
@@ -140,8 +137,7 @@ def test_the_two_summon_rows_keep_the_key_the_game_probes_for():
     `ProtoBombPower` overrides the property to select among a grid of rows;
     these two must not, or the row they declare would be registered under a key
     nothing looks up, which is the same class of miss as the raw `{Damage}`."""
-    for name, cls in (("CompanionOverhaulHooks.cs", "BaronBunnyPower"),
-                      ("CompanionOverhaulInazuma.cs", "TamotoPower")):
+    for name, cls in (("CompanionOverhaulHooks.cs", "BaronBunnyPower"),):
         src = (POWERS / "Prototype" / name).read_text(encoding="utf-8")
         body = src.split("class " + cls)[1].split("class ")[0]
         assert "SmartDescriptionLocKey" not in body, cls

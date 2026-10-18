@@ -5,6 +5,7 @@ using BaseLib.Abstracts;
 using KleeMod.Elements;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
+using MegaCrit.Sts2.Core.Commands.Builders;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Players;
@@ -18,49 +19,40 @@ using MegaCrit.Sts2.Core.ValueProps;
 namespace KleeMod.Powers;
 
 /// <summary>
-/// THE INAZUMA COMPANION OVERHAUL -- ITS FIFTEEN POWERS AND ITS ONE HELPER
+/// THE INAZUMA COMPANION OVERHAUL -- ITS POWERS AND ITS ONE HELPER
 /// (QUARANTINED, R213 B).
 ///
 /// The approved workshop <c>companion-workshop-inazuma-2026-09-01.md</c> sec.3
-/// (approved 2026-09-01 at its four default picks, its sec.9; a Paper artefact
-/// on another branch and not in this tree) rewrites Inazuma's Universal
-/// companion pool: fifteen shipped rows re-authored and nine characters with no
-/// row today given one. Its sec.2 nation shape is "Inazuma reads the HP bar",
-/// and eight of the twenty-four rows do.
+/// rewrote Inazuma's Universal companion pool; the Inazuma pool rework
+/// (<c>review/active/inazuma-companions-2026-10-18.md</c>, 2026-10-18) took
+/// it to 29 cards (8 / 13 / 8): three cut, seven rebuilt, eleven new, and six
+/// Powers. Its powers are at the foot of this file.
 ///
 /// SAME FLAG AS MONDSTADT, deliberately: <c>CompanionOverhaul.Enabled</c> means
 /// "the companion pool is the approved workshops' pool", and a second property
 /// would let a build offer one nation's rewrites beside the other's shipped
 /// rows -- a state no document describes and no seat would be asked to grade.
 ///
-/// WHAT THIS FILE REUSES rather than builds, which is most of it. Every hook
-/// below was built for Mondstadt's second wave and is spent again here without
-/// a line of new plumbing:
+/// WHAT THIS FILE REUSES rather than builds:
 ///
 ///   * THE END-OF-TURN VOLLEY, driven by <see cref="CompanionOverhaulTurnEnd"/>
-///     in one fixed order (Gorou's Juuga, Sayu's Daruma, Shinobu's ring, Yae's
-///     Sakura, Ayaka's Soumetsu, Ayato's clock, Chiori's Tamoto, and three
-///     clocks that fire nothing).
+///     in one fixed order (Gorou's Juuga, Shinobu's ring, Yae's Sakura,
+///     Ayaka's Soumetsu).
 ///   * THE START-OF-TURN PAYOUT, each power on its own
-///     <c>AfterPlayerTurnStart</c> broadcast, on the argument the Mondstadt
-///     three already make and which extends: the four are COMMUTATIVE. One
-///     clamps its own Block mark, one draws, one grants a rider and one deals
-///     UNELEMENTED damage -- so none reads a value another writes and none can
-///     change which reactions the others see.
+///     <c>AfterPlayerTurnStart</c> broadcast: Thoma's Block mark clamps and
+///     Kirara's parcel deals UNELEMENTED damage.
 ///   * THE BLOCK-ABSORPTION TRIGGER (Diona's paws) answers Thoma's Blazing
 ///     Barrier as well, from <see cref="CompanionOverhaulIncomingHit"/>.
 ///   * THE NEXT-ATTACK ELEMENT OVERRIDE (Bennett, Razor, Varka) answers Sara's
-///     Crowfeather Cover and Ayato's Kyouka, through the one funnel
+///     Crowfeather Cover and the Electro rider, through the one funnel
 ///     <see cref="CompanionOverhaulRiders"/> owns.
-///   * THE REACTION EVENT counts Swirls for Heizou at the same one call site.
-///   * <c>AfterCardPlayed</c> answers Thoma's Crimson Ooyoroi.
-///   * A POWER HOSTED ON A CHOSEN BODY (Barbara, Eula) hosts Yoimiya's mark.
+///   * THE REACTION EVENT counts Swirls for Chihayaburu at the same one call
+///     site.
 ///
-/// WHAT IS GENUINELY NEW, and there are two. A PER-PLAY DAMAGE TOTAL
+/// WHAT IS GENUINELY NEW: A PER-PLAY DAMAGE TOTAL
 /// (<see cref="CompanionOverhaulLedger.DamageDealtThisPlay"/>), because Gorou's
 /// "Block equal to half the damage dealt" reads a number no card can compute
-/// for itself; and A HIT THAT IGNORES BLOCK (Chiori's Tamoto), which is one
-/// optional flag on <see cref="ElementalHit.Deal"/>.
+/// for itself.
 ///
 /// PURITY IS LOAD-BEARING, as it is next door: nothing in this file mutates
 /// from a modifier hook. Every consumption is in <c>AfterPlayerTurnStart</c>,
@@ -196,177 +188,6 @@ public sealed class JuugaGuardPower : PowerModel, ILocalizationProvider
         await CreatureCmd.GainBlock(Owner, CompanionOverhaulLaw.JuugaGuardBlock,
                                     ValueProp.Unpowered, null);
         await PowerCmd.TickDownDuration(this);
-    }
-}
-
-// ---------------------------------------------------------------------------
-// SAYU
-// ---------------------------------------------------------------------------
-
-/// <summary>
-/// Sayu, Muji-Muji Daruma: "for 2 turns, at the end of your turn, if you are
-/// above 70% HP deal 6 damage to a random enemy; otherwise gain 6 Block."
-///
-/// THE BAR IS READ WHEN THE DARUMA ACTS, not when it was summoned. "If you are"
-/// is present tense, and the whole point of the nation's shape is that the
-/// split follows the fight.
-///
-/// THE DAMAGE CARRIES NO ELEMENT, because the card names none --
-/// <see cref="SolarIsotomaBloomPower"/> made the same call for the same reason.
-/// </summary>
-public sealed class MujiMujiDarumaPower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Muji-Muji Daruma"),
-        ("description",
-            "At the end of your turn, deal "
-          + $"[blue]{CompanionOverhaulLaw.DarumaDamage}[/blue] damage to a random "
-          + "enemy if you are above 70% HP, otherwise gain "
-          + $"[blue]{CompanionOverhaulLaw.DarumaBlock}[/blue] [gold]Block[/gold]. "
-          + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-
-    internal async Task FireVolley(PlayerChoiceContext choiceContext)
-    {
-        if (Owner.Player == null) return;
-        if (InazumaCompanion.AbovePercent(Owner, 70))
-        {
-            var target = CompanionOverhaulTargeting.RandomEnemy(CombatState);
-            if (target != null)
-            {
-                await InazumaCompanion.DealUnelemented(
-                    choiceContext, target,
-                    CompanionOverhaulLaw.DarumaDamage, Owner);
-            }
-        }
-        else
-        {
-            // NC-11: power-sourced Block stays raw.
-            await CreatureCmd.GainBlock(
-                Owner, CompanionOverhaulLaw.DarumaBlock,
-                ValueProp.Unpowered, null, fast: true);
-        }
-        await PowerCmd.TickDownDuration(this);
-    }
-}
-
-/// <summary>
-/// Sayu, Naptime: "Gain 4 Block. At the start of your next turn, draw 2 if you
-/// played no Attacks this turn."
-///
-/// THE CONDITION IS ABOUT THE TURN THE CARD WAS PLAYED, so it is answered at
-/// the END of that turn: an Attack played this turn deletes the promise, and
-/// anything still standing at the next turn's start has already earned its
-/// draw. Answering it at the start of the next turn instead would have meant
-/// reading a counter the turn boundary has already cleared.
-///
-/// Amount is CARDS, so two Naptimes draw four, and the promise is popped WHOLE
-/// -- it is kept once, not ticked.
-///
-/// ITS OWN BROADCAST on both ends. The draw is commutative with the other three
-/// start-of-turn readers, and the fizzle is a REMOVAL, which has no position to
-/// defend -- the same argument the Mondstadt wave's own removals make.
-/// </summary>
-/// <summary>
-/// `EB-468` MADE THE BADGE SAY WHEN THE PROMISE IS ALREADY DEAD.
-///
-/// THE FIND (Kokomi r15 (c) 4). Played after a Strike, this put "Naptime 4 --
-/// if you play no Attacks this turn, draw 4" on the bar for a full turn and
-/// paid nothing: the condition had already failed when the card was played,
-/// and the badge went on advertising the draw until the turn ended. "A Glam
-/// replay stacked it 2 to 4 rather than firing twice" was the same seat's
-/// second half, and unprinted.
-///
-/// THE RULE DOES NOT MOVE, and that is the whole shape of the fix. The promise
-/// is still granted and still removed at the end of a turn that saw an Attack
-/// (<see cref="AfterSideTurnEnd"/>), because a grant refused outright would
-/// leave the play with nothing on screen at all -- the badge is what the
-/// player reads, so the badge is what has to be honest. What is added is the
-/// LIVE face: while an Attack has already been played this turn the row says
-/// so, and the stacking clause says what a second copy does.
-/// </summary>
-public sealed class NaptimePower : PowerModel, ILocalizationProvider
-{
-    /// <summary>The promise, still live. `Copies add up.` is `EB-468`'s
-    /// second half: two grants make one bigger draw and not two draws, which
-    /// is <see cref="StackType"/>'s own arithmetic and was printed nowhere.
-    /// </summary>
-    private const string Promise =
-        "Next turn, draw [blue]{Amount}[/blue] card{Amount:plural:|s} if you "
-      + "play no Attacks this turn. Copies add up.";
-
-    /// <summary>The row key the missed face is filed under. Declared once so
-    /// <see cref="Localization"/> and <see cref="SmartDescriptionLocKey"/>
-    /// cannot drift -- `SalonMemberPower.ManualKey`'s arrangement.</summary>
-    private const string MissedKey = "smartDescriptionMissed";
-
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Naptime"),
-        ("description", Promise),
-        ("smartDescription", Promise),
-        (MissedKey,
-            "Missed this turn: an [gold]Attack[/gold] has been played, so "
-          + "this draws nothing and leaves at the end of the turn."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-
-    /// <summary>
-    /// Which of the two faces this badge prints right now.
-    ///
-    /// `IsMutable` FIRST, `SalonMemberPower.SmartDescriptionLocKey`'s guard
-    /// and for its reason: `HasSmartDescription` probes this key on a
-    /// CANONICAL power too, and <c>PowerModel.Owner</c>'s getter asserts
-    /// mutability (`EB-94`). A compendium copy therefore prints the promise,
-    /// which is also the honest answer -- it has no turn to have missed.
-    ///
-    /// THE LEDGER READ NEVER THROWS. This getter runs on every tooltip read,
-    /// which is a SPECULATIVE call site (`CompanionOverhaulLedger`'s own
-    /// header), and `For` is a roll-on-read lookup rather than a mutation of
-    /// the counter -- but a face may not be the thing that takes a combat
-    /// down, so the read is wrapped.
-    /// </summary>
-    protected override string SmartDescriptionLocKey =>
-        IsMutable && Owner is { } owner && MissedFor(owner)
-            ? Id.Entry + "." + MissedKey
-            : base.SmartDescriptionLocKey;
-
-    private static bool MissedFor(Creature owner)
-    {
-        try
-        {
-            return CompanionOverhaulLedger.For(owner).AttacksPlayedThisTurn > 0;
-        }
-        catch (System.Exception)
-        {
-            return false;
-        }
-    }
-
-    public override async Task AfterPlayerTurnStart(
-        PlayerChoiceContext choiceContext, Player player)
-    {
-        if (player.Creature != Owner) return;
-        var cards = (int)Amount;
-        await PowerCmd.Remove(this);
-        if (cards > 0) await CardPileCmd.Draw(choiceContext, cards, player);
-    }
-
-    public override async Task AfterSideTurnEnd(
-        PlayerChoiceContext choiceContext, CombatSide side,
-        IEnumerable<Creature> participants)
-    {
-        if (side != CombatSide.Player) return;
-        if (CompanionOverhaulLedger.For(Owner).AttacksPlayedThisTurn <= 0) return;
-        await PowerCmd.Remove(this);
     }
 }
 
@@ -535,53 +356,6 @@ public sealed class BlazingBarrierPower : PowerModel, ILocalizationProvider
     }
 }
 
-/// <summary>
-/// Thoma, Crimson Ooyoroi: "For 2 turns, whenever you play an Attack, deal 5
-/// Pyro damage to a random enemy and gain 3 Block."
-///
-/// <c>AfterCardPlayed</c>, so the rider answers the board the Attack left
-/// behind and a killing Attack's rider finds one fewer body. ONE volley per
-/// play and not per stack -- Amount is TURNS REMAINING, the arm's standing rule
-/// for a timed power, so a second Ooyoroi lengthens the window.
-///
-/// NOT gated on a first-in-series check: a replayed Attack is an Attack played
-/// again, which is the index rule the sim's own `_finish_play` loop takes.
-/// </summary>
-public sealed class CrimsonOoyoroiPower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Crimson Ooyoroi"),
-        ("description",
-            "Whenever you play an Attack, deal "
-          + $"[blue]{CompanionOverhaulLaw.OoyoroiDamage}[/blue] [gold]Pyro[/gold] "
-          + "damage to a random enemy and gain "
-          + $"[blue]{CompanionOverhaulLaw.OoyoroiBlock}[/blue] [gold]Block[/gold]. "
-          + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-
-    public override async Task AfterCardPlayed(
-        PlayerChoiceContext choiceContext, CardPlay cardPlay)
-    {
-        if (cardPlay.Card?.Owner?.Creature != Owner) return;
-        if (cardPlay.Card?.Type != CardType.Attack) return;
-        var target = CompanionOverhaulTargeting.RandomEnemy(CombatState);
-        if (target != null)
-        {
-            await ElementalHit.Deal(
-                choiceContext, target, Element.Pyro,
-                CompanionOverhaulLaw.OoyoroiDamage, Owner);
-        }
-        await CreatureCmd.GainBlock(
-            Owner, CompanionOverhaulLaw.OoyoroiBlock,
-            ValueProp.Unpowered, null, fast: true);
-    }
-}
-
 // ---------------------------------------------------------------------------
 // KUJOU SARA
 // ---------------------------------------------------------------------------
@@ -621,45 +395,6 @@ public sealed class CrowfeatherCoverPower
     {
         if (side != CombatSide.Player) return;
         await PowerCmd.Remove(this);
-    }
-}
-
-/// <summary>
-/// Kujou Sara, Tengu Stormcall: "Next turn, your Attacks deal 5 more damage."
-///
-/// A PROMISE, NOT A RIDER. It pays into the SHIPPED
-/// <see cref="AttackUpThisTurnPower"/> at the start of the turn it names, which
-/// is already summed by every damage path and already cleared at the end of the
-/// player's turn -- so "next turn" needs no clock of its own and the rider
-/// cannot outlive the turn it was promised for. Amount is COPIES: two
-/// stormcalls promise ten.
-/// </summary>
-public sealed class TenguStormcallPower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Tengu Stormcall"),
-        ("description",
-            "Next turn, your Attacks deal [blue]"
-          + CompanionOverhaulLaw.StormcallBonus
-          + "[/blue] additional damage."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-
-    public override async Task AfterPlayerTurnStart(
-        PlayerChoiceContext choiceContext, Player player)
-    {
-        if (player.Creature != Owner) return;
-        var copies = (int)Amount;
-        await PowerCmd.Remove(this);
-        if (copies <= 0) return;
-        await PowerCmd.Apply<AttackUpThisTurnPower>(
-            choiceContext, Owner,
-            CompanionOverhaulLaw.StormcallBonus * copies,
-            applier: Owner, cardSource: null);
     }
 }
 
@@ -734,95 +469,7 @@ public sealed class SesshouSakuraPower : PowerModel, ILocalizationProvider
 }
 
 // ---------------------------------------------------------------------------
-// YOIMIYA
-// ---------------------------------------------------------------------------
-
-/// <summary>
-/// Yoimiya, Aurous Blaze (AoE trim, 2026-10-03): "Deal 6 Pyro damage. For 2
-/// turns, whenever you play a Skill, deal 3 Pyro damage to that enemy."
-///
-/// HOSTED ON THE ENEMY, which is what "that enemy" means when a power holds
-/// no target: the body holds the mark. Barbara's Melody Loop and Eula's
-/// Lightfall Sword are the two rows that established the seam, and this is the
-/// third; a body that dies takes the mark with it.
-///
-/// "YOU" IS THE PLAYER WHO MARKED IT (<see cref="PowerModel.Applier"/>), and
-/// the card that placed the mark does not answer it: "for 2 turns, whenever
-/// you play a Skill" is the Skills after it. The 3 is the CARD's printed
-/// number, banked at play (<see cref="ISummonDamagePower"/>, `EB-463`).
-///
-/// Amount is TURNS REMAINING, so re-marking a body extends the window rather
-/// than doubling the hit. Sim twin: `effects._aurous_blaze_on_skill`.
-/// </summary>
-public sealed class AurousBlazePower : PowerModel, ILocalizationProvider,
-    ISummonDamagePower
-{
-    /// <summary>The card's printed 3 with its fold, or the arm's constant
-    /// where nothing banked one.</summary>
-    public int SummonDamage { get; private set; } =
-        CompanionOverhaulLaw.AurousBlazeDamage;
-
-    public void NoteSummonDamage(int amount)
-    {
-        SummonDamage = amount;
-        var damage = DynamicVars["Damage"];
-        damage.BaseValue = amount;
-        damage.ResetToBase();
-        InvokeDisplayAmountChanged();
-    }
-
-    protected override IEnumerable<DynamicVar> CanonicalVars =>
-        new DynamicVar[]
-        {
-            new DynamicVar("Damage", CompanionOverhaulLaw.AurousBlazeDamage),
-        };
-
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Aurous Blaze"),
-        // The compendium row carries the constant, the smart row the live
-        // number (`EB-353` / `EB-754`).
-        ("description",
-            "Whenever its marker plays a Skill, deal "
-          + $"[blue]{CompanionOverhaulLaw.AurousBlazeDamage}[/blue] [gold]Pyro[/gold] "
-          + "damage to this enemy. "
-          + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
-        ("smartDescription",
-            "Whenever its marker plays a Skill, deal "
-          + "[blue]{Damage}[/blue] [gold]Pyro[/gold] damage to this enemy. "
-          + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
-    };
-
-    public override PowerType Type => PowerType.Debuff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-
-    /// <summary>Does this play answer the mark? A Skill of the marker's that
-    /// is not the card that placed it. Pure, for the headless pin.</summary>
-    public static bool Answers(CardModel? card, Creature? marker) =>
-        card is { Type: CardType.Skill }
-        && marker != null
-        && card.Owner?.Creature == marker
-        && card is not Cards.Prototype.Generated.ProtoMiYoimiyaAurousBlaze;
-
-    public override async Task AfterCardPlayed(
-        PlayerChoiceContext choiceContext, CardPlay cardPlay)
-    {
-        var applier = Applier;
-        if (!Answers(cardPlay.Card, applier)) return;
-        if (Owner.IsDead) return;
-        await ElementalHit.Deal(
-            choiceContext, Owner, Element.Pyro, SummonDamage, applier);
-    }
-
-    /// <summary>The clock, run down by the arm's ordered end-of-turn walk.
-    /// A removal, so it defends no position in that sequence -- it is there
-    /// because the walk already visits the board for Eula's blade.</summary>
-    internal async Task Tick() => await PowerCmd.TickDownDuration(this);
-}
-
-// ---------------------------------------------------------------------------
-// KAMISATO AYAKA AND AYATO
+// KAMISATO AYAKA
 // ---------------------------------------------------------------------------
 
 /// <summary>
@@ -886,63 +533,8 @@ public sealed class SoumetsuPower : PowerModel, ILocalizationProvider
     }
 }
 
-/// <summary>
-/// Kamisato Ayato, Kyouka: "For 2 turns, your Attacks apply Hydro and deal 4
-/// more damage. When it ends, deal 12 Hydro damage to a random enemy."
-///
-/// <see cref="LightningFangPower"/>'s two halves plus an expiry payoff. Amount
-/// is TURNS REMAINING, so the damage it pays is the CONSTANT rather than the
-/// stack -- a second copy makes the window longer, not the hits bigger, which
-/// is the arm's standing rule for a timed power. The element half is read
-/// through <see cref="CompanionOverhaulRiders"/>.
-/// </summary>
-public sealed class KyoukaPower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Kyouka"),
-        ("description",
-            "Your Attacks apply [gold]Hydro[/gold] and deal "
-          + $"[blue]{CompanionOverhaulLaw.KyoukaDamage}[/blue] additional "
-          + "damage, then "
-          + $"[blue]{CompanionOverhaulLaw.KyoukaFinale}[/blue] "
-          + "[gold]Hydro[/gold] damage to a random enemy when it ends. "
-          + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-
-    public override decimal ModifyDamageAdditive(
-        Creature? target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource, CardPlay? cardPlay)
-    {
-        if (dealer != Owner || target == Owner) return 0m;
-        if (!props.IsPoweredAttack()) return 0m;
-        if (cardSource is not { Type: CardType.Attack }) return 0m;
-        return CompanionOverhaulLaw.KyoukaDamage;
-    }
-
-    internal async Task Tick(PlayerChoiceContext choiceContext)
-    {
-        if (Owner.Player == null) return;
-        if (Amount > 1)
-        {
-            await PowerCmd.TickDownDuration(this);
-            return;
-        }
-        await PowerCmd.Remove(this);
-        var target = CompanionOverhaulTargeting.RandomEnemy(CombatState);
-        if (target == null) return;
-        await ElementalHit.Deal(
-            choiceContext, target, Element.Hydro,
-            CompanionOverhaulLaw.KyoukaFinale, Owner);
-    }
-}
-
 // ---------------------------------------------------------------------------
-// KIRARA AND CHIORI
+// KIRARA
 // ---------------------------------------------------------------------------
 
 /// <summary>
@@ -987,83 +579,344 @@ public sealed class SurpriseDispatchPower : PowerModel, ILocalizationProvider
     }
 }
 
+// ---------------------------------------------------------------------------
+// THE INAZUMA POOL REWORK (2026-10-18)
+// ---------------------------------------------------------------------------
+// review/active/inazuma-companions-2026-10-18.md; [USER]: "Ok, agreed on all
+// defaults for both the PR and inazuma companions". Seven powers: Thoma's
+// rebuilt Ooyoroi, the Electro rider Sara's Stormcall and Raiden's Baleful
+// Omen share, and the five Rare Powers. Each one's sim twin is named on it.
+
 /// <summary>
-/// Chiori, Fluttering Hasode: "Summon Tamoto: for 3 turns, at the end of your
-/// turn deal 6 Geo damage to a random enemy, ignoring Block."
-///
-/// THE DOLL THAT CUTS ARMOUR. "Ignoring Block" is one optional flag on
-/// <see cref="ElementalHit.Deal"/> -- <c>ValueProp.Unblockable</c> beside the
-/// <c>Unpowered</c> every power-sourced hit already carries. Everything else
-/// about the hit is unchanged: it still reacts, it still counts as a hit, and
-/// it is still capped by Intangible, because unblockable is not uncappable
-/// (R128).
+/// The Inazuma rework's card-side helper: Chiori's Fluttering Hasode, "This
+/// ignores Block." The base game's <c>AttackCommand</c> carries its props in
+/// <c>DamageProps</c> with a private setter and offers only <c>Unpowered()</c>,
+/// so the emitted body adds <see cref="ValueProp.Unblockable"/> here. The hit
+/// stays a powered card Attack (Strength, Weak and Vulnerable still apply) and
+/// is still capped by Intangible. Sim twin:
+/// `deal_damage_to_enemy(ignore_block=True)`, from `_op_damage`.
 /// </summary>
-public sealed class TamotoPower
-    : PowerModel, ILocalizationProvider, ISummonDamagePower
+public static class InazumaAttackExtensions
 {
-    /// <summary>
-    /// `EB-463`. THE NUMBER THE CARD PRINTED, WITH THE CARD'S FOLD ON IT.
-    ///
-    /// Guest Cast raised Lynette's and Diona's Block and left this 6 at 6 on
-    /// the same screen (Furina r8 (c) 1), because Chiori's whole body is
-    /// `apply_power` and the damage never touched the card's own printed-
-    /// damage path. `SummonDamage.Note` banks the fold here at PLAY (R72), and
-    /// both the volley and the badge read it -- so `{Damage}` is what the
-    /// board will deal, and the constant is what an unfolded play leaves.
-    /// </summary>
-    public int SummonDamage { get; private set; } =
-        CompanionOverhaulLaw.TamotoDamage;
+    private static readonly System.Reflection.PropertyInfo? DamagePropsProperty =
+        typeof(AttackCommand).GetProperty(nameof(AttackCommand.DamageProps));
 
-    public void NoteSummonDamage(int amount)
+    public static AttackCommand IgnoringBlock(this AttackCommand command)
     {
-        SummonDamage = amount;
-        var damage = DynamicVars["Damage"];
-        damage.BaseValue = amount;
-        damage.ResetToBase();
-        InvokeDisplayAmountChanged();
+        DamagePropsProperty?.SetValue(
+            command, command.DamageProps | ValueProp.Unblockable);
+        return command;
     }
+}
 
-    protected override IEnumerable<DynamicVar> CanonicalVars =>
-        new DynamicVar[]
-        {
-            new DynamicVar("Damage", CompanionOverhaulLaw.TamotoDamage),
-        };
-
+/// <summary>
+/// Thoma, Crimson Ooyoroi (rebuilt as a Power, 2026-10-18): "At the start of
+/// your turn, keep up to 6 [9] of your Block." <see cref="WatatsumisGracePower"/>'s
+/// construction, the base game's Sturdy Clamp shape: the Block clear is
+/// prevented, then everything above the stack is lost. Amount IS the cap, so
+/// copies add. Barricade (or Grace) worn first keeps its own rule: the first
+/// preventer wins, as in the base game. Sim twin: `effects.ooyoroi_keeps`,
+/// read at the block clear beside `kokomi_plan.grace_keeps`.
+/// </summary>
+public sealed class CrimsonOoyoroiPower : PowerModel, ILocalizationProvider
+{
     public List<(string, string)>? Localization => new()
     {
-        ("title", "Tamoto"),
-        // `EB-754`, and it is Amber's defect on Chiori's row -- the same
-        // construction, found on the same sweep. `PowerModel.HoverTips` binds
-        // `DynamicVars.AddTo` on the SMART branch alone, so `{Damage}` written
-        // on the static row was never filled and the placeholder reached the
-        // screen. `EB-353`'s split: the compendium row carries the CONSTANT
-        // the var is seeded from, the smart row the live number.
+        ("title", "Crimson Ooyoroi"),
         ("description",
-            "At the end of your turn, deal "
-          + $"[blue]{CompanionOverhaulLaw.TamotoDamage}[/blue] [gold]Geo[/gold] "
-          + "damage to a random enemy, ignoring [gold]Block[/gold]. "
-          + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
-        ("smartDescription",
-            "At the end of your turn, deal "
-          + "[blue]{Damage}[/blue] [gold]Geo[/gold] "
-          + "damage to a random enemy, ignoring [gold]Block[/gold]. "
-          + "Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}."),
+            "At the start of your turn, keep up to [blue]{Amount}[/blue] of "
+          + "your [gold]Block[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    internal async Task FireVolley(PlayerChoiceContext choiceContext)
+    public override bool ShouldClearBlock(Creature creature) =>
+        creature != Owner;
+
+    public override async Task AfterPreventingBlockClear(
+        AbstractModel preventer, Creature creature)
     {
-        if (Owner.Player == null) return;
-        var target = CompanionOverhaulTargeting.RandomEnemy(CombatState);
-        if (target != null)
+        if (this != preventer || creature != Owner) return;
+        var over = (int)creature.Block - (int)Amount;
+        if (over > 0)
         {
-            await ElementalHit.Deal(
-                choiceContext, target, Element.Geo,
-                SummonDamage, Owner, ignoreBlock: true);
+            await CreatureCmd.LoseBlock(new BlockingPlayerChoiceContext(),
+                                        creature, over, null);
         }
-        await PowerCmd.TickDownDuration(this);
     }
+}
+
+/// <summary>
+/// Kujou Sara, Tengu Stormcall, and Raiden Shogun, Baleful Omen (2026-10-18):
+/// "Your next Attack this turn applies Electro." <see cref="CrowfeatherCoverPower"/>
+/// without the damage half: a one-shot element rider, spent by the next
+/// Attack card (<see cref="NextAttackRiderPower"/>) and removed at the end of
+/// the turn. The element is read through <see cref="CompanionOverhaulRiders"/>
+/// at Crowfeather's tier. Sim twin: `mi_next_electro` in
+/// `effects.companion_overhaul_card_start`.
+/// </summary>
+public sealed class NextAttackElectroPower
+    : NextAttackRiderPower, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Electro Rider"),
+        ("description",
+            "Your next Attack this turn applies [gold]Electro[/gold]."
+          + CardTypeClause),
+    };
+
+    public override PowerStackType StackType => PowerStackType.Single;
+
+    public override async Task AfterSideTurnEnd(
+        PlayerChoiceContext choiceContext, CombatSide side,
+        IEnumerable<Creature> participants)
+    {
+        if (side != CombatSide.Player) return;
+        await PowerCmd.Remove(this);
+    }
+}
+
+/// <summary>
+/// Raiden Shogun, Plane of Euthymia (Rare Power, 2 [1]): "At the end of your
+/// turn, Retain your Hand." The base game's Runic Pyramid as a Power: the
+/// end-of-turn flush is refused for its owner (<c>ShouldFlush</c>, the hook
+/// <c>RunicPyramid</c> and <c>RetainHandPower</c> override). Ethereal cards
+/// still Exhaust, because that is not the flush. Sim twin: `mi_euthymia` in
+/// `refpowers.retain_at_flush`.
+/// </summary>
+public sealed class PlaneOfEuthymiaPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Plane of Euthymia"),
+        ("description",
+            "At the end of your turn, Retain your [gold]Hand[/gold]."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Single;
+
+    public override bool ShouldFlush(Player player) =>
+        player != Owner.Player;
+}
+
+/// <summary>
+/// Itto, Royal Descent: Behold, Itto the Evil! (Rare Power, 2): "Whenever an
+/// enemy's attack deals you no damage, deal 6 [9] Geo damage to it."
+///
+/// PER ENEMY ATTACK, NOT PER HIT, <see cref="TidalRipostePower"/>'s read:
+/// <c>AfterAttack</c> fires once for the enemy's whole <c>AttackCommand</c>,
+/// and it pays when at least one hit reached her and none of them cost HP
+/// (Block took it, or it dealt 0). A multi-hit attack pays once. Amount IS
+/// the damage, so copies add. The hit is the arm's power-sourced Geo hit
+/// (<see cref="ElementalHit.Deal"/>), so it reacts. Sim twin:
+/// `effects.royal_descent`, called once per enemy attack beside Tidal
+/// Riposte.
+/// </summary>
+public sealed class RoyalDescentPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Royal Descent"),
+        ("description",
+            "Whenever an enemy's attack deals you no damage, deal "
+          + "[blue]{Amount}[/blue] [gold]Geo[/gold] damage to it."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    /// <summary>The rule, readable without a combat: one attack's hits on
+    /// her, as unblocked HP damage. No damage is "at least one hit, and none
+    /// got through".</summary>
+    public static bool DealtNoDamage(IEnumerable<int> unblocked)
+    {
+        var any = false;
+        foreach (var hit in unblocked)
+        {
+            if (hit > 0) return false;
+            any = true;
+        }
+        return any;
+    }
+
+    public override async Task AfterAttack(
+        PlayerChoiceContext choiceContext, AttackCommand command)
+    {
+        if (Owner == null || Owner.IsDead || Amount <= 0) return;
+        if (command.Attacker is not { IsEnemy: true } attacker) return;
+        if (!command.DamageProps.IsPoweredAttack()) return;
+        var me = Owner;
+        var hits = command.Results
+            .SelectMany(r => r)
+            .Where(r => r.Receiver == me)
+            .Select(r => r.UnblockedDamage);
+        if (!DealtNoDamage(hits)) return;
+        if (attacker.IsDead) return;
+        Flash();
+        await ElementalHit.Deal(
+            choiceContext, attacker, Element.Geo, (int)Amount, me);
+    }
+}
+
+/// <summary>
+/// Yoimiya, Niwabi Fire-Dance (Rare Power, 2 [1]): "The first Attack you
+/// play each turn is played twice." The base game's replay surface
+/// (<c>ModifyCardPlayCount</c>, Echo Form's and Burst's), on the shape
+/// <see cref="FirstAttackTwicePower"/> (Pincer) takes for one turn.
+///
+/// "THE FIRST" IS THE ARM'S ATTACK LEDGER
+/// (<see cref="CompanionOverhaulLedger.AttacksPlayedThisTurn"/>, written after
+/// each Attack play): an Attack played while it reads 0 is played twice, so a
+/// Niwabi played after this turn's first Attack waits for next turn. A card
+/// planned on the Bake-Kurage is not doubled (Pincer's rule: it resolves none
+/// of its face), though the write is an Attack play to the ledger. The stack
+/// is a marker: a second copy doubles nothing further. Sim twin:
+/// `effects.niwabi_replays`.
+/// </summary>
+public sealed class NiwabiFireDancePower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Niwabi Fire-Dance"),
+        ("description",
+            "The first Attack you play each turn is played twice."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Single;
+
+    public override int ModifyCardPlayCount(
+        CardModel card, Creature? target, int playCount)
+    {
+        if (card.Type != CardType.Attack) return playCount;
+        if (card.Owner?.Creature != Owner) return playCount;
+        if (BakeKuragePet.Is(target)) return playCount;
+        int played;
+        try
+        {
+            played = CompanionOverhaulLedger.For(Owner).AttacksPlayedThisTurn;
+        }
+        catch (System.Exception)
+        {
+            return playCount;
+        }
+        return played > 0 ? playCount : playCount + 1;
+    }
+
+    public override Task AfterModifyingCardPlayCount(CardModel card)
+    {
+        Flash();
+        return Task.CompletedTask;
+    }
+}
+
+/// <summary>
+/// Kaedehara Kazuha, Chihayaburu (Rare Power, 1 [0]): "Whenever you Swirl,
+/// draw 1 card." Read at the one site the mod resolves a reaction
+/// (<see cref="CompanionOverhaulReactions.Note"/>), on a Swirl the owner
+/// dealt: one draw per Swirl, so a Swirl of ALL enemies draws one for each
+/// enemy it Swirled. Amount is cards, so copies add. Sim twin: `mi_chihayaburu`
+/// in `effects.companion_overhaul_reaction`.
+/// </summary>
+public sealed class ChihayaburuPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Chihayaburu"),
+        ("description",
+            "Whenever you [gold]Swirl[/gold], draw [blue]{Amount}[/blue] "
+          + "card{Amount:plural:|s}."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    internal static async Task OnSwirl(
+        PlayerChoiceContext choiceContext, Creature dealer)
+    {
+        var player = dealer.Player;
+        if (player == null) return;
+        var cards = dealer.Powers.OfType<ChihayaburuPower>()
+            .Sum(p => (int)p.Amount);
+        if (cards <= 0) return;
+        foreach (var power in dealer.Powers.OfType<ChihayaburuPower>())
+        {
+            power.Flash();
+        }
+        await CardPileCmd.Draw(choiceContext, cards, player);
+    }
+}
+
+/// <summary>
+/// Wanderer, Hanega: Song of the Wind (Rare Power, 1 [0]; the review's
+/// amended text, 2026-10-18): "At the start of your turn, gain 1 Energy.
+/// Cards give you 3 less Block." The Energy is the base game's
+/// <c>EnergyNextTurnPower</c> hook (<c>AfterEnergyReset</c>), every turn. The
+/// Block is Dexterity's own filter turned down (<c>ModifyBlockAdditive</c> on
+/// powered card Block only, <c>IsPoweredCardOrMonsterMoveBlock</c> with a card
+/// source), so relic and power Block are untouched, and the game's
+/// <c>Hook.ModifyBlock</c> floors the total at 0. Amount is the Energy, so a
+/// second copy adds an Energy; the Block loss is the printed 3, once. Sim twins: `effects.hanega_energy` and
+/// `powers.modify_block_gained`.
+/// </summary>
+public sealed class HanegaPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Hanega: Song of the Wind"),
+        ("description",
+            "At the start of your turn, gain {Amount:energyIcons()}. Cards "
+          + $"give you [blue]{CompanionOverhaulLaw.HanegaBlockLoss}[/blue] "
+          + "less [gold]Block[/gold]."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    public override async Task AfterEnergyReset(Player player)
+    {
+        if (player != Owner.Player || Amount <= 0) return;
+        await PlayerCmd.GainEnergy((int)Amount, player);
+    }
+
+    public override decimal ModifyBlockAdditive(
+        Creature target, decimal block, ValueProp props,
+        CardModel? cardSource, CardPlay? cardPlay)
+    {
+        if (cardSource == null || target != Owner) return 0m;
+        if (cardSource.Owner?.Creature != Owner) return 0m;
+        if (!props.IsPoweredCardOrMonsterMoveBlock()) return 0m;
+        return -CompanionOverhaulLaw.HanegaBlockLoss;
+    }
+}
+
+/// <summary>
+/// Raiden Shogun, Baleful Omen's "ALL enemies lose 2 Strength this turn"
+/// (the Inazuma pool rework, 2026-10-18): <see cref="ProtoKoCoverYourEarsPower"/>'s
+/// shape, the base game's <c>PiercingWailPower</c>, on every enemy. Emitted by
+/// the codegen's <c>lose_strength</c> with <c>this_turn: true</c>
+/// (<c>{CardClass}Power</c>). Sim twin: <c>temp_strength_down</c>.
+/// </summary>
+public sealed class ProtoMiRaidenBalefulOmenPower : TemporaryStrengthPower, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Baleful Omen"),
+        ("description",
+            "Lose [blue]{Amount}[/blue] [gold]Strength[/gold] this turn."),
+    };
+
+    public override AbstractModel OriginModel =>
+        ModelDb.Card<global::KleeMod.Cards.Prototype.Generated.ProtoMiRaidenBalefulOmen>();
+
+    protected override bool IsPositive => false;
 }

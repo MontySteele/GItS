@@ -9603,3 +9603,36 @@ sense! ... let's do both."
   enemies." A Counter line, Prepared Retreat's shape; any HP loss in its
   window, from any source, breaks it (`HpLostTotal`, `hp_lost_this_combat`).
   No art yet (`art_coverage.KNOWN_MISSING`). The pool is 79, 20 / 39 / 20.
+
+## Inazuma pool rework, 2026-10-18
+
+`review/active/inazuma-companions-2026-10-18.md`, ruled ("Ok, agreed on all
+defaults for both the PR and inazuma companions"), with the main session's
+amendments the same day (Aisa Utamakura without Mend, Hanega's Block loss,
+Kyouka Fuushi's "not Stings or Wards"). The Universals are 28 (8 / 13 / 7).
+
+- **Cut**: Yoimiya, Aurous Blaze; Raiden, Musou no Hitotachi; Itto,
+  Superlative Superstrength. Their powers left with them, and so did the
+  rebuilt rows' old ones (Daruma, Naptime, Stormcall, Kyouka, Tamoto, the old
+  Ooyoroi clock), in both engines.
+- **Not built**: Ayato, Kyouka Fuushi. Its amended face renders 145
+  characters against the 120 card ceiling, so it stops on paper.
+- **Plan lines on Universal rows**: Naptime, Daruma and Kirara.
+  `gen_klee_cards._plan_companion_row` lets an Inazuma Universal print one;
+  any seat's Bake-Kurage carries it out once the off-character sweep is in.
+- **Chiori, Fluttering Hasode**: "This ignores Block." is the damage op's
+  `ignore_block: true`, `ValueProp.Unblockable` on the card's own attack
+  (`InazumaAttackExtensions.IgnoringBlock`); the sim's
+  `deal_damage_to_enemy(ignore_block=True)`.
+- **Heartstopper Strike**: Finisher's shape on the arm's Attack ledger, read
+  during the play, so "other" Attacks.
+- **Crimson Ooyoroi** keeps Block as Watatsumi's Grace does (the first
+  preventer worn wins, `effects.block_clear_keeps`). **Euthymia** is Runic
+  Pyramid's `ShouldFlush`. **Royal Descent** reads one enemy attack whole
+  (Tidal Riposte's `AfterAttack`): at least one hit on her and none cost HP.
+  **Niwabi** is `ModifyCardPlayCount` while the Attack ledger reads 0; a
+  card planned on the Bake-Kurage is not doubled. **Chihayaburu** draws at
+  the one Swirl site. **Hanega** gives Energy at `AfterEnergyReset` and takes
+  3 off powered card Block (`ModifyBlockAdditive`, Dexterity's filter),
+  floored at 0; relic and power Block are untouched.
+- **Art**: the ten new keys are on `art_coverage.KNOWN_MISSING`.

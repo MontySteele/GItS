@@ -148,10 +148,11 @@ def test_saras_window_is_named_for_its_effect(scrape):
     _, power_titles, appliers = scrape
 
     assert power_titles["AttackUpThisTurnPower"] == "Attack Up"
-    # And the promise that pays into it is still the only thing that does,
-    # which is what makes the shared-power reading the right one.
+    # Several cards pay into it, which is what makes the shared-power
+    # reading the right one. (Sara's Stormcall promise left with the Inazuma
+    # pool rework, 2026-10-18; Ayato's Kyouka applies it directly now.)
     reached = _reachable("AttackUpThisTurnPower", appliers)
-    assert "ProtoMiSaraTenguStormcall" in reached
+    assert "ProtoMiAyatoKyouka" in reached
     assert "BennettFantasticVoyage" not in reached
 
 

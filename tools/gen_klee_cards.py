@@ -4334,13 +4334,9 @@ APPLY_POWERS = {
     "mi_juuga": ("JuugaPower", None,
         "At the end of your turn, deal 6 damage and apply [gold]Geo[/gold] to "
         "a random enemy. Lasts {X} more turn(s)."),
-    "mi_daruma": ("MujiMujiDarumaPower", None,
-        "At the end of your turn, if you are above 70% HP deal 6 damage to a "
-        "random enemy; otherwise gain 6 [gold]Block[/gold]. Lasts {X} more "
-        "turn(s)."),
-    "mi_naptime": ("NaptimePower", None,
-        "At the start of your next turn, draw {X} -- unless you play an "
-        "[gold]Attack[/gold] this turn."),
+    # THE INAZUMA POOL REWORK (2026-10-18) retired Daruma's, Naptime's,
+    # Stormcall's, Aurous Blaze's, Kyouka's and Tamoto's powers with the rows
+    # that placed them, and rebuilt Crimson Ooyoroi's.
     "mi_sanctifying_ring": ("SanctifyingRingPower", None,
         "At the end of your turn, deal 5 damage and apply [gold]Electro[/gold] "
         "to ALL enemies, then gain 5 [gold]Block[/gold]. Lasts {X} more "
@@ -4349,34 +4345,34 @@ APPLY_POWERS = {
         "When this [gold]Block[/gold] absorbs damage, gain 3 "
         "[gold]Block[/gold]. {X} [gold]Block[/gold] still burns."),
     "mi_crimson_ooyoroi": ("CrimsonOoyoroiPower", None,
-        "Whenever you play an [gold]Attack[/gold], deal 5 damage and apply "
-        "[gold]Pyro[/gold] to a random enemy and gain 3 [gold]Block[/gold]. "
-        "Lasts {X} more turn(s)."),
+        "At the start of your turn, keep up to {X} of your "
+        "[gold]Block[/gold]."),
     "mi_crowfeather": ("CrowfeatherCoverPower", None,
         "Your next [gold]Attack[/gold] this turn deals {X} more damage and "
         "applies [gold]Electro[/gold]."),
-    "mi_stormcall": ("TenguStormcallPower", None,
-        "At the start of your next turn, your [gold]Attacks[/gold] deal 5 "
-        "more damage for that turn."),
+    "mi_next_electro": ("NextAttackElectroPower", None,
+        "Your next Attack this turn applies [gold]Electro[/gold]."),
     "mi_sesshou_sakura": ("SesshouSakuraPower", None,
         "At the end of your turn, each [gold]Sakura[/gold] deals 4 damage and "
         "applies [gold]Electro[/gold] to a random enemy; every one placed "
         "beside another deals 3 more. {X} out."),
-    "mi_aurous_blaze": ("AurousBlazePower", None,
-        "Whenever you play a Skill, deal 3 damage and apply "
-        "[gold]Pyro[/gold] to this enemy. Lasts {X} more turn(s)."),
     "mi_soumetsu": ("SoumetsuPower", None,
         "At the end of your turn, deal 8 damage and apply [gold]Cryo[/gold] "
         "to ALL enemies; when it ends, 16 more. Lasts {X} more turn(s)."),
-    "mi_kyouka": ("KyoukaPower", None,
-        "Your [gold]Attacks[/gold] apply [gold]Hydro[/gold] and deal 4 more "
-        "damage; when it ends, deal 12 [gold]Hydro[/gold] damage to a random "
-        "enemy. Lasts {X} more turn(s)."),
     "mi_surprise_dispatch": ("SurpriseDispatchPower", None,
         "At the start of your next turn, deal 10 damage to a random enemy."),
-    "mi_tamoto": ("TamotoPower", None,
-        "At the end of your turn, deal 6 damage and apply [gold]Geo[/gold] to "
-        "a random enemy, ignoring [gold]Block[/gold]. Lasts {X} more turn(s)."),
+    "mi_euthymia": ("PlaneOfEuthymiaPower", None,
+        "At the end of your turn, Retain your [gold]Hand[/gold]."),
+    "mi_royal_descent": ("RoyalDescentPower", None,
+        "Whenever an enemy's attack deals you no damage, deal {X} "
+        "[gold]Geo[/gold] damage to it."),
+    "mi_niwabi": ("NiwabiFireDancePower", None,
+        "The first Attack you play each turn is played twice."),
+    "mi_chihayaburu": ("ChihayaburuPower", None,
+        "Whenever you [gold]Swirl[/gold], draw {X} card(s)."),
+    "mi_hanega": ("HanegaPower", None,
+        "At the start of your turn, gain {X} Energy. Cards give you 3 less "
+        "[gold]Block[/gold]."),
     # KLEE'S COVEN PERSONALS (R213 B / R236), on the SAME flag
     # pair as the two nation blocks above. Every class lives in
     # klee-mod/KleeCode/Powers/Prototype/CompanionCoven.cs and is Compile
@@ -4669,7 +4665,8 @@ APPLY_POWERS = {
 # `TargetType.AnyEnemy` through the same seam.
 ENEMY_APPLY_POWERS = {"weak", "vulnerable",
                       "mc_melody_loop", "mc_lightfall_sword",
-                      "mi_aurous_blaze",
+                      # (`mi_aurous_blaze` left with the Inazuma pool
+                      # rework, 2026-10-18.)
                       # THE CO-OP SET, SECOND BATCH: Shrapnel's shred, on the
                       # enemy its Mine went on.
                       "ko_shrapnel",
@@ -4711,10 +4708,9 @@ APPLY_POWER_FIELDS = {"op", "power", "amount", "target", "max_stacks", "note",
 #: `summon_damage:` on the row has somewhere to land. Blocked by name for
 #: `never_reduces`' reason one block down: a row asking for the fold on a power
 #: that cannot bank it would ship a sim/mod split, silently.
-SUMMON_DAMAGE_POWERS = {"mi_tamoto", "mc_baron_bunny",
-                        # AoE trim, 2026-10-03: Yoimiya's mark, banked on
-                        # the enemy it lands on.
-                        "mi_aurous_blaze"}
+SUMMON_DAMAGE_POWERS = {"mc_baron_bunny"}
+# (Chiori's Tamoto and Yoimiya's mark left with the Inazuma pool rework,
+# 2026-10-18.)
 
 # Powers whose C# class implements the floor-not-clamp read (EB-26 D2). The
 # sim honours `never_reduces` at its own chokepoint for ANY power, but the mod
@@ -5061,6 +5057,14 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark",
 
 # Ops whose `bonus` field the "bonus" upgrade delta may target.
 BONUS_OPS = ("detonate", "move_bombs", "modify_bombs")
+
+def _plan_companion_row(card: dict) -> bool:
+    """An Inazuma Universal companion row, the one kind of non-Kokomi row
+    that may print a `plan:` line (the Inazuma pool rework, 2026-10-18)."""
+    return (str(card.get("id", "")).startswith("proto_mi_")
+            and card.get("nation") == "inazuma"
+            and not card.get("personal_pool"))
+
 
 # `ancient` is DELIBERATELY ABSENT, and the KeyError a row of that rarity
 # would raise here is enforcement rather than a gap. Every Ancient's C# class
@@ -5412,7 +5416,14 @@ def card_level_reason(
     # emit `KokomiPlan` calls and the row declares a pet-accepting TargetType,
     # so a `plan:` on anybody else's row would be a rule that character does
     # not have, wearing a schema key.
-    if card.get("plan") is not None and profile.character_id != "kokomi":
+    #
+    # THE INAZUMA POOL REWORK (2026-10-18): an Inazuma Universal companion
+    # (`proto_mi_`, a nation and no Personal pool) may print one too. It is
+    # offered to Kokomi, whose Bake-Kurage carries it out, and to Yae, whose
+    # kit brings the Bake-Kurage up the way the base game summons Osty
+    # (`KokomiOverhaul.LiveFor`, the off-character sweep).
+    if (card.get("plan") is not None and profile.character_id != "kokomi"
+            and not _plan_companion_row(card)):
         return (f"`plan:` on a {profile.character_id} row -- the Plan is the "
                 "Kokomi overhaul's rule and only her rows may print it")
     # `EB-703`. THE TAG ANSWERS "one of your Strikes", which is a question
@@ -10790,6 +10801,12 @@ def _emit_damage_call(card: dict, eff: dict, lines: list[str], ctx: dict,
     call.append(".WithElementHitFx(this)")
     if target == "all_enemies":
         call.append(".SpawningHitVfxOnEachCreature()")
+    # The Inazuma pool rework (2026-10-18), Chiori's Fluttering Hasode: "This
+    # ignores Block." `ValueProp.Unblockable` on the attack's props
+    # (`InazumaCompanion.IgnoringBlock`); the sim's twin is
+    # `deal_damage_to_enemy(ignore_block=True)`.
+    if eff.get("ignore_block"):
+        call.append(".IgnoringBlock()")
     call.append(".Execute(choiceContext);")
 
     stmt = "\n            ".join(call)

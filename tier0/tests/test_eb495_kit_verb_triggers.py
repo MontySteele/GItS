@@ -280,20 +280,20 @@ SIM_CALL_SITES = {
     ('effects.py', 13): ("'companion'", None, "'geo'"),
     ('effects.py', 14): ("'companion'", None, 'None'),
     ('effects.py', 15): ("'companion'", None, "'geo'"),
-    ('effects.py', 16): ("'companion'", None, 'None'),
+    # The Inazuma pool rework (2026-10-18) retired Daruma's, Kyouka's,
+    # Tamoto's, the old Ooyoroi's and Aurous Blaze's hits.
+    ('effects.py', 16): ("'companion'", None, "'electro'"),
     ('effects.py', 17): ("'companion'", None, "'electro'"),
-    ('effects.py', 18): ("'companion'", None, "'electro'"),
+    ('effects.py', 18): ("'companion'", None, "'cryo'"),
     ('effects.py', 19): ("'companion'", None, "'cryo'"),
-    ('effects.py', 20): ("'companion'", None, "'cryo'"),
-    ('effects.py', 21): ("'companion'", None, "'hydro'"),
-    ('effects.py', 22): ("'companion'", None, "'geo'"),
     # Varka's Sturm und Drang rider, a separate hit of the Swirled element
     # after the Attack (the Varka round 3 fix, 2026-10-10).
-    ('effects.py', 23): ("'companion'", None, 'element'),
-    ('effects.py', 24): ("'companion'", None, "'hydro'"),
-    ('effects.py', 25): ("'companion'", None, "'pyro'"),
-    ('effects.py', 26): ("'companion'", None, "'pyro'"),
-    ('effects.py', 27): ("'companion'", None, "'pyro'"),
+    ('effects.py', 20): ("'companion'", None, 'element'),
+    ('effects.py', 21): ("'companion'", None, "'hydro'"),
+    ('effects.py', 22): ("'companion'", None, "'pyro'"),
+    # Itto's Royal Descent (2026-10-18): Geo back at an attacker that dealt
+    # no damage.
+    ('effects.py', 23): ("'companion'", None, "'geo'"),
     # (`furina_stage.py`'s two doors left with v2, the Salon's Tab,
     # 2026-10-05: the arm runs on `furina_tide`'s rules and its one door.)
     # THE FURINA RESEARCH SLICE (`furina_tide`, sim only): the one unpowered

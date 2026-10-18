@@ -215,24 +215,16 @@ MIRRORED: dict[str, object] = {
     # implementations have to agree on them by value or a seat is grading a
     # different card from the one the sim scored.
     "CompanionOverhaulLaw.JuugaDamage": C.MI_JUUGA_DMG,
-    "CompanionOverhaulLaw.DarumaDamage": C.MI_DARUMA_DMG,
-    "CompanionOverhaulLaw.DarumaBlock": C.MI_DARUMA_BLOCK,
     "CompanionOverhaulLaw.SanctifyingRingDamage": C.MI_SANCTIFYING_RING_DMG,
     "CompanionOverhaulLaw.SanctifyingRingBlock": C.MI_SANCTIFYING_RING_BLOCK,
     "CompanionOverhaulLaw.BlazingBarrierBlock": C.MI_BLAZING_BARRIER_BLOCK,
-    "CompanionOverhaulLaw.OoyoroiDamage": C.MI_OOYOROI_DMG,
-    "CompanionOverhaulLaw.OoyoroiBlock": C.MI_OOYOROI_BLOCK,
-    "CompanionOverhaulLaw.StormcallBonus": C.MI_STORMCALL_BONUS,
     "CompanionOverhaulLaw.SakuraDamage": C.MI_SAKURA_DMG,
     "CompanionOverhaulLaw.SakuraBonus": C.MI_SAKURA_BONUS,
     "CompanionOverhaulLaw.SakuraCap": C.MI_SAKURA_CAP,
-    "CompanionOverhaulLaw.AurousBlazeDamage": C.MI_AUROUS_BLAZE_DMG,
     "CompanionOverhaulLaw.SoumetsuDamage": C.MI_SOUMETSU_DMG,
     "CompanionOverhaulLaw.SoumetsuFinale": C.MI_SOUMETSU_FINALE,
-    "CompanionOverhaulLaw.KyoukaDamage": C.MI_KYOUKA_BONUS,
-    "CompanionOverhaulLaw.KyoukaFinale": C.MI_KYOUKA_FINALE,
     "CompanionOverhaulLaw.SurpriseDispatchDamage": C.MI_SURPRISE_DISPATCH_DMG,
-    "CompanionOverhaulLaw.TamotoDamage": C.MI_TAMOTO_DMG,
+    "CompanionOverhaulLaw.HanegaBlockLoss": C.MI_HANEGA_BLOCK_LOSS,
     # KLEE'S COVEN PERSONALS (R236), same flag and same terms:
     # three numbers a POWER carries, mirrored by value because both engines
     # play these four rows.

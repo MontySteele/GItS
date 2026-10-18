@@ -24,6 +24,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -31,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMiKiraraSurpriseDispatch : CustomCardModel, ICompanionCard
+public sealed class ProtoMiKiraraSurpriseDispatch : CustomCardModel, ICompanionCard, IPlannedCard, INowLineCard
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -44,30 +45,61 @@ public sealed class ProtoMiKiraraSurpriseDispatch : CustomCardModel, ICompanionC
 
     public string? Nation => "inazuma";
 
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        ArmKeywordTips.ForPlan(base.ExtraHoverTips, this);
+
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mi_kirara_surprise_dispatch");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kirara — Surprise Dispatch"),
-        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Next turn, deal 10 damage to a random enemy."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Next turn, deal 10 damage to a random enemy.\nOr [gold]plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold]."),
     };
+
+    /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
+    /// was written. Carried out by the Bake-Kurage at the start of her next
+    /// turn (<see cref="KokomiPlan.ResolveAll"/>).</summary>
+    public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
+        new[]
+        {
+            new KokomiPlan.Planned(KokomiPlan.Kind.Block, DynamicVars["PlanBlock"].IntValue, KokomiPlan.Aim.Self),
+        };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new CalculationBaseVar(8m),
             new CalculationExtraVar(1m),
-            new FoldedCalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card))
+            new FoldedCalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card)),
+            new UnsourcedBlockVar("PlanBlock", 14m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoMiKiraraSurpriseDispatch()
-        : base(1, CardType.Skill, CardRarity.Uncommon, TargetType.Self, autoAdd: false)
+        : base(1, CardType.Skill, CardRarity.Uncommon, KokomiTargets.PetOrSelf, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
+    {
+        if (KokomiPlan.PlayedOnPet(cardPlay))
+        {
+            await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
+            if (DivineStrategyPower.NowLine(cardPlay, Owner.Creature, DivineStrategyPower.Aim.None) is not { } nowLine) return;
+            cardPlay = nowLine;
+        }
+        await PlayNowLine(choiceContext, cardPlay);
+    }
+
+    /// <summary>Where the now-line aims when the Bake-Kurage carries it out
+    /// for a Plan (a Plan stays open, 2026-10-01).</summary>
+    public DivineStrategyPower.Aim NowLineAim => DivineStrategyPower.Aim.None;
+
+    /// <summary>The card's now-line. Played face-up from <c>OnPlay</c>, and carried
+    /// out by the Bake-Kurage when the player chooses it for a Plan
+    /// (<see cref="KokomiPlan.ChooseLines"/>).</summary>
+    public async Task PlayNowLine(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), DynamicVars.CalculatedBlock.Props, cardPlay);
         await PowerCmd.Apply<SurpriseDispatchPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
@@ -76,5 +108,6 @@ public sealed class ProtoMiKiraraSurpriseDispatch : CustomCardModel, ICompanionC
     protected override void OnUpgrade()
     {
         DynamicVars.CalculationBase.UpgradeValueBy(3m);
+        DynamicVars["PlanBlock"].UpgradeValueBy(4m);
     }
 }

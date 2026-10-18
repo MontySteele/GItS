@@ -24,6 +24,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -31,8 +32,11 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMiChioriHasode : CustomCardModel, ICompanionCard
+public sealed class ProtoMiChioriHasode : CustomCardModel, IElementalCard, ICompanionCard
 {
+    /// <summary>Sheet applies_element: this companion attack applies its element.</summary>
+    public Element Element => Element.Geo;
+
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
     /// offers; Nation drives SAME_NATION_REWARD_SHARE weighting.</summary>
@@ -45,37 +49,48 @@ public sealed class ProtoMiChioriHasode : CustomCardModel, ICompanionCard
     public string? Nation => "inazuma";
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { CardKeyword.Exhaust };
+        new[] { KleeKeywords.AppliesGeo };
+
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Geo);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mi_chiori_hasode");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Chiori — Fluttering Hasode"),
-        ("description", "For {PowerAmount:diff()} turns, at the end of your turn deal 7 [gold]Geo[/gold] damage to a random enemy, ignoring [gold]Block[/gold]."),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Geo[/gold] damage twice. This ignores [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 3m)
+            new CalculationBaseVar(5m),
+            new ExtraDamageVar(1m),
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoMiChioriHasode()
-        : base(1, CardType.Skill, CardRarity.Uncommon, TargetType.Self, autoAdd: false)
+        : base(1, CardType.Attack, CardRarity.Uncommon, TargetType.AnyEnemy, autoAdd: false)
     {
     }
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<TamotoPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
-        SummonDamage.Note<TamotoPower>(Owner.Creature, this, 7);
+        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
+        await DamageCmd.Attack(DynamicVars.CalculatedDamage)
+            .WithHitCount(2)
+            .FromCard(this, cardPlay)
+            .Targeting(cardPlay.Target)
+            .WithElementHitFx(this)
+            .IgnoringBlock()
+            .Execute(choiceContext);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
+        DynamicVars.CalculationBase.UpgradeValueBy(2m);
     }
 }

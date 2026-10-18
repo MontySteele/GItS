@@ -79,8 +79,10 @@ def test_inazuma_five_stars_are_reachable_in_an_inazuma_run():
         banner = rewards.roll_banner(random.Random(s + 2 * 10 ** 9))
         offers = rewards.roll_rewards(random.Random(s), "kokomi", banner=banner)
         seen |= {c.id for c in offers if c.star == 5}
-    assert {"proto_mi_itto_superlative_superstrength",
-            "proto_mi_raiden_musou_no_hitotachi"} & seen, (
+    # The Inazuma pool rework (2026-10-18) cut the two 5-stars this named;
+    # the pin reads the nation's banner roster instead.
+    inazuma = {c.id for c in rewards.five_star_roster("inazuma")}
+    assert inazuma & seen, (
         "Inazuma's own 5-stars never surfaced in 400 Kokomi runs")
 
 

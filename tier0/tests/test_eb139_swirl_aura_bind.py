@@ -359,6 +359,9 @@ SWIRL_ROWS = frozenset((
     "proto_vk_jean_dandelion_breeze",
     # Varka's co-op five (2026-10-13): Windward Flank's "Swirl the enemy".
     "proto_vk_windward_flank",
+    # The Inazuma pool rework (2026-10-18): Windmuster Kick's "Swirl the
+    # enemy" after its hit.
+    "proto_mi_heizou_windmuster_kick",
 ))
 
 

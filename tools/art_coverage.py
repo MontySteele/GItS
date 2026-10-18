@@ -658,6 +658,26 @@ KNOWN_MISSING = {
     # dedupe (review/active/yae-dedupe-2026-10-16.md, 2026-10-16), whose
     # refill's eleven cards were painted by the Yae refill art pass
     # (2026-10-16), under "Yae refill art" in art/plan.tsv.
+    #
+    # THE INAZUMA POOL REWORK (2026-10-18): ten new companion cards, built
+    # without an art pass (the build was code only: no fetch, no render into
+    # the main checkout's ImageGen). Each wants official art of its own
+    # character, Inazuma only and no face already on a companion card
+    # (picked in the art pass that paints them). Three can take the art of
+    # the row the rework cut for the same character: Royal Descent from
+    # Superlative Superstrength (Itto), Euthymia from Musou no Hitotachi
+    # (Raiden), Niwabi from Aurous Blaze (Yoimiya). Wanderer has no source
+    # in art/SOURCES.tsv yet.
+    "proto_mi_ayaka_hyouka": "Inazuma pool rework 2026-10-18: Kamisato Ayaka, art pass pending",
+    "proto_mi_heizou_windmuster_kick": "Inazuma pool rework 2026-10-18: Shikanoin Heizou, art pass pending",
+    "proto_mi_itto_ushi": "Inazuma pool rework 2026-10-18: Arataki Itto, art pass pending",
+    "proto_mi_itto_royal_descent": "Inazuma pool rework 2026-10-18: Arataki Itto, can take Superlative Superstrength's art",
+    "proto_mi_raiden_baleful_omen": "Inazuma pool rework 2026-10-18: Raiden Shogun, art pass pending",
+    "proto_mi_raiden_euthymia": "Inazuma pool rework 2026-10-18: Raiden Shogun, can take Musou no Hitotachi's art",
+    "proto_mi_mizuki_aisa_utamakura": "Inazuma pool rework 2026-10-18: Yumemizuki Mizuki, art pass pending",
+    "proto_mi_yoimiya_niwabi": "Inazuma pool rework 2026-10-18: Yoimiya, can take Aurous Blaze's art",
+    "proto_mi_kazuha_chihayaburu": "Inazuma pool rework 2026-10-18: Kaedehara Kazuha, art pass pending",
+    "proto_mi_wanderer_hanega": "Inazuma pool rework 2026-10-18: Wanderer, no source yet, art pass pending",
 }
 
 

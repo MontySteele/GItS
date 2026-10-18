@@ -882,8 +882,8 @@ CO_TENANCY_LEDGER = {
             "does not have. It WRITES energy and the hand -- the energy reset "
             "is at the strictly earlier side-turn-start site (which is why "
             "this power is here and not there), no co-tenant of this "
-            "broadcast writes energy, and the draw is the write NaptimePower "
-            "and LionsFangPower already make here on the same terms: no "
+            "broadcast writes energy, and the draw is the write "
+            "LionsFangPower already makes here on the same terms: no "
             "co-tenant reads the hand's contents",
         ("Powers/Prototype/CompanionOverhaulPowers.cs", "SignatureMixPower"):
             "(the Mondstadt companion overhaul). Raw per-turn "
@@ -938,20 +938,6 @@ CO_TENANCY_LEDGER = {
             "It is also the only tenant here that draws from the rng, so no "
             "co-tenant's roll can move under it, and two copies of this one "
             "power are identical",
-        ("Powers/Prototype/CompanionOverhaulInazuma.cs", "NaptimePower"):
-            "(the Inazuma companion overhaul). Draws its promised "
-            "cards and removes itself. THE ORDERING QUESTION, answered: it "
-            "reads nothing this broadcast can move -- the condition it depends "
-            "on (did an Attack get played last turn) was settled at the "
-            "PREVIOUS turn's end, where the power deletes itself if it was "
-            "broken -- and drawing cards changes no input any co-tenant here "
-            "has",
-        ("Powers/Prototype/CompanionOverhaulInazuma.cs", "TenguStormcallPower"):
-            "(the Inazuma companion overhaul). Pays its promise "
-            "into the shipped AttackUpThisTurnPower and removes itself. THE "
-            "ORDERING QUESTION, answered: nothing in this broadcast reads an "
-            "attack rider -- every volley that could is at turn END, a "
-            "broadcast away -- and it reads nothing itself",
         ("Powers/Prototype/CompanionOverhaulInazuma.cs", "SurpriseDispatchPower"):
             "(the Inazuma companion overhaul). One unelemented "
             "hit at a random enemy, then it removes itself. THE ORDERING "
@@ -974,7 +960,7 @@ CO_TENANCY_LEDGER = {
             "play or an explosion and both are strictly later than this "
             "broadcast (the same answer GroundedPower gives above); it does "
             "read nothing else. It writes raw Block and one drawn "
-            "card, and the draw is the write NaptimePower already makes here "
+            "card, and the draw is the write LionsFangPower already makes here "
             "on the same terms: no co-tenant of this broadcast reads the "
             "hand's contents, and the two that touch the hand at all (the "
             "Klee and Kokomi kit-grants) ADD a card and read nothing back",
@@ -1342,20 +1328,16 @@ CO_TENANCY_LEDGER = {
             "AuraCmd.ElementOfPlay, both a broadcast away. THE ORDERING "
             "QUESTION, answered: ticking a clock reads nothing and writes "
             "only its own stack",
-        ("Powers/Prototype/CompanionOverhaulInazuma.cs", "NaptimePower"):
-            "(the Inazuma companion overhaul). A conditional "
-            "REMOVAL and nothing else: the promise breaks here if an Attack "
-            "was played this turn. THE ORDERING QUESTION, answered: it reads "
-            "the Attack counter, which is written at AfterCardPlayed and not "
-            "by anything in this broadcast, and it writes only its own "
-            "existence. It is NOT in CompanionOverhaulTurnEnd's walk for the "
-            "reason PassionOverloadPower is not: a removal has no position to "
-            "defend",
         ("Powers/Prototype/CompanionOverhaulInazuma.cs", "CrowfeatherCoverPower"):
             "(the Inazuma companion overhaul). The same this-turn "
             "EXPIRY PassionOverloadPower above it is, one nation over -- it "
             "removes itself and does nothing else, and what it pays is paid "
             "on the Attack that spends it, a broadcast away",
+        ("Powers/Prototype/CompanionOverhaulInazuma.cs", "NextAttackElectroPower"):
+            "(the Inazuma pool rework, 2026-10-18). Crowfeather's "
+            "this-turn EXPIRY without the damage: it removes itself and does "
+            "nothing else, and the element it claims is read on the Attack "
+            "that spends it, a broadcast away",
         ("Powers/Prototype/CompanionCoven.cs", "HexhunterChimePower"):
             "(Klee's coven Personals, R236). The same this-turn "
             "EXPIRY again -- it removes itself and does nothing else. THE "

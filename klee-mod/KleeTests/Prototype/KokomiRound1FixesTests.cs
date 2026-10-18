@@ -111,7 +111,7 @@ public class KokomiRound1FixesTests
         }
         foreach (var card in new CardModel[]
                  { new ProtoMiShinobuSanctifyingRing(),
-                   new ProtoMiKiraraSurpriseDispatch() })
+                   new ProtoMiChioriHasode() })
         {
             Assert.IsAssignableFrom<global::KleeMod.Cards.ICompanionCard>(card);
             Assert.False(card is IPlannedCard, card.GetType().Name);

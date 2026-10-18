@@ -44,27 +44,24 @@ public sealed class ProtoMiThomaCrimsonOoyoroi : CustomCardModel, ICompanionCard
 
     public string? Nation => "inazuma";
 
-    public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { CardKeyword.Exhaust };
-
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mi_thoma_crimson_ooyoroi");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Thoma — Crimson Ooyoroi"),
-        ("description", "For {PowerAmount:diff()} turns, whenever you play an Attack, deal 5 [gold]Pyro[/gold] damage to a random enemy and gain 3 [gold]Block[/gold]."),
+        ("description", "At the start of your turn, keep up to {PowerAmount:diff()} of your [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 2m)
+            new DynamicVar("PowerAmount", 6m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoMiThomaCrimsonOoyoroi()
-        : base(1, CardType.Skill, CardRarity.Uncommon, TargetType.Self, autoAdd: false)
+        : base(1, CardType.Power, CardRarity.Uncommon, TargetType.Self, autoAdd: false)
     {
     }
 
@@ -75,6 +72,6 @@ public sealed class ProtoMiThomaCrimsonOoyoroi : CustomCardModel, ICompanionCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
+        DynamicVars["PowerAmount"].UpgradeValueBy(3m);
     }
 }

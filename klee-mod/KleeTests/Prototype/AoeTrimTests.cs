@@ -141,32 +141,6 @@ public class AoeTrimTests
                         Il.Calls(Il.Method("ElementalHit", "DealAsIfAura")));
     }
 
-    // ---- Yoimiya -------------------------------------------------------
-
-    [Fact]
-    public void Aurous_blaze_answers_its_markers_skills_and_not_its_own_play()
-    {
-        var seat = Seat.Klee();
-        var skill = Owned<ProtoKoMineToss>(seat);          // a Skill
-        Assert.True(AurousBlazePower.Answers(skill, seat.Creature));
-        Assert.False(AurousBlazePower.Answers(Owned<ProtoKoRedKnight>(seat),
-                                              seat.Creature));
-        Assert.False(AurousBlazePower.Answers(
-            Owned<ProtoMiYoimiyaAurousBlaze>(seat), seat.Creature));
-        Assert.False(AurousBlazePower.Answers(skill, Seat.Klee().Creature));
-        Assert.Contains("ElementalHit.Deal",
-                        Il.Calls(Il.Method("AurousBlazePower", "AfterCardPlayed")));
-    }
-
-    [Fact]
-    public void Aurous_blaze_takes_the_cards_printed_three()
-    {
-        var power = new AurousBlazePower();
-        Assert.Contains(power.GetType().GetInterfaces(), i => i.Name == "ISummonDamagePower");
-        var play = Il.Calls(Il.Method("ProtoMiYoimiyaAurousBlaze", "OnPlay"));
-        Assert.Contains(play, c => c.StartsWith("DamageCmd.Attack"));
-        Assert.Contains(play, c => c.Contains("SummonDamage.Note"));
-        Assert.Contains("whenever you play a Skill",
-                        Face(new ProtoMiYoimiyaAurousBlaze()));
-    }
+    // (Yoimiya's Aurous Blaze was cut in the Inazuma pool rework,
+    // 2026-10-18.)
 }
