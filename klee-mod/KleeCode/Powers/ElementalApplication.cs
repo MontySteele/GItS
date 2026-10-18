@@ -275,6 +275,9 @@ public sealed class KleeElementalHooks : AbstractModel
         // Kokomi review r9 (2026-10-15, item 9): and last fight's carry-out
         // receipts.
         KokomiPlan.ResetFight();
+        // Co-op state divergence (2026-10-17): no morning window outlives the
+        // fight that opened it (`AuraPower.ResetMornings`).
+        AuraPower.ResetMornings();
         RelicAnswerLog.ResetFight();
         ReactionEvents.ResetFight();
         ReactionEffects.MarkTurnStart();
@@ -427,7 +430,7 @@ public static class AuraCmd
             default:
                 break;   // None / Anemo / Geo: nothing sticks.
         }
-        AuraPower.NoteTouched(Find(target));
+        AuraPower.NoteTouched(Find(target), applier);
     }
 
     /// <summary>
@@ -442,6 +445,6 @@ public static class AuraCmd
             choiceContext, aura,
             Duration(applier) - aura.Amount,
             applier: applier, cardSource: cardSource, silent: true);
-        AuraPower.NoteTouched(aura);
+        AuraPower.NoteTouched(aura, applier);
     }
 }

@@ -78,21 +78,67 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
 
     /// <summary>
     /// THE MORNING WINDOW (Kokomi follow-ups, 2026-10-01): open while a
-    /// morning drain runs (<c>KokomiPlan.ResolveAll</c>), so EVERY aura applied
-    /// or refreshed inside it is spared -- not only a Plan's own hit but a
-    /// card Moon's Reflection replays and Crystal Collapse's free copy, whose
-    /// hits reach the aura through the ordinary card doors. A depth and not a
-    /// flag, so a nested drain cannot close the outer one.
+    /// morning drain runs (<c>KokomiPlan.ResolveAll</c>), so every aura the
+    /// morning's OWNER applies or refreshes inside it is spared -- not only a
+    /// Plan's own hit but a card Moon's Reflection replays and Crystal
+    /// Collapse's free copy, whose hits reach the aura through the ordinary
+    /// card doors. A depth per owner and not a flag, so a nested drain cannot
+    /// close the outer one.
+    ///
+    /// PER OWNER AND PER FIGHT, NOT ONE PROCESS-WIDE COUNTER (co-op state
+    /// divergence, 2026-10-17: "we just got a multiplayer state divergence and
+    /// had to restart the fight again"). It was a single static int. A drain
+    /// that pauses for a choice which never arrives -- a fight abandoned while
+    /// Kokomi's morning waited on a pick -- never reaches its <c>finally</c>,
+    /// so the counter stayed above zero for the rest of that game process and
+    /// every aura anyone touched in every later fight was spared its tick on
+    /// that machine alone (the host's dump read Electro 1, the client's 2).
+    /// And while a drain waits on a choice the partner's queue keeps running,
+    /// so a global window also spared the PARTNER'S hits, in an order the two
+    /// machines need not share. So the window now names the creature whose
+    /// morning it is (its pets count as it), and it is emptied at every
+    /// combat start (<c>KleeElementalHooks.BeforeCombatStart</c>), which runs
+    /// on every machine.
     /// </summary>
-    internal static int MorningWindow;
+    private static readonly Dictionary<Creature, int> _mornings =
+        new(ReferenceEqualityComparer.Instance);
 
-    /// <summary>Spare <paramref name="aura"/> if the morning window is open.
-    /// Called by every door that applies or refreshes an aura
-    /// (<see cref="AuraCmd.Apply"/>, <see cref="AuraCmd.Refresh"/> and the
-    /// same-element branch of <see cref="ResolveLifecycle"/>).</summary>
-    internal static void NoteTouched(AuraPower? aura)
+    /// <summary>Open <paramref name="owner"/>'s morning window. Pair with
+    /// <see cref="CloseMorning"/> in a <c>finally</c>.</summary>
+    internal static void OpenMorning(Creature? owner)
     {
-        if (aura != null && MorningWindow > 0) aura._spareTurnStartTick = true;
+        if (owner == null) return;
+        _mornings[owner] = (_mornings.TryGetValue(owner, out var depth) ? depth : 0) + 1;
+    }
+
+    /// <summary>Close one level of <paramref name="owner"/>'s window.</summary>
+    internal static void CloseMorning(Creature? owner)
+    {
+        if (owner == null || !_mornings.TryGetValue(owner, out var depth)) return;
+        if (depth <= 1) _mornings.Remove(owner);
+        else _mornings[owner] = depth - 1;
+    }
+
+    /// <summary>Forget every open window: a drain the last fight left
+    /// suspended owes this fight nothing. Called at combat start.</summary>
+    internal static void ResetMornings() => _mornings.Clear();
+
+    /// <summary>Is <paramref name="applier"/> (or the seat whose pet it is)
+    /// inside its own morning window?</summary>
+    internal static bool InMorningWindow(Creature? applier)
+    {
+        if (applier == null || _mornings.Count == 0) return false;
+        var owner = applier.PetOwner?.Creature ?? applier;
+        return _mornings.ContainsKey(owner) || _mornings.ContainsKey(applier);
+    }
+
+    /// <summary>Spare <paramref name="aura"/> if <paramref name="applier"/>'s
+    /// morning window is open. Called by every door that applies or refreshes
+    /// an aura (<see cref="AuraCmd.Apply"/>, <see cref="AuraCmd.Refresh"/> and
+    /// the same-element branch of <see cref="ResolveLifecycle"/>).</summary>
+    internal static void NoteTouched(AuraPower? aura, Creature? applier)
+    {
+        if (aura != null && InMorningWindow(applier)) aura._spareTurnStartTick = true;
     }
 
     /// <summary>Spare this aura the tick that ends the current turn start.
@@ -372,7 +418,7 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
                     choiceContext, this,
                     AuraCmd.Duration(dealer) - Amount,
                     applier: dealer, cardSource: cardSource, silent: true);
-                NoteTouched(this);
+                NoteTouched(this, dealer);
                 return;
 
             case TriggerRules.HitOutcome.Consume:

@@ -562,6 +562,11 @@ public static class KokomiRefounding
 
     private static readonly HashSet<CardModel> _freeWrites = new();
 
+    /// <summary>Co-op state divergence (2026-10-17): a free write the last
+    /// fight left suspended owes this fight nothing. Called from
+    /// <see cref="KokomiPlan.ResetFight"/>.</summary>
+    internal static void ResetFight() => _freeWrites.Clear();
+
     /// <summary>Is this play Grand Design's free write? Read by
     /// <see cref="KokomiPlan.PlayedOnPet"/>, which otherwise refuses an
     /// auto-play.</summary>
@@ -1096,7 +1101,7 @@ public sealed class DawnTidePower : PowerModel, ILocalizationProvider
         if (!kokomi!.Powers.OfType<DawnTidePower>().Any()) return;
         var combat = kokomi.CombatState;
         if (combat == null) return;
-        AuraPower.MorningWindow++;
+        AuraPower.OpenMorning(kokomi);
         try
         {
             foreach (var enemy in combat.HittableEnemies.Where(e => !e.IsDead)
@@ -1108,7 +1113,7 @@ public sealed class DawnTidePower : PowerModel, ILocalizationProvider
         }
         finally
         {
-            AuraPower.MorningWindow--;
+            AuraPower.CloseMorning(kokomi);
         }
     }
 }
@@ -1134,7 +1139,7 @@ public static class KurageHydroSources
         using var credit = Diagnostics.DamageCredit.Open(
             kokomi, Diagnostics.DamageCredit.Pet, "Bake-Kurage",
             cause: cause, card: cause);
-        if (morning) AuraPower.MorningWindow++;
+        if (morning) AuraPower.OpenMorning(kokomi);
         try
         {
             await ElementalHit.Deal(choiceContext, target, Element.Hydro,
@@ -1142,7 +1147,7 @@ public static class KurageHydroSources
         }
         finally
         {
-            if (morning) AuraPower.MorningWindow--;
+            if (morning) AuraPower.CloseMorning(kokomi);
         }
     }
 }
