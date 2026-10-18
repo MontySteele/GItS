@@ -206,10 +206,14 @@ public sealed class YaeShrineLedger
     /// <paramref name="cap"/>: how many may stand (<see cref="YaeShrine.MaxSakura"/>).
     ///
     /// FULL SHRINE (review r3, amended after GPT's review; the door has
-    /// already made the oldest act): the SAME KIND as the oldest refreshes it
-    /// (to at least <see cref="YaeLaw.SakuraTurns"/>) and gives it a Level,
-    /// and none is added; ANOTHER KIND withers the oldest and the new Sakura
-    /// takes its place, as the newest, at its printed Level.
+    /// already made <see cref="NextToWither"/> act): the SAME KIND as that
+    /// Sakura refreshes it (to at least <see cref="YaeLaw.SakuraTurns"/>) and
+    /// gives it a Level, and none is added; ANOTHER KIND withers it and the
+    /// new Sakura takes its place, as the newest, at its printed Level.
+    /// [USER], 2026-10-17: the target is the Sakura closest to withering,
+    /// not the first planted ("I think that's closest to the expectation");
+    /// a run of Sakura Seals had refreshed slot 1 again and again while the
+    /// other two ran out.
     /// </summary>
     public bool Plant(int plantLevel, int? startLevel,
                                 YaeAnnotation inherited = YaeAnnotation.None,
@@ -221,19 +225,19 @@ public sealed class YaeShrineLedger
             plantLevel = Math.Max(plantLevel, at + plantLevel - YaeLaw.PlantLevel);
         if (_sakura.Count >= cap && _sakura.Count > 0)
         {
-            var oldest = _sakura[0];
-            if (oldest.Kind == kind)
+            var target = NextToWither()!;
+            if (target.Kind == kind)
             {
-                oldest.TurnsLeft = Math.Max(oldest.TurnsLeft, YaeLaw.SakuraTurns);
-                oldest.Level++;
+                target.TurnsLeft = Math.Max(target.TurnsLeft, YaeLaw.SakuraTurns);
+                target.Level++;
                 // Yae review r4, item 2: the planting card's Red Ink goes to
                 // the refreshed Sakura, as it would to a new one; the pool to
                 // 78, pick 2 (a): beside what it already carries.
-                oldest.Add(inherited);
-                LastPlanted = oldest;
+                target.Add(inherited);
+                LastPlanted = target;
                 return false;
             }
-            _sakura.RemoveAt(0);          // another kind: it withers
+            _sakura.Remove(target);       // another kind: it withers
         }
         Seq++;
         var planted = new YaeSakura
@@ -269,10 +273,33 @@ public sealed class YaeShrineLedger
     }
 
     /// <summary>Would a plant of <paramref name="kind"/> into a shrine of
-    /// <paramref name="cap"/> REPLACE (wither) the oldest? A full shrine
-    /// whose oldest is another kind. PURE.</summary>
+    /// <paramref name="cap"/> REPLACE (wither) a Sakura? A full shrine whose
+    /// <see cref="NextToWither"/> is another kind. PURE.</summary>
     public bool WouldReplace(int cap, YaeSakuraKind kind) =>
-        _sakura.Count >= cap && _sakura.Count > 0 && _sakura[0].Kind != kind;
+        _sakura.Count >= cap && _sakura.Count > 0 && NextToWither()!.Kind != kind;
+
+    /// <summary>The full-shrine plant's target: the Sakura closest to
+    /// withering, the fewest turns left, the oldest on a tie. A Deadline
+    /// Extension Sakura never withers, so it is chosen only when every one
+    /// carries it. Null on an empty shrine. PURE. Sim twin:
+    /// <c>yae_shrine.next_to_wither</c>.</summary>
+    public YaeSakura? NextToWither()
+    {
+        YaeSakura? best = null;
+        foreach (var s in _sakura)
+        {
+            if (best == null || Sooner(s, best)) best = s;
+        }
+        return best;
+
+        static bool Sooner(YaeSakura a, YaeSakura b)
+        {
+            var ae = a.Has(YaeAnnotation.DeadlineExtension);
+            var be = b.Has(YaeAnnotation.DeadlineExtension);
+            if (ae != be) return !ae;
+            return a.TurnsLeft < b.TurnsLeft;   // a tie keeps the older
+        }
+    }
 
     /// <summary>Genre Shift: the kinds with none standing, in kind order
     /// (Sakura, Foxfire Sakura, Kitsune Sakura). PURE.</summary>
@@ -558,9 +585,10 @@ public static class YaeShrine
     /// <summary>
     /// Plant <paramref name="n"/> Sakura of <paramref name="kind"/>, one at a
     /// time. With the shrine full (<see cref="MaxSakura"/>), each further
-    /// plant makes the then-oldest ACT first, exactly as its Last Bloom
-    /// would; then the ledger levels it (same kind) or withers it and
-    /// plants the new one in its place (another kind; review r3).
+    /// plant makes the Sakura closest to withering
+    /// (<see cref="YaeShrineLedger.NextToWither"/>) ACT first, exactly as its
+    /// Last Bloom would; then the ledger levels it (same kind) or withers it
+    /// and plants the new one in its place (another kind; review r3).
     /// <paramref name="startLevel"/>: Guardian of Narukami.
     /// <paramref name="inherited"/>: the planting card's Red Ink, given to
     /// each NEW Sakura this plants.
@@ -578,7 +606,7 @@ public static class YaeShrine
             var cap = MaxSakura(yae);
             if (ledger.Count >= cap && ledger.Count > 0)
             {
-                await Act(choiceContext, yae, ledger.Standing[0]);
+                await Act(choiceContext, yae, ledger.NextToWither()!);
             }
             var replaced = ledger.WouldReplace(cap, kind);
             ledger.Plant(PlantLevel(yae), startLevel, inherited, cap, kind, lasts);

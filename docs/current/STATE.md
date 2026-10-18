@@ -100,7 +100,8 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   Annotations; Yae Publishing House from the Dusty Tome), so the Darv guard
   is gone; seven relics and three potions of her own, the offer Meditations,
   her seven and Enlightened Blessing, the Defect's potions gone; Rewrite+
-  draws 3. **Round 8** (2026-10-17, `review/records/yae-round-8-2026-10-17.md`):
+  draws 3. A full-shrine plant now feeds (or replaces) the Sakura closest to
+  withering, not the first planted (2026-10-17, the user's co-op run). **Round 8** (2026-10-17, `review/records/yae-round-8-2026-10-17.md`):
   her first win, end floors 48 / 17 / 48 (won) / 33 / 48, mean 38.8 (round 7
   31.2); damage 0.78 / 0.84 / 0.79 of base. **The flat-value pass built**
   (2026-10-17, `review/active/yae-flat-value-2026-10-17.md` sec.3, ruled):

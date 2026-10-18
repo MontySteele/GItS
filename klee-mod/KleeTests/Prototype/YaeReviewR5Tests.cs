@@ -37,9 +37,9 @@ public class YaeReviewR5Tests
     [Fact]
     public void The_full_shrine_tip_is_the_long_form()
     {
-        Assert.Equal("Planting makes your oldest Sakura act. If the new Sakura is "
-                     + "the same kind, the oldest stays and gains a Level. If not, "
-                     + "the oldest withers and the new one takes its place.",
+        Assert.Equal("Planting makes the Sakura closest to withering act. If the "
+                     + "new one is the same kind, that Sakura refreshes and gains a "
+                     + "Level. If not, it withers and is replaced.",
                      ArmKeywordTips.YaeFullShrineTip);
     }
 
