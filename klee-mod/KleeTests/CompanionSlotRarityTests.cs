@@ -79,6 +79,19 @@ public class CompanionSlotRarityTests
     }
 
     [Fact]
+    public void The_reward_slot_asks_the_same_offerability_rule_as_the_shop()
+    {
+        // Audit 2026-10-18: Roll tested PersonalPool alone and skipped
+        // IsHiddenFrom, so Yae's reward slot could offer her own Sesshou
+        // Sakura while the shop and the sim hid it. Both surfaces now go
+        // through CompanionPool.IsOfferable.
+        var roll = typeof(CompanionSlot).GetMethods(All | BindingFlags.DeclaredOnly)
+            .Where(m => m.Name == nameof(CompanionSlot.Roll) && m.GetMethodBody() != null);
+        Assert.NotEmpty(roll);
+        Assert.All(roll, m => Assert.Contains(Il.Calls(m), c => c.EndsWith(".IsOfferable")));
+    }
+
+    [Fact]
     public void A_five_star_is_offerable_whatever_the_seed()
     {
         // NO FEATURED BANNER ([USER] 2026-10-18, "Agreed on (a)!" -- scrap
