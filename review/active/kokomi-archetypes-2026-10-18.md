@@ -14,7 +14,7 @@ Casket stay as they are. A card-by-card paper follows once the map is ruled.
 
 ## 1. Where the pool is now
 
-Her draftable pool is 76 cards, 20 Common / 38 Uncommon / 18 Rare (`docs/prototype-surface.yaml`,
+Her draftable pool is 78 cards, 20 Common / 38 Uncommon / 20 Rare, plus five co-op cards (`docs/prototype-surface.yaml`,
 `character: kokomi`). Here's each card sorted by what it rewards (a card can sit in two):
 
 | Theme | Cards | Examples |
@@ -31,14 +31,14 @@ Her draftable pool is 76 cards, 20 Common / 38 Uncommon / 18 Rare (`docs/prototy
 
 What the table says:
 
-1. **Eight themes over 76 cards, so none has a spine.** A base character runs about three
+1. **Eight themes over 78 cards, so none has a spine.** A base character runs about three
    archetypes over 85 cards. Kokomi's next four themes after the top two are 3 to 9 cards each: too
    thin to draft into, too many to ignore. A draft is then mostly the generic sixteen plus whatever
    theme cards show up, which plays as "good numbers".
 2. **The biggest theme doesn't ask you to build anything.** Every Kokomi deck plans one or two
    cards a turn, so a card that pays "per Plan waiting" or "per Plan carried out" pays in any of her
    decks. The Tactician payoffs reward playing Kokomi at all, not committing to a plan-heavy deck.
-3. **The powers aren't too many; they point nowhere.** She has 18 powers in 76 cards. The base five
+3. **The powers aren't too many; they point nowhere.** She has 18 powers in 83 cards (78 plus the five co-op). The base five
    have 17 to 20 in 85 (`game_ref/role_tempo_canon.json`), so the count is normal. But about half of
    hers are free-standing value that works anywhere: Kurage Vanguard (4 damage a turn), Resolve of
    Watatsumi (2 Strength), Kurage Bloom (a Sting a turn), Watatsumi's Grace (keep Block). With nothing
@@ -123,7 +123,7 @@ as they are; the card paper sets them.
 
 ## 5. Next
 
-The card paper: each of the 76 cards placed in A, B, C, Companion, co-op or glue, with a rewrite or a
+The card paper: each of the 78 cards placed in A, B, C, Companion, co-op or glue, with a rewrite or a
 replacement for every generic card and free-standing power, under the target shape above. Then a
 five-seat round and a run of yours.
 
