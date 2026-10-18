@@ -89,8 +89,13 @@ public class KokomiRoundTwoFixesTests
                 }
                 Hand(seat).Add(gd);
                 Hand(seat).Add(card);
+                // 2026-10-18 (ruled): and a Basic Attack or Skill with no
+                // Plan line, which Grand Design plans as itself.
                 bool takes = card is not ProtoKkGrandDesign
-                             && IsPetSpelling(card.TargetType);
+                             && (IsPetSpelling(card.TargetType)
+                                 || (card.Rarity == CardRarity.Basic
+                                     && card.Type is CardType.Attack
+                                                  or CardType.Skill));
                 if (KokomiRefounding.AnyToPlan(gd) != takes)
                     wrong.Add($"{type.Name}{(upgrade ? "+" : "")}");
                 checkedCards++;

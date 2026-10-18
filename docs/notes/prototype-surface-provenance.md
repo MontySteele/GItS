@@ -9603,3 +9603,22 @@ sense! ... let's do both."
   enemies." A Counter line, Prepared Retreat's shape; any HP loss in its
   window, from any source, breaks it (`HpLostTotal`, `hp_lost_this_combat`).
   No art yet (`art_coverage.KNOWN_MISSING`). The pool is 79, 20 / 39 / 20.
+
+## Grand Design takes Basics, 2026-10-18
+
+`review/active/open-design-items-2026-10-18.md`, ruled: "Ok, agreed on all
+defaults for both the PR and inazuma companions".
+
+- **Grand Design** (`proto_kk_grand_design`): "Plan up to 3 cards from your
+  Hand, Basic cards included. They cost 0." A Basic Attack or Skill with no
+  Plan line (her Strike and Defend) is offered beside the Plan cards. It is
+  moved to the Discard Pile (not played) and a one-clause Plan holds it
+  (`KokomiPlan.Kind.PlayAsItself`, sim `play_as_itself`); carried out, a free
+  copy is played at the front enemy and exhausted, so the original stays in
+  the deck. It is an ordinary Plan in every count (Tideturn, Feint, Turning
+  Tide, the Shoal, Endless Shoal, Nereid's double) and has one line, so it
+  cannot be flipped. Only Grand Design opens this door; the Bake-Kurage still
+  refuses a Strike. Cost, rarity and upgrade unchanged.
+- **The Plan tip** (`ArmKeywordTips.ForPlan`): "Play it on the Bake-Kurage
+  instead. After enemies act and you draw, Plans happen in order; Block lasts
+  that turn. Click one to flip it." 135 visible characters, the ceiling.

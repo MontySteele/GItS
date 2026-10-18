@@ -64,5 +64,6 @@ def test_a_repeated_carry_out_names_what_bought_it():
 
 def test_the_plan_tip_says_when_it_reads_the_enemies():
     tip = blindplay.ARM_KEYWORDS["Plan"]
-    assert "read enemies then" in tip
+    # 2026-10-18 (ruled): the tip now names the moment itself.
+    assert "After enemies act and you draw" in tip
     assert "Block lasts that turn" in tip

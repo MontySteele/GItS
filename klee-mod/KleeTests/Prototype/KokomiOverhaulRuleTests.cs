@@ -337,7 +337,9 @@ public class KokomiOverhaulRuleTests
                     "DamageTakenSince", "EnergyIfAttackedSince",
                     "LoseStrengthThisTurn", "DrawPileToHand",
                     // KOKOMI V3 (2026-10-18): Unbroken Tide.
-                    "DamageIfNoHpLostSince" },
+                    "DamageIfNoHpLostSince",
+                    // GRAND DESIGN TAKES BASICS (2026-10-18).
+                    "PlayAsItself" },
             System.Enum.GetNames(typeof(KokomiPlan.Kind)));
     }
 

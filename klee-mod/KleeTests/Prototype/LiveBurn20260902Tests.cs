@@ -163,11 +163,10 @@ public class LiveBurn20260902Tests
         // Plan text change") put the word back as the tip's opening, "Instead
         // of the line above": the face prints "Or plan:" under every now-line
         // (a Plan-only card keeps "Plan:").
-        // The tip still says WHERE a Plan card goes.
-        Assert.StartsWith("Instead of the line above, ",
-                          body.Substring(body.IndexOf("Instead",
-                              System.StringComparison.Ordinal)));
-        Assert.Contains("play it on the [gold]Bake-Kurage[/gold]", body);
+        // The tip still says WHERE a Plan card goes. 2026-10-18 (ruled):
+        // "Play it on the Bake-Kurage instead." is its opening.
+        Assert.Contains("Play it on the [gold]Bake-Kurage[/gold] instead.",
+                        body);
     }
 
     // ---- EB-297: no Burst gauge for a Kokomi who has no Burst -------------
