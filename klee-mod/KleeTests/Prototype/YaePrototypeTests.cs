@@ -891,10 +891,30 @@ public class YaePrototypeTests : IDisposable
     }
 
     [Fact]
+    public void Apply_checks_the_card_can_wear_a_masterpiece_before_it_clears_one()
+    {
+        // The base CanEnchant's card rules, less its "already enchanted"
+        // refusal (Apply swaps what the card wears).
+        Assert.True(YaeEditing.CanWear(CardType.Attack, inDeck: true, unplayable: false));
+        Assert.True(YaeEditing.CanWear(CardType.Skill, inDeck: false, unplayable: true));
+        Assert.False(YaeEditing.CanWear(CardType.Power, inDeck: true, unplayable: true));
+        Assert.False(YaeEditing.CanWear(CardType.Status, inDeck: false, unplayable: false));
+        Assert.False(YaeEditing.CanWear(CardType.Curse, inDeck: false, unplayable: false));
+        Assert.False(YaeEditing.CanWear(CardType.Quest, inDeck: false, unplayable: false));
+
+        // A failed check leaves the card's layers alone: the gate runs
+        // before the Clear that strips them.
+        var calls = Il.CallSequence(typeof(YaeEditing).GetMethod(nameof(YaeEditing.Apply))!).ToList();
+        var check = calls.IndexOf("YaeEditing.CanWear");
+        Assert.True(check >= 0);
+        Assert.True(check < calls.LastIndexOf("YaeEditing.Clear"));
+    }
+
+    [Fact]
     public void Each_edit_prompt_names_its_annotation_and_what_it_does()
     {
         Assert.Equal("Choose a card to Edit: Red Ink (it deals 3 more damage "
-                     + "and gives 3 more Block).",
+                     + "and gives 3 more Block). " + YaeEditing.FilterNote,
                      YaeEditing.EditPromptTextFor(YaeAnnotation.RedInk).Replace(" " + YaeEditing.ReplacesWarning, ""));
         Assert.Equal("Choose a card to Edit: Footnote (when it is played, "
                      + "draw 1 card).",
@@ -906,9 +926,18 @@ public class YaePrototypeTests : IDisposable
                      + "gain 1 Energy).",
                      YaeEditing.EditPromptTextFor(YaeAnnotation.Royalties).Replace(" " + YaeEditing.ReplacesWarning, ""));
         Assert.Equal("Choose a card to Edit: Reprint (the first time it is "
-                     + "played each combat, play it once more for each Reprint).",
+                     + "played each combat, play it once more for each Reprint). "
+                     + YaeEditing.FilterNote,
                      YaeEditing.EditPromptTextFor(YaeAnnotation.Reprint).Replace(" " + YaeEditing.ReplacesWarning, ""));
         Assert.EndsWith(YaeEditing.ReplacesWarning, YaeEditing.EditPromptTextFor(YaeAnnotation.RedInk));
+        // Yae round 11: only the Annotations the dead-edit filter narrows
+        // say so; the others reach every editable card.
+        Assert.True(YaeEditing.Filters(YaeAnnotation.RedInk));
+        Assert.True(YaeEditing.Filters(YaeAnnotation.Reprint));
+        Assert.False(YaeEditing.Filters(YaeAnnotation.Footnote));
+        Assert.False(YaeEditing.Filters(YaeAnnotation.None));
+        Assert.DoesNotContain(YaeEditing.FilterNote, YaeEditing.EditPromptTextFor(YaeAnnotation.Footnote));
+        Assert.Contains(YaeEditing.FilterNote, YaeEditing.EditUpToPromptTextFor(YaeAnnotation.RedInk));
         Assert.Equal(YaeEditing.EditPromptText,
                      YaeEditing.EditPromptTextFor(YaeAnnotation.None));
         Assert.Equal("KLEEMOD-YAE_EDIT_SAKURASEAL.selectionScreenPrompt",
