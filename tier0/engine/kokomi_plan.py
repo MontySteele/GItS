@@ -332,6 +332,13 @@ REPLAY_EXHAUSTED = "replay_exhausted"
 #: since the Kokomi level pass, 2026-10-12). What it holds is decided when the
 #: Plan is WRITTEN and carried out at the morning -- see `schedule`.
 PLAY_COPY_OF_COMPANION = "play_copy_of_companion"
+
+#: GRAND DESIGN TAKES BASICS (2026-10-18, review/active/open-design-items-
+#: 2026-10-18.md, ruled): the clause Grand Design mints for a Basic card with
+#: no Plan line. Like `replay_exhausted`, no sheet row spells it; the Plan
+#: holds the card (`entry.card`) and plays a free copy of it when carried out.
+#: `KokomiPlan.Kind.PlayAsItself` is the twin.
+PLAY_AS_ITSELF = "play_as_itself"
 #: The card that holds that clause, which never counts as its own "last
 #: Companion" (the Kokomi level pass, 2026-10-12).
 CRYSTAL_COLLAPSE_ID = "proto_mi_gorou_crystal_collapse"
@@ -657,7 +664,7 @@ def refuses_for_no_plan(state: CombatState, card: Card) -> bool:
     if needs_a_waiting_plan(card) and not state.kk_plan_queue:
         return True
     if needs_a_plannable_card(card):
-        return not any(c is not card and can_be_written(c)
+        return not any(c is not card and grand_design_takes(c)
                        for c in state.player.hand)
     # Kokomi round 4 (2026-10-13): Moon's Reflection, while the Exhaust Pile
     # is empty ("your Exhaust Pile is empty").
@@ -738,6 +745,22 @@ def can_be_written(card: Optional[Card]) -> bool:
     that specifically has a Plan line." `KokomiRefounding.CanBeWritten` is
     the twin."""
     return card is not None and bool(card.plan)
+
+
+def plans_as_itself(card: Optional[Card]) -> bool:
+    """GRAND DESIGN TAKES BASICS (2026-10-18, ruled; [USER]: "Ok, agreed on
+    all defaults for both the PR and inazuma companions"): a Basic Attack or
+    Skill with no Plan line -- her Strike and Defend. Only Grand Design reads
+    this; the jellyfish still refuses such a card.
+    `KokomiRefounding.PlansAsItself` is the twin."""
+    return (card is not None and card.rarity == "basic"
+            and card.type in ("attack", "skill") and not card.plan)
+
+
+def grand_design_takes(card: Optional[Card]) -> bool:
+    """What Grand Design's hand screen offers: a writable card, or a Basic it
+    plans as itself. `KokomiRefounding.GrandDesignTakes` is the twin."""
+    return can_be_written(card) or plans_as_itself(card)
 
 
 def _intends_to_attack(enemy: Enemy) -> bool:
@@ -1670,6 +1693,8 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
         _replay(state, entry.card)
     elif op == PLAY_COPY_OF_COMPANION:
         _play_copy(state, entry.card)
+    elif op == PLAY_AS_ITSELF:
+        _play_as_itself(state, entry.card)
     elif op == BLOCK_PER_STATUS_IN_HAND:
         block_per_status(state, amount, clause.get("written_count"))
     elif op == TRANSFORM_STATUSES_YOU_HAVE:
@@ -1916,6 +1941,23 @@ def _play_copy(state: CombatState, card: Optional[Card]) -> None:
         state.emit("plan_copy_empty")
         return
     state.emit("plan_copy", card=card.id)
+    effects._free_play(state, _copy.deepcopy(card), force_exhaust=True)
+
+
+def _play_as_itself(state: CombatState, card: Optional[Card]) -> None:
+    """GRAND DESIGN TAKES BASICS (2026-10-18): a planned Basic, carried out --
+    a free COPY of it is played and exhausted after, `_play_copy`'s door, so
+    the original stays wherever it went. An Attack with no living enemy is
+    not played. `KokomiPlan.PlayAsItself` is the twin."""
+    import copy as _copy
+
+    from tier0.engine import effects                # late import: cycle
+
+    if card is None:
+        return
+    if card.type == "attack" and front_enemy(state) is None:
+        return
+    state.emit("plan_as_itself", card=card.id)
     effects._free_play(state, _copy.deepcopy(card), force_exhaust=True)
 
 
@@ -2630,12 +2672,28 @@ def write_free(state: CombatState, card: Card) -> bool:
     return True
 
 
+def write_as_itself(state: CombatState, card: Card) -> bool:
+    """GRAND DESIGN TAKES BASICS (2026-10-18): a Basic card with no Plan line,
+    planned. It goes from her hand to the discard pile (moved, not played),
+    and a one-clause `play_as_itself` Plan is written under it, holding it.
+    An ordinary Plan in every count. `KokomiRefounding.WriteAsItself` is the
+    twin."""
+    from tier0.engine.state import remove_instance
+    if not live(state) or not plans_as_itself(card):
+        return False
+    if not remove_instance(state.player.hand, card):
+        return False
+    state.player.discard_pile.append(card)
+    schedule(state, card, clauses=[{"op": PLAY_AS_ITSELF}], replay=card)
+    return True
+
+
 def grand_design(state: CombatState, card: Card, amount: int) -> int:
-    """GRAND DESIGN (the re-founding's card under the old name): "Write up to
-    3 cards from your hand as Plans. They cost 0." The pilot writes the
-    writable cards in hand, most expensive first, up to `amount` (an
-    INSTRUMENT SURFACE: the player chooses in the mod).
-    `KokomiCards.GrandDesign` is the twin."""
+    """GRAND DESIGN (the re-founding's card under the old name): "Plan up to
+    3 cards from your Hand, Basic cards included. They cost 0." The pilot
+    writes the writable cards in hand, most expensive first, then fills the
+    rest with Basics (2026-10-18), up to `amount` (an INSTRUMENT SURFACE: the
+    player chooses in the mod). `KokomiCards.GrandDesign` is the twin."""
     if not live(state) or amount <= 0:
         return 0
     from tier0.engine import combat                 # late import: cycle
@@ -2644,8 +2702,11 @@ def grand_design(state: CombatState, card: Card, amount: int) -> int:
     picks.sort(key=lambda c: -(combat.card_cost(state, c)
                                if c.cost != "X" else 0))
     written = 0
+    picks += [c for c in list(state.player.hand)
+              if c is not card and plans_as_itself(c)]
     for pick in picks[:int(amount)]:
-        if write_free(state, pick):
+        if (write_free(state, pick) if can_be_written(pick)
+                else write_as_itself(state, pick)):
             written += 1
     state.emit("kk_grand_design", written=written)
     return written

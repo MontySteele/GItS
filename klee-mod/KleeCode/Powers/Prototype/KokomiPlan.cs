@@ -204,6 +204,15 @@ public static class KokomiPlan
         // (<see cref="KokomiOverhaulLedger.HpLostSince"/>). Sim twin
         // `kokomi_plan.DAMAGE_IF_NO_HP_LOST_SINCE`.
         DamageIfNoHpLostSince,
+        // GRAND DESIGN TAKES BASICS (2026-10-18, review/active/open-design-
+        // items-2026-10-18.md, [USER]: "Ok, agreed on all defaults"): a
+        // Basic card with no Plan line, planned by Grand Design, is played as
+        // itself when it is carried out -- a free copy of <see cref=
+        // "Planned.Card"/>, at the front enemy where it needs a target,
+        // exhausted after (<see cref="PlayAsItself"/>). No sheet row spells
+        // it; Grand Design mints it (<c>KokomiRefounding.WriteAsItself</c>).
+        // Sim twin `kokomi_plan.PLAY_AS_ITSELF`.
+        PlayAsItself,
     }
 
     /// <summary>
@@ -2485,6 +2494,12 @@ public static class KokomiPlan
                 await PlayCopy(choiceContext, kokomi, plan.Card);
                 return null;
 
+            // GRAND DESIGN TAKES BASICS (2026-10-18): the planned Strike or
+            // Defend, played as itself. Its own numbers print as it resolves.
+            case Kind.PlayAsItself:
+                await PlayAsItself(choiceContext, kokomi, plan, entry);
+                return null;
+
             // THE STATUS BATCH (2026-10-01). Kelp Wall pays the count it was
             // written with; Sea Glass Harvest reads the draw pile now
             // (Kokomi round-1 fixes, 2026-10-12).
@@ -2951,6 +2966,41 @@ public static class KokomiPlan
         await CardCmd.AutoPlay(choiceContext, copy, FrontEnemy(kokomi));
     }
 
+    /// <summary>
+    /// GRAND DESIGN TAKES BASICS (2026-10-18): a planned Basic card with no
+    /// Plan line, carried out. Crystal Collapse's door (<see cref="PlayCopy"/>):
+    /// a free COPY of the card is played and exhausted after, so the original
+    /// (which went to the Discard Pile when it was planned, and may be back in
+    /// her hand by now) is never pulled out of wherever it is. A card that
+    /// needs an enemy is aimed as every planned hit is: the front enemy, or
+    /// Converging Tide's stamp while that body stands (<see cref="Aimed"/>);
+    /// with no living enemy it is not played. Its Strength and Dexterity are
+    /// read as it is played, as any card's are. Sim twin:
+    /// `kokomi_plan._play_as_itself`.
+    /// </summary>
+    private static async Task PlayAsItself(
+        PlayerChoiceContext choiceContext, Creature kokomi, Planned plan,
+        Entry? entry)
+    {
+        var card = plan.Card;
+        if (card == null) return;
+        if (kokomi.CombatState is not { } combat) return;
+        Creature? target = null;
+        if (card.TargetType == TargetType.AnyEnemy)
+        {
+            target = Aimed(kokomi, plan, entry).FirstOrDefault(e => !e.IsDead);
+            if (target == null) return;
+        }
+        var copy = combat.CloneCard(card);
+        copy.ExhaustOnNextPlay = true;
+        await CardCmd.AutoPlay(choiceContext, copy, target);
+    }
+
+    /// <summary>Does this entry hold a Basic card Grand Design planned, to
+    /// be played as itself (2026-10-18)? Display only.</summary>
+    public static bool PlaysAsItself(Entry entry) =>
+        entry.Clauses.Any(clause => clause.Kind == Kind.PlayAsItself);
+
     /// One carried-out Plan on the wire (`EB-317`, widened by `EB-329`).
     ///
     /// A NAMED METHOD RATHER THAN A LAMBDA INSIDE <see cref="Snapshot"/>, and
@@ -3206,7 +3256,10 @@ public static class KokomiPlan
         // Kokomi review r9 (2026-10-15, item 4): the Plan Opening Gambit's
         // rider reaches shows the doubled number, the one that will land.
         if (entry.TwoLine) ShowQueuedPlanDamage(entry, kokomi, doubled);
+        // GRAND DESIGN TAKES BASICS (2026-10-18): a planned Strike or Defend
+        // has one line, its own face, and that is its Plan line here.
         var (now, plan) = entry.TwoLine ? LineTexts(entry.Source)
+            : PlaysAsItself(entry) ? ("", LineTexts(entry.Source).Now)
             : ("", "");
         return new Dictionary<string, object?>
             {
@@ -3271,7 +3324,10 @@ public static class KokomiPlan
                     ? null : NeedsAttack(entry),
                 // Item 11: the card written is an Attack, which the base
                 // game counts as an Attack played this turn (Ripple Basin).
-                ["attack"] = entry.Source?.Type == CardType.Attack,
+                // A Basic Grand Design planned was moved, not played, so
+                // it is no Attack played this turn (2026-10-18).
+                ["attack"] = entry.Source?.Type == CardType.Attack
+                             && !PlaysAsItself(entry),
                 // KOKOMI ROUND 7 (2026-10-14): the Plan plays a card through
                 // the game's own auto-play, which Ringing counts as the
                 // turn's one card; and where the Vulnerable it applies lands,
@@ -3292,7 +3348,7 @@ public static class KokomiPlan
     /// card. Display only.</summary>
     public static bool PlaysACard(Entry entry) =>
         entry.Clauses.Any(clause => clause.Kind is Kind.ReplayExhausted
-            or Kind.PlayCopyOfCompanion);
+            or Kind.PlayCopyOfCompanion or Kind.PlayAsItself);
 
     /// <summary>KOKOMI ROUND 7 (2026-10-14): where this entry's Vulnerable
     /// lands, in <see cref="WrittenAim"/>'s words ("all", "front", "other"),

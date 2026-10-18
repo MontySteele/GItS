@@ -180,9 +180,10 @@ public class ArmKeywordTipTests
         // above"; the second sentence shortened to stay under the ceiling.
         Assert.Equal(
             // Kokomi v2 seats (2026-10-18): when a Plan reads enemies.
-            "Instead of the line above, play it on the Bake-Kurage. "
-          + "Plans happen next turn in order and read enemies then; "
-          + "Block lasts that turn.",
+            // 2026-10-18 (ruled): when Plans happen, and the flip is back.
+            "Play it on the Bake-Kurage instead. After enemies act and "
+          + "you draw, Plans happen in order; Block lasts that turn. "
+          + "Click one to flip it.",
             rendered);
         // The base game's own longest mechanic tip is CHANNELING, 134.
         Assert.True(rendered.Length <= 135, rendered.Length.ToString());

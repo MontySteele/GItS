@@ -1667,11 +1667,11 @@
 
 - {id: proto_kk_grand_design, name: "Grand Design", character: kokomi,
    authored_by: [claude],
-   # The re-founding (2026-10-12): each card chosen is written as if played
-   # on the Bake-Kurage, for 0 Energy. Kokomi review 2026-10-13: unplayable
-   # when no other card in hand can be planned. Provenance note.
+   # Each pick is written as if played on the Bake-Kurage, for 0; unplayable
+   # with nothing to plan. 2026-10-18 (ruled): Basics with no Plan line are
+   # played as themselves when carried out. Provenance note.
    cost: 1, type: skill, rarity: rare, exhaust: true,
-   description: "Plan up to {KkAmount:diff()} cards from your [gold]Hand[/gold]. They cost 0.",
+   description: "Plan up to {KkAmount:diff()} cards from your [gold]Hand[/gold], Basic cards included. They cost 0.",
    effects: [{op: kokomi, kind: grand_design, amount: 3}],
    upgrade: {retain: true}}
 

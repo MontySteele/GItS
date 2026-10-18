@@ -1718,9 +1718,11 @@ ARM_KEYWORDS: dict[str, str] = {
     # Kokomi round 3 review (2026-10-11), change 3: when Plan Block lands.
     # Kokomi v2 seats (2026-10-18): "and read enemies then"; the flip
     # instruction is on the Bake-Kurage's own text.
-    "Plan": ("Instead of the line above, play it on the Bake-Kurage. "
-             "Plans happen next turn in order and read enemies then; "
-             "Block lasts that turn."),
+    # 2026-10-18 (open-design-items-2026-10-18.md, ruled): "After enemies
+    # act and you draw" names when, and the flip is back.
+    "Plan": ("Play it on the Bake-Kurage instead. After enemies act and "
+             "you draw, Plans happen in order; Block lasts that turn. "
+             "Click one to flip it."),
     # (`EB-643`'s Dusk row left with the word in the Kokomi re-founding,
     # 2026-10-12.)
     "Mend": ("Mend N: heal N HP, but never above the HP you had at the "

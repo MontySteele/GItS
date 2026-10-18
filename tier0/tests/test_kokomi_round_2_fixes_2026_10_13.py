@@ -49,7 +49,11 @@ def test_grand_design_counts_every_plan_card_and_nothing_else():
             st.player.hand = [gd, card]
             # Kokomi review r9 pick 1 (a), 2026-10-15: a Companion counts
             # only when it prints a Plan line.
-            want = (bool(card.plan)
+            # 2026-10-18 (ruled): and a Basic Attack or Skill with no Plan
+            # line, which Grand Design plans as itself.
+            want = ((bool(card.plan)
+                     or (card.rarity == "basic"
+                         and card.type in ("attack", "skill")))
                     and card.id != "proto_kk_grand_design")
             if combat.card_playable(st, gd) != want:
                 wrong.append((card.id, card.upgraded))

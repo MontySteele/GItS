@@ -380,13 +380,20 @@ public static class ArmKeywordTips
     /// ceiling the flip instruction left this tip, and it stays on the
     /// Bake-Kurage's own ("Click a waiting Plan to flip it."), where the
     /// flip is done.
+    ///
+    /// SAYS WHEN, AND THE FLIP IS BACK (2026-10-18,
+    /// review/active/open-design-items-2026-10-18.md, ruled; [USER]: "Ok,
+    /// agreed on all defaults"): "After enemies act and you draw" names the
+    /// moment the Plans happen, which "next turn ... read enemies then" only
+    /// implied, and "Click one to flip it." returns. 135 visible characters,
+    /// the ceiling.
     /// </summary>
     public static IEnumerable<IHoverTip> ForPlan(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, PlanKey,
-            "Instead of the line above, play it on the "
-          + "[gold]Bake-Kurage[/gold]. Plans happen next turn in order and "
-          + "read enemies then; [gold]Block[/gold] lasts that turn.");
+            "Play it on the [gold]Bake-Kurage[/gold] instead. After enemies "
+          + "act and you draw, Plans happen in order; [gold]Block[/gold] "
+          + "lasts that turn. Click one to flip it.");
 
     /// <summary>The text pass of 2026-10-08: <see cref="ForPlan"/> for a
     /// card with no line above its Plan. Attached by
