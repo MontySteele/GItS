@@ -500,7 +500,6 @@
  "tier05/tests/test_eb250_commonless_pool_rolls.py": 0.27,
  "tier05/tests/test_eb30m_ancient_door.py": 0.13,
  "tier05/tests/test_eb311_plan_pricing.py": 0.53,
- "tier05/tests/test_eb577_spark_seed.py": 0.05,
  "tier05/tests/test_eb58_aura_death_interval.py": 0.01,
  "tier05/tests/test_eb83_wood_carvings.py": 0.17,
  "tier05/tests/test_elite_blitz.py": 0.05,

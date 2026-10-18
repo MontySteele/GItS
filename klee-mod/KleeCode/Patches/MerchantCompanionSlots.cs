@@ -53,56 +53,25 @@ namespace KleeMod.Patches;
 internal static class MerchantInventory_CompanionColorlessSlots_Patch
 {
     /// <summary>
-    /// SLOT 1's Uncommon share: tier0 RARITY_ODDS CONDITIONED on
-    /// >= Uncommon -- Uncommon 0.35 and Rare 0.05 renormalize to 0.875 /
-    /// 0.125. NC-10 (R116) respecified slot 1 as "Uncommon or higher from the
-    /// home region", so the floor's odds are this slot's now; it used to be
-    /// slot 2's, and slot 1 was hard-wired to Uncommon with no roll at all.
+    /// THE BASE GAME'S SHAPE ([USER] 2026-10-18, legacy review pick 2:
+    /// "Agreed on all 6 legacy picks"). Base <c>PopulateColorlessCardEntries</c>
+    /// stocks a fixed Uncommon and a fixed Rare, and so do these two slots now:
+    /// slot 1 (home nation) is an Uncommon, slot 2 (any nation) a Rare. No
+    /// rarity is rolled. The 0.875 / 0.125 conditioned roll both slots used to
+    /// take is gone.
     ///
-    /// THE ALTERNATIVE READING, surfaced and NOT chosen, because R116 said
-    /// so in as many words ("a renormalization chosen by an implementer is a
-    /// balance value chosen by an implementer"): the floor could carry a
-    /// STATED SPLIT instead -- odds designed for the premium slot rather
-    /// than inherited from the reward table. Conditioning is the reading that
-    /// introduces no new number, so it is the one implemented; the split is a
-    /// [USER] call. See tier0/constants.py, same note.
-    ///
-    /// RESOLVED BY Q16, 2026-08-06 (R117 rider / R118, verbatim
-    /// "Condition."): [USER] chose the CONDITION reading -- the value below
-    /// IS the ruled implementation. The stated-split alternative was
-    /// declined; no value changed.
-    /// </summary>
-    private const float SlotOneUncommonOdds = 0.875f;
-
-    /// <summary>
-    /// SLOT 2's Uncommon share -- THE SAME CONDITIONED TABLE AS SLOT 1 since
-    /// [USER] restored the floor on 2026-08-10 (CONSTANTS_VERSION 9).
-    ///
-    /// It was 0.35f between R116 and that ruling, alongside a
-    /// `SlotTwoCommonOdds = 0.60f`: NC-10 read "any companion card" as the
-    /// absence of a filter, so the slot rolled tier0 RARITY_ODDS itself and
-    /// could sell a Common at the 50-gold band. [USER] closed the S4-G10
-    /// agenda item ("should slot 2 carry a rarity floor at all?") by
-    /// restoring R59's floor -- the paid premium channel does not sell
-    /// Commons -- so the Common constant is GONE, not merely unused, and this
-    /// one carries the conditioned value. The slots now differ by NATION and
-    /// by nothing else. tier05/shop.py moved in the same commit.
-    /// </summary>
-    private const float SlotTwoUncommonOdds = 0.875f;
-
-    /// <summary>
-    /// The bands each slot may fall back through when its drawn corner is
-    /// empty, IN TABLE ORDER. Both slots keep the floor on the fallback rung
-    /// now, so the two arrays hold the same bands and differ only in name --
-    /// kept as two so the slots stay separately addressable if a stated split
-    /// is ever ruled (see tier0/constants.py). Mirrors the odds dict
-    /// tier05/shop.py walks for the same rung.
+    /// Each array is the slot's rarity FIRST, then the band it falls back to
+    /// when no companion of that rarity can be offered at any nation. Slot 2
+    /// falling back to Uncommon is the ruling's own wording; slot 1 keeps Rare
+    /// as its roster-gap rung, so a slot is omitted only when neither band has
+    /// a drawable companion. Mirrors <c>C.SHOP_COMPANION_SLOT_RARITIES</c>
+    /// (tier05/shop.py walks the same ladders).
     /// </summary>
     private static readonly CardRarity[] SlotOneRarities =
         { CardRarity.Uncommon, CardRarity.Rare };
 
     private static readonly CardRarity[] SlotTwoRarities =
-        { CardRarity.Uncommon, CardRarity.Rare };
+        { CardRarity.Rare, CardRarity.Uncommon };
 
     /// <summary>
     /// F2. This was a bare `AccessTools.FieldRefAccess<...>("_colorlessCardEntries")`
@@ -166,30 +135,15 @@ internal static class MerchantInventory_CompanionColorlessSlots_Patch
 
         var entries = colorlessEntries(__instance);
 
-        // --- Slot 1: home region, UNCOMMON OR HIGHER (NC-10 / R116). The
-        // targeted "buy your dream support" slot (§4.7). It used to be
-        // hard-wired to Uncommon and therefore could never offer a Rare at
-        // all -- the flagship example of the semantic-parity gap S14 was
-        // chartered to find, because the constant the parity lint compares
-        // matched on both sides while the behaviour did not. ---
-        var slotOneRarity = player.PlayerRng.Shops.NextFloat() < SlotOneUncommonOdds
-            ? CardRarity.Uncommon
-            : CardRarity.Rare;
+        // --- Slot 1: home region, a fixed UNCOMMON. The targeted "buy your
+        // dream support" slot (§4.7), in base slot 1's shape. ---
         AddSlot(__instance, player, entries,
-            slotOneRarity, CompanionPool.HomeNation(player), slot: 1,
+            SlotOneRarities[0], CompanionPool.HomeNation(player), slot: 1,
             fallbackRarities: SlotOneRarities);
 
-        // --- Slot 2: ANY NATION, UNCOMMON OR HIGHER. The wildcard slot, with
-        // R59's rarity floor RESTORED by [USER] on 2026-08-10 after R116 had
-        // removed it. R59's argument -- a ~60%-Common wildcard is worse than
-        // the guaranteed Rare it replaces, and the paid channel should not
-        // sell Commons -- is the one that stands. One roll, one table, same
-        // as slot 1; the nation filter is the whole difference between the
-        // slots. ---
-        var slotTwoRarity = player.PlayerRng.Shops.NextFloat() < SlotTwoUncommonOdds
-            ? CardRarity.Uncommon
-            : CardRarity.Rare;
-        AddSlot(__instance, player, entries, slotTwoRarity, nation: null, slot: 2,
+        // --- Slot 2: ANY NATION, a fixed RARE, in base slot 2's shape;
+        // Uncommon when no Rare companion can be offered. ---
+        AddSlot(__instance, player, entries, SlotTwoRarities[0], nation: null, slot: 2,
             fallbackRarities: SlotTwoRarities);
 
         // Skip the base colorless fill. Both slots are normally stocked; a
@@ -237,12 +191,9 @@ internal static class MerchantInventory_CompanionColorlessSlots_Patch
     /// shorter shelf -- the same shape the base game produces when a pool
     /// runs thin -- and never an entry in an unpopulated state.
     ///
-    /// Live corner today: Fontaine designs ZERO Rare companions, so Furina's
-    /// slot 1 can never roll one. That is exactly the brittleness R59 cites
-    /// and it is why the floor is Uncommon rather than a guaranteed Rare.
-    /// Reaching the omission rung is strictly harder than that: it needs the
-    /// roster to supply no drawable companion at ANY nation in EITHER band,
-    /// which `tools/lint_companion_shop_coverage.py` fails the build over.
+    /// Reaching the omission rung needs the roster to supply no drawable
+    /// companion at ANY nation in EITHER band, which
+    /// `tools/lint_companion_shop_coverage.py` fails the build over.
     /// </summary>
     private static void AddSlot(
         MerchantInventory inventory, Player player,
@@ -264,7 +215,7 @@ internal static class MerchantInventory_CompanionColorlessSlots_Patch
             return drawn.Where(c => !stocked.Contains(c)).ToList();
         }
 
-        fallbackRarities ??= new[] { CardRarity.Uncommon, CardRarity.Rare };
+        fallbackRarities ??= new[] { rarity };
 
         var candidates = Draw(rarity, nation);
         var chosenRarity = rarity;
@@ -283,11 +234,9 @@ internal static class MerchantInventory_CompanionColorlessSlots_Patch
 
         if (candidates.Count == 0)
         {
-            // The rarity rung, generalized for NC-10: slot 2's table has
-            // three entries now, not two. Walk the SLOT'S OWN rarities in
-            // the table's order -- picking a "best" fallback would be a
-            // balance choice hiding in an error path -- and mirror
-            // tier05/shop.py, which walks its odds dict the same way.
+            // The rarity rung. Walk the SLOT'S OWN ladder in order -- picking
+            // a "best" fallback would be a balance choice hiding in an error
+            // path -- and mirror tier05/shop.py, which walks the same ladder.
             foreach (var other in fallbackRarities)
             {
                 if (other == rarity) continue;
@@ -295,9 +244,7 @@ internal static class MerchantInventory_CompanionColorlessSlots_Patch
                 if (candidates.Count == 0) continue;
                 chosenRarity = other;
                 Log.Warn($"[{KleeMod.ModId}] shop slot {slot} found no {rarity} "
-                       + $"companion at any nation; dropping to {other}. This "
-                       + "crosses the slot's rarity band and should be treated "
-                       + "as a roster gap, not as intended behaviour.");
+                       + $"companion at any nation; falling back to {other}.");
                 break;
             }
         }
