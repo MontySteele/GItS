@@ -22,6 +22,8 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
+- **Legacy review** (`legacy-review-2026-10-18.md`, seven picks): Klee's Spark seeding, shop and
+  free companion rarity, the companion frame, eight unfollowed LAW lines, Hair Trigger, Varka's Knights.
 - **Character five, two paper kits** (`zhongli-paper-kit-2026-09-28.md`,
   `nahida-paper-kit-2026-09-28.md`, three picks each, revised on GPT's audit).
   Varka became character four and is built (`STATE.md`), so his paper's
