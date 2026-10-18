@@ -255,31 +255,46 @@ internal static class KleePowerIcons
         BaronBunnyPower => KleePck.Path("klee/powers/detonation_splash.png"),
         LightfallSwordPower =>
             KleePck.Path("klee/powers/shattering_pressure.png"),
-        // THE INAZUMA ARM, on the same terms again: each borrows the shipped
-        // icon of the power whose job it takes over, and the workshop's own
-        // illustrations are deferred to the Balance stage.
-        JuugaPower => KleePck.Path("klee/powers/oz_summon.png"),
-        SanctifyingRingPower => KleePck.Path("klee/powers/oz_summon.png"),
-        BlazingBarrierPower => KleePck.Path("klee/powers/celestial_gift.png"),
-        CrimsonOoyoroiPower => KleePck.Path("klee/powers/celestial_gift.png"),
-        CrowfeatherCoverPower =>
-            KleePck.Path("klee/powers/passion_overload.png"),
-        SesshouSakuraPower => KleePck.Path("klee/powers/oz_summon.png"),
-        SoumetsuPower => KleePck.Path("klee/powers/oz_summon.png"),
-        SurpriseDispatchPower =>
-            KleePck.Path("klee/powers/detonation_splash.png"),
-        // The Inazuma pool rework (2026-10-18), the same borrow.
+        // THE INAZUMA ARM and its pool rework (2026-10-18): each companion
+        // power wears its own character's talent icon since the power and
+        // relic icon pass (2026-10-18, art/plan.tsv power_mi_*); Yae's
+        // Sesshou Sakura a sakura petal, since her skill icon is her own
+        // kit's Sakura badge. The badge each borrowed before stays the
+        // fallback for a pck built before the art.
+        JuugaPower => KleePck.Path("klee/powers/juuga.png")
+            ?? KleePck.Path("klee/powers/oz_summon.png"),
+        SanctifyingRingPower => KleePck.Path("klee/powers/sanctifying_ring.png")
+            ?? KleePck.Path("klee/powers/oz_summon.png"),
+        BlazingBarrierPower => KleePck.Path("klee/powers/blazing_barrier.png")
+            ?? KleePck.Path("klee/powers/celestial_gift.png"),
+        CrimsonOoyoroiPower => KleePck.Path("klee/powers/crimson_ooyoroi.png")
+            ?? KleePck.Path("klee/powers/celestial_gift.png"),
+        CrowfeatherCoverPower => KleePck.Path("klee/powers/crowfeather_cover.png")
+            ?? KleePck.Path("klee/powers/passion_overload.png"),
+        SesshouSakuraPower => KleePck.Path("klee/powers/sesshou_sakura.png")
+            ?? KleePck.Path("klee/powers/oz_summon.png"),
+        SoumetsuPower => KleePck.Path("klee/powers/soumetsu.png")
+            ?? KleePck.Path("klee/powers/oz_summon.png"),
+        SurpriseDispatchPower => KleePck.Path("klee/powers/surprise_dispatch.png")
+            ?? KleePck.Path("klee/powers/detonation_splash.png"),
+        // Raiden's and Sara's shared next-Attack-is-Electro rider still
+        // borrows (it belongs to no one character).
         NextAttackElectroPower =>
             KleePck.Path("klee/powers/passion_overload.png"),
-        PlaneOfEuthymiaPower => KleePck.Path("klee/powers/celestial_gift.png"),
-        RoyalDescentPower =>
-            KleePck.Path("klee/powers/shattering_pressure.png"),
-        NiwabiFireDancePower => KleePck.Path("klee/powers/study_buddy.png"),
-        ChihayaburuPower => KleePck.Path("klee/powers/celestial_gift.png"),
-        HanegaPower => KleePck.Path("klee/powers/passion_overload.png"),
-        // Growing the pool to 34 (2026-10-18), the same borrow.
-        TwinBladesPower => KleePck.Path("klee/powers/shattering_pressure.png"),
-        SacredSakurasFavorPower => KleePck.Path("klee/powers/oz_summon.png"),
+        PlaneOfEuthymiaPower => KleePck.Path("klee/powers/plane_of_euthymia.png")
+            ?? KleePck.Path("klee/powers/celestial_gift.png"),
+        RoyalDescentPower => KleePck.Path("klee/powers/royal_descent.png")
+            ?? KleePck.Path("klee/powers/shattering_pressure.png"),
+        NiwabiFireDancePower => KleePck.Path("klee/powers/niwabi_fire_dance.png")
+            ?? KleePck.Path("klee/powers/study_buddy.png"),
+        ChihayaburuPower => KleePck.Path("klee/powers/chihayaburu.png")
+            ?? KleePck.Path("klee/powers/celestial_gift.png"),
+        HanegaPower => KleePck.Path("klee/powers/hanega.png")
+            ?? KleePck.Path("klee/powers/passion_overload.png"),
+        TwinBladesPower => KleePck.Path("klee/powers/twin_blades.png")
+            ?? KleePck.Path("klee/powers/shattering_pressure.png"),
+        SacredSakurasFavorPower => KleePck.Path("klee/powers/sacred_sakuras_favor.png")
+            ?? KleePck.Path("klee/powers/oz_summon.png"),
         // THE SAME ARM'S STAND-IN SLICE, on the same terms once more, and the
         // borrow is easier to argue here than anywhere above: a stand-in wears
         // the Universal's own illustration (its row's `art_of:`), so its badge
@@ -472,9 +487,10 @@ internal static class KleePowerIcons
         // Amber, Explosive Puppet's this-turn loss: the same borrowed badge.
         ProtoMcAmberExplosivePuppetPower =>
             KleePck.Path("klee/powers/detonation_vuln.png"),
-        // Raiden's Baleful Omen (2026-10-18): the same.
-        ProtoMiRaidenBalefulOmenPower =>
-            KleePck.Path("klee/powers/detonation_vuln.png"),
+        // Raiden's Baleful Omen (2026-10-18): her skill's talent icon since
+        // the power and relic icon pass, the same borrowed badge as fallback.
+        ProtoMiRaidenBalefulOmenPower => KleePck.Path("klee/powers/baleful_omen.png")
+            ?? KleePck.Path("klee/powers/detonation_vuln.png"),
         // VARKA (the Oath rework): his Oath badge wears the Vision of its
         // current element (the retired Winds' files, the varka-art pass's
         // own); the card powers borrow the three varka power files and
@@ -564,8 +580,10 @@ internal static class KleePowerIcons
             ?? KleePck.Path("yae/powers/foxfire_lure.png")
             ?? KleePck.Path("klee/powers/detonation_vuln.png"),
         // The Yae pass (2026-10-16): Yae Publishing House, her Dusty Tome
-        // Ancient, borrows Serialization's badge (the Edit's) until its art.
-        YaePublishingHousePower => KleePck.Path("yae/powers/serialization.png")
+        // Ancient, wears her own light novel since the power and relic icon
+        // pass (2026-10-18); Serialization's badge stays the fallback.
+        YaePublishingHousePower => KleePck.Path("yae/powers/publishing_house.png")
+            ?? KleePck.Path("yae/powers/serialization.png")
             ?? KleePck.Path("klee/powers/passion_overload.png"),
         UnwaveringBannerPower =>
             KleePck.Path("varka/powers/stormward_stance.png"),

@@ -3341,3 +3341,24 @@ proto_mi_yoimiya_ryuukin_saxifrage	ImageGen/images/cards/companions/proto_mi_yoi
 proto_mi_chiori_twin_blades	ImageGen/images/cards/companions/proto_mi_chiori_twin_blades.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Chiori Full Wish.png		splash	chiori
 # proto_mi_yae_sacred_sakuras_favor <- Yae's Genshin Concert 2022 art (her Wish, full Wish and birthday art are on her own kit's cards)
 proto_mi_yae_sacred_sakuras_favor	ImageGen/images/cards/companions/proto_mi_yae_sacred_sakuras_favor.png	500	380	cover	x0.5,y0.16@1.5	shortlist	1	png	Genshin Concert 2022 Yae Miko.png		splash	yae
+# ---------- Power and relic icon pass (2026-10-18): borrowed badges get their own icon ----------
+# Inazuma companion powers: each its character's talent icon (Yae's Sesshou Sakura: a sakura petal). Yae Publishing House: her light novel.
+# Meditations of a Yako (Yae's starter relic) drew Kokomi's Pearl of Wisdom: an Inazuma Electro Vision.
+power_mi_plane_of_euthymia	ImageGen/images/powers/plane_of_euthymia.png	256	256	contain	center	shortlist	1	png	Talent Secret Art Musou Shinsetsu.png		icon	
+power_mi_baleful_omen	ImageGen/images/powers/baleful_omen.png	256	256	contain	center	shortlist	1	png	Talent Transcendence Baleful Omen.png		icon	
+power_mi_royal_descent	ImageGen/images/powers/royal_descent.png	256	256	contain	center	shortlist	1	png	Talent Royal Descent Behold, Itto the Evil!.png		icon	
+power_mi_niwabi_fire_dance	ImageGen/images/powers/niwabi_fire_dance.png	256	256	contain	center	shortlist	1	png	Talent Niwabi Fire-Dance.png		icon	
+power_mi_chihayaburu	ImageGen/images/powers/chihayaburu.png	256	256	contain	center	shortlist	1	png	Talent Chihayaburu.png		icon	
+power_mi_hanega	ImageGen/images/powers/hanega.png	256	256	contain	center	shortlist	1	png	Talent Hanega Song of the Wind.png		icon	
+power_mi_twin_blades	ImageGen/images/powers/twin_blades.png	256	256	contain	center	shortlist	1	png	Talent Hiyoku Twin Blades.png		icon	
+power_mi_sacred_sakuras_favor	ImageGen/images/powers/sacred_sakuras_favor.png	256	256	contain	center	shortlist	1	png	System Sacred Sakura's Favor.png		icon	
+power_mi_crimson_ooyoroi	ImageGen/images/powers/crimson_ooyoroi.png	256	256	contain	center	shortlist	1	png	Talent Crimson Ooyoroi.png		icon	
+power_mi_blazing_barrier	ImageGen/images/powers/blazing_barrier.png	256	256	contain	center	shortlist	1	png	Talent Blazing Blessing.png		icon	
+power_mi_juuga	ImageGen/images/powers/juuga.png	256	256	contain	center	shortlist	1	png	Talent Juuga Forward Unto Victory.png		icon	
+power_mi_sanctifying_ring	ImageGen/images/powers/sanctifying_ring.png	256	256	contain	center	shortlist	1	png	Talent Sanctifying Ring.png		icon	
+power_mi_crowfeather_cover	ImageGen/images/powers/crowfeather_cover.png	256	256	contain	center	shortlist	1	png	Talent Tengu Stormcall.png		icon	
+power_mi_sesshou_sakura	ImageGen/images/powers/sesshou_sakura.png	256	256	contain	center	shortlist	1	png	Item Dream Sakura.png		icon	
+power_mi_soumetsu	ImageGen/images/powers/soumetsu.png	256	256	contain	center	shortlist	1	png	Talent Kamisato Art Soumetsu.png		icon	
+power_mi_surprise_dispatch	ImageGen/images/powers/surprise_dispatch.png	256	256	contain	center	shortlist	1	png	Talent Secret Art Surprise Dispatch.png		icon	
+power_yae_publishing_house	ImageGen/images/yae/powers/publishing_house.png	256	256	contain	center	shortlist	1	png	JWGB A Light Novel.png		icon	
+relic_meditations_of_a_yako	ImageGen/images/yae/relics/meditations_of_a_yako.png	256	256	contain	center	shortlist	1	png	Vision Inazuma Electro.png		icon	

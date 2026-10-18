@@ -151,13 +151,17 @@ public class MeditationsOfAYako : CustomRelicModel
     /// override it derives from the mod id, which the atlas lacks.</summary>
     protected override string IconBaseName => "ring_of_the_snake";
 
-    /// <summary>Placeholder art: Kokomi's Pearl of Wisdom icon, borrowed
-    /// until her art pass plans her own.</summary>
+    /// <summary>Her own icon since the power and relic icon pass
+    /// (2026-10-18, art/plan.tsv relic_meditations_of_a_yako): an Inazuma
+    /// Electro Vision. Kokomi's Pearl of Wisdom, which it borrowed before,
+    /// stays the fallback for a pck built before the art.</summary>
     public override string PackedIconPath =>
-        KleePck.Path("kokomi/relics/pearl_of_wisdom.png") ?? base.PackedIconPath;
+        KleePck.Path("yae/relics/meditations_of_a_yako.png")
+        ?? KleePck.Path("kokomi/relics/pearl_of_wisdom.png") ?? base.PackedIconPath;
 
     protected override string BigIconPath =>
-        KleePck.Path("kokomi/relics/pearl_of_wisdom.png") ?? base.BigIconPath;
+        KleePck.Path("yae/relics/meditations_of_a_yako.png")
+        ?? KleePck.Path("kokomi/relics/pearl_of_wisdom.png") ?? base.BigIconPath;
 }
 
 /// <summary>
