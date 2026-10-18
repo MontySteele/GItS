@@ -261,7 +261,7 @@ def test_the_shape_of_water_upgraded(stings, dealt):
 
 def test_the_pool_stays_78_at_20_38_20():
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
-    assert len(ids) == len(set(ids)) == 78
+    assert len(ids) == len(set(ids)) == 79  # Kokomi v3 (2026-10-18): Unbroken Tide
     rows = {c.id for c in loader.prototype_cards()}
     for gone in ("proto_kk_measured_breath", "proto_kk_spring_tide"):
         assert gone not in ids and gone not in rows
@@ -270,5 +270,5 @@ def test_the_pool_stays_78_at_20_38_20():
     assert set(C.KOKOMI_JELLYFISH_IDS) <= set(ids)
     assert "proto_kk_endless_shoal" in ids
     rarity = collections.Counter(loader.get_card(cid).rarity for cid in ids)
-    assert rarity == {"common": 20, "uncommon": 38, "rare": 20}
+    assert rarity == {"common": 20, "uncommon": 39, "rare": 20}
     assert "draw_if_no_plan" not in kokomi_plan.KINDS

@@ -51,7 +51,7 @@ public sealed class ProtoKkTideturn : CustomCardModel, IElementalCard, ICharacte
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tideturn"),
-        ("description", "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus {ExtraDamage:diff()} for each [gold]Plan[/gold] waiting.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("description", "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus {ExtraDamage:diff()} for each [gold]Plan[/gold] waiting. Stings and Wards don't count.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -59,7 +59,7 @@ public sealed class ProtoKkTideturn : CustomCardModel, IElementalCard, ICharacte
         {
             new CalculationBaseVar(8m),
             new ExtraDamageVar(8m),
-            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => KokomiPlan.PlansHeld(card.Owner.Creature))
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => KokomiPlan.ChainPlansHeld(card.Owner.Creature))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

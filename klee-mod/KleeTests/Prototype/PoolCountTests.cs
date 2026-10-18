@@ -72,8 +72,9 @@ public class PoolCountTests
         // Tide (R) cut, Endless Shoal R -> U, All Streams Flow to the Sea (R)
         // and The Shape of Water (U) added: 21 / 36 / 21 -> 21 / 37 / 20.
         // The Kokomi level pass (2026-10-12): Change of Plans C -> U,
-        // 20 / 38 / 20.
-        AssertPool("KokomiOverhaulRoster", "Slice", 20, 38, 20);
+        // 20 / 38 / 20. Kokomi v3 (2026-10-18): Unbroken Tide (U) added,
+        // 20 / 39 / 20, 79.
+        AssertPool("KokomiOverhaulRoster", "Slice", 20, 39, 20, 79);
         AssertAncients("Kokomi");
         AssertTier("KokomiOverhaulRoster", "MultiplayerSlice");
     }

@@ -205,8 +205,8 @@ def test_the_pool_is_all_forty_four_of_the_slices_rows():
     Breath and Spring Tide cut, All Streams Flow to the Sea and The Shape of
     Water added after the re-founding's rows."""
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
-    assert len(ids) == 78
-    assert len(set(ids)) == 78
+    assert len(ids) == 79  # Kokomi v3 (2026-10-18): Unbroken Tide
+    assert len(set(ids)) == 79
     assert not set(ids) & set(C.KOKOMI_OVERHAUL_STARTER_IDS)
     assert "proto_kk_tide_wall" in ids
     assert "proto_kk_shell_guard" not in ids
@@ -246,9 +246,12 @@ def test_the_pool_is_all_forty_four_of_the_slices_rows():
     new = C.KOKOMI_REFOUNDING_IDS
     jelly = C.KOKOMI_JELLYFISH_IDS
     assert len(new) == 20 and len(own) == 4 and len(jelly) == 2
+    # Kokomi v3 (2026-10-18): Unbroken Tide after the jellyfish build's two.
+    assert C.KOKOMI_V3_IDS == ("proto_kk_unbroken_tide",)
     assert ids[-4:] == own
-    assert ids[-6:-4] == jelly
-    assert ids[-26:-6] == new
+    assert ids[-5:-4] == C.KOKOMI_V3_IDS
+    assert ids[-7:-5] == jelly
+    assert ids[-27:-7] == new
     assert all(cid.startswith("proto_mi_gorou_") for cid in own)
     assert "proto_kk_held_tide" not in ids
     assert "proto_kk_tidal_rhythm" not in ids
@@ -403,10 +406,11 @@ def test_the_pool_keeps_the_packets_rarity_split(overhaul):
     Tide (Rare) cut, Endless Shoal moved Rare to Uncommon, All Streams Flow to
     the Sea (Rare) and The Shape of Water (Uncommon) added: 21 / 37 / 20.
     THE KOKOMI LEVEL PASS (2026-10-12): Change of Plans Common -> Uncommon,
-    20 / 38 / 20."""
+    20 / 38 / 20. KOKOMI V3 (2026-10-18): Unbroken Tide (Uncommon) added,
+    20 / 39 / 20."""
     pool = rewards.character_pool("kokomi")
     assert {r: len(cs) for r, cs in sorted(pool.items())} == {
-        "common": 20, "uncommon": 38, "rare": 20}
+        "common": 20, "uncommon": 39, "rare": 20}
 
 
 def test_a_tier05_run_can_open_with_the_arms_starter(overhaul):

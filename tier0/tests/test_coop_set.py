@@ -86,7 +86,7 @@ def test_the_multiplayer_tier_is_outside_every_pool_count():
         assert not set(pool) & set(TIERS)
     # The counts R276 ruled do not move.
     assert len(C.KLEE_OVERHAUL_POOL_IDS) == 78
-    assert len(C.KOKOMI_OVERHAUL_POOL_IDS) == 78    # the status batch
+    assert len(C.KOKOMI_OVERHAUL_POOL_IDS) == 79    # Kokomi v3, 2026-10-18
 
 
 def test_no_sim_pool_deals_one(arms):

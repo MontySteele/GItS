@@ -94,7 +94,8 @@ public class LiveLooks8bTests
         var card = Source(Path.Combine(
             "klee-mod", "KleeCode", "Cards", "Prototype", "Generated",
             "ProtoKkTideturn.cs"));
-        Assert.Contains("KokomiPlan.PlansHeld(card.Owner.Creature)", card);
+        // Kokomi v3 (2026-10-18): Stings and Wards don't count.
+        Assert.Contains("KokomiPlan.ChainPlansHeld(card.Owner.Creature)", card);
 
         var var_ = Source(Path.Combine(
             "klee-mod", "KleeCode", "Powers", "Prototype",

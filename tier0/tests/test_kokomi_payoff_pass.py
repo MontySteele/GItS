@@ -45,7 +45,7 @@ def _write(st, card, energy=10):
 
 def test_the_pass_cuts_second_thoughts_and_canopy_stays(overhaul):
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
-    assert len(ids) == 78
+    assert len(ids) == 79  # Kokomi v3 (2026-10-18): Unbroken Tide
     # The re-founding (2026-10-12) cut Coral Tithe; Kurage Canopy stays.
     assert "proto_kk_kurage_canopy" in ids
     assert "proto_kk_coral_tithe" not in ids

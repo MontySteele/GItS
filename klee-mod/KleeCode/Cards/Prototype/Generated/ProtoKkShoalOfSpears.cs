@@ -51,14 +51,14 @@ public sealed class ProtoKkShoalOfSpears : CustomCardModel, IElementalCard, ICha
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Shoal of Spears"),
-        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies, plus once more for each [gold]Plan[/gold] waiting.{InCombat:\n(Deals {TotalDamage:diff()} damage)|}"),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies, plus once more for each [gold]Plan[/gold] waiting. Stings and Wards don't count.{InCombat:\n(Deals {TotalDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new DamageVar(5m, ValueProp.Move),
-            new HitsTotalDamageVar(static card => KokomiPlan.PlansHeld(card.Owner!.Creature!) + 1)
+            new HitsTotalDamageVar(static card => KokomiPlan.ChainPlansHeld(card.Owner!.Creature!) + 1)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -70,10 +70,10 @@ public sealed class ProtoKkShoalOfSpears : CustomCardModel, IElementalCard, ICha
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (KokomiPlan.PlansHeld(Owner.Creature) + 1 > 0)
+        if (KokomiPlan.ChainPlansHeld(Owner.Creature) + 1 > 0)
         {
             await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
-                .WithHitCount(KokomiPlan.PlansHeld(Owner.Creature) + 1)
+                .WithHitCount(KokomiPlan.ChainPlansHeld(Owner.Creature) + 1)
                 .FromCard(this, cardPlay)
                 .TargetingAllOpponents(CombatState!)
                 .WithElementHitFx(this)

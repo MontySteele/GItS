@@ -198,6 +198,12 @@ public static class KokomiPlan
         EnergyIfAttackedSince,
         LoseStrengthThisTurn,
         DrawPileToHand,
+        // KOKOMI V3 (2026-10-18, review/active/kokomi-cards-2026-10-18.md
+        // sec.6): Unbroken Tide's "If you lost no HP since you planned this,
+        // deal N damage", a Counter read off the entry's own window
+        // (<see cref="KokomiOverhaulLedger.HpLostSince"/>). Sim twin
+        // `kokomi_plan.DAMAGE_IF_NO_HP_LOST_SINCE`.
+        DamageIfNoHpLostSince,
     }
 
     /// <summary>
@@ -770,6 +776,16 @@ public static class KokomiPlan
     /// </summary>
     public static int PlansHeld(Creature? kokomi) =>
         Pending(kokomi?.Player).Count;
+
+    /// <summary>
+    /// KOKOMI V3 (2026-10-18, review/active/kokomi-cards-2026-10-18.md sec.6;
+    /// [USER]: "Makes sense! ... let's do both."): the Plans waiting that are
+    /// not a Sting's or Ward's -- Tideturn's and Shoal of Spears' "Stings and
+    /// Wards don't count". Breakwater keeps <see cref="PlansHeld"/>. Sim twin:
+    /// <c>kokomi_plan.chain_plans_held</c>.
+    /// </summary>
+    public static int ChainPlansHeld(Creature? kokomi) =>
+        Pending(kokomi?.Player).Count(e => !KokomiRefounding.IsJellyfish(e.Source));
 
     /// <summary>
     /// WHAT TO DRAW ON THE JELLYFISH RIGHT NOW: the morning's remaining Plans
@@ -1926,7 +1942,10 @@ public static class KokomiPlan
         // THE POOL OVERHAUL (2026-10-13), CHAIN: this carry-out counts
         // itself, so the per-turn count rises before its clauses run (and
         // before `AskedFor` reads it). Sim twin: `kokomi_plan._resolve_entry`.
-        KokomiOverhaulLedger.For(kokomi).NotePlanCarryingOut();
+        // Kokomi v3 (2026-10-18): a Sting's or Ward's Plan is left out of
+        // Feint's and Turning Tide's count.
+        KokomiOverhaulLedger.For(kokomi).NotePlanCarryingOut(
+            KokomiRefounding.IsJellyfish(entry.Source));
         // Kokomi round-3 changes (2026-10-12): what else landed in this
         // carry-out's window, named on the results line. (Coordinated Tide's
         // hit, its one rider, left with the pool overhaul, 2026-10-13.)
@@ -2457,6 +2476,17 @@ public static class KokomiPlan
                                  AskedFor(kokomi, plan, entry) ?? 0,
                                  entry, doubleDamage);
 
+            // KOKOMI V3 (2026-10-18): Unbroken Tide, the hit only if she
+            // lost no HP since it was written.
+            case Kind.DamageIfNoHpLostSince:
+                if (KokomiOverhaulLedger.For(kokomi)
+                        .HpLostSince(entry?.Window))
+                {
+                    return 0;
+                }
+                return await Hit(choiceContext, kokomi, plan, plan.Amount,
+                                 entry, doubleDamage);
+
             case Kind.EnergyIfAttackedSince:
                 if (!KokomiOverhaulLedger.For(kokomi)
                         .AttackedSince(entry?.Window))
@@ -2551,7 +2581,8 @@ public static class KokomiPlan
         Kind.GainStrength => "Strength",
         // THE POOL OVERHAUL (2026-10-13).
         Kind.DamagePerPlanThisTurn or Kind.DamageBlockedSince
-            or Kind.DamageTakenSince => "damage",
+            or Kind.DamageTakenSince or Kind.DamageIfNoHpLostSince
+            => "damage",
         Kind.EnergyIfAttackedSince => "Energy",
         Kind.LoseStrengthThisTurn => "Strength lost",
         Kind.DrawPileToHand => "cards added",
@@ -2581,9 +2612,10 @@ public static class KokomiPlan
         // THE POOL OVERHAUL (2026-10-13). Chain: the rate times the Plans
         // carried out this turn, this one included (the count rose before
         // the clauses ran). Counter: the entry's own window.
+        // Kokomi v3 (2026-10-18): Stings and Wards don't count.
         Kind.DamagePerPlanThisTurn =>
             plan.Amount
-            * KokomiOverhaulLedger.For(kokomi).PlansCarriedOutThisTurn,
+            * KokomiOverhaulLedger.For(kokomi).ChainPlansThisTurn,
         Kind.DamageBlockedSince =>
             KokomiOverhaulLedger.For(kokomi).BlockedSince(entry?.Window),
         Kind.DamageTakenSince =>
@@ -3311,11 +3343,16 @@ public static class KokomiPlan
                     case Kind.PlayCopyOfCompanion:
                         return CopiesCaption(clause.Card?.Title.ToString());
                     case Kind.DamagePerPlanThisTurn:
-                        var twice = index > 0
-                            && kokomi.Powers.OfType<NereidsAscensionPower>()
-                                    .Any();
+                        // Kokomi v3 (2026-10-18): Stings and Wards don't
+                        // count, so the place is counted in real Plans.
                         return LiveDeals(clause.Amount
-                            * (index + 1 + (twice ? 1 : 0)));
+                            * ChainPlace(Showing(kokomi.Player), index,
+                                kokomi.Powers.OfType<NereidsAscensionPower>()
+                                    .Any()));
+                    // KOKOMI V3 (2026-10-18): Unbroken Tide.
+                    case Kind.DamageIfNoHpLostSince:
+                        return ledger.HpLostSince(entry.Window)
+                            ? HpLostCaption : LiveDeals(clause.Amount);
                     // KOKOMI REVIEW R5 (2026-10-14, A3): a Counter's running
                     // count in its own words ("7 blocked so far"); the hit
                     // is that count.
@@ -3367,6 +3404,33 @@ public static class KokomiPlan
 
     /// <summary>The strip's damage caption, "Deals N".</summary>
     public static string LiveDeals(int amount) => $"Deals {amount}";
+
+    /// <summary>Unbroken Tide's caption once she has lost HP in its window
+    /// (Kokomi v3, 2026-10-18). Display only.</summary>
+    public const string HpLostCaption = "HP lost";
+
+    /// <summary>
+    /// KOKOMI V3 (2026-10-18): a waiting Chain Plan's count if the queue lands
+    /// as it stands -- the real Plans (not a Sting's or Ward's) up to and
+    /// including <paramref name="index"/>, one more when Nereid's Ascension
+    /// doubles a real first Plan ahead of it. PURE over its inputs. Display
+    /// only; the carry-out reads <see cref="KokomiOverhaulLedger.ChainPlansThisTurn"/>.
+    /// </summary>
+    public static int ChainPlace(IReadOnlyList<Entry> queue, int index,
+                                 bool twice)
+    {
+        var count = 0;
+        for (var i = 0; i <= index && i < queue.Count; i++)
+        {
+            if (!KokomiRefounding.IsJellyfish(queue[i].Source)) count++;
+        }
+        if (twice && index > 0 && queue.Count > 0
+            && !KokomiRefounding.IsJellyfish(queue[0].Source))
+        {
+            count++;
+        }
+        return count;
+    }
 
     /// <summary>Kelp Wall's running count, "N blocked so far" (Kokomi
     /// review r5, 2026-10-14, A3).</summary>

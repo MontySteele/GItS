@@ -258,13 +258,13 @@ public class KokomiJellyfishBuildTests
     public void The_pool_stays_78_with_the_cuts_gone_and_the_new_cards_last()
     {
         var slice = Slice();
-        Assert.Equal(78, slice.Count);
-        Assert.Equal(78, slice.Distinct().Count());
+        Assert.Equal(79, slice.Count); // Kokomi v3 (2026-10-18): Unbroken Tide
+        Assert.Equal(79, slice.Distinct().Count());
         Assert.DoesNotContain("ProtoKkMeasuredBreath", slice);
         Assert.DoesNotContain("ProtoKkSpringTide", slice);
         Assert.Contains("ProtoKkEndlessShoal", slice);
         Assert.Equal(new[] { "ProtoKkAllStreamsFlow", "ProtoKkTheShapeOfWater" },
-                     slice.Skip(slice.Count - 6).Take(2));
+                     slice.Skip(slice.Count - 7).Take(2));   // Unbroken Tide after (Kokomi v3)
         Assert.Null(typeof(KokomiCards).GetMethod("DrawIfNoPlan"));
         var asm = typeof(ProtoKkSting).Assembly;
         var rarity = slice
@@ -273,8 +273,9 @@ public class KokomiJellyfishBuildTests
             .GroupBy(c => c.Rarity)
             .ToDictionary(g => g.Key, g => g.Count());
         // The Kokomi level pass (2026-10-12): Change of Plans C -> U.
+        // Kokomi v3 (2026-10-18): Unbroken Tide (U).
         Assert.Equal(20, rarity[CardRarity.Common]);
-        Assert.Equal(38, rarity[CardRarity.Uncommon]);
+        Assert.Equal(39, rarity[CardRarity.Uncommon]);
         Assert.Equal(20, rarity[CardRarity.Rare]);
     }
 }

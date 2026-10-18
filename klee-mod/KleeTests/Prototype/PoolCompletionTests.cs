@@ -70,14 +70,15 @@ public class PoolCompletionTests : IDisposable
     {
         var slice = Cards("KokomiOverhaulRoster", "Slice");
         // 78 since pool completion; since the re-founding (2026-10-12) it
-        // ends with Gorou's four, her own cards.
-        Assert.Equal(78, slice.Count);
+        // ends with Gorou's four, her own cards. 79 with Kokomi v3
+        // (2026-10-18).
+        Assert.Equal(79, slice.Count);
         Assert.Equal(new[]
             {
                 "ProtoMiGorouInuzaka", "ProtoMiGorouWarBanner",
                 "ProtoMiGorouJuuga", "ProtoMiGorouCrystalCollapse",
             },
-            slice.Skip(74).ToArray());
+            slice.Skip(75).ToArray());
         var multiplayer = Cards("KokomiOverhaulRoster", "MultiplayerSlice");
         Assert.Equal(5, multiplayer.Count);
         Assert.Equal(new[] { "ProtoKkTacticalRelay", "ProtoKkKuragesMercy" },

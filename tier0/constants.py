@@ -974,6 +974,14 @@ KOKOMI_JELLYFISH_IDS: tuple[str, ...] = (
     "proto_kk_the_shape_of_water",
 )
 
+# KOKOMI V3 (2026-10-18, review/active/kokomi-cards-2026-10-18.md sec.6,
+# ruled: "Makes sense! ... let's do both."): Unbroken Tide, Read the Tide's
+# Uncommon, appended after the jellyfish build's rows in the sheet's order.
+# The pool becomes 79.
+KOKOMI_V3_IDS: tuple[str, ...] = (
+    "proto_kk_unbroken_tide",
+)
+
 # THE OFFERABLE POOL, WHOLE: 78, 20 / 38 / 20, in the sheet's own order, then
 # Gorou's four. THE POOL OVERHAUL (2026-10-13, review/active/kokomi-pool-
 # overhaul-2026-10-13.md sec.4) put each new card in the slot of the cut card
@@ -1041,6 +1049,7 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_kk_riptide_ruin",
     *KOKOMI_REFOUNDING_IDS,
     *KOKOMI_JELLYFISH_IDS,
+    *KOKOMI_V3_IDS,
     *KOKOMI_OWN_COMPANION_IDS,
 )
 

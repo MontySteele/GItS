@@ -43,9 +43,9 @@ def test_the_trims_print_the_papers_numbers():
 def test_change_of_plans_is_uncommon_and_the_split_is_20_38_20():
     assert card("proto_kk_change_of_plans").rarity == "uncommon"
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
-    assert len(ids) == 78
+    assert len(ids) == 79  # Kokomi v3 (2026-10-18): Unbroken Tide
     rarity = collections.Counter(loader.get_card(c).rarity for c in ids)
-    assert rarity == {"common": 20, "uncommon": 38, "rare": 20}
+    assert rarity == {"common": 20, "uncommon": 39, "rare": 20}
 
 
 # --- section 2: the floors ---------------------------------------------------

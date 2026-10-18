@@ -102,7 +102,7 @@ public class KokomiReviewR6Tests
     public void Two_hydro_sources_take_the_cut_powers_slots()
     {
         var slice = Slice();
-        Assert.Equal(78, slice.Count);
+        Assert.Equal(79, slice.Count); // Kokomi v3 (2026-10-18): Unbroken Tide
         Assert.DoesNotContain("ProtoKkJellyfishCurrent", slice);
         Assert.DoesNotContain("ProtoKkCoordinatedTide", slice);
         Assert.Contains("ProtoKkKurageVanguard", slice);

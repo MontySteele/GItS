@@ -1126,6 +1126,10 @@ class PlanEntry:
     since_blocked: int = 0
     since_taken: int = 0
     since_attacks: int = 0
+    # KOKOMI V3 (2026-10-18, card paper sec.6): Unbroken Tide's "if you lost
+    # no HP since you planned this" -- `hp_lost_this_combat` when it was
+    # written. `KokomiOverhaulLedger.Since.HpLost` is the twin.
+    since_hp_lost: int = 0
 
 @dataclass
 class CombatState:
@@ -1408,6 +1412,10 @@ class CombatState:
     # own hit is resolving (`kk_hit_card`: Jellyfish Current's Sting and
     # Coordinated Tide's Companion). `KokomiOverhaulLedger`'s twins.
     kk_plans_carried_out_this_turn: int = 0
+    # KOKOMI V3 (2026-10-18, card paper sec.6): the same count less the Sting
+    # and Ward Plans, Feint's and Turning Tide's "Stings and Wards don't
+    # count". `KokomiOverhaulLedger.ChainPlansThisTurn` is the twin.
+    kk_chain_plans_this_turn: int = 0
     kk_damage_blocked_total: int = 0
     kk_damage_taken_total: int = 0
     kk_attackers: list[int] = field(default_factory=list)

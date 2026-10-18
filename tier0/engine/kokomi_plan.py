@@ -86,6 +86,9 @@ PLAN_KINDS = frozenset((
     "damage_per_plan_this_turn", "damage_blocked_since",
     "damage_taken_since", "energy_if_attacked_since",
     "lose_strength_this_turn", "draw_pile_to_hand",
+    # KOKOMI V3 (2026-10-18, card paper sec.6): Unbroken Tide. See
+    # `DAMAGE_IF_NO_HP_LOST_SINCE`.
+    "damage_if_no_hp_lost_since",
 ))
 
 #: The clauses that carry NO `amount`. Each is a whole rule rather than a
@@ -133,7 +136,9 @@ PLAN_AIMED_OPS = frozenset((
     "apply_power",
     # THE POOL OVERHAUL (2026-10-13).
     "damage_per_plan_this_turn", "damage_blocked_since",
-    "damage_taken_since", "lose_strength_this_turn"))
+    "damage_taken_since", "lose_strength_this_turn",
+    # KOKOMI V3 (2026-10-18): Unbroken Tide.
+    "damage_if_no_hp_lost_since"))
 
 #: R276. The clauses whose `amount` may be zero: Tide Wall's is a flat bonus on
 #: top of the front enemy's intent, and the base card prints none. THE FEED
@@ -198,7 +203,10 @@ PLAN_ONLY_OPS = frozenset((
                            "damage_per_plan_this_turn",
                            "damage_blocked_since", "damage_taken_since",
                            "energy_if_attacked_since",
-                           "lose_strength_this_turn", "draw_pile_to_hand"))
+                           "lose_strength_this_turn", "draw_pile_to_hand",
+                           # KOKOMI V3 (2026-10-18): Unbroken Tide reads the
+                           # turns it sat through.
+                           "damage_if_no_hp_lost_since"))
 
 #: THE POOL OVERHAUL (2026-10-13, review/active/kokomi-pool-overhaul-
 #: 2026-10-13.md, picks 1 (a) and 2 (a); [USER]: "On Kokomi, I'm good with
@@ -238,6 +246,13 @@ DAMAGE_TAKEN_SINCE = "damage_taken_since"
 ENERGY_IF_ATTACKED_SINCE = "energy_if_attacked_since"
 LOSE_STRENGTH_THIS_TURN = "lose_strength_this_turn"
 DRAW_PILE_TO_HAND = "draw_pile_to_hand"
+#: KOKOMI V3 (2026-10-18, review/active/kokomi-cards-2026-10-18.md sec.6;
+#: [USER]: "Makes sense! ... let's do both."). Unbroken Tide: "If you lost no
+#: HP since you planned this, deal 12 Hydro damage to ALL enemies." A Counter
+#: line read off `hp_lost_this_combat` (`resources.note_player_hp_loss`, every
+#: source of HP loss) against the entry's `since_hp_lost`.
+#: `KokomiPlan.Kind.DamageIfNoHpLostSince` is the twin.
+DAMAGE_IF_NO_HP_LOST_SINCE = "damage_if_no_hp_lost_since"
 #: Brine Sting's aim.
 ENEMIES_ATTACKED_SINCE = "enemies_attacked_since"
 
@@ -969,7 +984,9 @@ def schedule(state: CombatState, card: Card,
                       # header). `KokomiOverhaulLedger.OpenWindow` is the twin.
                       since_blocked=state.kk_damage_blocked_total,
                       since_taken=state.kk_damage_taken_total,
-                      since_attacks=len(state.kk_attackers))
+                      since_attacks=len(state.kk_attackers),
+                      # KOKOMI V3 (2026-10-18): Unbroken Tide's window.
+                      since_hp_lost=state.hp_lost_this_combat)
     state.kk_plan_queue.append(entry)
     state.emit("plan_written", card=card.id, clauses=len(body),
                queued=len(state.kk_plan_queue),
@@ -1415,6 +1432,10 @@ def _resolve_entry(state: CombatState, entry: PlanEntry, why: str,
     # the count rises before its clauses run. `KokomiOverhaulLedger
     # .NotePlanCarryingOut` is the twin.
     state.kk_plans_carried_out_this_turn += 1
+    # KOKOMI V3 (2026-10-18, card paper sec.6): Feint's and Turning Tide's
+    # count skips a Sting's or Ward's Plan. `NotePlanCarryingOut`'s twin.
+    if not jellyfish_line(entry):
+        state.kk_chain_plans_this_turn += 1
     wrote = [False, False]
     if entry.line == "now" and entry.now_card is not None:
         # A PLAN STAYS OPEN (2026-10-01): the player chose the now-line. It
@@ -1582,8 +1603,9 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
     # THE POOL OVERHAUL (2026-10-13): the Chain, Counter and Intent lines.
     elif op == DAMAGE_PER_PLAN_THIS_TURN:
         # Feint, Turning Tide: the rate times the Plans carried out this
-        # turn, this one included.
-        _hit(state, clause, amount * state.kk_plans_carried_out_this_turn,
+        # turn, this one included. Kokomi v3 (2026-10-18): Stings and Wards
+        # don't count.
+        _hit(state, clause, amount * state.kk_chain_plans_this_turn,
              entry=entry, double=double_damage)
     elif op == DAMAGE_BLOCKED_SINCE:
         # Kelp Wall: the damage she blocked since it was written.
@@ -1600,6 +1622,13 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
             p.energy += amount
             state.emit("energy", amount=amount)
         state.emit("plan_prepared_retreat", attacked=attacked, amount=amount)
+    elif op == DAMAGE_IF_NO_HP_LOST_SINCE:
+        # Unbroken Tide (Kokomi v3, 2026-10-18): the hit only if she lost no
+        # HP since it was written.
+        unbroken = not hp_lost_since(state, entry)
+        if unbroken:
+            _hit(state, clause, amount, entry=entry, double=double_damage)
+        state.emit("plan_unbroken_tide", unbroken=unbroken, amount=amount)
     elif op == LOSE_STRENGTH_THIS_TURN:
         # Undercurrent Snare: Piercing Wail's this-turn loss on each enemy
         # that intends to attack when it lands.
@@ -1924,6 +1953,7 @@ def roll_turn(state: CombatState) -> None:
     state.kk_stings_played_this_turn = 0
     # The pool overhaul (2026-10-13): the Chain count's "this turn".
     state.kk_plans_carried_out_this_turn = 0
+    state.kk_chain_plans_this_turn = 0
     # (Crystal Collapse's memory is combat-wide since the Kokomi level pass,
     # 2026-10-12, so the turn boundary leaves it alone.)
 
@@ -2828,6 +2858,22 @@ def attackers_since(state: CombatState,
     if entry is None:
         return set()
     return set(state.kk_attackers[entry.since_attacks:])
+
+
+def hp_lost_since(state: CombatState, entry: Optional[PlanEntry]) -> bool:
+    """Unbroken Tide (Kokomi v3, 2026-10-18): did she lose any HP since
+    `entry` was written? No entry reads False. `KokomiOverhaulLedger
+    .HpLostSince` is the twin."""
+    if entry is None:
+        return False
+    return state.hp_lost_this_combat > entry.since_hp_lost
+
+
+def chain_plans_held(state: CombatState) -> int:
+    """KOKOMI V3 (2026-10-18, card paper sec.6): the Plans waiting that are
+    not a Sting's or Ward's -- Tideturn's and Shoal of Spears' "Stings and
+    Wards don't count". `KokomiPlan.ChainPlansHeld` is the twin."""
+    return sum(1 for e in state.kk_plan_queue if not jellyfish_line(e))
 
 
 def attacked_since(state: CombatState, entry: Optional[PlanEntry]) -> bool:

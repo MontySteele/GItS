@@ -385,6 +385,7 @@ public static class PrototypeRoster
             ModelDb.Card<ProtoKkTreatise>(),
             ModelDb.Card<ProtoKkTurnabout>(),
             ModelDb.Card<ProtoKkTurningTideChain>(),
+            ModelDb.Card<ProtoKkUnbrokenTide>(),
             ModelDb.Card<ProtoKkUndercurrentSnare>(),
             ModelDb.Card<ProtoKkUndertideLance>(),
             ModelDb.Card<ProtoKkUndertow>(),

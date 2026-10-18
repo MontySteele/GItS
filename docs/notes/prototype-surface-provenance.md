@@ -9583,3 +9583,22 @@ see if it works." Four changes built; Nereid's Ascension is unchanged.
   ALL with no Exhaust, 2 [1] at Noelle's price (the level pass,
   2026-10-12). Kurage Canopy's Ward per carry-out is the round 3 A-list's
   (2026-10-13).
+
+## Kokomi v3, 2026-10-18
+
+Card paper sec.6 (`review/active/kokomi-cards-2026-10-18.md`), ruled: "Makes
+sense! ... let's do both."
+
+- **Tideturn, Feint, Turning Tide, Shoal of Spears**: their Plan counts skip a
+  Sting's or Ward's Plan ("Stings and Wards don't count."). Tideturn and the
+  Shoal read `chain_plans_held` / `chain_plans_held_plus_one`
+  (`KokomiPlan.ChainPlansHeld`); Feint and Turning Tide read the ledger's
+  `ChainPlansThisTurn` (`kk_chain_plans_this_turn`). The token is the line's
+  own card, as Endless Shoal reads it. Breakwater and Battle Formation keep
+  counting every Plan. (Feint's and the Shoal's notes sit here for the
+  three-line comment cap.)
+- **Unbroken Tide** (new, Uncommon Skill, 1): "Gain 8 [11] Block. Plan: If you
+  lost no HP since you planned this, deal 12 [16] Hydro damage to ALL
+  enemies." A Counter line, Prepared Retreat's shape; any HP loss in its
+  window, from any source, breaks it (`HpLostTotal`, `hp_lost_this_combat`).
+  No art yet (`art_coverage.KNOWN_MISSING`). The pool is 79, 20 / 39 / 20.

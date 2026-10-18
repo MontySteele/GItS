@@ -65,8 +65,9 @@ public class KokomiLevelPassTests
     {
         Assert.Contains("plus once more for each [gold]Plan[/gold] waiting.",
                         Face(new ProtoKkShoalOfSpears()));
+        // Kokomi v3 (2026-10-18): Stings and Wards don't count.
         Assert.Contains(Il.Calls(Il.Method("ProtoKkShoalOfSpears", "OnPlay")),
-                        c => c.Contains("KokomiPlan.PlansHeld"));
+                        c => c.Contains("KokomiPlan.ChainPlansHeld"));
     }
 
     [Fact]

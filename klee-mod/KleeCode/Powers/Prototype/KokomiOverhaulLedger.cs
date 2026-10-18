@@ -290,8 +290,24 @@ public sealed class KokomiOverhaulLedger
     /// </summary>
     public int PlansCarriedOutThisTurn { get; private set; }
 
-    /// <summary>A carry-out begins (<c>KokomiPlan.ResolveEntry</c>).</summary>
-    public void NotePlanCarryingOut() => PlansCarriedOutThisTurn++;
+    /// <summary>
+    /// KOKOMI V3 (2026-10-18, review/active/kokomi-cards-2026-10-18.md sec.6;
+    /// [USER]: "Makes sense! ... let's do both."): the same count less the
+    /// Sting and Ward Plans -- Feint's and Turning Tide's "Stings and Wards
+    /// don't count". Battle Formation keeps <see cref="PlansCarriedOutThisTurn"/>.
+    /// Rolled with the turn. Sim twin:
+    /// <c>CombatState.kk_chain_plans_this_turn</c>.
+    /// </summary>
+    public int ChainPlansThisTurn { get; private set; }
+
+    /// <summary>A carry-out begins (<c>KokomiPlan.ResolveEntry</c>).
+    /// <paramref name="jellyfish"/>: it is a Sting's or Ward's Plan, which
+    /// the Chain count skips.</summary>
+    public void NotePlanCarryingOut(bool jellyfish = false)
+    {
+        PlansCarriedOutThisTurn++;
+        if (!jellyfish) ChainPlansThisTurn++;
+    }
 
     /// <summary>
     /// COUNTER: the running totals every "since you planned this" Plan reads
@@ -313,6 +329,19 @@ public sealed class KokomiOverhaulLedger
 
     /// <inheritdoc cref="DamageBlockedTotal"/>
     public int DamageTakenTotal { get; private set; }
+
+    /// <summary>KOKOMI V3 (2026-10-18): all the HP she lost this combat,
+    /// from any source -- Unbroken Tide's "if you lost no HP since you
+    /// planned this". Written by <see cref="NoteHpLost"/> from
+    /// <c>ProtoBakeKuragePower.AfterCurrentHpChanged</c>. Sim twin:
+    /// <c>CombatState.hp_lost_this_combat</c>.</summary>
+    public int HpLostTotal { get; private set; }
+
+    /// <summary>She lost <paramref name="amount"/> HP.</summary>
+    public void NoteHpLost(int amount)
+    {
+        if (amount > 0) HpLostTotal += amount;
+    }
 
     private readonly List<string> _attackers = new();
 
@@ -337,12 +366,20 @@ public sealed class KokomiOverhaulLedger
     /// <c>KokomiPlan.Schedule</c> (<see cref="OpenWindow"/>); each Counter
     /// clause reads its total less this. Sim twin: <c>PlanEntry.since_*</c>.
     /// </summary>
-    public readonly record struct Since(int Blocked, int Taken, int Attacks);
+    public readonly record struct Since(int Blocked, int Taken, int Attacks,
+                                        int HpLost = 0);
 
     /// <summary>A Plan is written: its window opens on the totals as they
     /// stand.</summary>
     public Since OpenWindow() =>
-        new(DamageBlockedTotal, DamageTakenTotal, _attackers.Count);
+        new(DamageBlockedTotal, DamageTakenTotal, _attackers.Count,
+            HpLostTotal);
+
+    /// <summary>Unbroken Tide (Kokomi v3, 2026-10-18): did she lose any HP
+    /// since the window opened? No window reads false. Sim twin:
+    /// <c>kokomi_plan.hp_lost_since</c>.</summary>
+    public bool HpLostSince(Since? window) =>
+        window is { } w && HpLostTotal > w.HpLost;
 
     /// <summary>Kelp Wall: the damage she blocked since the window opened.
     /// No window reads 0.</summary>
@@ -427,6 +464,7 @@ public sealed class KokomiOverhaulLedger
         StingsPlayedThisTurn = 0;
         // The pool overhaul (2026-10-13): the Chain count's "this turn".
         PlansCarriedOutThisTurn = 0;
+        ChainPlansThisTurn = 0;
         _round = round;
     }
 }

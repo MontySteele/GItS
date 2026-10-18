@@ -51,7 +51,7 @@ public sealed class ProtoKkTurningTideChain : CustomCardModel, IElementalCard, I
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Turning Tide"),
-        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage.\nOr [gold]plan[/gold]: Deal {PlanDamage:diff()} [gold]Hydro[/gold] damage to ALL enemies for each [gold]Plan[/gold] carried out this turn."),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage.\nOr [gold]plan[/gold]: Deal {PlanDamage:diff()} [gold]Hydro[/gold] damage to ALL enemies for each [gold]Plan[/gold] carried out this turn. Stings and Wards don't count."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

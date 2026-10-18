@@ -74,7 +74,7 @@ def test_the_offer_is_78_without_exposed_flank(overhaul):
     # the growth Powers (2026-10-10) appended Flood Tide; the re-founding
     # (2026-10-12) cut Nip and Current Read with 22 others.
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
-    assert len(ids) == 78
+    assert len(ids) == 79  # Kokomi v3 (2026-10-18): Unbroken Tide
     for cut in ("proto_kk_nip", "proto_kk_current_read"):
         assert cut not in ids
     assert "proto_kk_exposed_flank" not in ids

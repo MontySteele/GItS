@@ -166,7 +166,7 @@ def test_the_offer_is_seventy(overhaul):
     # cut seven and added seven; the re-founding (2026-10-12) cut 24 and
     # added 20 and Gorou's four.
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
-    assert len(ids) == 78
+    assert len(ids) == 79  # Kokomi v3 (2026-10-18): Unbroken Tide
     for cut in ("proto_kk_tide_chart", "proto_kk_cleansing_wave",
                 "proto_kk_ripple", "proto_kk_well_laid",
                 "proto_kk_sea_salt_prayer", "proto_kk_salt_line",

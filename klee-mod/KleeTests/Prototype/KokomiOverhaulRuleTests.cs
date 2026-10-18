@@ -335,7 +335,9 @@ public class KokomiOverhaulRuleTests
                     // Intent, and Read the Field's fetch.
                     "DamagePerPlanThisTurn", "DamageBlockedSince",
                     "DamageTakenSince", "EnergyIfAttackedSince",
-                    "LoseStrengthThisTurn", "DrawPileToHand" },
+                    "LoseStrengthThisTurn", "DrawPileToHand",
+                    // KOKOMI V3 (2026-10-18): Unbroken Tide.
+                    "DamageIfNoHpLostSince" },
             System.Enum.GetNames(typeof(KokomiPlan.Kind)));
     }
 
@@ -798,9 +800,9 @@ public class KokomiOverhaulRuleTests
         // Second Thoughts cut, Kurage Canopy and Coral Tithe added.
         // SEVENTY-EIGHT since pool completion (2026-10-01): eight added.
         // Still SEVENTY-EIGHT since the status batch (2026-10-01): seven cut,
-        // seven added.
+        // seven added. SEVENTY-NINE with Kokomi v3 (2026-10-18).
         var slice = Il.Method("KokomiOverhaulRoster", "Slice");
-        Assert.Equal(78, Il.CallSequence(slice)
+        Assert.Equal(79, Il.CallSequence(slice)
             .Count(c => c.StartsWith("ModelDb.Card")));
     }
 

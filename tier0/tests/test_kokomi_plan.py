@@ -142,7 +142,8 @@ def test_every_shipped_plan_line_passes_the_shape_check():
     # Retreat and Turnabout in, Riptide Guard out.
     # THIRTY-EIGHT with Kokomi review r8 (2026-10-14): Surging Shoal attacks
     # and blocks now, with no Plan line.
-    assert len(planned) == 38
+    # THIRTY-NINE with Kokomi v3 (2026-10-18): Unbroken Tide.
+    assert len(planned) == 39
     for card in planned:
         assert kokomi_plan.plan_shape_reason(card.plan) is None, card.id
 
@@ -738,7 +739,7 @@ def test_the_moon_overlooks_the_waters_is_off_the_surface(overhaul):
     # SEVENTY since the payoff pass (2026-10-01); SEVENTY-EIGHT since pool
     # completion (2026-10-01); still SEVENTY-EIGHT since the status batch
     # (2026-10-01: seven cut, seven added).
-    assert len(C.KOKOMI_OVERHAUL_POOL_IDS) == 78
+    assert len(C.KOKOMI_OVERHAUL_POOL_IDS) == 79  # Kokomi v3 (2026-10-18): Unbroken Tide
     assert not hasattr(kokomi_plan, "PLANS_ALSO_NOW")
     ids = {card.id for card in loader.prototype_cards()}
     assert "proto_kk_the_moon_overlooks_the_waters" not in ids

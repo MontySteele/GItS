@@ -55,8 +55,9 @@ public class KokomiOpenPlanTests : IDisposable
         // Sting and Ward and the co-op rows included; thirty-two since the
         // pool overhaul (2026-10-13): Turning Tide and Prepared Retreat in,
         // Riptide Guard out (Turnabout is Plan-only); thirty-one since Kokomi
-        // review r8 (2026-10-14): Surging Shoal has no Plan line.
-        Assert.Equal(31, types.Count(t =>
+        // review r8 (2026-10-14): Surging Shoal has no Plan line;
+        // thirty-two with Kokomi v3 (2026-10-18): Unbroken Tide.
+        Assert.Equal(32, types.Count(t =>
             typeof(INowLineCard).IsAssignableFrom(t)));
     }
 
