@@ -98,3 +98,16 @@ file. Most of these rules came from July and August, when the Python sim decided
    it as a noted exception.
 7. **Varka's Knights.** Ruled 2026-10-18 (a). The user: "Varka's Knight are actually supposed to count as
    companion cards to make relevant synergies work. That one is not a bug." STATE is corrected in this PR.
+
+## Ruled 2026-10-18
+
+The user: "Agreed on all 6 legacy picks". All six are (a):
+1. Klee's Spark seeding is removed.
+2. The shop's companion slots take the base shape: slot 1 Uncommon, slot 2 Rare (Uncommon if no Rare can be offered).
+3. The free companion rolls like the cards beside it: the reward's rarity odds, pity and upgrade chance. After a boss
+   it stays Rare, with an Uncommon fallback.
+4. Shared companions move to their own pool with a neutral frame.
+5. The eight unfollowed LAW lines are deleted in this PR, and P5a leaves QUEUE.
+6. Hair Trigger becomes Uncommon.
+
+Pick 7 was ruled earlier (Varka's Knights stay Companions).
