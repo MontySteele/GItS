@@ -6526,9 +6526,10 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # THE STATUS BATCH (2026-10-01): "Instead of the line above".
         # Kokomi round 3 review (2026-10-11): when Plan Block lands.
         # Kokomi v2 seats (2026-10-18): when a Plan reads enemies.
-        "Plan": ["Instead of the line above, play it on the ",
-                 ". Plans happen next turn in order and ",
-                 "read enemies then; ", " lasts that turn."],
+        # 2026-10-18 (ruled): when Plans happen, and the flip.
+        "Plan": ["Play it on the ", " instead. After enemies ",
+                 "act and you draw, Plans happen in order; ",
+                 "lasts that turn. Click one to flip it."],
         "Mend": [": heal N HP, but never above the HP you had",
                  "at the start of this combat"],
         # `EB-377` ADDED `Swirl` to the page beside `Hexerei`, which R276

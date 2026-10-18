@@ -263,6 +263,52 @@ public static class KokomiRules
             applier: kokomi, cardSource: null, silent: true);
     }
 
+    /// <summary>
+    /// THE OFF-CHARACTER RULE (2026-10-18): bring this player's kit up -- the
+    /// flag, the Bake-Kurage and the marker that carries the Plans out -- if
+    /// it is not up already. Called from the play hook (one of her cards, or
+    /// a card with a Plan line) and the pile hook (a Plan card reaching the
+    /// hand), so the jellyfish is on the field before the first Plan can be
+    /// aimed at it, as the base game summons Osty if absent. On Kokomi it is
+    /// <see cref="Install"/>, which her combat start has already run.
+    /// </summary>
+    public static async Task BringUp(Creature? creature)
+    {
+        if (creature?.Player == null || creature.CombatState == null) return;
+        if (creature.IsDead) return;
+        if (!KokomiOverhaul.Start(creature)) return;
+        await Install(creature);
+    }
+
+    /// <summary>Does this card, arriving in <paramref name="pile"/>, bring
+    /// its owner's kit up? A card with a Plan line, in the hand, of a player
+    /// whose kit is not up. PURE on the card.</summary>
+    internal static bool BringsUpOnArrival(CardModel? card, PileType? pile)
+    {
+        if (pile != PileType.Hand || !KokomiOverhaul.HasPlanLine(card)) return false;
+        return NotUpYet(card);
+    }
+
+    /// <summary>Does this play bring its owner's kit up? One of her cards or
+    /// a card with a Plan line, played by a player whose kit is not up.
+    /// PURE on the card.</summary>
+    internal static bool BringsUpOnPlay(CardModel? card) =>
+        KokomiOverhaul.BringsUpOnPlay(card) && NotUpYet(card);
+
+    private static bool NotUpYet(CardModel? card)
+    {
+        Creature? owner;
+        try
+        {
+            owner = card?.Owner?.Creature;
+        }
+        catch (System.Exception)
+        {
+            return false;
+        }
+        return owner?.Player != null && !KokomiOverhaul.LiveFor(owner);
+    }
+
     private static ICombatState? _combat;
 
     /// <summary>

@@ -198,8 +198,9 @@ public class KokomiOverhaulRuleTests
         Assert.Contains(prefix.GetCustomAttributesData(),
                         a => a.AttributeType.Name == "HarmonyPriority");
         var calls = Il.Calls(prefix);
-        // Character-scoped (the prototype-patch lint's rule (a)) ...
-        Assert.Contains("KokomiResources.IsKokomi", calls);
+        // Kit-scoped (the prototype-patch lint's rule (a)): hers, or a seat
+        // whose kit came up (the off-character rule, 2026-10-18) ...
+        Assert.Contains("KokomiOverhaul.LiveFor", calls);
         // ... and the pet is what it takes out of the bag.
         Assert.Contains("BakeKuragePet.Is", calls);
         // The run's own target stream, so a seeded run is not re-shuffled.
@@ -337,7 +338,9 @@ public class KokomiOverhaulRuleTests
                     "DamageTakenSince", "EnergyIfAttackedSince",
                     "LoseStrengthThisTurn", "DrawPileToHand",
                     // KOKOMI V3 (2026-10-18): Unbroken Tide.
-                    "DamageIfNoHpLostSince" },
+                    "DamageIfNoHpLostSince",
+                    // GRAND DESIGN TAKES BASICS (2026-10-18).
+                    "PlayAsItself" },
             System.Enum.GetNames(typeof(KokomiPlan.Kind)));
     }
 

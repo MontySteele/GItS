@@ -531,9 +531,8 @@ KLEE_OVERHAUL_MULTIPLAYER_IDS: tuple[str, ...] = (
 # WHAT MOVES WHEN IT IS ON, exhaustively (every site names this constant):
 #   * loader.companion_roster_replacement -- the MONDSTADT half of the
 #     companion roster becomes `MONDSTADT_OVERHAUL_POOL_IDS` and nothing else.
-#     Read at the two doors `tier05.rewards` already reads (the reward/shop
-#     pool and the Featured Banner's 5-star roster), so both offer surfaces
-#     move together.
+#     Read at the one door `tier05.rewards` reads (the reward/shop pool), so
+#     both offer surfaces move together.
 #   * loader._card_prototype -- `proto_mc_` ids resolve, the same door the
 #     Sparks and Klee-overhaul arms open for their own rows.
 # Inazuma and Fontaine are untouched in every build; the workshop is a
@@ -1846,14 +1845,9 @@ ACQUISITION_ONLY_RARITIES = frozenset({"basic", "token", "status", "curse",
 SAME_NATION_REWARD_SHARE = 0.5
 NATION_WEIGHTS = {"mondstadt": 1.0, "fontaine": 1.0, "inazuma": 1.0}
 
-# principles v1.8 / draft-sim addendum: the Featured Banner. Each run rolls
-# this many limited 5-stars per nation from the full designed roster, and only
-# featured 5-stars appear in that run's companion offers. Rotation moves from
-# authoring time (which someone must remember) to runtime (which the seed
-# remembers), so the 5-star roster per nation can grow without a cap.
-# DEGENERATE AT v0.1: Mondstadt has exactly 3 designed 5-stars, so the roll
-# features all of them and current numbers are unaffected. This is plumbing.
-BANNER_FEATURED_SLOTS = 3
+# No Featured Banner. It let only three five-stars per nation be offered in a
+# given run; [USER] scrapped it everywhere on 2026-10-18 ("Agreed on (a)!"),
+# so every companion in the pool is offerable in every run.
 
 # --- Tier 0.5 assigned draft policy (spec §4) ---
 # CONSTANTS_VERSION 2 (morning-triage ruling 3.1). v1 measurements (M5/M6

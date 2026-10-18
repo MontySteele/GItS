@@ -261,8 +261,10 @@ public static partial class KokomiCards
     /// Grand Design (the re-founding's card under the old name): "Write up to
     /// 3 cards from your hand as Plans. They cost 0." Each chosen card is
     /// written exactly as if she had played it on the Bake-Kurage, for 0
-    /// Energy (<see cref="KokomiRefounding.WriteFree"/>). Only a card that can
-    /// be written is offered: one with a Plan line.
+    /// Energy (<see cref="KokomiRefounding.WriteFree"/>). Offered: a card with
+    /// a Plan line, and since 2026-10-18 a Basic card without one ("Basic
+    /// cards included"), which is planned to be played as itself
+    /// (<see cref="KokomiRefounding.WriteAsItself"/>).
     /// </summary>
     public static async Task GrandDesign(
         PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
@@ -274,10 +276,13 @@ public static partial class KokomiCards
             new CardSelectorPrefs(
                 new LocString("cards", KokomiRefounding.GrandDesignPromptKey),
                 0, Amount(card)),
-            KokomiRefounding.CanBeWritten, card)).ToList();
+            KokomiRefounding.GrandDesignTakes, card)).ToList();
         foreach (var chosen in picked)
         {
-            await KokomiRefounding.WriteFree(choiceContext, chosen);
+            if (KokomiRefounding.CanBeWritten(chosen))
+                await KokomiRefounding.WriteFree(choiceContext, chosen);
+            else
+                await KokomiRefounding.WriteAsItself(choiceContext, chosen);
         }
     }
 
@@ -403,6 +408,23 @@ public static class KokomiRefounding
     public static bool CanBeWritten(CardModel? card) =>
         card is IPlannedCard { PlanClauses.Count: > 0 };
 
+    /// <summary>GRAND DESIGN TAKES BASICS (2026-10-18, review/active/
+    /// open-design-items-2026-10-18.md; [USER]: "Ok, agreed on all defaults
+    /// for both the PR and inazuma companions"): a Basic Attack or Skill with
+    /// no Plan line -- her Strike and Defend. Only Grand Design reads this;
+    /// the Bake-Kurage still refuses such a card. PURE. Sim twin:
+    /// <c>kokomi_plan.plans_as_itself</c>.</summary>
+    public static bool PlansAsItself(CardModel? card) =>
+        card is { Rarity: CardRarity.Basic,
+                  Type: CardType.Attack or CardType.Skill }
+        && !CanBeWritten(card);
+
+    /// <summary>What Grand Design's hand screen offers: a card that can be
+    /// written, or a Basic it plans as itself. PURE. Sim twin:
+    /// <c>kokomi_plan.grand_design_takes</c>.</summary>
+    public static bool GrandDesignTakes(CardModel? card) =>
+        CanBeWritten(card) || PlansAsItself(card);
+
     /// <summary>Grand Design's gate (Kokomi review 2026-10-13): does her
     /// hand hold a card, other than <paramref name="card"/> itself, that can
     /// be planned? A canonical copy has no owner and answers false. Must
@@ -437,7 +459,7 @@ public static class KokomiRefounding
 
     /// <summary>The hand read behind <see cref="AnyToPlan"/>, PURE: any card
     /// in <paramref name="hand"/> but <paramref name="self"/> that
-    /// <see cref="CanBeWritten"/>. A card whose read throws counts as
+    /// <see cref="GrandDesignTakes"/>. A card whose read throws counts as
     /// unplannable on its own rather than ending the read.</summary>
     public static bool AnyOtherToPlan(IEnumerable<CardModel> hand,
                                       CardModel? self) =>
@@ -533,7 +555,7 @@ public static class KokomiRefounding
     {
         try
         {
-            return CanBeWritten(card);
+            return GrandDesignTakes(card);
         }
         catch (System.Exception e)
         {
@@ -603,6 +625,33 @@ public static class KokomiRefounding
         {
             _freeWrites.Remove(card);
         }
+    }
+
+    /// <summary>
+    /// GRAND DESIGN TAKES BASICS (2026-10-18): a Basic card with no Plan line,
+    /// planned. It goes from her hand to the Discard Pile, where a played
+    /// card goes (moved, not played: no card-played hook sees it now), and a
+    /// one-clause Plan is written under it, <see cref="KokomiPlan.Kind.PlayAsItself"/>,
+    /// which plays a free copy of it at the carry-out. It is an ordinary Plan
+    /// in every count (Chain lines, Endless Shoal, Battle Formation, Nereid's
+    /// Ascension's double), and it has one line, so it cannot be flipped. No
+    /// jellyfish, nothing (<see cref="WriteFree"/>'s rule). Sim twin:
+    /// <c>kokomi_plan.write_as_itself</c>.
+    /// </summary>
+    public static async Task WriteAsItself(PlayerChoiceContext choiceContext,
+                                           CardModel card)
+    {
+        var kokomi = card.Owner?.Creature;
+        if (!KokomiOverhaul.LiveFor(kokomi)) return;
+        if (BakeKuragePet.Of(kokomi) == null) return;
+        if (!PlansAsItself(card)) return;
+        await CardPileCmd.Add(card, PileType.Discard, CardPilePosition.Top);
+        await KokomiPlan.Schedule(choiceContext, kokomi, card,
+            new[]
+            {
+                new KokomiPlan.Planned(KokomiPlan.Kind.PlayAsItself, 1,
+                                       KokomiPlan.Aim.FrontEnemy, card),
+            });
     }
 
     /// <summary>

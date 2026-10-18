@@ -36,8 +36,7 @@ python3 -m pytest tier0/tests tier05/tests -q          # what CI runs
 
 Library surface: `run_metrics.summarize_runs` (`:25`), `survival_profile`
 (`:160`), `stability_profile` (`:236`), `trajectory_profile` (`:366`),
-`route_profile` (`:83`), `act_funnel` (`:134`), `banner_variance` (`:523`),
-`conditional_assembly` (`:553`), `floor_kind_labels` (`:587`),
+`route_profile` (`:83`), `act_funnel` (`:134`), `floor_kind_labels`,
 `print_run_report` (`:610`); `ab.divergence / relevance / achievability /
 run_ab / run_route_ab` (`ab.py:34`, `:73`, `:112`, `:138`, `:218`);
 `stats.percentile / wilson95` (`stats.py:41`, `:60`); `sweeps.sweep /

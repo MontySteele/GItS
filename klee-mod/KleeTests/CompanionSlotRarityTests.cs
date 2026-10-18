@@ -78,6 +78,47 @@ public class CompanionSlotRarityTests
         Assert.Contains(": CardRarity.Rare", method);
     }
 
+    [Fact]
+    public void The_reward_slot_asks_the_same_offerability_rule_as_the_shop()
+    {
+        // Audit 2026-10-18: Roll tested PersonalPool alone and skipped
+        // IsHiddenFrom, so Yae's reward slot could offer her own Sesshou
+        // Sakura while the shop and the sim hid it. Both surfaces now go
+        // through CompanionPool.IsOfferable.
+        var roll = typeof(CompanionSlot).GetMethods(All | BindingFlags.DeclaredOnly)
+            .Where(m => m.Name == nameof(CompanionSlot.Roll) && m.GetMethodBody() != null);
+        Assert.NotEmpty(roll);
+        Assert.All(roll, m => Assert.Contains(Il.Calls(m), c => c.EndsWith(".IsOfferable")));
+    }
+
+    [Fact]
+    public void A_five_star_is_offerable_whatever_the_seed()
+    {
+        // NO FEATURED BANNER ([USER] 2026-10-18, "Agreed on (a)!" -- scrap
+        // the banner everywhere). The banner was the one offer filter keyed on
+        // the player's seed and a companion's star: it let only three
+        // five-stars per nation be offered in a given run. STRUCTURAL, for
+        // the headless reason above: neither offer surface -- the reward
+        // slot nor the shop's eligible set, lambdas included -- reads the
+        // seed or the star, so no seed can take a five-star out of a run.
+        // Rarity, nation weighting, personal pools and IsHiddenFrom remain.
+        foreach (var owner in new[] { typeof(CompanionSlot), typeof(CompanionPool) })
+        {
+            var methods = new[] { owner }
+                .Concat(owner.GetNestedTypes(All))
+                .SelectMany(t => t.GetMethods(All | BindingFlags.DeclaredOnly))
+                .Where(m => m.GetMethodBody() != null);
+            foreach (var method in methods)
+            {
+                var calls = Il.Calls(method);
+                Assert.DoesNotContain(calls, c => c.EndsWith(".get_Seed"));
+                Assert.DoesNotContain(calls, c => c.EndsWith(".get_Star"));
+            }
+        }
+        Assert.Null(typeof(CompanionSlot).Assembly
+                        .GetType("KleeMod.CompanionBanner"));
+    }
+
     /// <summary>A source file under `klee-mod/KleeCode`.</summary>
     private static string Source(string relativePath)
     {

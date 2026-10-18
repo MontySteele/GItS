@@ -154,7 +154,6 @@ MIRRORED: dict[str, object] = {
     # Klee.
     "CompanionConstants.MasqueHpLoss": C.MASQUE_HP_LOSS,
     "CompanionConstants.AncientSeaDamage": C.ANCIENT_SEA_DMG,
-    "CompanionBanner.FeaturedSlots": C.BANNER_FEATURED_SLOTS,
 
     # Furina.
     # RE-CLASSIFIED by the Fanfare rework (2026-07-28). FanfarePerEncoreGained

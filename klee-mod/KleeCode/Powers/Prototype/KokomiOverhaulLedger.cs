@@ -91,6 +91,21 @@ public sealed class KokomiOverhaulLedger
         return _byKokomi.TryGetValue(kokomi, out var ledger) ? ledger : null;
     }
 
+    /// <summary>
+    /// THE OFF-CHARACTER RULE (2026-10-18): has this player's Kokomi kit come
+    /// up this combat? Always false on Kokomi herself, who never needs it
+    /// (<see cref="KokomiOverhaul.LiveFor"/> answers her by identity). Anyone
+    /// else's kit comes up the first time a Plan card reaches their hand or
+    /// they play one of her cards (<see cref="KokomiRules.BringUp"/>), the
+    /// way the base game summons Osty if absent. A read: creates no ledger.
+    /// </summary>
+    public static bool HasStarted(Creature creature) =>
+        Peek(creature) is { Started: true };
+
+    /// <summary>The off-character flag <see cref="HasStarted"/> reads. Per
+    /// combat, like everything else here: a new combat is a new ledger.</summary>
+    public bool Started { get; set; }
+
     /// <summary>Test seam: forget everything. The mod never calls it.</summary>
     public static void ResetAll()
     {

@@ -142,9 +142,10 @@ def test_grand_design_does_not_count_itself():
 
 
 def test_grand_designs_face_is_unchanged():
+    # 2026-10-18 (ruled): "Basic cards included."
     assert _face("proto_kk_grand_design") == (
-        "Plan up to {KkAmount:diff()} cards from your [gold]Hand[/gold]. "
-        "They cost 0.")
+        "Plan up to {KkAmount:diff()} cards from your [gold]Hand[/gold], "
+        "Basic cards included. They cost 0.")
 
 
 # --- 4. Change of Plans: only with a Plan waiting -----------------------------

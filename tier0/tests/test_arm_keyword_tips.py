@@ -512,9 +512,10 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # when Plan Block lands, in two sentences.
             # Kokomi v2 seats (2026-10-18): Plans read enemies when they
             # land; the flip instruction is on the Bake-Kurage's own text.
-            "Instead of the line above, play it on the ",
-            "[gold]Bake-Kurage[/gold]. Plans happen next turn in order and ",
-            "read enemies then; [gold]Block[/gold] lasts that turn.\");",
+            # 2026-10-18 (ruled): when Plans happen, and the flip is back.
+            "Play it on the [gold]Bake-Kurage[/gold] instead. After enemies ",
+            "act and you draw, Plans happen in order; [gold]Block[/gold] ",
+            "lasts that turn. Click one to flip it.\");",
             "heal N HP, but never above the HP you had ",
             # Furina, THE STAGE (`EB-723`; the brief's sec.12 names the
             # seven words and sec.3 states each rule). The reframe's four --
@@ -1081,9 +1082,12 @@ def test_a_word_excused_by_a_card_tip_really_carries_that_tip(word):
 # Kokomi v2 seats (2026-10-18): two seats wrote Flank and Tide Wall reading
 # the enemy as it stood; the Plan reads it when it lands. The flip line went
 # to the Bake-Kurage's own text to fit the ceiling.
-PLAN_TIP = ("Instead of the line above, play it on the Bake-Kurage. "
-            "Plans happen next turn in order and read enemies then; "
-            "Block lasts that turn.")
+# 2026-10-18 (open-design-items-2026-10-18.md, ruled): "After enemies act
+# and you draw" says when, and "Click one to flip it." is back. 135, the
+# ceiling.
+PLAN_TIP = ("Play it on the Bake-Kurage instead. After enemies act and "
+            "you draw, Plans happen in order; Block lasts that turn. "
+            "Click one to flip it.")
 
 
 def test_the_plan_tip_is_the_rewrite_on_the_page():
@@ -1103,8 +1107,10 @@ def test_the_retired_clauses_left_the_word_and_the_panel_keeps_the_board_facts()
     """What left the tip is gone from BOTH copies of it, and the board facts
     a seat still needs are where the panel prints them."""
     body = blindplay.ARM_KEYWORDS["Plan"]
+    # "instead" is back as a word (2026-10-18, ruled: "Play it on the
+    # Bake-Kurage instead."), so it left this list.
     for gone in ("non-Minion", "folds as you write it", "when-hit",
-                 "any number wait", "still standing", "Dusk", "instead",
+                 "any number wait", "still standing", "Dusk",
                  "go off"):
         assert gone not in body, gone
     assert "never a Minion" in blindplay.PLAN_AIM_NOTE

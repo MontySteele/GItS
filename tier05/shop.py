@@ -98,8 +98,7 @@ def shop_offer(rng: random.Random, character: str,
 
 
 def companion_shop_offer(
-        rng: random.Random, character: str,
-        banner: frozenset[str] | None = None) -> list[tuple[Card, int]]:
+        rng: random.Random, character: str) -> list[tuple[Card, int]]:
     """The §4.7 companion channel: TWO priced slots (R59/R61, respecified by
     R116/NC-10, slot-2 floor RESTORED by [USER] 2026-08-10).
 
@@ -140,10 +139,9 @@ def companion_shop_offer(
     design ZERO Rare companions, so Furina's slot 1 could never roll one and
     took the nation-widening rung as its everyday path. It now designs four, so
     her slot 1 answers a Rare roll from her own nation. The rung is still
-    reachable and still load-bearing -- it is now the BANNER that can empty her
-    Rare tier (four Fontaine Rares against three featured slots), rather than
-    the roster being empty by construction. That is the first time the rung has
-    had a stochastic trigger instead of a structural one.
+    reachable for any nation that designs no card at the rolled rarity. (The
+    Featured Banner, which could also empty a nation's Rare tier, was scrapped
+    everywhere on 2026-10-18.)
     """
     home = loader.character_nation(character)
     pool = rewards.companion_pool()
@@ -151,8 +149,7 @@ def companion_shop_offer(
     def eligible(rarity: str, nation: str | None,
                  taken: list[Card]) -> list[Card]:
         taken_ids = {c.id for c in taken}
-        cards = rewards._banner_filtered(pool.get(rarity, []), banner)
-        return [c for c in cards
+        return [c for c in pool.get(rarity, [])
                 if c.personal_pool in (None, character)
                 and not yae_shrine.hidden_from(c.id, character)
                 and c.id not in taken_ids
@@ -274,7 +271,6 @@ def visit_shop(rng: random.Random, character: str, deck_ids: list[str],
                removal_uses: int = 0,
                n_offers: int = C.SHOP_CARD_OFFERS,
                companions: bool = True,
-               banner: frozenset[str] | None = None,
                visit: int = 0,
                policy_rng: random.Random | None = None) -> ShopOutcome:
     """Resolve one shop visit. Returns the mutated deck, remaining gold, the
@@ -331,7 +327,7 @@ def visit_shop(rng: random.Random, character: str, deck_ids: list[str],
     companion_offers: list[dict] = []
     if companions:
         for slot, (card, price) in enumerate(
-                companion_shop_offer(rng, character, banner), start=1):
+                companion_shop_offer(rng, character), start=1):
             shelf.append(card)
             price_of[id(card)] = price
             slot_of[id(card)] = slot

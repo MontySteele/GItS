@@ -108,8 +108,11 @@ public class KokomiStatusBatchTests : IDisposable
     {
         var tip = string.Join("", Il.Strings(Il.Method("ArmKeywordTips",
                                                        "ForPlan")));
-        Assert.StartsWith("Instead of the line above, play it on the ",
-                          tip.Substring(tip.IndexOf("Instead", StringComparison.Ordinal)));
+        // 2026-10-18 (ruled): "Play it on the Bake-Kurage instead." opens
+        // it now; the choice is still the tip's first word.
+        Assert.StartsWith("Play it on the ",
+                          tip.Substring(tip.IndexOf("Play it", StringComparison.Ordinal)));
+        Assert.Contains(" instead. After enemies ", tip);
     }
 
     // ---- the next hand -------------------------------------------------------------

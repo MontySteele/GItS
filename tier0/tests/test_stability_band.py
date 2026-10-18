@@ -154,7 +154,7 @@ def test_prevented_is_absent_not_zero_for_characters_without_a_ward():
 
 def test_no_runs_and_no_fights_are_distinguishable_from_a_flat_cohort():
     """Empty must not read as "perfectly stable", which is what a bare 0.0
-    SD would say. Same argument banner_variance makes for `degenerate`."""
+    SD would say."""
     assert run_metrics.stability_profile([], 80) == {}
     empty = run_metrics.stability_profile([_Run([])], 80)
     assert empty["fights"] == 0

@@ -153,7 +153,7 @@ internal static class KokomiPlanView
     /// nothing else.</summary>
     internal static bool Owns(NCardGridSelectionScreen? screen) =>
         screen != null && ReferenceEquals(screen, _screen)
-        && KokomiResources.IsKokomi(_owner?.Creature);
+        && KokomiOverhaul.LiveFor(_owner?.Creature);
 
     /// <summary>
     /// Bind the entry button to one strip's lifetime. Each strip root gets
@@ -308,7 +308,7 @@ internal static class KokomiPlanView
         {
             if (_screen == null || action == null || _owner is not { } me) return;
             if (action.OwnerId != me.NetId) return;
-            if (!KokomiResources.IsKokomi(me.Creature)) return;
+            if (!KokomiOverhaul.LiveFor(me.Creature)) return;
             Close();
         }
         catch (Exception e)
@@ -683,7 +683,7 @@ public static class KokomiPlanViewRows
 /// original) for any screen this mod did not open as the Plans view.
 /// </summary>
 // Character scope: `Owns` answers true only for the screen `TryOpen` opened,
-// and only while its owner is Kokomi; every other grid runs the original.
+// and only while its owner's Kokomi kit is up; every other grid runs the original.
 [HarmonyPatch(typeof(NSimpleCardSelectScreen), "OnCardClicked")]
 internal static class NSimpleCardSelectScreen_OnCardClicked_KokomiPlanView_Patch
 {

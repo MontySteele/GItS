@@ -132,8 +132,9 @@ play-on-the-jellyfish branch, and it decides the row's TargetType.
 `C.INAZUMA_OVERHAUL_POOL_IDS`) and Fontaine's sixteen ported as they are
 (legacy cleanup pick 4, `proto_mf_`, `C.FONTAINE_OVERHAUL_POOL_IDS`). The seam
 is one property in each engine, `CompanionPool.All` and
-`loader.companion_roster_replacement`, because the banner and the reward slot
-must never read different rosters (R64). The per-row reasoning is in
+`loader.companion_roster_replacement`, because the reward slot and the shop
+must never read different rosters. There is no Featured Banner (scrapped
+2026-10-18): every companion in the pool is offerable in every run. The per-row reasoning is in
 `docs/notes/prototype-surface-provenance.md`.
 
 **POOL WIRING** (legacy cleanup stage 4): each character's pool lists its

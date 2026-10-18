@@ -44,7 +44,7 @@ public sealed class ProtoKkGrandDesign : CustomCardModel, ICharacterCard, IUnpla
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Grand Design"),
-        ("description", "Plan up to {KkAmount:diff()} cards from your [gold]Hand[/gold]. They cost 0."),
+        ("description", "Plan up to {KkAmount:diff()} cards from your [gold]Hand[/gold], Basic cards included. They cost 0."),
     };
 
     // The Kokomi review (2026-10-13): unplayable while no other

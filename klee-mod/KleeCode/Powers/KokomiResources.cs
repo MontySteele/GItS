@@ -146,4 +146,31 @@ public sealed class KokomiResourceHooks : AbstractModel
             await KokomiRules.Install(player.Creature);
         }
     }
+
+    /// <summary>
+    /// THE OFF-CHARACTER RULE (2026-10-18), the play half: one of her cards,
+    /// or any card with a Plan line, brings its player's kit up before its
+    /// effects -- Varka's and Furina's play hook, and the base game's "Osty
+    /// is summoned if absent". A no-op on Kokomi, whose kit is up from the
+    /// combat start.
+    /// </summary>
+    public override async Task BeforeCardPlayed(CardPlay cardPlay)
+    {
+        if (!KokomiRules.BringsUpOnPlay(cardPlay.Card)) return;
+        await KokomiRules.BringUp(cardPlay.Card.Owner?.Creature);
+    }
+
+    /// <summary>
+    /// THE OFF-CHARACTER RULE (2026-10-18), the hand half: a card with a Plan
+    /// line reaching anyone's hand (drawn, or made there by Splash or a
+    /// Sting) puts the Bake-Kurage on the field, so the Plan has somewhere to
+    /// be aimed. The base game's gauge rule: it appears on first need and
+    /// stays for the combat. A no-op on Kokomi.
+    /// </summary>
+    public override async Task AfterCardChangedPiles(
+        CardModel card, PileType oldPileType, AbstractModel? clonedBy)
+    {
+        if (!KokomiRules.BringsUpOnArrival(card, card.Pile?.Type)) return;
+        await KokomiRules.BringUp(card.Owner?.Creature);
+    }
 }

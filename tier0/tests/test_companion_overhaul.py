@@ -60,8 +60,6 @@ def _caches_clear():
     loader.reset_arm_caches()
     rewards._companion_roster.cache_clear()
     rewards.companion_pool.cache_clear()
-    rewards.five_star_roster.cache_clear()
-    rewards.designed_nations.cache_clear()
 
 
 @pytest.fixture
@@ -149,15 +147,12 @@ def test_the_pool_ids_and_the_sheet_agree(overhaul):
                 & set(C.COVEN_PERSONAL_POOL_IDS))
 
 
-def test_the_banner_roster_moves_with_the_pool(overhaul):
-    """R64's whole point: the Featured Banner and the reward slot must read
-    ONE roster. A banner still built from the shipped index would feature
-    five-stars the slot cannot hand out."""
-    featured = {c.id for c in rewards.five_star_roster("mondstadt")}
-    assert featured
-    assert all(i.startswith("proto_mc_") for i in featured)
-    offerable = _pool_ids(rewards.companion_pool())
-    assert featured <= offerable
+def test_the_offerable_five_stars_are_the_overhaul_rows(overhaul):
+    """Every offerable Mondstadt five-star comes from the overhaul roster."""
+    fives = {c.id for cs in rewards.companion_pool().values() for c in cs
+             if c.nation == "mondstadt" and c.star == 5}
+    assert fives
+    assert all(i.startswith("proto_mc_") for i in fives)
 
 
 # ---------------------------------------------------------------------------

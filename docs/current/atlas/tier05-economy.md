@@ -8,8 +8,8 @@ and the `tier05/content/` pools (`events.yaml`, `potions.yaml`, `relics.yaml`,
 
 ## 1. Purpose
 
-Everything a run gains or spends *outside* combat: post-fight reward screens and
-the Featured Banner (`rewards.py`), the `$` node's card/companion shelf
+Everything a run gains or spends *outside* combat: post-fight reward screens
+(`rewards.py`), the `$` node's card/companion shelf
 (`shop.py`), Unknown-room events (`events.py`), and the run halves of the relic
 and potion systems (`relics.py`, `potions.py`). Each owns only the **run** half
 of a split — the combat half of every relic and potion lives in the frozen
@@ -47,7 +47,7 @@ PYTHONPATH=. python3 tools/lint_text_encoding.py
 ```
 
 Library surface: `events.visit / option_value / resolve`, `rewards.roll_rewards /
-roll_banner / character_pool`, `shop.visit_shop / companion_shop_offer`,
+character_pool`, `shop.visit_shop / companion_shop_offer`,
 `relics.HeldRelics / roll_relic_reward / neow_offer / ancient_offer`,
 `potions.roll_potion / PotionBag`. Every call site is in `tier05/model.py`
 (`:313-341`, `:395-450`, `:490-511`, `:687`, `:739-741`).
@@ -127,6 +127,8 @@ roll_banner / character_pool`, `shop.visit_shop / companion_shop_offer`,
   `("mondstadt",)` default had silently deleted every other nation's 5-stars from
   both reward slot and shop, so the nation set is now derived. `test_v18_banner`'s
   "roster <= cap" invariant is RETIRED. C# parity is structural, never numeric.
+  **Superseded 2026-10-18:** the banner is scrapped everywhere ([USER]: "Agreed
+  on (a)!"); every companion in the pool is offerable in every run.
 - **R65** (`:1961`) — unreleased-nation characters are placed in their nation of
   operation (Arlecchino → Fontaine); that is what `loader.character_nation`
   returns and what shop slot 1 and `SAME_NATION_REWARD_SHARE` key on.
