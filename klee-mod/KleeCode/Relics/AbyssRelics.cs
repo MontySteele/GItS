@@ -157,48 +157,42 @@ public sealed class AbyssOverflowRelic : AbyssBlessingRelic
 {
     public override AbyssBlessing Blessing => AbyssBlessing.Overflow;
     protected override string Title => "Overflow";
-    // A stand-in icon until its own is fetched (BACKLOG, art owed).
-    protected override string IconFile => "abyss/relics/elemental_burst.png";
+    protected override string IconFile => "abyss/relics/overflow.png";
 }
 
 public sealed class AbyssVigorOfTheAbyssRelic : AbyssBlessingRelic
 {
     public override AbyssBlessing Blessing => AbyssBlessing.VigorOfTheAbyss;
     protected override string Title => "Vigor of the Abyss";
-    // A stand-in icon until its own is fetched (BACKLOG, art owed).
-    protected override string IconFile => "abyss/relics/first_strike.png";
+    protected override string IconFile => "abyss/relics/vigor_of_the_abyss.png";
 }
 
 public sealed class AbyssMoonlitSpringRelic : AbyssBlessingRelic
 {
     public override AbyssBlessing Blessing => AbyssBlessing.MoonlitSpring;
     protected override string Title => "Moonlit Spring";
-    // A stand-in icon until its own is fetched (BACKLOG, art owed).
-    protected override string IconFile => "abyss/relics/moonlit_rest.png";
+    protected override string IconFile => "abyss/relics/moonlit_spring.png";
 }
 
 public sealed class AbyssBattleRhythmRelic : AbyssBlessingRelic
 {
     public override AbyssBlessing Blessing => AbyssBlessing.BattleRhythm;
     protected override string Title => "Battle Rhythm";
-    // A stand-in icon until its own is fetched (BACKLOG, art owed).
-    protected override string IconFile => "abyss/relics/resonance.png";
+    protected override string IconFile => "abyss/relics/battle_rhythm.png";
 }
 
 public sealed class AbyssWaveringMoonRelic : AbyssBlessingRelic
 {
     public override AbyssBlessing Blessing => AbyssBlessing.WaveringMoon;
     protected override string Title => "Wavering Moon";
-    // A stand-in icon until its own is fetched (BACKLOG, art owed).
-    protected override string IconFile => "abyss/relics/abyssal_moon.png";
+    protected override string IconFile => "abyss/relics/wavering_moon.png";
 }
 
 public sealed class AbyssStarfellDraftRelic : AbyssBlessingRelic
 {
     public override AbyssBlessing Blessing => AbyssBlessing.StarfellDraft;
     protected override string Title => "Starfell Draft";
-    // A stand-in icon until its own is fetched (BACKLOG, art owed).
-    protected override string IconFile => "abyss/relics/fateful_fortune.png";
+    protected override string IconFile => "abyss/relics/starfell_draft.png";
 }
 
 /// <summary>

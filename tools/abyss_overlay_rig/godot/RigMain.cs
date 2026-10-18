@@ -196,6 +196,12 @@ internal static class AbyssOverlayContentRig
         AbyssBlessing.Resonance => "abyss/relics/resonance.png",
         AbyssBlessing.Crystallize => "abyss/relics/crystallize.png",
         AbyssBlessing.FatefulFortune => "abyss/relics/fateful_fortune.png",
+        AbyssBlessing.Overflow => "abyss/relics/overflow.png",
+        AbyssBlessing.VigorOfTheAbyss => "abyss/relics/vigor_of_the_abyss.png",
+        AbyssBlessing.MoonlitSpring => "abyss/relics/moonlit_spring.png",
+        AbyssBlessing.BattleRhythm => "abyss/relics/battle_rhythm.png",
+        AbyssBlessing.WaveringMoon => "abyss/relics/wavering_moon.png",
+        AbyssBlessing.StarfellDraft => "abyss/relics/starfell_draft.png",
         _ => "",
     };
 
@@ -209,6 +215,10 @@ internal static class AbyssOverlayContentRig
         AbyssShadow.Rally => "abyss/powers/shadow_rally.png",
         AbyssShadow.Riptide => "abyss/powers/shadow_riptide.png",
         AbyssShadow.FatuiSkirmishers => "abyss/powers/shadow_fatui_skirmishers.png",
+        AbyssShadow.ThornyGround => "abyss/powers/shadow_thorny_ground.png",
+        AbyssShadow.Bulwark => "abyss/powers/shadow_bulwark.png",
+        AbyssShadow.Frenzy => "abyss/powers/shadow_frenzy.png",
+        AbyssShadow.Withering => "abyss/powers/shadow_withering.png",
         _ => "",
     };
 }

@@ -115,7 +115,7 @@ public static class FurinaStory
                         Then = new[] { new StoryEffect(StoryEffectKind.AddCard, 0, typeof(StageFright)) },
                     },
                 },
-                Portrait: () => KleeArt.CardPortrait("proto_fs_curtain_rise"),
+                Portrait: () => KleeArt.CardPortrait("event_furina_empty_house"),
                 FallbackPortraitPath: "res://images/events/the_legends_were_true.png"),
 
             new StoryEvent(
@@ -152,7 +152,7 @@ public static class FurinaStory
                         Then = new[] { new StoryEffect(StoryEffectKind.AddCard, 0, typeof(StageFright)) },
                     },
                 },
-                Portrait: () => KleeArt.CardPortrait("proto_fs_grand_deluge"),
+                Portrait: () => KleeArt.CardPortrait("event_furina_rising_water"),
                 FallbackPortraitPath: "res://images/events/wellspring.png"),
 
             new StoryEvent(
@@ -181,7 +181,7 @@ public static class FurinaStory
                         new StoryEffect(StoryEffectKind.GainRandomPotions, 1),
                         "Folded along the old creases. She'll want it for the next person who doubts her."),
                 },
-                Portrait: () => KleeArt.CardPortrait("proto_fs_guest_star_charlotte"),
+                Portrait: () => KleeArt.CardPortrait("event_furina_steambird_clipping"),
                 FallbackPortraitPath: "res://images/events/self_help_book.png"),
 
             // ---- Act 2.
@@ -222,7 +222,7 @@ public static class FurinaStory
                         "Her ending is completely wrong and the empty seats love it. Furina laughs so hard "
                       + "she has to sit down."),
                 },
-                Portrait: () => KleeArt.CardPortrait("proto_fs_understudys_debut"),
+                Portrait: () => KleeArt.CardPortrait("event_furina_understudy"),
                 FallbackPortraitPath: "res://images/events/the_legends_were_true.png")
             {
                 Follows = new[] { typeof(FurinaEmptyHouse) },
@@ -275,7 +275,7 @@ public static class FurinaStory
                         Then = new[] { new StoryEffect(StoryEffectKind.TransformCards, 2) },
                     },
                 },
-                Portrait: () => KleeArt.CardPortrait("proto_fs_verdict_of_the_oratrice"),
+                Portrait: () => KleeArt.CardPortrait("event_furina_oratrices_echo"),
                 FallbackPortraitPath: "res://images/events/punch_off.png")
             {
                 Follows = new[] { typeof(FurinaRisingWater) },
@@ -323,7 +323,7 @@ public static class FurinaStory
                         new StoryEffect(StoryEffectKind.AddCard, 0, typeof(ProtoFsTearfulMonologue)),
                         "\"Tell him I'll write.\" She reads it twice more on the way up."),
                 },
-                Portrait: () => KleeArt.CardPortrait("proto_fs_guest_star_neuvillette"),
+                Portrait: () => KleeArt.CardPortrait("event_furina_letter_from_the_court"),
                 FallbackPortraitPath: "res://images/events/potion_courier.png")
             {
                 Follows = new[] { typeof(FurinaSteambirdClipping) },
@@ -378,7 +378,7 @@ public static class FurinaStory
                         Then = new[] { new StoryEffect(StoryEffectKind.AddCard, 0, typeof(StageFright)) },
                     },
                 },
-                Portrait: () => KleeArt.CardPortrait("proto_fs_final_bow"),
+                Portrait: () => KleeArt.CardPortrait("event_furina_curtain_call"),
                 FallbackPortraitPath: "res://images/events/the_legends_were_true.png")
             {
                 Follows = new[] { typeof(FurinaUnderstudy) },
@@ -429,7 +429,7 @@ public static class FurinaStory
                         },
                     },
                 },
-                Portrait: () => KleeArt.CardPortrait("proto_fs_regina_of_all_waters"),
+                Portrait: () => KleeArt.CardPortrait("event_furina_empty_throne"),
                 FallbackPortraitPath: "res://images/events/wellspring.png")
             {
                 Follows = new[] { typeof(FurinaOratricesEcho), typeof(FurinaLetterFromTheCourt) },

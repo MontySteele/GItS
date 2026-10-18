@@ -12,8 +12,8 @@ namespace KleeMod.Cards;
 /// (<c>FurinaCardPool.GenerateAllCards</c>) and not of her offer
 /// (<c>FurinaStageRoster.OfferablePool</c>), so nothing generates it.
 ///
-/// ITS PICTURE IS BORROWED: Façade's, as Confinement borrows Sorry, Jean's
-/// (BACKLOG "Art owed, Furina's story").
+/// ITS PICTURE is its own (`curse_stage_fright` in art/plan.tsv, the art
+/// gaps pass 2026-10-18): a show cancelled.
 /// </summary>
 public sealed class StageFright : StoryCurse
 {
@@ -21,5 +21,5 @@ public sealed class StageFright : StoryCurse
 
     protected override string CurseTitle => TitleText;
 
-    public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_fs_facade");
+    public override Texture2D? CustomPortrait => KleeArt.CardPortrait("curse_stage_fright");
 }

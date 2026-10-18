@@ -112,7 +112,7 @@ public static class KokomiStory
                         new StoryEffect(StoryEffectKind.GainRandomPotions, 1),
                         "It is a very small piece, and nobody said she couldn't."),
                 },
-                Portrait: () => KleeArt.CardPortrait("proto_kk_read_the_field"),
+                Portrait: () => KleeArt.CardPortrait("event_kokomi_sand_table"),
                 FallbackPortraitPath: "res://images/events/punch_off.png"),
 
             new StoryEvent(
@@ -154,7 +154,7 @@ public static class KokomiStory
                         new StoryEffect(StoryEffectKind.Nothing),
                         "She watches it glow for a while, then climbs on."),
                 },
-                Portrait: () => KleeArt.CardPortrait("proto_kk_coral_bulwark"),
+                Portrait: () => KleeArt.CardPortrait("event_kokomi_coral_light"),
                 FallbackPortraitPath: "res://images/events/wellspring.png"),
 
             new StoryEvent(
@@ -181,7 +181,7 @@ public static class KokomiStory
                         new StoryEffect(StoryEffectKind.GainRandomPotions, 1),
                         "Three days off, two fallbacks, one beach. She files it under [i]urgent[/i]."),
                 },
-                Portrait: () => KleeArt.CardPortrait("proto_kk_treatise"),
+                Portrait: () => KleeArt.CardPortrait("event_kokomi_room_with_no_one"),
                 FallbackPortraitPath: "res://images/events/self_help_book.png"),
 
             // ---- Act 2.
@@ -217,7 +217,7 @@ public static class KokomiStory
                         Then = new[] { new StoryEffect(StoryEffectKind.ChooseRareCardToDeck, 3) },
                     },
                 },
-                Portrait: () => KleeArt.CardPortrait("proto_kk_grand_strategist"),
+                Portrait: () => KleeArt.CardPortrait("event_kokomi_other_commander"),
                 FallbackPortraitPath: "res://images/events/punch_off.png")
             {
                 Follows = new[] { typeof(KokomiSandTable) },
@@ -271,7 +271,7 @@ public static class KokomiStory
                         Then = new[] { new StoryEffect(StoryEffectKind.RemoveCard) },
                     },
                 },
-                Portrait: () => KleeArt.CardPortrait("proto_kk_watatsumis_grace"),
+                Portrait: () => KleeArt.CardPortrait("event_kokomi_serpents_bones"),
                 FallbackPortraitPath: "res://images/events/the_legends_were_true.png")
             {
                 Follows = new[] { typeof(KokomiCoralLight) },
@@ -317,7 +317,7 @@ public static class KokomiStory
                         "Bird egg sushi, her favourite. Gorou remembered. She eats every piece and sends "
                       + "the box back with a thank-you."),
                 },
-                Portrait: () => KleeArt.CardPortrait("proto_mi_gorou_war_banner"),
+                Portrait: () => KleeArt.CardPortrait("event_kokomi_report_from_gorou"),
                 FallbackPortraitPath: "res://images/events/potion_courier.png")
             {
                 Follows = new[] { typeof(KokomiEmptyRoom) },
@@ -365,7 +365,7 @@ public static class KokomiStory
                         new StoryEffect(StoryEffectKind.Nothing),
                         "A commander's bow, one to another. She takes the stairs, and it does not follow."),
                 },
-                Portrait: () => KleeArt.CardPortrait("proto_kk_masterstroke"),
+                Portrait: () => KleeArt.CardPortrait("event_kokomi_endgame"),
                 FallbackPortraitPath: "res://images/events/the_legends_were_true.png")
             {
                 Follows = new[] { typeof(KokomiOtherCommander) },
@@ -414,7 +414,7 @@ public static class KokomiStory
                         "She sends it down towards the sea, with a message folded into the current for "
                       + "whoever on Watatsumi is listening."),
                 },
-                Portrait: () => KleeArt.CardPortrait("proto_kk_tidal_surge"),
+                Portrait: () => KleeArt.CardPortrait("event_kokomi_tide_comes_in"),
                 FallbackPortraitPath: "res://images/events/wellspring.png")
             {
                 Follows = new[] { typeof(KokomiSerpentsBones), typeof(KokomiReportFromGorou) },

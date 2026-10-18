@@ -82,7 +82,7 @@ SHEETS: list = []
 # Every staged card dir, one per character plus the shared companions dir.
 # Listed rather than derived now that no sheet names them; deploy.ps1 stages
 # each one (`lint_roster_registry` holds this list to the roster).
-CHARACTER_DIRS = ("klee", "furina", "kokomi", "varka")
+CHARACTER_DIRS = ("klee", "furina", "kokomi", "varka", "yae")
 CARD_DIR_NAMES = (*CHARACTER_DIRS, "companions")
 
 # THE SHIPPED KITS' PAINTINGS. Every shipped card id lacked the `proto_`
@@ -118,6 +118,27 @@ CARD_DIRS = tuple(IMAGES / name for name in CARD_DIR_NAMES)
 # KNOWN-set pattern (as in tools/art_lint.py): a stale file with a reason on
 # record is a NOTE, not a failure. Never prune an entry without a new reason.
 KNOWN_STALE = {
+    "proto_ym_deadline": (
+        "The Yae dedupe (2026-10-16, review/active/yae-dedupe-2026-10-16.md, both picks (a)) cut Deadline from her pool. Kept rather than deleted: a painted asset on a yae/ out-path, visible to this tool since yae joined CHARACTER_DIRS (art gaps pass, 2026-10-18). It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_ym_grafted_branch": (
+        "The Yae dedupe (2026-10-16, review/active/yae-dedupe-2026-10-16.md, both picks (a)) cut Grafted Branch from her pool. Kept rather than deleted: a painted asset on a yae/ out-path, visible to this tool since yae joined CHARACTER_DIRS (art gaps pass, 2026-10-18). It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_ym_kitsune_flash": (
+        "The Yae dedupe (2026-10-16, review/active/yae-dedupe-2026-10-16.md, both picks (a)) cut Kitsune Flash from her pool. Kept rather than deleted: a painted asset on a yae/ out-path, visible to this tool since yae joined CHARACTER_DIRS (art gaps pass, 2026-10-18). It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_ym_print_run": (
+        "The Yae dedupe (2026-10-16, review/active/yae-dedupe-2026-10-16.md, both picks (a)) cut Print Run from her pool. Kept rather than deleted: a painted asset on a yae/ out-path, visible to this tool since yae joined CHARACTER_DIRS (art gaps pass, 2026-10-18). It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_ym_rooted_shrine": (
+        "The Yae dedupe (2026-10-16, review/active/yae-dedupe-2026-10-16.md, both picks (a)) cut Rooted Shrine from her pool. Kept rather than deleted: a painted asset on a yae/ out-path, visible to this tool since yae joined CHARACTER_DIRS (art gaps pass, 2026-10-18). It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_ym_shrine_bell": (
+        "The Yae dedupe (2026-10-16, review/active/yae-dedupe-2026-10-16.md, both picks (a)) cut Shrine Bell from her pool. Kept rather than deleted: a painted asset on a yae/ out-path, visible to this tool since yae joined CHARACTER_DIRS (art gaps pass, 2026-10-18). It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_ym_shrine_offering": (
+        "The Yae dedupe (2026-10-16, review/active/yae-dedupe-2026-10-16.md, both picks (a)) cut Shrine Offering from her pool. Kept rather than deleted: a painted asset on a yae/ out-path, visible to this tool since yae joined CHARACTER_DIRS (art gaps pass, 2026-10-18). It is NOT coverage for anything and must never be counted as such."
+    ),
     "proto_kk_jellyfish_current": (
         "The Kokomi review r6 (2026-10-14, review/active/kokomi-review-r6-2026-10-14.md pick 2 (b)) cut this row: Kurage Vanguard takes its slot. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),

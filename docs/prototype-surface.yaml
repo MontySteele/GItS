@@ -1111,7 +1111,7 @@
 # holder's Pyro damage, Bombs and Mines included.
 # 2026-10-11 Companion pass (review/ruled/companion-upper-pass-2026-10-11.md).
 - {id: proto_mc_durin_principle_of_purity, name: "Durin — Principle of Purity", character: klee,
-   authored_by: [claude], art_of: proto_mc_durin_binary_form,
+   authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: pyro,
    cost: 2, type: power,
    description: "At the start of your turn, deal 7 [gold]Pyro[/gold] damage to a random enemy. Choose one for the combat. [gold]White[/gold]: Enemies take 50% more damage from [gold]Elemental Reactions[/gold]. [gold]Dark[/gold]: Your [gold]Pyro[/gold] hits deal 4 additional damage.",

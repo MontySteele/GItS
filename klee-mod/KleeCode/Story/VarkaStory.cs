@@ -114,7 +114,7 @@ public static class VarkaStory
                         new StoryEffect(StoryEffectKind.ChooseFromPoolToDeck, 3),
                         "\"And not the new recruits. Send the ones who complain. They're usually right.\""),
                 },
-                Portrait: () => KleeArt.CardPortrait("proto_vk_grand_masters_order"),
+                Portrait: () => KleeArt.CardPortrait("event_varka_dispatch_from_mondstadt"),
                 FallbackPortraitPath: "res://images/events/potion_courier.png"),
 
             new StoryEvent(
@@ -142,7 +142,7 @@ public static class VarkaStory
                         "Boreas shows him Razor running with the wolves, fast and grinning. Varka watches "
                       + "until it fades."),
                 },
-                Portrait: () => KleeArt.CardPortrait("proto_vk_boreas_unbound"),
+                Portrait: () => KleeArt.CardPortrait("event_varka_wolf_of_the_north"),
                 FallbackPortraitPath: "res://images/events/punch_off.png")
             {
                 Follows = new[] { typeof(VarkaRearguard) },
@@ -177,7 +177,7 @@ public static class VarkaStory
                         new StoryEffect(StoryEffectKind.Nothing),
                         "Varka: \"" + WaveBackLine + "\""),
                 },
-                Portrait: () => KleeArt.CardPortrait("proto_vk_rally_to_the_banner"),
+                Portrait: () => KleeArt.CardPortrait("event_varka_long_way_home"),
                 FallbackPortraitPath: "res://images/events/the_legends_were_true.png")
             {
                 Follows = new[] { typeof(VarkaWolfOfTheNorth), typeof(VarkaFirstExam) },
@@ -235,7 +235,7 @@ public static class VarkaStory
                         Then = new[] { new StoryEffect(StoryEffectKind.AddCard, 0, typeof(OverdueReports)) },
                     },
                 },
-                Portrait: () => KleeArt.CardPortrait("proto_vk_grand_masters_verdict"),
+                Portrait: () => KleeArt.CardPortrait("event_varka_second_satchel"),
                 FallbackPortraitPath: "res://images/events/potion_courier.png")
             {
                 Follows = new[] { typeof(VarkaDispatchFromMondstadt) },
@@ -279,7 +279,7 @@ public static class VarkaStory
                         Then = new[] { new StoryEffect(StoryEffectKind.AddCard, 0, typeof(OverdueReports)) },
                     },
                 },
-                Portrait: () => KleeArt.CardPortrait("proto_vk_jean_dandelion_breeze"),
+                Portrait: () => KleeArt.CardPortrait("event_varka_acting_grand_master"),
                 FallbackPortraitPath: "res://images/events/the_legends_were_true.png")
             {
                 Follows = new[] { typeof(VarkaSecondSatchel) },
@@ -317,7 +317,7 @@ public static class VarkaStory
                         Then = new[] { new StoryEffect(StoryEffectKind.AddCard, 0, typeof(OverdueReports)) },
                     },
                 },
-                Portrait: () => KleeArt.CardPortrait("proto_vk_knights_muster"),
+                Portrait: () => KleeArt.CardPortrait("event_varka_rearguard"),
                 FallbackPortraitPath: "res://images/events/punch_off.png"),
 
             new StoryEvent(
@@ -343,7 +343,7 @@ public static class VarkaStory
                         new StoryEffect(StoryEffectKind.UpgradeChosenCard),
                         "\"Find a reason of your own.\" He did, eventually. It was home."),
                 },
-                Portrait: () => KleeArt.CardPortrait("proto_vk_windborne_resolve"),
+                Portrait: () => KleeArt.CardPortrait("event_varka_song_on_the_wind"),
                 FallbackPortraitPath: "res://images/events/wellspring.png"),
 
             new StoryEvent(
@@ -374,7 +374,7 @@ public static class VarkaStory
                         new StoryEffect(StoryEffectKind.Heal, 15),
                         "He pats the nearest dummy on the way by."),
                 },
-                Portrait: () => KleeArt.CardPortrait("proto_vk_four_winds_ascension"),
+                Portrait: () => KleeArt.CardPortrait("event_varka_first_exam"),
                 FallbackPortraitPath: "res://images/events/punch_off.png")
             {
                 Follows = new[] { typeof(VarkaSongOnTheWind) },

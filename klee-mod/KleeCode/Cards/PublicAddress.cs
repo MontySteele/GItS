@@ -13,8 +13,8 @@ namespace KleeMod.Cards;
 /// and not of her offer (<c>KokomiOverhaulRoster.OfferablePool</c>), so
 /// nothing generates it.
 ///
-/// ITS PICTURE IS BORROWED: Orders from the Shrine's (BACKLOG "Art owed,
-/// Kokomi's story").
+/// ITS PICTURE is its own (`curse_public_address` in art/plan.tsv, the art
+/// gaps pass 2026-10-18): Kokomi explaining, finger raised.
 /// </summary>
 public sealed class PublicAddress : StoryCurse
 {
@@ -27,5 +27,5 @@ public sealed class PublicAddress : StoryCurse
 
     protected override string? FlavorLine => Text;
 
-    public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_kk_orders_from_the_shrine");
+    public override Texture2D? CustomPortrait => KleeArt.CardPortrait("curse_public_address");
 }

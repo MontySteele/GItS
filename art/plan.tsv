@@ -1181,9 +1181,9 @@ breathless	ImageGen/images/cards/furina/breathless.png	500	380	cover_autocrop	co
 # yet, and S12 checks that list in BOTH directions -- a deferred path that IS in
 # the pck is a failure. The picks have landed, so the entries go in the same
 # commit, exactly as stagehands_encore's did at R231.
-power_furina_unheard_confession	ImageGen/images/furina/powers/unheard_confession.png	256	256	contain	center	shortlist	1	png	Animula Choragi.png		icon
+power_furina_unheard_confession	ImageGen/images/furina/powers/unheard_confession.png	256	256	contain	center	shortlist	1	png	Talent Discipline of the Supreme Arbitration.png		icon	
 power_furina_unheard_confession	ImageGen/images/furina/powers/unheard_confession.png	256	256	contain	center	shortlist	2	png	Item Fontaine Attunement.png		icon
-power_furina_fortissimo_guard	ImageGen/images/furina/powers/fortissimo_guard.png	256	256	contain	center	shortlist	1	png	Item Fontaine Completeness.png		icon
+power_furina_fortissimo_guard	ImageGen/images/furina/powers/fortissimo_guard.png	256	256	contain	center	shortlist	1	png	Talent Endless Waltz.png		icon	
 power_furina_fortissimo_guard	ImageGen/images/furina/powers/fortissimo_guard.png	256	256	contain	center	shortlist	2	png	Sword Hydro.png		icon
 power_furina_stagehands	ImageGen/images/furina/powers/stagehands.png	256	256	contain	center	shortlist	1	png	Item Movable Small Spotlight.png		icon
 power_furina_stagehands	ImageGen/images/furina/powers/stagehands.png	256	256	contain	center	shortlist	2	png	Icon Opera Epiclese.png		icon
@@ -1205,11 +1205,11 @@ power_furina_stagehands	ImageGen/images/furina/powers/stagehands.png	256	256	con
 # lands; a pick has landed, so the entry is removed in the same commit.
 # power_furina_stagehands_encore	ImageGen/images/furina/powers/stagehands_encore.png	256	256	contain	center	shortlist	2	png	Item Ovations That Ceased Upon Festivity.png		icon
 power_furina_stagehands_encore	ImageGen/images/furina/powers/stagehands_encore.png	256	256	contain	center	shortlist	1	png	Item Festival Spotlight.png		icon
-power_furina_courtroom_drama	ImageGen/images/furina/powers/courtroom_drama.png	256	256	contain	center	shortlist	1	png	Item Fontaine Judgment.png		icon
+power_furina_courtroom_drama	ImageGen/images/furina/powers/courtroom_drama.png	256	256	contain	center	shortlist	1	png	Constellation Axiomatic Judgment.png		icon	
 power_furina_courtroom_drama	ImageGen/images/furina/powers/courtroom_drama.png	256	256	contain	center	shortlist	2	png	Icon The Duke's Office.png		icon
 power_furina_the_gallery_stirs	ImageGen/images/furina/powers/the_gallery_stirs.png	256	256	contain	center	shortlist	1	png	Item Fontaine Big News.png		icon
 power_furina_the_gallery_stirs	ImageGen/images/furina/powers/the_gallery_stirs.png	256	256	contain	center	shortlist	2	png	Item Theater Tickets.png		icon
-power_furina_quick_change	ImageGen/images/furina/powers/quick_change.png	256	256	contain	center	shortlist	1	png	Item Fontaine Redemption.png		icon
+power_furina_quick_change	ImageGen/images/furina/powers/quick_change.png	256	256	contain	center	shortlist	1	png	Constellation Prestidigitation.png		icon	
 power_furina_quick_change	ImageGen/images/furina/powers/quick_change.png	256	256	contain	center	shortlist	2	png	Item Fontaine Lucine.png		icon
 # -- run 8 (EB-36 hunt half): the three placeholder-rendering mod art keys --
 spotlight_center_stage	ImageGen/images/cards/furina/spotlight_center_stage.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Tabletop Troupe Pros Furina.png		splash	furina_pool
@@ -1554,7 +1554,7 @@ proto_ko_sorry_jean	ImageGen/images/cards/klee/proto_ko_sorry_jean.png	500	380	c
 # ---------- Mondstadt companion overhaul (proto_mc_) ----------
 # proto_mc_diona_signature_mix: Diona pouring the drink -- Signature Mix is that cocktail; her only other cleared source
 proto_mc_diona_signature_mix	ImageGen/images/cards/companions/proto_mc_diona_signature_mix.png	500	380	cover	y0.35	shortlist	1	png	Diona Card.png		tcg	diona
-proto_mc_kaeya_frostgnaw	ImageGen/images/cards/companions/proto_mc_kaeya_frostgnaw.png	500	380	cover	center	shortlist	1	png	Cold-Blooded Strike Equipment Card.png		tcg	kaeya
+proto_mc_kaeya_frostgnaw	ImageGen/images/cards/companions/proto_mc_kaeya_frostgnaw.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Kaeya Wish Old CBT.png		splash	kaeya
 # proto_mc_kaeya_glacial_waltz: the only cleared Kaeya source; the TOP band is the ice-phoenix art, a different crop from Frostgnaw's centre
 proto_mc_kaeya_glacial_waltz	ImageGen/images/cards/companions/proto_mc_kaeya_glacial_waltz.png	500	380	cover	top	shortlist	1	png	Cold-Blooded Strike Equipment Card.png		tcg	kaeya
 proto_mc_barbara_show_begin	ImageGen/images/cards/companions/proto_mc_barbara_show_begin.png	500	380	cover	center	shortlist	1	png	Glorious Season Equipment Card.png		tcg	barbara
@@ -2823,20 +2823,20 @@ proto_fs_standing_room_only	ImageGen/images/cards/furina/proto_fs_standing_room_
 proto_fs_surging_waters	ImageGen/images/cards/furina/proto_fs_surging_waters.png	500	380	cover	x0.72,y0.66@1.4	shortlist	1	png	Anniversary Memories Album Wallpaper 12 - Underwater Storm in Fontaine - Aether.png		splash	
 proto_fs_undercurrent	ImageGen/images/cards/furina/proto_fs_undercurrent.png	500	380	cover	x0.46,y0.46@1.2	shortlist	1	png	Archon Quest Proof of Guilt.png		splash	
 # ---------- Spiral Abyss icons (2026-10-12): menu emblem, display relics, Shadow badges, Abyss Mage shields -> res://abyss/ ----------
-abyss_ui_spiral_abyss	ImageGen/images/abyss/ui/spiral_abyss.png	256	256	contain	center	auto	1	png	UI Spiral Abyss.png		icon
-abyss_relic_ley_line	ImageGen/images/abyss/relics/ley_line.png	256	256	contain	center	auto	1	png	Icon Ley Line Disorder.png		icon
-abyss_relic_abyssal_moon	ImageGen/images/abyss/relics/abyssal_moon.png	256	256	contain	center	auto	1	png	Iridescent Moon Icon.png		icon
-abyss_relic_moonlit_rest	ImageGen/images/abyss/relics/moonlit_rest.png	256	256	contain	center	auto	1	png	Item Sweet Madame.png		icon
-abyss_relic_first_strike	ImageGen/images/abyss/relics/first_strike.png	256	256	contain	center	auto	1	png	Sword Unaligned.png		icon
-abyss_relic_elemental_burst	ImageGen/images/abyss/relics/elemental_burst.png	256	256	contain	center	auto	1	png	Battle-Line Detonation Character Card Skill.png		icon
+abyss_ui_spiral_abyss	ImageGen/images/abyss/ui/spiral_abyss.png	256	256	contain	center	shortlist	1	png	Achievement Domains and Spiral Abyss Series I.png		icon	
+abyss_relic_ley_line	ImageGen/images/abyss/relics/ley_line.png	256	256	cover	x0.5,y0.58@1.15	shortlist	1	png	Ley Line Disorder Support Card.png		icon	
+abyss_relic_abyssal_moon	ImageGen/images/abyss/relics/abyssal_moon.png	256	256	cover	x0.51,y0.32@1.1	shortlist	1	png	Abyssal Moon.png		icon	
+abyss_relic_moonlit_rest	ImageGen/images/abyss/relics/moonlit_rest.png	256	256	contain	center	shortlist	1	png	Icon Imaginarium Theater Wondrous Boon 22.png		icon	
+abyss_relic_first_strike	ImageGen/images/abyss/relics/first_strike.png	256	256	contain	center	shortlist	1	png	Icon Imaginarium Theater Wondrous Boon 05.png		icon	
+abyss_relic_elemental_burst	ImageGen/images/abyss/relics/elemental_burst.png	256	256	contain	center	shortlist	1	png	Icon Imaginarium Theater Wondrous Boon 07.png		icon	
 abyss_relic_resonance	ImageGen/images/abyss/relics/resonance.png	256	256	contain	center	auto	1	png	Elemental Resonance.png		icon
-abyss_relic_crystallize	ImageGen/images/abyss/relics/crystallize.png	256	256	cover	center	auto	1	png	Crystallize Shield Hydro.png		icon
+abyss_relic_crystallize	ImageGen/images/abyss/relics/crystallize.png	256	256	contain	center	shortlist	1	png	Talent Dominus Lapidis.png		icon	
 abyss_relic_fateful_fortune	ImageGen/images/abyss/relics/fateful_fortune.png	256	256	contain	center	auto	1	png	Item Intertwined Fate.png		icon
 abyss_relic_abyss_shadows	ImageGen/images/abyss/relics/abyss_shadows.png	256	256	contain	center	auto	1	png	Abyss Lector Violet Lightning Icon.png		icon
 abyss_power_shadow_clock	ImageGen/images/abyss/powers/shadow_clock.png	256	256	contain	center	auto	1	png	Icon Clock.png		icon
 abyss_power_shadow_mage_shield	ImageGen/images/abyss/powers/shadow_mage_shield.png	256	256	contain	center	auto	1	png	Hydro Abyss Mage Icon.png		icon
-abyss_power_shadow_sheer_cold	ImageGen/images/abyss/powers/shadow_sheer_cold.png	256	256	contain	center	auto	1	svg	Element Cryo.svg		icon
-abyss_power_shadow_elemental_mark	ImageGen/images/abyss/powers/shadow_elemental_mark.png	256	256	contain	center	auto	1	svg	Element Pyro.svg		icon
+abyss_power_shadow_sheer_cold	ImageGen/images/abyss/powers/shadow_sheer_cold.png	256	256	contain	center	shortlist	1	png	Imaginarum Theater Frozen.png		icon	
+abyss_power_shadow_elemental_mark	ImageGen/images/abyss/powers/shadow_elemental_mark.png	256	256	contain	center	shortlist	1	png	Imaginarum Theater Burning.png		icon	
 abyss_power_shadow_herald	ImageGen/images/abyss/powers/shadow_herald.png	256	256	contain	center	auto	1	png	Abyss Herald Wicked Torrents Icon.png		icon
 abyss_power_shadow_rally	ImageGen/images/abyss/powers/shadow_rally.png	256	256	contain	center	auto	1	png	Item Rally Banner.png		icon
 abyss_power_shadow_riptide	ImageGen/images/abyss/powers/shadow_riptide.png	256	256	contain	center	auto	1	png	Riptide Buff Icon.png		icon
@@ -3248,3 +3248,65 @@ relic_epiclese_season_pass	ImageGen/images/furina/relics/epiclese_season_pass.pn
 potion_bottled_encore	ImageGen/images/furina/potions/bottled_encore.png	256	256	contain	center	shortlist	1	png	Item Golden House Maiden Essential Oil.png		icon	
 # potion_water_of_lucine <- NEW: the Lucine fountain itself
 potion_water_of_lucine	ImageGen/images/furina/potions/water_of_lucine.png	256	256	contain	center	shortlist	1	png	Item Fontaine Lucine.png		icon	
+# ---------- Art gaps pass (2026-10-18): story events, story curses, badges, Abyss round two, Durin/Kaeya picks ----------
+# Story events each get their own picture: the event's place or scene, the kit's own nation, no Companion faces.
+event_klee_starsnatch_cliff	ImageGen/images/cards/klee/event_klee_starsnatch_cliff.png	500	380	cover	x0.4,y0.5@1.1	shortlist	1	png	Starsnatch Cliff.png		splash	
+event_klee_letter_from_jean	ImageGen/images/cards/klee/event_klee_letter_from_jean.png	500	380	cover	x0.5,y0.45	shortlist	1	png	Wildlife White Pigeon Archive.png		splash	
+event_klee_knights_come_looking	ImageGen/images/cards/klee/event_klee_knights_come_looking.png	500	380	cover	x0.45,y0.5@1.1	shortlist	1	png	Knights of Favonius Headquarters Main Hall.png		splash	
+event_klee_dodoco_goes_missing	ImageGen/images/cards/klee/event_klee_dodoco_goes_missing.png	500	380	cover	x0.5,y0.45	shortlist	1	png	Starlight Reverie Avatar Klee.png		sticker	
+event_klee_found_you	ImageGen/images/cards/klee/event_klee_found_you.png	500	380	cover	x0.5,y0.5	shortlist	1	png	Dodoco's Bomb-Tastic Adventure Stage 6 Complete.png		sticker	
+event_klee_moms_marks	ImageGen/images/cards/klee/event_klee_moms_marks.png	500	380	cover	x0.33,y0.58@1.2	shortlist	1	png	Weibo 8M Followers.jpg		splash	
+event_klee_alices_cache	ImageGen/images/cards/klee/event_klee_alices_cache.png	500	380	cover	x0.5,y0.55@1.25	shortlist	1	png	Exquisite Chest.png		splash	
+event_klee_moms_last_note	ImageGen/images/cards/klee/event_klee_moms_last_note.png	500	380	cover	x0.45,y0.55@1.3	shortlist	1	png	Klee Birthday 2025 - Shorts.png		splash	
+event_varka_dispatch_from_mondstadt	ImageGen/images/cards/varka/event_varka_dispatch_from_mondstadt.png	500	380	cover	x0.45,y0.5@1.1	shortlist	1	png	Mondstadt Entrance - Windblume.png		splash	
+event_varka_wolf_of_the_north	ImageGen/images/cards/varka/event_varka_wolf_of_the_north.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Enemy Andrius Full Artwork.png		splash	
+event_varka_long_way_home	ImageGen/images/cards/varka/event_varka_long_way_home.png	500	380	cover	x0.42,y0.5@1.1	shortlist	1	png	Favonius Keep.png		splash	
+event_varka_second_satchel	ImageGen/images/cards/varka/event_varka_second_satchel.png	500	380	cover	x0.45,y0.5@1.1	shortlist	1	png	Knights of Favonius Headquarters Library 1.png		splash	
+event_varka_acting_grand_master	ImageGen/images/cards/varka/event_varka_acting_grand_master.png	500	380	cover	x0.45,y0.5@1.1	shortlist	1	png	Knights of Favonius Headquarters Grandmaster's Office.png		splash	
+event_varka_rearguard	ImageGen/images/cards/varka/event_varka_rearguard.png	500	380	cover	x0.45,y0.5@1.1	shortlist	1	png	Knights of Favonius Base.png		splash	
+event_varka_song_on_the_wind	ImageGen/images/cards/varka/event_varka_song_on_the_wind.png	500	380	cover	x0.42,y0.5@1.1	shortlist	1	png	Angel's Share Interior 2F.png		splash	
+event_varka_first_exam	ImageGen/images/cards/varka/event_varka_first_exam.png	500	380	cover	x0.5,y0.45@1.2	shortlist	1	png	Ellin With The Training Dummy From Salvaged Materials.png		splash	
+event_furina_empty_house	ImageGen/images/cards/furina/event_furina_empty_house.png	500	380	cover	x0.45,y0.5@1.1	shortlist	1	png	Story Quest This Life, Just Like a Light Trickle of Song.png		splash	
+event_furina_rising_water	ImageGen/images/cards/furina/event_furina_rising_water.png	500	380	cover	x0.45,y0.5@1.1	shortlist	1	png	Archon Quest The Truth Lost With the Rain.png		splash	
+event_furina_steambird_clipping	ImageGen/images/cards/furina/event_furina_steambird_clipping.png	500	380	cover	x0.62,y0.5	shortlist	1	png	Namecard Background Fontaine Big News.png		splash	
+event_furina_understudy	ImageGen/images/cards/furina/event_furina_understudy.png	500	380	cover	x0.3,y0.5	shortlist	1	png	This Life, Just Like a Light Trickle of Song Still 3 Lumine.png		splash	
+event_furina_oratrices_echo	ImageGen/images/cards/furina/event_furina_oratrices_echo.png	500	380	cover	x0.5,y0.5	shortlist	1	png	The Opera of Noirceur and Blancheur Still 1.png		splash	
+event_furina_letter_from_the_court	ImageGen/images/cards/furina/event_furina_letter_from_the_court.png	500	380	cover	x0.45,y0.45@1.1	shortlist	1	png	Melusine.png		splash	
+event_furina_curtain_call	ImageGen/images/cards/furina/event_furina_curtain_call.png	500	380	cover	x0.35,y0.45	shortlist	1	png	App Store Event Character Wallpaper Furina Version Luna II.png		splash	
+event_furina_empty_throne	ImageGen/images/cards/furina/event_furina_empty_throne.png	500	380	cover	x0.5,y0.5	shortlist	1	png	Prophecy Slate 1.png		splash	
+curse_stage_fright	ImageGen/images/cards/furina/curse_stage_fright.png	500	380	cover	x0.45,y0.5@1.1	shortlist	1	png	Story Quest Show Canceled.png		splash	
+event_kokomi_sand_table	ImageGen/images/cards/kokomi/event_kokomi_sand_table.png	500	380	cover	x0.4,y0.5@1.1	shortlist	1	png	Fort Fujitou.png		splash	
+event_kokomi_coral_light	ImageGen/images/cards/kokomi/event_kokomi_coral_light.png	500	380	cover	x0.5,y0.38@1.3	shortlist	1	png	Wildlife Coral Butterfly Archive.png		splash	
+event_kokomi_room_with_no_one	ImageGen/images/cards/kokomi/event_kokomi_room_with_no_one.png	500	380	cover	x0.5,y0.5	shortlist	1	png	Paimon's Paintings Set Migration to the Coral Sea 12.png		sticker	
+event_kokomi_other_commander	ImageGen/images/cards/kokomi/event_kokomi_other_commander.png	500	380	cover	x0.5,y0.5	shortlist	1	png	Tenshukaku Concept Art.png		splash	
+event_kokomi_serpents_bones	ImageGen/images/cards/kokomi/event_kokomi_serpents_bones.png	500	380	cover	x0.45,y0.5@1.1	shortlist	1	png	The Serpent's Bowels.png		splash	
+event_kokomi_report_from_gorou	ImageGen/images/cards/kokomi/event_kokomi_report_from_gorou.png	500	380	cover	x0.45,y0.5@1.1	shortlist	1	png	Bourou Village.png		splash	
+event_kokomi_endgame	ImageGen/images/cards/kokomi/event_kokomi_endgame.png	500	380	cover	x0.5,y0.5@1.1	shortlist	1	png	World Quest Orobashi's Legacy Part I.png		splash	
+event_kokomi_tide_comes_in	ImageGen/images/cards/kokomi/event_kokomi_tide_comes_in.png	500	380	cover	x0.68,y0.42@1.2	shortlist	1	png	World Quest Tail of Watatsumi.png		splash	
+curse_public_address	ImageGen/images/cards/kokomi/curse_public_address.png	500	380	cover	x0.5,y0.5	shortlist	1	png	Paimon's Paintings Set Migration to the Coral Sea 5.png		sticker	
+# Durin -- Principle of Purity: his own splash (was art_of Binary Form).
+proto_mc_durin_principle_of_purity	ImageGen/images/cards/companions/proto_mc_durin_principle_of_purity.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Durin Full Wish.png		splash	durin
+# Power badges: each borrowed badge gets its own talent / constellation icon.
+power_klee_finders_keepers	ImageGen/images/powers/finders_keepers.png	256	256	contain	center	shortlist	1	png	Talent All Of My Treasures!.png		icon	
+power_klee_damage_report	ImageGen/images/powers/damage_report.png	256	256	contain	center	shortlist	1	png	Talent Sparkling Burst.png		icon	
+power_purity_strike	ImageGen/images/powers/purity_strike.png	256	256	contain	center	shortlist	1	png	Talent Principle of Purity As the Light Shifts.png		icon	
+power_purity_white	ImageGen/images/powers/purity_white.png	256	256	contain	center	shortlist	1	png	Talent Transmutation Confirmation of Purity.png		icon	
+power_purity_dark	ImageGen/images/powers/purity_dark.png	256	256	contain	center	shortlist	1	png	Talent Principle of Darkness As the Stars Smolder.png		icon	
+power_yae_enlightened_blessing	ImageGen/images/yae/powers/enlightened_blessing.png	256	256	contain	center	shortlist	1	png	Talent Enlightened Blessing.png		icon	
+power_yae_saiguus_lesson	ImageGen/images/yae/powers/saiguus_lesson.png	256	256	contain	center	shortlist	1	png	Constellation Mischievous Teasing.png		icon	
+power_yae_sacred_shade	ImageGen/images/yae/powers/sacred_shade.png	256	256	contain	center	shortlist	1	png	Constellation Forbidden Art Daisesshou.png		icon	
+power_yae_editorial_priority	ImageGen/images/yae/powers/editorial_priority.png	256	256	contain	center	shortlist	1	png	Item Pretty Please, Kitsune Guuji Limited Deluxe Edition.png		icon	
+power_yae_stellar_conduct	ImageGen/images/yae/powers/stellar_conduct.png	256	256	contain	center	shortlist	1	png	Constellation The Seven Glamours.png		icon	
+power_yae_eternity	ImageGen/images/yae/powers/eternity.png	256	256	contain	center	shortlist	1	png	Talent Edict of Cleansing.png		icon	
+power_yae_hunting_gaze	ImageGen/images/yae/powers/hunting_gaze.png	256	256	contain	center	shortlist	1	png	Talent Great Secret Art Tenko Kenshin.png		icon	
+# Spiral Abyss round two: each entry its own icon (Imaginarium Theater boons and nearest official icons).
+abyss_relic_overflow	ImageGen/images/abyss/relics/overflow.png	256	256	contain	center	shortlist	1	png	Icon Imaginarium Theater Wondrous Boon 19.png		icon	
+abyss_relic_vigor_of_the_abyss	ImageGen/images/abyss/relics/vigor_of_the_abyss.png	256	256	contain	center	shortlist	1	png	Icon Imaginarium Theater Wondrous Boon 01.png		icon	
+abyss_relic_moonlit_spring	ImageGen/images/abyss/relics/moonlit_spring.png	256	256	contain	center	shortlist	1	png	Icon Imaginarium Theater Wondrous Boon 15.png		icon	
+abyss_relic_battle_rhythm	ImageGen/images/abyss/relics/battle_rhythm.png	256	256	contain	center	shortlist	1	png	Icon Imaginarium Theater Wondrous Boon 04.png		icon	
+abyss_relic_wavering_moon	ImageGen/images/abyss/relics/wavering_moon.png	256	256	cover	x0.5,y0.5@1.3	shortlist	1	png	Domain Spiral Abyss Abyssal Moon Spire.png		icon	
+abyss_relic_starfell_draft	ImageGen/images/abyss/relics/starfell_draft.png	256	256	contain	center	shortlist	1	png	Item Acquaint Fate.png		icon	
+abyss_power_shadow_thorny_ground	ImageGen/images/abyss/powers/shadow_thorny_ground.png	256	256	contain	center	shortlist	1	png	The Recollector's Path Curio Piercing Thorns.png		icon	
+abyss_power_shadow_bulwark	ImageGen/images/abyss/powers/shadow_bulwark.png	256	256	contain	center	shortlist	1	png	Da Plama (Rock Shieldwall Mitachurl) Character Card Skill.png		icon	
+abyss_power_shadow_frenzy	ImageGen/images/abyss/powers/shadow_frenzy.png	256	256	contain	center	shortlist	1	png	Stonehide Lawachurl Icon.png		icon	
+abyss_power_shadow_withering	ImageGen/images/abyss/powers/shadow_withering.png	256	256	contain	center	shortlist	1	png	Tumor of the Withering Icon.png		icon	
