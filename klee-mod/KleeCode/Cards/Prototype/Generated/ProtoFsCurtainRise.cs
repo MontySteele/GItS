@@ -64,7 +64,9 @@ public sealed class ProtoFsCurtainRise : CustomCardModel, ICharacterCard, IModal
     // that aims, and the bridge then demanded a target on the mode
     // that attacks nothing. These two rows are what it reads instead.
     public IReadOnlyList<string> ModeLabels =>
-        new[] { "Deal 7 damage", "[gold]Drain[/gold] 3: deal 12 instead" };
+        IsUpgraded
+            ? new[] { "Deal 10 damage", "[gold]Drain[/gold] 3: deal 16 instead" }
+            : new[] { "Deal 7 damage", "[gold]Drain[/gold] 3: deal 12 instead" };
 
     public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
         new[] { true, true };

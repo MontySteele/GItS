@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate the multiplayer treasure-room hands for Klee, Furina, Kokomi and Varka.
+"""Generate the multiplayer treasure-room hands for Klee, Furina, Kokomi, Varka and Yae.
 
 Tier F: every output is a recolour of the base game's own hand art, read out
 of the installed `SlayTheSpire2.pck`, so it is private-build art exactly like
@@ -43,6 +43,10 @@ to me"). Each character recolours one base character's arm in HSV:
               playtest: he drew no hand at a chest). A stand-in until a Varka
               recolour is drawn and approved; it copies the base pixels, so
               there is no recipe to approve.
+  * Yae    <- the Ironclad's arm, UNCHANGED, Varka's stand-in rule
+              (2026-10-17: the co-op game logged load errors for her three
+              missing hands). A recolour is a look for [USER]; this copy is
+              not.
 
 The arithmetic below is the prototype's, verbatim (float64 HSV round trip,
 truncating `astype(uint8)` on the way out), so the outputs match the approved
@@ -100,6 +104,10 @@ OUTPUTS = {
     "multiplayer_hand_kleemod-varka_rock.png":       ("ironclad", "rock"),
     "multiplayer_hand_kleemod-varka_paper.png":      ("ironclad", "paper"),
     "multiplayer_hand_kleemod-varka_scissors.png":   ("ironclad", "scissors"),
+    "multiplayer_hand_kleemod-yae_point.png":        ("ironclad", "point"),
+    "multiplayer_hand_kleemod-yae_rock.png":         ("ironclad", "rock"),
+    "multiplayer_hand_kleemod-yae_paper.png":        ("ironclad", "paper"),
+    "multiplayer_hand_kleemod-yae_scissors.png":     ("ironclad", "scissors"),
 }
 
 
@@ -235,7 +243,7 @@ RECIPES = {
     "silent": klee_pose,
     "regent": lambda img: recolor(img, FURINA_RULES),
     "necrobinder": lambda img: recolor(img, KOKOMI_RULES),
-    # Varka's stand-in: the Ironclad's arm as the base game draws it.
+    # Varka's and Yae's stand-in: the Ironclad's arm as the base game draws it.
     "ironclad": lambda img: img.convert("RGBA"),
 }
 

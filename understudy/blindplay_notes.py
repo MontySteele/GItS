@@ -750,6 +750,14 @@ EMPTY_SHELVES_NOTE = (
     "page cannot tell a sold-out shop from a shop the feed did not send; if "
     "the game shows wares, observe again, and say `proceed` to leave.*")
 
+#: Seat page backlog (2026-10-18): the plays of the turn a fight ended on, on
+#: the screen it ended into.
+LAST_PLAYS_HEADING = "## Your plays on the fight's last turn"
+LAST_PLAYS_NOTE = (
+    "*The fight is over. These are the cards you played on its last turn, "
+    "the one that ended it last -- printed here because a play that ends a "
+    "fight never reaches a battle screen.*")
+
 LAST_MORNING_NOTE = (
     "*The fight is over. This is the last thing the Bake-Kurage carried out "
     "in it -- printed here because a Plan whose kill ends a fight never "
@@ -3698,6 +3706,11 @@ def _keyword_rows(obs: dict[str, Any],
 # "12 base, nothing folded in" is Fossil Stalker's unmoved figure.
 INTENT_FOLD_CLAUSE = "{base} base, {folded} with {modifiers}"
 INTENT_FOLD_NOTHING = "{base} base, nothing folded in"
+#: Seat page backlog (2026-10-18; Louse Progenitor). Two folded models that
+#: net to nothing ("14 base, 14 with Strength and Weak") read as the Weak
+#: doing nothing; said where the base and the folded figure agree.
+INTENT_FOLD_CANCELS = ("{base} base, still {folded} with {modifiers}: they "
+                       "cancel out on this hit")
 INTENT_TOTAL_CLAUSE = "{folded} x {repeats} = {total} if every hit lands"
 
 #: `EB-323`. The wire's own answer to whose side a part is on, read off the
@@ -3763,6 +3776,11 @@ RESOLUTION_HIT_THORNS = ", from **{source}**'s Thorns"
 #: but you is your own HP cost (a Drain). The older-mod guess named the one
 #: Thorns holder, and Ousia Pledge's Drain read as Toadpole's Thorns.
 RESOLUTION_HIT_SELF = ", your own HP cost"
+#: Co-op (seat page backlog, 2026-10-18): the same hit on the OTHER player,
+#: named by their character.
+RESOLUTION_HIT_ON_PARTNER = ("  {n}. **{target}** (the other player) -- "
+                             "{amount}, taken while it resolved{source}")
+RESOLUTION_HIT_SELF_PARTNER = ", their own HP cost"
 #: The power name the page names as the source of a hit on you.
 THORNS_POWER = "Thorns"
 RESOLUTION_NO_HITS = "  Nothing this page can count landed off it."
@@ -3809,6 +3827,23 @@ RESOLUTION_STOKED = ("  Stoke the Flames: its Pyro damage was {n} higher.")
 #: Attack it played twice ("I never knew whether it triggered").
 RESOLUTION_PLAY_BONUS = "  {source}: each of its hits dealt {n} more damage."
 RESOLUTION_DOUBLED_BY = "  {source}: this Attack was played twice."
+#: Seat page backlog (2026-10-18): a Set off card's own damage when its Bombs
+#: had already killed the target (Kaboom!, Pocket Match). The number was
+#: missing and seats read it as lost.
+RESOLUTION_NO_TARGET = ("  Its own {n} damage hit nothing: its Bombs had "
+                        "already killed {target}.")
+#: Seat page backlog (2026-10-18; Klee suites 3 and 4): what a Set off
+#: detonated, per body, and where a charge jumped. A Set off that killed read
+#: as a vanished Bomb.
+RESOLUTION_DETONATED = "  Set off on **{target}**: {charges}."
+RESOLUTION_DETONATED_CHARGE = "{charge} ({n})"
+RESOLUTION_DETONATED_KILL = "{charge} ({n}, killed it)"
+RESOLUTION_JUMPED = "  Jumped: {charges}."
+RESOLUTION_JUMPED_CHARGE = "{charge} to **{target}**"
+RESOLUTION_NOTHING_JUMPED = "  Nothing jumped."
+#: A charge's payload, so its "Put Mine 3 on ..." lines read as one rider.
+RESOLUTION_PAYLOAD = ("  {charge}'s payload put {placed} on {count}: the "
+                      "\"Put {placed}\" lines above.")
 #: Varka round 5 (2026-10-13, "What to change" 2): what the card made you
 #: discard (Chain Lightning, Short Circuit), on its own play line, and when
 #: the game picked them because the hand held no more than it asked for.

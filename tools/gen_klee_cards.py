@@ -11911,6 +11911,68 @@ def resolve_upgrade_swap(text: str, upgraded: bool) -> str:
 _ENERGY_ICON = re.compile(r"\{energyPrefix:energyIcons\((\d+)\)\}")
 
 
+#: A var declared in a `CanonicalVars` row, and an `OnUpgrade` bump of one.
+_VAR_DECL = re.compile(r'new \w+\("(\w+)", (-?\d+(?:\.\d+)?)m')
+_VAR_BUMP = re.compile(
+    r'DynamicVars\["(\w+)"\]\.UpgradeValueBy\((-?\d+(?:\.\d+)?)m\)')
+_VAR_TOKEN = re.compile(r"\{(\w+):diff\(\)\}")
+
+
+def mode_label_from_face(label: str, face: str | None, vars_cs: str,
+                         upgrade_cs: str, upgraded: bool) -> str:
+    """The mode label with the card's own numbers for one side.
+
+    Seat page backlog (2026-10-18): `ModeLabels` carried the sheet's literal
+    label, so an upgraded Curtain Rise listed "Deal 7 damage" to the bridge
+    while its chooser face printed 10. The face (`modal_option_faces`) holds
+    var tokens; rendered with the vars' values it is the label the card
+    deals. The label's own wording and markup stay; only its numbers move,
+    in order, and only where the face's base side reads as the label with
+    markup folded out and no token is left. Otherwise the old label
+    rendering stands, so the base wire string never changes.
+    """
+    old = label_energy_words(resolve_upgrade_swap(label, upgraded))
+    if not face:
+        return old
+    values = {m.group(1): float(m.group(2)) for m in _VAR_DECL.finditer(vars_cs)}
+    bumps = {m.group(1): float(m.group(2))
+             for m in _VAR_BUMP.finditer(upgrade_cs)}
+
+    def render(side: bool) -> str | None:
+        text = label_energy_words(resolve_upgrade_swap(face, side))
+        missing = False
+
+        def number(m: re.Match) -> str:
+            nonlocal missing
+            var = m.group(1)
+            if var not in values:
+                missing = True
+                return m.group(0)
+            n = values[var] + (bumps.get(var, 0.0) if side else 0.0)
+            return str(int(n)) if n == int(n) else str(n)
+
+        text = _VAR_TOKEN.sub(number, text)
+        if missing or "{" in text:
+            return None
+        return text
+
+    if not upgraded:
+        return old
+    base, up = render(False), render(True)
+    base_label = label_energy_words(resolve_upgrade_swap(label, False))
+
+    def plain(text: str) -> str:
+        return re.sub(r"\s+", " ", strip_markup(text)).strip()
+
+    if base is None or up is None or plain(base) != plain(base_label):
+        return old
+    numbers = iter(re.findall(r"\d+(?:\.\d+)?", up))
+    if len(re.findall(r"\d+(?:\.\d+)?", up)) != len(
+            re.findall(r"\d+(?:\.\d+)?", old)):
+        return old
+    return re.sub(r"\d+(?:\.\d+)?", lambda _m: next(numbers), old)
+
+
 def label_energy_words(text: str) -> str:
     """`text` with each energy icon template written as "N [gold]Energy[/gold]".
 
@@ -19293,11 +19355,20 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     # a refusal).
     modal_aim_member = ""
     if aims is not None:
+        # Seat page backlog (2026-10-18): the upgraded side reads the card's
+        # vars, so an upgrade that bumps a mode's number lists the new one.
+        label_faces = (modal_option_faces(card, modal_eff["modes"], desc)
+                       if modal_eff is not None else None)
+        if label_faces is not None and len(label_faces) != len(aims):
+            label_faces = None
+
         def _labels_cs(upgraded: bool) -> str:
             return ", ".join(
-                '"' + label_energy_words(resolve_upgrade_swap(label, upgraded))
+                '"' + mode_label_from_face(
+                    label, label_faces[i] if label_faces else None,
+                    vars_block, upgrade_cs, upgraded)
                 .replace("\\", "\\\\").replace('"', '\\"') + '"'
-                for label, _ in aims)
+                for i, (label, _) in enumerate(aims))
         labels_cs = "new[] { " + _labels_cs(False) + " }"
         # 2026-10-04: a label carrying an upgrade swap (Interval Bell's
         # "Spend {IfUpgraded:show:2|3}") is rendered per side -- the bridge

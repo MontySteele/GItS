@@ -70,7 +70,9 @@ public sealed class ProtoFsSurintendanteChevalmarin : CustomCardModel, IElementa
     // that aims, and the bridge then demanded a target on the mode
     // that attacks nothing. These two rows are what it reads instead.
     public IReadOnlyList<string> ModeLabels =>
-        new[] { "Deal 4 Hydro damage to ALL enemies", "[gold]Drain[/gold] 3: deal 8 instead" };
+        IsUpgraded
+            ? new[] { "Deal 6 Hydro damage to ALL enemies", "[gold]Drain[/gold] 3: deal 11 instead" }
+            : new[] { "Deal 4 Hydro damage to ALL enemies", "[gold]Drain[/gold] 3: deal 8 instead" };
 
     public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
         new[] { false, false };

@@ -184,7 +184,13 @@ def test_the_reader_carries_the_keys_the_mod_sends():
          "edits",
          # Kokomi v2 seats (2026-10-18): Tidal Riposte's bonus and Pincer's
          # doubling, on the Attack's own line.
-         "play_bonus", "doubled_by"])
+         "play_bonus", "doubled_by",
+         # Seat page backlog (2026-10-18): a Set off card's own hit that
+         # found its target already dead to its Bombs.
+         "no_target",
+         # Seat page backlog (2026-10-18): what its Set off detonated, a
+         # payload it sent out, and where a charge jumped.
+         "detonations", "payloads", "jumps"])
     assert sorted(rows[0]["hits"][0]) == sorted(
         ["target", "amount", "blocked", "combat_id", "killed", "on_player",
          "source", "self",

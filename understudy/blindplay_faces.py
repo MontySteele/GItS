@@ -332,6 +332,13 @@ def _card_face(entry: dict[str, Any]) -> dict[str, Any]:
             entry.get("id"), _text(entry.get("description")),
             bool(entry.get("is_upgraded") or entry.get("upgraded"))),
         "kind": _text(entry.get("type")),
+        # Seat page backlog (2026-10-18): whether the face is the mod's. Only
+        # the mod's calculated faces are `FrontFoldedDamageVar`s; base Body
+        # Slam prints a "(Deals N damage)" line that does not fold the
+        # enemy's Vulnerable. Read off the id on the tool side; only the flag
+        # crosses.
+        "mod_card": _text(entry.get("id")).upper().replace("-", "_")
+        .startswith(qa_packet._MOD_ID_PREFIXES),
         # 2026-09-25 (opus-furina-l2b, (c) 2): a MODE of a card being played,
         # on its chooser. Read off the id on the tool side, like the printed
         # cost above, and only the flag crosses. The render prints no cost and

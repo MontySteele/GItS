@@ -54,6 +54,8 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         FRONT_ENEMY_NOTE,
                                         HAND_REPEAT_NOTE,
                                         LAST_MORNING_NOTE,
+                                        LAST_PLAYS_HEADING,
+                                        LAST_PLAYS_NOTE,
                                         METER_CAPPED_NOTE,
                                         METER_DEFINED_NOTE, METER_NOTE,
                                         METER_RULES,
@@ -82,6 +84,16 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         RESOLUTION_STOKED,
                                         RESOLUTION_PLAY_BONUS,
                                         RESOLUTION_DOUBLED_BY,
+                                        RESOLUTION_HIT_ON_PARTNER,
+                                        RESOLUTION_HIT_SELF_PARTNER,
+                                        RESOLUTION_NO_TARGET,
+                                        RESOLUTION_DETONATED,
+                                        RESOLUTION_DETONATED_CHARGE,
+                                        RESOLUTION_DETONATED_KILL,
+                                        RESOLUTION_JUMPED,
+                                        RESOLUTION_JUMPED_CHARGE,
+                                        RESOLUTION_NOTHING_JUMPED,
+                                        RESOLUTION_PAYLOAD,
                                         RESOLUTION_DISCARDED,
                                         RESOLUTION_DISCARDED_FOR_YOU,
                                         RESOLUTION_NO_AURA,
@@ -98,6 +110,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         RESOLUTION_AUTO_TURN_NOTE,
                                         NO_RESOLUTIONS_THIS_TURN,
                                         INTENT_FOLD_CLAUSE,
+                                        INTENT_FOLD_CANCELS,
                                         INTENT_FOLD_NOTHING,
                                         INTENT_TOTAL_CLAUSE,
                                         INTENT_TARGET_SIDE,
@@ -917,6 +930,14 @@ def _carry_out_rows(rows: list[dict[str, Any]],
         out += [PLAN_AFTER_LINE.format(source=a["source"], n=a["amount"],
                                        target=a["target"] or "an enemy")
                 for a in said.get("after") or []]
+        # Seat page backlog (2026-10-18): what this Plan made that the hand
+        # had no room for, under the Plan and not after the morning.
+        sent: dict[str, int] = {}
+        for card in said.get("discarded") or []:
+            sent[card] = sent.get(card, 0) + 1
+        out += ["    - " + EVENT_TO_DISCARD.format(
+                    n=n, card=_plural_card(card, n))
+                for card, n in sent.items()]
     return out
 
 
@@ -1415,6 +1436,34 @@ PREVIEW_LEAVES_OUT_CLAUSE = (" The damage printed on your cards does not "
                              "count this; it is added when a hit lands here.")
 
 
+#: Flutter's sentence ("takes 50% less damage from Attacks"), read off the
+#: power's text and never its name.
+_LESS_FROM_ATTACKS = re.compile(r"less damage from attacks", re.I)
+#: Seat page backlog (2026-10-18). `FlutterPower` cuts only a powered Attack
+#: (`ValueProp.IsPoweredAttack`); a Bomb or Mine goes off through
+#: `ElementalHit` as `Unpowered`, so the cut never reaches it. A seat saw it
+#: "halve Bomb damage in one run and not in two others" (the Set off card's
+#: own hit is an Attack and is cut).
+NOT_BOMBS_CLAUSE = (" Bombs and Mines are not Attacks, so it does not cut "
+                    "them; a Set off card's own damage is an Attack and is "
+                    "cut.")
+
+
+def _not_bombs_clause(power: dict[str, Any], c: dict[str, Any]) -> str:
+    """The Bomb clause on an Attack-only damage cut, where Bombs are in
+    play: a Bomb badge on a body, or a card in hand that names one."""
+    if not _LESS_FROM_ATTACKS.search(str(power.get("text") or "")):
+        return ""
+    on_board = any(_bomb_header(pw) or _fold(pw.get("name")) in ("bomb",
+                                                                   "mine")
+                   for e in c.get("enemies") or []
+                   for pw in e.get("powers") or [])
+    in_hand = any(re.search(r"\b(?:bombs?|mines?)\b",
+                            str(card.get("text") or ""), re.I)
+                  for card in c.get("hand") or [])
+    return NOT_BOMBS_CLAUSE if on_board or in_hand else ""
+
+
 def _preview_leaves_out(power: dict[str, Any],
                         hand: list[dict[str, Any]]) -> str:
     """The clause on an enemy's Vulnerable row, while a hand is shown."""
@@ -1498,6 +1547,7 @@ def _render_power(power: dict[str, Any], indent: str) -> str:
     if power["text"]:
         line += (f" — {power['text']}{_slow_clause(power)}"
                  f"{_every_n_cards_clause(power)}")
+    line += _tender_clause(power)
     # 2026-09-26 (control seats): what the power holds and never prints.
     if power.get("stolen_card"):
         line += STOLEN_CARD_CLAUSE.format(card=power["stolen_card"])
@@ -1521,6 +1571,27 @@ def _render_power(power: dict[str, Any], indent: str) -> str:
 _EVERY_N_CARDS = re.compile(r"\bevery (\d+) cards you play\b", re.IGNORECASE)
 _EVERY_N_CARDS_CLAUSE = (" The number is the cards left before the next one, "
                          "and it carries over from turn to turn.")
+
+
+#: Seat page backlog (2026-10-18; the Klee final-pass round). Tender's badge
+#: is `TenderPower.DisplayAmount`, the cards played THIS TURN (decompiled):
+#: each play takes 1 Strength and 1 Dexterity, and the turn's end gives the
+#: whole count back. The page printed "Tender 3" and nothing that said so.
+_TENDER_SENTENCE = re.compile(
+    r"whenever you play a card, lose .*strength.*dexterity this turn", re.I)
+TENDER_CLAUSE = (" The number is the cards you have played this turn: each "
+                 "took 1 Strength and 1 Dexterity, and all of it comes back "
+                 "at the end of your turn.")
+
+
+def _tender_clause(power: dict[str, Any]) -> str:
+    """Tender's count, read off its sentence (or its name where the feed
+    sent no sentence), or ''."""
+    text = qa_packet.strip_markup(str(power.get("text") or ""))
+    if _TENDER_SENTENCE.search(text) or (
+            not text and _fold(power.get("name")) == "tender"):
+        return TENDER_CLAUSE
+    return ""
 
 
 def _every_n_cards_clause(power: dict[str, Any]) -> str:
@@ -1937,6 +2008,45 @@ NO_LIVING_ENEMY_LINE = ("- No enemy is standing: every enemy is dead or "
 _DEALS_LINE = re.compile(r"\(Deals \d+ damage", re.I)
 
 
+#: Seat page backlog (2026-10-18): a dead enemy still in the fight, by the
+#: move it plans (decompiled `DecimillipedeSegment`: `DEAD_MOVE` does nothing
+#: and is followed by `REATTACH_MOVE`, which heals it by its Reattach if any
+#: other segment still lives).
+REVIVING_TWO_TURNS = ("- **{name}** — dead, waiting to Reattach: it does "
+                      "nothing on the next enemy turn and comes back{hp} on "
+                      "the one after, if another segment is still alive. It "
+                      "cannot be hit until then.")
+REVIVING_NEXT_TURN = ("- **{name}** — dead, Reattaching: it comes back{hp} on "
+                      "the next enemy turn, if another segment is still "
+                      "alive. It cannot be hit until then.")
+REVIVING_OTHER = "- **{name}** — dead, but still in the fight."
+_REVIVING_BY_MOVE = {"DEAD_MOVE": REVIVING_TWO_TURNS,
+                     "REATTACH_MOVE": REVIVING_NEXT_TURN}
+
+
+def _reviving_lines(rows: list[dict[str, Any]]) -> list[str]:
+    """One line per dead enemy the wire says is still planning a move."""
+    out = []
+    for row in rows:
+        hp = (f" with {row['revive_hp']} HP"
+              if isinstance(row.get("revive_hp"), int) and row["revive_hp"] > 0
+              else "")
+        out.append(_REVIVING_BY_MOVE.get(row.get("move_id") or "",
+                                         REVIVING_OTHER).format(
+            name=row["name"], hp=hp))
+    return out
+
+
+def _folds_front(card: dict[str, Any]) -> bool:
+    """A face whose "(Deals N damage)" line already folds the front enemy's
+    Vulnerable and Slow: the mod's calculated faces only
+    (`FrontFoldedDamageVar`). Base Body Slam prints the line too and leaves
+    them out. A face with no `mod_card` key (an old snapshot) keeps the old
+    reading."""
+    return (bool(_DEALS_LINE.search(str(card.get("text") or "")))
+            and card.get("mod_card", True) is not False)
+
+
 def _enemy_fold_note(enemies: list[dict[str, Any]],
                      hand: list[dict[str, Any]],
                      stage: bool = False) -> list[str]:
@@ -1961,14 +2071,12 @@ def _enemy_fold_note(enemies: list[dict[str, Any]],
     if not stage:
         for card in attacks:
             name = _plain_name(card.get("title"))
-            if (_DEALS_LINE.search(str(card.get("text") or ""))
-                    and name and name not in folded):
+            if _folds_front(card) and name and name not in folded:
                 folded.append(name)
     if not folded:
         return ["", ENEMY_FOLD_NOTE]
     cards = _and_list([f"**{name}**" for name in folded])
-    if all(_DEALS_LINE.search(str(card.get("text") or ""))
-           for card in attacks):
+    if all(_folds_front(card) for card in attacks):
         return ["", ENEMY_FOLD_NOTE_ONLY.format(cards=cards)]
     return ["", ENEMY_FOLD_NOTE_EXCEPT.format(cards=cards)]
 
@@ -2235,9 +2343,39 @@ def _in_play_order(hits: list[dict[str, Any]],
 _TIMES = {2: "two", 3: "three", 4: "four"}
 
 
+def _detonation_lines(row: dict[str, Any]) -> list[str]:
+    """A Set off's charges, grouped by body in the order they went off, then
+    where any jumped; "Nothing jumped." after a kill that moved nothing."""
+    out: list[str] = []
+    groups: dict[str, list[str]] = {}
+    for d in row.get("detonations") or []:
+        part = (RESOLUTION_DETONATED_KILL if d.get("killed")
+                else RESOLUTION_DETONATED_CHARGE).format(
+            charge=d["charge"], n=d["amount"])
+        groups.setdefault(d["target"] or "the enemy", []).append(part)
+    for target, parts in groups.items():
+        out.append(RESOLUTION_DETONATED.format(target=target,
+                                               charges=", ".join(parts)))
+    for load in row.get("payloads") or []:
+        out.append(RESOLUTION_PAYLOAD.format(
+            charge=load["charge"], placed=load["placed"],
+            count=("1 enemy" if load["count"] == 1
+                   else f"{load['count']} enemies")))
+    jumps = row.get("jumps") or []
+    if jumps:
+        out.append(RESOLUTION_JUMPED.format(charges=", ".join(
+            RESOLUTION_JUMPED_CHARGE.format(charge=j["charge"],
+                                            target=j["target"] or "an enemy")
+            for j in jumps)))
+    elif any(d.get("killed") for d in row.get("detonations") or []):
+        out.append(RESOLUTION_NOTHING_JUMPED)
+    return out
+
+
 def _resolution_lines(rows: list[dict[str, Any]],
                       stage: bool = False,
-                      enemies: list[dict[str, Any]] | None = None
+                      enemies: list[dict[str, Any]] | None = None,
+                      partner: bool = False
                       ) -> list[str]:
     """`EB-349` / `EB-611`. The turn's resolutions, with their hits numbered.
 
@@ -2302,6 +2440,12 @@ def _resolution_lines(rows: list[dict[str, Any]],
                 source=bonus["source"], n=bonus["amount"]))
         for source in row.get("doubled_by") or []:
             oath_lines.append(RESOLUTION_DOUBLED_BY.format(source=source))
+        # Seat page backlog (2026-10-18): what its Set off detonated, then
+        # its own hit where its Bombs killed the target first.
+        oath_lines += _detonation_lines(row)
+        for miss in row.get("no_target") or []:
+            oath_lines.append(RESOLUTION_NO_TARGET.format(
+                n=miss["amount"], target=miss["target"] or "the enemy"))
         # Varka round 5 (2026-10-13): what the card made you discard.
         discarded = row.get("discarded") or []
         if discarded:
@@ -2364,9 +2508,16 @@ def _resolution_lines(rows: list[dict[str, Any]],
                               if hit.get("label") else ""))
                 continue
             if hit.get("on_player"):
-                line = RESOLUTION_HIT_ON_YOU.format(
-                    n=n, target=target, amount=hit["amount"],
-                    source=_hit_on_you_source(hit, enemies or []))
+                # Co-op (2026-10-18): the partner's hit is theirs, not yours;
+                # a partner's own play's self-hit is "their own HP cost".
+                theirs = hit.get("on_partner") or (partner and not hit.get(
+                    "on_local"))
+                source = _hit_on_you_source(hit, enemies or [])
+                if theirs and source == RESOLUTION_HIT_SELF:
+                    source = RESOLUTION_HIT_SELF_PARTNER
+                line = (RESOLUTION_HIT_ON_PARTNER if theirs
+                        else RESOLUTION_HIT_ON_YOU).format(
+                    n=n, target=target, amount=hit["amount"], source=source)
                 if hit["blocked"] > 0:
                     line += RESOLUTION_HIT_BLOCKED.format(blocked=hit["blocked"])
                 out.append(line)
@@ -2504,7 +2655,9 @@ def _breakdown_clauses(breakdown: dict[str, Any]) -> list[str]:
     out: list[str] = []
     mods = breakdown.get("modifiers") or []
     if mods:
-        out.append(INTENT_FOLD_CLAUSE.format(
+        out.append((INTENT_FOLD_CANCELS if len(mods) > 1
+                    and breakdown["base"] == breakdown["folded"]
+                    else INTENT_FOLD_CLAUSE).format(
             modifiers=_and_list([f"**{m}**" for m in mods]),
             base=breakdown["base"], folded=breakdown["folded"]))
     elif breakdown["base"] == breakdown["folded"]:
@@ -4173,6 +4326,7 @@ def _incoming_line(enemies: list[dict[str, Any]], you: dict[str, Any],
     not_counted += "".join(INCOMING_CONDITIONAL_LOST.format(name=name)
                            for name in facts.get("lost") or [])
     not_counted += _death_blow_clauses(enemies)
+    not_counted += _mine_first_clause(enemies)
     if not any_attack and not (facts["hit"] or facts["hp"]):
         return INCOMING_NONE + not_counted
     block = int(you.get("block") or 0)
@@ -4220,6 +4374,35 @@ def _incoming_line(enemies: list[dict[str, Any]], you: dict[str, Any],
         line += INCOMING_LEAVES.format(after=max(0, you["hp"] - take),
                                        max_hp=you["max_hp"])
     return line + not_counted
+
+
+#: Seat page backlog (2026-10-18; Klee suite 1, item 1). A Mine goes off when
+#: its body attacks, BEFORE the hit (`ProtoBombPower.BeforeDamageReceived`):
+#: it can kill the attacker first, and Block it gives you (Look Out!, Clover
+#: Charm) lands before the hit. The sum above is the telegraphs alone.
+INCOMING_MINES_FIRST = (" Mines on {names} go off when that body attacks, "
+                        "before its hit lands: they may kill it first, and any "
+                        "Block they give you is not counted here.")
+_MINES_IN_PILE = re.compile(r"\bincluding \d+ Mines?\b", re.I)
+
+
+def _mine_first_clause(enemies: list[dict[str, Any]]) -> str:
+    """The clause naming each attacking body that carries a Mine, or ''."""
+    names: list[str] = []
+    for e in enemies:
+        if _is_down(e):
+            continue
+        if not any(_fold(i.get("type")) in ATTACK_KINDS
+                   for i in e.get("intents") or []):
+            continue
+        if any(_fold(p.get("name")) == "mine"
+               or (_fold(p.get("name")) == "bomb"
+                   and _MINES_IN_PILE.search(str(p.get("text") or "")))
+               for p in e.get("powers") or []):
+            name = f"**{e.get('name') or 'an enemy'}**"
+            if name not in names:
+                names.append(name)
+    return INCOMING_MINES_FIRST.format(names=_and_list(names)) if names else ""
 
 
 SACRED_SHADE_NAME = "The Shrine's Sacred Shade"
@@ -4569,6 +4752,12 @@ def render(obs: dict[str, Any]) -> str:
             # line saying so -- under the relic row, because it is that
             # relic's sentence being applied to the board above.
             out += _auto_turn_note(you, c["round"], c.get("resolutions"))
+        # Seat page backlog (2026-10-18): what a Companion summon (Oz,
+        # Soumetsu) did at the end of your last turn, off Kokomi's page.
+        if c.get("summon_hits"):
+            out += ["", SUMMON_HITS_HEADING, "", SUMMON_HITS_LEAD]
+            out += _carry_out_rows(c["summon_hits"], c["enemies"], you,
+                                   name_reactions=True)
         if c.get("plans"):
             # `EB-216`, the Kokomi draft-6 half, and the page's contract is
             # `EB-198`'s lesson restated: ONE FACT PER LINE. The strip that
@@ -4866,6 +5055,11 @@ def render(obs: dict[str, Any]) -> str:
         out += _enemy_fold_note(c["enemies"], c["hand"],
                                 stage=c.get("stage") is not None)
         out += ["", _OTHER_SIDE, ""]
+        # Seat page backlog (2026-10-18): the order they act in. The game
+        # walks `CombatState.Enemies` in list order on the enemy turn
+        # (`CombatManager.ExecuteEnemyTurn`), the list the bridge sends.
+        if sum(1 for e in c["enemies"] if _is_alive_row(e)) > 1:
+            out += [ENEMY_ORDER_NOTE, ""]
         # Seat page backlog (2026-10-13): the empty board says what the
         # refusal says (`NO_LIVING_ENEMY`).
         if c.get("no_living_enemy") is not None:
@@ -4908,10 +5102,13 @@ def render(obs: dict[str, Any]) -> str:
             out += _intent_fold_lines(e, you)
             for pw in _once(e["powers"]):
                 out.append(_render_power(pw, "    ")
-                           + _preview_leaves_out(pw, c["hand"]))
+                           + _preview_leaves_out(pw, c["hand"])
+                           + _not_bombs_clause(pw, c))
                 # `EB-605`: and where a Bomb badge's headline and its list of
                 # charge sizes are two different numbers, which is which.
                 out += _bomb_forecast_note(pw, e["powers"], "    ")
+        # Seat page backlog (2026-10-18): a dead enemy that is coming back.
+        out += _reviving_lines(c.get("reviving") or [])
         # 2026-10-05: the attacks shown, summed against your Block. A sum of
         # the telegraphs and nothing more; no plan is computed.
         # SEAT PAGE 3: on Furina's stage too. Her guests are pets, and an
@@ -5252,6 +5449,12 @@ def render(obs: dict[str, Any]) -> str:
             out += [f"The Spiral Abyss: {obs['abyss_result']}", ""]
         if obs["text"]:
             out += [obs["text"], ""]
+        # Seat page backlog (2026-10-18): the Ancient's lines so far, each
+        # under its speaker.
+        for line in obs.get("dialogue") or []:
+            who = ("You" if line["speaker"] == "you"
+                   else obs["title"] or "The Ancient")
+            out += [f"> **{who}:** {line['text']}", ""]
         if obs["in_dialogue"]:
             out += ["(the scene is still being told; say `proceed`)", ""]
         out += _render_options(obs["options"])
@@ -5330,6 +5533,9 @@ def render(obs: dict[str, Any]) -> str:
                     LAST_MORNING_NOTE, ""] + _render_carry_out(lm)
             if _board_note_wanted(lm):
                 out += ["", CARRY_OUT_BOARD_NOTE]
+        if obs.get("last_plays"):
+            out += ["", LAST_PLAYS_HEADING, "", LAST_PLAYS_NOTE, ""]
+            out += _resolution_lines(obs["last_plays"])
     else:                                                # pragma: no cover
         raise BlindPlayError(f"no renderer for screen {obs['screen']!r}")
 
@@ -5351,7 +5557,8 @@ def render(obs: dict[str, Any]) -> str:
             out += ["", PARTNER_RESOLUTIONS_HEADING.format(
                 partner=obs["coop"].get("partner") or "the other player"), ""]
             out += _resolution_lines(
-                theirs, enemies=(obs.get("combat") or {}).get("enemies") or [])
+                theirs, enemies=(obs.get("combat") or {}).get("enemies") or [],
+                partner=True)
 
     # `EB-473`: the relic row, on a screen that is not a fight, in the
     # combat header's own words and under its own heading. A relic claimed at
@@ -5486,6 +5693,20 @@ def assert_one_page(text: str) -> None:
 #: one bullet in that section that opens with a bold name; its intents, powers
 #: and the replaced-body line are all indented under it.
 _OTHER_SIDE = "## The other side"
+#: Seat page backlog (2026-10-18): the summon log, off Kokomi's page.
+SUMMON_HITS_HEADING = "## Your summons"
+SUMMON_HITS_LEAD = ("- These fired at the end of your last turn, before the "
+                    "enemies acted:")
+#: Seat page backlog (2026-10-18): the bridge "does not show the order
+#: enemies act in"; it does, by the list's own order.
+ENEMY_ORDER_NOTE = "*On their turn, the enemies act in the order listed here, top first.*"
+
+
+def _is_alive_row(enemy: dict[str, Any]) -> bool:
+    """A printed enemy row that is a living body (not a phase flip, not at
+    0 HP)."""
+    return (not enemy.get("phase_flip")
+            and not (isinstance(enemy.get("hp"), int) and enemy["hp"] <= 0))
 _BODY_ROW = re.compile(r"^- \*\*.+", re.MULTILINE)
 
 

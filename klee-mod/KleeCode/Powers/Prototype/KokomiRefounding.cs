@@ -71,8 +71,15 @@ public static partial class KokomiCards
             // (hand full)") rather than the seat reading it as lost.
             if (card.Pile?.Type == PileType.Discard)
             {
-                ResolutionLedger.NoteToDiscard(
-                    card.Title ?? (kind == Jellyfish.Sting ? "Sting" : "Ward"));
+                var title = card.Title
+                            ?? (kind == Jellyfish.Sting ? "Sting" : "Ward");
+                // Seat page backlog (2026-10-18): made inside a carry-out,
+                // the line goes on that Plan's row; it printed after the
+                // whole morning.
+                if (!KokomiPlan.NoteDiscardedInBeat(owner.Creature, title))
+                {
+                    ResolutionLedger.NoteToDiscard(title);
+                }
             }
         }
         // The jellyfish build (2026-10-12): Stings made this fight, for

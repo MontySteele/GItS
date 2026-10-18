@@ -64,7 +64,9 @@ public sealed class ProtoFsLeadingLady : CustomCardModel, ICharacterCard, IModal
     // that aims, and the bridge then demanded a target on the mode
     // that attacks nothing. These two rows are what it reads instead.
     public IReadOnlyList<string> ModeLabels =>
-        new[] { "Gain 6 Block", "[gold]Drain[/gold] 3: gain 11 instead" };
+        IsUpgraded
+            ? new[] { "Gain 8 Block", "[gold]Drain[/gold] 3: gain 14 instead" }
+            : new[] { "Gain 6 Block", "[gold]Drain[/gold] 3: gain 11 instead" };
 
     public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
         new[] { false, false };

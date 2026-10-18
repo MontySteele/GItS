@@ -112,11 +112,22 @@ def _pet_rows(row: dict[str, Any]) -> list[dict[str, Any]]:
     return out
 
 
+#: Co-op (seat page backlog, 2026-10-18): the element a partner's kit
+#: applies, by the character's printed name, so the reaction glossary counts
+#: the pairs the two players make together. Varka is not here: his Oath
+#: applies several, and the auras he leaves on the board are read already.
+PARTNER_ELEMENTS = {"klee": "Pyro", "furina": "Hydro", "kokomi": "Hydro",
+                    "yae miko": "Electro"}
+
+
 def _partner_rows(state: dict[str, Any]) -> list[dict[str, Any]]:
     out = []
     for row in partners(state):
         out.append({
             "name": _text(row.get("character")) or "the other player",
+            # Read by the glossary's element walk; never printed.
+            "element": PARTNER_ELEMENTS.get(
+                _fold(row.get("character")), ""),
             "hp": _int(row.get("hp")), "max_hp": _int(row.get("max_hp")),
             "block": (_int(row.get("block"))
                       if row.get("block") is not None else None),
@@ -305,8 +316,14 @@ def coop_block(state: dict[str, Any]) -> dict[str, Any] | None:
     waiting = ""
     if st in COMBAT_SCREENS and isinstance(state.get("battle"), dict):
         if me.get("is_alive") is False:
+            # Seat page backlog (2026-10-18): and what a win means for you,
+            # `Player.ReviveBeforeCombatEnd` (heals a dead player 1 HP before
+            # the fight ends; an after-fight heal such as Burning Blood's
+            # then adds to it).
             waiting = (f"You are down. {who} fights on; the fight ends "
-                       f"when they win it or fall too. Say `wait`.")
+                       f"when they win it or fall too. If they win, you get "
+                       f"back up with 1 HP, plus any after-fight healing. "
+                       f"Say `wait`.")
         elif (me.get("is_ready_to_end_turn") is True
               and _blob(state, "battle").get("all_players_ready") is not True):
             waiting = (f"You have ended your turn. {who} is still playing "

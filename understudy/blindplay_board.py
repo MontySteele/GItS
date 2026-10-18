@@ -725,6 +725,16 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
             if name and name not in waiting:
                 waiting.append(name)
         combat["no_living_enemy"] = waiting
+    # Seat page backlog (2026-10-18): the dead enemies still in the fight
+    # and planning a move (`gits/GitsRevivingEnemies.cs`): a Decimillipede
+    # segment waiting to Reattach. Empty on an older bridge.
+    combat["reviving"] = [
+        {"name": _text(r.get("name")) or "An enemy",
+         "move_id": _text(r.get("move_id")),
+         "revive_hp": (_int(r.get("revive_hp"))
+                       if r.get("revive_hp") is not None else None)}
+        for r in (_blob(state, "battle").get("reviving") or [])
+        if isinstance(r, dict)]
     # Seat page 3 (2026-10-05): what a debuff move does, where the wire names
     # the move and the base-game table knows it ("applies Frail 2", "steals a
     # card"). On the first part whose own hover names no power.
@@ -802,6 +812,7 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
         # hook -- read off the board where the ledger did not file them.
         name_resolution_kills(resolved, _enemies(state),
                               combat["round"] or None)
+        name_player_hits(resolved, state)
         # CO-OP (the Spiral Abyss seat round, 2026-10-12): both players'
         # plays resolve in each game, and "What you played" listed the
         # partner's. Theirs go under the other-player section.
@@ -825,6 +836,13 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
         # in the Bake-Kurage's receipt as in the enemy list four lines down.
         name_moved_rows(plans, _enemies(state), combat["enemies"])
         combat["plans"] = plans
+    # Seat page backlog (2026-10-18): a Companion summon's end-of-turn hits on
+    # a page that is not Kokomi's.
+    summons = summon_hits(p)
+    if summons:
+        name_moved_rows({"carried_out": summons, "fired_now": []},
+                        _enemies(state), combat["enemies"])
+        combat["summon_hits"] = summons
     stage = furina_stage(p)
     if stage is not None:
         # `EB-743`, and it is `EB-329`'s rule a third arm over: the mod names
@@ -1667,6 +1685,44 @@ def resolutions(player: dict[str, Any]) -> list[dict[str, Any]] | None:
                         if isinstance(ev, dict)
                         and _text(ev.get("kind")) == "doubled_by"
                         and _text(ev.get("power"))],
+                    # Seat page backlog (2026-10-18): a Set off card's own
+                    # hit that found its target already dead to its Bombs
+                    # (Kaboom!, Pocket Match), by body and amount.
+                    "no_target": [
+                        {"target": _text(ev.get("target")),
+                         "amount": _int(ev.get("amount"))}
+                        for ev in (row.get("events") or [])
+                        if isinstance(ev, dict)
+                        and _text(ev.get("kind")) == "no_target"
+                        and _int(ev.get("amount")) > 0],
+                    # Seat page backlog (2026-10-18; Klee suites 3 and 4):
+                    # what this card's Set off detonated, charge by charge,
+                    # and where a charge jumped. Empty on an older mod.
+                    "detonations": [
+                        {"charge": _text(ev.get("power")),
+                         "target": _text(ev.get("target")),
+                         "amount": _int(ev.get("amount")),
+                         "killed": _text(ev.get("kind")) == "detonated_killed"}
+                        for ev in (row.get("events") or [])
+                        if isinstance(ev, dict)
+                        and _text(ev.get("kind")) in ("detonated",
+                                                      "detonated_killed")
+                        and _text(ev.get("power"))],
+                    "payloads": [
+                        {"charge": _text(ev.get("power")),
+                         "placed": _text(ev.get("target")),
+                         "count": _int(ev.get("amount"))}
+                        for ev in (row.get("events") or [])
+                        if isinstance(ev, dict)
+                        and _text(ev.get("kind")) == "payload"
+                        and _int(ev.get("amount")) > 0],
+                    "jumps": [
+                        {"charge": _text(ev.get("power")),
+                         "target": _text(ev.get("target"))}
+                        for ev in (row.get("events") or [])
+                        if isinstance(ev, dict)
+                        and _text(ev.get("kind")) == "jumped"
+                        and _text(ev.get("power"))],
                     # Yae rounds 7, 8 and 10 (2026-10-17): what this play's
                     # Edit reached (`YaeEditing.NoteEdited` and its two
                     # siblings), in order. Empty on an older mod.
@@ -1843,6 +1899,35 @@ def name_resolution_rows(rows: list[dict[str, Any]],
                                                       hit["target"]))
 
 
+def name_player_hits(rows: list[dict[str, Any]],
+                     state: dict[str, Any]) -> None:
+    """Co-op (seat page backlog, 2026-10-18): a hit on a PLAYER is named by
+    that player's character, and marked as the partner's where it was not
+    you. The mod names a player creature by the platform's player name, which
+    a dev co-op build prints as "Test Host" / "Test Client 1", and the page
+    then called the partner's HP cost "Test Host (you) ... your own HP cost".
+    Matched on the creature's combat id, the co-op player row's `entity_id`.
+    A singleplayer state carries no `players` and nothing moves.
+    """
+    players = {_text(p.get("entity_id")): p
+               for p in (state.get("players") or [])
+               if isinstance(p, dict) and _text(p.get("entity_id"))}
+    if not players:
+        return
+    for row in rows:
+        for hit in row["hits"]:
+            if not hit.get("on_player"):
+                continue
+            who = players.get(hit["combat_id"])
+            if who is None:
+                continue
+            hit["target"] = _text(who.get("character")) or hit["target"]
+            if who.get("is_local") is False:
+                hit["on_partner"] = True
+            elif who.get("is_local") is True:
+                hit["on_local"] = True
+
+
 def name_resolution_kills(rows: list[dict[str, Any]],
                           wire: list[dict[str, Any]],
                           round_: int | None) -> None:
@@ -1948,7 +2033,9 @@ def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
         face.
     """
     raw = player.get("kokomi_plans")
-    if not isinstance(raw, dict) or not raw:
+    # Seat page backlog (2026-10-18): off Kokomi the map carries only the
+    # summon log (`summon_hits`, read by `summon_hits` below) and no `pet`.
+    if not isinstance(raw, dict) or not raw or "pet" not in raw:
         return None
     # `EB-773`: and what each entry has WRITTEN against a body -- `damage`, the
     # number already fixed in it, and `aim`, the one word saying where that
@@ -2037,6 +2124,19 @@ def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
                         for row in (raw.get("summon_hits") or [])
                         if isinstance(row, dict)],
     }
+
+
+def summon_hits(player: dict[str, Any]) -> list[dict[str, Any]]:
+    """What a Companion summon did at the end of the last turn, on a seat
+    that is not Kokomi (seat page backlog, 2026-10-18). Her page prints the
+    same rows inside her Plan block (`kokomi_plans`); here they stand alone.
+    Empty on Kokomi, on an older mod and where nothing fired."""
+    raw = player.get("kokomi_plans")
+    if not isinstance(raw, dict) or "pet" in raw:
+        return []
+    return [_carried_out_row(row, "")
+            for row in (raw.get("summon_hits") or [])
+            if isinstance(row, dict)]
 
 
 def reaction_log(player: dict[str, Any]) -> list[dict[str, str]] | None:
@@ -2237,6 +2337,11 @@ def _carried_out_row(row: dict[str, Any], pet_name: str) -> dict[str, Any]:
             # amount and body (`KokomiPlan.NoteAfter`); empty on an older mod.
             "after": [_rider_row(r) for r in (row.get("after") or [])
                       if isinstance(r, dict) and _int(r.get("amount")) > 0],
+            # Seat page backlog (2026-10-18): the generated cards this
+            # carry-out sent to the discard pile, hand full; empty on an
+            # older mod.
+            "discarded": [_text(c) for c in (row.get("discarded") or [])
+                          if _text(c)],
             # `EB-440`: A ROW IS A BODY THIS PLAN MOVED SOMETHING ON, and
             # Block is something. The filter existed to drop the mod's
             # zero-delta rows, and a beat that spent itself entirely on a
@@ -2301,6 +2406,29 @@ def last_morning(state: dict[str, Any]) -> dict[str, Any] | None:
         return None
     return {"pet_name": plans["pet_name"], "carried_out": plans["carried_out"],
             "fired_now": plans["fired_now"]}
+
+
+def last_plays(state: dict[str, Any],
+               morning: dict[str, Any] | None = None
+               ) -> list[dict[str, Any]] | None:
+    """Your plays on the turn the fight ended, on the screen it ended into.
+
+    Seat page backlog (2026-10-18): a play that ends the fight goes straight
+    to the reward screen, so its hits (a fight-ending Rapid Fire's four)
+    reached no page. The ledger is cleared only when the next fight opens
+    (`ResolutionLedger.ResetFight`) and the bridge sends it on every screen,
+    so the rows are still here. Yours only (a co-op partner's stay theirs),
+    and not the rows an enemy turn carried. Where the Bake-Kurage's last
+    carry-out is printed (`last_morning`) its auto-played rows are left to
+    that block. `None` where there is nothing to print.
+    """
+    rows = resolutions(_player(state))
+    if not rows:
+        return None
+    rows = [r for r in rows if r.get("is_local") is not False
+            and not r.get("carried")
+            and not (morning and r.get("auto_played"))]
+    return rows or None
 
 
 def _moved_row(row: dict[str, Any]) -> dict[str, Any]:

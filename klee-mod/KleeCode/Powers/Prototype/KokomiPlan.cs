@@ -371,7 +371,8 @@ public static class KokomiPlan
         string? Kind = null, int? Asked = null,
         IReadOnlyList<Rider>? Riders = null, bool Unfinished = false,
         bool NoTarget = false, IReadOnlyList<string>? Reactions = null,
-        string? Again = null, IReadOnlyList<Rider>? After = null);
+        string? Again = null, IReadOnlyList<Rider>? After = null,
+        IReadOnlyList<string>? Discarded = null);
 
     /// <summary>KOKOMI REVIEW R8 (2026-10-14, item 9): the Elemental
     /// Reactions a carry-out's own hits set off, by name, in order. A
@@ -642,6 +643,29 @@ public static class KokomiPlan
     /// from a Plan that missed (Kokomi round 5, lane 3).</summary>
     private static readonly HashSet<Player> _aimedAtNoOne = new();
 
+    /// <summary>Seat page backlog (2026-10-18; Kokomi round 4, lane 1, fight
+    /// 16): the generated cards a carry-out sent to the discard pile because
+    /// the hand was full (<see cref="NoteDiscardedInBeat"/>). Read onto that
+    /// carry-out's row, so the line sits under the Plan that made them and not
+    /// after the whole morning.</summary>
+    private static readonly Dictionary<Player, List<string>> _discardedInBeat = new();
+
+    /// <summary>File a generated card the hand had no room for under the Plan
+    /// being carried out. False where no carry-out of this seat is running,
+    /// and the caller files the turn's ordinary line instead.</summary>
+    public static bool NoteDiscardedInBeat(Creature? owner, string card)
+    {
+        var player = owner?.Player;
+        if (player == null || !_carrying.Contains(player)) return false;
+        if (!_discardedInBeat.TryGetValue(player, out var cards))
+        {
+            cards = new List<string>();
+            _discardedInBeat[player] = cards;
+        }
+        cards.Add(card);
+        return true;
+    }
+
     /// <summary>Is a Plan of this seat being carried out right now? Grand
     /// Strategist's "Whenever a Plan causes an Elemental Reaction": a
     /// reaction inside this window was caused by the Plan -- its own hit, or
@@ -693,6 +717,7 @@ public static class KokomiPlan
         _summoning.Clear();
         _summonReactions.Clear();
         _carrying.Clear();
+        _discardedInBeat.Clear();
         // `EB-643`: the cached environment read too, so a test that declares a
         // cap and one that does not cannot see each other's answer.
         _planCap = null;
@@ -716,6 +741,7 @@ public static class KokomiPlan
         _morning.Clear();
         _carrying.Clear();
         _aimedAtNoOne.Clear();
+        _discardedInBeat.Clear();
         _summoning.Clear();
         KokomiRefounding.ResetFight();
     }
@@ -1952,6 +1978,7 @@ public static class KokomiPlan
         var riders = new List<Rider>();
         if (seat != null) _aimedAtNoOne.Remove(seat);
         if (seat != null) _reactions.Remove(seat);
+        if (seat != null) _discardedInBeat.Remove(seat);
         if (seat != null) _carrying.Add(seat);
         try
         {
@@ -2008,12 +2035,17 @@ public static class KokomiPlan
             {
                 reactions = noted;
             }
+            List<string>? discarded = null;
+            if (seat != null && _discardedInBeat.Remove(seat, out var sent))
+            {
+                discarded = sent;
+            }
             Announce(kokomi,
                      entry.Now && entry.TwoLine
                          ? NowLineTitle(entry.Title) : entry.Title,
                      number, Moved(before, kokomi),
                      onPlay, kind, asked, riders, noTarget, reactions,
-                     again);
+                     again, discarded);
         }
 
         // SANGO ISSHIN's condition, written HERE because this is the one place
@@ -2063,7 +2095,8 @@ public static class KokomiPlan
                                  IReadOnlyList<Rider>? riders = null,
                                  bool noTarget = false,
                                  IReadOnlyList<string>? reactions = null,
-                                 string? again = null)
+                                 string? again = null,
+                                 IReadOnlyList<string>? discarded = null)
     {
         var line = Vfx.KurageBeat.Line(card, number);
         Vfx.KurageBeat.Say(BakeKuragePet.Of(kokomi) ?? kokomi, line);
@@ -2071,7 +2104,8 @@ public static class KokomiPlan
                                           kind, asked, riders,
                                           NoTarget: noTarget,
                                           Reactions: reactions,
-                                          Again: again));
+                                          Again: again,
+                                          Discarded: discarded));
     }
 
     /// <summary>
@@ -3003,6 +3037,9 @@ public static class KokomiPlan
             // after it (Following Current's hit), by source, amount and
             // body. Null where none.
             ["after"] = said.After?.Select(RiderRow).ToList(),
+            // Seat page backlog (2026-10-18): the generated cards this
+            // carry-out sent to the discard pile (hand full). Null where none.
+            ["discarded"] = said.Discarded?.ToList(),
         };
 
     /// One named rider inside one Plan's window (`EB-453`). A named method for
@@ -3142,6 +3179,16 @@ public static class KokomiPlan
         var creature = player?.Creature;
         if (player == null || !KokomiOverhaul.LiveFor(creature))
         {
+            // Seat page backlog (2026-10-18): a Companion summon's end-of-turn
+            // hit (Oz, Soumetsu) is logged for every seat (`Summon`), and only
+            // Kokomi's page printed it. Off Kokomi the snapshot carries that
+            // log alone, and only where it holds a row; with no `pet` key the
+            // page does not read it as her queue.
+            var hits = player == null ? null : SummonHits(player);
+            if (hits is { Count: > 0 })
+            {
+                snapshot["summon_hits"] = hits.Select(CarriedOutRow).ToList();
+            }
             return snapshot;
         }
 

@@ -83,7 +83,9 @@ public sealed class ProtoMcDurinBinaryForm : CustomCardModel, IElementalCard, IC
     // that aims, and the bridge then demanded a target on the mode
     // that attacks nothing. These two rows are what it reads instead.
     public IReadOnlyList<string> ModeLabels =>
-        new[] { "[gold]White[/gold]: Deal 6 [gold]Pyro[/gold] damage to ALL enemies", "[gold]Dark[/gold]: Deal 4 [gold]Pyro[/gold] damage to an enemy 3 times" };
+        IsUpgraded
+            ? new[] { "[gold]White[/gold]: Deal 8 [gold]Pyro[/gold] damage to ALL enemies", "[gold]Dark[/gold]: Deal 5 [gold]Pyro[/gold] damage to an enemy 3 times" }
+            : new[] { "[gold]White[/gold]: Deal 6 [gold]Pyro[/gold] damage to ALL enemies", "[gold]Dark[/gold]: Deal 4 [gold]Pyro[/gold] damage to an enemy 3 times" };
 
     public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
         new[] { false, true };

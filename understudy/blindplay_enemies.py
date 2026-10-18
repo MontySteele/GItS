@@ -224,6 +224,15 @@ ENEMY_BRIEFS: dict[str, tuple[str, str]] = {
         "Judicial Flight (no attack; gains Soar), Verdict (one heavy hit, "
         "then Vulnerable 4 to you; Soar ends). Soar halves the damage your "
         "Attacks deal to it for the one turn it is airborne."),
+    # Seat page backlog (2026-10-18; the Klee final-pass round): "Spiny
+    # Toad's Thorns showed on turn 1 only". Its loop takes them off again
+    # (decompiled `SpinyToad`).
+    "SPINY_TOAD": (
+        "Spiny Toad",
+        "Fixed three-turn loop: Protruding Spikes (no attack; gains Thorns "
+        "5), Spike Explosion (one heavy hit, then the 5 Thorns are gone), "
+        "Tongue Lash (one hit). It holds Thorns only from the first move to "
+        "the second."),
 }
 
 #: Every body of every act-1/2/3 elite and boss encounter in the shipped game.
