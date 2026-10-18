@@ -31,6 +31,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         INTENT_SOURCE_NOTE_BREAKDOWN,
                                         ONE_USE_DISCOUNT_NOTE,
                                         ONE_USE_RIDER_NOTE,
+                                        PLAN_DISCOUNT_NOTE,
                                         PER_HIT_NOTE,
                                         MAP_FLOOR_LINE, MAP_RUN_LINE,
                                         CARD_REWARD_ALTERNATIVE_NOTE,
@@ -1534,6 +1535,11 @@ _ATTACK_DAMAGE_BUFF = re.compile(
     r"your attacks deal[^.]*additional damage", re.I)
 _MULTI_HIT_LABEL = re.compile(r"^\s*(\d+)\s*[x×]\s*(\d+)\s*$")
 _ONE_USE_DISCOUNT = re.compile(r"the next (\w+) you play costs", re.I)
+# The Kokomi card paper v2 (2026-10-18): Draft the Orders' "The next card you
+# plan this turn costs 1 less", markup stepped over.
+_PLAN_DISCOUNT = re.compile(
+    r"the next card you (?:\[\w+\])?plan(?:\[/\w+\])? this turn costs",
+    re.I)
 # `EB-669`. The same sentence with any other consequence -- Battle Plan's "the
 # next Attack you play face-up this turn deals 4 additional damage". Asked
 # SECOND, so a price keeps the note written for a price.
@@ -1820,6 +1826,9 @@ def _one_use_discount_note(you: dict[str, Any]) -> list[str]:
     """
     for power in you.get("powers") or []:
         text = str(power.get("text") or "")
+        if _PLAN_DISCOUNT.search(text):
+            return ["", PLAN_DISCOUNT_NOTE.format(
+                power=f"**{power['name']}**")]
         found = _ONE_USE_DISCOUNT.search(text)
         if found:
             return ["", ONE_USE_DISCOUNT_NOTE.format(

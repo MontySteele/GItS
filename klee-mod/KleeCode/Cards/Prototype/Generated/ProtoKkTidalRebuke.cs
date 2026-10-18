@@ -51,15 +51,15 @@ public sealed class ProtoKkTidalRebuke : CustomCardModel, IElementalCard, IChara
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tidal Rebuke"),
-        ("description", "Deal [gold]Hydro[/gold] damage equal to your [gold]Block[/gold] to ALL enemies.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
+        ("description", "Lose all your [gold]Block[/gold]. Deal twice that in [gold]Hydro[/gold] damage to ALL enemies.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new CalculationBaseVar(0m),
-            new ExtraDamageVar(1m),
-            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => (int)card.Owner.Creature.Block)
+            new ExtraDamageVar(2m),
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => KokomiCards.BlockLostThisPlay(card))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -71,6 +71,7 @@ public sealed class ProtoKkTidalRebuke : CustomCardModel, IElementalCard, IChara
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        await KokomiCards.LoseAllBlock(choiceContext, this, cardPlay);
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
             .FromCard(this, cardPlay)
             .TargetingAllOpponents(CombatState!)

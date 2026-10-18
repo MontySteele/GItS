@@ -640,6 +640,9 @@ KNOWN_MISSING = {
     # dedupe (review/active/yae-dedupe-2026-10-16.md, 2026-10-16), whose
     # refill's eleven cards were painted by the Yae refill art pass
     # (2026-10-16), under "Yae refill art" in art/plan.tsv.
+    "proto_kk_draft_the_orders":
+        "Kokomi card paper v2 (2026-10-18): new in Shell of Sanctuary's "
+        "slot; its art is owed by the next Kokomi art pass",
 }
 
 

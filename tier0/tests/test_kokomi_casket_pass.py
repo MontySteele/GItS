@@ -108,11 +108,12 @@ def test_the_commons(overhaul):
     assert press_up.effects[0]["else"][0]["amount"] == 9
     assert press_up.effects[0]["then"][0]["amount"] == 14
 
-    # Kokomi review r9 (2026-10-15, item 4): 6 [9] Block, Retain.
-    shell = _row("proto_kk_shell_of_sanctuary")
-    assert shell.plan == []
-    assert shell.effects == [{"op": "block", "amount": 6}]
-    assert _up("proto_kk_shell_of_sanctuary").effects[0]["amount"] == 9
+    # Shell of Sanctuary left with the Kokomi card paper v2 (2026-10-18):
+    # Draft the Orders is 5 [8] Block and a discount, no Plan line.
+    draft = _row("proto_kk_draft_the_orders")
+    assert draft.plan == []
+    assert draft.effects[0] == {"op": "block", "amount": 5}
+    assert _up("proto_kk_draft_the_orders").effects[0]["amount"] == 8
 
 
 def test_no_common_increases_deck_size(overhaul):

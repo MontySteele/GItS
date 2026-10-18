@@ -930,6 +930,9 @@ POWER_HOOKS: dict[str, list[tuple[str, str, str]]] = {
                             _hook("shared", "block_held", "write")],
     "kk_tidal_riposte": [_hook("shared", "block_held", "read"),
                          _hook("shared", "enemy_intent", "read")],
+    # The Kokomi card paper v2 (2026-10-18): Draft the Orders' discount on
+    # the next card written on the Bake-Kurage.
+    "kk_draft_the_orders": [_hook("private", "kurage", "read")],
     "kk_kurage_canopy": [_hook("private", "kurage", "read"),
                          _hook("shared", "hand_contents", "write")],
     # Weak and Vulnerable carry no vocabulary hook (the `weak` row), so the
@@ -1074,6 +1077,7 @@ COUNT_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "exhaust_pile": [_hook("shared", "exhaust_pile", "read")],
     "exhausted_this_card": [_hook("shared", "exhaust_pile", "read")],
     "player_block": [_hook("shared", "block_held", "read")],
+    "block_lost_this_card": [_hook("shared", "block_held", "read")],
     "block_gained_this_card": [_hook("shared", "block_held", "read")],
     "hand_size": [_hook("shared", "hand_contents", "read")],
     "other_cards_in_hand": [_hook("shared", "hand_contents", "read")],

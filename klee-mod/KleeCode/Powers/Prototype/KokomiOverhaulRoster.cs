@@ -188,7 +188,7 @@ internal static class KokomiOverhaulRoster
         ModelDb.Card<ProtoKkBreakwater>(),
         ModelDb.Card<ProtoKkSurgingShoal>(),
         ModelDb.Card<ProtoKkPressTheAdvantage>(),
-        ModelDb.Card<ProtoKkShellOfSanctuary>(),
+        ModelDb.Card<ProtoKkDraftTheOrders>(),
         ModelDb.Card<ProtoKkTideturn>(),
         ModelDb.Card<ProtoKkPearlCurrent>(),
         ModelDb.Card<ProtoKkBubbleWard>(),

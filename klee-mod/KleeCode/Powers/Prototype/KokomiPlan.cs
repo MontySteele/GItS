@@ -1996,15 +1996,17 @@ public static class KokomiPlan
         {
             if (power is IKokomiPlanListener listener)
             {
-                await listener.OnPlanResolved(choiceContext, kokomi);
+                await listener.OnPlanResolved(choiceContext, kokomi,
+                                              entry.Source);
             }
         }
-        // THE RE-FOUNDING (2026-10-12): Endless Shoal (a Sting or Ward
-        // carried out; Coordinated Tide moved inside the window above). Once
-        // per carry-out, either line, like the bus above. Sim twin:
-        // `kokomi_plan.note_carried_out`.
+        // THE RE-FOUNDING (2026-10-12): Endless Shoal (Coordinated Tide moved
+        // inside the window above). Once per carry-out, either line, like the
+        // bus above; since the Kokomi card paper v2 (2026-10-18) not for a
+        // Sting's or Ward's line (`entry.Source`, the card whose line it is).
+        // Sim twin: `kokomi_plan.note_carried_out`.
         await KokomiRefounding.OnCarriedOut(choiceContext, kokomi,
-                                            entry.Returns);
+                                            entry.Returns, entry.Source);
         // KOKOMI'S OWN RELICS (2026-10-15): Everlasting Moonglow, after the
         // turn's first carry-out, through either door.
         await Relics.KokomiArmRelics.AfterPlanCarriedOut(kokomi,
@@ -3893,7 +3895,11 @@ public interface IKokomiPlanListener
 {
     /// <param name="choiceContext">Live context; a listener may draw or deal.</param>
     /// <param name="kokomi">The seat whose Plan was carried out.</param>
-    Task OnPlanResolved(PlayerChoiceContext choiceContext, Creature kokomi);
+    /// <param name="line">The card whose line was carried out
+    /// (<see cref="KokomiPlan.Entry.Source"/>): Kurage Canopy skips a Sting's
+    /// or Ward's (Kokomi card paper v2, 2026-10-18).</param>
+    Task OnPlanResolved(PlayerChoiceContext choiceContext, Creature kokomi,
+                        CardModel? line);
 }
 
 /// <summary>

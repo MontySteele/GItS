@@ -107,13 +107,15 @@ def test_endless_shoal_is_an_uncommon_power_at_1_innate_upgraded():
 
 
 def test_endless_shoal_adds_a_sting_per_carry_out():
+    """Kokomi card paper v2 (2026-10-18): not for a Sting's or Ward's Plan."""
     st = kokomi_state()
     st.player.powers[kokomi_plan.ENDLESS_SHOAL] = 1
     write(st, card("proto_kk_brine_sting"))
     write(st, card(kokomi_plan.WARD_ID))
+    write(st, card(kokomi_plan.STING_ID))
     st.player.hand.clear()
     carry_out(st)
-    assert [c.id for c in st.player.hand] == [kokomi_plan.STING_ID] * 2
+    assert [c.id for c in st.player.hand] == [kokomi_plan.STING_ID]
 
 
 def test_endless_shoal_on_a_doubled_carry_out_gives_two_stings():

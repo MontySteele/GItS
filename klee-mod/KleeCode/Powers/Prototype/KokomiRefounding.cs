@@ -624,20 +624,25 @@ public static class KokomiRefounding
 
     /// <summary>
     /// A Plan was just carried out; <paramref name="card"/> is the card that
-    /// wrote it. Endless Shoal (the jellyfish build, 2026-10-12): "Whenever
-    /// the Bake-Kurage carries out a Plan, add a Sting to your hand." Any
-    /// Plan, either line; once per CARRY-OUT, so a Plan carried out twice
-    /// (Nereid's Ascension, Second Wave) gives two Stings, and copies add one
-    /// each. (Coordinated Tide's hit is inside the carry-out,
+    /// wrote it and <paramref name="line"/> the card whose line it was (they
+    /// differ for Moon's Reflection). Endless Shoal (the jellyfish build,
+    /// 2026-10-12; Kokomi card paper v2, 2026-10-18, sec.2 change 5):
+    /// "Whenever the Bake-Kurage carries out a Plan that is not a Sting or
+    /// Ward, add a Sting to your Hand." Either line; once per CARRY-OUT, so a
+    /// Plan carried out twice (Nereid's Ascension, Second Wave) gives two
+    /// Stings, and copies add one each. A planned Sting no longer replaces
+    /// itself. (Coordinated Tide's hit is inside the carry-out,
     /// <see cref="CoordinatedTide"/>.) Sim twin:
     /// <c>kokomi_plan.note_carried_out</c>.
     /// </summary>
     public static async Task OnCarriedOut(PlayerChoiceContext choiceContext,
-                                          Creature kokomi, CardModel? card)
+                                          Creature kokomi, CardModel? card,
+                                          CardModel? line = null)
     {
         if (!KokomiOverhaul.LiveFor(kokomi)) return;
-        var stings = (int)kokomi.Powers.OfType<EndlessShoalPower>()
-            .Sum(p => p.Amount);
+        var stings = IsJellyfish(line ?? card)
+            ? 0
+            : (int)kokomi.Powers.OfType<EndlessShoalPower>().Sum(p => p.Amount);
         if (stings > 0)
         {
             await KokomiCards.AddJellyfish(kokomi.Player,
@@ -1052,7 +1057,8 @@ public sealed class UndercurrentSnarePower : TemporaryStrengthPower,
 }
 
 /// <summary>Endless Shoal (the jellyfish build, 2026-10-12): "Whenever the
-/// Bake-Kurage carries out a Plan, add a Sting to your hand." Paid from
+/// Bake-Kurage carries out a Plan that is not a Sting or Ward, add a Sting to
+/// your hand" (the clause since the Kokomi card paper v2, 2026-10-18). Paid from
 /// <see cref="KokomiRefounding.OnCarriedOut"/>, once per carry-out; copies
 /// add one each.</summary>
 public sealed class EndlessShoalPower : PowerModel, ILocalizationProvider
@@ -1062,7 +1068,8 @@ public sealed class EndlessShoalPower : PowerModel, ILocalizationProvider
         ("title", "Endless Shoal"),
         ("description",
             "Whenever the [gold]Bake-Kurage[/gold] carries out a "
-          + "[gold]Plan[/gold], add [blue]{Amount}[/blue] "
+          + "[gold]Plan[/gold] that is not a [gold]Sting[/gold] or "
+          + "[gold]Ward[/gold], add [blue]{Amount}[/blue] "
           + "{Amount:plural:[gold]Sting[/gold]|[gold]Stings[/gold]} to your "
           + "[gold]Hand[/gold]."),
     };

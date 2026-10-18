@@ -155,20 +155,18 @@ public class KokomiCasketPassTests : IDisposable
         Assert.Contains(Il.Calls(Il.Method("ProtoKkPressTheAdvantage", "OnPlay")),
                         c => c.Contains("KokomiPlan.PlansHeld"));
 
-        // Kokomi review r8 (2026-10-14, item 1): 7 [10] Block, plus 2 for
-        // each Plan waiting; no draw and no Plan line.
-        // Superseded by Kokomi review r9 item 4: a flat 6 [9], Retain.
-        var shell = new ProtoKkShellOfSanctuary();
-        Assert.Equal(6m, Var(shell, "Block"));
-        Assert.Equal(9m, Var(Upgraded<ProtoKkShellOfSanctuary>(), "Block"));
-        Assert.DoesNotContain(Il.Calls(Il.Method("ProtoKkShellOfSanctuary", "OnPlay")),
+        // Shell of Sanctuary left with the Kokomi card paper v2 (2026-10-18):
+        // Draft the Orders is 5 [8] Block and the plan discount, no Plan line.
+        var draft = new ProtoKkDraftTheOrders();
+        Assert.Equal(5m, Var(draft, "Block"));
+        Assert.Equal(8m, Var(Upgraded<ProtoKkDraftTheOrders>(), "Block"));
+        Assert.DoesNotContain(Il.Calls(Il.Method("ProtoKkDraftTheOrders", "OnPlay")),
                               c => c.Contains("KokomiPlan.Schedule"));
-        Assert.Equal("Gain {Block:diff()} [gold]Block[/gold].", Face(shell));
 
         // None of these creates a card.
         foreach (var type in new[] { "ProtoKkSurgingShoal",
                                      "ProtoKkPressTheAdvantage",
-                                     "ProtoKkShellOfSanctuary" })
+                                     "ProtoKkDraftTheOrders" })
         {
             Assert.DoesNotContain(Il.Calls(Il.Method(type, "OnPlay")),
                                   c => c.Contains("CreateCard")

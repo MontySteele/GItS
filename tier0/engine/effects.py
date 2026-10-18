@@ -241,6 +241,15 @@ def _runtime_count(state: CombatState, token: str,
         return len(p.exhaust_pile)
     if token == "player_block":
         return p.block
+    if token == "block_lost_this_card":
+        # Tidal Rebuke (Kokomi card paper v2, 2026-10-18): the Block its own
+        # `lose_all_block` just took; her standing Block before the play has
+        # lost anything (the pilot's estimate). `KokomiCards.BlockLostThisPlay`.
+        lost = getattr(state, "kk_block_lost", None)
+        if (lost is not None and current_card is not None
+                and lost[0] is current_card):
+            return lost[1]
+        return p.block
     if token == "attacks_in_hand":
         return sum(1 for c in p.hand if c.type == "attack")
     if token == "strike_cards":
@@ -3402,6 +3411,7 @@ RUNTIME_COUNT_NAMES = frozenset({
     "stage_guests", "stage_fanfare",
     "exhaust_pile",
     "player_block",
+    "block_lost_this_card",
     "attacks_in_hand",
     "strike_cards",
     "player_damage_events",
@@ -5365,6 +5375,9 @@ def _resolve_card_bound(state: CombatState, card: Card) -> None:
     # the side effect the helper must NOT have lives here instead: Bennett's
     # next_attack_up is CONSUMED by this play.
     bonus = flat_attack_bonus(state, card, state.current_card_cost)
+    # Tidal Riposte's stored bonus (Kokomi card paper v2), spent here beside
+    # `next_attack_up` -- but never by a write on the Bake-Kurage.
+    kokomi_plan.spend_riposte(state, card)
     if card.type == "attack":
         p = state.player
         p.powers.pop("next_attack_up", 0)
@@ -5386,6 +5399,9 @@ def _resolve_card_bound(state: CombatState, card: Card) -> None:
     # already paid (`combat.play_card` charged it before this) and the card is
     # already out of hand, which is the whole shape of rule 2.
     if kokomi_plan.plan_aimed_at_pet(state, card):
+        # Draft the Orders, spent by the write it cheapened (Kokomi card
+        # paper v2, 2026-10-18).
+        kokomi_plan.spend_draft_the_orders(state, card)
         kokomi_plan.schedule(state, card)
         return
 
@@ -5463,6 +5479,9 @@ def flat_attack_bonus(state: CombatState, card: Card, cost: int, *,
     # double-count class the AoE-blindness finding warned about.
     bonus = (p.powers.get("next_attack_up", 0)
              + p.powers.get("attack_up_this_turn", 0))
+    # THE KOKOMI CARD PAPER V2 (2026-10-18): Tidal Riposte's stored bonus,
+    # one Attack card face-up (`kokomi_plan.riposte_bonus`).
+    bonus += kokomi_plan.riposte_bonus(state, card)
     # THE MONDSTADT COMPANION OVERHAUL'S THREE ATTACK RIDERS.
     # Flat, and folded in exactly where `next_attack_up` is folded in --
     # they say the same English ("deals N more") and a second summing site

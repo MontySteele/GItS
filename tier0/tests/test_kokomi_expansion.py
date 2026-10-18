@@ -310,15 +310,20 @@ def test_grace_through_a_real_turn_boundary(overhaul):
     assert seen and seen[0] == 10
 
 
-def test_tidal_riposte_answers_a_fully_blocked_hit_once(overhaul):
+def test_tidal_riposte_stores_its_bonus_per_fully_blocked_attack(overhaul):
+    """Kokomi card paper v2 (2026-10-18): no damage back; a fully Blocked
+    attack (all its hits) stores the bonus, and attacks stack it."""
     enemy = make_enemy(hp=100)
     st = kokomi_state(enemies=[enemy])
     st.player.powers[kokomi_plan.TIDAL_RIPOSTE] = 5
-    kokomi_plan.tidal_riposte(st, enemy, blocked=6, unblocked=0)
-    assert enemy.hp == 95
-    kokomi_plan.tidal_riposte(st, enemy, blocked=3, unblocked=2)
-    kokomi_plan.tidal_riposte(st, enemy, blocked=0, unblocked=0)
-    assert enemy.hp == 95
+    kokomi_plan.tidal_riposte(st, enemy, [(6, 0)])
+    assert enemy.hp == 100
+    assert st.player.powers[kokomi_plan.TIDAL_RIPOSTE_CHARGE] == 5
+    kokomi_plan.tidal_riposte(st, enemy, [(3, 0), (3, 2)])   # one got through
+    kokomi_plan.tidal_riposte(st, enemy, [(0, 0)])           # nothing blocked
+    assert st.player.powers[kokomi_plan.TIDAL_RIPOSTE_CHARGE] == 5
+    kokomi_plan.tidal_riposte(st, enemy, [(4, 0), (4, 0), (4, 0)])
+    assert st.player.powers[kokomi_plan.TIDAL_RIPOSTE_CHARGE] == 10
 
 
 # --- Plan volume ------------------------------------------------------------------------

@@ -68,12 +68,14 @@ public class KokomiReviewR9Tests
     }
 
     [Fact]
-    public void Shell_of_sanctuary_is_a_flat_retained_block()
+    public void Shell_of_sanctuary_is_cut_for_draft_the_orders()
     {
-        var shell = new ProtoKkShellOfSanctuary();
-        Assert.Equal(6m, shell.DynamicVars["Block"].BaseValue);
-        Assert.Contains(CardKeyword.Retain, shell.CanonicalKeywords);
-        Assert.Equal("Gain {Block:diff()} [gold]Block[/gold].", Face(shell));
+        // The Kokomi card paper v2 (2026-10-18, sec.2 change 1).
+        var draft = new ProtoKkDraftTheOrders();
+        Assert.Equal(5m, draft.DynamicVars["Block"].BaseValue);
+        Assert.Equal("Gain {Block:diff()} [gold]Block[/gold]. The next card "
+                   + "you [gold]plan[/gold] this turn costs 1 less.",
+                     Face(draft));
     }
 
     // ---- item 4 ---------------------------------------------------------------

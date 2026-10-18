@@ -82,19 +82,22 @@ def test_watatsumi_muster_cards_keep_their_costs():
     assert not any(c.free_this_turn for c in st.player.hand[before:])
 
 
-# ---- item 4: Shell of Sanctuary ---------------------------------------------
+# ---- item 4: Shell of Sanctuary (cut by the Kokomi card paper v2) ---------
 
-def test_shell_of_sanctuary_is_six_nine_block_with_retain():
-    row = loader.get_card("proto_kk_shell_of_sanctuary")
-    assert row.retain and row.cost == 1 and row.plan == []
-    assert row.effects == [{"op": "block", "amount": 6}]
+def test_draft_the_orders_is_five_eight_block_and_a_discount():
+    """Shell of Sanctuary's slot since the Kokomi card paper v2 (2026-10-18):
+    5 [8] Block, no Retain, and the plan discount."""
+    row = loader.get_card("proto_kk_draft_the_orders")
+    assert not row.retain and row.cost == 1 and row.plan == []
+    assert row.effects[0] == {"op": "block", "amount": 5}
     up = upgrades.apply_upgrade(row)
-    assert up.effects == [{"op": "block", "amount": 9}] and up.retain
+    assert up.effects[0] == {"op": "block", "amount": 8}
     st = kokomi_state()
     st.player.block = 0
     from tier0.engine import effects
-    effects.resolve_card(st, loader.get_card("proto_kk_shell_of_sanctuary"))
-    assert st.player.block == 6
+    effects.resolve_card(st, loader.get_card("proto_kk_draft_the_orders"))
+    assert st.player.block == 5
+    assert st.player.powers[kokomi_plan.DRAFT_THE_ORDERS] == 1
 
 
 # ---- item 7: one wording for "no aura" --------------------------------------

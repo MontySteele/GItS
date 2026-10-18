@@ -100,6 +100,7 @@
     "proto_kk_coral_bulwark",
     "proto_kk_coral_crash",
     "proto_kk_dawn_tide",
+    "proto_kk_draft_the_orders",
     "proto_kk_drowning_pressure",
     "proto_kk_endless_shoal",
     "proto_kk_evening_watch",
@@ -137,7 +138,6 @@
     "proto_kk_sea_glass_harvest",
     "proto_kk_seas_reproach",
     "proto_kk_second_wave",
-    "proto_kk_shell_of_sanctuary",
     "proto_kk_shoal_call",
     "proto_kk_shoal_of_spears",
     "proto_kk_slack_water",
@@ -604,6 +604,7 @@
     "proto_kk_coral_bulwark": "kokomi",
     "proto_kk_coral_crash": "kokomi",
     "proto_kk_dawn_tide": "kokomi",
+    "proto_kk_draft_the_orders": "kokomi",
     "proto_kk_drowning_pressure": "kokomi",
     "proto_kk_endless_shoal": "kokomi",
     "proto_kk_evening_watch": "kokomi",
@@ -641,7 +642,6 @@
     "proto_kk_sea_glass_harvest": "kokomi",
     "proto_kk_seas_reproach": "kokomi",
     "proto_kk_second_wave": "kokomi",
-    "proto_kk_shell_of_sanctuary": "kokomi",
     "proto_kk_shoal_call": "kokomi",
     "proto_kk_shoal_of_spears": "kokomi",
     "proto_kk_slack_water": "kokomi",
@@ -1351,6 +1351,9 @@
     "proto_kk_dawn_tide": {
       "cost": -1
     },
+    "proto_kk_draft_the_orders": {
+      "block": 3
+    },
     "proto_kk_drowning_pressure": {
       "formula_per": 1
     },
@@ -1471,9 +1474,6 @@
     },
     "proto_kk_second_wave": {
       "damage": 2
-    },
-    "proto_kk_shell_of_sanctuary": {
-      "block": 3
     },
     "proto_kk_shoal_call": {
       "kokomi_amount": 1

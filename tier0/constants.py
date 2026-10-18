@@ -1008,7 +1008,7 @@ KOKOMI_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_kk_breakwater",
     "proto_kk_surging_shoal",
     "proto_kk_press_the_advantage",
-    "proto_kk_shell_of_sanctuary",
+    "proto_kk_draft_the_orders",
     "proto_kk_tideturn",
     "proto_kk_pearl_current",
     "proto_kk_bubble_ward",

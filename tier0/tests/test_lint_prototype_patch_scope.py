@@ -150,8 +150,15 @@ def test_the_shipped_prototype_tree_is_green() -> None:
     # the same pure by-name teardown the Spark, Fanfare and Drained counters
     # carry. It frees its own node and clears its own statics; the scope is
     # at `Setup`, through `VarkaPrototype.IsVarka`.
-    # A THIRTEENTH appearing here is the next review question.
-    assert len(markers) == 12, markers
+    # IT WENT TWELVE -> FOURTEEN ON 2026-10-18 (the Kokomi card paper v2):
+    # the `PlayCardAction.ExecuteAction` prefix and postfix in
+    # `Powers/Prototype/KokomiCardsV2.cs`, which record which card a play is
+    # about and whether it is aimed at the Bake-Kurage, for Draft the Orders'
+    # cost hook (the cost seam is handed no play, `EB-668`). Scoped by the
+    # card (only a card with a Plan line is recorded), whoever plays it; they
+    # change nothing about the play and resolve no seat.
+    # A FIFTEENTH appearing here is the next review question.
+    assert len(markers) == 14, markers
 
 
 def test_registered_in_the_ci_lane() -> None:

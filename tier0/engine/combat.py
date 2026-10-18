@@ -345,6 +345,10 @@ def card_cost(state: CombatState, card: Card) -> int:
     # priced, so `card_playable` can ask as often as it likes.
     if card.type == "attack" and p.powers.get("mc_starfrost_discount", 0):
         cost = max(0, cost - p.powers["mc_starfrost_discount"])
+    # THE KOKOMI CARD PAPER V2 (2026-10-18): Draft the Orders, on a card this
+    # play writes on the Bake-Kurage. Pure, like Mika's above; spent where
+    # the write happens (`kokomi_plan.spend_draft_the_orders`).
+    cost = max(0, cost - kokomi_plan.draft_discount(state, card, cost))
     # Base-game parity (FreeAttack / Corruption): checked AFTER the spark
     # branch, so a spark-freed attack spends the bank rather than a stack.
     # Precedence pinned by
@@ -1085,6 +1089,9 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # (C.KOKOMI_OVERHAUL). R276: Pincer's switch says "this turn" and dies
     # with it, on the same boundary.
     state.player.powers.pop(kokomi_plan.FIRST_ATTACK_TWICE, None)
+    # The Kokomi card paper v2 (2026-10-18): Draft the Orders says "this
+    # turn" too.
+    state.player.powers.pop(kokomi_plan.DRAFT_THE_ORDERS, None)
     # INSTRUMENT ONLY (pair of `turn_open`): the block standing when the player
     # hands the turn over, which is the quantity a demand curve is read against.
     # A turn that ended by killing the last enemy or by the player dying never
@@ -1188,6 +1195,7 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
             bool(enemy.bombs) and not enemy.bomb_suppression_spent
         )
         amount = enemy.ramped_amount(intent, state.turn)
+        riposte_hits: list[tuple[int, int]] = []
         for _ in range(enemy.ramped_times(intent)):
             dmg = powers.modify_damage_dealt(enemy, amount)
             if frozen:
@@ -1297,10 +1305,10 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
                                          powered_attack=True)
             # Objection! (the Furina sweep): twice the HP this hit cost.
             furina_stage.objection(state, enemy, hp_loss)
-            # (C.KOKOMI_OVERHAUL). THE EXPANSION's Tidal Riposte:
-            # a hit Block absorbed whole answers back, once per hit.
-            kokomi_plan.tidal_riposte(state, enemy, blocked,
-                                      dmg - blocked)
+            # (C.KOKOMI_OVERHAUL). Tidal Riposte reads the whole attack
+            # (Kokomi card paper v2, 2026-10-18): this hit is noted and the
+            # rule is asked once, after the loop.
+            riposte_hits.append((blocked, dmg - blocked))
             # THE KOKOMI POOL OVERHAUL (2026-10-13): the running totals a
             # "since you planned this" Plan reads -- this hit, blocked or
             # not, and who dealt it.
@@ -1314,6 +1322,9 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
                     return
             if not enemy.alive:
                 break               # FlameBarrier can kill the dealer
+        # Tidal Riposte, ONCE for the whole attack: every hit on her fully
+        # Blocked stores the bonus (`TidalRipostePower.AfterAttack`).
+        kokomi_plan.tidal_riposte(state, enemy, riposte_hits)
         if bomb_suppressed:
             enemy.bomb_suppression_spent = True
             state.emit("bomb_suppression_spent", enemy=enemy.name)

@@ -308,18 +308,14 @@ public class KokomiReviewTests
     // ---- 8. Tidal Riposte --------------------------------------------------------
 
     [Fact]
-    public void Tidal_riposte_hits_that_enemy()
+    public void Tidal_riposte_stores_for_the_next_attack()
     {
+        // The Kokomi card paper v2 (2026-10-18, sec.2 change 4).
         Assert.Equal(
-            "Whenever an enemy's attack is fully blocked, deal "
-          + "{PowerAmount:diff()} damage to that enemy.",
+            "Whenever you fully [gold]Block[/gold] an enemy's attack, your "
+          + "next Attack deals {PowerAmount:diff()} additional damage.",
             Face(new ProtoKkTidalRiposte()));
-        Assert.EndsWith("damage to that enemy.",
-                        PowerText(new TidalRipostePower()));
-        // The dealer, and nobody else.
-        Assert.Contains(
-            Il.Calls(Il.Method("TidalRipostePower", "AfterDamageReceived")),
-            c => c.Contains("ElementalHit.Deal"));
+        Assert.EndsWith("additional damage.", PowerText(new TidalRipostePower()));
     }
 
     // ---- 9. the rarity swap --------------------------------------------------------
