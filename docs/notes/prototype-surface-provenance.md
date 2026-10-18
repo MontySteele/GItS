@@ -9543,3 +9543,43 @@ pick 1 (a)); sec.3 is the main session's paper for a Prototype kit.
   "Review r3: the full-shrine rule is its own tip (ForFullShrine)"; The Seven
   Glamours was a 1 [0] Skill "Publishing every Annotated card in hand" before
   2026-10-15.
+
+## Kokomi card paper v2, 2026-10-18
+
+`review/active/kokomi-cards-2026-10-18.md` sec.2, ruled picks 1 (b), 2 (a)
+and 3 (a). [USER]: "On Kokomi, I'm good with all three - let's try that and
+see if it works." Four changes built; Nereid's Ascension is unchanged.
+
+- **Shell of Sanctuary is cut; Draft the Orders** (`proto_kk_draft_the_orders`,
+  Common Skill, 1) takes its slot: "Gain 5 [8] Block. The next card you plan
+  this turn costs 1 less." Power `kk_draft_the_orders`
+  (`DraftTheOrdersPower`). The game's cost hook is handed no play, so the
+  discount shows on every card in hand with a Plan line and a
+  `PlayCardAction.ExecuteAction` patch takes it back off a play aimed
+  anywhere but the Bake-Kurage (`KokomiPlanCost`). Spent by the first card
+  planned that it cheapened (a 0-cost Sting or Ward leaves it up); copies
+  add to the one discount; gone at turn end. The card has no art row yet.
+- **Tidal Rebuke**: "Lose all your Block. Deal twice that in Hydro damage to
+  ALL enemies." New kind `lose_all_block` (C# `KokomiCards.LoseAllBlock`)
+  ahead of the damage, and the count `block_lost_this_card`, which reads
+  what that play lost (her standing Block in a preview). Cost 2 [1], Retain,
+  unchanged. It used to deal her Block once and keep it (the Body Slam to
+  ALL of the level pass, 2026-10-12).
+- **Tidal Riposte**: "Whenever you fully Block an enemy's attack, your next
+  Attack deals 8 [11] additional damage." Once per enemy attack (the paper
+  said "more"; the text lint takes the base game's "additional") (its whole hit
+  list: something blocked, nothing through), not per hit. The amount is
+  stored in `kk_tidal_riposte_charge` (`TidalRiposteChargePower`), which
+  stacks, adds to every hit of the next Attack card played face-up and then
+  clears. An Attack written on the Bake-Kurage and a carried-out Plan do not
+  spend it. It used to deal 8 back to the attacker per blocked hit.
+- **Endless Shoal and Kurage Canopy**: "... carries out a Plan that is not a
+  Sting or Ward, ...". The line's own card is read (Moon's Reflection's
+  found card, else the writer).
+- **Sheet comments moved here** (the three-line cap): Endless Shoal is
+  Uncommon at 1, pays per CARRY-OUT (a Plan carried out twice gives two
+  Stings) and is Innate on upgrade, Kurage Bloom's and Infinite Blades'
+  upgrade (the jellyfish build, 2026-10-12). Tidal Rebuke is Body Slam to
+  ALL with no Exhaust, 2 [1] at Noelle's price (the level pass,
+  2026-10-12). Kurage Canopy's Ward per carry-out is the round 3 A-list's
+  (2026-10-13).

@@ -46,21 +46,14 @@ def _schedule_plans(st, n):
                                            cid=f"proto_kk_p{i}"))
 
 
-# ---- item 1: Shell of Sanctuary -------------------------------------------
+# ---- item 1: Shell of Sanctuary (cut by the Kokomi card paper v2) ---------
 
-def test_shell_of_sanctuary_is_a_flat_retained_block():
-    """Superseded by Kokomi review r9 (2026-10-15, item 4): 6 [9], Retain."""
-    row = loader.get_card("proto_kk_shell_of_sanctuary")
-    assert row.plan == [] and row.retain
-    assert row.effects == [{"op": "block", "amount": 6}]
-    assert _up("proto_kk_shell_of_sanctuary").effects[0]["amount"] == 9
-    st = kokomi_state()
-    effects.resolve_card(st, row)
-    assert st.player.block == 6
-    _schedule_plans(st, 3)
-    st.player.block = 0
-    effects.resolve_card(st, row)
-    assert st.player.block == 6
+def test_shell_of_sanctuary_is_cut_for_draft_the_orders():
+    """The Kokomi card paper v2 (2026-10-18, sec.2 change 1): Draft the
+    Orders takes its Common slot."""
+    ids = set(loader.pool_replacement("kokomi"))
+    assert "proto_kk_shell_of_sanctuary" not in ids
+    assert "proto_kk_draft_the_orders" in ids
 
 
 
@@ -125,8 +118,9 @@ def test_feints_now_line_is_a_flat_8_whatever_waits():
 
 
 def test_the_five_faces_print_the_ruled_text():
-    assert _sheet_row("proto_kk_shell_of_sanctuary")["description"] == (
-        "Gain {Block:diff()} [gold]Block[/gold].")
+    assert _sheet_row("proto_kk_draft_the_orders")["description"] == (
+        "Gain {Block:diff()} [gold]Block[/gold]. The next card you "
+        "[gold]plan[/gold] this turn costs 1 less.")
     assert _sheet_row("proto_kk_evening_watch")["description"] == (
         "Gain {KkAmount:diff()} [gold]Block[/gold] for each enemy intending "
         "to attack. Draw 1 card.")

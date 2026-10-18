@@ -1568,12 +1568,18 @@
    # `conditional_then_damage` the waiting branch alone.
    upgrade: {conditional_damage: 2, conditional_then_damage: 1}}
 
-- {id: proto_kk_shell_of_sanctuary, name: "Shell of Sanctuary", character: kokomi,
+# SHELL OF SANCTUARY IS CUT (Kokomi card paper v2, 2026-10-18,
+# review/active/kokomi-cards-2026-10-18.md sec.2 change 1): Draft the Orders
+# takes its Common slot and wears its art. Provenance note.
+
+- {id: proto_kk_draft_the_orders, name: "Draft the Orders", character: kokomi,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: common, retain: true,
-   # Kokomi review r9 item 4: Retain, a different job from Breakwater.
-   description: "Gain {Block:diff()} [gold]Block[/gold].",
-   effects: [{op: block, amount: 6}],
+   cost: 1, type: skill, rarity: common,
+   # Kokomi card paper v2 (2026-10-18, sec.2 change 1): pays for a setup turn
+   # and protects it. A 0-cost card planned does not spend the discount.
+   description: "Gain {Block:diff()} [gold]Block[/gold]. The next card you [gold]plan[/gold] this turn costs 1 less.",
+   effects: [{op: block, amount: 5},
+             {op: apply_power, power: kk_draft_the_orders, amount: 1, target: self}],
    upgrade: {block: 3}}
 
 - {id: proto_kk_tideturn, name: "Tideturn", character: kokomi,
@@ -1806,11 +1812,10 @@
 - {id: proto_kk_tidal_riposte, name: "Tidal Riposte", character: kokomi,
    authored_by: [claude],
    cost: 1, type: power, rarity: rare,
-   # "Fully Blocked": a hit Block absorbed whole, once per hit. It hits the
-   # attacker alone ("that enemy", Kokomi review 2026-10-13).
-   description: "Whenever an enemy's attack is fully blocked, deal {PowerAmount:diff()} damage to that enemy.",
-   # Kokomi review r6 (2026-10-14, item 5): 8 [11] (was 5 [7]); it pays once
-   # per hit of a multi-hit attack (`TidalRipostePower.AfterDamageReceived`).
+   # Kokomi card paper v2 (2026-10-18, sec.2 change 4): stored for her next
+   # Attack card (was 8 back at once). Provenance note.
+   description: "Whenever you fully [gold]Block[/gold] an enemy's attack, your next Attack deals {PowerAmount:diff()} additional damage.",
+   # Kokomi review r6 (2026-10-14, item 5): 8 [11] (was 5 [7]).
    effects: [{op: apply_power, power: kk_tidal_riposte, amount: 8, target: self}],
    # 11.
    upgrade: {power_amount: 3}}
@@ -1834,10 +1839,9 @@
 - {id: proto_kk_kurage_canopy, name: "Kurage Canopy", character: kokomi,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   # Kokomi round 3 A-list (2026-10-13): a Ward per CARRY-OUT, Endless
-   # Shoal's Ward twin (was 3 [4] Block); upgraded, the Ward is upgraded.
-   # Provenance note, "Kokomi round 3 A-list, 2026-10-13".
-   description: "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], add {IfUpgraded:show:an upgraded|a} [gold]Ward[/gold] to your [gold]Hand[/gold].",
+   # Kokomi card paper v2 (2026-10-18, sec.2 change 5): not for a Sting's
+   # or Ward's Plan. Provenance note.
+   description: "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold] that is not a [gold]Sting[/gold] or [gold]Ward[/gold], add {IfUpgraded:show:an upgraded|a} [gold]Ward[/gold] to your [gold]Hand[/gold].",
    effects: [{op: apply_power, power: kk_kurage_canopy, amount: 1, target: self}],
    upgrade: {upgraded_power: kk_kurage_canopy_plus}}
 
@@ -1882,12 +1886,13 @@
 
 - {id: proto_kk_tidal_rebuke, name: "Tidal Rebuke", character: kokomi,
    authored_by: [claude],
-   # Body Slam to ALL, no Exhaust, Retain. Kokomi level pass (2026-10-12):
-   # 2 [1], Noelle's price. Provenance note.
+   # Kokomi card paper v2 (2026-10-18, sec.2 change 3, pick 3 (a)): she
+   # spends the Block, twice over (was her Block once, kept). Provenance note.
    cost: 2, type: attack, rarity: rare, retain: true,
-   description: "Deal [gold]Hydro[/gold] damage equal to your [gold]Block[/gold] to ALL enemies.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
-   effects: [{op: damage, target: all_enemies,
-              amount_formula: {base: 0, per: 1, count: player_block}}],
+   description: "Lose all your [gold]Block[/gold]. Deal twice that in [gold]Hydro[/gold] damage to ALL enemies.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: kokomi, kind: lose_all_block},
+             {op: damage, target: all_enemies,
+              amount_formula: {base: 0, per: 2, count: block_lost_this_card}}],
    upgrade: {cost: -1}}
 
 # WATATSUMI RESISTANCE IS CUT (the pool overhaul, 2026-10-13, sec.4):
@@ -2171,11 +2176,10 @@
 
 - {id: proto_kk_endless_shoal, name: "Endless Shoal", character: kokomi,
    authored_by: [claude],
-   # The jellyfish build (2026-10-12): Uncommon, cost 1. Per CARRY-OUT: a
-   # Plan carried out twice gives two Stings. Innate on upgrade, Kurage
-   # Bloom's (and Infinite Blades') upgrade. Provenance note.
+   # Kokomi card paper v2 (2026-10-18, sec.2 change 5): a planned Sting no
+   # longer replaces itself. Provenance note.
    cost: 1, type: power, rarity: uncommon,
-   description: "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], add a [gold]Sting[/gold] to your [gold]Hand[/gold].",
+   description: "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold] that is not a [gold]Sting[/gold] or [gold]Ward[/gold], add a [gold]Sting[/gold] to your [gold]Hand[/gold].",
    effects: [{op: apply_power, power: kk_endless_shoal, amount: 1, target: self}],
    upgrade: {innate: true}}
 

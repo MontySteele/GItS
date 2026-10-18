@@ -50,14 +50,16 @@ public class KokomiReviewR8Tests
     // ---- items 1-5 -------------------------------------------------------------
 
     [Fact]
-    public void Shell_of_sanctuary_pays_per_plan_waiting()
+    public void Shell_of_sanctuarys_slot_is_draft_the_orders()
     {
-        // Superseded by Kokomi review r9 item 4: a flat 6 [9], Retain.
-        Assert.Equal((6, 9), Vars<ProtoKkShellOfSanctuary>("Block"));
-        Assert.Contains(CardKeyword.Retain, new ProtoKkShellOfSanctuary().CanonicalKeywords);
-        Assert.Contains(Calls("ProtoKkShellOfSanctuary", "OnPlay"),
+        // Shell of Sanctuary was cut by the Kokomi card paper v2 (2026-10-18,
+        // sec.2 change 1); Draft the Orders is its Common slot, 5 [8] Block.
+        Assert.Equal((5, 8), Vars<ProtoKkDraftTheOrders>("Block"));
+        Assert.DoesNotContain(CardKeyword.Retain,
+                              new ProtoKkDraftTheOrders().CanonicalKeywords);
+        Assert.Contains(Calls("ProtoKkDraftTheOrders", "OnPlay"),
                         c => c.Contains("CreatureCmd.GainBlock"));
-        Assert.DoesNotContain(Calls("ProtoKkShellOfSanctuary", "OnPlay"),
+        Assert.DoesNotContain(Calls("ProtoKkDraftTheOrders", "OnPlay"),
                               c => c.Contains("CardPileCmd.Draw"));
     }
 

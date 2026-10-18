@@ -173,11 +173,12 @@ def test_a_flipped_ward_carries_out_its_now_line_with_the_bonus():
 def test_coordinated_tide_lands_before_the_plan_bus():
     """The pool overhaul (2026-10-13): Coordinated Tide no longer hits on a
     carry-out (it adds a Sting when a Companion's own hit reacts), so a
-    written Sting carried out pays it nothing; the plan bus still pays."""
+    written Plan carried out pays it nothing; the plan bus still pays (on a
+    Plan that is not a Sting or Ward since the Kokomi card paper v2)."""
     st = kokomi_state()
     st.player.powers[kokomi_plan.COORDINATED_TIDE] = 1
     st.player.powers[kokomi_plan.KURAGE_CANOPY] = 3
-    write(st, card(kokomi_plan.STING_ID))
+    write(st, card("proto_kk_brine_sting"))
     carry_out(st)
     events = [e["event"] for e in st.log]
     assert "plan_coordinated_tide" not in events

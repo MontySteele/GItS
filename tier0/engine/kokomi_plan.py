@@ -342,7 +342,19 @@ TREATISE = "kk_treatise"
 AT_WATERS_EDGE = "kk_at_waters_edge"      # first Hydro hit a turn: Weak N + Vuln N
 CEREMONIAL_GARMENT = "kk_ceremonial_garment"  # +N per Weak/Vuln stack, Attacks
 WATATSUMIS_GRACE = "kk_watatsumis_grace"  # keep up to N Block at turn end
-TIDAL_RIPOSTE = "kk_tidal_riposte"        # N to an attacker fully Blocked
+TIDAL_RIPOSTE = "kk_tidal_riposte"        # an attack fully Blocked: store N
+#: THE KOKOMI CARD PAPER V2 (2026-10-18, review/active/kokomi-cards-2026-10-18.md
+#: sec.2 change 4): Tidal Riposte's STORED bonus, Vigor's shape one card wide
+#: -- the whole stack adds to every hit of her next Attack card played
+#: face-up, then clears; a write and a carried-out Plan do not spend it.
+#: `TidalRiposteChargePower` is the twin.
+TIDAL_RIPOSTE_CHARGE = "kk_tidal_riposte_charge"
+#: THE KOKOMI CARD PAPER V2 (sec.2 change 1): Draft the Orders, "The next card
+#: you plan this turn costs 1 less." Read in `combat.card_cost`
+#: (`draft_discount`), spent by the first card planned that it cheapened
+#: (`spend_draft_the_orders`), dropped at her turn's end.
+#: `DraftTheOrdersPower` is the twin.
+DRAFT_THE_ORDERS = "kk_draft_the_orders"
 #: THE PAYOFF PASS (2026-10-01): Kurage Canopy. Kokomi round 3 A-list
 #: (2026-10-13): "Whenever the Bake-Kurage carries out a Plan, add a Ward to
 #: your Hand." Per carry-out, on the plan bus; the upgraded card installs the
@@ -1478,10 +1490,11 @@ def _note_plan_resolved(state: CombatState,
     # "Whenever the Bake-Kurage carries out a Plan, add a Ward to your Hand."
     # Per carry-out, so a doubled one pays twice; Canopy+ makes Ward+.
     # `KurageCanopyBasePower` is the twin.
+    # Kokomi card paper v2 (2026-10-18): not for a Sting's or Ward's Plan.
     for power_id, upgraded in ((KURAGE_CANOPY, False),
                                (KURAGE_CANOPY_PLUS, True)):
         canopy = int(p.powers.get(power_id, 0))
-        if canopy:
+        if canopy and not jellyfish_line(entry):
             added = add_jellyfish(state, WARD_ID, canopy, upgraded=upgraded)
             state.emit("plan_kurage_canopy", amount=added,
                        upgraded=upgraded)
@@ -2239,23 +2252,77 @@ def grace_keeps(state: CombatState) -> Optional[int]:
     return min(int(state.player.block), n)
 
 
-def tidal_riposte(state: CombatState, enemy: Enemy, blocked: int,
-                  unblocked: int) -> None:
-    """TIDAL RIPOSTE: "Whenever an enemy's attack is fully Blocked, deal N
-    damage to it." One hit of an enemy's attack that Block absorbed whole
-    (Block took some and nothing reached her HP), once per hit. Hydro, as
-    every damaging card of hers is. `TidalRipostePower` is the twin."""
-    from tier0.engine import effects                # late import: cycle
-    if not live(state) or enemy is None or not enemy.alive:
-        return
-    if blocked <= 0 or unblocked > 0:
+def fully_blocked(hits: Sequence[tuple[int, int]]) -> bool:
+    """One enemy attack's hits on her, as (blocked, unblocked): Block took
+    something and nothing got through. `TidalRipostePower.FullyBlocked` is
+    the twin."""
+    return (any(b > 0 for b, _ in hits)
+            and all(u <= 0 for _, u in hits))
+
+
+def tidal_riposte(state: CombatState, enemy: Enemy,
+                  hits: Sequence[tuple[int, int]]) -> None:
+    """TIDAL RIPOSTE (Kokomi card paper v2, 2026-10-18, sec.2 change 4):
+    "Whenever you fully Block an enemy's attack, your next Attack deals N
+    more damage." ONCE PER ENEMY ATTACK, after its whole hit loop
+    (`combat._enemy_turn`), never per hit; copies and repeats stack the
+    stored bonus. `TidalRipostePower.AfterAttack` is the twin."""
+    if not live(state) or not state.player.alive:
         return
     n = int(state.player.powers.get(TIDAL_RIPOSTE, 0))
-    if n <= 0:
+    if n <= 0 or not fully_blocked(hits):
         return
-    state.emit("plan_tidal_riposte", target=enemy.name, amount=n)
-    effects.deal_damage_to_enemy(state, enemy, n, element="hydro",
-                                 source="plan", powered=False)
+    powers.apply_power(state, state.player, TIDAL_RIPOSTE_CHARGE, n)
+    state.emit("plan_tidal_riposte", enemy=getattr(enemy, "name", None),
+               amount=n)
+
+
+def riposte_bonus(state: CombatState, card: Card) -> int:
+    """The stored Riposte an Attack card would take, a PURE read for
+    `effects.flat_attack_bonus`. A card written on the Bake-Kurage takes none
+    (it deals nothing now)."""
+    if card.type != "attack":
+        return 0
+    n = int(state.player.powers.get(TIDAL_RIPOSTE_CHARGE, 0))
+    if n <= 0 or plan_aimed_at_pet(state, card):
+        return 0
+    return n
+
+
+def spend_riposte(state: CombatState, card: Card) -> None:
+    """The stored Riposte, spent by the Attack card that took it, beside
+    `next_attack_up`'s pop in `effects._resolve_card_bound`."""
+    if riposte_bonus(state, card):
+        state.player.powers.pop(TIDAL_RIPOSTE_CHARGE, None)
+        state.emit("plan_tidal_riposte_spent", card=card.id)
+
+
+def draft_discount(state: CombatState, card: Card, cost: int) -> int:
+    """DRAFT THE ORDERS' discount on `card` at `cost`, a PURE read for
+    `combat.card_cost`: a card with a Plan line that this play writes on the
+    Bake-Kurage, while the discount is up. 0 otherwise."""
+    if cost <= 0 or not can_be_written(card):
+        return 0
+    n = int(state.player.powers.get(DRAFT_THE_ORDERS, 0))
+    if n <= 0 or not plan_aimed_at_pet(state, card):
+        return 0
+    return n
+
+
+def spend_draft_the_orders(state: CombatState, card: Card) -> None:
+    """Spent by the first card planned that it cheapened: a 0-cost write (a
+    Sting, a Ward, Grand Design's free write) leaves it up. Called where the
+    write happens (`effects._resolve_card_bound`)."""
+    if not state.player.powers.get(DRAFT_THE_ORDERS, 0):
+        return
+    if state.kk_free_write is card or card.free_this_turn or card.cost == "X":
+        return
+    local = (int(card.cost) + card.cost_delta_this_turn
+             + card.cost_delta_this_combat)
+    if local <= 0:
+        return
+    state.player.powers.pop(DRAFT_THE_ORDERS, None)
+    state.emit("plan_draft_the_orders_spent", card=card.id)
 
 
 
@@ -2320,6 +2387,14 @@ def kind(state: CombatState, fx: dict, card: Card, target) -> None:
     elif k == "exhaust_statuses":
         # TIDECLEANSE (no Plan line since the re-founding).
         exhaust_statuses(state, amount)
+    elif k == "lose_all_block":
+        # TIDAL REBUKE (Kokomi card paper v2, 2026-10-18): "Lose all your
+        # Block. Deal twice that ..." -- kept for the damage clause after it
+        # (`block_lost_this_card`). `KokomiCards.LoseAllBlock` is the twin.
+        lost = int(p.block)
+        state.kk_block_lost = (card, lost)
+        p.block = 0
+        state.emit("plan_lose_all_block", amount=lost)
     else:                                   # unreachable: validated at load
         raise ValueError(f"unknown kokomi kind {k!r}")
 
@@ -2335,7 +2410,9 @@ KINDS = {"double_weak_vulnerable": (),
          "choose_common_companion": (), "add_companions": ("amount",),
          "call_the_generals": (), "reserves": (),
          "grand_design": ("amount",), "block_per_attacker": ("amount",),
-         "double_block": (), "exhaust_statuses": ("amount",)}
+         "double_block": (), "exhaust_statuses": ("amount",),
+         # THE KOKOMI CARD PAPER V2 (2026-10-18).
+         "lose_all_block": ()}
 
 
 def validate_op(card_id: str, fx: dict) -> None:
@@ -2570,17 +2647,33 @@ def note_written(state: CombatState, card: Card) -> None:
         watatsumi_resistance(state)
 
 
+def jellyfish_line(entry: Optional[PlanEntry]) -> bool:
+    """Is this Plan a Sting's or Ward's line? Read off the card whose line it
+    is (Moon's Reflection's found card, else the writer). Endless Shoal and
+    Kurage Canopy skip it (Kokomi card paper v2, 2026-10-18, sec.2 change 5).
+    `KokomiRefounding.IsJellyfish(entry.Source)` is the twin."""
+    if entry is None:
+        return False
+    from tier0.content import upgrades              # late import: cycle
+    owner = entry.now_card or entry.source
+    cid = owner.id if owner is not None else entry.card_id
+    if cid.endswith(upgrades.SUFFIX):
+        cid = cid[:-len(upgrades.SUFFIX)]
+    return cid in (STING_ID, WARD_ID)
+
+
 def note_carried_out(state: CombatState, entry: PlanEntry) -> None:
     """A Plan was just carried out. ENDLESS SHOAL (the jellyfish build,
-    2026-10-12): "Whenever the Bake-Kurage carries out a Plan, add a Sting to
-    your hand." Any Plan, either line; once per CARRY-OUT, so a Plan carried
-    out twice (Nereid's Ascension, Second Wave) gives two Stings, and copies
-    add one each. Coordinated Tide is `coordinated_tide`, before the plan bus.
+    2026-10-12; Kokomi card paper v2, 2026-10-18): "Whenever the Bake-Kurage
+    carries out a Plan that is not a Sting or Ward, add a Sting to your
+    hand." Either line; once per CARRY-OUT, so a Plan carried out twice
+    (Nereid's Ascension, Second Wave) gives two Stings, and copies add one
+    each. Coordinated Tide is `coordinated_tide`, before the plan bus.
     `KokomiRefounding.OnCarriedOut` is the twin."""
     if not live(state):
         return
     n = int(state.player.powers.get(ENDLESS_SHOAL, 0))
-    if n > 0:
+    if n > 0 and not jellyfish_line(entry):
         added = add_jellyfish(state, STING_ID, n, upgraded=False)
         state.emit("plan_endless_shoal", card=entry.card_id, amount=added)
     following_current(state)

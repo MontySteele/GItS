@@ -41,7 +41,7 @@ public sealed class ProtoKkTidalRiposte : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Tidal Riposte"),
-        ("description", "Whenever an enemy's attack is fully blocked, deal {PowerAmount:diff()} damage to that enemy."),
+        ("description", "Whenever you fully [gold]Block[/gold] an enemy's attack, your next Attack deals {PowerAmount:diff()} additional damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

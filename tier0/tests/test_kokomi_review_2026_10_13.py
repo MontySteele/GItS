@@ -183,12 +183,12 @@ def test_masterstroke_can_only_be_planned():
     assert row.effects == [] and row.plan
 
 
-# --- 8. Tidal Riposte: the attacker -------------------------------------------
+# --- 8. Tidal Riposte (stored since the Kokomi card paper v2, 2026-10-18) ---
 
-def test_tidal_riposte_names_that_enemy():
+def test_tidal_riposte_face():
     assert _face("proto_kk_tidal_riposte") == (
-        "Whenever an enemy's attack is fully blocked, deal "
-        "{PowerAmount:diff()} damage to that enemy.")
+        "Whenever you fully [gold]Block[/gold] an enemy's attack, your next "
+        "Attack deals {PowerAmount:diff()} additional damage.")
 
 
 # --- 9. the rarity swap -------------------------------------------------------

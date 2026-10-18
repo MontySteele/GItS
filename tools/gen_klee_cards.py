@@ -3343,6 +3343,10 @@ KOKOMI_KINDS = {
     # is the Mend). (Spring Tide and Measured Breath's kinds left with the
     # cards, the jellyfish build, 2026-10-12.)
     "kurages_mercy": "KuragesMercy",
+    # Kokomi card paper v2 (2026-10-18, sec.2 change 3): Tidal Rebuke's
+    # "Lose all your Block", remembered for the damage that follows it
+    # (`block_lost_this_card`).
+    "lose_all_block": "LoseAllBlock",
 }
 KOKOMI_KIND_AMOUNT = {"shoal_call",
                       "add_companions", "grand_design",
@@ -4083,18 +4087,27 @@ APPLY_POWERS = {
         "Vulnerable on their target."),
     "kk_watatsumis_grace": ("WatatsumisGracePower", None,
         "At the end of your turn, keep up to {X} of your Block."),
+    # Kokomi card paper v2 (2026-10-18, sec.2 change 4): the bonus is stored
+    # (`TidalRiposteChargePower`, Vigor's shape) until her next Attack card.
     "kk_tidal_riposte": ("TidalRipostePower", None,
-        "Whenever an enemy's attack is fully Blocked, deal {X} damage to it."),
+        "Whenever you fully Block an enemy's attack, your next Attack deals "
+        "{X} additional damage."),
+    # Kokomi card paper v2 (2026-10-18, sec.2 change 1): Draft the Orders.
+    # Class in KokomiExpansion.cs.
+    "kk_draft_the_orders": ("DraftTheOrdersPower", None,
+        "The next card you [gold]plan[/gold] this turn costs {X} less."),
     # THE PAYOFF PASS (2026-10-01). Kurage Canopy rides the plan bus
     # (`IKokomiPlanListener`); its class is in KokomiExpansion.cs. Kokomi
     # round 3 A-list (2026-10-13): a Ward per carried-out Plan; the upgraded
     # card installs the Plus power, whose Ward is upgraded (`upgraded_power`).
     "kk_kurage_canopy": ("KurageCanopyPower", None,
         "Whenever the [gold]Bake-Kurage[/gold] carries out a "
-        "[gold]Plan[/gold], add a [gold]Ward[/gold] to your hand."),
+        "[gold]Plan[/gold] that is not a [gold]Sting[/gold] or "
+        "[gold]Ward[/gold], add a [gold]Ward[/gold] to your hand."),
     "kk_kurage_canopy_plus": ("KurageCanopyPlusPower", None,
         "Whenever the [gold]Bake-Kurage[/gold] carries out a "
-        "[gold]Plan[/gold], add an upgraded [gold]Ward[/gold] to your "
+        "[gold]Plan[/gold] that is not a [gold]Sting[/gold] or "
+        "[gold]Ward[/gold], add an upgraded [gold]Ward[/gold] to your "
         "hand."),
     # POOL COMPLETION (2026-10-01). Classes in KokomiPoolCompletion.cs.
     "kk_seas_reproach": ("SeasReproachPower", None,
@@ -4131,7 +4144,8 @@ APPLY_POWERS = {
         "gain 1 Energy and draw 2 cards."),
     "kk_endless_shoal": ("EndlessShoalPower", None,
         "Whenever the [gold]Bake-Kurage[/gold] carries out a "
-        "[gold]Plan[/gold], add a [gold]Sting[/gold] to your hand."),
+        "[gold]Plan[/gold] that is not a [gold]Sting[/gold] or "
+        "[gold]Ward[/gold], add a [gold]Sting[/gold] to your hand."),
     "kk_dawn_tide": ("DawnTidePower", None,
         "At the start of your turn, the [gold]Bake-Kurage[/gold] applies "
         "[gold]Hydro[/gold] to ALL enemies."),
@@ -7014,7 +7028,15 @@ def player_block_calc_rider(card: dict,
     if eff.get("op") != "damage" or eff.get("target") == "self":
         return None
     formula = eff.get("amount_formula")
-    if not isinstance(formula, dict) or formula.get("count") != "player_block":
+    if not isinstance(formula, dict):
+        return None
+    # Kokomi card paper v2 (2026-10-18): Tidal Rebuke's `block_lost_this_card`,
+    # the Block its own `lose_all_block` just took -- her standing Block in a
+    # preview, before the play has lost anything.
+    if formula.get("count") == "block_lost_this_card":
+        return (int(formula.get("base", 0)), int(formula.get("per", 1)),
+                "static (card, _) => KokomiCards.BlockLostThisPlay(card)")
+    if formula.get("count") != "player_block":
         return None
     return (int(formula.get("base", 0)), int(formula.get("per", 1)),
             "static (card, _) => (int)card.Owner.Creature.Block")

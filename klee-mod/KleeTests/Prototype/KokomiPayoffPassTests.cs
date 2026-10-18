@@ -63,7 +63,8 @@ public class KokomiPayoffPassTests : IDisposable
         var up = Upgraded<ProtoKkKurageCanopy>();
         Assert.Equal(1, up.EnergyCost.Canonical);
         Assert.Equal("Whenever the [gold]Bake-Kurage[/gold] carries out a "
-                   + "[gold]Plan[/gold], add {IfUpgraded:show:an upgraded|a} "
+                   + "[gold]Plan[/gold] that is not a [gold]Sting[/gold] or "
+                   + "[gold]Ward[/gold], add {IfUpgraded:show:an upgraded|a} "
                    + "[gold]Ward[/gold] to your [gold]Hand[/gold].",
                      Face(card));
         var play = Seq("ProtoKkKurageCanopy", "OnPlay");

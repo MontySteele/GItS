@@ -77,7 +77,8 @@ def test_jean_swirls_an_enemy_with_an_aura():
 def test_kurage_canopy_face():
     assert _face("proto_kk_kurage_canopy") == (
         "Whenever the [gold]Bake-Kurage[/gold] carries out a "
-        "[gold]Plan[/gold], add {IfUpgraded:show:an upgraded|a} "
+        "[gold]Plan[/gold] that is not a [gold]Sting[/gold] or "
+        "[gold]Ward[/gold], add {IfUpgraded:show:an upgraded|a} "
         "[gold]Ward[/gold] to your [gold]Hand[/gold].")
 
 

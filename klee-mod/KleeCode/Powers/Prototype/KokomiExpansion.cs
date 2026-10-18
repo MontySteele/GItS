@@ -6,6 +6,7 @@ using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Elements;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
+using MegaCrit.Sts2.Core.Commands.Builders;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Powers;
@@ -99,8 +100,10 @@ public static class KokomiExpansion
 }
 
 /// <summary>Kurage Canopy (the payoff pass, 2026-10-01; Kokomi round 3
-/// A-list, 2026-10-13): "Whenever the Bake-Kurage carries out a Plan, add a
-/// Ward to your Hand." Endless Shoal's Ward twin. On the plan bus
+/// A-list, 2026-10-13): "Whenever the Bake-Kurage carries out a Plan that is
+/// not a Sting or Ward, add a Ward to your Hand." Endless Shoal's Ward twin;
+/// the Sting-or-Ward clause is the Kokomi card paper v2 (2026-10-18, sec.2
+/// change 5). On the plan bus
 /// (<see cref="IKokomiPlanListener"/>), which <c>KokomiPlan.ResolveEntry</c>
 /// calls once per CARRY-OUT, so a Plan carried out twice (Second Wave,
 /// Nereid's Ascension, All Streams) pays twice; copies add one each. A full
@@ -118,7 +121,8 @@ public abstract class KurageCanopyBasePower
         ("title", UpgradedWard ? "Kurage Canopy+" : "Kurage Canopy"),
         ("description",
             "Whenever the [gold]Bake-Kurage[/gold] carries out a "
-          + "[gold]Plan[/gold], add [blue]{Amount}[/blue] "
+          + "[gold]Plan[/gold] that is not a [gold]Sting[/gold] or "
+          + "[gold]Ward[/gold], add [blue]{Amount}[/blue] "
           + (UpgradedWard ? "upgraded " : "")
           + "{Amount:plural:[gold]Ward[/gold]|[gold]Wards[/gold]} to your "
           + "[gold]Hand[/gold]."),
@@ -129,10 +133,11 @@ public abstract class KurageCanopyBasePower
     public override PowerStackType StackType => PowerStackType.Counter;
 
     public async Task OnPlanResolved(
-        PlayerChoiceContext choiceContext, Creature kokomi)
+        PlayerChoiceContext choiceContext, Creature kokomi, CardModel? line)
     {
         if (kokomi != Owner) return;                 // co-op: your plans only
         if (Owner == null || Amount <= 0) return;
+        if (KokomiRefounding.IsJellyfish(line)) return;  // a Sting or Ward
         if (!KokomiOverhaul.LiveFor(Owner)) return;
         await KokomiCards.AddJellyfish(Owner.Player,
             KokomiCards.Jellyfish.Ward, (int)Amount, UpgradedWard);
@@ -254,34 +259,60 @@ public sealed class WatatsumisGracePower : PowerModel, ILocalizationProvider
     }
 }
 
-/// <summary>Tidal Riposte: "Whenever an enemy's attack is fully Blocked, deal
-/// 5 damage to it." A hit of an enemy's powered attack that Block absorbed
-/// whole -- Block took some and no HP was lost -- once per hit, Hydro. Sim
-/// twin: <c>kokomi_plan.tidal_riposte</c>.</summary>
+/// <summary>
+/// Tidal Riposte (Kokomi card paper v2, 2026-10-18, sec.2 change 4):
+/// "Whenever you fully Block an enemy's attack, your next Attack deals 8 [11]
+/// additional damage." It used to deal the 8 back at once, per hit; now the bonus is
+/// STORED (<see cref="TidalRiposteChargePower"/>) until she chooses to strike.
+///
+/// ONCE PER ENEMY ATTACK, NOT PER HIT. <c>AfterAttack</c> fires once for the
+/// enemy's whole <c>AttackCommand</c>, and its <c>Results</c> hold every hit:
+/// it pays when at least one hit reached her, Block took some, and no hit on
+/// her cost HP (<see cref="FullyBlocked(IEnumerable{ValueTuple{int,int}})"/>).
+/// In co-op only the hits on her are read. Copies stack the stored amount.
+/// Sim twin: <c>kokomi_plan.tidal_riposte</c>.
+/// </summary>
 public sealed class TidalRipostePower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
         ("title", "Tidal Riposte"),
         ("description",
-            "Whenever an enemy's attack is fully [gold]Blocked[/gold], deal "
-          // Kokomi review 2026-10-13: the attacker alone.
-          + "[blue]{Amount}[/blue] damage to that enemy."),
+            "Whenever you fully [gold]Block[/gold] an enemy's attack, your "
+          + "next Attack deals [blue]{Amount}[/blue] additional damage."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    public override async Task AfterDamageReceived(
-        PlayerChoiceContext choiceContext, Creature target, DamageResult result,
-        ValueProp props, Creature? dealer, CardModel? cardSource)
+    /// <summary>The rule, readable without a combat: one attack's hits on
+    /// her, as (blocked, unblocked). Fully blocked is "something was blocked
+    /// and nothing got through".</summary>
+    public static bool FullyBlocked(IEnumerable<(int Blocked, int Unblocked)> hits)
     {
-        if (Owner == null || target != Owner || Amount <= 0) return;
-        if (dealer == null || !dealer.IsEnemy || dealer.IsDead) return;
-        if (!props.IsPoweredAttack()) return;
-        if (result.BlockedDamage <= 0 || result.UnblockedDamage > 0) return;
-        await ElementalHit.Deal(choiceContext, dealer, Element.Hydro,
-                                (int)Amount, Owner, powered: false);
+        var any = false;
+        foreach (var (blocked, unblocked) in hits)
+        {
+            if (unblocked > 0) return false;
+            if (blocked > 0) any = true;
+        }
+        return any;
+    }
+
+    public override async Task AfterAttack(
+        PlayerChoiceContext choiceContext, AttackCommand command)
+    {
+        if (Owner == null || Owner.IsDead || Amount <= 0) return;
+        if (command.Attacker is not { IsEnemy: true }) return;
+        if (!command.DamageProps.IsPoweredAttack()) return;
+        var me = Owner;
+        var hits = command.Results
+            .SelectMany(r => r)
+            .Where(r => r.Receiver == me)
+            .Select(r => (r.BlockedDamage, r.UnblockedDamage));
+        if (!FullyBlocked(hits)) return;
+        await PowerCmd.Apply<TidalRiposteChargePower>(
+            choiceContext, me, Amount, applier: me, cardSource: null);
     }
 }

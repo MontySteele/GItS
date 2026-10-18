@@ -181,8 +181,13 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
   ("Mend 6 (1 will land)"), Jellyfish Current and Coordinated Tide cut for
   Kurage Vanguard and Following Current (two Hydro sources), and Read the
   Field's card costs 0. Both new cards wear official wiki art.
-- **Next:** five to eight seats overnight on this build, then [USER]'s run
-  (pick 4 (b)).
+- **Card paper v2 built** (2026-10-18, `review/active/kokomi-cards-2026-10-18.md`,
+  picks 1 (b), 2 (a), 3 (a)): Draft the Orders replaces Shell of Sanctuary,
+  Tidal Rebuke spends her Block twice over, Tidal Riposte stores its bonus for
+  her next Attack, and Endless Shoal and Kurage Canopy skip a Sting's or
+  Ward's Plan. Nereid's Ascension is unchanged. Unseen in game.
+- **Next:** the v2 seat round (three free drafts, two briefed toward Grand
+  Strategy and Read the Tide), then [USER]'s run.
 - **Story built** (2026-10-16, `review/active/kokomi-story-2026-10-16.md`,
   picks 1 (a) and 2 (a), ruled "nothing that blocks it from a beta launch.
   ... Approved!"): eight events in three threads (the strategist, Watatsumi,

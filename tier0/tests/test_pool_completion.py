@@ -93,9 +93,15 @@ def test_coral_crash_is_body_slam_and_tidal_rebuke_keeps_no_exhaust(overhaul):
     assert not rebuke.exhaust and rebuke.retain
     st = kokomi_state(enemies=[make_enemy(hp=300, intents=QUIET),
                                make_enemy(hp=300, intents=QUIET)])
+    # The Kokomi card paper v2 (2026-10-18, pick 3 (a)): she loses the Block
+    # and deals twice it.
+    assert rebuke.effects[0] == {"op": "kokomi", "kind": "lose_all_block"}
+    assert rebuke.effects[1]["amount_formula"] == {
+        "base": 0, "per": 2, "count": "block_lost_this_card"}
     st.player.block = 13
     _play(st, rebuke)
-    assert [e.hp for e in st.enemies] == [300 - 13, 300 - 13]
+    assert [e.hp for e in st.enemies] == [300 - 26, 300 - 26]
+    assert st.player.block == 0
 
 
 def test_noelles_sweeping_time_upgrades_to_cost_one(monkeypatch):

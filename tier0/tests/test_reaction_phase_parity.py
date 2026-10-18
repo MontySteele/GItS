@@ -1239,6 +1239,10 @@ CO_TENANCY_LEDGER = {
             "(the Kokomi overhaul, R276). Pincer's carry-out, "
             "\"this turn\", on the same-turn boundary (FLAG-1 / R114). "
             "Removes itself and touches nothing else",
+        ("Powers/Prototype/KokomiCardsV2.cs", "DraftTheOrdersPower"):
+            "(the Kokomi card paper v2, 2026-10-18). Draft the Orders' "
+            "\"this turn\" discount closing unspent, PlaydatePower's shape. "
+            "Removes itself and touches nothing a co-tenant reads",
         ("Powers/Prototype/KokomiOverhaulPowers.cs",
          "StunningStratagemPower"):
             "(Kokomi's own potions, 2026-10-15). A Stunning "

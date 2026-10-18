@@ -371,7 +371,7 @@ public sealed class SangonomiyasCounselPower
     public override PowerStackType StackType => PowerStackType.Counter;
 
     public async Task OnPlanResolved(
-        PlayerChoiceContext choiceContext, Creature kokomi)
+        PlayerChoiceContext choiceContext, Creature kokomi, CardModel? line)
     {
         if (!ReferenceEquals(kokomi, Owner) || Amount <= 0) return;
         foreach (var ally in CoopSet.OtherPlayers(Owner))

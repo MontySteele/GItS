@@ -204,12 +204,19 @@ public class KokomiExpansionTests : IDisposable
     }
 
     [Fact]
-    public void Tidal_riposte_answers_a_fully_blocked_hit()
+    public void Tidal_riposte_stores_its_bonus_per_fully_blocked_attack()
     {
-        var calls = Il.Calls(Il.Method("TidalRipostePower", "AfterDamageReceived"));
-        Assert.Contains(calls, c => c.Contains("ElementalHit.Deal"));
-        Assert.Contains(calls, c => c.Contains("DamageResult.get_BlockedDamage"));
-        Assert.Contains(calls, c => c.Contains("DamageResult.get_UnblockedDamage"));
+        // The Kokomi card paper v2 (2026-10-18): once per enemy attack, read
+        // off the whole command's results; it stores, it deals nothing back.
+        var calls = Il.Calls(Il.Method("TidalRipostePower", "AfterAttack"));
+        Assert.Contains(calls, c => c.Contains("PowerCmd.Apply"));
+        Assert.Contains(calls, c => c.Contains("AttackCommand.get_Results"));
+        Assert.DoesNotContain(calls, c => c.Contains("ElementalHit.Deal"));
+        Assert.Null(typeof(TidalRipostePower).GetMethod(
+            "AfterDamageReceived",
+            System.Reflection.BindingFlags.Public
+            | System.Reflection.BindingFlags.Instance
+            | System.Reflection.BindingFlags.DeclaredOnly));
     }
 
     [Fact]

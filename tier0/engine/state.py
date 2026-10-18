@@ -1392,6 +1392,10 @@ class CombatState:
     # `KokomiRefounding.IsFreeWrite`'s twin).
     kk_carrying_out: bool = False
     kk_free_write: Optional["Card"] = None
+    # THE KOKOMI CARD PAPER V2 (2026-10-18): Tidal Rebuke's lost Block, as
+    # (the card that lost it, the amount), read by its own damage clause
+    # (`effects._runtime_count`'s `block_lost_this_card`).
+    kk_block_lost: Optional[tuple] = None
     # THE KOKOMI POOL OVERHAUL (2026-10-13, review/active/kokomi-pool-
     # overhaul-2026-10-13.md). `kk_plans_carried_out_this_turn` is the Chain
     # count, raised at the top of each carry-out so it counts itself (Feint,

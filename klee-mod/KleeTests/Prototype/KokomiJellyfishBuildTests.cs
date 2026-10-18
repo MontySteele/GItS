@@ -130,7 +130,8 @@ public class KokomiJellyfishBuildTests
         Assert.Equal((CardType.Power, CardRarity.Uncommon, 1),
                      (card.Type, card.Rarity, card.EnergyCost.Canonical));
         Assert.Equal("Whenever the [gold]Bake-Kurage[/gold] carries out a "
-                   + "[gold]Plan[/gold], add a [gold]Sting[/gold] to your "
+                   + "[gold]Plan[/gold] that is not a [gold]Sting[/gold] or "
+                   + "[gold]Ward[/gold], add a [gold]Sting[/gold] to your "
                    + "[gold]Hand[/gold].", Face(card));
         var up = Upgraded<ProtoKkEndlessShoal>();
         Assert.Equal(1, up.EnergyCost.Canonical);
@@ -143,10 +144,11 @@ public class KokomiJellyfishBuildTests
         // Once per CARRY-OUT: `OnCarriedOut` is called from the tail of
         // `ResolveEntry`, which the drain runs once per carry-out -- so a Plan
         // carried out twice (Nereid's Ascension, Second Wave) gives two
-        // Stings. Any Plan: no jellyfish test is left in the payoff.
+        // Stings. Since the Kokomi card paper v2 (2026-10-18) a Sting's or
+        // Ward's Plan pays nothing: the jellyfish test is back, on the line.
         var calls = Seq("KokomiRefounding", "OnCarriedOut");
         Assert.Contains(calls, c => c.Contains("KokomiCards.AddJellyfish"));
-        Assert.DoesNotContain(calls, c => c.Contains("IsJellyfish"));
+        Assert.Contains(calls, c => c.Contains("IsJellyfish"));
         Assert.DoesNotContain(calls, c => c.Contains("CloneCard"));
         Assert.Contains("KokomiRefounding.OnCarriedOut",
                         Seq("KokomiPlan", "ResolveEntry"));

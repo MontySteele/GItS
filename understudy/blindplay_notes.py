@@ -603,6 +603,15 @@ ONE_USE_DISCOUNT_NOTE = (
     "you actually play is charged it, and the rest go back to their printed "
     "cost.*")
 
+# THE KOKOMI CARD PAPER V2 (2026-10-18): Draft the Orders, "The next card you
+# plan this turn costs 1 less." The game prices every card with a Plan line as
+# if it were the one planned, so the cut shows on all of them, and a card
+# played normally pays its printed price.
+PLAN_DISCOUNT_NOTE = (
+    "*{power} pays for ONE card you plan: every card with a Plan line shows "
+    "the cut, but only one played on the Bake-Kurage gets it. Played "
+    "normally, a card costs its printed price.*")
+
 # `EB-669`. THE SAME SHAPE ON A RIDER THAT IS NOT A PRICE.
 #
 # Battle Plan's carry-out leaves "The next Attack you play face-up this turn

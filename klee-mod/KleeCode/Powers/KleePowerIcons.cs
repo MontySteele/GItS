@@ -134,6 +134,12 @@ internal static class KleePowerIcons
             "kokomi/powers/vigil_of_the_deep.png"),
         TidalRipostePower => KleePck.Path(
             "kokomi/powers/vigil_of_the_deep.png"),
+        // THE KOKOMI CARD PAPER V2 (2026-10-18): the stored Riposte wears its
+        // Power's badge; Draft the Orders borrows the Plan clock's.
+        TidalRiposteChargePower => KleePck.Path(
+            "kokomi/powers/vigil_of_the_deep.png"),
+        DraftTheOrdersPower => KleePck.Path(
+            "kokomi/powers/before_sun_and_moon.png"),
         ProtoCeremonialGarmentPower => KleePck.Path(
             "kokomi/powers/ceremonial_garment.png"),
         AtWatersEdgePower => KleePck.Path("klee/powers/solar_isotoma.png"),
