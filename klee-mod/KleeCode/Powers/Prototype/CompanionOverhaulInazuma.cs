@@ -25,8 +25,9 @@ namespace KleeMod.Powers;
 /// The approved workshop <c>companion-workshop-inazuma-2026-09-01.md</c> sec.3
 /// rewrote Inazuma's Universal companion pool; the Inazuma pool rework
 /// (<c>review/active/inazuma-companions-2026-10-18.md</c>, 2026-10-18) took
-/// it to 29 cards (8 / 13 / 8): three cut, seven rebuilt, eleven new, and six
-/// Powers. Its powers are at the foot of this file.
+/// it to 34 cards (8 / 16 / 10): three cut, seven rebuilt, seventeen new, and
+/// eight Powers, two cards a character. Its powers are at the foot of this
+/// file.
 ///
 /// SAME FLAG AS MONDSTADT, deliberately: <c>CompanionOverhaul.Enabled</c> means
 /// "the companion pool is the approved workshops' pool", and a second property
@@ -919,4 +920,150 @@ public sealed class ProtoMiRaidenBalefulOmenPower : TemporaryStrengthPower, ILoc
         ModelDb.Card<global::KleeMod.Cards.Prototype.Generated.ProtoMiRaidenBalefulOmen>();
 
     protected override bool IsPositive => false;
+}
+
+// ---------------------------------------------------------------------------
+// GROWING THE POOL TO 34 (ruled 2026-10-18)
+// ---------------------------------------------------------------------------
+// review/active/inazuma-companions-2026-10-18.md, "Growing the pool to 34";
+// [USER]: "Agreed on (a)! And also on growing the pool". Two Rare Powers.
+
+/// <summary>
+/// Chiori, Hiyoku: Twin Blades (Rare Power, 1): "Your Attacks that hit more
+/// than once deal 2 [3] additional damage per hit."
+///
+/// A MULTI-HIT ATTACK IS ONE WHOSE PRINTED HIT COUNT IS 2 OR MORE: the
+/// <c>WithHitCount</c> the card's own <c>AttackCommand</c> was built with
+/// (its private <c>_hitCount</c>, read in <c>BeforeAttack</c>, before
+/// <c>Hook.ModifyAttackHitCount</c> has its say), so a single-hit Attack
+/// played twice by Niwabi is not one. The command is latched for its own
+/// hits and released in <c>AfterAttack</c>; the modifier only reads the latch.
+/// A Plan line's multi-hit (Pearl Current, Kyouka Fuushi) is paid in
+/// <see cref="KokomiPlan"/>'s <c>Hit</c> through <see cref="PlanBonus"/>,
+/// since a planned hit is no <c>AttackCommand</c>. Amount is the bonus, so
+/// copies add. Sim twin: `mi_twin_blades` in `effects._op_damage` (an Attack
+/// with `times` of 2 or more) and `kokomi_plan._hit`.
+/// </summary>
+public sealed class TwinBladesPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Hiyoku: Twin Blades"),
+        ("description",
+            "Your Attacks that hit more than once deal [blue]{Amount}[/blue] "
+          + "additional damage per hit."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Counter;
+
+    private static readonly System.Reflection.FieldInfo? HitCountField =
+        typeof(AttackCommand).GetField(
+            "_hitCount",
+            System.Reflection.BindingFlags.NonPublic
+            | System.Reflection.BindingFlags.Instance);
+
+    /// <summary>The Attack this power is paying on, between its
+    /// <c>BeforeAttack</c> and its <c>AfterAttack</c>.</summary>
+    private AttackCommand? _multiHit;
+
+    /// <summary>The hit count an <c>AttackCommand</c> was printed with, or 1
+    /// where it cannot be read.</summary>
+    public static int PrintedHits(AttackCommand command) =>
+        HitCountField?.GetValue(command) is int hits ? hits : 1;
+
+    /// <summary>The rule, readable without a combat.</summary>
+    public static bool IsMultiHitAttack(CardModel? card, int hits) =>
+        card is { Type: CardType.Attack } && hits >= 2;
+
+    public override Task BeforeAttack(AttackCommand command)
+    {
+        if (command.Attacker != Owner) return Task.CompletedTask;
+        _multiHit = IsMultiHitAttack(command.ModelSource as CardModel,
+                                     PrintedHits(command))
+            ? command : null;
+        return Task.CompletedTask;
+    }
+
+    public override Task AfterAttack(
+        PlayerChoiceContext choiceContext, AttackCommand command)
+    {
+        if (command == _multiHit) _multiHit = null;
+        return Task.CompletedTask;
+    }
+
+    public override decimal ModifyDamageAdditive(
+        Creature? target, decimal amount, ValueProp props, Creature? dealer,
+        CardModel? cardSource, CardPlay? cardPlay)
+    {
+        if (_multiHit == null || dealer != Owner || target == Owner) return 0m;
+        if (!props.IsPoweredAttack()) return 0m;
+        if (cardSource == null || cardSource != _multiHit.ModelSource) return 0m;
+        return Amount;
+    }
+
+    /// <summary>A planned hit's bonus: an Attack's Plan line of 2 or more
+    /// hits takes the owner's Twin Blades per hit, else 0.</summary>
+    public static int PlanBonus(Creature? owner, CardModel? source, int times)
+    {
+        if (owner == null || !IsMultiHitAttack(source, times)) return 0;
+        return owner.Powers.OfType<TwinBladesPower>().Sum(p => (int)p.Amount);
+    }
+}
+
+/// <summary>
+/// Yae Miko, Sacred Sakura's Favor (Rare Power, 2 [1]): "Damage you deal at
+/// the end of your turn is increased by 50%." Hidden from Yae, as Sesshou
+/// Sakura is (<see cref="CompanionPool.IsHiddenFrom"/>).
+///
+/// "AT THE END OF YOUR TURN" IS THE COMPANION END-OF-TURN WALK: every actor
+/// <see cref="CompanionOverhaulTurnEnd"/> runs (Glacial Waltz, Oz, Grand Ode,
+/// Dandelion Breeze, Solar Isotoma, Lightfall Sword, Juuga, Sanctifying Ring,
+/// Sesshou Sakura, Soumetsu) runs inside a window this class holds open for
+/// that creature, and <see cref="SimDamagePipeline.DealerMods"/> multiplies
+/// the dealer's damage by 1.5 while it is open and the dealer wears this. A
+/// marker: a second copy adds nothing. After the dealer's Strength and Weak,
+/// floored first, as the sim floors `modify_damage_dealt`. Sim twin:
+/// `effects.sacred_sakuras_favor_mult`, read in `deal_damage_to_enemy` while
+/// `state.turn_end_window` is open.
+/// </summary>
+public sealed class SacredSakurasFavorPower : PowerModel, ILocalizationProvider
+{
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Sacred Sakura's Favor"),
+        ("description",
+            "Damage you deal at the end of your turn is increased by "
+          + "[blue]50%[/blue]."),
+    };
+
+    public override PowerType Type => PowerType.Buff;
+
+    public override PowerStackType StackType => PowerStackType.Single;
+
+    /// <summary>The creature whose end-of-turn actor is running, or null.</summary>
+    private static Creature? _window;
+
+    /// <summary>Open the window for <paramref name="owner"/>; returns the
+    /// window it replaced, for <see cref="CloseWindow"/>.</summary>
+    public static Creature? OpenWindow(Creature owner)
+    {
+        var outer = _window;
+        _window = owner;
+        return outer;
+    }
+
+    public static void CloseWindow(Creature? outer) => _window = outer;
+
+    /// <summary>Is <paramref name="dealer"/>'s end-of-turn window open?</summary>
+    public static bool InWindow(Creature? dealer) =>
+        dealer != null && dealer == _window;
+
+    /// <summary>The multiplier on <paramref name="dealer"/>'s damage right
+    /// now: 1.5 in its window while it wears this, else 1. PURE.</summary>
+    public static decimal Multiplier(Creature? dealer) =>
+        InWindow(dealer) && dealer!.Powers.OfType<SacredSakurasFavorPower>().Any()
+            ? CompanionOverhaulLaw.SacredSakuraMult
+            : 1m;
 }

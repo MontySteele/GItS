@@ -143,11 +143,11 @@ internal static class CompanionOverhaulRoster
     /// are Kokomi's own cards (<c>C.KOKOMI_OWN_COMPANION_IDS</c>), in her
     /// pool and not in the shared roster.
     ///
-    /// TWENTY-EIGHT SINCE THE INAZUMA POOL REWORK (2026-10-18,
+    /// THIRTY-FOUR SINCE THE INAZUMA POOL REWORK (2026-10-18,
     /// <c>review/active/inazuma-companions-2026-10-18.md</c>): Aurous Blaze,
-    /// Musou no Hitotachi and Superlative Superstrength cut, eleven new. The
-    /// paper's 29th, Ayato's Kyouka Fuushi, is not built (its Plan face is
-    /// over the card ceiling). tier0 twin: <c>C.INAZUMA_OVERHAUL_POOL_IDS</c>.
+    /// Musou no Hitotachi and Superlative Superstrength cut, twelve new, then
+    /// five more and Hyouka moved to Uncommon when the pool grew to two cards
+    /// a character (8 / 16 / 10). tier0 twin: <c>C.INAZUMA_OVERHAUL_POOL_IDS</c>.
     ///
     /// NOTHING WAS DROPPED. Every one of the twenty-four prints inside the
     /// grammar the emitter speaks once this arm's fifteen powers exist -- which
@@ -185,6 +185,12 @@ internal static class CompanionOverhaulRoster
         ModelDb.Card<ProtoMiYoimiyaNiwabi>(),
         ModelDb.Card<ProtoMiKazuhaChihayaburu>(),
         ModelDb.Card<ProtoMiWandererHanega>(),
+        ModelDb.Card<ProtoMiAyatoKyoukaFuushi>(),
+        ModelDb.Card<ProtoMiKiraraMeowteorKick>(),
+        ModelDb.Card<ProtoMiYoimiyaRyuukinSaxifrage>(),
+        ModelDb.Card<ProtoMiWandererKyougen>(),
+        ModelDb.Card<ProtoMiChioriTwinBlades>(),
+        ModelDb.Card<ProtoMiYaeSacredSakurasFavor>(),
     };
 
     /// <summary>

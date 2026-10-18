@@ -121,4 +121,9 @@ public static class CompanionOverhaulLaw
     /// Mirrors <c>C.MI_HANEGA_BLOCK_LOSS</c>.</summary>
     public const int HanegaBlockLoss = 3;
 
+    /// <summary>Yae Miko, Sacred Sakura's Favor (growing the Inazuma pool,
+    /// 2026-10-18): "Damage you deal at the end of your turn is increased by
+    /// 50%." Mirrors <c>C.MI_SACRED_SAKURA_MULT</c>.</summary>
+    public const decimal SacredSakuraMult = 1.5m;
+
 }

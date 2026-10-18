@@ -277,6 +277,9 @@ internal static class KleePowerIcons
         NiwabiFireDancePower => KleePck.Path("klee/powers/study_buddy.png"),
         ChihayaburuPower => KleePck.Path("klee/powers/celestial_gift.png"),
         HanegaPower => KleePck.Path("klee/powers/passion_overload.png"),
+        // Growing the pool to 34 (2026-10-18), the same borrow.
+        TwinBladesPower => KleePck.Path("klee/powers/shattering_pressure.png"),
+        SacredSakurasFavorPower => KleePck.Path("klee/powers/oz_summon.png"),
         // THE SAME ARM'S STAND-IN SLICE, on the same terms once more, and the
         // borrow is easier to argue here than anywhere above: a stand-in wears
         // the Universal's own illustration (its row's `art_of:`), so its badge

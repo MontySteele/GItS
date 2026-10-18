@@ -224,6 +224,7 @@ MIRRORED: dict[str, object] = {
     "CompanionOverhaulLaw.SoumetsuFinale": C.MI_SOUMETSU_FINALE,
     "CompanionOverhaulLaw.SurpriseDispatchDamage": C.MI_SURPRISE_DISPATCH_DMG,
     "CompanionOverhaulLaw.HanegaBlockLoss": C.MI_HANEGA_BLOCK_LOSS,
+    "CompanionOverhaulLaw.SacredSakuraMult": C.MI_SACRED_SAKURA_MULT,
     # KLEE'S COVEN PERSONALS (R236), same flag and same terms:
     # three numbers a POWER carries, mirrored by value because both engines
     # play these four rows.

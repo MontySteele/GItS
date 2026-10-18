@@ -689,6 +689,7 @@ MI_SOUMETSU_DMG = 8             # Ayaka: Cryo to ALL, per turn, 2 turns
 MI_SOUMETSU_FINALE = 16         # Ayaka: and the hit it ends on
 MI_SURPRISE_DISPATCH_DMG = 10   # Kirara: the parcel, next turn
 MI_HANEGA_BLOCK_LOSS = 3        # Wanderer: Block cards give, less, per copy
+MI_SACRED_SAKURA_MULT = 1.5     # Yae: end-of-turn damage, increased by 50%
 
 # THE INAZUMA UNIVERSALS, WHOLE -- the workshop's sec.3 in its own character
 # order. TWENTY-FOUR, and the number is worth writing down: its sec.4 counts
@@ -700,7 +701,8 @@ MI_HANEGA_BLOCK_LOSS = 3        # Wanderer: Block cards give, less, per copy
 INAZUMA_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # Gorou's three left for Kokomi's own pool (the re-founding, 2026-10-12;
     # `KOKOMI_OWN_COMPANION_IDS`). The Inazuma pool rework (2026-10-18): three
-    # cut, eleven new, twenty-eight (the paper's Kyouka Fuushi is not built).
+    # cut, eleven new, twenty-nine; growing the pool (the same day) adds five
+    # more and moves Hyouka to Uncommon: thirty-four, 8 / 16 / 10.
     "proto_mi_sayu_fuuin_dash",
     "proto_mi_sayu_daruma",
     "proto_mi_sayu_naptime",
@@ -729,6 +731,12 @@ INAZUMA_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_mi_yoimiya_niwabi",
     "proto_mi_kazuha_chihayaburu",
     "proto_mi_wanderer_hanega",
+    "proto_mi_ayato_kyouka_fuushi",
+    "proto_mi_kirara_meowteor_kick",
+    "proto_mi_yoimiya_ryuukin_saxifrage",
+    "proto_mi_wanderer_kyougen",
+    "proto_mi_chiori_twin_blades",
+    "proto_mi_yae_sacred_sakuras_favor",
 )
 
 # THE INAZUMA WORKSHOP'S ONE PERSONAL, and it is a SEPARATE list because it is

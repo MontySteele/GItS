@@ -204,6 +204,13 @@ public static class KokomiPlan
         // (<see cref="KokomiOverhaulLedger.HpLostSince"/>). Sim twin
         // `kokomi_plan.DAMAGE_IF_NO_HP_LOST_SINCE`.
         DamageIfNoHpLostSince,
+        // THE INAZUMA POOL REWORK (2026-10-18, review/active/inazuma-
+        // companions-2026-10-18.md): Ayato's Kyouka Fuushi, "Plan: Deal 7
+        // Hydro damage 3 times, plus once per earlier Plan, not Stings or
+        // Wards." <see cref="Planned.Times"/> hits, plus one per Plan carried
+        // out before it this turn (<see cref="EarlierPlanHits"/>). Sim twin
+        // `kokomi_plan.DAMAGE_TIMES_PLUS_EARLIER_PLANS`.
+        DamageTimesPlusEarlierPlans,
         // GRAND DESIGN TAKES BASICS (2026-10-18, review/active/open-design-
         // items-2026-10-18.md, [USER]: "Ok, agreed on all defaults"): a
         // Basic card with no Plan line, planned by Grand Design, is played as
@@ -1041,7 +1048,9 @@ public static class KokomiPlan
         // queued here is the number the face printed.
         for (var i = 0; i < body.Count; i++)
         {
-            if (body[i].Kind == Kind.Damage)
+            // The Inazuma pool rework (2026-10-18): Kyouka Fuushi's hit is a
+            // printed flat hit too.
+            if (body[i].Kind is Kind.Damage or Kind.DamageTimesPlusEarlierPlans)
             {
                 body[i] = body[i] with
                 {
@@ -2501,6 +2510,13 @@ public static class KokomiPlan
                 return await Hit(choiceContext, kokomi, plan, plan.Amount,
                                  entry, doubleDamage);
 
+            // THE INAZUMA POOL REWORK (2026-10-18): Kyouka Fuushi, one more
+            // hit per Plan carried out before it this turn.
+            case Kind.DamageTimesPlusEarlierPlans:
+                return await Hit(choiceContext, kokomi,
+                                 plan with { Times = EarlierPlanHits(kokomi, plan) },
+                                 plan.Amount, entry, doubleDamage);
+
             case Kind.DamageQuarterMaxHp:
                 return await Hit(choiceContext, kokomi, plan,
                                  KokomiRules.QuarterOfMaxHp(kokomi),
@@ -2659,6 +2675,7 @@ public static class KokomiPlan
         // THE POOL OVERHAUL (2026-10-13).
         Kind.DamagePerPlanThisTurn or Kind.DamageBlockedSince
             or Kind.DamageTakenSince or Kind.DamageIfNoHpLostSince
+            or Kind.DamageTimesPlusEarlierPlans
             => "damage",
         Kind.EnergyIfAttackedSince => "Energy",
         Kind.LoseStrengthThisTurn => "Strength lost",
@@ -2874,6 +2891,9 @@ public static class KokomiPlan
         int amount, Entry? entry = null, bool doubleDamage = false)
     {
         if (amount <= 0) return null;
+        // THE INAZUMA POOL REWORK (2026-10-18), Chiori's Twin Blades: an
+        // Attack's Plan line that hits more than once deals N more per hit.
+        amount += TwinBladesPower.PlanBonus(kokomi, entry?.Source, plan.Times);
         if (doubleDamage) amount *= 2;
         // TELEMETRY ONLY: a Plan's hit is the Bake-Kurage's (`EB-334`), so it
         // is Kokomi's pet damage. The applier the engine reads is unchanged.
@@ -3484,6 +3504,13 @@ public static class KokomiPlan
                             * ChainPlace(Showing(kokomi.Player), index,
                                 kokomi.Powers.OfType<NereidsAscensionPower>()
                                     .Any()));
+                    // THE INAZUMA POOL REWORK (2026-10-18): Kyouka
+                    // Fuushi's hits if the queue lands as it stands.
+                    case Kind.DamageTimesPlusEarlierPlans:
+                        return LiveHits(System.Math.Max(1, clause.Times)
+                            + ChainPlace(Showing(kokomi.Player), index,
+                                kokomi.Powers.OfType<NereidsAscensionPower>()
+                                    .Any()) - 1);
                     // KOKOMI V3 (2026-10-18): Unbroken Tide.
                     case Kind.DamageIfNoHpLostSince:
                         return ledger.HpLostSince(entry.Window)
@@ -3539,6 +3566,23 @@ public static class KokomiPlan
 
     /// <summary>The strip's damage caption, "Deals N".</summary>
     public static string LiveDeals(int amount) => $"Deals {amount}";
+
+    /// <summary>Kyouka Fuushi's caption, "N hits" (the Inazuma pool rework,
+    /// 2026-10-18). Display only.</summary>
+    public static string LiveHits(int hits) => hits == 1 ? "1 hit" : $"{hits} hits";
+
+    /// <summary>
+    /// THE INAZUMA POOL REWORK (2026-10-18): Kyouka Fuushi's hits at
+    /// carry-out, its printed <see cref="Planned.Times"/> plus one per Plan
+    /// carried out before it this turn, not Stings or Wards. The ledger's
+    /// <see cref="KokomiOverhaulLedger.ChainPlansThisTurn"/> has counted this
+    /// carry-out already (it rises before the clauses run), so the earlier
+    /// Plans are one fewer. Sim twin: <c>kokomi_plan.earlier_plan_hits</c>.
+    /// </summary>
+    public static int EarlierPlanHits(Creature kokomi, Planned plan) =>
+        System.Math.Max(1, plan.Times)
+        + System.Math.Max(0,
+            KokomiOverhaulLedger.For(kokomi).ChainPlansThisTurn - 1);
 
     /// <summary>Unbroken Tide's caption once she has lost HP in its window
     /// (Kokomi v3, 2026-10-18). Display only.</summary>

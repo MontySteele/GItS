@@ -1550,7 +1550,10 @@ def authors_copy(state, editor) -> None:
 #: stays in the Inazuma roster for the others and is hidden from Yae's own
 #: offers (pick 5 (a), ruled 2026-10-13). C# twin:
 #: `CompanionPool.IsHiddenFrom`.
-HIDDEN_COMPANIONS = {"proto_mi_yae_sesshou_sakura": CHARACTER}
+HIDDEN_COMPANIONS = {"proto_mi_yae_sesshou_sakura": CHARACTER,
+                     # Growing the Inazuma pool (2026-10-18): her second
+                     # Universal, hidden the same way.
+                     "proto_mi_yae_sacred_sakuras_favor": CHARACTER}
 
 
 def hidden_from(card_id: str, character_id) -> bool:

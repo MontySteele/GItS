@@ -674,9 +674,24 @@ public sealed class CompanionOverhaulTurnEnd : AbstractModel
     /// <c>Localization</c> the badge shows, so the log says the words a player
     /// can see on the board and no second spelling of any summon exists here.
     /// </summary>
-    private static Task Act(
-        Creature owner, PowerModel power, System.Func<Task> act) =>
-        KokomiPlan.Summon(owner, SummonName(power), act);
+    /// <para>THE INAZUMA POOL REWORK (2026-10-18): the same door holds
+    /// Sacred Sakura's Favor's end-of-turn window open for the actor's
+    /// owner, so every actor here is "damage you deal at the end of your
+    /// turn" (<see cref="SacredSakurasFavorPower"/>). Sim twin:
+    /// <c>state.turn_end_window</c>.</para>
+    private static async Task Act(
+        Creature owner, PowerModel power, System.Func<Task> act)
+    {
+        var outer = SacredSakurasFavorPower.OpenWindow(owner);
+        try
+        {
+            await KokomiPlan.Summon(owner, SummonName(power), act);
+        }
+        finally
+        {
+            SacredSakurasFavorPower.CloseWindow(outer);
+        }
+    }
 
     /// <summary>The printed title of a power, or empty where it prints
     /// none.</summary>

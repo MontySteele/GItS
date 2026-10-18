@@ -89,6 +89,9 @@ PLAN_KINDS = frozenset((
     # KOKOMI V3 (2026-10-18, card paper sec.6): Unbroken Tide. See
     # `DAMAGE_IF_NO_HP_LOST_SINCE`.
     "damage_if_no_hp_lost_since",
+    # THE INAZUMA POOL REWORK (2026-10-18): Kyouka Fuushi. See
+    # `DAMAGE_TIMES_PLUS_EARLIER_PLANS`.
+    "damage_times_plus_earlier_plans",
 ))
 
 #: The clauses that carry NO `amount`. Each is a whole rule rather than a
@@ -138,7 +141,9 @@ PLAN_AIMED_OPS = frozenset((
     "damage_per_plan_this_turn", "damage_blocked_since",
     "damage_taken_since", "lose_strength_this_turn",
     # KOKOMI V3 (2026-10-18): Unbroken Tide.
-    "damage_if_no_hp_lost_since"))
+    "damage_if_no_hp_lost_since",
+    # The Inazuma pool rework (2026-10-18): Kyouka Fuushi.
+    "damage_times_plus_earlier_plans"))
 
 #: R276. The clauses whose `amount` may be zero: Tide Wall's is a flat bonus on
 #: top of the front enemy's intent, and the base card prints none. THE FEED
@@ -155,8 +160,10 @@ PLAN_ZERO_AMOUNT_OPS = frozenset(("block_max_intent", "block",
 #: (`EB-492`, Pincer's "Plan: Deal 3 damage three times"). The two scaled
 #: damage kinds already derive their size from a count, and a debuff applied
 #: twice in one beat is two stacks -- an `amount` -- rather than two
-#: applications. `gen_klee_cards.PLAN_TIMES_OPS` is the twin.
-PLAN_TIMES_OPS = frozenset(("damage",))
+#: applications. Kyouka Fuushi's hit (the Inazuma pool rework, 2026-10-18)
+#: takes one too: its `times` is the base count the earlier Plans add to.
+#: `gen_klee_cards.PLAN_TIMES_OPS` is the twin.
+PLAN_TIMES_OPS = frozenset(("damage", "damage_times_plus_earlier_plans"))
 
 #: Legal inside a `plan:` list and NOWHERE else. A top-level spelling would be
 #: a different, unpriced card, and this module is the only resolver of either.
@@ -206,7 +213,10 @@ PLAN_ONLY_OPS = frozenset((
                            "lose_strength_this_turn", "draw_pile_to_hand",
                            # KOKOMI V3 (2026-10-18): Unbroken Tide reads the
                            # turns it sat through.
-                           "damage_if_no_hp_lost_since"))
+                           "damage_if_no_hp_lost_since",
+                           # The Inazuma pool rework (2026-10-18): Kyouka
+                           # Fuushi reads the Plans carried out before it.
+                           "damage_times_plus_earlier_plans"))
 
 #: THE POOL OVERHAUL (2026-10-13, review/active/kokomi-pool-overhaul-
 #: 2026-10-13.md, picks 1 (a) and 2 (a); [USER]: "On Kokomi, I'm good with
@@ -253,6 +263,13 @@ DRAW_PILE_TO_HAND = "draw_pile_to_hand"
 #: source of HP loss) against the entry's `since_hp_lost`.
 #: `KokomiPlan.Kind.DamageIfNoHpLostSince` is the twin.
 DAMAGE_IF_NO_HP_LOST_SINCE = "damage_if_no_hp_lost_since"
+#: THE INAZUMA POOL REWORK (2026-10-18, review/active/inazuma-companions-
+#: 2026-10-18.md). Kamisato Ayato, Kyouka Fuushi: "Plan: Deal 7 Hydro damage
+#: 3 times, plus once per earlier Plan, not Stings or Wards." `times` hits,
+#: plus one for each Plan carried out before it this turn, counted as Feint
+#: counts (`kk_chain_plans_this_turn`, which has already counted this one).
+#: `KokomiPlan.Kind.DamageTimesPlusEarlierPlans` is the twin.
+DAMAGE_TIMES_PLUS_EARLIER_PLANS = "damage_times_plus_earlier_plans"
 #: Brine Sting's aim.
 ENEMIES_ATTACKED_SINCE = "enemies_attacked_since"
 
@@ -957,7 +974,10 @@ def schedule(state: CombatState, card: Card,
     owner = enchanted_by or card
     body = [dict(c, amount=hers(state, owner, int(c.get("amount", 0)),
                                 int(c.get("strength_times", 1))))
-            if c.get("op") == "damage" else c
+            # The Inazuma pool rework (2026-10-18): Kyouka Fuushi's hit is
+            # a printed flat hit too.
+            if c.get("op") in ("damage", DAMAGE_TIMES_PLUS_EARLIER_PLANS)
+            else c
             for c in body]
     # CRYSTAL COLLAPSE CAPTURES AT WRITING TIME, and that is the card: "the
     # last Companion card you played" (combat-wide since the Kokomi level
@@ -1630,6 +1650,11 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
         # don't count.
         _hit(state, clause, amount * state.kk_chain_plans_this_turn,
              entry=entry, double=double_damage)
+    elif op == DAMAGE_TIMES_PLUS_EARLIER_PLANS:
+        # Kyouka Fuushi (the Inazuma pool rework, 2026-10-18): one more hit
+        # per Plan carried out before it this turn, not Stings or Wards.
+        _hit(state, {**clause, "times": earlier_plan_hits(state, clause)},
+             amount, entry=entry, double=double_damage)
     elif op == DAMAGE_BLOCKED_SINCE:
         # Kelp Wall: the damage she blocked since it was written.
         _hit(state, clause, blocked_since(state, entry), entry=entry,
@@ -1856,6 +1881,13 @@ def _hit(state: CombatState, clause: dict, amount: int,
 
     if amount <= 0:
         return
+    # THE INAZUMA POOL REWORK (2026-10-18), Chiori's Twin Blades: an Attack's
+    # Plan line that hits more than once deals N more per hit.
+    # `TwinBladesPower.PlanBonus` is the twin.
+    source = entry.source if entry is not None else None
+    if (source is not None and source.type == "attack"
+            and int(clause.get("times", 1)) >= 2):
+        amount += state.player.powers.get("mi_twin_blades", 0)
     if double:
         amount *= 2
     for _ in range(max(1, int(clause.get("times", 1)))):
@@ -2928,6 +2960,15 @@ def hp_lost_since(state: CombatState, entry: Optional[PlanEntry]) -> bool:
     if entry is None:
         return False
     return state.hp_lost_this_combat > entry.since_hp_lost
+
+
+def earlier_plan_hits(state: CombatState, clause: dict) -> int:
+    """Kyouka Fuushi (the Inazuma pool rework, 2026-10-18): its printed hits
+    plus one per Plan carried out before it this turn, not Stings or Wards.
+    `kk_chain_plans_this_turn` has counted this Plan already, so the earlier
+    ones are one fewer. `KokomiPlan.EarlierPlanHits` is the twin."""
+    earlier = max(0, state.kk_chain_plans_this_turn - 1)
+    return max(1, int(clause.get("times", 1))) + earlier
 
 
 def chain_plans_held(state: CombatState) -> int:

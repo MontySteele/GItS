@@ -319,7 +319,9 @@
     "proto_mi_ayaka_hyouka",
     "proto_mi_ayaka_soumetsu",
     "proto_mi_ayato_kyouka",
+    "proto_mi_ayato_kyouka_fuushi",
     "proto_mi_chiori_hasode",
+    "proto_mi_chiori_twin_blades",
     "proto_mi_gorou_crystal_collapse",
     "proto_mi_gorou_inuzaka",
     "proto_mi_gorou_juuga",
@@ -330,6 +332,7 @@
     "proto_mi_itto_ushi",
     "proto_mi_kazuha_chihayaburu",
     "proto_mi_kazuha_slash",
+    "proto_mi_kirara_meowteor_kick",
     "proto_mi_kirara_surprise_dispatch",
     "proto_mi_mizuki_aisa_utamakura",
     "proto_mi_mizuki_anraku",
@@ -346,8 +349,11 @@
     "proto_mi_thoma_blazing_barrier",
     "proto_mi_thoma_crimson_ooyoroi",
     "proto_mi_wanderer_hanega",
+    "proto_mi_wanderer_kyougen",
+    "proto_mi_yae_sacred_sakuras_favor",
     "proto_mi_yae_sesshou_sakura",
     "proto_mi_yoimiya_niwabi",
+    "proto_mi_yoimiya_ryuukin_saxifrage",
     "proto_vk_absolute_zero",
     "proto_vk_amber_baron_bunny",
     "proto_vk_amber_fiery_rain",
@@ -831,7 +837,9 @@
     "proto_mi_ayaka_hyouka": "klee",
     "proto_mi_ayaka_soumetsu": "klee",
     "proto_mi_ayato_kyouka": "klee",
+    "proto_mi_ayato_kyouka_fuushi": "klee",
     "proto_mi_chiori_hasode": "klee",
+    "proto_mi_chiori_twin_blades": "klee",
     "proto_mi_gorou_crystal_collapse": "kokomi",
     "proto_mi_gorou_inuzaka": "kokomi",
     "proto_mi_gorou_juuga": "kokomi",
@@ -842,6 +850,7 @@
     "proto_mi_itto_ushi": "klee",
     "proto_mi_kazuha_chihayaburu": "klee",
     "proto_mi_kazuha_slash": "klee",
+    "proto_mi_kirara_meowteor_kick": "klee",
     "proto_mi_kirara_surprise_dispatch": "klee",
     "proto_mi_mizuki_aisa_utamakura": "klee",
     "proto_mi_mizuki_anraku": "klee",
@@ -858,8 +867,11 @@
     "proto_mi_thoma_blazing_barrier": "klee",
     "proto_mi_thoma_crimson_ooyoroi": "klee",
     "proto_mi_wanderer_hanega": "klee",
+    "proto_mi_wanderer_kyougen": "klee",
+    "proto_mi_yae_sacred_sakuras_favor": "klee",
     "proto_mi_yae_sesshou_sakura": "klee",
     "proto_mi_yoimiya_niwabi": "klee",
+    "proto_mi_yoimiya_ryuukin_saxifrage": "klee",
     "proto_vk_absolute_zero": "varka",
     "proto_vk_amber_baron_bunny": "varka",
     "proto_vk_amber_fiery_rain": "varka",
@@ -2072,8 +2084,15 @@
     "proto_mi_ayato_kyouka": {
       "power_amount": 2
     },
+    "proto_mi_ayato_kyouka_fuushi": {
+      "damage": 2,
+      "plan_damage": 2
+    },
     "proto_mi_chiori_hasode": {
       "damage": 2
+    },
+    "proto_mi_chiori_twin_blades": {
+      "power_amount": 1
     },
     "proto_mi_gorou_crystal_collapse": {
       "retain": true
@@ -2105,6 +2124,9 @@
       "cost": -1
     },
     "proto_mi_kazuha_slash": {
+      "damage": 3
+    },
+    "proto_mi_kirara_meowteor_kick": {
       "damage": 3
     },
     "proto_mi_kirara_surprise_dispatch": {
@@ -2159,6 +2181,13 @@
     "proto_mi_wanderer_hanega": {
       "cost": -1
     },
+    "proto_mi_wanderer_kyougen": {
+      "damage": 2,
+      "conditional_then_damage": 2
+    },
+    "proto_mi_yae_sacred_sakuras_favor": {
+      "cost": -1
+    },
     "proto_mi_yae_sesshou_sakura": {
       "add": {
         "op": "draw",
@@ -2167,6 +2196,9 @@
     },
     "proto_mi_yoimiya_niwabi": {
       "cost": -1
+    },
+    "proto_mi_yoimiya_ryuukin_saxifrage": {
+      "damage": 1
     },
     "proto_vk_absolute_zero": {
       "innate": true

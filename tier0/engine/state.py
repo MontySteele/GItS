@@ -1547,6 +1547,10 @@ class CombatState:
     extra_card_screens: int = 0
     dark_embrace_ethereal_count: int = 0  # deferred to after the hand flush
     attacks_played_this_turn: int = 0     # Juggling's ==3 trigger
+    # THE INAZUMA POOL REWORK (2026-10-18): open while the companion
+    # end-of-turn walk runs (`effects.companion_overhaul_turn_end`), the
+    # window Sacred Sakura's Favor multiplies.
+    turn_end_window: bool = False
     skills_played_this_turn: int = 0      # Pinpoint's self-discount
     # CardPlaysFinished this turn, counted per card TAG. PhantomBlades pays
     # only on the first tagged card played each turn, and "finished" is the

@@ -1910,6 +1910,11 @@ PREDICATES_CS = {
     # listener, and opens at the end of the player's previous turn.
     "hp_lost_since_last_turn":
         "HpLossWindow.LostSinceLastTurn(Owner.Creature)",
+    # The Inazuma pool rework (2026-10-18): Kirara's Meow-teor Kick, "If you
+    # have Block", and Wanderer's Kyougen, "If you have no Block", at play.
+    # Sim twins: `effects._predicate`'s `has_block` / `no_block`.
+    "has_block": "Owner.Creature.Block > 0",
+    "no_block": "Owner.Creature.Block <= 0",
     # THE KLEE OVERHAUL's two per-turn reads. Both come off
     # `KleeOverhaulLedger`, which is the ONE place the arm's counters are
     # written, so a card and the power that feeds it cannot disagree about
@@ -2033,6 +2038,8 @@ PREDICATE_TEXT = {
     "enemy_intends_attack": "If an enemy intends to attack",
     "hp_lost_this_turn": "If you have lost HP this turn",
     "hp_lost_since_last_turn": "If you lost HP since your last turn",
+    "has_block": "If you have [gold]Block[/gold]",
+    "no_block": "If you have no [gold]Block[/gold]",
     "bomb_went_off_this_turn": "If a [gold]Bomb[/gold] went off this turn",
     "bomb_reacted_this_turn":
         "If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] "
@@ -3527,6 +3534,11 @@ PLAN_CLAUSE_KINDS = {
     # KOKOMI V3 (2026-10-18, review/active/kokomi-cards-2026-10-18.md sec.6):
     # Unbroken Tide's "if you lost no HP since you planned this".
     "damage_if_no_hp_lost_since": "DamageIfNoHpLostSince",
+    # THE INAZUMA POOL REWORK (2026-10-18), Ayato's Kyouka Fuushi: "Deal 7
+    # Hydro damage 3 times, plus once per earlier Plan, not Stings or Wards."
+    # `times` hits, plus one per Plan carried out before it this turn
+    # (`ChainPlansThisTurn` less itself).
+    "damage_times_plus_earlier_plans": "DamageTimesPlusEarlierPlans",
     "lose_strength_this_turn": "LoseStrengthThisTurn",
     "draw_pile_to_hand": "DrawPileToHand",
     "apply_power": None,
@@ -3579,10 +3591,13 @@ PLAN_AIMED_OPS = {"damage", "damage_quarter_max_hp",
                   "damage_per_plan_this_turn", "damage_blocked_since",
                   "damage_taken_since", "lose_strength_this_turn",
                   # KOKOMI V3 (2026-10-18): Unbroken Tide.
-                  "damage_if_no_hp_lost_since"}
-#: The clauses a `times:` may repeat -- the flat hit, and nothing else
-#: (`EB-492`, Pincer). The twin of `kokomi_plan.PLAN_TIMES_OPS`.
-PLAN_TIMES_OPS = {"damage"}
+                  "damage_if_no_hp_lost_since",
+                  # The Inazuma pool rework (2026-10-18): Kyouka Fuushi.
+                  "damage_times_plus_earlier_plans"}
+#: The clauses a `times:` may repeat -- the flat hit (`EB-492`, Pincer), and
+#: Kyouka Fuushi's hit, whose `times` is the base before the earlier Plans
+#: are added. The twin of `kokomi_plan.PLAN_TIMES_OPS`.
+PLAN_TIMES_OPS = {"damage", "damage_times_plus_earlier_plans"}
 #: Legal inside a `plan:` list and NOWHERE else -- a top-level spelling would
 #: be a different, unpriced card, and `KokomiPlan` is the only caller of both.
 PLAN_ONLY_OPS = {
@@ -3617,7 +3632,10 @@ PLAN_ONLY_OPS = {
                  "damage_taken_since", "energy_if_attacked_since",
                  "lose_strength_this_turn", "draw_pile_to_hand",
                  # KOKOMI V3 (2026-10-18): Unbroken Tide.
-                 "damage_if_no_hp_lost_since"}
+                 "damage_if_no_hp_lost_since",
+                 # The Inazuma pool rework (2026-10-18): Kyouka Fuushi
+                 # reads the Plans carried out before it this turn.
+                 "damage_times_plus_earlier_plans"}
 
 #: R276. The clauses whose `amount` may be ZERO: Tide Wall's is a flat bonus
 #: on top of a number read off the board, and the base card prints none.
@@ -4373,6 +4391,12 @@ APPLY_POWERS = {
     "mi_hanega": ("HanegaPower", None,
         "At the start of your turn, gain {X} Energy. Cards give you 3 less "
         "[gold]Block[/gold]."),
+    # Growing the pool to 34 (2026-10-18): Chiori's and Yae's Rare Powers.
+    "mi_twin_blades": ("TwinBladesPower", None,
+        "Your Attacks that hit more than once deal {X} additional damage per "
+        "hit."),
+    "mi_sacred_sakuras_favor": ("SacredSakurasFavorPower", None,
+        "Damage you deal at the end of your turn is increased by 50%."),
     # KLEE'S COVEN PERSONALS (R213 B / R236), on the SAME flag
     # pair as the two nation blocks above. Every class lives in
     # klee-mod/KleeCode/Powers/Prototype/CompanionCoven.cs and is Compile
@@ -9112,7 +9136,10 @@ def build_vars(card: dict) -> list[str]:
     plan_line = card.get("plan") or []
     for index, (key, var) in sorted(plan_var_effects(card).items()):
         amount = int(plan_line[index]["amount"])
-        if key == "plan_damage" and plan_line[index].get("op") == "damage":
+        # The Inazuma pool rework (2026-10-18): Kyouka Fuushi's per-hit
+        # number is a flat hit too, folded at writing like `damage`.
+        if key == "plan_damage" and plan_line[index].get("op") in (
+                "damage", "damage_times_plus_earlier_plans"):
             strength_times = plan_line[index].get("strength_times")
             out.append(
                 f'new KokomiPlan.PlanDamageVar({amount}m, {int(strength_times)})'

@@ -970,6 +970,13 @@ def deal_damage_to_enemy(state: CombatState, enemy: Enemy, base: float,
     #                                 freeze it applies
     dmg = (powers.modify_damage_dealt(state.player, base) if powered
            else float(base))
+    # THE INAZUMA POOL REWORK (2026-10-18), Yae's Sacred Sakura's Favor:
+    # "Damage you deal at the end of your turn is increased by 50%." A hit in
+    # the companion end-of-turn walk (`turn_end_window`, set by
+    # `companion_overhaul_turn_end`), after the dealer's Strength and Weak.
+    # C# twin: `SimDamagePipeline.DealerMods`.
+    if powered and state.turn_end_window:
+        dmg *= sacred_sakuras_favor_mult(state)
     unamped = dmg                   # EB-57: the pre-amplifier counterfactual
     # Durin, Principle of Purity / DARK (AoE trim, 2026-10-03): "Your Pyro
     # damage deals 4 more." EVERY Pyro hit she deals -- card, Bomb, Mine,
@@ -1632,6 +1639,13 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
     # tag_damage_<tag> powers (Accuracy-like -> shiv) add per-hit.
     base += sum(state.player.powers.get(f"tag_damage_{t}", 0)
                 for t in card.tags)
+    # THE INAZUMA POOL REWORK (2026-10-18), Chiori's Twin Blades: "Your
+    # Attacks that hit more than once deal 2 additional damage per hit." An
+    # Attack whose hit count is 2 or more, per hit. C# twin:
+    # `TwinBladesPower.ModifyDamageAdditive`, read off the AttackCommand's
+    # printed hit count.
+    if card.type == "attack" and times >= 2:
+        base += state.player.powers.get("mi_twin_blades", 0)
     # Watchful Shoal (Kokomi round-3 changes): Kokomi's Accuracy on a Sting.
     base += kokomi_plan.watchful_shoal_bonus(state, card, kokomi_plan.STING_ID)
     # PhantomBladesPower pays only on the FIRST tagged card played each turn
@@ -3325,6 +3339,11 @@ PREDICATE_NAMES = frozenset({
     # THE EXPANSION (2026-10-01): Amber: Sharpshooter, Shifting Gale.
     "target_has_pyro",
     "element_changed_this_turn",
+    # THE INAZUMA POOL REWORK (2026-10-18): Kirara's Meow-teor Kick, "If you
+    # have Block", and Wanderer's Kyougen, "If you have no Block", read at
+    # play. C# twins: `Owner.Creature.Block > 0` and its negation.
+    "has_block",
+    "no_block",
     # YAE, THE POOL TO 78 (2026-10-15): Torii Ward's "If your shrine is
     # full", Late Night Reading's "If you have 3 Sakura" (3 or more).
     "shrine_full",
@@ -3749,6 +3768,11 @@ def _predicate(state: CombatState, name: str) -> bool:
         return state.hp_lost_this_turn > 0
     if name == "hp_lost_since_last_turn":
         return state.hp_lost_since_last_turn > 0
+    # The Inazuma pool rework (2026-10-18): Meow-teor Kick and Kyougen.
+    if name == "has_block":
+        return state.player.block > 0
+    if name == "no_block":
+        return state.player.block <= 0
     if name == "hp_lost_last_turn":
         return state.hp_lost_last_turn > 0
     if name == "first_turn_of_combat":
@@ -5264,6 +5288,8 @@ OPS = {
     "energy_if_attacked_since": _op_kokomi_plan_only,
     # KOKOMI V3 (2026-10-18): Unbroken Tide.
     "damage_if_no_hp_lost_since": _op_kokomi_plan_only,
+    # The Inazuma pool rework (2026-10-18): Kyouka Fuushi's Plan line.
+    "damage_times_plus_earlier_plans": _op_kokomi_plan_only,
     "lose_strength_this_turn": _op_kokomi_plan_only,
     "draw_pile_to_hand": _op_kokomi_plan_only,
     # --- base-game parity ops (the real Ironclad pool) ---
@@ -5959,6 +5985,11 @@ def companion_overhaul_turn_end(state: CombatState) -> None:
     Kokomi's pulse, which are the shipped tenants a flagged run can still hold.
     """
     p = state.player
+    # THE INAZUMA POOL REWORK (2026-10-18): the end-of-turn window Sacred
+    # Sakura's Favor reads (`sacred_sakuras_favor_mult`), open for this walk's
+    # actors as the C#'s `CompanionOverhaulTurnEnd.Act` holds it open for its
+    # own; closed before Klee's coven personals, which run outside that walk.
+    state.turn_end_window = True
 
     # Kaeya, Glacial Waltz -- stacks are TURNS REMAINING. FIRE, THEN TICK (the
     # AuraPower own-decay idiom the shipped volleys use), so a stack count
@@ -6085,6 +6116,7 @@ def companion_overhaul_turn_end(state: CombatState) -> None:
     # block rather than after the latch precisely so Nicole's question is
     # asked of the board the player really ended the turn holding.
     inazuma_overhaul_turn_end(state)
+    state.turn_end_window = False
     # ---- KLEE'S COVEN PERSONALS, still before the latch (R236) -------------
     # Yaoyao's Yuegui draws a target from `state.rng`, so its position decides
     # every later roll; it grants no Block, so it cannot change the answer
@@ -6094,6 +6126,15 @@ def companion_overhaul_turn_end(state: CombatState) -> None:
     # is on the board: a card drafted mid-fight must not read a stale answer
     # from the turn before it existed, and the field is per-combat anyway.
     p.mc_held_block_at_turn_end = p.block > 0
+
+
+def sacred_sakuras_favor_mult(state: CombatState) -> float:
+    """Yae Miko, Sacred Sakura's Favor (the Inazuma pool rework, 2026-10-18):
+    1.5 while the player wears it, else 1. A marker; copies do not stack.
+    `SacredSakurasFavorPower.Multiplier` is the twin."""
+    if state.player.powers.get("mi_sacred_sakuras_favor", 0) > 0:
+        return C.MI_SACRED_SAKURA_MULT
+    return 1.0
 
 
 def inazuma_overhaul_turn_end(state: CombatState) -> None:

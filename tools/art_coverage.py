@@ -678,6 +678,12 @@ KNOWN_MISSING = {
     "proto_mi_yoimiya_niwabi": "Inazuma pool rework 2026-10-18: Yoimiya, can take Aurous Blaze's art",
     "proto_mi_kazuha_chihayaburu": "Inazuma pool rework 2026-10-18: Kaedehara Kazuha, art pass pending",
     "proto_mi_wanderer_hanega": "Inazuma pool rework 2026-10-18: Wanderer, no source yet, art pass pending",
+    "proto_mi_ayato_kyouka_fuushi": "Inazuma pool rework 2026-10-18: Kamisato Ayato, art pass pending",
+    "proto_mi_kirara_meowteor_kick": "Inazuma pool grown to 34, 2026-10-18: Kirara, art pass pending",
+    "proto_mi_yoimiya_ryuukin_saxifrage": "Inazuma pool grown to 34, 2026-10-18: Yoimiya, art pass pending",
+    "proto_mi_wanderer_kyougen": "Inazuma pool grown to 34, 2026-10-18: Wanderer, no source yet, art pass pending",
+    "proto_mi_chiori_twin_blades": "Inazuma pool grown to 34, 2026-10-18: Chiori, art pass pending",
+    "proto_mi_yae_sacred_sakuras_favor": "Inazuma pool grown to 34, 2026-10-18: Yae Miko, art pass pending",
 }
 
 

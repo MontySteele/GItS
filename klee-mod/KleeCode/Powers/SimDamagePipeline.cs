@@ -40,6 +40,15 @@ public static class SimDamagePipeline
         {
             damage *= 0.75m;
         }
+        // THE INAZUMA POOL REWORK (2026-10-18), Yae's Sacred Sakura's Favor:
+        // 1.5 in the dealer's end-of-turn window, after Strength and Weak and
+        // floored first, as the sim's `modify_damage_dealt` floors before
+        // `deal_damage_to_enemy` multiplies. 1 everywhere else.
+        var favor = SacredSakurasFavorPower.Multiplier(dealer);
+        if (favor != 1m)
+        {
+            damage = System.Math.Floor(damage) * favor;
+        }
         return damage;
     }
 

@@ -21,7 +21,7 @@ namespace KleeMod.Tests.Prototype;
 /// THE INAZUMA COMPANION OVERHAUL -- on the arm's existing flag (sim twin
 /// <c>tier0/tests/test_inazuma_companion_overhaul.py</c>). Gorou's three are
 /// Kokomi's own cards; the Universals are the Inazuma pool rework's
-/// twenty-eight (2026-10-18, <c>review/active/inazuma-companions-2026-10-18.md</c>).
+/// thirty-four (2026-10-18, <c>review/active/inazuma-companions-2026-10-18.md</c>).
 ///
 /// Compiled only under <c>-p:PrototypeCards=true</c>, the same switch that
 /// compiles the arm.
@@ -42,7 +42,7 @@ public class InazumaCompanionOverhaulTests
     private static ValueProp Attack => ValueProp.Move;   // IsPoweredAttack()
 
     /// <summary>Gorou's three (Kokomi's own since the re-founding) and the
-    /// twenty-eight Universals of the Inazuma pool rework (2026-10-18), in
+    /// thirty-four Universals of the Inazuma pool rework (2026-10-18), in
     /// the roster's order.</summary>
     private static readonly Type[] Rows =
     {
@@ -77,6 +77,12 @@ public class InazumaCompanionOverhaulTests
         typeof(ProtoMiYoimiyaNiwabi),
         typeof(ProtoMiKazuhaChihayaburu),
         typeof(ProtoMiWandererHanega),
+        typeof(ProtoMiAyatoKyoukaFuushi),
+        typeof(ProtoMiKiraraMeowteorKick),
+        typeof(ProtoMiYoimiyaRyuukinSaxifrage),
+        typeof(ProtoMiWandererKyougen),
+        typeof(ProtoMiChioriTwinBlades),
+        typeof(ProtoMiYaeSacredSakurasFavor),
     };
 
     /// <summary>The powers the arm adds, by class, since the Inazuma pool
@@ -91,13 +97,14 @@ public class InazumaCompanionOverhaulTests
         typeof(PlaneOfEuthymiaPower), typeof(RoyalDescentPower),
         typeof(NiwabiFireDancePower), typeof(ChihayaburuPower),
         typeof(HanegaPower),
+        typeof(TwinBladesPower), typeof(SacredSakurasFavorPower),
     };
 
     /// <summary>The ones whose stack is a marker rather than a number.</summary>
     private static readonly Type[] SinglePowers =
     {
         typeof(NextAttackElectroPower), typeof(PlaneOfEuthymiaPower),
-        typeof(NiwabiFireDancePower),
+        typeof(NiwabiFireDancePower), typeof(SacredSakurasFavorPower),
     };
 
     // ---- THE ROWS -------------------------------------------------------
@@ -105,7 +112,7 @@ public class InazumaCompanionOverhaulTests
     [Fact]
     public void The_rows_are_offerable_inazuma_companions()
     {
-        Assert.Equal(31, Rows.Length);
+        Assert.Equal(37, Rows.Length);
         foreach (var type in Rows)
         {
             var card = (CardModel)Activator.CreateInstance(type)!;
@@ -121,16 +128,16 @@ public class InazumaCompanionOverhaulTests
     [Fact]
     public void The_rarity_split_is_the_reworks()
     {
-        // The Inazuma pool rework (2026-10-18): 8 Common, 13 Uncommon, 7 Rare
-        // Universals (the paper's eighth Rare, Kyouka Fuushi, is not built),
-        // plus Gorou's two Commons and one Uncommon.
+        // The Inazuma pool rework (2026-10-18), grown to two cards a
+        // character: 8 Common, 16 Uncommon, 10 Rare Universals, plus Gorou's
+        // two Commons and one Uncommon.
         var byRarity = Rows
             .Select(t => ((CardModel)Activator.CreateInstance(t)!).Rarity)
             .GroupBy(r => r)
             .ToDictionary(g => g.Key, g => g.Count());
         Assert.Equal(8 + 2, byRarity[CardRarity.Common]);
-        Assert.Equal(13 + 1, byRarity[CardRarity.Uncommon]);
-        Assert.Equal(7, byRarity[CardRarity.Rare]);
+        Assert.Equal(16 + 1, byRarity[CardRarity.Uncommon]);
+        Assert.Equal(10, byRarity[CardRarity.Rare]);
     }
 
     [Fact]
@@ -143,8 +150,8 @@ public class InazumaCompanionOverhaulTests
         var referenced = Il.CallSequence(inazuma)
             .Count(c => c.StartsWith("ModelDb.Card"));
         // 21 since the Kokomi re-founding (2026-10-12): Gorou's three are her
-        // own cards. 28 since the Inazuma pool rework (2026-10-18).
-        Assert.Equal(28, referenced);
+        // own cards. 34 since the Inazuma pool rework (2026-10-18).
+        Assert.Equal(34, referenced);
 
         var mondstadt = Il.Method("CompanionOverhaulRoster", "Universals");
         // 35 since the AoE trim (2026-10-03) split Durin in two; 39 since the
@@ -169,10 +176,16 @@ public class InazumaCompanionOverhaulTests
         var clause = Assert.Single(kirara.PlanClauses);
         Assert.Equal(KokomiPlan.Kind.Block, clause.Kind);
         Assert.Equal(14, clause.Amount);
+        // Kyouka Fuushi, the rework's Plan Rare: 7 three times, plus the
+        // earlier Plans.
+        var fuushi = Assert.IsAssignableFrom<IPlannedCard>(new ProtoMiAyatoKyoukaFuushi());
+        var hit = Assert.Single(fuushi.PlanClauses);
+        Assert.Equal(KokomiPlan.Kind.DamageTimesPlusEarlierPlans, hit.Kind);
+        Assert.Equal((7, 3, KokomiPlan.Aim.FrontEnemy), (hit.Amount, hit.Times, hit.Aim));
     }
 
     [Fact]
-    public void Kirara_is_the_one_row_that_declares_no_element()
+    public void Kiraras_two_rows_are_the_ones_that_declare_no_element()
     {
         // She is Dendro; this engine has six elements and no Dendro aura, and
         // her card names no element at all. Element.None is the honest
@@ -181,8 +194,10 @@ public class InazumaCompanionOverhaulTests
         var kirara = (ICompanionCard)Activator.CreateInstance(
             typeof(ProtoMiKiraraSurpriseDispatch))!;
         Assert.Equal(Element.None, kirara.CompanionElement);
+        Assert.Equal(Element.None, ((ICompanionCard)new ProtoMiKiraraMeowteorKick()).CompanionElement);
         foreach (var type in Rows.Where(
-                     t => t != typeof(ProtoMiKiraraSurpriseDispatch)))
+                     t => t != typeof(ProtoMiKiraraSurpriseDispatch)
+                          && t != typeof(ProtoMiKiraraMeowteorKick)))
         {
             var comp = (ICompanionCard)Activator.CreateInstance(type)!;
             Assert.NotEqual(Element.None, comp.CompanionElement);
@@ -675,5 +690,126 @@ public class InazumaCompanionOverhaulTests
         Assert.Contains("for each other Attack you played this turn.", face);
         Assert.Contains("{CalculatedDamage:diff()}", face);
         Assert.DoesNotContain("Swirl", face);
+    }
+    // ==================================================================
+    // Kyouka Fuushi and growing the pool to 34 (2026-10-18)
+    // ==================================================================
+
+    [Fact]
+    public void Kyouka_fuushi_counts_the_plans_before_it_and_not_itself()
+    {
+        KokomiOverhaulLedger.ResetAll();
+        try
+        {
+            var seat = Seat.Kokomi().WithCombatState();
+            var clause = Assert.Single(new ProtoMiAyatoKyoukaFuushi().PlanClauses);
+            var ledger = KokomiOverhaulLedger.For(seat.Creature);
+            ledger.NotePlanCarryingOut();                    // itself
+            Assert.Equal(3, KokomiPlan.EarlierPlanHits(seat.Creature, clause));
+            ledger.NotePlanCarryingOut(jellyfish: true);     // a Sting: no
+            Assert.Equal(3, KokomiPlan.EarlierPlanHits(seat.Creature, clause));
+            ledger.NotePlanCarryingOut();
+            ledger.NotePlanCarryingOut();
+            Assert.Equal(5, KokomiPlan.EarlierPlanHits(seat.Creature, clause));
+            // The carry-out hands Hit the grown count.
+            var resolve = string.Join(" ", Il.CallSequence(
+                Il.Method("KokomiPlan", "ResolveOne")));
+            Assert.Contains("KokomiPlan.EarlierPlanHits", resolve);
+        }
+        finally
+        {
+            KokomiOverhaulLedger.ResetAll();
+        }
+    }
+
+    [Fact]
+    public void The_new_rows_print_the_papers_faces()
+    {
+        string Face(CardModel card) => ((CustomCardModel)card).Localization!
+            .First(r => r.Item1 == "description").Item2;
+        Assert.Contains("plus once per earlier [gold]Plan[/gold], not Stings or Wards.",
+                        Face(new ProtoMiAyatoKyoukaFuushi()));
+        Assert.Contains("If you have [gold]Block[/gold], deal {BranchDamage:diff()} additional damage.",
+                        Face(new ProtoMiKiraraMeowteorKick()));
+        Assert.Contains("If you have no [gold]Block[/gold], deal {BranchDamage:diff()} additional damage.",
+                        Face(new ProtoMiWandererKyougen()));
+        Assert.Contains("damage 3 times.", Face(new ProtoMiYoimiyaRyuukinSaxifrage()));
+        Assert.Contains("additional damage per hit.", Face(new ProtoMiChioriTwinBlades()));
+        Assert.Equal("Damage you deal at the end of your turn is increased by 50%.",
+                     Face(new ProtoMiYaeSacredSakurasFavor()));
+        Assert.Equal(CardRarity.Uncommon, new ProtoMiAyakaHyouka().Rarity);
+    }
+
+    [Fact]
+    public void Twin_blades_pays_per_hit_on_a_multi_hit_attack_only()
+    {
+        var seat = Seat.Klee().WithCombatState().WithPower<TwinBladesPower>(2);
+        var power = seat.Creature.Powers.OfType<TwinBladesPower>().Single();
+        var target = Seat.Klee().Creature;
+        var ryuukin = Owned<ProtoMiYoimiyaRyuukinSaxifrage>(seat);
+        // No Attack in flight: nothing.
+        Assert.Equal(0m, power.ModifyDamageAdditive(
+            target, 4m, Attack, seat.Creature, ryuukin, null));
+        var three = new MegaCrit.Sts2.Core.Commands.Builders.AttackCommand(4m)
+            .WithHitCount(3).FromCard(ryuukin, null);
+        Assert.Equal(3, TwinBladesPower.PrintedHits(three));
+        power.BeforeAttack(three);
+        Assert.Equal(2m, power.ModifyDamageAdditive(
+            target, 4m, Attack, seat.Creature, ryuukin, null));
+        Assert.Equal(0m, power.ModifyDamageAdditive(
+            target, 4m, ValueProp.Unpowered, seat.Creature, ryuukin, null));
+        power.AfterAttack(null!, three);
+        Assert.Equal(0m, power.ModifyDamageAdditive(
+            target, 4m, Attack, seat.Creature, ryuukin, null));
+        // One printed hit is not "more than once".
+        var kick = Owned<ProtoMiKiraraMeowteorKick>(seat);
+        var one = new MegaCrit.Sts2.Core.Commands.Builders.AttackCommand(9m)
+            .FromCard(kick, null);
+        power.BeforeAttack(one);
+        Assert.Equal(0m, power.ModifyDamageAdditive(
+            target, 9m, Attack, seat.Creature, kick, null));
+        // A Plan line: an Attack's multi-hit takes it, a single hit does not.
+        Assert.Equal(2, TwinBladesPower.PlanBonus(seat.Creature, ryuukin, 3));
+        Assert.Equal(0, TwinBladesPower.PlanBonus(seat.Creature, ryuukin, 1));
+        Assert.Equal(0, TwinBladesPower.PlanBonus(
+            seat.Creature, new ProtoMiSayuNaptime(), 2));
+        Assert.Contains("TwinBladesPower.PlanBonus",
+            Il.Calls(Il.Method("KokomiPlan", "Hit")));
+    }
+
+    [Fact]
+    public void Sacred_sakuras_favor_multiplies_only_inside_the_end_of_turn_window()
+    {
+        var seat = Seat.Klee().WithPower<SacredSakurasFavorPower>(1);
+        var bare = Seat.Klee();
+        Assert.Equal(1m, SacredSakurasFavorPower.Multiplier(seat.Creature));
+        Assert.Equal(7m, SimDamagePipeline.DealerMods(seat.Creature, 7m));
+        var outer = SacredSakurasFavorPower.OpenWindow(seat.Creature);
+        try
+        {
+            Assert.Equal(CompanionOverhaulLaw.SacredSakuraMult,
+                         SacredSakurasFavorPower.Multiplier(seat.Creature));
+            Assert.Equal(10.5m, SimDamagePipeline.DealerMods(seat.Creature, 7m));
+            // Someone else's window, or no Favor: nothing.
+            Assert.Equal(1m, SacredSakurasFavorPower.Multiplier(bare.Creature));
+        }
+        finally
+        {
+            SacredSakurasFavorPower.CloseWindow(outer);
+        }
+        Assert.Equal(1m, SacredSakurasFavorPower.Multiplier(seat.Creature));
+        // STRUCTURAL: the walk's one door holds the window open.
+        var act = Il.Calls(Il.Method("CompanionOverhaulTurnEnd", "Act"));
+        Assert.Contains("SacredSakurasFavorPower.OpenWindow", act);
+    }
+
+    [Fact]
+    public void Sacred_sakuras_favor_is_hidden_from_yae_alone()
+    {
+        var card = new ProtoMiYaeSacredSakurasFavor();
+        Assert.True(CompanionPool.IsHiddenFrom(card, "yae"));
+        Assert.False(CompanionPool.IsHiddenFrom(card, "kokomi"));
+        Assert.True(CompanionPool.IsHiddenFrom(new ProtoMiYaeSesshouSakura(), "yae"));
+        Assert.False(CompanionPool.IsHiddenFrom(new ProtoMiChioriTwinBlades(), "yae"));
     }
 }

@@ -312,7 +312,7 @@ public class Round24Tests
         var start = src.IndexOf("public override async Task AfterSideTurnEnd(",
                                 StringComparison.Ordinal);
         Assert.True(start > 0);
-        var end = src.IndexOf("private static Task Act(", start,
+        var end = src.IndexOf("private static async Task Act(", start,
                               StringComparison.Ordinal);
         Assert.True(end > start);
         return src.Substring(start, end - start);

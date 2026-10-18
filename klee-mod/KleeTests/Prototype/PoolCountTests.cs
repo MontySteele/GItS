@@ -145,13 +145,14 @@ public class PoolCountTests
         // since the Klee-only companions (2026-10-03) added Sinful Hex, Mollis
         // Favonius, Ladder of Divine Ascent and Qiqi's Herald of Frost (Liyue).
         // Inazuma 21 since the Kokomi re-founding (2026-10-12): Gorou's three
-        // are her own cards. 28 since the Inazuma pool rework (2026-10-18).
-        Assert.Equal(39 + 28 + 16, universals.Count);
+        // are her own cards. 34 since the Inazuma pool rework (2026-10-18)
+        // grew it to two cards a character.
+        Assert.Equal(39 + 34 + 16, universals.Count);
         var byNation = universals.GroupBy(c => ((ICompanionCard)c).Nation)
             .ToDictionary(g => g.Key!, g => g.Count());
         Assert.Equal(38, byNation["mondstadt"]);
         Assert.Equal(1, byNation["liyue"]);
-        Assert.Equal(28, byNation["inazuma"]);
+        Assert.Equal(34, byNation["inazuma"]);
         Assert.Equal(16, byNation["fontaine"]);
         Assert.All(universals, c => Assert.Null(((ICompanionCard)c).PersonalPool));
         Assert.All(universals, c => Assert.Equal("KleeMod.Cards.Prototype.Generated",

@@ -1,8 +1,8 @@
 """The INAZUMA half of the companion overhaul -- the Universals, one flag.
 
 THE INAZUMA POOL REWORK (2026-10-18, review/active/inazuma-companions-
-2026-10-18.md) took the pool to twenty-eight: three cut, seven rebuilt,
-eleven new (the paper's Kyouka Fuushi is not built).
+2026-10-18.md) took the pool to twenty-nine: three cut, seven rebuilt,
+twelve new; growing the pool the same day made it thirty-four (8 / 16 / 10).
 
 Source: the approved workshop `companion-workshop-inazuma-2026-09-01.md`
 (approved 2026-09-01 at its four default picks, its sec.9; a Paper artefact on
@@ -76,7 +76,7 @@ def test_flag_off_ignore_block_is_not_reachable_and_block_still_eats():
     assert st.enemies[0].block == 12
 
 
-def test_all_twenty_eight_are_offerable(overhaul):
+def test_all_thirty_four_are_offerable(overhaul):
     offerable = {c.id for cards in rewards.companion_pool().values()
                  for c in cards}
     assert set(C.INAZUMA_OVERHAUL_POOL_IDS) <= offerable
@@ -100,7 +100,7 @@ def test_the_pool_ids_and_the_sheet_agree(overhaul):
                         | set(C.INAZUMA_OVERHAUL_PERSONAL_IDS) | own)
     assert not (set(C.INAZUMA_OVERHAUL_POOL_IDS)
                 & (set(C.INAZUMA_OVERHAUL_PERSONAL_IDS) | own))
-    assert len(C.INAZUMA_OVERHAUL_POOL_IDS) == 28
+    assert len(C.INAZUMA_OVERHAUL_POOL_IDS) == 34
     assert len(C.INAZUMA_OVERHAUL_PERSONAL_IDS) == 0
     assert own == {"proto_mi_gorou_inuzaka", "proto_mi_gorou_war_banner",
                    "proto_mi_gorou_juuga", "proto_mi_gorou_crystal_collapse"}
@@ -112,12 +112,12 @@ def test_the_rarity_split_is_the_workshops_enumeration(overhaul):
     among them. THE KOKOMI RE-FOUNDING (2026-10-12) moved Gorou's three
     Universals (two Common, one Uncommon) into Kokomi's own pool, so the
     Universals are 7 / 10 / 4. THE INAZUMA POOL REWORK (2026-10-18): 8 / 13 /
-    7 (the paper's eighth Rare, Kyouka Fuushi, is not built)."""
+    8, then 8 / 16 / 10 when the pool grew to two cards a character."""
     split = {}
     for cid in C.INAZUMA_OVERHAUL_POOL_IDS:
         card = loader.peek_card(cid)
         split[card.rarity] = split.get(card.rarity, 0) + 1
-    assert split == {"common": 8, "uncommon": 13, "rare": 7}
+    assert split == {"common": 8, "uncommon": 16, "rare": 10}
 
 
 def test_every_row_is_an_inazuma_universal(overhaul):
@@ -701,7 +701,8 @@ def test_kirara_keeps_her_parcel_and_plans_fourteen_block(overhaul):
 
 def test_the_plan_lines_pass_the_shape_check(overhaul):
     for cid in ("proto_mi_sayu_naptime", "proto_mi_sayu_daruma",
-                "proto_mi_kirara_surprise_dispatch"):
+                "proto_mi_kirara_surprise_dispatch",
+                "proto_mi_ayato_kyouka_fuushi"):
         assert kokomi_plan.plan_shape_reason(loader.get_card(cid).plan) is None
 
 
@@ -709,7 +710,7 @@ def test_hyouka_hits_all_and_weakens_each(overhaul):
     st = make_state(enemies=[make_enemy(hp=60, name="a"),
                              make_enemy(hp=60, name="b")])
     _play(st, "proto_mi_ayaka_hyouka")
-    assert [e.hp for e in st.enemies] == [56, 56]
+    assert [e.hp for e in st.enemies] == [55, 55]
     assert [e.powers.get("weak") for e in st.enemies] == [1, 1]
     assert [e.aura for e in st.enemies] == ["cryo", "cryo"]
 
@@ -910,3 +911,155 @@ def test_the_rare_powers_upgrade_as_listed(overhaul):
     assert _up("proto_mi_wanderer_hanega").cost == 0
     assert _up("proto_mi_itto_royal_descent").effects[0]["amount"] == 9
     assert _up("proto_mi_thoma_crimson_ooyoroi").effects[0]["amount"] == 9
+
+
+# ---------------------------------------------------------------------------
+# KYOUKA FUUSHI AND GROWING THE POOL TO 34 (2026-10-18)
+# ---------------------------------------------------------------------------
+# review/active/inazuma-companions-2026-10-18.md, "Growing the pool to 34".
+# The C# twin is `InazumaCompanionOverhaulTests.cs`.
+
+from tier0.tests.test_kokomi_refounding import (  # noqa: E402
+    card as _kk_card, kokomi_state as _kk_state)
+
+
+def _plan_hits(st, cid):
+    return [e for e in st.log if e["event"] == "damage"
+            and e.get("source") == "plan"]
+
+
+def _draw_probe(i):
+    return Card(id=f"proto_kk_probe{i}", name=f"Probe {i}", cost=0,
+                type="skill", effects=[],
+                plan=[{"op": "draw", "amount": 1}])
+
+
+def test_kyouka_fuushi_row(overhaul):
+    c = loader.get_card("proto_mi_ayato_kyouka_fuushi")
+    assert (c.rarity, c.cost, c.type) == ("rare", 2, "attack")
+    assert c.effects == [{"op": "damage", "amount": 7, "times": 3,
+                          "target": "enemy", "applies_element": True}]
+    assert c.plan == [{"op": "damage_times_plus_earlier_plans", "amount": 7,
+                       "times": 3, "target": "front_enemy"}]
+    up = _up("proto_mi_ayato_kyouka_fuushi")
+    assert up.effects[0]["amount"] == 9 and up.plan[0]["amount"] == 9
+
+
+def test_kyouka_fuushi_counts_earlier_plans_not_itself():
+    st = make_state()
+    clause = {"op": "damage_times_plus_earlier_plans", "amount": 7,
+              "times": 3}
+    st.kk_chain_plans_this_turn = 1          # itself only
+    assert kokomi_plan.earlier_plan_hits(st, clause) == 3
+    st.kk_chain_plans_this_turn = 3          # two real Plans before it
+    assert kokomi_plan.earlier_plan_hits(st, clause) == 5
+
+
+def test_kyouka_fuushi_carried_out_after_two_plans_hits_five_times(overhaul):
+    st = _kk_state()
+    kokomi_plan.schedule(st, _draw_probe(0))
+    kokomi_plan.schedule(st, _draw_probe(1))
+    kokomi_plan.schedule(st, _kk_card("proto_mi_ayato_kyouka_fuushi"))
+    st.player.draw_pile = [_kk_card("proto_kk_coral_bulwark")
+                           for _ in range(4)]
+    hp = st.enemies[0].hp
+    kokomi_plan.resolve_all(st)
+    assert len(_plan_hits(st, "proto_mi_ayato_kyouka_fuushi")) == 5
+    assert hp - st.enemies[0].hp == 7 * 5
+
+
+def test_kyouka_fuushi_behind_stings_and_wards_hits_three_times(overhaul):
+    st = _kk_state()
+    kokomi_plan.schedule(st, _kk_card(kokomi_plan.WARD_ID))
+    kokomi_plan.schedule(st, _kk_card(kokomi_plan.WARD_ID))
+    kokomi_plan.schedule(st, _kk_card("proto_mi_ayato_kyouka_fuushi"))
+    st.player.draw_pile = [_kk_card("proto_kk_coral_bulwark")
+                           for _ in range(4)]
+    hp = st.enemies[0].hp
+    kokomi_plan.resolve_all(st)
+    assert hp - st.enemies[0].hp == 7 * 3
+
+
+def test_hyouka_is_uncommon_now(overhaul):
+    assert loader.get_card("proto_mi_ayaka_hyouka").rarity == "uncommon"
+    assert _up("proto_mi_ayaka_hyouka").effects[0]["amount"] == 8
+
+
+def test_meowteor_kick_deals_three_more_with_block(overhaul):
+    st = make_state(enemies=[make_enemy(hp=60)])
+    _play(st, "proto_mi_kirara_meowteor_kick")
+    assert st.enemies[0].hp == 60 - 9
+    st = make_state(enemies=[make_enemy(hp=60)])
+    st.player.block = 1
+    _play(st, "proto_mi_kirara_meowteor_kick")
+    assert st.enemies[0].hp == 60 - 12
+    assert _up("proto_mi_kirara_meowteor_kick").effects[0]["amount"] == 12
+
+
+def test_ryuukin_hits_three_times(overhaul):
+    st = make_state(enemies=[make_enemy(hp=60)])
+    _play(st, "proto_mi_yoimiya_ryuukin_saxifrage")
+    assert st.enemies[0].hp == 60 - 12
+    assert _up("proto_mi_yoimiya_ryuukin_saxifrage").effects[0]["amount"] == 5
+
+
+def test_kyougen_deals_six_more_with_no_block(overhaul):
+    st = make_state(enemies=[make_enemy(hp=60)])
+    _play(st, "proto_mi_wanderer_kyougen")
+    assert st.enemies[0].hp == 60 - 12
+    st = make_state(enemies=[make_enemy(hp=60)])
+    st.player.block = 4
+    _play(st, "proto_mi_wanderer_kyougen")
+    assert st.enemies[0].hp == 60 - 6
+    up = _up("proto_mi_wanderer_kyougen")
+    assert up.effects[0]["amount"] == 8
+
+
+def test_twin_blades_adds_per_hit_to_multi_hit_attacks_only(overhaul):
+    st = make_state(enemies=[make_enemy(hp=90)])
+    _play(st, "proto_mi_chiori_twin_blades")
+    assert st.player.powers["mi_twin_blades"] == 2
+    _play(st, "proto_mi_yoimiya_ryuukin_saxifrage")      # 3 x (4 + 2)
+    assert st.enemies[0].hp == 90 - 18
+    _play(st, "proto_mi_kirara_meowteor_kick")           # one hit: 9
+    assert st.enemies[0].hp == 90 - 18 - 9
+    assert _up("proto_mi_chiori_twin_blades").effects[0]["amount"] == 3
+
+
+def test_twin_blades_reaches_a_multi_hit_plan_line(overhaul):
+    st = _kk_state()
+    st.player.powers["mi_twin_blades"] = 2
+    kokomi_plan.schedule(st, _kk_card("proto_mi_ayato_kyouka_fuushi"))
+    st.player.draw_pile = [_kk_card("proto_kk_coral_bulwark")
+                           for _ in range(4)]
+    hp = st.enemies[0].hp
+    kokomi_plan.resolve_all(st)
+    assert hp - st.enemies[0].hp == (7 + 2) * 3
+
+
+def test_sacred_sakuras_favor_raises_end_of_turn_damage_by_half(overhaul):
+    st = make_state(enemies=[make_enemy(hp=60)])
+    st.player.powers["mi_sanctifying_ring"] = 1
+    effects.companion_overhaul_turn_end(st)
+    plain = 60 - st.enemies[0].hp
+    assert plain == C.MI_SANCTIFYING_RING_DMG
+    st = make_state(enemies=[make_enemy(hp=60)])
+    _play(st, "proto_mi_yae_sacred_sakuras_favor")
+    st.player.powers["mi_sanctifying_ring"] = 1
+    effects.companion_overhaul_turn_end(st)
+    assert 60 - st.enemies[0].hp == int(plain * C.MI_SACRED_SAKURA_MULT)
+    assert st.turn_end_window is False
+    # A card's hit is not end-of-turn damage (the ring's Block cleared, so
+    # Meow-teor Kick prints its plain 9).
+    st.player.block = 0
+    hp = st.enemies[0].hp
+    _play(st, "proto_mi_kirara_meowteor_kick")
+    assert hp - st.enemies[0].hp == 9
+    assert _up("proto_mi_yae_sacred_sakuras_favor").cost == 1
+
+
+def test_sacred_sakuras_favor_is_hidden_from_yae_alone(overhaul):
+    from tier0.engine import yae_shrine
+    assert yae_shrine.hidden_from("proto_mi_yae_sacred_sakuras_favor", "yae")
+    assert not yae_shrine.hidden_from("proto_mi_yae_sacred_sakuras_favor",
+                                      "kokomi")

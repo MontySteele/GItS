@@ -2435,13 +2435,14 @@
    effects: [{op: apply_power, power: mi_soumetsu, amount: 2, target: self}]}
 
 # Inazuma rework (2026-10-18): Thunderclap with Weak, the debuff three of
-# Yae's cards read.
+# Yae's cards read. Growing the pool to 34 (the same day): Common to
+# Uncommon, 4 to 5.
 - {id: proto_mi_ayaka_hyouka, name: "Kamisato Ayaka — Kamisato Art: Hyouka", character: klee,
    authored_by: [claude],
-   nation: inazuma, star: 5, rarity: common, role_c: applier, element: cryo,
+   nation: inazuma, star: 5, rarity: uncommon, role_c: applier, element: cryo,
    cost: 1, type: attack,
-   description: "Deal 4 [gold]Cryo[/gold] damage to ALL enemies and apply 1 [gold]Weak[/gold] to each.",
-   effects: [{op: damage, amount: 4, target: all_enemies, applies_element: true},
+   description: "Deal 5 [gold]Cryo[/gold] damage to ALL enemies and apply 1 [gold]Weak[/gold] to each.",
+   effects: [{op: damage, amount: 5, target: all_enemies, applies_element: true},
              {op: apply_power, power: weak, amount: 1, target: all_enemies}],
    upgrade: {damage: 3}}
 
@@ -2584,6 +2585,74 @@
    cost: 1, type: power,
    description: "At the start of your turn, gain {energyPrefix:energyIcons(1)}. Cards give you 3 less [gold]Block[/gold].",
    effects: [{op: apply_power, power: mi_hanega, amount: 1, target: self}],
+   upgrade: {cost: -1}}
+
+# The paper's Plan Rare (2026-10-18). "Earlier Plan" is a Plan carried out
+# before it this turn, counted as Feint and Turning Tide count, not Stings or
+# Wards (`KokomiOverhaulLedger.ChainPlansThisTurn`, less itself).
+- {id: proto_mi_ayato_kyouka_fuushi, name: "Kamisato Ayato — Kyouka Fuushi", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: rare, role_c: applier, element: hydro,
+   cost: 2, type: attack,
+   description: "Deal 7 [gold]Hydro[/gold] damage 3 times. [gold]Plan[/gold]: Deal 7 [gold]Hydro[/gold] damage 3 times, plus once per earlier [gold]Plan[/gold], not Stings or Wards.",
+   effects: [{op: damage, amount: 7, times: 3, target: enemy, applies_element: true}],
+   plan: [{op: damage_times_plus_earlier_plans, amount: 7, times: 3, target: front_enemy}],
+   upgrade: {damage: 2, plan_damage: 2}}
+
+# --- GROWING THE POOL TO 34 (ruled 2026-10-18; the paper's last section):
+# every Inazuma character has two cards. ---
+
+- {id: proto_mi_kirara_meowteor_kick, name: "Kirara — Meow-teor Kick", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 4, rarity: common, role_c: trigger,
+   cost: 1, type: attack,
+   # The paper's "deal 3 more" is printed "3 additional damage" (text
+   # conventions rule 8, `more-damage`).
+   description: "Deal 9 damage. If you have [gold]Block[/gold], deal {BranchDamage:diff()} additional damage.",
+   effects: [{op: damage, amount: 9, target: enemy},
+             {op: conditional, if: has_block,
+              then: [{op: damage, amount: 3, target: enemy}]}],
+   upgrade: {damage: 3}}
+
+- {id: proto_mi_yoimiya_ryuukin_saxifrage, name: "Yoimiya — Ryuukin Saxifrage", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: uncommon, role_c: applier, element: pyro,
+   cost: 1, type: attack,
+   description: "Deal 4 [gold]Pyro[/gold] damage 3 times.",
+   effects: [{op: damage, amount: 4, times: 3, target: enemy, applies_element: true}],
+   upgrade: {damage: 1}}
+
+- {id: proto_mi_wanderer_kyougen, name: "Wanderer — Kyougen: Five Ceremonial Plays", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: uncommon, role_c: trigger, element: anemo,
+   cost: 1, type: attack,
+   # "deal 6 more" is printed "6 additional damage" (rule 8).
+   description: "Deal 6 [gold]Anemo[/gold] damage and [gold]Swirl[/gold] the enemy. If you have no [gold]Block[/gold], deal {BranchDamage:diff()} additional damage.",
+   effects: [{op: damage, amount: 6, target: enemy, applies_element: true},
+             {op: swirl, target: enemy},
+             {op: conditional, if: no_block,
+              then: [{op: damage, amount: 6, target: enemy, applies_element: true}]}],
+   upgrade: {damage: 2, conditional_then_damage: 2}}
+
+# A multi-hit Attack is one whose printed hit count is 2 or more, a Plan
+# line's included. "2 more damage per hit" is printed "2 additional damage
+# per hit" (rule 8).
+- {id: proto_mi_chiori_twin_blades, name: "Chiori — Hiyoku: Twin Blades", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: rare, role_c: trigger, element: geo,
+   cost: 1, type: power,
+   description: "Your Attacks that hit more than once deal 2 additional damage per hit.",
+   effects: [{op: apply_power, power: mi_twin_blades, amount: 2, target: self}],
+   upgrade: {power_amount: +1}}
+
+# Hidden from Yae, like Sesshou Sakura. "At the end of your turn" is the
+# companion end-of-turn walk (`CompanionOverhaulTurnEnd`). Provenance notes.
+- {id: proto_mi_yae_sacred_sakuras_favor, name: "Yae Miko — Sacred Sakura's Favor", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: rare, role_c: trigger, element: electro,
+   cost: 2, type: power,
+   description: "Damage you deal at the end of your turn is increased by 50%.",
+   effects: [{op: apply_power, power: mi_sacred_sakuras_favor, amount: 1, target: self}],
    upgrade: {cost: -1}}
 
 # --- FONTAINE (legacy cleanup pick 4): the shipped rows ported as they are,

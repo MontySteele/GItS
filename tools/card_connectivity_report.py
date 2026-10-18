@@ -643,6 +643,7 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "damage_taken_since": [_hook("private", "kurage", "read")],
     "energy_if_attacked_since": [_hook("private", "kurage", "read")],
     "damage_if_no_hp_lost_since": [_hook("private", "kurage", "read")],
+    "damage_times_plus_earlier_plans": [_hook("private", "kurage", "read")],
     "lose_strength_this_turn": [],
     "draw_pile_to_hand": [_hook("shared", "draw_pile", "read"),
                           _hook("shared", "hand_contents", "write")],
@@ -1147,6 +1148,8 @@ PREDICATE_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "exhausted_this_card": [_hook("shared", "exhaust_pile", "read")],
     "hp_lost_this_turn": [_hook("shared", "hp_ledger", "read")],
     "hp_lost_since_last_turn": [_hook("shared", "hp_ledger", "read")],
+    "has_block": [_hook("shared", "block_held", "read")],
+    "no_block": [_hook("shared", "block_held", "read")],
     "has_salon_members": [_hook("private", "salon", "read")],
     # EB-118 6.3. The yes/no and closed-vocabulary forms of the selection
     # read; the two integer forms live in PREDICATE_PREFIXES above.

@@ -715,7 +715,10 @@ KOKOMI_OVERHAUL_OPS = frozenset((
     "damage_taken_since", "energy_if_attacked_since",
     "lose_strength_this_turn", "draw_pile_to_hand",
     # KOKOMI V3 (2026-10-18): Unbroken Tide, priced with the Counter set.
-    "damage_if_no_hp_lost_since"))
+    "damage_if_no_hp_lost_since",
+    # The Inazuma pool rework (2026-10-18): Kyouka Fuushi, priced at its
+    # printed hits in `_op_price`.
+    "damage_times_plus_earlier_plans"))
 
 #: A HIT FOR A FRACTION OF HER MAX HP -- BOTH SPELLINGS. `damage_quarter_max_hp`
 #: is what the sheet writes today (Sango Isshin, now-line and planned half);
@@ -972,6 +975,10 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # Feint, Turning Tide: the rate once -- the line counts itself, so
         # one Plan carried out is the floor; more is a queue fact.
         return _neutral_amount(fx, 0)
+    if op == "damage_times_plus_earlier_plans":
+        # Kyouka Fuushi (the Inazuma pool rework, 2026-10-18): its printed
+        # hits at face; the earlier Plans are a queue fact.
+        return _neutral_amount(fx, 0) * max(1, int(fx.get("times", 1)))
     if op in ("damage_blocked_since", "damage_taken_since",
               "energy_if_attacked_since", "lose_strength_this_turn",
               # Kokomi v3 (2026-10-18): Unbroken Tide.
@@ -2246,6 +2253,8 @@ STATIC_OP_PRICING: dict[str, str] = {
                                 "while it waited, a fight fact",
     "damage_if_no_hp_lost_since": "ZERO: the hit only if she lost no HP "
                                   "while it waited, a fight fact",
+    "damage_times_plus_earlier_plans": "its printed hits at face: the "
+                                       "earlier Plans are a queue fact",
     "lose_strength_this_turn": "ZERO: Strength off the enemies that intend "
                                "to attack when it lands, a board fact",
     "draw_pile_to_hand": "STATIC_GENERATED_CARD_VALUE: one card of her "

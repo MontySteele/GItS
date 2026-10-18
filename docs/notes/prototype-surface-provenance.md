@@ -9628,17 +9628,48 @@ defaults for both the PR and inazuma companions".
 `review/active/inazuma-companions-2026-10-18.md`, ruled ("Ok, agreed on all
 defaults for both the PR and inazuma companions"), with the main session's
 amendments the same day (Aisa Utamakura without Mend, Hanega's Block loss,
-Kyouka Fuushi's "not Stings or Wards"). The Universals are 28 (8 / 13 / 7).
+Kyouka Fuushi's "not Stings or Wards"), then grown to two cards a character
+("Agreed on (a)! And also on growing the pool"). The Universals are 34
+(8 / 16 / 10).
 
 - **Cut**: Yoimiya, Aurous Blaze; Raiden, Musou no Hitotachi; Itto,
   Superlative Superstrength. Their powers left with them, and so did the
   rebuilt rows' old ones (Daruma, Naptime, Stormcall, Kyouka, Tamoto, the old
   Ooyoroi clock), in both engines.
-- **Not built**: Ayato, Kyouka Fuushi. Its amended face renders 145
-  characters against the 120 card ceiling, so it stops on paper.
-- **Plan lines on Universal rows**: Naptime, Daruma and Kirara.
-  `gen_klee_cards._plan_companion_row` lets an Inazuma Universal print one;
-  any seat's Bake-Kurage carries it out once the off-character sweep is in.
+- **Ayato, Kyouka Fuushi** (Rare Attack, 2): "Deal 7 [9] Hydro damage 3
+  times. Plan: Deal 7 [9] Hydro damage 3 times, plus once per earlier Plan,
+  not Stings or Wards." 115 rendered characters. A new Plan clause,
+  `damage_times_plus_earlier_plans` (`KokomiPlan.Kind.DamageTimesPlusEarlierPlans`):
+  its `times` hits plus `ChainPlansThisTurn - 1`, the count Feint and Turning
+  Tide read less the Plan itself (`KokomiPlan.EarlierPlanHits`, sim
+  `kokomi_plan.earlier_plan_hits`). Folded at writing like a flat hit.
+- **Plan lines on Universal rows**: Naptime, Daruma, Kirara and Kyouka
+  Fuushi. `gen_klee_cards._plan_companion_row` lets an Inazuma Universal
+  print one; since the off-character fix (#1438) any seat's Bake-Kurage
+  carries it out (`KokomiOffCharacterSweepTests`, an Ironclad and a Yae).
+- **Grown to 34**: Hyouka moves to Uncommon at 5 [8]. New: Kirara,
+  Meow-teor Kick (Common Attack, 1): "Deal 9 [12] damage. If you have Block,
+  deal 3 additional damage." (the paper's "3 more" in rule 8's words; the new
+  `has_block` predicate); Yoimiya, Ryuukin Saxifrage (Uncommon Attack, 1):
+  "Deal 4 [5] Pyro damage 3 times."; Wanderer, Kyougen: Five Ceremonial
+  Plays (Uncommon Attack, 1): "Deal 6 [8] Anemo damage and Swirl the enemy.
+  If you have no Block, deal 6 [8] additional damage." (`no_block`); Chiori,
+  Hiyoku: Twin Blades (Rare Power, 1): "Your Attacks that hit more than once
+  deal 2 [3] additional damage per hit."; Yae Miko, Sacred Sakura's Favor
+  (Rare Power, 2 [1]): "Damage you deal at the end of your turn is increased
+  by 50%.", hidden from Yae like Sesshou Sakura.
+- **Twin Blades**: a multi-hit Attack is one whose printed hit count is 2 or
+  more. The mod reads the `AttackCommand`'s own `_hitCount` in
+  `BeforeAttack` and pays per hit until `AfterAttack`; a Plan line's
+  multi-hit takes it in `KokomiPlan.Hit` (`TwinBladesPower.PlanBonus`). Sim:
+  `_op_damage` with `times` of 2 or more, and `kokomi_plan._hit`.
+- **Sacred Sakura's Favor**: "at the end of your turn" is the companion
+  end-of-turn walk. `CompanionOverhaulTurnEnd.Act`, the one door every actor
+  goes through, holds a window open for the actor's owner, and
+  `SimDamagePipeline.DealerMods` multiplies by 1.5 (floored first) inside it.
+  Sim: `state.turn_end_window` around `companion_overhaul_turn_end`'s actors,
+  read in `deal_damage_to_enemy`. Not covered: Furina's Guest Star acts and
+  Klee's coven personals, which run outside that walk.
 - **Chiori, Fluttering Hasode**: "This ignores Block." is the damage op's
   `ignore_block: true`, `ValueProp.Unblockable` on the card's own attack
   (`InazumaAttackExtensions.IgnoringBlock`); the sim's
@@ -9654,4 +9685,4 @@ Kyouka Fuushi's "not Stings or Wards"). The Universals are 28 (8 / 13 / 7).
   the one Swirl site. **Hanega** gives Energy at `AfterEnergyReset` and takes
   3 off powered card Block (`ModifyBlockAdditive`, Dexterity's filter),
   floored at 0; relic and power Block are untouched.
-- **Art**: the ten new keys are on `art_coverage.KNOWN_MISSING`.
+- **Art**: the sixteen new keys are on `art_coverage.KNOWN_MISSING`.
