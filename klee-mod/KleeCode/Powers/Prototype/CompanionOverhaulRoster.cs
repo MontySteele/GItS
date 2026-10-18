@@ -145,7 +145,7 @@ internal static class CompanionOverhaulRoster
     ///
     /// THIRTY-FOUR SINCE THE INAZUMA POOL REWORK (2026-10-18,
     /// <c>review/active/inazuma-companions-2026-10-18.md</c>): Aurous Blaze,
-    /// Musou no Hitotachi and Superlative Superstrength cut, twelve new, then
+    /// Musou no Hitotachi and Superlative Superstrength cut, eleven new, then
     /// five more and Hyouka moved to Uncommon when the pool grew to two cards
     /// a character (8 / 16 / 10). tier0 twin: <c>C.INAZUMA_OVERHAUL_POOL_IDS</c>.
     ///

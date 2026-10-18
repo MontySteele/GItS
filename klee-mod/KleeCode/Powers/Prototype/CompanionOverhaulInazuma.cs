@@ -25,7 +25,7 @@ namespace KleeMod.Powers;
 /// The approved workshop <c>companion-workshop-inazuma-2026-09-01.md</c> sec.3
 /// rewrote Inazuma's Universal companion pool; the Inazuma pool rework
 /// (<c>review/active/inazuma-companions-2026-10-18.md</c>, 2026-10-18) took
-/// it to 34 cards (8 / 16 / 10): three cut, seven rebuilt, seventeen new, and
+/// it to 34 cards (8 / 16 / 10): three cut, seven rebuilt, sixteen new, and
 /// eight Powers, two cards a character. Its powers are at the foot of this
 /// file.
 ///

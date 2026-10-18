@@ -2,7 +2,7 @@
 
 THE INAZUMA POOL REWORK (2026-10-18, review/active/inazuma-companions-
 2026-10-18.md) took the pool to twenty-nine: three cut, seven rebuilt,
-twelve new; growing the pool the same day made it thirty-four (8 / 16 / 10).
+eleven new; growing the pool the same day made it thirty-four (8 / 16 / 10).
 
 Source: the approved workshop `companion-workshop-inazuma-2026-09-01.md`
 (approved 2026-09-01 at its four default picks, its sec.9; a Paper artefact on
