@@ -22,6 +22,8 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         BOMB_REACTION_CLAUSE,
                                         REACTION_ELEMENTS,
                                         AUTO_TURN_NOTE,
+                                        AUTO_TURN_LISTED_NOTE,
+                                        AUTO_TURN_NONE_LISTED_NOTE,
                                         BUFF_INTENT_CLAUSE,
                                         CLONE_NOTE, EMPTY_SHELVES_NOTE,
                                         INTENT_NUMBER_DISAGREES,
@@ -63,6 +65,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         RESOLUTION_ROW,
                                         RESOLUTION_HIT_ROW,
                                         RESOLUTION_HIT_BLOCKED,
+                                        RESOLUTION_HIT_LABEL,
                                         RESOLUTION_HIT_ALL_BLOCKED,
                                         RESOLUTION_HIT_ON_YOU,
                                         RESOLUTION_HIT_SOURCE,
@@ -1633,18 +1636,31 @@ def _unblocked_raise_clause(c: dict[str, Any],
                                          relic=name)
 
 
-def _auto_turn_note(you: dict[str, Any], round_: Any) -> list[str]:
+def _auto_turn_note(you: dict[str, Any], round_: Any,
+                    resolutions: list[dict[str, Any]] | None = None
+                    ) -> list[str]:
     """`EB-349`: the turn a relic played, named on the turn it played it.
 
     Round one only, which is the turn the relic's own sentence is about, and
-    off the relic row this page already prints. The ledger itself is the
-    bridge's -- there is no record of a card resolving anywhere on the feed.
+    off the relic row this page already prints. Where the resolution ledger
+    is on the wire (`resolutions` not None), the note names the cards the
+    game played and points at the ledger's rows (Furina suite 1, lane 1: the
+    old note said no record existed, beside the record). On a build with no
+    ledger it states the gap, as it always did.
     """
     if round_ != 1:
         return []
     for relic in you.get("relics") or []:
         if _PLAYS_YOUR_TURN.search(str(relic.get("text") or "")):
-            return ["", AUTO_TURN_NOTE.format(relic=f"**{relic['name']}**")]
+            name = f"**{relic['name']}**"
+            if resolutions is None:
+                return ["", AUTO_TURN_NOTE.format(relic=name)]
+            cards = [f"**{row['card']}**" for row in resolutions
+                     if row.get("auto_played") and not row.get("carried")]
+            if cards:
+                return ["", AUTO_TURN_LISTED_NOTE.format(
+                    relic=name, cards=_and_list(cards))]
+            return ["", AUTO_TURN_NONE_LISTED_NOTE.format(relic=name)]
     return []
 
 
@@ -2310,7 +2326,9 @@ def _resolution_lines(rows: list[dict[str, Any]],
             # A body that died inside the play: the game hands the killing hit
             # to no damage hook, so the ledger files the death with no number.
             if hit.get("killed"):
-                out.append(RESOLUTION_HIT_KILLED.format(n=n, target=target))
+                out.append(RESOLUTION_HIT_KILLED.format(n=n, target=target)
+                           + (RESOLUTION_HIT_LABEL.format(label=hit["label"])
+                              if hit.get("label") else ""))
                 continue
             if hit.get("on_player"):
                 line = RESOLUTION_HIT_ON_YOU.format(
@@ -2320,15 +2338,17 @@ def _resolution_lines(rows: list[dict[str, Any]],
                     line += RESOLUTION_HIT_BLOCKED.format(blocked=hit["blocked"])
                 out.append(line)
                 continue
+            label = (RESOLUTION_HIT_LABEL.format(label=hit["label"])
+                     if hit.get("label") else "")
             if hit["amount"] <= 0 and hit["blocked"] > 0:
                 out.append(RESOLUTION_HIT_ALL_BLOCKED.format(
-                    n=n, target=target, blocked=hit["blocked"]))
+                    n=n, target=target, blocked=hit["blocked"]) + label)
                 continue
             line = RESOLUTION_HIT_ROW.format(n=n, target=target,
                                              amount=hit["amount"])
             if hit["blocked"] > 0:
                 line += RESOLUTION_HIT_BLOCKED.format(blocked=hit["blocked"])
-            out.append(line)
+            out.append(line + label)
         # BACKLOG (the Varka screen): an Anemo hit that found no aura on
         # anything it hit (Sayu's random Swirl) says the Swirl did nothing.
         if row.get("swirl_no_aura") and not row.get("swirl_on_aura"):
@@ -4506,7 +4526,7 @@ def render(obs: dict[str, Any]) -> str:
             # `EB-349`: and where one of them has already taken this turn, the
             # line saying so -- under the relic row, because it is that
             # relic's sentence being applied to the board above.
-            out += _auto_turn_note(you, c["round"])
+            out += _auto_turn_note(you, c["round"], c.get("resolutions"))
         if c.get("plans"):
             # `EB-216`, the Kokomi draft-6 half, and the page's contract is
             # `EB-198`'s lesson restated: ONE FACT PER LINE. The strip that

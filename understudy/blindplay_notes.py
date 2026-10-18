@@ -470,6 +470,22 @@ AUTO_TURN_NOTE = (
     "report of it. An empty hand or unspent energy here is that turn, not a "
     "fault.*")
 
+# Furina suite 1, lane 1 (2026-10-15): "Whispering Earring plays a seat's
+# first turn invisibly". The ledger IS on the wire now (`RESOLUTIONS_HEADING`
+# below lists the relic's plays, each marked as the game's), but the note
+# above still printed beside it and said there was no record at all -- so the
+# seat believed the note. Where the ledger is on the wire, the note points at
+# it instead.
+AUTO_TURN_LISTED_NOTE = (
+    "*{relic} plays a turn of yours for you, and it has already played this "
+    "one: {cards}. Each is listed with what it did under \"What you played "
+    "this turn, and what it did\" below, marked as played by the game. An "
+    "empty hand or unspent energy here is that turn, not a fault.*")
+AUTO_TURN_NONE_LISTED_NOTE = (
+    "*{relic} plays a turn of yours for you on this turn, and the list of "
+    "what resolved below names no card it played: it found nothing it could "
+    "play, or it has not played yet (`observe` again).*")
+
 # `EB-349`, the second half. A PER-HIT MODIFIER AGAINST A MULTI-HIT ICON.
 #
 # THE FIND (Kokomi r4d act 2, elite 4). "With `Tainted 4` the screen printed
@@ -3715,6 +3731,11 @@ RESOLUTIONS_HEADING = "## What you played this turn, and what it did"
 RESOLUTION_ROW = "- **{card}**{clauses}"
 RESOLUTION_HIT_ROW = "  {n}. **{target}** -- {amount}"
 RESOLUTION_HIT_BLOCKED = " (and {blocked} onto Block)"
+#: Seat page (Four Winds' Ascension+ read "2, 3, 9, 36" unlabelled): what kind
+#: of hit each was, where the mod named one -- an element's hit ("Pyro", or
+#: "Pyro, Vaporize" where the amplifier multiplied it) or a reaction's own
+#: damage ("Swirl", "Overloaded"). A plain card hit carries none.
+RESOLUTION_HIT_LABEL = " [{label}]"
 RESOLUTION_HIT_ALL_BLOCKED = "  {n}. **{target}** -- all {blocked} onto Block"
 #: 2026-10-01 (a Varka seat): a hit on YOU while the card resolved -- an
 #: enemy's Thorns answering it, say. Listed under Diluc's row it read as

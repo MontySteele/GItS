@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using KleeMod.Elements;
 using KleeMod.Powers;
 using KleeMod.Tests.Harness;
 using Xunit;
@@ -381,7 +382,7 @@ public class ResolutionLedgerTests
         var hit = ((List<Dictionary<string, object?>>)row["hits"]!)[0];
         Assert.Equal(new[] { "target", "amount", "blocked", "combat_id",
                              "killed", "on_player", "source", "self",
-                             "seq", "by" },
+                             "seq", "by", "label" },
                      new List<string>(hit.Keys).ToArray());
         Assert.Equal(false, hit["killed"]);
         // 2026-10-01: a hit on a player inside a play is marked as one.
@@ -643,5 +644,60 @@ public class ResolutionLedgerTests
             ResolutionLedger.Snapshot()[0]["hits"]!)[0];
         Assert.True(row.ContainsKey("source"));
         Assert.Equal("", row["source"]);
+    }
+    // ------------------------------------------- the hit label (2026-10-18) ---
+
+    /// <summary>Seat page: "The resolution rows do not say which hit was
+    /// which" (Four Winds' Ascension+ read "2, 3, 9, 36" unlabelled). A hit
+    /// filed inside a <see cref="ResolutionLedger.HitsAs"/> scope carries its
+    /// label on the wire; the innermost scope wins, and a hit outside every
+    /// scope carries none.</summary>
+    [Fact]
+    public void A_hit_inside_a_label_scope_carries_the_label()
+    {
+        Fresh();
+        ResolutionLedger.OpenPlay("four_winds", "Four Winds' Ascension", false);
+        ResolutionLedger.NoteHit(null, 2, 0);
+        using (ResolutionLedger.HitsAs("Swirl"))
+        {
+            ResolutionLedger.NoteHit(null, 3, 0);
+            using (ResolutionLedger.HitsAs("Pyro"))
+            {
+                ResolutionLedger.NoteHit(null, 9, 0);
+            }
+            ResolutionLedger.NoteKill("Slime", "7");
+        }
+        ResolutionLedger.NoteHit(null, 36, 0);
+
+        var hits = (List<Dictionary<string, object?>>)
+            ResolutionLedger.Snapshot()[0]["hits"]!;
+        Assert.Equal(new object?[] { "", "Swirl", "Pyro", "Swirl", "" },
+                     hits.ConvertAll(h => h["label"]).ToArray());
+    }
+
+    [Fact]
+    public void An_element_hit_is_labelled_by_its_element_and_amplifier()
+    {
+        Assert.Equal("Pyro",
+            ResolutionLedger.ElementLabel(Element.Pyro, Reaction.None, 1m));
+        Assert.Equal("Pyro, Vaporize",
+            ResolutionLedger.ElementLabel(Element.Pyro, Reaction.Vaporize, 1.5m));
+        Assert.Equal("Cryo, Melt",
+            ResolutionLedger.ElementLabel(Element.Cryo, Reaction.Melt, 2m));
+        // A non-amplifying reaction is its own label, not the hit's.
+        Assert.Equal("Electro",
+            ResolutionLedger.ElementLabel(Element.Electro, Reaction.Overload, 1m));
+        Assert.Equal("", ResolutionLedger.ElementLabel(Element.None, Reaction.None, 1m));
+    }
+
+    [Fact]
+    public void The_element_door_and_the_reaction_site_open_the_label()
+    {
+        Assert.Contains("ResolutionLedger.HitsAs",
+            Il.Calls(Il.Method("ElementalHit", "Deal")));
+        Assert.Contains("ResolutionLedger.HitsAs",
+            Il.Calls(Il.Method("ElementalHit", "DealAsIfAura")));
+        Assert.Contains("ResolutionLedger.HitsAs",
+            Il.Calls(Il.Method("ReactionEffects", "Resolve")));
     }
 }

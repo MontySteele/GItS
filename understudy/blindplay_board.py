@@ -1593,7 +1593,12 @@ def resolutions(player: dict[str, Any]) -> list[dict[str, Any]] | None:
                  "seq": _seq(h),
                  # BACKLOG (the Varka screen): the Power whose damage this
                  # was (Cycle of Seasons), "" for the card's own hit.
-                 "by": _text(h.get("by"))}
+                 "by": _text(h.get("by")),
+                 # Seat page (Four Winds' Ascension+ read "2, 3, 9, 36"):
+                 # what kind of hit it was -- an element ("Pyro", "Pyro,
+                 # Vaporize") or a reaction's own damage ("Swirl"); "" for a
+                 # plain card hit and on an older mod.
+                 "label": _text(h.get("label"))}
                 for h in (row.get("hits") or [])
                 if isinstance(h, dict)]
         # 2026-09-25 evening: who a random summon inside the card rolled, in
@@ -2613,6 +2618,17 @@ OPTION_UNNAMED_GRANT = (
     "it -- no rules text, no cost, no type -- so this page can offer it by "
     "name only")
 
+# Varka, Dispatch from Mondstadt ("Choose 1 of 3 random Knights to add to
+# your deck"): the note above told the seat a face was missing, but there is
+# no face to send -- the three are drawn when the option is taken, and the
+# chooser that opens then prints each card in full. An option worded as a
+# choice of N (the game's "Choose 1 of 3 ...") gets that sentence instead.
+OPTION_ROLLED_GRANT = (
+    "the cards to choose from are not on this screen: they are drawn when you "
+    "take this option, and the choice that opens then prints each card's face "
+    "in full")
+_CHOOSE_ONE_OF = re.compile(r"\bchoose\b[^.]*\bof\b[^.]*\badd\b", re.I)
+
 # `EB-393`: the sentence shape an option uses when it is handing over a card.
 # Deliberately narrow -- the words the game itself writes on these rows ("Add
 # Exterminate to your Deck", "Add a card to your deck") -- so a row that
@@ -2653,9 +2669,11 @@ def _event_option(entry: Any) -> dict[str, Any]:
     # what "the feed carried no face" means. A relic's own later doing -- two
     # Colorless cards rolled when it is obtained -- is not a face any feed
     # could carry, and this page no longer claims it was owed one.
-    if not _option_faces(entry) \
-            and _GRANTS_A_CARD.search(option.get("text") or ""):
-        option["note"] = OPTION_UNNAMED_GRANT
+    # Varka, Dispatch from Mondstadt: a choice of N rolled at the pick says so.
+    text = option.get("text") or ""
+    if not _option_faces(entry) and _GRANTS_A_CARD.search(text):
+        option["note"] = (OPTION_ROLLED_GRANT if _CHOOSE_ONE_OF.search(text)
+                          else OPTION_UNNAMED_GRANT)
     return option
 
 

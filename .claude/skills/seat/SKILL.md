@@ -26,8 +26,8 @@ the reply truncates and the round dies with the game already up.
 python tools/seat.py --opus-brief --lane 2 --character KLEEMOD-KLEE --scratch <dir>
 ```
 
-Prints `docs/current/operations/seat-brief.md` with the lane and notes path
-filled in (`--scratch` adds lane scripts `o`/`a`); on stderr, the embark, `--max-actions 120` unless named
+Prints `docs/current/operations/seat-brief.md` with the lane, notes path and
+record path (`<scratch>/seat-lane<N>/record.md`, or `--record PATH`) filled in (`--scratch` adds lane scripts `o`/`a`); on stderr, the embark, `--max-actions 120` unless named
 (Sonnet: 1500). **Paste it; never rewrite it** (a different instrument).
 
 ## Standing rules

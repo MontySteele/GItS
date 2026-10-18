@@ -172,7 +172,7 @@ from understudy.blindplay_board import (   # noqa: E402,F401  (re-export)
     _potion_slots, _preview_cards, _proceed_option,
     _relic_options, _rest_options, _reward_items, _screen_cards,
     _selected_bundle, UNEXPLAINED_OMISSION, map_floor, OPTION_UNNAMED_GRANT,
-    upgrade_deck_floor)
+    OPTION_ROLLED_GRANT, upgrade_deck_floor)
 from understudy.blindplay_notes import (   # noqa: E402,F401  (re-export)
     _ARM_KEYWORD_RE, ARM_KEYWORDS, AURA_NOTE, _BASE_KEYWORD_RE, BASE_KEYWORDS,
     BOSS_ROOM, COMPANION_SLOT_SENTENCE, COMPANION_STAGE_ARM_CLAUSE,
@@ -595,8 +595,13 @@ ROOM_CLOSED_TAIL = (": nothing was sent, and this is not counted as a "
                     "the next command.")
 
 #: What a command gets when an earlier one in its batch left the room.
-SCREEN_CHANGED_SKIP = ("Skipped: the screen changed after {command}; look "
-                       "again.")
+#: Round 11 (2026-10-18): seats chaining after `go "<node>"` read "look again"
+#: as a hiccup and chained again; the sentence now says what to do.
+SCREEN_CHANGED_SKIP = ("Skipped: the screen changed after {command}, so this "
+                       "was typed against a screen you have not seen. Nothing "
+                       "was sent, and this is not counted as a refusal. "
+                       "`observe` first, then give the command again "
+                       "(a `go` always opens a new screen).")
 
 
 def room_closed(why: str, prev_screen: str) -> str:
@@ -849,7 +854,9 @@ def cmd_act(args) -> int:
         # out since the r3 seat; this door, which every seat uses, now does
         # the same, bounded by the settle budget.
         result = post_when_the_room_is_open(
-            bridge, action, post, tries=SETTLE_TRIES, delay=SETTLE_DELAY_S)
+            bridge, action, post, tries=SETTLE_TRIES, delay=SETTLE_DELAY_S,
+            screen=("" if blindplay_coop.is_coop(state)
+                    else _screen(state)))
     except _BRIDGE_ERROR as exc:
         # Not charged: nobody knows whether the wire saw it.
         print(act_unanswered(exc))
@@ -884,6 +891,14 @@ def cmd_act(args) -> int:
     # `EB-456`: charged AFTER the post, so an act the wire never saw is not
     # billed for. The line is printed only on a lane that has a cap, so a
     # round run without one reads exactly as it always did.
+    # Seat page (`EB-391`'s rest): a POST the game itself refused did
+    # nothing in the run ("Rest site room is not open" still cost an action),
+    # so it is not billed either. It does not clear the refusal streak.
+    if refused(result):
+        if cap:
+            print(f"actions: {count} of {cap} (the game refused this one, "
+                  f"so it was not counted)")
+        return 1
     if cap:
         print(f"actions: {count_action()} of {cap}")
     else:

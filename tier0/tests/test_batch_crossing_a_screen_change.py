@@ -65,8 +65,10 @@ def test_commands_after_the_fight_ended_mid_batch_are_skipped_uncounted(
                     'choose "Strike"'):
         assert blindplay.cmd_act(_act(command)) == 1
         out = capsys.readouterr().out
-        assert out.strip() == ("Skipped: the screen changed after end turn; "
-                               "look again.")
+        assert out.strip() == blindplay.SCREEN_CHANGED_SKIP.format(
+            command="end turn")
+        assert out.startswith("Skipped: the screen changed after end turn")
+        assert "`observe` first" in out
     assert blindplay_shape.refusal_streak() == 0
     assert len(posted) == 1
 
