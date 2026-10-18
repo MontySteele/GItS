@@ -16,10 +16,11 @@ using MegaCrit.Sts2.Core.ValueProps;
 namespace KleeMod.Abyss;
 
 /// <summary>
-/// ABYSS MAGE SHIELD (the Spiral Abyss paper, sec.3): "Elites enter combat
-/// with a shield of this act's element, 8 hits deep, that stops all damage.
-/// Each hit removes 1, a reaction removes 3, and the counter element breaks
-/// it." Amount is the hits left.
+/// ABYSS MAGE SHIELD (<c>review/active/abyss-act-scaling-2026-10-18.md</c>,
+/// ruled 2026-10-18): "Elites enter combat with a shield of this act's
+/// element, 6 hits deep, that stops all damage. A hit removes 1. A reaction
+/// or a counter-element hit removes 3." It was 8 hits, and the counter
+/// element broke it outright. Amount is the hits left.
 ///
 /// STOPS ALL DAMAGE the way the base game's Intangible caps it: a damage cap
 /// (which also spares the wearer's Block and makes previews read 0) and an
@@ -29,7 +30,7 @@ namespace KleeMod.Abyss;
 /// A HIT is every damage instance the wearer receives while the shield is up,
 /// powered or not (a Bomb, a reaction's splash). Its element is the play's
 /// element (<see cref="AuraCmd.ElementOfPlay"/>), so only a card or a rider
-/// that names the counter element breaks the shield outright.
+/// that names the counter element removes 3 with its hit.
 ///
 /// A REACTION is every named reaction resolved on the wearer, reported from
 /// <see cref="ReactionEffects.Resolve"/> (the single site every reaction
@@ -54,9 +55,8 @@ public abstract class AbyssShieldPower : PowerModel, ILocalizationProvider
     {
         ("title", $"{Element} Abyss Shield"),
         ("description",
-            $"Stops all damage. Each hit removes {AbyssNumbers.MageShieldPerHit} and a "
-          + $"reaction removes {AbyssNumbers.MageShieldPerReaction}. "
-          + $"A {Counter} hit breaks it."),
+            $"Stops all damage. A hit removes {AbyssNumbers.MageShieldPerHit}. "
+          + $"A reaction or a {Counter} hit removes {AbyssNumbers.MageShieldPerReaction}."),
     };
 
     public override PowerType Type => PowerType.Buff;

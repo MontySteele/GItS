@@ -55,12 +55,15 @@ public static class AbyssChoicePage
 
     internal static string OptionTitleKey(AbyssBlessing b) => $"{KeyPrefix}.options.{b}.title";
 
-    internal static string OptionDescriptionKey(AbyssBlessing b, AbyssShadow s) =>
-        $"{KeyPrefix}.options.{b}.{s}.description";
+    /// <summary>One description row per (Blessing, Shadow) pair per act row
+    /// (<see cref="AbyssNumbers.Row"/>): the page prints the numbers of the
+    /// act it is shown in (<c>review/active/abyss-act-scaling-2026-10-18.md</c>).</summary>
+    public static string OptionDescriptionKey(AbyssBlessing b, AbyssShadow s, int act) =>
+        $"{KeyPrefix}.options.{b}.{s}.act{AbyssNumbers.Row(act) + 1}.description";
 
     /// <summary>The Abyss page's rows for the <c>events</c> table: the page,
     /// and one title per Blessing and one description per (Blessing, Shadow)
-    /// pair, since an option shows both.</summary>
+    /// pair and act, since an option shows both at that act's numbers.</summary>
     public static Dictionary<string, string> LocRows()
     {
         var rows = new Dictionary<string, string>
@@ -79,15 +82,18 @@ public static class AbyssChoicePage
             rows[OptionTitleKey(b)] = AbyssText.Name(b);
             foreach (var s in AbyssDraft.AllShadows)
             {
-                rows[OptionDescriptionKey(b, s)] = OptionDescription(b, s);
+                for (var act = 0; act < AbyssNumbers.ActRows; act++)
+                {
+                    rows[OptionDescriptionKey(b, s, act)] = OptionDescription(b, s, act);
+                }
             }
         }
         return rows;
     }
 
-    internal static string OptionDescription(AbyssBlessing b, AbyssShadow s) =>
-        $"{AbyssText.Text(b)}\n[red]If you pass this, the enemies may take its Shadow:[/red] [gold]{AbyssText.Name(s)}[/gold]. "
-        + AbyssText.Text(s);
+    internal static string OptionDescription(AbyssBlessing b, AbyssShadow s, int act) =>
+        $"{AbyssText.Text(b, act)}\n[red]If you pass this, the enemies may take its Shadow:[/red] [gold]{AbyssText.Name(s)}[/gold]. "
+        + AbyssText.Text(s, act);
 
     /// <summary>Events showing the Abyss page right now. A weak table, so a
     /// finished event is never kept alive by it.</summary>
@@ -153,7 +159,7 @@ public static class AbyssChoicePage
                 ancient,
                 () => OnChosen(ancient, offer, index, ancientDescription, ancientOptions, ancientFinished),
                 new LocString(LocTable, OptionTitleKey(option.Blessing)),
-                new LocString(LocTable, OptionDescriptionKey(option.Blessing, option.Shadow)),
+                new LocString(LocTable, OptionDescriptionKey(option.Blessing, option.Shadow, offer.ActIndex)),
                 $"{KeyPrefix}.{option.Blessing}",
                 Array.Empty<MegaCrit.Sts2.Core.HoverTips.IHoverTip>()));
         }
@@ -177,7 +183,7 @@ public static class AbyssChoicePage
         // Per player: each copy belongs to one player.
         if (option.Blessing == AbyssBlessing.FatefulFortune && ancient.Owner?.Creature is { } creature)
         {
-            await CreatureCmd.GainMaxHp(creature, AbyssNumbers.FatefulFortuneMaxHp);
+            await CreatureCmd.GainMaxHp(creature, AbyssNumbers.FatefulFortuneMaxHp(offer.ActIndex));
         }
 
         // Per player, display only: this copy's owner gets a relic for the

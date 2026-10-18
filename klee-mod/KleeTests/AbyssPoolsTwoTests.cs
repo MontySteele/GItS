@@ -62,16 +62,20 @@ public class AbyssPoolsTwoTests
             Assert.Equal(ThisActShadows.Contains(s) ? AbyssDuration.ThisAct : AbyssDuration.WholeRun,
                          AbyssDurations.Of(s));
         }
-        // Every This act entry says so in its own text; no Whole run one does.
-        foreach (var b in AbyssDraft.AllBlessings)
+        // Every This act entry says so in its own text, in every act; no
+        // Whole run one does.
+        for (var act = 0; act < AbyssNumbers.ActRows; act++)
         {
-            Assert.Equal(AbyssDurations.Of(b) == AbyssDuration.ThisAct,
-                         AbyssText.Text(b).StartsWith("This act, ", StringComparison.Ordinal));
-        }
-        foreach (var s in AbyssDraft.AllShadows)
-        {
-            Assert.Equal(AbyssDurations.Of(s) == AbyssDuration.ThisAct,
-                         AbyssText.Text(s).StartsWith("This act, ", StringComparison.Ordinal));
+            foreach (var b in AbyssDraft.AllBlessings)
+            {
+                Assert.Equal(AbyssDurations.Of(b) == AbyssDuration.ThisAct,
+                             AbyssText.Text(b, act).StartsWith("This act, ", StringComparison.Ordinal));
+            }
+            foreach (var s in AbyssDraft.AllShadows)
+            {
+                Assert.Equal(AbyssDurations.Of(s) == AbyssDuration.ThisAct,
+                             AbyssText.Text(s, act).StartsWith("This act, ", StringComparison.Ordinal));
+            }
         }
         Assert.Equal("Whole run", AbyssDurations.Tag(AbyssDuration.WholeRun));
         Assert.Equal("This act", AbyssDurations.Tag(AbyssDuration.ThisAct));
@@ -266,10 +270,13 @@ public class AbyssPoolsTwoTests
     [Fact]
     public void Vigor_adds_3_to_a_players_attacks_only_above_half_HP()
     {
-        Assert.Equal(3m, AbyssRules.VigorDamageDelta(true, true, 41, 80));
-        Assert.Equal(0m, AbyssRules.VigorDamageDelta(true, true, 40, 80));   // exactly half
-        Assert.Equal(0m, AbyssRules.VigorDamageDelta(true, false, 80, 80));  // not an attack
-        Assert.Equal(0m, AbyssRules.VigorDamageDelta(false, true, 80, 80));  // an enemy
+        Assert.Equal(3m, AbyssRules.VigorDamageDelta(true, true, 41, 80, actTaken: 0));
+        Assert.Equal(0m, AbyssRules.VigorDamageDelta(true, true, 40, 80, 0));   // exactly half
+        Assert.Equal(0m, AbyssRules.VigorDamageDelta(true, false, 80, 80, 0));  // not an attack
+        Assert.Equal(0m, AbyssRules.VigorDamageDelta(false, true, 80, 80, 0));  // an enemy
+        // 3 / 4 / 5 by the act it was taken in (2026-10-18).
+        Assert.Equal(4m, AbyssRules.VigorDamageDelta(true, true, 41, 80, actTaken: 1));
+        Assert.Equal(5m, AbyssRules.VigorDamageDelta(true, true, 41, 80, actTaken: 2));
 
         // Through the real hook.
         var abyss = NewModifier(act: 0);
@@ -288,28 +295,34 @@ public class AbyssPoolsTwoTests
     [Fact]
     public void Moonlit_Spring_heals_8_and_stacks_with_Moonlit_Rest()
     {
-        Assert.Equal(8, AbyssNumbers.MoonlitSpringHeal);
-        Assert.Equal(8, AbyssRules.CombatEndHeal(moonlitRest: false, moonlitSpring: true));
-        Assert.Equal(12, AbyssRules.CombatEndHeal(true, true));
-        Assert.Equal(4, AbyssRules.CombatEndHeal(true, false));
-        Assert.Equal(0, AbyssRules.CombatEndHeal(false, false));
+        // Spring stays 8 in every act (2026-10-18: healing is scarce in the
+        // base game); Rest is 4 / 6 / 8 by the act it was taken in.
+        Assert.Equal(new[] { 8, 8, 8 }, AbyssNumbers.MoonlitSpringHealByAct);
+        Assert.Equal(8, AbyssRules.CombatEndHeal(moonlitRestAct: null, moonlitSpringAct: 0));
+        Assert.Equal(12, AbyssRules.CombatEndHeal(0, 0));
+        Assert.Equal(4, AbyssRules.CombatEndHeal(0, null));
+        Assert.Equal(0, AbyssRules.CombatEndHeal(null, null));
+        // Rest taken in act 1, Spring in act 3: 4 + 8.
+        Assert.Equal(12, AbyssRules.CombatEndHeal(0, 2));
+        Assert.Equal(16, AbyssRules.CombatEndHeal(2, 2));
         Assert.Contains("AbyssRules.CombatEndHeal",
             Il.Calls(typeof(SpiralAbyss).GetMethod(nameof(SpiralAbyss.AfterCombatVictory))!));
     }
 
     [Fact]
-    public void No_retunes_the_first_eights_numbers_stand()
+    public void No_retunes_the_first_eights_act_1_numbers_stand()
     {
-        Assert.Equal(4, AbyssNumbers.AbyssalMoonDamage);
-        Assert.Equal(8, AbyssNumbers.CrystallizeBlock);
-        Assert.Equal(4, AbyssNumbers.MoonlitRestHeal);
+        // 2026-10-18 moved no act 1 number.
+        Assert.Equal(4, AbyssNumbers.AbyssalMoonDamage(0));
+        Assert.Equal(8, AbyssNumbers.CrystallizeBlock(0));
+        Assert.Equal(4, AbyssNumbers.MoonlitRestHeal(0));
     }
 
     [Fact]
     public void Battle_Rhythm_gives_1_Strength_and_1_Dexterity_at_combat_start()
     {
-        Assert.Equal(1, AbyssNumbers.BattleRhythmStrength);
-        Assert.Equal(1, AbyssNumbers.BattleRhythmDexterity);
+        Assert.Equal(new[] { 1, 2, 2 }, AbyssNumbers.BattleRhythmStrengthByAct);
+        Assert.Equal(new[] { 1, 2, 2 }, AbyssNumbers.BattleRhythmDexterityByAct);
         var start = Il.CallSequence(typeof(SpiralAbyss).GetMethod(nameof(SpiralAbyss.AfterRoomEntered))!);
         Assert.Contains("PowerCmd.Apply<StrengthPower>", start);
         Assert.Contains("PowerCmd.Apply<DexterityPower>", start);
@@ -320,7 +333,7 @@ public class AbyssPoolsTwoTests
     {
         Assert.True(AbyssRules.WaveringMoonFires(dealerIsPlayer: true));
         Assert.False(AbyssRules.WaveringMoonFires(dealerIsPlayer: false));
-        Assert.Equal(3, AbyssNumbers.WaveringMoonDamage);
+        Assert.Equal(new[] { 3, 4, 5 }, AbyssNumbers.WaveringMoonDamageByAct);
         Assert.Contains("SpiralAbyss.NoteReaction",
             Il.Calls(Il.Method("ReactionEffects", "Resolve")));
         Assert.Contains("CreatureCmd.Damage",
@@ -351,9 +364,9 @@ public class AbyssPoolsTwoTests
     [Fact]
     public void Frenzy_and_Thorny_Ground_put_powers_on_the_enemies_at_combat_start()
     {
-        Assert.Equal(2, AbyssNumbers.FrenzyStrength);
-        Assert.Equal(2, AbyssNumbers.ThornyGroundThorns);
-        Assert.Equal("This act, enemies start each combat with 2 Strength.", AbyssText.Text(AbyssShadow.Frenzy));
+        Assert.Equal(new[] { 2, 3, 4 }, AbyssNumbers.FrenzyStrengthByAct);
+        Assert.Equal(new[] { 2, 2, 3 }, AbyssNumbers.ThornyGroundThornsByAct);
+        Assert.Equal("This act, enemies start each combat with 2 Strength.", AbyssText.Text(AbyssShadow.Frenzy, 0));
         var start = Il.CallSequence(typeof(SpiralAbyss).GetMethod(nameof(SpiralAbyss.AfterRoomEntered))!);
         Assert.Contains("PowerCmd.Apply<ThornsPower>", start);
         Assert.Equal(2, start.Count(c => c == "PowerCmd.Apply<StrengthPower>"));   // Frenzy, Battle Rhythm
@@ -364,11 +377,11 @@ public class AbyssPoolsTwoTests
     {
         // 2026-10-17: per turn, not once at combat start (the user: "Bulwark
         // looks pretty weak"; "4 is fine for now").
-        Assert.Equal(4, AbyssNumbers.BulwarkBlock);
+        Assert.Equal(new[] { 4, 6, 8 }, AbyssNumbers.BulwarkBlockByAct);
         var turn = Il.Calls(typeof(SpiralAbyss).GetMethod(nameof(SpiralAbyss.AfterSideTurnStart))!);
         Assert.Contains("CreatureCmd.GainBlock", turn);
         Assert.Equal("This act, at the start of your turn, each enemy gains 4 Block.",
-                     AbyssText.Text(AbyssShadow.Bulwark));
+                     AbyssText.Text(AbyssShadow.Bulwark, 0));
     }
 
     [Fact]

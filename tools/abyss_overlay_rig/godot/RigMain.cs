@@ -89,9 +89,9 @@ public partial class RigMain : Node
                 data.Cards.Add(new AbyssOverlayViewData.Card
                 {
                     BlessingName = AbyssText.Name(b),
-                    BlessingText = AbyssText.Text(b),
+                    BlessingText = AbyssText.Text(b, state.Act),
                     ShadowName = AbyssText.Name(s),
-                    ShadowText = AbyssText.Text(s),
+                    ShadowText = AbyssText.Text(s, state.Act),
                     BlessingIcon = Png(job.ArtRoot + "/" + AbyssOverlayContentRig.BlessingIcon(b)),
                     ShadowIcon = Png(job.ArtRoot + "/" + AbyssOverlayContentRig.ShadowIcon(s)),
                 });
@@ -100,7 +100,7 @@ public partial class RigMain : Node
             {
                 data.Blessings.Add(new AbyssOverlayViewData.StripIcon
                 {
-                    Name = AbyssText.Name(b), Text = AbyssText.Text(b),
+                    Name = AbyssText.Name(b), Text = AbyssText.Text(b, 0),
                     Icon = Png(job.ArtRoot + "/" + AbyssOverlayContentRig.BlessingIcon(b)),
                 });
             }
@@ -108,7 +108,7 @@ public partial class RigMain : Node
             {
                 data.Shadows.Add(new AbyssOverlayViewData.StripIcon
                 {
-                    Name = AbyssText.Name(s), Text = AbyssText.Text(s),
+                    Name = AbyssText.Name(s), Text = AbyssText.Text(s, 0),
                     Icon = Png(job.ArtRoot + "/" + AbyssOverlayContentRig.ShadowIcon(s)),
                 });
             }

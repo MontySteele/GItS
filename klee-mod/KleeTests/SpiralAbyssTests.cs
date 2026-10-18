@@ -40,18 +40,35 @@ public class SpiralAbyssTests
     {
         // The first paper's eight of each, and round two's
         // (review/ruled/abyss-pools-2-2026-10-12.md): six Blessings, four
-        // Shadows, and Riptide's This act text.
+        // Shadows. Act 1's numbers are the papers' (the act scaling paper
+        // moves no act 1 number); act 2 and 3 are pinned row by row in
+        // AbyssActScalingTests. The three entries the act scaling paper
+        // rewrote (review/active/abyss-act-scaling-2026-10-18.md) are its
+        // texts, Riptide's with its cap as N.
         var papers = File.ReadAllText(Path.Combine(
                          RepoRoot(), "review", "active", "spiral-abyss-pools-2026-10-12.md"))
                    + File.ReadAllText(Path.Combine(
                          RepoRoot(), "review", "ruled", "abyss-pools-2-2026-10-12.md"));
+        var scaling = string.Join(" ", File.ReadAllText(Path.Combine(
+                RepoRoot(), "review", "active", "abyss-act-scaling-2026-10-18.md"))
+            .Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
+        var rewritten = new[] { AbyssShadow.Riptide, AbyssShadow.ElementalMark, AbyssShadow.MageShield };
         foreach (var b in AbyssDraft.AllBlessings)
         {
-            Assert.Contains($"**{AbyssText.Name(b)}** | {AbyssText.Text(b)} |", papers);
+            Assert.Contains($"**{AbyssText.Name(b)}** | {AbyssText.Text(b, 0)} |", papers);
         }
-        foreach (var s in AbyssDraft.AllShadows)
+        foreach (var s in AbyssDraft.AllShadows.Except(rewritten))
         {
-            Assert.Contains($"**{AbyssText.Name(s)}** | {AbyssText.Text(s)} |", papers);
+            Assert.Contains($"**{AbyssText.Name(s)}** | {AbyssText.Text(s, 0)} |", papers);
+        }
+        foreach (var s in rewritten)
+        {
+            var text = AbyssText.Text(s, 0);
+            if (s == AbyssShadow.Riptide)
+            {
+                text = text.Replace($"up to {AbyssNumbers.RiptideCap(0)} times", "up to N times");
+            }
+            Assert.Contains($"**{AbyssText.Name(s)}, new text:** \"{text}\"", scaling);
         }
         Assert.Equal(14, AbyssDraft.AllBlessings.Count);
         Assert.Equal(12, AbyssDraft.AllShadows.Count);
@@ -80,11 +97,12 @@ public class SpiralAbyssTests
         var fired = Enumerable.Range(1, 9).Where(AbyssRules.AbyssalMoonFires).ToArray();
         Assert.Equal(new[] { 3, 6, 9 }, fired);
         Assert.False(AbyssRules.AbyssalMoonFires(0));
-        Assert.Equal(4, AbyssNumbers.AbyssalMoonDamage);
+        Assert.Equal(new[] { 4, 5, 6 }, AbyssNumbers.AbyssalMoonDamageByAct);
     }
 
     [Fact]
-    public void MoonlitRest_heals_4() => Assert.Equal(4, AbyssNumbers.MoonlitRestHeal);
+    public void MoonlitRest_heals_4_6_8_by_act() =>
+        Assert.Equal(new[] { 4, 6, 8 }, AbyssNumbers.MoonlitRestHealByAct);
 
     [Fact]
     public void FirstStrike_adds_one_play_to_the_first_Attack_only()
@@ -134,7 +152,7 @@ public class SpiralAbyssTests
         Assert.True(AbyssRules.ElementalBurstFires(isPower: true, isFirstInSeries: true));
         Assert.False(AbyssRules.ElementalBurstFires(true, isFirstInSeries: false));
         Assert.False(AbyssRules.ElementalBurstFires(isPower: false, true));
-        Assert.Equal(6, AbyssNumbers.ElementalBurstDamage);
+        Assert.Equal(new[] { 6, 9, 12 }, AbyssNumbers.ElementalBurstDamageByAct);
     }
 
     [Fact]
@@ -158,7 +176,8 @@ public class SpiralAbyssTests
     }
 
     [Fact]
-    public void Crystallize_gives_8_Block() => Assert.Equal(8, AbyssNumbers.CrystallizeBlock);
+    public void Crystallize_gives_8_12_16_Block_by_act() =>
+        Assert.Equal(new[] { 8, 12, 16 }, AbyssNumbers.CrystallizeBlockByAct);
 
     /// <summary>The seat round (2026-10-12): the Blessing was called
     /// "Crystallize", the name of a reaction, and the page's glossary explained
@@ -169,12 +188,13 @@ public class SpiralAbyssTests
     {
         Assert.Equal(7, (int)AbyssBlessing.Crystallize);
         Assert.Equal("Jade Shield", AbyssText.Name(AbyssBlessing.Crystallize));
-        Assert.Equal("Start each combat with 8 Block.", AbyssText.Text(AbyssBlessing.Crystallize));
+        Assert.Equal("Start each combat with 8 Block.", AbyssText.Text(AbyssBlessing.Crystallize, 0));
         Assert.DoesNotContain(AbyssDraft.AllBlessings, b => AbyssText.Name(b).Contains("Crystallize"));
     }
 
     [Fact]
-    public void FatefulFortune_gives_12_Max_HP() => Assert.Equal(12, AbyssNumbers.FatefulFortuneMaxHp);
+    public void FatefulFortune_gives_12_16_20_Max_HP_by_act() =>
+        Assert.Equal(new[] { 12, 16, 20 }, AbyssNumbers.FatefulFortuneMaxHpByAct);
 
     // ---- Each Shadow once ------------------------------------------------------
 
@@ -184,19 +204,35 @@ public class SpiralAbyssTests
         Assert.False(AbyssRules.ClockApplies(4));
         Assert.True(AbyssRules.ClockApplies(5));
         Assert.True(AbyssRules.ClockApplies(9));
-        Assert.Equal(2, AbyssNumbers.ClockStrength);
+        Assert.Equal(new[] { 2, 2, 3 }, AbyssNumbers.ClockStrengthByAct);
     }
 
     [Fact]
-    public void MageShield_is_8_hits_a_reaction_takes_3_and_the_counter_breaks_it()
+    public void MageShield_is_6_hits_a_hit_takes_1_a_reaction_or_the_counter_takes_3()
     {
-        Assert.Equal(8, AbyssNumbers.MageShieldHits);
-        Assert.Equal(7, AbyssRules.ShieldAfterHit(8, Element.None, Element.Hydro));
-        Assert.Equal(7, AbyssRules.ShieldAfterHit(8, Element.Pyro, Element.Hydro));
-        Assert.Equal(0, AbyssRules.ShieldAfterHit(8, Element.Cryo, Element.Hydro));
+        // review/active/abyss-act-scaling-2026-10-18.md: 6 hits deep; the
+        // counter element no longer breaks it outright.
+        Assert.Equal(6, AbyssNumbers.MageShieldHits);
+        Assert.Equal(5, AbyssRules.ShieldAfterHit(6, Element.None, Element.Hydro));
+        Assert.Equal(5, AbyssRules.ShieldAfterHit(6, Element.Pyro, Element.Hydro));
+        Assert.Equal(3, AbyssRules.ShieldAfterHit(6, Element.Cryo, Element.Hydro));
+        Assert.Equal(0, AbyssRules.ShieldAfterHit(2, Element.Cryo, Element.Hydro));
         Assert.Equal(0, AbyssRules.ShieldAfterHit(1, Element.None, Element.Hydro));
-        Assert.Equal(5, AbyssRules.ShieldAfterReaction(8));
+        Assert.Equal(3, AbyssRules.ShieldAfterReaction(6));
         Assert.Equal(0, AbyssRules.ShieldAfterReaction(2));
+
+        // Six plain hits break it; two counter-element hits do (3 + 3); a
+        // character without elements needs 6 hits, one with the counter 2.
+        var plain = AbyssNumbers.MageShieldHits;
+        var plainHits = 0;
+        while (plain > 0) { plain = AbyssRules.ShieldAfterHit(plain, Element.None, Element.Pyro); plainHits++; }
+        Assert.Equal(6, plainHits);
+        var countered = AbyssNumbers.MageShieldHits;
+        var counterHits = 0;
+        while (countered > 0) { countered = AbyssRules.ShieldAfterHit(countered, Element.Hydro, Element.Pyro); counterHits++; }
+        Assert.Equal(2, counterHits);
+        // A hit that also reacts: 1 for the hit, 3 for the reaction.
+        Assert.Equal(2, AbyssRules.ShieldAfterReaction(AbyssRules.ShieldAfterHit(6, Element.None, Element.Pyro)));
         Assert.True(AbyssRules.MageShieldRoom(isElite: true));
         Assert.False(AbyssRules.MageShieldRoom(isElite: false));
     }
@@ -208,7 +244,7 @@ public class SpiralAbyssTests
         Assert.False(AbyssRules.SheerColdApplies(true, true, block: 1));
         Assert.False(AbyssRules.SheerColdApplies(isPlayer: false, true, 0));
         Assert.False(AbyssRules.SheerColdApplies(true, isAlive: false, 0));
-        Assert.Equal(3, AbyssNumbers.SheerColdHpLoss);
+        Assert.Equal(new[] { 3, 4, 5 }, AbyssNumbers.SheerColdHpLossByAct);
     }
 
     [Fact]
@@ -231,7 +267,8 @@ public class SpiralAbyssTests
     }
 
     [Fact]
-    public void Rally_gives_the_others_2_Strength() => Assert.Equal(2, AbyssNumbers.RallyStrength);
+    public void Rally_gives_the_others_2_3_3_Strength_by_act() =>
+        Assert.Equal(new[] { 2, 3, 3 }, AbyssNumbers.RallyStrengthByAct);
 
     [Fact]
     public void Fatui_covers_elites_and_bosses_with_3_Plated_Armor()
@@ -239,7 +276,7 @@ public class SpiralAbyssTests
         Assert.True(AbyssRules.FatuiRoom(isElite: true, isBoss: false));
         Assert.True(AbyssRules.FatuiRoom(false, isBoss: true));
         Assert.False(AbyssRules.FatuiRoom(false, false));
-        Assert.Equal(3, AbyssNumbers.FatuiPlating);
+        Assert.Equal(new[] { 3, 4, 6 }, AbyssNumbers.FatuiPlatingByAct);
     }
 
     [Fact]

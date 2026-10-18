@@ -53,12 +53,16 @@ In none of the 24 examples does an effect last several floors without lasting th
 | **Moonlit Spring** | This act, heal 8 HP at the end of each combat. |
 | **Battle Rhythm** | This act, start each combat with 1 Strength and 1 Dexterity. |
 
+Vigor of the Abyss and Battle Rhythm, 2026-10-18: numbers by act, see review/active/abyss-act-scaling-2026-10-18.md.
+
 **New Blessings, Whole run** (Genshin's Abyssal Moon shockwaves):
 
 | Name | Text |
 |---|---|
 | **Wavering Moon** | Whenever you trigger an Elemental Reaction, deal 3 damage to ALL enemies. |
 | **Starfell Draft** | Card rewards show 1 additional card. |
+
+Wavering Moon, 2026-10-18: numbers by act, see review/active/abyss-act-scaling-2026-10-18.md.
 
 **No retunes.** [USER]: "don't retune the existing ones; nobody's done full runs on the spiral abyss yet, so there's nothing to tune against." Abyssal Moon stays at 4, Jade Shield at 8 Block, Moonlit Rest at 4 HP. Moonlit Spring is Moonlit Rest's This-act sibling at 8, "double the per-run amount", and the two stack.
 
@@ -70,6 +74,8 @@ In none of the 24 examples does an effect last several floors without lasting th
 | **Bulwark** | This act, at the start of your turn, each enemy gains 4 Block. |
 | **Frenzy** | This act, enemies start each combat with 2 Strength. |
 
+Thorny Ground, Bulwark and Frenzy, 2026-10-18: numbers by act, see review/active/abyss-act-scaling-2026-10-18.md.
+
 Bulwark amended 2026-10-17 (was "enemies start each combat with 6 Block", which cleared at the enemies' first turn). The user: "Bulwark looks pretty weak"; "4 is fine for now, but we probably need to make per-act effects scale by act."
 
 Frenzy was "enemy Attacks deal 1 additional damage". [USER]: "Frenzy sounds like +1 strength for an act which might be too low", then "Why the extra words? Just give enemies 2 Strength."
@@ -80,6 +86,8 @@ Frenzy was "enemy Attacks deal 1 additional damage". [USER]: "Frenzy sounds like
 | Name | Text |
 |---|---|
 | **Riptide** | This act, whenever an enemy attack deals you unblocked damage, that enemy gains 1 Strength. |
+
+Riptide, 2026-10-18: numbers by act, see review/active/abyss-act-scaling-2026-10-18.md (it is now once per turn per enemy, up to 3 / 4 / 5 times per combat).
 
 **New Shadow, Whole run:**
 
