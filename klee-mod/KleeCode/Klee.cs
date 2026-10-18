@@ -44,7 +44,7 @@ namespace KleeMod;
 /// IKleeCharacter is her identity gate, and it arrives late on purpose
 /// (`EB-281`): she is the compatibility baseline, so every shipped site tests
 /// <c>is Klee</c> directly and still does. The interface exists for the
-/// QUARANTINE, where a patch compiled under the one prototype switch runs on
+/// prototype surface, where a patch runs on
 /// every seat at the table and has to be able to say whose creature it is about
 /// in the idiom Furina and Kokomi already use
 /// (<c>tools/lint_prototype_patch_scope.py</c>). It declares nothing, so

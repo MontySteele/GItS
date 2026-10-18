@@ -19,15 +19,13 @@ namespace KleeMod.Powers;
 
 // ======================================================================
 // THE CO-OP SET (review/records/coop-set-2026-09-25.md; [USER], 2026-09-25,
-// "Co-op interaction, pick 3a"). Nine multiplayer-only cards, three per
-// character, marked `CardMultiplayerConstraint.MultiplayerOnly` exactly as the
+// "Co-op interaction, pick 3a"). Nine multiplayer-only cards at first, three
+// per character; the sheet holds fifteen today, five each for Klee, Kokomi
+// and Varka (Furina has none since the Stage rework). Marked `CardMultiplayerConstraint.MultiplayerOnly` exactly as the
 // base game marks Tank, Demonic Shield, Flanking and Sneaky, so a
 // single-player run never offers one (`CardPoolModel.GetUnlockedCards` and
 // `CardFactory.FilterForPlayerCount` drop the constraint upstream of every
 // reward, shop and transform).
-//
-// QUARANTINED: this folder is Compile Remove'd from a release build, so only
-// `proto_` rows on the prototype surface can name anything here.
 //
 // "ANOTHER PLAYER" IS THE BASE GAME'S `TargetType.AnyAlly` (Lift, Believe In
 // You, Intercept): a living PLAYER on your side who is not you. "EACH OTHER
@@ -388,7 +386,7 @@ public sealed class SangonomiyasCounselPower
 // Genshin team role: Furina turns her stage into an ally's damage and is
 // charged by the party's HP swings; Klee's Mines shred for her allies and her
 // Bombs give them energy. Same terms as the first nine above: multiplayer
-// only, outside every pool count, quarantined with this folder.
+// only, outside every pool count.
 // ======================================================================
 
 // ---------------------------------------------------------------------------
@@ -537,7 +535,7 @@ public sealed class SparksForEveryonePower
 // design 5 co-op cards for Varka"). Escort Duty, Marching Orders, Windward
 // Flank, Comrades of the Expedition and West Wind's Blessing: the same terms
 // as the sets above -- multiplayer only, outside his pool count
-// (`VarkaRoster.MultiplayerSlice`), quarantined with this folder. Two of the
+// (`VarkaRoster.MultiplayerSlice`). Two of the
 // five are `varka` kinds (<see cref="VarkaCards.EscortDuty"/>,
 // <see cref="VarkaCards.MarchingOrders"/>); three are powers below.
 // ======================================================================

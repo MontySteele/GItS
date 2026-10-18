@@ -18,8 +18,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 namespace KleeMod.Powers;
 
 /// <summary>
-/// THE MONDSTADT COMPANION OVERHAUL, SECOND WAVE -- THE HOOKS (QUARANTINED,
-/// R213 B).
+/// THE MONDSTADT COMPANION OVERHAUL, SECOND WAVE -- THE HOOKS (R213 B).
 ///
 /// The first pass shipped twenty-one of the approved workshop's thirty-four
 /// Universals and left THIRTEEN out, each one because its printed text wanted
@@ -232,8 +231,7 @@ public sealed class CompanionOverhaulLedger
 /// PURE, because both callers are reached from preview paths.
 ///
 /// WITH NO OVERHAUL POWER STANDING THIS IS THE OLD EXPRESSION, character for
-/// character -- which is what makes a release build byte-identical. It also
-/// cannot be reached at all in one: the whole file is <c>Compile Remove</c>d.
+/// character.
 /// </summary>
 public static class CompanionOverhaulRiders
 {
@@ -339,7 +337,7 @@ public static class CompanionOverhaulReactions
         }
 
         // KLEE'S HEXEREI FAMILY, the third, fourth and fifth readers of this
-        // event (QUARANTINED, R236 sec.3): Albedo's Tectonic Tide on ANY
+        // event (R236 sec.3): Albedo's Tectonic Tide on ANY
         // reaction, Sucrose's Mollis Favonius on a DAMAGING one, Fischl's
         // Sinful Hex on an ELECTRO one -- which is derived from the reaction
         // and the consumed aura rather than passed, so nothing here widened
@@ -379,8 +377,7 @@ public static class CompanionOverhaulReactions
 
     /// <summary>
     /// DURIN, PRINCIPLE OF PURITY / WHITE (AoE trim, 2026-10-03): a multiplier
-    /// on the REACTION'S OWN damage. 1 with no White standing, which is what
-    /// leaves the shipped reaction pipeline byte-identical.
+    /// on the REACTION'S OWN damage. 1 with no White standing.
     ///
     /// It is the TEAM form: its percentage is summed over EVERY player, so any
     /// player's reaction against an enemy is boosted while any player holds it
@@ -766,8 +763,7 @@ public abstract class NextAttackRiderPower : PowerModel
 /// applies Pyro."
 ///
 /// A SECOND CLASS RATHER THAN A RETUNE of the shipped
-/// <see cref="NextAttackUpPower"/> of the same name, on the arm's standing
-/// rule: a flag-off build has to keep meaning what it printed, and the shipped
+/// <see cref="NextAttackUpPower"/> of the same name: the shipped
 /// power carries no element clause at all.
 ///
 /// The element half is read through <see cref="CompanionOverhaulRiders"/>; only
@@ -1379,8 +1375,8 @@ public sealed class CompanionOverhaulIncomingHit : AbstractModel
         if (dealer == null || dealer.Player != null) return;   // by an enemy
         if (!props.IsPoweredAttack()) return;
 
-        // THE KLEE ARM'S ONE INCOMING READER (QUARANTINED, `EB-732`), FIRST
-        // and behind its own flag. Return to Sender is the paws' construction
+        // THE KLEE ARM'S ONE INCOMING READER (`EB-732`), FIRST.
+        // Return to Sender is the paws' construction
         // with a Bomb on the attacker instead of an aura, and it rides this
         // listener rather than a fifth `AbstractModel` subscription for the
         // reason the four below it do: `amount` and the standing Block exist

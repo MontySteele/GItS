@@ -444,8 +444,7 @@ internal static class ReactionEffects
             // the single site a reaction resolves in the mod -- the sentence
             // three paragraphs down says so for the Burst credit -- so a row
             // written here cannot miss a beat or double one, which is the
-            // row's acceptance. Shipped rather than quarantined: every arm
-            // reacts. See `ReactionLog`.
+            // row's acceptance. See `ReactionLog`.
             // 2026-10-01 (a Varka seat): Kaeya's Cryo on a Hydro Cubex
             // Construct printed "Frozen on Cubex Construct" while its
             // Artifact ate the freeze. The reaction still happened (the aura
@@ -497,7 +496,7 @@ internal static class ReactionEffects
                 }
             }
 
-            // QUARANTINED (the Mondstadt companion overhaul). THE MOD COUNTS
+            // The Mondstadt companion overhaul. THE MOD COUNTS
             // REACTIONS AND BROADCASTS NONE, which is why two of the workshop's
             // cards -- Dahlia's Favonian Favor and Varka's Sturm und Drang --
             // could not be built at all. This call is the broadcast, and it is
@@ -592,7 +591,7 @@ internal static class ReactionEffects
                 // splash from early-detonating bombs or counting as an attack.
                 var splashTargets = target.CombatState?.HittableEnemies.ToList();
                 var splash = ReactionConstants.OverloadSplash;
-                // QUARANTINED. The other half of Durin's White form: the splash
+                // The other half of Durin's White form: the splash
                 // IS damage a reaction deals, so it takes the same factor the
                 // amplifier takes, at the one site that computes it. Truncated
                 // like the sim's `int(C.OVERLOAD_SPLASH * mult)`.

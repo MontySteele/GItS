@@ -21,9 +21,6 @@ namespace KleeMod.Tests.Prototype;
 /// THE INAZUMA COMPANION OVERHAUL -- twenty-four rows on the arm's existing
 /// flag (sim twin <c>tier0/tests/test_inazuma_companion_overhaul.py</c>).
 ///
-/// Compiled only under <c>-p:PrototypeCards=true</c>, the same switch that
-/// compiles the arm.
-///
 /// WHAT IS REAL HERE AND WHAT IS STRUCTURAL, on the terms
 /// <c>CompanionOverhaulHookTests</c> sets: a PURE reader can be called
 /// headlessly against a <see cref="Seat"/> holding real powers and is asserted
@@ -342,10 +339,10 @@ public class InazumaCompanionOverhaulTests
     public void Chiori_is_the_one_hit_that_ignores_block()
     {
         // STRUCTURAL: `ignoreBlock` is one optional flag on ElementalHit.Deal,
-        // defaulted false, so every other caller in the mod is byte-identical.
+        // defaulted false.
         // A SECOND OPTIONAL FLAG JOINED IT (`EB-334`, `powered`), which is why
         // the arity is seven and both defaults are asserted by NAME rather
-        // than by position -- a third quarantined flag must not be able to
+        // than by position -- a third optional flag must not be able to
         // move this pin's subject out from under it.
         var volley = Il.Method("TamotoPower", "FireVolley");
         Assert.Contains(Il.Calls(volley), c => c.Contains("ElementalHit.Deal"));

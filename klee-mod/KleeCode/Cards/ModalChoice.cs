@@ -521,8 +521,8 @@ public readonly struct ModePrice
 /// rather than by a delegate or an enum here. `ModePrice` moved AWAY from
 /// generated lambdas under `EB-220` because a price and the BADGE painted on
 /// the mode's face had to read one literal; a rule gate paints no badge, and
-/// the rule it asks lives in a Compile-Removed prototype file this assembly's
-/// shared code must not name. So the card, which may name it, answers it.
+/// the rule it asks lives in a prototype file this shared code does not name.
+/// So the card answers it.
 ///
 /// Sim twin: <c>tier0.engine.furina_stage.mode_offered</c> /
 /// <c>mode_refusal</c>, reached through <c>effects.mode_affordable</c>.

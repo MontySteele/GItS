@@ -193,11 +193,11 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
     /// Reads the element this play applies. Returns None for untagged damage,
     /// which never reacts.
     ///
-    /// DEALER-AWARE since the quarantined Mondstadt companion overhaul, whose
+    /// DEALER-AWARE since the Mondstadt companion overhaul, whose
     /// three next-Attack riders can change the answer; the funnel is
     /// <see cref="AuraCmd.ElementOfPlay"/> and the whole argument for having
-    /// one is there. With no rider standing -- and always in a release build --
-    /// this is the card read it always was.
+    /// one is there. With no rider standing this is the card read it always
+    /// was.
     /// </summary>
     protected static Element ElementOf(CardModel? cardSource, Creature? dealer) =>
         AuraCmd.ElementOfPlay(cardSource, dealer);
@@ -223,8 +223,8 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
     /// 1 for the span of that one read.
     ///
     /// PREVIEW ONLY and pure: it moves a counter the play never reads, and a
-    /// play in the middle of a preview does not exist. Every shipped caller is
-    /// byte-identical, because nothing outside the prototype var opens it.
+    /// play in the middle of a preview does not exist. Only the prototype var
+    /// opens it.
     /// </summary>
     public static System.IDisposable PreviewWithoutReaction()
     {

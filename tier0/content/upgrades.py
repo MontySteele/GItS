@@ -545,14 +545,6 @@ def _prototype_deltas(merged: dict[str, dict]) -> dict[str, dict]:
     reachable |= set(C.MONDSTADT_OVERHAUL_POOL_IDS)
     reachable |= set(C.INAZUMA_OVERHAUL_POOL_IDS)
     reachable |= set(C.FONTAINE_OVERHAUL_POOL_IDS)
-    # THE PERSONALS ride the same replacement roster -- Gorou's Crystal
-    # Collapse and Klee's four coven rows join it beside the two nations'
-    # Universals (`loader.companion_roster_replacement`) -- so a draft can
-    # put one in a deck and a rest site must be able to smith it. Left out,
-    # the sim offered all five and could upgrade none, while the C#
-    # upgrades every one.
-    reachable |= set(C.INAZUMA_OVERHAUL_PERSONAL_IDS)
-    reachable |= set(C.COVEN_PERSONAL_POOL_IDS)
     # VARKA's OATH REWORK has no switch (he ships nowhere else; collapsed
     # 2026-10-01): the loader's door is always open for every `proto_vk_`
     # row -- his starter, his pool and the cards his rules create -- so each

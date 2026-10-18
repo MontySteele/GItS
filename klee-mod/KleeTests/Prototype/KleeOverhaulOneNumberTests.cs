@@ -40,9 +40,8 @@ namespace KleeMod.Tests.Prototype;
 /// headless boundary"), so the ledger's half is pinned as the arithmetic it
 /// performs plus a structural read of the one call site that feeds it.
 ///
-/// THE COLLECTION IS LOAD-BEARING, for the reason
-/// <c>KleeOverhaulRoundOneFixTests</c> gives: <c>KleeOverhaul.Enabled</c> is
-/// one static for the whole process.
+/// THE COLLECTION is a leftover from the retired arm switch; it only keeps
+/// these tests serial.
 /// </summary>
 [Collection(KleeOverhaulArm.Name)]
 public class KleeOverhaulOneNumberTests

@@ -30,10 +30,9 @@ namespace KleeMod.Relics;
 /// registers the type itself, which is all StartingRelics needs.
 /// </summary>
 public sealed class PoundingSurprise : CustomRelicModel, IBombDetonationListener
-    // QUARANTINED. Under the Klee overhaul the relic IS the Spark rule (the
+    // Under the Klee overhaul the relic IS the Spark rule (the
     // ruled brief sec.8), so it listens to the arm's explosion bus as well as
-    // to the shipped detonation bus. The seam is inside the switch, so a
-    // release build neither compiles the interface nor references it.
+    // to the shipped detonation bus.
     , Powers.IProtoExplosionListener
 {
     public PoundingSurprise()

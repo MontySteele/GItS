@@ -122,4 +122,3 @@ def test_three_rows_are_klees_own_draftable_companions():
     assert len(ids) == 78
     assert Counter(loader.peek_card(i).rarity for i in ids) == {
         "common": 25, "uncommon": 32, "rare": 21}
-    assert C.COVEN_PERSONAL_POOL_IDS == ()

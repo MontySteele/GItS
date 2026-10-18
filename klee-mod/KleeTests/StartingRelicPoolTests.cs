@@ -30,11 +30,8 @@ namespace KleeMod.Tests;
 /// off the IL and comparable. A relic named by the first and not by the second
 /// is exactly the crash, found at build time instead of at character select.
 ///
-/// EVERY ARM AT ONCE, which is the other half of what the row asks. The walk
-/// reads all the branches a body CONTAINS, not the one a flag would take, so a
-/// build under <c>-p:PrototypeCards=true</c> checks the shipped starter and
-/// each arm's replacement together -- and a build without it checks the
-/// shipped branch, which is all the IL then holds.
+/// EVERY BRANCH AT ONCE, which is the other half of what the row asks. The walk
+/// reads all the branches a body CONTAINS.
 ///
 /// THE SHARED POOL. A starting relic that is a BASE GAME type is pooled by
 /// the borrowed <c>SilentRelicPool</c> that every one of these pools appends

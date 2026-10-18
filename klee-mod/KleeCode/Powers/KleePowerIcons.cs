@@ -28,11 +28,11 @@ internal static class KleePowerIcons
     {
         SparkPower => KleePck.Path("klee/powers/spark.png"),
         BombPower => KleePck.Path("klee/powers/bomb.png"),
-        // QUARANTINED (the Sparks alternative-cost arm). It borrows the icon of
+        // The Sparks alternative-cost arm. It borrows the icon of
         // the power it replaces -- True Spark Knight's old body was
         // spark_threshold_down and the re-authored card keeps the id, the
         // rarity and the cost. No new art for a prototype row, per the slice.
-        // QUARANTINED (the Klee overhaul, slice one). Every one of these borrows
+        // The Klee overhaul, slice one. Every one of these borrows
         // the icon of the shipped power whose job it takes over, for the reason
         // the row above gives: art is commissioned when a slice is ACCEPTED, and
         // a prototype that shipped new art would be paying for a card that may
@@ -116,7 +116,7 @@ internal static class KleePowerIcons
             KleePck.Path("klee/powers/bomb_and_spark_per_turn.png"),
         IntroductionMagicPower =>
             KleePck.Path("klee/powers/witchs_flame.png"),
-        // QUARANTINED (the Kokomi overhaul, draft 6). Every one of these
+        // The Kokomi overhaul, draft 6. Every one of these
         // borrows the icon of the SHIPPED Kokomi power whose job it takes over,
         // on the block above's argument verbatim: art is commissioned when a
         // slice is ACCEPTED, and a prototype that shipped new art would be
@@ -211,7 +211,7 @@ internal static class KleePowerIcons
         // clause now says. Art is commissioned when a slice is ACCEPTED.
         // THE CASKET PASS (2026-09-28). Moon Signal borrows her Ancient's
         // sigil, the badge above that counts something waiting to arrive.
-        // QUARANTINED (the Mondstadt companion overhaul). Every one of these
+        // The Mondstadt companion overhaul. Every one of these
         // borrows the icon of the SHIPPED companion power whose job it takes
         // over, on the block above's argument verbatim: art is commissioned
         // when a slice is ACCEPTED, and the workshop's own sec.5 defers all

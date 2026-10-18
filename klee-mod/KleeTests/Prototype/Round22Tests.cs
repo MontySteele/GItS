@@ -194,8 +194,7 @@ public class Round22Tests
     {
         // `EB-598` put the target's terms into `FrontFoldedDamageVar`'s own
         // `PreviewValue`, so the branch that reads that preview must not ask
-        // `ResolveOnTarget` for them again. Asked BY NAME, because the class
-        // is Compile-Removed from a release build.
+        // `ResolveOnTarget` for them again. Asked BY NAME, as the source does.
         var source = Source("Cards/KleeCardTooltips.cs").Replace("\r\n", "\n");
         Assert.Contains(
             "calculated.GetType().Name == \"FrontFoldedDamageVar\"", source);

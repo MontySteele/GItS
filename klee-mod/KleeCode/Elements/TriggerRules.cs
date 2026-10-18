@@ -26,8 +26,7 @@ namespace KleeMod.Elements;
 /// (<c>tools/lint_constant_parity.py</c> compares the defaults), and pins
 /// both sides by flipping it.
 ///
-/// Compiled in every build, not under <c>PROTOTYPE_CARDS</c>: this is the
-/// shared reaction layer, which every kit reacts through.
+/// This is the shared reaction layer, which every kit reacts through.
 /// </summary>
 public static class TriggerRules
 {

@@ -39,8 +39,7 @@ namespace KleeMod.Vfx;
 /// NOTHING HERE MAY THROW AT ITS CALLER. A cue that cannot be drawn is
 /// skipped with one warning; the rules have already run.
 ///
-/// QUARANTINED. <c>Vfx/Prototype/**</c> is Compile Remove'd without
-/// <c>-p:PrototypeCards=true</c>, and nothing here runs in `dotnet test`
+/// Nothing here runs in `dotnet test`
 /// (no combat room exists there: <see cref="HasRoom"/> is false).
 /// </summary>
 public static class FurinaStageCueNodes

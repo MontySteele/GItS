@@ -62,14 +62,11 @@ namespace KleeMod.Patches;
 ///
 /// THE REPAIR IS TWO POSTFIXES ON THE GAME'S OWN SEAMS, both scoped so that a
 /// board with no custom target type on it is byte-identical to vanilla.
-/// SHIPPED, NOT QUARANTINED, on <c>CustomTargetControllerNavigationPatch</c>'s
+/// FOR EVERY CHARACTER, on <c>CustomTargetControllerNavigationPatch</c>'s
 /// precedent and for its reason: the unreachable pet belongs to the base game
 /// and the base LIBRARY's own <c>Pet</c> / <c>PetOrSelf</c> types hit it too,
 /// so scoping the repair to one prototype arm would leave the trap armed for
-/// everyone else. Both are inert in a release build by construction -- no
-/// shipped row declares a custom target type, so no shipped play ever restricts
-/// navigation to a non-interactable creature or starts a custom-typed
-/// targeting session.
+/// everyone else. Both are inert for a play with no custom target type.
 /// </summary>
 internal static class CustomTargetReach
 {

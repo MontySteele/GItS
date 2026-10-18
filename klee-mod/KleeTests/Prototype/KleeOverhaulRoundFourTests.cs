@@ -38,9 +38,8 @@ namespace KleeMod.Tests.Prototype;
 /// headless boundary") -- so the preview value is composed here from the two
 /// halves the game composes it from, each of them run for real.
 ///
-/// THE COLLECTION IS LOAD-BEARING, for the reason
-/// <c>KleeOverhaulRoundOneFixTests</c> gives: <c>KleeOverhaul.Enabled</c> is
-/// one static for the whole process.
+/// THE COLLECTION is a leftover from the retired arm switch; it only keeps
+/// these tests serial.
 /// </summary>
 [Collection(KleeOverhaulArm.Name)]
 public class KleeOverhaulRoundFourTests

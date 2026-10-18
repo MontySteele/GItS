@@ -28,8 +28,7 @@ namespace KleeMod.Relics;
 /// Gravestone are his whole relic offer, and the Silent borrow goes (pick 1,
 /// <see cref="KeepSilentBorrow"/>).
 ///
-/// QUARANTINED for Salon Solitaire's reason: inside <c>#if PROTOTYPE_CARDS</c>
-/// and under <c>Relics/</c>, so the titles stay in
+/// UNDER <c>Relics/</c>, so the titles stay in
 /// <c>tools/lint_unique_names.py</c>'s namespace. Every effect asks
 /// <see cref="VarkaPrototype.IsVarka"/>, so a relic held by anyone else, or
 /// does nothing.

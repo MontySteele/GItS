@@ -32,10 +32,8 @@ def _fontaine_cards():
 def _char(c):
     """The character a ported row belongs to, off its id: the surface files
     every companion row under its owner, so the cameo is read off the name
-    (`proto_mf_<character>_...`, `proto_mf_guest_<character>_...`)."""
+    (`proto_mf_<character>_...`)."""
     rest = c.id[len("proto_mf_"):]
-    if rest.startswith("guest_"):
-        rest = rest[len("guest_"):]
     return rest.split("_", 1)[0]
 
 
@@ -49,7 +47,6 @@ def test_fontaine_sheet_loads_ratified_roster():
     shared = [c for c in cards if not c.guest_star]
     bench = [c for c in shared if c.star == 4]
     rares = [c for c in shared if c.star == 5]
-    guests = [c for c in cards if c.guest_star]
 
     # 4 characters x 3-card kits (kickoff §10).
     assert len(bench) == 12
@@ -64,9 +61,6 @@ def test_fontaine_sheet_loads_ratified_roster():
     for char in FONTAINE_5STARS:
         assert sum(1 for c in rares if _char(c) == char) == 1
     assert all(c.rarity == "rare" for c in rares)
-
-    assert {_char(c) for c in guests} == {"neuvillette"}
-    assert 2 <= len(guests) <= 3          # kickoff §9: 2-3 Neuvillette cards
 
 
 def test_cryo_application_budget():
@@ -116,10 +110,6 @@ def test_guest_star_never_in_shared_rewards():
         "proto_mf_arlecchino_masque_red_death",
     }
     assert all(not c.guest_star and c.personal_pool is None for c in roster)
-    # D2 in the flesh: Neuvillette is offerable AND has cameos, and
-    # they are different cards.
-    guest_ids = {c.id for c in _fontaine_cards() if c.guest_star}
-    assert guest_ids and not (guest_ids & {c.id for c in roster})
 
 
 def test_personal_pool_not_offered_cross_character():
@@ -328,22 +318,26 @@ def test_night_vigil_does_not_pay_bombs_or_summons():
     assert before - e.hp == 10
 
 
+# A plain Hydro applier (Block, then Hydro on the enemy).
+HYDRO_APPLIER = "proto_mc_barbara_show_begin"
+
+
 def test_ancient_sea_authority_extends_applied_and_refreshed_auras():
     st = make_state(enemies=[make_enemy(hp=200)])
     e = st.enemies[0]
-    effects.resolve_card(st, loader.get_card("proto_mf_guest_neuvillette_tears"))
+    effects.resolve_card(st, loader.get_card(HYDRO_APPLIER))
     assert e.aura_turns_left == C.AURA_DURATION_TURNS
 
     st2 = make_state(enemies=[make_enemy(hp=200)])
     e2 = st2.enemies[0]
     effects.resolve_card(
         st2, loader.get_card("proto_mf_neuvillette_ancient_sea_authority"))
-    effects.resolve_card(st2, loader.get_card("proto_mf_guest_neuvillette_tears"))
+    effects.resolve_card(st2, loader.get_card(HYDRO_APPLIER))
     assert e2.aura_turns_left == C.AURA_DURATION_TURNS + 1
     # Refresh must agree with application -- the reason aura_duration() is a
     # function rather than the constant read at three call sites.
     e2.aura_turns_left = 1
-    effects.resolve_card(st2, loader.get_card("proto_mf_guest_neuvillette_tears"))
+    effects.resolve_card(st2, loader.get_card(HYDRO_APPLIER))
     assert e2.aura_turns_left == C.AURA_DURATION_TURNS + 1
 
 

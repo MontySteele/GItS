@@ -14,8 +14,8 @@ namespace KleeMod.Cards;
 /// gem and tip and still read "Deal 13 Hydro damage". The gem, the tip and the
 /// hit already read <see cref="KleeCardTooltips.AppliedElement"/>; this makes
 /// the words a fourth reader of the same expression, by rewriting the printed
-/// element word in the finished face. Display only; in a release build no
-/// override exists and the face is untouched.
+/// element word in the finished face. Display only; with no override the face
+/// is untouched.
 ///
 /// Only the phrases that name the element a hit applies are rewritten:
 /// "[gold]Hydro[/gold] damage" and "Apply [gold]Hydro[/gold]".

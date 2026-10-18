@@ -479,7 +479,7 @@ internal static class AutoPlayNeverAimsAtThePetPatch
             // (a) CHARACTER SCOPE. A seat whose Kokomi kit is up (hers, or
             // anyone's once it came up: the off-character rule, 2026-10-18)
             // and so has a jellyfish; nothing
-            // else in the quarantine is touched by this patch.
+            // else is touched by this patch.
             var owner = card.Owner;
             if (owner == null || !KokomiOverhaul.LiveFor(owner.Creature)) return;
             if (card.CombatState is not { } combat) return;

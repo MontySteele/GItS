@@ -89,7 +89,6 @@ public enum GuestFxPlace
 /// NON-BLOCKING AND HEADLESS-SAFE: nothing here is awaited; every lookup is
 /// null-guarded, <c>TestMode</c> returns at once, and the whole body is
 /// inside a catch, the rule every bridge in this mod is written to.
-/// QUARANTINED with the stage under <c>Vfx/Prototype/**</c>.
 /// </summary>
 public static class FurinaGuestFx
 {

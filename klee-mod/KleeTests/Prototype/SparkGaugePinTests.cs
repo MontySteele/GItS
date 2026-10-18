@@ -21,9 +21,7 @@ namespace KleeMod.Tests.Prototype;
 ///
 /// WHAT IS REAL HERE. Every DECISION the change takes is a pure read off a
 /// creature or a power and runs for real: who gets the gauge, what number it
-/// draws, whose badge is suppressed, and -- the acceptance condition -- that
-/// with the arm off nothing at all moves. The Klee Burst gauge's new predicate
-/// is exercised on both sides of the same switch.
+/// draws, and whose badge is suppressed.
 ///
 /// WHAT IS STRUCTURAL, and labelled: the gauge SPEC TABLE is read out of
 /// <c>GaugeBridge</c> by reflection rather than drawn (drawing is Godot nodes,
@@ -61,7 +59,7 @@ public class SparkGaugePinTests
         var kokomi = Seat.Kokomi();
 
         // The identity half is the marker interface, which is the idiom
-        // `tools/lint_prototype_patch_scope.py` requires of a quarantined patch
+        // `tools/lint_prototype_patch_scope.py` requires of a prototype patch
         // and the one Furina and Kokomi already carry. If it ever comes off the
         // character, the arm's whole scope test silently starts answering false.
         Assert.IsAssignableFrom<IKleeCharacter>(klee.Player.Character);

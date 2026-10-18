@@ -37,11 +37,8 @@ namespace KleeMod.Tests.Prototype;
 /// constructor, and the Burst gate is exercised through the funnel every gain
 /// site goes through. Nothing is mocked and nothing is faked past.
 ///
-/// THE COLLECTION IS LOAD-BEARING. <c>KleeOverhaul.Enabled</c> is one static
-/// for the whole process; the arm tests below move it, and
-/// <c>KleeOverhaulRuleTests.The_arm_ships_off</c> reads it. Sharing a
-/// collection with that class is what keeps xunit from running the two at
-/// once.
+/// THE COLLECTION is a leftover from the retired arm switch; it only keeps
+/// these tests serial.
 /// </summary>
 [Collection(KleeOverhaulArm.Name)]
 public class KleeOverhaulRoundOneFixTests

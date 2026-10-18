@@ -84,9 +84,6 @@ namespace KleeMod.Vfx;
 /// With a keyboard the hint names the peek key ("Space: Plans", "S: Plans"),
 /// and a click on the hint opens the same view (2026-10-16), so the mouse
 /// has a door too. A click is not focus: the hint stays out of the walk.
-///
-/// QUARANTINED. `Vfx/Prototype/**` is Compile Remove'd without
-/// `-p:PrototypeCards=true`. Revert is the flag.
 /// </summary>
 internal static class KokomiPlanStrip
 {

@@ -394,17 +394,16 @@ internal static class KleeSelfCheck
         // shop roll cannot produce anything else). The throw escapes into
         // MerchantRoom.EnterInternal's async continuation, so entering ANY
         // shop is a black-screen soft lock -- finding 24, hit on the first
-        // shop playtest. KleeMod's CreateForMerchant prefix now substitutes a
-        // stocked type, so this reports as pool-depth truth rather than a live
-        // soft lock: below full coverage, some shop slots sell a different
-        // type than designed.
+        // shop playtest. The type-fallback prefix that used to substitute a
+        // stocked type was deleted 2026-10-18 once every pool held all three
+        // types (`test_every_kit_sheet_stocks_a_power_for_the_shop`), so a
+        // failure here is a live soft lock again.
         foreach (var type in new[] { CardType.Attack, CardType.Skill, CardType.Power })
         {
             if (!generatable.Any(c => c.Type == type))
             {
                 Fail("R3d", $"CardPool has no {type} cards at a rollable rarity. The merchant "
-                          + "always stocks this type; without the type-fallback patch every "
-                          + "shop soft locks, with it the slot silently sells another type.");
+                          + "always stocks this type, so every shop soft locks.");
             }
         }
 

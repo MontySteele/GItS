@@ -65,8 +65,7 @@ namespace KleeMod.Powers;
 /// Nothing is multiplied on top afterwards, which is why the pairs agree now:
 /// Weak and Vulnerable are BOTH phase-2 terms and belong in one product.
 ///
-/// QUARANTINED. The file sits under <c>Powers/Prototype/</c>, which
-/// <c>KleeCode.csproj</c> Compile-Removes from a release build, and
+/// SCOPE. The file sits under <c>Powers/Prototype/</c>, and
 /// <c>gen_klee_cards.build_vars</c> emits it for `proto_` rows only: the
 /// shipped sheets keep the game's own var, because what a card prints at rest
 /// is a surface R249 ruled is not repainted outside the arm. It sits beside
@@ -184,8 +183,7 @@ public static class FoldedPreview
 /// else, which is why they may be plain <c>DamageVar</c>s carrying the two
 /// sheet numbers rather than the base/extra pair the multiplier reads.
 ///
-/// QUARANTINED, for <see cref="FrontFoldedDamageVar"/>'s reason and by the
-/// same csproj rule.
+/// Scoped as <see cref="FrontFoldedDamageVar"/> is.
 /// </summary>
 public sealed class FoldedDamageVar : DamageVar
 {
@@ -375,7 +373,7 @@ public sealed class PlanCarriedDamageVar : DamageVar
 /// plain <c>DynamicVar</c> under a Block token throws the first time the card
 /// is played.
 ///
-/// QUARANTINED, in this file and by this file's csproj rule.
+/// Scoped as <see cref="FrontFoldedDamageVar"/> is.
 /// </summary>
 public sealed class FoldedBlockVar : BlockVar
 {
@@ -425,7 +423,7 @@ public sealed class FoldedBlockVar : BlockVar
 /// the convention every calculated attack keeps
 /// (<c>FurinaSpendAllPreviewWeakTests</c>).
 ///
-/// QUARANTINED: this directory, and <c>gen_klee_cards.calculated_block_var_type</c>
+/// Scoped: this directory, and <c>gen_klee_cards.calculated_block_var_type</c>
 /// emits it for `proto_` rows only.
 /// </summary>
 public sealed class FoldedCalculatedBlockVar : CalculatedBlockVar

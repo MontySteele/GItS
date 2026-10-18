@@ -27,7 +27,8 @@ namespace KleeMod.Tests.Prototype;
 /// (Her Ancient, Princess of Watatsumi, is the Archaic Tooth's Plan card since
 /// the Ancient audit, 2026-10-12: <c>AncientAuditTests</c>.)
 ///
-/// THE COLLECTION IS LOAD-BEARING: both arm switches are one static apiece.
+/// THE COLLECTION is a leftover from the retired arm switch; it only keeps
+/// these tests serial.
 /// </summary>
 [Collection(KleeOverhaulArm.Name)]
 public class KokomiR276Tests

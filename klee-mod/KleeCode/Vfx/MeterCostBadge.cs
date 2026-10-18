@@ -73,9 +73,8 @@ namespace KleeMod.Vfx;
 /// charges a meter. A card that charges none is left exactly as the base game
 /// drew it -- so a Regent at the same table still sees his own star badge.
 ///
-/// SHIPPED, NOT QUARANTINED (EB-220). The badge used to live under
-/// `Vfx/Prototype/**`, which is Compile Remove'd without
-/// `-p:PrototypeCards=true`, because when it was built every priced face it had
+/// OUTSIDE `Vfx/Prototype/` (EB-220). The badge used to live there,
+/// because when it was built every priced face it had
 /// to draw was a prototype row. Encore is not a prototype: `deep_breath`,
 /// `ebb_and_flow` and `dress_rehearsal` are shipped Furina cards, so the badge
 /// ships with them.

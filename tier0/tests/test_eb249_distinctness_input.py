@@ -31,15 +31,17 @@ def test_personal_rows_are_not_in_the_universal_pool():
     rows = _pools()["mondstadt-companions"]
     assert any(r.get("personal_pool") for r in rows)
     # 35 since Durin split in two (AoE trim, 2026-10-03); 38 since the
-    # Klee-only companions (2026-10-03) added three Mondstadt rows (Qiqi, the
-    # fourth, is Liyue's).
-    assert len(cdr.universal_rows(rows)) == 38
+    # Klee-only companions (2026-10-03) added three Mondstadt rows; 39 since
+    # Qiqi, the fourth, moved from Liyue to Mondstadt (2026-10-18).
+    assert len(cdr.universal_rows(rows)) == 39
 
 
 def test_guest_stars_are_not_in_the_universal_pool():
-    """(b), Fontaine's half: three of nineteen rows are generated cameos."""
+    """(b), Fontaine's half: the three Neuvillette cameos were deleted
+    (2026-10-18), so all sixteen rows are universal."""
     rows = _pools()["fontaine-companions"]
-    assert len(rows) == 19
+    assert not any(r.get("guest_star") for r in rows)
+    assert len(rows) == 16
     assert len(cdr.universal_rows(rows)) == 16
 
 
