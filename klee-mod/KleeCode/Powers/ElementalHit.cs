@@ -141,11 +141,19 @@ internal static class ElementalHit
         // Furina's guest effects (2026-10-16): Neuvillette's ring when his
         // bonus is in this hit. Visual only, never awaited.
         Vfx.FurinaGuestFx.OnHydroBonus(hydroBonus, element, target);
+        // The seat page's hit label: which element this hit was, and the
+        // amplifier that multiplied it (`ResolutionLedger.HitsAs`). Closed
+        // right after the damage call, so a hit the follow-ups below deal is
+        // not filed under it (`ResolutionLedger.ResetFight` clears a label a
+        // throw left open).
+        var hitLabel = ResolutionLedger.HitsAs(
+            ResolutionLedger.ElementLabel(element, ampReaction, amp));
         var results = await CreatureCmd.Damage(
             choiceContext, target, landed,
             ignoreBlock ? ValueProp.Unpowered | ValueProp.Unblockable
                         : ValueProp.Unpowered,
             dealer: null, cardSource: null, cardPlay: null);
+        hitLabel.Dispose();
         NoteAmplified(target, applier, ampReaction, amp, results);
         await CreditBlockBreak(choiceContext, target, applier, results);
         // KOKOMI'S AT WATER'S EDGE (the card pass, 2026-10-11): her first
@@ -265,9 +273,12 @@ internal static class ElementalHit
         using var credit = Diagnostics.DamageCredit.OpenIfNone(
             applier, Diagnostics.DamageCredit.Element);
         ElementHitFx.SpawnOn(target, element);
+        var hitLabel = ResolutionLedger.HitsAs(
+            ResolutionLedger.ElementLabel(element, reaction, amp));
         var results = await CreatureCmd.Damage(
             choiceContext, target, landed, ValueProp.Unpowered,
             dealer: null, cardSource: null, cardPlay: null);
+        hitLabel.Dispose();
         NoteAmplified(target, applier, reaction, amp, results);
         await CreditBlockBreak(choiceContext, target, applier, results);
         // KOKOMI'S AT WATER'S EDGE (the card pass, 2026-10-11): her first

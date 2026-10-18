@@ -1034,14 +1034,15 @@ public static class ArmKeywordTips
     // rule and nothing else. The guests' tips are their badges' sentences
     // (<see cref="StagePerformerBadge.ActText"/>).
 
-    /// <summary>Rule 3's price: a Spend N takes N of her Fanfare, and is
-    /// offered only when she has it. "Spend up to X" (the Spend paper,
+    /// <summary>Rule 3's price: a Spend N takes N of her Fanfare, and the
+    /// card or its Spend mode can't be played with less (Furina suite 1:
+    /// Quick Flourish, "Spend 4", read as playable under 4). "Spend up to X" (the Spend paper,
     /// 2026-10-10) takes X or all she has, and never fails.</summary>
     public static IEnumerable<IHoverTip> ForSpend(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, SpendKey,
-            "Pay that much [gold]Fanfare[/gold]. Offered only if you have "
-          + "enough. " + SpendUpToSentence);
+            "Pay that much [gold]Fanfare[/gold]. With less, you can't play "
+          + "the card or its Spend mode. " + SpendUpToSentence);
 
     /// <summary>The Spend tip's second sentence (the Spend paper,
     /// 2026-10-10), shared with the seat glossary.</summary>
@@ -1087,7 +1088,8 @@ public static class ArmKeywordTips
     /// 2026-10-13, the line is words there, never a second number).</summary>
     internal const string DrainBody =
         "Lose N HP. Each combat, the first 1/4 of your Max HP drained returns "
-      + "after combat; more than that only [gold]Repay[/gold] returns.";
+      + "after combat. That is your line: past it, only [gold]Repay[/gold] "
+      + "returns.";
 
     /// <summary>Rule 1: Drain N. The in-combat "Your Drain line is N" suffix
     /// (the pool-75 round, 2026-10-09) is off the tip since the 2026-10-11

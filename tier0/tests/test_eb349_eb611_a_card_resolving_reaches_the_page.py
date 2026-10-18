@@ -188,7 +188,9 @@ def test_the_reader_carries_the_keys_the_mod_sends():
          # The Klee round (2026-10-11): the play-order stamp.
          "seq",
          # BACKLOG, the Varka screen: the Power whose hit it was.
-         "by"])
+         "by",
+         # Seat page (2026-10-18): what kind of hit it was.
+         "label"])
 
 
 def test_the_internal_id_never_crosses_onto_the_page():

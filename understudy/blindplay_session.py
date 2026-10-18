@@ -742,7 +742,9 @@ class Session:
             action = post.pop("action")
             result = post_when_the_room_is_open(
                 self.wire, action, post, tries=self.settle_tries,
-                delay=self.settle_delay_s)
+                delay=self.settle_delay_s,
+                screen=("" if is_coop(state) else _text(
+                    (state or {}).get("state_type"))))
             card_played(state, action, post, result)
             # The card offer this answered, if any (`offer_log`).
             offer_log.record(state, res, command)
@@ -827,14 +829,32 @@ class Session:
 ROOM_NOT_OPEN = "room is not open"
 
 
+# Yae round 8 (2026-10-17, lane 5). `proceed` RIGHT AFTER `rest`. The rest
+# site's Proceed button is enabled only once the rest (or the smith) has
+# played out, a moment after the option is taken, so a `proceed` chained
+# straight after `rest` came back "No proceed button available or enabled"
+# (`McpMod.Actions.cs` `ExecuteProceed`). On a solo rest site that sentence is
+# the same moment as `ROOM_NOT_OPEN` and is ridden out the same way, on a
+# shorter bound. A co-op rest site is not retried here: there the button
+# waits on the partner, which no short poll fixes (`screen=""`).
+NO_PROCEED = "No proceed button"
+REST_PROCEED_TRIES = 16
+
+
 def post_when_the_room_is_open(wire: Any, action: str,
                                params: dict[str, Any], *, tries: int,
-                               delay: float) -> dict[str, Any]:
-    """POST, and re-POST while the bridge says the room is still loading."""
+                               delay: float, screen: str = "") -> dict[str, Any]:
+    """POST, and re-POST while the bridge says the room is still loading
+    (or, for a `proceed` on a solo rest site, while its Proceed button is
+    not yet up)."""
+    proceed_tries = (REST_PROCEED_TRIES
+                     if action == "proceed" and screen == "rest_site" else 0)
     result = wire.post(action, **params)
-    for _ in range(max(tries, 0)):
-        if ROOM_NOT_OPEN not in _text(
-                (result or {}).get("error") if isinstance(result, dict) else ""):
+    for attempt in range(max(tries, 0)):
+        error = _text((result or {}).get("error")
+                      if isinstance(result, dict) else "")
+        if not (ROOM_NOT_OPEN in error
+                or (NO_PROCEED in error and attempt < proceed_tries)):
             break
         time.sleep(delay)
         result = wire.post(action, **params)
@@ -848,6 +868,11 @@ def post_when_the_room_is_open(wire: Any, action: str,
 #: is `proceed` (`blindplay_grammar._proceed`), so the sentence says that.
 BRIDGE_VERBS_IN_PAGE_WORDS = (
     ("use advance_dialogue until it ends", "type `proceed` until it ends"),
+    # Yae round 8 (2026-10-17): the bare sentence read as a broken screen.
+    ("No proceed button available or enabled",
+     "No proceed button available or enabled (the screen's Proceed is not "
+     "up yet, or something on it still waits; `observe`, then `proceed` "
+     "again)"),
 )
 
 

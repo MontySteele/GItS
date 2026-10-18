@@ -62,9 +62,12 @@ def test_a_card_applying_another_element_names_the_switch_and_the_oath():
           _card(state, "Kindled Edge", "Deal 9 damage.", "Pyro"))
     page = blindplay.observe(state)
     assert _switch_lines(page, "Short Circuit") == [
-        "    - Switches you to Electro (Oath 2 → 1, plus what it gains)."]
+        "    - Switches you to Electro: your cards read Electro Oath 1 (plus "
+        "what this gains). Your Pyro Oath 2 is kept for when you switch "
+        "back."]
     assert _switch_lines(page, "Barbara: Glorious Season") == [
-        "    - Switches you to Hydro (Oath 2 → 0, plus what it gains)."]
+        "    - Switches you to Hydro: your cards read Hydro Oath 0 (plus what "
+        "this gains). Your Pyro Oath 2 is kept for when you switch back."]
     # The current element's own card switches nothing.
     assert _switch_lines(page, "Kindled Edge") == []
 
@@ -87,7 +90,8 @@ def test_the_banner_holds_the_element_against_all_but_a_knight():
     page = blindplay.observe(state)
     assert _switch_lines(page, "Short Circuit") == []
     assert _switch_lines(page, "Kaeya") == [
-        "    - Switches you to Cryo (Oath 2 → 0, plus what it gains)."]
+        "    - Switches you to Cryo: your cards read Cryo Oath 0 (plus what "
+        "this gains). Your Pyro Oath 2 is kept for when you switch back."]
 
 
 def test_under_all_four_winds_a_switch_moves_nothing():
@@ -105,7 +109,8 @@ def test_with_no_current_element_the_first_one_reads_from_zero():
                        "Skill"))
     page = blindplay.observe(state)
     assert _switch_lines(page, "Barbara: Glorious Season") == [
-        "    - Switches you to Hydro (Oath 0 → 1, plus what it gains)."]
+        "    - Switches you to Hydro: your cards read Hydro Oath 1 (plus what "
+        "this gains)."]
 
 
 def _melted_third(state):

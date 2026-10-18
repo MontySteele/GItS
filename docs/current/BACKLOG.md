@@ -17,7 +17,6 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 
 - Before the public launch, [USER] reviews every writing surface (events, Ancient and combat lines, select text, the Architect) for stilted lines (ruled 2026-10-16).
 - Furina, Let the People Rejoice's damage preview ignores an enemy's Hard To Kill cap (face said 34, each Exoskeleton took 9; suite 3 lane 5).
-- Furina's seat page never defines "past your line" in the Drain tip (suite 3 lane 5).
 - Furina's seat page printed a word tip for Charlotte on a screen with no Charlotte card (suite 3 lane 3).
 - Klee, Chain Fuse also grows Mines; its text does not say so (suite 6 lane 2).
 - Klee, Stoke the Fuse resolves before Party Poppers places its Bomb, so on an empty field it burns every Spark for nothing (suite 6 lane 4).
@@ -50,10 +49,8 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - Kokomi's story (`klee-mod/KleeCode/Story/KokomiStory.cs`, 2026-10-16): unseen in game. Watch the Gorou pick grid, the Rare pick grid after Doubt on "Concede and study its opening.", the 4 Max HP loss at The Serpent's Bones, the pearl and stake locks under 50 Gold, Public Address's two-line text, and her co-op story room showing her own event.
 - Furina's story (`klee-mod/KleeCode/Story/FurinaStory.cs`, 2026-10-16): unseen in game. Watch the Guest Star pick grid, the Oratrice lock under 50 Gold, Doubt leaving on "Break it.", and her Let the People Rejoice line.
 - Story chains (`klee-mod/KleeCode/Story/`, 2026-10-15): seen in the mixed round (2026-10-15) for Klee act 1 to 2 (Mom's Marks, Alice's Cache) and Varka acts 1 to 3 (Dispatch from Mondstadt, The Second Satchel, The Acting Grand Master, with the report option locked). Still unseen: Klee's act 3, routing after a save and reload, Doubt leaving as The Knights Come Looking opens, the potion reward screen mid-event, and the co-op story room (2026-10-16: each player gets their own character's event in the act's story room, and a character with no event that act gets A Quiet Landing, Heal 10 HP or Gain 50 Gold).
-- Seat page: an event option that adds a chosen card prints no card face ("the feed carried no face for it", Varka, Dispatch from Mondstadt); show the offered cards, or say they are drawn after the pick.
 - Kokomi, Kirara — Surprise Dispatch: a seat read its "next turn, deal 10" as landing in the enemy turn, not at her turn start (mixed round 2026-10-15, lane 1); check the timing and the page line.
 - Kokomi: Louse Progenitor's Curl Up did not trigger on a carried-out Plan's Hydro hit, only on the next card hit (mixed round, lane 2); check against the base game's hit rules.
-- Varka, Barbara's preview prints "Switches you to Hydro (Oath 25 -> 5 ...)", which reads as the Oath being erased; the Electro Oath persists and returns. Text fix (Balance: text-only may land on main).
 - Kokomi's seven relics and three potions and Furina's five relics and two potions (#1324, #1325) were not met in five seats; check them with `understudy.embark --relic` on a seat each, or in a play.
 - Klee's rest-site pose is a still: BaseLib rebuilds the rest sprite from the texture alone, so an idle loop there needs code.
 - Art owed, Spiral Abyss mode (2026-10-12): the menu emblem and The Ley Line are 64px wiki sources upscaled 4x, and seven are nearest-official stand-ins (Abyssal Moon = Iridescent Moon, Moonlit Rest = Sweet Madame, First Strike = Sword Unaligned, Elemental Burst = Battle-Line Detonation, Crystallize = Crystallize Shield Hydro, Sheer Cold = Element Cryo, Elemental Mark = Element Pyro).
@@ -86,8 +83,7 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - `EB-38` [USER] at a shop: the spine-less character portrait idles (the rest-site half is seen).
 - `EB-160` verify a live locale switch: the injected loc tables survive it, or a `LocException` names the seam.
 - Furina screen (wave 2026-10-12): Hymn's "(Repays 0)" preview is wrong after a Drain; Spend damage never shows Vulnerable; a boss shows "Frozen 1".
-- Furina suite 1: Quick Flourish ("Spend 4") is unplayable below 4 Fanfare without the card saying so; the Lynette glossary line does not match her card.
-- Whispering Earring (base relic) plays a seat's first turn invisibly: the seat page should log the cards it played (Furina suite 1, lane 1).
+- Furina suite 1: the Lynette glossary line does not match her card.
 - Kaiser Crab (Varka wave 2026-10-13, lane 5 fight 16): when Baron Bunny's turn-start hit killed Rocket, Crab Rage's 99 Block never reached Crusher (telemetry: 18 enemy Block all fight, Crusher's own Guarded Strike; Crusher then died to Tidal Bulwark and Blazing Charge). The base game grants it in `CrabRagePower.AfterDeath` and no mod code was found that removes it; reproduce live (`set_hp` Rocket low, Baron Bunny).
 - Kokomi round 3 (lane 4 F6): Change of Plans was refused "no Energy" with four Plans waiting. Not reproduced: it costs 0, its gate reads only the queue, and the sim plays it at 0 Energy with four waiting (`test_kokomi_round3_alist_2026_10_13`). The game's refusal enum ("EnergyCostTooHigh") is what prints "not enough energy"; have the next seat record the hand and Energy on any such refusal.
 - Varka text (ascension check 2026-10-12): a Knight Companion's element switch (Team Effort) shows only after the play; Kindled Edge switched him to Pyro with no "Element switch" line; Four Winds' Ascension returns after a mid-fight reshuffle, unprinted.
@@ -105,14 +101,11 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 ## Seat page (the blind seat's view: `blindplay_*` render and the bridge)
 
 
-- Yae round 8 (2026-10-17): `proceed` right after `rest` says "No proceed button" (lane 5).
 - The enemy-fold note names "(Deals N damage)" faces, but base Body Slam prints one too and does not fold (#1223).
 - The hand-full discard line for generated Stings and Wards prints only after the Plans resolve (Kokomi round 4, lane 1, fight 16).
 - No receipt says what a Set off detonated, so a Set off that kills reads as a vanished Bomb. Needs a detonation log in the mod like ReactionLog, a bridge read and a page line such as "Sizzle set off Corpse Slug: Mine 3 (3), Bomb 16 (2, killed it). Nothing jumped."
 - Incoming ignores Mines that fire first and Look Out!'s Block from them; the "Put Mine N on ..." lines after Big Badda Boom read as five Mines from one Bomb.
 - Kaboom!'s own damage is not printed when its target dies to its Bombs, and the hits of a fight-ending Rapid Fire are skipped.
-- The resolution rows do not say which hit was which (Four Winds' Ascension+ read "2, 3, 9, 36" unlabelled); needs a source label per hit on `ResolutionLedger`'s wire and in `blindplay_render`'s hit rows.
-- Cycle of Seasons' trigger damage prints on the line of the card that changed Varka's element, and Cycle's own line reads "Nothing this page can count landed off it".
 - Copy numbers renumber after a play, so "Frantic Escape (2)" picked the other copy; name copies by something stable (cost or upgrade) or warn on renumber. The bridge renumbers mid-turn too ("Sting (3)" vanished after a play and the next command was refused; Kokomi jellyfish round 2026-10-12, lane 1). Numbers now hold until the next `observe` (`resolve_shown_card`), but Kokomi round 3 lane 5 F6 still wasted The Shape of Water on a renumbered Sting; stable handles for a whole turn need copy identity across observes (a per-card id on the wire).
 - Pocket Match's play log listed 3 and left out its own 5 damage.
 - Tender prints only "Tender 3"; Fireworks Finale's "Written: 5" does not name the Strength loss that lowered it; Spiny Toad's Thorns showed on turn 1 only.
@@ -121,7 +114,6 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - Orb passives and evokes at the start and end of a turn are narrated nowhere; `ResolutionLedger` files card plays only.
 - The Neow bundle page printed one pack's rows jumbled (a line missing, its text under another card). Not reproduced; needs the raw `bundle_select` state from such a screen.
 - The Trial's first page printed only "Proceed", and `proceed` was then refused against its Accept / Reject options (the page read the event mid-transition).
-- The first rest at a rest site printed "Took: Rest." with "error Rest site room is not open" and still counted an action (see `EB-391`).
 - Co-op: players are named "Test Host"/"Test Client 1"; the reaction glossary ignores the partner's element; `wait` after a finished fight reports nothing while the reward is up; a play at an enemy the partner just killed is silently retargeted; the page calls the partner's HP cost "Test Host (you) ... your own HP cost"; a queued play at an enemy the partner killed mid-turn comes back "Skipped" or "not found" (every seat in `review/records/furina-coop-check-2026-10-16.md`).
 - Enemy rules not on the page: Flutter's "50% less damage from Attacks" halved Bomb damage in one run and not in two others; say whether it applies to a Bomb.
 - Louse Progenitor's intent under the player's Weak read "folded Strength and Weak: 14 on the move and 14 after" and the Weak seemed to do nothing; check the fold and the line.
@@ -138,7 +130,6 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 
 ## Harness, bridge and tools
 
-- The seat brief (`tools/seat.py --opus-brief`) names no path for the record: in Yae round 7 four seats wrote `record.md` in their scratch folder and one wrote none (its record came back in the hand-back only). Name the path in the brief.
 - Telemetry: Plan damage is credited to the writing card since #1222, so `damage_by_source` no longer has a "(Bake-Kurage)" key; update any analysis that reads it.
 - Shop card removal: after the first card is picked the screen refuses a re-pick and offers only confirm or skip; check whether the base screen allows a deselect and the bridge lacks the verb.
 - Bridge: Jumpy Dumpty refused without a target, a Durin chooser answered "still opening", and Mawler died at end of turn with no printed cause.

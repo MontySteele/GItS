@@ -73,7 +73,8 @@ python tools/seat.py --opus-brief --lane 1 --character KLEEMOD-KLEE --scratch <d
 `--opus-brief` prints the embark to run first on stderr, with an explicit
 `--max-actions` (120 by default, `--max-actions N` to change it), and with
 `--scratch` names the seat's own notes file, `<scratch>/seat-lane<N>/notes.md`,
-on the brief's lane line. The map page prints the run seed (from the lane's
+and its record, `<scratch>/seat-lane<N>/record.md` (`--record PATH` to name
+another), on the brief's lane line. The map page prints the run seed (from the lane's
 embark sidecar) and the ascension (from the wire).
 
 `tools/seat.py` (the `seat` skill) runs the same three steps you can run by

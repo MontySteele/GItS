@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using KleeMod.Elements;
 using MegaCrit.Sts2.Core.Context;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
@@ -133,7 +134,8 @@ public static class ResolutionLedger
                                       string Source = "",
                                       bool Self = false,
                                       long Seq = 0,
-                                      string By = "");
+                                      string By = "",
+                                      string Label = "");
 
     /// <summary>A power the card put on an enemy, and by how much
     /// (2026-09-26, the Silent control seat: "Poison applied is never shown
@@ -363,6 +365,53 @@ public static class ResolutionLedger
         public void Dispose() => _hitsBy = _was;
     }
 
+    /// <summary>The kind of hit the hits filed now are (<see cref="HitsAs"/>),
+    /// or empty.</summary>
+    private static string _hitsAs = string.Empty;
+
+    /// <summary>
+    /// "The resolution rows do not say which hit was which" (Four Winds'
+    /// Ascension+ read "2, 3, 9, 36" unlabelled). The doors that deal a hit
+    /// of a known kind open this scope round the damage call: an element's
+    /// hit (<c>ElementalHit.Deal</c>: "Pyro", or "Pyro, Vaporize" when an
+    /// amplifier multiplied it) and a reaction's own damage
+    /// (<c>ReactionEffects.Resolve</c>: "Overloaded", "Swirl"). The hit keeps
+    /// its number; the page prints the label beside it
+    /// (<see cref="Hit.Label"/>). A plain card hit opens no scope and stays
+    /// unlabelled. The innermost scope wins, so an element hit dealt inside a
+    /// reaction is named by its element.
+    /// </summary>
+    public static System.IDisposable HitsAs(string label) =>
+        new HitsAsScope(label);
+
+    /// <summary>The seat page's label for an element's hit: its element,
+    /// and the amplifying reaction where one multiplied it ("Pyro, Vaporize").
+    /// Display only (`ResolutionLedger.HitsAs`).</summary>
+    public static string ElementLabel(Element element, Reaction reaction,
+                                      decimal mult)
+    {
+        var name = element == Element.None ? string.Empty : element.ToString();
+        if (mult > 1m && reaction is Reaction.Vaporize or Reaction.Melt)
+        {
+            var amp = ReactionLog.PrintedName(reaction);
+            return name.Length == 0 ? amp : name + ", " + amp;
+        }
+        return name;
+    }
+
+    private sealed class HitsAsScope : System.IDisposable
+    {
+        private readonly string _was;
+
+        public HitsAsScope(string label)
+        {
+            _was = _hitsAs;
+            _hitsAs = label ?? string.Empty;
+        }
+
+        public void Dispose() => _hitsAs = _was;
+    }
+
     /// <summary>Where the player stopped watching, or negative for "no mark
     /// was taken this turn". <see cref="ReactionLog.MarkPlayerTurnEnd"/>'s
     /// twin, taken from the same broadcast.</summary>
@@ -405,6 +454,7 @@ public static class ResolutionLedger
         _open = null;
         _between = null;
         _playerTurnEnd = -1;
+        _hitsAs = string.Empty;
     }
 
     /// <summary>
@@ -587,7 +637,8 @@ public static class ResolutionLedger
                                OnPlayer: onPlayer,
                                Source: onPlayer && !self
                                    ? Named(dealer) : string.Empty,
-                               Self: self, Seq: ++_seq, By: _hitsBy));
+                               Self: self, Seq: ++_seq, By: _hitsBy,
+                               Label: _hitsAs));
     }
 
     /// <summary>
@@ -629,7 +680,7 @@ public static class ResolutionLedger
             return;
         }
         _open.Hits.Add(new Hit(target, 0, 0, combatId, Killed: true,
-                               Seq: ++_seq));
+                               Seq: ++_seq, By: _hitsBy, Label: _hitsAs));
     }
 
     /// <summary>
@@ -826,6 +877,7 @@ public static class ResolutionLedger
                     ["self"] = hit.Self,
                     ["seq"] = hit.Seq,
                     ["by"] = hit.By,
+                    ["label"] = hit.Label,
                 }),
             ["applied"] = row.Applied.ConvertAll(a =>
                 new Dictionary<string, object?>

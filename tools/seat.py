@@ -35,7 +35,9 @@ notes path, `DIR/seat-lane<N>/notes.md`, to the line that names the lane, and
 and `a` (act --brief) -- with the lane, the absolute interpreter, `--brief`
 and a `cd` to this repo root baked in, and the brief itself as
 `brief-lane<N>.md`, UTF-8 with LF line ends. The brief's lane line names the
-scripts. 21 of 43 seat transcripts on 2026-10-06/07 showed a failed command
+scripts, and (2026-10-18) the record path: `--record PATH`, else
+`<scratch>/seat-lane<N>/record.md` (in Yae round 7 four seats picked a path
+of their own and one wrote no record). 21 of 43 seat transcripts on 2026-10-06/07 showed a failed command
 after the seat had changed directory; 35 of 37 seats wrote such a wrapper for
 themselves, and one shared wrapper drove another seat's lane.
 That is for the OTHER kind of seat -- an Opus
@@ -149,6 +151,14 @@ def notes_path(scratch: str, lane: int) -> str:
     return (PurePath(scratch) / f"seat-lane{lane}" / "notes.md").as_posix()
 
 
+def record_path(scratch: str, lane: int) -> str:
+    """The seat's record, `<scratch>/seat-lane<N>/record.md`. The brief once
+    said only "at the path the coordinator gives you" and named none: in Yae
+    round 7 four seats wrote `record.md` in their scratch folder and one wrote
+    none at all, so its record came back in the hand-back only."""
+    return (PurePath(scratch) / f"seat-lane{lane}" / "record.md").as_posix()
+
+
 def lane_scripts(lane: int) -> dict[str, str]:
     """The seat's two lane scripts, `o` and `a`, as bash text. Each `cd`s to
     the repo root this tool runs from, so a seat that has changed directory
@@ -197,13 +207,14 @@ def embark_line(lane: int, character: str, max_actions: int,
 
 
 def brief_text(lane: int, character: str, coop: bool = False,
-               scratch: str = "") -> str:
+               scratch: str = "", record: str = "") -> str:
     """The brief, with the lane and the interpreter filled in.
 
     `coop` appends the page's co-op section (its own heading line dropped):
     a seat sharing a run with another seat is told so, and nobody else is.
     `scratch` adds the seat's own notes path to the line that names its
-    lane; the brief's body is never reworded.
+    lane; the brief's body is never reworded. The record path is named on
+    that line too: `record` when given, else `<scratch>/seat-lane<N>/record.md`.
     """
     text = BRIEF.read_text(encoding="utf-8")
     _, _, body = text.partition("## THE BRIEF")
@@ -224,6 +235,12 @@ def brief_text(lane: int, character: str, coop: bool = False,
                  f" `bash {folder}/o` to observe (`bash {folder}/o --define"
                  f' "<Word>"` for a definition) and'
                  f' `bash {folder}/a "<command>"` to act.')
+    record = record or (record_path(scratch, lane) if scratch else "")
+    if record:
+        record = PurePath(record).as_posix()
+        head += (f" Write your record (the one Write call) to `{record}`;"
+                 f" that file is the round's result, so write it even when"
+                 f" a budget stops the run.")
     return f"{head}\n{body.rstrip()}\n"
 
 
@@ -258,6 +275,10 @@ def main(argv: list[str]) -> int:
                     help="with --opus-brief: the coordinator's scratchpad; "
                          "the brief names <scratch>/seat-lane<N>/notes.md as "
                          "the seat's own notes file")
+    ap.add_argument("--record", default="",
+                    help="with --opus-brief: the path the seat writes its "
+                         "record to (default <scratch>/seat-lane<N>/record.md "
+                         "when --scratch is given)")
     ap.add_argument("--dry-run", action="store_true",
                     help="print the three commands and their env, run nothing")
     ap.add_argument("--oneline", action="store_true")
@@ -278,8 +299,20 @@ def main(argv: list[str]) -> int:
                 print(f"  WARNING: {notes.as_posix()} already exists (an "
                       f"earlier seat's notes?); move it before this seat "
                       f"starts.", file=sys.stderr)
+        record = args.record or (record_path(args.scratch, args.lane)
+                                 if args.scratch else "")
+        if record:
+            print(f"  record: {PurePath(record).as_posix()}", file=sys.stderr)
+            if Path(record).exists():
+                print(f"  WARNING: {PurePath(record).as_posix()} already "
+                      f"exists (an earlier seat's record?); move it before "
+                      f"this seat starts.", file=sys.stderr)
+        else:
+            print("  WARNING: no record path (pass --scratch or --record); "
+                  "the brief will not say where the record goes.",
+                  file=sys.stderr)
         text = brief_text(args.lane, args.character, coop=args.coop,
-                          scratch=args.scratch)
+                          scratch=args.scratch, record=record)
         if args.scratch:
             for path in write_lane_scripts(args.scratch, args.lane):
                 print(f"  wrote {path.as_posix()}", file=sys.stderr)

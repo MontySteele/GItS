@@ -6549,7 +6549,8 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # new. The anchors are the prose around the golded spans and the
         # interpolated numerals; the performers' rows are their badges'
         # sentences (`StagePerformerBadge.ActText`, in the badges file).
-        "Spend": ["Pay that much ", ". Offered only if you have "],
+        "Spend": ["Pay that much ", ". With less, you can't play ",
+                  "the card or its Spend mode. "],
         "Fanfare": ["Gain 1 for each HP you lose or ", ". ",
                     " uses it. Resets after each combat."],
         # THE SALON'S TAB (2026-10-05): the HP loan's two verbs.
@@ -6558,7 +6559,7 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # The drain-line round (2026-10-09): the curtain-call sentence.
         # The 2026-10-11 playtest: one sentence.
         "Drain": ["Lose N HP. Each combat, the first 1/4 of your Max HP "
-                  "drained returns ", "after combat; more than that only ",
+                  "drained returns ", "after combat. That is your line: past it, only ",
                   " returns."],
         # The pool to 75 (2026-10-09): the guest rule's words.
         # furina-next paper 3 (2026-10-16): the Block floor's one line.
@@ -6819,14 +6820,15 @@ def test_the_spend_row_says_she_pays_from_her_fanfare():
         "Deal 7 damage. Spend 3: deal 13 instead."], "Furina"))
     assert "- **Spend** — " in page
     row = blindplay.ARM_KEYWORDS["Spend"]
-    assert row == ("Pay that much Fanfare. Offered only if you have enough. "
+    assert row == ("Pay that much Fanfare. With less, you can't play the "
+                   "card or its Spend mode. "
                    "Spend up to X pays X, or all you have if that is less.")
     assert row in page
     assert "back performer" not in row
 
     src = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
            / "ArmKeywordTips.cs").read_text(encoding="utf-8")
-    for phrase in ("Pay that much ", ". Offered only if you have ",
+    for phrase in ("Pay that much ", ". With less, you can't play ",
                    "Spend up to X pays X, or all you have if that is less."):
         assert phrase in src, phrase
 

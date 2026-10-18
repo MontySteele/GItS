@@ -542,7 +542,8 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # lost and repaid, Drain and Repay are the HP loan, and the four
             # guests are the only performers. The v2 Stage's clauses (Bow,
             # Cue, Rehearsal, the front seat) left with v2.
-            "Pay that much [gold]Fanfare[/gold]. Offered only if you have ",
+            "Pay that much [gold]Fanfare[/gold]. With less, you can't play ",
+            "the card or its Spend mode. ",
             # The 2026-10-11 playtest: "the tooltips for Fanfare and Drain
             # are rather verbose (Drain moreso)".
             "Gain 1 for each HP you lose or [gold]Repay[/gold]. ",
@@ -550,7 +551,8 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # The Drain buffer (2026-10-11): HP drained past it is lost
             # unless Repaid. One sentence since the 2026-10-11 playtest.
             "Lose N HP. Each combat, the first 1/4 of your Max HP drained returns ",
-            "after combat; more than that only [gold]Repay[/gold] returns.",
+            "after combat. That is your line: past it, only [gold]Repay[/gold] ",
+            "returns.",
             # The pool to 75 (2026-10-09): the guest rule's words; the Block
             # floor's one line since furina-next paper 3 (2026-10-16).
             "Regain that much drained HP; a Repay counts the HP it returns. ",

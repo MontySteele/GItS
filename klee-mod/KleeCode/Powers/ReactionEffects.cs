@@ -401,6 +401,12 @@ internal static class ReactionEffects
                 // 2026-10-12: the card behind it, for `swirl_damage_by_card`.
                 cause: cardSource != null
                     ? Diagnostics.PlayTelemetry.CardNameOf(cardSource) : null);
+        // The seat page's hit label: a reaction's own damage (Overloaded's
+        // splash, Swirl's flat hit) is named by the reaction. An element hit
+        // dealt inside opens its own, innermost label (`ElementalHit.Deal`).
+        using var hitLabel = ResolutionLedger.HitsAs(
+            reaction == Reaction.None ? string.Empty
+                                      : ReactionLog.PrintedName(reaction));
         if (reaction != Reaction.None)
         {
             TotalResolved++;
