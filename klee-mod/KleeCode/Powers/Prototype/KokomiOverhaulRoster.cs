@@ -248,6 +248,10 @@ internal static class KokomiOverhaulRoster
         // Tide are cut.
         ModelDb.Card<ProtoKkAllStreamsFlow>(),
         ModelDb.Card<ProtoKkTheShapeOfWater>(),
+        // KOKOMI V3 (2026-10-18, review/active/kokomi-cards-2026-10-18.md
+        // sec.6): Unbroken Tide, LAST in the sheet's own order
+        // (`C.KOKOMI_V3_IDS`). The pool becomes 79.
+        ModelDb.Card<ProtoKkUnbrokenTide>(),
         // GOROU'S FOUR, her own cards since the re-founding (the ruling's
         // pick 3), ids kept: `C.KOKOMI_OWN_COMPANION_IDS`, LAST.
         ModelDb.Card<ProtoMiGorouInuzaka>(),

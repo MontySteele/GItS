@@ -640,6 +640,9 @@ KNOWN_MISSING = {
     # dedupe (review/active/yae-dedupe-2026-10-16.md, 2026-10-16), whose
     # refill's eleven cards were painted by the Yae refill art pass
     # (2026-10-16), under "Yae refill art" in art/plan.tsv.
+    # Kokomi v3, 2026-10-18, card paper sec.6: Unbroken Tide is not painted
+    # yet; it draws blank until an art pass gives it a plan.tsv row.
+    "proto_kk_unbroken_tide",
 }
 
 

@@ -71,7 +71,7 @@ public class KokomiPoolOverhaulTests
     public void Each_new_card_takes_the_cut_cards_place(string cut, string added)
     {
         var slice = Slice();
-        Assert.Equal(78, slice.Count);
+        Assert.Equal(79, slice.Count); // Kokomi v3 (2026-10-18): Unbroken Tide
         Assert.DoesNotContain(cut, slice);
         Assert.Contains(added, slice);
         Assert.Null(typeof(ProtoKkSting).Assembly.GetType(

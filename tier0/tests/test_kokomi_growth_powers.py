@@ -27,13 +27,13 @@ def _up(cid):
 
 def test_the_generals_banner_stays_out_and_the_pool_is_78(overhaul):
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
-    assert len(ids) == len(set(ids)) == 78
+    assert len(ids) == len(set(ids)) == 79  # Kokomi v3 (2026-10-18): Unbroken Tide
     for gone in ("proto_kk_the_generals_banner", "proto_kk_flood_tide"):
         assert gone not in ids
         assert gone not in {c.id for c in loader.prototype_cards()}
     rarity = collections.Counter(_row(cid).rarity for cid in ids)
     # The Kokomi level pass (2026-10-12): Change of Plans C -> U, 20 / 38 / 20.
-    assert rarity == {"common": 20, "uncommon": 38, "rare": 20}
+    assert rarity == {"common": 20, "uncommon": 39, "rare": 20}
 
 
 def test_kurage_canopy_installs_one_ward_power_and_its_plus(overhaul):

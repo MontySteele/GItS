@@ -713,7 +713,9 @@ KOKOMI_OVERHAUL_OPS = frozenset((
     # this set's terms.
     "damage_per_plan_this_turn", "damage_blocked_since",
     "damage_taken_since", "energy_if_attacked_since",
-    "lose_strength_this_turn", "draw_pile_to_hand"))
+    "lose_strength_this_turn", "draw_pile_to_hand",
+    # KOKOMI V3 (2026-10-18): Unbroken Tide, priced with the Counter set.
+    "damage_if_no_hp_lost_since"))
 
 #: A HIT FOR A FRACTION OF HER MAX HP -- BOTH SPELLINGS. `damage_quarter_max_hp`
 #: is what the sheet writes today (Sango Isshin, now-line and planned half);
@@ -971,7 +973,9 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # one Plan carried out is the floor; more is a queue fact.
         return _neutral_amount(fx, 0)
     if op in ("damage_blocked_since", "damage_taken_since",
-              "energy_if_attacked_since", "lose_strength_this_turn"):
+              "energy_if_attacked_since", "lose_strength_this_turn",
+              # Kokomi v3 (2026-10-18): Unbroken Tide.
+              "damage_if_no_hp_lost_since"):
         # ZERO: each reads the enemy turn the Plan sat through or the
         # intents when it lands, a fight fact an offer screen cannot read.
         return 0.0
@@ -2240,6 +2244,8 @@ STATIC_OP_PRICING: dict[str, str] = {
                           "waited, a fight fact an offer screen cannot read",
     "energy_if_attacked_since": "ZERO: Energy only if an enemy attacked "
                                 "while it waited, a fight fact",
+    "damage_if_no_hp_lost_since": "ZERO: the hit only if she lost no HP "
+                                  "while it waited, a fight fact",
     "lose_strength_this_turn": "ZERO: Strength off the enemies that intend "
                                "to attack when it lands, a board fact",
     "draw_pile_to_hand": "STATIC_GENERATED_CARD_VALUE: one card of her "

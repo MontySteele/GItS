@@ -66,7 +66,7 @@ def _events(st, name):
 def test_her_pool_is_seventy_eight(overhaul):
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
     # The re-founding (2026-10-12) rewrote the pool's order; the count holds.
-    assert len(ids) == len(set(ids)) == 78
+    assert len(ids) == len(set(ids)) == 79  # Kokomi v3 (2026-10-18): Unbroken Tide
     for cut in ("proto_kk_kurage_school", "proto_kk_patient_tide"):
         assert cut not in ids
     # Her co-op tier is the base game's shape: three Uncommons, two Rares.

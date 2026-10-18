@@ -79,9 +79,9 @@ def test_the_reaction_powers_are_cut_and_two_hydro_sources_take_their_slots():
         assert (row.rarity, row.type, row.cost) == ("uncommon", "power", 1)
         assert row.effects[0]["power"] == power
         assert _amounts(cid) == amounts
-    assert len(ids) == 78
+    assert len(ids) == 79  # Kokomi v3 (2026-10-18): Unbroken Tide
     rarity = collections.Counter(loader.get_card(cid).rarity for cid in ids)
-    assert rarity == {"common": 20, "uncommon": 38, "rare": 20}
+    assert rarity == {"common": 20, "uncommon": 39, "rare": 20}
 
 
 def test_kurage_vanguard_hits_the_front_enemy_for_hydro_each_turn():

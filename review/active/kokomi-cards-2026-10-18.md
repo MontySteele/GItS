@@ -151,3 +151,41 @@ try that and see if it works."
 3. **Tidal Rebuke's cost.**
    - **(a, default)** "Lose all your Block. Deal twice that." You give up the Block.
    - (b) "Deal damage equal to your Block. Then lose half of it." A softer trade.
+
+## 6. After the v2 round: two changes (2026-10-18, ruled)
+
+GPT reviewed the v2 round (`review/records/kokomi-v2-round-2026-10-18.md`). The user ruled both of its Kokomi
+picks: "Makes sense! ... let's do both."
+
+**1. The four damage cards that count Plans stop counting Stings and Wards.** On the printed numbers, planning
+three Stings and then playing Tideturn deals 32 now plus 9 to every enemy next turn. Playing the same three now
+and then The Shape of Water deals 32 now and nothing more. So planning won outright, and Shape was offered seven
+times and never taken. The new texts:
+
+- Tideturn: "Deal 8 Hydro damage, plus 8 for each Plan waiting, not Stings or Wards."
+- Feint: "Deal 8 Hydro damage. Plan: Deal 6 Hydro damage for each Plan carried out this turn, not Stings or
+  Wards."
+- Turning Tide: "Deal 9 Hydro damage. Plan: Deal 5 Hydro damage to ALL enemies per Plan carried out this turn,
+  not Stings or Wards."
+- Shoal of Spears: "Deal 5 Hydro damage to ALL enemies, plus once more for each Plan waiting, not Stings or
+  Wards."
+
+Under these texts, three planned Stings with Tideturn give 8 now and 9 next turn, against Shape's 32 now. The
+Shoal is now the deck that wants damage this turn, and Grand Strategy is the one that arranges real Plans.
+
+Breakwater and Battle Formation keep counting every Plan. They are defensive or once a turn, and GPT advised
+against applying the same rule to them. Shape is looked at again after the round.
+
+**2. Read the Tide gets an Uncommon that rewards blocking an attack completely.** Kelp Wall (Common) pays back the
+damage you blocked, and Tidal Riposte (Rare) pays for each attack you blocked completely. Nothing in between
+asks you to commit to a perfect defense:
+
+- **Unbroken Tide**, Uncommon Skill, 1 Energy: "Gain 8 [11] Block. Plan: If you lost no HP since you planned
+  this, deal 12 [16] Hydro damage to ALL enemies."
+
+Planning it costs its own Block, so the rest of the turn has to hold the line. It also teaches the habit Tidal
+Riposte pays for. The pool becomes 79. A cut, if one is needed, comes to the user with card texts and evidence.
+
+**The round:** two seats, both drafting freely. Each record answers two questions:
+- did you ever play Stings now, instead of planning them, and why?
+- did you ever give up damage to prepare a particular future turn?

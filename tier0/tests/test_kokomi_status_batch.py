@@ -63,7 +63,7 @@ def _carry_out(st, card):
 
 def test_the_batch_cuts_seven_and_its_five_survivors(overhaul):
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
-    assert len(ids) == 78
+    assert len(ids) == 79  # Kokomi v3 (2026-10-18): Unbroken Tide
     rows = {c.id: c for c in loader.prototype_cards()}
     for cid in CUT:
         assert cid not in ids
@@ -71,7 +71,7 @@ def test_the_batch_cuts_seven_and_its_five_survivors(overhaul):
     assert "proto_kk_coral_sanctuary" not in rows
     rarity = collections.Counter(_row(cid).rarity for cid in ids)
     # The Kokomi level pass (2026-10-12): Change of Plans C -> U, 20 / 38 / 20.
-    assert rarity == {"common": 20, "uncommon": 38, "rare": 20}
+    assert rarity == {"common": 20, "uncommon": 39, "rare": 20}
     # The re-founding (2026-10-12) cut Turning Tide and Abyssal Salvage.
     for cid in ("proto_kk_turning_tide", "proto_kk_abyssal_salvage"):
         assert cid not in ids

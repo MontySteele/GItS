@@ -69,9 +69,9 @@ def test_each_new_card_takes_the_slot_of_the_cut_card_of_its_rarity():
         assert cid not in ids and cid not in rows, cid
     for cid in NEW:
         assert cid in ids and cid in rows, cid
-    assert len(ids) == 78
+    assert len(ids) == 79  # Kokomi v3 (2026-10-18): Unbroken Tide
     rarity = collections.Counter(loader.get_card(cid).rarity for cid in ids)
-    assert rarity == {"common": 20, "uncommon": 38, "rare": 20}
+    assert rarity == {"common": 20, "uncommon": 39, "rare": 20}
     # The re-founding's cut Turning Tide keeps its own id, cut.
     assert "proto_kk_turning_tide" not in rows
 

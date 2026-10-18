@@ -238,7 +238,9 @@ PLAN_DELTA_OPS: dict[str, tuple[str, ...]] = {
     "plan_damage": ("damage",
                     # The Kokomi pool overhaul (2026-10-13): Feint's and
                     # Turning Tide's per-Plan rate.
-                    "damage_per_plan_this_turn"),
+                    "damage_per_plan_this_turn",
+                    # Kokomi v3 (2026-10-18): Unbroken Tide's hit.
+                    "damage_if_no_hp_lost_since"),
     # `EB-335`. Tide Wall's per-Plan scaler is a BLOCK clause wearing a count,
     # so it takes `plan_block`'s key rather than a sixth key of its own --
     # one printed Block number per row is still the rule, and the flat `block`

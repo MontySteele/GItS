@@ -211,9 +211,9 @@ def test_shoal_call_common_and_brine_sting_uncommon():
 def test_the_pool_stays_20_38_20():
     import collections
     ids = C.KOKOMI_OVERHAUL_POOL_IDS
-    assert len(ids) == 78
+    assert len(ids) == 79  # Kokomi v3 (2026-10-18): Unbroken Tide
     rarity = collections.Counter(loader.get_card(cid).rarity for cid in ids)
-    assert rarity == {"common": 20, "uncommon": 38, "rare": 20}
+    assert rarity == {"common": 20, "uncommon": 39, "rare": 20}
 
 
 # --- 10. Kurage's Wake: three Stings ------------------------------------------

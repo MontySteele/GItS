@@ -160,6 +160,7 @@
     "proto_kk_treatise",
     "proto_kk_turnabout",
     "proto_kk_turning_tide_chain",
+    "proto_kk_unbroken_tide",
     "proto_kk_undercurrent_snare",
     "proto_kk_undertide_lance",
     "proto_kk_undertow",
@@ -664,6 +665,7 @@
     "proto_kk_treatise": "kokomi",
     "proto_kk_turnabout": "kokomi",
     "proto_kk_turning_tide_chain": "kokomi",
+    "proto_kk_unbroken_tide": "kokomi",
     "proto_kk_undercurrent_snare": "kokomi",
     "proto_kk_undertide_lance": "kokomi",
     "proto_kk_undertow": "kokomi",
@@ -1550,6 +1552,10 @@
     "proto_kk_turning_tide_chain": {
       "damage": 3,
       "plan_damage": 1
+    },
+    "proto_kk_unbroken_tide": {
+      "block": 3,
+      "plan_damage": 4
     },
     "proto_kk_undercurrent_snare": {
       "block": 3,

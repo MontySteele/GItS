@@ -3507,6 +3507,9 @@ PLAN_CLAUSE_KINDS = {
     "damage_blocked_since": "DamageBlockedSince",
     "damage_taken_since": "DamageTakenSince",
     "energy_if_attacked_since": "EnergyIfAttackedSince",
+    # KOKOMI V3 (2026-10-18, review/active/kokomi-cards-2026-10-18.md sec.6):
+    # Unbroken Tide's "if you lost no HP since you planned this".
+    "damage_if_no_hp_lost_since": "DamageIfNoHpLostSince",
     "lose_strength_this_turn": "LoseStrengthThisTurn",
     "draw_pile_to_hand": "DrawPileToHand",
     "apply_power": None,
@@ -3557,7 +3560,9 @@ PLAN_AIMED_OPS = {"damage", "damage_quarter_max_hp",
                   "apply_power",
                   # THE POOL OVERHAUL (2026-10-13).
                   "damage_per_plan_this_turn", "damage_blocked_since",
-                  "damage_taken_since", "lose_strength_this_turn"}
+                  "damage_taken_since", "lose_strength_this_turn",
+                  # KOKOMI V3 (2026-10-18): Unbroken Tide.
+                  "damage_if_no_hp_lost_since"}
 #: The clauses a `times:` may repeat -- the flat hit, and nothing else
 #: (`EB-492`, Pincer). The twin of `kokomi_plan.PLAN_TIMES_OPS`.
 PLAN_TIMES_OPS = {"damage"}
@@ -3593,7 +3598,9 @@ PLAN_ONLY_OPS = {
                  # lands on or the enemy turn it sat through.
                  "damage_per_plan_this_turn", "damage_blocked_since",
                  "damage_taken_since", "energy_if_attacked_since",
-                 "lose_strength_this_turn", "draw_pile_to_hand"}
+                 "lose_strength_this_turn", "draw_pile_to_hand",
+                 # KOKOMI V3 (2026-10-18): Unbroken Tide.
+                 "damage_if_no_hp_lost_since"}
 
 #: R276. The clauses whose `amount` may be ZERO: Tide Wall's is a flat bonus
 #: on top of a number read off the board, and the base card prints none.
@@ -5553,6 +5560,10 @@ RUNTIME_TIMES = {
     # The Kokomi level pass (2026-10-12), Shoal of Spears: "plus once more for
     # each Plan waiting" -- always at least one hit.
     "plans_held_plus_one": "KokomiPlan.PlansHeld(Owner.Creature) + 1",
+    # Kokomi v3 (2026-10-18, card paper sec.6), Shoal of Spears: the same,
+    # Stings and Wards left out (`KokomiPlan.ChainPlansHeld`).
+    "chain_plans_held_plus_one":
+        "KokomiPlan.ChainPlansHeld(Owner.Creature) + 1",
 }
 
 # The clause each runtime count renders on the face. Separate from the C#
@@ -5563,6 +5574,8 @@ RUNTIME_TIMES_TEXT = {
     "sparks_spent": " for each [gold]Spark[/gold] spent",
     "plans_held": " once for each [gold]Plan[/gold] waiting",
     "plans_held_plus_one": ", plus once more for each [gold]Plan[/gold] waiting",
+    "chain_plans_held_plus_one": (", plus once more for each [gold]Plan[/gold]"
+                                  " waiting, not Stings or Wards"),
 }
 
 
@@ -7136,6 +7149,10 @@ KOKOMI_CASKET_COUNTS = {
         "card.Owner.Creature).ReactionsThisCombat",
     "plans_held": "static (card, _) => KokomiPlan.PlansHeld("
                   "card.Owner.Creature)",
+    # Kokomi v3 (2026-10-18, card paper sec.6), Tideturn: "for each Plan
+    # waiting. not Stings or Wards." Breakwater keeps `plans_held`.
+    "chain_plans_held": "static (card, _) => KokomiPlan.ChainPlansHeld("
+                        "card.Owner.Creature)",
 }
 
 
@@ -8500,6 +8517,9 @@ def calculated_block_var_type(card: dict) -> str:
 PREVIEW_HIT_COUNTS = {
     "sparks_spent": "SparkPower.SparksAtPlay(card.Owner!.Creature!)",
     "plans_held_plus_one": "KokomiPlan.PlansHeld(card.Owner!.Creature!) + 1",
+    # Kokomi v3 (2026-10-18): Shoal of Spears, Stings and Wards left out.
+    "chain_plans_held_plus_one":
+        "KokomiPlan.ChainPlansHeld(card.Owner!.Creature!) + 1",
     "stage_spent_threes": ("FurinaStage.SpentOrFanfare(card) / "
                            "FurinaStageLaw.BravuraSpentPer"),
 }

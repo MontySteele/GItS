@@ -198,6 +198,26 @@ public sealed class ProtoBakeKuragePower : PowerModel, ILocalizationProvider
         Vfx.KokomiPlanStrip.Refresh(Owner);
         return Task.CompletedTask;
     }
+
+    /// <summary>
+    /// KOKOMI V3 (2026-10-18, review/active/kokomi-cards-2026-10-18.md
+    /// sec.6): Unbroken Tide's "if you lost no HP since you planned this".
+    /// Every HP loss on her, whatever its source, moves the ledger's total
+    /// (<see cref="KokomiOverhaulLedger.NoteHpLost"/>). Sim twin:
+    /// <c>resources.note_player_hp_loss</c>'s <c>hp_lost_this_combat</c>.
+    /// </summary>
+    public override Task AfterCurrentHpChanged(Creature creature, decimal delta)
+    {
+        if (Owner == null || creature != Owner || delta >= 0m)
+        {
+            return Task.CompletedTask;
+        }
+        if (!KokomiOverhaul.LiveFor(Owner)) return Task.CompletedTask;
+        KokomiOverhaulLedger.For(Owner).NoteHpLost(
+            (int)System.Math.Ceiling(-delta));
+        Vfx.KokomiPlanStrip.Refresh(Owner);
+        return Task.CompletedTask;
+    }
 }
 
 /// <summary>
