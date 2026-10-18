@@ -371,7 +371,7 @@ public static class KokomiPlan
         string? Kind = null, int? Asked = null,
         IReadOnlyList<Rider>? Riders = null, bool Unfinished = false,
         bool NoTarget = false, IReadOnlyList<string>? Reactions = null,
-        string? Again = null);
+        string? Again = null, IReadOnlyList<Rider>? After = null);
 
     /// <summary>KOKOMI REVIEW R8 (2026-10-14, item 9): the Elemental
     /// Reactions a carry-out's own hits set off, by name, in order. A
@@ -2075,6 +2075,34 @@ public static class KokomiPlan
     }
 
     /// <summary>
+    /// Kokomi v3 seats (2026-10-18): WHAT FIRED OFF THIS CARRY-OUT, after it.
+    /// Following Current's 3 Hydro lands once the Plan's own clauses are done
+    /// (<see cref="KokomiRefounding.OnCarriedOut"/>), after the row is
+    /// recorded, so it is outside the beat's measurement and its riders, and
+    /// seats read it as never firing. The hit is put on the row it followed:
+    /// the last carry-out this turn, which is the one just recorded. Display
+    /// only; the page prints "Following Current: 3 Hydro to Louse".
+    /// </summary>
+    public static void NoteAfter(Creature kokomi, string source, int amount,
+                                 Creature? target)
+    {
+        var player = kokomi.Player;
+        if (player == null || target == null || amount <= 0) return;
+        if (!_carriedOut.TryGetValue(player, out var said) || said.Count == 0)
+        {
+            return;
+        }
+        var last = said[said.Count - 1];
+        if (last.Unfinished) return;
+        var after = new List<Rider>(last.After ?? System.Array.Empty<Rider>())
+        {
+            new Rider(source, amount, EnemyName(target),
+                      target.CombatId.ToString() ?? ""),
+        };
+        said[said.Count - 1] = last with { After = after };
+    }
+
+    /// <summary>
     /// Kokomi v2 seats (2026-10-18): WHY a morning entry is carried out more
     /// than once, one name per extra carry-out, in the order
     /// <see cref="Drain"/> adds them: Nereid's Ascension or A Stunning
@@ -2971,6 +2999,10 @@ public static class KokomiPlan
             // Kokomi v2 seats (2026-10-18): a carry-out past an entry's
             // first names the card that bought it. Null on the first.
             ["again"] = said.Again,
+            // Kokomi v3 seats (2026-10-18): what fired off this carry-out
+            // after it (Following Current's hit), by source, amount and
+            // body. Null where none.
+            ["after"] = said.After?.Select(RiderRow).ToList(),
         };
 
     /// One named rider inside one Plan's window (`EB-453`). A named method for

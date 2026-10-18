@@ -244,6 +244,12 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
         // elite-and-boss Shadow wears none outside its rooms (BadgesFor).
         var inForce = AbyssRules.BadgesFor(ShadowsNow, isElite, isBoss);
         foreach (var enemy in enemies) AbyssDisplay.ShowShadows(enemy, inForce, Record);
+        // The player-side Shadows (Withering, Sheer Cold) badge each player
+        // instead, where base powers show; ShadowsToShow picks the side.
+        foreach (var player in RunState.Players)
+        {
+            if (player.Creature is { IsDead: false } body) AbyssDisplay.ShowShadows(body, inForce, Record);
+        }
 
         // The combat-start powers, where the base game's Oddly Smooth Stone
         // and Philosopher's Stone put theirs.

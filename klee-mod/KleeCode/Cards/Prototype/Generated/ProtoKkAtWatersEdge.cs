@@ -45,7 +45,7 @@ public sealed class ProtoKkAtWatersEdge : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "At Water's Edge"),
-        ("description", "The first time each turn you deal [gold]Hydro[/gold] damage to an enemy, apply 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold] to it. [gold]Plans[/gold] count."),
+        ("description", "The first time each turn you deal [gold]Hydro[/gold] damage, apply 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold] to the enemy hit. [gold]Plans[/gold] count."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

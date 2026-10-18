@@ -63,9 +63,9 @@ public static partial class KokomiCards
 }
 
 /// <summary>
-/// At Water's Edge (the Kokomi card pass, 2026-10-11): "The first time each
-/// turn you deal Hydro damage to an enemy, apply 1 Weak and 1 Vulnerable to
-/// it." HER Hydro damage only (the wearer's), once a turn on the ledger's
+/// At Water's Edge (the Kokomi card pass, 2026-10-11; worded 2026-10-18):
+/// "The first time each turn you deal Hydro damage, apply 1 Weak and 1
+/// Vulnerable to the enemy hit." HER Hydro damage only (the wearer's), once a turn on the ledger's
 /// shared latch (<see cref="KokomiOverhaulLedger.ClaimOncePerTurn"/>), claimed
 /// by the first Hydro hit that lands on an enemy (fully blocked included) and
 /// leaves it alive: a killing hit neither pays nor spends the turn's trigger.
@@ -169,11 +169,11 @@ public sealed class AtWatersEdgePower : PowerModel, ILocalizationProvider
     {
         ("title", "At Water's Edge"),
         ("description",
-            "The first time each turn you deal [gold]Hydro[/gold] damage to "
-          + "an enemy, apply "
+            "The first time each turn you deal [gold]Hydro[/gold] damage, apply "
           + "[blue]{Amount}[/blue] [gold]Weak[/gold] and [blue]{Amount}[/blue] "
           // Kokomi review r6 (2026-10-14, item 8): a Plan's hit counts.
-          + "[gold]Vulnerable[/gold] to it. [gold]Plans[/gold] count."),
+          // 2026-10-18 wording: "to the enemy hit" (once per turn in all).
+          + "[gold]Vulnerable[/gold] to the enemy hit. [gold]Plans[/gold] count."),
     };
 
     public override PowerType Type => PowerType.Buff;

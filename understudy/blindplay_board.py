@@ -1428,7 +1428,7 @@ def name_moved_rows(plans: dict[str, Any], wire: list[dict[str, Any]],
         # `EB-518`: the riders take the same names as the moved rows, out of
         # the same lookup, because the page is asking a reader to add the two
         # lists together body by body.
-        for moved in row["moved"] + row["riders"]:
+        for moved in row["moved"] + row["riders"] + row.get("after", []):
             if not moved["combat_id"]:
                 continue
             moved["target"] = (by_id.get(moved["combat_id"])
@@ -2232,6 +2232,11 @@ def _carried_out_row(row: dict[str, Any], pet_name: str) -> dict[str, Any]:
             # first, and the card that bought it ("Nereid's Ascension");
             # "" on the first and on an older mod.
             "again": _text(row.get("again")),
+            # Kokomi v3 seats (2026-10-18): what fired off this carry-out
+            # after its beat (Following Current's Hydro hit), by source,
+            # amount and body (`KokomiPlan.NoteAfter`); empty on an older mod.
+            "after": [_rider_row(r) for r in (row.get("after") or [])
+                      if isinstance(r, dict) and _int(r.get("amount")) > 0],
             # `EB-440`: A ROW IS A BODY THIS PLAN MOVED SOMETHING ON, and
             # Block is something. The filter existed to drop the mod's
             # zero-delta rows, and a beat that spent itself entirely on a

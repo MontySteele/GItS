@@ -16,8 +16,8 @@ namespace KleeMod.Abyss;
 
 /// <summary>
 /// THE IN-RUN DISPLAY of the Spiral Abyss (2026-10-12): the relics that show
-/// each player what was taken, and the badges that show each enemy what it
-/// carries. DISPLAY ONLY -- nothing here changes a number. The effects are
+/// each player what was taken, and the badges that show each enemy (or, for
+/// a Shadow that acts on the player, each player) what it carries. DISPLAY ONLY -- nothing here changes a number. The effects are
 /// the <see cref="SpiralAbyss"/> modifier's hooks and stay there.
 ///
 /// Every decision is a pure planner (<see cref="BlessingsToGrant"/>,
@@ -98,14 +98,20 @@ public static class AbyssDisplay
     public static bool NeedsShadowsRelic(IEnumerable<AbyssShadow> applied, IEnumerable<RelicModel> held) =>
         applied.Any(s => s != AbyssShadow.None) && !held.OfType<AbyssShadowsRelic>().Any();
 
-    /// <summary>The Shadow badges this creature still lacks: enemies only, one
-    /// per Shadow in force.</summary>
+    /// <summary>The Shadow badges this creature still lacks, one per Shadow in
+    /// force, on the side the Shadow acts on. The two that act on the player
+    /// (<see cref="AbyssRules.ActsOnPlayer"/>: Withering, Sheer Cold) are worn
+    /// by each player, the rest by each enemy (2026-10-18: seats read the
+    /// player-side ones on the enemies as enemy effects). A creature that is
+    /// neither -- a pet, a summon on the player's side -- wears none.</summary>
     public static IReadOnlyList<AbyssShadow> ShadowsToShow(
-        bool isEnemy, IEnumerable<AbyssShadow> applied, IEnumerable<PowerModel> worn)
+        bool isEnemy, bool isPlayer, IEnumerable<AbyssShadow> applied, IEnumerable<PowerModel> worn)
     {
-        if (!isEnemy) return Array.Empty<AbyssShadow>();
+        if (!isEnemy && !isPlayer) return Array.Empty<AbyssShadow>();
         var shown = worn.OfType<AbyssShadowPower>().Select(p => p.Shadow).ToHashSet();
-        return applied.Where(s => s != AbyssShadow.None && shown.Add(s)).ToList();
+        return applied.Where(s => s != AbyssShadow.None
+                                  && AbyssRules.ActsOnPlayer(s) == !isEnemy
+                                  && shown.Add(s)).ToList();
     }
 
     /// <summary>The Abyss Shadows relic's list: each Shadow with the act it
@@ -259,14 +265,15 @@ public static class AbyssDisplay
 
     /// <summary>
     /// Put a badge on <paramref name="creature"/> for each Shadow in force it
-    /// does not yet wear. Enemies only. Attached through
+    /// does not yet wear: an enemy wears the enemy-side Shadows, a player the
+    /// player-side ones (<see cref="ShadowsToShow"/>). Attached through
     /// <c>PowerModel.ApplyInternal</c> (see <see cref="AbyssShadowPower"/>),
     /// so no hook hears it.
     /// </summary>
     public static void ShowShadows(Creature creature, IEnumerable<AbyssShadow> inForce, AbyssRecord record)
     {
         if (!creature.IsAlive || !creature.CanReceivePowers) return;
-        var missing = ShadowsToShow(creature.Side == CombatSide.Enemy, inForce, creature.Powers);
+        var missing = ShadowsToShow(creature.Side == CombatSide.Enemy, creature.IsPlayer, inForce, creature.Powers);
         foreach (var shadow in missing)
         {
             // The badge prints the number of the act the Shadow was taken in.

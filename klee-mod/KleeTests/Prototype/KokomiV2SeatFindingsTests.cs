@@ -64,4 +64,24 @@ public class KokomiV2SeatFindingsTests
         Assert.Contains("again", Il.Strings(
             Il.Method("KokomiPlan", "CarriedOutRow")));
     }
+
+    /// <summary>Kokomi v3 seats (2026-10-18): Following Current's 3 Hydro
+    /// lands after the Plan's beat and printed nothing, so seats thought it
+    /// never fired. The hit goes on the carry-out's row (`after`); page half
+    /// <c>tier0/tests/test_kokomi_following_current_receipt.py</c>.</summary>
+    [Fact]
+    public void Following_current_puts_its_hit_on_the_carry_out_row()
+    {
+        var fc = Il.Method("FollowingCurrentPower", "OnCarriedOut");
+        Assert.Contains("KurageHydroSources.Hit", Il.Calls(fc));
+        Assert.Contains("KokomiPlan.NoteAfter", Il.Calls(fc));
+        Assert.Contains("Following Current", Il.Strings(fc));
+        Assert.Contains("ElementalHit.Deal",
+                        Il.Calls(Il.Method("KurageHydroSources", "Hit")));
+        Assert.Contains("after", Il.Strings(
+            Il.Method("KokomiPlan", "CarriedOutRow")));
+        // NoteAfter amends the recorded row rather than adding a second.
+        Assert.DoesNotContain("KokomiPlan.Record",
+                              Il.Calls(Il.Method("KokomiPlan", "NoteAfter")));
+    }
 }
