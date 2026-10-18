@@ -35,11 +35,19 @@ namespace KleeMod;
 /// than <c>card_frame_red</c> makes BaseLib's HSV material patch stand aside,
 /// so the base material loads as it does for the base Colorless cards.
 ///
-/// NOT <see cref="IsColorless"/>. The base game reads that flag as a rule, not
-/// a look: Heirloom Hammer copies only a Colorless card in hand. Companions
-/// were never Colorless to it and this move changes their frame, not their
-/// rules. Shop pricing reads <c>card.Pool is ColorlessCardPool</c> (a type
-/// test), so the companion slots' prices do not move either.
+/// <see cref="IsColorless"/> IS TRUE, as for every base pool that belongs to
+/// no character. The base game reads the flag in exactly two places (0.111.0
+/// decompile): Heirloom Hammer copies a card in hand whose
+/// <c>VisualCardPool.IsColorless</c> holds, so it now takes a companion as it
+/// takes a base Colorless card; and Prismatic Gem leaves a card reward alone
+/// when every pool in its options is colorless, which no reward ever asks of
+/// this pool (the companion slot rolls from <see cref="CompanionPool"/>, not
+/// from <c>CardCreationOptions</c>). Everything that treats a card as
+/// "Colorless" for price or generation names <c>ColorlessCardPool</c> itself:
+/// shop pricing tests <c>card.Pool is ColorlessCardPool</c>, and every base
+/// Colorless generator (Jack of All Trades, Colorless Potion, Dingy Rug, the
+/// shop's Colorless row, ...) reads <c>ModelDb.CardPool&lt;ColorlessCardPool&gt;()</c>.
+/// So the flag moves no price and puts no companion in a base pool.
 ///
 /// THE OFFER (<see cref="FilterThroughEpochs"/>) is the companion roster
 /// (<see cref="CompanionPool.All"/>). Nothing rolls rewards from a shared pool
@@ -47,7 +55,10 @@ namespace KleeMod;
 /// unlocked set, and a TRANSFORM of a companion, which the base game draws from
 /// the original card's pool -- so a companion now transforms into another
 /// companion, as a Colorless card transforms into a Colorless card (it used to
-/// become a card of Klee's pool, in anyone's run).
+/// become a card of Klee's pool, in anyone's run), filtered to the companions
+/// that player could be offered (`Patches/CompanionTransformFilter.cs`). The
+/// card library lists them under its Colorless tab
+/// (`Patches/CompanionLibraryFilter.cs`).
 /// </summary>
 public sealed class CompanionCardPool : CustomCardPoolModel
 {
@@ -62,7 +73,7 @@ public sealed class CompanionCardPool : CustomCardPoolModel
     // ColorlessCardPool's own deck-entry grey.
     public override Color DeckEntryCardColor => new Color("A3A3A3FF");
 
-    public override bool IsColorless => false;
+    public override bool IsColorless => true;
 
     protected override IEnumerable<CardModel> FilterThroughEpochs(
         UnlockState unlockState, IEnumerable<CardModel> cards)
