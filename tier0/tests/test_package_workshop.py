@@ -245,6 +245,55 @@ def test_card_art_is_staged_as_lossless_webp(tmp_path):
         "a_rgb.webp", "b_rgba.webp", "c_broken.png"]
 
 
+def test_the_encode_cache_reuses_verified_results(tmp_path):
+    from PIL import Image
+    src_dir = tmp_path / "src"
+    src_dir.mkdir()
+    img = Image.new("RGBA", (6, 4))
+    img.putdata([(x * 40, y * 60, 200, (x * y * 30) % 256)
+                 for y in range(4) for x in range(6)])
+    img.save(src_dir / "a.png")
+    (src_dir / "b.png").write_bytes(b"not a png")
+    cache = tmp_path / "cache"
+    first = tmp_path / "one"
+    first.mkdir()
+    a1 = pw.stage_card(src_dir / "a.png", first, "a", cache)
+    b1 = pw.stage_card(src_dir / "b.png", first, "b", cache)
+    assert (a1.name, b1.name) == ("a.webp", "b.png")
+    assert len(list(cache.iterdir())) == 2
+    # A second run copies from the cache: same bytes, nothing re-encoded.
+    second = tmp_path / "two"
+    second.mkdir()
+    a2 = pw.stage_card(src_dir / "a.png", second, "a", cache)
+    b2 = pw.stage_card(src_dir / "b.png", second, "b", cache)
+    assert a2.read_bytes() == a1.read_bytes()
+    assert b2.read_bytes() == b"not a png"
+    # Edited art misses the cache and is encoded and checked again.
+    img.putpixel((0, 0), (1, 2, 3, 4))
+    img.save(src_dir / "a.png")
+    third = tmp_path / "three"
+    third.mkdir()
+    a3 = pw.stage_card(src_dir / "a.png", third, "a", cache)
+    with Image.open(a3) as got:
+        assert got.convert("RGBA").getpixel((0, 0)) == (1, 2, 3, 4)
+    assert len(list(cache.iterdir())) == 3
+
+
+def test_staging_in_parallel_matches_staging_in_order(tmp_path):
+    from PIL import Image
+    src_dir = tmp_path / "src"
+    src_dir.mkdir()
+    art = {}
+    for n in range(20):
+        im = Image.new("RGB", (5, 5), ((n * 13) % 256, n, 255 - n))
+        im.save(src_dir / f"c{n:02}.png")
+        art[f"c{n:02}"] = src_dir / f"c{n:02}.png"
+    cards = tmp_path / "cards"
+    cards.mkdir()
+    staged = pw.stage_cards(art, cards, tmp_path / "cache")
+    assert [p.name for p in staged] == [f"c{n:02}.webp" for n in range(20)]
+
+
 def test_the_dll_check_is_exact():
     blob = pw._blob("klee+kokomi+furina+varka")
     assert blob[0] == len("klee+kokomi+furina+varka")

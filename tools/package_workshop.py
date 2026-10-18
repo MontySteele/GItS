@@ -71,6 +71,8 @@ confirms the endpoint is in the dll when asked for and absent when not.
 from __future__ import annotations
 
 import argparse
+import concurrent.futures
+import hashlib
 import json
 import re
 import shutil
@@ -354,10 +356,29 @@ def check_dll(dll: Path, variant: Variant, endpoint: str | None = None) -> None:
                          "rebuild without --skip-build")
 
 
-def stage_card(src: Path, cards: Path, stem: str) -> Path:
+def stage_card(src: Path, cards: Path, stem: str, cache: Path | None = None) -> Path:
     """Write one card portrait into `cards` as lossless WebP, or as a copy of
     its png when the WebP would not decode to the same pixels (or the source
-    will not open). Returns the file written."""
+    will not open). Returns the file written.
+
+    CACHE (2026-10-17; the user: "Why does converting the card art take 10
+    minutes?"): with `cache`, the verified result is kept there under the
+    sha256 of the source bytes, `<sha>.webp`, or an empty `<sha>.png` marker
+    for a source that ships as its png. An unchanged portrait is then a copy,
+    and only new or edited art is encoded and pixel-checked."""
+    key = None
+    if cache is not None:
+        key = hashlib.sha256(src.read_bytes()).hexdigest()
+        hit = cache / f"{key}.webp"
+        if hit.exists():
+            dest = cards / f"{stem}.webp"
+            shutil.copy2(hit, dest)
+            return dest
+        if (cache / f"{key}.png").exists():
+            dest = cards / f"{stem}.png"
+            shutil.copy2(src, dest)
+            return dest
+
     from PIL import Image
 
     dest = cards / f"{stem}.webp"
@@ -371,11 +392,32 @@ def stage_card(src: Path, cards: Path, stem: str) -> Path:
     except Exception:  # an unreadable source ships as it is
         same = False
     if same:
+        if key is not None:
+            cache.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(dest, cache / f"{key}.webp")
         return dest
     dest.unlink(missing_ok=True)
     dest = cards / f"{stem}.png"
     shutil.copy2(src, dest)
+    if key is not None:
+        cache.mkdir(parents=True, exist_ok=True)
+        (cache / f"{key}.png").write_bytes(b"")
     return dest
+
+
+def _stage_one(job: tuple[Path, Path, str, Path | None]) -> Path:
+    """`stage_card` for a process pool (one picklable argument)."""
+    return stage_card(*job)
+
+
+def stage_cards(art: dict[str, Path], cards: Path, cache: Path | None) -> list[Path]:
+    """Stage every portrait, in stem order, across the CPU's cores: each
+    encode is independent and the pixel check is per file."""
+    jobs = [(path, cards, stem, cache) for stem, path in sorted(art.items())]
+    if len(jobs) < 16:
+        return [_stage_one(j) for j in jobs]
+    with concurrent.futures.ProcessPoolExecutor() as pool:
+        return list(pool.map(_stage_one, jobs, chunksize=8))
 
 
 def write_workspace(variant: Variant, version: str, workspace: Path, *,
@@ -397,7 +439,8 @@ def write_workspace(variant: Variant, version: str, workspace: Path, *,
         f.write("\n")
     shutil.copy2(dll, mod / f"{variant.mod_id}.dll")
     shutil.copy2(pck, mod / f"{variant.mod_id}.pck")
-    staged = [stage_card(path, cards, stem) for stem, path in sorted(art.items())]
+    # The encode cache sits beside the workspaces (`.workshop/_webp_cache/`).
+    staged = stage_cards(art, cards, workspace.parent / "_webp_cache")
     webp = sum(1 for p in staged if p.suffix == ".webp")
     card_bytes = sum(p.stat().st_size for p in staged)
 
