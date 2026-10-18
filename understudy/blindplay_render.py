@@ -883,6 +883,11 @@ SUMMON_REACTION_CLAUSE = " It set off {names}."
 #: The second row names the card that bought it (`KokomiPlan.AgainSources`).
 PLAN_AGAIN_CLAUSE = " *(carried out again: {source})*"
 
+#: Kokomi v3 seats (2026-10-18): Following Current's hit lands after the
+#: Plan's beat and printed nothing, so seats thought it never fired. One line
+#: under the carry-out it followed (`KokomiPlan.NoteAfter`).
+PLAN_AFTER_LINE = "    - {source}: {n} Hydro to {target}"
+
 
 def _carry_out_rows(rows: list[dict[str, Any]],
                     enemies: list[dict[str, Any]] | None = None,
@@ -909,6 +914,9 @@ def _carry_out_rows(rows: list[dict[str, Any]],
             f"{_rider_clause(said)}"
             f"{_summon_reaction_clause(said) if name_reactions else ''}")
         out += _render_moved(said)
+        out += [PLAN_AFTER_LINE.format(source=a["source"], n=a["amount"],
+                                       target=a["target"] or "an enemy")
+                for a in said.get("after") or []]
     return out
 
 

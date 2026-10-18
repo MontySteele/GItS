@@ -270,18 +270,45 @@ public class SpiralAbyssDisplayTests
     public void Every_enemy_gets_one_badge_per_Shadow_and_never_a_second()
     {
         var applied = new[] { AbyssShadow.Clock, AbyssShadow.MageShield, AbyssShadow.Riptide };
-        Assert.Equal(applied, AbyssDisplay.ShadowsToShow(isEnemy: true, applied, Array.Empty<PowerModel>()));
+        Assert.Equal(applied, AbyssDisplay.ShadowsToShow(isEnemy: true, isPlayer: false, applied, Array.Empty<PowerModel>()));
 
         var worn = new List<PowerModel> { (PowerModel)Uninit(typeof(AbyssClockShadowPower)) };
         Assert.Equal(new[] { AbyssShadow.MageShield, AbyssShadow.Riptide },
-                     AbyssDisplay.ShadowsToShow(true, applied, worn));
+                     AbyssDisplay.ShadowsToShow(true, false, applied, worn));
         worn.Add((PowerModel)Uninit(typeof(AbyssMageShieldShadowPower)));
         worn.Add((PowerModel)Uninit(typeof(AbyssRiptideShadowPower)));
-        Assert.Empty(AbyssDisplay.ShadowsToShow(true, applied, worn));
+        Assert.Empty(AbyssDisplay.ShadowsToShow(true, false, applied, worn));
 
-        // Players never wear them; no Shadow, no badge.
-        Assert.Empty(AbyssDisplay.ShadowsToShow(isEnemy: false, applied, Array.Empty<PowerModel>()));
-        Assert.Empty(AbyssDisplay.ShadowsToShow(true, Array.Empty<AbyssShadow>(), Array.Empty<PowerModel>()));
+        // Players never wear the enemy-side ones; no Shadow, no badge.
+        Assert.Empty(AbyssDisplay.ShadowsToShow(isEnemy: false, isPlayer: true, applied, Array.Empty<PowerModel>()));
+        Assert.Empty(AbyssDisplay.ShadowsToShow(true, false, Array.Empty<AbyssShadow>(), Array.Empty<PowerModel>()));
+    }
+
+    [Fact]
+    public void The_player_side_Shadows_badge_the_player_not_the_enemies()
+    {
+        // 2026-10-18 seats: Withering ("You start each combat with 1 Weak")
+        // and Sheer Cold ("If you end your turn with no Block, lose N HP")
+        // sat as badges on the enemies and read as enemy effects.
+        Assert.True(AbyssRules.ActsOnPlayer(AbyssShadow.Withering));
+        Assert.True(AbyssRules.ActsOnPlayer(AbyssShadow.SheerCold));
+        Assert.Equal(2, AbyssDraft.AllShadows.Count(AbyssRules.ActsOnPlayer));
+
+        var applied = new[] { AbyssShadow.Clock, AbyssShadow.Withering, AbyssShadow.SheerCold, AbyssShadow.Riptide };
+        Assert.Equal(new[] { AbyssShadow.Clock, AbyssShadow.Riptide },
+                     AbyssDisplay.ShadowsToShow(isEnemy: true, isPlayer: false, applied, Array.Empty<PowerModel>()));
+        Assert.Equal(new[] { AbyssShadow.Withering, AbyssShadow.SheerCold },
+                     AbyssDisplay.ShadowsToShow(isEnemy: false, isPlayer: true, applied, Array.Empty<PowerModel>()));
+        // Never a second: a player already wearing Withering gets only Sheer Cold.
+        var worn = new List<PowerModel> { (PowerModel)Uninit(typeof(AbyssWitheringShadowPower)) };
+        Assert.Equal(new[] { AbyssShadow.SheerCold },
+                     AbyssDisplay.ShadowsToShow(false, true, applied, worn));
+        // A pet or a player-side summon wears none.
+        Assert.Empty(AbyssDisplay.ShadowsToShow(isEnemy: false, isPlayer: false, applied, Array.Empty<PowerModel>()));
+
+        // STRUCTURAL: the doer asks the creature whether it is a player.
+        Assert.Contains("Creature.get_IsPlayer",
+            Il.Calls(typeof(AbyssDisplay).GetMethod(nameof(AbyssDisplay.ShowShadows))!));
     }
 
     [Fact]

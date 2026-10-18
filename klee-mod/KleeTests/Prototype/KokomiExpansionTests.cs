@@ -150,6 +150,9 @@ public class KokomiExpansionTests : IDisposable
         Assert.True(ledger.Claim(nameof(AtWatersEdgePower)));
         Assert.StartsWith("The first time each turn you deal [gold]Hydro[/gold]",
                           Face(new ProtoKkAtWatersEdge()));
+        // 2026-10-18 wording: once per turn in all, applied "to the enemy hit".
+        Assert.Contains("damage, apply 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold] to the enemy hit.",
+                        Face(new ProtoKkAtWatersEdge()));
     }
 
     /// <summary>The Kokomi card pass (2026-10-11, pick 1): Drowning

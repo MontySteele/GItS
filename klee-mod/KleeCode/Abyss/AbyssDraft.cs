@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using KleeMod.Elements;
+using KleeMod.Powers;
 using MegaCrit.Sts2.Core.Random;
 
 namespace KleeMod.Abyss;
@@ -64,13 +65,42 @@ public static class AbyssDraft
     public static IReadOnlyList<AbyssShadow> AllShadows { get; } =
         Enum.GetValues<AbyssShadow>().Where(s => s != AbyssShadow.None).ToArray();
 
+    /// <summary>
+    /// The Blessings that pay only on an Elemental Reaction: Overflow
+    /// ("Elemental Reactions deal double damage") and Wavering Moon
+    /// ("Whenever you trigger an Elemental Reaction"). A base-game character
+    /// cannot trigger one, so a run with no elemental player is never offered
+    /// them (2026-10-18).
+    /// </summary>
+    public static IReadOnlyList<AbyssBlessing> ReactionBlessings { get; } =
+        new[] { AbyssBlessing.Overflow, AbyssBlessing.WaveringMoon };
+
+    /// <summary>Can <paramref name="character"/> trigger an Elemental
+    /// Reaction? The mod's own characters (Klee, Kokomi, Furina, Varka, Yae)
+    /// can; base-game classes cannot.</summary>
+    public static bool CanReact(object? character) =>
+        character is IKleeCharacter or IKokomiCharacter or IFurinaCharacter
+            or IVarkaCharacter or IYaeCharacter;
+
+    /// <summary>
+    /// The page for <paramref name="actIndex"/>. <paramref name="anyElementalPlayer"/>
+    /// is whether at least one player in the run can trigger an Elemental
+    /// Reaction (<see cref="CanReact"/>; in co-op, any one qualifies). When
+    /// none can, <see cref="ReactionBlessings"/> leave the pool BEFORE the
+    /// shuffle, so the page is still a pure function of the seed and the
+    /// record, drawn from what remains. With an elemental player nothing is
+    /// filtered and the draw is exactly the unfiltered one, so a saved
+    /// elemental run reloads to the same page.
+    /// </summary>
     public static AbyssOffer Offer(
         ulong runSeed, int actIndex,
-        IEnumerable<AbyssBlessing> taken, IEnumerable<AbyssShadow> applied)
+        IEnumerable<AbyssBlessing> taken, IEnumerable<AbyssShadow> applied,
+        bool anyElementalPlayer = true)
     {
         var rng = new Rng(runSeed + (ulong)Math.Max(0, actIndex), RngName);
 
         var blessings = AllBlessings.Except(taken).ToList();
+        if (!anyElementalPlayer) blessings.RemoveAll(b => ReactionBlessings.Contains(b));
         var shadows = AllShadows.Except(applied).ToList();
         rng.Shuffle(blessings);
         rng.Shuffle(shadows);
@@ -115,8 +145,9 @@ public static class AbyssDraft
     }
 
     /// <summary>The page for <paramref name="actIndex"/> given a record.</summary>
-    public static AbyssOffer Offer(ulong runSeed, int actIndex, AbyssRecord record) =>
-        Offer(runSeed, actIndex, record.Blessings, record.Shadows);
+    public static AbyssOffer Offer(ulong runSeed, int actIndex, AbyssRecord record,
+        bool anyElementalPlayer = true) =>
+        Offer(runSeed, actIndex, record.Blessings, record.Shadows, anyElementalPlayer);
 }
 
 /// <summary>
@@ -330,6 +361,13 @@ public static class AbyssRules
     public static bool MageShieldRoom(bool isElite) => isElite;
 
     public static bool FatuiRoom(bool isElite, bool isBoss) => isElite || isBoss;
+
+    /// <summary>Does Shadow <paramref name="s"/> act on the player rather
+    /// than the enemies? Withering ("You start each combat with 1 Weak") and
+    /// Sheer Cold ("If you end your turn with no Block, lose N HP"): their
+    /// badges sit on the player (<see cref="AbyssDisplay.ShadowsToShow"/>).</summary>
+    public static bool ActsOnPlayer(AbyssShadow s) =>
+        s is AbyssShadow.Withering or AbyssShadow.SheerCold;
 
     /// <summary>
     /// The Shadow badges an enemy in this room wears: every Shadow in force,

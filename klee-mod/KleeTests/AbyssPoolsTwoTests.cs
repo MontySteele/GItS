@@ -414,9 +414,10 @@ public class AbyssPoolsTwoTests
         Assert.Equal(new[] { AbyssBlessing.StarfellDraft },
                      AbyssDisplay.BlessingsToGrant(record.BlessingsInForce(1), held));
 
-        // The badges are drawn from the Shadows in force.
+        // The badges are drawn from the Shadows in force (Withering acts on
+        // the player, so it badges the player).
         Assert.Equal(new[] { AbyssShadow.Withering },
-                     AbyssDisplay.ShadowsToShow(true, record.ShadowsInForce(1), Array.Empty<PowerModel>()));
+                     AbyssDisplay.ShadowsToShow(false, true, record.ShadowsInForce(1), Array.Empty<PowerModel>()));
 
         // STRUCTURAL: the act-change hook brings every player's relics into line.
         Assert.Contains("AbyssDisplay.GrantTo",
@@ -508,5 +509,53 @@ public class AbyssPoolsTwoTests
             if (record.Acts[i] < beforeAct) copy.Record(record.Acts[i], record.Blessings[i], record.Shadows[i]);
         }
         return copy;
+    }
+    // ---- Reaction Blessings: only with an elemental player (2026-10-18) -----
+
+    [Fact]
+    public void Reaction_Blessings_are_offered_only_when_a_player_can_react()
+    {
+        Assert.Equal(new[] { AbyssBlessing.Overflow, AbyssBlessing.WaveringMoon }, AbyssDraft.ReactionBlessings);
+
+        // The mod's five characters can trigger a reaction; base-game classes cannot.
+        foreach (var t in new[] { typeof(Klee), typeof(Kokomi), typeof(Furina), typeof(Varka), typeof(Yae) })
+        {
+            Assert.True(AbyssDraft.CanReact(RuntimeHelpers.GetUninitializedObject(t)), t.Name);
+        }
+        Assert.False(AbyssDraft.CanReact(new MegaCrit.Sts2.Core.Models.Characters.Ironclad()));
+        Assert.False(AbyssDraft.CanReact(null));
+
+        var sawReaction = false;
+        for (ulong seed = 1; seed <= 300; seed++)
+        {
+            var filtered = new AbyssRecord();
+            var open = new AbyssRecord();
+            for (var act = 0; act < 3; act++)
+            {
+                var page = AbyssDraft.Offer(seed * 7919UL, act, filtered, anyElementalPlayer: false);
+                // Drawn from the rest of the pool: still a full, mixed page.
+                Assert.Equal(3, page.Options.Count);
+                Assert.DoesNotContain(page.Options, o => AbyssDraft.ReactionBlessings.Contains(o.Blessing));
+                // Deterministic from the seed.
+                Assert.Equal(page.Options, AbyssDraft.Offer(seed * 7919UL, act, filtered, false).Options);
+                Assert.Equal(page.ShadowRoll, AbyssDraft.Offer(seed * 7919UL, act, filtered, false).ShadowRoll);
+
+                // With an elemental player nothing is filtered: the page is the
+                // unfiltered draw, so an elemental run's saved page is unchanged.
+                var elemental = AbyssDraft.Offer(seed * 7919UL, act, open, anyElementalPlayer: true);
+                var legacy = AbyssDraft.Offer(seed * 7919UL, act, open.Blessings, open.Shadows);
+                Assert.Equal(legacy.Options, elemental.Options);
+                Assert.Equal(legacy.ShadowRoll, elemental.ShadowRoll);
+                sawReaction |= elemental.Options.Any(o => AbyssDraft.ReactionBlessings.Contains(o.Blessing));
+
+                filtered.Record(act, page.Options[0].Blessing, page.ShadowIfChosen(0));
+                open.Record(act, elemental.Options[0].Blessing, elemental.ShadowIfChosen(0));
+            }
+        }
+        Assert.True(sawReaction);
+
+        // STRUCTURAL: the choice page asks the run's players.
+        var install = Il.Calls(typeof(AbyssChoicePage).GetMethod("Install", HeadlessGame.All)!);
+        Assert.Contains("AbyssDraft.Offer", install);
     }
 }

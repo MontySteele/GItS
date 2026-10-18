@@ -4086,8 +4086,8 @@ APPLY_POWERS = {
     # (Grand Design's, Flood Tide's and The Long Game's Powers left with the
     # Casket and the cards, the re-founding, 2026-10-12.)
     "kk_at_waters_edge": ("AtWatersEdgePower", None,
-        "The first time each turn you deal [gold]Hydro[/gold] damage to an "
-        "enemy, apply {X} Weak and {X} Vulnerable to it. [gold]Plans[/gold] "
+        "The first time each turn you deal [gold]Hydro[/gold] damage, apply "
+        "{X} Weak and {X} Vulnerable to the enemy hit. [gold]Plans[/gold] "
         "count."),
     "kk_ceremonial_garment": ("ProtoCeremonialGarmentPower", None,
         "Your Attacks deal {X} additional damage for each Weak and "

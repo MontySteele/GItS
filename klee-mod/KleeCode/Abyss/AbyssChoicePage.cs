@@ -135,7 +135,8 @@ public static class AbyssChoicePage
             return;
         }
 
-        var offer = AbyssDraft.Offer(runState.Rng.Seed, act, abyss.Record);
+        var anyElemental = runState.Players.Any(p => AbyssDraft.CanReact(p?.Character));
+        var offer = AbyssDraft.Offer(runState.Rng.Seed, act, abyss.Record, anyElemental);
         if (offer.Options.Count == 0) return;
 
         // What the Ancient drew, to put back after the pick.

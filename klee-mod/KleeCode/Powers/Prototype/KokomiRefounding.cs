@@ -1136,21 +1136,24 @@ public sealed class DawnTidePower : PowerModel, ILocalizationProvider
 /// </summary>
 public static class KurageHydroSources
 {
-    public static async Task Hit(PlayerChoiceContext choiceContext,
-                                 Creature kokomi, int amount, string cause,
-                                 bool morning)
+    /// <summary>Returns the body hit and what landed (before its Block;
+    /// <c>ElementalHit.Deal</c>'s figure), or (null, 0) when nothing was hit.</summary>
+    public static async Task<(Creature? Target, int Landed)> Hit(
+        PlayerChoiceContext choiceContext, Creature kokomi, int amount,
+        string cause, bool morning)
     {
-        if (amount <= 0) return;
+        if (amount <= 0) return (null, 0);
         var target = KokomiPlan.FrontEnemy(kokomi);
-        if (target == null || target.IsDead) return;
+        if (target == null || target.IsDead) return (null, 0);
         using var credit = Diagnostics.DamageCredit.Open(
             kokomi, Diagnostics.DamageCredit.Pet, "Bake-Kurage",
             cause: cause, card: cause);
         if (morning) AuraPower.OpenMorning(kokomi);
         try
         {
-            await ElementalHit.Deal(choiceContext, target, Element.Hydro,
-                                    amount, kokomi, powered: false);
+            var landed = await ElementalHit.Deal(choiceContext, target, Element.Hydro,
+                                                 amount, kokomi, powered: false);
+            return (target, landed);
         }
         finally
         {
@@ -1214,8 +1217,12 @@ public sealed class FollowingCurrentPower : PowerModel, ILocalizationProvider
     {
         var amount = (int)kokomi.Powers.OfType<FollowingCurrentPower>()
             .Sum(p => p.Amount);
-        await KurageHydroSources.Hit(choiceContext, kokomi, amount,
-                                     "Following Current",
-                                     morning: KokomiPlan.InMorning(kokomi));
+        var (target, landed) = await KurageHydroSources.Hit(
+            choiceContext, kokomi, amount, "Following Current",
+            morning: KokomiPlan.InMorning(kokomi));
+        // Kokomi v3 seats (2026-10-18): the page printed no line for this
+        // hit, so seats thought it never fired. It goes on the carry-out's
+        // own row ("Following Current: 3 Hydro to Louse").
+        KokomiPlan.NoteAfter(kokomi, "Following Current", landed, target);
     }
 }

@@ -1726,8 +1726,8 @@
    cost: 2, type: power, rarity: rare,
    # 2026-10-11 Kokomi card pass: once per turn, off her first Hydro damage
    # to an enemy (was any Elemental Reaction); Kokomi review r6 item 8
-   # (2026-10-14): "Plans count." Provenance notes.
-   description: "The first time each turn you deal [gold]Hydro[/gold] damage to an enemy, apply 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold] to it. [gold]Plans[/gold] count.",
+   # (2026-10-14): "Plans count."; 2026-10-18: "to the enemy hit". Provenance notes.
+   description: "The first time each turn you deal [gold]Hydro[/gold] damage, apply 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold] to the enemy hit. [gold]Plans[/gold] count.",
    effects: [{op: apply_power, power: kk_at_waters_edge, amount: 1, target: self}],
    upgrade: {cost: -1}}
 
