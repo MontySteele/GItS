@@ -15,11 +15,11 @@ namespace KleeMod.RunStats;
 /// re-implement that gate; it reads the setting once more here as a second
 /// belt, so a future game build that fires the hook more widely still sends
 /// nothing with it off. (2) The mod's own setting, "Share anonymous run stats
-/// with the Teyvat Spire developers", default off
-/// (<c>RunStatsConfig.ShareAnonymousRunStats</c>).
+/// with the Teyvat Spire developers", default ON since 2026-10-18 ([USER]:
+/// "Let's go default on."; <c>RunStatsConfig.ShareAnonymousRunStats</c>).
 ///
 /// Nothing is made unless both are on: the install id is asked for only
-/// after the check, so a player who never opts in never gets one.
+/// after the check, so a player who turns the setting off never gets one.
 /// </summary>
 public static class RunStatsUpload
 {

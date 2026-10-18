@@ -359,15 +359,21 @@ def test_the_privacy_paragraph_rides_only_with_the_uploader():
     beta = pw.VARIANTS["beta"]
     without = pw.workshop_json(beta, "0.3.0", "friends_only", None)["description"]
     with_ = pw.workshop_json(beta, "0.3.0", "friends_only", None, ROUTE)["description"]
-    assert "Run data (optional)" not in without
-    assert "Run data (optional)" in with_ and with_.startswith(without)
+    assert "Run data." not in without
+    assert "Run data." in with_ and with_.startswith(without)
     for words in ("Upload data", "no Steam id", "IP address is not stored",
-                  "deleted after a year", "random id"):
+                  "deleted after a year", "random id", "on by default",
+                  "Settings, Mod Configuration (BaseLib), Open Config, Teyvat Spire Roster"):
         assert words in with_, words
     # The paragraph names the setting by the label the mod actually shows.
     hook = (ROOT / "klee-mod" / "KleeCode" / "RunStats" / "RunStatsHook.cs").read_text(encoding="utf-8")
     label = "Share anonymous run stats with the Teyvat Spire developers"
     assert f'"{label}"' in hook and f'"{label}"' in with_
+    # Default on (2026-10-18), in the code the page describes.
+    assert "ShareAnonymousRunStats { get; set; } = true;" in hook
+    # The paste-ready copy in the runbook matches what the packager writes.
+    runbook = (ROOT / "docs" / "current" / "operations" / "workshop.md").read_text(encoding="utf-8")
+    assert pw.PRIVACY_PARAGRAPH.strip() in runbook
 
 
 def _dll_with(*strings: str, tmp_path: Path) -> Path:

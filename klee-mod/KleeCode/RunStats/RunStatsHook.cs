@@ -20,14 +20,18 @@ namespace KleeMod.RunStats;
 /// (<c>%APPDATA%/SlayTheSpire2/mod_configs/KleeMod.cfg</c>). The player sees
 /// one tickbox under Settings, Mod Configuration (BaseLib), Open Config,
 /// Teyvat Spire Roster:
-/// "Share anonymous run stats with the Teyvat Spire developers", off until
-/// they tick it. The install id is hidden, survives Restore Defaults, and is
-/// made the first time a run is actually sent.
+/// "Share anonymous run stats with the Teyvat Spire developers", on by
+/// default since 2026-10-18 ([USER]: "Let's go default on."), and the player
+/// can untick it there. The install id is hidden, survives Restore Defaults,
+/// and is made the first time a run is actually sent. The default reaches
+/// new installs only: BaseLib keeps a saved value, so an install that ran
+/// the opt-in beta keeps its saved choice ([USER]: "2) is fine on the
+/// telemetry flip - we currently only have 2 people testing it.").
 /// </summary>
 public sealed class RunStatsConfig : SimpleModConfig
 {
     [ConfigHoverTip]
-    public static bool ShareAnonymousRunStats { get; set; } = false;
+    public static bool ShareAnonymousRunStats { get; set; } = true;
 
     [ConfigHideInUI]
     [ConfigIgnoreRestoreDefaults]
