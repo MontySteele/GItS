@@ -721,7 +721,33 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
             total += SimDamagePipeline.ResolveOnTarget(
                 target, _charges[i].Size * badge * multiplier + dark, paid);
         }
-        return total;
+        return ShellCapped(target, total);
+    }
+
+    /// <summary>
+    /// KIT DISPLAY PASS (2026-10-18), the Klee faces' first line: the printed
+    /// Bomb number left out Hardened Shell's cap while the shell's own badge
+    /// showed it. The shell caps the HP its body can lose this turn
+    /// (<c>HardenedShellPower.ModifyHpLostBeforeOstyLate</c>), after Block, and
+    /// its <c>DisplayAmount</c> is the allowance left, so a Set off here can
+    /// land no more than the enemy's Block plus that. A pile-wide cap, not a
+    /// per-charge one: the allowance is one running total for the turn. PURE;
+    /// display only, the hit itself meets the shell in the engine.
+    /// </summary>
+    public static int ShellCapped(Creature target, int total)
+    {
+        var shell = target.Powers.OfType<HardenedShellPower>().FirstOrDefault();
+        if (shell == null) return total;
+        int left;
+        try
+        {
+            left = shell.DisplayAmount;
+        }
+        catch (System.Exception)
+        {
+            return total;
+        }
+        return System.Math.Min(total, System.Math.Max(0, (int)target.Block) + left);
     }
 
     /// <summary>What Alice's Teapot multiplies the first charge by while it is
