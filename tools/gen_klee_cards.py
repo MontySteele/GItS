@@ -3270,6 +3270,23 @@ YAE_PLANT_KINDS = frozenset({"plant", "plant_level",
                              "replant", "plant_missing", "plant_until_full"})
 
 
+#: The C# `YaePlantShape` each plant kind previews as (the Sakura display).
+YAE_PLANT_SHAPES = {"plant": "Plant", "plant_level": "PlantLevel",
+                    "replant": "Replant", "plant_missing": "PlantMissing",
+                    "plant_until_full": "PlantUntilFull"}
+
+
+def yae_plant_shape(card: dict) -> tuple[str, str] | None:
+    """The row's first `yae` plant op as (`YaePlantShape`, `YaeSakuraKind`)
+    member names, for `ISakuraPlantShapeCard` (the Sakura display's plant
+    preview), or None for a row that plants nothing. Display only."""
+    for fx in iter_effects(card.get("effects") or []):
+        if fx.get("op") == "yae" and fx.get("kind") in YAE_PLANT_KINDS:
+            kind = YAE_SAKURA_KINDS.get(fx.get("as"), "Thunder")
+            return YAE_PLANT_SHAPES[fx["kind"]], kind
+    return None
+
+
 def yae_plants_sakura(card: dict) -> bool:
     """Does this row's own play plant a Sakura? Sim twin:
     `yae_shrine.plants_sakura`."""
@@ -17799,6 +17816,20 @@ def emit(
     # `yae_shrine.plants_sakura`, off the same ops.
     if yae_plants_sakura(card):
         interfaces += ", ISakuraPlanterCard"
+    # THE SAKURA DISPLAY (pick 3 (a) of review/active/yae-pool-to-78-2026-10-15.md):
+    # the same rows say HOW they plant, so hovering one previews "refreshes /
+    # replaces this Sakura" on the slot it touches. Display only.
+    yae_shape_member = ""
+    yae_shape = yae_plant_shape(card)
+    if yae_shape is not None:
+        interfaces += ", ISakuraPlantShapeCard"
+        yae_shape_member = (
+            "\n\n    /// <summary>How this card plants (the Sakura display's "
+            "preview).</summary>\n"
+            f"    public YaePlantShape SakuraPlantShape => YaePlantShape.{yae_shape[0]};"
+            "\n\n    /// <summary>The kind it plants (Replanting's and Genre "
+            "Shift's are read off the shrine).</summary>\n"
+            f"    public YaeSakuraKind SakuraPlantKind => YaeSakuraKind.{yae_shape[1]};")
     # The same rule's Block fact: a `yae` kind that gives the card's own
     # Block (Hide Behind the Shrine's "gain 5 more", the refill) declares no
     # BlockVar, so `GainsBlock` cannot see it
@@ -19387,7 +19418,7 @@ public sealed class {cls} : {interfaces}
     {{
         ("title", "{title_cs}"),
         ("description", {desc_expr}),
-    }};{tags_member}{wide_target_member}{flip_member}{discard_discount_member}{stage_bow_member}{transcendence_member}{varka_switch_member}{return_to_hand_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{plan_gate_member}{plan_reason_member}{stage_gate_member}{stage_reason_member}{playable_gate_member}{playable_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}{homework_member}
+    }};{tags_member}{wide_target_member}{flip_member}{discard_discount_member}{stage_bow_member}{transcendence_member}{varka_switch_member}{yae_shape_member}{return_to_hand_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{plan_gate_member}{plan_reason_member}{stage_gate_member}{stage_reason_member}{playable_gate_member}{playable_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}{homework_member}
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

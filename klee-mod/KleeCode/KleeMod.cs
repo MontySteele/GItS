@@ -611,6 +611,8 @@ public static class KleeMod
                         "Kitsune Sakura",
                     [Cards.ArmKeywordTips.FullShrineKey + ".title"] =
                         "Full shrine",
+                    // The Sakura display's slot hover (the pool to 78, pick 3 (a)).
+                    [Vfx.YaeSakuraSlots.SlotTitleKey + ".title"] = "Shrine",
                     [Cards.ArmKeywordTips.LightfallSwordKey + ".title"] =
                         "Lightfall Sword",
                     [Cards.ArmKeywordTips.PlanOnlyKey + ".title"] = "Plan",

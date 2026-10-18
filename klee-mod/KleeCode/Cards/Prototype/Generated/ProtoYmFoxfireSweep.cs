@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoYmFoxfireSweep : CustomCardModel, IElementalCard, ICharacterCard, ISakuraPlanterCard
+public sealed class ProtoYmFoxfireSweep : CustomCardModel, IElementalCard, ICharacterCard, ISakuraPlanterCard, ISakuraPlantShapeCard
 {
     /// <summary>Sheet: all Yae attacks apply Electro (catalyst-grade cadence).</summary>
     public Element Element => Element.Electro;
@@ -53,6 +53,12 @@ public sealed class ProtoYmFoxfireSweep : CustomCardModel, IElementalCard, IChar
         ("title", "Foxfire Sweep"),
         ("description", "Deal {Damage:diff()} [gold]Electro[/gold] damage to ALL enemies. Plant a [gold]Foxfire Sakura[/gold]. It strikes now."),
     };
+
+    /// <summary>How this card plants (the Sakura display's preview).</summary>
+    public YaePlantShape SakuraPlantShape => YaePlantShape.Plant;
+
+    /// <summary>The kind it plants (Replanting's and Genre Shift's are read off the shrine).</summary>
+    public YaeSakuraKind SakuraPlantKind => YaeSakuraKind.Foxfire;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
