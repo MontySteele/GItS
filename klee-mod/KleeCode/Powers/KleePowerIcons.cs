@@ -92,14 +92,14 @@ internal static class KleePowerIcons
             KleePck.Path("klee/powers/spark_threshold_down.png"),
         AlicesDetonatorBasePower =>
             KleePck.Path("klee/powers/witchs_flame.png"),
-        // THE STATUS PACKAGE (2026-10-01), on the block above's terms:
-        // Finders Keepers places a Bomb off an event (Party Poppers' badge),
-        // Damage Report hits ALL off an event (Spark Knight's), and Solitary
-        // Confinement changes a cost (Playdate's). Illustrations owed.
-        FindersKeepersPower =>
-            KleePck.Path("klee/powers/bomb_and_spark_per_turn.png"),
-        DamageReportPower =>
-            KleePck.Path("klee/powers/spark_threshold_down.png"),
+        // THE STATUS PACKAGE (2026-10-01): Finders Keepers and Damage Report
+        // wear their own badges since the art gaps pass (2026-10-18, art/plan.tsv
+        // power_klee_*), Klee's talent icons; the borrowed badge stays the
+        // fallback for a pck built before the art.
+        FindersKeepersPower => KleePck.Path("klee/powers/finders_keepers.png")
+            ?? KleePck.Path("klee/powers/bomb_and_spark_per_turn.png"),
+        DamageReportPower => KleePck.Path("klee/powers/damage_report.png")
+            ?? KleePck.Path("klee/powers/spark_threshold_down.png"),
         // R252's DEFENCE-SHELF POWER, on the block above's terms verbatim: it
         // borrows Grounded's icon, because Grounded is the power whose job it
         // takes over one trigger along -- both pay Block off the arm's own
@@ -242,10 +242,14 @@ internal static class KleePowerIcons
             KleePck.Path("klee/powers/passion_overload.png"),
         SturmUndDrangPower => KleePck.Path("klee/powers/amp_reaction_up.png"),
         FavonianFavorPower => KleePck.Path("klee/powers/celestial_gift.png"),
-        // Durin, Principle of Purity (AoE trim, 2026-10-03): Binary Form's icon.
-        PurityStrikePower => KleePck.Path("klee/powers/witchs_flame.png"),
-        PurityWhitePower => KleePck.Path("klee/powers/witchs_flame.png"),
-        PurityDarkPower => KleePck.Path("klee/powers/witchs_flame.png"),
+        // Durin, Principle of Purity: his own talent icons (art gaps pass
+        // 2026-10-18, art/plan.tsv power_purity_*), Binary Form's as fallback.
+        PurityStrikePower => KleePck.Path("klee/powers/purity_strike.png")
+            ?? KleePck.Path("klee/powers/witchs_flame.png"),
+        PurityWhitePower => KleePck.Path("klee/powers/purity_white.png")
+            ?? KleePck.Path("klee/powers/witchs_flame.png"),
+        PurityDarkPower => KleePck.Path("klee/powers/purity_dark.png")
+            ?? KleePck.Path("klee/powers/witchs_flame.png"),
         SacramentalShowerPower =>
             KleePck.Path("klee/powers/detonation_splash.png"),
         BaronBunnyPower => KleePck.Path("klee/powers/detonation_splash.png"),
@@ -526,24 +530,31 @@ internal static class KleePowerIcons
         // with the Rite, shrine r2.)
         SerialNovelPower => KleePck.Path("yae/powers/editor_in_chief.png")
             ?? KleePck.Path("varka/powers/electro_wind.png"),
-        // The pool to 78 (2026-10-15): no new art (the build generated
-        // none), so each new Power borrows her badge nearest its rule until
-        // its art pass (a BACKLOG line).
-        EnlightenedBlessingPower => KleePck.Path("yae/powers/sakura.png")
+        // The pool to 78 (2026-10-15) and the refill: their own badges since
+        // the art gaps pass (2026-10-18, art/plan.tsv power_yae_*), each with
+        // the badge it borrowed before as the fallback.
+        EnlightenedBlessingPower => KleePck.Path("yae/powers/enlightened_blessing.png")
+            ?? KleePck.Path("yae/powers/sakura.png")
             ?? KleePck.Path("klee/powers/oz_summon.png"),
-        SaiguusLessonPower => KleePck.Path("yae/powers/foxfire_lure.png")
+        SaiguusLessonPower => KleePck.Path("yae/powers/saiguus_lesson.png")
+            ?? KleePck.Path("yae/powers/foxfire_lure.png")
             ?? KleePck.Path("klee/powers/detonation_vuln.png"),
-        SacredShadePower => KleePck.Path("yae/powers/yakan_offering.png")
+        SacredShadePower => KleePck.Path("yae/powers/sacred_shade.png")
+            ?? KleePck.Path("yae/powers/yakan_offering.png")
             ?? KleePck.Path("klee/powers/oz_summon.png"),
-        EditorialPriorityPower => KleePck.Path("yae/powers/serialization.png")
+        EditorialPriorityPower => KleePck.Path("yae/powers/editorial_priority.png")
+            ?? KleePck.Path("yae/powers/serialization.png")
             ?? KleePck.Path("klee/powers/passion_overload.png"),
-        StellarConductPower => KleePck.Path("yae/powers/edict_of_cleansing.png")
+        StellarConductPower => KleePck.Path("yae/powers/stellar_conduct.png")
+            ?? KleePck.Path("yae/powers/edict_of_cleansing.png")
             ?? KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
-        EternityPower => KleePck.Path("yae/powers/sakura_grove.png")
+        EternityPower => KleePck.Path("yae/powers/eternity.png")
+            ?? KleePck.Path("yae/powers/sakura_grove.png")
             ?? KleePck.Path("klee/powers/bomb_damage_up.png"),
-        // The refill (2026-10-16): no new art; Hunting Gaze borrows the
-        // Lure's badge, the other aim.
-        HuntingGazePower => KleePck.Path("yae/powers/foxfire_lure.png")
+        // The refill (2026-10-16): Hunting Gaze's own badge, the Lure's as
+        // the fallback.
+        HuntingGazePower => KleePck.Path("yae/powers/hunting_gaze.png")
+            ?? KleePck.Path("yae/powers/foxfire_lure.png")
             ?? KleePck.Path("klee/powers/detonation_vuln.png"),
         // The Yae pass (2026-10-16): Yae Publishing House, her Dusty Tome
         // Ancient, borrows Serialization's badge (the Edit's) until its art.

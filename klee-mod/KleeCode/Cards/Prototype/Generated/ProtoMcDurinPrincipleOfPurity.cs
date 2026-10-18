@@ -48,7 +48,7 @@ public sealed class ProtoMcDurinPrincipleOfPurity : CustomCardModel, ICompanionC
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         ArmKeywordTips.ForElementalReaction(base.ExtraHoverTips, this);
 
-    public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_durin_binary_form");
+    public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_durin_principle_of_purity");
 
     public override List<(string, string)>? Localization => new()
     {
@@ -120,7 +120,7 @@ public sealed class ProtoMcDurinPrincipleOfPurityModeA : ModalOptionCard
     /// pre-EB-275 answer that sends the game to its own card_atlas for an id
     /// only this mod knows (proofs-8a, 2026-09-16).</summary>
     public override Texture2D? CustomPortrait =>
-        KleeArt.CardPortrait("proto_mc_durin_binary_form");
+        KleeArt.CardPortrait("proto_mc_durin_principle_of_purity");
 
     public override List<(string, string)>? Localization => new()
     {
@@ -152,7 +152,7 @@ public sealed class ProtoMcDurinPrincipleOfPurityModeB : ModalOptionCard
     /// pre-EB-275 answer that sends the game to its own card_atlas for an id
     /// only this mod knows (proofs-8a, 2026-09-16).</summary>
     public override Texture2D? CustomPortrait =>
-        KleeArt.CardPortrait("proto_mc_durin_binary_form");
+        KleeArt.CardPortrait("proto_mc_durin_principle_of_purity");
 
     public override List<(string, string)>? Localization => new()
     {

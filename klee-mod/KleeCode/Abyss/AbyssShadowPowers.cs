@@ -111,27 +111,23 @@ public sealed class AbyssFatuiSkirmishersShadowPower : AbyssShadowPower
 public sealed class AbyssThornyGroundShadowPower : AbyssShadowPower
 {
     public override AbyssShadow Shadow => AbyssShadow.ThornyGround;
-    // A stand-in icon until its own is fetched (BACKLOG, art owed).
-    public override string IconFile => "abyss/powers/shadow_herald.png";
+    public override string IconFile => "abyss/powers/shadow_thorny_ground.png";
 }
 
 public sealed class AbyssBulwarkShadowPower : AbyssShadowPower
 {
     public override AbyssShadow Shadow => AbyssShadow.Bulwark;
-    // A stand-in icon until its own is fetched (BACKLOG, art owed).
-    public override string IconFile => "abyss/powers/shadow_fatui_skirmishers.png";
+    public override string IconFile => "abyss/powers/shadow_bulwark.png";
 }
 
 public sealed class AbyssFrenzyShadowPower : AbyssShadowPower
 {
     public override AbyssShadow Shadow => AbyssShadow.Frenzy;
-    // A stand-in icon until its own is fetched (BACKLOG, art owed).
-    public override string IconFile => "abyss/powers/shadow_rally.png";
+    public override string IconFile => "abyss/powers/shadow_frenzy.png";
 }
 
 public sealed class AbyssWitheringShadowPower : AbyssShadowPower
 {
     public override AbyssShadow Shadow => AbyssShadow.Withering;
-    // A stand-in icon until its own is fetched (BACKLOG, art owed).
-    public override string IconFile => "abyss/powers/shadow_sheer_cold.png";
+    public override string IconFile => "abyss/powers/shadow_withering.png";
 }

@@ -118,7 +118,7 @@ public static class KleeStory
                         new StoryEffect(StoryEffectKind.RemoveCard),
                         "Klee puts the fuse away and watches the fish swim past."),
                 },
-                Portrait: () => KleeArt.CardPortrait("proto_ko_fish_fry"),
+                Portrait: () => KleeArt.CardPortrait("event_klee_starsnatch_cliff"),
                 FallbackPortraitPath: "res://images/events/wellspring.png"),
 
             new StoryEvent(
@@ -145,7 +145,7 @@ public static class KleeStory
                         new StoryEffect(StoryEffectKind.UpgradeRandomBombCards, 2),
                         "It folds into a perfect little bomb. Jean won't mind. Probably."),
                 },
-                Portrait: () => KleeArt.CardPortrait("proto_ko_behind_jeans_desk"),
+                Portrait: () => KleeArt.CardPortrait("event_klee_letter_from_jean"),
                 FallbackPortraitPath: "res://images/events/self_help_book.png")
             {
                 Follows = new[] { typeof(KleeStarsnatchCliff) },
@@ -178,7 +178,7 @@ public static class KleeStory
                         "Klee: \"You can all come! Dodoco, make room!\" Three knights fall in behind her, "
                       + "trying very hard to look like they were planning to anyway."),
                 },
-                Portrait: () => KleeArt.CardPortrait("proto_ko_favonius_escort"),
+                Portrait: () => KleeArt.CardPortrait("event_klee_knights_come_looking"),
                 FallbackPortraitPath: "res://images/events/the_legends_were_true.png")
             {
                 Follows = new[] { typeof(KleeLetterFromJean), typeof(KleeFoundYou) },
@@ -231,7 +231,7 @@ public static class KleeStory
                         Then = new[] { new StoryEffect(StoryEffectKind.AddCard, 0, typeof(MegaCrit.Sts2.Core.Models.Cards.Doubt)) },
                     },
                 },
-                Portrait: () => KleeArt.CardPortrait("proto_ko_dodoco"),
+                Portrait: () => KleeArt.CardPortrait("event_klee_dodoco_goes_missing"),
                 FallbackPortraitPath: "res://images/events/wellspring.png"),
 
             new StoryEvent(
@@ -266,7 +266,7 @@ public static class KleeStory
                         Then = DodocoHome,
                     },
                 },
-                Portrait: () => KleeArt.CardPortrait("proto_ko_dodoco_tag"),
+                Portrait: () => KleeArt.CardPortrait("event_klee_found_you"),
                 FallbackPortraitPath: "res://images/events/self_help_book.png")
             {
                 Follows = new[] { typeof(KleeDodocoGoesMissing) },
@@ -309,7 +309,7 @@ public static class KleeStory
                         new StoryEffect(StoryEffectKind.UpgradeRandomCards, 2),
                         "A bomb, a star, and \"Klee was here too!\""),
                 },
-                Portrait: () => KleeArt.CardPortrait("proto_ko_alices_recipe"),
+                Portrait: () => KleeArt.CardPortrait("event_klee_moms_marks"),
                 FallbackPortraitPath: "res://images/events/wellspring.png"),
 
             new StoryEvent(
@@ -349,7 +349,7 @@ public static class KleeStory
                         new StoryEffect(StoryEffectKind.Nothing),
                         "Klee tiptoes backwards all the way to the stairs. Dodoco keeps watch."),
                 },
-                Portrait: () => KleeArt.CardPortrait("proto_ko_alices_detonator"),
+                Portrait: () => KleeArt.CardPortrait("event_klee_alices_cache"),
                 FallbackPortraitPath: "res://images/events/self_help_book.png")
             {
                 Follows = new[] { typeof(KleeMomsMarks) },
@@ -392,7 +392,7 @@ public static class KleeStory
                         ShownIf = SavedTheCache with { Not = true },
                     },
                 },
-                Portrait: () => KleeArt.CardPortrait("proto_ko_alices_introduction_magic"),
+                Portrait: () => KleeArt.CardPortrait("event_klee_moms_last_note"),
                 FallbackPortraitPath: "res://images/events/the_legends_were_true.png")
             {
                 Follows = new[] { typeof(KleeAlicesCache) },
