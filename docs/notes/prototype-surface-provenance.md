@@ -9590,7 +9590,8 @@ Card paper sec.6 (`review/active/kokomi-cards-2026-10-18.md`), ruled: "Makes
 sense! ... let's do both."
 
 - **Tideturn, Feint, Turning Tide, Shoal of Spears**: their Plan counts skip a
-  Sting's or Ward's Plan ("Stings and Wards don't count."). Tideturn and the
+  Sting's or Ward's Plan ("(not Stings or Wards)"; Turning Tide says "per Plan" to fit the
+  120-character ceiling). Tideturn and the
   Shoal read `chain_plans_held` / `chain_plans_held_plus_one`
   (`KokomiPlan.ChainPlansHeld`); Feint and Turning Tide read the ledger's
   `ChainPlansThisTurn` (`kk_chain_plans_this_turn`). The token is the line's

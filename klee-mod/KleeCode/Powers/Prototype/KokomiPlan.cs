@@ -2612,7 +2612,7 @@ public static class KokomiPlan
         // THE POOL OVERHAUL (2026-10-13). Chain: the rate times the Plans
         // carried out this turn, this one included (the count rose before
         // the clauses ran). Counter: the entry's own window.
-        // Kokomi v3 (2026-10-18): Stings and Wards don't count.
+        // Kokomi v3 (2026-10-18): not Stings or Wards.
         Kind.DamagePerPlanThisTurn =>
             plan.Amount
             * KokomiOverhaulLedger.For(kokomi).ChainPlansThisTurn,

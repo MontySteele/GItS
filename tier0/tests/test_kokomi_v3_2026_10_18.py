@@ -4,7 +4,7 @@ Card paper `review/active/kokomi-cards-2026-10-18.md` sec.6; [USER]: "Makes
 sense! ... let's do both."
 
   1. Tideturn, Feint, Turning Tide and Shoal of Spears stop counting Plans
-     that are Stings or Wards ("Stings and Wards don't count."). Breakwater
+     that are Stings or Wards ("(not Stings or Wards)"). Breakwater
      and Battle Formation keep counting every Plan.
   2. Unbroken Tide, Uncommon Skill, 1: "Gain 8 [11] Block. Plan: If you lost
      no HP since you planned this, deal 12 [16] Hydro damage to ALL enemies."
@@ -24,7 +24,7 @@ from tier0.tests.test_kokomi_refounding import (  # noqa: F401
     caches, card, carry_out, kokomi_state, write)
 
 ATTACK = [{"kind": "attack", "amount": 6}]
-STING_TAIL = " Stings and Wards don't count."
+STING_TAIL = " (not Stings or Wards)."
 
 
 def _face(cid):
@@ -62,19 +62,19 @@ def _plan_jellyfish(st):
 def test_the_four_faces_say_stings_and_wards_dont_count():
     assert _face("proto_kk_tideturn") == (
         "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus "
-        "{ExtraDamage:diff()} for each [gold]Plan[/gold] waiting." + STING_TAIL
+        "{ExtraDamage:diff()} for each [gold]Plan[/gold] waiting" + STING_TAIL
         + "{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}")
     assert _face("proto_kk_feint") == (
         "Deal 8 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 6 "
         "[gold]Hydro[/gold] damage for each [gold]Plan[/gold] carried out "
-        "this turn." + STING_TAIL)
+        "this turn" + STING_TAIL)
     assert _face("proto_kk_turning_tide_chain") == (
         "Deal 9 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 5 "
-        "[gold]Hydro[/gold] damage to ALL enemies for each [gold]Plan[/gold] "
-        "carried out this turn." + STING_TAIL)
+        "[gold]Hydro[/gold] damage to ALL enemies per [gold]Plan[/gold] "
+        "carried out this turn" + STING_TAIL)
     assert _face("proto_kk_shoal_of_spears") == (
         "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies, plus "
-        "once more for each [gold]Plan[/gold] waiting." + STING_TAIL
+        "once more for each [gold]Plan[/gold] waiting" + STING_TAIL
         + "{InCombat:\n(Deals {TotalDamage:diff()} damage)|}")
 
 

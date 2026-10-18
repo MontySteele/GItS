@@ -5575,7 +5575,7 @@ RUNTIME_TIMES_TEXT = {
     "plans_held": " once for each [gold]Plan[/gold] waiting",
     "plans_held_plus_one": ", plus once more for each [gold]Plan[/gold] waiting",
     "chain_plans_held_plus_one": (", plus once more for each [gold]Plan[/gold]"
-                                  " waiting. Stings and Wards don't count"),
+                                  " waiting (not Stings or Wards)"),
 }
 
 
@@ -7150,7 +7150,7 @@ KOKOMI_CASKET_COUNTS = {
     "plans_held": "static (card, _) => KokomiPlan.PlansHeld("
                   "card.Owner.Creature)",
     # Kokomi v3 (2026-10-18, card paper sec.6), Tideturn: "for each Plan
-    # waiting. Stings and Wards don't count." Breakwater keeps `plans_held`.
+    # waiting. not Stings or Wards." Breakwater keeps `plans_held`.
     "chain_plans_held": "static (card, _) => KokomiPlan.ChainPlansHeld("
                         "card.Owner.Creature)",
 }

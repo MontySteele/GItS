@@ -51,7 +51,7 @@ public sealed class ProtoKkFeint : CustomCardModel, IElementalCard, ICharacterCa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Feint"),
-        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage.\nOr [gold]plan[/gold]: Deal {PlanDamage:diff()} [gold]Hydro[/gold] damage for each [gold]Plan[/gold] carried out this turn. Stings and Wards don't count."),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage.\nOr [gold]plan[/gold]: Deal {PlanDamage:diff()} [gold]Hydro[/gold] damage for each [gold]Plan[/gold] carried out this turn (not Stings or Wards)."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

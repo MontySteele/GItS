@@ -2080,7 +2080,7 @@ def test_feints_face_prints_the_plan_line_it_can_write(overhaul):
     (2026-10-13) the line is a Chain: it pays for the Plans landed with it."""
     faces = _faces()
     assert ("[gold]Plan[/gold]: Deal 6 [gold]Hydro[/gold] damage for each "
-            "[gold]Plan[/gold] carried out this turn.") in \
+            "[gold]Plan[/gold] carried out this turn (not Stings or Wards).") in \
         faces["proto_kk_feint"]
 
 

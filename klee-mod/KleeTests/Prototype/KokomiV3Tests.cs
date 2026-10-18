@@ -22,7 +22,7 @@ namespace KleeMod.Tests.Prototype;
 [Collection(KleeOverhaulArm.Name)]
 public class KokomiV3Tests
 {
-    private const string Tail = " Stings and Wards don't count.";
+    private const string Tail = " (not Stings or Wards).";
 
     private static T Upgraded<T>() where T : CardModel, new()
     {
@@ -47,23 +47,23 @@ public class KokomiV3Tests
     {
         Assert.Equal(
             "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus "
-          + "{ExtraDamage:diff()} for each [gold]Plan[/gold] waiting." + Tail
+          + "{ExtraDamage:diff()} for each [gold]Plan[/gold] waiting" + Tail
           + "{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
             Face(new ProtoKkTideturn()));
         Assert.Equal(
             "Deal {Damage:diff()} [gold]Hydro[/gold] damage.\nOr "
           + "[gold]plan[/gold]: Deal {PlanDamage:diff()} [gold]Hydro[/gold] "
-          + "damage for each [gold]Plan[/gold] carried out this turn." + Tail,
+          + "damage for each [gold]Plan[/gold] carried out this turn" + Tail,
             Face(new ProtoKkFeint()));
         Assert.Equal(
             "Deal {Damage:diff()} [gold]Hydro[/gold] damage.\nOr "
           + "[gold]plan[/gold]: Deal {PlanDamage:diff()} [gold]Hydro[/gold] "
-          + "damage to ALL enemies for each [gold]Plan[/gold] carried out "
-          + "this turn." + Tail,
+          + "damage to ALL enemies per [gold]Plan[/gold] carried out "
+          + "this turn" + Tail,
             Face(new ProtoKkTurningTideChain()));
         Assert.Equal(
             "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies, "
-          + "plus once more for each [gold]Plan[/gold] waiting." + Tail
+          + "plus once more for each [gold]Plan[/gold] waiting" + Tail
           + "{InCombat:\n(Deals {TotalDamage:diff()} damage)|}",
             Face(new ProtoKkShoalOfSpears()));
         Assert.DoesNotContain("Stings", Face(new ProtoKkBreakwater()));

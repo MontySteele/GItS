@@ -162,13 +162,13 @@ three Stings and then playing Tideturn deals 32 now plus 9 to every enemy next t
 and then The Shape of Water deals 32 now and nothing more. So planning won outright, and Shape was offered seven
 times and never taken. The new texts:
 
-- Tideturn: "Deal 8 Hydro damage, plus 8 for each Plan waiting. Stings and Wards don't count."
-- Feint: "Deal 8 Hydro damage. Plan: Deal 6 Hydro damage for each Plan carried out this turn. Stings and Wards
-  don't count."
-- Turning Tide: "Deal 9 Hydro damage. Plan: Deal 5 Hydro damage to ALL enemies for each Plan carried out this
-  turn. Stings and Wards don't count."
-- Shoal of Spears: "Deal 5 Hydro damage to ALL enemies, plus once more for each Plan waiting. Stings and Wards
-  don't count."
+- Tideturn: "Deal 8 Hydro damage, plus 8 for each Plan waiting (not Stings or Wards)."
+- Feint: "Deal 8 Hydro damage. Plan: Deal 6 Hydro damage for each Plan carried out this turn (not Stings or
+  Wards)."
+- Turning Tide: "Deal 9 Hydro damage. Plan: Deal 5 Hydro damage to ALL enemies per Plan carried out this turn
+  (not Stings or Wards)."
+- Shoal of Spears: "Deal 5 Hydro damage to ALL enemies, plus once more for each Plan waiting (not Stings or
+  Wards)."
 
 Under these texts, three planned Stings with Tideturn give 8 now and 9 next turn, against Shape's 32 now. The
 Shoal is now the deck that wants damage this turn, and Grand Strategy is the one that arranges real Plans.

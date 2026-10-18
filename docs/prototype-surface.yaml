@@ -1244,7 +1244,7 @@
    # Pool overhaul (2026-10-13): a Chain Plan. Review r5: Plan 5 -> 6.
    # Kokomi review r8 (2026-10-14) item 5: the now-line is a flat 8 (was
    # 8, plus 3 per Plan waiting). Provenance notes.
-   description: "Deal 8 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 6 [gold]Hydro[/gold] damage for each [gold]Plan[/gold] carried out this turn. Stings and Wards don't count.",
+   description: "Deal 8 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 6 [gold]Hydro[/gold] damage for each [gold]Plan[/gold] carried out this turn (not Stings or Wards).",
    effects: [{op: damage, amount: 8, target: enemy}],
    plan: [{op: damage_per_plan_this_turn, amount: 6, target: front_enemy}],
    # 10 / Plan 8 per Plan.
@@ -1587,8 +1587,8 @@
    cost: 1, type: attack, rarity: uncommon,
    # Kokomi level pass (2026-10-12, sec.2): a floor of 8 [10] with none
    # waiting (was 0), Feint's shape.
-   # Kokomi v3, 2026-10-18, card paper sec.6: Stings and Wards don't count.
-   description: "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus {ExtraDamage:diff()} for each [gold]Plan[/gold] waiting. Stings and Wards don't count.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   # Kokomi v3, 2026-10-18, card paper sec.6: not Stings or Wards.
+   description: "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus {ExtraDamage:diff()} for each [gold]Plan[/gold] waiting (not Stings or Wards).{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: enemy,
               amount_formula: {base: 8, per: 8, count: chain_plans_held}}],
    # 10, plus 10 each. 2026-10-11 Kokomi card pass: 4 [5] -> 6 [8]. Kokomi round 2 (2026-10-12): 8 [10].
@@ -1869,7 +1869,7 @@
    # The re-founding (2026-10-12): one hit per Plan waiting (was per Plan
    # written this turn).
    # Kokomi level pass (2026-10-12, sec.2): always hits at least once.
-   description: "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies, plus once more for each [gold]Plan[/gold] waiting. Stings and Wards don't count.{InCombat:\n(Deals {TotalDamage:diff()} damage)|}",
+   description: "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies, plus once more for each [gold]Plan[/gold] waiting (not Stings or Wards).{InCombat:\n(Deals {TotalDamage:diff()} damage)|}",
    effects: [{op: damage, amount: 5, target: all_enemies,
               times: chain_plans_held_plus_one}],
    # 6 a hit. Kokomi round 2 (2026-10-12): 4 [5] -> 5 [6].
@@ -2012,8 +2012,8 @@
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
    # kokomi-review-r5-2026-10-14 numbers pass: 7 -> 9, Plan 4 -> 5 per Plan.
-   # Kokomi v3, 2026-10-18, card paper sec.6: Stings and Wards don't count.
-   description: "Deal 9 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 5 [gold]Hydro[/gold] damage to ALL enemies for each [gold]Plan[/gold] carried out this turn. Stings and Wards don't count.",
+   # Kokomi v3, 2026-10-18, card paper sec.6: not Stings or Wards.
+   description: "Deal 9 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 5 [gold]Hydro[/gold] damage to ALL enemies per [gold]Plan[/gold] carried out this turn (not Stings or Wards).",
    effects: [{op: damage, amount: 9, target: enemy}],
    plan: [{op: damage_per_plan_this_turn, amount: 5, target: all_enemies}],
    # 12 / Plan 6 per Plan.
