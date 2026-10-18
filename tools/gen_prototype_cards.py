@@ -90,7 +90,9 @@ REPO = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(REPO))
 
 import tools.gen_klee_cards as gen                            # noqa: E402
-from tier0.content.loader import PROTOTYPE_ID_PREFIX          # noqa: E402
+from tier0.content.loader import (COMPANION_POOL_KEY,         # noqa: E402
+                                  PROTOTYPE_ID_PREFIX,
+                                  is_shared_companion_row)
 from tier0.content.upgrades import prototype_default_delta    # noqa: E402
 from tier0.content import yaml_memo                          # noqa: E402
 from understudy import authorship                             # noqa: E402
@@ -367,6 +369,12 @@ def plan() -> gen.ProfilePlan:
     rows = _rows()
     generated: dict[str, str] = {}
     owners: dict[str, str] = {}
+    # THE POOL a row's class joins, which is its owner EXCEPT for a shared
+    # companion (legacy review pick 4, [USER] 2026-10-18: "Shared companions
+    # move to their own pool with a neutral frame, out of Klee's"). `owners`
+    # stays the emitting profile -- art path, element, text -- so only the
+    # frame moves.
+    pools: dict[str, str] = {}
     # EB-213: the row-carried upgrade deltas, recorded so "can this staged
     # card be smithed, and to what?" is answerable from the manifest rather
     # than by re-reading the sheet.
@@ -449,12 +457,14 @@ def plan() -> gen.ProfilePlan:
                     "the runtime work first.")
         generated[card_id] = gen.emit(card, profile)
         owners[card_id] = character
+        pools[card_id] = (COMPANION_POOL_KEY if is_shared_companion_row(card)
+                          else character)
         mode_faces[card_id] = gen._modal_option_names([card], {card_id})
 
     # Emitted ALWAYS, empty surface included: `KleeMod.PrototypeCards` names
     # this class under `#if PROTOTYPE_CARDS`, so a dev build of an empty
     # surface must still compile. An empty surface is the healthy state.
-    generated["prototype_roster"] = _roster_source(owners, mode_faces)
+    generated["prototype_roster"] = _roster_source(pools, mode_faces)
 
     manifest = {
         "_comment": (
@@ -470,6 +480,10 @@ def plan() -> gen.ProfilePlan:
         },
         "generated": sorted(generated.keys() - {"prototype_roster"}),
         "owners": dict(sorted(owners.items())),
+        # The rows whose POOL is not their owner's: the shared companions,
+        # in `CompanionCardPool` with the neutral frame (legacy review pick 4).
+        "companion_pool": sorted(cid for cid, pool in pools.items()
+                                 if pool == COMPANION_POOL_KEY),
         # Named rather than merely emitted, so "did this row's mode faces
         # reach a pool?" is answerable from the manifest -- EB-150 shipped
         # because nothing wrote that question down anywhere.
@@ -493,13 +507,19 @@ def plan() -> gen.ProfilePlan:
         stale_label="Prototype ",
         up_to_date="gen_prototype_cards: prototype surface up to date",
         summary=[f"prototype: generated {count} card(s)"]
-        + [f"  {card_id} -- {owner}" for card_id, owner in sorted(owners.items())],
+        + [f"  {card_id} -- {owner}"
+           + (" (companion pool)" if pools[card_id] == COMPANION_POOL_KEY else "")
+           for card_id, owner in sorted(owners.items())],
     )
 
 
 def _roster_source(owners: dict[str, str],
                    mode_faces: dict[str, list[str]] | None = None) -> str:
-    """`PrototypeRoster.For(characterId)` -- membership, split by owner.
+    """`PrototypeRoster.For(characterId)` -- membership, split by POOL.
+
+    `owners` maps each row to the pool it joins: its character, or
+    `"companion"` for a shared companion (`CompanionCardPool`, legacy review
+    pick 4), which is a key of the switch like any character's.
 
     Split by owner because `CardModel.Pool` supplies the card FRAME and the
     energy icon: a Kokomi prototype resolved through `KleeCardPool` would draw
@@ -517,7 +537,7 @@ def _roster_source(owners: dict[str, str],
     fields: list[str] = []
     builders: list[str] = []
     arms: list[str] = []
-    for character in sorted(gen.PROTOTYPE_OWNERS):
+    for character in sorted(gen.PROTOTYPE_OWNERS) + [COMPANION_POOL_KEY]:
         ids = sorted(cid for cid, owner in owners.items() if owner == character)
         classes = [gen.pascal(cid) for cid in ids]
         for cid in ids:
@@ -542,7 +562,8 @@ def _roster_source(owners: dict[str, str],
 //
 //     The prototype surface: the current kits, compiled in every build. Each
 //     character's pool holds its rows so CardModel.Pool resolves (a poolless
-//     card throws "You monster!" on draw); what may be offered is each kit's
+//     card throws "You monster!" on draw), and the shared companions are
+//     CompanionCardPool's ("companion"); what may be offered is each kit's
 //     roster (PrototypeCards.cs).
 // </auto-generated>
 
@@ -569,7 +590,8 @@ public static class PrototypeRoster
 
 {builder_body}
 
-    /// <summary>Prototype rows owned by one character, or none.</summary>
+    /// <summary>Prototype rows in one character's pool, or in the shared
+    /// companion pool (`"companion"`), or none.</summary>
     public static IReadOnlyList<CardModel> For(string characterId) =>
         characterId switch
         {{

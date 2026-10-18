@@ -585,9 +585,15 @@ def test_prototype_cards_are_each_characters_pool(tmp_path, monkeypatch):
     code = REPO / "klee-mod" / "KleeCode"
     for path, character in (("KleeCardPool.cs", "klee"),
                             ("FurinaCardPool.cs", "furina"),
-                            ("KokomiCardPool.cs", "kokomi")):
+                            ("KokomiCardPool.cs", "kokomi"),
+                            ("CompanionCardPool.cs", "companion")):
         body = (code / path).read_text(encoding="utf-8")
         assert f'PrototypeCards.For("{character}")' in body, path
+    # The shared pool is only visible to `CardModel.Pool` because BaseLib
+    # registers an `IsShared` CustomCardPoolModel (legacy review pick 4).
+    shared = (code / "CompanionCardPool.cs").read_text(encoding="utf-8")
+    assert ": CustomCardPoolModel" in shared
+    assert "public override bool IsShared => true;" in shared
 
     from tools import lint_pool_membership
     roster = (code / "Cards" / "Prototype" / "Generated" / "PrototypeRoster.cs")

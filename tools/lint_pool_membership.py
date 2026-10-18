@@ -18,11 +18,14 @@ Both cases were cards deliberately kept OUT of KleeCardPool -- companions
 statuses (created at play time). "Not rollable" is a legitimate design
 position; "in no pool at all" is never legitimate.
 
-THE POOLS THAT COUNT are character-owned pools. ModelDb.AllCardPools is
-AllCharacters.Select(c => c.CardPool) plus a hardcoded array of shared pools,
-so an unattached helper pool is invisible. Membership therefore means
-reachable from KleeCardPool, FurinaCardPool or KokomiCardPool. Their FilterThroughEpochs
-overrides keep generated-only kit/token cards out of reward rolls.
+THE POOLS THAT COUNT are character-owned pools and BaseLib shared pools.
+ModelDb.AllCardPools is AllCharacters.Select(c => c.CardPool) plus the shared
+pools, a hardcoded array that BaseLib's ModelDbSharedCardPoolsPatch extends
+with every CustomCardPoolModel declaring IsShared -- so a plain helper pool is
+invisible. Membership therefore means reachable from a character's pool or
+from CompanionCardPool (the shared companions, legacy review pick 4). Their
+FilterThroughEpochs overrides keep generated-only kit/token cards out of
+reward rolls.
 
 Usage: python tools/lint_pool_membership.py
 Exit 1 with findings on stdout if any card class is unpooled.
@@ -44,6 +47,9 @@ MEMBERSHIP_FILES = [
     REPO / "klee-mod" / "KleeCode" / "RosterAncientCards.cs",
     REPO / "klee-mod" / "KleeCode" / "FurinaCardPool.cs",
     REPO / "klee-mod" / "KleeCode" / "KokomiCardPool.cs",
+    # The shared companions' pool (BaseLib IsShared), whose members are
+    # PrototypeRoster's "companion" arm below.
+    REPO / "klee-mod" / "KleeCode" / "CompanionCardPool.cs",
     # The prototype surface: every current-kit card. `PrototypeCards.For`
     # hands this roster to each character's GenerateAllCards.
     REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype" / "Generated"

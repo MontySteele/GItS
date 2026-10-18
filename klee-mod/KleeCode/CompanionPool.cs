@@ -11,38 +11,14 @@ namespace KleeMod;
 /// The queryable companion surface: "which companions may be offered to THIS
 /// player, in THIS nation, at THIS rarity". Track A of the §4.7 shop sprint.
 ///
-/// WHY THIS IS NOT A CardPoolModel (read before "fixing" it).
-///
-/// §4.1/§4.7 describe companions as a colorless <c>CustomCardPoolModel</c>.
-/// That description is now BUILDABLE but deliberately NOT built, and the
-/// reasoning changed twice, so both halves are recorded here:
-///
-/// 1. The old blocker is GONE. KleeOffPoolCards documents an ATTEMPT 1 that a
-///    standalone pool "could never work", because ModelDb.AllCardPools is
-///    AllCharacterCardPools concat a HARDCODED array of 7 shared pools with no
-///    registration hook. That was true when it was written and is now STALE:
-///    BaseLib ships <c>ModelDbSharedCardPoolsPatch</c>, a postfix on the
-///    shared-pools getter that appends any <c>CustomCardPoolModel</c> whose
-///    <c>IsShared</c> is true (registered from its own constructor). A
-///    companion pool WOULD resolve today.
-///
-/// 2. The reason not to do it anyway is cost, not feasibility. Registering a
-///    real pool means MIGRATING all 47 companion models out of the three
-///    character pools, because <c>CardModel.Pool</c> must resolve to exactly
-///    one pool -- and Pool supplies the card FRAME, energy icon and deck-entry
-///    colour. So the migration is a visual change to every companion card, it
-///    touches the shared loader surface all three character workstreams sit
-///    on, and it depends on our pool being constructed before the first
-///    <c>ModelDb.AllCardPools</c> read (that property caches; AllSharedCardPools
-///    does not). `klee-mod/KleeTests` (EB-105) cannot answer any of it --
-///    `ModelDb` lookups and anything touching a Godot object are outside its
-///    headless boundary, and the frame is a Godot object -- so none of it is
-///    verifiable except by launching the game.
-///
-/// Nothing in this sprint NEEDS the pool object: <c>MerchantCardEntry</c> takes
-/// a plain <c>IEnumerable&lt;CardModel&gt;</c>, so the shop reads this class
-/// directly. The migration is therefore a de-risked follow-up, not a
-/// prerequisite -- flagged for [USER] at sprint close-out.
+/// NOT THE POOL OBJECT. The shared companions' <c>CardPoolModel</c> is
+/// <see cref="CompanionCardPool"/> (legacy review pick 4, [USER] 2026-10-18:
+/// "Shared companions move to their own pool with a neutral frame, out of
+/// Klee's"); it holds them so <c>CardModel.Pool</c> resolves and gives them
+/// the Colorless frame. This class is the OFFER question, which a pool cannot
+/// answer because it is not told the player: <c>MerchantCardEntry</c> takes a
+/// plain <c>IEnumerable&lt;CardModel&gt;</c>, so the shop reads this class
+/// directly.
 ///
 /// HARD CONSTRAINT (sprint plan, Track A): the free reward slot is untouched.
 /// CompanionSlot.Roll does not route through this class; it only delegates the

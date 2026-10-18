@@ -140,6 +140,14 @@ must never read different rosters. There is no Featured Banner (scrapped
 **POOL WIRING** (legacy cleanup stage 4): each character's pool lists its
 `proto_` rows in `GenerateAllCards` and offers its roster
 (`*Roster.OfferablePool`, `FurinaStageRoster.Pool`, `VarkaRoster.Pool`).
+The shared companions are not in any character's pool: they are
+`CompanionCardPool`'s, a BaseLib shared pool with the base Colorless frame and
+energy orb ([USER] 2026-10-18, legacy review pick 4: "Shared companions move to
+their own pool with a neutral frame, out of Klee's"). The codegen routes a row
+there by what it is (`loader.is_shared_companion_row`: a Companion row with no
+`personal_pool:` that no kit claims in `C.KIT_OWN_COMPANION_IDS`), not by its
+`character:` field, which still reads `klee` and still picks the emitting
+profile (art path, text).
 Counts are pinned by `KleeTests/Prototype/PoolCountTests.cs`: 78 per kit. Still checked:
 the tier0 schema validators, the codegen, `lint_generated_structure` and
 `lint_pool_membership`. Depth: `docs/current/atlas/klee-mod-cards.md` §7.
