@@ -11,17 +11,16 @@ namespace KleeMod;
 
 /// <summary>
 /// The companion reward slot -- tier05 rewards.roll_rewards, standard mode
-/// (one offer; pity/choose-3 measured null and ruled OUT). The Featured
-/// Banner WAS skipped by ruling while it was a no-op at roster size; it went
-/// live here and in the shop together on 2026-07-25 (R64), when Fontaine
-/// shipped a 4th Rare -- see CompanionBanner.
+/// (one offer; pity/choose-3 measured null and ruled OUT). There is no
+/// Featured Banner: every companion in the pool is offerable in every run
+/// ([USER] 2026-10-18, "Agreed on (a)!" -- scrap the banner everywhere), in
+/// this slot and in the shop alike.
 ///
 /// Law mirrored exactly: roll a rarity on RARITY_ODDS, fall through
 /// rare -> uncommon -> common when a tier is empty, then a NATION-WEIGHTED
 /// pick inside the tier. Rarity is the sheet's rarity field (codegen'd as
-/// CardRarity); Star is a separate 4/5 banner concept read only by
-/// CompanionBanner -- the two happen to coincide at rare/5-star today, but
-/// nothing here reads Star.
+/// CardRarity); Star is a separate 4/5 label -- the two happen to coincide at
+/// rare/5-star today, but nothing here reads Star.
 ///
 /// Nation weighting went live with the Fontaine roster (2026-07-21 ruling:
 /// "it's fine for Fontaine companions to show up as long as the 50%
@@ -97,12 +96,6 @@ public static class CompanionSlot
             var characterId = CharacterId(player);
             if (comp.PersonalPool is not null
                 && comp.PersonalPool != characterId) continue;
-            // Featured Banner (R64, 2026-07-25). Applied BEFORE the rarity
-            // tiers are built, exactly as tier05 roll_rewards filters the pool
-            // before its rarity roll -- so a banner that empties the Rare tier
-            // falls through to Uncommon on the existing ladder below instead
-            // of producing an empty pool at the pick.
-            if (!CompanionBanner.IsOffered(canonical, player)) continue;
             if (!tiers.TryGetValue(canonical.Rarity, out var tier))
             {
                 tiers[canonical.Rarity] = tier = new List<CardModel>();

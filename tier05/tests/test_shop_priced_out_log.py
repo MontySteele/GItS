@@ -59,7 +59,7 @@ def _fixed_shop(monkeypatch, character_ids: list[str],
                                         for c in character_ids])
     monkeypatch.setattr(
         shop, "companion_shop_offer",
-        lambda rng, character, banner=None: [
+        lambda rng, character: [
             (loader.get_card(c), C.SHOP_COMPANION_PRICE[
                 loader.peek_card(c).rarity])
             for c in companion_ids])

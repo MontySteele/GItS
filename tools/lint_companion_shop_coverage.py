@@ -35,15 +35,11 @@ CHECKS
 
 REPORTED BUT NOT FAILED: a home nation with no RARE companion. The ladder
 handles it by widening the nation. It is a roster fact worth seeing on every
-run of this lint, not a build break. (Fontaine shipped zero until R64 gave it
-four on 2026-07-25 -- which is what made check 1 count cards the shop cannot
-actually draw, and why `eligible` now models the banner.)
+run of this lint, not a build break.
 
-BANNER STATE IS PART OF THE POOL (R64). Every count below is the WORST CASE
-over banner rolls, not the roster. While the banner was a no-op the two were
-the same number; they no longer are, and the corner this lint exists to catch
--- a filter emptying a pool that looked full -- is now reachable through the
-banner as well as through the nation filter.
+NO BANNER. The Featured Banner, which once thinned each nation's five-stars to
+three per run, was scrapped everywhere on 2026-10-18 ([USER]: "Agreed on
+(a)!"), so every count below is the roster itself.
 
 Usage: python tools/lint_companion_shop_coverage.py
 Exit 1 with findings on stdout.
@@ -65,30 +61,6 @@ from tier05 import rewards                  # noqa: E402
 PATCH = (REPO / "klee-mod" / "KleeCode" / "Patches"
          / "MerchantCompanionSlots.cs")
 
-# BOTH channels must gate 5-stars on the banner, and they must do it together.
-# The standing ruling that kept the banner switched off named this exact
-# condition -- "it goes live in both channels together, when a nation ships a
-# 4th Rare" -- because a banner wired into one channel only means the reward
-# slot and the shop disagree about which cards exist in a run, which no player
-# could diagnose and no sim run can see (tier 0.5 models one seat).
-#
-# A source tripwire rather than a test, for the reason recorded throughout this
-# file: there is no C# test project. It is a weak instrument and it is the
-# strongest one available; deleting a filter is a one-line change that nothing
-# else in the repo would notice.
-#
-# MATCHED ON THE CALL, NOT THE WORD. The first version of this check searched
-# for "CompanionBanner" and passed against a file whose filter had been deleted,
-# because both files also NAME the class in a comment. Verified by removing the
-# call and watching the lint stay green -- the same inert-rule failure S9 hit in
-# validate.ps1. A tripwire nobody has seen fire is a tripwire that does not
-# exist.
-BANNER_CALL = re.compile(r"CompanionBanner\.IsOffered\s*\(")
-BANNER_CHANNELS = [
-    ("reward slot", REPO / "klee-mod" / "KleeCode" / "CompanionSlot.cs"),
-    ("shop channel", REPO / "klee-mod" / "KleeCode" / "CompanionPool.cs"),
-]
-
 # Characters that host the companion system. A new roster character means a
 # new row here; the reference characters never see a companion at all.
 CHARACTERS = ["klee", "furina", "kokomi"]
@@ -104,8 +76,8 @@ REQUIRED_RUNGS = [
     # constructing a MerchantCardEntry, matching tier05/shop.py, which has
     # always dropped the slot.
     #
-    # MATCHED ON THE RETURN, NOT ON A WORD, for the same reason BANNER_CALL is
-    # matched on the call: the file still explains the old rung in prose, and
+    # MATCHED ON THE RETURN, NOT ON A WORD: the file still explains the old
+    # rung in prose, and
     # a pattern that a comment can satisfy is a tripwire that cannot fire. The
     # regex below requires the `return;` that sits inside the empty-candidates
     # branch -- delete the branch and the match goes with it.
@@ -124,35 +96,12 @@ FORBIDDEN_RUNGS = [
 
 
 def eligible(character: str, rarity: str, nation: str | None) -> list:
-    """Cards the shop could draw, WORST CASE over banner rolls.
-
-    BANNER-AWARE SINCE R64 (2026-07-25). This used to return the full roster,
-    which was exactly right while the Featured Banner was a no-op -- no nation
-    designed more 5-stars than BANNER_FEATURED_SLOTS, so nothing was ever
-    filtered. Fontaine's fourth Rare ended that: one Fontaine 5-star is now
-    absent from any given run, and a lint that counts all four is counting
-    cards the shop cannot draw.
-
-    The thinning is applied PER NATION and only to 5-stars, mirroring
-    rewards.roll_banner and _banner_filtered exactly: a nation contributes at
-    most BANNER_FEATURED_SLOTS of them, and 4-stars are never gated. WHICH
-    5-stars survive is seed-dependent and irrelevant here -- coverage is a
-    counting question, and the count is the same for every roll.
-    """
+    """Cards the shop could draw for this character at this rarity."""
     pool = rewards.companion_pool()
-    cards = [c for c in pool.get(rarity, [])
-             if c.personal_pool in (None, character)
-             and not c.guest_star
-             and (nation is None or c.nation == nation)]
-
-    kept = [c for c in cards if c.star != 5]
-    by_nation: dict[str | None, list] = {}
-    for c in cards:
-        if c.star == 5:
-            by_nation.setdefault(c.nation, []).append(c)
-    for _nation, fives in by_nation.items():
-        kept.extend(sorted(fives, key=lambda c: c.id)[:C.BANNER_FEATURED_SLOTS])
-    return kept
+    return [c for c in pool.get(rarity, [])
+            if c.personal_pool in (None, character)
+            and not c.guest_star
+            and (nation is None or c.nation == nation)]
 
 
 def main() -> int:
@@ -197,16 +146,6 @@ def main() -> int:
                     f"{character}: {home} designs no {rarity} companion; "
                     "slot 1 widens the nation when it rolls one (known, "
                     "handled by the ladder -- see R59)")
-
-    for label, path in BANNER_CHANNELS:
-        if not path.exists():
-            findings.append(f"missing {label} source: {path.relative_to(REPO)}")
-        elif not BANNER_CALL.search(path.read_text(encoding="utf-8")):
-            findings.append(
-                f"{path.name}: the {label} no longer gates 5-stars on "
-                "CompanionBanner. The banner is only correct if BOTH channels "
-                "apply it -- one channel alone means the reward slot and the "
-                "shop disagree about which cards exist in a run")
 
     if not PATCH.exists():
         findings.append(f"missing merchant patch: {PATCH.relative_to(REPO)}")

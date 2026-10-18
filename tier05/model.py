@@ -166,7 +166,6 @@ class RunResult:
     time_to_online: Optional[int] = None    # fights until core complete
     fight_stats: list = field(default_factory=list)       # t0 FightStats
     rests: list[tuple] = field(default_factory=list)
-    banner: frozenset[str] = field(default_factory=frozenset)   # v1.8 featured
     gold: int = 0                       # run-model rework §5: economy state
     shop: list[dict] = field(default_factory=list)   # §5: shop purchase log
     shop_companion_offers: list[dict] = field(default_factory=list)
@@ -317,7 +316,6 @@ class _RunCtx:
     # the main stream.
     policy_rng: random.Random
     pilot: object
-    banner: frozenset
     route_policy: Callable
     res: RunResult
     deck_ids: list[str]
@@ -487,7 +485,7 @@ class _RunCtx:
         self.shop_visits += 1
         outcome = shop.visit_shop(self.rng, self.character, self.deck_ids,
                                   self.gold, self.plan(), self.policy,
-                                  self.removal_uses, banner=self.banner,
+                                  self.removal_uses,
                                   visit=visit,
                                   policy_rng=self.pick_rng())
         self.deck_ids = outcome.deck_ids
@@ -773,7 +771,7 @@ class _RunCtx:
         for n_comp_i, forced in screens:
             offers = rewards.roll_rewards(
                 self.rng, self.character, companion_offers=n_comp_i,
-                banner=self.banner, companion_rarity=forced,
+                companion_rarity=forced,
                 card_rarity=forced,
                 # `EB-577`: the floor this screen is on, 1-based. `i` is the
                 # index this node took in `res.node_kinds` BEFORE the append,
@@ -858,18 +856,9 @@ def _setup_run(character: str, archetype: str, pilot_id: str,
     elif slot_mode not in ("standard", "choose3"):
         raise ValueError(f"unknown slot mode {slot_mode!r}")
     rng = random.Random(seed)
-    # v1.8 Featured Banner: rolled once per run and fixed for its duration.
-    # DEDICATED rng stream, the same trick draft_regret uses, for a specific
-    # reason: drawing the banner from `rng` would advance the main stream and
-    # silently renumber every existing measurement, including the frozen v0.1
-    # snapshot. Seed-determined either way, which is all the spec asks for.
-    # `nations` is passed EXPLICITLY rather than left to the default. This call
-    # site is the entire reason the default was wrong for as long as it was:
-    # it took the argument-free form, so the banner covered Mondstadt alone and
-    # every other nation's 5-stars were filtered out of every offer in the run.
-    # Naming the set here means the audit is visible where the run is built.
-    banner = rewards.roll_banner(random.Random(seed + 2 * 10 ** 9),
-                                 nations=rewards.designed_nations())
+    # No Featured Banner ([USER] 2026-10-18, "Agreed on (a)!"). It drew from
+    # its own stream (`seed + 2e9`), so removing it moves no main-stream draw;
+    # what moves is the offer pool, which now holds every five-star.
     pilot = make_pilot(loader.pilot_weights(pilot_id))
     # Dedicated stream: randomized starters are seed-replayable but do not
     # renumber encounters, reward rolls, shops, or any calibrated run result.
@@ -918,7 +907,7 @@ def _setup_run(character: str, archetype: str, pilot_id: str,
         raise ValueError(f"n_acts={n} out of range: {total_acts} act(s) "
                          f"registered in RUN_ACTS")
     res = RunResult(seed=seed, won=False, death_node=None, hp_by_node=[],
-                    deck_ids=deck_ids, node_kinds=[], banner=banner,
+                    deck_ids=deck_ids, node_kinds=[],
                     n_acts=n, route=route_name)
     # EB-17p deck injection, LAST in run start and deliberately so. Two
     # run-start relic effects consume the MAIN rng stream in a way that
@@ -942,7 +931,7 @@ def _setup_run(character: str, archetype: str, pilot_id: str,
         deck_ids.append(cid)
     return _RunCtx(character=character, archetype=archetype, policy=policy,
                    rng=rng, policy_rng=random.Random(seed + 6 * 10 ** 9),
-                   pilot=pilot, banner=banner,
+                   pilot=pilot,
                    route_policy=route.POLICIES[route_name], res=res,
                    deck_ids=deck_ids, hp=hp, max_hp=max_hp, gold=gold, n=n,
                    seed_ids=seed_ids, grant_relics=grant_relics,

@@ -64,9 +64,6 @@ def test_fontaine_sheet_loads_ratified_roster():
     for char in FONTAINE_5STARS:
         assert sum(1 for c in rares if _char(c) == char) == 1
     assert all(c.rarity == "rare" for c in rares)
-    # The roster now EXCEEDS BANNER_FEATURED_SLOTS, which is the whole point of
-    # the sprint that added them: it is what makes the banner selective.
-    assert len(rares) > C.BANNER_FEATURED_SLOTS
 
     assert {_char(c) for c in guests} == {"neuvillette"}
     assert 2 <= len(guests) <= 3          # kickoff §9: 2-3 Neuvillette cards
@@ -107,15 +104,11 @@ def test_guest_star_never_in_shared_rewards():
     from tier05 import rewards
     assert all(not c.guest_star
                for cs in rewards.companion_pool().values() for c in cs)
-    # No banner participation either. This used to assert the roster was
-    # EMPTY, which proved the exclusion only because Fontaine had no designed
-    # shared 5-stars -- a vacuous pass that would have gone on reading green if
-    # a guest had leaked in the moment real Rares landed. Now that four exist
-    # (R64), assert the separation directly: the roster is exactly the shared
-    # Rares, and no guest id appears in it.
-    # Since legacy cleanup stage 4 (pick 4) the roster is the PORTED rows,
-    # `proto_mf_<shipped id>`, the shipped bodies as they are.
-    roster = rewards.five_star_roster("fontaine")
+    # The offerable Fontaine five-stars are exactly the shared Rares, and no
+    # guest id is among them. Since legacy cleanup stage 4 (pick 4) they are
+    # the PORTED rows, `proto_mf_<shipped id>`, the shipped bodies as they are.
+    roster = [c for cs in rewards.companion_pool().values() for c in cs
+              if c.nation == "fontaine" and c.star == 5]
     assert {c.id for c in roster} == {
         "proto_mf_navia_cannon_fire_support",
         "proto_mf_clorinde_impale_the_night",
@@ -123,7 +116,7 @@ def test_guest_star_never_in_shared_rewards():
         "proto_mf_arlecchino_masque_red_death",
     }
     assert all(not c.guest_star and c.personal_pool is None for c in roster)
-    # D2 in the flesh: Neuvillette is in the banner roster AND has cameos, and
+    # D2 in the flesh: Neuvillette is offerable AND has cameos, and
     # they are different cards.
     guest_ids = {c.id for c in _fontaine_cards() if c.guest_star}
     assert guest_ids and not (guest_ids & {c.id for c in roster})
