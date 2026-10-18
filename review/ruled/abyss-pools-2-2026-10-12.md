@@ -55,6 +55,8 @@ In none of the 24 examples does an effect last several floors without lasting th
 
 2026-10-18: Moonlit Spring 8 -> 5, see review/records/spiral-abyss-round-3-2026-10-18.md.
 
+2026-10-18: Moonlit Rest 4 / 6 / 8 -> 2 / 3 / 5 by act taken (its table is in review/active/spiral-abyss-pools-2026-10-12.md), see review/records/spiral-abyss-round-3-2026-10-18.md.
+
 Vigor of the Abyss and Battle Rhythm, 2026-10-18: numbers by act, see review/active/abyss-act-scaling-2026-10-18.md.
 
 **New Blessings, Whole run** (Genshin's Abyssal Moon shockwaves):

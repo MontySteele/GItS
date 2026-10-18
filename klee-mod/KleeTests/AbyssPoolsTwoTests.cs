@@ -296,15 +296,15 @@ public class AbyssPoolsTwoTests
     public void Moonlit_Spring_heals_5_and_stacks_with_Moonlit_Rest()
     {
         // Spring is 5 in every act (2026-10-18, round 3: 8 healed 70 to 80
-        // HP in one act); Rest is 4 / 6 / 8 by the act it was taken in.
+        // HP in one act); Rest is 2 / 3 / 5 by the act it was taken in.
         Assert.Equal(new[] { 5, 5, 5 }, AbyssNumbers.MoonlitSpringHealByAct);
         Assert.Equal(5, AbyssRules.CombatEndHeal(moonlitRestAct: null, moonlitSpringAct: 0));
-        Assert.Equal(9, AbyssRules.CombatEndHeal(0, 0));
-        Assert.Equal(4, AbyssRules.CombatEndHeal(0, null));
+        Assert.Equal(7, AbyssRules.CombatEndHeal(0, 0));
+        Assert.Equal(2, AbyssRules.CombatEndHeal(0, null));
         Assert.Equal(0, AbyssRules.CombatEndHeal(null, null));
-        // Rest taken in act 1, Spring in act 3: 4 + 5.
-        Assert.Equal(9, AbyssRules.CombatEndHeal(0, 2));
-        Assert.Equal(13, AbyssRules.CombatEndHeal(2, 2));
+        // Rest taken in act 1, Spring in act 3: 2 + 5.
+        Assert.Equal(7, AbyssRules.CombatEndHeal(0, 2));
+        Assert.Equal(10, AbyssRules.CombatEndHeal(2, 2));
         Assert.Contains("AbyssRules.CombatEndHeal",
             Il.Calls(typeof(SpiralAbyss).GetMethod(nameof(SpiralAbyss.AfterCombatVictory))!));
     }
@@ -312,10 +312,11 @@ public class AbyssPoolsTwoTests
     [Fact]
     public void No_retunes_the_first_eights_act_1_numbers_stand()
     {
-        // 2026-10-18 moved no act 1 number.
+        // The act scaling paper moved no act 1 number; round 3 (2026-10-18)
+        // moved Moonlit Rest 4 -> 2.
         Assert.Equal(4, AbyssNumbers.AbyssalMoonDamage(0));
         Assert.Equal(8, AbyssNumbers.CrystallizeBlock(0));
-        Assert.Equal(4, AbyssNumbers.MoonlitRestHeal(0));
+        Assert.Equal(2, AbyssNumbers.MoonlitRestHeal(0));
     }
 
     [Fact]
