@@ -510,9 +510,11 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # "Or plan:" and the tip opens "Instead of the line above".
             # Kokomi round 3 review (2026-10-11), change 3: the tip says
             # when Plan Block lands, in two sentences.
+            # Kokomi v2 seats (2026-10-18): Plans read enemies when they
+            # land; the flip instruction is on the Bake-Kurage's own text.
             "Instead of the line above, play it on the ",
-            "[gold]Bake-Kurage[/gold]; click to flip. Plans happen next turn ",
-            "in order, and their [gold]Block[/gold] lasts that turn.\");",
+            "[gold]Bake-Kurage[/gold]. Plans happen next turn in order and ",
+            "read enemies then; [gold]Block[/gold] lasts that turn.\");",
             "heal N HP, but never above the HP you had ",
             # Furina, THE STAGE (`EB-723`; the brief's sec.12 names the
             # seven words and sec.3 states each rule). The reframe's four --
@@ -1076,8 +1078,11 @@ def test_a_word_excused_by_a_card_tip_really_carries_that_tip(word):
 # line above"; the second sentence was shortened to stay under the ceiling.
 # Kokomi round 3 review (2026-10-11), change 3: one clause on when Plan
 # Block lands, merged so the tip stays two sentences.
-PLAN_TIP = ("Instead of the line above, play it on the Bake-Kurage; "
-            "click to flip. Plans happen next turn in order, and their "
+# Kokomi v2 seats (2026-10-18): two seats wrote Flank and Tide Wall reading
+# the enemy as it stood; the Plan reads it when it lands. The flip line went
+# to the Bake-Kurage's own text to fit the ceiling.
+PLAN_TIP = ("Instead of the line above, play it on the Bake-Kurage. "
+            "Plans happen next turn in order and read enemies then; "
             "Block lasts that turn.")
 
 

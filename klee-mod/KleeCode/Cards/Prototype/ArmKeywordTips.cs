@@ -373,13 +373,20 @@ public static class ArmKeywordTips
     /// review/active/kokomi-delay-pays-2026-10-01.md), pick 5 (a): "Plans
     /// carry out on their Plan line; click a waiting Plan to flip it." The
     /// Bake-Kurage carries a two-line Plan out as either line; no screen.
+    ///
+    /// KOKOMI V2 SEATS (2026-10-18): two seats wrote Flank and Tide Wall
+    /// expecting the enemy's intent as it stood, and the Plan read it the
+    /// next morning. "and read enemies then" says when; to fit the 135
+    /// ceiling the flip instruction left this tip, and it stays on the
+    /// Bake-Kurage's own ("Click a waiting Plan to flip it."), where the
+    /// flip is done.
     /// </summary>
     public static IEnumerable<IHoverTip> ForPlan(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, PlanKey,
             "Instead of the line above, play it on the "
-          + "[gold]Bake-Kurage[/gold]; click to flip. Plans happen next turn "
-          + "in order, and their [gold]Block[/gold] lasts that turn.");
+          + "[gold]Bake-Kurage[/gold]. Plans happen next turn in order and "
+          + "read enemies then; [gold]Block[/gold] lasts that turn.");
 
     /// <summary>The text pass of 2026-10-08: <see cref="ForPlan"/> for a
     /// card with no line above its Plan. Attached by

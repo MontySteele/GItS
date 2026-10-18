@@ -181,7 +181,10 @@ def test_the_reader_carries_the_keys_the_mod_sends():
          # Seat page backlog (2026-10-13): the card's type (Ripple Basin).
          "card_type",
          # Yae rounds 7 to 10 (2026-10-17): what the play's Edit reached.
-         "edits"])
+         "edits",
+         # Kokomi v2 seats (2026-10-18): Tidal Riposte's bonus and Pincer's
+         # doubling, on the Attack's own line.
+         "play_bonus", "doubled_by"])
     assert sorted(rows[0]["hits"][0]) == sorted(
         ["target", "amount", "blocked", "combat_id", "killed", "on_player",
          "source", "self",

@@ -364,7 +364,8 @@ public static class KokomiPlan
         IReadOnlyList<MovedOn>? Moved, bool OnPlay,
         string? Kind = null, int? Asked = null,
         IReadOnlyList<Rider>? Riders = null, bool Unfinished = false,
-        bool NoTarget = false, IReadOnlyList<string>? Reactions = null);
+        bool NoTarget = false, IReadOnlyList<string>? Reactions = null,
+        string? Again = null);
 
     /// <summary>KOKOMI REVIEW R8 (2026-10-14, item 9): the Elemental
     /// Reactions a carry-out's own hits set off, by name, in order. A
@@ -1413,12 +1414,21 @@ public static class KokomiPlan
                                         StratagemTimes(kokomi))
                       + (extraThis ? 1 : 0)
                       + System.Math.Max(0, entry.Extra);
+            // Kokomi v2 seats (2026-10-18): a lane read "War Council" twice
+            // on the morning's list and could not tell a second carry-out
+            // from a repeated line. Each carry-out past the first names the
+            // card that bought it (`AgainSources`), and the page prints it.
+            var again = AgainFor(
+                kokomi, index == 0 ? firstTimes : 1, extraThis,
+                extraThis ? riderSource : null, entry.Extra);
             for (var i = 0; i < times; i++)
             {
                 var (wroteDouble, wroteExtra) = await ResolveEntry(
                     choiceContext, kokomi, entry, onPlay: false,
                     doubleDamage: doubleThis,
-                    drainEntries: due.Count);
+                    drainEntries: due.Count,
+                    again: i == 0 ? null
+                        : again[System.Math.Min(i, again.Count) - 1]);
                 // OR'd ACROSS THIS ENTRY'S OWN CARRY-OUTS, for the reason
                 // above: an entry doubled by Nereid's prints its rider twice
                 // and twice said twice is still twice.
@@ -1879,7 +1889,7 @@ public static class KokomiPlan
     private static async Task<(bool Double, bool Extra)> ResolveEntry(
         PlayerChoiceContext choiceContext, Creature kokomi, Entry entry,
         bool onPlay = false, bool doubleDamage = false,
-        int drainEntries = 1)
+        int drainEntries = 1, string? again = null)
     {
         var wroteDouble = false;
         var wroteExtra = false;
@@ -1983,7 +1993,8 @@ public static class KokomiPlan
                      entry.Now && entry.TwoLine
                          ? NowLineTitle(entry.Title) : entry.Title,
                      number, Moved(before, kokomi),
-                     onPlay, kind, asked, riders, noTarget, reactions);
+                     onPlay, kind, asked, riders, noTarget, reactions,
+                     again);
         }
 
         // SANGO ISSHIN's condition, written HERE because this is the one place
@@ -2032,15 +2043,46 @@ public static class KokomiPlan
                                  string? kind = null, int? asked = null,
                                  IReadOnlyList<Rider>? riders = null,
                                  bool noTarget = false,
-                                 IReadOnlyList<string>? reactions = null)
+                                 IReadOnlyList<string>? reactions = null,
+                                 string? again = null)
     {
         var line = Vfx.KurageBeat.Line(card, number);
         Vfx.KurageBeat.Say(BakeKuragePet.Of(kokomi) ?? kokomi, line);
         Record(kokomi, new CarriedOutPlan(card, number, line, moved, onPlay,
                                           kind, asked, riders,
                                           NoTarget: noTarget,
-                                          Reactions: reactions));
+                                          Reactions: reactions,
+                                          Again: again));
     }
+
+    /// <summary>
+    /// Kokomi v2 seats (2026-10-18): WHY a morning entry is carried out more
+    /// than once, one name per extra carry-out, in the order
+    /// <see cref="Drain"/> adds them: Nereid's Ascension or A Stunning
+    /// Stratagem (whichever sets the base count), then the rider the entry
+    /// before wrote (Second Wave), then All Streams' gift on the entry
+    /// itself. PURE; the page prints "(again: Nereid's Ascension)" on the
+    /// second row.
+    /// </summary>
+    public static IReadOnlyList<string> AgainSources(
+        int baseTimes, int stratagemTimes, bool extraRider,
+        string? riderSource, int entryExtra)
+    {
+        var names = new List<string>();
+        var times = System.Math.Max(baseTimes, stratagemTimes);
+        var by = stratagemTimes >= times && stratagemTimes > 1
+            ? "A Stunning Stratagem" : "Nereid's Ascension";
+        for (var i = 1; i < times; i++) names.Add(by);
+        if (extraRider) names.Add(riderSource ?? "Second Wave");
+        for (var i = 0; i < entryExtra; i++) names.Add("All Streams");
+        return names;
+    }
+
+    private static IReadOnlyList<string> AgainFor(
+        Creature kokomi, int baseTimes, bool extraRider, string? riderSource,
+        int entryExtra) =>
+        AgainSources(baseTimes, StratagemTimes(kokomi), extraRider,
+                     riderSource, System.Math.Max(0, entryExtra));
 
     /// <summary>
     /// A PLAN THAT NEVER HAPPENED, filed in the order it would have (`EB-453`).
@@ -2894,6 +2936,9 @@ public static class KokomiPlan
             // hits set off, which the receipt names beside a number above
             // its ask (a Vaporize). Null where none.
             ["reactions"] = said.Reactions?.ToList(),
+            // Kokomi v2 seats (2026-10-18): a carry-out past an entry's
+            // first names the card that bought it. Null on the first.
+            ["again"] = said.Again,
         };
 
     /// One named rider inside one Plan's window (`EB-453`). A named method for

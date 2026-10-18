@@ -135,6 +135,19 @@ public sealed class FirstAttackTwicePower : PowerModel, ILocalizationProvider
         if (cardPlay.Card.Owner?.Creature != Owner) return;
         if (KokomiPlan.PlayedOnPet(cardPlay)) return;
         if (!cardPlay.IsLastInSeries) return;
+        // Kokomi v2 seats (2026-10-18): "I never knew whether it triggered".
+        // The Attack's own line names what played it twice
+        // (`ResolutionLedger.DoubledBy`), beside the page's "played two
+        // times".
+        if (cardPlay.PlayCount > 1)
+        {
+            Flash();
+            string title;
+            try { title = cardPlay.Card.Title?.ToString() ?? string.Empty; }
+            catch (System.Exception) { title = string.Empty; }
+            ResolutionLedger.NoteEventOnPlay(ResolutionLedger.DoubledBy, title,
+                                             title, "Pincer");
+        }
         await PowerCmd.Remove(this);
     }
 

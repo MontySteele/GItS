@@ -3957,7 +3957,7 @@ def test_the_meter_ledger_stays_off_the_carry_out_block():
         assert set(row) == {"card", "number", "line", "kind", "asked",
                             "on_play", "board_read", "moved",
                             "riders", "unfinished", "no_target",
-                            "reactions"}
+                            "reactions", "again"}
         for moved in row["moved"]:
             assert set(moved) == {"target", "combat_id", "amount", "dead",
                                   "absorbed"}
@@ -6522,9 +6522,10 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # text now; the long forms are the panel's own notes.
         # THE STATUS BATCH (2026-10-01): "Instead of the line above".
         # Kokomi round 3 review (2026-10-11): when Plan Block lands.
+        # Kokomi v2 seats (2026-10-18): when a Plan reads enemies.
         "Plan": ["Instead of the line above, play it on the ",
-                 "; click to flip. Plans happen next turn ",
-                 "in order, and their ", " lasts that turn."],
+                 ". Plans happen next turn in order and ",
+                 "read enemies then; ", " lasts that turn."],
         "Mend": [": heal N HP, but never above the HP you had",
                  "at the start of this combat"],
         # `EB-377` ADDED `Swirl` to the page beside `Hexerei`, which R276

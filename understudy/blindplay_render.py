@@ -80,6 +80,8 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
                                         RESOLUTION_FANG_DEFAULT,
                                         RESOLUTION_WOLFPACK,
                                         RESOLUTION_STOKED,
+                                        RESOLUTION_PLAY_BONUS,
+                                        RESOLUTION_DOUBLED_BY,
                                         RESOLUTION_DISCARDED,
                                         RESOLUTION_DISCARDED_FOR_YOU,
                                         RESOLUTION_NO_AURA,
@@ -876,6 +878,11 @@ def _plan_no_attack_lines(entry: dict[str, Any],
 #: Ring's tick with no reaction named").
 SUMMON_REACTION_CLAUSE = " It set off {names}."
 
+#: Kokomi v2 seats (2026-10-18): a lane read "War Council" twice on the
+#: morning's list and could not tell a second carry-out from a repeated line.
+#: The second row names the card that bought it (`KokomiPlan.AgainSources`).
+PLAN_AGAIN_CLAUSE = " *(carried out again: {source})*"
+
 
 def _carry_out_rows(rows: list[dict[str, Any]],
                     enemies: list[dict[str, Any]] | None = None,
@@ -895,8 +902,10 @@ def _carry_out_rows(rows: list[dict[str, Any]],
             out.append(f"  - {said['card']} — still planned when the fight "
                        "ended, so it never happened.")
             continue
+        again = (PLAN_AGAIN_CLAUSE.format(source=said["again"])
+                 if said.get("again") else "")
         out.append(
-            f"  - {said['line']}{_kind_clause(said, enemies, you)}"
+            f"  - {said['line']}{again}{_kind_clause(said, enemies, you)}"
             f"{_rider_clause(said)}"
             f"{_summon_reaction_clause(said) if name_reactions else ''}")
         out += _render_moved(said)
@@ -2278,6 +2287,13 @@ def _resolution_lines(rows: list[dict[str, Any]],
         stoked = int(row.get("stoked") or 0)
         if stoked > 0:
             oath_lines.append(RESOLUTION_STOKED.format(n=stoked))
+        # Kokomi v2 seats (2026-10-18): Tidal Riposte's bonus and Pincer's
+        # doubling, on this line.
+        for bonus in row.get("play_bonus") or []:
+            oath_lines.append(RESOLUTION_PLAY_BONUS.format(
+                source=bonus["source"], n=bonus["amount"]))
+        for source in row.get("doubled_by") or []:
+            oath_lines.append(RESOLUTION_DOUBLED_BY.format(source=source))
         # Varka round 5 (2026-10-13): what the card made you discard.
         discarded = row.get("discarded") or []
         if discarded:

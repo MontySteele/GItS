@@ -232,6 +232,7 @@ public sealed class TidalRiposteChargePower : PowerModel, ILocalizationProvider
 {
     private CardPlay? _spendingOn;
     private int _spending;
+    private bool _paid;
 
     public List<(string, string)>? Localization => new()
     {
@@ -249,11 +250,24 @@ public sealed class TidalRiposteChargePower : PowerModel, ILocalizationProvider
     {
         _spendingOn = null;
         _spending = 0;
+        _paid = false;
         if (cardPlay.Card?.Type != CardType.Attack) return Task.CompletedTask;
         if (cardPlay.Card?.Owner?.Creature != Owner) return Task.CompletedTask;
         if (KokomiPlan.PlayedOnPet(cardPlay)) return Task.CompletedTask;
         _spendingOn = cardPlay;
         _spending = (int)Amount;
+        return Task.CompletedTask;
+    }
+
+    /// <summary>Kokomi v2 seats (2026-10-18): a hit of the latched play that
+    /// took the bonus marks it paid, so the play's line can say so.</summary>
+    public override Task AfterDamageGiven(
+        PlayerChoiceContext choiceContext, Creature dealer, DamageResult result,
+        ValueProp props, Creature target, CardModel? cardSource)
+    {
+        if (_spendingOn == null || dealer != Owner) return Task.CompletedTask;
+        if (!props.IsPoweredAttack()) return Task.CompletedTask;
+        if (ReferenceEquals(cardSource, _spendingOn.Card)) _paid = true;
         return Task.CompletedTask;
     }
 
@@ -279,8 +293,23 @@ public sealed class TidalRiposteChargePower : PowerModel, ILocalizationProvider
         if (!ReferenceEquals(_spendingOn, cardPlay)) return;
         _spendingOn = null;
         var spent = _spending;
+        var paid = _paid;
         _spending = 0;
+        _paid = false;
         if (spent <= 0) return;
+        // Kokomi v2 seats (2026-10-18): "it never visibly paid off". The
+        // power flashes and the Attack's own line says what it added, Stoke
+        // the Flames' receipt (`ResolutionLedger.PlayBonus`).
+        if (paid)
+        {
+            Flash();
+            string title;
+            try { title = cardPlay.Card?.Title?.ToString() ?? string.Empty; }
+            catch (System.Exception) { title = string.Empty; }
+            ResolutionLedger.NoteEventOnPlay(ResolutionLedger.PlayBonus, title,
+                                             title, "Tidal Riposte",
+                                             amount: spent);
+        }
         if (Amount <= spent)
         {
             await PowerCmd.Remove(this);
