@@ -1,121 +1,128 @@
-# Kokomi: every card placed, and what changes, 2026-10-18
+# Kokomi: every card placed, and what changes (v2), 2026-10-18
 
-This follows `review/active/kokomi-archetypes-2026-10-18.md`, where the user ruled three archetypes
-(pick 1 (a)): **Grand Strategy** (plan a lot, win the morning), **Read the Tide** (answer intents,
-turn Block into damage, not a turtle), and **the Shoal** (the "Silent-like Sting / Ward strategy").
-Companions sit in the middle. Picks 2 and 3 were taken at their defaults and are reopened here
-against the actual cards. The user's Exhaust question (2026-10-18: "we have plenty of cards that
-exhaust, but no character that makes use of strong Exhaust synergies") is answered in sec.3,
-because the Shoal is where it fits.
+This follows `review/active/kokomi-archetypes-2026-10-18.md`, where the user ruled three archetypes (pick 1
+(a)): **Grand Strategy**, **Read the Tide** (not a turtle), and **the Shoal** (the "Silent-like Sting / Ward
+strategy"), with Companions in the middle.
 
-## 1. Where every card goes
+**Why there is a v2.** The user had GPT review v1. GPT's verdict: v1's six changes "would give the Shoal
+a stronger engine", but would not make Kokomi "feel more deliberate". The user then ruled: "Yeah, let's try
+a v2 on the Kokomi paper." I checked GPT's claims against the sheet, and they hold:
+- **The Exhaust pair made one action answer everything.** With Tidepool and Receding Tide out, Shoal Call
+  and its three Stings gave 12 damage, 8 Block and 4 draws for 1 Energy, and fed The Tide Returns too.
+  Exhaust is a cost for the Ironclad, who burns cards he wanted. Kokomi's Exhausted cards are free Stings
+  and Companions, so for her the payoffs were pure bonus.
+- **Undertide Lance's "3+ Plans" bar was cheap.** Shoal Call writes three 0-cost Plans.
+- **Coral Bulwark's +3 against an attack was efficiency, not foresight.** You play Block then anyway.
+- **Damage-dealing payoffs don't stop a turtle.** Tidal Riposte's retaliation is automatic. The test is
+  whether the player has to choose when to turn safety into an attack.
+- **The Shoal converges on planning.** Endless Shoal turns a carried-out Sting Plan back into a Sting, and
+  Following Current pays on the way. "Play now, play many" then gets planning's rewards as well.
 
-Card texts are in `docs/prototype-surface.yaml`; the census is the archetypes paper's sec.1.
+v2 keeps Plan, the three archetypes and Stings' Plan lines. It changes fewer cards, and each change asks for
+a choice.
+
+## 1. What Kokomi promises
+
+**She makes room to prepare, protects the preparation, and chooses the moment to take control.** This is
+GPT's line, adopted here. In Genshin her kit is protection (the jellyfish's healing and Hydro) and
+stepping in personally (her Burst). Here, with no healing outside the Ironclad, protection is Block, Weak and
+support.
+
+Each archetype gets one **winning turn** and one **cost**:
+
+| Archetype | The winning turn | What makes it a choice |
+|---|---|---|
+| **Grand Strategy** | A morning where a sequence you arranged fires in order: Opening Gambit doubling the next Plan, Second Wave running one twice, Pincer playing your first Attack twice, into Masterstroke or Tamakushi's Wrath. | The setup turn spends Energy and cards for nothing now. You either protect the sequence, or break it to survive by flipping a waiting Plan or using Change of Plans. |
+| **Read the Tide** | Commit an answer before the enemy acts (Kelp Wall, Brine Sting, Turnabout, Tide Wall), then spend what it built on one counterattack. | Block you spend is safety you lose. Plans are committed before the next intents are known. |
+| **The Shoal** | Many Stings in one turn into Watchful Shoal and The Shape of Water. | Each Sting is 4 damage now, or 3 to ALL next morning. Planning it should cost the "now" payoff, not collect both. |
+
+## 2. The changes (five cards)
+
+**Grand Strategy: afford the setup turn, and get a moment to cash it.**
+1. **Shell of Sanctuary → Draft the Orders** (Common Skill, 1): "Gain 5 [8] Block. The next card you plan
+   this turn costs 1 less." This is unchanged from v1. It pays for a setup turn and protects it, and Shell
+   of Sanctuary was plain Block.
+2. **Nereid's Ascension** (Rare, 2 [1]) becomes her Burst, a Skill with Exhaust: "Carry out all your
+   waiting Plans now. This turn, your Attacks deal double damage." This is the "take control" moment. The
+   carry-out uses the verb Change of Plans already has. The Plans fire first and are not doubled; your
+   Attacks after them are. Every archetype has a reason to take it:
+   - Grand Strategy cashes its arranged sequence a turn early.
+   - The Shoal doubles a turn of Stings.
+   - Read the Tide gets a real trade-off: Brine Sting and Turnabout pay for attacks "since you planned
+     this", so cashing them early pays less.
+
+   The current version ("your first Plan is carried out twice") is a free-standing engine that rewards
+   any Kokomi deck.
+
+**Read the Tide: trade safety for the counterattack.**
+
+3. **Tidal Rebuke** (Rare Attack, 2 [1], Retain): "Lose all your Block. Deal twice that in Hydro damage to
+   ALL enemies." Today it deals your Block once and keeps it. Now it's the decision itself: you're
+   defenceless after a big AoE.
+   - Watatsumi's Grace ("keep up to 10 [15] Block") gains a purpose: bank Block across a turn, then spend
+     it.
+   - Coral Crash stays the Common Body Slam that keeps your Block.
+4. **Tidal Riposte** (Rare Power, 1): "Whenever an enemy's attack is fully blocked, your next Attack deals
+   8 [11] more damage." Today it deals 8 back automatically. Now the bonus stacks until you attack, so the
+   deck wins only by choosing to strike.
+
+**The Shoal: playing now and planning stop collecting the same rewards.**
+
+5. **Endless Shoal** (Uncommon Power, 1): "Whenever the Bake-Kurage carries out a Plan that is not a Sting
+   or Ward, add a Sting to your Hand." The bridge from Grand Strategy into the Shoal stays. A planned Sting
+   no longer replaces itself. Kurage Canopy gets the same clause for Wards.
+
+**What v1 changed that v2 does not:**
+- Undertide Lance and Coral Bulwark stay as they are.
+- Kurage Vanguard, Pearl Current and Suffocating Deep are not replaced. A good attack is allowed to be a
+  good attack.
+
+The numbers on Nereid's Ascension and Tidal Rebuke are first guesses for the seats to test.
+
+## 3. Exhaust: held
+
+In our kits, 80 cards Exhaust and none rewards it. The user is right that this is a gap. But Kokomi isn't
+the place to fill it: her cards that Exhaust are throwaways she gets for free, so any payoff for Exhaust is a
+bonus on top of things she already does. The base game's Exhaust archetype works because Ironclad has to
+give up real cards to feed it.
+
+The closest Kokomi idea is salvaging a failed Plan: Exhaust a waiting Plan for an immediate effect. But
+flipping a Plan to its now-line already does that job. A Kokomi Exhaust payoff would need a cost of its own
+first. This goes in BACKLOG as "the first Exhaust archetype needs a kit whose Exhaust costs something".
+
+## 4. Where every card goes
+
+Card texts are in `docs/prototype-surface.yaml`.
 
 | Group | Count | Cards |
 |---|---|---|
-| **Grand Strategy** | 18 | Feint, Turning Tide, Breakwater, Press the Advantage, *Draft the Orders (new)*, Tideturn, Opening Gambit, Second Wave, Change of Plans, Pincer, *Undertide Lance (threshold)*, Following Current, Masterstroke, Sango Isshin, Shoal of Spears, Battle Formation, Nereid's Ascension, Grand Design |
-| **Read the Tide** | 22 | Kelp Wall, Coral Crash, Undertow, *Coral Bulwark (intent)*, Brine Sting, Flank, Evening Watch, Prepared Retreat, Tide Wall, Undercurrent Snare, Drowning Pressure, Spearhead, Ambush, Riptide, War Council, Turnabout, Tidal Rebuke, Tidal Riposte, Sea's Reproach, At Water's Edge, Watatsumi's Grace, The Moon a Ship |
-| **The Shoal** | 21 | Jellyfish Drift, Kurage's Wake, Watatsumi Drill, Bubble Ward, Shoal Call, Tidecleanse, Brine Spray, Kurage Barrage, The Shape of Water, Flotsam Surge, Sea Glass Harvest, Endless Shoal, Kurage Bloom, Kurage Canopy, Watchful Shoal, *Tidepool (new)*, *Receding Tide (new)*, *The Tide Returns (new)*, All Streams Flow to the Sea, Grand Strategist, Dawn Tide |
+| **Grand Strategy** | 18 | Feint, Turning Tide, Breakwater, Press the Advantage, *Draft the Orders*, Tideturn, Opening Gambit, Second Wave, Change of Plans, Pincer, Undertide Lance, Following Current, Masterstroke, Sango Isshin, Shoal of Spears, Battle Formation, *Nereid's Ascension*, Grand Design |
+| **Read the Tide** | 23 | Kelp Wall, Coral Crash, Undertow, Coral Bulwark, Brine Sting, Flank, Evening Watch, Prepared Retreat, Tide Wall, Undercurrent Snare, Drowning Pressure, Spearhead, Ambush, Riptide, War Council, Turnabout, *Tidal Rebuke*, *Tidal Riposte*, Sea's Reproach, At Water's Edge, Watatsumi's Grace, The Moon a Ship, Suffocating Deep |
+| **The Shoal** | 18 | Jellyfish Drift, Kurage's Wake, Watatsumi Drill, Bubble Ward, Shoal Call, Tidecleanse, Brine Spray, Kurage Barrage, The Shape of Water, Flotsam Surge, Sea Glass Harvest, *Endless Shoal*, Kurage Bloom, Kurage Canopy, Watchful Shoal, All Streams Flow to the Sea, Grand Strategist, Dawn Tide |
 | **Companions** | 9 | Orders from the Shrine, Watatsumi Muster, Call the Generals, Sangonomiya's Orders, Treatise, and the four Gorou cards |
 | **Co-op** | 5 | unchanged |
-| **Glue** | 8 | Tidal Surge, Tidal Screen, Surging Shoal, Read the Field, Steady Tide, Resolve of Watatsumi, Riptide Ruin, Tamakushi's Wrath |
+| **Glue** | 10 | Tidal Surge, Tidal Screen, Surging Shoal, Read the Field, Steady Tide, Resolve of Watatsumi, Riptide Ruin, Tamakushi's Wrath, Kurage Vanguard, Pearl Current |
 
-Each card is listed once: 18 + 22 + 21 + 9 + 5 + 8 = 83, the 78-card pool plus the five co-op cards.
-Some cards serve two groups. Endless Shoal and Kurage Canopy (listed under the Shoal) turn
-carried-out Plans into Stings and Wards, which makes them the Strategy–Shoal bridge. Treatise
-(listed under Companions) also rewards planning. The pool stays 78 (20 / 38 / 20).
+18 + 23 + 18 + 9 + 5 + 10 = 83: the 78-card pool plus the five co-op cards. Changed cards are in italics.
 
-**A correction to the archetypes paper.** Placed card by card, only four of her 18 powers are truly
-free-standing: Kurage Vanguard, Resolve of Watatsumi, Kurage Bloom and Watatsumi's Grace. The paper's
-"about half" was too high. The "spam powers" feel comes from something else. Following Current,
-Dawn Tide, Sea's Reproach, Tidal Riposte and At Water's Edge each pay off an action **every** Kokomi
-deck already takes: carrying out a Plan, applying Hydro, applying Weak, blocking. They're archetype
-cards whose condition is free, which is the same problem as the Plan-count payoffs. The fix is the
-same too: the archetypes get enablers and payoffs that a deck has to build toward (below). Most of
-those powers stay; they become rewarding once a deck leans their way.
-
-## 2. The changes (six cards)
-
-**Grand Strategy: make a heavy planning turn affordable, and reward going past normal.**
-1. **Shell of Sanctuary → Draft the Orders** (Common Skill, 1): "Gain 5 [8] Block. The next card
-   you plan this turn costs 1 less." This is the archetype's Common enabler. Shell of Sanctuary was
-   plain Block with no reason to pick it over Coral Bulwark.
-2. **Undertide Lance** (Uncommon Attack, 2) keeps its now-line ("Deal 9 [12] Hydro damage to ALL
-   enemies"). Its Plan becomes "Deal 9 [12] Hydro damage to ALL enemies. If 3 or more Plans are
-   carried out this turn, deal it twice." This is the first threshold payoff: it's better in a deck
-   that writes three Plans than in one that writes one.
-
-**Read the Tide: one more card that reads intents, at Common.**
-3. **Coral Bulwark** (Common Skill, 1): "Gain 8 [11] Block. If an enemy intends to attack, gain 3
-   more." It was plain Block. Now the archetype's Common Block looks at intents like the rest of it.
-
-**The Shoal becomes the Exhaust archetype (sec.3).**
-4. **Kurage Vanguard → Tidepool** (Uncommon Power, 1): "Whenever a card is Exhausted, gain 2 [3]
-   Block." It's the Feel No Pain of the deck. Kurage Vanguard was a free-standing 4 damage a turn,
-   and Dawn Tide and Following Current remain her other Hydro sources.
-5. **Pearl Current → Receding Tide** (Uncommon Power, 2 [1]): "Whenever a card is Exhausted, draw 1
-   card." It's the Dark Embrace of the deck. Pearl Current was a generic multi-hit.
-6. **Suffocating Deep → The Tide Returns** (Rare Attack, 2): "Deal 3 [4] Hydro damage for each
-   card Exhausted this combat." It's the Knife Trap of the deck. Suffocating Deep was one of eight
-   Read the Tide Rares, the most of any group, so this evens the Rares out (Strategy 6, Tide 7,
-   Shoal 4 plus the bridges).
-
-Nothing else changes, and no number moves outside these six.
-
-## 3. Exhaust, and why the Shoal
-
-The user is right: in our five kits, 80 cards Exhaust and **none** rewards it (a search of every
-row's text for "whenever … Exhaust", "Exhaust pile" and the like). The base game rewards it in the
-Ironclad's archetype (Feel No Pain, Dark Embrace, Ashen Strike, Pact's End, Howl from Beyond), in
-the Silent's Knife Trap, and in four relics (read from the decompile's `AfterCardExhausted`
-users).
-
-Kokomi's Shoal already Exhausts more than any deck in the mod, without trying:
-- every Sting and Ward is Exhaust;
-- every Inazuma Companion she generates is Ethereal, so it Exhausts at end of turn;
-- Flotsam Surge's Dazed are Ethereal;
-- Tidecleanse Exhausts Statuses and Curses.
-
-So the three new cards pay off what the Shoal and her Companion middle already do. They give the
-Silent-like deck its engine, the same way Knife Trap and After Image do for Shivs. That also covers
-the Companion middle: a Companion-heavy Kokomi feeds Tidepool and Receding Tide through Ethereal.
-
-**Loop check** (the standing rule: close a loop only if trivial to assemble). Receding Tide plus
-Stings draws a card per Sting. Stings come only from generators, never from the deck, so the draw
-is bounded by how many Stings the turn made. It is not a loop. If a seat finds one, the fix is a
-per-turn cap, not a cut.
-
-## 4. Read the Tide against the turtle guardrails
-
-- **No new Block carry-over.** Watatsumi's Grace stays capped at "keep up to 10 [15]".
-- **Every build-around wins by damage.** Turnabout, Tidal Rebuke, Tidal Riposte and Sea's Reproach
-  all deal damage. The only Block-only Rare left is The Moon a Ship (Block plus Mend), which is a
-  defensive card, not a win condition.
-- **The clock is real.** The tier05 boss pools (`tier05/content/act*_pool.yaml`) give every boss
-  but one 2 to 3 Strength per cycle and 170 to 510 HP, so a deck that only blocks loses to the
-  ramp. The seat check stays: Read the Tide's normal fights should run no more than about one turn
-  longer than base's.
+**Not addressed in v2:** Battle Formation ("the first time each turn 2 or more Plans are carried out") is
+still a count that every deck meets. If the seats show it as an automatic pick, it's next.
 
 ## 5. Next
 
-Build the six changes. Then run five Kokomi seats, briefed to draft toward an archetype (one lane
-per archetype, two lanes free). Then a run of yours.
+Build the five changes, with their sim twins and tips. Then run five Kokomi seats, one briefed per archetype
+and two left free. Each seat record answers: what was the winning turn, and what did you give up for it? A
+run of yours follows.
 
 ## Picks
 
-1. **The six changes, as a set.**
-   - **(a, default)** Build all six.
-   - (b) Build the Strategy and Tide changes (1–3) only, and hold the Exhaust layer for a separate
-     look.
-2. **Exhaust payoffs count any card, or only her own.**
-   - **(a, default)** Any card Exhausted, so Ethereal Companions, Dazed and partner-made cards
-     count. That's simple and generous, and it ties in the Companion middle.
-   - (b) Only Stings and Wards. That's tighter, but it shuts out the Companions.
-3. **Picks 2 and 3 of the archetypes paper, now that the cards are on the table.**
-   - **(a, default)** Confirm both. Stings keep their Plan lines (Endless Shoal and Kurage Canopy stay
-     the bridge). Of the four free-standing powers, only Kurage Vanguard is replaced. Resolve of
-     Watatsumi and Kurage Bloom stay as glue, and Watatsumi's Grace stays as Read the Tide's capped
-     defence.
-   - (b) Also repoint Kurage Bloom ("At the start of your turn, add a Sting to your Hand") to an
-     Exhaust payoff.
+1. **The five changes.**
+   - **(a, default)** Build all five.
+   - (b) Build them, but leave Nereid's Ascension as it is. It's the biggest change, and it moves her Rare
+     build-around.
+2. **Exhaust.**
+   - **(a, default)** Hold it: no Kokomi Exhaust payoffs, and a BACKLOG line for a future kit.
+   - (b) Try one card that salvages a Plan, "Exhaust a waiting Plan: …", in the same seat round.
+3. **Tidal Rebuke's cost.**
+   - **(a, default)** "Lose all your Block. Deal twice that." You give up the Block.
+   - (b) "Deal damage equal to your Block. Then lose half of it." A softer trade.
