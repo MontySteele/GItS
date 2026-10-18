@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from tier0.content import loader
+from tier0.content import loader, yaml_memo
 from tier0.engine import combat
 from tier0.engine import yae_shrine as Y
 from tier0.engine.state import CombatState, Enemy
@@ -135,8 +135,7 @@ def test_meditations_says_the_annotation_was_made_that_fight():
 # 7. Sakura Seal and Footnote say what their Annotation does -----------------
 
 def _row(card_id):
-    import yaml
-    rows = yaml.safe_load((REPO / "docs" / "prototype-surface.yaml")
+    rows = yaml_memo.safe_load((REPO / "docs" / "prototype-surface.yaml")
                           .read_text(encoding="utf-8"))
     rows = rows["cards"] if isinstance(rows, dict) else rows
     return next(r for r in rows if r["id"] == card_id)

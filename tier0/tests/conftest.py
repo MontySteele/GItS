@@ -1,3 +1,4 @@
+import itertools
 import os
 import random
 from pathlib import Path
@@ -112,6 +113,31 @@ def _no_embark_sidecars(tmp_path_factory):
     shape._SIDECAR_DIR = held
 
 
+#: Numbers the per-test directories `_fresh_dir` makes, one counter per
+#: process. `getbasetemp()` is already per process (per xdist worker) and new
+#: every session, so a number is never reused under it.
+_FRESH_DIRS = itertools.count()
+
+
+def _fresh_dir(tmp_path_factory, name: str) -> Path:
+    """A new, empty directory for ONE test, in constant time.
+
+    WHY NOT `tmp_path_factory.mktemp(name)` (test-runtime pass, 2026-10-17):
+    `mktemp` finds its next number by listing the whole basetemp, and the two
+    autouse fixtures below asked it for THREE directories per test, every
+    test. The basetemp grows by three entries a test, so each call scanned
+    every directory the worker had made so far -- quadratic in the tests a
+    worker runs, ~16% of `test_understudy_blindplay.py`'s time on its own.
+    A counter gives the same promise (fresh, empty, private to this worker,
+    under its basetemp) without the scan; `mkdir` without `exist_ok` refuses
+    rather than reuse one.
+    """
+    path = tmp_path_factory.getbasetemp() / "per-test" / (
+        f"{name}{next(_FRESH_DIRS)}")
+    path.mkdir(parents=True)
+    return path
+
+
 # 2026-10-08. THE LANE STATE LIVES UNDER `%LOCALAPPDATA%\gits-lanes` NOW
 # (`blindplay_shape.lane_state_dir`), beside the live lanes' games, and the old
 # location (`understudy/logs`) is still read once and cleared on a forget. A
@@ -122,8 +148,8 @@ def _lane_state_in_tmp(tmp_path_factory):
     from understudy import blindplay_shape as shape
     # Fresh per TEST, not per worker: an embark test's sidecar copy must not
     # become the next test's run.
-    root = tmp_path_factory.mktemp("lane-state")
-    legacy = tmp_path_factory.mktemp("lane-state-legacy")
+    root = _fresh_dir(tmp_path_factory, "lane-state")
+    legacy = _fresh_dir(tmp_path_factory, "lane-state-legacy")
     held = shape._LANE_STATE_ROOT, shape._LEGACY_STATE_DIR
     held_env = os.environ.get(shape.LANE_STATE_ENV)
     shape._LANE_STATE_ROOT, shape._LEGACY_STATE_DIR = root, legacy
@@ -145,7 +171,7 @@ def _offer_log_in_tmp(tmp_path_factory):
     from understudy import offer_log
     held = os.environ.get(offer_log.OFFER_LOG_ENV)
     os.environ[offer_log.OFFER_LOG_ENV] = str(
-        tmp_path_factory.mktemp("card-offers"))
+        _fresh_dir(tmp_path_factory, "card-offers"))
     yield
     if held is None:
         os.environ.pop(offer_log.OFFER_LOG_ENV, None)

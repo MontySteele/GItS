@@ -27,6 +27,7 @@ become wrong:
 """
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -767,6 +768,37 @@ def test_canon_corpus_on_a_missing_tree_is_a_reason_not_a_crash(tmp_path):
 HAS_CANON = ccr.canon_reachable()
 
 
+@pytest.fixture(scope="module")
+def shared_decompile(tmp_path_factory):
+    """ONE decompile of `sts2.dll` for the in-process reads below.
+
+    `build_report()` decompiles the binary into a fresh TemporaryDirectory on
+    every call, ~8 s each on a DLL-backed checkout: the completeness pin calls
+    it once and the determinism pin twice. With the per-type `rglob` it also
+    did (now one walk, `extract.cs_index`), this module was ~100 s on one
+    xdist worker -- the tail of the whole local suite (test-runtime pass,
+    2026-10-17). The extractor's own documented reuse knob,
+    `$GITS_ILSPY_TREE`, keeps one tree between calls; pointing it at a
+    module-scoped temp dir means the first read decompiles (the tree-building
+    branch) and the rest reuse it (the marker branch). The decompiled bytes are
+    the same, so every assertion reads the same report.
+
+    `test_real_invocation...` does NOT take this fixture and runs first, so the
+    plain CLI path -- the TemporaryDirectory branch -- is still exercised end
+    to end once. A machine that already sets `$GITS_ILSPY_TREE`, or one with
+    no game to read, is left exactly as it was.
+    """
+    env = _extract.ILSPY_TREE_ENV
+    if not HAS_CANON or os.environ.get(env):
+        yield
+        return
+    os.environ[env] = str(tmp_path_factory.mktemp("ilspy-tree"))
+    try:
+        yield
+    finally:
+        os.environ.pop(env, None)
+
+
 def test_real_invocation_prints_the_report_this_checkout_can_support():
     proc = subprocess.run(
         [sys.executable, "tools/card_connectivity_report.py"],
@@ -787,7 +819,8 @@ def test_real_invocation_prints_the_report_this_checkout_can_support():
             assert f"--- {canon} (" not in out
 
 
-def test_report_completeness_matches_the_corpus_and_carries_no_threshold():
+def test_report_completeness_matches_the_corpus_and_carries_no_threshold(
+        shared_decompile):
     report = ccr.build_report()
     assert report["complete"] is HAS_CANON
     if HAS_CANON:
@@ -811,7 +844,7 @@ def test_report_completeness_matches_the_corpus_and_carries_no_threshold():
     assert "0.55" not in source and "0.65" not in source
 
 
-def test_report_is_deterministic():
+def test_report_is_deterministic(shared_decompile):
     assert ccr.render(ccr.build_report()) == ccr.render(ccr.build_report())
 
 

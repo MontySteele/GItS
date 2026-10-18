@@ -25,8 +25,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import yaml
-
+from tier0.content import yaml_memo
 from tools.gen_klee_cards import folded_branch_damage
 
 REPO = Path(__file__).resolve().parents[2]
@@ -34,7 +33,7 @@ GENERATED = REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype" / "Generated"
 
 
 def _sheet_row(card_id: str) -> dict:
-    sheet = yaml.safe_load(
+    sheet = yaml_memo.safe_load(
         (REPO / "docs" / "prototype-surface.yaml").read_text(encoding="utf-8"))
     rows = sheet["cards"] if isinstance(sheet, dict) else sheet
     return next(r for r in rows if r["id"] == card_id)

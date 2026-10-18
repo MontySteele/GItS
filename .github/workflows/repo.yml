@@ -166,7 +166,25 @@ jobs:
           set -eu
           files=$(python tools/ci_shards.py --shard ${{ matrix.shard }} --of 4)
           echo "shard ${{ matrix.shard }}/4 runs $(printf '%s\n' "$files" | wc -l) files"
-          python -m pytest $files -q -n auto --dist loadscope --no-loadscope-reorder --durations=25
+          python -m pytest $files -q -n auto --dist loadscope --no-loadscope-reorder --durations=25 --junitxml=junit-shard-${{ matrix.shard }}.xml
+
+      # 2026-10-17 (test-runtime pass). The shard's JUnit report, kept a week,
+      # so the shard balance can be refreshed from THIS runner's seconds:
+      #   gh run download <run-id> -p 'junit-shard-*'
+      #   python tools/ci_shards.py --update-durations junit-shard-*/*.xml
+      # The durations file used to be timed on a Windows dev box, where the
+      # PowerShell-backed and DLL-backed tests that skip here cost the most.
+      # Uploading cannot change a result: it runs after the suite, and a
+      # failed upload is a warning, not a red shard.
+      - name: upload this shard's JUnit timings
+        if: always() && steps.scope.outputs.docs_only != 'true'
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-shard-${{ matrix.shard }}
+          path: junit-shard-${{ matrix.shard }}.xml
+          retention-days: 7
+          if-no-files-found: ignore
 
       # The docs-only arm: every module in tier0/tests + tier05/tests that
       # opens a committed .md file tools/ci_changed_paths.py classifies as a

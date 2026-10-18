@@ -1766,10 +1766,17 @@ class CanonReader:
     def __init__(self, root: Path):
         self.root = root
         self._cache: dict[str, str] = {}
+        # One walk of the tree on the first miss, not one `rglob` per name
+        # (`extract.cs_index`: the same files `rglob` would find).
+        self._index: dict[str, list[Path]] | None = None
 
     def source(self, short_name: str) -> str:
         if short_name not in self._cache:
-            paths = sorted(self.root.rglob(f"{short_name}.cs"))
+            from tools import extract_base_game_pool as extract
+            if self._index is None:
+                self._index = extract.cs_index(self.root)
+            paths = sorted(extract._find_cs(self.root, short_name,
+                                            self._index))
             self._cache[short_name] = (
                 paths[0].read_text(encoding="utf-8") if paths else "")
         return self._cache[short_name]

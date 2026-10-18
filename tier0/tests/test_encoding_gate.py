@@ -19,6 +19,8 @@ fixed at ratification, and the remaining debt -- tools and tests reading
 .cs/.tsv/.ps1/.yaml fixtures -- was paid off in full on 2026-08-08. DEBT is
 now empty and the tests below hold it there.
 """
+import pytest
+
 from tools import lint_text_encoding as lint
 
 # Spelled out so the probe sources below can be written as concatenated
@@ -48,14 +50,26 @@ NL = chr(10)
 DEBT: dict[str, int] = {}
 
 
-def test_no_new_undeclared_encodings():
-    live = {rel: len(hits) for rel, hits in lint.scan().items()}
+@pytest.fixture(scope="module")
+def live():
+    """ONE `lint.scan()` of the repo for the four pins that read it.
+
+    The scan parses every `.py` under the scan roots and takes ~5 s; four
+    tests each ran their own over the same unchanged tree (test-runtime pass,
+    2026-10-17). Nothing here writes a scanned file, and no test mutates the
+    dict it is handed -- each builds its own view of it.
+    """
+    return lint.scan()
+
+
+def test_no_new_undeclared_encodings(live):
+    counts = {rel: len(hits) for rel, hits in live.items()}
     new = []
-    for rel, count in sorted(live.items()):
+    for rel, count in sorted(counts.items()):
         allowed = DEBT.get(rel, 0)
         if count > allowed:
             detail = ", ".join(f"line {ln} {what}"
-                               for ln, what in lint.scan()[rel])
+                               for ln, what in live[rel])
             new.append(f"{rel}: {count} undeclared (allowed {allowed}) "
                        f"-- {detail}")
     assert not new, (
@@ -64,19 +78,19 @@ def test_no_new_undeclared_encodings():
         "cannot be caught by running the code): " + "; ".join(new))
 
 
-def test_debt_list_is_not_stale():
+def test_debt_list_is_not_stale(live):
     """A file that has been fixed must leave the list, or its entry rots into
     cover for the next real offence in that same file."""
-    live = {rel: len(hits) for rel, hits in lint.scan().items()}
-    stale = {rel: (recorded, live.get(rel, 0))
+    counts = {rel: len(hits) for rel, hits in live.items()}
+    stale = {rel: (recorded, counts.get(rel, 0))
              for rel, recorded in DEBT.items()
-             if live.get(rel, 0) < recorded}
+             if counts.get(rel, 0) < recorded}
     assert not stale, (
         "these improved -- lower the DEBT count (recorded, actual): "
         f"{stale}")
 
 
-def test_the_content_path_carries_no_debt():
+def test_the_content_path_carries_no_debt(live):
     """The loaders are the reason the gate exists: a mojibake card name there
     reaches the sheet, the sim, the gallery and the generated C# at once. They
     are never allowed onto the debt list, however small the entry looks."""
@@ -84,8 +98,9 @@ def test_the_content_path_carries_no_debt():
     listed = [rel for rel in DEBT if rel.startswith(protected)]
     assert not listed, f"the content path may not carry encoding debt: {listed}"
 
-    live = [rel for rel in lint.scan() if rel.startswith(protected)]
-    assert not live, f"undeclared encoding on the content path: {live}"
+    offending = [rel for rel in live if rel.startswith(protected)]
+    assert not offending, (
+        f"undeclared encoding on the content path: {offending}")
 
 
 def test_image_open_is_not_a_text_read(tmp_path):
@@ -148,10 +163,10 @@ def test_binary_mode_is_seen_in_both_call_shapes(tmp_path):
     assert lines == [8, 9, 10], lint.offences(probe)
 
 
-def test_the_exemption_did_not_swallow_the_real_offences_in_those_files():
+def test_the_exemption_did_not_swallow_the_real_offences_in_those_files(
+        live):
     """The four files that LEFT the debt list must genuinely have nothing left,
     not merely have gone quiet -- otherwise the recount hid a live defect."""
-    live = lint.scan()
     for rel in ("tools/art_lint.py", "tools/gen_furina_stills.py",
                 "tools/gen_kokomi_stills.py",
                 "tools/lint_unique_names.py"):

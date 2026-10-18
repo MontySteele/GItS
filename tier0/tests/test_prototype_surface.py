@@ -30,7 +30,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from tier0.content import loader
+from tier0.content import loader, yaml_memo
 
 # THE SHIPPED WORLD, NAMED (legacy cleanup stage 3, 2026-10-01): the sim
 # defaults to the current kits, and these pins read the shipped ones.
@@ -72,7 +72,7 @@ def _live_sheet(tmp_path: Path, extra) -> Path:
     kit's starter and pool resolve off the surface unconditionally, so a
     surface that lacked them would not load at all; a fixture row is staged
     BESIDE the kits rather than in their place."""
-    real = yaml.safe_load(_REAL_SURFACE.read_text(encoding="utf-8"))
+    real = yaml_memo.safe_load(_REAL_SURFACE.read_text(encoding="utf-8"))
     return _sheet(tmp_path, list(real) + list(extra))
 
 
@@ -103,7 +103,7 @@ def test_the_shipped_surface_loads_whatever_is_on_it():
     through the shipped validators.
     """
     assert loader.PROTOTYPE_SHEET.exists()
-    rows = yaml.safe_load(
+    rows = yaml_memo.safe_load(
         loader.PROTOTYPE_SHEET.read_text(encoding="utf-8")) or []
     cards = loader.prototype_cards()
     assert len(cards) == len(rows)
@@ -128,7 +128,7 @@ def test_the_surface_is_non_empty_only_while_a_slice_is_open():
     Deliberately generic -- it names no slice. Hard-coding "the Kokomi slice"
     here would make the guard expire quietly the moment that slice closed.
     """
-    rows = yaml.safe_load(
+    rows = yaml_memo.safe_load(
         loader.PROTOTYPE_SHEET.read_text(encoding="utf-8")) or []
     if not rows:
         return                      # the healthy steady state
@@ -622,7 +622,7 @@ def test_the_scenario_grants_the_fixture_row_by_id():
     """
     path = (REPO / "understudy" / "scenarios"
             / "eb147-prototype-grant.yaml")
-    doc = yaml.safe_load(path.read_text(encoding="utf-8"))
+    doc = yaml_memo.safe_load(path.read_text(encoding="utf-8"))
     assert doc["character"] == "KLEEMOD-KOKOMI"
     grants = [step["give"] for step in doc["steps"] if "give" in step]
     assert grants, "the scenario must grant something"
@@ -782,7 +782,7 @@ def _emitted_faces() -> dict[str, tuple[dict, str]]:
     """Every generated prototype card as `{id: (row, printed face)}`."""
     import re
 
-    rows = {r["id"]: r for r in yaml.safe_load(
+    rows = {r["id"]: r for r in yaml_memo.safe_load(
         loader.PROTOTYPE_SHEET.read_text(encoding="utf-8")) or []}
     out: dict[str, tuple[dict, str]] = {}
     for path in sorted(_GENERATED.glob("*.cs")):
@@ -861,7 +861,7 @@ def test_every_kokomi_row_declares_the_target_type_the_slice_states():
 
     checked = 0
     # Parsed once, not once per generated file: the loop below only reads it.
-    rows = {r["id"]: r for r in yaml.safe_load(
+    rows = {r["id"]: r for r in yaml_memo.safe_load(
         loader.PROTOTYPE_SHEET.read_text(encoding="utf-8")) or []}
     for path in sorted(_GENERATED.glob("*.cs")):
         source = path.read_text(encoding="utf-8")
@@ -937,7 +937,7 @@ def test_the_sim_carries_the_bare_title_for_a_declared_shadow():
     """The sim's half of "both engines print the same title", taken at the ONE
     seam: a `Card` the engine hands to a report, a draft or a seat page has
     the player's title on it, never the sheet's declaration."""
-    rows = {r["id"]: r["name"] for r in yaml.safe_load(
+    rows = {r["id"]: r["name"] for r in yaml_memo.safe_load(
         loader.PROTOTYPE_SHEET.read_text(encoding="utf-8")) or []}
     checked = 0
     for card in loader.prototype_cards():
@@ -987,7 +987,7 @@ def test_the_sheet_declares_a_shadow_only_with_the_suffix_both_engines_strip():
     travelled."""
     import re
 
-    rows = yaml.safe_load(
+    rows = yaml_memo.safe_load(
         loader.PROTOTYPE_SHEET.read_text(encoding="utf-8")) or []
     trailing = re.compile(r"\s\([^()]*\)$")
     for row in rows:

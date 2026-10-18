@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from tier0.content import loader, upgrades
+from tier0.content import loader, upgrades, yaml_memo
 from tier0.engine import combat, effects, kokomi_plan
 from tier0.tests.conftest import make_enemy
 from tier0.tests.test_kokomi_plan import plan_card
@@ -34,8 +34,7 @@ def _up(cid):
 
 
 def _sheet_row(cid):
-    import yaml
-    rows = yaml.safe_load((REPO / "docs" / "prototype-surface.yaml")
+    rows = yaml_memo.safe_load((REPO / "docs" / "prototype-surface.yaml")
                           .read_text(encoding="utf-8"))
     rows = rows["cards"] if isinstance(rows, dict) else rows
     return next(r for r in rows if r["id"] == cid)
