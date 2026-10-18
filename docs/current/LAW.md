@@ -70,12 +70,11 @@ cooldowns; any open-world system.
   deck and it must fall apart. A character may make Companions central only
   through its own enabling cards, which the delete-test removes.
 - **Rarity:** a 4-star Companion is at most Uncommon power. A 5-star has up
-  to two cards, Uncommon or Rare, each a support payoff (buff, amplify, aura),
-  never its own scaling damage engine. Every designed companion may be offered
+  to two cards, Uncommon or Rare, each a support payoff (buff, amplify, aura). Every designed companion may be offered
   in every run (the Featured Banner was removed 2026-10-18).
 - **A character's personal-pool Companions are its kit** and may be
   deck-defining, within the rarity guardrails; the delete-test still governs
-  them. They may also enter through an optional, declinable run-start offer.
+  them.
 - **The free Companion reward is enabler-grade and random,** about half from
   the character's nation. Its value is off-element access, so a weak roll is
   never a dead pick.
@@ -84,8 +83,6 @@ cooldowns; any open-world system.
   the rarity floor and shelf order govern the shop together.
 - **An empty Companion slot is left out,** never filled with a base colorless
   card.
-- **Neutral energy, draw and deck-thinning are legal Companion utility** when
-  one-shot, costed and Exhaust-gated.
 - **Cycling engines are Uncommon or higher.** A card that replaces itself at no
   net energy or hand cost is a cycling engine, whatever else it does.
 - **A character from an unreleased nation sits in the nation it operates in**
@@ -106,10 +103,6 @@ cooldowns; any open-world system.
 - **Official HoYoverse art may ship in a free, clearly unofficial public
   build; no HoYoverse audio ships.** The mod is never monetized or presented
   as official, and every image keeps its source row in `art/SOURCES.tsv`.
-  Builds stay private until the distribution point is ruled
-  (`review/active/distribution-readiness-2026-10-12.md`).
-- **Naming:** constellation names for Rares and upgrades, talent names for
-  relics, voice lines for flavor.
 
 ## Card authoring
 
@@ -123,11 +116,6 @@ cooldowns; any open-world system.
 - **No strict domination between adjacent rarities:** a card must not be a
   strictly better copy of another at similar weight. Prefer base-game "twist"
   shapes over supersets.
-- **Threshold cards pay a flat printed bonus once,** not a proportional read.
-  Charge and meter bars are Uncommon or higher. On a Balance sheet, a
-  threshold is never lowered.
-- **At most two new keywords per character** beyond the shared element system.
-- **Upgraded starter cards get a distinct name,** not a "+".
 - **Copies inherit their printed bounds,** and copy effects never make an
   energy-positive loop.
 - **An Ancient gap is fixed with real content,** never by removing the option.
@@ -147,8 +135,6 @@ cooldowns; any open-world system.
   semver build metadata, never a `-` before the patch.
 - **State-reading riders snapshot state at cast.** Rules read the resource,
   never its display.
-- **Every meter is declared bounded or unbounded,** with any cap read from
-  `constants.py`.
 - **A structurally invisible defect gets a machine-readable list and a lint**
   (empty starting relics, pool rarity coverage, Ancient coverage, required
   nodes); the list checks itself for rot.

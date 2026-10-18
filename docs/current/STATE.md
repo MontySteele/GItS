@@ -39,7 +39,7 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   Klee, Kokomi and Varka have co-op cards (Varka's five are built); Furina
   has none since the Stage rework.
 - Every starter is the base Strike x4 and Defend x4 plus two cards of its own.
-  Starter basics change only on [USER]'s pick. No kit starts with a Companion.
+  Starter basics change only on [USER]'s pick. No kit starts with a shared Companion; Varka's Knights are his kit's own Companions and count as Companions for every synergy.
 - **Character five is Yae Miko** (`review/active/yae-proposal-2026-10-12.md`,
   ruled; the Stellar-Conduct nod is parked). **Prototype, batch one built
   in C#** (2026-10-13): the card paper
