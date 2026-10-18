@@ -15,9 +15,8 @@ import random
 from pathlib import Path
 
 import pytest
-import yaml
 
-from tier0.content import loader
+from tier0.content import loader, yaml_memo
 from tier0.engine import furina_tide as T
 from tier0.engine.state import CombatState, Enemy
 from tools import gen_klee_cards as gen
@@ -39,7 +38,7 @@ def _state(hp=78, enemies=2, enemy_hp=200):
 
 
 def _rows():
-    raw = yaml.safe_load(
+    raw = yaml_memo.safe_load(
         Path(loader.PROTOTYPE_SHEET).read_text(encoding="utf-8"))
     return {d["id"]: d for d in raw}
 

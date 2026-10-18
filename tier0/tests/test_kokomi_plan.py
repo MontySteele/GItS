@@ -19,7 +19,7 @@ import collections
 import pytest
 
 from tier0 import constants as C
-from tier0.content import loader
+from tier0.content import loader, yaml_memo
 from tier0.engine import effects, kokomi_plan, powers
 from tier0.engine.combat import run_fight
 from tier0.engine.state import Card
@@ -1879,9 +1879,8 @@ def _faces():
     face and the loader does not keep it on a `Card`."""
     import pathlib
 
-    import yaml
     repo = pathlib.Path(__file__).resolve().parents[2]
-    rows = yaml.safe_load(
+    rows = yaml_memo.safe_load(
         (repo / "docs" / "prototype-surface.yaml").read_text(encoding="utf-8"))
     return {r["id"]: r["description"] for r in rows if "description" in r}
 

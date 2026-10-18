@@ -295,14 +295,40 @@ def _run_ilspy_project(dll: Path, output_dir: Path) -> None:
         sys.exit(f"ilspycmd failed ({p.returncode}):\n{p.stderr}")
 
 
-def _read_decompiled_type(root: Path, type_name: str) -> str:
+def cs_index(root: Path) -> dict[str, list[Path]]:
+    """Every `*.cs` under `root`, by file name -- ONE walk of the tree.
+
+    `_find_cs(root, name, index)` answers what `root.rglob(f"{name}.cs")`
+    answers (the same files, in the same walk order, under the platform's
+    case rule via `os.path.normcase`, which is pathlib's default) without
+    walking the whole decompiled project again for every type. A pool read
+    looks up ~100 types; at one `rglob` each that was ~8 s of a ~10 s canon
+    read in `card_connectivity_report` (test-runtime pass, 2026-10-17).
+    Build one per read of a tree nobody is writing to.
+    """
+    index: dict[str, list[Path]] = {}
+    for path in root.rglob("*.cs"):
+        index.setdefault(os.path.normcase(path.name), []).append(path)
+    return index
+
+
+def _find_cs(root: Path, short_name: str,
+             index: dict[str, list[Path]] | None = None) -> list[Path]:
+    """`list(root.rglob(f"{short_name}.cs"))`, out of `index` when given."""
+    if index is None:
+        return list(root.rglob(f"{short_name}.cs"))
+    return list(index.get(os.path.normcase(f"{short_name}.cs"), ()))
+
+
+def _read_decompiled_type(root: Path, type_name: str,
+                          index: dict[str, list[Path]] | None = None) -> str:
     """Read one project-mode type, rejecting same-name namespace collisions."""
     namespace, short_name = type_name.rsplit(".", 1)
     namespace_decl = re.compile(
         rf"\bnamespace\s+{re.escape(namespace)}(?:;|\s*\{{)"
     )
     matches: list[tuple[Path, str]] = []
-    for path in root.rglob(f"{short_name}.cs"):
+    for path in _find_cs(root, short_name, index):
         src = path.read_text(encoding="utf-8")
         if namespace_decl.search(src):
             matches.append((path, src))
@@ -314,10 +340,11 @@ def _read_decompiled_type(root: Path, type_name: str) -> str:
     return matches[0][1]
 
 
-def _read_decompiled_short(root: Path, short_name: str) -> str:
+def _read_decompiled_short(root: Path, short_name: str,
+                           index: dict[str, list[Path]] | None = None) -> str:
     """Read a type by short name alone (powers live outside CARD_NS, and
     pinning their namespace here would be one more guess to go stale)."""
-    paths = sorted(root.rglob(f"{short_name}.cs"))
+    paths = sorted(_find_cs(root, short_name, index))
     if not paths:
         sys.exit(f"{short_name} not found in the decompiled project")
     if len(paths) > 1:
@@ -382,12 +409,14 @@ def read_pool(root: Path, character: str) -> tuple[list[str], dict[str, str]]:
     decompile once. The single-character entry point below is this plus the
     tree, unchanged in behaviour.
     """
-    pool_src = _read_decompiled_type(root, f"{POOL_NS}{character}CardPool")
+    index = cs_index(root)          # one walk; this read writes nothing
+    pool_src = _read_decompiled_type(root, f"{POOL_NS}{character}CardPool",
+                                     index)
     names = re.findall(r"ModelDb\.Card<(\w+)>", pool_src)
     if not names:
         sys.exit(f"no cards found in {character}CardPool -- check the name")
     sources = {
-        name: _read_decompiled_type(root, f"{CARD_NS}{name}")
+        name: _read_decompiled_type(root, f"{CARD_NS}{name}", index)
         for name in names
     }
     # TOKEN CARDS. A character's content is not only what she can draft:
@@ -405,7 +434,8 @@ def read_pool(root: Path, character: str) -> tuple[list[str], dict[str, str]]:
     resolved: list[str] = []
     for name in tokens:
         try:
-            sources[name] = _read_decompiled_type(root, f"{CARD_NS}{name}")
+            sources[name] = _read_decompiled_type(root, f"{CARD_NS}{name}",
+                                                  index)
         except SystemExit as err:
             # ONLY "not found" may skip (a Power, a Vfx: not a token).
             # An AMBIGUOUS match is a real error and must not be
@@ -431,7 +461,7 @@ def read_pool(root: Path, character: str) -> tuple[list[str], dict[str, str]]:
         if not any(f"<{power_cls}>" in src for src in sources.values()):
             continue
         derived = prefix + _single_card_tag(
-            _read_decompiled_short(root, power_cls), power_cls)
+            _read_decompiled_short(root, power_cls, index), power_cls)
         SUPPORTED_POWERS[power_cls] = derived
         UPGRADE_POWER_KEY[derived] = "power_amount"
     return names, sources

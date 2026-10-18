@@ -109,3 +109,32 @@ A fact this measurement turned up, not fixed here:
   because its official pools want `tools/extract_base_game_pool.py` to have
   been run first. It is a standing red in the local-only lane, so
   `run_lints.py --lane ci` is the arm that goes green today.
+
+### Test-runtime pass, 2026-10-17
+
+[USER]: "Can you also do a review pass on the test suite and see if we can
+get the test runtime down any further?" No test was deleted, skipped or
+loosened and no battery size moved; every change computes the same thing
+fewer times. What changed, and the rule each one leaves behind:
+
+- **Per-test temp directories.** The tier0 conftest's autouse fixtures made
+  three `tmp_path_factory.mktemp` directories per test. `mktemp` lists the
+  whole basetemp to find its next number, so the cost grew with every test a
+  worker had run. They now use `_fresh_dir` (a counter, O(1)). Do not add a
+  per-test `mktemp` to an autouse fixture.
+- **One walk of a decompiled tree.** `extract_base_game_pool.read_pool` and
+  `CanonReader` looked up each type with its own `rglob` over the decompiled
+  game; they now share one `cs_index(root)`. The canon read in
+  `card_connectivity_report` went from ~10 s to ~1 s, and
+  `test_eb118_connectivity` from ~100 s on one worker (the local suite's
+  tail) to ~20 s.
+- **Shared reads inside a module.** `test_encoding_gate` scans the repo once
+  (module fixture) instead of four times; `lint_generated_structure` reads the
+  Powers token map once per sweep instead of once per card; eleven test files
+  that re-parsed `docs/prototype-surface.yaml` per helper call go through
+  `tier0.content.yaml_memo` (same parser, a fresh deep copy per call).
+- **CI.** `ci_shards --verify` runs its five collections at once (the
+  `lints` job's audit step was 55 s). Each pytest shard uploads its JUnit
+  report for a week; refresh the balance from the runner's own seconds with
+  `gh run download <run-id> -p 'junit-shard-*'` then
+  `python tools/ci_shards.py --update-durations junit-shard-*/*.xml`.

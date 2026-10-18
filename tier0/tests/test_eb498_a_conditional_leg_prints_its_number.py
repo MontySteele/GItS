@@ -40,8 +40,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import yaml
-
+from tier0.content import yaml_memo
 from tools.gen_klee_cards import folded_branch_damage
 
 REPO = Path(__file__).resolve().parents[2]
@@ -58,7 +57,7 @@ BLOCK_ROWS = ("proto_ko_run_away", "proto_mc_noelle_breastplate",
 
 
 def _rows() -> dict[str, dict]:
-    return {r["id"]: r for r in yaml.safe_load(SHEET.read_text(encoding="utf-8"))
+    return {r["id"]: r for r in yaml_memo.safe_load(SHEET.read_text(encoding="utf-8"))
             if isinstance(r, dict) and "id" in r}
 
 

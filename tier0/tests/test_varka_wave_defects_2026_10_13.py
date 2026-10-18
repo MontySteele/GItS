@@ -15,8 +15,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-import yaml
-
+from tier0.content import yaml_memo
 from tools import gen_klee_cards as gen
 
 REPO = Path(__file__).resolve().parents[2]
@@ -25,7 +24,7 @@ SHEET = REPO / "docs" / "prototype-surface.yaml"
 
 
 def _row(row_id: str) -> dict:
-    rows = yaml.safe_load(SHEET.read_text(encoding="utf-8"))
+    rows = yaml_memo.safe_load(SHEET.read_text(encoding="utf-8"))
     return next(r for r in rows if isinstance(r, dict) and r.get("id") == row_id)
 
 

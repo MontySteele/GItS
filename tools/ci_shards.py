@@ -133,16 +133,29 @@ def _collect(paths: list[str]) -> set[str]:
 
 
 def verify(shards: int) -> int:
-    """The collection audit: the shards' node ids partition the full suite."""
-    full = _collect(list(ROOTS))
+    """The collection audit: the shards' node ids partition the full suite.
+
+    The full collection and every shard's run AT ONCE (test-runtime pass,
+    2026-10-17): five serial `--collect-only` passes were 55 s of the `lints`
+    job, which made it as long as the slowest pytest shard. Each collection is
+    its own process, exactly as before, and the results are read in shard
+    order, so what is checked and what is printed are unchanged.
+    """
+    from concurrent.futures import ThreadPoolExecutor
+    plan = partition(discover(), load_durations(), shards)
+    with ThreadPoolExecutor(max_workers=len(plan) + 1) as pool:
+        full_job = pool.submit(_collect, list(ROOTS))
+        jobs = [pool.submit(_collect, files) if files else None
+                for files in plan]
+        full = full_job.result()
+        collected = [job.result() if job else None for job in jobs]
     seen: dict[str, int] = {}
     problems: list[str] = []
-    for i, files in enumerate(partition(discover(), load_durations(), shards),
-                              start=1):
-        if not files:
+    for i, nodes in enumerate(collected, start=1):
+        if nodes is None:
             problems.append(f"shard {i} is empty")
             continue
-        for node in _collect(files):
+        for node in nodes:
             if node in seen:
                 problems.append(f"{node} is in shard {seen[node]} and {i}")
             seen[node] = i

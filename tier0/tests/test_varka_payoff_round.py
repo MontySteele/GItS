@@ -14,9 +14,8 @@ import random
 from pathlib import Path
 
 import pytest
-import yaml
 
-from tier0.content import loader
+from tier0.content import loader, yaml_memo
 from tier0.engine import combat
 from tier0.engine import varka_oath as V
 from tier0.engine.state import CombatState, Enemy
@@ -58,7 +57,7 @@ def _play(st, card):
 
 
 def _row(card_id):
-    rows = yaml.safe_load(
+    rows = yaml_memo.safe_load(
         (REPO_ROOT / "docs" / "prototype-surface.yaml").read_text(
             encoding="utf-8"))
     rows = rows if isinstance(rows, list) else rows.get("cards", [])

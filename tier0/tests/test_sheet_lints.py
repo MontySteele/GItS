@@ -501,8 +501,13 @@ def test_the_unique_name_lint_declares_its_encoding(tmp_path):
     prove the value came back right.
     """
     from tools import lint_text_encoding
-    assert "tools/lint_unique_names.py" not in lint_text_encoding.scan(), (
-        "lint_unique_names must declare encoding= on its sheet read")
+    # The one file, not the whole repo: `scan` reports per file, so this is
+    # the same verdict on `lint_unique_names.py` without parsing every other
+    # `.py` under tier0/tier05/tools (~3-5 s; test-runtime pass, 2026-10-17).
+    target = REPO / "tools" / "lint_unique_names.py"
+    assert target.is_file()
+    assert "tools/lint_unique_names.py" not in lint_text_encoding.scan(
+        [target]), "lint_unique_names must declare encoding= on its sheet read"
 
     sys.path.insert(0, str(REPO / "tools"))
     import lint_unique_names

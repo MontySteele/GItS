@@ -339,11 +339,18 @@ def canonical_vars_block(source: str) -> str:
 _EXTRA_ARG_DECL = re.compile(r'description\.Add\(\s*"([A-Za-z]\w*)"')
 
 
-def declared_vars(source: str) -> set[str]:
+def declared_vars(source: str,
+                  aliases: dict[str, str] | None = None) -> set[str]:
     """Var names this file declares in CanonicalVars, plus the description
-    arguments its `AddExtraArgsToDescription` adds."""
+    arguments its `AddExtraArgsToDescription` adds.
+
+    `aliases` is `var_token_aliases()`, read here when not handed in. A sweep
+    hands in one read: the map is a property of the Powers tree, not of the
+    card, and re-reading ~110 files per card was ~6 s of a 7 s prototype
+    sweep (test-runtime pass, 2026-10-17)."""
     block = canonical_vars_block(source)
-    aliases = var_token_aliases()
+    if aliases is None:
+        aliases = var_token_aliases()
     names = set(_NAMED_DECL.findall(block))
     names |= set(_NAMED_TYPED_DECL.findall(block))
     for typed in _TYPED_DECL.findall(block):
@@ -366,10 +373,11 @@ def referenced_vars(source: str) -> set[str]:
     return names - PSEUDO_TOKENS
 
 
-def structural_problems(source: str, where: str) -> list[str]:
-    """L1 + L2 for a single generated file."""
+def structural_problems(source: str, where: str,
+                        aliases: dict[str, str] | None = None) -> list[str]:
+    """L1 + L2 for a single generated file (`aliases`: see `declared_vars`)."""
     problems = []
-    declared = declared_vars(source)
+    declared = declared_vars(source, aliases)
     referenced = referenced_vars(source)
 
     for name in sorted(referenced - declared):
@@ -474,6 +482,7 @@ def generated_sources(profile: CharacterProfile) -> list[tuple[dict, str, str]]:
 
 def problems(profile: CharacterProfile) -> list[str]:
     found = []
+    aliases = var_token_aliases()        # once per sweep, not once per card
     for card, source, where in generated_sources(profile):
         if not source:
             found.append(
@@ -481,7 +490,7 @@ def problems(profile: CharacterProfile) -> list[str]:
                 f"{profile.out_dir.name}/{pascal(card['id'])}.cs does not exist"
             )
             continue
-        found += structural_problems(source, where)
+        found += structural_problems(source, where, aliases)
         found += coverage_problems(card, source, where)
         found += aim_problems(source, where)
     return found
