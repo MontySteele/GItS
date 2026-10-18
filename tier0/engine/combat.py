@@ -459,6 +459,9 @@ def _finish_play(state: CombatState, card: Card,
     # R276, PINCER's carry-out: the first face-up Attack this turn is
     # played twice. `FirstAttackTwicePower.ModifyCardPlayCount`.
     replays += kokomi_plan.spend_first_attack_twice(state, card)
+    # Yoimiya, Niwabi Fire-Dance (2026-10-18): the first Attack each turn is
+    # played twice. `NiwabiFireDancePower.ModifyCardPlayCount`.
+    replays += effects.niwabi_replays(state, card)
     # VARKA's Grand Master's Order: the next Knight played this turn is
     # played twice, and each replay is a Knight play of its own (the Oath
     # scope and the current-element step open per resolution, in
@@ -749,7 +752,10 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
         # (C.KOKOMI_OVERHAUL). THE EXPANSION's Watatsumi's Grace:
         # "keep up to N of your Block" -- the clear takes what is above the
         # cap (the base game's Sturdy Clamp shape). None without the Power.
-        kept = kokomi_plan.grace_keeps(state)
+        # The Inazuma pool rework (2026-10-18): Thoma's Crimson Ooyoroi is
+        # the same shape, and the first of the two worn wins
+        # (`effects.block_clear_keeps`).
+        kept = effects.block_clear_keeps(state)
         p.block = 0 if kept is None else kept
     # THE TAMAKUSHI CASKET (2026-10-12, [USER]: "let's have her starter relic
     # apply block at the beginning of the turn rather than the end"): "At the
@@ -810,6 +816,8 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     p.energy += furina_tide.energy_kept(state)
     # Crowd Favorite (the Furina sweep): AfterEnergyReset.
     p.energy += furina_stage.crowd_favorite(state)
+    # Wanderer, Hanega (the Inazuma pool rework, 2026-10-18): AfterEnergyReset.
+    p.energy += effects.hanega_energy(state)
     # site D, with Hook.ModifyHandDraw folded in (ToolsOfTheTrade and
     # DrawCardsNextTurn). Relic-driven opening-hand bonuses are a different
     # hook and stay where they are.
@@ -981,6 +989,9 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     furina_tide.end_of_turn(state)
     # The Furina sweep: Trial by Water's mark and Rainfall Overture lapse.
     furina_stage.turn_end(state)
+    # THE INAZUMA POOL REWORK (2026-10-18): the end-of-turn phase that
+    # `effects.player_turn_end_triggers` opened closes after its last tenant.
+    state.turn_end_window = False
     _settle_phases(state)        # turn-end burst (Sparks 'n' Splash) can
     #                              drop a phased boss
     # Injected Burn/Wither (§10.2): end-of-turn damage while in hand,
@@ -1310,6 +1321,9 @@ def _enemy_turn(state: CombatState, enemy: Enemy) -> None:
         # Tidal Riposte, ONCE for the whole attack: every hit on her fully
         # Blocked stores the bonus (`TidalRipostePower.AfterAttack`).
         kokomi_plan.tidal_riposte(state, enemy, riposte_hits)
+        # Itto, Royal Descent (2026-10-18), on the same once-per-attack read:
+        # no hit cost HP. `RoyalDescentPower.AfterAttack`.
+        effects.royal_descent(state, enemy, riposte_hits)
         if bomb_suppressed:
             enemy.bomb_suppression_spent = True
             state.emit("bomb_suppression_spent", enemy=enemy.name)

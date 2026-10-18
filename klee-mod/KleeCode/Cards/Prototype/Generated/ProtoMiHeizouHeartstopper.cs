@@ -52,16 +52,14 @@ public sealed class ProtoMiHeizouHeartstopper : CustomCardModel, IElementalCard,
         new[] { KleeKeywords.AppliesAnemo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        TipAudience.Seat
-            ? ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo), this)
-            : KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo);
+        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mi_heizou_heartstopper");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Shikanoin Heizou — Heartstopper Strike"),
-        ("description", "Deal {CalculatedDamage:diff()} [gold]Anemo[/gold] damage. Deals 4 additional damage for each [gold]Swirl[/gold] this turn.{IfUpgraded:show: Draw 1 card.|}"),
+        ("description", "Deal {CalculationBase:diff()} [gold]Anemo[/gold] damage, plus {ExtraDamage:diff()} for each other Attack you played this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}"),
     };
 
     protected override HashSet<CardTag> CanonicalTags => new() { CardTag.Strike };
@@ -69,10 +67,9 @@ public sealed class ProtoMiHeizouHeartstopper : CustomCardModel, IElementalCard,
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(6m),
+            new CalculationBaseVar(4m),
             new ExtraDamageVar(4m),
-            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => CompanionOverhaulLedger.For(card.Owner.Creature).SwirlsThisTurn),
-            new CardsVar(1)
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => CompanionOverhaulLedger.For(card.Owner.Creature).AttacksPlayedThisTurn)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -90,14 +87,10 @@ public sealed class ProtoMiHeizouHeartstopper : CustomCardModel, IElementalCard,
             .Targeting(cardPlay.Target)
             .WithElementHitFx(this)
             .Execute(choiceContext);
-        if (IsUpgraded)
-        {
-            await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
-        }
     }
 
     protected override void OnUpgrade()
     {
-        // add: draw -- expressed at play time as an IsUpgraded-gated draw appended after the base effects.
+        DynamicVars.ExtraDamage.UpgradeValueBy(2m);
     }
 }

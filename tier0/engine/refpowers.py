@@ -1212,6 +1212,12 @@ def retain_at_flush(state: CombatState, flushing: list[Card]) -> list[Card]:
     if yae_shrine.retains_hand(state):
         state.emit("yae_retain_hand", kept=[c.id for c in flushing])
         return list(flushing)
+    # Raiden Shogun, Plane of Euthymia (the Inazuma pool rework, 2026-10-18):
+    # "At the end of your turn, Retain your Hand." Runic Pyramid's rule, every
+    # turn (`PlaneOfEuthymiaPower.ShouldFlush`).
+    if state.player.powers.get("mi_euthymia", 0):
+        state.emit("mi_euthymia_retain", kept=[c.id for c in flushing])
+        return list(flushing)
 
     # PhantomBladesPower gives Retain to every tagged card it owns
     # (AfterApplied over AllCards, then AfterCardEnteredCombat for each new

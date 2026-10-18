@@ -313,19 +313,28 @@
     "proto_mf_lynette_enigmatic_feint",
     "proto_mf_navia_cannon_fire_support",
     "proto_mf_neuvillette_ancient_sea_authority",
+    "proto_mi_ayaka_hyouka",
     "proto_mi_ayaka_soumetsu",
     "proto_mi_ayato_kyouka",
+    "proto_mi_ayato_kyouka_fuushi",
     "proto_mi_chiori_hasode",
+    "proto_mi_chiori_twin_blades",
     "proto_mi_gorou_crystal_collapse",
     "proto_mi_gorou_inuzaka",
     "proto_mi_gorou_juuga",
     "proto_mi_gorou_war_banner",
     "proto_mi_heizou_heartstopper",
-    "proto_mi_itto_superlative_superstrength",
+    "proto_mi_heizou_windmuster_kick",
+    "proto_mi_itto_royal_descent",
+    "proto_mi_itto_ushi",
+    "proto_mi_kazuha_chihayaburu",
     "proto_mi_kazuha_slash",
+    "proto_mi_kirara_meowteor_kick",
     "proto_mi_kirara_surprise_dispatch",
+    "proto_mi_mizuki_aisa_utamakura",
     "proto_mi_mizuki_anraku",
-    "proto_mi_raiden_musou_no_hitotachi",
+    "proto_mi_raiden_baleful_omen",
+    "proto_mi_raiden_euthymia",
     "proto_mi_sara_crowfeather_cover",
     "proto_mi_sara_tengu_stormcall",
     "proto_mi_sayu_daruma",
@@ -336,8 +345,12 @@
     "proto_mi_shinobu_thundergrust",
     "proto_mi_thoma_blazing_barrier",
     "proto_mi_thoma_crimson_ooyoroi",
+    "proto_mi_wanderer_hanega",
+    "proto_mi_wanderer_kyougen",
+    "proto_mi_yae_sacred_sakuras_favor",
     "proto_mi_yae_sesshou_sakura",
-    "proto_mi_yoimiya_aurous_blaze",
+    "proto_mi_yoimiya_niwabi",
+    "proto_mi_yoimiya_ryuukin_saxifrage",
     "proto_vk_absolute_zero",
     "proto_vk_amber_baron_bunny",
     "proto_vk_amber_fiery_rain",
@@ -815,19 +828,28 @@
     "proto_mf_lynette_enigmatic_feint": "klee",
     "proto_mf_navia_cannon_fire_support": "klee",
     "proto_mf_neuvillette_ancient_sea_authority": "klee",
+    "proto_mi_ayaka_hyouka": "klee",
     "proto_mi_ayaka_soumetsu": "klee",
     "proto_mi_ayato_kyouka": "klee",
+    "proto_mi_ayato_kyouka_fuushi": "klee",
     "proto_mi_chiori_hasode": "klee",
+    "proto_mi_chiori_twin_blades": "klee",
     "proto_mi_gorou_crystal_collapse": "kokomi",
     "proto_mi_gorou_inuzaka": "kokomi",
     "proto_mi_gorou_juuga": "kokomi",
     "proto_mi_gorou_war_banner": "kokomi",
     "proto_mi_heizou_heartstopper": "klee",
-    "proto_mi_itto_superlative_superstrength": "klee",
+    "proto_mi_heizou_windmuster_kick": "klee",
+    "proto_mi_itto_royal_descent": "klee",
+    "proto_mi_itto_ushi": "klee",
+    "proto_mi_kazuha_chihayaburu": "klee",
     "proto_mi_kazuha_slash": "klee",
+    "proto_mi_kirara_meowteor_kick": "klee",
     "proto_mi_kirara_surprise_dispatch": "klee",
+    "proto_mi_mizuki_aisa_utamakura": "klee",
     "proto_mi_mizuki_anraku": "klee",
-    "proto_mi_raiden_musou_no_hitotachi": "klee",
+    "proto_mi_raiden_baleful_omen": "klee",
+    "proto_mi_raiden_euthymia": "klee",
     "proto_mi_sara_crowfeather_cover": "klee",
     "proto_mi_sara_tengu_stormcall": "klee",
     "proto_mi_sayu_daruma": "klee",
@@ -838,8 +860,12 @@
     "proto_mi_shinobu_thundergrust": "klee",
     "proto_mi_thoma_blazing_barrier": "klee",
     "proto_mi_thoma_crimson_ooyoroi": "klee",
+    "proto_mi_wanderer_hanega": "klee",
+    "proto_mi_wanderer_kyougen": "klee",
+    "proto_mi_yae_sacred_sakuras_favor": "klee",
     "proto_mi_yae_sesshou_sakura": "klee",
-    "proto_mi_yoimiya_aurous_blaze": "klee",
+    "proto_mi_yoimiya_niwabi": "klee",
+    "proto_mi_yoimiya_ryuukin_saxifrage": "klee",
     "proto_vk_absolute_zero": "varka",
     "proto_vk_amber_baron_bunny": "varka",
     "proto_vk_amber_fiery_rain": "varka",
@@ -2043,14 +2069,24 @@
     "proto_mf_neuvillette_ancient_sea_authority": {
       "cost": -1
     },
+    "proto_mi_ayaka_hyouka": {
+      "damage": 3
+    },
     "proto_mi_ayaka_soumetsu": {
       "power_amount": 1
     },
     "proto_mi_ayato_kyouka": {
-      "power_amount": 1
+      "power_amount": 2
+    },
+    "proto_mi_ayato_kyouka_fuushi": {
+      "damage": 2,
+      "plan_damage": 2
     },
     "proto_mi_chiori_hasode": {
-      "power_amount": 1
+      "damage": 2
+    },
+    "proto_mi_chiori_twin_blades": {
+      "innate": true
     },
     "proto_mi_gorou_crystal_collapse": {
       "retain": true
@@ -2067,42 +2103,58 @@
       "plan_strength": 1
     },
     "proto_mi_heizou_heartstopper": {
-      "add": {
-        "op": "draw",
-        "amount": 1
-      }
+      "formula_per": 2
     },
-    "proto_mi_itto_superlative_superstrength": {
-      "damage": 3,
+    "proto_mi_heizou_windmuster_kick": {
+      "damage": 4
+    },
+    "proto_mi_itto_royal_descent": {
+      "power_amount": 3
+    },
+    "proto_mi_itto_ushi": {
       "block": 3
+    },
+    "proto_mi_kazuha_chihayaburu": {
+      "cost": -1
     },
     "proto_mi_kazuha_slash": {
       "damage": 3
     },
+    "proto_mi_kirara_meowteor_kick": {
+      "damage": 3
+    },
     "proto_mi_kirara_surprise_dispatch": {
-      "block": 3
+      "block": 3,
+      "plan_block": 4
+    },
+    "proto_mi_mizuki_aisa_utamakura": {
+      "draw": 1
     },
     "proto_mi_mizuki_anraku": {
       "cost": -1
     },
-    "proto_mi_raiden_musou_no_hitotachi": {
+    "proto_mi_raiden_baleful_omen": {
+      "strength_loss": 1
+    },
+    "proto_mi_raiden_euthymia": {
       "cost": -1
     },
     "proto_mi_sara_crowfeather_cover": {
       "power_amount": 1
     },
     "proto_mi_sara_tengu_stormcall": {
-      "damage": 3
+      "vulnerable": 1
     },
     "proto_mi_sayu_daruma": {
-      "power_amount": 1
+      "block": 3,
+      "plan_block": 3
     },
     "proto_mi_sayu_fuuin_dash": {
       "damage": 3
     },
     "proto_mi_sayu_naptime": {
       "block": 3,
-      "power_amount": 1
+      "plan_block": 3
     },
     "proto_mi_shinobu_grass_ring": {
       "block": 3
@@ -2118,7 +2170,17 @@
       "power_amount": 1
     },
     "proto_mi_thoma_crimson_ooyoroi": {
-      "power_amount": 1
+      "power_amount": 3
+    },
+    "proto_mi_wanderer_hanega": {
+      "cost": -1
+    },
+    "proto_mi_wanderer_kyougen": {
+      "damage": 2,
+      "conditional_then_damage": 2
+    },
+    "proto_mi_yae_sacred_sakuras_favor": {
+      "cost": -1
     },
     "proto_mi_yae_sesshou_sakura": {
       "add": {
@@ -2126,9 +2188,11 @@
         "amount": 1
       }
     },
-    "proto_mi_yoimiya_aurous_blaze": {
-      "damage": 3,
-      "power_amount": 1
+    "proto_mi_yoimiya_niwabi": {
+      "cost": -1
+    },
+    "proto_mi_yoimiya_ryuukin_saxifrage": {
+      "damage": 1
     },
     "proto_vk_absolute_zero": {
       "innate": true

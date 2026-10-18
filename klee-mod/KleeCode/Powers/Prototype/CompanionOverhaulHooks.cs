@@ -268,17 +268,20 @@ public static class CompanionOverhaulRiders
         // 2026-10-10: its damage is a separate hit of the Swirled element
         // after the Attack, and the Attack keeps its own element, so a
         // Crosswind after a Swirl still Swirls -- `SwirlChargePower.OnSpent`.)
-        // The Inazuma arm adds one of each --
-        // Ayato's Kyouka ("for 2 turns, your Attacks apply Hydro") and Sara's
-        // Crowfeather Cover ("your next Attack ... applies Electro") -- and
-        // they join the sequence at their own tier rather than at the end,
+        // The Inazuma arm adds its one-shots --
+        // Sara's Crowfeather Cover ("your next Attack ... applies Electro")
+        // and the Electro rider -- and they join the sequence at their own
+        // tier rather than at the end,
         // which is what keeps "last wins" meaning the most specific claim
         // rather than the most recently written class. Sim twin:
         // `effects.companion_overhaul_card_start`, same order.
         if (dealer.Powers.OfType<LightningFangPower>().Any()) over = Element.Electro;
-        if (dealer.Powers.OfType<KyoukaPower>().Any()) over = Element.Hydro;
         if (dealer.Powers.OfType<PassionOverloadPower>().Any()) over = Element.Pyro;
         if (dealer.Powers.OfType<CrowfeatherCoverPower>().Any()) over = Element.Electro;
+        // The Inazuma pool rework (2026-10-18): Stormcall's and Baleful
+        // Omen's rider, at Crowfeather's tier. (Ayato's blanket Kyouka left
+        // with that rework.)
+        if (dealer.Powers.OfType<NextAttackElectroPower>().Any()) over = Element.Electro;
         return over == Element.None ? printed : over;
     }
 }
@@ -360,6 +363,11 @@ public static class CompanionOverhaulReactions
         // KLEE'S COVEN rides the same write: Prune's Chime needs the ELEMENT
         // this Swirl consumed, and this is the one site the mod has it.
         CompanionOverhaulLedger.For(dealer).NoteSwirl(consumedAura);
+
+        // Kazuha, Chihayaburu (the Inazuma pool rework, 2026-10-18):
+        // "Whenever you Swirl, draw 1 card." Sim twin: `mi_chihayaburu` in
+        // `effects.companion_overhaul_reaction`, at the same point.
+        await ChihayaburuPower.OnSwirl(choiceContext, dealer);
 
         // Varka, Sturm und Drang: "Whenever a Swirl happens, your next Attack
         // deals 6 more damage OF THE SWIRLED ELEMENT."
@@ -1321,6 +1329,10 @@ public sealed class LightfallSwordPower : PowerModel, ILocalizationProvider
         var host = Owner;
         await PowerCmd.Remove(this);
         var dealt = SimDamagePipeline.DealerMods(Applier, damage);
+        // The seat this card-less hit is credited to (telemetry), which
+        // Sacred Sakura's Favor also reads: the dealer is null on this door.
+        using var credit = Diagnostics.DamageCredit.OpenIfNone(
+            Applier, Diagnostics.DamageCredit.Power);
         await CreatureCmd.Damage(
             choiceContext, host,
             (int)SimDamagePipeline.TargetMods(host, dealt),

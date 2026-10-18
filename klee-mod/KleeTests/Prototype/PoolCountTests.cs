@@ -146,13 +146,14 @@ public class PoolCountTests
         // Favonius, Ladder of Divine Ascent and Qiqi's Herald of Frost (in
         // Mondstadt since 2026-10-18, LAW's unreleased-nation line).
         // Inazuma 21 since the Kokomi re-founding (2026-10-12): Gorou's three
-        // are her own cards.
-        Assert.Equal(39 + 21 + 16, universals.Count);
+        // are her own cards. 34 since the Inazuma pool rework (2026-10-18)
+        // grew it to two cards a character.
+        Assert.Equal(39 + 34 + 16, universals.Count);
         var byNation = universals.GroupBy(c => ((ICompanionCard)c).Nation)
             .ToDictionary(g => g.Key!, g => g.Count());
         Assert.Equal(39, byNation["mondstadt"]);
         Assert.False(byNation.ContainsKey("liyue"));
-        Assert.Equal(21, byNation["inazuma"]);
+        Assert.Equal(34, byNation["inazuma"]);
         Assert.Equal(16, byNation["fontaine"]);
         Assert.All(universals, c => Assert.Null(((ICompanionCard)c).PersonalPool));
         Assert.All(universals, c => Assert.Equal("KleeMod.Cards.Prototype.Generated",

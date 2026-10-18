@@ -142,14 +142,14 @@ def test_seas_reproach_fires_on_weak_a_plan_applies():
     assert st.enemies[0].hp < hp
 
 
-def test_heizou_counts_swirls_before_his_own_hit():
-    """His count is read when the hit is computed, so his own Swirl does not
-    raise it: 6 with no Swirl before him this turn."""
-    st = kokomi_state()
-    st.mi_swirls_this_turn = 0
+def test_heizou_counts_the_attacks_before_his_own_hit():
+    """His count is read when the hit is computed, so his own play does not
+    raise it. Since the Inazuma pool rework (2026-10-18) it counts the other
+    Attacks played this turn, not Swirls."""
     row = loader.get_card("proto_mi_heizou_heartstopper")
     formula = row.effects[0]["amount_formula"]
-    assert formula == {"base": 6, "per": 4, "count": "swirls_this_turn"}
+    assert formula == {"base": 4, "per": 4,
+                       "count": "attacks_played_this_turn"}
 
 
 # ---- items 7-11 and pick 1 (a): the seat page -----------------------------

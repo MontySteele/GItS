@@ -518,11 +518,12 @@ def test_the_end_of_turn_order_is_the_one_the_mod_walks(overhaul):
                         # Juuga's Plan line (the Kokomi re-founding,
                         # 2026-10-12): its Block on the same clock, beside
                         # the volley (`mi_juuga_guard` in the sim).
-                        "JuugaGuardPower", "MujiMujiDarumaPower",
+                        # The Inazuma pool rework (2026-10-18) retired
+                        # Daruma, Kyouka, Tamoto, the old Ooyoroi clock and
+                        # Aurous Blaze.
+                        "JuugaGuardPower",
                         "SanctifyingRingPower", "SesshouSakuraPower",
-                        "SoumetsuPower", "KyoukaPower", "TamotoPower",
-                        "CrimsonOoyoroiPower",
-                        "AurousBlazePower",
+                        "SoumetsuPower",
                         # (Klee's coven Yuegui, last before the latch, was
                         # cut by the Klee-only companions, 2026-10-03.)
                         "RevelationPower"], cs_order

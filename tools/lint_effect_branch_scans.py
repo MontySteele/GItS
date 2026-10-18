@@ -164,6 +164,12 @@ BRANCH_ONLY_KNOWN: dict[str, tuple[tuple[str, ...], str]] = {
         ("apply_power",),
         "Rosaria's Vulnerable sits in a `then:`; the generated card carries"
         " `BaseKeywordTips.ForVulnerable` for it." + _COMPANION_CHECK),
+    # THE INAZUMA POOL REWORK (2026-10-18).
+    "proto_mi_itto_ushi": (
+        ("apply_power",),
+        "Ushi's Strength sits in a `then:`; the generated card carries"
+        " `BaseKeywordTips.ForStrength` for it (checked in"
+        " ProtoMiIttoUshi.cs)." + _COMPANION_CHECK),
     # proto_mc_durin_binary_form left at the AoE trim (2026-10-03): its forms
     # are damage now, and Principle of Purity's form powers sit beside a
     # top-level apply_power, so no op hides in a branch.
