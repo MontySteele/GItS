@@ -65,6 +65,18 @@ public sealed class VarkaOathLedger
         }
     }
 
+    /// <summary>Has this creature's Oath started this combat
+    /// (<see cref="VarkaOath.Start"/>)? A pure read: it creates nothing.
+    /// </summary>
+    public static bool HasStarted(Creature creature)
+    {
+        lock (Gate)
+        {
+            if (!ReferenceEquals(_combat, (object?)creature.CombatState)) return false;
+            return _byVarka.TryGetValue(creature, out var ledger) && ledger.Started;
+        }
+    }
+
     /// <summary>Test seam: forget every ledger. The mod never calls it.
     /// </summary>
     public static void ResetAll()
@@ -77,6 +89,11 @@ public sealed class VarkaOathLedger
     }
 
     private readonly Dictionary<Element, int> _oath = Elements.ToDictionary(e => e, _ => 0);
+
+    /// <summary>Is the Oath kept for this creature this combat? Varka's is
+    /// always; anyone else's from the first Varka card they play (the
+    /// off-character fix, 2026-10-18).</summary>
+    public bool Started { get; set; }
 
     /// <summary>His current element: the last Knight's, the last Oath element
     /// one of his other cards applied (the open Oath, 2026-09-30), or what
@@ -436,8 +453,33 @@ public interface IVarkaSwitchCard
 /// </summary>
 public static class VarkaOath
 {
-    /// <summary>Is this creature Varka?</summary>
-    public static bool Live(Creature? creature) => VarkaPrototype.IsVarka(creature);
+    /// <summary>
+    /// Is the Oath kept for THIS creature: it gains Oath from the elements it
+    /// applies and the Swirls it makes, a Knight sets its current element,
+    /// and the Oath Powers pay? Varka's is from the start of every combat;
+    /// anyone else's from the first Varka card they play this combat
+    /// (<see cref="Start"/>; the off-character fix, 2026-10-18), the base
+    /// game's Orbs shape (the first Channel grants a slot to a character
+    /// with none). In co-op each seat's Oath is its own.
+    /// </summary>
+    public static bool Live(Creature? creature) =>
+        VarkaPrototype.IsVarka(creature)
+        || (creature?.Player != null && VarkaOathLedger.HasStarted(creature));
+
+    /// <summary>Is this one of Varka's cards: his pool, his Knights, his
+    /// Ancients? PURE.</summary>
+    public static bool IsVarkaCard(CardModel? card) =>
+        card is ICharacterCard { CharacterId: VarkaPrototype.CharacterId }
+        || VarkaRules.IsKnight(card);
+
+    /// <summary>Start this player's Oath, once a combat: a Varka card is
+    /// being played. False for no player.</summary>
+    public static bool Start(Creature? creature)
+    {
+        if (creature?.Player == null) return false;
+        VarkaOathLedger.For(creature).Started = true;
+        return true;
+    }
 
     // ---- reads (PURE; the generated readers and the badge take these) -----
 
@@ -499,7 +541,7 @@ public static class VarkaOath
     /// <c>enemies_with_aura</c> count; West Wind Shield's, cut by the combo
     /// pass).</summary>
     public static int EnemiesWithAura(Creature? creature) =>
-        creature?.CombatState == null || !Live(creature) ? 0
+        creature?.CombatState == null || creature.Player == null ? 0
             : creature.CombatState.HittableEnemies.Count(
                 e => AuraCmd.Find(e) != null);
 
@@ -526,7 +568,9 @@ public static class VarkaOath
     public static async Task BeginPlay(CardModel card)
     {
         var owner = card.Owner?.Creature;
-        if (!Live(owner)) return;
+        // One of his cards starts its player's Oath first, whoever that
+        // player is (the off-character fix, 2026-10-18).
+        if (!Live(owner) && (!IsVarkaCard(card) || !Start(owner))) return;
         var ledger = VarkaOathLedger.For(owner!);
         ledger.OpenScope(open: !VarkaRules.IsKnight(card), card: card);
         if (!VarkaRules.IsKnight(card)) return;
@@ -1043,7 +1087,12 @@ public static class VarkaOath
             // A canonical (compendium) copy asserts on Owner.
             return false;
         }
-        if (owner?.CombatState == null || !Live(owner)) return false;
+        // A Varka card would start its player's Oath as it is played.
+        if (owner?.CombatState == null
+            || (!Live(owner) && (owner.Player == null || !IsVarkaCard(card))))
+        {
+            return false;
+        }
         if (!IsOathElement(element)) return false;
         if (Current(owner) == element) return false;
         return VarkaRules.IsKnight(card)
@@ -1104,7 +1153,7 @@ public static class VarkaOath
     /// <c>{InCombat:{VarkaSwirl}|}</c> and the line reads "(No aura to
     /// Swirl)" while the enemy it is aimed at has no aura
     /// (<see cref="DescribedTarget"/>), or, not aimed, while no enemy has
-    /// one. Empty otherwise, off a combat and for anyone but a live Varka.
+    /// one. Empty otherwise, off a combat and for anyone who is not a player.
     /// Display only.
     /// </summary>
     public static string SwirlLine(CardModel? card)
@@ -1119,7 +1168,7 @@ public static class VarkaOath
         {
             return "";
         }
-        if (owner?.CombatState == null || !Live(owner)) return "";
+        if (owner?.CombatState == null || owner.Player == null) return "";
         var target = DescribedTarget.For(card);
         if (target != null) return SwirlWords(AuraCmd.Find(target) != null);
         return SwirlWords(owner.CombatState.HittableEnemies

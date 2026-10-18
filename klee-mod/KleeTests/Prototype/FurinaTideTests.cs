@@ -651,10 +651,13 @@ public class FurinaTideTests
             Assert.Contains(gate, Il.Calls(Il.Method(type, "get_IsPlayable")));
             Assert.True(typeof(IUnplayableReasonCard).IsAssignableFrom(t));
         }
-        // Off Furina, or with no owner, the gate answers no and never throws.
+        // With no owner the gate answers no and never throws. Off Furina it
+        // answers as on her (the off-character fix, 2026-10-18): any
+        // player's HP pays a Drain, never to 0, and a Spend needs Fanfare.
         FurinaStageLedger.ResetAll();
         Assert.False(FurinaStage.CanDrain(null, 2));
-        Assert.False(FurinaStage.CanDrain(Seat.Klee().Creature, 2));
+        Assert.True(FurinaStage.CanDrain(Seat.Klee().Creature, 2));
+        Assert.False(FurinaStage.CanDrain(Seat.Klee(2).Creature, 2));
         Assert.False(FurinaStage.CanSpend(Seat.Klee().Creature, 4));
         Assert.True(FurinaStage.CanDrain(Seat.Furina(78).Creature, 5));
         FurinaStageLedger.ResetAll();
@@ -675,19 +678,31 @@ public class FurinaTideTests
     }
 
     [Fact]
-    public void Her_verbs_do_nothing_on_anyone_else_and_never_throw()
+    public void Her_verbs_need_a_player_and_bring_anyones_stage_up()
     {
+        // The off-character fix (2026-10-18): her verbs work for whichever
+        // player plays the card, on that player's own Stage. With no player
+        // they do nothing and never throw.
         FurinaStageLedger.ResetAll();
-        var klee = Seat.Klee().WithCombatState().Creature;
         var context = new MegaCrit.Sts2.Core.GameActions.Multiplayer
             .ThrowingPlayerChoiceContext();
-        Assert.False(StageKit.Run(FurinaStage.Drain(context, klee, 3)));
-        Assert.Equal(0, StageKit.Run(FurinaStage.Repay(context, klee, 3)));
-        Assert.Equal(0, StageKit.Run(FurinaStage.RepayAll(context, klee)));
-        Assert.Equal(0, StageKit.Run(FurinaStage.SpendAll(context, klee)));
-        StageKit.Run(FurinaStage.GuestStar(context, klee, "clorinde"));
-        Assert.Equal(0, FurinaStage.DrainedOf(klee));
-        Assert.Equal(80, (int)klee.CurrentHp);
+        Assert.False(StageKit.Run(FurinaStage.Drain(context, null, 3)));
+        Assert.Equal(0, StageKit.Run(FurinaStage.Repay(context, null, 3)));
+        Assert.Equal(0, StageKit.Run(FurinaStage.Gain(context, null, 3)));
+        StageKit.Run(FurinaStage.GuestStar(context, null, "clorinde"));
+
+        // Reading a Klee's Stage never brings it up; a verb does.
+        var klee = Seat.Klee().WithCombatState().Creature;
+        Assert.Equal(0, FurinaStage.FanfareOf(klee));
+        Assert.False(FurinaStage.LiveFor(klee));
+        Assert.Equal(3, StageKit.Run(FurinaStage.Gain(context, klee, 3)));
+        Assert.True(FurinaStage.LiveFor(klee));
+        Assert.Equal(3, FurinaStage.FanfareOf(klee));
+
+        // A second seat's Stage is its own.
+        var partner = Seat.Klee().WithCombatState().Creature;
+        Assert.False(FurinaStage.LiveFor(partner));
+        Assert.Equal(0, FurinaStage.FanfareOf(partner));
         FurinaStageLedger.ResetAll();
     }
 

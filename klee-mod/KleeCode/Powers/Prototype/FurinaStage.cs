@@ -54,11 +54,66 @@ namespace KleeMod.Powers;
 /// </summary>
 public static class FurinaStage
 {
-    /// <summary>Is the kit live for THIS creature? In co-op the other seat is
-    /// not hers: her cards do nothing on anyone else, and never throw.
+    /// <summary>
+    /// Is the Stage UP for THIS creature: its clocks run (the guests' acts,
+    /// the turn's counts, the curtain call), HP lost prints Fanfare, and its
+    /// gauges may draw? Furina's is up from the start of every combat;
+    /// anyone else's from their first Stage verb or Furina card this combat
+    /// (<see cref="Ensure"/>; the off-character fix, 2026-10-18). This is
+    /// the base game's Orbs and Osty shape: the Defect's first Channel
+    /// grants a slot to a character with none, and Osty is summoned if
+    /// absent. In co-op each seat's Stage is its own.
     /// </summary>
     public static bool LiveFor(Creature? creature) =>
-        FurinaResources.IsFurina(creature);
+        FurinaResources.IsFurina(creature)
+        || (creature?.Player != null && FurinaStageLedger.HasOpened(creature));
+
+    /// <summary>Does this creature have a Stage to READ? Any player's: a
+    /// card's face, price and gate read the same for whoever holds it (an
+    /// Ironclad with no Stage up reads a fresh one: 0 Fanfare, nothing
+    /// drained). Reading never brings the Stage up.</summary>
+    public static bool Holds(Creature? creature) => creature?.Player != null;
+
+    /// <summary>
+    /// A Stage verb or a Furina card brings this player's Stage up, once a
+    /// combat (the off-character fix, 2026-10-18: card verbs work for
+    /// whichever player plays the card). The ledger's entry HP is what it
+    /// captured on its first ask. False for no player, so a verb does
+    /// nothing and never throws.
+    /// </summary>
+    public static bool Ensure(Creature? owner)
+    {
+        if (!Holds(owner)) return false;
+        var ledger = FurinaStageLedger.For(owner!);
+        if (!ledger.Opened) ledger.Open(ledger.EntryHp, ledger.EntryMaxHp);
+        return true;
+    }
+
+    /// <summary>Her roster id, the one her cards carry.</summary>
+    public const string CharacterId = "furina";
+
+    /// <summary>Is this one of Furina's cards (her pool, her Guest Stars, her
+    /// Ancients)? Playing one brings the player's Stage up, so her Powers
+    /// and her readers are live on anyone who plays them. PURE.</summary>
+    public static bool IsFurinaCard(CardModel? card) =>
+        card is global::KleeMod.Cards.ICharacterCard { CharacterId: CharacterId };
+
+    /// <summary>A card play opens: one of hers brings its player's Stage up
+    /// before its effects (<see cref="Ensure"/>).</summary>
+    public static void StartOnPlay(CardModel? card)
+    {
+        if (!IsFurinaCard(card)) return;
+        Creature? owner;
+        try
+        {
+            owner = card!.Owner?.Creature;
+        }
+        catch (System.Exception)
+        {
+            return;
+        }
+        Ensure(owner);
+    }
 
     /// <summary>The eleven guests' sheet names (the slice's four, the pool to
     /// 39's three and the pool to 75's four).</summary>
@@ -93,7 +148,7 @@ public static class FurinaStage
     // ---- reading the kit ---------------------------------------------------
 
     public static IReadOnlyList<StageSeat> Of(Creature? owner) =>
-        owner == null || !LiveFor(owner)
+        owner == null || !Holds(owner)
             ? System.Array.Empty<StageSeat>()
             : FurinaStageLedger.For(owner).Seats;
 
@@ -102,26 +157,26 @@ public static class FurinaStage
 
     /// <summary>Her Fanfare.</summary>
     public static int FanfareOf(Creature? owner) =>
-        LiveFor(owner) ? FurinaStageLedger.For(owner!).Fanfare : 0;
+        Holds(owner) ? FurinaStageLedger.For(owner!).Fanfare : 0;
 
     /// <summary>Her drained HP, not yet repaid.</summary>
     public static int DrainedOf(Creature? owner) =>
-        LiveFor(owner) ? FurinaStageLedger.For(owner!).Drained : 0;
+        Holds(owner) ? FurinaStageLedger.For(owner!).Drained : 0;
 
     /// <summary>High Stakes' count: HP she has drained this combat, gross
     /// (no Repay lowers it; the Spend round 2, 2026-10-10).</summary>
     public static int DrainedThisCombatOf(Creature? owner) =>
-        LiveFor(owner) ? FurinaStageLedger.For(owner!).DrainedThisCombat : 0;
+        Holds(owner) ? FurinaStageLedger.For(owner!).DrainedThisCombat : 0;
 
     /// <summary>Her Drain line (rule 1): her HP now minus the Drain buffer
     /// she has left (2026-10-11); HP drained past it does not return at the
     /// curtain call.</summary>
     public static int LineOf(Creature? owner) =>
-        LiveFor(owner) ? FurinaStageLedger.For(owner!).Line : 0;
+        Holds(owner) ? FurinaStageLedger.For(owner!).Line : 0;
 
     /// <summary>`stage_spent`: what THIS play's spend-all took.</summary>
     public static int Spent(CardModel? card) =>
-        card?.Owner?.Creature is { } owner && LiveFor(owner)
+        card?.Owner?.Creature is { } owner && Holds(owner)
             ? FurinaStageLedger.For(owner).SpentThisPlay : 0;
 
     /// <summary>`stage_spent` for a "Spend up to <paramref name="cap"/>" as
@@ -134,7 +189,7 @@ public static class FurinaStage
     public static int SpentOrUpTo(CardModel? card, int cap)
     {
         var owner = card?.Owner?.Creature;
-        return SpentOrUpToCap(card, LiveFor(owner)
+        return SpentOrUpToCap(card, Holds(owner)
             ? FurinaStageLedger.For(owner!).CardUpToCap(cap) : cap);
     }
 
@@ -145,7 +200,7 @@ public static class FurinaStage
         var spent = Spent(card);
         if (spent > 0) return spent;
         var owner = card?.Owner?.Creature;
-        if (!LiveFor(owner)) return 0;
+        if (!Holds(owner)) return 0;
         return CenterOfAttentionPower.Covers(owner)
             ? cap
             : FurinaStageLedger.For(owner!).UpToOf(cap);
@@ -192,8 +247,11 @@ public static class FurinaStage
             (int)owner.Powers.OfType<T>().Sum(p => p.Amount);
         // Her relics (Furina's card pass, 2026-10-15), counted off the
         // player; none headless.
+        // Relic effects are Furina's own (the off-character fix,
+        // 2026-10-18): her Stage on anyone else counts none.
+        var hers = FurinaResources.IsFurina(owner);
         int Held<T>() where T : RelicModel =>
-            owner.Player?.Relics.OfType<T>().Count() ?? 0;
+            hers ? owner.Player?.Relics.OfType<T>().Count() ?? 0 : 0;
         var seasonPass = Held<Relics.EpicleseSeasonPass>();
         return new StageMods
         {
@@ -228,12 +286,12 @@ public static class FurinaStage
     /// <summary>Is a Spend N offered? Only when her Fanfare holds it.
     /// </summary>
     public static bool CanSpend(Creature? owner, int amount) =>
-        LiveFor(owner) && FurinaStageLedger.For(owner!).CanSpend(amount);
+        Holds(owner) && FurinaStageLedger.For(owner!).CanSpend(amount);
 
     /// <summary>Rule 1: is a Drain N offered? Only when it would not take her
     /// to 0 HP or below (2026-10-09: never refused for the line).</summary>
     public static bool CanDrain(Creature? owner, int amount) =>
-        LiveFor(owner)
+        Holds(owner)
         && FurinaStageLedger.For(owner!).CanDrain(amount,
                                                   (int)owner!.CurrentHp);
 
@@ -250,19 +308,21 @@ public static class FurinaStage
         if (owner == null) return;
         await FurinaStagePets.Sync(owner);
         RefreshBadges(owner);
+        await ShowBadge(owner);
     }
 
     // ---- the verbs the cards call -------------------------------------------
 
     /// <summary>Gain Fanfare (a relic, a potion, an Ancient).</summary>
-    public static Task<int> Gain(PlayerChoiceContext choiceContext,
-                                 Creature? owner, int amount,
-                                 string source = "")
+    public static async Task<int> Gain(PlayerChoiceContext choiceContext,
+                                       Creature? owner, int amount,
+                                       string source = "")
     {
-        if (!LiveFor(owner) || amount <= 0) return Task.FromResult(0);
+        if (amount <= 0 || !Ensure(owner)) return 0;
         var gained = FurinaStageLedger.For(owner!).Gain(amount, source);
         RefreshBadges(owner);
-        return Task.FromResult(gained);
+        await ShowBadge(owner);
+        return gained;
     }
 
     /// <summary>A Spend N. Center of Attention's free Spend takes nothing
@@ -271,7 +331,7 @@ public static class FurinaStage
     public static async Task<int> Spend(PlayerChoiceContext choiceContext,
                                         Creature? owner, int amount)
     {
-        if (!LiveFor(owner)) return 0;
+        if (!Ensure(owner)) return 0;
         if (CenterOfAttentionPower.TryClaim(owner!))
         {
             RefreshBadges(owner);
@@ -292,7 +352,7 @@ public static class FurinaStage
     /// (<see cref="FurinaStageLedger.CardUpToCap"/>).</summary>
     public static Task<int> SpendUpTo(PlayerChoiceContext choiceContext,
                                       Creature? owner, int cap) =>
-        LiveFor(owner)
+        Ensure(owner)
             ? SpendUpToCap(choiceContext, owner,
                            FurinaStageLedger.For(owner!).CardUpToCap(cap))
             : Task.FromResult(0);
@@ -325,20 +385,21 @@ public static class FurinaStage
     public static async Task<int> SpendAll(PlayerChoiceContext choiceContext,
                                            Creature? owner)
     {
-        if (!LiveFor(owner)) return 0;
+        if (!Ensure(owner)) return 0;
         var spent = await Director(choiceContext, owner!).SpendAll();
         RefreshBadges(owner);
         return spent;
     }
 
-    /// <summary>Rule 1: Drain N. Nothing on anyone but Furina, and nothing
-    /// that would take her to 0 HP.</summary>
+    /// <summary>Rule 1: Drain N, on whichever player plays it, and nothing
+    /// that would take them to 0 HP.</summary>
     public static async Task<bool> Drain(PlayerChoiceContext choiceContext,
                                          Creature? owner, int amount)
     {
-        if (!LiveFor(owner)) return false;
+        if (!Ensure(owner)) return false;
         var drained = await Director(choiceContext, owner!).Drain(amount);
         RefreshBadges(owner);
+        await ShowBadge(owner);
         return drained;
     }
 
@@ -353,11 +414,12 @@ public static class FurinaStage
                                         Creature? owner, int amount,
                                         StageFloor floor = StageFloor.Block)
     {
-        if (!LiveFor(owner)) return 0;
+        if (!Ensure(owner)) return 0;
         var director = Director(choiceContext, owner!);
         var back = await director.RepayFloor(amount, floor);
         director.Stage.NoteRepayLeft(amount, back);
         RefreshBadges(owner);
+        await ShowBadge(owner);
         return back;
     }
 
@@ -368,7 +430,7 @@ public static class FurinaStage
     /// expression, so preview and resolution agree.</summary>
     public static int RepayLeftOrRoom(CardModel? card, int amount)
     {
-        if (card?.Owner?.Creature is not { } owner || !LiveFor(owner))
+        if (card?.Owner?.Creature is not { } owner || !Holds(owner))
         {
             return 0;
         }
@@ -382,9 +444,10 @@ public static class FurinaStage
     public static async Task<int> RepayAll(PlayerChoiceContext choiceContext,
                                            Creature? owner)
     {
-        if (!LiveFor(owner)) return 0;
+        if (!Ensure(owner)) return 0;
         var back = await Director(choiceContext, owner!).RepayAll();
         RefreshBadges(owner);
+        await ShowBadge(owner);
         return back;
     }
 
@@ -392,7 +455,7 @@ public static class FurinaStage
     public static async Task ActEachTwice(PlayerChoiceContext choiceContext,
                                           Creature? owner)
     {
-        if (!LiveFor(owner)) return;
+        if (!Ensure(owner)) return;
         await Director(choiceContext, owner!).ActEachTwice();
         await Done(owner);
     }
@@ -402,7 +465,7 @@ public static class FurinaStage
     public static async Task EnergyNextTurn(PlayerChoiceContext choiceContext,
                                             Creature? owner, int amount)
     {
-        if (!LiveFor(owner) || amount <= 0) return;
+        if (amount <= 0 || !Ensure(owner)) return;
         await PowerCmd.Apply<EnergyNextTurnPower>(
             choiceContext, owner!, amount, applier: owner, cardSource: null);
     }
@@ -418,7 +481,7 @@ public static class FurinaStage
                                        int fanfare = 0,
                                        CardModel? card = null)
     {
-        if (!LiveFor(owner)) return;
+        if (!Ensure(owner)) return;
         var director = Director(choiceContext, owner!);
         await director.SummonGuest(Parse(member), card?.IsUpgraded ?? false,
                                    card);
@@ -441,7 +504,7 @@ public static class FurinaStage
     public static async Task ActOldest(PlayerChoiceContext choiceContext,
                                        Creature? owner)
     {
-        if (!LiveFor(owner)) return;
+        if (!Ensure(owner)) return;
         await Director(choiceContext, owner!).ActOldest();
         await Done(owner);
     }
@@ -450,7 +513,7 @@ public static class FurinaStage
     public static async Task ActAll(PlayerChoiceContext choiceContext,
                                     Creature? owner)
     {
-        if (!LiveFor(owner)) return;
+        if (!Ensure(owner)) return;
         await Director(choiceContext, owner!).ActAll();
         await Done(owner);
     }
@@ -461,7 +524,7 @@ public static class FurinaStage
     public static async Task FinalBow(PlayerChoiceContext choiceContext,
                                       Creature? owner, int times)
     {
-        if (!LiveFor(owner) || owner!.Player is not { } player) return;
+        if (!Ensure(owner) || owner!.Player is not { } player) return;
         var ledger = FurinaStageLedger.For(owner);
         if (ledger.IsEmpty) return;
         var index = 0;
@@ -482,7 +545,7 @@ public static class FurinaStage
     public static async Task SummonRandom(PlayerChoiceContext choiceContext,
                                           Creature? owner)
     {
-        if (!LiveFor(owner)) return;
+        if (!Ensure(owner)) return;
         var ledger = FurinaStageLedger.For(owner!);
         var absent = System.Enum.GetValues<StagePerformer>()
             .Where(who => ledger.SeatOf(who) == null).ToList();
@@ -495,12 +558,12 @@ public static class FurinaStage
 
     /// <summary>Undercurrent's count: Drains made this combat.</summary>
     public static int DrainsThisCombat(Creature? owner) =>
-        LiveFor(owner) ? FurinaStageLedger.For(owner!).DrainsThisCombat : 0;
+        Holds(owner) ? FurinaStageLedger.For(owner!).DrainsThisCombat : 0;
 
     /// <summary>Rising Tide's count: Repays that returned HP this turn.
     /// </summary>
     public static int RepaysThisTurn(Creature? owner) =>
-        LiveFor(owner) ? FurinaStageLedger.For(owner!).RepaysThisTurn : 0;
+        Holds(owner) ? FurinaStageLedger.For(owner!).RepaysThisTurn : 0;
 
     /// <summary>Endless Waltz (furina-next paper 3, 2026-10-16): "Repay 2.
     /// Deal X damage, plus Y for each time you Repaid this turn." Its own
@@ -510,7 +573,7 @@ public static class FurinaStage
     /// expression, so preview and resolution agree.</summary>
     public static int RepaysThisTurnWith(CardModel? card, int amount)
     {
-        if (card?.Owner?.Creature is not { } owner || !LiveFor(owner))
+        if (card?.Owner?.Creature is not { } owner || !Holds(owner))
         {
             return 0;
         }
@@ -523,7 +586,7 @@ public static class FurinaStage
     /// <summary>Grand Absolution's "that much": HP THIS play's Repays
     /// returned.</summary>
     public static int RepaidThisPlay(CardModel? card) =>
-        card?.Owner?.Creature is { } owner && LiveFor(owner)
+        card?.Owner?.Creature is { } owner && Holds(owner)
             ? FurinaStageLedger.For(owner).RepaidThisPlay : 0;
 
     /// <summary>Grand Absolution's face before the play: the HP a Repay of
@@ -532,7 +595,7 @@ public static class FurinaStage
     {
         var repaid = RepaidThisPlay(card);
         if (repaid > 0) return repaid;
-        return card?.Owner?.Creature is { } owner && LiveFor(owner)
+        return card?.Owner?.Creature is { } owner && Holds(owner)
             ? FurinaStageFacePreview.Room(owner, DrainedOf(owner)) : 0;
     }
 
@@ -540,11 +603,11 @@ public static class FurinaStage
     /// 1 or more HP drained this turn by any Drain, her cards' or a guest's
     /// act. Mirrors <c>furina_stage.drained_this_turn</c>.</summary>
     public static bool DrainedThisTurn(Creature? owner) =>
-        LiveFor(owner) && FurinaStageLedger.For(owner!).DrainedThisTurn > 0;
+        Holds(owner) && FurinaStageLedger.For(owner!).DrainedThisTurn > 0;
 
     /// <summary>Clean Slate: "If you have no drained HP left".</summary>
     public static bool NoneDrained(Creature? owner) =>
-        LiveFor(owner) && DrainedOf(owner) <= 0;
+        Holds(owner) && DrainedOf(owner) <= 0;
 
     /// <summary>Neuvillette's line: "Your Hydro damage deals 2 more." [3]
     /// The bonus a hit of <paramref name="element"/> from
@@ -700,7 +763,11 @@ public static class FurinaStage
     /// Solitaire's 1, The Curtain Never Falls' 2.</summary>
     public static int SingerOf(Creature? owner)
     {
-        if (!LiveFor(owner) || owner!.Player is not { } player) return 0;
+        // Salon Solitaire is her starter: hers alone.
+        if (!FurinaResources.IsFurina(owner) || owner!.Player is not { } player)
+        {
+            return 0;
+        }
         return player.Relics.OfType<Relics.SalonSolitaire>().Count()
                    * FurinaStageLaw.SingerRepay
                + player.Relics.OfType<Relics.CurtainNeverFalls>().Count()
@@ -805,11 +872,24 @@ public static class FurinaStage
     public static async Task InstallBadge(Creature? owner)
     {
         if (!LiveFor(owner)) return;
+        // Anyone else's badge goes up on their first Fanfare, as the base
+        // game's Star counter does, and never off a combat.
+        if (!FurinaResources.IsFurina(owner)
+            && (owner!.CombatState == null || FanfareOf(owner) <= 0))
+        {
+            return;
+        }
         if (owner!.Powers.OfType<FanfarePower>().Any()) return;
         await PowerCmd.Apply<FanfarePower>(
             new ThrowingPlayerChoiceContext(), owner, 1,
             applier: owner, cardSource: null, silent: true);
     }
+
+    /// <summary>Anyone else's Fanfare badge, after a move that can gain
+    /// Fanfare (<see cref="InstallBadge"/>). Furina's is up already.</summary>
+    internal static Task ShowBadge(Creature? owner) =>
+        FurinaResources.IsFurina(owner) ? Task.CompletedTask
+                                        : InstallBadge(owner);
 
     /// <summary>Redraw the Fanfare badge, the Fanfare gauge, the Drained
     /// counter and the cues.</summary>
@@ -852,7 +932,7 @@ public static class FurinaStage
     // ---- the forecast (what the end of this turn will do) ------------------
 
     /// <summary>The end of this turn, forecast: each guest's act in seat
-    /// order. Null for anyone but Furina. PURE.</summary>
+    /// order. Null for anyone whose Stage is not up. PURE.</summary>
     public static StageForecast? Forecast(Creature? owner)
     {
         if (!LiveFor(owner)) return null;

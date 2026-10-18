@@ -281,6 +281,23 @@ public static class VarkaOathDial
         creature != null && VarkaPrototype.IsVarka(creature);
 
     /// <summary>
+    /// Is the dial on this creature's screen? The base game's Star rule
+    /// (<see cref="SparkCounter.ShowsFor"/>'s): always for Varka, and for
+    /// anyone else whose Oath is kept from their first Oath or current
+    /// element to the end of the combat (a built dial stays; the
+    /// off-character fix, 2026-10-18). Headless-safe.
+    /// </summary>
+    public static bool ShowsFor(Creature? creature)
+    {
+        if (creature?.Player is not { } player) return false;
+        return AppliesTo(creature)
+            || (VarkaOath.Live(creature)
+                && (VarkaOathLedger.For(creature).Total > 0
+                    || VarkaOath.HasCurrent(creature)))
+            || Displays.Get(player) != null;
+    }
+
+    /// <summary>
     /// Is this his Oath badge on his OWN screen, where the dial draws it? A
     /// co-op partner still sees it on his creature. Never throws: a
     /// canonical power has no owner to ask.
@@ -297,7 +314,7 @@ public static class VarkaOathDial
         {
             return false;
         }
-        return owner != null && AppliesTo(owner) && LocalContext.IsMe(owner);
+        return owner != null && ShowsFor(owner) && LocalContext.IsMe(owner);
     }
 
     // --------------------------------------------------------- lifecycle --
@@ -307,7 +324,7 @@ public static class VarkaOathDial
     public static void Setup(CombatState? state)
     {
         var me = TryGetMe(state);
-        if (me == null || !AppliesTo(me.Creature)) return;
+        if (me == null || !ShowsFor(me.Creature)) return;
         if (NCombatRoom.Instance?.Ui is not { } ui) return;
 
         var star = ui.GetNodeOrNull<Control>("%StarCounter");
@@ -335,7 +352,7 @@ public static class VarkaOathDial
     /// before any node work when there is no combat room.</summary>
     public static void Refresh(Creature? creature)
     {
-        if (!AppliesTo(creature) || NCombatRoom.Instance == null) return;
+        if (!ShowsFor(creature) || NCombatRoom.Instance == null) return;
         var player = creature!.Player;
         if (player == null || !LocalContext.IsMe(player)) return;
 
@@ -384,7 +401,7 @@ public static class VarkaOathDial
         try
         {
             var owner = card?.Owner?.Creature;
-            return AppliesTo(owner) && LocalContext.IsMe(owner!);
+            return ShowsFor(owner) && LocalContext.IsMe(owner!);
         }
         catch (Exception)
         {
@@ -682,7 +699,7 @@ public static class VarkaOathDial
 // lint: no-seat: pure static teardown. It frees, by name, the one child node
 // this file added to the combat UI and clears this file's own statics; it
 // touches no run state, player or creature. The scope lives at the only door
-// that BUILDS the node (`Setup`, through `VarkaOathDial.AppliesTo`).
+// that BUILDS the node (`Setup`, through `VarkaOathDial.ShowsFor`).
 [HarmonyPatch(typeof(NCombatUi), nameof(NCombatUi.Deactivate))]
 internal static class NCombatUi_Deactivate_VarkaOathDial_Patch
 {
@@ -713,7 +730,7 @@ internal static class NHandCardHolder_Hover_VarkaOathDial_Patch
         {
             var card = __instance.CardNode?.Model;
             if (card?.Owner?.Creature is not { } owner
-                || !VarkaPrototype.IsVarka(owner)
+                || !VarkaOathDial.ShowsFor(owner)
                 || !LocalContext.IsMe(owner))
             {
                 if (!isHovered) VarkaOathDial.NoteHover(card, false);
@@ -767,7 +784,7 @@ internal static class VarkaOathDialHold
         {
             var card = play.Holder?.CardNode?.Model;
             if (card?.Owner?.Creature is not { } owner
-                || !VarkaPrototype.IsVarka(owner)
+                || !VarkaOathDial.ShowsFor(owner)
                 || !LocalContext.IsMe(owner))
             {
                 return;
@@ -787,7 +804,7 @@ internal static class VarkaOathDialHold
         {
             var card = play.Holder?.CardNode?.Model;
             if (card?.Owner?.Creature is not { } owner
-                || !VarkaPrototype.IsVarka(owner)
+                || !VarkaOathDial.ShowsFor(owner)
                 || !LocalContext.IsMe(owner))
             {
                 return;

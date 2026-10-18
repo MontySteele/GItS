@@ -477,7 +477,7 @@ internal static class PlayTelemetry
     {
         try
         {
-            if (!VarkaOath.Live(creature)) return;
+            if (!VarkaPrototype.IsVarka(creature)) return;
             var oath = VarkaOathLedger.Elements
                 .Select(e => (Name: e.ToString(), Count: VarkaOath.Count(creature, e)))
                 .ToList();
@@ -816,7 +816,7 @@ internal static class PlayTelemetry
     {
         try
         {
-            return creature != null && VarkaOath.Live(creature)
+            return creature != null && VarkaPrototype.IsVarka(creature)
                 ? VarkaOath.Current(creature).ToString() : null;
         }
         catch (Exception)

@@ -86,6 +86,20 @@ public static class FanfareCounter
     public static bool AppliesTo(Creature? creature) =>
         FurinaResources.IsFurina(creature);
 
+    /// <summary>
+    /// Is the gauge on this creature's screen? The base game's Star rule
+    /// (<see cref="SparkCounter.ShowsFor"/>'s): always for Furina, and for
+    /// anyone else whose Stage is up from their first Fanfare to the end of
+    /// the combat (a built gauge stays). Headless-safe.
+    /// </summary>
+    public static bool ShowsFor(Creature? creature)
+    {
+        if (creature?.Player is not { } player) return false;
+        return AppliesTo(creature)
+            || (FurinaStage.LiveFor(creature) && Read(creature) > 0)
+            || Displays.Get(player) != null;
+    }
+
     /// <summary>The number the gauge draws: her Fanfare, the ledger's.</summary>
     public static int Read(Creature? creature) => FurinaStage.FanfareOf(creature);
 
@@ -125,7 +139,7 @@ public static class FanfareCounter
         {
             return false;
         }
-        return owner != null && AppliesTo(owner) && LocalContext.IsMe(owner);
+        return owner != null && ShowsFor(owner) && LocalContext.IsMe(owner);
     }
 
     /// <summary>Build the gauge for the LOCAL seat, from the
@@ -133,7 +147,7 @@ public static class FanfareCounter
     public static void Setup(CombatState? state)
     {
         var me = TryGetMe(state);
-        if (me == null || !AppliesTo(me.Creature)) return;
+        if (me == null || !ShowsFor(me.Creature)) return;
         if (NCombatRoom.Instance?.Ui is not { } ui) return;
 
         var star = ui.GetNodeOrNull<Control>("%StarCounter");
@@ -163,7 +177,7 @@ public static class FanfareCounter
     /// before any node work when there is no combat room.</summary>
     public static void Refresh(Creature? creature)
     {
-        if (!AppliesTo(creature) || NCombatRoom.Instance == null) return;
+        if (!ShowsFor(creature) || NCombatRoom.Instance == null) return;
         var player = creature!.Player;
         if (player == null || !LocalContext.IsMe(player)) return;
 
@@ -312,7 +326,7 @@ public static class FanfareCounter
 // lint: no-seat: pure static teardown. It frees, by name, the one child node
 // this file added to the combat UI and touches no run state, player or
 // creature. The scope lives at the only door that BUILDS the node (`Setup`,
-// through `FanfareCounter.AppliesTo`).
+// through `FanfareCounter.ShowsFor`).
 [HarmonyPatch(typeof(NCombatUi), nameof(NCombatUi.Deactivate))]
 internal static class NCombatUi_Deactivate_FurinaFanfareCounter_Patch
 {

@@ -848,6 +848,11 @@ public static class KleeMod
             // looks up -- finding 23, same failure mode R4 documents for
             // cards. The self-check's R5 rule caught it at boot.
 
+            // SEA GLASS (the off-character fix, 2026-10-18): Orobas can offer
+            // it for one of OUR characters, and its title reads a per-
+            // character row the base game ships only for its own five.
+            LocManager.Instance.GetTable("relics").MergeWith(
+                Relics.SeaGlassTitles.LocRows(t => ModelDb.GetId(t).Entry));
 
             Log.Info($"[{ModId}] Localization strings injected.");
         }

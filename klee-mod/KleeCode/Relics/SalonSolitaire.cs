@@ -57,7 +57,7 @@ public sealed class SalonSolitaire : CustomRelicModel
     public override async Task BeforeCombatStart()
     {
         var furina = Owner?.Creature;
-        if (!FurinaStage.LiveFor(furina)) return;
+        if (!FurinaResources.IsFurina(furina)) return;
         await FurinaStage.OpenCombat(furina);
     }
 
