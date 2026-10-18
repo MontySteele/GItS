@@ -162,3 +162,34 @@ line (Kazuha Slash, Sesshou Sakura, Chiori and Ayato are 5-star Uncommons), and 
    - (b) Keep the LAW line and the banner as they are. Then this rework has to drop to one Rare per 5-star
      character, and the banner shows 3 of about 10.
    - (c) Remove the banner for Inazuma only, so every card is always offered.
+
+**Ruled 2026-10-18.** On being reminded what the banner does, the user said: "I wonder if we should just scrap them,
+because I am suddenly realizing that we see an awful lot of the same 5 stars in card rewards." Then, on the revised
+pick ("(a) Scrap the banner everywhere, and amend LAW to two cards per 5-star"), the user said: "Agreed on (a)! And
+also on growing the pool". So:
+- The Featured Banner is removed for every nation. Mondstadt runs offered 3 of its 13 five-star cards, Inazuma 3 of
+  9 and Fontaine 3 of 7.
+- `LAW.md` drops the banner sentence and allows up to two cards per 5-star (amended in this PR).
+
+## Growing the pool to 34 (ruled 2026-10-18)
+
+The user: "we aimed for 2 cards per Mondstadt character, with 4 stars getting a mix of Uncommon and Common, and 5
+stars getting a mix of Rare and Uncommon." Every Inazuma character now gets two cards. Sayu and Shinobu keep a third
+card as a Common, because Inazuma's cast is mostly 5-stars and would otherwise have 6 Commons. That makes 34 cards:
+8 Common, 16 Uncommon and 10 Rare.
+
+| Change | Card | Text |
+|---|---|---|
+| Moved | Kamisato Ayaka, Kamisato Art: Hyouka (Common to Uncommon) | Deal 5 Cryo damage to ALL enemies and apply 1 Weak to each. |
+| New | Kirara, Meow-teor Kick (Common Attack, 1) | Deal 9 damage. If you have Block, deal 3 more. |
+| New | Yoimiya, Ryuukin Saxifrage (Uncommon Attack, 1) | Deal 4 Pyro damage 3 times. |
+| New | Wanderer, Kyougen: Five Ceremonial Plays (Uncommon Attack, 1) | Deal 6 Anemo damage and Swirl the enemy. If you have no Block, deal 6 more. |
+| New | Chiori, Hiyoku: Twin Blades (Rare Power, 1) | Your Attacks that hit more than once deal 2 more damage per hit. |
+| New | Yae Miko, Sacred Sakura's Favor (Rare Power, 2) | Damage you deal at the end of your turn is increased by 50%. Hidden from Yae, like Sesshou Sakura. |
+
+What the new cards do:
+- **Twin Blades** turns the multi-hit Attacks into a plan: Hasode, Ryuukin, Kyouka Fuushi, and Mondstadt's Fiery Rain.
+- **Sacred Sakura's Favor** turns the end-of-turn damage cards into a deck: Sanctifying Ring, Soumetsu, Sesshou
+  Sakura, Oz and Glacial Waltz. Both of these are support payoffs.
+- **Ryuukin and Twin Blades** are good Edit targets for Yae, since Red Ink adds 3 per hit.
+- **Kyougen** pairs with Hanega and feeds Chihayaburu.

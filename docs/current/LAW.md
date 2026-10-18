@@ -69,10 +69,10 @@ cooldowns; any open-world system.
   delete-test always holds: remove your character's own cards from a winning
   deck and it must fall apart. A character may make Companions central only
   through its own enabling cards, which the delete-test removes.
-- **Rarity:** a 4-star Companion is at most Uncommon power. A 5-star is a
-  Rare, exactly one card per 5-star, and a support payoff (buff, amplify,
-  aura), never its own scaling damage engine. The Featured Banner (per nation
-  per run) gates 5-star availability; the designed roster may grow.
+- **Rarity:** a 4-star Companion is at most Uncommon power. A 5-star has up
+  to two cards, Uncommon or Rare, each a support payoff (buff, amplify, aura),
+  never its own scaling damage engine. Every designed companion may be offered
+  in every run (the Featured Banner was removed 2026-10-18).
 - **A character's personal-pool Companions are its kit** and may be
   deck-defining, within the rarity guardrails; the delete-test still governs
   them. They may also enter through an optional, declinable run-start offer.
