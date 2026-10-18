@@ -40,15 +40,9 @@ namespace KleeMod;
 /// is still hardcoded; BaseLib grew the hook around it. So a companion pool
 /// would resolve today.
 ///
-/// It is still not built, for a different and much smaller reason: doing it
-/// means migrating all 47 companion models OUT of the three character pools
-/// (CardModel.Pool must resolve to exactly one pool, and Pool supplies the
-/// card frame and energy icon), which is a visual change to every companion
-/// plus an init-order dependency no test in `klee-mod/KleeTests` (EB-105)
-/// can check -- `ModelDb` and the game's boot order are outside its headless
-/// boundary. See CompanionPool.cs. The distinction matters: this is now a COST decision,
-/// not an impossibility, and anyone re-reading the paragraph above should not
-/// conclude otherwise.
+/// BUILT (legacy review pick 4, 2026-10-18): the shared companions are
+/// <see cref="CompanionCardPool"/>'s now, a BaseLib shared pool with the
+/// Colorless frame. What is left here is Klee's own never-generated cards.
 ///
 /// ATTEMPT 2 (this): the cards go into KleeCardPool, which IS visible (Klee is
 /// a character, so her pool is in AllCharacterCardPools), and KleeCardPool

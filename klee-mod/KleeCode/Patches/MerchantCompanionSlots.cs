@@ -41,9 +41,9 @@ namespace KleeMod.Patches;
 ///
 /// PRICING IS NATIVE, WITH ONE DELIBERATE LOSS. MerchantCardEntry.GetCost is
 /// 50/75/150 by rarity, then x1.15 iff `card.Pool is ColorlessCardPool`.
-/// Companions resolve Pool to their character's pool (see CompanionPool for
-/// why they are not a pool of their own), so they are priced at the BASE
-/// bands and do not collect the colorless surcharge. That matches §4.7 as
+/// Companions resolve Pool to <see cref="CompanionCardPool"/> (or a kit's own
+/// pool), which is not that type, so they are priced at the BASE bands and do
+/// not collect the colorless surcharge. That matches §4.7 as
 /// written -- "base shop-card gold bands by drawn rarity" -- but it does mean
 /// the mod's premium channel is ~15% cheaper than the one it replaces, and
 /// pricing is supposed to be the balance governor. Flagged at close-out; the

@@ -48,9 +48,12 @@ public sealed class KleeCardPool : CardPoolModel
     /// MEMBERSHIP: every card whose <c>CardModel.Pool</c> is Klee's. A card in
     /// no pool throws "You monster!" the moment it is drawn
     /// (<see cref="KleeOffPoolCards"/>, <c>tools/lint_pool_membership.py</c>).
-    /// Every `proto_` row she owns -- her kit, its starter and tokens, and the
-    /// companion roster (Mondstadt, Inazuma and Fontaine) -- then her
-    /// Ancients and her never-offered tokens.
+    /// Every `proto_` row in her pool -- her kit, its starter and tokens, and
+    /// her three own companions -- then her Ancients and her never-offered
+    /// tokens. The shared companions are NOT here since legacy review pick 4
+    /// ([USER] 2026-10-18: "Shared companions move to their own pool with a
+    /// neutral frame, out of Klee's"): they are <see cref="CompanionCardPool"/>'s,
+    /// though their rows still say `character: klee`.
     /// </summary>
     protected override CardModel[] GenerateAllCards() =>
         PrototypeCards.For("klee")

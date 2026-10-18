@@ -3,9 +3,10 @@ using KleeMod.Elements;
 namespace KleeMod.Cards;
 
 /// <summary>
-/// Marker for companion cards (docs/mondstadt-companions.yaml): drafted from
-/// the 4th reward slot, never in KleeCardPool (tier05 character_pool excludes
-/// companions and the game's own reward roll draws from the pool). The
+/// Marker for companion cards (docs/prototype-surface.yaml): drafted from
+/// the 4th reward slot and the shop. A shared one lives in
+/// <see cref="CompanionCardPool"/> (neutral frame, legacy review pick 4); a
+/// kit's own lives in that kit's pool and is offered from it. The
 /// element here is the COMPANION's element for reward/UI purposes -- whether
 /// a hit applies it is the sheet's explicit applies_element call, carried by
 /// IElementalCard exactly as on Klee's own attacks (companions are exempt

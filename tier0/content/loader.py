@@ -72,6 +72,27 @@ PROTOTYPE_ID_PREFIX = "proto_"
 # sheet's bookkeeping. `docs/notes/prototype-surface-provenance.md` records it.
 PROTOTYPE_SHADOW_SUFFIX = " (proto)"
 
+# THE SHARED COMPANION POOL's owner key (legacy review pick 4, [USER]
+# 2026-10-18: "Shared companions move to their own pool with a neutral frame,
+# out of Klee's"). Not a character: `PrototypeRoster.For("companion")` is the
+# membership of the mod's `CompanionCardPool`.
+COMPANION_POOL_KEY = "companion"
+
+
+def is_shared_companion_row(row: dict) -> bool:
+    """Is this sheet row a SHARED companion -- a Universal of the companion
+    pool rather than a card of one kit?
+
+    Read off what the row IS, never off its `character:` field, which every
+    Universal still carries as `klee` from when her pool held them: a Companion
+    row (it carries `star`) with no `personal_pool:` (Varka's Knights are his)
+    that no kit claims as its own (`C.KIT_OWN_COMPANION_IDS`: Klee's three,
+    Gorou's four). The emitter still prints it with the `character:` profile,
+    so its art path and its text do not move; only its POOL does.
+    """
+    return ("star" in row and not row.get("personal_pool")
+            and row.get("id") not in C.KIT_OWN_COMPANION_IDS)
+
 
 def display_name(name: str) -> str:
     """The player-facing title for a sheet `name:` (`EB-322`).

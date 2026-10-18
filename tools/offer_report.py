@@ -54,6 +54,9 @@ from typing import Any, Iterable
 import yaml
 
 REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO))
+from tier0.content.loader import (COMPANION_POOL_KEY,  # noqa: E402
+                                  is_shared_companion_row)
 DEFAULT_DIR = REPO / "understudy" / "logs" / "offers"
 SHEET = REPO / "docs" / "prototype-surface.yaml"
 ELEMENTS = ("pyro", "hydro", "electro", "cryo", "anemo", "geo", "dendro")
@@ -102,7 +105,11 @@ def load_sheet(path: Path = SHEET) -> dict[str, dict]:
         tags += [str(row[k]).lower() for k in ("role_c", "type", "rarity",
                                                "personal_pool") if row.get(k)]
         facts = {"id": str(row["id"]), "name": str(row.get("name") or ""),
-                 "owner": str(row.get("character") or "").lower(),
+                 # A shared companion's owner is its POOL, "companion" (legacy
+                 # review pick 4), not the `character: klee` its row carries:
+                 # it is never one of Klee's never-offered cards.
+                 "owner": (COMPANION_POOL_KEY if is_shared_companion_row(row)
+                           else str(row.get("character") or "").lower()),
                  "rarity": str(row.get("rarity") or "").lower(),
                  "type": str(row.get("type") or "").lower(),
                  "elements": _elements_named(row), "tags": tags}
