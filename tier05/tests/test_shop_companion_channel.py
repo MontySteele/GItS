@@ -66,17 +66,10 @@ def test_the_floor_is_slot_ones_and_the_home_region_is_too(character):
 
 
 @pytest.mark.parametrize("character", CHARACTERS)
-def test_slot_two_is_wildcard_nation_but_keeps_the_floor(character):
-    """The other half of the same spec, AS AMENDED.
-
-    THIS TEST PINS A WORLD A RULING CHANGED, and it is rewritten rather than
-    deleted. It used to be `test_slot_two_is_unrestricted_in_both_filters` and
-    asserted the opposite of its first clause: that slot 2 DOES offer Commons,
-    because R116/NC-10 had removed the rarity floor from it. [USER] restored
-    the floor on 2026-08-10 (S4-G10 close-out, CONSTANTS_VERSION 9) on R59's
-    original rationale -- the paid premium channel does not sell Commons -- so
-    the Common assertion inverts and the nation assertion stands unchanged.
-    Slot 2 is now wildcard in ONE filter, not two.
+def test_slot_two_is_wildcard_nation_and_a_fixed_rare(character):
+    """Slot 2 is any nation and a fixed Rare, in the base shop's shape
+    ([USER] 2026-10-18, legacy review pick 2). Every roster character's
+    wildcard pool holds a Rare, so the Uncommon fallback never fires here.
     """
     rarities = set()
     nations = set()
@@ -91,10 +84,8 @@ def test_slot_two_is_wildcard_nation_but_keeps_the_floor(character):
         f"{character}'s slot 2 offered a Common -- the Uncommon floor [USER] "
         "restored on 2026-08-10 is broken, and the paid channel is selling "
         "50-gold Commons again")
-    assert rarities == {"uncommon", "rare"}, (
-        f"{character}'s slot 2 reached {sorted(rarities)}; the floor admits "
-        "exactly Uncommon and Rare, and a band it never reaches is a dead "
-        "table entry")
+    assert rarities == {"rare"}, (
+        f"{character}'s slot 2 reached {sorted(rarities)}; it is a fixed Rare")
     assert len(nations) > 1, (
         "slot 2 is still the WILDCARD-NATION slot -- the floor's restoration "
         "moved the rarity filter only")

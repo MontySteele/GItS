@@ -99,20 +99,14 @@ def shop_offer(rng: random.Random, character: str,
 
 def companion_shop_offer(
         rng: random.Random, character: str) -> list[tuple[Card, int]]:
-    """The §4.7 companion channel: TWO priced slots (R59/R61, respecified by
-    R116/NC-10, slot-2 floor RESTORED by [USER] 2026-08-10).
+    """The §4.7 companion channel: TWO priced slots, in the base shop's shape
+    ([USER] 2026-10-18, legacy review pick 2: "Agreed on all 6 legacy picks").
 
-    Slot 1 draws the character's HOME NATION at an Uncommon floor -- the
-    targeted "buy your dream support" slot. Slot 2 draws ANY NATION at the
-    SAME Uncommon floor. The two slots differ by nation and by nothing else.
-
-    THE FLOOR ON SLOT 2 CAME BACK ON 2026-08-10. R116/NC-10 had removed it
-    ("any companion card"), which let slot 2 roll the full reward odds and
-    sell a Common at the 50-gold band. [USER] closed the S4-G10 agenda item
-    "should slot 2 carry a rarity floor at all?" by restoring R59's reading:
-    the paid premium channel does not sell Commons. Both engines moved
-    together and the shop world bumped to CONSTANTS_VERSION 9, so no §4.7
-    number measured before that date is comparable with one measured after.
+    Slot 1 is a fixed Uncommon from the character's HOME NATION -- the
+    targeted "buy your dream support" slot. Slot 2 is a fixed Rare from ANY
+    NATION, an Uncommon when no Rare companion can be offered. No rarity is
+    rolled (`C.SHOP_COMPANION_SLOT_RARITIES`); the conditioned 0.875 / 0.125
+    roll both slots took before that ruling is gone.
     Returns ``(card, price)`` pairs because the two slots are priced by DRAWN RARITY,
     which is the whole balance story: §4.7 lets the paid channel roll
     payoff-grade 5-stars precisely because gold, not a stat nerf, is the
@@ -123,8 +117,8 @@ def companion_shop_offer(
     RARITY, because R59 ratified the floor while §4.7 only ever described the
     nation as falling through:
 
-        home nation @ rarity -> any nation @ rarity -> any nation @ the other
-        rarity -> the slot is OMITTED.
+        home nation @ rarity -> any nation @ rarity -> any nation @ the
+        slot's fallback rarity -> the slot is OMITTED.
 
     THE LAST RUNG NO LONGER DIVERGES ([USER] 2026-08-10). It used to: the C#
     side fell back to one base colorless card for that slot, while tier 0.5 --
@@ -158,34 +152,19 @@ def companion_shop_offer(
     offers: list[tuple[Card, int]] = []
     taken: list[Card] = []
     for slot in range(C.SHOP_COMPANION_SLOTS):
-        # ONE TABLE, TWO NATIONS ([USER] 2026-08-10, CONSTANTS_VERSION 9).
-        # Slot 1 is "Uncommon or higher from the home region"; slot 2 is
-        # "Uncommon or higher from any region". The slots differ in the NATION
-        # filter only, so they read the same conditioned odds -- which is why
-        # `odds` is no longer a per-slot choice.
-        #
-        # WHAT MOVED. R116/NC-10 had slot 2 on RARITY_ODDS itself (no floor,
-        # Commons drawable at the 50-gold band); [USER] restored R59's floor
-        # on 2026-08-10 and slot 2 came back to this table. The conditioning
-        # inside the table is still Q16's ruled reading (R118, verbatim
-        # "Condition."); that ruling is untouched here, only its scope grew
-        # back to both slots.
+        # A FIXED RARITY PER SLOT (base shape, 2026-10-18): the ladder's
+        # first band is the slot's, the rest is its fallback.
         nation = home if slot == 0 else None
-        odds = C.SHOP_COMPANION_RARITY_ODDS
-        rarity = _roll_companion_rarity(rng, odds)
+        ladder = C.SHOP_COMPANION_SLOT_RARITIES[slot]
+        rarity = ladder[0]
         cards = eligible(rarity, nation, taken)
         if not cards and nation is not None:
             cards = eligible(rarity, None, taken)
         if not cards:
-            # The rarity rung: try the table's OWN remaining rarities, in the
-            # table's order. Order is the odds table's, not a preference of
-            # this function's -- picking a "best" fallback rarity would be a
-            # balance choice hiding in an error path. Since the floor came
-            # back to slot 2 the table is two-entry again for both slots, so
-            # this rung can no longer drop a slot below Uncommon.
-            for other in odds:
-                if other == rarity:
-                    continue
+            # The rarity rung: the slot's OWN fallback bands, in order --
+            # picking a "best" fallback would be a balance choice hiding in
+            # an error path.
+            for other in ladder[1:]:
                 cards = eligible(other, None, taken)
                 if cards:
                     rarity = other
@@ -197,26 +176,6 @@ def companion_shop_offer(
         offers.append((loader.get_card(pick.id),
                        C.SHOP_COMPANION_PRICE[rarity]))
     return offers
-
-
-def _roll_companion_rarity(rng: random.Random, odds: dict) -> str:
-    """One draw from a rarity table.
-
-    NC-10 (R116) gave the two slots different tables and made the table an
-    argument rather than a constant this function reads. [USER]'s 2026-08-10
-    floor restoration put both slots back on one table, but the argument
-    STAYS an argument: a per-slot table is the shape a future stated split
-    would need (see tier0/constants.py), and re-hardcoding the read would
-    have to be undone to get there. The fallback returns the table's FIRST
-    key, the table's own commonest rarity; it is only reachable on float slop.
-    """
-    roll = rng.random()
-    acc = 0.0
-    for rarity, weight in odds.items():
-        acc += weight
-        if roll < acc:
-            return rarity
-    return next(iter(odds))
 
 
 @dataclass

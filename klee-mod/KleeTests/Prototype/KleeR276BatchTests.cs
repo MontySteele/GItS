@@ -71,11 +71,12 @@ public class KleeR276BatchTests
     }
 
     [Fact]
-    public void Hair_trigger_is_a_free_common_that_aims_and_draws()
+    public void Hair_trigger_is_a_free_uncommon_that_aims_and_draws()
     {
-        // Seat round 2026-09-23: 0 Energy and a card (2 upgraded).
+        // Seat round 2026-09-23: 0 Energy and a card (2 upgraded). Uncommon
+        // since the legacy review (pick 6, 2026-10-18): a 0-cost cantrip.
         var card = new ProtoKoHairTrigger();
-        Assert.Equal(CardRarity.Common, card.Rarity);
+        Assert.Equal(CardRarity.Uncommon, card.Rarity);
         Assert.Equal(CardType.Skill, card.Type);
         Assert.Equal(TargetType.AnyEnemy, card.TargetType);
         Assert.Equal(0, card.EnergyCost.Canonical);

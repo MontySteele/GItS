@@ -226,11 +226,7 @@ public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
     {
         if (!OffersCompanionTo(player, creationOptions)) return false;
 
-        var companionRarity =
-            creationOptions.RarityOdds == CardRarityOddsType.BossEncounter
-                ? CardRarity.Rare
-                : (CardRarity?)null;
-        var offer = CompanionSlot.Roll(player, companionRarity);
+        var offer = CompanionSlot.Roll(player, creationOptions);
         if (offer == null) return false;
         cardRewardOptions.Add(new CardCreationResult(offer));
         return true;
@@ -362,10 +358,7 @@ public sealed class CurtainNeverFalls : CustomRelicModel
         CardCreationOptions creationOptions)
     {
         if (!OffersCompanionTo(player, creationOptions)) return false;
-        var rarity = creationOptions.RarityOdds == CardRarityOddsType.BossEncounter
-            ? CardRarity.Rare
-            : (CardRarity?)null;
-        var offer = CompanionSlot.Roll(player, rarity);
+        var offer = CompanionSlot.Roll(player, creationOptions);
         if (offer == null) return false;
         cardRewardOptions.Add(new CardCreationResult(offer));
         return true;
