@@ -741,7 +741,7 @@ internal static class PlayTelemetry
     {
         try
         {
-            if (!KokomiOverhaul.LiveFor(creature)) return;
+            if (!KokomiOverhaul.IsHers(creature)) return;
             record.IsKokomi = true;
             var ledger = KokomiOverhaulLedger.Peek(creature);
             if (ledger != null) record.KokomiLedger = ledger;
@@ -762,7 +762,7 @@ internal static class PlayTelemetry
         try
         {
             if (!causedByEthereal || card?.Owner is not { } player) return;
-            if (!KokomiOverhaul.LiveFor(player.Creature)) return;
+            if (!KokomiOverhaul.IsHers(player.Creature)) return;
             RecordEtherealLost(player,
                 sting: card is global::KleeMod.Cards.Prototype.Generated.ProtoKkSting);
         }
@@ -2846,7 +2846,7 @@ public sealed class PlayTelemetryHooks : AbstractModel
                 MeterLedger.Spark, id, title, turn,
                 SparkPower.SparksAtPlay(creature));
 
-            if (KokomiOverhaul.LiveFor(creature))
+            if (KokomiOverhaul.IsHers(creature))
             {
                 MeterLedger.OpenPlay(
                     MeterLedger.Plan, id, title, turn,

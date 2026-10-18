@@ -28,7 +28,7 @@ namespace KleeMod.Relics;
 ///
 /// QUARANTINED for Salon Solitaire's reason: under <c>Relics/</c>, so the
 /// titles stay in <c>tools/lint_unique_names.py</c>'s namespace. Every effect
-/// asks <see cref="KokomiOverhaul.LiveFor"/>, so a relic held by anyone else
+/// asks <see cref="KokomiOverhaul.IsHers"/>, so a relic held by anyone else
 /// does nothing. No relic writes or carries out a Plan by itself (brief rule
 /// 4, "Nothing happens by itself").
 ///
@@ -49,7 +49,7 @@ public static class KokomiArmRelics
     /// <summary>How many copies of <typeparamref name="T"/> this Kokomi
     /// holds; 0 for anyone else.</summary>
     internal static int Held<T>(Creature? kokomi) where T : RelicModel =>
-        KokomiOverhaul.LiveFor(kokomi) && kokomi!.Player is { } player
+        KokomiOverhaul.IsHers(kokomi) && kokomi!.Player is { } player
             ? player.Relics.OfType<T>().Count()
             : 0;
 
@@ -68,7 +68,7 @@ public static class KokomiArmRelics
     /// </summary>
     public static bool FirstTurnOf(RelicModel relic, Player player) =>
         player == relic.Owner
-        && KokomiOverhaul.LiveFor(player.Creature)
+        && KokomiOverhaul.IsHers(player.Creature)
         && player.PlayerCombatState?.TurnNumber == 1
         && player.Creature is { IsDead: false };
 
@@ -188,7 +188,7 @@ public sealed class ResistanceArmband : KokomiArmRelic
     /// <summary>Is this play one that counts? A Companion of hers, not a
     /// carry-out. PURE on the play.</summary>
     public static bool Counts(CardPlay cardPlay, Creature? kokomi) =>
-        KokomiOverhaul.LiveFor(kokomi)
+        KokomiOverhaul.IsHers(kokomi)
         && cardPlay.Card is ICompanionCard
         && cardPlay.Card.Owner?.Creature == kokomi
         && !KokomiPlan.IsCarryingOut(kokomi!.Player);

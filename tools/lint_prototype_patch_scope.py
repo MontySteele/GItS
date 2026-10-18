@@ -104,9 +104,14 @@ PROTOTYPE_DIRS: tuple[str, ...] = (
 #   * `Powers.OfType<SparkAttackCostPower>` is the Sparks arm's scope: the
 #     power is granted to one character, so its PRESENCE on the owner is the
 #     character test. Named explicitly rather than accepting `OfType<` at
-#     large, which would let any power stand in for an identity check.
+#     large, which would let any power stand in for an identity check;
+#   * `KokomiOverhaul.LiveFor` is Kokomi's kit gate: `IsKokomi`, or a seat
+#     whose kit came up this combat (the off-character rule, 2026-10-18: a
+#     Plan card in hand or one of her cards played), which is exactly the
+#     set of seats that own a Bake-Kurage. Every other seat returns early.
 SCOPE_IDIOMS: tuple[str, ...] = (
     "KokomiResources.IsKokomi(",
+    "KokomiOverhaul.LiveFor(",
     "FurinaResources.IsFurina(",
     "KurageMemory.IsLive(",
     "KurageMemory.BaseKitLive(",
