@@ -2445,8 +2445,8 @@ proto_kk_breakwater	ImageGen/images/cards/kokomi/proto_kk_breakwater.png	500	380
 proto_kk_massed_volley	ImageGen/images/cards/kokomi/proto_kk_massed_volley.png	500	380	cover	x0.18,y0.70@2.0	shortlist	1	png	Version 2.1 Wallpaper 1.png		splash	kokomi_pool
 # proto_kk_press_the_advantage <- Kokomi (left-centre), face in frame
 proto_kk_press_the_advantage	ImageGen/images/cards/kokomi/proto_kk_press_the_advantage.png	500	380	cover	x0.23,y0.62@1.8	shortlist	1	png	Version 3.7 Wallpaper 1.png		splash	kokomi_pool
-# proto_kk_shell_of_sanctuary <- sanctuary
-proto_kk_shell_of_sanctuary	ImageGen/images/cards/kokomi/proto_kk_shell_of_sanctuary.png	500	380	cover	center	shortlist	1	png	Windtrace 2022-12-23 The Pearl of Sango.png		splash	kokomi_pool
+# proto_kk_draft_the_orders <- Shell of Sanctuary's picture, carried with its slot (Kokomi card paper v2, 2026-10-18)
+proto_kk_draft_the_orders	ImageGen/images/cards/kokomi/proto_kk_draft_the_orders.png	500	380	cover	center	shortlist	1	png	Windtrace 2022-12-23 The Pearl of Sango.png		splash	kokomi_pool
 # proto_kk_ambush <- lying in wait
 proto_kk_ambush	ImageGen/images/cards/kokomi/proto_kk_ambush.png	500	380	cover	x0.45,y0.45@1.1	shortlist	1	png	Story Quest Sangonomiya Kokomi A1 Watatsumi Sightseeing.png		splash	kokomi_pool
 # proto_kk_read_the_field <- studying the field
