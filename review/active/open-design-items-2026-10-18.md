@@ -109,3 +109,15 @@ These are notes for the next Yae round, not changes:
    - **(a, default)** "Play it on the Bake-Kurage instead. After enemies act and you draw, Plans happen in order;
      Block lasts that turn. Click one to flip it."
    - (b) Keep today's text.
+
+## Ruled 2026-10-18
+
+The user: "Ok, agreed on all defaults for both the PR and inazuma companions". All four picks are (a):
+1. Nereid's Ascension stays as it is; Kokomi Exhaust is held, not closed.
+2. Grand Design: "Plan up to 3 cards from your Hand, Basic cards included. They cost 0."
+3. No new Tenko scaling; the Tenko roles above are watched in Yae's next round.
+4. The Plan tip: "Play it on the Bake-Kurage instead. After enemies act and you draw, Plans happen in order; Block
+   lasts that turn. Click one to flip it."
+
+To build: Grand Design (pick 2) and the Plan tip (pick 4). Both are text and one rule on one Rare, with no seat round
+of their own; they ride Kokomi's next round.
