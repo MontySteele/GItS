@@ -205,12 +205,15 @@ public class YaeAncientsRelicsTests : IDisposable
         Assert.Equal(2, ledger.Count);
         Assert.NotSame(it, ledger.LastPlanted);
 
-        // Into a full shrine whose oldest is a Foxfire Sakura: it Levels that one.
+        // Into a full shrine: it never withers, so (2026-10-17) the plant
+        // Levels the Foxfire Sakura closest to withering, not it.
+        var second = ledger.LastPlanted!;
         ledger.Plant(YaeLaw.PlantLevel, 3, kind: YaeSakuraKind.Foxfire);
         ledger.Plant(YaeLaw.PlantLevel, 3, kind: YaeSakuraKind.Foxfire);
         Assert.Equal(3, ledger.Count);
-        Assert.Same(it, ledger.LastPlanted);
-        Assert.Equal(4, it.Level);
+        Assert.Same(second, ledger.LastPlanted);
+        Assert.Equal(4, second.Level);
+        Assert.Equal(3, it.Level);
     }
 
     [Fact]

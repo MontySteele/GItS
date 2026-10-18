@@ -44,6 +44,11 @@ draws the blow.
   - **A different kind:** the oldest acts, withers, and the new Sakura takes
     its place at its printed Level. Changing the board's mix costs you an
     established Sakura.
+  - **Amended 2026-10-17:** both branches act on the Sakura closest to
+    withering (fewest turns left, the oldest on a tie; a Deadline Extension
+    Sakura last), not the first planted. A run of Sakura Seals had refreshed
+    slot 1 again and again while the other two ran out. [USER]: "I think
+    that's closest to the expectation."
 - **Tenko** becomes one plain rule again: "Every Sakura acts now. Refresh them
   to at least 3 turns." The typed Tenko and its double effect go. This is the
   power cut: one action per Sakura, not two. The mix of kinds you planted

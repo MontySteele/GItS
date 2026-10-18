@@ -724,9 +724,9 @@ public static class ArmKeywordTips
     /// the short form until it bit them. The title says "Full shrine".
     /// </summary>
     public static readonly string YaeFullShrineTip =
-        "Planting makes your oldest Sakura act. If the new Sakura is the same "
-      + "kind, the oldest stays and gains a Level. If not, the oldest withers "
-      + "and the new one takes its place.";
+        "Planting makes the Sakura closest to withering act. If the new one "
+      + "is the same kind, that Sakura refreshes and gains a Level. If not, "
+      + "it withers and is replaced.";
 
     /// <summary>The text pass of 2026-10-08: Eula's blade, a counter on the
     /// enemy (<c>LightfallSwordPower</c>) with a badge and no tip.</summary>

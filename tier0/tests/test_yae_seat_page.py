@@ -99,10 +99,10 @@ def test_the_page_prints_every_sakura_oldest_first():
                         "an enemy for 3, 3 turns left.")
     # Review r3: full, so the next plant makes the oldest act first.
     # Yae review r5, item 5: the hover's sentences.
-    assert lines[4] == ("- Shrine full: planting makes your oldest Sakura "
-                        "act. If the new Sakura is the same kind, the oldest "
-                        "stays and gains a Level. If not, the oldest withers "
-                        "and the new one takes its place.")
+    assert lines[4] == ("- Shrine full: planting makes the Sakura closest "
+                        "to withering act. If the new one is the same kind, "
+                        "that Sakura refreshes and gains a Level. If not, it "
+                        "withers and is replaced.")
     assert lines[-1] == "- Annotated cards in your hand: 0."
 
 

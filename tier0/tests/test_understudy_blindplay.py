@@ -6637,11 +6637,11 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                            " + its Level when it acts."],
         "Kitsune Sakura": ["A fox decoy ", ". When it acts, you gain "],
         # Yae review r5, item 5: the long form.
-        "Full shrine": ["Planting makes your oldest Sakura act. If the new "
-                        "Sakura is the same ",
-                        "kind, the oldest stays and gains a Level. If not, "
-                        "the oldest withers ",
-                        "and the new one takes its place."],
+        "Full shrine": ["Planting makes the Sakura closest to withering "
+                        "act. If the new one ",
+                        "is the same kind, that Sakura refreshes and gains a "
+                        "Level. If not, ",
+                        "it withers and is replaced."],
         "Edit": ["Give a card an Annotation for this combat, replacing "
                  "its last. ", "Published ones stay and add up."],
         # 2026-10-14: each Annotation's own row, `YaeAnnotationText.Rule`

@@ -138,7 +138,7 @@ public class YaePrototypeTests : IDisposable
     }
 
     [Fact]
-    public void Planting_into_a_full_shrine_refreshes_and_levels_only_the_oldest()
+    public void Planting_into_a_full_shrine_refreshes_and_levels_the_one_closest_to_withering()
     {
         var ledger = Fresh();
         PlantN(ledger, 3);
@@ -149,8 +149,10 @@ public class YaePrototypeTests : IDisposable
         Assert.Same(oldest, ledger.Standing[0]);
         Assert.Equal(new[] { 2, 1, 1 }, ledger.Standing.Select(s => s.Level));
         Assert.Equal(new[] { 3, 2, 2 }, ledger.Standing.Select(s => s.TurnsLeft));
-        PlantN(ledger, 1);                    // no cap (review r1, pick 2)
-        Assert.Equal(new[] { 3, 1, 1 }, ledger.Standing.Select(s => s.Level));
+        // 2026-10-17: the refreshed oldest now has the most turns left, so
+        // the next plant feeds the second (closest to withering).
+        PlantN(ledger, 1);
+        Assert.Equal(new[] { 2, 2, 1 }, ledger.Standing.Select(s => s.Level));
     }
 
     [Fact]
@@ -826,10 +828,9 @@ public class YaePrototypeTests : IDisposable
         Assert.True(ledger.Plant(YaeLaw.PlantLevel, null, kind: YaeSakuraKind.Kitsune));
         Assert.Equal(YaeLaw.SakuraCap, ledger.Count);
         Assert.Equal(YaeSakuraKind.Kitsune, ledger.Standing[^1].Kind);
-        Assert.Equal("Planting makes your oldest Sakura act. If the new Sakura "
-                     + "is the same kind, the oldest stays and gains a Level. "
-                     + "If not, the oldest withers and the new one takes its "
-                     + "place.",
+        Assert.Equal("Planting makes the Sakura closest to withering act. If "
+                     + "the new one is the same kind, that Sakura refreshes "
+                     + "and gains a Level. If not, it withers and is replaced.",
                      ArmKeywordTips.YaeFullShrineTip);
     }
     // ---- the Edit tip and each Annotation's own (2026-10-14) ----------------

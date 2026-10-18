@@ -28,8 +28,9 @@ THE RULES AS MODELLED (review r3, ruled 2026-10-14,
     when it withers (Last Bloom), and on Tenko. A damage action is Electro,
     unpowered (a pet's hit: no Strength, no Weak; Vulnerable and Block
     apply), source "card"; the Lure aims a Thunder strike.
-  * FULL SHRINE (amended after GPT's review): a plant into a full shrine
-    makes the OLDEST act first. Same kind as the new one: the oldest
+  * FULL SHRINE (amended after GPT's review; 2026-10-17 the target is the
+    Sakura closest to withering, `next_to_wither`, not the oldest): a plant
+    into a full shrine makes it act first. Same kind as the new one: the oldest
     refreshes to at least 3 and gains a Level, and none is added. A
     different kind: the oldest withers and the new Sakura takes its place
     (as the newest) at its printed Level. Under `SCALING == "count"` (pick 1
@@ -454,13 +455,33 @@ def _plant_level(player) -> int:
     return PLANT_LEVEL + _power(player, MOONCALL)
 
 
+def next_to_wither(led) -> Optional["Sakura"]:
+    """The full-shrine plant's target: the Sakura closest to withering, the
+    fewest turns left, the oldest on a tie; a Deadline Extension Sakura
+    (it never withers) only when every one carries it. None on an empty
+    shrine. C# twin: `YaeShrineLedger.NextToWither`."""
+    best = None
+    for s in led.sakura:
+        if best is None:
+            best = s
+            continue
+        se, be = s.has(DEADLINE), best.has(DEADLINE)
+        if se != be:
+            if not se:
+                best = s
+        elif s.turns_left < best.turns_left:
+            best = s
+    return best
+
+
 def plant(state, n: int = 1, reason: str = "plant",
           level: Optional[int] = None,
           annotation: Optional[str] = None,
           kind: str = THUNDER, lasts: int = 0) -> None:
     """Plant `n` Sakura of `kind`, one at a time, each at the card's Level
     (`level`, Guardian of Narukami; else `PLANT_LEVEL`) plus Fox's Mooncall's
-    bonus. FULL SHRINE (review r3, amended): the OLDEST acts first; if it is
+    bonus. FULL SHRINE (review r3, amended; 2026-10-17 the Sakura closest
+    to withering, `next_to_wither`, in place of the oldest): it acts first; if it is
     the same kind it refreshes (to at least 3) and gains 1 Level and none is
     added; if not, it withers and the new Sakura takes its place, as the
     newest, at its printed Level. `annotation`: what each NEW Sakura
@@ -473,7 +494,9 @@ def plant(state, n: int = 1, reason: str = "plant",
     cap = sakura_cap(state.player)
     for _ in range(n):
         if len(led.sakura) >= cap and led.sakura:
-            oldest = led.sakura[0]
+            # 2026-10-17 (the user: "closest to the expectation"): the
+            # Sakura closest to withering, not the first planted.
+            oldest = next_to_wither(led)
             if SCALING == "level":
                 act(state, oldest, "full_shrine")
                 if oldest.kind == kind:

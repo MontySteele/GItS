@@ -1735,10 +1735,10 @@ ARM_KEYWORDS: dict[str, str] = {
     "Kitsune Sakura": ("A fox decoy Sakura. When it acts, you gain 2 + its "
                        "Level Block."),
     # Yae review r5, item 5.
-    "Full shrine": ("Planting makes your oldest Sakura act. If the new Sakura "
-                    "is the same kind, the oldest stays and gains a Level. If "
-                    "not, the oldest withers and the new one takes its "
-                    "place."),
+    # 2026-10-17: the Sakura closest to withering, not the first planted.
+    "Full shrine": ("Planting makes the Sakura closest to withering act. If "
+                    "the new one is the same kind, that Sakura refreshes and "
+                    "gains a Level. If not, it withers and is replaced."),
     "Edit": ("Give a card an Annotation for this combat, replacing its "
              "last. Published ones stay and add up. A card that Edits up "
              "to 2 cards opens one chooser: pick up to 2 different cards, "

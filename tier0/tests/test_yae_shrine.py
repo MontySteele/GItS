@@ -740,3 +740,54 @@ def test_a_full_shrine_plant_never_shortens_the_oldests_timer(yae):
     _led(st).sakura[0].turns_left = 1
     Y.plant(st, 1)
     assert _led(st).sakura[0].turns_left == Y.SAKURA_TURNS
+
+
+def test_a_full_shrine_plant_feeds_the_sakura_closest_to_withering(yae):
+    # The user (2026-10-17): a run of Sakura Seals kept refreshing the first
+    # Sakura planted while the other two ran out. Agreed: "I think that's
+    # closest to the expectation" -- the target is the one closest to
+    # withering, the oldest on a tie.
+    st = _state()
+    Y.plant(st, 3)
+    led = _led(st)
+    first, second, third = led.sakura
+    first.turns_left, second.turns_left, third.turns_left = 3, 1, 2
+    Y.plant(st, 1)
+    assert [r["level"] for r in _strikes(st)] == [1]
+    assert (second.level, second.turns_left) == (2, Y.SAKURA_TURNS)
+    assert (first.level, third.level) == (1, 1)
+    Y.plant(st, 1)                  # third (2 left) is now closest
+    assert (third.level, third.turns_left) == (2, Y.SAKURA_TURNS)
+    assert led.sakura == [first, second, third]   # order is planting order
+
+
+def test_repeated_full_shrine_plants_keep_the_whole_shrine_standing(yae):
+    st = _state()
+    Y.plant(st, 3)
+    for _ in range(4):
+        Y.turn_end(st)
+        st.in_player_turn = True
+        Y.plant(st, 1)
+    assert len(_led(st).sakura) == 3
+
+
+def test_another_kind_replaces_the_sakura_closest_to_withering(yae):
+    st = _state()
+    Y.plant(st, 3)
+    led = _led(st)
+    first, second, third = led.sakura
+    second.turns_left = 1
+    Y.plant(st, 1, kind=Y.FOXFIRE)
+    assert second not in led.sakura
+    assert led.sakura[:2] == [first, third]
+    assert led.sakura[-1].kind == Y.FOXFIRE
+
+
+def test_a_deadline_extension_sakura_is_fed_last(yae):
+    st = _state()
+    Y.plant(st, 3)
+    led = _led(st)
+    led.sakura[0].add(Y.DEADLINE)
+    led.sakura[0].turns_left = 1
+    Y.plant(st, 1)
+    assert [s.level for s in led.sakura] == [1, 2, 1]
