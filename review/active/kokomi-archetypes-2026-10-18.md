@@ -86,19 +86,53 @@ character: about 18 cards per archetype (with 2 or 3 build-around Rares each), a
 cards, the 5 co-op cards, and about 10 glue cards. The pool stays 78 (20 / 38 / 20), including the
 two Ancients.
 
-## 3. What this does not change
+## 3. Read the Tide is not a turtle
+
+The user: "I do worry that 'read the tide' ends up as some unkillable turtle build, which I know is
+also a problem Ironclad can sometimes find itself causing ... Probably something around how block
+doesn't scale as big as damage and so block-maxxing might not kill the boss fast enough to avoid
+dying to its own scaling and mechanics."
+
+The base game holds turtles back in five ways:
+1. **Block resets each turn.** Keeping it costs a Rare (Barricade) or a capped card.
+2. **Enemies outscale it.** Strength buffs, growing multi-hits, status cards and boss mechanics
+   mean a deck that cannot end the fight loses.
+3. **Damage outscales Block.** Strength multiplies across multi-hits, but Dexterity adds once per
+   Block card.
+4. **A turtle wins only once it converts.** Body Slam's kind of card turns Block into damage, and
+   at that point the deck has stopped being a pure turtle.
+5. **Clog.** A deck of Block draws no damage, so fights run longer and the extra turns cost HP.
+
+Guardrails written into Read the Tide:
+- No Block carry-over beyond today's capped Watatsumi's Grace ("keep up to N"), and no Barricade.
+- Every build-around wins by dealing damage, never by lasting longer.
+- Its damage reads enemy attacks (Counter and Intent), so it grows with the enemy's threat and
+  stalls against a boss that buffs instead of attacking.
+- **The measured check:** in the seat round its normal fights run no more than about one turn longer
+  than base's (`tools/telemetry_report.py`, fight length by act). If they do, the archetype's
+  Block is cut first.
+
+How the base game's bosses add to the clock (enrage, scaling) is checked against the boss data in
+the card paper, not assumed.
+
+## 4. What this does not change
 
 Plan, the Bake-Kurage, the open Plan (flip a waiting Plan to its now-line), the starter deck, the
 Tamakushi Casket, the Ancients, her relics and potions, and her story are all unchanged. Numbers stay
 as they are; the card paper sets them.
 
-## 4. Next
+## 5. Next
 
 The card paper: each of the 76 cards placed in A, B, C, Companion, co-op or glue, with a rewrite or a
 replacement for every generic card and free-standing power, under the target shape above. Then a
 five-seat round and a run of yours.
 
 ## Picks
+
+**Pick 1 ruled (a), 2026-10-18.** The user: "I think that this largely makes sense ... Otherwise I
+do think that having a Plan archetype and a Silent-like Sting / Ward strategy makes a lot of
+sense", with the turtle guardrails of sec.3. Picks 2 and 3 are taken at their defaults for the card
+paper, which reopens them against the actual cards.
 
 1. **The archetype map.**
    - **(a, default)** Three archetypes (Grand Strategy, Read the Tide, the Shoal), with Companions in
