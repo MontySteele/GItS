@@ -119,10 +119,13 @@ public class VarkaModelArtTests
         Assert.Equal(expected, got);
     }
 
-    [Fact]
-    public void His_card_trail_is_not_the_ironclads_orange()
+    [Theory]
+    [InlineData("Varka")]
+    [InlineData("Furina")]
+    [InlineData("Kokomi")]
+    public void His_card_trail_is_not_the_ironclads_orange(string character)
     {
-        var src = RepoFile("klee-mod/KleeCode/Varka.cs");
+        var src = RepoFile($"klee-mod/KleeCode/{character}.cs");
         Assert.Contains("\"res://scenes/vfx/card_trail_defect.tscn\"", src);
     }
 

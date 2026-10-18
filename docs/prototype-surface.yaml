@@ -5170,8 +5170,9 @@
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
    # The highest-Level Sakura of any kind; on a tie, the oldest (Editor-in-
-   # Chief's reading).
-   description: "Your highest-Level [gold]Sakura[/gold] gains {YmAmount:diff()} Levels and lasts 2 more turns.",
+   # Chief's reading). Yae round 11 (2026-10-18): the face says so, after a
+   # seat lost Thunder Levels to a Kitsune Sakura on a tie.
+   description: "Your highest-Level [gold]Sakura[/gold] gains {YmAmount:diff()} Levels and lasts 2 more turns. Ties go to the oldest.",
    effects: [{op: yae, kind: bless_highest, amount: 3, lasts: 2}],
    upgrade: {yae_amount: 1}}
 

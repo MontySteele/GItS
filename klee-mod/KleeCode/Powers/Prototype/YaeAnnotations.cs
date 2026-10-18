@@ -563,6 +563,7 @@ public static class YaeEditing
             ? EditPromptText
             : $"Choose a card to Edit: {YaeAnnotationText.Name(annotation)} "
               + $"({YaeAnnotationText.PromptClause(annotation)}). "
+              + FilterClause(annotation)
               + ReplacesWarning;
 
     /// <summary>Yae review r4, pick 1 (a) (ruled 2026-10-15): a multi-card
@@ -577,7 +578,26 @@ public static class YaeEditing
     public static string EditUpToPromptTextFor(YaeAnnotation annotation) =>
         $"Choose up to {{Amount}} cards to Edit: {YaeAnnotationText.Name(annotation)} "
         + $"({YaeAnnotationText.PromptClause(annotation)}). "
+        + FilterClause(annotation)
         + ReplacesWarning;
+
+    /// <summary>Yae round 11 (2026-10-18): the dead-edit filter
+    /// (<see cref="YaeAnnotationReach.Affects(YaeAnnotation, bool, bool, bool, bool)"/>)
+    /// leaves cards out of the chooser, and a seat read the gap as a bug.
+    /// </summary>
+    public const string FilterNote = "Only cards it would change are shown.";
+
+    /// <summary>Does this Annotation's chooser skip any card? True when a
+    /// card with no damage, Block, plant or play would be skipped (Red Ink,
+    /// Reprint). PURE.</summary>
+    public static bool Filters(YaeAnnotation annotation) =>
+        annotation != YaeAnnotation.None
+        && !YaeAnnotationReach.Affects(annotation, false, false, false, false);
+
+    /// <summary><see cref="FilterNote"/> and a space for an Annotation whose
+    /// chooser skips cards, else nothing. PURE.</summary>
+    public static string FilterClause(YaeAnnotation annotation) =>
+        Filters(annotation) ? FilterNote + " " : "";
 
     /// <summary>The Edit chooser's terms. One card: exactly one, as before.
     /// Several: ONE chooser of zero to <paramref name="times"/> cards, so
@@ -814,6 +834,22 @@ public static class YaeEditing
     }
 
     /// <summary>
+    /// Could <paramref name="card"/> wear a Masterpiece once what it wears
+    /// now is cleared? The base <c>EnchantmentModel.CanEnchant</c>'s card
+    /// rules (never a Status, Curse or Quest; never an Unplayable deck card)
+    /// without its "already enchanted" refusal, which <see cref="Apply"/>
+    /// answers by swapping. PURE.
+    /// </summary>
+    public static bool CanWear(CardType type, bool inDeck, bool unplayable) =>
+        type != CardType.Status && type != CardType.Curse && type != CardType.Quest
+        && !(inDeck && unplayable);
+
+    /// <summary><see cref="CanWear(CardType, bool, bool)"/> read off the card.</summary>
+    public static bool CanWear(CardModel card) =>
+        CanWear(card.Type, card.Pile?.Type == PileType.Deck,
+                card.Keywords.Contains(CardKeyword.Unplayable));
+
+    /// <summary>
     /// Give <paramref name="card"/> these layers: a fresh Masterpiece carrying
     /// <paramref name="stack"/> and <paramref name="temporary"/>, the Reprint
     /// state given, swapped in for whatever it wore (so the card redraws it).
@@ -824,8 +860,15 @@ public static class YaeEditing
                              int temporaryCount = 1)
     {
         var layers = stack.Where(a => a != YaeAnnotation.None).ToList();
+        if (layers.Count == 0 && temporary == YaeAnnotation.None)
+        {
+            Clear(card);
+            return true;
+        }
+        // Check before clearing: a card that cannot wear a Masterpiece keeps
+        // what it wears rather than losing every layer.
+        if (!CanWear(card)) return false;
         Clear(card);
-        if (layers.Count == 0 && temporary == YaeAnnotation.None) return true;
         var model = (YaeMasterpiece)ModelDb.Enchantment<YaeMasterpiece>().ToMutable();
         model.Set(layers, temporary, playedOnce, armed, temporaryCount);
         if (!model.CanEnchant(card)) return false;
