@@ -4,6 +4,7 @@ using KleeMod.Powers;
 using KleeMod.Tests.Harness;
 using KleeMod.Vfx;
 using MegaCrit.Sts2.Core.ControllerInput;
+using MegaCrit.Sts2.Core.Entities.Actions;
 using MegaCrit.Sts2.Core.Models;
 using Xunit;
 
@@ -112,6 +113,105 @@ public class KokomiPlanViewTests
             KokomiPlanViewRows.FlipSent(Plan(null)));
         Assert.EndsWith("flipping to its Plan line.",
             KokomiPlanViewRows.FlipSent(Plan(null, now: true)));
+    }
+
+    // ---- the morning's choices come first (co-op softlock, 2026-10-17) -------
+    // [USER]: "I seem to have caused a softlock by opening the list of plans
+    // at the beginning of the turn when the plans were trying to play."
+
+    private const ulong Her = 1;
+    private const ulong Partner = 2;
+
+    [Fact]
+    public void Her_own_waiting_running_or_choosing_action_keeps_the_view_shut()
+    {
+        Assert.False(KokomiPlanViewRows.OpenBlockedByActions(
+            Array.Empty<(ulong, GameActionState)>(), Her));
+        foreach (var state in new[]
+                 {
+                     GameActionState.WaitingForExecution,
+                     GameActionState.Executing,
+                     GameActionState.GatheringPlayerChoice,
+                     GameActionState.ReadyToResumeExecuting,
+                 })
+        {
+            Assert.True(KokomiPlanViewRows.OpenBlockedByActions(
+                new[] { (Her, state) }, Her));
+        }
+        // Done or cancelled actions left on a queue do not.
+        Assert.False(KokomiPlanViewRows.OpenBlockedByActions(
+            new[] { (Her, GameActionState.Finished),
+                    (Her, GameActionState.Canceled) }, Her));
+    }
+
+    [Fact]
+    public void The_partners_queue_holds_the_view_only_while_an_action_runs()
+    {
+        // The partner choosing or with cards queued: hers to open.
+        Assert.False(KokomiPlanViewRows.OpenBlockedByActions(
+            new[] { (Partner, GameActionState.GatheringPlayerChoice),
+                    (Partner, GameActionState.WaitingForExecution) }, Her));
+        // Any action running holds it.
+        Assert.True(KokomiPlanViewRows.OpenBlockedByActions(
+            new[] { (Partner, GameActionState.Executing) }, Her));
+    }
+
+    [Fact]
+    public void An_open_view_gives_way_to_her_choice_and_not_the_partners()
+    {
+        Assert.True(KokomiPlanViewRows.ChoiceTakesOver(
+            new[] { (Her, GameActionState.GatheringPlayerChoice) }, Her, false));
+        Assert.True(KokomiPlanViewRows.ChoiceTakesOver(
+            Array.Empty<(ulong, GameActionState)>(), Her, handSelecting: true));
+        Assert.False(KokomiPlanViewRows.ChoiceTakesOver(
+            new[] { (Partner, GameActionState.GatheringPlayerChoice) }, Her, false));
+        // Her flip request running through the queue is not a choice.
+        Assert.False(KokomiPlanViewRows.ChoiceTakesOver(
+            new[] { (Her, GameActionState.Executing) }, Her, false));
+    }
+
+    [Fact]
+    public void The_hint_is_not_drawn_while_the_morning_carries_the_plans_out()
+    {
+        Assert.True(KokomiPlanViewRows.HintShown(2, draining: false));
+        Assert.False(KokomiPlanViewRows.HintShown(2, draining: true));
+        Assert.False(KokomiPlanViewRows.HintShown(0, draining: false));
+    }
+
+    [Fact]
+    public void The_view_waits_for_actions_and_closes_for_her_choice()
+    {
+        // Structural pins (Il): the open refuses on the action scan, the
+        // frame hook and the game's pause-for-choice both close the view.
+        Assert.Contains("KokomiPlanView.ActionsBusy",
+                        Il.Calls(Il.Method("KokomiPlanView", "TryOpen")));
+        Assert.Contains("KokomiPlanViewRows.OpenBlockedByActions",
+                        Il.Calls(Il.Method("KokomiPlanView", "ActionsBusy")));
+        var frame = Il.Calls(Il.Method("KokomiPlanView", "OnFrame"));
+        Assert.Contains("KokomiPlanViewRows.ChoiceTakesOver", frame);
+        Assert.Contains("KokomiPlanView.Close", frame);
+        Assert.Contains("NPlayerHand.get_IsInCardSelection", frame);
+        Assert.Contains("KokomiPlanView.Close",
+                        Il.Calls(Il.Method("KokomiPlanView", "OnChoiceBegun")));
+        Assert.Contains("KokomiPlanView.OnChoiceBegun", Il.Calls(Il.Method(
+            "ActionQueueSet_PauseActionForPlayerChoice_KokomiPlanView_Patch",
+            "Postfix")));
+        Assert.Contains("KokomiPlanViewRows.HintShown",
+                        Il.Calls(Il.Method("KokomiPlanStrip", "PaintHint")));
+    }
+
+    [Fact]
+    public void The_frame_hook_comes_off_the_tree_it_went_on_once()
+    {
+        // The old Forget fell back to the main loop when the screen was gone
+        // and logged "Attempt to disconnect a nonexistent connection" on the
+        // second call (Close, then the screen's own exit).
+        var forget = Il.Calls(Il.Method("KokomiPlanView", "Forget"));
+        Assert.DoesNotContain("Engine.GetMainLoop", forget);
+        Assert.Contains("_frameTree",
+                        Il.FieldsWritten(Il.Method("KokomiPlanView", "Forget")));
+        Assert.Contains("_frameTree",
+                        Il.FieldsWritten(Il.Method("KokomiPlanView", "TryOpen")));
     }
 
     // ---- the strip's button hint --------------------------------------------

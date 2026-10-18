@@ -1,12 +1,17 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using Godot;
 using HarmonyLib;
 using KleeMod.Powers;
 using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.ControllerInput;
+using MegaCrit.Sts2.Core.Entities.Actions;
 using MegaCrit.Sts2.Core.Entities.Players;
+using MegaCrit.Sts2.Core.GameActions;
+using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Logging;
@@ -18,6 +23,7 @@ using MegaCrit.Sts2.Core.Nodes.Rooms;
 using MegaCrit.Sts2.Core.Nodes.Screens.Capstones;
 using MegaCrit.Sts2.Core.Nodes.Screens.CardSelection;
 using MegaCrit.Sts2.Core.Nodes.Screens.Overlays;
+using MegaCrit.Sts2.Core.Runs;
 using MegaCrit.Sts2.addons.mega_text;
 
 namespace KleeMod.Vfx;
@@ -76,6 +82,27 @@ namespace KleeMod.Vfx;
 /// is read (they are decorated on every frame while the view is open, so a
 /// late holder is caught a frame later).
 ///
+/// THE MORNING'S CHOICES COME FIRST (co-op softlock, 2026-10-17). [USER]: "I
+/// seem to have caused a softlock by opening the list of plans at the
+/// beginning of the turn when the plans were trying to play. I had to save and
+/// restart the fight to fix it." A Plan that asks for a card (Read the
+/// Field's "Put a Draw Pile card into your Hand") runs inside her turn-start
+/// hook, as a hook action that pauses for her choice and pushes the game's
+/// own pile screen. That screen has a peek button bound to the same key the
+/// strip advertised as "Space: Plans" (<c>NPeekButton.Hotkeys</c>, pushed on
+/// top of the strip's binding by <c>NButton.RegisterHotkeys</c>), so the key
+/// meant for the Plans toggled the morning's choice into peek mode: the grid
+/// and its prompt hidden, the overlay still up, the turn held. Three guards
+/// now, all local UI and none of them synced state: the hint is not drawn
+/// while the morning runs (<see cref="KokomiPlanViewRows.HintShown"/>); the
+/// view refuses to open while one of her actions is queued, running or
+/// waiting on a choice, or while any action is running
+/// (<see cref="KokomiPlanViewRows.OpenBlockedByActions"/>); and an open view
+/// closes itself the moment a choice of hers begins, from the game's own
+/// pause-for-choice (the patch at the foot of this file) and on every frame
+/// as a backstop (<see cref="KokomiPlanViewRows.ChoiceTakesOver"/>), so the
+/// choice screen always reaches her.
+///
 /// QUARANTINED with the strip: `Vfx/Prototype/**`.
 /// </summary>
 internal static class KokomiPlanView
@@ -100,6 +127,20 @@ internal static class KokomiPlanView
     private static NSimpleCardSelectScreen? _screen;
 
     private static Player? _owner;
+
+    /// <summary>The tree <see cref="OnFrame"/> was added to, so it is taken
+    /// off that tree once and only once (an unsubscribe from a tree it was
+    /// never on logs "Attempt to disconnect a nonexistent connection").</summary>
+    private static SceneTree? _frameTree;
+
+    /// <summary>The game's per-player action queues. Private in the game;
+    /// read only, to see whether one of her own actions is still on them.
+    /// Null if a game update renames it, and then the scan finds nothing and
+    /// the other guards stand.</summary>
+    private static readonly FieldInfo? QueuesField =
+        AccessTools.Field(typeof(ActionQueueSet), "_actionQueues");
+
+    private static bool _scanWarned;
 
     /// <summary>The cards the view shows, in queue order.</summary>
     private static readonly List<CardModel> Shown = new();
@@ -150,6 +191,7 @@ internal static class KokomiPlanView
                 return;
             }
             if (ScreenBusy()) return;
+            if (ActionsBusy(me)) return;
 
             var queue = KokomiPlan.Pending(me);
             Shown.Clear();
@@ -174,7 +216,11 @@ internal static class KokomiPlanView
             NOverlayStack.Instance!.Push(screen);
             NHotkeyManager.Instance?.PushHotkeyPressedBinding(
                 MegaInput.cancel, CloseAction);
-            if (screen.GetTree() is { } tree) tree.ProcessFrame += OnFrame;
+            if (screen.GetTree() is { } tree)
+            {
+                tree.ProcessFrame += OnFrame;
+                _frameTree = tree;
+            }
         }
         catch (Exception e)
         {
@@ -197,6 +243,78 @@ internal static class KokomiPlanView
             return true;
         }
         return NTargetManager.Instance.IsInSelection;
+    }
+
+    /// <summary>One of her own actions queued, running or waiting on a
+    /// choice, or any action running: the view waits.</summary>
+    private static bool ActionsBusy(Player me) =>
+        KokomiPlanViewRows.OpenBlockedByActions(ActionStates(), me.NetId);
+
+    /// <summary>
+    /// Every action the game holds right now, as (owner, state): the one the
+    /// executor is running and everything on the per-player queues (a hook
+    /// action paused for a choice sits at the front of its owner's queue).
+    /// Read only. A scan that cannot read the queues answers what it has.
+    /// </summary>
+    private static List<(ulong Owner, GameActionState State)> ActionStates()
+    {
+        var states = new List<(ulong Owner, GameActionState State)>();
+        var run = RunManager.Instance;
+        if (run == null) return states;
+        if (run.ActionExecutor?.CurrentlyRunningAction is { } running)
+        {
+            states.Add((running.OwnerId, running.State));
+        }
+        try
+        {
+            if (run.ActionQueueSet is { } set
+                && QueuesField?.GetValue(set) is IEnumerable queues)
+            {
+                foreach (var queue in queues)
+                {
+                    if (queue == null) continue;
+                    if (Traverse.Create(queue).Field("actions").GetValue()
+                        is not IEnumerable actions)
+                    {
+                        continue;
+                    }
+                    foreach (var action in actions)
+                    {
+                        if (action is GameAction a) states.Add((a.OwnerId, a.State));
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            if (!_scanWarned)
+            {
+                _scanWarned = true;
+                Log.Warn($"[{KleeMod.ModId}] plans view: action scan skipped: {e}");
+            }
+        }
+        return states;
+    }
+
+    /// <summary>
+    /// THE GAME'S PAUSE-FOR-CHOICE (the patch below): a choice of hers is
+    /// beginning, so an open view gets out of its way before its screen or
+    /// hand selection comes up. A choice of the other seat's leaves it open.
+    /// Never throws into the game's action code.
+    /// </summary>
+    internal static void OnChoiceBegun(GameAction? action)
+    {
+        try
+        {
+            if (_screen == null || action == null || _owner is not { } me) return;
+            if (action.OwnerId != me.NetId) return;
+            if (!KokomiResources.IsKokomi(me.Creature)) return;
+            Close();
+        }
+        catch (Exception e)
+        {
+            Log.Warn($"[{KleeMod.ModId}] plans view: choice close skipped: {e}");
+        }
     }
 
     private static bool HasOwner(CardModel card)
@@ -260,7 +378,28 @@ internal static class KokomiPlanView
         Decorate(repaint: true);
     }
 
-    private static void OnFrame() => Decorate(repaint: false);
+    /// <summary>Every frame while the view is open: close it if a choice of
+    /// hers has begun (the backstop to <see cref="OnChoiceBegun"/>), else
+    /// caption the grid.</summary>
+    private static void OnFrame()
+    {
+        try
+        {
+            if (_owner is { } me
+                && KokomiPlanViewRows.ChoiceTakesOver(
+                    ActionStates(), me.NetId,
+                    NCombatRoom.Instance?.Ui?.Hand?.IsInCardSelection == true))
+            {
+                Close();
+                return;
+            }
+        }
+        catch (Exception e)
+        {
+            Log.Warn($"[{KleeMod.ModId}] plans view: choice check skipped: {e}");
+        }
+        Decorate(repaint: false);
+    }
 
     /// <summary>
     /// Give each grid card its caption. The grid builds its holders
@@ -361,14 +500,13 @@ internal static class KokomiPlanView
     {
         NHotkeyManager.Instance?.RemoveHotkeyPressedBinding(
             MegaInput.cancel, CloseAction);
-        if (_screen != null && GodotObject.IsInstanceValid(_screen)
-            && _screen.GetTree() is { } tree)
+        // Off the tree it was added to, once: a second Forget (Close, then the
+        // screen's own exit) finds nothing to take off.
+        var tree = _frameTree;
+        _frameTree = null;
+        if (tree != null && GodotObject.IsInstanceValid(tree))
         {
             tree.ProcessFrame -= OnFrame;
-        }
-        else if (Engine.GetMainLoop() is SceneTree main)
-        {
-            main.ProcessFrame -= OnFrame;
         }
         _screen = null;
         _owner = null;
@@ -423,6 +561,56 @@ public static class KokomiPlanViewRows
         }
         return -1;
     }
+
+    /// <summary>
+    /// Do the game's actions keep the view shut? Yes while any action is
+    /// running, and while one of her own (<paramref name="me"/>) is queued,
+    /// running, paused for a choice or about to resume -- the turn-start hook
+    /// that carries out the Plans is one of hers, and its choice must reach
+    /// her first. The other seat's queued or choosing actions do not.
+    /// </summary>
+    public static bool OpenBlockedByActions(
+        IEnumerable<(ulong Owner, GameActionState State)> actions, ulong me)
+    {
+        foreach (var (owner, state) in actions)
+        {
+            if (state == GameActionState.Executing) return true;
+            if (owner == me && Live(state)) return true;
+        }
+        return false;
+    }
+
+    /// <summary>
+    /// Must an open view close for a choice? Yes once one of her own actions
+    /// is gathering a choice, or her hand has gone into a selection.
+    /// </summary>
+    public static bool ChoiceTakesOver(
+        IEnumerable<(ulong Owner, GameActionState State)> actions, ulong me,
+        bool handSelecting)
+    {
+        if (handSelecting) return true;
+        foreach (var (owner, state) in actions)
+        {
+            if (owner == me && state == GameActionState.GatheringPlayerChoice)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private static bool Live(GameActionState state) => state is
+        GameActionState.WaitingForExecution or GameActionState.Executing
+        or GameActionState.GatheringPlayerChoice
+        or GameActionState.ReadyToResumeExecuting;
+
+    /// <summary>
+    /// Is the strip's "Plans" hint drawn? Only with Plans waiting and not
+    /// while the morning is carrying them out: a Plan's choice screen takes
+    /// the same key for its own peek button then (2026-10-17).
+    /// </summary>
+    public static bool HintShown(int count, bool draining) =>
+        count > 0 && !draining;
 
     /// <summary>Can a press flip this Plan? Only a two-line one.</summary>
     public static bool Flippable(KokomiPlan.Entry entry) => entry.TwoLine;
@@ -506,4 +694,21 @@ internal static class NSimpleCardSelectScreen_OnCardClicked_KokomiPlanView_Patch
         KokomiPlanView.OnPicked(card);
         return false;
     }
+}
+
+/// <summary>
+/// A choice is beginning: the game pauses the chooser's action here, on every
+/// peer, before the choice screen or hand selection comes up. The postfix
+/// closes the local Plans view if the choice is its owner's. Local UI only;
+/// the action, the queue and the choice are untouched.
+/// </summary>
+// Character scope: `OnChoiceBegun` acts only while this mod's Plans view is
+// open (a Kokomi seat's), and only for its owner's action; otherwise it
+// returns at once.
+[HarmonyPatch(typeof(ActionQueueSet), nameof(ActionQueueSet.PauseActionForPlayerChoice))]
+internal static class ActionQueueSet_PauseActionForPlayerChoice_KokomiPlanView_Patch
+{
+    [HarmonyPostfix]
+    public static void Postfix(GameAction action) =>
+        KokomiPlanView.OnChoiceBegun(action);
 }
