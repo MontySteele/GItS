@@ -38,14 +38,14 @@ public sealed class ProtoKkUndercurrentSnare : CustomCardModel, ICharacterCard, 
     public string CharacterId => "kokomi";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForStrength(BaseKeywordTips.ForWeak(ArmKeywordTips.ForPlan(base.ExtraHoverTips, this), this), this);
+        BaseKeywordTips.ForStrength(ArmKeywordTips.ForPlan(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_undercurrent_snare");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Undercurrent Snare"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Apply 2 [gold]Weak[/gold].\nOr [gold]plan[/gold]: Each enemy that intends to attack loses {PlanPowerAmount:diff()} [gold]Strength[/gold] this turn."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold].\nOr [gold]plan[/gold]: Each enemy that intends to attack loses {PlanPowerAmount:diff()} [gold]Strength[/gold] this turn."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -67,7 +67,7 @@ public sealed class ProtoKkUndercurrentSnare : CustomCardModel, ICharacterCard, 
     // autoAdd: false -- the character-aware roster pool owns membership.
     // Partially generated character sheets must never auto-register cards.
     public ProtoKkUndercurrentSnare()
-        : base(1, CardType.Skill, CardRarity.Uncommon, KokomiTargets.PetOrEnemy, autoAdd: false)
+        : base(1, CardType.Skill, CardRarity.Uncommon, KokomiTargets.PetOrSelf, autoAdd: false)
     {
     }
 
@@ -76,7 +76,7 @@ public sealed class ProtoKkUndercurrentSnare : CustomCardModel, ICharacterCard, 
         if (KokomiPlan.PlayedOnPet(cardPlay))
         {
             await KokomiPlan.Schedule(choiceContext, Owner.Creature, this, PlanClauses);
-            if (DivineStrategyPower.NowLine(cardPlay, Owner.Creature, DivineStrategyPower.Aim.FrontEnemy) is not { } nowLine) return;
+            if (DivineStrategyPower.NowLine(cardPlay, Owner.Creature, DivineStrategyPower.Aim.None) is not { } nowLine) return;
             cardPlay = nowLine;
         }
         await PlayNowLine(choiceContext, cardPlay);
@@ -84,7 +84,7 @@ public sealed class ProtoKkUndercurrentSnare : CustomCardModel, ICharacterCard, 
 
     /// <summary>Where the now-line aims when the Bake-Kurage carries it out
     /// for a Plan (a Plan stays open, 2026-10-01).</summary>
-    public DivineStrategyPower.Aim NowLineAim => DivineStrategyPower.Aim.FrontEnemy;
+    public DivineStrategyPower.Aim NowLineAim => DivineStrategyPower.Aim.None;
 
     /// <summary>The card's now-line. Played face-up from <c>OnPlay</c>, and carried
     /// out by the Bake-Kurage when the player chooses it for a Plan
@@ -92,8 +92,6 @@ public sealed class ProtoKkUndercurrentSnare : CustomCardModel, ICharacterCard, 
     public async Task PlayNowLine(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
-        ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await PowerCmd.Apply<WeakPower>(choiceContext, cardPlay.Target, 2, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
