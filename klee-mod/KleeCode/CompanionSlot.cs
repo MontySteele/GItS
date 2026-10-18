@@ -87,15 +87,14 @@ public static class CompanionSlot
         var tiers = new Dictionary<CardRarity, List<CardModel>>();
         // CompanionPool.All, not CompanionRoster.All: the pool class is the ONE
         // door to "which companions exist for this run", and the Mondstadt
-        // companion overhaul (QUARANTINED, R213 B) redirects exactly it. The
-        // same object on every build that does not turn that arm on, so this
-        // is a rename and not a behaviour change.
+        // companion overhaul roster is what it returns, on every build.
         foreach (var canonical in CompanionPool.All)
         {
-            if (canonical is not ICompanionCard comp) continue;
-            var characterId = CharacterId(player);
-            if (comp.PersonalPool is not null
-                && comp.PersonalPool != characterId) continue;
+            // The one offerability rule the shop's Eligible uses too: personal
+            // pools AND IsHiddenFrom (Yae is never offered Sesshou Sakura, her
+            // card paper pick 5 (a)). This loop used to test PersonalPool alone,
+            // so Yae's reward slot could still offer it (audit 2026-10-18).
+            if (!CompanionPool.IsOfferable(canonical, player)) continue;
             if (!tiers.TryGetValue(canonical.Rarity, out var tier))
             {
                 tiers[canonical.Rarity] = tier = new List<CardModel>();
