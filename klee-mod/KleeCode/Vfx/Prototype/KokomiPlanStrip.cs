@@ -432,7 +432,9 @@ internal static class KokomiPlanStrip
             }
         }
 
-        PaintHint(root, page, pending.Count);
+        // Not while the morning runs: a Plan's choice screen owns the key then.
+        PaintHint(root, page, pending.Count,
+                  !ReferenceEquals(pending, KokomiPlan.Pending(player)));
         if (count == null) return;
         count.Text = KokomiPlanPages.PagerCaption(page, pending.Count);
     }
@@ -440,10 +442,11 @@ internal static class KokomiPlanStrip
     /// <summary>
     /// THE BUTTON HINT: the peek button's glyph (the game's own, so a
     /// remapped button shows its new glyph) and "Plans", under the last
-    /// picture or under the pager. Hidden for a mouse player and for an empty
-    /// queue.
+    /// picture or under the pager. Hidden for an empty queue and while the
+    /// morning carries the Plans out (a Plan's choice screen owns the key).
     /// </summary>
-    private static void PaintHint(Control root, int page, int count)
+    private static void PaintHint(Control root, int page, int count,
+                                  bool draining)
     {
         var hint = root.GetNodeOrNull<Control>("PadHint");
         if (hint == null) return;
@@ -458,7 +461,9 @@ internal static class KokomiPlanStrip
                 ? KokomiPlanViewRows.KeyName(
                     inputs.GetCurrentHotkey(MegaInput.peek))
                 : null;
-            var text = count > 0 ? KokomiPlanViewRows.HintText(input, key) : null;
+            var text = KokomiPlanViewRows.HintShown(count, draining)
+                ? KokomiPlanViewRows.HintText(input, key)
+                : null;
             hint.Visible = text != null;
             if (text == null) return;
             var glyph = hint.GetNodeOrNull<TextureRect>("Glyph");
