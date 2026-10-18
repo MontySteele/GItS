@@ -2891,9 +2891,6 @@ public static class KokomiPlan
         int amount, Entry? entry = null, bool doubleDamage = false)
     {
         if (amount <= 0) return null;
-        // THE INAZUMA POOL REWORK (2026-10-18), Chiori's Twin Blades: an
-        // Attack's Plan line that hits more than once deals N more per hit.
-        amount += TwinBladesPower.PlanBonus(kokomi, entry?.Source, plan.Times);
         if (doubleDamage) amount *= 2;
         // TELEMETRY ONLY: a Plan's hit is the Bake-Kurage's (`EB-334`), so it
         // is Kokomi's pet damage. The applier the engine reads is unchanged.
@@ -2914,6 +2911,9 @@ public static class KokomiPlan
         // twin: `kokomi_plan._resolve_entry`'s `kk_hit_card`.
         using var hitCard = KokomiRefounding.CreditHits(entry?.Source);
         var times = plan.Times < 1 ? 1 : plan.Times;
+        // THE INAZUMA POOL REWORK (2026-10-18), Chiori's Twin Blades: an
+        // Attack's Plan line that hits more than once hits one more time.
+        times += TwinBladesPower.PlanExtraHits(kokomi, entry?.Source, times);
         int? first = null;
         var aimedAtAnyone = false;
         for (var pass = 0; pass < times; pass++)

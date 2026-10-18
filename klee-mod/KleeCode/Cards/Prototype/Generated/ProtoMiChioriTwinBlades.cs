@@ -49,13 +49,13 @@ public sealed class ProtoMiChioriTwinBlades : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Chiori — Hiyoku: Twin Blades"),
-        ("description", "Your Attacks that hit more than once deal {PowerAmount:diff()} additional damage per hit."),
+        ("description", "Your Attacks that hit more than once hit one additional time."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 2m)
+
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -67,11 +67,11 @@ public sealed class ProtoMiChioriTwinBlades : CustomCardModel, ICompanionCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<TwinBladesPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<TwinBladesPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
+        AddKeyword(CardKeyword.Innate);
     }
 }

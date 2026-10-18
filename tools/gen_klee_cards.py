@@ -4393,8 +4393,7 @@ APPLY_POWERS = {
         "[gold]Block[/gold]."),
     # Growing the pool to 34 (2026-10-18): Chiori's and Yae's Rare Powers.
     "mi_twin_blades": ("TwinBladesPower", None,
-        "Your Attacks that hit more than once deal {X} additional damage per "
-        "hit."),
+        "Your Attacks that hit more than once hit {X} additional time(s)."),
     "mi_sacred_sakuras_favor": ("SacredSakurasFavorPower", None,
         "Damage you deal at the end of your turn is increased by 50%."),
     # KLEE'S COVEN PERSONALS (R213 B / R236), on the SAME flag

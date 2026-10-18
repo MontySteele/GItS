@@ -2092,7 +2092,7 @@
       "damage": 2
     },
     "proto_mi_chiori_twin_blades": {
-      "power_amount": 1
+      "innate": true
     },
     "proto_mi_gorou_crystal_collapse": {
       "retain": true

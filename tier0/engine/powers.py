@@ -112,10 +112,11 @@ def modify_block_gained(fighter: Fighter, amount: int) -> int:
         amount = max(0, amount + dex)
     # Wanderer, Hanega (the Inazuma pool rework, 2026-10-18): "Cards give you
     # 3 less Block." Dexterity's own additive step turned down, on the same
-    # card-block funnel, floored at 0; the 3 is printed once however many
-    # copies are worn. `HanegaPower.ModifyBlockAdditive` is the twin.
+    # card-block funnel, floored at 0; 3 per copy (the review, 2026-10-18).
+    # `HanegaPower.ModifyBlockAdditive` is the twin.
     if fighter.powers.get("mi_hanega", 0):
-        amount = max(0, amount - C.MI_HANEGA_BLOCK_LOSS)
+        amount = max(0, amount
+                     - C.MI_HANEGA_BLOCK_LOSS * fighter.powers["mi_hanega"])
     # ShadowmeldPower.ModifyBlockMultiplicative -> 2^Amount, and unlike Frail
     # it carries NO IsPoweredCardOrMonsterMoveBlock guard: it doubles every
     # kind of block its owner gains. tier0's two block paths are disjoint

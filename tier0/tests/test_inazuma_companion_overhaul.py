@@ -1015,51 +1015,77 @@ def test_kyougen_deals_six_more_with_no_block(overhaul):
     assert up.effects[0]["amount"] == 8
 
 
-def test_twin_blades_adds_per_hit_to_multi_hit_attacks_only(overhaul):
+def test_twin_blades_adds_one_hit_to_multi_hit_attacks_only(overhaul):
     st = make_state(enemies=[make_enemy(hp=90)])
     _play(st, "proto_mi_chiori_twin_blades")
-    assert st.player.powers["mi_twin_blades"] == 2
-    _play(st, "proto_mi_yoimiya_ryuukin_saxifrage")      # 3 x (4 + 2)
-    assert st.enemies[0].hp == 90 - 18
+    assert st.player.powers["mi_twin_blades"] == 1
+    _play(st, "proto_mi_yoimiya_ryuukin_saxifrage")      # 4 hits of 4
+    assert st.enemies[0].hp == 90 - 16
     _play(st, "proto_mi_kirara_meowteor_kick")           # one hit: 9
-    assert st.enemies[0].hp == 90 - 18 - 9
-    assert _up("proto_mi_chiori_twin_blades").effects[0]["amount"] == 3
+    assert st.enemies[0].hp == 90 - 16 - 9
+    up = _up("proto_mi_chiori_twin_blades")
+    assert up.innate and up.cost == 1
 
 
 def test_twin_blades_reaches_a_multi_hit_plan_line(overhaul):
     st = _kk_state()
-    st.player.powers["mi_twin_blades"] = 2
+    st.player.powers["mi_twin_blades"] = 1
     kokomi_plan.schedule(st, _kk_card("proto_mi_ayato_kyouka_fuushi"))
     st.player.draw_pile = [_kk_card("proto_kk_coral_bulwark")
                            for _ in range(4)]
     hp = st.enemies[0].hp
     kokomi_plan.resolve_all(st)
-    assert hp - st.enemies[0].hp == (7 + 2) * 3
+    assert hp - st.enemies[0].hp == 7 * 4
 
 
 def test_sacred_sakuras_favor_raises_end_of_turn_damage_by_half(overhaul):
     st = make_state(enemies=[make_enemy(hp=60)])
     st.player.powers["mi_sanctifying_ring"] = 1
-    effects.companion_overhaul_turn_end(st)
+    effects.player_turn_end_triggers(st)
     plain = 60 - st.enemies[0].hp
     assert plain == C.MI_SANCTIFYING_RING_DMG
     st = make_state(enemies=[make_enemy(hp=60)])
     _play(st, "proto_mi_yae_sacred_sakuras_favor")
     st.player.powers["mi_sanctifying_ring"] = 1
-    effects.companion_overhaul_turn_end(st)
+    effects.player_turn_end_triggers(st)
     assert 60 - st.enemies[0].hp == int(plain * C.MI_SACRED_SAKURA_MULT)
-    assert st.turn_end_window is False
-    # A card's hit is not end-of-turn damage (the ring's Block cleared, so
-    # Meow-teor Kick prints its plain 9).
-    st.player.block = 0
+    # An unpowered hit in the window (a Sakura strike, a guest's act) too.
     hp = st.enemies[0].hp
-    _play(st, "proto_mi_kirara_meowteor_kick")
-    assert hp - st.enemies[0].hp == 9
+    effects.deal_damage_to_enemy(st, st.enemies[0], 4, element=None,
+                                 source="card", powered=False)
+    assert hp - st.enemies[0].hp == 6
     assert _up("proto_mi_yae_sacred_sakuras_favor").cost == 1
 
 
-def test_sacred_sakuras_favor_is_hidden_from_yae_alone(overhaul):
+def test_sacred_sakuras_favor_skips_damage_outside_the_end_of_turn(overhaul):
+    st = make_state(enemies=[make_enemy(hp=60)])
+    st.player.powers["mi_sacred_sakuras_favor"] = 1
+    assert st.turn_end_window is False
+    _play(st, "proto_mi_kirara_meowteor_kick")           # a card: 9
+    assert st.enemies[0].hp == 60 - 9
+    hp = st.enemies[0].hp
+    effects.deal_damage_to_enemy(st, st.enemies[0], 6, element=None,
+                                 source="companion")     # turn-start volley
+    assert hp - st.enemies[0].hp == 6
+
+
+def test_the_end_of_turn_window_closes_after_the_last_tenant():
+    src = (REPO / "tier0" / "engine" / "combat.py").read_text(encoding="utf-8")
+    body = src[src.index("effects.player_turn_end_triggers(state)"):]
+    assert body.index("furina_stage.turn_end(state)") < body.index(
+        "state.turn_end_window = False")
+
+
+def test_sacred_sakuras_favor_is_offered_to_yae(overhaul):
     from tier0.engine import yae_shrine
-    assert yae_shrine.hidden_from("proto_mi_yae_sacred_sakuras_favor", "yae")
     assert not yae_shrine.hidden_from("proto_mi_yae_sacred_sakuras_favor",
-                                      "kokomi")
+                                      "yae")
+    assert yae_shrine.hidden_from("proto_mi_yae_sesshou_sakura", "yae")
+
+
+def test_hanega_stacks_both_halves(overhaul):
+    st = make_state()
+    _play(st, "proto_mi_wanderer_hanega")
+    _play(st, "proto_mi_wanderer_hanega")
+    assert effects.hanega_energy(st) == 2
+    assert powers.modify_block_gained(st.player, 8) == 2

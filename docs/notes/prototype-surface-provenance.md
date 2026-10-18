@@ -9654,22 +9654,38 @@ Kyouka Fuushi's "not Stings or Wards"), then grown to two cards a character
   "Deal 4 [5] Pyro damage 3 times."; Wanderer, Kyougen: Five Ceremonial
   Plays (Uncommon Attack, 1): "Deal 6 [8] Anemo damage and Swirl the enemy.
   If you have no Block, deal 6 [8] additional damage." (`no_block`); Chiori,
-  Hiyoku: Twin Blades (Rare Power, 1): "Your Attacks that hit more than once
-  deal 2 [3] additional damage per hit."; Yae Miko, Sacred Sakura's Favor
-  (Rare Power, 2 [1]): "Damage you deal at the end of your turn is increased
-  by 50%.", hidden from Yae like Sesshou Sakura.
+  Hiyoku: Twin Blades (Rare Power, 1, Innate upgraded): "Your Attacks that
+  hit more than once hit one additional time."; Yae Miko, Sacred Sakura's
+  Favor (Rare Power, 2 [1]): "Damage you deal at the end of your turn is
+  increased by 50%.", offered to Yae too (the review, 2026-10-18).
+- **Hanega stacks** (the review, 2026-10-18): each copy gives 1 Energy and 3
+  less Block from cards, so two give 2 and 6. The badge prints the live
+  total (`HanegaBlockLossVar`); the static row prints one copy's 3.
 - **Twin Blades**: a multi-hit Attack is one whose printed hit count is 2 or
-  more. The mod reads the `AttackCommand`'s own `_hitCount` in
-  `BeforeAttack` and pays per hit until `AfterAttack`; a Plan line's
-  multi-hit takes it in `KokomiPlan.Hit` (`TwinBladesPower.PlanBonus`). Sim:
-  `_op_damage` with `times` of 2 or more, and `kokomi_plan._hit`.
-- **Sacred Sakura's Favor**: "at the end of your turn" is the companion
-  end-of-turn walk. `CompanionOverhaulTurnEnd.Act`, the one door every actor
-  goes through, holds a window open for the actor's owner, and
-  `SimDamagePipeline.DealerMods` multiplies by 1.5 (floored first) inside it.
-  Sim: `state.turn_end_window` around `companion_overhaul_turn_end`'s actors,
-  read in `deal_damage_to_enemy`. Not covered: Furina's Guest Star acts and
-  Klee's coven personals, which run outside that walk.
+  more, read off the `AttackCommand`'s own `_hitCount` (before any hit-count
+  modifier, so Niwabi's replay of a single hit is not one). The extra hit is
+  the base game's `ModifyAttackHitCount`, one per stack; a Plan line's
+  multi-hit gains it in `KokomiPlan.Hit` (`TwinBladesPower.PlanExtraHits`).
+  Sim: `_op_damage` with `times` of 2 or more, and `kokomi_plan._hit`. The
+  Red Ink targets are the multi-hit Attacks themselves (Ryuukin, Hasode),
+  since Red Ink adds 3 per hit; Twin Blades supports them, and the
+  Annotation that matters on Twin Blades is Reprint.
+- **Sacred Sakura's Favor**: "at the end of your turn" is the game's own
+  end-of-turn phase: `PlayerTurnPhase.End`, which `CombatManager` sets after
+  AutoPostPlay and before `BeforeSideTurnEnd` and which lasts through the
+  hand flush and `AfterSideTurnEnd` until the side switches, with the
+  current side still the player's (`SacredSakurasFavorPower.InEndOfTurn`).
+  "Damage you deal" is a hit on an enemy whose dealer is the owner or the
+  owner's pet, or, on the mod's dealer-less doors, whose damage credit scope
+  names the owner's seat. One `ModifyDamageMultiplicative`, x1.5, so the
+  companion walk, Furina's guests, Yae's Sakura strikes, Bombs set off then
+  and base-game end-of-turn powers all take it, and Lisa's start-of-turn
+  Lightning Rose does not. Sim: `state.turn_end_window`, open from
+  `player_turn_end_triggers` (after the AutoPostPlay sweep) to the last
+  end-of-turn tenant in `combat`, read on every hit in
+  `deal_damage_to_enemy`. The sim has no orbs, no turn-end-in-hand cards
+  and no base-game end-of-turn damage powers, and its reaction splash
+  outside that door is not multiplied.
 - **Chiori, Fluttering Hasode**: "This ignores Block." is the damage op's
   `ignore_block: true`, `ValueProp.Unblockable` on the card's own attack
   (`InazumaAttackExtensions.IgnoringBlock`); the sim's

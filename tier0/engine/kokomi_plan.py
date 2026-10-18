@@ -1881,16 +1881,16 @@ def _hit(state: CombatState, clause: dict, amount: int,
 
     if amount <= 0:
         return
-    # THE INAZUMA POOL REWORK (2026-10-18), Chiori's Twin Blades: an Attack's
-    # Plan line that hits more than once deals N more per hit.
-    # `TwinBladesPower.PlanBonus` is the twin.
-    source = entry.source if entry is not None else None
-    if (source is not None and source.type == "attack"
-            and int(clause.get("times", 1)) >= 2):
-        amount += state.player.powers.get("mi_twin_blades", 0)
     if double:
         amount *= 2
-    for _ in range(max(1, int(clause.get("times", 1)))):
+    times = max(1, int(clause.get("times", 1)))
+    # THE INAZUMA POOL REWORK (2026-10-18), Chiori's Twin Blades: an Attack's
+    # Plan line that hits more than once hits one more time per stack.
+    # `TwinBladesPower.PlanExtraHits` is the twin.
+    source = entry.source if entry is not None else None
+    if source is not None and source.type == "attack" and times >= 2:
+        times += state.player.powers.get("mi_twin_blades", 0)
+    for _ in range(times):
         for enemy in _aimed(state, clause, entry):
             if not enemy.alive:
                 continue
