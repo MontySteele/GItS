@@ -132,7 +132,7 @@ public static class AbyssNumbers
     public const int OverflowMultiplier = 2;
     public static IReadOnlyList<int> VigorDamageByAct { get; } = new[] { 3, 4, 5 };
     public static int VigorDamage(int act) => At(VigorDamageByAct, act);
-    public static IReadOnlyList<int> MoonlitSpringHealByAct { get; } = new[] { 8, 8, 8 };
+    public static IReadOnlyList<int> MoonlitSpringHealByAct { get; } = new[] { 5, 5, 5 };
     public static int MoonlitSpringHeal(int act) => At(MoonlitSpringHealByAct, act);
     public static IReadOnlyList<int> BattleRhythmStrengthByAct { get; } = new[] { 1, 2, 2 };
     public static int BattleRhythmStrength(int act) => At(BattleRhythmStrengthByAct, act);

@@ -293,18 +293,18 @@ public class AbyssPoolsTwoTests
     }
 
     [Fact]
-    public void Moonlit_Spring_heals_8_and_stacks_with_Moonlit_Rest()
+    public void Moonlit_Spring_heals_5_and_stacks_with_Moonlit_Rest()
     {
-        // Spring stays 8 in every act (2026-10-18: healing is scarce in the
-        // base game); Rest is 4 / 6 / 8 by the act it was taken in.
-        Assert.Equal(new[] { 8, 8, 8 }, AbyssNumbers.MoonlitSpringHealByAct);
-        Assert.Equal(8, AbyssRules.CombatEndHeal(moonlitRestAct: null, moonlitSpringAct: 0));
-        Assert.Equal(12, AbyssRules.CombatEndHeal(0, 0));
+        // Spring is 5 in every act (2026-10-18, round 3: 8 healed 70 to 80
+        // HP in one act); Rest is 4 / 6 / 8 by the act it was taken in.
+        Assert.Equal(new[] { 5, 5, 5 }, AbyssNumbers.MoonlitSpringHealByAct);
+        Assert.Equal(5, AbyssRules.CombatEndHeal(moonlitRestAct: null, moonlitSpringAct: 0));
+        Assert.Equal(9, AbyssRules.CombatEndHeal(0, 0));
         Assert.Equal(4, AbyssRules.CombatEndHeal(0, null));
         Assert.Equal(0, AbyssRules.CombatEndHeal(null, null));
-        // Rest taken in act 1, Spring in act 3: 4 + 8.
-        Assert.Equal(12, AbyssRules.CombatEndHeal(0, 2));
-        Assert.Equal(16, AbyssRules.CombatEndHeal(2, 2));
+        // Rest taken in act 1, Spring in act 3: 4 + 5.
+        Assert.Equal(9, AbyssRules.CombatEndHeal(0, 2));
+        Assert.Equal(13, AbyssRules.CombatEndHeal(2, 2));
         Assert.Contains("AbyssRules.CombatEndHeal",
             Il.Calls(typeof(SpiralAbyss).GetMethod(nameof(SpiralAbyss.AfterCombatVictory))!));
     }
