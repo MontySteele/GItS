@@ -4,7 +4,7 @@ Card paper `review/active/kokomi-cards-2026-10-18.md` sec.6; [USER]: "Makes
 sense! ... let's do both."
 
   1. Tideturn, Feint, Turning Tide and Shoal of Spears stop counting Plans
-     that are Stings or Wards ("(not Stings or Wards)"). Breakwater
+     that are Stings or Wards ("..., not Stings or Wards."). Breakwater
      and Battle Formation keep counting every Plan.
   2. Unbroken Tide, Uncommon Skill, 1: "Gain 8 [11] Block. Plan: If you lost
      no HP since you planned this, deal 12 [16] Hydro damage to ALL enemies."
@@ -24,7 +24,7 @@ from tier0.tests.test_kokomi_refounding import (  # noqa: F401
     caches, card, carry_out, kokomi_state, write)
 
 ATTACK = [{"kind": "attack", "amount": 6}]
-STING_TAIL = " (not Stings or Wards)."
+STING_TAIL = ", not Stings or Wards."
 
 
 def _face(cid):

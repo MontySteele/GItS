@@ -5575,7 +5575,7 @@ RUNTIME_TIMES_TEXT = {
     "plans_held": " once for each [gold]Plan[/gold] waiting",
     "plans_held_plus_one": ", plus once more for each [gold]Plan[/gold] waiting",
     "chain_plans_held_plus_one": (", plus once more for each [gold]Plan[/gold]"
-                                  " waiting (not Stings or Wards)"),
+                                  " waiting, not Stings or Wards"),
 }
 
 

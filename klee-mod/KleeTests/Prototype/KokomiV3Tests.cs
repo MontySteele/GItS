@@ -22,7 +22,7 @@ namespace KleeMod.Tests.Prototype;
 [Collection(KleeOverhaulArm.Name)]
 public class KokomiV3Tests
 {
-    private const string Tail = " (not Stings or Wards).";
+    private const string Tail = ", not Stings or Wards.";
 
     private static T Upgraded<T>() where T : CardModel, new()
     {
