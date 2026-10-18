@@ -121,4 +121,4 @@ def test_three_rows_are_klees_own_draftable_companions():
     ids = C.KLEE_OVERHAUL_POOL_IDS
     assert len(ids) == 78
     assert Counter(loader.peek_card(i).rarity for i in ids) == {
-        "common": 25, "uncommon": 32, "rare": 21}
+        "common": 24, "uncommon": 33, "rare": 21}

@@ -27,7 +27,8 @@ def _slot(card) -> bool:
 
 
 SEED = 77
-BOUNDARY_SEED = 75   # see test_two_act_run_walks_both_acts_and_heals...
+BOUNDARY_SEED = 76   # see test_two_act_run_walks_both_acts_and_heals... (75 until the
+#                      Spark seed left, 2026-10-18: 75 then reached the boss unwounded)
 #                      (70 until legacy cleanup stage 6 changed the starter;
 #                      74 until Klee's HP went 62 -> 70, final pass 2026-10-02)
 CHIP = 4          # flat HP loss per stubbed fight -- every fight is won

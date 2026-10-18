@@ -160,14 +160,6 @@ KLEE_OVERHAUL_OPENING_SPARK = 3
 # Damage Report's Spark per status drawn (Klee pre-Balance sweep, 2026-10-03);
 # flat at both levels. `KleeOverhaulLaw.DamageReportSpark`.
 KLEE_OVERHAUL_DAMAGE_REPORT_SPARK = 1
-# THE SPARK SEED (`EB-577`, D default off the Klee r21 packet sec.5). Sparks
-# read as inert until a sink is drafted, six rounds running (r17-r21): r21 lane
-# 2 ended fights holding 3, 4 and 5 Sparks with Dig In the deck's only reader.
-# So the ARM's first card rewards guarantee a Spark-priced row -- floors 1 to 3,
-# which is the first two card rewards of a run. NOT A SHEET CHANGE: no card's
-# rarity, price or text moves, only which cards a reward screen may show while
-# the deck has no reader at all. C# twin `KleeOverhaulLaw.SparkSeedFloors`.
-KLEE_OVERHAUL_SPARK_SEED_FLOORS = 3
 
 # R276, Wait For It...'s Energy: "draw 2 cards and gain 1 Energy" the next
 # time one of her Bombs reacts this turn. Mirrored by value from
@@ -1614,52 +1606,19 @@ SHOP_REMOVAL_PRICE_STEP = 25     # §5: "rising per use" -- +25 each removal
 #                                  only bites once multi-act adds a 2nd shop.
 SHOP_CARD_OFFERS = 3             # "a few cards" (§5). OPEN NUMBER -- §8 does
 #                                  not fix a count; 3 mirrors REWARD_CARD_OFFERS.
-# --- §4.7 companion channel (R59/R61, respecified by R116/NC-10, slot-2
-# --- floor RESTORED by [USER] 2026-08-10) ---------------------------------
-# The shop's TWO colorless slots carry companions.
-#
-# WHERE THE SLOTS STAND TODAY. Slot 1 = home region, Uncommon-or-higher.
-# Slot 2 = any nation, Uncommon-or-higher. The NATION is what separates the
-# slots; the RARITY FLOOR is common to both.
-#
-# HISTORY, kept because it is the reasoning that moved. R59 read the floor as
-# covering both slots, on the argument that a wildcard at full reward odds
-# (~60% Common) makes this shop worse than base's guaranteed-Rare slot 2.
-# R116/NC-10 respecified slot 2 as "any companion card" -- no nation, no
-# floor -- and Commons became drawable at the 50-gold band. [USER] closed
-# that out on 2026-08-10 (S4-G10 agenda item "should slot 2 carry a rarity
-# floor at all?") by RESTORING the floor per R59's original rationale: the
-# paid premium channel is not a place to sell Commons. Slot 2 therefore reads
-# SHOP_COMPANION_RARITY_ODDS again, exactly as it did before R116.
-# This changes the shop world in both engines -> CONSTANTS_VERSION 8 -> 9.
+# --- §4.7 companion channel: the shop's TWO colorless slots carry companions.
+# THE BASE GAME'S SHAPE ([USER] 2026-10-18, legacy review pick 2: "Agreed on
+# all 6 legacy picks"). Base stocks a fixed Uncommon and a fixed Rare colorless
+# card; so do these slots. Slot 1 = home nation, a fixed Uncommon. Slot 2 = any
+# nation, a fixed Rare, Uncommon when no Rare companion can be offered. No
+# rarity is rolled: the 0.875 / 0.125 conditioned table both slots read from
+# R116 to this ruling is gone. History: `git show a943cc7cb:tier0/constants.py`.
 SHOP_COMPANION_SLOTS = 2
-# BOTH SLOTS' odds: RARITY_ODDS CONDITIONED on >= Uncommon, i.e. renormalized
-# over the rarities that survive the floor -- 0.35/0.40 and 0.05/0.40. That
-# is the only reading of "Uncommon or higher" that introduces no new number,
-# and the values below are unchanged from when the floor covered both slots
-# the first time.
-#
-# THE ALTERNATIVE READING, surfaced and NOT chosen (R116 required this
-# explicitly: "a renormalization chosen by an implementer is a balance value
-# chosen by an implementer"): the floor could instead carry its own STATED
-# SPLIT, a fresh pair of odds designed for the premium slot rather than
-# inherited from the reward table. That is a balance decision with a
-# defensible case -- slot 1 is the "buy your dream support" slot and 12.5%
-# Rare may be the wrong price for it -- and it is a [USER] call, not this
-# one. Nothing below was tuned; conditioning was applied and the result is
-# the identity on the existing values.
-# RESOLVED BY Q16, 2026-08-06 (R117 rider, answered R118, verbatim
-# "Condition."): [USER] chose the CONDITION reading -- the odds below ARE
-# RARITY_ODDS renormalized over the >=Uncommon pool, exactly as shipped.
-# The stated-split alternative above was declined; a fresh split would be
-# its own row in its own window. No value changed by the ruling: the
-# conditioning was already the identity on these numbers.
-SHOP_COMPANION_RARITY_ODDS = {"uncommon": 0.875, "rare": 0.125}
-# SLOT 2 reads THIS SAME TABLE ([USER] 2026-08-10). Between R116 and that
-# ruling it read RARITY_ODDS itself, unconditioned, and could offer a Common
-# at the Common band; the floor's restoration puts both slots back on one
-# table. There is still no second constant -- the two slots differ by NATION
-# only, and one table is what makes that visible.
+# Per slot, the slot's rarity FIRST and then its fallback band. Slot 1's Rare
+# rung is the roster-gap fallback only. C# twin:
+# `MerchantInventory_CompanionColorlessSlots_Patch.SlotOneRarities` /
+# `SlotTwoRarities` (`tier0/tests/test_shop_slot_rarities_parity.py`).
+SHOP_COMPANION_SLOT_RARITIES = (("uncommon", "rare"), ("rare", "uncommon"))
 # Priced by DRAWN RARITY (§4.7: gold is the balance governor, not a stat nerf).
 # These are the REAL StS2 shop bands, read off MerchantCardEntry.GetCost, so
 # the sim and the mod charge the same gold for the same companion. They are
@@ -1676,9 +1635,8 @@ SHOP_COMPANION_RARITY_ODDS = {"uncommon": 0.875, "rare": 0.125}
 # METHOD as the other two, not invented: `MerchantCardEntry.GetCost`'s IL
 # carries `ldc.i4 150`, `ldc.i4.s 75`, `ldc.i4.s 50` and the 1.15 colorless
 # multiplier, in that order. Same provenance, same paragraph, no new number.
-# INERT since the floor was restored ([USER] 2026-08-10): with both slots on
-# SHOP_COMPANION_RARITY_ODDS no shop draw can be a Common, so nothing indexes
-# this entry today. It is KEPT rather than deleted because it is a fact about
+# INERT since the floor was restored ([USER] 2026-08-10): no shop slot draws
+# a Common, so nothing indexes this entry today. It is KEPT rather than deleted because it is a fact about
 # `GetCost`, not a choice of ours -- deleting it would mean re-reading the IL
 # to bring the band back, and both engines still price by drawn rarity.
 SHOP_COMPANION_PRICE = {"common": 50, "uncommon": 75, "rare": 150}

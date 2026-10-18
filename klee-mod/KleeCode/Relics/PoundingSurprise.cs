@@ -116,9 +116,9 @@ public sealed class PoundingSurprise : CustomRelicModel, IBombDetonationListener
     ///
     /// Source == Encounter is the "post-fight reward" gate (the enum's own
     /// doc); Shop and Other (events, relic-granted picks) get no companion,
-    /// matching roll_rewards being the post-fight function. BossEncounter
-    /// odds identify the end-of-act reward and force this fourth slot to the
-    /// Rare companion tier.
+    /// matching roll_rewards being the post-fight function. The companion
+    /// rolls on the reward's own odds (CompanionSlot.Roll), so after a boss it
+    /// is a Rare.
     /// </summary>
     public override bool TryModifyCardRewardOptions(
         Player player, List<CardCreationResult> cardRewardOptions,
@@ -126,10 +126,7 @@ public sealed class PoundingSurprise : CustomRelicModel, IBombDetonationListener
     {
         if (!OffersCompanionTo(player, creationOptions)) return false;
 
-        var companionRarity = creationOptions.RarityOdds == CardRarityOddsType.BossEncounter
-            ? CardRarity.Rare
-            : (CardRarity?)null;
-        var offer = CompanionSlot.Roll(player, companionRarity);
+        var offer = CompanionSlot.Roll(player, creationOptions);
         if (offer == null) return false;
         cardRewardOptions.Add(new CardCreationResult(offer));
         return true;

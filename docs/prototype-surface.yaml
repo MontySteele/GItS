@@ -424,7 +424,7 @@
 
 - {id: proto_ko_hair_trigger, name: "Hair Trigger", character: klee,
    authored_by: [claude],
-   cost: 0, type: skill, rarity: common,
+   cost: 0, type: skill, rarity: uncommon,
    description: "Your [gold]Bombs[/gold] on the enemy become [gold]Mines[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}.",
    upgrade: {draw: 1},
    effects: [{op: mine_bombs, target: enemy}, {op: draw, amount: 1}]}
