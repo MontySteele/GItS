@@ -75,12 +75,11 @@ public sealed class FurinaResourceHooks : AbstractModel
         IReadOnlyList<Creature> participants, ICombatState combatState)
     {
         if (side != CombatSide.Player) return Task.CompletedTask;
+        // Every player's (the off-character fix, 2026-10-18): her cards'
+        // "if you lost HP this turn" reads the same in anyone's hand.
         foreach (var creature in participants)
         {
-            if (FurinaResources.IsFurina(creature))
-            {
-                CurtainCallHooks.ResetTurn(creature);
-            }
+            if (creature.IsPlayer) CurtainCallHooks.ResetTurn(creature);
         }
         return Task.CompletedTask;
     }
@@ -88,7 +87,7 @@ public sealed class FurinaResourceHooks : AbstractModel
     /// <summary>The per-turn HP-lost window (Curtain Call's readers).</summary>
     public override Task AfterCurrentHpChanged(Creature creature, decimal delta)
     {
-        if (delta < 0m && FurinaResources.IsFurina(creature))
+        if (delta < 0m && creature.IsPlayer)
         {
             CurtainCallHooks.NoteHpLost(creature, (int)Math.Ceiling(-delta));
         }

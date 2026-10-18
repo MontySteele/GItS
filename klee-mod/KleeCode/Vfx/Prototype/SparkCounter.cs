@@ -207,11 +207,13 @@ public static class SparkCounter
     /// <summary>
     /// The counter's place in the row above the energy orb: after Furina's
     /// Fanfare gauge when she holds Sparks, above Varka's Oath dial when he
-    /// does (<see cref="VarkaOathDial.SlotsTall"/>), first otherwise.
+    /// does (<see cref="VarkaOathDial.SlotsTall"/>), first otherwise. Anyone
+    /// else showing one of those (the off-character fix, 2026-10-18) gets
+    /// the same slot.
     /// </summary>
     public static int SlotFor(Creature? creature) =>
-        FanfareCounter.AppliesTo(creature) ? DrainedCounter.Slot + 1
-        : VarkaOathDial.AppliesTo(creature)
+        FanfareCounter.ShowsFor(creature) ? DrainedCounter.Slot + 1
+        : VarkaOathDial.ShowsFor(creature)
             ? VarkaOathDial.SlotsTall(FallbackSide) : 0;
 
     /// <summary>The number the badge draws: the bank, right now, through the

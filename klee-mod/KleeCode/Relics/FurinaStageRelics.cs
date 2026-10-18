@@ -46,7 +46,7 @@ public static class FurinaStageRelics
         Count<T>(furina) > 0;
 
     internal static int Count<T>(Creature? furina) where T : RelicModel =>
-        FurinaStage.LiveFor(furina) && furina!.Player is { } player
+        FurinaResources.IsFurina(furina) && furina!.Player is { } player
             ? player.Relics.OfType<T>().Count()
             : 0;
 
@@ -78,7 +78,7 @@ public sealed class OperaGlasses : CustomRelicModel
     public override async Task BeforeCombatStart()
     {
         var furina = Owner?.Creature;
-        if (!FurinaStage.LiveFor(furina)) return;
+        if (!FurinaResources.IsFurina(furina)) return;
         Flash();
         await FurinaStage.Gain(new ThrowingPlayerChoiceContext(), furina,
                                Fanfare, "Opera Glasses");
@@ -161,7 +161,7 @@ public sealed class OperaTicketStub : FurinaStageRelic
         player == relic.Owner
         && player.PlayerCombatState?.TurnNumber == 1
         && player.Creature is { IsDead: false } furina
-        && FurinaStage.LiveFor(furina);
+        && FurinaResources.IsFurina(furina);
 
     public override async Task AfterPlayerTurnStart(
         PlayerChoiceContext choiceContext, Player player)

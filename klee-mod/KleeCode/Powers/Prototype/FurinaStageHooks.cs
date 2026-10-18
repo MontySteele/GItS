@@ -83,6 +83,9 @@ public sealed class FurinaStageHooks : AbstractModel
     /// <summary>A fresh per-play spend record (`stage_spent`).</summary>
     public override Task BeforeCardPlayed(CardPlay cardPlay)
     {
+        // One of Furina's cards brings its player's Stage up first, whoever
+        // that player is (the off-character fix, 2026-10-18).
+        FurinaStage.StartOnPlay(cardPlay.Card);
         // The card's name rides the play so a Spend in it is filed under it
         // (the play telemetry's Fanfare record, 2026-10-10).
         FurinaStage.BeginPlay(cardPlay.Card?.Owner?.Creature,
@@ -104,14 +107,16 @@ public sealed class FurinaStageHooks : AbstractModel
     /// <summary>Rule 3: every HP she loses prints 1 Fanfare -- a hit past
     /// Block, a status, a card's own HP cost. A Drain counts its own loss
     /// (the ledger's <c>Draining</c> latch).</summary>
-    public override Task AfterCurrentHpChanged(Creature creature, decimal delta)
+    public override async Task AfterCurrentHpChanged(Creature creature,
+                                                     decimal delta)
     {
         if (delta < 0m && FurinaStage.LiveFor(creature))
         {
             FurinaStage.NoteHpLost(creature,
                                    (int)System.Math.Ceiling(-delta));
+            // Anyone else's badge goes up on their first Fanfare.
+            await FurinaStage.ShowBadge(creature);
         }
-        return Task.CompletedTask;
     }
 
     /// <summary>Lynette's line: an enemy's hit that reached her HP.</summary>

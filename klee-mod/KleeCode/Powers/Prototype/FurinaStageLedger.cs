@@ -224,6 +224,15 @@ public sealed class FurinaStageLedger
     /// call's walk at the combat's end).</summary>
     public static IReadOnlyCollection<Creature> Furinas => _byFurina.Keys;
 
+    /// <summary>Has this creature's Stage been brought up this combat
+    /// (<see cref="FurinaStage.Ensure"/>, or her relic's combat open)? A
+    /// pure read: it creates nothing and captures nothing.</summary>
+    public static bool HasOpened(Creature creature)
+    {
+        if (!ReferenceEquals(_combat, (object?)creature.CombatState)) return false;
+        return _byFurina.TryGetValue(creature, out var ledger) && ledger.Opened;
+    }
+
     /// <summary>Test seam: forget every ledger.</summary>
     public static void ResetAll()
     {

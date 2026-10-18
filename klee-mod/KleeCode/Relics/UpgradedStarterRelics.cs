@@ -320,7 +320,7 @@ public sealed class CurtainNeverFalls : CustomRelicModel
     public override async Task BeforeCombatStart()
     {
         var furina = Owner?.Creature;
-        if (!Powers.FurinaStage.LiveFor(furina)) return;
+        if (!Powers.FurinaResources.IsFurina(furina)) return;
         await Powers.FurinaStage.OpenCombat(furina);
     }
 
