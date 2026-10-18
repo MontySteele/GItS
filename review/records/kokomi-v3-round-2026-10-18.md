@@ -54,6 +54,14 @@ finding.
   attack a turn ahead, into Coral Crash. Coral Crash dealt 25.6 a play in act 3.
 - Combos read clearly: Gambit, Second Wave, Feint+ and Tideturn+. Block-to-Stun on the Rock and Tunneler made good
   decisions.
+- **Unbroken Tide made the decision it was built for (seat 7).** The seat called it worth the card. It "forces
+  exact Block math each turn", and it paid out whenever Block matched the incoming damage:
+  - against the Terror Eel, 21 Block against 9;
+  - against the Owl Magistrate, exactly 18 against 18;
+  - on enemy turns with no attack.
+
+  When the seat couldn't hold the line it played the card as 8 Block. Planning it short of Block was "pure waste",
+  which is the price as designed.
 
 ## What did not
 
