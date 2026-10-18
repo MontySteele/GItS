@@ -95,6 +95,8 @@ conversion rule the player has to learn. I don't recommend it.
 
 ## Picks
 
+**Ruled 2026-10-17, both (a).** The user: "Agreed on both of these".
+
 1. **How a Level is valued once Levels carry over.**
    - **(a, default)** Thunder 1 + 2 per Level; Foxfire and Kitsune unchanged.
    - (b) Carry over at today's rates.
