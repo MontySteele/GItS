@@ -17,8 +17,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Powers;
 
-// THE POOL EXPANSION's Powers (R276), QUARANTINED with the rest of
-// `Powers/Prototype/`. Every one is applied by an ordinary `apply_power` row
+// THE POOL EXPANSION's Powers (R276). Every one is applied by an ordinary `apply_power` row
 // (or, for Alice's Detonator, by the one install call its row makes), and every
 // one reads the arm's existing primitives -- the ledger, `ProtoBombPower`'s
 // reads and verbs, the Spark chokepoint -- so no rule is re-expressed here.

@@ -32,10 +32,8 @@ namespace KleeMod.Tests.Prototype;
 ///   * <c>EB-284</c> -- the arm pools omitted the Ancient tail, so Darv's
 ///     Dusty Tome roll drew nothing and the act-two door NRE'd.
 ///
-/// THE COLLECTION IS LOAD-BEARING, for the reason
-/// <c>KleeOverhaulRoundOneFixTests</c> gives: <c>KleeOverhaul.Enabled</c> is
-/// one static for the whole process and <c>KleeOverhaulRuleTests.The_arm_ships_off</c>
-/// reads it.
+/// THE COLLECTION is a leftover from the retired arm switch; it only keeps
+/// these tests serial.
 /// </summary>
 [Collection(KleeOverhaulArm.Name)]
 public class KleeOverhaulRoundThreeTests

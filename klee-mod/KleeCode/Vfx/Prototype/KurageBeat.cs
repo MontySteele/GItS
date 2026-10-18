@@ -54,9 +54,6 @@ namespace KleeMod.Vfx;
 /// shape with the relic's name in the card's place. It is also the exact
 /// string that rides the wire to the blind page (`KokomiPlan.Snapshot`), so
 /// what a seat reads and what a player sees are one string built once.
-///
-/// QUARANTINED. `Vfx/Prototype/**` is Compile Remove'd without
-/// `-p:PrototypeCards=true`. Revert is the flag.
 /// </summary>
 internal static class KurageBeat
 {

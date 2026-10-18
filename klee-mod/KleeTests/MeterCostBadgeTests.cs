@@ -20,7 +20,7 @@ namespace KleeMod.Tests;
 /// function the gate asks.
 ///
 /// THIS FILE IS NOT UNDER `Prototype/`, unlike the Spark badge's pin was. That
-/// is the change: the badge used to be quarantined because every priced face it
+/// is the change: the badge used to sit under `Prototype/` because every priced face it
 /// drew was a prototype row, and Encore's priced faces are shipped Furina cards.
 /// </summary>
 public class MeterCostBadgeTests

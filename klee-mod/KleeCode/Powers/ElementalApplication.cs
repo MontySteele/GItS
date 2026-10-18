@@ -363,7 +363,7 @@ public static class AuraCmd
     ///
     /// It used to be <c>cardSource is IElementalCard</c> written out at each of
     /// those three sites, which was correct while the element was a property of
-    /// the CARD alone. The quarantined Mondstadt companion overhaul prints
+    /// the CARD alone. The Mondstadt companion overhaul prints
     /// three cards that change what an Attack applies -- "your next Attack ...
     /// applies Pyro", "for 2 turns, your Attacks apply Electro", "6 more damage
     /// of the swirled element" -- so the answer now depends on the DEALER too,
@@ -371,10 +371,6 @@ public static class AuraCmd
     /// element would be the worst kind of bug to find in play. One funnel.
     ///
     /// PURE, because every caller is reached from a preview path.
-    ///
-    /// WITHOUT the prototype switch this is character for character the
-    /// expression the three sites carried before, so a release build is
-    /// unchanged and the arm's classes are not compiled at all.
     /// </summary>
     public static Element ElementOfPlay(CardModel? cardSource, Creature? dealer)
     {

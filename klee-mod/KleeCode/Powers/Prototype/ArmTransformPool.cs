@@ -32,9 +32,8 @@ namespace KleeMod.Powers;
 /// whose arm is on, the prefix answers the base game's own filter
 /// (<c>GetFilteredTransformationOptions</c>, the private step it would have
 /// run) over the CHARACTER's unlocked cards -- which under the arm is the
-/// arm's pool, `FilterThroughEpochs` being the arm's seam. Every other card,
-/// every other character and every run with the arms off takes the base
-/// method untouched.
+/// arm's pool, `FilterThroughEpochs` being the arm's seam. Every other card
+/// and every other character takes the base method untouched.
 ///
 /// FURINA'S STAGE BORROWS SILENT'S PAIR (2026-09-28), so a transform of one
 /// of her base Strikes or Defends would have offered Silent's pool; she is

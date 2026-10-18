@@ -12,7 +12,7 @@ using Xunit;
 namespace KleeMod.Tests.Prototype;
 
 /// <summary>
-/// `EB-272`: the quarantined arms' keyword tips.
+/// `EB-272`: the prototype arms' keyword tips.
 ///
 /// WHAT IS REACHABLE HERE. Enumerating a tip end to end is NOT: every yielded
 /// <c>HoverTip</c> formats a <c>LocString</c> title through
@@ -294,7 +294,7 @@ public class ArmKeywordTipTests
         // "Tips the faces need: Spend, Fanfare (the bar), Raise, Bow, the
         // lead, the back performer, Rotate". Each is a rule the SHIPPED engine
         // does not have -- a shipped Fanfare is a METER and this one is a
-        // performer's own bar -- so all seven belong on this quarantined
+        // performer's own bar -- so all seven belong on this prototype
         // surface and none is a shipped keyword. Two of them are two words on
         // purpose: what `lead performer` and `back performer` carry is a rule
         // about WHICH SEAT, and a tip on the bare word "lead" would fire on

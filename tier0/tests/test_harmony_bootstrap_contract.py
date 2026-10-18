@@ -7,11 +7,10 @@ throws. Every patch after that point is never applied, and the single
 try/catch around the call logged one line naming the patch that threw -- not
 the ones that consequently never armed.
 
-Two of this assembly's patches are softlock guards (`CreateForMerchant` type
-fallback, finding 24 -- entering ANY shop black-screens the run; and the
-`CreateForReward` clamp, finding 22). Reflection order is neither source order
+Some of this assembly's patches are softlock guards (the `CreateForReward`
+clamp, finding 22, among them). Reflection order is neither source order
 nor stable across builds, so a dead lookup in a cosmetic VFX patch could
-disarm the shop guard, and the run would then die in a shop hours later for a
+disarm a guard, and the run would then die hours later for a
 reason nothing in the log pointed at.
 
 WHY SOURCE-TEXT. Same reason `test_creature_facing_contract` gives: this code

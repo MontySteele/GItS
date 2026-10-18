@@ -63,12 +63,7 @@ public static class CompanionPool
     /// given different answers. That was already true by coincidence -- both
     /// read the same generated list -- and it is now
     /// true by construction, because the Mondstadt companion overhaul
-    /// (QUARANTINED, R213 B) redirects exactly this property.
-    ///
-    /// WITHOUT the prototype switch the branch below is not compiled and this
-    /// returns the generated list itself, the same object it always returned.
-    /// With the switch and the arm off, <c>CompanionOverhaul.Enabled</c> is
-    /// false and it still does.
+    /// (R213 B) redirects exactly this property.
     /// </summary>
     public static IReadOnlyList<CardModel> All =>
         Powers.CompanionOverhaulRoster.Roster();

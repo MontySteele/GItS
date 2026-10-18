@@ -43,10 +43,9 @@ namespace KleeMod.Relics;
 /// stays raw, the base relic's <c>ValueProp.Unpowered</c>. Sim twin:
 /// <c>kokomi_plan.casket_block</c>, right after the turn's Block clear.
 ///
-/// THE WHOLE FILE IS QUARANTINED, for the reason it always was:
+/// IT SITS IN <c>Relics/</c>, not <c>Powers/Prototype/</c>:
 /// <c>tools/lint_unique_names.py</c> reads relic names out of
-/// <c>klee-mod/KleeCode/Relics/*.cs</c>, so it sits here under
-/// <c>#if PROTOTYPE_CARDS</c> rather than under <c>Powers/Prototype/</c>.
+/// <c>klee-mod/KleeCode/Relics/*.cs</c>.
 ///
 /// IT KEEPS THE COMPANION REWARD SLOT, which the Commander draws from.
 ///

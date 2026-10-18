@@ -1283,59 +1283,28 @@ def relic_hooks_replacement(character_id: str) -> list[str] | None:
 
 
 def companion_roster_replacement() -> list[Card]:
-    """Every COMPANION an offer surface may see, or None to keep the shipped
-    roster.
+    """Every COMPANION an offer surface may see.
 
     THE ONE DOOR, and its C# twin is `KleeMod.CompanionPool.All`. Both offer
     surfaces in the sim read it through `tier05.rewards.companion_pool` (the
     reward slot and the shop), so the two cannot disagree about which
     companions exist in a run.
 
-    A REPLACEMENT OF TWO NATIONS, NOT OF THE ROSTER. Two approved workshops,
-    one per nation, both Paper artefacts on the companion-workshop branches and
-    neither in this tree: `companion-workshop-mondstadt-2026-09-01.md` (approved
-    2026-09-01) rewrites MONDSTADT's Universals, and
-    `companion-workshop-inazuma-2026-09-01.md` (approved the same day at its
-    four default picks, its sec.9) rewrites INAZUMA's. Fontaine has no workshop
-    yet -- both documents say so in their own sec.6 -- so its rows come through
-    untouched, and the seventeen shipped Mondstadt rows and the fifteen shipped
-    Inazuma rows do not come through at all.
-
-    THE KEPT HALF IS FILTERED BY NATION and the ADDED HALF IS LISTED BY ID
-    (`C.MONDSTADT_OVERHAUL_POOL_IDS`, `C.INAZUMA_OVERHAUL_POOL_IDS`), the same
-    asymmetry the C# twin argues: the rule about the other nations is literally
-    "not one of ours", and a hand-copied list of their rows would silently drop
-    the next row somebody ships; the rule about a replaced nation is "these rows
-    and nothing else", where a prefix match would be a second, softer definition
-    that fails the day a row is renamed.
-
-    ONE FLAG FOR BOTH NATIONS. A second property would let a build offer one
-    workshop's rewrites beside the other nation's shipped rows -- a state no
-    document describes and no seat would be asked to grade.
+    THE THREE NATIONS' PROTOTYPE ROWS, LISTED BY ID
+    (`C.MONDSTADT_OVERHAUL_POOL_IDS`, `C.INAZUMA_OVERHAUL_POOL_IDS`,
+    `C.FONTAINE_OVERHAUL_POOL_IDS`). No shipped companion row comes through
+    since Fontaine's port (legacy cleanup pick 4), so the old "kept shipped
+    rows" half is gone.
 
     Returns CARDS rather than ids because its callers tier the result by
     rarity and nation, and the ids are resolved here once through the same
     `peek_card` door `character_pool` uses for the other arms.
 
     """
-    kept = [c for c in _card_index().values()
-            if c.is_companion and c.nation not in C.COMPANION_OVERHAUL_NATIONS]
-    # AND THE PERSONALS, which are not Universals and are not in either
-    # nation's pool list: `personal_pool` is what makes a row one character's,
-    # and `tier05.rewards` filters `personal_pool in (None, character_id)` at
-    # the offer site. They are added to the ROSTER anyway -- the roster is
-    # what an offer surface may see, and a Personal that never entered it
-    # could not be offered to its own character either. Kokomi's (R236,
-    # `INAZUMA_OVERHAUL_PERSONAL_IDS`) and Klee's coven (R236,
-    # `COVEN_PERSONAL_POOL_IDS`) ride the same list; Prune's shipped
-    # `prune_witch_hunt` is superseded by the KEPT half's nation filter
-    # above, which drops every Mondstadt row the lists do not name.
     added = [peek_card(cid) for cid in (C.MONDSTADT_OVERHAUL_POOL_IDS
                                         + C.INAZUMA_OVERHAUL_POOL_IDS
-                                        + C.FONTAINE_OVERHAUL_POOL_IDS
-                                        + C.INAZUMA_OVERHAUL_PERSONAL_IDS
-                                        + C.COVEN_PERSONAL_POOL_IDS)]
-    return sorted(kept + added, key=lambda c: c.id)
+                                        + C.FONTAINE_OVERHAUL_POOL_IDS)]
+    return sorted(added, key=lambda c: c.id)
 
 
 @lru_cache(maxsize=1)

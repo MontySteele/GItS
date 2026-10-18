@@ -44,8 +44,8 @@ public class PetTargetReachTests
         // vanilla targeting whitelist -- enemies for `AnyEnemy`, allies for
         // `AnyAlly` -- holds only interactable creatures, and those are
         // already linked by `NCombatRoom.UpdateCreatureNavigation`. On such a
-        // whitelist the postfix must write NOTHING, so a release build's focus
-        // ring is byte-identical to the one the game shipped.
+        // whitelist the postfix must write NOTHING, so the focus ring is the
+        // one the game shipped.
         Assert.False(NeedsRing(new[] { true, true, true }));
         Assert.False(NeedsRing(new[] { true, true }));
 
@@ -92,8 +92,8 @@ public class PetTargetReachTests
         Assert.True(ShouldOpen(custom: true, interactable: false, allowed: true));
 
         // A vanilla session opens nothing, whatever is on the board -- this is
-        // the clause that makes the patch inert in a release build, where no
-        // shipped row declares a custom target type.
+        // the clause that makes the patch inert for a play with no custom
+        // target type.
         Assert.False(ShouldOpen(custom: false, interactable: false, allowed: true));
 
         // An ordinary enemy is already open; writing to it would be the patch

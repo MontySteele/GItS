@@ -124,10 +124,9 @@ public static class CompanionSlot
     {
         // rarity tier -> canonical companion models. personal_pool cards are
         // only offered to their own character (tier05: "load-bearing the
-        // moment a second character exists"). That moment has arrived twice
-        // over: three characters host this slot now, each from its own
-        // starter relic, so CharacterId below has three live arms and the
-        // filter is doing real work.
+        // moment a second character exists"). It has: five characters host
+        // this slot now, each from its own starter relic, so the filter is
+        // doing real work.
         var tiers = new Dictionary<CardRarity, List<CardModel>>();
         // CompanionPool.All, not CompanionRoster.All: the pool class is the ONE
         // door to "which companions exist for this run", and the Mondstadt

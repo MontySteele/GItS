@@ -39,8 +39,7 @@ namespace KleeMod.Powers;
 /// <see cref="FoldedDamageVar"/> opens the same scope over its own read, so a
 /// face whose hit carries Hydro previews the reaction the hit will cause.
 ///
-/// QUARANTINED under <c>Powers/Prototype/</c>, which a release build does not
-/// compile; nothing outside a generated prototype row opens it.
+/// Nothing outside a generated prototype row opens it.
 /// </summary>
 public static class HitElement
 {

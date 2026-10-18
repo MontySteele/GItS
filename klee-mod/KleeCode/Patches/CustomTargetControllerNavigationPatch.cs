@@ -61,12 +61,11 @@ namespace KleeMod.Patches;
 /// which is exactly what <c>OnCancelPlayCard</c> does unconditionally on every
 /// cancel.
 ///
-/// SHIPPED, NOT QUARANTINED, on `Vfx/NonFiniteCardGuard.cs`'s precedent and
+/// FOR EVERY CHARACTER, on `Vfx/NonFiniteCardGuard.cs`'s precedent and
 /// for the same reason: the broken code is the base LIBRARY's, reached by any
 /// card of any character declaring any custom target type, and scoping the
-/// repair to one prototype arm would leave the trap armed everywhere else. It
-/// is inert in a release build by construction -- no shipped row declares a
-/// custom target type, so <see cref="ShouldRestore"/> answers false.
+/// repair to one prototype arm would leave the trap armed everywhere else. For
+/// a card with no custom target type <see cref="ShouldRestore"/> answers false.
 /// </summary>
 [HarmonyPatch(typeof(NCardPlay), "TryPlayCard")]
 internal static class NCardPlay_TryPlayCard_RestoreControllerNavigation_Patch

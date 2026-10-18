@@ -15,7 +15,7 @@ namespace KleeMod.Powers;
 /// <summary>
 /// Marker for Klee's CharacterModel. Same reason Furina and Kokomi have one,
 /// arrived at from the other end: a prototype patch runs on EVERY seat at the
-/// table under the single <c>PROTOTYPE_CARDS</c> switch, so one arm's UI change
+/// table, so one arm's UI change
 /// can take down a run belonging to a different character
 /// (<c>EB-194</c>, <c>EB-221</c>), and <c>tools/lint_prototype_patch_scope.py</c>
 /// requires every such patch to say whose creature it is about in an identity
@@ -25,8 +25,7 @@ namespace KleeMod.Powers;
 /// spellings open since it was written.
 ///
 /// EMPTY, AND NOTHING SHIPPED READS IT YET. The shipped identity tests are
-/// deliberately left as they are: this arrives for `EB-281`, whose acceptance
-/// condition is that a flag-off build behaves exactly as it did.
+/// deliberately left as they are (`EB-281`).
 /// </summary>
 public interface IKleeCharacter
 {
@@ -133,10 +132,8 @@ public sealed class SparkPower : PowerModel, ILocalizationProvider
     /// sync to catch. <see cref="AfterPowerAmountChanged"/> covers the one
     /// exception, a bank moved by something that is not this mod at all.
     ///
-    /// EMPTY IN A RELEASE BUILD. The gauge lives in <c>Vfx/Prototype/</c>, which
-    /// is <c>Compile Remove</c>d without <c>-p:PrototypeCards=true</c>, so the
-    /// seam is guarded here once instead of at each call site -- the same shape
-    /// <c>KleeBurstResource.Find</c> uses for the arm read it needs.
+    /// ONE SEAM, so the gauge is refreshed here once instead of at each call
+    /// site.
     /// </summary>
     private static void SyncGauge(Creature? player)
     {

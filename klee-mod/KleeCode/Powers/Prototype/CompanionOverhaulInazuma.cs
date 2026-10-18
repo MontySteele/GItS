@@ -19,7 +19,7 @@ namespace KleeMod.Powers;
 
 /// <summary>
 /// THE INAZUMA COMPANION OVERHAUL -- ITS FIFTEEN POWERS AND ITS ONE HELPER
-/// (QUARANTINED, R213 B).
+/// (R213 B).
 ///
 /// The approved workshop <c>companion-workshop-inazuma-2026-09-01.md</c> sec.3
 /// (approved 2026-09-01 at its four default picks, its sec.9; a Paper artefact
@@ -27,11 +27,6 @@ namespace KleeMod.Powers;
 /// companion pool: fifteen shipped rows re-authored and nine characters with no
 /// row today given one. Its sec.2 nation shape is "Inazuma reads the HP bar",
 /// and eight of the twenty-four rows do.
-///
-/// SAME FLAG AS MONDSTADT, deliberately: <c>CompanionOverhaul.Enabled</c> means
-/// "the companion pool is the approved workshops' pool", and a second property
-/// would let a build offer one nation's rewrites beside the other's shipped
-/// rows -- a state no document describes and no seat would be asked to grade.
 ///
 /// WHAT THIS FILE REUSES rather than builds, which is most of it. Every hook
 /// below was built for Mondstadt's second wave and is spent again here without
@@ -134,9 +129,7 @@ internal static class InazumaCompanion
 /// deal 6 Geo damage to a random enemy." Amount is TURNS REMAINING.
 ///
 /// <see cref="GlacialWaltzPower"/>'s shape, character for character, with a
-/// different element and a different number -- a separate class rather than a
-/// retune for the arm's standing reason: a flag-off build has to keep meaning
-/// what it printed.
+/// different element and a different number, as a separate class.
 /// </summary>
 public sealed class JuugaPower : PowerModel, ILocalizationProvider
 {

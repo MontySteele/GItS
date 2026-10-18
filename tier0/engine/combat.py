@@ -493,21 +493,6 @@ def _finish_play(state: CombatState, card: Card,
         # `tier0.engine.companion_hexerei`.
         companion_hexerei.note_card_played(state, card)
         klee_overhaul.note_card_played(state, card)
-        if replay_index == 0:
-            # "Little Hexenzirkul" (EB-219, retargeted by EB-642 and R276):
-            # Klee's kit answering a COMPANION play, which is where LAW:145
-            # puts the grant now that Prune's face may not carry it. Which
-            # cards answer is the function's own question, not this line's --
-            # any card that counts as a Companion under the arm (a Klee card
-            # Alice marked included), the shipped Personal Companion pool off it.
-            # INSIDE the loop but gated to the
-            # first pass, for two reasons that pull in opposite directions and
-            # meet exactly here: the mint has to be ONCE PER PLAY (a replay is
-            # one card resolved twice -- the same argument that put Navia's
-            # Cannon Fire Support above this loop), and it has to be able to
-            # read `reactions_this_card`, which does not exist until a
-            # resolution has run. C# does the same at KleeElementalHooks.
-            effects.klee_companion_spark(state, card)
     # THE AUTOMATIC POWER FLOOR GRANT USED TO LIVE HERE. Deleted by the
     # Fanfare rework (2026-07-28, Track B, RULED): playing any Power silently
     # raised floor, cap and current by 5 (rares 8), printed on no card and

@@ -143,14 +143,15 @@ public class PoolCountTests
             .ToList();
         // Mondstadt 35 since the AoE trim (2026-10-03) split Durin in two; 39
         // since the Klee-only companions (2026-10-03) added Sinful Hex, Mollis
-        // Favonius, Ladder of Divine Ascent and Qiqi's Herald of Frost (Liyue).
+        // Favonius, Ladder of Divine Ascent and Qiqi's Herald of Frost (in
+        // Mondstadt since 2026-10-18, LAW's unreleased-nation line).
         // Inazuma 21 since the Kokomi re-founding (2026-10-12): Gorou's three
         // are her own cards.
         Assert.Equal(39 + 21 + 16, universals.Count);
         var byNation = universals.GroupBy(c => ((ICompanionCard)c).Nation)
             .ToDictionary(g => g.Key!, g => g.Count());
-        Assert.Equal(38, byNation["mondstadt"]);
-        Assert.Equal(1, byNation["liyue"]);
+        Assert.Equal(39, byNation["mondstadt"]);
+        Assert.False(byNation.ContainsKey("liyue"));
         Assert.Equal(21, byNation["inazuma"]);
         Assert.Equal(16, byNation["fontaine"]);
         Assert.All(universals, c => Assert.Null(((ICompanionCard)c).PersonalPool));

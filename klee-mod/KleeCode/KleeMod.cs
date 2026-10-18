@@ -90,15 +90,13 @@ public static class KleeMod
                     // board no longer each override BeforeSideTurnEnd. This
                     // one listener drives them in the sim's fixed order.
                     .Concat(Powers.TurnEndSequencer.Subscribe(combatState))
-                    // QUARANTINED (R213 B). The Mondstadt companion overhaul's
+                    // R213 B. The Mondstadt companion overhaul's
                     // own end-of-turn tenant, on the same argument one line up:
                     // six of its powers fire at the end of the player's turn,
                     // four of the six put an element on the board and five draw
                     // from Rng.CombatTargets, so they get ONE listener in a
-                    // fixed order. Not compiled at all in a release build, and
-                    // inert with the arm off -- the powers it drives can only
-                    // reach a creature that played an overhaul card, and with
-                    // the arm off no such card is offerable.
+                    // fixed order. The powers it drives can only reach a
+                    // creature that played an overhaul card.
                     .Concat(Powers.CompanionOverhaulTurnEnd.Subscribe(combatState))
                     // The same arm's SECOND WAVE, on the same argument again.
                     // Three of its powers answer an enemy's hit and two of the
@@ -108,7 +106,7 @@ public static class KleeMod
                     // a deck while no power of this arm is on anybody -- one of
                     // them lives on the ENEMY -- which is why it cannot be a
                     // power. Both are inert on a board carrying none of the
-                    // arm's rows, which is every board with the arm off.
+                    // arm's rows.
                     .Concat(Powers.CompanionOverhaulIncomingHit.Subscribe(combatState))
                     .Concat(Powers.CompanionOverhaulPlayWatcher.Subscribe(combatState))
                     // EB-279. The Klee overhaul's rule-3 sweep, on the same
@@ -116,8 +114,7 @@ public static class KleeMod
                     // Bomb can be orphaned that the arm itself does not cause
                     // -- any creature's death, and any card play -- are
                     // BROADCAST hooks, and a power on the dying enemy cannot
-                    // hear either of them. Not compiled in a release build,
-                    // and inert with the arm off: with no proto Bomb on any
+                    // hear either of them. With no proto Bomb on any
                     // board the register is empty and the sweep is a walk over
                     // nothing. See KleeOverhaulSweep.cs for why AfterDeath is
                     // trustworthy where the enemy's own hooks are not.
@@ -130,9 +127,8 @@ public static class KleeMod
                     // the concat, which is the ordering: the shipped
                     // end-of-turn tenants are what her docket accounts for,
                     // and an act resolving before them would move a number the
-                    // docket had already drawn. Not compiled in a release
-                    // build, and inert with the arm off -- every method's
-                    // first line is `FurinaStage.LiveFor`.
+                    // docket had already drawn. Every method's first line is
+                    // `FurinaStage.LiveFor`.
                     .Concat(Powers.FurinaStageHooks.Subscribe(combatState))
                     // FURINA, THE SWEEP (2026-10-14): the HP-lost counts,
                     // the first turn and Stage Directions' next-turn cost,
@@ -214,22 +210,17 @@ public static class KleeMod
                     Powers.RecallFromExhaust.PromptText,
                 // `EB-655`. The `scry_bottom` screen, on the same terms: one
                 // verb, one ruled string, and this dictionary is its only
-                // source. OUTSIDE the compile switch below, because the op is
-                // a sheet verb any character may print and not a prototype
-                // rule.
+                // source. The op is a sheet verb any character may print.
                 [Powers.ScryBottom.PromptKey] = Powers.ScryBottom.PromptText,
                 // `EB-679`. The `scry_take` screen -- the same verb one door
                 // over, with the pick coming to hand instead of going to the
-                // bottom. Outside the compile switch for the row above's
-                // reason: a sheet verb, not a prototype rule.
+                // bottom. A sheet verb, like the row above.
                 [Powers.ScryTake.PromptKey] = Powers.ScryTake.PromptText,
-                // QUARANTINED (the Kokomi overhaul, draft 6). Moon's
+                // The Kokomi overhaul, draft 6. Moon's
                 // Reflection's exhaust-pile screen, on exactly the terms the three rows
                 // above have: a LocString is a table plus a key with no
                 // raw-text constructor, so the copy can only reach the screen
-                // as a row, and this dictionary is its only source. Inside the
-                // compile switch because the verb it names does not exist in a
-                // release build.
+                // as a row, and this dictionary is its only source.
                 [Powers.KokomiPlan.ReflectionPromptKey] =
                     Powers.KokomiPlan.ReflectionPromptText,
                 // THE STATUS BATCH (2026-10-01): Tidecleanse's hand screen,
@@ -483,11 +474,7 @@ public static class KleeMod
                     // go here. None stands since Arlecchino's Bond of Life
                     // left (the 2026-10-11 Companion pass).
 
-                    // `EB-272`. QUARANTINED, and inside the switch for the
-                    // reason Rally's prompt is: `Cards/Prototype/**` is
-                    // Compile Remove'd from a release build, so
-                    // `Cards.ArmKeywordTips` does not exist there and these
-                    // eleven keys name nothing. Under the switch they are the
+                    // `EB-272`. These eleven keys are the
                     // only source of the titles, exactly as the four rider
                     // rows above are -- the pck's card_keywords.json carries
                     // none of them, and a missing row renders as the raw key
@@ -716,11 +703,6 @@ public static class KleeMod
             // Klee r17 lane 1). The sim says the same thing structurally:
             // `potions.fire_potion` goes through `refpowers.unpowered_damage`,
             // which never reaches `modify_damage_taken`.
-            //
-            // UNDER THE QUARANTINE, like the five keyword bodies above and for
-            // the same reason: a release build does not police the base game's
-            // English (`KleeSelfCheck` says so in as many words), and the
-            // glossary these words have to agree with is itself arm-only.
             LocManager.Instance.GetTable("powers").MergeWith(
                 new Dictionary<string, string>
                 {
@@ -1179,71 +1161,6 @@ internal static class CardFactory_CreateForReward_Clamp_Patch
         return options.RngOverride == null
             ? copy
             : copy.WithRngOverride(options.RngOverride);
-    }
-}
-
-/// <summary>
-/// Finding 24: entering ANY shop soft locks the run while Klee's pool has no
-/// Power cards.
-///
-/// MerchantInventory.PopulateCharacterCardEntries stocks a hardcoded slot
-/// layout — 2 Attacks, 2 Skills, 1 Power — and CreateForMerchant(player,
-/// options, type) rolls a rarity that must contain a card of that type.
-/// GetNextAllowedRarity wraps Common->Uncommon->Rare and returns None when no
-/// rarity has one, and the method throws. The throw happens inside
-/// MerchantRoom.EnterInternal's async continuation, so the room never finishes
-/// entering: black screen, no crash dialog, run lost. Klee ships 24 cards and
-/// not one is a Power, so this was every shop, deterministically.
-///
-/// SUBSTITUTING THE TYPE RATHER THAN EMPTYING THE SLOT, deliberately. The
-/// merchant's 5-slot layout is load-bearing UI — Populate has no "no card"
-/// path — so the safe degradation is offering a Skill or Attack where the
-/// Power would sit. The fallback order prefers Skill (the closer analogue of
-/// a Power purchase: utility, not damage). Like the reward-draw clamp above,
-/// this patch stops changing anything the moment the pool contains a Power
-/// card, which is the real fix and a C3 content item.
-///
-/// The eligibility test mirrors CreateForMerchant exactly: it excludes Basic
-/// (the method's own filter) and demands Common/Uncommon/Rare, because the
-/// shop rarity roll can only ever land on those three (same reasoning as
-/// self-check R3a). Base characters stock every type and never hit the
-/// fallback.
-/// </summary>
-[HarmonyPatch(typeof(CardFactory), nameof(CardFactory.CreateForMerchant),
-    new[] { typeof(Player), typeof(IEnumerable<CardModel>), typeof(CardType) })]
-internal static class CardFactory_CreateForMerchant_TypeFallback_Patch
-{
-    [HarmonyPrefix]
-    public static void Prefix(IEnumerable<CardModel> options, ref CardType type)
-    {
-        // Callers pass materialized lists; guard anyway so a lazy sequence is
-        // only enumerated here once.
-        var pool = options as IReadOnlyCollection<CardModel> ?? options.ToList();
-
-        bool Stocks(CardType t) => pool.Any(c => c.Type == t
-            && (c.Rarity == CardRarity.Common
-                || c.Rarity == CardRarity.Uncommon
-                || c.Rarity == CardRarity.Rare));
-
-        if (Stocks(type))
-        {
-            return;
-        }
-
-        foreach (var fallback in new[] { CardType.Skill, CardType.Attack, CardType.Power })
-        {
-            if (Stocks(fallback))
-            {
-                Log.Warn($"[{KleeMod.ModId}] merchant slot wanted a {type} card but the "
-                       + $"pool has none at a rollable rarity; offering a {fallback} "
-                       + "instead. This stops happening once the pool stocks that type.");
-                type = fallback;
-                return;
-            }
-        }
-
-        // Nothing of any type is rollable; fall through and let the game's own
-        // descriptive exception surface the truly-broken pool.
     }
 }
 

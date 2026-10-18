@@ -8512,8 +8512,9 @@ def upgrade_run_states() -> tuple[dict, dict]:
                      for i, name in enumerate(grid)],
             "draw_pile": [
                 # The row this clause needs is one the build defines no
-                # upgrade for: since legacy cleanup stage 6 emptied
-                # `UPGRADE_DEBT`, that is a row carrying `no_upgrade:`.
+                # upgrade for. No live row carries `no_upgrade:` since the
+                # Neuvillette guest rows went (2026-10-18), so the tests that
+                # need one patch the index (`_TEARS_NO_UPGRADE`).
                 {"id": "KLEEMOD-PROTO_MF_GUEST_NEUVILLETTE_TEARS",
                  "name": "O Tears, I Shall Repay", "type": "Skill",
                  "cost": "0", "description": "Deal 8 damage."},
@@ -8527,6 +8528,11 @@ def upgrade_run_states() -> tuple[dict, dict]:
             "draw_pile_count": 3, "discard_pile_count": 0,
             "exhaust_pile_count": 0}}
     return fight, smith
+
+
+# A no-upgrade register holding one row, for the pages that need one now that
+# the live sheet has none (the Neuvillette guest rows were deleted 2026-10-18).
+_TEARS_NO_UPGRADE = frozenset({"PROTO_MF_GUEST_NEUVILLETTE_TEARS"})
 
 
 def test_the_smith_says_why_a_card_is_not_on_its_list():
@@ -8546,7 +8552,9 @@ def test_the_smith_says_why_a_card_is_not_on_its_list():
     assert "Not on this list" not in blindplay.observe(smith)  # nothing known
 
     blindplay.observe(fight)
-    page = blindplay.observe(smith)
+    with mock.patch.object(qa_packet, "no_upgrade_index",
+                           lambda repo=None: _TEARS_NO_UPGRADE):
+        page = blindplay.observe(smith)
     assert "## Not on this list, and why" in page
     assert ("- **O Tears, I Shall Repay** — "
             + blindplay.NO_UPGRADE_DEFINED) in page
@@ -8581,8 +8589,25 @@ def test_the_no_upgrade_register_is_read_by_id_and_only_its_ids_cross():
     """The registers' VALUES (`UPGRADE_DEBT`, a row's `no_upgrade:`) are
     register prose naming ruling and row numbers, which is exactly what may
     not reach a blind page. Only the key set is read, and the page writes its
-    own plain sentence."""
-    index = qa_packet.no_upgrade_index()
+    own plain sentence. No live row carries `no_upgrade:` (2026-10-18), so
+    the register is read off a one-row sheet in a scratch tree."""
+    import tempfile
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / "tools").mkdir()
+        (root / "tools" / "gen_prototype_cards.py").write_text(
+            "", encoding="utf-8")
+        (root / "docs").mkdir()
+        (root / "docs" / "prototype-surface.yaml").write_text(
+            "\n".join([
+                "- {id: proto_mf_guest_neuvillette_tears, name: x,",
+                '   no_upgrade: "register prose, R999",',
+                "   cost: 1}",
+                "- {id: proto_ko_kapow, name: y,",
+                "   cost: 0}",
+                ""]),
+            encoding="utf-8")
+        index = qa_packet.no_upgrade_index(root)
     assert "PROTO_MF_GUEST_NEUVILLETTE_TEARS" in index
     assert "PROTO_KO_KAPOW" not in index
     for entry in index:

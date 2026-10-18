@@ -21,26 +21,59 @@ SEED = 42
 
 # --- healing law (R8, supersedes the v0.3.1 exhaust errata) ---
 
+def _heal_ops(x):
+    """Every healing op anywhere in a row: the effects, the Plan line, a
+    mode or a conditional branch. Mend is healing."""
+    if isinstance(x, dict):
+        if x.get("op") in ("heal", "mend") or x.get("kind") in ("heal", "mend"):
+            yield x
+        for v in x.values():
+            yield from _heal_ops(v)
+    elif isinstance(x, (list, tuple)):
+        for v in x:
+            yield from _heal_ops(v)
+
+
 def test_healing_law_is_conjunctive():
-    """R8: true in-combat healing is Rare-tier AND Exhausts; no 4-star
-    companion may true-heal (4-stars cap at uncommon). This replaces the
-    v0.3.1 test that asserted Barbara/Bennett heals Exhaust -- those
-    heals no longer exist (converted to block/meter). Enforced over the
-    WHOLE sheet so the next heal that lands in the pool answers to the
-    law, not to a review."""
-    for card in loader._card_index().values():
-        if card.character in loader.EXTERNAL_CARD_SHEETS.values():
-            # R8 is OUR design law. The base-game reference pool is EVIDENCE
-            # we measure against, not a sheet we author -- auditing it here
-            # would fail the suite for a MegaCrit design decision.
-            continue
-        heals = any(fx.get("op") == "heal" for fx in card.effects)
-        if not heals:
+    """R8: true in-combat healing (Mend included) is Rare-tier AND Exhausts;
+    no 4-star companion may heal. Read off the LIVE sheet,
+    `docs/prototype-surface.yaml`, so the next heal that lands in a pool
+    answers to the law, not to a review."""
+    cards = loader.prototype_cards()
+    assert cards, "the live sheet read empty; this test would pass vacuously"
+    for card in cards:
+        body = {k: v for k, v in vars(card).items()
+                if k not in ("name", "description")}
+        if not any(_heal_ops(body)):
             continue
         assert card.rarity == "rare" and card.exhaust, (
-            f"{card.id}: true heal below Rare-and-Exhausts (R8 law)")
+            f"{card.id}: heal below Rare-and-Exhausts (R8 law)")
         assert not (card.is_companion and card.star == 4), (
-            f"{card.id}: 4-star companion may not true-heal (R8)")
+            f"{card.id}: 4-star companion may not heal (R8)")
+
+
+def test_four_star_companions_are_at_most_uncommon():
+    """LAW: a 4-star companion is at most Uncommon (the banner's Star reader
+    that used to sit beside this is gone). Basic counts as below Uncommon:
+    Varka's starter Knights are 4-star Basics."""
+    rows = [c for c in loader.prototype_cards() if c.star == 4]
+    assert rows, "no 4-star row read; this test would pass vacuously"
+    over = [c.id for c in rows
+            if c.rarity not in ("basic", "common", "uncommon")]
+    assert not over, f"4-star rows above Uncommon: {over}"
+
+
+def test_every_kit_sheet_stocks_a_power_for_the_shop():
+    """The merchant stocks one Power from the character's pool and throws
+    (a black-screen softlock, finding 24) when none is rollable. The mod's
+    type-fallback patch was deleted once every pool held Powers; this keeps
+    that true at the sheet."""
+    cards = loader.prototype_cards()
+    for kit in ("klee", "kokomi", "furina", "varka", "yae"):
+        powers = [c.id for c in cards if c.character == kit
+                  and not c.is_companion and c.type == "power"
+                  and c.rarity in ("common", "uncommon", "rare")]
+        assert powers, f"{kit}: no Power at a rollable rarity"
 
 
 def _freeze_via_companion(st):

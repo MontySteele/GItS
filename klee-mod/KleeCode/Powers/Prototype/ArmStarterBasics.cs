@@ -119,14 +119,10 @@ namespace KleeMod.Powers;
 /// `TouchOfOrobas.GetUpgradedStarterRelic` (quoted in
 /// <c>Relics/UpgradedStarterRelics.cs</c>).
 ///
-/// FLAG OFF, NOTHING MOVES. With both arms off <see cref="StrikeFor"/>,
-/// <see cref="DefendFor"/> and <see cref="DefendTipsFor"/> return null before
-/// they touch `ModelDb`, every prefix returns true, and the base game answers
-/// exactly as it did -- Kaboom! and Duck and Cover for Klee, her shipped
-/// basics, and Fasten's tip a picture of Duck and Cover, which is correct off
-/// the arm. A release build compiles none of this: the file is under
-/// `Powers/Prototype/**`, which `KleeCode.csproj` removes without
-/// `-p:PrototypeCards=true`.
+/// ANY OTHER CHARACTER, NOTHING MOVES. For a character none of ours
+/// <see cref="StrikeFor"/>, <see cref="DefendFor"/> and
+/// <see cref="DefendTipsFor"/> return null before they touch `ModelDb`, every
+/// prefix returns true, and the base game answers exactly as it did.
 ///
 /// FURINA UNDER THE STAGE ARM IS CLAIMED TOO (2026-09-28). [USER]: "We
 /// should really just replace Soloist's Solicitation and Stage Presence with
@@ -134,8 +130,7 @@ namespace KleeMod.Powers;
 /// pair (<c>FurinaStageRoster.StarterStrike</c>), and without this seam Large
 /// Capsule would hand a Stage run the shipped Soloist's Solicitation and Stage
 /// Presence -- first in <c>FurinaCardPool.AllCards</c> -- and Fasten's tip would
-/// picture Stage Presence. With <see cref="FurinaStage.Enabled"/> off her
-/// shipped basics are still the honest answer and the base game gives it.
+/// picture Stage Presence.
 /// </summary>
 internal static class ArmStarterBasics
 {
@@ -146,8 +141,8 @@ internal static class ArmStarterBasics
     ///
     /// SCOPED ON THE IDENTITY INTERFACES, not on the concrete classes. That is
     /// what `tools/lint_prototype_patch_scope.py` accepts, and its reason is
-    /// this file's problem exactly: ONE `PROTOTYPE_CARDS` switch compiles every
-    /// arm, so a prototype patch with no character test runs on every seat at a
+    /// this file's problem exactly: every arm is compiled into one build, so a
+    /// prototype patch with no character test runs on every seat at a
     /// co-op table (`EB-194`, `EB-221`). It is also the honest predicate --
     /// <c>IKleeCharacter</c> is the arm's own identity gate everywhere else in
     /// the mod.
@@ -238,7 +233,7 @@ internal static class ArmStarterBasics
     /// builds (`ArmStarterBasicsTests`). If MegaCrit adds a third tip, that pin
     /// bites rather than the arm quietly dropping it.
     ///
-    /// TAKES THE CHARACTER, NOT THE CARD, so the flag-off pin can ask it the
+    /// TAKES THE CHARACTER, NOT THE CARD, so a pin can ask it the
     /// same way it asks the other two -- with a character and no live run. The
     /// card-shaped part (is it mutable, has it an owner) belongs to the patch,
     /// because that is the base game's own guard and it is where the base

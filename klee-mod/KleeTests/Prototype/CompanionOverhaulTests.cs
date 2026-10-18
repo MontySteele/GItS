@@ -20,11 +20,6 @@ namespace KleeMod.Tests.Prototype;
 /// `companion-workshop-mondstadt-2026-09-01.md`; sim twin
 /// <c>tier0/tests/test_companion_overhaul.py</c>).
 ///
-/// This whole file is compiled only under <c>-p:PrototypeCards=true</c>
-/// (KleeTests.csproj), the same switch that compiles the arm. That is the point
-/// rather than an inconvenience: the arm's C# does not exist in a release build,
-/// so a pin against it cannot either.
-///
 /// WHAT IS REAL HERE AND WHAT IS STRUCTURAL, said once. The CARDS are real --
 /// a <c>CardModel</c> can be constructed headlessly, so its cost, type, rarity
 /// and companion identity are direct reads. The POWERS' printed faces are real
@@ -136,10 +131,7 @@ public class CompanionOverhaulTests
     [Fact]
     public void The_one_wiring_seam_reads_the_flag_and_nothing_else()
     {
-        // STRUCTURAL. Flag off is byte-identical, pinned where it is decided
-        // rather than asserted in prose: the seam is one `if` on the property,
-        // so with the arm off `CompanionPool.All` falls through to the
-        // generated roster it always returned.
+        // STRUCTURAL: `CompanionPool.All` reads the overhaul roster.
         var all = typeof(CompanionPool)
             .GetProperty("All", All)!.GetGetMethod(true)!;
         var calls = Il.Calls(all);
@@ -172,15 +164,14 @@ public class CompanionOverhaulTests
     public void Every_row_is_an_offerable_mondstadt_companion()
     {
         // 35 since the AoE trim (2026-10-03) split Durin in two; 39 since the
-        // Klee-only companions (2026-10-03). Qiqi is Liyue's, the one row on
-        // this roster from a nation with no workshop.
+        // Klee-only companions (2026-10-03). Qiqi sits in Mondstadt until
+        // Liyue has a sheet (LAW, 2026-10-18).
         Assert.Equal(39, Universals.Length);
         foreach (var type in Universals)
         {
             var card = (CardModel)Activator.CreateInstance(type)!;
             var comp = Assert.IsAssignableFrom<ICompanionCard>(card);
-            Assert.Equal(type == typeof(ProtoMcQiqiHeraldOfFrost)
-                             ? "liyue" : "mondstadt", comp.Nation);
+            Assert.Equal("mondstadt", comp.Nation);
             // A Universal, never a Personal: a personal-pool row would be
             // Klee's kit and could not be offered to another character, which
             // is the one thing every row here is required to be able to be
@@ -472,10 +463,8 @@ public class CompanionOverhaulTests
     [Fact]
     public void The_listener_is_subscribed_only_under_the_prototype_switch()
     {
-        // The subscription lives in KleeMod.Register behind `#if
-        // PROTOTYPE_CARDS`, which is what keeps a release build from even
-        // referencing the type. This pin is the compiled proof: the call is in
-        // the assembly we are testing, which is a PROTOTYPE build.
+        // The subscription lives in KleeMod.Register. This pin is the
+        // compiled proof: the call is in the assembly we are testing.
         // NESTED TYPES INCLUDED, and they are the point: the subscription is
         // a LAMBDA passed to ModHelper.SubscribeForCombatStateHooks, and a C#
         // lambda compiles into a generated closure class rather than into the

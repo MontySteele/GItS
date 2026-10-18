@@ -1387,7 +1387,7 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         // PYRO, UNLESS A COVEN PERSONAL SAYS OTHERWISE (R236). Prune's
         // Hexhunter Chime is the one thing in either engine that moves rule 5's
         // element, and it moves it for ONE explosion; the call answers Pyro on
-        // every other board and with the companion arm off. Sim twin:
+        // every other board. Sim twin:
         // `companion_coven.bomb_element`, read at `klee_overhaul._explode`.
         var element = await CompanionCovenBombs.ElementFor(choiceContext, applier);
         // THE AURA THIS EXPLOSION MAY CONSUME, read BEFORE the funnel eats it

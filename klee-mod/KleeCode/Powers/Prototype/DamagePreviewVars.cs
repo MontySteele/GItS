@@ -23,7 +23,7 @@ namespace KleeMod.Powers;
 /// on a Furina Stage board the base game's own convention), the one
 /// <see cref="FrontFoldedDamageVar"/> and Varka's <c>{VkHit}</c> take.
 ///
-/// QUARANTINED under <c>Powers/Prototype/</c>, emitted by codegen for
+/// Under <c>Powers/Prototype/</c>, emitted by codegen for
 /// <c>proto_</c> rows only, and only where the face prints the token
 /// (<c>gen_klee_cards.preview_token_vars</c>).
 /// </summary>

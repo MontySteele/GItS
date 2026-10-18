@@ -192,9 +192,8 @@ public class Round16Tests
     //
     // BOTH SURFACES, because they are read at different moments: the relic
     // once at the top of a run, and the card on the turn the Encore is being
-    // spent. THE ARM'S RELIC FACE IS READ AS SOURCE, not off the type -- the
-    // gate compiles this suite with `PrototypeCards` alone, so the
-    // `FURINA_REFRAME` branch is not in the binary. `Round12Tests` reads the
+    // spent. THE ARM'S RELIC FACE IS READ AS SOURCE, not off the type, a
+    // leftover from when the branch was not in every binary. `Round12Tests` reads the
     // same file the same way for the same reason.
 
 

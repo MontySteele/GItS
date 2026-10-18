@@ -11,7 +11,7 @@ namespace KleeMod.Vfx;
 /// THE SPARK BANK AS A RESOURCE DISPLAY, under the Klee overhaul arm only
 /// (<c>EB-281</c>).
 ///
-/// THE DEFECT. Under <c>KleeOverhaul.Enabled</c> Sparks are Klee's ONE meter --
+/// THE DEFECT. Under the Klee overhaul Sparks are Klee's ONE meter --
 /// every explosion mints one (<c>KleeOverhaulLaw.SparkPerExplosion</c>) and the
 /// slice's sinks are priced in them -- and the bank rendered as a status-strip
 /// Power, a badge among the buffs and debuffs. [USER] asked for the shape the
@@ -88,16 +88,11 @@ public static class SparkGauge
     /// counter appears on their first Spark (<see cref="SparkCounter.ShowsFor"/>,
     /// 2026-10-04).
     ///
-    /// The arm is the same runtime read <c>Klee.StartingDeck</c> and
-    /// <c>KleeCardPool.FilterThroughEpochs</c> take, for the reason
-    /// <c>KleeOverhaul</c> records: a dev build compiles this arm beside the
-    /// Sparks arm, so the switch cannot be a bare <c>#if</c>.
-    ///
     /// THE IDENTITY HALF IS <c>IKleeCharacter</c> rather than <c>is Klee</c>:
     /// the shape <c>tools/lint_prototype_patch_scope.py</c> requires of every
-    /// patch under the quarantine, and the shape Furina's and Kokomi's own gates
-    /// already take. The reason is co-op -- everything compiled under the one
-    /// prototype switch is fanned to every seat at the table, and a change that
+    /// prototype patch, and the shape Furina's and Kokomi's own gates
+    /// already take. The reason is co-op -- every prototype patch is fanned to
+    /// every seat at the table, and a change that
     /// cannot name whose creature it is about is the shape of `EB-194` and
     /// `EB-221`. This method is the WHOLE scope of the change: the gauge and the
     /// badge suppression both come through it.
@@ -112,10 +107,7 @@ public static class SparkGauge
     /// <see cref="SparkPower.SparksAsResolved"/> because it is the PLAIN read
     /// and a display wants the plain read. The two can only disagree while the
     /// base free-Attack rule has a pending threshold spend, and that rule is
-    /// retired wherever this file compiles at all
-    /// (<c>SparkPower.BaseRuleActive</c> is <c>false</c> under
-    /// <c>PROTOTYPE_CARDS</c>, which is the switch that compiles
-    /// <c>Vfx/Prototype/**</c>). The alt-cost power keeps its own pending
+    /// retired. The alt-cost power keeps its own pending
     /// decision and pays through <c>SparkPower.Spend</c>, so it never arms the
     /// accessor's subtraction either.
     /// </summary>
@@ -128,9 +120,7 @@ public static class SparkGauge
     /// so the number on screen and the number in the ledger can never come
     /// from different reads.
     ///
-    /// Arm-gated HERE rather than at each call site: with the arm off there is
-    /// no Spark display to redraw, and a release build must not gain a
-    /// refresh on a code path that never had one.
+    /// Gated HERE rather than at each call site.
     ///
     /// ONLY THE ENERGY-AREA COUNTER (`EB-621`) since the 2026-09-24 playtest:
     /// the overhead gauge this used to redraw first is gone, so there is no

@@ -41,8 +41,7 @@ namespace KleeMod.Tests;
 /// or builds a `CombatState`. Every assertion is a call-graph read.
 ///
 /// The prototype arm's verbs -- the overhaul Bomb, the Mine, the Plan, the
-/// Stage -- are in `Prototype/KitVerbBaseTriggerProtoPinTests.cs`, because
-/// their types are not compiled without `-p:PrototypeCards=true`. The sim
+/// Stage -- are in `Prototype/KitVerbBaseTriggerProtoPinTests.cs`. The sim
 /// column and the `powered:`/`element:` ARGUMENT values, which no IL read can
 /// see, are pinned in `tier0/tests/test_eb495_kit_verb_triggers.py`.
 /// </summary>
