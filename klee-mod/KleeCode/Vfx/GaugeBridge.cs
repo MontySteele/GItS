@@ -8,7 +8,7 @@ namespace KleeMod.Vfx;
 /// <summary>
 /// The combat UI's one setup seam for the mod's tracked displays: the
 /// end-of-turn docket, Kokomi's Plan strip, Klee's Spark counter and
-/// Furina's Fanfare gauge and Varka's Oath dial. The
+/// Furina's Fanfare gauge, Varka's Oath dial and Yae's Sakura row. The
 /// overhead Burst gauges and Kokomi's Charge row it used to build went with
 /// the shipped kits (legacy cleanup stage 5).
 /// </summary>
@@ -33,5 +33,6 @@ internal static class NCombatUi_Activate_GaugeSetup
         FanfareCounter.Setup(state);
         DrainedCounter.Setup(state);
         VarkaOathDial.Setup(state);
+        YaeSakuraDisplay.Setup(state);
     }
 }

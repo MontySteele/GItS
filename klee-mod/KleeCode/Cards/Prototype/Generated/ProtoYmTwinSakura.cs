@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoYmTwinSakura : CustomCardModel, ICharacterCard, ISakuraPlanterCard
+public sealed class ProtoYmTwinSakura : CustomCardModel, ICharacterCard, ISakuraPlanterCard, ISakuraPlantShapeCard
 {
     /// <summary>Block arrives only from the ruled upgrade (`add: block`), so the
     /// claim moves with it -- see gen_klee_cards `_upgrade_add_lines` (EB-122).</summary>
@@ -51,6 +51,12 @@ public sealed class ProtoYmTwinSakura : CustomCardModel, ICharacterCard, ISakura
         ("title", "Twin Sakura"),
         ("description", "Plant {YmAmount:diff()} [gold]Sakura[/gold].{IfUpgraded:show: Gain 4 [gold]Block[/gold].|}"),
     };
+
+    /// <summary>How this card plants (the Sakura display's preview).</summary>
+    public YaePlantShape SakuraPlantShape => YaePlantShape.Plant;
+
+    /// <summary>The kind it plants (Replanting's and Genre Shift's are read off the shrine).</summary>
+    public YaeSakuraKind SakuraPlantKind => YaeSakuraKind.Thunder;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

@@ -16,6 +16,42 @@ public interface ISakuraPlanterCard
 {
 }
 
+/// <summary>How a planting card's play plants, for the Sakura display's
+/// preview (<c>YaeSakuraSlots.PlantsOf</c>): the row's `yae` plant kind.
+/// </summary>
+public enum YaePlantShape
+{
+    /// <summary>"Plant a Sakura" / "Plant 2 Sakura" (YmAmount of them).</summary>
+    Plant = 0,
+
+    /// <summary>"Plant a Sakura ... at Level N": one (YmAmount is the Level).</summary>
+    PlantLevel = 1,
+
+    /// <summary>Replanting: the oldest withers, one of its kind is planted.</summary>
+    Replant = 2,
+
+    /// <summary>Genre Shift: one of each kind not standing.</summary>
+    PlantMissing = 3,
+
+    /// <summary>Narukami Bloom: Sakura until the shrine is full.</summary>
+    PlantUntilFull = 4,
+}
+
+/// <summary>
+/// THE SAKURA DISPLAY'S PLANT PREVIEW (pick 3 (a) of
+/// <c>review/active/yae-pool-to-78-2026-10-15.md</c>): what a planting card
+/// plants, as data, so hovering it can say "refreshes / replaces this
+/// Sakura" on the slot it would touch. The codegen emits it beside
+/// <see cref="ISakuraPlanterCard"/> on every row with a `yae` plant op, off
+/// that row's first one. Display only: no rule reads it.
+/// </summary>
+public interface ISakuraPlantShapeCard
+{
+    YaePlantShape SakuraPlantShape { get; }
+
+    YaeSakuraKind SakuraPlantKind { get; }
+}
+
 /// <summary>
 /// A card whose `yae` kind gives its own Block (block_per_sakura,
 /// block_per_edit, and the refill's wither_newest_block, Hide Behind the

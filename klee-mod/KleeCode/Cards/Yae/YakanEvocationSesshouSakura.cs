@@ -39,9 +39,14 @@ namespace KleeMod.Cards.Yae;
 /// <c>tools/lint_handwritten_parity.ANCIENT_WITNESS</c>.
 /// </summary>
 public sealed class YakanEvocationSesshouSakura
-    : CustomCardModel, ICharacterCard, ISakuraPlanterCard
+    : CustomCardModel, ICharacterCard, ISakuraPlanterCard, ISakuraPlantShapeCard
 {
     public string CharacterId => YaePrototype.CharacterId;
+
+    /// <summary>One Foxfire Sakura at a Level (the Sakura display's preview).</summary>
+    public YaePlantShape SakuraPlantShape => YaePlantShape.PlantLevel;
+
+    public YaeSakuraKind SakuraPlantKind => YaeSakuraKind.Foxfire;
 
     public override Texture2D? CustomPortrait =>
         RosterArt.CardPortrait("yakan_evocation_sesshou_sakura");

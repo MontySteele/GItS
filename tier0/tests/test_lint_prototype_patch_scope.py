@@ -157,8 +157,13 @@ def test_the_shipped_prototype_tree_is_green() -> None:
     # cost hook (the cost seam is handed no play, `EB-668`). Scoped by the
     # card (only a card with a Plan line is recorded), whoever plays it; they
     # change nothing about the play and resolve no seat.
-    # A FIFTEENTH appearing here is the next review question.
-    assert len(markers) == 14, markers
+    # IT WENT FOURTEEN -> FIFTEEN ON 2026-10-18 (Yae's Sakura display): its
+    # `NCombatUi.Deactivate` teardown (`Vfx/Prototype/YaeSakuraDisplay.cs`)
+    # clears its own statics (the seat, the hovered and held card); the row
+    # dies with her creature node, and the scope is at `Refresh`, through
+    # `YaeShrine.Live` and `LocalContext.IsMe`.
+    # A SIXTEENTH appearing here is the next review question.
+    assert len(markers) == 15, markers
 
 
 def test_registered_in_the_ci_lane() -> None:

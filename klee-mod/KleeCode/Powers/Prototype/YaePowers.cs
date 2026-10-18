@@ -180,6 +180,9 @@ public static class SakuraBadge
         {
             badge.Refresh();
         }
+        // The Sakura display (pick 3 (a) of the pool to 78) rides the same
+        // funnel: a view of the ledger, as the badges are.
+        global::KleeMod.Vfx.YaeSakuraDisplay.Refresh(yae);
     }
 
     private static Task Apply(PlayerChoiceContext choiceContext, Creature yae, System.Type type)

@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoYmYakanEvocation : CustomCardModel, ICharacterCard, ISakuraPlanterCard, ITranscendenceCard
+public sealed class ProtoYmYakanEvocation : CustomCardModel, ICharacterCard, ISakuraPlanterCard, ISakuraPlantShapeCard, ITranscendenceCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "yae";
@@ -52,6 +52,12 @@ public sealed class ProtoYmYakanEvocation : CustomCardModel, ICharacterCard, ISa
     /// (BaseLib's `ArchaicToothTranscendenceUpgradesPatch`).</summary>
     public CardModel GetTranscendenceTransformedCard() =>
         ModelDb.Card<global::KleeMod.Cards.Yae.YakanEvocationSesshouSakura>();
+
+    /// <summary>How this card plants (the Sakura display's preview).</summary>
+    public YaePlantShape SakuraPlantShape => YaePlantShape.Plant;
+
+    /// <summary>The kind it plants (Replanting's and Genre Shift's are read off the shrine).</summary>
+    public YaeSakuraKind SakuraPlantKind => YaeSakuraKind.Thunder;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

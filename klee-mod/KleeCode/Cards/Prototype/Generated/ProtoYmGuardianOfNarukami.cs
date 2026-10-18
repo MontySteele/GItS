@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoYmGuardianOfNarukami : CustomCardModel, ICharacterCard, ISakuraPlanterCard
+public sealed class ProtoYmGuardianOfNarukami : CustomCardModel, ICharacterCard, ISakuraPlanterCard, ISakuraPlantShapeCard
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "yae";
@@ -47,6 +47,12 @@ public sealed class ProtoYmGuardianOfNarukami : CustomCardModel, ICharacterCard,
         ("title", "Guardian of Narukami"),
         ("description", "Gain {Block:diff()} [gold]Block[/gold]. Plant a [gold]Kitsune Sakura[/gold]. It starts at Level {YmAmount:diff()}."),
     };
+
+    /// <summary>How this card plants (the Sakura display's preview).</summary>
+    public YaePlantShape SakuraPlantShape => YaePlantShape.PlantLevel;
+
+    /// <summary>The kind it plants (Replanting's and Genre Shift's are read off the shrine).</summary>
+    public YaeSakuraKind SakuraPlantKind => YaeSakuraKind.Kitsune;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

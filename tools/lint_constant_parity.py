@@ -824,6 +824,27 @@ UNMIRRORED: dict[str, str] = {
     "VarkaOathDial.Margin":
         "presentation: the Spark counter's panel margin, named on the dial "
         "for its tests. The sim has no energy panel.",
+    # Yae's Sakura display (2026-10-18, the pool to 78, pick 3 (a)). Every
+    # number is the row's look; what it draws is the shrine ledger's.
+    "YaeSakuraDisplay.SlotSide":
+        "presentation: one shrine slot's side in pixels. The sim draws no row.",
+    "YaeSakuraDisplay.SlotGap":
+        "presentation: the gap between slots in pixels. The sim draws no row.",
+    "YaeSakuraDisplay.HeadGap":
+        "presentation: the row's clearance over her hitbox. The sim has no "
+        "hitbox.",
+    "YaeSakuraDisplay.PreviewHeight":
+        "presentation: the band under a slot for the plant preview's words.",
+    "YaeSakuraDisplay.LevelFontSize":
+        "presentation: the Level number's font size.",
+    "YaeSakuraDisplay.SmallFontSize":
+        "presentation: the turns, marks and preview font size.",
+    "YaeSakuraDisplay.PipSide":
+        "presentation: one turn pip's side in pixels.",
+    "YaeSakuraSlots.MaxPips":
+        "presentation: turns drawn as pips up to this many, a number past it. "
+        "It is not the Sakura's lifetime (YaeLaw.SakuraTurns is), only how "
+        "many dots fit a slot.",
     # The Bake-Kurage's beat (`EB-316`, `EB-317`). Both numbers are SCREEN
     # TIME. They decide how long an animation and a speech bubble occupy the
     # frame and nothing else: no hit is added, removed, resized or reordered by
