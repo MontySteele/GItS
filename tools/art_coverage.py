@@ -118,6 +118,15 @@ CARD_DIRS = tuple(IMAGES / name for name in CARD_DIR_NAMES)
 # KNOWN-set pattern (as in tools/art_lint.py): a stale file with a reason on
 # record is a NOTE, not a failure. Never prune an entry without a new reason.
 KNOWN_STALE = {
+    "proto_mi_itto_superlative_superstrength": (
+        "The Inazuma pool rework (2026-10-18) cut Superlative Superstrength from the pool, and its art carries over to Royal Descent (its plan row was repointed). Kept rather than deleted: a painted asset on a companions/ out-path that main shipped until the rework merged. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_mi_raiden_musou_no_hitotachi": (
+        "The Inazuma pool rework (2026-10-18) cut Musou no Hitotachi from the pool, and its art carries over to Euthymia (its plan row was repointed). Kept rather than deleted: a painted asset on a companions/ out-path that main shipped until the rework merged. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_mi_yoimiya_aurous_blaze": (
+        "The Inazuma pool rework (2026-10-18) cut Aurous Blaze from the pool, and its art carries over to Niwabi Fire-Dance (its plan row was repointed). Kept rather than deleted: a painted asset on a companions/ out-path that main shipped until the rework merged. It is NOT coverage for anything and must never be counted as such."
+    ),
     "proto_ym_deadline": (
         "The Yae dedupe (2026-10-16, review/active/yae-dedupe-2026-10-16.md, both picks (a)) cut Deadline from her pool. Kept rather than deleted: a painted asset on a yae/ out-path, visible to this tool since yae joined CHARACTER_DIRS (art gaps pass, 2026-10-18). It is NOT coverage for anything and must never be counted as such."
     ),
@@ -658,32 +667,6 @@ KNOWN_MISSING = {
     # dedupe (review/active/yae-dedupe-2026-10-16.md, 2026-10-16), whose
     # refill's eleven cards were painted by the Yae refill art pass
     # (2026-10-16), under "Yae refill art" in art/plan.tsv.
-    #
-    # THE INAZUMA POOL REWORK (2026-10-18): ten new companion cards, built
-    # without an art pass (the build was code only: no fetch, no render into
-    # the main checkout's ImageGen). Each wants official art of its own
-    # character, Inazuma only and no face already on a companion card
-    # (picked in the art pass that paints them). Three can take the art of
-    # the row the rework cut for the same character: Royal Descent from
-    # Superlative Superstrength (Itto), Euthymia from Musou no Hitotachi
-    # (Raiden), Niwabi from Aurous Blaze (Yoimiya). Wanderer has no source
-    # in art/SOURCES.tsv yet.
-    "proto_mi_ayaka_hyouka": "Inazuma pool rework 2026-10-18: Kamisato Ayaka, art pass pending",
-    "proto_mi_heizou_windmuster_kick": "Inazuma pool rework 2026-10-18: Shikanoin Heizou, art pass pending",
-    "proto_mi_itto_ushi": "Inazuma pool rework 2026-10-18: Arataki Itto, art pass pending",
-    "proto_mi_itto_royal_descent": "Inazuma pool rework 2026-10-18: Arataki Itto, can take Superlative Superstrength's art",
-    "proto_mi_raiden_baleful_omen": "Inazuma pool rework 2026-10-18: Raiden Shogun, art pass pending",
-    "proto_mi_raiden_euthymia": "Inazuma pool rework 2026-10-18: Raiden Shogun, can take Musou no Hitotachi's art",
-    "proto_mi_mizuki_aisa_utamakura": "Inazuma pool rework 2026-10-18: Yumemizuki Mizuki, art pass pending",
-    "proto_mi_yoimiya_niwabi": "Inazuma pool rework 2026-10-18: Yoimiya, can take Aurous Blaze's art",
-    "proto_mi_kazuha_chihayaburu": "Inazuma pool rework 2026-10-18: Kaedehara Kazuha, art pass pending",
-    "proto_mi_wanderer_hanega": "Inazuma pool rework 2026-10-18: Wanderer, no source yet, art pass pending",
-    "proto_mi_ayato_kyouka_fuushi": "Inazuma pool rework 2026-10-18: Kamisato Ayato, art pass pending",
-    "proto_mi_kirara_meowteor_kick": "Inazuma pool grown to 34, 2026-10-18: Kirara, art pass pending",
-    "proto_mi_yoimiya_ryuukin_saxifrage": "Inazuma pool grown to 34, 2026-10-18: Yoimiya, art pass pending",
-    "proto_mi_wanderer_kyougen": "Inazuma pool grown to 34, 2026-10-18: Wanderer, no source yet, art pass pending",
-    "proto_mi_chiori_twin_blades": "Inazuma pool grown to 34, 2026-10-18: Chiori, art pass pending",
-    "proto_mi_yae_sacred_sakuras_favor": "Inazuma pool grown to 34, 2026-10-18: Yae Miko, art pass pending",
 }
 
 
