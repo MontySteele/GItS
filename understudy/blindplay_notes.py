@@ -1843,7 +1843,8 @@ ARM_KEYWORDS: dict[str, str] = {
     # trio, Bow, Cue, Rehearsal, the front performer, Ousia, Pneuma and six
     # guests) left with it; their history is in git.
     # The Spend paper (2026-10-10): "Spend up to X" pays X or all she has.
-    "Spend": ("Pay that much Fanfare. Offered only if you have enough. "
+    "Spend": ("Pay that much Fanfare. With less, you can't play the card "
+              "or its Spend mode. "
               "Spend up to X pays X, or all you have if that is less."),
     # The 2026-10-11 playtest: "the tooltips for Fanfare and Drain are
     # rather verbose (Drain moreso)".
@@ -1854,8 +1855,8 @@ ARM_KEYWORDS: dict[str, str] = {
     # Repaid. The drain-line round (2026-10-09): "Drained HP
     # above your line returns after combat."
     "Drain": ("Lose N HP. Each combat, the first 1/4 of your Max HP "
-              "drained returns after combat; more than that only Repay "
-              "returns."),
+              "drained returns after combat. That is your line: past it, "
+              "only Repay returns."),
     # THE POOL TO 75 (2026-10-09): a Repay counts the HP it returns; a
     # Guest Star exhausts and comes back when its guest leaves. furina-next
     # paper 3 (2026-10-16): the Block floor is the rule's one line.

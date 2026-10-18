@@ -3073,8 +3073,13 @@ AURA_USED_UP = "no aura to Swirl ({reaction} used it up)."
 #: card whose play would make another element current. The page layer only:
 #: [USER] ruled no more text on the cards themselves. The new count is the
 #: Oath that element holds NOW; the play's own Oath gain comes on top.
-OATH_SWITCH_NOTE = ("    - Switches you to {element} "
-                    "(Oath {old} → {new}, plus what it gains).")
+#: Varka (Barbara): "Oath 25 → 5" read as the Oath being erased; the old
+#: element's Oath stays and counts again when he switches back, so the note
+#: says which Oath his cards read and that the other is kept.
+OATH_SWITCH_NOTE = ("    - Switches you to {element}: your cards read "
+                    "{element} Oath {new} (plus what this gains).")
+OATH_SWITCH_KEPT = (" Your {old_element} Oath {old} is kept for when you "
+                    "switch back.")
 UNWAVERING_BANNER_TITLE = "Unwavering Banner"
 ALL_FOUR_WINDS_TITLE = "All Four Winds"
 _SWIRL_WORD = re.compile(r"Swirl")
@@ -3113,9 +3118,13 @@ def _oath_switch(card: dict[str, Any], oath: dict[str, Any] | None,
         return ""
     if not knight and _has_power(you, UNWAVERING_BANNER_TITLE):
         return ""
-    old = oath["counts"].get(oath["element"], 0) if oath["element"] else 0
-    return OATH_SWITCH_NOTE.format(element=element, old=old,
+    note = OATH_SWITCH_NOTE.format(element=element,
                                    new=oath["counts"][element])
+    if oath["element"]:
+        note += OATH_SWITCH_KEPT.format(
+            old_element=oath["element"],
+            old=oath["counts"].get(oath["element"], 0))
+    return note
 
 
 def _render_oath(oath: dict[str, Any],

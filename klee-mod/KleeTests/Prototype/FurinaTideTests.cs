@@ -814,8 +814,8 @@ public class FurinaTideTests
             .GetField(name, HeadlessGame.All)!.GetRawConstantValue()!;
         Assert.Equal(
             "Lose N HP. Each combat, the first 1/4 of your Max HP drained "
-            + "returns after combat; more than that only [gold]Repay[/gold] "
-            + "returns.",
+            + "returns after combat. That is your line: past it, only "
+            + "[gold]Repay[/gold] returns.",
             Body("DrainBody"));
         Assert.Contains("drained HP", Body("RepayBody"));
         Assert.Contains("[gold]Repay[/gold]", Body("FanfareBody"));

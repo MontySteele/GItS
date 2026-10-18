@@ -17,7 +17,6 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 
 - Before the public launch, [USER] reviews every writing surface (events, Ancient and combat lines, select text, the Architect) for stilted lines (ruled 2026-10-16).
 - Furina, Let the People Rejoice's damage preview ignores an enemy's Hard To Kill cap (face said 34, each Exoskeleton took 9; suite 3 lane 5).
-- Furina's seat page never defines "past your line" in the Drain tip (suite 3 lane 5).
 - Furina's seat page printed a word tip for Charlotte on a screen with no Charlotte card (suite 3 lane 3).
 - Klee, Chain Fuse also grows Mines; its text does not say so (suite 6 lane 2).
 - Klee, Stoke the Fuse resolves before Party Poppers places its Bomb, so on an empty field it burns every Spark for nothing (suite 6 lane 4).
@@ -52,7 +51,6 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - Story chains (`klee-mod/KleeCode/Story/`, 2026-10-15): seen in the mixed round (2026-10-15) for Klee act 1 to 2 (Mom's Marks, Alice's Cache) and Varka acts 1 to 3 (Dispatch from Mondstadt, The Second Satchel, The Acting Grand Master, with the report option locked). Still unseen: Klee's act 3, routing after a save and reload, Doubt leaving as The Knights Come Looking opens, the potion reward screen mid-event, and the co-op story room (2026-10-16: each player gets their own character's event in the act's story room, and a character with no event that act gets A Quiet Landing, Heal 10 HP or Gain 50 Gold).
 - Kokomi, Kirara — Surprise Dispatch: a seat read its "next turn, deal 10" as landing in the enemy turn, not at her turn start (mixed round 2026-10-15, lane 1); check the timing and the page line.
 - Kokomi: Louse Progenitor's Curl Up did not trigger on a carried-out Plan's Hydro hit, only on the next card hit (mixed round, lane 2); check against the base game's hit rules.
-- Varka, Barbara's preview prints "Switches you to Hydro (Oath 25 -> 5 ...)", which reads as the Oath being erased; the Electro Oath persists and returns. Text fix (Balance: text-only may land on main).
 - Kokomi's seven relics and three potions and Furina's five relics and two potions (#1324, #1325) were not met in five seats; check them with `understudy.embark --relic` on a seat each, or in a play.
 - Klee's rest-site pose is a still: BaseLib rebuilds the rest sprite from the texture alone, so an idle loop there needs code.
 - Art owed, Spiral Abyss mode (2026-10-12): the menu emblem and The Ley Line are 64px wiki sources upscaled 4x, and seven are nearest-official stand-ins (Abyssal Moon = Iridescent Moon, Moonlit Rest = Sweet Madame, First Strike = Sword Unaligned, Elemental Burst = Battle-Line Detonation, Crystallize = Crystallize Shield Hydro, Sheer Cold = Element Cryo, Elemental Mark = Element Pyro).
@@ -85,7 +83,7 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 - `EB-38` [USER] at a shop: the spine-less character portrait idles (the rest-site half is seen).
 - `EB-160` verify a live locale switch: the injected loc tables survive it, or a `LocException` names the seam.
 - Furina screen (wave 2026-10-12): Hymn's "(Repays 0)" preview is wrong after a Drain; Spend damage never shows Vulnerable; a boss shows "Frozen 1".
-- Furina suite 1: Quick Flourish ("Spend 4") is unplayable below 4 Fanfare without the card saying so; the Lynette glossary line does not match her card.
+- Furina suite 1: the Lynette glossary line does not match her card.
 - Kaiser Crab (Varka wave 2026-10-13, lane 5 fight 16): when Baron Bunny's turn-start hit killed Rocket, Crab Rage's 99 Block never reached Crusher (telemetry: 18 enemy Block all fight, Crusher's own Guarded Strike; Crusher then died to Tidal Bulwark and Blazing Charge). The base game grants it in `CrabRagePower.AfterDeath` and no mod code was found that removes it; reproduce live (`set_hp` Rocket low, Baron Bunny).
 - Kokomi round 3 (lane 4 F6): Change of Plans was refused "no Energy" with four Plans waiting. Not reproduced: it costs 0, its gate reads only the queue, and the sim plays it at 0 Energy with four waiting (`test_kokomi_round3_alist_2026_10_13`). The game's refusal enum ("EnergyCostTooHigh") is what prints "not enough energy"; have the next seat record the hand and Energy on any such refusal.
 - Varka text (ascension check 2026-10-12): a Knight Companion's element switch (Team Effort) shows only after the play; Kindled Edge switched him to Pyro with no "Element switch" line; Four Winds' Ascension returns after a mid-fight reshuffle, unprinted.
