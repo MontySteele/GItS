@@ -42,6 +42,3 @@ line leaves this file. Closed picks are in git
 - **Globe Head** (the Teyvat frame's enemy reskins; returns with the frame or
   elemental enemies): (1) reskin; (2) redesign. No default: the silhouette is the
   whole question. `dossiers/remap/reskin-gallery.md`.
-- **Companion cards P5a** (`companion-cards-2026-08-30.md`): how a Rare
-  Personal companion would ever be acquired. Deferred by R234; it returns
-  before any Rare Personal companion is designed.

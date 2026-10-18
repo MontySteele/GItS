@@ -31,9 +31,7 @@ namespace KleeMod.Tests.Prototype;
 /// that it can SHIP, which is the whole objection R213 B's "same emitter" rule
 /// exists to answer.
 ///
-/// Compiled only under <c>-p:PrototypeCards=true</c>, like everything in this
-/// directory: the class it pins does not exist in a release build, so a pin
-/// against it must not either. The sim twin is
+/// The sim twin is
 /// <c>tier0/tests/test_kurage_base_kit.py</c>'s EB-213 block (the campfire
 /// reaching the ruled 5) and <c>tier0/tests/test_prototype_surface.py</c>'s
 /// (b2) block (the channel itself).

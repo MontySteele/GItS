@@ -28,7 +28,7 @@ namespace KleeMod.Vfx;
 /// <c>CardModel.BuildDescription</c> appended "Applies Pyro" as a line of the
 /// rules box on every face carrying the keyword. Flipping those four fields to
 /// <c>AutoKeywordPosition.None</c> is the whole of the removal, and it is ONE
-/// switch for all 114 faces across the four sheets and both quarantined arms,
+/// switch for all 114 faces across the four sheets and both prototype arms,
 /// because there is one keyword per element and every sheet declares the same
 /// four.
 ///
@@ -313,7 +313,7 @@ internal static class ElementBadge
         // as cheap as one read off the keyword, and
         // `KleeCardTooltips.AppliedElement` is the one expression -- the same
         // one the reaction preview and the hit itself go through, so the gem,
-        // the words and the aura cannot come apart. In a release build it
+        // the words and the aura cannot come apart. With no override it
         // returns the printed element unchanged.
         var element = KleeCardTooltips.AppliedElement(card, ElementOf(card));
         Texture2D? texture = null;

@@ -52,8 +52,7 @@ namespace KleeMod.Relics;
 /// one of the four starter Knights off the player's own seeded
 /// Transformations stream, so every client of a co-op run rolls the same one.
 ///
-/// QUARANTINED by <c>#if PROTOTYPE_CARDS</c> and living in <c>Relics/</c>,
-/// <c>TamakushiCasket</c>'s reason: <c>tools/lint_unique_names.py</c> reads
+/// IN <c>Relics/</c>, <c>TamakushiCasket</c>'s reason: <c>tools/lint_unique_names.py</c> reads
 /// relic titles out of this directory only.
 ///
 /// THE STARTING ELEMENT (<c>review/active/varka-defence-2026-10-01.md</c>
@@ -226,10 +225,7 @@ public class BoreasFang : CustomRelicModel
         CardCreationOptions creationOptions)
     {
         if (!OffersCompanionTo(player, creationOptions)) return false;
-        var rarity = creationOptions.RarityOdds == CardRarityOddsType.BossEncounter
-            ? CardRarity.Rare
-            : (CardRarity?)null;
-        var offer = CompanionSlot.Roll(player, rarity);
+        var offer = CompanionSlot.Roll(player, creationOptions);
         if (offer == null) return false;
         cardRewardOptions.Add(new CardCreationResult(offer));
         return true;

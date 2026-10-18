@@ -102,8 +102,6 @@ namespace KleeMod.Vfx;
 /// pause-for-choice (the patch at the foot of this file) and on every frame
 /// as a backstop (<see cref="KokomiPlanViewRows.ChoiceTakesOver"/>), so the
 /// choice screen always reaches her.
-///
-/// QUARANTINED with the strip: `Vfx/Prototype/**`.
 /// </summary>
 internal static class KokomiPlanView
 {

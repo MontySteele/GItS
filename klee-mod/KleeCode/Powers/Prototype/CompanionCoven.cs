@@ -18,23 +18,13 @@ using MegaCrit.Sts2.Core.ValueProps;
 namespace KleeMod.Powers;
 
 /// <summary>
-/// KLEE'S FOUR COVEN PERSONALS, C# side (QUARANTINED, R213 B / R236). Twin of
+/// THE COVEN ROWS' POWERS, C# side (R236). Twin of
 /// <c>tier0/engine/companion_coven.py</c>, function for function.
 ///
-/// The approved Mondstadt workshop's sec.4 and its sec.3 Prune entry give Klee
-/// four PERSONAL companions. A Personal is not a Universal: it rides the
-/// channel <c>prune_witch_hunt</c> already rides -- <c>ICompanionCard
-/// .PersonalPool</c>, filtered at every offer site by
-/// <see cref="CompanionPool.IsOfferable"/> -- so the four join
-/// <see cref="CompanionOverhaulRoster"/>'s replacement roster without joining
-/// either nation's Universal pool, and neither nation's count moves.
-///
-/// NO NEW SWITCH. This is the SAME arm as the two nation workshops:
-/// <c>-p:PrototypeCards=true</c> is the quarantine and
-/// <c>-p:CompanionOverhaul=true</c> moves <see cref="CompanionOverhaul"/>'s
-/// default. A fifth property would let a build offer Klee's coven beside the
-/// shipped Mondstadt rows the coven's own Prune row supersedes, which is a
-/// state no document describes.
+/// The Mondstadt workshop gave Klee four PERSONAL companions. Since the
+/// Klee-only companions (2026-10-03) none is a Personal: Prune's Chime is in
+/// Klee's own pool, Qiqi's Herald of Frost is a shared Universal, and Sayu
+/// and Yaoyao are cut.
 ///
 /// TWO ARMS MEET HERE. Prune's Chime speaks about BOMBS, which are the KLEE
 /// overhaul's rule -- so <see cref="CompanionCovenBombs"/> tests that arm as
@@ -180,17 +170,4 @@ public sealed class HeraldOfFrostPower : PowerModel, ILocalizationProvider
             ValueProp.Unpowered, null, fast: true);
         await PowerCmd.TickDownDuration(this);
     }
-}
-
-/// <summary>
-/// THE COVEN'S PERSONALS, EMPTY SINCE THE KLEE-ONLY COMPANIONS (2026-10-03,
-/// <c>review/active/mondstadt-companions-2026-10-03.md</c> sec.4): Prune's
-/// Chime is in Klee's own draftable pool (<see cref="KleeOverhaulRoster"/>),
-/// Qiqi's Herald of Frost is a shared Universal
-/// (<see cref="CompanionOverhaulRoster"/>), Sayu and Yaoyao are cut. Sim twin:
-/// the empty <c>C.COVEN_PERSONAL_POOL_IDS</c>.
-/// </summary>
-internal static class CompanionCovenRoster
-{
-    internal static IEnumerable<CardModel> Personals() => Array.Empty<CardModel>();
 }

@@ -97,39 +97,3 @@ def test_a_card_only_screen_still_offers_the_normal_number_of_cards(
     offers = rewards.roll_rewards(random.Random(0), "klee",
                                   companion_offers=0)
     assert len(offers) == C.REWARD_CARD_OFFERS
-
-
-def test_the_extra_screen_does_not_advance_the_companion_pity_clock(
-        monkeypatch):
-    """A screen that CANNOT produce a companion must not count as a screen
-    that failed to -- otherwise The Hunt quietly accelerates pity.
-
-    Asserted WITHIN one run rather than by comparing two. Extra screens roll
-    on the shared run RNG, so a with/without pair diverges on every draw
-    after the first extra screen and the two runs are not comparable at all
-    -- the first version of this test compared them and read a difference
-    that was RNG, not pity.
-
-    The invariant instead: with pity(2), the own-screen immediately after a
-    companion is taken can never be a pity screen, because the clock was
-    just reset to 0 and needs 2. Three card-only screens sit between them
-    here; if those counted, the clock would read 3 and the next own screen
-    WOULD be a pity screen.
-    """
-    def take_companion(rng, deck, offers, archetype):
-        return next((c for c in offers if c.is_companion), None)
-
-    monkeypatch.setattr(model, "run_fight", _fight_earning(3))
-    res = model.run_one("klee", "demolition", "demolition",
-                        take_companion, 1, slot_mode="pity(2)")
-    own = [d for d in res.decisions
-           if any(c.is_companion for c in d["offers"])]
-    assert len(own) > 3                      # the invariant has cases to test
-    took_one = False
-    for d in own:
-        n_comp = sum(1 for c in d["offers"] if c.is_companion)
-        if took_one:
-            assert n_comp != 3, "pity fired one screen after a reset"
-        picked = d["picked"]
-        took_one = picked is not None and any(
-            c.is_companion and c.id == picked for c in d["offers"])

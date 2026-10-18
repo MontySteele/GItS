@@ -24,10 +24,8 @@ namespace KleeMod.Potions;
 /// rule-bending turn) per character. Combat only, and aimed at a player as the
 /// base game's character potions are, so in co-op one can be handed over.
 ///
-/// QUARANTINED: the file is inside <c>#if PROTOTYPE_CARDS</c>, and the two
-/// pools are what the characters' <c>PotionPool</c> answers only under their
-/// arms (<c>Klee.PotionPool</c>, <c>Furina.PotionPool</c>). Arm off, both still
-/// answer <c>SilentPotionPool</c> and none of these can be rolled.
+/// The two pools are what <c>Klee.PotionPool</c> and <c>Furina.PotionPool</c>
+/// answer.
 /// </summary>
 public static class ArmPotions
 {
@@ -198,8 +196,8 @@ public sealed class BottledApplause : ArmPotion
 
 // ---- the pools -------------------------------------------------------------
 
-/// <summary>Klee's potion pool under the Klee arm: her three, and nothing
-/// borrowed. <c>Klee.PotionPool</c> answers it only with the arm on.</summary>
+/// <summary>Klee's potion pool: her three, and nothing
+/// borrowed. <c>Klee.PotionPool</c> answers it.</summary>
 public sealed class KleePotionPool : PotionPoolModel
 {
     public override string EnergyColorName => "ironclad";

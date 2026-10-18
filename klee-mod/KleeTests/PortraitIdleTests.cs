@@ -254,7 +254,7 @@ public class PortraitIdleTests
     [Fact]
     public void The_idle_reads_no_arm_flag()
     {
-        // SHIPPED, not quarantined, on `MerchantSpineBindingPatch.cs`'s
+        // FOR EVERY CHARACTER, on `MerchantSpineBindingPatch.cs`'s
         // precedent: the gap belongs to every spine-less portrait and all
         // three of ours are, so an arm-scoped idle would close a third of the
         // row and leave two characters a photograph.

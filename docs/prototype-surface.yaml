@@ -424,7 +424,7 @@
 
 - {id: proto_ko_hair_trigger, name: "Hair Trigger", character: klee,
    authored_by: [claude],
-   cost: 0, type: skill, rarity: common,
+   cost: 0, type: skill, rarity: uncommon,
    description: "Your [gold]Bombs[/gold] on the enemy become [gold]Mines[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}.",
    upgrade: {draw: 1},
    effects: [{op: mine_bombs, target: enemy}, {op: draw, amount: 1}]}
@@ -2800,30 +2800,6 @@
    description: "At the start of your turn, lose 1 HP and gain {PowerAmount:diff()} [gold]Strength[/gold].",
    effects: [{op: apply_power, power: masque_red_death, amount: 1, target: self, note: "at the start of each turn lose 1 HP and gain 1 Strength"}]}
 
-- {id: proto_mf_guest_neuvillette_tears, name: "Neuvillette — O Tears, I Shall Repay", character: furina,
-   no_upgrade: "A Guest Star is made for one fight and never upgraded, as the shipped row.",
-   authored_by: [claude],
-   art_of: guest_neuvillette_tears,
-   nation: fontaine, star: 5, rarity: common, role_c: applier, element: hydro, cost: 1, type: attack, guest_star: true,
-   description: "Deal 5 [gold]Hydro[/gold] damage.",
-   effects: [{op: damage, amount: 5, target: enemy, applies_element: true}]}
-
-- {id: proto_mf_guest_neuvillette_droplets, name: "Neuvillette — Sourcewater Droplets", character: furina,
-   no_upgrade: "A Guest Star is made for one fight and never upgraded, as the shipped row.",
-   authored_by: [claude],
-   art_of: guest_neuvillette_droplets,
-   nation: fontaine, star: 5, rarity: common, role_c: buffer, element: hydro, cost: 1, type: skill, guest_star: true,
-   description: "Gain 4 [gold]Block[/gold]. Apply [gold]Hydro[/gold] to a random enemy.",
-   effects: [{op: block, amount: 4}, {op: apply_aura, element: hydro, target: random_enemy}]}
-
-- {id: proto_mf_guest_neuvillette_judgment, name: "Neuvillette — Equitable Judgment", character: furina,
-   no_upgrade: "A Guest Star is made for one fight and never upgraded, as the shipped row.",
-   authored_by: [claude],
-   art_of: guest_neuvillette_judgment,
-   nation: fontaine, star: 5, rarity: uncommon, role_c: applier, element: hydro, cost: 2, type: attack, guest_star: true,
-   description: "Lose {HpLoss} HP. Deal 7 [gold]Hydro[/gold] damage to ALL enemies.",
-   effects: [{op: damage, amount: 3, target: self}, {op: damage, amount: 7, target: all_enemies, applies_element: true}]}
-
 # coven Personals, PR: coven-personals (R236). Prune in Klee's own pool, Qiqi
 # shared, Sayu and Yaoyao cut by the Klee-only companions (2026-10-03).
 # Per-row reasoning: docs/notes/prototype-surface-provenance.md.
@@ -2846,7 +2822,7 @@
 # 2026-10-11 Companion pass (review/ruled/companion-upper-pass-2026-10-11.md).
 - {id: proto_mc_qiqi_herald_of_frost, name: "Qiqi — Herald of Frost", character: klee,
    authored_by: [claude],
-   nation: liyue, star: 5, rarity: uncommon, role_c: applier, element: cryo,
+   nation: mondstadt, star: 5, rarity: uncommon, role_c: applier, element: cryo,
    cost: 1, type: skill, exhaust: true,
    description: "For 3 turns, at the start of your turn apply [gold]Cryo[/gold] twice to a random enemy and gain 4 [gold]Block[/gold].",
    effects: [{op: apply_power, power: cvn_herald_of_frost, amount: 3, target: self}]}

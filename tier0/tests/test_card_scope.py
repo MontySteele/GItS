@@ -72,13 +72,6 @@ RUN_SCOPE_ALLOWED = {
         "the 4th reward option -- a reward card is picked INTO THE DECK, so "
         "run scope is its real lifetime (CardFactory.CreateForReward ends in "
         "exactly this call)",
-    "SparkSeededReward.cs":
-        "`EB-594`: the SWAPPED reward option, the same kind of card as the "
-        "appended one above and picked into the deck the same way. It creates "
-        "one for exactly the reason the row exists -- the postfix used to "
-        "hand the screen a row straight out of `GetPossibleCards`, which is a "
-        "CANONICAL model, and serialising the pick threw "
-        "`CanonicalModelException` inside HeftyTablet.AfterObtained",
     "TheLegendsWereTrueMirror.cs":
         "the Teyvat arm's mirror of the base game's `TheLegendsWereTrue`, "
         "mirrored clause for clause: `NabTheMap` puts a Spoils Map straight "

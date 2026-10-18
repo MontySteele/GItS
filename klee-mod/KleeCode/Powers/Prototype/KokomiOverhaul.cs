@@ -1,7 +1,7 @@
 namespace KleeMod.Powers;
 
 /// <summary>
-/// THE KOKOMI OVERHAUL SWITCH, C# side. Twin of tier0's <c>C.KOKOMI_OVERHAUL</c>.
+/// THE KOKOMI OVERHAUL, C# side. Twin of tier0's <c>C.KOKOMI_OVERHAUL</c>.
 ///
 /// The ruled brief (<c>review/active/kokomi-brief-2026-09-01.md</c> DRAFT 7,
 /// direction ruled R240 and approved R241) replaces her whole rule set with ONE
@@ -20,24 +20,9 @@ namespace KleeMod.Powers;
 /// DRAFT 2's RULES ARE GONE, NOT OFF. Tide, Surge, Exert, the pulse and its
 /// budget, the Garment, Strength-to-Tide, Orders and Tactics are cut by the
 /// brief's sec.6 by name, so their ops, their constants and their C# are
-/// deleted rather than left inert behind a second switch. What survives from
-/// draft 2 is the typed Plan queue, Mend, and this switch.
+/// deleted. What survives from draft 2 is the typed Plan queue and Mend.
 ///
-/// TWO SWITCHES, NOT ONE, AND THEY DO DIFFERENT JOBS -- the same arrangement
-/// <see cref="KleeOverhaul"/> and <see cref="CompanionOverhaul"/> make, for the
-/// same reasons:
-///
-///   * <c>-p:PrototypeCards=true</c> (defines <c>PROTOTYPE_CARDS</c>) is the
-///     QUARANTINE. It compiles <c>Cards/Prototype/**</c> and
-///     <c>Powers/Prototype/**</c> -- this file included -- so a release build
-///     contains no type from this arm at all.
-///   * <c>-p:KokomiOverhaul=true</c> (defines <c>KOKOMI_OVERHAUL</c>) is the
-///     ARM. It only moves <see cref="Enabled"/>'s default. The rules engine
-///     compiles either way, because the headless pins have to exercise the
-///     rules AND assert the flag-off wiring in one build.
-///
-/// WHAT MOVES WHEN IT IS ON, exhaustively. Every seam is one <c>if</c> on this
-/// property and there are eleven of them, in two groups.
+/// WHAT THE ARM CHANGES, in two groups.
 ///
 /// The five that REPLACE:
 ///   * <c>Kokomi.StartingDeck</c> -- the slice's ten cards
@@ -76,13 +61,6 @@ namespace KleeMod.Powers;
 ///   * the Burst GAUGE -- <c>KokomiResources.BurstGaugeApplies</c>
 ///     (`EB-297`), the predicate <c>GaugeBridge</c> selects on, so the
 ///     overhead bar is not built at all.
-///
-/// FLAG OFF IS BYTE-IDENTICAL. Every one of those ten is an early branch on
-/// this property, so with it off her starter, her relic, her pool and her
-/// funnel are exactly what they were, and no card applies a power from this
-/// arm. That is the acceptance condition and it is pinned by
-/// <c>KleeTests/Prototype/KokomiOverhaulRuleTests.cs</c> and
-/// <c>tier0/tests/test_kokomi_overhaul.py</c> rather than intended.
 /// </summary>
 public static class KokomiOverhaul
 {
@@ -90,9 +68,7 @@ public static class KokomiOverhaul
 
     /// <summary>
     /// Is the arm live FOR THIS CREATURE? The arm is Kokomi's alone, and every
-    /// rule below asks through this rather than through
-    /// <see cref="Enabled"/> directly -- in co-op the other seat may be Klee,
-    /// and a bare flag read would hand him a Tide counter.
+    /// rule below asks through this -- in co-op the other seat may be Klee.
     ///
     /// THE OFF-CHARACTER RULE (2026-10-18), on the base game's Osty and Orbs
     /// precedent: her kit is live on her from turn one, and on anyone else

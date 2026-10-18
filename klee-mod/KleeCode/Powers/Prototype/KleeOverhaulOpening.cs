@@ -34,11 +34,7 @@ namespace KleeMod.Powers;
 /// cannot pay twice, and per-PLAYER so a co-op partner's turn counter cannot
 /// mint Klee's Spark. Identity through <see cref="IKleeCharacter"/>, which is
 /// what <c>tools/lint_prototype_patch_scope.py</c> requires of anything running
-/// on every seat at the table under the one prototype switch.
-///
-/// FLAG OFF IT DOES NOT RUN. The <c>KleeOverhaul.Enabled</c> guard is first, so
-/// a build carrying the quarantine but not the arm -- and every release build,
-/// which does not compile this file at all -- is byte for byte what it was.
+/// on every seat at the table.
 /// </summary>
 internal static class KleeOverhaulOpening
 {

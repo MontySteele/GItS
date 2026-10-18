@@ -16,14 +16,13 @@ namespace KleeMod;
 /// walk — and every patch class after it is never applied. The catch logged a
 /// single line ("Harmony patching failed: ...") and initialization carried on.
 ///
-/// That is the worst available shape for this mod specifically, because two of
-/// our patches are softlock guards: `CardFactory_CreateForMerchant_TypeFallback`
-/// (finding 24 — entering ANY shop black-screens the run) and
-/// `CardFactory_CreateForReward_Clamp` (finding 22). Reflection order is not
+/// That is the worst available shape for this mod specifically, because some
+/// of our patches are softlock guards (`SoftlockGuards` below; the reward
+/// clamp, finding 22, among them). Reflection order is not
 /// source order and is not stable across builds, so an unrelated dead lookup in
-/// some cosmetic VFX patch could silently disarm the shop guard, and the only
+/// some cosmetic VFX patch could silently disarm a guard, and the only
 /// evidence would be one log line that named the VFX patch. The run would then
-/// die in a shop, hours later, for a reason nothing pointed at.
+/// die hours later for a reason nothing pointed at.
 ///
 /// The fix is not cleverness, it is granularity: each patch class gets its own
 /// CreateClassProcessor call inside its own try/catch. One dead lookup disarms
@@ -56,7 +55,6 @@ internal static class KleePatchBootstrap
     private static readonly HashSet<string> SoftlockGuards = new(StringComparer.Ordinal)
     {
         nameof(CardFactory_CreateForReward_Clamp_Patch),
-        nameof(CardFactory_CreateForMerchant_TypeFallback_Patch),
         nameof(ProgressSaveManager_EpochCheck_Patch),
         nameof(Patches.MerchantInventory_CompanionColorlessSlots_Patch),
     };

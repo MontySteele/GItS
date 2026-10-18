@@ -46,14 +46,6 @@ namespace KleeMod.Powers;
 /// passes since have made it 39, and the Casket pass (2026-09-28) 46, and the
 /// cleanup pass (2026-09-29) 44, and the feed pass (2026-09-29) 48; it has been
 /// 78 since pool completion (2026-10-01), re-founded on 2026-10-12.
-///
-/// THE OVERHAUL WINS WHERE IT MEETS THE KURAGE'S MEMORY. A dev build compiles
-/// this arm AND that one, and both want her starter. They are alternatives, not
-/// layers -- the memory is priced inside the Charge bank this arm retires -- so
-/// with <c>KokomiOverhaul.Enabled</c> the memory's starter substitution is not
-/// reached and its rules are switched off at the funnel. With it off, nothing
-/// here runs and the memory arm owns the starter exactly as before, which is
-/// the acceptance condition.
 /// </summary>
 internal static class KokomiOverhaulRoster
 {

@@ -21,8 +21,10 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   `KleeTests/Prototype/PoolCountTests.cs`.
 - **The sim** (`tier0`, `tier05`) runs the current kits as a rules twin. It
   does not gate balance; balance is measured on the real game.
-- **Last release package:** `0.2.1357` (2026-08-29), which predates the
-  current kits.
+- **Last release package:** the friends-only Workshop beta, **0.3.4**
+  (2026-10-17), read off the change note in the local, untracked
+  `.workshop/beta/workshop.json` (`operations/workshop.md`). The older
+  `0.2.1357` (2026-08-29) predates the current kits.
 
 ## Roster
 
@@ -39,7 +41,7 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   Klee, Kokomi and Varka have co-op cards (Varka's five are built); Furina
   has none since the Stage rework.
 - Every starter is the base Strike x4 and Defend x4 plus two cards of its own.
-  Starter basics change only on [USER]'s pick. No kit starts with a Companion.
+  Starter basics change only on [USER]'s pick. No kit starts with a shared Companion; Varka's Knights are his kit's own Companions and count as Companions for every synergy.
 - **Character five is Yae Miko** (`review/active/yae-proposal-2026-10-12.md`,
   ruled; the Stellar-Conduct nod is parked). **Prototype, batch one built
   in C#** (2026-10-13): the card paper
@@ -344,11 +346,13 @@ A fourth main-menu mode (`klee-mod/KleeCode/Abyss/`).
 ## Live cell
 
 The sim stamps below describe the sim's world; they do not gate kit balance.
-Stamps read live via `tier05/cells.py` (`PILOT_WEIGHTS_VERSION` 6).
+Stamps read live via `tier05/cells.py` (`PILOT_WEIGHTS_VERSION` 6). The last
+column names the change that last bumped each stamp; the `D` and `C` ones
+were about content retired since (the Salon, the shipped Undercurrent).
 
 | stamp | value | source | what this value covers |
 |---|---|---|---|
 | `RT` `RUNTEMPLATE_VERSION` | **13** | `tier0/constants.py` | `EB-83`: Wood Carvings joins the act-1 event pool. |
-| `D` `DRAFTER_VERSION` | **18** | `tier0/constants.py` | `EB-28`: Salon deploy priced through `STATIC_SALON_MEMBER_VALUE = 1.5`. |
+| `D` `DRAFTER_VERSION` | **18** | `tier0/constants.py` | `EB-28`: Salon deploy pricing (the Salon is retired). |
 | `P` `POLICY_VERSION` | **11** | `tier05/draft.py` | R207's scorer-literacy window. |
-| `C` `CONSTANTS_VERSION` | **22** | `tier0/constants.py` | Undercurrent costs 1 (2026-09-25). |
+| `C` `CONSTANTS_VERSION` | **22** | `tier0/constants.py` | Undercurrent costs 1 (2026-09-25; the shipped card is retired). |

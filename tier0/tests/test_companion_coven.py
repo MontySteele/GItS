@@ -81,7 +81,6 @@ def test_flag_off_an_explosion_is_still_pyro():
 # ---------------------------------------------------------------------------
 
 def test_the_coven_is_no_longer_a_personal_channel(overhaul):
-    assert C.COVEN_PERSONAL_POOL_IDS == ()
     for cid in (PRUNE, QIQI):
         card = loader.peek_card(cid)
         assert card.is_companion, cid
@@ -90,7 +89,9 @@ def test_the_coven_is_no_longer_a_personal_channel(overhaul):
     assert PRUNE not in _pool_ids(rewards.companion_pool())
     assert QIQI in C.MONDSTADT_OVERHAUL_POOL_IDS
     assert QIQI in _pool_ids(rewards.companion_pool())
-    assert loader.peek_card(QIQI).nation == "liyue"
+    # LAW: a character from an unreleased nation sits in the nation it
+    # operates in until its home sheet exists (2026-10-18).
+    assert loader.peek_card(QIQI).nation == "mondstadt"
 
 def test_flag_on_the_chime_supersedes_prunes_shipped_row(overhaul):
     """R236: under the arm the Chime IS Prune's card. The supersession is the
@@ -250,8 +251,7 @@ def test_every_personal_is_smithable_in_the_sim(overhaul):
     C# upgrades every one. A rest site with nothing to smith on a card the
     other engine smiths is the two engines playing different runs."""
     from tier0.content import upgrades
-    personals = (C.COVEN_PERSONAL_POOL_IDS + C.INAZUMA_OVERHAUL_PERSONAL_IDS
-                 + (PRUNE, QIQI))
+    personals = (PRUNE, QIQI)
     # Two since the Kokomi re-founding (2026-10-12): Gorou's Personal moved
     # into Kokomi's own pool, where her upgrade index answers for it.
     assert len(personals) == 2

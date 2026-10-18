@@ -31,8 +31,8 @@ namespace KleeMod.Tests.Prototype;
 /// not plan a reaction." The D default is taken: the sizes print in SET-OFF
 /// ORDER WITH ORDINALS, on the page and on the C# tooltip.
 ///
-/// THE COLLECTION IS LOAD-BEARING, `KleeOverhaulRoundOneFixTests`' reason:
-/// `KleeOverhaul.Enabled` is one static for the whole process.
+/// THE COLLECTION is a leftover from the retired arm switch; it only keeps
+/// these tests serial.
 /// </summary>
 [Collection(KleeOverhaulArm.Name)]
 public class BombBadgeHalvesTests

@@ -8,7 +8,7 @@ namespace KleeMod.Tests.Prototype;
 
 /// <summary>
 /// THE KLEE OVERHAUL, SLICE ONE: rules 1 to 7 of the ruled brief
-/// (`review/active/klee-brief-2026-09-01.md` sec.3), and the flag-off pin.
+/// (`review/active/klee-brief-2026-09-01.md` sec.3), and the wiring pin.
 ///
 /// WHAT IS REAL HERE AND WHAT IS STRUCTURAL, said once. The rules were written
 /// with the shipped Bomb's own split -- the DECISIONS are pure (growth, the
@@ -37,11 +37,7 @@ public class KleeOverhaulRuleTests
     [Fact]
     public void The_three_wiring_seams_read_the_flag_and_nothing_else()
     {
-        // FLAG OFF IS BYTE-IDENTICAL, pinned where it is decided rather than
-        // asserted in prose. Each seam is one `if` on the same property, so
-        // with the arm off `Klee.StartingDeck` falls through to the template
-        // the Sparks arm owns and `KleeCardPool.FilterThroughEpochs` falls
-        // through to the shipped off-pool filter.
+        // STRUCTURAL: each seam reads the overhaul roster.
         var deck = typeof(global::KleeMod.Klee)
             .GetProperty("StartingDeck", HeadlessGame.All)!.GetGetMethod(true)!;
         Assert.Contains("KleeOverhaulRoster.StartingDeck", Il.Calls(deck));

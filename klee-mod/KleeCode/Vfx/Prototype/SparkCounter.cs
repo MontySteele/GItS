@@ -139,9 +139,6 @@ namespace KleeMod.Vfx;
 /// headless boundary), so the pins below are the DECISIONS -- the scope, the
 /// number, the funnel, the geometry source and the arm gate. The look is a
 /// frame on the next `+proto` deploy.
-///
-/// QUARANTINED. `Vfx/Prototype/**` is `Compile Remove`d without
-/// `-p:PrototypeCards=true`. Revert is the flag.
 /// </summary>
 public static class SparkCounter
 {

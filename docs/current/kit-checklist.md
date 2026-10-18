@@ -6,9 +6,7 @@ the machinery review's change 6 demoted them: they are a checklist a sheet is
 read against, not a gate rows pass, and answering "no" to one is a finding for
 the brief, not a merge block.
 
-Nothing here is a numeric band and nothing here gates. The clause that says so,
-and decision closeness (R213 F) as the only numeric design falsifier, stayed in
-`LAW.md` under *Design governance*.
+Nothing here is a numeric band and nothing here gates.
 
 Provisional through the Klee slice, then reviewed.
 

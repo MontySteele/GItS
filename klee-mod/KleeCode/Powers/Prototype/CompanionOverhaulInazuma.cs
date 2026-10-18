@@ -20,7 +20,7 @@ namespace KleeMod.Powers;
 
 /// <summary>
 /// THE INAZUMA COMPANION OVERHAUL -- ITS POWERS AND ITS ONE HELPER
-/// (QUARANTINED, R213 B).
+/// (R213 B).
 ///
 /// The approved workshop <c>companion-workshop-inazuma-2026-09-01.md</c> sec.3
 /// rewrote Inazuma's Universal companion pool; the Inazuma pool rework
@@ -29,12 +29,9 @@ namespace KleeMod.Powers;
 /// eight Powers, two cards a character. Its powers are at the foot of this
 /// file.
 ///
-/// SAME FLAG AS MONDSTADT, deliberately: <c>CompanionOverhaul.Enabled</c> means
-/// "the companion pool is the approved workshops' pool", and a second property
-/// would let a build offer one nation's rewrites beside the other's shipped
-/// rows -- a state no document describes and no seat would be asked to grade.
-///
-/// WHAT THIS FILE REUSES rather than builds:
+/// WHAT THIS FILE REUSES rather than builds, which is most of it. Every hook
+/// below was built for Mondstadt's second wave and is spent again here without
+/// a line of new plumbing:
 ///
 ///   * THE END-OF-TURN VOLLEY, driven by <see cref="CompanionOverhaulTurnEnd"/>
 ///     in one fixed order (Gorou's Juuga, Shinobu's ring, Yae's Sakura,
@@ -131,9 +128,7 @@ internal static class InazumaCompanion
 /// deal 6 Geo damage to a random enemy." Amount is TURNS REMAINING.
 ///
 /// <see cref="GlacialWaltzPower"/>'s shape, character for character, with a
-/// different element and a different number -- a separate class rather than a
-/// retune for the arm's standing reason: a flag-off build has to keep meaning
-/// what it printed.
+/// different element and a different number, as a separate class.
 /// </summary>
 public sealed class JuugaPower : PowerModel, ILocalizationProvider
 {

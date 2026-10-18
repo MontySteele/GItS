@@ -109,8 +109,7 @@ public static class ScryTake
     private static void Announce(Player owner, CardModel card) =>
         Say(owner, AutoTakeLine(Named(card)));
 
-    /// <summary>One line over the player's head; silent headless and in a
-    /// release build.</summary>
+    /// <summary>One line over the player's head; silent headless.</summary>
     private static void Say(Player owner, string line)
     {
         Vfx.KurageBeat.Say(owner.Creature, line);

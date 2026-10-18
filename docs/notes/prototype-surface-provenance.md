@@ -5699,7 +5699,8 @@ Fontaine rework is its own paper." Built in legacy cleanup stage 4.
 - The three Neuvillette guest stars are `proto_mf_guest_neuvillette_*`, owned by
   `furina`, `guest_star: true`, `no_upgrade:` (a guest star is made for one
   fight; the shipped rows had no upgrade). No current card generates a guest
-  star, so they are members only.
+  star, so they are members only. Deleted 2026-10-18 (the legacy review's
+  hygiene list): nothing generated them.
 - Both engines' companion roster is now prototype rows only:
   `CompanionOverhaulRoster.FontaineUniversals` and
   `C.FONTAINE_OVERHAUL_POOL_IDS`, with `fontaine` in
@@ -6132,7 +6133,8 @@ agreed on all of these."; Kitchen Alchemy kept, "it's quite good!", Once More!
 cut instead).
 
 - To the shared Mondstadt roster (`C.MONDSTADT_OVERHAUL_POOL_IDS`, 35 to 39):
-  `proto_mc_qiqi_herald_of_frost` (was a coven Personal),
+  `proto_mc_qiqi_herald_of_frost` (was a coven Personal; `nation:` liyue to
+  mondstadt 2026-10-18, LAW's unreleased-nation line),
   `proto_mc_fischl_sinful_hex`, `proto_mc_sucrose_mollis_favonius`,
   `proto_mc_nicole_ladder_of_ascent` (were stand-ins; `personal_pool:` and
   `replaces:` both dropped).

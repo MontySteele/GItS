@@ -184,12 +184,30 @@ card as a Common, because Inazuma's cast is mostly 5-stars and would otherwise h
 | New | Kirara, Meow-teor Kick (Common Attack, 1) | Deal 9 damage. If you have Block, deal 3 more. |
 | New | Yoimiya, Ryuukin Saxifrage (Uncommon Attack, 1) | Deal 4 Pyro damage 3 times. |
 | New | Wanderer, Kyougen: Five Ceremonial Plays (Uncommon Attack, 1) | Deal 6 Anemo damage and Swirl the enemy. If you have no Block, deal 6 more. |
-| New | Chiori, Hiyoku: Twin Blades (Rare Power, 1) | Your Attacks that hit more than once deal 2 more damage per hit. |
-| New | Yae Miko, Sacred Sakura's Favor (Rare Power, 2) | Damage you deal at the end of your turn is increased by 50%. Hidden from Yae, like Sesshou Sakura. |
+| New | Chiori, Hiyoku: Twin Blades (Rare Power, 1) | Your Attacks that hit more than once hit one additional time. (Upgrade: Innate.) |
+| New | Yae Miko, Sacred Sakura's Favor (Rare Power, 2) | Damage you deal at the end of your turn is increased by 50%. |
 
 What the new cards do:
 - **Twin Blades** turns the multi-hit Attacks into a plan: Hasode, Ryuukin, Kyouka Fuushi, and Mondstadt's Fiery Rain.
 - **Sacred Sakura's Favor** turns the end-of-turn damage cards into a deck: Sanctifying Ring, Soumetsu, Sesshou
   Sakura, Oz and Glacial Waltz. Both of these are support payoffs.
-- **Ryuukin and Twin Blades** are good Edit targets for Yae, since Red Ink adds 3 per hit.
+- **Ryuukin and Hasode** are good Edit targets for Yae, since Red Ink adds 3 per hit. Twin Blades adds a hit
+  to each, and Reprint on Twin Blades is the Annotation that matters for it.
 - **Kyougen** pairs with Hanega and feeds Chihayaburu.
+
+## Revised on GPT's second review (2026-10-18)
+
+The user asked GPT to check the 34-card version. GPT kept the expansion and raised four points. All four held:
+- **Twin Blades was underpriced for a Rare.** "+2 damage per hit on multi-hit Attacks" is a narrower Inflame
+  (Uncommon, +2 Strength for every Attack). It now adds a hit instead: "Your Attacks that hit more than once hit one
+  additional time." That bends the rule, and it keeps the multi-hit specialisation.
+- **Sacred Sakura's Favor didn't do what its face says.** The build wrapped a list of companion effects, so Lisa's
+  start-of-turn volley got the bonus and Furina's end-of-turn guests didn't. It now reads the real end of your turn.
+- **Sacred Sakura's Favor is no longer hidden from Yae.** Hiding Sesshou Sakura stops her owning a second shrine.
+  Favor is a damage payoff, and with her it's a real choice: build for Sakura damage at turn end, or spend cards on
+  Tenko turns now.
+- **Hanega's penalty now stacks with its Energy.** Two copies, or a Reprint, give 2 Energy and 6 less Block, so a
+  second copy is no longer a free bargain.
+
+To watch in the seat round, beside Euthymia and Niwabi: Hanega with a second copy or Reprint, and whether Favor
+becomes Yae's automatic Rare.

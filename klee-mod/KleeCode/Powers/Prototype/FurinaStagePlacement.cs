@@ -70,8 +70,8 @@ namespace KleeMod.Powers;
 /// SO: A SMALL PLACEMENT PASS, AND NOT A HARMONY PATCH. This lays the line
 /// out in SEAT order after every change to the stage. It patches nothing,
 /// overrides nothing and is called only by the stage's own verbs
-/// (<c>FurinaStagePets.Sync</c> and <c>FurinaStage</c>), so with the arm off
-/// it does not run and a board with no stage is laid out by the engine exactly
+/// (<c>FurinaStagePets.Sync</c> and <c>FurinaStage</c>), so a board with no
+/// stage is laid out by the engine exactly
 /// as it always was.
 ///
 /// THE LEAD IS THE RIGHT-MOST SLOT. Allies sit at negative X and the enemies'

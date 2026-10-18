@@ -52,7 +52,7 @@ namespace KleeMod.Vfx;
 /// portrait subtree. A real rig answers yes and we do nothing, so the base
 /// cast is untouched and this is inert for it.
 ///
-/// SHIPPED, NOT QUARANTINED, on `MerchantSpineBindingPatch.cs`'s precedent and
+/// FOR EVERY CHARACTER, on `MerchantSpineBindingPatch.cs`'s precedent and
 /// for its reason: the gap is every spine-less character's, all three of ours
 /// are, and scoping it to one prototype arm would leave two of them a
 /// photograph. Nothing in this file reads an arm flag.

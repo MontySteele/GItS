@@ -80,7 +80,7 @@ namespace KleeMod.Vfx;
 /// to match confirms it and names the frame; a `tNow` near 1 at an ordinary
 /// 16 ms delta refutes it, and the source is something else.
 ///
-/// SHIPPED, NOT QUARANTINED. The failing code is the base game's and is reached
+/// FOR EVERY CHARACTER. The failing code is the base game's and is reached
 /// by every character on every card play; scoping the guard to one prototype
 /// arm would leave the hang in place everywhere else. On finite input every
 /// patch here is a two-comparison no-op that changes nothing.

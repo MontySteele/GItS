@@ -28,13 +28,6 @@ namespace KleeMod.Powers;
 /// screen that could still offer the shipped 79 would be offering cards written
 /// against rules the run is no longer playing. Slice one's own scope statement
 /// is that the 28 rows are "Klee's only reward pool" for the prototype run.
-///
-/// THE OVERHAUL WINS WHERE THE TWO ARMS OVERLAP. A dev build compiles this arm
-/// AND the Sparks arm, and both want Klee's starter. They are alternatives, not
-/// layers -- the Sparks substitutions are priced inside the rules this arm
-/// retires -- so with <c>KleeOverhaul.Enabled</c> the Sparks starter is not
-/// reached. With it off, nothing here runs and the Sparks arm owns the starter
-/// exactly as before, which is the acceptance condition.
 /// </summary>
 internal static class KleeOverhaulRoster
 {

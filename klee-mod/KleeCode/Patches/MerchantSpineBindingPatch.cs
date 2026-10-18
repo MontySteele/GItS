@@ -64,7 +64,7 @@ namespace KleeMod.Patches;
 /// why the campfire works today and the shop does not. This prefix asks the
 /// merchant the question the rest site already asks.
 ///
-/// SHIPPED, NOT QUARANTINED, on `Vfx/NonFiniteCardGuard.cs`'s and
+/// FOR EVERY CHARACTER, on `Vfx/NonFiniteCardGuard.cs`'s and
 /// `CustomTargetControllerNavigationPatch.cs`'s precedent and for their reason:
 /// the failing code is the base GAME's, reached by any character whose
 /// merchant portrait is not a Spine rig, and all three of ours are. Scoping it

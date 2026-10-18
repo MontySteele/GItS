@@ -32,13 +32,11 @@ public static class KleeCardTooltips
     /// <summary>`EB-389`. Titles the line a card grows while a rider is
     /// overriding the element it prints.
     ///
-    /// INSIDE THE SWITCH, and `KeywordTitleRowTests` is why: that rule finds
+    /// A REGISTERED ROW, and `KeywordTitleRowTests` is why: that rule finds
     /// every `KLEEMOD-` key in the assembly by reflection and demands a
     /// registered `.title` row for it, because a key with no row renders AS
     /// the key (0.2-589, 0.2-634). The row it needs is registered beside the
-    /// arm's other title rows, which are themselves behind this switch -- and
-    /// an override can only exist under the arm anyway, since the rider file
-    /// is <c>Compile Remove</c>d in a release build.</summary>
+    /// arm's other title rows.</summary>
     public const string OverriddenElementKey = "KLEEMOD-ELEMENT_OVERRIDDEN";
 
 
@@ -58,8 +56,7 @@ public static class KleeCardTooltips
     /// `effects.companion_overhaul_card_start`.
     ///
     /// <paramref name="printed"/> is codegen's static answer and is returned
-    /// unchanged in a release build, where the whole rider file is
-    /// <c>Compile Remove</c>d and no override can exist.
+    /// unchanged when no override stands.
     /// </summary>
     public static Element AppliedElement(CardModel card, Element printed)
     {
@@ -330,9 +327,8 @@ public static class KleeCardTooltips
         // FOLDED THEM. `FrontFoldedDamageVar` (the arm's proto rows) writes
         // them into `PreviewValue` itself, and `PrintedDamage` now reads that
         // number, so asking `ResolveOnTarget` for them again would multiply a
-        // Vulnerable twice. Asked by TYPE NAME rather than by type, because
-        // the class lives under `Cards/Prototype/` and a release build
-        // Compile-Removes it -- there it simply never matches.
+        // Vulnerable twice. Asked by TYPE NAME rather than by type, a
+        // leftover from when the class was not compiled in every build.
         // `EB-733`. A CARD THAT SETS OFF FIRST DOES NOT GET ITS OWN AMPLIFIER.
         //
         // THE FIND (Klee r26 lane 1, (c) 5). Pocket Match's *Reaction preview:
@@ -453,8 +449,7 @@ public static class KleeCardTooltips
     /// <summary>
     /// The body a <c>FrontFoldedDamageVar</c> face folds its number against
     /// while it sits in the hand with no aim: the front enemy, or none on a
-    /// Furina Stage board (<c>FoldedPreview.Body</c> with no target). Null
-    /// in a release build, where no face folds a body. PURE.
+    /// Furina Stage board (<c>FoldedPreview.Body</c> with no target). PURE.
     /// </summary>
     private static Creature? FaceBody(CardModel card)
     {
@@ -583,12 +578,8 @@ public static class KleeCardTooltips
     /// drag target to be handed one. Every other var stops at the dealer's
     /// hooks, which is why this tip exists at all.
     ///
-    /// BY NAME AND NOT BY TYPE, which is a build fact rather than a
-    /// preference: that class sits under <c>Powers/Prototype/</c> and
-    /// <c>KleeCode.csproj</c> Compile-Removes the directory from a release
-    /// build, so a <c>typeof</c> here would not compile there. In a release
-    /// build no var can carry the name and the answer is false, which is also
-    /// the truth about that build.
+    /// BY NAME AND NOT BY TYPE, a leftover from when that class (under
+    /// <c>Powers/Prototype/</c>) was not compiled in every build.
     /// </summary>
     private static bool TargetAlreadyFolded(CardModel card) =>
         card.DynamicVars.TryGetValue("CalculatedDamage", out var calculated)

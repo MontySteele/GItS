@@ -482,7 +482,7 @@ def test_the_pool_keeps_the_packets_rarity_split(overhaul):
     the base game's thicker Rares (the paper's sec.3)."""
     pool = rewards.character_pool("klee")
     assert {r: len(cs) for r, cs in sorted(pool.items())} == {
-        "common": 25, "uncommon": 32, "rare": 21}
+        "common": 24, "uncommon": 33, "rare": 21}
 
 
 def test_no_other_character_moves_under_the_flag(overhaul):

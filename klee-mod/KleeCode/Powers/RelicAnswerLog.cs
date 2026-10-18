@@ -36,9 +36,6 @@ namespace KleeMod.Powers;
 /// one way, and the beat that does not add up is the one that struck the same
 /// body twice.
 ///
-/// SHIPPED CODE, like `ReactionLog` and unlike the relic that feeds it: the
-/// Casket is quarantined behind `PROTOTYPE_CARDS`, and a log that were
-/// quarantined with it would make "no rows" mean two things to the bridge.
 /// Empty is a fact; absent is a build with no klee mod.
 /// </summary>
 public static class RelicAnswerLog

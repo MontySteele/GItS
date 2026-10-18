@@ -11,7 +11,7 @@ using MegaCrit.Sts2.Core.Models;
 namespace KleeMod.Cards;
 
 /// <summary>
-/// `EB-272`: the QUARANTINED ARMS' KEYWORDS, defined once each.
+/// `EB-272`: the PROTOTYPE ARMS' KEYWORDS, defined once each.
 ///
 /// THE GAP, and it is the same gap one register row over from Charge and
 /// Burst. Every shipped keyword on a face has somewhere a player can read it
@@ -34,12 +34,9 @@ namespace KleeMod.Cards;
 /// definition because it printed the word, not because somebody remembered.
 ///
 /// WHY A SEPARATE CLASS FROM <see cref="KleeCardTooltips"/> AND
-/// <see cref="KokomiRiderTips"/>. It lives under `Cards/Prototype/`, which
-/// `KleeCode.csproj` REMOVES from a release build, for the same reason the
-/// arms' powers do: these sentences describe rules that exist only under
-/// `-p:PrototypeCards=true`, and several of them quote a `*OverhaulLaw`
-/// constant that is not compiled otherwise. A release build contains neither
-/// the text nor the keys.
+/// <see cref="KokomiRiderTips"/>. It lives under `Cards/Prototype/` beside
+/// the arms' powers, because these sentences describe the arms' rules and
+/// several of them quote a `*OverhaulLaw` constant.
 ///
 /// WHAT THESE ARE NOT. They are NOT the badge. `ProtoBombPower` prints the
 /// Bomb rules on the ENEMY, live, with the pile's own numbers in them, and
@@ -174,7 +171,7 @@ public static class ArmKeywordTips
     // `EB-378`. NOT A KEYWORD, and the only key here that is not: it titles a
     // RIDER on the rows whose element arrives with the jellyfish rather than
     // with the play. It lives in this class because it is a sentence about the
-    // Plan, which is this class's word and this quarantine's rule.
+    // Plan, which is this class's word and this arm's rule.
     public const string PlanElementKey = "KLEEMOD-ARM_PLAN_ELEMENT";
 
     // `EB-709`. A RIDER AND NOT A KEYWORD, beside `PlanElementKey` for that
@@ -262,9 +259,8 @@ public static class ArmKeywordTips
     /// stated about an arm that does not have it. What both arms DO share is
     /// the rest of rule 4, and it is exactly what `SparkPower`'s own retired
     /// face says ("a resource; cards that print a Spark price spend it"): the
-    /// alternative cost is live in every prototype build, because
-    /// `SparkPower.BaseRuleActive` is `false` whenever `PROTOTYPE_CARDS` is
-    /// defined. So the shared clauses are unconditional and the kit rule joins
+    /// alternative cost is live in every build. So the shared clauses are
+    /// unconditional and the kit rule joins
     /// them only under the arm that owns it.
     ///
     /// KLEE'S CARDS ON ANYONE (2026-10-04, [USER]: "Klee's cards need to work
