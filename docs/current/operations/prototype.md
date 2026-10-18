@@ -147,7 +147,11 @@ their own pool with a neutral frame, out of Klee's"). The codegen routes a row
 there by what it is (`loader.is_shared_companion_row`: a Companion row with no
 `personal_pool:` that no kit claims in `C.KIT_OWN_COMPANION_IDS`), not by its
 `character:` field, which still reads `klee` and still picks the emitting
-profile (art path, text).
+profile (art path, text). Like the base Colorless pool it answers
+`IsColorless` true (Heirloom Hammer copies companions); it sits under the card
+library's Colorless tab (`Patches/CompanionLibraryFilter.cs`), and a transform
+offers only companions the player could be offered
+(`Patches/CompanionTransformFilter.cs`, so Yae never gets her Sesshou Sakura).
 Counts are pinned by `KleeTests/Prototype/PoolCountTests.cs`: 78 per kit. Still checked:
 the tier0 schema validators, the codegen, `lint_generated_structure` and
 `lint_pool_membership`. Depth: `docs/current/atlas/klee-mod-cards.md` §7.
