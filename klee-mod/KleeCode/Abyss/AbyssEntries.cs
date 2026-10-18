@@ -124,7 +124,7 @@ public static class AbyssNumbers
     public const int RiptideStrength = 1;
     public const int FatuiPlating = 3;
     public const int ThornyGroundThorns = 2;
-    public const int BulwarkBlock = 6;
+    public const int BulwarkBlock = 4;
     public const int FrenzyStrength = 2;
     public const int WitheringWeak = 1;
 }
@@ -226,7 +226,7 @@ public static class AbyssText
         AbyssShadow.ThornyGround =>
             $"This act, enemies start each combat with {AbyssNumbers.ThornyGroundThorns} Thorns.",
         AbyssShadow.Bulwark =>
-            $"This act, enemies start each combat with {AbyssNumbers.BulwarkBlock} Block.",
+            $"This act, at the start of your turn, each enemy gains {AbyssNumbers.BulwarkBlock} Block.",
         // [USER], 2026-10-12: "Why the extra words? Just give enemies 2 Strength."
         AbyssShadow.Frenzy =>
             $"This act, enemies start each combat with {AbyssNumbers.FrenzyStrength} Strength.",

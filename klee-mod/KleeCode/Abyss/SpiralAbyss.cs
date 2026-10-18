@@ -203,18 +203,6 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
                     creature, AbyssNumbers.CrystallizeBlock, ValueProp.Unpowered, null);
             }
         }
-
-        // Bulwark: "enemies start each combat with 6 Block". Here, where the
-        // base game's Anchor gives its combat-start Block, so it is up for
-        // the player's first turn and clears at the enemies' first.
-        var combat = RunState.Players.Select(p => p.Creature?.CombatState).FirstOrDefault(c => c != null);
-        if (Has(AbyssShadow.Bulwark) && combat != null)
-        {
-            foreach (var enemy in combat.Enemies.Where(e => e.IsAlive).ToList())
-            {
-                await CreatureCmd.GainBlock(enemy, AbyssNumbers.BulwarkBlock, ValueProp.Unpowered, null);
-            }
-        }
     }
 
     // ---- Shadows that arrive with the room ------------------------------
@@ -316,6 +304,17 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
     {
         if (side == CombatSide.Player)
         {
+            // Bulwark (2026-10-17; the user: "Bulwark looks pretty weak"):
+            // each enemy gains 4 Block at the start of every player turn, so
+            // it soaks each turn's damage. It was 6 Block once, at combat
+            // start, which cleared at the enemies' first turn.
+            if (Has(AbyssShadow.Bulwark))
+            {
+                foreach (var enemy in combatState.Enemies.Where(e => e.IsAlive).ToList())
+                {
+                    await CreatureCmd.GainBlock(enemy, AbyssNumbers.BulwarkBlock, ValueProp.Unpowered, null);
+                }
+            }
             if (!Has(AbyssBlessing.Resonance)) return;
             foreach (var creature in participants)
             {

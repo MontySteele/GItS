@@ -360,11 +360,15 @@ public class AbyssPoolsTwoTests
     }
 
     [Fact]
-    public void Bulwark_gives_the_enemies_6_Block_where_combat_start_Block_goes()
+    public void Bulwark_gives_each_enemy_4_Block_at_the_start_of_every_player_turn()
     {
-        Assert.Equal(6, AbyssNumbers.BulwarkBlock);
-        var start = Il.Calls(typeof(SpiralAbyss).GetMethod(nameof(SpiralAbyss.BeforeCombatStart))!);
-        Assert.Contains("CreatureCmd.GainBlock", start);
+        // 2026-10-17: per turn, not once at combat start (the user: "Bulwark
+        // looks pretty weak"; "4 is fine for now").
+        Assert.Equal(4, AbyssNumbers.BulwarkBlock);
+        var turn = Il.Calls(typeof(SpiralAbyss).GetMethod(nameof(SpiralAbyss.AfterSideTurnStart))!);
+        Assert.Contains("CreatureCmd.GainBlock", turn);
+        Assert.Equal("This act, at the start of your turn, each enemy gains 4 Block.",
+                     AbyssText.Text(AbyssShadow.Bulwark));
     }
 
     [Fact]
