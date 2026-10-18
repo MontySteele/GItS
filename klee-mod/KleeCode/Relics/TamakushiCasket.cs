@@ -99,7 +99,7 @@ public class TamakushiCasket : CustomRelicModel
     /// </summary>
     public override async Task BeforeCombatStart()
     {
-        if (!KokomiOverhaul.LiveFor(Owner?.Creature)) return;
+        if (!KokomiOverhaul.IsHers(Owner?.Creature)) return;
         await BakeKuragePet.Summon(Owner);
     }
 
@@ -111,7 +111,7 @@ public class TamakushiCasket : CustomRelicModel
     {
         var kokomi = Owner?.Creature;
         if (kokomi == null || creature != kokomi) return;
-        if (!KokomiOverhaul.LiveFor(kokomi)) return;
+        if (!KokomiOverhaul.IsHers(kokomi)) return;
         var block = BlockFor(KokomiPlan.PlansHeld(kokomi));
         if (block <= 0) return;
         Flash();

@@ -134,9 +134,11 @@ internal static class KokomiPlanStrip
     private static readonly
         TrackedDisplayBridge.Registry<Player, Control> Displays = new();
 
-    /// <summary>Is the Plan strip the element this seat should have?</summary>
+    /// <summary>Is the Plan strip the element this seat should have? On
+    /// Kokomi from turn one; on anyone else from their first Plan written
+    /// (the off-character rule, 2026-10-18: <see cref="KokomiOverhaul.StripShowsFor"/>).</summary>
     private static bool Live(Creature? creature) =>
-        KokomiOverhaul.LiveFor(creature);
+        KokomiOverhaul.StripShowsFor(creature);
 
     /// <summary>Build for the LOCAL seat and nothing else. Called from the same
     /// `NCombatUi.Activate` postfix the gauges and the memory card use, so
@@ -188,7 +190,9 @@ internal static class KokomiPlanStrip
     public static void DiscardAll(CombatState? state)
     {
         var me = TryGetMe(state);
-        if (me == null || !Live(me.Creature)) return;
+        // Any seat whose kit came up may hold a strip, so the teardown asks
+        // the wider gate rather than the strip's own.
+        if (me == null || !KokomiOverhaul.LiveFor(me.Creature)) return;
         KokomiPlanView.Close();
         Displays.Discard(me);
     }

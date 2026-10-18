@@ -93,9 +93,59 @@ public static class KokomiOverhaul
     /// rule below asks through this rather than through
     /// <see cref="Enabled"/> directly -- in co-op the other seat may be Klee,
     /// and a bare flag read would hand him a Tide counter.
+    ///
+    /// THE OFF-CHARACTER RULE (2026-10-18), on the base game's Osty and Orbs
+    /// precedent: her kit is live on her from turn one, and on anyone else
+    /// from the moment it comes up for them (<see cref="KokomiRules.BringUp"/>:
+    /// a Plan card reaching their hand, or one of her cards played). Each
+    /// player's kit is their own in co-op. Her relics and her telemetry
+    /// record stay hers: they ask <see cref="IsHers"/>.
     /// </summary>
     public static bool LiveFor(MegaCrit.Sts2.Core.Entities.Creatures.Creature? creature) =>
+        KokomiResources.IsKokomi(creature)
+        || (creature?.Player != null && KokomiOverhaulLedger.HasStarted(creature));
+
+    /// <summary>Is this creature Kokomi herself? The gate for what is truly
+    /// hers rather than her kit's: her relics (the Tamakushi Casket and her
+    /// arm relics) and her telemetry record.</summary>
+    public static bool IsHers(MegaCrit.Sts2.Core.Entities.Creatures.Creature? creature) =>
         KokomiResources.IsKokomi(creature);
+
+    /// <summary>Mark this player's kit as up for this combat. True when it
+    /// is live afterwards. Synchronous and idempotent; the jellyfish and the
+    /// marker are <see cref="KokomiRules.BringUp"/>'s.</summary>
+    public static bool Start(MegaCrit.Sts2.Core.Entities.Creatures.Creature? creature)
+    {
+        if (creature?.Player == null) return false;
+        if (LiveFor(creature)) return true;
+        KokomiOverhaulLedger.For(creature).Started = true;
+        return true;
+    }
+
+    /// <summary>Does this card print a Plan line? Every such card is an
+    /// <see cref="IPlannedCard"/> and aims at the Bake-Kurage, a Companion's
+    /// included.</summary>
+    public static bool HasPlanLine(MegaCrit.Sts2.Core.Models.CardModel? card) =>
+        card is IPlannedCard;
+
+    /// <summary>Does this seat get the Plan strip (and its peek view)? On
+    /// Kokomi from turn one, as always; on anyone else once their kit is up
+    /// AND they have written a Plan this combat -- the base game's gauge
+    /// rule (the Regent's Star counter appears on first gain). A read: it
+    /// creates no ledger.</summary>
+    public static bool StripShowsFor(MegaCrit.Sts2.Core.Entities.Creatures.Creature? creature) =>
+        IsHers(creature)
+        || (creature != null && LiveFor(creature)
+            && KokomiOverhaulLedger.Peek(creature) is { PlansWrittenThisCombat: > 0 });
+
+    /// <summary>Is this one of her cards (her roster id)?</summary>
+    public static bool IsKokomiCard(MegaCrit.Sts2.Core.Models.CardModel? card) =>
+        card is global::KleeMod.Cards.ICharacterCard { CharacterId: "kokomi" };
+
+    /// <summary>Does playing this card bring its player's kit up? One of her
+    /// cards, or any card with a Plan line.</summary>
+    public static bool BringsUpOnPlay(MegaCrit.Sts2.Core.Models.CardModel? card) =>
+        HasPlanLine(card) || IsKokomiCard(card);
 }
 
 /// <summary>
