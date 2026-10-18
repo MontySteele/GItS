@@ -6,6 +6,7 @@ using Godot;
 using KleeMod.Cards;
 using KleeMod.Powers;
 using MegaCrit.Sts2.Core.CardSelection;
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.Entities.Relics;
@@ -15,6 +16,7 @@ using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Rewards;
 using MegaCrit.Sts2.Core.Rooms;
+using MegaCrit.Sts2.Core.Runs;
 using MegaCrit.Sts2.Core.TestSupport;
 
 namespace KleeMod.Relics;
@@ -118,6 +120,33 @@ public class MeditationsOfAYako : CustomRelicModel
             return false;
         }
         rewards.Add(new YaePublishReward(player, this));
+        return true;
+    }
+
+    /// <summary>Whether this relic adds the companion slot to the reward
+    /// being built for <paramref name="player"/>: only its own owner's,
+    /// once (see <see cref="CompanionSlot.OffersTo"/>).</summary>
+    public bool OffersCompanionTo(Player player, CardCreationOptions creationOptions) =>
+        CompanionSlot.OffersTo(this, player, creationOptions, player.Character is IYaeCharacter);
+
+    /// <summary>
+    /// Yae's companion reward slot: the starter relic is where every roster
+    /// character's fourth reward choice lives. It was left off when this
+    /// relic was written, so Yae drafted no companions at all; [USER]'s
+    /// co-op run caught it (2026-10-17), as it caught Furina's (2026-09-27).
+    /// Enlightened Blessing inherits it.
+    /// </summary>
+    public override bool TryModifyCardRewardOptions(
+        Player player, List<CardCreationResult> cardRewardOptions,
+        CardCreationOptions creationOptions)
+    {
+        if (!OffersCompanionTo(player, creationOptions)) return false;
+        var rarity = creationOptions.RarityOdds == CardRarityOddsType.BossEncounter
+            ? CardRarity.Rare
+            : (CardRarity?)null;
+        var offer = CompanionSlot.Roll(player, rarity);
+        if (offer == null) return false;
+        cardRewardOptions.Add(new CardCreationResult(offer));
         return true;
     }
 

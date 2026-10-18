@@ -5,6 +5,7 @@ using KleeMod.Relics;
 using KleeMod.Tests.Harness;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Players;
+using MegaCrit.Sts2.Core.Entities.Relics;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Characters;
 using MegaCrit.Sts2.Core.Runs;
@@ -18,7 +19,7 @@ namespace KleeMod.Tests;
 /// The base game's <c>Hook.TryModifyCardRewardOptions</c> runs every hook
 /// listener in the run over the reward being built, passing that reward's
 /// player; <c>RunState.IterateHookListeners</c> gathers the relics of EVERY
-/// active player (read off the 0.111.0 decompile). The six slot hosts used to
+/// active player (read off the 0.111.0 decompile). The slot hosts used to
 /// gate on the player's character alone, so two players on the same mod
 /// character each had both starter relics answer their reward: five options,
 /// two of them companions. The gate now also asks that the reward's player be
@@ -39,6 +40,8 @@ public class CompanionSlotOwnerTests
         new object[] { "Furina", typeof(CurtainNeverFalls) },
         new object[] { "Kokomi", typeof(TamakushiCasket) },
         new object[] { "Varka", typeof(BoreasFang) },
+        new object[] { "Yae", typeof(MeditationsOfAYako) },
+        new object[] { "Yae", typeof(EnlightenedBlessing) },
     };
 
     private static Seat SeatFor(string character) => character switch
@@ -47,6 +50,7 @@ public class CompanionSlotOwnerTests
         "Furina" => Seat.Furina(),
         "Kokomi" => Seat.Kokomi(),
         "Varka" => Seat.Varka(),
+        "Yae" => Seat.Yae(),
         _ => throw new ArgumentException(character),
     };
 
@@ -120,5 +124,26 @@ public class CompanionSlotOwnerTests
         var shop = new CardCreationOptions(Array.Empty<CardPoolModel>(),
             CardCreationSource.Shop, CardRarityOddsType.Shop);
         Assert.False(Offers(relic, seat.Player, shop));
+    }
+
+    /// <summary>Every Starter-rarity relic in the mod hosts the slot: the
+    /// starting relic is where each roster character's fourth reward choice
+    /// lives. Yae's was written without it and she drafted no companions
+    /// until [USER]'s co-op run (2026-10-17); Furina's Stage relic did the
+    /// same (2026-09-27).</summary>
+    [Fact]
+    public void Every_starting_relic_hosts_the_companion_slot()
+    {
+        var starters = typeof(PoundingSurprise).Assembly.GetTypes()
+            .Where(t => typeof(RelicModel).IsAssignableFrom(t) && !t.IsAbstract
+                        && t.GetConstructor(Type.EmptyTypes) != null)
+            .Select(t => (RelicModel)Activator.CreateInstance(t)!)
+            .Where(r => r.Rarity == RelicRarity.Starter)
+            .Select(r => r.GetType())
+            .ToList();
+        Assert.Contains(typeof(MeditationsOfAYako), starters);
+        var missing = starters.Where(t => t.GetMethod("OffersCompanionTo") == null)
+            .Select(t => t.Name).ToList();
+        Assert.Empty(missing);
     }
 }
