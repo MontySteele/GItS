@@ -171,8 +171,8 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
   (Tome) and Princess of Watatsumi (Tooth on Kurage's Oath).
 - **Relics and potions:** her own seven relics and three potions
   (`review/active/kokomi-relics-potions-2026-10-15.md`, kit census picks 1
-  and 2); the Silent borrow is gone from both. Placeholder icons until her
-  art pass. Untested in game until a deploy.
+  and 2); the Silent borrow is gone from both. Each has its own icon
+  (`art/plan.tsv` relic_ and potion_ rows). Untested in game until a deploy.
 - **Latest:** the pool overhaul is built
   (`review/active/kokomi-pool-overhaul-2026-10-13.md`, picks 1 (a) and 2
   (a)): eight Plan lines and payoffs rewritten to Counter, Intent and Chain
