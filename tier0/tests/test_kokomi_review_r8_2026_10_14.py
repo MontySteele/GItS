@@ -86,9 +86,8 @@ def test_evening_watch_gives_6_per_attacker():
 
 def test_undercurrent_snare_blocks_8_and_keeps_its_plan():
     row = loader.get_card("proto_kk_undercurrent_snare")
-    assert row.effects[0] == {"op": "block", "amount": 8}
-    assert row.effects[1] == {"op": "apply_power", "power": "weak",
-                              "amount": 2, "target": "enemy"}
+    # 2026-10-17: the Weak is cut (the user's co-op run).
+    assert row.effects == [{"op": "block", "amount": 8}]
     assert row.plan == [{"op": "lose_strength_this_turn", "amount": 4,
                          "target": "enemies_intending_attack"}]
     up = _up("proto_kk_undercurrent_snare")
@@ -133,7 +132,7 @@ def test_the_five_faces_print_the_ruled_text():
         "Gain {KkAmount:diff()} [gold]Block[/gold] for each enemy intending "
         "to attack. Draw 1 card.")
     assert _sheet_row("proto_kk_undercurrent_snare")["description"].startswith(
-        "Gain 8 [gold]Block[/gold]. Apply 2 [gold]Weak[/gold]. ")
+        "Gain 8 [gold]Block[/gold]. [gold]Plan[/gold]: ")
     assert _sheet_row("proto_kk_surging_shoal")["description"] == (
         "Deal 10 [gold]Hydro[/gold] damage to ALL enemies. Gain 10 "
         "[gold]Block[/gold].")

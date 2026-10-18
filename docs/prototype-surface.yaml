@@ -1707,9 +1707,9 @@
    cost: 1, type: skill, rarity: uncommon,
    # kokomi-review-r5-2026-10-14 numbers pass: Gain 5 Block added; Plan 3 -> 4 Strength.
    # Kokomi review r8 (2026-10-14) item 3: Block 5 -> 8 [11]. Plan unchanged.
-   description: "Gain 8 [gold]Block[/gold]. Apply 2 [gold]Weak[/gold]. [gold]Plan[/gold]: Each enemy that intends to attack loses 4 [gold]Strength[/gold] this turn.",
-   effects: [{op: block, amount: 8},
-             {op: apply_power, power: weak, amount: 2, target: enemy}],
+   # 2026-10-17 (user's co-op run): the Weak is cut.
+   description: "Gain 8 [gold]Block[/gold]. [gold]Plan[/gold]: Each enemy that intends to attack loses 4 [gold]Strength[/gold] this turn.",
+   effects: [{op: block, amount: 8}],
    plan: [{op: lose_strength_this_turn, amount: 4, target: enemies_intending_attack}],
    # 11 Block / Plan 5 Strength.
    upgrade: {block: 3, plan_power_amount: 1}}
