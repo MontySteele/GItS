@@ -66,3 +66,26 @@ and Dexterity to between -3 and -6. That is the base game. No Shadow fed her mor
 1. **Thorny Ground act 3:** **(a, default)** 3 → 2, the same as acts 1 and 2. (b) Keep 3.
 2. **Moonlit Spring:** **(a, default)** 8 → 5, still more than Rest's 4 but not a full fight's healing.
    (b) Keep 8.
+
+**Ruled 2026-10-18.** The user: "1) Let's leave it at 3 for act 3. 2) Agreed on (a), and Moonlit Rest might need
+a look as well." So Thorny Ground keeps 3 in act 3, and Moonlit Spring goes to 5. Moonlit Rest goes back to the
+user as a pick, below.
+
+## Moonlit Rest (pick)
+
+Rest heals 4 / 6 / 8 per combat for the rest of the run, by the act it is taken in. There are about 15 fights an
+act. Spring at 5 then heals about 75 HP in its one act. Rest's totals:
+
+| Taken in | Rest now | Rest at 2 / 3 / 5 |
+|---|---|---|
+| Act 1 | 4 × 45 ≈ 180 | 2 × 45 ≈ 90 |
+| Act 2 | 6 × 30 ≈ 180 | 3 × 30 ≈ 90 |
+| Act 3 | 8 × 15 ≈ 120 | 5 × 15 ≈ 75 |
+
+Ironclad's Burning Blood heals 6 per combat, and it is the base game's only steady healing. Rest at 4 gives any
+character two-thirds of it from act 1 on.
+
+3. **Moonlit Rest:**
+   - **(a, default)** 2 / 3 / 5. Its whole-run total comes to about Spring's one act. The difference is spread
+     against burst.
+   - (b) Keep 4 / 6 / 8.
