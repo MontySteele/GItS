@@ -97,18 +97,24 @@ public static class GitsModalTargeting
     /// then a UNIQUE substring either way round, so a form that abbreviates
     /// "Gain 3 Block, applying no element" to "Gain 3 Block" still lands.
     /// Ambiguity is reported, never guessed at.
+    ///
+    /// Both sides are read with the game's markup folded out (seat page
+    /// backlog, 2026-10-18): a label is the card's rich text
+    /// (`[gold]Drain[/gold] 3: deal 12 instead`) and the page prints it
+    /// plain, so a mode named off the page matched neither rule.
     /// </summary>
     public static int Match(IReadOnlyList<ModalMode> modes, string wanted)
     {
-        string want = (wanted ?? "").Trim();
+        string want = Fold(wanted);
         if (want.Length == 0) return NoMode;
         var exact = Indexes(modes, m =>
-            string.Equals(m.Trim(), want, StringComparison.OrdinalIgnoreCase));
+            string.Equals(Fold(m), want, StringComparison.OrdinalIgnoreCase));
         if (exact.Count == 1) return exact[0];
         if (exact.Count > 1) return Ambiguous;
         var loose = Indexes(modes, m =>
-            m.Contains(want, StringComparison.OrdinalIgnoreCase)
-            || want.Contains(m.Trim(), StringComparison.OrdinalIgnoreCase));
+            Fold(m).Length > 0
+            && (Fold(m).Contains(want, StringComparison.OrdinalIgnoreCase)
+                || want.Contains(Fold(m), StringComparison.OrdinalIgnoreCase)));
         if (loose.Count == 1) return loose[0];
         return loose.Count > 1 ? Ambiguous : NoMode;
     }
@@ -116,6 +122,14 @@ public static class GitsModalTargeting
     /// <summary>The labels, for a refusal that lists what it would have taken.</summary>
     public static string Labels(IReadOnlyList<ModalMode> modes) =>
         string.Join(" | ", modes.Select(m => $"'{m.Label}'"));
+
+    /// <summary>A label or a want with `[tag]` markup taken out and its
+    /// spaces collapsed.</summary>
+    public static string Fold(string? text) =>
+        System.Text.RegularExpressions.Regex.Replace(
+            System.Text.RegularExpressions.Regex.Replace(
+                text ?? "", @"\[/?[a-zA-Z_]+\]", ""),
+            @"\s+", " ").Trim();
 
     private static List<int> Indexes(
         IReadOnlyList<ModalMode> modes, Func<string, bool> hit)

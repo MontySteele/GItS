@@ -995,9 +995,17 @@ def _upgraded_face_index_cached(repo: Path) -> tuple[
 #: which is the same bargain `upgrade_preview`'s own template path makes one
 #: function down (`re.search`, "the template is the middle of the printed face
 #: rather than the whole of it").
+#:
+#: `EB-667`, the last half: the Amalgamator's Ultimate Strike and Ultimate
+#: Defend (and the Teyvat forge's copies of them) are base cards in no pool
+#: sheet, so the Smith printed no upgrade for them either. Their deltas are
+#: the decompiled `OnUpgrade`s: `UltimateStrike` 14 damage +6,
+#: `UltimateDefend` 11 Block +4 (read off the installed build, 2026-10-18).
 _BASE_GAME_BASICS: dict[str, tuple[re.Pattern[str], int]] = {
     "strike": (re.compile(r"^Deal (\d+) damage\."), 3),
     "defend": (re.compile(r"^Gain (\d+) Block\."), 3),
+    "ultimate strike": (re.compile(r"^Deal (\d+) damage\."), 6),
+    "ultimate defend": (re.compile(r"^Gain (\d+) Block\."), 4),
 }
 
 

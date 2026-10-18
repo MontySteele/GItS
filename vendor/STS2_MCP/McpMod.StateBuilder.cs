@@ -1167,6 +1167,16 @@ public static partial class McpMod
         }
         battle["enemies"] = enemies;
 
+        // GItS LOCAL EDIT (seat page backlog, 2026-10-18): the dead enemies
+        // still in the fight and planning a move -- a Decimillipede segment
+        // waiting to Reattach -- under their own key, so the living list and
+        // its entity ids are unchanged (gits/GitsRevivingEnemies.cs).
+        var reviving = GitsRevivingEnemies.Build(combatState.Enemies);
+        if (reviving.Count > 0)
+        {
+            battle[GitsRevivingEnemies.Key] = reviving;
+        }
+
         return battle;
     }
 
@@ -1950,6 +1960,14 @@ public static partial class McpMod
             {
                 var hitbox = ancientLayout.GetNodeOrNull<NClickableControl>("%DialogueHitbox");
                 inDialogue = hitbox != null && hitbox.Visible && hitbox.IsEnabled;
+                // GItS LOCAL EDIT (seat page backlog, 2026-10-18): the
+                // Ancient's lines shown so far, so the page prints the story
+                // and not only "the scene is still being told"
+                // (gits/GitsAncientDialogue.cs). Absent where none are read.
+                if (GitsAncientDialogue.Lines(ancientLayout) is { } dialogue)
+                {
+                    state[GitsAncientDialogue.Key] = dialogue;
+                }
             }
         }
         state["in_dialogue"] = inDialogue;

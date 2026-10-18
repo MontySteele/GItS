@@ -264,6 +264,26 @@ public static class ResolutionLedger
     /// Pincer's Plan). Both on that play's own line.</summary>
     public const string PlayBonus = "play_bonus";
     public const string DoubledBy = "doubled_by";
+    /// <summary>Seat page backlog (2026-10-18): a Set off card's own hit
+    /// (Kaboom!, Pocket Match) that hit nothing because its Bombs had
+    /// already killed the target; `Amount` is the damage it would have
+    /// dealt, `Target` the body. On that play's own line.</summary>
+    public const string NoTarget = "no_target";
+    /// <summary>Seat page backlog (2026-10-18; Klee suites 3 and 4): what a
+    /// Set off detonated, charge by charge (`Power` "Bomb 16" or "Mine 3",
+    /// `Target` the body, `Amount` what it dealt), the one that killed its
+    /// body marked apart; and a charge that jumped to another body. On the
+    /// Set off card's own line, and only while a card is resolving.</summary>
+    public const string Detonated = "detonated";
+    public const string DetonatedKilled = "detonated_killed";
+    public const string Jumped = "jumped";
+    /// <summary>A charge's payload (Jumpy Dumpty's) going out: `Power` the
+    /// charge ("Bomb 11"), `Target` what it placed ("Mine 3"), `Amount` on how
+    /// many enemies.</summary>
+    public const string Payload = "payload";
+
+    /// <summary>Is a card resolving right now (a row open)?</summary>
+    public static bool PlayOpen => _open != null;
     /// <summary>Kokomi round 3 A-list (2026-10-13): a generated card (a
     /// Sting or a Ward) went to the discard pile because the hand was full,
     /// the base game's rule; and a card Ethereal Exhausted at the end of the

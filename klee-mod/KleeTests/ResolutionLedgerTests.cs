@@ -700,4 +700,54 @@ public class ResolutionLedgerTests
         Assert.Contains("ResolutionLedger.HitsAs",
             Il.Calls(Il.Method("ReactionEffects", "Resolve")));
     }
+
+    /// <summary>Seat page backlog (2026-10-18): a Set off card's own hit
+    /// (Kaboom!, Pocket Match) that found its target already dead to its
+    /// Bombs is filed on that play's row, with the damage it would have
+    /// dealt, instead of leaving the number out. Page half:
+    /// <c>tier0/tests/test_seat_page_backlog_2026_10_18.py</c>.</summary>
+    [Fact]
+    public void A_set_off_cards_own_hit_on_a_dead_target_is_filed_on_its_row()
+    {
+        Assert.Equal("no_target", ResolutionLedger.NoTarget);
+        var deal = Il.Method("ProtoBombPower", "DealCardDamage");
+        Assert.Contains("ResolutionLedger.NoteEvent", Il.Calls(deal));
+
+        Fresh();
+        ResolutionLedger.OpenPlay("proto_ko_kapow", "Kaboom!", false);
+        ResolutionLedger.NoteEvent(ResolutionLedger.NoTarget, "Kaboom!",
+                                   "Corpse Slug", "", "7", amount: 4);
+        var rows = ResolutionLedger.Snapshot();
+        Assert.Single(rows);
+        var events = (List<Dictionary<string, object?>>)rows[0]["events"]!;
+        Assert.Single(events);
+        Assert.Equal("no_target", events[0]["kind"]);
+        Assert.Equal("Corpse Slug", events[0]["target"]);
+        Assert.Equal(4, events[0]["amount"]);
+    }
+
+    /// <summary>Seat page backlog (2026-10-18; Klee suites 3 and 4): a Set
+    /// off files each charge it detonated, the payload a charge sent out and
+    /// a charge that jumped, on the Set off card's line and only while a card
+    /// is resolving.</summary>
+    [Fact]
+    public void A_set_off_files_what_it_detonated_and_where_it_jumped()
+    {
+        Assert.Equal("detonated", ResolutionLedger.Detonated);
+        Assert.Equal("detonated_killed", ResolutionLedger.DetonatedKilled);
+        Assert.Equal("jumped", ResolutionLedger.Jumped);
+        Assert.Equal("payload", ResolutionLedger.Payload);
+        foreach (var method in new[] { "Explode", "JumpCharges" })
+        {
+            var calls = Il.Calls(Il.Method("ProtoBombPower", method));
+            Assert.Contains("ResolutionLedger.get_PlayOpen", calls);
+            Assert.Contains("ResolutionLedger.NoteEvent", calls);
+        }
+        Fresh();
+        Assert.False(ResolutionLedger.PlayOpen);
+        ResolutionLedger.OpenPlay("proto_ko_sizzle", "Sizzle", false);
+        Assert.True(ResolutionLedger.PlayOpen);
+        ResolutionLedger.ClosePlay();
+        Assert.False(ResolutionLedger.PlayOpen);
+    }
 }

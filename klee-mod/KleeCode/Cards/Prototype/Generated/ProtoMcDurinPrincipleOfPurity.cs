@@ -63,7 +63,9 @@ public sealed class ProtoMcDurinPrincipleOfPurity : CustomCardModel, ICompanionC
     // that aims, and the bridge then demanded a target on the mode
     // that attacks nothing. These two rows are what it reads instead.
     public IReadOnlyList<string> ModeLabels =>
-        new[] { "[gold]White[/gold]: Enemies take 50% more damage from [gold]Elemental Reactions[/gold]", "[gold]Dark[/gold]: Your [gold]Pyro[/gold] hits deal 4 additional damage" };
+        IsUpgraded
+            ? new[] { "[gold]White[/gold]: Enemies take 75% more damage from [gold]Elemental Reactions[/gold]", "[gold]Dark[/gold]: Your [gold]Pyro[/gold] hits deal 6 additional damage" }
+            : new[] { "[gold]White[/gold]: Enemies take 50% more damage from [gold]Elemental Reactions[/gold]", "[gold]Dark[/gold]: Your [gold]Pyro[/gold] hits deal 4 additional damage" };
 
     public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>
         new[] { false, false };

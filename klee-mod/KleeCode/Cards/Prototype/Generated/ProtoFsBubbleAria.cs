@@ -69,7 +69,7 @@ public sealed class ProtoFsBubbleAria : CustomCardModel, ICharacterCard, IStageS
     // that attacks nothing. These two rows are what it reads instead.
     public IReadOnlyList<string> ModeLabels =>
         IsUpgraded
-            ? new[] { "Gain 6 Block", "Gain 8 [gold]Block[/gold]. [gold]Spend[/gold] 3: draw 2 cards." }
+            ? new[] { "Gain 8 Block", "Gain 8 [gold]Block[/gold]. [gold]Spend[/gold] 3: draw 2 cards." }
             : new[] { "Gain 6 Block", "Gain 6 [gold]Block[/gold]. [gold]Spend[/gold] 3: draw 2 cards." };
 
     public IReadOnlyList<bool> ModeAimsAtChosenEnemy =>

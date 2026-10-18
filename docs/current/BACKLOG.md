@@ -105,48 +105,26 @@ is `git show bf073df4:docs/current/BACKLOG.md`.
 ## Seat page (the blind seat's view: `blindplay_*` render and the bridge)
 
 
-- The enemy-fold note names "(Deals N damage)" faces, but base Body Slam prints one too and does not fold (#1223).
-- The hand-full discard line for generated Stings and Wards prints only after the Plans resolve (Kokomi round 4, lane 1, fight 16).
-- No receipt says what a Set off detonated, so a Set off that kills reads as a vanished Bomb. Needs a detonation log in the mod like ReactionLog, a bridge read and a page line such as "Sizzle set off Corpse Slug: Mine 3 (3), Bomb 16 (2, killed it). Nothing jumped."
-- Incoming ignores Mines that fire first and Look Out!'s Block from them; the "Put Mine N on ..." lines after Big Badda Boom read as five Mines from one Bomb.
-- Kaboom!'s own damage is not printed when its target dies to its Bombs, and the hits of a fight-ending Rapid Fire are skipped.
 - Copy numbers renumber after a play, so "Frantic Escape (2)" picked the other copy; name copies by something stable (cost or upgrade) or warn on renumber. The bridge renumbers mid-turn too ("Sting (3)" vanished after a play and the next command was refused; Kokomi jellyfish round 2026-10-12, lane 1). Numbers now hold until the next `observe` (`resolve_shown_card`), but Kokomi round 3 lane 5 F6 still wasted The Shape of Water on a renumbered Sting; stable handles for a whole turn need copy identity across observes (a per-card id on the wire).
-- Pocket Match's play log listed 3 and left out its own 5 damage.
-- Tender prints only "Tender 3"; Fireworks Finale's "Written: 5" does not name the Strength loss that lowered it; Spiny Toad's Thorns showed on turn 1 only.
-- A Companion summon's ticks (Kamisato Ayaka's Soumetsu) print only inside Kokomi's Plan block (`summon_hits`); a Furina or Klee page shows them nowhere.
-- A companion's end-of-turn hit (Kaeya, Oz) names its body only when it reacts; a plain hit is on no wire, because `ResolutionLedger` files card plays and a power's damage is not one.
 - Orb passives and evokes at the start and end of a turn are narrated nowhere; `ResolutionLedger` files card plays only.
 - The Neow bundle page printed one pack's rows jumbled (a line missing, its text under another card). Not reproduced; needs the raw `bundle_select` state from such a screen.
 - The Trial's first page printed only "Proceed", and `proceed` was then refused against its Accept / Reject options (the page read the event mid-transition).
-- Co-op: players are named "Test Host"/"Test Client 1"; the reaction glossary ignores the partner's element; `wait` after a finished fight reports nothing while the reward is up; a play at an enemy the partner just killed is silently retargeted; the page calls the partner's HP cost "Test Host (you) ... your own HP cost"; a queued play at an enemy the partner killed mid-turn comes back "Skipped" or "not found" (every seat in `review/records/furina-coop-check-2026-10-16.md`).
-- Enemy rules not on the page: Flutter's "50% less damage from Attacks" halved Bomb damage in one run and not in two others; say whether it applies to a Bomb.
-- Louse Progenitor's intent under the player's Weak read "folded Strength and Weak: 14 on the move and 14 after" and the Weak seemed to do nothing; check the fold and the line.
-- Co-op: Yae's multiplayer hand pointers (res://images/ui/hands/multiplayer_hand_kleemod-yae_{point,paper,rock}.png) are missing; the game logs load errors (seen 2026-10-17). Klee, Furina, Kokomi and Varka get theirs from `tools/gen_multiplayer_hands.py` (a recolour of a base arm, or Varka's unchanged stand-in), packed by `tools/build_pck.ps1`'s hands block; Yae needs a row there (a recolour is a look for [USER]; a stand-in copy is not).
-- Co-op: a downed player is revived after the fight (at 1 or 13 HP) with no warning on the page.
-- Co-op: `proceed` answers "No proceed button" at rest sites, chests and rewards until the partner acts, then works on a retry; the page should say it is waiting on the partner.
-- A dead Decimillipede segment waiting to Reattach is not on the wire (`BuildBattleState` sends only living enemies); send the body and its revive countdown.
-- The bridge does not show the order enemies act in; print it when the game exposes it.
+- Co-op: a play at an enemy the partner just killed is silently retargeted; a queued play at an enemy the partner killed mid-turn comes back "Skipped" or "not found" (`review/records/furina-coop-check-2026-10-16.md`).
 - Live repro, no change before it: Wax Lizard Tail did not fire after Toy Box (base relics; `review/records/furina-fullrun-round-2-2026-10-10.md`). Check whether a melted relic stays in `player.Relics` unflagged, so the page still lists it (bridge `McpMod.StateBuilder.cs:1471-1488`).
 - Live repro, no change before it: Fairy in a Bottle may not have saved the Ironclad control at death (base potion; `review/records/kokomi-fullrun-round-2026-10-10.md`). No klee-mod hook touches death or HP loss, so check the base game's own path in a live run.
 
 - Furina: Frozen on a boss, and whether a guest's act ends a freeze, are not printed (round 2026-10-12, lane 2; the Freminet Block half is built, #1223). Needs the game.
-- Seat page: an Ancient's greeting text is not printed, only "(the scene is still being told)"; print the dialogue lines so seats read the story.
 
 ## Harness, bridge and tools
 
-- Telemetry: Plan damage is credited to the writing card since #1222, so `damage_by_source` no longer has a "(Bake-Kurage)" key; update any analysis that reads it.
-- Shop card removal: after the first card is picked the screen refuses a re-pick and offers only confirm or skip; check whether the base screen allows a deselect and the bridge lacks the verb.
-- Bridge: Jumpy Dumpty refused without a target, a Durin chooser answered "still opening", and Mawler died at end of turn with no printed cause.
-- Drowning Beacon's "Bottle" potion reward: trace the bridge on the event's custom reward screen (is it shown, or left behind on `proceed`). The mod matches the base event.
-- Bridge `ModeLabels`/`RecordChoice` still carry the sheet's literal numbers for mode faces; read them from the card's vars instead.
+- Bridge: a Durin chooser answered "still opening", and Mawler died at end of turn with no printed cause.
 - Co-op dev grant: `give_card` is refused in multiplayer because the pile add bypasses the action-queue synchronizer; a synced grant would let a co-op seat round be dressed with named co-op cards.
-- An embark was never reverted (all its ledger rows APPLIED, the game still up at `game_over`) although the seat's teardown was run; find why before relying on `seat.py` teardown. `embark` now refuses a lane with a live un-reverted launch.
+- An embark was never reverted (all its ledger rows APPLIED, the game still up at `game_over`) although the seat's teardown was run; find why before relying on `seat.py` teardown. `embark` now refuses a lane with a live un-reverted launch. One candidate: `--teardown` without `--lane` defaults to lane 0 (`embark.py` `--lane default=0`), so a lane-N teardown typed without it reverts lane 0's newest embark.
 - The seat harness sometimes sends end-turn twice in a row (seat rounds); find which path repeats it.
 - `EB-391` the `rest` verb sometimes fails its first call on an open rest site ("Rest site room is not open"); game-side race.
 - `EB-208` the seed ledger ships empty: run the Klee three-body seed hunt and record the first entries.
 - `EB-212` stage and seal real matched-telegraph pairs (identical but for the enemy intent) under `understudy/battery/pairs/`.
-- `EB-193` `game_ref/role_tempo_canon.json` predates the int-var reader fix; regenerate it (46 cards gain `has_body`).
-- `EB-667` the Smith shows no upgrade for Ultimate Strike; its numbers are published nowhere the repo reads.
+- `EB-193` `game_ref/role_tempo_canon.json` predates the int-var reader fix; regenerate it (46 cards gain `has_body`). `tools/canon_role_tempo.py` now fails in `write_docs` (it reads the retired `docs/klee-cards.yaml` through `role_tempo.SHEETS`), and the fresh JSON moves the committed floors in `docs/role-tempo-floors.yaml` (anchored to the retired `furina/salon` / `furina/fanfare` archetypes); fix the writer and rule the floors together.
 - `EB-71` no committed sheet prints `sly_autoplay`, so the `CardKeyword.Sly` rail has never run in game; whoever prints the first one checks it live.
 
 ## Sim

@@ -3955,10 +3955,12 @@ def test_the_meter_ledger_stays_off_the_carry_out_block():
         # `reactions` (Kokomi review r8, 2026-10-14): the reactions the
         # Plan's own hits set off, which a sighted player watched happen.
         # `after` (Kokomi v3 seats, 2026-10-18): Following Current's hit.
+        # `discarded` (seat page backlog, 2026-10-18): the Stings or Wards
+        # the Plan made that the full hand sent to the discard pile.
         assert set(row) == {"card", "number", "line", "kind", "asked",
                             "on_play", "board_read", "moved",
                             "riders", "unfinished", "no_target",
-                            "reactions", "again", "after"}
+                            "reactions", "again", "after", "discarded"}
         for moved in row["moved"]:
             assert set(moved) == {"target", "combat_id", "amount", "dead",
                                   "absorbed"}

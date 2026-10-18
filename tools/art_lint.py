@@ -782,6 +782,11 @@ GENERATOR_OWNED = {
     "ImageGen/images/hands/multiplayer_hand_kleemod-varka_rock.png":      "gen_multiplayer_hands.py",
     "ImageGen/images/hands/multiplayer_hand_kleemod-varka_paper.png":     "gen_multiplayer_hands.py",
     "ImageGen/images/hands/multiplayer_hand_kleemod-varka_scissors.png":  "gen_multiplayer_hands.py",
+    # Yae wears the Ironclad's arm unchanged too (2026-10-18), Varka's rule.
+    "ImageGen/images/hands/multiplayer_hand_kleemod-yae_point.png":       "gen_multiplayer_hands.py",
+    "ImageGen/images/hands/multiplayer_hand_kleemod-yae_rock.png":        "gen_multiplayer_hands.py",
+    "ImageGen/images/hands/multiplayer_hand_kleemod-yae_paper.png":       "gen_multiplayer_hands.py",
+    "ImageGen/images/hands/multiplayer_hand_kleemod-yae_scissors.png":    "gen_multiplayer_hands.py",
 }
 
 

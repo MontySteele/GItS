@@ -1156,7 +1156,18 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         PlayerChoiceContext choiceContext, Creature target, decimal damage,
         CardModel cardSource, CardPlay cardPlay)
     {
-        if (damage <= 0 || target.IsDead) return;
+        if (damage <= 0) return;
+        if (target.IsDead)
+        {
+            // Seat page backlog (2026-10-18): the Bombs killed it first, so
+            // the card's own hit has nothing to land on; the page says so on
+            // the play's line instead of leaving the number out.
+            ResolutionLedger.NoteEvent(ResolutionLedger.NoTarget,
+                                       cardSource.Title ?? string.Empty,
+                                       target, string.Empty,
+                                       amount: (int)damage);
+            return;
+        }
         await DamageCmd.Attack(damage)
             .FromCard(cardSource, cardPlay)
             .Targeting(target)
@@ -1413,6 +1424,18 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         // `PendingReactionMultiplier` makes for the badge, taken BEFORE the
         // funnel because the funnel consumes the aura, so the line and the
         // preview cannot disagree about which reaction this was.
+        // Seat page backlog (2026-10-18; Klee suites 3 and 4): the charge on
+        // the Set off card's own line, so a Set off that kills does not read
+        // as a vanished Bomb. Only inside a card's play; a Mine answering an
+        // attack has its own line below.
+        if (ResolutionLedger.PlayOpen)
+        {
+            ResolutionLedger.NoteEvent(
+                target.IsDead ? ResolutionLedger.DetonatedKilled
+                              : ResolutionLedger.Detonated,
+                cardSource?.Title ?? string.Empty, target,
+                (charge.IsMine ? "Mine " : "Bomb ") + size, amount: dealt);
+        }
         ledger.NoteLine(
             (charge.IsMine ? "Mine " : "Bomb ") + size + " went off on "
           + NameOf(target) + " for " + dealt
@@ -1474,6 +1497,17 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
                 ledger.NoteLine(
                     "Its rider placed Mine " + charge.PayloadMineAll + " on "
                   + landed + (landed == 1 ? " enemy" : " enemies"));
+                // Seat page backlog (2026-10-18): the "Put Mine 3 on ..."
+                // lines a payload makes read as several Mines from one Bomb;
+                // the play's line says which charge put them there.
+                if (ResolutionLedger.PlayOpen)
+                {
+                    ResolutionLedger.NoteEvent(ResolutionLedger.Payload,
+                        cardSource?.Title ?? string.Empty,
+                        "Mine " + charge.PayloadMineAll,
+                        (charge.IsMine ? "Mine " : "Bomb ") + size,
+                        amount: landed);
+                }
             }
         }
 
@@ -1571,6 +1605,14 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
             await Place(choiceContext, dest, charge.Size, charge.IsMine,
                         charge.PayloadMineAll, applier, cardSource,
                         homework: charge.Homework, relocated: true);
+            // Seat page backlog (2026-10-18): where it went, on the line of
+            // the card whose Set off it jumped from.
+            if (ResolutionLedger.PlayOpen)
+            {
+                ResolutionLedger.NoteEvent(ResolutionLedger.Jumped,
+                    cardSource?.Title ?? string.Empty, dest,
+                    (charge.IsMine ? "Mine " : "Bomb ") + charge.Size);
+            }
         }
     }
 

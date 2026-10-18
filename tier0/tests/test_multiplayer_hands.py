@@ -1,6 +1,6 @@
 """The co-op treasure-room hands: names, packing, and the ctex reader.
 
-`tools/gen_multiplayer_hands.py` writes sixteen Tier F hands (twelve recolours, Varka's four copies) that the game
+`tools/gen_multiplayer_hands.py` writes twenty Tier F hands (twelve recolours, four copies each for Varka and Yae) that the game
 finds only by name: `CharacterModel.Arm<Pose>TexturePath` derives
 `res://images/ui/hands/multiplayer_hand_<id.entry>_<pose>.png` and nothing
 overrides it. So the things that can silently break are all spellings, each
@@ -32,7 +32,7 @@ sys.path.insert(0, str(ROOT / "tools"))
 import art_lint  # noqa: E402
 import gen_multiplayer_hands as hands  # noqa: E402
 
-CHARACTERS = ("klee", "furina", "kokomi", "varka")
+CHARACTERS = ("klee", "furina", "kokomi", "varka", "yae")
 BUILD_PCK = ROOT / "tools" / "build_pck.ps1"
 FALLBACK_CS = ROOT / "klee-mod" / "KleeCode" / "KleeAssetPathFallback.cs"
 

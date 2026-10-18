@@ -84,4 +84,33 @@ public class KokomiV2SeatFindingsTests
         Assert.DoesNotContain("KokomiPlan.Record",
                               Il.Calls(Il.Method("KokomiPlan", "NoteAfter")));
     }
+
+    /// <summary>Seat page backlog (2026-10-18; Kokomi round 4, lane 1): a
+    /// Sting or Ward a carry-out makes into a full hand goes on that Plan's
+    /// row (`discarded`), not on the turn's ordinary line, which printed after
+    /// the whole morning. Outside a carry-out the old line stands.</summary>
+    [Fact]
+    public void A_full_hand_discard_inside_a_carry_out_sits_on_its_plan()
+    {
+        var add = Il.Method("KokomiCards", "AddJellyfish");
+        Assert.Contains("KokomiPlan.NoteDiscardedInBeat", Il.Calls(add));
+        Assert.Contains("ResolutionLedger.NoteToDiscard", Il.Calls(add));
+        Assert.False(KokomiPlan.NoteDiscardedInBeat(null, "Sting"));
+        Assert.Contains("discarded", Il.Strings(
+            Il.Method("KokomiPlan", "CarriedOutRow")));
+    }
+
+    /// <summary>Seat page backlog (2026-10-18): a Companion summon's
+    /// end-of-turn hit (Oz, Soumetsu) is logged for every seat and only
+    /// Kokomi's page printed it. Off Kokomi the snapshot carries the summon
+    /// log alone (no `pet` key), so a Furina or Klee page prints it too.
+    /// </summary>
+    [Fact]
+    public void Off_kokomi_the_snapshot_carries_the_summon_log()
+    {
+        var snapshot = Il.Method("KokomiPlan", "Snapshot");
+        Assert.Contains("KokomiPlan.SummonHits", Il.Calls(snapshot));
+        Assert.Contains("summon_hits", Il.Strings(snapshot));
+        Assert.Empty(KokomiPlan.Snapshot(null));
+    }
 }

@@ -26,6 +26,7 @@ from understudy.blindplay_board import (_bundle_cards, _combat, deck_titles,
                                         _rest_options, _reward_items,
                                         _screen_cards, _selected_bundle,
                                         enchant_in_prompt, last_morning,
+                                        last_plays,
                                         map_floor,
                                         upgrade_deck_floor)
 from understudy.blindplay_faces import (SEAT_FACE_ID, _card_face,
@@ -693,6 +694,15 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         obs["text"] = _text(ev.get("body") or ev.get("text")
                             or ev.get("description"))
         obs["in_dialogue"] = bool(ev.get("in_dialogue"))
+        # Seat page backlog (2026-10-18): an Ancient's lines shown so far
+        # (`gits/GitsAncientDialogue.cs`), speaker and text; empty on an
+        # older bridge and on every other event.
+        obs["dialogue"] = [
+            {"speaker": "you" if _text(line.get("speaker")) == "you"
+             else "ancient",
+             "text": " ".join(_text(line.get("text")).split())}
+            for line in (ev.get("dialogue") or [])
+            if isinstance(line, dict) and _text(line.get("text"))]
         # CO-OP SPIRAL ABYSS (2026-10-14): "the page does not say which
         # Shadow lands on the enemies". Once the Blessing pick lands, the
         # room carries the result line (the pick and the Shadow the enemies
@@ -817,6 +827,9 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
         # receipt lands here. `None` -- and so printed nowhere -- on every
         # reward screen of a build without the rule.
         obs["last_morning"] = last_morning(state)
+        # Seat page backlog (2026-10-18): the plays of the turn the fight
+        # ended on, the killing one included.
+        obs["last_plays"] = last_plays(state, obs["last_morning"])
     elif st in ("treasure", "relic_select"):
         obs["screen"] = st
         obs["items"] = [_named_option(r) for r in _relic_options(state)]

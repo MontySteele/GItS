@@ -947,7 +947,21 @@ def answer_lines(res: dict[str, Any], state: dict[str, Any] | None,
     nothing, so it prints no "Took" line, only the refusal: a seat choosing
     mid-greeting read "Took: X" and then the bridge's no (2026-10-12)."""
     took = "" if refused(result) else taken_line(res, state)
-    return [x for x in (took, _result_line(result)) if x]
+    lines = [x for x in (took, _result_line(result)) if x]
+    # Co-op (seat page backlog, 2026-10-18): at a rest site, a chest or a
+    # reward screen the Proceed button waits on the partner too, and the
+    # sentence read as a broken screen until a retry happened to work.
+    if (refused(result) and isinstance(state, dict)
+            and is_coop(state)
+            and NO_PROCEED in _text((result or {}).get("error"))):
+        lines.append(COOP_PROCEED_WAITS)
+    return lines
+
+
+#: Co-op: what a refused `proceed` adds (seat page backlog, 2026-10-18).
+COOP_PROCEED_WAITS = ("In co-op, Proceed opens only once the other player "
+                      "has finished on this screen too. Say `wait`, then "
+                      "`proceed` again.")
 
 
 # What each verb's answer opens with. A word per verb rather than one flat

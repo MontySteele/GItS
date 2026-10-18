@@ -120,6 +120,25 @@ public class GitsModalTargetingTests
         Assert.Null(GitsModalTargeting.Modes(new HalfRead()));
     }
 
+    private sealed class CurtainRiseLike
+    {
+        public IReadOnlyList<string> ModeLabels =>
+            new[] { "Deal 10 damage", "[gold]Drain[/gold] 3: deal 16 instead" };
+
+        public IReadOnlyList<bool> ModeAimsAtChosenEnemy => new[] { true, true };
+    }
+
+    [Fact]
+    public void AModeNamedAsThePagePrintsItMatchesItsMarkedUpLabel()
+    {
+        // Seat page backlog (2026-10-18): the page folds `[gold]` out, the
+        // label keeps it; both sides are folded before matching.
+        var modes = GitsModalTargeting.Modes(new CurtainRiseLike())!;
+        Assert.Equal(1, GitsModalTargeting.Match(modes, "Drain 3: deal 16 instead"));
+        Assert.Equal(1, GitsModalTargeting.Match(modes, "Drain 3"));
+        Assert.Equal(0, GitsModalTargeting.Match(modes, "Deal 10 damage"));
+    }
+
     [Fact]
     public void TheLabelsAreListedForARefusalToPrint()
     {
