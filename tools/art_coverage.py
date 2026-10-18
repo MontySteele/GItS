@@ -133,9 +133,6 @@ KNOWN_STALE = {
     "proto_kk_reserves": (
         "The Kokomi pool overhaul (2026-10-13, review/active/kokomi-pool-overhaul-2026-10-13.md sec.4) cut this row: Brine Spray takes its slot. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
-    "proto_kk_brace_for_the_tide": (
-        "The Kokomi pool overhaul (2026-10-13, review/active/kokomi-pool-overhaul-2026-10-13.md sec.4) cut this row: Jellyfish Current takes its slot. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
-    ),
     "proto_kk_moons_reflection": (
         "The Kokomi pool overhaul (2026-10-13, review/active/kokomi-pool-overhaul-2026-10-13.md sec.4) cut this row: Prepared Retreat takes its slot. Kept rather than deleted: a painted asset on disk. It is NOT coverage for anything and must never be counted as such."
     ),
@@ -640,9 +637,6 @@ KNOWN_MISSING = {
     # dedupe (review/active/yae-dedupe-2026-10-16.md, 2026-10-16), whose
     # refill's eleven cards were painted by the Yae refill art pass
     # (2026-10-16), under "Yae refill art" in art/plan.tsv.
-    # Kokomi v3, 2026-10-18, card paper sec.6: Unbroken Tide is not painted
-    # yet; it draws blank until an art pass gives it a plan.tsv row.
-    "proto_kk_unbroken_tide",
 }
 
 

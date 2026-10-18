@@ -2558,8 +2558,8 @@ proto_fs_star_turn	ImageGen/images/cards/furina/proto_fs_star_turn.png	500	380	c
 proto_kk_abyssal_salvage	ImageGen/images/cards/kokomi/proto_kk_abyssal_salvage.png	500	380	cover	x0.45,y0.50@1.25	shortlist	1	png	World Quest Heart of Watatsumi.png		splash	kokomi_pool
 # proto_kk_at_waters_edge <- the pier and the sea
 proto_kk_at_waters_edge	ImageGen/images/cards/kokomi/proto_kk_at_waters_edge.png	500	380	cover	x0.42	shortlist	1	png	Archon Quest Sword Fish Resistance.png		splash	kokomi_pool
-# proto_kk_brace_for_the_tide <- the sea at sunset
-proto_kk_brace_for_the_tide	ImageGen/images/cards/kokomi/proto_kk_brace_for_the_tide.png	500	380	cover	x0.45	shortlist	1	png	World Quest Fin of Watatsumi.png		splash	kokomi_pool
+# proto_kk_unbroken_tide <- Brace for the Tide's picture, the sea at sunset (Kokomi v3, 2026-10-18)
+proto_kk_unbroken_tide	ImageGen/images/cards/kokomi/proto_kk_unbroken_tide.png	500	380	cover	x0.45	shortlist	1	png	World Quest Fin of Watatsumi.png		splash	kokomi_pool
 # proto_kk_ceremonial_garment <- Kokomi in her kimono, face in frame
 proto_kk_ceremonial_garment	ImageGen/images/cards/kokomi/proto_kk_ceremonial_garment.png	500	380	cover	x0.57,y0.37@1.5	shortlist	1	png	Sangonomiya Kokomi Birthday 2023.png		splash	kokomi_pool
 # proto_kk_coral_crash <- Kokomi under the sea, face in frame
