@@ -55,16 +55,17 @@ def test_an_anemo_hit_on_a_bare_enemy_says_the_swirl_did_nothing():
 # ---- (b) ---------------------------------------------------------------------
 
 def test_sharpshooter_reads_pyro_once_before_its_first_hit():
-    """The enemy wears Pyro; Kyouka turns the first hit Hydro, whose
-    Vaporize eats the Pyro mid-card. The second hit still lands: 18 (12 x
-    1.5) and then 12 on the Hydro the Vaporize left."""
+    """The enemy wears Pyro; the Electro rider (Tengu Stormcall's, since
+    Ayato's Hydro Kyouka left with the Inazuma pool rework, 2026-10-18)
+    turns the first hit Electro, whose Overloaded eats the Pyro mid-card.
+    The second hit still lands: Overloaded's 6, then 8 and 8."""
     T._reset()
     try:
         st = T._state(enemies=[T._enemy(aura="pyro")])
-        st.player.powers["mi_kyouka"] = 2
+        st.player.powers["mi_next_electro"] = 1
         T._play(st, T._vk("amber_sharpshooter"))
         assert st.enemies[0].aura != "pyro"
-        assert st.enemies[0].hp == 100 - 18 - 12
+        assert st.enemies[0].hp == 100 - 6 - 8 - 8
         # And no Pyro at the start: one hit, whatever the first hit leaves.
         st = T._state()
         T._play(st, T._vk("amber_sharpshooter"))

@@ -671,24 +671,17 @@ MC_LIONS_FANG_DRAW = 1
 # text, re-priced in its sec.8 -- nothing is derived and nothing is picked.
 MI_JUUGA_DMG = 7                # Gorou: Geo damage per turn, 3 turns
 MI_JUUGA_GUARD_BLOCK = 6        # Gorou: Juuga's Plan line, Block per turn, 3 turns
-MI_DARUMA_DMG = 9               # Sayu: the Daruma's hit above 70% HP
-MI_DARUMA_BLOCK = 9             # Sayu: and the Block below it
 MI_SANCTIFYING_RING_DMG = 6     # Shinobu: Electro to ALL, per turn, 3 turns
 MI_SANCTIFYING_RING_BLOCK = 6   # Shinobu: and the Block that rides it
 MI_BLAZING_BARRIER_BLOCK = 3    # Thoma: Block per absorbing hit
-MI_OOYOROI_DMG = 5              # Thoma: Pyro per Attack you play, 2 turns
-MI_OOYOROI_BLOCK = 3            # Thoma: and the Block per Attack
-MI_STORMCALL_BONUS = 5          # Sara: damage your Attacks gain, next turn
 MI_SAKURA_DMG = 4               # Yae: a Sakura's own Electro volley
 MI_SAKURA_BONUS = 3             # Yae: more, for a Sakura placed beside one
 MI_SAKURA_CAP = 3               # Yae: "Up to 3"
-MI_AUROUS_BLAZE_DMG = 6         # Yoimiya: the Pyro the mark answers with
 MI_SOUMETSU_DMG = 8             # Ayaka: Cryo to ALL, per turn, 2 turns
 MI_SOUMETSU_FINALE = 16         # Ayaka: and the hit it ends on
-MI_KYOUKA_BONUS = 4             # Ayato: damage your Attacks gain, 2 turns
-MI_KYOUKA_FINALE = 12           # Ayato: the illusion that pops when it ends
 MI_SURPRISE_DISPATCH_DMG = 10   # Kirara: the parcel, next turn
-MI_TAMOTO_DMG = 7               # Chiori: Geo per turn, ignoring Block
+MI_HANEGA_BLOCK_LOSS = 3        # Wanderer: Block cards give, less, per copy
+MI_SACRED_SAKURA_MULT = 1.5     # Yae: end-of-turn damage, increased by 50%
 
 # THE INAZUMA UNIVERSALS, WHOLE -- the workshop's sec.3 in its own character
 # order. TWENTY-FOUR, and the number is worth writing down: its sec.4 counts
@@ -699,7 +692,9 @@ MI_TAMOTO_DMG = 7               # Chiori: Geo per turn, ignoring Block
 # and is not here, and neither is any stand-in.
 INAZUMA_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     # Gorou's three left for Kokomi's own pool (the re-founding, 2026-10-12;
-    # `KOKOMI_OWN_COMPANION_IDS`). Twenty-one.
+    # `KOKOMI_OWN_COMPANION_IDS`). The Inazuma pool rework (2026-10-18): three
+    # cut, eleven new, twenty-nine; growing the pool (the same day) adds five
+    # more and moves Hyouka to Uncommon: thirty-four, 8 / 16 / 10.
     "proto_mi_sayu_fuuin_dash",
     "proto_mi_sayu_daruma",
     "proto_mi_sayu_naptime",
@@ -710,17 +705,30 @@ INAZUMA_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_mi_thoma_crimson_ooyoroi",
     "proto_mi_sara_crowfeather_cover",
     "proto_mi_sara_tengu_stormcall",
-    "proto_mi_itto_superlative_superstrength",
-    "proto_mi_raiden_musou_no_hitotachi",
     "proto_mi_kazuha_slash",
     "proto_mi_yae_sesshou_sakura",
-    "proto_mi_yoimiya_aurous_blaze",
     "proto_mi_ayaka_soumetsu",
+    "proto_mi_ayaka_hyouka",
     "proto_mi_ayato_kyouka",
     "proto_mi_heizou_heartstopper",
+    "proto_mi_heizou_windmuster_kick",
     "proto_mi_kirara_surprise_dispatch",
     "proto_mi_mizuki_anraku",
+    "proto_mi_mizuki_aisa_utamakura",
     "proto_mi_chiori_hasode",
+    "proto_mi_itto_ushi",
+    "proto_mi_raiden_baleful_omen",
+    "proto_mi_raiden_euthymia",
+    "proto_mi_itto_royal_descent",
+    "proto_mi_yoimiya_niwabi",
+    "proto_mi_kazuha_chihayaburu",
+    "proto_mi_wanderer_hanega",
+    "proto_mi_ayato_kyouka_fuushi",
+    "proto_mi_kirara_meowteor_kick",
+    "proto_mi_yoimiya_ryuukin_saxifrage",
+    "proto_mi_wanderer_kyougen",
+    "proto_mi_chiori_twin_blades",
+    "proto_mi_yae_sacred_sakuras_favor",
 )
 
 # THE INAZUMA WORKSHOP'S ONE PERSONAL list (R236, sec.3 Gorou). EMPTY SINCE

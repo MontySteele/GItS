@@ -334,6 +334,8 @@ public class KokomiOverhaulRuleTests
                     "LoseStrengthThisTurn", "DrawPileToHand",
                     // KOKOMI V3 (2026-10-18): Unbroken Tide.
                     "DamageIfNoHpLostSince",
+                    // THE INAZUMA POOL REWORK (2026-10-18): Kyouka Fuushi.
+                    "DamageTimesPlusEarlierPlans",
                     // GRAND DESIGN TAKES BASICS (2026-10-18).
                     "PlayAsItself" },
             System.Enum.GetNames(typeof(KokomiPlan.Kind)));

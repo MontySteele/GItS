@@ -92,8 +92,10 @@ public class KokomiRefoundingTests
     {
         foreach (var card in new CardModel[]
                  { new ProtoMiShinobuThundergrust(), new ProtoMiShinobuGrassRing(),
-                   new ProtoMiKiraraSurpriseDispatch() })
+                   new ProtoMiChioriHasode() })
         {
+            // (Kirara left this list in the Inazuma pool rework, 2026-10-18:
+            // she prints a Plan line now.)
             var name = card.GetType().Name;
             Assert.IsAssignableFrom<global::KleeMod.Cards.ICompanionCard>(card);
             Assert.False(card is IPlannedCard, name);

@@ -283,50 +283,8 @@ def test_dark_adds_to_every_pyro_hit_bombs_included():
     assert e.hp == 163 - 10
 
 
-# ---------------------------------------------------------------------------
-# YOIMIYA, AUROUS BLAZE (sec.6)
-# ---------------------------------------------------------------------------
-
-def _skill():
-    return Card(id="s", name="s", cost=1, type="skill", effects=[])
-
-
-def test_aurous_blaze_hits_now_then_answers_each_skill_on_its_enemy():
-    a, b = make_enemy(hp=90, name="a"), make_enemy(hp=90, name="b")
-    st = make_state(enemies=[a, b])
-    card = load("proto_mi_yoimiya_aurous_blaze")
-    assert card.type == "skill"
-    play(st, card, aim=a)
-    effects.companion_overhaul_card_played(st, card)   # not its own trigger
-    assert a.hp == 84 and b.hp == 90
-    assert a.powers["mi_aurous_blaze"] == 2
-    s = _skill()
-    effects.companion_overhaul_card_played(st, s)
-    assert a.hp == 81 and b.hp == 90
-    atk = Card(id="t", name="t", cost=1, type="attack", effects=[])
-    effects.companion_overhaul_card_played(st, atk)
-    assert a.hp == 81
-
-
-def test_aurous_blaze_lasts_two_turns():
-    a = make_enemy(hp=90)
-    st = make_state(enemies=[a])
-    play(st, load("proto_mi_yoimiya_aurous_blaze"), aim=a)
-    effects.inazuma_overhaul_turn_end(st)
-    assert a.powers["mi_aurous_blaze"] == 1
-    effects.inazuma_overhaul_turn_end(st)
-    assert "mi_aurous_blaze" not in a.powers
-    hp = a.hp
-    effects.companion_overhaul_card_played(st, _skill())
-    assert a.hp == hp
-
-
-def test_aurous_blaze_no_longer_answers_non_attack_damage():
-    a, b = make_enemy(hp=90, name="a"), make_enemy(hp=90, name="b")
-    st = make_state(enemies=[a, b])
-    play(st, load("proto_mi_yoimiya_aurous_blaze"), aim=a)
-    effects.deal_damage_to_enemy(st, a, 5, source="card")
-    assert a.hp == 84 - 5 and b.hp == 90
+# (Yoimiya's Aurous Blaze, sec.6, was cut in the Inazuma pool rework,
+# 2026-10-18.)
 
 
 # ---------------------------------------------------------------------------

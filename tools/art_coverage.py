@@ -118,6 +118,15 @@ CARD_DIRS = tuple(IMAGES / name for name in CARD_DIR_NAMES)
 # KNOWN-set pattern (as in tools/art_lint.py): a stale file with a reason on
 # record is a NOTE, not a failure. Never prune an entry without a new reason.
 KNOWN_STALE = {
+    "proto_mi_itto_superlative_superstrength": (
+        "The Inazuma pool rework (2026-10-18) cut Superlative Superstrength from the pool, and its art carries over to Royal Descent (its plan row was repointed). Kept rather than deleted: a painted asset on a companions/ out-path that main shipped until the rework merged. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_mi_raiden_musou_no_hitotachi": (
+        "The Inazuma pool rework (2026-10-18) cut Musou no Hitotachi from the pool, and its art carries over to Euthymia (its plan row was repointed). Kept rather than deleted: a painted asset on a companions/ out-path that main shipped until the rework merged. It is NOT coverage for anything and must never be counted as such."
+    ),
+    "proto_mi_yoimiya_aurous_blaze": (
+        "The Inazuma pool rework (2026-10-18) cut Aurous Blaze from the pool, and its art carries over to Niwabi Fire-Dance (its plan row was repointed). Kept rather than deleted: a painted asset on a companions/ out-path that main shipped until the rework merged. It is NOT coverage for anything and must never be counted as such."
+    ),
     "proto_ym_deadline": (
         "The Yae dedupe (2026-10-16, review/active/yae-dedupe-2026-10-16.md, both picks (a)) cut Deadline from her pool. Kept rather than deleted: a painted asset on a yae/ out-path, visible to this tool since yae joined CHARACTER_DIRS (art gaps pass, 2026-10-18). It is NOT coverage for anything and must never be counted as such."
     ),

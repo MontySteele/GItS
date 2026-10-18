@@ -2312,6 +2312,10 @@
    effects: [{op: apply_power, power: mi_juuga, amount: 3, target: self}],
    plan: [{op: juuga_guard, amount: 3}]}
 
+# THE INAZUMA POOL REWORK (2026-10-18, review/active/inazuma-companions-2026-10-18.md):
+# 8 Common / 13 Uncommon / 7 Rare. Provenance: docs/notes/prototype-surface-provenance.md,
+# "Inazuma pool rework, 2026-10-18".
+
 - {id: proto_mi_sayu_fuuin_dash, name: "Sayu — Yoohoo Art: Fuuin Dash", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: trigger, element: anemo,
@@ -2319,21 +2323,26 @@
    description: "Deal 8 [gold]Anemo[/gold] damage to a random enemy and [gold]Swirl[/gold] it.",
    effects: [{op: damage, amount: 8, target: random_enemy, applies_element: true}]}
 
-# 2026-10-11 Companion pass (review/ruled/companion-upper-pass-2026-10-11.md).
+# Inazuma rework (2026-10-18): rebuilt with a Plan line.
 - {id: proto_mi_sayu_daruma, name: "Sayu — Muji-Muji Daruma", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: uncommon, role_c: buffer, element: anemo,
-   cost: 1, type: skill, exhaust: true,
-   description: "For 2 turns, at the end of your turn deal 9 damage to a random enemy if you are above 70% HP; otherwise, gain 9 [gold]Block[/gold].",
-   effects: [{op: apply_power, power: mi_daruma, amount: 2, target: self}]}
+   cost: 1, type: skill,
+   description: "Gain 6 [gold]Block[/gold]. [gold]Plan[/gold]: Gain {energyPrefix:energyIcons(1)} and 6 [gold]Block[/gold].",
+   effects: [{op: block, amount: 6}],
+   plan: [{op: energy, amount: 1}, {op: block, amount: 6}],
+   upgrade: {block: 3, plan_block: 3}}
 
+# Inazuma rework (2026-10-18): rebuilt with a Plan line ("no cycling at
+# Common": the draw is a turn late and costs 1).
 - {id: proto_mi_sayu_naptime, name: "Sayu — Naptime", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: buffer, element: anemo,
-   cost: 0, type: skill,
-   description: "Gain 4 [gold]Block[/gold]. Next turn, draw 2 cards if you play no Attacks this turn.",
-   effects: [{op: block, amount: 4},
-             {op: apply_power, power: mi_naptime, amount: 2, target: self}]}
+   cost: 1, type: skill,
+   description: "Gain 7 [gold]Block[/gold]. [gold]Plan[/gold]: Gain 7 [gold]Block[/gold] and draw 1 card.",
+   effects: [{op: block, amount: 7}],
+   plan: [{op: block, amount: 7}, {op: draw, amount: 1}],
+   upgrade: {block: 3, plan_block: 3}}
 
 # 2026-10-11 Companion pass (review/ruled/companion-upper-pass-2026-10-11.md).
 - {id: proto_mi_shinobu_sanctifying_ring, name: "Shinobu — Sanctifying Ring", character: klee,
@@ -2370,12 +2379,15 @@
    effects: [{op: block, amount: 6},
              {op: apply_power, power: mi_blazing_barrier, amount: 6, target: self}]}
 
+# Inazuma rework (2026-10-18): rebuilt as the pool's Uncommon Power, the
+# Watatsumi's Grace shape (the Block clear keeps up to the stack).
 - {id: proto_mi_thoma_crimson_ooyoroi, name: "Thoma — Crimson Ooyoroi", character: klee,
    authored_by: [claude],
-   nation: inazuma, star: 4, rarity: uncommon, role_c: applier, element: pyro,
-   cost: 1, type: skill, exhaust: true,
-   description: "For 2 turns, whenever you play an Attack, deal 5 [gold]Pyro[/gold] damage to a random enemy and gain 3 [gold]Block[/gold].",
-   effects: [{op: apply_power, power: mi_crimson_ooyoroi, amount: 2, target: self}]}
+   nation: inazuma, star: 4, rarity: uncommon, role_c: buffer, element: pyro,
+   cost: 1, type: power,
+   description: "At the start of your turn, keep up to 6 of your [gold]Block[/gold].",
+   effects: [{op: apply_power, power: mi_crimson_ooyoroi, amount: 6, target: self}],
+   upgrade: {power_amount: +3}}
 
 - {id: proto_mi_sara_crowfeather_cover, name: "Kujou Sara — Crowfeather Cover", character: klee,
    authored_by: [claude],
@@ -2384,29 +2396,19 @@
    description: "Your next Attack this turn deals 4 additional damage and applies [gold]Electro[/gold].",
    effects: [{op: apply_power, power: mi_crowfeather, amount: 4, target: self}]}
 
+# Inazuma rework (2026-10-18): the base game's Trip with an Electro rider.
 - {id: proto_mi_sara_tengu_stormcall, name: "Kujou Sara — Tengu Stormcall", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: uncommon, role_c: applier, element: electro,
-   cost: 1, type: attack,
-   description: "Deal 5 [gold]Electro[/gold] damage. Next turn, your Attacks deal 5 additional damage.",
-   effects: [{op: damage, amount: 5, target: enemy, applies_element: true},
-             {op: apply_power, power: mi_stormcall, amount: 1, target: self}]}
+   cost: 0, type: skill,
+   description: "Apply 2 [gold]Vulnerable[/gold]. Your next Attack this turn applies [gold]Electro[/gold].",
+   effects: [{op: apply_power, power: vulnerable, amount: 2, target: enemy},
+             {op: apply_power, power: mi_next_electro, amount: 1, target: self}],
+   upgrade: {vulnerable: +1}}
 
-- {id: proto_mi_itto_superlative_superstrength, name: "Itto — Superlative Superstrength", character: klee,
-   authored_by: [claude],
-   nation: inazuma, star: 5, rarity: rare, role_c: trigger, element: geo,
-   cost: 2, type: attack,
-   description: "Deal 14 [gold]Geo[/gold] damage. Gain 12 [gold]Block[/gold].",
-   effects: [{op: damage, amount: 14, target: enemy, applies_element: true},
-             {op: block, amount: 12}]}
-
-- {id: proto_mi_raiden_musou_no_hitotachi, name: "Raiden Shogun — Musou no Hitotachi", character: klee,
-   authored_by: [claude],
-   nation: inazuma, star: 5, rarity: rare, role_c: applier, element: electro,
-   cost: 3, type: attack,
-   description: "Deal {CalculationBase:diff()} [gold]Electro[/gold] damage. Deals {ExtraDamage:diff()} additional damage for each [gold]Companion[/gold] card you played this combat.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
-   effects: [{op: damage, target: enemy, applies_element: true,
-              amount_formula: {base: 27, per: 5, count: companions_played_this_combat}}]}
+# YOIMIYA, AUROUS BLAZE; RAIDEN SHOGUN, MUSOU NO HITOTACHI; AND ITTO,
+# SUPERLATIVE SUPERSTRENGTH ARE CUT (the Inazuma rework, 2026-10-18). Each
+# character returns at Rare.
 
 - {id: proto_mi_kazuha_slash, name: "Kaedehara Kazuha — Kazuha Slash", character: klee,
    authored_by: [claude],
@@ -2422,18 +2424,6 @@
    description: "Place a [gold]Sakura[/gold], up to 3. At the end of your turn, each deals 4 [gold]Electro[/gold] damage to a random enemy, or 7 after the first.",
    effects: [{op: apply_power, power: mi_sesshou_sakura, amount: 1, target: self}]}
 
-- {id: proto_mi_yoimiya_aurous_blaze, name: "Yoimiya — Aurous Blaze", character: klee,
-   authored_by: [claude],
-   nation: inazuma, star: 5, rarity: uncommon, role_c: trigger, element: pyro,
-   cost: 1, type: skill, exhaust: true,
-   # AoE trim, 2026-10-03 (review/active/aoe-trim-2026-10-03.md sec.6): it
-   # hits on the turn it is played and leaves the AoE count. The mark's 3 is
-   # the card's (`summon_damage:`); the stack is turns remaining.
-   description: "Deal 6 [gold]Pyro[/gold] damage. For 2 turns, whenever you play a Skill, deal 3 [gold]Pyro[/gold] damage to that enemy.",
-   effects: [{op: damage, amount: 6, target: enemy, applies_element: true},
-             {op: apply_power, power: mi_aurous_blaze, amount: 2, target: enemy,
-              summon_damage: 3}]}
-
 - {id: proto_mi_ayaka_soumetsu, name: "Kamisato Ayaka — Soumetsu", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 5, rarity: rare, role_c: trigger, element: cryo,
@@ -2444,30 +2434,61 @@
    description: "For 2 turns, at the end of your turn deal 8 [gold]Cryo[/gold] damage to ALL enemies. The last one deals 16 additional damage.",
    effects: [{op: apply_power, power: mi_soumetsu, amount: 2, target: self}]}
 
+# Inazuma rework (2026-10-18): Thunderclap with Weak, the debuff three of
+# Yae's cards read. Growing the pool to 34 (the same day): Common to
+# Uncommon, 4 to 5.
+- {id: proto_mi_ayaka_hyouka, name: "Kamisato Ayaka — Kamisato Art: Hyouka", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: uncommon, role_c: applier, element: cryo,
+   cost: 1, type: attack,
+   description: "Deal 5 [gold]Cryo[/gold] damage to ALL enemies and apply 1 [gold]Weak[/gold] to each.",
+   effects: [{op: damage, amount: 5, target: all_enemies, applies_element: true},
+             {op: apply_power, power: weak, amount: 1, target: all_enemies}],
+   upgrade: {damage: 3}}
+
+# Inazuma rework (2026-10-18): rebuilt. The paper's "3 more damage" is
+# printed "3 additional damage" (text conventions rule 8, `more-damage`).
 - {id: proto_mi_ayato_kyouka, name: "Kamisato Ayato — Kyouka", character: klee,
    authored_by: [claude],
-   nation: inazuma, star: 5, rarity: uncommon, role_c: buffer, element: hydro,
-   cost: 1, type: skill, exhaust: true,
-   description: "Your Attacks apply [gold]Hydro[/gold] and deal 4 additional damage. In 2 turns, deal 12 [gold]Hydro[/gold] damage to a random enemy.",
-   effects: [{op: apply_power, power: mi_kyouka, amount: 2, target: self}]}
+   nation: inazuma, star: 5, rarity: uncommon, role_c: applier, element: hydro,
+   cost: 1, type: skill,
+   description: "Apply [gold]Hydro[/gold] to ALL enemies. This turn, your Attacks deal 3 additional damage.",
+   effects: [{op: apply_aura, element: hydro, target: all_enemies},
+             {op: apply_power, power: attack_up_this_turn, amount: 3, target: self}],
+   upgrade: {power_amount: +2}}
 
+# Inazuma rework (2026-10-18): Finisher at a Common rate; it no longer
+# needs Swirls from other cards. "Other" is the ledger read during the play,
+# before this Attack is counted.
 - {id: proto_mi_heizou_heartstopper, name: "Shikanoin Heizou — Heartstopper Strike", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: trigger, element: anemo,
    cost: 1, type: attack, tags: [strike],
-   # `EB-696`: the LIVE total, Well Laid's shape, and the count's window said
-   # out loud. The finding: the provenance note.
-   description: "Deal {CalculatedDamage:diff()} [gold]Anemo[/gold] damage. Deals 4 additional damage for each [gold]Swirl[/gold] this turn.",
+   description: "Deal {CalculationBase:diff()} [gold]Anemo[/gold] damage, plus {ExtraDamage:diff()} for each other Attack you played this turn.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: enemy, applies_element: true,
-              amount_formula: {base: 6, per: 4, count: swirls_this_turn}}]}
+              amount_formula: {base: 4, per: 4, count: attacks_played_this_turn}}],
+   upgrade: {formula_per: 2}}
 
+- {id: proto_mi_heizou_windmuster_kick, name: "Shikanoin Heizou — Windmuster Kick", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 4, rarity: uncommon, role_c: trigger, element: anemo,
+   cost: 2, type: attack,
+   description: "Deal 12 [gold]Anemo[/gold] damage and [gold]Swirl[/gold] the enemy. Draw 1 card.",
+   effects: [{op: damage, amount: 12, target: enemy, applies_element: true},
+             {op: swirl, target: enemy},
+             {op: draw, amount: 1}],
+   upgrade: {damage: 4}}
+
+# Inazuma rework (2026-10-18): kept, with a Plan line.
 - {id: proto_mi_kirara_surprise_dispatch, name: "Kirara — Surprise Dispatch", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: uncommon, role_c: buffer,
    cost: 1, type: skill,
-   description: "Gain 8 [gold]Block[/gold]. Next turn, deal 10 damage to a random enemy.",
+   description: "Gain 8 [gold]Block[/gold]. Next turn, deal 10 damage to a random enemy. [gold]Plan[/gold]: Gain 14 [gold]Block[/gold].",
    effects: [{op: block, amount: 8},
-             {op: apply_power, power: mi_surprise_dispatch, amount: 1, target: self}]}
+             {op: apply_power, power: mi_surprise_dispatch, amount: 1, target: self}],
+   plan: [{op: block, amount: 14}],
+   upgrade: {block: 3, plan_block: 4}}
 
 # 2026-10-11 Companion pass (review/ruled/companion-upper-pass-2026-10-11.md).
 - {id: proto_mi_mizuki_anraku, name: "Yumemizuki Mizuki — Anraku Secret Spring Therapy", character: klee,
@@ -2481,14 +2502,157 @@
              {op: damage, amount: 14, target: all_enemies, applies_element: false},
              {op: mend, amount: 6}]}
 
-# 2026-10-11 Companion pass (review/ruled/companion-upper-pass-2026-10-11.md).
+# Inazuma rework (2026-10-18), amended by the review the same day: no Mend
+# (LAW: true healing is Rare and Exhaust).
+- {id: proto_mi_mizuki_aisa_utamakura, name: "Yumemizuki Mizuki — Aisa Utamakura", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: uncommon, role_c: buffer, element: anemo,
+   cost: 1, type: skill,
+   description: "Apply 1 [gold]Weak[/gold] to ALL enemies. Draw {Cards:diff()} cards.",
+   effects: [{op: apply_power, power: weak, amount: 1, target: all_enemies},
+             {op: draw, amount: 2}],
+   upgrade: {draw: +1}}
+
+# Inazuma rework (2026-10-18): rebuilt as an Attack that cuts through Block.
 - {id: proto_mi_chiori_hasode, name: "Chiori — Fluttering Hasode", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 5, rarity: uncommon, role_c: trigger, element: geo,
-   cost: 1, type: skill, exhaust: true,
-   description: "For 3 turns, at the end of your turn deal 7 [gold]Geo[/gold] damage to a random enemy, ignoring [gold]Block[/gold].",
-   effects: [{op: apply_power, power: mi_tamoto, amount: 3, target: self,
-              summon_damage: 7}]}
+   cost: 1, type: attack,
+   description: "Deal 5 [gold]Geo[/gold] damage twice. This ignores [gold]Block[/gold].",
+   effects: [{op: damage, amount: 5, times: 2, target: enemy, applies_element: true,
+              ignore_block: true}],
+   upgrade: {damage: 2}}
+
+- {id: proto_mi_itto_ushi, name: "Itto — Ushi to the Rescue", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: uncommon, role_c: buffer, element: geo,
+   cost: 1, type: skill,
+   description: "Gain 8 [gold]Block[/gold]. If an enemy intends to attack, gain 1 [gold]Strength[/gold].",
+   effects: [{op: block, amount: 8},
+             {op: conditional, if: enemy_intends_attack,
+              then: [{op: apply_power, power: strength, amount: 1, target: self}]}],
+   upgrade: {block: 3}}
+
+# Inazuma rework (2026-10-18): the pool's one way to take enemy Strength.
+- {id: proto_mi_raiden_baleful_omen, name: "Raiden Shogun — Transcendence: Baleful Omen", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: uncommon, role_c: applier, element: electro,
+   cost: 1, type: skill,
+   description: "ALL enemies lose 2 [gold]Strength[/gold] this turn. Your next Attack this turn applies [gold]Electro[/gold].",
+   effects: [{op: lose_strength, amount: 2, target: all_enemies, this_turn: true},
+             {op: apply_power, power: mi_next_electro, amount: 1, target: self}],
+   upgrade: {strength_loss: +1}}
+
+# --- the Rares: Powers that bend a rule (Inazuma rework, 2026-10-18) ---
+
+- {id: proto_mi_raiden_euthymia, name: "Raiden Shogun — Plane of Euthymia", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: rare, role_c: buffer, element: electro,
+   cost: 2, type: power,
+   description: "At the end of your turn, Retain your [gold]Hand[/gold].",
+   effects: [{op: apply_power, power: mi_euthymia, amount: 1, target: self}],
+   upgrade: {cost: -1}}
+
+- {id: proto_mi_itto_royal_descent, name: "Itto — Royal Descent: Behold, Itto the Evil!", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: rare, role_c: trigger, element: geo,
+   cost: 2, type: power,
+   description: "Whenever an enemy's attack deals you no damage, deal 6 [gold]Geo[/gold] damage to it.",
+   effects: [{op: apply_power, power: mi_royal_descent, amount: 6, target: self}],
+   upgrade: {power_amount: +3}}
+
+- {id: proto_mi_yoimiya_niwabi, name: "Yoimiya — Niwabi Fire-Dance", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: rare, role_c: trigger, element: pyro,
+   cost: 2, type: power,
+   description: "The first Attack you play each turn is played twice.",
+   effects: [{op: apply_power, power: mi_niwabi, amount: 1, target: self}],
+   upgrade: {cost: -1}}
+
+- {id: proto_mi_kazuha_chihayaburu, name: "Kaedehara Kazuha — Chihayaburu", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: rare, role_c: trigger, element: anemo,
+   cost: 1, type: power,
+   description: "Whenever you [gold]Swirl[/gold], draw 1 card.",
+   effects: [{op: apply_power, power: mi_chihayaburu, amount: 1, target: self}],
+   upgrade: {cost: -1}}
+
+# The review's amended text (2026-10-18): Block from cards only, floored at
+# 0; relics and powers are unaffected.
+- {id: proto_mi_wanderer_hanega, name: "Wanderer — Hanega: Song of the Wind", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: rare, role_c: trigger, element: anemo,
+   cost: 1, type: power,
+   description: "At the start of your turn, gain {energyPrefix:energyIcons(1)}. Cards give you 3 less [gold]Block[/gold].",
+   effects: [{op: apply_power, power: mi_hanega, amount: 1, target: self}],
+   upgrade: {cost: -1}}
+
+# The paper's Plan Rare (2026-10-18). "Earlier Plan" is a Plan carried out
+# before it this turn, counted as Feint and Turning Tide count, not Stings or
+# Wards (`KokomiOverhaulLedger.ChainPlansThisTurn`, less itself).
+- {id: proto_mi_ayato_kyouka_fuushi, name: "Kamisato Ayato — Kyouka Fuushi", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: rare, role_c: applier, element: hydro,
+   cost: 2, type: attack,
+   description: "Deal 7 [gold]Hydro[/gold] damage 3 times. [gold]Plan[/gold]: Deal 7 [gold]Hydro[/gold] damage 3 times, plus once per earlier [gold]Plan[/gold], not Stings or Wards.",
+   effects: [{op: damage, amount: 7, times: 3, target: enemy, applies_element: true}],
+   plan: [{op: damage_times_plus_earlier_plans, amount: 7, times: 3, target: front_enemy}],
+   upgrade: {damage: 2, plan_damage: 2}}
+
+# --- GROWING THE POOL TO 34 (ruled 2026-10-18; the paper's last section):
+# every Inazuma character has two cards. ---
+
+- {id: proto_mi_kirara_meowteor_kick, name: "Kirara — Meow-teor Kick", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 4, rarity: common, role_c: trigger,
+   cost: 1, type: attack,
+   # The paper's "deal 3 more" is printed "3 additional damage" (text
+   # conventions rule 8, `more-damage`).
+   description: "Deal 9 damage. If you have [gold]Block[/gold], deal {BranchDamage:diff()} additional damage.",
+   effects: [{op: damage, amount: 9, target: enemy},
+             {op: conditional, if: has_block,
+              then: [{op: damage, amount: 3, target: enemy}]}],
+   upgrade: {damage: 3}}
+
+- {id: proto_mi_yoimiya_ryuukin_saxifrage, name: "Yoimiya — Ryuukin Saxifrage", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: uncommon, role_c: applier, element: pyro,
+   cost: 1, type: attack,
+   description: "Deal 4 [gold]Pyro[/gold] damage 3 times.",
+   effects: [{op: damage, amount: 4, times: 3, target: enemy, applies_element: true}],
+   upgrade: {damage: 1}}
+
+- {id: proto_mi_wanderer_kyougen, name: "Wanderer — Kyougen: Five Ceremonial Plays", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: uncommon, role_c: trigger, element: anemo,
+   cost: 1, type: attack,
+   # "deal 6 more" is printed "6 additional damage" (rule 8).
+   description: "Deal 6 [gold]Anemo[/gold] damage and [gold]Swirl[/gold] the enemy. If you have no [gold]Block[/gold], deal {BranchDamage:diff()} additional damage.",
+   effects: [{op: damage, amount: 6, target: enemy, applies_element: true},
+             {op: swirl, target: enemy},
+             {op: conditional, if: no_block,
+              then: [{op: damage, amount: 6, target: enemy, applies_element: true}]}],
+   upgrade: {damage: 2, conditional_then_damage: 2}}
+
+# A multi-hit Attack is one whose printed hit count is 2 or more, a Plan
+# line's included. The review (2026-10-18): one more hit, Innate upgraded.
+- {id: proto_mi_chiori_twin_blades, name: "Chiori — Hiyoku: Twin Blades", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: rare, role_c: trigger, element: geo,
+   cost: 1, type: power,
+   description: "Your Attacks that hit more than once hit one additional time.",
+   effects: [{op: apply_power, power: mi_twin_blades, amount: 1, target: self}],
+   upgrade: {innate: true}}
+
+# "At the end of your turn" is the game's End phase (provenance notes).
+# Offered to Yae too since the review (2026-10-18).
+- {id: proto_mi_yae_sacred_sakuras_favor, name: "Yae Miko — Sacred Sakura's Favor", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: rare, role_c: trigger, element: electro,
+   cost: 2, type: power,
+   description: "Damage you deal at the end of your turn is increased by 50%.",
+   effects: [{op: apply_power, power: mi_sacred_sakuras_favor, amount: 1, target: self}],
+   upgrade: {cost: -1}}
 
 # --- FONTAINE (legacy cleanup pick 4): the shipped rows ported as they are,
 # bodies, upgrades and art; the three guest stars are Furina's. Provenance

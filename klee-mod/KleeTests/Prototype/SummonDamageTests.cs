@@ -39,7 +39,8 @@ public class SummonDamageTests
     [Fact]
     public void EB463_the_badge_prints_a_hole_seeded_from_the_constant()
     {
-        var tamoto = new TamotoPower();
+        // (Chiori's Tamoto left with the Inazuma pool rework, 2026-10-18:
+        // Fluttering Hasode is an Attack now. Amber's trap is the carrier.)
         var bunny = new BaronBunnyPower();
 
         // A HOLE AND NOT A LITERAL, which is the whole reason these two left
@@ -52,15 +53,9 @@ public class SummonDamageTests
         // the Codex seat read the literal `{Damage}` off Amber's buff (Klee
         // r27, fight 4). The live badge is the smart row; the compendium row
         // prints the seed.
-        Assert.Contains("[blue]{Damage}[/blue] [gold]Geo[/gold]",
-                        Row(tamoto, "smartDescription"));
         Assert.Contains("[blue]{Damage}[/blue] [gold]Pyro[/gold]",
                         Row(bunny, "smartDescription"));
-        Assert.DoesNotContain("{Damage}", Face(tamoto));
         Assert.DoesNotContain("{Damage}", Face(bunny));
-        Assert.Contains(
-            $"[blue]{CompanionOverhaulLaw.TamotoDamage}[/blue] [gold]Geo[/gold]",
-            Face(tamoto));
         Assert.Contains(
             $"[blue]{CompanionOverhaulLaw.BaronBunnyDamage}[/blue] [gold]Pyro[/gold]",
             Face(bunny));
@@ -68,10 +63,7 @@ public class SummonDamageTests
         // SEEDED FROM THE CONSTANT, so a power applied by anything but the
         // `summon_damage:` grammar is the number it always was, and a retune
         // of the law moves the seed with it (`EB-89`'s rule).
-        Assert.Equal(CompanionOverhaulLaw.TamotoDamage, tamoto.SummonDamage);
         Assert.Equal(CompanionOverhaulLaw.BaronBunnyDamage, bunny.SummonDamage);
-        Assert.Equal(CompanionOverhaulLaw.TamotoDamage,
-                     (int)tamoto.DynamicVars["Damage"].BaseValue);
         Assert.Equal(CompanionOverhaulLaw.BaronBunnyDamage,
                      (int)bunny.DynamicVars["Damage"].BaseValue);
     }
@@ -81,11 +73,6 @@ public class SummonDamageTests
     {
         // The defect this row is about is a face and a hit that disagree, so
         // the pin is that ONE write moves both.
-        var tamoto = new TamotoPower();
-        tamoto.NoteSummonDamage(9);
-        Assert.Equal(9, tamoto.SummonDamage);
-        Assert.Equal(9, (int)tamoto.DynamicVars["Damage"].BaseValue);
-
         var bunny = new BaronBunnyPower();
         bunny.NoteSummonDamage(12);
         Assert.Equal(12, bunny.SummonDamage);
@@ -98,9 +85,6 @@ public class SummonDamageTests
         // Read off the compiled bodies: both used to hand the law constant
         // straight to `ElementalHit.Deal`, which is exactly why the fold could
         // not reach them.
-        var volley = Il.Method("TamotoPower", "FireVolley");
-        Assert.Contains(Il.Calls(volley),
-                        c => c.Contains("get_SummonDamage"));
         var explode = Il.Method("BaronBunnyPower", "Explode");
         Assert.Contains(Il.Calls(explode),
                         c => c.Contains("get_SummonDamage"));
@@ -120,8 +104,7 @@ public class SummonDamageTests
 
         // AND THE GENERATED CARDS CALL IT, immediately after the apply -- the
         // one moment the card, the fold and the power all exist at once.
-        foreach (var card in new[] { "ProtoMiChioriHasode",
-                                     "ProtoMcAmberExplosivePuppet" })
+        foreach (var card in new[] { "ProtoMcAmberExplosivePuppet" })
         {
             var play = Il.Method(card, "OnPlay");
             Assert.Contains(Il.Calls(play), c => c.Contains("SummonDamage.Note"));

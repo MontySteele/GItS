@@ -157,7 +157,9 @@ public class Round24Tests
         // Klee-only companions, 2026-10-03), and since the Kokomi re-founding
         // (2026-10-12) Juuga's Plan-line Block beside its volley. Fifteen since
         // the Kokomi level pass (2026-10-12) retired the War Banner's tick.
-        Assert.Equal(15, System.Text.RegularExpressions.Regex.Matches(
+        // Twelve since the Inazuma pool rework (2026-10-18) retired Daruma's,
+        // Kyouka's and Tamoto's.
+        Assert.Equal(12, System.Text.RegularExpressions.Regex.Matches(
             walk, @"await Act\(creature, ").Count);
     }
 

@@ -162,7 +162,8 @@ def test_nimble_is_not_skill_only_and_takes_a_block_granting_attack():
     assert live == {"proto_ko_dodoco_tag",       # Klee tempo paper
                     "proto_mc_kaeya_frostgnaw",
                     "proto_mf_freminet_pressurized_floe",
-                    "proto_mi_itto_superlative_superstrength",
+                    # (Itto's Superlative Superstrength was cut in the
+                    # Inazuma pool rework, 2026-10-18.)
                     # Kokomi's own card since the re-founding (2026-10-12):
                     # its Plan line is "Gain 11 Block".
                     "proto_mi_gorou_inuzaka",

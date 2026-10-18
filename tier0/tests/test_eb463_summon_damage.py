@@ -44,9 +44,9 @@ def _play(state, card_id: str):
 
 def test_the_two_rows_declare_the_summons_printed_damage(arm):
     """The sheet says the number, once, where both engines read it."""
-    chiori = loader.peek_card("proto_mi_chiori_hasode")
+    # (Chiori's Tamoto left with the Inazuma pool rework, 2026-10-18:
+    # Fluttering Hasode is an Attack now. Amber's trap is the one row.)
     amber = loader.peek_card("proto_mc_amber_explosive_puppet")
-    assert [fx.get("summon_damage") for fx in chiori.effects] == [7]
     # Amber's first effect is her Strength loss (2026-10-02); the trap is second.
     assert [fx.get("summon_damage") for fx in amber.effects] == [None, 8]
 
@@ -57,24 +57,6 @@ def test_a_row_with_no_grammar_banks_nothing(arm):
     state = _state()
     _play(state, "proto_mc_diona_icy_paws")
     assert state.player.summon_damage == {}
-
-
-# --- `EB-463`: Chiori banks her printed 6 ------------------------------
-
-
-def test_chiori_off_guest_cast_banks_her_printed_six(arm):
-    state = _state()
-    _play(state, "proto_mi_chiori_hasode")
-    assert state.player.summon_damage["mi_tamoto"] == C.MI_TAMOTO_DMG
-
-
-def test_the_volley_off_the_mode_is_the_printed_six(arm):
-    state = _state()
-    _play(state, "proto_mi_chiori_hasode")
-    before = sum(e.hp for e in state.enemies)
-    effects.companion_overhaul_turn_end(state)
-    assert (before - sum(e.hp for e in state.enemies)
-            == C.MI_TAMOTO_DMG)
 
 
 # --- `EB-565`: Amber banks her printed 8 -------------------------------

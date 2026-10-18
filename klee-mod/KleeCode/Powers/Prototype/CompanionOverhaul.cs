@@ -80,14 +80,6 @@ public static class CompanionOverhaulLaw
     /// <c>C.MI_JUUGA_GUARD_BLOCK</c>.</summary>
     public const int JuugaGuardBlock = 6;
 
-    /// <summary>Sayu, Muji-Muji Daruma: the hit above 70% HP.
-    /// Mirrors <c>C.MI_DARUMA_DMG</c>.</summary>
-    public const int DarumaDamage = 9;
-
-    /// <summary>Sayu, Muji-Muji Daruma: and the Block below it.
-    /// Mirrors <c>C.MI_DARUMA_BLOCK</c>.</summary>
-    public const int DarumaBlock = 9;
-
     /// <summary>Kuki Shinobu, Sanctifying Ring: Electro to ALL, per turn.
     /// Mirrors <c>C.MI_SANCTIFYING_RING_DMG</c>.</summary>
     public const int SanctifyingRingDamage = 6;
@@ -99,18 +91,6 @@ public static class CompanionOverhaulLaw
     /// <summary>Thoma, Blazing Barrier: Block per absorbing hit.
     /// Mirrors <c>C.MI_BLAZING_BARRIER_BLOCK</c>.</summary>
     public const int BlazingBarrierBlock = 3;
-
-    /// <summary>Thoma, Crimson Ooyoroi: Pyro per Attack you play.
-    /// Mirrors <c>C.MI_OOYOROI_DMG</c>.</summary>
-    public const int OoyoroiDamage = 5;
-
-    /// <summary>Thoma, Crimson Ooyoroi: and the Block per Attack.
-    /// Mirrors <c>C.MI_OOYOROI_BLOCK</c>.</summary>
-    public const int OoyoroiBlock = 3;
-
-    /// <summary>Kujou Sara, Tengu Stormcall: damage your Attacks gain next
-    /// turn. Mirrors <c>C.MI_STORMCALL_BONUS</c>.</summary>
-    public const int StormcallBonus = 5;
 
     /// <summary>Yae Miko, Sesshou Sakura: a Sakura's own volley.
     /// Mirrors <c>C.MI_SAKURA_DMG</c>.</summary>
@@ -124,10 +104,6 @@ public static class CompanionOverhaulLaw
     /// Mirrors <c>C.MI_SAKURA_CAP</c>.</summary>
     public const int SakuraCap = 3;
 
-    /// <summary>Yoimiya, Aurous Blaze: the Pyro the mark answers with.
-    /// Mirrors <c>C.MI_AUROUS_BLAZE_DMG</c>.</summary>
-    public const int AurousBlazeDamage = 6;
-
     /// <summary>Kamisato Ayaka, Soumetsu: Cryo to ALL, per turn.
     /// Mirrors <c>C.MI_SOUMETSU_DMG</c>.</summary>
     public const int SoumetsuDamage = 8;
@@ -136,19 +112,18 @@ public static class CompanionOverhaulLaw
     /// Mirrors <c>C.MI_SOUMETSU_FINALE</c>.</summary>
     public const int SoumetsuFinale = 16;
 
-    /// <summary>Kamisato Ayato, Kyouka: damage your Attacks gain, 2 turns.
-    /// Mirrors <c>C.MI_KYOUKA_BONUS</c>.</summary>
-    public const int KyoukaDamage = 4;
-
-    /// <summary>Kamisato Ayato, Kyouka: the illusion that pops at the end.
-    /// Mirrors <c>C.MI_KYOUKA_FINALE</c>.</summary>
-    public const int KyoukaFinale = 12;
-
     /// <summary>Kirara, Surprise Dispatch: the parcel, next turn.
     /// Mirrors <c>C.MI_SURPRISE_DISPATCH_DMG</c>.</summary>
     public const int SurpriseDispatchDamage = 10;
 
-    /// <summary>Chiori, Tamoto: Geo per turn, ignoring Block.
-    /// Mirrors <c>C.MI_TAMOTO_DMG</c>.</summary>
-    public const int TamotoDamage = 7;
+    /// <summary>Wanderer, Hanega: Song of the Wind (the Inazuma pool
+    /// rework, 2026-10-18): "Cards give you 3 less Block", per copy.
+    /// Mirrors <c>C.MI_HANEGA_BLOCK_LOSS</c>.</summary>
+    public const int HanegaBlockLoss = 3;
+
+    /// <summary>Yae Miko, Sacred Sakura's Favor (growing the Inazuma pool,
+    /// 2026-10-18): "Damage you deal at the end of your turn is increased by
+    /// 50%." Mirrors <c>C.MI_SACRED_SAKURA_MULT</c>.</summary>
+    public const decimal SacredSakuraMult = 1.5m;
+
 }

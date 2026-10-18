@@ -143,7 +143,10 @@ def test_every_shipped_plan_line_passes_the_shape_check():
     # THIRTY-EIGHT with Kokomi review r8 (2026-10-14): Surging Shoal attacks
     # and blocks now, with no Plan line.
     # THIRTY-NINE with Kokomi v3 (2026-10-18): Unbroken Tide.
-    assert len(planned) == 39
+    # FORTY-TWO with the Inazuma pool rework (2026-10-18): Naptime, Daruma
+    # and Kirara, the first Plan lines on Universal companion rows.
+    # FORTY-THREE with Kyouka Fuushi, the same rework's Plan Rare.
+    assert len(planned) == 43
     for card in planned:
         assert kokomi_plan.plan_shape_reason(card.plan) is None, card.id
 

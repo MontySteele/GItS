@@ -366,6 +366,52 @@ public class KokomiOffCharacterSweepTests
         });
     }
 
+    /// <summary>THE INAZUMA POOL REWORK (2026-10-18): a Universal
+    /// Companion's Plan line (Kirara's Surprise Dispatch, Ayato's Kyouka
+    /// Fuushi) is plannable by anyone. In the hand it brings the Bake-Kurage
+    /// up; with the kit up the card's pet half takes the player's own
+    /// jellyfish; and its play writes the Plan through the same two calls
+    /// her own cards make.</summary>
+    [Theory]
+    [InlineData("ironclad")]
+    [InlineData("yae")]
+    public void A_non_kokomi_can_plan_an_inazuma_companions_plan_line(string who)
+    {
+        WithDistinctSpellings(() =>
+        {
+            Clean();
+            try
+            {
+                var seat = (who == "yae" ? Seat.Yae() : Ironclad()).WithCombatState();
+                var kirara = OffCharacterSweep.HeldBy(
+                    typeof(ProtoMiKiraraSurpriseDispatch), seat);
+                var fuushi = OffCharacterSweep.HeldBy(
+                    typeof(ProtoMiAyatoKyoukaFuushi), seat);
+                Assert.True(Arrives(kirara, PileType.Hand));
+                Assert.True(Arrives(fuushi, PileType.Hand));
+                Assert.True(OnPlay(kirara));
+
+                KokomiOverhaul.Start(seat.Creature);
+                var kurage = Kurage(seat);
+                Assert.Equal(KokomiTargets.KurageOrSelf, kirara.TargetType);
+                Assert.True(Pred("CanTargetKurageOrSelf")(kurage, seat.Player));
+                Assert.Equal(KokomiTargets.PetOrEnemy, fuushi.TargetType);
+                Assert.True(Pred("CanTargetPetOrEnemy")(kurage, seat.Player));
+            }
+            finally
+            {
+                Clean();
+            }
+        });
+        foreach (var type in new[] { typeof(ProtoMiKiraraSurpriseDispatch),
+                                     typeof(ProtoMiAyatoKyoukaFuushi) })
+        {
+            var play = Il.Calls(Il.Method(type.Name, "OnPlay"));
+            Assert.Contains("KokomiPlan.PlayedOnPet", play);
+            Assert.Contains("KokomiPlan.Schedule", play);
+        }
+    }
+
     [Fact]
     public void A_play_on_the_kurage_writes_a_plan_whoever_plays_it()
     {

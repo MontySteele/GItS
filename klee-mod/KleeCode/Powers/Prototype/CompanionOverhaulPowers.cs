@@ -604,10 +604,6 @@ public sealed class CompanionOverhaulTurnEnd : AbstractModel
             {
                 await Act(creature, guard, () => guard.Guard(choiceContext));
             }
-            foreach (var daruma in creature.Powers.OfType<MujiMujiDarumaPower>().ToList())
-            {
-                await Act(creature, daruma, () => daruma.FireVolley(choiceContext));
-            }
             foreach (var ring in creature.Powers.OfType<SanctifyingRingPower>().ToList())
             {
                 await Act(creature, ring, () => ring.FireVolley(choiceContext));
@@ -620,35 +616,8 @@ public sealed class CompanionOverhaulTurnEnd : AbstractModel
             {
                 await Act(creature, soumetsu, () => soumetsu.FireVolley(choiceContext));
             }
-            foreach (var kyouka in creature.Powers.OfType<KyoukaPower>().ToList())
-            {
-                await Act(creature, kyouka, () => kyouka.Tick(choiceContext));
-            }
-            foreach (var tamoto in creature.Powers.OfType<TamotoPower>().ToList())
-            {
-                await Act(creature, tamoto, () => tamoto.FireVolley(choiceContext));
-            }
-            // The two clocks that fire nothing here: a tick and a mark on an
-            // enemy body. Grouped
-            // last because none of them can change an outcome by running in a
-            // different order.
-            foreach (var ooyoroi in creature.Powers.OfType<CrimsonOoyoroiPower>().ToList())
-            {
-                await PowerCmd.TickDownDuration(ooyoroi);
-            }
-            var marked = creature.CombatState?.HittableEnemies.ToList();
-            if (marked != null)
-            {
-                foreach (var enemy in marked)
-                {
-                    foreach (var blaze in enemy.Powers
-                                 .OfType<AurousBlazePower>().ToList())
-                    {
-                        if (blaze.Applier != creature) continue;
-                        await blaze.Tick();
-                    }
-                }
-            }
+            // (The Inazuma pool rework, 2026-10-18, retired the clocks that
+            // fired nothing here: Thoma's old Ooyoroi and Yoimiya's mark.)
             foreach (var rev in creature.Powers.OfType<RevelationPower>().ToList())
             {
                 rev.NoteEndOfTurn();

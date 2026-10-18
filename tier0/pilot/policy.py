@@ -161,6 +161,10 @@ def _est(state: CombatState, val, default: int = 0) -> float:
 # the fanfare clamp below records the other half of).
 _ENGINE_LIVE_PREDICATES = frozenset({
     "enemy_intends_attack",
+    # The Inazuma pool rework (2026-10-18): Meow-teor Kick's "If you have
+    # Block" and Kyougen's "If you have no Block", the player's Block now.
+    "has_block",
+    "no_block",
     # `EB-711` (`C.KOKOMI_OVERHAUL`). "If the Bake-Kurage is
     # holding a Plan" -- `len(state.kk_plan_queue) > 0`, a pure current-state
     # read with no snapshot field and no telemetry row, which is exactly this

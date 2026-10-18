@@ -1617,8 +1617,10 @@ proto_mi_thoma_blazing_barrier	ImageGen/images/cards/companions/proto_mi_thoma_b
 proto_mi_thoma_crimson_ooyoroi	ImageGen/images/cards/companions/proto_mi_thoma_crimson_ooyoroi.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Thoma Wish.png		splash	thoma
 proto_mi_sara_crowfeather_cover	ImageGen/images/cards/companions/proto_mi_sara_crowfeather_cover.png	500	380	cover	y0.16	shortlist	1	png	Kujou Sara Character Card.png		tcg	sara
 proto_mi_sara_tengu_stormcall	ImageGen/images/cards/companions/proto_mi_sara_tengu_stormcall.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Kujou Sara Wish.png		splash	sara
-proto_mi_itto_superlative_superstrength	ImageGen/images/cards/companions/proto_mi_itto_superlative_superstrength.png	500	380	cover	y0.16	shortlist	1	png	Arataki Itto Character Card.png		tcg	itto
-proto_mi_raiden_musou_no_hitotachi	ImageGen/images/cards/companions/proto_mi_raiden_musou_no_hitotachi.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Raiden Shogun Full Wish.png		splash	raiden
+# proto_mi_itto_royal_descent <- proto_mi_itto_superlative_superstrength: cut in the Inazuma pool rework (2026-10-18), its art carries over
+proto_mi_itto_royal_descent	ImageGen/images/cards/companions/proto_mi_itto_royal_descent.png	500	380	cover	y0.16	shortlist	1	png	Arataki Itto Character Card.png		tcg	itto
+# proto_mi_raiden_euthymia <- proto_mi_raiden_musou_no_hitotachi: cut in the Inazuma pool rework (2026-10-18), its art carries over
+proto_mi_raiden_euthymia	ImageGen/images/cards/companions/proto_mi_raiden_euthymia.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Raiden Shogun Full Wish.png		splash	raiden
 # ---------- Companion overhaul round 2: the 25 rows with no art (2026-09-02) ----------
 # Completes the two blocks above. Every character here had NO cleared source in
 # art/raw or SOURCES.tsv, so each row is a fresh fetch of that character's own
@@ -1666,7 +1668,8 @@ proto_mi_kazuha_slash	ImageGen/images/cards/companions/proto_mi_kazuha_slash.png
 proto_mi_kirara_surprise_dispatch	ImageGen/images/cards/companions/proto_mi_kirara_surprise_dispatch.png	500	380	cover	y0.16	shortlist	1	png	Kirara Character Card.png		tcg	kirara
 proto_mi_mizuki_anraku	ImageGen/images/cards/companions/proto_mi_mizuki_anraku.png	500	380	cover	y0.16	shortlist	1	png	Yumemizuki Mizuki Character Card.png		tcg	mizuki
 proto_mi_yae_sesshou_sakura	ImageGen/images/cards/companions/proto_mi_yae_sesshou_sakura.png	500	380	cover	y0.16	shortlist	1	png	Yae Miko Character Card.png		tcg	yae
-proto_mi_yoimiya_aurous_blaze	ImageGen/images/cards/companions/proto_mi_yoimiya_aurous_blaze.png	500	380	cover	y0.16	shortlist	1	png	Yoimiya Character Card.png		tcg	yoimiya
+# proto_mi_yoimiya_niwabi <- proto_mi_yoimiya_aurous_blaze: cut in the Inazuma pool rework (2026-10-18), its art carries over
+proto_mi_yoimiya_niwabi	ImageGen/images/cards/companions/proto_mi_yoimiya_niwabi.png	500	380	cover	y0.16	shortlist	1	png	Yoimiya Character Card.png		tcg	yoimiya
 # ================================================================
 # COVERAGE CLOSE-OUT 2026-09-16 -- the 54-row art bill (art_coverage.py).
 # ================================================================
@@ -3310,3 +3313,31 @@ abyss_power_shadow_thorny_ground	ImageGen/images/abyss/powers/shadow_thorny_grou
 abyss_power_shadow_bulwark	ImageGen/images/abyss/powers/shadow_bulwark.png	256	256	contain	center	shortlist	1	png	Da Plama (Rock Shieldwall Mitachurl) Character Card Skill.png		icon	
 abyss_power_shadow_frenzy	ImageGen/images/abyss/powers/shadow_frenzy.png	256	256	contain	center	shortlist	1	png	Stonehide Lawachurl Icon.png		icon	
 abyss_power_shadow_withering	ImageGen/images/abyss/powers/shadow_withering.png	256	256	contain	center	shortlist	1	png	Tumor of the Withering Icon.png		icon	
+# ---------- Inazuma pool rework art (2026-10-18): the rework's new companion cards, each its own character's official art ----------
+# Every source is a title no other row claims; same source_group as the character's other companion rows.
+# proto_mi_ayaka_hyouka <- Ayaka's full Wish art, fan and blade in the ice
+proto_mi_ayaka_hyouka	ImageGen/images/cards/companions/proto_mi_ayaka_hyouka.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Kamisato Ayaka Full Wish.png		splash	ayaka
+# proto_mi_heizou_windmuster_kick <- Heizou's full Wish art, mid-kick on the wind
+proto_mi_heizou_windmuster_kick	ImageGen/images/cards/companions/proto_mi_heizou_windmuster_kick.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Shikanoin Heizou Full Wish.png		splash	heizou
+# proto_mi_itto_ushi <- Itto's full Wish art
+proto_mi_itto_ushi	ImageGen/images/cards/companions/proto_mi_itto_ushi.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Arataki Itto Full Wish.png		splash	itto
+# proto_mi_raiden_baleful_omen <- the Shogun's TCG character card (her full Wish is Euthymia's; her Wish banner is the same painting)
+proto_mi_raiden_baleful_omen	ImageGen/images/cards/companions/proto_mi_raiden_baleful_omen.png	500	380	cover	y0.16	shortlist	1	png	Raiden Shogun Character Card.png		tcg	raiden
+# proto_mi_mizuki_aisa_utamakura <- Mizuki's full Wish art, riding her dream baku
+proto_mi_mizuki_aisa_utamakura	ImageGen/images/cards/companions/proto_mi_mizuki_aisa_utamakura.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Yumemizuki Mizuki Full Wish.png		splash	mizuki
+# proto_mi_kazuha_chihayaburu <- Kazuha's full Wish art, blade drawn in the maple wind
+proto_mi_kazuha_chihayaburu	ImageGen/images/cards/companions/proto_mi_kazuha_chihayaburu.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Kaedehara Kazuha Full Wish.png		splash	kazuha
+# proto_mi_wanderer_hanega <- Wanderer's full Wish art, airborne on the wind
+proto_mi_wanderer_hanega	ImageGen/images/cards/companions/proto_mi_wanderer_hanega.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Wanderer Full Wish.png		splash	wanderer
+# proto_mi_wanderer_kyougen <- Wanderer's TCG character card
+proto_mi_wanderer_kyougen	ImageGen/images/cards/companions/proto_mi_wanderer_kyougen.png	500	380	cover	y0.16	shortlist	1	png	Wanderer Character Card.png		tcg	wanderer
+# proto_mi_ayato_kyouka_fuushi <- Ayato's full Wish art, blade and water
+proto_mi_ayato_kyouka_fuushi	ImageGen/images/cards/companions/proto_mi_ayato_kyouka_fuushi.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Kamisato Ayato Full Wish.png		splash	ayato
+# proto_mi_kirara_meowteor_kick <- Kirara's full Wish art, mid-leap
+proto_mi_kirara_meowteor_kick	ImageGen/images/cards/companions/proto_mi_kirara_meowteor_kick.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Kirara Full Wish.png		splash	kirara
+# proto_mi_yoimiya_ryuukin_saxifrage <- Yoimiya's full Wish art, bow and fireworks
+proto_mi_yoimiya_ryuukin_saxifrage	ImageGen/images/cards/companions/proto_mi_yoimiya_ryuukin_saxifrage.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Yoimiya Full Wish.png		splash	yoimiya
+# proto_mi_chiori_twin_blades <- Chiori's full Wish art, both blades out
+proto_mi_chiori_twin_blades	ImageGen/images/cards/companions/proto_mi_chiori_twin_blades.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Chiori Full Wish.png		splash	chiori
+# proto_mi_yae_sacred_sakuras_favor <- Yae's Genshin Concert 2022 art (her Wish, full Wish and birthday art are on her own kit's cards)
+proto_mi_yae_sacred_sakuras_favor	ImageGen/images/cards/companions/proto_mi_yae_sacred_sakuras_favor.png	500	380	cover	x0.5,y0.16@1.5	shortlist	1	png	Genshin Concert 2022 Yae Miko.png		splash	yae
