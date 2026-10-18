@@ -20,12 +20,14 @@ This paper fills the two pools and sets the build. It has no picks. Tell me if a
 |---|---|---|
 | **The Ley Line** | Each enemy turn, every enemy without an aura takes this act's element. An enemy wearing an aura deals 1 less damage. | Ley Line Disorders. For the base five it is a defence; for the kits it is a reaction target every turn. |
 | **Abyssal Moon** | Every third card you play in a turn deals 4 damage to ALL enemies. | The Abyssal Moon's shockwaves. It rewards cheap cards: Stings, Sparks, Shivs. |
-| **Moonlit Rest** | Heal 4 HP at the end of each combat. | Abyss healing between chambers. Healing is rare outside Ironclad, which makes this the safe pick. |
+| **Moonlit Rest** | Heal 2 HP at the end of each combat. | Abyss healing between chambers. Healing is rare outside Ironclad, which makes this the safe pick. |
 | **First Strike** | Your first Attack each combat is played twice. | Burst openers. |
 | **Elemental Burst** | Whenever you play a Power, deal 6 damage to ALL enemies. | Burst blessings. Powers stop being a turn's dead tempo. |
 | **Resonance** | On turn 1 of each combat, gain 1 Energy and draw 1 card. | Elemental Resonance. It answers the "starter hand with no decision" opening our seats keep reporting. |
 | **Jade Shield** | Start each combat with 8 Block. | Geo shields. Renamed from Crystallize: the name collided with the Crystallize reaction. |
 | **Fateful Fortune** | Gain 12 Max HP. | A plain pick, for a party that is losing. |
+
+2026-10-18: Moonlit Rest 4 / 6 / 8 -> 2 / 3 / 5 by act taken, see review/records/spiral-abyss-round-3-2026-10-18.md.
 
 ## 3. Shadows (eight)
 

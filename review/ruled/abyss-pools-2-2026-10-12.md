@@ -50,8 +50,12 @@ In none of the 24 examples does an effect last several floors without lasting th
 |---|---|
 | **Overflow** | This act, Elemental Reactions deal double damage. |
 | **Vigor of the Abyss** | This act, while you are above half HP, your Attacks deal 3 additional damage. |
-| **Moonlit Spring** | This act, heal 8 HP at the end of each combat. |
+| **Moonlit Spring** | This act, heal 5 HP at the end of each combat. |
 | **Battle Rhythm** | This act, start each combat with 1 Strength and 1 Dexterity. |
+
+2026-10-18: Moonlit Spring 8 -> 5, see review/records/spiral-abyss-round-3-2026-10-18.md.
+
+2026-10-18: Moonlit Rest 4 / 6 / 8 -> 2 / 3 / 5 by act taken (its table is in review/active/spiral-abyss-pools-2026-10-12.md), see review/records/spiral-abyss-round-3-2026-10-18.md.
 
 Vigor of the Abyss and Battle Rhythm, 2026-10-18: numbers by act, see review/active/abyss-act-scaling-2026-10-18.md.
 

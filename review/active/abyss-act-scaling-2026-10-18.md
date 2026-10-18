@@ -70,9 +70,9 @@ Klee's Bombs, as base Thorns do. The round measures HP lost to Thorns per charac
 | Entry | Lasts | Act 1 / 2 / 3 | Why |
 |---|---|---|---|
 | Vigor of the Abyss, "+N per Attack" | This act | **3 / 4 / 5** | Per hit |
-| Moonlit Spring, "heal N" | This act | **8 / 8 / 8** | Healing is scarce in the base game. The round measures healing received |
+| Moonlit Spring, "heal N" | This act | **5 / 5 / 5** | Round 3 (2026-10-18): 8 healed 70 to 80 HP in one act. The user: "Agreed on (a)" |
 | Battle Rhythm, "N Strength and N Dexterity" | This act | **1 / 2 / 2** | Strength and Dexterity multiply across cards |
-| Moonlit Rest, "heal N" | Whole run | **4 / 6 / 8** | In act 3 it lasts as long as Spring, so it gets Spring's number |
+| Moonlit Rest, "heal N" | Whole run | **2 / 3 / 5** | Its whole-run total comes to about Spring's one act (round 3, 2026-10-18) |
 | Jade Shield, "start with N Block" | Whole run | **8 / 12 / 16** | Block per fight grows 2.3× |
 | Elemental Burst, "N to ALL per Power" | Whole run | **6 / 9 / 12** | |
 | Abyssal Moon, "every third card, N to ALL" | Whole run | **4 / 5 / 6** | It fires more often in longer fights |

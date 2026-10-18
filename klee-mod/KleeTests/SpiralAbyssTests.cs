@@ -101,8 +101,8 @@ public class SpiralAbyssTests
     }
 
     [Fact]
-    public void MoonlitRest_heals_4_6_8_by_act() =>
-        Assert.Equal(new[] { 4, 6, 8 }, AbyssNumbers.MoonlitRestHealByAct);
+    public void MoonlitRest_heals_2_3_5_by_act() =>
+        Assert.Equal(new[] { 2, 3, 5 }, AbyssNumbers.MoonlitRestHealByAct);
 
     [Fact]
     public void FirstStrike_adds_one_play_to_the_first_Attack_only()

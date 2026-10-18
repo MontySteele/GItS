@@ -118,7 +118,7 @@ public static class AbyssNumbers
     public const int AbyssalMoonEvery = 3;
     public static IReadOnlyList<int> AbyssalMoonDamageByAct { get; } = new[] { 4, 5, 6 };
     public static int AbyssalMoonDamage(int act) => At(AbyssalMoonDamageByAct, act);
-    public static IReadOnlyList<int> MoonlitRestHealByAct { get; } = new[] { 4, 6, 8 };
+    public static IReadOnlyList<int> MoonlitRestHealByAct { get; } = new[] { 2, 3, 5 };
     public static int MoonlitRestHeal(int act) => At(MoonlitRestHealByAct, act);
     public static IReadOnlyList<int> ElementalBurstDamageByAct { get; } = new[] { 6, 9, 12 };
     public static int ElementalBurstDamage(int act) => At(ElementalBurstDamageByAct, act);
@@ -132,7 +132,7 @@ public static class AbyssNumbers
     public const int OverflowMultiplier = 2;
     public static IReadOnlyList<int> VigorDamageByAct { get; } = new[] { 3, 4, 5 };
     public static int VigorDamage(int act) => At(VigorDamageByAct, act);
-    public static IReadOnlyList<int> MoonlitSpringHealByAct { get; } = new[] { 8, 8, 8 };
+    public static IReadOnlyList<int> MoonlitSpringHealByAct { get; } = new[] { 5, 5, 5 };
     public static int MoonlitSpringHeal(int act) => At(MoonlitSpringHealByAct, act);
     public static IReadOnlyList<int> BattleRhythmStrengthByAct { get; } = new[] { 1, 2, 2 };
     public static int BattleRhythmStrength(int act) => At(BattleRhythmStrengthByAct, act);
