@@ -22,6 +22,8 @@ line leaves this file. Closed picks are in git
 
 ## Open packets in `review/active/`
 
+- **The 5-star rule and the banner** (`inazuma-companions-2026-10-18.md`, last section, one
+  pick): amend LAW to allow two cards per 5-star and feature 3 five-star characters per run, not 3 card ids.
 - **Character five, two paper kits** (`zhongli-paper-kit-2026-09-28.md`,
   `nahida-paper-kit-2026-09-28.md`, three picks each, revised on GPT's audit).
   Varka became character four and is built (`STATE.md`), so his paper's

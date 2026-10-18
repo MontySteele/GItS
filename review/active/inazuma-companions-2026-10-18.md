@@ -69,7 +69,7 @@ Yae Miko, Sesshou Sakura (still hidden from Yae); Kamisato Ayaka, Soumetsu; Yume
 | Kamisato Ayato, Kyouka (rebuilt) | 1 Skill | Apply Hydro to ALL enemies. This turn, your Attacks deal 3 more damage. |
 | Itto, Ushi to the Rescue (new) | 1 Skill | Gain 8 Block. If an enemy intends to attack, gain 1 Strength. |
 | Raiden Shogun, Transcendence: Baleful Omen (new) | 1 Skill | ALL enemies lose 2 Strength this turn. Your next Attack this turn applies Electro. |
-| Yumemizuki Mizuki, Aisa Utamakura (new) | 1 Skill | Draw 2 cards. Mend 4. |
+| Yumemizuki Mizuki, Aisa Utamakura (new) | 1 Skill | Apply 1 Weak to ALL enemies. Draw 2 cards. |
 | Shikanoin Heizou, Windmuster Kick (new) | 2 Attack | Deal 12 Anemo damage and Swirl the enemy. Draw 1 card. |
 
 The four kept Uncommons (Sanctifying Ring, Kazuha Slash, Sesshou Sakura, Kirara) are taken at 11–20%, and between
@@ -78,7 +78,8 @@ them they keep the pool's one Swirl-to-all and its one Sakura.
   Uncommon Power. Kokomi's Read the Tide wants exactly this.
 - **Tengu Stormcall** is the base game's Trip with an Electro rider.
 - **Baleful Omen** is the pool's only way to take enemy Strength, as a 1-turn Disarm to every enemy.
-- **Aisa Utamakura** is draw with a Mend. Kokomi already uses Mend.
+- **Aisa Utamakura** is draw with a calming Weak. It had a Mend, but LAW makes true healing Rare and Exhaust, and
+  every Mend card in the mod is both.
 
 ### Rares (8: 2 kept, 6 new; 5 Powers)
 
@@ -88,8 +89,8 @@ them they keep the pool's one Swirl-to-all and its one Sakura.
 | Itto, Royal Descent: Behold, Itto the Evil! (new) | 2 Power | Whenever an enemy's attack deals you no damage, deal 6 Geo damage to it. |
 | Yoimiya, Niwabi Fire-Dance (new) | 2 Power | The first Attack you play each turn is played twice. |
 | Kaedehara Kazuha, Chihayaburu (new) | 1 Power | Whenever you Swirl, draw 1 card. |
-| Wanderer, Hanega: Song of the Wind (new) | 1 Power | At the start of your turn, gain 1 Energy. You can't gain Block. |
-| Kamisato Ayato, Kyouka Fuushi (new, Plan) | 2 Attack | Deal 7 Hydro damage 3 times. Plan: Deal 7 Hydro damage 3 times, and once more for each Plan carried out before it this turn. *Without Plans:* Deal 7 Hydro damage 3 times. Costs 1 less if you played a Skill this turn. |
+| Wanderer, Hanega: Song of the Wind (new) | 1 Power | At the start of your turn, gain 1 Energy. Cards give you 3 less Block. |
+| Kamisato Ayato, Kyouka Fuushi (new, Plan) | 2 Attack | Deal 7 Hydro damage 3 times. Plan: Deal 7 Hydro damage 3 times, and once more for each Plan carried out before it this turn, not Stings or Wards. *Without Plans:* Deal 7 Hydro damage 3 times. Costs 1 less if you played a Skill this turn. |
 
 Each Rare now changes how you play, not how much you deal:
 - **Euthymia** is Raiden's eternity: your hand stops leaving. It's the base's Runic Pyramid as a card. It also helps
@@ -98,8 +99,9 @@ Each Rare now changes how you play, not how much you deal:
   character's voice.
 - **Niwabi** is a two-for-one on your first Attack every turn, and it decides your openings.
 - **Chihayaburu** makes Swirl a draw engine for the pool's four Swirl cards.
-- **Hanega** is the hard bend: an Energy a turn for giving up Block. It's built for fragile, fast decks (Klee), and
-  a trap for Kokomi, on purpose.
+- **Hanega** trades Energy for Block: each Block card gives 3 less. A deck of a few big Block cards keeps most of
+  its defence; a deck of many small ones loses it. Recognising which deck you have is the decision. It was "You
+  can't gain Block", which made it a trap for both Inazuma characters.
 - **Kyouka Fuushi** is the Plan Rare. On the Bake-Kurage at the end of a long morning, it is Kokomi's best finisher.
 
 Yae fit (pick 3 (a)): Hyouka's Weak (which three of her cards read) and Euthymia's Retain suit her without naming her mechanic. My
@@ -128,3 +130,35 @@ character's own.
 - Art: the new characters and cards (Wanderer, Hyouka, Ushi, Baleful Omen, Aisa Utamakura, Windmuster Kick, Euthymia,
   Royal Descent, Niwabi, Chihayaburu, Hanega, Kyouka Fuushi) need card art: official art of that character, picked in
   the art pass that builds them.
+
+## Revised on GPT's review (2026-10-18)
+
+The user asked GPT to review this paper. Three findings held, and the cards changed as above:
+- **Kyouka Fuushi** counted every earlier Plan, Stings included. Three planned Stings would double its hits, which
+  is the Shoal shortcut the Kokomi cleanup removed from Feint, Tideturn, Turning Tide and Shoal of Spears. It now
+  says "not Stings or Wards" like those four.
+- **Aisa Utamakura** broke the healing rule (`LAW.md`, Card authoring): Mend is true healing.
+- **Hanega** was a trap card, not a choice.
+
+Answered: Red Ink adds 3 per hit (`YaeAnnotations.cs`), so Chiori's 5 twice becomes 16 and Kyouka Fuushi's three
+hits become 30 when Annotated.
+
+To watch in the seat round: Euthymia beside Yae's own Retain (Deadline Extension, Hold the Presses), and Niwabi beside
+the Plan payoffs Kokomi arranges. The question is whether they make her own cards less worth drafting.
+
+### The 5-star rule and the banner (pick for the user)
+
+The paper's line "Banner gating now applies" was wrong about how the banner works. `CompanionBanner.cs` features 3
+five-star card ids per nation per run, at any rarity. Inazuma already has 9 five-star cards, so a run sees 3 of
+them. After this rework it would have 16, so a run would see 3 of 16, and most of the new Rares would rarely appear.
+`LAW.md` also still says "A 5-star is a Rare, exactly one card per 5-star". The current pool already breaks that
+line (Kazuha Slash, Sesshou Sakura, Chiori and Ayato are 5-star Uncommons), and the rework breaks it further.
+
+1. **The 5-star rule.**
+   - **(a, default)** Amend LAW to: "A 5-star has up to two cards, Uncommon or Rare, each a support payoff (buff,
+     amplify, aura), never its own scaling damage engine." The banner then features 3 five-star *characters* per
+     nation per run, with all their cards. Inazuma has 10 five-star characters, so a run sees about 5 of its 16
+     five-star cards.
+   - (b) Keep the LAW line and the banner as they are. Then this rework has to drop to one Rare per 5-star
+     character, and the banner shows 3 of about 10.
+   - (c) Remove the banner for Inazuma only, so every card is always offered.
