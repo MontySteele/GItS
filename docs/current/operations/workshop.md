@@ -53,7 +53,7 @@ ids still load. Universal Companions stay. `klee-mod/KleeCode/ReleaseVariant.cs`
 and `Patches/ReleaseKitsPatch.cs` are the code; `KleeTests/ReleaseVariantTests.cs`
 and `tier0/tests/test_package_workshop.py` the pins.
 
-**Opt-in run stats (beta only, 2026-10-16).** [USER]: "go ahead and try to
+**Run stats (beta only, 2026-10-16; default on 2026-10-18).** [USER]: "go ahead and try to
 build the opt-in upload now in the beta release so we can test drive the
 telemetry before we spread it further." Add the deployed Worker's URL
 (`telemetry-worker/README.md`, Deploy; today
@@ -80,7 +80,9 @@ present when not asked for). Every build now also carries
 `-p:GitsVariant=<variant>`, read back as `WorkshopRelease.Variant`.
 
 What the player sees: one tickbox, "Share anonymous run stats with the
-Teyvat Spire developers", off by default, under Settings, Mod Configuration
+Teyvat Spire developers", **on by default** since 2026-10-18 ([USER], asked
+whether the page's disclaimer was enough instead of opt-in: "Let's go default
+on."), switchable off in the same place, under Settings, Mod Configuration
 (BaseLib), Open Config, Teyvat Spire Roster (BaseLib's config screen; it is
 also on the main menu when BaseLib's own setting shows it there). It is
 stored in `%APPDATA%/SlayTheSpire2/mod_configs/KleeMod.cfg` with the install
@@ -92,7 +94,23 @@ is read once more as a second belt. The record is schema v1, trimmed on the
 game thread and posted on a pool thread: one try, 10 s timeout, failures
 logged (`run stats:` in godot.log) and dropped, no retry queue.
 `KleeTests/RunStatsTests.cs` and `tier0/tests/test_run_stats_record.py` are
-the pins; `tools/telemetry_remote.py` reads what arrived.
+the pins; `tools/telemetry_remote.py` reads what arrived. The public variant
+still compiles no uploader, and what is sent is unchanged.
+
+Existing beta installs: BaseLib keeps a saved value over a changed default
+(`ModConfig.Init` captures the code default, then `Load` applies the file),
+and every install that ran the opt-in beta has `"ShareAnonymousRunStats":
+"False"` written whether the player chose it or not; the file cannot tell
+the two apart. So `RunStatsUpload.MigrateDefault` turns the setting on
+**once** for a config whose hidden `RunStatsDefaultVersion` is below 1, then
+stamps 1; a player who turns it off after that stays off. Restore Defaults
+now restores on.
+
+The page's run-data paragraph (default on), as `PRIVACY_PARAGRAPH` in
+`tools/package_workshop.py` writes it (paste it over the old "Run data
+(optional)" paragraph in the saved description):
+
+> Run data. This beta sends a short summary of each finished run to the Teyvat Spire developers: your character, ascension, result, the cards and relics you ended with, which cards you were offered and took, and your HP floor by floor. It holds no Steam id, name, chat or other personal details, and your IP address is not stored. Runs are tied only to a random id made by the mod on your machine. Data is used to balance the mod and deleted after a year. It is on by default; turn it off any time with "Share anonymous run stats with the Teyvat Spire developers" under Settings, Mod Configuration (BaseLib), Open Config, Teyvat Spire Roster. It only sends when the game's own "Upload data" setting is on.
 
 **What [USER] runs**, after editing the description in `workshop.json`
 (delete its DRAFT line) and checking `image.png`:

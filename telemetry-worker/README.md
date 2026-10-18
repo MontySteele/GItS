@@ -69,15 +69,9 @@ needed.
 
 Raw SQL: `npx wrangler d1 execute gits-telemetry --remote --json --command "SELECT ..."`.
 
-## Workshop privacy paragraph (DRAFT)
+## Workshop privacy paragraph (default on, 2026-10-18)
 
 `tools/package_workshop.py` adds this, as plain text, to the beta's description when it is given an
 endpoint (`PRIVACY_PARAGRAPH`, which also names where the setting is).
 
-> **Run data (optional).** If you turn on "Share anonymous run stats with the Teyvat Spire developers"
-> in the mod's settings *and* the game's own
-> "Upload data" setting is on, the mod sends a short summary of each finished run to the Teyvat Spire
-> developers: your character, ascension, result, the cards and relics you ended with, which cards you were
-> offered and took, and your HP floor by floor. It holds no Steam id, name, chat or other personal details,
-> and your IP address is not stored. Runs are tied only to a random id made by the mod on your machine.
-> Data is used to balance the mod and deleted after a year. Turn the switch off at any time to stop.
+> **Run data.** This beta sends a short summary of each finished run to the Teyvat Spire developers: your character, ascension, result, the cards and relics you ended with, which cards you were offered and took, and your HP floor by floor. It holds no Steam id, name, chat or other personal details, and your IP address is not stored. Runs are tied only to a random id made by the mod on your machine. Data is used to balance the mod and deleted after a year. It is on by default; turn it off any time with "Share anonymous run stats with the Teyvat Spire developers" under Settings, Mod Configuration (BaseLib), Open Config, Teyvat Spire Roster. It only sends when the game's own "Upload data" setting is on.

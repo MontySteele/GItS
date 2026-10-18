@@ -20,14 +20,22 @@ namespace KleeMod.RunStats;
 /// (<c>%APPDATA%/SlayTheSpire2/mod_configs/KleeMod.cfg</c>). The player sees
 /// one tickbox under Settings, Mod Configuration (BaseLib), Open Config,
 /// Teyvat Spire Roster:
-/// "Share anonymous run stats with the Teyvat Spire developers", off until
-/// they tick it. The install id is hidden, survives Restore Defaults, and is
-/// made the first time a run is actually sent.
+/// "Share anonymous run stats with the Teyvat Spire developers", on by
+/// default since 2026-10-18 ([USER]: "Let's go default on."), and the player
+/// can untick it there. The install id is hidden, survives Restore Defaults,
+/// and is made the first time a run is actually sent.
+/// <c>RunStatsDefaultVersion</c> (hidden, kept through Restore Defaults)
+/// records that the one-time switch to default on has been applied
+/// (<c>RunStatsUpload.MigrateDefault</c>).
 /// </summary>
 public sealed class RunStatsConfig : SimpleModConfig
 {
     [ConfigHoverTip]
-    public static bool ShareAnonymousRunStats { get; set; } = false;
+    public static bool ShareAnonymousRunStats { get; set; } = true;
+
+    [ConfigHideInUI]
+    [ConfigIgnoreRestoreDefaults]
+    public static int RunStatsDefaultVersion { get; set; } = 0;
 
     [ConfigHideInUI]
     [ConfigIgnoreRestoreDefaults]
@@ -78,8 +86,17 @@ internal static class RunStatsHook
     {
         try
         {
-            var config = new RunStatsConfig();
+            var config = new RunStatsConfig(); // BaseLib loads the saved file here
             RunStatsConfig.Instance = config;
+            var (share, version, save) = RunStatsUpload.MigrateDefault(
+                RunStatsConfig.ShareAnonymousRunStats, RunStatsConfig.RunStatsDefaultVersion);
+            if (save)
+            {
+                RunStatsConfig.ShareAnonymousRunStats = share;
+                RunStatsConfig.RunStatsDefaultVersion = version;
+                config.Save();
+                Log.Info($"[{KleeMod.ModId}] run stats: the setting moved to default on (once)");
+            }
             ModConfigRegistry.Register(OwnModId(), config);
             ModManager.OnMetricsUpload += OnMetricsUpload;
             Log.Info($"[{KleeMod.ModId}] run stats: compiled in (endpoint set); "

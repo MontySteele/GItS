@@ -433,6 +433,7 @@ _ABYSS_SCREEN_REASON = (
     "no game rule reads it, so no sim twin exists.")
 
 UNMIRRORED: dict[str, str] = {
+    "RunStatsUpload.DefaultOnVersion": "the run-stats config migration stamp (beta uploader); not a game rule, the sim has no settings",
     "AbyssOverlayFlow.ResultSeconds": _ABYSS_SCREEN_REASON,
     "AbyssOverlayFlow.FadeSeconds": _ABYSS_SCREEN_REASON,
     "AbyssOverlayView.CardWidth": _ABYSS_SCREEN_REASON,
