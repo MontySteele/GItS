@@ -54,6 +54,33 @@
   "static_file": null,
   "texel_mb": 8.13
  },
+ "kokomi": {
+  "box": [
+   1040,
+   28,
+   864,
+   1052
+  ],
+  "cell": [
+   692,
+   844
+  ],
+  "fps": 6,
+  "frames": 13,
+  "grid": [
+   2,
+   7
+  ],
+  "ppu": 1300.0,
+  "scale": 0.8,
+  "sheet": [
+   1384,
+   5908
+  ],
+  "sheet_file": "select_loop.png",
+  "static_file": null,
+  "texel_mb": 8.18
+ },
  "varka": {
   "box": [
    848,
