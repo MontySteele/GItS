@@ -190,7 +190,10 @@ def test_the_reader_carries_the_keys_the_mod_sends():
          "no_target",
          # Seat page backlog (2026-10-18): what its Set off detonated, a
          # payload it sent out, and where a charge jumped.
-         "detonations", "payloads", "jumps"])
+         "detonations", "payloads", "jumps",
+         # Backlog wave 3 (2026-10-19): Block the card gave, and whether
+         # it was still resolving when the feed was read.
+         "block", "open"])
     assert sorted(rows[0]["hits"][0]) == sorted(
         ["target", "amount", "blocked", "combat_id", "killed", "on_player",
          "source", "self",

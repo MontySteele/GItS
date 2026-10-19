@@ -603,8 +603,18 @@ def settle_board(state: dict[str, Any], wire: Any = bridge,
 
 def _in_flight(state: dict[str, Any]) -> bool:
     """Does the feed say an action is still running? Only an explicit
-    `hp_settled: false` counts; an absent key is an older bridge."""
-    return _player(state).get("hp_settled") is False
+    `hp_settled: false` counts; an absent key is an older bridge.
+
+    Seat page backlog wave 3 (2026-10-19): and a card the resolution ledger
+    still has open (`open: true` on its row) is still resolving -- a free
+    Bravura's page was read after its first hit of four and listed only
+    that one."""
+    player = _player(state)
+    if player.get("hp_settled") is False:
+        return True
+    rows = player.get("resolutions")
+    return isinstance(rows, list) and any(
+        isinstance(r, dict) and r.get("open") is True for r in rows)
 
 def _player(state: dict[str, Any]) -> dict[str, Any]:
     p = state.get("player")

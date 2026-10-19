@@ -3824,6 +3824,13 @@ RESOLUTION_POWER_PLAYED = ("  It is a Power: it is now on you and works "
 #: 'what it did'." A power the card put on an enemy, or took off one.
 RESOLUTION_APPLIED = "  Put **{power} {n}** on **{target}**."
 RESOLUTION_REMOVED = "  Took **{power} {n}** off **{target}**."
+#: Seat page backlog wave 3 (2026-10-19): Klee Can Explain! gains 6 Block
+#: and its row read "Nothing this page can count landed off it". Block a
+#: card gave a player, on its row.
+RESOLUTION_BLOCK = "  {target} gained **{n} Block**."
+#: The same wave: a card the feed was read in the middle of (a free
+#: Bravura's page listed its first hit of four).
+RESOLUTION_OPEN_CLAUSE = " *(still resolving when this page was read)*"
 #: 2026-09-25 (opus-furina-l2b, (c) 4). The same line on a board with a
 #: stage, where "nothing countable" was false under every Raise: what a card
 #: did to a performer's bar is filed on the stage log, and this says where.

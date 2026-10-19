@@ -1748,6 +1748,15 @@ def resolutions(player: dict[str, Any]) -> list[dict[str, Any]] | None:
                    if isinstance(a, dict) and _text(a.get("power"))
                    and _int(a.get("amount"))
                    and not (is_power and a.get("on_player"))]
+        # Seat page backlog wave 3 (2026-10-19): the Block the card gave a
+        # player (Klee Can Explain!'s 6), in play order with the rest.
+        block = [{"target": _text(b.get("target")),
+                  "amount": _int(b.get("amount")),
+                  "combat_id": _text(b.get("combat_id")),
+                  "self": bool(b.get("self")),
+                  "seq": _seq(b)}
+                 for b in (row.get("block") or [])
+                 if isinstance(b, dict) and _int(b.get("amount")) > 0]
         # The rebalance round (2026-10-03): Varka's Oath gains inside the
         # card, sourced ("applied", "Swirl" or ""), and whether one of them
         # made Boreas's Fang add Four Winds' Ascension. Absent on an older
@@ -1856,6 +1865,11 @@ def resolutions(player: dict[str, Any]) -> list[dict[str, Any]] | None:
                     "swirl_no_aura": _int(row.get("swirl_no_aura")),
                     "swirl_on_aura": _int(row.get("swirl_on_aura")),
                     "applied": applied,
+                    "block": block,
+                    # Seat page backlog wave 3 (2026-10-19): the card was
+                    # still resolving when the feed was read (a free
+                    # Bravura's page listed one hit of four).
+                    "open": bool(row.get("open")),
                     "auto_played": bool(row.get("auto_played")),
                     # The Spiral Abyss seat round (2026-10-12): whose card
                     # (`is_local` False is the co-op partner's; None on an
@@ -2328,7 +2342,31 @@ _SPARK_EVENTS = {
 }
 
 
-def _spark_source_name(source: str, card: str) -> str:
+#: The events a relic only rides: the Bomb going off is what the reader
+#: watched, so these keep the event word whichever relic paid.
+_RIDDEN_EVENTS = frozenset({"detonation", "explosion", "bomb_reaction"})
+
+
+def _relic_titles(player: dict[str, Any]) -> dict[str, str]:
+    """The player's relics by ledger slug -> printed title.
+
+    The ledger's slug is the C# type's (`relic:explosive_frags/...`), which
+    is not always the relic's name: that type prints as Dodoco Tales. So the
+    title comes from the relic the player holds, matched on its id
+    (`KLEEMOD-EXPLOSIVE_FRAGS`), and never from the slug."""
+    titles: dict[str, str] = {}
+    for relic in player.get("relics") or []:
+        if not isinstance(relic, dict):
+            continue
+        rid = _text(relic.get("id")).rsplit("-", 1)[-1].lower()
+        name = _text(relic.get("name"))
+        if rid and name:
+            titles[rid] = name
+    return titles
+
+
+def _spark_source_name(source: str, card: str,
+                       relics: dict[str, str] | None = None) -> str:
     """The printed word for one Spark gain (`EB-610`).
 
     THE CARD WINS WHERE THE EVENT IS A PLAY, which is the r23 beat itself: the
@@ -2352,6 +2390,13 @@ def _spark_source_name(source: str, card: str) -> str:
         return tail.replace("_", " ").title()
     if card and tail in ("play", ""):
         return card
+    # A RELIC THAT IS THE CAUSE NAMES ITSELF (seat page backlog wave 3,
+    # 2026-10-19): Dodoco Tales' opening Sparks printed "+4 the start of the
+    # fight". Only a relic the player holds is named, under its own title.
+    if (source or "").startswith("relic:") and tail not in _RIDDEN_EVENTS:
+        slug = source[len("relic:"):].split("/", 1)[0].lower()
+        if relics and relics.get(slug):
+            return relics[slug]
     named = _SPARK_EVENTS.get(tail)
     if named:
         return named
@@ -2384,6 +2429,7 @@ def spark_sources(player: dict[str, Any]) -> list[dict[str, Any]] | None:
     if not isinstance(rows, list):
         return None
     folded: dict[str, dict[str, Any]] = {}
+    relics = _relic_titles(player)
     for row in rows:
         if not isinstance(row, dict):
             continue
@@ -2391,7 +2437,7 @@ def spark_sources(player: dict[str, Any]) -> list[dict[str, Any]] | None:
         if amount <= 0:
             continue
         name = _spark_source_name(_text(row.get("source")),
-                                  _text(row.get("card")))
+                                  _text(row.get("card")), relics)
         if name in folded:
             folded[name]["amount"] += amount
         else:

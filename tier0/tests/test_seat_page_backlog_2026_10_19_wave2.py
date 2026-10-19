@@ -78,15 +78,28 @@ def test_two_dead_segments_on_a_first_look_are_numbered():
 
 # ---- Beat Down with no Attacks in the discard -------------------------------
 
+#: The base game's own Beat Down, as the bridge sends it. The eng loc table's
+#: `BEAT_DOWN.description` is the string below; `BeatDown` is a 3-cost Rare
+#: Skill with `CardsVar(3)`, and the bridge's `StripRichTextTags` drops the
+#: [gold] span.
+BEAT_DOWN_LOC = ("Play {Cards:diff()} random Attacks from your "
+                 "[gold]Discard Pile[/gold].")
+BEAT_DOWN_WIRE = (BEAT_DOWN_LOC.replace("{Cards:diff()}", "3")
+                  .replace("[gold]", "").replace("[/gold]", ""))
+
+
+def test_beat_down_wire_text_is_the_base_cards():
+    assert BEAT_DOWN_WIRE == "Play 3 random Attacks from your Discard Pile."
+
+
 def _potion_chooser(discard: list[dict]) -> dict:
     state = combat_state()
     state["state_type"] = "card_select"
     state["card_select"] = {
         "screen_type": "choose", "can_confirm": False, "can_cancel": False,
         "prompt": "Choose a card.",
-        "cards": [{"name": "Beat Down", "cost": "1", "type": "Skill",
-                   "description": "Play 3 random Attacks from your Discard "
-                                  "Pile."},
+        "cards": [{"name": "Beat Down", "cost": "3", "type": "Skill",
+                   "rarity": "Rare", "description": BEAT_DOWN_WIRE},
                   {"name": "Panache", "cost": "0", "type": "Power",
                    "description": "Every time you play 5 cards in a single "
                                   "turn, deal 10 damage to ALL enemies."}]}
