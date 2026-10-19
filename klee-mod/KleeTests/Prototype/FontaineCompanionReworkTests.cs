@@ -278,6 +278,16 @@ public class FontaineCompanionReworkTests
     }
 
     [Fact]
+    public void Chilling_penalty_hears_furinas_drains()
+    {
+        // GPT's review (2026-10-19): every Drain is an HP loss, so each one
+        // hits once. STRUCTURAL: a Drain is `CreatureCmd.Damage` on her, which
+        // is the `AfterDamageReceived` the power reads.
+        var drain = typeof(GameStageBoard).GetMethod("LoseHp", All)!;
+        Assert.Contains(Il.Calls(drain), c => c.Contains("CreatureCmd.Damage"));
+    }
+
+    [Fact]
     public void Vanguards_valor_ends_with_the_turn()
     {
         Assert.NotNull(typeof(NextAttackUpPower).GetMethod(

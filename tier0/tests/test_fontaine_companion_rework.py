@@ -233,6 +233,21 @@ def test_chilling_penalty_answers_any_hp_lost():
     assert st.enemies[0].hp == before - 5
 
 
+def test_chilling_penalty_answers_each_of_furinas_drains():
+    """GPT's review (2026-10-19): every Drain is an HP loss in the game
+    (`StageBoard.LoseHp` is `CreatureCmd.Damage`), so each Drain hits once."""
+    from tier0.engine import furina_stage as FS
+    st = make_state(enemies=[make_enemy(hp=300)], hp=78)
+    st.player.character_id = "furina"
+    st.in_player_turn = True
+    st.turn = 1
+    FS.reset_for_combat(st.player)
+    st.player.powers["mf_chilling_penalty"] = 5
+    assert FS.drain(st, 4)
+    assert FS.drain(st, 4)
+    assert st.enemies[0].hp == 300 - 5 - 5
+
+
 def test_miracle_parade_pays_four_hp_for_two_energy_and_two_cards():
     st = make_state(hp=50, enemies=[make_enemy(hp=200)])
     st.player.draw_pile = _filler(5)
