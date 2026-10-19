@@ -1,157 +1,126 @@
 ## Prototype surface (`EB-147`) — the current kits' one sheet
 
-`docs/prototype-surface.yaml` is the card sheet for every current kit, every
-character at once: each row names its owner with `character:`, and every id
-starts `proto_` (ids kept, legacy cleanup pick 1: renaming breaks saves, art
-paths and the seat bridge). The old shipped kits' sheets
-(`docs/*-cards.yaml`, `*-upgrades.yaml` and the three companion sheets), their
-C# and the arm switches are deleted (legacy cleanup stages 5 and 6, 2026-10-01,
-`review/ruled/legacy-cleanup-2026-10-01.md`). There is one build and one sim
-world: the current kits.
+`docs/prototype-surface.yaml` is the card sheet for every current kit: each
+row names its owner with `character:`, and every id starts `proto_` (ids are
+kept: renaming breaks saves, art paths and the seat bridge). There is one
+build and one sim world, the current kits; the old kits' sheets and C# are
+gone (`review/ruled/legacy-cleanup-2026-10-01.md`). Regenerate with
+`tools/gen_prototype_cards.py [--check]` (`OPERATIONS.md`).
 
-```sh
-.venv/Scripts/python.exe tools/gen_prototype_cards.py           # emit the C#
-.venv/Scripts/python.exe tools/gen_prototype_cards.py --check   # staleness gate (CI lane, and validate.ps1 S6a)
-```
+**THE BUILD.** There is no switch: the surface compiles in every build, so a
+plain `dotnet build`, `dotnet test klee-mod/KleeTests`, `deploy.ps1`,
+`validate.ps1` and the `-Package` zip all carry the current kits, unmarked.
+`TeyvatFrame` stays off (`operations/teyvat-frame.md`).
 
-**THE BUILD.** There is no switch: the surface compiles in every build (the
-`PrototypeCards`, kit-arm and `ShippedKits` properties left at legacy cleanup
-stage 5), so a plain `dotnet build`, `dotnet test`, `deploy.ps1`,
-`validate.ps1` and the `-Package` handoff zip all carry the current kits,
-unmarked. `TeyvatFrame` stays off: the frame is on hold (`STATE.md`). There is
-one C# test configuration (`dotnet test klee-mod/KleeTests`, the `dotnet-test`
-gate).
-
-**THE SIM RUNS THE SAME KITS.** tier0 and tier 0.5 read the surface for every
-kit: `loader.pool_replacement` is each kit's offerable pool (the C# pools'
+**THE SIM RUNS THE SAME KITS.** tier0 and tier 0.5 read the surface:
+`loader.pool_replacement` is each kit's offerable pool (the C# pools'
 `GenerateAllCards`), `loader._starter_ids` its ten, and
 `loader.companion_roster_replacement` the companion roster
 (`CompanionPool.All`). The surface stays out of `_card_index`, which holds the
-reference characters' cards (`tier0/content/cards/`) and feeds their pools,
-digests and balance reports. The calibration bands were measured on the old
-kits and are retired until a kit reaches Balance (legacy cleanup pick 5;
-`tier0/tests/retired_calibration.py`). The sim's job before Balance is
-degenerate-loop and dead-card detection off the sheet draft.
+reference characters' cards. The calibration bands are retired until a kit
+reaches Balance (`tier0/tests/retired_calibration.py`); before Balance the
+sim's job is degenerate-loop and dead-card detection off the sheet draft.
 
 **C# FIRST, sim at Balance.** A new kit rule lands in the C# mod first; the sim
 twin follows once the rule survives the Prototype gate. Klee, Kokomi, Furina's
-Stage, the companion roster and Varka's Oath are built in both engines today.
+Stage, the companion roster, Varka's Oath and Yae's Shrine are built in both
+engines today.
 
-**Deploying.** `tools/deploy_round.py` from the art-bearing main checkout, game
-closed: it rebuilds the pck if stale, runs `klee-mod\build\deploy.ps1` (the
-release build, `MAJOR.AUTO`, no mark), then `deploy_bridge.ps1`, and reads the
-result back off disk. **`klee-mod\build\deploy_proto.ps1` is for a build that
-differs from the release**, and today that is only `-TeyvatFrame` (on hold): a
-package stamped `MAJOR.AUTO+proto`. **To restore the release build run
-`tools/deploy_round.py`**; the absence of `+proto` in the in-game version is
-the confirmation. A dev build stays installed only when its arm is the subject
-of what happens next and the handover packet names the version string
-(`EB-257`). **After every deploy a round will play on, run `python -m
-understudy.soak --runs 1 --character KLEEMOD-KLEE --max-fights 3` and read
-`fights=3 defects=0` before any registered run (R225).**
+**Deploying.** `tools/deploy_round.py` from the art-bearing main checkout,
+game closed (`operations/build-deploy.md`). `klee-mod\build\deploy_proto.ps1`
+is only for a build that differs from the release, today only `-TeyvatFrame`,
+stamped `MAJOR.AUTO+proto`; **restore the release with
+`tools/deploy_round.py`**, confirmed by no `+proto` in the in-game version. A
+dev build stays installed only when its arm is the subject of what happens
+next and the handover packet names the version string (`EB-257`). **After
+every deploy a round will play on, run `python -m understudy.soak --runs 1
+--character KLEEMOD-KLEE --max-fights 3` and read `fights=3 defects=0` before
+any registered run (R225).**
 
-**A face may be on the ROW** (`EB-215`). `gen_klee_cards` renders a card's
-text from its body, and a Power's per power id; a row may state its own face
-with `description:`, emitted into the same `Localization` list.
+**A face may be on the ROW** (`EB-215`): `description:` states the row's own
+face; otherwise `gen_klee_cards` renders it from the body.
 
-**KEYWORD TIPS ARE DERIVED FROM THE FACE** (`EB-272`). A row that prints a kit
-keyword as `[gold]Keyword[/gold]` gets that keyword's hover tip attached by
-codegen. The table is `gen_klee_cards.ARM_KEYWORDS` (Klee: `Bomb`, `Set off`,
-`Spark`, `Mine`; Kokomi: `Mend`, `Plan`; companions: `Swirl`), the sentences
-are `Cards/Prototype/ArmKeywordTips.cs`, and their titles are registered in
-`KleeMod.InjectLocStrings`. Adding a keyword means a table row, a `For<Word>`
-method and a title row; `tier0/tests/test_arm_keyword_tips.py` fails on any of
-the three missing.
+**KEYWORD TIPS ARE DERIVED FROM THE FACE** (`EB-272`). A row printing a kit
+keyword as `[gold]Keyword[/gold]` gets its hover tip from codegen. Adding a
+keyword means a row in `gen_klee_cards.ARM_KEYWORDS`, a `For<Word>` method in
+`Cards/Prototype/ArmKeywordTips.cs` and a title in `KleeMod.InjectLocStrings`;
+`tier0/tests/test_arm_keyword_tips.py` fails on any of the three missing.
 
-**An upgrade is on the ROW** (`EB-213`): `upgrade: {<key>: <delta>}`.
-`gen_prototype_cards.py` registers it into the codegen's delta index before
-emitting, and `tier0/content/upgrades.py` merges the same block, so both
-engines read one place. A declared delta the emitter cannot express STOPS the
-run. **Every row has one, or says why not** (`EB-315`): a row that declares
-nothing takes the Prototype-stage rule (`upgrades.prototype_default_delta`),
-which reads both printed lines (`effects:` and `plan:`); a row that genuinely
-cannot upgrade carries `no_upgrade: <reason>`, refused empty by both engines.
-`gen_prototype_cards.UPGRADE_DEBT` is the checked register of any other
-exemption (empty since stage 6).
+**An upgrade is on the ROW** (`EB-213`): `upgrade: {<key>: <delta>}`, read by
+both engines (`gen_prototype_cards.py` and `tier0/content/upgrades.py`). A
+delta the emitter cannot express STOPS the run. **Every row has one, or says
+why not** (`EB-315`): a row with none takes
+`upgrades.prototype_default_delta` (which reads `effects:` and `plan:`); a row
+that cannot upgrade carries `no_upgrade: <reason>`, refused empty by both
+engines. `gen_prototype_cards.UPGRADE_DEBT` is the checked exemption register
+(empty).
 
 **Staging a row** — edit the sheet, regen, build, then grant it by id from a
-scenario (`give: {card: KLEEMOD-PROTO_..., pile: hand}`); template in
-`understudy/scenarios/eb147-prototype-grant.yaml`. A row the emitter cannot
-express STOPS the run by name.
+scenario (`give: {card: KLEEMOD-PROTO_..., pile: hand}`); template
+`understudy/scenarios/eb147-prototype-grant.yaml`.
 
-**THE ELEMENT PORT'S SWITCH (2026-09-28)** is not a kit arm: it switches the
-shared reaction layer (`review/ruled/element-home-review-2026-09-28.md` §4 A).
-`SwirlPays` is an MSBuild property defaulted on in `Directory.Build.props`,
-defining `SWIRL_PAYS`, which moves `KleeMod.Elements.TriggerRules.SwirlPays`.
-The sim twin `C.SWIRL_PAYS` defaults `True` to match (2026-10-08, after the
-retest of the switch alone); `tools/lint_constant_parity.py` compares the two
-defaults, and both sides are pinned both ways by flipping it
-(`tier0/tests/test_element_port.py`; C# `KleeTests/ElementPortTests.cs`).
-Its twin, `CrystallizeKeepsAura`, went with spent auras on 2026-10-03: every
-reaction consumes its aura.
+**THE ELEMENT PORT'S SWITCH** is not a kit arm: `SwirlPays`, an MSBuild
+property defaulted on in `Directory.Build.props`, moves the shared
+`KleeMod.Elements.TriggerRules.SwirlPays`
+(`review/ruled/element-home-review-2026-09-28.md` §4 A). The sim twin
+`C.SWIRL_PAYS` defaults `True` to match; `tools/lint_constant_parity.py`
+compares the defaults, and `tier0/tests/test_element_port.py` and
+`KleeTests/ElementPortTests.cs` pin both settings. Every reaction consumes
+its aura.
 
 ```sh
 dotnet build klee-mod/KleeCode -p:SwirlPays=false
 ```
 
-**VARKA** has no switch (legacy cleanup stage 2). His rows are `proto_vk_`,
-owner `varka`; the C# rules are `Powers/Prototype/VarkaOath.cs` and the sim
-twin `tier0/engine/varka_oath.py`. His cards speak one verb,
-`{op: varka, kind: ...}`, each kind one `VarkaCards.<Kind>` call; its numbers
-are the card's `Vk*` vars and the upgrade keys `varka_per` / `varka_base` /
-`varka_amount` move them.
+**VARKA.** Rows `proto_vk_`, owner `varka`; C# `Powers/Prototype/VarkaOath.cs`,
+sim `tier0/engine/varka_oath.py`. His cards speak one verb,
+`{op: varka, kind: ...}`, each kind one `VarkaCards.<Kind>` call; numbers are
+the card's `Vk*` vars, moved by upgrade keys `varka_per` / `varka_base` /
+`varka_amount`.
 
-**YAE MIKO** has no switch, Varka's arrangement. Her rows are `proto_ym_`,
-owner `yae`; the C# rules are `Powers/Prototype/YaeShrine.cs` (the Sakura
-ledger, the strikes, Tenko, `YaeCards`), `YaeAnnotations.cs` (the five
-Annotations as `CustomEnchantmentModel`s, Edit, Publish and the per-card
-draft, a BaseLib saved field on the deck card) and `YaePowers.cs`; the sim
-twin is `tier0/engine/yae_shrine.py`. Her cards speak one verb,
-`{op: yae, kind: ...}`, each kind one `YaeCards.<Kind>` call; its numbers are
-the card's `Ym*` vars and the upgrade keys `yae_per` / `yae_base` /
-`yae_amount` move them. Meditations of a Yako adds a Publish row to the
-reward screen after an elite or boss fight (`Relics/MeditationsOfAYako.cs`,
-`YaePublishReward`; it was a rest-site option until 2026-10-14). Her pool is 78 since
-the pool to 78 (2026-10-15). Parity: `tier0/tests/test_yae_parity.py`.
-Since the design axes (2026-10-14) `kind: rite` names its Rite (`rite:`
-thunder / warding / wildfire / offering, the C# `YaeRite`) and
-`kind: edit_sakura` names its end (`which:` newest / oldest / every, the C#
-`YaeSakuraEnd`) and a Sakura reading (red_ink, fox_fire, deadline).
+**YAE MIKO**, Varka's arrangement. Rows `proto_ym_`, owner `yae`; C#
+`Powers/Prototype/YaeShrine.cs` (the Sakura ledger, strikes, Tenko,
+`YaeCards`), `YaeAnnotations.cs` (the five Annotations, Edit, Publish, the
+per-card draft as a BaseLib saved field) and `YaePowers.cs`; sim
+`tier0/engine/yae_shrine.py`; parity `tier0/tests/test_yae_parity.py`. Verb
+`{op: yae, kind: ...}`, `Ym*` vars, upgrade keys `yae_per` / `yae_base` /
+`yae_amount`. `kind: rite` names its Rite (`rite:` thunder / warding /
+wildfire / offering, C# `YaeRite`); `kind: edit_sakura` names its end
+(`which:` newest / oldest / every, C# `YaeSakuraEnd`) and a Sakura reading
+(red_ink, fox_fire, deadline). Meditations of a Yako adds a Publish row to the
+reward screen after an elite or boss fight
+(`Relics/MeditationsOfAYako.cs`, `YaePublishReward`).
 
-**KOKOMI'S PLAN.** The **Bake-Kurage** is a real pet
-(`Powers/Prototype/BakeKuragePet.cs`) enemies cannot target. A card with a
-Plan line is played ON it, and at the start of her next turn the jellyfish
-carries that line out (`Powers/Prototype/KokomiPlan.cs`; sim
-`tier0/engine/kokomi_plan.py`). A row's Plan line is a top-level `plan:` list
-in the `effects:` vocabulary with the targets `front_enemy` / `all_enemies` /
-`self`; the codegen emits typed `KokomiPlan.Planned` records plus the
-play-on-the-jellyfish branch, and it decides the row's TargetType.
+**KOKOMI'S PLAN.** The **Bake-Kurage** is a pet enemies cannot target
+(`Powers/Prototype/BakeKuragePet.cs`). A card with a Plan line is played ON
+it, and at the start of her next turn it carries the line out
+(`Powers/Prototype/KokomiPlan.cs`; sim `tier0/engine/kokomi_plan.py`). A
+row's Plan line is a top-level `plan:` list in the `effects:` vocabulary with
+targets `front_enemy` / `all_enemies` / `self`; codegen emits typed
+`KokomiPlan.Planned` records and decides the row's TargetType.
 
-**THE COMPANION ROSTER** is the approved workshops' Universals: Mondstadt's
-(`proto_mc_`, `C.MONDSTADT_OVERHAUL_POOL_IDS`), Inazuma's (`proto_mi_`,
-`C.INAZUMA_OVERHAUL_POOL_IDS`) and Fontaine's sixteen ported as they are
-(legacy cleanup pick 4, `proto_mf_`, `C.FONTAINE_OVERHAUL_POOL_IDS`). The seam
-is one property in each engine, `CompanionPool.All` and
-`loader.companion_roster_replacement`, because the reward slot and the shop
-must never read different rosters. There is no Featured Banner (scrapped
-2026-10-18): every companion in the pool is offerable in every run. The per-row reasoning is in
-`docs/notes/prototype-surface-provenance.md`.
+**THE COMPANION ROSTER** is Mondstadt's (`proto_mc_`,
+`C.MONDSTADT_OVERHAUL_POOL_IDS`), Inazuma's (`proto_mi_`,
+`C.INAZUMA_OVERHAUL_POOL_IDS`) and Fontaine's (`proto_mf_`,
+`C.FONTAINE_OVERHAUL_POOL_IDS`). The seam is one property in each engine,
+`CompanionPool.All` and `loader.companion_roster_replacement`, because the
+reward slot and the shop must never read different rosters. There is no
+Featured Banner: every companion in the pool is offerable in every run.
+Per-row reasoning: `docs/notes/prototype-surface-provenance.md`.
 
-**POOL WIRING** (legacy cleanup stage 4): each character's pool lists its
-`proto_` rows in `GenerateAllCards` and offers its roster
-(`*Roster.OfferablePool`, `FurinaStageRoster.Pool`, `VarkaRoster.Pool`).
-The shared companions are not in any character's pool: they are
-`CompanionCardPool`'s, a BaseLib shared pool with the base Colorless frame and
-energy orb ([USER] 2026-10-18, legacy review pick 4: "Shared companions move to
-their own pool with a neutral frame, out of Klee's"). The codegen routes a row
-there by what it is (`loader.is_shared_companion_row`: a Companion row with no
-`personal_pool:` that no kit claims in `C.KIT_OWN_COMPANION_IDS`), not by its
-`character:` field, which still reads `klee` and still picks the emitting
-profile (art path, text). Like the base Colorless pool it answers
-`IsColorless` true (Heirloom Hammer copies companions); it sits under the card
+**POOL WIRING.** Each character's pool lists its `proto_` rows in
+`GenerateAllCards` and offers its roster (`*Roster.OfferablePool`,
+`FurinaStageRoster.Pool`, `VarkaRoster.Pool`). Shared companions are in no
+character's pool: they are `CompanionCardPool`'s, a BaseLib shared pool with
+the base Colorless frame and orb ([USER] 2026-10-18, legacy review pick 4).
+The codegen routes a row there by what it is (`loader.is_shared_companion_row`:
+a Companion row with no `personal_pool:` that no kit claims in
+`C.KIT_OWN_COMPANION_IDS`), not by its `character:` field, which still reads
+`klee` and still picks the emitting profile (art path, text). It answers
+`IsColorless` true (Heirloom Hammer copies companions), sits under the
 library's Colorless tab (`Patches/CompanionLibraryFilter.cs`), and a transform
 offers only companions the player could be offered
-(`Patches/CompanionTransformFilter.cs`, so Yae never gets her Sesshou Sakura).
-Counts are pinned by `KleeTests/Prototype/PoolCountTests.cs`: 78 per kit. Still checked:
-the tier0 schema validators, the codegen, `lint_generated_structure` and
+(`Patches/CompanionTransformFilter.cs`). Counts are pinned by
+`KleeTests/Prototype/PoolCountTests.cs`: 78 per kit. Also checked: the tier0
+schema validators, the codegen, `lint_generated_structure` and
 `lint_pool_membership`. Depth: `docs/current/atlas/klee-mod-cards.md` §7.
