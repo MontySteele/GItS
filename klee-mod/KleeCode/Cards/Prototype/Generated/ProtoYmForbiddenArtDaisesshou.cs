@@ -51,13 +51,13 @@ public sealed class ProtoYmForbiddenArtDaisesshou : CustomCardModel, IElementalC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Forbidden Art: Daisesshou"),
-        ("description", "Every [gold]Sakura[/gold] withers. Deal {YmPer:diff()} [gold]Electro[/gold] damage to ALL enemies for each one."),
+        ("description", "Every [gold]Sakura[/gold] withers. Deal {YmPer:diff()} [gold]Electro[/gold] damage to ALL enemies for each Level they had."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("YmPer", 9m)
+            new DynamicVar("YmPer", 3m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -74,6 +74,6 @@ public sealed class ProtoYmForbiddenArtDaisesshou : CustomCardModel, IElementalC
 
     protected override void OnUpgrade()
     {
-        DynamicVars["YmPer"].UpgradeValueBy(3m);
+        DynamicVars["YmPer"].UpgradeValueBy(1m);
     }
 }

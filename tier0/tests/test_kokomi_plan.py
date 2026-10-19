@@ -2189,25 +2189,26 @@ def test_night_watch_is_off_the_sheet_and_out_of_the_pool(overhaul):
 def test_breakwater_pays_per_plan_waiting(overhaul):
     """THE RE-FOUNDING (2026-10-12): Dusk is retired, so Breakwater's
     Plans-waiting Block is its now-line: "Gain 6 Block, plus 3 for each Plan
-    waiting." 8 base upgraded, the rate unchanged."""
+    waiting." 8 [10] base since the pool sweep (2026-10-18), the rate
+    unchanged."""
     from tier0.content import upgrades
 
     row = _row("proto_kk_breakwater")
     assert row.plan == []
     assert row.effects == [{"op": "block", "amount_formula": {
-        "base": 6, "per": 3, "count": "plans_held"}}]
+        "base": 8, "per": 3, "count": "plans_held"}}]
     up = upgrades.apply_upgrade(row)
     assert up.effects[0]["amount_formula"] == {
-        "base": 8, "per": 3, "count": "plans_held"}
+        "base": 10, "per": 3, "count": "plans_held"}
     row = _row("proto_kk_breakwater")
     st = kokomi_state()
     effects.resolve_card(st, row)
-    assert st.player.block == 6
+    assert st.player.block == 8
     for i in range(2):
         kokomi_plan.schedule(st, plan_card([{"op": "draw", "amount": 1}],
                                            cid=f"proto_kk_p{i}"))
     effects.resolve_card(st, row)
-    assert st.player.block == 6 + 6 + 3 * 2
+    assert st.player.block == 8 + 8 + 3 * 2
 
 
 def test_riptide_adds_its_rider_per_debuffed_body(overhaul):

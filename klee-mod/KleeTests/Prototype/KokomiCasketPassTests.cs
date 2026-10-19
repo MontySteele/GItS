@@ -143,13 +143,13 @@ public class KokomiCasketPassTests : IDisposable
 
         // Pearl Diver left the pool in the status batch (2026-10-01).
 
-        // The cleanup pass (2026-09-29): 7 / 11, upgraded 9 / 14.
+        // The pool sweep (2026-10-18): 8 / 13, upgraded 10 / 16.
         var press = new ProtoKkPressTheAdvantage();
-        Assert.Equal(7m, Var(press, "PlainDamage"));
-        Assert.Equal(11m, Var(press, "BranchDamage"));
+        Assert.Equal(8m, Var(press, "PlainDamage"));
+        Assert.Equal(13m, Var(press, "BranchDamage"));
         var pressUp = Upgraded<ProtoKkPressTheAdvantage>();
-        Assert.Equal(9m, Var(pressUp, "PlainDamage"));
-        Assert.Equal(14m, Var(pressUp, "BranchDamage"));
+        Assert.Equal(10m, Var(pressUp, "PlainDamage"));
+        Assert.Equal(16m, Var(pressUp, "BranchDamage"));
         Assert.Contains(Il.Calls(Il.Method("ProtoKkPressTheAdvantage", "OnPlay")),
                         c => c.Contains("KokomiPlan.PlansHeld"));
 

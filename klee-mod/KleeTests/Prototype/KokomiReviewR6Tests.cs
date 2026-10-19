@@ -57,7 +57,7 @@ public class KokomiReviewR6Tests
     [Fact]
     public void The_numbers_pass()
     {
-        Assert.Equal((7, 10), Vars<ProtoKkWatatsumiDrill>("Damage"));
+        Assert.Equal((8, 11), Vars<ProtoKkWatatsumiDrill>("Damage"));   // the pool sweep, 2026-10-18
         Assert.Equal((5, 6), Vars<ProtoKkKuragesWake>("Damage"));
         Assert.Equal((4, 6), Vars<ProtoKkWatchfulShoal>("PowerAmount"));
         Assert.Equal((6, 8), Vars<ProtoKkGrandStrategist>("PowerAmount"));

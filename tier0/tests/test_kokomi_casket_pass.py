@@ -101,12 +101,12 @@ def test_the_commons(overhaul):
     # The cleanup pass (2026-09-29): 7 / 11, upgraded 9 / 14.
     press = _row("proto_kk_press_the_advantage")
     st = kokomi_state(enemies=[make_enemy(hp=100)])
-    assert _hit(st, press) == 7
+    assert _hit(st, press) == 8   # pool sweep 2026-10-18: 8 / 13 [10 / 16]
     kokomi_plan.schedule(st, plan_card([{"op": "energy", "amount": 1}]))
-    assert _hit(st, press) == 11
+    assert _hit(st, press) == 13
     press_up = _up("proto_kk_press_the_advantage")
-    assert press_up.effects[0]["else"][0]["amount"] == 9
-    assert press_up.effects[0]["then"][0]["amount"] == 14
+    assert press_up.effects[0]["else"][0]["amount"] == 10
+    assert press_up.effects[0]["then"][0]["amount"] == 16
 
     # Shell of Sanctuary left with the Kokomi card paper v2 (2026-10-18):
     # Draft the Orders is 5 [8] Block and a discount, no Plan line.

@@ -45,7 +45,7 @@ public sealed class ProtoYmEnlightenedBlessing : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Scattered Blossoms"),
-        ("description", "Whenever a [gold]Sakura[/gold] withers, draw 1 card."),
+        ("description", "Whenever a [gold]Sakura[/gold] withers, draw 2 cards."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -63,7 +63,7 @@ public sealed class ProtoYmEnlightenedBlessing : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<EnlightenedBlessingPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<EnlightenedBlessingPower>(choiceContext, Owner.Creature, 2, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()

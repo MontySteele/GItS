@@ -275,11 +275,11 @@ def test_press_the_advantages_waiting_branch_is_scored_and_not_priced_at_zero():
 
     quiet = make_state(enemies=[make_enemy(hp=60)])
     quiet.kk_plan_queue = []
-    assert policy._expected_damage(quiet, card) == 7.0
+    assert policy._expected_damage(quiet, card) == 8.0
 
     waiting = make_state(enemies=[make_enemy(hp=60)])
     waiting.kk_plan_queue = [object()]
-    assert policy._expected_damage(waiting, card) == 11.0
+    assert policy._expected_damage(waiting, card) == 13.0
 
 
 def test_the_prototype_predicate_read_is_the_engine_s_own(monkeypatch):

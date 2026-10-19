@@ -548,7 +548,7 @@ MC_SIGNATURE_MIX_BLOCK = 4      # Diona: Block per turn, 2 turns
 MC_GLACIAL_WALTZ_DMG = 7        # Kaeya: Cryo damage per turn, 3 turns
 MC_OZ_DMG = 5                   # Fischl: Oz's Electro volley, no turn limit
 MC_REVELATION_BLOCK = 5         # Nicole: Block at the start of your turn
-MC_REVELATION_STRENGTH = 2      # Nicole: Theosis, for holding the line
+MC_REVELATION_STRENGTH = 1      # Nicole: Theosis (2 until the pool sweep, 2026-10-18)
 MC_LIGHTNING_ROSE_DMG = 6       # Lisa: Electro damage per turn, 3 turns
 MC_LIGHTNING_ROSE_VULN = 1      # Lisa: the Vulnerable that rides it
 # THE SECOND WAVE -- the thirteen rows the first pass left out. Same rule as

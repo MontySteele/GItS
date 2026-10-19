@@ -122,6 +122,13 @@ public static class YaeLaw
     /// higher, deal 6 [8] more."</summary>
     public const int FangLevel = 3;
 
+    /// <summary>ETERNITY (the pool sweep, 2026-10-18,
+    /// <c>review/active/pool-sweep-2026-10-18.md</c> sec.1): "Their Levels
+    /// count twice." The Level an effect READS: the stored Level, doubled
+    /// while she has Eternity. Gains, carry-overs and the stored Level are
+    /// not doubled. PURE. Sim twin: <c>yae_shrine.effective_level</c>.</summary>
+    public static int EffectiveLevel(int level, bool eternal) => eternal ? level * 2 : level;
+
     /// <summary>Kitsune Barrage's hit count for <paramref name="standing"/>
     /// Sakura. PURE.</summary>
     public static int BarrageHitCount(int standing) =>

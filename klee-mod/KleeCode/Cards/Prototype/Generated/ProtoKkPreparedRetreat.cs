@@ -61,7 +61,7 @@ public sealed class ProtoKkPreparedRetreat : CustomCardModel, ICharacterCard, IP
         new List<DynamicVar>
         {
             new BlockVar(8m, ValueProp.Move),
-            new EnergyVar("PlanEnergy", 1)
+            new EnergyVar("PlanEnergy", 2)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

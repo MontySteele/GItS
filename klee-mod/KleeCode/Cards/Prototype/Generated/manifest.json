@@ -1592,7 +1592,7 @@
       "kokomi_amount": 1
     },
     "proto_kk_shoal_of_spears": {
-      "damage": 1
+      "damage": 2
     },
     "proto_kk_slack_water": {
       "damage": 3,
@@ -2260,7 +2260,7 @@
       "power_amount": 1
     },
     "proto_mi_thoma_crimson_ooyoroi": {
-      "power_amount": 3
+      "power_amount": 4
     },
     "proto_mi_wanderer_hanega": {
       "cost": -1
@@ -2613,7 +2613,7 @@
       "yae_amount": 1
     },
     "proto_ym_forbidden_art_daisesshou": {
-      "yae_per": 3
+      "yae_per": 1
     },
     "proto_ym_fox_fire_draft": {
       "yae_amount": 1

@@ -90,9 +90,9 @@ def test_a_0_cost_sting_can_still_be_written_and_carried_out():
 
 @pytest.mark.parametrize("cid,base,up", [
     ("proto_kk_jellyfish_drift", 6, 8),
-    ("proto_kk_watatsumi_drill", 7, 10),   # Kokomi review r6 item 1
-    # Kokomi round 3 A-list (2026-10-13): 6 [9], Cloak and Dagger's 6.
-    ("proto_kk_bubble_ward", 6, 9),
+    ("proto_kk_watatsumi_drill", 8, 11),   # pool sweep 2026-10-18
+    # The pool sweep (2026-10-18): 7 [10].
+    ("proto_kk_bubble_ward", 7, 10),
 ])
 def test_the_generators_are_at_the_silents_rates(cid, base, up):
     row = loader.get_card(cid)

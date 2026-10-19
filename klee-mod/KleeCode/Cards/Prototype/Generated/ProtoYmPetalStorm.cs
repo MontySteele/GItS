@@ -58,7 +58,7 @@ public sealed class ProtoYmPetalStorm : CustomCardModel, IElementalCard, ICharac
         new List<DynamicVar>
         {
             new CalculationBaseVar(0m),
-            new ExtraDamageVar(3m),
+            new ExtraDamageVar(4m),
             new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => YaeShrine.Count(card.Owner.Creature))
         };
 

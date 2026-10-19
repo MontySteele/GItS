@@ -103,8 +103,8 @@ public class PoolCompletionTests : IDisposable
 
         // The Rare pass (2026-10-04): 4 [5] a hit; since the re-founding one
         // hit per Plan waiting. Kokomi round 2 (2026-10-12): 5 [6].
-        Assert.Equal(5, new ProtoKkShoalOfSpears().DynamicVars["Damage"].IntValue);
-        Assert.Equal(6, Upgraded<ProtoKkShoalOfSpears>().DynamicVars["Damage"].IntValue);
+        Assert.Equal(7, new ProtoKkShoalOfSpears().DynamicVars["Damage"].IntValue);   // the pool sweep, 2026-10-18
+        Assert.Equal(9, Upgraded<ProtoKkShoalOfSpears>().DynamicVars["Damage"].IntValue);
         // The Kokomi level pass (2026-10-12): Sea's Reproach 5 [7] at 1
         // Energy on both faces.
         Assert.Equal(1, new ProtoKkSeasReproach().EnergyCost.Canonical);

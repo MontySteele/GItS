@@ -119,7 +119,7 @@ public sealed class SignatureMixPower : PowerModel, ILocalizationProvider
 
 /// <summary>
 /// Nicole, Revelation, Uncreated Light: "At the start of your turn, gain 5
-/// Block. If you had Block left at the end of your last turn, also gain 2
+/// Block. If you had Block left at the end of your last turn, also gain 1
 /// Strength." PERMANENT -- a Power has no turn limit (workshop sec.1).
 ///
 /// THE LATCH IS THE CARD. "Had Block left at the end of your last turn" cannot

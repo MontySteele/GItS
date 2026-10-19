@@ -55,7 +55,8 @@ public class KokomiRound2ChangesTests
         // the Kokomi review r6 (2026-10-14, pick 2 (b)).
         Assert.Equal((6, 8), (Var<ProtoKkGrandStrategist>("PowerAmount"),
                               Var<ProtoKkGrandStrategist>("PowerAmount", true)));
-        Assert.Equal((5, 6), (Var<ProtoKkShoalOfSpears>("Damage"),
+        // The pool sweep (2026-10-18): Shoal of Spears 7 [9].
+        Assert.Equal((7, 9), (Var<ProtoKkShoalOfSpears>("Damage"),
                               Var<ProtoKkShoalOfSpears>("Damage", true)));
     }
 

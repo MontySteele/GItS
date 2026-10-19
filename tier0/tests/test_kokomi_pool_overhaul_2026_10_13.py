@@ -100,9 +100,9 @@ def test_the_new_cards_numbers_and_upgrades():
     assert (up.effects[0]["amount"], up.plan[0]["amount"]) == (12, 6)
     retreat = loader.get_card("proto_kk_prepared_retreat")
     assert retreat.effects == [{"op": "block", "amount": 8}]
-    assert retreat.plan == [{"op": "energy_if_attacked_since", "amount": 1}]
+    assert retreat.plan == [{"op": "energy_if_attacked_since", "amount": 2}]
     up = _up("proto_kk_prepared_retreat")
-    assert (up.effects[0]["amount"], up.plan[0]["amount"]) == (11, 2)
+    assert (up.effects[0]["amount"], up.plan[0]["amount"]) == (11, 3)
     turnabout = loader.get_card("proto_kk_turnabout")
     assert turnabout.effects == [] and turnabout.exhaust
     assert turnabout.plan == [{"op": "damage_taken_since",
@@ -240,7 +240,7 @@ def test_prepared_retreat_pays_energy_only_if_attacked():
     kokomi_plan.note_enemy_hit(st, st.enemies[0], blocked=6, incoming=6)
     st.player.energy = 0
     kokomi_plan.resolve_all(st)
-    assert st.player.energy == 1
+    assert st.player.energy == 2   # the pool sweep (2026-10-18)
 
 
 def test_turnabout_deals_all_damage_taken_blocked_or_not_to_all():
