@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 """Generate map markers in the base game's pin look, from the model-rendered select close-up.
 
-The ONE producer of `ui/map_marker.png` for Klee and Yae (2026-10-19). Klee's
+The ONE producer of `ui/map_marker.png` for all five kits (2026-10-19). Klee's
 was the wiki side icon (Klee visual paper, pick 3 (a): "the map marker is
 refit to its box"; it filled only the lower two-thirds of its box and read
 about 0.7 the size of the others); Yae borrowed Klee's through build_pck's
-Copy-YaeFallback. Furina's, Kokomi's and Varka's stay their stills scripts'
-square crops of official art until [USER] picks a look for all five.
+Copy-YaeFallback; Furina's, Kokomi's and Varka's were square crops of official
+art from their stills scripts. [USER], 2026-10-19, on the Klee and Yae pins:
+"I think all 5 should get pins."
 
 THE SLOT (SlayTheSpire2.pck, read 2026-10-19). The base markers
 (`images/packed/map/icons/map_marker_<char>.png`) are 49x64 RGBA: one flat
@@ -28,7 +29,7 @@ Drawn at SS times the size and reduced with LANCZOS, so every edge is
 antialiased. Deterministic: same close-up in, same bytes out.
 
 Usage:
-    .venv/Scripts/python tools/gen_map_markers.py [--chars klee,yae] [--art-root <checkout>]
+    .venv/Scripts/python tools/gen_map_markers.py [--chars klee,varka,furina,kokomi,yae] [--art-root <checkout>]
         [--out-root <dir>] [--check]
 
 `--art-root` reads the close-ups under another checkout's ImageGen/ (a worktree
@@ -67,11 +68,24 @@ HEAD_PX, CROWN_AT = 24.0, 9.0
 class Marker:
     icon: str          # the gen_char_icons.CHARS row whose source and landmarks it uses
     out: str           # relative to the out root
-    color: str         # CharacterModel.MapDrawingColor, hex
+    color: str         # the pin's colour, hex (each kit's own; five distinct hues)
+    spec: GI.Icon | None = None   # landmarks of its own, where the icon's source is not the close-up
 
 
+#: Klee's and Yae's colours are their MapDrawingColor; Furina, Kokomi and Varka
+#: share a cyan family there, so their pins take a hue of their own each:
+#: Varka Anemo teal, Furina deep Hydro blue, Kokomi coral (her frame tint).
 CHARS = {
     "klee": Marker(icon="klee", out="ImageGen/images/ui/map_marker.png", color="C4472F"),
+    "varka": Marker(icon="varka", out="ImageGen/images/varka/ui/map_marker.png", color="2FA58A"),
+    "furina": Marker(icon="furina", out="ImageGen/images/furina/ui/map_marker.png", color="3A63C8"),
+    # her top-bar icon is cut from her official splash; the pin uses her
+    # model close-up (crown under the bun, eyes at x 1317 and 1432, chin 451)
+    "kokomi": Marker(icon="kokomi", out="ImageGen/images/kokomi/ui/map_marker.png", color="E8848F",
+                     spec=GI.Icon(source="ImageGen/images/kokomi/ui/select_closeup.png",
+                                  out="ImageGen/images/kokomi/ui/map_marker.png",
+                                  source_size=(1920, 1080), source_bbox=(1056, 36, 1890, 1080),
+                                  face_cx=1372, crown_y=112, chin_y=451)),
     "yae": Marker(icon="yae", out="ImageGen/images/yae/ui/map_marker.png", color="B07FE0"),
 }
 
@@ -161,7 +175,7 @@ def main(argv=None) -> int:
     problems = []
     for name in names:
         m = CHARS[name]
-        spec = GI.CHARS[m.icon]
+        spec = m.spec or GI.CHARS[m.icon]
         src_path = art_root / spec.source
         if not src_path.exists():
             print(f"SKIPPED: {name} -- no source at {spec.source}")

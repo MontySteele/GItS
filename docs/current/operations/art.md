@@ -12,7 +12,7 @@ python3 tools/art_hunt.py Furina ; python3 tools/art_contact_sheet.py --list
 .venv/Scripts/python tools/cut_combat_layers.py klee [--check]
 .venv/Scripts/python tools/cut_combat_layers.py --all [--check|--verify]   # 10 configs
 .venv/Scripts/python tools/gen_furina_stills.py    # and gen_kokomi_stills.py, gen_yae_stills.py [--art-root <checkout>] [--check]
-.venv/Scripts/python tools/gen_map_markers.py [--chars klee,yae] [--art-root <checkout>] [--check]   # base-style pins with the model's face
+.venv/Scripts/python tools/gen_map_markers.py [--chars klee,varka,furina,kokomi,yae] [--art-root <checkout>] [--check]   # every kit's map marker: a base-style pin with the model's face
 .venv/Scripts/python tools/gen_char_icons.py [--chars klee,varka,kokomi,furina] [--art-root <checkout>] [--out-root <dir>] [--check]   # top-bar icons, 85x85 like the base cast
 .venv/Scripts/python tools/gen_char_icon_outlines.py [--check]   # every outline halo, after gen_char_icons
 .venv/Scripts/python tools/gen_mod_image.py [--check]      # Mods-screen badge, EB-161
