@@ -281,10 +281,11 @@ public class VarkaOathDialTests : IDisposable
         AsLocalSeat(1UL, () => Assert.True(VarkaOathDial.HidesBadge(badge)));
         AsLocalSeat(2UL, () => Assert.False(VarkaOathDial.HidesBadge(badge)));
 
-        // The left-element flag keeps its own badge.
+        // The left-element flag goes too since the icon declutter
+        // (2026-10-19): the pip shows its count, the dial's hover its line.
         seat.WithPower<HydroOathLeftPower>(1);
         var left = seat.Creature.Powers.OfType<HydroOathLeftPower>().Single();
-        AsLocalSeat(1UL, () => Assert.False(VarkaOathDial.HidesBadge(left)));
+        AsLocalSeat(1UL, () => Assert.True(VarkaOathDial.HidesBadge(left)));
 
         // A canonical model has no owner to ask, and must not throw.
         Assert.False(VarkaOathDial.HidesBadge(new PyroOathPower()));

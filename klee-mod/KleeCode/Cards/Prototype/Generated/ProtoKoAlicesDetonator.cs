@@ -60,7 +60,7 @@ public sealed class ProtoKoAlicesDetonator : CustomCardModel
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await AlicesDetonatorBasePower.Install(choiceContext, Owner.Creature, IsUpgraded, this);
+        await AlicesDetonatorPower.Install(choiceContext, Owner.Creature, IsUpgraded, this);
     }
 
     protected override void OnUpgrade()

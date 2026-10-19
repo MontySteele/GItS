@@ -63,18 +63,11 @@ public sealed class ProtoKkKurageCanopy : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (IsUpgraded)
-        {
-            await PowerCmd.Apply<KurageCanopyPlusPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
-        }
-        else
-        {
-            await PowerCmd.Apply<KurageCanopyPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
-        }
+        await UpgradeTwinPower.Install<KurageCanopyPower>(choiceContext, Owner.Creature, 1, IsUpgraded, Owner.Creature, this);
     }
 
     protected override void OnUpgrade()
     {
-        // upgraded_power: the upgraded card installs KurageCanopyPlusPower, read off IsUpgraded when the card is played.
+        // upgraded_power: the upgraded card's copy of KurageCanopyPower counts as upgraded, read off IsUpgraded when the card is played.
     }
 }

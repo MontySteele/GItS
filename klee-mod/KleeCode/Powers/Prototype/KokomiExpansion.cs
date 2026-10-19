@@ -11,6 +11,7 @@ using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.ValueProps;
@@ -108,29 +109,46 @@ public static class KokomiExpansion
 /// calls once per CARRY-OUT, so a Plan carried out twice (Second Wave,
 /// Nereid's Ascension, All Streams) pays twice; copies add one each. A full
 /// hand sends the Ward to the discard pile
-/// (<see cref="KokomiCards.AddJellyfish"/>). The upgraded card installs
-/// <see cref="KurageCanopyPlusPower"/>, whose Ward is upgraded. Sim twin:
+/// (<see cref="KokomiCards.AddJellyfish"/>). A copy the upgraded card
+/// installed adds an upgraded Ward. ONE BADGE for both versions since the
+/// icon declutter (2026-10-19); it was a "+" twin, and the two batches still
+/// arrive in the order the two powers would have acted
+/// (<see cref="UpgradeTwinPower.Batches()"/>). Sim twin:
 /// <c>kokomi_plan._note_plan_resolved</c>.</summary>
-public abstract class KurageCanopyBasePower
-    : PowerModel, ILocalizationProvider, IKokomiPlanListener
+public sealed class KurageCanopyPower
+    : UpgradeTwinPower, ILocalizationProvider, IKokomiPlanListener
 {
-    protected abstract bool UpgradedWard { get; }
-
     public List<(string, string)>? Localization => new()
     {
-        ("title", UpgradedWard ? "Kurage Canopy+" : "Kurage Canopy"),
+        ("title", "Kurage Canopy"),
         ("description",
             "Whenever the [gold]Bake-Kurage[/gold] carries out a "
           + "[gold]Plan[/gold] that is not a [gold]Sting[/gold] or "
           + "[gold]Ward[/gold], add [blue]{Amount}[/blue] "
-          + (UpgradedWard ? "upgraded " : "")
           + "{Amount:plural:[gold]Ward[/gold]|[gold]Wards[/gold]} to your "
           + "[gold]Hand[/gold]."),
     };
 
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
+    /// <summary>The badge previews the Ward it adds: the plain one, and the
+    /// upgraded one when an upgraded card installed a copy. (The face keeps
+    /// its one sentence: a count of each would pass the power ceiling.)
+    /// </summary>
+    protected override IEnumerable<IHoverTip> ExtraHoverTips
+    {
+        get
+        {
+            var tips = new List<IHoverTip>();
+            if (!IsMutable || PlainCopies > 0)
+            {
+                tips.Add(HoverTipFactory.FromCard<ProtoKkWard>(false));
+            }
+            if (IsMutable && UpgradedCopies > 0)
+            {
+                tips.Add(HoverTipFactory.FromCard<ProtoKkWard>(true));
+            }
+            return tips;
+        }
+    }
 
     public async Task OnPlanResolved(
         PlayerChoiceContext choiceContext, Creature kokomi, CardModel? line)
@@ -139,21 +157,12 @@ public abstract class KurageCanopyBasePower
         if (Owner == null || Amount <= 0) return;
         if (KokomiRefounding.IsJellyfish(line)) return;  // a Sting or Ward
         if (!KokomiOverhaul.LiveFor(Owner)) return;
-        await KokomiCards.AddJellyfish(Owner.Player,
-            KokomiCards.Jellyfish.Ward, (int)Amount, UpgradedWard);
+        foreach (var (count, upgraded) in Batches())
+        {
+            await KokomiCards.AddJellyfish(Owner.Player,
+                KokomiCards.Jellyfish.Ward, count, upgraded);
+        }
     }
-}
-
-/// <summary>Kurage Canopy: a plain Ward per carry-out.</summary>
-public sealed class KurageCanopyPower : KurageCanopyBasePower
-{
-    protected override bool UpgradedWard => false;
-}
-
-/// <summary>Kurage Canopy+: an upgraded Ward per carry-out.</summary>
-public sealed class KurageCanopyPlusPower : KurageCanopyBasePower
-{
-    protected override bool UpgradedWard => true;
 }
 
 /// <summary>At Water's Edge (her C1; the Kokomi card pass, 2026-10-11). The
@@ -189,37 +198,6 @@ public sealed class AtWatersEdgePower : PowerModel, ILocalizationProvider
         if (hit == null || !hit.IsEnemy) return;
         if (AuraCmd.ElementOfPlay(cardSource, dealer) != Element.Hydro) return;
         await KokomiExpansion.OnHydroDamage(choiceContext, Owner, hit);
-    }
-}
-
-/// <summary>Ceremonial Garment: "Your Attacks deal 1 more damage for each
-/// Weak and Vulnerable on their target." Per hit of an Attack card she plays
-/// face-up, off the body it lands on; STACKS of Weak plus stacks of
-/// Vulnerable (the Kokomi card pass, 2026-10-11; it counted distinct debuffs
-/// before). Sim twin: <c>kokomi_plan.garment_bonus</c>.</summary>
-public sealed class ProtoCeremonialGarmentPower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Ceremonial Garment"),
-        ("description",
-            "Your Attacks deal [blue]{Amount}[/blue] additional damage for "
-          + "each [gold]Weak[/gold] and [gold]Vulnerable[/gold] on their "
-          + "target."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-
-    public override decimal ModifyDamageAdditive(
-        Creature? target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource, CardPlay? cardPlay)
-    {
-        if (dealer != Owner || target == null || target == Owner) return 0m;
-        if (!props.IsPoweredAttack()) return 0m;
-        if (cardSource is not { Type: CardType.Attack }) return 0m;
-        return Amount * KokomiOverhaulKit.WeakVulnStacks(target);
     }
 }
 

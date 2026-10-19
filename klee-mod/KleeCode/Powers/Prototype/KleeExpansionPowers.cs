@@ -24,61 +24,6 @@ namespace KleeMod.Powers;
 // Sim twins: `tier0/engine/klee_overhaul.py`, the R276 block.
 
 /// <summary>
-/// Playdate: "The next Companion card you play this turn costs 1 less."
-/// A cost-seam discount under Klee's own reading of a Companion card
-/// (<see cref="KleeExpansion.IsCompanionCard"/>). EACH COPY IS 1 OFF THE SAME
-/// NEXT CARD: two Playdates are two sentences about one card, so the discount
-/// is the stack and the whole stack is spent on it. Expires at the end of the
-/// turn it was played on.
-/// </summary>
-public sealed class PlaydatePower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Playdate"),
-        ("description",
-            "The next [gold]Companion[/gold] card you play this turn costs "
-          + "[blue]{Amount}[/blue] less."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-    public override PowerStackType StackType => PowerStackType.Counter;
-
-    /// <summary>The cost this power takes off <paramref name="card"/>, 0 if
-    /// it does not apply. PURE -- the rule, readable without a combat.</summary>
-    public static decimal Discounted(decimal originalCost, int discount) =>
-        System.Math.Max(0m, originalCost - discount);
-
-    public override bool TryModifyEnergyCostInCombat(
-        CardModel card, decimal originalCost, out decimal modifiedCost)
-    {
-        modifiedCost = originalCost;
-        if (!KleeExpansion.IsCompanionCard(card)) return false;
-        if (card.Owner?.Creature != Owner) return false;
-        if (originalCost <= 0m) return false;
-        modifiedCost = Discounted(originalCost, Amount);
-        return true;
-    }
-
-    public override async Task AfterCardPlayed(
-        PlayerChoiceContext choiceContext, CardPlay cardPlay)
-    {
-        if (!KleeExpansion.IsCompanionCard(cardPlay.Card)) return;
-        if (cardPlay.Card?.Owner?.Creature != Owner) return;
-        if (!cardPlay.IsLastInSeries) return;
-        await PowerCmd.Remove(this);
-    }
-
-    public override async Task AfterSideTurnEnd(
-        PlayerChoiceContext choiceContext, CombatSide side,
-        IEnumerable<Creature> participants)
-    {
-        if (side != CombatSide.Player) return;
-        await PowerCmd.Remove(this);
-    }
-}
-
-/// <summary>
 /// Boom Badge (playtest 2026-09-24, [USER]: "seems weak"): "The next time you
 /// Set off this turn, your Bombs deal double damage."
 ///
@@ -443,44 +388,55 @@ public sealed class SparkKnightPower : PowerModel, ILocalizationProvider
 /// (<c>BeforeHandDraw</c>), the base game's <c>SentryModePower</c> (Sweeping
 /// Gaze) site and command. No prompt of any kind.
 ///
-/// TWO POWERS AND ONE RULE: the upgraded card's copies arrive upgraded, and a
-/// Power has no upgrade of its own and a copy count cannot also carry a flag,
-/// so the card installs one twin or the other (<see cref="Install"/>) and both
-/// twins are this class with a different answer to <see cref="Upgraded"/>.
-/// ABSTRACT so that neither twin's lookup (`OfType`) can find the other.
+/// ONE POWER FOR BOTH VERSIONS (the icon declutter, 2026-10-19, [USER]: "our
+/// characters tend to make a lot of icons"). It was two twins, plain and "+",
+/// so a deck with both versions showed two badges. Now every copy is the
+/// Amount and a copy the upgraded card installed is counted in
+/// <see cref="UpgradeTwinPower.UpgradedCopies"/>: each turn it adds one Alice's
+/// Mine per copy, upgraded for each upgraded copy, the two batches in the
+/// order the twins would have acted (<see cref="UpgradeTwinPower.Batches()"/>).
 /// </summary>
-public abstract class AlicesDetonatorBasePower : PowerModel, ILocalizationProvider
+public sealed class AlicesDetonatorPower : UpgradeTwinPower, ILocalizationProvider
 {
-    /// <summary>Do this Power's Alice's Mines arrive upgraded?</summary>
-    public abstract bool Upgraded { get; }
-
     /// <summary>The badge previews the Alice's Mine it adds, as the card does
-    /// (Sentry Mode's Sweeping Gaze), upgraded on the Plus twin.</summary>
-    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        new[] { HoverTipFactory.FromCard<ProtoKoAlicesMine>(Upgraded) };
-
-    public abstract List<(string, string)>? Localization { get; }
-
-    public override PowerType Type => PowerType.Buff;
-    public override PowerStackType StackType => PowerStackType.Counter;
-
-    /// <summary>The card's play: install the twin its upgrade names.</summary>
-    public static async Task Install(
-        PlayerChoiceContext choiceContext, Creature? klee, bool upgraded,
-        CardModel? cardSource)
+    /// (Sentry Mode's Sweeping Gaze): the plain one, then the upgraded one
+    /// when an upgraded card installed a copy.</summary>
+    protected override IEnumerable<IHoverTip> ExtraHoverTips
     {
-        if (klee == null) return;
-        if (upgraded)
+        get
         {
-            await PowerCmd.Apply<AlicesDetonatorPlusPower>(
-                choiceContext, klee, 1, applier: klee, cardSource: cardSource);
-        }
-        else
-        {
-            await PowerCmd.Apply<AlicesDetonatorPower>(
-                choiceContext, klee, 1, applier: klee, cardSource: cardSource);
+            var tips = new List<IHoverTip>();
+            if (!IsMutable || PlainCopies > 0)
+            {
+                tips.Add(HoverTipFactory.FromCard<ProtoKoAlicesMine>(false));
+            }
+            if (IsMutable && UpgradedCopies > 0)
+            {
+                tips.Add(HoverTipFactory.FromCard<ProtoKoAlicesMine>(true));
+            }
+            return tips;
         }
     }
+
+    public List<(string, string)>? Localization => new()
+    {
+        ("title", "Alice's Detonator"),
+        ("description",
+            "At the start of your turn, add [blue]{Amount}[/blue] "
+          + "[gold]Alice's Mine[/gold] to your [gold]Hand[/gold]."),
+        ("smartDescription",
+            "At the start of your turn, add [blue]{Amount}[/blue] "
+          + "[gold]Alice's Mine[/gold] to your [gold]Hand[/gold]"
+          + "{Upgraded:cond:>0?, [blue]{}[/blue] of them upgraded|}."),
+    };
+
+    /// <summary>The card's play: one copy, noted as upgraded when the card
+    /// is.</summary>
+    public static Task Install(
+        PlayerChoiceContext choiceContext, Creature? klee, bool upgraded,
+        CardModel? cardSource) =>
+        Install<AlicesDetonatorPower>(choiceContext, klee, 1, upgraded,
+                                      klee, cardSource);
 
     public override async Task BeforeHandDraw(
         Player player, PlayerChoiceContext choiceContext,
@@ -489,45 +445,19 @@ public abstract class AlicesDetonatorBasePower : PowerModel, ILocalizationProvid
         if (Owner == null || player.Creature != Owner) return;
         var combat = Owner.CombatState;
         if (combat == null) return;
-        for (var copy = 0; copy < Amount; copy++)
+        foreach (var (count, upgraded) in Batches())
         {
-            var card = combat.CreateCard(ModelDb.Card<ProtoKoAlicesMine>(), player);
-            if (card == null) continue;
-            if (Upgraded && card.IsUpgradable && !card.IsUpgraded)
+            for (var copy = 0; copy < count; copy++)
             {
-                card.UpgradeInternal();
+                var card = combat.CreateCard(ModelDb.Card<ProtoKoAlicesMine>(), player);
+                if (card == null) continue;
+                if (upgraded && card.IsUpgradable && !card.IsUpgraded)
+                {
+                    card.UpgradeInternal();
+                }
+                await CardPileCmd.AddGeneratedCardToCombat(
+                    card, PileType.Hand, player);
             }
-            await CardPileCmd.AddGeneratedCardToCombat(
-                card, PileType.Hand, player);
         }
     }
-}
-
-/// <summary>Alice's Detonator, as the base card installs it.</summary>
-public sealed class AlicesDetonatorPower : AlicesDetonatorBasePower
-{
-    public override bool Upgraded => false;
-
-    public override List<(string, string)>? Localization => new()
-    {
-        ("title", "Alice's Detonator"),
-        ("description",
-            "At the start of your turn, add [blue]{Amount}[/blue] "
-          + "[gold]Alice's Mine[/gold] to your [gold]Hand[/gold]."),
-    };
-}
-
-/// <summary>The upgraded Alice's Detonator: the same rule, and each Alice's Mine it
-/// adds arrives upgraded.</summary>
-public sealed class AlicesDetonatorPlusPower : AlicesDetonatorBasePower
-{
-    public override bool Upgraded => true;
-
-    public override List<(string, string)>? Localization => new()
-    {
-        ("title", "Alice's Detonator+"),
-        ("description",
-            "At the start of your turn, add [blue]{Amount}[/blue] upgraded "
-          + "[gold]Alice's Mine[/gold] to your [gold]Hand[/gold]."),
-    };
 }

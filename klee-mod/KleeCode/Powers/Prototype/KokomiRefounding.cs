@@ -655,30 +655,6 @@ public static class KokomiRefounding
     }
 
     /// <summary>
-    /// A Plan was just written; <paramref name="written"/> is the card that
-    /// wrote it. Watatsumi Resistance pays a Sting for a Companion card
-    /// (Watchful Shoal left this bus in the Kokomi round-3 changes,
-    /// 2026-10-12). Sim twin:
-    /// <c>kokomi_plan.note_written</c>.
-    /// </summary>
-    public static async Task OnWritten(PlayerChoiceContext choiceContext,
-                                       Creature? kokomi, CardModel? written)
-    {
-        if (kokomi == null || written == null) return;
-        if (!KokomiOverhaul.LiveFor(kokomi)) return;
-        if (CompanionHexerei.CountsAsCompanion(written))
-        {
-            var stings = (int)kokomi.Powers.OfType<WatatsumiResistancePower>()
-                .Sum(p => p.Amount);
-            if (stings > 0)
-            {
-                await KokomiCards.AddJellyfish(kokomi.Player,
-                    KokomiCards.Jellyfish.Sting, stings, upgraded: false);
-            }
-        }
-    }
-
-    /// <summary>
     /// A Plan was just carried out; <paramref name="card"/> is the card that
     /// wrote it and <paramref name="line"/> the card whose line it was (they
     /// differ for Moon's Reflection). Endless Shoal (the jellyfish build,
@@ -732,16 +708,11 @@ public static class KokomiRefounding
     ///     (<see cref="KokomiOverhaulLedger.ReactionsThisCombat"/>);
     ///   * Grand Strategist: "Whenever you trigger an Elemental Reaction,
     ///     deal 4 damage to ALL enemies" -- any reaction credited to her (was
-    ///     a Plan's alone);
-    ///   * Coordinated Tide: a Companion card's own hit reacted, played or
-    ///     carried out as a Plan -- add a Sting;
-    ///   * Jellyfish Current: a Sting's own hit reacted -- add a Sting.
-    /// "Its own hit" is <paramref name="cardSource"/>, the card the game's
-    /// damage carried, or, for a Plan line's hit (which goes out through
-    /// <c>ElementalHit.Deal</c> with no card), the card that wrote the Plan
-    /// (<see cref="CreditHits"/>, opened by <c>KokomiPlan.Hit</c>).
-    /// JELLYFISH CURRENT IS BOUNDED: each reaction consumes the aura it
-    /// reacted with (the thin-deck loop rule's known set). Sim twin:
+    ///     a Plan's alone).
+    /// (Coordinated Tide's and Jellyfish Current's Stings, which read the
+    /// hit's own card through <paramref name="cardSource"/> or
+    /// <see cref="CreditHits"/>, left with their dead power classes in the
+    /// icon declutter, 2026-10-19: no row applied either.) Sim twin:
     /// <c>kokomi_plan.note_reaction</c>.
     /// </summary>
     public static async Task OnReaction(PlayerChoiceContext choiceContext,
@@ -763,22 +734,6 @@ public static class KokomiRefounding
                                                    amount, dealer,
                                                    powered: false);
             }
-        }
-        var card = cardSource ?? _creditedHit;
-        if (card == null) return;
-        var tide = (int)dealer.Powers.OfType<CoordinatedTidePower>()
-            .Sum(p => p.Amount);
-        if (tide > 0 && IsCompanionHit(card))
-        {
-            await KokomiCards.AddJellyfish(dealer.Player,
-                KokomiCards.Jellyfish.Sting, tide, upgraded: false);
-        }
-        var current = (int)dealer.Powers.OfType<JellyfishCurrentPower>()
-            .Sum(p => p.Amount);
-        if (current > 0 && card is ProtoKkSting)
-        {
-            await KokomiCards.AddJellyfish(dealer.Player,
-                KokomiCards.Jellyfish.Sting, current, upgraded: false);
         }
     }
 
@@ -964,28 +919,6 @@ public sealed class WatchfulShoalPower : PowerModel, ILocalizationProvider
     }
 }
 
-/// <summary>Coordinated Tide (the pool overhaul, 2026-10-13, the bridge):
-/// "Whenever a Companion triggers an Elemental Reaction, add a Sting to your
-/// Hand." A Companion card's own hit, played or carried out as a Plan; copies
-/// add one each. Paid from <see cref="KokomiRefounding.OnReaction"/>. (Was
-/// a hit whenever the Bake-Kurage carried out an Ethereal card.)</summary>
-public sealed class CoordinatedTidePower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Coordinated Tide"),
-        ("description",
-            "Whenever a [gold]Companion[/gold] triggers an [gold]Elemental "
-          + "Reaction[/gold], add [blue]{Amount}[/blue] "
-          + "{Amount:plural:[gold]Sting[/gold]|[gold]Stings[/gold]} to your "
-          + "[gold]Hand[/gold]."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-}
-
 /// <summary>Grand Strategist (the pool overhaul, 2026-10-13): "Whenever you
 /// trigger an Elemental Reaction, deal 4 damage to ALL enemies." Any
 /// reaction credited to her. Paid from
@@ -998,29 +931,6 @@ public sealed class GrandStrategistPower : PowerModel, ILocalizationProvider
         ("description",
             "Whenever you trigger an [gold]Elemental Reaction[/gold], deal "
           + "[blue]{Amount}[/blue] damage to ALL enemies."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-}
-
-/// <summary>Jellyfish Current (the pool overhaul, 2026-10-13): "Whenever a
-/// Sting triggers an Elemental Reaction, add a Sting to your Hand." A Sting's
-/// own hit -- played, flipped or carried out as its Plan line. Bounded: each
-/// reaction consumes the aura it reacted with. Copies add one each. Paid
-/// from <see cref="KokomiRefounding.OnReaction"/>. Sim twin:
-/// <c>kokomi_plan.note_reaction</c>.</summary>
-public sealed class JellyfishCurrentPower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Jellyfish Current"),
-        ("description",
-            "Whenever a [gold]Sting[/gold] triggers an [gold]Elemental "
-          + "Reaction[/gold], add [blue]{Amount}[/blue] "
-          + "{Amount:plural:[gold]Sting[/gold]|[gold]Stings[/gold]} to your "
-          + "[gold]Hand[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;

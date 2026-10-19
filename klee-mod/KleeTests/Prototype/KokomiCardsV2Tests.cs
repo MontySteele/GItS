@@ -178,7 +178,7 @@ public class KokomiCardsV2Tests
     {
         Assert.Contains(Calls("KokomiRefounding", "OnCarriedOut"),
                         c => c.Contains("KokomiRefounding.IsJellyfish"));
-        Assert.Contains(Calls("KurageCanopyBasePower", "OnPlanResolved"),
+        Assert.Contains(Calls("KurageCanopyPower", "OnPlanResolved"),
                         c => c.Contains("KokomiRefounding.IsJellyfish"));
         Assert.Contains("KokomiRefounding.OnCarriedOut",
                         Seq("KokomiPlan", "ResolveEntry"));

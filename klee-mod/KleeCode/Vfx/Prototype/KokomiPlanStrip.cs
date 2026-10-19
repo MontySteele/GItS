@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
 using HarmonyLib;
 using KleeMod.Powers;
@@ -778,4 +779,102 @@ internal static class NCombatUi_Deactivate_KokomiPlanStrip_Patch
     [HarmonyPostfix]
     public static void Postfix() =>
         KokomiPlanStrip.DiscardAll(KokomiRules.Combat as CombatState);
+}
+
+/// <summary>
+/// THE ICON DECLUTTER (2026-10-19, [USER]: "can we do a search over all of the
+/// things in each kit that still print a status icon and see if they're
+/// 'really' needed? I've noticed that our characters tend to make a lot of
+/// icons."). Two of her badges say what another surface already draws, so
+/// they are kept off her OWN status strip, the way Klee's Spark and Furina's
+/// Fanfare badges are; a co-op partner still sees both.
+///
+/// <list type="bullet">
+/// <item><see cref="PendingPlansPower"/>, the Plan count, carries no rule:
+/// the strip draws one picture per waiting Plan (and "+N"), and the Plans view
+/// lists them, off the same queue.</item>
+/// <item><see cref="ProtoBakeKuragePower"/>, the presence marker: its two
+/// facts ("Enemies can't target it. It holds your Plans ...") move onto the
+/// jellyfish's own hover (<see cref="Creature_HoverTips_BakeKurage_Patch"/>),
+/// which is where a player looks for what the jellyfish is. Hidden only once
+/// the jellyfish is on the field, so the sentence always has a home.</item>
+/// </list>
+///
+/// Suppressed at the container, never through <c>IsVisibleInternal</c>: the
+/// seat bridge's power list skips an invisible power, and the seat page reads
+/// both. Never throws: a canonical power has no owner to ask.
+/// </summary>
+public static class KokomiBadges
+{
+    public static bool HidesBadge(PowerModel power)
+    {
+        if (power is not (PendingPlansPower or ProtoBakeKuragePower)) return false;
+        Creature? owner;
+        try
+        {
+            owner = power.IsMutable ? power.Owner : null;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+        if (owner == null || !KokomiOverhaul.LiveFor(owner)) return false;
+        if (!LocalContext.IsMe(owner)) return false;
+        return power is PendingPlansPower
+            ? KokomiOverhaul.StripShowsFor(owner)
+            : BakeKuragePet.Of(owner) != null;
+    }
+
+    /// <summary>The marker whose sentence the jellyfish's own hover shows:
+    /// its owner's, or null (not her jellyfish, or no marker yet).</summary>
+    public static ProtoBakeKuragePower? PetMarker(Creature? pet)
+    {
+        if (!BakeKuragePet.Is(pet)) return null;
+        var owner = pet!.PetOwner?.Creature;
+        if (owner == null || !KokomiOverhaul.LiveFor(owner)) return null;
+        return KokomiRules.Marker(owner);
+    }
+
+    /// <summary>The tips the jellyfish's own hover adds (<see cref="PetMarker"/>'s),
+    /// or none. Never throws.</summary>
+    public static IReadOnlyList<IHoverTip> PetTips(Creature? pet)
+    {
+        try
+        {
+            return PetMarker(pet)?.HoverTips.ToList()
+                ?? (IReadOnlyList<IHoverTip>)Array.Empty<IHoverTip>();
+        }
+        catch (Exception)
+        {
+            return Array.Empty<IHoverTip>();
+        }
+    }
+}
+
+/// <summary>Her Plan count and Bake-Kurage marker stay off her own status
+/// strip (<see cref="KokomiBadges"/>); a co-op partner still sees them.</summary>
+[HarmonyPatch(typeof(NPowerContainer), "Add")]
+internal static class NPowerContainer_Add_KokomiBadges_Patch
+{
+    [HarmonyPrefix]
+    public static bool Prefix(PowerModel power) =>
+        !KokomiBadges.HidesBadge(power);
+}
+
+/// <summary>Hovering the jellyfish shows what its marker badge said. The game's
+/// creature hover lists the creature's own powers' tips, and the jellyfish
+/// carries none, so the marker's are appended after them. It resolves no
+/// seat; the scope is <c>KokomiOverhaul.LiveFor</c> in
+/// <see cref="KokomiBadges.PetMarker"/>.</summary>
+[HarmonyPatch(typeof(Creature), nameof(Creature.HoverTips), MethodType.Getter)]
+internal static class Creature_HoverTips_BakeKurage_Patch
+{
+    [HarmonyPostfix]
+    public static void Postfix(Creature __instance,
+                               ref IEnumerable<IHoverTip> __result)
+    {
+        var extra = KokomiBadges.PetTips(__instance);
+        if (extra.Count == 0) return;
+        __result = __result.Concat(extra).ToList();
+    }
 }

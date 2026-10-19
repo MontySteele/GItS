@@ -860,9 +860,11 @@ public sealed class PassionOverloadPower : NextAttackRiderPower, ILocalizationPr
 /// </summary>
 public sealed class SwirlChargePower : NextAttackRiderPower, ILocalizationProvider
 {
+    // "Swirl Charge" since the icon declutter (2026-10-19): it shared
+    // Sturm und Drang's title, the power that charges it.
     public List<(string, string)>? Localization => new()
     {
-        ("title", "Sturm und Drang"),
+        ("title", "Swirl Charge"),
         ("description",
             "Your next Attack deals [blue]{Amount}[/blue] additional damage of "
           + "the last [gold]Swirl[/gold]ed element." + CardTypeClause),
@@ -1273,7 +1275,9 @@ public sealed class BaronBunnyPower
 
     public List<(string, string)>? Localization => new()
     {
-        ("title", "Baron Bunny"),
+        // "Baron Bunny Decoy" since the icon declutter (2026-10-19): Varka's
+        // next-turn Baron Bunny (`VarkaBaronBunnyPower`) had the same title.
+        ("title", "Baron Bunny Decoy"),
         // `EB-754` (Klee r27, the Codex seat, fight 4): the decoy printed the
         // literal `{Damage}` on the page. `PowerModel.HoverTips` binds
         // `DynamicVars.AddTo` on the SMART branch alone -- the static branch

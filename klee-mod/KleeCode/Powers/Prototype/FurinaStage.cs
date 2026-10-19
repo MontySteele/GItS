@@ -265,14 +265,14 @@ public static class FurinaStage
             GrandEntrance = Sum<GrandEntrancePower>(),
             Showstopper = Sum<ShowstopperPower>(),
             Crescendo = Sum<CrescendoPower>(),
-            PrimaDonna = Sum<PrimaDonnaPower>() + Sum<PrimaDonnaPlusPower>(),
-            PrimaDonnaDraw = Sum<PrimaDonnaPlusPower>(),
+            // One badge for both versions (the icon declutter, 2026-10-19):
+            // every copy is Energy, an upgraded card's copy is also a card.
+            PrimaDonna = Sum<PrimaDonnaPower>(),
+            PrimaDonnaDraw = owner.Powers.OfType<PrimaDonnaPower>()
+                .Sum(p => p.UpgradedCopies),
             StandingRoomOnly = Sum<StandingRoomOnlyPower>(),
-            HymnOfRenewal = Sum<HymnOfRenewalPower>(),
             Revelry = Sum<UniversalRevelryPower>(),
-            SalonsEncore = Sum<SalonsEncorePower>(),
             Thunderous = Sum<ThunderousApplausePower>(),
-            OusiaSurge = Sum<OusiaSurgePower>(),
             FiveCenturyAct = owner.Powers.OfType<FiveCenturyActPower>().Count(),
             CriticsDarling = Sum<CriticsDarlingPower>(),
             ExtendedRun = Sum<ExtendedRunPower>(),
@@ -672,7 +672,6 @@ public static class FurinaStage
         CrescendoGains(choiceContext, furina);
         await ReginaDrains(choiceContext, furina);
         await FountainRepays(choiceContext, furina);
-        await PneumaTidesRepays(choiceContext, furina);
         await PrimaDonnaEnergy(choiceContext, furina);
         RefreshBadges(furina);
     }
@@ -702,20 +701,6 @@ public static class FurinaStage
         using (FurinaStageLedger.For(furina).CausedBy(StageDirector.ReginaTitle))
         {
             await Director(choiceContext, furina).Regina(copies);
-        }
-    }
-
-    /// <summary>Pneuma Tides: "At the start of your turn, Repay 2." [3]
-    /// </summary>
-    private static async Task PneumaTidesRepays(
-        PlayerChoiceContext choiceContext, Creature furina)
-    {
-        var amount = (int)furina.Powers.OfType<PneumaTidesPower>()
-            .Sum(p => p.Amount);
-        if (amount <= 0) return;
-        using (FurinaStageLedger.For(furina).CausedBy(StageDirector.PneumaTidesTitle))
-        {
-            await Director(choiceContext, furina).PneumaTides(amount);
         }
     }
 
@@ -899,12 +884,6 @@ public static class FurinaStage
         foreach (var badge in owner!.Powers.OfType<FanfarePower>().ToList())
         {
             badge.Refresh();
-        }
-        // High Stakes' badge is its bonus now, which every Drain and Repay
-        // moves (the Spend round, 2026-10-10).
-        foreach (var stakes in owner.Powers.OfType<HighStakesPower>().ToList())
-        {
-            stakes.Refresh();
         }
         Vfx.FanfareCounter.Refresh(owner);
         Vfx.DrainedCounter.Refresh(owner);

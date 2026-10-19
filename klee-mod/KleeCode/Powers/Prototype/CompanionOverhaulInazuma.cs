@@ -169,9 +169,11 @@ public sealed class JuugaPower : PowerModel, ILocalizationProvider
 /// </summary>
 public sealed class JuugaGuardPower : PowerModel, ILocalizationProvider
 {
+    // Its own title since the icon declutter (2026-10-19): it shared the
+    // volley's, so two different badges read the same name.
     public List<(string, string)>? Localization => new()
     {
-        ("title", "Juuga: Forward Unto Victory"),
+        ("title", "Juuga Guard"),
         ("description",
             "At the end of your turn, gain "
           + $"[blue]{CompanionOverhaulLaw.JuugaGuardBlock}[/blue] "

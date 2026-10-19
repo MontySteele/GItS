@@ -54,7 +54,8 @@ public class KokomiPayoffPassTests : IDisposable
     {
         // Kokomi round 3 A-list (2026-10-13): "Whenever the Bake-Kurage
         // carries out a Plan, add a Ward to your Hand." (was 3 [4] Block);
-        // the upgraded card installs the Plus power, whose Ward is upgraded.
+        // the upgraded card's copy adds an upgraded Ward (one power for both
+        // versions since the icon declutter, 2026-10-19).
         var card = new ProtoKkKurageCanopy();
         Assert.Equal(1, card.EnergyCost.Canonical);
         Assert.Equal(CardType.Power, card.Type);
@@ -68,8 +69,7 @@ public class KokomiPayoffPassTests : IDisposable
                    + "[gold]Ward[/gold] to your [gold]Hand[/gold].",
                      Face(card));
         var play = Seq("ProtoKkKurageCanopy", "OnPlay");
-        Assert.Contains(play, c => c.Contains("KurageCanopyPower"));
-        Assert.Contains(play, c => c.Contains("KurageCanopyPlusPower"));
+        Assert.Contains(play, c => c.Contains("UpgradeTwinPower.Install"));
         Assert.Contains(play, c => c.Contains("get_IsUpgraded"));
     }
 
@@ -81,11 +81,9 @@ public class KokomiPayoffPassTests : IDisposable
         // Streams' gift), so a doubled carry-out pays twice.
         Assert.True(typeof(IKokomiPlanListener)
             .IsAssignableFrom(typeof(KurageCanopyPower)));
-        Assert.True(typeof(IKokomiPlanListener)
-            .IsAssignableFrom(typeof(KurageCanopyPlusPower)));
         // A Ward per carry-out through the one jellyfish maker, whose full
         // hand sends it to the discard pile (Endless Shoal's rule).
-        var hook = Seq("KurageCanopyBasePower", "OnPlanResolved");
+        var hook = Seq("KurageCanopyPower", "OnPlanResolved");
         Assert.Contains(hook, c => c.Contains("KokomiCards.AddJellyfish"));
         Assert.DoesNotContain(hook, c => c.Contains("CreatureCmd.GainBlock"));
         Assert.DoesNotContain(hook,

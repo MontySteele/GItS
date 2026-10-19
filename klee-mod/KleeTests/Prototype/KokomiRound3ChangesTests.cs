@@ -140,9 +140,11 @@ public class KokomiRound3ChangesTests
             .Single(r => r.Item1 == "description").Item2;
         // Its Ward half left with the Ward's Block (2026-10-18).
         Assert.DoesNotContain("Ward", power);
-        // Writing an Ethereal card pays nothing now.
-        Assert.DoesNotContain(Seq("KokomiRefounding", "OnWritten"),
-                              c => c.Contains("WatchfulShoalPower"));
+        // Writing an Ethereal card pays nothing now; the write-payoff hook
+        // itself left with Watatsumi Resistance (the icon declutter,
+        // 2026-10-19), the last power it paid.
+        Assert.Null(typeof(KokomiRefounding).GetMethod("OnWritten",
+                                                      HeadlessGame.All));
     }
 
     [Fact]
