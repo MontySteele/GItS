@@ -20,8 +20,9 @@ nothing torn down. What comes next is a person running
     python -m understudy.embark --character klee --arm proto_ko_kapow
     python -m understudy.embark --character klee --lane 1      # a SECOND game
     python -m understudy.embark --character IRONCLAD --lane 1  # base-game CONTROL
-    python -m understudy.embark --teardown                     # put it all back
+    python -m understudy.embark --teardown --lane 0            # put lane 0 back
     python -m understudy.embark --teardown --lane 1            # lane 1's only
+    python -m understudy.embark --teardown --stamp S           # one embark, by name
     python -m understudy.embark --lanes 1,2,3 --character klee --seeds A,B,C   # PARALLEL
     python -m understudy.embark --teardown --lanes 1,2,3
     python -m understudy.embark --coop --lanes 2,3         --characters KLEEMOD-KLEE,KLEEMOD-FURINA --ascension 0   # CO-OP
@@ -678,6 +679,14 @@ def teardown(stamp: str = "", lane: object = None) -> str:
     only remover, and it is run by hand.
     """
     label = instances.label_for(lane) if lane is not None else ""
+    if not stamp and label:
+        # THE LANE'S LIVE GAME FIRST, then its newest sidecar. The newest
+        # sidecar is whichever embark ran last, and when that one failed (or
+        # was already reverted) its teardown reverted nothing and exited 0
+        # while the game an older embark launched stayed up on the lane.
+        live = live_launch_on_lane(label)
+        if live is not None:
+            stamp = live[0]
     stamp = stamp or latest_stamp(label)
     blob = json.loads(sidecar_path(stamp).read_text(encoding="utf-8"))
     recorded = sidecar_lane(blob)
@@ -983,7 +992,7 @@ def main(argv: list[str] | None = None) -> int:
                          "the seat's own arithmetic -- two of three round-13 "
                          "seats overran a counted 120 by a third. 0 (the "
                          "default) is no budget, exactly as before")
-    ap.add_argument("--lane", default=0, metavar="N",
+    ap.add_argument("--lane", default=None, metavar="N",
                     help="which game instance to open the run in. 0 (the "
                          "default) is the machine's own %%APPDATA%% and port "
                          "15526 -- an embark exactly as it was. 1 launches a "
@@ -996,7 +1005,10 @@ def main(argv: list[str] | None = None) -> int:
                          "directory out from under a running game -- and no "
                          "teardown removes it either. A lane-1 run is NOT a "
                          "run of record. With "
-                         "--teardown it names WHICH lane's embark to revert")
+                         "--teardown it names WHICH lane's embark to revert, "
+                         "and a teardown needs it (or --stamp): a lane-less "
+                         "teardown used to mean lane 0 and left a lane-1 "
+                         "game up")
     ap.add_argument("--coop", action="store_true",
                     help="CO-OP: open ONE run across two lanes, one player "
                          "each, over the game's --fastmp localhost transport "
@@ -1084,8 +1096,16 @@ def main(argv: list[str] | None = None) -> int:
             # shared install still being in the state a LAUNCH needs; the
             # sidecar already knows which lane it was, and the ledger already
             # knows what it changed.
+            if args.lane is None and not args.stamp:
+                raise EmbarkError(
+                    "--teardown needs --lane N (or --stamp S): a lane-less "
+                    "teardown used to default to lane 0, so a seat on "
+                    "another lane 'tore down' lane 0's old embark and its "
+                    "own game stayed up")
             print(teardown(args.stamp, lane=args.lane))
             return 0
+        if args.lane is None:
+            args.lane = 0
         instance, install_bridge = soak.lane_setup(args.lane)
         blob = embark(args.character, hold=args.hold, chosen_seed=args.seed,
                       chosen_ascension=args.ascension,
@@ -1148,7 +1168,8 @@ def main(argv: list[str] | None = None) -> int:
               f"          # bash")
     print("  python -m understudy.blindplay observe")
     print("  python -m understudy.blindplay session --max-actions N")
-    print(f"  python -m understudy.embark --teardown{lane_arg}")
+    print(f"  python -m understudy.embark --teardown "
+          f"--lane {label[len('lane'):]}")
     if lane_arg:
         print()
         print(f"LANE {lane_arg.rsplit(' ', 1)[-1]} IS NOT A RUN OF RECORD: "

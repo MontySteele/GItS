@@ -779,7 +779,7 @@ def test_a_lane_zero_embark_prints_no_lane_noise(tmp_path, monkeypatch,
     assert embark.main(["--character", "klee"]) == 0
     out = capsys.readouterr().out
     assert "GITS_LANE" not in out
-    assert "python -m understudy.embark --teardown\n" in out
+    assert "python -m understudy.embark --teardown --lane 0\n" in out
 
 
 # --------------------------------------------------------------- soak ------
