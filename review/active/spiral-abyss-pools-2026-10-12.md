@@ -40,7 +40,7 @@ This paper fills the two pools and sets the build. It has no picks. Tell me if a
 | **Abyss Herald** | Enemies have 15% more HP. | Abyss enemy levels. |
 | **Rally** | When an enemy dies, every other enemy gains 2 Strength. | The Abyss Lector's rally. Kill order matters. |
 | **Riptide** | Whenever an enemy attack deals you unblocked damage, that enemy gains 1 Strength. | Childe's Riptide: a mark that makes his next blows harder. Failing to Block feeds the enemy. |
-| **Fatui Skirmishers** | Elites and bosses enter combat with 3 Plated Armor. | Fatui shields. Multi-hit and Block strip pay. |
+| **Fatui Skirmishers** | Elites and bosses enter combat with 3 Plated Armor (more in co-op). | Fatui shields. Base Plating triples for two players (ruled 2026-10-18: keep it, say so). Multi-hit and Block strip pay. |
 
 Ruled 2026-10-12, [USER]: "Riptide sounds insanely dangerous for enemies that open with a single very high hit as a block check; the rest all look good." Riptide was rewritten.
 
