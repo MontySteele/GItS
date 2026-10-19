@@ -702,12 +702,10 @@ def test_the_stage_effects_are_neutral_deterministic_and_reach_the_stage():
 
 
 #: the most alpha an effect frame may carry on its canvas edge: more, and the
-#: game draws the cut as a pale box round the effect (Repay's bloom, 55, fixed
-#: 2026-10-19 by fx.STREAM_BACK)
+#: game draws the cut as a pale box round the effect (Repay's bloom at 55,
+#: Spend's confetti at 151, Navia's and Wriothesley's shards at 163; all
+#: widened 2026-10-19)
 EFFECT_EDGE_ALPHA = 3
-#: effects still cut at their canvas edge (max edge alpha when listed): this
-#: set can only shrink
-EFFECT_EDGE_KNOWN = {"spend": 151, "navia": 163, "wriothesley": 163, "chevreuse": 4, "lynette": 5}
 
 
 def _edge_alpha(im) -> int:
@@ -720,10 +718,7 @@ def test_no_stage_or_guest_effect_is_cut_at_its_canvas_edge():
     makers = [(n, m, ppu) for n, m in fx.STAGE_EFFECTS.items()] + [(n, m, 130.0) for n, m in fx.GUEST_EFFECTS.items()]
     for name, make, at in makers:
         edge = max(_edge_alpha(im) for im in make(at, fx.STAGE_FPS)[0])
-        if name in EFFECT_EDGE_KNOWN:
-            assert edge > EFFECT_EDGE_ALPHA, f"{name} is no longer cut: drop it from EFFECT_EDGE_KNOWN"
-        else:
-            assert edge <= EFFECT_EDGE_ALPHA, (name, edge)
+        assert edge <= EFFECT_EDGE_ALPHA, (name, edge)
 
 
 def test_furinas_manifest_carries_the_stage_effects_as_packed():

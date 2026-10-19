@@ -4,80 +4,80 @@
 
 [sub_resource type="AtlasTexture" id="Atlas_lynette_0"]
 atlas = ExtResource("1_lynette")
-region = Rect2(0, 0, 451, 437)
+region = Rect2(0, 0, 451, 439)
 margin = Rect2(0, 0, 0, 0)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_lynette_1"]
 atlas = ExtResource("1_lynette")
 region = Rect2(451, 0, 385, 396)
-margin = Rect2(17, 28, 66, 41)
+margin = Rect2(17, 30, 66, 43)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_lynette_2"]
 atlas = ExtResource("1_lynette")
-region = Rect2(0, 437, 344, 335)
-margin = Rect2(44, 72, 107, 102)
+region = Rect2(0, 439, 343, 335)
+margin = Rect2(45, 74, 108, 104)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_lynette_3"]
 atlas = ExtResource("1_lynette")
-region = Rect2(344, 437, 288, 295)
-margin = Rect2(84, 86, 163, 142)
+region = Rect2(343, 439, 289, 296)
+margin = Rect2(83, 88, 162, 143)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_lynette_4"]
 atlas = ExtResource("1_lynette")
-region = Rect2(632, 437, 252, 246)
-margin = Rect2(97, 102, 199, 191)
+region = Rect2(632, 439, 252, 246)
+margin = Rect2(97, 104, 199, 193)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_lynette_5"]
 atlas = ExtResource("1_lynette")
-region = Rect2(0, 772, 212, 225)
-margin = Rect2(108, 123, 239, 212)
+region = Rect2(0, 774, 213, 225)
+margin = Rect2(108, 125, 238, 214)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_lynette_6"]
 atlas = ExtResource("1_lynette")
-region = Rect2(212, 772, 196, 214)
-margin = Rect2(112, 146, 255, 223)
+region = Rect2(213, 774, 196, 214)
+margin = Rect2(112, 148, 255, 225)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_lynette_7"]
 atlas = ExtResource("1_lynette")
-region = Rect2(408, 772, 171, 207)
-margin = Rect2(125, 156, 280, 230)
+region = Rect2(409, 774, 171, 206)
+margin = Rect2(125, 159, 280, 233)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_lynette_8"]
 atlas = ExtResource("1_lynette")
-region = Rect2(579, 772, 140, 187)
-margin = Rect2(146, 167, 311, 250)
+region = Rect2(580, 774, 140, 187)
+margin = Rect2(146, 169, 311, 252)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_lynette_9"]
 atlas = ExtResource("1_lynette")
-region = Rect2(719, 772, 110, 157)
-margin = Rect2(165, 177, 341, 280)
+region = Rect2(720, 774, 110, 157)
+margin = Rect2(165, 179, 341, 282)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_lynette_10"]
 atlas = ExtResource("1_lynette")
-region = Rect2(829, 772, 113, 113)
-margin = Rect2(164, 174, 338, 324)
+region = Rect2(830, 774, 113, 113)
+margin = Rect2(164, 176, 338, 326)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_lynette_11"]
 atlas = ExtResource("1_lynette")
-region = Rect2(0, 997, 125, 125)
-margin = Rect2(158, 168, 326, 312)
+region = Rect2(0, 999, 125, 125)
+margin = Rect2(158, 170, 326, 314)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_lynette_12"]
 atlas = ExtResource("1_lynette")
-region = Rect2(125, 997, 92, 95)
-margin = Rect2(173, 183, 359, 342)
+region = Rect2(125, 999, 92, 95)
+margin = Rect2(173, 185, 359, 344)
 filter_clip = true
 
 [sub_resource type="Shader" id="Shader_element"]
@@ -143,7 +143,7 @@ self_modulate = Color(1, 1, 1, 0)
 material = SubResource("ShaderMaterial_tint")
 texture = SubResource("Atlas_lynette_0")
 centered = false
-offset = Vector2(-220, -230)
+offset = Vector2(-220, -233)
 scale = Vector2(0.5, 0.5)
 
 [node name="FxPlayer" type="AnimationPlayer" parent="."]

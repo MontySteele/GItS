@@ -1131,98 +1131,98 @@ filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_stage_spend_0"]
 atlas = ExtResource("9_stage_spend")
-region = Rect2(0, 0, 174, 175)
-margin = Rect2(220, 213, 440, 353)
+region = Rect2(0, 0, 175, 175)
+margin = Rect2(351, 213, 639, 353)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_stage_spend_1"]
 atlas = ExtResource("9_stage_spend")
-region = Rect2(174, 0, 178, 178)
-margin = Rect2(218, 212, 436, 350)
+region = Rect2(175, 0, 178, 178)
+margin = Rect2(350, 212, 636, 350)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_stage_spend_2"]
 atlas = ExtResource("9_stage_spend")
-region = Rect2(352, 0, 240, 239)
-margin = Rect2(187, 181, 374, 289)
+region = Rect2(353, 0, 239, 239)
+margin = Rect2(319, 181, 575, 289)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_stage_spend_3"]
 atlas = ExtResource("9_stage_spend")
-region = Rect2(592, 0, 296, 295)
-margin = Rect2(159, 153, 318, 233)
+region = Rect2(592, 0, 295, 295)
+margin = Rect2(291, 153, 519, 233)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_stage_spend_4"]
 atlas = ExtResource("9_stage_spend")
-region = Rect2(888, 0, 393, 450)
-margin = Rect2(136, 22, 221, 78)
+region = Rect2(887, 0, 394, 450)
+margin = Rect2(267, 22, 420, 78)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_stage_spend_5"]
 atlas = ExtResource("9_stage_spend")
-region = Rect2(1281, 0, 431, 488)
-margin = Rect2(116, 4, 183, 40)
+region = Rect2(1281, 0, 432, 488)
+margin = Rect2(247, 4, 382, 40)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_stage_spend_6"]
 atlas = ExtResource("9_stage_spend")
 region = Rect2(0, 488, 450, 508)
-margin = Rect2(100, 0, 164, 20)
+margin = Rect2(232, 0, 364, 20)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_stage_spend_7"]
 atlas = ExtResource("9_stage_spend")
 region = Rect2(450, 488, 453, 507)
-margin = Rect2(86, 12, 161, 21)
+margin = Rect2(218, 12, 361, 21)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_stage_spend_8"]
 atlas = ExtResource("9_stage_spend")
-region = Rect2(903, 488, 472, 450)
-margin = Rect2(60, 76, 142, 78)
+region = Rect2(903, 488, 473, 450)
+margin = Rect2(191, 76, 341, 78)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_stage_spend_9"]
 atlas = ExtResource("9_stage_spend")
 region = Rect2(0, 996, 509, 454)
-margin = Rect2(33, 74, 105, 74)
+margin = Rect2(165, 74, 305, 74)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_stage_spend_10"]
 atlas = ExtResource("9_stage_spend")
 region = Rect2(509, 996, 562, 318)
-margin = Rect2(5, 72, 52, 210)
+margin = Rect2(137, 72, 252, 210)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_stage_spend_11"]
 atlas = ExtResource("9_stage_spend")
-region = Rect2(1071, 996, 581, 335)
-margin = Rect2(12, 74, 33, 193)
+region = Rect2(1071, 996, 619, 335)
+margin = Rect2(106, 74, 195, 193)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_stage_spend_12"]
 atlas = ExtResource("9_stage_spend")
-region = Rect2(0, 1450, 614, 341)
-margin = Rect2(0, 88, 0, 187)
+region = Rect2(0, 1450, 670, 342)
+margin = Rect2(76, 87, 144, 186)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_stage_spend_13"]
 atlas = ExtResource("9_stage_spend")
-region = Rect2(614, 1450, 557, 362)
-margin = Rect2(41, 91, 57, 166)
+region = Rect2(670, 1450, 714, 362)
+margin = Rect2(49, 91, 100, 166)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_stage_spend_14"]
 atlas = ExtResource("9_stage_spend")
-region = Rect2(1171, 1450, 593, 382)
-margin = Rect2(21, 94, 21, 146)
+region = Rect2(0, 1812, 768, 382)
+margin = Rect2(25, 94, 46, 146)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_stage_spend_15"]
 atlas = ExtResource("9_stage_spend")
-region = Rect2(0, 1832, 610, 400)
-margin = Rect2(4, 99, 4, 128)
+region = Rect2(768, 1812, 814, 399)
+margin = Rect2(0, 100, 0, 129)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_stage_drain_0"]
@@ -3103,7 +3103,7 @@ self_modulate = Color(1, 1, 1, 0)
 material = SubResource("ShaderMaterial_spend")
 texture = SubResource("Atlas_stage_spend_0")
 centered = false
-offset = Vector2(-307, -301)
+offset = Vector2(-439, -301)
 scale = Vector2(0.5, 0.5)
 metadata/effect = "spend"
 

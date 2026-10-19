@@ -4,62 +4,62 @@
 
 [sub_resource type="AtlasTexture" id="Atlas_chevreuse_0"]
 atlas = ExtResource("1_chevreuse")
-region = Rect2(0, 0, 120, 124)
-margin = Rect2(72, 89, 153, 152)
+region = Rect2(0, 0, 121, 124)
+margin = Rect2(72, 105, 152, 169)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_chevreuse_1"]
 atlas = ExtResource("1_chevreuse")
-region = Rect2(120, 0, 123, 137)
-margin = Rect2(75, 93, 150, 139)
+region = Rect2(121, 0, 123, 138)
+margin = Rect2(75, 109, 150, 155)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_chevreuse_2"]
 atlas = ExtResource("1_chevreuse")
-region = Rect2(243, 0, 153, 160)
-margin = Rect2(70, 57, 120, 116)
+region = Rect2(244, 0, 153, 160)
+margin = Rect2(70, 73, 120, 133)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_chevreuse_3"]
 atlas = ExtResource("1_chevreuse")
-region = Rect2(396, 0, 188, 196)
-margin = Rect2(47, 57, 85, 80)
+region = Rect2(397, 0, 188, 196)
+margin = Rect2(47, 73, 85, 97)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_chevreuse_4"]
 atlas = ExtResource("1_chevreuse")
-region = Rect2(0, 196, 180, 216)
-margin = Rect2(54, 50, 93, 60)
+region = Rect2(0, 196, 180, 217)
+margin = Rect2(54, 66, 93, 76)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_chevreuse_5"]
 atlas = ExtResource("1_chevreuse")
-region = Rect2(180, 196, 191, 221)
-margin = Rect2(42, 45, 82, 55)
+region = Rect2(180, 196, 191, 220)
+margin = Rect2(42, 62, 82, 73)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_chevreuse_6"]
 atlas = ExtResource("1_chevreuse")
 region = Rect2(371, 196, 213, 227)
-margin = Rect2(30, 30, 60, 49)
+margin = Rect2(30, 46, 60, 66)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_chevreuse_7"]
 atlas = ExtResource("1_chevreuse")
 region = Rect2(0, 423, 235, 251)
-margin = Rect2(19, 14, 38, 25)
+margin = Rect2(19, 30, 38, 42)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_chevreuse_8"]
 atlas = ExtResource("1_chevreuse")
-region = Rect2(235, 423, 256, 272)
-margin = Rect2(9, 0, 17, 4)
+region = Rect2(235, 423, 256, 274)
+margin = Rect2(9, 14, 17, 19)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_chevreuse_9"]
 atlas = ExtResource("1_chevreuse")
-region = Rect2(0, 695, 273, 237)
-margin = Rect2(0, 39, 0, 39)
+region = Rect2(0, 697, 273, 293)
+margin = Rect2(0, 0, 0, 0)
 filter_clip = true
 
 [sub_resource type="Shader" id="Shader_element"]
@@ -125,7 +125,7 @@ self_modulate = Color(1, 1, 1, 0)
 material = SubResource("ShaderMaterial_tint")
 texture = SubResource("Atlas_chevreuse_0")
 centered = false
-offset = Vector2(-137, -154)
+offset = Vector2(-137, -170)
 scale = Vector2(0.5, 0.5)
 
 [node name="FxPlayer" type="AnimationPlayer" parent="."]

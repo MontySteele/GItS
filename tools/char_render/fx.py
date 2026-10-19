@@ -442,14 +442,22 @@ def _drop(buf, c, vel, r, val):
         stroke(buf, c, back, r * 1.6, val * 0.85)
 
 
+#: Spend's canvas (w, h, origin x, origin y) at REF_PPU: wide enough that
+#: the confetti thrown out sideways fades before the edge (at 640 it was cut,
+#: edge alpha 151, a pale box in game; every effect's canvas is held to edge
+#: alpha <= 3 by tier0/tests/test_char_render.py)
+SPEND_CELL = (900, 620, 480, 380)
+
+
 def spend_burst(ppu: float = REF_PPU, fps: int = STAGE_FPS):
     """Spend: a golden burst of confetti and stage sparkle thrown up from
     Furina -- a flash, a ring, forty spinning confetti slips flung out and
     falling, and sparkles winking round her. 0.8 s."""
     s = float(ppu) / REF_PPU
     k = SUPER * s
-    W, H = int(round(640 * s)), int(round(620 * s))
-    origin = (W / 2, 380 * s)
+    cw, ch, ox, oy = SPEND_CELL
+    W, H = int(round(cw * s)), int(round(ch * s))
+    origin = (ox * s, oy * s)
     rng = np.random.default_rng(STAGE_SEED)
     pieces = [(rng.uniform(-math.pi * 0.95, -math.pi * 0.05), rng.uniform(260, 620), rng.uniform(0, 2 * math.pi),
                rng.uniform(8, 22), rng.uniform(9, 15), rng.uniform(4, 7), rng.uniform(0.8, 1.0)) for _ in range(40)]
@@ -681,7 +689,7 @@ def wriothesley_shock(ppu: float = REF_PPU, fps: int = STAGE_FPS):
             x = cx + math.cos(ang) * speed * t * k
             y = cy - 40 * k + (math.sin(ang) * speed * t + 0.5 * 1500 * t * t) * k
             _shard(buf, (x, y), ang + spin * t, length * k, width * k, 0.95 * fade)
-    return _guest_frames("wriothesley", ppu, fps, (560, 640, 280, 500), draw)
+    return _guest_frames("wriothesley", ppu, fps, (700, 640, 340, 500), draw)
 
 
 def lynette_swirl(ppu: float = REF_PPU, fps: int = STAGE_FPS):
@@ -714,7 +722,7 @@ def lynette_swirl(ppu: float = REF_PPU, fps: int = STAGE_FPS):
                 rr = r * (1 - 0.3 * w)
                 _star(buf, (cx + math.cos(ang) * rr * k, cy + math.sin(ang) * rr * k),
                       size * k * math.sin(math.pi * w), math.sin(math.pi * w))
-    return _guest_frames("lynette", ppu, fps, (480, 480, 240, 240), draw)
+    return _guest_frames("lynette", ppu, fps, (500, 500, 240, 260), draw)
 
 
 def clorinde_cross(ppu: float = REF_PPU, fps: int = STAGE_FPS):
@@ -921,7 +929,7 @@ def navia_shards(ppu: float = REF_PPU, fps: int = STAGE_FPS):
             quad = [(x + dx * ca - dy * sa, y + dx * sa + dy * ca) for dx, dy in ((-hw, -hh), (hw, -hh), (hw, hh), (-hw, hh))]
             v = (0.55 + 0.45 * abs(math.cos(a * 1.7))) * fade
             fill_quad(buf, quad, (v, v, v, v))
-    return _guest_frames("navia", ppu, fps, (520, 540, 260, 340), draw)
+    return _guest_frames("navia", ppu, fps, (640, 540, 340, 340), draw)
 
 
 def neuvillette_ring(ppu: float = REF_PPU, fps: int = STAGE_FPS):
@@ -963,7 +971,7 @@ def chevreuse_crackle(ppu: float = REF_PPU, fps: int = STAGE_FPS):
             ang = 2 * math.pi * j / 6 + 0.4
             r = (20 + 140 * u) * k
             _disc(buf, (cx + math.cos(ang) * r, cy + math.sin(ang) * r - 30 * u * u * k), 5 * k, v * 0.9, 0.6)
-    return _guest_frames("chevreuse", ppu, fps, (320, 320, 160, 160), draw)
+    return _guest_frames("chevreuse", ppu, fps, (320, 340, 160, 180), draw)
 
 
 #: guest name -> its effect, in the manifest's guest order
