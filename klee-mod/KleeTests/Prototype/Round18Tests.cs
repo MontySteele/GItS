@@ -248,7 +248,7 @@ public class Round18Tests
                                     "smartDescriptionSparksMines" })
         {
             var face = rows.First(r => r.Item1 == key).Item2;
-            Assert.Contains("[gold]Pyro[/gold] damage and gives [blue]{Sparks}"
+            Assert.Contains("{BombElement} damage and gives [blue]{Sparks}"
                             + "[/blue] [gold]Spark{Sparks:plural:|s}[/gold].",
                             face);
             Assert.Contains(

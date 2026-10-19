@@ -272,3 +272,57 @@ def test_a_power_s_energy_icon_reads_as_energy(newcomer):
     page = blindplay.screen_page(state)
     assert "energy_icon" not in page
     assert "Blazing Delight 1 — At the start of your turn, gain" in page
+
+
+# ---- Swirl legibility (2026-10-19): the aim preview --------------------------
+
+_SWIRL_TIP = {"name": "Reaction preview: Swirl",
+              "description": "Removes the Hydro aura and deals 2 damage to "
+                             "ALL enemies."}
+
+
+def _aimed_fight() -> dict:
+    """`_fight()` with the bridge's aim preview on the first card: what a
+    drag onto the Nibbit (combat id 1) would show."""
+    state = _fight()
+    state["player"]["hand"][0]["aim_previews"] = [
+        {"combat_id": 1, "tips": [_SWIRL_TIP]},
+        # An enemy that is not on this board prints nothing.
+        {"combat_id": 99, "tips": [_SWIRL_TIP]}]
+    return state
+
+
+def test_the_newcomer_page_prints_the_aim_preview_under_its_card(newcomer):
+    page = blindplay.screen_page(_aimed_fight())
+    line = ("    On Nibbit: *Reaction preview: Swirl* — Removes the Hydro "
+            "aura and deals 2 damage to ALL enemies.")
+    assert page.count(line) == 1
+    lines = page.splitlines()
+    card = next(i for i, ln in enumerate(lines)
+                if ln.startswith("- **Pearl Barrage**"))
+    nxt = next(i for i, ln in enumerate(lines)
+               if i > card and ln.startswith("- **"))
+    assert card < lines.index(line) < nxt
+    assert page.count("    On ") == 1
+
+
+def test_a_card_with_no_aim_preview_prints_no_on_line(newcomer):
+    assert "    On " not in blindplay.screen_page(_fight())
+
+
+def test_off_the_seat_page_is_unmoved_by_the_aim_preview(lane):
+    assert (blindplay.screen_page(_aimed_fight())
+            == blindplay.screen_page(_fight()))
+
+
+def test_the_bridge_reads_the_games_own_aim_preview():
+    root = REPO / "vendor" / "STS2_MCP"
+    aim = (root / "gits" / "GitsAimPreview.cs").read_text(encoding="utf-8")
+    assert '"KleeMod.Cards.ReactionAim"' in aim
+    assert '"PreviewsFor"' in aim
+    assert "if (!_gitsPlayerAudience) return;" in aim
+    tips = (root / "gits" / "GitsSeatTips.cs").read_text(encoding="utf-8")
+    assert "GitsSetPlayerAudience(true);" in tips
+    assert "GitsSetPlayerAudience(false);" in tips
+    builder = (root / "McpMod.StateBuilder.cs").read_text(encoding="utf-8")
+    assert "GitsAddAimPreviews(card, cardRow);" in builder

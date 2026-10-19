@@ -134,7 +134,7 @@ EXCEPTIONS = {
 
 #: THE BOMB BADGE'S GRID, rebuilt by the text pass of 2026-09-25 to at most
 #: three short sentences: what a Set off pays, the pile, and the rider. Every
-#: face fits the power ceiling EXCEPT ten that carry the rider sentence (126
+#: face fits the power ceiling EXCEPT nine that carry the rider sentence (126
 #: to 164 rendered; the plain and Melt rider rows fit at 112 and 122),
 #: and those are excepted by name here -- ONE reason for all of them, and only
 #: the rows over 125 are listed (rot semantics would fail the rest).
@@ -150,8 +150,7 @@ EXCEPTIONS.update({
         ("Sparks", "Mines", ""), ("Sparks", "Mines", "Vaporize"),
         ("Sparks", "Mines", "Melt"), ("Sparks", "", "Vaporize"),
         ("Sparks", "", "Melt"), ("", "Mines", "Vaporize"),
-        ("", "Mines", "Melt"), ("Sparks", "", ""), ("", "Mines", ""),
-        ("", "", "Vaporize"))
+        ("", "Mines", "Melt"), ("Sparks", "", ""), ("", "Mines", ""))
 })
 
 # --- the shipped exceptions: id -> reason. Same rot semantics. -----------

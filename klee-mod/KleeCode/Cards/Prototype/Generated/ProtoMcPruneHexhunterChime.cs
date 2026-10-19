@@ -52,17 +52,24 @@ public sealed class ProtoMcPruneHexhunterChime : CustomCardModel, IElementalCard
         new[] { KleeKeywords.AppliesAnemo };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        TipAudience.Seat
-            ? ArmKeywordTips.ForSwirl(ArmKeywordTips.ForBomb(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo), this), this)
-            : ArmKeywordTips.ForBomb(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo), this);
+        ArmKeywordTips.ForSwirl(ArmKeywordTips.ForBomb(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_mc_prune_hexhunter_chime");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Prune — Ring-A-Ding-Ding! Hexhunter Chime"),
-        ("description", "Deal {CalculatedDamage:diff()} [gold]Anemo[/gold] damage and [gold]Swirl[/gold] the enemy. The next [gold]Bomb[/gold] that goes off this turn deals that element instead of [gold]Pyro[/gold]."),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Anemo[/gold] damage and [gold]Swirl[/gold] the enemy{InCombat:{SwirlAura}|}. The next [gold]Bomb[/gold] that goes off this turn deals that element instead of [gold]Pyro[/gold]."),
     };
+
+    /// <summary>Whether this card's Swirl has an aura to Swirl, in combat
+    /// (`SwirlAuraFace`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("SwirlAura", SwirlAuraFace.Line(this));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

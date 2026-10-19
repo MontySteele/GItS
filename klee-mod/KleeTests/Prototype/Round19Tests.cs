@@ -210,7 +210,7 @@ public class Round19Tests
         Assert.DoesNotContain("{Count}", face);
         Assert.DoesNotContain("hit", face);
         Assert.Contains("[gold]Set off[/gold] here deals [blue]{Size}[/blue] "
-                      + "[gold]Pyro[/gold] damage.", face);
+                      + "{BombElement} damage.", face);
         Assert.Contains("Bombs here, oldest first: [blue]{Charges}[/blue]",
                         face);
     }

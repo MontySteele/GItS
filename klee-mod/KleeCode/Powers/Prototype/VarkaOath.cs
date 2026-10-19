@@ -984,15 +984,62 @@ public static class VarkaOath
     /// <summary>One element's Swirl payout in words, with
     /// <see cref="VarkaLaw"/>'s numbers: "Pyro (3 damage)". Empty for an
     /// element that pays nothing. PURE.</summary>
-    public static string PayoutWords(Element element) => element switch
+    public static string PayoutWords(Element element)
     {
-        Element.Pyro => $"Pyro ({VarkaLaw.SwirlPyroDamage} damage)",
-        Element.Hydro => $"Hydro ({VarkaLaw.SwirlHydroBlock} Block)",
-        Element.Cryo => $"Cryo ({VarkaLaw.SwirlCryoVulnerable} Vulnerable)",
-        Element.Electro =>
-            $"Electro ({VarkaLaw.SwirlElectroDamageAll} damage to ALL)",
+        var effect = PayoutEffect(element);
+        return effect.Length > 0 ? $"{element} ({effect})" : string.Empty;
+    }
+
+    /// <summary>What one Swirl payout of <paramref name="element"/> does, in
+    /// <see cref="VarkaLaw"/>'s numbers: "3 Block". Empty for an element that
+    /// pays nothing. <see cref="PayoutWords"/>' and the Swirl line's one
+    /// source. PURE.</summary>
+    public static string PayoutEffect(Element element) => element switch
+    {
+        Element.Pyro => $"{VarkaLaw.SwirlPyroDamage} damage",
+        Element.Hydro => $"{VarkaLaw.SwirlHydroBlock} Block",
+        Element.Cryo => $"{VarkaLaw.SwirlCryoVulnerable} Vulnerable",
+        Element.Electro => $"{VarkaLaw.SwirlElectroDamageAll} damage to ALL",
         _ => string.Empty,
     };
+
+    /// <summary>
+    /// SWIRL LEGIBILITY (2026-10-19): what his Swirl pays, in words, "Swirl
+    /// pays Hydro: 3 Block", with ", twice" or ", 3 times" when it pays over
+    /// (<paramref name="times"/>: Stormterror's Scale, Crosscurrent's own
+    /// Swirl). Empty with no current element or nothing paid. The card
+    /// face's line and the Swirl preview's clause. PURE.
+    /// </summary>
+    public static string SwirlPays(Element current, int times)
+    {
+        var effect = PayoutEffect(current);
+        if (effect.Length == 0 || times <= 0) return string.Empty;
+        var over = times switch
+        {
+            1 => "",
+            2 => ", twice",
+            _ => $", {times} times",
+        };
+        return $"Swirl pays {current}: {effect}{over}";
+    }
+
+    /// <summary>
+    /// What a Swirl <paramref name="card"/> makes for <paramref name="varka"/>
+    /// pays right now, as <see cref="SwirlPays"/> words, or empty: no live
+    /// Oath, no Boreas's Fang (the payout is the Fang's), or no current
+    /// element. Times are Stormterror's Scale's copies, doubled on
+    /// Crosscurrent ("This Swirl pays twice"). Display only: it reads the
+    /// ledger and the relics and runs nothing. Twin Gales' extra payout
+    /// depends on the aura Swirled and is that card's own words.
+    /// </summary>
+    public static string SwirlPaysNow(Creature? varka, CardModel? card)
+    {
+        if (varka == null || !Live(varka)) return string.Empty;
+        if (!Relics.BoreasFang.PaysSwirls(varka.Player)) return string.Empty;
+        var times = Relics.StormterrorsScale.PayoutsFor(varka)
+                    * (card is ProtoVkCrosscurrent ? 2 : 1);
+        return SwirlPays(VarkaOathLedger.For(varka).Current, times);
+    }
 
     /// <summary>What one Swirl paid under Twin Gales, as the seat page prints
     /// it: the current element's payout, and the Swirled element's when it is
@@ -1170,14 +1217,25 @@ public static class VarkaOath
         }
         if (owner?.CombatState == null || owner.Player == null) return "";
         var target = DescribedTarget.For(card);
-        if (target != null) return SwirlWords(AuraCmd.Find(target) != null);
-        return SwirlWords(owner.CombatState.HittableEnemies
-            .Any(e => AuraCmd.Find(e) != null));
+        var aura = target != null
+            ? AuraCmd.Find(target) != null
+            : owner.CombatState.HittableEnemies
+                .Any(e => AuraCmd.Find(e) != null);
+        return SwirlWords(aura, SwirlPaysNow(owner, card));
     }
 
     /// <summary>The words: "(no aura: no Swirl)" when there is no aura, else
     /// empty. PURE.</summary>
     public static string SwirlWords(bool aura) => aura ? "" : NoAuraToSwirl;
+
+    /// <summary>
+    /// SWIRL LEGIBILITY (2026-10-19): with an aura to Swirl the line names
+    /// what the Swirl pays, "(Swirl pays Hydro: 3 Block)"
+    /// (<see cref="SwirlPaysNow"/>); with none it reads "(no aura: no
+    /// Swirl)" as before. Empty with an aura and nothing paid. PURE.
+    /// </summary>
+    public static string SwirlWords(bool aura, string pays) =>
+        !aura ? NoAuraToSwirl : pays.Length > 0 ? $"\n({pays})" : "";
 
     /// <summary><see cref="SwirlWords"/>' line.</summary>
     public const string NoAuraToSwirl = "\n(no aura: no Swirl)";

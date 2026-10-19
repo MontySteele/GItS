@@ -236,7 +236,7 @@ public class BombBadgeHalvesTests
             Assert.EndsWith(".smartDescriptionSparks", LocKey(paid));
             Assert.Equal(
                 "[gold]Set off[/gold] here deals [blue]{Size}[/blue] "
-              + "[gold]Pyro[/gold] damage and gives [blue]{Sparks}[/blue] "
+              + "{BombElement} damage and gives [blue]{Sparks}[/blue] "
               + "[gold]Spark{Sparks:plural:|s}[/gold]. Bombs here, oldest "
               + "first: [blue]{Charges}[/blue].",
                 Row(paid, "smartDescriptionSparks"));

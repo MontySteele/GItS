@@ -27,6 +27,11 @@ WHAT THE PAGE KEEPS, AND WHERE EACH COMES FROM
   board pieces a player sees drawn on screen (the Plans queued on the
   Bake-Kurage, the stage's seats, an ally's HP). Names are the page's handles
   (`Nibbit (1)`, `Coral Guard (2)`), because a command needs them.
+* The reaction preview a drag shows: a player sees one by dragging a card
+  onto an enemy, so under each card the page prints "On <enemy>: <preview>"
+  for every enemy where the game would show one. The bridge reads the
+  game's own aim preview per (card, enemy) on a player-audience read
+  (`aim_previews`, `gits/GitsAimPreview.cs`).
 * Every other screen is the ordinary page with the seat-only parts cut
   (`trim_page`): the ledger sections, the glossary, the "why it is not on
   this list" notes, and the page's own italic notes, except a note that
@@ -107,6 +112,41 @@ def _card_lines(entry: dict[str, Any], label: str, face: dict[str, Any]
     if text:
         out.append(f"    {text}")
     return out + _tip_lines(entry.get("keywords"))
+
+
+def _enemy_handles(state: dict[str, Any], enemies: list[dict[str, Any]]
+                   ) -> dict[Any, str]:
+    """`{combat_id: the page's handle}` for the enemies on this board."""
+    names: dict[Any, str] = {}
+    for raw, e in zip(_enemies(state), enemies):
+        cid = raw.get("combat_id")
+        if cid is not None and e.get("name"):
+            names[cid] = e["name"]
+    return names
+
+
+def _aim_lines(entry: dict[str, Any], names: dict[Any, str]) -> list[str]:
+    """Swirl legibility (2026-10-19): the reaction preview a player sees by
+    dragging this card onto an enemy, one line per enemy where one shows.
+    The bridge reads it off the game's own aim preview (`aim_previews`,
+    `gits/GitsAimPreview.cs`); this prints it and computes nothing."""
+    out = []
+    for row in entry.get("aim_previews") or []:
+        if not isinstance(row, dict):
+            continue
+        name = names.get(row.get("combat_id"))
+        if not name:
+            continue
+        for k in row.get("tips") or []:
+            if not isinstance(k, dict):
+                continue
+            title = _text(k.get("name") or k.get("title"))
+            text = _text(k.get("description") or k.get("text"))
+            if title and text:
+                out.append(f"    On {name}: *{title}* — {text}")
+            elif text or title:
+                out.append(f"    On {name}: {text or title}")
+    return out
 
 
 def _intent_line(intent: dict[str, Any]) -> str:
@@ -204,8 +244,10 @@ def combat_page(state: dict[str, Any], obs: dict[str, Any]) -> str:
     hand = _hand(state)
     if not hand:
         out.append("- (empty)")
+    names = _enemy_handles(state, c["enemies"])
     for entry, face in zip(hand, c["hand"]):
         out += _card_lines(entry, face["title"], face)
+        out += _aim_lines(entry, names)
     out += ["", "## Enemies"]
     for raw, e in zip(_enemies(state), c["enemies"]):
         if _int(raw.get("hp")) <= 0 and not raw.get("intents"):

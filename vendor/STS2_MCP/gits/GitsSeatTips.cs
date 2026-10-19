@@ -101,9 +101,16 @@ public static partial class McpMod
         Func<Dictionary<string, object?>> build)
     {
         GitsSeatTipsExit();
+        // Swirl legibility (2026-10-19): the hand rows carry the aim previews
+        // on this read only (`GitsAimPreview.cs`).
+        GitsSetPlayerAudience(true);
         Dictionary<string, object?> state;
         try { state = build(); }
-        finally { GitsSeatTipsEnter(); }
+        finally
+        {
+            GitsSetPlayerAudience(false);
+            GitsSeatTipsEnter();
+        }
         state["tip_audience"] = "player";
         return state;
     }

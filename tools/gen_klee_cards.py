@@ -1591,14 +1591,23 @@ def keyword_tip_boxes(keywords: list[str]) -> int:
     return sum(1 for k in keywords if k.startswith("KleeKeywords."))
 
 
+#: SWIRL LEGIBILITY (2026-10-19): rows whose face turns on what a Swirl
+#: does, so a player's hover keeps the Swirl box beside `Applies Anemo`.
+#: Prune's Hexhunter Chime: "the next Bomb deals that element" names the
+#: element the Swirl took, which only the Swirl box explains.
+PLAYER_SWIRL_TIP_IDS = frozenset({"proto_mc_prune_hexhunter_chime"})
+
+
 def player_tip_layers(layers: list[tuple[str, str]], keywords: list[str],
-                      spark_priced: bool) -> list[tuple[str, str]]:
+                      spark_priced: bool, keep_swirl: bool = False
+                      ) -> list[tuple[str, str]]:
     """The layers a PLAYER's hover raises, from the seat's full chain.
 
     1. Riders (`SEAT_ONLY_TIP_CALLS`) are the seat's.
     2. `Elemental Reaction` is dropped wherever an `Applies X` box is up: the
        Applies box already says another aura reacts. `Swirl` likewise where
-       `Applies Anemo` is up, whose box names the Swirl.
+       `Applies Anemo` is up, whose box names the Swirl, unless `keep_swirl`
+       (`PLAYER_SWIRL_TIP_IDS`).
     3. `Spark` only on a card that prints a Spark cost.
     4. A Guest Star card raises one merged Guest Star box, not Summon too.
     5. At most `PLAYER_TIP_CAP` boxes: base words go first (the base game's
@@ -1612,7 +1621,7 @@ def player_tip_layers(layers: list[tuple[str, str]], keywords: list[str],
             continue
         if call == "ArmKeywordTips.ForElementalReaction" and applies:
             continue
-        if (call == "ArmKeywordTips.ForSwirl"
+        if (call == "ArmKeywordTips.ForSwirl" and not keep_swirl
                 and "KleeKeywords.AppliesAnemo" in keywords):
             continue
         if call == "ArmKeywordTips.ForSpark" and not spark_priced:
@@ -17450,6 +17459,10 @@ def half_hp_face_lines(card: dict, desc: str
 SWIRL_AURA_TOKEN = "SwirlAura"
 SWIRL_AURA_WORDS = " (no aura: no Swirl)"
 
+#: SWIRL LEGIBILITY (2026-10-19): Swirl rows outside Sucrose's that carry the
+#: clause too. Prune's Hexhunter Chime Swirls to hand its element to a Bomb.
+SWIRL_AURA_EXTRA_IDS = frozenset({"proto_mc_prune_hexhunter_chime"})
+
 #: The Swirl phrases the clause follows, in the order they are tried.
 SWIRL_AURA_PHRASES = ("[gold]Swirl[/gold] ALL enemies",
                       "[gold]Swirl[/gold] the enemy")
@@ -17468,7 +17481,8 @@ def swirl_aura_face_lines(card: dict, desc: str
     rows only, the ones the review names: a row whose name starts "Sucrose"
     and whose effects Swirl. Varka's own rows keep `VarkaOath.SwirlLine`.
     """
-    if not str(card.get("name") or "").startswith("Sucrose"):
+    if (not str(card.get("name") or "").startswith("Sucrose")
+            and card.get("id") not in SWIRL_AURA_EXTRA_IDS):
         return desc, []
     if not any(e.get("op") == "swirl" for e in _effects_everywhere(card)):
         return desc, []
@@ -18797,7 +18811,8 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
             player_expr = fold_tip_layers(player_tip_layers(
                 split_tip_layers(tips_expr), keywords,
                 any(eff.get("op") == "spend_spark"
-                    for eff in card["effects"])))
+                    for eff in card["effects"]),
+                keep_swirl=card.get("id") in PLAYER_SWIRL_TIP_IDS))
         if player_expr == tips_expr:
             tooltip_member = (
                 "\n    protected override IEnumerable<IHoverTip> ExtraHoverTips =>\n"
