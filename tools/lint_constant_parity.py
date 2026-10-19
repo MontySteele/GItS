@@ -343,6 +343,9 @@ MIRRORED: dict[str, object] = {
     "VarkaLaw.SwirlElectroDamageAll": _varka("SWIRL_ELECTRO_DAMAGE_ALL"),
     # THE EXPANSION (2026-10-01): Eye of Stormterror's Swirls a turn.
     "VarkaLaw.EyeOfStormterrorSwirls": _varka("EYE_OF_STORMTERROR_SWIRLS"),
+    # The power upgrade pass (2026-10-19): the Plus powers' numbers.
+    "VarkaLaw.EyeOfStormterrorSwirlsUpgraded":
+        _varka("EYE_OF_STORMTERROR_SWIRLS_UPGRADED"),
     # Varka co-op fixes (2026-10-11): The Order Answers offers 3 Knights.
     "VarkaRules.OrderAnswersOptions": _varka("ORDER_ANSWERS_OPTIONS"),
 }

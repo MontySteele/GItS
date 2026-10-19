@@ -82,7 +82,7 @@ def test_four_rows_swapped_and_the_pool_stays_78(rebalance):
     ids = {c for r in pool.values() for c in r}
     assert sum(len(v) for v in pool.values()) == 78
     assert {k: len(v) for k, v in pool.items()} == {
-        "common": 20, "uncommon": 35, "rare": 23}
+        "common": 20, "uncommon": 36, "rare": 22}  # the rarity sweep, 2026-10-19
     assert {_vk(c) for c in NEW} <= ids
     sheet = {c.id for c in loader.prototype_cards()}
     assert not ({_vk(c) for c in GONE} & sheet)

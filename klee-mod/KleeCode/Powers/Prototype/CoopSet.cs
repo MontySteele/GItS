@@ -780,15 +780,25 @@ public sealed class ComradesOfTheExpeditionPower
 /// <see cref="CoopSet.OtherPlayers"/>; the energy is
 /// <c>PlayerCmd.GainEnergy</c>. The stack is the energy, so a second copy
 /// gives 2.
+///
+/// THE POWER UPGRADE PASS (2026-10-19): the upgraded card installs
+/// <see cref="WestWindsBlessingPlusPower"/>, whose gift also draws each other
+/// player 1 card, was Innate. Each form keeps its own latch.
 /// </summary>
-public sealed class WestWindsBlessingPower : PowerModel, ILocalizationProvider
+public abstract class WestWindsBlessingBasePower : PowerModel, ILocalizationProvider
 {
+    /// <summary>The cards each other player draws with the gift, 0 [1].</summary>
+    public abstract int Draws { get; }
+
     public List<(string, string)>? Localization => new()
     {
-        ("title", "West Wind's Blessing"),
+        ("title", Draws > 0 ? "West Wind's Blessing+" : "West Wind's Blessing"),
         ("description",
             "The first time each turn you [gold]Swirl[/gold], each other "
-          + "player gains {Amount:energyIcons()}."),
+          + "player gains {Amount:energyIcons()}"
+          + (Draws > 0
+              ? " and draws " + Draws + " card" + (Draws == 1 ? "" : "s")
+              : "") + "."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -819,13 +829,14 @@ public sealed class WestWindsBlessingPower : PowerModel, ILocalizationProvider
 
     /// <summary>A Swirl <paramref name="varka"/> made: pay each copy he
     /// holds.</summary>
-    public static async Task OnSwirl(Creature varka)
+    public static async Task OnSwirl(
+        PlayerChoiceContext choiceContext, Creature varka)
     {
         if (!Counts(varka)) return;
         var others = CoopSet.OtherPlayers(varka);
         if (others.Count == 0) return;
         var round = varka.CombatState?.RoundNumber ?? 0;
-        foreach (var blessing in varka.Powers.OfType<WestWindsBlessingPower>()
+        foreach (var blessing in varka.Powers.OfType<WestWindsBlessingBasePower>()
                      .ToList())
         {
             if (blessing.Amount <= 0 || !blessing.Take(round)) continue;
@@ -834,8 +845,25 @@ public sealed class WestWindsBlessingPower : PowerModel, ILocalizationProvider
                 if (ally.Player is { } player)
                 {
                     await PlayerCmd.GainEnergy((int)blessing.Amount, player);
+                    if (blessing.Draws > 0)
+                    {
+                        await CardPileCmd.Draw(choiceContext, blessing.Draws,
+                                               player);
+                    }
                 }
             }
         }
     }
+}
+
+/// <summary>West Wind's Blessing: the energy alone.</summary>
+public sealed class WestWindsBlessingPower : WestWindsBlessingBasePower
+{
+    public override int Draws => 0;
+}
+
+/// <summary>West Wind's Blessing+: the energy and 1 card.</summary>
+public sealed class WestWindsBlessingPlusPower : WestWindsBlessingBasePower
+{
+    public override int Draws => 1;
 }

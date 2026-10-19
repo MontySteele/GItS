@@ -104,12 +104,13 @@ EXPANSION_IDS = (
 )
 
 
-def test_the_pool_is_78_twenty_thirty_five_twenty_three(varka):
+def test_the_pool_is_78_twenty_thirty_six_twenty_two(varka):
     pool = [c for c in _rows() if c.rarity != "basic"]
     assert len(pool) == 78
     by = {r: sum(1 for c in pool if c.rarity == r)
           for r in ("common", "uncommon", "rare")}
-    assert by == {"common": 20, "uncommon": 35, "rare": 23}
+    # The rarity sweep (2026-10-19): three Powers down, two Skills up.
+    assert by == {"common": 20, "uncommon": 36, "rare": 22}
     ids = {c.id for c in pool}
     assert len(EXPANSION_IDS) == 36
     assert {_vk(x) for x in EXPANSION_IDS} <= ids
@@ -144,7 +145,11 @@ def test_the_paper_numbers_and_upgrades(varka):
     assert fx(_vk("pathfinders_mark") + "+", "varka")["upgraded"] is True
     assert loader.get_card(_vk("retaliating_tide") + "+").cost == 1
     assert loader.get_card(_vk("the_order_answers") + "+").cost == 1
-    assert loader.get_card(_vk("wildfire_oath") + "+").innate is True
+    # The power upgrade pass (2026-10-19): Wildfire Oath+ installs the Plus
+    # power ("plus 3"), was Innate.
+    up = loader.get_card(_vk("wildfire_oath") + "+")
+    assert not up.innate
+    assert up.effects[0]["power"] == V.WILDFIRE_OATH_PLUS
     # Varka payoff fix (2026-10-08): both rares cost 1, were 2.
     assert loader.get_card(_vk("wildfire_oath")).cost == 1
     assert loader.get_card(_vk("absolute_zero")).cost == 1

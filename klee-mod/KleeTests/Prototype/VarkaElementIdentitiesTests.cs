@@ -227,7 +227,7 @@ public class VarkaElementIdentitiesTests : IDisposable
         // application just raised counts (the sim's `note_hit` order).
         var note = Il.CallSequence(Il.Method("VarkaOath", "NoteApplication")).ToList();
         var gain = note.IndexOf("VarkaOath.Gain");
-        var paid = note.IndexOf("WildfireOathPower.OnPyroApplied");
+        var paid = note.IndexOf("WildfireOathBasePower.OnPyroApplied");
         Assert.True(gain >= 0 && paid > gain, string.Join(", ", note));
         // Element-less and unpowered: it never re-enters NoteApplication.
         Assert.Contains("ElementalHit.DealUnelemented",

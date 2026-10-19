@@ -69,3 +69,63 @@ Graded by the suite on the five baseline seeds, against the last Varka suite
   percentage points from the 4.1% baseline.
 - **P4** (descriptive, no threshold). The Vulnerable bonus damage per Cryo
   payout is reported.
+
+## 3. The power upgrade pass (added 2026-10-19)
+
+[USER], 2026-10-19: "You do have a habit of making too many powers just
+decrease their cost by 1 on upgrade though" and "Since we're already planning
+a Varka run, I'm fine with doing a Powers pass on him now."
+
+The census before the pass: of Varka's 23 Power upgrades, 10 were Innate only
+and 4 were a cost cut only. Base Ironclad has 2 Innate-only and 4 cost-only of
+17; Silent 3 and 3 of 18. After the pass Varka has 3 and 3: Boreas Unbound,
+Twin Gales and Azure Fang's Oath keep Innate; Retaliating Tide, Oathbound
+Aegis and The Order Answers keep their cost cut.
+
+The eight upgrades that changed (the upgraded text is in brackets):
+
+| Card | Was | Now |
+|---|---|---|
+| Unwavering Banner | Innate | "gain 1 [2] Oath of your current element instead" |
+| Wildfire Oath | Innate | "deal damage equal to your Pyro Oath [plus 3] to it" |
+| Absolute Zero | Innate | "deal damage equal to your Cryo Oath [plus 3] to it" |
+| Lupical | Innate | "shuffle [an upgraded] copy of it into your Draw Pile" |
+| Weathervane | Innate | "It becomes your current element. [Gain 1 Oath of it.]" (the brief's "[and you gain 1 Oath of it]", shortened to fit the 20-character upgrade-clause lint) |
+| Eye of Stormterror | Innate | "The first 3 [4] times you Swirl each turn, draw 1 card." |
+| West Wind's Blessing (co-op) | Innate | "each other player gains 1 Energy [and draws 1 card]" |
+| Comrades of the Expedition (co-op) | cost 2 [1] | "gain 1 [2] Oath of your current element" |
+
+The first seven upgraded cards put down a Plus power (`upgraded_power` on the
+row, the `*PlusPower` classes in `VarkaPowers.cs` and `CoopSet.cs`, sim twins
+in `tier0/engine/varka_oath.py`). Comrades is a stack bump (`power_amount`).
+Weathervane+ gains its Oath only when an element is chosen, not on a cancel.
+When both forms of the Banner are up, a held switch pays 2, once a play. Eye
+of Stormterror+'s 4 is `VarkaLaw.EyeOfStormterrorSwirlsUpgraded`, which
+`tools/lint_constant_parity.py` holds equal to the sim's; the other numbers
+are printed on the Plus classes and pinned by `VarkaPowerUpgradeTests` (C#)
+and `tier0/tests/test_varka_power_upgrades.py` (sim).
+
+- **P5.** Upgrade pass: no single upgraded power changes Varka's end floors on
+  the suite seeds on its own; the suite's floors stay within his last
+  Varka-next suite range (P2 covers it).
+- **P6** (descriptive, no threshold). The suite reports how often each of the
+  eight changed powers was taken and how often it was upgraded.
+
+## 4. The rarity sweep (added 2026-10-19)
+
+[USER], 2026-10-19: "I had not noticed that Varka's powers are basically all
+rares. Can we do a sweep over that now as well?" Rarity moves only; no number
+or text changed.
+
+- Rare to Uncommon (Powers): Converging Winds, Dawn Wind's March, Weathervane.
+- Uncommon to Rare (Skills): Grand Master's Order, Rally to the Banner.
+
+The census before the sweep: Rare 25 = 16 Powers (2 of them co-op) + 8
+Attacks + 1 Skill; Uncommon 38 = 7 Powers + 11 Attacks + 20 Skills. The base
+characters (the `game_ref` pools) have 9 to 10 Rare Powers, 5 to 11 Rare
+Skills and 20 to 27 Rares. After: Rare 24 (13 Powers, 8 Attacks, 3 Skills),
+Uncommon 39 (10 Powers). His 78-card solo pool goes from 20 / 35 / 23 to
+20 / 36 / 22 (`PoolCountTests`, `STATE.md`).
+
+- **P7** (descriptive, no threshold). The suite reports how often each of the
+  five moved cards was offered and how often it was taken.

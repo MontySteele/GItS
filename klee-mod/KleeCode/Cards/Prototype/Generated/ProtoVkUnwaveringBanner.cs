@@ -45,7 +45,7 @@ public sealed class ProtoVkUnwaveringBanner : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Unwavering Banner"),
-        ("description", "Only [gold]Knights[/gold] change your [gold]current element[/gold]. Whenever another card would, gain 1 [gold]Oath[/gold] of your [gold]current element[/gold] instead."),
+        ("description", "Only [gold]Knights[/gold] change your [gold]current element[/gold]. Whenever another card would, gain {IfUpgraded:show:2|1} [gold]Oath[/gold] of your [gold]current element[/gold] instead."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -63,11 +63,18 @@ public sealed class ProtoVkUnwaveringBanner : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<UnwaveringBannerPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        if (IsUpgraded)
+        {
+            await PowerCmd.Apply<UnwaveringBannerPlusPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        }
+        else
+        {
+            await PowerCmd.Apply<UnwaveringBannerPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        }
     }
 
     protected override void OnUpgrade()
     {
-        AddKeyword(CardKeyword.Innate);
+        // upgraded_power: the upgraded card installs UnwaveringBannerPlusPower, read off IsUpgraded when the card is played.
     }
 }

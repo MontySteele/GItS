@@ -3242,6 +3242,8 @@ ASCENSION_RELICS = ("Wolf's Gravestone",)
 #: spread, so an Anemo card does not get the line.
 WILDFIRE_TITLE = "Wildfire Oath"
 WILDFIRE_NOTE = "    - Wildfire: +{n} a hit."
+#: Wildfire Oath+'s "plus 3" (`WildfireOathPlusPower.Bonus`).
+WILDFIRE_PLUS_BONUS = 3
 
 
 def _wildfire_hit(you: dict[str, Any], oath: dict[str, Any] | None)         -> int | None:
@@ -3249,12 +3251,19 @@ def _wildfire_hit(you: dict[str, Any], oath: dict[str, Any] | None)         -> i
     power down (or no Oath block to read his Pyro Oath off)."""
     if not oath:
         return None
+    total = None
+    pyro = int(oath["counts"].get("Pyro") or 0)
     for power in you.get("powers") or []:
         if _fold(power.get("name")) == _fold(WILDFIRE_TITLE):
             stacks = power.get("stacks")
             stacks = stacks if isinstance(stacks, int) and stacks > 0 else 1
-            return max(0, stacks * int(oath["counts"].get("Pyro") or 0))
-    return None
+            # The power upgrade pass (2026-10-19): "Wildfire Oath+" (the
+            # fold drops the "+") adds 3 per stack; both forms may be up.
+            bonus = (WILDFIRE_PLUS_BONUS
+                     if str(power.get("name") or "").rstrip().endswith("+")
+                     else 0)
+            total = (total or 0) + max(0, stacks * (pyro + bonus))
+    return total
 
 
 def _applies_pyro(card: dict[str, Any]) -> bool:

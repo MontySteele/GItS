@@ -282,7 +282,7 @@ public class VarkaExpansionTests : IDisposable
         Assert.Equal(3, VarkaLaw.EyeOfStormterrorSwirls);
         var swirl = Calls("VarkaOath", "OnSwirl");
         Assert.Contains("VarkaOath.Pay", swirl);
-        Assert.Contains("EyeOfStormterrorPower.Draw", swirl);
+        Assert.Contains("EyeOfStormterrorBasePower.Draw", swirl);
         Assert.Contains("CreatureCmd.GainBlock", swirl);            // Eye Wall
         Assert.Contains("VarkaOath.IsOathElement", swirl);          // Twin Gales
     }
@@ -313,7 +313,7 @@ public class VarkaExpansionTests : IDisposable
         // Co-op notes pick 2 (2026-10-02): Assembly left EndPlay for
         // NoteApplication (CoopNotesRulingsTests).
         Assert.DoesNotContain("AssemblyAtTheCathedralPower.OnElementApplied", end);
-        Assert.Contains("WolfpackPower.OnAscensionPlayed", end);
+        Assert.Contains("WolfpackBasePower.OnAscensionPlayed", end);
         // The Varka payoff round (2026-10-10): the copy is shuffled into the
         // draw pile, Exhausts, and the seat page hears of it.
         var wolves = Calls("WolfpackPower", "OnAscensionPlayed");
@@ -411,7 +411,9 @@ public class VarkaExpansionTests : IDisposable
         Assert.Equal(2, new ProtoVkTheOrderAnswers().EnergyCost.Canonical);
         Assert.Equal(1, Upgraded<ProtoVkTheOrderAnswers>().EnergyCost
             .GetWithModifiers(CostModifiers.None));
-        Assert.Contains(CardKeyword.Innate, Upgraded<ProtoVkWildfireOath>().Keywords);
+        // The power upgrade pass (2026-10-19): Wildfire Oath+ is "plus 3",
+        // was Innate (VarkaPowerUpgradeTests).
+        Assert.DoesNotContain(CardKeyword.Innate, Upgraded<ProtoVkWildfireOath>().Keywords);
         // The forced-Amber round (2026-10-10): Oath Unto Death costs 2, was 3;
         // its upgrade stays Innate.
         Assert.Equal(2, new ProtoVkOathUntoDeath().EnergyCost.Canonical);

@@ -128,12 +128,15 @@ def test_the_sheet_strings(varka):
         "Deal {VkBase:diff()} [gold]Pyro[/gold] damage. Gain "
         "{VkAmount:diff()} [gold]Strength[/gold] this turn.")
     assert _row(_vk("wolfpack"))["description"] == (
-        "Whenever you play [gold]Four Winds' Ascension[/gold], shuffle a copy of it into "
+        "Whenever you play [gold]Four Winds' Ascension[/gold], shuffle "
+        "{IfUpgraded:show:an upgraded|a} copy of it into "
         "your [gold]Draw Pile[/gold]. The copy [gold]Exhausts[/gold].")
-    assert _row(_vk("wolfpack"))["upgrade"] == {"innate": True}
+    # The power upgrade pass (2026-10-19): the copy is upgraded, was Innate.
+    assert _row(_vk("wolfpack"))["upgrade"] == {
+        "upgraded_power": "vk_wolfpack_plus"}
     assert _row(_vk("unwavering_banner"))["description"] == (
         "Only [gold]Knights[/gold] change your [gold]current element[/gold]. "
-        "Whenever another card would, gain 1 [gold]Oath[/gold] of your "
+        "Whenever another card would, gain {IfUpgraded:show:2|1} [gold]Oath[/gold] of your "
         "[gold]current element[/gold] instead.")
     # Numbers held.
     stoke = _row(_vk("stoke_the_flames"))

@@ -209,10 +209,25 @@ THE_ORDER_ANSWERS = "vk_the_order_answers"
 #: Pyro paper 2 (2026-10-12): Stoke the Flames' "Your next Pyro Attack this
 #: turn deals 5 additional damage" (`pyro_attack_bonus`).
 NEXT_PYRO_ATTACK = "vk_next_pyro_attack"
-#: Unwavering Banner's "gain 1 Oath of your current element instead".
+#: Unwavering Banner's "gain 1 [2] Oath of your current element instead".
 BANNER_OATH = 1
-#: Eye of Stormterror: "The first 3 times you Swirl each turn".
+BANNER_OATH_UPGRADED = 2
+#: Eye of Stormterror: "The first 3 [4] times you Swirl each turn".
 EYE_OF_STORMTERROR_SWIRLS = 3
+EYE_OF_STORMTERROR_SWIRLS_UPGRADED = 4
+#: Wildfire Oath+ and Absolute Zero+: "your Pyro [Cryo] Oath plus 3".
+OATH_PAYOFF_UPGRADE_BONUS = 3
+#: Weathervane+: "and you gain 1 Oath of it".
+WEATHERVANE_OATH_UPGRADED = 1
+#: THE POWER UPGRADE PASS (2026-10-19): the upgraded card installs the Plus
+#: power (`upgraded_power`, rewritten by `tier0/content/upgrades.py`), was
+#: Innate. C# twins: the `*PlusPower` classes in VarkaPowers.cs.
+UNWAVERING_BANNER_PLUS = "vk_unwavering_banner_plus"
+WILDFIRE_OATH_PLUS = "vk_wildfire_oath_plus"
+ABSOLUTE_ZERO_PLUS = "vk_absolute_zero_plus"
+WOLFPACK_PLUS = "vk_wolfpack_plus"
+WEATHERVANE_PLUS = "vk_weathervane_plus"
+EYE_OF_STORMTERROR_PLUS = "vk_eye_of_stormterror_plus"
 #: Tempest of the Four Winds' four hits, in the printed order.
 TEMPEST_ELEMENTS = ("pyro", "hydro", "cryo", "electro")
 
@@ -429,6 +444,12 @@ def _power(player, name: str) -> int:
     return int(player.powers.get(name, 0))
 
 
+def has_banner(player) -> bool:
+    """Is Unwavering Banner up, either form? C# twin: `VarkaOath.HasBanner`."""
+    return bool(_power(player, UNWAVERING_BANNER)
+                or _power(player, UNWAVERING_BANNER_PLUS))
+
+
 def _block(state, amount: int, reason: str) -> None:
     """Unpowered Block (no Dexterity, no Frail), the payouts' door."""
     if amount <= 0:
@@ -532,7 +553,7 @@ def open_oath_switches(led: VarkaLedger, element: str,
     open-Oath play, for an Oath element, outside a no-credit hit, and never
     under Unwavering Banner ("Only Knights can change your current element";
     `note_hit` asks with no `player` and pays the Banner itself)."""
-    if player is not None and _power(player, UNWAVERING_BANNER):
+    if player is not None and has_banner(player):
         return False
     return bool(OPEN_OATH and led.play_open and led.play_open[-1]
                 and element in ELEMENTS and not led.no_apply_credit)
@@ -549,7 +570,11 @@ def banner_holds(state, element: str) -> None:
         return
     led.banner_paid = True
     state.emit("varka_banner", element=led.current, would=element)
-    gain(state, led.current, BANNER_OATH, "unwavering_banner")
+    # The power upgrade pass (2026-10-19): the Plus form pays 2, the larger
+    # when both are up.
+    paid = (BANNER_OATH_UPGRADED if _power(state.player, UNWAVERING_BANNER_PLUS)
+            else BANNER_OATH)
+    gain(state, led.current, paid, "unwavering_banner")
 
 
 # --------------------------------------------------------------------------
@@ -594,7 +619,7 @@ def card_makes_current(state, element: str) -> None:
     `VarkaOath.CardMakesCurrent`."""
     if ledger(state.player) is None or element not in ELEMENTS:
         return
-    if _power(state.player, UNWAVERING_BANNER):
+    if has_banner(state.player):
         banner_holds(state, element)
     else:
         set_current(state, element, knight=False)
@@ -643,14 +668,17 @@ def end_play(state, card=None) -> None:
     if card is None:
         return
     wolves = _power(p, WOLFPACK)
-    if wolves and card.id.rstrip("+") == ASCENSION_ID:
+    wolves_plus = _power(p, WOLFPACK_PLUS)
+    if (wolves or wolves_plus) and card.id.rstrip("+") == ASCENSION_ID:
         # WOLFPACK (the Varka payoff round, 2026-10-10): "shuffle a copy of
         # it into your Draw Pile. The copy Exhausts." A random depth, top and
         # bottom alike (`draw` pops index 0); a copy played fires it again.
         # C# twin: `WolfpackPower.OnAscensionPlayed`.
         from tier0.content import loader            # late: cycle
-        for _ in range(wolves):
-            copy = loader.get_card(card.id)
+        # The power upgrade pass (2026-10-19): Lupical+'s copy is always
+        # upgraded; the plain form's follows the played card.
+        for cid in [card.id] * wolves + [ASCENSION_ID + "+"] * wolves_plus:
+            copy = loader.get_card(cid)
             copy.exhaust = True
             p.draw_pile.insert(state.rng.randrange(len(p.draw_pile) + 1),
                                copy)
@@ -675,7 +703,7 @@ def note_hit(state, enemy, element) -> None:
             state.draw(sf)
     if not led.no_apply_credit:
         if open_oath_switches(led, element):
-            if _power(state.player, UNWAVERING_BANNER):
+            if has_banner(state.player):
                 banner_holds(state, element)
             else:
                 set_current(state, element, knight=False)
@@ -706,7 +734,10 @@ def _wildfire(state, enemy) -> None:
     led = ledger(state.player)
     if led is None or not enemy.alive:
         return
-    n = _power(state.player, WILDFIRE_OATH) * led.oath["pyro"]
+    # The power upgrade pass (2026-10-19): Wildfire Oath+ adds 3 per stack.
+    n = (_power(state.player, WILDFIRE_OATH) * led.oath["pyro"]
+         + _power(state.player, WILDFIRE_OATH_PLUS)
+         * (led.oath["pyro"] + OATH_PAYOFF_UPGRADE_BONUS))
     if n <= 0:
         return
     from tier0.engine import effects                # late: cycle
@@ -766,9 +797,14 @@ def on_swirl(state, enemy, aura: str) -> None:
     # EYE WALL: "Whenever you Swirl this turn, gain 3 Block."
     _block(state, _power(p, EYE_WALL), "eye_wall")
     # EYE OF STORMTERROR: "The first 3 times you Swirl each turn, draw 1."
+    # The power upgrade pass (2026-10-19): each form reads its own count,
+    # 3 [4].
     eye = _power(p, EYE_OF_STORMTERROR)
     if eye and led.swirls_this_turn <= EYE_OF_STORMTERROR_SWIRLS:
         state.draw(eye)
+    eye_plus = _power(p, EYE_OF_STORMTERROR_PLUS)
+    if eye_plus and led.swirls_this_turn <= EYE_OF_STORMTERROR_SWIRLS_UPGRADED:
+        state.draw(eye_plus)
 
 
 def pays_swirls(player) -> bool:
@@ -816,7 +852,10 @@ def on_debuff_applied(state, target, name: str, stacks: int) -> None:
             or not getattr(target, "alive", False)
             or not any(target is e for e in state.enemies)):
         return
-    n = _power(state.player, ABSOLUTE_ZERO) * led.oath["cryo"]
+    # The power upgrade pass (2026-10-19): Absolute Zero+ adds 3 per stack.
+    n = (_power(state.player, ABSOLUTE_ZERO) * led.oath["cryo"]
+         + _power(state.player, ABSOLUTE_ZERO_PLUS)
+         * (led.oath["cryo"] + OATH_PAYOFF_UPGRADE_BONUS))
     if n <= 0:
         return
     from tier0.engine import effects                # late: cycle
@@ -904,7 +943,8 @@ def turn_start(state) -> None:
     # Oath in; it becomes your current element." Sworn Brotherhood below
     # gains the new one. Since the combo pass "Only Knights can change your
     # current element": the Banner holds it, and it is no card, so no Oath.
-    if _power(p, WEATHERVANE) and not _power(p, UNWAVERING_BANNER):
+    if ((_power(p, WEATHERVANE) or _power(p, WEATHERVANE_PLUS))
+            and not has_banner(p)):
         _weathervane(state, led)
     bunny = int(p.powers.pop(BARON_BUNNY, 0))
     if bunny:
@@ -946,6 +986,11 @@ def _weathervane(state, led: VarkaLedger) -> None:
         choice = best
     state.emit("varka_weathervane", element=choice)
     set_current(state, choice, knight=False)
+    # Weathervane+ (the power upgrade pass, 2026-10-19): "and you gain 1
+    # Oath of it", only when an element was chosen. C# twin:
+    # `VarkaOath.Weathervane`.
+    if _power(state.player, WEATHERVANE_PLUS):
+        gain(state, choice, WEATHERVANE_OATH_UPGRADED, "weathervane")
 
 
 def turn_end(state) -> None:
@@ -1455,7 +1500,7 @@ def op_varka(state, fx: dict, card) -> None:
         held = [el for el in ELEMENTS if led.oath[el] > 0]
         if not held:
             return
-        if _power(p, UNWAVERING_BANNER):
+        if has_banner(p):
             # The combo pass: only Knights change it. The Banner holds, and
             # pays when another element could have been chosen.
             other = next((el for el in held if el != led.current), None)

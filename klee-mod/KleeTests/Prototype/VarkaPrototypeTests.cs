@@ -816,7 +816,7 @@ public class VarkaPrototypeTests : IDisposable
     }
 
     [Fact]
-    public void The_pool_is_seventy_eight_cards_twenty_thirty_five_and_twenty_three()
+    public void The_pool_is_seventy_eight_cards_twenty_thirty_six_and_twenty_two()
     {
         var pool = Cards("VarkaRoster", "Pool")
             .Select(c => c.Substring("ModelDb.Card<".Length).TrimEnd('>'))
@@ -830,8 +830,9 @@ public class VarkaPrototypeTests : IDisposable
             .ToList();
         Assert.Equal(78, types.Count);
         Assert.Equal(20, types.Count(c => c.Rarity == CardRarity.Common));
-        Assert.Equal(35, types.Count(c => c.Rarity == CardRarity.Uncommon));
-        Assert.Equal(23, types.Count(c => c.Rarity == CardRarity.Rare));
+        // The rarity sweep (2026-10-19): 20 / 36 / 22, was 20 / 35 / 23.
+        Assert.Equal(36, types.Count(c => c.Rarity == CardRarity.Uncommon));
+        Assert.Equal(22, types.Count(c => c.Rarity == CardRarity.Rare));
         Assert.Equal(13, types.Count(VarkaRules.IsKnight));
         // The starter cards are not offered.
         foreach (var starter in new[] { "ProtoVkFourWindsAscension",

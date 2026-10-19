@@ -50,7 +50,7 @@ public sealed class ProtoVkWestWindsBlessing : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "West Wind's Blessing"),
-        ("description", "The first time each turn you [gold]Swirl[/gold], each other player gains {energyPrefix:energyIcons(1)}."),
+        ("description", "The first time each turn you [gold]Swirl[/gold], each other player gains {energyPrefix:energyIcons(1)}{IfUpgraded:show: and draws 1 card|}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -68,11 +68,18 @@ public sealed class ProtoVkWestWindsBlessing : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<WestWindsBlessingPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        if (IsUpgraded)
+        {
+            await PowerCmd.Apply<WestWindsBlessingPlusPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        }
+        else
+        {
+            await PowerCmd.Apply<WestWindsBlessingPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        }
     }
 
     protected override void OnUpgrade()
     {
-        AddKeyword(CardKeyword.Innate);
+        // upgraded_power: the upgraded card installs WestWindsBlessingPlusPower, read off IsUpgraded when the card is played.
     }
 }

@@ -601,16 +601,24 @@ public sealed class StaticFieldPower : PowerModel, ILocalizationProvider
 /// Change of Guard and Weathervane, which no longer pass it: a card's blocked
 /// switch pays 1 Oath of the current element once per play
 /// (<see cref="VarkaOath.BannerHolds"/>); Weathervane is not a card and pays
-/// nothing. Sim twin: <c>varka_oath.banner_holds</c>.</summary>
-public sealed class UnwaveringBannerPower : PowerModel, ILocalizationProvider
+/// nothing. Sim twin: <c>varka_oath.banner_holds</c>.
+///
+/// THE POWER UPGRADE PASS (2026-10-19): the upgraded card installs
+/// <see cref="UnwaveringBannerPlusPower"/>, whose held switch pays 2
+/// (the printed 1 [2], as Vow of the Blade's), was Innate. Either form
+/// holds the switch; the payout is the larger, once per play.</summary>
+public abstract class UnwaveringBannerBasePower : PowerModel, ILocalizationProvider
 {
+    /// <summary>The Oath a held switch pays.</summary>
+    public abstract int OathPaid { get; }
+
     public List<(string, string)>? Localization => new()
     {
-        ("title", "Unwavering Banner"),
+        ("title", OathPaid > 1 ? "Unwavering Banner+" : "Unwavering Banner"),
         ("description",
             "Only [gold]Knights[/gold] can change your [gold]current "
-          + "element[/gold]. Whenever another card would, gain 1 "
-          + "[gold]Oath[/gold] of your [gold]current "
+          + "element[/gold]. Whenever another card would, gain " + OathPaid
+          + " [gold]Oath[/gold] of your [gold]current "
           + "element[/gold] instead."),
     };
 
@@ -620,6 +628,18 @@ public sealed class UnwaveringBannerPower : PowerModel, ILocalizationProvider
 
     /// <summary>The badge flashes when the Banner holds a switch.</summary>
     internal void Pulse() => Flash();
+}
+
+/// <summary>Unwavering Banner: a held switch pays 1.</summary>
+public sealed class UnwaveringBannerPower : UnwaveringBannerBasePower
+{
+    public override int OathPaid => 1;
+}
+
+/// <summary>Unwavering Banner+: a held switch pays 2.</summary>
+public sealed class UnwaveringBannerPlusPower : UnwaveringBannerBasePower
+{
+    public override int OathPaid => 2;
 }
 
 /// <summary>Cycle of Seasons (the AoE trim, sec.4): "Whenever your current
@@ -753,37 +773,58 @@ public sealed class AssemblyAtTheCathedralPower : PowerModel, ILocalizationProvi
 /// your Pyro Oath to it." Pyro's <see cref="AbsoluteZeroPower"/>: paid from
 /// <see cref="VarkaOath.NoteApplication"/> once that application's own Oath
 /// credit is in, element-less and unpowered, per stack. Sim twin:
-/// <c>varka_oath._wildfire</c>, from <c>varka_oath.note_hit</c>.</summary>
-public sealed class WildfireOathPower : PowerModel, ILocalizationProvider
+/// <c>varka_oath._wildfire</c>, from <c>varka_oath.note_hit</c>.
+///
+/// THE POWER UPGRADE PASS (2026-10-19): the upgraded card installs
+/// <see cref="WildfireOathPlusPower"/>, "your Pyro Oath plus 3"
+/// (its printed 3), was Innate. Each form
+/// pays its own hit.</summary>
+public abstract class WildfireOathBasePower : PowerModel, ILocalizationProvider
 {
+    /// <summary>The flat damage added to the Pyro Oath, 0 [3].</summary>
+    public abstract int Bonus { get; }
+
     public List<(string, string)>? Localization => new()
     {
-        ("title", "Wildfire Oath"),
+        ("title", Bonus > 0 ? "Wildfire Oath+" : "Wildfire Oath"),
         ("description",
             "Whenever you apply [gold]Pyro[/gold] to an enemy, deal damage "
-          + "equal to your [gold]Pyro[/gold] [gold]Oath[/gold] to it."),
+          + "equal to your [gold]Pyro[/gold] [gold]Oath[/gold]"
+          + (Bonus > 0 ? " plus " + Bonus : "") + " to it."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    /// <summary>One application's damage: the Pyro Oath per stack. PURE.
-    /// </summary>
-    public static int DamageFor(int pyroOath, int stacks) =>
-        System.Math.Max(0, pyroOath * stacks);
+    /// <summary>One application's damage: the Pyro Oath plus the bonus, per
+    /// stack. PURE.</summary>
+    public static int DamageFor(int pyroOath, int stacks, int bonus = 0) =>
+        System.Math.Max(0, (pyroOath + bonus) * stacks);
 
     internal async Task OnPyroApplied(
         PlayerChoiceContext choiceContext, Creature target)
     {
         if (!VarkaOath.Live(Owner) || !target.IsAlive) return;
         var damage = DamageFor(VarkaOath.Count(Owner, Element.Pyro),
-                               (int)Amount);
+                               (int)Amount, Bonus);
         if (damage <= 0) return;
         Flash();
         await ElementalHit.DealUnelemented(choiceContext, target, damage,
                                            Owner, powered: false);
     }
+}
+
+/// <summary>Wildfire Oath: the Pyro Oath.</summary>
+public sealed class WildfireOathPower : WildfireOathBasePower
+{
+    public override int Bonus => 0;
+}
+
+/// <summary>Wildfire Oath+: the Pyro Oath plus 3.</summary>
+public sealed class WildfireOathPlusPower : WildfireOathBasePower
+{
+    public override int Bonus => 3;
 }
 
 /// <summary>
@@ -837,26 +878,33 @@ public sealed class RetaliatingTidePower : PowerModel, ILocalizationProvider
 /// Reproach's test (a positive application he made, once per enemy it lands
 /// on), element-less and unpowered, per stack. Sim twin:
 /// <c>varka_oath.on_debuff_applied</c>, from <c>refpowers.on_power_applied</c>.
+///
+/// THE POWER UPGRADE PASS (2026-10-19): the upgraded card installs
+/// <see cref="AbsoluteZeroPlusPower"/>, "your Cryo Oath plus 3"
+/// (its printed 3), was Innate.
 /// </summary>
-public sealed class AbsoluteZeroPower : PowerModel, ILocalizationProvider
+public abstract class AbsoluteZeroBasePower : PowerModel, ILocalizationProvider
 {
+    /// <summary>The flat damage added to the Cryo Oath, 0 [3].</summary>
+    public abstract int Bonus { get; }
+
     public List<(string, string)>? Localization => new()
     {
-        ("title", "Absolute Zero"),
+        ("title", Bonus > 0 ? "Absolute Zero+" : "Absolute Zero"),
         ("description",
             "Whenever you apply [gold]Weak[/gold] or [gold]Vulnerable[/gold] "
-          + "to an enemy, deal damage equal to your [gold]Cryo[/gold] [gold]Oath[/gold] "
-          + "to it."),
+          + "to an enemy, deal damage equal to your [gold]Cryo[/gold] [gold]Oath[/gold]"
+          + (Bonus > 0 ? " plus " + Bonus : "") + " to it."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    /// <summary>One application's damage: the Cryo Oath per stack. PURE.
-    /// </summary>
-    public static int DamageFor(int cryoOath, int stacks) =>
-        System.Math.Max(0, cryoOath * stacks);
+    /// <summary>One application's damage: the Cryo Oath plus the bonus, per
+    /// stack. PURE.</summary>
+    public static int DamageFor(int cryoOath, int stacks, int bonus = 0) =>
+        System.Math.Max(0, (cryoOath + bonus) * stacks);
 
     public override async Task AfterPowerAmountChanged(
         PlayerChoiceContext choiceContext, PowerModel power, decimal amount,
@@ -865,12 +913,24 @@ public sealed class AbsoluteZeroPower : PowerModel, ILocalizationProvider
         if (!SeasReproachPower.Pays(power, amount, applier, Owner)) return;
         if (!VarkaOath.Live(Owner)) return;
         var damage = DamageFor(VarkaOath.Count(Owner, Element.Cryo),
-                               (int)Amount);
+                               (int)Amount, Bonus);
         if (damage <= 0) return;
         Flash();
         await ElementalHit.DealUnelemented(choiceContext, power.Owner!, damage,
                                            Owner, powered: false);
     }
+}
+
+/// <summary>Absolute Zero: the Cryo Oath.</summary>
+public sealed class AbsoluteZeroPower : AbsoluteZeroBasePower
+{
+    public override int Bonus => 0;
+}
+
+/// <summary>Absolute Zero+: the Cryo Oath plus 3.</summary>
+public sealed class AbsoluteZeroPlusPower : AbsoluteZeroBasePower
+{
+    public override int Bonus => 3;
 }
 
 /// <summary>Azure Fang's Oath (was Oath Unto Death): "Whenever you gain Oath of your current
@@ -896,14 +956,22 @@ public sealed class OathUntoDeathPower : PowerModel, ILocalizationProvider
 /// copy Exhausts." Paid by <see cref="VarkaOath.EndPlay"/>, one copy per
 /// stack, upgraded when the played one was, at a random depth of the draw
 /// pile. A copy played fires it again, so one real card and one copy
-/// circulate. Sim twin: <c>varka_oath.end_play</c>.</summary>
-public sealed class WolfpackPower : PowerModel, ILocalizationProvider
+/// circulate. Sim twin: <c>varka_oath.end_play</c>.
+///
+/// THE POWER UPGRADE PASS (2026-10-19): the upgraded card installs
+/// <see cref="WolfpackPlusPower"/>, whose copy is always upgraded, was
+/// Innate.</summary>
+public abstract class WolfpackBasePower : PowerModel, ILocalizationProvider
 {
+    /// <summary>Is every copy upgraded, whatever the played one was?</summary>
+    public abstract bool UpgradedCopy { get; }
+
     public List<(string, string)>? Localization => new()
     {
-        ("title", "Lupical"),
+        ("title", UpgradedCopy ? "Lupical+" : "Lupical"),
         ("description",
-            "Whenever you play [gold]Four Winds' Ascension[/gold], shuffle a copy of it "
+            "Whenever you play [gold]Four Winds' Ascension[/gold], shuffle "
+          + (UpgradedCopy ? "an upgraded" : "a") + " copy of it "
           + "into your [gold]Draw Pile[/gold]. The copy "
           + "[gold]Exhausts[/gold]."),
     };
@@ -923,7 +991,8 @@ public sealed class WolfpackPower : PowerModel, ILocalizationProvider
             var copy = combat.CreateCard(
                 ModelDb.GetById<CardModel>(played.Id), player);
             if (copy == null) continue;
-            if (played.IsUpgraded && copy.IsUpgradable && !copy.IsUpgraded)
+            if ((played.IsUpgraded || UpgradedCopy) && copy.IsUpgradable
+                && !copy.IsUpgraded)
             {
                 copy.UpgradeInternal();
             }
@@ -945,6 +1014,18 @@ public sealed class WolfpackPower : PowerModel, ILocalizationProvider
                                              "Lupical", amount: made);
         }
     }
+}
+
+/// <summary>Lupical: the copy is upgraded when the played one was.</summary>
+public sealed class WolfpackPower : WolfpackBasePower
+{
+    public override bool UpgradedCopy => false;
+}
+
+/// <summary>Lupical+: the copy is always upgraded.</summary>
+public sealed class WolfpackPlusPower : WolfpackBasePower
+{
+    public override bool UpgradedCopy => true;
 }
 
 /// <summary>
@@ -1010,20 +1091,43 @@ public sealed class OathboundAegisPower : PowerModel, ILocalizationProvider
 
 /// <summary>Weathervane: "At the start of your turn, you may choose an
 /// element you have Oath in; it becomes your current element." Paid first
-/// in <see cref="VarkaOath.TurnStart"/>, on a cancelable grid.</summary>
-public sealed class WeathervanePower : PowerModel, ILocalizationProvider
+/// in <see cref="VarkaOath.TurnStart"/>, on a cancelable grid.
+///
+/// THE POWER UPGRADE PASS (2026-10-19): the upgraded card installs
+/// <see cref="WeathervanePlusPower"/>: an element chosen also gains 1 Oath
+/// of it (none on a cancel), was Innate. Either form gives the one choice.
+/// </summary>
+public abstract class WeathervaneBasePower : PowerModel, ILocalizationProvider
 {
+    /// <summary>The Oath a chosen element gains, 0 [1].</summary>
+    public abstract int OathGained { get; }
+
     public List<(string, string)>? Localization => new()
     {
-        ("title", "Weathervane"),
+        ("title", OathGained > 0 ? "Weathervane+" : "Weathervane"),
         ("description",
             "At the start of your turn, you may choose an element you have "
-          + "[gold]Oath[/gold] in. It becomes your [gold]current element[/gold]."),
+          + "[gold]Oath[/gold] in. It becomes your [gold]current element[/gold]."
+          + (OathGained > 0
+              ? " Gain " + OathGained + " [gold]Oath[/gold] of it."
+              : "")),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Single;
+}
+
+/// <summary>Weathervane: the choice alone.</summary>
+public sealed class WeathervanePower : WeathervaneBasePower
+{
+    public override int OathGained => 0;
+}
+
+/// <summary>Weathervane+: the chosen element gains 1 Oath.</summary>
+public sealed class WeathervanePlusPower : WeathervaneBasePower
+{
+    public override int OathGained => 1;
 }
 
 /// <summary>Twin Gales: "Your Swirls also pay the element they Swirl. If
@@ -1047,14 +1151,23 @@ public sealed class TwinGalesPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>Eye of Stormterror: "The first 3 times you Swirl each turn,
-/// draw 1 card." Paid by <see cref="VarkaOath.OnSwirl"/>.</summary>
-public sealed class EyeOfStormterrorPower : PowerModel, ILocalizationProvider
+/// draw 1 card." Paid by <see cref="VarkaOath.OnSwirl"/>.
+///
+/// THE POWER UPGRADE PASS (2026-10-19): the upgraded card installs
+/// <see cref="EyeOfStormterrorPlusPower"/>, the first 4 Swirls
+/// (<see cref="VarkaLaw.EyeOfStormterrorSwirlsUpgraded"/>), was Innate. Each
+/// form reads its own count.</summary>
+public abstract class EyeOfStormterrorBasePower : PowerModel, ILocalizationProvider
 {
+    /// <summary>The Swirls each turn that draw, 3 [4].</summary>
+    public abstract int Swirls { get; }
+
     public List<(string, string)>? Localization => new()
     {
-        ("title", "Eye of Stormterror"),
+        ("title", Swirls > VarkaLaw.EyeOfStormterrorSwirls
+            ? "Eye of Stormterror+" : "Eye of Stormterror"),
         ("description",
-            "The first " + VarkaLaw.EyeOfStormterrorSwirls + " times you "
+            "The first " + Swirls + " times you "
           + "[gold]Swirl[/gold] each turn, draw [blue]{Amount}[/blue] "
           + "card{Amount:plural:|s}."),
     };
@@ -1069,6 +1182,18 @@ public sealed class EyeOfStormterrorPower : PowerModel, ILocalizationProvider
         Flash();
         await CardPileCmd.Draw(choiceContext, Amount, player);
     }
+}
+
+/// <summary>Eye of Stormterror: the first 3 Swirls each turn.</summary>
+public sealed class EyeOfStormterrorPower : EyeOfStormterrorBasePower
+{
+    public override int Swirls => VarkaLaw.EyeOfStormterrorSwirls;
+}
+
+/// <summary>Eye of Stormterror+: the first 4 Swirls each turn.</summary>
+public sealed class EyeOfStormterrorPlusPower : EyeOfStormterrorBasePower
+{
+    public override int Swirls => VarkaLaw.EyeOfStormterrorSwirlsUpgraded;
 }
 
 /// <summary>The Order Answers: "At the start of your turn, choose 1 of 3

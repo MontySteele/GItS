@@ -173,7 +173,7 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   each combat, your starting Knight's element becomes current. Your Swirls
   also pay your current element." Wolf's Gravestone (Orobas upgrade) adds an
   upgraded Ascension, free that turn, on his first Oath gain each combat.
-- **Pool:** 78 (20 / 35 / 23), thirteen pool Knights. Ancients: All Four
+- **Pool:** 78 (20 / 36 / 22), thirteen pool Knights. Ancients: All Four
   Winds (Tome); Dandelion Gale (Tooth, replacing Four Winds' Ascension): 10
   Anemo to ALL, then 3 per current Oath to each, Retain, 2 [1]; an upgraded
   Ascension becomes an upgraded Gale. Deep Freeze has no Retain.

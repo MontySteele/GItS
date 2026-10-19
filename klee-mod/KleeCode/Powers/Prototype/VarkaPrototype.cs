@@ -73,4 +73,8 @@ public static class VarkaLaw
     /// <summary>Eye of Stormterror (the expansion): the Swirls each turn that
     /// draw.</summary>
     public const int EyeOfStormterrorSwirls = 3;
+
+    /// <summary>Eye of Stormterror+ (the power upgrade pass, 2026-10-19): the
+    /// first 4 Swirls each turn draw.</summary>
+    public const int EyeOfStormterrorSwirlsUpgraded = 4;
 }

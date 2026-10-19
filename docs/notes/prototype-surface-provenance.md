@@ -9795,3 +9795,32 @@ picks 2 and 3 went (a); the card designs carry no pick). The pool is 30
   (`art/plan.tsv`, "Fontaine pool rework art"), birthday art, TCG character
   cards, character cards and Emilie's full Wish, each a title no other row
   claims.
+
+## Varka power upgrade pass, 2026-10-19
+
+[USER], 2026-10-19: "You do have a habit of making too many powers just
+decrease their cost by 1 on upgrade though" and "Since we're already planning
+a Varka run, I'm fine with doing a Powers pass on him now." Staged on
+`varka-fang-next` (`review/active/varka-fang-next-2026-10-19.md`, sec.3).
+
+- Seven upgrades that were Innate now install a Plus power
+  (`upgraded_power`): Unwavering Banner (gain 1 [2] Oath), Wildfire Oath and
+  Absolute Zero (the Oath [plus 3]), Lupical ([an upgraded] copy),
+  Weathervane ([Gain 1 Oath of it.], only when an element is chosen),
+  Eye of Stormterror (the first 3 [4] Swirls) and West Wind's Blessing
+  ([and draws 1 card]). Classes: the `*BasePower` / `*PlusPower` pairs in
+  `Powers/Prototype/VarkaPowers.cs` and `CoopSet.cs`; Eye+'s 4 in
+  `VarkaLaw`; sim twins in `tier0/engine/varka_oath.py`.
+- Comrades of the Expedition's cost cut became `power_amount: +1` (1 [2]
+  Oath; the stack is the Oath).
+- Unchanged: Boreas Unbound, Twin Gales and Azure Fang's Oath keep Innate;
+  Retaliating Tide, Oathbound Aegis and The Order Answers keep their cost cut.
+
+## Varka rarity sweep, 2026-10-19
+
+[USER], 2026-10-19: "I had not noticed that Varka's powers are basically all
+rares. Can we do a sweep over that now as well?" Rarity only, no number or
+text: Converging Winds, Dawn Wind's March and Weathervane go Rare to
+Uncommon; Grand Master's Order and Rally to the Banner go Uncommon to Rare.
+His pool is 20 / 36 / 22, was 20 / 35 / 23 (`review/active/varka-fang-next-2026-10-19.md`,
+sec.4).

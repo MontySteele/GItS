@@ -4032,16 +4032,18 @@
 - {id: proto_vk_comrades_of_the_expedition, name: "Comrades of the Expedition", character: varka,
    authored_by: [claude], multiplayer: true,
    cost: 2, type: power, rarity: rare,
-   description: "Whenever another player plays an Attack, gain 1 [gold]Oath[/gold] of your [gold]current element[/gold].",
+   description: "Whenever another player plays an Attack, gain {PowerAmount:diff()} [gold]Oath[/gold] of your [gold]current element[/gold].",
    effects: [{op: apply_power, power: vk_comrades_of_the_expedition, amount: 1, target: self}],
-   upgrade: {cost: -1}}
+   # Upgrade was cost -1: "Varka power upgrade pass, 2026-10-19".
+   upgrade: {power_amount: +1}}
 
 - {id: proto_vk_west_winds_blessing, name: "West Wind's Blessing", character: varka,
    authored_by: [claude], multiplayer: true,
    cost: 2, type: power, rarity: rare,
-   description: "The first time each turn you [gold]Swirl[/gold], each other player gains {energyPrefix:energyIcons(1)}.",
+   description: "The first time each turn you [gold]Swirl[/gold], each other player gains {energyPrefix:energyIcons(1)}{IfUpgraded:show: and draws 1 card|}.",
    effects: [{op: apply_power, power: vk_west_winds_blessing, amount: 1, target: self}],
-   upgrade: {innate: true}}
+   # Upgrade was Innate: "Varka power upgrade pass, 2026-10-19".
+   upgrade: {upgraded_power: vk_west_winds_blessing_plus}}
 
 # VARKA, THE OATH REWORK (review/active/varka-paper-kit-2026-09-28.md, ruled
 # 2026-09-29). Rules: Powers/Prototype/VarkaOath.cs, tier0/engine/varka_oath.py.
@@ -4274,7 +4276,8 @@
 
 - {id: proto_vk_grand_masters_order, name: "Grand Master's Order", character: varka,
    authored_by: [claude],
-   cost: 0, type: skill, rarity: uncommon, exhaust: true,
+   # Rare, was Uncommon: "Varka rarity sweep, 2026-10-19".
+   cost: 0, type: skill, rarity: rare, exhaust: true,
    description: "The next [gold]Knight[/gold] you play this turn is played twice.",
    effects: [{op: apply_power, power: vk_grand_masters_order, amount: 1, target: self}],
    upgrade: {retain: true}}
@@ -4316,7 +4319,8 @@
 
 - {id: proto_vk_rally_to_the_banner, name: "Rally to the Banner", character: varka,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: uncommon, exhaust: true,
+   # Rare, was Uncommon: "Varka rarity sweep, 2026-10-19".
+   cost: 1, type: skill, rarity: rare, exhaust: true,
    description: "Move all your [gold]Oath[/gold] to your [gold]current element[/gold].",
    effects: [{op: varka, kind: rally}],
    upgrade: {cost: -1}}
@@ -4405,7 +4409,8 @@
    # Varka round 3, pick 1 (2026-10-10, review/records/varka-round-3-2026-10-10.md):
    # re-aimed, (a) at 6 [8] after the tier-0 read (#1042). Was cost 2 [1],
    # "The elements your Swirls spread set off Elemental Reactions".
-   cost: 1, type: power, rarity: rare,
+   cost: 1, type: power, rarity: uncommon,
+   # Uncommon, was Rare: "Varka rarity sweep, 2026-10-19".
    description: "Your [gold]Swirls[/gold] deal {PowerAmount:diff()} additional damage to ALL enemies.",
    effects: [{op: apply_power, power: vk_converging_winds, amount: 6, target: self}],
    upgrade: {power_amount: 2}}
@@ -4460,7 +4465,8 @@
    authored_by: [claude],
    # Pick 3 (ruled): 2 raised to 3. Cost 2 to 1, upgrade Block +1 for
    # the cost cut: provenance, "Varka weak cards, 2026-10-03".
-   cost: 1, type: power, rarity: rare,
+   # Uncommon, was Rare: "Varka rarity sweep, 2026-10-19".
+   cost: 1, type: power, rarity: uncommon,
    description: "Whenever you gain [gold]Oath[/gold] of your [gold]current element[/gold], gain {PowerAmount:diff()} [gold]Block[/gold].",
    effects: [{op: apply_power, power: vk_dawn_winds_march, amount: 3, target: self}],
    upgrade: {power_amount: 1}}
@@ -4600,9 +4606,10 @@
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
    # Reworded by the combo pass (sec.4, 2026-10-04): a mono-element payoff.
-   description: "Only [gold]Knights[/gold] change your [gold]current element[/gold]. Whenever another card would, gain 1 [gold]Oath[/gold] of your [gold]current element[/gold] instead.",
+   description: "Only [gold]Knights[/gold] change your [gold]current element[/gold]. Whenever another card would, gain {IfUpgraded:show:2|1} [gold]Oath[/gold] of your [gold]current element[/gold] instead.",
    effects: [{op: apply_power, power: vk_unwavering_banner, amount: 1, target: self}],
-   upgrade: {innate: true}}
+   # Upgrade was Innate: "Varka power upgrade pass, 2026-10-19".
+   upgrade: {upgraded_power: vk_unwavering_banner_plus}}
 
 - {id: proto_vk_shifting_gale, name: "Shifting Gale", character: varka,
    authored_by: [claude],
@@ -4686,9 +4693,10 @@
    # Since 2026-10-03 Pyro's Absolute Zero: provenance note, "Varka
    # Wildfire Oath and Short Circuit, 2026-10-03"; costs 1 since "Varka payoff fix, 2026-10-08".
    cost: 1, type: power, rarity: rare,
-   description: "Whenever you apply [gold]Pyro[/gold] to an enemy, deal damage equal to your [gold]Pyro[/gold] [gold]Oath[/gold] to it.",
+   description: "Whenever you apply [gold]Pyro[/gold] to an enemy, deal damage equal to your [gold]Pyro[/gold] [gold]Oath[/gold]{IfUpgraded:show: plus 3|} to it.",
    effects: [{op: apply_power, power: vk_wildfire_oath, amount: 1, target: self}],
-   upgrade: {innate: true}}
+   # Upgrade was Innate: "Varka power upgrade pass, 2026-10-19".
+   upgrade: {upgraded_power: vk_wildfire_oath_plus}}
 
 # Element identities (sec.4): Retaliating Tide replaces Unbroken Tide.
 - {id: proto_vk_retaliating_tide, name: "Retaliating Tide", character: varka,
@@ -4705,9 +4713,10 @@
    # debuff while Cryo was current.
    # Varka payoff fix, 2026-10-08: costs 1, was 2.
    cost: 1, type: power, rarity: rare,
-   description: "Whenever you apply [gold]Weak[/gold] or [gold]Vulnerable[/gold] to an enemy, deal damage equal to your [gold]Cryo[/gold] [gold]Oath[/gold] to it.",
+   description: "Whenever you apply [gold]Weak[/gold] or [gold]Vulnerable[/gold] to an enemy, deal damage equal to your [gold]Cryo[/gold] [gold]Oath[/gold]{IfUpgraded:show: plus 3|} to it.",
    effects: [{op: apply_power, power: vk_absolute_zero, amount: 1, target: self}],
-   upgrade: {innate: true}}
+   # Upgrade was Innate: "Varka power upgrade pass, 2026-10-19".
+   upgrade: {upgraded_power: vk_absolute_zero_plus}}
 
 - {id: proto_vk_thundering_verdict, name: "Lightning Fang", character: varka,
    authored_by: [claude],
@@ -4742,9 +4751,10 @@
    cost: 1, type: power, rarity: rare,
    # Varka payoff round, 2026-10-10: shuffled in, the copy Exhausts (was: to
    # the discard pile). Provenance note, "Varka payoff round, 2026-10-10".
-   description: "Whenever you play [gold]Four Winds' Ascension[/gold], shuffle a copy of it into your [gold]Draw Pile[/gold]. The copy [gold]Exhausts[/gold].",
+   description: "Whenever you play [gold]Four Winds' Ascension[/gold], shuffle {IfUpgraded:show:an upgraded|a} copy of it into your [gold]Draw Pile[/gold]. The copy [gold]Exhausts[/gold].",
    effects: [{op: apply_power, power: vk_wolfpack, amount: 1, target: self}],
-   upgrade: {innate: true}}
+   # Upgrade was Innate: "Varka power upgrade pass, 2026-10-19".
+   upgrade: {upgraded_power: vk_wolfpack_plus}}
 
 - {id: proto_vk_oathbound_aegis, name: "Oathbound Aegis", character: varka,
    authored_by: [claude],
@@ -4758,10 +4768,12 @@
 - {id: proto_vk_weathervane, name: "Weathervane", character: varka,
    authored_by: [claude],
    # Varka last pass (2026-10-12): costs 1, was 2.
-   cost: 1, type: power, rarity: rare,
-   description: "At the start of your turn, you may choose an element you have [gold]Oath[/gold] in. It becomes your [gold]current element[/gold].",
+   # Uncommon, was Rare: "Varka rarity sweep, 2026-10-19".
+   cost: 1, type: power, rarity: uncommon,
+   description: "At the start of your turn, you may choose an element you have [gold]Oath[/gold] in. It becomes your [gold]current element[/gold].{IfUpgraded:show: Gain 1 [gold]Oath[/gold] of it.|}",
    effects: [{op: apply_power, power: vk_weathervane, amount: 1, target: self}],
-   upgrade: {innate: true}}
+   # Upgrade was Innate: "Varka power upgrade pass, 2026-10-19".
+   upgrade: {upgraded_power: vk_weathervane_plus}}
 
 - {id: proto_vk_tempest_of_the_four_winds, name: "Tempest of the Four Winds", character: varka,
    authored_by: [claude],
@@ -4795,9 +4807,10 @@
 - {id: proto_vk_eye_of_stormterror, name: "Eye of Stormterror", character: varka,
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
-   description: "The first 3 times you [gold]Swirl[/gold] each turn, draw 1 card.",
+   description: "The first {IfUpgraded:show:4|3} times you [gold]Swirl[/gold] each turn, draw 1 card.",
    effects: [{op: apply_power, power: vk_eye_of_stormterror, amount: 1, target: self}],
-   upgrade: {innate: true}}
+   # Upgrade was Innate: "Varka power upgrade pass, 2026-10-19".
+   upgrade: {upgraded_power: vk_eye_of_stormterror_plus}}
 
 - {id: proto_vk_charge_of_the_knights, name: "Charge of the Knights", character: varka,
    authored_by: [claude],

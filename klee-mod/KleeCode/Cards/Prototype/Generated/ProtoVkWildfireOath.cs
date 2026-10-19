@@ -45,7 +45,7 @@ public sealed class ProtoVkWildfireOath : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Wildfire Oath"),
-        ("description", "Whenever you apply [gold]Pyro[/gold] to an enemy, deal damage equal to your [gold]Pyro[/gold] [gold]Oath[/gold] to it."),
+        ("description", "Whenever you apply [gold]Pyro[/gold] to an enemy, deal damage equal to your [gold]Pyro[/gold] [gold]Oath[/gold]{IfUpgraded:show: plus 3|} to it."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -63,11 +63,18 @@ public sealed class ProtoVkWildfireOath : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<WildfireOathPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        if (IsUpgraded)
+        {
+            await PowerCmd.Apply<WildfireOathPlusPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        }
+        else
+        {
+            await PowerCmd.Apply<WildfireOathPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        }
     }
 
     protected override void OnUpgrade()
     {
-        AddKeyword(CardKeyword.Innate);
+        // upgraded_power: the upgraded card installs WildfireOathPlusPower, read off IsUpgraded when the card is played.
     }
 }

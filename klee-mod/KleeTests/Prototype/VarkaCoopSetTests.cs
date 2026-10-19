@@ -95,12 +95,14 @@ public class VarkaCoopSetTests : IDisposable
             + "{InCombat:{VarkaSwirl}|}",
             Face(new ProtoVkWindwardFlank()));
         Assert.Equal(
-            "Whenever another player plays an Attack, gain 1 "
+            // The power upgrade pass (2026-10-19): 1 [2] Oath.
+            "Whenever another player plays an Attack, gain {PowerAmount:diff()} "
             + "[gold]Oath[/gold] of your [gold]current element[/gold].",
             Face(new ProtoVkComradesOfTheExpedition()));
         Assert.Equal(
             "The first time each turn you [gold]Swirl[/gold], each other "
-            + "player gains {energyPrefix:energyIcons(1)}.",
+            + "player gains {energyPrefix:energyIcons(1)}"
+            + "{IfUpgraded:show: and draws 1 card|}.",
             Face(new ProtoVkWestWindsBlessing()));
     }
 
@@ -113,19 +115,23 @@ public class VarkaCoopSetTests : IDisposable
         Upgrade(escort);
         Assert.Equal(9m, escort.DynamicVars.Block.BaseValue);
 
-        // Marching Orders and Windward Flank: 1 [0]. Comrades: 2 [1].
+        // Marching Orders and Windward Flank: 1 [0]. Comrades (the power
+        // upgrade pass, 2026-10-19): 2 [2], and 1 [2] Oath; was 2 [1].
         Assert.Equal(0, Upgraded<ProtoVkMarchingOrders>().EnergyCost
             .GetWithModifiers(CostModifiers.None));
         Assert.Equal(0, Upgraded<ProtoVkWindwardFlank>().EnergyCost
             .GetWithModifiers(CostModifiers.None));
-        Assert.Equal(1, Upgraded<ProtoVkComradesOfTheExpedition>().EnergyCost
-            .GetWithModifiers(CostModifiers.None));
+        var comrades = Upgraded<ProtoVkComradesOfTheExpedition>();
+        Assert.Equal(2, comrades.EnergyCost.GetWithModifiers(CostModifiers.None));
+        Assert.Equal(2m, comrades.DynamicVars["PowerAmount"].BaseValue);
 
-        // West Wind's Blessing: Innate, and the cost stays 2.
+        // West Wind's Blessing: the cost stays 2; upgraded it also draws each
+        // other player 1 card (the power upgrade pass, 2026-10-19: was
+        // Innate), through WestWindsBlessingPlusPower.
         var blessing = new ProtoVkWestWindsBlessing();
         Assert.DoesNotContain(CardKeyword.Innate, blessing.Keywords);
         Upgrade(blessing);
-        Assert.Contains(CardKeyword.Innate, blessing.Keywords);
+        Assert.DoesNotContain(CardKeyword.Innate, blessing.Keywords);
         Assert.Equal(2, blessing.EnergyCost.GetWithModifiers(CostModifiers.None));
     }
 
@@ -351,11 +357,11 @@ public class VarkaCoopSetTests : IDisposable
     public void West_winds_blessing_rides_every_swirl_he_makes()
     {
         var swirl = Il.CallSequence(Il.Method("VarkaOath", "OnSwirl")).ToList();
-        Assert.Contains("WestWindsBlessingPower.OnSwirl", swirl);
+        Assert.Contains("WestWindsBlessingBasePower.OnSwirl", swirl);
         var pay = Il.CallSequence(
-            Il.Method("WestWindsBlessingPower", "OnSwirl")).ToList();
+            Il.Method("WestWindsBlessingBasePower", "OnSwirl")).ToList();
         var others = pay.IndexOf("CoopSet.OtherPlayers");
-        var latch = pay.IndexOf("WestWindsBlessingPower.Take");
+        var latch = pay.IndexOf("WestWindsBlessingBasePower.Take");
         var energy = pay.IndexOf("PlayerCmd.GainEnergy");
         Assert.True(others >= 0 && others < latch && latch < energy);
     }
@@ -393,13 +399,19 @@ public class VarkaCoopSetTests : IDisposable
 
             combat.CurrentSide = CombatSide.Enemy;
             Assert.False(WestWindsBlessingPower.Counts(varka.Creature));
-            await WestWindsBlessingPower.OnSwirl(varka.Creature);
+            await WestWindsBlessingBasePower.OnSwirl(
+                new MegaCrit.Sts2.Core.GameActions.Multiplayer.ThrowingPlayerChoiceContext(),
+                varka.Creature);
             Assert.Equal(energy, ally.Player.PlayerCombatState!.Energy);
 
             combat.CurrentSide = CombatSide.Player;
-            await WestWindsBlessingPower.OnSwirl(varka.Creature);
+            await WestWindsBlessingBasePower.OnSwirl(
+                new MegaCrit.Sts2.Core.GameActions.Multiplayer.ThrowingPlayerChoiceContext(),
+                varka.Creature);
             Assert.Equal(energy + 1, ally.Player.PlayerCombatState!.Energy);
-            await WestWindsBlessingPower.OnSwirl(varka.Creature);
+            await WestWindsBlessingBasePower.OnSwirl(
+                new MegaCrit.Sts2.Core.GameActions.Multiplayer.ThrowingPlayerChoiceContext(),
+                varka.Creature);
             Assert.Equal(energy + 1, ally.Player.PlayerCombatState!.Energy);
         }
         finally

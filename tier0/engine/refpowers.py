@@ -1382,7 +1382,8 @@ def on_power_applied(state: CombatState, target: Fighter, name: str,
     # it." Sea's Reproach's test; `varka_oath` is a no-op for anyone else.
     if (name in ("weak", "vulnerable") and stacks > 0
             and applier is state.player and target is not state.player
-            and state.player.powers.get("vk_absolute_zero", 0)):
+            and (state.player.powers.get("vk_absolute_zero", 0)
+                 or state.player.powers.get("vk_absolute_zero_plus", 0))):
         from tier0.engine import varka_oath         # late import: cycle
         varka_oath.on_debuff_applied(state, target, name, stacks)
 

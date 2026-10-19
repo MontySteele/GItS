@@ -45,7 +45,7 @@ public sealed class ProtoVkEyeOfStormterror : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Eye of Stormterror"),
-        ("description", "The first 3 times you [gold]Swirl[/gold] each turn, draw 1 card."),
+        ("description", "The first {IfUpgraded:show:4|3} times you [gold]Swirl[/gold] each turn, draw 1 card."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -63,11 +63,18 @@ public sealed class ProtoVkEyeOfStormterror : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<EyeOfStormterrorPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        if (IsUpgraded)
+        {
+            await PowerCmd.Apply<EyeOfStormterrorPlusPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        }
+        else
+        {
+            await PowerCmd.Apply<EyeOfStormterrorPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        }
     }
 
     protected override void OnUpgrade()
     {
-        AddKeyword(CardKeyword.Innate);
+        // upgraded_power: the upgraded card installs EyeOfStormterrorPlusPower, read off IsUpgraded when the card is played.
     }
 }

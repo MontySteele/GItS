@@ -45,7 +45,7 @@ public sealed class ProtoVkAbsoluteZero : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Absolute Zero"),
-        ("description", "Whenever you apply [gold]Weak[/gold] or [gold]Vulnerable[/gold] to an enemy, deal damage equal to your [gold]Cryo[/gold] [gold]Oath[/gold] to it."),
+        ("description", "Whenever you apply [gold]Weak[/gold] or [gold]Vulnerable[/gold] to an enemy, deal damage equal to your [gold]Cryo[/gold] [gold]Oath[/gold]{IfUpgraded:show: plus 3|} to it."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -63,11 +63,18 @@ public sealed class ProtoVkAbsoluteZero : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<AbsoluteZeroPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        if (IsUpgraded)
+        {
+            await PowerCmd.Apply<AbsoluteZeroPlusPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        }
+        else
+        {
+            await PowerCmd.Apply<AbsoluteZeroPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        }
     }
 
     protected override void OnUpgrade()
     {
-        AddKeyword(CardKeyword.Innate);
+        // upgraded_power: the upgraded card installs AbsoluteZeroPlusPower, read off IsUpgraded when the card is played.
     }
 }

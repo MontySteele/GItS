@@ -27,7 +27,7 @@ public class VarkaBacklogDisplayTests
         Assert.Equal("", VarkaOath.WildfireLine(null));
         // The number is the power's own arithmetic over the Pyro Oath.
         Assert.Contains(Il.Calls(Il.Method("VarkaOath", "WildfireLine")),
-                        c => c.Contains("WildfireOathPower.DamageFor"));
+                        c => c.Contains("WildfireOathBasePower.DamageFor"));
     }
 
     [Fact]

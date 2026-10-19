@@ -92,7 +92,8 @@ def test_the_pool_stays_78_five_out_five_in(varka):
     assert len(pool) == 78
     by = {r: sum(1 for c in pool.values() if c.rarity == r)
           for r in ("common", "uncommon", "rare")}
-    assert by == {"common": 20, "uncommon": 35, "rare": 23}
+    # The rarity sweep (2026-10-19): three Powers down, two Skills up.
+    assert by == {"common": 20, "uncommon": 36, "rare": 22}
     assert not {_vk(x) for x in CUT} & set(pool)
     assert {x: pool[_vk(x)].rarity for x in ADDED} == ADDED
     for x in CUT:
