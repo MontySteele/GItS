@@ -8,6 +8,33 @@ commit message, the document the ruling changes is edited in place, and the
 line leaves this file. Closed picks are in git
 (`git show 2b73880a:docs/current/QUEUE.md` for the last copy in the old form).
 
+## Backlog wrap-up (2026-10-19)
+
+Found while clearing `BACKLOG.md`; each is a rule or text call on a kit.
+
+1. **Klee, Stoke the Fuse** spends every Spark even on an empty field, as
+   its text says; Party Poppers' Bomb lands after the play, on a random enemy.
+   (a, default) leave it. (b) spend only if the target has a Bomb (`klee-next`).
+2. **Klee, Perfect Timing's** replay hits nothing when the first Set off
+   killed the target. (a, default) leave it. (b) the replay picks another
+   enemy with Bombs (`klee-next`).
+3. **Klee, Chained Reactions:** a Set off takes the whole pile first, so a
+   second Bomb in that pile never grows. (a, default) say so: "your Bombs
+   still waiting grow 3" (text only). (b) leave it.
+4. **Klee, the Mine tip** never says it uses up the aura. (a, default) "A Bomb
+   that also goes off when its enemy attacks you (its plain Bombs stay), and
+   uses up the enemy's aura. Any Set off spends it too." (b) leave it.
+5. **Furina, the Archaic Tooth's All the World's a Stage+** replaces Rising
+   Applause+ but drops its Retain. (a, default) keep the Retain. (b) leave it.
+6. **Role-tempo floors:** regenerating with the fixed card reader moves 25 of
+   110 package floors (Klee's spark `velocity|early` 5.6 to 19.4).
+   (a, default) take the new floors. (b) keep the old ones.
+
+Moved here from the backlog, yours by nature: the writing review before the
+public launch; Yae's card-trail colour (she borrows the Ironclad's orange);
+"Witch's Homework" and "Witch's Homework II" read alike; listen for the
+modded death sound (`set_hp player 1`); the shop portrait idles.
+
 ## Eyes-on looks (materials ready; no build waits on them)
 
 - **End-of-turn docket:** does the end of turn read legibly, is the per-seat

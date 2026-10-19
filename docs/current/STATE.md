@@ -105,7 +105,8 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   (`review/records/kokomi-yae-round-2026-10-19.md`); [USER]'s co-op runs
   2026-10-18.
 - **Next:** the card-by-card paper for her three ruled archetypes (Grand
-  Strategy, Read the Tide, Shoal).
+  Strategy, Read the Tide, Shoal); it takes up her warding (`EB-80`: the
+  2026-10-19 round ran short of Block since Ward lost its Block).
 
 **Furina: Balance** (2026-10-15).
 - **Rules** (`review/active/furina-research-proposal-2026-10-05.md` sec.2):
