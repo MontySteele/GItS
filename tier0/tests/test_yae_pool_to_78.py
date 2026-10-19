@@ -267,12 +267,32 @@ def test_offertory_box_and_torii_ward_and_late_night_reading():
     assert len(st.player.hand) == hand + 3
 
 
-def test_hold_the_presses_retains_the_hand():
+@pytest.mark.parametrize("annotated, drawn", [(0, 0), (1, 1), (2, 2), (4, 2)])
+def test_hold_the_presses_draws_per_annotated_card_up_to_two(annotated,
+                                                             drawn):
+    """Redesigned 2026-10-19: "Gain 8 Block. Draw 1 card for each Annotated
+    card in your Hand, up to 2." The hand at resolution; an Annotated Hold
+    the Presses does not count itself."""
+    st = _state()
+    marked = [loader.get_card("strike") for _ in range(annotated)]
+    for c in marked:
+        Y.annotate(st, c, Y.RED_INK)
+    st.player.hand = [*marked, loader.get_card("defend")]
+    htp = _card("hold_the_presses")
+    Y.annotate(st, htp, Y.ROYALTIES)
+    before = len(st.player.hand)
+    _play(st, htp)
+    assert len(st.player.hand) == before + drawn
+    assert st.player.block == 8
+    assert htp.cost == 1
+
+
+def test_hold_the_presses_retains_nothing_now():
+    from tier0.engine import refpowers
     st = _state()
     _play(st, "hold_the_presses")
-    assert Y.retains_hand(st)
-    Y.turn_start(st)
-    assert not Y.retains_hand(st)
+    cards = [loader.get_card("strike")]
+    assert refpowers.retain_at_flush(st, cards) == []
 
 
 def test_afterword_returns_every_annotated_card():

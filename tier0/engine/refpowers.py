@@ -1206,12 +1206,6 @@ def retain_at_flush(state: CombatState, flushing: list[Card]) -> list[Card]:
     keep: list[Card] = []
     if not flushing:
         return keep
-    # YAE, THE POOL TO 78: Hold the Presses, "Retain your hand this turn"
-    # (the base game's RetainHandPower): every card that would flush stays.
-    from tier0.engine import yae_shrine          # late import avoids cycle
-    if yae_shrine.retains_hand(state):
-        state.emit("yae_retain_hand", kept=[c.id for c in flushing])
-        return list(flushing)
     # Raiden Shogun, Plane of Euthymia (the Inazuma pool rework, 2026-10-18):
     # "At the end of your turn, Retain your Hand." Runic Pyramid's rule, every
     # turn (`PlaneOfEuthymiaPower.ShouldFlush`).

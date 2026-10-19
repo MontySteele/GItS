@@ -258,7 +258,7 @@ KIND_FIELDS = {
     "strike_all_at": (),
     "kitsune_act": (),
     "level_kitsune": ("amount",),
-    "retain_hand": (),
+    "draw_per_annotated": ("amount",),
     "replant": ("amount",),
     "plant_missing": (),
     "plant_until_full": (),
@@ -370,9 +370,8 @@ class YaeLedger:
     #: Copy.
     recall_choice: object = None
     #: The pool to 78: Editorial Priority's "first Annotated card this
-    #: turn" has been played; Hold the Presses' "Retain your hand this turn".
+    #: turn" has been played.
     priority_used: bool = False
-    retain_hand: bool = False
     #: The refill (2026-10-16): cards Edited this turn (Publisher's
     #: Deadline), cleared at her turn start; and the last enemy one of her
     #: Attack cards hit (Hunting Gaze). C# twins: `EditsThisTurn`,
@@ -1020,12 +1019,6 @@ def editorial_free(state, card) -> bool:
             and not led.priority_used and is_annotated(card))
 
 
-def retains_hand(state) -> bool:
-    """Hold the Presses: "Retain your hand this turn"."""
-    led = ledger(state.player)
-    return led is not None and led.retain_hand
-
-
 def turn_start(state) -> None:
     """`combat._player_turn`, post-draw: the Lure expires; Serial Novel
     brings back an Annotated card; Yakan Offering plants; then Sakura Grove
@@ -1035,7 +1028,6 @@ def turn_start(state) -> None:
         return
     led.lure = None
     led.priority_used = False
-    led.retain_hand = False
     led.edits_this_turn = 0
     for _ in range(_power(state.player, SERIAL_NOVEL)):
         cands = [c for c in state.player.discard_pile if is_annotated(c)]
@@ -1773,8 +1765,14 @@ def op_yae(state, fx: dict, card) -> None:
             act(state, s, "kitsunes_shelter")
     elif kind == "level_kitsune":
         level_up(state, fx["amount"], kind=KITSUNE)
-    elif kind == "retain_hand":
-        led.retain_hand = True
+    elif kind == "draw_per_annotated":
+        # Hold the Presses (redesigned 2026-10-19): "Draw 1 card for each
+        # Annotated card in your Hand, up to 2." The played card has left the
+        # hand. C# twin: `YaeCards.DrawPerAnnotated`.
+        n = min(sum(1 for c in state.player.hand if is_annotated(c)),
+                fx["amount"])
+        if n:
+            state.draw(n)
     elif kind == "replant":
         replant(state, fx["amount"], inherited(card))
     elif kind == "plant_missing":

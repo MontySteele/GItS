@@ -333,8 +333,8 @@
     "proto_mi_kirara_surprise_dispatch",
     "proto_mi_mizuki_aisa_utamakura",
     "proto_mi_mizuki_anraku",
-    "proto_mi_raiden_baleful_omen",
     "proto_mi_raiden_euthymia",
+    "proto_mi_raiden_musou_no_hitotachi",
     "proto_mi_sara_crowfeather_cover",
     "proto_mi_sara_tengu_stormcall",
     "proto_mi_sayu_daruma",
@@ -848,8 +848,8 @@
     "proto_mi_kirara_surprise_dispatch": "klee",
     "proto_mi_mizuki_aisa_utamakura": "klee",
     "proto_mi_mizuki_anraku": "klee",
-    "proto_mi_raiden_baleful_omen": "klee",
     "proto_mi_raiden_euthymia": "klee",
+    "proto_mi_raiden_musou_no_hitotachi": "klee",
     "proto_mi_sara_crowfeather_cover": "klee",
     "proto_mi_sara_tengu_stormcall": "klee",
     "proto_mi_sayu_daruma": "klee",
@@ -1107,8 +1107,8 @@
     "proto_mi_kirara_surprise_dispatch",
     "proto_mi_mizuki_aisa_utamakura",
     "proto_mi_mizuki_anraku",
-    "proto_mi_raiden_baleful_omen",
     "proto_mi_raiden_euthymia",
+    "proto_mi_raiden_musou_no_hitotachi",
     "proto_mi_sara_crowfeather_cover",
     "proto_mi_sara_tengu_stormcall",
     "proto_mi_sayu_daruma",
@@ -2223,11 +2223,11 @@
     "proto_mi_mizuki_anraku": {
       "cost": -1
     },
-    "proto_mi_raiden_baleful_omen": {
-      "strength_loss": 1
-    },
     "proto_mi_raiden_euthymia": {
-      "cost": -1
+      "innate": true
+    },
+    "proto_mi_raiden_musou_no_hitotachi": {
+      "formula_base": 6
     },
     "proto_mi_sara_crowfeather_cover": {
       "power_amount": 1

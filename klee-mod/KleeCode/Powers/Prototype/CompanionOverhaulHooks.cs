@@ -278,8 +278,8 @@ public static class CompanionOverhaulRiders
         if (dealer.Powers.OfType<LightningFangPower>().Any()) over = Element.Electro;
         if (dealer.Powers.OfType<PassionOverloadPower>().Any()) over = Element.Pyro;
         if (dealer.Powers.OfType<CrowfeatherCoverPower>().Any()) over = Element.Electro;
-        // The Inazuma pool rework (2026-10-18): Stormcall's and Baleful
-        // Omen's rider, at Crowfeather's tier. (Ayato's blanket Kyouka left
+        // The Inazuma pool rework (2026-10-18): Stormcall's (and, until
+        // 2026-10-19, Baleful Omen's) rider, at Crowfeather's tier. (Ayato's blanket Kyouka left
         // with that rework.)
         if (dealer.Powers.OfType<NextAttackElectroPower>().Any()) over = Element.Electro;
         return over == Element.None ? printed : over;

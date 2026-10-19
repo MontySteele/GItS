@@ -72,6 +72,6 @@ public sealed class ProtoMiRaidenEuthymia : CustomCardModel, ICompanionCard
 
     protected override void OnUpgrade()
     {
-        EnergyCost.UpgradeBy(-1);
+        AddKeyword(CardKeyword.Innate);
     }
 }

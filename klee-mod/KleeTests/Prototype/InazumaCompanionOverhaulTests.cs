@@ -71,8 +71,8 @@ public class InazumaCompanionOverhaulTests
         typeof(ProtoMiMizukiAisaUtamakura),
         typeof(ProtoMiChioriHasode),
         typeof(ProtoMiIttoUshi),
-        typeof(ProtoMiRaidenBalefulOmen),
         typeof(ProtoMiRaidenEuthymia),
+        typeof(ProtoMiRaidenMusouNoHitotachi),
         typeof(ProtoMiIttoRoyalDescent),
         typeof(ProtoMiYoimiyaNiwabi),
         typeof(ProtoMiKazuhaChihayaburu),
@@ -130,14 +130,15 @@ public class InazumaCompanionOverhaulTests
     {
         // The Inazuma pool rework (2026-10-18), grown to two cards a
         // character: 8 Common, 16 Uncommon, 10 Rare Universals, plus Gorou's
-        // two Commons and one Uncommon.
+        // two Commons and one Uncommon. 8 / 15 / 11 since Baleful Omen
+        // (Uncommon) gave way to Musou no Hitotachi (Rare), 2026-10-19.
         var byRarity = Rows
             .Select(t => ((CardModel)Activator.CreateInstance(t)!).Rarity)
             .GroupBy(r => r)
             .ToDictionary(g => g.Key, g => g.Count());
         Assert.Equal(8 + 2, byRarity[CardRarity.Common]);
-        Assert.Equal(16 + 1, byRarity[CardRarity.Uncommon]);
-        Assert.Equal(10, byRarity[CardRarity.Rare]);
+        Assert.Equal(15 + 1, byRarity[CardRarity.Uncommon]);
+        Assert.Equal(11, byRarity[CardRarity.Rare]);
     }
 
     [Fact]
@@ -839,5 +840,88 @@ public class InazumaCompanionOverhaulTests
     {
         Assert.False(CompanionPool.IsHiddenFrom(new ProtoMiYaeSacredSakurasFavor(), "yae"));
         Assert.True(CompanionPool.IsHiddenFrom(new ProtoMiYaeSesshouSakura(), "yae"));
+    }
+
+    // ---- RAIDEN, 2026-10-19 ------------------------------------------------
+    // [USER]: "On Musou - what about something closer to Defect's
+    // hyperbeam?" / "Im seeing this as a 3 cost card like hyperbeam."
+
+    private static List<CardModel> Hand(Seat seat) =>
+        (List<CardModel>)typeof(CardPile)
+            .GetField("_cards", All)!
+            .GetValue(PileType.Hand.GetPile(seat.Player)!)!;
+
+    private static T UpgradedCard<T>() where T : CardModel, new()
+    {
+        var card = new T();
+        Seat.Set(card, "IsMutable", true);
+        typeof(CardModel).GetMethod("UpgradeInternal", All)!
+            .Invoke(card, Array.Empty<object?>());
+        return card;
+    }
+
+    [Fact]
+    public void Musou_is_a_three_cost_rare_hyperbeam()
+    {
+        var card = new ProtoMiRaidenMusouNoHitotachi();
+        Assert.Equal(CardRarity.Rare, card.Rarity);
+        Assert.Equal(CardType.Attack, card.Type);
+        Assert.Equal(TargetType.AllEnemies, card.TargetType);
+        Assert.Equal(3, (int)card.EnergyCost.Canonical);
+        Assert.Equal(Element.Electro, ((ICompanionCard)card).CompanionElement);
+        Assert.Equal(16, (int)card.DynamicVars.CalculationBase.BaseValue);
+        Assert.Equal(2, (int)card.DynamicVars.ExtraDamage.BaseValue);
+        Assert.Equal(3, (int)card.DynamicVars["StrengthLoss"].BaseValue);
+        var up = UpgradedCard<ProtoMiRaidenMusouNoHitotachi>();
+        Assert.Equal(22, (int)up.DynamicVars.CalculationBase.BaseValue);
+        Assert.Equal(2, (int)up.DynamicVars.ExtraDamage.BaseValue);
+        Assert.Equal(3, (int)up.DynamicVars["StrengthLoss"].BaseValue);
+        Assert.Equal(3, (int)up.EnergyCost.Canonical);
+    }
+
+    [Fact]
+    public void Musou_counts_the_hand_without_itself()
+    {
+        var seat = Seat.Klee().WithCombatState();
+        var musou = Owned<ProtoMiRaidenMusouNoHitotachi>(seat);
+        var hand = Hand(seat);
+        Assert.Equal(0, InazumaHand.OtherCardsInHand(musou));
+        hand.Add(musou);
+        Assert.Equal(0, InazumaHand.OtherCardsInHand(musou));
+        for (var i = 0; i < 4; i++) hand.Add(new ProtoMiIttoUshi());
+        Assert.Equal(4, InazumaHand.OtherCardsInHand(musou));
+        // The face's multiplier: 16 + 2 x 4.
+        Assert.Equal(24, 16 + 2 * InazumaHand.OtherCardsInHand(musou));
+    }
+
+    [Fact]
+    public void Musou_hits_then_takes_three_strength_from_everyone_this_turn()
+    {
+        var calls = Il.CallSequence(typeof(ProtoMiRaidenMusouNoHitotachi)
+            .GetMethod("OnPlay", All)!).ToList();
+        var hit = calls.FindIndex(c => c.Contains("DamageCmd.Attack"));
+        var losses = calls.Select((c, i) => (c, i))
+            .Where(x => x.c.Contains("PowerCmd.Apply")).Select(x => x.i).ToList();
+        Assert.True(hit >= 0);
+        Assert.Equal(2, losses.Count);              // ALL enemies, then you
+        Assert.All(losses, i => Assert.True(i > hit));
+        Assert.Contains(calls, c => c.Contains("HittableEnemies"));
+        // Piercing Wail's this-turn shape: a TemporaryStrengthPower that takes.
+        Assert.True(typeof(TemporaryStrengthPower)
+            .IsAssignableFrom(typeof(ProtoMiRaidenMusouNoHitotachiPower)));
+        var isPositive = typeof(ProtoMiRaidenMusouNoHitotachiPower)
+            .GetProperty("IsPositive", All)!;
+        Assert.False((bool)isPositive.GetValue(new ProtoMiRaidenMusouNoHitotachiPower())!);
+    }
+
+    [Fact]
+    public void Euthymia_costs_two_and_its_upgrade_is_innate()
+    {
+        var card = new ProtoMiRaidenEuthymia();
+        Assert.Equal(2, (int)card.EnergyCost.Canonical);
+        var up = UpgradedCard<ProtoMiRaidenEuthymia>();
+        Assert.Equal(2, (int)up.EnergyCost.Canonical);
+        Assert.Contains(CardKeyword.Innate, up.Keywords);
+        Assert.DoesNotContain(CardKeyword.Innate, card.Keywords);
     }
 }

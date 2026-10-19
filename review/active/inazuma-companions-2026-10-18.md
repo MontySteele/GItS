@@ -68,7 +68,7 @@ Yae Miko, Sesshou Sakura (still hidden from Yae); Kamisato Ayaka, Soumetsu; Yume
 | Chiori, Fluttering Hasode (rebuilt) | 1 Attack | Deal 5 Geo damage twice. This ignores Block. |
 | Kamisato Ayato, Kyouka (rebuilt) | 1 Skill | Apply Hydro to ALL enemies. This turn, your Attacks deal 3 more damage. |
 | Itto, Ushi to the Rescue (new) | 1 Skill | Gain 8 Block. If an enemy intends to attack, gain 1 Strength. |
-| Raiden Shogun, Transcendence: Baleful Omen (new) | 1 Skill | ALL enemies lose 2 Strength this turn. Your next Attack this turn applies Electro. |
+| ~~Raiden Shogun, Transcendence: Baleful Omen (new)~~ (cut 2026-10-19, see the end of this page) | 1 Skill | ALL enemies lose 2 Strength this turn. Your next Attack this turn applies Electro. |
 | Yumemizuki Mizuki, Aisa Utamakura (new) | 1 Skill | Apply 1 Weak to ALL enemies. Draw 2 cards. |
 | Shikanoin Heizou, Windmuster Kick (new) | 2 Attack | Deal 12 Anemo damage and Swirl the enemy. Draw 1 card. |
 
@@ -211,3 +211,20 @@ The user asked GPT to check the 34-card version. GPT kept the expansion and rais
 
 To watch in the seat round, beside Euthymia and Niwabi: Hanega with a second copy or Reprint, and whether Favor
 becomes Yae's automatic Rare.
+
+## Musou returns, Baleful Omen is cut (ruled 2026-10-19)
+
+On the pool sweep's pick 3 (`review/active/pool-sweep-2026-10-18.md`), the user: "On Musou - what about something
+closer to Defect's hyperbeam?" / "Im seeing this as a 3 cost card like hyperbeam." Baleful Omen is cut and Musou no
+Hitotachi comes back as Raiden's second Rare. The pool stays 34; its split moves one Uncommon to Rare: 8 Common, 15
+Uncommon and 11 Rare. LAW allows two cards per 5-star, so Raiden is Euthymia and Musou.
+
+| Change | Card | Text |
+|---|---|---|
+| Cut | Raiden Shogun, Transcendence: Baleful Omen (Uncommon Skill, 1) | ALL enemies lose 2 Strength this turn. Your next Attack this turn applies Electro. |
+| Back | Raiden Shogun, Musou no Hitotachi (Rare Attack, 3) | Deal 16 [22] Electro damage to ALL enemies, plus 2 for each card in your Hand. ALL enemies and you lose 3 Strength this turn. |
+| Upgrade | Raiden Shogun, Plane of Euthymia (Rare Power, 2) | The upgrade is Innate (was cost 1). |
+
+Musou counts the hand when it resolves, Musou itself not included. Its Strength loss is Baleful Omen's (Piercing
+Wail's this-turn loss), on you as well. The hit lands before you lose the Strength. It keeps Baleful Omen's art (the
+Shogun's TCG character card). Euthymia keeps her full Wish.
