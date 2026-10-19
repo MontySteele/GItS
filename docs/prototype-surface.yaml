@@ -2093,7 +2093,8 @@
    # Same id, name and art; both lines of a Sting, a Ward's now-line.
    # Provenance note.
    cost: 1, type: power, rarity: uncommon,
-   description: "Your [gold]Stings[/gold] deal {PowerAmount:diff()} additional damage. Your [gold]Wards[/gold] gain {PowerAmount:diff()} additional [gold]Block[/gold].",
+   # Ward and Casket (2026-10-18): the Ward half is gone with the Ward's Block.
+   description: "Your [gold]Stings[/gold] deal {PowerAmount:diff()} additional damage.",
    # Kokomi review r6 (2026-10-14, item 3): 4 [6] (was 3 [5]), Accuracy's.
    effects: [{op: apply_power, power: kk_watchful_shoal, amount: 4, target: self}],
    # 6 and 6.
@@ -2265,12 +2266,14 @@
 - {id: proto_kk_ward, name: "Ward", character: kokomi,
    authored_by: [claude],
    # The jellyfish build (2026-10-12): cost 0, with its Plan line.
+   # Ward and Casket (2026-10-18, [USER]: "Ward should stop giving Block...
+   # change it to 'draw 1. Plan: draw 1'"): no Block, no Weak.
    cost: 0, type: skill, rarity: token, ethereal: true, exhaust: true,
-   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Apply 1 [gold]Weak[/gold].",
-   effects: [{op: block, amount: 4}],
-   plan: [{op: apply_power, power: weak, amount: 1, target: front_enemy}],
-   # 6 Block / Plan 2 Weak.
-   upgrade: {block: 2, plan_power_amount: 1}}
+   description: "Draw 1 card. [gold]Plan[/gold]: Draw {PlanCards:diff()} card{PlanCards:plural:|s}.",
+   effects: [{op: draw, amount: 1}],
+   plan: [{op: draw, amount: 1}],
+   # The Plan draws 2.
+   upgrade: {plan_draw: 1}}
 
 # THE INAZUMA COMPANION OVERHAUL, beside the Mondstadt block:
 # these ARE Inazuma's Universal companion pool.

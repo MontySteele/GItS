@@ -536,7 +536,7 @@ public class KokomiOffCharacterSweepTests
         foreach (var (type, method) in new[]
                  {
                      ("TamakushiCasket", "BeforeCombatStart"),
-                     ("TamakushiCasket", "AfterBlockCleared"),
+                     ("TamakushiCasket", "Counts"),
                      ("KokomiArmRelics", "FirstTurnOf"),
                      ("ResistanceArmband", "Counts"),
                  })

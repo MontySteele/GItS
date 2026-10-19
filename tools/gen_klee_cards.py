@@ -4167,8 +4167,7 @@ APPLY_POWERS = {
     "kk_kurage_bloom": ("KurageBloomPower", None,
         "At the start of your turn, add a [gold]Sting[/gold] to your hand."),
     "kk_watchful_shoal": ("WatchfulShoalPower", None,
-        "Your [gold]Stings[/gold] deal {X} additional damage. Your "
-        "[gold]Wards[/gold] gain {X} additional [gold]Block[/gold]."),
+        "Your [gold]Stings[/gold] deal {X} additional damage."),
     # THE POOL OVERHAUL (2026-10-13): Coordinated Tide reads a Companion's
     # reaction and Grand Strategist any of hers; Jellyfish Current and Battle
     # Formation are new. Classes in KokomiRefounding.cs.

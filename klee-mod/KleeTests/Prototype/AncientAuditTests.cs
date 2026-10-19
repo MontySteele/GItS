@@ -176,13 +176,13 @@ public class AncientAuditTests
     }
 
     [Fact]
-    public void The_watatsumi_casket_pays_per_plan_from_the_same_hook()
+    public void The_watatsumi_casket_pays_more_from_the_same_hook()
     {
-        Assert.Contains("TamakushiCasket.BlockFor",
-            Il.Calls(Il.Method("TamakushiCasket", "AfterBlockCleared")));
-        Assert.Equal(0, new WatatsumiCasket().BlockFor(0));
-        Assert.Equal(6, new WatatsumiCasket().BlockFor(2));
-        Assert.Equal(3, new TamakushiCasket().BlockFor(2));
+        // Ward and Casket (2026-10-18): 2 Block a play, the starter's 1.
+        Assert.Contains("TamakushiCasket.get_Block",
+            Il.Calls(Il.Method("TamakushiCasket", "AfterCardPlayed")));
+        Assert.Equal(2, new WatatsumiCasket().Block);
+        Assert.Equal(1, new TamakushiCasket().Block);
     }
 
     // ==== Furina ==============================================================

@@ -1680,9 +1680,7 @@ def _op_block(state: CombatState, fx: dict, card: Card) -> None:
     # per play off a state latch, which under-counted every multi-gain card.
     # Frail bites it, exactly as the hook order does: the enchant additive
     # lands before the multiplicative listeners.
-    # Watchful Shoal (Kokomi round-3 changes): a Ward's extra Block, an
-    # additive like Dexterity, so Frail bites it.
-    raw += kokomi_plan.watchful_shoal_bonus(state, card, kokomi_plan.WARD_ID)
+    # (Watchful Shoal's Ward Block left with the Ward's Block, 2026-10-18.)
     for _ in range(times):
         amount = raw + card.enchant_block
         # Frail bites each printed card-block gain before the refpower funnel.
@@ -5227,6 +5225,9 @@ def resolve_card(state: CombatState, card: Card) -> None:
         varka_oath.begin_play(state, card)
     try:
         _resolve_card_bound(state, card)
+        # THE TAMAKUSHI CASKET (2026-10-18): a Plan card or a Companion
+        # played, face-up or written (C#'s `AfterCardPlayed`).
+        kokomi_plan.casket_block(state, card)
         # THE FURINA RESEARCH SLICE (`furina_tide`, sim only): the same door
         # for the research proposal's rows. Dead without the `ftd` tag.
         if "ftd" in card.tags:

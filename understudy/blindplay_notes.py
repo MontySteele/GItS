@@ -1684,8 +1684,9 @@ def _summon_row(hay: str) -> str:
 #: mirrored constant. The count and Open the Casket are retired.
 #: (The Ancient audit, 2026-10-12, dropped the second sentence the Kokomi
 #: pre-run fixes added, "A Plan's own Block comes at the start of your next
-#: turn.")
-CASKET_ROW = (f"At the start of your turn, if a Plan is waiting, gain "
+#: turn.") Ward and Casket (2026-10-18): Block per Plan card or Companion
+#: played, not at the start of the turn.
+CASKET_ROW = (f"Whenever you play a Plan card or a Companion, gain "
               f"{CASKET_BLOCK} Block.")
 
 ARM_KEYWORDS: dict[str, str] = {
@@ -1815,8 +1816,9 @@ ARM_KEYWORDS: dict[str, str] = {
     #
     # THE CASKET PASS (2026-09-28) retired the strike for a count; THE KOKOMI
     # RE-FOUNDING (2026-10-12) retired the count and its token, Open the
-    # Casket. The relic gives Block at the start of her turn while a Plan is
-    # waiting, and the row is its face (`TamakushiCasket.Face`) word for word.
+    # Casket. The relic gives Block for each Plan card or Companion she plays
+    # (2026-10-18), and the row is its face (`TamakushiCasket.Face`) word for
+    # word.
     "Tamakushi Casket": CASKET_ROW,
     # `EB-377` ADDED `Swirl`, printed as a VERB by ten Universals, beside
     # `Hexerei` -- which R276 pick 2 retired: the Spark and Klee's three

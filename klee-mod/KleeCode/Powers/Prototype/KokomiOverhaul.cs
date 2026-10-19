@@ -132,15 +132,15 @@ public static class KokomiOverhaul
 ///
 /// THE RE-FOUNDING (2026-10-12, design pass pick 3, ruled) REPLACED THE ONES
 /// THAT WERE HERE. The Casket's count, Open the Casket and The Long Game are
-/// gone; the relic reads "At the start of your turn, if a Plan is waiting,
-/// gain 3 Block." (start, not end, since [USER]'s 2026-10-12 ruling).
+/// gone. Since 2026-10-18 the relic reads "Whenever you play a Plan card or
+/// a Companion, gain 1 Block."
 ///
 /// MIRRORED BY VALUE from tier0, which is why it is a named constant rather
 /// than a literal at the call site (<c>tools/lint_constant_parity.py</c>).
 /// </summary>
 public static class KokomiOverhaulLaw
 {
-    /// <summary>The Tamakushi Casket's Block at the start of her turn while a
-    /// Plan is waiting. Mirrors <c>C.KOKOMI_OVERHAUL_CASKET_BLOCK</c>.</summary>
-    public const int CasketBlock = 3;
+    /// <summary>The Tamakushi Casket's Block for each Plan card or Companion
+    /// she plays. Mirrors <c>C.KOKOMI_OVERHAUL_CASKET_BLOCK</c>.</summary>
+    public const int CasketBlock = 1;
 }

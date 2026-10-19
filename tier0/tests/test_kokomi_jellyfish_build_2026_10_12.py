@@ -51,13 +51,29 @@ def test_the_sting_costs_0_and_keeps_its_plan_line():
 
 
 def test_the_ward_costs_0_and_keeps_its_plan_line():
+    """Ward and Casket (2026-10-18, [USER]: "Ward should stop giving
+    Block... change it to 'draw 1. Plan: draw 1'"): Draw 1. Plan: Draw 1
+    (2 upgraded)."""
     row, up = loader.get_card(kokomi_plan.WARD_ID), _up(kokomi_plan.WARD_ID)
     assert row.cost == 0 and up.cost == 0
     assert row.is_ethereal and row.exhaust
-    assert row.effects == [{"op": "block", "amount": 4}]
-    assert row.plan == [{"op": "apply_power", "power": "weak", "amount": 1,
-                         "target": "front_enemy"}]
-    assert up.effects[0]["amount"] == 6 and up.plan[0]["amount"] == 2
+    assert row.effects == [{"op": "draw", "amount": 1}]
+    assert row.plan == [{"op": "draw", "amount": 1}]
+    assert up.effects[0]["amount"] == 1 and up.plan[0]["amount"] == 2
+
+
+def test_a_played_ward_draws_1_and_its_plan_draws_1():
+    st = kokomi_state()
+    st.player.hand.clear()
+    st.player.draw_pile[:] = [card("strike") for _ in range(5)]
+    _attacking(st)
+    _play(st, card(kokomi_plan.WARD_ID))
+    assert len(st.player.hand) == 1 and st.player.block == 0
+    for e in st.enemies:
+        e.intents = []
+    write(st, card(kokomi_plan.WARD_ID))
+    carry_out(st)
+    assert len(st.player.hand) == 2 and st.player.block == 0
 
 
 def test_a_0_cost_sting_can_still_be_written_and_carried_out():
@@ -115,7 +131,9 @@ def test_endless_shoal_adds_a_sting_per_carry_out():
     write(st, card(kokomi_plan.STING_ID))
     st.player.hand.clear()
     carry_out(st)
-    assert [c.id for c in st.player.hand] == [kokomi_plan.STING_ID]
+    # The Ward's Plan draws a card since 2026-10-18; only Stings are asked.
+    assert [c.id for c in st.player.hand
+            if c.id == kokomi_plan.STING_ID] == [kokomi_plan.STING_ID]
 
 
 def test_endless_shoal_on_a_doubled_carry_out_gives_two_stings():

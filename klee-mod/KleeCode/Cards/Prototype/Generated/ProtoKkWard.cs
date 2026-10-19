@@ -41,14 +41,14 @@ public sealed class ProtoKkWard : CustomCardModel, ICharacterCard, IPlannedCard,
         new[] { CardKeyword.Ethereal, CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForWeak(ArmKeywordTips.ForPlan(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForPlan(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_ward");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Ward"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold].\nOr [gold]plan[/gold]: Apply {PlanPowerAmount:diff()} [gold]Weak[/gold]."),
+        ("description", "Draw 1 card.\nOr [gold]plan[/gold]: Draw {PlanCards:diff()} card{PlanCards:plural:|s}."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -57,14 +57,14 @@ public sealed class ProtoKkWard : CustomCardModel, ICharacterCard, IPlannedCard,
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.ApplyWeak, DynamicVars["PlanPowerAmount"].IntValue, KokomiPlan.Aim.FrontEnemy),
+            new KokomiPlan.Planned(KokomiPlan.Kind.Draw, DynamicVars["PlanCards"].IntValue, KokomiPlan.Aim.Self),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(4m, ValueProp.Move),
-            new DynamicVar("PlanPowerAmount", 1m)
+            new CardsVar(1),
+            new DynamicVar("PlanCards", 1m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -94,12 +94,11 @@ public sealed class ProtoKkWard : CustomCardModel, ICharacterCard, IPlannedCard,
     /// (<see cref="KokomiPlan.ChooseLines"/>).</summary>
     public async Task PlayNowLine(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
+        await CardPileCmd.Draw(choiceContext, DynamicVars.Cards.BaseValue, Owner);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Block.UpgradeValueBy(2m);
-        DynamicVars["PlanPowerAmount"].UpgradeValueBy(1m);
+        DynamicVars["PlanCards"].UpgradeValueBy(1m);
     }
 }

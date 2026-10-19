@@ -38,14 +38,14 @@ public sealed class ProtoKkWatchfulShoal : CustomCardModel, ICharacterCard
     public string CharacterId => "kokomi";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KokomiCards.WithWardPreview(KokomiCards.WithStingPreview(base.ExtraHoverTips));
+        KokomiCards.WithStingPreview(base.ExtraHoverTips);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_watchful_shoal");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Watchful Shoal"),
-        ("description", "Your [gold]Stings[/gold] deal {PowerAmount:diff()} additional damage. Your [gold]Wards[/gold] gain {PowerAmount:diff()} additional [gold]Block[/gold]."),
+        ("description", "Your [gold]Stings[/gold] deal {PowerAmount:diff()} additional damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

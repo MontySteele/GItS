@@ -41,11 +41,12 @@ public class KokomiReviewR5Tests
     }
 
     [Fact]
-    public void The_watchful_shoal_badge_previews_the_sting_and_the_ward()
+    public void The_watchful_shoal_badge_previews_the_sting()
     {
+        // Its Ward half left with the Ward's Block (2026-10-18).
         var calls = Il.Calls(Il.Method("WatchfulShoalPower",
                                        "get_ExtraHoverTips"));
         Assert.Contains(calls, c => c.Contains("WithStingPreview"));
-        Assert.Contains(calls, c => c.Contains("WithWardPreview"));
+        Assert.DoesNotContain(calls, c => c.Contains("WithWardPreview"));
     }
 }

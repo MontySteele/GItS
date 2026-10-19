@@ -96,8 +96,7 @@ def test_watchful_shoal_numbers_and_face():
     assert (row.effects[0]["amount"], up.effects[0]["amount"]) == (4, 6)   # Kokomi review r6 item 3
     assert _rows()["proto_kk_watchful_shoal"]["description"] == (
         "Your [gold]Stings[/gold] deal {PowerAmount:diff()} additional "
-        "damage. Your [gold]Wards[/gold] gain {PowerAmount:diff()} "
-        "additional [gold]Block[/gold].")
+        "damage.")   # its Ward half left with the Ward's Block, 2026-10-18
 
 
 def test_a_played_sting_deals_3_more():
@@ -133,20 +132,17 @@ def test_a_written_sting_carries_the_bonus_to_every_enemy():
     assert all(x >= 6 for x in lost), lost
 
 
-def test_a_played_ward_gains_3_more_and_frail_bites_it():
+def test_a_played_ward_gains_no_block_from_the_shoal():
+    """Ward and Casket (2026-10-18): a Ward draws, and Watchful Shoal no
+    longer touches it."""
     st = kokomi_state()
     _attacking(st)
     st.player.powers[kokomi_plan.WATCHFUL_SHOAL] = 3
     st.player.block = 0
     _play(st, card(kokomi_plan.WARD_ID))
-    assert st.player.block == 4 + 3
-    st = kokomi_state()
-    _attacking(st)
-    st.player.powers[kokomi_plan.WATCHFUL_SHOAL] = 3
-    st.player.powers["frail"] = 1
-    st.player.block = 0
-    _play(st, card(kokomi_plan.WARD_ID))
-    assert st.player.block == int((4 + 3) * 0.75)
+    assert st.player.block == 0
+    assert kokomi_plan.watchful_shoal_bonus(
+        st, card(kokomi_plan.WARD_ID), kokomi_plan.STING_ID) == 0
 
 
 def test_other_cards_get_nothing():
@@ -158,14 +154,14 @@ def test_other_cards_get_nothing():
     assert st.player.block == 8
 
 
-def test_a_flipped_ward_carries_out_its_now_line_with_the_bonus():
+def test_a_flipped_ward_carries_out_its_now_line_and_gains_no_block():
     st = kokomi_state()
     st.player.powers[kokomi_plan.WATCHFUL_SHOAL] = 3
     write(st, card(kokomi_plan.WARD_ID))
     assert kokomi_plan.flip(st, 0)
     st.player.block = 0
     carry_out(st)
-    assert st.player.block == 4 + 3
+    assert st.player.block == 0
 
 
 # --- Coordinated Tide: before the plan bus -----------------------------------

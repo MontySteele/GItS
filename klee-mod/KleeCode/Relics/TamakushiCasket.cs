@@ -21,27 +21,22 @@ namespace KleeMod.Relics;
 /// <summary>
 /// TAMAKUSHI CASKET -- the Kokomi overhaul's starting relic.
 ///
-/// THE RE-FOUNDING (2026-10-12) REWROTE IT, and kept its name and art
-/// (<c>review/ruled/kokomi-design-pass-2026-10-11.md</c> pick 3, ruled; card
-/// paper sec.1 rule 1): "At the start of your turn, if a Plan is waiting,
-/// gain 3 Block." The count it kept since the Casket pass (2026-09-28) and the
-/// Open the Casket token it dealt are gone with the Casket. About 9 Block in a
-/// three-turn act-1 fight, against Burning Blood's 6 HP; with no 0-cost Plan
-/// left, the Plan it asks for costs Energy, so the condition is a real price.
+/// WARD AND CASKET (2026-10-18, [USER]: "Modify the starting relic... 'gain
+/// 2 block for each Plan or Companion Card played.'", then "if we allow for
+/// Sting and Ward to count, is that a real problem? I'm wondering if we scale
+/// that around allowing 0-cost cards to trigger it (possibly bringing it down
+/// to 1 per card played)."): "Whenever you play a Plan card or a Companion,
+/// gain 1 Block." It replaces the start-of-turn Block for a waiting Plan (the
+/// re-founding's, 2026-10-12; git keeps its reasoning).
 ///
-/// START OF TURN, NOT END (2026-10-12, [USER]: "For Kokomi - let's have her
-/// starter relic apply block at the beginning of the turn rather than the
-/// end."). THE HOOK IS <c>AfterBlockCleared</c>, the base game's
-/// <c>BlockNextTurnPower</c>'s: <c>CombatManager.StartTurn</c> clears Block,
-/// broadcasts <c>AfterBlockCleared</c> for each creature starting its turn,
-/// and only then runs <c>SetupPlayerTurn</c> (energy, the draw,
-/// <c>AfterPlayerTurnStart</c>), where <c>ProtoBakeKuragePower</c> carries
-/// the waiting Plans out and clears the queue
-/// (<c>tier0/tests/test_reaction_phase_parity.TURN_START_BROADCAST_ORDER</c>).
-/// So the Block survives the clear, and the queue it reads
-/// (<see cref="KokomiPlan.PlansHeld"/>) is still last turn's Plans. Block
-/// stays raw, the base relic's <c>ValueProp.Unpowered</c>. Sim twin:
-/// <c>kokomi_plan.casket_block</c>, right after the turn's Block clear.
+/// WHAT COUNTS is Treatise's card test (<see cref="TreatisePower"/>): a card
+/// that prints a Plan line (<see cref="KokomiRefounding.CanBeWritten"/>) or a
+/// Companion (<see cref="ICompanionCard"/>), once a play however many of the
+/// two it is. Played face-up or planned onto the Bake-Kurage alike: planning
+/// a card is playing it. Stings and Wards print Plan lines, so they count
+/// like any Plan card. A Plan carried out later is the jellyfish's play, not
+/// hers (<see cref="KokomiPlan.IsCarryingOut"/>). Block stays raw, the base relic's <c>ValueProp.Unpowered</c>. Sim twin:
+/// <c>kokomi_plan.casket_block</c>, after each play.
 ///
 /// IT SITS IN <c>Relics/</c>, not <c>Powers/Prototype/</c>:
 /// <c>tools/lint_unique_names.py</c> reads relic names out of
@@ -64,17 +59,10 @@ public class TamakushiCasket : CustomRelicModel
     public override RelicModel? GetUpgradeReplacement() =>
         ModelDb.Relic<WatatsumiCasket>().ToMutable();
 
-    /// <summary>The Block at the start of her turn while a Plan is waiting:
-    /// <see cref="KokomiOverhaulLaw.CasketBlock"/>. The
-    /// <see cref="WatatsumiCasket"/> pays it once per Plan instead
-    /// (<see cref="BlockFor"/>).</summary>
-    public int Block => KokomiOverhaulLaw.CasketBlock;
-
-    /// <summary>The Block a queue this deep pays at the start of her turn.
-    /// The Tamakushi Casket: <see cref="Block"/> if any Plan is waiting.
-    /// PURE.</summary>
-    public virtual int BlockFor(int plansWaiting) =>
-        Pays(plansWaiting) ? Block : 0;
+    /// <summary>The Block each counted play pays:
+    /// <see cref="KokomiOverhaulLaw.CasketBlock"/>; the
+    /// <see cref="WatatsumiCasket"/>'s is larger.</summary>
+    public virtual int Block => KokomiOverhaulLaw.CasketBlock;
 
     public override RelicRarity Rarity => RelicRarity.Starter;
 
@@ -84,11 +72,10 @@ public class TamakushiCasket : CustomRelicModel
         ("description", Face(KokomiOverhaulLaw.CasketBlock)),
     };
 
-    /// <summary>The face, one sentence. (The Ancient audit, 2026-10-12,
-    /// dropped its second sentence, "A Plan's own Block comes at the start of
-    /// your next turn.")</summary>
+    /// <summary>The face, one sentence, shared with the Watatsumi Casket.
+    /// </summary>
     internal static string Face(int block) =>
-        "At the start of your turn, if a [gold]Plan[/gold] is waiting, gain "
+        "Whenever you play a [gold]Plan[/gold] card or a Companion, gain "
       + "[blue]" + block + "[/blue] [gold]Block[/gold].";
 
     /// <summary>
@@ -102,23 +89,34 @@ public class TamakushiCasket : CustomRelicModel
         await BakeKuragePet.Summon(Owner);
     }
 
-    /// <summary>"At the start of your turn, if a Plan is waiting, gain 3
-    /// Block." Her own Block clear only, and only while the Bake-Kurage still
-    /// holds last turn's Plans (they are carried out later this turn, in
-    /// <c>AfterPlayerTurnStart</c>).</summary>
-    public override async Task AfterBlockCleared(Creature creature)
+    /// <summary>Does this card count? A Plan card (Stings and Wards
+    /// included) or a Companion. PURE.</summary>
+    public static bool CountsCard(CardModel? card) =>
+        KokomiRefounding.CanBeWritten(card) || card is ICompanionCard;
+
+    /// <summary>Does this play pay? Hers, a card that counts, face-up or
+    /// planned, and not a carry-out. PURE on the play.</summary>
+    public static bool Counts(CardPlay cardPlay, Creature? kokomi) =>
+        kokomi != null
+        && KokomiOverhaul.IsHers(kokomi)
+        && cardPlay.Card.Owner?.Creature == kokomi
+        && CountsCard(cardPlay.Card)
+        && !KokomiPlan.IsCarryingOut(kokomi.Player);
+
+    /// <summary>"Whenever you play a Plan card or a Companion, gain 1
+    /// Block." Once a play, however many of the two the card is.</summary>
+    public override async Task AfterCardPlayed(
+        PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         var kokomi = Owner?.Creature;
-        if (kokomi == null || creature != kokomi) return;
-        if (!KokomiOverhaul.IsHers(kokomi)) return;
-        var block = BlockFor(KokomiPlan.PlansHeld(kokomi));
+        if (kokomi == null || cardPlay.Player != Owner) return;
+        if (!Counts(cardPlay, kokomi)) return;
+        var block = Block;
         if (block <= 0) return;
         Flash();
-        await CreatureCmd.GainBlock(kokomi, block, ValueProp.Unpowered, null);
+        await CreatureCmd.GainBlock(kokomi, block, ValueProp.Unpowered, null,
+                                    fast: true);
     }
-
-    /// <summary>Does a queue this deep pay? Any Plan waiting. PURE.</summary>
-    public static bool Pays(int plansWaiting) => plansWaiting > 0;
 
     /// <summary>
     /// The relic's own name, for any line that names it. A second spelling of
@@ -164,13 +162,11 @@ public class TamakushiCasket : CustomRelicModel
 /// <summary>
 /// WATATSUMI CASKET -- the Tamakushi Casket upgraded, Touch of Orobas's
 /// hand-over (main-session design, 2026-09-30, from [USER]'s co-op playtest:
-/// "Varka and Kokomi need Ancient relics for Orobas"). The Ancient audit
-/// (ruled 2026-10-12: "Watastumi Casket is a bit weak for an Ancient relic -
-/// perhaps bump it to "3 Block per Plan" instead of just "3 block if there
-/// was a Plan"."): "At the start of your turn, gain 3 Block for each Plan
-/// waiting." (5 Block if any Plan waited, before.) It IS a Tamakushi Casket
-/// (see its header), so the hook and the companion reward slot are the
-/// base's, and the only difference is <see cref="BlockFor"/>.
+/// "Varka and Kokomi need Ancient relics for Orobas"). Since Ward and Casket
+/// (2026-10-18): "Whenever you play a Plan card or a Companion, gain 2
+/// Block." It IS a Tamakushi Casket (see its header), so the
+/// hook and the companion reward slot are the base's, and the only
+/// difference is <see cref="Block"/>.
 ///
 /// ANCIENT, NEVER STARTER (see <c>ExplosiveFrags</c>). ICON: the Tamakushi
 /// Casket's own fallback chain, as Pearl of Insight reuses the Pearl's.
@@ -183,18 +179,13 @@ public sealed class WatatsumiCasket : TamakushiCasket
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Watatsumi Casket"),
-        ("description",
-            "At the start of your turn, gain [blue]" + WatatsumiBlock
-          + "[/blue] [gold]Block[/gold] for each [gold]Plan[/gold] waiting."),
+        ("description", Face(WatatsumiBlock)),
     };
 
-    /// <summary>The Block per waiting Plan at the start of her turn.
-    /// </summary>
-    public const int WatatsumiBlock = 3;
+    /// <summary>The Block each counted play pays.</summary>
+    public const int WatatsumiBlock = 2;
 
-    /// <summary>3 Block for each Plan waiting. PURE.</summary>
-    public override int BlockFor(int plansWaiting) =>
-        plansWaiting > 0 ? WatatsumiBlock * plansWaiting : 0;
+    public override int Block => WatatsumiBlock;
 
     /// <summary>Already the upgrade: nothing further for Orobas.</summary>
     public override RelicModel? GetUpgradeReplacement() => null;

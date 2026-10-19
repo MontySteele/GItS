@@ -42,13 +42,13 @@ SHATTER_DAMAGE = 6
 
 #: `EB-625`, rewritten by the Casket pass (2026-09-28) and again by the Kokomi
 #: re-founding (2026-10-12), which retired the count. The Block the Tamakushi
-#: Casket gives at the start of her turn while a Plan is waiting --
+#: Casket gives for each Plan card or Companion she plays (2026-10-18) --
 #: `KokomiOverhaulLaw.CasketBlock` in the mod and
 #: `C.KOKOMI_OVERHAUL_CASKET_BLOCK` in the sim. Mirrored here for
 #: `BOMB_GROWTH`'s reason (this module may not reach `tier0`) and held in step
 #: from the test side against both, so a retune cannot leave the page's Casket
 #: glossary quoting a retired number while the relic's face moves.
-CASKET_BLOCK = 3
+CASKET_BLOCK = 1
 
 #: `EB-560`. THE SPARK A KLEE COMBAT OPENS WITH, `KleeOverhaulLaw.OpeningSpark`
 #: in the mod and `C.KLEE_OVERHAUL_OPENING_SPARK` in the sim, mirrored here for

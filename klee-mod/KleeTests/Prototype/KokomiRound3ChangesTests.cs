@@ -134,19 +134,19 @@ public class KokomiRound3ChangesTests
                               Var<ProtoKkWatchfulShoal>("PowerAmount", true)));
         Assert.Equal(
             "Your [gold]Stings[/gold] deal {PowerAmount:diff()} additional "
-          + "damage. Your [gold]Wards[/gold] gain {PowerAmount:diff()} "
-          + "additional [gold]Block[/gold].",
+          + "damage.",
             Face(new ProtoKkWatchfulShoal()));
         var power = new WatchfulShoalPower().Localization!
             .Single(r => r.Item1 == "description").Item2;
-        Assert.Contains("additional [gold]Block[/gold].", power);
+        // Its Ward half left with the Ward's Block (2026-10-18).
+        Assert.DoesNotContain("Ward", power);
         // Writing an Ethereal card pays nothing now.
         Assert.DoesNotContain(Seq("KokomiRefounding", "OnWritten"),
                               c => c.Contains("WatchfulShoalPower"));
     }
 
     [Fact]
-    public void A_stings_now_line_and_a_wards_block_take_the_bonus()
+    public void A_stings_now_line_takes_the_bonus_and_a_ward_nothing()
     {
         var seat = Seat.Kokomi().WithPower<WatchfulShoalPower>(3);
         var power = seat.Creature.Powers.OfType<WatchfulShoalPower>().Single();
@@ -162,12 +162,13 @@ public class KokomiRound3ChangesTests
         Assert.Equal(0m, power.ModifyDamageAdditive(
             enemy, 7m, ValueProp.Unpowered, seat.Creature, new ProtoKkSting(),
             null));
-        Assert.Equal(3m, power.ModifyBlockAdditive(
+        // Ward and Casket (2026-10-18): the power no longer adds Block.
+        Assert.Equal(0m, power.ModifyBlockAdditive(
             seat.Creature, 7m, ValueProp.Move, new ProtoKkWard(), null));
-        Assert.Equal(0m, power.ModifyBlockAdditive(
-            seat.Creature, 8m, ValueProp.Move, new ProtoKkCoralBulwark(), null));
-        Assert.Equal(0m, power.ModifyBlockAdditive(
-            enemy, 7m, ValueProp.Move, new ProtoKkWard(), null));
+        Assert.Null(typeof(WatchfulShoalPower).GetMethod("ModifyBlockAdditive",
+            System.Reflection.BindingFlags.Public
+            | System.Reflection.BindingFlags.Instance
+            | System.Reflection.BindingFlags.DeclaredOnly));
     }
 
     [Fact]

@@ -757,12 +757,8 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
         # (`effects.block_clear_keeps`).
         kept = effects.block_clear_keeps(state)
         p.block = 0 if kept is None else kept
-    # THE TAMAKUSHI CASKET (2026-10-12, [USER]: "let's have her starter relic
-    # apply block at the beginning of the turn rather than the end"): "At the
-    # start of your turn, if a Plan is waiting, gain 3 Block." StS2's
-    # `AfterBlockCleared`, the relic's own hook: after the clear, so the Block
-    # stays, and before `resolve_all` below empties the queue it reads.
-    kokomi_plan.casket_block(state)
+    # (The Tamakushi Casket's start-of-turn Block left this site on
+    # 2026-10-18: it pays per play now, `kokomi_plan.casket_block`.)
 
     # THE COMPANION LEDGER'S HANDOVER, on the line above the clear rather than
     # in a hook of its own: this turn's count becomes last turn's, in the ONE
@@ -976,8 +972,8 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # one the next morning will carry out (`kokomi_plan.pilot_flips`; the Plan
     # line by default). (Dusk's drain left this site on 2026-10-12.)
     kokomi_plan.pilot_flips(state)
-    # (The Tamakushi Casket's Block left this site on 2026-10-12 for the start
-    # of the turn, right after the Block clear: `kokomi_plan.casket_block`.)
+    # (The Tamakushi Casket's Block left this site on 2026-10-12; since
+    # 2026-10-18 it pays per play: `kokomi_plan.casket_block`.)
     # VARKA (`varka_oath.turn_end`): Oathbound Aegis's end-of-turn Block,
     # at the same `BeforeSideTurnEnd` site. A no-op for anyone else.
     varka_oath.turn_end(state)

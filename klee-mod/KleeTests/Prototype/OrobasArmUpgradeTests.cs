@@ -127,11 +127,9 @@ public class WolfsGravestoneTests : IDisposable
 }
 
 
-/// <summary>The Kokomi re-founding (2026-10-12): the Tamakushi Casket is
-/// "At the start of your turn, if a Plan is waiting, gain 3 Block." (start,
-/// not end, since 2026-10-12); the
-/// Watatsumi Casket "At the start of your turn, gain 3 Block for each Plan
-/// waiting." (the Ancient audit, ruled 2026-10-12).</summary>
+/// <summary>Ward and Casket (2026-10-18): the Tamakushi Casket is
+/// "Whenever you play a Plan card or a Companion, gain 1 Block."; the
+/// Watatsumi Casket the same with 2.</summary>
 public class WatatsumiCasketTests
 {
     private static T Bare<T>() where T : class =>
@@ -141,36 +139,25 @@ public class WatatsumiCasketTests
         relic.Localization!.First(r => r.Item1 == "description").Item2;
 
     [Fact]
-    public void The_casket_pays_3_block_and_the_watatsumi_casket_3_per_plan()
+    public void The_casket_pays_1_block_a_play_and_the_watatsumi_casket_2()
     {
-        Assert.Equal(3, Bare<TamakushiCasket>().Block);
-        Assert.Equal(3, WatatsumiCasket.WatatsumiBlock);
-        // The Tamakushi Casket: 3 if any Plan waits, however many.
-        Assert.Equal(0, Bare<TamakushiCasket>().BlockFor(0));
-        Assert.Equal(3, Bare<TamakushiCasket>().BlockFor(1));
-        Assert.Equal(3, Bare<TamakushiCasket>().BlockFor(3));
-        // The Watatsumi Casket: 3 for each Plan waiting.
-        Assert.Equal(0, Bare<WatatsumiCasket>().BlockFor(0));
-        Assert.Equal(3, Bare<WatatsumiCasket>().BlockFor(1));
-        Assert.Equal(9, Bare<WatatsumiCasket>().BlockFor(3));
+        Assert.Equal(1, Bare<TamakushiCasket>().Block);
+        Assert.Equal(2, Bare<WatatsumiCasket>().Block);
         Assert.Equal(
-            "At the start of your turn, if a [gold]Plan[/gold] is waiting, gain "
-          + "[blue]3[/blue] [gold]Block[/gold].",
+            "Whenever you play a [gold]Plan[/gold] card or a Companion, gain "
+          + "[blue]1[/blue] [gold]Block[/gold].",
             Face(Bare<TamakushiCasket>()));
         Assert.Equal(
-            "At the start of your turn, gain [blue]3[/blue] [gold]Block[/gold] "
-          + "for each [gold]Plan[/gold] waiting.",
+            "Whenever you play a [gold]Plan[/gold] card or a Companion, gain "
+          + "[blue]2[/blue] [gold]Block[/gold].",
             Face(Bare<WatatsumiCasket>()));
     }
 
     [Fact]
-    public void It_pays_only_while_a_plan_is_waiting()
+    public void It_pays_from_the_card_played_hook()
     {
-        Assert.False(TamakushiCasket.Pays(0));
-        Assert.True(TamakushiCasket.Pays(1));
-        Assert.True(TamakushiCasket.Pays(3));
-        var turnStart = Il.Calls(Il.Method("TamakushiCasket", "AfterBlockCleared"));
-        Assert.Contains(turnStart, c => c.Contains("KokomiPlan.PlansHeld"));
-        Assert.Contains(turnStart, c => c.Contains("CreatureCmd.GainBlock"));
+        var hook = Il.Calls(Il.Method("TamakushiCasket", "AfterCardPlayed"));
+        Assert.Contains(hook, c => c.Contains("TamakushiCasket.Counts"));
+        Assert.Contains(hook, c => c.Contains("CreatureCmd.GainBlock"));
     }
 }
