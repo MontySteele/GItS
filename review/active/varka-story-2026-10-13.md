@@ -51,7 +51,7 @@ plot beats).
 
 ## 4. Act 2: The Wolf of the North
 
-> Frost spreads across the landing. Boreas takes shape beside Varka, stretches, and bares his teeth. The wolf carries a fragment of Andrius's spirit, but Varka knows that look well enough: his old partner wants a spar.
+> Frost spreads across the landing. Andrius takes shape beside Varka, stretches, and bares his teeth. The Wolf of the North gave him his title, and Varka knows that look well enough: his old partner wants a spar.
 >
 > *"You've gone soft, Knight."* — *"Soft? Come over here and say that."*
 
@@ -69,7 +69,7 @@ plot beats).
 |---|---|---|
 | **Eula** | Add an upgraded **Eula: Icetide Vortex** to your deck. | "You still owe me a rematch. Don't you dare go easy." |
 | **Noelle** | Add an upgraded **Noelle: Steadfast Maid** to your deck. | "Welcome back, Grand Master! Please, let me take the front line." |
-| **Diluc** | Add an upgraded **Diluc: Searing Onslaught** to your deck. | "Angel's Share is holding your usual table. Don't keep it waiting." |
+| **Diluc** | Add an upgraded **Diluc: Searing Onslaught** to your deck. | "There's a bottle at Angel's Share with your name on it. You're paying." |
 | **Wave them back to the column.** | Nothing. | "Stay with the others. I'll meet you all at the foot of the stairs." |
 
 All three cards are his Uncommons (`proto_vk_eula_icetide_vortex`, `proto_vk_noelle_steadfast_maid`, `proto_vk_diluc_searing_onslaught`). Diluc left the Knights and never liked Varka's ways, but he still keeps a table for him at his tavern. When one steps out, Varka answers: "Ha, good to have you here! Come on, we're nearly there."

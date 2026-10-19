@@ -190,14 +190,16 @@ def test_her_attack_hit_lands_on_the_clips_main_impact():
     assert delay == pytest.approx(real["sheets"]["attack"]["events"]["main"])
 
 
-def test_the_pack_copies_her_frames_compressed_and_switches_rest_and_select_only_when_present():
+def test_the_pack_copies_her_frames_compressed_and_switches_rest_only_when_present():
     ps = (ROOT / "tools" / "build_pck.ps1").read_text(encoding="utf-8-sig")
     block = ps.split("$kokomiFrames = Join-Path $src 'kokomi\\model\\frames'", 1)[1].split("\n}\n", 1)[0]
     assert "Write-TextureImport" in block and "Test-Path $kokomiFrames" in block
     assert "Test-Path (Join-Path $src 'kokomi\\model\\kokomi_rest.png')" in ps
     assert "\"res://kokomi/model/$kokomiRestArt\"" in ps
-    assert "Test-Path (Join-Path $src 'kokomi\\ui\\select_closeup.png')" in ps
-    assert "\"res://kokomi/ui/$kokomiSelectArt\"" in ps
+    # her select scene is generated (tools.kokomi_rig gen, tools/select_bg.py,
+    # 2026-10-19), and the pack refuses to build without the close-up it draws
+    assert "$kokomiSelectArt" not in ps
+    assert "'kokomi\\ui\\select_closeup.png'" in ps.split("foreach ($closeup in @(", 1)[1].split(")", 1)[0]
     # the generated merchant scene replaced the static sprite; the old rig's layers no longer ship
     assert "'kokomi\\model\\merchant_character.tscn'" not in ps
     assert "$rigChar" not in ps and "kokomi\\model\\layers" not in ps

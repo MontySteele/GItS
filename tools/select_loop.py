@@ -1,4 +1,4 @@
-"""Character select, stage 2: a rendered idle loop of the close-up, for Klee, Varka and Furina.
+"""Character select, stage 2: a rendered idle loop of the close-up, for Klee, Varka, Furina and Kokomi.
 
 [USER], 2026-10-14: "during character select, none of the art pieces for the
 base game's characters are static; the character does a small idle loop with
@@ -10,7 +10,7 @@ and the pigtails or coat tails or cloth, each a cosine of the loop). The game
 plays it forward then back, so there is no seam and no popping: frame 0 is
 the still, and the last frame is the exhale.
 
-    python tools/select_loop.py build --char klee|varka|furina --models <scratch>/models \
+    python tools/select_loop.py build --char klee|varka|furina|kokomi --models <scratch>/models \
         --work <scratch dir> [--pmx <klee pmx>] [--art-root <main checkout>] [--blender <exe>]
     python tools/select_loop.py render --char ... --models ... --work ...   # Blender + post.py only
     python tools/select_loop.py pack   --char ... --work ... [--art-root ...] [--check]
@@ -64,6 +64,7 @@ CHARS = {
     "klee": {"kind": "klee", "ppu": 1700.0, "outline": 6.0, "art": ("ui",)},
     "varka": {"kind": "kit", "ppu": 1100.0, "outline": 7.0, "art": ("varka", "ui")},
     "furina": {"kind": "kit", "ppu": 1300.0, "outline": 7.0, "art": ("furina", "ui")},
+    "kokomi": {"kind": "kit", "ppu": 1300.0, "outline": 7.0, "art": ("kokomi", "ui")},
 }
 SHEET_FILE = "select_loop.png"
 STATIC_FILE = "select_closeup_static.png"
