@@ -800,6 +800,7 @@ public static class YaeEditing
     /// </summary>
     public static bool Editable(CardModel candidate, CardModel? editor) =>
         !ReferenceEquals(candidate, editor)
+        && !WearsOtherEnchantment(candidate)
         && candidate.Type != CardType.Status
         && candidate.Type != CardType.Curse
         && candidate.Type != CardType.Quest;
@@ -817,15 +818,25 @@ public static class YaeEditing
         && YaeAnnotationReach.Affects(candidate, annotation);
 
     /// <summary>
-    /// Clear whatever Enchantment the card carries, taking back the Retain a
-    /// Deadline Extension added unless the card prints Retain itself.
+    /// Does the card wear an Enchantment that is not a Masterpiece (a
+    /// base-game one such as Nutritious Soup's Tezcatara's Ember, or another
+    /// mod's)? A card has one Enchantment slot, so such a card can never be
+    /// Edited: the Edit would erase it (seat 2026-10-19, Yae lane 2: Sakura
+    /// Seal+ on a Souped Strike took it from Deal 9 to Deal 6). PURE.
+    /// </summary>
+    public static bool WearsOtherEnchantment(CardModel? card) =>
+        card?.Enchantment != null && card.Enchantment is not YaeMasterpiece;
+
+    /// <summary>
+    /// Clear the card's Masterpiece, taking back the Retain a Deadline
+    /// Extension added unless the card prints Retain itself. Any other
+    /// Enchantment is never touched.
     /// </summary>
     public static void Clear(CardModel card)
     {
-        var had = card.Enchantment;
-        if (had == null) return;
+        if (card.Enchantment is not YaeMasterpiece m) return;
         CardCmd.ClearEnchantment(card);
-        if (had is YaeMasterpiece m && m.Count(YaeAnnotation.DeadlineExtension) > 0
+        if (m.Count(YaeAnnotation.DeadlineExtension) > 0
             && !card.CanonicalKeywords.Contains(CardKeyword.Retain))
         {
             card.RemoveKeyword(CardKeyword.Retain);
@@ -844,9 +855,11 @@ public static class YaeEditing
         type != CardType.Status && type != CardType.Curse && type != CardType.Quest
         && !(inDeck && unplayable);
 
-    /// <summary><see cref="CanWear(CardType, bool, bool)"/> read off the card.</summary>
+    /// <summary><see cref="CanWear(CardType, bool, bool)"/> read off the
+    /// card, and never a card wearing another Enchantment
+    /// (<see cref="WearsOtherEnchantment"/>).</summary>
     public static bool CanWear(CardModel card) =>
-        CanWear(card.Type, card.Pile?.Type == PileType.Deck,
+        !WearsOtherEnchantment(card) && CanWear(card.Type, card.Pile?.Type == PileType.Deck,
                 card.Keywords.Contains(CardKeyword.Unplayable));
 
     /// <summary>
@@ -859,6 +872,8 @@ public static class YaeEditing
                              YaeAnnotation temporary, bool playedOnce, int armed,
                              int temporaryCount = 1)
     {
+        // Never over another Enchantment, not even to clear: it is not ours.
+        if (WearsOtherEnchantment(card)) return false;
         var layers = stack.Where(a => a != YaeAnnotation.None).ToList();
         if (layers.Count == 0 && temporary == YaeAnnotation.None)
         {
@@ -1196,7 +1211,8 @@ public static class YaeEditing
     /// do nothing on is not offered (the dead-edit filter).</summary>
     public static IEnumerable<CardModel> PublishChoices(Player player) =>
         PublishChoices(player.Deck.Cards
-            .Where(c => YaeAnnotationReach.Affects(c, Draft(c)))
+            .Where(c => !WearsOtherEnchantment(c)
+                        && YaeAnnotationReach.Affects(c, Draft(c)))
             .Select(c => (c, Draft(c), Published(c))));
 
     /// <summary>

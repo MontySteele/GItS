@@ -1147,12 +1147,23 @@ def _apply_layers(card) -> None:
     card.enchant_effects = riders
 
 
+def wears_other_enchantment(card) -> bool:
+    """Does the card wear a named (base-game) enchantment, which a deck-list
+    id carries as `@name`? A card has one enchantment slot, so such a card is
+    never Edited: the Edit would erase it (seat 2026-10-19, Yae lane 2). C#
+    twin: `YaeEditing.WearsOtherEnchantment`."""
+    from tier0.content import enchantments          # late: cycle
+    return enchantments.MARK in str(getattr(card, "id", ""))
+
+
 def annotate(state, card, name: str, reason: str = "edit") -> None:
     """An Edit: `name` fills the card's ONE TEMPORARY SLOT, replacing what
     was there; the stack is never touched. A temporary Reprint arms one
-    fresh replay."""
+    fresh replay. Never on a card wearing another enchantment."""
     if name not in ANNOTATIONS:
         raise ValueError(f"unknown Annotation {name!r}")
+    if wears_other_enchantment(card):
+        return
     card.ym_temp = name
     card.ym_armed = 1 if name == REPRINT else 0
     slot = getattr(card, "ym_slot", None)
@@ -1197,6 +1208,8 @@ def publish_to(card, names) -> None:
     permanence, `build_player`)."""
     if isinstance(names, str):
         names = [names]
+    if wears_other_enchantment(card):
+        return
     card.ym_stack = stack(card) + list(names)
     _apply_layers(card)
 
@@ -1307,6 +1320,7 @@ def _editable(state, editor, annotation: Optional[str] = None) -> list:
     do something on (the dead-edit filter)."""
     return [c for c in state.player.hand
             if c is not editor and not c.kit_card and not c.is_junk
+            and not wears_other_enchantment(c)
             and (annotation is None or affects(c, annotation))]
 
 
@@ -1439,7 +1453,8 @@ def publish_choices(drafts: dict, published: Optional[dict] = None,
     return [slot for slot in sorted(drafts)
             if drafts[slot]
             and (cards is None or slot not in cards
-                 or affects(cards[slot], drafts[slot]))]
+                 or (not wears_other_enchantment(cards[slot])
+                     and affects(cards[slot], drafts[slot])))]
 
 
 def publish_after_fight(room: str, drafts: dict, published: dict,
