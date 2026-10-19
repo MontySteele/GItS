@@ -163,10 +163,35 @@ def _element(fig_x: float) -> dict[str, Element]:
                         ),
             ),
         ),
+        # Electro (Yae, 2026-10-19): a slow violet light pulsing behind the
+        # figure, sakura petals drifting down and across in front (her
+        # Sacred Sakura), and small violet sparks flicking upward, fast and
+        # short-lived, as static off the Electro.
+        "electro": Element(
+            textures=(Tex("Tex_dot", 32, 32, SOFT_DOT), Tex("Tex_petal", 20, 12, HARD_DOT),
+                      Tex("Tex_spark", 6, 24, HARD_DOT)),
+            emitters=(
+                Emitter("Glow", "Tex_dot", (fig_x, 700), 2, 4.0, (130, 130), (0, -1), 0, (0, 6),
+                        (0, 0), (15.0, 19.0),
+                        ((0.0, (0.69, 0.42, 1, 0)), (0.5, (0.72, 0.45, 1, 0.24)), (1.0, (0.69, 0.42, 1, 0))),
+                        behind=True, scale_curve=PULSE),
+                Emitter("Petals", "Tex_petal", (1100, -40), 12, 11.0, (900, 30), (-0.35, 1), 20, (40, 80),
+                        (-6, 14), (0.7, 1.2),
+                        ((0.0, (1, 0.74, 0.84, 0)), (0.1, (1, 0.76, 0.86, 0.95)),
+                         (0.85, (0.98, 0.7, 0.82, 0.85)), (1.0, (0.98, 0.7, 0.82, 0))),
+                        additive=False, angle=(0, 360), angular_velocity=(-120, 120), tangential=(-12, 12),
+                        hue=(-0.03, 0.02)),
+                Emitter("Sparks", "Tex_spark", (fig_x, 900), 14, 1.6, (520, 260), (0, -1), 35, (60, 140),
+                        (0, 0), (0.5, 1.0),
+                        ((0.0, (0.85, 0.7, 1, 0)), (0.08, (0.9, 0.78, 1, 1)), (0.4, (0.66, 0.4, 1, 0.7)),
+                         (1.0, (0.55, 0.3, 1, 0))),
+                        align=True, damping=(40, 80), hue=(-0.02, 0.02)),
+            ),
+        ),
     }
 
 
-ELEMENTS = ("pyro", "anemo", "hydro")
+ELEMENTS = ("pyro", "anemo", "hydro", "electro")
 
 
 # ---------------------------------------------------------------------------

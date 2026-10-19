@@ -407,26 +407,49 @@ REST = pose(
 
 # ------------------------------------------------------------------ character select
 # Sly and sure: chin level, a knowing half-lidded smile, the near hand raised
-# under her chin, the far hand on her hip.
+# to her chin, fingers loose and the back of the hand toward the viewer, the
+# far hand set back on her hip (2026-10-19 polish: the first take's fist
+# under the chin and fingers at her waist read as a blob and a poke).
 
 
-def select_pose(head_turn=16.0):
-    return pose([("move", "センター", (0, 0, -0.01)),
+def select_pose(head_turn=16.0, breath=1.0, swing=0.0):
+    """breath 1.0 and swing 0 is the still; the loop (SELECT_LOOP) breathes
+    out from there: the chest settles, the head dips a hair, the hand under
+    her chin follows it down and the robe and sleeves sway."""
+    o = 1.0 - breath
+    return pose([("move", "センター", (0, 0, -0.01 - 0.005 * o)),
                  ("movew", "足ＩＫ.L", (0.06, 0.02, 0)),
                  ("movew", "足ＩＫ.R", (-0.05, -0.02, 0)),
-                 ("rotw", "上半身", Y, -3.0),
+                 ("rotw", "上半身", Y, -3.0 + 1.0 * o),
                  ("rotw", "上半身", Z, -16),
                  ("rotw", "首", Z, head_turn * 0.4),
                  ("rotw", "頭", Z, head_turn * 0.6),
-                 ("rot", "頭", X, -3),
-                 ("rotw", "頭", Y, -8)]
-                + hands(far=(0.15, -0.05, -0.17), near=(0.02, -0.17, 0.20), far_pole=(1.0, 0.3, 0.0),
-                        near_pole=(-0.8, 0.0, -0.6), far_curl=(30, 10), near_curl=(35, 15))
-                + cloth(0),
+                 ("rot", "頭", X, -3 + 1.5 * o),
+                 ("rotw", "頭", Y, -8 - 1.0 * o)]
+                + hands(far=(0.19, 0.01, -0.17 - 0.004 * o), near=(0.03, -0.19, 0.18 - 0.010 * o),
+                        far_pole=(1.0, 0.3, 0.0), near_pole=(-0.8, 0.0, -0.6), far_curl=(30, 10),
+                        near_curl=(25, 8), near_aim=((0.5, -0.2, 0.8), 0.0))
+                + cloth(swing, sleeve_swing=2.0 * swing),
                 {"にやり": 0.6, "口角上げ": 0.4, "じと目": 0.25})
 
 
 SELECT = select_pose()
+
+#: The close-up's idle loop (select stage 2, 2026-10-19, as Furina's and
+#: Varka's): HALF a breath, from the still's pose out to the exhale with the
+#: robe swung. The game plays it forward then back, so every motion is a
+#: cosine of the loop (eased at both ends) and the loop has no seam.
+#: tools/select_loop.py renders it at the still's framing; frame 0 IS the still.
+SELECT_LOOP = {
+    "length": 2.0, "fps": 6, "loop": True, "motion_end": 2.0,
+    "keys": [
+        (0.0, select_pose(), "io"),
+        (2.0, select_pose(breath=0.0, swing=2.5), "io"),
+    ],
+}
+#: not in CLIPS: a half loop that does not close on its own (the game plays it
+#: forward then back); only tools/select_loop.py renders it
+SELECT_LOOPS = {"select_loop": SELECT_LOOP}
 
 # ------------------------------------------------------------------ roster tile
 # The face close-up is cut from the same pose.

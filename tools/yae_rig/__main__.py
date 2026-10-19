@@ -1,7 +1,7 @@
-"""Yae Miko's combat and merchant scenes: generate or check.
+"""Yae Miko's combat, merchant and character-select scenes: generate or check.
 
-    python -m tools.yae_rig gen            # write both scenes
-    python -m tools.yae_rig gen --check    # exit 1 if either scene is stale
+    python -m tools.yae_rig gen            # write the three scenes
+    python -m tools.yae_rig gen --check    # exit 1 if any scene is stale
 
 Needs no art and no engine: the scenes are text from yae.yaml and the
 committed manifest tools/char_render/yae_frames.json. Until her first render
@@ -18,7 +18,8 @@ from . import rig
 
 
 def scenes() -> list[tuple]:
-    return [(rig.SCENE, rig.render_scene()), (rig.MERCHANT_SCENE, rig.render_merchant_scene())]
+    return [(rig.SCENE, rig.render_scene()), (rig.MERCHANT_SCENE, rig.render_merchant_scene()),
+            (rig.SELECT_SCENE, rig.render_select_scene())]
 
 
 def main(argv: list[str] | None = None) -> int:

@@ -520,3 +520,7 @@ resource=res://yae/model/frames/yae_idle_low.png
 resource=res://yae/model/frames/yae_merchant.png
 resource=res://yae/model/frames/yae_shadow.png
 resource=res://yae/model/merchant_character.tscn
+resource=res://yae/ui/char_select_bg_yae.tscn
+resource=res://yae/ui/select_bg.png
+resource=res://yae/ui/select_closeup.png
+resource=res://yae/ui/select_loop.png

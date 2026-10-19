@@ -313,7 +313,10 @@ relic_dodoco_tales	ImageGen/images/relics/dodoco_tales.png	256	256	contain	cente
 # char_icon	ImageGen/images/ui/char_icon.png	88	88	cover	top	auto	1	png	Klee Icon.png		icon
 energy_icon_large	ImageGen/images/ui/energy_icon_74.png	74	74	contain	center	auto	1	svg	Element Pyro.svg		icon
 energy_icon_small	ImageGen/images/ui/energy_icon_22.png	22	22	contain	center	auto	1	svg	Element Pyro.svg		icon
-map_marker	ImageGen/images/ui/map_marker.png	49	64	cover	top	auto	1	png	Klee Side Icon.png		icon
+# map_marker (retired 2026-10-19): a base-style pin with her face, cut from the
+# model-rendered select close-up by tools/gen_map_markers.py (Klee visual paper,
+# pick 3 (a): the side icon filled only the lower two-thirds of its box); art_lint L11.
+# map_marker	ImageGen/images/ui/map_marker.png	49	64	cover	top	auto	1	png	Klee Side Icon.png		icon
 selection_splash	ImageGen/images/ui/selection_splash.png	1920	1200	cover	center	auto	1	png	Klee Wish.png		splash
 select_bg	ImageGen/images/ui/select_bg.png	1920	1080	cover	center	auto	1	png	Namecard Background Klee Explosive.png		splash
 # ---------- COMBAT MODEL SOURCE (raw; hand-cut into layers per manifest recipe) ----------
@@ -3392,3 +3395,12 @@ proto_mf_sigewinne_super_saturated_syringing	ImageGen/images/cards/companions/pr
 proto_mf_escoffier_rehab_diet	ImageGen/images/cards/companions/proto_mf_escoffier_rehab_diet.png	500	380	cover	y0.33	shortlist	1	png	Escoffier Card.png		splash	escoffier
 # proto_mf_emilie_aromatic_explication <- Emilie's full Wish art
 proto_mf_emilie_aromatic_explication	ImageGen/images/cards/companions/proto_mf_emilie_aromatic_explication.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Emilie Full Wish.png		splash	emilie
+
+# ---------- Yae character shell (2026-10-19, the Yae art pass) ----------
+# Her select backdrop, a straight wiki fetch: her own namecard, tinted Electro
+# violet by the generated select scene (tools/yae_rig). L1 scopes to /cards/,
+# so proto_ym_sakura_seal wearing the same namecard is legal, as
+# kokomi_select_bg's The Deep is. The other shell surfaces are generator-owned
+# (art_lint L11): gen_yae_stills.py, gen_map_markers.py, gen_char_icons.py,
+# gen_char_icon_outlines.py, gen_transition_wipe.py, select_loop.py.
+yae_select_bg	ImageGen/images/yae/ui/select_bg.png	1920	1080	cover	center	shortlist	1	png	Namecard Background Yae Miko Kitsune Dreaming.png		splash

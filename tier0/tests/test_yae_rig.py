@@ -179,16 +179,17 @@ def test_the_shipped_scenes_are_the_generators():
     assert rig.FRAMES.exists()
     assert rig.SCENE.read_text(encoding="utf-8") == rig.render_scene()
     assert rig.MERCHANT_SCENE.read_text(encoding="utf-8") == rig.render_merchant_scene()
+    assert rig.SELECT_SCENE.read_text(encoding="utf-8") == rig.render_select_scene()
 
 
-def test_the_pack_copies_her_frames_compressed_and_switches_rest_and_select_only_when_present():
+def test_the_pack_copies_her_frames_compressed_and_switches_rest_only_when_present():
     ps = (ROOT / "tools" / "build_pck.ps1").read_text(encoding="utf-8-sig")
     block = ps.split("$yaeFrames = Join-Path $src 'yae\\model\\frames'", 1)[1].split("\n}\n", 1)[0]
     assert "Write-TextureImport" in block and "Test-Path $yaeFrames" in block
     assert "Test-Path (Join-Path $src 'yae\\model\\yae_rest.png')" in ps
     assert "\"res://yae/model/$yaeRestArt\"" in ps
-    assert "Test-Path (Join-Path $src 'yae\\ui\\select_closeup.png')" in ps
-    assert "\"res://yae/ui/$yaeSelectArt\"" in ps
+    # her select scene is tools/yae_rig's since 2026-10-19 (test_select_bg.py)
+    assert "$yaeSelectArt" not in ps
     # Klee's placeholders stay the fallback at every path her art does not fill
     assert "Copy-YaeFallback $relative" in ps
     # her generated merchant scene replaced the static sprite heredoc

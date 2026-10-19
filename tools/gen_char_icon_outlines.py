@@ -74,6 +74,8 @@ ICONS = {
                "ImageGen/images/kokomi/ui/char_icon_outline.png"),
     "varka":  ("ImageGen/images/varka/ui/char_icon.png",
                "ImageGen/images/varka/ui/char_icon_outline.png"),
+    "yae":    ("ImageGen/images/yae/ui/char_icon.png",
+               "ImageGen/images/yae/ui/char_icon_outline.png"),
 }
 
 

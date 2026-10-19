@@ -80,5 +80,32 @@
   "sheet_file": "select_loop.png",
   "static_file": "select_closeup_static.png",
   "texel_mb": 7.85
+ },
+ "yae": {
+  "box": [
+   968,
+   28,
+   712,
+   1052
+  ],
+  "cell": [
+   644,
+   948
+  ],
+  "fps": 6,
+  "frames": 13,
+  "grid": [
+   2,
+   7
+  ],
+  "ppu": 1200.0,
+  "scale": 0.9,
+  "sheet": [
+   1288,
+   6636
+  ],
+  "sheet_file": "select_loop.png",
+  "static_file": null,
+  "texel_mb": 8.55
  }
 }

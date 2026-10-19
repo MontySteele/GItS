@@ -80,11 +80,12 @@ public sealed class Yae : CustomCharacterModel, IYaeCharacter
 
     public override IReadOnlyList<RelicModel> StartingRelics => YaeRoster.StartingRelics();
 
-    // ART: placeholders. Every KleePck.Path returns null on a miss, and
-    // tools/build_pck.ps1 fills each of these paths from Klee's files when
-    // hers are absent (Copy-YaeFallback), so the select screen and the map
-    // never receive a dead path (KleeSelfCheck R9). The scenes are authored
-    // by build_pck.ps1, Varka's first shapes.
+    // ART: her own at every path since the 2026-10-19 art pass (model
+    // renders, tools/gen_yae_stills.py, gen_map_markers.py, gen_char_icons.py,
+    // the generated select scene of tools/yae_rig). Every KleePck.Path returns
+    // null on a miss, and tools/build_pck.ps1 still fills each of these paths
+    // from Klee's files in a checkout without her art (Copy-YaeFallback), so
+    // the select screen and the map never receive a dead path (KleeSelfCheck R9).
     public override string? CustomCharacterSelectIconPath =>
         KleePck.Path("yae/ui/select_portrait.png");
     public override string? CustomCharacterSelectLockedIconPath =>
@@ -120,7 +121,7 @@ public sealed class Yae : CustomCharacterModel, IYaeCharacter
     /// %AnimationTree, so CreatureAnimationRouter, the death seam and the
     /// facing fix apply, plus the element layer KleeMod.Vfx.ElementTrail
     /// colours. Without the scene (a build without her art) she keeps the
-    /// static combat_model.png (Klee's, borrowed by Copy-YaeFallback); a
+    /// static combat_model.png (her idle frame, tools/gen_yae_stills.py); a
     /// null return hands the game its own scene lookup.
     /// </summary>
     public override NCreatureVisuals? CreateCustomVisuals()

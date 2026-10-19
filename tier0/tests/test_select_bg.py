@@ -1,4 +1,4 @@
-"""The animated character-select scenes of Klee, Varka and Furina (stage 1).
+"""The animated character-select scenes of Klee, Varka, Furina and Yae (stage 1).
 
 [USER], 2026-10-14: "during character select, none of the art pieces for the
 base game's characters are static; the character does a small idle loop with
@@ -26,15 +26,18 @@ from tools import select_bg
 from tools.furina_rig import rig as furina_rig
 from tools.klee_rig import rig as klee_rig
 from tools.varka_rig import rig as varka_rig
+from tools.yae_rig import rig as yae_rig
 
 ROOT = Path(__file__).resolve().parents[2]
 BUILD = ROOT / "tools" / "build_pck.ps1"
 
-RIGS = {"klee": klee_rig, "varka": varka_rig, "furina": furina_rig}
-ELEMENT = {"klee": "pyro", "varka": "anemo", "furina": "hydro"}
+RIGS = {"klee": klee_rig, "varka": varka_rig, "furina": furina_rig, "yae": yae_rig}
+ELEMENT = {"klee": "pyro", "varka": "anemo", "furina": "hydro", "yae": "electro"}
 #: Emitter names each element must carry (the brief: Pyro embers/sparks,
-#: Anemo streaks + leaves, Hydro droplets/bubbles).
-EMITTERS = {"pyro": {"Embers", "Sparks"}, "anemo": {"Streaks", "Leaves"}, "hydro": {"Bubbles", "Droplets"}}
+#: Anemo streaks + leaves, Hydro droplets/bubbles; Yae, 2026-10-19: Electro
+#: sparks and her sakura petals).
+EMITTERS = {"pyro": {"Embers", "Sparks"}, "anemo": {"Streaks", "Leaves"}, "hydro": {"Bubbles", "Droplets"},
+            "electro": {"Petals", "Sparks"}}
 
 
 @pytest.fixture(scope="module", params=sorted(RIGS))
@@ -157,7 +160,7 @@ def test_one_producer_build_pck_no_longer_writes_the_select_scenes(char):
 
 def test_each_rig_names_its_own_element_and_tint():
     tints = {c: RIGS[c].SELECT_TINT for c in RIGS}
-    assert len(set(tints.values())) == 3
+    assert len(set(tints.values())) == len(RIGS)
     for c, rig in RIGS.items():
         assert rig.SELECT_ELEMENT == ELEMENT[c]
         assert f"self_modulate = {klee_rig.color(rig.SELECT_TINT)}" in _node(_text(c), "Backdrop")

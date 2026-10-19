@@ -265,7 +265,17 @@ CHARS = {
         # her far hand (yae_clips.PHANTOM), as Kokomi's jet does.
         "clips": "yae_clips",
         "blades": {},
+        # her skin layer 肌 (legs, hands, feet: tex/肌.png, 88% transparent)
+        # is cut by its texture's alpha at the thigh tops and the sandal
+        # straps; rendered DITHERED the cut texels drew flat black (a dark
+        # patch under her skirt and a black blot in the seiza's lap), Kokomi's
+        # defect, so she takes Kokomi's fix (2026-10-19 QA)
+        "alpha_mats": {"肌"},
         "hide_mats": set(),
+        # the face's outline stops short of the lips (render.py unline_mouth):
+        # without it the hull folded into her smile's corners and drew two
+        # black ticks at the select close-up's mouth (2026-10-19 QA)
+        "mouth_mat": "口舌",
         "camera_height": 0.9,
     },
     "varka": {

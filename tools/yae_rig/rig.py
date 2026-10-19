@@ -25,7 +25,7 @@ from pathlib import Path
 
 import yaml
 
-from tools.klee_rig.rig import color, vec2
+from tools.klee_rig.rig import color, shadow_fade, vec2
 from tools.varka_rig.rig import (MODEL, NL, PROP_ORDER, SHADER_CODE, Clip, Track, _expand, _shown, _steps,
                                  _transition, _window, animation_block, atlas_block, clip_of, fx_window,
                                  hex_color, sub)
@@ -124,6 +124,9 @@ def build_animations(spec: dict, frames: dict, clips: dict[str, Clip]) -> dict[s
     for name in ANIMATION_ORDER:
         anim = spec["animations"][name]
         tracks = [_expand(anim, tr) for tr in anim.get("tracks", ())]
+        fade = shadow_fade(tracks, MODEL, f"{FACING}/{SHADOW_NODE}")   # the shadow fades with her at death
+        if fade is not None:
+            tracks.append(fade)
         tracks += state_tracks(spec, frames, clips, anim)
         paths = [t.path for t in tracks]
         assert len(paths) == len(set(paths)), f"{name}: duplicate track"
@@ -421,3 +424,26 @@ def render_merchant_scene(frames: dict | None = None) -> str:
         ]),
     ]
     return NL.join(out) + NL
+
+
+# ---------------------------------------------------------------------------
+# the character-select background
+# ---------------------------------------------------------------------------
+
+#: The select scene this generator is the one producer of (build_pck.ps1 only
+#: overlays it): her namecard backdrop, the close-up's rendered idle loop and
+#: the Electro emitters (tools/select_bg.py; 2026-10-19, Varka's shape).
+SELECT_SCENE = ROOT / "klee-mod" / "pck-src" / "yae" / "ui" / "char_select_bg_yae.tscn"
+#: The backdrop tint, her Electro violet (as the scene carried it in
+#: build_pck.ps1): it pushes the namecard back so the figure separates.
+SELECT_TINT = (0.69, 0.5, 0.88, 1.0)
+SELECT_ELEMENT = "electro"
+#: The figure's horizontal centre in select_closeup.png (her opaque columns
+#: span x 979-1639 in the 2026-10-19 render): the breath's pivot and the glow.
+SELECT_FIGURE_X = 1309.0
+
+
+def render_select_scene() -> str:
+    from tools.select_bg import load_loop, render_select_scene as _render
+
+    return _render("yae", "YaeBg", SELECT_TINT, SELECT_ELEMENT, SELECT_FIGURE_X, load_loop("yae"))
