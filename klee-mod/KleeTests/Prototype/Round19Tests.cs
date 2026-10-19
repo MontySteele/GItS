@@ -281,11 +281,15 @@ public class Round19Tests
     // a Skill's damage clause is emitted as `ValueProp.Move`, so Weak cuts it
     // and Vulnerable raises it. What is true is the card TYPE.
 
+    //
+    // THE TWO ELEMENT RIDERS SAY IT IN THEIR FIRST WORDS (Kokomi review r4,
+    // item 4, 2026-10-19): Bennett's and Sara's faces spend their ceiling on
+    // the element rule instead -- "is Pyro, not its own element", and which
+    // rider wins when both stand -- so "your next Attack CARD" carries the
+    // card-type rule and the shared clause stays on the other two.
     [Theory]
-    [InlineData(typeof(PassionOverloadPower))]
     [InlineData(typeof(SwirlChargePower))]
     [InlineData(typeof(StarfrostDiscountPower))]
-    [InlineData(typeof(CrowfeatherCoverPower))]
     public void Every_next_attack_rider_prints_the_card_type_rule(Type rider)
     {
         var power = (ILocalizationProvider)Activator.CreateInstance(rider)!;
@@ -294,6 +298,23 @@ public class Round19Tests
 
         Assert.Contains("Only an Attack card spends it, never a Skill.", face);
         Assert.Contains("next Attack", face);
+    }
+
+    [Theory]
+    [InlineData(typeof(PassionOverloadPower), "Pyro", true)]
+    [InlineData(typeof(CrowfeatherCoverPower), "Electro", false)]
+    public void The_element_riders_print_one_element_and_who_wins(
+        Type rider, string element, bool namesSara)
+    {
+        var power = (ILocalizationProvider)Activator.CreateInstance(rider)!;
+        var face = power.Localization!
+            .First(r => r.Item1 == "description").Item2;
+
+        Assert.StartsWith("Your next Attack card this turn deals ", face);
+        Assert.Contains(
+            $"is [gold]{element}[/gold], not its own element.", face);
+        Assert.Equal(namesSara,
+            face.Contains("[gold]Electro[/gold] from Sara wins."));
     }
 
     [Fact]

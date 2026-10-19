@@ -1196,7 +1196,7 @@ public sealed class GameStageBoard : IStageBoard
         var pool = enemies;
         if (target == StageTarget.Aura)
         {
-            // "an enemy, one with an aura if able" (the diversity pass,
+            // "an enemy, aura first" (the diversity pass,
             // 2026-10-11): with no aura on any enemy, any enemy.
             var aura = enemies.Where(e => AuraCmd.Find(e) != null).ToList();
             if (aura.Count > 0) pool = aura;

@@ -1,3 +1,4 @@
+using System;
 using Godot;
 using KleeMod.Tests.Harness;
 using Xunit;
@@ -61,6 +62,41 @@ public class RewardRowProbeTests
     {
         Assert.Equal("NotDrawn", Classify(View169, CardAt(960f, 616f), false));
         Assert.Equal("NotDrawn", Classify(View169, new Rect2(960f, 616f, 0f, 0f), true));
+    }
+
+    /// <summary>The row's verdict from placement names, through reflection
+    /// like the rest of this file (the probe's enums are internal).</summary>
+    private static string Judge(params string[] names)
+    {
+        var placement = ((System.Reflection.MethodInfo)Il.Method(
+            "RewardRowProbe", "Classify")).ReturnType;
+        var list = (System.Collections.IList)Activator.CreateInstance(
+            typeof(System.Collections.Generic.List<>).MakeGenericType(placement))!;
+        foreach (var n in names) list.Add(Enum.Parse(placement, n));
+        return Il.Method("RewardRowProbe", "Judge")
+                 .Invoke(null, new object[] { list })!.ToString()!;
+    }
+
+    [Fact]
+    public void A_row_on_screen_is_ok()
+    {
+        Assert.Equal("Ok", Judge("OnScreen", "OnScreen", "OnScreen", "OnScreen"));
+    }
+
+    [Fact]
+    public void A_row_still_being_drawn_writes_no_line()
+    {
+        // The 8,448 lines of 2026-10-19: every one a card not yet drawn.
+        Assert.Equal("Skip", Judge("OnScreen", "NotDrawn", "OnScreen"));
+        Assert.Equal("Skip", Judge("NotDrawn", "NotDrawn", "NotDrawn", "NotDrawn"));
+    }
+
+    [Fact]
+    public void A_drawn_card_off_screen_is_a_sighting_even_beside_an_undrawn_one()
+    {
+        Assert.Equal("Sighting", Judge("OnScreen", "OnScreen", "OffScreen"));
+        Assert.Equal("Sighting", Judge("PartlyOff", "OnScreen"));
+        Assert.Equal("Sighting", Judge("NotDrawn", "OffScreen"));
     }
 
     [Fact]
