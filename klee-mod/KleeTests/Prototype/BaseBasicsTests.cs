@@ -141,10 +141,16 @@ public class BaseBasicsTests
         // WHY IRONCLAD FOR KLEE AND SILENT FOR KOKOMI, and it is not taste. A
         // card's frame and energy orb come off `CardModel.Pool`, which for a
         // base basic is the base character's pool -- so the only way the four
-        // Strikes sit in her hand looking like her own cards is to pick the
-        // pool her own already borrows from. Both mod pools have borrowed
-        // theirs since C1; this pin is what stops one of them being re-skinned
+        // Strikes carry her energy orb is to pick the pool her own already
+        // borrows it from. This pin is what stops one of them being re-skinned
         // without the starter following it.
+        //
+        // THE FRAME NO LONGER MATCHES, deliberately (card frames stage 1,
+        // 2026-10-19, [USER]: "we need a quick way of distinguishing the
+        // character cards"): each kit pool now tints its own frame
+        // (`CardFrameColors`), while the base Strike and Defend keep their base
+        // character's frame. Starter basics are never changed, so that seam
+        // stays until stage 2 decides it.
         // ALLOCATED, NOT RESOLVED THROUGH ModelDb: the base pools are
         // registered by the game's own boot, which this harness does not run
         // (README, "The headless boundary"). Both properties are literal
@@ -155,17 +161,11 @@ public class BaseBasicsTests
 
         Assert.Equal(Pool<IroncladCardPool>().EnergyColorName,
                      Pool<KleeCardPool>().EnergyColorName);
-        Assert.Equal(Pool<IroncladCardPool>().CardFrameMaterialPath,
-                     Pool<KleeCardPool>().CardFrameMaterialPath);
         Assert.Equal(Pool<SilentCardPool>().EnergyColorName,
                      Pool<KokomiCardPool>().EnergyColorName);
-        Assert.Equal(Pool<SilentCardPool>().CardFrameMaterialPath,
-                     Pool<KokomiCardPool>().CardFrameMaterialPath);
         // The Stage (2026-09-28) deals Silent's pair for the same reason.
         Assert.Equal(Pool<SilentCardPool>().EnergyColorName,
                      Pool<FurinaCardPool>().EnergyColorName);
-        Assert.Equal(Pool<SilentCardPool>().CardFrameMaterialPath,
-                     Pool<FurinaCardPool>().CardFrameMaterialPath);
     }
 
     // ---- the two cards of her own -----------------------------------------

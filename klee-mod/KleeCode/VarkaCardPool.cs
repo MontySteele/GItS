@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using Godot;
+using BaseLib.Utils.Attributes;
 using KleeMod.Cards.Prototype;
 using KleeMod.Powers;
 using MegaCrit.Sts2.Core.Models;
@@ -15,21 +15,18 @@ namespace KleeMod;
 /// (<see cref="VarkaRoster.Pool"/>). Compiled with the prototype surface,
 /// beside the character.
 /// </summary>
-public sealed class VarkaCardPool : CardPoolModel
+[CustomID("VARKA_CARD_POOL")]
+public sealed class VarkaCardPool : KitCardPool
 {
     public override string Title => VarkaPrototype.CharacterId;
 
-    // The Silent's green frame and energy, the borrow Kokomi's and Furina's
-    // pools make; his base Strike and Defend are hers for the same reason.
+    // The Silent's energy orb, the borrow Kokomi's and Furina's pools make;
+    // his base Strike and Defend are hers for the same reason.
     public override string EnergyColorName => "silent";
 
-    public override string CardFrameMaterialPath => "card_frame_green";
-
-    public override Color DeckEntryCardColor => new("4CC2A8");
-
-    public override Color EnergyOutlineColor => new("1D5E52");
-
-    public override bool IsColorless => false;
+    /// <summary>Frame tint, chip and orb-number outline:
+    /// <see cref="CardFrameColors.Varka"/>.</summary>
+    public override CardFrameColors.Tint Tint => CardFrameColors.Varka;
 
     /// <summary>THE OFFER: the pool and his Ancients
     /// (<see cref="VarkaRoster.OfferablePool"/>). The one door into reward

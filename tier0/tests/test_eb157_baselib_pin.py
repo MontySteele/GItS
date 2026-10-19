@@ -57,7 +57,7 @@ LOCAL_PROPS = ROOT / "klee-mod" / "local.props"
 # NOT in the list, deliberately, and each was checked by hand:
 #   * `RunState` -- `Owner.RunState` is the GAME's, not BaseLib's
 #     `BetaMainCompatibility` shim of the same name;
-#   * `CustomPowerModel`, `CustomCardPoolModel`, `CustomContentDictionary`,
+#   * `CustomPowerModel`, `CustomContentDictionary`,
 #     `MultiPileCardSelect` and the `BaseLib.Hooks` interfaces -- named only in
 #     comments explaining what we deliberately do NOT derive from or rely on
 #     (see KleePowerIcons.cs's header, and KleeMod.cs's finding-27 note).
@@ -65,6 +65,8 @@ CALLED_BASELIB_TYPES: frozenset[str] = frozenset({
     "AncientDialogueUtil",     # BaseLib.Utils
     "AutoKeywordPosition",     # BaseLib.Patches.Content
     "CustomCardModel",         # BaseLib.Abstracts -- 327 uses, the roster
+    "CustomCardPoolModel",     # BaseLib.Abstracts -- KitCardPool, CompanionCardPool
+    "CustomIDAttribute",       # BaseLib.Utils.Attributes -- kit pools keep their ids
     "CustomCharacterModel",    # BaseLib.Abstracts -- the three characters
     "CustomRelicModel",        # BaseLib.Abstracts
     "ICustomModel",            # BaseLib.Abstracts

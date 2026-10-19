@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using Godot;
+using BaseLib.Utils.Attributes;
 using KleeMod.Cards.Kokomi;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Unlocks;
@@ -20,24 +20,19 @@ namespace KleeMod;
 /// Since legacy cleanup stage 4 (2026-10-01) the pool IS the current kit:
 /// the `proto_kk_` rows are its members and the arm's roster its offer.
 /// </summary>
-public sealed class KokomiCardPool : CardPoolModel
+[CustomID("KOKOMI_CARD_POOL")]
+public sealed class KokomiCardPool : KitCardPool
 {
     public override string Title => "kokomi";
 
-    // Native frame borrowed while her art pass is outstanding, same standing
-    // arrangement Furina shipped under. "silent" is the closest energy colour
-    // to hydro in the base set.
+    // The Silent's orb, borrowed while her art pass is outstanding, same
+    // standing arrangement Furina shipped under. "silent" is the closest
+    // energy colour to hydro in the base set.
     public override string EnergyColorName => "silent";
 
-    public override string CardFrameMaterialPath => "card_frame_green";
-
-    /// <summary>Watatsumi pearl-blue; also her NameColor and map colour, so
-    /// the deck screen and the map read as the same character.</summary>
-    public override Color DeckEntryCardColor => new("6FC8D6");
-
-    public override Color EnergyOutlineColor => new("1E5A6B");
-
-    public override bool IsColorless => false;
+    /// <summary>Frame tint, chip and orb-number outline:
+    /// <see cref="CardFrameColors.Kokomi"/>.</summary>
+    public override CardFrameColors.Tint Tint => CardFrameColors.Kokomi;
 
     /// <summary>
     /// THE OFFER (<c>GetUnlockedCards</c>, the sole door into reward rolls,

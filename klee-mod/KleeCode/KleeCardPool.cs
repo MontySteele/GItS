@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using Godot;
+using BaseLib.Utils.Attributes;
 using KleeMod.Cards;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Unlocks;
@@ -11,24 +11,21 @@ namespace KleeMod;
 /// Klee's card pool. C1 contains only the four starter stubs; the slice list
 /// (31 cards + companions, spec C2) lands via codegen from the YAML sheet.
 ///
-/// C1 STUB: EnergyColorName / CardFrameMaterialPath borrow Ironclad's red
-/// assets because we ship no .pck yet (has_pck: false). Custom frame + energy
-/// art is an art-pass item, not a boot blocker.
+/// The frame is her own tint of the base frame (card frames stage 1,
+/// <see cref="CardFrameColors"/>); the energy orb is still the Ironclad's.
+/// Custom frame + energy art is stage 2, an art-pass item.
 /// </summary>
-public sealed class KleeCardPool : CardPoolModel
+[CustomID("KLEE_CARD_POOL")]
+public sealed class KleeCardPool : KitCardPool
 {
     public override string Title => "klee";
 
+    // The Ironclad's orb, borrowed until stage 2 gives her her own.
     public override string EnergyColorName => "ironclad";
 
-    public override string CardFrameMaterialPath => "card_frame_red";
-
-    // Klee red, per spec C1.4 (artist's final call later).
-    public override Color DeckEntryCardColor => new Color("E85A4F");
-
-    public override Color EnergyOutlineColor => new Color("7A2418");
-
-    public override bool IsColorless => false;
+    /// <summary>Frame tint, chip and orb-number outline:
+    /// <see cref="CardFrameColors.Klee"/>.</summary>
+    public override CardFrameColors.Tint Tint => CardFrameColors.Klee;
 
     /// <summary>
     /// THE OFFER. <c>GetUnlockedCards</c> is the only path into reward rolls

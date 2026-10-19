@@ -295,11 +295,11 @@ decompile of `sts2.dll` and pinned by `KleeTests/Prototype/BaseBasicsTests.cs`.
   never asks the owner — so an Ironclad basic in Klee's deck resolves to
   `IroncladCardPool` and nothing throws. Portrait path, energy icon and frame
   material all come off that pool, which is why each arm takes the pair its own
-  pool already borrows: Klee `card_frame_red` + `ironclad`, Kokomi
-  `card_frame_green` + `silent`. **The one visible seam** is the deck screen's
-  `DeckEntryCardColor`, which stays the base pool's (`D62000` / `5EBD00`)
-  rather than the mod pool's — reported, not hidden, and eyes-on at the next
-  live acceptance.
+  pool already borrows the energy orb from: Klee `ironclad`, Kokomi `silent`.
+  **The visible seam** is the frame: since card frames stage 1 (2026-10-19)
+  each kit pool tints its own frame (`KleeCode/CardFrameColors.cs`), so the
+  base Strike and Defend wear the base character's frame and deck-entry colour
+  (`D62000` / `5EBD00`) beside the kit's own cards.
 - **The element belongs to the card, never to the hand that plays it**
   ([USER], 2026-10-05: "that effect just lives in the card pool as a symbol on
   relevant elemental cards and the card states 'deals [element] damage' or

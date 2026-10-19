@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using Godot;
+using BaseLib.Utils.Attributes;
 using KleeMod.Cards.Prototype;
 using KleeMod.Powers;
 using MegaCrit.Sts2.Core.Models;
@@ -14,21 +14,18 @@ namespace KleeMod;
 /// <c>CardModel.Pool</c> resolves; its OFFER is batch one's thirty
 /// (<see cref="YaeRoster.Pool"/>). Varka's arrangement.
 /// </summary>
-public sealed class YaeCardPool : CardPoolModel
+[CustomID("YAE_CARD_POOL")]
+public sealed class YaeCardPool : KitCardPool
 {
     public override string Title => YaePrototype.CharacterId;
 
-    // The Defect's blue frame and energy (Electro's nearest base colour);
-    // her base Strike and Defend are his for the same reason.
+    // The Defect's energy orb (Electro's nearest base colour); her base
+    // Strike and Defend are his for the same reason.
     public override string EnergyColorName => "defect";
 
-    public override string CardFrameMaterialPath => "card_frame_blue";
-
-    public override Color DeckEntryCardColor => new("B07FE0");
-
-    public override Color EnergyOutlineColor => new("4B2A6E");
-
-    public override bool IsColorless => false;
+    /// <summary>Frame tint, chip and orb-number outline:
+    /// <see cref="CardFrameColors.Yae"/>.</summary>
+    public override CardFrameColors.Tint Tint => CardFrameColors.Yae;
 
     /// <summary>THE OFFER: her pool (<see cref="YaeRoster.OfferablePool"/>),
     /// the one door into reward rolls, the shop and transforms.</summary>
