@@ -41,9 +41,16 @@ namespace KleeMod.Diagnostics;
 /// writes ONE line to godot.log: how many options, how many holders, the
 /// canvas size, and for each holder its centre, its card body's rect and
 /// whether that rect is on screen, partly off, wholly off, or not drawn. A
-/// row that is fully on screen is an INFO line; any card that is not is a
-/// WARN line that starts "reward row OFF SCREEN". The next time the user sees
-/// it, that line names which of the readings above it was.
+/// row that is fully on screen is an INFO line; any DRAWN card that is not is
+/// a WARN line that starts "reward row OFF SCREEN". The next time the user
+/// sees it, that line names which of the readings above it was.
+///
+/// A ROW STILL BEING DRAWN WRITES NOTHING (2026-10-19). Until then a card not
+/// yet drawn ("NotDrawn card_rect 0x0": hidden, or shrunk to nothing by the
+/// fly-in) counted as off and wrote the WARN line -- 8,448 of them in the
+/// logs by 2026-10-19 -- which buried the one sighting the probe exists for.
+/// A card with no area is not a card the player can see off screen, so a row
+/// whose only misses are undrawn cards is skipped (<see cref="Judge"/>).
 ///
 /// It reads and never writes: no position, scale or focus is touched, so the
 /// three-card base look is untouched by construction. Every step is inside
@@ -83,6 +90,36 @@ internal static class RewardRowProbe
             return Placement.OnScreen;
         }
         return grown.Intersects(card) ? Placement.PartlyOff : Placement.OffScreen;
+    }
+
+    /// <summary>What one row's reading comes to.</summary>
+    internal enum RowVerdict
+    {
+        /// <summary>Every card is drawn and on screen: an INFO line.</summary>
+        Ok,
+        /// <summary>A drawn card is partly or wholly off: the WARN line.</summary>
+        Sighting,
+        /// <summary>No drawn card is off, but one is not drawn yet: no line.</summary>
+        Skip,
+    }
+
+    /// <summary>
+    /// The row's verdict from its cards' placements, kept free of nodes like
+    /// <see cref="Classify"/>. A drawn card off screen is a sighting whatever
+    /// else the row holds; otherwise a card not yet drawn skips the row.
+    /// </summary>
+    internal static RowVerdict Judge(IEnumerable<Placement> placements)
+    {
+        var undrawn = false;
+        foreach (var p in placements)
+        {
+            if (p is Placement.PartlyOff or Placement.OffScreen)
+            {
+                return RowVerdict.Sighting;
+            }
+            undrawn |= p == Placement.NotDrawn;
+        }
+        return undrawn ? RowVerdict.Skip : RowVerdict.Ok;
     }
 
     /// <summary>
@@ -133,7 +170,7 @@ internal static class RewardRowProbe
         var view = screen.GetViewportRect();
         var holders = row.GetChildren().OfType<NGridCardHolder>().ToList();
         var parts = new List<string>();
-        var anyOff = false;
+        var placements = new List<Placement>();
         for (var i = 0; i < holders.Count; i++)
         {
             var holder = holders[i];
@@ -144,7 +181,7 @@ internal static class RewardRowProbe
                           && card.Modulate.A > 0.01f
                           && body != null && body.IsVisibleInTree();
             var placement = Classify(view, rect, visible);
-            anyOff |= placement != Placement.OnScreen;
+            placements.Add(placement);
             var center = holder.GlobalPosition;
             parts.Add(string.Format(CultureInfo.InvariantCulture,
                 "{0}:{1} {2} holder=({3:0},{4:0}) local_x={5:0} card_rect=({6:0},{7:0} {8:0}x{9:0})",
@@ -152,6 +189,12 @@ internal static class RewardRowProbe
                 center.X, center.Y, holder.Position.X,
                 rect.Position.X, rect.Position.Y, rect.Size.X, rect.Size.Y));
         }
+        var verdict = Judge(placements);
+        if (verdict == RowVerdict.Skip)
+        {
+            return;
+        }
+        var anyOff = verdict == RowVerdict.Sighting;
         var text = new StringBuilder();
         text.Append(anyOff ? "reward row OFF SCREEN" : "reward row ok");
         text.Append(string.Format(CultureInfo.InvariantCulture,

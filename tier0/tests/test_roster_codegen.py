@@ -6,6 +6,7 @@ import json
 import re
 from pathlib import Path
 
+import pytest
 import yaml
 
 from tools import gen_klee_cards as gen
@@ -877,3 +878,27 @@ def test_every_place_bomb_face_prints_the_bombs_own_amount():
         + "\n  ".join(offenders))
 
 
+
+
+@pytest.mark.parametrize("effect", [
+    {"op": "place_bomb", "amount": 1, "target": "enemy", "bomb_damage": 4},
+    {"op": "detonate", "target": "enemy"},
+    {"op": "modify_bombs", "bonus": 2},
+    {"op": "move_bombs", "target": "enemy"},
+    {"op": "damage", "amount": 6, "target": "enemy",
+     "bonus_formula": "2_per_detonation_this_combat"},
+])
+def test_the_shipped_bombs_ops_are_refused_at_codegen(effect):
+    """`BombPower.cs` is deleted, and these ops' emitters still write calls
+    into it: a row using one would generate C# that fails the build far from
+    the sheet. `blocked_reason` names the deleted power instead (2026-10-19)."""
+    card = dict(_add_before_probe(), id="shipped_bomb_probe",
+                effects=[{"op": "draw", "amount": 1}, effect])
+    assert "BombPower" in (gen.blocked_reason(card) or "")
+
+
+def test_chance_bomb_per_detonation_is_refused_at_codegen():
+    card = dict(_add_before_probe(), id="shipped_bomb_probe",
+                effects=[{"op": "chance_bomb_per_detonation",
+                          "chance": 0.5, "bomb_damage": 4}])
+    assert "BombPower" in (gen.blocked_reason(card) or "")

@@ -174,7 +174,7 @@ public class FurinaDiversityPassTests : IDisposable
         Assert.Contains($"damage Lynette Aura "
                         + $"{FurinaStageLaw.LynetteActDamage} Anemo",
                         kit.Board.Log);
-        Assert.Contains("one with an aura if able",
+        Assert.Contains("to an enemy, aura first.",
                         Face(new ProtoFsGuestStarLynette()));
         Assert.Contains("aura first",
                         StagePerformerBadge.ActText(StagePerformer.Lynette));

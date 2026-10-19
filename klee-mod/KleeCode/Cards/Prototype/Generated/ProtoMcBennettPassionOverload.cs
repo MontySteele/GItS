@@ -49,7 +49,7 @@ public sealed class ProtoMcBennettPassionOverload : CustomCardModel, ICompanionC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Bennett — Passion Overload"),
-        ("description", "Your next Attack this turn deals {PowerAmount:diff()} additional damage and applies [gold]Pyro[/gold]."),
+        ("description", "Your next Attack card this turn deals {PowerAmount:diff()} additional damage and is [gold]Pyro[/gold], not its own element. [gold]Electro[/gold] from Sara wins."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
