@@ -92,7 +92,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from understudy import (authorship, blindplay_brief, blindplay_coop,
-                       blindplay_shape, bridge,
+                       blindplay_newcomer, blindplay_shape, bridge,
                        lanewatch, offer_log, qa_packet, report, seat)
 
 # `klee-mod/local.props` is the machine's one statement of where the game is,
@@ -366,11 +366,15 @@ def cmd_observe(args) -> int:
     out = _refusal_stream(args)
     if not getattr(args, "raw_file", ""):
         _warn_build_skew(state)
+        _warn_old_bridge(state)
     try:
         # 2026-10-01: `--define "<Word>"` prints that word's definition off
         # this screen and nothing else; the brief page prints each once.
         word = getattr(args, "define", "") or ""
-        if word:
+        if word and blindplay_newcomer.on():
+            # The newcomer seat (2026-10-19): the game's own tip or none.
+            print(blindplay_newcomer.define(state, word).rstrip("\n"))
+        elif word:
             print(blindplay_brief.define(
                 observe(state), word,
                 blindplay_shape.bomb_growth(observation(state)),
@@ -441,6 +445,20 @@ def _warn_build_skew(state: dict[str, Any]) -> None:
         print(line, file=sys.stderr)
 
 
+def _warn_old_bridge(state: dict[str, Any]) -> None:
+    """The newcomer seat (2026-10-19): once per lane, on stderr, where the
+    bridge did not answer the ask for the player's hover tips."""
+    if not (blindplay_newcomer.on()
+            and blindplay_newcomer.bridge_ignored_audience(state)):
+        return
+    seen = blindplay_shape.read_words_seen()
+    if blindplay_newcomer.OLD_BRIDGE_KEY in seen:
+        return
+    seen.add(blindplay_newcomer.OLD_BRIDGE_KEY)
+    blindplay_shape.write_words_seen(seen)
+    print(blindplay_newcomer.OLD_BRIDGE_WARNING, file=sys.stderr)
+
+
 def screen_page(state: dict[str, Any], full: bool = True) -> str:
     """The full page as a printing door prints it: `observe`, with the
     "Since last page" line cut to the ledger events this lane has not been
@@ -452,8 +470,16 @@ def screen_page(state: dict[str, Any], full: bool = True) -> str:
     seat on the lane) never saw it again. Now the fight remembers which kinds
     it has briefed, and the first page of the fight that a door prints carries
     the briefing whatever the round. `full` (plain `observe`) prints it on
-    every round-1 page as before."""
+    every round-1 page as before.
+
+    THE NEWCOMER SEAT (2026-10-19, `blindplay_newcomer`): with
+    `GITS_NEWCOMER=1` a live fight is the player's page and every other
+    screen is this page with the seat-only parts cut."""
     obs = observation(state)
+    newcomer = blindplay_newcomer.on()
+    if (newcomer and obs.get("screen") == "combat" and not obs.get("blocked")
+            and obs.get("combat")):
+        return blindplay_newcomer.combat_page(state, obs)
     combat = obs.get("combat")
     # 2026-10-08: whether this page opens its fight, for the brief page's
     # relic block (`blindplay_brief.RELICS_HEADING`). Kept in the fight's own
@@ -474,7 +500,7 @@ def screen_page(state: dict[str, Any], full: bool = True) -> str:
     newest = newest_event(obs)
     if newest:
         blindplay_shape.write_events_seen(newest)
-    return text
+    return blindplay_newcomer.trim_page(text) if newcomer else text
 
 
 #: The fight-memory mark that this fight's relic sentences have printed, and
@@ -496,8 +522,9 @@ def _refusal_stream(args):
 
 def _page(text: str, args) -> str:
     """The page as printed: whole, or `blindplay_brief.brief` of it, which
-    keeps a word's definition the first time this lane is shown it."""
-    if not _brief_on(args):
+    keeps a word's definition the first time this lane is shown it. A
+    newcomer's page has no definitions to trim and is printed whole."""
+    if not _brief_on(args) or blindplay_newcomer.on():
         return text
     seen = blindplay_shape.read_words_seen()
     page = blindplay_brief.brief(text, seen, relics_full=_FIGHT_OPENING[0])

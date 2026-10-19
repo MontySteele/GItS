@@ -36,6 +36,10 @@ for _leaked in ("GIT_DIR", "GIT_WORK_TREE", "GIT_INDEX_FILE",
                 "GIT_COMMON_DIR", "GIT_NAMESPACE", "GIT_CEILING_DIRECTORIES"):
     os.environ.pop(_leaked, None)
 
+# The newcomer seat (2026-10-19): a shell that set `GITS_NEWCOMER=1` for a
+# round must not turn every page test into the newcomer's page.
+os.environ.pop("GITS_NEWCOMER", None)
+
 
 # `EB-496`. THE FIGHT'S MEMORY IS ON DISK NOW, so it leaks between test FILES
 # and between xdist workers, not merely between tests in one module. The
