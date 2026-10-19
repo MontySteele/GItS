@@ -24,7 +24,7 @@ namespace KleeMod.Tests;
 ///
 /// THE FIX is the pattern already pinned next door: a second counter keyed by
 /// `Player` and cleared when the combat instance changes, exactly like
-/// `BombPower.DetonationsThisCombat` (`BombInstancingTests` covers that one).
+/// `ProtoBombPower.ExplosionsThisCombat`.
 ///
 /// THE BOUNDARY. `ReactionEffects.Resolve` is an async game path that needs a
 /// live `PlayerChoiceContext`, so it cannot run here (README). What CAN run is
@@ -33,7 +33,7 @@ namespace KleeMod.Tests;
 /// </summary>
 public class ReactionSeatCountTests
 {
-    private static readonly Type Reactions = typeof(BombPower).Assembly
+    private static readonly Type Reactions = typeof(SparkPower).Assembly
         .GetTypes().First(t => t.Name == "ReactionEffects");
 
     private static void Record(object combat, Seat seat)
@@ -135,7 +135,7 @@ public class ReactionSeatCountTests
     public void The_telemetry_row_reads_the_per_seat_counter_and_not_the_global()
     {
         // The call site, structurally: OpenTurn writes the per-seat row.
-        var openTurn = typeof(BombPower).Assembly.GetTypes()
+        var openTurn = typeof(SparkPower).Assembly.GetTypes()
             .First(t => t.Name == "PlayTelemetry")
             .GetMethod("OpenTurn", HeadlessGame.All)!;
 

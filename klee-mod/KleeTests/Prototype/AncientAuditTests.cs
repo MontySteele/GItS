@@ -238,44 +238,17 @@ public class AncientAuditTests
     [Fact]
     public void Dodoco_tales_hears_one_bus_per_explosion()
     {
-        // It listens on the shipped detonation bus and on the arm's explosion
-        // bus. Only the shipped BombPower rings the first, and nothing places
-        // one: no method outside BombPower calls its placers or detonators.
-        var shipped = new HashSet<string>(StringComparer.Ordinal)
-        {
-            "BombPower.Place", "BombPower.DetonateOn", "BombPower.DetonateAll",
-            "BombPower.MoveAllTo", "BombPower.ResolveTurnStartPiles",
-        };
-        var callers = new List<string>();
-        foreach (var type in typeof(RosterAncientCards).Assembly.GetTypes())
-        {
-            if (type == typeof(BombPower) || type.DeclaringType == typeof(BombPower))
-            {
-                continue;
-            }
-            foreach (var method in type.GetMethods(HeadlessGame.All)
-                         .Where(m => m.DeclaringType == type))
-            {
-                IReadOnlyCollection<string> calls;
-                try
-                {
-                    calls = Il.Calls(method);
-                }
-                catch (Exception)
-                {
-                    continue;
-                }
-                if (calls.Any(shipped.Contains))
-                {
-                    callers.Add(type.Name + "." + method.Name);
-                }
-            }
-        }
-        Assert.Empty(callers);
+        // It listens on the arm's explosion bus alone: the old shipped
+        // detonation bus left with the shipped BombPower (deleted 2026-10-19,
+        // when nothing had placed one since the text pass of 2026-10-08).
+        var listens = typeof(ExplosiveFrags).GetInterfaces()
+            .Where(i => i.Name.EndsWith("Listener", StringComparison.Ordinal))
+            .Select(i => i.Name)
+            .ToList();
+        Assert.Equal(new[] { nameof(IProtoExplosionListener) }, listens);
 
         // And the arm's explosion bus rings the arm's listeners alone.
         var bus = Il.Calls(Il.Method("ProtoBombPower", "NotifyExplosionListeners"));
         Assert.Contains("IProtoExplosionListener.OnBombExploded", bus);
-        Assert.DoesNotContain("IBombDetonationListener.OnBombDetonated", bus);
     }
 }

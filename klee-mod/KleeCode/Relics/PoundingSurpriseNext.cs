@@ -42,7 +42,7 @@ namespace KleeMod.Relics;
 /// Furina Stage's arrangement for the same shape.
 /// </summary>
 public sealed class PoundingSurpriseNext : CustomRelicModel,
-    IBombDetonationListener, IProtoExplosionListener
+    IProtoExplosionListener
 {
     /// <summary>The Bomb it places at the start of each combat.</summary>
     public const int OpeningBomb = 6;
@@ -111,15 +111,6 @@ public sealed class PoundingSurpriseNext : CustomRelicModel,
         if (offer == null) return false;
         cardRewardOptions.Add(new CardCreationResult(offer));
         return true;
-    }
-
-    public async Task OnBombDetonated(
-        PlayerChoiceContext choiceContext, Creature? applier, Creature target, int damage)
-    {
-        if (applier?.Player != Owner) return;
-        Flash();
-        await SparkPower.Gain(choiceContext, Owner.Creature, 1, cardSource: null,
-            source: "relic:pounding_surprise_next/detonation");
     }
 
     public async Task OnBombExploded(

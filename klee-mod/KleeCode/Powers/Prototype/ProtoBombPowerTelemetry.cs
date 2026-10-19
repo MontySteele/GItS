@@ -8,10 +8,10 @@ namespace KleeMod.Powers;
 /// <summary>
 /// THE PROTOTYPE BOMB'S DETONATION COUNT, for the play telemetry.
 ///
-/// The fight record's `detonations` read <see cref="BombPower"/>'s counter,
+/// The fight record's `detonations` read <c>BombPower</c>'s counter,
 /// and the Klee arm's Bombs and Mines are this power, which never touched it:
 /// the 2026-10-02 co-op fact-check read 0 detonations across a whole Klee run.
-/// So this keeps the same shape <see cref="BombPower.DetonationsThisCombat"/>
+/// So this keeps the same shape <c>BombPower.DetonationsThisCombat</c>
 /// keeps -- per combat, per placer, cleared when the combat instance changes
 /// -- with Mines counted beside the total.
 ///

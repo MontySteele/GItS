@@ -260,20 +260,6 @@ public class KitVerbBaseTriggerPinTests
     }
 
     [Fact]
-    public void The_shipped_bomb_detonates_only_on_an_Attack_cards_hit()
-    {
-        // MATRIX V1/V2 vs the shipped Bomb: `BombPower.AfterDamageReceived`
-        // asks BOTH questions -- a powered hit AND `cardSource.Type ==
-        // CardType.Attack` -- so unlike Skittish it agrees with the sim's
-        // `source == "attack"`. That agreement is a cell and is pinned here.
-        var calls = Il.Calls(Il.Method("BombPower", "AfterDamageReceived"));
-
-        Assert.Contains("ValuePropExtensions.IsPoweredAttack", calls);
-        Assert.Contains("CardModel.get_Type", calls);
-        Assert.Contains("DamageResult.get_UnblockedDamage", calls);
-    }
-
-    [Fact]
     public void Shatter_asks_the_same_two_questions_the_sim_asks()
     {
         // MATRIX V21, the other cell where the engines agree through

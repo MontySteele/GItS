@@ -572,7 +572,7 @@ internal static class PlayTelemetry
                 // in every seat's row, and a reader dividing by that seat's
                 // turns or cards used the wrong denominator.
                 // `ResolvedThisCombat` is the per-seat counter, keyed the way
-                // BombPower's detonation totals next door are. A dealer-less
+                // ProtoBombPower's explosion totals next door are. A dealer-less
                 // reaction belongs to no seat, so the seats' own numbers sum
                 // to at most the team-wide one, never more.
                 var mine = ReactionEffects.ResolvedThisCombat(combat, player);
@@ -599,11 +599,11 @@ internal static class PlayTelemetry
     /// <summary>
     /// EB-18 — the bomb counters, sampled rather than hooked.
     ///
-    /// <see cref="BombPower"/> already keeps a per-combat, PER-PLAYER
-    /// detonation total (the co-op ownership fix, EPOCH 2 / D2) and now a
-    /// corpse-detonation total beside it. Both are monotonic within a combat,
-    /// so reading them at each turn boundary and at combat end — taking the
-    /// MAX, never the last value — costs two dictionary lookups per seat and
+    /// <see cref="ProtoBombPower"/> keeps per-combat, PER-PLAYER explosion
+    /// totals (the co-op ownership fix, EPOCH 2 / D2). They are monotonic
+    /// within a combat, so reading them at each turn boundary and at combat
+    /// end — taking the MAX, never the last value — costs a few dictionary
+    /// lookups per seat and
     /// cannot go backwards if a stale-flush reads a record after the next
     /// combat has already reset the counters.
     ///
@@ -615,13 +615,12 @@ internal static class PlayTelemetry
     {
         foreach (var (player, record) in Open)
         {
-            // 2026-10-02: the Klee arm's Bombs and Mines are `ProtoBombPower`,
-            // which never touched `BombPower`'s counter, so a whole Klee run
-            // read 0. Both powers count now; a seat only ever holds one.
+            // 2026-10-02: the Klee arm's Bombs and Mines are `ProtoBombPower`.
+            // The old shipped `BombPower` this once summed with was placed by
+            // no card and is deleted (2026-10-19), so this is the only feed.
             record.Detonations = Math.Max(
                 record.Detonations,
-                BombPower.DetonationsThisCombat(combat, player)
-                + ProtoBombPower.ExplosionsThisCombat(combat, player));
+                ProtoBombPower.ExplosionsThisCombat(combat, player));
             record.MineDetonations = Math.Max(
                 record.MineDetonations,
                 ProtoBombPower.MineExplosionsThisCombat(combat, player));
@@ -632,9 +631,6 @@ internal static class PlayTelemetry
             record.MineDetonationsByAttack = Math.Max(
                 record.MineDetonationsByAttack,
                 ProtoBombPower.AttackMineExplosionsThisCombat(combat, player));
-            record.CorpseDetonations = Math.Max(
-                record.CorpseDetonations,
-                BombPower.CorpseDetonationsThisCombat(combat, player));
             // 2026-10-06. The reaction tallies, sampled on the same rule: per
             // key, the MAX of what was held and what the counter reads, so a
             // stale-flush that reads after the next combat reset them (they
@@ -2000,6 +1996,10 @@ internal static class PlayTelemetry
         public string Encounter = string.Empty;
         public int Detonations;
         public int MineDetonations;
+        /// <summary>NO LONGER FED (2026-10-19). Its only source was the old
+        /// shipped <c>BombPower</c>'s corpse counter, deleted with that power;
+        /// the field and its `corpse_detonations` key stay so the telemetry
+        /// schema does not move, and it always writes 0.</summary>
         public int CorpseDetonations;
         /// <summary>2026-10-08. Klee-arm charges whose explosion set off an
         /// Elemental Reaction (`bomb_reactions`); the seat's other reactions

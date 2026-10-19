@@ -308,7 +308,7 @@ internal static class ReactionEffects
     /// seat's turns, cards or damage used the wrong denominator. The row is a
     /// per-seat record; a team-wide number in it is a measurement error, not a
     /// design position. So the fix is a SECOND counter with the honest scope,
-    /// keyed exactly the way <see cref="BombPower.DetonationsThisCombat"/>
+    /// keyed exactly the way <c>BombPower.DetonationsThisCombat</c>
     /// next door is keyed -- the pattern this repo already pinned for the same
     /// question.
     ///

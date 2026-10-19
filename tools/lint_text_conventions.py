@@ -155,27 +155,13 @@ EXCEPTIONS.update({
 })
 
 # --- the shipped exceptions: id -> reason. Same rot semantics. -----------
-SHIPPED_EXCEPTIONS = {
-    "BombPower.description": (
-        "R249 pick 3(a): the shipped Bomb badge is the surface that states "
-        "all three of its rules in full -- when it goes off, what makes it "
-        "go off early, and the once-per-combat 25% cut -- because the "
-        "keyword tip beside it is a primer and drops the last clause's "
-        "scope; the prototype badge carries the same exception for the same "
-        "reason"),
-    "BombPower.smartDescription": (
-        "R249 pick 3(a): the shipped Bomb badge keeps its three rules -- a "
-        "live total, a live Bomb count and the 25%-off first attack -- the "
-        "way the prototype's Mine faces do; the static description without "
-        "the live count meets the ceiling"),
-}
+#: Empty since 2026-10-19: its two rows were the old shipped Bomb badge
+#: (`Powers/BombPower.cs`), deleted with that power.
+SHIPPED_EXCEPTIONS: dict[str, str] = {}
 
-#: R249 pick 2(a). The old Bomb badge (`Powers/BombPower.cs`) still says
-#: "detonates". No card places that power any more and its keyword tip left
-#: with the text pass of 2026-10-08; the class stays until its tests and the
-#: telemetry that reads its counters are retired, so the report does not read
-#: the `goes-off` spelling on it. The gate carries the spelling everywhere.
-SHIPPED_SKIP_SPELLINGS = {"goes-off"}
+#: Spellings `--report` does not read. Empty since the old Bomb badge, which
+#: still said "detonates" (R249 pick 2(a)), was deleted on 2026-10-19.
+SHIPPED_SKIP_SPELLINGS: set[str] = set()
 
 
 def pick_branch(expr: str, branch: str) -> str:
@@ -1206,8 +1192,7 @@ def main(argv: list[str]) -> int:
         print("text-conventions (report): exceptions carried "
               "(each over its ceiling for the reason given):")
         print("\n".join(f"  {k}: {v}" for k, v in SHIPPED_EXCEPTIONS.items()))
-        print(f"  spellings not read here: {sorted(SHIPPED_SKIP_SPELLINGS)} "
-              "-- the old Bomb badge still says 'detonates'")
+        print(f"  spellings not read here: {sorted(SHIPPED_SKIP_SPELLINGS)}")
         print(loc_count_line())
         print(f"report: {len(rows)} strings read (top-level power badges and "
               f"relics), {len(found)} finding(s) -- a report, not a gate")
