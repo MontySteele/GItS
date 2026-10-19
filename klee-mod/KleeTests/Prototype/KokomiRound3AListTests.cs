@@ -57,12 +57,14 @@ public class KokomiRound3AListTests
     }
 
     [Fact]
-    public void Kurage_canopy_plus_is_the_upgraded_ward_twin()
+    public void Kurage_canopy_is_one_power_for_both_versions()
     {
-        Assert.True(typeof(KurageCanopyBasePower)
-            .IsAssignableFrom(typeof(KurageCanopyPlusPower)));
-        Assert.True(typeof(KurageCanopyBasePower)
+        // The icon declutter (2026-10-19): the "+" twin folded into one
+        // power that counts the upgraded card's copies.
+        Assert.True(typeof(UpgradeTwinPower)
             .IsAssignableFrom(typeof(KurageCanopyPower)));
+        Assert.Null(typeof(KurageCanopyPower).Assembly
+            .GetType("KleeMod.Powers.KurageCanopyPlusPower"));
     }
 
     [Fact]

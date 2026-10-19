@@ -7,7 +7,7 @@ the framing math for both characters.
 Outputs (all gitignored Tier F, ledgered in art/SOURCES.tsv):
     ImageGen/images/kokomi/model/combat_model.png        240x280  static fallback
     ImageGen/images/kokomi/ui/selection_splash.png      1920x1200
-    ImageGen/images/kokomi/ui/map_marker.png              49x64
+    (ui/map_marker.png left 2026-10-19: tools/gen_map_markers.py draws a pin from the model close-up)
 
 The top-bar icon (ui/char_icon.png) left this script on 2026-10-13:
 tools/gen_char_icons.py draws it from her select splash, framed to the base
@@ -42,8 +42,7 @@ import sys
 from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from char_stills import (alpha_bbox, cutout_from_plate, fit,  # noqa: E402
-                         head_crop)
+from char_stills import alpha_bbox, cutout_from_plate, fit  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 PLATE = ROOT / "art" / "raw" / "Sangonomiya_Kokomi_Portrait.png"
@@ -51,8 +50,6 @@ CUTOUT = ROOT / "ImageGen" / "images" / "kokomi" / "model" / "kokomi_portrait_cu
 UI = ROOT / "ImageGen" / "images" / "kokomi" / "ui"
 MODEL = ROOT / "ImageGen" / "images" / "kokomi" / "model"
 
-# Set by eye (see module docstring). Larger fraction = wider shot.
-MARKER_HEAD_FRAC = 0.24
 
 # Selection splash. She sits left of centre because the select screen's info
 # panel occupies the right third (mirrors Furina's offset).
@@ -100,9 +97,6 @@ def main():
     fit(cutout, 240, 280).save(MODEL / "combat_model.png")
     print("  combat_model.png       240x280")
 
-    head_crop(cutout, 49, 64, head_frac=MARKER_HEAD_FRAC,
-              centre_on="head").save(UI / "map_marker.png")
-    print("  map_marker.png 49x64")
 
     # Selection splash. Framed off the ALPHA BBOX rather than the image frame
     # -- the Portrait carries ~9% empty margin all round, so scaling by frame

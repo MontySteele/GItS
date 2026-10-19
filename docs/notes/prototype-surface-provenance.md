@@ -3569,9 +3569,10 @@ damage to ALL enemies (4 upgraded), where it was 2 to a random one. The hit has 
 element (`ElementalHit.DealUnelemented`; the sim's `element=None`) since
 2026-09-23, so it cannot spend an aura a companion laid down.
 
-**`proto_ko_alices_detonator`**: two Power twins, `AlicesDetonatorPower` and
-`AlicesDetonatorPlusPower`, installed by the card's upgrade; each adds one
-Ka-pow! (upgraded on the Plus twin) per stack after the turn's draw.
+**`proto_ko_alices_detonator`**: one power, `AlicesDetonatorPower` (since the
+icon declutter, 2026-10-19; it was two twins), counts the upgraded card's
+copies; each copy adds one Alice's Mine (upgraded for an upgraded copy)
+before the turn's draw.
 
 ## The co-op set (2026-09-25)
 
@@ -8237,8 +8238,9 @@ with one text held:
 - **Bubble Ward:** 6 [9] Block (was 5 [8]), Cloak and Dagger's 6 and a Shiv.
 - **Kurage Canopy:** "Whenever the Bake-Kurage carries out a Plan, add a Ward
   to your Hand." (was 3 [4] Block). Endless Shoal's Ward twin, once per
-  carry-out. The upgraded card installs `KurageCanopyPlusPower`
-  (`upgraded_power: kk_kurage_canopy_plus`), whose Ward is upgraded. A full
+  carry-out. The upgraded card's copy (`upgraded_power:
+  kk_kurage_canopy_plus`) adds an upgraded Ward, counted on the one
+  `KurageCanopyPower` since the icon declutter (2026-10-19). A full
   hand sends the Ward to the discard pile in game (`KokomiCards.AddJellyfish`);
   the sim stops it at the hand, its `_add_token` rule.
 - **Albedo, Solar Isotoma:** "...deal 8 damage to the enemy with the most
@@ -9270,8 +9272,9 @@ in the promotion PR with suite 2's record.
 - **Prima Donna**'s "last turn" is latched when her turn closes
   (`FurinaStageLedger.CloseTurn`, after the guests act), so end-of-turn
   Spends (Full House, Showstopper) count and a Spend this turn never pays
-  this turn. The upgraded card installs `PrimaDonnaPlusPower`
-  (`upgraded_power: fs_prima_donna_plus`), which also draws 1. The 10-Fanfare
+  this turn. The upgraded card's copy (`upgraded_power:
+  fs_prima_donna_plus`) also draws 1, counted on the one `PrimaDonnaPower`
+  since the icon declutter (2026-10-19). The 10-Fanfare
   constant (`PrimaDonnaFanfare`) is gone. The Spend tip now also reads the
   past tense, `[gold]Spent[/gold]`.
 - **The runaway check** (sec.3): Standing Room Only with Full House (4),

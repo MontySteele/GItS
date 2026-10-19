@@ -73,6 +73,6 @@ public sealed class ProtoVkWestWindsBlessing : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        // upgraded_power: the upgraded card installs WestWindsBlessingPower, read off IsUpgraded when the card is played.
+        // upgraded_power: the upgraded card's copy of WestWindsBlessingPower counts as upgraded, read off IsUpgraded when the card is played.
     }
 }

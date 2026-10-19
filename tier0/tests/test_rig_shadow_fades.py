@@ -1,6 +1,6 @@
 """The ground shadow fades with the body at death (in-game check 2026-10-16).
 
-Klee, Varka and Furina each draw a Shadow sprite beside their Model under
+Klee, Varka, Furina, Kokomi and Yae (2026-10-19) each draw a Shadow sprite beside their Model under
 Visuals/Facing. The death clip faded the Model only, so "a dark oval stays
 on the ground where they stood". tools/klee_rig/rig.shadow_fade copies the
 Model's alpha onto the Shadow; this reads the shipped (generated) scenes, which
@@ -29,7 +29,7 @@ def _animations(text: str) -> dict[str, str]:
     return out
 
 
-@pytest.mark.parametrize("who", ["klee", "varka", "furina"])
+@pytest.mark.parametrize("who", ["klee", "varka", "furina", "kokomi", "yae"])
 def test_the_shadow_fades_out_with_the_death_clip_and_nowhere_else(who):
     text = (ROOT / "klee-mod" / "pck-src" / who / "model" / "combat.tscn").read_text(encoding="utf-8")
     anims = _animations(text)

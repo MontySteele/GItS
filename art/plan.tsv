@@ -313,7 +313,10 @@ relic_dodoco_tales	ImageGen/images/relics/dodoco_tales.png	256	256	contain	cente
 # char_icon	ImageGen/images/ui/char_icon.png	88	88	cover	top	auto	1	png	Klee Icon.png		icon
 energy_icon_large	ImageGen/images/ui/energy_icon_74.png	74	74	contain	center	auto	1	svg	Element Pyro.svg		icon
 energy_icon_small	ImageGen/images/ui/energy_icon_22.png	22	22	contain	center	auto	1	svg	Element Pyro.svg		icon
-map_marker	ImageGen/images/ui/map_marker.png	49	64	cover	top	auto	1	png	Klee Side Icon.png		icon
+# map_marker (retired 2026-10-19): a base-style pin with her face, cut from the
+# model-rendered select close-up by tools/gen_map_markers.py (Klee visual paper,
+# pick 3 (a): the side icon filled only the lower two-thirds of its box); art_lint L11.
+# map_marker	ImageGen/images/ui/map_marker.png	49	64	cover	top	auto	1	png	Klee Side Icon.png		icon
 selection_splash	ImageGen/images/ui/selection_splash.png	1920	1200	cover	center	auto	1	png	Klee Wish.png		splash
 select_bg	ImageGen/images/ui/select_bg.png	1920	1080	cover	center	auto	1	png	Namecard Background Klee Explosive.png		splash
 # ---------- COMBAT MODEL SOURCE (raw; hand-cut into layers per manifest recipe) ----------
@@ -768,7 +771,6 @@ power_furina_fanfare	ImageGen/images/furina/powers/fanfare.png	256	256	contain	c
 power_furina_fanfare	ImageGen/images/furina/powers/fanfare.png	256	256	contain	center	shortlist	3	png	Furina Item.png		icon
 power_furina_rising_ovation	ImageGen/images/furina/powers/rising_ovation.png	256	256	contain	center	auto	1	png	Constellation A Woman Adapts Like Duckweed in Water.png		icon
 power_furina_salon_member	ImageGen/images/furina/powers/salon_member.png	256	256	contain	center	auto	1	png	Talent Salon Solitaire.png		icon
-power_furina_grand_salon	ImageGen/images/furina/powers/grand_salon.png	256	256	contain	center	auto	1	png	Talent Salon Solitaire 2.png		icon
 power_furina_center_stage	ImageGen/images/furina/powers/center_stage.png	256	256	contain	center	auto	1	png	Talent The Sea Is My Stage.png		icon
 power_furina_guest_cast	ImageGen/images/furina/powers/guest_cast.png	256	256	contain	center	auto	1	png	Constellation They Know Not Life, Who Dwelt in the Netherworld Not!.png		icon
 power_furina_leading_role	ImageGen/images/furina/powers/leading_role.png	256	256	contain	center	auto	1	png	Constellation His Name I Now Know, It Is...!.png		icon
@@ -776,9 +778,7 @@ power_furina_supporting_cast	ImageGen/images/furina/powers/supporting_cast.png	2
 power_furina_top_billing	ImageGen/images/furina/powers/top_billing.png	256	256	contain	center	auto	1	png	Constellation Love Is a Rebellious Bird That None Can Tame.png		icon
 power_furina_limelight	ImageGen/images/furina/powers/limelight.png	256	256	contain	center	auto	1	png	Constellation Hear Me — Let Us Raise the Chalice of Love!.png		icon
 power_furina_star_of_the_show	ImageGen/images/furina/powers/star_of_the_show.png	256	256	contain	center	auto	1	png	Animula Choragi Shape.png		icon
-power_furina_stage_lights	ImageGen/images/furina/powers/stage_lights.png	256	256	contain	center	auto	1	png	Talent Unheard Confession.png		icon
 power_furina_standing_ovation	ImageGen/images/furina/powers/standing_ovation.png	256	256	contain	center	shortlist	1	png	Furina Icon.png		icon
-power_furina_ovation_trickle	ImageGen/images/furina/powers/ovation_trickle.png	256	256	contain	center	shortlist	1	png	Item Furina Banquet.png		icon
 # --- Kokomi art pass, 2026-07-25 (docs/kokomi-art-pass-requirements.md). Tier F, private build only. ---
 # Shortlists, not picks: rank 1 is the effective source until the taste pass rules.
 # Anchors are COMPUTED from each source's geometry, not chosen. A cover anchor is a CENTRE and the crop
@@ -1144,8 +1144,6 @@ grand_gala	ImageGen/images/cards/furina/grand_gala.png	500	380	cover_autocrop	co
 # -- run 2: AS2-E2 icon re-hunt, the 4 weak marks (AS2 log, 'Open [USER] items') --
 power_furina_standing_ovation	ImageGen/images/furina/powers/standing_ovation.png	256	256	contain	center	shortlist	2	png	Talent Conclusive Ovation.png		icon
 power_furina_standing_ovation	ImageGen/images/furina/powers/standing_ovation.png	256	256	contain	center	shortlist	3	png	Conclusive Ovation Equipment Card.png		icon
-power_furina_ovation_trickle	ImageGen/images/furina/powers/ovation_trickle.png	256	256	contain	center	shortlist	2	png	Item Ovations That Ceased Upon Festivity.png		icon
-power_furina_ovation_trickle	ImageGen/images/furina/powers/ovation_trickle.png	256	256	contain	center	shortlist	3	png	Conclusive Ovation Equipment Card Golden.png		icon
 power_friendly_visit	ImageGen/images/powers/friendly_visit.png	256	256	contain	center	shortlist	2	png	Item Gift.png		icon
 power_friendly_visit	ImageGen/images/powers/friendly_visit.png	256	256	contain	center	shortlist	3	png	Trifolium.png		icon
 power_study_buddy	ImageGen/images/powers/study_buddy.png	256	256	contain	center	shortlist	2	png	Book Ragged Notebook.png		icon
@@ -1399,9 +1397,6 @@ power_kokomi_kurages_oath	ImageGen/images/kokomi/powers/kurages_oath.png	256	256
 power_kokomi_before_sun_and_moon	ImageGen/images/kokomi/powers/before_sun_and_moon.png	256	256	cover	y0.66@2.2	shortlist	1	png	Sangonomiya Kokomi Vision.png		icon
 power_kokomi_before_sun_and_moon	ImageGen/images/kokomi/powers/before_sun_and_moon.png	256	256	contain	center	shortlist	2	png	Talent Nereid's Ascension.png		icon
 power_kokomi_before_sun_and_moon	ImageGen/images/kokomi/powers/before_sun_and_moon.png	256	256	contain	center	shortlist	3	png	Icon Emoji Paimon's Paintings 13 Sangonomiya Kokomi 2.png		sticker
-power_kokomi_ceremonial_garment	ImageGen/images/kokomi/powers/ceremonial_garment.png	256	256	contain	center	shortlist	1	png	Ceremonial Garment Buff Icon.png		icon
-power_kokomi_ceremonial_garment	ImageGen/images/kokomi/powers/ceremonial_garment.png	256	256	cover	center	shortlist	2	gif	Nereid's Ascension Ceremonial Garment Water Preview.gif	50	icon
-power_kokomi_ceremonial_garment	ImageGen/images/kokomi/powers/ceremonial_garment.png	256	256	cover	center	shortlist	3	gif	Nereid's Ascension Ceremonial Garment Attack Preview.gif	50	icon
 power_kokomi_vigil_of_the_deep	ImageGen/images/kokomi/powers/vigil_of_the_deep.png	256	256	cover	center	shortlist	1	png	Namecard Background Sangonomiya Kokomi The Deep.png		icon
 power_kokomi_vigil_of_the_deep	ImageGen/images/kokomi/powers/vigil_of_the_deep.png	256	256	cover	center	shortlist	2	png	Item Sangonomiya Kokomi The Deep.png		icon
 power_kokomi_vigil_of_the_deep	ImageGen/images/kokomi/powers/vigil_of_the_deep.png	256	256	cover	center	shortlist	3	gif	Nereid's Ascension Ceremonial Garment Water Preview.gif	70	icon
@@ -3392,6 +3387,15 @@ proto_mf_sigewinne_super_saturated_syringing	ImageGen/images/cards/companions/pr
 proto_mf_escoffier_rehab_diet	ImageGen/images/cards/companions/proto_mf_escoffier_rehab_diet.png	500	380	cover	y0.33	shortlist	1	png	Escoffier Card.png		splash	escoffier
 # proto_mf_emilie_aromatic_explication <- Emilie's full Wish art
 proto_mf_emilie_aromatic_explication	ImageGen/images/cards/companions/proto_mf_emilie_aromatic_explication.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Emilie Full Wish.png		splash	emilie
+
+# ---------- Yae character shell (2026-10-19, the Yae art pass) ----------
+# Her select backdrop, a straight wiki fetch: her own namecard, tinted Electro
+# violet by the generated select scene (tools/yae_rig). L1 scopes to /cards/,
+# so proto_ym_sakura_seal wearing the same namecard is legal, as
+# kokomi_select_bg's The Deep is. The other shell surfaces are generator-owned
+# (art_lint L11): gen_yae_stills.py, gen_map_markers.py, gen_char_icons.py,
+# gen_char_icon_outlines.py, gen_transition_wipe.py, select_loop.py.
+yae_select_bg	ImageGen/images/yae/ui/select_bg.png	1920	1080	cover	center	shortlist	1	png	Namecard Background Yae Miko Kitsune Dreaming.png		splash
 # ---------- Power badge pass (2026-10-19): badges that borrowed another power's icon get their own ----------
 # Kit powers wear their kit's own talent/constellation icons or an item of the kit's nation; companion powers
 # their companion's talent icon. The borrowed badge stays the fallback in KleePowerIcons.cs.
@@ -3508,9 +3512,7 @@ power_kokomi_endless_shoal	ImageGen/images/kokomi/powers/endless_shoal.png	256	2
 # power_kokomi_watchful_shoal <- Inazuma sea-glow: sharper Stings
 power_kokomi_watchful_shoal	ImageGen/images/kokomi/powers/watchful_shoal.png	256	256	contain	center	shortlist	1	png	Item Fluorescent Fungus.png		icon	
 # power_kokomi_jellyfish_current <- a jellyfish
-power_kokomi_jellyfish_current	ImageGen/images/kokomi/powers/jellyfish_current.png	256	256	contain	center	shortlist	1	png	Item Clear Gold Hat Jellyfish.png		icon	
 # power_kokomi_coordinated_tide <- Inazuma crystal
-power_kokomi_coordinated_tide	ImageGen/images/kokomi/powers/coordinated_tide.png	256	256	contain	center	shortlist	1	png	Item Crystal Marrow.png		icon	
 # power_kokomi_watatsumis_grace <- Kokomi passive
 power_kokomi_watatsumis_grace	ImageGen/images/kokomi/powers/watatsumis_grace.png	256	256	contain	center	shortlist	1	png	Talent The Shape of Water.png		icon	
 # power_kokomi_tidal_riposte <- Kokomi C6, a blade: the riposte
@@ -3526,7 +3528,6 @@ power_kokomi_treatise	ImageGen/images/kokomi/powers/treatise.png	256	256	contain
 # power_kokomi_kurage_canopy <- a jellyfish canopy
 power_kokomi_kurage_canopy	ImageGen/images/kokomi/powers/kurage_canopy.png	256	256	contain	center	shortlist	1	png	Item Rampaging Sapphire Blue Hat Jellyfish.png		icon	
 # power_kokomi_watatsumi_resistance <- an Inazuma Hydro Vision
-power_kokomi_watatsumi_resistance	ImageGen/images/kokomi/powers/watatsumi_resistance.png	256	256	contain	center	shortlist	1	png	Vision Inazuma Hydro.png		icon	
 # power_kokomi_grand_strategist <- a Hydro reaction
 power_kokomi_grand_strategist	ImageGen/images/kokomi/powers/grand_strategist.png	256	256	contain	center	shortlist	1	png	Reaction Vaporize.png		icon	
 # power_kokomi_undercurrent_snare <- enemy rider: tangling seagrass
@@ -3556,7 +3557,6 @@ power_furina_center_of_attention	ImageGen/images/furina/powers/center_of_attenti
 # power_furina_the_masquerade <- the Opera Epiclese in miniature
 power_furina_the_masquerade	ImageGen/images/furina/powers/the_masquerade.png	256	256	contain	center	shortlist	1	png	Item Theater's Cool Mist.png		icon	
 # power_furina_high_stakes <- Neuvillette's verdict: what was Drained is owed
-power_furina_high_stakes	ImageGen/images/furina/powers/high_stakes.png	256	256	contain	center	shortlist	1	png	Talent O Tears, I Shall Repay.png		icon	
 # power_varka_unsworn_oath <- his own Vision, beside the four Oath Visions
 power_varka_unsworn_oath	ImageGen/images/varka/powers/unsworn_oath.png	256	256	contain	center	shortlist	1	png	Vision Mondstadt Anemo.png		icon	
 # power_varka_knight_of_boreas <- Boreas

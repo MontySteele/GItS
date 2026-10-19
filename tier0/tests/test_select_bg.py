@@ -1,4 +1,4 @@
-"""The animated character-select scenes of Klee, Varka, Furina and Kokomi (stage 1).
+"""The animated character-select scenes of Klee, Varka, Furina, Kokomi and Yae (stage 1).
 
 [USER], 2026-10-14: "during character select, none of the art pieces for the
 base game's characters are static; the character does a small idle loop with
@@ -27,17 +27,20 @@ from tools.furina_rig import rig as furina_rig
 from tools.klee_rig import rig as klee_rig
 from tools.kokomi_rig import rig as kokomi_rig
 from tools.varka_rig import rig as varka_rig
+from tools.yae_rig import rig as yae_rig
 
 ROOT = Path(__file__).resolve().parents[2]
 BUILD = ROOT / "tools" / "build_pck.ps1"
 
-RIGS = {"klee": klee_rig, "varka": varka_rig, "furina": furina_rig, "kokomi": kokomi_rig}
-ELEMENT = {"klee": "pyro", "varka": "anemo", "furina": "hydro", "kokomi": "reef"}
+RIGS = {"klee": klee_rig, "varka": varka_rig, "furina": furina_rig, "kokomi": kokomi_rig, "yae": yae_rig}
+ELEMENT = {"klee": "pyro", "varka": "anemo", "furina": "hydro", "kokomi": "reef", "yae": "electro"}
 #: Emitter names each element must carry (the brief: Pyro embers/sparks,
 #: Anemo streaks + leaves, Hydro droplets/bubbles).
 EMITTERS = {"pyro": {"Embers", "Sparks"}, "anemo": {"Streaks", "Leaves"}, "hydro": {"Bubbles", "Droplets"},
             # Kokomi's Hydro (2026-10-19): Furina's bubbles, and her jellyfish drifting up
-            "reef": {"Bubbles", "Jellies"}}
+            "reef": {"Bubbles", "Jellies"},
+            # Yae's Electro (2026-10-19): sparks and her sakura petals
+            "electro": {"Petals", "Sparks"}}
 
 
 @pytest.fixture(scope="module", params=sorted(RIGS))

@@ -507,7 +507,6 @@ public class FurinaGuestRuleTests
         Assert.Equal(0, low.Board.Gained);
         foreach (var hook in new[] { "FurinaStage.CrescendoGains",
                                      "FurinaStage.ReginaDrains",
-                                     "FurinaStage.PneumaTidesRepays",
                                      "FurinaStage.PrimaDonnaEnergy" })
         {
             Assert.Contains(hook, Il.Calls(Il.Method("FurinaStage", "TurnStart")));

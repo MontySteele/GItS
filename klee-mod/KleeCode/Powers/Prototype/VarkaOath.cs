@@ -1355,13 +1355,6 @@ public static class VarkaOath
         {
             await bunny.Fire(choiceContext);
         }
-        foreach (var sworn in varka.Powers.OfType<SwornBrotherhoodPower>().ToList())
-        {
-            foreach (var element in VarkaOathLedger.Elements)
-            {
-                await Gain(choiceContext, varka, element, sworn.Amount);
-            }
-        }
         // Power cost sweep, 2026-09-30: the base card, current element only.
         foreach (var sworn in varka.Powers.OfType<SwornBrotherhoodCurrentPower>().ToList())
         {

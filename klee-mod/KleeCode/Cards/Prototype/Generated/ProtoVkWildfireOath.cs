@@ -68,6 +68,6 @@ public sealed class ProtoVkWildfireOath : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        // upgraded_power: the upgraded card installs WildfireOathPower, read off IsUpgraded when the card is played.
+        // upgraded_power: the upgraded card's copy of WildfireOathPower counts as upgraded, read off IsUpgraded when the card is played.
     }
 }

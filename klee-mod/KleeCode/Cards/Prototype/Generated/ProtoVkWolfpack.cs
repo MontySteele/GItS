@@ -64,6 +64,6 @@ public sealed class ProtoVkWolfpack : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        // upgraded_power: the upgraded card installs WolfpackPower, read off IsUpgraded when the card is played.
+        // upgraded_power: the upgraded card's copy of WolfpackPower counts as upgraded, read off IsUpgraded when the card is played.
     }
 }

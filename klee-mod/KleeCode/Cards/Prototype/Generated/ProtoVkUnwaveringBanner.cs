@@ -68,6 +68,6 @@ public sealed class ProtoVkUnwaveringBanner : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        // upgraded_power: the upgraded card installs UnwaveringBannerPower, read off IsUpgraded when the card is played.
+        // upgraded_power: the upgraded card's copy of UnwaveringBannerPower counts as upgraded, read off IsUpgraded when the card is played.
     }
 }

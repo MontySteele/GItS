@@ -283,13 +283,14 @@ public class KokomiPoolOverhaulTests
     }
 
     [Fact]
-    public void The_reaction_reader_counts_and_pays_the_four_readings()
+    public void The_reaction_reader_counts_and_pays_its_readings()
     {
         var reads = Il.Calls(Il.Method("KokomiRefounding", "OnReaction"));
         Assert.Contains(reads, c => c.Contains("NoteReaction"));
         Assert.Contains(reads, c => c.Contains("ElementalHit.DealUnelemented"));
-        Assert.Contains(reads, c => c.Contains("IsCompanionHit"));
-        Assert.Contains(reads, c => c.Contains("KokomiCards.AddJellyfish"));
+        // Coordinated Tide's and Jellyfish Current's Stings left with their
+        // dead classes (the icon declutter, 2026-10-19).
+        Assert.DoesNotContain(reads, c => c.Contains("KokomiCards.AddJellyfish"));
         // Grand Strategist no longer asks whether a Plan is being carried out.
         Assert.DoesNotContain(reads, c => c.Contains("IsCarryingOut"));
         // The one site a reaction resolves hands the card over.
@@ -306,12 +307,8 @@ public class KokomiPoolOverhaulTests
     }
 
     [Fact]
-    public void Jellyfish_current_and_coordinated_tide_say_what_they_pay()
+    public void Grand_strategist_says_what_it_pays()
     {
-        Assert.Contains("Whenever a [gold]Sting[/gold] triggers",
-                        PowerFace(new JellyfishCurrentPower()));
-        Assert.Contains("Whenever a [gold]Companion[/gold] triggers",
-                        PowerFace(new CoordinatedTidePower()));
         Assert.Contains("Whenever you trigger",
                         PowerFace(new GrandStrategistPower()));
     }

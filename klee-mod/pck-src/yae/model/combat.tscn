@@ -964,19 +964,19 @@ tracks/0/keys = {
 tracks/1/type = "value"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath("Visuals/Facing/Model/Attack:self_modulate")
+tracks/1/path = NodePath("Visuals/Facing/Shadow:modulate")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Color(1, 1, 1, 0)]
+"values": [Color(1, 1, 1, 1)]
 }
 tracks/2/type = "value"
 tracks/2/imported = false
 tracks/2/enabled = true
-tracks/2/path = NodePath("Visuals/Facing/Model/AttackFx:self_modulate")
+tracks/2/path = NodePath("Visuals/Facing/Model/Attack:self_modulate")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
@@ -988,7 +988,7 @@ tracks/2/keys = {
 tracks/3/type = "value"
 tracks/3/imported = false
 tracks/3/enabled = true
-tracks/3/path = NodePath("Visuals/Facing/Model/Cast:self_modulate")
+tracks/3/path = NodePath("Visuals/Facing/Model/AttackFx:self_modulate")
 tracks/3/interp = 1
 tracks/3/loop_wrap = true
 tracks/3/keys = {
@@ -1000,7 +1000,7 @@ tracks/3/keys = {
 tracks/4/type = "value"
 tracks/4/imported = false
 tracks/4/enabled = true
-tracks/4/path = NodePath("Visuals/Facing/Model/Death:self_modulate")
+tracks/4/path = NodePath("Visuals/Facing/Model/Cast:self_modulate")
 tracks/4/interp = 1
 tracks/4/loop_wrap = true
 tracks/4/keys = {
@@ -1012,7 +1012,7 @@ tracks/4/keys = {
 tracks/5/type = "value"
 tracks/5/imported = false
 tracks/5/enabled = true
-tracks/5/path = NodePath("Visuals/Facing/Model/Hurt:self_modulate")
+tracks/5/path = NodePath("Visuals/Facing/Model/Death:self_modulate")
 tracks/5/interp = 1
 tracks/5/loop_wrap = true
 tracks/5/keys = {
@@ -1024,106 +1024,118 @@ tracks/5/keys = {
 tracks/6/type = "value"
 tracks/6/imported = false
 tracks/6/enabled = true
-tracks/6/path = NodePath("Visuals/Facing/Model/Idle:self_modulate")
+tracks/6/path = NodePath("Visuals/Facing/Model/Hurt:self_modulate")
 tracks/6/interp = 1
 tracks/6/loop_wrap = true
 tracks/6/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Color(1, 1, 1, 1)]
+"values": [Color(1, 1, 1, 0)]
 }
 tracks/7/type = "value"
 tracks/7/imported = false
 tracks/7/enabled = true
-tracks/7/path = NodePath("Visuals/Facing/Model/IdleLow:self_modulate")
+tracks/7/path = NodePath("Visuals/Facing/Model/Idle:self_modulate")
 tracks/7/interp = 1
 tracks/7/loop_wrap = true
 tracks/7/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Color(1, 1, 1, 0)]
+"values": [Color(1, 1, 1, 1)]
 }
 tracks/8/type = "value"
 tracks/8/imported = false
 tracks/8/enabled = true
-tracks/8/path = NodePath("Visuals/Facing/Model/Attack:texture")
-tracks/8/interp = 0
+tracks/8/path = NodePath("Visuals/Facing/Model/IdleLow:self_modulate")
+tracks/8/interp = 1
 tracks/8/loop_wrap = true
 tracks/8/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [SubResource("Atlas_attack_0")]
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
 }
 tracks/9/type = "value"
 tracks/9/imported = false
 tracks/9/enabled = true
-tracks/9/path = NodePath("Visuals/Facing/Model/AttackFx:texture")
+tracks/9/path = NodePath("Visuals/Facing/Model/Attack:texture")
 tracks/9/interp = 0
 tracks/9/loop_wrap = true
 tracks/9/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 1,
-"values": [SubResource("Atlas_fx_attack_0")]
+"values": [SubResource("Atlas_attack_0")]
 }
 tracks/10/type = "value"
 tracks/10/imported = false
 tracks/10/enabled = true
-tracks/10/path = NodePath("Visuals/Facing/Model/Cast:texture")
+tracks/10/path = NodePath("Visuals/Facing/Model/AttackFx:texture")
 tracks/10/interp = 0
 tracks/10/loop_wrap = true
 tracks/10/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 1,
-"values": [SubResource("Atlas_cast_0")]
+"values": [SubResource("Atlas_fx_attack_0")]
 }
 tracks/11/type = "value"
 tracks/11/imported = false
 tracks/11/enabled = true
-tracks/11/path = NodePath("Visuals/Facing/Model/Death:texture")
+tracks/11/path = NodePath("Visuals/Facing/Model/Cast:texture")
 tracks/11/interp = 0
 tracks/11/loop_wrap = true
 tracks/11/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 1,
-"values": [SubResource("Atlas_death_0")]
+"values": [SubResource("Atlas_cast_0")]
 }
 tracks/12/type = "value"
 tracks/12/imported = false
 tracks/12/enabled = true
-tracks/12/path = NodePath("Visuals/Facing/Model/Hurt:texture")
+tracks/12/path = NodePath("Visuals/Facing/Model/Death:texture")
 tracks/12/interp = 0
 tracks/12/loop_wrap = true
 tracks/12/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 1,
-"values": [SubResource("Atlas_hurt_0")]
+"values": [SubResource("Atlas_death_0")]
 }
 tracks/13/type = "value"
 tracks/13/imported = false
 tracks/13/enabled = true
-tracks/13/path = NodePath("Visuals/Facing/Model/Idle:texture")
+tracks/13/path = NodePath("Visuals/Facing/Model/Hurt:texture")
 tracks/13/interp = 0
 tracks/13/loop_wrap = true
 tracks/13/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 1,
-"values": [SubResource("Atlas_idle_0")]
+"values": [SubResource("Atlas_hurt_0")]
 }
 tracks/14/type = "value"
 tracks/14/imported = false
 tracks/14/enabled = true
-tracks/14/path = NodePath("Visuals/Facing/Model/IdleLow:texture")
+tracks/14/path = NodePath("Visuals/Facing/Model/Idle:texture")
 tracks/14/interp = 0
 tracks/14/loop_wrap = true
 tracks/14/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [SubResource("Atlas_idle_0")]
+}
+tracks/15/type = "value"
+tracks/15/imported = false
+tracks/15/enabled = true
+tracks/15/path = NodePath("Visuals/Facing/Model/IdleLow:texture")
+tracks/15/interp = 0
+tracks/15/loop_wrap = true
+tracks/15/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 1,
@@ -1473,19 +1485,19 @@ tracks/0/keys = {
 tracks/1/type = "value"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath("Visuals/Facing/Model/Idle:self_modulate")
+tracks/1/path = NodePath("Visuals/Facing/Shadow:modulate")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
+"times": PackedFloat32Array(0, 0.12, 0.6, 1.7, 2.2),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
 "update": 0,
-"values": [Color(1, 1, 1, 0)]
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
 }
 tracks/2/type = "value"
 tracks/2/imported = false
 tracks/2/enabled = true
-tracks/2/path = NodePath("Visuals/Facing/Model/IdleLow:self_modulate")
+tracks/2/path = NodePath("Visuals/Facing/Model/Idle:self_modulate")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
@@ -1497,7 +1509,7 @@ tracks/2/keys = {
 tracks/3/type = "value"
 tracks/3/imported = false
 tracks/3/enabled = true
-tracks/3/path = NodePath("Visuals/Facing/Model/Attack:self_modulate")
+tracks/3/path = NodePath("Visuals/Facing/Model/IdleLow:self_modulate")
 tracks/3/interp = 1
 tracks/3/loop_wrap = true
 tracks/3/keys = {
@@ -1509,7 +1521,7 @@ tracks/3/keys = {
 tracks/4/type = "value"
 tracks/4/imported = false
 tracks/4/enabled = true
-tracks/4/path = NodePath("Visuals/Facing/Model/Hurt:self_modulate")
+tracks/4/path = NodePath("Visuals/Facing/Model/Attack:self_modulate")
 tracks/4/interp = 1
 tracks/4/loop_wrap = true
 tracks/4/keys = {
@@ -1521,46 +1533,58 @@ tracks/4/keys = {
 tracks/5/type = "value"
 tracks/5/imported = false
 tracks/5/enabled = true
-tracks/5/path = NodePath("Visuals/Facing/Model/Death:self_modulate")
+tracks/5/path = NodePath("Visuals/Facing/Model/Hurt:self_modulate")
 tracks/5/interp = 1
 tracks/5/loop_wrap = true
 tracks/5/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Color(1, 1, 1, 1)]
+"values": [Color(1, 1, 1, 0)]
 }
 tracks/6/type = "value"
 tracks/6/imported = false
 tracks/6/enabled = true
-tracks/6/path = NodePath("Visuals/Facing/Model/Cast:self_modulate")
+tracks/6/path = NodePath("Visuals/Facing/Model/Death:self_modulate")
 tracks/6/interp = 1
 tracks/6/loop_wrap = true
 tracks/6/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Color(1, 1, 1, 0)]
+"values": [Color(1, 1, 1, 1)]
 }
 tracks/7/type = "value"
 tracks/7/imported = false
 tracks/7/enabled = true
-tracks/7/path = NodePath("Visuals/Facing/Model/Death:texture")
-tracks/7/interp = 0
+tracks/7/path = NodePath("Visuals/Facing/Model/Cast:self_modulate")
+tracks/7/interp = 1
 tracks/7/loop_wrap = true
 tracks/7/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("Visuals/Facing/Model/Death:texture")
+tracks/8/interp = 0
+tracks/8/loop_wrap = true
+tracks/8/keys = {
 "times": PackedFloat32Array(0, 0.0667, 0.1333, 0.2, 0.2667, 0.3333, 0.4, 0.4667, 0.5333, 0.6, 0.6667, 0.7333, 0.8, 0.8667, 0.9333, 1, 1.0667, 1.1333, 1.2, 1.2667, 1.3333, 1.4, 1.4667, 1.5333, 1.6),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
 "update": 1,
 "values": [SubResource("Atlas_death_0"), SubResource("Atlas_death_1"), SubResource("Atlas_death_2"), SubResource("Atlas_death_3"), SubResource("Atlas_death_4"), SubResource("Atlas_death_5"), SubResource("Atlas_death_6"), SubResource("Atlas_death_7"), SubResource("Atlas_death_8"), SubResource("Atlas_death_9"), SubResource("Atlas_death_10"), SubResource("Atlas_death_11"), SubResource("Atlas_death_12"), SubResource("Atlas_death_13"), SubResource("Atlas_death_14"), SubResource("Atlas_death_15"), SubResource("Atlas_death_16"), SubResource("Atlas_death_17"), SubResource("Atlas_death_18"), SubResource("Atlas_death_19"), SubResource("Atlas_death_20"), SubResource("Atlas_death_21"), SubResource("Atlas_death_22"), SubResource("Atlas_death_23"), SubResource("Atlas_death_24")]
 }
-tracks/8/type = "value"
-tracks/8/imported = false
-tracks/8/enabled = true
-tracks/8/path = NodePath("Visuals/Facing/Model/AttackFx:self_modulate")
-tracks/8/interp = 1
-tracks/8/loop_wrap = true
-tracks/8/keys = {
+tracks/9/type = "value"
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/path = NodePath("Visuals/Facing/Model/AttackFx:self_modulate")
+tracks/9/interp = 1
+tracks/9/loop_wrap = true
+tracks/9/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,

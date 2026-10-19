@@ -136,9 +136,6 @@ public class FurinaLineRepayFloorTests
             Assert.DoesNotContain(BlockFloor, Face(card));
             Assert.DoesNotContain("could not", Face(card));
         }
-        Assert.Contains("could not",
-            new PneumaTidesPower().Localization!
-                .Single(r => r.Item1 == "description").Item2);
         Assert.DoesNotContain("could not",
             new GrandEntrancePower().Localization!
                 .Single(r => r.Item1 == "description").Item2);

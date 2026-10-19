@@ -29,7 +29,7 @@ from pathlib import Path
 
 import yaml
 
-from tools.klee_rig.rig import color, vec2
+from tools.klee_rig.rig import color, shadow_fade, vec2
 from tools.varka_rig.rig import (MODEL, NL, PROP_ORDER, SHADER_CODE, Clip, Track, _expand, _shown, _steps,
                                  _transition, _window, animation_block, atlas_block, clip_of, fx_window,
                                  hex_color, sub)
@@ -128,6 +128,9 @@ def build_animations(spec: dict, frames: dict, clips: dict[str, Clip]) -> dict[s
     for name in ANIMATION_ORDER:
         anim = spec["animations"][name]
         tracks = [_expand(anim, tr) for tr in anim.get("tracks", ())]
+        fade = shadow_fade(tracks, MODEL, f"{FACING}/{SHADOW_NODE}")   # the shadow fades with her at death
+        if fade is not None:
+            tracks.append(fade)
         tracks += state_tracks(spec, frames, clips, anim)
         paths = [t.path for t in tracks]
         assert len(paths) == len(set(paths)), f"{name}: duplicate track"

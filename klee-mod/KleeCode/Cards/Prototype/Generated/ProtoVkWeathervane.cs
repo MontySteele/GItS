@@ -68,6 +68,6 @@ public sealed class ProtoVkWeathervane : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        // upgraded_power: the upgraded card installs WeathervanePower, read off IsUpgraded when the card is played.
+        // upgraded_power: the upgraded card's copy of WeathervanePower counts as upgraded, read off IsUpgraded when the card is played.
     }
 }
