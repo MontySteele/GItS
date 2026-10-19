@@ -51,7 +51,8 @@ Clorinde (13%).
    eleven. (a, default) Allow it: a guest star is that character performing
    for Furina, a different card with a different job, and the companion art
    uses a different picture. (b) A character is a guest star or a companion,
-   never both; the new 5-stars would then be the only additions.
+   never both: the seven overlapping companions move out, Wriothesley, Lyney,
+   Sigewinne and Escoffier stay Furina's, and only Emilie is added.
 3. **Element.** Today Cryo carries six cards and Hydro one. (a, default)
    Even it out: the reworked and new cards spread across the elements the
    characters use (Hydro for Neuvillette and Sigewinne, Pyro for Lyney, and so
