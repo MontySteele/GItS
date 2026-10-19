@@ -16,6 +16,8 @@ cut to about 350 characters is `git show 3ce4f8c35:docs/current/BACKLOG.md`.
 
 ## Kits and display (the mod)
 
+- Yae's art QA (one pass, never reviewed): her character-select image has black smudges near the mouth; check her model frames, select, rest and merchant art for the same.
+- Kokomi and Yae have still character-select images; Klee, Varka and Furina have animated ones. Kokomi's waits for her prototype to settle.
 - Power badges borrowing another power's icon (`KleePowerIcons.cs`), counts: Klee (17), Kokomi (26), Furina (31), Varka (~25), Yae (Serial Novel), Mondstadt companions (21), co-op (10), three debuff riders. Each needs its own `art/plan.tsv` power_ row (borrowed badge as fallback); upgraded starter relics share their starters' icons. Names: `git show 3ce4f8c35:docs/current/BACKLOG.md`.
 - Klee's map marker is still the wiki side-icon in the lower two-thirds of its 49x64 box (visual paper, pick 3 (a)): refit it with an `art_process` pass in the main checkout, or draw a base-style pin.
 - Kokomi's three potions and Furina's two potions (#1324, #1325) were not met in a seat; check them with `understudy.embark --relic` or in a play (the relics are seen).
