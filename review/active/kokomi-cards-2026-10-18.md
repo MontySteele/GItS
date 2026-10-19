@@ -236,15 +236,21 @@ Kokomi and Yae round (`kokomi-yae-round-2026-10-19.md`) and the newcomer round
    round, not a verdict (Rares bend, they are not removed).
 
 **The changes.**
-1. **Battle Formation** (Rare Power, 1): "The first time each turn 2 or more
-   Plans that are not Stings or Wards are carried out, gain 1 Energy and draw
-   1 card." This is the v2 rule for the count cards, applied to the last card
-   that still counts everything. Breakwater keeps counting every Plan: it is
-   defensive, and GPT advised keeping it.
+1. **Battle Formation** (Rare Power, 2 [1]): "At the start of your turn, if 2
+   or more of your Plans were carried out, gain [E]. Stings and Wards don't
+   count." Two reasons. Counting every Plan made it automatic (v2 flagged it).
+   And at 1 Energy for a card and an Energy most turns it was cheap: Klee's
+   Blazing Delight pays 2 for an unconditional Energy and draw. [USER],
+   2026-10-19: "I wonder if it's too cheap ... The card text also feels
+   awkwardly long." So it costs 2, loses the draw, and takes the base
+   start-of-turn template; the upgrade lowers the cost. Breakwater keeps
+   counting every Plan: it is defensive, and GPT advised keeping it.
 2. **Grand Design** (Rare Skill, 1): "Plan up to 3 [4] cards from your Hand,
-   Basic cards included. They cost 0. Draw 1 card for each." Planning your
-   Strikes and Defends now refills the hand you spent, so the setup turn is
-   still a turn.
+   Basic cards included. They cost 0. Draw 1 card for each. Exhaust." Planning
+   three cards free is already an Energy cheat ([USER]: "exceptionally strong
+   if you view it as energy cheating (3 for 1) - might need Exhaust or a cost
+   bump"). The draw fixes the empty hand the seats saw, and Exhaust makes it the
+   one setup turn of a fight, not a repeat.
 3. **The Plan tip says who hits** (text only): "The Bake-Kurage carries it out
    at the start of your next turn. Its hits are not Attacks, and your Strength
    does not add to them." Whether the enemy's Vulnerable counts is checked live
@@ -275,8 +281,10 @@ pick with the numbers, not a build.
 ### Picks
 
 1. **The two card changes.**
-   - **(a, default)** Build both: Battle Formation and Grand Design.
-   - (b) Build Battle Formation only, and leave Grand Design for your run.
+   - **(a, default)** Build both as written above (Battle Formation at 2 with no
+     draw; Grand Design draws and Exhausts).
+   - (b) Grand Design without the draw or Exhaust (unchanged), Battle Formation
+     as above.
 2. **Defence.**
    - **(a, default)** Measure first, with the trigger above.
    - (b) Give Ward's Plan line "Gain 3 Block" now, before the round.
