@@ -13,7 +13,7 @@ SRC = (Path(__file__).resolve().parents[2]
 
 
 def test_glam_row_keeps_the_shipped_sentence_and_adds_the_rule():
-    start = SRC.index('GetTable("enchantments")')
+    start = SRC.index('Table("enchantments")')
     row = SRC[start:SRC.index("});", start)]
     assert '["GLAM.description"] =' in row
     text = "".join(part.split('"')[1] for part in row.split("\n")

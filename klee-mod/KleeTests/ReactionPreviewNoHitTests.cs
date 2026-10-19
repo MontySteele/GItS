@@ -184,9 +184,9 @@ public class ReactionPreviewNoHitTests
         // "the first takes the aura", which is what made the number beside it
         // a contradiction rather than a gap.
         //
-        // THE TEST IS THE PRINTED ORDER, the row's own wording. Read off the
-        // authored English row rather than a loc lookup, so a non-English host
-        // cannot answer it differently.
+        // THE TEST IS THE PRINTED ORDER, the row's own wording, stamped on
+        // the class by the generator (`ISetsOffFirstCard`), so no host
+        // language can answer it differently.
         Assert.True(KleeCardTooltips.SetsOffFirst(new ProtoKoPocketMatch()));
         Assert.True(KleeCardTooltips.SetsOffFirst(new ProtoKoKapow()));
 

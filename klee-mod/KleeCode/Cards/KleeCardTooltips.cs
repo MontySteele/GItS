@@ -495,41 +495,15 @@ public static class KleeCardTooltips
     /// `EB-733`. Does this card's printed face put <b>Set off</b> before its
     /// own damage?
     ///
-    /// READ OFF THE ROW THE MOD AUTHORED, which is the one place a card's
-    /// clause ORDER is written down in a form this class can ask: the play
-    /// body is a compiled method, and the localized string is a table lookup a
-    /// non-English host would answer differently. <c>Localization</c> is
-    /// <c>CustomCardModel</c>'s own English source row -- the same one the
-    /// emitter writes and `lint_text_conventions` measures.
-    ///
-    /// FALSE FOR EVERY CARD THAT IS NOT ONE OF OURS, and false for a row whose
-    /// Set off comes AFTER its damage: there the card's own hit does meet the
-    /// aura and the amplified body is right as it stands.
-    ///
-    /// THE OPENINGS: "Set off the enemy." (the bare "Set off." until
-    /// 2026-10-03, when blind seats read it as ALL), the bare form (Flash
-    /// Point keeps it: the longer opening is one past its card ceiling), and
-    /// Pocket Match's "Set off only your largest Bomb on the enemy." Each puts
-    /// one aimed explosion ahead of the card's own hit, so the first charge
-    /// takes the aura either way.
+    /// A DATA FLAG, NOT A TEXT READ (localization route b, 2026-10-19): the
+    /// card generator stamps <see cref="ISetsOffFirstCard"/> on a row whose
+    /// face opens with an aimed Set off, so nothing at runtime reads English
+    /// to decide behaviour. False for every card that is not one of ours, and
+    /// false for a row whose Set off comes AFTER its damage: there the card's
+    /// own hit does meet the aura and the amplified body is right as it
+    /// stands.
     /// </summary>
-    public static bool SetsOffFirst(CardModel card)
-    {
-        if (card is not CustomCardModel custom) return false;
-        var rows = custom.Localization;
-        if (rows == null) return false;
-        foreach (var row in rows)
-        {
-            if (row.Item1 != "description" || row.Item2 == null) continue;
-            return row.Item2.StartsWith("[gold]Set off[/gold] the enemy.",
-                                        System.StringComparison.Ordinal)
-                || row.Item2.StartsWith("[gold]Set off[/gold].",
-                                        System.StringComparison.Ordinal)
-                || row.Item2.StartsWith("[gold]Set off[/gold] only your largest ",
-                                        System.StringComparison.Ordinal);
-        }
-        return false;
-    }
+    public static bool SetsOffFirst(CardModel card) => card is ISetsOffFirstCard;
 
     /// <summary>
     /// `EB-589`. The number this card's face is printing right now, or 0 where
@@ -702,4 +676,17 @@ public static class KleeCardTooltips
           + "and there is no hit here for the 1.75x to multiply.",
         _ => null,
     };
+}
+
+/// <summary>
+/// `EB-733`. A MARKER: this card's face opens with an aimed <b>Set off</b>
+/// ("Set off the enemy.", the bare "Set off.", or Pocket Match's "Set off
+/// only your largest Bomb on the enemy."), so the Set off takes the aura
+/// before the card's own hit (<see cref="KleeCardTooltips.SetsOffFirst"/>).
+/// Stamped by <c>tools/gen_klee_cards.py</c> (<c>sets_off_first</c>); declared
+/// here, outside Powers/Prototype, because the tooltip reading it ships in
+/// every build.
+/// </summary>
+public interface ISetsOffFirstCard
+{
 }

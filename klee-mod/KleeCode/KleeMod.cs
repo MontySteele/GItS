@@ -165,7 +165,7 @@ public static class KleeMod
             // Keys are ModelId.Entry, which is UPPER_SNAKE_CASE derived from the
             // class name (DuckAndCover -> DUCK_AND_COVER), NOT lowercase.
             // CardModel.Description reads "cards" -> "<ENTRY>.description".
-            LocManager.Instance.GetTable("cards").MergeWith(new Dictionary<string, string>
+            EnglishLoc.Table("cards").MergeWith(new Dictionary<string, string>
             {
                 // Two separate syntaxes are in play here, and both bit us:
                 //
@@ -281,16 +281,16 @@ public static class KleeMod
 
             // YAE MIKO (2026-10-14): each Annotation's Edit prompt, which
             // names it and what it does (`YaeEditing.EditPromptTextFor`).
-            LocManager.Instance.GetTable("cards").MergeWith(
+            EnglishLoc.Table("cards").MergeWith(
                 Powers.YaeAnnotationText.All.ToDictionary(
                     Powers.YaeEditing.EditPromptKeyFor,
                     Powers.YaeEditing.EditPromptTextFor));
             // Yae review r4, pick 1 (a): a multi-card Edit's one chooser.
-            LocManager.Instance.GetTable("cards").MergeWith(
+            EnglishLoc.Table("cards").MergeWith(
                 Powers.YaeAnnotationText.All.ToDictionary(
                     Powers.YaeEditing.EditUpToPromptKeyFor,
                     Powers.YaeEditing.EditUpToPromptTextFor));
-            LocManager.Instance.GetTable("cards").MergeWith(
+            EnglishLoc.Table("cards").MergeWith(
                 new Dictionary<string, string>
                 {
                     [Powers.YaeEditing.NothingToEditKey] =
@@ -308,7 +308,7 @@ public static class KleeMod
             // Meditations of a Yako's reward-screen row. A Reward's
             // Description is a table lookup, so its row is merged into
             // `gameplay_ui` here, its only source.
-            LocManager.Instance.GetTable("gameplay_ui").MergeWith(
+            EnglishLoc.Table("gameplay_ui").MergeWith(
                 new Dictionary<string, string>
                 {
                     [Relics.YaePublishReward.DescriptionKey] =
@@ -329,7 +329,7 @@ public static class KleeMod
             // retired number. The MULTIPLIERS (1.5x, 1.75x) stay literals on
             // purpose: they are floats, and interpolating a float renders it
             // under the host's culture, so a comma locale would print "1,5x".
-            var keywordTable = LocManager.Instance.GetTable("card_keywords");
+            var keywordTable = EnglishLoc.Table("card_keywords");
             var keywordFallback = new Dictionary<string, string>
                 {
                     // `EB-345` / R249. The shared tips took the text pass.
@@ -703,7 +703,7 @@ public static class KleeMod
             // Klee r17 lane 1). The sim says the same thing structurally:
             // `potions.fire_potion` goes through `refpowers.unpowered_damage`,
             // which never reaches `modify_damage_taken`.
-            LocManager.Instance.GetTable("powers").MergeWith(
+            EnglishLoc.Table("powers").MergeWith(
                 new Dictionary<string, string>
                 {
                     // `EB-523` PUT THE ATTACK BACK IN, and it is `EB-497`'s own
@@ -817,7 +817,7 @@ public static class KleeMod
             // stacking: a replayed power adds its turns); Glam's own row says
             // so. The shipped sentence, read off `SlayTheSpire2.pck`'s
             // `localization/eng/enchantments.json`, with one sentence added.
-            LocManager.Instance.GetTable("enchantments").MergeWith(
+            EnglishLoc.Table("enchantments").MergeWith(
                 new Dictionary<string, string>
                 {
                     ["GLAM.description"] =
@@ -835,7 +835,7 @@ public static class KleeMod
             // SEA GLASS (the off-character fix, 2026-10-18): Orobas can offer
             // it for one of OUR characters, and its title reads a per-
             // character row the base game ships only for its own five.
-            LocManager.Instance.GetTable("relics").MergeWith(
+            EnglishLoc.Table("relics").MergeWith(
                 Relics.SeaGlassTitles.LocRows(t => ModelDb.GetId(t).Entry));
 
             Log.Info($"[{ModId}] Localization strings injected.");
@@ -857,49 +857,8 @@ public static class KleeMod
 //  Harmony patches
 // ---------------------------------------------------------------------------
 
-/// <summary>
-/// Injects our loc strings once LocManager has built its tables.
-///
-/// BOTH MERGES RIDE THIS ONE SEAM (EB-759). The Teyvat arm's rows used to be
-/// merged from <c>KleeMod.Initialize</c>, a <c>[ModInitializer]</c>, which runs
-/// well before <c>LocManager.Initialize</c> — so <c>LocManager.Instance</c>
-/// had no tables and <c>TeyvatLoc.Inject</c>'s own try/catch caught an
-/// <c>NullReferenceException</c> on EVERY boot, merged zero rows, and left
-/// every dressed string rendering as its raw key
-/// (<c>review/records/teyvat-spike-proofs-2026-09-15.md</c>). The call-site
-/// comment there reasoned about when a table is READ; the constraint is when
-/// it EXISTS. The card rows never had the bug because they have always been
-/// here, and the arm's rows are here now for the same reason.
-///
-/// ORDER INSIDE THE POSTFIX DOES NOT MATTER: the two merges touch disjoint
-/// tables (cards/card_keywords/powers/characters against acts/monsters/
-/// intents/events) and neither reads the other's. Both swallow their own
-/// exceptions, so one failing cannot cost the other its text.
-/// </summary>
-[HarmonyPatch(typeof(LocManager), nameof(LocManager.Initialize))]
-internal static class LocManager_Initialize_Patch
-{
-    [HarmonyPostfix]
-    public static void Postfix()
-    {
-        KleeMod.InjectLocStrings();
-
-        // THE TEYVAT RUN FRAME ARM's rows (spike, -p:TeyvatFrame=true). A
-        // no-op with the arm off — `TeyvatLoc.Inject`'s first line is the
-        // flag — so a release build merges not one row.
-        Teyvat.TeyvatLoc.Inject();
-
-        // The story tables' rows (Klee story batches 1 and 2): event pages,
-        // Ancient exchanges and spoken lines. Disjoint keys from both merges
-        // above, and its own try/catch.
-        Story.StoryLoc.Inject();
-
-#if GITS_RUN_STATS
-        // The run-stats setting's label (settings_ui), its own try/catch.
-        RunStats.RunStatsHook.InjectLoc();
-#endif
-    }
-}
+// LocManager_Initialize_Patch, the seam these rows ride, lives with the
+// rest of the English-table plumbing in Localization/EnglishLoc.cs.
 
 // ---------------------------------------------------------------------------
 // ModelDb_AllCharacters_Patch — REMOVED (finding 27). BaseLib's

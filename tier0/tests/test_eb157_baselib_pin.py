@@ -71,6 +71,8 @@ CALLED_BASELIB_TYPES: frozenset[str] = frozenset({
     "CustomRelicModel",        # BaseLib.Abstracts
     "ICustomModel",            # BaseLib.Abstracts
     "ILocalizationProvider",   # BaseLib.Abstracts -- 65 uses
+    "ModelLocPatch",           # BaseLib.Patches.Localization -- EnglishLoc skips our models in it
+    "SimpleLoc",               # BaseLib.Patches.Localization -- EnglishLoc writes rows as BaseLib does
     "NodeFactory",             # BaseLib.Utils.NodeFactories
     "PoolAttribute",           # BaseLib.Utils -- [Pool(typeof(...))]
     "SpireField",              # BaseLib.Utils
@@ -81,6 +83,7 @@ BASELIB_NAMESPACES = (
     "BaseLib.Utils",
     "BaseLib.Utils.NodeFactories",
     "BaseLib.Patches.Content",
+    "BaseLib.Patches.Localization",
 )
 
 
