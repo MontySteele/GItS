@@ -131,7 +131,11 @@ SHEET_FIXTURES: dict[str, dict] = {
                             "target": "enemy", "bomb_damage": 5}]),
     "sparks": _row(effects=[{"op": "gain_spark", "amount": 1}]),
     "encore": _row(effects=[{"op": "gain_encore", "amount": 5}]),
-    "fanfare": _row(effects=[{"op": "raise_fanfare_cap", "amount": 5}]),
+    # The Stage's Fanfare (Trial by Water writes it); the shipped meter's
+    # `raise_fanfare_cap` tripped this until that meter left, 2026-10-19.
+    "fanfare": _row(effects=[{"op": "apply_power",
+                              "power": "fs_trial_by_water", "amount": 2,
+                              "target": "enemy"}]),
     "salon": _row(effects=[{"op": "apply_power", "power": "salon_member",
                             "amount": 1, "target": "self",
                             "member": "usher"}]),
@@ -291,8 +295,8 @@ V2_POWER_ROWS = {
     "salon_bow_encore", "salon_deploy_block", "spotlight_mult_bonus",
     "spotlight_mult_bonus_turn", "spotlight_flat_damage",
     "spotlight_flat_damage_turn", "spotlight_discount", "spotlight_draw",
-    "spotlight_encore_first", "ovation_spend_boost", "fanfare_delta_block",
-    "fanfare_attack_per10", "first_attack_draw", "encore_spend_draw",
+    "spotlight_encore_first", "ovation_spend_boost",
+    "first_attack_draw", "encore_spend_draw",
     "cross_examination", "kurage_ward", "kurage_amp", "ceremonial_garment",
     "prevent_exhaust_ward", "feel_no_pain", "dark_embrace", "metallicize"}
 
@@ -314,19 +318,16 @@ def test_v3_and_v4_added_no_shared_entry_and_one_private_entry():
     # onto. No shared entry moved, so the shared writer:reader table of a
     # shipped-sheet reading cannot renumber.
     assert set(ccr.PRIVATE_STATES) == V2_PRIVATE_ENTRIES | {"stage"}
-    # `fanfare_attack_per5` joins the delta on the same argument
-    # (2026-09-07): it is the reframe arm's copy of `fanfare_attack_per10` at
-    # a halved threshold, exists in NO pre-door sheet -- only in
-    # `docs/prototype-surface.yaml`, which no baseline corpus reads -- and its
-    # hook row is the per-10 row's, verbatim.
     # v4's power rows are the overhaul arms' own (`ko_`, `kk_`, `fs_`), which
-    # exist only on the prototype surface.
+    # exist only on the prototype surface. (`fanfare_attack_per5` sat in the
+    # delta beside `bomb_damage_per_rotation`, and the shipped meter's three
+    # power rows -- it, `fanfare_attack_per10` and `fanfare_delta_block` --
+    # left with that meter on 2026-10-19, so V2_POWER_ROWS above no longer
+    # names the two that were baseline rows.)
     added = set(ccr.POWER_HOOKS) - V2_POWER_ROWS
-    assert {"bomb_damage_per_rotation", "fanfare_attack_per5"} <= added
+    assert "bomb_damage_per_rotation" in added
     assert all(p.startswith(("ko_", "kk_", "fs_")) for p in
-               added - {"bomb_damage_per_rotation", "fanfare_attack_per5"})
-    assert ccr.POWER_HOOKS["fanfare_attack_per5"] == \
-        ccr.POWER_HOOKS["fanfare_attack_per10"]
+               added - {"bomb_damage_per_rotation"})
     assert not V2_POWER_ROWS - set(ccr.POWER_HOOKS)
 
 

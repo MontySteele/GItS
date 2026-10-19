@@ -22,8 +22,7 @@ from tier0.engine.state import (SLY_AUTOPLAY_THIS_TURN, Bomb, Card,
                                 CombatState, Enemy,
                                 grant_sly_autoplay,
                                 remove_instance, sly_autoplays,
-                                sly_granted_this_turn, sly_riders,
-                                sync_fanfare_cap_to_max_hp)
+                                sly_granted_this_turn, sly_riders)
 
 
 def _amount(state: CombatState, val) -> int:
@@ -64,28 +63,12 @@ def _amount(state: CombatState, val) -> int:
 
 
 def _bonus_formula(state: CombatState, formula: str,
-                   card: Optional[Card] = None, *,
-                   valuation: bool = False) -> int:
-    """Scaling riders on a damage or block amount.
+                   card: Optional[Card] = None) -> int:
+    """Scaling riders on a damage or block amount: `N_per_<thing>`, a full
+    step per unit of a small count ('detonation_this_combat').
 
-    `valuation=True` says THIS CALL IS AN ESTIMATE, not a resolution (EB-242).
-    The pilot prices a rider through this exact helper on purpose -- that is
-    what keeps its price from drifting from what resolving the card pays --
-    but a price is not a play, so an estimate must not tick the reads-per-turn
-    instrument. `resources.note_charge_read` declared the two pilot sites out
-    of scope from the day it landed, and §2 of the charge registration says
-    deliberation is deliberately NOT counted; the flag is that declaration
-    made executable. Everything else -- both engine resolve sites, and the
-    suite's direct probes of the primitive -- is a resolution and tallies
-    exactly what it always did, because the DEFAULT is the resolve path and
-    the exemption has to be asked for.
-
-    Two grammars, and the difference is deliberate:
-
-      N_per_<thing>      a full step per unit, for SMALL counts --
-                         'detonation_this_combat'
-      N_per_M_<resource> a ratio, for LARGE pools -- 'fanfare' -- where 1:1
-                         would pay far too much
+    The pilot prices a rider through this exact helper on purpose, so its
+    price cannot drift from what resolving the card pays.
     """
     n, _, rest = formula.partition("_per_")
     if not n.isdigit():
@@ -104,22 +87,6 @@ def _bonus_formula(state: CombatState, formula: str,
         # are none today; recorded so the off-by-one is a decision rather
         # than a discovery.
         return int(n) * state.companion_plays_this_turn
-    m, _, what = rest.partition("_")
-    if what == "fanfare" and m.isdigit():
-        # EB-253: the fanfare twin of the charge leg below. The pilot prices
-        # a Fanfare rider through this same helper, and a price is not a
-        # play -- `note_fanfare_read` is the LIVE-meter instrument, so
-        # deliberation counted there reports the pilot's turn as the
-        # player's. Same declaration, same default: every engine resolve
-        # site and every direct probe still tallies exactly what it did.
-        if not valuation:
-            resources.note_fanfare_read(state, "bonus_formula",
-                                        card=card.id if card else None)
-        # `readable`, not the raw field: the meter can sit BELOW ZERO since
-        # the Hyperbeam (Track C.2), and a rider reading -12 would pay
-        # NEGATIVE damage -- an attack that heals the enemy. Effects shut off
-        # rather than invert; see resources.drop_fanfare_to_floor.
-        return int(n) * (resources.readable(state.player) // int(m))
     raise ValueError(f"unknown bonus_formula {formula!r}")
 
 
@@ -399,22 +366,11 @@ def _runtime_count(state: CombatState, token: str,
     if token == "swirls_this_turn":
         # Heizou's Heartstopper Strike: "4 more for each Swirl this turn".
         return state.mi_swirls_this_turn
-    if token == "fanfare_drained":
-        # CURRENT-KIT USE ONLY (R213 B): the FURINA REFRAME's two drain rows
-        # (packet §4.6, `F11` (1) and `F12` (1)). What `drain_fanfare` took
-        # FROM THIS PLAY, read by the effects that follow it on the card.
-        #
-        # A PER-CARD NUMBER AND NOT A METER READ, which is the whole reason it
-        # is a count at all: by the time the damage or the Block resolves the
-        # meter is 0, so an effect that read `p.fanfare` here would pay out
-        # nothing every time. Written by `_op_drain_fanfare`, cleared per card
-        # play beside `discards_this_card` and its neighbours.
-        return state.fanfare_drained_this_card
     # FURINA (the Salon's Tab). `stage_spent` is what THIS play spent
     # ("Spend all your Fanfare"), read back by the effect after it, because
     # by the time the damage resolves the Fanfare it measures is gone;
     # written by `_op_stage_spend` and `_op_stage_spend_all`, cleared per
-    # card play beside `fanfare_drained_this_card`. 0 for anyone else.
+    # card play beside `discards_this_card`. 0 for anyone else.
     if token == "stage_spent":
         return state.stage_spent_this_card
     # The Spend paper (2026-10-10): "Draw 1 for every 4 spent" and "hit once
@@ -2232,117 +2188,6 @@ def _op_spend_spark(state: CombatState, fx: dict, card: Card) -> None:
     spend_sparks(state, spend_spark_amount(fx))
 
 
-def _op_gain_fanfare_floor(state: CombatState, fx: dict, card: Card) -> None:
-    """The **Fanfare +X** keyword: current, floor and cap raised together.
-
-    Since the Fanfare rework (2026-07-28, Track B, RULED) this is a PRINTED
-    keyword and a RARE POWER payoff, not an invisible automatic. It used to
-    fire for free on every Power played -- see the deleted block in
-    combat._finish_play -- and the whole track is about moving that value
-    onto faces the player can read.
-
-    Reads as the full grant because all three move: the meter jumps now, and
-    it can never fall back past where the grant put it. That is why the
-    keyword is bare "Fanfare" rather than "Fanfare Floor" -- the floor is the
-    lasting half, but the immediate half is what the player feels first.
-
-    Inert for characters without the resource, like every Fanfare path.
-    """
-    resources.gain_fanfare_floor(state, fx["amount"], f"card:{card.id}")
-
-
-def _op_raise_fanfare_cap(state: CombatState, fx: dict, card: Card) -> None:
-    """The **Fanfare Cap +X** keyword: headroom only, nothing granted.
-
-    UN-RETIRED by the Fanfare rework (2026-07-28, Track B, RULED). This op
-    died with the kickoff §4 uncapper clause because a ceiling nobody reached
-    was worth nothing, and it returns for a different job: it is the SMALL
-    half of the keyword pair, the thing a common or uncommon Power prints
-    instead of the 5 free floor points it used to receive silently.
-
-    Spelled "Fanfare Cap" on every face, never bare "Cap" -- the Salon's
-    member cap is also a per-player stat since A12, and one word cannot mean
-    both.
-
-    STATED PLAINLY, because it changes how these numbers should be read: the
-    cap has been a NON-BINDING safety rail since F-A5, and the sprint's own
-    battery measured read-at-cap at under 1% under every pilot. A card that
-    prints only "Fanfare Cap +X" is therefore close to inert AT CURRENT
-    CONSTANTS. That is a measurement, not an argument against the keyword --
-    the pair exists so the two grants can be priced apart, and the cap half
-    becomes live the moment floors stack or decay softens. It is recorded
-    here so nobody reads a flat result off these cards as a bug.
-    """
-    resources.raise_fanfare_cap(state, fx["amount"], f"card:{card.id}")
-
-
-def _op_crash_fanfare(state: CombatState, fx: dict, card: Card) -> None:
-    """The Hyperbeam settle (Track C.2, 2026-07-28): The Final Verdict.
-
-    Fanfare falls to its floor, and the FLOOR falls by `amount`. The gavel
-    falls once and the house is silent afterwards -- and stays quieter than
-    it started, which is the price that makes "deal damage equal to Fanfare"
-    a card rather than a free hit.
-
-    Deliberately a SEPARATE op from the damage line rather than a rider on
-    it, so the sheet reads in the order the card resolves: the attack reads
-    the meter, THEN the meter crashes. Folding the crash into the damage op
-    would make the ordering an implementation detail of one op instead of a
-    visible line on the card.
-
-    The floor MAY GO NEGATIVE (RULED). See resources.drop_fanfare_to_floor
-    for the semantics and for the PROPOSED reader-clamp that goes with it.
-    """
-    resources.drop_fanfare_to_floor(state, fx["amount"], f"card:{card.id}")
-
-
-def _op_drain_fanfare(state: CombatState, fx: dict, card: Card) -> None:
-    """(R213 B): the FURINA REFRAME's drain, slice two.
-
-    THE WHOLE OP. The held meter goes to 0 and the amount it held is recorded
-    as this play's `fanfare_drained`, which the effects after it on the same
-    card read through the ordinary `amount_formula: {count: fanfare_drained}`
-    grammar. Two rows print it -- the Rare all-enemy hit (§4.6, `F11` (1)) and
-    the survival twin beside it (`F12` (1)) -- and the pair is the point: with
-    one card draining, draining is a button; with two, it is a plan.
-
-    A SEPARATE OP AND NOT A RIDER, for `crash_fanfare`'s reason one line up:
-    the sheet then reads in the order the card resolves -- the meter empties,
-    THEN the number that empties it is spent -- and the ordering is a visible
-    line on the row rather than an implementation detail inside a damage op.
-
-    WHAT IT DOES NOT TOUCH, each deliberately:
-
-      * THE FLOOR. `crash_fanfare` is the op that moves it, and moving it is
-        that card's whole price; a drain is a SPEND of what has been earned,
-        so the baseline the meter rests on is left exactly where it was.
-      * THE CAP. Same argument from the other end, and `crash_fanfare`'s own
-        note gives it: a falling ceiling would make the card quietly worse the
-        second time it is played in one combat, which is a different card.
-      * THE FOCUS TERM. The reframe's scaling invariant (packet §4.4) is that
-        Focus multiplies PERFORMANCE numerics and nothing else, so the drained
-        amount is the meter's own number and no rider reaches it. `salon_bow`
-        is where the Focus term lives and it is not on this card.
-      * DECAY. Untouched: an emptied meter decays from 0 like any other.
-
-    Playable at any value, including 0 -- it reads the HELD meter and never a
-    threshold, which is why neither row carries a `requires` gate. A drain of
-    nothing is a wasted card and the player can see that coming from the
-    meter, exactly as an empty stage is visible to `salon_bow`.
-    """
-    p = state.player
-    if not p.fanfare_cap:                       # not a Fanfare character
-        state.fanfare_drained_this_card = 0
-        return
-    before = p.fanfare
-    drained = resources.readable(p)             # a debt cannot be drained
-    p.fanfare -= drained
-    state.fanfare_drained_this_card = drained
-    resources.note_fanfare_change(state, before)
-    state.emit("fanfare_drained", amount=drained, source=f"card:{card.id}",
-               floor=p.fanfare_floor, total=p.fanfare)
-
-
 def _generation_pool(state: CombatState, fx: dict, which: str) -> list[Card]:
     from tier0.content import loader                # late import avoids cycle
     if which == "guest_star":
@@ -3278,7 +3123,6 @@ PREDICATE_PREFIXES = frozenset({
     "target_has_power_",
     "self_has_power_",
     "exhaust_pile_at_least_",
-    "fanfare_at_least_",
     # EB-118. `_has_type_` takes a card TYPE (a closed vocabulary, validated
     # below); the other two take an integer like their neighbours.
     "exhaust_selection_has_type_",
@@ -3320,7 +3164,7 @@ def is_known_predicate(name: str) -> bool:
         if prefix == "exhaust_selection_has_type_":
             return arg in CARD_TYPES
         # The integer forms must actually carry an integer. A typo'd
-        # `fanfare_at_least_ten` would otherwise pass a name-only check and
+        # `exhaust_pile_at_least_ten` would otherwise pass a name-only check and
         # raise from int() mid-combat -- the very failure being moved earlier.
         return arg.isdigit()
     return False
@@ -3422,10 +3266,6 @@ RUNTIME_COUNT_NAMES = frozenset({
     # The Kokomi pool overhaul (2026-10-13): All Streams Flow to the Sea, the
     # Elemental Reactions she triggered this combat. Same registry reason.
     "reactions_triggered_this_combat",
-    # CURRENT-KIT USE ONLY (R213 B) -- the drain op's count. Same
-    # reason as the two above: the loader validates every count token at LOAD
-    # off this set.
-    "fanfare_drained",
     # VARKA, THE OATH REWORK (`varka_oath.COUNTS`). `attacks_played_this_turn`
     # (Lisa: Infinite Circuit) is the shared counter registered above.
     "current_oath",
@@ -3716,14 +3556,6 @@ def _predicate(state: CombatState, name: str) -> bool:
         # C# twin counts AFTER (`FurinaStageLedger.CardsPlayedThisTurn`), so
         # it asks for 0; both spell "no card before this one".
         return state.cards_played_this_turn == 1
-    if name.startswith("fanfare_at_least_"):
-        resources.note_fanfare_read(state, "threshold")
-        # Clamped for consistency with every other reader. It cannot change
-        # an answer today -- every printed threshold is positive, so a
-        # negative meter fails either way -- and it is written this way so a
-        # future `fanfare_at_least_0` reads as "she has any" rather than as
-        # "always true, even mid-Hyperbeam-debt".
-        return resources.readable(state.player) >= int(name.rsplit("_", 1)[1])
     if name.startswith("hp_pct_below_"):
         # THE MONDSTADT COMPANION OVERHAUL. Noelle's
         # Breastplate: "If you are below half HP, gain 4 more."
@@ -3883,10 +3715,6 @@ def _op_gain_max_hp(state: CombatState, fx: dict, card: Card) -> None:
     n = _amount(state, fx["amount"])
     p.max_hp += n
     p.hp += n
-    # EB-97: the Fanfare ceiling rides LIVE max HP, so Feed raises it MID
-    # FIGHT exactly as `FurinaResources.FanfareCap` does -- the one place the
-    # two engines used to diverge inside a single combat.
-    sync_fanfare_cap_to_max_hp(p)
     state.emit("gain_max_hp", amount=n)
 
 
@@ -5078,10 +4906,6 @@ OPS = {
     "stage_spend_up_to": _op_stage_spend_up_to,
     "stage_spend_half": _op_stage_spend_half,
     "stage_energy_next": _op_stage_energy_next,
-    "gain_fanfare_floor": _op_gain_fanfare_floor,
-    "raise_fanfare_cap": _op_raise_fanfare_cap,
-    "crash_fanfare": _op_crash_fanfare,
-    "drain_fanfare": _op_drain_fanfare,
     "heal": _op_heal,
     "add_card": _op_add_card,
     "discard": _op_discard,
@@ -5321,10 +5145,7 @@ def _resolve_card_bound(state: CombatState, card: Card) -> None:
     # THE FONTAINE POOL REWORK: Sigewinne's enemies hit, the same scoping.
     state.mf_enemies_hit_this_card = set()
     state.discards_this_card = 0
-    # (R213 B), on the same line and for the same scoping reason:
-    # the card after a drain must not read the drain's number.
-    state.fanfare_drained_this_card = 0
-    # FURINA'S STAGE, on the same line as the drain above and for its reason:
+    # FURINA'S STAGE, on the same line and for the same scoping reason:
     # the card after a Spend must not read the Spend's number.
     state.stage_spent_this_card = 0
     # THE POOL TO 75: and the card after a Repay must not read its HP.
@@ -5426,14 +5247,12 @@ def _resolve_card_bound(state: CombatState, card: Card) -> None:
     kokomi_plan.note_sting_played(state, card)
 
 
-def flat_attack_bonus(state: CombatState, card: Card, cost: int, *,
-                      valuation: bool = False) -> int:
+def flat_attack_bonus(state: CombatState, card: Card, cost: int) -> int:
     """The per-card flat bonus every attack card carries, as a PURE READ.
 
     Bennett's next_attack_up, Nicole's celestial_gift, the Bennett-burst
-    attack_up_this_turn window, Spark Knight Style's zero-cost rider,
-    Rapturous Applause's Fanfare term, and Kokomi's Ceremonial Garment
-    Charge read all land here — flat, folded in before strength/vulnerable.
+    attack_up_this_turn window, Spark Knight Style's zero-cost rider and the
+    kit riders all land here — flat, folded in before strength/vulnerable.
 
     Consumes nothing, so the pilot may call it to price a play it has not
     made (v0.4 W1: the pilot previously saw NONE of these, so it valued every
@@ -5441,14 +5260,6 @@ def flat_attack_bonus(state: CombatState, card: Card, cost: int, *,
     windows -- most visibly the Garment, where a priest-median bank is worth
     more than most cards' printed damage). The consuming pop and the
     KNOB_READS tick stay at the real call site.
-
-    EB-253, and the reason this line no longer reads "touches no telemetry":
-    it did. Rapturous Applause's Fanfare term files a `fanfare_read` on the
-    way past, so the pilot's price for every attack in hand landed in the
-    LIVE-meter instrument as if the player had played them all. The fix is
-    EB-242's, one instrument over -- `valuation=True` DECLARES the call an
-    estimate and tallies nothing, and the default stays the resolve path so a
-    new resolve site has to opt out on purpose rather than by omission.
     """
     if card.type != "attack":
         return 0
@@ -5499,23 +5310,6 @@ def flat_attack_bonus(state: CombatState, card: Card, cost: int, *,
     # deal 1 more damage for each guest on stage." The C# twin is
     # `LeadingLadyPower.ModifyDamageAdditive`.
     bonus += furina_stage.leading_lady_bonus(state)
-    # Rapturous Applause: attacks +N per 10 Fanfare ("stacks grant flat
-    # power bonuses", kickoff §4). Reads the pool, spends nothing.
-    n = p.powers.get("fanfare_attack_per10", 0)
-    if n:
-        if not valuation:                          # EB-253, see the docstring
-            resources.note_fanfare_read(state, "attack_power")
-        bonus += n * (resources.readable(p) // 10)
-    # THE SAME CLAUSE AT THE REFRAME ARM'S GRANULARITY (2026-09-07). The arm's
-    # meter ranges 0-15 where the shipped one ranges 20-30, so the arm copy of
-    # this rider halves the THRESHOLD and keeps the payout: 1 per 5 Fanfare is
-    # the shipped 1 per 10 read on a meter half the size, and not a bigger
-    # number on the same one.
-    n5 = p.powers.get("fanfare_attack_per5", 0)
-    if n5:
-        if not valuation:                          # EB-253, see the docstring
-            resources.note_fanfare_read(state, "attack_power")
-        bonus += n5 * (resources.readable(p) // 5)
     # VARKA (`varka_oath.attack_bonus`): Stormward Stance, on his Anemo
     # Attacks while his current element's Oath is at the bar. 0 for anyone
     # else.

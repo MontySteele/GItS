@@ -58,7 +58,6 @@ STATIC_AOE_MULT = 2.0
 # Block, and Sly riders live outside card.effects entirely -- the same
 # defect class as v6's AoE blindness. Conservative structural proxies:
 STATIC_SLY_SHARE = 0.5        # a Sly rider needs a card-effect discard
-STATIC_FANFARE_FLOOR_VALUE = 0.2  # per printed floor point (v9). A floor is
 
 # These predicates are readable before a card is played. Mid-resolution
 # conditions such as reaction_triggered_by_this and killed_target remain out:
@@ -538,7 +537,7 @@ def _core_progress(deck: list[Card], archetype: str) -> float:
 _PRICED_INLINE = frozenset({
     "damage", "chain_attack", "block", "place_bomb", "apply_power",
     "conditional", "choose_one",
-    "gain_fanfare_floor", "grow_damage", "repeat_this",
+    "grow_damage", "repeat_this",
     # EB-311: the Max-HP fraction needs the CARD -- whose Max HP the fraction
     # is taken of is a fact about the character the row belongs to and is not
     # on the effect dict.
@@ -787,36 +786,10 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
     if op == "refresh_all_auras":
         return STATIC_AURA_REFRESH_VALUE
 
-    # -- Furina's meter ----------------------------------------------------
-    if op == "raise_fanfare_cap":
-        return _neutral_amount(fx, 0) * STATIC_FANFARE_CAP_VALUE
-    if op == "crash_fanfare":
-        return -_neutral_amount(fx, 0) * STATIC_CRASH_FANFARE_VALUE
-    if op == "drain_fanfare":
-        # THE FURINA REFRAME'S DRAIN (furina_reframe.FURINA_REFRAME).
-        # ZERO, and a DELIBERATE zero of a THIRD kind, different from both
-        # neighbours it sits between.
-        #
-        # `crash_fanfare` above is a COST with a printed number, so it prices as
-        # one. This op prints no number at all -- it takes whatever the meter
-        # holds -- and what the spend BUYS is the effect after it, which is an
-        # `amount_formula` the pricer already reads at its own base. Pricing the
-        # drain as well would charge the card for its cost and credit it for its
-        # payout twice over, on the same line.
-        #
-        # Nor is a negative honest here. The meter is not a bank the drafter can
-        # see: at offer time there is no combat, so "what would this take?" has
-        # no answer that is not a guess about how a run goes.
-        #
-        # Prototype surface only: no shipped row prints the op, no offerable
-        # pool holds one, so every drafted number in the world is byte-identical
-        # with and without this branch and DRAFTER_VERSION does not move. The
-        # same terms `block_half_damage` took.
-        return 0.0
     # -- FURINA'S STAGE (`tier0.engine.furina_stage`) --
     if op in FURINA_STAGE_OPS:
-        # ZERO, every one, and it is `drain_fanfare`'s argument one arm over
-        # rather than a shrug. The Stage's verbs are about a BOARD -- who is on
+        # ZERO, every one, and a deliberate zero rather than a shrug. The
+        # Stage's verbs are about a BOARD -- who is on
         # stage, who is in front, how much Fanfare she holds -- and an offer
         # screen has no board: at draft time there is no combat, so "what
         # would this Cue do?" and "can this Spend be paid?" have no answer
@@ -829,8 +802,8 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # Prototype surface only: no shipped row prints any of these, no
         # offerable pool holds one with the flag off, so every drafted number
         # in the world is byte-identical with and without this branch and
-        # DRAFTER_VERSION does not move. The same terms `drain_fanfare` and
-        # `block_half_damage` took.
+        # DRAFTER_VERSION does not move. The same terms `block_half_damage`
+        # took.
         return 0.0
 
     # -- VARKA, the Oath rework (`varka_oath`, Varka seats only) -----------
@@ -1353,13 +1326,6 @@ def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
                 # time, same reasoning as the Durin/Kurage single-pulse
                 # convention.
                 total += STATIC_POWER_ENGINE_VALUE
-            elif fx.get("op") == "gain_fanfare_floor":                # v9
-                # A permanent baseline, priced like Strength: it is not
-                # output now, it is output on every later read. Conservative
-                # on purpose -- the drafter cannot see how many readers the
-                # deck will end up holding, and over-pricing a floor would
-                # bend every Furina plan toward the same few cards.
-                total += _neutral_amount(fx) * STATIC_FANFARE_FLOOR_VALUE
             elif fx.get("op") == "grow_damage":
                 total += fx.get("amount", 0) * 0.5  # one discounted redraw
             else:
@@ -1612,12 +1578,6 @@ STATIC_POWER_ENGINE_VALUE = 0.0
 #     rejected flat draw/energy/Spark/Burst proxies: raising them
 #     monotonically reduced Klee's real-run result." Honouring a measurement
 #     beats honouring a symmetry.
-#   * raise_fanfare_cap. The op's own docstring carries the measurement:
-#     read-at-cap under 1% under every pilot, so headroom is worth ~nothing
-#     at current constants. It becomes live the moment floors stack.
-#   * crash_fanfare. See its constant below -- pricing a cost whose paired
-#     benefit is still invisible would be a bookkeeping asymmetry, not a
-#     valuation.
 #   * strip_block / transform_in_hand / remember_card, each for a reason
 #     stated at its constant.
 #
@@ -1663,11 +1623,6 @@ STATIC_SWIRL_VALUE = 1.5           # swirl: spreads/consumes an aura someone
                                    # else applied, so it is worth less than
                                    # applying one and worth nothing alone.
 STATIC_AURA_REFRESH_VALUE = 1.0    # refresh_all_auras: extends what is
-# -- Furina's meter -------------------------------------------------------
-STATIC_FANFARE_CAP_VALUE = 0.0     # raise_fanfare_cap. MEASURED INERT, not
-                                   # unpriced: the op's docstring records
-                                   # read-at-cap under 1% under every pilot.
-STATIC_CRASH_FANFARE_VALUE = 0.0   # crash_fanfare. The Final Verdict's
 # -- cards from nowhere ---------------------------------------------------
 STATIC_GENERATED_CARD_VALUE = 2.0  # per token generated into hand
                                    # (generate_guest_star, generate_from_
@@ -1905,7 +1860,7 @@ STATIC_DRAW_VALUE = 0.0            # draw, draw_while, draw_to_hand_size
 STATIC_ENERGY_VALUE = 0.0          # energy, and cost_mod through it
 STATIC_SPARK_VALUE = 0.0           # gain_spark, discard_for_sparks. STAYS
 # -- Klee's Spark price (W3, EB-118 Phase 3, R211) --------------------------
-# THE COST-SIDE DIAL, on STATIC_CRASH_FANFARE_VALUE's idiom: the sign lives in
+# THE COST-SIDE DIAL: the sign lives in
 # `_op_price`'s branch, the magnitude lives here, and the reason lives beside
 # the magnitude.
 #
@@ -2144,7 +2099,7 @@ _STAGE_ZERO = ("ZERO: a verb about the BOARD -- who is on stage, who is in "
                "charge the cost and credit the payout on one line. Prototype "
                "surface only -- no shipped row prints it and no drafted "
                "number moves, so the priced-op set grows without a "
-               "DRAFTER_VERSION bump (`drain_fanfare`'s own terms)")
+               "DRAFTER_VERSION bump")
 
 STATIC_OP_PRICING: dict[str, str] = {
     # --- priced before v13 -----------------------------------------------
@@ -2157,7 +2112,6 @@ STATIC_OP_PRICING: dict[str, str] = {
     "choose_one": "MAX of the modes -- the player picks, so no share blend; "
                   "deep_breath's mode-2 under-credit ACCEPTED at the row "
                   "(R194) and its price is unmoved by the conversion",
-    "gain_fanfare_floor": "STATIC_FANFARE_FLOOR_VALUE per point (v9)",
     "grow_damage": "one discounted future redraw",
     # --- the Klee overhaul, slice one (C.KLEE_OVERHAUL) ------
     # One rationale, ten ops, because it is ONE decision: the arm is C#
@@ -2284,16 +2238,6 @@ STATIC_OP_PRICING: dict[str, str] = {
                                       "and tier 0.5 seats one; a "
                                       "multiplayer-only row is never offered "
                                       "here",
-    # --- the Furina reframe (furina_reframe.FURINA_REFRAME) ---
-    "drain_fanfare": "ZERO: it SPENDS the meter, and what the spend buys is "
-                     "printed by the effect after it as an `amount_formula` "
-                     "the pricer already reads at its own base. Pricing the "
-                     "drain as well would charge the card for its cost and "
-                     "credit it for its payout twice over. Prototype surface "
-                     "only -- no shipped row prints it and no drafted number "
-                     "moves, so the priced-op set grows without a "
-                     "DRAFTER_VERSION bump (the same terms as "
-                     "`block_half_damage` below)",
     # --- FURINA'S STAGE (`tier0.engine.furina_stage`) ---
     **{op: _STAGE_ZERO for op in FURINA_STAGE_OPS},
     # --- the Inazuma companion overhaul (C.COMPANION_OVERHAUL) -
@@ -2319,10 +2263,6 @@ STATIC_OP_PRICING: dict[str, str] = {
     "apply_aura": "STATIC_AURA_VALUE per applied aura, AoE-scaled",
     "swirl": "STATIC_SWIRL_VALUE; needs an aura it did not apply",
     "refresh_all_auras": "STATIC_AURA_REFRESH_VALUE, dead on a clean board",
-    # --- Furina's meter ---------------------------------------------------
-    "raise_fanfare_cap": "ZERO: STATIC_FANFARE_CAP_VALUE, measured inert",
-    "crash_fanfare": "ZERO: STATIC_CRASH_FANFARE_VALUE until the meter-read "
-                     "formula is priced; see the constant",
     # --- cards from nowhere ----------------------------------------------
     "add_card": "STATIC_GENERATED_CARD_VALUE per token, off-pile share "
                 "applied, NEGATIVE for a `status`-rarity add",

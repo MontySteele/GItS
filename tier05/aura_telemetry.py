@@ -1,6 +1,6 @@
 """Hydro-application uptime telemetry (Curtain Call sweep, R85 Track D).
 
-Reads the combat event log; changes nothing (the fanfare_telemetry
+Reads the combat event log; changes nothing (the read-only telemetry
 contract). The metric definition is REGISTERED in
 docs/archive/curtain-call-sprint-log-2026-07-27.md §4 and fixed for the sweep:
 

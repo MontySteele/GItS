@@ -64,10 +64,10 @@ def test_the_gate_passes_a_knob_the_engine_really_reads():
     def cell(value):
         # A real read on the real path -- module attribute access, which is
         # what every consumer in this repo does.
-        seen.append(C.FANFARE_DECAY_FRACTION)
+        seen.append(C.MELT_MULT)
         return value
 
-    out = list(sweeps.sweep("FANFARE_DECAY_FRACTION", (0.1, 0.2), cell))
+    out = list(sweeps.sweep("MELT_MULT", (0.1, 0.2), cell))
 
     assert [v for v, _ in out] == [0.1, 0.2]
     assert seen == [0.1, 0.2], "each cell must see its own armed value"
@@ -75,36 +75,36 @@ def test_the_gate_passes_a_knob_the_engine_really_reads():
 
 def test_the_stamped_default_is_restored_after_a_sweep():
     """A sweep must not leave the world edited for whatever runs next."""
-    before = C.FANFARE_DECAY_FRACTION
+    before = C.MELT_MULT
 
-    list(sweeps.sweep("FANFARE_DECAY_FRACTION", (0.4,),
-                      lambda v: C.FANFARE_DECAY_FRACTION))
+    list(sweeps.sweep("MELT_MULT", (0.4,),
+                      lambda v: C.MELT_MULT))
 
-    assert C.FANFARE_DECAY_FRACTION == before
-    assert "FANFARE_DECAY_FRACTION" not in C._SWEPT
+    assert C.MELT_MULT == before
+    assert "MELT_MULT" not in C._SWEPT
 
 
 def test_the_default_is_restored_even_when_a_cell_raises():
     """The failure path is the one that matters: a sweep that dies holding
     an armed knob would silently contaminate every later measurement in the
     same process."""
-    before = C.FANFARE_DECAY_FRACTION
+    before = C.MELT_MULT
 
     def exploding_cell(value):
         raise ValueError("boom")
 
     with pytest.raises(ValueError):
-        list(sweeps.sweep("FANFARE_DECAY_FRACTION", (0.4,), exploding_cell))
+        list(sweeps.sweep("MELT_MULT", (0.4,), exploding_cell))
 
-    assert C.FANFARE_DECAY_FRACTION == before
-    assert "FANFARE_DECAY_FRACTION" not in C._SWEPT
+    assert C.MELT_MULT == before
+    assert "MELT_MULT" not in C._SWEPT
 
 
 def test_the_gate_refuses_a_knob_that_does_not_exist():
     """A typo'd knob name sweeps nothing and would report a clean null --
     the same defect wearing a different hat."""
     with pytest.raises(AttributeError):
-        list(sweeps.sweep("FANFARE_DECAY_FRACTOIN", (0.1,), lambda v: v))
+        list(sweeps.sweep("MELT_MULTT", (0.1,), lambda v: v))
 
 
 def test_multi_knob_sweeps_require_every_axis_to_be_live():
@@ -112,30 +112,30 @@ def test_multi_knob_sweeps_require_every_axis_to_be_live():
     nothing (NORMAL_ATTRITION_SCALE, deleted by R67). A 2D grid with a dead
     second axis is half an experiment reported as a whole one."""
     def cell(frac, dead):
-        return C.FANFARE_DECAY_FRACTION
+        return C.MELT_MULT
 
     with pytest.raises(sweeps.DeadKnobError) as excinfo:
-        list(sweeps.sweep_pairs(("FANFARE_DECAY_FRACTION", DEAD_KNOB),
+        list(sweeps.sweep_pairs(("MELT_MULT", DEAD_KNOB),
                                 [(0.1, 1.0)], cell))
 
     assert DEAD_KNOB in str(excinfo.value)
     # And the live axis is not blamed for the dead one's failure.
-    assert "FANFARE_DECAY_FRACTION" not in str(excinfo.value).split(
+    assert "MELT_MULT" not in str(excinfo.value).split(
         "without reading")[0].replace(DEAD_KNOB, "")
 
 
 def test_multi_knob_sweeps_restore_every_knob():
-    before = (C.FANFARE_DECAY_FRACTION, C.FANFARE_CAP_FRACTION)
+    before = (C.MELT_MULT, C.FROZEN_DAMAGE_MULT)
 
     def cell(frac, cap):
-        return (C.FANFARE_DECAY_FRACTION, C.FANFARE_CAP_FRACTION)
+        return (C.MELT_MULT, C.FROZEN_DAMAGE_MULT)
 
     out = list(sweeps.sweep_pairs(
-        ("FANFARE_DECAY_FRACTION", "FANFARE_CAP_FRACTION"),
+        ("MELT_MULT", "FROZEN_DAMAGE_MULT"),
         [(0.1, 0.25), (0.3, 0.75)], cell))
 
     assert [r for _, r in out] == [(0.1, 0.25), (0.3, 0.75)]
-    assert (C.FANFARE_DECAY_FRACTION, C.FANFARE_CAP_FRACTION) == before
+    assert (C.MELT_MULT, C.FROZEN_DAMAGE_MULT) == before
 
 
 def test_reads_do_not_leak_between_cells():
@@ -146,11 +146,11 @@ def test_reads_do_not_leak_between_cells():
     def cell(value):
         # Only the first cell reads the knob.
         if not calls:
-            calls.append(C.FANFARE_DECAY_FRACTION)
+            calls.append(C.MELT_MULT)
         return value
 
     with pytest.raises(sweeps.DeadKnobError):
-        list(sweeps.sweep("FANFARE_DECAY_FRACTION", (0.1, 0.2), cell))
+        list(sweeps.sweep("MELT_MULT", (0.1, 0.2), cell))
 
     assert len(calls) == 1, "cell two must be judged on its own reads"
 

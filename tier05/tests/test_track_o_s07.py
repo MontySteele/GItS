@@ -15,7 +15,7 @@ from __future__ import annotations
 import json
 import pathlib
 
-from tier05 import aura_telemetry, fanfare_telemetry
+from tier05 import aura_telemetry
 
 _FIXTURES = (pathlib.Path(__file__).resolve().parents[2]
              / "review" / "redteam" / "fixtures" / "track_o"
@@ -24,12 +24,6 @@ _FIXTURES = (pathlib.Path(__file__).resolve().parents[2]
 
 def _log(name: str) -> list[dict]:
     return json.loads(_FIXTURES.read_text(encoding="utf-8"))[name]["log"]
-
-
-def _fanfare_turns(turns: int, held: int, cap: int) -> list[dict]:
-    return [{"turn": t, "event": "fanfare_turn", "total": held, "cap": cap,
-             "floor": 0, "at_cap": held >= cap, "at_floor": held == 0}
-            for t in range(1, turns + 1)]
 
 
 # --- aura: the intervals that DO close ------------------------------------
@@ -64,20 +58,3 @@ def test_aura_traces_do_not_leak_across_fights() -> None:
     assert (again.applications, again.hydro_turns) == (first.applications,
                                                        first.hydro_turns)
 
-
-# --- fanfare: the columns that really are pooled --------------------------
-#
-# fanfare_telemetry.py:181-183 states the rule: pool the numerator and the
-# denominator, so a two-turn combat cannot weigh as much as a twenty-turn one.
-# time_at_cap and overflow obey it. (mean_held_fraction and peak_fraction do
-# not -- slice-07 finding S07-03 -- and are deliberately not pinned.)
-
-def test_time_at_cap_is_pooled_over_turns_not_averaged_over_combats() -> None:
-    long_fight = fanfare_telemetry.trace(_fanfare_turns(20, 10, 10))
-    short_deaths = [fanfare_telemetry.trace(_fanfare_turns(1, 0, 10))
-                    for _ in range(9)]
-    agg = fanfare_telemetry.aggregate([long_fight] + short_deaths)
-    assert agg["turns"] == 29
-    assert agg["time_at_cap"] == 20 / 29
-    # The per-combat average of the same quantity would be 1/10.
-    assert agg["time_at_cap"] != 0.1

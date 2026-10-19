@@ -16,9 +16,7 @@ How it works, per card in gen_klee_cards.HAND_WRITTEN:
   C# side -- the standard idioms are regex-extracted from the card file:
     `new XxxVar(Nm...)` / `new DynamicVar("Name", Nm)`, `.WithHitCount(N)`,
     `: base(N, CardType...)`, `.UpgradeValueBy(Nm)`, `EnergyCost.UpgradeBy(N)`,
-    plus the numbers that are NOT DynamicVars -- `GainEncore(owner, N)`, and
-    the Fanfare rider's step in both its spellings (the `/ M` in the
-    CalculatedDamageVar multiplier and `fanfareStep: M` in the hover tip).
+    plus the one number that is NOT a DynamicVar, `GainEncore(owner, N)`.
   Mismatch in any category is a finding; any finding exits 1.
 
 Ancient-rarity cards have NO sheet row and never will -- the sim models
@@ -66,51 +64,15 @@ class Unparseable(Exception):
 class Expected:
     """The sheet-side numbers a hand-written card must show in C#.
 
-    One object rather than a growing tuple of parallel lists. Furina's kit
-    Burst added two categories at once -- the Encore literal, which is NOT a
-    DynamicVar, and the Fanfare rider's (per, step) pair, which lands in two
-    unrelated C# spellings -- and a five-positional-argument walk was going to
-    get one of them transposed eventually.
+    One object rather than a growing tuple of parallel lists: Furina's kit
+    Burst added the Encore literal, which is NOT a DynamicVar, and a
+    positional walk was going to get the categories transposed eventually.
     """
 
     def __init__(self) -> None:
         self.vars: list[int] = []
         self.hits: list[int] = []
         self.encore: list[int] = []
-        self.fanfare_riders: list[tuple[int, int]] = []
-
-
-FANFARE_RIDER_RE = re.compile(r"(\d+)_per_(\d+)_fanfare")
-
-
-def fanfare_rider(card: dict, eff: dict) -> tuple[int, int]:
-    """`bonus_formula: N_per_M_fanfare` on a non-self damage -> (N, M).
-
-    This is the ONE rider grammar with a parity rule, and it has one because
-    the generator has one: gen_klee_cards.fanfare_calc_rider renders it as
-    CalculationBaseVar(amount) + ExtraDamageVar(N) + a CalculatedDamageVar
-    whose multiplier divides ReadableFanfare by M. `let_the_people_rejoice` is
-    hand-written and follows that shape by hand, which is exactly the copy this
-    file exists to police.
-
-    The two scope guards are gen's own, restated so a card that falls outside
-    them fails loudly rather than being measured against the wrong C# shape:
-    self-target damage never renders through the rider path, and a salon-deploy
-    card renders its replacement multiplier instead (salon_calc_rider).
-    """
-    formula = eff.get("bonus_formula")
-    if eff.get("target") == "self":
-        raise Unparseable(
-            f"bonus_formula '{formula}' on a self-target damage (not the "
-            "CalculatedDamageVar path)")
-    if gen.salon_deploy_card(card):
-        raise Unparseable(
-            f"bonus_formula '{formula}' on a salon-deploy card (renders "
-            "through the salon replacement multiplier, not the rider path)")
-    m = FANFARE_RIDER_RE.fullmatch(str(formula))
-    if not m:
-        raise Unparseable(f"bonus_formula '{formula}' has no parity rule")
-    return int(m.group(1)), int(m.group(2))
 
 
 def walk_effects(effects: list, exp: Expected, card: dict) -> None:
@@ -126,13 +88,11 @@ def walk_effects(effects: list, exp: Expected, card: dict) -> None:
                     exp.vars.append(int(eff[bonus]))
                     keys.discard(bonus)
             if "bonus_formula" in eff:
-                per, _step = fanfare_rider(card, eff)
-                # The per-step lands as ExtraDamageVar, i.e. one more base
-                # value; the step itself is not a var and is checked on its own
-                # two C# spellings (see extract_cs).
-                exp.vars.append(per)
-                exp.fanfare_riders.append((per, _step))
-                keys.discard("bonus_formula")
+                # The one rider grammar that had a parity rule, the shipped
+                # Fanfare meter's `N_per_M_fanfare`, left with the meter.
+                raise Unparseable(
+                    f"bonus_formula '{eff['bonus_formula']}' has no parity "
+                    "rule")
             times = eff.get("times", 1)
             keys.discard("times")
             if not isinstance(times, int):
@@ -274,13 +234,6 @@ COST_UPG_RE = re.compile(r'EnergyCost\.UpgradeBy\(\s*(-?\d+)\s*\)')
 # hand-written Encore card would be a new shape needing its own rule.
 ENCORE_RE = re.compile(
     r'FurinaResources\.GainEncore\(\s*[\w.]+\s*,\s*(\d+)\s*\)')
-# The Fanfare rider's STEP, in both places the shape puts it: the multiplier
-# lambda that divides the meter, and the hover tip that prints the arithmetic.
-# Checking one and not the other is how a face and a hit disagree, which is
-# the exact playtest bug the CalculatedDamageVar conversion was for.
-FANFARE_DIV_RE = re.compile(r'ReadableFanfare\([^)]*\)\s*/\s*(\d+)')
-FANFARE_TIP_RE = re.compile(
-    r'fanfarePer:\s*(\d+)\s*,\s*fanfareStep:\s*(\d+)')
 
 
 def extract_cs(text: str) -> dict:
@@ -294,11 +247,9 @@ def extract_cs(text: str) -> dict:
         "hits": [int(h) for h in HIT_RE.findall(text)],
         "upgrade_vars": [int(float(v)) for v in UPG_RE.findall(text)],
         "upgrade_cost": [int(c) for c in COST_UPG_RE.findall(text)],
-        # Furina categories. Empty on every other character's cards, so they
-        # cost nothing to assert everywhere.
+        # Furina's category. Empty on every other character's cards, so it
+        # costs nothing to assert everywhere.
         "encore": [int(n) for n in ENCORE_RE.findall(text)],
-        "fanfare_div": [int(n) for n in FANFARE_DIV_RE.findall(text)],
-        "fanfare_tip": [(int(a), int(b)) for a, b in FANFARE_TIP_RE.findall(text)],
         # Burst-energy spike: sheet `skill_tag` must land as the ISkillTagCard
         # marker or the card silently generates no burst energy.
         "skill_tag": "ISkillTagCard" in text,
@@ -325,13 +276,12 @@ def extract_cs(text: str) -> dict:
 
 
 def furina_number_findings(exp: "Expected", got: dict, where) -> list[str]:
-    """The numbers that are neither DynamicVars nor hit counts.
+    """The number that is neither a DynamicVar nor a hit count.
 
-    Split out because both call sites need them and neither should be the one
-    that remembers to. All three categories are empty on a card that has no
-    Encore and no Fanfare rider, so asserting them on every hand-written card
-    costs nothing and means a future Klee/Kokomi card that grows one is checked
-    the day it does.
+    Split out because both call sites need it and neither should be the one
+    that remembers to. The category is empty on a card that has no Encore, so
+    asserting it on every hand-written card costs nothing and means a future
+    Klee/Kokomi card that grows one is checked the day it does.
     """
     findings: list[str] = []
     if Counter(got["encore"]) != Counter(exp.encore):
@@ -339,18 +289,6 @@ def furina_number_findings(exp: "Expected", got: dict, where) -> list[str]:
             f"gain_encore: sheet {sorted(exp.encore)}, {where} "
             f"FurinaResources.GainEncore {sorted(got['encore'])} -- the Encore "
             "amount is a bare int argument, so a var-only compare cannot see it")
-    exp_steps = [step for _per, step in exp.fanfare_riders]
-    if Counter(got["fanfare_div"]) != Counter(exp_steps):
-        findings.append(
-            f"fanfare rider step: sheet bonus_formula {sorted(exp_steps)}, "
-            f"{where} ReadableFanfare(...)/N {sorted(got['fanfare_div'])} -- "
-            "the divisor is what the card actually resolves")
-    if sorted(got["fanfare_tip"]) != sorted(exp.fanfare_riders):
-        findings.append(
-            f"fanfare rider tip: sheet bonus_formula {sorted(exp.fanfare_riders)}, "
-            f"{where} FurinaRiderTips fanfarePer/fanfareStep "
-            f"{sorted(got['fanfare_tip'])} -- the hover tip prints the "
-            "arithmetic, so a stale pair says one thing and the hit does another")
     return findings
 
 
@@ -451,7 +389,8 @@ def kit_no_pile() -> list[str]:
 # EMPTY as of EB-3. It held exactly one entry, `let_the_people_rejoice`, whose
 # reason was "Furina's encore/fanfare ops have no parity rule -- teaching them
 # is a Furina pass, not this one". That pass is this one: walk_effects now
-# rules `gain_encore` and the `N_per_M_fanfare` damage rider, so the Burst's
+# rules `gain_encore` and (until the shipped meter left, 2026-10-19) the
+# `N_per_M_fanfare` damage rider, so the Burst's
 # 8 / 1 / 4 / 6 are all compared against docs/furina-cards.yaml and the
 # deferral had to come out. Kept as a named, empty table rather than deleted:
 # the stale-deferral check below is what forces the next entry back out again,
@@ -646,8 +585,6 @@ ANCIENT_WITNESS: dict[str, dict] = {
         "upgrade_vars": [3],
         "upgrade_cost": [],
         "encore": [],
-        "fanfare_div": [],
-        "fanfare_tip": [],
     },
     "PrincessOfWatatsumi": {
         "why": "Kokomi's Archaic Tooth Ancient, Kurage's Oath's "
@@ -665,8 +602,6 @@ ANCIENT_WITNESS: dict[str, dict] = {
         "arm_only_upgrade_vars": [2],
         "upgrade_cost": [],
         "encore": [],
-        "fanfare_div": [],
-        "fanfare_tip": [],
     },
     "JumpyDumptyMkOmega": {
         "why": "Klee's Archaic Tooth Ancient, Jumpy Dumpty's replacement "
@@ -679,8 +614,6 @@ ANCIENT_WITNESS: dict[str, dict] = {
         "upgrade_vars": [4, 4],
         "upgrade_cost": [],
         "encore": [],
-        "fanfare_div": [],
-        "fanfare_tip": [],
     },
 }
 
@@ -710,8 +643,6 @@ ANCIENT_WITNESS.update({
         "upgrade_vars": [],
         "upgrade_cost": [-1],
         "encore": [],
-        "fanfare_div": [],
-        "fanfare_tip": [],
     },
     "DivineStrategy": {
         "why": "Kokomi's Dusty Tome Ancient (pool completion, 2026-10-01): a "
@@ -723,8 +654,6 @@ ANCIENT_WITNESS.update({
         "upgrade_vars": [],
         "upgrade_cost": [-1],
         "encore": [],
-        "fanfare_div": [],
-        "fanfare_tip": [],
     },
     "AllFourWinds": {
         "why": "Varka's Dusty Tome Ancient (the Varka review, ruled "
@@ -738,8 +667,6 @@ ANCIENT_WITNESS.update({
         "upgrade_vars": [],
         "upgrade_cost": [-1],
         "encore": [],
-        "fanfare_div": [],
-        "fanfare_tip": [],
     },
     "DandelionGale": {
         "why": "Varka's Archaic Tooth Ancient, Four Winds' Ascension's "
@@ -753,8 +680,6 @@ ANCIENT_WITNESS.update({
         "upgrade_vars": [],
         "upgrade_cost": [-1],
         "encore": [],
-        "fanfare_div": [],
-        "fanfare_tip": [],
     },
     "YakanEvocationSesshouSakura": {
         "why": "Yae's Archaic Tooth Ancient, Yakan Evocation's replacement "
@@ -767,8 +692,6 @@ ANCIENT_WITNESS.update({
         "upgrade_vars": [],
         "upgrade_cost": [-1],
         "encore": [],
-        "fanfare_div": [],
-        "fanfare_tip": [],
     },
     "YaePublishingHouse": {
         "why": "Yae's Dusty Tome Ancient (the Yae pass, 2026-10-16): a "
@@ -780,8 +703,6 @@ ANCIENT_WITNESS.update({
         "upgrade_vars": [],
         "upgrade_cost": [-1],
         "encore": [],
-        "fanfare_div": [],
-        "fanfare_tip": [],
     },
     "CenterOfAttention": {
         "why": "Furina's Dusty Tome Ancient (pool completion, 2026-10-01): a "
@@ -793,8 +714,6 @@ ANCIENT_WITNESS.update({
         "upgrade_vars": [],
         "upgrade_cost": [-1],
         "encore": [],
-        "fanfare_div": [],
-        "fanfare_tip": [],
     },
 })
 
@@ -804,7 +723,7 @@ ANCIENT_WITNESS.update({
 # witnessing the thing it was added for).
 WITNESSED_CATEGORIES = (
     "cost", "vars", "hits", "upgrade_vars", "upgrade_cost",
-    "encore", "fanfare_div", "fanfare_tip",
+    "encore",
 )
 
 ANCIENT_CTOR_RE = re.compile(r":\s*base\s*\([^;]*CardRarity\.Ancient", re.S)

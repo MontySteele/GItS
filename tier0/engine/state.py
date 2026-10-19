@@ -52,12 +52,9 @@ RETIRED_CARD_FIELDS = {
         "re-emitted by tools/extract_base_game_pool.py, which writes the new "
         "shape."),
     "fanfare_cost": (
-        "Fanfare is a read-only momentum stat ('The Tide Turns', F-A4) -- "
-        "no card spends it, and Encore is Furina's only managed resource. "
-        "A card that wants to reward a full meter READS it "
-        "(bonus_formula: N_per_M_fanfare) or gates on it "
-        "(if: fanfare_at_least_N); a card that wants to raise the player's "
-        "permanent baseline grants a floor (op: gain_fanfare_floor)."),
+        "The shipped Fanfare meter is gone (2026-10-19). Furina's Fanfare is "
+        "the Stage's: a card spends it through an `op: furina` Spend kind "
+        "and reads it through the `stage_fanfare` counts."),
     "plan_dusk": (
         "Dusk is retired (the Kokomi re-founding, 2026-10-12, "
         "review/ruled/kokomi-design-pass-2026-10-11.md pick 5): every Plan "
@@ -322,8 +319,7 @@ class Card:
     # generator, including ordinary shared companions pulled by that effect.
     # Guest Cast treats this temporary guest like every other Companion.
     generated_by_guest_star: bool = False
-    # NOTE: `fanfare_cost` was RETIRED by "The Tide Turns" (F-A4). Fanfare is
-    # a read-only momentum stat; no card spends it. See RETIRED_CARD_FIELDS.
+    # NOTE: `fanfare_cost` is RETIRED. See RETIRED_CARD_FIELDS.
     # Base-game parity (Ironclad pool): CanBeGeneratedInCombat. Feed sets it
     # false so a generator cannot conjure the card that permanently raises
     # max HP. MUST be honored by generate_from_pool -- otherwise Stoke
@@ -623,54 +619,6 @@ class KleeCharge:
     payload_mine_all: int = 0
 
 
-def fanfare_cap_base_term(max_hp: int) -> int:
-    """The Fanfare ceiling's BASE term, taken from LIVE max HP (EB-97).
-
-    `docs/current/characters/furina-identity-record.md` (ex-LAW, archived) says
-    "Fanfare is capped at %maxHP", and the mod reads it that
-    way every time it is asked: `FurinaResources.FanfareCap` computes
-    `FanfareCapFraction * creature.MaxHp + capBonus` from the creature's
-    CURRENT MaxHp. tier0 used to freeze the base term at the sheet's printed
-    `hp` and carry that number through every max-HP move in the run, so a
-    Decipher (-24) or a Feed (+7) never reached the ceiling and the two
-    engines disagreed -- inside a single combat, in Feed's case.
-
-    Truncating `int()` rather than rounding, to match C#'s `(int)` cast on
-    the same product. Clamped at zero because the term is a ceiling and a
-    negative max HP is not a state either engine represents.
-    """
-    return int(C.FANFARE_CAP_FRACTION * max(0, max_hp))
-
-
-def sync_fanfare_cap_to_max_hp(player: "Player") -> None:
-    """Re-derive the cap's base term from the player's live max HP.
-
-    Moves `fanfare_cap` and `fanfare_cap_base` by the SAME delta so every
-    bonus riding on top of the base term survives: the in-combat grants
-    (`raise_fanfare_cap`, `gain_fanfare_floor`) sit in `fanfare_cap` alone
-    and must not be rewound here, and a hand-rolled cap (the batteries, the
-    probes, every test that seats a number directly) is a bonus too as far
-    as this is concerned -- it is preserved exactly while max HP holds still.
-
-    A no-op for a character with no Fanfare resource, and a no-op while max
-    HP has not moved since the last sync.
-
-    Does NOT re-clamp the meter. The mod clamps in `GainFanfare` only, so a
-    meter above a freshly-lowered ceiling stays put until the next gain
-    drags it down -- `resources.gain_fanfare` has the same `min()` and gets
-    there the same way.
-    """
-    if not player.fanfare_cap_base and not player.fanfare_cap:
-        return                                   # no Fanfare resource
-    delta = (fanfare_cap_base_term(player.max_hp)
-             - fanfare_cap_base_term(player.fanfare_cap_hp))
-    player.fanfare_cap_hp = player.max_hp
-    if not delta:
-        return
-    player.fanfare_cap_base = max(0, player.fanfare_cap_base + delta)
-    player.fanfare_cap = max(0, player.fanfare_cap + delta)
-
-
 @dataclass
 class Fighter:
     hp: int
@@ -804,68 +752,12 @@ class Player(Fighter):
     node_kind: str = ""           # "", "normal", "elite", or "boss"
     # --- Furina (kickoff §3/§4); inert defaults for everyone else ---
     character_id: str = ""        # who this player IS
-    fanfare: int = 0              # read-only momentum stat; global pool
-    fanfare_cap: int = 0          # 0 = character has no Fanfare resource.
-                                  # Since "The Tide Turns" this is a high
-                                  # SAFETY RAIL, not a design dial -- under
-                                  # decay the ceiling does not bind.
-    # The out-of-combat ceiling, used by run_fight to REWIND fanfare_cap
-    # between fights. `player` is one object reused across every combat in a
-    # run, so without a rewind the cap ratchets upward all run.
-    #
-    # WHY A SNAPSHOT RATHER THAN A SUBTRACTION. run_fight used to rewind with
-    # `fanfare_cap -= fanfare_floor`, which was exact only while
-    # gain_fanfare_floor was the ONLY writer of either field and always moved
-    # both by the same n. The Fanfare rework (2026-07-28) broke that
-    # coincidence twice over: `raise_fanfare_cap` (Track B) moves the cap
-    # alone, and `drop_fanfare_to_floor` (Track C.2) moves the floor alone
-    # and DOWNWARD. Under the old arithmetic a Fanfare Cap card leaked its
-    # headroom into every later fight and a Hyperbeam ADDED ceiling on the
-    # way out. A snapshot cannot drift no matter how many writers exist.
-    fanfare_cap_base: int = 0
-    # The max HP the cap's base term was last derived from (EB-97). Not a
-    # design number -- it is the bookkeeping that lets sync_fanfare_cap_to_
-    # max_hp move the base term by a DELTA and so leave every bonus riding
-    # on top of it (in-combat grants, hand-seated caps) untouched. Seeded in
-    # __post_init__ from the constructed max HP so every build path is right
-    # without knowing about the field.
-    fanfare_cap_hp: int = 0
-    # The baseline the meter rests on. Decay clamps here, never below. The
-    # "Fanfare +X" keyword raises floor, cap AND current together
-    # (resources.gain_fanfare_floor) -- raising the cap alongside the floor
-    # is what keeps the gradient alive instead of re-pinning the meter.
-    #
-    # MAY BE NEGATIVE since the Hyperbeam (Track C.2, RULED): The Final
-    # Verdict digs the floor out from under the meter, and the player climbs
-    # back out with activity. Readers clamp at zero via resources.readable,
-    # so a negative meter turns effects off rather than inverting them.
-    fanfare_floor: int = 0
     # FURINA (the Salon's Tab, 2026-10-05): her stage, Fanfare and drained
     # ledger live on `player.ftd` (`furina_tide.Ftd`, attached by
     # `furina_stage.reset_for_combat`). The v2 Stage's fields left with v2.
     # Who makes the player's choices inside a Stage card (whether to take a
     # Drain or Spend mode). None = `furina_stage.FURINA_TIDE_DECIDER`.
     stage_decider: Optional[object] = None
-
-    def __post_init__(self) -> None:
-        # Seed the out-of-combat ceiling from the printed one, so EVERY
-        # construction path is correct without having to know about the
-        # field: the two loader builders, the batteries, and every test that
-        # hand-rolls a Player. Setting it only at the loader would have made
-        # run_fight rewind a hand-built Furina's cap to ZERO on her second
-        # fight -- a silent character-loses-her-resource bug reachable only
-        # from paths the loader does not own.
-        #
-        # `or` rather than a None sentinel: 0 means "no Fanfare resource" for
-        # the cap already, so the two spellings of absent agree.
-        if not self.fanfare_cap_base:
-            self.fanfare_cap_base = self.fanfare_cap
-        # EB-97: the max HP the seated cap is understood to have come from.
-        # Same reasoning as the line above -- seed it on EVERY construction
-        # path, or a hand-built Furina's first max-HP move would be read as
-        # a move away from 0 and re-derive the whole ceiling.
-        if not self.fanfare_cap_hp:
-            self.fanfare_cap_hp = self.max_hp
 
 
 @dataclass
@@ -1219,11 +1111,6 @@ class CombatState:
     # refpowers reads the count to divide a per-gain allowance.
     block_gained_this_card: int = 0
     discards_this_card: int = 0           # CalculatedGamble's draw-back count
-    # (R213 B). What `drain_fanfare` took from THIS card play,
-    # read back by the effects after it through
-    # `amount_formula: {count: fanfare_drained}`. Per-card and not a meter
-    # read: the meter is 0 by the time they resolve.
-    fanfare_drained_this_card: int = 0
     last_drawn_type: str = ""             # EscapePlan's drawn-card branch
     # FURINA'S STAGE. What THIS card play spent ("Spend all your Fanfare"),
     # read back by the effect after it through `amount_formula: {count:

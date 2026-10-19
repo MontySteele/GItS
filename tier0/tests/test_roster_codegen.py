@@ -720,10 +720,10 @@ def test_a_second_top_level_target_keeps_a_conditional_delta_structural(
 
 
 def _bar_probe(**kw) -> dict:
-    """A Furina threshold reader: draw 1, and 2 more at 6 Fanfare."""
+    """A Furina threshold reader: draw 1, and 2 more at 6 Encore."""
     return dict(_ethereal_probe(character="furina"),
                 effects=[{"op": "draw", "amount": 1},
-                         {"op": "conditional", "if": "fanfare_at_least_6",
+                         {"op": "conditional", "if": "encore_at_least_6",
                           "then": [{"op": "draw", "amount": 2}]}],
                 **kw)
 
@@ -735,14 +735,14 @@ def test_a_moved_bar_emits_one_comparison_and_prints_both_numbers(monkeypatch):
     the question away."""
     monkeypatch.setattr(
         gen, "_upgrade_deltas",
-        {"eb118_codegen_probe": {"condition": "fanfare_at_least_3"}})
+        {"eb118_codegen_probe": {"condition": "encore_at_least_3"}})
     card = _bar_probe()
     assert gen.upgrade_plan(card)[1] is None
     source = gen.emit(card, gen.FURINA_PROFILE)
 
-    assert ("if (FurinaResources.ReadableFanfare(Owner.Creature) "
+    assert ("if (FurinaResources.Encore(Owner.Creature) "
             ">= (IsUpgraded ? 3 : 6))") in source
-    assert ("If you have at least {IfUpgraded:show:3|6} [gold]Fanfare[/gold]"
+    assert ("If you have at least {IfUpgraded:show:3|6} [gold]Encore[/gold]"
             in source)
     assert "IsUpgraded ||" not in source
 
@@ -754,14 +754,14 @@ def test_the_unconditional_spelling_is_untouched_by_the_second_one(monkeypatch):
                         {"eb118_codegen_probe": {"condition": "unconditional"}})
     source = gen.emit(_bar_probe(), gen.FURINA_PROFILE)
 
-    assert ("if (IsUpgraded || FurinaResources.ReadableFanfare(Owner.Creature) "
+    assert ("if (IsUpgraded || FurinaResources.Encore(Owner.Creature) "
             ">= 6)") in source
     assert "IsUpgraded ? 3" not in source
 
 
 def test_an_upgraded_bar_on_another_meter_is_refused(monkeypatch):
     """An upgrade MOVES a bar; it does not change the question. Charge is
-    Kokomi's bank, and a Fanfare reader whose `+` card asked it would be a
+    Kokomi's bank, and an Encore reader whose `+` card asked it would be a
     different card wearing the same face."""
     monkeypatch.setattr(
         gen, "_upgrade_deltas",
@@ -775,7 +775,7 @@ def test_a_moved_bar_on_a_card_that_prints_none_is_refused(monkeypatch):
     the same rule every other delta key here keeps."""
     monkeypatch.setattr(
         gen, "_upgrade_deltas",
-        {"eb118_codegen_probe": {"condition": "fanfare_at_least_3"}})
+        {"eb118_codegen_probe": {"condition": "encore_at_least_3"}})
     reason = gen.upgrade_plan(_ethereal_probe(character="furina"))[1]
     assert "prints no top-level meter bar" in reason
 
@@ -786,11 +786,11 @@ def test_two_printed_bars_make_a_moved_bar_structural(monkeypatch):
     engines upgrading different numbers -- refused, not half-applied."""
     card = _bar_probe()
     card["effects"] = card["effects"] + [
-        {"op": "conditional", "if": "fanfare_at_least_10",
+        {"op": "conditional", "if": "encore_at_least_10",
          "then": [{"op": "draw", "amount": 1}]}]
     monkeypatch.setattr(
         gen, "_upgrade_deltas",
-        {"eb118_codegen_probe": {"condition": "fanfare_at_least_3"}})
+        {"eb118_codegen_probe": {"condition": "encore_at_least_3"}})
     reason = gen.upgrade_plan(card)[1]
     assert "2 top-level meter bars" in reason
 

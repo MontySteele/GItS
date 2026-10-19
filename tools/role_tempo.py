@@ -202,8 +202,6 @@ GENERATES = {
     "conscript": "conscript",
     "gain_charge": "charge",
     "gain_encore": "encore",
-    "raise_fanfare_cap": "fanfare",
-    "gain_fanfare_floor": "fanfare",
     "burst_energy": "burst",
 }
 # Tokens that only exist for ONE character, keyed by the sheet they live on.
@@ -223,7 +221,6 @@ CONSUMES = {
     "salon_perform": "salon_member",
     "salon_rotate": "salon_member",
     "spend_encore": "encore",
-    "crash_fanfare": "fanfare",
 }
 
 # Powers whose whole job is to make a token better. `scaling` is theirs by
@@ -233,7 +230,6 @@ TOKEN_POWER_PREFIX = (
     ("salon_", "salon_member"),
     ("spotlight_", "spotlight"),
     ("ovation_", "spotlight"),
-    ("fanfare_", "fanfare"),
     ("bomb_", "bomb"),
     ("detonation_", "bomb"),
     ("spark_", "spark"),
@@ -246,28 +242,16 @@ TOKEN_POWER_PREFIX = (
 # THE DISTINCTION THE PREFIX RULE CANNOT MAKE, and the one a token's payoff
 # set turns on: a Power that IMPROVES a resource (salon_damage_up: members
 # tick harder) is a carrier and inherits; a Power that IS a payoff OF the
-# resource (fanfare_delta_block: Fanfare moving is what pays the Block)
-# defines the cash-out and must credit it. Left to the prefix rule, every
-# Fanfare payoff would have been silently filed as a Fanfare carrier and the
-# meter would have reported an empty cash-out for structural reasons that had
-# nothing to do with the design.
+# resource (ceremonial_garment: Charge is what pays through it) defines the
+# cash-out and must credit it. Left to the prefix rule, every such payoff
+# would have been silently filed as a carrier and the meter would have
+# reported an empty cash-out for structural reasons that had nothing to do
+# with the design. (The shipped Fanfare meter's three payoff Powers left with
+# it, 2026-10-19.)
 #
 # STOP-AND-SURFACE (A-G1): this table is the arguable part of the tag-through.
 # Each entry is a claim about which side of that line a Power sits on.
 TOKEN_PAYOFF_POWERS = {
-    "fanfare_attack_per10": (
-        "fanfare", ("scaling",),
-        "furina-cards.yaml rapturous_applause: 'attacks +N damage per 10 "
-        "Fanfare'. A per-attack term that grows with the meter -- the one "
-        "genuinely multiplicative Fanfare read in the pool."),
-    "fanfare_attack_per5": (
-        "fanfare", ("scaling",),
-        "the row above's clause at a retired arm's granularity (per 5, on "
-        "a meter that ranges 0-15). Same side of the line, same tags."),
-    "fanfare_delta_block": (
-        "fanfare", ("block",),
-        "furina-cards.yaml unheard_confession: 'gain 1 Block whenever Fanfare "
-        "CHANGES AMOUNT'. The meter moving is the payment."),
     "ceremonial_garment": (
         "charge", ("scaling",),
         "kokomi-cards.yaml ceremonial_garment: while the state holds, her "
@@ -320,10 +304,10 @@ METERS = {
         "'Defect-orb shape: fixed active company' -- the canon bounded "
         "precedent, named in the sheet before the ruling asked for it."),
     "fanfare": (
-        True, "FANFARE_CAP_FRACTION",
-        "DERIVED cap: fraction of maxHP, not a fixed integer. Demoted to a "
-        "high safety rail by the Tide Turns sprint (F-A5) -- bounded on "
-        "paper, and the W2 cells reported 0.0% at-cap, so it rarely binds."),
+        False, None,
+        "The Stage's Fanfare: one number on Furina, with no fade and no cap "
+        "(`furina_tide`). The shipped meter's maxHP cap left with that "
+        "meter on 2026-10-19."),
     "spark": (
         True, "SPARKS_FOR_FREE_ATTACK",
         "Threshold-and-consume at 3: the meter cannot sit above its cap "

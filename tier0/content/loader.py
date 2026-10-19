@@ -1414,9 +1414,7 @@ def build_player(character_id: str, deck: str = "starter") -> Player:
                   cadence=spec.get("cadence", "skill"),
                   relic_hooks=hooks,
                   relic_effects=_starting_relic_effects(spec),
-                  character_id=spec["id"],
-                  fanfare_cap=(state_mod.fanfare_cap_base_term(spec["hp"])
-                               if spec.get("fanfare") else 0))
+                  character_id=spec["id"])
 
 
 def build_player_from_ids(character_id: str, card_ids: list[str],
@@ -1457,9 +1455,7 @@ def build_player_from_ids(character_id: str, card_ids: list[str],
                   potions=list(potions or []),
                   potion_slots=potion_slots,
                   node_kind=node_kind,
-                  character_id=spec["id"],
-                  fanfare_cap=(state_mod.fanfare_cap_base_term(spec["hp"])
-                               if spec.get("fanfare") else 0))
+                  character_id=spec["id"])
 
 
 def starting_deck(character_id: str, rng=None) -> list[str]:

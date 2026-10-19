@@ -151,9 +151,11 @@ def test_validation_recurses_into_conditional_branches():
 
 def test_parameterised_predicates_must_carry_a_real_argument():
     """`fanfare_at_least_ten` used to pass a name check and die in int()."""
-    assert effects.is_known_predicate("fanfare_at_least_10")
-    assert not effects.is_known_predicate("fanfare_at_least_ten")
-    assert not effects.is_known_predicate("fanfare_at_least_")
+    assert effects.is_known_predicate("exhaust_pile_at_least_10")
+    assert not effects.is_known_predicate("exhaust_pile_at_least_ten")
+    assert not effects.is_known_predicate("exhaust_pile_at_least_")
+    # The shipped Fanfare meter's bar left with the meter (2026-10-19).
+    assert not effects.is_known_predicate("fanfare_at_least_10")
     # target_has_power_ takes a power NAME, so any suffix is legal by design.
     assert effects.is_known_predicate("target_has_power_vulnerable")
 
