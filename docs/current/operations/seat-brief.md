@@ -92,6 +92,8 @@ right after a refused command on an unchanged board, and a `proceed` (or
 a reward screen, or a relic still in an open chest. Say it again to go ahead
 anyway; that second `proceed` is how you skip on purpose. A card offer you
 opened and left with `skip` is already skipped: it does not hold `proceed`.
+After a sent `end turn`, `observe` before the next command: anything typed
+first is skipped, not sent, because it would land on a turn you have not seen.
 
 ### Your budget
 
