@@ -147,8 +147,8 @@ public sealed class Kokomi : CustomCharacterModel, IKokomiCharacter
         KleePck.Path("kokomi/model/merchant_character.tscn");
 
     /// <summary>
-    /// Combat model, scene-first like Klee and Furina: the layer-cut rig at
-    /// kokomi/model/combat.tscn (fences in tools/combat_layer_fences/kokomi.yaml),
+    /// Combat model, scene-first like Klee and Furina: the scene rendered from
+    /// her model at kokomi/model/combat.tscn (`python -m tools.kokomi_rig gen`),
     /// which carries %Facing and %AnimationTree, so CreatureAnimationRouter,
     /// the death seam and the facing fix all apply with no code of hers.
     /// Falls back to the static 240x280 combat_model.png when the pck predates
