@@ -272,8 +272,10 @@ public static class AbyssText
         AbyssShadow.Riptide =>
             "This act, the first time each turn an enemy's attack deals you unblocked damage, it gains "
           + $"{AbyssNumbers.RiptideStrength} Strength, up to {AbyssNumbers.RiptideCap(act)} times per combat.",
+        // 2026-10-18 ([USER]: pick (a)): base Plating scales in co-op (x3 for two
+        // players, PlatingPower.GetScaledAmountForMultiplayer), so the text says so.
         AbyssShadow.FatuiSkirmishers =>
-            $"Elites and bosses enter combat with {AbyssNumbers.FatuiPlating(act)} Plated Armor.",
+            $"Elites and bosses enter combat with {AbyssNumbers.FatuiPlating(act)} Plated Armor (more in co-op).",
         AbyssShadow.ThornyGround =>
             $"This act, enemies start each combat with {AbyssNumbers.ThornyGroundThorns(act)} Thorns.",
         AbyssShadow.Bulwark =>

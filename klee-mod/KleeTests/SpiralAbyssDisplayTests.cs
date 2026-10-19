@@ -319,7 +319,7 @@ public class SpiralAbyssDisplayTests
         // enemy. The paper (review/active/spiral-abyss-pools-2026-10-12.md):
         // "Elites and bosses enter combat with 3 Plated Armor." The effect
         // already followed it; the badge now does too.
-        Assert.Equal("Elites and bosses enter combat with 3 Plated Armor.",
+        Assert.Equal("Elites and bosses enter combat with 3 Plated Armor (more in co-op).",
                      AbyssText.Text(AbyssShadow.FatuiSkirmishers, 0));
         var inForce = new[] { AbyssShadow.Bulwark, AbyssShadow.FatuiSkirmishers, AbyssShadow.MageShield };
         Assert.Equal(new[] { AbyssShadow.Bulwark },

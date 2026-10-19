@@ -88,9 +88,9 @@ public class AbyssActScalingTests
     [InlineData(AbyssShadow.SheerCold, 0, "If you end your turn with no Block, lose 3 HP.")]
     [InlineData(AbyssShadow.SheerCold, 1, "If you end your turn with no Block, lose 4 HP.")]
     [InlineData(AbyssShadow.SheerCold, 2, "If you end your turn with no Block, lose 5 HP.")]
-    [InlineData(AbyssShadow.FatuiSkirmishers, 0, "Elites and bosses enter combat with 3 Plated Armor.")]
-    [InlineData(AbyssShadow.FatuiSkirmishers, 1, "Elites and bosses enter combat with 4 Plated Armor.")]
-    [InlineData(AbyssShadow.FatuiSkirmishers, 2, "Elites and bosses enter combat with 6 Plated Armor.")]
+    [InlineData(AbyssShadow.FatuiSkirmishers, 0, "Elites and bosses enter combat with 3 Plated Armor (more in co-op).")]
+    [InlineData(AbyssShadow.FatuiSkirmishers, 1, "Elites and bosses enter combat with 4 Plated Armor (more in co-op).")]
+    [InlineData(AbyssShadow.FatuiSkirmishers, 2, "Elites and bosses enter combat with 6 Plated Armor (more in co-op).")]
     public void A_Shadows_text_prints_its_acts_number(AbyssShadow s, int act, string text) =>
         Assert.Equal(text, AbyssText.Text(s, act));
 
