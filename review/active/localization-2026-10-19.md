@@ -52,3 +52,10 @@ not a huge lift ... I just don't know how that goes in the mod side."
    story prose left English. (b) Everything.
 3. **Which first.** (a, default) Simplified Chinese: the largest Genshin and
    Slay the Spire audience after English. (b) Name one.
+
+**Ruled 2026-10-19,** [USER]: "agreed on (a) all around for the characters at
+Balance. Once we've finalized the other two and we've finished working on
+event text, we can do a deeper pass on the rest of the text." So: step one
+now; the first language is Simplified Chinese, gameplay text of the Balance
+kits (Klee, Varka, Furina) and the shared text; Kokomi and Yae join at their
+Balance; story and event prose waits for the event-text work to finish.

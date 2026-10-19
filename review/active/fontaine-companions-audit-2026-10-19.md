@@ -20,8 +20,8 @@ Kokomi's kit). Fontaine is under half of either.
   only as one of Furina's guest-star cards) and Emilie (nowhere).
 
 **Weak for their rarity** (nearest base card in brackets):
-- Bogglecat Box, 4 Block draw 2 (Backflip: 5 and 2), a Common that cycles.
-- Freezing Point, 7 and draw 1 (Pommel Strike: 9 and 1), a Common that cycles.
+- Bogglecat Box, 4 Block draw 2 (Backflip: 5 and 2).
+- Freezing Point, 7 and draw 1 (Pommel Strike: 9 and 1).
 - Shattering Pressure (U), 5 twice: Twin Strike's Common numbers. Taken 5 of
   216 offers.
 - Astonishing Shift (U), Swirl and 8 to ALL: a Common number.
@@ -46,6 +46,11 @@ Clorinde (13%).
    two each (a Common and an Uncommon), the four 5-stars given a second card
    (Uncommon or Rare), and the five missing 5-stars added at two each. (b)
    Keep the eight characters and only fix their cards (about 16).
+   **Ruled (a), amended, 2026-10-19:** "while the (a) picks are largely fine,
+   we may still want to leave some Companions at multiple Commons so the
+   Common pool has more than 4 cards in it." So the 4-stars keep two Commons
+   each and gain or keep one Uncommon: 8 Commons, as today and as Inazuma's
+   pool, and about 30 cards in all (8 / 13 / 9).
 2. **Furina's guest stars.** Seven companion characters are also guest-star
    cards in Furina's own pool, and the five new 5-stars would make that up to
    eleven. (a, default) Allow it: a guest star is that character performing
@@ -58,5 +63,10 @@ Clorinde (13%).
    characters use (Hydro for Neuvillette and Sigewinne, Pyro for Lyney, and so
    on), so the pool is not a Cryo pool by accident. (b) Leave the spread as
    it falls.
+
+Picks 2 and 3 ruled (a), 2026-10-19. On the two draw Commons above, [USER]:
+"Cycling is when a 0 cost card can draw at least 1, thus replacing itself. A
+card that costs energy cannot be a cycling piece." (This page first called
+them cycling; they are just under rate.)
 
 After the picks, the card-by-card paper follows, like Inazuma's.
