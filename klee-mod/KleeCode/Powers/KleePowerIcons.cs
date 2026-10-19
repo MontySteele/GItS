@@ -26,6 +26,10 @@ internal static class KleePowerIcons
 {
     internal static string? PathFor(PowerModel power) => power switch
     {
+        // THE BADGE PASS (2026-10-19): every badge that two powers shared now
+        // has its own icon first (art/plan.tsv, "Power badge pass"); the badge
+        // it borrowed before stays the `??` fallback for a pck built without it.
+        // The comments below that say an illustration "stays owed" predate it.
         SparkPower => KleePck.Path("klee/powers/spark.png"),
         // The Sparks alternative-cost arm. It borrows the icon of
         // the power it replaces -- True Spark Knight's old body was
@@ -42,7 +46,8 @@ internal static class KleePowerIcons
         AlicesRecipePower =>
             KleePck.Path("klee/powers/bomb_damage_up.png"),
         ChainedReactionsPower =>
-            KleePck.Path("klee/powers/bomb_and_spark_per_turn.png"),
+            KleePck.Path("klee/powers/chained_reactions.png")
+            ?? KleePck.Path("klee/powers/bomb_and_spark_per_turn.png"),
         BombEchoPower =>
             KleePck.Path("klee/powers/sparks_n_splash.png"),
         // THE POOL PASS's Rare (`EB-491`), on the block above's terms
@@ -50,7 +55,8 @@ internal static class KleePowerIcons
         // Pact pays a second REACTION off a Bomb's reaction. Its own
         // illustration stays owed until the slice is accepted.
         VermillionPactPower =>
-            KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
+            KleePck.Path("klee/powers/sparkborne_magic.png")
+            ?? KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
         // R276's Explosive Frags borrows the shipped Explosive Frags badge,
         // whose job it takes over for the arm's Mine (Vulnerable per charge
         // gone off). Its own illustration stays owed until Balance.
@@ -63,24 +69,30 @@ internal static class KleePowerIcons
         // spark-per-turn badge. Both illustrations stay
         // owed until the slice is accepted.
         ReturnToSenderPower =>
-            KleePck.Path("klee/powers/bomb_and_spark_per_turn.png"),
+            KleePck.Path("klee/powers/return_to_sender.png")
+            ?? KleePck.Path("klee/powers/bomb_and_spark_per_turn.png"),
         BlazingDelightPower =>
             KleePck.Path("klee/powers/spark_per_turn.png"),
         // THE POOL EXPANSION (R276), on the block above's terms verbatim: each
         // borrows the icon of the arm power whose job it is nearest to, and
         // its own illustration stays owed until the slice is accepted.
         PlaydatePower => KleePck.Path("klee/powers/friendly_visit.png"),
-        BoomBadgePower => KleePck.Path("klee/powers/study_buddy.png"),
+        BoomBadgePower => KleePck.Path("klee/powers/boom_badge.png")
+            ?? KleePck.Path("klee/powers/study_buddy.png"),
         WaitForItPower =>
             KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
         AftershockPower =>
-            KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
+            KleePck.Path("klee/powers/aftershock.png")
+            ?? KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
         PartyPoppersPower =>
-            KleePck.Path("klee/powers/bomb_and_spark_per_turn.png"),
+            KleePck.Path("klee/powers/party_poppers.png")
+            ?? KleePck.Path("klee/powers/bomb_and_spark_per_turn.png"),
         SecretBasePower =>
             KleePck.Path("klee/powers/bomb_and_spark_per_turn.png"),
-        LookOutPower => KleePck.Path("klee/powers/spark_per_turn.png"),
-        DodocoPower => KleePck.Path("klee/powers/bomb.png"),
+        LookOutPower => KleePck.Path("klee/powers/look_out.png")
+            ?? KleePck.Path("klee/powers/spark_per_turn.png"),
+        DodocoPower => KleePck.Path("klee/powers/dodoco.png")
+            ?? KleePck.Path("klee/powers/bomb.png"),
         // THE SPIRAL ABYSS (2026-10-12): each Abyss Mage Shield wears the
         // official shield of its element, and each Shadow badge its own icon.
         // The paths are literals on the subclasses (validate.ps1 S12 reads
@@ -112,9 +124,11 @@ internal static class KleePowerIcons
         // does is turn a hand into Companion cards (R276). The three rows' own
         // illustrations stay owed until the slice is accepted.
         WitchesCirclePower =>
-            KleePck.Path("klee/powers/bomb_and_spark_per_turn.png"),
+            KleePck.Path("klee/powers/witches_circle.png")
+            ?? KleePck.Path("klee/powers/bomb_and_spark_per_turn.png"),
         IntroductionMagicPower =>
-            KleePck.Path("klee/powers/witchs_flame.png"),
+            KleePck.Path("klee/powers/introduction_magic.png")
+            ?? KleePck.Path("klee/powers/witchs_flame.png"),
         // The Kokomi overhaul, draft 6. Every one of these
         // borrows the icon of the SHIPPED Kokomi power whose job it takes over,
         // on the block above's argument verbatim: art is commissioned when a
@@ -129,81 +143,108 @@ internal static class KleePowerIcons
         // badge of The Clouds Like Waves Rippling, the defensive Power it
         // replaces; Ceremonial Garment wears the shipped Garment's own badge;
         // the others borrow the nearest shipped SHAPE, the block above's rule. Art is commissioned when a slice is ACCEPTED.
-        WatatsumisGracePower => KleePck.Path(
+        WatatsumisGracePower => KleePck.Path("kokomi/powers/watatsumis_grace.png")
+            ?? KleePck.Path(
             "kokomi/powers/vigil_of_the_deep.png"),
-        TidalRipostePower => KleePck.Path(
+        TidalRipostePower => KleePck.Path("kokomi/powers/tidal_riposte.png")
+            ?? KleePck.Path(
             "kokomi/powers/vigil_of_the_deep.png"),
         // THE KOKOMI CARD PAPER V2 (2026-10-18): the stored Riposte wears its
         // Power's badge; Draft the Orders borrows the Plan clock's.
-        TidalRiposteChargePower => KleePck.Path(
+        TidalRiposteChargePower => KleePck.Path("kokomi/powers/riposte.png")
+            ?? KleePck.Path(
             "kokomi/powers/vigil_of_the_deep.png"),
-        DraftTheOrdersPower => KleePck.Path(
+        DraftTheOrdersPower => KleePck.Path("kokomi/powers/draft_the_orders.png")
+            ?? KleePck.Path(
             "kokomi/powers/before_sun_and_moon.png"),
         ProtoCeremonialGarmentPower => KleePck.Path(
             "kokomi/powers/ceremonial_garment.png"),
-        AtWatersEdgePower => KleePck.Path("klee/powers/solar_isotoma.png"),
+        AtWatersEdgePower => KleePck.Path("kokomi/powers/at_waters_edge.png")
+            ?? KleePck.Path("klee/powers/solar_isotoma.png"),
         // THE PAYOFF PASS (2026-10-01): Kurage Canopy is her Ancient's Block
         // per carry-out, so it wears that badge.
-        KurageCanopyPower => KleePck.Path(
+        KurageCanopyPower => KleePck.Path("kokomi/powers/kurage_canopy.png")
+            ?? KleePck.Path(
             "kokomi/powers/princess_of_watatsumi.png"),
-        KurageCanopyPlusPower => KleePck.Path(
+        KurageCanopyPlusPower => KleePck.Path("kokomi/powers/kurage_canopy.png")
+            ?? KleePck.Path(
             "kokomi/powers/princess_of_watatsumi.png"),
         // POOL COMPLETION (2026-10-01): the six new Powers and three Ancient
         // Powers borrow the nearest shipped shape, the block above's rule.
         SeasReproachPower => KleePck.Path(
             "kokomi/powers/vigil_of_the_deep.png"),
-        WatatsumiResistancePower => KleePck.Path(
+        WatatsumiResistancePower => KleePck.Path("kokomi/powers/watatsumi_resistance.png")
+            ?? KleePck.Path(
             "kokomi/powers/princess_of_watatsumi.png"),
         DivineStrategyPower => KleePck.Path(
             "kokomi/powers/before_sun_and_moon.png"),
-        AlicesMasterpiecePower => KleePck.Path(
+        AlicesMasterpiecePower => KleePck.Path("klee/powers/alices_masterpiece.png")
+            ?? KleePck.Path(
             "klee/powers/bomb_damage_up.png"),
-        CenterOfAttentionPower => KleePck.Path(
+        CenterOfAttentionPower => KleePck.Path("furina/powers/center_of_attention.png")
+            ?? KleePck.Path(
             "furina/powers/limelight.png"),
         // THE RE-FOUNDING (2026-10-12): the seven new Powers and the two Plan
         // clocks borrow the nearest shipped shape, the block above's rule. Art
         // is commissioned when a slice is ACCEPTED.
         SangonomiyasOrdersPower => KleePck.Path(
             "kokomi/powers/princess_of_watatsumi.png"),
-        KurageBloomPower => KleePck.Path("kokomi/powers/bake_kurage.png"),
-        WatchfulShoalPower => KleePck.Path(
+        KurageBloomPower => KleePck.Path("kokomi/powers/kurage_bloom.png")
+            ?? KleePck.Path("kokomi/powers/bake_kurage.png"),
+        WatchfulShoalPower => KleePck.Path("kokomi/powers/watchful_shoal.png")
+            ?? KleePck.Path(
             "kokomi/powers/vigil_of_the_deep.png"),
-        CoordinatedTidePower => KleePck.Path("kokomi/powers/bake_kurage.png"),
-        GrandStrategistPower => KleePck.Path(
+        CoordinatedTidePower => KleePck.Path("kokomi/powers/coordinated_tide.png")
+            ?? KleePck.Path("kokomi/powers/bake_kurage.png"),
+        GrandStrategistPower => KleePck.Path("kokomi/powers/grand_strategist.png")
+            ?? KleePck.Path(
             "klee/powers/amp_reaction_up.png"),
-        EndlessShoalPower => KleePck.Path("kokomi/powers/bake_kurage.png"),
+        EndlessShoalPower => KleePck.Path("kokomi/powers/endless_shoal.png")
+            ?? KleePck.Path("kokomi/powers/bake_kurage.png"),
         // THE POOL OVERHAUL (2026-10-13): the two new Powers borrow the
         // nearest shipped shape, the block above's rule, and Undercurrent
         // Snare's this-turn loss wears Cover Your Ears!'s borrowed badge.
-        JellyfishCurrentPower => KleePck.Path("kokomi/powers/bake_kurage.png"),
-        BattleFormationPower => KleePck.Path(
+        JellyfishCurrentPower => KleePck.Path("kokomi/powers/jellyfish_current.png")
+            ?? KleePck.Path("kokomi/powers/bake_kurage.png"),
+        BattleFormationPower => KleePck.Path("kokomi/powers/battle_formation.png")
+            ?? KleePck.Path(
             "kokomi/powers/before_sun_and_moon.png"),
         UndercurrentSnarePower =>
-            KleePck.Path("klee/powers/detonation_vuln.png"),
-        DawnTidePower => KleePck.Path("kokomi/powers/bake_kurage.png"),
+            KleePck.Path("kokomi/powers/undercurrent_snare.png")
+            ?? KleePck.Path("klee/powers/detonation_vuln.png"),
+        DawnTidePower => KleePck.Path("kokomi/powers/dawn_tide.png")
+            ?? KleePck.Path("kokomi/powers/bake_kurage.png"),
         // Kokomi review r6 (2026-10-14): the two Hydro sources borrow the
         // jellyfish's badge, the block above's rule.
-        KurageVanguardPower => KleePck.Path("kokomi/powers/bake_kurage.png"),
+        KurageVanguardPower => KleePck.Path("kokomi/powers/kurage_vanguard.png")
+            ?? KleePck.Path("kokomi/powers/bake_kurage.png"),
         FollowingCurrentPower =>
-            KleePck.Path("kokomi/powers/bake_kurage.png"),
-        JuugaGuardPower => KleePck.Path("klee/powers/oz_summon.png"),
-        NereidsAscensionPower => KleePck.Path(
+            KleePck.Path("kokomi/powers/following_current.png")
+            ?? KleePck.Path("kokomi/powers/bake_kurage.png"),
+        JuugaGuardPower => KleePck.Path("kokomi/powers/juuga_guard.png")
+            ?? KleePck.Path("klee/powers/oz_summon.png"),
+        NereidsAscensionPower => KleePck.Path("kokomi/powers/nereids_ascension.png")
+            ?? KleePck.Path(
             "kokomi/powers/before_sun_and_moon.png"),
         // Kokomi's own potions (2026-10-15): A Stunning Stratagem is Nereid's
         // read widened to every Plan for a turn, so it wears Nereid's badge.
-        StunningStratagemPower => KleePck.Path(
+        StunningStratagemPower => KleePck.Path("kokomi/powers/stunning_stratagem.png")
+            ?? KleePck.Path(
             "kokomi/powers/before_sun_and_moon.png"),
         // The four with no shipped Kokomi power to borrow from -- the Plan
         // badge, its draw rider and the two Commander powers -- take
         // the nearest shipped SHAPE instead: a Klee companion power for the
         // two that read Companions, and her Ancient's sigil for the badge
         // that counts something waiting to arrive.
-        PendingPlansPower => KleePck.Path(
+        PendingPlansPower => KleePck.Path("kokomi/powers/plan.png")
+            ?? KleePck.Path(
             "kokomi/powers/princess_of_watatsumi.png"),
         // R276: Pincer's carry-out borrows the nearest shipped SHAPE, the
         // block above's rule: a replay.
-        FirstAttackTwicePower => KleePck.Path("klee/powers/study_buddy.png"),
-        TreatisePower => KleePck.Path("klee/powers/spark_per_turn.png"),
+        FirstAttackTwicePower => KleePck.Path("kokomi/powers/pincer.png")
+            ?? KleePck.Path("klee/powers/study_buddy.png"),
+        TreatisePower => KleePck.Path("kokomi/powers/treatise.png")
+            ?? KleePck.Path("klee/powers/spark_per_turn.png"),
         // `EB-668`. Battle Plan's rider borrows the icon of the shipped power
         // that already means "your next Attack hits harder" -- the same
         // standing rule the discount took from Rally, applied to what the
@@ -218,29 +259,41 @@ internal static class KleePowerIcons
         // of an asset is the established shape in this file -- KleePck.Path
         // returns null while a file is absent, so a missing PNG changes
         // nothing and the miss is logged once by name.
-        SignatureMixPower => KleePck.Path("klee/powers/celestial_gift.png"),
-        RevelationPower => KleePck.Path("klee/powers/celestial_gift.png"),
-        GlacialWaltzPower => KleePck.Path("klee/powers/oz_summon.png"),
+        SignatureMixPower => KleePck.Path("klee/powers/signature_mix.png")
+            ?? KleePck.Path("klee/powers/celestial_gift.png"),
+        RevelationPower => KleePck.Path("klee/powers/revelation.png")
+            ?? KleePck.Path("klee/powers/celestial_gift.png"),
+        GlacialWaltzPower => KleePck.Path("klee/powers/glacial_waltz.png")
+            ?? KleePck.Path("klee/powers/oz_summon.png"),
         MondstadtOzPower => KleePck.Path("klee/powers/oz_summon.png"),
-        LightningRosePower => KleePck.Path("klee/powers/oz_summon.png"),
-        GrandOdePower => KleePck.Path("klee/powers/amp_reaction_up.png"),
-        DandelionBreezePower => KleePck.Path("klee/powers/amp_reaction_up.png"),
+        LightningRosePower => KleePck.Path("klee/powers/lightning_rose.png")
+            ?? KleePck.Path("klee/powers/oz_summon.png"),
+        GrandOdePower => KleePck.Path("klee/powers/grand_ode.png")
+            ?? KleePck.Path("klee/powers/amp_reaction_up.png"),
+        DandelionBreezePower => KleePck.Path("klee/powers/dandelion_breeze.png")
+            ?? KleePck.Path("klee/powers/amp_reaction_up.png"),
         SolarIsotomaBloomPower =>
             KleePck.Path("klee/powers/solar_isotoma.png"),
         // The same arm's SECOND WAVE, on the same terms: each borrows the
         // shipped icon of the power whose job it takes over, or of the shipped
         // companion power it is the rewrite of.
-        IcyPawsPower => KleePck.Path("klee/powers/frozen.png"),
-        MelodyLoopPower => KleePck.Path("klee/powers/oz_summon.png"),
+        IcyPawsPower => KleePck.Path("klee/powers/icy_paws.png")
+            ?? KleePck.Path("klee/powers/frozen.png"),
+        MelodyLoopPower => KleePck.Path("klee/powers/melody_loop.png")
+            ?? KleePck.Path("klee/powers/oz_summon.png"),
         PassionOverloadPower =>
             KleePck.Path("klee/powers/passion_overload.png"),
-        SwirlChargePower => KleePck.Path("klee/powers/amp_reaction_up.png"),
+        SwirlChargePower => KleePck.Path("klee/powers/swirl_charge.png")
+            ?? KleePck.Path("klee/powers/amp_reaction_up.png"),
         StarfrostDiscountPower =>
             KleePck.Path("klee/powers/zero_cost_attacks_up.png"),
         LightningFangPower =>
-            KleePck.Path("klee/powers/passion_overload.png"),
-        SturmUndDrangPower => KleePck.Path("klee/powers/amp_reaction_up.png"),
-        FavonianFavorPower => KleePck.Path("klee/powers/celestial_gift.png"),
+            KleePck.Path("klee/powers/lightning_fang.png")
+            ?? KleePck.Path("klee/powers/passion_overload.png"),
+        SturmUndDrangPower => KleePck.Path("klee/powers/sturm_und_drang.png")
+            ?? KleePck.Path("klee/powers/amp_reaction_up.png"),
+        FavonianFavorPower => KleePck.Path("klee/powers/favonian_favor.png")
+            ?? KleePck.Path("klee/powers/celestial_gift.png"),
         // Durin, Principle of Purity: his own talent icons (art gaps pass
         // 2026-10-18, art/plan.tsv power_purity_*), Binary Form's as fallback.
         PurityStrikePower => KleePck.Path("klee/powers/purity_strike.png")
@@ -250,8 +303,10 @@ internal static class KleePowerIcons
         PurityDarkPower => KleePck.Path("klee/powers/purity_dark.png")
             ?? KleePck.Path("klee/powers/witchs_flame.png"),
         SacramentalShowerPower =>
-            KleePck.Path("klee/powers/detonation_splash.png"),
-        BaronBunnyPower => KleePck.Path("klee/powers/detonation_splash.png"),
+            KleePck.Path("klee/powers/sacramental_shower.png")
+            ?? KleePck.Path("klee/powers/detonation_splash.png"),
+        BaronBunnyPower => KleePck.Path("klee/powers/baron_bunny.png")
+            ?? KleePck.Path("klee/powers/detonation_splash.png"),
         LightfallSwordPower =>
             KleePck.Path("klee/powers/shattering_pressure.png"),
         // THE INAZUMA ARM and its pool rework (2026-10-18): each companion
@@ -279,7 +334,8 @@ internal static class KleePowerIcons
         // Raiden's and Sara's shared next-Attack-is-Electro rider still
         // borrows (it belongs to no one character).
         NextAttackElectroPower =>
-            KleePck.Path("klee/powers/passion_overload.png"),
+            KleePck.Path("klee/powers/electro_rider.png")
+            ?? KleePck.Path("klee/powers/passion_overload.png"),
         PlaneOfEuthymiaPower => KleePck.Path("klee/powers/plane_of_euthymia.png")
             ?? KleePck.Path("klee/powers/celestial_gift.png"),
         RoyalDescentPower => KleePck.Path("klee/powers/royal_descent.png")
@@ -298,7 +354,8 @@ internal static class KleePowerIcons
         // borrow is easier to argue here than anywhere above: a stand-in wears
         // the Universal's own illustration (its row's `art_of:`), so its badge
         // borrows the icon that Universal's power already uses.
-        LionsFangPower => KleePck.Path("klee/powers/spark_per_turn.png"),
+        LionsFangPower => KleePck.Path("klee/powers/lions_fang.png")
+            ?? KleePck.Path("klee/powers/spark_per_turn.png"),
         // R252's fifth caretaker. Let the Show Begin♪ prints no power, so this
         // one takes the second half of the block's rule: the icon of the power
         // whose job the stand-in takes over, which is Noelle's I Got Your Back
@@ -311,14 +368,19 @@ internal static class KleePowerIcons
         // it replaces printed no power at all (Fischl's Nightrider, Sucrose's
         // Wind Spirit Creation), the icon of the arm power whose job the
         // stand-in takes over.
-        SinfulHexPower => KleePck.Path("klee/powers/oz_summon.png"),
-        MollisFavoniusPower => KleePck.Path("klee/powers/amp_reaction_up.png"),
-        LadderOfAscentPower => KleePck.Path("klee/powers/witchs_flame.png"),
+        SinfulHexPower => KleePck.Path("klee/powers/sinful_hex.png")
+            ?? KleePck.Path("klee/powers/oz_summon.png"),
+        MollisFavoniusPower => KleePck.Path("klee/powers/mollis_favonius.png")
+            ?? KleePck.Path("klee/powers/amp_reaction_up.png"),
+        LadderOfAscentPower => KleePck.Path("klee/powers/ladder_of_ascent.png")
+            ?? KleePck.Path("klee/powers/witchs_flame.png"),
         // KLEE'S COVEN PERSONALS (R236), same arm and same terms again: each
         // borrows the shipped icon of the power whose job it takes over, and
         // the four rows' own illustrations are deferred to the Balance stage.
-        HexhunterChimePower => KleePck.Path("klee/powers/amp_reaction_up.png"),
-        HeraldOfFrostPower => KleePck.Path("klee/powers/oz_summon.png"),
+        HexhunterChimePower => KleePck.Path("klee/powers/hexhunter_chime.png")
+            ?? KleePck.Path("klee/powers/amp_reaction_up.png"),
+        HeraldOfFrostPower => KleePck.Path("klee/powers/herald_of_frost.png")
+            ?? KleePck.Path("klee/powers/oz_summon.png"),
         // THE FURINA REFRAME'S RAPTUROUS APPLAUSE COPY, on the same terms as
         // every borrow above: the arm copy is the shipped clause at a halved
         // threshold, so it wears the shipped power's own sigil rather than
@@ -326,13 +388,15 @@ internal static class KleePowerIcons
         // R276 batch two: the Stage's five powers borrow the shipped Furina
         // sigil nearest their job, on the terms every borrow above takes.
         ThunderousApplausePower =>
-            KleePck.Path("furina/powers/standing_ovation.png"),
+            KleePck.Path("furina/powers/thunderous_applause.png")
+            ?? KleePck.Path("furina/powers/standing_ovation.png"),
         // THE SALON'S TAB (2026-10-05): the slice's three new powers borrow
         // the shipped Furina sigil nearest their job, on the same terms.
         SalonsEncorePower =>
             KleePck.Path("furina/powers/grand_salon.png"),
         UniversalRevelryPower =>
-            KleePck.Path("furina/powers/the_gallery_stirs.png"),
+            KleePck.Path("furina/powers/universal_revelry.png")
+            ?? KleePck.Path("furina/powers/the_gallery_stirs.png"),
         // THE RE-FOUNDING (2026-10-04): Rehearsal and its Rare source
         // borrow the gallery's sigil and Full House's neighbour, on the same
         // terms.
@@ -406,39 +470,54 @@ internal static class KleePowerIcons
         // THE SWEEP, SECOND SET (2026-10-14): borrowed sigils until the
         // powers get their own.
         ArkheInBalancePower =>
-            KleePck.Path("furina/powers/ousia_surge.png"),
-        ObjectionPower => KleePck.Path("furina/powers/masque_red_death.png"),
+            KleePck.Path("furina/powers/arkhe_in_balance.png")
+            ?? KleePck.Path("furina/powers/ousia_surge.png"),
+        ObjectionPower => KleePck.Path("furina/powers/objection.png")
+            ?? KleePck.Path("furina/powers/masque_red_death.png"),
         TrialByWaterPower =>
-            KleePck.Path("furina/powers/guest_neuvillette.png"),
+            KleePck.Path("furina/powers/trial_by_water.png")
+            ?? KleePck.Path("furina/powers/guest_neuvillette.png"),
         RainfallOverturePower =>
-            KleePck.Path("furina/powers/fountain_of_lucine.png"),
+            KleePck.Path("furina/powers/rainfall_overture.png")
+            ?? KleePck.Path("furina/powers/fountain_of_lucine.png"),
         CrowdFavoritePower =>
-            KleePck.Path("furina/powers/ousia_surge.png"),
-        PlotTwistPower => KleePck.Path("furina/powers/masque_red_death.png"),
+            KleePck.Path("furina/powers/crowd_favorite.png")
+            ?? KleePck.Path("furina/powers/ousia_surge.png"),
+        PlotTwistPower => KleePck.Path("furina/powers/plot_twist.png")
+            ?? KleePck.Path("furina/powers/masque_red_death.png"),
         MasqueRedDeathPower =>
             KleePck.Path("furina/powers/masque_red_death.png"),
         AncientSeaAuthorityPower =>
-            KleePck.Path("furina/powers/guest_neuvillette.png"),
+            KleePck.Path("klee/powers/ancient_sea_authority.png")
+            ?? KleePck.Path("furina/powers/guest_neuvillette.png"),
         CannonFireSupportPower =>
-            KleePck.Path("furina/powers/guest_navia.png"),
-        NightVigilPower => KleePck.Path("furina/powers/guest_clorinde.png"),
+            KleePck.Path("klee/powers/cannon_fire_support.png")
+            ?? KleePck.Path("furina/powers/guest_navia.png"),
+        NightVigilPower => KleePck.Path("klee/powers/night_vigil.png")
+            ?? KleePck.Path("furina/powers/guest_clorinde.png"),
         // THE FONTAINE POOL REWORK (2026-10-19): each new Power wears its
         // character's guest-star badge; Emilie has none and borrows the cast's.
-        GrinMalkinHatPower => KleePck.Path("furina/powers/guest_lyney.png"),
+        GrinMalkinHatPower => KleePck.Path("klee/powers/grin_malkin_hat.png")
+            ?? KleePck.Path("furina/powers/guest_lyney.png"),
         ReboundHydrotherapyPower =>
-            KleePck.Path("furina/powers/guest_sigewinne.png"),
+            KleePck.Path("klee/powers/rebound_hydrotherapy.png")
+            ?? KleePck.Path("furina/powers/guest_sigewinne.png"),
         ChillingPenaltyPower =>
-            KleePck.Path("furina/powers/guest_wriothesley.png"),
+            KleePck.Path("klee/powers/chilling_penalty.png")
+            ?? KleePck.Path("furina/powers/guest_wriothesley.png"),
         AromaticExplicationPower =>
-            KleePck.Path("furina/powers/guest_cast.png"),
+            KleePck.Path("klee/powers/aromatic_explication.png")
+            ?? KleePck.Path("furina/powers/guest_cast.png"),
         TheMasqueradePower =>
-            KleePck.Path("furina/powers/fortissimo_guard.png"),
+            KleePck.Path("furina/powers/the_masquerade.png")
+            ?? KleePck.Path("furina/powers/fortissimo_guard.png"),
         LeadingLadyPower => KleePck.Path("furina/powers/leading_role.png"),
         FullHousePower => KleePck.Path("furina/powers/supporting_cast.png"),
         CrescendoPower => KleePck.Path("furina/powers/rising_ovation.png"),
         EnsembleCastPower => KleePck.Path("furina/powers/guest_cast.png"),
         GrandEntrancePower => KleePck.Path("furina/powers/center_stage.png"),
-        HighStakesPower => KleePck.Path("furina/powers/courtroom_drama.png"),
+        HighStakesPower => KleePck.Path("furina/powers/high_stakes.png")
+            ?? KleePck.Path("furina/powers/courtroom_drama.png"),
         HymnOfRenewalPower => KleePck.Path("furina/powers/stage_lights.png"),
         PneumaTidesPower => KleePck.Path("furina/powers/ovation_trickle.png"),
         PrimaDonnaPower =>
@@ -467,34 +546,43 @@ internal static class KleePowerIcons
         // borrow above takes -- the Bomb for the two that set Klee's Bombs
         // off, the Stage's board for the lead that shields an ally, an
         // ovation for the crowd, and the Casket's for the Plan payoff.
-        PassTheMatchPower => KleePck.Path("klee/powers/bomb.png"),
-        KnightsOfFavoniusPower => KleePck.Path("klee/powers/bomb_damage_up.png"),
+        PassTheMatchPower => KleePck.Path("klee/powers/pass_the_match.png")
+            ?? KleePck.Path("klee/powers/bomb.png"),
+        KnightsOfFavoniusPower => KleePck.Path("klee/powers/knights_of_favonius.png")
+            ?? KleePck.Path("klee/powers/bomb_damage_up.png"),
         SangonomiyasCounselPower =>
             KleePck.Path("kokomi/powers/kurages_oath.png"),
         // The second batch (review/active/coop-concepts-2026-09-27.md), on
         // the same borrowing terms: the Mine's shred wears the Bomb's
         // Vulnerable sigil, the energy gift the reaction-energy one, the
         // toast a spotlight, the crowd an ovation.
-        ShrapnelPower => KleePck.Path("klee/powers/detonation_vuln.png"),
+        ShrapnelPower => KleePck.Path("klee/powers/shrapnel.png")
+            ?? KleePck.Path("klee/powers/detonation_vuln.png"),
         SparksForEveryonePower =>
-            KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
+            KleePck.Path("klee/powers/sparks_for_everyone.png")
+            ?? KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
         // Varka's co-op five (2026-10-13), on the same borrowing terms:
         // Windward Flank's shred wears Shrapnel's, West Wind's Blessing's
         // energy gift Sparks for Everyone's, and Comrades' Oath gain
         // Stormward Stance's (the Oath badge the expansion borrows).
-        WindwardFlankPower => KleePck.Path("klee/powers/detonation_vuln.png"),
+        WindwardFlankPower => KleePck.Path("varka/powers/windward_flank.png")
+            ?? KleePck.Path("klee/powers/detonation_vuln.png"),
         WestWindsBlessingPower =>
-            KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
+            KleePck.Path("varka/powers/west_winds_blessing.png")
+            ?? KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
         ComradesOfTheExpeditionPower =>
-            KleePck.Path("varka/powers/stormward_stance.png"),
+            KleePck.Path("varka/powers/comrades_of_the_expedition.png")
+            ?? KleePck.Path("varka/powers/stormward_stance.png"),
         // Klee final pass (2026-10-02): Cover Your Ears!'s this-turn Strength
         // loss on an enemy borrows the Bomb's Vulnerable sigil, the badge
         // Shrapnel's enemy debuff already wears. Its own art stays owed.
         ProtoKoCoverYourEarsPower =>
-            KleePck.Path("klee/powers/detonation_vuln.png"),
+            KleePck.Path("klee/powers/cover_your_ears.png")
+            ?? KleePck.Path("klee/powers/detonation_vuln.png"),
         // Amber, Explosive Puppet's this-turn loss: the same borrowed badge.
         ProtoMcAmberExplosivePuppetPower =>
-            KleePck.Path("klee/powers/detonation_vuln.png"),
+            KleePck.Path("klee/powers/explosive_puppet.png")
+            ?? KleePck.Path("klee/powers/detonation_vuln.png"),
         // Raiden's Musou no Hitotachi (2026-10-19, Baleful Omen's power and its
         // talent icon carried over): the icon since
         // the power and relic icon pass, the same borrowed badge as fallback.
@@ -515,25 +603,32 @@ internal static class KleePowerIcons
         CryoOathPower => KleePck.Path("varka/powers/cryo_wind.png"),
         ElectroOathPower => KleePck.Path("varka/powers/electro_wind.png"),
         UnswornOathPower =>
-            KleePck.Path("varka/powers/converging_winds.png"),
+            KleePck.Path("varka/powers/unsworn_oath.png")
+            ?? KleePck.Path("varka/powers/converging_winds.png"),
         StormwardStancePower =>
             KleePck.Path("varka/powers/stormward_stance.png"),
         ConvergingWindsPower =>
             KleePck.Path("varka/powers/converging_winds.png"),
         BoreasUnboundPower => KleePck.Path("varka/powers/boreas_unbound.png"),
-        DawnWindsMarchPower => KleePck.Path("varka/powers/boreas_unbound.png"),
+        DawnWindsMarchPower => KleePck.Path("varka/powers/dawn_winds_march.png")
+            ?? KleePck.Path("varka/powers/boreas_unbound.png"),
         SwornBrotherhoodPower =>
-            KleePck.Path("varka/powers/converging_winds.png"),
+            KleePck.Path("varka/powers/knight_of_boreas.png")
+            ?? KleePck.Path("varka/powers/converging_winds.png"),
         SwornBrotherhoodCurrentPower =>
-            KleePck.Path("varka/powers/converging_winds.png"),
-        VarkaBaronBunnyPower => KleePck.Path("varka/powers/pyro_wind.png"),
-        GrandMastersOrderPower => KleePck.Path("klee/powers/study_buddy.png"),
+            KleePck.Path("varka/powers/knight_of_boreas.png")
+            ?? KleePck.Path("varka/powers/converging_winds.png"),
+        VarkaBaronBunnyPower => KleePck.Path("varka/powers/baron_bunny.png")
+            ?? KleePck.Path("varka/powers/pyro_wind.png"),
+        GrandMastersOrderPower => KleePck.Path("varka/powers/grand_masters_order.png")
+            ?? KleePck.Path("klee/powers/study_buddy.png"),
         // THE EXPANSION (2026-10-01): no new art for a prototype, so each
         // borrows the varka badge nearest its rule -- an element Power its
         // element's Vision, a Swirl reader Converging Winds', a Block or
         // Oath Power Stormward Stance's, an element-change Power Boreas
         // Unbound's, a Knight Power Study Buddy's (Grand Master's Order's).
-        StaticFieldPower => KleePck.Path("varka/powers/electro_wind.png"),
+        StaticFieldPower => KleePck.Path("varka/powers/static_field.png")
+            ?? KleePck.Path("varka/powers/electro_wind.png"),
         // YAE MIKO (art pass 2026-10-14): her own badges, art/plan.tsv's
         // power_yae_ rows (her talent and constellation icons). Each keeps
         // its old borrowed badge as the fallback, so a pck built before the
@@ -560,7 +655,8 @@ internal static class KleePowerIcons
         // badge, the nearest rule, until its art lands. (Fallen Petals'
         // two powers left when it became a Skill; the four Rite badges left
         // with the Rite, shrine r2.)
-        SerialNovelPower => KleePck.Path("yae/powers/editor_in_chief.png")
+        SerialNovelPower => KleePck.Path("yae/powers/serial_novel.png")
+            ?? KleePck.Path("yae/powers/editor_in_chief.png")
             ?? KleePck.Path("varka/powers/electro_wind.png"),
         // The pool to 78 (2026-10-15) and the refill: their own badges since
         // the art gaps pass (2026-10-18, art/plan.tsv power_yae_*), each with
@@ -595,35 +691,53 @@ internal static class KleePowerIcons
             ?? KleePck.Path("yae/powers/serialization.png")
             ?? KleePck.Path("klee/powers/passion_overload.png"),
         UnwaveringBannerPower =>
-            KleePck.Path("varka/powers/stormward_stance.png"),
-        CycleOfSeasonsPower => KleePck.Path("varka/powers/boreas_unbound.png"),
+            KleePck.Path("varka/powers/unwavering_banner.png")
+            ?? KleePck.Path("varka/powers/stormward_stance.png"),
+        CycleOfSeasonsPower => KleePck.Path("varka/powers/cycle_of_seasons.png")
+            ?? KleePck.Path("varka/powers/boreas_unbound.png"),
         // Varka defence (2026-10-01): Cycle of Seasons' Block twin.
         WindborneResolvePower =>
-            KleePck.Path("varka/powers/boreas_unbound.png"),
-        EyeWallPower => KleePck.Path("varka/powers/converging_winds.png"),
+            KleePck.Path("varka/powers/windborne_resolve.png")
+            ?? KleePck.Path("varka/powers/boreas_unbound.png"),
+        EyeWallPower => KleePck.Path("varka/powers/eye_wall.png")
+            ?? KleePck.Path("varka/powers/converging_winds.png"),
         AssemblyAtTheCathedralPower =>
-            KleePck.Path("klee/powers/study_buddy.png"),
-        WildfireOathPower => KleePck.Path("varka/powers/pyro_wind.png"),
+            KleePck.Path("varka/powers/assembly_at_the_cathedral.png")
+            ?? KleePck.Path("klee/powers/study_buddy.png"),
+        WildfireOathPower => KleePck.Path("varka/powers/wildfire_oath.png")
+            ?? KleePck.Path("varka/powers/pyro_wind.png"),
         // Pyro paper 2 (2026-10-12): Ember Cleave's Strength this turn and
         // Stoke the Flames' next Pyro Attack borrow Pyro's Vision badge.
-        EmberCleavePower => KleePck.Path("varka/powers/pyro_wind.png"),
-        StokeTheFlamesPower => KleePck.Path("varka/powers/pyro_wind.png"),
-        RetaliatingTidePower => KleePck.Path("varka/powers/hydro_wind.png"),
-        AbsoluteZeroPower => KleePck.Path("varka/powers/cryo_wind.png"),
+        EmberCleavePower => KleePck.Path("varka/powers/ember_cleave.png")
+            ?? KleePck.Path("varka/powers/pyro_wind.png"),
+        StokeTheFlamesPower => KleePck.Path("varka/powers/stoke_the_flames.png")
+            ?? KleePck.Path("varka/powers/pyro_wind.png"),
+        RetaliatingTidePower => KleePck.Path("varka/powers/retaliating_tide.png")
+            ?? KleePck.Path("varka/powers/hydro_wind.png"),
+        AbsoluteZeroPower => KleePck.Path("varka/powers/absolute_zero.png")
+            ?? KleePck.Path("varka/powers/cryo_wind.png"),
         OathUntoDeathPower =>
-            KleePck.Path("varka/powers/stormward_stance.png"),
-        WolfpackPower => KleePck.Path("varka/powers/boreas_unbound.png"),
+            KleePck.Path("varka/powers/azure_fangs_oath.png")
+            ?? KleePck.Path("varka/powers/stormward_stance.png"),
+        WolfpackPower => KleePck.Path("varka/powers/lupical.png")
+            ?? KleePck.Path("varka/powers/boreas_unbound.png"),
         // His Ancient (the Varka review, 2026-10-12): the Oath badge's
         // nearest shape, Stormward Stance's.
         AllFourWindsPower =>
-            KleePck.Path("varka/powers/stormward_stance.png"),
+            KleePck.Path("varka/powers/all_four_winds.png")
+            ?? KleePck.Path("varka/powers/stormward_stance.png"),
         OathboundAegisPower =>
-            KleePck.Path("varka/powers/stormward_stance.png"),
-        WeathervanePower => KleePck.Path("varka/powers/boreas_unbound.png"),
-        TwinGalesPower => KleePck.Path("varka/powers/converging_winds.png"),
+            KleePck.Path("varka/powers/oathbound_aegis.png")
+            ?? KleePck.Path("varka/powers/stormward_stance.png"),
+        WeathervanePower => KleePck.Path("varka/powers/weathervane.png")
+            ?? KleePck.Path("varka/powers/boreas_unbound.png"),
+        TwinGalesPower => KleePck.Path("varka/powers/twin_gales.png")
+            ?? KleePck.Path("varka/powers/converging_winds.png"),
         EyeOfStormterrorPower =>
-            KleePck.Path("varka/powers/converging_winds.png"),
-        TheOrderAnswersPower => KleePck.Path("klee/powers/study_buddy.png"),
+            KleePck.Path("varka/powers/eye_of_stormterror.png")
+            ?? KleePck.Path("varka/powers/converging_winds.png"),
+        TheOrderAnswersPower => KleePck.Path("varka/powers/the_order_answers.png")
+            ?? KleePck.Path("klee/powers/study_buddy.png"),
         // Companion summons/auras. These four had NO case at all and fell to
         // `_ => null`, i.e. the base-game placeholder -- the gap the 2026-07-24
         // sweep found from Oz and Solar Isotoma. Wiring the paths ahead of the
@@ -636,7 +750,8 @@ internal static class KleePowerIcons
         // no case at all and rendered the base-game placeholder.
         ReplayNextCompanionPower => KleePck.Path("klee/powers/study_buddy.png"),
         AttackUpThisTurnPower => KleePck.Path("klee/powers/fantastic_voyage.png"),
-        NextAttackUpPower => KleePck.Path("klee/powers/passion_overload.png"),
+        NextAttackUpPower => KleePck.Path("klee/powers/vanguards_valor.png")
+            ?? KleePck.Path("klee/powers/passion_overload.png"),
         FrozenPower => KleePck.Path("klee/powers/frozen.png"),
 
         // FURINA. This block used to route all of her powers at KLEE textures
