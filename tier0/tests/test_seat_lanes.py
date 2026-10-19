@@ -360,3 +360,43 @@ def test_lane_zero_and_the_real_profile_are_never_written(tmp_path,
                               appdata=tmp_path / "lane", label="lane5")
     assert instances.enable_lane_mods(real) == []
     assert path.read_bytes() == before
+
+
+def test_a_lane_switches_off_every_mod_outside_the_allowed_three(
+        tmp_path, monkeypatch):
+    """The first newcomer round (2026-10-19): a Workshop subscription the
+    lane's list had never seen (RitsuLib) loaded in all five lanes. Every mod
+    on disk outside BaseLib, the bridge and the kits is listed OFF."""
+    monkeypatch.setenv("APPDATA", str(tmp_path / "real"))
+    path = _settings(tmp_path, [
+        {"id": "BaseLib", "is_enabled": True, "source": "steam_workshop"},
+        {"id": "klee", "is_enabled": True, "source": "mods_directory"},
+        {"id": "STS2_MCP", "is_enabled": True, "source": "mods_directory"},
+        {"id": "PengoTarot", "is_enabled": True, "source": "steam_workshop"}])
+    game = tmp_path / "steamapps" / "common" / "Slay the Spire 2"
+    for folder, manifest in (
+            (game / "mods" / "klee", {"id": "klee", "has_dll": True}),
+            (game / "mods" / "quick_fingers",
+             {"id": "quick_fingers", "has_dll": True}),
+            (tmp_path / "steamapps" / "workshop" / "content" / "2868840"
+             / "1" / "BaseLib", {"id": "BaseLib", "has_dll": True}),
+            (tmp_path / "steamapps" / "workshop" / "content" / "2868840"
+             / "2", {"id": "STS2-RitsuLib", "has_dll": True})):
+        folder.mkdir(parents=True)
+        (folder / "m.json").write_text(json.dumps(manifest), encoding="utf-8")
+    (game / "mods" / "quick_fingers" / "settings.json").write_text(
+        json.dumps({"seed": 1}), encoding="utf-8")
+    inst = instances.Instance(game_dir=game, port=15531,
+                              appdata=tmp_path / "lane", label="lane5")
+    changed = instances.enable_lane_mods(inst)
+    assert changed == [(path, ["-STS2-RitsuLib", "-quick_fingers",
+                               "-PengoTarot"])]
+    rows = {m["id"]: (m["is_enabled"], m["source"])
+            for m in json.loads(path.read_bytes())["mod_settings"]["mod_list"]}
+    assert rows == {"BaseLib": (True, "steam_workshop"),
+                    "klee": (True, "mods_directory"),
+                    "STS2_MCP": (True, "mods_directory"),
+                    "PengoTarot": (False, "steam_workshop"),
+                    "STS2-RitsuLib": (False, "steam_workshop"),
+                    "quick_fingers": (False, "mods_directory")}
+    assert instances.enable_lane_mods(inst) == []          # idempotent
