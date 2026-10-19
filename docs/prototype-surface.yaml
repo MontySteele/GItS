@@ -5228,10 +5228,10 @@
 
 - {id: proto_ym_hold_the_presses, name: "Hold the Presses", character: yae,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: uncommon,
-   # The base game's Equilibrium rider (RetainHandPower).
-   description: "Gain 6 [gold]Block[/gold]. Retain your hand this turn.",
-   effects: [{op: block, amount: 6},
+   cost: 2, type: skill, rarity: uncommon,
+   # Equilibrium's rider and price (RetainHandPower); 1 Energy until 2026-10-18.
+   description: "Gain 12 [gold]Block[/gold]. Retain your hand this turn.",
+   effects: [{op: block, amount: 12},
              {op: yae, kind: retain_hand}],
    upgrade: {block: 3}}
 
@@ -5434,9 +5434,9 @@
 
 - {id: proto_ym_forbidden_art_daisesshou, name: "Forbidden Art: Daisesshou", character: yae,
    authored_by: [claude],
-   cost: 2, type: attack, rarity: rare,
+   cost: 0, type: attack, rarity: rare,
    # Each Sakura acts once as it withers (its Last Bloom), then ONE hit to
-   # ALL of 9 [12] for each that withered.
+   # ALL of 9 [12] for each that withered. 0 cost since 2026-10-18.
    description: "Every [gold]Sakura[/gold] withers. Deal {YmPer:diff()} [gold]Electro[/gold] damage to ALL enemies for each one.",
    effects: [{op: yae, kind: daisesshou, per: 9, target: all_enemies}],
    upgrade: {yae_per: 3}}
