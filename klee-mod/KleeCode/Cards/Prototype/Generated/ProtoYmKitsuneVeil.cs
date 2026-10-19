@@ -51,7 +51,7 @@ public sealed class ProtoYmKitsuneVeil : CustomCardModel, ICharacterCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(5m, ValueProp.Move),
+            new BlockVar(8m, ValueProp.Move),
             new DynamicVar("YmAmount", 2m)
         };
 

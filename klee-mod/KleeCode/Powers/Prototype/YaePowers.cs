@@ -425,9 +425,9 @@ public sealed class EditorInChiefPower : PowerModel, ILocalizationProvider
 //  tier0/engine/yae_shrine.py.
 // ---------------------------------------------------------------------------
 
-/// <summary>Scattered Blossoms: "Whenever a Sakura withers, draw 1 card."
-/// Paid by <see cref="YaeShrine.Withered"/>, one card per stack per Sakura
-/// that withered.</summary>
+/// <summary>Scattered Blossoms: "Whenever a Sakura withers, draw 2 cards."
+/// Paid by <see cref="YaeShrine.Withered"/>, its Amount (2 a copy since the
+/// pool sweep, 2026-10-18) per Sakura that withered.</summary>
 public sealed class EnlightenedBlessingPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
@@ -607,7 +607,9 @@ public sealed class HuntingGazePower : PowerModel, ILocalizationProvider
 /// <summary>Eternity: "Your Sakura no longer wither when their turns run
 /// out." While she has it no timer ticks (<see cref="YaeShrineLedger.Tick"/>);
 /// a Sakura still withers to Fallen Petals, Replanting, Daisesshou or a
-/// full-shrine plant of another kind.</summary>
+/// full-shrine plant of another kind. Since the pool sweep (2026-10-18)
+/// "Their Levels count twice": every Level an effect reads goes through
+/// <see cref="YaeShrine.EffectiveLevel"/>; the stored Level is not doubled.</summary>
 public sealed class EternityPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
@@ -615,7 +617,7 @@ public sealed class EternityPower : PowerModel, ILocalizationProvider
         ("title", "Eternity"),
         ("description",
             "Your [gold]Sakura[/gold] no longer wither when their turns run "
-          + "out."),
+          + "out. Their Levels count twice."),
     };
 
     public override PowerType Type => PowerType.Buff;

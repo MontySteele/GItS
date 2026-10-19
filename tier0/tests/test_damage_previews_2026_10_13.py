@@ -75,6 +75,6 @@ def test_no_number_moved():
                    "bonus_if: {if: companion_played_this_turn, amount: 6}",
                    "amount_formula: {base: 0, per: 3, count: "
                    "weak_vuln_stacks_on_target}",
-                   "{op: damage, amount: 5, target: all_enemies,\n"
+                   "{op: damage, amount: 7, target: all_enemies,\n"
                    "              times: chain_plans_held_plus_one}"):
         assert needle in sheet, needle

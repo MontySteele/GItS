@@ -216,17 +216,17 @@ def arm(monkeypatch):
 # --- the Rare pass (2026-10-04) ------------------------------------------------
 
 def test_shoal_of_spears_is_one_hit_per_plan_waiting(overhaul):
-    """One hit of 5, plus one more per Plan waiting (the floor is the Kokomi
+    """One hit of 7 (the pool sweep, 2026-10-18), plus one more per Plan waiting (the floor is the Kokomi
     level pass, 2026-10-12), so her Strength counts on each hit; with no Plan
     waiting it still hits once."""
     st = kokomi_state(enemies=[make_enemy(hp=300, intents=QUIET),
                                make_enemy(hp=300, intents=QUIET)])
     st.player.powers["strength"] = 2
     _play(st, "proto_kk_shoal_of_spears")
-    assert [e.hp for e in st.enemies] == [300 - 7, 300 - 7]
+    assert [e.hp for e in st.enemies] == [300 - 9, 300 - 9]
     for i in range(3):
         kokomi_plan.schedule(st, plan_card(
             [{"op": "energy", "amount": 1}], cid=f"proto_kk_w{i}"))
     _play(st, "proto_kk_shoal_of_spears")
-    assert [e.hp for e in st.enemies] == [300 - 7 - 4 * 7, 300 - 7 - 4 * 7]
+    assert [e.hp for e in st.enemies] == [300 - 9 - 4 * 9, 300 - 9 - 4 * 9]
 

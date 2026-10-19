@@ -715,12 +715,13 @@ def test_hyouka_hits_all_and_weakens_each(overhaul):
     assert [e.aura for e in st.enemies] == ["cryo", "cryo"]
 
 
-def test_ooyoroi_keeps_up_to_six_block_through_the_clear(overhaul):
+def test_ooyoroi_keeps_up_to_eight_block_through_the_clear(overhaul):
+    # 6 [9] -> 8 [12], the pool sweep (2026-10-18, sec.3 pick 4).
     st = make_state()
     _play(st, "proto_mi_thoma_crimson_ooyoroi")
-    assert st.player.powers["mi_crimson_ooyoroi"] == 6
+    assert st.player.powers["mi_crimson_ooyoroi"] == 8
     st.player.block = 10
-    assert effects.ooyoroi_keeps(st) == 6
+    assert effects.ooyoroi_keeps(st) == 8
     st.player.block = 4
     assert effects.ooyoroi_keeps(st) == 4
     assert effects.block_clear_keeps(st) == 4
@@ -815,7 +816,7 @@ def test_windmuster_hits_swirls_and_draws(overhaul):
     st = make_state(enemies=[make_enemy(hp=90)])
     _hand(st)
     _play(st, "proto_mi_heizou_windmuster_kick")
-    assert st.enemies[0].hp == 78
+    assert st.enemies[0].hp == 76   # 14 since the pool sweep (2026-10-18)
     assert len(st.player.hand) == 1
 
 
@@ -910,7 +911,7 @@ def test_the_rare_powers_upgrade_as_listed(overhaul):
     assert _up("proto_mi_kazuha_chihayaburu").cost == 0
     assert _up("proto_mi_wanderer_hanega").cost == 0
     assert _up("proto_mi_itto_royal_descent").effects[0]["amount"] == 9
-    assert _up("proto_mi_thoma_crimson_ooyoroi").effects[0]["amount"] == 9
+    assert _up("proto_mi_thoma_crimson_ooyoroi").effects[0]["amount"] == 12
 
 
 # ---------------------------------------------------------------------------

@@ -67,7 +67,7 @@ public sealed class ProtoMiHeizouWindmusterKick : CustomCardModel, IElementalCar
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(12m),
+            new CalculationBaseVar(14m),
             new ExtraDamageVar(1m),
             new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card)),
             new CardsVar(1)

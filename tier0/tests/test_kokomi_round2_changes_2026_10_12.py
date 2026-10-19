@@ -37,7 +37,7 @@ def _amount(c):
     # (2026-10-13): it makes Wards now (`test_kokomi_payoff_pass`).
     # Grand Strategist 4 [6] since the pool overhaul (was 7 [10]).
     ("proto_kk_grand_strategist", 6, 8),   # Kokomi review r6 item 4
-    ("proto_kk_shoal_of_spears", 5, 6),
+    ("proto_kk_shoal_of_spears", 7, 9),   # pool sweep 2026-10-18
 ])
 def test_the_retuned_numbers(cid, base, up):
     assert (_amount(_row(cid)), _amount(_up(cid))) == (base, up)

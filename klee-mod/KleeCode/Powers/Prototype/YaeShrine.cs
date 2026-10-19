@@ -446,8 +446,10 @@ public sealed class YaeShrineLedger
     }
 
     /// <summary>Sesshou Fang (the refill): does any Sakura, any kind, stand
-    /// at <paramref name="level"/> or higher? PURE.</summary>
-    public bool AnyAtLevel(int level) => _sakura.Any(s => s.Level >= level);
+    /// at <paramref name="level"/> or higher? With <paramref name="eternal"/>
+    /// (Eternity) its Level counts twice. PURE.</summary>
+    public bool AnyAtLevel(int level, bool eternal = false) =>
+        _sakura.Any(s => YaeLaw.EffectiveLevel(s.Level, eternal) >= level);
 
     /// <summary>Does this kind deal damage (Edict, the Lure)? PURE.</summary>
     public static bool DealsDamage(YaeSakuraKind kind) => kind != YaeSakuraKind.Kitsune;
@@ -642,7 +644,7 @@ public static class YaeShrine
 
     /// <summary>
     /// SCATTERED BLOSSOMS (the pool to 78): "Whenever a Sakura withers,
-    /// draw 1 card." Paid once per Sakura that withered, per stack: a timer
+    /// draw 2 cards" (1 until the pool sweep, 2026-10-18). Paid once per Sakura that withered, per stack: a timer
     /// run out, Fallen Petals, Replanting, Daisesshou, a full-shrine plant
     /// that replaced the oldest. Sim twin: <c>yae_shrine._withered</c>.
     /// </summary>
@@ -654,6 +656,15 @@ public static class YaeShrine
         await CardPileCmd.Draw(choiceContext, per * n, player);
     }
 
+    /// <summary>Does she have Eternity ("Their Levels count twice")?</summary>
+    public static bool Eternal(Creature? yae) =>
+        yae != null && yae.GetPowerAmount<EternityPower>() > 0;
+
+    /// <summary>The Level an effect reads off <paramref name="sakura"/>:
+    /// doubled under Eternity (<see cref="YaeLaw.EffectiveLevel"/>).</summary>
+    public static int EffectiveLevel(Creature? yae, YaeSakura sakura) =>
+        YaeLaw.EffectiveLevel(sakura.Level, Eternal(yae));
+
     /// <summary>Is this enemy Weak (Edict's and Kitsune Pounce's read)?
     /// </summary>
     public static bool IsWeak(Creature? target) =>
@@ -662,7 +673,7 @@ public static class YaeShrine
     /// <summary>The size of <paramref name="sakura"/>'s action, before Edict.
     /// </summary>
     public static int Size(Creature yae, YaeSakura sakura) =>
-        YaeShrineLedger.ActSize(sakura.Kind, sakura.Level, sakura.Annotations)
+        YaeShrineLedger.ActSize(sakura.Kind, EffectiveLevel(yae, sakura), sakura.Annotations)
         // Electroculus (the Yae pass, 2026-10-16): "Your Sakura's strikes deal
         // 1 more damage", added to the strike's size before Edict and Fox
         // Fire; a Foxfire's hit on ALL counts, a Kitsune's Block does not.
@@ -908,21 +919,30 @@ public static class YaeShrine
     /// <summary>
     /// FORBIDDEN ART: DAISESSHOU (the pool to 78): "Every Sakura withers."
     /// Each acts once as it withers (its Last Bloom), oldest first, Deadline
-    /// Extension or not. Returns how many withered.
+    /// Extension or not. Returns the Levels the withered Sakura had, each
+    /// read before it acts and withers (the pool sweep, 2026-10-18,
+    /// <c>review/active/pool-sweep-2026-10-18.md</c> sec.1). Sim twin:
+    /// <c>yae_shrine.wither_all</c>.
     /// </summary>
     public static async Task<int> WitherAll(PlayerChoiceContext choiceContext, Creature? yae)
     {
         if (yae == null || !Live(yae)) return 0;
         var ledger = YaeShrineLedger.For(yae);
         var n = 0;
+        var levels = 0;
         foreach (var sakura in ledger.Standing.ToList())
         {
+            var level = EffectiveLevel(yae, sakura);
             await Act(choiceContext, yae, sakura);
-            if (ledger.Wither(sakura)) n++;
+            if (ledger.Wither(sakura))
+            {
+                n++;
+                levels += level;
+            }
         }
         await Withered(choiceContext, yae, n);
         await SakuraBadge.Sync(choiceContext, yae);
-        return n;
+        return levels;
     }
 
     /// <summary>
@@ -1193,11 +1213,11 @@ public static class YaeShrineFace
     /// <summary>A Tenko card's live clause.</summary>
     public static string TenkoLine(CardModel? card) =>
         Owner(card) is { } yae
-            ? TenkoWords(Total(YaeShrineLedger.For(yae).Standing, YaeSakuraKind.Thunder)
+            ? TenkoWords(Total(YaeShrineLedger.For(yae).Standing, YaeSakuraKind.Thunder, YaeShrine.Eternal(yae))
                          + Bonus(yae, YaeSakuraKind.Thunder),
-                         Total(YaeShrineLedger.For(yae).Standing, YaeSakuraKind.Foxfire)
+                         Total(YaeShrineLedger.For(yae).Standing, YaeSakuraKind.Foxfire, YaeShrine.Eternal(yae))
                          + Bonus(yae, YaeSakuraKind.Foxfire),
-                         Total(YaeShrineLedger.For(yae).Standing, YaeSakuraKind.Kitsune))
+                         Total(YaeShrineLedger.For(yae).Standing, YaeSakuraKind.Kitsune, YaeShrine.Eternal(yae)))
             : "";
 
     /// <summary>Electroculus's +1 on each Sakura of a damage kind.</summary>
@@ -1206,10 +1226,13 @@ public static class YaeShrineFace
         * YaeShrineLedger.For(yae).Standing.Count(s => s.Kind == kind);
 
     /// <summary>What every Sakura of <paramref name="kind"/> would do,
-    /// summed, off the numbers alone. PURE.</summary>
-    public static int Total(IEnumerable<YaeSakura> standing, YaeSakuraKind kind) =>
+    /// summed, off the numbers alone; under Eternity each Level counts
+    /// twice. PURE.</summary>
+    public static int Total(IEnumerable<YaeSakura> standing, YaeSakuraKind kind,
+                            bool eternal = false) =>
         standing.Where(s => s.Kind == kind)
-            .Sum(s => YaeShrineLedger.ActSize(s.Kind, s.Level, s.Annotations));
+            .Sum(s => YaeShrineLedger.ActSize(s.Kind, YaeLaw.EffectiveLevel(s.Level, eternal),
+                                              s.Annotations));
 
     /// <summary>The clause for each kind's sum, in kind order, zeros left
     /// out: " (Sakura: 8 damage, 4 to each enemy, 5 Block)"; all zero is the "no
@@ -1509,16 +1532,21 @@ public static class YaeCards
         YaeShrine.PlantUntilFull(choiceContext, card.Owner?.Creature,
                                  YaeAnnotationReach.Inherited(card));
 
-    /// <summary>Forbidden Art: Daisesshou: "Every Sakura withers. Deal 9
-    /// [12] Electro damage to ALL enemies for each one." ONE powered hit of
-    /// the card on every enemy, YmPer times the Sakura that withered; none
-    /// withered, no hit.</summary>
+    /// <summary>Forbidden Art: Daisesshou: "Every Sakura withers. Deal 3
+    /// [4] Electro damage to ALL enemies for each Level they had." ONE
+    /// powered hit of the card on every enemy, YmPer times the Levels the
+    /// withered Sakura had (the pool sweep, 2026-10-18); none withered, no
+    /// hit.</summary>
     public static async Task Daisesshou(PlayerChoiceContext choiceContext, CardModel card,
                                         CardPlay cardPlay)
     {
-        var n = await YaeShrine.WitherAll(choiceContext, card.Owner?.Creature);
-        await CardHitAll(choiceContext, card, cardPlay, Var(card, "YmPer") * n);
+        var levels = await YaeShrine.WitherAll(choiceContext, card.Owner?.Creature);
+        await CardHitAll(choiceContext, card, cardPlay, DaisesshouDamage(Var(card, "YmPer"), levels));
     }
+
+    /// <summary>Daisesshou's hit: <paramref name="per"/> for each Level the
+    /// withered Sakura had; 0 (no hit) when none withered. PURE.</summary>
+    public static int DaisesshouDamage(int per, int levels) => levels > 0 ? per * levels : 0;
 
     /// <summary>Offertory Box: "Gain [E] for each Sakura." (its upgrade's
     /// draw is the row's `add:`).</summary>
@@ -1550,9 +1578,12 @@ public static class YaeCards
 
     /// <summary>
     /// FALLEN PETALS (review r3, sec.4): "Your oldest Sakura withers (it acts
-    /// once, its Last Bloom). If one did, gain 1 Energy [and draw 1 card]."
-    /// The upgrade's draw is read off <c>IsUpgraded</c> (`yae_upgraded`).
+    /// once, its Last Bloom). If one did, gain 1 Energy and draw 1 [2]
+    /// cards." (the pool sweep, 2026-10-18: the base draws too). The
+    /// upgrade's second card is read off <c>IsUpgraded</c> (`yae_upgraded`).
     /// </summary>
+    public static int FallenPetalsDraw(bool upgraded) => upgraded ? 2 : 1;
+
     public static async Task FallenPetals(PlayerChoiceContext choiceContext,
                                           CardModel card, CardPlay cardPlay)
     {
@@ -1560,10 +1591,7 @@ public static class YaeCards
         if (owner?.Creature == null) return;
         if (!await YaeShrine.WitherOldest(choiceContext, owner.Creature)) return;
         await PlayerCmd.GainEnergy(1, owner);
-        if (card.IsUpgraded)
-        {
-            await CardPileCmd.Draw(choiceContext, 1, owner);
-        }
+        await CardPileCmd.Draw(choiceContext, FallenPetalsDraw(card.IsUpgraded), owner);
     }
 
     /// <summary>Second Printing (review r3, sec.3): "Put an Annotated card
@@ -1599,7 +1627,7 @@ public static class YaeCards
     {
         var yae = card.Owner?.Creature;
         var high = yae != null && YaeShrine.Live(yae)
-                   && YaeShrineLedger.For(yae).AnyAtLevel(YaeLaw.FangLevel);
+                   && YaeShrineLedger.For(yae).AnyAtLevel(YaeLaw.FangLevel, YaeShrine.Eternal(yae));
         return CardHit(choiceContext, card, cardPlay,
                        Var(card, "YmBase") + (high ? Var(card, "YmAmount") : 0));
     }

@@ -57,7 +57,7 @@ public sealed class ProtoKkShoalOfSpears : CustomCardModel, IElementalCard, ICha
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(5m, ValueProp.Move),
+            new DamageVar(7m, ValueProp.Move),
             new HitsTotalDamageVar(static card => KokomiPlan.ChainPlansHeld(card.Owner!.Creature!) + 1)
         };
 
@@ -84,6 +84,6 @@ public sealed class ProtoKkShoalOfSpears : CustomCardModel, IElementalCard, ICha
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Damage.UpgradeValueBy(1m);
+        DynamicVars.Damage.UpgradeValueBy(2m);
     }
 }

@@ -418,12 +418,12 @@ def test_fallen_petals_withers_the_oldest_now_and_pays_energy(yae):
     combat.play_card(st, c)
     assert [s.level for s in _led(st).sakura] == [3]     # the oldest went
     assert len(_strikes(st)) == 1 and _strikes(st)[0]["reason"] == "bloom"
-    assert st.player.energy == 1 and len(st.player.hand) == hand
+    assert st.player.energy == 1 and len(st.player.hand) == hand + 1  # draw 1 (pool sweep)
     up = loader.get_card(_ym("fallen_petals") + "+")
     st.player.hand.append(up)
     combat.play_card(st, up)
     assert not _led(st).sakura and st.player.energy == 2
-    assert len(st.player.hand) == hand + 1       # the upgrade's card
+    assert len(st.player.hand) == hand + 3       # the upgrade's 2 cards
 
 
 def test_a_plant_at_a_level_keeps_it_and_levels_no_other(yae):

@@ -51,12 +51,13 @@ def test_second_wave_names_the_plan_written_after_it_this_turn():
     assert _up("proto_kk_second_wave").effects[0]["amount"] == 9
 
 
-def test_bubble_ward_is_6_and_9():
+def test_bubble_ward_is_7_and_10():
+    # The pool sweep (2026-10-18): 6 [9] -> 7 [10].
     assert _face("proto_kk_bubble_ward") == (
-        "Gain 6 [gold]Block[/gold]. Add a [gold]Ward[/gold] to your "
+        "Gain 7 [gold]Block[/gold]. Add a [gold]Ward[/gold] to your "
         "[gold]Hand[/gold].")
-    assert _card("proto_kk_bubble_ward").effects[0]["amount"] == 6
-    assert _up("proto_kk_bubble_ward").effects[0]["amount"] == 9
+    assert _card("proto_kk_bubble_ward").effects[0]["amount"] == 7
+    assert _up("proto_kk_bubble_ward").effects[0]["amount"] == 10
 
 
 def test_albedo_deals_geo_to_all_per_attack():

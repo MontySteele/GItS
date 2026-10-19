@@ -30,7 +30,7 @@ public static class CompanionOverhaulLaw
 
     /// <summary>Nicole, Revelation: Theosis, for holding the line.
     /// Mirrors <c>C.MC_REVELATION_STRENGTH</c>.</summary>
-    public const int RevelationStrength = 2;
+    public const int RevelationStrength = 1;   // 2 until the pool sweep, 2026-10-18
 
     /// <summary>Lisa, Lightning Rose: Electro damage per end of turn.
     /// Mirrors <c>C.MC_LIGHTNING_ROSE_DMG</c>.</summary>

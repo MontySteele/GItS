@@ -192,8 +192,8 @@ def _translate(state, fx, card=None):
         # Review r3: the oldest acts once and withers, then 1 Energy.
         if n_sak:
             yield {"op": "energy", "amount": 1}
-            if fx.get("upgraded"):
-                yield {"op": "draw", "amount": 1}
+            # The pool sweep (2026-10-18): draw 1 [2].
+            yield {"op": "draw", "amount": 2 if fx.get("upgraded") else 1}
     elif kind == "second_printing":
         if any(Y.is_annotated(c) for c in state.player.discard_pile):
             yield {"op": "draw", "amount": 1}

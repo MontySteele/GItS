@@ -37,7 +37,7 @@ def _amounts(cid, where="effects", i=0):
 # ---- items 1-5: numbers ---------------------------------------------------
 
 def test_the_numbers_pass():
-    assert _amounts("proto_kk_watatsumi_drill") == (7, 10)
+    assert _amounts("proto_kk_watatsumi_drill") == (8, 11)   # pool sweep
     wake = loader.get_card("proto_kk_kurages_wake")
     assert (wake.effects[0]["amount"], wake.effects[0]["times"]) == (5, 2)
     assert _amounts("proto_kk_watchful_shoal") == (4, 6)

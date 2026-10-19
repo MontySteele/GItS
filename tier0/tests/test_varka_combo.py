@@ -352,7 +352,7 @@ def test_lions_fang_upgrade_is_a_cost_cut(varka):
     card = loader.get_card("proto_mc_jean_lions_fang")
     up = loader.get_card("proto_mc_jean_lions_fang+")
     assert (card.cost, up.cost) == (2, 1)
-    assert up.effects[0]["amount"] == card.effects[0]["amount"] == 8
+    assert up.effects[0]["amount"] == card.effects[0]["amount"] == 6   # pool sweep
 
 
 def test_four_winds_ascension_upgrade_is_a_cost_cut(varka):

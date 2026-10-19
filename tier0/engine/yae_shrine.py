@@ -552,13 +552,23 @@ def plant(state, n: int = 1, reason: str = "plant",
                    kind=kind, levels=[s.level for s in led.sakura])
 
 
+def effective_level(state, s: Sakura) -> int:
+    """ETERNITY (the pool sweep, 2026-10-18, review/active/pool-sweep-
+    2026-10-18.md sec.1): "Their Levels count twice." The Level an effect
+    READS, doubled while she has Eternity; the stored Level, gains and
+    carry-overs are not doubled. C# twin: `YaeShrine.EffectiveLevel`."""
+    eternal = _power(state.player, ETERNITY) > 0
+    return s.level * 2 if eternal else s.level
+
+
 def act_size(state, s: Sakura) -> int:
     """One action's size, before Edict: Thunder 1 + 2 per Level damage (the
     Sakura Levels paper), Foxfire 1 + Level to each enemy, Kitsune 2 + Level
     Block; a Red Ink Sakura's 3 adds to any kind (review r3)."""
     led = ledger(state.player)
     if SCALING == "level":
-        size = kind_base(s.kind) + kind_per_level(s.kind) * s.level
+        size = (kind_base(s.kind)
+                + kind_per_level(s.kind) * effective_level(state, s))
     else:
         size = (COUNT_TABLE[min(SAKURA_CAP, len(led.sakura))]
                 + led.shrine_bonus
@@ -907,7 +917,8 @@ def annotations_on_card(card) -> int:
 
 def _withered(state, n: int) -> None:
     """SCATTERED BLOSSOMS (the pool to 78): "Whenever a Sakura withers,
-    draw 1 card", per stack per Sakura. C# twin: `YaeShrine.Withered`."""
+    draw 2 cards" (the row's amount, 2 since the pool sweep 2026-10-18),
+    per stack per Sakura. C# twin: `YaeShrine.Withered`."""
     per = _power(state.player, ENLIGHTENED_BLESSING)
     if per > 0 and n > 0:
         state.emit("yae_enlightened_blessing", cards=per * n)
@@ -916,21 +927,27 @@ def _withered(state, n: int) -> None:
 
 def wither_all(state) -> int:
     """Forbidden Art: Daisesshou: every Sakura withers, each acting once
-    (its Last Bloom), oldest first. Returns how many."""
+    (its Last Bloom), oldest first. Returns the Levels the withered Sakura
+    had, each read before it acts (the pool sweep, 2026-10-18,
+    review/active/pool-sweep-2026-10-18.md sec.1). C# twin:
+    `YaeShrine.WitherAll`."""
     led = ledger(state.player)
     if led is None:
         return 0
     n = 0
+    levels = 0
     for s in list(led.sakura):
+        level = effective_level(state, s)
         act(state, s, "bloom")
         if s in led.sakura:
             led.sakura.remove(s)
             n += 1
+            levels += level
     if n:
         state.emit("yae_wither", count=n, standing=len(led.sakura),
                    reason="daisesshou")
     _withered(state, n)
-    return n
+    return levels
 
 
 def replant(state, higher: int, annotation: Optional[str] = None) -> None:
@@ -1724,8 +1741,7 @@ def op_yae(state, fx: dict, card) -> None:
         if wither_oldest(state):
             state.player.energy += 1
             state.emit("energy", amount=1)
-            if fx.get("upgraded"):
-                state.draw(1)
+            state.draw(2 if fx.get("upgraded") else 1)
     elif kind == "second_printing":
         second_printing(state, card, bool(fx.get("upgraded")))
     elif kind == "authors_copy":
@@ -1769,8 +1785,8 @@ def op_yae(state, fx: dict, card) -> None:
         if room > 0:
             plant(state, room, "narukami_bloom", annotation=inherited(card))
     elif kind == "daisesshou":
-        n = wither_all(state)
-        amount = fx["per"] * n
+        levels = wither_all(state)
+        amount = fx["per"] * levels
         if amount > 0:
             for e in list(state.living_enemies):
                 _card_hit(state, card, amount, target=e)
@@ -1792,7 +1808,8 @@ def op_yae(state, fx: dict, card) -> None:
         _card_hit(state, card, fx["amount"],
                   hits=barrage_hits(len(led.sakura)))
     elif kind == "level_strike":
-        high = any(s.level >= FANG_LEVEL for s in led.sakura)
+        high = any(effective_level(state, s) >= FANG_LEVEL
+                   for s in led.sakura)
         _card_hit(state, card, fx["base"] + (fx["amount"] if high else 0))
     elif kind == "strike_oldest_at":
         targets = effects._pick_targets(state, "enemy")

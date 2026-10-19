@@ -51,7 +51,7 @@ public sealed class ProtoKkBreakwater : CustomCardModel, ICharacterCard
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(6m),
+            new CalculationBaseVar(8m),
             new CalculationExtraVar(3m),
             new FoldedCalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => KokomiPlan.PlansHeld(card.Owner.Creature))
         };

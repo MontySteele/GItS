@@ -55,7 +55,7 @@ public sealed class ProtoMcJeanLionsFang : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Jean — Lion's Fang, Fair Protector"),
-        ("description", "At the start of your turn, if none of your [gold]Bombs[/gold] went off last turn, gain 8 [gold]Block[/gold] and draw 1 card."),
+        ("description", "At the start of your turn, if none of your [gold]Bombs[/gold] went off last turn, gain 6 [gold]Block[/gold] and draw 1 card."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -73,7 +73,7 @@ public sealed class ProtoMcJeanLionsFang : CustomCardModel, ICompanionCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<LionsFangPower>(choiceContext, Owner.Creature, 8, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<LionsFangPower>(choiceContext, Owner.Creature, 6, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()

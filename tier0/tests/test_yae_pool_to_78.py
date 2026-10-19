@@ -211,12 +211,30 @@ def test_replanting_withers_the_oldest_and_plants_its_kind_higher():
         (Y.KITSUNE, 4), (Y.THUNDER, 3)]
 
 
-def test_daisesshou_withers_all_and_hits_all_per_each():
+def test_daisesshou_withers_all_and_hits_all_per_level():
+    # The pool sweep (2026-10-18, review/active/pool-sweep-2026-10-18.md
+    # sec.1): 3 [4] to ALL per Level the withered Sakura had, read before
+    # they wither. Kitsune Sakura (their bloom is Block) at Levels 1, 2, 3.
     st = _state(2)
-    Y.plant(st, 2, kind=Y.KITSUNE)
+    Y.plant(st, 1, kind=Y.KITSUNE, level=1)
+    Y.plant(st, 1, kind=Y.KITSUNE, level=2)
+    Y.plant(st, 1, kind=Y.KITSUNE, level=3)
+    assert [s.level for s in _led(st).sakura] == [1, 2, 3]
     _play(st, "forbidden_art_daisesshou")
     assert not _led(st).sakura
     assert _hp(st) == [100 - 18, 100 - 18]
+    st = _state(2)
+    Y.plant(st, 1, kind=Y.KITSUNE, level=1)
+    Y.plant(st, 1, kind=Y.KITSUNE, level=2)
+    Y.plant(st, 1, kind=Y.KITSUNE, level=3)
+    _play(st, loader.get_card("proto_ym_forbidden_art_daisesshou+"))
+    assert _hp(st) == [100 - 24, 100 - 24]
+
+
+def test_daisesshou_on_an_empty_shrine_does_not_hit():
+    st = _state(2)
+    _play(st, "forbidden_art_daisesshou")
+    assert _hp(st) == [100, 100]
 
 
 def test_kitsune_shelter_and_veil():
@@ -316,3 +334,34 @@ def test_eternity_stops_the_timers():
     for _ in range(5):
         Y.turn_end(st)
     assert len(_led(st).sakura) == 1
+
+
+# --- the pool sweep (2026-10-18): Eternity, "Their Levels count twice" -------
+
+def test_eternity_doubles_the_levels_effects_read_not_the_stored_level():
+    st = _state(2)
+    Y.plant(st, 1, level=2)
+    s = _led(st).sakura[0]
+    assert Y.act_size(st, s) == 1 + 2 * 2
+    st.player.powers[Y.ETERNITY] = 1
+    assert Y.effective_level(st, s) == 4
+    assert Y.act_size(st, s) == 1 + 2 * 4          # 9, not 5
+    assert s.level == 2                             # the stored Level
+
+
+def test_eternity_doubles_daisesshou_and_counts_for_sesshou_fang():
+    st = _state(2)
+    st.player.powers[Y.ETERNITY] = 1
+    Y.plant(st, 1, kind=Y.KITSUNE, level=1)
+    Y.plant(st, 1, kind=Y.KITSUNE, level=2)
+    _play(st, "forbidden_art_daisesshou")
+    assert _hp(st) == [100 - 3 * 6, 100 - 3 * 6]    # (1 + 2) x 2 Levels
+    st = _state()
+    Y.plant(st, 1, kind=Y.KITSUNE, level=2)
+    _play(st, "sesshou_fang")
+    plain = 100 - st.enemies[0].hp
+    st = _state()
+    st.player.powers[Y.ETERNITY] = 1
+    Y.plant(st, 1, kind=Y.KITSUNE, level=2)
+    _play(st, "sesshou_fang")
+    assert 100 - st.enemies[0].hp == plain + 6      # Level 2 reads as 4 >= 3

@@ -115,7 +115,7 @@ def test_shoal_of_spears_hits_once_more_per_real_plan_only():
     _play(st, card("proto_kk_shoal_of_spears"))
     # One hit, plus one for each of the two real Plans; the Sting and the
     # Ward add none.
-    assert [b - e.hp for b, e in zip(before, st.enemies)] == [15, 15]
+    assert [b - e.hp for b, e in zip(before, st.enemies)] == [21, 21]
 
 
 def test_feint_counts_itself_and_real_plans_not_stings_or_wards():

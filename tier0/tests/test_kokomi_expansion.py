@@ -113,21 +113,22 @@ def test_masterstroke_is_a_retained_plan_only_attack(overhaul):
 
 # --- the Big Plan ---------------------------------------------------
 
-def test_undertide_lance_plans_a_flat_eighteen(overhaul):
-    """The re-founding (2026-10-12): a flat 18 to the front enemy, alone or
-    not (the "carried out alone" doubling is gone)."""
+def test_undertide_lance_plans_a_flat_twenty_two(overhaul):
+    """The re-founding (2026-10-12): a flat Plan to the front enemy, alone or
+    not (the "carried out alone" doubling is gone); 22 since the pool sweep
+    (2026-10-18)."""
     enemy = make_enemy(hp=200)
     st = kokomi_state(enemies=[enemy])
     kokomi_plan.schedule(st, _row("proto_kk_undertide_lance"))
     kokomi_plan.resolve_all(st)
-    assert enemy.hp == 200 - 18
+    assert enemy.hp == 200 - 22
 
     enemy = make_enemy(hp=200)
     st = kokomi_state(enemies=[enemy])
     kokomi_plan.schedule(st, _row("proto_kk_undertide_lance"))
     kokomi_plan.schedule(st, plan_card([{"op": "block", "amount": 1}]))
     kokomi_plan.resolve_all(st)
-    assert enemy.hp == 200 - 18
+    assert enemy.hp == 200 - 22
 
 
 # --- Tide Control ---------------------------------------------------------------

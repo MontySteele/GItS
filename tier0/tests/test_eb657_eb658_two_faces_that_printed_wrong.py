@@ -64,8 +64,8 @@ def test_each_arm_takes_its_own_delta():
     would split the face from the hit on the first forge."""
     src = (GENERATED / "ProtoKkPressTheAdvantage.cs").read_text(
         encoding="utf-8")
-    assert 'new FoldedDamageVar("PlainDamage", 7m, ValueProp.Move)' in src
-    assert 'new FoldedDamageVar("BranchDamage", 11m, ValueProp.Move)' in src
+    assert 'new FoldedDamageVar("PlainDamage", 8m, ValueProp.Move)' in src
+    assert 'new FoldedDamageVar("BranchDamage", 13m, ValueProp.Move)' in src
     assert 'DynamicVars["PlainDamage"].UpgradeValueBy(2m);' in src
     assert 'DynamicVars["BranchDamage"].UpgradeValueBy(3m);' in src
 
@@ -75,8 +75,8 @@ def test_the_hit_is_untouched_and_still_swaps_at_play_time():
     no number is printed the card does not deal."""
     src = (GENERATED / "ProtoKkPressTheAdvantage.cs").read_text(
         encoding="utf-8")
-    assert "(IsUpgraded ? 9m : 7m)" in src
-    assert "(IsUpgraded ? 14m : 11m)" in src
+    assert "(IsUpgraded ? 10m : 8m)" in src
+    assert "(IsUpgraded ? 16m : 13m)" in src
     assert src.count("DamageCmd.Attack") == 2
 
 

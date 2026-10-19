@@ -355,7 +355,7 @@ public class YaeReviewR3Tests : IDisposable
         var petals = new ProtoYmFallenPetals();
         Assert.Equal((0, CardType.Skill), (petals.EnergyCost.Canonical, petals.Type));
         Assert.Equal("Your oldest [gold]Sakura[/gold] withers (it acts once, its Last Bloom). "
-                     + "If one did, gain {energyPrefix:energyIcons(1)}{IfUpgraded:show:, and draw 1 card|}.",
+                     + "If one did, gain {energyPrefix:energyIcons(1)} and draw {IfUpgraded:show:2 cards|1 card}.",
                      Face(petals));
         var calls = Il.CallSequence(typeof(YaeCards).GetMethod(nameof(YaeCards.FallenPetals))!).ToList();
         var wither = calls.FindIndex(c => c.Contains(nameof(YaeShrine.WitherOldest)));

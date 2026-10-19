@@ -110,7 +110,8 @@ public class KokomiPoolOverhaulTests
                       retreat.EnergyCost.Canonical));
         Assert.Equal((8, 11), (Var<ProtoKkPreparedRetreat>("Block"),
                                Var<ProtoKkPreparedRetreat>("Block", true)));
-        Assert.Equal((1, 2), (Var<ProtoKkPreparedRetreat>("PlanEnergy"),
+        // The pool sweep (2026-10-18): Plan Energy 2 [3].
+        Assert.Equal((2, 3), (Var<ProtoKkPreparedRetreat>("PlanEnergy"),
                               Var<ProtoKkPreparedRetreat>("PlanEnergy", true)));
         Assert.IsType<MegaCrit.Sts2.Core.Localization.DynamicVars.EnergyVar>(
             retreat.DynamicVars["PlanEnergy"]);
