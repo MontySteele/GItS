@@ -122,7 +122,7 @@ KNOWN_STALE = {
         "The Inazuma pool rework (2026-10-18) cut Superlative Superstrength from the pool, and its art carries over to Royal Descent (its plan row was repointed). Kept rather than deleted: a painted asset on a companions/ out-path that main shipped until the rework merged. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_mi_raiden_baleful_omen": (
-        "Baleful Omen was cut 2026-10-19 (Musou no Hitotachi returned as a Rare), and its art carries over to Musou (its plan row was repointed). Kept rather than deleted: a painted asset on a companions/ out-path that main shipped until the cut merged. It is NOT coverage for anything and must never be counted as such."
+        "Baleful Omen was cut 2026-10-19 (Musou no Hitotachi returned as a Rare), and Musou takes a different source (the Platinum TCG card). Kept rather than deleted: a painted asset on a companions/ out-path that main shipped until the cut merged. It is NOT coverage for anything and must never be counted as such."
     ),
     "proto_mi_yoimiya_aurous_blaze": (
         "The Inazuma pool rework (2026-10-18) cut Aurous Blaze from the pool, and its art carries over to Niwabi Fire-Dance (its plan row was repointed). Kept rather than deleted: a painted asset on a companions/ out-path that main shipped until the rework merged. It is NOT coverage for anything and must never be counted as such."

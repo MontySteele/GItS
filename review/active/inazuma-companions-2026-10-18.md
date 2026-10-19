@@ -226,5 +226,5 @@ Uncommon and 11 Rare. LAW allows two cards per 5-star, so Raiden is Euthymia and
 | Upgrade | Raiden Shogun, Plane of Euthymia (Rare Power, 2) | The upgrade is Innate (was cost 1). |
 
 Musou counts the hand when it resolves, Musou itself not included. Its Strength loss is Baleful Omen's (Piercing
-Wail's this-turn loss), on you as well. The hit lands before you lose the Strength. It keeps Baleful Omen's art (the
-Shogun's TCG character card). Euthymia keeps her full Wish.
+Wail's this-turn loss), on you as well. The hit lands before you lose the Strength. Its art is the Shogun's
+Platinum TCG card, so it differs from Euthymia's full Wish.

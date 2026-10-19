@@ -3321,8 +3321,8 @@ proto_mi_ayaka_hyouka	ImageGen/images/cards/companions/proto_mi_ayaka_hyouka.png
 proto_mi_heizou_windmuster_kick	ImageGen/images/cards/companions/proto_mi_heizou_windmuster_kick.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Shikanoin Heizou Full Wish.png		splash	heizou
 # proto_mi_itto_ushi <- Itto's full Wish art
 proto_mi_itto_ushi	ImageGen/images/cards/companions/proto_mi_itto_ushi.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Arataki Itto Full Wish.png		splash	itto
-# proto_mi_raiden_musou_no_hitotachi <- proto_mi_raiden_baleful_omen: cut 2026-10-19, its art carries over (the Shogun's TCG character card; her full Wish is Euthymia's)
-proto_mi_raiden_musou_no_hitotachi	ImageGen/images/cards/companions/proto_mi_raiden_musou_no_hitotachi.png	500	380	cover	y0.16	shortlist	1	png	Raiden Shogun Character Card.png		tcg	raiden
+# proto_mi_raiden_musou_no_hitotachi <- the Shogun's Platinum TCG card (2026-10-19; her full Wish is Euthymia's, the plain TCG card stays on cut Baleful Omen's png)
+proto_mi_raiden_musou_no_hitotachi	ImageGen/images/cards/companions/proto_mi_raiden_musou_no_hitotachi.png	500	380	cover	y0.16	shortlist	1	png	Raiden Shogun Character Card Platinum.png		tcg	raiden
 # proto_mi_mizuki_aisa_utamakura <- Mizuki's full Wish art, riding her dream baku
 proto_mi_mizuki_aisa_utamakura	ImageGen/images/cards/companions/proto_mi_mizuki_aisa_utamakura.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Yumemizuki Mizuki Full Wish.png		splash	mizuki
 # proto_mi_kazuha_chihayaburu <- Kazuha's full Wish art, blade drawn in the maple wind

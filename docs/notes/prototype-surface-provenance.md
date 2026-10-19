@@ -9713,7 +9713,8 @@ Omen is cut".
 
 - **Cut**: Raiden, Transcendence: Baleful Omen (Uncommon Skill). Its power
   is renamed for Musou (`ProtoMiRaidenMusouNoHitotachiPower`, the codegen's
-  `{CardClass}Power`), its talent icon kept, and its card art carries over.
+  `{CardClass}Power`), its talent icon kept. Musou's art row takes the Platinum TCG card,
+  a different source from Euthymia's full Wish (L12, identical crops).
 - **Raiden, Musou no Hitotachi** (Rare Attack, 3), back on its old id.
   [USER]: "On Musou - what about something closer to Defect's hyperbeam?" /
   "Im seeing this as a 3 cost card like hyperbeam." "Deal 16 [22] Electro
