@@ -24,7 +24,6 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
-using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -45,15 +44,12 @@ public sealed class ProtoMfChevreuseVanguardsValor : CustomCardModel, ICompanion
 
     public string? Nation => "fontaine";
 
-    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForElementalReaction(base.ExtraHoverTips, this);
-
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("chevreuse_vanguards_valor");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Chevreuse — Vanguard's Valor"),
-        ("description", "Your next Attack deals {PowerAmount:diff()} additional damage, plus 3 if an [gold]Elemental Reaction[/gold] triggered this turn."),
+        ("description", "Your next Attack this turn deals {PowerAmount:diff()} additional damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -72,14 +68,10 @@ public sealed class ProtoMfChevreuseVanguardsValor : CustomCardModel, ICompanion
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await PowerCmd.Apply<NextAttackUpPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
-        if (ReactionEffects.ReactionTriggeredThisTurn)
-        {
-            await PowerCmd.Apply<NextAttackUpPower>(choiceContext, Owner.Creature, 3, applier: Owner.Creature, cardSource: this);
-        }
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PowerAmount"].UpgradeValueBy(2m);
+        DynamicVars["PowerAmount"].UpgradeValueBy(3m);
     }
 }

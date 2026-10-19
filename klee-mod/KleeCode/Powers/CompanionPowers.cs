@@ -251,6 +251,10 @@ public sealed class AttackUpThisTurnPower : PowerModel, ILocalizationProvider
 /// every hit of that one card (its repeat tail included -- same CardPlay)
 /// and is gone afterwards; here the modify hook pays out during the play
 /// and AfterCardPlayed removes the power once the attack's series ends.
+///
+/// "THIS TURN" since the Fontaine pool rework (2026-10-19): an unspent bonus
+/// leaves at the end of the player's turn, Crowfeather Cover's rule. Sim
+/// twin: `next_attack_up` popped in `effects.player_turn_end_triggers`.
 /// </summary>
 public sealed class NextAttackUpPower : PowerModel, ILocalizationProvider
 {
@@ -258,8 +262,17 @@ public sealed class NextAttackUpPower : PowerModel, ILocalizationProvider
     {
         ("title", "Vanguard's Valor"),
         ("description",
-            "Your next Attack deals [blue]{Amount}[/blue] additional damage."),
+            "Your next Attack this turn deals [blue]{Amount}[/blue] "
+          + "additional damage."),
     };
+
+    public override async Task AfterSideTurnEnd(
+        PlayerChoiceContext choiceContext, CombatSide side,
+        IEnumerable<Creature> participants)
+    {
+        if (side != CombatSide.Player) return;
+        await PowerCmd.Remove(this);
+    }
 
     public override PowerType Type => PowerType.Buff;
 

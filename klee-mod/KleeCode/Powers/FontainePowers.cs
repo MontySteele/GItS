@@ -23,25 +23,17 @@ namespace KleeMod.Powers;
 /// </summary>
 
 /// <summary>
-/// Navia, Cannon Fire Support: "Whenever an Elemental Reaction happens, gain
-/// Amount Block." (The Fontaine sanity check, 2026-10-12, pick 3: it keyed on
-/// playing a Companion card before.)
+/// Navia, Cannon Fire Support (the Fontaine pool rework, 2026-10-19,
+/// <c>review/active/fontaine-companions-2026-10-19.md</c>): "At the start of
+/// your turn, deal 5 [7] Geo damage to ALL enemies." It gained Block after a
+/// reaction until the rework (the lowest Rare take, 3%).
 ///
-/// No hook of its own. <see cref="OnReaction"/> is called from
-/// <c>CompanionOverhaulReactions.Note</c>, which <c>ReactionEffects.Resolve</c>
-/// calls once per named reaction -- the single site a reaction resolves in the
-/// mod, the same one Dahlia's Favonian Favor reads. Sim twin: the
-/// `cannon_fire_support` read in `effects.companion_overhaul_reaction`.
-///
-/// CO-OP: THE BOARD'S REACTIONS, NOT ONLY YOURS. "Happens" is the board-wide
-/// reading red-pen R1 sealed for <c>ReactionEffects.ReactionTriggeredThisTurn</c>
-/// (a Reaction is a fact about the board both players stand on), so every
-/// player holding this power is paid for every reaction, whoever dealt it,
-/// and for a reaction with no dealer. Solo that is every reaction, which is
-/// the sim's reading. Favonian Favor pays its holder only for reactions that
-/// holder dealt; this card does not copy that.
-///
-/// Raw Block (NC-11: power-sourced Block stays raw), Amount per copy.
+/// Amount IS the damage, so copies add. Each hit is the arm's power-sourced
+/// elemental hit (<see cref="ElementalHit.Deal"/>), so on an aura it is a
+/// Crystallize and pays that reaction's Block, as the paper says. Every
+/// living hittable enemy, in board order, read once before the volley. Sim
+/// twin: the `cannon_fire_support` read in
+/// `effects.player_turn_start_triggers`, beside Neuvillette's.
 /// </summary>
 public sealed class CannonFireSupportPower : PowerModel, ILocalizationProvider
 {
@@ -49,32 +41,27 @@ public sealed class CannonFireSupportPower : PowerModel, ILocalizationProvider
     {
         ("title", "Cannon Fire Support"),
         ("description",
-            "Whenever an [gold]Elemental Reaction[/gold] happens, gain "
-          + "[blue]{Amount}[/blue] [gold]Block[/gold]."),
+            "At the start of your turn, deal [blue]{Amount}[/blue] "
+          + "[gold]Geo[/gold] damage to ALL enemies."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    /// <summary>A reaction resolved on <paramref name="target"/>'s board: pay
-    /// every living player creature that holds the power.</summary>
-    internal static async Task OnReaction(
-        PlayerChoiceContext choiceContext, Creature target)
+    public override async Task AfterPlayerTurnStart(
+        PlayerChoiceContext choiceContext, Player player)
     {
-        var players = target.CombatState?.PlayerCreatures;
-        if (players == null) return;
-        foreach (var creature in players.ToList())
+        if (player.Creature != Owner || Amount <= 0) return;
+        var enemies = Owner.CombatState?.HittableEnemies
+            .Where(e => e.IsAlive).ToList();
+        if (enemies == null || enemies.Count == 0) return;
+        Flash();
+        foreach (var enemy in enemies)
         {
-            if (!creature.IsAlive) continue;
-            foreach (var power in creature.Powers
-                         .OfType<CannonFireSupportPower>().ToList())
-            {
-                power.Flash();
-                await CreatureCmd.GainBlock(
-                    creature, power.Amount, ValueProp.Unpowered, null,
-                    fast: true);
-            }
+            if (!enemy.IsAlive) continue;
+            await ElementalHit.Deal(
+                choiceContext, enemy, Elements.Element.Geo, Amount, Owner);
         }
     }
 }

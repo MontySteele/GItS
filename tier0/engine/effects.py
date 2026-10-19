@@ -1722,6 +1722,27 @@ def _op_block_half_damage(state: CombatState, fx: dict, card: Card) -> None:
     state.emit("block", amount=amount)
 
 
+def _op_block_per_enemy_hit(state: CombatState, fx: dict,
+                            card: Card) -> None:
+    """THE FONTAINE POOL REWORK (2026-10-19). Sigewinne's Super-Saturated
+    Syringing: "Gain 4 Block for each enemy hit."
+
+    The enemies are this play's own (`state.mf_enemies_hit_this_card`, fed at
+    the tail of `deal_damage_to_enemy`), so a kill counts and an enemy behind
+    full Block counts. A card's own Block line, so it takes the printed-Block
+    funnel, `_op_block_half_damage`'s shape. C# twin:
+    `FontaineCompanion.BlockPerEnemyHit`.
+    """
+    amount = int(fx["amount"]) * len(state.mf_enemies_hit_this_card)
+    if amount <= 0:
+        return
+    amount = powers.modify_block_gained(state.player, amount)
+    state.player.block += amount
+    state.block_gains_this_card += 1
+    state.block_gained_this_card += amount
+    state.emit("block", amount=amount)
+
+
 def _op_block_next_turn(state: CombatState, fx: dict, card: Card) -> None:
     # Charlotte, First-Person Shutter: pre-emptive block that lands at the
     # start of the player's NEXT turn (after the turn-start block reset).
@@ -2706,6 +2727,11 @@ def exhaust_pool(state: CombatState, fx: dict,
         pool = [c for c in pool if c.rarity == "status"]
     elif fx.get("filter") == "non_attack":
         pool = [c for c in pool if c.type != "attack"]
+    elif fx.get("filter") == "any":
+        # THE FONTAINE POOL REWORK (2026-10-19): Emilie's Lumidouce Legacy,
+        # "Exhaust a card in your Hand", a Status or a Curse included, for
+        # any owner. The C# selector is `static _ => true` on this filter.
+        pass
     elif kokomi_rotation_law(state.player):
         # ROTATION LAW ([USER] 2026-08-23): Kokomi rotates her OWN cards
         # out, never a Status or a Curse. The unfiltered pool -- chosen or
@@ -3163,6 +3189,8 @@ PREDICATE_NAMES = frozenset({
     # what it is asking about is the board as the hit lands.
     "target_has_debuff",
     "reaction_triggered_by_this",
+    # THE FONTAINE POOL REWORK (2026-10-19): Navia's Crystalshot.
+    "crystallize_triggered_by_this",
     "reaction_triggered_this_turn",
     "killed_target",
     "killed_target_fatal",
@@ -3522,6 +3550,10 @@ def _predicate(state: CombatState, name: str) -> bool:
         return state.target_had_aura
     if name == "reaction_triggered_by_this":
         return state.reactions_this_card > 0
+    if name == "crystallize_triggered_by_this":
+        # THE FONTAINE POOL REWORK (2026-10-19): "If this triggers
+        # Crystallize", the per-card count `reactions._react` keeps.
+        return state.crystallize_this_card > 0
     if name == "shrine_full":
         return yae_shrine.shrine_full(state)
     if name == "three_sakura":
@@ -5006,6 +5038,7 @@ OPS = {
     "block_next_turn": _op_block_next_turn,
     # (C.COMPANION_OVERHAUL) -- the Inazuma arm's one new op.
     "block_half_damage": _op_block_half_damage,
+    "block_per_enemy_hit": _op_block_per_enemy_hit,
     BLOCK_AT_TURN_START: _op_block_at_turn_start,
     "draw": _op_draw,
     "draw_while": _op_draw_while,
@@ -5270,6 +5303,7 @@ def _resolve_card_bound(state: CombatState, card: Card) -> None:
     # `cardSource`.
     state.kk_hit_card = card
     state.reactions_this_card = 0
+    state.crystallize_this_card = 0               # the Fontaine rework
     state.kills_this_card = 0
     state.fatal_kills_this_card = 0
     state.exhausted_this_card = 0
@@ -5284,6 +5318,8 @@ def _resolve_card_bound(state: CombatState, card: Card) -> None:
     # the same line as the two Block counters and for the same scoping reason:
     # the card after an Attack must bank nothing from it.
     state.mi_damage_dealt_this_card = 0
+    # THE FONTAINE POOL REWORK: Sigewinne's enemies hit, the same scoping.
+    state.mf_enemies_hit_this_card = set()
     state.discards_this_card = 0
     # (R213 B), on the same line and for the same scoping reason:
     # the card after a drain must not read the drain's number.
@@ -5580,6 +5616,9 @@ def player_turn_start_triggers(state: CombatState) -> None:
         enemy = state.rng.choice(list(state.living_enemies))
         deal_damage_to_enemy(state, enemy, C.ANCIENT_SEA_DMG,
                              element="hydro", source="companion")
+    # THE FONTAINE POOL REWORK (2026-10-19): Navia's and Sigewinne's
+    # start-of-turn Powers, beside Neuvillette's (`fontaine_turn_start`).
+    fontaine_turn_start(state)
     n = p.powers.get("spark_per_turn", 0)               # Endless Fireworks
     if n:
         gain_sparks(state, n, source="power:endless_fireworks/turn_start")
@@ -5850,6 +5889,9 @@ def player_turn_end_triggers(state: CombatState) -> None:
     if p.powers.get("solar_isotoma", 0):                # Albedo, 3 turns
         p.powers["solar_isotoma"] -= 1
     p.powers.pop("attack_up_this_turn", None)           # Bennett burst
+    # Chevreuse, Vanguard's Valor: "Your next Attack THIS TURN" since the
+    # Fontaine pool rework (2026-10-19); `NextAttackUpPower.AfterSideTurnEnd`.
+    p.powers.pop("next_attack_up", None)
     companion_overhaul_turn_end(state)
 
 
@@ -6484,14 +6526,8 @@ def companion_overhaul_reaction(state: CombatState, enemy: Enemy,
         # RAW, like every other power-sourced Block in this arm (NC-11).
         p.block += n
         state.emit("block", amount=n)
-    # Navia, Cannon Fire Support (the Fontaine sanity check, 2026-10-12):
-    # "Whenever an Elemental Reaction happens, gain 4 Block." Any reaction,
-    # raw Block. C# twin: `CannonFireSupportPower.OnReaction`, which in co-op
-    # pays every holder for every reaction on the board.
-    navia = p.powers.get("cannon_fire_support", 0)
-    if navia:
-        p.block += navia
-        state.emit("cannon_fire_support", amount=navia)
+    # (Navia's Cannon Fire Support left this reader with the Fontaine pool
+    # rework, 2026-10-19: it hits ALL enemies each turn, `fontaine_turn_start`.)
     # Varka, Sturm und Drang: "Whenever a Swirl happens, your next Attack deals
     # 6 more damage OF THE SWIRLED ELEMENT." The amount banks as an ordinary
     # stack (so two Swirls before one Attack bank twice, which is what
@@ -6613,6 +6649,11 @@ def companion_overhaul_damage_dealt(state: CombatState, enemy: Enemy,
     function call it does not need; this guard is what lets the acceptance test
     assert the property of the FUNCTION rather than of one caller.
     """
+    # THE FONTAINE POOL REWORK (2026-10-19): an enemy this card reached,
+    # whatever its Block took, for Sigewinne's "for each enemy hit". The C#
+    # twin notes the receiver of every card-sourced `AfterDamageReceived`.
+    if source in ("card", "attack"):
+        state.mf_enemies_hit_this_card.add(id(enemy))
     if hp_dmg > 0 and source in ("card", "attack"):
         # CARD-SOURCED ONLY, which is what "the damage dealt" names on a card
         # that deals it -- and it is also what keeps the two engines counting
@@ -6706,3 +6747,110 @@ def niwabi_replays(state: CombatState, card: Card) -> int:
         return 0
     state.emit("mi_niwabi", card=card.id)
     return 1
+
+
+# =============================================================================
+# THE FONTAINE POOL REWORK (2026-10-19,
+# review/active/fontaine-companions-2026-10-19.md): 30 cards, 8 / 13 / 9.
+# Every reader below asks only about the player who holds the power, so a
+# companion works the same in anyone's deck. C# twins:
+# `Powers/Prototype/CompanionOverhaulFontaine.cs` and Navia's
+# `CannonFireSupportPower` (`Powers/FontainePowers.cs`).
+# =============================================================================
+
+def grow_on_retain(state: CombatState, card: Card) -> None:
+    """Freminet, Shattering Pressure: "Each time you Retain this, it deals 5
+    additional damage this combat." Called from the hand flush for every
+    retained card that carries `retain_grow`; raises this instance's first
+    literal damage op, `_op_grow_damage`'s idiom. C# twin:
+    `FontaineCompanion.GrowOnRetain`."""
+    hit = next((effect for effect in card.effects
+                if effect.get("op") == "damage"
+                and effect.get("target") != "self"
+                and isinstance(effect.get("amount"), int)), None)
+    if hit is None:
+        raise ValueError(f"{card.id}: retain_grow has no literal damage op")
+    hit["amount"] += int(card.retain_grow)
+    state.emit("retain_grow", card=card.id, amount=card.retain_grow,
+               total=hit["amount"])
+
+
+def fontaine_turn_start(state: CombatState) -> None:
+    """Navia's Cannon Fire Support and Sigewinne's Rebound Hydrotherapy, at
+    the start of the player's turn beside Neuvillette's Heir.
+
+    Navia: "deal 5 Geo damage to ALL enemies"; the stack IS the damage, so
+    copies add, and on an aura each hit is a Crystallize. Sigewinne: "gain 3
+    Block and apply Hydro to a random enemy"; the stack IS the Block, raw
+    (NC-11), and the Hydro is one application a turn. C# twins:
+    `CannonFireSupportPower.AfterPlayerTurnStart` and
+    `ReboundHydrotherapyPower.AfterPlayerTurnStart`.
+    """
+    p = state.player
+    n = p.powers.get("cannon_fire_support", 0)
+    if n:
+        for enemy in list(state.living_enemies):
+            deal_damage_to_enemy(state, enemy, n, element="geo",
+                                 source="companion")
+        state.emit("cannon_fire_support", amount=n)
+    n = p.powers.get("mf_rebound_hydrotherapy", 0)
+    if n:
+        p.block += n                                      # RAW (NC-11)
+        state.emit("block", amount=n)
+        if state.living_enemies:
+            enemy = state.rng.choice(list(state.living_enemies))
+            reactions.resolve_hit(state, enemy, "hydro", 0,
+                                  "mf_rebound_hydrotherapy")
+
+
+def fontaine_turn_start_late(state: CombatState) -> None:
+    """Emilie, Aromatic Explication: "At the start of your turn, Exhaust a
+    Status or Curse from your Hand or Draw Pile. If you did, gain 1 Energy."
+    After the turn's draw, so a Status just drawn is in the Hand. The Hand
+    first, then the Draw Pile, a random one of the first that holds any; one
+    per copy. C# twin: `AromaticExplicationPower.AfterPlayerTurnStart`."""
+    p = state.player
+    for _ in range(int(p.powers.get("mf_aromatic_explication", 0))):
+        pile = p.hand if any(c.is_junk for c in p.hand) else p.draw_pile
+        pool = [c for c in pile if c.is_junk]
+        if not pool:
+            return
+        victim = state.rng.choice(pool)
+        remove_instance(pile, victim)
+        from tier0.engine import refpowers as _rp         # late (cycle)
+        _rp.exhaust_card(state, victim)
+        # `PlayerCmd.GainEnergy`, so a NoEnergyGain ceiling denies it (the
+        # Drum of Battle's gate in `refpowers.after_card_exhausted`).
+        if state.no_energy_gain_ceiling is not None:
+            state.emit("energy_gain_denied", amount=C.MF_AROMATIC_ENERGY)
+        else:
+            p.energy += C.MF_AROMATIC_ENERGY
+        state.emit("mf_aromatic_explication", card=victim.id,
+                   energy=C.MF_AROMATIC_ENERGY)
+
+
+def grin_malkin_hat(state: CombatState) -> None:
+    """Lyney, Grin-Malkin Hat: "Whenever you Exhaust a card, deal 4 Pyro
+    damage to a random enemy." From `refpowers.after_card_exhausted`, the one
+    funnel every exhaust passes. The stack IS the damage. C# twin:
+    `GrinMalkinHatPower.AfterCardExhausted`."""
+    n = state.player.powers.get("mf_grin_malkin_hat", 0)
+    if not n or not state.living_enemies:
+        return
+    enemy = state.rng.choice(list(state.living_enemies))
+    deal_damage_to_enemy(state, enemy, n, element="pyro", source="companion")
+    state.emit("mf_grin_malkin_hat", target=enemy.name, amount=n)
+
+
+def chilling_penalty(state: CombatState) -> None:
+    """Wriothesley, Chilling Penalty: "Whenever you lose HP, deal 5 Cryo damage
+    to a random enemy." From `resources.note_player_hp_loss`, the one funnel
+    true HP loss passes, once per loss. The stack IS the damage. C# twin:
+    `ChillingPenaltyPower.AfterDamageReceived`."""
+    p = state.player
+    n = p.powers.get("mf_chilling_penalty", 0)
+    if not n or p.hp <= 0 or not state.living_enemies:
+        return
+    enemy = state.rng.choice(list(state.living_enemies))
+    deal_damage_to_enemy(state, enemy, n, element="cryo", source="companion")
+    state.emit("mf_chilling_penalty", target=enemy.name, amount=n)

@@ -596,6 +596,10 @@ _FREE_PLAY_CONTEXT = (
     # for the reason its three neighbours are: an auto-play that dealt damage
     # inside an outer card would otherwise hand the outer card its number.
     "mi_damage_dealt_this_card",
+    # THE FONTAINE POOL REWORK (2026-10-19): Crystalshot's Crystallize and
+    # Super-Saturated Syringing's enemies hit, per card, saved for their
+    # neighbours' reason.
+    "crystallize_this_card", "mf_enemies_hit_this_card",
     # EB-118's identity context. The saved value is the LIST OBJECT, which is
     # why every writer rebinds instead of clearing in place: a free play that
     # exhausts mid-resolution opens its own list, and the restore below hands
@@ -838,6 +842,9 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # Block has to land here because it reads a ledger that was rolled at the
     # top of this function.
     klee_overhaul.turn_start_late(state)
+    # THE FONTAINE POOL REWORK (2026-10-19): Emilie's Aromatic Explication
+    # reads the Hand the draw just dealt, at the C#'s `AfterPlayerTurnStart`.
+    effects.fontaine_turn_start_late(state)
     # VARKA (`varka_oath.turn_start`): his start-of-turn Powers at the same
     # post-draw site -- Baron Bunny's burst, Sworn Brotherhood, Oath of the
     # Knights, in that order. A no-op for anyone else.
@@ -1023,6 +1030,13 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # the same card compare EQUAL, and a value check here would drop the
     # unretained twin from every pile -- a silent deck-shrink.
     retained_ids = {id(c) for c in retained}
+    # THE FONTAINE POOL REWORK (2026-10-19): a card that grows each time it
+    # is Retained (Shattering Pressure) grows here, once per flush it
+    # survives. `FontaineCompanion.GrowOnRetain` is the twin, on the game's
+    # `AfterFlush`.
+    for c in retained:
+        if c.retain_grow:
+            effects.grow_on_retain(state, c)
     # EB-17, dead-in-hand half one: everything the flush takes away. Both
     # destinations count -- a card discarded unplayed and an unplayed Ethereal
     # burned to exhaust are the same finding ("it was in hand and it did

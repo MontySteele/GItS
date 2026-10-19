@@ -9754,3 +9754,44 @@ Defect's Frost access.
 - `proto_ym_sakura_canopy`: costs 2, Gain 6 [9] Block and plant 2 Kitsune
   Sakura (was 1 Energy, 4 [5] Block for each Sakura).
 - Footnote and Royalties stay as printed (the user, 2026-10-19).
+
+## Fontaine pool rework, 2026-10-19
+
+`review/active/fontaine-companions-2026-10-19.md` (direction ruled on the
+audit, "we may still want to leave some Companions at multiple Commons";
+picks 2 and 3 went (a); the card designs carry no pick). The pool is 30
+(8 / 13 / 9): five kept, eleven rebuilt on their ids, fourteen new.
+
+- **Rebuilt in place**: Interdiction Fire, Vanguard's Valor (flat 6 [9],
+  this turn: `NextAttackUpPower` now ends with the turn in both engines),
+  Enigmatic Feint, Bogglecat Box (Block upgrade), First-Person Shutter
+  (Block and Weak, no Cryo), Freezing Point, Pers (0 cost), Backstroke,
+  Astonishing Shift (Weak to ALL), Shattering Pressure (Retain, grows) and
+  Cannon Fire Support (Geo to ALL each turn; the reaction Block left both
+  engines).
+- **New**: Navia's Crystalshot (the `crystallize_triggered_by_this`
+  predicate, `ReactionEffects.CrystallizeResolved` and
+  `state.crystallize_this_card`), Clorinde's Hunter's Vigil (Sara's
+  `mi_next_electro`), Neuvillette's O Tears, Arlecchino's Balemoon Rising,
+  and two each for Wriothesley, Lyney, Sigewinne, Escoffier and Emilie.
+- **Engine work**: `retain_grow` (a Retain card's growth at the flush:
+  `FontaineCompanion.GrowOnRetain` on the card's `AfterFlush`, sim
+  `effects.grow_on_retain`); `block_per_enemy_hit` (Sigewinne, off
+  `CompanionOverhaulLedger.EnemiesHitThisPlay`, sim
+  `state.mf_enemies_hit_this_card`); `exhaust_from` `filter: any` (Emilie's
+  Lumidouce Legacy takes any card, junk included, for any owner); the base
+  game's `DrawCardsNextTurnPower` as `draw_cards_next_turn` (Escoffier).
+- **Powers** (`Powers/Prototype/CompanionOverhaulFontaine.cs`): Grin-Malkin
+  Hat (any exhaust, sim `refpowers.after_card_exhausted`), Rebound
+  Hydrotherapy (turn start, beside Neuvillette's), Chilling Penalty (any HP
+  lost: `AfterDamageReceived`, sim `resources.note_player_hp_loss`) and
+  Aromatic Explication (after the draw; the Hand's Statuses and Curses
+  first, then the Draw Pile's).
+- **Elements**: Emilie is Dendro and Shattering Pressure is Physical, so
+  those three rows declare no element (Kirara's rule). Every other row keeps
+  its character's element on the row; the paper's "no element" count is
+  about what a card applies.
+- **Art**: the fourteen new cards draw their own character's official art
+  (`art/plan.tsv`, "Fontaine pool rework art"), birthday art, TCG character
+  cards, character cards and Emilie's full Wish, each a title no other row
+  claims.

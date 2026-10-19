@@ -1394,6 +1394,9 @@ GOLD_NAMES = {
                 "Hydro gems attach and named on the reaction log",
     "Overloaded": "a reaction, defined by the reaction preview the Pyro and "
                   "Electro gems attach and named on the reaction log",
+    # Navia's Ceremonial Crystalshot (the Fontaine pool rework, 2026-10-19).
+    "Crystallize": "a reaction, defined by the reaction preview the Geo gem "
+                   "attaches and named on the reaction log",
 }
 
 

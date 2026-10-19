@@ -163,11 +163,13 @@ def test_every_five_star_is_offerable_whatever_the_seed():
     offered in a given run, so one of Fontaine's four was missing from every
     Furina run. Now each of them reaches both the reward slot and the shop
     under every seed; rarity, nation weighting and personal pools still apply.
+    The Rares since the Fontaine pool rework (2026-10-19) gave the 5-stars
+    Uncommons too: nine of them, read off a Rare roll.
     """
     fives = {c.id for cs in rewards.companion_pool().values() for c in cs
              if c.nation == "fontaine" and c.star == 5
-             and c.personal_pool is None}
-    assert len(fives) == 4
+             and c.rarity == "rare" and c.personal_pool is None}
+    assert len(fives) == 9
     for seed in range(5):
         rng = random.Random(seed)
         slot = {c.id for _ in range(200)

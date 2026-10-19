@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMfCharlotteEnduringFrosthelm : CustomCardModel, ICompanionCard, IVarkaSwitchCard
+public sealed class ProtoMfCharlotteEnduringFrosthelm : CustomCardModel, ICompanionCard
 {
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
@@ -45,40 +45,23 @@ public sealed class ProtoMfCharlotteEnduringFrosthelm : CustomCardModel, ICompan
 
     public string? Nation => "fontaine";
 
-    public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { KleeKeywords.AppliesCryo };
-
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo, appliesWithoutHit: true), this, Element.Cryo);
+        BaseKeywordTips.ForWeak(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("charlotte_enduring_frosthelm");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Charlotte — First-Person Shutter"),
-        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply [gold]Cryo[/gold] to an enemy. Next turn, gain {BlockNextTurn:diff()} [gold]Block[/gold].{InCombat:{VarkaSwitch}|}"),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Apply 1 [gold]Weak[/gold]."),
     };
-
-    /// <summary>The element this card makes current, on its in-combat line
-    /// (`VarkaOath.SwitchLine`).</summary>
-    protected override void AddExtraArgsToDescription(
-        MegaCrit.Sts2.Core.Localization.LocString description)
-    {
-        base.AddExtraArgsToDescription(description);
-        description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Cryo));
-    }
-
-    /// <summary>The element this card makes Varka's current element
-    /// (`VarkaOathDial` previews it).</summary>
-    public Element VarkaSwitchElement => Element.Cryo;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(4m),
+            new CalculationBaseVar(6m),
             new CalculationExtraVar(1m),
-            new FoldedCalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card)),
-            new SpotlightSystem.DeferredBlockVar(4m)
+            new FoldedCalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -92,12 +75,11 @@ public sealed class ProtoMfCharlotteEnduringFrosthelm : CustomCardModel, ICompan
     {
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), DynamicVars.CalculatedBlock.Props, cardPlay);
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
-        await ElementalHit.ApplyOnly(choiceContext, cardPlay.Target, Element.Cryo, Owner.Creature);
-        await PowerCmd.Apply<BlockNextTurnPower>(choiceContext, Owner.Creature, (int)SpotlightSystem.PrintedBlock(this, 4), applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<WeakPower>(choiceContext, cardPlay.Target, 1, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.CalculationBase.UpgradeValueBy(2m);
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
     }
 }

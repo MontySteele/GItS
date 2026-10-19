@@ -2673,27 +2673,29 @@
    effects: [{op: apply_power, power: mi_sacred_sakuras_favor, amount: 1, target: self}],
    upgrade: {cost: -1}}
 
-# --- FONTAINE (legacy cleanup pick 4): the shipped rows ported as they are,
-# bodies, upgrades and art; the three guest stars are Furina's. Provenance
-# note, "Fontaine companions ported, 2026-10-01". ---
+# --- FONTAINE: the pool reworked (2026-10-19,
+# review/active/fontaine-companions-2026-10-19.md): 30 cards, 8 / 13 / 9.
+# Provenance: docs/notes/prototype-surface-provenance.md, "Fontaine pool rework, 2026-10-19". ---
 
-# Fontaine sanity check, 2026-10-12 (review/ruled/fontaine-companions-2026-10-12.md, ruled).
+# Fontaine rework (2026-10-19): 8 [10] to 7 [9], plus 1 Vulnerable.
 - {id: proto_mf_chevreuse_interdiction_fire, name: "Chevreuse — Interdiction Fire", character: klee,
    upgrade: {damage: 2},
    authored_by: [claude],
    art_of: chevreuse_interdiction_fire,
    nation: fontaine, star: 4, rarity: common, role_c: applier, element: pyro, cost: 1, type: attack,
-   description: "Deal 8 [gold]Pyro[/gold] damage.",
-   effects: [{op: damage, amount: 8, target: enemy, applies_element: true}]}
+   description: "Deal 7 [gold]Pyro[/gold] damage. Apply 1 [gold]Vulnerable[/gold].",
+   effects: [{op: damage, amount: 7, target: enemy, applies_element: true},
+             {op: apply_power, power: vulnerable, amount: 1, target: enemy}]}
 
-# Fontaine sanity check, 2026-10-12 (review/ruled/fontaine-companions-2026-10-12.md, ruled).
+# Fontaine rework (2026-10-19): a flat 6 [9]; the reaction rider left. The
+# bonus now ends with the turn (`NextAttackUpPower`).
 - {id: proto_mf_chevreuse_vanguards_valor, name: "Chevreuse — Vanguard's Valor", character: klee,
-   upgrade: {buff: 2},
+   upgrade: {buff: 3},
    authored_by: [claude],
    art_of: chevreuse_vanguards_valor,
    nation: fontaine, star: 4, rarity: common, role_c: buffer, element: pyro, cost: 0, type: skill,
-   description: "Your next Attack deals 6 additional damage, plus 3 if an [gold]Elemental Reaction[/gold] triggered this turn.",
-   effects: [{op: buff_next_attack, amount: 6}, {op: conditional, if: reaction_triggered_this_turn, then: [{op: buff_next_attack, amount: 3}]}]}
+   description: "Your next Attack this turn deals 6 additional damage.",
+   effects: [{op: buff_next_attack, amount: 6}]}
 
 - {id: proto_mf_chevreuse_bursting_grenades, name: "Chevreuse — Ring of Bursting Grenades", character: klee,
    upgrade: {damage: 2},
@@ -2703,51 +2705,53 @@
    description: "Deal 14 [gold]Pyro[/gold] damage to ALL enemies.",
    effects: [{op: damage, amount: 14, target: all_enemies, applies_element: true}]}
 
+# Fontaine rework (2026-10-19): the Block is the card, the Swirl the bonus.
 - {id: proto_mf_lynette_enigmatic_feint, name: "Lynette — Enigmatic Feint", character: klee,
-   upgrade: {block: 2},
+   upgrade: {block: 3},
    authored_by: [claude],
    art_of: lynette_enigmatic_feint,
    nation: fontaine, star: 4, rarity: common, role_c: trigger, element: anemo, cost: 1, type: skill,
-   description: "[gold]Swirl[/gold] the enemy. Gain 5 [gold]Block[/gold].",
-   effects: [{op: swirl, target: enemy}, {op: block, amount: 5}]}
+   description: "Gain 8 [gold]Block[/gold]. [gold]Swirl[/gold] the enemy.",
+   effects: [{op: block, amount: 8}, {op: swirl, target: enemy}]}
 
-# Fontaine sanity check, 2026-10-12 (review/ruled/fontaine-companions-2026-10-12.md, ruled).
+# Fontaine rework (2026-10-19): Backflip. The upgrade is Block, not a draw.
 - {id: proto_mf_lynette_box_trick, name: "Lynette — Bogglecat Box", character: klee,
-   upgrade: {draw: 1},
+   upgrade: {block: 3},
    authored_by: [claude],
    art_of: lynette_box_trick,
    nation: fontaine, star: 4, rarity: common, role_c: buffer, element: anemo, cost: 1, type: skill,
-   description: "Gain 4 [gold]Block[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}.",
-   effects: [{op: block, amount: 4}, {op: draw, amount: 2}]}
+   description: "Gain 5 [gold]Block[/gold]. Draw 2 cards.",
+   effects: [{op: block, amount: 5}, {op: draw, amount: 2}]}
 
-# 2026-10-11 Companion pass (review/ruled/companion-upper-pass-2026-10-11.md).
+# Fontaine rework (2026-10-19): 8 [10] to ALL becomes 6 [8], plus Weak to ALL.
 - {id: proto_mf_lynette_astonishing_shift, name: "Lynette — Magic Trick: Astonishing Shift", character: klee,
    upgrade: {damage: 2},
    authored_by: [claude],
    art_of: lynette_astonishing_shift,
    nation: fontaine, star: 4, rarity: uncommon, role_c: trigger, element: anemo, cost: 1, type: skill,
-   description: "[gold]Swirl[/gold] the enemy. Deal 8 damage to ALL enemies.",
-   effects: [{op: swirl, target: enemy}, {op: damage, amount: 8, target: all_enemies, applies_element: false}]}
+   description: "[gold]Swirl[/gold] the enemy. Deal 6 damage to ALL enemies. Apply 1 [gold]Weak[/gold] to ALL enemies.",
+   effects: [{op: swirl, target: enemy}, {op: damage, amount: 6, target: all_enemies, applies_element: false},
+             {op: apply_power, power: weak, amount: 1, target: all_enemies}]}
 
-# Fontaine sanity check, 2026-10-12 (review/ruled/fontaine-companions-2026-10-12.md, ruled).
+# Fontaine rework (2026-10-19): 7 [9] to 8 [10].
 - {id: proto_mf_charlotte_freezing_point, name: "Charlotte — Framing: Freezing Point Composition", character: klee,
    upgrade: {damage: 2},
    authored_by: [claude],
    art_of: charlotte_freezing_point,
    nation: fontaine, star: 4, rarity: common, role_c: applier, element: cryo, cost: 1, type: attack,
-   description: "Deal 7 [gold]Cryo[/gold] damage. Draw {Cards:diff()} card{Cards:plural:|s}.",
-   effects: [{op: damage, amount: 7, target: enemy, applies_element: true}, {op: draw, amount: 1}]}
+   description: "Deal 8 [gold]Cryo[/gold] damage. Draw 1 card.",
+   effects: [{op: damage, amount: 8, target: enemy, applies_element: true}, {op: draw, amount: 1}]}
 
-# Fontaine sanity check, 2026-10-12 (review/ruled/fontaine-companions-2026-10-12.md, ruled).
+# Fontaine rework (2026-10-19): the Cryo and next turn's Block left; the
+# pool's first Weak.
 - {id: proto_mf_charlotte_enduring_frosthelm, name: "Charlotte — First-Person Shutter", character: klee,
-   upgrade: {block: 2},
+   upgrade: {block: 3},
    authored_by: [claude],
    art_of: charlotte_enduring_frosthelm,
    nation: fontaine, star: 4, rarity: common, role_c: buffer, element: cryo, cost: 1, type: skill,
-   description: "Gain 4 [gold]Block[/gold]. Apply [gold]Cryo[/gold] to an enemy. Next turn, gain {BlockNextTurn:diff()} [gold]Block[/gold].",
-   effects: [{op: block, amount: 4}, {op: apply_aura, element: cryo, target: enemy}, {op: block_next_turn, amount: 4}]}
+   description: "Gain 6 [gold]Block[/gold]. Apply 1 [gold]Weak[/gold].",
+   effects: [{op: block, amount: 6}, {op: apply_power, power: weak, amount: 1, target: enemy}]}
 
-# 2026-10-11 Companion pass (review/ruled/companion-upper-pass-2026-10-11.md).
 - {id: proto_mf_charlotte_snappy_silhouette, name: "Charlotte — Snappy Silhouette", character: klee,
    upgrade: {vulnerable: 1},
    authored_by: [claude],
@@ -2756,40 +2760,125 @@
    description: "Apply 1 [gold]Vulnerable[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}.",
    effects: [{op: apply_power, power: vulnerable, amount: 1, target: enemy}, {op: draw, amount: 1}]}
 
+# Fontaine rework (2026-10-19): 1 cost, 8 [10] to 0 cost, 4 [6]. It draws
+# nothing, so it does not cycle.
 - {id: proto_mf_freminet_pers_deploy, name: "Freminet — Pers, Deploy!", character: klee,
    upgrade: {damage: 2},
    authored_by: [claude],
    art_of: freminet_pers_deploy,
-   nation: fontaine, star: 4, rarity: common, role_c: applier, element: cryo, cost: 1, type: attack,
-   description: "Deal 8 [gold]Cryo[/gold] damage.",
-   effects: [{op: damage, amount: 8, target: enemy, applies_element: true}]}
+   nation: fontaine, star: 4, rarity: common, role_c: applier, element: cryo, cost: 0, type: attack,
+   description: "Deal 4 [gold]Cryo[/gold] damage.",
+   effects: [{op: damage, amount: 4, target: enemy, applies_element: true}]}
 
-# Fontaine sanity check, 2026-10-12 (review/ruled/fontaine-companions-2026-10-12.md, ruled).
+# Fontaine rework (2026-10-19): 10 and 6 to 12 [16] and 6 [8].
 - {id: proto_mf_freminet_pressurized_floe, name: "Freminet — Pressurized Floe: Backstroke", character: klee,
-   upgrade: {damage: 2},
+   upgrade: {damage: 4, block: 2},
    authored_by: [claude],
    art_of: freminet_pressurized_floe,
    nation: fontaine, star: 4, rarity: common, role_c: applier, element: cryo, cost: 2, type: attack,
-   description: "Deal 10 [gold]Cryo[/gold] damage. Gain 6 [gold]Block[/gold].",
-   effects: [{op: damage, amount: 10, target: enemy, applies_element: true}, {op: block, amount: 6}]}
+   description: "Deal 12 [gold]Cryo[/gold] damage. Gain 6 [gold]Block[/gold].",
+   effects: [{op: damage, amount: 12, target: enemy, applies_element: true}, {op: block, amount: 6}]}
 
-# Fontaine sanity check, 2026-10-12 (review/ruled/fontaine-companions-2026-10-12.md, ruled).
+# Fontaine rework (2026-10-19): the pool's Retain card, Physical in the game,
+# so no element. "5 more" is printed "5 additional damage" (rule 8).
 - {id: proto_mf_freminet_shattering_pressure, name: "Freminet — Shattering Pressure", character: klee,
    upgrade: {damage: 2},
    authored_by: [claude],
    art_of: freminet_shattering_pressure,
-   nation: fontaine, star: 4, rarity: uncommon, role_c: applier, element: cryo, cost: 1, type: attack,
-   description: "Deal 5 [gold]Cryo[/gold] damage twice.",
-   effects: [{op: damage, amount: 5, target: enemy, times: 2, applies_element: true}]}
+   nation: fontaine, star: 4, rarity: uncommon, role_c: trigger, cost: 1, type: attack,
+   retain: true, retain_grow: 5,
+   description: "Deal 8 damage. Each time you Retain this, it deals 5 additional damage this combat.",
+   effects: [{op: damage, amount: 8, target: enemy}]}
 
-# Fontaine sanity check, 2026-10-12 (review/ruled/fontaine-companions-2026-10-12.md, ruled).
+# Fontaine rework (2026-10-19): a Geo Attack; the draw keys off this hit's
+# own Crystallize.
+- {id: proto_mf_navia_ceremonial_crystalshot, name: "Navia — Ceremonial Crystalshot", character: klee,
+   upgrade: {damage: 3},
+   authored_by: [claude],
+   nation: fontaine, star: 5, rarity: uncommon, role_c: trigger, element: geo, cost: 1, type: attack,
+   description: "Deal 10 [gold]Geo[/gold] damage. If this triggers [gold]Crystallize[/gold], draw 1 card.",
+   effects: [{op: damage, amount: 10, target: enemy, applies_element: true},
+             {op: conditional, if: crystallize_triggered_by_this,
+              then: [{op: draw, amount: 1}]}]}
+
+# Fontaine rework (2026-10-19): the pool's first Uncommon draw; Sara's
+# Electro rider (`mi_next_electro`).
+- {id: proto_mf_clorinde_hunters_vigil, name: "Clorinde — Hunter's Vigil", character: klee,
+   upgrade: {draw: 1},
+   authored_by: [claude],
+   nation: fontaine, star: 5, rarity: uncommon, role_c: applier, element: electro, cost: 1, type: skill,
+   description: "Draw {Cards:diff()} cards. Your next Attack this turn applies [gold]Electro[/gold].",
+   effects: [{op: draw, amount: 2}, {op: apply_power, power: mi_next_electro, amount: 1, target: self}]}
+
+- {id: proto_mf_neuvillette_o_tears, name: "Neuvillette — O Tears, I Shall Repay", character: klee,
+   upgrade: {damage: 3},
+   authored_by: [claude],
+   nation: fontaine, star: 5, rarity: uncommon, role_c: applier, element: hydro, cost: 1, type: attack,
+   description: "Deal 7 [gold]Hydro[/gold] damage to ALL enemies.",
+   effects: [{op: damage, amount: 7, target: all_enemies, applies_element: true}]}
+
+# Fontaine rework (2026-10-19): Hemokinesis at 12 with a Pyro aura.
+- {id: proto_mf_arlecchino_balemoon_rising, name: "Arlecchino — Balemoon Rising", character: klee,
+   upgrade: {damage: 4},
+   authored_by: [claude],
+   nation: fontaine, star: 5, rarity: uncommon, role_c: applier, element: pyro, cost: 1, type: attack,
+   description: "Lose 2 HP. Deal 12 [gold]Pyro[/gold] damage.",
+   effects: [{op: damage, amount: 2, target: self},
+             {op: damage, amount: 12, target: enemy, applies_element: true}]}
+
+# Fontaine rework (2026-10-19): Strength taken for good, 1 at a time.
+- {id: proto_mf_wriothesley_gracious_rebuke, name: "Wriothesley — Gracious Rebuke", character: klee,
+   upgrade: {damage: 2},
+   authored_by: [claude],
+   nation: fontaine, star: 5, rarity: uncommon, role_c: applier, element: cryo, cost: 1, type: attack,
+   description: "Deal 7 [gold]Cryo[/gold] damage. The enemy loses 1 [gold]Strength[/gold].",
+   effects: [{op: damage, amount: 7, target: enemy, applies_element: true},
+             {op: lose_strength, amount: 1, target: enemy}]}
+
+# Fontaine rework (2026-10-19): the pool's Exhaust payoff (`GrinMalkinHatPower`).
+- {id: proto_mf_lyney_grin_malkin_hat, name: "Lyney — Grin-Malkin Hat", character: klee,
+   upgrade: {power_amount: 2},
+   authored_by: [claude],
+   nation: fontaine, star: 5, rarity: uncommon, role_c: applier, element: pyro, cost: 1, type: power,
+   description: "Whenever you [gold]Exhaust[/gold] a card, deal 4 [gold]Pyro[/gold] damage to a random enemy.",
+   effects: [{op: apply_power, power: mf_grin_malkin_hat, amount: 4, target: self}]}
+
+# Fontaine rework (2026-10-19): the Block Power, and a Hydro aura each turn
+# (`ReboundHydrotherapyPower`).
+- {id: proto_mf_sigewinne_rebound_hydrotherapy, name: "Sigewinne — Rebound Hydrotherapy", character: klee,
+   upgrade: {power_amount: 1},
+   authored_by: [claude],
+   nation: fontaine, star: 5, rarity: uncommon, role_c: applier, element: hydro, cost: 1, type: power,
+   description: "At the start of your turn, gain 3 [gold]Block[/gold] and apply [gold]Hydro[/gold] to a random enemy.",
+   effects: [{op: apply_power, power: mf_rebound_hydrotherapy, amount: 3, target: self}]}
+
+# Fontaine rework (2026-10-19): next turn's draw is the base game's
+# DrawCardsNextTurnPower.
+- {id: proto_mf_escoffier_low_temperature_cooking, name: "Escoffier — Low-Temperature Cooking", character: klee,
+   upgrade: {block: 3},
+   authored_by: [claude],
+   nation: fontaine, star: 5, rarity: uncommon, role_c: buffer, element: cryo, cost: 1, type: skill,
+   description: "Gain 8 [gold]Block[/gold]. Next turn, draw 1 card.",
+   effects: [{op: block, amount: 8}, {op: apply_power, power: draw_cards_next_turn, amount: 1, target: self}]}
+
+# Fontaine rework (2026-10-19): Burning Pact. Any card in the Hand may go,
+# a Status or a Curse included (`filter: any`). Emilie is Dendro: no element.
+- {id: proto_mf_emilie_lumidouce_legacy, name: "Emilie — Lumidouce Legacy", character: klee,
+   upgrade: {draw: 1},
+   authored_by: [claude],
+   nation: fontaine, star: 5, rarity: uncommon, role_c: buffer, cost: 1, type: skill,
+   description: "[gold]Exhaust[/gold] a card in your [gold]Hand[/gold]. Draw {Cards:diff()} cards.",
+   effects: [{op: exhaust_from, select: chosen, filter: any, amount: 1}, {op: draw, amount: 2}]}
+
+# Fontaine rework (2026-10-19): 1 cost and Block after a reaction to 2 cost,
+# Geo to ALL each turn (`CannonFireSupportPower`).
 - {id: proto_mf_navia_cannon_fire_support, name: "Navia — Cannon Fire Support", character: klee,
    upgrade: {power_amount: 2},
    authored_by: [claude],
    art_of: navia_cannon_fire_support,
-   nation: fontaine, star: 5, rarity: rare, role_c: buffer, element: geo, cost: 1, type: power,
-   description: "Whenever an [gold]Elemental Reaction[/gold] happens, gain 4 [gold]Block[/gold].",
-   effects: [{op: apply_power, power: cannon_fire_support, amount: 4, target: self, note: "whenever an Elemental Reaction happens, gain 4 Block"}]}
+   nation: fontaine, star: 5, rarity: rare, role_c: trigger, element: geo, cost: 2, type: power,
+   description: "At the start of your turn, deal 5 [gold]Geo[/gold] damage to ALL enemies.",
+   effects: [{op: apply_power, power: cannon_fire_support, amount: 5, target: self}]}
 
 - {id: proto_mf_clorinde_impale_the_night, name: "Clorinde — Impale the Night", character: klee,
    upgrade: {damage: 3},
@@ -2818,6 +2907,51 @@
    nation: fontaine, star: 5, rarity: rare, role_c: buffer, element: pyro, cost: 1, type: power,
    description: "At the start of your turn, lose 1 HP and gain {PowerAmount:diff()} [gold]Strength[/gold].",
    effects: [{op: apply_power, power: masque_red_death, amount: 1, target: self, note: "at the start of each turn lose 1 HP and gain 1 Strength"}]}
+
+# Fontaine rework (2026-10-19): pays off any HP lost, enemy attacks included
+# (`ChillingPenaltyPower`).
+- {id: proto_mf_wriothesley_chilling_penalty, name: "Wriothesley — Chilling Penalty", character: klee,
+   upgrade: {power_amount: 2},
+   authored_by: [claude],
+   nation: fontaine, star: 5, rarity: rare, role_c: applier, element: cryo, cost: 1, type: power,
+   description: "Whenever you lose HP, deal 5 [gold]Cryo[/gold] damage to a random enemy.",
+   effects: [{op: apply_power, power: mf_chilling_penalty, amount: 5, target: self}]}
+
+# Fontaine rework (2026-10-19): Adrenaline with a second Energy for 4 HP.
+- {id: proto_mf_lyney_miracle_parade, name: "Lyney — Wondrous Trick: Miracle Parade", character: klee,
+   upgrade: {draw: 1},
+   authored_by: [claude],
+   nation: fontaine, star: 5, rarity: rare, role_c: buffer, element: pyro, cost: 0, type: skill, exhaust: true,
+   description: "Lose 4 HP. Gain {energyPrefix:energyIcons(2)}. Draw {Cards:diff()} cards.",
+   effects: [{op: damage, amount: 4, target: self}, {op: energy, amount: 2}, {op: draw, amount: 2}]}
+
+# Fontaine rework (2026-10-19): an enemy hit is one this card's damage
+# reached, a kill included (`block_per_enemy_hit`).
+- {id: proto_mf_sigewinne_super_saturated_syringing, name: "Sigewinne — Super-Saturated Syringing", character: klee,
+   upgrade: {damage: 3},
+   authored_by: [claude],
+   nation: fontaine, star: 5, rarity: rare, role_c: applier, element: hydro, cost: 2, type: attack,
+   description: "Deal 10 [gold]Hydro[/gold] damage to ALL enemies. Gain 4 [gold]Block[/gold] for each enemy hit.",
+   effects: [{op: damage, amount: 10, target: all_enemies, applies_element: true},
+             {op: block_per_enemy_hit, amount: 4}]}
+
+# Fontaine rework (2026-10-19): the pool's one heal, Rare and Exhausting
+# (LAW), Mizuki's Anraku's shape.
+- {id: proto_mf_escoffier_rehab_diet, name: "Escoffier — Rehab Diet", character: klee,
+   upgrade: {block: 3, mend: 3},
+   authored_by: [claude],
+   nation: fontaine, star: 5, rarity: rare, role_c: buffer, element: cryo, cost: 1, type: skill, exhaust: true,
+   description: "Gain 10 [gold]Block[/gold]. [gold]Mend[/gold] {Mend:diff()}{InCombat: ({MendLands} will land)|}.",
+   effects: [{op: block, amount: 10}, {op: mend, amount: 6}]}
+
+# Fontaine rework (2026-10-19): a Status or Curse is taken at random, the
+# Hand first (`AromaticExplicationPower`). Emilie is Dendro: no element.
+- {id: proto_mf_emilie_aromatic_explication, name: "Emilie — Aromatic Explication", character: klee,
+   upgrade: {cost: -1},
+   authored_by: [claude],
+   nation: fontaine, star: 5, rarity: rare, role_c: buffer, cost: 1, type: power,
+   description: "At the start of your turn, [gold]Exhaust[/gold] a Status or Curse from your [gold]Hand[/gold] or [gold]Draw Pile[/gold]. If you did, gain {energyPrefix:energyIcons(1)}.",
+   effects: [{op: apply_power, power: mf_aromatic_explication, amount: 1, target: self}]}
 
 # coven Personals, PR: coven-personals (R236). Prune in Klee's own pool, Qiqi
 # shared, Sayu and Yaoyao cut by the Klee-only companions (2026-10-03).

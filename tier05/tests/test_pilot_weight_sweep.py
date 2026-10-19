@@ -644,7 +644,7 @@ def test_the_control_cell_is_not_a_term_in_the_gate():
 
 
 def test_the_gate_fires_end_to_end_on_the_first_offending_point(
-        scope, monkeypatch):
+        scope, monkeypatch, request):
     """The whole loop, on real cells: `EXHAUST_JUNK_BONUS` is unreachable
     behind Kokomi's rotation law, so the sweep is refused rather than printing
     a table of rows identical to the baseline for a reason that has nothing to
@@ -660,7 +660,22 @@ def test_the_gate_fires_end_to_end_on_the_first_offending_point(
     -- which would make this loop pass by never asking the question. The claim
     is about the gate MACHINERY, so it is made on a vector the harness is
     pointed at by hand.
+
+    THE FONTAINE POOL REWORK (2026-10-19) gave the axis a door: Emilie's
+    Lumidouce Legacy exhausts any card, junk included, for anyone. The claim
+    is still about the machinery, so the world it runs in leaves that one
+    row out and the axis is dead by construction again.
     """
+    from tier0 import constants as C
+    from tier05 import rewards
+    monkeypatch.setattr(C, "FONTAINE_OVERHAUL_POOL_IDS", tuple(
+        cid for cid in C.FONTAINE_OVERHAUL_POOL_IDS
+        if cid != "proto_mf_emilie_lumidouce_legacy"))
+    def _forget():
+        rewards._companion_roster.cache_clear()
+        rewards.companion_pool.cache_clear()
+    _forget()
+    request.addfinalizer(_forget)
     monkeypatch.setitem(w4.STAGE_N, "coverage", (4, 11))
     cells = ["exhaust-primary", "exhaust-secondary"]
     base = dict(EXHAUST_DEFAULTS)

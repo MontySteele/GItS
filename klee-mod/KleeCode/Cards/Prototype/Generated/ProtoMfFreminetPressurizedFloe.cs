@@ -78,7 +78,7 @@ public sealed class ProtoMfFreminetPressurizedFloe : CustomCardModel, IElemental
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(10m),
+            new CalculationBaseVar(12m),
             new ExtraDamageVar(1m),
             new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card)),
             new SpotlightSystem.SpotlitBlockVar(6m)
@@ -104,6 +104,7 @@ public sealed class ProtoMfFreminetPressurizedFloe : CustomCardModel, IElemental
 
     protected override void OnUpgrade()
     {
-        DynamicVars.CalculationBase.UpgradeValueBy(2m);
+        DynamicVars.CalculationBase.UpgradeValueBy(4m);
+        DynamicVars.Block.UpgradeValueBy(2m);
     }
 }

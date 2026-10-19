@@ -294,6 +294,11 @@ SIM_CALL_SITES = {
     # Itto's Royal Descent (2026-10-18): Geo back at an attacker that dealt
     # no damage.
     ('effects.py', 23): ("'companion'", None, "'geo'"),
+    # The Fontaine pool rework (2026-10-19): Navia's Geo to ALL each turn,
+    # Lyney's Grin-Malkin Hat and Wriothesley's Chilling Penalty.
+    ('effects.py', 24): ("'companion'", None, "'geo'"),
+    ('effects.py', 25): ("'companion'", None, "'pyro'"),
+    ('effects.py', 26): ("'companion'", None, "'cryo'"),
     # (`furina_stage.py`'s two doors left with v2, the Salon's Tab,
     # 2026-10-05: the arm runs on `furina_tide`'s rules and its one door.)
     # THE FURINA RESEARCH SLICE (`furina_tide`, sim only): the one unpowered

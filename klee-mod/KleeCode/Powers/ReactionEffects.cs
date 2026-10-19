@@ -38,6 +38,16 @@ internal static class ReactionEffects
     public static int TotalResolved { get; private set; }
 
     /// <summary>
+    /// <see cref="TotalResolved"/>'s twin for one reaction: Crystallizes
+    /// resolved, monotonic and only ever diffed. Navia's Ceremonial
+    /// Crystalshot (the Fontaine pool rework, 2026-10-19) asks "if this
+    /// triggers Crystallize" by snapshotting it at the top of its play. Sim
+    /// twin: <c>state.crystallize_this_card</c>, counted in
+    /// <c>reactions._react</c>.
+    /// </summary>
+    public static int CrystallizeResolved { get; private set; }
+
+    /// <summary>
     /// TotalResolved as of the start of the current player turn. The sim keeps
     /// an explicit state.reactions_this_turn and zeroes it at the top of the
     /// player turn (combat.py) BEFORE start-of-turn bomb detonation, so
@@ -435,6 +445,7 @@ internal static class ReactionEffects
         if (reaction != Reaction.None)
         {
             TotalResolved++;
+            if (reaction == Reaction.Crystallize) CrystallizeResolved++;
             RecordResolved(target.CombatState, dealer);
             // TELEMETRY ONLY (2026-10-06): the same credit, by reaction name.
             Diagnostics.ReactionTally.NoteReaction(

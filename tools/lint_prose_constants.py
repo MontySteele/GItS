@@ -254,6 +254,10 @@ ALLOWED: dict[tuple[str, str, str], str] = {
     ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoKoBlazingDelight.cs",
      "WaitForItPower.ReactionEnergy", "1"):
         "the card's own energy, not Wait For It's",
+    # The Fontaine pool rework (2026-10-19): Emilie's Energy joined the set.
+    ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoKoBlazingDelight.cs",
+     "AromaticExplicationPower.EnergyPerExhaust", "1"):
+        "the card's own energy, not Aromatic Explication's",
     ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoKoBlazingDelight.cs",
      "BouquetOfRoses.Energy", "1"):
         "the card's own energy, not Bouquet of Roses'",

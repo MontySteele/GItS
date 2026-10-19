@@ -189,8 +189,12 @@ internal static class CompanionOverhaulRoster
     /// <summary>
     /// Fontaine's sixteen, ported as they are (legacy cleanup pick 4,
     /// 2026-10-01): the shipped rows' bodies and upgrades on `proto_mf_` ids,
-    /// in the sheet's order. A Fontaine rework is its own paper. tier0 twin:
-    /// <c>C.FONTAINE_OVERHAUL_POOL_IDS</c>.
+    /// in the sheet's order.
+    ///
+    /// THIRTY SINCE THE FONTAINE POOL REWORK (2026-10-19,
+    /// <c>review/active/fontaine-companions-2026-10-19.md</c>): five kept,
+    /// eleven rebuilt on their ids, fourteen new for nine 5-stars (8 / 13 / 9).
+    /// tier0 twin: <c>C.FONTAINE_OVERHAUL_POOL_IDS</c>.
     /// </summary>
     private static IEnumerable<CardModel> FontaineUniversals() => new CardModel[]
     {
@@ -206,9 +210,23 @@ internal static class CompanionOverhaulRoster
         ModelDb.Card<ProtoMfFreminetPersDeploy>(),
         ModelDb.Card<ProtoMfFreminetPressurizedFloe>(),
         ModelDb.Card<ProtoMfFreminetShatteringPressure>(),
+        ModelDb.Card<ProtoMfNaviaCeremonialCrystalshot>(),
+        ModelDb.Card<ProtoMfClorindeHuntersVigil>(),
+        ModelDb.Card<ProtoMfNeuvilletteOTears>(),
+        ModelDb.Card<ProtoMfArlecchinoBalemoonRising>(),
+        ModelDb.Card<ProtoMfWriothesleyGraciousRebuke>(),
+        ModelDb.Card<ProtoMfLyneyGrinMalkinHat>(),
+        ModelDb.Card<ProtoMfSigewinneReboundHydrotherapy>(),
+        ModelDb.Card<ProtoMfEscoffierLowTemperatureCooking>(),
+        ModelDb.Card<ProtoMfEmilieLumidouceLegacy>(),
         ModelDb.Card<ProtoMfNaviaCannonFireSupport>(),
         ModelDb.Card<ProtoMfClorindeImpaleTheNight>(),
         ModelDb.Card<ProtoMfNeuvilletteAncientSeaAuthority>(),
         ModelDb.Card<ProtoMfArlecchinoMasqueRedDeath>(),
+        ModelDb.Card<ProtoMfWriothesleyChillingPenalty>(),
+        ModelDb.Card<ProtoMfLyneyMiracleParade>(),
+        ModelDb.Card<ProtoMfSigewinneSuperSaturatedSyringing>(),
+        ModelDb.Card<ProtoMfEscoffierRehabDiet>(),
+        ModelDb.Card<ProtoMfEmilieAromaticExplication>(),
     };
 }
