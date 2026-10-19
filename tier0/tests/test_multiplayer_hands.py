@@ -1,6 +1,6 @@
 """The co-op treasure-room hands: names, packing, and the ctex reader.
 
-`tools/gen_multiplayer_hands.py` writes twenty Tier F hands (twelve recolours, four copies each for Varka and Yae) that the game
+`tools/gen_multiplayer_hands.py` writes twenty Tier F hands (a recolour of a base arm per character, four poses each) that the game
 finds only by name: `CharacterModel.Arm<Pose>TexturePath` derives
 `res://images/ui/hands/multiplayer_hand_<id.entry>_<pose>.png` and nothing
 overrides it. So the things that can silently break are all spellings, each

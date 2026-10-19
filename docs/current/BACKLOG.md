@@ -16,10 +16,7 @@ cut to about 350 characters is `git show 3ce4f8c35:docs/current/BACKLOG.md`.
 
 ## Kits and display (the mod)
 
-- Yae's art QA (one pass, never reviewed): her character-select image has black smudges near the mouth; check her model frames, select, rest and merchant art for the same.
-- Kokomi and Yae have still character-select images; Klee, Varka and Furina have animated ones. Kokomi's waits for her prototype to settle.
 - Upgraded starter relics share their starters' icons (Pounding Surprise II, the Watatsumi Casket, Yae's Enlightened Blessing). Power badges: the 2026-10-19 badge pass gave every shared badge its own icon (`art/plan.tsv` power badge pass); the pairs that share on purpose (a power and its upgraded form, an Oath and its Left twin) stay shared. Check the three Reaction-icon badges (Aftershock, Grand Strategist, All Four Winds) read at game size; they are wide and render small.
-- Klee's map marker is still the wiki side-icon in the lower two-thirds of its 49x64 box (visual paper, pick 3 (a)): refit it with an `art_process` pass in the main checkout, or draw a base-style pin.
 - Kokomi's three potions and Furina's two potions (#1324, #1325) were not met in a seat; check them with `understudy.embark --relic` or in a play (the relics are seen).
 - Klee's rest-site pose is a still: BaseLib rebuilds the rest sprite from the texture alone, so an idle loop there needs code.
 - Turn-start order: Durin's Pyro hit, Neuvillette's Hydro, Varka's Swirl, Navia's Geo and Sigewinne's Hydro all share `AfterPlayerTurnStart`, so the mod gives them no order where the sim does; stage them into one ordered broadcast if a seat sees the two disagree.

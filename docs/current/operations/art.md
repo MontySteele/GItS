@@ -11,11 +11,12 @@ python3 tools/art_coverage.py            # CI runs it WITHOUT --strict (empty bi
 python3 tools/art_hunt.py Furina ; python3 tools/art_contact_sheet.py --list
 .venv/Scripts/python tools/cut_combat_layers.py klee [--check]
 .venv/Scripts/python tools/cut_combat_layers.py --all [--check|--verify]   # 10 configs
-.venv/Scripts/python tools/gen_furina_stills.py    # and gen_kokomi_stills.py
+.venv/Scripts/python tools/gen_furina_stills.py    # and gen_kokomi_stills.py, gen_yae_stills.py [--art-root <checkout>] [--check]
+.venv/Scripts/python tools/gen_map_markers.py [--chars klee,varka,furina,kokomi,yae] [--art-root <checkout>] [--check]   # every kit's map marker: a base-style pin with the model's face
 .venv/Scripts/python tools/gen_char_icons.py [--chars klee,varka,kokomi,furina] [--art-root <checkout>] [--out-root <dir>] [--check]   # top-bar icons, 85x85 like the base cast
 .venv/Scripts/python tools/gen_char_icon_outlines.py [--check]   # every outline halo, after gen_char_icons
 .venv/Scripts/python tools/gen_mod_image.py [--check]      # Mods-screen badge, EB-161
-.venv/Scripts/python tools/gen_multiplayer_hands.py [--check] [--art-root <checkout>]   # co-op treasure hands, from the game pck
+.venv/Scripts/python tools/gen_multiplayer_hands.py [--check] [--art-root <checkout>] [--chars yae,varka]   # co-op treasure hands, from the game pck
 ```
 
 Rules that hold across the pipeline:
@@ -100,20 +101,24 @@ Visual papers: `review/active/varka-visual-paper-2026-10-13.md`,
   .venv/Scripts/python tools/char_render/pack.py --char furina --stage-fx-only [spend drain repay] --art-root <main checkout> [--check]   # her stage effects, likewise
   ```
 
-- Kokomi's skin layers 手 and 肌 are her `alpha_mats` and must render
+- Kokomi's skin layers 手 and 肌, and Yae's 肌, are `alpha_mats` and must render
   BLENDED: under DITHERED the toon ramp draws every cut texel opaque black.
+- A kit whose face hull folds into the lips (dark ticks at the mouth corners
+  in the close-up) names its mouth material as `mouth_mat` (Varka, Yae).
 - Yae's model is temporary; `Yae.cs` loads `yae/model/combat.tscn` first and
-  falls back to Klee's borrowed still only where her file is missing.
+  falls back to her own `combat_model.png` (`gen_yae_stills.py`, from her
+  idle frame). Every Yae shell surface is now her own (2026-10-19); build_pck's
+  Copy-YaeFallback only fills a checkout without her art.
 
 ### Character-select idle loops (`tools/select_loop.py`)
 
-Klee, Varka, Furina and Kokomi play a rendered loop of the close-up; manifest
+Klee, Varka, Furina, Kokomi and Yae play a rendered loop of the close-up; manifest
 `tools/select_loop.json`. A character with no entry gets `tools/select_bg.py`'s
-breathing still. Yae waits for her model to settle.
+breathing still.
 
 ```sh
 .venv/Scripts/python tools/select_loop.py build --char klee --pmx <klee pmx> --work <scratch dir> --art-root <main checkout>
-.venv/Scripts/python tools/select_loop.py build --char varka|furina|kokomi --models <scratch>/models --work <scratch dir> --art-root <main checkout>
+.venv/Scripts/python tools/select_loop.py build --char varka|furina|kokomi|yae --models <scratch>/models --work <scratch dir> --art-root <main checkout>
 .venv/Scripts/python -m tools.<char>_rig gen     # the scene reads the manifest
 ```
 
