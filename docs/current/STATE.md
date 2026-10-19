@@ -162,11 +162,14 @@ Per-card readings: `docs/notes/prototype-surface-provenance.md`.
   keyboard's peek key (Space, or S in keyboard-only play, both remappable in
   the game's settings; the hint under the strip names it) and on a click on
   that hint (2026-10-16, unseen in game).
-- **Starter relic:** the Tamakushi Casket gains 3 Block at the start of her
-  turn while a Plan is waiting, after the Block clear and before Plans
-  resolve. Its upgrade, the Watatsumi Casket, gains 3 for each Plan waiting.
+- **Starter relic:** since 2026-10-18 the Tamakushi Casket gains 1 Block
+  whenever she plays a Plan card (Stings and Wards included) or a Companion,
+  played or planned (a Plan carried out does not count). Its upgrade, the
+  Watatsumi Casket, gains 2.
 - **Jellyfish:** Stings and Wards are generated, cost 0, Ethereal and
-  Exhaust, and have a Plan line.
+  Exhaust, and have a Plan line. Since 2026-10-18 a Ward draws 1 card and its
+  Plan draws 1 (2 upgraded), with no Block; Watchful Shoal adds damage to
+  Stings only.
 - **Pool:** 78 (20 / 38 / 20), five co-op cards. Ancients: Divine Strategy
   (Tome) and Princess of Watatsumi (Tooth on Kurage's Oath).
 - **Relics and potions:** her own seven relics and three potions

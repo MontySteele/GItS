@@ -911,19 +911,18 @@ public sealed class KurageBloomPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// Watchful Shoal (Kokomi round-3 changes, 2026-10-12): "Your Stings deal 3
-/// additional damage. Your Wards gain 3 additional Block." The base game's
-/// Accuracy, on the jellyfish.
+/// Watchful Shoal (Kokomi round-3 changes, 2026-10-12): "Your Stings deal 4
+/// additional damage." The base game's Accuracy, on the Stings. (Its Ward
+/// half went with the Ward's Block, 2026-10-18.)
 ///
-/// THREE PLACES A JELLYFISH NUMBER IS MADE, and this reaches each:
-/// a Sting's or Ward's NOW-LINE, played or carried out by a flip, goes
-/// through the engine's hooks (<see cref="ModifyDamageAdditive"/>,
-/// <see cref="ModifyBlockAdditive"/>), which is also what folds the face; a
-/// Sting's PLAN LINE is an unpowered planned hit the hooks never see, so its
-/// bonus is folded at writing with her Strength
+/// TWO PLACES A STING NUMBER IS MADE, and this reaches both:
+/// a Sting's NOW-LINE, played or carried out by a flip, goes through the
+/// engine's hook (<see cref="ModifyDamageAdditive"/>), which is also what
+/// folds the face; its PLAN LINE is an unpowered planned hit the hook never
+/// sees, so its bonus is folded at writing with her Strength
 /// (<see cref="KokomiPlan.Hers"/> asks <see cref="StingBonus"/>), and the
-/// face's <c>PlanDamageVar</c> previews the same call. A Ward's Plan line
-/// gains no Block. Sim twin: <c>kokomi_plan.watchful_shoal_bonus</c>.
+/// face's <c>PlanDamageVar</c> previews the same call. Sim twin:
+/// <c>kokomi_plan.watchful_shoal_bonus</c>.
 /// </summary>
 public sealed class WatchfulShoalPower : PowerModel, ILocalizationProvider
 {
@@ -932,21 +931,19 @@ public sealed class WatchfulShoalPower : PowerModel, ILocalizationProvider
         ("title", "Watchful Shoal"),
         ("description",
             "Your [gold]Stings[/gold] deal [blue]{Amount}[/blue] additional "
-          + "damage. Your [gold]Wards[/gold] gain [blue]{Amount}[/blue] "
-          + "additional [gold]Block[/gold]."),
+          + "damage."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    /// <summary>Kokomi review r5 (2026-10-14, A9): the badge defines the two
-    /// cards it names, as the card's face does (<see
-    /// cref="KokomiCards.WithStingPreview"/>), so "Wards" is defined where a
-    /// seat reads it. Two boxes, inside the three-tip cap.</summary>
+    /// <summary>Kokomi review r5 (2026-10-14, A9): the badge defines the
+    /// card it names, as the card's face does (<see
+    /// cref="KokomiCards.WithStingPreview"/>), so "Stings" is defined where a
+    /// seat reads it.</summary>
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KokomiCards.WithWardPreview(KokomiCards.WithStingPreview(
-            System.Array.Empty<IHoverTip>()));
+        KokomiCards.WithStingPreview(System.Array.Empty<IHoverTip>());
 
     /// <summary>The Plan-line bonus a Sting written now carries: the stack
     /// on <paramref name="kokomi"/>, 0 for any other card.</summary>
@@ -964,14 +961,6 @@ public sealed class WatchfulShoalPower : PowerModel, ILocalizationProvider
         if (Owner == null || dealer != Owner || target == Owner) return 0m;
         if (!props.IsPoweredAttack()) return 0m;
         return cardSource is ProtoKkSting ? Amount : 0m;
-    }
-
-    public override decimal ModifyBlockAdditive(
-        Creature target, decimal block, ValueProp props,
-        CardModel? cardSource, CardPlay? cardPlay)
-    {
-        if (Owner == null || target != Owner) return 0m;
-        return cardSource is ProtoKkWard ? Amount : 0m;
     }
 }
 

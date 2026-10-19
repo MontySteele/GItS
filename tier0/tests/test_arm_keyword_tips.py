@@ -862,8 +862,6 @@ NO_GLOSSARY_ROW_OWED = {
     "Sting": "a token card the page prints with its own face once it is added",
     "Stings": "a token card the page prints with its own face once it is added",
     "Ward": "a token card the page prints with its own face once it is added",
-    # Watchful Shoal (Kokomi round-3 changes, 2026-10-12).
-    "Wards": "a token card the page prints with its own face once it is added",
     "Sea Glass": "a token card the page prints with its own face once added",
     # The card text pass (2026-10-12): the hand is a zone, golded as the base
     # golds it; the two cards a face makes, golded as Burn is.
@@ -1375,10 +1373,10 @@ GOLD_BASE_GAME = {"Block", "Energy", "Exhaust", "Exhausted", "Exhausts",
 GOLD_ELEMENTS = {"Pyro", "Hydro", "Electro", "Cryo", "Anemo", "Geo"}
 #: A card the face makes, golded as the base golds `OVERCLOCK`'s Burn.
 #: Sting, Stings and Ward since the Kokomi re-founding (2026-10-12), which
-#: also preview the card they name (`KokomiCards.WithStingPreview`); Wards
-#: since Watchful Shoal's rewrite (Kokomi round-3 changes, 2026-10-12).
+#: also preview the card they name (`KokomiCards.WithStingPreview`). (Wards
+#: left with Watchful Shoal's Ward half, 2026-10-18.)
 GOLD_CREATED_CARDS = {"Dazed", "Confiscated", "Sting", "Stings", "Ward",
-                      "Wards", "Sea Glass",
+                      "Sea Glass",
                       # The card text pass (2026-10-12, rule 9).
                       "Alice's Mine", "Pop!", "Four Winds' Ascension"}
 #: Words whose tip attaches off an op rather than off the table.

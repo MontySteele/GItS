@@ -830,10 +830,10 @@ CVN_HERALD_APPLICATIONS = 2     # Qiqi: "apply Cryo twice"
 # Casket carries, printed on the relic and on no card, named here for
 # `tools/lint_constant_parity.py` to compare the C# mirror BY VALUE.
 # THE RE-FOUNDING (2026-10-12, review/ruled/kokomi-design-pass-2026-10-11.md
-# pick 3, ruled): the Casket's count and Open the Casket are gone; the relic
-# reads "At the start of your turn, if a Plan is waiting, gain 3 Block." (start,
-# not end, since [USER]'s 2026-10-12 ruling).
-KOKOMI_OVERHAUL_CASKET_BLOCK = 3
+# pick 3, ruled): the Casket's count and Open the Casket are gone. Ward and
+# Casket (2026-10-18): the relic reads "Whenever you play a Plan card or a
+# Companion, gain 1 Block."
+KOKOMI_OVERHAUL_CASKET_BLOCK = 1
 # Call the Generals' "Choose 1 of 3 random Rare Inazuma Companions" (the card
 # paper's Rare): how many are offered. Mirrored BY VALUE against
 # `KokomiCompanionPlan.GeneralsOffered`.

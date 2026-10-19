@@ -1683,8 +1683,7 @@
       "power_amount": 1
     },
     "proto_kk_ward": {
-      "block": 2,
-      "plan_power_amount": 1
+      "plan_draw": 1
     },
     "proto_kk_watatsumi_drill": {
       "damage": 3

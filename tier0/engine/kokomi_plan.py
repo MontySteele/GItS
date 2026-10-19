@@ -412,7 +412,7 @@ WATATSUMI_RESISTANCE = "kk_watatsumi_resistance"
 #: `Powers/Prototype/KokomiRefounding.cs`.
 SANGONOMIYAS_ORDERS = "kk_sangonomiyas_orders"   # turn start: N Companions
 KURAGE_BLOOM = "kk_kurage_bloom"                 # turn start: N Stings
-WATCHFUL_SHOAL = "kk_watchful_shoal"             # Stings +N dmg, Wards +N Block
+WATCHFUL_SHOAL = "kk_watchful_shoal"             # Stings +N dmg
 COORDINATED_TIDE = "kk_coordinated_tide"         # a Companion's reaction: N Stings
 GRAND_STRATEGIST = "kk_grand_strategist"         # her reaction: N to ALL
 ENDLESS_SHOAL = "kk_endless_shoal"               # a Plan carried out: N Stings
@@ -2747,11 +2747,11 @@ def grand_design(state: CombatState, card: Card, amount: int) -> int:
 def watchful_shoal_bonus(state: CombatState, card: Optional[Card],
                          jellyfish_id: str) -> int:
     """WATCHFUL SHOAL (Kokomi round-3 changes, 2026-10-12): "Your Stings deal
-    N additional damage. Your Wards gain N additional Block." The stack when
-    `card` is the jellyfish `jellyfish_id` (either upgrade), else 0. Read by
-    `effects._op_damage` (a Sting's now-line, played or flipped),
-    `effects._op_block` (a Ward's now-line) and `hers` (a Sting's Plan line,
-    folded at writing). `WatchfulShoalPower` is the twin."""
+    N additional damage." (Its Ward half went with the Ward's Block,
+    2026-10-18.) The stack when `card` is the jellyfish `jellyfish_id` (either
+    upgrade), else 0. Read by `effects._op_damage` (a Sting's now-line,
+    played or flipped) and `hers` (a Sting's Plan line, folded at writing).
+    `WatchfulShoalPower` is the twin."""
     if card is None or not live(state):
         return 0
     if card.id not in (jellyfish_id, jellyfish_id + "+"):
@@ -3059,23 +3059,30 @@ def turn_start_generators(state: CombatState) -> None:
         add_companions(state, orders, upgraded=False, free=True)
 
 
-def casket_block(state: CombatState) -> None:
-    """THE TAMAKUSHI CASKET (the re-founding, 2026-10-12): "At the start of
-    your turn, if a Plan is waiting, gain 3 Block." Start, not end, since
-    [USER]'s ruling the same day ("let's have her starter relic apply block at
-    the beginning of the turn rather than the end"). Its hook, at this
-    engine's `AfterBlockCleared` site: right after the turn's Block clear and
-    before `resolve_all` carries the waiting Plans out, so the queue it reads
-    is still last turn's. Raw relic Block (`ValueProp.Unpowered`).
-    `TamakushiCasket.AfterBlockCleared` is the twin."""
+def casket_counts(card: Optional[Card]) -> bool:
+    """Does the Tamakushi Casket pay for this card? A Plan card (Stings and
+    Wards included) or a Companion. `TamakushiCasket.Counts` is the twin.
+    PURE."""
+    return card is not None and (can_be_written(card)
+                                 or bool(card.is_companion))
+
+
+def casket_block(state: CombatState, card: Card) -> None:
+    """THE TAMAKUSHI CASKET (Ward and Casket, 2026-10-18, [USER]: "Modify the
+    starting relic... 'gain 2 block for each Plan or Companion Card
+    played.'", then down to 1 with Stings and Wards counting): "Whenever you
+    play a Plan card or a Companion, gain 1 Block." Called by `effects.resolve_card` after each play,
+    face-up or written on the Bake-Kurage (planning is playing it). A
+    carry-out is not her play (`kk_carrying_out`). Raw relic Block
+    (`ValueProp.Unpowered`). `TamakushiCasket.AfterCardPlayed` is the twin."""
     from tier0.content import loader                # late import: cycle
     if not live(state):
         return
     if loader.OVERHAUL_CASKET_HOOK not in state.player.relic_hooks:
         return
-    if not state.kk_plan_queue:
+    if state.kk_carrying_out or not casket_counts(card):
         return
     n = int(C.KOKOMI_OVERHAUL_CASKET_BLOCK)
     state.player.block += n
     state.emit("block", amount=n)
-    state.emit("casket_block", amount=n, waiting=len(state.kk_plan_queue))
+    state.emit("casket_block", amount=n, card=card.id)

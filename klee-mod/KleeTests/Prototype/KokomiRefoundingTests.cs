@@ -31,36 +31,113 @@ public class KokomiRefoundingTests
     // ---- the relic ---------------------------------------------------------
 
     [Fact]
-    public void The_casket_is_3_block_while_a_plan_waits_and_the_upgrade_3_per_plan()
+    public void The_casket_is_1_block_a_play_and_the_upgrade_2()
     {
-        Assert.Equal(3, KokomiOverhaulLaw.CasketBlock);
-        Assert.Equal(3, new TamakushiCasket().Block);
-        Assert.Equal(3, new TamakushiCasket().BlockFor(2));
-        Assert.Equal(6, new WatatsumiCasket().BlockFor(2));
-        Assert.False(TamakushiCasket.Pays(0));
-        Assert.True(TamakushiCasket.Pays(1));
+        // Ward and Casket (2026-10-18, [USER]: "if we allow for Sting and
+        // Ward to count, is that a real problem? ... (possibly bringing it
+        // down to 1 per card played)").
+        Assert.Equal(1, KokomiOverhaulLaw.CasketBlock);
+        Assert.Equal(1, new TamakushiCasket().Block);
+        Assert.Equal(2, new WatatsumiCasket().Block);
+        Assert.Equal(2, WatatsumiCasket.WatatsumiBlock);
         Assert.Equal(
-            "At the start of your turn, if a [gold]Plan[/gold] is waiting, gain "
-            + "[blue]3[/blue] [gold]Block[/gold].",
+            "Whenever you play a [gold]Plan[/gold] card or a Companion, gain "
+            + "[blue]1[/blue] [gold]Block[/gold].",
             new TamakushiCasket().Localization!
                 .First(r => r.Item1 == "description").Item2);
-        Assert.Contains("[blue]3[/blue] [gold]Block[/gold] for each",
+        Assert.Equal(
+            "Whenever you play a [gold]Plan[/gold] card or a Companion, gain "
+            + "[blue]2[/blue] [gold]Block[/gold].",
             new WatatsumiCasket().Localization!
                 .First(r => r.Item1 == "description").Item2);
     }
 
     [Fact]
-    public void The_casket_reads_the_queue_and_gains_raw_block_after_the_block_clear()
+    public void The_casket_pays_for_a_plan_card_a_companion_a_sting_and_a_ward()
     {
-        // [USER], 2026-10-12: "let's have her starter relic apply block at the
-        // beginning of the turn rather than the end." AfterBlockCleared runs
-        // after the turn's Block clear and before AfterPlayerTurnStart, where
-        // the waiting Plans are carried out.
-        var seq = Seq(nameof(TamakushiCasket), "AfterBlockCleared");
-        var held = seq.IndexOf("KokomiPlan.PlansHeld");
-        var block = seq.IndexOf("CreatureCmd.GainBlock");
-        Assert.True(held >= 0 && block > held, string.Join(" ", seq));
+        var kokomi = Seat.Kokomi();
+        // A Plan card, a Companion with no Plan line, a Plan-line Companion
+        // (one bool, so it pays once), a Sting and a Ward.
+        foreach (var card in new CardModel[] {
+                     new ProtoKkSteadyTide(), new ProtoMiShinobuThundergrust(),
+                     new ProtoMiGorouInuzaka(), new ProtoKkSting(),
+                     new ProtoKkWard() })
+        {
+            Assert.True(TamakushiCasket.Counts(Play(Owned(card, kokomi), kokomi),
+                                               kokomi.Creature),
+                        card.GetType().Name);
+        }
+        // Not her Strike or Defend, and not on anyone else.
+        Assert.False(TamakushiCasket.Counts(Play(Owned(
+            new MegaCrit.Sts2.Core.Models.Cards.StrikeSilent(), kokomi), kokomi),
+            kokomi.Creature));
+        Assert.False(TamakushiCasket.Counts(Play(Owned(
+            new MegaCrit.Sts2.Core.Models.Cards.DefendSilent(), kokomi), kokomi),
+            kokomi.Creature));
+        var klee = Seat.Klee();
+        Assert.False(TamakushiCasket.Counts(Play(Owned(
+            new ProtoKkSteadyTide(), klee), klee), klee.Creature));
     }
+
+    [Fact]
+    public void The_casket_pays_nothing_for_a_plan_carried_out()
+    {
+        var kokomi = Seat.Kokomi();
+        var carrying = (HashSet<MegaCrit.Sts2.Core.Entities.Players.Player>)
+            typeof(KokomiPlan).GetField("_carrying", HeadlessGame.All)!
+                .GetValue(null)!;
+        var play = Play(Owned(new ProtoKkSteadyTide(), kokomi), kokomi);
+        Assert.True(TamakushiCasket.Counts(play, kokomi.Creature));
+        carrying.Add(kokomi.Player);
+        try
+        {
+            Assert.False(TamakushiCasket.Counts(play, kokomi.Creature));
+        }
+        finally
+        {
+            carrying.Remove(kokomi.Player);
+        }
+    }
+
+    [Fact]
+    public void The_casket_pays_raw_block_on_a_play_face_up_or_planned()
+    {
+        // Planning is playing it: the hook never asks whether the play went
+        // onto the Bake-Kurage, only whether it is a carry-out.
+        var hook = Seq(nameof(TamakushiCasket), "AfterCardPlayed");
+        var counts = hook.IndexOf("TamakushiCasket.Counts");
+        var block = hook.IndexOf("CreatureCmd.GainBlock");
+        Assert.True(counts >= 0 && block > counts, string.Join(" ", hook));
+        Assert.DoesNotContain("KokomiPlan.PlayedOnPet", hook);
+        var test = Seq(nameof(TamakushiCasket), "Counts");
+        Assert.Contains("KokomiPlan.IsCarryingOut", test);
+        Assert.DoesNotContain("KokomiPlan.PlayedOnPet", test);
+        // The start-of-turn Block is gone.
+        Assert.Null(typeof(TamakushiCasket).GetMethod("AfterBlockCleared",
+            System.Reflection.BindingFlags.Public
+            | System.Reflection.BindingFlags.Instance
+            | System.Reflection.BindingFlags.DeclaredOnly));
+    }
+
+    private static T Owned<T>(T card, Seat owner) where T : CardModel
+    {
+        Seat.Set(card, "IsMutable", true);
+        Seat.Force(card, "Owner", owner.Player);
+        return card;
+    }
+
+    private static MegaCrit.Sts2.Core.Entities.Cards.CardPlay Play(
+        CardModel card, Seat by) => new()
+    {
+        Card = card,
+        Player = by.Player,
+        Target = null,
+        ResultPile = PileType.Discard,
+        Resources = default,
+        IsAutoPlay = false,
+        PlayIndex = 0,
+        PlayCount = 1,
+    };
 
     // ---- the jellyfish -----------------------------------------------------
 

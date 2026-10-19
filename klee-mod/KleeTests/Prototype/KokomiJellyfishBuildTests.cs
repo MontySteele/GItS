@@ -84,11 +84,21 @@ public class KokomiJellyfishBuildTests
     {
         var ward = new ProtoKkWard();
         Assert.Equal(0, ward.EnergyCost.Canonical);
-        Assert.Equal((4, 6), (Var<ProtoKkWard>("Block"),
-                              Var<ProtoKkWard>("Block", true)));
-        Assert.Equal((1, 2), (Var<ProtoKkWard>("PlanPowerAmount"),
-                              Var<ProtoKkWard>("PlanPowerAmount", true)));
-        Assert.Single(ward.PlanClauses);
+        // Ward and Casket (2026-10-18, [USER]: "Ward should stop giving
+        // Block... change it to 'draw 1. Plan: draw 1'"): Draw 1. Plan: Draw
+        // 1 (2 upgraded). No Block, no Weak.
+        Assert.Equal((1, 1), (Var<ProtoKkWard>("Cards"),
+                              Var<ProtoKkWard>("Cards", true)));
+        Assert.Equal((1, 2), (Var<ProtoKkWard>("PlanCards"),
+                              Var<ProtoKkWard>("PlanCards", true)));
+        Assert.False(ward.DynamicVars.ContainsKey("Block"));
+        Assert.False(ward.DynamicVars.ContainsKey("PlanPowerAmount"));
+        var clause = Assert.Single(ward.PlanClauses);
+        Assert.Equal(KokomiPlan.Kind.Draw, clause.Kind);
+        Assert.Contains("CardPileCmd.Draw",
+                        Il.Calls(Il.Method("ProtoKkWard", "PlayNowLine")));
+        Assert.DoesNotContain("CreatureCmd.GainBlock",
+                              Il.Calls(Il.Method("ProtoKkWard", "PlayNowLine")));
         Assert.True(KokomiRefounding.CanBeWritten(ward));
     }
 
