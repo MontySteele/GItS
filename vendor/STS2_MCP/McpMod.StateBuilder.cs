@@ -1270,7 +1270,12 @@ public static partial class McpMod
             int cardIndex = 0;
             foreach (var card in combatState.Hand.Cards)
             {
-                hand.Add(BuildCardState(card, cardIndex));
+                var cardRow = BuildCardState(card, cardIndex);
+                // GItS LOCAL EDIT (Swirl legibility, 2026-10-19). On a
+                // player-audience read only, the reaction preview a drag onto
+                // each enemy would show (`gits/GitsAimPreview.cs`).
+                GitsAddAimPreviews(card, cardRow);
+                hand.Add(cardRow);
                 cardIndex++;
             }
             state["hand"] = hand;

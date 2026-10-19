@@ -141,7 +141,7 @@ public static class KleeCardTooltips
         // Co-op seat (2026-10-16): Kaeya's Frozen preview missed an Artifact
         // that ate the freeze. A Frozen an Artifact will block is its own row,
         // so a plain Frozen on another enemy cannot hide it.
-        var seen = new HashSet<(Reaction, bool)>();
+        var seen = new HashSet<(Reaction, bool, Element)>();
         var printedTrigger = trigger;
         var hittable = card.CombatState.HittableEnemies;
         var several = hittable.Count() > 1;
@@ -157,8 +157,24 @@ public static class KleeCardTooltips
             // an Artifact also eats Overloaded's Weak, Superconduct's
             // Vulnerable and Electro-Charged's Poison, so those rows say so.
             var blocked = ReactionEffects.ArtifactWillBlock(reaction, enemy);
-            if (reaction == Reaction.None || !seen.Add((reaction, blocked)))
+            // Swirl legibility (2026-10-19): a Swirl preview names the element
+            // it spreads, so one per aura element, not one per reaction.
+            var spread = reaction == Reaction.Swirl ? aura.Element : Element.None;
+            if (reaction == Reaction.None || !seen.Add((reaction, blocked, spread)))
             {
+                continue;
+            }
+
+            // SWIRL LEGIBILITY (2026-10-19): the Swirl preview says what this
+            // Swirl does here -- the element it spreads, the damage, and for
+            // Varka the Oath it credits and what his Fang pays -- instead of
+            // the generic rule.
+            if (reaction == Reaction.Swirl)
+            {
+                previews.Add(new HoverTip(
+                    new LocString(Table, PreviewKey(reaction, false) + ".title"),
+                    (elementOnlyOnSpend ? SpendOnlyPrefix : "")
+                        + SwirlBody(card, aura.Element, several)));
                 continue;
             }
 
@@ -676,6 +692,45 @@ public static class KleeCardTooltips
           + "and there is no hit here for the 1.75x to multiply.",
         _ => null,
     };
+
+    /// <summary>
+    /// SWIRL LEGIBILITY (2026-10-19). The Swirl preview's body for this card
+    /// against a <paramref name="aura"/> aura: the spread and the flat damage
+    /// (<c>ReactionEffects.SwirlPays</c>, Durin's White folded in as there),
+    /// then, for a live Varka, the Oath the Swirl credits and what his Fang
+    /// pays (<see cref="VarkaOath.SwirlPaysNow"/>). Display only.
+    /// </summary>
+    private static string SwirlBody(CardModel card, Element aura, bool others)
+    {
+        var dealer = TipOwner.CreatureOf(card);
+        var damage = (int)(ReactionConstants.SwirlDamage
+                           * CompanionOverhaulReactions.DamageMultiplier(dealer));
+        var varka = dealer != null && VarkaOath.Live(dealer);
+        return SwirlPreviewBody(
+            aura, others, damage,
+            varka && VarkaOath.IsOathElement(aura) ? aura : Element.None,
+            varka ? VarkaOath.SwirlPaysNow(dealer, card) : "");
+    }
+
+    /// <summary>
+    /// The Swirl preview's words, at most two sentences: "Spreads Cryo to the
+    /// other enemies and deals 2 damage to ALL enemies." (with one enemy,
+    /// "Removes the Cryo aura and ..."), then Varka's "+1 Cryo Oath; Swirl
+    /// pays Hydro: 3 Block." where <paramref name="oath"/> or
+    /// <paramref name="pays"/> says so. PURE.
+    /// </summary>
+    public static string SwirlPreviewBody(Element aura, bool others, int damage,
+                                          Element oath, string pays)
+    {
+        var body = (others
+                ? $"Spreads [gold]{aura}[/gold] to the other enemies"
+                : $"Removes the [gold]{aura}[/gold] aura")
+            + $" and deals [blue]{damage}[/blue] damage to ALL enemies.";
+        var varka = new List<string>();
+        if (oath != Element.None) varka.Add($"+1 [gold]{oath}[/gold] Oath");
+        if (!string.IsNullOrEmpty(pays)) varka.Add(pays);
+        return varka.Count == 0 ? body : body + " " + string.Join("; ", varka) + ".";
+    }
 }
 
 /// <summary>

@@ -113,7 +113,7 @@ def test_a_frozen_artifact_blocked_is_said_on_the_row_and_the_preview():
     assert "ReactionEffects.ArtifactWillBlock(reaction, enemy)" in tips
     # Co-op seat (2026-10-16): a blocked Frozen is its own row, and the
     # preview never reads the hit-scoped Shatter mark.
-    assert "new HashSet<(Reaction, bool)>()" in tips
+    assert "new HashSet<(Reaction, bool, Element)>()" in tips
     assert "FrozenArtifactDetail(enemy)" not in tips
     assert "blocks the" in tips
 

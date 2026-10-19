@@ -72,7 +72,7 @@ public class KleeOverhaulRoundFourTests
         Assert.DoesNotContain("(", face);
         Assert.DoesNotContain("of them", face);
         Assert.Equal("[gold]Set off[/gold] here deals [blue]{Size}[/blue] "
-                   + "[gold]Pyro[/gold] damage. Bombs here, oldest first: "
+                   + "{BombElement} damage. Bombs here, oldest first: "
                    + "[blue]{Charges}[/blue].", face);
     }
 

@@ -167,7 +167,10 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
       + (rider ? RiderSentence : string.Empty);
 
     /// <summary>The total, with no full stop: a reaction clause may follow.</summary>
-    private const string PyroTotal = "[blue]{Size}[/blue] [gold]Pyro[/gold] damage";
+    /// Swirl legibility (2026-10-19): the element is <c>{BombElement}</c>
+    /// (<see cref="BombElementVar"/>), which prints Pyro on every board but a
+    /// Chime-armed one.
+    private const string PyroTotal = "[blue]{Size}[/blue] {BombElement} damage";
 
     /// <summary>`EB-721`. The one term folded into the total that a reader
     /// cannot check against a badge on the enemy: the amplifying reaction the
@@ -297,6 +300,16 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
             if (target == null) return ReactionKind.None;
             // ALICE'S TEAPOT: the first Bomb she sets off this turn reacts as
             // if its enemy had Hydro, whatever it really holds.
+            if (ChimeWalk(target) is { } chimed)
+            {
+                return chimed.Select(c => c.Tag).FirstOrDefault(t => t != null)
+                    switch
+                    {
+                        "Vaporize" => ReactionKind.Vaporize,
+                        "Melt" => ReactionKind.Melt,
+                        _ => ReactionKind.None,
+                    };
+            }
             if (Relics.AlicesTeapot.Pending(Applier)) return ReactionKind.Vaporize;
             return AuraCmd.Find(target)?.Element switch
             {
@@ -367,6 +380,10 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     {
         if (_charges.Count == 0 || !IsMutable || Owner is not { } target)
             return new string?[_charges.Count];
+        if (ChimeWalk(target) is { } chimed)
+        {
+            return chimed.Select(c => c.Tag).ToArray();
+        }
         string? real = AuraCmd.Find(target)?.Element switch
         {
             Elements.Element.Hydro => "Vaporize",
@@ -499,6 +516,8 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
             // live like `{Size}` (a relic can change under a pile that has
             // not moved).
             new SparksVar(),
+            // Swirl legibility (2026-10-19): the element, live (the Chime).
+            new BombElementVar(),
         };
 
     /// <summary><c>{Sparks}</c>, read live off <see cref="SparksOnSetOff"/>
@@ -516,6 +535,110 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
 
         public override string ToString() =>
             Live.ToString(System.Globalization.CultureInfo.InvariantCulture);
+    }
+
+    /// <summary>
+    /// SWIRL LEGIBILITY (2026-10-19): <c>{BombElement}</c>, the element a Set
+    /// off here deals, read live: "[gold]Pyro[/gold]", or while Prune's
+    /// Hexhunter Chime is armed with a Swirled element, that element for the
+    /// first charge ("[gold]Hydro[/gold]", or "[gold]Hydro[/gold] and
+    /// [gold]Pyro[/gold]" for a pile of several). Display only:
+    /// <see cref="CompanionCovenBombs.ElementFor"/> still decides the hit.
+    /// </summary>
+    private sealed class BombElementVar : DynamicVar
+    {
+        public BombElementVar() : base("BombElement", 0m)
+        {
+        }
+
+        protected override decimal GetBaseValueForIConvertible() => 0m;
+
+        public override string ToString()
+        {
+            var pile = _owner as ProtoBombPower;
+            return ElementWords(pile?.ChimeElementNow() ?? Element.None,
+                                pile?._charges.Count ?? 1);
+        }
+    }
+
+    /// <summary><see cref="BombElementVar"/>'s words: Pyro with no Chime
+    /// element, the Chime's element for a lone charge, and "X and Pyro" for
+    /// a pile of several (only the first charge takes the Chime). PURE.
+    /// </summary>
+    public static string ElementWords(Element chime, int charges)
+    {
+        const string pyro = "[gold]Pyro[/gold]";
+        if (chime == Element.None || chime == Element.Pyro) return pyro;
+        var first = $"[gold]{chime}[/gold]";
+        return charges > 1 ? $"{first} and {pyro}" : first;
+    }
+
+    /// <summary>
+    /// The element the next explosion takes from Prune's Hexhunter Chime, or
+    /// None: no Chime armed on the placer, no Swirl latched this turn, or
+    /// Pyro. The read <see cref="CompanionCovenBombs.ElementFor"/> spends,
+    /// without spending it. PURE; display only.
+    /// </summary>
+    public Element ChimeElementNow()
+    {
+        if (!IsMutable || _charges.Count == 0) return Element.None;
+        var applier = Applier;
+        if (applier == null
+            || !applier.Powers.OfType<HexhunterChimePower>().Any())
+        {
+            return Element.None;
+        }
+        var swirled = CompanionOverhaulLedger.For(applier).LastSwirlElement;
+        return swirled == Element.Pyro ? Element.None : swirled;
+    }
+
+    /// <summary>
+    /// The pile walked as it would go off with the Chime's element on the
+    /// first charge (<see cref="ChimeElementNow"/>): per charge, the
+    /// amplifier it lands with, its additive bonus (Durin's Dark, Neuvillette
+    /// on Hydro, as <c>ElementalHit.Deal</c> adds them) and its reaction tag.
+    /// A charge that reacts consumes the aura (the Vermillion Pact puts it
+    /// back); one that meets a bare body leaves its element there; Alice's
+    /// Teapot takes the first charge whose element reacts with Hydro. Null
+    /// with no Chime element, and every number then comes from the Pyro walk
+    /// as before. PURE; display only.
+    /// </summary>
+    private (decimal Paid, int Bonus, string? Tag)[]? ChimeWalk(Creature target)
+    {
+        var chime = ChimeElementNow();
+        if (chime == Element.None) return null;
+        var aura = AuraCmd.Find(target)?.Element ?? Element.None;
+        var teapot = Relics.AlicesTeapot.Pending(Applier);
+        var pact = Applier != null && VermillionPactPower.Holds(Applier);
+        var walk = new (decimal, int, string?)[_charges.Count];
+        for (var i = 0; i < walk.Length; i++)
+        {
+            var element = i == 0 ? chime : Element.Pyro;
+            var bonus = PurityDarkPower.BonusFor(Applier, element)
+                        + FurinaStage.HydroBonus(Applier, element);
+            Reaction reaction;
+            if (teapot && ReactionTable.Lookup(Element.Hydro, element)
+                    != Reaction.None)
+            {
+                teapot = false;
+                reaction = ReactionTable.Lookup(Element.Hydro, element);
+            }
+            else
+            {
+                reaction = ReactionTable.Lookup(aura, element);
+                if (reaction != Reaction.None)
+                {
+                    if (!pact) aura = Element.None;
+                }
+                else if (aura == Element.None)
+                {
+                    aura = element;
+                }
+            }
+            var amp = ReactionTable.AmplifierMultiplier(reaction, Applier);
+            walk[i] = (amp, bonus, amp != 1m ? reaction.ToString() : null);
+        }
+        return walk;
     }
 
     /// <summary>
@@ -694,9 +817,12 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     /// PYRO, WHICH IS THE ELEMENT THE FACE PRINTS. The explosion asks
     /// <c>CompanionCovenBombs.ElementFor</c>, which is an async command call a
     /// tooltip may not make and which answers Pyro on every board but one --
-    /// Prune's Hexhunter Chime, for ONE explosion, under the companion arm. A
-    /// preview that is right on every other board and behind by one Chime is
-    /// the trade; the face's own "Pyro damage" makes the same claim already.
+    /// Prune's Hexhunter Chime, for ONE explosion, under the companion arm.
+    /// Swirl legibility (2026-10-19): that board is read too, without the
+    /// command -- <see cref="ChimeElementNow"/> peeks at the armed Chime and
+    /// the latched Swirl, <see cref="ChimeWalk"/> walks the pile with that
+    /// element on the first charge, and the face names it
+    /// (<see cref="BombElementVar"/>).
     ///
     /// THE DEALER IS CONSULTED FOR THIS ONE TERM AND R248 IS NOT BREACHED.
     /// "Nothing of Klee's" is about her Strength and her Weak, which move a hit
@@ -738,6 +864,22 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
         if (target == null) return TotalSize * multiplier;
 
         var total = 0;
+        var badgeFactor = BoomBadgePower.FactorFor(
+            Applier?.Powers.OfType<BoomBadgePower>().FirstOrDefault()?.Amount
+            ?? 0);
+        // Swirl legibility (2026-10-19): with Prune's Chime armed, the first
+        // charge deals the Swirled element, so the walk is that element's.
+        if (ChimeWalk(target) is { } chimed)
+        {
+            for (var i = 0; i < _charges.Count; i++)
+            {
+                total += SimDamagePipeline.ResolveOnTarget(
+                    target,
+                    _charges[i].Size * badgeFactor * multiplier + chimed[i].Bonus,
+                    chimed[i].Paid);
+            }
+            return ShellCapped(target, total);
+        }
         // `EB-559`: the first charge through the funnel is the one that meets
         // the aura (`EB-432`, and `_charges` is placement order), so the
         // amplifier rides it and every charge behind it lands into a bare body.
