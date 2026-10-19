@@ -6197,6 +6197,24 @@ def _mc_most_auras(state: CombatState):
 # =============================================================================
 
 
+def _spends_next_attack_rider(card: Card) -> bool:
+    """Does this Attack use up Mika's next-Attack discount (2026-10-18)?
+
+    Only one that costs Energy: the card's own cost, before any power's cut
+    (the C# reads `EnergyCost.GetWithModifiers(CostModifiers.Local)`, its
+    per-card modifiers and no hook). An X Attack takes no discount and a
+    Spark-priced or freed one costs 0, so none spends it; an Attack the
+    discount itself brings to 0 does. Twin of
+    `StarfrostDiscountPower.SpentBy`.
+    """
+    if card.cost == "X" or card.free_this_turn:
+        return False
+    cost = (card.cost_set_this_combat if card.cost_set_this_combat is not None
+            else card.cost)
+    return max(0, cost + card.cost_delta_this_turn
+               + card.cost_delta_this_combat) > 0
+
+
 def companion_overhaul_card_start(state: CombatState, card: Card) -> str:
     """The arm's per-PLAY block: returns the element THIS Attack applies.
 
@@ -6240,7 +6258,11 @@ def companion_overhaul_card_start(state: CombatState, card: Card) -> str:
     # read in `combat.card_cost`, which is pure and is called by the playability
     # gate as well; the CONSUMPTION is here, at the one site both play paths
     # reach, so a card cannot be priced twice or refunded.
-    p.powers.pop("mc_starfrost_discount", None)
+    # 2026-10-18: a 0-Energy Attack (a Spark-priced one included) saved
+    # nothing, so it does not use the discount up; it waits for an Attack
+    # that costs Energy (`StarfrostDiscountPower.SpentBy`).
+    if _spends_next_attack_rider(card):
+        p.powers.pop("mc_starfrost_discount", None)
     override = ""
     if p.powers.get("mc_lightning_fang", 0):
         override = "electro"

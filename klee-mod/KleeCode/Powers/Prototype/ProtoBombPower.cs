@@ -1898,7 +1898,7 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
             // killed its target, the game had torn the body out of the combat
             // (`PowerCmd.Apply` answers null when `CanReceivePowers` is false,
             // decompiled), and the charge was dropped with the warning below.
-            // The keyword says "If its enemy dies, it jumps to another" -- and
+            // The keyword says "If its enemy dies, it jumps" -- and
             // the sim already lands it on the corpse and sweeps it onward
             // (`klee_overhaul.place`, then `sweep_jumps`) -- so it jumps.
             await JumpCharges(choiceContext, target,

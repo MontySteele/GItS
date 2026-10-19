@@ -121,9 +121,10 @@ public class ArmKeywordTipTests
         // grows (rule 1's rate) and the jump (rule 3, `EB-361`).
         var printed = Printed("ForBomb");
         Assert.Contains("Deals its size in [gold]Pyro[/gold] damage when "
-                      + "[gold]Set off[/gold]. Grows ", printed);
+                      + "[gold]Set off[/gold]. [gold]Vulnerable[/gold] "
+                      + "raises it. Grows ", printed);
         Assert.Contains(" at the start of your turn. If its enemy dies, it "
-                      + "jumps to another.", printed);
+                      + "jumps.", printed);
         Assert.DoesNotContain("survivor", printed);
 
         // `EB-89`, read the only way it can be read: the growth rate is NOT a

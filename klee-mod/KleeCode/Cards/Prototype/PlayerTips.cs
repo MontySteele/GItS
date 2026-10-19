@@ -52,10 +52,12 @@ internal static class PlayerTips
             "Fischl's raven. While you hold Oz, at Your Side, he hits with "
           + "[gold]Electro[/gold] each turn.",
 
-        // Kokomi. The Plan on a Companion is the paper's own sentence.
+        // Kokomi. The keyword tip's opening and timing (2026-10-18), inside
+        // this box's 100: its "; Block lasts that turn" and flip sentence
+        // are the seat's.
         [ArmKeywordTips.PlanKey] =
-            "Instead of the line above, play it on the "
-          + "[gold]Bake-Kurage[/gold]. It happens next turn.",
+            "Play it on the [gold]Bake-Kurage[/gold] instead. After enemies "
+          + "act and you draw, Plans happen in order.",
         [ArmKeywordTips.PlanOnlyKey] =
             "Play the card on the [gold]Bake-Kurage[/gold]. It happens next "
           + "turn.",

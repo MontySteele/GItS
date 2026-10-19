@@ -209,7 +209,9 @@ public static class ArmKeywordTips
     /// how it grows, and the jump. The edge cases the old tip carried --
     /// Block stops it, only Vulnerable and the HP cap move it, a second Bomb
     /// stacks beside the first -- are dropped on purpose: they are learned by
-    /// playing, and the live number is on the badge. The growth is still
+    /// playing, and the live number is on the badge. Vulnerable came back
+    /// (2026-10-18, suite 6 lane 5: no page said an enemy's Vulnerable
+    /// raises a Bomb), and the jump lost "to another" to fit. The growth is still
     /// interpolated from its Law constant (`EB-89`). The history of the old
     /// wording is in git.
     /// </summary>
@@ -217,9 +219,9 @@ public static class ArmKeywordTips
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, BombKey,
             "Deals its size in [gold]Pyro[/gold] damage when "
-          + "[gold]Set off[/gold]. Grows " + KleeOverhaulLaw.BombGrowth
-          + " at the start of your turn. If its enemy dies, it jumps to "
-          + "another.");
+          + "[gold]Set off[/gold]. [gold]Vulnerable[/gold] raises it. Grows "
+          + KleeOverhaulLaw.BombGrowth
+          + " at the start of your turn. If its enemy dies, it jumps.");
 
     /// <summary>
     /// Rule 2, the word [USER] named ("Set Off has no tooltip text"). The
