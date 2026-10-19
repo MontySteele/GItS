@@ -236,17 +236,23 @@ Kokomi and Yae round (`kokomi-yae-round-2026-10-19.md`) and the newcomer round
    round, not a verdict (Rares bend, they are not removed).
 
 **The changes.**
-1. **Battle Formation** (Rare Power, 2 [1]): "At the start of your turn, if 2
-   or more of your Plans were carried out, gain [E]. Stings and Wards don't
-   count." Two reasons. Counting every Plan made it automatic (v2 flagged it).
+1. **Battle Formation** (Rare Power, 2): "At the start of your turn, if 2 or
+   more of your Plans were carried out, gain [E] [and draw 1 card]. Stings and
+   Wards don't count." Two reasons. Counting every Plan made it automatic (v2 flagged it).
    And at 1 Energy for a card and an Energy most turns it was cheap: Klee's
    Blazing Delight pays 2 for an unconditional Energy and draw. [USER],
    2026-10-19: "I wonder if it's too cheap ... The card text also feels
    awkwardly long." So it costs 2, loses the draw, and takes the base
-   start-of-turn template; the upgrade lowers the cost. Breakwater keeps
+   start-of-turn template. The upgrade adds the draw back instead of lowering
+   the cost: [USER] noted too many powers upgrade by cost alone. A census
+   (`docs/prototype-surface.yaml` against `game_ref/*-upgrades.yaml`) puts
+   cost-only power upgrades at Ironclad 4 of 17, Silent 3 of 18, Kokomi 2 of
+   18, Klee 3 of 18, Varka 4 of 23, Yae 5 of 15 and Furina 7 of 17. Kokomi's
+   overuse is Innate (6 of 18; base 2 or 3), so this upgrade is neither. Breakwater keeps
    counting every Plan: it is defensive, and GPT advised keeping it.
-2. **Grand Design** (Rare Skill, 1): "Plan up to 3 [4] cards from your Hand,
-   Basic cards included. They cost 0. Draw 1 card for each. Exhaust." Planning
+2. **Grand Design** (Rare Skill, 1): "Plan up to 3 [4] cards from your Hand.
+   They cost 0. Draw 1 card for each. Exhaust." ("Basic cards included" is cut:
+   [USER], "feels unnecessary".) Planning
    three cards free is already an Energy cheat ([USER]: "exceptionally strong
    if you view it as energy cheating (3 for 1) - might need Exhaust or a cost
    bump"). The draw fixes the empty hand the seats saw, and Exhaust makes it the
@@ -281,8 +287,8 @@ pick with the numbers, not a build.
 ### Picks
 
 1. **The two card changes.**
-   - **(a, default)** Build both as written above (Battle Formation at 2 with no
-     draw; Grand Design draws and Exhausts).
+   - **(a, default)** Build both as written above (Battle Formation at 2, the draw on
+     upgrade; Grand Design draws and Exhausts).
    - (b) Grand Design without the draw or Exhaust (unchanged), Battle Formation
      as above.
 2. **Defence.**
