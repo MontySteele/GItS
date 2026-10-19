@@ -378,7 +378,7 @@ public class ResolutionLedgerTests
         var row = ResolutionLedger.Snapshot()[0];
         Assert.Equal(new[] { "card_id", "card", "auto_played", "owner",
                              "is_local", "play_count", "card_type", "carried",
-                             "overflowed", "hits", "applied", "summoned",
+                             "open", "block", "overflowed", "hits", "applied", "summoned",
                              "oath", "fang_ascension", "fang_relic",
                              "swirl_no_aura", "swirl_on_aura", "between",
                              "events" },

@@ -151,6 +151,14 @@ public static class ResolutionLedger
                                                long Seq = 0,
                                                bool OnPlayer = false);
 
+    /// <summary>Block a card gave, and to whom (seat page backlog wave 3,
+    /// 2026-10-19: Klee Can Explain! gains 6 Block and its row read "Nothing
+    /// this page can count landed off it"). `Self` is the card's own player.
+    /// `Seq` is <see cref="Hit"/>'s, for the same merge.</summary>
+    public readonly record struct BlockGained(string Target, int Amount,
+                                              string CombatId, long Seq,
+                                              bool Self);
+
     /// <summary>One resolved card.
     ///
     /// `AutoPlayed` is `CardPlay.IsAutoPlay`. `Carried` is
@@ -176,6 +184,10 @@ public static class ResolutionLedger
         /// <summary>The powers this card put on enemies, in order
         /// (<see cref="NotePower(string, string, int, string)"/>).</summary>
         public List<PowerApplied> Applied { get; } = new();
+
+        /// <summary>The Block this card gave, in order
+        /// (<see cref="NoteBlock(string, int, string, bool)"/>).</summary>
+        public List<BlockGained> Block { get; } = new();
 
         /// <summary>Who a random summon inside this card rolled, in order:
         /// the member id and its printed name (<see cref="NoteSummon"/>).
@@ -869,6 +881,32 @@ public static class ResolutionLedger
                                            ++_seq, onPlayer));
     }
 
+    /// <summary>"This card gave this player Block" (seat page backlog wave
+    /// 3, 2026-10-19). Filed by <c>PlayTelemetryHooks.AfterBlockGained</c>
+    /// for Block whose source is a card, on players only. Dropped where no
+    /// play is open, <see cref="NoteHit"/>'s rule.</summary>
+    public static void NoteBlock(Creature? target, int amount, bool self)
+    {
+        if (target == null) return;
+        NoteBlock(Named(target), amount,
+                  Safe(() => target.CombatId.ToString()), self);
+    }
+
+    /// <summary>The same note, taking the facts rather than the game object,
+    /// <see cref="OpenPlay(string, string, bool)"/>'s bargain.</summary>
+    public static void NoteBlock(string target, int amount, string combatId,
+                                 bool self)
+    {
+        if (_open == null || amount <= 0) return;
+        if (_open.Block.Count >= MaxHits)
+        {
+            _open.Overflowed = true;
+            return;
+        }
+        _open.Block.Add(new BlockGained(target, amount, combatId, ++_seq,
+                                        self));
+    }
+
     /// <summary>Where the open row's power list stands, so a placement can
     /// find the entry its own <c>PowerCmd.Apply</c> filed
     /// (<see cref="SizeAppliedSince"/>).</summary>
@@ -998,6 +1036,19 @@ public static class ResolutionLedger
             ["play_count"] = row.PlayCount,
             ["card_type"] = row.CardType,
             ["carried"] = row.Carried,
+            // Seat page backlog wave 3 (2026-10-19): this card is still
+            // resolving, so its hits so far are not all of them (a free
+            // Bravura's page listed one hit of four).
+            ["open"] = ReferenceEquals(row, _open),
+            ["block"] = row.Block.ConvertAll(b =>
+                new Dictionary<string, object?>
+                {
+                    ["target"] = b.Target,
+                    ["amount"] = b.Amount,
+                    ["combat_id"] = b.CombatId,
+                    ["seq"] = b.Seq,
+                    ["self"] = b.Self,
+                }),
             ["overflowed"] = row.Overflowed,
             ["hits"] = row.Hits.ConvertAll(hit =>
                 new Dictionary<string, object?>

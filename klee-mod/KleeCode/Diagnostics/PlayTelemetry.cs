@@ -2954,6 +2954,22 @@ public sealed class PlayTelemetryHooks : AbstractModel
         ValueProp props, CardModel? cardSource)
     {
         PlayTelemetry.BlockGained(creature, amount, cardSource);
+        // Seat page backlog wave 3 (2026-10-19): Block a card gave a player,
+        // on that card's row (Klee Can Explain!).
+        try
+        {
+            if (cardSource != null && creature is { IsPlayer: true }
+                && ResolutionLedger.PlayOpen)
+            {
+                ResolutionLedger.NoteBlock(creature, (int)amount,
+                    self: ReferenceEquals(cardSource.Owner?.Creature, creature));
+            }
+        }
+        catch (Exception e)
+        {
+            Log.Warn($"[{KleeMod.ModId}] resolution ledger block: "
+                   + $"{e.GetType().Name}: {e.Message}");
+        }
         return Task.CompletedTask;
     }
 

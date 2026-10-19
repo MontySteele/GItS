@@ -173,6 +173,8 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, _aura_on_board,
                                         CONFIRM_TAKES_NOTHING_NOTE,
                                         POTION_BARRED_NOTE,
                                         RESOLUTION_APPLIED,
+                                        RESOLUTION_BLOCK,
+                                        RESOLUTION_OPEN_CLAUSE,
                                         RESOLUTION_REMOVED,
                                         STOLEN_CARD_CLAUSE,
                                         TURN_ORDER_NOTE,
@@ -2328,7 +2330,8 @@ def _hit_on_you_source(hit: dict[str, Any],
 
 
 def _in_play_order(hits: list[dict[str, Any]],
-                   applied: list[dict[str, Any]]
+                   applied: list[dict[str, Any]],
+                   block: list[dict[str, Any]] | None = None
                    ) -> list[tuple[str, dict[str, Any]]]:
     """One row's hits and applied powers, in the order they happened.
 
@@ -2339,7 +2342,8 @@ def _in_play_order(hits: list[dict[str, Any]],
     hit, then every power.
     """
     tagged = ([("hit", h) for h in hits]
-              + [("applied", a) for a in applied])
+              + [("applied", a) for a in applied]
+              + [("block", b) for b in block or []])
     if all(entry.get("seq") is not None for _, entry in tagged):
         tagged.sort(key=lambda pair: pair[1]["seq"])
     return tagged
@@ -2419,6 +2423,8 @@ def _resolution_lines(rows: list[dict[str, Any]],
             clauses += RESOLUTION_CARRIED_CLAUSE
         if row.get("overflowed"):
             clauses += RESOLUTION_OVERFLOW_CLAUSE
+        if row.get("open"):
+            clauses += RESOLUTION_OPEN_CLAUSE
         if (row.get("play_count") or 1) > 1:
             # Yae review r5, item 3: a replay whose target died hits nothing.
             replayed = (RESOLUTION_REPLAYED_KILL_CLAUSE if row.get("killed")
@@ -2479,10 +2485,12 @@ def _resolution_lines(rows: list[dict[str, Any]],
         oath_lines += _edit_receipt_lines(row.get("edits") or [])
         killed = row.get("killed") or []
         applied = row.get("applied") or []
-        if not row["hits"] and not killed and not applied and oath_lines:
+        block = row.get("block") or []
+        if (not row["hits"] and not killed and not applied and not block
+                and oath_lines):
             out += oath_lines
             continue
-        if not row["hits"] and not killed and not applied:
+        if not row["hits"] and not killed and not applied and not block:
             # 2026-09-25 (opus-furina-l2b): on a board with a stage, a card
             # that hit nothing may still have moved a bar, and the stage log
             # above now files every Raise -- so the line points there rather
@@ -2500,7 +2508,14 @@ def _resolution_lines(rows: list[dict[str, Any]],
                            else RESOLUTION_NO_HITS)
             continue
         n = 0
-        for kind, entry in _in_play_order(row["hits"], applied):
+        for kind, entry in _in_play_order(row["hits"], applied, block):
+            # Seat page backlog wave 3 (2026-10-19): Block it gave a player.
+            if kind == "block":
+                who = (("They" if partner else "You") if entry.get("self")
+                       else f"**{entry['target'] or 'Your partner'}**")
+                out.append(RESOLUTION_BLOCK.format(target=who,
+                                                   n=entry["amount"]))
+                continue
             # 2026-09-26 (the Silent control seat): the powers it put on
             # enemies.
             if kind == "applied":
@@ -3295,7 +3310,7 @@ OATH_SWITCH_KEPT = (" Your {old_element} Oath {old} is kept for when you "
                     "switch back.")
 UNWAVERING_BANNER_TITLE = "Unwavering Banner"
 ALL_FOUR_WINDS_TITLE = "All Four Winds"
-_SWIRL_WORD = re.compile(r"Swirl")
+_SWIRL_WORD = re.compile(r"\bSwirl\b")
 
 
 def _holds_a_swirl(hand: list[dict[str, Any]]) -> bool:

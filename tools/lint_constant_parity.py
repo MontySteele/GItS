@@ -658,6 +658,13 @@ UNMIRRORED: dict[str, str] = {
         "A SCENE OFFSET, not balance: the base game's own pet placement "
         "constant, lifted from `NCombatRoom.AddCreature` (`owner.Y + 10`) so "
         "a performer stands on the line the engine's own layout would give it.",
+    # Backlog wave 3 (2026-10-19): the Bake-Kurage stood on the Defect's
+    # leg; it now stands on the same line Furina's guests do.
+    "BakeKuragePlacement.OwnerYOffset":
+        "A SCENE OFFSET, not balance: the base game's own pet placement "
+        "constant (`NCombatRoom.AddCreature`, `owner.Y + 10`), so the "
+        "jellyfish stands where the engine's own layout would put it. The "
+        "sim has no scene tree.",
     "MeterLedger.MaxRows":
         "`EB-216`. INSTRUMENT, not balance: how many per-play ledger rows the "
         "mod keeps before dropping the oldest. It touches no game number, no "
