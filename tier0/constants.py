@@ -740,11 +740,10 @@ INAZUMA_OVERHAUL_PERSONAL_IDS: tuple[str, ...] = ()
 # The nation this second replacement owns.
 INAZUMA_OVERHAUL_NATION = "inazuma"
 
-# FONTAINE'S SIXTEEN, PORTED AS THEY ARE (legacy cleanup pick 4, 2026-10-01).
-# Fontaine has no workshop; its shipped rows moved to the prototype surface
-# unchanged (`proto_mf_` rows, bodies and upgrades as shipped), so the
-# companion pool is prototype rows only and the shipped sheet can go. In the
-# sheet's order.
+# FONTAINE'S SIXTEEN, PORTED AS THEY ARE (legacy cleanup pick 4, 2026-10-01),
+# THIRTY SINCE THE FONTAINE POOL REWORK (2026-10-19,
+# review/active/fontaine-companions-2026-10-19.md): five kept, eleven rebuilt on
+# their ids, fourteen new (8 / 13 / 9). In the sheet's order.
 FONTAINE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_mf_chevreuse_interdiction_fire",
     "proto_mf_chevreuse_vanguards_valor",
@@ -758,11 +757,27 @@ FONTAINE_OVERHAUL_POOL_IDS: tuple[str, ...] = (
     "proto_mf_freminet_pers_deploy",
     "proto_mf_freminet_pressurized_floe",
     "proto_mf_freminet_shattering_pressure",
+    "proto_mf_navia_ceremonial_crystalshot",
+    "proto_mf_clorinde_hunters_vigil",
+    "proto_mf_neuvillette_o_tears",
+    "proto_mf_arlecchino_balemoon_rising",
+    "proto_mf_wriothesley_gracious_rebuke",
+    "proto_mf_lyney_grin_malkin_hat",
+    "proto_mf_sigewinne_rebound_hydrotherapy",
+    "proto_mf_escoffier_low_temperature_cooking",
+    "proto_mf_emilie_lumidouce_legacy",
     "proto_mf_navia_cannon_fire_support",
     "proto_mf_clorinde_impale_the_night",
     "proto_mf_neuvillette_ancient_sea_authority",
     "proto_mf_arlecchino_masque_red_death",
+    "proto_mf_wriothesley_chilling_penalty",
+    "proto_mf_lyney_miracle_parade",
+    "proto_mf_sigewinne_super_saturated_syringing",
+    "proto_mf_escoffier_rehab_diet",
+    "proto_mf_emilie_aromatic_explication",
 )
+# Emilie, Aromatic Explication: Energy per Status or Curse it Exhausts.
+MF_AROMATIC_ENERGY = 1
 
 # =============================================================================
 # KLEE'S COVEN (R236). The Mondstadt workshop gave Klee four Personal

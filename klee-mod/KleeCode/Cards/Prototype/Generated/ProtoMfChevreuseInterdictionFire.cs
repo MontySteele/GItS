@@ -52,14 +52,14 @@ public sealed class ProtoMfChevreuseInterdictionFire : CustomCardModel, IElement
         new[] { KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro), this, Element.Pyro);
+        BaseKeywordTips.ForVulnerable(ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro), this, Element.Pyro), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("chevreuse_interdiction_fire");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Chevreuse — Interdiction Fire"),
-        ("description", "Deal {CalculatedDamage:diff()} [gold]Pyro[/gold] damage.{InCombat:{VarkaSwitch}|}{InCombat:{VarkaWildfire}|}"),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Pyro[/gold] damage. Apply 1 [gold]Vulnerable[/gold].{InCombat:{VarkaSwitch}|}{InCombat:{VarkaWildfire}|}"),
     };
 
     /// <summary>This card's in-combat Oath lines
@@ -79,7 +79,7 @@ public sealed class ProtoMfChevreuseInterdictionFire : CustomCardModel, IElement
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(8m),
+            new CalculationBaseVar(7m),
             new ExtraDamageVar(1m),
             new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card))
         };
@@ -99,6 +99,7 @@ public sealed class ProtoMfChevreuseInterdictionFire : CustomCardModel, IElement
             .Targeting(cardPlay.Target)
             .WithElementHitFx(this)
             .Execute(choiceContext);
+        await PowerCmd.Apply<VulnerablePower>(choiceContext, cardPlay.Target, 1, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()

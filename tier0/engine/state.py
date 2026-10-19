@@ -227,6 +227,12 @@ class Card:
     # card upgrade such as Hot Hands+ can now express the base-game keyword
     # without pretending to be a Burst.
     retain: bool = False
+    # THE FONTAINE POOL REWORK (2026-10-19): Freminet's Shattering Pressure,
+    # "Each time you Retain this, it deals N additional damage this combat."
+    # Read at the hand flush (`combat`), which raises this instance's first
+    # literal damage op, `_op_grow_damage`'s idiom. C# twin: the card's own
+    # `AfterFlush` (`FontaineCompanion.GrowOnRetain`).
+    retain_grow: int = 0
     # EB-118: Ethereal printed on the BASE card. Until now the keyword was
     # reachable only through `tags: [ethereal]`, which is how the engine
     # sheets spell it for Statuses, Curses and the Spotlight token -- a
@@ -1157,6 +1163,10 @@ class CombatState:
     # Formula / conditional context (reset per card play in resolve_card)
     detonations_total: int = 0            # The Big One formula
     reactions_this_card: int = 0          # reaction_triggered_by_this
+    # THE FONTAINE POOL REWORK (2026-10-19): Crystallizes this card's play
+    # triggered (`crystallize_triggered_by_this`, Navia's Crystalshot). C#
+    # twin: a snapshot diff of `ReactionEffects.CrystallizeResolved`.
+    crystallize_this_card: int = 0
     reactions_this_turn: int = 0          # reaction_triggered_this_turn
     # THE INAZUMA COMPANION OVERHAUL (C.COMPANION_OVERHAUL). The
     # SWIRLS this player turn, which is the count Heizou's Heartstopper Strike
@@ -1308,6 +1318,10 @@ class CombatState:
     # an outer card would otherwise leave its number behind for the outer card
     # to bank. Written only inside a flag branch (`deal_damage_to_enemy`).
     mi_damage_dealt_this_card: int = 0
+    # THE FONTAINE POOL REWORK (2026-10-19): the enemies this card's damage
+    # reached, by identity, a kill included (Sigewinne's "for each enemy
+    # hit"). C# twin: `CompanionOverhaulLedger.EnemiesHitThisPlay`.
+    mf_enemies_hit_this_card: set = field(default_factory=set)
     # THE MEND CEILING (C.COMPANION_OVERHAUL). The HP the player
     # walked into this fight with, which is the Kokomi brief's one rule for the
     # keyword and therefore the bound on Mizuki's Universal in ANYONE's hands.

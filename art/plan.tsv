@@ -3362,3 +3362,33 @@ power_mi_soumetsu	ImageGen/images/powers/soumetsu.png	256	256	contain	center	sho
 power_mi_surprise_dispatch	ImageGen/images/powers/surprise_dispatch.png	256	256	contain	center	shortlist	1	png	Talent Secret Art Surprise Dispatch.png		icon	
 power_yae_publishing_house	ImageGen/images/yae/powers/publishing_house.png	256	256	contain	center	shortlist	1	png	JWGB A Light Novel.png		icon	
 relic_meditations_of_a_yako	ImageGen/images/yae/relics/meditations_of_a_yako.png	256	256	contain	center	shortlist	1	png	Vision Inazuma Electro.png		icon	
+# ---------- Fontaine pool rework art (2026-10-19): the rework's fourteen new companion cards, each its own character's official art ----------
+# Every source is a title no other row claims; same source_group as the character's other companion rows.
+# proto_mf_navia_ceremonial_crystalshot <- Navia's 2024 birthday art
+proto_mf_navia_ceremonial_crystalshot	ImageGen/images/cards/companions/proto_mf_navia_ceremonial_crystalshot.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Navia Birthday 2024.png		splash	navia
+# proto_mf_clorinde_hunters_vigil <- Clorinde's 2024 birthday art
+proto_mf_clorinde_hunters_vigil	ImageGen/images/cards/companions/proto_mf_clorinde_hunters_vigil.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Clorinde Birthday 2024.png		splash	clorinde
+# proto_mf_neuvillette_o_tears <- Neuvillette's 2024 birthday art
+proto_mf_neuvillette_o_tears	ImageGen/images/cards/companions/proto_mf_neuvillette_o_tears.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Neuvillette Birthday 2024.png		splash	neuvillette
+# proto_mf_arlecchino_balemoon_rising <- Arlecchino's TCG character card
+proto_mf_arlecchino_balemoon_rising	ImageGen/images/cards/companions/proto_mf_arlecchino_balemoon_rising.png	500	380	cover	y0.16	shortlist	1	png	Arlecchino Character Card.png		tcg	arlecchino
+# proto_mf_wriothesley_gracious_rebuke <- Wriothesley's 2024 birthday art
+proto_mf_wriothesley_gracious_rebuke	ImageGen/images/cards/companions/proto_mf_wriothesley_gracious_rebuke.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Wriothesley Birthday 2024.png		splash	wriothesley
+# proto_mf_lyney_grin_malkin_hat <- Lyney's 2024 birthday art
+proto_mf_lyney_grin_malkin_hat	ImageGen/images/cards/companions/proto_mf_lyney_grin_malkin_hat.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Lyney Birthday 2024.png		splash	lyney
+# proto_mf_sigewinne_rebound_hydrotherapy <- Sigewinne's 2025 birthday art
+proto_mf_sigewinne_rebound_hydrotherapy	ImageGen/images/cards/companions/proto_mf_sigewinne_rebound_hydrotherapy.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Sigewinne Birthday 2025.png		splash	sigewinne
+# proto_mf_escoffier_low_temperature_cooking <- Escoffier's 2025 birthday art
+proto_mf_escoffier_low_temperature_cooking	ImageGen/images/cards/companions/proto_mf_escoffier_low_temperature_cooking.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Escoffier Birthday 2025.png		splash	escoffier
+# proto_mf_emilie_lumidouce_legacy <- Emilie's TCG character card
+proto_mf_emilie_lumidouce_legacy	ImageGen/images/cards/companions/proto_mf_emilie_lumidouce_legacy.png	500	380	cover	y0.16	shortlist	1	png	Emilie Character Card.png		tcg	emilie
+# proto_mf_wriothesley_chilling_penalty <- Wriothesley's character card art
+proto_mf_wriothesley_chilling_penalty	ImageGen/images/cards/companions/proto_mf_wriothesley_chilling_penalty.png	500	380	cover	y0.33	shortlist	1	png	Wriothesley Card.png		splash	wriothesley
+# proto_mf_lyney_miracle_parade <- Lyney's character card art
+proto_mf_lyney_miracle_parade	ImageGen/images/cards/companions/proto_mf_lyney_miracle_parade.png	500	380	cover	y0.33	shortlist	1	png	Lyney Card.png		splash	lyney
+# proto_mf_sigewinne_super_saturated_syringing <- Sigewinne's character card art
+proto_mf_sigewinne_super_saturated_syringing	ImageGen/images/cards/companions/proto_mf_sigewinne_super_saturated_syringing.png	500	380	cover	y0.33	shortlist	1	png	Sigewinne Card.png		splash	sigewinne
+# proto_mf_escoffier_rehab_diet <- Escoffier's character card art
+proto_mf_escoffier_rehab_diet	ImageGen/images/cards/companions/proto_mf_escoffier_rehab_diet.png	500	380	cover	y0.33	shortlist	1	png	Escoffier Card.png		splash	escoffier
+# proto_mf_emilie_aromatic_explication <- Emilie's full Wish art
+proto_mf_emilie_aromatic_explication	ImageGen/images/cards/companions/proto_mf_emilie_aromatic_explication.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Emilie Full Wish.png		splash	emilie

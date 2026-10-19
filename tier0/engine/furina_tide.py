@@ -1104,6 +1104,11 @@ def drain(state, n: int) -> bool:
     state.hp_lost_this_turn += n
     state.hp_lost_this_combat += n       # Facade (the sweep, 2026-10-14)
     state.emit("ftd_drain", amount=n, hp=p.hp, drained=f.drained)
+    # THE FONTAINE POOL REWORK (2026-10-19): a Drain is an HP loss in the
+    # game (`StageBoard.LoseHp` is `CreatureCmd.Damage`), so Wriothesley's
+    # Chilling Penalty answers it at that moment; it answers it here too.
+    from tier0.engine import effects as _effects    # late: avoids the cycle
+    _effects.chilling_penalty(state)
     gain(state, n, "drain")
     _loop_readers(state, n)
     # The Masquerade (the block gap, 2026-10-09): the HP actually drained as

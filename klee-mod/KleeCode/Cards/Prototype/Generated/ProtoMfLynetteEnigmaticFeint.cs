@@ -58,13 +58,13 @@ public sealed class ProtoMfLynetteEnigmaticFeint : CustomCardModel, ICompanionCa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Lynette — Enigmatic Feint"),
-        ("description", "[gold]Swirl[/gold] the enemy. Gain {CalculatedBlock:diff()} [gold]Block[/gold]."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. [gold]Swirl[/gold] the enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(5m),
+            new CalculationBaseVar(8m),
             new CalculationExtraVar(1m),
             new FoldedCalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card))
         };
@@ -78,13 +78,13 @@ public sealed class ProtoMfLynetteEnigmaticFeint : CustomCardModel, ICompanionCa
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
+        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), DynamicVars.CalculatedBlock.Props, cardPlay);
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await ElementalHit.ApplyOnly(choiceContext, cardPlay.Target, Element.Anemo, Owner.Creature);
-        await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.CalculatedBlock.Calculate(cardPlay.Target), DynamicVars.CalculatedBlock.Props, cardPlay);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars.CalculationBase.UpgradeValueBy(2m);
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
     }
 }

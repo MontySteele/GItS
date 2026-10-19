@@ -981,6 +981,31 @@ CO_TENANCY_LEDGER = {
             "it in player_turn_start_triggers after the Strength mints and "
             "before the companion overhaul block; the mod gives no order "
             "among same-broadcast tenants",
+        ("Powers/FontainePowers.cs", "CannonFireSupportPower"):
+            "Navia's per-turn Geo hit on ALL enemies (the Fontaine pool "
+            "rework, 2026-10-19). THE ORDERING QUESTION, answered, and it is "
+            "AncientSeaAuthorityPower's RACE, on the same BACKLOG line: each "
+            "hit Crystallizes an aura another tenant lays, and it can kill a "
+            "body another tenant would touch. The sim runs it right after "
+            "Neuvillette's hit (effects.fontaine_turn_start); the mod gives "
+            "no order among same-broadcast tenants",
+        ("Powers/Prototype/CompanionOverhaulFontaine.cs",
+         "ReboundHydrotherapyPower"):
+            "Sigewinne's per-turn raw Block and one Hydro application on a "
+            "random enemy (the Fontaine pool rework, 2026-10-19). THE "
+            "ORDERING QUESTION, answered, and it is the same RACE on the same "
+            "BACKLOG line: the Hydro can react with an aura another tenant "
+            "lays, and it draws from Rng.CombatTargets beside them. The sim "
+            "runs it after Navia's (effects.fontaine_turn_start)",
+        ("Powers/Prototype/CompanionOverhaulFontaine.cs",
+         "AromaticExplicationPower"):
+            "Emilie's per-turn Exhaust of a Status or Curse and 1 Energy "
+            "(the Fontaine pool rework, 2026-10-19). THE ORDERING QUESTION, "
+            "answered: it reads the Hand and the Draw Pile, which the two "
+            "kit-grants above ADD to without reading, and it exhausts junk "
+            "they never add; its Energy is read by no co-tenant. The sim "
+            "runs it at the same post-draw site "
+            "(effects.fontaine_turn_start_late)",
         ("Powers/KokomiResources.cs", "KokomiResourceHooks"):
             "Kokomi kit-grant check: adds a card when charged. Its input, the "
             "Charge meter, is minted a broadcast earlier (see "
@@ -1338,6 +1363,11 @@ CO_TENANCY_LEDGER = {
             "this-turn EXPIRY without the damage: it removes itself and does "
             "nothing else, and the element it claims is read on the Attack "
             "that spends it, a broadcast away",
+        ("Powers/CompanionPowers.cs", "NextAttackUpPower"):
+            "(the Fontaine pool rework, 2026-10-19: Chevreuse's Vanguard's "
+            "Valor says this turn). The same this-turn EXPIRY: it removes "
+            "itself and does nothing else, and what it pays is paid on the "
+            "Attack that spends it, a broadcast away",
         ("Powers/Prototype/CompanionCoven.cs", "HexhunterChimePower"):
             "(Klee's coven Personals, R236). The same this-turn "
             "EXPIRY again -- it removes itself and does nothing else. THE "
@@ -1564,14 +1594,11 @@ def test_the_sequenced_powers_do_not_take_the_broadcast_back(rel, cls):
 # M5 -- it is why Navia's own play paid itself in C# and not in the sim, until
 # her card left card plays for reactions (2026-10-12).
 
-def test_navia_pays_at_the_one_reaction_site_in_both_engines():
-    """The Fontaine sanity check (2026-10-12, pick 3): Cannon Fire Support
-    pays on "an Elemental Reaction happens", not on a Companion play, so the
-    M5 card-play snapshot above went with the old trigger. Both engines now
-    read it where a reaction resolves: C# `CompanionOverhaulReactions.Note`
-    (called from `ReactionEffects.Resolve`), ahead of its dealer guard so a
-    dealer-less reaction pays too; the sim `effects.companion_overhaul_reaction`
-    (called from `reactions._react`)."""
+def test_navia_hits_at_the_turn_start_in_both_engines():
+    """The Fontaine pool rework (2026-10-19): Cannon Fire Support deals Geo
+    to ALL enemies at the start of the turn, so it left both reaction sites
+    and reads no card play either. C# `AfterPlayerTurnStart`; the sim
+    `effects.fontaine_turn_start`, called beside Neuvillette's hit."""
     fontaine = (SOURCE / "Powers" / "FontainePowers.cs").read_text(
         encoding="utf-8")
     spans = _class_spans(fontaine)
@@ -1579,16 +1606,18 @@ def test_navia_pays_at_the_one_reaction_site_in_both_engines():
     assert mine, "CannonFireSupportPower not found"
     body = fontaine[mine[0][1]:mine[0][2]]
     assert "AfterCardPlayed" not in body and "BeforeCardPlayed" not in body
+    assert "AfterPlayerTurnStart" in body
 
     hooks = (SOURCE / "Powers" / "Prototype" / "CompanionOverhaulHooks.cs"
              ).read_text(encoding="utf-8")
-    note = method_body(hooks, r"internal\s+static\s+async\s+Task\s+Note\s*\(")
-    assert note.index("CannonFireSupportPower.OnReaction") < note.index(
-        "if (dealer == null) return;"), note
+    assert "CannonFireSupportPower.OnReaction" not in hooks
 
     sim = (ROOT / "tier0" / "engine" / "effects.py").read_text(encoding="utf-8")
     start = sim.index("def companion_overhaul_reaction(")
-    assert 'p.powers.get("cannon_fire_support", 0)' in sim[start:start + 4000]
+    end = sim.index("\ndef ", start + 10)
+    assert "cannon_fire_support" not in sim[start:end].split('"""', 2)[-1]
+    turn = sim.index("def fontaine_turn_start(")
+    assert 'p.powers.get("cannon_fire_support", 0)' in sim[turn:turn + 2000]
     combat_src = (ROOT / "tier0" / "engine" / "combat.py").read_text(
         encoding="utf-8")
     assert "cannon_fire_support" not in combat_src

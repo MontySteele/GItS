@@ -248,6 +248,10 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
 
     if name:
         state.reactions_this_card += 1
+        # THE FONTAINE POOL REWORK: Navia's Crystalshot asks about its own
+        # Crystallize (`ReactionEffects.CrystallizeResolved` is the twin).
+        if name == "crystallize":
+            state.crystallize_this_card += 1
         state.reactions_this_turn += 1
         p = state.player
         # (C.COMPANION_OVERHAUL). The arm's two reaction readers --

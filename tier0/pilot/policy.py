@@ -287,6 +287,9 @@ BLIND_PREDICATES = frozenset({
     # the card, which the pilot deliberately does not do.
     "reaction_triggered_by_this",
     "killed_target",
+    # The Fontaine pool rework (2026-10-19): Navia's Crystalshot, the same
+    # class -- did this card's own hit Crystallize.
+    "crystallize_triggered_by_this",
     # The three below are printed ONLY by the `real_ironclad` / `real_silent`
     # reference pools, which live in the gitignored `game_ref/` and so are
     # invisible to a fresh clone and to CI. They were untriaged until the S7

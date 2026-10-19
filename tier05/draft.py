@@ -1032,6 +1032,12 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # pool holds one with the flag off, so every drafted number in the
         # world is unchanged and DRAFTER_VERSION does not move.
         return 0.0
+    # -- the Fontaine pool rework (2026-10-19) ------------------------------
+    if op == "block_per_enemy_hit":
+        # Sigewinne's "Gain 4 Block for each enemy hit": the printed Block
+        # once, the floor of a card whose damage hits ALL enemies (there is
+        # always one). More enemies is a board fact no static pricer sees.
+        return float(_neutral_amount(fx, 0))
 
     # -- cards from nowhere ------------------------------------------------
     if op == "generate_from_pool":
@@ -2295,6 +2301,9 @@ STATIC_OP_PRICING: dict[str, str] = {
                          "damage line LANDED, which no static pricer can see "
                          "(prototype surface only -- no shipped row prints it "
                          "and no drafted number moves)",
+    # --- the Fontaine pool rework (2026-10-19) ---
+    "block_per_enemy_hit": "printed Block once, the floor of an ALL-enemies "
+                           "hit (more enemies is a board fact)",
     # --- damage/Block-shaped, new in v13 ---------------------------------
     "block_next_turn": "printed Block at STATIC_DELAYED_BLOCK_SHARE",
     "block_at_turn_start": "printed Block at STATIC_DELAYED_BLOCK_SHARE, once "

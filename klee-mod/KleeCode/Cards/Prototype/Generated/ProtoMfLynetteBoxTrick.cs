@@ -49,13 +49,13 @@ public sealed class ProtoMfLynetteBoxTrick : CustomCardModel, ICompanionCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Lynette — Bogglecat Box"),
-        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Draw {Cards:diff()} card{Cards:plural:|s}."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold]. Draw 2 cards."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(4m),
+            new CalculationBaseVar(5m),
             new CalculationExtraVar(1m),
             new FoldedCalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card)),
             new CardsVar(2)
@@ -76,6 +76,6 @@ public sealed class ProtoMfLynetteBoxTrick : CustomCardModel, ICompanionCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars.Cards.UpgradeValueBy(1m);
+        DynamicVars.CalculationBase.UpgradeValueBy(3m);
     }
 }

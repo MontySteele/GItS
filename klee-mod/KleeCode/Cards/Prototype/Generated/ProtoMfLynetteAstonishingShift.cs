@@ -50,21 +50,21 @@ public sealed class ProtoMfLynetteAstonishingShift : CustomCardModel, ICompanion
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         TipAudience.Seat
-            ? ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, appliesWithoutHit: true), this)
-            : KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, appliesWithoutHit: true);
+            ? BaseKeywordTips.ForWeak(ArmKeywordTips.ForSwirl(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, appliesWithoutHit: true), this), this)
+            : BaseKeywordTips.ForWeak(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Anemo, appliesWithoutHit: true), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("lynette_astonishing_shift");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Lynette — Magic Trick: Astonishing Shift"),
-        ("description", "[gold]Swirl[/gold] the enemy. Deal {CalculatedDamage:diff()} damage to ALL enemies."),
+        ("description", "[gold]Swirl[/gold] the enemy. Deal {CalculatedDamage:diff()} damage to ALL enemies. Apply 1 [gold]Weak[/gold] to ALL enemies."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(8m),
+            new CalculationBaseVar(6m),
             new ExtraDamageVar(1m),
             new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card))
         };
@@ -86,6 +86,10 @@ public sealed class ProtoMfLynetteAstonishingShift : CustomCardModel, ICompanion
             .WithElementHitFx(this)
             .SpawningHitVfxOnEachCreature()
             .Execute(choiceContext);
+        foreach (var debuffTarget in CombatState!.HittableEnemies.ToList())
+        {
+            await PowerCmd.Apply<WeakPower>(choiceContext, debuffTarget, 1, applier: Owner.Creature, cardSource: this);
+        }
     }
 
     protected override void OnUpgrade()

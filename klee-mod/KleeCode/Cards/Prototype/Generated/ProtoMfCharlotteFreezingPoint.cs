@@ -59,7 +59,7 @@ public sealed class ProtoMfCharlotteFreezingPoint : CustomCardModel, IElementalC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Charlotte — Framing: Freezing Point Composition"),
-        ("description", "Deal {CalculatedDamage:diff()} [gold]Cryo[/gold] damage. Draw {Cards:diff()} card{Cards:plural:|s}.{InCombat:{VarkaSwitch}|}"),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Cryo[/gold] damage. Draw 1 card.{InCombat:{VarkaSwitch}|}"),
     };
 
     /// <summary>The element this card makes current, on its in-combat line
@@ -78,7 +78,7 @@ public sealed class ProtoMfCharlotteFreezingPoint : CustomCardModel, IElementalC
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(7m),
+            new CalculationBaseVar(8m),
             new ExtraDamageVar(1m),
             new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card)),
             new CardsVar(1)

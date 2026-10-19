@@ -667,6 +667,10 @@ MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   # site, Compile Remove'd out of a release build like the rest
                   # of Powers/Prototype.
                   "block_half_damage",
+                  # THE FONTAINE POOL REWORK (2026-10-19): Sigewinne's "Gain
+                  # 4 Block for each enemy hit", the same ledger's per-play
+                  # enemies (`FontaineCompanion.BlockPerEnemyHit`).
+                  "block_per_enemy_hit",
                   # EB-122 (EB-69's fill): the turn-scoped Sly grant. Rides
                   # SlyGrant.Grant, whose whole shape is Hand Trick's --
                   # CardSelectCmd.FromHand filtered to non-Sly Skills, then
@@ -2014,6 +2018,12 @@ PREDICATES_CS = {
     # YAE, THE REFILL (2026-10-16): Fox's Shade's "If any enemy is Weak".
     # Sim twin: `effects._predicate` via `yae_shrine.weak_enemies`.
     "any_enemy_weak": "YaeShrine.WeakEnemies(Owner.Creature) > 0",
+    # THE FONTAINE POOL REWORK (2026-10-19): Navia's Ceremonial Crystalshot,
+    # "If this triggers Crystallize". `reaction_triggered_by_this`'s snapshot
+    # shape on the one reaction (`ReactionEffects.CrystallizeResolved`). Sim
+    # twin: `effects._predicate` via `state.crystallize_this_card`.
+    "crystallize_triggered_by_this":
+        "ReactionEffects.CrystallizeResolved > crystallizeAtStart",
 }
 
 # The if-clause each predicate renders on the card.
@@ -2068,6 +2078,8 @@ PREDICATE_TEXT = {
     "shrine_full": "If your shrine is full",
     "three_sakura": "If you have 3 [gold]Sakura[/gold]",
     "any_enemy_weak": "If any enemy is [gold]Weak[/gold]",
+    "crystallize_triggered_by_this":
+        "If this triggers [gold]Crystallize[/gold]",
 }
 
 _FANFARE_BAR = re.compile(r"^fanfare_at_least_(\d+)$")
@@ -4573,10 +4585,33 @@ APPLY_POWERS = {
         "your hand."),
     # Fontaine 5-star Rares (R64, 2026-07-25). Amounts live on the cards, so
     # none of these adds a constant for the parity lint to drift on.
-    # Navia keys on reactions since the Fontaine sanity check (2026-10-12).
+    # Navia hits ALL enemies each turn since the Fontaine pool rework
+    # (2026-10-19); she keyed on reactions from the sanity check (2026-10-12).
     "cannon_fire_support": ("CannonFireSupportPower", None,
-        "Whenever an [gold]Elemental Reaction[/gold] happens, gain {X} "
-        "[gold]Block[/gold]."),
+        "At the start of your turn, deal {X} [gold]Geo[/gold] damage to ALL "
+        "enemies."),
+    # THE FONTAINE POOL REWORK (2026-10-19). Classes in
+    # klee-mod/KleeCode/Powers/Prototype/CompanionOverhaulFontaine.cs; each
+    # row carries its own `description:`. Sim twins: tier0.engine.effects'
+    # `fontaine_*` readers.
+    "mf_grin_malkin_hat": ("GrinMalkinHatPower", None,
+        "Whenever you [gold]Exhaust[/gold] a card, deal {X} [gold]Pyro[/gold] "
+        "damage to a random enemy."),
+    "mf_rebound_hydrotherapy": ("ReboundHydrotherapyPower", None,
+        "At the start of your turn, gain {X} [gold]Block[/gold] and apply "
+        "[gold]Hydro[/gold] to a random enemy."),
+    "mf_chilling_penalty": ("ChillingPenaltyPower", None,
+        "Whenever you lose HP, deal {X} [gold]Cryo[/gold] damage to a random "
+        "enemy."),
+    "mf_aromatic_explication": ("AromaticExplicationPower", None,
+        "At the start of your turn, [gold]Exhaust[/gold] a Status or Curse "
+        "from your [gold]Hand[/gold] or [gold]Draw Pile[/gold]. If you did, "
+        "gain 1 Energy."),
+    # The base game's own next-turn draw (Silent), first printed by
+    # Escoffier's Low-Temperature Cooking (the Fontaine pool rework). tier0
+    # reads the `draw_cards_next_turn` stack at the hand draw (`refpowers`).
+    "draw_cards_next_turn": ("DrawCardsNextTurnPower", None,
+        "Next turn, draw {X} card{XS}."),
     "night_vigil": ("NightVigilPower", None,
         "Your Attacks against enemies holding an aura deal {X} additional "
         "damage."),
@@ -5320,6 +5355,12 @@ CARD_FIELDS = {
     # without this entry the first card ruled Ethereal from print would BLOCK
     # with "card field(s) ['ethereal'] not understood".
     "ethereal",
+    # THE FONTAINE POOL REWORK (2026-10-19): Freminet's Shattering Pressure,
+    # "Each time you Retain this, it deals N additional damage this combat."
+    # A Retain card's own growth, emitted as the card's `AfterFlush` (the
+    # flush hands every retained card over by name). Sim twin: `Card.retain_grow`
+    # read at `combat._end_player_turn`'s flush.
+    "retain_grow",
     # Companion identity/reward metadata.
     "star", "element", "role_c", "personal_pool", "nation", "character",
     "guest_star",
@@ -6455,6 +6496,12 @@ def blocked_reason(
                 return ("redirect_queued_plans target "
                         f"'{eff.get('target')}' -- the queue re-aims at the "
                         "enemy the card was played on")
+        if op == "block_per_enemy_hit":
+            unknown = set(eff) - {"op", "amount"}
+            if unknown:
+                return f"{op} field(s) {sorted(unknown)} not understood"
+            if not isinstance(eff.get("amount"), int):
+                return f"{op} needs a literal `amount`"
         if op in KOKOMI_BARE_OPS | {"block_half_damage"}:
             # No fields at all: each is one whole printed clause, and any
             # number they might carry is a rule's, not a card's.
@@ -6746,7 +6793,13 @@ def blocked_reason(
             # whole hand -- and that is still blocked below.
             if eff.get("filter") != "status" and eff.get("select") != "chosen":
                 return "exhaust_from without status filter (any-card pool not built)"
-            if eff.get("filter") not in (None, "status"):
+            # `filter: any` (the Fontaine pool rework, 2026-10-19: Emilie's
+            # Lumidouce Legacy, Burning Pact's "Exhaust a card"): the chosen
+            # pool is the whole Hand, a Status or a Curse included, for any
+            # owner. Chosen only; the random any-card pool stays unbuilt.
+            if eff.get("filter") == "any" and eff.get("select") != "chosen":
+                return "exhaust_from filter 'any' is the chosen branch's"
+            if eff.get("filter") not in (None, "status", "any"):
                 return f"exhaust_from filter '{eff.get('filter')}'"
             # amount > 1 is expressible ONLY on the chosen branch, and the
             # distinction is not pedantry. The sim's RANDOM branch re-rolls
@@ -12410,13 +12463,19 @@ def build_body(
     # so the running total has to start at zero when the play does. Emitted
     # only for a card that asks. Sim twin: `state.mi_damage_dealt_this_card`,
     # zeroed at the head of `effects.resolve_card`.
-    if any(e.get("op") == "block_half_damage"
+    # THE FONTAINE POOL REWORK: Sigewinne's enemies hit, the same per-play
+    # ledger opened the same way.
+    if any(e.get("op") in ("block_half_damage", "block_per_enemy_hit")
            for e in _effects_everywhere(card)):
         lines.append(
             "CompanionOverhaulLedger.For(Owner.Creature).BeginPlay();")
     preds = {e["if"] for e in card["effects"] if e.get("op") == "conditional"}
     if "reaction_triggered_by_this" in preds:
         lines.append("var reactionsAtStart = ReactionEffects.TotalResolved;")
+    if "crystallize_triggered_by_this" in preds:
+        # THE FONTAINE POOL REWORK: the same snapshot, on Crystallize alone.
+        lines.append(
+            "var crystallizeAtStart = ReactionEffects.CrystallizeResolved;")
     if "swirled_by_this" in preds:
         # VARKA: the same snapshot shape, on his own Swirl count.
         lines.append(
@@ -13435,6 +13494,15 @@ def build_body(
                 "await InazumaCompanion.BlockHalfDamage("
                 "choiceContext, Owner.Creature, cardPlay);")
 
+        elif op == "block_per_enemy_hit":
+            # THE FONTAINE POOL REWORK. Sigewinne's Block clause, off the
+            # enemies this play's damage reached (the ledger opened at the
+            # top of the body). Sim twin: `effects._op_block_per_enemy_hit`.
+            lines.append(
+                "await FontaineCompanion.BlockPerEnemyHit("
+                f"choiceContext, Owner.Creature, {int(eff['amount'])}, "
+                "cardPlay);")
+
 
         elif op == "remove_debuff":
             lines.append(
@@ -13907,8 +13975,11 @@ def build_body(
             # Grit's, any card in hand, a Status or a Curse included. The
             # rotation law is Kokomi's alone; the sim's `exhaust_pool` drops
             # junk only under her relic.
+            # `filter: any` (the Fontaine pool rework) says the same thing on
+            # the row, for a Companion anyone may hold.
             selector = ("KokomiResources.OwnCard"
                         if card.get("character") != "varka"
+                        and eff.get("filter") != "any"
                         else "static _ => true")
             # EB-118: the selection's identity context. Opened BEFORE the
             # screen so a cancelled or empty selector leaves an EMPTY context
@@ -18428,6 +18499,30 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     {{
         if (card != this) return;
 {cardplay_decl}        {sly_body}
+    }}
+'''
+
+    if card.get("retain_grow"):
+        # THE FONTAINE POOL REWORK (2026-10-19): the Retain card's growth.
+        # The game's flush names every card it kept (`Hook.AfterFlush`'s
+        # `retainedCards`), and every card in a combat pile hears the hook,
+        # so the card asks about itself. `FontaineCompanion.GrowOnRetain`
+        # holds the rule; the var is the one `grow_damage` raises.
+        grow_var = ('DynamicVars.CalculationBase'
+                    if any(calc_rider(card, e) is not None
+                           for e in card.get("effects", []))
+                    else "DynamicVars.Damage")
+        sly_cs += f'''
+    /// <summary>Each time this is Retained, it deals more this combat.</summary>
+    public override Task AfterFlush(
+        PlayerChoiceContext choiceContext,
+        MegaCrit.Sts2.Core.Entities.Players.Player player,
+        IReadOnlyCollection<CardModel> flushedCards,
+        IReadOnlyCollection<CardModel> retainedCards)
+    {{
+        FontaineCompanion.GrowOnRetain(
+            this, {grow_var}, retainedCards, {int(card["retain_grow"])});
+        return Task.CompletedTask;
     }}
 '''
 

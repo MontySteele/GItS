@@ -186,7 +186,11 @@ public sealed class CompanionOverhaulLedger
     /// <summary>A card play begins: the play-scoped total starts clean.
     /// `KokomiOverhaulLedger.BeginPlay`'s shape, and emitted the same way --
     /// at the top of the body of any card that reads it.</summary>
-    public void BeginPlay() => DamageDealtThisPlay = 0;
+    public void BeginPlay()
+    {
+        DamageDealtThisPlay = 0;
+        _enemiesHit.Clear();
+    }
 
     /// <summary>Damage that reached an enemy's HP during the current play.
     /// The one write site.</summary>
@@ -194,6 +198,21 @@ public sealed class CompanionOverhaulLedger
     {
         if (hp > 0) DamageDealtThisPlay += hp;
     }
+
+    private readonly HashSet<Creature> _enemiesHit = new();
+
+    /// <summary>
+    /// THE FONTAINE POOL REWORK (2026-10-19): the distinct enemies the
+    /// CURRENT CARD PLAY's damage reached, Block or not, a kill included --
+    /// Sigewinne's "for each enemy hit". Fed beside <see cref="NoteDamage"/>
+    /// and cleared by the same <see cref="BeginPlay"/>. Sim twin:
+    /// `state.mf_enemies_hit_this_card`.
+    /// </summary>
+    public int EnemiesHitThisPlay => _enemiesHit.Count;
+
+    /// <summary>An enemy took a hit from the current play. The one write
+    /// site.</summary>
+    public void NoteEnemyHit(Creature enemy) => _enemiesHit.Add(enemy);
 
     /// <summary>Roll the per-turn counter to <paramref name="round"/>. Public
     /// to the pins so a turn boundary can be exercised without a combat.</summary>
@@ -208,6 +227,7 @@ public sealed class CompanionOverhaulLedger
         // of a play: a turn boundary is a play boundary too, and a total left
         // standing across one is a number nothing would ever clear.
         DamageDealtThisPlay = 0;
+        _enemiesHit.Clear();
         _round = round;
     }
 }
@@ -316,12 +336,8 @@ public static class CompanionOverhaulReactions
     {
         if (reaction == Reaction.None) return;
 
-        // Navia, Cannon Fire Support (the Fontaine sanity check, 2026-10-12):
-        // "Whenever an Elemental Reaction happens, gain 4 Block." Ahead of the
-        // dealer guard below, because it pays every holder on the board for
-        // every reaction, a dealer-less one included. The co-op reading is
-        // argued on `CannonFireSupportPower`.
-        await CannonFireSupportPower.OnReaction(choiceContext, target);
+        // (Navia's Cannon Fire Support left this site with the Fontaine pool
+        // rework, 2026-10-19: it hits ALL enemies at the start of the turn.)
 
         if (dealer == null) return;
 
@@ -1543,8 +1559,11 @@ public sealed class CompanionOverhaulPlayWatcher : AbstractModel
         // definition -- and it is the number the sim's twin now hands its own
         // reader (`effects.deal_damage_to_enemy`'s `removed`). Gorou killing
         // an 8-HP body with a 12 gains 4, not 6, and gains it on the kill.
-        CompanionOverhaulLedger.For(dealer)
-            .NoteDamage(result.UnblockedDamage - result.OverkillDamage);
+        var ledger = CompanionOverhaulLedger.For(dealer);
+        ledger.NoteDamage(result.UnblockedDamage - result.OverkillDamage);
+        // THE FONTAINE POOL REWORK: an enemy this play reached, whatever its
+        // Block took (Sigewinne's "for each enemy hit").
+        if (target.IsEnemy) ledger.NoteEnemyHit(target);
         return Task.CompletedTask;
     }
 }

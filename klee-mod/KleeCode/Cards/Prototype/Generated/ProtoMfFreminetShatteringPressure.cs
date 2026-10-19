@@ -24,7 +24,6 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
-using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -32,53 +31,34 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoMfFreminetShatteringPressure : CustomCardModel, IElementalCard, ICompanionCard, IVarkaSwitchCard
+public sealed class ProtoMfFreminetShatteringPressure : CustomCardModel, ICompanionCard
 {
-    /// <summary>Sheet applies_element: this companion attack applies its element.</summary>
-    public Element Element => Element.Cryo;
-
     /// <summary>Companion identity (companion sheet): star drives the
     /// reward slot's rarity tier; PersonalPool gates per-character
     /// offers; Nation drives SAME_NATION_REWARD_SHARE weighting.</summary>
     public int Star => 4;
 
-    public Element CompanionElement => Element.Cryo;
+    public Element CompanionElement => Element.None;
 
     public string? PersonalPool => null;
 
     public string? Nation => "fontaine";
 
     public override IEnumerable<CardKeyword> CanonicalKeywords =>
-        new[] { KleeKeywords.AppliesCryo };
-
-    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForElementSwitch(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Cryo), this, Element.Cryo);
+        new[] { CardKeyword.Retain };
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("freminet_shattering_pressure");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Freminet — Shattering Pressure"),
-        ("description", "Deal {CalculatedDamage:diff()} [gold]Cryo[/gold] damage twice.{InCombat:{VarkaSwitch}|}"),
+        ("description", "Deal {CalculatedDamage:diff()} damage. Each time you Retain this, it deals 5 additional damage this combat."),
     };
-
-    /// <summary>The element this card makes current, on its in-combat line
-    /// (`VarkaOath.SwitchLine`).</summary>
-    protected override void AddExtraArgsToDescription(
-        MegaCrit.Sts2.Core.Localization.LocString description)
-    {
-        base.AddExtraArgsToDescription(description);
-        description.Add("VarkaSwitch", VarkaOath.SwitchLine(this, Element.Cryo));
-    }
-
-    /// <summary>The element this card makes Varka's current element
-    /// (`VarkaOathDial` previews it).</summary>
-    public Element VarkaSwitchElement => Element.Cryo;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new CalculationBaseVar(5m),
+            new CalculationBaseVar(8m),
             new ExtraDamageVar(1m),
             new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedDamageDelta(card))
         };
@@ -94,7 +74,6 @@ public sealed class ProtoMfFreminetShatteringPressure : CustomCardModel, IElemen
     {
         ArgumentNullException.ThrowIfNull(cardPlay.Target, "cardPlay.Target");
         await DamageCmd.Attack(DynamicVars.CalculatedDamage)
-            .WithHitCount(2)
             .FromCard(this, cardPlay)
             .Targeting(cardPlay.Target)
             .WithElementHitFx(this)
@@ -104,5 +83,17 @@ public sealed class ProtoMfFreminetShatteringPressure : CustomCardModel, IElemen
     protected override void OnUpgrade()
     {
         DynamicVars.CalculationBase.UpgradeValueBy(2m);
+    }
+
+    /// <summary>Each time this is Retained, it deals more this combat.</summary>
+    public override Task AfterFlush(
+        PlayerChoiceContext choiceContext,
+        MegaCrit.Sts2.Core.Entities.Players.Player player,
+        IReadOnlyCollection<CardModel> flushedCards,
+        IReadOnlyCollection<CardModel> retainedCards)
+    {
+        FontaineCompanion.GrowOnRetain(
+            this, DynamicVars.CalculationBase, retainedCards, 5);
+        return Task.CompletedTask;
     }
 }

@@ -311,6 +311,9 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # has no state for that -- `damage` two lines above is `[]` for the same
     # reason, refined by target rather than counted as a state.
     "block_half_damage": [_hook("shared", "block_held", "write")],
+    # THE FONTAINE POOL REWORK (2026-10-19): Sigewinne's Block per enemy hit,
+    # the same `block_held` write.
+    "block_per_enemy_hit": [_hook("shared", "block_held", "write")],
     "strip_block": [_hook("shared", "block_held", "use")],
     "heal": [_hook("shared", "hp_ledger", "write")],
     "gain_max_hp": [_hook("shared", "hp_ledger", "write")],

@@ -423,6 +423,15 @@ internal static class KleePowerIcons
         CannonFireSupportPower =>
             KleePck.Path("furina/powers/guest_navia.png"),
         NightVigilPower => KleePck.Path("furina/powers/guest_clorinde.png"),
+        // THE FONTAINE POOL REWORK (2026-10-19): each new Power wears its
+        // character's guest-star badge; Emilie has none and borrows the cast's.
+        GrinMalkinHatPower => KleePck.Path("furina/powers/guest_lyney.png"),
+        ReboundHydrotherapyPower =>
+            KleePck.Path("furina/powers/guest_sigewinne.png"),
+        ChillingPenaltyPower =>
+            KleePck.Path("furina/powers/guest_wriothesley.png"),
+        AromaticExplicationPower =>
+            KleePck.Path("furina/powers/guest_cast.png"),
         TheMasqueradePower =>
             KleePck.Path("furina/powers/fortissimo_guard.png"),
         LeadingLadyPower => KleePck.Path("furina/powers/leading_role.png"),

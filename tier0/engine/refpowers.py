@@ -320,6 +320,9 @@ def after_card_exhausted(state: CombatState, card: Card,
     n = p.powers.get("feel_no_pain", 0)
     if n:
         gain_block(state, p, n)                  # Unpowered: no Unmovable
+    # THE FONTAINE POOL REWORK (2026-10-19): Lyney's Grin-Malkin Hat, a Pyro
+    # hit on every exhaust, ethereal included (`GrinMalkinHatPower`).
+    _effects.grin_malkin_hat(state)
     n = p.powers.get("dark_embrace", 0)
     if not n:
         return

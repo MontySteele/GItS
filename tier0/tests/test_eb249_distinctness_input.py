@@ -38,11 +38,12 @@ def test_personal_rows_are_not_in_the_universal_pool():
 
 def test_guest_stars_are_not_in_the_universal_pool():
     """(b), Fontaine's half: the three Neuvillette cameos were deleted
-    (2026-10-18), so all sixteen rows are universal."""
+    (2026-10-18), so every row is universal: thirty since the Fontaine pool
+    rework (2026-10-19)."""
     rows = _pools()["fontaine-companions"]
     assert not any(r.get("guest_star") for r in rows)
-    assert len(rows) == 16
-    assert len(cdr.universal_rows(rows)) == 16
+    assert len(rows) == 30
+    assert len(cdr.universal_rows(rows)) == 30
 
 
 def test_the_kit_pools_are_the_pinned_78_and_untouched_by_the_filter():

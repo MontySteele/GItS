@@ -302,3 +302,7 @@ def note_player_hp_loss(state: CombatState, n: int) -> None:
     # Fanfare 1:1 on that arm. A no-op for anyone else.
     from tier0.engine import furina_tide           # late: avoids the cycle
     furina_tide.on_hp_loss(state, n)
+    # THE FONTAINE POOL REWORK (2026-10-19): Wriothesley's Chilling Penalty,
+    # a Cryo hit on any HP lost, at this one funnel (`ChillingPenaltyPower`).
+    from tier0.engine import effects               # late: avoids the cycle
+    effects.chilling_penalty(state)
