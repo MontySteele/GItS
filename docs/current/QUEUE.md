@@ -37,6 +37,14 @@ modded death sound (`set_hp player 1`); the shop portrait idles.
 
 ## Eyes-on looks (materials ready; no build waits on them)
 
+- **Models and screens in motion** (from the backlog, 2026-10-19): Klee,
+  Varka and Furina in motion (the facing flip with an enemy behind, multi-hit
+  timing at Normal speed, Varka's two ground bursts, a pale bar behind a
+  summoned Freminet, Furina's eleven guest effects); the Bake-Kurage beside a
+  non-Kokomi character; Kokomi's Plans grid with a controller (open, flip,
+  captions, focus return) and the pet by D-pad; Varka's element-switch hover;
+  the drag-aimed reaction preview. Polish only what bothers you.
+
 - **End-of-turn docket:** does the end of turn read legibly, is the per-seat
   position doing the attribution work, is the chip's prominence right. Frames
   in `art/eb52_captures/` and `understudy/logs/frames/`; no frame isolates the

@@ -8,6 +8,16 @@ records named below and git (last long copy:
 [`LAW.md`](LAW.md); stage procedure: `operations/stage-gate.md`. Card
 numbers live on the sheet.
 
+## Release pass (ruled 2026-10-19)
+
+[USER] took GPT's release review's five defaults ("Agreed all around"):
+freeze Klee's and Varka's mechanics (wording and preview fixes only); Furina
+stays a launch candidate; Kokomi's bounded finish comes next and Yae stays in
+beta; elements, stories and the Abyss are kept, not grown. The pass stops when
+newcomers can reach and understand the fun. Next: a newcomer seat (the page a
+human sees, no ledger or glossary) on all five kits. Feedback comes through
+Workshop comments and telemetry.
+
 ## Mod build environment (pinned)
 
 Slay the Spire 2 **v0.111.0** (`41cef1ea`, buildid `24724944`, branch
@@ -106,7 +116,8 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   2026-10-18.
 - **Next:** the card-by-card paper for her three ruled archetypes (Grand
   Strategy, Read the Tide, Shoal); it takes up her warding (`EB-80`: the
-  2026-10-19 round ran short of Block since Ward lost its Block).
+  2026-10-19 round ran short of Block since Ward lost its Block). Ideas held for it: a Plan-only
+  Nereid's Ascension, and Exhausting a waiting Plan for an effect now.
 
 **Furina: Balance** (2026-10-15).
 - **Rules** (`review/active/furina-research-proposal-2026-10-05.md` sec.2):
@@ -129,12 +140,16 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
 - **Process:** frozen on `main`; changes go on `furina-next` with a suite
   record.
 - **Latest record:** `review/records/furina-suite-4-2026-10-16.md` (mean
-  40.4, two runs won); HP lost still about 1.6 to 1.9 of base.
+  40.4, two runs won). Its HP figures are before the Curtain Call refund and
+  count her own Drains (GPT recheck, 2026-10-19): after the refund she loses
+  7.7 / 12.8 / 14.9% of max HP a normal fight against base 8.8 / 14.9 / 10.0,
+  so only act 3 is high.
 - **Story built** (`review/active/furina-story-2026-10-15.md`,
   `Story/FurinaStory.cs`): events, lines and the Stage Fright curse. Unseen
   in game.
-- **Next:** a paper on Drain's own cost (the open HP gap); the co-op check
-  owed at a finish line.
+- **Next:** make her HP legible (which HP comes back after the fight, which
+  Drain stays a cost, why Repay gives Block below full HP), not a buff; the
+  co-op check owed at a finish line.
 
 **Varka: Balance.**
 - **Rules** (`review/active/varka-paper-kit-2026-09-28.md` sec.3;
