@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
-using Godot;
+using BaseLib.Utils.Attributes;
 using KleeMod.Cards.Furina;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Unlocks;
@@ -12,20 +12,17 @@ namespace KleeMod;
 /// kit, selector, selector options, and Guest Stars are members only so their
 /// CardModel.Pool lookups remain valid when they are created in combat.
 /// </summary>
-public sealed class FurinaCardPool : CardPoolModel
+[CustomID("FURINA_CARD_POOL")]
+public sealed class FurinaCardPool : KitCardPool
 {
     public override string Title => "furina";
 
-    // Temporary native frame while the Furina art pass is outstanding.
+    // The Silent's orb, borrowed while the Furina art pass is outstanding.
     public override string EnergyColorName => "silent";
 
-    public override string CardFrameMaterialPath => "card_frame_green";
-
-    public override Color DeckEntryCardColor => new("4AA6C8");
-
-    public override Color EnergyOutlineColor => new("174B67");
-
-    public override bool IsColorless => false;
+    /// <summary>Frame tint, chip and orb-number outline:
+    /// <see cref="CardFrameColors.Furina"/>.</summary>
+    public override CardFrameColors.Tint Tint => CardFrameColors.Furina;
 
     /// <summary>
     /// THE OFFER (<c>GetUnlockedCards</c>, the sole door into reward rolls,

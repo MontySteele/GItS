@@ -865,6 +865,13 @@ UNMIRRORED: dict[str, str] = {
     "ElementBadge.Gap":
         "presentation: pixels between the gem's right edge and the type "
         "plaque's left, so the pair reads as one row.",
+    # The companion nation pip (card frames stage 1, 2026-10-19), the gem's
+    # mirror on the plaque's right; the sim has no card face.
+    "NationEmblem.Side":
+        "presentation: the nation pip's diameter in card pixels.",
+    "NationEmblem.Gap":
+        "presentation: pixels between the type plaque's right edge and the "
+        "nation pip, the element gem's gap mirrored.",
     "ReactionFx.FlashSeconds":
         "presentation: a reaction's body-flash length in seconds; nothing "
         "waits on it, and the sim draws nothing.",

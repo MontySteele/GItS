@@ -42,6 +42,12 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   has none since the Stage rework.
 - Every starter is the base Strike x4 and Defend x4 plus two cards of its own.
   Starter basics change only on [USER]'s pick. No kit starts with a shared Companion; Varka's Knights are his kit's own Companions and count as Companions for every synergy.
+- **Card frames stage 1 built** (2026-10-19, `review/active/card-frames-2026-10-19.md`;
+  [USER]: "we need a quick way of distinguishing the character cards"): each kit
+  tints its own frame (Klee red-orange, Furina deep blue, Kokomi pearl coral,
+  Varka teal, Yae magenta; `KleeCode/CardFrameColors.cs`) and every Companion
+  shows a nation pip right of its type plaque; unseen in game. Stage 2 (own
+  frame art per kit) is an art job for [USER].
 - **Character five is Yae Miko** (`review/active/yae-proposal-2026-10-12.md`,
   ruled; the Stellar-Conduct nod is parked). **Prototype, batch one built
   in C#** (2026-10-13): the card paper
