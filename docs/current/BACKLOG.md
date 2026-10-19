@@ -31,6 +31,7 @@ cut to about 350 characters is `git show 3ce4f8c35:docs/current/BACKLOG.md`.
 - Furina: whether a guest's act ends a Frozen is not printed; needs the game (Frozen itself prints since 2026-10-19).
 - Kujou Sara's Electro rider prints "Applies Electro — Applies Hydro for 2 turns" (newcomer round 1, lane 4); its keyword tip reuses the Hydro text.
 - Yae's planting rule: two Yakan Evocations made two separate Level 1 Sakura, against "Same kind: it refreshes and gains a Level" (newcomer round 1, lane 5); check live, then fix the text or the code. Dawn Prayer's "newest" lands on Twin Sakura's Kitsune, an order the page never shows.
+- Upgrades that only cut cost or add Innate: at Furina's and Yae's next card passes, count their cost-only and Innate-only upgrades against the base five and replace the excess with a real upgrade, as Kokomi's finish pass (`review/active/kokomi-cards-2026-10-18.md` sec. 7, upgrade census) and Varka's powers pass (`varka-fang-next`) did ([USER], 2026-10-19: "You do have a habit of making too many powers just decrease their cost by 1 on upgrade").
 - Durin's start-of-turn tick skipped one fight (Fogmog, trace); `RandomEnemy` may pick the Eye With Teeth illusion (`CompanionOverhaulPowers.cs:51`). Live look. (Chained Reactions is QUEUE, backlog wrap-up pick 3.)
 
 ## Harness, bridge, tools and sim
