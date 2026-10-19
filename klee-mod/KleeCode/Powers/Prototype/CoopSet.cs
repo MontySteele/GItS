@@ -781,29 +781,26 @@ public sealed class ComradesOfTheExpeditionPower
 /// <c>PlayerCmd.GainEnergy</c>. The stack is the energy, so a second copy
 /// gives 2.
 ///
-/// THE POWER UPGRADE PASS (2026-10-19): the upgraded card installs
-/// <see cref="WestWindsBlessingPlusPower"/>, whose gift also draws each other
-/// player 1 card, was Innate. Each form keeps its own latch.
+/// THE POWER UPGRADE PASS (2026-10-19, [USER]: "You do have a habit of making
+/// too many powers just decrease their cost by 1 on upgrade though"): was
+/// Innate. ONE power for both versions (<see cref="UpgradeTwinPower"/>, the
+/// icon declutter's shape): Amount is every copy installed,
+/// <see cref="UpgradeTwinPower.UpgradedCopies"/> the copies an upgraded card
+/// installed. Each upgraded copy also draws each other player 1 card.
 /// </summary>
-public abstract class WestWindsBlessingBasePower : PowerModel, ILocalizationProvider
+public sealed class WestWindsBlessingPower : UpgradeTwinPower, ILocalizationProvider
 {
-    /// <summary>The cards each other player draws with the gift, 0 [1].</summary>
-    public abstract int Draws { get; }
-
     public List<(string, string)>? Localization => new()
     {
-        ("title", Draws > 0 ? "West Wind's Blessing+" : "West Wind's Blessing"),
+        ("title", "West Wind's Blessing"),
         ("description",
             "The first time each turn you [gold]Swirl[/gold], each other "
+          + "player gains {Amount:energyIcons()}."),
+        ("smartDescription",
+            "The first time each turn you [gold]Swirl[/gold], each other "
           + "player gains {Amount:energyIcons()}"
-          + (Draws > 0
-              ? " and draws " + Draws + " card" + (Draws == 1 ? "" : "s")
-              : "") + "."),
+          + "{Upgraded:cond:>0? and draws [blue]{}[/blue]|}."),
     };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
 
     /// <summary>The round this power last paid, or -1.</summary>
     private sealed class Latch
@@ -836,7 +833,7 @@ public abstract class WestWindsBlessingBasePower : PowerModel, ILocalizationProv
         var others = CoopSet.OtherPlayers(varka);
         if (others.Count == 0) return;
         var round = varka.CombatState?.RoundNumber ?? 0;
-        foreach (var blessing in varka.Powers.OfType<WestWindsBlessingBasePower>()
+        foreach (var blessing in varka.Powers.OfType<WestWindsBlessingPower>()
                      .ToList())
         {
             if (blessing.Amount <= 0 || !blessing.Take(round)) continue;
@@ -845,25 +842,13 @@ public abstract class WestWindsBlessingBasePower : PowerModel, ILocalizationProv
                 if (ally.Player is { } player)
                 {
                     await PlayerCmd.GainEnergy((int)blessing.Amount, player);
-                    if (blessing.Draws > 0)
+                    if (blessing.UpgradedCopies > 0)
                     {
-                        await CardPileCmd.Draw(choiceContext, blessing.Draws,
-                                               player);
+                        await CardPileCmd.Draw(choiceContext,
+                            blessing.UpgradedCopies, player);
                     }
                 }
             }
         }
     }
-}
-
-/// <summary>West Wind's Blessing: the energy alone.</summary>
-public sealed class WestWindsBlessingPower : WestWindsBlessingBasePower
-{
-    public override int Draws => 0;
-}
-
-/// <summary>West Wind's Blessing+: the energy and 1 card.</summary>
-public sealed class WestWindsBlessingPlusPower : WestWindsBlessingBasePower
-{
-    public override int Draws => 1;
 }

@@ -63,18 +63,11 @@ public sealed class ProtoVkEyeOfStormterror : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (IsUpgraded)
-        {
-            await PowerCmd.Apply<EyeOfStormterrorPlusPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
-        }
-        else
-        {
-            await PowerCmd.Apply<EyeOfStormterrorPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
-        }
+        await UpgradeTwinPower.Install<EyeOfStormterrorPower>(choiceContext, Owner.Creature, 1, IsUpgraded, Owner.Creature, this);
     }
 
     protected override void OnUpgrade()
     {
-        // upgraded_power: the upgraded card installs EyeOfStormterrorPlusPower, read off IsUpgraded when the card is played.
+        // upgraded_power: the upgraded card installs EyeOfStormterrorPower, read off IsUpgraded when the card is played.
     }
 }

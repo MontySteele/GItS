@@ -14,8 +14,10 @@ namespace KleeMod.Tests.Prototype;
 /// <summary>
 /// VARKA, THE POWER UPGRADE PASS (2026-10-19). [USER]: "You do have a habit
 /// of making too many powers just decrease their cost by 1 on upgrade
-/// though." Seven upgrades that were Innate now install a Plus power, and
-/// Comrades of the Expedition's cost cut became 1 [2] Oath. The sim twin is
+/// though." Seven upgrades that were Innate now carry their upgrade on ONE
+/// power per card (<see cref="UpgradeTwinPower"/>: Amount is every copy,
+/// UpgradedCopies the upgraded ones), and Comrades of the Expedition's cost
+/// cut became 1 [2] Oath. The sim twin is
 /// <c>tier0/tests/test_varka_power_upgrades.py</c>; the staging paper is
 /// <c>review/active/varka-fang-next-2026-10-19.md</c>.
 /// </summary>
@@ -62,16 +64,21 @@ public class VarkaPowerUpgradeTests : IDisposable
 
     [Theory]
     [MemberData(nameof(Swaps))]
-    public void The_upgraded_card_installs_the_plus_power_and_is_not_innate(
+    public void The_card_installs_one_power_that_counts_its_upgraded_copies(
         Type cardType, string power, string swap)
     {
         var card = (CardModel)Activator.CreateInstance(cardType)!;
         Assert.Contains(swap, Face(card));
         Assert.DoesNotContain(CardKeyword.Innate, card.Keywords);
         var play = Seq(cardType.Name, "OnPlay");
-        Assert.Contains(play, c => c.Contains(power));
-        Assert.Contains(play, c => c.Contains(power.Replace("Power", "PlusPower")));
+        Assert.Contains(play, c => c.Contains("UpgradeTwinPower.Install"));
         Assert.Contains(play, c => c.Contains("get_IsUpgraded"));
+        Assert.DoesNotContain(play, c => c.Contains("PlusPower"));
+        var cls = typeof(UpgradeTwinPower).Assembly.GetTypes()
+            .Single(t => t.Name == power);
+        Assert.True(typeof(UpgradeTwinPower).IsAssignableFrom(cls), power);
+        Assert.Null(typeof(UpgradeTwinPower).Assembly.GetTypes()
+            .FirstOrDefault(t => t.Name == power.Replace("Power", "PlusPower")));
     }
 
     [Fact]
@@ -102,36 +109,40 @@ public class VarkaPowerUpgradeTests : IDisposable
     }
 
     [Fact]
-    public void The_plus_numbers()
+    public void The_stacking_rules()
     {
-        Assert.Equal(1, new UnwaveringBannerPower().OathPaid);
-        Assert.Equal(2, new UnwaveringBannerPlusPower().OathPaid);
-        Assert.Equal(0, new WildfireOathPower().Bonus);
-        Assert.Equal(3, new WildfireOathPlusPower().Bonus);
-        Assert.Equal(0, new AbsoluteZeroPower().Bonus);
-        Assert.Equal(3, new AbsoluteZeroPlusPower().Bonus);
-        Assert.False(new WolfpackPower().UpgradedCopy);
-        Assert.True(new WolfpackPlusPower().UpgradedCopy);
-        Assert.Equal(0, new WeathervanePower().OathGained);
-        Assert.Equal(1, new WeathervanePlusPower().OathGained);
-        Assert.Equal(3, new EyeOfStormterrorPower().Swirls);
-        Assert.Equal(4, new EyeOfStormterrorPlusPower().Swirls);
-        Assert.Equal(0, new WestWindsBlessingPower().Draws);
-        Assert.Equal(1, new WestWindsBlessingPlusPower().Draws);
-        // "Your Pyro [Cryo] Oath plus 3", per stack.
-        Assert.Equal(7, WildfireOathBasePower.DamageFor(4, 1, 3));
-        Assert.Equal(4, WildfireOathBasePower.DamageFor(4, 1));
-        Assert.Equal(10, AbsoluteZeroBasePower.DamageFor(2, 2, 3));
+        // Banner: each copy adds its own, 1 plain, 2 upgraded, at least 1.
+        Assert.Equal(1, UnwaveringBannerPower.OathFor(1, 0));
+        Assert.Equal(2, UnwaveringBannerPower.OathFor(0, 1));
+        Assert.Equal(3, UnwaveringBannerPower.OathFor(1, 1));
+        Assert.Equal(1, UnwaveringBannerPower.OathFor(0, 0));
+        // Wildfire / Absolute Zero: one hit, the Oath per copy plus 3 per
+        // upgraded copy (a second plain copy doubles, as before).
+        Assert.Equal(4, WildfireOathPower.DamageFor(4, 1));
+        Assert.Equal(7, WildfireOathPower.DamageFor(4, 1, 1));
+        Assert.Equal(11, WildfireOathPower.DamageFor(4, 2, 1));
+        Assert.Equal(10, AbsoluteZeroPower.DamageFor(2, 2, 2));
+        // Eye: every copy draws through the 3rd Swirl, upgraded ones the 4th.
+        Assert.Equal(2, EyeOfStormterrorPower.DrawsFor(3, 2, 1));
+        Assert.Equal(1, EyeOfStormterrorPower.DrawsFor(4, 2, 1));
+        Assert.Equal(0, EyeOfStormterrorPower.DrawsFor(4, 2, 0));
+        Assert.Equal(0, EyeOfStormterrorPower.DrawsFor(5, 2, 2));
+        Assert.Equal(4, VarkaLaw.EyeOfStormterrorSwirlsUpgraded);
+        // Lupical: plain and upgraded batches, in the order they landed.
+        Assert.Equal(new[] { (1, false), (1, true) },
+                     UpgradeTwinPower.Batches(1, 1, upgradedFirst: false));
     }
 
     [Fact]
-    public void The_live_sites_read_either_form()
+    public void The_live_sites_read_the_upgraded_copies()
     {
+        Assert.Contains(Seq("UnwaveringBannerPower", "get_OathPaid"),
+            c => c.Contains("UpgradeTwinPower.get_UpgradedCopies"));
         Assert.Contains(Seq("VarkaOath", "BannerHolds"),
-            c => c.Contains("UnwaveringBannerBasePower"));
+            c => c.Contains("UnwaveringBannerPower.get_OathPaid"));
         Assert.Contains(Seq("VarkaOath", "Weathervane"),
-            c => c.Contains("WeathervaneBasePower"));
-        Assert.Contains(Seq("VarkaOath", "OnSwirl"),
-            c => c.Contains("EyeOfStormterrorBasePower"));
+            c => c.Contains("WeathervanePower"));
+        Assert.Contains(Seq("WestWindsBlessingPower", "OnSwirl"),
+            c => c.Contains("CardPileCmd.Draw"));
     }
 }

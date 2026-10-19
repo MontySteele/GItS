@@ -1,9 +1,10 @@
 """VARKA, THE POWER UPGRADE PASS (2026-10-19) -- the sim's pins for the eight
 power upgrades that stopped being Innate or a cost cut. [USER], 2026-10-19:
 "You do have a habit of making too many powers just decrease their cost by 1
-on upgrade though." Each upgraded card installs a Plus power
-(`upgraded_power`, rewritten by `tier0/content/upgrades.py`); Comrades of the
-Expedition bumps its stack. Rules: `tier0/engine/varka_oath.py`; the C# twin
+on upgrade though." Each upgraded card's copy is counted under a `_plus`
+name (`upgraded_power`, rewritten by `tier0/content/upgrades.py`; in C# it is
+ONE power per card, `UpgradeTwinPower.UpgradedCopies`); Comrades of the
+Expedition bumps its stack. Stacking: each copy adds its own. Rules: `tier0/engine/varka_oath.py`; the C# twin
 is `klee-mod/KleeTests/Prototype/VarkaPowerUpgradeTests.cs`. Staging paper:
 `review/active/varka-fang-next-2026-10-19.md`.
 """
@@ -151,3 +152,24 @@ def test_lupical_plus_shuffles_an_upgraded_copy(varka):
     combat.play_card(st, card)
     copies = [c for c in p.draw_pile if c.id == V.ASCENSION_ID + "+"]
     assert len(copies) == 1 and copies[0].exhaust
+
+
+def test_banner_plain_and_upgraded_pay_three(varka):
+    st = _state()
+    led = V.ledger(st.player)
+    led.current = "pyro"
+    st.player.powers[V.UNWAVERING_BANNER] = 1
+    st.player.powers[V.UNWAVERING_BANNER_PLUS] = 1
+    V.banner_holds(st, "cryo")
+    assert led.oath["pyro"] == 3
+
+
+def test_two_upgraded_weathervanes_gain_two(varka):
+    st = _state()
+    led = V.ledger(st.player)
+    led.current = "pyro"
+    led.oath.update(pyro=1, cryo=2)
+    st.player.powers[V.WEATHERVANE_PLUS] = 2
+    led.weathervane_choice = "cryo"
+    V.turn_start(st)
+    assert led.oath["cryo"] == 4

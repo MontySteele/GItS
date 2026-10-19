@@ -282,7 +282,7 @@ public class VarkaExpansionTests : IDisposable
         Assert.Equal(3, VarkaLaw.EyeOfStormterrorSwirls);
         var swirl = Calls("VarkaOath", "OnSwirl");
         Assert.Contains("VarkaOath.Pay", swirl);
-        Assert.Contains("EyeOfStormterrorBasePower.Draw", swirl);
+        Assert.Contains("EyeOfStormterrorPower.Draw", swirl);
         Assert.Contains("CreatureCmd.GainBlock", swirl);            // Eye Wall
         Assert.Contains("VarkaOath.IsOathElement", swirl);          // Twin Gales
     }
@@ -313,7 +313,7 @@ public class VarkaExpansionTests : IDisposable
         // Co-op notes pick 2 (2026-10-02): Assembly left EndPlay for
         // NoteApplication (CoopNotesRulingsTests).
         Assert.DoesNotContain("AssemblyAtTheCathedralPower.OnElementApplied", end);
-        Assert.Contains("WolfpackBasePower.OnAscensionPlayed", end);
+        Assert.Contains("WolfpackPower.OnAscensionPlayed", end);
         // The Varka payoff round (2026-10-10): the copy is shuffled into the
         // draw pile, Exhausts, and the seat page hears of it.
         var wolves = Calls("WolfpackPower", "OnAscensionPlayed");

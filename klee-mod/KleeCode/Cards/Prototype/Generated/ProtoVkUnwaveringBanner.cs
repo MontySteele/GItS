@@ -63,18 +63,11 @@ public sealed class ProtoVkUnwaveringBanner : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (IsUpgraded)
-        {
-            await PowerCmd.Apply<UnwaveringBannerPlusPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
-        }
-        else
-        {
-            await PowerCmd.Apply<UnwaveringBannerPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
-        }
+        await UpgradeTwinPower.Install<UnwaveringBannerPower>(choiceContext, Owner.Creature, 1, IsUpgraded, Owner.Creature, this);
     }
 
     protected override void OnUpgrade()
     {
-        // upgraded_power: the upgraded card installs UnwaveringBannerPlusPower, read off IsUpgraded when the card is played.
+        // upgraded_power: the upgraded card installs UnwaveringBannerPower, read off IsUpgraded when the card is played.
     }
 }

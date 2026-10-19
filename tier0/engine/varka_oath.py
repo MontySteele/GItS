@@ -219,9 +219,10 @@ EYE_OF_STORMTERROR_SWIRLS_UPGRADED = 4
 OATH_PAYOFF_UPGRADE_BONUS = 3
 #: Weathervane+: "and you gain 1 Oath of it".
 WEATHERVANE_OATH_UPGRADED = 1
-#: THE POWER UPGRADE PASS (2026-10-19): the upgraded card installs the Plus
-#: power (`upgraded_power`, rewritten by `tier0/content/upgrades.py`), was
-#: Innate. C# twins: the `*PlusPower` classes in VarkaPowers.cs.
+#: THE POWER UPGRADE PASS (2026-10-19): the upgraded card's copy is counted
+#: under its own name (`upgraded_power`, rewritten by
+#: `tier0/content/upgrades.py`), was Innate. The C# twin is ONE power per card
+#: whose `UpgradeTwinPower.UpgradedCopies` counts these.
 UNWAVERING_BANNER_PLUS = "vk_unwavering_banner_plus"
 WILDFIRE_OATH_PLUS = "vk_wildfire_oath_plus"
 ABSOLUTE_ZERO_PLUS = "vk_absolute_zero_plus"
@@ -570,10 +571,11 @@ def banner_holds(state, element: str) -> None:
         return
     led.banner_paid = True
     state.emit("varka_banner", element=led.current, would=element)
-    # The power upgrade pass (2026-10-19): the Plus form pays 2, the larger
-    # when both are up.
-    paid = (BANNER_OATH_UPGRADED if _power(state.player, UNWAVERING_BANNER_PLUS)
-            else BANNER_OATH)
+    # The power upgrade pass (2026-10-19): each copy adds its own, 1 per
+    # plain copy and 2 per upgraded copy. C# twin: `OathFor`.
+    paid = max(1, BANNER_OATH * _power(state.player, UNWAVERING_BANNER)
+               + BANNER_OATH_UPGRADED
+               * _power(state.player, UNWAVERING_BANNER_PLUS))
     gain(state, led.current, paid, "unwavering_banner")
 
 
@@ -989,8 +991,9 @@ def _weathervane(state, led: VarkaLedger) -> None:
     # Weathervane+ (the power upgrade pass, 2026-10-19): "and you gain 1
     # Oath of it", only when an element was chosen. C# twin:
     # `VarkaOath.Weathervane`.
-    if _power(state.player, WEATHERVANE_PLUS):
-        gain(state, choice, WEATHERVANE_OATH_UPGRADED, "weathervane")
+    plus = _power(state.player, WEATHERVANE_PLUS)
+    if plus:
+        gain(state, choice, WEATHERVANE_OATH_UPGRADED * plus, "weathervane")
 
 
 def turn_end(state) -> None:

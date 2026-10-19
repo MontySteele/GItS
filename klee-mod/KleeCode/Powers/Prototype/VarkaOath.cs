@@ -453,12 +453,6 @@ public interface IVarkaSwitchCard
 /// </summary>
 public static class VarkaOath
 {
-    /// <summary>Is Unwavering Banner up, either form (the power upgrade
-    /// pass, 2026-10-19: the upgraded card installs
-    /// <see cref="UnwaveringBannerPlusPower"/>)?</summary>
-    public static bool HasBanner(this Creature creature) =>
-        creature.Powers.OfType<UnwaveringBannerBasePower>().Any();
-
     /// <summary>
     /// Is the Oath kept for THIS creature: it gains Oath from the elements it
     /// applies and the Swirls it makes, a Knight sets its current element,
@@ -610,7 +604,7 @@ public static class VarkaOath
         }
         if (card is ProtoVkFourWindsAscension)
         {
-            foreach (var wolves in owner!.Powers.OfType<WolfpackBasePower>().ToList())
+            foreach (var wolves in owner!.Powers.OfType<WolfpackPower>().ToList())
             {
                 await wolves.OnAscensionPlayed(card);
             }
@@ -714,7 +708,7 @@ public static class VarkaOath
         PlayerChoiceContext choiceContext, Creature varka, Element element)
     {
         if (!Live(varka) || !IsOathElement(element)) return;
-        if (varka.HasBanner())
+        if (varka.HasPower<UnwaveringBannerPower>())
         {
             await BannerHolds(choiceContext, varka, element);
             return;
@@ -849,7 +843,7 @@ public static class VarkaOath
         // gains 1 Oath of the current element instead (once per play).
         if (ledger.OpenOathSwitches(element, cardSource))
         {
-            if (applier.HasBanner())
+            if (applier.HasPower<UnwaveringBannerPower>())
             {
                 await BannerHolds(choiceContext, applier, element);
             }
@@ -870,7 +864,7 @@ public static class VarkaOath
         if (element == Element.Pyro && target != null)
         {
             foreach (var wildfire in applier.Powers
-                         .OfType<WildfireOathBasePower>().ToList())
+                         .OfType<WildfireOathPower>().ToList())
             {
                 await wildfire.OnPyroApplied(choiceContext, target);
             }
@@ -901,16 +895,15 @@ public static class VarkaOath
         var current = ledger.Current;
         if (current == Element.None || element == current) return;
         if (!ledger.TakeBannerPay()) return;
-        var banners = varka.Powers.OfType<UnwaveringBannerBasePower>().ToList();
-        foreach (var banner in banners)
+        var paid = 0;
+        foreach (var banner in varka.Powers.OfType<UnwaveringBannerPower>().ToList())
         {
             banner.Pulse();
+            paid += banner.OathPaid;
         }
-        // "gain 1 [2] Oath" -- the printed number, as Vow of the Blade's;
-        // the larger when both forms are up (the power upgrade pass,
-        // 2026-10-19), once per play.
-        var paid = banners.Count == 0 ? 1 : banners.Max(b => b.OathPaid);
-        await Gain(choiceContext, varka, current, paid);
+        // "gain 1 [2] Oath" -- 1 per plain copy, 2 per upgraded copy (the
+        // power upgrade pass, 2026-10-19), once per play.
+        await Gain(choiceContext, varka, current, System.Math.Max(1, paid));
     }
 
     // ---- the Swirl ------------------------------------------------------------
@@ -974,18 +967,15 @@ public static class VarkaOath
             await CreatureCmd.GainBlock(dealer, wall.Amount,
                 ValueProp.Unpowered, null, fast: true);
         }
-        // The power upgrade pass (2026-10-19): each form reads its own
-        // count, 3 [4].
-        foreach (var eye in dealer.Powers.OfType<EyeOfStormterrorBasePower>().ToList())
+        // The power upgrade pass (2026-10-19): the upgraded copies also draw
+        // on the 4th (`EyeOfStormterrorPower.DrawsFor`).
+        foreach (var eye in dealer.Powers.OfType<EyeOfStormterrorPower>().ToList())
         {
-            if (ledger.SwirlsThisTurn <= eye.Swirls)
-            {
-                await eye.Draw(choiceContext);
-            }
+            await eye.Draw(choiceContext, ledger.SwirlsThisTurn);
         }
         // West Wind's Blessing (Varka's co-op five, 2026-10-13): the first
         // Swirl each turn gives each other player energy.
-        await WestWindsBlessingBasePower.OnSwirl(choiceContext, dealer);
+        await WestWindsBlessingPower.OnSwirl(choiceContext, dealer);
         if (current != Element.None)
         {
             Log.Info($"[{KleeMod.ModId}] VARKA Swirl on {target.Name}: "
@@ -1184,7 +1174,7 @@ public static class VarkaOath
         if (!IsOathElement(element)) return false;
         if (Current(owner) == element) return false;
         return VarkaRules.IsKnight(card)
-            || !owner.HasBanner();
+            || !owner.HasPower<UnwaveringBannerPower>();
     }
 
     /// <summary>
@@ -1305,18 +1295,18 @@ public static class VarkaOath
             return "";
         }
         if (owner?.CombatState == null || !Live(owner)) return "";
-        var fires = owner.Powers.OfType<WildfireOathBasePower>().ToList();
-        if (fires.Sum(p => (int)p.Amount) <= 0) return "";
+        var fires = owner.Powers.OfType<WildfireOathPower>().ToList();
+        var stacks = fires.Sum(p => (int)p.Amount);
+        var upgraded = fires.Sum(p => p.UpgradedCopies);
+        if (stacks <= 0) return "";
         var gain = 1;
         if (Current(owner) == Element.Pyro || WouldSwitchTo(card, Element.Pyro))
         {
             gain += owner.Powers.OfType<OathUntoDeathPower>()
                 .Sum(p => (int)p.Amount);
         }
-        // The power upgrade pass (2026-10-19): Wildfire Oath+ adds its 3.
-        var pyro = Count(owner, Element.Pyro) + gain;
-        return WildfireWords(fires.Sum(p => WildfireOathBasePower.DamageFor(
-            pyro, (int)p.Amount, p.Bonus)));
+        return WildfireWords(WildfireOathPower.DamageFor(
+            Count(owner, Element.Pyro) + gain, stacks, upgraded));
     }
 
     /// <summary>The line itself, "(Wildfire Oath deals 5)", or empty for 0.
@@ -1356,8 +1346,8 @@ public static class VarkaOath
         // gains the element it chose. Since the combo pass (2026-10-04)
         // "Only Knights can change your current element", so Unwavering
         // Banner stops it; it is not a card, so it gains nothing instead.
-        if (varka.Powers.OfType<WeathervaneBasePower>().Any()
-            && !varka.HasBanner())
+        if (varka.HasPower<WeathervanePower>()
+            && !varka.HasPower<UnwaveringBannerPower>())
         {
             await Weathervane(choiceContext, player);
         }
@@ -1414,11 +1404,10 @@ public static class VarkaOath
             choiceContext, player, held, optional: true);
         if (element == Element.None) return;
         await SetCurrent(choiceContext, varka, element, knight: false);
-        // Weathervane+ (the power upgrade pass, 2026-10-19): "and you gain 1
-        // Oath of it", only when an element was chosen. Sim twin:
-        // `varka_oath._weathervane`.
-        var oath = varka.Powers.OfType<WeathervaneBasePower>()
-            .Select(w => w.OathGained).DefaultIfEmpty(0).Max();
+        // Weathervane, upgraded (the power upgrade pass, 2026-10-19): "Gain 1
+        // Oath of it", per upgraded copy, only when an element was chosen.
+        // Sim twin: `varka_oath._weathervane`.
+        var oath = varka.Powers.OfType<WeathervanePower>().Sum(w => w.OathGained);
         if (oath > 0) await Gain(choiceContext, varka, element, oath);
     }
 }
@@ -1630,7 +1619,7 @@ public static partial class VarkaCards
         // Unwavering Banner (the combo pass, 2026-10-04): only Knights change
         // it. No grid: the Banner holds, and pays 1 Oath of the current
         // element when another element could have been chosen.
-        if (owner.HasBanner())
+        if (owner.HasPower<UnwaveringBannerPower>())
         {
             var other = held.FirstOrDefault(e => e != ledger.Current);
             if (other != Element.None)

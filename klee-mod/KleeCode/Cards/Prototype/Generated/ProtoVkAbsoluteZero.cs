@@ -63,18 +63,11 @@ public sealed class ProtoVkAbsoluteZero : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (IsUpgraded)
-        {
-            await PowerCmd.Apply<AbsoluteZeroPlusPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
-        }
-        else
-        {
-            await PowerCmd.Apply<AbsoluteZeroPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
-        }
+        await UpgradeTwinPower.Install<AbsoluteZeroPower>(choiceContext, Owner.Creature, 1, IsUpgraded, Owner.Creature, this);
     }
 
     protected override void OnUpgrade()
     {
-        // upgraded_power: the upgraded card installs AbsoluteZeroPlusPower, read off IsUpgraded when the card is played.
+        // upgraded_power: the upgraded card installs AbsoluteZeroPower, read off IsUpgraded when the card is played.
     }
 }

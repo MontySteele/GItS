@@ -68,18 +68,11 @@ public sealed class ProtoVkWestWindsBlessing : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (IsUpgraded)
-        {
-            await PowerCmd.Apply<WestWindsBlessingPlusPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
-        }
-        else
-        {
-            await PowerCmd.Apply<WestWindsBlessingPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
-        }
+        await UpgradeTwinPower.Install<WestWindsBlessingPower>(choiceContext, Owner.Creature, 1, IsUpgraded, Owner.Creature, this);
     }
 
     protected override void OnUpgrade()
     {
-        // upgraded_power: the upgraded card installs WestWindsBlessingPlusPower, read off IsUpgraded when the card is played.
+        // upgraded_power: the upgraded card installs WestWindsBlessingPower, read off IsUpgraded when the card is played.
     }
 }

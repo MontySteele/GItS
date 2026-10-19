@@ -67,8 +67,6 @@ public class VarkaPayoffRoundTests : IDisposable
                                   "shuffle {IfUpgraded:show:an upgraded|a} copy"),
                      Face(new ProtoVkWolfpack()));
         Assert.Equal(face, Face(new WolfpackPower()));
-        Assert.Equal(face.Replace("a copy", "an upgraded copy"),
-                     Face(new WolfpackPlusPower()));
         Assert.Equal("wolfpack", ResolutionLedger.Wolfpack);
     }
 

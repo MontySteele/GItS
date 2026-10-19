@@ -570,9 +570,6 @@ internal static class KleePowerIcons
         WestWindsBlessingPower =>
             KleePck.Path("varka/powers/west_winds_blessing.png")
             ?? KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
-        WestWindsBlessingPlusPower =>
-            KleePck.Path("varka/powers/west_winds_blessing.png")
-            ?? KleePck.Path("klee/powers/reaction_bonus_spark_energy.png"),
         ComradesOfTheExpeditionPower =>
             KleePck.Path("varka/powers/comrades_of_the_expedition.png")
             ?? KleePck.Path("varka/powers/stormward_stance.png"),
@@ -696,9 +693,6 @@ internal static class KleePowerIcons
         UnwaveringBannerPower =>
             KleePck.Path("varka/powers/unwavering_banner.png")
             ?? KleePck.Path("varka/powers/stormward_stance.png"),
-        UnwaveringBannerPlusPower =>
-            KleePck.Path("varka/powers/unwavering_banner.png")
-            ?? KleePck.Path("varka/powers/stormward_stance.png"),
         CycleOfSeasonsPower => KleePck.Path("varka/powers/cycle_of_seasons.png")
             ?? KleePck.Path("varka/powers/boreas_unbound.png"),
         // Varka defence (2026-10-01): Cycle of Seasons' Block twin.
@@ -712,8 +706,6 @@ internal static class KleePowerIcons
             ?? KleePck.Path("klee/powers/study_buddy.png"),
         WildfireOathPower => KleePck.Path("varka/powers/wildfire_oath.png")
             ?? KleePck.Path("varka/powers/pyro_wind.png"),
-        WildfireOathPlusPower => KleePck.Path("varka/powers/wildfire_oath.png")
-            ?? KleePck.Path("varka/powers/pyro_wind.png"),
         // Pyro paper 2 (2026-10-12): Ember Cleave's Strength this turn and
         // Stoke the Flames' next Pyro Attack borrow Pyro's Vision badge.
         EmberCleavePower => KleePck.Path("varka/powers/ember_cleave.png")
@@ -724,14 +716,10 @@ internal static class KleePowerIcons
             ?? KleePck.Path("varka/powers/hydro_wind.png"),
         AbsoluteZeroPower => KleePck.Path("varka/powers/absolute_zero.png")
             ?? KleePck.Path("varka/powers/cryo_wind.png"),
-        AbsoluteZeroPlusPower => KleePck.Path("varka/powers/absolute_zero.png")
-            ?? KleePck.Path("varka/powers/cryo_wind.png"),
         OathUntoDeathPower =>
             KleePck.Path("varka/powers/azure_fangs_oath.png")
             ?? KleePck.Path("varka/powers/stormward_stance.png"),
         WolfpackPower => KleePck.Path("varka/powers/lupical.png")
-            ?? KleePck.Path("varka/powers/boreas_unbound.png"),
-        WolfpackPlusPower => KleePck.Path("varka/powers/lupical.png")
             ?? KleePck.Path("varka/powers/boreas_unbound.png"),
         // His Ancient (the Varka review, 2026-10-12): the Oath badge's
         // nearest shape, Stormward Stance's.
@@ -743,14 +731,9 @@ internal static class KleePowerIcons
             ?? KleePck.Path("varka/powers/stormward_stance.png"),
         WeathervanePower => KleePck.Path("varka/powers/weathervane.png")
             ?? KleePck.Path("varka/powers/boreas_unbound.png"),
-        WeathervanePlusPower => KleePck.Path("varka/powers/weathervane.png")
-            ?? KleePck.Path("varka/powers/boreas_unbound.png"),
         TwinGalesPower => KleePck.Path("varka/powers/twin_gales.png")
             ?? KleePck.Path("varka/powers/converging_winds.png"),
         EyeOfStormterrorPower =>
-            KleePck.Path("varka/powers/eye_of_stormterror.png")
-            ?? KleePck.Path("varka/powers/converging_winds.png"),
-        EyeOfStormterrorPlusPower =>
             KleePck.Path("varka/powers/eye_of_stormterror.png")
             ?? KleePck.Path("varka/powers/converging_winds.png"),
         TheOrderAnswersPower => KleePck.Path("varka/powers/the_order_answers.png")

@@ -9803,14 +9803,14 @@ decrease their cost by 1 on upgrade though" and "Since we're already planning
 a Varka run, I'm fine with doing a Powers pass on him now." Staged on
 `varka-fang-next` (`review/active/varka-fang-next-2026-10-19.md`, sec.3).
 
-- Seven upgrades that were Innate now install a Plus power
-  (`upgraded_power`): Unwavering Banner (gain 1 [2] Oath), Wildfire Oath and
+- Seven upgrades that were Innate now carry the upgrade on ONE power per
+  card (`upgraded_power` naming the same class, `UpgradeTwinPower`): Unwavering Banner (gain 1 [2] Oath), Wildfire Oath and
   Absolute Zero (the Oath [plus 3]), Lupical ([an upgraded] copy),
   Weathervane ([Gain 1 Oath of it.], only when an element is chosen),
   Eye of Stormterror (the first 3 [4] Swirls) and West Wind's Blessing
-  ([and draws 1 card]). Classes: the `*BasePower` / `*PlusPower` pairs in
-  `Powers/Prototype/VarkaPowers.cs` and `CoopSet.cs`; Eye+'s 4 in
-  `VarkaLaw`; sim twins in `tier0/engine/varka_oath.py`.
+  ([and draws 1 card]). Each copy adds its own (the stacking rules:
+  the staging paper, sec.3). Classes in `Powers/Prototype/VarkaPowers.cs`
+  and `CoopSet.cs`; sim twins in `tier0/engine/varka_oath.py`.
 - Comrades of the Expedition's cost cut became `power_amount: +1` (1 [2]
   Oath; the stack is the Oath).
 - Unchanged: Boreas Unbound, Twin Gales and Azure Fang's Oath keep Innate;

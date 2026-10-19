@@ -4128,9 +4128,10 @@ APPLY_POWERS = {
     "vk_west_winds_blessing": ("WestWindsBlessingPower", None,
         "The first time each turn you [gold]Swirl[/gold], each other player "
         "gains {X} [gold]Energy[/gold]."),
-    # The power upgrade pass (2026-10-19): the upgraded card installs
-    # the Plus power (`upgraded_power`).
-    "vk_west_winds_blessing_plus": ("WestWindsBlessingPlusPower", None,
+    # The power upgrade pass (2026-10-19): the upgraded card's copy is
+    # counted on the same class (`UpgradeTwinPower`, the icon declutter's
+    # shape), so each `_plus` key names the base class.
+    "vk_west_winds_blessing_plus": ("WestWindsBlessingPower", None,
         "The first time each turn you [gold]Swirl[/gold], each other player "
         "gains {X} [gold]Energy[/gold] and draws 1 card."),
     "mc_sinful_hex": ("SinfulHexPower", None,
@@ -4499,9 +4500,7 @@ APPLY_POWERS = {
         "Only [gold]Knights[/gold] change your [gold]current "
         "element[/gold]. Whenever another card would, gain 1 "
         "[gold]Oath[/gold] of it instead."),
-    # The power upgrade pass (2026-10-19): the upgraded card installs
-    # the Plus power (`upgraded_power`).
-    "vk_unwavering_banner_plus": ("UnwaveringBannerPlusPower", None,
+    "vk_unwavering_banner_plus": ("UnwaveringBannerPower", None,
         "Only [gold]Knights[/gold] change your [gold]current "
         "element[/gold]. Whenever another card would, gain 2 "
         "[gold]Oath[/gold] of it instead."),
@@ -4520,9 +4519,7 @@ APPLY_POWERS = {
     "vk_wildfire_oath": ("WildfireOathPower", None,
         "Whenever you apply [gold]Pyro[/gold] to an enemy, deal damage equal "
         "to your [gold]Pyro[/gold] [gold]Oath[/gold] to it."),
-    # The power upgrade pass (2026-10-19): the upgraded card installs
-    # the Plus power (`upgraded_power`).
-    "vk_wildfire_oath_plus": ("WildfireOathPlusPower", None,
+    "vk_wildfire_oath_plus": ("WildfireOathPower", None,
         "Whenever you apply [gold]Pyro[/gold] to an enemy, deal damage equal "
         "to your [gold]Pyro[/gold] [gold]Oath[/gold] plus 3 to it."),
     "vk_retaliating_tide": ("RetaliatingTidePower", None,
@@ -4532,9 +4529,7 @@ APPLY_POWERS = {
         "While your [gold]current element[/gold] is [gold]Cryo[/gold], your "
         "[gold]Swirls[/gold] apply [gold]Vulnerable[/gold] and "
         "[gold]Weak[/gold] to ALL enemies."),
-    # The power upgrade pass (2026-10-19): the upgraded card installs
-    # the Plus power (`upgraded_power`).
-    "vk_absolute_zero_plus": ("AbsoluteZeroPlusPower", None,
+    "vk_absolute_zero_plus": ("AbsoluteZeroPower", None,
         "Whenever you apply [gold]Weak[/gold] or [gold]Vulnerable[/gold] to "
         "an enemy, deal damage equal to your [gold]Cryo[/gold] "
         "[gold]Oath[/gold] plus 3 to it."),
@@ -4544,9 +4539,7 @@ APPLY_POWERS = {
     "vk_wolfpack": ("WolfpackPower", None,
         "Whenever you play Four Winds' Ascension, add a copy of it to your "
         "[gold]Discard Pile[/gold]."),
-    # The power upgrade pass (2026-10-19): the upgraded card installs
-    # the Plus power (`upgraded_power`).
-    "vk_wolfpack_plus": ("WolfpackPlusPower", None,
+    "vk_wolfpack_plus": ("WolfpackPower", None,
         "Whenever you play Four Winds' Ascension, shuffle an upgraded copy "
         "of it into your [gold]Draw Pile[/gold]. The copy Exhausts."),
     "vk_oathbound_aegis": ("OathboundAegisPower", None,
@@ -4559,9 +4552,7 @@ APPLY_POWERS = {
     "vk_weathervane": ("WeathervanePower", None,
         "At the start of your turn, you may choose an element you have "
         "[gold]Oath[/gold] in. It becomes your [gold]current element[/gold]."),
-    # The power upgrade pass (2026-10-19): the upgraded card installs
-    # the Plus power (`upgraded_power`).
-    "vk_weathervane_plus": ("WeathervanePlusPower", None,
+    "vk_weathervane_plus": ("WeathervanePower", None,
         "At the start of your turn, you may choose an element you have "
         "[gold]Oath[/gold] in. It becomes your [gold]current element[/gold]. "
         "Gain 1 [gold]Oath[/gold] of it."),
@@ -4622,9 +4613,7 @@ APPLY_POWERS = {
         "pays twice."),
     "vk_eye_of_stormterror": ("EyeOfStormterrorPower", None,
         "The first 3 times you [gold]Swirl[/gold] each turn, draw {X} card."),
-    # The power upgrade pass (2026-10-19): the upgraded card installs
-    # the Plus power (`upgraded_power`).
-    "vk_eye_of_stormterror_plus": ("EyeOfStormterrorPlusPower", None,
+    "vk_eye_of_stormterror_plus": ("EyeOfStormterrorPower", None,
         "The first 4 times you [gold]Swirl[/gold] each turn, draw {X} card."),
     "vk_the_order_answers": ("TheOrderAnswersPower", None,
         "At the start of your turn, add {X} random [gold]Knight[/gold] to "
@@ -12898,6 +12887,15 @@ def build_body(
                 # different power, a play-time `IsUpgraded` read (sim twin:
                 # upgrades.py rewrites the effect's `power`).
                 up_cls = APPLY_POWERS[upgrade_plan(card)[0]["upgraded_power"]][0]
+                if up_cls == cls:
+                    # THE ICON DECLUTTER (2026-10-19): one class for both
+                    # versions (`UpgradeTwinPower`); the play notes whether
+                    # its copy came from an upgraded card.
+                    lines.append(
+                        f"await UpgradeTwinPower.Install<{cls}>(choiceContext, "
+                        f"Owner.Creature, {amount}, IsUpgraded, Owner.Creature, "
+                        "this);")
+                    continue
                 lines.append(
                     "if (IsUpgraded)\n"
                     "        {\n"

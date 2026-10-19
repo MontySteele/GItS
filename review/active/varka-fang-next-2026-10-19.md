@@ -95,15 +95,29 @@ The eight upgrades that changed (the upgraded text is in brackets):
 | West Wind's Blessing (co-op) | Innate | "each other player gains 1 Energy [and draws 1 card]" |
 | Comrades of the Expedition (co-op) | cost 2 [1] | "gain 1 [2] Oath of your current element" |
 
-The first seven upgraded cards put down a Plus power (`upgraded_power` on the
-row, the `*PlusPower` classes in `VarkaPowers.cs` and `CoopSet.cs`, sim twins
-in `tier0/engine/varka_oath.py`). Comrades is a stack bump (`power_amount`).
-Weathervane+ gains its Oath only when an element is chosen, not on a cancel.
-When both forms of the Banner are up, a held switch pays 2, once a play. Eye
-of Stormterror+'s 4 is `VarkaLaw.EyeOfStormterrorSwirlsUpgraded`, which
-`tools/lint_constant_parity.py` holds equal to the sim's; the other numbers
-are printed on the Plus classes and pinned by `VarkaPowerUpgradeTests` (C#)
-and `tier0/tests/test_varka_power_upgrades.py` (sim).
+Each of the seven is ONE power per card, so a plain and an upgraded copy
+show one badge (`UpgradeTwinPower`, the icon declutter's shape: Amount is
+every copy, `UpgradedCopies` the upgraded ones). Each copy adds its own:
+
+- Unwavering Banner: a held switch pays 1 per plain copy and 2 per upgraded
+  copy, once a play (plain plus upgraded pays 3; two plain copies now pay 2,
+  where the old one-of-a-kind Banner paid 1).
+- Wildfire Oath, Absolute Zero: still one hit per application; the Oath per
+  copy (a second copy doubles, as before) plus 3 per upgraded copy.
+- Lupical: one shuffled copy per copy, as before; an upgraded copy's is
+  always upgraded, a plain copy's follows the played card.
+- Weathervane: one choice a turn however many copies; a chosen element gains
+  1 Oath per upgraded copy, none on a cancel.
+- Eye of Stormterror: every copy draws 1 on each of the first 3 Swirls a
+  turn, as before; upgraded copies also draw on the 4th.
+- West Wind's Blessing: the energy is 1 per copy, as before; each upgraded
+  copy also draws each other player 1 card.
+
+Comrades is a stack bump (`power_amount`). Eye of Stormterror's 4 is
+`VarkaLaw.EyeOfStormterrorSwirlsUpgraded`, which
+`tools/lint_constant_parity.py` holds equal to the sim's. The sim (`tier0/engine/varka_oath.py`) counts the
+upgraded copies under `_plus` names. Tests: `VarkaPowerUpgradeTests` (C#),
+`tier0/tests/test_varka_power_upgrades.py` (sim).
 
 - **P5.** Upgrade pass: no single upgraded power changes Varka's end floors on
   the suite seeds on its own; the suite's floors stay within his last

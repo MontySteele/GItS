@@ -357,11 +357,11 @@ public class VarkaCoopSetTests : IDisposable
     public void West_winds_blessing_rides_every_swirl_he_makes()
     {
         var swirl = Il.CallSequence(Il.Method("VarkaOath", "OnSwirl")).ToList();
-        Assert.Contains("WestWindsBlessingBasePower.OnSwirl", swirl);
+        Assert.Contains("WestWindsBlessingPower.OnSwirl", swirl);
         var pay = Il.CallSequence(
-            Il.Method("WestWindsBlessingBasePower", "OnSwirl")).ToList();
+            Il.Method("WestWindsBlessingPower", "OnSwirl")).ToList();
         var others = pay.IndexOf("CoopSet.OtherPlayers");
-        var latch = pay.IndexOf("WestWindsBlessingBasePower.Take");
+        var latch = pay.IndexOf("WestWindsBlessingPower.Take");
         var energy = pay.IndexOf("PlayerCmd.GainEnergy");
         Assert.True(others >= 0 && others < latch && latch < energy);
     }
@@ -399,17 +399,17 @@ public class VarkaCoopSetTests : IDisposable
 
             combat.CurrentSide = CombatSide.Enemy;
             Assert.False(WestWindsBlessingPower.Counts(varka.Creature));
-            await WestWindsBlessingBasePower.OnSwirl(
+            await WestWindsBlessingPower.OnSwirl(
                 new MegaCrit.Sts2.Core.GameActions.Multiplayer.ThrowingPlayerChoiceContext(),
                 varka.Creature);
             Assert.Equal(energy, ally.Player.PlayerCombatState!.Energy);
 
             combat.CurrentSide = CombatSide.Player;
-            await WestWindsBlessingBasePower.OnSwirl(
+            await WestWindsBlessingPower.OnSwirl(
                 new MegaCrit.Sts2.Core.GameActions.Multiplayer.ThrowingPlayerChoiceContext(),
                 varka.Creature);
             Assert.Equal(energy + 1, ally.Player.PlayerCombatState!.Energy);
-            await WestWindsBlessingBasePower.OnSwirl(
+            await WestWindsBlessingPower.OnSwirl(
                 new MegaCrit.Sts2.Core.GameActions.Multiplayer.ThrowingPlayerChoiceContext(),
                 varka.Creature);
             Assert.Equal(energy + 1, ally.Player.PlayerCombatState!.Energy);
