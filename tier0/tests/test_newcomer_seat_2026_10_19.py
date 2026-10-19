@@ -258,3 +258,17 @@ def test_the_newcomer_lane_scripts_set_the_flag(tmp_path):
         assert "export GITS_LANE=2 GITS_NEWCOMER=1 " in body
     head = seat.brief_text(2, "X", scratch=str(tmp_path), newcomer=True)
     assert "the newcomer setting" in head.splitlines()[0]
+
+
+def test_a_power_s_energy_icon_reads_as_energy(newcomer):
+    """Newcomer round lane 1 (2026-10-19): Blazing Delight's power text kept
+    its `[ironclad_energy_icon.png]` tag, the leak guard refused every page
+    and the run stalled mid-fight. Power text goes through `_text`."""
+    state = _fight()
+    state["player"]["status"].append({
+        "id": "BLAZING_DELIGHT", "name": "Blazing Delight", "amount": 1,
+        "type": "Buff", "description": "At the start of your turn, gain "
+        "[ironclad_energy_icon.png] and draw that many cards."})
+    page = blindplay.screen_page(state)
+    assert "energy_icon" not in page
+    assert "Blazing Delight 1 — At the start of your turn, gain" in page

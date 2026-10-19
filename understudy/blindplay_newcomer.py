@@ -86,7 +86,7 @@ def _power_line(power: dict[str, Any], indent: str) -> str:
     if power.get("numbered") is not False:
         line += f" {power['stacks']}"
     if power.get("text"):
-        line += f" — {power['text']}"
+        line += f" — {_text(power['text'])}"
     return line
 
 
