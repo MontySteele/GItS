@@ -101,8 +101,11 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
 - **Parked:** Nereid's Ascension carries her burst's name only (no HP
   scaling, healing or jellyfish refresh). [USER]: "Let's flag this as a
   possible change on Kokomi and otherwise leave it alone."
-- **Next:** the v2 seat round (three free drafts, two briefed toward Grand
-  Strategy and Read the Tide), then [USER]'s run.
+- **Latest:** Ward draws, the Casket pays per Plan or Companion card
+  (`review/records/kokomi-yae-round-2026-10-19.md`); [USER]'s co-op runs
+  2026-10-18.
+- **Next:** the card-by-card paper for her three ruled archetypes (Grand
+  Strategy, Read the Tide, Shoal).
 
 **Furina: Balance** (2026-10-15).
 - **Rules** (`review/active/furina-research-proposal-2026-10-05.md` sec.2):
@@ -186,12 +189,11 @@ Stellar-Conduct nod is parked). Code: `proto_ym_` rows,
   Sakura that keeps the starter's Annotations and strikes as it lands), Yae
   Publishing House (Tome) (`review/active/yae-ancients-relics-2026-10-16.md`).
   Starter change built (#1393, `review/active/yae-draft-pass-2026-10-17.md`).
-- **Latest built, unseen in game:** pool sweep sec.1, Hold the Presses and
-  the Block and Edit pass (`review/active/yae-block-edit-pass-2026-10-19.md`).
-  A Yae seat round is owed.
-- **Latest numbers** (`review/records/yae-round-10-2026-10-17.md`): act-1 HP
-  lost per fight 7.8 against base 5.9 is what is left.
-- **Next:** [USER]'s run (`yae-sakura-levels-2026-10-17.md`, pick 4 (a)).
+- **Latest:** the Kitsune and Edit pass
+  (`review/active/yae-block-edit-pass-2026-10-19.md`), seat-played
+  (`review/records/yae-round-2026-10-19b.md`): Block per turn now at or over
+  base; act-1 tempo is what is left (HP lost 1.27x base, damage 0.80).
+- **Next:** act-1 tempo; watch Sakura Grove with Kitsune (Levels 10-15).
 
 ## Elements
 
