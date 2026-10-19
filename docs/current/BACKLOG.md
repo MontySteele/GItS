@@ -29,10 +29,13 @@ cut to about 350 characters is `git show 3ce4f8c35:docs/current/BACKLOG.md`.
 - Show the amplifier on a hit whose element is chosen at play (Four Winds' Ascension, Northwind Avatar): no preview (the seat page names Melt and Vaporize factors since 2026-10-19).
 - Kaiser Crab (Varka wave 2026-10-13, lane 5 fight 16): when Baron Bunny's turn-start hit killed Rocket, Crab Rage's 99 Block never reached Crusher. The base game grants it in `CrabRagePower.AfterDeath` and no mod code was found that removes it; reproduce live (`set_hp` Rocket low, Baron Bunny).
 - Furina: whether a guest's act ends a Frozen is not printed; needs the game (Frozen itself prints since 2026-10-19).
+- Kujou Sara's Electro rider prints "Applies Electro — Applies Hydro for 2 turns" (newcomer round 1, lane 4); its keyword tip reuses the Hydro text.
+- Yae's planting rule: two Yakan Evocations made two separate Level 1 Sakura, against "Same kind: it refreshes and gains a Level" (newcomer round 1, lane 5); check live, then fix the text or the code. Dawn Prayer's "newest" lands on Twin Sakura's Kitsune, an order the page never shows.
 - Durin's start-of-turn tick skipped one fight (Fogmog, trace); `RandomEnemy` may pick the Eye With Teeth illusion (`CompanionOverhaulPowers.cs:51`). Live look. (Chained Reactions is QUEUE, backlog wrap-up pick 3.)
 
 ## Harness, bridge, tools and sim
 
+- Newcomer page (`understudy/blindplay_newcomer.py`): show a reviving enemy (Test Subject's revive left the enemy list blank for a turn); the Ancient's full heal and the run-over deck are not printed on any page; a stale reward screen showed after the Potions event (newcomer round 1, lane 5).
 - Co-op dev grant: `give_card` is refused in multiplayer because the pile add bypasses the action-queue synchronizer; a synced grant would let a co-op seat round be dressed with named co-op cards.
 - `EB-193` `game_ref/role_tempo_canon.json` predates the int-var reader fix; the writer is fixed (2026-10-19), but the regen moves 25 of 110 package floors in `docs/role-tempo-floors.yaml` (QUEUE, backlog wrap-up pick 6).
 - Legacy cleanup stage 6: the Spotlight print fold (`SpotlightSystem.PrintedDamage/PrintedBlock*`, `SpotlitBlockVar`, codegen `spotlight_calc_rider` / `spotlight_block_rider`) stays in every generated card because removing it changes current rows' C#. Drop it in one regen with a deploy check, riding Klee's next promotion PR.

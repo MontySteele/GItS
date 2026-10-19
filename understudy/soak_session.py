@@ -348,8 +348,8 @@ class Session:
             # from a lane 0 with the bridge switched off never answers its
             # port (`instances.enable_lane_mods`).
             for path, what in instances.enable_lane_mods(self.instance):
-                print(f"lane {self.instance.label}: enabled "
-                      f"{', '.join(what)} in {path}")
+                print(f"lane {self.instance.label}: mod list "
+                      f"{', '.join(what)} (- is off) in {path}")
             # And every epoch and ascension, so a seat plays the full pools
             # and any ascension can be chosen (`unlock_lane_progress`).
             for path, what in instances.unlock_lane_progress(self.instance):

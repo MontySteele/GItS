@@ -706,9 +706,48 @@ def note_launch(label: str, pid: int | None, now=time.time) -> None:
 #: answers) and the kits.
 LANE_REQUIRED_MODS = ("STS2_MCP", "klee")
 
+#: The only mods a lane may load: the required two and the library the kits
+#: are built on. Every other mod found on disk is switched OFF in the lane.
+LANE_ALLOWED_MODS = LANE_REQUIRED_MODS + ("BaseLib",)
+
+#: Steam's Workshop folder for Slay the Spire 2, relative to steamapps.
+WORKSHOP_RELATIVE = ("workshop", "content", "2868840")
+
+
+def installed_mods(game_dir: Path | None) -> list[tuple[str, str]]:
+    """`(id, source)` for every mod manifest on disk: the game's `mods`
+    folder and the Workshop items Steam has downloaded. A manifest is a JSON
+    object with an `id` and a `has_dll` key, as the game's own loader reads
+    it; anything else (a mod's settings file) is skipped."""
+    if game_dir is None:
+        return []
+    game_dir = Path(game_dir)
+    roots = [(game_dir / "mods", "mods_directory")]
+    if len(game_dir.parents) >= 2:
+        roots.append((game_dir.parents[1].joinpath(*WORKSHOP_RELATIVE),
+                      "steam_workshop"))
+    found: dict[str, str] = {}
+    for root, source in roots:
+        if not root.is_dir():
+            continue
+        for item in sorted(root.iterdir()):
+            if not item.is_dir():
+                continue
+            for path in sorted(item.glob("*.json")) + sorted(
+                    item.glob("*/*.json")):
+                try:
+                    data = json.loads(path.read_text(encoding="utf-8-sig"))
+                except (OSError, UnicodeDecodeError, ValueError):
+                    continue
+                if (isinstance(data, dict) and isinstance(data.get("id"), str)
+                        and "has_dll" in data):
+                    found.setdefault(data["id"], source)
+    return sorted(found.items())
+
 
 def enable_lane_mods(inst: Instance) -> list[tuple[Path, list[str]]]:
-    """Turn the bridge and the kit mod ON in a LANE's `settings.save`.
+    """Turn the bridge and the kit mod ON in a LANE's `settings.save`, and
+    every mod outside `LANE_ALLOWED_MODS` OFF.
 
     WHY (2026-10-05, the first five-lane embark). A fresh lane's
     `settings.save` is copied from lane 0's, and lane 0's is the owner's: on
@@ -718,6 +757,13 @@ def enable_lane_mods(inst: Instance) -> list[tuple[Path, list[str]]]:
     for the whole 180 s menu wait. Lanes 1-4, seeded months earlier, still
     had it on. The lane's own copy is edited to the state a click in the
     game's mod menu would leave; lane 0's is never written.
+
+    AND EVERY OTHER MOD OFF (2026-10-19, the first newcomer round). The game
+    loads a mod its list has never seen, so a Workshop subscription made for
+    another reason (GenshinSpire2 and its library RitsuLib) loaded in all
+    five lanes and put a "telemetry permission" popup on each screen. Every
+    mod on disk outside `LANE_ALLOWED_MODS` is now listed OFF, a new one
+    included; the returned names for those read `-<id>`.
 
     LANES ONLY, on the same two locks as `reveal_pending_epochs`. Idempotent;
     a file that does not parse is left alone. Returns `(path, [mods turned
@@ -757,6 +803,20 @@ def enable_lane_mods(inst: Instance) -> list[tuple[Path, list[str]]]:
             elif row.get("is_enabled") is not True:
                 row["is_enabled"] = True
                 what.append(name)
+        for name, source in installed_mods(inst.game_dir):
+            if name in LANE_ALLOWED_MODS:
+                continue
+            row = next((m for m in listed if isinstance(m, dict)
+                        and m.get("id") == name), None)
+            if row is None:
+                listed.append({"id": name, "is_enabled": False,
+                               "source": source})
+                what.append(f"-{name}")
+        for row in listed:
+            if (isinstance(row, dict) and row.get("id") not in LANE_ALLOWED_MODS
+                    and row.get("is_enabled") is not False):
+                row["is_enabled"] = False
+                what.append(f"-{row.get('id')}")
         if not what:
             continue
         text = json.dumps(data, indent=2, ensure_ascii=False)

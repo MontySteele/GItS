@@ -14,9 +14,12 @@ numbers live on the sheet.
 freeze Klee's and Varka's mechanics (wording and preview fixes only); Furina
 stays a launch candidate; Kokomi's bounded finish comes next and Yae stays in
 beta; elements, stories and the Abyss are kept, not grown. The pass stops when
-newcomers can reach and understand the fun. Next: a newcomer seat (the page a
-human sees, no ledger or glossary) on all five kits. Feedback comes through
-Workshop comments and telemetry.
+newcomers can reach and understand the fun. Feedback comes through Workshop
+comments and telemetry. Newcomer round 1 (`review/records/newcomer-round-1-2026-10-19.md`):
+all five newcomers found and named their kit's central loop and would play
+again. The gaps were Furina's refund amount, Yae's planting rule and Dawn Prayer
+order, and Swirl's contribution (Klee, Varka). Round 2 runs on the same seed
+after Furina's refund display and the Yae check.
 
 ## Mod build environment (pinned)
 
