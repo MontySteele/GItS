@@ -95,9 +95,28 @@ def _hp(st):
 
 def test_every_plain_planter_plants_a_plain_sakura():
     st = _state()
-    for name in ("yakan_evocation", "twin_sakura", "thunder_petal"):
+    # Twin Sakura left this list with the Yae block and Edit pass
+    # (2026-10-19): a Sakura and a Kitsune Sakura (its own test).
+    for name in ("yakan_evocation", "thunder_petal"):
         _play(st, name)
     assert {s.kind for s in _led(st).sakura} == {Y.THUNDER}
+
+
+def test_twin_sakura_plants_a_sakura_then_a_kitsune_and_the_lantern_and_canopy_plant_kitsune():
+    """The Yae block and Edit pass (2026-10-19): Kitsune at Defect's Frost
+    access."""
+    st = _state()
+    _play(st, "twin_sakura")
+    assert [s.kind for s in _led(st).sakura] == [Y.THUNDER, Y.KITSUNE]
+    st = _state()
+    _play(st, "cliffhanger")                     # Kitsune Lantern
+    assert [s.kind for s in _led(st).sakura] == [Y.KITSUNE]
+    assert st.enemies[0].hp == st.enemies[0].max_hp - 7
+    st = _state()
+    st.player.energy = 3
+    _play(st, "sakura_canopy")
+    assert [s.kind for s in _led(st).sakura] == [Y.KITSUNE, Y.KITSUNE]
+    assert st.player.block == 6
 
 
 def test_a_sakura_strikes_one_enemy_for_two_plus_level():
@@ -283,7 +302,7 @@ def test_an_edit_fills_the_temporary_slot_and_a_later_one_replaces_it():
     st = _state()
     c = _published("strike", [Y.REPRINT])
     st.player.hand.append(c)
-    _play(st, "cliffhanger")
+    Y.annotate(st, c, Y.DEADLINE)        # Cliffhanger's Edit went 2026-10-19
     assert Y.stack(c) == [Y.REPRINT] and Y.temp(c) == Y.DEADLINE and c.retain
     _play(st, "footnote")
     assert Y.stack(c) == [Y.REPRINT] and Y.temp(c) == Y.FOOTNOTE

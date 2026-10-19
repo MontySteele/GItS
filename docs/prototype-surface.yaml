@@ -4789,12 +4789,13 @@
 
 - {id: proto_ym_twin_sakura, name: "Twin Sakura", character: yae,
    authored_by: [claude],
-   # Design axes sec.4: costs 1 (was 2 [1]); the upgrade adds Gain 4 Block.
-   # Shrine r2: both at Level 1. Review r3: the full-shrine rule is the
-   # Full shrine tip's.
+   # Yae block and Edit pass, 2026-10-19 (sec.2): a Sakura and a Kitsune
+   # Sakura (was 2 Sakura). Earlier history: provenance note, "Yae: the
+   # block and Edit pass".
    cost: 1, type: skill, rarity: common,
-   description: "Plant {YmAmount:diff()} [gold]Sakura[/gold].",
-   effects: [{op: yae, kind: plant, amount: 2}],
+   description: "Plant a [gold]Sakura[/gold] and a [gold]Kitsune Sakura[/gold].",
+   effects: [{op: yae, kind: plant, amount: 1},
+             {op: yae, kind: plant, amount: 1, as: kitsune}],
    upgrade: {add: {op: block, amount: 4}}}
 
 - {id: proto_ym_fox_fire_draft, name: "Fox Fire Draft", character: yae,
@@ -4898,12 +4899,15 @@
              {op: yae, kind: strike_planted}],
    upgrade: {damage: 3}}
 
-- {id: proto_ym_cliffhanger, name: "Cliffhanger", character: yae,
+- {id: proto_ym_cliffhanger, name: "Kitsune Lantern", character: yae,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal 8 [gold]Electro[/gold] damage. [gold]Edit[/gold] a card in your hand: [gold]Deadline Extension[/gold].",
-   effects: [{op: damage, amount: 8, target: enemy},
-             {op: yae, kind: edit, annotation: deadline, amount: 1}],
+   # Yae block and Edit pass, 2026-10-19 (sec.2): Cliffhanger becomes Kitsune
+   # Lantern, 7 [10] and a Kitsune Sakura (was 8 [11], Edit a card in your
+   # hand: Deadline Extension). The id stays.
+   description: "Deal 7 [gold]Electro[/gold] damage. Plant a [gold]Kitsune Sakura[/gold].",
+   effects: [{op: damage, amount: 7, target: enemy},
+             {op: yae, kind: plant, amount: 1, as: kitsune}],
    upgrade: {damage: 3}}
 
 # The refill (review/active/yae-refill-2026-10-16.md, ruled 2026-10-16): eight
@@ -5261,11 +5265,13 @@
 
 - {id: proto_ym_sakura_canopy, name: "Sakura Canopy", character: yae,
    authored_by: [claude],
-   cost: 1, type: skill, rarity: uncommon,
-   description: "Gain {CalculationExtra:diff()} [gold]Block[/gold] for each [gold]Sakura[/gold].{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}",
-   effects: [{op: block,
-              amount_formula: {base: 0, per: 4, count: sakura_count}}],
-   upgrade: {formula_per: 1}}
+   # Yae block and Edit pass, 2026-10-19 (sec.2): costs 2, 6 [9] Block and 2
+   # Kitsune Sakura (was 1, 4 [5] Block for each Sakura).
+   cost: 2, type: skill, rarity: uncommon,
+   description: "Gain 6 [gold]Block[/gold]. Plant {YmAmount:diff()} [gold]Kitsune Sakura[/gold].",
+   effects: [{op: block, amount: 6},
+             {op: yae, kind: plant, amount: 2, as: kitsune}],
+   upgrade: {block: 3}}
 
 - {id: proto_ym_disarming_smile, name: "Disarming Smile", character: yae,
    authored_by: [claude],

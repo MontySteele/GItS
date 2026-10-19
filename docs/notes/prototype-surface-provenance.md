@@ -9735,3 +9735,22 @@ Omen is cut".
   resolution, capped at `YmAmount`. The `retain_hand` kind, `YaeCards.RetainHand`
   and the sim's `retains_hand` flag left with the Retain; nothing else used
   them.
+
+## Yae: the block and Edit pass, 2026-10-19
+
+`review/active/yae-block-edit-pass-2026-10-19.md` sec.2: Kitsune Sakura at
+Defect's Frost access.
+
+- `proto_ym_twin_sakura`: Plant a Sakura and a Kitsune Sakura (was Plant 2
+  Sakura); the upgrade still adds Gain 4 Block. Its earlier history, moved
+  from the row: design axes sec.4 made it cost 1 (was 2 [1]) and gave the
+  upgrade Gain 4 Block; shrine r2 plants at Level 1; review r3 made the
+  full-shrine rule the Full shrine tip's. It is the first row with two plant
+  ops, so the codegen emits `ISakuraPlantMixCard` and the Sakura display
+  previews both plants in order.
+- `proto_ym_cliffhanger`: renamed Kitsune Lantern, the id kept. Deal 7 [10]
+  Electro damage and plant a Kitsune Sakura (was 8 [11] and Edit a card in
+  your hand: Deadline Extension).
+- `proto_ym_sakura_canopy`: costs 2, Gain 6 [9] Block and plant 2 Kitsune
+  Sakura (was 1 Energy, 4 [5] Block for each Sakura).
+- Footnote and Royalties stay as printed (the user, 2026-10-19).

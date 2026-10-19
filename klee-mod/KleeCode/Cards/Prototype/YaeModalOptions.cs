@@ -108,8 +108,9 @@ public sealed class AnnotationOptionDeadline : ModalOptionCard, AnnotationOption
 {
     public YaeAnnotation OptionAnnotation => YaeAnnotation.DeadlineExtension;
 
-    // The dedupe (2026-10-16) cut Deadline; Cliffhanger prints the same
-    // Annotation.
+    // The dedupe (2026-10-16) cut Deadline and took Cliffhanger's art; the
+    // Yae block and Edit pass (2026-10-19) made Cliffhanger Kitsune Lantern,
+    // which keeps the art and no longer prints the Annotation.
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_cliffhanger");
 
     public override List<(string, string)>? Localization => AnnotationFace.For(OptionAnnotation);
