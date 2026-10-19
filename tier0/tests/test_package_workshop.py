@@ -428,4 +428,7 @@ def test_the_csproj_compiles_run_stats_only_with_an_endpoint():
     props = (ROOT / "klee-mod" / "Directory.Build.props").read_text(encoding="utf-8")
     assert "GitsTelemetryEndpoint" not in props
     mod = (ROOT / "klee-mod" / "KleeCode" / "KleeMod.cs").read_text(encoding="utf-8")
-    assert mod.count("#if GITS_RUN_STATS") == 2
+    assert mod.count("#if GITS_RUN_STATS") == 1
+    # The settings label's merge rides the English-table pass (2026-10-19).
+    loc = (ROOT / "klee-mod" / "KleeCode" / "Localization" / "EnglishLoc.cs").read_text(encoding="utf-8")
+    assert loc.count("#if GITS_RUN_STATS") == 1

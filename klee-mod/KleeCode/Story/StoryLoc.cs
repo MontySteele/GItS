@@ -71,10 +71,12 @@ public static class StoryLoc
     {
         try
         {
-            LocManager.Instance.GetTable(StoryLines.Table).MergeWith(LineRows());
-            LocManager.Instance.GetTable(StoryEventModel.Table).MergeWith(EventRows());
-            var ancients = LocManager.Instance.GetTable(StoryAncients.Table);
-            ancients.MergeWith(StoryAncients.Rows(a => StoryAncients.NextButtonFrom(ancients, a)));
+            EnglishLoc.Table(StoryLines.Table).MergeWith(LineRows());
+            EnglishLoc.Table(StoryEventModel.Table).MergeWith(EventRows());
+            // The "next" buttons are copied from the base game's own, so a
+            // non-English table gets its own language's copy.
+            EnglishLoc.MergeDerived(StoryAncients.Table,
+                table => StoryAncients.Rows(a => StoryAncients.NextButtonFrom(table, a)));
         }
         catch (Exception e)
         {

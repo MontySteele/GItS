@@ -184,6 +184,10 @@ REGISTRY: tuple[Lint, ...] = (
     # `docs/current/text-conventions.md` fixes. Carries a curated exception
     # list with a reason per entry and rot semantics, so it can only shrink.
     _ci("text-conventions",     "tools/lint_text_conventions.py"),
+    # Localization route b (2026-10-19): a translated row keeps every
+    # placeholder its English has, and a row whose English moved since it was
+    # translated is stale. Vacuous until the first translation lands.
+    _ci("loc-translations",     "tools/lint_loc_translations.py"),
     # The tooltip trim (2026-10-14): a player's card hover raises at most 3
     # boxes of at most 100 characters ("about 90"). The seat's full chain is
     # not measured; it keeps every rider for the blind page.
