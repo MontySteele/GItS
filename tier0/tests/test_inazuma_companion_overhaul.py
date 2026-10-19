@@ -112,12 +112,14 @@ def test_the_rarity_split_is_the_workshops_enumeration(overhaul):
     among them. THE KOKOMI RE-FOUNDING (2026-10-12) moved Gorou's three
     Universals (two Common, one Uncommon) into Kokomi's own pool, so the
     Universals are 7 / 10 / 4. THE INAZUMA POOL REWORK (2026-10-18): 8 / 13 /
-    8, then 8 / 16 / 10 when the pool grew to two cards a character."""
+    8, then 8 / 16 / 10 when the pool grew to two cards a character, then
+    8 / 15 / 11 when Baleful Omen (Uncommon) gave way to Musou no Hitotachi
+    (Rare), 2026-10-19."""
     split = {}
     for cid in C.INAZUMA_OVERHAUL_POOL_IDS:
         card = loader.peek_card(cid)
         split[card.rarity] = split.get(card.rarity, 0) + 1
-    assert split == {"common": 8, "uncommon": 16, "rare": 10}
+    assert split == {"common": 8, "uncommon": 15, "rare": 11}
 
 
 def test_every_row_is_an_inazuma_universal(overhaul):
@@ -648,8 +650,9 @@ def _hand(st, n=5):
 def test_the_three_cuts_are_off_the_sheet(overhaul):
     on_sheet = {c.id for c in loader.prototype_cards()}
     for cid in ("proto_mi_yoimiya_aurous_blaze",
-                "proto_mi_raiden_musou_no_hitotachi",
-                "proto_mi_itto_superlative_superstrength"):
+                "proto_mi_itto_superlative_superstrength",
+                # Cut 2026-10-19, when Musou no Hitotachi came back.
+                "proto_mi_raiden_baleful_omen"):
         assert cid not in on_sheet
 
 
@@ -759,18 +762,75 @@ def test_stormcall_applies_vulnerable_and_the_next_attack_is_electro(overhaul):
 
 def test_the_electro_rider_leaves_with_the_turn(overhaul):
     st = make_state()
-    _play(st, "proto_mi_raiden_baleful_omen")
+    _play(st, "proto_mi_sara_tengu_stormcall")
     effects.inazuma_overhaul_turn_end(st)
     assert "mi_next_electro" not in st.player.powers
 
 
-def test_baleful_omen_takes_two_strength_from_every_enemy_this_turn(overhaul):
-    st = make_state(enemies=[make_enemy(hp=60, name="a"),
-                             make_enemy(hp=60, name="b")])
-    _play(st, "proto_mi_raiden_baleful_omen")
+def _musou_board(hand_size):
+    st = make_state(enemies=[make_enemy(hp=200, name="a"),
+                             make_enemy(hp=200, name="b")])
+    st.player.hand = [Card(id=f"h{i}", name="h", cost=1, type="skill")
+                      for i in range(hand_size)]
+    return st
+
+
+@pytest.mark.parametrize("hand_size", [0, 3, 7])
+def test_musou_deals_sixteen_plus_two_per_card_in_hand(overhaul, hand_size):
+    """Musou no Hitotachi (2026-10-19): "Deal 16 Electro damage to ALL
+    enemies, plus 2 for each card in your Hand." The hand at resolution;
+    Musou itself has left it."""
+    st = _musou_board(hand_size)
+    _play(st, "proto_mi_raiden_musou_no_hitotachi")
     for e in st.enemies:
-        assert e.powers.get("temp_strength_down") == 2
-    assert st.player.powers["mi_next_electro"] == 1
+        assert e.hp == 200 - (16 + 2 * hand_size)
+        assert e.aura == "electro"
+
+
+def test_musou_counts_the_hand_without_itself(overhaul):
+    """Played from the hand through the real play path, Musou is not one of
+    the cards it counts."""
+    st = _musou_board(4)
+    musou = loader.get_card("proto_mi_raiden_musou_no_hitotachi")
+    st.player.hand.append(musou)
+    st.player.energy = 3
+    combat.play_card(st, musou)
+    assert [e.hp for e in st.enemies] == [200 - 24, 200 - 24]
+
+
+def test_musou_upgrade_is_twenty_two_base(overhaul):
+    st = _musou_board(2)
+    effects.resolve_card(st, _up("proto_mi_raiden_musou_no_hitotachi"))
+    assert st.enemies[0].hp == 200 - (22 + 4)
+    assert loader.get_card("proto_mi_raiden_musou_no_hitotachi").cost == 3
+    assert loader.get_card("proto_mi_raiden_musou_no_hitotachi").rarity         == "rare"
+
+
+def test_musou_takes_three_strength_from_everyone_this_turn(overhaul):
+    """"ALL enemies and you lose 3 Strength this turn": Piercing Wail's
+    `temp_strength_down` on every enemy and on the player, each returned at
+    its own side's turn end."""
+    from tier0.engine import powers
+    st = _musou_board(0)
+    _play(st, "proto_mi_raiden_musou_no_hitotachi")
+    for c in [*st.enemies, st.player]:
+        assert c.powers.get("strength", 0) == -3
+        assert c.powers.get("temp_strength_down") == 3
+    powers.on_turn_end(st, st.player)
+    assert st.player.powers.get("strength", 0) == 0
+    st.in_player_turn = False
+    for e in st.enemies:
+        powers.on_turn_end(st, e)
+        assert e.powers.get("strength", 0) == 0
+
+
+def test_musou_hits_before_the_strength_loss(overhaul):
+    """The damage lands first, so the player's own -3 never shrinks it."""
+    st = _musou_board(0)
+    st.player.powers["strength"] = 2
+    _play(st, "proto_mi_raiden_musou_no_hitotachi")
+    assert st.enemies[0].hp == 200 - 18
+    assert st.player.powers["strength"] == -1
 
 
 def test_chiori_hits_twice_through_block(overhaul):
@@ -906,7 +966,9 @@ def test_hanega_takes_three_off_card_block_and_gives_an_energy(overhaul):
 
 
 def test_the_rare_powers_upgrade_as_listed(overhaul):
-    assert _up("proto_mi_raiden_euthymia").cost == 1
+    # 2026-10-19: Euthymia's upgrade is Innate; the cost stays 2.
+    up = _up("proto_mi_raiden_euthymia")
+    assert up.innate and up.cost == 2
     assert _up("proto_mi_yoimiya_niwabi").cost == 1
     assert _up("proto_mi_kazuha_chihayaburu").cost == 0
     assert _up("proto_mi_wanderer_hanega").cost == 0

@@ -4728,6 +4728,13 @@ def _op_lose_strength(state: CombatState, fx: dict, card: Card) -> None:
     enemy's own turn.
     """
     amount = int(_amount(state, fx["amount"]))
+    if fx.get("this_turn") and fx.get("target") == "self":
+        # Musou no Hitotachi (2026-10-19): "ALL enemies and you lose 3
+        # Strength this turn" -- the same marker on the player, returned at
+        # her own turn end.
+        powers.apply_power(state, state.player, "temp_strength_down", amount,
+                           applier=state.player)
+        return
     if fx.get("this_turn"):
         for enemy in _pick_targets(state, fx.get("target", "enemy")):
             powers.apply_power(state, enemy, "temp_strength_down", amount,

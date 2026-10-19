@@ -42,7 +42,7 @@ for the archetype pass, not numbers: Feint and Turning Tide (need two real
 Plans), the Hydro reaction cards (she has no second element of her own),
 Flotsam Surge, Sea Glass Harvest, Evening Watch.
 
-## 3. Companions (picks 1, 2, 4, 5 ruled (a), 2026-10-18; pick 3 open)
+## 3. Companions (picks 1, 2, 4, 5 ruled (a), 2026-10-18; pick 3 ruled 2026-10-19)
 
 These cards are offered to every kit, Balance kits included.
 
@@ -59,6 +59,10 @@ These cards are offered to every kit, Balance kits included.
 3. **Raiden, Baleful Omen** (Inazuma U, 1): ALL enemies lose 2 [3] Strength
    this turn. Piercing Wail, a Common, is 6.
    (a, default) 4 [6]. (b) leave it.
+   **Ruled 2026-10-19: Omen cut; Musou no Hitotachi returns as a 3-cost
+   Hyperbeam-style Rare (see the Inazuma paper).** Raiden's other Rare,
+   Plane of Euthymia, keeps cost 2 and its upgrade becomes Innate (was cost
+   1).
 4. **Thoma, Crimson Ooyoroi** (Inazuma U power, 1): keep up to 6 [9] Block.
    Kokomi's own Rare keeps 10 [15]; a Colorless Uncommon should sit a bit
    above a kit card, not under.
@@ -68,6 +72,12 @@ These cards are offered to every kit, Balance kits included.
    Predator is 15 and 2 cards.
    (a, default) 14 [18]. (b) leave it.
    **Ruled (a), 2026-10-18.**
+
+Yae's **Hold the Presses**, redesigned 2026-10-19: [USER]: "we already have
+an enchantment that gives Retain and doing it for one turn is strictly
+worse. The card probably needs a redesign." Now 1 Energy: "Gain 8 [11]
+Block. Draw 1 card for each Annotated card in your Hand, up to 2." (was 2
+Energy, 12 [15] Block and Retain your hand this turn).
 
 Noted, no change proposed: Gorou's War Banner and Itto's Ushi give
 repeatable Strength (watch in Kokomi seats); Albedo's Dust of Purification

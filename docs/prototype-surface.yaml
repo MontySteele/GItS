@@ -2547,16 +2547,6 @@
               then: [{op: apply_power, power: strength, amount: 1, target: self}]}],
    upgrade: {block: 3}}
 
-# Inazuma rework (2026-10-18): the pool's one way to take enemy Strength.
-- {id: proto_mi_raiden_baleful_omen, name: "Raiden Shogun — Transcendence: Baleful Omen", character: klee,
-   authored_by: [claude],
-   nation: inazuma, star: 5, rarity: uncommon, role_c: applier, element: electro,
-   cost: 1, type: skill,
-   description: "ALL enemies lose 2 [gold]Strength[/gold] this turn. Your next Attack this turn applies [gold]Electro[/gold].",
-   effects: [{op: lose_strength, amount: 2, target: all_enemies, this_turn: true},
-             {op: apply_power, power: mi_next_electro, amount: 1, target: self}],
-   upgrade: {strength_loss: +1}}
-
 # --- the Rares: Powers that bend a rule (Inazuma rework, 2026-10-18) ---
 
 - {id: proto_mi_raiden_euthymia, name: "Raiden Shogun — Plane of Euthymia", character: klee,
@@ -2565,7 +2555,22 @@
    cost: 2, type: power,
    description: "At the end of your turn, Retain your [gold]Hand[/gold].",
    effects: [{op: apply_power, power: mi_euthymia, amount: 1, target: self}],
-   upgrade: {cost: -1}}
+   # 2026-10-19 (pool-sweep paper sec.3): the upgrade is Innate, not cost 1.
+   upgrade: {innate: true}}
+
+# 2026-10-19: Baleful Omen cut; Musou returns as a Hyperbeam (provenance,
+# "Raiden and Hold the Presses, 2026-10-19").
+- {id: proto_mi_raiden_musou_no_hitotachi, name: "Raiden Shogun — Musou no Hitotachi", character: klee,
+   authored_by: [claude],
+   nation: inazuma, star: 5, rarity: rare, role_c: applier, element: electro,
+   cost: 3, type: attack,
+   description: "Deal {CalculationBase:diff()} [gold]Electro[/gold] damage to ALL enemies, plus {ExtraDamage:diff()} for each card in your [gold]Hand[/gold]. ALL enemies and you lose {StrengthLoss:diff()} [gold]Strength[/gold] this turn.{InCombat:
+(Deals {CalculatedDamage:diff()} damage)|}",
+   effects: [{op: damage, target: all_enemies, applies_element: true,
+              amount_formula: {base: 16, per: 2, count: other_cards_in_hand}},
+             {op: lose_strength, amount: 3, target: all_enemies, this_turn: true},
+             {op: lose_strength, amount: 3, target: self, this_turn: true}],
+   upgrade: {formula_base: 6}}
 
 - {id: proto_mi_itto_royal_descent, name: "Itto — Royal Descent: Behold, Itto the Evil!", character: klee,
    authored_by: [claude],
@@ -5246,11 +5251,12 @@
 
 - {id: proto_ym_hold_the_presses, name: "Hold the Presses", character: yae,
    authored_by: [claude],
-   cost: 2, type: skill, rarity: uncommon,
-   # Equilibrium's rider and price (RetainHandPower); 1 Energy until 2026-10-18.
-   description: "Gain 12 [gold]Block[/gold]. Retain your hand this turn.",
-   effects: [{op: block, amount: 12},
-             {op: yae, kind: retain_hand}],
+   # Redesigned 2026-10-19; was 2: 12 Block, Retain your hand this turn
+   # (provenance, "Raiden and Hold the Presses, 2026-10-19").
+   cost: 1, type: skill, rarity: uncommon,
+   description: "Gain 8 [gold]Block[/gold]. Draw 1 card for each [gold]Annotated[/gold] card in your [gold]Hand[/gold], up to {YmAmount:diff()}.",
+   effects: [{op: block, amount: 8},
+             {op: yae, kind: draw_per_annotated, amount: 2}],
    upgrade: {block: 3}}
 
 - {id: proto_ym_sakura_canopy, name: "Sakura Canopy", character: yae,

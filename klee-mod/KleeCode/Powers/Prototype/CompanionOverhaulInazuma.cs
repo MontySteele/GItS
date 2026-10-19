@@ -649,7 +649,7 @@ public sealed class CrimsonOoyoroiPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// Kujou Sara, Tengu Stormcall, and Raiden Shogun, Baleful Omen (2026-10-18):
+/// Kujou Sara, Tengu Stormcall (2026-10-18; Baleful Omen shared it until cut, 2026-10-19):
 /// "Your next Attack this turn applies Electro." <see cref="CrowfeatherCoverPower"/>
 /// without the damage half: a one-shot element rider, spent by the next
 /// Attack card (<see cref="NextAttackRiderPower"/>) and removed at the end of
@@ -937,25 +937,42 @@ internal sealed class HanegaBlockLossVar : DynamicVar
 }
 
 /// <summary>
-/// Raiden Shogun, Baleful Omen's "ALL enemies lose 2 Strength this turn"
-/// (the Inazuma pool rework, 2026-10-18): <see cref="ProtoKoCoverYourEarsPower"/>'s
-/// shape, the base game's <c>PiercingWailPower</c>, on every enemy. Emitted by
-/// the codegen's <c>lose_strength</c> with <c>this_turn: true</c>
+/// Raiden Shogun, Musou no Hitotachi's "ALL enemies and you lose 3 Strength
+/// this turn" (2026-10-19, Baleful Omen's power renamed with its card cut):
+/// <see cref="ProtoKoCoverYourEarsPower"/>'s shape, the base game's
+/// <c>PiercingWailPower</c>, on every enemy and on the player. Emitted by the
+/// codegen's <c>lose_strength</c> with <c>this_turn: true</c>
 /// (<c>{CardClass}Power</c>). Sim twin: <c>temp_strength_down</c>.
 /// </summary>
-public sealed class ProtoMiRaidenBalefulOmenPower : TemporaryStrengthPower, ILocalizationProvider
+public sealed class ProtoMiRaidenMusouNoHitotachiPower : TemporaryStrengthPower, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
-        ("title", "Baleful Omen"),
+        ("title", "Musou no Hitotachi"),
         ("description",
             "Lose [blue]{Amount}[/blue] [gold]Strength[/gold] this turn."),
     };
 
     public override AbstractModel OriginModel =>
-        ModelDb.Card<global::KleeMod.Cards.Prototype.Generated.ProtoMiRaidenBalefulOmen>();
+        ModelDb.Card<global::KleeMod.Cards.Prototype.Generated.ProtoMiRaidenMusouNoHitotachi>();
 
     protected override bool IsPositive => false;
+}
+
+/// <summary>
+/// Musou no Hitotachi's "plus 2 for each card in your Hand" (2026-10-19): the
+/// hand as it stands, the card itself left out, so the preview in hand and
+/// the hit in play read the same number. Sim twin: the
+/// <c>other_cards_in_hand</c> runtime count.
+/// </summary>
+public static class InazumaHand
+{
+    public static int OtherCardsInHand(CardModel card)
+    {
+        var owner = card.Owner;
+        if (owner == null) return 0;
+        return PileType.Hand.GetPile(owner).Cards.Count(c => !ReferenceEquals(c, card));
+    }
 }
 
 // ---------------------------------------------------------------------------

@@ -2837,7 +2837,10 @@ EXHAUST_STATUSES_GROW_LARGEST_FIELDS = {"op", "amount", "draw_each"}
 # card's own `<Card>Power` class (its title is the card's), hand-written
 # beside the rules it serves.
 LOSE_STRENGTH_FIELDS = {"op", "amount", "target", "per_status", "this_turn"}
-LOSE_STRENGTH_TARGETS = ("all_enemies", "enemy")
+#: `self` (Musou no Hitotachi, 2026-10-19: "ALL enemies and you lose 3
+#: Strength this turn"): the same this-turn power on the player, so it takes
+#: `this_turn: true` only.
+LOSE_STRENGTH_TARGETS = ("all_enemies", "enemy", "self")
 #: Treasure Map and Come Back and Play!: one card of a KIND out of the discard
 #: pile into the hand, the player choosing among the kind.
 FETCH_FROM_DISCARD_FIELDS = {"op", "filter"}
@@ -3110,7 +3113,9 @@ YAE_KINDS = {
     "strike_all_at": "StrikeAllAt",
     "kitsune_act": "KitsuneAct",
     "level_kitsune": "LevelKitsune",
-    "retain_hand": "RetainHand",
+    # Hold the Presses, redesigned 2026-10-19: "Draw 1 card for each
+    # Annotated card in your Hand, up to 2" (YmAmount).
+    "draw_per_annotated": "DrawPerAnnotated",
     "replant": "Replant",
     "plant_missing": "PlantMissing",
     "plant_until_full": "PlantUntilFull",
@@ -3165,7 +3170,7 @@ YAE_KIND_FIELDS = {
     "strike_all_at": (),
     "kitsune_act": (),
     "level_kitsune": ("amount",),
-    "retain_hand": (),
+    "draw_per_annotated": ("amount",),
     "replant": ("amount",),
     "plant_missing": (),
     "plant_until_full": (),
@@ -6127,6 +6132,8 @@ def blocked_reason(
                 per = eff["per_status"]
                 if not isinstance(per, int) or isinstance(per, bool)                         or per <= 0:
                     return f"{op} per_status must be a positive literal int"
+            if eff.get("target") == "self" and eff.get("this_turn") is not True:
+                return f"{op} target self takes this_turn: true"
             if "this_turn" in eff:
                 if eff["this_turn"] is not True:
                     return f"{op} this_turn must be true or absent"
@@ -7240,6 +7247,12 @@ VARKA_COUNTS = {
 #: her own charges only (R205), read when the Block is gained. Sim twin: the
 #: `enemies_with_bomb` runtime count.
 KLEE_COUNTS = {
+    # Musou no Hitotachi (2026-10-19): "plus 2 for each card in your Hand",
+    # the hand at resolution with Musou itself left out (in play it has left
+    # the hand; in the hand's preview it is skipped). Sim twin: the
+    # `other_cards_in_hand` runtime count (Precise Cut's).
+    "other_cards_in_hand": "static (card, _) => InazumaHand."
+                           "OtherCardsInHand(card)",
     "enemies_with_bomb": "static (card, _) => ProtoBombPower."
                          "EnemiesHoldingChargeFrom(card.Owner.Creature)",
 }
@@ -8885,9 +8898,12 @@ def build_vars(card: dict) -> list[str]:
             # `EnergyIconsFormatter` reads an `EnergyVar` (a plain
             # `DynamicVar` throws), so the var is the base game's type.
             out.append(f'new EnergyVar({int(eff["amount"])})')
-        elif op == "lose_strength":
+        elif op == "lose_strength" and eff is next(
+                f for f in card["effects"] if f.get("op") == "lose_strength"):
             # Defence in the status pile. Always a var (raise_fanfare_cap's
-            # rule): the face prints it and its one carrier upgrades it.
+            # rule): the face prints it and its one carrier upgrades it. The
+            # first op owns it (Musou no Hitotachi's second, on you, reads
+            # the same `StrengthLoss`).
             out.append(
                 f'new DynamicVar("StrengthLoss", {int(eff["amount"])}m)')
         elif op == "scry_take" and scry_upgrade(card):
@@ -13248,6 +13264,11 @@ def build_body(
                 lines.append(
                     f"await PowerCmd.Apply<{power}>(choiceContext, "
                     f"cardPlay.Target, {sign}{loss}, "
+                    "applier: Owner.Creature, cardSource: this);")
+            elif eff.get("target") == "self":
+                lines.append(
+                    f"await PowerCmd.Apply<{power}>(choiceContext, "
+                    f"Owner.Creature, {sign}{loss}, "
                     "applier: Owner.Creature, cardSource: this);")
             else:
                 lines.append(

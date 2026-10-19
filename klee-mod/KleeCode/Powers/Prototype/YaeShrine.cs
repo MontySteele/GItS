@@ -1501,14 +1501,25 @@ public static class YaeCards
                                CardPlay cardPlay) =>
         YaeShrine.Verdict(choiceContext, card.Owner?.Creature);
 
-    /// <summary>Hold the Presses: "Retain your hand this turn", the base
-    /// game's Equilibrium rider (<c>RetainHandPower</c>, 1 turn).</summary>
-    public static async Task RetainHand(PlayerChoiceContext choiceContext, CardModel card,
-                                        CardPlay cardPlay)
+    /// <summary>Hold the Presses (redesigned 2026-10-19): "Draw 1 card for
+    /// each Annotated card in your Hand, up to 2" (YmAmount). The hand is read
+    /// at resolution, the card itself (in play) not in it.</summary>
+    public static int AnnotatedDraw(CardModel card)
     {
-        var owner = card.Owner?.Creature;
+        var owner = card.Owner;
+        if (owner == null) return 0;
+        var annotated = PileType.Hand.GetPile(owner).Cards
+            .Count(c => !ReferenceEquals(c, card) && YaeEditing.IsAnnotated(c));
+        return System.Math.Min(annotated, Var(card, "YmAmount"));
+    }
+
+    public static async Task DrawPerAnnotated(PlayerChoiceContext choiceContext, CardModel card,
+                                              CardPlay cardPlay)
+    {
+        var owner = card.Owner;
         if (owner == null) return;
-        await PowerCmd.Apply<RetainHandPower>(choiceContext, owner, 1m, owner, card);
+        var n = AnnotatedDraw(card);
+        if (n > 0) await CardPileCmd.Draw(choiceContext, n, owner);
     }
 
     /// <summary>Replanting: "Your oldest Sakura withers. Plant one of its

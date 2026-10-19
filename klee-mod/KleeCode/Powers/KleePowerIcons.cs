@@ -487,9 +487,10 @@ internal static class KleePowerIcons
         // Amber, Explosive Puppet's this-turn loss: the same borrowed badge.
         ProtoMcAmberExplosivePuppetPower =>
             KleePck.Path("klee/powers/detonation_vuln.png"),
-        // Raiden's Baleful Omen (2026-10-18): her skill's talent icon since
+        // Raiden's Musou no Hitotachi (2026-10-19, Baleful Omen's power and its
+        // talent icon carried over): the icon since
         // the power and relic icon pass, the same borrowed badge as fallback.
-        ProtoMiRaidenBalefulOmenPower => KleePck.Path("klee/powers/baleful_omen.png")
+        ProtoMiRaidenMusouNoHitotachiPower => KleePck.Path("klee/powers/baleful_omen.png")
             ?? KleePck.Path("klee/powers/detonation_vuln.png"),
         // VARKA (the Oath rework): his Oath badge wears the Vision of its
         // current element (the retired Winds' files, the varka-art pass's

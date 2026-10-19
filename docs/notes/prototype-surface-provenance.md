@@ -9704,3 +9704,34 @@ Kyouka Fuushi's "not Stings or Wards"), then grown to two cards a character
   3 off powered card Block (`ModifyBlockAdditive`, Dexterity's filter),
   floored at 0; relic and power Block are untouched.
 - **Art**: the sixteen new keys are on `art_coverage.KNOWN_MISSING`.
+
+## Raiden and Hold the Presses, 2026-10-19
+
+`review/active/pool-sweep-2026-10-18.md` sec.3 pick 3 and
+`review/active/inazuma-companions-2026-10-18.md`, "Musou returns, Baleful
+Omen is cut".
+
+- **Cut**: Raiden, Transcendence: Baleful Omen (Uncommon Skill). Its power
+  is renamed for Musou (`ProtoMiRaidenMusouNoHitotachiPower`, the codegen's
+  `{CardClass}Power`), its talent icon kept, and its card art carries over.
+- **Raiden, Musou no Hitotachi** (Rare Attack, 3), back on its old id.
+  [USER]: "On Musou - what about something closer to Defect's hyperbeam?" /
+  "Im seeing this as a 3 cost card like hyperbeam." "Deal 16 [22] Electro
+  damage to ALL enemies, plus 2 for each card in your Hand. ALL enemies and
+  you lose 3 Strength this turn." The hand is counted at resolution, Musou
+  itself not in it (`InazumaHand.OtherCardsInHand`; sim
+  `other_cards_in_hand`, Precise Cut's count). The hit comes first, so your
+  own -3 never shrinks it. `lose_strength` takes `target: self` with
+  `this_turn: true`: the same Piercing Wail power on the player, back at
+  her own turn end. The first `lose_strength` op owns `StrengthLoss`.
+- **Raiden, Plane of Euthymia**: cost stays 2; the upgrade is Innate (was
+  cost -1).
+- **Yae, Hold the Presses** (Uncommon Skill, 1; was 2): "Gain 8 [11] Block.
+  Draw 1 card for each Annotated card in your Hand, up to 2." [USER]: "we
+  already have an enchantment that gives Retain and doing it for one turn is
+  strictly worse. The card probably needs a redesign." The new Yae kind
+  `draw_per_annotated` (`YaeCards.DrawPerAnnotated`, sim
+  `yae_shrine` `draw_per_annotated`) counts `IsAnnotated` cards in hand at
+  resolution, capped at `YmAmount`. The `retain_hand` kind, `YaeCards.RetainHand`
+  and the sim's `retains_hand` flag left with the Retain; nothing else used
+  them.
