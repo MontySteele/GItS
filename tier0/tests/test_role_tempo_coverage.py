@@ -295,3 +295,14 @@ def test_tag_through_entities_all_carry_their_provenance():
     for power, (token, roles, why) in rt.TOKEN_PAYOFF_POWERS.items():
         assert set(roles) <= set(rt.SOLVE), power
         assert len(why) > 60, power
+
+
+def test_the_doc_writer_survives_the_retired_sheets(monkeypatch, tmp_path):
+    """`EB-193`: `write_docs` read the retired `docs/klee-cards.yaml` through
+    `role_tempo.SHEETS` and died. A missing sheet declares no archetype, and
+    an empty span prints as `none`."""
+    from tools import canon_role_tempo as crt
+    monkeypatch.setattr(rt, "SHEETS", {"klee": tmp_path / "gone.yaml"})
+    assert crt.gits_archetype_sizes() == []
+    assert crt._span([]) == "none"
+    assert crt._span([3, 9]) == "3–9"
