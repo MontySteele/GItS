@@ -1,4 +1,4 @@
-"""The animated character-select scenes of Klee, Varka, Furina and Yae (stage 1).
+"""The animated character-select scenes of Klee, Varka, Furina, Kokomi and Yae (stage 1).
 
 [USER], 2026-10-14: "during character select, none of the art pieces for the
 base game's characters are static; the character does a small idle loop with
@@ -25,18 +25,21 @@ import pytest
 from tools import select_bg
 from tools.furina_rig import rig as furina_rig
 from tools.klee_rig import rig as klee_rig
+from tools.kokomi_rig import rig as kokomi_rig
 from tools.varka_rig import rig as varka_rig
 from tools.yae_rig import rig as yae_rig
 
 ROOT = Path(__file__).resolve().parents[2]
 BUILD = ROOT / "tools" / "build_pck.ps1"
 
-RIGS = {"klee": klee_rig, "varka": varka_rig, "furina": furina_rig, "yae": yae_rig}
-ELEMENT = {"klee": "pyro", "varka": "anemo", "furina": "hydro", "yae": "electro"}
+RIGS = {"klee": klee_rig, "varka": varka_rig, "furina": furina_rig, "kokomi": kokomi_rig, "yae": yae_rig}
+ELEMENT = {"klee": "pyro", "varka": "anemo", "furina": "hydro", "kokomi": "reef", "yae": "electro"}
 #: Emitter names each element must carry (the brief: Pyro embers/sparks,
-#: Anemo streaks + leaves, Hydro droplets/bubbles; Yae, 2026-10-19: Electro
-#: sparks and her sakura petals).
+#: Anemo streaks + leaves, Hydro droplets/bubbles).
 EMITTERS = {"pyro": {"Embers", "Sparks"}, "anemo": {"Streaks", "Leaves"}, "hydro": {"Bubbles", "Droplets"},
+            # Kokomi's Hydro (2026-10-19): Furina's bubbles, and her jellyfish drifting up
+            "reef": {"Bubbles", "Jellies"},
+            # Yae's Electro (2026-10-19): sparks and her sakura petals
             "electro": {"Petals", "Sparks"}}
 
 
@@ -208,5 +211,5 @@ def test_the_rendered_loop_steps_a_sheet_over_the_moving_region_and_never_seams(
 
 def test_the_pack_builder_ships_the_loop_vram_compressed_and_refuses_without_it():
     ps = BUILD.read_text(encoding="utf-8")
-    block = ps.split("select_loop.json", 1)[1].split("# Kokomi's backdrop tint", 1)[0]
+    block = ps.split("select_loop.json", 1)[1].split("# Character.Icon returns a Control", 1)[0]
     assert "Write-TextureImport" in block and "throw" in block

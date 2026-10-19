@@ -242,6 +242,10 @@ CHARS = {
         # flat black there (toon.toon_material, `cutout`; 2026-10-18).
         "alpha_mats": {"手", "肌"},
         "hide_mats": set(),
+        # the face's outline stops short of the lips (render.py unline_mouth):
+        # without it the select close-up drew dark ticks at her mouth's
+        # corners, a pout whatever the morphs said (2026-10-19)
+        "mouth_mat": "口舌",
         "camera_height": 0.8,
     },
     "yae": {

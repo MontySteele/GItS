@@ -24,9 +24,7 @@ Found while clearing `BACKLOG.md`; each is a rule or text call on a kit.
 4. **Klee, the Mine tip** never says it uses up the aura. (a, default) "A Bomb
    that also goes off when its enemy attacks you (its plain Bombs stay), and
    uses up the enemy's aura. Any Set off spends it too." (b) leave it.
-5. **Furina, the Archaic Tooth's All the World's a Stage+** replaces Rising
-   Applause+ but drops its Retain. (a, default) keep the Retain. (b) leave it.
-6. **Role-tempo floors:** regenerating with the fixed card reader moves 25 of
+5. **Role-tempo floors:** regenerating with the fixed card reader moves 25 of
    110 package floors (Klee's spark `velocity|early` 5.6 to 19.4).
    (a, default) take the new floors. (b) keep the old ones.
 

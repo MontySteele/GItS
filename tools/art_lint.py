@@ -729,6 +729,8 @@ GENERATOR_OWNED = {
     "ImageGen/images/kokomi/model/frames/kokomi_shadow.png": "char_render/pack.py",
     "ImageGen/images/kokomi/model/kokomi_rest.png":         "char_render/pack.py",
     "ImageGen/images/kokomi/ui/select_closeup.png":         "char_render/pack.py",
+    "ImageGen/images/kokomi/ui/select_loop.png": "select_loop.py",
+    "ImageGen/images/kokomi/ui/select_closeup_static.png": "select_loop.py",
     "ImageGen/images/kokomi/ui/select_portrait.png":        "char_render/pack.py",
     "ImageGen/images/kokomi/ui/select_portrait_locked.png": "char_render/pack.py",
     # Yae Miko's model art (phase A, a temporary model, 2026-10-14): Kokomi's

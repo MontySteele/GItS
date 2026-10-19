@@ -112,13 +112,13 @@ Visual papers: `review/active/varka-visual-paper-2026-10-13.md`,
 
 ### Character-select idle loops (`tools/select_loop.py`)
 
-Klee, Varka, Furina and Yae play a rendered loop of the close-up; manifest
+Klee, Varka, Furina, Kokomi and Yae play a rendered loop of the close-up; manifest
 `tools/select_loop.json`. A character with no entry gets `tools/select_bg.py`'s
-breathing still. Kokomi waits for her prototype to settle.
+breathing still.
 
 ```sh
 .venv/Scripts/python tools/select_loop.py build --char klee --pmx <klee pmx> --work <scratch dir> --art-root <main checkout>
-.venv/Scripts/python tools/select_loop.py build --char varka|furina|yae --models <scratch>/models --work <scratch dir> --art-root <main checkout>
+.venv/Scripts/python tools/select_loop.py build --char varka|furina|kokomi|yae --models <scratch>/models --work <scratch dir> --art-root <main checkout>
 .venv/Scripts/python -m tools.<char>_rig gen     # the scene reads the manifest
 ```
 

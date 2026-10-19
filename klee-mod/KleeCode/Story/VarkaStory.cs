@@ -122,8 +122,8 @@ public static class VarkaStory
                 EventType: typeof(VarkaWolfOfTheNorth),
                 Title: "The Wolf of the North",
                 Body:
-                    "Frost spreads across the landing. Boreas takes shape beside Varka, stretches, and bares "
-                  + "his teeth. The wolf carries a fragment of Andrius's spirit, but Varka knows that look "
+                    "Frost spreads across the landing. Andrius takes shape beside Varka, stretches, and bares "
+                  + "his teeth. The Wolf of the North gave him his title, and Varka knows that look "
                   + "well enough: his old partner wants a spar.\n\n[i]\"You've gone soft, Knight.\"[/i] — "
                   + "[i]\"Soft? Come over here and say that.\"[/i]",
                 Options: new[]
@@ -171,7 +171,7 @@ public static class VarkaStory
                     new StoryOption("DILUC", "Diluc",
                         "Add an upgraded [gold]Diluc: Searing Onslaught[/gold] to your deck.",
                         new StoryEffect(StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoVkDilucSearingOnslaught)),
-                        HomeResult("Diluc", "Angel's Share is holding your usual table. Don't keep it waiting.", DilucAnswer)),
+                        HomeResult("Diluc", "There's a bottle at Angel's Share with your name on it. You're paying.", DilucAnswer)),
                     new StoryOption("WAVE_THEM_BACK", "Wave them back to the column.",
                         "Nothing.",
                         new StoryEffect(StoryEffectKind.Nothing),
@@ -337,7 +337,7 @@ public static class VarkaStory
                     new StoryOption("TOAST_ABSENT_FRIENDS", "Toast absent friends.",
                         "Gain a random potion.",
                         new StoryEffect(StoryEffectKind.GainRandomPotions, 1),
-                        "He pours out a little of the good wine for Valentine."),
+                        "He raises a cup of the good wine to Valentine."),
                     new StoryOption("REMEMBER_VALENTINES_ADVICE", "Remember Valentine's advice.",
                         "Upgrade a card.",
                         new StoryEffect(StoryEffectKind.UpgradeChosenCard),
