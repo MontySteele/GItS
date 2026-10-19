@@ -5,73 +5,73 @@
 [sub_resource type="AtlasTexture" id="Atlas_wriothesley_0"]
 atlas = ExtResource("1_wriothesley")
 region = Rect2(0, 0, 166, 166)
-margin = Rect2(186, 173, 371, 198)
+margin = Rect2(235, 182, 492, 207)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_wriothesley_1"]
 atlas = ExtResource("1_wriothesley")
-region = Rect2(166, 0, 174, 173)
-margin = Rect2(182, 165, 363, 191)
+region = Rect2(166, 0, 173, 173)
+margin = Rect2(232, 174, 485, 200)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_wriothesley_2"]
 atlas = ExtResource("1_wriothesley")
-region = Rect2(340, 0, 233, 245)
-margin = Rect2(152, 90, 304, 119)
+region = Rect2(339, 0, 233, 244)
+margin = Rect2(202, 100, 425, 129)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_wriothesley_3"]
 atlas = ExtResource("1_wriothesley")
-region = Rect2(573, 0, 287, 311)
-margin = Rect2(125, 29, 250, 53)
+region = Rect2(572, 0, 287, 310)
+margin = Rect2(175, 39, 371, 63)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_wriothesley_4"]
 atlas = ExtResource("1_wriothesley")
-region = Rect2(860, 0, 334, 329)
-margin = Rect2(102, 19, 203, 35)
+region = Rect2(859, 0, 334, 328)
+margin = Rect2(151, 29, 324, 45)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_wriothesley_5"]
 atlas = ExtResource("1_wriothesley")
-region = Rect2(0, 329, 376, 345)
-margin = Rect2(81, 9, 161, 19)
+region = Rect2(0, 328, 376, 344)
+margin = Rect2(130, 19, 282, 29)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_wriothesley_6"]
 atlas = ExtResource("1_wriothesley")
-region = Rect2(376, 329, 415, 349)
-margin = Rect2(63, 9, 122, 15)
+region = Rect2(376, 328, 414, 357)
+margin = Rect2(113, 10, 244, 16)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_wriothesley_7"]
 atlas = ExtResource("1_wriothesley")
-region = Rect2(791, 329, 460, 362)
-margin = Rect2(42, 0, 77, 2)
+region = Rect2(790, 328, 460, 371)
+margin = Rect2(91, 0, 198, 2)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_wriothesley_8"]
 atlas = ExtResource("1_wriothesley")
-region = Rect2(0, 691, 505, 311)
-margin = Rect2(21, 53, 32, 53)
+region = Rect2(0, 699, 505, 311)
+margin = Rect2(71, 62, 153, 62)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_wriothesley_9"]
 atlas = ExtResource("1_wriothesley")
-region = Rect2(505, 691, 537, 311)
-margin = Rect2(0, 52, 0, 53)
+region = Rect2(505, 699, 553, 311)
+margin = Rect2(50, 61, 105, 62)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_wriothesley_10"]
 atlas = ExtResource("1_wriothesley")
-region = Rect2(0, 1002, 511, 307)
-margin = Rect2(0, 56, 26, 57)
+region = Rect2(0, 1010, 606, 307)
+margin = Rect2(25, 65, 52, 66)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_wriothesley_11"]
 atlas = ExtResource("1_wriothesley")
-region = Rect2(511, 1002, 487, 300)
-margin = Rect2(25, 64, 50, 64)
+region = Rect2(606, 1010, 658, 300)
+margin = Rect2(0, 73, 0, 73)
 filter_clip = true
 
 [sub_resource type="Shader" id="Shader_element"]
@@ -137,7 +137,7 @@ self_modulate = Color(1, 1, 1, 0)
 material = SubResource("ShaderMaterial_tint")
 texture = SubResource("Atlas_wriothesley_0")
 centered = false
-offset = Vector2(-269, -285)
+offset = Vector2(-318, -294)
 scale = Vector2(0.5, 0.5)
 
 [node name="FxPlayer" type="AnimationPlayer" parent="."]

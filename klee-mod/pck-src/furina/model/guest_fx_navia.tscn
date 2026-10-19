@@ -4,74 +4,74 @@
 
 [sub_resource type="AtlasTexture" id="Atlas_navia_0"]
 atlas = ExtResource("1_navia")
-region = Rect2(0, 0, 129, 130)
-margin = Rect2(185, 112, 370, 123)
+region = Rect2(0, 0, 130, 130)
+margin = Rect2(257, 113, 468, 170)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_navia_1"]
 atlas = ExtResource("1_navia")
-region = Rect2(129, 0, 126, 128)
-margin = Rect2(187, 112, 373, 125)
+region = Rect2(130, 0, 126, 129)
+margin = Rect2(259, 112, 472, 171)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_navia_2"]
 atlas = ExtResource("1_navia")
-region = Rect2(255, 0, 158, 141)
-margin = Rect2(169, 89, 341, 112)
+region = Rect2(256, 0, 158, 142)
+margin = Rect2(242, 89, 440, 158)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_navia_3"]
 atlas = ExtResource("1_navia")
-region = Rect2(413, 0, 204, 124)
-margin = Rect2(145, 66, 295, 129)
+region = Rect2(414, 0, 205, 124)
+margin = Rect2(217, 67, 393, 176)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_navia_4"]
 atlas = ExtResource("1_navia")
-region = Rect2(617, 0, 254, 145)
-margin = Rect2(117, 47, 245, 108)
+region = Rect2(619, 0, 254, 145)
+margin = Rect2(190, 48, 344, 155)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_navia_5"]
 atlas = ExtResource("1_navia")
-region = Rect2(0, 145, 304, 165)
-margin = Rect2(89, 31, 195, 88)
+region = Rect2(0, 145, 305, 165)
+margin = Rect2(161, 32, 293, 135)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_navia_6"]
 atlas = ExtResource("1_navia")
-region = Rect2(304, 145, 357, 185)
-margin = Rect2(59, 18, 142, 68)
+region = Rect2(305, 145, 356, 185)
+margin = Rect2(132, 19, 242, 115)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_navia_7"]
 atlas = ExtResource("1_navia")
-region = Rect2(0, 330, 407, 207)
-margin = Rect2(31, 8, 92, 46)
+region = Rect2(0, 330, 408, 207)
+margin = Rect2(103, 9, 190, 93)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_navia_8"]
 atlas = ExtResource("1_navia")
-region = Rect2(407, 330, 456, 229)
-margin = Rect2(4, 2, 43, 24)
+region = Rect2(408, 330, 456, 229)
+margin = Rect2(77, 3, 142, 71)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_navia_9"]
 atlas = ExtResource("1_navia")
-region = Rect2(0, 559, 482, 253)
-margin = Rect2(0, 0, 17, 0)
+region = Rect2(0, 559, 504, 254)
+margin = Rect2(51, 0, 94, 46)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_navia_10"]
 atlas = ExtResource("1_navia")
-region = Rect2(0, 812, 499, 246)
-margin = Rect2(0, 1, 0, 7)
+region = Rect2(0, 813, 551, 275)
+margin = Rect2(26, 2, 47, 25)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_navia_11"]
 atlas = ExtResource("1_navia")
-region = Rect2(499, 812, 390, 219)
-margin = Rect2(109, 6, 109, 34)
+region = Rect2(0, 1088, 598, 293)
+margin = Rect2(0, 7, 0, 7)
 filter_clip = true
 
 [sub_resource type="Shader" id="Shader_element"]
@@ -137,7 +137,7 @@ self_modulate = Color(1, 1, 1, 0)
 material = SubResource("ShaderMaterial_tint")
 texture = SubResource("Atlas_navia_0")
 centered = false
-offset = Vector2(-250, -177)
+offset = Vector2(-322, -178)
 scale = Vector2(0.5, 0.5)
 
 [node name="FxPlayer" type="AnimationPlayer" parent="."]

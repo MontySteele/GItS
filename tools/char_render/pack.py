@@ -29,6 +29,10 @@ tools/char_render/render.py's raw frames and writes, under
                                       `--guest-fx-only` repacks just these into the
                                       committed manifest, `--guest-fx-sheet <png>`
                                       draws their review sheet
+  model/frames/furina_<spend|drain|repay>.png  Furina's stage effects
+                                      (fx.STAGE_EFFECTS), the manifest's
+                                      `effects`; `--stage-fx-only [name ...]`
+                                      repacks them alone, as --guest-fx-only
   model/<char>_rest.png               the seated rest-site still, padded so
                                       BaseLib's centred sprite puts his seat on
                                       the rest-site anchor
@@ -300,6 +304,49 @@ def guest_fx(char: str, ppu: float):
     return recs, writes
 
 
+def stage_fx(char: str, name: str, ppu: float):
+    """One stage effect (fx.STAGE_EFFECTS) at `ppu`, Furina's combat ppu:
+    (record, [(file, sheet)])."""
+    frames, origin, to = FX.STAGE_EFFECTS[name](ppu, FX.STAGE_FPS)
+    esheets, erec = sheets_for(frames, origin, STAGE_FILES[char][name])
+    erec.update({"fps": FX.STAGE_FPS, "ppu": ppu, "length": round(len(frames) / FX.STAGE_FPS, 4), "loop": False,
+                 "heat": "R=G=B heat (1 core, ~0.5 glow), A coverage; tint per element",
+                 "tint": FX.STAGE_TINTS[name], "uses": [],
+                 "anchor": "origin is Furina's chest" + ("; `to` the first guest seat" if to else "")})
+    if to:
+        # the far end, in the trimmed cell's px (as `origin`)
+        erec["to"] = [round(to[0] - origin[0] + erec["origin"][0]), round(to[1] - origin[1] + erec["origin"][1])]
+    return erec, esheets
+
+
+def stage_fx_only(char: str, names: list, art: Path, check: bool) -> int:
+    """Repack the named stage effects alone into the committed manifest, which
+    keeps every other record (and the effects' order): they need no render."""
+    mpath = manifest_path(char)
+    manifest = json.loads(mpath.read_text(encoding="utf-8"))
+    ppu = manifest["sheets"]["idle"]["ppu"]
+    sheets = []
+    for name in names:
+        assert name in STAGE_FILES.get(char, {}), f"{name}: not a stage effect of {char}"
+        manifest["effects"][name], es = stage_fx(char, name, ppu)
+        sheets += es
+    text = json.dumps(manifest, indent=1, ensure_ascii=False) + "\n"
+    if check:
+        if mpath.read_text(encoding="utf-8") != text:
+            print(f"STALE: {mpath.name}'s effects {names} differ from fx.STAGE_EFFECTS")
+            return 1
+        print(f"{mpath.name}'s effects {names} are current")
+        return 0
+    for file, im in sheets:
+        path = art / "model" / "frames" / file
+        path.parent.mkdir(parents=True, exist_ok=True)
+        im.save(path, optimize=True)
+        print("wrote", path)
+    mpath.write_text(text, encoding="utf-8", newline="\n")
+    print("wrote", mpath.relative_to(ROOT))
+    return 0
+
+
 #: the review sheet: six key frames per guest, one row each, at game scale
 SHEET_CELL = 330
 SHEET_BACKDROP = (22, 24, 32, 255)
@@ -447,6 +494,8 @@ def main(argv=None) -> int:
     ap.add_argument("--check", action="store_true", help="only report; write nothing")
     ap.add_argument("--guest-fx-only", action="store_true",
                     help="repack only the guest effects into the committed manifest (no renders)")
+    ap.add_argument("--stage-fx-only", nargs="*", metavar="NAME",
+                    help="repack only these stage effects (default all) into the committed manifest (no renders)")
     ap.add_argument("--guest-fx-sheet", metavar="PNG", help="draw the guest effects' review sheet and exit")
     args = ap.parse_args(argv)
     char = args.char
@@ -458,6 +507,8 @@ def main(argv=None) -> int:
         return 0
     if args.guest_fx_only:
         return guest_fx_only(char, art, args.check)
+    if args.stage_fx_only is not None:
+        return stage_fx_only(char, args.stage_fx_only or list(STAGE_FILES.get(char, {})), art, args.check)
     if not args.renders:
         ap.error("--renders is required")
     R = Path(args.renders)
@@ -518,17 +569,8 @@ def main(argv=None) -> int:
 
     # the stage's own effect clips (fx.STAGE_EFFECTS), at the combat ppu: no
     # clip places them; the game plays each on its stage event (phase B)
-    for name, file in STAGE_FILES.get(char, {}).items():
-        ppu = manifest["sheets"]["idle"]["ppu"]
-        frames, origin, to = FX.STAGE_EFFECTS[name](ppu, FX.STAGE_FPS)
-        esheets, erec = sheets_for(frames, origin, file)
-        erec.update({"fps": FX.STAGE_FPS, "ppu": ppu, "length": round(len(frames) / FX.STAGE_FPS, 4), "loop": False,
-                     "heat": "R=G=B heat (1 core, ~0.5 glow), A coverage; tint per element",
-                     "tint": FX.STAGE_TINTS[name], "uses": [],
-                     "anchor": "origin is Furina's chest" + ("; `to` the first guest seat" if to else "")})
-        if to:
-            # the far end, in the trimmed cell's px (as `origin`)
-            erec["to"] = [round(to[0] - origin[0] + erec["origin"][0]), round(to[1] - origin[1] + erec["origin"][1])]
+    for name in STAGE_FILES.get(char, {}):
+        erec, esheets = stage_fx(char, name, manifest["sheets"]["idle"]["ppu"])
         manifest["effects"][name] = erec
         writes += [(out_frames / n, im) for n, im in esheets]
         print(f"stage {name}: {erec['count']} frames  cell {erec['cell']}  origin {erec['origin']}  to {erec.get('to')}")

@@ -97,6 +97,7 @@ Visual papers: `review/active/varka-visual-paper-2026-10-13.md`,
   ```sh
   .venv/Scripts/python tools/char_render/pack.py --char furina --guest-fx-only --art-root <main checkout> [--check]
   .venv/Scripts/python tools/char_render/pack.py --char furina --guest-fx-sheet <scratch>/sheet.png
+  .venv/Scripts/python tools/char_render/pack.py --char furina --stage-fx-only [spend drain repay] --art-root <main checkout> [--check]   # her stage effects, likewise
   ```
 
 - Kokomi's skin layers 手 and 肌 are her `alpha_mats` and must render
