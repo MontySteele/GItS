@@ -149,23 +149,6 @@ public sealed class FanfarePower : PowerModel, ILocalizationProvider
     }
 }
 
-/// <summary><i>Salon's Encore</i>: "Whenever you Drain, deal 3 damage to ALL
-/// enemies." [4] Copies add.</summary>
-public sealed class SalonsEncorePower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Salon's Encore"),
-        ("description",
-            "Whenever you [gold]Drain[/gold], deal [blue]{Amount}[/blue] "
-          + "damage to ALL enemies."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-}
-
 /// <summary><i>Thunderous Applause</i>: "Whenever you Spend, deal 3 damage to
 /// ALL enemies." [4] A spend-all is one Spend. Copies add.</summary>
 public sealed class ThunderousApplausePower : PowerModel, ILocalizationProvider
@@ -198,23 +181,6 @@ public sealed class UniversalRevelryPower : PowerModel, ILocalizationProvider
         ("description",
             "Whenever you [gold]Drain[/gold] or [gold]Repay[/gold], gain that "
           + "much additional [gold]Fanfare[/gold]."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-}
-
-/// <summary><i>Ousia Surge</i>: "The first time you Drain each turn, draw 1
-/// card." [Innate] Copies add cards.</summary>
-public sealed class OusiaSurgePower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Ousia Surge"),
-        ("description",
-            "The first time each turn you [gold]Drain[/gold], draw "
-          + "[blue]{Amount}[/blue] card."),
     };
 
     public override PowerType Type => PowerType.Buff;

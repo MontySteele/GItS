@@ -1228,11 +1228,6 @@ CO_TENANCY_LEDGER = {
             "on the enemy, expiring at the end of the player turn, Pass the "
             "Match's boundary. Removes itself and touches nothing a co-tenant "
             "reads. No sim twin: tier 0 seats one player (engine/coop.py)",
-        ("Powers/Prototype/KleeExpansionPowers.cs", "PlaydatePower"):
-            "(the Klee overhaul, R276). Playdate's discount "
-            "expiring at the end of the turn that wrote it, "
-            "CompanionCostThisTurnPower's boundary. Removes "
-            "itself and touches nothing a co-tenant reads",
         ("Powers/Prototype/KleeExpansionPowers.cs", "BoomBadgePower"):
             "(the Klee overhaul, R276). Boom Badge's replay grant "
             "expiring at the end of its turn, ReplayNextCompanionPower's "

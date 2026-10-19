@@ -63,18 +63,11 @@ public sealed class ProtoFsPrimaDonna : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        if (IsUpgraded)
-        {
-            await PowerCmd.Apply<PrimaDonnaPlusPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
-        }
-        else
-        {
-            await PowerCmd.Apply<PrimaDonnaPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
-        }
+        await UpgradeTwinPower.Install<PrimaDonnaPower>(choiceContext, Owner.Creature, 1, IsUpgraded, Owner.Creature, this);
     }
 
     protected override void OnUpgrade()
     {
-        // upgraded_power: the upgraded card installs PrimaDonnaPlusPower, read off IsUpgraded when the card is played.
+        // upgraded_power: the upgraded card's copy of PrimaDonnaPower counts as upgraded, read off IsUpgraded when the card is played.
     }
 }

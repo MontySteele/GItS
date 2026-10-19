@@ -297,10 +297,13 @@ public static class YaeSakuraSlots
 /// (<see cref="FurinaStageCueNodes"/>), and where the base game's Defect
 /// keeps his orbs. Whether it collides with anything is a live question.
 ///
-/// THE LEDGER IS THE TRUTH and the badges stay. Each Sakura's badge
-/// (<see cref="SakuraBadgePower"/>) is still on her status strip, its
+/// THE LEDGER IS THE TRUTH and the badges stay ON THE MODEL. Each Sakura's
+/// badge (<see cref="SakuraBadgePower"/>) is still on her creature, its
 /// tooltip unchanged (the seat page reads it), and a slot's hover shows the
-/// one-line rules and then that badge's own tips. The feed is
+/// one-line rules and then that badge's own tips. Since the icon declutter
+/// (2026-10-19, [USER]: "our characters tend to make a lot of icons") the
+/// badges are kept off her OWN status strip (<see cref="HidesBadge"/>), where
+/// this row draws the same Sakura; a co-op partner still sees them. The feed is
 /// <see cref="SakuraBadge.Sync"/>, the funnel every shrine move ends in, plus
 /// a power landing on her (Sakura Channeling, Eternity) and a card in hand
 /// hovered, focused or held (Varka's dial's doors, <see cref="VarkaOathDial"/>).
@@ -709,6 +712,28 @@ public static class YaeSakuraDisplay
         }
     }
 
+    /// <summary>
+    /// Is this a Sakura badge on her OWN screen, where this row draws the
+    /// same Sakura with its hover (kind, Level, turns, Annotations)? A co-op
+    /// partner still sees it. Suppressed at the container, never through
+    /// <c>IsVisibleInternal</c>: the seat bridge's power list skips an
+    /// invisible power. Never throws: a canonical power has no owner to ask.
+    /// </summary>
+    public static bool HidesBadge(PowerModel power)
+    {
+        if (power is not SakuraBadgePower) return false;
+        Creature? owner;
+        try
+        {
+            owner = power.IsMutable ? power.Owner : null;
+        }
+        catch (Exception)
+        {
+            return false;
+        }
+        return owner != null && YaePrototype.IsYae(owner) && LocalContext.IsMe(owner);
+    }
+
     // ------------------------------------------------------------- hover --
 
     /// <summary>The one-line rules, then the slot's own badge's tooltip (the
@@ -770,6 +795,16 @@ internal static class NCombatUi_Deactivate_YaeSakuraDisplay_Patch
 {
     [HarmonyPostfix]
     public static void Postfix() => YaeSakuraDisplay.Forget();
+}
+
+/// <summary>Her Sakura badges stay off her own status strip, where the row
+/// draws them; a co-op partner still sees them.</summary>
+[HarmonyPatch(typeof(NPowerContainer), "Add")]
+internal static class NPowerContainer_Add_YaeSakuraBadge_Patch
+{
+    [HarmonyPrefix]
+    public static bool Prefix(PowerModel power) =>
+        !YaeSakuraDisplay.HidesBadge(power);
 }
 
 /// <summary>A power landing on her (Sakura Channeling's slots, Eternity's

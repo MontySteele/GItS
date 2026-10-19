@@ -1147,12 +1147,6 @@ public static class KokomiPlan
         }
         await Sync(choiceContext, kokomi,
             SparkPower.SourceOf(source), before);
-        // THE RE-FOUNDING (2026-10-12): the write payoffs -- Watchful
-        // Shoal's Block for an Ethereal card, Watatsumi Resistance's Sting
-        // for a Companion. After the queue moved, so a payoff reads the Plan
-        // as written. Sim twin: `kokomi_plan.note_written`.
-        await KokomiRefounding.OnWritten(choiceContext, kokomi,
-                                         entry.Returns);
 
         // `EB-570`: A PLAN IS ONLY EVER QUEUED HERE. The Moon Overlooks the
         // Waters used to carry the entry out on the spot as well -- "Plans

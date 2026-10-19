@@ -98,26 +98,6 @@ public class KokomiExpansionTests : IDisposable
 
     // ---- Tide Control ---------------------------------------------------------
 
-    [Fact]
-    public void Ceremonial_garment_pays_per_weak_and_vulnerable_stack()
-    {
-        var seat = Seat.Kokomi().WithPower<ProtoCeremonialGarmentPower>(1);
-        var power = seat.Creature.Powers.OfType<ProtoCeremonialGarmentPower>()
-                        .Single();
-        var target = Seat.Kokomi()
-            .WithPower<WeakPower>(2).WithPower<VulnerablePower>(1).Creature;
-        var attack = new ProtoKkPincer();
-        // The Kokomi card pass (2026-10-11): stacks, so Weak 2 + Vulnerable 1
-        // is 3 (it counted 2 distinct debuffs before).
-        Assert.Equal(3m, power.ModifyDamageAdditive(
-            target, 10m, ValueProp.Move, seat.Creature, attack, null));
-        Assert.Equal(0m, power.ModifyDamageAdditive(
-            target, 10m, ValueProp.Move, seat.Creature,
-            new ProtoKkCoralBulwark(), null));
-        Assert.Equal(0m, power.ModifyDamageAdditive(
-            target, 10m, ValueProp.Unpowered, seat.Creature, attack, null));
-    }
-
     /// <summary>The Kokomi card pass (2026-10-11): "The first time each
     /// turn you deal Hydro damage to an enemy, apply 1 Weak and 1 Vulnerable
     /// to it." Fed from both Hydro doors (a powered hit's

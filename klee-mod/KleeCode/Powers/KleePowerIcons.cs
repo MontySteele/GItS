@@ -76,7 +76,6 @@ internal static class KleePowerIcons
         // THE POOL EXPANSION (R276), on the block above's terms verbatim: each
         // borrows the icon of the arm power whose job it is nearest to, and
         // its own illustration stays owed until the slice is accepted.
-        PlaydatePower => KleePck.Path("klee/powers/friendly_visit.png"),
         BoomBadgePower => KleePck.Path("klee/powers/boom_badge.png")
             ?? KleePck.Path("klee/powers/study_buddy.png"),
         WaitForItPower =>
@@ -101,7 +100,7 @@ internal static class KleePowerIcons
         AbyssShadowPower shadow => KleePck.Path(shadow.IconFile),
         SparkKnightPower =>
             KleePck.Path("klee/powers/spark_threshold_down.png"),
-        AlicesDetonatorBasePower =>
+        AlicesDetonatorPower =>
             KleePck.Path("klee/powers/witchs_flame.png"),
         // THE STATUS PACKAGE (2026-10-01): Finders Keepers and Damage Report
         // wear their own badges since the art gaps pass (2026-10-18, art/plan.tsv
@@ -157,8 +156,6 @@ internal static class KleePowerIcons
         DraftTheOrdersPower => KleePck.Path("kokomi/powers/draft_the_orders.png")
             ?? KleePck.Path(
             "kokomi/powers/before_sun_and_moon.png"),
-        ProtoCeremonialGarmentPower => KleePck.Path(
-            "kokomi/powers/ceremonial_garment.png"),
         AtWatersEdgePower => KleePck.Path("kokomi/powers/at_waters_edge.png")
             ?? KleePck.Path("klee/powers/solar_isotoma.png"),
         // THE PAYOFF PASS (2026-10-01): Kurage Canopy is her Ancient's Block
@@ -166,16 +163,10 @@ internal static class KleePowerIcons
         KurageCanopyPower => KleePck.Path("kokomi/powers/kurage_canopy.png")
             ?? KleePck.Path(
             "kokomi/powers/princess_of_watatsumi.png"),
-        KurageCanopyPlusPower => KleePck.Path("kokomi/powers/kurage_canopy.png")
-            ?? KleePck.Path(
-            "kokomi/powers/princess_of_watatsumi.png"),
         // POOL COMPLETION (2026-10-01): the six new Powers and three Ancient
         // Powers borrow the nearest shipped shape, the block above's rule.
         SeasReproachPower => KleePck.Path(
             "kokomi/powers/vigil_of_the_deep.png"),
-        WatatsumiResistancePower => KleePck.Path("kokomi/powers/watatsumi_resistance.png")
-            ?? KleePck.Path(
-            "kokomi/powers/princess_of_watatsumi.png"),
         DivineStrategyPower => KleePck.Path(
             "kokomi/powers/before_sun_and_moon.png"),
         AlicesMasterpiecePower => KleePck.Path("klee/powers/alices_masterpiece.png")
@@ -194,8 +185,6 @@ internal static class KleePowerIcons
         WatchfulShoalPower => KleePck.Path("kokomi/powers/watchful_shoal.png")
             ?? KleePck.Path(
             "kokomi/powers/vigil_of_the_deep.png"),
-        CoordinatedTidePower => KleePck.Path("kokomi/powers/coordinated_tide.png")
-            ?? KleePck.Path("kokomi/powers/bake_kurage.png"),
         GrandStrategistPower => KleePck.Path("kokomi/powers/grand_strategist.png")
             ?? KleePck.Path(
             "klee/powers/amp_reaction_up.png"),
@@ -204,8 +193,6 @@ internal static class KleePowerIcons
         // THE POOL OVERHAUL (2026-10-13): the two new Powers borrow the
         // nearest shipped shape, the block above's rule, and Undercurrent
         // Snare's this-turn loss wears Cover Your Ears!'s borrowed badge.
-        JellyfishCurrentPower => KleePck.Path("kokomi/powers/jellyfish_current.png")
-            ?? KleePck.Path("kokomi/powers/bake_kurage.png"),
         BattleFormationPower => KleePck.Path("kokomi/powers/battle_formation.png")
             ?? KleePck.Path(
             "kokomi/powers/before_sun_and_moon.png"),
@@ -392,8 +379,6 @@ internal static class KleePowerIcons
             ?? KleePck.Path("furina/powers/standing_ovation.png"),
         // THE SALON'S TAB (2026-10-05): the slice's three new powers borrow
         // the shipped Furina sigil nearest their job, on the same terms.
-        SalonsEncorePower =>
-            KleePck.Path("furina/powers/grand_salon.png"),
         UniversalRevelryPower =>
             KleePck.Path("furina/powers/universal_revelry.png")
             ?? KleePck.Path("furina/powers/the_gallery_stirs.png"),
@@ -466,7 +451,6 @@ internal static class KleePowerIcons
             KleePck.Path("furina/powers/guest_freminet.png"),
         FountainOfLucinePower =>
             KleePck.Path("furina/powers/fountain_of_lucine.png"),
-        OusiaSurgePower => KleePck.Path("furina/powers/ousia_surge.png"),
         // THE SWEEP, SECOND SET (2026-10-14): borrowed sigils until the
         // powers get their own.
         ArkheInBalancePower =>
@@ -516,13 +500,7 @@ internal static class KleePowerIcons
         CrescendoPower => KleePck.Path("furina/powers/rising_ovation.png"),
         EnsembleCastPower => KleePck.Path("furina/powers/guest_cast.png"),
         GrandEntrancePower => KleePck.Path("furina/powers/center_stage.png"),
-        HighStakesPower => KleePck.Path("furina/powers/high_stakes.png")
-            ?? KleePck.Path("furina/powers/courtroom_drama.png"),
-        HymnOfRenewalPower => KleePck.Path("furina/powers/stage_lights.png"),
-        PneumaTidesPower => KleePck.Path("furina/powers/ovation_trickle.png"),
         PrimaDonnaPower =>
-            KleePck.Path("furina/powers/star_of_the_show.png"),
-        PrimaDonnaPlusPower =>
             KleePck.Path("furina/powers/star_of_the_show.png"),
         ReginaOfAllWatersPower =>
             KleePck.Path("furina/powers/limelight.png"),
@@ -612,9 +590,6 @@ internal static class KleePowerIcons
         BoreasUnboundPower => KleePck.Path("varka/powers/boreas_unbound.png"),
         DawnWindsMarchPower => KleePck.Path("varka/powers/dawn_winds_march.png")
             ?? KleePck.Path("varka/powers/boreas_unbound.png"),
-        SwornBrotherhoodPower =>
-            KleePck.Path("varka/powers/knight_of_boreas.png")
-            ?? KleePck.Path("varka/powers/converging_winds.png"),
         SwornBrotherhoodCurrentPower =>
             KleePck.Path("varka/powers/knight_of_boreas.png")
             ?? KleePck.Path("varka/powers/converging_winds.png"),
