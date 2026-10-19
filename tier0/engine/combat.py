@@ -21,7 +21,7 @@ from tier0.engine import (companion_hexerei, effects,
                           potions, powers, reactions, refpowers, relics,
                           resources, varka_oath, yae_shrine)
 from tier0.engine.state import (Card, CombatState, Enemy, Player,
-                                remove_instance, sync_fanfare_cap_to_max_hp)
+                                remove_instance)
 
 # A pilot is a callable: (state) -> Card | None (None = end turn).
 Pilot = Callable[[CombatState], Card | None]
@@ -496,17 +496,8 @@ def _finish_play(state: CombatState, card: Card,
         # `tier0.engine.companion_hexerei`.
         companion_hexerei.note_card_played(state, card)
         klee_overhaul.note_card_played(state, card)
-    # THE AUTOMATIC POWER FLOOR GRANT USED TO LIVE HERE. Deleted by the
-    # Fanfare rework (2026-07-28, Track B, RULED): playing any Power silently
-    # raised floor, cap and current by 5 (rares 8), printed on no card and
-    # named in no tooltip. A mechanic worth ~4% of her power that the player
-    # could not read is a mechanic the player cannot play around.
-    #
-    # The value moves ONTO THE CARDS as printed keywords -- "Fanfare Cap +X"
-    # (raise_fanfare_cap) and "Fanfare +X" (gain_fanfare_floor, rare Powers
-    # only). There is deliberately NO card-type branch left in this function:
-    # a Power now grants exactly what it prints, the same as every other card
-    # type, and that uniformity is the point rather than a side effect.
+    # There is deliberately NO card-type branch in this function: a Power
+    # grants exactly what it prints, the same as every other card type.
     if card.kit_card:
         pass                                  # returns to the kit, no pile
     else:
@@ -585,10 +576,6 @@ _FREE_PLAY_CONTEXT = (
     # The Kokomi pool overhaul (2026-10-13): the card whose own hit is
     # resolving. A free play inside an outer card hands it back after.
     "kk_hit_card",
-    # (R213 B). The drain op's per-play total, saved for its
-    # neighbours' reason: a free play that drained inside an outer card would
-    # otherwise hand the outer card its number.
-    "fanfare_drained_this_card",
     # FURINA'S STAGE. The per-play spend total, saved for its neighbour's reason exactly: a free play that spent
     # inside an outer card would otherwise hand the outer card its number.
     "stage_spent_this_card",
@@ -727,12 +714,6 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # free, Objection! and Plot Twist lapse. After the sweep above, which
     # clears every `free_this_turn`.
     furina_stage.turn_start(state)
-    # Fanfare decay, HERE at the true top of the turn -- before the block
-    # clear, the draw, Salon upkeep and every other turn-start generator.
-    # Order is a design choice, not an accident: decay eats what was CARRIED
-    # OVER, and then this turn's activity builds on the remainder. Applying
-    # it after turn-start generation would tax income instead of inventory.
-    resources.decay_fanfare(state)
     # StS2 site A (BeforeSideTurnStart) -- BEFORE the block clear and BEFORE
     # the draw. Aggression pulls Attacks out of the discard pile here; running
     # it after the draw would over-fill the hand versus the real game.
@@ -921,16 +902,6 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
             # Blood Potion can cross Red Skull's HP threshold after its normal
             # turn-start evaluation and before the first card is chosen.
             relics.reevaluate_conditionals(state)
-
-    # Pass 4 Q1a: Fanfare trajectory snapshot, taken HERE -- after turn-start
-    # triggers, Salon upkeep, energy and draw, before the first card -- because
-    # that is the state the pilot actually decides in, and the state that
-    # determines whether this turn's generation overflows. Report-only (R14).
-    if p.fanfare_cap:
-        state.emit("fanfare_turn", total=p.fanfare, cap=p.fanfare_cap,
-                   floor=p.fanfare_floor,
-                   at_cap=p.fanfare >= p.fanfare_cap,
-                   at_floor=p.fanfare <= p.fanfare_floor)
 
     seen_states: set[tuple] = set()
     while not state.over:
@@ -1577,26 +1548,6 @@ def run_fight(player: Player, enemies: list[Enemy], pilot: Pilot,
                         # hand-full selector fallback must not advance the
                         # main combat stream and renumber existing seeds.
                         selector_rng=random.Random(seed + 4 * 10 ** 9))
-    # Per-combat resources.
-    player.fanfare = 0
-    # Fanfare floors and cap grants are per-COMBAT, like every other Furina
-    # resource: a card is replayed each fight and re-earns what it prints.
-    #
-    # RESTORE FROM A SNAPSHOT, not by subtracting the floor. The old rewind
-    # (`fanfare_cap -= fanfare_floor`) was exact only while gain_fanfare_floor
-    # was the sole writer of both fields and always moved them together. The
-    # Fanfare rework broke that on both sides: raise_fanfare_cap moves the cap
-    # alone, and the Hyperbeam's floor drop moves the floor alone and
-    # DOWNWARD -- which under the old line would have ADDED ceiling on the way
-    # out of every fight it was played in. See Player.fanfare_cap_base.
-    #
-    # EB-97: re-derive the base term from LIVE max HP first. tier05 rebuilds
-    # the Player from the sheet and only THEN assigns the run's real max HP
-    # (`tier05/model.py`), so without this the whole run would fight on the
-    # printed-HP ceiling -- the deviation from the Furina identity record the mod never had.
-    sync_fanfare_cap_to_max_hp(player)
-    player.fanfare_cap = player.fanfare_cap_base
-    player.fanfare_floor = 0
     # (C.COMPANION_OVERHAUL). Nicole's end-of-turn Block latch is
     # per-combat like everything else on this line: a fight opens with no
     # previous turn, so nobody has held the line yet.

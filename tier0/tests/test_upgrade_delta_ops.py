@@ -152,7 +152,7 @@ def test_external_numeric_and_selection_deltas_apply(monkeypatch):
 
 
 def _bar_card() -> Card:
-    """A threshold reader: draw 1, and 2 more at 6 Fanfare."""
+    """A threshold reader: draw 1, and 2 more with 6 cards Exhausted."""
     return Card(
         id="synthetic",
         name="Synthetic",
@@ -160,7 +160,7 @@ def _bar_card() -> Card:
         type="skill",
         effects=[
             {"op": "draw", "amount": 1},
-            {"op": "conditional", "if": "fanfare_at_least_6",
+            {"op": "conditional", "if": "exhaust_pile_at_least_6",
              "then": [{"op": "draw", "amount": 2}]},
         ],
     )
@@ -173,12 +173,12 @@ def test_a_condition_delta_naming_a_bar_moves_the_gate(monkeypatch):
     one comparison (`gen_klee_cards.moved_bar_predicate_cs`)."""
     monkeypatch.setattr(
         upgrades, "_upgrade_index",
-        lambda: {"synthetic": {"condition": "fanfare_at_least_3"}})
+        lambda: {"synthetic": {"condition": "exhaust_pile_at_least_3"}})
 
     upgraded = upgrades.apply_upgrade(_bar_card())
 
     assert [fx["op"] for fx in upgraded.effects] == ["draw", "conditional"]
-    assert upgraded.effects[1]["if"] == "fanfare_at_least_3"
+    assert upgraded.effects[1]["if"] == "exhaust_pile_at_least_3"
     assert upgraded.effects[1]["then"] == [{"op": "draw", "amount": 2}]
 
 
@@ -220,7 +220,7 @@ def test_a_moved_bar_with_no_gate_to_move_is_refused(monkeypatch):
     that found no matching effect raises rather than upgrading nothing."""
     monkeypatch.setattr(
         upgrades, "_upgrade_index",
-        lambda: {"synthetic": {"condition": "fanfare_at_least_3"}})
+        lambda: {"synthetic": {"condition": "exhaust_pile_at_least_3"}})
     card = Card(id="synthetic", name="Synthetic", cost=0, type="skill",
                 effects=[{"op": "draw", "amount": 1}])
 

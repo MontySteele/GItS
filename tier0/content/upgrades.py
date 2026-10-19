@@ -636,12 +636,11 @@ def _iter_effects(effects: list[dict]):
 
 
 #: A METER BAR, split into the meter and the number it asks for
-#: (`fanfare_at_least_6` -> `fanfare`, `6`). Only the `condition` delta reads
+#: (`exhaust_pile_at_least_6` -> `exhaust_pile`, `6`). Only the `condition` delta reads
 #: it, and only to check that an upgraded bar asks the SAME meter as the
 #: printed one -- the bar itself is authored on the row in both places, so no
-#: threshold is ever computed here. The codegen holds the same shape one
-#: predicate family at a time (`gen_klee_cards._FANFARE_BAR` and its
-#: neighbours); this is deliberately the family-blind form, because the rule
+#: threshold is ever computed here. This is deliberately the family-blind
+#: form, because the rule
 #: it enforces is about the two bars agreeing rather than about which meter
 #: they read.
 _SAME_METER_BAR = re.compile(r"^(.+)_at_least_(\d+)$")
@@ -1389,30 +1388,6 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             ok = _bump_first((fx for fx in top
                               if fx.get("op") == "discard_for_sparks"),
                              "sparks", val)
-        elif key == "fanfare_floor":
-            # The "Fanfare +X" keyword's upgrade. Once retired in favour of
-            # `fanfare_cap` and back again: the cap grammar died with F-A4/F-A5
-            # and the floor replaced it, and the Fanfare rework (Track B,
-            # 2026-07-28) brought the cap back as the OTHER keyword, so both
-            # keys are now live and they are NOT interchangeable -- one buys
-            # baseline, one buys headroom, and a card prints exactly one.
-            ok = _bump_first((fx for fx in top
-                              if fx.get("op") == "gain_fanfare_floor"),
-                             "amount", val)
-        elif key == "fanfare_cap":
-            # The "Fanfare Cap +X" keyword's upgrade (Track B, 2026-07-28).
-            ok = _bump_first((fx for fx in top
-                              if fx.get("op") == "raise_fanfare_cap"),
-                             "amount", val)
-        elif key == "floor_drop":
-            # The Hyperbeam's price (Track C.2, 2026-07-28). NEGATIVE deltas
-            # are the normal direction here -- the upgrade makes the hole
-            # SHALLOWER -- which is why it needs its own key rather than
-            # riding a generic amount bump whose sign convention says
-            # "bigger is better".
-            ok = _bump_first((fx for fx in top
-                              if fx.get("op") == "crash_fanfare"),
-                             "amount", val)
         elif key == "kokomi_amount":
             # THE KOKOMI EXPANSION: the row's `kokomi` op's printed number
             # (its C# DynamicVar `KkAmount`).

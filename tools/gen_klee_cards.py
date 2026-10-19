@@ -443,15 +443,15 @@ SHIPPED_BOMB_OPS = frozenset({"place_bomb", "detonate", "modify_bombs",
 
 MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   "spend_spark", "spend_charge", "burst_energy",
-                  "gain_encore", "spend_encore", "raise_fanfare_cap",
-                  "gain_fanfare_floor",
-                  # Fanfare rework (2026-07-28): the Hyperbeam settle
-                  # (Track C.2) and the on-demand bow probe (Track D).
-                  "crash_fanfare", "salon_bow",
+                  "gain_encore", "spend_encore",
+                  # Fanfare rework (2026-07-28): the on-demand bow probe
+                  # (Track D).
+                  "salon_bow",
                   # (`drain_fanfare`, the retired reframe's drain, left with
-                  # its C# half, `FurinaDrain`, under R276's hygiene: no row
-                  # printed it, and a row that tried now fails as an unknown
-                  # op rather than emitting a call to a deleted class.)
+                  # its C# half, `FurinaDrain`, under R276's hygiene, and the
+                  # shipped meter's `raise_fanfare_cap`, `gain_fanfare_floor`
+                  # and `crash_fanfare` followed on 2026-10-19: no row printed
+                  # them, and a row that tries now fails as an unknown op.)
                   # EB-118 §5.5 (staged): the queue verbs. Both are a
                   # single call into SalonMemberPower, the salon_bow
                   # shape, so they carry no locals and no new grammar.
@@ -1879,9 +1879,10 @@ PREDICATES_CS = {
     # MinionPower does), read before the hit. Sim twin: tier0's
     # `fatal_kills_this_card` / `Enemy.counts_for_fatal`.
     "killed_target_fatal": "fatalAtStart.Any(e => e.IsDead)",
-    # fanfare_at_least_N is PARAMETRIC (see predicate_cs / predicate_text):
-    # the bar is authored per card and moves at red-pen, so a literal map
-    # turned every new threshold into a codegen KeyError.
+    # The meter bars (charge_at_least_N and the rest) are PARAMETRIC (see
+    # predicate_cs / predicate_text): the bar is authored per card and moves
+    # at red-pen, so a literal map turned every new threshold into a codegen
+    # KeyError.
     "has_salon_members": "SalonMemberPower.Count(Owner.Creature) > 0",
     # (`furina_stage.FURINA_STAGE`, `EB-723`). Is anybody on
     # stage. A Spend mode's own gate is NOT this predicate: since R276 it asks
@@ -2087,15 +2088,14 @@ PREDICATE_TEXT = {
         "If this triggers [gold]Crystallize[/gold]",
 }
 
-_FANFARE_BAR = re.compile(r"^fanfare_at_least_(\d+)$")
-# Same parametric treatment, same reason (see predicate_cs): these bars are
-# balance numbers authored per card, so they must be a card edit and never a
-# codegen table edit. Kokomi's two banks are the exhaust pile (a count the
-# engine already keeps) and Charge.
+# Parametric (see predicate_cs): these bars are balance numbers authored per
+# card, so they must be a card edit and never a codegen table edit. Kokomi's
+# two banks are the exhaust pile (a count the engine already keeps) and
+# Charge.
 _CHARGE_BAR = re.compile(r"^charge_at_least_(\d+)$")
 _EXHAUST_PILE_BAR = re.compile(r"^exhaust_pile_at_least_(\d+)$")
 # Curtain Call: Encore is a HELD buffer, so a threshold on it is the same
-# shape as Fanfare's and gets the same parametric treatment for the same
+# shape as Charge's and gets the same parametric treatment for the same
 # reason -- moving the bar must be a card edit, never a codegen edit.
 _ENCORE_BAR = re.compile(r"^encore_at_least_(\d+)$")
 # EB-118 §5.5: WHO is next to perform. Parametric like the bars above, but on
@@ -2155,14 +2155,12 @@ def bonus_if_cs(eff: dict) -> str:
 def predicate_cs(name: str) -> str | None:
     """C# expression for a sheet predicate, or None if unsupported.
 
-    `fanfare_at_least_N` is generated rather than tabled: the bar is a
-    balance number authored per card and moved at red-pen, so tabling it
-    made every new threshold a codegen KeyError instead of a card edit.
+    A meter bar (`charge_at_least_N`) is generated rather than tabled: the
+    bar is a balance number authored per card and moved at red-pen, so
+    tabling it made every new threshold a codegen KeyError instead of a card
+    edit.
     """
     name = name or ""
-    hit = _FANFARE_BAR.match(name)
-    if hit:
-        return f"FurinaResources.ReadableFanfare(Owner.Creature) >= {hit.group(1)}"
     hit = _CHARGE_BAR.match(name)
     if hit:
         return f"KokomiResources.GetCharge(Owner.Creature) >= {hit.group(1)}"
@@ -2253,7 +2251,7 @@ def _bar_swap_text(printed: str | None, upgraded: str | None) -> str | None:
     """One if-clause printing both bars, or None if they differ by more than
     the threshold.
 
-    "If you have at least 6 [gold]Fanfare[/gold]" and its 3 twin come out of
+    "If you have at least 6 [gold]Charge[/gold]" and its 3 twin come out of
     the same `predicate_text` template, so the difference between them IS the
     number: the common head and tail are kept and `{IfUpgraded:show:up|base}`
     is spliced between them. Written as a diff rather than as a per-meter
@@ -2282,9 +2280,6 @@ def _bar_swap_text(printed: str | None, upgraded: str | None) -> str | None:
 def predicate_text(name: str) -> str | None:
     """The if-clause the predicate renders on the card face."""
     name = name or ""
-    hit = _FANFARE_BAR.match(name)
-    if hit:
-        return f"If you have at least {hit.group(1)} [gold]Fanfare[/gold]"
     hit = _CHARGE_BAR.match(name)
     if hit:
         return f"If you have at least {hit.group(1)} [gold]Charge[/gold]"
@@ -2294,7 +2289,7 @@ def predicate_text(name: str) -> str | None:
                 "[gold]Exhausted[/gold]")
     hit = _ENCORE_BAR.match(name)
     if hit:
-        # [gold] like its Fanfare/Charge siblings above -- swelling_overture
+        # [gold] like its Charge sibling above -- swelling_overture
         # shipped an un-golded resource keyword on a face (SYS-9).
         #
         # IT WAS NEVER THE ONLY ONE, and this comment used to say it was.
@@ -4628,13 +4623,6 @@ APPLY_POWERS = {
         "At the start of your turn, gain {X} [gold]Strength[/gold]. Your "
         "[gold]Bond of Life[/gold] eats the first 5 [gold]Block[/gold] you "
         "gain each turn."),
-    "fanfare_attack_per10": ("FanfareAttackPer10Power", None,
-        "Your Attacks deal {X} additional damage per 10 [gold]Fanfare[/gold]."),
-    # The reframe arm's copy of the row above, at the arm's granularity: a
-    # meter that ranges 0-15 reads the shipped 20-30 meter's clause with its
-    # THRESHOLD halved, so the payout stays 1 and the bar becomes 5.
-    "fanfare_attack_per5": ("FanfareAttackPer5Power", None,
-        "Your Attacks deal {X} additional damage per 5 [gold]Fanfare[/gold]."),
     # B5 (2026-07-28): the face NAMES the member and says nothing else. The
     # member's act, its bow, and the cap rules moved to hover tips
     # (SalonMemberTips) -- eight cards were reprinting one paragraph that
@@ -4721,13 +4709,6 @@ APPLY_POWERS = {
         "{X} card{XS}."),
     "first_attack_draw": ("FirstAttackDrawPower", None,
         "The first Attack you play each turn draws {X} card{XS}."),
-    # A7 (2026-07-29): the last sheet card to reach C#. The trigger lives in
-    # FurinaResources.NoteFanfareChanged rather than in the power, because the
-    # four Fanfare mutators are static methods, not broadcasts a PowerModel can
-    # subscribe to.
-    "fanfare_delta_block": ("FanfareDeltaBlockPower", None,
-        "Whenever your [gold]Fanfare[/gold] changes amount, gain {X} "
-        "[gold]Block[/gold]."),
 }
 
 # Powers applied to ENEMIES (native debuffs, plus the two quarantined
@@ -4937,7 +4918,7 @@ HAND_WRITTEN_ROSTER: set[str] = set()
 #                  of the conditional; C# reads (IsUpgraded || pred) at play
 #                  and swaps the text via {IfUpgraded:show:...|...} (the
 #                  runtime form BaseLib's SimpleLoc generates for upgrade
-#                  swaps). A METER BAR (`fanfare_at_least_3`): tier0 rewrites
+#                  swaps). A METER BAR (`charge_at_least_3`): tier0 rewrites
 #                  the top-level conditional's `if:` to that bar, and C# reads
 #                  `bank >= (IsUpgraded ? up : base)` -- the gate MOVES rather
 #                  than going away, so the upgraded card still asks the
@@ -4991,8 +4972,7 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark",
                        # and the gate, which both read `PrintedSparkPrice`.
                        "spark_price",
                        "encore",
-                       "encore_cost", "fanfare_cost", "fanfare_cap",
-                       "fanfare_floor", "heal",
+                       "encore_cost", "heal",
                        "bomb_damage", "burst_energy", "cost",
                        "discard", "sparks", "innate", "retain", "bonus", "chance",
                        "conditional_bonus", "condition", "bombs",
@@ -5050,10 +5030,6 @@ EXPRESSIBLE_DELTAS = ({"damage", "block", "draw", "spark",
                        # fixed Drain's price.
                        "furina_amount", "guest_upgraded", "stage_drain",
                        "bonus_per_detonation", "bonus_slope",
-                       # Fanfare rework Track C.2 (2026-07-28): the
-                       # Hyperbeam's upgrade cuts its PRICE (the floor it
-                       # digs), so the delta is normally negative.
-                       "floor_drop",
                        # `EB-679` (Read the Field). How many cards the look
                        # shows, rendered off the "Scry" DynamicVar the op
                        # emits -- the Sparks idiom, one more time.
@@ -5308,7 +5284,7 @@ def wide_only_target(card: dict) -> dict | None:
 
 # A card-level field can alter playability or lifecycle without appearing in
 # effects. Treating unknown fields as harmless metadata is therefore unsafe:
-# that is how an Encore/Fanfare cost could otherwise disappear while the body
+# that is how an Encore cost could otherwise disappear while the body
 # still compiles. Descriptive/draft metadata is allowlisted beside every
 # currently implemented lifecycle field.
 CARD_FIELDS = {
@@ -5379,9 +5355,8 @@ CARD_FIELDS = {
     # shipped card (Prune's coven Personal supersedes `prune_witch_hunt` under
     # the companion arm) points at the existing portrait this way.
     "art_of",
-    # Furina resource gates. BaseLib provides affordability and post-effect
-    # Fanfare spend; FurinaResourceHooks moves Encore spend pre-effect.
-    "encore_cost", "fanfare_cost",
+    # Furina's Encore gate. FurinaResourceHooks moves Encore spend pre-effect.
+    "encore_cost",
     # Curtain Call (R85): the register a card's NAME speaks in. Purely
     # descriptive naming metadata (salon | archon | private on Furina's
     # sheet) -- nothing mechanical to emit, so it is whitelisted as inert
@@ -5942,7 +5917,7 @@ def blocked_reason(
         # (it merely fails to show on the face, which is what the Legibility
         # sprint converted). Every OTHER op had no such path -- the formula
         # was read by nothing, so the card silently shipped its bare base.
-        # Thunderous Ovation lost `1_per_2_fanfare` that way for two
+        # Thunderous Ovation lost its Block rider that way for two
         # playtests. Blocking is the honest failure: an UNAPPLIABLE card is
         # visible in the manifest, a quietly-wrong one is not.
         if op != "damage" and eff.get("bonus_formula") is not None \
@@ -5974,10 +5949,9 @@ def blocked_reason(
             if bf is not None and not (
                     bf.endswith("_per_detonation_this_combat")
                     and bf.partition("_per_")[0].isdigit()) and not re.fullmatch(
-                        r"\d+_per_\d+_fanfare", bf) and not re.fullmatch(
-                        # Kokomi's Charge reader. Same CalculatedDamageVar path
-                        # as Fanfare's -- see charge_calc_rider for why an
-                        # honest printed number matters more here than there.
+                        # Kokomi's Charge reader, on the CalculatedDamageVar
+                        # path -- see charge_calc_rider for why an honest
+                        # printed number matters here.
                         r"\d+_per_\d+_charge", bf) and not re.fullmatch(
                         # Curtain Call: Body Slam's grammar -- an attack priced
                         # off the held Encore buffer. READ only, never spent.
@@ -6574,8 +6548,7 @@ def blocked_reason(
             unknown = set(eff) - {"op", "amount"}
             if unknown:
                 return f"{op} field(s) {sorted(unknown)} not understood"
-        elif op in {"gain_encore", "spend_encore", "raise_fanfare_cap",
-                    "gain_fanfare_floor", "crash_fanfare", "salon_bow",
+        elif op in {"gain_encore", "spend_encore", "salon_bow",
                     # A Spark price the generator cannot read as a
                     # literal is a price the IsPlayable gate cannot show.
                     "spend_spark",
@@ -7046,36 +7019,11 @@ def bomb_var(card: dict) -> str:
     return "BombDamage"
 
 
-def fanfare_calc_rider(card: dict, eff: dict) -> tuple[int, int, int] | None:
-    """Furina Legibility sprint (2026-07-24): a plain Fanfare damage rider
-    (`N_per_M_fanfare`) rendered through the base game's CalculatedDamageVar so
-    the card face / hover preview and the resolved hit share ONE value path --
-    base + N*(Fanfare/M) -- instead of the display showing only the static base
-    while PrintedDamage silently adds the rider at resolution (the playtest bug).
-
-    Returns (base, per_n, fanfare_div) or None. Scope guards, both card-level so
-    build_vars and build_body agree and no deferred modifier is dropped:
-      * a non-self damage effect carrying an N_per_M_fanfare formula;
-      * NOT a salon-deploy card -- the salon x3 replacement multiplier is the
-        deferred entangled modifier, so those stay on the PrintedDamage path.
-    The Spotlight PrintedDamage wrap this bypasses is identity for Furina's own
-    cards (Center Stage does not scale her own numbers), so no resolved number
-    changes."""
-    if eff.get("op") != "damage" or eff.get("target") == "self":
-        return None
-    m = re.fullmatch(r"(\d+)_per_(\d+)_fanfare", eff.get("bonus_formula", ""))
-    if not m:
-        return None
-    if salon_deploy_card(card):
-        return None
-    return int(eff["amount"]), int(m.group(1)), int(m.group(2))
-
-
 def exhaust_pile_calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     """`amount_formula: {base, per, count: exhaust_pile}` -- her finishers that
     read everything she has rotated off the line so far.
 
-    Same CalculatedDamageVar path as the Charge and Fanfare riders, for the
+    Same CalculatedDamageVar path as the Charge rider, for the
     same reason: the pile grows all combat, so a face printing only `base`
     would understate the card by more than it states by the time anyone casts
     it. Only the exhaust_pile count is expressible; any other count token
@@ -8390,9 +8338,9 @@ def block_calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
 
     THE DEFECT THIS CLOSES. Every rider predicate in this file gated on
     `op != "damage"`, because until Curtain Call C every rider in the pool
-    was a damage rider. Thunderous Ovation hung `1_per_2_fanfare` on a
-    *block* op and the generator dropped it without a word: the sheet said
-    "6, +1 per 2 Fanfare", the card gave a flat 6, and the playtest reported
+    was a damage rider. Thunderous Ovation hung a meter rider on a *block*
+    op and the generator dropped it without a word: the sheet said "6, +1
+    per 2" of the meter, the card gave a flat 6, and the playtest reported
     exactly that ("just gave 6 block"). The sim had implemented the rider all
     along, so this was a pure C#-side silent drop.
 
@@ -8407,7 +8355,6 @@ def block_calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     if eff.get("op") != "block":
         return None
     formula = eff.get("bonus_formula", "")
-    m = re.fullmatch(r"(\d+)_per_(\d+)_fanfare", formula)
     # A13 (2026-07-28): the per-member slope rides the same rail on a block op
     # -- Dinner Service is its first card, and the whole point of the rework is
     # that the face shows the stage paying.
@@ -8431,7 +8378,7 @@ def block_calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     # inherit every guard below: one CalculationBase per card is the
     # invariant this function exists to keep.
     staged = stage_count_block_rider(card, eff)
-    if (not m and not members and not companions and not charge
+    if (not members and not companions and not charge
             and staged is None):
         return None
     if salon_deploy_card(card):
@@ -8454,14 +8401,10 @@ def block_calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     if companions:
         return int(eff["amount"]), int(companions.group(1)), (
             f"static (card, _) => {COMPANION_PLAYS_THIS_TURN_CS}")
-    if charge:
-        return int(eff["amount"]), int(charge.group(1)), (
-            "static (card, _) => "
-            f"KokomiResources.GetCharge(card.Owner.Creature) "
-            f"/ {int(charge.group(2))}")
-    return int(eff["amount"]), int(m.group(1)), (
+    return int(eff["amount"]), int(charge.group(1)), (
         "static (card, _) => "
-        f"FurinaResources.ReadableFanfare(card.Owner.Creature) / {int(m.group(2))}")
+        f"KokomiResources.GetCharge(card.Owner.Creature) "
+        f"/ {int(charge.group(2))}")
 
 
 def debuff_calc_rider(card: dict, eff: dict) -> tuple[int, int] | None:
@@ -8505,12 +8448,6 @@ def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
     off this one predicate so they cannot disagree about which shape a card is.
     The multiplier func must be static (CalculatedVar rejects instance targets).
     """
-    fanfare = fanfare_calc_rider(card, eff)
-    if fanfare is not None:
-        base, per_n, div = fanfare
-        return base, per_n, (
-            "static (card, _) => "
-            f"FurinaResources.ReadableFanfare(card.Owner.Creature) / {div}")
     pile = exhaust_pile_calc_rider(card, eff)
     if pile is not None:
         return pile
@@ -9002,8 +8939,7 @@ def build_vars(card: dict) -> list[str]:
             out.append(f'new EnergyVar({int(eff["amount"])})')
         elif op == "lose_strength" and eff is next(
                 f for f in card["effects"] if f.get("op") == "lose_strength"):
-            # Defence in the status pile. Always a var (raise_fanfare_cap's
-            # rule): the face prints it and its one carrier upgrades it. The
+            # Defence in the status pile. Always a var: the face prints it and its one carrier upgrades it. The
             # first op owns it (Musou no Hitotachi's second, on you, reads
             # the same `StrengthLoss`).
             out.append(
@@ -9034,9 +8970,6 @@ def build_vars(card: dict) -> list[str]:
         elif op == "burst_energy" and burst_upgrade(card):
             # Same rule as Sparks: a var only when the upgrade must render.
             out.append(f'new DynamicVar("BurstEnergy", {int(eff["amount"])}m)')
-        elif op == "raise_fanfare_cap":
-            out.append(
-                f'new DynamicVar("FanfareCap", {int(eff["amount"])}m)')
         elif op == "kokomi" and "amount" in eff:
             # THE KOKOMI EXPANSION: the kind's printed number, read back by
             # `KokomiCards` off the card.
@@ -9096,17 +9029,6 @@ def build_vars(card: dict) -> list[str]:
                 token, source = VARKA_FOLLOW_UP_KINDS[eff["kind"]]
                 out.append('new VarkaFollowUpDamageVar('
                            f'"{token}", "{source}")')
-        elif op == "crash_fanfare":
-            # Always a var: the Hyperbeam's upgrade IS this number (the
-            # floor_drop delta), so the upgraded face has to render it.
-            out.append(
-                f'new DynamicVar("FloorDrop", {int(eff["amount"])}m)')
-        elif op == "gain_fanfare_floor":
-            # Always a var, never a literal: BOTH sheet cards carrying this op
-            # have a fanfare_floor upgrade delta, so the new value must render
-            # on the upgraded card. (G-A2.)
-            out.append(
-                f'new DynamicVar("FanfareFloor", {int(eff["amount"])}m)')
         elif op == "heal":
             out.append(f'new DynamicVar("Heal", {int(eff["amount"])}m)')
         elif op in POWER_UPGRADE_OPS and eff is power_upgrade_effect(card):
@@ -9509,9 +9431,6 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         # bonus_slope: the same rewrite under the name new rows use. See
         # upgrades.py, where one branch serves both keys.
         "bonus_slope": any("bonus_formula" in e for e in effects),
-        # floor_drop: tier0 bumps the crash_fanfare amount, and the value
-        # renders off the FloorDrop var the op already emits.
-        "floor_drop": any(e["op"] == "crash_fanfare" for e in effects),
         # cards: tier0 bumps the add_card amount.
         "cards": any(e["op"] == "add_card" for e in effects),
         # remove: value-checked in the loop below, which owns the whole key
@@ -9533,15 +9452,6 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
         "strength_loss": any(e["op"] == "lose_strength" for e in effects),
         "encore": any(e["op"] == "gain_encore" for e in everywhere),
         "encore_cost": int(card.get("encore_cost", 0)) > 0,
-        "fanfare_cost": int(card.get("fanfare_cost", 0)) > 0,
-        "fanfare_cap": any(e["op"] == "raise_fanfare_cap" for e in effects),
-        # G-A2. upgrades.py binds this delta to the first TOP-LEVEL
-        # gain_fanfare_floor, so `effects` (not `everywhere`) is the right
-        # scope -- a floor grant nested inside a conditional would not be the
-        # one the sim bumps, and pretending otherwise would silently upgrade
-        # the wrong branch.
-        "fanfare_floor": any(
-            e["op"] == "gain_fanfare_floor" for e in effects),
         "heal": any(e["op"] == "heal" for e in effects),
         "bomb_damage": any(e["op"] == "place_bomb" for e in effects),
         # EB-283. Each binds to the op that PRINTS the number, so a delta on a
@@ -12709,11 +12619,9 @@ def build_body(
                         f" + {per} * "
                         "BombPower.DetonationsThisCombat(CombatState!, Owner)")
                 else:
-                    n, _, rest = formula.partition("_per_")
-                    per_fanfare = rest.partition("_")[0]
-                    amount_expr += (
-                        f" + {n} * "
-                        f"(FurinaResources.ReadableFanfare(Owner.Creature) / {per_fanfare})")
+                    raise ValueError(
+                        f"{card['id']}: bonus_formula {formula!r} reached the "
+                        "plain damage path")
             if salon_deployed:
                 amount_expr = (
                     f"({amount_expr}) * "
@@ -12806,26 +12714,6 @@ def build_body(
             lines.append(
                 "await FurinaResources.SpendEncoreOrHp("
                 f"choiceContext, Owner.Creature, {int(eff['amount'])}, this);")
-
-        elif op == "raise_fanfare_cap":
-            lines.append(
-                "FurinaResources.RaiseFanfareCap("
-                "Owner.Creature, DynamicVars[\"FanfareCap\"].IntValue);")
-
-        elif op == "gain_fanfare_floor":
-            lines.append(
-                "FurinaResources.GainFanfareFloor("
-                "Owner.Creature, DynamicVars[\"FanfareFloor\"].IntValue);")
-
-        elif op == "crash_fanfare":
-            # The Hyperbeam settle (Track C.2, 2026-07-28), mirroring
-            # resources.drop_fanfare_to_floor: Fanfare falls to its floor and
-            # the floor falls by the printed amount. The floor MAY GO
-            # NEGATIVE, which is ruled; FurinaResources.DropFanfareToFloor
-            # owns the clamp so the two engines cannot disagree about it.
-            lines.append(
-                "FurinaResources.DropFanfareToFloor("
-                "Owner.Creature, DynamicVars[\"FloorDrop\"].IntValue);")
 
         elif op == "salon_bow":
             # The on-demand bow (Track D, 2026-07-28). The LEFTMOST member --
@@ -15052,8 +14940,7 @@ def meter_price_clauses(card: dict, deltas: dict) -> list[str]:
     over-large delta is a sheet defect, not a refund.
     """
     out: list[str] = []
-    for field, label in (("encore_cost", "Encore"),
-                         ("fanfare_cost", "Fanfare")):
+    for field, label in (("encore_cost", "Encore"),):
         base_cost = int(card.get(field, 0))
         if not base_cost:
             continue
@@ -15671,53 +15558,6 @@ def build_description(card: dict, *,
             # below it (the IsPlayable gate), so this describes a gate and
             # never a partial spend.
             parts.append(f"Spend {int(eff['amount'])} [gold]Charge[/gold].")
-
-        # THE TWO FANFARE KEYWORDS (rework Track B, 2026-07-28, RULED). These
-        # replaced sentences with a printed keyword each, because the value
-        # they carry used to arrive invisibly -- every Power granted 5 floor
-        # (rares 8) and no card said so.
-        elif op == "raise_fanfare_cap":
-            # "Fanfare Cap", never bare "Cap": the Salon's member cap is also
-            # a per-player stat since A12, and one word cannot mean both.
-            parts.append("[gold]Fanfare Cap[/gold] +{FanfareCap:diff()}.")
-
-        elif op == "gain_fanfare_floor":
-            # "Fanfare +X" for the FULL grant -- current, baseline and cap
-            # together. The convention is only unambiguous because no card
-            # grants transient Fanfare directly (all four generation sources
-            # are indirect); register lint L12 is the blocker that keeps it
-            # that way, on the sheet AND on effects.OPS.
-            #
-            # `EB-568`: AND THE SECOND CLAUSE, which is the half that lasts.
-            # "+8" is the grant and it is gone the moment the meter moves; the
-            # BASELINE is the thing the card actually bought, and nothing on
-            # the face said so. The Furina r14 lane-2 seat watched Fanfare sit
-            # at 8 for three fights, met two meters it could not explain
-            # ("Fanfare Floor / Cap Bonus 8"), and called the card "much
-            # better than printed" -- a card under-reporting itself by its own
-            # durable effect. THE OP MOVES ALL THREE NUMBERS
-            # (`resources.gain_fanfare_floor`), so the sentence is two clauses
-            # because the effect is two facts, and both are true on every
-            # build; the arm is only where the second one is load-bearing,
-            # because there Fanfare is minted by performance alone and the
-            # floor is most of what a deck ever holds.
-            #
-            # `EB-507` MUST SKIP A ROW CARRYING THIS SENTENCE. That row blanks
-            # a Fanfare rider whose face promises Fanfare from something other
-            # than a performance; the floor clause promises no such thing --
-            # it states a bound the arm's own meter is read against -- and
-            # blanking it would delete the one true sentence this card had
-            # been missing.
-            parts.append("[gold]Fanfare[/gold] +{FanfareFloor:diff()}, and "
-                         "cannot fall below {FanfareFloor:diff()}.")
-
-        elif op == "crash_fanfare":
-            # Two sentences because it is two things happening, and the
-            # SECOND one is the cost -- burying it in a subclause is how a
-            # card that digs a hole reads as a card that just resets.
-            parts.append(
-                "Your [gold]Fanfare[/gold] falls to its baseline, and that "
-                "baseline falls by {FloorDrop:diff()}.")
 
         elif op == "salon_bow":
             n = int(eff.get("amount", 1))
@@ -16996,16 +16836,6 @@ def build_upgrade(card: dict) -> list[str]:
                 "declared slope var to land on -- the card would ship an "
                 "empty OnUpgrade")
         lines.append(f"{slope_var}.UpgradeValueBy({int(deltas[bkey])}m);")
-    if "floor_drop" in deltas:
-        # Track C.2 (upgrades.py floor_drop): NEGATIVE deltas are the normal
-        # direction -- the crash gets SHALLOWER. The op always declares the
-        # FloorDrop var (build_vars), so the bump re-prints itself. (SYS-1:
-        # the_final_verdict shipped an empty OnUpgrade for want of this
-        # branch.)
-        done.add("floor_drop")
-        lines.append(
-            'DynamicVars["FloorDrop"].UpgradeValueBy('
-            f'{int(deltas["floor_drop"])}m);')
     if "encore" in deltas:
         done.add("encore")
         salon_encore = next(
@@ -17023,16 +16853,6 @@ def build_upgrade(card: dict) -> list[str]:
             lines.append(
                 "// encore: every gain_encore site reads IsUpgraded at play "
                 "time (branches included).")
-    if "fanfare_cap" in deltas:
-        done.add("fanfare_cap")
-        lines.append(
-            'DynamicVars["FanfareCap"].UpgradeValueBy('
-            f'{int(deltas["fanfare_cap"])}m);')
-    if "fanfare_floor" in deltas:
-        done.add("fanfare_floor")
-        lines.append(
-            'DynamicVars["FanfareFloor"].UpgradeValueBy('
-            f'{int(deltas["fanfare_floor"])}m);')
     if "cards" in deltas:
         done.add("cards")
         lines.append(f'DynamicVars["Stash"].UpgradeValueBy({int(deltas["cards"])}m);')
@@ -17096,11 +16916,6 @@ def build_upgrade(card: dict) -> list[str]:
         lines.append(
             "CustomResources<EncoreResource>.Cost(this)!.UpgradeCostBy("
             f'{int(deltas["encore_cost"])});')
-    if "fanfare_cost" in deltas:
-        done.add("fanfare_cost")
-        lines.append(
-            "CustomResources<FanfareResource>.Cost(this)!.UpgradeCostBy("
-            f'{int(deltas["fanfare_cost"])});')
     if "cost" in deltas:
         done.add("cost")
         lines.append(f'EnergyCost.UpgradeBy({int(deltas["cost"])});')
@@ -19637,10 +19452,6 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         resource_cost_setup.append(
             "CustomResources<EncoreResource>.SetCanonicalCost("
             f"this, {int(card['encore_cost'])});")
-    if int(card.get("fanfare_cost", 0)) > 0:
-        resource_cost_setup.append(
-            "CustomResources<FanfareResource>.SetCanonicalCost("
-            f"this, {int(card['fanfare_cost'])});")
     resource_cost_cs = (
         "        " + "\n        ".join(resource_cost_setup) + "\n"
         if resource_cost_setup else "")

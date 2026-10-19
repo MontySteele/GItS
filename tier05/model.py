@@ -37,7 +37,7 @@ from tier0.engine.state import Card, Enemy
 from tier0.harness import metrics as t0_metrics
 from tier0.pilot.policy import make_pilot
 from tier05 import (acts, aura_telemetry, conditional_telemetry,
-                    draft, events, fanfare_telemetry, overlap_telemetry,
+                    draft, events, overlap_telemetry,
                     maps, potions as potion_pool, rewards, route, shop)
 from tier05 import relics as relic_pool
 
@@ -227,14 +227,6 @@ class RunResult:
     #                    index -- act boundaries sit at multiples of
     #                    C.MAP_FLOORS.
     acts_completed: int = 0             # §10.1: boss wins (final boss included)
-    fanfare_traces: list = field(default_factory=list)   # pass 4 Q1a:
-    #                    (act_index, FanfareTrace) per fight, in order.
-    #                    Empty traces (turns == 0) for non-Fanfare rosters.
-    #                    Under RUNTEMPLATE 6 the count of traces is no longer
-    #                    fixed: a route decides how many fights a run takes, so
-    #                    a per-COMBAT rate derived from these must be rescaled
-    #                    by the observed fight count, never by a template
-    #                    constant (see fanfare_telemetry.per_run).
     relics_by_act: list = field(default_factory=list)    # C2 (addendum): how
     #                    many GRANTED relics were held as each act's boss
     #                    resolved, in act order. `relics` above is overwritten
@@ -693,8 +685,6 @@ class _RunCtx:
         rosters the mechanism does not exist on, so it costs them nothing."""
         act_i = self.act_i
         log = state.log
-        self.res.fanfare_traces.append(                # pass 4 Q1a
-            (act_i, fanfare_telemetry.trace(log)))
         self.res.overlap_traces.append(                # C4 (Neap Tide addendum)
             (act_i, overlap_telemetry.trace(log)))
         self.res.aura_traces.append(                   # Curtain Call R85 Track D

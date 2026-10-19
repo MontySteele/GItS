@@ -31,8 +31,8 @@ Usage:
 
     from tier05 import sweeps
 
-    for value, result in sweeps.sweep("FANFARE_CAP_FRACTION",
-                                      (0.25, 0.5, 0.75), run_cell):
+    for value, result in sweeps.sweep("MELT_MULT",
+                                      (1.5, 2.0, 2.5), run_cell):
         print(value, result["winrate"])
 
 `run_cell` is called once per value and receives that value. Anything it

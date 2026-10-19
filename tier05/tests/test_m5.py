@@ -287,17 +287,16 @@ def test_skip_is_a_real_pick():
     # cardboard. Under v13 it scores 1.33 and is CORRECTLY taken, so keeping
     # it here would have pinned the defect instead of the claim. The claim --
     # an off-plan screen below the bar is skipped, skip is not dead code -- is
-    # unchanged, and now rides on Casting Call, whose whole printed text is
-    # `raise_fanfare_cap`: priced at a MEASURED zero (read-at-cap under 1%
-    # under every pilot), which is a different thing from an unpriced one.
-    #
-    # Casting Call left with the shipped sheets (legacy cleanup stage 6); a
-    # synthetic row printing the same `raise_fanfare_cap` text stands in.
+    # unchanged, and rides on a synthetic row whose whole printed text is
+    # `draw`: priced at a MEASURED zero (STATIC_DRAW_VALUE, the v3 sweep),
+    # which is a different thing from an unpriced one. (Casting Call's
+    # `raise_fanfare_cap` carried it until the shipped Fanfare meter left,
+    # 2026-10-19.)
     from tier0.engine.state import Card
     starter = _cards(*loader.starting_deck("klee"))
-    offers = [Card(id="casting_call_like", name="x", cost=1, type="skill",
+    offers = [Card(id="draw_only", name="x", cost=1, type="skill",
                    rarity="common",
-                   effects=[{"op": "raise_fanfare_cap", "amount": 5}])]
+                   effects=[{"op": "draw", "amount": 1}])]
     pick = draft.assigned_policy(random.Random(0), starter, offers,
                                  "demolition")
     assert pick is None

@@ -19,33 +19,10 @@ of the convention (does this name read in this voice?) is [USER]'s eyes-on
 name audit, by house law, and no tool pretends to cover it.
 
   R1  every Furina card carries register: salon | archon | private.
-  R2  any card that READS Fanfare (a bonus_formula reading fanfare, a
-      fanfare_at_least_* gate, or the gain_fanfare_floor "Fanfare +X" grant)
-      is register: archon. Fanfare IS the mask/audience stat; a stagehand
-      name on a Fanfare read is the register scramble this sweep exists to
-      remove.
-      raise_fanfare_cap RELEASED FROM THIS RULE by the compensation pass
-      (Track 1, RULED 2026-07-28). It joined R2 one day earlier, at the
-      rework, and there it did real work: the cap keyword went on a SHORT
-      LIST, and R2 was the selector that produced the list. The ruling
-      reversed the list -- every Power printed "Fanfare Cap +X" -- and a
-      requirement every Power must satisfy carries no register information
-      at all. Left in R2 it would have forced every salon and private Power
-      to rename itself into the archon voice to satisfy a lint that had
-      stopped selecting anything.
-      THE RELEASE STANDS, on new ground. EB-118 sec.5.2 (2026-08-24) removed
-      the rider from the sixteen cards that carried it incidentally and
-      retired R7 with them, so the cap verb is once again a chosen line
-      rather than a universal one. It is NOT put back into R2, because
-      whether a dedicated headroom card speaks in the archon voice is a
-      naming call and THERE IS NO SUCH CARD TO JUDGE. The last carrier,
-      `lasting_impression`, lost the line on 2026-08-24 when [USER] ruled the
-      replacement upgrade delta (`{encore: +2}`) that had been pinning it, so
-      the sheet now prints the cap verb NOWHERE. That card became a pure
-      Encore body in the same edit and R4 moved it archon -> private, which
-      is the mechanical half; whether the NAME reads in the offstage voice is
-      the eyes-on audit this docstring reserves.
-      The full grant stays in R2 because it stayed rare and chosen.
+  R2  RETIRED 2026-10-19 with the shipped Fanfare meter it read. It said a
+      card that READS Fanfare (a `N_per_M_fanfare` rider, a
+      `fanfare_at_least_*` gate or the `gain_fanfare_floor` grant) is
+      register: archon; none of those spellings exists in the engine now.
   R3  any card that APPLIES salon_member (deploys a cast member) is
       register: salon. Reads (has_salon_members and count scalers) are not
       deploys and carry no constraint -- Dinner Service feeding the
@@ -57,31 +34,10 @@ name audit, by house law, and no tool pretends to cover it.
   R5  the Focalors cap: EXACTLY two cards carry the focalors tag, and both
       are rare (ruling 2026-07-27: the_sea_is_my_stage + reginas_mercy; no
       third Focalors reference anywhere in the pool).
-  L12 NO DIRECT TRANSIENT FANFARE GRANT, on the sheet or in the engine.
-      Required by the Fanfare rework brief (Track B, 2026-07-28) and the
-      reason it is a BLOCKER rather than a warning: the "Fanfare +X" keyword
-      can only mean the permanent grant while every generation source is
-      INDIRECT (hp_lost, encore_spent, encore_absorbed, center_stage --
-      things the player DOES, which then pay). The first card that hands out
-      transient Fanfare outright makes the keyword mean two things, on faces
-      already printed, forever. Checked on BOTH surfaces: a banned op on a
-      sheet row, and a banned op existing in effects.OPS at all -- because a
-      sheet lint alone would pass right up until someone wrote the card.
-  R6  the "Fanfare +X" keyword (gain_fanfare_floor) is a RARE POWER payoff.
-      The cheap half of the pair ("Fanfare Cap +X") is what commons,
-      uncommons and Exhaust skills may print. Ruled with the rework; before
-      it, every Power got a floor grant by rarity and no card said so.
-  R7  RETIRED 2026-08-24 (EB-118 sec.5.2). It read: every Power prints
-      exactly one Fanfare keyword. The rule was sound as a way of making a
-      Power's grant visible, and it is retired for the opposite reason to
-      the one it was written against -- not because a Power might grant
-      nothing invisibly, but because "Fanfare Cap +X" on all sixteen
-      non-payoff Powers had stopped being information. The cap has not been
-      a binding number since F-A5, so a line that printed everywhere and
-      changed almost nothing taught the reader to skip printed riders. The
-      verb survives for a card whose JOB is headroom; the universal rider
-      does not. R6 is untouched: the full grant is still a rare-POWER
-      payoff, still exactly three cards, and it is still enforced below.
+  R6, R7 and L12 RETIRED: R7 on 2026-08-24 (EB-118 sec.5.2), R6 (the
+      "Fanfare +X" grant is a rare Power) and L12 (no direct transient
+      Fanfare grant) on 2026-10-19, with the shipped meter they guarded.
+      The Stage's own `furina` kind `gain_fanfare` is a different Fanfare.
 
 Third-instance rule stands: if a second character adopts registers, this
 generalizes into a shared lint with a per-character vocabulary table.
@@ -106,35 +62,6 @@ from tools.effect_walk import iter_effects as _leaf_ops  # noqa: E402
 SHEET = REPO / "docs" / "prototype-surface.yaml"
 OWN_PREFIX = "proto_fs_"
 REGISTERS = ("salon", "archon", "private")
-
-
-# Only the FULL GRANT is Fanfare-touching for R2 -- see the R2 note. The
-# other printed keyword (`raise_fanfare_cap`) had its own rule, R7, and that
-# rule is retired; nothing here selects on it any more.
-R2_OPS = ("gain_fanfare_floor",)
-
-# L12. Ops that would hand the player TRANSIENT Fanfare directly. None of
-# these exists today and none may be added; the names are the plausible
-# spellings someone would reach for, so the lint fires on the attempt rather
-# than on the consequence three passes later.
-BANNED_TRANSIENT_OPS = ("gain_fanfare", "add_fanfare", "grant_fanfare",
-                        "fanfare", "give_fanfare")
-
-
-def _touches_fanfare(card: dict) -> bool:
-    for fx in _leaf_ops(card.get("effects")):
-        if fx.get("op") in R2_OPS:
-            return True
-        if "fanfare" in str(fx.get("bonus_formula", "")):
-            return True
-        if str(fx.get("if", "")).startswith("fanfare_at_least_"):
-            return True
-    return False
-
-
-def _grants_fanfare_floor(card: dict) -> bool:
-    return any(fx.get("op") == "gain_fanfare_floor"
-               for fx in _leaf_ops(card.get("effects")))
 
 
 def _applies_member(card: dict) -> bool:
@@ -163,56 +90,13 @@ def main() -> int:
             errors.append(f"R1 {cid}: register {reg!r} not in {REGISTERS}")
             continue
         census[reg] += 1
-        if _touches_fanfare(c) and reg != "archon":
-            errors.append(f"R2 {cid}: touches Fanfare but register={reg}")
-        elif _applies_member(c) and reg != "salon":
+        if _applies_member(c) and reg != "salon":
             errors.append(f"R3 {cid}: deploys salon_member but register={reg}")
         if (_pure_encore(c) and reg != "private"
                 and "focalors" not in (c.get("tags") or ())):
             errors.append(f"R4 {cid}: pure-Encore card but register={reg}")
         if "focalors" in (c.get("tags") or ()):
             focalors.append(c)
-        for fx in _leaf_ops(c.get("effects")):
-            if fx.get("op") in BANNED_TRANSIENT_OPS:
-                errors.append(
-                    f"L12 {cid}: op {fx['op']!r} would grant TRANSIENT "
-                    "Fanfare directly. Every generation source must stay "
-                    "indirect or the printed 'Fanfare +X' keyword becomes "
-                    "ambiguous on faces already shipped")
-        if _grants_fanfare_floor(c) and not (
-                c.get("type") == "power" and c.get("rarity") == "rare"):
-            errors.append(
-                f"R6 {cid}: prints 'Fanfare +X' (gain_fanfare_floor) but is "
-                f"a {c.get('rarity')} {c.get('type')}. The full grant is a "
-                "RARE POWER payoff; commons, uncommons and Exhaust skills "
-                "print 'Fanfare Cap +X' instead")
-
-    # L12, the ENGINE half. The sheet half above can only catch a card that
-    # was written; this catches the op being made available at all, which is
-    # the step that actually opens the door.
-    #
-    # THE REPO ROOT IS PUSHED ONTO sys.path EXPLICITLY. This was first written
-    # as a bare try/except ImportError with a `pass` fallback, "so the lint
-    # keeps working as a standalone yaml checker" -- and the mutation test
-    # caught what that actually did: run as `python tools/lint_...py`, sys.path
-    # starts at tools/, `tier0` is not importable, and the except branch
-    # silently switched off half the gate in the exact way the lint is
-    # normally invoked. A planted `gain_fanfare` op passed clean.
-    #
-    # So: fix the path, and let an ImportError RAISE. A lint that cannot see
-    # the thing it lints must fail loudly, not report zero violations. This is
-    # the same class of defect the L12 rule itself exists to prevent -- a gap
-    # that is invisible precisely because nothing complains.
-    if str(REPO) not in sys.path:
-        sys.path.insert(0, str(REPO))
-    from tier0.engine import effects
-
-    for op in BANNED_TRANSIENT_OPS:
-        if op in effects.OPS:
-            errors.append(
-                f"L12 engine: effects.OPS exposes {op!r}. No op may hand "
-                "out transient Fanfare directly -- generation stays "
-                "indirect so 'Fanfare +X' keeps one meaning")
 
     # R5 was "exactly 2" on the shipped sheet, whose two Focalors rares were
     # ruled; the Stage's rows tag none yet (legacy cleanup stage 6), so the

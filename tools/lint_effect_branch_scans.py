@@ -124,9 +124,6 @@ RULES_BEARING_OPS: dict[str, str] = {
     "swirl": "element keyword + reaction preview",
     # lint_generated_structure MECHANICS rows (now branch-aware; listed so a
     # branch-nested one is still announced rather than merely tolerated).
-    "raise_fanfare_cap": "Fanfare keyword marker",
-    "gain_fanfare_floor": "Fanfare keyword marker",
-    "crash_fanfare": "Fanfare price marker",
     # Every power tooltip is keyed off the applied power's name.
     "apply_power": "power tooltip",
 }

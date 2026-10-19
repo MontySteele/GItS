@@ -14,8 +14,7 @@ import contextlib
 from typing import Optional
 
 from tier0 import constants as C
-from tier0.engine import (effects, furina_stage, klee_overhaul, powers,
-                          resources)
+from tier0.engine import effects, furina_stage, klee_overhaul, powers
 from tier0.engine.combat import (card_cost, card_playable, spark_cost,
                                  spark_price, spark_threshold)
 from tier0.engine.state import Card, CombatState
@@ -157,8 +156,7 @@ def _est(state: CombatState, val, default: int = 0) -> float:
 
 # Names the pilot delegates VERBATIM to `effects._predicate`: pure reads of
 # current state, with no snapshot field and no telemetry side effect, so one
-# rule asked from both sides beats a second copy (the Track C.2 lesson that
-# the fanfare clamp below records the other half of).
+# rule asked from both sides beats a second copy (the Track C.2 lesson).
 _ENGINE_LIVE_PREDICATES = frozenset({
     "enemy_intends_attack",
     # The Inazuma pool rework (2026-10-18): Meow-teor Kick's "If you have
@@ -266,7 +264,6 @@ SCORABLE_PREDICATES = frozenset({
 SCORABLE_PREDICATE_PREFIXES = (
     "target_has_power_",
     "exhaust_pile_at_least_",
-    "fanfare_at_least_",
 ) + _ENGINE_LIVE_PREFIXES
 
 BLIND_PREDICATES = frozenset({
@@ -478,12 +475,6 @@ def _active_effects(state: CombatState, effect_list: list[dict],
                 ready = state.hp_lost_this_turn > 0
             elif name == "hp_lost_since_last_turn":
                 ready = state.hp_lost_since_last_turn > 0
-            elif name.startswith("fanfare_at_least_"):
-                # Same clamp the engine's own predicate uses, so the pilot's
-                # forecast of which branch fires cannot disagree with the
-                # branch that actually fires (Track C.2 negative floor).
-                ready = (resources.readable(state.player)
-                         >= int(name.rsplit("_", 1)[1]))
             elif name == "reaction_triggered_this_turn":
                 # EB-24p: turn-level counter, known exactly at score time
                 # (unlike reaction_triggered_by_this, which is mid-resolution
@@ -506,10 +497,7 @@ def _active_effects(state: CombatState, effect_list: list[dict],
                 # EB-144. Pure current-state reads with no snapshot field and
                 # no telemetry side effect, so the pilot ASKS THE ENGINE
                 # rather than keeping a second copy of the rule -- the same
-                # round trip `choose_one` below makes, and the half of the
-                # Track C.2 lesson the fanfare clamp above cannot take (that
-                # one goes through `resources.readable` precisely BECAUSE the
-                # engine's predicate files a census row on the way past).
+                # round trip `choose_one` below makes (the Track C.2 lesson).
                 ready = effects._predicate(state, name)
             else:
                 continue
@@ -518,8 +506,7 @@ def _active_effects(state: CombatState, effect_list: list[dict],
         elif fx["op"] == "choose_one":
             # EB-118: the pilot forecasts the mode it will actually take by
             # asking the ENGINE's chooser rather than keeping a second copy
-            # of the rule -- the Track C.2 lesson the fanfare clamp above
-            # records. With the switch off that chooser is the staged fixed
+            # of the rule -- the Track C.2 lesson. With the switch off that chooser is the staged fixed
             # index; with it on it is `choose_mode` below, and the round trip
             # (pilot -> engine seam -> pilot) is deliberate: one rule, asked
             # the same way from both sides. `None` for the card is why
@@ -541,17 +528,12 @@ def _expected_damage(state: CombatState, card: Card) -> float:
     # arithmetic it scored through before (`_formula_amount`'s first branch).
     selection: dict = {}
     # v0.4 W1 (priest-pilot audit): the flat per-attack bonus the engine folds
-    # in at resolution — Bennett's next_attack_up, celestial_gift, the Fanfare
-    # term, and Kokomi's Ceremonial Garment Charge read. The pilot used to see
+    # in at resolution — Bennett's next_attack_up and the kit riders. The
+    # pilot used to see
     # NONE of it, so it priced every attack at its printed number and played
     # straight through its own buff windows. Same helper the engine calls, so
     # the estimate cannot drift from what resolves; it is a pure read.
-    #
-    # `valuation=True` (EB-253): the Fanfare term inside that helper files a
-    # `fanfare_read`, and scoring a hand is not playing it. Same declaration
-    # the `bonus_formula` call below already carries for EB-242's instrument.
-    flat = effects.flat_attack_bonus(state, card, card_cost(state, card),
-                                     valuation=True)
+    flat = effects.flat_attack_bonus(state, card, card_cost(state, card))
     for fx in _active_effects(state, card.effects, card):
         if fx["op"] == "damage":
             if fx.get("target") == "self":
@@ -575,12 +557,10 @@ def _expected_damage(state: CombatState, card: Card) -> float:
             if rider and target:
                 per_hit += (rider["per"]
                             * target.powers.get(rider["power"], 0))
-            if "bonus_formula" in fx:       # detonation / fanfare formulas
+            if "bonus_formula" in fx:       # detonation formulas
                 try:
-                    # valuation=True (EB-242): an estimate, not a play, so it
-                    # ticks no reads-per-turn instrument.
                     per_hit += effects._bonus_formula(
-                        state, fx["bonus_formula"], valuation=True)
+                        state, fx["bonus_formula"])
                 except ValueError:
                     pass
             # The flat bonus rides on top of the printed number, per hit, which
@@ -808,15 +788,11 @@ def _raw_block(state: CombatState, card: Card) -> float:
         amount = (_formula_amount(state, fx, card, selection)
                   if "amount_formula" in fx else fx["amount"])
         # F-B1: Block carries the same scaling rider damage does, so the
-        # pilot has to read it or it prices a Fanfare-scaled blocker at its
-        # printed number and blocks with the wrong card. Same helper the
-        # engine calls, so the estimate cannot drift from what resolves.
+        # pilot has to read it or it prices a scaled blocker at its printed
+        # number and blocks with the wrong card. Same helper the engine
+        # calls, so the estimate cannot drift from what resolves.
         if "bonus_formula" in fx:
-            # valuation=True (EB-242): the same helper the engine calls, so
-            # the estimate cannot drift -- and the same reason it must not
-            # tally, because pricing a blocker is not blocking with it.
-            amount += effects._bonus_formula(state, fx["bonus_formula"],
-                                             valuation=True)
+            amount += effects._bonus_formula(state, fx["bonus_formula"])
         times = fx.get("times", 1)
         if times == "exhausted_this_card":
             times = _estimated_exhausts(state, card)

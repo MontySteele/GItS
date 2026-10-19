@@ -493,15 +493,6 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # --- Furina ---
     "gain_encore": [_hook("private", "encore", "write")],
     "spend_encore": [_hook("private", "encore", "use")],
-    "gain_fanfare_floor": [_hook("private", "fanfare", "write")],
-    "raise_fanfare_cap": [_hook("private", "fanfare", "write")],
-    "crash_fanfare": [_hook("private", "fanfare", "use")],
-    # (R213 B, the Furina reframe's drain slice). The same
-    # competing USE `crash_fanfare` above makes, and for the same
-    # reason: the meter is spent, so a second drain in one turn finds
-    # nothing. What follows it on the card reads the amount taken,
-    # which is a per-play number and not a state in this vocabulary.
-    "drain_fanfare": [_hook("private", "fanfare", "use")],
     # FURINA'S STAGE (`tier0.engine.furina_stage`, the Salon's Tab rules,
     # 2026-10-05). ONE PRIVATE STATE, `stage`, and it is a new one rather than
     # `salon` reused: the shipped Salon is a different board, and a row
@@ -834,15 +825,7 @@ POWER_HOOKS: dict[str, list[tuple[str, str, str]]] = {
                                _hook("private", "encore", "write")],
     "ovation_spend_boost": [_hook("private", "encore", "read"),
                             _hook("private", "spotlight", "write")],
-    # Furina — Fanfare and the universal-verb riders
-    "fanfare_delta_block": [_hook("private", "fanfare", "read"),
-                            _hook("shared", "block_held", "write")],
-    "fanfare_attack_per10": [_hook("private", "fanfare", "read"),
-                             _hook("shared", "card_identity", "write")],
-    # The reframe arm's copy of the same rider: the threshold halves for a
-    # meter half the size, so the hooks are the per-10 row's, unchanged.
-    "fanfare_attack_per5": [_hook("private", "fanfare", "read"),
-                            _hook("shared", "card_identity", "write")],
+    # Furina — the universal-verb riders
     "first_attack_draw": [_hook("shared", "plays_this_turn", "read"),
                           _hook("shared", "draw_pile", "use"),
                           _hook("shared", "universal_verb_power", "write")],
@@ -1039,9 +1022,6 @@ UNIVERSAL_VERB_POWERS = tuple(
 
 # Named formula spellings. Unknown spelling -> UNCLASSIFIED.
 FORMULA_HOOKS: dict[str, list[tuple[str, str, str]]] = {
-    "1_per_1_fanfare": [_hook("private", "fanfare", "read")],
-    "1_per_2_fanfare": [_hook("private", "fanfare", "read")],
-    "1_per_4_fanfare": [_hook("private", "fanfare", "read")],
     "1_per_3_encore": [_hook("private", "encore", "read")],
     "1_per_2_charge": [_hook("private", "charge", "read")],
     "2_per_salon_member": [_hook("private", "salon", "read")],
@@ -1182,7 +1162,6 @@ PREDICATE_HOOKS: dict[str, list[tuple[str, str, str]]] = {
 }
 PREDICATE_PREFIXES: dict[str, list[tuple[str, str, str]]] = {
     "encore_at_least_": [_hook("private", "encore", "read")],
-    "fanfare_at_least_": [_hook("private", "fanfare", "read")],
     "charge_at_least_": [_hook("private", "charge", "read")],
     "exhaust_pile_at_least_": [_hook("shared", "exhaust_pile", "read")],
     # EB-118 6.3. The integer forms; the closed-vocabulary and yes/no forms
@@ -1199,7 +1178,7 @@ PREDICATE_PREFIXES: dict[str, list[tuple[str, str, str]]] = {
 
 # Prefixes whose argument is a NAME, not an integer. Kept separate from
 # PREDICATE_PREFIXES above because that table's match requires a digit
-# argument -- deliberately, so a typo'd `fanfare_at_least_ten` reports
+# argument -- deliberately, so a typo'd `charge_at_least_ten` reports
 # UNCLASSIFIED here rather than being waved through. These get the same
 # strictness from a closed argument list instead: the engine validates the
 # same vocabularies at load (`C.SALON_MEMBERS`, `effects.CARD_TYPES`), so a
