@@ -230,7 +230,7 @@ reason to be here, unlike Alice: she came to collect her late Grand Master.
 **The Long Way Home's reunion replies** become one per knight (today all
 three share "Ha, good to have you here!"). Eula, "You still owe me a rematch":
 "Tomorrow. After I've slept. I won't go easy." Noelle, "let me take the front
-line": "It's yours. I'll be right behind you." Diluc, "your usual table":
+line": "It's yours. I'll be right behind you." Diluc, "a bottle at Angel's Share":
 "Tell them to bring up the good bottle. The one you hide."
 
 **The Long Way Home** keeps its options. Opening line by Rearguard choice:
@@ -243,7 +243,7 @@ line": "It's yours. I'll be right behind you." Diluc, "your usual table":
 | Option | Effect | Result |
 |---|---|---|
 | Hum along. | Heal 12 HP. | He gets the second verse wrong. He always does. |
-| Toast absent friends. | Gain a random potion. | He pours out a little of the good wine for Valentine. |
+| Toast absent friends. | Gain a random potion. | He raises a cup of the good wine to Valentine. |
 | Remember Valentine's advice. | Upgrade a card. | "Find a reason of your own." He did, eventually. It was home. |
 
 **The First Exam** (act 2, a price with free ways out). Like Starsnatch, it
@@ -336,3 +336,21 @@ placeholder like "heal 10 or gain 50 gold"".
   event or the placeholder. Both clients route every copy from shared state
   (the seed, the act, each player's run history), so they agree. Unseen in
   game.
+
+## Lore check (2026-10-19)
+
+A canon check of Varka's chain (sources: Baidu Baike, Hoyodex and summaries of
+the Fandom profile; the in-game text was not read verbatim) found three lines
+wrong and fixed them in `Story/VarkaStory.cs`:
+- **The Wolf of the North:** Boreas is Andrius, not a second wolf carrying his
+  spirit. The scene is now Andrius.
+- **"Five years"** stays: [USER], 2026-10-19: "the 'five years' is canonically how long
+  the expedition lasted".
+- **Diluc:** canon has him disapprove of Varka's methods, so the warm "your
+  usual table" welcome is now drier.
+- **Valentine:** a libation implies he died, which no source says, so it is
+  now a toast.
+
+The First Exam and A Song on the Wind fit his timeline as written: both come
+before he was a knight. The BACKLOG fallback ("move both to his Knight of
+Boreas years") is dropped.
