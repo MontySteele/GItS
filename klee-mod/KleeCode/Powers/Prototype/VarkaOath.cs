@@ -1633,15 +1633,45 @@ public static partial class VarkaCards
     /// Oath." No Block of its own; one Hydro hit, so it reacts with an aura
     /// already there and credits the Hydro Oath like any Hydro hit. The Block
     /// and the Oath are read before the hit (its own credit comes after).
-    /// Sim twin: <c>varka_oath</c>'s <c>tidal_bulwark</c> kind.</summary>
+    /// Sim twin: <c>varka_oath</c>'s <c>tidal_bulwark</c> kind.
+    ///
+    /// AT 0 IT STILL SWINGS (in-game check 2026-10-16,
+    /// <c>varka/02-attack-hydro-*</c>: at 0 Block and no Hydro Oath the card
+    /// played no motion at all). <see cref="ElementHit"/> skips a hit of 0,
+    /// as the sim's <c>_card_hit</c> does, so no attack command ran and
+    /// nothing lunged. The rule stays (no hit, no Hydro, no credit); only the
+    /// swing is played, through the same trigger and delay an attack command
+    /// uses (<see cref="SwingsWithoutAHit"/>).</summary>
     public static Task TidalBulwark(
         PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
     {
         var owner = card.Owner?.Creature;
+        var damage = TidalBulwarkDamage(owner == null ? 0 : (int)owner.Block,
+            Var(card, "VkPer"), VarkaOath.Count(owner, Element.Hydro));
+        if (SwingsWithoutAHit(damage, cardPlay.Target?.IsAlive == true))
+        {
+            return SwingOnly(card);
+        }
         return ElementHit(choiceContext, card, cardPlay, cardPlay.Target,
-                   TidalBulwarkDamage(owner == null ? 0 : (int)owner.Block,
-                       Var(card, "VkPer"), VarkaOath.Count(owner, Element.Hydro)),
-                   Element.Hydro);
+                   damage, Element.Hydro);
+    }
+
+    /// <summary>An Attack whose one hit is 0 still plays its swing when it
+    /// was aimed at a living enemy. PURE.</summary>
+    public static bool SwingsWithoutAHit(decimal damage, bool targetAlive) =>
+        damage <= 0 && targetAlive;
+
+    /// <summary>The attack command's own lunge, with no hit after it: the
+    /// "Attack" trigger at the character's AttackAnimDelay.</summary>
+    private static Task SwingOnly(CardModel card)
+    {
+        var owner = card.Owner;
+        if (owner?.Creature is not { IsDead: false } creature)
+        {
+            return Task.CompletedTask;
+        }
+        return CreatureCmd.TriggerAnim(creature, "Attack",
+            owner.Character.AttackAnimDelay);
     }
 
     /// <summary>Glacial Edict's stacks: 1, plus 1 for every

@@ -158,6 +158,23 @@ public class VarkaRebalanceTests : IDisposable
         Assert.Equal(0, VarkaCards.TidalBulwarkDamage(0, 3m, 0));
     }
 
+    [Fact]
+    public void Tidal_bulwark_at_0_still_swings_but_does_not_hit()
+    {
+        // In-game check 2026-10-16 (varka/02-attack-hydro-*): at 0 Block it
+        // played no motion. The swing plays; the 0 hit is still skipped, as
+        // the sim's _card_hit skips it.
+        Assert.True(VarkaCards.SwingsWithoutAHit(0m, targetAlive: true));
+        Assert.False(VarkaCards.SwingsWithoutAHit(0m, targetAlive: false));
+        Assert.False(VarkaCards.SwingsWithoutAHit(4m, targetAlive: true));
+        var body = Calls("VarkaCards", "TidalBulwark");
+        Assert.Contains("VarkaCards.SwingsWithoutAHit", body);
+        Assert.Contains("VarkaCards.SwingOnly", body);
+        var swing = Calls("VarkaCards", "SwingOnly");
+        Assert.Contains("CreatureCmd.TriggerAnim", swing);
+        Assert.DoesNotContain("DamageCmd.Attack", swing);
+    }
+
     // ---- sec.4: payoffs that borrow -----------------------------------------
 
     [Fact]
