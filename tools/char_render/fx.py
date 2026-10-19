@@ -486,11 +486,18 @@ def spend_burst(ppu: float = REF_PPU, fps: int = STAGE_FPS):
     return frames, origin, None
 
 
-def _stream(ppu, fps, length, reverse, glow_end):
+#: px at REF_PPU of canvas behind her chest (left of it): Drain's drops need
+#: 100; Repay's heal bloom and ring reach about 170 out from her chest, glow
+#: included, so at 100 its frames 12 to 17 were cut flat at the canvas edge
+#: and the game drew a pale box round the glow (border alpha up to 55)
+STREAM_BACK = {"drain": 100, "repay": 200}
+
+
+def _stream(ppu, fps, length, reverse, glow_end, back=100):
     s = float(ppu) / REF_PPU
     k = SUPER * s
-    W, H = int(round((STAGE_DX + 200) * s)), int(round(300 * s))
-    origin = (100 * s, 200 * s)                   # her chest
+    W, H = int(round((STAGE_DX + 100 + back) * s)), int(round(300 * s))
+    origin = (back * s, 200 * s)                  # her chest
     to = (origin[0] + STAGE_DX * s, origin[1])    # the first guest seat
     rng = np.random.default_rng(STAGE_SEED + (1 if reverse else 0))
     drops = [(rng.uniform(0.0, 0.45), rng.uniform(-50, 50), rng.uniform(0.32, 0.45), rng.uniform(10, 16),
@@ -533,13 +540,13 @@ def _stream(ppu, fps, length, reverse, glow_end):
 def drain_stream(ppu: float = REF_PPU, fps: int = STAGE_FPS):
     """Drain: Hydro droplets drawn out of Furina and pulled along a shallow
     arc to the stage (the first guest seat), speeding as they go. 0.9 s."""
-    return _stream(ppu, fps, 0.9, reverse=False, glow_end=False)
+    return _stream(ppu, fps, 0.9, reverse=False, glow_end=False, back=STREAM_BACK["drain"])
 
 
 def repay_return(ppu: float = REF_PPU, fps: int = STAGE_FPS):
     """Repay: the droplets come back from the stage and slow into her, then a
     soft heal glow blooms on her. 1.0 s."""
-    return _stream(ppu, fps, 1.0, reverse=True, glow_end=True)
+    return _stream(ppu, fps, 1.0, reverse=True, glow_end=True, back=STREAM_BACK["repay"])
 
 
 STAGE_EFFECTS = {"spend": spend_burst, "drain": drain_stream, "repay": repay_return}
