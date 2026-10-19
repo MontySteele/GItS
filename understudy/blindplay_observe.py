@@ -14,6 +14,7 @@ from understudy import qa_packet
 from understudy.blindplay_coop import (WAIT_COMMAND, ally_forms, coop_block,
                                       is_coop)
 from understudy.blindplay_board import (_bundle_cards, _combat, deck_titles,
+                                        discard_attack_notes,
                                         OUTSIDE_FIGHT_EVENTS, page_events,
                                         _event_option, _event_options,
                                         _map_ahead, _map_boss, _map_paths,
@@ -416,6 +417,9 @@ def observation(state: dict[str, Any]) -> dict[str, Any]:
             obs["offers"] = [obs["offers"][i] for i in chooser_order(
                 state, _screen_cards(state))]
         mark_edit_replaces(obs["prompt"], obs["offers"])
+        # Seat page backlog wave 2 (2026-10-19): a card that plays Attacks
+        # from the Discard Pile, offered while the pile holds none.
+        discard_attack_notes(state, obs["offers"])
         # Yae round 10 (2026-10-17, lane 4): A HAND PICK LEAVES THE LIST. The
         # game moves a picked hand card out of the hand into the selected row
         # (`NPlayerHand.SelectCardInSimpleMode`), so the list no longer shows

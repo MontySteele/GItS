@@ -1529,7 +1529,7 @@ _FIGHT_MEMORY: dict[str, Any] = {"roster": {}, "ordinals": {},
                                  "round": None, "hp": {}, "reborn": {},
                                  "replaced": {}, "kills": {}, "shown": {},
                                  "revived": {}, "briefed": set(),
-                                 "hand": {}}
+                                 "hand": {}, "aims": {}}
 #: Whether this process has read the lane's store yet. The load is lazy and
 #: happens once: a fresh `observe` pays one file read, and a long-lived
 #: `Session` pays it on its first fight and never again.
@@ -1563,7 +1563,7 @@ def _load_fight() -> None:
     # from a store written before that row -- absent being the same answer an
     # unread body gives, so an older store simply mints no replacement.
     for key in ("ordinals", "names", "handles", "hp", "reborn", "replaced",
-                "kills", "shown", "revived", "hand"):
+                "kills", "shown", "revived", "hand", "aims"):
         value = held.get(key)
         if isinstance(value, dict):
             _FIGHT_MEMORY[key] = dict(value)
@@ -1594,6 +1594,7 @@ def _save_fight() -> None:
            "kills": dict(_FIGHT_MEMORY["kills"]),
            "shown": dict(_FIGHT_MEMORY["shown"]),
            "hand": dict(_FIGHT_MEMORY["hand"]),
+           "aims": dict(_FIGHT_MEMORY.get("aims") or {}),
            "numbered": sorted(_FIGHT_MEMORY["numbered"]),
            "elements": sorted(_FIGHT_MEMORY["elements"]),
            "briefed": sorted(_FIGHT_MEMORY["briefed"]),
@@ -1618,8 +1619,48 @@ def forget_fight() -> None:
     _FIGHT_MEMORY["shown"] = {}
     _FIGHT_MEMORY["briefed"] = set()
     _FIGHT_MEMORY["hand"] = {}
+    _FIGHT_MEMORY["aims"] = {}
     _FIGHT_LOADED[0] = True
     _drop_store("fight", _FIGHT_STORE_DIR)
+
+
+# CO-OP (Furina co-op check, 2026-10-16; seat page backlog wave 2). A PLAY
+# AIMED AT A BODY THAT DIED BEFORE IT LANDED. The partner kills the target
+# between the seat's send and the game's resolve, the game plays the card at
+# another body, and the page printed the hit with nothing saying the aim had
+# moved. So a sent play's aim is remembered for the turn -- the card, the
+# body's combat id and printed name, and how many ledger rows stood before it
+# -- and the board marks the row that resolved it (`blindplay_board.
+# mark_retargets`).
+
+
+def _aim_turn(state: dict[str, Any]) -> str:
+    floor, round_ = _hand_turn(state)
+    return f"{floor}|{round_}"
+
+
+def remember_aim(state: dict[str, Any], card: str, combat_id: str,
+                 name: str, rows_before: int) -> None:
+    """File one sent play's aim for this turn."""
+    _load_fight()
+    turn = _aim_turn(state)
+    mem = _FIGHT_MEMORY.get("aims") or {}
+    if mem.get("turn") != turn:
+        mem = {"turn": turn, "list": []}
+    mem["list"] = list(mem.get("list") or []) + [
+        {"card": card, "combat_id": combat_id, "name": name,
+         "rows_before": rows_before}]
+    _FIGHT_MEMORY["aims"] = mem
+    _save_fight()
+
+
+def remembered_aims(state: dict[str, Any]) -> list[dict[str, Any]]:
+    """This turn's remembered aims, oldest first."""
+    _load_fight()
+    mem = _FIGHT_MEMORY.get("aims") or {}
+    if mem.get("turn") != _aim_turn(state):
+        return []
+    return [a for a in (mem.get("list") or []) if isinstance(a, dict)]
 
 
 def briefed_this_fight() -> set[str]:
@@ -1727,6 +1768,20 @@ def _label_hand(state: dict[str, Any], hand: list[dict[str, Any]]
     bases = [_hand_base(t) for t in titles]
     faces = [_hand_face(e) for e in hand]
     nums: list[int | None] = [None] * len(hand)
+    # Seat page backlog wave 2 (2026-10-19): a bridge that sends each hand
+    # card's own handle (`gits/GitsCardHandle.cs`) names the card outright,
+    # so a number follows its card by handle and nothing is aligned.
+    handles = [e.get("handle") for e in hand]
+    by_handle = all(isinstance(h, int) and not isinstance(h, bool)
+                    for h in handles)
+    if by_handle:
+        held_by = {r.get("h"): r for r in rows if isinstance(r.get("h"), int)}
+        for j, h in enumerate(handles):
+            row = held_by.get(h)
+            if (row and row.get("k") == keys[j]
+                    and isinstance(row.get("n"), int)):
+                nums[j] = row["n"]
+        old, back = [], []
     for i, j in _align(old, bases, faces):
         if old[i].get("k") == keys[j] and isinstance(old[i].get("n"), int):
             nums[j] = old[i]["n"]
@@ -1754,8 +1809,10 @@ def _label_hand(state: dict[str, Any], hand: list[dict[str, Any]]
             nums[j] = nxt[k]
     labels = [t if not n else f"{t} ({n})" for t, n in zip(titles, nums)]
     held = {"floor": floor, "round": round_, "next": nxt,
-            "cards": [{"b": b, "k": k, "f": f, "n": n}
-                      for b, k, f, n in zip(bases, keys, faces, nums)]}
+            "cards": [dict({"b": b, "k": k, "f": f, "n": n},
+                           **({"h": h} if by_handle else {}))
+                      for b, k, f, n, h in zip(bases, keys, faces, nums,
+                                               handles)]}
     return labels, held
 
 

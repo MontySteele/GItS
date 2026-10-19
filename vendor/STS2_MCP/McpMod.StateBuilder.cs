@@ -1654,6 +1654,10 @@ public static partial class McpMod
         GitsRefreshHandPreview(card);
         var state = BuildCardInfo(card);
         state["index"] = index;
+        // GItS LOCAL EDIT (seat page backlog wave 2, 2026-10-19). The card
+        // object's own handle, so the blind page keeps a copy's number for
+        // the whole turn (gits/GitsCardHandle.cs).
+        state[GitsCardHandle.Key] = GitsCardHandle.Of(card);
         state["description"] = SafeGetCardDescription(card); // hand cards use default pile
         state["target_type"] = card.TargetType.ToString();
         // GItS LOCAL EDIT (`EB-216`, the Kokomi draft-6 half). A CUSTOM target

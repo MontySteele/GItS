@@ -235,15 +235,20 @@ public class ResolutionLedgerTests
     }
 
     /// <summary>An enemy dying on its own turn, or to a bomb on nobody's
-    /// turn, is not a card killing it: `NoteHit`'s rule, one hook over.
+    /// turn, is not a card killing it: no card row gets the kill. Since the
+    /// seat page backlog wave 2 (2026-10-19) it is a page event between
+    /// plays instead (`ResolutionLedger.DiedOutsidePlay`).
     /// </summary>
     [Fact]
-    public void A_death_outside_a_play_is_filed_nowhere()
+    public void A_death_outside_a_play_is_filed_on_no_card()
     {
         Fresh();
         ResolutionLedger.NoteKill("Toadpole", "2");
 
-        Assert.Empty(ResolutionLedger.Snapshot());
+        var rows = ResolutionLedger.Snapshot();
+        Assert.Single(rows);
+        Assert.Equal(true, rows[0]["between"]);
+        Assert.Empty((List<Dictionary<string, object?>>)rows[0]["hits"]!);
     }
 
     // --------------------------------------------------------- the window ---

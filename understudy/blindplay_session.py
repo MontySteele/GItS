@@ -19,10 +19,13 @@ from understudy import authorship, bridge, offer_log, qa_packet, seat
 from understudy.blindplay_coop import (WAIT_POLL_S, blocked_on_partner,
                                        is_coop, not_waiting_line,
                                        wait_for_partner, wait_line)
-from understudy.blindplay_faces import hand_card_left, hand_card_picked
-from understudy.blindplay_grammar import act
+from understudy.blindplay_board import resolutions
+from understudy.blindplay_faces import (_enemy_names, hand_card_left,
+                                        hand_card_picked, remember_aim)
+from understudy.blindplay_grammar import _fight_round, act
 from understudy.blindplay_observe import observation
-from understudy.blindplay_read import _int, settle, settle_board, _text
+from understudy.blindplay_read import (_enemies, _int, settle, settle_board,
+                                       _text)
 from understudy.blindplay_render import (assert_one_page, render,
                                          sha256, still_in_fight)
 from understudy.blindplay_shape import (BlindPlayError, _is_rate_limited,
@@ -948,9 +951,34 @@ def card_played(state: dict[str, Any], action: str, post: dict[str, Any],
     if refused(result) or not isinstance(post.get("card_index"), int):
         return
     if action == "play_card":
+        _remember_aim(state, post)
         hand_card_left(state, post["card_index"])
     elif action == "combat_select_card":
         hand_card_picked(state, post["card_index"])
+
+
+def _remember_aim(state: dict[str, Any], post: dict[str, Any]) -> None:
+    """Co-op (seat page backlog wave 2): a play sent at an enemy files its
+    aim, so the page can say when that body died before the play landed
+    (`blindplay_board.mark_retargets`)."""
+    target = _text(post.get("target"))
+    if not target or not isinstance(state, dict):
+        return
+    player = state.get("player") if isinstance(state.get("player"),
+                                                dict) else {}
+    hand = [c for c in (player.get("hand") or []) if isinstance(c, dict)]
+    index = post["card_index"]
+    if not 0 <= index < len(hand):
+        return
+    enemies = _enemies(state)
+    names = _enemy_names(enemies, _fight_round(state))
+    for enemy, name in zip(enemies, names):
+        if (_text(enemy.get("entity_id")) == target
+                and enemy.get("combat_id") is not None):
+            remember_aim(state, _text(hand[index].get("name")),
+                         _text(enemy.get("combat_id")), name,
+                         len(resolutions(player) or []))
+            return
 
 
 def answer_lines(res: dict[str, Any], state: dict[str, Any] | None,
@@ -967,7 +995,21 @@ def answer_lines(res: dict[str, Any], state: dict[str, Any] | None,
             and is_coop(state)
             and NO_PROCEED in _text((result or {}).get("error"))):
         lines.append(COOP_PROCEED_WAITS)
+    # Co-op (seat page backlog wave 2): the aimed enemy died between the
+    # page's check and the game's (the partner killed it), so nothing played.
+    if (refused(result)
+            and TARGET_GONE in _text((result or {}).get("error"))):
+        lines.append(TARGET_DIED_FIRST)
     return lines
+
+
+#: The bridge's refusal for an aimed enemy no longer alive
+#: (`McpMod.Actions.cs`, `ExecutePlayCard`).
+TARGET_GONE = "not found among alive enemies"
+#: What a seat is told instead (Furina co-op check, 2026-10-16).
+TARGET_DIED_FIRST = ("The enemy you aimed at died before this play reached "
+                     "the game (in co-op, the other player may have killed "
+                     "it). Nothing was played and no Energy was spent.")
 
 
 #: Co-op: what a refused `proceed` adds (seat page backlog, 2026-10-18).
