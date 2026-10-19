@@ -1256,9 +1256,12 @@ public class TeyvatFrameTests : IDisposable
             .GetType("KleeMod.LocManager_Initialize_Patch", throwOnError: true)!;
         var postfix = StaticMethod(patch, "Postfix");
 
-        var inPostfix = Il.Calls(postfix);
-        Assert.Contains("TeyvatLoc.Inject", inPostfix);
-        Assert.Contains("KleeMod.InjectLocStrings", inPostfix);
+        // Localization route b (2026-10-19): the postfix runs one pass over
+        // the English tables, and the pass is where the merges are listed.
+        Assert.Contains("EnglishLoc.ApplyToCurrent", Il.Calls(postfix));
+        var inPass = Il.Calls(StaticMethod(typeof(EnglishLoc), nameof(EnglishLoc.RunInjectors)));
+        Assert.Contains("TeyvatLoc.Inject", inPass);
+        Assert.Contains("KleeMod.InjectLocStrings", inPass);
 
         var initialize = StaticMethod(typeof(KleeMod), nameof(KleeMod.Initialize));
         Assert.DoesNotContain("TeyvatLoc.Inject", Il.Calls(initialize));

@@ -5607,6 +5607,21 @@ def cs_escape(text: str) -> str:
             .replace("\n", "\\n"))
 
 
+#: `EB-733`. The openings that put one aimed Set off ahead of the card's own
+#: hit: "Set off the enemy.", the bare "Set off." and Pocket Match's "Set off
+#: only your largest Bomb". An ALL-enemies Set off is not one of them.
+SETS_OFF_FIRST_OPENINGS = (
+    "[gold]Set off[/gold] the enemy.",
+    "[gold]Set off[/gold].",
+    "[gold]Set off[/gold] only your largest ",
+)
+
+
+def sets_off_first(face: str) -> bool:
+    """True for a face that opens with an aimed Set off (`ISetsOffFirstCard`)."""
+    return face.startswith(SETS_OFF_FIRST_OPENINGS)
+
+
 _sheet_cards_cache: dict[Path, list] = {}
 
 
@@ -18021,6 +18036,11 @@ def emit(
     if any(fx.get("op") == "set_off"
            for fx in iter_effects(card.get("effects") or [])):
         interfaces += ", ISetOffCard"
+    # `EB-733`. A face that opens with an aimed Set off says so on the class,
+    # so `KleeCardTooltips.SetsOffFirst` reads a flag instead of the English
+    # row (localization route b, 2026-10-19).
+    if sets_off_first(desc):
+        interfaces += ", ISetsOffFirstCard"
     # YAE MIKO, RED INK ON A PLANTING CARD (ruled 2026-10-14): a row whose own
     # play plants a Sakura (`yae` plant / plant_level) says so on the class,
     # a MARKER read by `YaeAnnotationReach.Plants` (the Edit filter, and Red

@@ -296,7 +296,7 @@ public class RunStatsTests
             a => a.Key == "GitsTelemetryEndpoint");
         Assert.DoesNotContain(Il.Calls(Il.Method("KleeMod", "Initialize")),
             c => c.Contains("RunStats"));
-        Assert.DoesNotContain(Il.Calls(Il.Method("LocManager_Initialize_Patch", "Postfix")),
+        Assert.DoesNotContain(Il.Calls(Il.Method("EnglishLoc", "RunInjectors")),
             c => c.Contains("RunStats"));
         // And the mod never touches the game's metrics hook outside that folder.
         Assert.DoesNotContain(mod.GetTypes().SelectMany(t =>

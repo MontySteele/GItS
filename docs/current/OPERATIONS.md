@@ -20,6 +20,7 @@ the one your task reaches; never all of them. Depth for any subsystem is in
 | the paused Teyvat frame: music, portraits, act art, its codegen | `operations/teyvat-frame.md` |
 | build the pck and deploy into the game | `operations/build-deploy.md` |
 | make the Steam Workshop packages (public, beta) | `operations/workshop.md` |
+| where our text lives in each language, or add a translation | `operations/localization.md` |
 | run a scenario, a staged round, a seat or blind play | `operations/understudy-seats.md` |
 | brief an agent, or work out what it should read | `operations/briefing.md` |
 | repeat a ritual every sitting does by hand | `operations/agent-rituals.md` |

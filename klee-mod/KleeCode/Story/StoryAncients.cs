@@ -165,10 +165,12 @@ public static class StoryAncients
             var stem = key[..key.LastIndexOf('.')];
             var repeat = stem.EndsWith("r", StringComparison.Ordinal) ? "r" : "";
             var lineOne = stem[..(stem.Length - repeat.Length - 1)] + "1" + repeat;
-            fallback ??= s.GetRawText();
+            // Read off THIS table, not the live manager's: the English pass
+            // and the local pass each copy their own language's word.
+            fallback ??= table.GetRawText(key);
             if (keys.Contains(stem + ".ancient") && keys.Contains(lineOne + ".char"))
             {
-                return s.GetRawText();
+                return table.GetRawText(key);
             }
         }
         return fallback;

@@ -101,7 +101,7 @@ internal static class RunStatsHook
         try
         {
             var prefix = "KLEEMOD-" + StringHelper.Slugify(nameof(RunStatsConfig.ShareAnonymousRunStats));
-            LocManager.Instance.GetTable("settings_ui").MergeWith(new Dictionary<string, string>
+            EnglishLoc.Table("settings_ui").MergeWith(new Dictionary<string, string>
             {
                 ["KLEEMOD.mod_title"] = "Teyvat Spire Roster",
                 [prefix + ".title"] = "Share anonymous run stats with the Teyvat Spire developers",

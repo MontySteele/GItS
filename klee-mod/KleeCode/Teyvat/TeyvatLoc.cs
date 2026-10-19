@@ -97,7 +97,7 @@ internal static partial class TeyvatLoc
             // ".title")`, so these are the names the map screen and the
             // run-history row print -- and the only thing that names a
             // dressing at all, since a missing row renders the raw key.
-            LocManager.Instance.GetTable("acts").MergeWith(new Dictionary<string, string>
+            EnglishLoc.Table("acts").MergeWith(new Dictionary<string, string>
             {
                 [TeyvatFrame.Mondstadt + ".title"] = "Mondstadt",
                 [TeyvatFrame.Liyue + ".title"] = "Liyue",
@@ -124,25 +124,32 @@ internal static partial class TeyvatLoc
                 intents[MonsterModel_L10NMonsterLookup_TeyvatNames_Patch.Dressed(key, dressing)] = value;
             }
 
-            LocManager.Instance.GetTable("monsters").MergeWith(monsters);
-            LocManager.Instance.GetTable("intents").MergeWith(intents);
+            EnglishLoc.Table("monsters").MergeWith(monsters);
+            EnglishLoc.Table("intents").MergeWith(intents);
 
             // The converted event's own rows (see `EventRows`). Copied rather
             // than passed, because `MergeWith` takes a concrete `Dictionary`
             // and the table itself stays read-only to everything else.
-            LocManager.Instance.GetTable("events")
+            EnglishLoc.Table("events")
                 .MergeWith(new Dictionary<string, string>(EventRows, StringComparer.Ordinal));
 
             // The dressed Ancients' rows. LAST, and separately, because the
             // derivation reads the `ancients` table it then writes to -- see
             // `TeyvatAncients` for why an empty faces-file cell is an ALIAS
             // rather than a missing row.
-            var ancients = TeyvatAncients.RowsFor(LocManager.Instance.GetTable("ancients"));
-            LocManager.Instance.GetTable("ancients").MergeWith(ancients);
+            // A copy of base-game text, so a non-English table gets its own
+            // language's aliases (`EnglishLoc.MergeDerived`).
+            var ancientRows = 0;
+            EnglishLoc.MergeDerived("ancients", table =>
+            {
+                var rows = TeyvatAncients.RowsFor(table);
+                ancientRows = Math.Max(ancientRows, rows.Count);
+                return rows;
+            });
 
             Log.Info($"[{KleeMod.ModId}] teyvat: loc merged ({monsters.Count} dressed enemy "
                    + $"name(s), {intents.Count} dressed intent word(s), {EventRows.Count} "
-                   + $"converted-event row(s), {ancients.Count} dressed-Ancient row(s) "
+                   + $"converted-event row(s), {ancientRows} dressed-Ancient row(s) "
                    + $"across {TeyvatGeneratedAncients.BaseEntries.Count} bodies).");
         }
         catch (Exception e)

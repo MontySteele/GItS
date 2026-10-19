@@ -435,18 +435,16 @@ internal static class AbyssModifierListPatches
     }
 }
 
-/// <summary>The mode's rows, merged once the tables exist (the same seam as
-/// <c>LocManager_Initialize_Patch</c>, for the reason recorded there).</summary>
-[HarmonyPatch(typeof(LocManager), nameof(LocManager.Initialize))]
-internal static class LocManager_Initialize_Abyss_Patch
+/// <summary>The mode's rows, merged into the English table by
+/// <c>EnglishLoc.RunInjectors</c> (the same seam as the card rows).</summary>
+internal static class AbyssLoc
 {
-    [HarmonyPostfix]
-    private static void Postfix()
+    internal static void Inject()
     {
         try
         {
-            LocManager.Instance.GetTable(AbyssChoicePage.LocTable).MergeWith(AbyssChoicePage.LocRows());
-            LocManager.Instance.GetTable("main_menu_ui").MergeWith(AbyssMenu.LocRows());
+            EnglishLoc.Table(AbyssChoicePage.LocTable).MergeWith(AbyssChoicePage.LocRows());
+            EnglishLoc.Table("main_menu_ui").MergeWith(AbyssMenu.LocRows());
         }
         catch (Exception e)
         {
