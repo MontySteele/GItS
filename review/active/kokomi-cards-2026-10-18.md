@@ -189,3 +189,98 @@ Riposte pays for. The pool becomes 79. A cut, if one is needed, comes to the use
 **The round:** two seats, both drafting freely. Each record answers two questions:
 - did you ever play Stings now, instead of planning them, and why?
 - did you ever give up damage to prepare a particular future turn?
+
+## 7. The finish pass (2026-10-19)
+
+The release pass gives Kokomi one bounded finish ([USER], 2026-10-19:
+"let's do the archetype paper pass"). This section reads three rounds against
+the archetypes: v3 (`review/records/kokomi-v3-round-2026-10-18.md`), the
+Kokomi and Yae round (`kokomi-yae-round-2026-10-19.md`) and the newcomer round
+(`newcomer-round-1-2026-10-19.md`, lane 4).
+
+**What the archetypes now do.**
+- **Grand Strategy works.** Second Wave into Masterstroke did 82; planning
+  Masterstroke and cashing it early with Change of Plans killed three bosses
+  and elites. Seats gave up damage to set up a turn, and it paid.
+- **Read the Tide works without its Rares.** Tide Wall into Coral Crash
+  carried a deep run (25.6 a play in act 3), and Unbroken Tide made the exact
+  Block decision it was built for.
+- **The Shoal is a real choice now.** Stings are mostly played at once (to
+  finish an enemy, lay Hydro for a reaction, or stun), and planning one is a
+  decision for Breakwater or Battle Formation.
+- **A newcomer found the Plan loop alone** and called it the best part.
+
+**What does not.**
+1. **Battle Formation is still automatic.** "The first time each turn 2 or more
+   Plans are carried out" counts Stings and Wards, so any deck meets it (v2
+   flagged this as next).
+2. **Grand Design is weak with Strikes and Defends in hand** (v3, seats 1 and
+   6): planning a card with no Plan line only delays it, and the card spends
+   your hand.
+3. **Plans are hard to read.** A newcomer could not tell whether Strength and
+   Vulnerable count on a planned hit, and saw Plan hits ignore Flutter's "less
+   damage from Attacks" with nothing saying why. The rule
+   (`KokomiPlan.cs:50-58`): the Bake-Kurage deals Plan hits, unpowered, so her
+   Strength does not add and they are not Attacks. The Casket's Block is also
+   invisible (BACKLOG).
+4. **Defence over a long run is unproven either way.** Three of four deaths in
+   the 10-19 round were HP attrition. But it was two Kokomi runs, one with a
+   single Mend, one beaten by Frail and Weak, and the newcomer ran three fights
+   without a rest. That is not yet evidence that she lacks Block. Her pool
+   counts as normal: 6 Commons and 8 Uncommons give her Block, against the
+   Ironclad's 6 and 5 and the Silent's 5 and 7 (`game_ref/*_pool.yaml`), and
+   the Casket pays 1 for every Sting and Ward, which is her After Image.
+5. **Never played or never offered:** Tidal Rebuke, Tidal Riposte, Shoal of
+   Spears and The Shape of Water were not played in v3; Nereid's Ascension and
+   Sango Isshin were not offered in 48 floors. That is drafting chance over one
+   round, not a verdict (Rares bend, they are not removed).
+
+**The changes.**
+1. **Battle Formation** (Rare Power, 1): "The first time each turn 2 or more
+   Plans that are not Stings or Wards are carried out, gain 1 Energy and draw
+   1 card." This is the v2 rule for the count cards, applied to the last card
+   that still counts everything. Breakwater keeps counting every Plan: it is
+   defensive, and GPT advised keeping it.
+2. **Grand Design** (Rare Skill, 1): "Plan up to 3 [4] cards from your Hand,
+   Basic cards included. They cost 0. Draw 1 card for each." Planning your
+   Strikes and Defends now refills the hand you spent, so the setup turn is
+   still a turn.
+3. **The Plan tip says who hits** (text only): "The Bake-Kurage carries it out
+   at the start of your next turn. Its hits are not Attacks, and your Strength
+   does not add to them." Whether the enemy's Vulnerable counts is checked live
+   before the tip says so either way.
+
+**Held.**
+- **Nereid's Ascension** stays as written ([USER] flagged it as a possible
+  change, otherwise leave it). The Plan-only version ("Plan: this turn, your
+  Attacks deal double damage", with a no-stacking clause) stays the next thing
+  to try if it is ever offered and found flat.
+- **Salvaging a waiting Plan** (Exhaust it for an effect now) stays in
+  BACKLOG. The round below tests the deck without it.
+
+**The round.** Five Kokomi seats, whole runs, A0, on the five suite seeds, so
+her act-by-act HP lost per fight can be compared with the base characters on
+the same seeds (the Read the Tide guardrail: normal fights within about one
+turn of base). Three draft freely. Two are briefed toward the cards no seat has
+played: one Read the Tide seat granted Tidal Riposte, one Shoal seat granted
+The Shape of Water. Each record answers: what was the winning turn, what did
+you give up for it, and did you ever lose a fight to running out of Block?
+
+**The defence trigger, written now so the round decides it:** if her pooled
+HP lost per normal fight is more than 1.5 above the base characters' on the
+same seeds, Ward's Plan line gains "Gain 3 Block". That reopens [USER]'s
+2026-10-18 ruling ("Ward should stop giving Block"), so it comes back as a
+pick with the numbers, not a build.
+
+### Picks
+
+1. **The two card changes.**
+   - **(a, default)** Build both: Battle Formation and Grand Design.
+   - (b) Build Battle Formation only, and leave Grand Design for your run.
+2. **Defence.**
+   - **(a, default)** Measure first, with the trigger above.
+   - (b) Give Ward's Plan line "Gain 3 Block" now, before the round.
+3. **The round.**
+   - **(a, default)** Five seats on the suite seeds, two of them briefed as
+     above.
+   - (b) Two free seats only.
