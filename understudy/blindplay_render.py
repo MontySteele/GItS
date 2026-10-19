@@ -14,7 +14,8 @@ from typing import Any
 from understudy import qa_packet
 from understudy.blindplay_board import PHASE_FLIP_LINE, enchant_moves_line
 from understudy.blindplay_faces import enchantment_tag
-from understudy.blindplay_notes import (_AURA_NAME_RE, ATTACK_BUFF_NOTE,
+from understudy.blindplay_notes import (_AURA_NAME_RE, _aura_on_board,
+                                        ATTACK_BUFF_NOTE,
                                         ENEMY_FOLD_NOTE,
                                         ENEMY_FOLD_NOTE_EXCEPT,
                                         ENEMY_FOLD_NOTE_ONLY,
@@ -3399,6 +3400,11 @@ SHRINE_FULL_LINE = ("- Shrine full: planting makes the Sakura closest to "
                     "withering act. Same kind: it refreshes and gains a "
                     "Level. Other kind: it withers, and the new one takes "
                     "its Level if higher.")
+#: Yae round 2026-10-19b (lane 1): a full-shrine plant of another kind
+#: withered a Kitsune and a Red Ink Sakura the seat did not expect. The page
+#: names the one a plant reaches now (`YaeShrineLedger.NextToWither`).
+SHRINE_NEXT_LINE = ("- Next to act on a plant: Sakura {slot} ({kind}). A plant "
+                    "of another kind withers it.")
 SHRINE_ROW = ("- Sakura {slot}: {kind}, Level {level}{origin}, {action}"
               "{turns}.")
 #: Each kind's action on the row (review r3).
@@ -3415,6 +3421,31 @@ SHRINE_ANNOTATED_LINE = "- Annotated cards in your hand: {n}."
 #: Bestseller's count (Yae review r5, pick 1 (a)), which no card
 #: on the board shows (`YaeShrine.Snapshot`, via `player.yae_shrine`).
 SHRINE_EDITS_LINE = "- Cards Edited this combat: {n}."
+
+
+def next_to_wither(rows: list[dict[str, Any]]) -> dict[str, Any] | None:
+    """The Sakura a full-shrine plant reaches: one without Deadline
+    Extension before one with it, then the fewest turns left, the oldest on a
+    tie (`YaeShrineLedger.NextToWither`, `WithersSooner`). Rows are oldest
+    first. None where a row does not say its turns left (an older badge)."""
+    if not rows or any(row.get("turns") is None for row in rows):
+        return None
+
+    def deadline(row: dict[str, Any]) -> bool:
+        anns = row.get("annotations")
+        if anns is None:
+            anns = [row.get("annotation")]
+        return "Deadline Extension" in anns
+
+    best = rows[0]
+    for row in rows[1:]:
+        if deadline(row) != deadline(best):
+            if deadline(best):
+                best = row
+            continue
+        if int(row["turns"]) < int(best["turns"]):
+            best = row
+    return best
 
 
 def _render_shrine(shrine: dict[str, Any]) -> list[str]:
@@ -3454,6 +3485,11 @@ def _render_shrine(shrine: dict[str, Any]) -> list[str]:
                                      turns=tail))
     if rows and len(rows) >= cap:
         out.append(SHRINE_FULL_LINE)
+        nxt = next_to_wither(rows)
+        if nxt is not None:
+            name, _ = SHRINE_KIND.get(nxt.get("kind") or "thunder",
+                                      SHRINE_KIND["thunder"])
+            out.append(SHRINE_NEXT_LINE.format(slot=nxt["slot"], kind=name))
     if any((row.get("kind") or "thunder") == "thunder" for row in rows):
         out.append(SHRINE_TARGET_LINE)
     if shrine.get("lure"):
@@ -3858,11 +3894,21 @@ INCOMING_NO_ATTACK_TAKE = ("- Incoming this turn: no attack is shown "
 REST_ROOM = " (healing stops at max HP: at most {room} more)"
 #: The since-last-page line, and how many phrases it names before it counts.
 EVENTS_HEAD = "- Since last page: "
+#: Varka combo round (2026-10-05, item 5): a potion that only acts on an
+#: aura, and the clause its belt row takes while no enemy wears one.
+AURA_ONLY_POTIONS = frozenset({"Bottled Gale"})
+POTION_NO_AURA = " *(No enemy has an aura: it would do nothing now.)*"
 EVENTS_CAP = 8
 #: SEAT PAGE 3 (2026-10-05). An attack that Shattered Frozen: the after-state
 #: shows only "no Frozen", and a seat read the enemy's next full hit as
 #: Frozen's cut failing (`FrozenPower.AfterDamageReceived`).
 EVENT_SHATTERED = "{card} Shattered {target}: Frozen removed"
+#: Seat page backlog (2026-10-19): a relic that worked and left nothing on
+#: the board saying so ("Tamakushi Casket: gained 1 Block"), and an orb's
+#: passive or evoke ("Lightning orb: passive"). The mod files both
+#: (`ResolutionLedger.NoteRelic`, `OrbNarration`).
+EVENT_RELIC = "{relic}: {did}"
+EVENT_ORB = "{orb}: {did}"
 #: The curtain call, on the first page after the fight (Furina's drained HP
 #: comes back when combat ends; seats could not tell it had).
 EVENT_HP_RETURNED = "Drained {n} HP returned (the fight ended)"
@@ -4556,6 +4602,11 @@ def _event_phrases(kind: str, evs: list[dict[str, Any]]) -> list[str]:
             out.append(EVENT_SWIRL_PAID.format(
                 element=card or "an aura", target=target or "an enemy",
                 paid=power) + times)
+        elif kind == "relic" and card and power:
+            out.append(EVENT_RELIC.format(relic=card, did=power) + times)
+        elif kind == "orb" and card and power:
+            name = card if "orb" in card.casefold() else f"{card} orb"
+            out.append(EVENT_ORB.format(orb=name, did=power) + times)
     return out
 
 
@@ -5001,9 +5052,14 @@ def render(obs: dict[str, Any]) -> str:
             # 2026-10-01 (a Varka seat): `use potion 1` drank the first
             # potion when the seat meant another; the belt printed no
             # numbers. Each row carries the number `use potion <n>` takes.
+            # Varka combo round (2026-10-05, item 5): Bottled Gale with no
+            # aura on any enemy does nothing, and nothing said so.
+            bare = not _aura_on_board({"enemies": c.get("enemies") or []})
             for n, p in enumerate(you["potions"], start=1):
-                out.append(f"- {n}. **{p['title']}** — {p['text']}"
-                           if p["text"] else f"- {n}. **{p['title']}**")
+                out.append((f"- {n}. **{p['title']}** — {p['text']}"
+                            if p["text"] else f"- {n}. **{p['title']}**")
+                           + (POTION_NO_AURA if bare and p["title"]
+                              in AURA_ONLY_POTIONS else ""))
         # VARKA (the Oath rework): his current element, his four Oath counts,
         # what a Swirl pays now and every enemy's aura, directly above the
         # hand whose Swirl choices they decide. The Varka payoff round

@@ -460,6 +460,13 @@ internal static class ReactionEffects
             // Construct printed "Frozen on Cubex Construct" while its
             // Artifact ate the freeze. The reaction still happened (the aura
             // is gone); the row says what did not land.
+            // Seat page backlog (2026-10-19): an amplifier names its factor
+            // ("Diluc printed 9 against the 6 on the card" and no reason).
+            if (reaction is Reaction.Vaporize or Reaction.Melt)
+            {
+                ReactionLog.DetailNextIfNone(ResolutionLedger.AmplifiedDetail(
+                    ReactionTable.AmplifierMultiplier(reaction, dealer)));
+            }
             if (reaction == Reaction.Frozen
                 && FrozenArtifactDetail(target) is { } blocked)
             {

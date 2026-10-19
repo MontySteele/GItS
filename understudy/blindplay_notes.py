@@ -3064,10 +3064,36 @@ def _bomb_hay(word: str, hay: str, obs: dict[str, Any]) -> str:
     matched against the haystack unchanged -- this is one word's defect and not
     a new rule for the table.
     """
+    if word in _GUEST_NAME_WORDS:
+        return _guest_hay(hay, obs)
     if word != "Bomb":
         return hay
     for name in _creature_names(obs):
         hay = hay.replace(name, " ")
+    return hay
+
+
+#: Seat page backlog (2026-10-19; Furina suite 3, lane 3). A word tip for
+#: Charlotte printed on a screen with no Charlotte card: Furina's own event
+#: prose names her guests ("She is still doing Charlotte's voice under her
+#: breath", Letter from the Court; The Steambird Clipping), and a story line
+#: is not her guest. So the four guest names are matched with an event's
+#: body and dialogue struck out; an event OPTION that summons one still
+#: raises the row.
+_GUEST_NAME_WORDS = frozenset({"Charlotte", "Wriothesley", "Lynette",
+                               "Clorinde"})
+
+
+def _guest_hay(hay: str, obs: dict[str, Any]) -> str:
+    """`hay` with an event room's story text struck out (above)."""
+    if obs.get("screen") != "event":
+        return hay
+    prose = [str(obs.get("text") or "")]
+    prose += [str(line.get("text") or "") for line in obs.get("dialogue") or []
+              if isinstance(line, dict)]
+    for text in prose:
+        if text.strip():
+            hay = hay.replace(text, " ")
     return hay
 
 

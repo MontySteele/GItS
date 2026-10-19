@@ -708,7 +708,11 @@ public sealed class FurinaStageLedger
         var gained = amount;
         Fanfare += gained;
         GainedThisTurn += gained;
-        Note(new StageBeat(GainEvent, default, -1, Fanfare, gained, source));
+        // Seat page backlog (2026-10-19): the source rides `Source`, the
+        // field the wire's `source` and the page's "from Claque's Ledger"
+        // read; it sat in `Reason`, which no gain line prints.
+        Note(new StageBeat(GainEvent, default, -1, Fanfare, gained, "",
+                           Source: source ?? ""));
         return gained;
     }
 
@@ -1179,8 +1183,12 @@ public sealed class FurinaStageLedger
             .Select(beat => (object?)new Dictionary<string, object?>
             {
                 ["event"] = beat.Event,
-                ["member"] = FurinaStage.Name(beat.Who),
-                ["name"] = DisplayName(beat.Who),
+                // Seat page backlog (2026-10-19): a beat no performer made
+                // (a gain, a spend, a Drain, a Repay, a Power's hit) carries
+                // `default` -- Charlotte -- and her name reached the page,
+                // which then glossed a guest no card on screen named.
+                ["member"] = NoPerformer(beat) ? "" : FurinaStage.Name(beat.Who),
+                ["name"] = NoPerformer(beat) ? "" : DisplayName(beat.Who),
                 ["seat"] = beat.Seat,
                 ["seat_key"] = beat.SeatKey,
                 ["fanfare"] = beat.Fanfare,
@@ -1241,4 +1249,10 @@ public sealed class FurinaStageLedger
     /// <summary>The name a guest prints, off one table so the page and the
     /// bodies agree.</summary>
     public static string DisplayName(StagePerformer who) => who.ToString();
+
+    /// <summary>The beats no performer makes: their <c>Who</c> is the enum's
+    /// default and names nobody. PURE.</summary>
+    public static bool NoPerformer(StageBeat beat) =>
+        beat.Seat < 0 && beat.Event is GainEvent or SpendEvent or DrainEvent
+            or RepayEvent or HitEvent;
 }

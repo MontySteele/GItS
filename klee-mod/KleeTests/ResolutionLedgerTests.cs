@@ -680,9 +680,9 @@ public class ResolutionLedgerTests
     {
         Assert.Equal("Pyro",
             ResolutionLedger.ElementLabel(Element.Pyro, Reaction.None, 1m));
-        Assert.Equal("Pyro, Vaporize",
+        Assert.Equal("Pyro, Vaporize 1.5x",
             ResolutionLedger.ElementLabel(Element.Pyro, Reaction.Vaporize, 1.5m));
-        Assert.Equal("Cryo, Melt",
+        Assert.Equal("Cryo, Melt 2x",
             ResolutionLedger.ElementLabel(Element.Cryo, Reaction.Melt, 2m));
         // A non-amplifying reaction is its own label, not the hit's.
         Assert.Equal("Electro",
