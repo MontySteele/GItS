@@ -385,7 +385,12 @@ public static partial class McpMod
 
         try
         {
-            var stateTask = RunOnMainThread(() => BuildMultiplayerGameState());
+            // GItS LOCAL EDIT (the newcomer seat, 2026-10-19) - `?audience=player`
+            // reads the player's hover tips, not the seat's (`gits/GitsSeatTips.cs`).
+            bool gitsAsPlayer = GitsAudienceIsPlayer(request);
+            var stateTask = RunOnMainThread(() => gitsAsPlayer
+                ? GitsAsPlayer(BuildMultiplayerGameState)
+                : BuildMultiplayerGameState());
             var state = stateTask.GetAwaiter().GetResult();
 
             if (format == "markdown")
@@ -479,7 +484,12 @@ public static partial class McpMod
 
         try
         {
-            var stateTask = RunOnMainThread(() => BuildGameState());
+            // GItS LOCAL EDIT (the newcomer seat, 2026-10-19) - `?audience=player`
+            // reads the player's hover tips, not the seat's (`gits/GitsSeatTips.cs`).
+            bool gitsAsPlayer = GitsAudienceIsPlayer(request);
+            var stateTask = RunOnMainThread(() => gitsAsPlayer
+                ? GitsAsPlayer(BuildGameState)
+                : BuildGameState());
             var state = stateTask.GetAwaiter().GetResult();
 
             if (format == "markdown")

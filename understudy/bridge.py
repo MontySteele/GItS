@@ -19,6 +19,7 @@ both cost a session's time to learn the hard way:
 from __future__ import annotations
 
 import json
+import os
 import threading
 import time
 import urllib.error
@@ -264,17 +265,35 @@ def coop_state(state: dict) -> dict:
     return state
 
 
+#: THE NEWCOMER SEAT (2026-10-19). Set to `1` on a seat's lane scripts
+#: (`tools/seat.py --opus-brief --newcomer`): every state read asks the bridge
+#: for the PLAYER's hover tips (`?audience=player`, `gits/GitsSeatTips.cs`),
+#: and the page prints what a human sees (`understudy/blindplay_newcomer.py`).
+NEWCOMER_ENV = "GITS_NEWCOMER"
+#: The query a newcomer's state read carries.
+PLAYER_AUDIENCE = "?audience=player"
+
+
+def newcomer() -> bool:
+    """Whether this process reads as a newcomer seat (`NEWCOMER_ENV`)."""
+    return os.environ.get(NEWCOMER_ENV, "").strip() == "1"
+
+
+def _state_url(url: str) -> str:
+    return url + PLAYER_AUDIENCE if newcomer() else url
+
+
 def get_state() -> dict:
     base = current_base()
     if base in _coop_bases:
-        state = _request(MULTIPLAYER)
+        state = _request(_state_url(MULTIPLAYER))
         if not _redirected(state, _USE_SINGLEPLAYER):
             return coop_state(state)
         _coop_bases.discard(base)
-    state = _request(SINGLEPLAYER)
+    state = _request(_state_url(SINGLEPLAYER))
     if _redirected(state, _USE_MULTIPLAYER):
         _coop_bases.add(base)
-        return coop_state(_request(MULTIPLAYER))
+        return coop_state(_request(_state_url(MULTIPLAYER)))
     return state
 
 

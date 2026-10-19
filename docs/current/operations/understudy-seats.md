@@ -71,6 +71,8 @@ python -m understudy.blindplay session --max-actions 40 --max-wall-s 5400
 python -m understudy.embark --teardown --lane 1              # put it all back
 ```
 
+**A newcomer seat** (2026-10-19) tests whether a kit explains itself: add `--newcomer` to `--opus-brief`. The seat gets the brief's NEWCOMER section (the commands and seat rules, no rule explanations, an exit form), and its lane scripts set `GITS_NEWCOMER=1`, so the page shows only what a player sees (`understudy/blindplay_newcomer.py`: the player's hover tips via the bridge's `?audience=player`, no ledger, forecasts, glossary or page notes, and `--define` answering with the game's own tip or none). The lane needs a bridge built from this tree or later; `observe` warns once on stderr when it is older.
+
 - `embark --ascension N` sets the run's ascension (a mismatch on read-back
   fails the embark), so a base-game control run can match a mod run.
 - Every embark unlocks the lane's saves as `unlock all` does (epochs, A10).

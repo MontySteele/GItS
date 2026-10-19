@@ -11,6 +11,11 @@
 // `KleeMod.Cards.TipAudience.EnterSeat()` / `ExitSeat()`, and the page reads
 // every sentence it read before the trim, word for word.
 //
+// THE NEWCOMER SEAT (2026-10-19). A state read asked with `?audience=player`
+// runs its builder OUTSIDE the seat scope (`GitsAsPlayer`), so the page reads
+// the player's trimmed hovers, and the state carries `tip_audience: "player"`
+// so the page can tell this bridge from an older one that ignored the ask.
+//
 // REFLECTION, on `GitsFurinaStage.cs`'s terms: no compile-time reference to
 // the klee mod, so "no klee mod" means "no seat scope", which is the truth (a
 // card with no trim needs none). A hit is cached; a miss is probed again
@@ -19,6 +24,7 @@
 // of the process. Every failure is swallowed: a state read must never throw.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Godot;
@@ -77,5 +83,28 @@ public static partial class McpMod
     {
         try { _gitsSeatExit?.Invoke(null, null); }
         catch (Exception) { /* a state read must never throw */ }
+    }
+
+    /// <summary>The newcomer seat: whether a state read asked for the
+    /// player's hover tips (`?audience=player`).</summary>
+    internal static bool GitsAudienceIsPlayer(System.Net.HttpListenerRequest request)
+    {
+        try { return request.QueryString["audience"] == "player"; }
+        catch (Exception) { return false; }
+    }
+
+    /// <summary>Run a state builder as the PLAYER reads it: the seat scope
+    /// <see cref="McpMod.RunOnMainThread{T}"/> opened is left for the length
+    /// of the build and entered again after, and the state is marked
+    /// <c>tip_audience: "player"</c>. Called on the main thread only.</summary>
+    internal static Dictionary<string, object?> GitsAsPlayer(
+        Func<Dictionary<string, object?>> build)
+    {
+        GitsSeatTipsExit();
+        Dictionary<string, object?> state;
+        try { state = build(); }
+        finally { GitsSeatTipsEnter(); }
+        state["tip_audience"] = "player";
+        return state;
     }
 }

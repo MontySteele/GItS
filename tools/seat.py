@@ -133,6 +133,12 @@ def interpreter() -> str:
 #: The page's co-op section heading. Everything from it on is printed only
 #: with `--coop`, so a singleplayer seat's brief is the brief it always was.
 COOP_HEADING = "\n## CO-OP"
+#: The newcomer seat's brief (2026-10-19). Everything from this heading on is
+#: printed only with `--newcomer`, in place of THE BRIEF; the coordinator's
+#: paragraph above its `---` rule is not printed.
+NEWCOMER_HEADING = "\n## NEWCOMER"
+#: What a newcomer's lane scripts and commands carry (`bridge.NEWCOMER_ENV`).
+NEWCOMER_ENV = "GITS_NEWCOMER"
 
 #: The action cap an Opus seat's embark gets when the coordinator names none.
 #: `embark --max-actions` defaults to 0 (no cap), and a hand-driven seat once
@@ -159,30 +165,33 @@ def record_path(scratch: str, lane: int) -> str:
     return (PurePath(scratch) / f"seat-lane{lane}" / "record.md").as_posix()
 
 
-def lane_scripts(lane: int) -> dict[str, str]:
+def lane_scripts(lane: int, newcomer: bool = False) -> dict[str, str]:
     """The seat's two lane scripts, `o` and `a`, as bash text. Each `cd`s to
     the repo root this tool runs from, so a seat that has changed directory
     still runs this checkout's bridge; the lane and `--brief` are fixed, and
-    the interpreter is the absolute one the brief names (`EB-678`)."""
+    the interpreter is the absolute one the brief names (`EB-678`).
+    `newcomer` exports `GITS_NEWCOMER=1` too (the newcomer seat's page)."""
     root = PurePath(REPO).as_posix()
     py = interpreter()
+    extra = f" {NEWCOMER_ENV}=1" if newcomer else ""
     head = ("#!/usr/bin/env bash\n"
             f"# Lane {lane} seat script, written by tools/seat.py. "
             "Do not edit.\n"
             f'cd "{root}" || exit 1\n'
-            f"export GITS_LANE={lane} PYTHONIOENCODING=utf-8\n")
+            f"export GITS_LANE={lane}{extra} PYTHONIOENCODING=utf-8\n")
     return {
         "o": head + f'exec {py} -m understudy.blindplay observe --brief "$@"\n',
         "a": head + f'exec {py} -m understudy.blindplay act --brief "$@"\n',
     }
 
 
-def write_lane_scripts(scratch: str, lane: int) -> list[Path]:
+def write_lane_scripts(scratch: str, lane: int,
+                       newcomer: bool = False) -> list[Path]:
     """Write `o` and `a` into `<scratch>/seat-lane<N>/`, LF line ends."""
     folder = Path(notes_path(scratch, lane)).parent
     folder.mkdir(parents=True, exist_ok=True)
     out = []
-    for name, text in lane_scripts(lane).items():
+    for name, text in lane_scripts(lane, newcomer).items():
         path = folder / name
         path.write_bytes(text.encode("utf-8"))
         try:
@@ -206,8 +215,17 @@ def embark_line(lane: int, character: str, max_actions: int,
             f"--lane {lane} --max-actions {max_actions}")
 
 
+def newcomer_body(text: str) -> str:
+    """The newcomer section's seat text: after its heading, after the
+    coordinator's paragraph and its `---` rule."""
+    _, _, part = text.partition(NEWCOMER_HEADING)
+    _, _, seat = part.partition("\n---\n")
+    return seat
+
+
 def brief_text(lane: int, character: str, coop: bool = False,
-               scratch: str = "", record: str = "") -> str:
+               scratch: str = "", record: str = "",
+               newcomer: bool = False) -> str:
     """The brief, with the lane and the interpreter filled in.
 
     `coop` appends the page's co-op section (its own heading line dropped):
@@ -219,13 +237,27 @@ def brief_text(lane: int, character: str, coop: bool = False,
     text = BRIEF.read_text(encoding="utf-8")
     _, _, body = text.partition("## THE BRIEF")
     body, _, coop_part = (body or text).partition(COOP_HEADING)
+    coop_part = coop_part.partition(NEWCOMER_HEADING)[0]
+    if newcomer:
+        # The newcomer seat (2026-10-19): its own brief, not THE BRIEF.
+        body = "\n" + newcomer_body(text).lstrip("\n")
     if coop and coop_part:
         body = body.rstrip() + "\n\n" + coop_part.split("\n", 1)[1].lstrip()
     body = body.replace("<LANE>", str(lane))
     py = interpreter()
     body = BARE_PYTHON.sub(lambda _m: py, body)
     head = f"You are the blind seat for **{character}** on lane {lane}."
-    if scratch:
+    if scratch and newcomer:
+        notes = notes_path(scratch, lane)
+        folder = PurePath(notes).parent.as_posix()
+        head += (f" Your scratch folder is `{folder}`"
+                 f" and your notes file is `{notes}`."
+                 f" Play through your two lane scripts, which carry your lane,"
+                 f" the interpreter, the newcomer setting and the repo folder:"
+                 f" `bash {folder}/o` to observe (`bash {folder}/o --define"
+                 f' "<Word>"` for the game\'s tooltip) and'
+                 f' `bash {folder}/a "<command>"` to act.')
+    elif scratch:
         notes = notes_path(scratch, lane)
         folder = PurePath(notes).parent.as_posix()
         head += (f" Your scratch folder is `{folder}`"
@@ -271,6 +303,11 @@ def main(argv: list[str]) -> int:
     ap.add_argument("--coop", action="store_true",
                     help="with --opus-brief: add the co-op paragraph (the "
                          "run is shared with another seat; `wait`)")
+    ap.add_argument("--newcomer", action="store_true",
+                    help="with --opus-brief: the newcomer seat (2026-10-19) -- "
+                         "its own brief, and lane scripts that set "
+                         "GITS_NEWCOMER=1 so the page shows only what a "
+                         "player sees")
     ap.add_argument("--scratch", default="",
                     help="with --opus-brief: the coordinator's scratchpad; "
                          "the brief names <scratch>/seat-lane<N>/notes.md as "
@@ -311,10 +348,17 @@ def main(argv: list[str]) -> int:
             print("  WARNING: no record path (pass --scratch or --record); "
                   "the brief will not say where the record goes.",
                   file=sys.stderr)
+        if args.newcomer:
+            print(f"  newcomer: the seat's commands set {NEWCOMER_ENV}=1; the "
+                  f"lane's bridge must be one that answers "
+                  f"`?audience=player` (observe warns once if not)",
+                  file=sys.stderr)
         text = brief_text(args.lane, args.character, coop=args.coop,
-                          scratch=args.scratch, record=record)
+                          scratch=args.scratch, record=record,
+                          newcomer=args.newcomer)
         if args.scratch:
-            for path in write_lane_scripts(args.scratch, args.lane):
+            for path in write_lane_scripts(args.scratch, args.lane,
+                                           newcomer=args.newcomer):
                 print(f"  wrote {path.as_posix()}", file=sys.stderr)
             brief = (Path(notes_path(args.scratch, args.lane)).parent.parent
                      / f"brief-lane{args.lane}.md")

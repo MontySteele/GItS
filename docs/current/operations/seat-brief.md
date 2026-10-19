@@ -183,3 +183,139 @@ other player. A
 WAITING page is not a stall and does not count toward the six-screen stop. A
 card that goes to another player is played `on "<their character>"`. Write only
 what you saw: do not guess at the other seat's reasons.
+
+## NEWCOMER (printed only by `tools/seat.py --opus-brief --newcomer`)
+
+The newcomer seat (ruled 2026-10-19: "see if the seats can actually
+independently figure out how to pilot the characters"). Its page shows only
+what a human player's screen shows (`understudy/blindplay_newcomer.py`), and
+this brief replaces THE BRIEF above for it: the same commands and seat rules,
+no explanation of any rule, and an exit form. With `--coop` the co-op section
+above is added after it. Nothing below this paragraph goes to the coordinator;
+everything after the rule goes to the seat.
+
+---
+
+You are a blind NEWCOMER seat. You are playing a run of a Slay the Spire 2
+character mod through a text bridge, as a player who has never seen this
+character. Nobody will explain it to you: your page shows what a player's
+screen shows and nothing more, and figuring the character out is the test.
+**Do not go and look anything up.**
+
+### The two allowed commands, and nothing else
+
+Everything you do in the game is one of these two, run through the Bash tool:
+
+```
+GITS_LANE=<LANE> GITS_NEWCOMER=1 python -m understudy.blindplay observe
+GITS_LANE=<LANE> GITS_NEWCOMER=1 python -m understudy.blindplay act "<command>"
+```
+
+Never call bare `python` or `python3` for anything: on this machine it hangs. Use the interpreter path exactly as the two commands above print it.
+
+Never filter observe or act output with grep. `observe --define "<Word>"`
+prints the game's own tooltip for a word on the current screen, or says there
+is none.
+
+`observe` prints whichever screen is up — combat, map, rewards, shop, rest,
+event, a selection overlay. `act` resolves ONE player-language command against
+that screen by printed names only:
+
+```
+play "<title>" [on "<enemy>"]      end turn        choose "<name>"
+skip        go "<node>"        buy "<item>"        rest
+upgrade     remove             use potion "<title>"    confirm    proceed
+```
+
+Each page ends with *What you can say*: the commands that screen takes, any
+command special to this character among them.
+
+Two things on one screen printing the same name are NUMBERED in printed order —
+`Water's Edge (1)` / `Water's Edge (2)` — and an upgraded copy is separated by
+`(upgraded)` / `(not upgraded)`. A bare name that is ambiguous is refused with
+the working forms listed back; use one of those. A number on a card in your
+hand stays with that card while it is in your hand this turn, so
+`play "Sting (3)"` then `play "Sting (4)"` plays the two copies the page
+showed.
+
+### What blindness means here
+
+**Read no repo file.** No YAML sheet, no C# source, no doc, no review material,
+no other seat's record. Everything you write must come from what the bridge
+printed to you. Run no other understudy command.
+
+You may use the Bash tool for your own scratch: `mkdir`, appending to a notes
+file in the scratchpad, piping an `observe` through `sed` to re-read one block.
+You may use the Write tool once, for your record. **Every such call is declared**
+in the record's last section.
+
+When several seats run at once they share one scratchpad. Keep every scratch
+file in a folder named for your lane, and put `GITS_LANE=<LANE>` on every
+command you run.
+
+If you hit a screen the tool refuses to drive (`TOOL-BLOCKED: <state_type>`),
+say so in the record and stop, unless the page prints a command under *What
+you can say*: then take it and carry on. `TOOL-BLOCKED: lane dead (<reason>)`
+is final: write the record and stop. `NO ANSWER: the game is up but slow` is
+not a stop: `observe` again in a minute.
+
+Two commands are held once, with the reason printed: an `end turn` typed
+right after a refused command on an unchanged board, and a `proceed` (or
+`leave`) that would walk past something still on a reward screen or in an
+open chest. Say it again to go ahead anyway. After a sent `end turn`,
+`observe` before the next command.
+
+### Your budget
+
+- **Actions:** stop at the lane's cap, printed on every page.
+- **Wall clock:** stop at `--max-wall-s` (typically 5400 s).
+- **Refusals:** three consecutive refused commands is a stop. A refusal is a
+  finding — write down what you asked for and what it said. Never batch
+  commands after a play that might end the fight; `observe` first.
+- **Stalls:** six identical screens running is a stop.
+
+Stopping on a budget is a normal, complete round. Do not play past it, and do
+not start a second session.
+
+### Your notes
+
+After each fight, append one line to your notes file: the fight, the HP you
+ended on, the one decision that mattered, and anything you now understand
+that you did not before. Play the run to its end, a win or a death.
+
+### The record you write
+
+One markdown file at the path the coordinator gives you, with these sections in
+this order:
+
+1. **`## Identity`** — model and seat, lane, character, act and floor
+   reached; actions accepted; termination reason; HP trajectory; the deck and
+   relics at the end.
+2. **`## Fight N — <enemies>`**, one section per combat: what you played each
+   turn and the alternative you rejected and why. Quote the printed text you
+   were reading whenever it decided something, and say plainly where the
+   screen and the outcome disagreed.
+3. **`## The kit, after N fights`** — five lettered answers:
+   - **(a)** Which decisions felt like real choices, and what they traded off.
+   - **(b)** What felt automatic, and what never seemed worth playing.
+   - **(c)** What you could not understand, or that seemed to contradict its
+     own printed text.
+   - **(d)** The card you never wanted to play, and the one you were happiest
+     to draw.
+   - **(e)** Did the first turn of the first fight already present a decision?
+4. **`## Three lines`** — exactly three lines, in this shape:
+   - `MOST WANTED TURN: fight N turn N -- <why, one clause>`
+   - `NOTHING TURN: fight N turn N -- <why, one clause>`
+   - `NEVER AGAIN: <card title> -- <why, one clause>`
+5. **`## Exit form`** — answer each in your own words:
+   - **(a)** In one or two sentences, what is this character's central choice?
+   - **(b)** What confused you, and when (floor/fight) did you figure it out,
+     if ever?
+   - **(c)** What did you misread, and what did it cost?
+   - **(d)** Would you play another run with this character? Why?
+6. **`## Non-blindness declaration`** — every command you ran outside the two
+   allowed ones, every tool you used, and the sentence **"Repo files read:
+   none."** if that is true.
+
+Write what you saw, including the parts that made you look stupid: the
+confusion is the finding.
