@@ -65,7 +65,9 @@ def test_every_hand_edit_screen_applies_exactly_one_annotation():
     ("ProtoYmProofread", "Reprint", "false"),
     ("ProtoYmMarginNote", "RedInk", "false"),
     ("ProtoYmFootnote", "Footnote", "false"),
-    ("ProtoYmCliffhanger", "DeadlineExtension", "false"),
+    # Cliffhanger left this list with the Yae block and Edit pass
+    # (2026-10-19): as Kitsune Lantern it plants a Kitsune Sakura and Edits
+    # nothing.
     ("ProtoYmSakuraSeal", "SakuraSeal", "false"),
     ("ProtoYmRoyalties", "Royalties", "false"),
     ("ProtoYmInkedBranches", "RedInk", "true"),

@@ -240,7 +240,8 @@ def test_the_planting_marker_is_the_sims_planting_set():
     """The C# marker (codegen) and the sim's `plants_sakura` name the same
     rows: Yakan Evocation, Twin Sakura, (review r3) the two kind planters,
     Foxfire Sweep and Shrine Maiden's Guard, and the pool to 78's five left
-    after the dedupe (2026-10-16)."""
+    after the dedupe (2026-10-16). The Yae block and Edit pass (2026-10-19):
+    Kitsune Lantern (Cliffhanger's id) and Sakura Canopy plant Kitsune."""
     marked, planting = set(), set()
     for path in GENERATED.glob("ProtoYm*.cs"):
         text = path.read_text(encoding="utf-8")
@@ -254,15 +255,16 @@ def test_the_planting_marker_is_the_sims_planting_set():
                                   _ym("shrine_maidens_guard"),
                                   _ym("thunder_petal"), _ym("genre_shift"),
                                   _ym("replanting"), _ym("narukami_bloom"),
-                                  _ym("guardian_of_narukami")}
+                                  _ym("guardian_of_narukami"),
+                                  _ym("cliffhanger"), _ym("sakura_canopy")}
 
 
 def test_a_yae_kinds_own_block_counts_for_red_ink_in_both_engines():
     """Red Ink rides a `yae` kind's own Block, so the filter keeps it. The
     refill (2026-10-16): Hide Behind the Shrine's "gain 5 more" is one, the
     only row carrying the C# `IYaeBlockCard` marker. Sakura Canopy's Block
-    is on the calculated rail (a `CalculatedBlockVar`), which the game's own
-    GainsBlock answers."""
+    is a flat BlockVar since the Yae block and Edit pass (2026-10-19), which
+    the game's own GainsBlock answers."""
     hide = _card("hide_behind_the_shrine")
     assert Y.gives_block(hide) and Y.affects(hide, Y.RED_INK)
     marked = set()
@@ -272,7 +274,7 @@ def test_a_yae_kinds_own_block_counts_for_red_ink_in_both_engines():
             marked.add(re.search(r"Sheet entry: id=(\S+)", text).group(1))
     assert marked == {_ym("hide_behind_the_shrine")}
     src = (GENERATED / "ProtoYmSakuraCanopy.cs").read_text(encoding="utf-8")
-    assert "CalculatedBlockVar(" in src
+    assert "new BlockVar(6m" in src
 
 
 def test_the_red_ink_rule_says_where_it_goes():

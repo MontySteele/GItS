@@ -2746,7 +2746,7 @@
       "innate": true
     },
     "proto_ym_sakura_canopy": {
-      "formula_per": 1
+      "block": 3
     },
     "proto_ym_sakura_channeling": {
       "cost": -1

@@ -53,6 +53,18 @@ public interface ISakuraPlantShapeCard
 }
 
 /// <summary>
+/// A planting card with more than one plant op (Twin Sakura, the Yae block
+/// and Edit pass, 2026-10-19: "Plant a Sakura and a Kitsune Sakura"): every
+/// plant it makes, in order, which the display previews in place of
+/// <see cref="ISakuraPlantShapeCard.SakuraPlantKind"/> times YmAmount.
+/// Display only: no rule reads it.
+/// </summary>
+public interface ISakuraPlantMixCard
+{
+    System.Collections.Generic.IReadOnlyList<YaeSakuraKind> SakuraPlantKinds { get; }
+}
+
+/// <summary>
 /// A card whose `yae` kind gives its own Block (block_per_sakura,
 /// block_per_edit, and the refill's wither_newest_block, Hide Behind the
 /// Shrine; block_per_edit has no row since Print Run took the calculated rail,

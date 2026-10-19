@@ -3299,6 +3299,22 @@ def yae_plant_shape(card: dict) -> tuple[str, str] | None:
     return None
 
 
+def yae_plant_mix(card: dict) -> list[str] | None:
+    """The `YaeSakuraKind` member names of every plant a row with MORE than
+    one `plant` op makes, in order, for `ISakuraPlantMixCard` (Twin Sakura,
+    the Yae block and Edit pass, 2026-10-19); None for every other row.
+    Display only."""
+    ops = [fx for fx in iter_effects(card.get("effects") or [])
+           if fx.get("op") == "yae" and fx.get("kind") in YAE_PLANT_KINDS]
+    if len(ops) < 2:
+        return None
+    if any(fx["kind"] != "plant" for fx in ops):
+        raise ValueError(f"{card.get('id')}: a mixed plant row plants only "
+                         "with `plant` ops")
+    return [YAE_SAKURA_KINDS.get(fx.get("as"), "Thunder")
+            for fx in ops for _ in range(int(fx.get("amount", 1)))]
+
+
 def yae_plants_sakura(card: dict) -> bool:
     """Does this row's own play plant a Sakura? Sim twin:
     `yae_shrine.plants_sakura`."""
@@ -17955,6 +17971,18 @@ def emit(
             "\n\n    /// <summary>The kind it plants (Replanting's and Genre "
             "Shift's are read off the shrine).</summary>\n"
             f"    public YaeSakuraKind SakuraPlantKind => YaeSakuraKind.{yae_shape[1]};")
+        # Yae block and Edit pass, 2026-10-19: a row with more than one plant
+        # op (Twin Sakura's "a Sakura and a Kitsune Sakura") previews every
+        # plant in order, not only its first op's.
+        mix = yae_plant_mix(card)
+        if mix is not None:
+            interfaces += ", ISakuraPlantMixCard"
+            kinds = ", ".join(f"YaeSakuraKind.{k}" for k in mix)
+            yae_shape_member += (
+                "\n\n    /// <summary>Every plant, in order (the Sakura display's "
+                "preview).</summary>\n"
+                "    public IReadOnlyList<YaeSakuraKind> SakuraPlantKinds => "
+                f"new[] {{ {kinds} }};")
     # The same rule's Block fact: a `yae` kind that gives the card's own
     # Block (Hide Behind the Shrine's "gain 5 more", the refill) declares no
     # BlockVar, so `GainsBlock` cannot see it

@@ -254,8 +254,10 @@ public static class YaeSakuraSlots
             return null;
         var standing = YaeShrineLedger.For(yae).Standing;
         var cap = YaeShrine.MaxSakura(yae);
-        var plants = PlantsOf(shape.SakuraPlantShape, shape.SakuraPlantKind,
-                              YaeCards.Var(card, "YmAmount"), standing, cap);
+        var plants = card is ISakuraPlantMixCard mix
+            ? mix.SakuraPlantKinds
+            : PlantsOf(shape.SakuraPlantShape, shape.SakuraPlantKind,
+                       YaeCards.Var(card, "YmAmount"), standing, cap);
         return Preview(standing, cap, shape.SakuraPlantShape, plants);
     }
 

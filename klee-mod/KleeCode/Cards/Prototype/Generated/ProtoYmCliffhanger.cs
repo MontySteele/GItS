@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoYmCliffhanger : CustomCardModel, IElementalCard, ICharacterCard
+public sealed class ProtoYmCliffhanger : CustomCardModel, IElementalCard, ICharacterCard, ISakuraPlanterCard, ISakuraPlantShapeCard
 {
     /// <summary>Sheet: all Yae attacks apply Electro (catalyst-grade cadence).</summary>
     public Element Element => Element.Electro;
@@ -44,20 +44,26 @@ public sealed class ProtoYmCliffhanger : CustomCardModel, IElementalCard, IChara
         new[] { KleeKeywords.AppliesElectro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForEdit(ArmKeywordTips.ForAnnotation(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this, YaeAnnotation.DeadlineExtension, false), this);
+        ArmKeywordTips.ForFullShrine(ArmKeywordTips.ForKitsuneSakura(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Electro), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_cliffhanger");
 
     public override List<(string, string)>? Localization => new()
     {
-        ("title", "Cliffhanger"),
-        ("description", "Deal {Damage:diff()} [gold]Electro[/gold] damage. [gold]Edit[/gold] a card in your hand: [gold]Deadline Extension[/gold]."),
+        ("title", "Kitsune Lantern"),
+        ("description", "Deal {Damage:diff()} [gold]Electro[/gold] damage. Plant a [gold]Kitsune Sakura[/gold]."),
     };
+
+    /// <summary>How this card plants (the Sakura display's preview).</summary>
+    public YaePlantShape SakuraPlantShape => YaePlantShape.Plant;
+
+    /// <summary>The kind it plants (Replanting's and Genre Shift's are read off the shrine).</summary>
+    public YaeSakuraKind SakuraPlantKind => YaeSakuraKind.Kitsune;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(8m, ValueProp.Move)
+            new DamageVar(7m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -75,7 +81,7 @@ public sealed class ProtoYmCliffhanger : CustomCardModel, IElementalCard, IChara
             .Targeting(cardPlay.Target)
             .WithElementHitFx(this)
             .Execute(choiceContext);
-        await YaeCards.Edit(choiceContext, this, cardPlay, YaeAnnotation.DeadlineExtension);
+        await YaeCards.Plant(choiceContext, this, cardPlay, YaeSakuraKind.Kitsune);
     }
 
     protected override void OnUpgrade()

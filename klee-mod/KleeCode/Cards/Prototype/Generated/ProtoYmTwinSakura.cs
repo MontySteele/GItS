@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoYmTwinSakura : CustomCardModel, ICharacterCard, ISakuraPlanterCard, ISakuraPlantShapeCard
+public sealed class ProtoYmTwinSakura : CustomCardModel, ICharacterCard, ISakuraPlanterCard, ISakuraPlantShapeCard, ISakuraPlantMixCard
 {
     /// <summary>Block arrives only from the ruled upgrade (`add: block`), so the
     /// claim moves with it -- see gen_klee_cards `_upgrade_add_lines` (EB-122).</summary>
@@ -42,14 +42,14 @@ public sealed class ProtoYmTwinSakura : CustomCardModel, ICharacterCard, ISakura
     public string CharacterId => "yae";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForFullShrine(ArmKeywordTips.ForSakura(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForFullShrine(ArmKeywordTips.ForKitsuneSakura(ArmKeywordTips.ForSakura(base.ExtraHoverTips, this), this), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_ym_twin_sakura");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Twin Sakura"),
-        ("description", "Plant {YmAmount:diff()} [gold]Sakura[/gold].{IfUpgraded:show: Gain 4 [gold]Block[/gold].|}"),
+        ("description", "Plant a [gold]Sakura[/gold] and a [gold]Kitsune Sakura[/gold].{IfUpgraded:show: Gain 4 [gold]Block[/gold].|}"),
     };
 
     /// <summary>How this card plants (the Sakura display's preview).</summary>
@@ -58,10 +58,13 @@ public sealed class ProtoYmTwinSakura : CustomCardModel, ICharacterCard, ISakura
     /// <summary>The kind it plants (Replanting's and Genre Shift's are read off the shrine).</summary>
     public YaeSakuraKind SakuraPlantKind => YaeSakuraKind.Thunder;
 
+    /// <summary>Every plant, in order (the Sakura display's preview).</summary>
+    public IReadOnlyList<YaeSakuraKind> SakuraPlantKinds => new[] { YaeSakuraKind.Thunder, YaeSakuraKind.Kitsune };
+
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("YmAmount", 2m)
+
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -74,6 +77,7 @@ public sealed class ProtoYmTwinSakura : CustomCardModel, ICharacterCard, ISakura
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await YaeCards.Plant(choiceContext, this, cardPlay);
+        await YaeCards.Plant(choiceContext, this, cardPlay, YaeSakuraKind.Kitsune);
         if (IsUpgraded)
         {
             await CreatureCmd.GainBlock(Owner.Creature, new BlockVar(4m, ValueProp.Move), cardPlay);

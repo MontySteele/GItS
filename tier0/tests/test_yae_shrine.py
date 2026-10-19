@@ -173,16 +173,20 @@ def test_a_plant_does_not_level_the_others_and_a_full_shrine_feeds_the_oldest(ya
                if r["reason"] != "full_shrine") == 7 + 3 + 3
 
 
-def test_twin_sakura_with_two_standing_plants_one_then_feeds_the_oldest(yae):
+def test_twin_sakura_with_two_standing_plants_one_then_replaces_the_oldest(yae):
+    # The Yae block and Edit pass (2026-10-19): a Sakura and a Kitsune
+    # Sakura. Into the last slot the Sakura plants; the Kitsune then meets a
+    # full shrine, and the Sakura closest to withering (a strike Sakura, not
+    # its kind) acts, withers and is replaced.
     st = _state()
     _play(st, _ym("twin_sakura"))
-    assert [s.level for s in _led(st).sakura] == [1, 1]
-    first = _led(st).sakura[0]
-    first.turns_left = 1
+    assert [(s.kind, s.level) for s in _led(st).sakura] == [
+        (Y.THUNDER, 1), (Y.KITSUNE, 1)]
+    _led(st).sakura[0].turns_left = 1
     _play(st, _ym("twin_sakura"))
-    assert len(_led(st).sakura) == 3
-    assert [s.level for s in _led(st).sakura] == [2, 1, 1]
-    assert first.turns_left == Y.SAKURA_TURNS
+    assert [(s.kind, s.level) for s in _led(st).sakura] == [
+        (Y.KITSUNE, 1), (Y.THUNDER, 1), (Y.KITSUNE, 1)]
+    assert [r["reason"] for r in _strikes(st)] == ["full_shrine"]
 
 
 def test_a_sakura_withers_after_three_strikes_and_tenko_refreshes(yae):
@@ -221,7 +225,7 @@ def test_extend_lengthens_and_narukami_ray_levels(yae):
 
 def test_the_lure_aims_every_strike_this_turn_and_expires(yae):
     st = _state(n=3)
-    _play(st, _ym("twin_sakura"))
+    Y.plant(st, 2)          # Twin Sakura plants a Kitsune since 2026-10-19
     _play(st, _ym("foxfire_lure"))
     assert _led(st).lure is st.enemies[0]
     Y.turn_end(st)
@@ -562,7 +566,7 @@ def test_an_edit_overwrites_and_deadline_retains(yae):
     c = loader.get_card("strike")
     st.player.hand.append(c)
     _play(st, _red_ink_edit())
-    _play(st, _ym("cliffhanger"))
+    Y.annotate(st, c, Y.DEADLINE)        # Cliffhanger's Edit went 2026-10-19
     assert Y.temp(c) == Y.DEADLINE and c.retain
     assert c.enchant_damage == 0
     _play(st, _red_ink_edit())
@@ -706,10 +710,13 @@ def test_twin_sakura_into_a_full_shrine_strikes_per_plant(yae):
     st = _state()
     Y.plant(st, 3)
     _play(st, _ym("twin_sakura"))
-    # Plant one feeds the oldest (now the newest-refreshed, still first);
-    # plant two feeds it again: two strikes, at Levels 1 then 2.
+    # Plant one (a Sakura) feeds the oldest, its kind: a strike at Level 1,
+    # and Level 2. Plant two (a Kitsune, 2026-10-19) meets it again: it
+    # strikes at Level 2, withers, and the Kitsune takes its place at that
+    # Level (Levels carry over).
     assert [r["level"] for r in _strikes(st)] == [1, 2]
-    assert [s.level for s in _led(st).sakura] == [3, 1, 1]
+    assert [(s.kind, s.level) for s in _led(st).sakura] == [
+        (Y.THUNDER, 1), (Y.THUNDER, 1), (Y.KITSUNE, 2)]
 
 
 def test_a_plant_below_the_cap_strikes_nothing(yae):
