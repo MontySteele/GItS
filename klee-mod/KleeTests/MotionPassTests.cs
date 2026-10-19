@@ -116,6 +116,30 @@ public class MotionPassTests
     }
 
     [Fact]
+    public void A_set_off_attacks_own_hit_is_sent_as_the_hop_not_the_throw()
+    {
+        // Kaboom! (in-game check 2026-10-16): on a dense field the Bombs
+        // outlast the 0.85 s hop, so the card's own "Attack" reached an idle
+        // tree and threw. Inside a Set off Attack's play it is the hop again.
+        string Remap(string trigger, bool inPlay) => (string)Motion()
+            .GetMethod("RemapDuringPlay", All)!.Invoke(null, new object[] { trigger, inPlay })!;
+
+        Assert.Equal("SetOff", Remap("Attack", true));
+        Assert.Equal("Attack", Remap("Attack", false));
+        Assert.Equal("Hit", Remap("Hit", true));
+        Assert.Equal("Dead", Remap("Dead", true));
+        Assert.Equal("Cast", Remap("Cast", true));
+        // Travel to the current state is a no-op, so a hop still playing is
+        // not restarted; an ended one hops again on the hit.
+        Assert.Equal("setoff", Select("SetOff", false, Full.Append("setoff").ToArray()));
+        // Only a Set off ATTACK is marked; the play's start clears the mark.
+        var src = RepoFile("klee-mod/KleeCode/Vfx/CardPlayMotion.cs");
+        Assert.Contains("trigger == SetOffTrigger && card.Type == CardType.Attack", src);
+        Assert.Contains("CardPlayMotion.RemapDuringPlay(",
+            RepoFile("klee-mod/KleeCode/Vfx/CreatureAnimationRouter.cs"));
+    }
+
+    [Fact]
     public void Klees_scene_opts_in_to_the_idle_desync()
     {
         var scene = RepoFile("klee-mod/pck-src/klee/model/combat.tscn");

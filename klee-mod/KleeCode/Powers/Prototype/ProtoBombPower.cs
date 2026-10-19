@@ -334,6 +334,50 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
     /// two long.</summary>
     private enum ReactionKind { None, Vaporize, Melt }
 
+    /// <summary>
+    /// Which charges of a pile of <paramref name="count"/> react, and with
+    /// what, in set-off order: <see cref="PredictedSetOffDamage"/>'s own walk.
+    /// The first charge meets the aura and consumes it, so the rest land bare;
+    /// Alice's Teapot makes the first a pretend Vaporize and the second meets
+    /// the real aura; the Vermillion Pact puts the aura back, so every charge
+    /// after the Teapot's reacts. <paramref name="real"/> is "Vaporize",
+    /// "Melt" or null. PURE.
+    /// </summary>
+    public static string?[] ReactionTags(int count, bool teapot,
+                                         string? real, bool pact)
+    {
+        var tags = new string?[System.Math.Max(0, count)];
+        var pending = real;
+        for (var i = 0; i < tags.Length; i++)
+        {
+            if (i == 0 && teapot)
+            {
+                tags[i] = "Vaporize";
+                continue;
+            }
+            tags[i] = pending;
+            if (!pact) pending = null;
+        }
+        return tags;
+    }
+
+    /// <summary><see cref="ReactionTags"/> for this pile on its enemy now.
+    /// All null on a canonical copy. PURE.</summary>
+    private string?[] ReactionTagsNow()
+    {
+        if (_charges.Count == 0 || !IsMutable || Owner is not { } target)
+            return new string?[_charges.Count];
+        string? real = AuraCmd.Find(target)?.Element switch
+        {
+            Elements.Element.Hydro => "Vaporize",
+            Elements.Element.Cryo => "Melt",
+            _ => null,
+        };
+        return ReactionTags(_charges.Count, Relics.AlicesTeapot.Pending(Applier),
+                            real,
+                            Applier != null && VermillionPactPower.Holds(Applier));
+    }
+
     public override PowerType Type => PowerType.Buff;
 
     /// <summary>Counter: charges are spent by going off, not ticked by time.</summary>
@@ -538,8 +582,16 @@ public sealed partial class ProtoBombPower : PowerModel, ILocalizationProvider
                 return string.Join(" / ", sizes);
             }
 
+            // KIT DISPLAY PASS (2026-10-19; Klee suite 1, 2026-10-05, item 2):
+            // "deals 111 with Melt" read as if the whole pile took the 1.75,
+            // and only the charge that meets the aura does. The charge that
+            // reacts says so beside its own size. The total's clause stays:
+            // a lone charge needs no tag, and the face's sentence is at its
+            // ceiling (`tools/lint_text_conventions.py` measures the source).
+            var tags = pile.ReactionTagsNow();
             return string.Join(" / ", sizes.Select(
-                (size, index) => Ordinal(index + 1) + " " + size));
+                (size, index) => Ordinal(index + 1) + " " + size
+                    + (tags[index] is { } tag ? " (" + tag + ")" : string.Empty)));
         }
 
         /// <summary>`1st`, `2nd`, `3rd`, `4th` ... -- the position of one

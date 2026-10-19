@@ -170,6 +170,42 @@ public class BombBadgeHalvesTests
             ProtoBombs.Place(live, klee.Creature, new ProtoBombs.Charge(9))));
     }
 
+    [Fact]
+    public void Only_the_charge_that_meets_the_aura_is_tagged_with_the_melt()
+    {
+        // Klee suite 1 (2026-10-05, item 2): "deals 111 with Melt" read as if
+        // the whole pile took the 1.75; only the first charge meets the aura.
+        var klee = Seat.Klee();
+        var cold = Seat.Klee(60).WithPower<CryoAuraPower>(2).Creature;
+        var pile = ProtoBombs.Place(cold, klee.Creature, new ProtoBombs.Charge(12));
+        pile.AddCharge(new ProtoBombPower.ProtoCharge(8, false, 0));
+
+        Assert.Equal("1st 12 (Melt) / 2nd 8", Charges(pile));
+
+        // A lone charge keeps its bare size: the total's clause says it.
+        var wet = Seat.Klee(60).WithPower<HydroAuraPower>(2).Creature;
+        Assert.Equal("9", Charges(
+            ProtoBombs.Place(wet, klee.Creature, new ProtoBombs.Charge(9))));
+    }
+
+    [Fact]
+    public void The_reaction_tags_walk_the_teapot_and_the_pact_like_the_forecast()
+    {
+        // `PredictedSetOffDamage`'s loop: the first charge consumes the aura;
+        // the Teapot's pretend Vaporize consumes nothing real; the Pact puts
+        // the aura back for every later charge.
+        Assert.Equal(new string?[] { "Melt", null, null },
+                     ProtoBombPower.ReactionTags(3, false, "Melt", false));
+        Assert.Equal(new string?[] { "Vaporize", "Melt", null },
+                     ProtoBombPower.ReactionTags(3, true, "Melt", false));
+        Assert.Equal(new string?[] { "Melt", "Melt", "Melt" },
+                     ProtoBombPower.ReactionTags(3, false, "Melt", true));
+        Assert.Equal(new string?[] { "Vaporize", null },
+                     ProtoBombPower.ReactionTags(2, true, null, true));
+        Assert.Equal(new string?[] { null, null },
+                     ProtoBombPower.ReactionTags(2, false, null, false));
+    }
+
     // ---- text pass 2026-09-25: the Sparks a Set off here gives -----------
 
     [Fact]
