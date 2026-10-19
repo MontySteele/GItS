@@ -67,6 +67,9 @@ cut to about 350 characters is `git show 3ce4f8c35:docs/current/BACKLOG.md`.
 
 ## Seat page (the blind seat's view: `blindplay_*` render and the bridge)
 
+- `observe` refuses ("this page printed the enemy list twice") when two Decimillipede segments wait to Reattach; both seats of the Fontaine round hit it (`review/records/fontaine-round-2026-10-19.md`).
+- The Colorless Potion offers Beat Down (play 3 Attacks from the discard) with no note when the Discard Pile has no Attacks (Fontaine round, lane 1).
+
 
 - Copy numbers renumber after a play, so seats pick the wrong copy ("Frantic Escape (2)"; Kokomi round 3 lane 5 wasted The Shape of Water on a renumbered Sting). Numbers now hold until the next `observe` (`resolve_shown_card`); stable handles for a whole turn need a per-card id on the wire.
 - The Neow bundle page printed one pack's rows jumbled (a line missing, its text under another card). Not reproduced; needs the raw `bundle_select` state from such a screen.
