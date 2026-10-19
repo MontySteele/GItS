@@ -840,13 +840,23 @@ ROOM_NOT_OPEN = "room is not open"
 NO_PROCEED = "No proceed button"
 REST_PROCEED_TRIES = 16
 
+# Klee scaling round 2 (2026-10-06, lane 3). A Durin chooser twice answered
+# "still opening". `NChooseACardSelectionScreen` drops a press in its first
+# 350 ms, and the bridge says so with nothing chosen ("The screen was still
+# opening and did not take the pick - nothing was chosen, choose again",
+# `McpMod.Actions.cs` `ExecuteSelectCard`). That is the same moment as
+# `ROOM_NOT_OPEN`, and re-sending cannot pick twice: a press that did land
+# makes the next one answer "already made", which is not retried.
+CHOOSER_OPENING = "still opening and did not take the pick"
+CHOOSER_OPENING_TRIES = 8
+
 
 def post_when_the_room_is_open(wire: Any, action: str,
                                params: dict[str, Any], *, tries: int,
                                delay: float, screen: str = "") -> dict[str, Any]:
     """POST, and re-POST while the bridge says the room is still loading
     (or, for a `proceed` on a solo rest site, while its Proceed button is
-    not yet up)."""
+    not yet up, or while a chooser is still opening and took no pick)."""
     proceed_tries = (REST_PROCEED_TRIES
                      if action == "proceed" and screen == "rest_site" else 0)
     result = wire.post(action, **params)
@@ -854,7 +864,9 @@ def post_when_the_room_is_open(wire: Any, action: str,
         error = _text((result or {}).get("error")
                       if isinstance(result, dict) else "")
         if not (ROOM_NOT_OPEN in error
-                or (NO_PROCEED in error and attempt < proceed_tries)):
+                or (NO_PROCEED in error and attempt < proceed_tries)
+                or (CHOOSER_OPENING in error
+                    and attempt < CHOOSER_OPENING_TRIES)):
             break
         time.sleep(delay)
         result = wire.post(action, **params)
