@@ -349,6 +349,32 @@ public static class ResolutionLedger
         NoteEvent(EtherealExhausted, card, string.Empty, string.Empty,
                   onPlayer: true);
 
+    /// <summary>Seat page backlog (2026-10-19): a relic that worked and
+    /// left nothing on the board saying so -- the Tamakushi Casket's Block,
+    /// Sango Pearl's refund, Ocean-Hued Clam's Mend, Everlasting Moonglow's
+    /// return or its skip at a full hand. `Card` is the relic's printed
+    /// title and `Power` what it did, in a few plain words. The page prints
+    /// "Tamakushi Casket: gained 1 Block" under "Since last page".</summary>
+    public const string RelicDid = "relic";
+
+    /// <summary>File one <see cref="RelicDid"/> event.</summary>
+    public static void NoteRelic(string relic, string what) =>
+        NoteEvent(RelicDid, relic ?? string.Empty, string.Empty,
+                  what ?? string.Empty, onPlayer: true);
+
+    /// <summary>Seat page backlog (2026-10-19): an orb's passive or evoke
+    /// (the base game's Defect orbs), which no card play files. `Card` is the
+    /// orb's printed title and `Power` is <see cref="OrbPassive"/> or
+    /// <see cref="OrbEvoked"/>.</summary>
+    public const string OrbFired = "orb";
+    public const string OrbPassive = "passive";
+    public const string OrbEvoked = "evoked";
+
+    /// <summary>File one <see cref="OrbFired"/> event.</summary>
+    public static void NoteOrb(string orb, bool evoked) =>
+        NoteEvent(OrbFired, orb ?? string.Empty, string.Empty,
+                  evoked ? OrbEvoked : OrbPassive, onPlayer: true);
+
     private static long _seq =
         System.DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() * 1000;
 
@@ -411,19 +437,33 @@ public static class ResolutionLedger
         new HitsAsScope(label);
 
     /// <summary>The seat page's label for an element's hit: its element,
-    /// and the amplifying reaction where one multiplied it ("Pyro, Vaporize").
-    /// Display only (`ResolutionLedger.HitsAs`).</summary>
+    /// and the amplifying reaction where one multiplied it, with its factor
+    /// ("Pyro, Vaporize 1.5x"; seat page backlog 2026-10-19: Rosaria's Melt
+    /// printed 15 from a written 9 and no factor said why). Display only
+    /// (`ResolutionLedger.HitsAs`).</summary>
     public static string ElementLabel(Element element, Reaction reaction,
                                       decimal mult)
     {
         var name = element == Element.None ? string.Empty : element.ToString();
         if (mult > 1m && reaction is Reaction.Vaporize or Reaction.Melt)
         {
-            var amp = ReactionLog.PrintedName(reaction);
+            var amp = ReactionLog.PrintedName(reaction) + " " + Factor(mult);
             return name.Length == 0 ? amp : name + ", " + amp;
         }
         return name;
     }
+
+    /// <summary>An amplifier's factor as the reaction preview prints it:
+    /// "1.5x", "2x", "1.75x". PURE.</summary>
+    public static string Factor(decimal mult) =>
+        mult.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)
+        + "x";
+
+    /// <summary>The reaction row's detail for a Vaporize or Melt
+    /// (<c>ReactionEffects.Resolve</c>): "The hit that set it off dealt 1.5x
+    /// damage." PURE.</summary>
+    public static string AmplifiedDetail(decimal mult) =>
+        "The hit that set it off dealt " + Factor(mult) + " damage.";
 
     private sealed class HitsAsScope : System.IDisposable
     {

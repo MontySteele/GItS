@@ -114,9 +114,19 @@ public class TamakushiCasket : CustomRelicModel
         var block = Block;
         if (block <= 0) return;
         Flash();
+        // Seat page backlog (2026-10-19): "could not tell from the screen
+        // whether it fired". The page prints it under "Since last page".
+        ResolutionLedger.NoteRelic(RelicName, BlockNote(block));
         await CreatureCmd.GainBlock(kokomi, block, ValueProp.Unpowered, null,
                                     fast: true);
     }
+
+    /// <summary>The page's words for one payout: "gained 1 Block". PURE.
+    /// </summary>
+    public static string BlockNote(int block) => $"gained {block} Block";
+
+    /// <summary>The printed title the page names it by.</summary>
+    public virtual string RelicName => SourceName;
 
     /// <summary>
     /// The relic's own name, for any line that names it. A second spelling of
@@ -186,6 +196,9 @@ public sealed class WatatsumiCasket : TamakushiCasket
     public const int WatatsumiBlock = 2;
 
     public override int Block => WatatsumiBlock;
+
+    /// <summary>The printed title the page names it by.</summary>
+    public override string RelicName => "Watatsumi Casket";
 
     /// <summary>Already the upgrade: nothing further for Orobas.</summary>
     public override RelicModel? GetUpgradeReplacement() => null;

@@ -178,6 +178,12 @@ public static class ReactionLog
     /// </summary>
     public static void DetailNext(string detail) => _nextDetail = detail;
 
+    /// <summary><see cref="DetailNext"/>, unless a sentence is already
+    /// waiting (an element-only Vaporize's "nothing to amplify" wins over the
+    /// factor; seat page backlog 2026-10-19).</summary>
+    public static void DetailNextIfNone(string detail) =>
+        _nextDetail ??= detail;
+
     /// <summary>The damage-event boundary for <see cref="DetailNext"/>,
     /// called beside <c>ReactionEffects.ClearShatterMark</c>.</summary>
     public static void ClearDetail() => _nextDetail = null;

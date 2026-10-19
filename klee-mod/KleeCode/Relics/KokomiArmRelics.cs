@@ -154,8 +154,19 @@ public sealed class SangoPearl : KokomiArmRelic
         if (!Claims(cardPlay, kokomi)) return;
         var paid = cardPlay.Resources.EnergySpent;
         Flash();
+        // Seat page backlog (2026-10-19): the page says the discount is spent.
+        ResolutionLedger.NoteRelic(PageName, SpentNote((int)paid));
         if (paid > 0) await PlayerCmd.GainEnergy(paid, Owner);
     }
+
+    /// <summary>The printed title the page names it by.</summary>
+    public const string PageName = "Sango Pearl";
+
+    /// <summary>The page's words: "refunded 2 Energy, used this combat",
+    /// or "used this combat" for a write that cost nothing. PURE.</summary>
+    public static string SpentNote(int refunded) =>
+        refunded > 0 ? $"refunded {refunded} Energy, used this combat"
+                     : "used this combat";
 }
 
 /// <summary>Uncommon. "The first time each turn you play a Companion, gain 4
@@ -291,7 +302,30 @@ public sealed class EverlastingMoonglow : KokomiArmRelic
         if (!KokomiOverhaulLedger.ClaimOncePerTurn(kokomi, Latch)) return;
         if (!Returnable(card) || card!.Owner?.Creature != kokomi) return;
         KokomiArmRelics.FlashAll<EverlastingMoonglow>(kokomi);
+        // Seat page backlog (2026-10-19): a full hand sends the card to the
+        // Discard Pile (the base game's rule), and the page says which.
+        string name;
+        try { name = card.Title?.ToString() ?? string.Empty; }
+        catch (Exception) { name = string.Empty; }
+        var full = kokomi.Player is { } player
+                   && PileType.Hand.GetPile(player).Cards.Count
+                      >= CardPile.MaxCardsInHand;
+        ResolutionLedger.NoteRelic(PageName, ReturnNote(name, full));
         await CardPileCmd.Add(card, PileType.Hand);
+    }
+
+    /// <summary>The printed title the page names it by.</summary>
+    public const string PageName = "Everlasting Moonglow";
+
+    /// <summary>The page's words: "returned Ward to your hand", or, at a
+    /// full hand, "your hand was full, so Ward went to your Discard Pile".
+    /// PURE.</summary>
+    public static string ReturnNote(string card, bool handFull)
+    {
+        var what = card.Length > 0 ? card : "the card";
+        return handFull
+            ? $"your hand was full, so {what} went to your Discard Pile"
+            : $"returned {what} to your hand";
     }
 }
 
@@ -330,8 +364,20 @@ public sealed class OceanHuedClam : KokomiArmRelic
         var amount = MendFor(kokomi);
         if (amount <= 0) return;
         KokomiArmRelics.FlashAll<OceanHuedClam>(kokomi);
-        await KokomiRules.Mend(choiceContext, kokomi, amount);
+        var landed = await KokomiRules.Mend(choiceContext, kokomi, amount);
+        // Seat page backlog (2026-10-19): the Mend had no page line.
+        ResolutionLedger.NoteRelic(PageName, MendNote(amount, landed));
     }
+
+    /// <summary>The printed title the page names it by.</summary>
+    public const string PageName = "Ocean-Hued Clam";
+
+    /// <summary>The page's words: "Mend 1, healed 1 HP", or "Mend 1, healed
+    /// 0 HP (Mend stops at your HP when the fight began)". PURE.</summary>
+    public static string MendNote(int amount, int landed) =>
+        $"Mend {amount}, healed {landed} HP"
+        + (landed < amount && landed <= 0
+            ? " (Mend stops at your HP when the fight began)" : "");
 }
 
 /// <summary>Rare. "Your Stings and Wards are not Ethereal." Read where every

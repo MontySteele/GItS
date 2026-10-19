@@ -1170,6 +1170,14 @@ def _each(raw: Any) -> int | None:
     return value if value >= 0 else None
 
 
+#: The stage beats no performer makes (`FurinaStageLedger.NoPerformer`).
+_NO_PERFORMER_EVENTS = frozenset({"gain", "spend", "drain", "repay", "hit"})
+
+
+def _no_performer(event: str, row: dict[str, Any]) -> bool:
+    return event in _NO_PERFORMER_EVENTS and _int(row.get("seat"), -1) < 0
+
+
 def _stage_name(row: dict[str, Any]) -> str:
     member = _text(row.get("member"))
     return STAGE_SHORT_NAMES.get(member, _text(row.get("name")))
@@ -1241,8 +1249,13 @@ def furina_stage(player: dict[str, Any]) -> dict[str, Any] | None:
             why = ""
         log.append({
             "event": event,
-            "member": _text(row.get("member")),
-            "name": _stage_name(row),
+            # Seat page backlog (2026-10-19): a beat no performer made
+            # carries the enum's default, Charlotte, on an older mod; her
+            # name in the log raised her glossary row with no Charlotte on
+            # screen (Furina suite 3, lane 3). `FurinaStageLedger.NoPerformer`.
+            "member": "" if _no_performer(event, row)
+            else _text(row.get("member")),
+            "name": "" if _no_performer(event, row) else _stage_name(row),
             "seat": _int(row.get("seat"), -1),
             "key": _seat_key(row.get("seat_key")),
             "fanfare": _int(row.get("fanfare")),
@@ -1776,7 +1789,12 @@ PAGE_EVENT_KINDS = ("drawn", "negated", "triggered", "stolen", "returned",
                     # Kokomi round 3 A-list (2026-10-13): a generated card
                     # sent to the discard pile by a full hand, and the
                     # turn's end Ethereal Exhaust.
-                    "discarded", "ethereal")
+                    "discarded", "ethereal",
+                    # Seat page backlog (2026-10-19): a relic that worked with
+                    # nothing on the board to say so (the Tamakushi Casket's
+                    # Block, Sango Pearl, Ocean-Hued Clam, Everlasting
+                    # Moonglow), and an orb's passive or evoke.
+                    "relic", "orb")
 #: The event kinds a page OUTSIDE a fight prints (the reward screen after it).
 OUTSIDE_FIGHT_EVENTS = frozenset({"curtain"})
 
