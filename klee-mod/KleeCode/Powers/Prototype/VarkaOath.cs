@@ -940,7 +940,7 @@ public static class VarkaOath
                     * (ledger.PaysTwice > 0 ? 2 : 1);
         for (var pay = 0; pay < times; pay++)
         {
-            await Pay(choiceContext, target, dealer, current);
+            await Pay(choiceContext, target, dealer, current, fang: true);
             if (twin && IsOathElement(swirled))
             {
                 await Pay(choiceContext, target, dealer, swirled);
@@ -1073,11 +1073,23 @@ public static class VarkaOath
     /// widened Pyro's until element identities; Absolute Zero widened Cryo's
     /// until the rebalance, 2026-10-03, made it a debuff payoff,
     /// <see cref="AbsoluteZeroPower"/>.)
+    /// <paramref name="fang"/> (2026-10-19, Varka Fang pick 2a): this is
+    /// Boreas's Fang's current-element payout, not Twin Gales' Swirled one,
+    /// so the run telemetry tags it (`fang_*` fields,
+    /// <see cref="Diagnostics.PlayTelemetry"/>). Measurement only: the tag
+    /// changes no number and no argument.
     /// </summary>
     private static async Task Pay(
         PlayerChoiceContext choiceContext, Creature target, Creature dealer,
-        Element element)
+        Element element, bool fang = false)
     {
+        using var tag = fang && element != Element.None
+            ? Diagnostics.DamageCredit.OpenFang(element.ToString())
+            : default;
+        if (fang && element != Element.None)
+        {
+            Diagnostics.PlayTelemetry.FangPaid(dealer, element.ToString());
+        }
         var enemies = dealer.CombatState?.HittableEnemies.ToList()
                       ?? new List<Creature>();
         switch (element)
@@ -1091,15 +1103,32 @@ public static class VarkaOath
                 }
                 break;
             case Element.Hydro:
+            {
+                var blockBefore = fang ? (int)dealer.Block : 0;
                 await CreatureCmd.GainBlock(dealer, VarkaLaw.SwirlHydroBlock,
                     ValueProp.Unpowered, null, fast: true);
+                if (fang)
+                {
+                    Diagnostics.PlayTelemetry.FangBlockGained(
+                        dealer, (int)dealer.Block - blockBefore);
+                }
                 break;
+            }
             case Element.Cryo:
                 if (target.IsAlive)
                 {
+                    var vulnBefore = fang
+                        ? Diagnostics.ReactionTally.Stacks<VulnerablePower>(target)
+                        : 0;
                     await PowerCmd.Apply<VulnerablePower>(
                         choiceContext, target, VarkaLaw.SwirlCryoVulnerable,
                         applier: dealer, cardSource: null);
+                    if (fang)
+                    {
+                        Diagnostics.PlayTelemetry.FangVulnerableApplied(
+                            dealer, target, vulnBefore,
+                            Diagnostics.ReactionTally.Stacks<VulnerablePower>(target));
+                    }
                 }
                 break;
             case Element.Electro:

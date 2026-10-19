@@ -99,7 +99,7 @@ def test_the_page_prints_his_element_his_oath_and_what_a_swirl_pays():
     lines = _block(page)
     assert lines[0] == "- Current element: Pyro."
     assert lines[1] == "- Oath: Pyro 2, Hydro 0, Electro 1, Cryo 0."
-    assert lines[2] == "- Your Swirls deal 3 damage to that enemy."
+    assert lines[2] == "- Your Swirls deal 5 damage to that enemy."
     auras = [line for line in lines if line.startswith("- **Hilichurl")]
     assert len(auras) == 3
     assert "Pyro: an Anemo hit Swirls it." in auras[0]
@@ -128,7 +128,7 @@ def test_no_badge_still_prints_his_block_with_zero_counts():
 
 def test_every_current_element_names_its_own_payout():
     for element, sentence in (
-            ("Pyro", "Your Swirls deal 3 damage to that enemy."),
+            ("Pyro", "Your Swirls deal 5 damage to that enemy."),
             ("Hydro", "Your Swirls give you 3 Block."),
             ("Cryo", "Your Swirls apply 1 Vulnerable to that enemy."),
             ("Electro", "Your Swirls deal 3 damage to ALL enemies.")):
@@ -165,7 +165,7 @@ def test_the_block_is_built_off_the_wires_own_rows():
     oath = combat["oath"]
     assert oath["element"] == "Pyro"
     assert oath["counts"] == {"Pyro": 2, "Hydro": 0, "Electro": 1, "Cryo": 0}
-    assert oath["payout"] == "Your Swirls deal 3 damage to that enemy."
+    assert oath["payout"] == "Your Swirls deal 5 damage to that enemy."
     assert [r["element"] for r in oath["auras"]] == ["Pyro", "Hydro", None]
     assert all("state" not in r for r in oath["auras"])
 

@@ -128,6 +128,55 @@ public static class DamageCredit
         return Open(source, kind, label);
     }
 
+    // ---- Boreas's Fang's payout (2026-10-19, Varka Fang pick 2a) ----------
+
+    private static readonly AsyncLocal<string?> _fang = new();
+
+    /// <summary>The element of the Boreas's Fang payout resolving on this
+    /// call chain ("Pyro", "Electro"), or null. Read by
+    /// <see cref="PlayTelemetry"/> to file `fang_damage_by_element`. It is a
+    /// TAG BESIDE the credit scope, not a scope of its own, so the hit keeps
+    /// its kind and its `damage_by_source` key ("(Swirl)") unchanged.
+    /// Everything awaited inside the payout carries the tag: a death trigger
+    /// the payout's hit sets off is tagged too (rare; accepted).</summary>
+    public static string? FangElement => _fang.Value;
+
+    /// <summary>Restores the Fang tag that was set before; a default value
+    /// restores nothing.</summary>
+    public readonly struct FangScope : IDisposable
+    {
+        private readonly string? _prior;
+        private readonly bool _set;
+
+        internal FangScope(string? prior)
+        {
+            _prior = prior;
+            _set = true;
+        }
+
+        public void Dispose()
+        {
+            if (_set) _fang.Value = _prior;
+        }
+    }
+
+    /// <summary>Tags the hits of one Fang payout of
+    /// <paramref name="element"/>. Call only from an <c>async</c> method
+    /// (<c>VarkaOath.Pay</c>), for the header's reason.</summary>
+    public static FangScope OpenFang(string element)
+    {
+        try
+        {
+            var prior = _fang.Value;
+            _fang.Value = element;
+            return new FangScope(prior);
+        }
+        catch (Exception)
+        {
+            return default;
+        }
+    }
+
     /// <summary>The seat a creature's damage belongs to: a pet's owner, else
     /// the creature's own player, else nobody (an enemy).</summary>
     public static Player? OwnerOf(Creature? creature)

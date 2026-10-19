@@ -288,11 +288,11 @@ public class VarkaPrototypeTests : IDisposable
     [Fact]
     public void The_swirl_payout_numbers_are_the_papers()
     {
-        Assert.Equal(3, VarkaLaw.SwirlPyroDamage);
+        Assert.Equal(5, VarkaLaw.SwirlPyroDamage);
         Assert.Equal(3, VarkaLaw.SwirlHydroBlock);
         Assert.Equal(1, VarkaLaw.SwirlCryoVulnerable);
         Assert.Equal(3, VarkaLaw.SwirlElectroDamageAll);
-        Assert.Equal("Your Swirls deal 3 damage to that enemy.",
+        Assert.Equal("Your Swirls deal 5 damage to that enemy.",
                      VarkaOath.PayoutSentence(Element.Pyro));
         Assert.Equal("Your Swirls deal 3 damage to ALL enemies.",
                      VarkaOath.PayoutSentence(Element.Electro));

@@ -162,7 +162,7 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
     Cryo or Electro any card of his applied. His cards read only its Oath; a
     card that would change it says "(Makes X current)" in combat.
   - **Swirl:** a Swirl he makes gains 1 Oath of the element Swirled; with
-    Boreas's Fang it also pays his current element (Pyro 3 damage, Hydro 3
+    Boreas's Fang it also pays his current element (Pyro 5 damage, Hydro 3
     Block, Cryo 1 Vulnerable, Electro 3 to ALL).
   - **Display:** the Oath dial by the Energy orb
     (`Vfx/Prototype/VarkaOathDial.cs`), four element pips, the current one

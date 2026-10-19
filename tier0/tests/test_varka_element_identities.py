@@ -357,9 +357,9 @@ def test_wildfire_no_longer_widens_the_swirl(varka):
     led.current, led.oath["pyro"] = "pyro", 4
     st.player.powers[V.WILDFIRE_OATH] = 1
     _play(st, _vk("jean_dandelion_breeze"))              # a Skill
-    # The flat 2 to both, then Pyro's 3 to the one Swirled; Anemo is no
+    # The flat 2 to both, then Pyro's payout to the one Swirled; Anemo is no
     # Pyro application.
-    assert sorted(e.hp for e in st.enemies) == [100 - 2 - 3, 100 - 2]
+    assert sorted(e.hp for e in st.enemies) == [100 - 2 - V.SWIRL_PYRO_DAMAGE, 100 - 2]
 
 
 # ---------------------------------------------------------------------------

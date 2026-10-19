@@ -168,7 +168,7 @@ ELEMENT = "anemo"
 ELEMENTS = ("pyro", "hydro", "electro", "cryo")
 
 # --- the Swirl payout of each current element (C# `VarkaLaw`) ---
-SWIRL_PYRO_DAMAGE = 3             # to the enemy Swirled, element-less
+SWIRL_PYRO_DAMAGE = 5             # to the enemy Swirled, element-less (3 -> 5, 2026-10-19 Fang pick 1a)
 SWIRL_HYDRO_BLOCK = 3             # Block, unpowered
 SWIRL_CRYO_VULNERABLE = 1         # on the enemy Swirled
 SWIRL_ELECTRO_DAMAGE_ALL = 3      # to ALL living enemies, element-less
