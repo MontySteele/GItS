@@ -21,11 +21,12 @@ Strength, Exhausts), Feel No Pain (1, 3 Block per Exhaust), Adrenaline (0,
 
 Fontaine's fighters spend their own health (Arlecchino's Bond of Life,
 Lyney's Prop, Wriothesley's Chilling Penalty). The pool already has one such
-card, Arlecchino's Masque of the Red Death. Three more cost HP, and
+card, Arlecchino's Masque of the Red Death. Two more cost HP (Balemoon
+Rising and Miracle Parade), and
 Wriothesley's Rare pays off any HP lost, including to enemy attacks, so it is
 never dead.
 
-## The pool after: 30 cards (8 / 13 / 9), 5 Powers
+## The pool after: 30 cards (8 / 13 / 9), 7 Powers
 
 **Kept as they are (5):** Chevreuse, Ring of Bursting Grenades (taken 24%);
 Charlotte, Snappy Silhouette; Clorinde, Impale the Night (13%); Neuvillette,
@@ -133,6 +134,29 @@ make Energy.
 1. **Build** the 11 rebuilt rows and the 14 new ones on the sheet,
    with codegen, tests, and companion art for the five new characters.
 2. **Then a seat round** (a new card batch): two seats, each with a one-page
-   record, on kits that draft companions.
+   record, on kits that draft companions. One seat is Furina's, and that seat
+   is given Chilling Penalty if she is not offered it (see below).
+
+## What the seat round watches (GPT's review, 2026-10-19)
+
+GPT liked the direction and raised three risks to test, not to fix on paper:
+- **Companion Powers doing the character's work.** Cannon Fire Support,
+  Rebound Hydrotherapy and Neuvillette together give an aura, a Geo hit on it
+  and the Crystallize Block, with no character card. Check against the
+  delete-test (`LAW.md`, Companions): a winning deck with its character cards
+  removed must fall apart. If a seat's deck carries on its companion Powers,
+  Cannon Fire Support is the first to change.
+- **Chilling Penalty on Furina.** Every Drain is an HP loss, so each Drain
+  hits once (`FurinaStage.cs`, `LoseHp`), and drained HP comes back after the
+  fight (`FurinaStageHooks.cs`, the curtain call). Its strength there is how
+  many Drains a turn she makes, not the 5. If it runs away, it fires at most
+  once or twice a turn. Checked: the HP the new cards cost is not Drain, so it
+  does not come back after the fight (it does give Furina Fanfare, as every
+  HP she loses does).
+- **Gracious Rebuke played again and again.** The Strength loss is permanent
+  and the card does not Exhaust, so a long fight can stack it. Its record
+  counts how many times one enemy was hit by it.
+
+Aromatic Explication is allowed to be a specialist answer to Statuses.
 
 No picks.

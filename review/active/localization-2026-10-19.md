@@ -59,3 +59,19 @@ event text, we can do a deeper pass on the rest of the text." So: step one
 now; the first language is Simplified Chinese, gameplay text of the Balance
 kits (Klee, Varka, Furina) and the shared text; Kokomi and Yae join at their
 Balance; story and event prose waits for the event-text work to finish.
+
+**Pick 1 reopened and ruled (b), 2026-10-19.** Moving the English into files
+turned out to be four large PRs: 119 lines are built from balance numbers in
+code, one gameplay rule reads English card text, and about 60 tools and 148
+test files read the text from code. [USER] asked whether (b) would need (a)
+later; it does not, since a translation is a file either way. [USER]: "agreed
+on (b)". So English stays in code and is sent to the game's English fallback
+table (re-applied on a language switch), a generated English reference file
+carries every key for translators, each translated line carries the hash of
+its English, and the placeholder lint ships. The rule that reads English card
+text becomes a flag.
+
+Live check, 2026-10-19 (lane 1 booted in Simplified Chinese): the game's own
+text is Chinese and ours shows in English, but plurals break: Countdown reads
+"Draw 2 card." because the English is formatted with Chinese plural rules.
+(b) fixes that, since fallback lines are formatted as English.
