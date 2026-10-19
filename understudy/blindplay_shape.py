@@ -519,6 +519,43 @@ def screen_changed_after(room: str, lane: object = None,
     return str(row.get("command") or "the last command")
 
 
+# KOKOMI ROUND 3 (2026-10-11, lane 5). `end turn` SENT TWICE. The seat typed
+# `end turn` a second time without looking, and the turn it ended was the NEXT
+# one, at 56 HP (F4, 56 to 35). `end turn` is asynchronous: the act that
+# follows reads through `settle` (`EB-175`), which rides out the enemy turn
+# and hands back the new turn's board -- so a second `end turn` (or a `play`
+# written for the old hand) lands on a turn the seat has never seen. The room
+# does not change, so `screen_changed_after` cannot see it. Any command after
+# a sent `end turn`, with no look since, is now a skip: not sent, not counted.
+TURN_ENDED_SKIP = ("Skipped: your `end turn` was sent and the next turn is a "
+                   "board you have not seen, so this was not sent (a second "
+                   "`end turn` would end the NEW turn). This is not counted "
+                   "as a refusal. `observe` first, then give the command "
+                   "again.")
+
+
+def _is_end_turn(command: str) -> bool:
+    return " ".join(str(command).lower().split()).startswith("end turn")
+
+
+def turn_ended_since_look(command: str, lane: object = None,
+                          now: float | None = None) -> bool:
+    """Was the lane's last sent command an `end turn`, with no look since
+    (fresh within `REFUSAL_MARK_TTL_S`), and is `command` something that acts
+    on a turn? A co-op `wait` is exempt: it is what follows an `end turn`
+    there, and it prints the page it waited for."""
+    if " ".join(str(command).lower().split()).startswith("wait"):
+        return False
+    row = read_state_json(sent_mark_path(lane))
+    if not isinstance(row, dict) or not _is_end_turn(row.get("command", "")):
+        return False
+    now = time.time() if now is None else now
+    try:
+        return now - float(row.get("at") or 0) <= REFUSAL_MARK_TTL_S
+    except (TypeError, ValueError):
+        return False
+
+
 # CO-OP SPIRAL ABYSS (2026-10-14, lanes 4/5). THE SEAT'S LAST LOOK. The
 # client seat chained `play` commands; the host's Bombs killed the last enemy
 # in between, the rest were refused against a fight that had ended (or a

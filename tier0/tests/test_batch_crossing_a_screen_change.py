@@ -153,3 +153,33 @@ def test_new_seat_clears_its_own_lanes_streak(lane, capsys):
     assert blindplay_shape.refusal_streak() == 0
     assert blindplay_shape.refusal_streak("4") == 3
     blindplay_shape.clear_refusal_streak("4")
+
+
+def test_a_second_end_turn_without_a_look_is_skipped(lane, capsys):
+    """Kokomi round 3 (2026-10-11, lane 5): `end turn` typed twice ended the
+    NEXT turn, because the act reads through the enemy turn (`EB-175`) and
+    the room never changes. Anything after a sent `end turn` and before a
+    look is skipped, uncounted; a look lets it through."""
+    screen, posted = lane
+    blindplay.screen_page(combat_state())
+    assert blindplay.cmd_act(_act("end turn")) == 0
+    assert len(posted) == 1
+    capsys.readouterr()
+    for command in ("end turn", "End  Turn", 'play "Strike"'):
+        assert blindplay.cmd_act(_act(command)) == 1
+        assert capsys.readouterr().out.strip() == blindplay.TURN_ENDED_SKIP
+    assert len(posted) == 1
+    assert blindplay_shape.refusal_streak() == 0
+    assert blindplay.cmd_observe(_observe()) == 0
+    capsys.readouterr()
+    assert blindplay.cmd_act(_act("end turn")) == 0, capsys.readouterr().out
+    assert len(posted) == 2
+
+
+def test_a_coop_wait_after_end_turn_is_not_skipped(lane):
+    blindplay_shape.mark_sent("end turn", "fight")
+    assert blindplay_shape.turn_ended_since_look("wait") is False
+    assert blindplay_shape.turn_ended_since_look("end turn") is True
+    late = blindplay_shape.REFUSAL_MARK_TTL_S + 1.0
+    blindplay_shape.mark_sent("end turn", "fight", now=0.0)
+    assert blindplay_shape.turn_ended_since_look("end turn", now=late) is False

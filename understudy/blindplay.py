@@ -135,7 +135,7 @@ from understudy.blindplay_shape import (   # noqa: E402,F401  (re-export)
     clear_refusal_streak, count_refusal, MAX_REFUSALS, refusal_streak,
     clear_refusal, mark_refusal, pending_refusal,
     clear_sent, last_sent_command, mark_sent, room_of,
-    screen_changed_after,
+    screen_changed_after, turn_ended_since_look, TURN_ENDED_SKIP,
     clear_look, read_look, remember_look,
     card_skips, clear_card_skips, mark_card_skip,
     read_shown_hand, remember_shown_hand,
@@ -745,6 +745,13 @@ def cmd_act(args) -> int:
         after = screen_changed_after(room_of(_screen(state)))
         if after is not None:
             print(SCREEN_CHANGED_SKIP.format(command=after))
+            return 1
+        # Kokomi round 3 (2026-10-11): a command after a sent `end turn`,
+        # with no look since, would land on the next turn
+        # (`blindplay_shape.turn_ended_since_look`).
+        if (room_of(_screen(state)) == "fight"
+                and turn_ended_since_look(args.command)):
+            print(TURN_ENDED_SKIP)
             return 1
     # The screen the lane's last page was rendered on, read BEFORE `act`
     # (whose observation rolls the run ledger onto this screen).
