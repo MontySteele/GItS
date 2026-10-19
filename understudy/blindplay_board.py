@@ -21,13 +21,14 @@ from understudy.blindplay_faces import (_card_face, _card_title,
                                         hand_labels, relic_faces,
                                         remember_deck, remember_kills,
                                         remembered_deck,
+                                        remembered_aims,
                                         remembered_enemy_name,
                                         remembered_enemy_names)
 from understudy.blindplay_read import (_aims_at_an_enemy, _blob, _enemies,
                                        _fold, _hand, _int,
                                        _is_mod_source_tip,
-                                       _label, _listing, _player, _potions,
-                                       _screen, _text)
+                                       _label, _listing, _number_names,
+                                       _player, _potions, _screen, _text)
 from understudy.blindplay_enemies import brief_key, enemy_brief
 from understudy.blindplay_moves import EFFECT_KINDS, move_effect
 from understudy.blindplay_shape import SELECT_SCREENS
@@ -597,6 +598,56 @@ def _status_counts(rows: Any) -> list[tuple[str, int]]:
     return list(counts.items())
 
 
+#: Seat page backlog wave 2 (2026-10-19, Fontaine round lane 1): the
+#: Colorless Potion offered Beat Down, which plays Attacks from the Discard
+#: Pile, on a turn whose Discard Pile held none, and nothing said so. A face
+#: with one sentence naming both gets this line under it when the fight's
+#: Discard Pile (`player.discard_pile`) holds no Attack.
+NO_DISCARD_ATTACKS_NOTE = "Your Discard Pile has no Attacks right now."
+_SENTENCE = re.compile(r"[^.]+")
+
+
+def discard_attack_notes(state: dict[str, Any],
+                         faces: list[dict[str, Any]]) -> None:
+    """Put `NO_DISCARD_ATTACKS_NOTE` on each offered face that takes
+    Attacks from the Discard Pile, when the pile holds none. Silent off a
+    fight and on a feed with no `discard_pile` list."""
+    pile = _player(state).get("discard_pile")
+    if not isinstance(pile, list):
+        return
+    if any(_fold(c.get("type")) == "attack"
+           for c in pile if isinstance(c, dict)):
+        return
+    for face in faces:
+        text = _text(face.get("text"))
+        if any(re.search(r"\battacks?\b", s, re.I)
+               and re.search(r"\bdiscard pile\b", s, re.I)
+               for s in _SENTENCE.findall(text)):
+            face.setdefault("face_notes", []).append(NO_DISCARD_ATTACKS_NOTE)
+
+
+def _reviving_rows(wire: list[Any]) -> list[dict[str, Any]]:
+    """The dead enemies still in the fight, each under its own name.
+
+    Fontaine round (2026-10-19, both seats): two Decimillipede segments
+    waiting to Reattach printed two identical rows under the wire's bare
+    title, and the page's own one-body-per-row check refused the screen.
+    Each row takes the name this fight gave that body (`Decimillipede (2)`);
+    a title still repeated after that is numbered in list order."""
+    rows = [{"name": remembered_enemy_name(
+                 _text(r.get("combat_id")),
+                 _text(r.get("name")) or "An enemy")
+             if _text(r.get("combat_id"))
+             else (_text(r.get("name")) or "An enemy"),
+             "move_id": _text(r.get("move_id")),
+             "revive_hp": (_int(r.get("revive_hp"))
+                           if r.get("revive_hp") is not None else None)}
+            for r in wire if isinstance(r, dict)]
+    for r, numbered in zip(rows, _number_names([r["name"] for r in rows])):
+        r["name"] = numbered
+    return rows
+
+
 def _combat(state: dict[str, Any]) -> dict[str, Any]:
     p = _player(state)
     resources = p.get("resources")
@@ -728,13 +779,8 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
     # Seat page backlog (2026-10-18): the dead enemies still in the fight
     # and planning a move (`gits/GitsRevivingEnemies.cs`): a Decimillipede
     # segment waiting to Reattach. Empty on an older bridge.
-    combat["reviving"] = [
-        {"name": _text(r.get("name")) or "An enemy",
-         "move_id": _text(r.get("move_id")),
-         "revive_hp": (_int(r.get("revive_hp"))
-                       if r.get("revive_hp") is not None else None)}
-        for r in (_blob(state, "battle").get("reviving") or [])
-        if isinstance(r, dict)]
+    combat["reviving"] = _reviving_rows(
+        _blob(state, "battle").get("reviving") or [])
     # Seat page 3 (2026-10-05): what a debuff move does, where the wire names
     # the move and the base-game table knows it ("applies Frail 2", "steals a
     # card"). On the first part whose own hover names no power.
@@ -813,6 +859,8 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
         name_resolution_kills(resolved, _enemies(state),
                               combat["round"] or None)
         name_player_hits(resolved, state)
+        # Co-op (seat page backlog wave 2): a play whose aim died first.
+        mark_retargets(resolved, state)
         # CO-OP (the Spiral Abyss seat round, 2026-10-12): both players'
         # plays resolve in each game, and "What you played" listed the
         # partner's. Theirs go under the other-player section.
@@ -1378,7 +1426,7 @@ def spend_unavailable(text: str, stage: dict[str, Any] | None,
 #: when the observation is built: a raw kind such as `random_aura` is a
 #: snake_case token the blindness check refuses (2026-09-26).
 STAGE_TARGET_WORDS = {"all": "ALL enemies", "random": "a random enemy",
-                      "random_aura": "an enemy, one with an aura if able"}
+                      "random_aura": "an enemy, aura first"}
 
 
 def _stage_target(value: Any) -> str:
@@ -1557,6 +1605,51 @@ def _seq(entry: dict[str, Any]) -> int | None:
     return seq if seq > 0 else None
 
 
+def _base_title(title: Any) -> str:
+    return _fold(_text(title).rstrip("+"))
+
+
+def mark_retargets(rows: list[dict[str, Any]],
+                   state: dict[str, Any]) -> None:
+    """Mark each row that resolved a remembered aim at a body that died
+    before it landed (`blindplay_faces.remember_aim`): `retarget` is
+    `{"aimed": name, "went": [names]}`, `went` empty where it reached no
+    enemy. A row whose aimed body is still standing, or that hit or killed
+    it, is left alone, and so is a row that filed nothing on any enemy."""
+    alive = {_text(e.get("combat_id")) for e in _enemies(state)
+             if _int(e.get("hp")) > 0 and e.get("combat_id") is not None}
+    claimed: set[int] = set()
+    for aim in remembered_aims(state):
+        cid = _text(aim.get("combat_id"))
+        if not cid:
+            continue
+        start = _int(aim.get("rows_before"))
+        for i in range(max(start, 0), len(rows)):
+            row = rows[i]
+            if (i in claimed or row.get("is_local") is False
+                    or _base_title(row.get("card"))
+                    != _base_title(aim.get("card"))):
+                continue
+            claimed.add(i)
+            touched = [h for h in (row.get("hits") or [])
+                       if not h.get("on_player")]
+            touched += [a for a in (row.get("applied") or [])
+                        if not a.get("on_player")]
+            ids = {_text(h.get("combat_id")) for h in touched}
+            if (cid in alive or cid in ids
+                    or _text(aim.get("name")) in (row.get("killed") or [])):
+                break
+            went: list[str] = []
+            for h in touched:
+                name = _text(h.get("target"))
+                if name and name not in went:
+                    went.append(name)
+            if touched or row.get("no_target"):
+                row["retarget"] = {"aimed": _text(aim.get("name"))
+                                   or "the enemy", "went": went}
+            break
+
+
 def resolutions(player: dict[str, Any]) -> list[dict[str, Any]] | None:
     """What resolved this turn, in order, with its hits under it
     (`EB-349` / `EB-611`).
@@ -1641,14 +1734,20 @@ def resolutions(player: dict[str, Any]) -> list[dict[str, Any]] | None:
                     if isinstance(s, dict)]
         # 2026-09-26 (the Silent control seat): the powers the card put on
         # enemies, in order. Absent on an older mod, and then nothing prints.
+        # Seat page backlog wave 2 (2026-10-19): and a power the card put
+        # on its own player (`on_player`; Wait For It...), except under a
+        # Power card, whose own line already says it is on you.
+        is_power = _fold(_text(row.get("card_type"))) == "power"
         applied = [{"target": _text(a.get("target")),
                     "power": _text(a.get("power")),
                     "amount": _int(a.get("amount")),
                     "combat_id": _text(a.get("combat_id")),
+                    "on_player": bool(a.get("on_player")),
                     "seq": _seq(a)}
                    for a in (row.get("applied") or [])
                    if isinstance(a, dict) and _text(a.get("power"))
-                   and _int(a.get("amount"))]
+                   and _int(a.get("amount"))
+                   and not (is_power and a.get("on_player"))]
         # The rebalance round (2026-10-03): Varka's Oath gains inside the
         # card, sourced ("applied", "Swirl" or ""), and whether one of them
         # made Boreas's Fang add Four Winds' Ascension. Absent on an older
@@ -1794,7 +1893,11 @@ PAGE_EVENT_KINDS = ("drawn", "negated", "triggered", "stolen", "returned",
                     # nothing on the board to say so (the Tamakushi Casket's
                     # Block, Sango Pearl, Ocean-Hued Clam, Everlasting
                     # Moonglow), and an orb's passive or evoke.
-                    "relic", "orb")
+                    "relic", "orb",
+                    # Seat page backlog wave 2 (2026-10-19): an enemy that
+                    # died with no card resolving (`ResolutionLedger.
+                    # DiedOutsidePlay`), and what hit it last.
+                    "died")
 #: The event kinds a page OUTSIDE a fight prints (the reward screen after it).
 OUTSIDE_FIGHT_EVENTS = frozenset({"curtain"})
 

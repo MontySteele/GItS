@@ -141,10 +141,15 @@ public static class ResolutionLedger
     /// (2026-09-26, the Silent control seat: "Poison applied is never shown
     /// in 'what it did'"). `Amount` is the change the game reports to
     /// `AfterPowerAmountChanged`, signed, so a strip reads as one. `Seq` is
-    /// <see cref="Hit"/>'s, for the same merge (2026-10-11).</summary>
+    /// <see cref="Hit"/>'s, for the same merge (2026-10-11).
+    /// `OnPlayer` (seat page backlog wave 2, 2026-10-19): the power went on
+    /// the player who played the card (Wait For It...'s own power), so a
+    /// Skill whose whole effect is a power on her no longer reads as
+    /// "Nothing ... landed".</summary>
     public readonly record struct PowerApplied(string Target, string Power,
                                                int Amount, string CombatId,
-                                               long Seq = 0);
+                                               long Seq = 0,
+                                               bool OnPlayer = false);
 
     /// <summary>One resolved card.
     ///
@@ -517,6 +522,7 @@ public static class ResolutionLedger
     public static void ResetFight()
     {
         Rows.Clear();
+        LastSource.Clear();
         _open = null;
         _between = null;
         _playerTurnEnd = -1;
@@ -738,7 +744,11 @@ public static class ResolutionLedger
     /// </summary>
     public static void NoteKill(string target, string combatId)
     {
-        if (_open == null) return;
+        if (_open == null)
+        {
+            NoteNonCardKill(target, combatId);
+            return;
+        }
         if (_open.Hits.Exists(h => h.Killed && h.CombatId == combatId)) return;
         if (_open.Hits.Count >= MaxHits)
         {
@@ -747,6 +757,62 @@ public static class ResolutionLedger
         }
         _open.Hits.Add(new Hit(target, 0, 0, combatId, Killed: true,
                                Seq: ++_seq, By: _hitsBy, Label: _hitsAs));
+    }
+
+    /// <summary>Seat page backlog wave 2 (2026-10-19): an enemy that died
+    /// with no card resolving -- a Mine's answer, an end-of-turn power,
+    /// Poison. "Mawler died at end of turn with no printed cause." Filed as a
+    /// page event between plays: `Target` the body and `Card` what hit it
+    /// last, where <see cref="NoteDamageSource"/> heard one.</summary>
+    public const string DiedOutsidePlay = "died";
+
+    /// <summary>The last thing that damaged each enemy outside a play, by
+    /// combat id: a power's name, a card's title, or the dealer's.</summary>
+    private static readonly Dictionary<string, string> LastSource = new();
+
+    /// <summary>"This is about to damage that body" (the game's
+    /// <c>BeforeDamageReceived</c>). Kept only outside a play and only for
+    /// an enemy, for <see cref="NoteNonCardKill"/>.</summary>
+    public static void NoteDamageSource(Creature? target, Creature? dealer,
+                                       string cardSource)
+    {
+        if (_open != null || target == null) return;
+        bool enemy;
+        try { enemy = target.IsEnemy; }
+        catch (System.Exception) { enemy = false; }
+        if (!enemy) return;
+        bool playerDealt;
+        try { playerDealt = dealer?.IsPlayer ?? false; }
+        catch (System.Exception) { playerDealt = false; }
+        var dealerName = ReferenceEquals(dealer, target) || playerDealt
+            ? string.Empty : Named(dealer);
+        NoteDamageSource(Safe(() => target.CombatId.ToString()),
+                         SourceName(_hitsBy, cardSource, dealerName));
+    }
+
+    /// <summary>The same, taking the facts.</summary>
+    public static void NoteDamageSource(string combatId, string source)
+    {
+        if (_open != null || string.IsNullOrEmpty(combatId)) return;
+        LastSource[combatId] = source ?? string.Empty;
+    }
+
+    /// <summary>What a non-card hit is named by: the power whose damage it
+    /// is, else the card behind it, else whoever dealt it. PURE.</summary>
+    public static string SourceName(string power, string card,
+                                    string dealer) =>
+        !string.IsNullOrEmpty(power) ? power
+        : !string.IsNullOrEmpty(card) ? card
+        : dealer ?? string.Empty;
+
+    /// <summary>File <see cref="DiedOutsidePlay"/> for a body that died
+    /// with no play open, once per body.</summary>
+    private static void NoteNonCardKill(string target, string combatId)
+    {
+        LastSource.TryGetValue(combatId ?? string.Empty, out var source);
+        LastSource.Remove(combatId ?? string.Empty);
+        NoteEvent(DiedOutsidePlay, source ?? string.Empty, target,
+                  string.Empty, combatId ?? string.Empty);
     }
 
     /// <summary>
@@ -772,23 +838,26 @@ public static class ResolutionLedger
 
     /// <summary>
     /// "This power changed on this enemy, inside the card that is resolving."
-    /// ENEMIES ONLY, and the caller checks it: what a card puts on the player
-    /// is on the player's own status block. Dropped where no play is open,
-    /// <see cref="NoteHit"/>'s rule and its reason: an enemy buffing itself
-    /// on its own turn is not a card resolving.
+    /// The caller files enemies, and the player only where the resolving card
+    /// itself applied the power (<paramref name="onPlayer"/>; seat page
+    /// backlog wave 2, 2026-10-19: Wait For It... printed "Nothing ...
+    /// landed"). Dropped where no play is open, <see cref="NoteHit"/>'s rule
+    /// and its reason: an enemy buffing itself on its own turn is not a card
+    /// resolving.
     /// </summary>
-    public static void NotePower(Creature? target, string power, int amount)
+    public static void NotePower(Creature? target, string power, int amount,
+                                 bool onPlayer = false)
     {
         if (target == null) return;
         NotePower(Named(target), power, amount,
-                  Safe(() => target.CombatId.ToString()));
+                  Safe(() => target.CombatId.ToString()), onPlayer);
     }
 
     /// <summary>The same note, taking the facts rather than the game object,
     /// <see cref="OpenPlay(string, string, bool)"/>'s bargain and its
     /// reason.</summary>
     public static void NotePower(string target, string power, int amount,
-                                 string combatId)
+                                 string combatId, bool onPlayer = false)
     {
         if (_open == null || amount == 0 || string.IsNullOrEmpty(power)) return;
         if (_open.Applied.Count >= MaxHits)
@@ -797,7 +866,7 @@ public static class ResolutionLedger
             return;
         }
         _open.Applied.Add(new PowerApplied(target, power, amount, combatId,
-                                           ++_seq));
+                                           ++_seq, onPlayer));
     }
 
     /// <summary>Where the open row's power list stands, so a placement can
@@ -953,6 +1022,7 @@ public static class ResolutionLedger
                     ["amount"] = a.Amount,
                     ["combat_id"] = a.CombatId,
                     ["seq"] = a.Seq,
+                    ["on_player"] = a.OnPlayer,
                 }),
             ["summoned"] = row.Summoned.ConvertAll(s =>
                 new Dictionary<string, object?>

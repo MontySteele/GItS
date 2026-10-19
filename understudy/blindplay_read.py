@@ -469,18 +469,48 @@ def _event_without_options(state: dict[str, Any]) -> bool:
     return (not blob.get("options") and blob.get("in_dialogue") is not True)
 
 
+def _event_lone_proceed(state: dict[str, Any]) -> bool:
+    """An event room whose only button is a bare "Proceed" (seat page
+    backlog wave 2, 2026-10-19): the Trial's first page printed only
+    "Proceed", and `proceed` was refused against the Accept / Reject the
+    room really held. Such a page may be the room still changing over, so
+    it is read again until two reads agree."""
+    if str(state.get("state_type")) != "event":
+        return False
+    options = _blob(state, "event").get("options") or []
+    return (len(options) == 1 and isinstance(options[0], dict)
+            and _fold(options[0].get("title")) == "proceed")
+
+
+def _event_buttons(state: dict[str, Any]) -> list[str]:
+    """The event's button titles, for comparing two reads."""
+    return [_fold(o.get("title")) for o in
+            (_blob(state, "event").get("options") or [])
+            if isinstance(o, dict)]
+
+
 def settle_event(state: dict[str, Any], wire: Any = bridge,
                  tries: int = EVENT_SETTLE_TRIES,
                  delay: float = SETTLE_DELAY_S) -> dict[str, Any]:
-    """Re-ask, briefly, an event room whose options have not appeared yet.
+    """Re-ask, briefly, an event room whose options have not appeared yet,
+    or whose only option is a bare "Proceed" that may be mid-change
+    (`_event_lone_proceed`): that one is read until two reads in a row show
+    the same buttons.
 
     SHORT AND NEVER RAISING, `settle_board`'s rule: a room that really has no
-    options is drawn after a few reads, as before."""
+    options, or really has only "Proceed", is drawn after a few reads."""
     for _ in range(tries):
-        if not _event_without_options(state):
+        if _event_without_options(state):
+            time.sleep(delay)
+            state = wire.get_state()
+            continue
+        if not _event_lone_proceed(state):
             return state
         time.sleep(delay)
-        state = wire.get_state()
+        again = wire.get_state()
+        if _event_buttons(again) == _event_buttons(state):
+            return again
+        state = again
     return state
 
 

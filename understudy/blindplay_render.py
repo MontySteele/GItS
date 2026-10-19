@@ -385,6 +385,10 @@ def _render_card(c: dict[str, Any], bullet: str = "-",
     # asking, so this line is the only place the refused mode shows.
     for line in c.get("spend_unavailable") or []:
         out.append(f"    {line}")
+    # Seat page backlog wave 2 (2026-10-19): a short fact about the board
+    # under the face it bears on (`blindplay_board.discard_attack_notes`).
+    for line in c.get("face_notes") or []:
+        out.append(f"    {line}")
     # `EB-483`: on the Smith's grid, the face this card would print UPGRADED,
     # under the one it prints now. Absent on every other screen, and absent
     # here for a row this page cannot render without guessing -- see
@@ -2373,6 +2377,16 @@ def _detonation_lines(row: dict[str, Any]) -> list[str]:
     return out
 
 
+#: Co-op (Furina co-op check, 2026-10-16): a play aimed at a body that
+#: died before it landed (the partner killed it), and where it went.
+#: A power a partner's card put on that partner (`_resolution_lines`).
+PARTNER_SELF = "themselves"
+RESOLUTION_RETARGETED = ("  You aimed it at **{aimed}**, which died before it "
+                         "landed; it went to {went} instead.")
+RESOLUTION_RETARGET_NOTHING = ("  You aimed it at **{aimed}**, which died "
+                               "before it landed; it hit no enemy.")
+
+
 def _resolution_lines(rows: list[dict[str, Any]],
                       stage: bool = False,
                       enemies: list[dict[str, Any]] | None = None,
@@ -2412,6 +2426,13 @@ def _resolution_lines(rows: list[dict[str, Any]],
             clauses += replayed.format(
                 times=_TIMES.get(row["play_count"], str(row["play_count"])))
         out.append(RESOLUTION_ROW.format(card=row["card"], clauses=clauses))
+        # Co-op (seat page backlog wave 2): its aim died before it landed.
+        moved = row.get("retarget")
+        if moved:
+            out.append((RESOLUTION_RETARGETED if moved["went"]
+                        else RESOLUTION_RETARGET_NOTHING).format(
+                aimed=moved["aimed"],
+                went=_and_list([f"**{n}**" for n in moved["went"]])))
         # 2026-09-25 evening: the performer a random summon rolled.
         if row.get("summoned"):
             out.append(RESOLUTION_SUMMONED.format(names=_and_list(
@@ -2483,10 +2504,15 @@ def _resolution_lines(rows: list[dict[str, Any]],
             # 2026-09-26 (the Silent control seat): the powers it put on
             # enemies.
             if kind == "applied":
+                # Seat page backlog wave 2: a power the card put on its
+                # own player.
+                target = ((PARTNER_SELF if partner else "you")
+                          if entry.get("on_player")
+                          else entry["target"] or "an enemy")
                 out.append((RESOLUTION_APPLIED if entry["amount"] > 0
                             else RESOLUTION_REMOVED).format(
                     power=entry["power"], n=abs(entry["amount"]),
-                    target=entry["target"] or "an enemy"))
+                    target=target))
                 continue
             hit = entry
             target = hit["target"] or "an enemy"
@@ -3659,7 +3685,7 @@ def _stage_act_effect(row: dict[str, Any]) -> str:
         element = STAGE_MEMBER_ELEMENTS.get(member, "")
         to = (" to ALL enemies" if member in STAGE_ALL_MEMBERS
               else f" to {row['target']}" if row.get("target")
-              else " to an enemy, one with an aura if able"
+              else " to an enemy, aura first"
               if member == "lynette"
               else " to a random enemy")
         return f": {n}{' ' + element if element else ''} damage{to}"
@@ -3909,6 +3935,11 @@ EVENT_SHATTERED = "{card} Shattered {target}: Frozen removed"
 #: (`ResolutionLedger.NoteRelic`, `OrbNarration`).
 EVENT_RELIC = "{relic}: {did}"
 EVENT_ORB = "{orb}: {did}"
+#: Seat page backlog wave 2 (2026-10-19): "Mawler died at end of turn with
+#: no printed cause." An enemy that died with no card resolving, and what
+#: hit it last where the ledger heard it.
+EVENT_DIED = "{target} died ({cause})"
+EVENT_DIED_NO_CAUSE = "{target} died, not from a card you played"
 #: The curtain call, on the first page after the fight (Furina's drained HP
 #: comes back when combat ends; seats could not tell it had).
 EVENT_HP_RETURNED = "Drained {n} HP returned (the fight ended)"
@@ -4607,6 +4638,10 @@ def _event_phrases(kind: str, evs: list[dict[str, Any]]) -> list[str]:
         elif kind == "orb" and card and power:
             name = card if "orb" in card.casefold() else f"{card} orb"
             out.append(EVENT_ORB.format(orb=name, did=power) + times)
+        elif kind == "died" and target:
+            out.append((EVENT_DIED.format(target=target, cause=card)
+                        if card else EVENT_DIED_NO_CAUSE.format(
+                            target=target)) + times)
     return out
 
 

@@ -2934,6 +2934,18 @@ public sealed class PlayTelemetryHooks : AbstractModel
         CardModel? cardSource)
     {
         PlayTelemetry.NoteBeforeDamage(target, dealer, cardSource);
+        // Seat page backlog wave 2 (2026-10-19): what hit an enemy outside
+        // a play, so a death with no card behind it can name its cause.
+        try
+        {
+            ResolutionLedger.NoteDamageSource(target, dealer,
+                cardSource?.Title?.ToString() ?? string.Empty);
+        }
+        catch (Exception e)
+        {
+            Log.Warn($"[{KleeMod.ModId}] resolution ledger source: "
+                   + $"{e.GetType().Name}: {e.Message}");
+        }
         return Task.CompletedTask;
     }
 
@@ -2977,6 +2989,15 @@ public sealed class PlayTelemetryHooks : AbstractModel
                 Watch(power);
                 ResolutionLedger.NotePower(owner,
                     power!.Title.GetFormattedText() ?? "", (int)amount);
+            }
+            // Seat page backlog wave 2 (2026-10-19): a power the resolving
+            // card put on its player (Wait For It...), filed as hers.
+            else if (owner is { IsPlayer: true } && cardSource != null
+                     && ResolutionLedger.PlayOpen)
+            {
+                ResolutionLedger.NotePower(owner,
+                    power!.Title.GetFormattedText() ?? "", (int)amount,
+                    onPlayer: true);
             }
         }
         catch (Exception e)
