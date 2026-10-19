@@ -166,7 +166,7 @@ public static class FurinaStageCues
             : cue.Kind == StageCueKind.Block
                 ? $"Gives you {cue.Amount} Block."
             : cue.Target == StageForecastCue.Aura
-                ? "Hits an enemy, one with an aura if able."
+                ? "Hits an enemy, aura first."
                 : "Acts at the end of your turn.";
 
     /// <summary>

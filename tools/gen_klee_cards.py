@@ -436,6 +436,11 @@ PROTOTYPE_OWNERS = {**PROFILES, VARKA_PROFILE.character_id: VARKA_PROFILE,
 # on upgrade is a repricing, and repricing is [USER]'s), the payment emitted
 # here, and the cost LINE emitted separately as an IsPlayable override (see
 # `charge_gate_member` in emit()).
+#: The shipped Bomb's ops, whose emitters write calls into the deleted
+#: `BombPower`; `blocked_reason` refuses them (2026-10-19).
+SHIPPED_BOMB_OPS = frozenset({"place_bomb", "detonate", "modify_bombs",
+                              "move_bombs", "chance_bomb_per_detonation"})
+
 MECHANICAL_OPS = {"damage", "block", "draw", "place_bomb", "gain_spark",
                   "spend_spark", "spend_charge", "burst_energy",
                   "gain_encore", "spend_encore", "raise_fanfare_cap",
@@ -5881,6 +5886,19 @@ def blocked_reason(
         op = eff.get("op")
         if op not in MECHANICAL_OPS:
             return f"op '{op}'"
+        # THE SHIPPED BOMB'S OPS, refused here rather than emitted (2026-10-19).
+        # Their emitters below still write `BombPower.*` calls, and
+        # `BombPower.cs` is deleted, so a row using one generated C# that
+        # failed the build far from the sheet. No row uses them; a new one is
+        # told at codegen time, by name. The Klee overhaul's Bomb is
+        # `ProtoBombPower`, reached through its own ops (`set_off`, ...).
+        if op in SHIPPED_BOMB_OPS:
+            return (f"op '{op}' emits the deleted shipped `BombPower`; "
+                    "use the overhaul's ProtoBombPower ops")
+        if str(eff.get("bonus_formula", "")).endswith(
+                "_per_detonation_this_combat"):
+            return ("bonus_formula '*_per_detonation_this_combat' reads the "
+                    "deleted shipped `BombPower`")
         # THE CO-OP SET's `target: ally`, refused everywhere it is not built.
         if eff.get("target") == "ally" and op not in COOP_ALLY_OPS:
             return f"op '{op}' cannot aim at another player (target 'ally')"

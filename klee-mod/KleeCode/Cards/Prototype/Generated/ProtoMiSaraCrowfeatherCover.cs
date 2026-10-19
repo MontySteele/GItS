@@ -49,7 +49,7 @@ public sealed class ProtoMiSaraCrowfeatherCover : CustomCardModel, ICompanionCar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kujou Sara — Crowfeather Cover"),
-        ("description", "Your next Attack this turn deals {PowerAmount:diff()} additional damage and applies [gold]Electro[/gold]."),
+        ("description", "Your next Attack card this turn deals {PowerAmount:diff()} additional damage and is [gold]Electro[/gold], not its own element."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -728,9 +728,12 @@ public abstract class NextAttackRiderPower : PowerModel
     /// a rider reads the card, and a Skill is not one.
     /// </summary>
     ///
-    /// FORTY-SIX CHARACTERS, and it is four faces' worth of ceiling: the
-    /// longest of them (`CrowfeatherCoverPower`) runs to 119 of 125 with this
+    /// FORTY-SIX CHARACTERS, and it was four faces' worth of ceiling: the
+    /// longest of them (`CrowfeatherCoverPower`) ran to 119 of 125 with this
     /// on it, so no rider takes an exception for a sentence every rider owes.
+    /// Bennett's and Sara's faces left it on 2026-10-19 (Kokomi review r4,
+    /// item 4): they spend the ceiling on which element the Attack is, and
+    /// "your next Attack CARD" in their first words carries the type rule.
     /// "Never a Skill" rather than "never a Skill's damage" is what paid for
     /// that, and it loses nothing: the rule is about the card's TYPE and a
     /// Skill that deals no damage was never spending the buff either.
@@ -789,8 +792,9 @@ public abstract class NextAttackRiderPower : PowerModel
 }
 
 /// <summary>
-/// Bennett, Passion Overload: "Your next Attack this turn deals 4 more and
-/// applies Pyro."
+/// Bennett, Passion Overload: "Your next Attack card this turn deals 4
+/// additional damage and is Pyro, not its own element. Electro from Sara
+/// wins." (the order <see cref="CompanionOverhaulRiders.ElementFor"/> reads).
 ///
 /// A SECOND CLASS RATHER THAN A RETUNE of the shipped
 /// <see cref="NextAttackUpPower"/> of the same name: the shipped
@@ -808,8 +812,9 @@ public sealed class PassionOverloadPower : NextAttackRiderPower, ILocalizationPr
     {
         ("title", "Passion Overload"),
         ("description",
-            "Your next Attack this turn deals [blue]{Amount}[/blue] additional "
-          + "damage and applies [gold]Pyro[/gold]." + CardTypeClause),
+            "Your next Attack card this turn deals [blue]{Amount}[/blue] "
+          + "additional damage and is [gold]Pyro[/gold], not its own element. "
+          + "[gold]Electro[/gold] from Sara wins."),
     };
 
     public override decimal ModifyDamageAdditive(

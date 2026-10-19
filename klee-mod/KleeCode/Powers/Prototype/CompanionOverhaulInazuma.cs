@@ -361,8 +361,8 @@ public sealed class BlazingBarrierPower : PowerModel, ILocalizationProvider
 // ---------------------------------------------------------------------------
 
 /// <summary>
-/// Kujou Sara, Crowfeather Cover: "Your next Attack this turn deals 4 more and
-/// applies Electro."
+/// Kujou Sara, Crowfeather Cover: "Your next Attack card this turn deals 4
+/// additional damage and is Electro, not its own element."
 ///
 /// <see cref="PassionOverloadPower"/> with a different element, and a separate
 /// type for that reason alone: the element half is read through
@@ -375,8 +375,9 @@ public sealed class CrowfeatherCoverPower
     {
         ("title", "Crowfeather Cover"),
         ("description",
-            "Your next Attack this turn deals [blue]{Amount}[/blue] additional "
-          + "damage and applies [gold]Electro[/gold]." + CardTypeClause),
+            "Your next Attack card this turn deals [blue]{Amount}[/blue] "
+          + "additional damage and is [gold]Electro[/gold], not its own "
+          + "element."),
     };
 
     public override decimal ModifyDamageAdditive(

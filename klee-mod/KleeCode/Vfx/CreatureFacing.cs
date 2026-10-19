@@ -461,7 +461,16 @@ internal static class Hook_AfterDeath_Facing
     public static void Prefix(Creature creature)
     {
         if (creature == null || creature.IsPlayer) return;
-        CreatureFacing.RefreshPlayers(creature.CombatState, onlyIfFacedSideEmpty: true, "death");
+        try
+        {
+            CreatureFacing.RefreshPlayers(creature.CombatState, onlyIfFacedSideEmpty: true, "death");
+        }
+        catch (Exception)
+        {
+            // A turn must never cost the death hook: a throw from a prefix
+            // skips Hook.AfterDeath, and with it every AfterDeath listener
+            // (the Kaiser Crab's Crab Rage among them).
+        }
     }
 }
 
