@@ -8,6 +8,7 @@ using KleeMod.Powers;
 using MegaCrit.Sts2.Core.Combat;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
+using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Hooks;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
@@ -114,6 +115,34 @@ internal static class CardPlayMotion
         => definedByThisMod && card is ISetOffCard;
 
     /// <summary>
+    /// A SET OFF ATTACK KEEPS THE HOP TO ITS OWN HIT (in-game check
+    /// 2026-10-16, `klee/09-setoff-dense-*`: Kaboom! played the throw). The
+    /// card's own lunge is absorbed only while the tree is still in the
+    /// setoff clip (0.85 s), and on a dense field the Bombs going off first
+    /// outlast it, so the hit's "Attack" reached an idle tree and threw a
+    /// bomb. For the rest of a Set off Attack's play, that "Attack" is sent
+    /// as "SetOff" instead: absorbed while the hop still plays (travel to the
+    /// current state is a no-op), a second hop on the hit if it has ended.
+    /// Marked per creature at the play's start and cleared at the next play's
+    /// start. Pure.
+    /// </summary>
+    internal static string RemapDuringPlay(string trigger, bool inSetOffAttackPlay)
+        => inSetOffAttackPlay && trigger == "Attack" ? SetOffTrigger : trigger;
+
+    private static readonly ConditionalWeakTable<Creature, object> SetOffAttackPlays = new();
+    private static readonly object Marker = new();
+
+    /// <summary>Whether this creature is inside a Set off Attack's play.</summary>
+    internal static bool InSetOffAttackPlay(Creature? creature)
+        => creature != null && SetOffAttackPlays.TryGetValue(creature, out _);
+
+    private static void NoteSetOffAttackPlay(Creature creature, bool isSetOffAttack)
+    {
+        SetOffAttackPlays.Remove(creature);
+        if (isSetOffAttack) SetOffAttackPlays.Add(creature, Marker);
+    }
+
+    /// <summary>
     /// The trigger a play of this card should send, or null for none. Pure:
     /// Skill -> Cast, Power -> PowerUp (the base's own pairing), and nothing
     /// for an Attack (its <c>AttackCommand</c> already lunges), a Status, a
@@ -153,6 +182,8 @@ internal static class CardPlayMotion
             : IsRejoicePlay(card) ? RejoiceTrigger
             : IsSetOffPlay(card, ours) ? SetOffTrigger
             : TriggerFor(card.Type, ours);
+        NoteSetOffAttackPlay(creature,
+            trigger == SetOffTrigger && card.Type == CardType.Attack);
         if (trigger == null) return;
         if (trigger == JumpyTrigger)
         {

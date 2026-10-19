@@ -188,6 +188,10 @@ internal static class CreatureAnimationRouter
         // every body the arm does not cover.
         IdleDesync.Apply(creature, tree);
 
+        // A Set off Attack's own hit keeps the hop (CardPlayMotion).
+        trigger = CardPlayMotion.RemapDuringPlay(
+            trigger, CardPlayMotion.InSetOffAttackPlay(creature.Entity));
+
         var hasState = StatesOf(tree);
         var low = RefreshLowHealth(creature, tree, hasState);
 
