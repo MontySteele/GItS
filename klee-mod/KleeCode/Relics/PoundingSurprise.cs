@@ -20,19 +20,18 @@ namespace KleeMod.Relics;
 /// demolition deck feed the Spark economy: bombs pop, sparks bank, the third
 /// spark makes the next real Attack free.
 ///
-/// Subscribes to BombPower's detonation bus by interface, once per bomb — a
-/// 3-bomb pop banks 3 Sparks (sim parity: the grant is inside the per-bomb
-/// loop in tier0/engine/effects.py).
+/// Subscribes to ProtoBombPower's explosion bus by interface, once per
+/// explosion (the old shipped BombPower's detonation bus left with that power,
+/// 2026-10-19).
 ///
 /// autoAdd: false for the same reason as the cards (DECISIONS finding 14):
 /// BaseLib's auto-registration demands a [Pool] attribute, and this relic is
 /// not pool content — it exists only as StartingRelics[0]. ModelDb still
 /// registers the type itself, which is all StartingRelics needs.
 /// </summary>
-public sealed class PoundingSurprise : CustomRelicModel, IBombDetonationListener
+public sealed class PoundingSurprise : CustomRelicModel
     // Under the Klee overhaul the relic IS the Spark rule (the
-    // ruled brief sec.8), so it listens to the arm's explosion bus as well as
-    // to the shipped detonation bus.
+    // ruled brief sec.8), so it listens to the arm's explosion bus.
     , Powers.IProtoExplosionListener
 {
     public PoundingSurprise()
@@ -132,23 +131,12 @@ public sealed class PoundingSurprise : CustomRelicModel, IBombDetonationListener
         return true;
     }
 
-    public async Task OnBombDetonated(
-        PlayerChoiceContext choiceContext, Creature? applier, Creature target, int damage)
-    {
-        // Own bombs only: in co-op another player's detonations are theirs.
-        if (applier?.Player != Owner) return;
-
-        Flash();
-        await SparkPower.Gain(choiceContext, Owner.Creature, 1, cardSource: null,
-            source: "relic:pounding_surprise/detonation");
-    }
-
     /// <summary>
     /// THE OVERHAUL'S RULE 4, and the whole of what this relic does under that
     /// arm: one Spark per EXPLOSION.
     ///
-    /// It is the same body as the shipped hook above, pointed at the arm's own
-    /// bus, because it is the same rule -- the brief simply makes it the only
+    /// It is the same body the old shipped detonation hook had, pointed at the
+    /// arm's own bus, because it is the same rule -- the brief simply makes it the only
     /// Spark source there is ("Under this flag Sparks come ONLY from
     /// explosions"). The relic's OTHER hook, the companion reward slot, is not
     /// gated off: it is not a Spark rule and not a Bomb rule, and the slice's

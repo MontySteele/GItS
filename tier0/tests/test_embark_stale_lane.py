@@ -67,3 +67,34 @@ def test_the_embark_refuses_and_names_the_stamp(tmp_path, monkeypatch):
     assert "27116" in msg
     # Refused before anything is written: no new sidecar.
     assert len(list(tmp_path.glob("embark-*.json"))) == 1
+
+
+def test_a_lane_less_teardown_is_refused(capsys):
+    """BACKLOG: an embark was never reverted although the seat's teardown ran.
+    `--teardown` without `--lane` meant lane 0, so a teardown typed for a
+    lane-1 seat reverted lane 0's old (already reverted) embark, exited 0,
+    and left the lane-1 game up. It now has to name the lane or the stamp."""
+    assert embark.main(["--teardown"]) == 2
+    err = capsys.readouterr().err
+    assert "--teardown needs --lane N (or --stamp S)" in err
+
+
+def test_teardown_by_lane_picks_the_live_game_not_the_newest_sidecar(
+        tmp_path, monkeypatch):
+    """The older embark holds the game; a newer one on the lane failed and is
+    already reverted. The lane's teardown reverts the one with the game up."""
+    monkeypatch.setattr(embark, "LOG_DIR", tmp_path)
+    monkeypatch.setattr(soak, "pid_image", _alive(27116))
+    _embark_on_disk(tmp_path, "20260929-145523", "lane1")
+    _embark_on_disk(tmp_path, "20260929-150609", "lane1", state="REVERTED",
+                    pid=43264)
+    picked = []
+
+    def _stop(stamp):
+        picked.append(stamp)
+        raise embark.EmbarkError("stop")
+
+    monkeypatch.setattr(embark, "sidecar_path", _stop)
+    with pytest.raises(embark.EmbarkError):
+        embark.teardown("", lane=1)
+    assert picked == ["20260929-145523"]

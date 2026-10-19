@@ -31,7 +31,7 @@ namespace KleeMod.Powers;
 /// Bomb that ALSO goes off when its enemy attacks a player, before the hit
 /// lands (any player since 2026-09-25: see <see cref="BeforeDamageReceived"/>).
 ///
-/// WHY THIS IS A SEPARATE POWER AND NOT A MODE ON <see cref="BombPower"/>.
+/// WHY THIS IS A SEPARATE POWER AND NOT A MODE ON <c>BombPower</c>.
 /// Rule 7 is "nothing fires by itself", and the shipped Bomb's whole lifecycle
 /// is two automatic detonations -- <c>BeforeSideTurnStart</c> and the
 /// early pop in <c>AfterDamageReceived</c>. Teaching one type to be both would
@@ -39,7 +39,7 @@ namespace KleeMod.Powers;
 /// per-placer instancing, suppression arbiter and death-teardown compensation
 /// are the mod's most load-bearing co-op work. A second power costs one type and
 /// buys the acceptance condition outright: under the flag no card places a
-/// <see cref="BombPower"/>, so "no automatic detonation of any kind" is a
+/// <c>BombPower</c>, so "no automatic detonation of any kind" is a
 /// property of what is on the board rather than of a branch somebody remembers.
 /// The shipped Bomb is not edited by this arm in any build.
 ///

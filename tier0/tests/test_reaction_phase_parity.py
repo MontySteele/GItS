@@ -736,9 +736,6 @@ CO_TENANCY_LEDGER = {
             "and that is likewise private to this power. No sim twin orders "
             "it, because slice one is C# first and tier0 refuses the arm's "
             "ops",
-        ("Powers/BombPower.cs", "BombPower"):
-            "turn-start detonation of last turn's bombs (enemy-attached; "
-            "sim: combat.py detonate_bombs)",
         ("Powers/FurinaResources.cs", "FurinaResourceHooks"):
             "purges the Salon company map, clears Curtain Call per-turn "
             "windows; touches nothing its co-tenants read",

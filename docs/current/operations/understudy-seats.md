@@ -82,8 +82,9 @@ python -m understudy.embark --teardown --lane 1              # put it all back
 - **`REFUSAL STOP` is sticky** for every later seat on the lane; lift it with
   `python -m understudy.blindplay reset-refusals --lane N` (budget untouched).
 - `embark --hold` attaches to a game somebody else launched and changes
-  nothing. `--teardown` walks the reversibility ledger on disk (newest embark
-  first, or `--stamp`) and refuses another lane's sidecar.
+  nothing. `--teardown` needs `--lane N` or `--stamp S` (lane-less used to
+  mean lane 0). It walks the reversibility ledger on disk (the lane's live
+  game first, else its newest embark) and refuses another lane's sidecar.
 
 | variable | what it does |
 |---|---|

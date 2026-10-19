@@ -428,3 +428,35 @@ def test_the_prompt_says_a_numbered_enemy_keeps_its_number():
     text = blindplay.PROMPT_PATH.read_text(encoding="utf-8")
     assert "an enemy that was\nnumbered earlier in the fight" in text
 
+
+
+def test_a_chooser_still_opening_is_re_sent_bounded(monkeypatch):
+    """BACKLOG (Klee scaling round 2, lane 3): a Durin chooser answered "still
+    opening" twice. The bridge took no pick, so the POST is re-sent, bounded;
+    an "already made" answer is not retried."""
+    opening = {"status": "error", "error": (
+        "The screen was still opening and did not take the pick - nothing "
+        "was chosen, choose again")}
+
+    class Wire:
+        def __init__(self, answers):
+            self.answers, self.posts = answers, 0
+
+        def post(self, action, **params):
+            self.posts += 1
+            return self.answers[min(self.posts, len(self.answers)) - 1]
+
+    monkeypatch.setattr(blindplay_session.time, "sleep", lambda _s: None)
+    wire = Wire([opening, opening, {"status": "ok", "message": "Choosing"}])
+    result = blindplay_session.post_when_the_room_is_open(
+        wire, "select_card", {"index": 0}, tries=60, delay=0)
+    assert result["status"] == "ok" and wire.posts == 3
+    stuck = Wire([opening])
+    blindplay_session.post_when_the_room_is_open(
+        stuck, "select_card", {"index": 0}, tries=60, delay=0)
+    assert stuck.posts == blindplay_session.CHOOSER_OPENING_TRIES + 1
+    made = Wire([{"status": "error", "error": "This choice is already made "
+                  "and the screen is closing - read the state again"}])
+    blindplay_session.post_when_the_room_is_open(
+        made, "select_card", {"index": 0}, tries=60, delay=0)
+    assert made.posts == 1

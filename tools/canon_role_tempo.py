@@ -673,6 +673,9 @@ def _table(per_char: dict, extract_key: str, rows: list[str]) -> list[str]:
 def _span(values) -> str:
     """`lo–hi`, or a bare number when the span is a point. An en dash, to
     match the surrounding prose."""
+    values = list(values)
+    if not values:
+        return "none"
     lo, hi = min(values), max(values)
     return f"{lo}" if lo == hi else f"{lo}–{hi}"
 
@@ -687,6 +690,11 @@ def gits_archetype_sizes() -> list[int]:
     """
     sizes: list[int] = []
     for path in rt.SHEETS.values():
+        # `EB-193`: the shipped sheets were retired (`docs/klee-cards.yaml`
+        # first), and `write_docs` died here on the missing file. A sheet
+        # that is gone declares no archetype.
+        if not path.exists():
+            continue
         rows = rt.load_rows(path)
         for archetype in rt.declared_archetypes(path):
             sizes.append(len([r for r in rows

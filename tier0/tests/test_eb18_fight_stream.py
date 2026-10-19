@@ -43,7 +43,6 @@ from tier1 import analyze
 
 REPO = Path(__file__).resolve().parents[2]
 CS_TELEMETRY = REPO / "klee-mod" / "KleeCode" / "Diagnostics" / "PlayTelemetry.cs"
-CS_BOMB = REPO / "klee-mod" / "KleeCode" / "Powers" / "BombPower.cs"
 
 
 # ------------------------------------------------------------- fixtures ---
@@ -318,39 +317,16 @@ def test_the_run_id_is_the_games_own_seed_and_not_an_invented_id():
     assert "StringSeed" in CS_TELEMETRY.read_text(encoding="utf-8")
 
 
-def test_the_corpse_test_is_read_per_bomb_before_that_bombs_damage():
-    """The bomb that lands the kill detonated on a LIVE enemy; only the bombs
-    behind it in the same payload are corpse detonations. A single test taken
-    before the payload would mislabel the first one."""
-    src = CS_BOMB.read_text(encoding="utf-8")
-    assert "onCorpse: target is { IsDead: true }" in src
-
-
-def test_the_corpse_counter_is_per_player_like_the_total_it_rides_beside():
-    """EPOCH 2 / D2: a team-wide count inflates a co-op seat's reading. The
-    corpse counter is keyed the same way the detonation total is, and cleared
-    with it, or the two would disagree in co-op."""
-    src = CS_BOMB.read_text(encoding="utf-8")
-    assert "Dictionary<Player, int> _corpseDetonationsByPlayer" in src
-    assert "_corpseDetonationsByPlayer.Clear();" in src
-
-
-def test_the_counter_is_read_by_telemetry_and_by_nothing_else():
-    """REPORTS, never GRADES. If a card or relic ever reads it, this fails."""
+def test_nothing_feeds_the_corpse_counter_since_the_shipped_bomb_left():
+    """`corpse_detonations` stays in the schema (readers key on its presence),
+    but its only source was the old shipped `BombPower`'s corpse counter,
+    deleted 2026-10-19. The record field is still written and always reads 0;
+    if anything starts feeding it again, this test is the place to say what."""
     readers = [p for p in (REPO / "klee-mod" / "KleeCode").rglob("*.cs")
                if "CorpseDetonationsThisCombat" in p.read_text(encoding="utf-8")]
-    assert {p.name for p in readers} == {"BombPower.cs", "PlayTelemetry.cs"}
-
-
-def test_the_big_ones_input_is_untouched_by_the_new_counter():
-    """`DetonationsThisCombat` still counts every detonation, corpse ones
-    included -- the new counter is a second reading of the same events, not a
-    filter on the old one."""
-    src = CS_BOMB.read_text(encoding="utf-8")
-    body = src.split("private static void RecordDetonation", 1)[-1]
-    total = body.index("_detonationsByPlayer[player] =")
-    corpse = body.index("if (!onCorpse) return;")
-    assert total < corpse, "the total must increment before the corpse gate"
+    assert readers == []
+    assert "record.CorpseDetonations =" not in CS_TELEMETRY.read_text(
+        encoding="utf-8")
 
 
 # ------------------------------------------- 2026-10-02: the credit keys ---

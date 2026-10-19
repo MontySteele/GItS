@@ -435,8 +435,6 @@ def test_the_sources_the_census_mints_are_the_ones_the_matrix_lists():
 #: whole population instead.
 CS_VERB_DOORS = {
     # verb, file, the helper that owns it
-    "V4 bomb detonation (shipped)":
-        ("Powers/BombPower.cs", "ElementalHit.Deal", None),
     "V5 bomb explosion / Set off":
         ("Powers/Prototype/ProtoBombPower.cs",
          "ElementalHit.DealWithoutDealerMods", None),

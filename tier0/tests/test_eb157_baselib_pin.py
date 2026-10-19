@@ -75,7 +75,6 @@ CALLED_BASELIB_TYPES: frozenset[str] = frozenset({
     "SimpleLoc",               # BaseLib.Patches.Localization -- EnglishLoc writes rows as BaseLib does
     "NodeFactory",             # BaseLib.Utils.NodeFactories
     "PoolAttribute",           # BaseLib.Utils -- [Pool(typeof(...))]
-    "SpireField",              # BaseLib.Utils
 })
 
 BASELIB_NAMESPACES = (

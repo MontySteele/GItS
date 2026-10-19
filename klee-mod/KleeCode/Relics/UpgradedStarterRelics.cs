@@ -120,24 +120,14 @@ internal static class UpgradedStarterRelics
 /// half needs no sim entry because it is the starter's own hook, which the sim
 /// never removes.
 /// </summary>
-public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
+public sealed class ExplosiveFrags : CustomRelicModel
     // The same seam Pounding Surprise takes: under the Klee overhaul this
     // relic is the upgraded form of the Spark rule, so it listens to the
-    // arm's explosion bus too. ONE PAYMENT PER EXPLOSION (checked by the
-    // Ancient audit, 2026-10-12): the shipped detonation bus above rings only
-    // for the shipped BombPower, which nothing places any more; every Bomb
-    // and Mine is a ProtoBombPower and rings the explosion bus alone
-    // (AncientAuditTests pins it).
+    // arm's explosion bus. ONE PAYMENT PER EXPLOSION: every Bomb and Mine is
+    // a ProtoBombPower and rings that bus alone (the old shipped BombPower and
+    // its detonation bus were deleted 2026-10-19; nothing placed one).
     , Powers.IProtoExplosionListener
 {
-    /// <summary>
-    /// Sparks per detonation. UNCHANGED from the base relic -- the upgrade is
-    /// the opening bank below, not this rate. Kept as a named constant rather
-    /// than a literal 1 so that anyone tempted to raise it meets the ruling
-    /// first.
-    /// </summary>
-    public const int SparksPerDetonation = 1;
-
     /// <summary>Under the Klee arm, the first explosion each turn pays this
     /// many Sparks instead of one (the relics-and-potions paper's repair,
     /// ruled 2026-09-27).</summary>
@@ -230,21 +220,6 @@ public sealed class ExplosiveFrags : CustomRelicModel, IBombDetonationListener
         if (offer == null) return false;
         cardRewardOptions.Add(new CardCreationResult(offer));
         return true;
-    }
-
-
-    public async Task OnBombDetonated(
-        PlayerChoiceContext choiceContext, Creature? applier, Creature target,
-        int damage)
-    {
-        // Own bombs only: in co-op another player's detonations are theirs.
-        if (applier?.Player != Owner) return;
-
-        Flash();
-        await SparkPower.Gain(
-            choiceContext, Owner.Creature, SparksPerDetonation,
-            cardSource: null,
-            source: "relic:explosive_frags/detonation");
     }
 
     /// <summary>

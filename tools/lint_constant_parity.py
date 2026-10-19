@@ -679,13 +679,6 @@ UNMIRRORED: dict[str, str] = {
         "than silently truncated because a reader adding up forty lines that "
         "should be forty-three has been handed `EB-518`'s error in a new "
         "place. The sim has no ledger to size.",
-    "ExplosiveFrags.SparksPerDetonation":
-        "the BASE starter's rate, carried forward unchanged by the upgrade -- "
-        "the doubling of this rate was rejected at the 2026-07-26 red-pen. Its "
-        "sim counterpart is a literal at the detonation site in effects.py "
-        "(`gain_sparks(state, 1)` under spark_on_detonation), not a named "
-        "constant, so there is nothing to compare against by value. The "
-        "opening windfall beside it (`OpeningSparks`) is MIRRORED above.",
     # The two PearlOfInsightRelic rates USED TO LIVE HERE, as derived
     # expressions this lint could not read. R190 ratified the 2x relationship
     # as a standing invariant and they moved to MIRRORED above, with INVARIANTS

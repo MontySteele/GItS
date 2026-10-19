@@ -27,7 +27,6 @@ internal static class KleePowerIcons
     internal static string? PathFor(PowerModel power) => power switch
     {
         SparkPower => KleePck.Path("klee/powers/spark.png"),
-        BombPower => KleePck.Path("klee/powers/bomb.png"),
         // The Sparks alternative-cost arm. It borrows the icon of
         // the power it replaces -- True Spark Knight's old body was
         // spark_threshold_down and the re-authored card keeps the id, the

@@ -408,7 +408,6 @@ public class DamageCreditTelemetryTests : IDisposable
     [InlineData("FrozenPower", "AfterDamageReceived", "DamageCredit.Open")]
     [InlineData("ProtoBombPower", "Explode", "DamageCredit.Open")]
     [InlineData("BombEchoPower", "Fire", "DamageCredit.Open")]
-    [InlineData("BombPower", "ResolvePayload", "DamageCredit.Open")]
     [InlineData("KokomiPlan", "Hit", "DamageCredit.Open")]
     [InlineData("KokomiPlan", "Hit", "PlayTelemetry.CardNameOf")]
     [InlineData("GameStageBoard", "Damage", "DamageCredit.Open")]

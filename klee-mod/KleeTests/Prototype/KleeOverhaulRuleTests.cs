@@ -55,21 +55,6 @@ public class KleeOverhaulRuleTests
         Assert.Contains("KleeOverhaulRoster.StarterStrike", basics);
     }
 
-    [Fact]
-    public void The_shipped_bomb_is_not_edited_by_this_arm()
-    {
-        // The whole reason the overhaul is a SECOND power. If this ever fails,
-        // the arm has reached into the file whose per-placer instancing,
-        // suppression arbiter and death-teardown compensation are the mod's
-        // most load-bearing co-op work.
-        var shipped = typeof(BombPower).GetMethods(HeadlessGame.All)
-            .Where(m => m.DeclaringType == typeof(BombPower))
-            .SelectMany(Il.Calls)
-            .ToList();
-        Assert.DoesNotContain(shipped, c => c.StartsWith("ProtoBombPower."));
-        Assert.DoesNotContain(shipped, c => c.StartsWith("KleeOverhaul"));
-    }
-
     // ---- RULE 1: the Bomb grows, and never goes off by itself ------------
 
     [Fact]
