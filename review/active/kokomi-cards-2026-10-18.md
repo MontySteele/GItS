@@ -257,11 +257,18 @@ Kokomi and Yae round (`kokomi-yae-round-2026-10-19.md`) and the newcomer round
    if you view it as energy cheating (3 for 1) - might need Exhaust or a cost
    bump"). The draw fixes the empty hand the seats saw, and Exhaust makes it the
    one setup turn of a fight, not a repeat.
-3. **The Plan tip says who hits** (text only): "The Bake-Kurage carries it out
-   at the start of your next turn. Its hits are not Attacks, so Strength and
-   Vulnerable don't change them." Vulnerable checked against the game's code:
-   it multiplies powered attacks only, and a Plan hit is unpowered
-   (`KokomiPlan.cs`, `ElementalHit`).
+3. **The Plan tip: not changed.** The draft said Strength and Vulnerable
+   don't change Plan hits. Half of that was wrong: the enemy's Vulnerable
+   already multiplies a Plan hit through the mod's own step
+   (`ElementalHit.cs:131`, `SimDamagePipeline.TargetMods`; sim pin
+   `test_enemy_vulnerable_multiplies_a_planned_hit`). Only her Strength and
+   Weak are left out. The new sentence also did not fit the 100-character tip
+   box without dropping "Play it on the Bake-Kurage instead", so the tip stays.
+4. **Plan hits following Osty: not built.** [USER] first ruled "make it follow
+   the Osty pattern" on the belief that Vulnerable did not count. It already
+   does, so the Osty pattern would only add enemy on-hit answers to Plans
+   (Thorns-style hit-backs, Personal Hive's Dazed, Flutter's cut on Attacks),
+   a cut. Reopened on that fact and dropped.
 
 **Held.**
 - **Nereid's Ascension** stays as written ([USER] flagged it as a possible
@@ -289,6 +296,8 @@ pick with the numbers, not a build.
 
 Ruled 2026-10-19, all (a). Pick 1: [USER], "I like this all around." Picks 2
 and 3: [USER], "run ... the Kokomi seats" (the defaults).
+Two follow-up picks, both (a), [USER] 2026-10-19 ("good on both (a)"): drop
+the Osty change; leave the Plan tip as it is.
 
 1. **The two card changes.**
    - **(a, default)** Build both as written above (Battle Formation at 2, the draw on
