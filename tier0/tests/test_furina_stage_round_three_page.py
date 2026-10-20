@@ -151,7 +151,7 @@ def test_the_fanfare_row_is_the_arms_under_the_arm_and_the_meters_off_it():
     assert on != off
     assert off == FANFARE_SHIPPED_ROW
     # THE SALON'S TAB (2026-10-05): printed by every HP she loses or Repays.
-    assert "each HP you lose or Repay" in on
+    assert "each HP you lose, Drain included, or Repay" in on
 
 
 # --- the packet's hand, numbered -------------------------------------------

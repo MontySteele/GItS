@@ -6556,7 +6556,7 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # sentences (`StagePerformerBadge.ActText`, in the badges file).
         "Spend": ["Pay that much ", ". With less, you can't play ",
                   "the card or its Spend mode. "],
-        "Fanfare": ["Gain 1 for each HP you lose or ", ". ",
+        "Fanfare": ["Gain 1 for each HP you lose, ", " included, or ", ". ",
                     " uses it. Resets after each combat."],
         # THE SALON'S TAB (2026-10-05): the HP loan's two verbs.
         # The Drain line rule (2026-10-09): the line is entry HP minus 1/4

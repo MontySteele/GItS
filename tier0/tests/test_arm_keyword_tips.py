@@ -549,7 +549,7 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             "the card or its Spend mode. ",
             # The 2026-10-11 playtest: "the tooltips for Fanfare and Drain
             # are rather verbose (Drain moreso)".
-            "Gain 1 for each HP you lose or [gold]Repay[/gold]. ",
+            "Gain 1 for each HP you lose, [gold]Drain[/gold] included, or [gold]Repay[/gold]. ",
             "[gold]Spend[/gold] uses it. Resets after each combat.",
             # The Drain buffer (2026-10-11): HP drained past it is lost
             # unless Repaid. One sentence since the 2026-10-11 playtest.
