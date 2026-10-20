@@ -104,14 +104,19 @@ def test_following_current_hits_once_per_carry_out():
     assert st.enemies[0].hp == hp - 6
 
 
-# ---- pick 3 (a): Read the Field's card costs 0 ----------------------------
+# ---- pick 3 (a), reworked by the Kokomi upgrade pass (2026-10-19): Read the
+# Field's card costs 1 less this turn, upgraded only ------------------------
 
-def test_read_the_fields_plan_card_costs_0_this_turn():
+def test_read_the_fields_plan_card_costs_1_less_when_upgraded():
     st = kokomi_state()
     st.player.draw_pile = [card("proto_kk_spearhead")]
     pick = kokomi_plan.draw_pile_to_hand(st)
-    assert pick is not None and pick.free_this_turn
-    assert "It costs 0 this turn." in (
+    assert pick is not None and not pick.free_this_turn
+    assert pick.cost_delta_this_turn == 0
+    st.player.draw_pile = [card("proto_kk_spearhead")]
+    pick = kokomi_plan.draw_pile_to_hand(st, upgraded=True)
+    assert pick is not None and pick.cost_delta_this_turn == -1
+    assert "{IfUpgraded:show: It costs 1 less.|}" in (
         _row("proto_kk_read_the_field")["description"])
 
 

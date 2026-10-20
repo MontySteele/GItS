@@ -116,16 +116,18 @@ def test_the_pair_is_a_shape_and_not_a_card_special_case():
 
 # ---------------------------------------------------------------------------
 # `EB-658`. FLANK SAYS WHEN IT READS THE INTENTS -- at carry-out since the
-# Kokomi level pass (2026-10-12), so the face states no moment at all.
+# Kokomi level pass (2026-10-12), and the face says so since the Kokomi
+# upgrade pass (2026-10-19, finish round item 4).
 # ---------------------------------------------------------------------------
 
 def test_flanks_face_names_the_moment_the_intents_are_read():
     row = _sheet_row("proto_kk_flank")
     assert row["description"] == (
         "Deal 8 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 11 "
-        "[gold]Hydro[/gold] damage to each enemy that intends to attack.")
+        "[gold]Hydro[/gold] damage to each enemy that intends to attack "
+        "when this is carried out.")
     src = (GENERATED / "ProtoKkFlank.cs").read_text(encoding="utf-8")
-    assert "each enemy that intends to attack." in src
+    assert "each enemy that intends to attack when this is carried out." in src
     assert "when you wrote this" not in src
 
 

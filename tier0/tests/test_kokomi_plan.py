@@ -157,7 +157,10 @@ def test_every_shipped_plan_line_passes_the_shape_check():
     ([{"op": "damage", "amount": 4, "target": "enemy"}], "a planned clause lands"),
     ([{"op": "damage", "amount": 4}], "a planned clause lands"),
     ([{"op": "draw", "amount": "X"}], "positive literal int"),
-    ([{"op": "draw", "amount": 0}], "positive literal int"),
+    # The Kokomi upgrade pass (2026-10-19): a 0 draw is legal (the clause
+    # an upgrade adds), so the floor is pinned on a 0 flat hit.
+    ([{"op": "damage", "amount": 0, "target": "front_enemy"}],
+     "positive literal int"),
     ([{"op": "apply_power", "power": "strength", "amount": 2,
        "target": "front_enemy"}], "not one of"),
     ([{"op": "draw", "amount": 1, "times": 2}], "not understood"),
@@ -359,7 +362,8 @@ def test_war_councils_face_and_its_hit_agree_about_the_aura(overhaul):
     bare = make_enemy(hp=40)
     st = kokomi_state(enemies=[bare])
     effects.resolve_card(st, loader.get_card("proto_kk_war_council"))
-    assert bare.powers.get("weak") == 1
+    # The Kokomi upgrade pass (2026-10-19): 2 Weak (was 1).
+    assert bare.powers.get("weak") == 2
     assert bare.hp == 40, "the now-line deals no damage"
     assert bare.aura is None, "the now-line leaves no aura"
 
@@ -1338,7 +1342,7 @@ def test_a_non_companion_play_is_not_what_it_catches(overhaul):
     assert st.kk_plan_queue[0].card is comp
 
 
-def test_a_turn_with_no_other_companion_writes_an_empty_plan(overhaul):
+def test_a_turn_with_no_other_companion_plays_a_random_common_one(overhaul):
     """THE EMPTY CASE IS WRITTEN DOWN, not refused: the face says what it does
     with nothing, and a Plan that silently declined to queue would make the
     strip lie about the queue's depth."""
@@ -1348,11 +1352,16 @@ def test_a_turn_with_no_other_companion_writes_an_empty_plan(overhaul):
     kokomi_plan.schedule(st, card)
     entry = st.kk_plan_queue[0]
     assert entry.card is None
-    assert entry.label == "Crystal Collapse: nothing"
+    # The Kokomi upgrade pass (2026-10-19): nothing caught plays a random
+    # Common Inazuma Companion, Sangonomiya's Orders' offer.
+    assert entry.label == "Crystal Collapse: a random Companion"
     kokomi_plan.resolve_all(st)
-    assert counts(st)["plan_copy_empty"] == 1
+    assert counts(st)["plan_copy_empty"] == 0
     assert counts(st)["plan_copy"] == 0
-    assert st.enemies[0].hp == 40
+    played = [e for e in st.log if e["event"] == "plan_copy_random"]
+    assert len(played) == 1
+    pool = {c.id for c in kokomi_plan.generated_companions(st, "common")}
+    assert played[0]["card"] in pool
 
 
 def test_the_morning_plays_a_free_copy_and_keeps_the_original(overhaul):
@@ -1950,7 +1959,8 @@ def test_the_three_rider_faces_print_the_window_the_rider_lives_in(overhaul):
     # Opening Gambit names the same window ("written this turn").
     assert faces["proto_kk_second_wave"] == (
         "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: The "
-        "[gold]Plan[/gold] written after it this turn is carried out twice.")
+        "[gold]Plan[/gold] written after it this turn is carried out twice."
+        "{IfUpgraded:show: Draw 1 card.|}")
     assert faces["proto_kk_opening_gambit"].endswith(
         "The next [gold]Plan[/gold] written this turn deals double damage.")
     # Scout Ahead, the third, was cut in the cleanup pass (2026-09-29).
@@ -2170,10 +2180,12 @@ def test_read_the_field_is_a_selection_and_a_planned_wall(overhaul):
     row = _row("proto_kk_read_the_field")
     assert row.effects == [{"op": "scry_take", "amount": 3}]
     assert row.plan == [{"op": "draw_pile_to_hand"}]
-    assert row.upgrade == {"scry": 1}
+    # The Kokomi upgrade pass (2026-10-19): the fetched card costs 1 less
+    # this turn on the upgraded card.
+    assert row.upgrade == {"scry": 1, "upgraded_grant": True}
     up = upgrades.apply_upgrade(_row("proto_kk_read_the_field"))
     assert up.effects[0]["amount"] == 4
-    assert up.plan == [{"op": "draw_pile_to_hand"}]
+    assert up.plan == [{"op": "draw_pile_to_hand", "upgraded": True}]
 
 
 def test_night_watch_is_off_the_sheet_and_out_of_the_pool(overhaul):
@@ -2515,16 +2527,18 @@ _COC_NOW = {"op": "damage", "target": "enemy",
 
 
 @pytest.mark.parametrize("cid,now,plan,up_now,up_plan", [
+    # The Kokomi upgrade pass (2026-10-19): both sides upgrade.
     ("proto_kk_ambush", [_VULN2],
      [{"op": "damage", "amount": 12, "target": "front_enemy"}],
-     [_VULN2], [{"op": "damage", "amount": 15, "target": "front_enemy"}]),
+     [dict(_VULN2, amount=3)],
+     [{"op": "damage", "amount": 15, "target": "front_enemy"}]),
     # 2026-10-05: the row declares the Hydro its face prints.
     ("proto_kk_second_wave", [{"op": "damage", "amount": 7,
                                "target": "enemy", "applies_element": True}],
-     [{"op": "next_plan_extra_carry_out"}],
+     [{"op": "next_plan_extra_carry_out"}, {"op": "draw", "amount": 0}],
      [{"op": "damage", "amount": 9, "target": "enemy",
        "applies_element": True}],
-     [{"op": "next_plan_extra_carry_out"}]),
+     [{"op": "next_plan_extra_carry_out"}, {"op": "draw", "amount": 1}]),
 ])
 def test_core_pass_rows_and_upgrades(overhaul, cid, now, plan, up_now,
                                      up_plan):

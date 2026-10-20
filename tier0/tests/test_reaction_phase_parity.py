@@ -1118,6 +1118,13 @@ CO_TENANCY_LEDGER = {
             "lands in relative to the mints above, the numbers it draws are "
             "re-read on the next redraw; the sim has no counterpart because "
             "there is nothing here to model",
+        ("Powers/Prototype/KokomiExpansion.cs", "AtWatersEdgePower"):
+            "(the Kokomi upgrade pass, 2026-10-19). Display only: the badge "
+            "re-reads the ledger's once-a-turn latch and sets its own Spent "
+            "var. THE ORDERING QUESTION, answered: it writes no game state, "
+            "and a co-tenant that spends the latch first or after leaves the "
+            "same answer (the claim itself sets the var), so no order moves "
+            "a number; there is nothing for the sim to model",
     },
     "BeforeSideTurnEnd": {
         ("Powers/Prototype/FurinaStageHooks.cs", "FurinaStageHooks"):

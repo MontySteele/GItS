@@ -106,9 +106,11 @@ def test_the_new_cards_numbers_and_upgrades():
     assert (up.effects[0]["amount"], up.plan[0]["amount"]) == (11, 3)
     turnabout = loader.get_card("proto_kk_turnabout")
     assert turnabout.effects == [] and turnabout.exhaust
-    assert turnabout.plan == [{"op": "damage_taken_since",
+    assert turnabout.plan == [{"op": "damage_taken_since", "amount": 0,
                                "target": "all_enemies"}]
-    assert _up("proto_kk_turnabout").cost == 1   # the Prototype-stage rule
+    # The Kokomi upgrade pass (2026-10-19): Plan damage +5, cost stays.
+    up = _up("proto_kk_turnabout")
+    assert up.cost == 2 and up.plan[0]["amount"] == 5
     spray = loader.get_card("proto_kk_brine_spray")
     assert spray.effects[0]["amount"] == 8
     assert _up("proto_kk_brine_spray").effects[0]["amount"] == 10

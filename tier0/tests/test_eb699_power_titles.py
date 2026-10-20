@@ -46,7 +46,9 @@ CODE = REPO / "klee-mod" / "KleeCode"
 #: into the description beside a literal title.
 _TITLE = re.compile(r'\("title",\s*\$?"([^"]*)"\)')
 _CLASS = re.compile(r"\bclass\s+(\w+)")
-_APPLY = re.compile(r"PowerCmd\.Apply<(\w+)>")
+#: The Kokomi upgrade pass (2026-10-19): a one-class-for-both-versions
+#: power is applied through `UpgradeTwinPower.Install<T>`.
+_APPLY = re.compile(r"(?:PowerCmd\.Apply|UpgradeTwinPower\.Install)<(\w+)>")
 
 #: A companion card's title is "<Character> -- <Card>", em dash. The power
 #: wears the card half.

@@ -56,7 +56,7 @@ public sealed class ProtoKkCoordinatedStrike : CustomCardModel, IElementalCard, 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Coordinated Strike"),
-        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage.\nOr [gold]plan[/gold]: Next turn, each other player's Attacks deal 3 additional damage."),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage.\nOr [gold]plan[/gold]: Next turn, each other player's Attacks deal {PlanAttackBonus:diff()} additional damage."),
     };
 
     protected override HashSet<CardTag> CanonicalTags => new() { CardTag.Strike };
@@ -67,13 +67,14 @@ public sealed class ProtoKkCoordinatedStrike : CustomCardModel, IElementalCard, 
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.OthersAttackDamageThisTurn, 3, KokomiPlan.Aim.Self),
+            new KokomiPlan.Planned(KokomiPlan.Kind.OthersAttackDamageThisTurn, DynamicVars["PlanAttackBonus"].IntValue, KokomiPlan.Aim.Self),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(6m, ValueProp.Move)
+            new DamageVar(6m, ValueProp.Move),
+            new DynamicVar("PlanAttackBonus", 3m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -114,5 +115,6 @@ public sealed class ProtoKkCoordinatedStrike : CustomCardModel, IElementalCard, 
     protected override void OnUpgrade()
     {
         DynamicVars.Damage.UpgradeValueBy(3m);
+        DynamicVars["PlanAttackBonus"].UpgradeValueBy(1m);
     }
 }

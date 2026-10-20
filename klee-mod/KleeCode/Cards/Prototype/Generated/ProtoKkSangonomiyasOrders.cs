@@ -45,7 +45,7 @@ public sealed class ProtoKkSangonomiyasOrders : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sangonomiya's Orders"),
-        ("description", "At the start of your turn, add a random Common Inazuma [gold]Companion[/gold] to your [gold]Hand[/gold]. It costs 0 and is [gold]Ethereal[/gold]."),
+        ("description", "At the start of your turn, add a random{IfUpgraded:show: upgraded|} Common Inazuma [gold]Companion[/gold] to your [gold]Hand[/gold]. It costs 0 and is [gold]Ethereal[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -63,11 +63,11 @@ public sealed class ProtoKkSangonomiyasOrders : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<SangonomiyasOrdersPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        await UpgradeTwinPower.Install<SangonomiyasOrdersPower>(choiceContext, Owner.Creature, 1, IsUpgraded, Owner.Creature, this);
     }
 
     protected override void OnUpgrade()
     {
-        AddKeyword(CardKeyword.Innate);
+        // upgraded_power: the upgraded card's copy of SangonomiyasOrdersPower counts as upgraded, read off IsUpgraded when the card is played.
     }
 }

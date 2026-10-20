@@ -45,7 +45,7 @@ public sealed class ProtoKkKelpWall : CustomCardModel, ICharacterCard, IPlannedC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kelp Wall"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Draw 1 card.\nOr [gold]plan[/gold]: Deal [gold]Hydro[/gold] damage equal to the Attack damage you blocked since you planned this."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Draw 1 card.\nOr [gold]plan[/gold]: Deal [gold]Hydro[/gold] damage equal to the Attack damage you blocked since you planned this{IfUpgraded:show:, plus 4|}."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -54,14 +54,15 @@ public sealed class ProtoKkKelpWall : CustomCardModel, ICharacterCard, IPlannedC
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.DamageBlockedSince, 0, KokomiPlan.Aim.FrontEnemy),
+            new KokomiPlan.Planned(KokomiPlan.Kind.DamageBlockedSince, DynamicVars["PlanDamage"].IntValue, KokomiPlan.Aim.FrontEnemy),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new BlockVar(7m, ValueProp.Move),
-            new CardsVar(1)
+            new CardsVar(1),
+            new DynamicVar("PlanDamage", 0m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -98,5 +99,6 @@ public sealed class ProtoKkKelpWall : CustomCardModel, ICharacterCard, IPlannedC
     protected override void OnUpgrade()
     {
         DynamicVars.Block.UpgradeValueBy(2m);
+        DynamicVars["PlanDamage"].UpgradeValueBy(4m);
     }
 }

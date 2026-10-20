@@ -123,8 +123,10 @@ public class KokomiPoolOverhaulTests
                      (turnabout.Type, turnabout.Rarity,
                       turnabout.EnergyCost.Canonical));
         Assert.Contains(CardKeyword.Exhaust, turnabout.CanonicalKeywords);
-        Assert.Equal(1, (int)Upgraded<ProtoKkTurnabout>().EnergyCost
+        // The Kokomi upgrade pass (2026-10-19): the cost stays; Plan +5.
+        Assert.Equal(2, (int)Upgraded<ProtoKkTurnabout>().EnergyCost
             .GetWithModifiers(CostModifiers.None));
+        Assert.Equal(5, Upgraded<ProtoKkTurnabout>().PlanClauses.Single().Amount);
         Assert.False(turnabout is INowLineCard);
         var taken = Assert.Single(turnabout.PlanClauses);
         Assert.Equal((KokomiPlan.Kind.DamageTakenSince,

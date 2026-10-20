@@ -41,8 +41,10 @@ public class KokomiLevelPassTests
     [Fact]
     public void Steady_tide_is_eleven_fourteen_and_change_of_plans_is_uncommon()
     {
-        Assert.Equal(11, new ProtoKkSteadyTide().DynamicVars.Block.IntValue);
-        Assert.Equal(14, Upgraded<ProtoKkSteadyTide>().DynamicVars.Block.IntValue);
+        // The Kokomi upgrade pass (2026-10-19): 9 [12]; Plan draw 3 [4].
+        Assert.Equal(9, new ProtoKkSteadyTide().DynamicVars.Block.IntValue);
+        Assert.Equal(12, Upgraded<ProtoKkSteadyTide>().DynamicVars.Block.IntValue);
+        Assert.Equal(4, Upgraded<ProtoKkSteadyTide>().PlanClauses.Single().Amount);
         Assert.Equal(CardRarity.Uncommon, new ProtoKkChangeOfPlans().Rarity);
     }
 
@@ -92,8 +94,8 @@ public class KokomiLevelPassTests
         Assert.Equal(KokomiPlan.Aim.EnemiesIntendingAttack, clause.Aim);
         Assert.Equal(11, clause.Amount);
         Assert.Equal(14, Assert.Single(Upgraded<ProtoKkFlank>().PlanClauses).Amount);
-        Assert.EndsWith("each enemy that intends to attack.",
-                        Face(new ProtoKkFlank()));
+        Assert.EndsWith("each enemy that intends to attack when this is "
+                        + "carried out.", Face(new ProtoKkFlank()));
     }
 
     [Fact]

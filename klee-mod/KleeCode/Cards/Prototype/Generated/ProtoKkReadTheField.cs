@@ -45,7 +45,7 @@ public sealed class ProtoKkReadTheField : CustomCardModel, ICharacterCard, IPlan
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Read the Field"),
-        ("description", "Take 1 of your top {Scry:diff()} cards.\nOr [gold]plan[/gold]: Put a [gold]Draw Pile[/gold] card into your [gold]Hand[/gold]. It costs 0 this turn."),
+        ("description", "Take 1 of your top {Scry:diff()} cards.\nOr [gold]plan[/gold]: Put a [gold]Draw Pile[/gold] card into your [gold]Hand[/gold].{IfUpgraded:show: It costs 1 less.|}"),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -107,5 +107,6 @@ public sealed class ProtoKkReadTheField : CustomCardModel, ICharacterCard, IPlan
     protected override void OnUpgrade()
     {
         DynamicVars["Scry"].UpgradeValueBy(1m);
+        // upgraded_grant: the granted card arrives upgraded, read off IsUpgraded when the Power is installed.
     }
 }

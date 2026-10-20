@@ -10,8 +10,10 @@ using MegaCrit.Sts2.Core.Commands.Builders;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Powers;
+using MegaCrit.Sts2.Core.Entities.Players;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.HoverTips;
+using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.ValueProps;
@@ -92,6 +94,12 @@ public static class KokomiExpansion
                 kokomi, nameof(AtWatersEdgePower)))
         {
             return;
+        }
+        // The Kokomi upgrade pass (2026-10-19, finish round item 5): the
+        // badge flashes when the turn's trigger is spent, and says so.
+        foreach (var power in kokomi.Powers.OfType<AtWatersEdgePower>().ToList())
+        {
+            power.ShowSpent(true, flash: true);
         }
         await PowerCmd.Apply<WeakPower>(
             choiceContext, target, n, applier: kokomi, cardSource: null);
@@ -183,11 +191,47 @@ public sealed class AtWatersEdgePower : PowerModel, ILocalizationProvider
           // Kokomi review r6 (2026-10-14, item 8): a Plan's hit counts.
           // 2026-10-18 wording: "to the enemy hit" (once per turn in all).
           + "[gold]Vulnerable[/gold] to the enemy hit. [gold]Plans[/gold] count."),
+        // The Kokomi upgrade pass (2026-10-19, finish round item 5): in
+        // combat the badge says when this turn's trigger is spent.
+        ("smartDescription",
+            "The first time each turn you deal [gold]Hydro[/gold] damage, apply "
+          + "[blue]{Amount}[/blue] [gold]Weak[/gold] and [blue]{Amount}[/blue] "
+          + "[gold]Vulnerable[/gold] to the enemy hit. [gold]Plans[/gold] count."
+          + "{Spent:cond:>0? (Used this turn.)|}"),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
+
+    protected override IEnumerable<DynamicVar> CanonicalVars => new List<DynamicVar>
+    {
+        new("Spent", 0m),
+    };
+
+    /// <summary>Has this turn's trigger been spent? Read off the ledger's
+    /// latch, the one thing that knows what turn it is. Display only.</summary>
+    public bool Spent =>
+        Owner != null
+        && KokomiOverhaulLedger.For(Owner).IsClaimed(nameof(AtWatersEdgePower));
+
+    /// <summary>Set the badge's spent line (and flash it when the trigger
+    /// fires). Display only.</summary>
+    public void ShowSpent(bool spent, bool flash = false)
+    {
+        if (flash) Flash();
+        if (!IsMutable) return;
+        DynamicVars["Spent"].BaseValue = spent ? 1m : 0m;
+    }
+
+    /// <summary>A new turn: the badge reads the latch again, so a trigger a
+    /// morning Plan already spent stays shown spent.</summary>
+    public override Task AfterPlayerTurnStart(
+        PlayerChoiceContext choiceContext, Player player)
+    {
+        if (Owner != null && player.Creature == Owner) ShowSpent(Spent);
+        return Task.CompletedTask;
+    }
 
     public override async Task AfterDamageGiven(
         PlayerChoiceContext choiceContext, Creature dealer, DamageResult result,

@@ -1467,6 +1467,7 @@
       "formula_base": 2
     },
     "proto_kk_ambush": {
+      "power_amount": 1,
       "plan_damage": 3
     },
     "proto_kk_at_waters_edge": {
@@ -1495,7 +1496,8 @@
       "draw": 1
     },
     "proto_kk_coordinated_strike": {
-      "damage": 3
+      "damage": 3,
+      "plan_attack_bonus": 1
     },
     "proto_kk_coral_bulwark": {
       "block": 3
@@ -1542,10 +1544,12 @@
       "damage": 2
     },
     "proto_kk_joint_orders": {
-      "block": 3
+      "block": 3,
+      "plan_draw": 1
     },
     "proto_kk_kelp_wall": {
-      "block": 2
+      "block": 2,
+      "plan_damage": 4
     },
     "proto_kk_kurage_barrage": {
       "damage": 1
@@ -1567,7 +1571,8 @@
       "plan_damage": 3
     },
     "proto_kk_kurages_wake": {
-      "damage": 1
+      "damage": 1,
+      "plan_draw": 1
     },
     "proto_kk_masterstroke": {
       "plan_damage": 12
@@ -1576,7 +1581,8 @@
       "innate": true
     },
     "proto_kk_opening_gambit": {
-      "damage": 2
+      "damage": 2,
+      "plan_power_amount": 1
     },
     "proto_kk_orders_from_the_shrine": {
       "cost": -1
@@ -1586,7 +1592,8 @@
       "plan_damage": 1
     },
     "proto_kk_pincer": {
-      "damage": 1
+      "damage": 1,
+      "plan_draw": 1
     },
     "proto_kk_prepared_retreat": {
       "block": 3,
@@ -1597,7 +1604,8 @@
       "conditional_then_damage": 1
     },
     "proto_kk_read_the_field": {
-      "scry": 1
+      "scry": 1,
+      "upgraded_grant": true
     },
     "proto_kk_resolve_of_watatsumi": {
       "power_amount": 1
@@ -1618,7 +1626,7 @@
       "power_amount": 1
     },
     "proto_kk_sangonomiyas_orders": {
-      "innate": true
+      "upgraded_power": "kk_sangonomiyas_orders_plus"
     },
     "proto_kk_sea_glass_harvest": {
       "block": 3,
@@ -1628,7 +1636,8 @@
       "power_amount": 2
     },
     "proto_kk_second_wave": {
-      "damage": 2
+      "damage": 2,
+      "plan_draw": 1
     },
     "proto_kk_shoal_call": {
       "kokomi_amount": 1
@@ -1641,10 +1650,12 @@
       "plan_power_amount": 1
     },
     "proto_kk_spearhead": {
-      "damage": 4
+      "damage": 4,
+      "plan_power_amount": 1
     },
     "proto_kk_steady_tide": {
-      "block": 3
+      "block": 3,
+      "plan_draw": 1
     },
     "proto_kk_sting": {
       "damage": 2,
@@ -1679,7 +1690,8 @@
       "power_amount": 3
     },
     "proto_kk_tidal_screen": {
-      "block": 3
+      "block": 3,
+      "plan_draw": 1
     },
     "proto_kk_tidal_surge": {
       "damage": 3,
@@ -1700,7 +1712,7 @@
       "innate": true
     },
     "proto_kk_turnabout": {
-      "cost": -1
+      "plan_damage": 5
     },
     "proto_kk_turning_tide_chain": {
       "damage": 3,
@@ -1722,7 +1734,8 @@
       "damage": 3
     },
     "proto_kk_war_council": {
-      "power_amount": 1
+      "power_amount": 1,
+      "plan_draw": 1
     },
     "proto_kk_ward": {
       "plan_draw": 1
@@ -2272,7 +2285,8 @@
       "plan_block": 3
     },
     "proto_mi_gorou_juuga": {
-      "power_amount": 1
+      "power_amount": 1,
+      "plan_power_amount": 1
     },
     "proto_mi_gorou_war_banner": {
       "block": 3,

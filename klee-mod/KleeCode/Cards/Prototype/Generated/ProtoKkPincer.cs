@@ -51,7 +51,7 @@ public sealed class ProtoKkPincer : CustomCardModel, IElementalCard, ICharacterC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Pincer"),
-        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage twice.\nOr [gold]plan[/gold]: Your first Attack that turn is played twice."),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage twice.\nOr [gold]plan[/gold]: Your first Attack that turn is played twice.{IfUpgraded:show: Draw 1 card.|}"),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -61,12 +61,14 @@ public sealed class ProtoKkPincer : CustomCardModel, IElementalCard, ICharacterC
         new[]
         {
             new KokomiPlan.Planned(KokomiPlan.Kind.FirstAttackTwice, 0, KokomiPlan.Aim.Self),
+            new KokomiPlan.Planned(KokomiPlan.Kind.Draw, DynamicVars["PlanCards"].IntValue, KokomiPlan.Aim.Self),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(5m, ValueProp.Move)
+            new DamageVar(5m, ValueProp.Move),
+            new DynamicVar("PlanCards", 0m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -108,5 +110,6 @@ public sealed class ProtoKkPincer : CustomCardModel, IElementalCard, ICharacterC
     protected override void OnUpgrade()
     {
         DynamicVars.Damage.UpgradeValueBy(1m);
+        DynamicVars["PlanCards"].UpgradeValueBy(1m);
     }
 }

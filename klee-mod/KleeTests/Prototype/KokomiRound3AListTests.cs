@@ -33,7 +33,8 @@ public class KokomiRound3AListTests
     public void Second_wave_names_the_plan_written_after_it_this_turn()
     {
         Assert.EndsWith("The [gold]Plan[/gold] written after it this turn is "
-                      + "carried out twice.", Face(new ProtoKkSecondWave()));
+                      + "carried out twice.{IfUpgraded:show: Draw 1 card.|}",
+                        Face(new ProtoKkSecondWave()));
     }
 
     [Fact]

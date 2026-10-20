@@ -171,9 +171,11 @@ def test_a_played_sting_counts_and_a_written_one_does_not():
     _play(st, _up(kokomi_plan.STING_ID))
     assert st.kk_stings_played_this_combat == 2
     assert st.kk_stings_played_this_turn == 2
-    # Brine Sting is not a Sting.
+    # The Kokomi upgrade pass (2026-10-19, card paper pick 1 (a)): Brine
+    # Sting is a Sting too.
     _play(st, card("proto_kk_brine_sting"))
-    assert st.kk_stings_played_this_combat == 2
+    assert st.kk_stings_played_this_combat == 3
+    assert st.kk_stings_played_this_turn == 3
 
 
 def test_a_flipped_sting_carried_out_is_not_played():

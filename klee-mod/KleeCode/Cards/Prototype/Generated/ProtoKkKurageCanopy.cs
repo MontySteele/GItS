@@ -38,7 +38,7 @@ public sealed class ProtoKkKurageCanopy : CustomCardModel, ICharacterCard
     public string CharacterId => "kokomi";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KokomiCards.WithWardPreview(KokomiCards.WithStingPreview(ArmKeywordTips.ForPlanNoLine(base.ExtraHoverTips, this)));
+        KokomiCards.WithWardPreview(KokomiCards.WithStingPreview(ArmKeywordTips.ForPlanNoLine(base.ExtraHoverTips, this)), IsUpgraded);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_kurage_canopy");
 

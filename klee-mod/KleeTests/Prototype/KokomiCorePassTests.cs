@@ -122,7 +122,9 @@ public class KokomiCorePassTests
     public void Ambush_applies_vulnerable_now_and_plans_twelve()
     {
         var card = new ProtoKkAmbush();
-        Assert.Equal("Apply 2 [gold]Vulnerable[/gold].\nOr [gold]plan[/gold]: "
+        // The Kokomi upgrade pass (2026-10-19): Vulnerable 2 [3].
+        Assert.Equal(3, Upgraded<ProtoKkAmbush>().DynamicVars["PowerAmount"].IntValue);
+        Assert.Equal("Apply {PowerAmount:diff()} [gold]Vulnerable[/gold].\nOr [gold]plan[/gold]: "
                    + "Deal {PlanDamage:diff()} [gold]Hydro[/gold] damage.", Face(card));
         var clause = Assert.Single(card.PlanClauses);
         Assert.Equal((KokomiPlan.Kind.Damage, 12), (clause.Kind, clause.Amount));
@@ -146,6 +148,6 @@ public class KokomiCorePassTests
         var elemental = Assert.IsAssignableFrom<IElementalCard>(card);
         Assert.Equal(Element.Hydro, elemental.Element);
         Assert.Equal(KokomiPlan.Kind.NextPlanExtraCarryOut,
-                     Assert.Single(card.PlanClauses).Kind);
+                     card.PlanClauses[0].Kind);
     }
 }

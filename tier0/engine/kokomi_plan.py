@@ -111,9 +111,10 @@ PLAN_AMOUNTLESS_OPS = frozenset((
     "first_attack_twice",
     # THE STATUS BATCH: "every status and curse".
     "transform_statuses_you_have",
-    # THE POOL OVERHAUL (2026-10-13): Kelp Wall's and Turnabout's size is read
-    # off the ledger at carry-out; Read the Field's is one card.
-    "damage_blocked_since", "damage_taken_since", "draw_pile_to_hand",
+    # THE POOL OVERHAUL (2026-10-13): Read the Field's is one card. (Kelp
+    # Wall's and Turnabout's ledger reads carry a flat bonus since the Kokomi
+    # upgrade pass, 2026-10-19: `PLAN_ZERO_AMOUNT_OPS`.)
+    "draw_pile_to_hand",
 ))
 
 #: The two debuffs a Plan may apply. `KokomiPlan.PLAN_APPLY_POWERS`' twin.
@@ -154,7 +155,13 @@ PLAN_AIMED_OPS = frozenset((
 PLAN_ZERO_AMOUNT_OPS = frozenset(("block_max_intent", "block",
                                  # POOL COMPLETION: Tactical Relay's draw is
                                  # written at 0 and added by the upgrade.
-                                 "each_player_draw"))
+                                 "each_player_draw",
+                                 # THE KOKOMI UPGRADE PASS (2026-10-19): War
+                                 # Council's, Pincer's and Second Wave's draw,
+                                 # and Kelp Wall's and Turnabout's flat bonus
+                                 # on the ledger's count, each written at 0.
+                                 "draw", "damage_blocked_since",
+                                 "damage_taken_since"))
 
 #: The clauses a `times:` may repeat: the FLAT hit, and nothing else
 #: (`EB-492`, Pincer's "Plan: Deal 3 damage three times"). The two scaled
@@ -314,6 +321,9 @@ MI_JUUGA_GUARD = "mi_juuga_guard"
 #: The two jellyfish cards (card paper sec.1 rule 4), off-pool sheet rows.
 STING_ID = "proto_kk_sting"
 WARD_ID = "proto_kk_ward"
+#: Brine Sting counts as a Sting played (the Kokomi upgrade pass,
+#: 2026-10-19).
+BRINE_STING_ID = "proto_kk_brine_sting"
 #: The nation the Commander's generators draw from.
 GENERATED_NATION = "inazuma"
 #: Call the Generals' "1 of 3".
@@ -411,6 +421,7 @@ WATATSUMI_RESISTANCE = "kk_watatsumi_resistance"
 #: THE RE-FOUNDING (2026-10-12): seven Powers. Twins in
 #: `Powers/Prototype/KokomiRefounding.cs`.
 SANGONOMIYAS_ORDERS = "kk_sangonomiyas_orders"   # turn start: N Companions
+SANGONOMIYAS_ORDERS_PLUS = "kk_sangonomiyas_orders_plus"  # ... upgraded
 KURAGE_BLOOM = "kk_kurage_bloom"                 # turn start: N Stings
 WATCHFUL_SHOAL = "kk_watchful_shoal"             # Stings +N dmg
 COORDINATED_TIDE = "kk_coordinated_tide"         # a Companion's reaction: N Stings
@@ -508,7 +519,7 @@ def plan_shape_reason(clauses: Sequence[dict]) -> Optional[str]:
         # times", on the flat hit only.
         if op == "damage":
             allowed.add("strength_times")
-        if op == TRANSFORM_STATUSES_YOU_HAVE:
+        if op in (TRANSFORM_STATUSES_YOU_HAVE, DRAW_PILE_TO_HAND):
             allowed.add("upgraded")      # the `upgraded_grant` key's flag
         unknown = set(eff) - allowed
         if unknown:
@@ -848,7 +859,10 @@ def plan_label(card: Card, held: Optional[Card]) -> str:
     which is what the player will see resolve.
     """
     short = card.name.split("—")[-1].strip() or card.name
-    return f"{short}: {held.name if held is not None else 'nothing'}"
+    # The Kokomi upgrade pass (2026-10-19): nothing caught plays a random
+    # Common Companion.
+    return (f"{short}: "
+            f"{held.name if held is not None else 'a random Companion'}")
 
 
 def _enchanted(card: Optional[Card], amount: int) -> int:
@@ -1587,7 +1601,10 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
     aim = clause.get("target")
 
     if op == "draw":
-        state.draw(amount)
+        # The Kokomi upgrade pass (2026-10-19): a 0 draw is the clause an
+        # upgrade adds, unprinted on the base face; it draws nothing.
+        if amount > 0:
+            state.draw(amount)
     elif op == "energy":
         p.energy += amount
         state.emit("energy", amount=amount)
@@ -1659,12 +1676,13 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
              amount, entry=entry, double=double_damage)
     elif op == DAMAGE_BLOCKED_SINCE:
         # Kelp Wall: the damage she blocked since it was written.
-        _hit(state, clause, blocked_since(state, entry), entry=entry,
-             double=double_damage)
+        # The Kokomi upgrade pass (2026-10-19): plus the upgrade's bonus.
+        _hit(state, clause, blocked_since(state, entry) + amount,
+             entry=entry, double=double_damage)
     elif op == DAMAGE_TAKEN_SINCE:
         # Turnabout: all the damage enemies dealt her since, blocked or not.
-        _hit(state, clause, taken_since(state, entry), entry=entry,
-             double=double_damage)
+        _hit(state, clause, taken_since(state, entry) + amount,
+             entry=entry, double=double_damage)
     elif op == ENERGY_IF_ATTACKED_SINCE:
         # Prepared Retreat: Energy if an enemy attacked her since.
         attacked = attacked_since(state, entry)
@@ -1686,8 +1704,9 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
             powers.apply_power(state, enemy, "temp_strength_down", amount,
                                applier=p)
     elif op == DRAW_PILE_TO_HAND:
-        # Read the Field: one card of her choice from the Draw Pile.
-        draw_pile_to_hand(state)
+        # Read the Field: one card of her choice from the Draw Pile; 1 less
+        # this turn on the upgraded card (the upgrade pass, 2026-10-19).
+        draw_pile_to_hand(state, bool(clause.get("upgraded")))
     elif op in coop.PLAN_OPS:
         # THE CO-OP SET: Joint Orders' ally draws, Coordinated Strike's other
         # players hit harder. Nobody else is at a one-seat table, so the
@@ -1972,7 +1991,16 @@ def _play_copy(state: CombatState, card: Optional[Card]) -> None:
     from tier0.engine import effects                # late import: cycle
 
     if card is None:
-        state.emit("plan_copy_empty")
+        # THE KOKOMI UPGRADE PASS (2026-10-19): "If you haven't, play a
+        # random Common Inazuma Companion" -- Sangonomiya's Orders' offer
+        # (`generated_companions`), played free and exhausted after.
+        pool = generated_companions(state, "common") if live(state) else []
+        if not pool:
+            state.emit("plan_copy_empty")
+            return
+        pick = state.rng.choice(pool)
+        state.emit("plan_copy_random", card=pick.id)
+        effects._free_play(state, _copy.deepcopy(pick), force_exhaust=True)
         return
     state.emit("plan_copy", card=card.id)
     effects._free_play(state, _copy.deepcopy(card), force_exhaust=True)
@@ -2852,7 +2880,11 @@ def note_sting_played(state: CombatState, card: Card) -> None:
     `note_face_up_plan_card`; a write returns before it, and a carry-out is
     not her play (`kk_carrying_out`), Treatise's reading.
     `ProtoBakeKuragePower.AfterCardPlayed` is the twin."""
-    if not live(state) or card.id.rstrip("+") != STING_ID:
+    # The Kokomi upgrade pass (2026-10-19, card paper pick 1 (a)): Brine
+    # Sting is a Sting too -- "the face says Sting, and a player will read
+    # it that way".
+    if not live(state) or card.id.rstrip("+") not in (STING_ID,
+                                                      BRINE_STING_ID):
         return
     if state.kk_carrying_out:
         return
@@ -3016,12 +3048,15 @@ def battle_formation(state: CombatState) -> None:
     state.emit("plan_battle_formation", energy=energy, cards=cards)
 
 
-def draw_pile_to_hand(state: CombatState) -> Optional[Card]:
+def draw_pile_to_hand(state: CombatState,
+                      upgraded: bool = False) -> Optional[Card]:
     """READ THE FIELD's Plan line (the pool overhaul, 2026-10-13): "Put a card
-    from your Draw Pile into your Hand. It costs 0 this turn." (the cost since
-    the Kokomi review r6, pick 3 (a), 2026-10-14). The player chooses in the mod; the
-    pilot takes `effects._best_card`, an INSTRUMENT SURFACE. An empty pile or
-    a full hand is a no-op. `KokomiPlan.DrawPileToHand` is the twin."""
+    from your Draw Pile into your Hand." Upgraded (the Kokomi upgrade pass,
+    2026-10-19): "It costs 1 less this turn." (It cost 0 on both faces from
+    the Kokomi review r6, pick 3 (a), 2026-10-14.) The player chooses in the
+    mod; the pilot takes `effects._best_card`, an INSTRUMENT SURFACE. An empty
+    pile or a full hand is a no-op. `KokomiPlan.DrawPileToHand` is the
+    twin."""
     from tier0.engine import effects                # late import: cycle
     from tier0.engine.state import remove_instance
     pile = list(state.player.draw_pile)
@@ -3030,7 +3065,8 @@ def draw_pile_to_hand(state: CombatState) -> Optional[Card]:
         return None
     pick = effects._best_card(pile)
     remove_instance(state.player.draw_pile, pick)
-    pick.free_this_turn = True
+    if upgraded:
+        pick.cost_delta_this_turn -= 1
     state.player.hand.append(pick)
     state.emit("plan_draw_pile_to_hand", card=pick.id)
     return pick
@@ -3065,6 +3101,11 @@ def turn_start_generators(state: CombatState) -> None:
     orders = int(p.powers.get(SANGONOMIYAS_ORDERS, 0))
     if orders:
         add_companions(state, orders, upgraded=False, free=True)
+    # The Kokomi upgrade pass (2026-10-19): the upgraded card's copy adds an
+    # upgraded Companion (one `UpgradeTwinPower` in the mod).
+    orders_plus = int(p.powers.get(SANGONOMIYAS_ORDERS_PLUS, 0))
+    if orders_plus:
+        add_companions(state, orders_plus, upgraded=True, free=True)
 
 
 def casket_counts(card: Optional[Card]) -> bool:

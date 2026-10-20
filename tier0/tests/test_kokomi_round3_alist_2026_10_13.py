@@ -46,7 +46,8 @@ def _probe_plan(i: int = 0) -> Card:
 def test_second_wave_names_the_plan_written_after_it_this_turn():
     assert _face("proto_kk_second_wave") == (
         "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: The "
-        "[gold]Plan[/gold] written after it this turn is carried out twice.")
+        "[gold]Plan[/gold] written after it this turn is carried out twice."
+        "{IfUpgraded:show: Draw 1 card.|}")
     assert _card("proto_kk_second_wave").effects[0]["amount"] == 7
     assert _up("proto_kk_second_wave").effects[0]["amount"] == 9
 

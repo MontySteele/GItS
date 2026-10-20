@@ -443,6 +443,11 @@ public sealed class KokomiOverhaulLedger
     /// has.</summary>
     public bool Claim(string key) => _claimed.Add(key);
 
+    /// <summary>Has <paramref name="key"/>'s once-per-turn latch been claimed
+    /// this turn? A read that spends nothing (At Water's Edge's badge, the
+    /// Kokomi upgrade pass, 2026-10-19). Display only.</summary>
+    public bool IsClaimed(string key) => _claimed.Contains(key);
+
     /// <summary>
     /// THE ONCE-PER-COMBAT LATCH (Kokomi's own relics, 2026-10-15): Sango
     /// Pearl's "the first card you plan each combat". True the first time
