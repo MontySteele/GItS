@@ -602,7 +602,7 @@
     "KLEEMOD-PROTO_KK_PREPARED_RETREAT.title": "Prepared Retreat",
     "KLEEMOD-PROTO_KK_PRESS_THE_ADVANTAGE.description": "Deal {PlainDamage:diff()} [gold]Hydro[/gold] damage. If a [gold]Plan[/gold] is waiting, deal {BranchDamage:diff()} instead.",
     "KLEEMOD-PROTO_KK_PRESS_THE_ADVANTAGE.title": "Press the Advantage",
-    "KLEEMOD-PROTO_KK_READ_THE_FIELD.description": "Take 1 of your top {Scry:diff()} cards.\nOr [gold]plan[/gold]: Put a [gold]Draw Pile[/gold] card into your [gold]Hand[/gold].{IfUpgraded:show: It costs 1 less.|}",
+    "KLEEMOD-PROTO_KK_READ_THE_FIELD.description": "Take 1 of your top {Scry:diff()} cards.\nOr [gold]plan[/gold]: Put a [gold]Draw Pile[/gold] card into your [gold]Hand[/gold]. It costs 0 this turn.{IfUpgraded:show: Draw 1 card.|}",
     "KLEEMOD-PROTO_KK_READ_THE_FIELD.title": "Read the Field",
     "KLEEMOD-PROTO_KK_RESOLVE_OF_WATATSUMI.description": "Gain {PowerAmount:diff()} [gold]Strength[/gold].",
     "KLEEMOD-PROTO_KK_RESOLVE_OF_WATATSUMI.title": "Resolve of Watatsumi",

@@ -66,8 +66,9 @@ def test_the_plan_line_upgrades(cid, base, upgraded):
     assert _up(cid).plan[0]["amount"] == upgraded
 
 
-@pytest.mark.parametrize("cid", ["proto_kk_pincer", "proto_kk_second_wave"])
-def test_pincer_and_second_wave_plans_draw_1_upgraded(cid):
+@pytest.mark.parametrize("cid", ["proto_kk_pincer", "proto_kk_second_wave",
+                                 "proto_kk_read_the_field"])
+def test_pincer_second_wave_and_read_the_field_plans_draw_1_upgraded(cid):
     assert _row(cid).plan[-1] == {"op": "draw", "amount": 0}
     assert _up(cid).plan[-1] == {"op": "draw", "amount": 1}
 

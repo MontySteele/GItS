@@ -9863,10 +9863,9 @@ weak-card and upgrade pass" ("This table looks good. Ship it").
   `plan_power_amount` Juuga's Plan turns, `plan_draw` a card count (Kurage's
   Wake's Stings, Joint Orders' ally draw), `plan_attack_bonus` Coordinated
   Strike's.
-- Read the Field: the fetched card costs 1 less this turn on the upgraded
-  card only (it cost 0 on both faces since Kokomi review r6, pick 3 (a)).
-  `upgraded_grant` on the plan clause; the face's add-clause is "It costs 1
-  less." to meet the 20-character ceiling.
+- Read the Field: the fetched card still costs 0 this turn on both faces
+  (Kokomi review r6, pick 3 (a)); the upgraded Plan also draws 1, Pincer's
+  shape (a draw written at 0).
 - Sangonomiya's Orders: the upgrade makes the Companion upgraded (was
   Innate). `upgraded_power: kk_sangonomiyas_orders_plus`, one
   `UpgradeTwinPower` class.

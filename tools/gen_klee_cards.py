@@ -9515,10 +9515,7 @@ def upgrade_plan(card: dict) -> tuple[dict, str | None]:
                               for e in effects)
         # THE STATUS BATCH: Sea Glass Harvest's Sea Glass+ is read off the
         # writing card's IsUpgraded when the Plan is carried out.
-        or any(e.get("op") in ("transform_statuses_you_have",
-                               # The Kokomi upgrade pass (2026-10-19): Read
-                               # the Field's fetched card costs 1 less.
-                               "draw_pile_to_hand")
+        or any(e.get("op") == "transform_statuses_you_have"
                for e in plan_line),
         # VARKA (Knights' Roll Call+): the chosen Knight arrives upgraded,
         # read at play time off `IsUpgraded`; the face carries its own
@@ -14877,6 +14874,12 @@ def _authored_face_numbers(card: dict):
     for index, eff in enumerate(card.get("plan") or []):
         amount = eff.get("amount")
         if not isinstance(amount, int):
+            continue
+        # The Kokomi upgrade pass (2026-10-19): a clause written at 0 is one
+        # an upgrade ADDS, so the base face prints no number for it -- a
+        # literal 0 elsewhere on the face (Read the Field's "It costs 0 this
+        # turn") is not its number.
+        if amount == 0 and eff.get("op") in PLAN_ZERO_AMOUNT_OPS:
             continue
         if index in plan_vars:
             key, var = plan_vars[index]

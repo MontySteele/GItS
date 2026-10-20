@@ -2179,13 +2179,12 @@ def test_read_the_field_is_a_selection_and_a_planned_wall(overhaul):
 
     row = _row("proto_kk_read_the_field")
     assert row.effects == [{"op": "scry_take", "amount": 3}]
-    assert row.plan == [{"op": "draw_pile_to_hand"}]
-    # The Kokomi upgrade pass (2026-10-19): the fetched card costs 1 less
-    # this turn on the upgraded card.
-    assert row.upgrade == {"scry": 1, "upgraded_grant": True}
+    # The Kokomi upgrade pass (2026-10-19): the upgraded Plan also draws 1.
+    assert row.plan == [{"op": "draw_pile_to_hand"}, {"op": "draw", "amount": 0}]
+    assert row.upgrade == {"scry": 1, "plan_draw": 1}
     up = upgrades.apply_upgrade(_row("proto_kk_read_the_field"))
     assert up.effects[0]["amount"] == 4
-    assert up.plan == [{"op": "draw_pile_to_hand", "upgraded": True}]
+    assert up.plan == [{"op": "draw_pile_to_hand"}, {"op": "draw", "amount": 1}]
 
 
 def test_night_watch_is_off_the_sheet_and_out_of_the_pool(overhaul):

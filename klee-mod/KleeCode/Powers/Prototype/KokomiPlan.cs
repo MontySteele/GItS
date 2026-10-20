@@ -2601,8 +2601,7 @@ public static class KokomiPlan
                 return plan.Amount;
 
             case Kind.DrawPileToHand:
-                return await DrawPileToHand(
-                    choiceContext, player, entry?.Source?.IsUpgraded ?? false);
+                return await DrawPileToHand(choiceContext, player);
         }
         return null;
     }
@@ -2619,7 +2618,7 @@ public static class KokomiPlan
         "Choose a card to put into your [gold]Hand[/gold].";
 
     private static async Task<int?> DrawPileToHand(
-        PlayerChoiceContext choiceContext, Player player, bool upgraded)
+        PlayerChoiceContext choiceContext, Player player)
     {
         var pile = CardPile.Get(PileType.Draw, player);
         if (pile == null || pile.Cards.Count == 0) return 0;
@@ -2629,10 +2628,8 @@ public static class KokomiPlan
                                   1))).FirstOrDefault();
         if (pick == null) return 0;
         await CardPileCmd.Add(pick, PileType.Hand, CardPilePosition.Top);
-        // The Kokomi upgrade pass (2026-10-19): "It costs 1 less this turn",
-        // on the upgraded card only (it cost 0 on both faces from the Kokomi
-        // review r6, pick 3 (a), 2026-10-14).
-        if (upgraded) pick.EnergyCost.AddThisTurn(-1);
+        // Kokomi review r6 pick 3 (a) (2026-10-14): "It costs 0 this turn."
+        pick.EnergyCost.SetThisTurn(0);
         return 1;
     }
 

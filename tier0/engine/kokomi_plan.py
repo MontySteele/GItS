@@ -519,7 +519,7 @@ def plan_shape_reason(clauses: Sequence[dict]) -> Optional[str]:
         # times", on the flat hit only.
         if op == "damage":
             allowed.add("strength_times")
-        if op in (TRANSFORM_STATUSES_YOU_HAVE, DRAW_PILE_TO_HAND):
+        if op == TRANSFORM_STATUSES_YOU_HAVE:
             allowed.add("upgraded")      # the `upgraded_grant` key's flag
         unknown = set(eff) - allowed
         if unknown:
@@ -1704,9 +1704,8 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
             powers.apply_power(state, enemy, "temp_strength_down", amount,
                                applier=p)
     elif op == DRAW_PILE_TO_HAND:
-        # Read the Field: one card of her choice from the Draw Pile; 1 less
-        # this turn on the upgraded card (the upgrade pass, 2026-10-19).
-        draw_pile_to_hand(state, bool(clause.get("upgraded")))
+        # Read the Field: one card of her choice from the Draw Pile.
+        draw_pile_to_hand(state)
     elif op in coop.PLAN_OPS:
         # THE CO-OP SET: Joint Orders' ally draws, Coordinated Strike's other
         # players hit harder. Nobody else is at a one-seat table, so the
@@ -3048,12 +3047,11 @@ def battle_formation(state: CombatState) -> None:
     state.emit("plan_battle_formation", energy=energy, cards=cards)
 
 
-def draw_pile_to_hand(state: CombatState,
-                      upgraded: bool = False) -> Optional[Card]:
+def draw_pile_to_hand(state: CombatState) -> Optional[Card]:
     """READ THE FIELD's Plan line (the pool overhaul, 2026-10-13): "Put a card
-    from your Draw Pile into your Hand." Upgraded (the Kokomi upgrade pass,
-    2026-10-19): "It costs 1 less this turn." (It cost 0 on both faces from
-    the Kokomi review r6, pick 3 (a), 2026-10-14.) The player chooses in the
+    from your Draw Pile into your Hand. It costs 0 this turn." (the cost since
+    the Kokomi review r6, pick 3 (a), 2026-10-14; the upgraded Plan also draws
+    1 since the Kokomi upgrade pass, 2026-10-19). The player chooses in the
     mod; the pilot takes `effects._best_card`, an INSTRUMENT SURFACE. An empty
     pile or a full hand is a no-op. `KokomiPlan.DrawPileToHand` is the
     twin."""
@@ -3065,8 +3063,7 @@ def draw_pile_to_hand(state: CombatState,
         return None
     pick = effects._best_card(pile)
     remove_instance(state.player.draw_pile, pick)
-    if upgraded:
-        pick.cost_delta_this_turn -= 1
+    pick.free_this_turn = True
     state.player.hand.append(pick)
     state.emit("plan_draw_pile_to_hand", card=pick.id)
     return pick

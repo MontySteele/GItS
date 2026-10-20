@@ -853,12 +853,9 @@ def apply_upgrade(card) -> "Card":  # noqa: F821 - avoids circular import
             # THE STATUS BATCH: Sea Glass Harvest's Plan transforms into
             # Sea Glass+, a flag on the plan clause.
             if hit is None:
-                # The Kokomi upgrade pass (2026-10-19): Read the Field's
-                # fetched card costs 1 less this turn, the same flag.
                 hit = next((fx for fx in (getattr(card, "plan", None) or [])
                             if fx.get("op")
-                            in ("transform_statuses_you_have",
-                                "draw_pile_to_hand")),
+                            == "transform_statuses_you_have"),
                            None)
             ok = hit is not None and val is True
             if ok:

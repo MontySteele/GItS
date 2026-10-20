@@ -137,15 +137,13 @@ public class KokomiReviewR6Tests
     // ---- pick 3 (a) ----------------------------------------------------------------
 
     [Fact]
-    public void Read_the_fields_card_costs_1_less_when_upgraded()
+    public void Read_the_fields_card_costs_0_this_turn()
     {
-        // Reworked by the Kokomi upgrade pass (2026-10-19): 1 less this
-        // turn, on the upgraded card only (was 0 on both).
         Assert.Contains(Calls("KokomiPlan", "DrawPileToHand"),
-                        c => c.Contains("AddThisTurn"));
-        Assert.DoesNotContain(Calls("KokomiPlan", "DrawPileToHand"),
-                              c => c.Contains("SetThisTurn"));
-        Assert.EndsWith("{IfUpgraded:show: It costs 1 less.|}",
+                        c => c.Contains("SetThisTurn"));
+        // The Kokomi upgrade pass (2026-10-19): 0 on both faces; the
+        // upgrade adds a draw.
+        Assert.EndsWith("It costs 0 this turn.{IfUpgraded:show: Draw 1 card.|}",
                         Face(new ProtoKkReadTheField()));
     }
 

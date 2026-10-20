@@ -1274,13 +1274,14 @@
    # THE FEED PASS (2026-09-29): Common -> Uncommon, no other change. A
    # card that does a thing now AND writes a Plan sits at a higher rarity.
    cost: 1, type: skill, rarity: uncommon,
-   # Pool overhaul (2026-10-13); the Kokomi upgrade pass (2026-10-19): the
-   # fetched card costs 1 less this turn, upgraded only. Provenance notes.
-   description: "Take 1 of your top {Scry:diff()} cards. [gold]Plan[/gold]: Put a [gold]Draw Pile[/gold] card into your [gold]Hand[/gold].{IfUpgraded:show: It costs 1 less.|}",
+   # Pool overhaul (2026-10-13) and Kokomi review r6 pick 3 (a): the Plan
+   # fetches a card that costs 0 this turn. Kokomi upgrade pass (2026-10-19):
+   # the upgraded Plan also draws 1 (the plain 0-cost stays).
+   description: "Take 1 of your top {Scry:diff()} cards. [gold]Plan[/gold]: Put a [gold]Draw Pile[/gold] card into your [gold]Hand[/gold]. It costs 0 this turn.{IfUpgraded:show: Draw 1 card.|}",
    effects: [{op: scry_take, amount: 3}],
-   plan: [{op: draw_pile_to_hand}],
-   # 4 seen; the fetched card costs 1 less this turn.
-   upgrade: {scry: 1, upgraded_grant: true}}
+   plan: [{op: draw_pile_to_hand}, {op: draw, amount: 0}],
+   # 4 seen; the upgraded Plan draws 1.
+   upgrade: {scry: 1, plan_draw: 1}}
 
 # EXPOSED FLANK IS CUT (THE FEED PASS, 2026-09-29): a now-and-Plan Common.
 # Tombstoned in docs/retired-card-ids.yaml; provenance note, "the feed pass".

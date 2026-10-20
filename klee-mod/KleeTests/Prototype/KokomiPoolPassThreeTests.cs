@@ -152,7 +152,8 @@ public class KokomiPoolPassThreeTests
         // Draw Pile now (was 10 [12] Block), and prints no number.
         var card = new ProtoKkReadTheField();
         Assert.Equal(1, card.EnergyCost.Canonical);
-        var clause = Assert.Single(card.PlanClauses);
+        // The Kokomi upgrade pass (2026-10-19): a draw rides behind it.
+        var clause = card.PlanClauses[0];
         Assert.Equal(KokomiPlan.Kind.DrawPileToHand, clause.Kind);
         Assert.DoesNotContain("PlanBlock", Source("ProtoKkReadTheField"));
     }

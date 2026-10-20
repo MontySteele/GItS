@@ -62,7 +62,8 @@ public class KokomiUpgradePassTests
     [Theory]
     [InlineData(typeof(ProtoKkPincer))]
     [InlineData(typeof(ProtoKkSecondWave))]
-    public void Pincer_and_second_wave_plans_draw_one_upgraded(Type type)
+    [InlineData(typeof(ProtoKkReadTheField))]
+    public void Pincer_second_wave_and_read_the_field_plans_draw_one_upgraded(Type type)
     {
         var plain = (IPlannedCard)Activator.CreateInstance(type)!;
         Assert.Equal((KokomiPlan.Kind.Draw, 0), Plan(plain).Last());
@@ -146,12 +147,14 @@ public class KokomiUpgradePassTests
     }
 
     [Fact]
-    public void Read_the_field_discounts_only_when_upgraded()
+    public void Read_the_field_costs_0_on_both_faces()
     {
-        Assert.EndsWith("{IfUpgraded:show: It costs 1 less.|}",
-                        Face(new ProtoKkReadTheField()));
-        Assert.Contains(Il.Calls(Il.Method("KokomiPlan", "DrawPileToHand")),
-                        c => c.Contains("AddThisTurn"));
+        Assert.Contains("It costs 0 this turn.", Face(new ProtoKkReadTheField()));
+        Assert.Contains("It costs 0 this turn.",
+                        Face(Upgraded<ProtoKkReadTheField>()));
+        var calls = Il.Calls(Il.Method("KokomiPlan", "DrawPileToHand"));
+        Assert.Contains(calls, c => c.Contains("SetThisTurn"));
+        Assert.DoesNotContain(calls, c => c.Contains("AddThisTurn"));
     }
 
     [Fact]

@@ -153,7 +153,8 @@ public class KokomiPoolOverhaulTests
         // Kokomi review r6 (2026-10-14, item 12): "the Attack damage".
         Assert.Contains("Attack damage you blocked since you planned this",
                         Face(new ProtoKkKelpWall()));
-        var field = Assert.Single(new ProtoKkReadTheField().PlanClauses);
+        // The Kokomi upgrade pass (2026-10-19): a draw rides behind it.
+        var field = new ProtoKkReadTheField().PlanClauses[0];
         Assert.Equal(KokomiPlan.Kind.DrawPileToHand, field.Kind);
         Assert.Contains(Seq("KokomiPlan", "DrawPileToHand"),
                         c => c.Contains("CardSelectCmd.FromCombatPile"));
