@@ -210,9 +210,9 @@ public class KokomiStatusBatchTests : IDisposable
     public void Sea_glass_harvest_is_compact_on_the_next_hand_curses_included()
     {
         var card = new ProtoKkSeaGlassHarvest();
-        // The Kokomi card pass (2026-10-11): 10 [13] Block.
-        Assert.Equal(10m, card.DynamicVars.Block.BaseValue);
-        Assert.Equal(13m, Upgraded<ProtoKkSeaGlassHarvest>().DynamicVars.Block.BaseValue);
+        // The Kokomi upgrade pass (2026-10-19): 8 [11] Block (was 10 [13]).
+        Assert.Equal(8m, card.DynamicVars.Block.BaseValue);
+        Assert.Equal(11m, Upgraded<ProtoKkSeaGlassHarvest>().DynamicVars.Block.BaseValue);
         Assert.Equal(KokomiPlan.Kind.TransformStatusesYouHave,
                      Assert.Single(card.PlanClauses).Kind);
         Assert.Contains("[gold]Sea Glass[/gold]{IfUpgraded:show:+|}", Face(card));

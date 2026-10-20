@@ -1262,8 +1262,9 @@
    description: "Apply 2 [gold]Vulnerable[/gold]. [gold]Plan[/gold]: Deal 12 [gold]Hydro[/gold] damage.",
    effects: [{op: apply_power, power: vulnerable, amount: 2, target: enemy}],
    plan: [{op: damage, amount: 12, target: front_enemy}],
-   # Plan 15; the now-line does not upgrade.
-   upgrade: {plan_damage: 3}}
+   # Kokomi upgrade pass (2026-10-19, [USER]: "both the Plan and non-Plan
+   # sides get upgrades"): 3 Vulnerable; Plan 15.
+   upgrade: {power_amount: 1, plan_damage: 3}}
 
 # POOL PASS FOUR (`EB-679`): the now-line is SELECTION and the 5 Block is
 # gone. r26's lane made no decision off the look-and-bury and the Block was a
@@ -1274,12 +1275,13 @@
    # card that does a thing now AND writes a Plan sits at a higher rarity.
    cost: 1, type: skill, rarity: uncommon,
    # Pool overhaul (2026-10-13) and Kokomi review r6 pick 3 (a): the Plan
-   # fetches a card that costs 0 this turn. Provenance note.
-   description: "Take 1 of your top {Scry:diff()} cards. [gold]Plan[/gold]: Put a [gold]Draw Pile[/gold] card into your [gold]Hand[/gold]. It costs 0 this turn.",
+   # fetches a card that costs 0 this turn. Kokomi upgrade pass (2026-10-19):
+   # the upgraded Plan also draws 1 (the plain 0-cost stays).
+   description: "Take 1 of your top {Scry:diff()} cards. [gold]Plan[/gold]: Put a [gold]Draw Pile[/gold] card into your [gold]Hand[/gold]. It costs 0 this turn.{IfUpgraded:show: Draw 1 card.|}",
    effects: [{op: scry_take, amount: 3}],
-   plan: [{op: draw_pile_to_hand}],
-   # 4 seen; the Plan line prints no number.
-   upgrade: {scry: 1}}
+   plan: [{op: draw_pile_to_hand}, {op: draw, amount: 0}],
+   # 4 seen; the upgraded Plan draws 1.
+   upgrade: {scry: 1, plan_draw: 1}}
 
 # EXPOSED FLANK IS CUT (THE FEED PASS, 2026-09-29): a now-and-Plan Common.
 # Tombstoned in docs/retired-card-ids.yaml; provenance note, "the feed pass".
@@ -1297,13 +1299,13 @@
 - {id: proto_kk_war_council, name: "War Council", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
-   # Plan line buys what only a head start can buy.
-   description: "Apply 1 [gold]Weak[/gold] to ALL enemies. [gold]Plan[/gold]: Gain {energyPrefix:energyIcons(2)}.",
-   effects: [{op: apply_power, power: weak, amount: 1, target: all_enemies}],
-   plan: [{op: energy, amount: 2}],
-   # now 2 Weak; the Plan line does not upgrade.
-   upgrade: {power_amount: 1}}
+   # R276 pick 1 (the halves rewrite); the Kokomi upgrade pass (2026-10-19):
+   # Weak 2 [3], the upgrade adds the Plan's draw. Provenance notes.
+   description: "Apply 2 [gold]Weak[/gold] to ALL enemies. [gold]Plan[/gold]: Gain {energyPrefix:energyIcons(2)}{IfUpgraded:show: and draw 1 card|}.",
+   effects: [{op: apply_power, power: weak, amount: 2, target: all_enemies}],
+   plan: [{op: energy, amount: 2}, {op: draw, amount: 0}],
+   # 3 Weak; Plan 2 Energy and draw 1.
+   upgrade: {power_amount: 1, plan_draw: 1}}
 
 # `EB-492`. THE RARE, REDESIGNED: it was a Plan itself, so the kit's payoff
 # spent the morning it was meant to pay for. Now a Power, for the fight.
@@ -1336,9 +1338,9 @@
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
    # R276 pick 1: the intent, read at carry-out, a flat 6 under it; the
-   # largest intent on the board (2026-10-12). Face and live total: Kokomi
-   # review 2026-10-13. Provenance note.
-   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus the biggest attack an enemy intends on the turn it lands.",
+   # largest intent on the board (2026-10-12). Face: the Kokomi upgrade pass
+   # (2026-10-19). Provenance notes.
+   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus the biggest attack an enemy intends when this is carried out.",
    effects: [{op: block, amount: 4}],
    plan: [{op: block_max_intent, amount: 6}],
    # now 6; Plan 9 plus the intent.
@@ -1458,19 +1460,21 @@
    # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
    # Plan line buys what only a head start can buy.
    # Wording pass 2026-10-14: "Next turn" read as a second turn of delay.
-   description: "Deal 5 [gold]Hydro[/gold] damage twice. [gold]Plan[/gold]: Your first Attack that turn is played twice.",
+   description: "Deal 5 [gold]Hydro[/gold] damage twice. [gold]Plan[/gold]: Your first Attack that turn is played twice.{IfUpgraded:show: Draw 1 card.|}",
    effects: [{op: damage, amount: 5, target: enemy, times: 2}],
-   plan: [{op: first_attack_twice}],
+   plan: [{op: first_attack_twice}, {op: draw, amount: 0}],
    # 2026-10-11 Kokomi card pass (review/ruled/kokomi-card-pass-2026-10-11.md):
-   # 5 twice; upgraded 6 twice. The Plan line does not upgrade.
-   upgrade: {damage: 1}}
+   # 5 twice; upgraded 6 twice. Kokomi upgrade pass (2026-10-19): the
+   # upgraded Plan also draws 1.
+   upgrade: {damage: 1, plan_draw: 1}}
 
 - {id: proto_kk_flank, name: "Flank", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
    # Kokomi level pass (2026-10-12, sec.2): the Plan reads intents WHEN IT IS
-   # CARRIED OUT, as Tide Wall does ("when you wrote this" goes); 11 [14].
-   description: "Deal 8 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 11 [gold]Hydro[/gold] damage to each enemy that intends to attack.",
+   # CARRIED OUT, as Tide Wall does; 11 [14]. The face says so since the
+   # Kokomi upgrade pass (2026-10-19).
+   description: "Deal 8 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 11 [gold]Hydro[/gold] damage to each enemy that intends to attack when this is carried out.",
    effects: [{op: damage, amount: 8, target: enemy}],
    # `EB-492`, the intent-keyed aim, read at carry-out.
    plan: [{op: damage, amount: 11, target: enemies_intending_attack}],
@@ -1499,7 +1503,8 @@
    # Order and the upgrade's one half: the provenance note.
    plan: [{op: apply_power, power: vulnerable, amount: 1, target: all_enemies},
           {op: next_plan_double_damage}],
-   upgrade: {damage: 2}}
+   # Kokomi upgrade pass (2026-10-19): Plan Vulnerable 1 [2].
+   upgrade: {damage: 2, plan_power_amount: 1}}
 
 - {id: proto_kk_second_wave, name: "Second Wave", character: kokomi,
    authored_by: [claude],
@@ -1507,15 +1512,16 @@
    cost: 1, type: skill, rarity: uncommon,
    # Kokomi core pass (review/active/kokomi-core-pass-2026-09-27.md): the
    # now-half does something on a quiet turn.
-   description: "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: The [gold]Plan[/gold] written after it this turn is carried out twice.",
+   description: "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: The [gold]Plan[/gold] written after it this turn is carried out twice.{IfUpgraded:show: Draw 1 card.|}",
    # `applies_element: true` (2026-10-05): the face prints Hydro, so the row
    # declares it rather than leaning on Kokomi's retired every-card cadence.
    effects: [{op: damage, amount: 7, target: enemy, applies_element: true}],
    # A FLAG AND NOT A COUNT: under Nereid's Ascension the entry this reaches
    # is carried out THREE times (`CarryOutTimes + 1`) and not four, which is
    # the rule stated at `kokomi_plan.NEXT_PLAN_EXTRA_CARRY_OUT`.
-   plan: [{op: next_plan_extra_carry_out}],
-   upgrade: {damage: 2}}
+   plan: [{op: next_plan_extra_carry_out}, {op: draw, amount: 0}],
+   # The upgraded Plan also draws 1 (the Kokomi upgrade pass, 2026-10-19).
+   upgrade: {damage: 2, plan_draw: 1}}
 
 # SECOND THOUGHTS IS CUT (the Kokomi payoff pass, 2026-10-01; main session: "an undo
 # button, and an undo is a dead draw"). Its `cancel_last_plan` op left with legacy
@@ -1863,8 +1869,8 @@
    description: "Gain 7 [gold]Block[/gold]. [gold]Plan[/gold]: Draw 2 cards.",
    effects: [{op: block, amount: 7}],
    plan: [{op: draw, amount: 2}],
-   # 10 Block; the Plan line does not upgrade.
-   upgrade: {block: 3}}
+   # 10 Block; Plan draw 3 (Kokomi upgrade pass, 2026-10-19).
+   upgrade: {block: 3, plan_draw: 1}}
 
 # SPRING TIDE IS CUT (the jellyfish build, 2026-10-12,
 # review/ruled/kokomi-jellyfish-growth-2026-10-12.md sec.3): The Shape of
@@ -1914,12 +1920,12 @@
 - {id: proto_kk_turnabout, name: "Turnabout", character: kokomi,
    authored_by: [claude],
    cost: 2, type: skill, rarity: rare, exhaust: true,
-   # The paper's "Deal damage equal to all the damage enemies dealt you
-   # ..." in the 120-character card ceiling: the same sentence, shorter.
-   description: "[gold]Plan[/gold]: Deal the damage enemies dealt you since you planned this, blocked or not, to ALL enemies.",
+   # The paper's sentence in the 120-character ceiling. The Kokomi upgrade
+   # pass (2026-10-19): Plan damage +5 (was cost -1). Provenance notes.
+   description: "[gold]Plan[/gold]: Deal the damage enemies dealt you since you planned this, blocked or not,{IfUpgraded:show: plus 5,|} to ALL enemies.",
    effects: [],
-   plan: [{op: damage_taken_since, target: all_enemies}],
-   upgrade: {cost: -1}}
+   plan: [{op: damage_taken_since, amount: 0, target: all_enemies}],
+   upgrade: {plan_damage: 5}}
 
 # --- THE STATUS BATCH (2026-10-01, ruled), LAST in the sheet's order; seven
 # rows cut above; Coral Sanctuary not built (pool 77). Provenance note,
@@ -1931,12 +1937,13 @@
    # The pool overhaul (2026-10-13): a Counter Plan; Kokomi review r6 item
    # 12: only an enemy Attack's damage counts, and the face says so.
    # Provenance notes.
-   description: "Gain {Block:diff()} [gold]Block[/gold]. Draw 1 card. [gold]Plan[/gold]: Deal [gold]Hydro[/gold] damage equal to the Attack damage you blocked since you planned this.",
+   description: "Gain {Block:diff()} [gold]Block[/gold]. Draw 1 card. [gold]Plan[/gold]: Deal [gold]Hydro[/gold] damage equal to the Attack damage you blocked since you planned this{IfUpgraded:show:, plus 4|}.",
    # kokomi-review-r5-2026-10-14 numbers pass: Block 5 -> 7.
    effects: [{op: block, amount: 7}, {op: draw, amount: 1}],
-   plan: [{op: damage_blocked_since, target: front_enemy}],
-   # now 9 Block; the Plan line prints no number.
-   upgrade: {block: 2}}
+   # Kokomi upgrade pass (2026-10-19): a flat bonus written at 0.
+   plan: [{op: damage_blocked_since, amount: 0, target: front_enemy}],
+   # now 9 Block; Plan +4 damage.
+   upgrade: {block: 2, plan_damage: 4}}
 
 - {id: proto_kk_tidecleanse, name: "Tidecleanse", character: kokomi,
    authored_by: [claude],
@@ -1956,11 +1963,12 @@
    # Compact on every pile she holds, curses included (provenance notes,
    # 2026-10-12, r5 A-list and r6 item 6, 2026-10-14: the Discard Pile
    # joins). Sea Glass is a token in no pool: 0, "Gain 1 [2] Energy. Exhaust."
-   description: "Gain 10 [gold]Block[/gold]. [gold]Plan[/gold]: Transform every Status and Curse you have into [gold]Sea Glass[/gold]{IfUpgraded:show:+|}.",
-   effects: [{op: block, amount: 10}],
+   description: "Gain 8 [gold]Block[/gold]. [gold]Plan[/gold]: Transform every Status and Curse you have into [gold]Sea Glass[/gold]{IfUpgraded:show:+|}.",
+   effects: [{op: block, amount: 8}],
    plan: [{op: transform_statuses_you_have}],
-   # 2026-10-11 Kokomi card pass: 8 [11] -> 10 [13].
-   # 13 Block; the Sea Glass arrives upgraded.
+   # 2026-10-11 Kokomi card pass: 8 [11] -> 10 [13]. Kokomi upgrade pass
+   # (2026-10-19, [USER]: "Sea Glass Harvest's block rate sounds quite
+   # high"): back to 8 [11]. 11 Block; the Sea Glass arrives upgraded.
    upgrade: {block: 3, upgraded_grant: true}}
 
 - {id: proto_kk_flotsam_surge, name: "Flotsam Surge", character: kokomi,
@@ -2059,8 +2067,8 @@
    description: "Deal 5 [gold]Hydro[/gold] damage twice. [gold]Plan[/gold]: Add 3 [gold]Stings[/gold] to your [gold]Hand[/gold].",
    effects: [{op: damage, amount: 5, target: enemy, times: 2}],
    plan: [{op: add_stings, amount: 3}],
-   # 6 twice; the Plan line does not upgrade.
-   upgrade: {damage: 1}}
+   # 6 twice; Plan 4 Stings (Kokomi upgrade pass, 2026-10-19).
+   upgrade: {damage: 1, plan_draw: 1}}
 
 - {id: proto_kk_watatsumi_muster, name: "Watatsumi Muster", character: kokomi,
    authored_by: [claude],
@@ -2076,9 +2084,11 @@
    # Kokomi review r9 (2026-10-15, item 3): the card costs 0 and the Power
    # costs 2 (was 1); taken 0 of 7, 0 of 6 in r8.
    cost: 2, type: power, rarity: uncommon,
-   description: "At the start of your turn, add a random Common Inazuma [gold]Companion[/gold] to your [gold]Hand[/gold]. It costs 0 and is [gold]Ethereal[/gold].",
+   # Kokomi upgrade pass (2026-10-19): the upgrade makes the Companion
+   # upgraded, instead of Innate. One power for both versions.
+   description: "At the start of your turn, add a random{IfUpgraded:show: upgraded|} Common Inazuma [gold]Companion[/gold] to your [gold]Hand[/gold]. It costs 0 and is [gold]Ethereal[/gold].",
    effects: [{op: apply_power, power: kk_sangonomiyas_orders, amount: 1, target: self}],
-   upgrade: {innate: true}}
+   upgrade: {upgraded_power: kk_sangonomiyas_orders_plus}}
 
 - {id: proto_kk_kurage_bloom, name: "Kurage Bloom", character: kokomi,
    authored_by: [claude],
@@ -2143,18 +2153,19 @@
    description: "Deal 14 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Apply 2 [gold]Vulnerable[/gold] to ALL enemies.",
    effects: [{op: damage, amount: 14, target: enemy}],
    plan: [{op: apply_power, power: vulnerable, amount: 2, target: all_enemies}],
-   # 18 damage; the Plan line does not upgrade.
-   upgrade: {damage: 4}}
+   # 18 damage; Plan 3 Vulnerable (Kokomi upgrade pass, 2026-10-19).
+   upgrade: {damage: 4, plan_power_amount: 1}}
 
 - {id: proto_kk_steady_tide, name: "Steady Tide", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon, ethereal: true,
    # Kokomi level pass (2026-10-12, sec.1): 13 [16] -> 11 [14].
-   description: "Gain 11 [gold]Block[/gold]. [gold]Plan[/gold]: Draw 3 cards.",
-   effects: [{op: block, amount: 11}],
+   # Kokomi upgrade pass (2026-10-19): 11 [14] -> 9 [12]; Plan draw 3 [4].
+   description: "Gain 9 [gold]Block[/gold]. [gold]Plan[/gold]: Draw 3 cards.",
+   effects: [{op: block, amount: 9}],
    plan: [{op: draw, amount: 3}],
-   # 14 Block; the Plan line does not upgrade.
-   upgrade: {block: 3}}
+   # 12 Block; Plan draw 4.
+   upgrade: {block: 3, plan_draw: 1}}
 
 - {id: proto_kk_resolve_of_watatsumi, name: "Resolve of Watatsumi", character: kokomi,
    authored_by: [claude],
@@ -2322,7 +2333,10 @@
    # damage (wording pass 2026-10-15; provenance note).
    description: "For 3 turns, deal 7 [gold]Geo[/gold] damage to a random enemy at the end of your turn. [gold]Plan[/gold]: Gain 6 [gold]Block[/gold] instead.",
    effects: [{op: apply_power, power: mi_juuga, amount: 3, target: self}],
-   plan: [{op: juuga_guard, amount: 3}]}
+   plan: [{op: juuga_guard, amount: 3}],
+   # Kokomi upgrade pass (2026-10-19): 4 turns on both sides (the default
+   # moved the now-line only, so the Plan's Block kept 3 turns).
+   upgrade: {power_amount: 1, plan_power_amount: 1}}
 
 # THE INAZUMA POOL REWORK (2026-10-18, review/active/inazuma-companions-2026-10-18.md):
 # 8 Common / 13 Uncommon / 7 Rare. Provenance: docs/notes/prototype-surface-provenance.md,
@@ -2992,10 +3006,10 @@
    # in her pool rather than her Personal companion slot.
    nation: inazuma, star: 4, rarity: uncommon, role_c: trigger, element: geo,
    cost: 1, type: skill,
-   # Kokomi level pass (2026-10-12, sec.2): the last Companion played this
-   # COMBAT ("other" and "this turn" go). Crystal Collapse never counts as
-   # its own last Companion.
-   description: "[gold]Plan[/gold]: Play a copy of the last [gold]Companion[/gold] card you played.",
+   # Kokomi level pass (2026-10-12): the last Companion played this COMBAT,
+   # never itself. The Kokomi upgrade pass (2026-10-19): none played, a
+   # random Common Inazuma Companion. Provenance notes.
+   description: "[gold]Plan[/gold]: Play a copy of the last [gold]Companion[/gold] you played. If none, play a random Common one.",
    effects: [],
    plan: [{op: play_copy_of_companion}],
    # 2026-10-12: Retain, not cost 0 ("no card with a Plan line costs 0",
@@ -3959,7 +3973,8 @@
    authored_by: [claude], multiplayer: true,
    cost: 1, type: skill, rarity: uncommon,
    description: "Another player gains 6 [gold]Block[/gold]. [gold]Plan[/gold]: They draw 2 cards.",
-   upgrade: {block: 3},
+   # Kokomi upgrade pass (2026-10-19): Plan draw 3.
+   upgrade: {block: 3, plan_draw: 1},
    effects: [{op: block, amount: 6, target: ally}],
    plan: [{op: ally_draw, amount: 2}]}
 
@@ -3967,7 +3982,8 @@
    authored_by: [claude], multiplayer: true,
    cost: 1, type: attack, rarity: uncommon, tags: [strike],
    description: "Deal 6 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Next turn, each other player's Attacks deal 3 additional damage.",
-   upgrade: {damage: 3},
+   # Kokomi upgrade pass (2026-10-19): Plan +4.
+   upgrade: {damage: 3, plan_attack_bonus: 1},
    effects: [{op: damage, amount: 6, target: enemy}],
    plan: [{op: others_attack_damage_this_turn, amount: 3}]}
 

@@ -124,9 +124,13 @@ public class KokomiPoolPassTwoTests
         // Uncommon since the Casket pass (2026-09-28).
         Assert.Equal(CardRarity.Uncommon, card.Rarity);
 
-        var clause = Assert.Single(card.PlanClauses);
+        // The Kokomi upgrade pass (2026-10-19): a draw rides behind the
+        // rider, written at 0 and 1 upgraded.
+        var clause = card.PlanClauses[0];
         Assert.Equal(KokomiPlan.Kind.NextPlanExtraCarryOut, clause.Kind);
         Assert.Equal(KokomiPlan.Aim.Self, clause.Aim);
+        Assert.Equal((KokomiPlan.Kind.Draw, 0),
+                     (card.PlanClauses[1].Kind, card.PlanClauses[1].Amount));
     }
 
     [Fact]
@@ -425,7 +429,8 @@ public class KokomiPoolPassTwoTests
         // round 3 A-list (2026-10-13): Second Wave names the window.
         Assert.Equal(
             "Deal {Damage:diff()} [gold]Hydro[/gold] damage.\nOr [gold]plan[/gold]: The "
-          + "[gold]Plan[/gold] written after it this turn is carried out twice.",
+          + "[gold]Plan[/gold] written after it this turn is carried out twice."
+          + "{IfUpgraded:show: Draw 1 card.|}",
             Face(new ProtoKkSecondWave()));
         Assert.EndsWith("The next [gold]Plan[/gold] written this turn deals double damage.",
                         Face(new ProtoKkOpeningGambit()));

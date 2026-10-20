@@ -9844,3 +9844,36 @@ sec.7, "The changes", ruled all (a)).
   cost 0. Draw 1 card for each. Exhaust." 1 card per card actually planned;
   the upgrade is the fourth pick (was Retain). "Basic cards included" is cut
   from the face; Basics are still offered and planned as themselves.
+
+## Kokomi upgrade pass, 2026-10-19
+
+[USER], 2026-10-19: "can we make sure that if you upgrade a Plan card, both
+the Plan and non-Plan sides get upgrades where possible?", "Sea Glass
+Harvest's block rate sounds quite high", and "make sure Sea Glass Harvest has
+a tooltip that shows what Sea Glass does, the same way Defect's Compact shows
+what Fuel does"; the table in `review/active/kokomi-next-2026-10-19.md`, "The
+weak-card and upgrade pass" ("This table looks good. Ship it").
+
+- An upgrade that ADDS a Plan clause writes it at 0 on the base row, the
+  Tactical Relay shape: War Council's, Pincer's and Second Wave's draw, and
+  Kelp Wall's (+4) and Turnabout's (+5) flat bonus on the ledger's count.
+  `draw`, `damage_blocked_since` and `damage_taken_since` joined the
+  zero-amount clauses in both engines; a 0 draw draws nothing.
+- New plan-key bindings: `plan_damage` reaches the two Counter reads,
+  `plan_power_amount` Juuga's Plan turns, `plan_draw` a card count (Kurage's
+  Wake's Stings, Joint Orders' ally draw), `plan_attack_bonus` Coordinated
+  Strike's.
+- Read the Field: the fetched card still costs 0 this turn on both faces
+  (Kokomi review r6, pick 3 (a)); the upgraded Plan also draws 1, Pincer's
+  shape (a draw written at 0).
+- Sangonomiya's Orders: the upgrade makes the Companion upgraded (was
+  Innate). `upgraded_power: kk_sangonomiyas_orders_plus`, one
+  `UpgradeTwinPower` class.
+- Crystal Collapse: "If none, play a random Common one" (a random Common
+  Inazuma Companion off Sangonomiya's Orders' offer, played free, exhausted
+  after). The face was cut to fit the 120-character ceiling.
+- Juuga: the default upgrade moved only the now-line (3 [4] turns), so the
+  Plan's Block kept 3 turns; both are 4 now. Inuzaka's default already moves
+  both lines (+3 damage, +3 Plan Block).
+- Tide Wall and Flank: "when this is carried out" (finish round items 3-4).
+

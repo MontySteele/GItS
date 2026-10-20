@@ -124,8 +124,19 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   up to 3 [4] cards from your Hand. They cost 0. Draw 1 card for each.
   Exhaust." The Plan tip's new sentence is not built: at 134 characters it
   does not fit the tip ceilings (player box 100, seat tip 135).
-- **Next:** a five-seat round on the suite seeds that also decides her
-  defence.
+- **Upgrade pass built** (`review/active/kokomi-next-2026-10-19.md`, "The
+  weak-card and upgrade pass"): a Plan card's upgrade moves both lines where
+  it can (Ambush, Read the Field, Pincer, Second Wave, Opening Gambit, Tidal
+  Screen, Kelp Wall, Kurage's Wake, Spearhead, Joint Orders, Coordinated
+  Strike, Turnabout, Juuga); War Council is Weak 2 [3], Plan 2 Energy [and
+  draw 1]; Sea Glass Harvest 8 [11] Block with a Sea Glass preview; Steady
+  Tide 9 [12], Plan draw 3 [4]; Sangonomiya's Orders+ adds an upgraded
+  Companion; Crystal Collapse with none played plays a random Common one;
+  Brine Sting counts for The Shape of Water. Tide Wall and Flank say they
+  read intent when carried out; At Water's Edge's badge shows when it is
+  spent.
+- **Next:** [USER]'s play at her finish line (`kokomi-next-2026-10-19.md`
+  pick 2 (b) ruled the weak-card review first; it is built).
 
 **Furina: Balance** (2026-10-15).
 - **Rules** (`review/active/furina-research-proposal-2026-10-05.md` sec.2):

@@ -142,7 +142,11 @@ public class KokomiPoolPassTests
         var card = new ProtoKkPincer();
         Assert.Equal(1, card.EnergyCost.Canonical);
 
-        var clause = Assert.Single(card.PlanClauses);
+        // The Kokomi upgrade pass (2026-10-19): a draw rides behind the
+        // switch, written at 0 and 1 upgraded.
+        var clause = card.PlanClauses[0];
+        Assert.Equal((KokomiPlan.Kind.Draw, 0),
+                     (card.PlanClauses[1].Kind, card.PlanClauses[1].Amount));
         Assert.Equal(KokomiPlan.Kind.FirstAttackTwice, clause.Kind);
         Assert.Equal(KokomiPlan.Aim.Self, clause.Aim);
         Assert.Equal(0, clause.Amount);

@@ -160,8 +160,12 @@ public sealed class ProtoBakeKuragePower : PowerModel, ILocalizationProvider
         // THE JELLYFISH BUILD (2026-10-12): a Sting PLAYED -- face-up, not
         // written on the Bake-Kurage and not a carry-out (Treatise's
         // reading) -- counts for All Streams Flow to the Sea and The Shape
-        // of Water. Sim twin: `kokomi_plan.note_sting_played`.
+        // of Water. Sim twin: `kokomi_plan.note_sting_played`. The Kokomi
+        // upgrade pass (2026-10-19, card paper pick 1 (a)): Brine Sting is a
+        // Sting too -- "the face says Sting, and a player will read it that
+        // way".
         if (cardPlay.Card is global::KleeMod.Cards.Prototype.Generated.ProtoKkSting
+                or global::KleeMod.Cards.Prototype.Generated.ProtoKkBrineSting
             && cardPlay.Card.Owner?.Creature == Owner
             && !KokomiPlan.PlayedOnPet(cardPlay)
             && !KokomiPlan.IsCarryingOut(Owner.Player))

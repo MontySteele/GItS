@@ -89,7 +89,8 @@ public class CoopSetTests
             Face(new ProtoKoPassTheMatch()));
         Assert.Equal(
             "Another player gains {Block:diff()} [gold]Block[/gold].\n"
-            + "Or [gold]plan[/gold]: They draw 2 cards.",
+            + "Or [gold]plan[/gold]: They draw {PlanCards:diff()} "
+            + "card{PlanCards:plural:|s}.",
             Face(new ProtoKkJointOrders()));
     }
 

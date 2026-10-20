@@ -133,12 +133,24 @@ public static partial class KokomiCards
         if (held != null) yield return HoverTipFactory.FromCard(held);
     }
 
-    /// <summary>A face that names a Ward previews one.</summary>
+    /// <summary>A face that names a Ward previews one; the upgraded one
+    /// where the upgraded card hands over an upgraded Ward (Kurage Canopy,
+    /// the Kokomi upgrade pass, 2026-10-19).</summary>
     public static IEnumerable<IHoverTip> WithWardPreview(
-        IEnumerable<IHoverTip> tips)
+        IEnumerable<IHoverTip> tips, bool upgraded = false)
     {
         foreach (var tip in tips) yield return tip;
-        yield return HoverTipFactory.FromCard<ProtoKkWard>(false);
+        yield return HoverTipFactory.FromCard<ProtoKkWard>(upgraded);
+    }
+
+    /// <summary>A face that names Sea Glass previews it, as Compact previews
+    /// Fuel (the Kokomi upgrade pass, 2026-10-19): Sea Glass+ on the card
+    /// whose Plan makes it.</summary>
+    public static IEnumerable<IHoverTip> WithSeaGlassPreview(
+        IEnumerable<IHoverTip> tips, bool upgraded)
+    {
+        foreach (var tip in tips) yield return tip;
+        yield return HoverTipFactory.FromCard<global::KleeMod.Cards.Prototype.SeaGlass>(upgraded);
     }
 
     /// <summary>
@@ -798,8 +810,12 @@ public static class KokomiRefounding
 
 /// <summary>Sangonomiya's Orders: "At the start of your turn, add a random
 /// Common Inazuma Companion card to your hand. It is Ethereal." Copies add
-/// one each. Sim twin: <c>kokomi_plan.turn_start_generators</c>.</summary>
-public sealed class SangonomiyasOrdersPower : PowerModel, ILocalizationProvider
+/// one each. The Kokomi upgrade pass (2026-10-19): one power for both
+/// versions (<see cref="UpgradeTwinPower"/>), each upgraded copy's
+/// Companion arriving upgraded (the face keeps its one sentence: a count of
+/// each would pass the power ceiling, Kurage Canopy's reason). Sim twin:
+/// <c>kokomi_plan.turn_start_generators</c>.</summary>
+public sealed class SangonomiyasOrdersPower : UpgradeTwinPower, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
@@ -813,10 +829,6 @@ public sealed class SangonomiyasOrdersPower : PowerModel, ILocalizationProvider
           + "{Amount:plural:is|are} [gold]Ethereal[/gold]."),
     };
 
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-
     // STAGED into the start-of-turn tail (AfterPlayerTurnStartLate), so the
     // card lands after the Bake-Kurage's morning Plans in every order -- the
     // sim's `kokomi_plan.turn_start_generators`, after `resolve_all`.
@@ -827,19 +839,26 @@ public sealed class SangonomiyasOrdersPower : PowerModel, ILocalizationProvider
         if (!KokomiOverhaul.LiveFor(Owner)) return;
         var combat = Owner.CombatState;
         if (combat == null) return;
-        var made = KokomiCompanionPlan.Generated(player, CardRarity.Common)
-            .TakeRandom((int)Amount, player.RunState.Rng.CombatCardGeneration)
-            .Select(c => combat.CreateCard(c, player))
-            .Where(c => c != null)
-            .Cast<CardModel>()
-            .ToList();
-        foreach (var companion in made)
+        foreach (var (count, upgraded) in Batches())
         {
-            // Kokomi review r9 (2026-10-15, item 3): "It costs 0."
-            var free = KokomiCompanionPlan.Generate(companion);
-            free.EnergyCost.SetThisTurn(0);
-            await CardPileCmd.AddGeneratedCardToCombat(
-                free, PileType.Hand, player);
+            var made = KokomiCompanionPlan.Generated(player, CardRarity.Common)
+                .TakeRandom(count, player.RunState.Rng.CombatCardGeneration)
+                .Select(c => combat.CreateCard(c, player))
+                .Where(c => c != null)
+                .Cast<CardModel>()
+                .ToList();
+            foreach (var companion in made)
+            {
+                if (upgraded && companion.IsUpgradable && !companion.IsUpgraded)
+                {
+                    companion.UpgradeInternal();
+                }
+                // Kokomi review r9 (2026-10-15, item 3): "It costs 0."
+                var free = KokomiCompanionPlan.Generate(companion);
+                free.EnergyCost.SetThisTurn(0);
+                await CardPileCmd.AddGeneratedCardToCombat(
+                    free, PileType.Hand, player);
+            }
         }
     }
 }

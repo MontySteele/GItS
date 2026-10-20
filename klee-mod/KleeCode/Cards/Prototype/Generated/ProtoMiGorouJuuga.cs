@@ -65,13 +65,14 @@ public sealed class ProtoMiGorouJuuga : CustomCardModel, ICompanionCard, IPlanne
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.JuugaGuard, 3, KokomiPlan.Aim.Self),
+            new KokomiPlan.Planned(KokomiPlan.Kind.JuugaGuard, DynamicVars["PlanPowerAmount"].IntValue, KokomiPlan.Aim.Self),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 3m)
+            new DynamicVar("PowerAmount", 3m),
+            new DynamicVar("PlanPowerAmount", 3m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -107,5 +108,6 @@ public sealed class ProtoMiGorouJuuga : CustomCardModel, ICompanionCard, IPlanne
     protected override void OnUpgrade()
     {
         DynamicVars["PowerAmount"].UpgradeValueBy(1m);
+        DynamicVars["PlanPowerAmount"].UpgradeValueBy(1m);
     }
 }

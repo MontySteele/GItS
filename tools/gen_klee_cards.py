@@ -3600,9 +3600,10 @@ PLAN_AMOUNTLESS_OPS = {"damage_quarter_max_hp", "play_copy_of_companion",
                        # THE STATUS BATCH: "every status and curse" prints
                        # no size.
                        "transform_statuses_you_have",
-                       # THE POOL OVERHAUL (2026-10-13): a size read off the
-                       # ledger at carry-out, and one card.
-                       "damage_blocked_since", "damage_taken_since",
+                       # THE POOL OVERHAUL (2026-10-13): one card. (Kelp
+                       # Wall's and Turnabout's ledger reads carry a flat
+                       # bonus since the Kokomi upgrade pass, 2026-10-19:
+                       # `PLAN_ZERO_AMOUNT_OPS`.)
                        "draw_pile_to_hand"}
 
 #: The two debuffs a Plan may apply. A CLOSED map on purpose: the jellyfish
@@ -3688,7 +3689,12 @@ PLAN_ONLY_OPS = {
 PLAN_ZERO_AMOUNT_OPS = {"block_max_intent", "block",
                         # POOL COMPLETION: Tactical Relay's draw, added by
                         # the upgrade.
-                        "each_player_draw"}
+                        "each_player_draw",
+                        # THE KOKOMI UPGRADE PASS (2026-10-19): War Council's,
+                        # Pincer's and Second Wave's draw, and Kelp Wall's and
+                        # Turnabout's flat bonus, each written at 0.
+                        "draw", "damage_blocked_since",
+                        "damage_taken_since"}
 
 
 def plan_reason(card: dict) -> str | None:
@@ -4192,6 +4198,12 @@ APPLY_POWERS = {
     # sec.2). Every class lives in Powers/Prototype/KokomiRefounding.cs.
     "kk_sangonomiyas_orders": ("SangonomiyasOrdersPower", None,
         "At the start of your turn, add a random Common Inazuma "
+        "[gold]Companion[/gold] card to your hand. It costs 0 and is "
+        "[gold]Ethereal[/gold]."),
+    # The Kokomi upgrade pass (2026-10-19): the upgraded card's copy adds an
+    # upgraded Companion, one class for both versions (`UpgradeTwinPower`).
+    "kk_sangonomiyas_orders_plus": ("SangonomiyasOrdersPower", None,
+        "At the start of your turn, add a random upgraded Common Inazuma "
         "[gold]Companion[/gold] card to your hand. It costs 0 and is "
         "[gold]Ethereal[/gold]."),
     "kk_kurage_bloom": ("KurageBloomPower", None,
@@ -14843,6 +14855,12 @@ def _authored_face_numbers(card: dict):
         amount = eff.get("amount")
         if not isinstance(amount, int):
             continue
+        # The Kokomi upgrade pass (2026-10-19): a clause written at 0 is one
+        # an upgrade ADDS, so the base face prints no number for it -- a
+        # literal 0 elsewhere on the face (Read the Field's "It costs 0 this
+        # turn") is not its number.
+        if amount == 0 and eff.get("op") in PLAN_ZERO_AMOUNT_OPS:
+            continue
         if index in plan_vars:
             key, var = plan_vars[index]
             yield key, var, amount
@@ -18804,8 +18822,21 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
         tips_expr = ("KokomiCards.WithStingPreview("
                      f"{tips_expr or 'base.ExtraHoverTips'})")
     if "[gold]Ward" in desc:
+        # The Kokomi upgrade pass (2026-10-19): a face whose Ward arrives
+        # upgraded on the upgraded card (Kurage Canopy) previews that one.
+        ward_up = ", IsUpgraded" if "upgraded|a} [gold]Ward" in desc else ""
         tips_expr = ("KokomiCards.WithWardPreview("
-                     f"{tips_expr or 'base.ExtraHoverTips'})")
+                     f"{tips_expr or 'base.ExtraHoverTips'}{ward_up})")
+    # The Kokomi upgrade pass (2026-10-19, [USER]: "make sure Sea Glass
+    # Harvest has a tooltip that shows what Sea Glass does, the same way
+    # Defect's Compact shows what Fuel does"): a face that names Sea Glass
+    # previews it, the upgraded one where the face prints its `+`.
+    if "[gold]Sea Glass" in desc:
+        glass_up = ("IsUpgraded"
+                    if "[gold]Sea Glass[/gold]{IfUpgraded:show:+|}" in desc
+                    else "false")
+        tips_expr = ("KokomiCards.WithSeaGlassPreview("
+                     f"{tips_expr or 'base.ExtraHoverTips'}, {glass_up})")
     # Kokomi wording pass (2026-10-14): Crystal Collapse previews the
     # Companion it copies -- the one a waiting Plan caught, or the one it
     # would catch now -- the same Blade Dance shape, live.

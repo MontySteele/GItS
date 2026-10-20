@@ -38,7 +38,7 @@ public sealed class ProtoKkSeaGlassHarvest : CustomCardModel, ICharacterCard, IP
     public string CharacterId => "kokomi";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForPlan(base.ExtraHoverTips, this);
+        KokomiCards.WithSeaGlassPreview(ArmKeywordTips.ForPlan(base.ExtraHoverTips, this), IsUpgraded);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_sea_glass_harvest");
 
@@ -60,7 +60,7 @@ public sealed class ProtoKkSeaGlassHarvest : CustomCardModel, ICharacterCard, IP
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(10m, ValueProp.Move)
+            new BlockVar(8m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

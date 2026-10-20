@@ -50,7 +50,7 @@ public sealed class ProtoKkJointOrders : CustomCardModel, ICharacterCard, IPlann
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Joint Orders"),
-        ("description", "Another player gains {Block:diff()} [gold]Block[/gold].\nOr [gold]plan[/gold]: They draw 2 cards."),
+        ("description", "Another player gains {Block:diff()} [gold]Block[/gold].\nOr [gold]plan[/gold]: They draw {PlanCards:diff()} card{PlanCards:plural:|s}."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -59,13 +59,14 @@ public sealed class ProtoKkJointOrders : CustomCardModel, ICharacterCard, IPlann
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.AllyDraw, 2, KokomiPlan.Aim.Self),
+            new KokomiPlan.Planned(KokomiPlan.Kind.AllyDraw, DynamicVars["PlanCards"].IntValue, KokomiPlan.Aim.Self),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new BlockVar(6m, ValueProp.Move)
+            new BlockVar(6m, ValueProp.Move),
+            new DynamicVar("PlanCards", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -102,5 +103,6 @@ public sealed class ProtoKkJointOrders : CustomCardModel, ICharacterCard, IPlann
     protected override void OnUpgrade()
     {
         DynamicVars.Block.UpgradeValueBy(3m);
+        DynamicVars["PlanCards"].UpgradeValueBy(1m);
     }
 }

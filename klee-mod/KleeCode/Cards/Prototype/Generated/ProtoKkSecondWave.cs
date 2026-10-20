@@ -53,7 +53,7 @@ public sealed class ProtoKkSecondWave : CustomCardModel, IElementalCard, ICharac
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Second Wave"),
-        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage.\nOr [gold]plan[/gold]: The [gold]Plan[/gold] written after it this turn is carried out twice."),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage.\nOr [gold]plan[/gold]: The [gold]Plan[/gold] written after it this turn is carried out twice.{IfUpgraded:show: Draw 1 card.|}"),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -63,12 +63,14 @@ public sealed class ProtoKkSecondWave : CustomCardModel, IElementalCard, ICharac
         new[]
         {
             new KokomiPlan.Planned(KokomiPlan.Kind.NextPlanExtraCarryOut, 0, KokomiPlan.Aim.Self),
+            new KokomiPlan.Planned(KokomiPlan.Kind.Draw, DynamicVars["PlanCards"].IntValue, KokomiPlan.Aim.Self),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(7m, ValueProp.Move)
+            new DamageVar(7m, ValueProp.Move),
+            new DynamicVar("PlanCards", 0m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -109,5 +111,6 @@ public sealed class ProtoKkSecondWave : CustomCardModel, IElementalCard, ICharac
     protected override void OnUpgrade()
     {
         DynamicVars.Damage.UpgradeValueBy(2m);
+        DynamicVars["PlanCards"].UpgradeValueBy(1m);
     }
 }

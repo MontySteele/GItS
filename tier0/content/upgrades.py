@@ -243,7 +243,10 @@ PLAN_DELTA_OPS: dict[str, tuple[str, ...]] = {
                     "damage_if_no_hp_lost_since",
                     # The Inazuma pool rework (2026-10-18): Kyouka
                     # Fuushi's per-hit number.
-                    "damage_times_plus_earlier_plans"),
+                    "damage_times_plus_earlier_plans",
+                    # The Kokomi upgrade pass (2026-10-19): Kelp Wall's and
+                    # Turnabout's flat bonus, written at 0.
+                    "damage_blocked_since", "damage_taken_since"),
     # `EB-335`. Tide Wall's per-Plan scaler is a BLOCK clause wearing a count,
     # so it takes `plan_block`'s key rather than a sixth key of its own --
     # one printed Block number per row is still the rule, and the flat `block`
@@ -258,7 +261,10 @@ PLAN_DELTA_OPS: dict[str, tuple[str, ...]] = {
     "plan_power_amount": ("apply_power",
                           # The Kokomi pool overhaul (2026-10-13): Undercurrent
                           # Snare's Strength loss.
-                          "lose_strength_this_turn"),
+                          "lose_strength_this_turn",
+                          # The Kokomi upgrade pass (2026-10-19): Juuga's
+                          # Plan turns.
+                          "juuga_guard"),
     # The Kokomi pool overhaul (2026-10-13): Prepared Retreat's "gain 1 [2]
     # Energy".
     "plan_energy": ("energy", "energy_if_attacked_since"),
@@ -267,9 +273,13 @@ PLAN_DELTA_OPS: dict[str, tuple[str, ...]] = {
     "plan_strength": ("gain_strength",),
     "plan_draw": ("draw",
                   # POOL COMPLETION: Tactical Relay's "and draws 1 card".
-                  "each_player_draw"),
-    # R276, Battle Plan: "your Attacks deal N more damage" this turn.
-    "plan_attack_bonus": (),
+                  "each_player_draw",
+                  # The Kokomi upgrade pass (2026-10-19): a card count --
+                  # Kurage's Wake's Stings, Joint Orders' ally draw.
+                  "add_stings", "ally_draw"),
+    # R276, Battle Plan: "your Attacks deal N more damage" this turn. The
+    # Kokomi upgrade pass (2026-10-19): Coordinated Strike's.
+    "plan_attack_bonus": ("others_attack_damage_this_turn",),
 }
 
 

@@ -45,9 +45,10 @@ def test_tide_wall_reads_the_biggest_intent_not_the_front_one():
     st.player.block = 0
     carry_out(st)
     assert st.player.block == 6 + 18
-    # Reworded in the Kokomi review (2026-10-13).
+    # Reworded in the Kokomi review (2026-10-13) and the Kokomi upgrade
+    # pass (2026-10-19, finish round item 3).
     assert _rows()["proto_kk_tide_wall"]["description"].endswith(
-        "plus the biggest attack an enemy intends on the turn it lands.")
+        "plus the biggest attack an enemy intends when this is carried out.")
 
 
 def test_no_enemies_intend_nothing():
@@ -75,9 +76,9 @@ def test_kelp_wall_now_line_blocks_and_draws():
     assert row.effects[1] == {"op": "draw", "amount": 1}
     up = upgrades.apply_upgrade(loader.get_card("proto_kk_kelp_wall"))
     assert up.effects[0]["amount"] == 9
-    # The pool overhaul (2026-10-13): the Plan is a Counter line with no
-    # printed number (was the level pass's flat 12 [15] Block).
-    assert up.plan == [{"op": "damage_blocked_since",
+    # The pool overhaul (2026-10-13): the Plan is a Counter line; the Kokomi
+    # upgrade pass (2026-10-19) adds +4 on the upgraded card.
+    assert up.plan == [{"op": "damage_blocked_since", "amount": 4,
                         "target": "front_enemy"}]
     st = kokomi_state()
     _attacking(st)

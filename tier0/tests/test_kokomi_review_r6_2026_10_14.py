@@ -111,8 +111,10 @@ def test_read_the_fields_plan_card_costs_0_this_turn():
     st.player.draw_pile = [card("proto_kk_spearhead")]
     pick = kokomi_plan.draw_pile_to_hand(st)
     assert pick is not None and pick.free_this_turn
-    assert "It costs 0 this turn." in (
-        _row("proto_kk_read_the_field")["description"])
+    # The Kokomi upgrade pass (2026-10-19): on both faces; the upgrade adds
+    # a draw.
+    assert _row("proto_kk_read_the_field")["description"].endswith(
+        "It costs 0 this turn.{IfUpgraded:show: Draw 1 card.|}")
 
 
 def _row(cid):

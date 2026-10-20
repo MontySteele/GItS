@@ -141,7 +141,9 @@ public class KokomiReviewR6Tests
     {
         Assert.Contains(Calls("KokomiPlan", "DrawPileToHand"),
                         c => c.Contains("SetThisTurn"));
-        Assert.Contains("It costs 0 this turn.",
+        // The Kokomi upgrade pass (2026-10-19): 0 on both faces; the
+        // upgrade adds a draw.
+        Assert.EndsWith("It costs 0 this turn.{IfUpgraded:show: Draw 1 card.|}",
                         Face(new ProtoKkReadTheField()));
     }
 

@@ -48,7 +48,7 @@ public sealed class ProtoKkTurnabout : CustomCardModel, ICharacterCard, IPlanned
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Turnabout"),
-        ("description", "Play on the [gold]Bake-Kurage[/gold].\n[gold]Plan[/gold]: Deal the damage enemies dealt you since you planned this, blocked or not, to ALL enemies."),
+        ("description", "Play on the [gold]Bake-Kurage[/gold].\n[gold]Plan[/gold]: Deal the damage enemies dealt you since you planned this, blocked or not,{IfUpgraded:show: plus 5,|} to ALL enemies."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -57,13 +57,13 @@ public sealed class ProtoKkTurnabout : CustomCardModel, ICharacterCard, IPlanned
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.DamageTakenSince, 0, KokomiPlan.Aim.AllEnemies),
+            new KokomiPlan.Planned(KokomiPlan.Kind.DamageTakenSince, DynamicVars["PlanDamage"].IntValue, KokomiPlan.Aim.AllEnemies),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("PlanDamage", 0m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -80,6 +80,6 @@ public sealed class ProtoKkTurnabout : CustomCardModel, ICharacterCard, IPlanned
 
     protected override void OnUpgrade()
     {
-        EnergyCost.UpgradeBy(-1);
+        DynamicVars["PlanDamage"].UpgradeValueBy(5m);
     }
 }

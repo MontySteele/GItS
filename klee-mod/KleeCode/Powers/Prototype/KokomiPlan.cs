@@ -10,6 +10,7 @@ using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.Entities.Powers;
 using MegaCrit.Sts2.Core.Entities.Players;
+using MegaCrit.Sts2.Core.Extensions;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
@@ -1209,7 +1210,9 @@ public static class KokomiPlan
         var cut = name.LastIndexOf('—');
         var shortName = cut >= 0 ? name.Substring(cut + 1).Trim() : name;
         if (shortName.Length == 0) shortName = name;
-        var what = held?.Title.ToString() ?? "nothing";
+        // The Kokomi upgrade pass (2026-10-19): nothing caught plays a
+        // random Common Companion.
+        var what = held?.Title.ToString() ?? "a random Companion";
         return $"{shortName}: {what}";
     }
 
@@ -2436,6 +2439,10 @@ public static class KokomiPlan
                     ValueProp.Move, null);
 
             case Kind.Draw:
+                // The Kokomi upgrade pass (2026-10-19): a 0 draw is the
+                // clause an upgrade adds (War Council, Pincer, Second Wave),
+                // unprinted on the base face; it draws nothing.
+                if (plan.Amount <= 0) return null;
                 await CardPileCmd.Draw(choiceContext, plan.Amount, player);
                 return plan.Amount;
 
@@ -2704,10 +2711,14 @@ public static class KokomiPlan
         Kind.DamagePerPlanThisTurn =>
             plan.Amount
             * KokomiOverhaulLedger.For(kokomi).ChainPlansThisTurn,
+        // The Kokomi upgrade pass (2026-10-19): plus the flat bonus the
+        // upgrade writes (Kelp Wall +4, Turnabout +5; 0 on the base card).
         Kind.DamageBlockedSince =>
-            KokomiOverhaulLedger.For(kokomi).BlockedSince(entry?.Window),
+            KokomiOverhaulLedger.For(kokomi).BlockedSince(entry?.Window)
+            + plan.Amount,
         Kind.DamageTakenSince =>
-            KokomiOverhaulLedger.For(kokomi).TakenSince(entry?.Window),
+            KokomiOverhaulLedger.For(kokomi).TakenSince(entry?.Window)
+            + plan.Amount,
         // R276. Tide Wall asks for the largest intent plus its bonus.
         Kind.BlockMaxIntent =>
             KokomiOverhaulKit.MostIntendedDamage(kokomi) + plan.Amount,
@@ -3007,8 +3018,23 @@ public static class KokomiPlan
     private static async Task PlayCopy(
         PlayerChoiceContext choiceContext, Creature kokomi, CardModel? card)
     {
-        if (card == null) return;
         if (kokomi.CombatState is not { } combat) return;
+        if (card == null)
+        {
+            // THE KOKOMI UPGRADE PASS (2026-10-19): "If you haven't, play a
+            // random Common Inazuma Companion" -- Sangonomiya's Orders' offer
+            // (KokomiCompanionPlan.Generated), played free and exhausted
+            // after. Sim twin: `kokomi_plan._play_copy`.
+            if (kokomi.Player is not { } player) return;
+            var pick = KokomiCompanionPlan.Generated(player, CardRarity.Common)
+                .TakeRandom(1, player.RunState.Rng.CombatCardGeneration)
+                .FirstOrDefault();
+            if (pick == null) return;
+            if (combat.CreateCard(pick, player) is not { } made) return;
+            made.ExhaustOnNextPlay = true;
+            await CardCmd.AutoPlay(choiceContext, made, FrontEnemy(kokomi));
+            return;
+        }
         var copy = combat.CloneCard(card);
         copy.ExhaustOnNextPlay = true;
         await CardCmd.AutoPlay(choiceContext, copy, FrontEnemy(kokomi));
@@ -3598,7 +3624,9 @@ public static class KokomiPlan
     /// <see cref="Entry.Title"/>.</summary>
     public static string CopiesCaption(string? title)
     {
-        if (string.IsNullOrWhiteSpace(title)) return "Copies nothing";
+        // The Kokomi upgrade pass (2026-10-19): nothing caught plays a
+        // random Common Companion.
+        if (string.IsNullOrWhiteSpace(title)) return "Random Companion";
         var name = title!;
         var dash = name.LastIndexOf('—');
         if (dash >= 0) name = name.Substring(dash + 1).Trim();

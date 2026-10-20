@@ -96,9 +96,10 @@ def test_kelp_wall_pays_the_flat_block_on_a_clean_hand(overhaul):
     """The Kokomi level pass (2026-10-12): the status count went. The pool
     overhaul (2026-10-13): the Plan is a Counter line -- Hydro damage equal
     to the damage she blocked since she planned it (was a flat 12 [15]
-    Block). With nothing blocked, it gives no Block and deals nothing."""
+    Block). With nothing blocked, it gives no Block and deals nothing. The
+    Kokomi upgrade pass (2026-10-19): a flat bonus written at 0."""
     assert _row("proto_kk_kelp_wall").plan == [
-        {"op": "damage_blocked_since", "target": "front_enemy"}]
+        {"op": "damage_blocked_since", "amount": 0, "target": "front_enemy"}]
     st = _quiet_state()
     st.player.hand = _filler(3)
     hp = st.enemies[0].hp
@@ -119,12 +120,14 @@ def test_kelp_wall_ignores_statuses_in_hand(overhaul):
     assert hp - st.enemies[0].hp == 9
 
 
-def test_kelp_wall_upgrades_the_flat_block_only(overhaul):
-    """Its upgrade moves the now-line's Block alone (7 -> 9 since the
-    numbers pass, kokomi-review-r5-2026-10-14); the Plan line prints no number."""
+def test_kelp_wall_upgrades_both_lines(overhaul):
+    """Its upgrade moves the now-line's Block (7 -> 9 since the numbers pass,
+    kokomi-review-r5-2026-10-14) and, since the Kokomi upgrade pass
+    (2026-10-19), adds 4 to the Plan's hit."""
     up = _up("proto_kk_kelp_wall")
     assert up.effects[0]["amount"] == 9
-    assert up.plan == _row("proto_kk_kelp_wall").plan
+    assert up.plan == [{"op": "damage_blocked_since", "amount": 4,
+                        "target": "front_enemy"}]
 
 
 # --- Tidecleanse -------------------------------------------------------------------

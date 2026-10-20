@@ -45,7 +45,7 @@ public sealed class ProtoKkReadTheField : CustomCardModel, ICharacterCard, IPlan
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Read the Field"),
-        ("description", "Take 1 of your top {Scry:diff()} cards.\nOr [gold]plan[/gold]: Put a [gold]Draw Pile[/gold] card into your [gold]Hand[/gold]. It costs 0 this turn."),
+        ("description", "Take 1 of your top {Scry:diff()} cards.\nOr [gold]plan[/gold]: Put a [gold]Draw Pile[/gold] card into your [gold]Hand[/gold]. It costs 0 this turn.{IfUpgraded:show: Draw 1 card.|}"),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -55,12 +55,14 @@ public sealed class ProtoKkReadTheField : CustomCardModel, ICharacterCard, IPlan
         new[]
         {
             new KokomiPlan.Planned(KokomiPlan.Kind.DrawPileToHand, 0, KokomiPlan.Aim.Self),
+            new KokomiPlan.Planned(KokomiPlan.Kind.Draw, DynamicVars["PlanCards"].IntValue, KokomiPlan.Aim.Self),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("Scry", 3m)
+            new DynamicVar("Scry", 3m),
+            new DynamicVar("PlanCards", 0m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -107,5 +109,6 @@ public sealed class ProtoKkReadTheField : CustomCardModel, ICharacterCard, IPlan
     protected override void OnUpgrade()
     {
         DynamicVars["Scry"].UpgradeValueBy(1m);
+        DynamicVars["PlanCards"].UpgradeValueBy(1m);
     }
 }

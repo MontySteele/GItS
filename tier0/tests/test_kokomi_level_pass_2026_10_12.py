@@ -32,8 +32,10 @@ def test_the_trims_print_the_papers_numbers():
             _up("proto_kk_flotsam_surge").effects[0]["amount"]) == (10, 13)
     tide = card("proto_kk_steady_tide")
     assert (tide.effects[0]["amount"],
-            _up("proto_kk_steady_tide").effects[0]["amount"]) == (11, 14)
+            _up("proto_kk_steady_tide").effects[0]["amount"]) == (9, 12)
     assert tide.ethereal and tide.plan == [{"op": "draw", "amount": 3}]
+    # The Kokomi upgrade pass (2026-10-19): Plan draw 3 [4].
+    assert _up("proto_kk_steady_tide").plan == [{"op": "draw", "amount": 4}]
     ruin = card("proto_kk_riptide_ruin")
     assert ruin.effects == [{"op": "damage", "amount": 11,
                              "target": "all_enemies", "times": 2}]

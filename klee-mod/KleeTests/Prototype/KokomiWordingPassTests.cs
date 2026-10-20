@@ -115,8 +115,10 @@ public class KokomiWordingPassTests
         Assert.Equal("Copies Crystal Collapse",
                      KokomiPlan.CopiesCaption("Gorou — Crystal Collapse"));
         Assert.Equal("Copies Strike", KokomiPlan.CopiesCaption("Strike"));
-        Assert.Equal("Copies nothing", KokomiPlan.CopiesCaption(null));
-        Assert.Equal("Copies nothing", KokomiPlan.CopiesCaption(""));
+        // The Kokomi upgrade pass (2026-10-19): nothing caught plays a
+        // random Common Companion.
+        Assert.Equal("Random Companion", KokomiPlan.CopiesCaption(null));
+        Assert.Equal("Random Companion", KokomiPlan.CopiesCaption(""));
         // The caption is the strip's live line and the seat page's `live`.
         Assert.Contains(Il.Calls(Il.Method("KokomiPlan", "LiveLine")),
                         c => c.Contains("CopiesCaption"));

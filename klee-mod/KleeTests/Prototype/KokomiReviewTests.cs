@@ -28,6 +28,15 @@ namespace KleeMod.Tests.Prototype;
 [Collection(KleeOverhaulArm.Name)]
 public class KokomiReviewTests
 {
+    private static T Upgraded<T>() where T : CardModel, new()
+    {
+        var card = new T();
+        Seat.Set(card, "IsMutable", true);
+        typeof(CardModel).GetMethod("UpgradeInternal", HeadlessGame.All)!
+            .Invoke(card, Array.Empty<object>());
+        return card;
+    }
+
     private static string Face(CardModel card) =>
         ((CustomCardModel)card).Localization!
             .First(r => r.Item1 == "description").Item2;
@@ -100,7 +109,7 @@ public class KokomiReviewTests
         Assert.Equal(
             "Gain {Block:diff()} [gold]Block[/gold].\nOr [gold]plan[/gold]: "
           + "Gain {PlanBlock:diff()} [gold]Block[/gold], plus the biggest "
-          + "attack an enemy intends on the turn it lands.",
+          + "attack an enemy intends when this is carried out.",
             Face(new ProtoKkTideWall()));
     }
 
@@ -335,7 +344,9 @@ public class KokomiReviewTests
         var wake = new ProtoKkKuragesWake();
         Assert.Equal((KokomiPlan.Kind.AddStings, 3),
             wake.PlanClauses.Select(c => (c.Kind, c.Amount)).Single());
-        Assert.Contains("[gold]plan[/gold]: Add 3 [gold]Stings[/gold]",
+        // The Kokomi upgrade pass (2026-10-19): 3 [4].
+        Assert.Contains("[gold]plan[/gold]: Add {PlanCards:diff()} [gold]Stings[/gold]",
                         Face(wake));
+        Assert.Equal(4, Upgraded<ProtoKkKuragesWake>().PlanClauses.Single().Amount);
     }
 }

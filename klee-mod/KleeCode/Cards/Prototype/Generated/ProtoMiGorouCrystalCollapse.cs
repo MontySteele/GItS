@@ -53,7 +53,7 @@ public sealed class ProtoMiGorouCrystalCollapse : CustomCardModel, ICompanionCar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Gorou — Crystal Collapse"),
-        ("description", "Play on the [gold]Bake-Kurage[/gold].\n[gold]Plan[/gold]: Play a copy of the last [gold]Companion[/gold] card you played."),
+        ("description", "Play on the [gold]Bake-Kurage[/gold].\n[gold]Plan[/gold]: Play a copy of the last [gold]Companion[/gold] you played. If none, play a random Common one."),
     };
 
     // Kokomi wording pass (2026-10-14): unplayable until a
