@@ -45,6 +45,6 @@ for that play, not for this paper.
    - (b) Keep the rule and say so on the card: "for each Sting token".
 2. **What comes next.**
    - **(a, default)** [USER]'s play of Kokomi at her finish line, once the fixes
-     above are in. A card pass on the four weak cards follows, from your play
+     above are in. A card pass on the four weak cards follows, from that play
      and this round together.
    - (b) The weak-card pass first, then [USER]'s play.
