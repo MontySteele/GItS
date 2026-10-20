@@ -119,7 +119,7 @@ to the surface and later died fighting the Shogun. His remains have poisoned peo
 
 | Option | Effect | Result |
 |---|---|---|
-| Lay a hand on it, through her sleeve. | Lose 4 Max HP. Gain a random Rare relic. | She wraps her hand first and keeps the touch short; she knows what his remains did to Inazuma. For a moment she can feel the islands he raised. The cold stays in her fingers. |
+| Lay a hand on it, through her sleeve. | Lose 4 Max HP. Gain a random Rare relic. | She wraps her hand first and keeps the touch short; she knows what his remains did to Inazuma. For a moment she can feel the island he gave her people. The cold stays in her fingers. |
 | Gather the offerings at its foot. | Gain 100 Gold. Add **Doubt**. | Someone has been leaving Mora here for a very long time. She takes it home for the shrine's poor box. The bone whispers to her all the way up. |
 | Promise him a rite at home. | Remove a card. Add **Public Address**. | A proper one, on Watatsumi, with the whole shrine there. She means every word, and she is already dreading the speech. |
 

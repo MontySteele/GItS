@@ -249,7 +249,7 @@ public static class KokomiStory
                         "Lose 4 Max HP. Gain a random Rare relic.",
                         new StoryEffect(StoryEffectKind.LoseMaxHp, 4),
                         "She wraps her hand first and keeps the touch short; she knows what his remains "
-                      + "did to Inazuma. For a moment she can feel the islands he raised. The cold stays "
+                      + "did to Inazuma. For a moment she can feel the island he gave her people. The cold stays "
                       + "in her fingers.")
                     {
                         Then = new[] { new StoryEffect(StoryEffectKind.GainRandomRareRelic) },
