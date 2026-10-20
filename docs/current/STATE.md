@@ -117,10 +117,9 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
 - **Latest:** Ward draws, the Casket pays per Plan or Companion card
   (`review/records/kokomi-yae-round-2026-10-19.md`); [USER]'s co-op runs
   2026-10-18.
-- **Next:** the card-by-card paper for her three ruled archetypes (Grand
-  Strategy, Read the Tide, Shoal); it takes up her warding (`EB-80`: the
-  2026-10-19 round ran short of Block since Ward lost its Block). Ideas held for it: a Plan-only
-  Nereid's Ascension, and Exhausting a waiting Plan for an effect now.
+- **Next:** the finish pass, `review/active/kokomi-cards-2026-10-18.md` sec.7
+  (Battle Formation, Grand Design, the Plan tip; picks open), then a
+  five-seat round on the suite seeds that also decides her defence.
 
 **Furina: Balance** (2026-10-15).
 - **Rules** (`review/active/furina-research-proposal-2026-10-05.md` sec.2):
@@ -217,7 +216,12 @@ Stellar-Conduct nod is parked). Code: `proto_ym_` rows,
   (`review/active/yae-block-edit-pass-2026-10-19.md`), seat-played
   (`review/records/yae-round-2026-10-19b.md`): Block per turn now at or over
   base; act-1 tempo is what is left (HP lost 1.27x base, damage 0.80).
-- **Next:** act-1 tempo; watch Sakura Grove with Kitsune (Levels 10-15).
+- **Next:** [USER]'s playtest. Act-1 tempo is at base (R10 to 10-19b: 3.23
+  turns and 18.8 damage a turn against base 3.37 and 18.6) with about 1 HP a
+  fight left over, and The Kin took 4 of her 6 act-1 boss losses; her pool pass
+  looks at defence there, not damage. Then an archetype paper on [USER]'s three
+  identities (priestess, kitsune and familiar, writer), keeping the Edit side
+  from carrying the kit. Watch Sakura Grove with Kitsune (Levels 10-15).
 
 ## Elements
 

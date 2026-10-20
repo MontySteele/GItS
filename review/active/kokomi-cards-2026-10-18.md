@@ -189,3 +189,116 @@ Riposte pays for. The pool becomes 79. A cut, if one is needed, comes to the use
 **The round:** two seats, both drafting freely. Each record answers two questions:
 - did you ever play Stings now, instead of planning them, and why?
 - did you ever give up damage to prepare a particular future turn?
+
+## 7. The finish pass (2026-10-19)
+
+The release pass gives Kokomi one bounded finish ([USER], 2026-10-19:
+"let's do the archetype paper pass"). This section reads three rounds against
+the archetypes: v3 (`review/records/kokomi-v3-round-2026-10-18.md`), the
+Kokomi and Yae round (`kokomi-yae-round-2026-10-19.md`) and the newcomer round
+(`newcomer-round-1-2026-10-19.md`, lane 4).
+
+**What the archetypes now do.**
+- **Grand Strategy works.** Second Wave into Masterstroke did 82; planning
+  Masterstroke and cashing it early with Change of Plans killed three bosses
+  and elites. Seats gave up damage to set up a turn, and it paid.
+- **Read the Tide works without its Rares.** Tide Wall into Coral Crash
+  carried a deep run (25.6 a play in act 3), and Unbroken Tide made the exact
+  Block decision it was built for.
+- **The Shoal is a real choice now.** Stings are mostly played at once (to
+  finish an enemy, lay Hydro for a reaction, or stun), and planning one is a
+  decision for Breakwater or Battle Formation.
+- **A newcomer found the Plan loop alone** and called it the best part.
+
+**What does not.**
+1. **Battle Formation is still automatic.** "The first time each turn 2 or more
+   Plans are carried out" counts Stings and Wards, so any deck meets it (v2
+   flagged this as next).
+2. **Grand Design is weak with Strikes and Defends in hand** (v3, seats 1 and
+   6): planning a card with no Plan line only delays it, and the card spends
+   your hand.
+3. **Plans are hard to read.** A newcomer could not tell whether Strength and
+   Vulnerable count on a planned hit, and saw Plan hits ignore Flutter's "less
+   damage from Attacks" with nothing saying why. The rule
+   (`KokomiPlan.cs:50-58`): the Bake-Kurage deals Plan hits, unpowered, so her
+   Strength does not add and they are not Attacks. The Casket's Block is also
+   invisible (BACKLOG).
+4. **Defence over a long run is unproven either way.** Three of four deaths in
+   the 10-19 round were HP attrition. But it was two Kokomi runs, one with a
+   single Mend, one beaten by Frail and Weak, and the newcomer ran three fights
+   without a rest. That is not yet evidence that she lacks Block. Her pool
+   counts as normal: 6 Commons and 8 Uncommons give her Block, against the
+   Ironclad's 6 and 5 and the Silent's 5 and 7 (`game_ref/*_pool.yaml`), and
+   the Casket pays 1 for every Sting and Ward, which is her After Image.
+5. **Never played or never offered:** Tidal Rebuke, Tidal Riposte, Shoal of
+   Spears and The Shape of Water were not played in v3; Nereid's Ascension and
+   Sango Isshin were not offered in 48 floors. That is drafting chance over one
+   round, not a verdict (Rares bend, they are not removed).
+
+**The changes.**
+1. **Battle Formation** (Rare Power, 2): "At the start of your turn, if 2 or
+   more of your Plans were carried out, gain [E] [and draw 1 card]. Stings and
+   Wards don't count." Two reasons. Counting every Plan made it automatic (v2 flagged it).
+   And at 1 Energy for a card and an Energy most turns it was cheap: Klee's
+   Blazing Delight pays 2 for an unconditional Energy and draw. [USER],
+   2026-10-19: "I wonder if it's too cheap ... The card text also feels
+   awkwardly long." So it costs 2, loses the draw, and takes the base
+   start-of-turn template. The upgrade adds the draw back instead of lowering
+   the cost: [USER] noted too many powers upgrade by cost alone. A census
+   (`docs/prototype-surface.yaml` against `game_ref/*-upgrades.yaml`) puts
+   cost-only power upgrades at Ironclad 4 of 17, Silent 3 of 18, Kokomi 2 of
+   18, Klee 3 of 18, Varka 4 of 23, Yae 5 of 15 and Furina 7 of 17. Kokomi's
+   overuse is Innate (6 of 18; base 2 or 3), so this upgrade is neither. Breakwater keeps
+   counting every Plan: it is defensive, and GPT advised keeping it.
+2. **Grand Design** (Rare Skill, 1): "Plan up to 3 [4] cards from your Hand.
+   They cost 0. Draw 1 card for each. Exhaust." ("Basic cards included" is cut:
+   [USER], "feels unnecessary".) Planning
+   three cards free is already an Energy cheat ([USER]: "exceptionally strong
+   if you view it as energy cheating (3 for 1) - might need Exhaust or a cost
+   bump"). The draw fixes the empty hand the seats saw, and Exhaust makes it the
+   one setup turn of a fight, not a repeat.
+3. **The Plan tip says who hits** (text only): "The Bake-Kurage carries it out
+   at the start of your next turn. Its hits are not Attacks, so Strength and
+   Vulnerable don't change them." Vulnerable checked against the game's code:
+   it multiplies powered attacks only, and a Plan hit is unpowered
+   (`KokomiPlan.cs`, `ElementalHit`).
+
+**Held.**
+- **Nereid's Ascension** stays as written ([USER] flagged it as a possible
+  change, otherwise leave it). The Plan-only version ("Plan: this turn, your
+  Attacks deal double damage", with a no-stacking clause) stays the next thing
+  to try if it is ever offered and found flat.
+- **Salvaging a waiting Plan** (Exhaust it for an effect now) stays in
+  BACKLOG. The round below tests the deck without it.
+
+**The round.** Five Kokomi seats, whole runs, A0, on the five suite seeds, so
+her act-by-act HP lost per fight can be compared with the base characters on
+the same seeds (the Read the Tide guardrail: normal fights within about one
+turn of base). Three draft freely. Two are briefed toward the cards no seat has
+played: one Read the Tide seat granted Tidal Riposte, one Shoal seat granted
+The Shape of Water. Each record answers: what was the winning turn, what did
+you give up for it, and did you ever lose a fight to running out of Block?
+
+**The defence trigger, written now so the round decides it:** if her pooled
+HP lost per normal fight is more than 1.5 above the base characters' on the
+same seeds, Ward's Plan line gains "Gain 3 Block". That reopens [USER]'s
+2026-10-18 ruling ("Ward should stop giving Block"), so it comes back as a
+pick with the numbers, not a build.
+
+### Picks
+
+Ruled 2026-10-19, all (a). Pick 1: [USER], "I like this all around." Picks 2
+and 3: [USER], "run ... the Kokomi seats" (the defaults).
+
+1. **The two card changes.**
+   - **(a, default)** Build both as written above (Battle Formation at 2, the draw on
+     upgrade; Grand Design draws and Exhausts).
+   - (b) Grand Design without the draw or Exhaust (unchanged), Battle Formation
+     as above.
+2. **Defence.**
+   - **(a, default)** Measure first, with the trigger above.
+   - (b) Give Ward's Plan line "Gain 3 Block" now, before the round.
+3. **The round.**
+   - **(a, default)** Five seats on the suite seeds, two of them briefed as
+     above.
+   - (b) Two free seats only.
