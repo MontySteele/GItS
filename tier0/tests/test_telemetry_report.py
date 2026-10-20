@@ -482,3 +482,63 @@ def test_the_schema_names_the_tempo_keys():
                 "fang_vulnerable_bonus_damage"):
         assert f"`{key}`" in readme, key
         assert (f'\\"{key}\\":' in cs or f'"{key}"' in cs), key
+
+
+# ---- --story (ruled 2026-10-19, the story rewards paper, item 4) ----------
+
+def story(event="KLEEMOD-KLEE_ALICES_CACHE", option="OPEN", character="Klee",
+          hp=50, max_hp=100, gold=100, deck=15, room=2, seats=1, seat=0,
+          feed="human", run_id="SEED1", floor=20, **extra):
+    row = {"record": "story", "schema": "1", "feed": feed, "source": "mod",
+           "run_id": run_id, "run_instance": "s#0", "seats": seats,
+           "seat_index": seat, "character": character, "event": event,
+           "option": option, "act": 2, "floor": floor, "event_room": room,
+           "hp_before": hp, "max_hp_before": max_hp, "gold_before": gold,
+           "deck_before": deck, "cards_offered": [], "cards_picked": [],
+           "cards_added": [], "relics_gained": [], "potions_offered": [],
+           "ts": 1_790_000_000.0}
+    row.update(extra)
+    return row
+
+
+def test_story_counts_options_with_the_state_at_the_time(tmp_path, capsys):
+    rows = [story(option="OPEN", hp=40, gold=100, room=1),
+            story(option="OPEN", hp=60, gold=200, room=3, run_id="SEED2"),
+            story(option="LEAVE", hp=90, gold=150, deck=20, run_id="SEED3"),
+            fight()]
+    out = run(tmp_path, rows, "--story", capsys=capsys)
+    assert out["records_kept"] == 3
+    (cache,) = out["story"]
+    assert cache["choices"] == 3 and cache["acts"] == [2]
+    opened, left = cache["options"]
+    assert (opened["option"], opened["taken"]) == ("OPEN", 2)
+    assert opened["hp_pct"] == 50.0 and opened["gold"] == 150.0
+    assert opened["event_room"] == 2.0
+    assert (left["option"], left["taken"], left["deck"]) == ("LEAVE", 1, 20.0)
+
+
+def test_story_drops_a_coop_lane_copy_and_filters(tmp_path, capsys):
+    rows = [story(seats=2, seat=0), story(seats=2, seat=0),
+            story(seats=2, seat=1, character="Varka",
+                  event="KLEEMOD-VARKA_FIRST_EXAM"),
+            story(feed="bot", run_id="SEED9")]
+    out = run(tmp_path, rows, "--story", "--feed", "human",
+              "--character", "Klee", capsys=capsys)
+    assert out["records_read"] == 3
+    assert out["records_kept"] == 1
+    d = write(tmp_path / "text", rows)
+    assert tr.main(["--dir", str(d), "--story"]) == 0
+    text = capsys.readouterr().out
+    assert "KLEEMOD-KLEE_ALICES_CACHE" in text and "OPEN" in text
+
+
+def test_the_schema_names_the_story_keys():
+    readme = (REPO / "understudy" / "README.md").read_text(encoding="utf-8")
+    cs = (REPO / "klee-mod" / "KleeCode" / "Diagnostics"
+          / "StoryChoiceRecord.cs").read_text(encoding="utf-8")
+    for key in ("event", "option", "event_room", "hp_before",
+                "max_hp_before", "gold_before", "deck_before",
+                "cards_offered", "cards_picked", "cards_added",
+                "relics_gained", "potions_offered", "character_id"):
+        assert f"`{key}`" in readme, key
+        assert f'["{key}"]' in cs, key

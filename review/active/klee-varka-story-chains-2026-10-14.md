@@ -317,8 +317,10 @@ second story character's event waited for the act's next event room.
 their character? And for characters who have no events, they get a
 placeholder like "heal 10 or gain 50 gold"".
 
-- **One story room per act for the whole table.** The act's first event room
-  that any player's story would claim (as before) is a story room for every
+- **One story room per act for the whole table.** The act's story room (since
+  2026-10-19 its 1st, 2nd or 3rd event room, each with chance 1/3, from one
+  roll on the run's seed: `review/active/story-rewards-pass-2026-10-19.md`,
+  item 2), where any player's story would claim it, is a story room for every
   player at once.
 - **Each player gets their own event** in it: their character's event for the
   act, routed from their own saved story by the same rules as solo, with

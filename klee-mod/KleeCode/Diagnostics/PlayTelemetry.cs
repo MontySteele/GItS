@@ -1977,6 +1977,35 @@ internal static class PlayTelemetry
         }
     }
 
+    /// <summary>
+    /// A STORY CHOICE (ruled 2026-10-19): one `record: "story"` row in this
+    /// session's log, beside the fight rows, with the same run linkage. A read
+    /// (rule 1) that never throws (rule 2).
+    /// </summary>
+    internal static void StoryChoice(StoryChoiceRecord record)
+    {
+        if (_writeFailed || !Enabled) return;
+        try
+        {
+            var run = RunManager.Instance?.DebugOnlyGetState();
+            var runId = string.Empty;
+            if (run != null)
+            {
+                runId = RunId(run);
+                NoteRun(run);
+            }
+            var line = record.ToJson(SchemaVersion, Feed(), Intent(), runId, _runInstance,
+                DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() / 1000.0).ToJsonString();
+            var path = LogPath();
+            if (path == null) return;
+            File.AppendAllText(path, line + "\n", new UTF8Encoding(false));
+        }
+        catch (Exception e)
+        {
+            Warn("StoryChoice", e);
+        }
+    }
+
     private static string Root() =>
         Path.Combine(ProjectSettings.GlobalizePath("user://"), "gits_telemetry");
 

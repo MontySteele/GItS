@@ -1042,6 +1042,20 @@ surfaced in the report.
 `won`; then `outcome`, `actions`, `wall_s`, `fights`, `final_act`,
 `final_floor`, `defects`, `forced_defaults`, `log`.
 
+### `story` — one story-event choice (mod feed, since 2026-10-19)
+
+Written by the mod (`StoryChoiceRecord`, `PlayTelemetry.StoryChoice`) when a
+player takes a story event's option, in the same file as the fight rows, one
+row per seat (each co-op client writes every seat's). Linkage as a fight row:
+`schema`, `feed`, `source`, `intent`, `run_id`, `run_instance`, `seats`,
+`seat_index`, `character` (display title), `character_id`. Then `event` (the
+event's entry), `option` (the option key), `act`, `floor`, `event_room` (the
+act's event room it fired in, 1-based), and the state before the option ran:
+`hp_before`, `max_hp_before`, `gold_before`, `deck_before`. What it gave:
+`cards_offered` and `cards_picked` (a choose-one screen, `[{id, upgraded}]`),
+`cards_added` (added outright), `relics_gained`, `potions_offered` (ids);
+`ts`. Read by `tools/telemetry_report.py --story`.
+
 ## Reading it
 
 ```

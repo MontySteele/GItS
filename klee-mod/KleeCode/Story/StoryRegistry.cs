@@ -38,13 +38,12 @@ public static class StoryRegistry
 public static class StoryRules
 {
     /// <summary>
-    /// The story event an event room in this act becomes, or null.
-    ///
-    /// THE FIRST EVENT ROOM OF THE ACT. The first event a story character's
-    /// run pulls in the act is her event, and at most one of hers fires an
-    /// act (<see cref="Route"/>). The solo rule; a co-op table goes through
-    /// <see cref="RoomEventFor"/>, where every player's event shares the
-    /// act's story room.
+    /// The story event an event room in this act becomes IF IT IS THE ACT'S
+    /// STORY ROOM, or null. Which event room that is, is
+    /// <see cref="StoryRoomDue"/>'s call (<see cref="StoryRoomEventFor"/>
+    /// asks both); at most one of hers fires an act (<see cref="Route"/>).
+    /// The solo rule; a co-op table goes through <see cref="RoomEventFor"/>,
+    /// where every player's event shares the act's story room.
     /// </summary>
     /// <param name="seats">Each player's character and that player's saved
     /// story (<see cref="Records"/>), in seat order.</param>
@@ -63,6 +62,73 @@ public static class StoryRules
         }
         return null;
     }
+
+    /// <summary>
+    /// WHEN THE STORY ROOM COMES (ruled 2026-10-19, the story rewards paper,
+    /// pick 2: "1/3 at the act's first event room, 2/3 at the second, certain
+    /// at the third"). Cumulative: the act's story room is its 1st, 2nd or
+    /// 3rd event room with equal chance. Retune here, in one place.
+    /// </summary>
+    public static readonly IReadOnlyList<double> StoryRoomThresholds = new[] { 1.0 / 3.0, 2.0 / 3.0, 1.0 };
+
+    /// <summary>
+    /// The act's ONE story-room roll, in [0, 1): from the run seed and the
+    /// act alone, never one of the run's own rngs (so no other roll in the
+    /// run moves), and never re-rolled room by room. A reload, and every
+    /// client at a co-op table, reads the same number.
+    /// </summary>
+    public static double StoryRoomRoll(ulong seed, int actIndex) =>
+        (Mix(seed, "story.room.act" + actIndex) >> 11) * (1.0 / (1UL << 53));
+
+    /// <summary>
+    /// Whether the event room being pulled is the act's story room, given the
+    /// act's event rooms already visited (<paramref name="eventRoomsBefore"/>:
+    /// 0 at the act's first). Past the schedule's end it stays due, so a room
+    /// another substitution took (Lantern Key's) passes the story on to the
+    /// next one. An act with fewer event rooms than its roll needs never
+    /// fires: the chain takes its skip branch (<see cref="Route"/>).
+    /// </summary>
+    public static bool StoryRoomDue(ulong seed, int actIndex, int eventRoomsBefore)
+    {
+        if (eventRoomsBefore < 0) return false;
+        var i = Math.Min(eventRoomsBefore, StoryRoomThresholds.Count - 1);
+        return StoryRoomRoll(seed, actIndex) < StoryRoomThresholds[i];
+    }
+
+    /// <summary>The act's story room as a 1-based event-room number (1, 2 or
+    /// 3 under the ruled schedule): the first room <see cref="StoryRoomDue"/>
+    /// holds for.</summary>
+    public static int StoryRoomNumber(ulong seed, int actIndex)
+    {
+        var roll = StoryRoomRoll(seed, actIndex);
+        for (var i = 0; i < StoryRoomThresholds.Count; i++)
+        {
+            if (roll < StoryRoomThresholds[i]) return i + 1;
+        }
+        return StoryRoomThresholds.Count;
+    }
+
+    /// <summary>
+    /// THE ACT'S EVENT ROOMS SO FAR, from the run's map history for this act:
+    /// each map point whose first room was an event room, story room or not,
+    /// and whatever substitution (Lantern Key's) chose its event. An Ancient
+    /// is not one. Read as the next room is pulled, the history does not yet
+    /// hold that room (<c>RunManager</c> appends a point after it creates
+    /// its room); read inside a room, it holds that room too, so it is the
+    /// room's own 1-based number.
+    /// </summary>
+    public static int EventRoomsIn(IEnumerable<(bool IsAncient, bool FirstRoomIsEvent)> actHistory) =>
+        actHistory.Count(p => !p.IsAncient && p.FirstRoomIsEvent);
+
+    /// <summary>
+    /// THE MODEL THE EVENT ROOM BEING PULLED BECOMES, or null for the drawn
+    /// event: <see cref="RoomEventFor"/> when this is the act's story room
+    /// (<see cref="StoryRoomDue"/>), else nothing. What the game's seam asks.
+    /// </summary>
+    public static Type? StoryRoomEventFor(
+        IReadOnlyList<(Type Character, IReadOnlyList<StoryRecord> Records)> seats,
+        int actIndex, ulong seed, int eventRoomsBefore) =>
+        StoryRoomDue(seed, actIndex, eventRoomsBefore) ? RoomEventFor(seats, actIndex, seed) : null;
 
     /// <summary>
     /// THE MODEL AN EVENT ROOM BECOMES, or null for the drawn event.
@@ -137,7 +203,10 @@ public static class StoryRules
 
     /// <summary>A draw in [0, n) from the seed and a salt, without touching
     /// any of the run's own rngs (so every later roll stays where it was).</summary>
-    public static int Draw(ulong seed, string salt, int n)
+    public static int Draw(ulong seed, string salt, int n) => (int)(Mix(seed, salt) % (ulong)n);
+
+    /// <summary>The seed and a salt, hashed (FNV-1a, then splitmix64).</summary>
+    private static ulong Mix(ulong seed, string salt)
     {
         ulong h = 14695981039346656037UL; // FNV-1a
         foreach (var ch in salt)
@@ -150,7 +219,7 @@ public static class StoryRules
         z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9UL;
         z = (z ^ (z >> 27)) * 0x94D049BB133111EBUL;
         z ^= z >> 31;
-        return (int)(z % (ulong)n);
+        return z;
     }
 
     /// <summary>
