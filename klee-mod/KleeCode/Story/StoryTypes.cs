@@ -226,6 +226,21 @@ public sealed record StoryOption(
             return total;
         }
     }
+
+    /// <summary>All the Max HP the option costs (for the game's lethal
+    /// warning on a Max HP loss, Vakuu's and Drowning Beacon's).</summary>
+    public int MaxHpCost
+    {
+        get
+        {
+            var total = 0;
+            foreach (var e in Effects)
+            {
+                if (e.Kind == StoryEffectKind.LoseMaxHp) total += e.Amount;
+            }
+            return total;
+        }
+    }
 }
 
 /// <summary>One event: the act it belongs to (0 is act 1), the model type

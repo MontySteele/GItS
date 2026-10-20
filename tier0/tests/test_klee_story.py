@@ -42,6 +42,9 @@ def _places_a_bomb(row: dict) -> bool:
             return True
         if op["op"] in ("plant_bomb_copy_largest", "plant_homework_bomb"):
             return True
+        # Jumpy Dumpty Mk.III: "Each hit places a Bomb 4 on that enemy."
+        if op.get("plant_on_hit"):
+            return True
     return False
 
 

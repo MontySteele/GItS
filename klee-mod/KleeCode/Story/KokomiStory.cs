@@ -241,8 +241,8 @@ public static class KokomiStory
                 Title: "The Serpent's Bones",
                 Body:
                     "A great curved bone is set into the wall, long as a boat, faintly purple. Every "
-                  + "child on Watatsumi knows that shape: Orobashi, who raised the islands for his "
-                  + "people and died for it. His remains have poisoned people before.",
+                  + "child on Watatsumi knows that shape: Orobashi, who brought his people up to the "
+                  + "surface and later died fighting the Shogun. His remains have poisoned people before.",
                 Options: new[]
                 {
                     new StoryOption("LAY_A_HAND", "Lay a hand on it, through her sleeve.",
@@ -263,12 +263,12 @@ public static class KokomiStory
                         Then = new[] { new StoryEffect(StoryEffectKind.AddCard, 0, typeof(Doubt)) },
                     },
                     new StoryOption("PROMISE_A_RITE", "Promise him a rite at home.",
-                        "Add [gold]Public Address[/gold]. Remove a card.",
-                        new StoryEffect(StoryEffectKind.AddCard, 0, typeof(PublicAddress)),
+                        "Remove a card. Add [gold]Public Address[/gold].",
+                        new StoryEffect(StoryEffectKind.RemoveCard),
                         "A proper one, on Watatsumi, with the whole shrine there. She means every word, "
                       + "and she is already dreading the speech.")
                     {
-                        Then = new[] { new StoryEffect(StoryEffectKind.RemoveCard) },
+                        Then = new[] { new StoryEffect(StoryEffectKind.AddCard, 0, typeof(PublicAddress)) },
                     },
                 },
                 Portrait: () => KleeArt.CardPortrait("event_kokomi_serpents_bones"),

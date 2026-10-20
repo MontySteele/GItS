@@ -196,9 +196,18 @@ public abstract class StoryEventModel : EventModel
                     new LocString(Table, OptionDescriptionKey(entry, o)),
                     InitialOptionKey(locked ? o.Key + "_LOCKED" : o.Key),
                     TipsFor(o));
-                // The game's own lethal warning for an HP cost (Brain Leech's).
+                // The game's own lethal warnings: an HP cost (Brain Leech's
+                // ThatDoesDamage) and a Max HP cost (Vakuu's
+                // ThatDecreasesMaxHp). One option carrying both flashes if
+                // either would kill.
                 var hp = o.HpCost;
-                return hp > 0 ? option.ThatDoesDamage(hp) : option;
+                var maxHp = o.MaxHpCost;
+                if (hp > 0 && maxHp > 0)
+                    return option.ThatWillKillPlayerIf(p =>
+                        p.Creature.CurrentHp <= hp || p.Creature.MaxHp <= maxHp);
+                if (hp > 0) return option.ThatDoesDamage(hp);
+                if (maxHp > 0) return option.ThatDecreasesMaxHp(maxHp);
+                return option;
             })
             .ToList();
     }

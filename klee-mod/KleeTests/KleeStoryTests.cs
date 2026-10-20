@@ -239,6 +239,12 @@ public class KleeStoryTests
 
         Assert.True(StoryRules.PlacesBomb(Klee, "KLEEMOD-PROTO_KO_POP"));
         Assert.True(StoryRules.PlacesBomb(Klee, "KLEEMOD-PROTO_KO_JUMPY_DUMPTY"));
+        // Mk.III's hits place Bombs; the Archaic Tooth Ancient Mk.Omega is
+        // not a sheet row but places a Bomb on ALL enemies and upgrades.
+        Assert.True(StoryRules.PlacesBomb(Klee, "KLEEMOD-PROTO_KO_JUMPY_DUMPTY_MK_III"));
+        var omega = new JumpyDumptyMkOmega();
+        Assert.True(StoryRules.PlacesBomb(Klee, omega.Id.Entry));
+        Assert.True(omega.IsUpgradable);
         Assert.False(StoryRules.PlacesBomb(Klee, "KLEEMOD-PROTO_KO_MINE_TOSS"));
         Assert.False(StoryRules.PlacesBomb(Klee, "STRIKE_IRONCLAD"));
         Assert.Equal("proto_ko_pop", StoryRules.SheetIdOf("KLEEMOD-PROTO_KO_POP"));

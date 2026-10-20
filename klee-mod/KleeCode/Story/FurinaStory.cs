@@ -301,7 +301,7 @@ public static class FurinaStory
                     "A Melusine in a Palais courier's cap is waiting on the step, holding a very neatly "
                   + "addressed letter. \"I'm to wait for your reply, Miss Furina.\" The letter reads: "
                   + "\"Miss Furina. The Court notes your absence. The Court also notes that Café Lutèce has "
-                  + "not sold a single Pour la Justice in some weeks, and is concerned. N.\"",
+                  + "not sold a single La Lettre à Focalors in some weeks, and is concerned. N.\"",
                 Options: new[]
                 {
                     new StoryOption("WRITE_BACK_AT_LENGTH", "Write back at length.",
