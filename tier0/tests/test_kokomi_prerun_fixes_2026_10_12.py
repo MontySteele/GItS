@@ -57,9 +57,9 @@ def test_the_sheet_face_is_labelled_unmodified_not_written():
 # --- 4. the Casket row is one sentence again (the Ancient audit) ------------
 
 def test_the_casket_row_is_the_one_sentence_face():
-    # Ward and Casket (2026-10-18): Block per Plan card or Companion played.
+    # Ward and Casket (2026-10-18); 2026-10-20 it pays for planning.
     assert blindplay_notes.CASKET_ROW == (
-        "Whenever you play a Plan card or a Companion, gain 1 Block.")
+        "Whenever you Plan a card or play a Companion, gain 1 Block.")
 
 
 # --- 5. Surrounded and "turns you" under --define ----------------------------

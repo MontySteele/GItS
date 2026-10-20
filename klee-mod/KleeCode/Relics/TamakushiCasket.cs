@@ -25,17 +25,20 @@ namespace KleeMod.Relics;
 /// 2 block for each Plan or Companion Card played.'", then "if we allow for
 /// Sting and Ward to count, is that a real problem? I'm wondering if we scale
 /// that around allowing 0-cost cards to trigger it (possibly bringing it down
-/// to 1 per card played)."): "Whenever you play a Plan card or a Companion,
-/// gain 1 Block." It replaces the start-of-turn Block for a waiting Plan (the
+/// to 1 per card played)."), worded since 2026-10-20: "Whenever you Plan a
+/// card or play a Companion, gain 1 Block." It replaces the start-of-turn Block for a waiting Plan (the
 /// re-founding's, 2026-10-12; git keeps its reasoning).
 ///
-/// WHAT COUNTS is Treatise's card test (<see cref="TreatisePower"/>): a card
-/// that prints a Plan line (<see cref="KokomiRefounding.CanBeWritten"/>) or a
-/// Companion (<see cref="ICompanionCard"/>), once a play however many of the
-/// two it is. Played face-up or planned onto the Bake-Kurage alike: planning
-/// a card is playing it. Stings and Wards print Plan lines, so they count
-/// like any Plan card. A Plan carried out later is the jellyfish's play, not
-/// hers (<see cref="KokomiPlan.IsCarryingOut"/>). Block stays raw, the base relic's <c>ValueProp.Unpowered</c>. Sim twin:
+/// WHAT COUNTS (2026-10-20, [USER] on paying for planning, not for any Plan
+/// card: "2 was definitely the intent, and we should figure out a different
+/// Block solution if needed"): a card PLANNED this play, written onto the
+/// Bake-Kurage (<see cref="KokomiPlan.PlayedOnPet"/> and
+/// <see cref="KokomiRefounding.CanBeWritten"/>), or a Companion
+/// (<see cref="ICompanionCard"/>) played face-up or planned. A Plan card
+/// played face-up pays nothing. Once a play however many of the two it is.
+/// A Plan carried out later is the jellyfish's play, not hers
+/// (<see cref="KokomiPlan.IsCarryingOut"/>). Treatise keeps its own test.
+/// Block stays raw, the base relic's <c>ValueProp.Unpowered</c>. Sim twin:
 /// <c>kokomi_plan.casket_block</c>, after each play.
 ///
 /// IT SITS IN <c>Relics/</c>, not <c>Powers/Prototype/</c>:
@@ -75,7 +78,7 @@ public class TamakushiCasket : CustomRelicModel
     /// <summary>The face, one sentence, shared with the Watatsumi Casket.
     /// </summary>
     internal static string Face(int block) =>
-        "Whenever you play a [gold]Plan[/gold] card or a Companion, gain "
+        "Whenever you [gold]Plan[/gold] a card or play a Companion, gain "
       + "[blue]" + block + "[/blue] [gold]Block[/gold].";
 
     /// <summary>
@@ -89,21 +92,24 @@ public class TamakushiCasket : CustomRelicModel
         await BakeKuragePet.Summon(Owner);
     }
 
-    /// <summary>Does this card count? A Plan card (Stings and Wards
-    /// included) or a Companion. PURE.</summary>
-    public static bool CountsCard(CardModel? card) =>
-        KokomiRefounding.CanBeWritten(card) || card is ICompanionCard;
+    /// <summary>Does this card pay, planned or not? A Companion always; a
+    /// Plan card (Stings and Wards included) only when
+    /// <paramref name="planned"/>. PURE.</summary>
+    public static bool CountsCard(CardModel? card, bool planned) =>
+        card is ICompanionCard
+        || (planned && KokomiRefounding.CanBeWritten(card));
 
-    /// <summary>Does this play pay? Hers, a card that counts, face-up or
-    /// planned, and not a carry-out. PURE on the play.</summary>
+    /// <summary>Does this play pay? Hers, a card planned this play
+    /// (<see cref="KokomiPlan.PlayedOnPet"/>) or a Companion, and not a
+    /// carry-out. PURE on the play.</summary>
     public static bool Counts(CardPlay cardPlay, Creature? kokomi) =>
         kokomi != null
         && KokomiOverhaul.IsHers(kokomi)
         && cardPlay.Card.Owner?.Creature == kokomi
-        && CountsCard(cardPlay.Card)
+        && CountsCard(cardPlay.Card, KokomiPlan.PlayedOnPet(cardPlay))
         && !KokomiPlan.IsCarryingOut(kokomi.Player);
 
-    /// <summary>"Whenever you play a Plan card or a Companion, gain 1
+    /// <summary>"Whenever you Plan a card or play a Companion, gain 1
     /// Block." Once a play, however many of the two the card is.</summary>
     public override async Task AfterCardPlayed(
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
@@ -173,8 +179,8 @@ public class TamakushiCasket : CustomRelicModel
 /// WATATSUMI CASKET -- the Tamakushi Casket upgraded, Touch of Orobas's
 /// hand-over (main-session design, 2026-09-30, from [USER]'s co-op playtest:
 /// "Varka and Kokomi need Ancient relics for Orobas"). Since Ward and Casket
-/// (2026-10-18): "Whenever you play a Plan card or a Companion, gain 2
-/// Block." It IS a Tamakushi Casket (see its header), so the
+/// (2026-10-18), worded since 2026-10-20: "Whenever you Plan a card or play
+/// a Companion, gain 2 Block." It IS a Tamakushi Casket (see its header), so the
 /// hook and the companion reward slot are the base's, and the only
 /// difference is <see cref="Block"/>.
 ///

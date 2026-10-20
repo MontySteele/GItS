@@ -97,9 +97,11 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   prints one); it is carried out at the start of her next turn, after the
   draw. Clicking a waiting Plan flips it to the now-line. The Plans view
   (`Vfx/Prototype/KokomiPlanView.cs`, the peek button) is unseen in game.
-- **Starter relic:** the Tamakushi Casket gains 1 Block whenever she plays a
-  Plan card (Stings and Wards included) or a Companion, played or planned,
-  not carried out; the Watatsumi Casket gains 2.
+- **Starter relic:** the Tamakushi Casket gains 1 Block whenever she Plans
+  a card (Stings and Wards included) or plays a Companion (face-up or
+  planned), never on a carry-out; the Watatsumi Casket gains 2. A Plan card
+  played face-up pays nothing (2026-10-20, [USER]: "2 was definitely the
+  intent, and we should figure out a different Block solution if needed").
 - **Jellyfish:** Stings and Wards are generated, cost 0, Ethereal and
   Exhaust, with a Plan line. A Ward draws 1 and its Plan draws 1 (2
   upgraded), no Block; Watchful Shoal adds damage to Stings only.
@@ -114,8 +116,8 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
 - **Parked:** Nereid's Ascension carries her burst's name only (no HP
   scaling, healing or jellyfish refresh). [USER]: "Let's flag this as a
   possible change on Kokomi and otherwise leave it alone."
-- **Latest:** Ward draws, the Casket pays per Plan or Companion card
-  (`review/records/kokomi-yae-round-2026-10-19.md`); [USER]'s co-op runs
+- **Latest:** Ward draws, the Casket pays per card Planned or Companion
+  played (`review/records/kokomi-yae-round-2026-10-19.md`); [USER]'s co-op runs
   2026-10-18.
 - **Finish pass built** (`review/active/kokomi-cards-2026-10-18.md` sec.7,
   ruled all (a)): Battle Formation (Rare Power, 2): "At the start of your

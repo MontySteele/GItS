@@ -5087,11 +5087,16 @@ def resolve_card(state: CombatState, card: Card) -> None:
     varka = varka_oath.live(state.player)
     if varka:
         varka_oath.begin_play(state, card)
+    # The card this play writes onto the Bake-Kurage, scoped to this play: a
+    # play nested inside it (a carry-out during the write) restores it.
+    planned_before, state.kk_planned_card = state.kk_planned_card, None
     try:
         _resolve_card_bound(state, card)
-        # THE TAMAKUSHI CASKET (2026-10-18): a Plan card or a Companion
-        # played, face-up or written (C#'s `AfterCardPlayed`).
-        kokomi_plan.casket_block(state, card)
+        # THE TAMAKUSHI CASKET (2026-10-18; 2026-10-20 it pays for planning):
+        # a card written on the Bake-Kurage this play, or a Companion played
+        # either way (C#'s `AfterCardPlayed`).
+        kokomi_plan.casket_block(state, card,
+                                 planned=state.kk_planned_card is card)
         # THE FURINA RESEARCH SLICE (`furina_tide`, sim only): the same door
         # for the research proposal's rows. Dead without the `ftd` tag.
         if "ftd" in card.tags:
@@ -5110,6 +5115,7 @@ def resolve_card(state: CombatState, card: Card) -> None:
         furina_stage.end_play(state)
         state.card_aim = None
         state.card_aim_bound = False
+        state.kk_planned_card = planned_before
         # THE KOKOMI POOL OVERHAUL (2026-10-13): no card's hit is resolving
         # once the play is over, so a reaction after it (Dawn Tide at turn
         # start) is credited to no card. A free play restores the outer
@@ -5205,6 +5211,7 @@ def _resolve_card_bound(state: CombatState, card: Card) -> None:
         # Draft the Orders, spent by the write it cheapened (Kokomi card
         # paper v2, 2026-10-18).
         kokomi_plan.spend_draft_the_orders(state, card)
+        state.kk_planned_card = card       # the Tamakushi Casket's read
         kokomi_plan.schedule(state, card)
         return
 

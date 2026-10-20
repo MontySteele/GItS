@@ -6591,9 +6591,10 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # Block interpolated on both sides (`KokomiOverhaulLaw.CasketBlock`,
         # `blindplay_shape.CASKET_BLOCK`), so the anchors are the prose
         # either side of it and of the golded spans. Ward and Casket
-        # (2026-10-18): Block per Plan card or Companion played.
-        "Tamakushi Casket": ["Whenever you play a ",
-                             " card or a Companion, gain "],
+        # (2026-10-18): Block per Plan card or Companion played; since
+        # 2026-10-20 per card Planned or Companion played.
+        "Tamakushi Casket": ["Whenever you ",
+                             " a card or play a Companion, gain "],
         # 2026-09-25 (the afternoon Klee seats): `Companion` HAS a tip now,
         # and the page's row opens with its sentence word for word, then
         # keeps the reward-slot sentence the tip does not carry. Until then

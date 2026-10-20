@@ -156,29 +156,37 @@ def _casket(st):
     st.player.block = 0
 
 
-@pytest.mark.parametrize("cid", [
-    "proto_kk_steady_tide",              # a Plan card
-    "proto_mi_shinobu_thundergrust",     # a Companion with no Plan line
-    "proto_mi_gorou_inuzaka",            # both: pays once
-    kokomi_plan.STING_ID,
-    kokomi_plan.WARD_ID,
-])
-def test_the_casket_pays_1_for_a_plan_card_or_companion_played(cid):
-    """Ward and Casket (2026-10-18, [USER]: "if we allow for Sting and Ward
-    to count, is that a real problem? ... (possibly bringing it down to 1 per
-    card played)"): "Whenever you play a Plan card or a Companion, gain 1
-    Block." Played face-up."""
+def _face_up(cid):
     st = kokomi_state()
     st.enemies[0].intents = [{"kind": "attack", "amount": 5}]
     _casket(st)
     c = card(cid)
     st.player.hand.append(c)
     combat.play_card(st, c)
-    gained = sum(e["amount"] for e in st.log if e["event"] == "casket_block")
-    assert gained == C.KOKOMI_OVERHAUL_CASKET_BLOCK == 1
+    return sum(e["amount"] for e in st.log if e["event"] == "casket_block")
 
 
-@pytest.mark.parametrize("cid", ["proto_kk_steady_tide", kokomi_plan.WARD_ID])
+@pytest.mark.parametrize("cid", [
+    "proto_mi_shinobu_thundergrust",     # a Companion with no Plan line
+    "proto_mi_gorou_inuzaka",            # both: pays once
+])
+def test_the_casket_pays_1_for_a_companion_played_face_up(cid):
+    """2026-10-20, [USER]: "2 was definitely the intent, and we should
+    figure out a different Block solution if needed": "Whenever you Plan a
+    card or play a Companion, gain 1 Block." A Companion pays face-up."""
+    assert _face_up(cid) == C.KOKOMI_OVERHAUL_CASKET_BLOCK == 1
+
+
+@pytest.mark.parametrize("cid", [
+    "proto_kk_steady_tide", kokomi_plan.STING_ID, kokomi_plan.WARD_ID])
+def test_the_casket_pays_nothing_for_a_plan_card_played_face_up(cid):
+    """2026-10-20: a Plan card pays only when it is Planned."""
+    assert _face_up(cid) == 0
+
+
+@pytest.mark.parametrize("cid", ["proto_kk_steady_tide", kokomi_plan.WARD_ID,
+                                 kokomi_plan.STING_ID,
+                                 "proto_mi_gorou_inuzaka"])
 def test_the_casket_pays_for_a_card_planned_and_not_for_its_carry_out(cid):
     st = kokomi_state()
     _casket(st)
@@ -207,7 +215,7 @@ def test_the_casket_left_the_start_of_the_turn():
     import inspect
     assert "kokomi_plan.casket_block(state" not in inspect.getsource(
         combat._player_turn)
-    assert "kokomi_plan.casket_block(state, card)" in inspect.getsource(
+    assert "kokomi_plan.casket_block(state, card," in inspect.getsource(
         effects.resolve_card)
 
 

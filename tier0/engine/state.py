@@ -1297,6 +1297,11 @@ class CombatState:
     # `KokomiRefounding.IsFreeWrite`'s twin).
     kk_carrying_out: bool = False
     kk_free_write: Optional["Card"] = None
+    # The card this play wrote onto the Bake-Kurage, set by
+    # `effects._resolve_card_bound`'s Plan branch and scoped to one play by
+    # `effects.resolve_card`. The Tamakushi Casket reads it (2026-10-20: it
+    # pays for planning, `KokomiPlan.PlayedOnPet`'s twin at play time).
+    kk_planned_card: Optional["Card"] = None
     # THE KOKOMI CARD PAPER V2 (2026-10-18): Tidal Rebuke's lost Block, as
     # (the card that lost it, the amount), read by its own damage clause
     # (`effects._runtime_count`'s `block_lost_this_card`).
