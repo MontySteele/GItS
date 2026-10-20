@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Godot;
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Models;
 
 namespace KleeMod.Story;
@@ -67,8 +68,9 @@ public sealed class CharacterStory
     /// biggest Bomb, called from the Bomb's explosion).</summary>
     public IReadOnlyCollection<Type> SignatureCards { get; init; } = Array.Empty<Type>();
 
-    /// <summary>What "Choose 1 of 3 random ..." draws from (Varka: his pool
-    /// Knights, the pool Knights' Roll Call offers). Null: none.</summary>
+    /// <summary>What a named "Choose 1 of 3 random ..." draws from (Furina:
+    /// her Guest Stars). Rarity offers are <see cref="StoryOffer"/>s instead.
+    /// Null: none.</summary>
     public Func<IReadOnlyList<CardModel>>? ChoicePool { get; init; }
 }
 
@@ -177,15 +179,61 @@ public enum StoryEffectKind
     /// <summary>Lose <c>Amount</c> Max HP (The Serpent's Bones).</summary>
     LoseMaxHp,
 
-    /// <summary>Choose 1 of <c>Amount</c> distinct random Rare cards from the
-    /// owner's card offer (her pool's unlocked cards, what her rewards roll
-    /// from) and add it to the deck (The Other Commander).</summary>
-    ChooseRareCardToDeck,
+    /// <summary>Choose 1 of <c>Amount</c> distinct random cards of
+    /// <see cref="StoryEffect.Offer"/>'s rarity (and type) and add it to the
+    /// deck, upgraded if the offer says so. From the owner's card offer (her
+    /// pool's unlocked cards, what her rewards roll from), or from the
+    /// Companions she can be offered (the story rewards paper, 2026-10-19:
+    /// "Choose 1 of 3 random [rarity] cards"). Locked with none.</summary>
+    ChooseOfferToDeck,
 }
 
-/// <summary>One option's effect.</summary>
+/// <summary>One option's effect. <see cref="Offer"/> is what a
+/// <see cref="StoryEffectKind.ChooseOfferToDeck"/> offers.</summary>
 public sealed record StoryEffect(
-    StoryEffectKind Kind, int Amount = 0, Type? Card = null, int HpLoss = 0);
+    StoryEffectKind Kind, int Amount = 0, Type? Card = null, int HpLoss = 0)
+{
+    public StoryOffer? Offer { get; init; }
+
+    /// <summary>"Choose 1 of <paramref name="count"/> random ..." from the
+    /// owner's card pool.</summary>
+    public static StoryEffect Choose(
+        CardRarity rarity, CardType? type = null, bool upgraded = false, int count = 3) =>
+        new(StoryEffectKind.ChooseOfferToDeck, count) { Offer = new StoryOffer(rarity, type, upgraded) };
+
+    /// <summary>"Choose 1 of <paramref name="count"/> random ... Companions".</summary>
+    public static StoryEffect ChooseCompanion(CardRarity rarity, bool upgraded = false, int count = 3) =>
+        new(StoryEffectKind.ChooseOfferToDeck, count)
+        {
+            Offer = new StoryOffer(rarity, null, upgraded, Companions: true),
+        };
+}
+
+/// <summary>
+/// What a card offer draws from: cards of <see cref="Rarity"/>, of
+/// <see cref="Type"/> when it is set, from the owner's card pool or (with
+/// <see cref="Companions"/>) the Companions she can be offered; shown
+/// upgraded when <see cref="Upgraded"/>.
+/// </summary>
+public sealed record StoryOffer(
+    CardRarity Rarity, CardType? Type = null, bool Upgraded = false, bool Companions = false)
+{
+    /// <summary>Whether a card of this rarity and type is in the offer.</summary>
+    public bool Admits(CardRarity rarity, CardType type) =>
+        rarity == Rarity && (Type == null || type == Type);
+
+    /// <summary>The base templates' line: "Choose 1 of 3 random upgraded
+    /// Rare cards to add to your deck."</summary>
+    public string Text(int count)
+    {
+        var what = Companions ? "Companions" : Type switch
+        {
+            null => "cards",
+            CardType t => t + "s",
+        };
+        return $"Choose 1 of {count} random {(Upgraded ? "upgraded " : "")}{Rarity} {what} to add to your deck.";
+    }
+}
 
 /// <summary>One option: its button, its effect line, what it does, and the
 /// page it leaves on screen (<c>null</c>: the event's own page stays).

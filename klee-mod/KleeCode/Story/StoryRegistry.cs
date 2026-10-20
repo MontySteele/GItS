@@ -270,7 +270,9 @@ public static class StoryRules
     /// option it cannot pay (Luminous Choir)": a Gold price above the
     /// player's Gold; "Remove every Curse" with no Curse; Remove or Transform
     /// with no eligible card; "Upgrade N random cards that place a Bomb" with
-    /// none. "Remove every X" with none is not a lock: that part does nothing.
+    /// none; "Choose 1 of 3 random ..." with no card to offer (fewer than three
+    /// is not a lock: those there are are offered). "Remove every X" with none
+    /// is not a lock: that part does nothing.
     /// </summary>
     public static bool IsLocked(StoryOption option, StoryDeckView deck)
     {
@@ -284,6 +286,8 @@ public static class StoryRules
                 case StoryEffectKind.UpgradeRandomBombCards when deck.UpgradableBombPlacers == 0:
                 case StoryEffectKind.RemoveEveryCurseLoseGoldEach
                     when deck.RemovableCurses == 0 || deck.Gold < e.Amount * deck.RemovableCurses:
+                case StoryEffectKind.ChooseOfferToDeck or StoryEffectKind.ChooseFromPoolToDeck
+                    when deck.OfferSize != null && deck.OfferSize(e) == 0:
                     return true;
             }
         }
@@ -433,9 +437,11 @@ public static class StoryRules
 
 /// <summary>What a lock reads off the owner: Gold, and how many deck cards
 /// can be removed, transformed, are removable Curses, and are upgradable
-/// cards that place a Bomb.</summary>
+/// cards that place a Bomb; and how many cards a card offer has to show
+/// (<see cref="OfferSize"/>; null: not asked, never a lock).</summary>
 public sealed record StoryDeckView(
-    int Gold, int Removable, int Transformable, int RemovableCurses, int UpgradableBombPlacers);
+    int Gold, int Removable, int Transformable, int RemovableCurses, int UpgradableBombPlacers,
+    Func<StoryEffect, int>? OfferSize = null);
 
 /// <summary>One speech at a boss's entry: the table <see cref="Story"/> whose
 /// rows are spoken, the seat that owns it, and either a pair exchange with

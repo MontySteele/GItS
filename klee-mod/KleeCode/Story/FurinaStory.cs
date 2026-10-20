@@ -1,4 +1,6 @@
 using KleeMod.Cards;
+using CardRarity = MegaCrit.Sts2.Core.Entities.Cards.CardRarity;
+using CardType = MegaCrit.Sts2.Core.Entities.Cards.CardType;
 using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Powers;
 using Doubt = MegaCrit.Sts2.Core.Models.Cards.Doubt;
@@ -108,11 +110,11 @@ public static class FurinaStory
                         "She has never actually sat out here. The seats are softer than she thought. She "
                       + "stays until her feet stop aching."),
                     new StoryOption("TAKE_A_COSTUME", "Take a costume from the rack.",
-                        "Gain a random relic. Add [gold]Stage Fright[/gold].",
+                        "Gain a random relic. Add [gold]Doubt[/gold].",
                         new StoryEffect(StoryEffectKind.GainRandomRelic),
                         "It fits perfectly. She would very much like to know who took her measurements.")
                     {
-                        Then = new[] { new StoryEffect(StoryEffectKind.AddCard, 0, typeof(StageFright)) },
+                        Then = new[] { new StoryEffect(StoryEffectKind.AddCard, 0, typeof(Doubt)) },
                     },
                 },
                 Portrait: () => KleeArt.CardPortrait("event_furina_empty_house"),
@@ -197,7 +199,7 @@ public static class FurinaStory
                 Options: new[]
                 {
                     new StoryOption("TEACH_HER_THE_ENDING", "Teach her the ending.",
-                        "Lose 6 HP. Add an upgraded [gold]Understudy's Debut[/gold].",
+                        "Lose 6 HP. Choose 1 of 3 random upgraded Uncommon cards to add to your deck.",
                         new StoryEffect(StoryEffectKind.LoseHp, 6),
                         "\"You bow on the last note, not after. Chin up. Hands where they can see them. No, "
                       + "like this.\" By the fifth try the girl has it. \"Are you ever scared?\" \"Again. "
@@ -205,7 +207,7 @@ public static class FurinaStory
                     {
                         Then = new[]
                         {
-                            new StoryEffect(StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoFsUnderstudysDebut)),
+                            StoryEffect.Choose(CardRarity.Uncommon, upgraded: true),
                         },
                     },
                     new StoryOption("TAKE_THE_ROLE_BACK", "Take the role back.",
@@ -251,12 +253,12 @@ public static class FurinaStory
                 Options: new[]
                 {
                     new StoryOption("PLEAD_GUILTY", "Plead guilty.",
-                        "Lose 12 HP. Gain a random Rare relic.",
+                        "Lose 12 HP. Gain a random relic.",
                         new StoryEffect(StoryEffectKind.LoseHp, 12),
                         "\"I lied to everyone for five hundred years.\" A pause. \"And it kept them alive.\" "
                       + "The scale tips, and something drops into the tray.")
                     {
-                        Then = new[] { new StoryEffect(StoryEffectKind.GainRandomRareRelic) },
+                        Then = new[] { new StoryEffect(StoryEffectKind.GainRandomRelic) },
                     },
                     new StoryOption("PLEAD_INNOCENT", "Plead innocent.",
                         "Heal 15 HP. Add [gold]Stage Fright[/gold].",
@@ -267,8 +269,8 @@ public static class FurinaStory
                         Then = new[] { new StoryEffect(StoryEffectKind.AddCard, 0, typeof(StageFright)) },
                     },
                     new StoryOption("GIVE_IT_A_PERFORMANCE", "Give it a performance.",
-                        "Lose 50 Gold. Transform 2 cards.",
-                        new StoryEffect(StoryEffectKind.LoseGold, 50),
+                        "Lose 100 Gold. Transform 2 cards.",
+                        new StoryEffect(StoryEffectKind.LoseGold, 100),
                         "There is a slot for an admission fee. She pays, under protest, then gives it the "
                       + "old monologue from the top. It's still good. The machine hands back something new.")
                     {
@@ -319,8 +321,8 @@ public static class FurinaStory
                         Then = new[] { new StoryEffect(StoryEffectKind.Heal, 25) },
                     },
                     new StoryOption("KEEP_IT", "Keep it for a hard night.",
-                        "Add [gold]Tearful Monologue[/gold].",
-                        new StoryEffect(StoryEffectKind.AddCard, 0, typeof(ProtoFsTearfulMonologue)),
+                        "Choose 1 of 3 random Common Skills to add to your deck.",
+                        StoryEffect.Choose(CardRarity.Common, CardType.Skill),
                         "\"Tell him I'll write.\" She reads it twice more on the way up."),
                 },
                 Portrait: () => KleeArt.CardPortrait("event_furina_letter_from_the_court"),
@@ -354,14 +356,14 @@ public static class FurinaStory
                 Options: new[]
                 {
                     new StoryOption("GIVE_THEM_THE_FINALE", "Give them the finale.",
-                        "Lose 10 HP. Add an upgraded [gold]Let the People Rejoice[/gold].",
+                        "Lose 10 HP. Choose 1 of 3 random upgraded Rare cards to add to your deck.",
                         new StoryEffect(StoryEffectKind.LoseHp, 10),
                         "Halfway through she changes the ending, because she has a better one. The "
                       + "orchestra, somehow, follows her.")
                     {
                         Then = new[]
                         {
-                            new StoryEffect(StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoFsLetThePeopleRejoice)),
+                            StoryEffect.Choose(CardRarity.Rare, upgraded: true),
                         },
                     },
                     new StoryOption("BOW_AND_LEAVE", "Bow and leave them wanting more.",
@@ -407,8 +409,8 @@ public static class FurinaStory
                 Options: new[]
                 {
                     new StoryOption("SIT_IN_IT", "Sit in it one last time.",
-                        "Lose 15 HP. Gain a random Rare relic.",
-                        new StoryEffect(StoryEffectKind.LoseHp, 15),
+                        "Lose 18 HP. Gain a random Rare relic.",
+                        new StoryEffect(StoryEffectKind.LoseHp, 18),
                         "Just as cold as she remembers. She tells herself she won't cry, and then she does.")
                     {
                         Then = new[] { new StoryEffect(StoryEffectKind.GainRandomRareRelic) },

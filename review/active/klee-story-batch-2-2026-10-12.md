@@ -1,5 +1,7 @@
 # Klee's story in the run: acts 2 and 3 (2026-10-12)
 
+*Rewards repriced 2026-10-19 by the story rewards pass (`story-rewards-pass-2026-10-19.md`, ruled all (a)); the rows below carry the new effects.*
+
 **Why.** Batch 1 (`klee-story-batch-1-2026-10-12.md`) is ruled ("Otherwise the dialogue looks good"), and its acts 2 and 3 follow in the same voice. Same rules as batch 1:
 - American English;
 - every word ours;
@@ -25,9 +27,9 @@ Batch 1's act-1 event leaves her having blasted the fish or not. These two event
 
 | Option | Effect | Their line |
 |---|---|---|
-| **Kaeya** | Add an upgraded **Kaeya — Glacial Waltz** to your deck. | "There you are! Shall we finish your adventure together? Jean's waiting for us." |
-| **Noelle** | Add an upgraded **Noelle — Breastplate** to your deck. | "Are you hurt, Klee? Here, have something to eat. I'll stay with you." |
-| **Albedo** | Add an upgraded **Albedo — Solar Isotoma** to your deck. | "I'm glad you're safe. Show me where you're going, and we'll find a way up." |
+| **Kaeya** | Lose 6 HP. Choose 1 of 3 random upgraded Uncommon Companions to add to your deck. | "There you are! Shall we finish your adventure together? Jean's waiting for us." |
+| **Noelle** | Choose 1 of 3 random upgraded Common Companions to add to your deck. | "Are you hurt, Klee? Here, have something to eat. I'll stay with you." |
+| **Albedo** | Lose 12 HP. Choose 1 of 3 random upgraded Rare Companions to add to your deck. | "I'm glad you're safe. Show me where you're going, and we'll find a way up." |
 
 These are her existing Companion cards (`proto_mc_kaeya_glacial_waltz`, `proto_mc_noelle_breastplate`, `proto_mc_albedo_solar_isotoma`). Klee answers whichever knight she picks: "You found me! Can we see what's at the top before we go home? Please?"
 

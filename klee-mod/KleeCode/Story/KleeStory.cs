@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using CardRarity = MegaCrit.Sts2.Core.Entities.Cards.CardRarity;
+using CardType = MegaCrit.Sts2.Core.Entities.Cards.CardType;
 using KleeMod.Cards;
 using KleeMod.Cards.Prototype.Generated;
 
@@ -110,8 +112,8 @@ public static class KleeStory
                         new StoryEffect(StoryEffectKind.GainGoldAddCard, 75, typeof(Confinement)),
                         "KABOOM! Fish everywhere. Klee hopes the Spire doesn't tell Jean."),
                     new StoryOption("JUST_ONE_LITTLE_BOMB", "Just one little bomb.",
-                        "Add [gold]Fish Blasting[/gold] to your deck.",
-                        new StoryEffect(StoryEffectKind.AddCard, 0, typeof(ProtoKoFishBlasting)),
+                        "Choose 1 of 3 random Common Attacks to add to your deck.",
+                        StoryEffect.Choose(CardRarity.Common, CardType.Attack),
                         "Just a little one. Klee keeps the biggest fish for Dodoco."),
                     new StoryOption("LEAVE_THEM_BE", "Leave them be.",
                         "Remove a card from your deck.",
@@ -161,17 +163,23 @@ public static class KleeStory
                 Options: new[]
                 {
                     new StoryOption("KAEYA", "Kaeya",
-                        "Add an upgraded [gold]Kaeya — Glacial Waltz[/gold] to your deck.",
-                        new StoryEffect(StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoMcKaeyaGlacialWaltz)),
-                        KnightsResult("Kaeya", "There you are! Shall we finish your adventure together? Jean's waiting for us.")),
+                        "Lose 6 HP. Choose 1 of 3 random upgraded Uncommon Companions to add to your deck.",
+                        new StoryEffect(StoryEffectKind.LoseHp, 6),
+                        KnightsResult("Kaeya", "There you are! Shall we finish your adventure together? Jean's waiting for us."))
+                    {
+                        Then = new[] { StoryEffect.ChooseCompanion(CardRarity.Uncommon, upgraded: true) },
+                    },
                     new StoryOption("NOELLE", "Noelle",
-                        "Add an upgraded [gold]Noelle — Breastplate[/gold] to your deck.",
-                        new StoryEffect(StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoMcNoelleBreastplate)),
+                        "Choose 1 of 3 random upgraded Common Companions to add to your deck.",
+                        StoryEffect.ChooseCompanion(CardRarity.Common, upgraded: true),
                         KnightsResult("Noelle", "Are you hurt, Klee? Here, have something to eat. I'll stay with you.")),
                     new StoryOption("ALBEDO", "Albedo",
-                        "Add an upgraded [gold]Albedo — Solar Isotoma[/gold] to your deck.",
-                        new StoryEffect(StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoMcAlbedoSolarIsotoma)),
-                        KnightsResult("Albedo", "I'm glad you're safe. Show me where you're going, and we'll find a way up.")),
+                        "Lose 12 HP. Choose 1 of 3 random upgraded Rare Companions to add to your deck.",
+                        new StoryEffect(StoryEffectKind.LoseHp, 12),
+                        KnightsResult("Albedo", "I'm glad you're safe. Show me where you're going, and we'll find a way up."))
+                    {
+                        Then = new[] { StoryEffect.ChooseCompanion(CardRarity.Rare, upgraded: true) },
+                    },
                     new StoryOption("EVERYONE_CAN_COME", "Everyone can come!",
                         "Nothing.",
                         new StoryEffect(StoryEffectKind.Nothing),
@@ -245,15 +253,15 @@ public static class KleeStory
                 Options: new[]
                 {
                     new StoryOption("ASK_NICELY", "Ask nicely for Dodoco back.",
-                        "Add an upgraded [gold]Dodoco Tag[/gold]. Remove every [gold]Doubt[/gold].",
-                        new StoryEffect(StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoKoDodocoTag)),
+                        "Choose 1 of 3 random Uncommon Attacks to add to your deck. Remove every [gold]Doubt[/gold].",
+                        StoryEffect.Choose(CardRarity.Uncommon, CardType.Attack),
                         "Klee trades it her last snack. Dodoco is a little sticky, but fine.")
                     {
                         Then = DodocoHome,
                     },
                     new StoryOption("GRAB_AND_RUN", "Grab Dodoco and some treasure, and run!",
-                        "Lose 8 HP. Gain a random relic. Remove every [gold]Doubt[/gold].",
-                        new StoryEffect(StoryEffectKind.LoseHp, 8),
+                        "Lose 11 HP. Gain a random relic. Remove every [gold]Doubt[/gold].",
+                        new StoryEffect(StoryEffectKind.LoseHp, 11),
                         "It bites. Klee doesn't let go of either.")
                     {
                         Then = new[] { new StoryEffect(StoryEffectKind.GainRandomRelic), DodocoHome[0] },
@@ -298,11 +306,11 @@ public static class KleeStory
                         new StoryEffect(StoryEffectKind.GainGold, 75),
                         "The marks lead to a little pouch of Mora. Mom always leaves snack money."),
                     new StoryOption("TRY_THE_RECIPE", "Try the recipe right now.",
-                        "Lose 10 HP. Add [gold]Alice's Recipe[/gold].",
+                        "Lose 10 HP. Choose 1 of 3 random Rare cards to add to your deck.",
                         new StoryEffect(StoryEffectKind.LoseHp, 10),
                         "It works! Klee's eyebrows will grow back.")
                     {
-                        Then = new[] { new StoryEffect(StoryEffectKind.AddCard, 0, typeof(ProtoKoAlicesRecipe)) },
+                        Then = new[] { StoryEffect.Choose(CardRarity.Rare) },
                     },
                     new StoryOption("ADD_A_MARK", "Add a mark of her own.",
                         "Upgrade 2 random cards.",
@@ -323,23 +331,23 @@ public static class KleeStory
                 Options: new[]
                 {
                     new StoryOption("OPEN_IT", "It's an emergency! Open it!",
-                        "Lose 15 HP. Gain a random Rare relic.",
-                        new StoryEffect(StoryEffectKind.LoseHp, 15),
+                        "Lose 12 HP. Gain a random relic.",
+                        new StoryEffect(StoryEffectKind.LoseHp, 12),
                         "KABOOM. Mom wasn't joking about lively. Inside, wrapped in fireproof cloth, is "
                       + "something wonderful.")
                     {
-                        Then = new[] { new StoryEffect(StoryEffectKind.GainRandomRareRelic) },
+                        Then = new[] { new StoryEffect(StoryEffectKind.GainRandomRelic) },
                     },
                     new StoryOption("SAVE_IT", "Save it for a real emergency.",
-                        "Lose 5 HP. Gain a random potion.",
+                        "Lose 5 HP. Gain a random potion. Mom's chest will still be there.",
                         new StoryEffect(StoryEffectKind.LoseHp, 5),
                         "The chest sputters at her the whole way up. Klee carries it very, very carefully.")
                     {
                         Then = new[] { new StoryEffect(StoryEffectKind.GainRandomPotions, 1) },
                     },
                     new StoryOption("LEAVE_IT", "Leave it for the next adventurer.",
-                        "Lose 50 Gold. Transform 2 cards.",
-                        new StoryEffect(StoryEffectKind.LoseGold, 50),
+                        "Lose 100 Gold. Transform 2 cards.",
+                        new StoryEffect(StoryEffectKind.LoseGold, 100),
                         "Klee swaps in two of her own bombs, and some Mora for luck. Fair's fair.")
                     {
                         Then = new[] { new StoryEffect(StoryEffectKind.TransformCards, 2) },
@@ -368,13 +376,13 @@ public static class KleeStory
                         new StoryEffect(StoryEffectKind.Heal, 20),
                         "\"...and I'll see you in Mondstadt. Love, Mom.\" Klee reads it twice."),
                     new StoryOption("TRY_THE_TRICK", "Try the trick on the back.",
-                        "Lose 10 HP. Add an upgraded [gold]Alice's Introduction Magic[/gold].",
+                        "Lose 10 HP. Choose 1 of 3 random upgraded Rare cards to add to your deck.",
                         new StoryEffect(StoryEffectKind.LoseHp, 10),
                         "On the fifth try, it works. \"I did it, Dodoco! Let's do it again!\"")
                     {
                         Then = new[]
                         {
-                            new StoryEffect(StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoKoAlicesIntroductionMagic)),
+                            StoryEffect.Choose(CardRarity.Rare, upgraded: true),
                         },
                     },
                     new StoryOption("OPEN_THE_CHEST", "Open the chest at last.",

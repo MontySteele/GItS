@@ -122,31 +122,31 @@ public class StoryChainTests
         Steps(typeof(KleeDodocoGoesMissing), 0, (StoryEffectKind.LoseHp, 10, null), (StoryEffectKind.GainRandomRelic, 0, null));
         Steps(typeof(KleeDodocoGoesMissing), 1, (StoryEffectKind.LoseGold, 50, null), (StoryEffectKind.RemoveCard, 0, null));
         Steps(typeof(KleeDodocoGoesMissing), 2, (StoryEffectKind.Heal, 15, null), (StoryEffectKind.AddCard, 0, typeof(Doubt)));
-        Steps(typeof(KleeFoundYou), 0, (StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoKoDodocoTag)), (StoryEffectKind.RemoveEvery, 0, typeof(Doubt)));
-        Steps(typeof(KleeFoundYou), 1, (StoryEffectKind.LoseHp, 8, null), (StoryEffectKind.GainRandomRelic, 0, null), (StoryEffectKind.RemoveEvery, 0, typeof(Doubt)));
+        Steps(typeof(KleeFoundYou), 0, (StoryEffectKind.ChooseOfferToDeck, 3, null), (StoryEffectKind.RemoveEvery, 0, typeof(Doubt)));
+        Steps(typeof(KleeFoundYou), 1, (StoryEffectKind.LoseHp, 11, null), (StoryEffectKind.GainRandomRelic, 0, null), (StoryEffectKind.RemoveEvery, 0, typeof(Doubt)));
         Steps(typeof(KleeFoundYou), 2, (StoryEffectKind.TransformCards, 1, null), (StoryEffectKind.RemoveEvery, 0, typeof(Doubt)));
         // Every option removes Doubt, and every option's line says so.
         Assert.All(E(typeof(KleeFoundYou)).Options,
             o => Assert.EndsWith(" Remove every [gold]Doubt[/gold].", o.Description));
         Steps(typeof(KleeMomsMarks), 0, (StoryEffectKind.GainGold, 75, null));
-        Steps(typeof(KleeMomsMarks), 1, (StoryEffectKind.LoseHp, 10, null), (StoryEffectKind.AddCard, 0, typeof(ProtoKoAlicesRecipe)));
+        Steps(typeof(KleeMomsMarks), 1, (StoryEffectKind.LoseHp, 10, null), (StoryEffectKind.ChooseOfferToDeck, 3, null));
         Steps(typeof(KleeMomsMarks), 2, (StoryEffectKind.UpgradeRandomCards, 2, null));
-        Steps(typeof(KleeAlicesCache), 0, (StoryEffectKind.LoseHp, 15, null), (StoryEffectKind.GainRandomRareRelic, 0, null));
+        Steps(typeof(KleeAlicesCache), 0, (StoryEffectKind.LoseHp, 12, null), (StoryEffectKind.GainRandomRelic, 0, null));
         Steps(typeof(KleeAlicesCache), 1, (StoryEffectKind.LoseHp, 5, null), (StoryEffectKind.GainRandomPotions, 1, null));
-        Steps(typeof(KleeAlicesCache), 2, (StoryEffectKind.LoseGold, 50, null), (StoryEffectKind.TransformCards, 2, null));
+        Steps(typeof(KleeAlicesCache), 2, (StoryEffectKind.LoseGold, 100, null), (StoryEffectKind.TransformCards, 2, null));
         Steps(typeof(KleeAlicesCache), 3, (StoryEffectKind.Nothing, 0, null));
         Steps(typeof(KleeMomsLastNote), 0, (StoryEffectKind.Heal, 20, null));
-        Steps(typeof(KleeMomsLastNote), 1, (StoryEffectKind.LoseHp, 10, null), (StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoKoAlicesIntroductionMagic)));
+        Steps(typeof(KleeMomsLastNote), 1, (StoryEffectKind.LoseHp, 10, null), (StoryEffectKind.ChooseOfferToDeck, 3, null));
         Steps(typeof(KleeMomsLastNote), 2, (StoryEffectKind.GainRandomRareRelic, 0, null));
         Steps(typeof(KleeMomsLastNote), 3, (StoryEffectKind.UpgradeRandomBombCards, 3, null));
 
         Steps(typeof(VarkaSecondSatchel), 0, (StoryEffectKind.LoseHp, 8, null), (StoryEffectKind.UpgradeRandomCards, 2, null), (StoryEffectKind.RemoveEvery, 0, typeof(OverdueReports)));
         Steps(typeof(VarkaSecondSatchel), 1, (StoryEffectKind.LoseGold, 75, null), (StoryEffectKind.RemoveCard, 0, null));
         Steps(typeof(VarkaSecondSatchel), 2, (StoryEffectKind.GainRandomPotions, 2, null), (StoryEffectKind.AddCard, 0, typeof(OverdueReports)));
-        Steps(typeof(VarkaActingGrandMaster), 0, (StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoMcJeanDandelionBreeze)));
-        Steps(typeof(VarkaActingGrandMaster), 1, (StoryEffectKind.RemoveEveryCurseLoseGoldEach, 25, null));
+        Steps(typeof(VarkaActingGrandMaster), 0, (StoryEffectKind.LoseHp, 10, null), (StoryEffectKind.ChooseOfferToDeck, 3, null));
+        Steps(typeof(VarkaActingGrandMaster), 1, (StoryEffectKind.RemoveEveryCurseLoseGoldEach, 50, null));
         Steps(typeof(VarkaActingGrandMaster), 2, (StoryEffectKind.UpgradeRandomCards, 3, null), (StoryEffectKind.AddCard, 0, typeof(OverdueReports)));
-        Steps(typeof(VarkaRearguard), 0, (StoryEffectKind.LoseHp, 10, null), (StoryEffectKind.ChooseFromPoolToDeck, 3, null));
+        Steps(typeof(VarkaRearguard), 0, (StoryEffectKind.LoseHp, 10, null), (StoryEffectKind.ChooseOfferToDeck, 3, null));
         Steps(typeof(VarkaRearguard), 1, (StoryEffectKind.LoseGold, 75, null), (StoryEffectKind.RemoveCard, 0, null));
         Steps(typeof(VarkaRearguard), 2, (StoryEffectKind.GainRandomPotions, 2, null), (StoryEffectKind.AddCard, 0, typeof(OverdueReports)));
         Steps(typeof(VarkaSongOnTheWind), 0, (StoryEffectKind.Heal, 12, null));
@@ -180,7 +180,7 @@ public class StoryChainTests
     public void An_option_warns_of_every_HP_it_costs()
     {
         Assert.Equal(10, E(typeof(KleeDodocoGoesMissing)).Options[0].HpCost);
-        Assert.Equal(15, E(typeof(KleeAlicesCache)).Options[0].HpCost);
+        Assert.Equal(12, E(typeof(KleeAlicesCache)).Options[0].HpCost);
         Assert.Equal(12, E(typeof(VarkaWolfOfTheNorth)).Options[0].HpCost);
         Assert.Equal(0, E(typeof(KleeAlicesCache)).Options[3].HpCost);
     }
@@ -418,8 +418,8 @@ public class StoryChainTests
     [Fact]
     public void A_Gold_price_above_your_Gold_is_locked()
     {
-        Assert.True(Locked(typeof(KleeAlicesCache), "LEAVE_IT", Deck(gold: 49)));
-        Assert.False(Locked(typeof(KleeAlicesCache), "LEAVE_IT", Deck(gold: 50)));
+        Assert.True(Locked(typeof(KleeAlicesCache), "LEAVE_IT", Deck(gold: 99)));
+        Assert.False(Locked(typeof(KleeAlicesCache), "LEAVE_IT", Deck(gold: 100)));
         Assert.True(Locked(typeof(KleeDodocoGoesMissing), "LEAVE_MORA_AS_BAIT", Deck(gold: 0)));
         Assert.True(Locked(typeof(VarkaSecondSatchel), "HAND_TO_THE_COURIER", Deck(gold: 74)));
         Assert.True(Locked(typeof(VarkaRearguard), "LEAVE_SUPPLIES", Deck(gold: 74)));
@@ -429,11 +429,13 @@ public class StoryChainTests
     }
 
     [Fact]
-    public void Remove_every_Curse_locks_with_no_Curse_or_short_of_25_each()
+    public void Remove_every_Curse_locks_with_no_Curse_or_short_of_50_each()
     {
         Assert.True(Locked(typeof(VarkaActingGrandMaster), "PROMISE_A_FULL_REPORT", Deck(curses: 0)));
-        Assert.False(Locked(typeof(VarkaActingGrandMaster), "PROMISE_A_FULL_REPORT", Deck(gold: 50, curses: 2)));
-        Assert.True(Locked(typeof(VarkaActingGrandMaster), "PROMISE_A_FULL_REPORT", Deck(gold: 49, curses: 2)));
+        Assert.False(Locked(typeof(VarkaActingGrandMaster), "PROMISE_A_FULL_REPORT", Deck(gold: 100, curses: 2)));
+        Assert.True(Locked(typeof(VarkaActingGrandMaster), "PROMISE_A_FULL_REPORT", Deck(gold: 99, curses: 2)));
+        Assert.False(Locked(typeof(VarkaActingGrandMaster), "PROMISE_A_FULL_REPORT", Deck(gold: 50, curses: 1)));
+        Assert.True(Locked(typeof(VarkaActingGrandMaster), "PROMISE_A_FULL_REPORT", Deck(gold: 49, curses: 1)));
     }
 
     [Fact]

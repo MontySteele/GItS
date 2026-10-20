@@ -113,28 +113,28 @@ public class KokomiStoryTests
         Steps(typeof(KokomiCoralLight), 2, (StoryEffectKind.LoseGold, 50, null), (StoryEffectKind.RemoveCard, 0, null));
         Steps(typeof(KokomiCoralLight), 3, (StoryEffectKind.Nothing, 0, null));
         Steps(typeof(KokomiEmptyRoom), 0, (StoryEffectKind.Heal, 15, null));
-        Steps(typeof(KokomiEmptyRoom), 1, (StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoKkTreatise)));
+        Steps(typeof(KokomiEmptyRoom), 1, (StoryEffectKind.ChooseOfferToDeck, 3, null));
         Steps(typeof(KokomiEmptyRoom), 2, (StoryEffectKind.GainRandomPotions, 1, null));
         Steps(typeof(KokomiOtherCommander), 0, (StoryEffectKind.LoseHp, 12, null), (StoryEffectKind.GainRandomRelic, 0, null));
         Steps(typeof(KokomiOtherCommander), 1, (StoryEffectKind.TransformCards, 1, null));
-        Steps(typeof(KokomiOtherCommander), 2, (StoryEffectKind.AddCard, 0, typeof(Doubt)), (StoryEffectKind.ChooseRareCardToDeck, 3, null));
-        Steps(typeof(KokomiSerpentsBones), 0, (StoryEffectKind.LoseMaxHp, 4, null), (StoryEffectKind.GainRandomRareRelic, 0, null));
+        Steps(typeof(KokomiOtherCommander), 2, (StoryEffectKind.AddCard, 0, typeof(Doubt)), (StoryEffectKind.ChooseOfferToDeck, 3, null));
+        Steps(typeof(KokomiSerpentsBones), 0, (StoryEffectKind.LoseMaxHp, 8, null), (StoryEffectKind.GainRandomRelic, 0, null));
         Steps(typeof(KokomiSerpentsBones), 1, (StoryEffectKind.GainGold, 100, null), (StoryEffectKind.AddCard, 0, typeof(Doubt)));
         Steps(typeof(KokomiSerpentsBones), 2, (StoryEffectKind.RemoveCard, 0, null), (StoryEffectKind.AddCard, 0, typeof(PublicAddress)));
-        Steps(typeof(KokomiReportFromGorou), 0, (StoryEffectKind.ChooseFromPoolToDeck, 3, null));
+        Steps(typeof(KokomiReportFromGorou), 0, (StoryEffectKind.ChooseOfferToDeck, 3, null));
         Steps(typeof(KokomiReportFromGorou), 1, (StoryEffectKind.UpgradeRandomCards, 2, null));
         Steps(typeof(KokomiReportFromGorou), 2, (StoryEffectKind.Heal, 20, null));
-        Steps(typeof(KokomiEndgame), 0, (StoryEffectKind.LoseHp, 15, null), (StoryEffectKind.GainRandomRareRelic, 0, null));
-        Steps(typeof(KokomiEndgame), 1, (StoryEffectKind.LoseGold, 50, null), (StoryEffectKind.TransformCards, 2, null));
+        Steps(typeof(KokomiEndgame), 0, (StoryEffectKind.LoseHp, 18, null), (StoryEffectKind.GainRandomRareRelic, 0, null));
+        Steps(typeof(KokomiEndgame), 1, (StoryEffectKind.LoseGold, 100, null), (StoryEffectKind.TransformCards, 2, null));
         Steps(typeof(KokomiEndgame), 2, (StoryEffectKind.Nothing, 0, null));
-        Steps(typeof(KokomiTideComesIn), 0, (StoryEffectKind.LoseHp, 6, null), (StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoKkKurageCanopy)));
+        Steps(typeof(KokomiTideComesIn), 0, (StoryEffectKind.LoseHp, 6, null), (StoryEffectKind.ChooseOfferToDeck, 3, null));
         Steps(typeof(KokomiTideComesIn), 1, (StoryEffectKind.Heal, 20, null));
         Steps(typeof(KokomiTideComesIn), 2, (StoryEffectKind.RemoveCard, 0, null));
 
         // The cards are the paper's, under their own names.
         Assert.Equal("Treatise", Title(new ProtoKkTreatise()));
         Assert.Equal("Kurage Canopy", Title(new ProtoKkKurageCanopy()));
-        Assert.Equal(4, E(typeof(KokomiSerpentsBones)).Options[0].Effects[0].Amount);
+        Assert.Equal(8, E(typeof(KokomiSerpentsBones)).Options[0].Effects[0].Amount);
     }
 
     private static void Steps(Type evt, int option, params (StoryEffectKind Kind, int Amount, Type? Card)[] steps)
@@ -178,10 +178,10 @@ public class KokomiStoryTests
     [Fact]
     public void A_Max_HP_cost_carries_the_games_lethal_warning()
     {
-        // Lay a hand on it costs 4 Max HP: the option flashes red, the base
+        // Lay a hand on it costs 8 Max HP: the option flashes red, the base
         // game's way (Vakuu's ThatDecreasesMaxHp), when it would kill.
         var bones = E(typeof(KokomiSerpentsBones));
-        Assert.Equal(4, bones.Options[0].MaxHpCost);
+        Assert.Equal(8, bones.Options[0].MaxHpCost);
         Assert.Equal(0, bones.Options[1].MaxHpCost);
         Assert.Equal(0, bones.Options[2].MaxHpCost);
         // STRUCTURAL: the option builder (a closure in GenerateInitialOptions)
@@ -212,21 +212,12 @@ public class KokomiStoryTests
     }
 
     [Fact]
-    public void Gorous_four_are_the_choice_pool_in_her_pool_order()
+    public void Her_offers_are_rarity_offers_with_no_named_pool()
     {
-        Assert.NotNull(K.ChoicePool);
-        Assert.Equal(typeof(KokomiStory), K.ChoicePool!.Method.DeclaringType);
-        Assert.Equal(nameof(KokomiStory.GorouCards), K.ChoicePool.Method.Name);
-        var calls = Il.CallSequence(Il.Method(nameof(KokomiStory), nameof(KokomiStory.GorouCards)));
-        Assert.Equal(4, calls.Count(c => c.Contains("ModelDb.Card")));
-    }
-
-    [Fact]
-    public void The_Rare_choice_draws_from_her_offer()
-    {
-        Assert.Contains("CardPoolModel.GetUnlockedCards",
-            Il.Calls(Il.Method(nameof(StoryEventModel), "RareOffer")));
-        Assert.Contains("StoryEventModel.RareOffer",
+        // The story rewards pass (2026-10-19): Gorou's report offers
+        // Uncommon Companions, not the four Gorou cards.
+        Assert.Null(K.ChoicePool);
+        Assert.Contains("StoryEventModel.OfferPool",
             Il.Calls(Il.Method(nameof(StoryEventModel), "Apply")));
         Assert.Contains("CreatureCmd.LoseMaxHp",
             Il.Calls(Il.Method(nameof(StoryEventModel), "Apply")));
@@ -371,8 +362,8 @@ public class KokomiStoryTests
         Assert.False(StoryRules.IsLocked(pearl, new StoryDeckView(50, 10, 10, 0, 0)));
         Assert.True(StoryRules.IsLocked(pearl, new StoryDeckView(99, 0, 10, 0, 0)));
         var stake = E(typeof(KokomiEndgame)).Options[1];
-        Assert.True(StoryRules.IsLocked(stake, new StoryDeckView(49, 10, 10, 0, 0)));
-        Assert.False(StoryRules.IsLocked(stake, new StoryDeckView(50, 10, 10, 0, 0)));
+        Assert.True(StoryRules.IsLocked(stake, new StoryDeckView(99, 10, 10, 0, 0)));
+        Assert.False(StoryRules.IsLocked(stake, new StoryDeckView(100, 10, 10, 0, 0)));
         Assert.True(StoryRules.IsLocked(stake, new StoryDeckView(99, 10, 0, 0, 0)));
         // The free ways out never lock.
         var broke = new StoryDeckView(0, 0, 0, 0, 0);

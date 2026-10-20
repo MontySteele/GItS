@@ -155,26 +155,26 @@ public class FurinaStoryTests
     {
         Steps(typeof(FurinaEmptyHouse), 0, (StoryEffectKind.LoseHp, 8, null), (StoryEffectKind.UpgradeRandomCards, 2, null));
         Steps(typeof(FurinaEmptyHouse), 1, (StoryEffectKind.Heal, 10, null));
-        Steps(typeof(FurinaEmptyHouse), 2, (StoryEffectKind.GainRandomRelic, 0, null), (StoryEffectKind.AddCard, 0, typeof(StageFright)));
+        Steps(typeof(FurinaEmptyHouse), 2, (StoryEffectKind.GainRandomRelic, 0, null), (StoryEffectKind.AddCard, 0, typeof(Doubt)));
         Steps(typeof(FurinaRisingWater), 0, (StoryEffectKind.LoseHp, 10, null), (StoryEffectKind.RemoveCard, 0, null));
         Steps(typeof(FurinaRisingWater), 1, (StoryEffectKind.AddCard, 0, typeof(Doubt)), (StoryEffectKind.UpgradeRandomCards, 3, null));
         Steps(typeof(FurinaRisingWater), 2, (StoryEffectKind.GainGold, 75, null), (StoryEffectKind.AddCard, 0, typeof(StageFright)));
         Steps(typeof(FurinaSteambirdClipping), 0, (StoryEffectKind.Heal, 12, null));
         Steps(typeof(FurinaSteambirdClipping), 1, (StoryEffectKind.ChooseFromPoolToDeck, 3, null));
         Steps(typeof(FurinaSteambirdClipping), 2, (StoryEffectKind.GainRandomPotions, 1, null));
-        Steps(typeof(FurinaUnderstudy), 0, (StoryEffectKind.LoseHp, 6, null), (StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoFsUnderstudysDebut)));
+        Steps(typeof(FurinaUnderstudy), 0, (StoryEffectKind.LoseHp, 6, null), (StoryEffectKind.ChooseOfferToDeck, 3, null));
         Steps(typeof(FurinaUnderstudy), 1, (StoryEffectKind.RemoveCard, 0, null), (StoryEffectKind.AddCard, 0, typeof(StageFright)));
         Steps(typeof(FurinaUnderstudy), 2, (StoryEffectKind.GainGold, 50, null));
-        Steps(typeof(FurinaOratricesEcho), 0, (StoryEffectKind.LoseHp, 12, null), (StoryEffectKind.GainRandomRareRelic, 0, null));
+        Steps(typeof(FurinaOratricesEcho), 0, (StoryEffectKind.LoseHp, 12, null), (StoryEffectKind.GainRandomRelic, 0, null));
         Steps(typeof(FurinaOratricesEcho), 1, (StoryEffectKind.Heal, 15, null), (StoryEffectKind.AddCard, 0, typeof(StageFright)));
-        Steps(typeof(FurinaOratricesEcho), 2, (StoryEffectKind.LoseGold, 50, null), (StoryEffectKind.TransformCards, 2, null));
+        Steps(typeof(FurinaOratricesEcho), 2, (StoryEffectKind.LoseGold, 100, null), (StoryEffectKind.TransformCards, 2, null));
         Steps(typeof(FurinaLetterFromTheCourt), 0, (StoryEffectKind.UpgradeChosenCard, 0, null));
         Steps(typeof(FurinaLetterFromTheCourt), 1, (StoryEffectKind.LoseGold, 40, null), (StoryEffectKind.Heal, 25, null));
-        Steps(typeof(FurinaLetterFromTheCourt), 2, (StoryEffectKind.AddCard, 0, typeof(ProtoFsTearfulMonologue)));
-        Steps(typeof(FurinaCurtainCall), 0, (StoryEffectKind.LoseHp, 10, null), (StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoFsLetThePeopleRejoice)));
+        Steps(typeof(FurinaLetterFromTheCourt), 2, (StoryEffectKind.ChooseOfferToDeck, 3, null));
+        Steps(typeof(FurinaCurtainCall), 0, (StoryEffectKind.LoseHp, 10, null), (StoryEffectKind.ChooseOfferToDeck, 3, null));
         Steps(typeof(FurinaCurtainCall), 1, (StoryEffectKind.Heal, 30, null));
         Steps(typeof(FurinaCurtainCall), 2, (StoryEffectKind.UpgradeRandomCards, 3, null), (StoryEffectKind.AddCard, 0, typeof(StageFright)));
-        Steps(typeof(FurinaEmptyThrone), 0, (StoryEffectKind.LoseHp, 15, null), (StoryEffectKind.GainRandomRareRelic, 0, null));
+        Steps(typeof(FurinaEmptyThrone), 0, (StoryEffectKind.LoseHp, 18, null), (StoryEffectKind.GainRandomRareRelic, 0, null));
         Steps(typeof(FurinaEmptyThrone), 1, (StoryEffectKind.Heal, 20, null));
         Steps(typeof(FurinaEmptyThrone), 2, (StoryEffectKind.LoseHp, 8, null), (StoryEffectKind.RemoveCard, 0, null), (StoryEffectKind.RemoveEvery, 0, typeof(Doubt)));
 
@@ -345,8 +345,8 @@ public class FurinaStoryTests
     public void A_price_she_cannot_pay_is_locked()
     {
         var performance = E(typeof(FurinaOratricesEcho)).Options[2];
-        Assert.True(StoryRules.IsLocked(performance, new StoryDeckView(49, 10, 10, 0, 0)));
-        Assert.False(StoryRules.IsLocked(performance, new StoryDeckView(50, 10, 10, 0, 0)));
+        Assert.True(StoryRules.IsLocked(performance, new StoryDeckView(99, 10, 10, 0, 0)));
+        Assert.False(StoryRules.IsLocked(performance, new StoryDeckView(100, 10, 10, 0, 0)));
         Assert.True(StoryRules.IsLocked(performance, new StoryDeckView(99, 10, 0, 0, 0)));
         var cake = E(typeof(FurinaLetterFromTheCourt)).Options[1];
         Assert.True(StoryRules.IsLocked(cake, new StoryDeckView(39, 10, 10, 0, 0)));

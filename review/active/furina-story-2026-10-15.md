@@ -1,5 +1,7 @@
 # Furina: her story, events and lines (2026-10-15)
 
+*Rewards repriced 2026-10-19 by the story rewards pass (`story-rewards-pass-2026-10-19.md`, ruled all (a)); the rows below carry the new effects.*
+
 **Why.** [USER], 2026-10-15: Furina's next items include "the event and
 dialogue sweep to be brought up to par with Klee and Varka", and "go ahead and
 do these items while I do the Furina run next". The standard is the ruled
@@ -47,7 +49,7 @@ straightens before she can stop herself.*
 |---|---|---|
 | Perform for no one. | Lose 8 HP. Upgrade 2 random cards. | She plays every part and finally lands the high note in the second act. Nobody claps. She bows anyway, and makes a note about the lighting. |
 | Sit in the front row. | Heal 10 HP. | She has never actually sat out here. The seats are softer than she thought. She stays until her feet stop aching. |
-| Take a costume from the rack. | Gain a random relic. Add **Stage Fright**. | It fits perfectly. She would very much like to know who took her measurements. |
+| Take a costume from the rack. | Gain a random relic. Add **Doubt**. | It fits perfectly. She would very much like to know who took her measurements. |
 
 **Act 1. Rising Water** (a memory; every option priced). *Water is creeping up
 the stairs, ankle-deep and rising. Furina stops dead. For five hundred years
@@ -86,7 +88,7 @@ the understudy. Nobody told me how it ends."
 
 | Option | Effect | Result |
 |---|---|---|
-| Teach her the ending. | Lose 6 HP. Add an upgraded **Understudy's Debut**. | "You bow on the last note, not after. Chin up. Hands where they can see them. No, like this." By the fifth try the girl has it. "Are you ever scared?" "Again. From the top." |
+| Teach her the ending. | Lose 6 HP. Choose 1 of 3 random upgraded Uncommon cards to add to your deck. | "You bow on the last note, not after. Chin up. Hands where they can see them. No, like this." By the fifth try the girl has it. "Are you ever scared?" "Again. From the top." |
 | Take the role back. | Remove a card. Add **Stage Fright**. | The girl hurries off, relieved. Furina takes her mark. She knows every line, and the first one still comes out a beat late. |
 | Let her improvise. | Gain 50 Gold. | Her ending is completely wrong and the empty seats love it. Furina laughs so hard she has to sit down. |
 
@@ -99,9 +101,9 @@ know. A plate reads: *State your case.*
 
 | Option | Effect | Result |
 |---|---|---|
-| Plead guilty. | Lose 12 HP. Gain a random Rare relic. | "I lied to everyone for five hundred years." A pause. "And it kept them alive." The scale tips, and something drops into the tray. |
+| Plead guilty. | Lose 12 HP. Gain a random relic. | "I lied to everyone for five hundred years." A pause. "And it kept them alive." The scale tips, and something drops into the tray. |
 | Plead innocent. | Heal 15 HP. Add **Stage Fright**. | "I did what I had to, and it worked." The scale doesn't move. "Well? Say something." It never could decide anything by itself. |
-| Give it a performance. | Lose 50 Gold. Transform 2 cards. Locked with less than 50 Gold. | There is a slot for an admission fee. She pays, under protest, then gives it the old monologue from the top. It's still good. The machine hands back something new. |
+| Give it a performance. | Lose 100 Gold. Transform 2 cards. Locked with less than 100 Gold. | There is a slot for an admission fee. She pays, under protest, then gives it the old monologue from the top. It's still good. The machine hands back something new. |
 
 **Act 2. A Letter from the Court** (home; follows A Steambird Clipping or no
 act-1 event; price, free way out). Opening: *read* "She is still doing
@@ -117,7 +119,7 @@ in some weeks, and is concerned. N."
 |---|---|---|
 | Write back at length. | Upgrade a card. | Four pages: the stairs (too many), the lighting (dreadful), a very rude Ancient, and the cake situation, which she considers urgent. The courier tucks it away carefully. |
 | Order the cake anyway. | Lose 40 Gold. Heal 25 HP. Locked with less than 40 Gold. | She sends the courier off with the Mora and an order. On the next landing a box from Café Lutèce is waiting, still cold. She eats the whole thing on the stairs. |
-| Keep it for a hard night. | Add **Tearful Monologue**. | "Tell him I'll write." She reads it twice more on the way up. |
+| Keep it for a hard night. | Choose 1 of 3 random Common Skills to add to your deck. | "Tell him I'll write." She reads it twice more on the way up. |
 
 The courier is how a reply gets out, as Varka's couriers carry his satchels
 both ways. Melusines working at the Palais Mermonia is canon, but not in the
@@ -132,7 +134,7 @@ been waiting for her a long time.
 
 | Option | Effect | Result |
 |---|---|---|
-| Give them the finale. | Lose 10 HP. Add an upgraded **Let the People Rejoice**. *(a jackpot)* | Halfway through she changes the ending, because she has a better one. The orchestra, somehow, follows her. |
+| Give them the finale. | Lose 10 HP. Choose 1 of 3 random upgraded Rare cards to add to your deck. | Halfway through she changes the ending, because she has a better one. The orchestra, somehow, follows her. |
 | Bow and leave them wanting more. | Heal 30 HP. | One proper bow, and off while they're still clapping. Someone in the wings is grinning at her. |
 | Ask them to stay for an encore. | Upgrade 3 random cards. Add **Stage Fright**. | They stay. Her heart is pounding. She sends the orchestra back to the top twice, because the tempo is wrong. |
 
@@ -147,7 +149,7 @@ for one.
 
 | Option | Effect | Result |
 |---|---|---|
-| Sit in it one last time. | Lose 15 HP. Gain a random Rare relic. | Just as cold as she remembers. She tells herself she won't cry, and then she does. |
+| Sit in it one last time. | Lose 18 HP. Gain a random Rare relic. | Just as cold as she remembers. She tells herself she won't cry, and then she does. |
 | Walk past it. | Heal 20 HP. | "No, thank you," she says, as if it had offered, and keeps climbing. |
 | Break it. | Lose 8 HP. Remove a card. Remove every **Doubt**. | It shatters like a stage prop, because that's all this one is. |
 

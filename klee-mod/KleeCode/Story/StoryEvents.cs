@@ -226,7 +226,28 @@ public abstract class StoryEventModel : EventModel
             RemovableCurses: cards.Count(IsRemovableCurse),
             UpgradableBombPlacers: story == null
                 ? 0
-                : cards.Count(c => c.IsUpgradable && StoryRules.PlacesBomb(story, c.Id.Entry)));
+                : cards.Count(c => c.IsUpgradable && StoryRules.PlacesBomb(story, c.Id.Entry)),
+            OfferSize: e => OfferSize(owner, story, e));
+    }
+
+    /// <summary>How many cards a card offer has to show (an option with none
+    /// is locked). A count that cannot be read is not a lock.</summary>
+    private static int OfferSize(Player owner, CharacterStory? story, StoryEffect effect)
+    {
+        try
+        {
+            return effect.Kind switch
+            {
+                StoryEffectKind.ChooseOfferToDeck when effect.Offer != null => OfferPool(owner, effect.Offer).Count,
+                StoryEffectKind.ChooseFromPoolToDeck => story?.ChoicePool?.Invoke().Count ?? 0,
+                _ => 1,
+            };
+        }
+        catch (Exception e)
+        {
+            Log.Warn($"[{KleeMod.ModId}] story: could not count a card offer, it stays open: {e.Message}");
+            return 1;
+        }
     }
 
     /// <summary>A hover tip for each card an option adds.</summary>
@@ -358,8 +379,9 @@ public abstract class StoryEventModel : EventModel
                 await ChooseFromPool(owner, option, effect,
                     Story?.ChoicePool?.Invoke() ?? Array.Empty<CardModel>());
                 break;
-            case StoryEffectKind.ChooseRareCardToDeck:
-                await ChooseFromPool(owner, option, effect, RareOffer(owner));
+            case StoryEffectKind.ChooseOfferToDeck:
+                await ChooseFromPool(owner, option, effect, OfferPool(owner, effect.Offer!),
+                    effect.Offer!.Upgraded);
                 break;
             case StoryEffectKind.LoseMaxHp:
                 await CreatureCmd.LoseMaxHp(new ThrowingPlayerChoiceContext(), owner.Creature,
@@ -468,18 +490,27 @@ public abstract class StoryEventModel : EventModel
     }
 
     /// <summary>
-    /// "Choose 1 of 3 random Knights to add to your deck": <c>Amount</c>
+    /// "Choose 1 of 3 random Guest Stars to add to your deck": <c>Amount</c>
     /// distinct cards from <paramref name="pool"/> (the table's
-    /// <see cref="CharacterStory.ChoicePool"/>, or her Rare offer) by Knights'
-    /// Roll Call's draw (<c>VarkaRules.DrawDistinct</c>'s shape, on the
-    /// event's Rng), picked on the game's add-to-deck grid (Brain Leech's
-    /// Share Knowledge). The screen's prompt is the option's own line.
+    /// <see cref="CharacterStory.ChoicePool"/>, or a card offer,
+    /// <see cref="OfferPool"/>) by Knights' Roll Call's draw
+    /// (<c>VarkaRules.DrawDistinct</c>'s shape, on the event's Rng, so no
+    /// reward rng moves), upgraded when <paramref name="upgraded"/>, picked on
+    /// the game's add-to-deck grid (Brain Leech's Share Knowledge). Fewer
+    /// than <c>Amount</c>: those there are. The screen's prompt is the
+    /// option's own line.
     /// </summary>
     private async Task ChooseFromPool(
-        Player owner, StoryOption option, StoryEffect effect, IReadOnlyList<CardModel> pool)
+        Player owner, StoryOption option, StoryEffect effect, IReadOnlyList<CardModel> pool,
+        bool upgraded = false)
     {
         var offered = StoryRules.PickRandom(pool, effect.Amount, n => Rng.NextInt(n))
-            .Select(c => new CardCreationResult(owner.RunState.CreateCard(c, owner)))
+            .Select(c =>
+            {
+                var card = owner.RunState.CreateCard(c, owner);
+                if (upgraded && card.IsUpgradable) CardCmd.Upgrade(card);
+                return new CardCreationResult(card);
+            })
             .ToList();
         if (offered.Count == 0) return;
         _choice?.CardsOffered.AddRange(offered.Select(c => CardRow(c.Card)));
@@ -498,14 +529,21 @@ public abstract class StoryEventModel : EventModel
 
     private void NoteAdded(CardModel card) => _choice?.CardsAdded.Add(CardRow(card));
 
-    /// <summary>"Choose 1 of 3 random Rare cards": the Rare cards of her
-    /// offer, the set her card rewards roll from
-    /// (<c>CardPoolModel.GetUnlockedCards</c>, in its own fixed order).</summary>
-    private static IReadOnlyList<CardModel> RareOffer(Player owner) =>
-        owner.Character.CardPool
-            .GetUnlockedCards(owner.UnlockState, owner.RunState.CardMultiplayerConstraint)
-            .Where(c => c.Rarity == CardRarity.Rare)
-            .ToList();
+    /// <summary>"Choose 1 of 3 random Uncommon Attacks": the cards of her
+    /// offer the <paramref name="offer"/> admits (<see cref="StoryOffer.Admits"/>),
+    /// from the set her card rewards roll from
+    /// (<c>CardPoolModel.GetUnlockedCards</c>, in its own fixed order) or,
+    /// for Companions, the ones she can be offered
+    /// (<c>CompanionPool.Eligible</c>, the reward slot's and the shop's
+    /// rule).</summary>
+    private static IReadOnlyList<CardModel> OfferPool(Player owner, StoryOffer offer)
+    {
+        IEnumerable<CardModel> source = offer.Companions
+            ? CompanionPool.Eligible(owner, offer.Rarity, null)
+            : owner.Character.CardPool
+                .GetUnlockedCards(owner.UnlockState, owner.RunState.CardMultiplayerConstraint);
+        return source.Where(c => offer.Admits(c.Rarity, c.Type)).ToList();
+    }
 
     public static bool IsRemovableCurse(CardModel card) =>
         card.Type == CardType.Curse && card.IsRemovable;

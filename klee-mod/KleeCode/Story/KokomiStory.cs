@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using KleeMod.Cards;
+using CardRarity = MegaCrit.Sts2.Core.Entities.Cards.CardRarity;
+using CardType = MegaCrit.Sts2.Core.Entities.Cards.CardType;
 using KleeMod.Cards.Prototype.Generated;
 using MegaCrit.Sts2.Core.Models;
 using Doubt = MegaCrit.Sts2.Core.Models.Cards.Doubt;
@@ -172,8 +174,8 @@ public static class KokomiStory
                         new StoryEffect(StoryEffectKind.Heal, 15),
                         "She does nothing at all, carefully, for a whole hour."),
                     new StoryOption("READ_THE_TOP_BOOK", "Read the top book.",
-                        "Add an upgraded [gold]Treatise[/gold].",
-                        new StoryEffect(StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoKkTreatise)),
+                        "Choose 1 of 3 random Uncommon Powers to add to your deck.",
+                        StoryEffect.Choose(CardRarity.Uncommon, CardType.Power),
                         "A treatise on naval supply. On page forty the author is wrong about tides, and "
                       + "she fills three margins explaining why."),
                     new StoryOption("PLAN_A_HOLIDAY", "Plan a holiday.",
@@ -214,7 +216,7 @@ public static class KokomiStory
                         "She plays its first ten moves against herself until she sees it: it takes every "
                       + "piece left in reach.")
                     {
-                        Then = new[] { new StoryEffect(StoryEffectKind.ChooseRareCardToDeck, 3) },
+                        Then = new[] { StoryEffect.Choose(CardRarity.Rare) },
                     },
                 },
                 Portrait: () => KleeArt.CardPortrait("event_kokomi_other_commander"),
@@ -246,13 +248,13 @@ public static class KokomiStory
                 Options: new[]
                 {
                     new StoryOption("LAY_A_HAND", "Lay a hand on it, through her sleeve.",
-                        "Lose 4 Max HP. Gain a random Rare relic.",
-                        new StoryEffect(StoryEffectKind.LoseMaxHp, 4),
+                        "Lose 8 Max HP. Gain a random relic.",
+                        new StoryEffect(StoryEffectKind.LoseMaxHp, 8),
                         "She wraps her hand first and keeps the touch short; she knows what his remains "
                       + "did to Inazuma. For a moment she can feel the island he gave her people. The cold stays "
                       + "in her fingers.")
                     {
-                        Then = new[] { new StoryEffect(StoryEffectKind.GainRandomRareRelic) },
+                        Then = new[] { new StoryEffect(StoryEffectKind.GainRandomRelic) },
                     },
                     new StoryOption("GATHER_THE_OFFERINGS", "Gather the offerings at its foot.",
                         "Gain 100 Gold. Add [gold]Doubt[/gold].",
@@ -302,8 +304,8 @@ public static class KokomiStory
                 Options: new[]
                 {
                     new StoryOption("SEND_FOR_REINFORCEMENTS", "Send for reinforcements.",
-                        "Choose 1 of 3 Gorou cards.",
-                        new StoryEffect(StoryEffectKind.ChooseFromPoolToDeck, 3),
+                        "Choose 1 of 3 random Uncommon Companions to add to your deck.",
+                        StoryEffect.ChooseCompanion(CardRarity.Uncommon),
                         "The scout runs down the stairs with her orders. An hour later there are paw "
                       + "prints on the landing and a familiar voice calling drill."),
                     new StoryOption("WRITE_BACK", "Write back with new orders.",
@@ -343,18 +345,18 @@ public static class KokomiStory
                 Options: new[]
                 {
                     new StoryOption("OFFER_HER_LAST_PIECE", "Offer it her last piece.",
-                        "Lose 15 HP. Gain a random Rare relic.",
-                        new StoryEffect(StoryEffectKind.LoseHp, 15),
+                        "Lose 18 HP. Gain a random Rare relic.",
+                        new StoryEffect(StoryEffectKind.LoseHp, 18),
                         "She sets her piece on the split step. It takes the piece, as it always does, and "
                       + "the stair folds shut over it like a closing board. The jolt throws her hard "
                       + "against the wall.")
                     {
                         Then = new[] { new StoryEffect(StoryEffectKind.GainRandomRareRelic) },
                     },
-                    // "Locked under 50 Gold": a Gold price locks itself.
+                    // "Locked under 100 Gold": a Gold price locks itself.
                     new StoryOption("PAY_ITS_STAKE", "Pay its stake and trade pieces.",
-                        "Lose 50 Gold. Transform 2 cards.",
-                        new StoryEffect(StoryEffectKind.LoseGold, 50),
+                        "Lose 100 Gold. Transform 2 cards.",
+                        new StoryEffect(StoryEffectKind.LoseGold, 100),
                         "It will not trade for nothing. She counts out its stake in Mora, and they trade "
                       + "their last pieces.")
                     {
@@ -393,14 +395,14 @@ public static class KokomiStory
                 Options: new[]
                 {
                     new StoryOption("SHAPE_A_SHOAL", "Shape a whole shoal.",
-                        "Lose 6 HP. Add an upgraded [gold]Kurage Canopy[/gold].",
+                        "Lose 6 HP. Choose 1 of 3 random upgraded Uncommon Powers to add to your deck.",
                         new StoryEffect(StoryEffectKind.LoseHp, 6),
                         "A dozen Bake-Kurage, more than she has ever held at once. The whole stairwell "
                       + "turns blue with their light.")
                     {
                         Then = new[]
                         {
-                            new StoryEffect(StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoKkKurageCanopy)),
+                            StoryEffect.Choose(CardRarity.Uncommon, CardType.Power, upgraded: true),
                         },
                     },
                     new StoryOption("RIDE_THE_TIDE", "Ride the tide up.",
@@ -436,19 +438,6 @@ public static class KokomiStory
 
         // "Her signature card is Nereid's Ascension", once a combat.
         SignatureCards = new[] { typeof(ProtoKkNereidsAscension) },
-        ChoicePool = GorouCards,
-    };
-
-    /// <summary>"Choose 1 of 3 Gorou cards" (A Report from Gorou): the four
-    /// Gorou cards in her pool, in her pool's order
-    /// (<c>KokomiOverhaulRoster.Slice</c>'s tail). A list, so the draw's
-    /// order is fixed on every client.</summary>
-    public static IReadOnlyList<CardModel> GorouCards() => new CardModel[]
-    {
-        ModelDb.Card<ProtoMiGorouInuzaka>(),
-        ModelDb.Card<ProtoMiGorouWarBanner>(),
-        ModelDb.Card<ProtoMiGorouJuuga>(),
-        ModelDb.Card<ProtoMiGorouCrystalCollapse>(),
     };
 }
 
