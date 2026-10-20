@@ -44,8 +44,11 @@ public class FurinaWaveTests
     [Fact]
     public void The_face_warns_past_the_buffer_with_no_number()
     {
-        Assert.Equal("\n(Past your Drain buffer)", FurinaStageFacePreview.PastLine);
-        Assert.DoesNotContain(FurinaStageFacePreview.PastLine,
+        // Her HP legibility pass (2026-10-19): the all-past and inside tags
+        // carry no number either; only the split names its two parts.
+        Assert.DoesNotContain(FurinaStageFacePreview.PastLineLost,
+                              char.IsDigit);
+        Assert.DoesNotContain(FurinaStageFacePreview.ReturnsTag,
                               char.IsDigit);
         Assert.Equal("\n(Past your Drain buffer: returns after combat)",
                      FurinaStageFacePreview.PastLineReturns);

@@ -3799,12 +3799,13 @@
               then: [{op: damage, amount: 7, target: enemy}]}]}
 
 # Facade: Block off every HP she has lost this combat, any source, capped
-# (`furina` kind `facade`, its cap the card's FsAmount).
+# (`furina` kind `facade`, its cap the card's FsAmount); since 2026-10-19
+# it says Drain counts and prints the count in combat (`StageLost`).
 - {id: proto_fs_facade, name: "Façade", character: furina,
    upgrade: {furina_amount: +4},
    authored_by: [claude],
    register: salon, cost: 1, type: skill, rarity: common,
-   description: "Gain [gold]Block[/gold] equal to the HP you have lost this combat, up to {FsAmount:diff()}.",
+   description: "Gain [gold]Block[/gold] equal to the HP you have lost this combat, Drain included, up to {FsAmount:diff()}.",
    effects: [{op: furina, kind: facade, amount: 12}]}
 
 # Trial by Water: Vulnerable, and a this-turn mark that pays 2 Fanfare each

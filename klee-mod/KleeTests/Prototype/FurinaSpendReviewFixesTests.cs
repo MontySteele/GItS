@@ -43,15 +43,20 @@ public class FurinaSpendReviewFixesTests
             var b = Build(new ProtoFsOusiaPledge());           // a Drain card
             var ledger = FurinaStageLedger.For(b.Furina.Creature);
             Seat.Force(b.Furina.Creature, "CurrentHp", ledger.Line + 10);
-            Assert.Equal("", FurinaStageFacePreview.DrainLine(b.Card, 4));
+            // Her HP legibility pass (2026-10-19): a Drain inside the
+            // buffer says it returns.
+            Assert.Equal(FurinaStageFacePreview.ReturnsTag,
+                         FurinaStageFacePreview.DrainLine(b.Card, 4));
 
             ledger.ModsOverride = new StageMods { Masquerade = 1 };
-            Assert.Equal("\n(+4 Block: The Masquerade)",
+            Assert.Equal(FurinaStageFacePreview.ReturnsTag
+                         + "\n(+4 Block: The Masquerade)",
                          FurinaStageFacePreview.DrainLine(b.Card, 4));
 
             ledger.ModsOverride = null;
             Assert.NotNull(ledger.Seat(StagePerformer.Freminet));
-            Assert.Equal("\n(+4 Block: Freminet)",
+            Assert.Equal(FurinaStageFacePreview.ReturnsTag
+                         + "\n(+4 Block: Freminet)",
                          FurinaStageFacePreview.DrainLine(b.Card, 4));
 
             // Both, after the line warning when the Drain goes past it.
@@ -59,7 +64,7 @@ public class FurinaSpendReviewFixesTests
             // 2 HP of Drain buffer left (the Drain buffer, 2026-10-11).
             ledger.NoteDrain(ledger.BufferLeft - 2,
                              (int)b.Furina.Creature.CurrentHp);
-            Assert.Equal(FurinaStageFacePreview.PastLine
+            Assert.Equal("\n(2 returns, 2 past your line)"
                          + "\n(+4 Block: The Masquerade)\n(+4 Block: Freminet)",
                          FurinaStageFacePreview.DrainLine(b.Card, 4));
 

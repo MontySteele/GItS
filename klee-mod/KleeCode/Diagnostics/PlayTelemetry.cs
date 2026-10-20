@@ -348,6 +348,16 @@ internal static class PlayTelemetry
             var alive = combat.Enemies.Count(e => e != null && e.IsAlive);
             RecordSpendCardPlay(owner, combat.RoundNumber, CardName(card),
                                 alive);
+            // Her HP legibility pass (2026-10-19): a Rising Applause play
+            // with the other Spend cards in hand beside it, by name.
+            if (card is global::KleeMod.Cards.Prototype.Generated
+                    .ProtoFsStandingOvation)
+            {
+                var others = CardPile.Get(PileType.Hand, owner)?.Cards
+                    .Where(c => !ReferenceEquals(c, card));
+                RecordRisingApplausePlay(owner, combat.RoundNumber,
+                                         SpendCardNames(others));
+            }
         }
         catch (Exception e)
         {
@@ -366,6 +376,27 @@ internal static class PlayTelemetry
         if (ledger == null) return;
         record.Stage = ledger;
         record.SpendCardPlays.Add((round, name ?? "", Math.Max(0, enemiesAlive)));
+    }
+
+    /// <summary>
+    /// HER HP LEGIBILITY PASS (2026-10-19, the starter pick left as it is):
+    /// "I keep coming back to how her starter card drains the whole bank. I
+    /// really can't tell if this is a problem or not." Each Rising Applause
+    /// play files [round, Fanfare before, [the other Spend cards in hand]],
+    /// so the next Furina round can say whether it spends banks a payoff in
+    /// hand would have used. Furina only. The hook-free half, and the test
+    /// seam. A read (rule 1).
+    /// </summary>
+    internal static void RecordRisingApplausePlay(Player player, int round,
+                                                  string[]? otherSpendCards)
+    {
+        if (!Open.TryGetValue(player, out var record)) return;
+        if (player.Creature is not { } creature) return;
+        var ledger = FurinaStageLedger.Peek(creature);
+        if (ledger == null) return;
+        record.Stage = ledger;
+        record.RisingApplausePlays.Add(
+            (round, ledger.Fanfare, otherSpendCards ?? Array.Empty<string>()));
     }
 
     // ------------------------------------------------- draws and Energy ---
@@ -2290,6 +2321,10 @@ internal static class PlayTelemetry
         /// alive] per Spend card play (<see cref="SpendCardPlayed"/>).
         /// </summary>
         public readonly List<(int Round, string Name, int Alive)> SpendCardPlays = new();
+        /// <summary>Her HP legibility pass (2026-10-19). [round, Fanfare
+        /// before, [other Spend cards in hand]] per Rising Applause play
+        /// (<see cref="RecordRisingApplausePlay"/>).</summary>
+        public readonly List<(int Round, int Before, string[] Others)> RisingApplausePlays = new();
         /// <summary>2026-10-10 (round 2). The rounds that opened with a
         /// Block-gaining card in hand and attack damage telegraphed
         /// (<see cref="BlockCardTurn"/>).</summary>
@@ -2548,6 +2583,24 @@ internal static class PlayTelemetry
                     sb.Append('[').Append(SpendCardPlays[i].Round).Append(',');
                     Quote(sb, SpendCardPlays[i].Name);
                     sb.Append(',').Append(SpendCardPlays[i].Alive).Append(']');
+                }
+                sb.Append(']');
+                // Her HP legibility pass (2026-10-19): each Rising Applause
+                // play, [round, fanfare before, [other Spend cards in hand]].
+                sb.Append(",\"rising_applause_plays\":[");
+                for (var i = 0; i < RisingApplausePlays.Count; i++)
+                {
+                    if (i > 0) sb.Append(',');
+                    sb.Append('[').Append(RisingApplausePlays[i].Round)
+                      .Append(',').Append(RisingApplausePlays[i].Before)
+                      .Append(",[");
+                    var others = RisingApplausePlays[i].Others;
+                    for (var j = 0; j < others.Length; j++)
+                    {
+                        if (j > 0) sb.Append(',');
+                        Quote(sb, others[j]);
+                    }
+                    sb.Append("]]");
                 }
                 sb.Append(']');
                 // Furina round 3 (2026-10-11): her Drain buffer and what

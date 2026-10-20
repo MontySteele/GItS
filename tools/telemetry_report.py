@@ -97,7 +97,10 @@ WHAT IT PRINTS (the Balance bar, `docs/current/operations/stage-gate.md`):
      Furina round 5 (2026-10-11): the Spend card plays (`spend_card_plays`:
      `scP`, and the median enemies alive as one was played) and the Spend
      cards in hand at each turn start by name (`spend_card_names_turn_start`,
-     tallied per card under the table).
+     tallied per card under the table). Since her HP legibility pass
+     (2026-10-19): the Rising Applause Spends (`rising_applause_plays` rows
+     with Fanfare before them), how many had another Spend card in hand,
+     and which, under the table.
 
   6. With `--block-gap` (the Spend round 2, 2026-10-10; every character):
      turns that opened with a Block-gaining card in hand while the enemies
@@ -590,7 +593,23 @@ def _stage_extras(rows: list[dict]) -> dict:
                 continue
             for name in row[1]:
                 held[str(name)] = held.get(str(name), 0) + 1
+    # Her HP legibility pass (2026-10-19): each Rising Applause play,
+    # [round, fanfare before, [other Spend cards in hand]]; a play with a
+    # bank before it is a Spend.
+    ra = [row for r in rows
+          for row in (r.get("rising_applause_plays") or [])
+          if isinstance(row, list) and len(row) > 2
+          and isinstance(row[1], (int, float)) and row[1] > 0
+          and isinstance(row[2], list)]
+    ra_others: dict[str, int] = {}
+    for row in ra:
+        for name in set(str(n) for n in row[2]):
+            ra_others[name] = ra_others.get(name, 0) + 1
     return {
+        "rising_applause_spends": (len(ra) if any(
+            "rising_applause_plays" in r for r in rows) else None),
+        "rising_applause_with_other": sum(1 for row in ra if row[2]),
+        "rising_applause_others": ra_others,
         "fights_with_past_lost": len(lost),
         "past_lost": _median(lost),
         "past_lost_total": sum(lost) if lost else None,
@@ -647,6 +666,16 @@ def render_fanfare(fx: list[dict]) -> list[str]:
         lines.append(f"  {s['group'][:15]}: Spend cards in hand at turn "
                      "start, by name (turn starts)")
         for name, n in held[:12]:
+            lines.append(f"    {name[:28]:<29}{n:>5}")
+    for s in fx:
+        if s.get("rising_applause_spends") is None:
+            continue
+        lines.append(f"  {s['group'][:15]}: Rising Applause Spends "
+                     f"{s['rising_applause_spends']}, with another Spend "
+                     f"card in hand {s['rising_applause_with_other']}")
+        others = sorted(s["rising_applause_others"].items(),
+                        key=lambda kv: (-kv[1], kv[0]))
+        for name, n in others[:12]:
             lines.append(f"    {name[:28]:<29}{n:>5}")
     return lines
 

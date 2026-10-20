@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using Godot;
 using HarmonyLib;
 using KleeMod.Cards;
@@ -38,7 +39,10 @@ namespace KleeMod.Vfx;
 /// the base game's style for a number over art, cream with a dark outline in
 /// the glyph's bottom-right corner (<see cref="FurinaCounterFace"/>), inside
 /// a thin red ring (<see cref="RingColour"/>); the hover is the Drain
-/// buffer left and the Drain rule. No HP-bar tick: the counter is the reading.
+/// buffer left and the Drain rule. Since her HP legibility pass
+/// (2026-10-19) the hover also says what returns after combat and the
+/// drains still coming this turn and next, and the returning HP is drawn on
+/// her bar (<see cref="FurinaReturningHpBar"/>).
 ///
 /// THE FEED is <see cref="FurinaStage.RefreshBadges"/>, the funnel every
 /// Drain, Repay and turn already takes. No <c>_Process</c>.
@@ -130,13 +134,70 @@ public static class DrainedCounter
             : "");
 
     /// <summary>The hover's body: the buffer left, the drained count (and
-    /// how much of it is past the buffer) and the rule. Pure.</summary>
+    /// how much of it is past the buffer), what returns after combat, the
+    /// drains still coming, and the rule. Pure.</summary>
     public static string HoverBody(int drained, int bufferLeft,
                                    bool lineZero = false, int past = 0,
-                                   bool pastReturns = false) =>
+                                   bool pastReturns = false,
+                                   int returning = 0, int guestDrain = 0,
+                                   int reginaDrain = 0) =>
         BufferSentence(bufferLeft, lineZero, pastReturns) + "\n"
       + DrainedPhrase(drained, past, pastReturns)
-      + ".\n" + ArmKeywordTips.DrainBody;
+      + ".\n" + ReturnsLine(returning) + "\n"
+      + ComingLines(guestDrain, reginaDrain)
+      + ArmKeywordTips.DrainBody;
+
+    /// <summary>THE RETURNING HP (her HP legibility pass, 2026-10-19,
+    /// change 1): "Returns after combat: N", the HP the curtain call would
+    /// give back now (<see cref="FurinaStageLedger.ReturningAt"/>), the
+    /// figure the pale segment on her HP bar draws
+    /// (<see cref="FurinaReturningHpBar"/>). Pure.</summary>
+    public static string ReturnsLine(int returning) =>
+        "Returns after combat: [blue]"
+      + Math.Max(0, returning).ToString(CultureInfo.InvariantCulture)
+      + "[/blue]";
+
+    /// <summary>THE TURN'S COMING DRAINS (her HP legibility pass,
+    /// 2026-10-19, change 3: no total showed before End Turn). "At end of
+    /// turn: guests Drain N" and "Next turn: Regina Drains N", each only
+    /// when it would drain anything; each line ends in a newline. Pure.
+    /// </summary>
+    public static string ComingLines(int guestDrain, int reginaDrain) =>
+        (guestDrain > 0
+            ? "At end of turn: guests Drain [blue]"
+              + guestDrain.ToString(CultureInfo.InvariantCulture)
+              + "[/blue]\n"
+            : "")
+      + (reginaDrain > 0
+            ? "Next turn: Regina Drains [blue]"
+              + reginaDrain.ToString(CultureInfo.InvariantCulture)
+              + "[/blue]\n"
+            : "");
+
+    /// <summary>What the guests' acts will Drain at the end of this turn at
+    /// <paramref name="hp"/>: Lyney's act
+    /// (<see cref="FurinaStageLaw.LyneyActDrain"/>), the only guest act that
+    /// Drains, stopped at the line as <see cref="StageDirector.NoChoiceDrain"/>
+    /// stops it, and none where it would take her to 0 HP. Pure.</summary>
+    public static int GuestDrainAtTurnEnd(FurinaStageLedger ledger, int hp)
+    {
+        if (!ledger.OnStage(StagePerformer.Lyney)) return 0;
+        var room = ledger.GuestDrainRoom(FurinaStageLaw.LyneyActDrain, hp);
+        return ledger.CanDrain(room, hp) ? room : 0;
+    }
+
+    /// <summary>What Regina of All Waters will Drain at the start of her
+    /// next turn: <paramref name="copies"/> Drains of
+    /// <see cref="FurinaStageLaw.ReginaDrain"/>, each stopped at the line,
+    /// against the buffer left after <paramref name="guestDrain"/>
+    /// (<see cref="StageDirector.Regina"/>). The enemies' turn between moves
+    /// her HP, not her buffer. Pure.</summary>
+    public static int ReginaDrainNextTurn(int copies, int bufferLeft,
+                                          int guestDrain = 0) =>
+        copies <= 0
+            ? 0
+            : Math.Max(0, Math.Min(copies * FurinaStageLaw.ReginaDrain,
+                                   bufferLeft - Math.Max(0, guestDrain)));
 
     /// <summary>The hover's body for her, read off the ledger now.</summary>
     public static string HoverBody(Creature? creature)
@@ -146,9 +207,17 @@ public static class DrainedCounter
             return HoverBody(0, 0);
         }
         var ledger = FurinaStageLedger.For(creature);
+        var hp = (int)creature.CurrentHp;
+        var guests = GuestDrainAtTurnEnd(ledger, hp);
+        var copies = (int)creature.Powers.OfType<ReginaOfAllWatersPower>()
+            .Sum(p => p.Amount);
         return HoverBody(ledger.Drained, ledger.BufferLeft, ledger.Line <= 0,
                          ledger.DrainedPast,
-                         ledger.Mods.FiveCenturyAct > 0);
+                         ledger.Mods.FiveCenturyAct > 0,
+                         ledger.ReturningAt(hp, (int)creature.MaxHp),
+                         guests,
+                         ReginaDrainNextTurn(copies, ledger.BufferLeft,
+                                             guests));
     }
 
     /// <summary>Build the counter for the LOCAL seat, from the

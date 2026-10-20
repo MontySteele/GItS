@@ -388,7 +388,7 @@
     "KLEEMOD-PROTO_FS_ENCORE_PERFORMANCE.title": "Encore Performance",
     "KLEEMOD-PROTO_FS_ENSEMBLE_CAST.description": "You have 4 guest seats. [gold]Summon[/gold] a random guest.",
     "KLEEMOD-PROTO_FS_ENSEMBLE_CAST.title": "Ensemble Cast",
-    "KLEEMOD-PROTO_FS_FACADE.description": "Gain [gold]Block[/gold] equal to the HP you have lost this combat, up to {FsAmount:diff()}.",
+    "KLEEMOD-PROTO_FS_FACADE.description": "Gain [gold]Block[/gold] equal to the HP you have lost this combat, Drain included, up to {FsAmount:diff()}.{InCombat:{StageLost}|}",
     "KLEEMOD-PROTO_FS_FACADE.title": "Façade",
     "KLEEMOD-PROTO_FS_FINAL_BOW.description": "Draw 1 card. Choose a guest. It acts {IfUpgraded:show:3 times|twice}, then leaves.",
     "KLEEMOD-PROTO_FS_FINAL_BOW.title": "Final Bow",

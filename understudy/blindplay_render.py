@@ -3824,6 +3824,29 @@ ACT_CHANGE_NOTE = (
     "and its read now -- nothing here says which step did what.*")
 
 
+#: Furina's HP legibility pass (2026-10-19): "Several 'HP A -> B' lines
+#: list the drain only, while the header HP already had Repay added." The
+#: line now lists what moved her HP, in the order it adds up.
+HP_PART_WORDS = (("drained", "Drain −{n}"), ("repaid", "Repay +{n}"),
+                 ("returned", "returned after the fight +{n}"),
+                 ("other", "hits and other changes {signed}"))
+
+
+def _hp_parts_clause(parts: dict[str, int] | None) -> str:
+    """" (Drain −5, Repay +2, hits and other changes −3)": each part of
+    the move that is not 0, or "" where the feed named none."""
+    if not parts:
+        return ""
+    said = []
+    for key, words in HP_PART_WORDS:
+        n = int(parts.get(key) or 0)
+        if n == 0 or (key != "other" and n < 0):
+            continue
+        said.append(words.format(n=abs(n), signed=(f"+{n}" if n > 0
+                                                   else f"−{abs(n)}")))
+    return f" ({', '.join(said)})" if said else ""
+
+
 def _render_run_change(change: dict[str, Any]) -> list[str]:
     """`EB-676` / `EB-715`: what moved since the previous screen, or nothing.
 
@@ -3862,7 +3885,8 @@ def _render_run_change(change: dict[str, Any]) -> list[str]:
         rows.append(f"- HP {was} → {now}"
                     + (f" (of {change['max_hp']})" if change.get("max_hp")
                        else "")
-                    + f", {moved}")
+                    + f", {moved}"
+                    + _hp_parts_clause(change.get("hp_parts")))
     # 2026-09-26 (control seat, Defect): "Treasure chest gold was never
     # itemized (55 -> 101)." Gold is said wherever it moved.
     if change.get("gold"):

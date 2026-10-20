@@ -41,8 +41,17 @@ public sealed class ProtoFsFacade : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Façade"),
-        ("description", "Gain [gold]Block[/gold] equal to the HP you have lost this combat, up to {FsAmount:diff()}."),
+        ("description", "Gain [gold]Block[/gold] equal to the HP you have lost this combat, Drain included, up to {FsAmount:diff()}.{InCombat:{StageLost}|}"),
     };
+
+    /// <summary>This card's in-combat Stage line
+    /// (`FurinaStageFacePreview`).</summary>
+    protected override void AddExtraArgsToDescription(
+        MegaCrit.Sts2.Core.Localization.LocString description)
+    {
+        base.AddExtraArgsToDescription(description);
+        description.Add("StageLost", FurinaStageFacePreview.LostThisCombat(this));
+    }
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

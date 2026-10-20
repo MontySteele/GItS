@@ -226,6 +226,9 @@ MOD_ONLY = {"character", "ts",       # the seat's character; the wall clock
             # at each turn start, and each Spend card play with the enemies
             # alive. Mod-side hand and hook reads with no wire route.
             "spend_card_names_turn_start", "spend_card_plays",
+            # 2026-10-19 (her HP legibility pass): each Rising Applause
+            # play with the other Spend cards in hand. A mod-side hand read.
+            "rising_applause_plays",
             # 2026-10-10 (the Kokomi whole-run round): the Plans written and
             # carried out per fight; 2026-10-12 (the re-founding, which
             # retired the Casket's count): the Ethereal cards she lost at
