@@ -1872,7 +1872,7 @@ ARM_KEYWORDS: dict[str, str] = {
               "Spend up to X pays X, or all you have if that is less."),
     # The 2026-10-11 playtest: "the tooltips for Fanfare and Drain are
     # rather verbose (Drain moreso)".
-    "Fanfare": ("Gain 1 for each HP you lose or Repay. Spend uses it. "
+    "Fanfare": ("Gain 1 for each HP you lose, Drain included, or Repay. Spend uses it. "
                 "Resets after each combat."),
     # The Drain buffer (2026-10-11): the first 1/4 of her Max HP drained
     # each combat returns after it; what she drains past it is lost unless

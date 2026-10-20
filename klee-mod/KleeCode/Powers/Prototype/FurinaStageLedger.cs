@@ -358,6 +358,7 @@ public sealed class FurinaStageLedger
         RepaidThisTurn = 0;
         DrainsThisCombat = 0;
         DrainedThisCombat = 0;
+        RepaidThisCombat = 0;
         RepaysThisTurn = 0;
         RepaidThisPlay = 0;
         SpendsThisTurn = 0;
@@ -502,6 +503,24 @@ public sealed class FurinaStageLedger
     /// Repays every turn). Mirrors <c>Ftd.drained_this_combat</c>.</summary>
     public int DrainedThisCombat { get; private set; }
 
+    /// <summary>HP repaid this combat, GROSS (her HP legibility pass,
+    /// 2026-10-19): the seat page's HP-change line lists it beside
+    /// <see cref="DrainedThisCombat"/>. A read; no rule reads it.</summary>
+    public int RepaidThisCombat { get; private set; }
+
+    /// <summary>THE RETURNING HP (her HP legibility pass, 2026-10-19,
+    /// change 1): what the curtain call would return if the combat ended at
+    /// <paramref name="hp"/> of <paramref name="maxHp"/> -- the drained HP
+    /// within the buffer, and with A Five-Century Act the past-line part
+    /// too, never past Max HP. <see cref="CurtainCallOf"/>'s sum, read
+    /// without emptying the ledger. Pure.</summary>
+    public int ReturningAt(int hp, int maxHp)
+    {
+        var owed = DrainedAbove
+                 + (Mods.FiveCenturyAct > 0 ? DrainedPast : 0);
+        return System.Math.Max(0, System.Math.Min(owed, maxHp - hp));
+    }
+
     /// <summary>Repays that returned HP this turn (Rising Tide's count).
     /// </summary>
     public int RepaysThisTurn { get; private set; }
@@ -580,6 +599,7 @@ public sealed class FurinaStageLedger
         DrainedPast -= past;
         DrainedAbove = System.Math.Max(0, DrainedAbove - (amount - past));
         RepaidThisTurn += amount;
+        RepaidThisCombat += amount;
         RepaysThisTurn++;
         RepaidThisPlay += amount;
     }
@@ -1146,6 +1166,10 @@ public sealed class FurinaStageLedger
         snapshot["spent_this_turn"] = ledger.SpentThisTurn;
         snapshot["drained"] = ledger.Drained;
         snapshot["drained_past"] = ledger.DrainedPast;
+        // Her HP legibility pass (2026-10-19): the gross Drain and Repay this
+        // combat, so the seat page's "HP A -> B" line can list what moved it.
+        snapshot["drained_this_combat"] = ledger.DrainedThisCombat;
+        snapshot["repaid_this_combat"] = ledger.RepaidThisCombat;
         // The Spend round (2026-10-10): A Five-Century Act is in play, so the
         // past-line part returns after combat and the page says so.
         snapshot["past_returns"] = ledger.Mods.FiveCenturyAct > 0;

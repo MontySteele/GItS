@@ -1303,7 +1303,73 @@ def _run_snapshot(state: dict[str, Any]) -> dict[str, Any]:
                             p.get("can_use_in_combat") is not False]
                            for p in player["potions"]
                            if isinstance(p, dict) and _text(p.get("name"))]
+    snap.update(_hp_ledger_snapshot(player))
     return snap
+
+
+def _hp_ledger_snapshot(player: dict[str, Any]) -> dict[str, Any]:
+    """Furina's HP legibility pass (2026-10-19): what the "HP A -> B" line
+    needs to list what moved her HP. The Stage's gross Drain and Repay this
+    combat (`FurinaStageLedger.Snapshot`'s `drained_this_combat`,
+    `repaid_this_combat`), and the newest page event's `seq` with every
+    curtain call's (HP returned after a fight). Empty on any other seat and
+    on a build that sends none."""
+    out: dict[str, Any] = {}
+    stage = player.get("furina_stage")
+    if isinstance(stage, dict) and stage.get("drained_this_combat") is not None:
+        out["stage_drained"] = _int(stage.get("drained_this_combat"))
+        out["stage_repaid"] = _int(stage.get("repaid_this_combat"))
+    rows = player.get("resolutions")
+    if not isinstance(rows, list):
+        return out
+    seqs: list[int] = []
+    curtains: list[list[int]] = []
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        for ev in row.get("events") or []:
+            if not isinstance(ev, dict) or ev.get("seq") is None:
+                continue
+            seq = _int(ev.get("seq"))
+            seqs.append(seq)
+            if _text(ev.get("kind")) == "curtain":
+                curtains.append([seq, _int(ev.get("amount"))])
+    if seqs:
+        out["event_seq"] = max(seqs)
+    if curtains:
+        out["curtains"] = curtains
+    return out
+
+
+def _hp_parts(before: dict[str, Any], here: dict[str, Any]) -> dict[str, int]:
+    """What moved her HP between two reads, as far as the feed says
+    (Furina's HP legibility pass, 2026-10-19: the seat's "HP 78 -> 75, down
+    3" counted the Drain only while the header had the Repay in it, and
+    after a fight netted the refund against the Drain). `drained` and
+    `repaid` are the Stage's gross counts moved within one fight;
+    `returned` the curtain calls filed since the earlier read; `other`
+    whatever is left of the move (hits, healing). `{}` when the feed names
+    no part, so another seat's line reads as before."""
+    parts: dict[str, int] = {}
+    if ("stage_drained" in before and "stage_drained" in here
+            and before.get("floor") == here.get("floor")
+            and _int(here["stage_drained"]) >= _int(before["stage_drained"])):
+        parts["drained"] = (_int(here["stage_drained"])
+                            - _int(before["stage_drained"]))
+        parts["repaid"] = max(0, _int(here.get("stage_repaid"))
+                              - _int(before.get("stage_repaid")))
+    if before.get("event_seq") is not None:
+        floor = _int(before["event_seq"])
+        parts["returned"] = sum(amount for seq, amount
+                                in here.get("curtains") or []
+                                if seq > floor)
+    if not any(parts.values()):
+        return {}
+    was, now = _int(before.get("hp")), _int(here.get("hp"))
+    parts["other"] = (now - was) - (parts.get("repaid", 0)
+                                    + parts.get("returned", 0)
+                                    - parts.get("drained", 0))
+    return parts
 
 
 def _run_key(state: dict[str, Any]) -> str:
@@ -1417,6 +1483,10 @@ def run_change(state: dict[str, Any]) -> dict[str, Any]:
         gone = _self_used_potions(before.get("potions"), here.get("potions"))
         if gone:
             change["potions_fired"] = gone
+        if change.get("hp"):
+            parts = _hp_parts(before, here)
+            if parts:
+                change["hp_parts"] = parts
         if change:
             change["max_hp"] = here.get("max_hp")
             # WHETHER THE ROOM CHANGED, as a boolean and never as the previous

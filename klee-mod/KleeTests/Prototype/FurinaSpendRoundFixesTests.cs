@@ -147,14 +147,16 @@ public class FurinaSpendRoundFixesTests : IDisposable
             // 2 HP of Drain buffer left (the Drain buffer, 2026-10-11).
             ledger.NoteDrain(ledger.BufferLeft - 2,
                              (int)b.Furina.Creature.CurrentHp);
-            Assert.Equal(FurinaStageFacePreview.PastLine,
+            // Her HP legibility pass (2026-10-19): the split, in numbers.
+            Assert.Equal("\n(2 returns, 2 past your line)",
                          FurinaStageFacePreview.DrainLine(b.Card, 4));
             ledger.ModsOverride = new StageMods { FiveCenturyAct = 1 };
             Assert.Equal("\n(Past your Drain buffer: returns after combat)",
                          FurinaStageFacePreview.DrainLine(b.Card, 4));
-            // Within the buffer nothing is printed either way.
+            // Within the buffer it returns either way.
             ledger.NoteRepay(ledger.Drained);
-            Assert.Equal("", FurinaStageFacePreview.DrainLine(b.Card, 4));
+            Assert.Equal(FurinaStageFacePreview.ReturnsTag,
+                         FurinaStageFacePreview.DrainLine(b.Card, 4));
         });
     }
 

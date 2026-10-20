@@ -17292,6 +17292,20 @@ def flip_face_args(card: dict) -> list[tuple[str, str]]:
     return args
 
 
+#: Facade's count in combat (her HP legibility pass, 2026-10-19, change 4).
+STAGE_LOST_TOKEN = "StageLost"
+
+
+def stage_lost_call(card: dict) -> str | None:
+    """Facade's "(Lost this combat: N)", or None: a seat saw 3 Block, then
+    12, and could not say why. A row whose effects carry the
+    `{op: furina, kind: facade}` op prints the count its Block reads."""
+    if any(fx.get("op") == "furina" and fx.get("kind") == "facade"
+           for fx in card.get("effects") or []):
+        return "FurinaStageFacePreview.LostThisCombat(this)"
+    return None
+
+
 def stage_face_args(card: dict) -> list[tuple[str, str]]:
     """Every in-combat Stage line a row's face carries, as (token, C#)."""
     if is_flip_row(card):
@@ -17303,7 +17317,8 @@ def stage_face_args(card: dict) -> list[tuple[str, str]]:
                         (STAGE_SPEND_HITS_TOKEN,
                          stage_spend_hits_call(card)),
                         (STAGE_SPEND_SHORT_TOKEN,
-                         stage_spend_short_call(card))):
+                         stage_spend_short_call(card)),
+                        (STAGE_LOST_TOKEN, stage_lost_call(card))):
         if call:
             args.append((token, call))
     return args

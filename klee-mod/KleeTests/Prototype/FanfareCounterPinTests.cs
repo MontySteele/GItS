@@ -113,7 +113,7 @@ public class FanfareCounterPinTests
           + "[gold]Repay[/gold].";
         // The gauge's hover sits under the Fanfare title, so its shortened
         // tip (the 2026-10-11 playtest) drops the word.
-        Assert.Contains("Gain 1 for each HP you lose or [gold]Repay[/gold].",
+        Assert.Contains("Gain 1 for each HP you lose, [gold]Drain[/gold] included, or [gold]Repay[/gold].",
                         FanfareCounter.HoverBody(3, 1));
         var smart = new FanfarePower().Localization!
             .Single(r => r.Item1 == "smartDescription").Item2;

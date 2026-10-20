@@ -62,8 +62,9 @@ public static class FurinaStageBowPreview
 /// adds the token in <c>AddExtraArgsToDescription</c>.
 ///
 /// THE DRAIN LINE. Since the Drain line rule (2026-10-09) a Drain may go
-/// past the line, so the card says so in hand, before the play: "(Past your
-/// Drain buffer)" while the Drain would take her past it. The one
+/// past the line, so the card says so in hand, before the play; since her HP
+/// legibility pass (2026-10-19) every Drain card says where its Drain lands
+/// (<see cref="FurinaStageFacePreview.DrainTag"/>). The one
 /// refusal left -- a Drain to 0 HP -- reads "(Not enough HP)", because the
 /// game's chooser has no greyed option
 /// (<see cref="ModalChoice.SelectAffordableMode"/>). The gate is
@@ -77,10 +78,10 @@ public static class FurinaStageBowPreview
 public static class FurinaStageFacePreview
 {
     /// <summary>"(Not enough HP)" while a Drain of <paramref name="amount"/>
-    /// would take her to 0 HP; "(Past your Drain buffer)" while it
-    /// would take her past the line; then the Block the Drain pays and who
-    /// pays it (<see cref="DrainBlock(int, int, bool)"/>). Empty otherwise,
-    /// and off a combat or a Furina board.</summary>
+    /// would take her to 0 HP; else where the Drain lands
+    /// (<see cref="DrainTag"/>); then the Block the Drain pays and who pays
+    /// it (<see cref="DrainBlock(int, int, bool)"/>). Empty off a combat or
+    /// a Furina board.</summary>
     public static string DrainLine(CardModel card, int amount)
     {
         if (Owner(card) is not { } owner) return "";
@@ -88,13 +89,50 @@ public static class FurinaStageFacePreview
         var ledger = FurinaStageLedger.For(owner);
         var block = DrainBlock(amount, ledger.Mods.Masquerade,
                                ledger.OnStage(StagePerformer.Freminet));
-        if (!ledger.PastLine(amount, (int)owner.CurrentHp)) return block;
-        // The Spend round (2026-10-10): with A Five-Century Act in play the
-        // HP drained past the line returns at the curtain call too, so the
-        // tag says that instead of naming a line that costs nothing.
-        return (ledger.Mods.FiveCenturyAct > 0 ? PastLineReturns : PastLine)
+        // The split the play will make (`FurinaStageLedger.NoteDrain`): the
+        // part that fits in the buffer left returns, the rest is past the
+        // line.
+        var returns = ledger.GuestDrainRoom(amount, (int)owner.CurrentHp);
+        return DrainTag(returns, amount - returns,
+                        ledger.Mods.FiveCenturyAct > 0)
              + block;
     }
+
+    /// <summary>
+    /// WHERE A DRAIN LANDS (her HP legibility pass, 2026-10-19, change 2: a
+    /// Drain inside the buffer carried no tag, so seats could not tell a
+    /// refunded Drain from a real cost until after paying). One tag per Drain
+    /// card, for <paramref name="returns"/> HP inside the buffer and
+    /// <paramref name="past"/> past the line: "(Returns after combat)" all
+    /// inside; "(Past your line: lost unless you Repay)" all past;
+    /// "(N returns, M past your line)" split. Under A Five-Century Act
+    /// (<paramref name="pastReturns"/>) the past-line part returns too, so
+    /// that case keeps "(Past your Drain buffer: returns after combat)" (the
+    /// Spend round, 2026-10-10). Empty for no Drain. Pure.
+    /// </summary>
+    public static string DrainTag(int returns, int past,
+                                  bool pastReturns = false)
+    {
+        returns = System.Math.Max(0, returns);
+        past = System.Math.Max(0, past);
+        if (returns + past <= 0) return "";
+        if (past == 0) return ReturnsTag;
+        if (pastReturns) return PastLineReturns;
+        if (returns == 0) return PastLineLost;
+        return SplitTag(returns, past);
+    }
+
+    /// <summary>The tag for a Drain wholly inside the buffer.</summary>
+    public const string ReturnsTag = "\n(Returns after combat)";
+
+    /// <summary>The tag for a Drain wholly past the line.</summary>
+    public const string PastLineLost =
+        "\n(Past your line: lost unless you Repay)";
+
+    /// <summary>The tag for a Drain that splits: "(4 returns, 2 past your
+    /// line)".</summary>
+    public static string SplitTag(int returns, int past) =>
+        $"\n({returns} returns, {past} past your line)";
 
     /// <summary>
     /// THE BLOCK A DRAIN PAYS, AND WHO PAYS IT (the Spend rounds review,
@@ -130,6 +168,20 @@ public static class FurinaStageFacePreview
     /// line returns after combat.</summary>
     public const string PastLineReturns =
         "\n(Past your Drain buffer: returns after combat)";
+
+    /// <summary>FACADE'S COUNT (her HP legibility pass, 2026-10-19, change
+    /// 4: a seat saw 3 Block, then 12, and could not say why): "(Lost this
+    /// combat: N)", the count its Block reads
+    /// (<see cref="FurinaSweep.LostThisCombat"/>). Empty off a combat or a
+    /// Furina board.</summary>
+    public static string LostThisCombat(CardModel card) =>
+        Owner(card) is { } owner
+            ? LostThisCombatWords(FurinaSweep.LostThisCombat(owner))
+            : "";
+
+    /// <summary>The words, for the pins.</summary>
+    public static string LostThisCombatWords(int lost) =>
+        $"\n(Lost this combat: {System.Math.Max(0, lost)})";
 
     /// <summary>The refusal's words: a Drain cannot take her to 0 HP.
     /// </summary>
@@ -194,14 +246,6 @@ public static class FurinaStageFacePreview
              + spend.ToString(System.Globalization.CultureInfo.InvariantCulture)
              + ": " + buys + ")";
     }
-
-    /// <summary>The warning's words, for the pins: the HP drained past the
-    /// line is lost unless Repaid. THE FURINA WAVE (2026-10-13, "To change
-    /// now" 1): no line number. "(Past your Drain line of 59 HP)" was a
-    /// second Drain number beside the buffer; the face now says it in the
-    /// buffer's words, as the counter and the seat page do, and the Drain
-    /// tip says what past it costs.</summary>
-    public const string PastLine = "\n(Past your Drain buffer)";
 
     /// <summary>The Drain tip's in-combat sentence (the pool-75 round,
     /// 2026-10-09: every record missed where the line sat): "Your Drain line

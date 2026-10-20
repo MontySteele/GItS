@@ -125,7 +125,8 @@ def test_the_counter_and_the_face_print_no_line_number():
     assert '"Drain buffer: [blue]"' in counter
     assert '"Drain line [blue]"' not in counter
     face = (POWERS / "FurinaStageBowPreview.cs").read_text(encoding="utf-8")
-    assert 'public const string PastLine = "\\n(Past your Drain buffer)";' in face
+    # Her HP legibility pass (2026-10-19): the all-past tag.
+    assert '"\\n(Past your line: lost unless you Repay)";' in face
     assert "Drain line of {line}" not in face
 
 

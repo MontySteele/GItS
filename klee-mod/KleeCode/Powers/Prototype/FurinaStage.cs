@@ -887,6 +887,8 @@ public static class FurinaStage
         }
         Vfx.FanfareCounter.Refresh(owner);
         Vfx.DrainedCounter.Refresh(owner);
+        // Her HP legibility pass (2026-10-19): the returning HP on her bar.
+        Vfx.FurinaReturningHpBar.Refresh(owner);
         Vfx.FurinaStageCues.Refresh(owner);
     }
 

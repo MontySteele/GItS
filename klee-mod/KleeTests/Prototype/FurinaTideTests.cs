@@ -838,8 +838,9 @@ public class FurinaTideTests
         // The Drain line rule (2026-10-09): past the line is a warning, and
         // the one refusal left is a Drain to 0 HP.
         // The Furina wave (2026-10-13): no line number on the face.
-        Assert.Equal("\n(Past your Drain buffer)",
-                     FurinaStageFacePreview.PastLine);
+        // Her HP legibility pass (2026-10-19): the all-past tag.
+        Assert.Equal("\n(Past your line: lost unless you Repay)",
+                     FurinaStageFacePreview.PastLineLost);
         Assert.Equal("\n(Not enough HP)", FurinaStageFacePreview.NotEnoughHp);
         // Off a combat the tip adds nothing.
         Assert.Equal("", FurinaStageFacePreview.LineNow(new ProtoFsOusiaPledge()));

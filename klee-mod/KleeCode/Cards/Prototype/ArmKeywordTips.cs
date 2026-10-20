@@ -1069,7 +1069,7 @@ public static class ArmKeywordTips
     /// The 2026-10-11 playtest: "the tooltips for Fanfare and Drain are
     /// rather verbose (Drain moreso)".</summary>
     internal const string FanfareBody =
-        "Gain 1 for each HP you lose or [gold]Repay[/gold]. "
+        "Gain 1 for each HP you lose, [gold]Drain[/gold] included, or [gold]Repay[/gold]. "
       + "[gold]Spend[/gold] uses it. Resets after each combat.";
 
     /// <summary>Furina's sweep (2026-10-14): Ousia / Pneuma's "Flip", one
