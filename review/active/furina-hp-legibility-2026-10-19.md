@@ -71,6 +71,13 @@ nothing left to repay.
 
 ## Picks
 
+Ruled 2026-10-19, all (a): [USER], "Otherwise agreed on the defaults." On
+the starter: "I keep coming back to how her starter card drains the whole
+bank. I really can't tell if this is a problem or not." Left as it is for
+now; the build adds one telemetry field, a Rising Applause Spend made while
+another Spend card is in hand, so the next Furina round can say whether it
+drains banks a payoff would have used.
+
 1. **The returning HP.**
    - **(a, default)** A segment on the HP bar plus the hover line.
    - (b) The hover line only (cheaper; the number is one hover away).
