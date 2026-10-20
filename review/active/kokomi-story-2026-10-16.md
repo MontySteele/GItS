@@ -114,14 +114,14 @@ It opens with a line from her act 1 choice:
 - *paid:* "She has one pearl left. She is glad she kept it."
 
 *A great curved bone is set into the wall, long as a boat, faintly purple.
-Every child on Watatsumi knows that shape: Orobashi, who raised the islands
-for his people and died for it. His remains have poisoned people before.*
+Every child on Watatsumi knows that shape: Orobashi, who brought his people up
+to the surface and later died fighting the Shogun. His remains have poisoned people before.*
 
 | Option | Effect | Result |
 |---|---|---|
-| Lay a hand on it, through her sleeve. | Lose 4 Max HP. Gain a random Rare relic. | She wraps her hand first and keeps the touch short; she knows what his remains did to Inazuma. For a moment she can feel the islands he raised. The cold stays in her fingers. |
+| Lay a hand on it, through her sleeve. | Lose 4 Max HP. Gain a random Rare relic. | She wraps her hand first and keeps the touch short; she knows what his remains did to Inazuma. For a moment she can feel the island he gave her people. The cold stays in her fingers. |
 | Gather the offerings at its foot. | Gain 100 Gold. Add **Doubt**. | Someone has been leaving Mora here for a very long time. She takes it home for the shrine's poor box. The bone whispers to her all the way up. |
-| Promise him a rite at home. | Add **Public Address**. Remove a card. | A proper one, on Watatsumi, with the whole shrine there. She means every word, and she is already dreading the speech. |
+| Promise him a rite at home. | Remove a card. Add **Public Address**. | A proper one, on Watatsumi, with the whole shrine there. She means every word, and she is already dreading the speech. |
 
 **Act 2. A Report from Gorou** (her home event; all free). It follows A Room
 with No One In It, or no act 1 event. When it follows the room, it opens:

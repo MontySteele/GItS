@@ -110,8 +110,8 @@ keeps growing." *kept* "The clipping is still in her glove." *no event*
 none. *Body:* A Melusine in a Palais courier's cap is waiting on the step,
 holding a very neatly addressed letter. "I'm to wait for your reply, Miss
 Furina." The letter reads: "Miss Furina. The Court notes your absence. The
-Court also notes that Café Lutèce has not sold a single Pour la Justice in
-some weeks, and is concerned. N."
+Court also notes that Café Lutèce has not sold a single La Lettre à Focalors
+in some weeks, and is concerned. N."
 
 | Option | Effect | Result |
 |---|---|---|
@@ -202,8 +202,8 @@ cover."
 `lore-census/furina-lore-census-2026-10-15.md`; the story sources are
 second-hand). Canon: the 500 years, the prophecy (the people dissolve and the
 Archon is left weeping alone on her throne), the trial at the Opera Epiclese,
-her acting after it, Café Lutèce selling her cake (Pour la Justice, from the
-recipe La Lettre à Focalors), Charlotte as the Steambird's reporter. Ours, as
+her acting after it, Café Lutèce selling its cake La Lettre à Focalors (her own
+dish from it is Pour la Justice), Charlotte as the Steambird's reporter. Ours, as
 the chains' scenes are: Neuvillette's letter, Charlotte's review and every
 landing in the Spire. Changed after the check: the throne is the prophecy's,
 not "blue glass", and the café is named.

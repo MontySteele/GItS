@@ -175,7 +175,7 @@ public static class KleeStory
                     new StoryOption("EVERYONE_CAN_COME", "Everyone can come!",
                         "Nothing.",
                         new StoryEffect(StoryEffectKind.Nothing),
-                        "Klee: \"You can all come! Dodoco, make room!\" Three knights fall in behind her, "
+                        "Klee: \"You can all come! Dodoco, make room!\" The three fall in behind her, "
                       + "trying very hard to look like they were planning to anyway."),
                 },
                 Portrait: () => KleeArt.CardPortrait("event_klee_knights_come_looking"),
@@ -245,21 +245,21 @@ public static class KleeStory
                 Options: new[]
                 {
                     new StoryOption("ASK_NICELY", "Ask nicely for Dodoco back.",
-                        "Add an upgraded [gold]Dodoco Tag[/gold].",
+                        "Add an upgraded [gold]Dodoco Tag[/gold]. Remove every [gold]Doubt[/gold].",
                         new StoryEffect(StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoKoDodocoTag)),
                         "Klee trades it her last snack. Dodoco is a little sticky, but fine.")
                     {
                         Then = DodocoHome,
                     },
                     new StoryOption("GRAB_AND_RUN", "Grab Dodoco and some treasure, and run!",
-                        "Lose 8 HP. Gain a random relic.",
+                        "Lose 8 HP. Gain a random relic. Remove every [gold]Doubt[/gold].",
                         new StoryEffect(StoryEffectKind.LoseHp, 8),
                         "It bites. Klee doesn't let go of either.")
                     {
                         Then = new[] { new StoryEffect(StoryEffectKind.GainRandomRelic), DodocoHome[0] },
                     },
                     new StoryOption("SWAP_HER_BEST_BOMB", "Swap her best bomb for Dodoco.",
-                        "Transform a card.",
+                        "Transform a card. Remove every [gold]Doubt[/gold].",
                         new StoryEffect(StoryEffectKind.TransformCards, 1),
                         "It gives her a rock in return. Klee keeps the rock.")
                     {
@@ -417,6 +417,10 @@ public static class KleeStory
         BombPlacers = new HashSet<string>
         {
             "proto_ko_jumpy_dumpty",
+            "proto_ko_jumpy_dumpty_mk_iii",
+            // The Archaic Tooth Ancient (Cards/JumpyDumptyMkOmega.cs): not a
+            // sheet row, but it places a Bomb on ALL enemies and upgrades.
+            "jumpy_dumpty_mk_omega",
             "proto_ko_pop",
             "proto_ko_bang_bang",
             "proto_ko_ammo_scavenging",

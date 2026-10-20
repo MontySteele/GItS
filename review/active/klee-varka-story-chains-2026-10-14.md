@@ -93,9 +93,9 @@ Opening line by act-1 choice: *chased* "Klee knows this trail. She ran most of i
 
 | Option | Effect | Result |
 |---|---|---|
-| Ask nicely for Dodoco back. | Add an upgraded **Dodoco Tag**. | Klee trades it her last snack. Dodoco is a little sticky, but fine. |
-| Grab Dodoco and some treasure, and run! | Lose 8 HP. Gain a random relic. | It bites. Klee doesn't let go of either. |
-| Swap her best bomb for Dodoco. | Transform a card. | It gives her a rock in return. Klee keeps the rock. |
+| Ask nicely for Dodoco back. | Add an upgraded **Dodoco Tag**. Remove every **Doubt**. | Klee trades it her last snack. Dodoco is a little sticky, but fine. |
+| Grab Dodoco and some treasure, and run! | Lose 8 HP. Gain a random relic. Remove every **Doubt**. | It bites. Klee doesn't let go of either. |
+| Swap her best bomb for Dodoco. | Transform a card. Remove every **Doubt**. | It gives her a rock in return. Klee keeps the rock. |
 
 **The Knights Come Looking** keeps its options and effects. On the Dodoco
 thread it opens: "Dodoco rides on Klee's shoulder the whole way." **If Dodoco
@@ -108,7 +108,7 @@ relayed by [USER]):
 
 | Option | Effect | Result |
 |---|---|---|
-| Everyone can come! | Nothing. | Klee: "You can all come! Dodoco, make room!" Three knights fall in behind her, trying very hard to look like they were planning to anyway. |
+| Everyone can come! | Nothing. | Klee: "You can all come! Dodoco, make room!" The three fall in behind her, trying very hard to look like they were planning to anyway. |
 
 **Mom's Marks** (act 1, a price with free ways out):
 

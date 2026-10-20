@@ -120,7 +120,7 @@ public class KokomiStoryTests
         Steps(typeof(KokomiOtherCommander), 2, (StoryEffectKind.AddCard, 0, typeof(Doubt)), (StoryEffectKind.ChooseRareCardToDeck, 3, null));
         Steps(typeof(KokomiSerpentsBones), 0, (StoryEffectKind.LoseMaxHp, 4, null), (StoryEffectKind.GainRandomRareRelic, 0, null));
         Steps(typeof(KokomiSerpentsBones), 1, (StoryEffectKind.GainGold, 100, null), (StoryEffectKind.AddCard, 0, typeof(Doubt)));
-        Steps(typeof(KokomiSerpentsBones), 2, (StoryEffectKind.AddCard, 0, typeof(PublicAddress)), (StoryEffectKind.RemoveCard, 0, null));
+        Steps(typeof(KokomiSerpentsBones), 2, (StoryEffectKind.RemoveCard, 0, null), (StoryEffectKind.AddCard, 0, typeof(PublicAddress)));
         Steps(typeof(KokomiReportFromGorou), 0, (StoryEffectKind.ChooseFromPoolToDeck, 3, null));
         Steps(typeof(KokomiReportFromGorou), 1, (StoryEffectKind.UpgradeRandomCards, 2, null));
         Steps(typeof(KokomiReportFromGorou), 2, (StoryEffectKind.Heal, 20, null));
@@ -161,6 +161,41 @@ public class KokomiStoryTests
         Assert.Equal(new[] { typeof(KokomiEmptyRoom), typeof(KokomiReportFromGorou) }, allFree);
         Assert.Equal(new[] { typeof(KokomiSerpentsBones) }, allPriced);
         Assert.Contains("| These eight | 2 (25%) | 5 (63%) | 1 (13%) |", Paper());
+    }
+
+    [Fact]
+    public void Promise_him_a_rite_removes_before_it_adds_the_curse()
+    {
+        // The removal screen opens on the deck as it was, so the new
+        // Public Address cannot remove itself; the text reads in that order.
+        var o = E(typeof(KokomiSerpentsBones)).Options.Single(x => x.Key == "PROMISE_A_RITE");
+        Assert.Equal(StoryEffectKind.RemoveCard, o.Effects[0].Kind);
+        Assert.Equal(StoryEffectKind.AddCard, o.Effects[1].Kind);
+        Assert.Equal(typeof(PublicAddress), o.Effects[1].Card);
+        Assert.Equal("Remove a card. Add [gold]Public Address[/gold].", o.Description);
+    }
+
+    [Fact]
+    public void A_Max_HP_cost_carries_the_games_lethal_warning()
+    {
+        // Lay a hand on it costs 4 Max HP: the option flashes red, the base
+        // game's way (Vakuu's ThatDecreasesMaxHp), when it would kill.
+        var bones = E(typeof(KokomiSerpentsBones));
+        Assert.Equal(4, bones.Options[0].MaxHpCost);
+        Assert.Equal(0, bones.Options[1].MaxHpCost);
+        Assert.Equal(0, bones.Options[2].MaxHpCost);
+        // STRUCTURAL: the option builder (a closure in GenerateInitialOptions)
+        // calls the game's own warnings.
+        const System.Reflection.BindingFlags All = System.Reflection.BindingFlags.Public
+            | System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance
+            | System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.DeclaredOnly;
+        var calls = typeof(StoryEventModel).GetNestedTypes(All)
+            .SelectMany(t => t.GetMethods(All))
+            .Concat(typeof(StoryEventModel).GetMethods(All))
+            .SelectMany(m => Il.Calls(m))
+            .ToList();
+        Assert.Contains("EventOption.ThatDecreasesMaxHp", calls);
+        Assert.Contains("EventOption.ThatDoesDamage", calls);
     }
 
     [Fact]

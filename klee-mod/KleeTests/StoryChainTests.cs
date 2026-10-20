@@ -125,6 +125,9 @@ public class StoryChainTests
         Steps(typeof(KleeFoundYou), 0, (StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoKoDodocoTag)), (StoryEffectKind.RemoveEvery, 0, typeof(Doubt)));
         Steps(typeof(KleeFoundYou), 1, (StoryEffectKind.LoseHp, 8, null), (StoryEffectKind.GainRandomRelic, 0, null), (StoryEffectKind.RemoveEvery, 0, typeof(Doubt)));
         Steps(typeof(KleeFoundYou), 2, (StoryEffectKind.TransformCards, 1, null), (StoryEffectKind.RemoveEvery, 0, typeof(Doubt)));
+        // Every option removes Doubt, and every option's line says so.
+        Assert.All(E(typeof(KleeFoundYou)).Options,
+            o => Assert.EndsWith(" Remove every [gold]Doubt[/gold].", o.Description));
         Steps(typeof(KleeMomsMarks), 0, (StoryEffectKind.GainGold, 75, null));
         Steps(typeof(KleeMomsMarks), 1, (StoryEffectKind.LoseHp, 10, null), (StoryEffectKind.AddCard, 0, typeof(ProtoKoAlicesRecipe)));
         Steps(typeof(KleeMomsMarks), 2, (StoryEffectKind.UpgradeRandomCards, 2, null));
