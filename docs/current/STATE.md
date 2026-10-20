@@ -179,8 +179,13 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   Ascension becomes an upgraded Gale. Deep Freeze has no Retain.
 - **Process:** frozen on `main`; card changes go through `varka-next` with a
   suite record; text-only fixes may land on `main`.
-- **Next:** story, events and visual checks in game, and the two-seat round
-  on the starter change.
+- **Latest record:** `review/records/varka-fang-next-suite-2026-10-19.md`
+  (mean 48.0, three wins; Fang Pyro 5, power upgrades, rarity sweep;
+  promoted 2026-10-19). Four upgraded powers were offered and never taken
+  (Unwavering Banner, Absolute Zero, Eye of Stormterror, Wildfire Oath).
+- **Next:** a base-five control round on the suite seeds with today's
+  harness (is he above the bar?), after the public launch; no major nerf
+  before it ([USER], 2026-10-19).
 
 **Yae Miko: Prototype** (`review/active/yae-proposal-2026-10-12.md`; the
 Stellar-Conduct nod is parked). Code: `proto_ym_` rows,
