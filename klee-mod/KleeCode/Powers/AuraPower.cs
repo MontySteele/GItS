@@ -263,34 +263,19 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
     /// (ElementalHit resolves the reaction before its TargetMods) -- one
     /// reaction, two payouts.
     ///
-    /// COURTROOM DRAMA (EB-19/M1, 2026-08-07): the identical shape, one power
-    /// over. Cross Examination's Vulnerable is applied from
-    /// CurtainCallHooks.NoteFirstReaction, which ReactionEffects.Resolve
-    /// reaches from AfterDamageReceived -- one hook too late to amplify the
-    /// hit that caused the reaction. The sim applies it inside `_react`
-    /// (reactions.py, the `reactions_this_turn == 1` block) and runs
-    /// modify_damage_taken afterwards, so tier0's triggering hit IS x1.5.
-    /// Same two-payout tell as Superconduct: the bomb path already amplifies,
-    /// because ElementalHit.Deal resolves the reaction before
-    /// SimDamagePipeline.TargetMods reads Vulnerable -- and that path is
-    /// Unpowered, so the IsPoweredAttack gate above keeps it out of here and
-    /// the two can never both pay.
-    ///
     /// BOSS-ROOM FROZEN (EB-19/M1b, 2026-08-07): the same shape one reaction
     /// over. Under the NC-7 alpha substitution a Frozen reaction in a boss
     /// room on a non-minion applies Vulnerable instead of Frozen, and the sim
     /// applies it from inside `_react` (reactions.py:147-150) before
     /// modify_damage_taken -- so tier0's triggering hit is x1.5. C# lands it
     /// from ReactionEffects.Resolve, reached from AfterDamageReceived, one
-    /// hook too late. UNCONDITIONAL, unlike Courtroom Drama: the boss branch
-    /// has no first-reaction gate, so every qualifying Frozen amplifies its
-    /// own hit. Minions and non-boss rooms take Frozen and are exempt.
+    /// hook too late. Unconditional: the boss branch has no first-reaction
+    /// gate, so every qualifying Frozen amplifies its own hit. Minions and non-boss rooms take Frozen and are exempt.
     ///
-    /// All three sources share ONE multiplier, deliberately. In the sim they
-    /// write the same `vulnerable` stack and modify_damage_taken is a flat
-    /// x1.5 on any nonzero stack, so a hit that is both a Superconduct and
-    /// the turn's first reaction is x1.5, not x2.25 -- and a boss-room Frozen
-    /// that is also the turn's first reaction is x1.5, not x2.25.
+    /// Both sources share ONE multiplier, deliberately. In the sim they write
+    /// the same `vulnerable` stack and modify_damage_taken is a flat x1.5 on
+    /// any nonzero stack. (Courtroom Drama, the third source, left with its
+    /// power, which no row applied: icon declutter leftovers, 2026-10-19.)
     ///
     /// The already-Vulnerable guard is what keeps that faithful: the sim's
     /// modify_damage_taken is a flat x1.5 on any nonzero vulnerable stack, not
@@ -319,14 +304,12 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
         // (sim _amp_mult). The amp-cap detector lives inside the overload.
         var mult = ReactionTable.AmplifierMultiplier(reaction, dealer);
 
-        // The three sim sites that put Vulnerable on the target from INSIDE
+        // The two sim sites that put Vulnerable on the target from INSIDE
         // _react, i.e. in time to scale the hit that triggered them.
         var vulnerableFromThisReaction =
             reaction == Reaction.Superconduct
             || (reaction == Reaction.Frozen
-                && ReactionEffects.FrozenBossVulnWillApply(target))
-            || (reaction != Reaction.None
-                && CurtainCallHooks.CourtroomDramaWillAmplify(dealer));
+                && ReactionEffects.FrozenBossVulnWillApply(target));
 
         if (vulnerableFromThisReaction
             && !target.Powers.OfType<VulnerablePower>().Any())

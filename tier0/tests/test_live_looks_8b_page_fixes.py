@@ -202,7 +202,8 @@ def _overridden_face_state() -> dict:
         "target_type": "AnyEnemy",
         "keywords": [
             {"name": "Applies Pyro",
-             "description": "Leaves a Pyro aura on the enemy."},
+             "description": "Applies Pyro for 2 turns. Another aura is "
+                            "consumed in an Elemental Reaction."},
             {"name": "Element overridden",
              "description": "This card applies Electro instead of the "
                             "element it prints."}]}]
@@ -223,7 +224,16 @@ def test_defect_five_the_row_keeps_its_body():
     """The row is renamed and not dropped: it carries the only sentence on the
     page saying what an element DOES."""
     page = blindplay.observe(_overridden_face_state())
-    assert "Leaves a Pyro aura on the enemy." in page
+    assert "Another aura is consumed in an Elemental Reaction." in page
+
+
+def test_defect_five_the_body_names_the_landed_element():
+    """Newcomer round 1, lane 4 (2026-10-19): under Sara's Electro rider the
+    renamed row read "Applies Electro -- Applies Hydro for 2 turns". The
+    body's element word follows the override with the name."""
+    page = blindplay.observe(_overridden_face_state())
+    assert "Applies Electro for 2 turns" in page
+    assert "Pyro for 2 turns" not in page
 
 
 def test_defect_five_a_face_with_no_override_is_untouched():

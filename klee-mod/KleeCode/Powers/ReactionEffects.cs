@@ -90,10 +90,6 @@ internal static class ReactionEffects
         // window, so the three receipts one page prints cannot disagree about
         // which turn they are about.
         ResolutionLedger.MarkTurnStart();
-        // Fully cleared rather than purged: every key is written and read
-        // inside a single player turn, so there is nothing to carry over and
-        // no way for this map to grow across a run.
-        DealerReactionsThisTurn.Clear();
     }
 
     /// <summary>
@@ -116,11 +112,9 @@ internal static class ReactionEffects
     /// extra turn `ReactionTriggeredThisTurn` still read true off the previous
     /// turn, so Chevreuse / Vanguard's Valor and Furina's Audience
     /// Participation paid a rider with no reaction behind it (a windfall --
-    /// both are `buff_next_attack`); and `DealerReactionsThisTurn[dealer]` was
-    /// still 1, so the first real reaction saw `already == 1`,
-    /// `NoteFirstReaction` was skipped, and Courtroom Drama's once-per-turn
-    /// Vulnerable never applied -- dropping the x1.5 from both the preview and
-    /// the dealt damage. `ReactionsThisTurn` accumulated across both turns.
+    /// both are `buff_next_attack`); and `ReactionsThisTurn` accumulated across
+    /// both turns. (A per-dealer window for Courtroom Drama cleared here too
+    /// until that power left, 2026-10-19.)
     ///
     /// CO-OP SCOPING IS RATIFIED AS SHIPPED (R205, 2026-08-24). An extra turn
     /// is a new turn FOR THE BOARD and only for the player taking it:
@@ -139,26 +133,7 @@ internal static class ReactionEffects
         ReactionLog.MarkTurnStart();
         RelicAnswerLog.MarkTurnStart();
         ResolutionLedger.MarkTurnStart();
-        if (extraTurnCreature != null)
-        {
-            DealerReactionsThisTurn.Remove(extraTurnCreature);
-        }
     }
-
-    /// <summary>
-    /// Reactions this player turn, PER DEALER. The global counters above are
-    /// deliberately shared (red-pen R1: a Reaction is a fact about the board);
-    /// Courtroom Drama is not, because it is a POWER and a power belongs to
-    /// somebody. Split out 2026-07-29: the once-per-turn gate used to read
-    /// the global <see cref="ReactionsThisTurn"/>, so in co-op a partner's
-    /// reaction spent your window -- flatly contradicting the contract written
-    /// on <see cref="CurtainCallHooks.NoteFirstReaction"/> ("your partner's
-    /// reaction does not spend your once-per-turn window"). Solo, where the
-    /// dealer is the only player, this is byte-for-byte the sim's
-    /// <c>state.reactions_this_turn == 1</c>.
-    /// </summary>
-    private static readonly Dictionary<Creature, int> DealerReactionsThisTurn =
-        new();
 
     /// <summary>
     /// tier0 predicate reaction_triggered_this_turn (Chevreuse, Vanguard's
@@ -194,28 +169,9 @@ internal static class ReactionEffects
     /// The sim's `state.reactions_this_turn`. Derived from the same snapshot
     /// as <see cref="ReactionTriggeredThisTurn"/> rather than kept as a second
     /// counter, so there is still exactly one increment site.
-    ///
-    /// NOT the Courtroom Drama gate. That reads
-    /// <see cref="DealerReactionsThisTurn"/> -- see the note there for why a
-    /// board-wide count is the wrong question to ask about an owned power.
     /// This stays public as the board-scoped reading the sim mirrors.
     /// </summary>
     public static int ReactionsThisTurn => TotalResolved - _turnStartTotal;
-
-    /// <summary>
-    /// Would the NEXT reaction this dealer causes be their first this turn?
-    ///
-    /// The read-only twin of the gate inside <see cref="Resolve"/> (`already
-    /// == 0`), pulled out so the damage pipeline can ASK the question one
-    /// phase before Resolve ANSWERS it -- see
-    /// <see cref="CurtainCallHooks.CourtroomDramaWillAmplify"/>. Pure: it
-    /// only reads the map, and the increment stays in Resolve so there is
-    /// still exactly one write site.
-    /// </summary>
-    public static bool NextReactionIsFirstFor(Creature? dealer) =>
-        dealer != null
-        && (DealerReactionsThisTurn.TryGetValue(dealer, out var seen)
-            ? seen : 0) == 0;
 
     /// <summary>
     /// PURE forecast of the boss-room Frozen substitution (EB-19/M1b): would a
@@ -231,12 +187,12 @@ internal static class ReactionEffects
     /// INSIDE `_react` (reactions.py:147-150) and only then runs
     /// modify_damage_taken, so tier0's triggering hit is itself x1.5. C#
     /// reaches Resolve from AuraPower.AfterDamageReceived, one hook after that
-    /// hit's number is final -- exactly the Superconduct / Courtroom Drama
-    /// shape, one reaction over. See AuraPower.ModifyDamageMultiplicative.
+    /// hit's number is final -- exactly the Superconduct shape, one reaction
+    /// over. See AuraPower.ModifyDamageMultiplicative.
     ///
-    /// UNCONDITIONAL sim-side, unlike Courtroom Drama: there is no
-    /// first-reaction gate on the boss branch, so every boss-room Frozen on a
-    /// non-minion amplifies its own hit.
+    /// UNCONDITIONAL sim-side: there is no first-reaction gate on the boss
+    /// branch, so every boss-room Frozen on a non-minion amplifies its own
+    /// hit.
     ///
     /// Called from AuraPower.ModifyDamageMultiplicative, which the UI calls
     /// speculatively for damage previews -- so every read is null-tolerant
@@ -497,22 +453,6 @@ internal static class ReactionEffects
             // THE SPIRAL ABYSS (Wavering Moon): a reaction a player triggers
             // deals 3 to every enemy. A no-op outside an Abyss run.
             await Abyss.SpiralAbyss.NoteReaction(choiceContext, target, dealer);
-
-            // Courtroom Drama (R85): the FIRST reaction of the turn puts its
-            // target on the stand. Counted PER DEALER -- the sim's
-            // `reactions_this_turn == 1` in the only configuration it models
-            // (solo), and the written co-op contract everywhere else.
-            if (dealer != null)
-            {
-                var already = DealerReactionsThisTurn.TryGetValue(
-                    dealer, out var seen) ? seen : 0;
-                DealerReactionsThisTurn[dealer] = already + 1;
-                if (already == 0)
-                {
-                    await CurtainCallHooks.NoteFirstReaction(
-                        choiceContext, target, dealer, cardSource);
-                }
-            }
 
             // The Mondstadt companion overhaul. THE MOD COUNTS
             // REACTIONS AND BROADCASTS NONE, which is why two of the workshop's

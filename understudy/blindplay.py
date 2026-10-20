@@ -500,7 +500,7 @@ def screen_page(state: dict[str, Any], full: bool = True) -> str:
     newest = newest_event(obs)
     if newest:
         blindplay_shape.write_events_seen(newest)
-    return blindplay_newcomer.trim_page(text) if newcomer else text
+    return blindplay_newcomer.trim_page(text, state) if newcomer else text
 
 
 #: The fight-memory mark that this fight's relic sentences have printed, and

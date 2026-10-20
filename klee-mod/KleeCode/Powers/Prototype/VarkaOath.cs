@@ -2340,6 +2340,18 @@ public sealed class VarkaHitDamageVar : DamageVar
 /// <see cref="VarkaCards.AvatarHit"/> deal it. With no current element, or a
 /// total of 0, the play deals nothing and the face prints 0. Emitted by
 /// codegen for the kinds in <c>VARKA_CURRENT_HIT_PREVIEW_KINDS</c>.
+///
+/// NO REACTION ON A ONE-TARGET CARD (BACKLOG, 2026-10-19: "show the
+/// amplifier on a hit whose element is chosen at play"). The element is
+/// known at preview time, but the amplifier never applies: the card's Anemo
+/// hit lands first on the same body and Swirls whatever aura it wore (every
+/// reaction consumes; the spread reaches only the OTHER enemies), so the
+/// second hit always meets a bare body. Both engines agree (the sim's
+/// `reactions._react` anemo branch). The face used to fold a Melt or
+/// Vaporize the play never dealt, so a one-target card previews with the
+/// reaction term off (<see cref="AuraPower.PreviewWithoutReaction"/>).
+/// Dandelion Gale hits ALL enemies, where a later Swirl's spread can leave an
+/// aura on an earlier body, so it keeps the fold.
 /// </summary>
 public sealed class VarkaCurrentElementHitVar : DamageVar
 {
@@ -2388,10 +2400,16 @@ public sealed class VarkaCurrentElementHitVar : DamageVar
             FurinaStage.LiveFor(owner), card, previewMode, target,
             KokomiPlan.FrontEnemy(owner));
         using (HitElement.Carry(card, element))
+        using (FollowsOwnAnemoHit(card) ? AuraPower.PreviewWithoutReaction() : null)
         {
             base.UpdateCardPreview(card, previewMode, body, runGlobalHooks);
         }
     }
+
+    /// <summary>A one-target card: its Anemo hit has already consumed the
+    /// body's aura when this hit lands. PURE.</summary>
+    public static bool FollowsOwnAnemoHit(CardModel card) =>
+        card.TargetType != TargetType.AllEnemies;
 }
 
 /// <summary>

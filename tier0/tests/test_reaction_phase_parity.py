@@ -88,24 +88,6 @@ PHASE_LEDGER = [
         "multiplicative phase.",
     ),
     (
-        "courtroom-drama-vulnerable-is-multiplicative",
-        "Powers/AuraPower.cs",
-        "ModifyDamageMultiplicative",
-        r"public\s+override\s+decimal\s+ModifyDamageMultiplicative\s*\(",
-        ["CurtainCallHooks.CourtroomDramaWillAmplify",
-         "ReactionConstants.VulnerableTakenMult"],
-        ["CurtainCallHooks.CourtroomDramaWillAmplify"],
-        "EB-19/M1, the Superconduct shape one power over. Courtroom Drama's "
-        "Vulnerable is applied from CurtainCallHooks.NoteFirstReaction, which "
-        "ReactionEffects.Resolve reaches from AfterDamageReceived -- one hook "
-        "after the triggering hit's number is final. The sim applies it "
-        "inside reactions._react (the `reactions_this_turn == 1` block) and "
-        "runs modify_damage_taken afterwards, so tier0's triggering hit is "
-        "itself x1.5. Same two-payout tell as Superconduct: the bomb path "
-        "already amplified, because ElementalHit.Deal resolves the reaction "
-        "before SimDamagePipeline.TargetMods reads Vulnerable.",
-    ),
-    (
         "boss-frozen-vulnerable-is-multiplicative",
         "Powers/AuraPower.cs",
         "ModifyDamageMultiplicative",
@@ -121,7 +103,7 @@ PHASE_LEDGER = [
         "effects.deal_damage_to_enemy, so tier0's triggering hit is itself "
         "x1.5; C# lands it from ReactionEffects.Resolve, reached from "
         "AfterDamageReceived, one hook after that number is final. "
-        "UNCONDITIONAL, unlike Courtroom Drama -- the boss branch carries no "
+        "UNCONDITIONAL -- the boss branch carries no "
         "first-reaction gate, so EVERY qualifying boss-room Frozen was short "
         "by a third of its own hit.",
     ),
@@ -267,14 +249,10 @@ _ASSIGNMENT = re.compile(r"(?<![=!<>+\-*/%&|^])=(?![=>])")
 def test_the_reaction_vulnerables_share_one_multiplier():
     """Two of these on one hit is x1.5, not x2.25.
 
-    All three sim sites write the SAME `vulnerable` stack, and
+    Both sim sites write the SAME `vulnerable` stack, and
     powers.modify_damage_taken is a flat multiply on any nonzero stack rather
-    than one per source. Two separate `mult *=` statements in this hook would
-    be correct on either source alone and wrong on the hit that is both --
-    and both live combinations exist: Superconduct as the turn's first
-    reaction with Courtroom Drama installed (Cryo aura + Electro attack), and
-    a boss-room Frozen (Cryo attack into a Hydro aura, no MinionPower) that is
-    also the turn's first reaction.
+    than one per source, so the hook keeps ONE `mult *=` statement. (The
+    third source, Courtroom Drama, left with its power on 2026-10-19.)
     """
     body = method_body(
         (SOURCE / "Powers" / "AuraPower.cs").read_text(encoding="utf-8"),
@@ -305,41 +283,6 @@ def test_the_reaction_vulnerable_mirror_cannot_double_pay_the_bomb_path():
     # ...and the order that makes the bomb path's amplification real.
     assert deal.index("ReactionEffects.Resolve") < deal.index(
         "SimDamagePipeline.TargetMods"), deal
-
-
-def test_the_courtroom_drama_forecast_is_a_read():
-    """The predicate the pure modifier calls must itself be pure.
-
-    ModifyDamageMultiplicative runs in preview and tooltip paths, so a
-    forecast that CONSUMED the once-per-turn window would spend Courtroom
-    Drama on a hit that was never thrown. The single increment site stays in
-    ReactionEffects.Resolve.
-    """
-    # Both forecasts are expression-bodied on purpose -- a `=>` member cannot
-    # hold a statement, so "it only reads" is enforced by the shape as well as
-    # by the text below. method_body() would run past a `=>` member's end, so
-    # these are matched as expressions.
-    curtain = (SOURCE / "Powers" / "CurtainCallPowers.cs").read_text(
-        encoding="utf-8")
-    forecast = re.search(
-        r"public\s+static\s+bool\s+CourtroomDramaWillAmplify\s*\([^)]*\)\s*=>"
-        r"(.*?);", curtain, re.S)
-    assert forecast, "CourtroomDramaWillAmplify is no longer expression-bodied"
-    for forbidden in ("Cmd.", "await"):
-        assert forbidden not in forecast.group(1), (
-            f"CourtroomDramaWillAmplify contains {forbidden!r}; it is called "
-            "from a speculative damage-preview path and must only read.")
-    assert not _ASSIGNMENT.search(forecast.group(1)), forecast.group(1)
-
-    reactions = (SOURCE / "Powers" / "ReactionEffects.cs").read_text(
-        encoding="utf-8")
-    inner = re.search(
-        r"public\s+static\s+bool\s+NextReactionIsFirstFor\s*\([^)]*\)\s*=>"
-        r"(.*?);", reactions, re.S)
-    assert inner, "NextReactionIsFirstFor is no longer expression-bodied"
-    assert "DealerReactionsThisTurn" in inner.group(1)
-    # One write site, still in Resolve.
-    assert reactions.count("DealerReactionsThisTurn[dealer] =") == 1, reactions
 
 
 def _frozen_boss_forecast() -> str:
@@ -446,8 +389,8 @@ def test_the_boss_frozen_mirror_matches_the_sim_predicate_verbatim():
     correspondence between two files, and pinning only the C# half lets the
     sim move out from under it. Two things must hold: the predicate is
     `boss_room and not enemy.is_minion`, and it is UNCONDITIONAL (no
-    first-reaction gate like Courtroom Drama's), which is why the C# mirror
-    has no NextReactionIsFirstFor in its Frozen clause.
+    first-reaction gate), which is why the C# mirror has no gate in its
+    Frozen clause.
     """
     sim = (ROOT / "tier0" / "engine" / "reactions.py").read_text(
         encoding="utf-8")

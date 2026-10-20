@@ -28,14 +28,14 @@ METER_CS = ROOT / "klee-mod" / "KleeCode" / "Powers" / "MeterCost.cs"
 
 #: Furina's shipped `courtroom_drama` row, spelled inline: the modal probes
 #: below were built on it, and the sheet that held it left at legacy cleanup
-#: stage 6. Only its frame matters -- the effects are always replaced.
+#: stage 6. Only its frame matters -- the effects are always replaced (its
+#: own power left with the icon declutter leftovers, 2026-10-19).
 _PROBE_BASE = {
     "id": "courtroom_drama", "name": "Courtroom Drama", "register": "archon",
     "cost": 1, "type": "power", "rarity": "uncommon", "solve": ["utility"],
     "tempo_band": {"fight": ["late"], "run": ["early"]},
     "archetypes": ["generic"], "role": "glue",
-    "effects": [{"op": "apply_power", "power": "cross_examination",
-                 "amount": 1, "target": "self"}]}
+    "effects": [{"op": "draw", "amount": 1}]}
 
 
 def modal_card(*modes, **overrides):

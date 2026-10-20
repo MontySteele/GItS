@@ -384,6 +384,14 @@ public class VarkaComboTests : IDisposable
         Assert.Equal(0, VarkaCurrentElementHitVar.Raw(
             Var(avatar, "VkBase"), Var(avatar, "VkPer"), Element.None, 3));
 
+        // BACKLOG 2026-10-19: the one-target cards' Anemo hit Swirls the
+        // body's aura first, so the second hit's preview folds no reaction;
+        // Dandelion Gale (ALL enemies) keeps the fold.
+        Assert.True(VarkaCurrentElementHitVar.FollowsOwnAnemoHit(ascension));
+        Assert.True(VarkaCurrentElementHitVar.FollowsOwnAnemoHit(avatar));
+        Assert.False(VarkaCurrentElementHitVar.FollowsOwnAnemoHit(
+            new global::KleeMod.Cards.Varka.DandelionGale()));
+
         // Still one hit each: both go through the one shared hit.
         Assert.Contains("VarkaCards.CurrentElementHit",
                         Calls("VarkaCards", "AscensionHit"));

@@ -21,7 +21,8 @@ import pytest
 from understudy import blindplay, blindplay_newcomer, bridge
 
 from tier0.tests.test_understudy_blindplay import (card_reward_state,
-                                                   combat_state, rest_state,
+                                                   combat_state, event_state,
+                                                   game_over_state, rest_state,
                                                    rewards_state)
 
 REPO = Path(__file__).resolve().parents[2]
@@ -326,3 +327,66 @@ def test_the_bridge_reads_the_games_own_aim_preview():
     assert "GitsSetPlayerAudience(false);" in tips
     builder = (root / "McpMod.StateBuilder.cs").read_text(encoding="utf-8")
     assert "GitsAddAimPreviews(card, cardRow);" in builder
+
+
+# ---- newcomer round 1 page fixes (2026-10-19) ---------------------------------
+
+def _reviving_fight() -> dict:
+    """Test Subject between forms: every body at 0, no intents, and the
+    wire's `battle.reviving` row for the one coming back."""
+    state = _fight()
+    for e in state["battle"]["enemies"]:
+        e["hp"] = 0
+        e["intents"] = []
+        e.pop("intent", None)
+    state["battle"]["reviving"] = [{"combat_id": "", "name": "Test Subject",
+                                    "max_hp": 100, "move_id": "RESPAWN"}]
+    return state
+
+
+def test_a_reviving_enemy_is_on_the_newcomer_board(newcomer):
+    page = blindplay.screen_page(_reviving_fight())
+    enemies = page.split("## Enemies", 1)[1]
+    assert ("- **Test Subject** — HP 0/100, down but still on the board"
+            in enemies)
+
+
+def test_a_board_with_no_living_enemy_still_names_who_was_there(newcomer):
+    state = _reviving_fight()
+    state["battle"]["reviving"] = []
+    enemies = blindplay.screen_page(state).split("## Enemies", 1)[1]
+    assert "down but still on the board" in enemies
+
+
+def test_an_event_page_prints_the_top_bar(newcomer):
+    state = copy.deepcopy(event_state())
+    state["player"] = {"hp": 72, "max_hp": 72, "gold": 171}
+    page = blindplay.screen_page(state)
+    assert "- HP 72/72, 171 gold" in page
+
+
+def test_a_page_that_prints_hp_gets_no_second_bar(newcomer):
+    state = copy.deepcopy(rest_state())
+    state["player"] = {**(state.get("player") or {}), "hp": 30,
+                       "max_hp": 70, "gold": 5}
+    page = blindplay.screen_page(state)
+    assert "gold" not in page.split("HP 30/70", 1)[0]
+    assert "- HP 30/70, 5 gold" not in page
+
+
+def test_the_reward_screen_drops_the_last_fights_plays(newcomer):
+    text = ("# What the fight left behind\n\n- **Card**\n\n"
+            "## Your plays on the fight's last turn\n\n- **Strike**\n\n"
+            "## What you can say\n\n- `proceed`\n")
+    page = blindplay_newcomer.trim_page(text)
+    assert "# Rewards" in page and "left behind" not in page
+    assert "last turn" not in page and "Strike" not in page
+    assert "- `proceed`" in page
+
+
+def test_the_run_over_page_prints_the_deck():
+    state = copy.deepcopy(game_over_state())
+    state["player"] = {"hp": 0, "max_hp": 72, "gold": 9, "master_deck": [
+        {"name": "Strike"}, {"name": "Strike"}, {"name": "Twin Sakura+"}]}
+    page = blindplay.screen_page(state)
+    assert "- Deck (3 cards): Strike x2, Twin Sakura+" in page
