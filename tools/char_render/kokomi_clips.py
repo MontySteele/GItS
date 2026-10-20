@@ -380,10 +380,16 @@ REST = pose(
 
 # ------------------------------------------------------------------ character select
 # Composed and sure of the plan: chin level, a knowing smile, the far hand
-# open and low before her, palm up, and the near hand relaxed at her waist.
+# open and low before her, palm up, and the near hand relaxed at her hip.
 # The near hand was at her chest until 2026-10-19; there its fingers sank
 # into the bow and its forearm read as a flat band across the dress, so it
-# came down to stance A's NEAR (the brooch now shows).
+# came down to stance A's NEAR (the brooch now shows). Under this pose's
+# twist that put the forearm as a thin sliver sunk into the dress (user,
+# 2026-10-20), so the hand moved out beside her hip: SELECT_NEAR.
+
+#: the near hand beside her hip, a little in front, the elbow out to her side
+SELECT_NEAR = (-0.10, -0.15, -0.18)
+SELECT_NEAR_POLE = (-1.0, 0.3, -0.2)
 
 
 def select_pose(head_turn=16.0, breath=1.0, swing=0.0):
@@ -400,8 +406,8 @@ def select_pose(head_turn=16.0, breath=1.0, swing=0.0):
                  ("rotw", "頭", Z, head_turn * 0.6),
                  ("rot", "頭", X, -4 + 1.5 * b),
                  ("rotw", "頭", Y, -6 - 0.8 * b)]
-                + hands(far=(0.26, -0.14, -0.12 - 0.014 * b), near=add(NEAR, (0, 0, -0.004 * b)),
-                        far_pole=(0.3, 0.6, -1.0), near_pole=NEAR_POLE, far_curl=(10 + 3 * b, 0),
+                + hands(far=(0.26, -0.14, -0.12 - 0.014 * b), near=add(SELECT_NEAR, (0, 0, -0.004 * b)),
+                        far_pole=(0.3, 0.6, -1.0), near_pole=SELECT_NEAR_POLE, far_curl=(10 + 3 * b, 0),
                         near_curl=(25, 10), far_aim=((0.8, -0.3, -0.1), -90.0))
                 + cloth(swing, sleeve_swing=-4.0 * swing),
                 {"にこり": 0.7, "口角上げ": 0.5, "なごみ": 0.2})
