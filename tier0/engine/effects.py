@@ -352,6 +352,9 @@ def _runtime_count(state: CombatState, token: str,
         # CURRENT-KIT USE ONLY (the Kokomi level pass, 2026-10-12) -- Shoal of
         # Spears, "plus once more for each Plan waiting": one hit, and one more
         # per Plan the jellyfish holds. C# twin: `KokomiPlan.PlansHeld + 1`.
+        # Stings and Wards count: Shoal was exempted from the 2026-10-18
+        # "not Stings or Wards" rule on 2026-10-20 (it held
+        # `chain_plans_held_plus_one`, now gone).
         return len(state.kk_plan_queue) + 1
     if token == "chain_plans_held":
         # KOKOMI V3 (2026-10-18, review/active/kokomi-cards-2026-10-18.md
@@ -359,10 +362,6 @@ def _runtime_count(state: CombatState, token: str,
         # count.": the queue less the Sting and Ward Plans. Breakwater keeps
         # `plans_held`. C# twin: `KokomiPlan.ChainPlansHeld`.
         return kokomi_plan.chain_plans_held(state)
-    if token == "chain_plans_held_plus_one":
-        # KOKOMI V3 (2026-10-18) -- Shoal of Spears, the same count plus its
-        # one hit. C# twin: `KokomiPlan.ChainPlansHeld + 1`.
-        return kokomi_plan.chain_plans_held(state) + 1
     if token == "swirls_this_turn":
         # Heizou's Heartstopper Strike: "4 more for each Swirl this turn".
         return state.mi_swirls_this_turn
@@ -3241,10 +3240,10 @@ RUNTIME_COUNT_NAMES = frozenset({
     # CURRENT-KIT USE ONLY (the Kokomi level pass, 2026-10-12) -- Shoal of
     # Spears' hit count, one more than the Plans held. Same registry reason.
     "plans_held_plus_one",
-    # KOKOMI V3 (2026-10-18): Tideturn's and Shoal of Spears' counts, Stings
-    # and Wards left out. Same registry reason.
+    # KOKOMI V3 (2026-10-18): Tideturn's count, Stings and Wards left out
+    # (Shoal of Spears was exempted 2026-10-20 and reads `plans_held_plus_one`
+    # again). Same registry reason.
     "chain_plans_held",
-    "chain_plans_held_plus_one",
     # CURRENT-KIT USE ONLY (`EB-492`) -- Well Laid's "for each Plan the
     # Bake-Kurage carried out this morning". Registered here as well as
     # resolved in `_runtime_count` for this registry's own reason: the loader

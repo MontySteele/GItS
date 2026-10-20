@@ -60,6 +60,20 @@ script does: one install means ONE deployed build for every lane, so a second
 lane's game holds the same lock on `klee.dll` as the first. Tear the lane down
 (`python -m understudy.embark --teardown --lane N`) rather than deploying
 around it.
+
+THE BETA SHADOW (2026-10-20). [USER] subscribes to his own friends-only beta
+Workshop item (3821050238, manifest id `klee-beta`). The game sorts it ahead
+of `mods\\klee`, both assemblies are named `klee`, so the dev deploy fails to
+load ("Assembly with same name is already loaded" in godot.log) and the beta
+plays instead -- he played 0.3.9 believing it was dev 0.2.6094. This tool now
+WARNS, in the dry run, among the verify lines and after a deploy, when a
+`klee-beta` manifest sits under the Workshop content dir and the game's mod
+settings (`%APPDATA%\\SlayTheSpire2\\steam\\<id>\\settings.save`,
+`mod_settings.mod_list`) do not mark it disabled. It never blocks and never
+edits the settings. `--log` reads the latest godot.log and says which klee
+assembly actually loaded and whether the "already loaded" error is there.
+
+    python tools/deploy_round.py --log
 """
 from __future__ import annotations
 
@@ -239,28 +253,177 @@ def art_debt(root: Path = REPO) -> str:
             + ", ".join(missing))
 
 
+#: Slay the Spire 2's Steam app id: its Workshop items live under
+#: `steamapps/workshop/content/<this>/<item id>/<folder>/manifest.json`.
+STEAM_APP_ID = "2868840"
+#: The beta Workshop item's manifest id (`tools/package_workshop.py`'s beta
+#: package) and the name the in-game mod settings list it under.
+BETA_MOD_ID = "klee-beta"
+BETA_MOD_NAME = "Teyvat Spire Roster (Beta)"
+DEFAULT_STEAMAPPS = Path(r"C:\Program Files (x86)\Steam\steamapps")
+
+
+def game_dir_from_props(root: Path = REPO) -> Path | None:
+    """`GameDir` out of `klee-mod/local.props`, or None."""
+    props = root / "klee-mod" / "local.props"
+    if not props.exists():
+        return None
+    import xml.etree.ElementTree as ET
+    try:
+        found = ET.parse(props).find(".//GameDir")
+    except ET.ParseError:
+        return None
+    return Path(found.text.strip()) if found is not None and found.text else None
+
+
+def workshop_content_dir(game_dir: Path | None) -> Path:
+    """The game's Workshop content dir: `<steamapps>/workshop/content/<app>`.
+
+    `game_dir` is `<steamapps>/common/Slay the Spire 2`; without one, the
+    default Steam library."""
+    steamapps = (game_dir.parent.parent if game_dir is not None
+                 else DEFAULT_STEAMAPPS)
+    return steamapps / "workshop" / "content" / STEAM_APP_ID
+
+
+def beta_manifests(content_dir: Path) -> list[Path]:
+    """Every `manifest.json` under the Workshop content dir whose id is
+    `klee-beta` (`<item>/<folder>/manifest.json`)."""
+    if not content_dir.is_dir():
+        return []
+    found = []
+    for manifest in sorted(content_dir.glob("*/*/manifest.json")):
+        try:
+            data = json.loads(manifest.read_text(encoding="utf-8-sig"))
+        except (OSError, ValueError):
+            continue
+        if isinstance(data, dict) and data.get("id") == BETA_MOD_ID:
+            found.append(manifest)
+    return found
+
+
+def settings_files(appdata: Path | None = None) -> list[Path]:
+    """The game's settings saves, each holding `mod_settings.mod_list`:
+    `%APPDATA%/SlayTheSpire2/steam/<steam id>/settings.save` (and the
+    `default/<n>/settings.save` a non-Steam profile writes)."""
+    if appdata is None:
+        import os
+        env = os.environ.get("APPDATA")
+        if not env:
+            return []
+        appdata = Path(env)
+    base = appdata / "SlayTheSpire2"
+    return (sorted(base.glob("steam/*/settings.save"))
+            + sorted(base.glob("default/*/settings.save")))
+
+
+def mod_enabled(settings: list[Path], mod_id: str) -> bool | None:
+    """Whether the game's mod settings leave `mod_id` ON. READ ONLY.
+
+    True when any settings save lists it enabled (or mods are on and it is not
+    listed yet: the game enables a new mod), False when every save that lists
+    it says disabled or turns mods off altogether, None when no save is
+    readable."""
+    verdicts = []
+    for path in settings:
+        try:
+            data = json.loads(path.read_text(encoding="utf-8-sig"))
+        except (OSError, ValueError):
+            continue
+        ms = data.get("mod_settings") if isinstance(data, dict) else None
+        if not isinstance(ms, dict):
+            continue
+        if ms.get("mods_enabled") is False:
+            verdicts.append(False)
+            continue
+        rows = [r for r in ms.get("mod_list") or []
+                if isinstance(r, dict) and r.get("id") == mod_id]
+        verdicts.append(bool(rows[0].get("is_enabled", True)) if rows else True)
+    if not verdicts:
+        return None
+    return any(verdicts)
+
+
+def beta_shadow(game_dir: Path | None = None,
+                appdata: Path | None = None,
+                content_dir: Path | None = None) -> tuple[str, str | None]:
+    """`(verify line, WARNING or None)` for the subscribed beta Workshop copy.
+
+    The beta's assembly is named `klee` too and the game loads it first, so an
+    enabled beta means the dev deploy fails to load and the beta plays."""
+    content = content_dir or workshop_content_dir(game_dir)
+    found = beta_manifests(content)
+    if not found:
+        return "workshop beta:     not subscribed (no klee-beta manifest)", None
+    where = found[0].parent
+    on = mod_enabled(settings_files(appdata), BETA_MOD_ID)
+    if on is False:
+        return f"workshop beta:     present, disabled in settings ({where})", None
+    state = "ENABLED" if on else "enabled? (no readable settings.save)"
+    warning = (f"WARNING: the beta Workshop copy ({where}) is {state} and "
+               f"loads BEFORE mods\\klee. Both assemblies are named klee, so "
+               f"THIS DEPLOY WILL NOT LOAD and the game plays the beta "
+               f"instead. Fix: in the in-game mod settings, disable "
+               f"\"{BETA_MOD_NAME}\" and restart. "
+               f"(`tools/deploy_round.py --log` confirms which one loaded.)")
+    return f"workshop beta:     {state} -- SHADOWS this deploy ({where})", warning
+
+
+def godot_log(appdata: Path | None = None) -> Path | None:
+    """The latest game log, `%APPDATA%/SlayTheSpire2/logs/godot.log`."""
+    if appdata is None:
+        import os
+        env = os.environ.get("APPDATA")
+        if not env:
+            return None
+        appdata = Path(env)
+    path = appdata / "SlayTheSpire2" / "logs" / "godot.log"
+    return path if path.is_file() else None
+
+
+def klee_load_report(log_text: str) -> list[str]:
+    """Which klee assembly the game loaded, read off a godot.log.
+
+    Reads three line shapes: `Loading assembly DLL <path>` for a klee dll,
+    `Calling initializer method of type KleeMod.KleeMod for klee,
+    Version=<v>` (the one that RAN), and `Exception thrown while loading mod
+    klee ... already loaded` (the one that did not)."""
+    import re
+    dlls = re.findall(r"Loading assembly DLL (.*klee[^\\/]*\.dll)\s*$",
+                      log_text, flags=re.M | re.I)
+    ran = re.findall(r"Calling initializer method of type KleeMod\.KleeMod "
+                     r"for klee, Version=([^,\s]+)", log_text)
+    clash = re.findall(r"Exception thrown while loading mod klee.*?"
+                       r"'klee, Version=([^,']+).*?already loaded",
+                       log_text)
+    out = []
+    for dll in dlls:
+        out.append(f"klee dll tried:    {dll.strip()}")
+    out.append("klee loaded:       "
+               + (", ".join(f"version {v}" for v in ran) if ran else "NONE"))
+    if clash:
+        out.append("ERROR:             'Assembly with same name is already "
+                   f"loaded' -- version {', '.join(clash)} did NOT load "
+                   f"(another klee assembly, most likely the {BETA_MOD_ID} "
+                   f"Workshop copy, loaded first)")
+    else:
+        out.append("already-loaded:    none")
+    return out
+
+
 def verification(root: Path = REPO) -> list[str]:
     """The lines a deploy is read back on, off disk, and the branch built.
 
     Deliberately NOT the deploy script's own stdout: a deploy that printed
     success and staged nothing is the failure this reads past.
     """
-    game_dir = None
-    props = root / "klee-mod" / "local.props"
-    if props.exists():
-        import xml.etree.ElementTree as ET
-        try:
-            tree = ET.parse(props)
-            found = tree.find(".//GameDir")
-            if found is not None and found.text:
-                game_dir = Path(found.text.strip())
-        except ET.ParseError:
-            game_dir = None
+    game_dir = game_dir_from_props(root)
+    beta_line, _ = beta_shadow(game_dir)
     if game_dir is None:
         return ["installed version: UNKNOWN -- no readable klee-mod/local.props",
                 f"branch:            {current_branch(root) or '(detached)'}",
                 "bridge:            UNKNOWN", "staged images:     UNKNOWN",
-                art_debt(root)]
+                art_debt(root), beta_line]
 
     manifest = game_dir / "mods" / "klee" / "manifest.json"
     try:
@@ -276,7 +439,7 @@ def verification(root: Path = REPO) -> list[str]:
             f"bridge:            {'present' if bridge else 'ABSENT'} "
             f"({game_dir / 'mods' / 'STS2_MCP'})",
             f"staged images:     {count} card png(s)",
-            art_debt(root)]
+            art_debt(root), beta_line]
 
 
 def plan(args) -> list[list[str]]:
@@ -328,8 +491,15 @@ def main(argv: list[str]) -> int:
                     help="deploy the checked-out `<kit>-next` branch as a "
                     "+next staging build (refuses on any other branch or a "
                     "dirty tracked tree)")
+    ap.add_argument("--log", action="store_true",
+                    help="read the latest godot.log: which klee assembly "
+                    "loaded, and whether 'already loaded' appears; runs "
+                    "nothing")
     ap.add_argument("--oneline", action="store_true")
     args = ap.parse_args(argv)
+
+    if args.log:
+        return log_report(oneline=args.oneline)
 
     names = [a.strip().lower() for a in args.arms.split(",") if a.strip()]
     unknown = [a for a in names
@@ -373,8 +543,11 @@ def main(argv: list[str]) -> int:
 
     rebuild, why = pck_decision(pck_rel=pck_for(args.arms))
     steps = plan(args)
+    _, beta_warning = beta_shadow(game_dir_from_props())
 
     if args.dry_run:
+        if beta_warning:
+            print(beta_warning)
         if args.oneline:
             print(f"deploy_round: pck "
                   f"{'REBUILD' if (args.pck or rebuild) else 'skip'} ({why}); "
@@ -414,7 +587,29 @@ def main(argv: list[str]) -> int:
     if args.oneline:
         print("deploy_round: " + "; ".join(l.split(":", 1)[1].strip()
                                            for l in lines))
+    else:
+        for line in lines:
+            print(line)
+    if beta_warning:
+        print(beta_warning)
+    return 0
+
+
+def log_report(appdata: Path | None = None, oneline: bool = False) -> int:
+    """`--log`: what the latest godot.log says about klee. Exit 0 always --
+    a report, not a gate."""
+    path = godot_log(appdata)
+    if path is None:
+        print("deploy_round --log: no godot.log under "
+              "%APPDATA%\\SlayTheSpire2\\logs")
         return 0
+    lines = klee_load_report(path.read_text(encoding="utf-8",
+                                            errors="replace"))
+    if oneline:
+        print("deploy_round --log: " + "; ".join(
+            l.split(":", 1)[1].strip() for l in lines))
+        return 0
+    print(f"log:               {path}")
     for line in lines:
         print(line)
     return 0

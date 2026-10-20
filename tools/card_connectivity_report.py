@@ -1086,7 +1086,6 @@ COUNT_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "plans_held": [_hook("private", "kurage", "read")],
     "plans_held_plus_one": [_hook("private", "kurage", "read")],
     "chain_plans_held": [_hook("private", "kurage", "read")],
-    "chain_plans_held_plus_one": [_hook("private", "kurage", "read")],
     "plans_carried_out_this_combat": [_hook("private", "kurage", "read")],
     "stings_played_this_turn": [_hook("shared", "plays_this_turn", "read"),
                                 _hook("shared", "card_identity", "read")],

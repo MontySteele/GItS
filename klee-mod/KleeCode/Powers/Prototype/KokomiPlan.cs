@@ -823,8 +823,9 @@ public static class KokomiPlan
     /// <summary>
     /// KOKOMI V3 (2026-10-18, review/active/kokomi-cards-2026-10-18.md sec.6;
     /// [USER]: "Makes sense! ... let's do both."): the Plans waiting that are
-    /// not a Sting's or Ward's -- Tideturn's and Shoal of Spears' "Stings and
-    /// Wards don't count". Breakwater keeps <see cref="PlansHeld"/>. Sim twin:
+    /// not a Sting's or Ward's -- Tideturn's "Stings and Wards don't count".
+    /// Breakwater keeps <see cref="PlansHeld"/>, and so does Shoal of Spears
+    /// since its exemption (2026-10-20). Sim twin:
     /// <c>kokomi_plan.chain_plans_held</c>.
     /// </summary>
     public static int ChainPlansHeld(Creature? kokomi) =>

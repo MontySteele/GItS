@@ -169,6 +169,8 @@ times and never taken. The new texts:
   not Stings or Wards."
 - Shoal of Spears: "Deal 5 Hydro damage to ALL enemies, plus once more for each Plan waiting, not Stings or
   Wards."
+  **Exempted on 2026-10-20**, the user: "I'm wondering if we can drop the 'not stings or wards' condition from
+  Shoal of Spears. It's already a Rare." It counts every Plan waiting again; the other three keep the rule.
 
 Under these texts, three planned Stings with Tideturn give 8 now and 9 next turn, against Shape's 32 now. The
 Shoal is now the deck that wants damage this turn, and Grand Strategy is the one that arranges real Plans.

@@ -43,7 +43,7 @@ CASES = [
      "new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier("),
     ("proto_kk_shoal_of_spears", "ProtoKkShoalOfSpears",
      _deals("TotalDamage"),
-     "new HitsTotalDamageVar(static card => KokomiPlan.ChainPlansHeld("),
+     "new HitsTotalDamageVar(static card => KokomiPlan.PlansHeld("),
     ("proto_kk_drowning_pressure", "ProtoKkDrowningPressure",
      _deals("PressureHit"), "new DebuffsAfterDamageVar()"),
     ("proto_fs_bravura", "ProtoFsBravura", _deals("TotalDamage"),
@@ -76,5 +76,5 @@ def test_no_number_moved():
                    "amount_formula: {base: 0, per: 3, count: "
                    "weak_vuln_stacks_on_target}",
                    "{op: damage, amount: 7, target: all_enemies,\n"
-                   "              times: chain_plans_held_plus_one}"):
+                   "              times: plans_held_plus_one}"):
         assert needle in sheet, needle

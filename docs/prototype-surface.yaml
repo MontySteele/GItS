@@ -1289,9 +1289,9 @@
 - {id: proto_kk_treatise, name: "Treatise", character: kokomi,
    authored_by: [claude],
    # Pays for a play not written on the Bake-Kurage, never a carry-out.
-   # Cost 0 (2026-10-11); Companions count (round 2); face reworded again in
-   # the Kokomi review 2026-10-13. Provenance note.
-   cost: 0, type: power, rarity: uncommon,
+   # Cost 0 -> 1 (2026-10-20, [USER]: "It seems too good."; base-game
+   # precedent in the provenance note). The upgrade stays Innate.
+   cost: 1, type: power, rarity: uncommon,
    description: "The first time each turn you play a [gold]Plan[/gold] card or a [gold]Companion[/gold] without planning it, draw 1 card.",
    effects: [{op: apply_power, power: kk_treatise, amount: 1, target: self}],
    upgrade: {innate: true}}
@@ -1880,12 +1880,12 @@
    authored_by: [claude],
    # Pool sweep 2026-10-18 (review/active/pool-sweep-2026-10-18.md): 5 [6] -> 7 [9] a hit.
    cost: 1, type: attack, rarity: rare,
-   # The re-founding (2026-10-12): one hit per Plan waiting (was per Plan
-   # written this turn).
-   # Kokomi level pass (2026-10-12, sec.2): always hits at least once.
-   description: "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies, plus once more for each [gold]Plan[/gold] waiting, not Stings or Wards.{InCombat:\n(Deals {TotalDamage:diff()} damage)|}",
+   # One hit, plus one per Plan waiting. Stings and Wards count again
+   # (2026-10-20, [USER]: "It's already a Rare."); only Shoal is exempt
+   # from the 2026-10-18 rule. Provenance note.
+   description: "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies, plus once more for each [gold]Plan[/gold] waiting.{InCombat:\n(Deals {TotalDamage:diff()} damage)|}",
    effects: [{op: damage, amount: 7, target: all_enemies,
-              times: chain_plans_held_plus_one}],
+              times: plans_held_plus_one}],
    # 9 a hit. Kokomi round 2 (2026-10-12): 4 [5] -> 5 [6].
    upgrade: {damage: 2}}
 
