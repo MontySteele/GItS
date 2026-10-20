@@ -21,7 +21,7 @@ public interface IVarkaCharacter
 ///     (<see cref="VarkaOathLedger"/>); his CURRENT ELEMENT is the last
 ///     Knight's, and his cards read only its Oath (<see cref="VarkaOath"/>).
 ///   * BOREAS'S FANG (<c>Relics.BoreasFang</c>): a Swirl he makes pays his
-///     current element: Pyro 3 damage to the enemy Swirled, Hydro 3 Block,
+///     current element: Pyro 5 damage to the enemy Swirled, Hydro 3 Block,
 ///     Cryo 1 Vulnerable, Electro 3 damage to ALL (<see cref="VarkaLaw"/>;
 ///     the relic's since Starter (a), 2026-10-13). It makes his starter
 ///     Knight's element current each combat, and at the start of a run rolls
@@ -58,7 +58,7 @@ public static class VarkaPrototype
 public static class VarkaLaw
 {
     /// <summary>Pyro current: damage to the enemy he Swirled.</summary>
-    public const int SwirlPyroDamage = 3;
+    public const int SwirlPyroDamage = 5;
 
     /// <summary>Hydro current: Block per Swirl.</summary>
     public const int SwirlHydroBlock = 3;
@@ -73,4 +73,8 @@ public static class VarkaLaw
     /// <summary>Eye of Stormterror (the expansion): the Swirls each turn that
     /// draw.</summary>
     public const int EyeOfStormterrorSwirls = 3;
+
+    /// <summary>Eye of Stormterror+ (the power upgrade pass, 2026-10-19): the
+    /// first 4 Swirls each turn draw.</summary>
+    public const int EyeOfStormterrorSwirlsUpgraded = 4;
 }

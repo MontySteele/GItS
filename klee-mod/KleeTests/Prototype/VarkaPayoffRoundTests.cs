@@ -59,10 +59,13 @@ public class VarkaPayoffRoundTests : IDisposable
     [Fact]
     public void Wolfpack_says_shuffle_and_exhaust_on_card_and_power()
     {
+        // The power upgrade pass (2026-10-19): the upgraded copy.
         const string face = "Whenever you play [gold]Four Winds' Ascension[/gold], shuffle "
                           + "a copy of it into your [gold]Draw Pile[/gold]. The "
                           + "copy [gold]Exhausts[/gold].";
-        Assert.Equal(face, Face(new ProtoVkWolfpack()));
+        Assert.Equal(face.Replace("shuffle a copy",
+                                  "shuffle {IfUpgraded:show:an upgraded|a} copy"),
+                     Face(new ProtoVkWolfpack()));
         Assert.Equal(face, Face(new WolfpackPower()));
         Assert.Equal("wolfpack", ResolutionLedger.Wolfpack);
     }
@@ -71,7 +74,8 @@ public class VarkaPayoffRoundTests : IDisposable
     public void The_banner_card_says_the_current_element()
     {
         Assert.Equal("Only [gold]Knights[/gold] change your [gold]current "
-                     + "element[/gold]. Whenever another card would, gain 1 "
+                     + "element[/gold]. Whenever another card would, gain "
+                     + "{IfUpgraded:show:2|1} "
                      + "[gold]Oath[/gold] of your [gold]current element[/gold] "
                      + "instead.", Face(new ProtoVkUnwaveringBanner()));
     }

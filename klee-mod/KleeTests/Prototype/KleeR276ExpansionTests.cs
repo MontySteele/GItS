@@ -357,29 +357,9 @@ public class KleeR276ExpansionTests
     // ---- the Companion route ---------------------------------------------
 
     [Fact]
-    public void Playdate_takes_one_off_the_next_companion_card_and_nothing_else()
+    public void The_badge_and_wait_for_it_expire_at_the_end_of_the_turn_they_were_played()
     {
-        var seat = Seat.Klee().WithPower<PlaydatePower>(1);
-        var power = seat.Creature.Powers.OfType<PlaydatePower>().Single();
-
-        var friend = Owned<ProtoMcDionaIcyPaws>(seat);           // a Companion card
-        Assert.True(power.TryModifyEnergyCostInCombat(friend, 2m, out var cost));
-        Assert.Equal(1m, cost);
-        // Klee's own card is not a Companion card.
-        var own = Owned<ProtoKoPop>(seat);
-        Assert.False(power.TryModifyEnergyCostInCombat(own, 1m, out _));
-        // A free card has nothing to take off.
-        Assert.False(power.TryModifyEnergyCostInCombat(friend, 0m, out _));
-        // Two Playdates are two sentences about the same next card.
-        Assert.Equal(0m, PlaydatePower.Discounted(1m, 2));
-        // The card left with its row (Klee design review, 2026-10-08); the
-        // power stays registered.
-    }
-
-    [Fact]
-    public void Playdate_and_the_badge_expire_at_the_end_of_the_turn_they_were_played()
-    {
-        foreach (var type in new[] { "PlaydatePower", "BoomBadgePower", "WaitForItPower" })
+        foreach (var type in new[] { "BoomBadgePower", "WaitForItPower" })
         {
             Assert.Contains("PowerCmd.Remove",
                             Il.Calls(Il.Method(type, "AfterSideTurnEnd")));
@@ -560,12 +540,12 @@ public class KleeR276ExpansionTests
         // Necrobinder's Sentry Gaze ..."): Alice's Mine, not Ka-pow!, at
         // Sentry Mode's site (BeforeHandDraw). Sim twin:
         // `test_alices_detonator_adds_an_alices_mine_and_the_plus_an_upgraded_one`.
-        Assert.False(((AlicesDetonatorBasePower)RuntimeHelpers
-            .GetUninitializedObject(typeof(AlicesDetonatorPower))).Upgraded);
-        Assert.True(((AlicesDetonatorBasePower)RuntimeHelpers
-            .GetUninitializedObject(typeof(AlicesDetonatorPlusPower))).Upgraded);
-        Assert.Contains("AlicesDetonatorBasePower.Install", Play("ProtoKoAlicesDetonator"));
-        var turn = Il.Calls(Il.Method("AlicesDetonatorBasePower", "BeforeHandDraw"));
+        // One power for both versions (the icon declutter, 2026-10-19): an
+        // upgraded card's copy is counted, and its Mine arrives upgraded.
+        Assert.True(typeof(UpgradeTwinPower).IsAssignableFrom(typeof(AlicesDetonatorPower)));
+        Assert.Contains("AlicesDetonatorPower.Install", Play("ProtoKoAlicesDetonator"));
+        var turn = Il.Calls(Il.Method("AlicesDetonatorPower", "BeforeHandDraw"));
+        Assert.Contains("UpgradeTwinPower.Batches", turn);
         Assert.Contains("CardModel.UpgradeInternal", turn);
         Assert.Contains("CardPileCmd.AddGeneratedCardToCombat", turn);
         Assert.Contains(turn, c => c.Contains("CreateCard"));
@@ -594,13 +574,13 @@ public class KleeR276ExpansionTests
         Assert.Contains("HoverTipFactory.FromCard", preview);
         Assert.Contains("CardModel.get_IsUpgraded", preview);
 
-        // And the Power's badge previews the same card, upgraded on the Plus
-        // twin -- the Ka-pow! it actually adds.
-        var badge = typeof(AlicesDetonatorBasePower)
+        // And the Power's badge previews the same card, upgraded when an
+        // upgraded card installed a copy -- the Mine it actually adds.
+        var badge = typeof(AlicesDetonatorPower)
             .GetProperty("ExtraHoverTips", HeadlessGame.All)!.GetGetMethod(true)!;
         var calls = Il.Calls(badge);
         Assert.Contains("HoverTipFactory.FromCard", calls);
-        Assert.Contains("AlicesDetonatorBasePower.get_Upgraded", calls);
+        Assert.Contains("UpgradeTwinPower.get_UpgradedCopies", calls);
 
         // The card text pass (2026-10-12, rule 9): a card name is golded
         // wherever a face prints it; the preview still carries the card.

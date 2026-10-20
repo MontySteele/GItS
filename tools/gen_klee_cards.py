@@ -3949,9 +3949,6 @@ APPLY_POWERS = {
     # klee-mod/KleeCode/Powers/Prototype/KleeExpansionPowers.cs, on the same
     # quarantine as the block above. The {X} templates are for form; every row
     # carries its own `description:` (EB-215).
-    "ko_playdate": ("PlaydatePower", None,
-        "The next [gold]Companion[/gold] card you play this turn costs 1 "
-        "less."),
     "ko_boom_badge": ("BoomBadgePower", None,
         "Your next [gold]Set off[/gold] card this turn is played twice."),
     "ko_wait_for_it": ("WaitForItPower", None,
@@ -4001,16 +3998,12 @@ APPLY_POWERS = {
     # FURINA, THE SALON'S TAB (2026-10-05). Every class lives in
     # klee-mod/KleeCode/Powers/Prototype/FurinaStagePowers.cs; the rules they
     # switch on live in `FurinaStage`. Every row states its own face.
-    "fs_salons_encore": ("SalonsEncorePower", None,
-        "Whenever you [gold]Drain[/gold], deal {X} damage to ALL enemies."),
     "fs_thunderous_applause": ("ThunderousApplausePower", None,
         "Whenever you [gold]Spend[/gold], deal {X} damage to ALL enemies."),
     "fs_universal_revelry": ("UniversalRevelryPower", None,
         "Whenever you [gold]Drain[/gold] or [gold]Repay[/gold], gain that "
         "much additional [gold]Fanfare[/gold]."),
     # THE POOL TO 39 (review/ruled/furina-pool-40-2026-10-05.md sec.3).
-    "fs_ousia_surge": ("OusiaSurgePower", None,
-        "The first time you [gold]Drain[/gold] each turn, draw {X} card."),
     "fs_a_five_century_act": ("FiveCenturyActPower", None,
         "HP you [gold]Drain[/gold] past your line also returns when combat "
         "ends."),
@@ -4034,30 +4027,23 @@ APPLY_POWERS = {
     "fs_ensemble_cast": ("EnsembleCastPower", None,
         "You have 4 guest seats."),
     # Furina's engines (furina-next, 2026-10-16): Crescendo counts from the
-    # turn it is played; Prima Donna's upgraded card installs the Plus power
-    # (`upgraded_power`), which also draws.
+    # turn it is played; Prima Donna's upgraded card's copy also draws
+    # (`upgraded_power`), counted on the same class since the icon declutter
+    # (2026-10-19, `UpgradeTwinPower`).
     "fs_crescendo": ("CrescendoPower", None,
         "At the start of your turn, gain {X} [gold]Fanfare[/gold], then {X} "
         "more each turn after."),
     "fs_prima_donna": ("PrimaDonnaPower", None,
         "At the start of your turn, if you [gold]Spent[/gold] last turn, "
         "gain 1 Energy."),
-    "fs_prima_donna_plus": ("PrimaDonnaPlusPower", None,
+    "fs_prima_donna_plus": ("PrimaDonnaPower", None,
         "At the start of your turn, if you [gold]Spent[/gold] last turn, "
         "gain 1 Energy and draw 1 card."),
     "fs_standing_room_only": ("StandingRoomOnlyPower", None,
         "Whenever you [gold]Spend[/gold], gain 1 [gold]Strength[/gold]."),
-    "fs_high_stakes": ("HighStakesPower", None,
-        "Your Attacks deal 1 additional damage for every {X} HP you have "
-        "[gold]Drained[/gold] and not [gold]Repaid[/gold]."),
     "fs_regina_of_all_waters": ("ReginaOfAllWatersPower", None,
         "At the start of your turn, [gold]Drain[/gold] 3, never past your "
         "line. If you do, gain 1 [gold]Strength[/gold]."),
-    "fs_pneuma_tides": ("PneumaTidesPower", None,
-        "At the start of your turn, [gold]Repay[/gold] {X}."),
-    "fs_hymn_of_renewal": ("HymnOfRenewalPower", None,
-        "Whenever you [gold]Repay[/gold] 4 or more HP at once, gain 1 "
-        "[gold]Strength[/gold]."),
     # THE BLOCK GAP (2026-10-09). The class lives in
     # klee-mod/KleeCode/Powers/Prototype/FurinaPool75Powers.cs.
     "fs_the_masquerade": ("TheMasqueradePower", None,
@@ -4128,6 +4114,12 @@ APPLY_POWERS = {
     "vk_west_winds_blessing": ("WestWindsBlessingPower", None,
         "The first time each turn you [gold]Swirl[/gold], each other player "
         "gains {X} [gold]Energy[/gold]."),
+    # The power upgrade pass (2026-10-19): the upgraded card's copy is
+    # counted on the same class (`UpgradeTwinPower`, the icon declutter's
+    # shape), so each `_plus` key names the base class.
+    "vk_west_winds_blessing_plus": ("WestWindsBlessingPower", None,
+        "The first time each turn you [gold]Swirl[/gold], each other player "
+        "gains {X} [gold]Energy[/gold] and draws 1 card."),
     "mc_sinful_hex": ("SinfulHexPower", None,
         "Whenever an [gold]Electro[/gold] [gold]Elemental Reaction[/gold] "
         "happens this turn, deal {X} [gold]Electro[/gold] damage to a random "
@@ -4166,9 +4158,6 @@ APPLY_POWERS = {
         "The first time each turn you deal [gold]Hydro[/gold] damage, apply "
         "{X} Weak and {X} Vulnerable to the enemy hit. [gold]Plans[/gold] "
         "count."),
-    "kk_ceremonial_garment": ("ProtoCeremonialGarmentPower", None,
-        "Your Attacks deal {X} additional damage for each Weak and "
-        "Vulnerable on their target."),
     "kk_watatsumis_grace": ("WatatsumisGracePower", None,
         "At the end of your turn, keep up to {X} of your Block."),
     # Kokomi card paper v2 (2026-10-18, sec.2 change 4): the bonus is stored
@@ -4183,12 +4172,14 @@ APPLY_POWERS = {
     # THE PAYOFF PASS (2026-10-01). Kurage Canopy rides the plan bus
     # (`IKokomiPlanListener`); its class is in KokomiExpansion.cs. Kokomi
     # round 3 A-list (2026-10-13): a Ward per carried-out Plan; the upgraded
-    # card installs the Plus power, whose Ward is upgraded (`upgraded_power`).
+    # card's copy adds an upgraded Ward (`upgraded_power`). Since the icon
+    # declutter (2026-10-19) both versions are ONE power class
+    # (`UpgradeTwinPower`), so the Plus key names the same class.
     "kk_kurage_canopy": ("KurageCanopyPower", None,
         "Whenever the [gold]Bake-Kurage[/gold] carries out a "
         "[gold]Plan[/gold] that is not a [gold]Sting[/gold] or "
         "[gold]Ward[/gold], add a [gold]Ward[/gold] to your hand."),
-    "kk_kurage_canopy_plus": ("KurageCanopyPlusPower", None,
+    "kk_kurage_canopy_plus": ("KurageCanopyPower", None,
         "Whenever the [gold]Bake-Kurage[/gold] carries out a "
         "[gold]Plan[/gold] that is not a [gold]Sting[/gold] or "
         "[gold]Ward[/gold], add an upgraded [gold]Ward[/gold] to your "
@@ -4197,9 +4188,6 @@ APPLY_POWERS = {
     "kk_seas_reproach": ("SeasReproachPower", None,
         "Whenever you apply [gold]Weak[/gold] or [gold]Vulnerable[/gold] to "
         "an enemy, deal {X} damage to it."),
-    "kk_watatsumi_resistance": ("WatatsumiResistancePower", None,
-        "Whenever you write a [gold]Companion[/gold] card as a "
-        "[gold]Plan[/gold], add a [gold]Sting[/gold] to your hand."),
     # THE RE-FOUNDING (2026-10-12, review/ruled/kokomi-card-paper-2026-10-12.md
     # sec.2). Every class lives in Powers/Prototype/KokomiRefounding.cs.
     "kk_sangonomiyas_orders": ("SangonomiyasOrdersPower", None,
@@ -4213,15 +4201,9 @@ APPLY_POWERS = {
     # THE POOL OVERHAUL (2026-10-13): Coordinated Tide reads a Companion's
     # reaction and Grand Strategist any of hers; Jellyfish Current and Battle
     # Formation are new. Classes in KokomiRefounding.cs.
-    "kk_coordinated_tide": ("CoordinatedTidePower", None,
-        "Whenever a [gold]Companion[/gold] triggers an [gold]Elemental "
-        "Reaction[/gold], add a [gold]Sting[/gold] to your hand."),
     "kk_grand_strategist": ("GrandStrategistPower", None,
         "Whenever you trigger an [gold]Elemental Reaction[/gold], deal {X} "
         "damage to ALL enemies."),
-    "kk_jellyfish_current": ("JellyfishCurrentPower", None,
-        "Whenever a [gold]Sting[/gold] triggers an [gold]Elemental "
-        "Reaction[/gold], add a [gold]Sting[/gold] to your hand."),
     "kk_battle_formation": ("BattleFormationPower", None,
         "Whenever 3 or more [gold]Plans[/gold] are carried out in one turn, "
         "gain 1 Energy and draw 2 cards."),
@@ -4472,11 +4454,9 @@ APPLY_POWERS = {
     "vk_dawn_winds_march": ("DawnWindsMarchPower", None,
         "Whenever you gain [gold]Oath[/gold] of your [gold]current "
         "element[/gold], gain {X} [gold]Block[/gold]."),
-    "vk_sworn_brotherhood": ("SwornBrotherhoodPower", None,
-        "At the start of your turn, gain {X} [gold]Oath[/gold] of every "
-        "element."),
-    # Power cost sweep, 2026-09-30: the base Sworn Brotherhood; the upgrade
-    # installs the every-element power above.
+    # Power cost sweep, 2026-09-30: the base Sworn Brotherhood (Knight of
+    # Boreas). Its every-element twin left in the icon declutter (2026-10-19):
+    # no row applied it.
     "vk_sworn_brotherhood_current": ("SwornBrotherhoodCurrentPower", None,
         "At the start of your turn, gain {X} [gold]Oath[/gold] of your "
         "[gold]current element[/gold]."),
@@ -4494,6 +4474,10 @@ APPLY_POWERS = {
         "Only [gold]Knights[/gold] change your [gold]current "
         "element[/gold]. Whenever another card would, gain 1 "
         "[gold]Oath[/gold] of it instead."),
+    "vk_unwavering_banner_plus": ("UnwaveringBannerPower", None,
+        "Only [gold]Knights[/gold] change your [gold]current "
+        "element[/gold]. Whenever another card would, gain 2 "
+        "[gold]Oath[/gold] of it instead."),
     "vk_cycle_of_seasons": ("CycleOfSeasonsPower", None,
         "Whenever your [gold]current element[/gold] changes, deal {X} damage "
         "to ALL enemies."),
@@ -4509,6 +4493,9 @@ APPLY_POWERS = {
     "vk_wildfire_oath": ("WildfireOathPower", None,
         "Whenever you apply [gold]Pyro[/gold] to an enemy, deal damage equal "
         "to your [gold]Pyro[/gold] [gold]Oath[/gold] to it."),
+    "vk_wildfire_oath_plus": ("WildfireOathPower", None,
+        "Whenever you apply [gold]Pyro[/gold] to an enemy, deal damage equal "
+        "to your [gold]Pyro[/gold] [gold]Oath[/gold] plus 3 to it."),
     "vk_retaliating_tide": ("RetaliatingTidePower", None,
         "At the end of your turn, deal damage equal to your "
         "[gold]Block[/gold] to a random enemy."),
@@ -4516,12 +4503,19 @@ APPLY_POWERS = {
         "While your [gold]current element[/gold] is [gold]Cryo[/gold], your "
         "[gold]Swirls[/gold] apply [gold]Vulnerable[/gold] and "
         "[gold]Weak[/gold] to ALL enemies."),
+    "vk_absolute_zero_plus": ("AbsoluteZeroPower", None,
+        "Whenever you apply [gold]Weak[/gold] or [gold]Vulnerable[/gold] to "
+        "an enemy, deal damage equal to your [gold]Cryo[/gold] "
+        "[gold]Oath[/gold] plus 3 to it."),
     "vk_oath_unto_death": ("OathUntoDeathPower", None,
         "Whenever you gain [gold]Oath[/gold] of your [gold]current "
         "element[/gold], gain {X} more."),
     "vk_wolfpack": ("WolfpackPower", None,
         "Whenever you play Four Winds' Ascension, add a copy of it to your "
         "[gold]Discard Pile[/gold]."),
+    "vk_wolfpack_plus": ("WolfpackPower", None,
+        "Whenever you play Four Winds' Ascension, shuffle an upgraded copy "
+        "of it into your [gold]Draw Pile[/gold]. The copy Exhausts."),
     "vk_oathbound_aegis": ("OathboundAegisPower", None,
         "At the end of your turn, gain [gold]Block[/gold] equal to half your "
         "total [gold]Oath[/gold]."),
@@ -4532,6 +4526,10 @@ APPLY_POWERS = {
     "vk_weathervane": ("WeathervanePower", None,
         "At the start of your turn, you may choose an element you have "
         "[gold]Oath[/gold] in. It becomes your [gold]current element[/gold]."),
+    "vk_weathervane_plus": ("WeathervanePower", None,
+        "At the start of your turn, you may choose an element you have "
+        "[gold]Oath[/gold] in. It becomes your [gold]current element[/gold]. "
+        "Gain 1 [gold]Oath[/gold] of it."),
     # YAE MIKO (2026-10-13). Every class lives in
     # klee-mod/KleeCode/Powers/Prototype/YaePowers.cs; each row carries its
     # own `description:`. Sim twins: tier0/engine/yae_shrine.py.
@@ -4589,6 +4587,8 @@ APPLY_POWERS = {
         "pays twice."),
     "vk_eye_of_stormterror": ("EyeOfStormterrorPower", None,
         "The first 3 times you [gold]Swirl[/gold] each turn, draw {X} card."),
+    "vk_eye_of_stormterror_plus": ("EyeOfStormterrorPower", None,
+        "The first 4 times you [gold]Swirl[/gold] each turn, draw {X} card."),
     "vk_the_order_answers": ("TheOrderAnswersPower", None,
         "At the start of your turn, add {X} random [gold]Knight[/gold] to "
         "your hand."),
@@ -12861,19 +12861,28 @@ def build_body(
                 # different power, a play-time `IsUpgraded` read (sim twin:
                 # upgrades.py rewrites the effect's `power`).
                 up_cls = APPLY_POWERS[upgrade_plan(card)[0]["upgraded_power"]][0]
-                lines.append(
-                    "if (IsUpgraded)\n"
-                    "        {\n"
-                    f"            await PowerCmd.Apply<{up_cls}>(choiceContext, "
-                    f"Owner.Creature, {amount}, applier: Owner.Creature, "
-                    "cardSource: this);\n"
-                    "        }\n"
-                    "        else\n"
-                    "        {\n"
-                    f"            await PowerCmd.Apply<{cls}>(choiceContext, "
-                    f"Owner.Creature, {amount}, applier: Owner.Creature, "
-                    "cardSource: this);\n"
-                    "        }")
+                if up_cls == cls:
+                    # THE ICON DECLUTTER (2026-10-19): one class for both
+                    # versions (`UpgradeTwinPower`); the play notes whether
+                    # its copy came from an upgraded card.
+                    lines.append(
+                        f"await UpgradeTwinPower.Install<{cls}>(choiceContext, "
+                        f"Owner.Creature, {amount}, IsUpgraded, Owner.Creature, "
+                        "this);")
+                else:
+                    lines.append(
+                        "if (IsUpgraded)\n"
+                        "        {\n"
+                        f"            await PowerCmd.Apply<{up_cls}>(choiceContext, "
+                        f"Owner.Creature, {amount}, applier: Owner.Creature, "
+                        "cardSource: this);\n"
+                        "        }\n"
+                        "        else\n"
+                        "        {\n"
+                        f"            await PowerCmd.Apply<{cls}>(choiceContext, "
+                        f"Owner.Creature, {amount}, applier: Owner.Creature, "
+                        "cardSource: this);\n"
+                        "        }")
             else:
                 lines.append(
                     f"await PowerCmd.Apply<{cls}>(choiceContext, Owner.Creature, "
@@ -13358,7 +13367,7 @@ def build_body(
             # Alice's Detonator. Whether the Ka-pow!s arrive upgraded is the
             # CARD's upgrade, read here at install time (`upgraded_grant`).
             lines.append(
-                "await AlicesDetonatorBasePower.Install(choiceContext, "
+                "await AlicesDetonatorPower.Install(choiceContext, "
                 "Owner.Creature, IsUpgraded, this);")
 
         elif op == "companion_mark_hand":
@@ -16628,9 +16637,17 @@ def build_upgrade(card: dict) -> list[str]:
         # Power cost sweep, 2026-09-30. The same play-time read: OnPlay
         # applies the named power when upgraded; the face states the swap.
         done.add("upgraded_power")
-        lines.append("// upgraded_power: the upgraded card installs "
-                     f"{APPLY_POWERS[deltas['upgraded_power']][0]}, read off "
-                     "IsUpgraded when the card is played.")
+        up_cls = APPLY_POWERS[deltas["upgraded_power"]][0]
+        base = upgraded_power_effect(card)
+        if base is not None and APPLY_POWERS.get(
+                base.get("power"), ("",))[0] == up_cls:
+            lines.append("// upgraded_power: the upgraded card's copy of "
+                         f"{up_cls} counts as upgraded, read off IsUpgraded "
+                         "when the card is played.")
+        else:
+            lines.append("// upgraded_power: the upgraded card installs "
+                         f"{up_cls}, read off IsUpgraded when the card is "
+                         "played.")
     if "kokomi_amount" in deltas:
         done.add("kokomi_amount")
         lines.append('DynamicVars["KkAmount"].UpgradeValueBy('
@@ -17089,12 +17106,11 @@ STAGE_REPAY_PAYOUT_CS = {
     "damage": "FurinaStageFacePreview.PayDamage",
 }
 STAGE_REPAY_POWER_PAYOUTS = {
-    "fs_pneuma_tides": "vigor", "fs_fountain_of_lucine": "block",
-    "fs_grand_entrance": "block"}
+    "fs_fountain_of_lucine": "block", "fs_grand_entrance": "block"}
 
 #: The Repay powers whose face reads a `PowerAmount` var (an upgrade moves
 #: their number); Fountain of Lucine's Repay is fixed (2026-10-13).
-STAGE_REPAY_POWER_VARS = frozenset({"fs_pneuma_tides", "fs_grand_entrance"})
+STAGE_REPAY_POWER_VARS = frozenset({"fs_grand_entrance"})
 
 
 def _damage_reads_repay_left(card: dict) -> bool:
@@ -17129,7 +17145,7 @@ def stage_repay_payout_cs(card: dict, repay: dict) -> str:
 #: Powers whose whole job is a Repay of their amount (the pool-75 round,
 #: 2026-10-09: every Repay face prints "(Repays N)", these included).
 STAGE_REPAY_POWERS = frozenset({
-    "fs_pneuma_tides", "fs_fountain_of_lucine", "fs_grand_entrance"})
+    "fs_fountain_of_lucine", "fs_grand_entrance"})
 
 
 def stage_later_repay_call(card: dict) -> str | None:

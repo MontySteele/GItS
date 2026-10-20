@@ -239,20 +239,20 @@ def test_a_spread_credits_nothing(varka):
 
 def test_northwind_credits_both_keys_and_ascension_only_the_swirl(varka):
     # Northwind: 10 Anemo Swirls the Pyro (+1 swirl-Pyro, flat 2, Pyro
-    # payout 3), then 8 + 2 x 2 Pyro, which credits apply-Pyro.
+    # payout), then 8 + 2 x 2 Pyro, which credits apply-Pyro.
     st = _state(enemies=[_enemy(aura="pyro")])
     led = _led(st)
     led.current, led.oath["pyro"] = "pyro", 1
     _play(st, _vk("northwind_avatar"))
     assert led.oath["pyro"] == 3
-    assert st.enemies[0].hp == 100 - (10 + 2 + 3 + 12)
+    assert st.enemies[0].hp == 100 - (10 + 2 + V.SWIRL_PYRO_DAMAGE + 12)
     # Ascension: 10 Anemo Swirls (+1), then 3 x 2 Pyro that credits nothing.
     st = _state(enemies=[_enemy(aura="pyro")])
     led = _led(st)
     led.current, led.oath["pyro"] = "pyro", 1
     _play(st, _vk("four_winds_ascension"))
     assert led.oath["pyro"] == 2
-    assert st.enemies[0].hp == 100 - (10 + 2 + 3 + 6)
+    assert st.enemies[0].hp == 100 - (10 + 2 + V.SWIRL_PYRO_DAMAGE + 6)
 
 
 def test_ascension_with_no_current_element_deals_its_anemo_only(varka):
@@ -383,7 +383,7 @@ def test_each_swirl_payout(varka, current):
     _play(st, _vk("jean_dandelion_breeze"))
     a, b = st.enemies
     assert _led(st).oath["cryo"] == 1                   # the Swirl's credit
-    extra_a = {"pyro": 3, "electro": 3}.get(current, 0)
+    extra_a = {"pyro": V.SWIRL_PYRO_DAMAGE, "electro": 3}.get(current, 0)
     extra_b = {"electro": 3}.get(current, 0)
     assert a.hp == 100 - 2 - extra_a
     assert b.hp == 100 - 2 - extra_b
@@ -397,7 +397,7 @@ def test_the_pyro_payout_is_unpowered_and_meets_vulnerable(varka):
     st.player.powers["strength"] = 5
     st.enemies[0].powers["vulnerable"] = 2
     V.on_swirl(st, st.enemies[0], "cryo")
-    assert st.enemies[0].hp == 100 - int(3 * 1.5)
+    assert st.enemies[0].hp == 100 - int(V.SWIRL_PYRO_DAMAGE * 1.5)
 
 
 # ---------------------------------------------------------------------------

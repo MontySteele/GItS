@@ -289,7 +289,12 @@ MOD_ONLY = {"character", "ts",       # the seat's character; the wall clock
             # narrates none of them; MOD FEED ONLY, added, never a rename.
             "cards_drawn_by_turn", "energy_by_turn", "swirl_damage_by_card",
             "oath_by_turn", "oath_peak", "current_element_by_turn",
-            "full_house_triggers"}
+            "full_house_triggers",
+            # 2026-10-19 (Varka Fang review, pick 2a): what Boreas's Fang
+            # paid, tagged in `VarkaOath.Pay`. MOD FEED ONLY, added.
+            "fang_payouts_by_element", "fang_damage_by_element",
+            "fang_damage_blocked", "fang_block", "fang_vulnerable",
+            "fang_vulnerable_bonus_damage"}
 
 
 def _csharp_keys() -> set[str]:

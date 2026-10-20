@@ -379,28 +379,51 @@ REST = pose(
     {"にこり": 0.5, "なごみ": 0.5}, yaw=40)
 
 # ------------------------------------------------------------------ character select
-# Composed and sure of the plan: chin level, a knowing smile, the near hand at
-# her chest and the far hand open and low before her, palm up.
+# Composed and sure of the plan: chin level, a knowing smile, the far hand
+# open and low before her, palm up, and the near hand relaxed at her waist.
+# The near hand was at her chest until 2026-10-19; there its fingers sank
+# into the bow and its forearm read as a flat band across the dress, so it
+# came down to stance A's NEAR (the brooch now shows).
 
 
-def select_pose(head_turn=16.0):
-    return pose([("move", "センター", (0, 0, -0.01)),
+def select_pose(head_turn=16.0, breath=1.0, swing=0.0):
+    """breath 1.0 and swing 0 is the still; the loop (SELECT_LOOP) breathes out
+    from there: the chest settles, the chin dips a hair, the open hand sinks
+    and the skirt tails and sleeves sway."""
+    b = 1.0 - breath
+    return pose([("move", "センター", (0, 0, -0.01 - 0.005 * b)),
                  ("movew", "足ＩＫ.L", (0.05, 0.02, 0)),
                  ("movew", "足ＩＫ.R", (-0.04, -0.02, 0)),
-                 ("rotw", "上半身", Y, -2.0),
+                 ("rotw", "上半身", Y, -2.0 + 1.0 * b),
                  ("rotw", "上半身", Z, -16),
                  ("rotw", "首", Z, head_turn * 0.4),
                  ("rotw", "頭", Z, head_turn * 0.6),
-                 ("rot", "頭", X, -4),
-                 ("rotw", "頭", Y, -6)]
-                + hands(far=(0.26, -0.14, -0.12), near=(-0.02, -0.16, 0.02), far_pole=(0.3, 0.6, -1.0),
-                        near_pole=(-0.8, 0.0, -0.6), far_curl=(10, 0), near_curl=(30, 10),
-                        far_aim=((0.8, -0.3, -0.1), -90.0))
-                + cloth(0),
+                 ("rot", "頭", X, -4 + 1.5 * b),
+                 ("rotw", "頭", Y, -6 - 0.8 * b)]
+                + hands(far=(0.26, -0.14, -0.12 - 0.014 * b), near=add(NEAR, (0, 0, -0.004 * b)),
+                        far_pole=(0.3, 0.6, -1.0), near_pole=NEAR_POLE, far_curl=(10 + 3 * b, 0),
+                        near_curl=(25, 10), far_aim=((0.8, -0.3, -0.1), -90.0))
+                + cloth(swing, sleeve_swing=-4.0 * swing),
                 {"にこり": 0.7, "口角上げ": 0.5, "なごみ": 0.2})
 
 
 SELECT = select_pose()
+
+#: The close-up's idle loop (select stage 2; Kokomi's 2026-10-19): HALF a
+#: breath, from the still's pose out to the exhale with the tails and sleeves
+#: swung. The game plays it forward then back, so every motion is a cosine of
+#: the loop (eased at both ends) and the loop has no seam.
+#: tools/select_loop.py renders it at the still's framing; frame 0 IS the still.
+SELECT_LOOP = {
+    "length": 2.0, "fps": 6, "loop": True, "motion_end": 2.0,
+    "keys": [
+        (0.0, select_pose(), "io"),
+        (2.0, select_pose(breath=0.0, swing=2.5), "io"),
+    ],
+}
+#: not in CLIPS: a half loop that does not close on its own (the game plays it
+#: forward then back); only tools/select_loop.py renders it
+SELECT_LOOPS = {"select_loop": SELECT_LOOP}
 
 # ------------------------------------------------------------------ roster tile
 # The face close-up is cut from the same pose.

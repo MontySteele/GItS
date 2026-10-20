@@ -109,11 +109,12 @@ public class PoolCountTests
     }
 
     [Fact]
-    public void Varka_is_78_and_20_35_23_with_two_ancients()
+    public void Varka_is_78_and_20_36_22_with_two_ancients()
     {
         // His Ancients since the Varka review (ruled 2026-10-12); no co-op
         // tier yet.
-        AssertPool("VarkaRoster", "Pool", 20, 35, 23);
+        // The rarity sweep (2026-10-19): 20 / 36 / 22, was 20 / 35 / 23.
+        AssertPool("VarkaRoster", "Pool", 20, 36, 22);
         AssertAncients("Varka");
     }
 

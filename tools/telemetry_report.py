@@ -655,6 +655,7 @@ def tempo_summary(group: str, rows: list[dict]) -> dict:
     full = [_num(r, "full_house_triggers") for r in rows
             if "full_house_triggers" in r]
     full = [v for v in full if v is not None]
+    fang = fang_summary(rows)
     return {
         "group": group, "fights": len(rows),
         "fights_with_draws": len(drawn),
@@ -671,6 +672,57 @@ def tempo_summary(group: str, rows: list[dict]) -> dict:
         "fights_with_oath": sum(1 for r in rows if "oath_peak" in r),
         "full_house_triggers": sum(full) if full else None,
         "full_house_fights": sum(1 for v in full if v > 0),
+        "fang": fang,
+    }
+
+
+def fang_summary(rows: list[dict]) -> dict | None:
+    """Boreas's Fang's payouts (2026-10-19, Varka Fang review pick 2a), over
+    the fights that carry `fang_payouts_by_element`: payouts by element,
+    damage per Pyro / Electro payout, Block per Hydro payout, Vulnerable
+    stacks and Vulnerable bonus damage per Cryo payout, and the Fang's share
+    of those fights' `damage_dealt`. None when no fight carries the keys."""
+    carried = [r for r in rows
+               if isinstance(r.get("fang_payouts_by_element"), dict)]
+    if not carried:
+        return None
+    paid: dict[str, int] = {}
+    dmg: dict[str, int] = {}
+    block = vuln = 0
+    bonus = 0.0
+    dealt = 0
+    for r in carried:
+        for e, n in r["fang_payouts_by_element"].items():
+            if isinstance(n, (int, float)):
+                paid[str(e)] = paid.get(str(e), 0) + int(n)
+        for e, n in (r.get("fang_damage_by_element") or {}).items():
+            if isinstance(n, (int, float)):
+                dmg[str(e)] = dmg.get(str(e), 0) + int(n)
+        block += int(_num(r, "fang_block") or 0)
+        vuln += int(_num(r, "fang_vulnerable") or 0)
+        bonus += float(_num(r, "fang_vulnerable_bonus_damage") or 0.0)
+        dealt += int(_num(r, "damage_dealt") or 0)
+
+    def per(total: float, element: str) -> float | None:
+        n = paid.get(element, 0)
+        return total / n if n else None
+
+    fang_damage = sum(dmg.values())
+    return {
+        "fights": len(carried),
+        "payouts": dict(sorted(paid.items())),
+        "damage": dict(sorted(dmg.items())),
+        "pyro_damage_per_payout": per(dmg.get("Pyro", 0), "Pyro"),
+        "electro_damage_per_payout": per(dmg.get("Electro", 0), "Electro"),
+        "hydro_block_per_payout": per(block, "Hydro"),
+        "cryo_vulnerable_per_payout": per(vuln, "Cryo"),
+        "cryo_bonus_per_payout": per(bonus, "Cryo"),
+        "vulnerable_bonus_damage": bonus,
+        # The Fang's own hits over the fights' dealt damage; the Vulnerable
+        # bonus is a second reading of other hits and is shown beside it.
+        "damage_share": fang_damage / dealt if dealt else None,
+        "damage_share_with_bonus": ((fang_damage + bonus) / dealt
+                                    if dealt else None),
     }
 
 
@@ -703,6 +755,20 @@ def render_tempo(tx: list[dict]) -> list[str]:
             lines.append(f"  {s['group'][:15]}: Full House triggers "
                          f"{_f(s['full_house_triggers'], 0)} in "
                          f"{s['full_house_fights']} fights")
+        fang = s.get("fang")
+        if fang:
+            share = ("--" if fang["damage_share"] is None
+                     else f"{100 * fang['damage_share']:.1f}%")
+            payouts = ", ".join(f"{e} {n}" for e, n in fang["payouts"].items())
+            lines.append(f"  {s['group'][:15]}: Boreas's Fang "
+                         f"({fang['fights']} fights): payouts {payouts}; "
+                         f"share of damage {share}")
+            lines.append(
+                f"    per payout: Pyro {_f(fang['pyro_damage_per_payout'])} dmg,"
+                f" Electro {_f(fang['electro_damage_per_payout'])} dmg,"
+                f" Hydro {_f(fang['hydro_block_per_payout'])} Block,"
+                f" Cryo {_f(fang['cryo_vulnerable_per_payout'])} Vuln"
+                f" + {_f(fang['cryo_bonus_per_payout'])} bonus dmg")
         swirl = sorted(s["swirl_damage_by_card"].items(),
                        key=lambda kv: (-kv[1], kv[0]))
         if swirl:

@@ -438,12 +438,47 @@ def test_tempo_pools_draws_energy_swirl_oath_and_full_house(tmp_path, capsys):
     assert "Converging Winds" in text
 
 
+def test_tempo_reads_boreas_fangs_payouts(tmp_path, capsys):
+    """Varka Fang review pick 2a (2026-10-19): the Fang's payouts by
+    element, per payout and as a share of damage dealt. A fight without the
+    keys is left out. C# twin: FangTelemetryTests."""
+    rows = [
+        fight("Varka", damage_dealt=100,
+              fang_payouts_by_element={"Pyro": 2, "Cryo": 2},
+              fang_damage_by_element={"Pyro": 9}, fang_block=0,
+              fang_vulnerable=2, fang_vulnerable_bonus_damage=3.5),
+        fight("Varka", damage_dealt=50,
+              fang_payouts_by_element={"Hydro": 2, "Electro": 1},
+              fang_damage_by_element={"Electro": 6}, fang_block=6,
+              fang_vulnerable=0, fang_vulnerable_bonus_damage=0),
+        fight("Varka", damage_dealt=999),             # an older record
+    ]
+    out = run(tmp_path, rows, "--tempo", "--character", "Varka",
+              capsys=capsys)
+    f = out["tempo"][0]["fang"]
+    assert f["fights"] == 2
+    assert f["payouts"] == {"Cryo": 2, "Electro": 1, "Hydro": 2, "Pyro": 2}
+    assert f["pyro_damage_per_payout"] == 4.5
+    assert f["electro_damage_per_payout"] == 6.0
+    assert f["hydro_block_per_payout"] == 3.0
+    assert f["cryo_vulnerable_per_payout"] == 1.0
+    assert f["cryo_bonus_per_payout"] == 1.75
+    assert f["damage_share"] == 15 / 150
+    d = write(tmp_path / "text", rows)
+    assert tr.main(["--dir", str(d), "--tempo", "--character", "Varka"]) == 0
+    text = capsys.readouterr().out
+    assert "Boreas's Fang (2 fights)" in text and "share of damage 10.0%" in text
+
+
 def test_the_schema_names_the_tempo_keys():
     readme = (REPO / "understudy" / "README.md").read_text(encoding="utf-8")
     cs = (REPO / "klee-mod" / "KleeCode" / "Diagnostics" / "PlayTelemetry.cs"
           ).read_text(encoding="utf-8")
     for key in ("cards_drawn_by_turn", "energy_by_turn",
                 "swirl_damage_by_card", "oath_by_turn", "oath_peak",
-                "current_element_by_turn", "full_house_triggers"):
+                "current_element_by_turn", "full_house_triggers",
+                "fang_payouts_by_element", "fang_damage_by_element",
+                "fang_damage_blocked", "fang_block", "fang_vulnerable",
+                "fang_vulnerable_bonus_damage"):
         assert f"`{key}`" in readme, key
         assert (f'\\"{key}\\":' in cs or f'"{key}"' in cs), key

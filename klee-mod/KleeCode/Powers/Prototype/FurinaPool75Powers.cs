@@ -97,10 +97,13 @@ public sealed class CrescendoPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary><i>Prima Donna</i> (furina-next, 2026-10-16): "At the start of
-/// your turn, if you Spent last turn, gain 1 Energy." Last turn is her
-/// previous turn, its end-of-turn Spends included; a Spend of 0 is no Spend
-/// (<see cref="StageDirector.PrimaDonna"/>). Copies add Energy.</summary>
-public sealed class PrimaDonnaPower : PowerModel, ILocalizationProvider
+/// your turn, if you Spent last turn, gain 1 Energy." [and draw 1 card.]
+/// Last turn is her previous turn, its end-of-turn Spends included; a Spend
+/// of 0 is no Spend (<see cref="StageDirector.PrimaDonna"/>). Every copy adds
+/// Energy; a copy the upgraded card installed also adds a card
+/// (<see cref="UpgradeTwinPower.UpgradedCopies"/>). One badge for both
+/// versions since the icon declutter (2026-10-19); it was a "+" twin.</summary>
+public sealed class PrimaDonnaPower : UpgradeTwinPower, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
@@ -108,30 +111,12 @@ public sealed class PrimaDonnaPower : PowerModel, ILocalizationProvider
         ("description",
             "At the start of your turn, if you [gold]Spent[/gold] last turn, "
           + "gain {Amount:energyIcons()}."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-}
-
-/// <summary>The upgraded <i>Prima Donna</i>: "... gain 1 Energy and draw 1
-/// card." The upgraded card installs this one (`upgraded_power`). Copies add
-/// Energy and cards.</summary>
-public sealed class PrimaDonnaPlusPower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Prima Donna+"),
-        ("description",
+        ("smartDescription",
             "At the start of your turn, if you [gold]Spent[/gold] last turn, "
-          + "gain {Amount:energyIcons()} and draw [blue]{Amount}[/blue] "
-          + "card."),
+          + "gain {Amount:energyIcons()}"
+          + "{Upgraded:cond:==1? and draw [blue]1[/blue] card|>1? and draw "
+          + "[blue]{}[/blue] cards|}."),
     };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
 }
 
 /// <summary><i>Standing Room Only</i> (furina-next, 2026-10-16): "Whenever
@@ -153,147 +138,6 @@ public sealed class StandingRoomOnlyPower : PowerModel, ILocalizationProvider
     public override PowerStackType StackType => PowerStackType.Counter;
 }
 
-/// <summary><i>Hymn of Renewal</i>: "Whenever you Repay 4 or more HP at
-/// once, gain 1 Strength." It counts the HP the Repay actually returned,
-/// not the number printed on the card (the paper's Review section; on this
-/// hover and the sheet comment, not on the card face). Copies add.</summary>
-public sealed class HymnOfRenewalPower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Hymn of Renewal"),
-        ("description",
-            "Whenever you [gold]Repay[/gold] 4 or more HP at once, gain "
-          + "[blue]{Amount}[/blue] [gold]Strength[/gold]. Only HP actually "
-          + "regained counts."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-}
-
-/// <summary>
-/// <i>High Stakes</i> (reworked by the Spend round,
-/// <c>review/records/furina-spend-round-2026-10-10.md</c>, "What changes" 3,
-/// and again by round 2, <c>furina-spend-round-2-2026-10-10.md</c> change 1):
-/// "Your Attacks deal 1 additional damage for every 5 HP you have Drained
-/// this combat." [every 4]. The old card ("within 5 HP of your Drain line")
-/// was NEVER AGAIN three times over two rounds: the line band punished the
-/// play the kit teaches. Round 1's "Drained and not Repaid" sat near 0,
-/// because Salon Solitaire Repays every turn: it peaked at +2 in three plays.
-///
-/// THE AMOUNT IS THE DIVISOR (4, 3 upgraded since the Spend rounds review:
-/// <see cref="FurinaStageLaw.HighStakesEvery"/>). It reads the ledger's gross
-/// count (<see cref="FurinaStageLedger.DrainedThisCombat"/>, every Drain's HP,
-/// which no Repay lowers), rounded down, and adds it to each powered Attack
-/// hit, as Strength does. What it added is filed for the play telemetry
-/// (<see cref="AfterDamageGiven"/>).
-///
-/// COPIES ADD, AS SEPARATE INSTANCES. A divisor cannot stack by summing (two
-/// copies at 5 would read "every 10"), so each play is its own instance
-/// (<see cref="PowerInstanceType.Instanced"/>, the base game's
-/// <c>AutomationPower</c> shape) and each adds its own bonus.
-///
-/// THE BADGE SHOWS THE BONUS NOW (<see cref="DisplayAmount"/>, refreshed by
-/// <see cref="FurinaStage.RefreshBadges"/> on every Drain and Repay), and the
-/// hover says it in words.
-/// </summary>
-public sealed class HighStakesPower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "High Stakes"),
-        ("description",
-            "Your Attacks deal 1 additional damage for every "
-          + "[blue]{Amount}[/blue] HP you have [gold]Drained[/gold] this "
-          + "combat."),
-        ("smartDescription",
-            "Your Attacks deal 1 additional damage for every "
-          + "[blue]{Amount}[/blue] HP you have [gold]Drained[/gold] this "
-          + "combat. Now: [blue]{Bonus}[/blue] additional damage."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-
-    public override PowerInstanceType InstanceType =>
-        PowerInstanceType.Instanced;
-
-    protected override IEnumerable<DynamicVar> CanonicalVars =>
-        new DynamicVar[] { new BonusVar() };
-
-    /// <summary>This copy's bonus a hit now. PURE.</summary>
-    public int Bonus =>
-        IsMutable && Owner != null
-            ? FurinaStageLaw.HighStakesBonus(
-                FurinaStage.DrainedThisCombatOf(Owner), Amount)
-            : 0;
-
-    /// <summary>The badge: the bonus now, not the divisor.</summary>
-    public override int DisplayAmount => Bonus;
-
-    /// <summary>Redraw the badge's number.</summary>
-    internal void Refresh()
-    {
-        if (!IsMutable || Owner == null) return;
-        InvokeDisplayAmountChanged();
-    }
-
-    /// <summary>The bonus, read at the hit: her Attacks only (a card's
-    /// powered hit). PURE.
-    ///
-    /// NO TARGET IS ASKED FOR, as Strength asks for none (the Spend rounds
-    /// review, 2026-10-10, change 2). A card in her hand previews with no
-    /// body on a Stage board (<see cref="FoldedPreview.Body"/>: the game
-    /// names one only while the card is aimed), so a <c>target == null</c>
-    /// gate dropped the bonus from the face: Hydro Lance printed 15 and dealt
-    /// 18. The Attack-card and powered-hit gates stay; her own body is still
-    /// refused.</summary>
-    public override decimal ModifyDamageAdditive(
-        Creature? target, decimal amount, ValueProp props, Creature? dealer,
-        CardModel? cardSource, CardPlay? cardPlay)
-    {
-        if (dealer != Owner || target == Owner) return 0m;
-        if (!props.IsPoweredAttack()) return 0m;
-        if (cardSource is not { Type: CardType.Attack }) return 0m;
-        return Bonus;
-    }
-
-    /// <summary>The play telemetry's <c>high_stakes_bonus</c> (the Spend
-    /// round 2, 2026-10-10): the bonus this copy added to a hit that landed,
-    /// capped at what the hit dealt (HP and Block). A read for the record;
-    /// nothing the rules ask.</summary>
-    public override Task AfterDamageGiven(
-        PlayerChoiceContext choiceContext, Creature dealer, DamageResult result,
-        ValueProp props, Creature target, CardModel? cardSource)
-    {
-        if (dealer != Owner || !props.IsPoweredAttack()) return Task.CompletedTask;
-        if (cardSource is not { Type: CardType.Attack }) return Task.CompletedTask;
-        if (!FurinaStage.LiveFor(Owner)) return Task.CompletedTask;
-        FurinaStageLedger.For(Owner!).NoteHighStakes(
-            FurinaStageLaw.HighStakesCredit(
-                Bonus, (int)(result.UnblockedDamage + result.BlockedDamage)));
-        return Task.CompletedTask;
-    }
-
-    /// <summary>`{Bonus}` in the hover, read live.</summary>
-    private sealed class BonusVar : DynamicVar
-    {
-        public BonusVar() : base("Bonus", 0m)
-        {
-        }
-
-        private int Live => _owner is HighStakesPower power ? power.Bonus : 0;
-
-        protected override decimal GetBaseValueForIConvertible() => Live;
-
-        public override string ToString() =>
-            Live.ToString(System.Globalization.CultureInfo.InvariantCulture);
-    }
-}
-
 /// <summary><i>Regina of All Waters</i>: "At the start of your turn, Drain 3,
 /// never past your line. If you do, gain 1 Strength." Each copy Drains and
 /// gains on its own; the Drain stops at the line (2026-10-10).
@@ -306,25 +150,6 @@ public sealed class ReginaOfAllWatersPower : PowerModel, ILocalizationProvider
         ("description",
             "At the start of your turn, [gold]Drain[/gold] 3, never past "
           + "your line. If you do, gain 1 [gold]Strength[/gold]."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-}
-
-/// <summary><i>Pneuma Tides</i>: "At the start of your turn, Repay 2. Gain 1
-/// Vigor for any HP it could not Repay." [3] (The Repay floor, 2026-10-09.)
-/// Copies add to one Repay.</summary>
-public sealed class PneumaTidesPower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Pneuma Tides"),
-        ("description",
-            "At the start of your turn, [gold]Repay[/gold] "
-          + "[blue]{Amount}[/blue]. Gain 1 [gold]Vigor[/gold] for any HP it "
-          + "could not [gold]Repay[/gold]."),
     };
 
     public override PowerType Type => PowerType.Buff;

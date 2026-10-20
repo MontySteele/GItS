@@ -577,15 +577,25 @@ def lint(rows, *, pixel_check: bool = True) -> list[str]:
 GENERATOR_OWNED = {
     "ImageGen/images/furina/model/combat_model.png":        "gen_furina_stills.py",
     "ImageGen/images/furina/ui/selection_splash.png":       "gen_furina_stills.py",
-    "ImageGen/images/furina/ui/map_marker.png":             "gen_furina_stills.py",
+    "ImageGen/images/furina/ui/map_marker.png":             "gen_map_markers.py",
     "ImageGen/images/kokomi/model/combat_model.png":        "gen_kokomi_stills.py",
     "ImageGen/images/kokomi/ui/selection_splash.png":       "gen_kokomi_stills.py",
-    "ImageGen/images/kokomi/ui/map_marker.png":             "gen_kokomi_stills.py",
+    "ImageGen/images/kokomi/ui/map_marker.png":             "gen_map_markers.py",
     # Varka (prototype, 2026-09-29): same six surfaces from his own render,
     # less the roster tile, which his model art took over (below).
     "ImageGen/images/varka/model/combat_model.png":         "gen_varka_stills.py",
     "ImageGen/images/varka/ui/selection_splash.png":        "gen_varka_stills.py",
-    "ImageGen/images/varka/ui/map_marker.png":              "gen_varka_stills.py",
+    "ImageGen/images/varka/ui/map_marker.png":              "gen_map_markers.py",
+    # Yae (2026-10-19): her two fallback stills from her model renders, and
+    # Klee's and her map markers, base-style pins with the model's face.
+    "ImageGen/images/yae/model/combat_model.png":           "gen_yae_stills.py",
+    "ImageGen/images/yae/ui/selection_splash.png":          "gen_yae_stills.py",
+    "ImageGen/images/ui/map_marker.png":                    "gen_map_markers.py",
+    "ImageGen/images/yae/ui/map_marker.png":                "gen_map_markers.py",
+    "ImageGen/images/yae/ui/select_loop.png": "select_loop.py",
+    "ImageGen/images/yae/ui/char_icon.png":                 "gen_char_icons.py",
+    "ImageGen/images/yae/ui/char_icon_outline.png":         "gen_char_icon_outlines.py",
+    "ImageGen/images/yae/ui/transition_wipe.png":           "gen_transition_wipe.py",
     "ImageGen/images/furina/salon/glyph_damage.png":        "gen_salon_glyphs.py",
     "ImageGen/images/furina/salon/glyph_block.png":         "gen_salon_glyphs.py",
     "ImageGen/images/furina/salon/glyph_support.png":       "gen_salon_glyphs.py",
@@ -719,6 +729,8 @@ GENERATOR_OWNED = {
     "ImageGen/images/kokomi/model/frames/kokomi_shadow.png": "char_render/pack.py",
     "ImageGen/images/kokomi/model/kokomi_rest.png":         "char_render/pack.py",
     "ImageGen/images/kokomi/ui/select_closeup.png":         "char_render/pack.py",
+    "ImageGen/images/kokomi/ui/select_loop.png": "select_loop.py",
+    "ImageGen/images/kokomi/ui/select_closeup_static.png": "select_loop.py",
     "ImageGen/images/kokomi/ui/select_portrait.png":        "char_render/pack.py",
     "ImageGen/images/kokomi/ui/select_portrait_locked.png": "char_render/pack.py",
     # Yae Miko's model art (phase A, a temporary model, 2026-10-14): Kokomi's

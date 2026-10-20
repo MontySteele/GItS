@@ -83,30 +83,6 @@ public class FurinaSpendRound2Tests : IDisposable
         Assert.Equal(0, kit.Stage.DrainedThisCombat);
     }
 
-    [Fact]
-    public void High_stakes_bonus_reads_the_gross_count_and_copies_add()
-    {
-        var furina = Seat.Furina(80).WithPower<HighStakesPower>(5);
-        var enemy = Seat.Klee().Creature;
-        var stakes = furina.Creature.Powers.OfType<HighStakesPower>().Single();
-        var attack = new ProtoFsBravura();
-        decimal Hit(HighStakesPower p) =>
-            p.ModifyDamageAdditive(enemy, 6m, ValueProp.Move, furina.Creature,
-                                   attack, null);
-        var ledger = FurinaStageLedger.For(furina.Creature);
-        ledger.NoteDrain(7, 80);
-        ledger.NoteDrain(4, 50);
-        ledger.NoteRepay(11);                             // all of it back
-        Assert.Equal(0, ledger.Drained);
-        Assert.Equal(2m, Hit(stakes));                    // 11 / 5
-        Assert.Equal(2, stakes.DisplayAmount);
-        furina.WithPower<HighStakesPower>(4);
-        Assert.Equal(2m + 2m, furina.Creature.Powers.OfType<HighStakesPower>()
-            .Sum(p => Hit(p)));                           // 11/5 + 11/4
-        Assert.Contains("FurinaStage.DrainedThisCombatOf",
-            Il.Calls(typeof(HighStakesPower).GetProperty("Bonus")!.GetMethod!));
-    }
-
     [Theory]
     [InlineData(3, 10, 3)]
     [InlineData(3, 2, 2)]
@@ -118,25 +94,12 @@ public class FurinaSpendRound2Tests : IDisposable
         Assert.Equal(credit, FurinaStageLaw.HighStakesCredit(bonus, dealt));
     }
 
-    [Fact]
-    public void High_stakes_files_what_it_added_for_the_telemetry()
-    {
-        var calls = Il.Calls(Il.Method("HighStakesPower", "AfterDamageGiven"));
-        Assert.Contains("FurinaStageLedger.NoteHighStakes", calls);
-        Assert.Contains("FurinaStageLaw.HighStakesCredit", calls);
-        var ledger = FurinaStageLedger.Detached();
-        ledger.NoteHighStakes(3);
-        ledger.NoteHighStakes(0);
-        ledger.NoteHighStakes(2);
-        Assert.Equal(5, ledger.HighStakesDealt);
-    }
-
     // ---- 2. Gentle Current: cut in the diversity pass (2026-10-11) -----------
 
     [Fact]
     public void Gentle_current_is_cut_and_the_block_floor_preview_stays()
     {
-        Assert.Null(typeof(HighStakesPower).Assembly.GetType(
+        Assert.Null(typeof(FurinaStageLedger).Assembly.GetType(
             "KleeMod.Cards.Prototype.Generated.ProtoFsGentleCurrent"));
         // The house preview it shared with Hymn of Many Waters:
         // "(Repay N: gain M Block)" since furina-next paper 3.
@@ -151,7 +114,7 @@ public class FurinaSpendRound2Tests : IDisposable
     [Fact]
     public void The_next_turn_repay_power_is_gone()
     {
-        Assert.DoesNotContain(typeof(HighStakesPower).Assembly.GetTypes(),
+        Assert.DoesNotContain(typeof(FurinaStageLedger).Assembly.GetTypes(),
                               t => t.Name == "RepayNextTurnPower");
         Assert.DoesNotContain("RepayNextTurn",
             string.Join(" ", Il.Calls(Il.Method("FurinaStage", "TurnStart"))));

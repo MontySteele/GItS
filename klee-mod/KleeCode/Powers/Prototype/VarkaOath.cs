@@ -895,12 +895,15 @@ public static class VarkaOath
         var current = ledger.Current;
         if (current == Element.None || element == current) return;
         if (!ledger.TakeBannerPay()) return;
+        var paid = 0;
         foreach (var banner in varka.Powers.OfType<UnwaveringBannerPower>().ToList())
         {
             banner.Pulse();
+            paid += banner.OathPaid;
         }
-        // "gain 1 Oath" -- the printed 1, as Vow of the Blade's.
-        await Gain(choiceContext, varka, current, 1);
+        // "gain 1 [2] Oath" -- 1 per plain copy, 2 per upgraded copy (the
+        // power upgrade pass, 2026-10-19), once per play.
+        await Gain(choiceContext, varka, current, System.Math.Max(1, paid));
     }
 
     // ---- the Swirl ------------------------------------------------------------
@@ -940,7 +943,7 @@ public static class VarkaOath
                     * (ledger.PaysTwice > 0 ? 2 : 1);
         for (var pay = 0; pay < times; pay++)
         {
-            await Pay(choiceContext, target, dealer, current);
+            await Pay(choiceContext, target, dealer, current, fang: true);
             if (twin && IsOathElement(swirled))
             {
                 await Pay(choiceContext, target, dealer, swirled);
@@ -964,16 +967,15 @@ public static class VarkaOath
             await CreatureCmd.GainBlock(dealer, wall.Amount,
                 ValueProp.Unpowered, null, fast: true);
         }
-        if (ledger.SwirlsThisTurn <= VarkaLaw.EyeOfStormterrorSwirls)
+        // The power upgrade pass (2026-10-19): the upgraded copies also draw
+        // on the 4th (`EyeOfStormterrorPower.DrawsFor`).
+        foreach (var eye in dealer.Powers.OfType<EyeOfStormterrorPower>().ToList())
         {
-            foreach (var eye in dealer.Powers.OfType<EyeOfStormterrorPower>().ToList())
-            {
-                await eye.Draw(choiceContext);
-            }
+            await eye.Draw(choiceContext, ledger.SwirlsThisTurn);
         }
         // West Wind's Blessing (Varka's co-op five, 2026-10-13): the first
         // Swirl each turn gives each other player energy.
-        await WestWindsBlessingPower.OnSwirl(dealer);
+        await WestWindsBlessingPower.OnSwirl(choiceContext, dealer);
         if (current != Element.None)
         {
             Log.Info($"[{KleeMod.ModId}] VARKA Swirl on {target.Name}: "
@@ -1073,11 +1075,23 @@ public static class VarkaOath
     /// widened Pyro's until element identities; Absolute Zero widened Cryo's
     /// until the rebalance, 2026-10-03, made it a debuff payoff,
     /// <see cref="AbsoluteZeroPower"/>.)
+    /// <paramref name="fang"/> (2026-10-19, Varka Fang pick 2a): this is
+    /// Boreas's Fang's current-element payout, not Twin Gales' Swirled one,
+    /// so the run telemetry tags it (`fang_*` fields,
+    /// <see cref="Diagnostics.PlayTelemetry"/>). Measurement only: the tag
+    /// changes no number and no argument.
     /// </summary>
     private static async Task Pay(
         PlayerChoiceContext choiceContext, Creature target, Creature dealer,
-        Element element)
+        Element element, bool fang = false)
     {
+        using var tag = fang && element != Element.None
+            ? Diagnostics.DamageCredit.OpenFang(element.ToString())
+            : default;
+        if (fang && element != Element.None)
+        {
+            Diagnostics.PlayTelemetry.FangPaid(dealer, element.ToString());
+        }
         var enemies = dealer.CombatState?.HittableEnemies.ToList()
                       ?? new List<Creature>();
         switch (element)
@@ -1091,15 +1105,32 @@ public static class VarkaOath
                 }
                 break;
             case Element.Hydro:
+            {
+                var blockBefore = fang ? (int)dealer.Block : 0;
                 await CreatureCmd.GainBlock(dealer, VarkaLaw.SwirlHydroBlock,
                     ValueProp.Unpowered, null, fast: true);
+                if (fang)
+                {
+                    Diagnostics.PlayTelemetry.FangBlockGained(
+                        dealer, (int)dealer.Block - blockBefore);
+                }
                 break;
+            }
             case Element.Cryo:
                 if (target.IsAlive)
                 {
+                    var vulnBefore = fang
+                        ? Diagnostics.ReactionTally.Stacks<VulnerablePower>(target)
+                        : 0;
                     await PowerCmd.Apply<VulnerablePower>(
                         choiceContext, target, VarkaLaw.SwirlCryoVulnerable,
                         applier: dealer, cardSource: null);
+                    if (fang)
+                    {
+                        Diagnostics.PlayTelemetry.FangVulnerableApplied(
+                            dealer, target, vulnBefore,
+                            Diagnostics.ReactionTally.Stacks<VulnerablePower>(target));
+                    }
                 }
                 break;
             case Element.Electro:
@@ -1264,8 +1295,9 @@ public static class VarkaOath
             return "";
         }
         if (owner?.CombatState == null || !Live(owner)) return "";
-        var stacks = owner.Powers.OfType<WildfireOathPower>()
-            .Sum(p => (int)p.Amount);
+        var fires = owner.Powers.OfType<WildfireOathPower>().ToList();
+        var stacks = fires.Sum(p => (int)p.Amount);
+        var upgraded = fires.Sum(p => p.UpgradedCopies);
         if (stacks <= 0) return "";
         var gain = 1;
         if (Current(owner) == Element.Pyro || WouldSwitchTo(card, Element.Pyro))
@@ -1274,7 +1306,7 @@ public static class VarkaOath
                 .Sum(p => (int)p.Amount);
         }
         return WildfireWords(WildfireOathPower.DamageFor(
-            Count(owner, Element.Pyro) + gain, stacks));
+            Count(owner, Element.Pyro) + gain, stacks, upgraded));
     }
 
     /// <summary>The line itself, "(Wildfire Oath deals 5)", or empty for 0.
@@ -1323,13 +1355,6 @@ public static class VarkaOath
         {
             await bunny.Fire(choiceContext);
         }
-        foreach (var sworn in varka.Powers.OfType<SwornBrotherhoodPower>().ToList())
-        {
-            foreach (var element in VarkaOathLedger.Elements)
-            {
-                await Gain(choiceContext, varka, element, sworn.Amount);
-            }
-        }
         // Power cost sweep, 2026-09-30: the base card, current element only.
         foreach (var sworn in varka.Powers.OfType<SwornBrotherhoodCurrentPower>().ToList())
         {
@@ -1372,6 +1397,11 @@ public static class VarkaOath
             choiceContext, player, held, optional: true);
         if (element == Element.None) return;
         await SetCurrent(choiceContext, varka, element, knight: false);
+        // Weathervane, upgraded (the power upgrade pass, 2026-10-19): "Gain 1
+        // Oath of it", per upgraded copy, only when an element was chosen.
+        // Sim twin: `varka_oath._weathervane`.
+        var oath = varka.Powers.OfType<WeathervanePower>().Sum(w => w.OathGained);
+        if (oath > 0) await Gain(choiceContext, varka, element, oath);
     }
 }
 

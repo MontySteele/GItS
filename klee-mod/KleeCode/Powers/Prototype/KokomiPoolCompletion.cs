@@ -95,31 +95,6 @@ public sealed class SeasReproachPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// Watatsumi Resistance (pool completion; the re-founding, 2026-10-12):
-/// "Whenever you write a Companion card as a Plan, add a Sting to your hand."
-/// One Sting per copy, per Companion WRITTEN (it read Companion plays and
-/// added Nips before). Paid from <see cref="KokomiRefounding.OnWritten"/>,
-/// the one place a Plan is written. Sim twin:
-/// <c>kokomi_plan.watatsumi_resistance</c>.
-/// </summary>
-public sealed class WatatsumiResistancePower : PowerModel, ILocalizationProvider
-{
-    public List<(string, string)>? Localization => new()
-    {
-        ("title", "Watatsumi Resistance"),
-        ("description",
-            "Whenever you plan a [gold]Companion[/gold] card, add "
-          + "[blue]{Amount}[/blue] "
-          + "{Amount:plural:[gold]Sting[/gold]|[gold]Stings[/gold]} to your "
-          + "[gold]Hand[/gold]."),
-    };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-}
-
-/// <summary>
 /// DIVINE STRATEGY, Kokomi's second Ancient (pool completion, 2026-10-01;
 /// <c>Cards/Kokomi/DivineStrategy.cs</c>): "The first time each turn you play
 /// a card on the Bake-Kurage, the line above its Plan happens now too."

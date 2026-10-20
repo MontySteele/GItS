@@ -11,7 +11,7 @@ Outputs (all gitignored Tier F, ledgered in art/SOURCES.tsv):
                                                          model frames)
     ImageGen/images/furina/ui/selection_splash.png     1920x1200
     (ui/char_icon.png left 2026-10-13: tools/gen_char_icons.py draws it)
-    ImageGen/images/furina/ui/map_marker.png             49x64
+    (ui/map_marker.png left 2026-10-19: tools/gen_map_markers.py draws a pin from the model close-up)
 
 CENTRING RULE. Every framing here is computed from the render's ALPHA
 bounding box, never from the image frame -- that is precisely the bug being
@@ -37,7 +37,7 @@ import sys
 from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from char_stills import fit, head_crop  # noqa: E402
+from char_stills import fit  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 CUTOUT = ROOT / "ImageGen" / "images" / "furina" / "model" / "furina_wikipedia_cutout.png"
@@ -60,10 +60,8 @@ def main():
     fit(cutout, 240, 280).save(MODEL / "combat_model.png")
     print("  combat_model.png       240x280")
 
-    # Character icon + map marker: tight head crops on transparency.
-    # (the icon is tools/gen_char_icons.py's, from her model close-up)
-    head_crop(cutout, 49, 64, head_frac=0.34).save(UI / "map_marker.png")
-    print("  map_marker.png 49x64")
+    # The icon and the map marker are tools/gen_char_icons.py's and
+    # tools/gen_map_markers.py's, from her model close-up.
 
     # Selection splash: the full-res twin, framed so she sits centred in the
     # left-of-centre third the info panel leaves free.

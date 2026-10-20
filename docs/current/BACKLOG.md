@@ -16,10 +16,8 @@ cut to about 350 characters is `git show 3ce4f8c35:docs/current/BACKLOG.md`.
 
 ## Kits and display (the mod)
 
-- Yae's art QA (one pass, never reviewed): her character-select image has black smudges near the mouth; check her model frames, select, rest and merchant art for the same.
-- Kokomi and Yae have still character-select images; Klee, Varka and Furina have animated ones. Kokomi's waits for her prototype to settle.
-- Power badges borrowing another power's icon (`KleePowerIcons.cs`), counts: Klee (17), Kokomi (26), Furina (31), Varka (~25), Yae (Serial Novel), Mondstadt companions (21), co-op (10), three debuff riders. Each needs its own `art/plan.tsv` power_ row (borrowed badge as fallback); upgraded starter relics share their starters' icons. Names: `git show 3ce4f8c35:docs/current/BACKLOG.md`.
-- Klee's map marker is still the wiki side-icon in the lower two-thirds of its 49x64 box (visual paper, pick 3 (a)): refit it with an `art_process` pass in the main checkout, or draw a base-style pin.
+- Upgraded starter relics share their starters' icons (Pounding Surprise II, the Watatsumi Casket, Yae's Enlightened Blessing). Power badges: the 2026-10-19 badge pass gave every shared badge its own icon (`art/plan.tsv` power badge pass); the pairs that share on purpose (a power and its upgraded form, an Oath and its Left twin) stay shared. Check the three Reaction-icon badges (Aftershock, Grand Strategist, All Four Winds) read at game size; they are wide and render small.
+- Icon declutter leftovers (2026-10-19): three dead power classes stay because live code still names them. Courtroom Drama (`CrossExaminationPower`) and Quick Change (`FirstAttackDrawPower`) in `Powers/CurtainCallPowers.cs` are `APPLY_POWERS` keys that the tier0 modal-parity and connectivity tests use as fixtures. Study Buddy (`ReplayNextCompanionPower`) is what the generator's `replay_next_companion` op emits. Retiring them means retiring the op and the fixtures in both engines. The sim keeps twins of the deleted powers (`furina_stage.py`, `kokomi_plan.py`, `klee_overhaul.py`, `varka_oath.py`), and nothing applies them.
 - Kokomi's three potions and Furina's two potions (#1324, #1325) were not met in a seat; check them with `understudy.embark --relic` or in a play (the relics are seen).
 - Klee's rest-site pose is a still: BaseLib rebuilds the rest sprite from the texture alone, so an idle loop there needs code.
 - Turn-start order: Durin's Pyro hit, Neuvillette's Hydro, Varka's Swirl, Navia's Geo and Sigewinne's Hydro all share `AfterPlayerTurnStart`, so the mod gives them no order where the sim does; stage them into one ordered broadcast if a seat sees the two disagree.
@@ -33,6 +31,7 @@ cut to about 350 characters is `git show 3ce4f8c35:docs/current/BACKLOG.md`.
 - Furina: whether a guest's act ends a Frozen is not printed; needs the game (Frozen itself prints since 2026-10-19).
 - Kujou Sara's Electro rider prints "Applies Electro — Applies Hydro for 2 turns" (newcomer round 1, lane 4); its keyword tip reuses the Hydro text.
 - Yae's planting rule: two Yakan Evocations made two separate Level 1 Sakura, against "Same kind: it refreshes and gains a Level" (newcomer round 1, lane 5); check live, then fix the text or the code. Dawn Prayer's "newest" lands on Twin Sakura's Kitsune, an order the page never shows.
+- Upgrades that only cut cost or add Innate: at Furina's and Yae's next card passes, count their cost-only and Innate-only upgrades against the base five and replace the excess with a real upgrade, as Kokomi's finish pass (`review/active/kokomi-cards-2026-10-18.md` sec. 7, upgrade census) and Varka's powers pass (`varka-fang-next`) did ([USER], 2026-10-19: "You do have a habit of making too many powers just decrease their cost by 1 on upgrade").
 - Durin's start-of-turn tick skipped one fight (Fogmog, trace); `RandomEnemy` may pick the Eye With Teeth illusion (`CompanionOverhaulPowers.cs:51`). Live look. (Chained Reactions is QUEUE, backlog wrap-up pick 3.)
 
 ## Harness, bridge, tools and sim

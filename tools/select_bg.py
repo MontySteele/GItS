@@ -96,10 +96,14 @@ SOFT_DOT = (0.0, 1.0), (0.35, 0.55), (1.0, 0.0)
 HARD_DOT = (0.0, 1.0), (0.6, 0.9), (1.0, 0.0)
 RING = (0.0, 0.0), (0.55, 0.12), (0.8, 0.85), (0.9, 0.5), (1.0, 0.0)
 PULSE = (0.0, 0.0), (0.5, 1.0), (1.0, 0.0)
+#: a jellyfish bell: bright crown, soft skirt
+JELLY = (0.0, 0.9), (0.45, 0.65), (0.8, 0.22), (1.0, 0.0)
+#: a jellyfish's swim: the bell swells and settles twice over its life
+BOB = (0.0, 0.5), (0.25, 1.0), (0.5, 0.75), (0.75, 1.0), (1.0, 0.6)
 
 
 def _element(fig_x: float) -> dict[str, Element]:
-    """The three elements' emitters, placed around a figure centred at x."""
+    """Each element's emitters, placed around a figure centred at x."""
     return {
         # Pyro: embers rising off the bottom edge, a few fast sparks arcing up
         # and falling back, and a slow warm glow breathing behind the figure.
@@ -163,10 +167,59 @@ def _element(fig_x: float) -> dict[str, Element]:
                         ),
             ),
         ),
+        # Kokomi's Hydro, the reef (2026-10-19): a pearl-aqua light behind the
+        # figure, Furina's bubbles at fewer and slower, and a few soft
+        # coral-violet jellyfish (her Bake-Kurage) drifting up and pulsing,
+        # so the two Hydro kits do not share one screen.
+        "reef": Element(
+            textures=(Tex("Tex_dot", 32, 32, SOFT_DOT), Tex("Tex_bubble", 48, 48, RING),
+                      Tex("Tex_jelly", 48, 40, JELLY)),
+            emitters=(
+                Emitter("Glow", "Tex_dot", (fig_x, 700), 2, 5.0, (150, 150), (0, -1), 0, (0, 5),
+                        (0, 0), (16.0, 21.0),
+                        ((0.0, (0.5, 0.86, 0.95, 0)), (0.5, (0.55, 0.86, 0.95, 0.22)), (1.0, (0.5, 0.86, 0.95, 0))),
+                        behind=True, scale_curve=PULSE),
+                Emitter("Bubbles", "Tex_bubble", (960, 1120), 14, 11.0, (1000, 30), (0, -1), 10, (35, 70),
+                        (0, -5), (0.3, 0.7),
+                        ((0.0, (0.7, 0.9, 1, 0)), (0.12, (0.75, 0.92, 1, 0.7)), (0.85, (0.8, 0.94, 1, 0.55)),
+                         (1.0, (0.85, 0.96, 1, 0))),
+                        tangential=(-8, 8), damping=(0, 2)),
+                Emitter("Jellies", "Tex_jelly", (960, 1000), 7, 14.0, (950, 120), (0, -1), 8, (14, 26),
+                        (0, -2), (0.7, 1.3),
+                        ((0.0, (1, 0.72, 0.86, 0)), (0.15, (1, 0.74, 0.88, 0.5)), (0.8, (0.78, 0.7, 1, 0.42)),
+                         (1.0, (0.7, 0.7, 1, 0))),
+                        tangential=(-4, 4), hue=(-0.03, 0.03), scale_curve=BOB),
+            ),
+        ),
+        # Electro (Yae, 2026-10-19): a slow violet light pulsing behind the
+        # figure, sakura petals drifting down and across in front (her
+        # Sacred Sakura), and small violet sparks flicking upward, fast and
+        # short-lived, as static off the Electro.
+        "electro": Element(
+            textures=(Tex("Tex_dot", 32, 32, SOFT_DOT), Tex("Tex_petal", 20, 12, HARD_DOT),
+                      Tex("Tex_spark", 6, 24, HARD_DOT)),
+            emitters=(
+                Emitter("Glow", "Tex_dot", (fig_x, 700), 2, 4.0, (130, 130), (0, -1), 0, (0, 6),
+                        (0, 0), (15.0, 19.0),
+                        ((0.0, (0.69, 0.42, 1, 0)), (0.5, (0.72, 0.45, 1, 0.24)), (1.0, (0.69, 0.42, 1, 0))),
+                        behind=True, scale_curve=PULSE),
+                Emitter("Petals", "Tex_petal", (1100, -40), 12, 11.0, (900, 30), (-0.35, 1), 20, (40, 80),
+                        (-6, 14), (0.7, 1.2),
+                        ((0.0, (1, 0.74, 0.84, 0)), (0.1, (1, 0.76, 0.86, 0.95)),
+                         (0.85, (0.98, 0.7, 0.82, 0.85)), (1.0, (0.98, 0.7, 0.82, 0))),
+                        additive=False, angle=(0, 360), angular_velocity=(-120, 120), tangential=(-12, 12),
+                        hue=(-0.03, 0.02)),
+                Emitter("Sparks", "Tex_spark", (fig_x, 900), 14, 1.6, (520, 260), (0, -1), 35, (60, 140),
+                        (0, 0), (0.5, 1.0),
+                        ((0.0, (0.85, 0.7, 1, 0)), (0.08, (0.9, 0.78, 1, 1)), (0.4, (0.66, 0.4, 1, 0.7)),
+                         (1.0, (0.55, 0.3, 1, 0))),
+                        align=True, damping=(40, 80), hue=(-0.02, 0.02)),
+            ),
+        ),
     }
 
 
-ELEMENTS = ("pyro", "anemo", "hydro")
+ELEMENTS = ("pyro", "anemo", "hydro", "reef", "electro")
 
 
 # ---------------------------------------------------------------------------

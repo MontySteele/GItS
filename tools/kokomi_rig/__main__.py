@@ -1,10 +1,10 @@
-"""Kokomi's combat and merchant scenes: generate or check.
+"""Kokomi's combat, merchant and select scenes: generate or check.
 
-    python -m tools.kokomi_rig gen            # write both scenes
-    python -m tools.kokomi_rig gen --check    # exit 1 if either scene is stale
+    python -m tools.kokomi_rig gen            # write the three scenes
+    python -m tools.kokomi_rig gen --check    # exit 1 if any scene is stale
 
 Needs no art and no engine: the scenes are text from kokomi.yaml and the
-committed manifest tools/char_render/kokomi_frames.json. Until her first
+committed manifests tools/char_render/kokomi_frames.json and tools/select_loop.json. Until her first
 render writes that manifest there is nothing to generate: `gen` says so and
 exits 2, `gen --check` says so and passes (her layer-cut rig still ships).
 """
@@ -17,7 +17,8 @@ from . import rig
 
 
 def scenes() -> list[tuple]:
-    return [(rig.SCENE, rig.render_scene()), (rig.MERCHANT_SCENE, rig.render_merchant_scene())]
+    return [(rig.SCENE, rig.render_scene()), (rig.MERCHANT_SCENE, rig.render_merchant_scene()),
+            (rig.SELECT_SCENE, rig.render_select_scene())]
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -41,6 +42,7 @@ def main(argv: list[str] | None = None) -> int:
             else:
                 print(f"{path.name} is current.")
             continue
+        path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(text, encoding="utf-8", newline="\n")
         print(f"wrote {path.relative_to(rig.ROOT)} ({len(text)} bytes)")
     return stale

@@ -104,16 +104,12 @@ public class NullTargetPreviewGateTests
     public void Target_reading_bonuses_keep_their_null_target_gate()
     {
         var klee = Seat.Klee()
-            .WithPower<NightVigilPower>(4)
-            .WithPower<ProtoCeremonialGarmentPower>(2);
+            .WithPower<NightVigilPower>(4);
         var me = klee.Creature;
         var attack = new ProtoVkCrosswind();
 
         var vigil = me.Powers.OfType<NightVigilPower>().Single();
-        var garment = me.Powers.OfType<ProtoCeremonialGarmentPower>().Single();
         Assert.Equal(0m, vigil.ModifyDamageAdditive(
-            null, 8m, ValueProp.Move, me, attack, null));
-        Assert.Equal(0m, garment.ModifyDamageAdditive(
             null, 8m, ValueProp.Move, me, attack, null));
     }
 }

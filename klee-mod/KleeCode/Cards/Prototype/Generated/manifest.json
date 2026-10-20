@@ -2371,7 +2371,7 @@
       "damage": 1
     },
     "proto_vk_absolute_zero": {
-      "innate": true
+      "upgraded_power": "vk_absolute_zero_plus"
     },
     "proto_vk_amber_baron_bunny": {
       "block": 2,
@@ -2424,7 +2424,7 @@
       "varka_base": 3
     },
     "proto_vk_comrades_of_the_expedition": {
-      "cost": -1
+      "power_amount": 1
     },
     "proto_vk_converging_winds": {
       "power_amount": 2
@@ -2468,7 +2468,7 @@
       "damage": 3
     },
     "proto_vk_eye_of_stormterror": {
-      "innate": true
+      "upgraded_power": "vk_eye_of_stormterror_plus"
     },
     "proto_vk_eye_of_the_storm": {
       "formula_per": 1
@@ -2623,7 +2623,7 @@
       "innate": true
     },
     "proto_vk_unwavering_banner": {
-      "innate": true
+      "upgraded_power": "vk_unwavering_banner_plus"
     },
     "proto_vk_violet_storm": {
       "varka_base": 2
@@ -2635,13 +2635,13 @@
       "block": 6
     },
     "proto_vk_weathervane": {
-      "innate": true
+      "upgraded_power": "vk_weathervane_plus"
     },
     "proto_vk_west_winds_blessing": {
-      "innate": true
+      "upgraded_power": "vk_west_winds_blessing_plus"
     },
     "proto_vk_wildfire_oath": {
-      "innate": true
+      "upgraded_power": "vk_wildfire_oath_plus"
     },
     "proto_vk_windborne_resolve": {
       "power_amount": 2
@@ -2650,7 +2650,7 @@
       "cost": -1
     },
     "proto_vk_wolfpack": {
-      "innate": true
+      "upgraded_power": "vk_wolfpack_plus"
     },
     "proto_ym_afterword": {
       "cost": -1

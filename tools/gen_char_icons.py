@@ -2,7 +2,7 @@
 """Generate the top-bar character icons (`ui/char_icon.png`) from select art.
 
 The ONE producer of `char_icon.png` for every character listed in `CHARS`
-(Klee, Varka, Kokomi and Furina since 2026-10-13). The outline halo beside
+(Klee, Varka, Kokomi and Furina since 2026-10-13; Yae since 2026-10-19). The outline halo beside
 each icon is still derived from it by `gen_char_icon_outlines.py`; run that
 after this.
 
@@ -55,7 +55,7 @@ source's size and alpha bbox: a re-rendered source fails loudly ("re-measure")
 instead of silently reframing.
 
 Usage:
-    .venv/Scripts/python tools/gen_char_icons.py [--chars klee,varka,kokomi,furina]
+    .venv/Scripts/python tools/gen_char_icons.py [--chars klee,varka,kokomi,furina,yae]
         [--art-root <checkout>] [--out-root <dir>] [--check]
 
 `--art-root` reads the sources under another checkout's ImageGen/ (a worktree
@@ -154,6 +154,16 @@ CHARS = {
         face_cx=1300, crown_y=260, chin_y=537,
         head_px=44.32, crown_at=36.0, face_at=44.4,
         disc=(42.5, 47.0, 34.0), keep_above=330),
+    # Yae: her model-rendered select close-up (tools/char_render/pack.py,
+    # re-rendered 2026-10-19 with the mouth unlined and the hand at her chin).
+    # Crown is the top of her hair under the gold ornament (row 100); eyes at
+    # x 1222 and 1325, chin at row 410. Her near hand rises beside the chin at
+    # x 1330+, mostly below the disc.
+    "yae": Icon(
+        source="ImageGen/images/yae/ui/select_closeup.png",
+        out="ImageGen/images/yae/ui/char_icon.png",
+        source_size=(1920, 1080), source_bbox=(980, 37, 1664, 1080),
+        face_cx=1274, crown_y=100, chin_y=410),
 }
 
 

@@ -589,6 +589,7 @@ internal static class PlayTelemetry
             }
 
             SampleDetonations(combat);
+            SyncFangVulnerable();
         }
         catch (Exception e)
         {
@@ -1132,6 +1133,12 @@ internal static class PlayTelemetry
         if (owner == null || !Open.TryGetValue(owner, out var dealt)) return false;
         FileHit(dealt, kind, source, unblocked, blocked,
                 SwirlKey(dealt, kind, cardSource));
+        FileFangHit(dealt, DamageCredit.FangElement, unblocked, blocked);
+        if (target != null)
+        {
+            RecordVulnerableHit(target, Math.Max(0, unblocked) + Math.Max(0, blocked),
+                                ReactionTally.Stacks<MegaCrit.Sts2.Core.Models.Powers.VulnerablePower>(target));
+        }
         return unblocked > 0;
     }
 
@@ -1196,13 +1203,211 @@ internal static class PlayTelemetry
         record.DamageBlocked += Math.Max(0, blocked);
     }
 
+    // ------------------------------------------------- Boreas's Fang ---
+
+    /// <summary>
+    /// 2026-10-19 -- WHAT BOREAS'S FANG PAID (Varka Fang review, pick 2a:
+    /// "Cryo stays and gets measured"). Before this the Pyro and Electro
+    /// payouts' damage sat in `damage_by_source["(Swirl)"]` beside the Swirl's
+    /// own flat hit, and the Hydro Block and Cryo Vulnerable were not tagged
+    /// at all. Appended fields, Varka seats only; every older field keeps
+    /// its meaning (the payout's damage is still under "(Swirl)"):
+    ///
+    ///   * `fang_payouts_by_element`: one per payout <c>VarkaOath.Pay</c>
+    ///     ran for the current element (a Stormterror's Scale or Crosscurrent
+    ///     repeat is another payout; Twin Gales' Swirled-element payout is
+    ///     not the Fang's and is not counted). A Pyro or Cryo payout on a
+    ///     target the Swirl already killed counts and pays nothing.
+    ///   * `fang_damage_by_element`: the HP its hits took, on the
+    ///     `damage_by_source` rule (overkill not counted), so it can be
+    ///     divided by `damage_dealt`; `fang_damage_blocked` is the enemy
+    ///     Block they broke.
+    ///   * `fang_block`: the Block a Hydro payout added, as observed.
+    ///   * `fang_vulnerable`: Vulnerable stacks a Cryo payout added to an
+    ///     enemy (after minus before; an Artifact that ate it adds 0).
+    ///   * `fang_vulnerable_bonus_damage`: the Vulnerable share of hits on
+    ///     enemies wearing Fang Vulnerable. THE ATTRIBUTION RULE: every hit
+    ///     any seat is credited with on an enemy whose Vulnerable is above 0
+    ///     is read as amplified by <see cref="global::KleeMod.Elements.ReactionConstants.VulnerableTakenMult"/>
+    ///     (true of powered attacks and of the mod's element hits, which run
+    ///     <c>SimDamagePipeline.TargetMods</c>; an unpowered hit that skips it
+    ///     is overcounted). Its bonus is <c>dealt - dealt / 1.5</c> (dealt =
+    ///     HP plus Block, the `amp_bonus_damage` rule), and the Fang is
+    ///     credited the fraction of the enemy's stacks it owns. Ownership is
+    ///     proportional: a Fang payout adds its stacks to the Fang's count on
+    ///     that enemy; when the stack total is seen to FALL (the turn-end
+    ///     decay, read at each hit and each turn open), the Fang's count falls
+    ///     in the same ratio; a rise from another source leaves the Fang's
+    ///     count alone and dilutes its share. The bonus goes to the Fang's
+    ///     seat whoever dealt the hit.
+    ///
+    /// Measurement only (rule 1): reads, no game object touched.
+    /// </summary>
+    internal sealed class FangVulnerableShare
+    {
+        internal decimal Stacks;
+        internal int LastSeen;
+
+        /// <summary>Brings the Fang's count in line with <paramref name="now"/>
+        /// stacks on the enemy and answers its share (0 to 1).</summary>
+        internal decimal Sync(int now)
+        {
+            if (now <= 0)
+            {
+                Stacks = 0m;
+                LastSeen = 0;
+                return 0m;
+            }
+            if (LastSeen > 0 && now < LastSeen) Stacks *= (decimal)now / LastSeen;
+            Stacks = Math.Min(Stacks, now);
+            LastSeen = now;
+            return Stacks / now;
+        }
+    }
+
+    private static FightRecord? FangRecord(Creature? dealer)
+    {
+        if (dealer?.Player is not { } player) return null;
+        if (!Open.TryGetValue(player, out var record)) return null;
+        record.IsVarka = true;
+        return record;
+    }
+
+    /// <summary>The Fang ran one payout of <paramref name="element"/>.</summary>
+    internal static void FangPaid(Creature? dealer, string element)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(element) || FangRecord(dealer) is not { } record) return;
+            record.FangPayoutsByElement.TryGetValue(element, out var n);
+            record.FangPayoutsByElement[element] = n + 1;
+        }
+        catch (Exception e)
+        {
+            Warn("FangPaid", e);
+        }
+    }
+
+    /// <summary>A Hydro payout added <paramref name="amount"/> Block.</summary>
+    internal static void FangBlockGained(Creature? dealer, int amount)
+    {
+        try
+        {
+            if (amount <= 0 || FangRecord(dealer) is not { } record) return;
+            record.FangBlock += amount;
+        }
+        catch (Exception e)
+        {
+            Warn("FangBlockGained", e);
+        }
+    }
+
+    /// <summary>A Cryo payout took <paramref name="target"/>'s Vulnerable from
+    /// <paramref name="before"/> to <paramref name="after"/>.</summary>
+    internal static void FangVulnerableApplied(Creature? dealer, Creature? target,
+                                               int before, int after)
+    {
+        try
+        {
+            if (target == null || FangRecord(dealer) is not { } record) return;
+            if (!record.FangVulnerableOn.TryGetValue(target, out var share))
+            {
+                share = new FangVulnerableShare();
+                record.FangVulnerableOn[target] = share;
+            }
+            share.Sync(before);
+            var added = Math.Max(0, after - before);
+            share.Stacks = Math.Min(share.Stacks + added, Math.Max(0, after));
+            share.LastSeen = Math.Max(0, after);
+            record.FangVulnerable += added;
+        }
+        catch (Exception e)
+        {
+            Warn("FangVulnerableApplied", e);
+        }
+    }
+
+    /// <summary>A hit a seat is credited with landed on
+    /// <paramref name="target"/>, <paramref name="dealt"/> HP plus Block, while
+    /// it wore <paramref name="vulnerable"/> stacks: file the Fang's share
+    /// of the Vulnerable bonus (the header's rule). The test seam too.</summary>
+    internal static void RecordVulnerableHit(Creature target, int dealt, int vulnerable)
+    {
+        try
+        {
+            foreach (var record in Open.Values)
+            {
+                if (!record.FangVulnerableOn.TryGetValue(target, out var share)) continue;
+                var owned = share.Sync(vulnerable);
+                if (owned <= 0m || dealt <= 0) continue;
+                var mult = global::KleeMod.Elements.ReactionConstants.VulnerableTakenMult;
+                record.FangVulnerableBonus += (dealt - dealt / mult) * owned;
+            }
+        }
+        catch (Exception e)
+        {
+            Warn("RecordVulnerableHit", e);
+        }
+    }
+
+    /// <summary>Turn open: read each Fang-Vulnerable enemy's stacks, so the
+    /// enemy turn's decay is seen before another source can add more.</summary>
+    private static void SyncFangVulnerable()
+    {
+        foreach (var record in Open.Values)
+        {
+            foreach (var (enemy, share) in record.FangVulnerableOn)
+            {
+                share.Sync(enemy.IsAlive ? ReactionTally.Stacks<MegaCrit.Sts2.Core.Models.Powers.VulnerablePower>(enemy) : 0);
+            }
+        }
+    }
+
+    /// <summary>Test seam: the turn-open Vulnerable read with given stacks.
+    /// The mod never calls it.</summary>
+    internal static void SyncFangVulnerableForTest(Creature target, int vulnerable)
+    {
+        foreach (var record in Open.Values)
+        {
+            if (record.FangVulnerableOn.TryGetValue(target, out var share))
+            {
+                share.Sync(vulnerable);
+            }
+        }
+    }
+
+    /// <summary>Test seam: one Fang payout, as <c>VarkaOath.Pay</c> calls the
+    /// three notes, by seat rather than creature. The mod never calls it.
+    /// </summary>
+    internal static void FangPaidForTest(Player player, string element, int block,
+                                         Creature? target, int vulnBefore, int vulnAfter)
+    {
+        var creature = player.Creature;
+        FangPaid(creature, element);
+        if (block > 0) FangBlockGained(creature, block);
+        if (target != null) FangVulnerableApplied(creature, target, vulnBefore, vulnAfter);
+    }
+
+    private static void FileFangHit(FightRecord record, string? element,
+                                    int unblocked, int blocked)
+    {
+        if (string.IsNullOrEmpty(element)) return;
+        record.IsVarka = true;
+        if (unblocked > 0)
+        {
+            record.FangDamageByElement.TryGetValue(element, out var had);
+            record.FangDamageByElement[element] = had + unblocked;
+        }
+        record.FangDamageBlocked += Math.Max(0, blocked);
+    }
+
     // ---------------------------------------------------- killing blows ---
 
     /// <summary>One hit in flight: who it credits, and what stood in front of
     /// it when it started.</summary>
     private readonly record struct PendingHit(
         Player? Owner, string Kind, string Source, Player? Victim, int Hp, int Block,
-        string? Swirl = null);
+        string? Swirl = null, string? Fang = null, int Vulnerable = 0);
 
     private static readonly Dictionary<Creature, List<PendingHit>> Pending = new();
 
@@ -1237,7 +1442,9 @@ internal static class PlayTelemetry
                 var (owner, kind, source) = Credit(dealer, cardSource);
                 if (owner == null || !Open.TryGetValue(owner, out var record)) return;
                 hit = new PendingHit(owner, kind, source, null, hp, block,
-                                     SwirlKey(record, kind, cardSource));
+                                     SwirlKey(record, kind, cardSource),
+                                     DamageCredit.FangElement,
+                                     ReactionTally.Stacks<MegaCrit.Sts2.Core.Models.Powers.VulnerablePower>(target));
             }
 
             if (!Pending.TryGetValue(target, out var stack))
@@ -1296,6 +1503,8 @@ internal static class PlayTelemetry
 
             if (hit.Owner == null || !Open.TryGetValue(hit.Owner, out var dealt)) return;
             FileHit(dealt, hit.Kind, hit.Source, hit.Hp, hit.Block, hit.Swirl);
+            FileFangHit(dealt, hit.Fang, hit.Hp, hit.Block);
+            RecordVulnerableHit(creature, hit.Hp + hit.Block, hit.Vulnerable);
             dealt.KillingBlows++;
         }
         catch (Exception e)
@@ -2092,6 +2301,18 @@ internal static class PlayTelemetry
         /// (<see cref="SwirlKey"/>); the same damage stays under "(Swirl)" in
         /// <see cref="DamageBySource"/>.</summary>
         public readonly Dictionary<string, int> SwirlDamageByCard = new();
+        /// <summary>2026-10-19. Boreas's Fang's payouts (the "Boreas's Fang"
+        /// section): count and HP damage by current element, the Block its
+        /// hits broke, its Block, its Vulnerable stacks, and the Vulnerable
+        /// bonus damage credited to them.</summary>
+        public readonly Dictionary<string, int> FangPayoutsByElement = new();
+        public readonly Dictionary<string, int> FangDamageByElement = new();
+        public int FangDamageBlocked;
+        public int FangBlock;
+        public int FangVulnerable;
+        public decimal FangVulnerableBonus;
+        /// <summary>The Fang's Vulnerable stacks per enemy. Not written.</summary>
+        internal readonly Dictionary<Creature, FangVulnerableShare> FangVulnerableOn = new();
         /// <summary>-1 until the first turn sample; the counter is monotonic
         /// across combats, so a fight's own count is a difference.</summary>
         public int ReactionsAtStart = -1;
@@ -2361,6 +2582,17 @@ internal static class PlayTelemetry
                     sb.Append(']');
                 }
                 sb.Append(']');
+                // 2026-10-19 (Varka Fang pick 2a): what Boreas's Fang paid.
+                sb.Append(",\"fang_payouts_by_element\":");
+                IntMap(sb, FangPayoutsByElement);
+                sb.Append(",\"fang_damage_by_element\":");
+                IntMap(sb, FangDamageByElement);
+                sb.Append(",\"fang_damage_blocked\":").Append(FangDamageBlocked);
+                sb.Append(",\"fang_block\":").Append(FangBlock);
+                sb.Append(",\"fang_vulnerable\":").Append(FangVulnerable);
+                sb.Append(",\"fang_vulnerable_bonus_damage\":").Append(
+                    Math.Round(FangVulnerableBonus, 2, MidpointRounding.AwayFromZero)
+                        .ToString("0.##", CultureInfo.InvariantCulture));
             }
             sb.Append(",\"turns\":").Append(Turns);
             sb.Append(',');

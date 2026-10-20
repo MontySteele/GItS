@@ -223,7 +223,7 @@ public class FurinaEnginesTests : IDisposable
     }
 
     [Fact]
-    public void Prima_donna_costs_2_and_its_upgrade_installs_the_plus_power()
+    public void Prima_donna_costs_2_and_its_upgrade_counts_on_the_same_power()
     {
         var card = new ProtoFsPrimaDonna();
         Assert.Equal(2, card.EnergyCost.Canonical);
@@ -233,8 +233,10 @@ public class FurinaEnginesTests : IDisposable
         var plus = Upgraded(new ProtoFsPrimaDonna());
         Assert.Equal(2, plus.EnergyCost.Canonical);
         var source = Generated("ProtoFsPrimaDonna");
-        Assert.Contains("PowerCmd.Apply<PrimaDonnaPlusPower>", source);
-        Assert.Contains("PowerCmd.Apply<PrimaDonnaPower>", source);
+        // One badge for both versions (the icon declutter, 2026-10-19).
+        Assert.Contains("UpgradeTwinPower.Install<PrimaDonnaPower>(choiceContext, "
+                        + "Owner.Creature, 1, IsUpgraded,", source);
+        Assert.DoesNotContain("PrimaDonnaPlusPower", source);
         Assert.DoesNotContain("EnergyCost.UpgradeBy", source);
     }
 }

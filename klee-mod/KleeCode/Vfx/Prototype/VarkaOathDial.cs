@@ -301,10 +301,16 @@ public static class VarkaOathDial
     /// Is this his Oath badge on his OWN screen, where the dial draws it? A
     /// co-op partner still sees it on his creature. Never throws: a
     /// canonical power has no owner to ask.
+    ///
+    /// THE ICON DECLUTTER (2026-10-19, [USER]: "our characters tend to make
+    /// a lot of icons"): the "(left)" flag goes too. Its number is his Oath of
+    /// the element he left, which that element's pip shows, and the switch
+    /// itself shows as the pip shrinking from large to small. Its sentence
+    /// joins the dial's hover while it stands (<see cref="ShowHover"/>).
     /// </summary>
     public static bool HidesBadge(PowerModel power)
     {
-        if (power is not OathBadgePower) return false;
+        if (power is not (OathBadgePower or OathLeftPower)) return false;
         Creature? owner;
         try
         {
@@ -643,7 +649,8 @@ public static class VarkaOathDial
     }
 
     /// <summary>The badge's own tooltip: the live Oath badge's hover tips, or
-    /// the plain Oath badge's before he holds any Oath.</summary>
+    /// the plain Oath badge's before he holds any Oath, then the element he
+    /// left this turn, if any.</summary>
     private static void ShowHover(Control root, Creature creature)
     {
         try
@@ -657,6 +664,12 @@ public static class VarkaOathDial
                   {
                       ModelDb.Power<UnswornOathPower>().DumbHoverTip,
                   };
+            // The element he left this turn: its badge is hidden on his own
+            // screen (`HidesBadge`), so its sentence rides the dial's hover.
+            foreach (var left in creature.Powers.OfType<OathLeftPower>())
+            {
+                tips.AddRange(left.HoverTips);
+            }
             NHoverTipSet.CreateAndShow(
                 root, tips, HoverTip.GetHoverTipAlignment(root));
             root.SetMeta(HoverShownMeta, true);

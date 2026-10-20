@@ -181,19 +181,6 @@ public class PoolCompletionTests : IDisposable
     }
 
     [Fact]
-    public void Watatsumi_resistance_adds_a_sting_per_companion_written()
-    {
-        // The re-founding (2026-10-12): paid on WRITING a Companion, in
-        // Stings, from the one place a Plan is written.
-        Assert.Null(typeof(WatatsumiResistancePower).GetMethod(
-            "AfterCardPlayed", HeadlessGame.All
-            | System.Reflection.BindingFlags.DeclaredOnly));
-        var written = Seq("KokomiRefounding", "OnWritten");
-        Assert.Contains(written, c => c.Contains("WatatsumiResistancePower"));
-        Assert.Contains(written, c => c.Contains("KokomiCards.AddJellyfish"));
-    }
-
-    [Fact]
     public void Tactical_relay_plans_energy_and_an_upgraded_draw_for_each_player()
     {
         var card = new ProtoKkTacticalRelay();

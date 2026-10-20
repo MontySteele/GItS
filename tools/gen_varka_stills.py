@@ -9,7 +9,7 @@ Outputs (all gitignored Tier F, ledgered in art/SOURCES.tsv):
                                                          (the fallback; the game
                                                          draws his model frames)
     ImageGen/images/varka/ui/selection_splash.png      1920x1200
-    ImageGen/images/varka/ui/map_marker.png              49x64
+    (ui/map_marker.png left 2026-10-19: tools/gen_map_markers.py draws a pin from the model close-up)
 
 SOURCE. `Varka Portrait.png` (1376x1776, official, fetched by the Varka block
 of art/plan.tsv into art/raw/). Unlike Kokomi's Portrait it already ships as an
@@ -42,15 +42,13 @@ import sys
 from PIL import Image
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from char_stills import alpha_bbox, fit, head_crop  # noqa: E402
+from char_stills import alpha_bbox, fit  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE_REL = Path("art") / "raw" / "Varka_Portrait.png"
 UI_REL = Path("ImageGen") / "images" / "varka" / "ui"
 MODEL_REL = Path("ImageGen") / "images" / "varka" / "model"
 
-# Set by eye against rendered crops. Larger fraction = wider shot.
-MARKER_HEAD_FRAC = 0.21
 
 # Selection splash: measured against the VISIBLE 1080 band of the 1920x1200
 # texture (see gen_kokomi_stills.py for why), left of centre for the info panel.
@@ -78,8 +76,6 @@ def render(cutout):
     out = {}
     out[MODEL_REL / "combat_model.png"] = fit(cutout, 240, 280)
 
-    out[UI_REL / "map_marker.png"] = head_crop(
-        cutout, 49, 64, head_frac=MARKER_HEAD_FRAC, centre_on="head")
 
     x0, y0, x1, y1 = alpha_bbox(cutout)
     subject = cutout.crop((x0, y0, x1, y1))

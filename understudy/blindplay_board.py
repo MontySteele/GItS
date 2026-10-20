@@ -944,7 +944,7 @@ def _combat(state: dict[str, Any]) -> dict[str, Any]:
 #: Swirl he makes pays for each current element (`VarkaLaw` numbers).
 VARKA_OATH_ELEMENTS = ("Pyro", "Hydro", "Electro", "Cryo")
 VARKA_SWIRL_PAYOUT = {
-    "Pyro": "Your Swirls deal 3 damage to that enemy.",
+    "Pyro": "Your Swirls deal 5 damage to that enemy.",
     "Hydro": "Your Swirls give you 3 Block.",
     "Cryo": "Your Swirls apply 1 Vulnerable to that enemy.",
     "Electro": "Your Swirls deal 3 damage to ALL enemies.",

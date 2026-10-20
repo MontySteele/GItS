@@ -76,7 +76,10 @@ swears more of that element to his blade.
   elements waits until he switches back. Running two elements is allowed;
   juggling them is the cost, and the Switch cards (sec.7) are what pay for it.
 - **A Swirl he makes pays his current element**, one effect:
-  - **Pyro:** 3 damage to the enemy Swirled.
+  - **Pyro:** 5 damage to the enemy Swirled (was 3; Boreas's Fang review,
+    pick 1, 2026-10-19, [USER]: "Yeah, let's do (a) all around and then
+    test the impact of the relic overall."; staged on `varka-fang-next`,
+    `review/active/varka-fang-next-2026-10-19.md`).
   - **Hydro:** gain 3 Block.
   - **Cryo:** 1 Vulnerable on the enemy Swirled.
   - **Electro:** to be chosen by the sim, [USER]: "Either aoe electro, or draw

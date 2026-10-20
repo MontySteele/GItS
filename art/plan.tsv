@@ -313,7 +313,10 @@ relic_dodoco_tales	ImageGen/images/relics/dodoco_tales.png	256	256	contain	cente
 # char_icon	ImageGen/images/ui/char_icon.png	88	88	cover	top	auto	1	png	Klee Icon.png		icon
 energy_icon_large	ImageGen/images/ui/energy_icon_74.png	74	74	contain	center	auto	1	svg	Element Pyro.svg		icon
 energy_icon_small	ImageGen/images/ui/energy_icon_22.png	22	22	contain	center	auto	1	svg	Element Pyro.svg		icon
-map_marker	ImageGen/images/ui/map_marker.png	49	64	cover	top	auto	1	png	Klee Side Icon.png		icon
+# map_marker (retired 2026-10-19): a base-style pin with her face, cut from the
+# model-rendered select close-up by tools/gen_map_markers.py (Klee visual paper,
+# pick 3 (a): the side icon filled only the lower two-thirds of its box); art_lint L11.
+# map_marker	ImageGen/images/ui/map_marker.png	49	64	cover	top	auto	1	png	Klee Side Icon.png		icon
 selection_splash	ImageGen/images/ui/selection_splash.png	1920	1200	cover	center	auto	1	png	Klee Wish.png		splash
 select_bg	ImageGen/images/ui/select_bg.png	1920	1080	cover	center	auto	1	png	Namecard Background Klee Explosive.png		splash
 # ---------- COMBAT MODEL SOURCE (raw; hand-cut into layers per manifest recipe) ----------
@@ -768,7 +771,6 @@ power_furina_fanfare	ImageGen/images/furina/powers/fanfare.png	256	256	contain	c
 power_furina_fanfare	ImageGen/images/furina/powers/fanfare.png	256	256	contain	center	shortlist	3	png	Furina Item.png		icon
 power_furina_rising_ovation	ImageGen/images/furina/powers/rising_ovation.png	256	256	contain	center	auto	1	png	Constellation A Woman Adapts Like Duckweed in Water.png		icon
 power_furina_salon_member	ImageGen/images/furina/powers/salon_member.png	256	256	contain	center	auto	1	png	Talent Salon Solitaire.png		icon
-power_furina_grand_salon	ImageGen/images/furina/powers/grand_salon.png	256	256	contain	center	auto	1	png	Talent Salon Solitaire 2.png		icon
 power_furina_center_stage	ImageGen/images/furina/powers/center_stage.png	256	256	contain	center	auto	1	png	Talent The Sea Is My Stage.png		icon
 power_furina_guest_cast	ImageGen/images/furina/powers/guest_cast.png	256	256	contain	center	auto	1	png	Constellation They Know Not Life, Who Dwelt in the Netherworld Not!.png		icon
 power_furina_leading_role	ImageGen/images/furina/powers/leading_role.png	256	256	contain	center	auto	1	png	Constellation His Name I Now Know, It Is...!.png		icon
@@ -776,9 +778,7 @@ power_furina_supporting_cast	ImageGen/images/furina/powers/supporting_cast.png	2
 power_furina_top_billing	ImageGen/images/furina/powers/top_billing.png	256	256	contain	center	auto	1	png	Constellation Love Is a Rebellious Bird That None Can Tame.png		icon
 power_furina_limelight	ImageGen/images/furina/powers/limelight.png	256	256	contain	center	auto	1	png	Constellation Hear Me — Let Us Raise the Chalice of Love!.png		icon
 power_furina_star_of_the_show	ImageGen/images/furina/powers/star_of_the_show.png	256	256	contain	center	auto	1	png	Animula Choragi Shape.png		icon
-power_furina_stage_lights	ImageGen/images/furina/powers/stage_lights.png	256	256	contain	center	auto	1	png	Talent Unheard Confession.png		icon
 power_furina_standing_ovation	ImageGen/images/furina/powers/standing_ovation.png	256	256	contain	center	shortlist	1	png	Furina Icon.png		icon
-power_furina_ovation_trickle	ImageGen/images/furina/powers/ovation_trickle.png	256	256	contain	center	shortlist	1	png	Item Furina Banquet.png		icon
 # --- Kokomi art pass, 2026-07-25 (docs/kokomi-art-pass-requirements.md). Tier F, private build only. ---
 # Shortlists, not picks: rank 1 is the effective source until the taste pass rules.
 # Anchors are COMPUTED from each source's geometry, not chosen. A cover anchor is a CENTRE and the crop
@@ -1144,8 +1144,6 @@ grand_gala	ImageGen/images/cards/furina/grand_gala.png	500	380	cover_autocrop	co
 # -- run 2: AS2-E2 icon re-hunt, the 4 weak marks (AS2 log, 'Open [USER] items') --
 power_furina_standing_ovation	ImageGen/images/furina/powers/standing_ovation.png	256	256	contain	center	shortlist	2	png	Talent Conclusive Ovation.png		icon
 power_furina_standing_ovation	ImageGen/images/furina/powers/standing_ovation.png	256	256	contain	center	shortlist	3	png	Conclusive Ovation Equipment Card.png		icon
-power_furina_ovation_trickle	ImageGen/images/furina/powers/ovation_trickle.png	256	256	contain	center	shortlist	2	png	Item Ovations That Ceased Upon Festivity.png		icon
-power_furina_ovation_trickle	ImageGen/images/furina/powers/ovation_trickle.png	256	256	contain	center	shortlist	3	png	Conclusive Ovation Equipment Card Golden.png		icon
 power_friendly_visit	ImageGen/images/powers/friendly_visit.png	256	256	contain	center	shortlist	2	png	Item Gift.png		icon
 power_friendly_visit	ImageGen/images/powers/friendly_visit.png	256	256	contain	center	shortlist	3	png	Trifolium.png		icon
 power_study_buddy	ImageGen/images/powers/study_buddy.png	256	256	contain	center	shortlist	2	png	Book Ragged Notebook.png		icon
@@ -1399,9 +1397,6 @@ power_kokomi_kurages_oath	ImageGen/images/kokomi/powers/kurages_oath.png	256	256
 power_kokomi_before_sun_and_moon	ImageGen/images/kokomi/powers/before_sun_and_moon.png	256	256	cover	y0.66@2.2	shortlist	1	png	Sangonomiya Kokomi Vision.png		icon
 power_kokomi_before_sun_and_moon	ImageGen/images/kokomi/powers/before_sun_and_moon.png	256	256	contain	center	shortlist	2	png	Talent Nereid's Ascension.png		icon
 power_kokomi_before_sun_and_moon	ImageGen/images/kokomi/powers/before_sun_and_moon.png	256	256	contain	center	shortlist	3	png	Icon Emoji Paimon's Paintings 13 Sangonomiya Kokomi 2.png		sticker
-power_kokomi_ceremonial_garment	ImageGen/images/kokomi/powers/ceremonial_garment.png	256	256	contain	center	shortlist	1	png	Ceremonial Garment Buff Icon.png		icon
-power_kokomi_ceremonial_garment	ImageGen/images/kokomi/powers/ceremonial_garment.png	256	256	cover	center	shortlist	2	gif	Nereid's Ascension Ceremonial Garment Water Preview.gif	50	icon
-power_kokomi_ceremonial_garment	ImageGen/images/kokomi/powers/ceremonial_garment.png	256	256	cover	center	shortlist	3	gif	Nereid's Ascension Ceremonial Garment Attack Preview.gif	50	icon
 power_kokomi_vigil_of_the_deep	ImageGen/images/kokomi/powers/vigil_of_the_deep.png	256	256	cover	center	shortlist	1	png	Namecard Background Sangonomiya Kokomi The Deep.png		icon
 power_kokomi_vigil_of_the_deep	ImageGen/images/kokomi/powers/vigil_of_the_deep.png	256	256	cover	center	shortlist	2	png	Item Sangonomiya Kokomi The Deep.png		icon
 power_kokomi_vigil_of_the_deep	ImageGen/images/kokomi/powers/vigil_of_the_deep.png	256	256	cover	center	shortlist	3	gif	Nereid's Ascension Ceremonial Garment Water Preview.gif	70	icon
@@ -3392,3 +3387,229 @@ proto_mf_sigewinne_super_saturated_syringing	ImageGen/images/cards/companions/pr
 proto_mf_escoffier_rehab_diet	ImageGen/images/cards/companions/proto_mf_escoffier_rehab_diet.png	500	380	cover	y0.33	shortlist	1	png	Escoffier Card.png		splash	escoffier
 # proto_mf_emilie_aromatic_explication <- Emilie's full Wish art
 proto_mf_emilie_aromatic_explication	ImageGen/images/cards/companions/proto_mf_emilie_aromatic_explication.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Emilie Full Wish.png		splash	emilie
+
+# ---------- Yae character shell (2026-10-19, the Yae art pass) ----------
+# Her select backdrop, a straight wiki fetch: her own namecard, tinted Electro
+# violet by the generated select scene (tools/yae_rig). L1 scopes to /cards/,
+# so proto_ym_sakura_seal wearing the same namecard is legal, as
+# kokomi_select_bg's The Deep is. The other shell surfaces are generator-owned
+# (art_lint L11): gen_yae_stills.py, gen_map_markers.py, gen_char_icons.py,
+# gen_char_icon_outlines.py, gen_transition_wipe.py, select_loop.py.
+yae_select_bg	ImageGen/images/yae/ui/select_bg.png	1920	1080	cover	center	shortlist	1	png	Namecard Background Yae Miko Kitsune Dreaming.png		splash
+# ---------- Power badge pass (2026-10-19): badges that borrowed another power's icon get their own ----------
+# Kit powers wear their kit's own talent/constellation icons or an item of the kit's nation; companion powers
+# their companion's talent icon. The borrowed badge stays the fallback in KleePowerIcons.cs.
+# power_klee_chained_reactions <- exact name, Klee C
+power_klee_chained_reactions	ImageGen/images/powers/chained_reactions.png	256	256	contain	center	shortlist	1	png	Constellation Chained Reactions.png		icon	
+# power_klee_sparkborne_magic <- exact name (Sparkborne Magic), Klee passive
+power_klee_sparkborne_magic	ImageGen/images/powers/sparkborne_magic.png	256	256	contain	center	shortlist	1	png	Talent Sparkborne Magic.png		icon	
+# power_klee_boom_badge <- Klee passive: the next blast hits harder
+power_klee_boom_badge	ImageGen/images/powers/boom_badge.png	256	256	contain	center	shortlist	1	png	Talent Pounding Surprise.png		icon	
+# power_klee_aftershock <- a reaction that sets off another blast
+power_klee_aftershock	ImageGen/images/powers/aftershock.png	256	256	contain	center	shortlist	1	png	Reaction Overloaded.png		icon	
+# power_klee_return_to_sender <- a crate that blows up on whoever hit it
+power_klee_return_to_sender	ImageGen/images/powers/return_to_sender.png	256	256	contain	center	shortlist	1	png	Item Boom-Boom Unit.png		icon	
+# power_klee_look_out <- Dodoco's umbrella: Block off a Mine
+power_klee_look_out	ImageGen/images/powers/look_out.png	256	256	contain	center	shortlist	1	png	Item Dodoco's Sunshade Umbrella.png		icon	
+# power_klee_dodoco <- Klee's skill, which leaves Mines
+power_klee_dodoco	ImageGen/images/powers/dodoco.png	256	256	contain	center	shortlist	1	png	Talent Jumpy Dumpty.png		icon	
+# power_klee_party_poppers <- exact name
+power_klee_party_poppers	ImageGen/images/powers/party_poppers.png	256	256	contain	center	shortlist	1	png	Item Jumpy Dumpty Party Popper.png		icon	
+# power_klee_witches_circle <- the coven's enchanted sweet
+power_klee_witches_circle	ImageGen/images/powers/witches_circle.png	256	256	contain	center	shortlist	1	png	Item Dodoco's Enchanted Candy.png		icon	
+# power_klee_alices_masterpiece <- Alice's book of Freedom
+power_klee_alices_masterpiece	ImageGen/images/powers/alices_masterpiece.png	256	256	contain	center	shortlist	1	png	Item Philosophies of Freedom.png		icon	
+# power_klee_introduction_magic <- Alice's primer of Freedom
+power_klee_introduction_magic	ImageGen/images/powers/introduction_magic.png	256	256	contain	center	shortlist	1	png	Item Teachings of Freedom.png		icon	
+# power_klee_pass_the_match <- co-op: the spark passed along
+power_klee_pass_the_match	ImageGen/images/powers/pass_the_match.png	256	256	contain	center	shortlist	1	png	Item Glimmering Essence.png		icon	
+# power_klee_sparks_for_everyone <- co-op: Klee's Kaboom!
+power_klee_sparks_for_everyone	ImageGen/images/powers/sparks_for_everyone.png	256	256	contain	center	shortlist	1	png	Talent Kaboom!.png		icon	
+# power_klee_knights_of_favonius <- co-op: Mondstadt's old dream
+power_klee_knights_of_favonius	ImageGen/images/powers/knights_of_favonius.png	256	256	contain	center	shortlist	1	png	Item Scattered Piece of Decarabian's Dream.png		icon	
+# power_klee_shrapnel <- co-op enemy rider: Amber's scattering shards
+power_klee_shrapnel	ImageGen/images/powers/shrapnel.png	256	256	contain	center	shortlist	1	png	Constellation Wildfire.png		icon	
+# power_klee_cover_your_ears <- enemy rider: a barrel going off
+power_klee_cover_your_ears	ImageGen/images/powers/cover_your_ears.png	256	256	contain	center	shortlist	1	png	Item Explosive Barrel.png		icon	
+# power_mc_signature_mix <- Diona, exact
+power_mc_signature_mix	ImageGen/images/powers/signature_mix.png	256	256	contain	center	shortlist	1	png	Talent Signature Mix.png		icon	
+# power_mc_revelation <- Nicole, exact
+power_mc_revelation	ImageGen/images/powers/revelation.png	256	256	contain	center	shortlist	1	png	Talent Revelation Uncreated Light.png		icon	
+# power_mc_ladder_of_ascent <- Nicole, exact
+power_mc_ladder_of_ascent	ImageGen/images/powers/ladder_of_ascent.png	256	256	contain	center	shortlist	1	png	Talent Revelation Ladder of Divine Ascent.png		icon	
+# power_mc_favonian_favor <- Dahlia's burst
+power_mc_favonian_favor	ImageGen/images/powers/favonian_favor.png	256	256	contain	center	shortlist	1	png	Talent Radiant Psalter.png		icon	
+# power_mc_sacramental_shower <- Dahlia's skill
+power_mc_sacramental_shower	ImageGen/images/powers/sacramental_shower.png	256	256	contain	center	shortlist	1	png	Talent Immersive Ordinance.png		icon	
+# power_mc_glacial_waltz <- Kaeya, exact
+power_mc_glacial_waltz	ImageGen/images/powers/glacial_waltz.png	256	256	contain	center	shortlist	1	png	Talent Glacial Waltz.png		icon	
+# power_mc_lightning_rose <- Lisa, exact
+power_mc_lightning_rose	ImageGen/images/powers/lightning_rose.png	256	256	contain	center	shortlist	1	png	Talent Lightning Rose.png		icon	
+# power_mc_melody_loop <- Barbara's skill (Melody Loop)
+power_mc_melody_loop	ImageGen/images/powers/melody_loop.png	256	256	contain	center	shortlist	1	png	Talent Let the Show Begin.png		icon	
+# power_mc_sinful_hex <- Fischl, exact
+power_mc_sinful_hex	ImageGen/images/powers/sinful_hex.png	256	256	contain	center	shortlist	1	png	Talent Undone Be Thy Sinful Hex.png		icon	
+# power_mc_herald_of_frost <- Qiqi, exact
+power_mc_herald_of_frost	ImageGen/images/powers/herald_of_frost.png	256	256	contain	center	shortlist	1	png	Talent Adeptus Art Herald of Frost.png		icon	
+# power_mc_grand_ode <- Venti, exact
+power_mc_grand_ode	ImageGen/images/powers/grand_ode.png	256	256	contain	center	shortlist	1	png	Talent Wind's Grand Ode.png		icon	
+# power_mc_dandelion_breeze <- Jean, exact
+power_mc_dandelion_breeze	ImageGen/images/powers/dandelion_breeze.png	256	256	contain	center	shortlist	1	png	Talent Dandelion Breeze.png		icon	
+# power_mc_mollis_favonius <- Sucrose, exact
+power_mc_mollis_favonius	ImageGen/images/powers/mollis_favonius.png	256	256	contain	center	shortlist	1	png	Talent Mollis Favonius.png		icon	
+# power_mc_hexhunter_chime <- Prune, exact
+power_mc_hexhunter_chime	ImageGen/images/powers/hexhunter_chime.png	256	256	contain	center	shortlist	1	png	Talent Ring-A-Ding-Ding! Hexhunter Chime.png		icon	
+# power_mc_sturm_und_drang <- Varka C4
+power_mc_sturm_und_drang	ImageGen/images/powers/sturm_und_drang.png	256	256	contain	center	shortlist	1	png	Constellation For None May Take From Us Our Freedom of Song.png		icon	
+# power_mc_swirl_charge <- a held Swirl (Jean's gale)
+power_mc_swirl_charge	ImageGen/images/powers/swirl_charge.png	256	256	contain	center	shortlist	1	png	Talent Gale Blade.png		icon	
+# power_mc_lightning_fang <- Razor, exact
+power_mc_lightning_fang	ImageGen/images/powers/lightning_fang.png	256	256	contain	center	shortlist	1	png	Talent Lightning Fang.png		icon	
+# power_mc_icy_paws <- Diona, exact
+power_mc_icy_paws	ImageGen/images/powers/icy_paws.png	256	256	contain	center	shortlist	1	png	Talent Icy Paws.png		icon	
+# power_mc_lions_fang <- Jean, exact
+power_mc_lions_fang	ImageGen/images/powers/lions_fang.png	256	256	contain	center	shortlist	1	png	Constellation Lion's Fang, Fair Protector of Mondstadt.png		icon	
+# power_mc_electro_rider <- Sara's burst: an Electro strike
+power_mc_electro_rider	ImageGen/images/powers/electro_rider.png	256	256	contain	center	shortlist	1	png	Talent Subjugation Koukou Sendou.png		icon	
+# power_mc_vanguards_valor <- Chevreuse
+power_mc_vanguards_valor	ImageGen/images/powers/vanguards_valor.png	256	256	contain	center	shortlist	1	png	Talent Vanguard's Coordinated Tactics.png		icon	
+# power_mc_baron_bunny <- Amber, exact
+power_mc_baron_bunny	ImageGen/images/powers/baron_bunny.png	256	256	contain	center	shortlist	1	png	Constellation It's Baron Bunny!.png		icon	
+# power_mc_explosive_puppet <- Amber, exact
+power_mc_explosive_puppet	ImageGen/images/powers/explosive_puppet.png	256	256	contain	center	shortlist	1	png	Talent Explosive Puppet.png		icon	
+# power_mf_ancient_sea_authority <- Neuvillette, exact
+power_mf_ancient_sea_authority	ImageGen/images/powers/ancient_sea_authority.png	256	256	contain	center	shortlist	1	png	Talent Heir to the Ancient Sea's Authority.png		icon	
+# power_mf_cannon_fire_support <- Navia's burst
+power_mf_cannon_fire_support	ImageGen/images/powers/cannon_fire_support.png	256	256	contain	center	shortlist	1	png	Talent As the Sunlit Sky's Singing Salute.png		icon	
+# power_mf_night_vigil <- Clorinde's skill
+power_mf_night_vigil	ImageGen/images/powers/night_vigil.png	256	256	contain	center	shortlist	1	png	Talent Hunter's Vigil.png		icon	
+# power_mf_grin_malkin_hat <- Lyney's Grin-Malkin
+power_mf_grin_malkin_hat	ImageGen/images/powers/grin_malkin_hat.png	256	256	contain	center	shortlist	1	png	Talent Wondrous Trick Miracle Parade.png		icon	
+# power_mf_rebound_hydrotherapy <- Sigewinne, exact
+power_mf_rebound_hydrotherapy	ImageGen/images/powers/rebound_hydrotherapy.png	256	256	contain	center	shortlist	1	png	Talent Rebound Hydrotherapy.png		icon	
+# power_mf_chilling_penalty <- Wriothesley's skill (Chilling Penalty)
+power_mf_chilling_penalty	ImageGen/images/powers/chilling_penalty.png	256	256	contain	center	shortlist	1	png	Talent Icefang Rush.png		icon	
+# power_mf_aromatic_explication <- Emilie, exact
+power_mf_aromatic_explication	ImageGen/images/powers/aromatic_explication.png	256	256	contain	center	shortlist	1	png	Talent Aromatic Explication.png		icon	
+# power_kokomi_plan <- Kokomi passive: the strategy queued
+power_kokomi_plan	ImageGen/images/kokomi/powers/plan.png	256	256	contain	center	shortlist	1	png	Talent Flawless Strategy.png		icon	
+# power_kokomi_stunning_stratagem <- exact name, her dish
+power_kokomi_stunning_stratagem	ImageGen/images/kokomi/powers/stunning_stratagem.png	256	256	contain	center	shortlist	1	png	Item A Stunning Stratagem.png		icon	
+# power_kokomi_nereids_ascension <- exact name
+power_kokomi_nereids_ascension	ImageGen/images/kokomi/powers/nereids_ascension.png	256	256	contain	center	shortlist	1	png	Talent Nereid's Ascension.png		icon	
+# power_kokomi_at_waters_edge <- exact name
+power_kokomi_at_waters_edge	ImageGen/images/kokomi/powers/at_waters_edge.png	256	256	contain	center	shortlist	1	png	Constellation At Water's Edge.png		icon	
+# power_kokomi_following_current <- Kokomi C
+power_kokomi_following_current	ImageGen/images/kokomi/powers/following_current.png	256	256	contain	center	shortlist	1	png	Constellation All Streams Flow to the Sea.png		icon	
+# power_kokomi_kurage_vanguard <- a jellyfish to the front
+power_kokomi_kurage_vanguard	ImageGen/images/kokomi/powers/kurage_vanguard.png	256	256	contain	center	shortlist	1	png	Item Sapphire Blue Young Hat Jellyfish.png		icon	
+# power_kokomi_dawn_tide <- Kokomi C
+power_kokomi_dawn_tide	ImageGen/images/kokomi/powers/dawn_tide.png	256	256	contain	center	shortlist	1	png	Constellation The Moon Overlooks the Waters.png		icon	
+# power_kokomi_kurage_bloom <- Kokomi C
+power_kokomi_kurage_bloom	ImageGen/images/kokomi/powers/kurage_bloom.png	256	256	contain	center	shortlist	1	png	Constellation The Clouds Like Waves Rippling.png		icon	
+# power_kokomi_endless_shoal <- Kokomi passive
+power_kokomi_endless_shoal	ImageGen/images/kokomi/powers/endless_shoal.png	256	256	contain	center	shortlist	1	png	Talent Song of Pearls.png		icon	
+# power_kokomi_watchful_shoal <- Inazuma sea-glow: sharper Stings
+power_kokomi_watchful_shoal	ImageGen/images/kokomi/powers/watchful_shoal.png	256	256	contain	center	shortlist	1	png	Item Fluorescent Fungus.png		icon	
+# power_kokomi_jellyfish_current <- a jellyfish
+# power_kokomi_coordinated_tide <- Inazuma crystal
+# power_kokomi_watatsumis_grace <- Kokomi passive
+power_kokomi_watatsumis_grace	ImageGen/images/kokomi/powers/watatsumis_grace.png	256	256	contain	center	shortlist	1	png	Talent The Shape of Water.png		icon	
+# power_kokomi_tidal_riposte <- Kokomi C6, a blade: the riposte
+power_kokomi_tidal_riposte	ImageGen/images/kokomi/powers/tidal_riposte.png	256	256	contain	center	shortlist	1	png	Constellation Sango Isshin.png		icon	
+# power_kokomi_riposte <- Inazuma sea spectre's charge
+power_kokomi_riposte	ImageGen/images/kokomi/powers/riposte.png	256	256	contain	center	shortlist	1	png	Item Spectral Nucleus.png		icon	
+# power_kokomi_draft_the_orders <- Inazuma talent book
+power_kokomi_draft_the_orders	ImageGen/images/kokomi/powers/draft_the_orders.png	256	256	contain	center	shortlist	1	png	Item Teachings of Transience.png		icon	
+# power_kokomi_battle_formation <- Inazuma talent book
+power_kokomi_battle_formation	ImageGen/images/kokomi/powers/battle_formation.png	256	256	contain	center	shortlist	1	png	Item Philosophies of Transience.png		icon	
+# power_kokomi_treatise <- Watatsumi pearl shell
+power_kokomi_treatise	ImageGen/images/kokomi/powers/treatise.png	256	256	contain	center	shortlist	1	png	Item Pearl Cage.png		icon	
+# power_kokomi_kurage_canopy <- a jellyfish canopy
+power_kokomi_kurage_canopy	ImageGen/images/kokomi/powers/kurage_canopy.png	256	256	contain	center	shortlist	1	png	Item Rampaging Sapphire Blue Hat Jellyfish.png		icon	
+# power_kokomi_watatsumi_resistance <- an Inazuma Hydro Vision
+# power_kokomi_grand_strategist <- a Hydro reaction
+power_kokomi_grand_strategist	ImageGen/images/kokomi/powers/grand_strategist.png	256	256	contain	center	shortlist	1	png	Reaction Vaporize.png		icon	
+# power_kokomi_undercurrent_snare <- enemy rider: tangling seagrass
+power_kokomi_undercurrent_snare	ImageGen/images/kokomi/powers/undercurrent_snare.png	256	256	contain	center	shortlist	1	png	Item Seagrass.png		icon	
+# power_kokomi_juuga_guard <- Gorou's defence
+power_kokomi_juuga_guard	ImageGen/images/kokomi/powers/juuga_guard.png	256	256	contain	center	shortlist	1	png	Talent Inuzaka All-Round Defense.png		icon	
+# power_kokomi_pincer <- Inazuma Hydro drop
+power_kokomi_pincer	ImageGen/images/kokomi/powers/pincer.png	256	256	contain	center	shortlist	1	png	Item Dew of Repudiation.png		icon	
+# power_furina_thunderous_applause <- Fontaine bell
+power_furina_thunderous_applause	ImageGen/images/furina/powers/thunderous_applause.png	256	256	contain	center	shortlist	1	png	Item Lumidouce Bell.png		icon	
+# power_furina_universal_revelry <- Fontaine dancer
+power_furina_universal_revelry	ImageGen/images/furina/powers/universal_revelry.png	256	256	contain	center	shortlist	1	png	Item Pneuma-Ousia Waltzing Automaton.png		icon	
+# power_furina_arkhe_in_balance <- Fontaine Vision
+power_furina_arkhe_in_balance	ImageGen/images/furina/powers/arkhe_in_balance.png	256	256	contain	center	shortlist	1	png	Vision Fontaine Hydro Ousia.png		icon	
+# power_furina_crowd_favorite <- a flower for the star
+power_furina_crowd_favorite	ImageGen/images/furina/powers/crowd_favorite.png	256	256	contain	center	shortlist	1	png	Item Marcotte.png		icon	
+# power_furina_objection <- Fontaine Justice book
+power_furina_objection	ImageGen/images/furina/powers/objection.png	256	256	contain	center	shortlist	1	png	Item Philosophies of Justice.png		icon	
+# power_furina_plot_twist <- a switcheroo
+power_furina_plot_twist	ImageGen/images/furina/powers/plot_twist.png	256	256	contain	center	shortlist	1	png	Item Opera House Switcheroo Case Record.png		icon	
+# power_furina_trial_by_water <- the court's verdict
+power_furina_trial_by_water	ImageGen/images/furina/powers/trial_by_water.png	256	256	contain	center	shortlist	1	png	Constellation Juridical Exhortation.png		icon	
+# power_furina_rainfall_overture <- Hydro
+power_furina_rainfall_overture	ImageGen/images/furina/powers/rainfall_overture.png	256	256	contain	center	shortlist	1	png	Item Hydro Sigil.png		icon	
+# power_furina_center_of_attention <- Furina's own soloist
+power_furina_center_of_attention	ImageGen/images/furina/powers/center_of_attention.png	256	256	contain	center	shortlist	1	png	Talent Soloist's Solicitation.png		icon	
+# power_furina_the_masquerade <- the Opera Epiclese in miniature
+power_furina_the_masquerade	ImageGen/images/furina/powers/the_masquerade.png	256	256	contain	center	shortlist	1	png	Item Theater's Cool Mist.png		icon	
+# power_furina_high_stakes <- Neuvillette's verdict: what was Drained is owed
+# power_varka_unsworn_oath <- his own Vision, beside the four Oath Visions
+power_varka_unsworn_oath	ImageGen/images/varka/powers/unsworn_oath.png	256	256	contain	center	shortlist	1	png	Vision Mondstadt Anemo.png		icon	
+# power_varka_knight_of_boreas <- Boreas
+power_varka_knight_of_boreas	ImageGen/images/varka/powers/knight_of_boreas.png	256	256	contain	center	shortlist	1	png	Item Ring of Boreas.png		icon	
+# power_varka_eye_wall <- Varka talent
+power_varka_eye_wall	ImageGen/images/varka/powers/eye_wall.png	256	256	contain	center	shortlist	1	png	Talent Dawn's Return.png		icon	
+# power_varka_twin_gales <- Boreas
+power_varka_twin_gales	ImageGen/images/varka/powers/twin_gales.png	256	256	contain	center	shortlist	1	png	Item Tail of Boreas.png		icon	
+# power_varka_eye_of_stormterror <- Stormterror
+power_varka_eye_of_stormterror	ImageGen/images/varka/powers/eye_of_stormterror.png	256	256	contain	center	shortlist	1	png	Item Dvalin's Claw.png		icon	
+# power_varka_unwavering_banner <- Varka C6
+power_varka_unwavering_banner	ImageGen/images/varka/powers/unwavering_banner.png	256	256	contain	center	shortlist	1	png	Constellation Beloved Mondstadt, Steadfast You Shall Shine.png		icon	
+# power_varka_azure_fangs_oath <- an oath out of Mondstadt's old epic
+power_varka_azure_fangs_oath	ImageGen/images/varka/powers/azure_fangs_oath.png	256	256	contain	center	shortlist	1	png	Item Fragment of Decarabian's Epic.png		icon	
+# power_varka_all_four_winds <- all four elements swirled
+power_varka_all_four_winds	ImageGen/images/varka/powers/all_four_winds.png	256	256	contain	center	shortlist	1	png	Reaction Swirl.png		icon	
+# power_varka_oathbound_aegis <- Jean's aegis
+power_varka_oathbound_aegis	ImageGen/images/varka/powers/oathbound_aegis.png	256	256	contain	center	shortlist	1	png	Constellation People's Aegis.png		icon	
+# power_varka_dawn_winds_march <- exact name
+power_varka_dawn_winds_march	ImageGen/images/varka/powers/dawn_winds_march.png	256	256	contain	center	shortlist	1	png	Talent Dawn Wind's March.png		icon	
+# power_varka_cycle_of_seasons <- Varka talent
+power_varka_cycle_of_seasons	ImageGen/images/varka/powers/cycle_of_seasons.png	256	256	contain	center	shortlist	1	png	Talent Homebound Wind's Paean.png		icon	
+# power_varka_windborne_resolve <- Mondstadt's old tower
+power_varka_windborne_resolve	ImageGen/images/varka/powers/windborne_resolve.png	256	256	contain	center	shortlist	1	png	Item Tile of Decarabian's Tower.png		icon	
+# power_varka_lupical <- the wolf pack
+power_varka_lupical	ImageGen/images/varka/powers/lupical.png	256	256	contain	center	shortlist	1	png	Item Boreal Wolf's Milk Tooth.png		icon	
+# power_varka_weathervane <- Mondstadt's pinwheel flower, turning with the wind
+power_varka_weathervane	ImageGen/images/varka/powers/weathervane.png	256	256	contain	center	shortlist	1	png	Item Windwheel Aster.png		icon	
+# power_varka_grand_masters_order <- Jean, Acting Grand Master
+power_varka_grand_masters_order	ImageGen/images/varka/powers/grand_masters_order.png	256	256	contain	center	shortlist	1	png	Constellation When the West Wind Arises.png		icon	
+# power_varka_assembly_at_the_cathedral <- the Cathedral
+power_varka_assembly_at_the_cathedral	ImageGen/images/varka/powers/assembly_at_the_cathedral.png	256	256	contain	center	shortlist	1	png	Item Holy Water.png		icon	
+# power_varka_the_order_answers <- Varka's call
+power_varka_the_order_answers	ImageGen/images/varka/powers/the_order_answers.png	256	256	contain	center	shortlist	1	png	Item Varka's Invitation Ticket.png		icon	
+# power_varka_comrades_of_the_expedition <- co-op: Mondstadt relic of the old guard
+power_varka_comrades_of_the_expedition	ImageGen/images/varka/powers/comrades_of_the_expedition.png	256	256	contain	center	shortlist	1	png	Item Fetters of the Dandelion Gladiator.png		icon	
+# power_varka_west_winds_blessing <- co-op: the wind's blessing
+power_varka_west_winds_blessing	ImageGen/images/varka/powers/west_winds_blessing.png	256	256	contain	center	shortlist	1	png	Item Dvalin's Sigh.png		icon	
+# power_varka_windward_flank <- co-op enemy rider
+power_varka_windward_flank	ImageGen/images/varka/powers/windward_flank.png	256	256	contain	center	shortlist	1	png	Item Debris of Decarabian's City.png		icon	
+# power_varka_baron_bunny <- Amber C
+power_varka_baron_bunny	ImageGen/images/varka/powers/baron_bunny.png	256	256	contain	center	shortlist	1	png	Constellation Bunny Triggered.png		icon	
+# power_varka_wildfire_oath <- Diluc C, Pyro
+power_varka_wildfire_oath	ImageGen/images/varka/powers/wildfire_oath.png	256	256	contain	center	shortlist	1	png	Constellation Searing Ember.png		icon	
+# power_varka_ember_cleave <- Diluc, Pyro cleave
+power_varka_ember_cleave	ImageGen/images/varka/powers/ember_cleave.png	256	256	contain	center	shortlist	1	png	Talent Searing Onslaught.png		icon	
+# power_varka_stoke_the_flames <- Diluc C, Pyro
+power_varka_stoke_the_flames	ImageGen/images/varka/powers/stoke_the_flames.png	256	256	contain	center	shortlist	1	png	Constellation Flowing Flame.png		icon	
+# power_varka_retaliating_tide <- Mona C, Hydro
+power_varka_retaliating_tide	ImageGen/images/varka/powers/retaliating_tide.png	256	256	contain	center	shortlist	1	png	Constellation Prophecy of Submersion.png		icon	
+# power_varka_absolute_zero <- Kaeya C, Cryo
+power_varka_absolute_zero	ImageGen/images/varka/powers/absolute_zero.png	256	256	contain	center	shortlist	1	png	Constellation Frostbiting Embrace.png		icon	
+# power_varka_static_field <- Lisa, exact
+power_varka_static_field	ImageGen/images/varka/powers/static_field.png	256	256	contain	center	shortlist	1	png	Talent Static Electricity Field.png		icon	
+# power_yae_serial_novel <- Inazuma Light book
+power_yae_serial_novel	ImageGen/images/yae/powers/serial_novel.png	256	256	contain	center	shortlist	1	png	Item Philosophies of Light.png		icon	

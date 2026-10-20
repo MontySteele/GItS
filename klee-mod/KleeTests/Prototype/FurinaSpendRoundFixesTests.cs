@@ -84,54 +84,13 @@ public class FurinaSpendRoundFixesTests : IDisposable
     }
 
     [Fact]
-    public void High_stakes_adds_per_attack_hit_off_the_gross_drained_and_copies_add()
-    {
-        var furina = Seat.Furina(80).WithPower<HighStakesPower>(5);
-        var enemy = Seat.Klee().Creature;
-        var stakes = furina.Creature.Powers.OfType<HighStakesPower>().Single();
-        Assert.Equal(PowerInstanceType.Instanced, stakes.InstanceType);
-        var attack = new ProtoFsBravura();
-        decimal Hit(HighStakesPower p, CardModel? source,
-                    ValueProp props = ValueProp.Move) =>
-            p.ModifyDamageAdditive(enemy, 6m, props, furina.Creature, source,
-                                   null);
-
-        Assert.Equal(0m, Hit(stakes, attack));       // nothing drained
-        var ledger = FurinaStageLedger.For(furina.Creature);
-        ledger.NoteDrain(8, 80);                      // above the line
-        ledger.NoteDrain(6, 45);                      // past the line (60)
-        Assert.Equal(14, ledger.Drained);
-        Assert.Equal(2m, Hit(stakes, attack));        // 14 / 5
-        Assert.Equal(2, stakes.Bonus);
-        Assert.Equal(2, stakes.DisplayAmount);        // the badge: the bonus
-        // The Spend round 2 (2026-10-10): Repay no longer lowers it.
-        ledger.NoteRepay(5);
-        Assert.Equal(9, ledger.Drained);
-        Assert.Equal(2m, Hit(stakes, attack));        // still 14 / 5
-        ledger.NoteDrain(1, 80);
-        Assert.Equal(3m, Hit(stakes, attack));        // 15 / 5
-        // Not a Skill's hit, not an unpowered hit, not someone else's.
-        Assert.Equal(0m, Hit(stakes, new ProtoFsOusiaPledge()));
-        Assert.Equal(0m, Hit(stakes, attack, ValueProp.Unpowered));
-        Assert.Equal(0m, stakes.ModifyDamageAdditive(
-            enemy, 6m, ValueProp.Move, enemy, attack, null));
-        // A second copy (upgraded, every 4) is its own instance and adds.
-        furina.WithPower<HighStakesPower>(4);
-        var both = furina.Creature.Powers.OfType<HighStakesPower>().ToList();
-        Assert.Equal(2, both.Count);
-        Assert.Equal(3m + 3m, both.Sum(p => Hit(p, attack)));   // 15/5 + 15/4
-    }
-
-    [Fact]
-    public void High_stakes_refreshes_and_against_the_tide_reads_drained_this_turn()
+    public void Against_the_tide_reads_drained_this_turn()
     {
         // Against the Tide (2026-10-12, review/records/furina-varka-round-
         // 2026-10-12.md): "If you Drained this turn", not "within 5 HP of
         // your Drain line".
         Assert.Contains("FurinaStage.DrainedThisTurn(Owner.Creature)",
                         Generated("ProtoFsAgainstTheTide"));
-        Assert.Contains("HighStakesPower.Refresh",
-            Il.Calls(Il.Method("FurinaStage", "RefreshBadges")));
     }
 
     [Fact]

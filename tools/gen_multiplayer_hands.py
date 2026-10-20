@@ -39,14 +39,17 @@ to me"). Each character recolours one base character's arm in HSV:
               navy coat.
   * Kokomi <- the Necrobinder's arm: magenta sleeve -> lavender, sallow skin
               -> pale.
-  * Varka  <- the Ironclad's gauntleted arm, UNCHANGED (2026-09-30 co-op
-              playtest: he drew no hand at a chest). A stand-in until a Varka
-              recolour is drawn and approved; it copies the base pixels, so
-              there is no recipe to approve.
-  * Yae    <- the Ironclad's arm, UNCHANGED, Varka's stand-in rule
-              (2026-10-17: the co-op game logged load errors for her three
-              missing hands). A recolour is a look for [USER]; this copy is
-              not.
+  * Varka  <- the Ironclad's gauntleted arm: orange bracer -> pale bronze
+              (his gauntlet plates), brown sleeve -> black coat, green-grey
+              hand -> black glove (`varka_arm`, 2026-10-19). It was the
+              Ironclad's arm unchanged from the 2026-09-30 co-op playtest
+              until [USER]'s Yae art pass asked for every kit's own hands.
+  * Yae    <- the Necrobinder's bare arm: magenta sleeve -> white silk with a
+              crimson cuff at its top (her detached sleeves), sallow skin ->
+              fair (`yae_arm`, 2026-10-19; was the Ironclad's arm unchanged
+              since 2026-10-17). Both 2026-10-19 recipes are eyes-on picks
+              for [USER] at the next co-op chest; the four approved ones above
+              are untouched.
 
 The arithmetic below is the prototype's, verbatim (float64 HSV round trip,
 truncating `astype(uint8)` on the way out), so the outputs match the approved
@@ -57,7 +60,7 @@ Deterministic: same base pck in, same bytes out.
 
 Usage:
     .venv/Scripts/python tools/gen_multiplayer_hands.py [--check]
-        [--art-root <checkout>] [--game-dir <install>]
+        [--art-root <checkout>] [--game-dir <install>] [--chars yae,varka]
 
 `--art-root` lets a worktree write into (or check) the main checkout's
 gitignored `ImageGen/`. `--game-dir` defaults to klee-mod/local.props's
@@ -104,11 +107,15 @@ OUTPUTS = {
     "multiplayer_hand_kleemod-varka_rock.png":       ("ironclad", "rock"),
     "multiplayer_hand_kleemod-varka_paper.png":      ("ironclad", "paper"),
     "multiplayer_hand_kleemod-varka_scissors.png":   ("ironclad", "scissors"),
-    "multiplayer_hand_kleemod-yae_point.png":        ("ironclad", "point"),
-    "multiplayer_hand_kleemod-yae_rock.png":         ("ironclad", "rock"),
-    "multiplayer_hand_kleemod-yae_paper.png":        ("ironclad", "paper"),
-    "multiplayer_hand_kleemod-yae_scissors.png":     ("ironclad", "scissors"),
+    "multiplayer_hand_kleemod-yae_point.png":        ("necrobinder", "point"),
+    "multiplayer_hand_kleemod-yae_rock.png":         ("necrobinder", "rock"),
+    "multiplayer_hand_kleemod-yae_paper.png":        ("necrobinder", "paper"),
+    "multiplayer_hand_kleemod-yae_scissors.png":     ("necrobinder", "scissors"),
 }
+
+#: Output file -> its recipe, where it is not its base character's recipe
+#: (Kokomi and Yae both start from the Necrobinder's arm).
+RECIPE_OF = {name: "yae" for name in OUTPUTS if "-yae_" in name}
 
 
 # --- HSV, float64, the prototype's own implementation ----------------------
@@ -239,12 +246,58 @@ def klee_pose(img: Image.Image) -> Image.Image:
     return _to_image(a)
 
 
+def _put(new, m, h, s, v):
+    new[..., 0][m] = h
+    new[..., 1][m] = s
+    new[..., 2][m] = v
+
+
+def yae_arm(img: Image.Image) -> Image.Image:
+    """The Necrobinder's arm as Yae's: her detached sleeve is white silk with
+    a crimson cuff (the top 14% of the sleeve, the edge nearest the hand),
+    and the sallow skin turns fair."""
+    a = _to_float(img)
+    hsv = rgb_to_hsv(a[..., :3])
+    h, s, v = hsv[..., 0], hsv[..., 1], hsv[..., 2]
+    sleeve = band(h, 290, 360) & (s >= 0.15)
+    skin = band(h, 0, 70) & ~sleeve
+    rows = np.where((sleeve & (a[..., 3] > 0.3)).any(1))[0]
+    top = rows.min()
+    cuff_row = top + max(6, round((rows.max() - top) * 0.14))
+    cuff = sleeve & (np.arange(a.shape[0])[:, None] <= cuff_row)
+    silk = sleeve & ~cuff
+    new = hsv.copy()
+    _put(new, silk, 0.98, s[silk] * 0.10, np.minimum(1, 0.5 + 0.55 * v[silk]))
+    _put(new, cuff, 0.985, np.minimum(1, 0.45 + 0.4 * s[cuff]), np.minimum(1, v[cuff] * 0.95))
+    _put(new, skin, 0.055, s[skin] * 0.55, np.minimum(1, 0.48 + 0.55 * v[skin]))
+    a[..., :3] = np.clip(hsv_to_rgb(new), 0, 1)
+    return _to_image(a)
+
+
+def varka_arm(img: Image.Image) -> Image.Image:
+    """The Ironclad's arm as Varka's: the orange bracer turns pale bronze
+    (his gauntlet plates), the brown sleeve his black coat, and the
+    green-grey hand a black glove."""
+    a = _to_float(img)
+    hsv = rgb_to_hsv(a[..., :3])
+    h, s, v = hsv[..., 0], hsv[..., 1], hsv[..., 2]
+    bracer = band(h, 20, 50) & (s >= 0.3) & (v >= 0.35)
+    sleeve = band(h, 0, 50) & ~bracer
+    glove = band(h, 60, 200) & (s >= 0.08)
+    new = hsv.copy()
+    _put(new, bracer, 0.105, s[bracer] * 0.6, np.minimum(1, v[bracer] * 0.92))
+    _put(new, sleeve, 0.5, np.minimum(1, s[sleeve] * 0.35), v[sleeve] * 0.55)
+    _put(new, glove, 0.55, s[glove] * 0.25, v[glove] * 0.32)
+    a[..., :3] = np.clip(hsv_to_rgb(new), 0, 1)
+    return _to_image(a)
+
+
 RECIPES = {
     "silent": klee_pose,
     "regent": lambda img: recolor(img, FURINA_RULES),
     "necrobinder": lambda img: recolor(img, KOKOMI_RULES),
-    # Varka's and Yae's stand-in: the Ironclad's arm as the base game draws it.
-    "ironclad": lambda img: img.convert("RGBA"),
+    "ironclad": varka_arm,
+    "yae": yae_arm,
 }
 
 
@@ -306,7 +359,7 @@ def game_dir_for(art_root: Path) -> Path:
 def build_all(pck_path: Path) -> dict:
     """output file name -> generated image."""
     base = read_base_hands(pck_path)
-    return {name: RECIPES[b](base[(b, pose)]) for name, (b, pose) in OUTPUTS.items()}
+    return {name: RECIPES[RECIPE_OF.get(name, b)](base[(b, pose)]) for name, (b, pose) in OUTPUTS.items()}
 
 
 def main(argv=None) -> int:
@@ -317,6 +370,8 @@ def main(argv=None) -> int:
                     help="checkout whose ImageGen/ to write or check")
     ap.add_argument("--game-dir", type=Path, default=None,
                     help="game install holding SlayTheSpire2.pck")
+    ap.add_argument("--chars", default="",
+                    help="write or check only these characters (e.g. yae,varka); default all")
     args = ap.parse_args(argv)
 
     art_root = args.art_root.resolve()
@@ -328,6 +383,10 @@ def main(argv=None) -> int:
         return 0
 
     images = build_all(pck_path)
+    if args.chars:
+        keep = {c for c in args.chars.split(",") if c}
+        images = {n: im for n, im in images.items()
+                  if n.split("kleemod-", 1)[1].rsplit("_", 1)[0] in keep}
     out_dir = art_root / OUT_DIR
     if args.check:
         stale = []

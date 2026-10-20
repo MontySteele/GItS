@@ -1748,7 +1748,7 @@ ARM_KEYWORDS: dict[str, str] = {
              "the current. A Swirl gives 1 Oath of the element it Swirls, "
              "not of your current element."),
     "current element": ("The last Pyro, Hydro, Cryo or Electro you applied. "
-                        "Swirls pay it: Pyro 3 damage, Hydro 3 Block, Cryo 1 "
+                        "Swirls pay it: Pyro 5 damage, Hydro 3 Block, Cryo 1 "
                         "Vulnerable, Electro 3 to ALL."),
     "Knight": ("One of Varka's Companions. Playing one makes its element "
                "your current element. Geo does not."),

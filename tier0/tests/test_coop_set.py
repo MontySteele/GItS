@@ -275,17 +275,20 @@ def _varka():
 
 def test_varkas_five_are_ruled_at_their_costs_and_upgrades():
     """The ruled numbers: Escort Duty 6 [9] ("a little low" lifted the
-    paper's 5 [7]), Marching Orders and Windward Flank 1 [0], Comrades 2 [1],
-    West Wind's Blessing 2 and Innate."""
+    paper's 5 [7]), Marching Orders and Windward Flank 1 [0], Comrades 2 and
+    1 [2] Oath, West Wind's Blessing 2 and "and draws 1 card" (the power
+    upgrade pass, 2026-10-19: were cost -1 and Innate)."""
     rows = {cid: _row(cid) for cid in C.VARKA_MULTIPLAYER_IDS}
     assert [(r.cost, r.type, r.rarity) for r in rows.values()] == [
         (1, "skill", "uncommon"), (1, "skill", "uncommon"),
         (1, "skill", "uncommon"), (2, "power", "rare"), (2, "power", "rare")]
     assert rows["proto_vk_escort_duty"].upgrade == {"block": 3}
-    for cid in ("proto_vk_marching_orders", "proto_vk_windward_flank",
-                "proto_vk_comrades_of_the_expedition"):
+    for cid in ("proto_vk_marching_orders", "proto_vk_windward_flank"):
         assert rows[cid].upgrade == {"cost": -1}, cid
-    assert rows["proto_vk_west_winds_blessing"].upgrade == {"innate": True}
+    assert rows["proto_vk_comrades_of_the_expedition"].upgrade == {
+        "power_amount": 1}
+    assert rows["proto_vk_west_winds_blessing"].upgrade == {
+        "upgraded_power": "vk_west_winds_blessing_plus"}
     assert [e["target"] for e in rows["proto_vk_marching_orders"].effects]         == [coop.ALLY]
 
 

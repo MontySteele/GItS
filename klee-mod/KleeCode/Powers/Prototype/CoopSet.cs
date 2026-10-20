@@ -780,8 +780,15 @@ public sealed class ComradesOfTheExpeditionPower
 /// <see cref="CoopSet.OtherPlayers"/>; the energy is
 /// <c>PlayerCmd.GainEnergy</c>. The stack is the energy, so a second copy
 /// gives 2.
+///
+/// THE POWER UPGRADE PASS (2026-10-19, [USER]: "You do have a habit of making
+/// too many powers just decrease their cost by 1 on upgrade though"): was
+/// Innate. ONE power for both versions (<see cref="UpgradeTwinPower"/>, the
+/// icon declutter's shape): Amount is every copy installed,
+/// <see cref="UpgradeTwinPower.UpgradedCopies"/> the copies an upgraded card
+/// installed. Each upgraded copy also draws each other player 1 card.
 /// </summary>
-public sealed class WestWindsBlessingPower : PowerModel, ILocalizationProvider
+public sealed class WestWindsBlessingPower : UpgradeTwinPower, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
@@ -789,11 +796,11 @@ public sealed class WestWindsBlessingPower : PowerModel, ILocalizationProvider
         ("description",
             "The first time each turn you [gold]Swirl[/gold], each other "
           + "player gains {Amount:energyIcons()}."),
+        ("smartDescription",
+            "The first time each turn you [gold]Swirl[/gold], each other "
+          + "player gains {Amount:energyIcons()}"
+          + "{Upgraded:cond:>0? and draws [blue]{}[/blue]|}."),
     };
-
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
 
     /// <summary>The round this power last paid, or -1.</summary>
     private sealed class Latch
@@ -819,7 +826,8 @@ public sealed class WestWindsBlessingPower : PowerModel, ILocalizationProvider
 
     /// <summary>A Swirl <paramref name="varka"/> made: pay each copy he
     /// holds.</summary>
-    public static async Task OnSwirl(Creature varka)
+    public static async Task OnSwirl(
+        PlayerChoiceContext choiceContext, Creature varka)
     {
         if (!Counts(varka)) return;
         var others = CoopSet.OtherPlayers(varka);
@@ -834,6 +842,11 @@ public sealed class WestWindsBlessingPower : PowerModel, ILocalizationProvider
                 if (ally.Player is { } player)
                 {
                     await PlayerCmd.GainEnergy((int)blessing.Amount, player);
+                    if (blessing.UpgradedCopies > 0)
+                    {
+                        await CardPileCmd.Draw(choiceContext,
+                            blessing.UpgradedCopies, player);
+                    }
                 }
             }
         }
