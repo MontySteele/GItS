@@ -80,7 +80,8 @@ def test_each_new_card_takes_the_slot_of_the_cut_card_of_its_rarity():
     ("proto_kk_turning_tide_chain", "common", "attack", 1),
     ("proto_kk_brine_spray", "uncommon", "attack", 1),
     ("proto_kk_prepared_retreat", "uncommon", "skill", 1),
-    ("proto_kk_battle_formation", "rare", "power", 1),
+    # The Kokomi finish pass (2026-10-19): 1 -> 2.
+    ("proto_kk_battle_formation", "rare", "power", 2),
     ("proto_kk_turnabout", "rare", "skill", 2),
 ])
 def test_the_six_new_cards(cid, rarity, ctype, cost):
@@ -111,7 +112,9 @@ def test_the_new_cards_numbers_and_upgrades():
     spray = loader.get_card("proto_kk_brine_spray")
     assert spray.effects[0]["amount"] == 8
     assert _up("proto_kk_brine_spray").effects[0]["amount"] == 10
-    assert _up("proto_kk_battle_formation").innate
+    # The Kokomi finish pass (2026-10-19): the upgrade adds the draw, not
+    # Innate (`test_kokomi_finish_pass_2026_10_19`).
+    assert not _up("proto_kk_battle_formation").innate
 
 
 def test_the_rewrites_numbers():
@@ -287,29 +290,15 @@ def test_read_the_field_puts_a_draw_pile_card_into_the_hand():
 
 # --- Battle Formation ---------------------------------------------------------------
 
-def test_battle_formation_fires_once_when_the_second_plan_finishes():
-    """Numbers pass (kokomi-review-r5-2026-10-14): 3 -> 2 Plans, draw 2 -> 1."""
+# The Kokomi finish pass (2026-10-19) moved Battle Formation off the carry-out
+# to the start of the turn: `test_kokomi_finish_pass_2026_10_19`.
+
+def test_battle_formation_is_no_longer_paid_by_a_carry_out():
     st = kokomi_state()
     st.player.powers[kokomi_plan.BATTLE_FORMATION] = 1
     for i in range(4):
         kokomi_plan.schedule(st, _draw_plan(i))
     st.player.draw_pile = [card("proto_kk_coral_bulwark") for _ in range(10)]
-    carry_out(st)
-    paid = [e for e in st.log if e["event"] == "plan_battle_formation"]
-    assert len(paid) == 1
-    assert paid[0]["energy"] == 1 and paid[0]["cards"] == 1
-    events = [e["event"] for e in st.log]
-    carried = [i for i, ev in enumerate(events) if ev == "plan_carried_out"]
-    at = events.index("plan_battle_formation")
-    assert carried[1] < at < carried[2]
-
-
-def test_battle_formation_waits_for_two():
-    st = kokomi_state()
-    st.player.powers[kokomi_plan.BATTLE_FORMATION] = 1
-    for i in range(1):
-        kokomi_plan.schedule(st, _draw_plan(i))
-    st.player.draw_pile = [card("proto_kk_coral_bulwark") for _ in range(4)]
     carry_out(st)
     assert not [e for e in st.log if e["event"] == "plan_battle_formation"]
 

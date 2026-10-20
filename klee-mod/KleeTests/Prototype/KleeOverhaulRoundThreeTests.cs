@@ -402,6 +402,7 @@ public class KleeOverhaulRoundThreeTests
         // covered without anyone remembering it.
         var expensiveAndUnupgraded = rows
             .Where(t => !HasUpgradeBody(t) && !MovesSparkPrice(t)
+                        && !InstallsAnUpgradedCopy(t)
                         && CanonicalCost(t) >= 2)
             .Select(t => t.Name)
             .ToList();
@@ -506,6 +507,20 @@ public class KleeOverhaulRoundThreeTests
         // -- so the match is on the NAME and not on an exact member spelling.
         return Il.Calls(price.GetMethod)
             .Any(c => c.Contains("IsUpgraded", StringComparison.Ordinal));
+    }
+
+    /// <summary>
+    /// Does the upgraded card install an upgraded copy of its power?
+    /// (`upgraded_power` naming the same class, `UpgradeTwinPower`; Battle
+    /// Formation since the Kokomi finish pass, 2026-10-19.) The play reads
+    /// <c>IsUpgraded</c> into <c>UpgradeTwinPower.Install</c>, so
+    /// <c>OnUpgrade</c> is honestly empty, as a Spark-price cut's is.
+    /// </summary>
+    private static bool InstallsAnUpgradedCopy(Type card)
+    {
+        var play = card.GetMethod("OnPlay", HeadlessGame.All);
+        return play != null && Il.CallSequence(play)
+            .Any(c => c.Contains("UpgradeTwinPower.Install", StringComparison.Ordinal));
     }
 
     private static void Upgrade(CardModel card)

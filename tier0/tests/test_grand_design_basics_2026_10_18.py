@@ -79,13 +79,16 @@ def test_a_planned_strike_deals_its_damage_next_turn_and_stays_in_the_deck():
     gd = card("proto_kk_grand_design")
     strike, defend = card("strike"), card("defend")
     st.player.hand = [gd, strike, defend]
+    # Grand Design draws 1 for each (the Kokomi finish pass, 2026-10-19): a
+    # draw pile, so no reshuffle takes the planned cards back.
+    st.player.draw_pile = [card("proto_kk_coral_bulwark") for _ in range(4)]
     combat.play_card(st, gd)
     assert len(st.kk_plan_queue) == 2
     assert all(e.clauses == [{"op": kokomi_plan.PLAY_AS_ITSELF}]
                for e in st.kk_plan_queue)
     # Moved, not played: both originals are in the discard pile, unspent.
     assert strike in st.player.discard_pile and defend in st.player.discard_pile
-    assert not st.player.hand
+    assert [c.id for c in st.player.hand] == ["proto_kk_coral_bulwark"] * 2
     # One-line Plans: nothing to flip to.
     assert all(e.now_card is None for e in st.kk_plan_queue)
     hp = st.enemies[0].hp
@@ -105,9 +108,11 @@ def test_plan_cards_are_written_first_then_basics_fill_the_rest():
     oath = card("proto_kk_kurages_oath")
     st.player.hand = [gd, card("strike"), oath, card("strike"),
                       card("strike")]
+    st.player.draw_pile = [card("proto_kk_coral_bulwark") for _ in range(4)]
     combat.play_card(st, gd)
     assert len(st.kk_plan_queue) == 3
     assert st.kk_plan_queue[0].source is oath
     assert [e.clauses for e in st.kk_plan_queue[1:]] == [
         [{"op": kokomi_plan.PLAY_AS_ITSELF}]] * 2
-    assert [c.id for c in st.player.hand] == ["strike"]
+    assert sorted(c.id for c in st.player.hand) == (
+        ["proto_kk_coral_bulwark"] * 3 + ["strike"])

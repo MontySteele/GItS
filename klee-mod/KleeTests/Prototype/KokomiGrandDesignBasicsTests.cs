@@ -156,12 +156,14 @@ public class KokomiGrandDesignBasicsTests
     }
 
     [Fact]
-    public void Grand_designs_face_says_basic_cards_included()
+    public void Grand_designs_face_no_longer_says_basic_cards_included()
     {
+        // The Kokomi finish pass (2026-10-19): the words are cut, the rule
+        // stays (the pins above).
         var face = new ProtoKkGrandDesign().Localization!
             .Single(kv => kv.Item1 == "description").Item2;
         Assert.Equal("Plan up to {KkAmount:diff()} cards from your "
-                   + "[gold]Hand[/gold], Basic cards included. They cost 0.",
+                   + "[gold]Hand[/gold]. They cost 0. Draw 1 card for each.",
                      face);
     }
 }

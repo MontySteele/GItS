@@ -1674,13 +1674,13 @@
 
 - {id: proto_kk_grand_design, name: "Grand Design", character: kokomi,
    authored_by: [claude],
-   # Each pick is written as if played on the Bake-Kurage, for 0; unplayable
-   # with nothing to plan. 2026-10-18 (ruled): Basics with no Plan line are
-   # played as themselves when carried out. Provenance note.
+   # Each pick is written as if played on the Bake-Kurage, for 0; Basics
+   # still plan as themselves. Kokomi finish pass (2026-10-19): draws 1 per
+   # card planned, upgrade 3 -> 4. Provenance note.
    cost: 1, type: skill, rarity: rare, exhaust: true,
-   description: "Plan up to {KkAmount:diff()} cards from your [gold]Hand[/gold], Basic cards included. They cost 0.",
+   description: "Plan up to {KkAmount:diff()} cards from your [gold]Hand[/gold]. They cost 0. Draw 1 card for each.",
    effects: [{op: kokomi, kind: grand_design, amount: 3}],
-   upgrade: {retain: true}}
+   upgrade: {kokomi_amount: 1}}
 
 - {id: proto_kk_masterstroke, name: "Masterstroke", character: kokomi,
    authored_by: [claude],
@@ -1746,13 +1746,13 @@
 # turn, when the third Plan of the turn finishes.
 - {id: proto_kk_battle_formation, name: "Battle Formation", character: kokomi,
    authored_by: [claude],
-   cost: 1, type: power, rarity: rare,
-   # kokomi-review-r5-2026-10-14 numbers pass: 3 -> 2 Plans, draw 2 -> 1.
-   # Kokomi wording pass (2026-10-14): the face says once a turn, as the
-   # power already paid (`BattleFormationPower`, the ledger's Claim).
-   description: "The first time each turn 2 or more [gold]Plans[/gold] are carried out, gain {energyPrefix:energyIcons(1)} and draw 1 card.",
+   cost: 2, type: power, rarity: rare,
+   # Kokomi finish pass (2026-10-19): read after the morning's Plans; one
+   # power for both versions, every copy Energy, each upgraded copy a card.
+   # Provenance note.
+   description: "At the start of your turn, if 2 or more of your [gold]Plans[/gold] were carried out, gain {energyPrefix:energyIcons(1)}{IfUpgraded:show: and draw 1 card|}. Stings and Wards don't count.",
    effects: [{op: apply_power, power: kk_battle_formation, amount: 1, target: self}],
-   upgrade: {innate: true}}
+   upgrade: {upgraded_power: kk_battle_formation_plus}}
 
 - {id: proto_kk_suffocating_deep, name: "Suffocating Deep", character: kokomi,
    authored_by: [claude],

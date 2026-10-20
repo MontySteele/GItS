@@ -57,25 +57,15 @@ def test_pincer_pays_on_the_morning_it_is_carried_out(caches):
 
 # --- 2. Battle Formation: once a turn ----------------------------------------
 
-def test_battle_formation_says_once_a_turn():
+def test_battle_formation_says_when():
+    # The Kokomi finish pass (2026-10-19): the base start-of-turn template.
     desc = _row("proto_kk_battle_formation")["description"]
     assert desc.startswith(
-        "The first time each turn 2 or more [gold]Plans[/gold] are carried "
-        "out, gain ")
+        "At the start of your turn, if 2 or more of your [gold]Plans[/gold] "
+        "were carried out, gain ")
     src = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
            / "KokomiRefounding.cs").read_text(encoding="utf-8")
-    assert '$"The first time each turn {Threshold} or more "' in src
-
-
-def test_battle_formation_pays_once_however_many_plans(caches):
-    st = kokomi_state()
-    st.player.powers[kokomi_plan.BATTLE_FORMATION] = 1
-    energy = st.player.energy
-    st.kk_plans_carried_out_this_turn = 2
-    kokomi_plan.battle_formation(st)
-    st.kk_plans_carried_out_this_turn = 3
-    kokomi_plan.battle_formation(st)
-    assert st.player.energy == energy + 1
+    assert '$"At the start of your turn, if {Threshold} or more of your "' in src
 
 
 # --- 3. Juuga: the Plan line says its three turns -----------------------------

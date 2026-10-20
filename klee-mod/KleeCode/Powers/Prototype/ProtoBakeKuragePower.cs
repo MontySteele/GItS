@@ -114,6 +114,10 @@ public sealed class ProtoBakeKuragePower : PowerModel, ILocalizationProvider
         if (Owner == null || player.Creature != Owner) return;
         if (!KokomiOverhaul.LiveFor(Owner)) return;
         await KokomiPlan.ResolveAll(choiceContext, Owner);
+        // THE KOKOMI FINISH PASS (2026-10-19): Battle Formation reads the
+        // morning's Plans, not Stings or Wards, once they are all carried
+        // out. Sim twin: `kokomi_plan.battle_formation`, after `resolve_all`.
+        await BattleFormationPower.Signal(choiceContext, Owner);
         // THE RE-FOUNDING (2026-10-12): Dawn Tide, AFTER the morning's Plans,
         // so the Hydro it applies is standing for her own turn rather than
         // spent by a Plan that reacts with it. Sim twin:

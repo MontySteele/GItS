@@ -9827,3 +9827,20 @@ text: Converging Winds, Dawn Wind's March and Weathervane go Rare to
 Uncommon; Grand Master's Order and Rally to the Banner go Uncommon to Rare.
 His pool is 20 / 36 / 22, was 20 / 35 / 23 (`review/active/varka-fang-next-2026-10-19.md`,
 sec.4).
+
+## Kokomi finish pass, 2026-10-19
+
+[USER], 2026-10-19: "I like this all around" (`review/active/kokomi-cards-2026-10-18.md`
+sec.7, "The changes", ruled all (a)).
+
+- Battle Formation (Rare Power, 1 -> 2): "At the start of your turn, if 2 or
+  more of your Plans were carried out, gain [E] [and draw 1 card]. Stings and
+  Wards don't count." Read once, right after the morning's Plans, off the
+  Chain count (Plans less Stings and Wards). The upgrade adds the draw
+  (was Innate). One power for both versions (`upgraded_power` naming the
+  same class, `UpgradeTwinPower`): every copy adds 1 Energy, each upgraded
+  copy 1 card. Breakwater is unchanged.
+- Grand Design (Rare Skill, 1): "Plan up to 3 [4] cards from your Hand. They
+  cost 0. Draw 1 card for each. Exhaust." 1 card per card actually planned;
+  the upgrade is the fourth pick (was Retain). "Basic cards included" is cut
+  from the face; Basics are still offered and planned as themselves.

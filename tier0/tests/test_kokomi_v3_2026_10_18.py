@@ -78,9 +78,10 @@ def test_the_four_faces_say_stings_and_wards_dont_count():
         + "{InCombat:\n(Deals {TotalDamage:diff()} damage)|}")
 
 
-def test_breakwater_and_battle_formation_are_unchanged():
+def test_breakwater_is_unchanged():
+    # Battle Formation stopped counting Stings and Wards in the Kokomi finish
+    # pass (2026-10-19, `test_kokomi_finish_pass_2026_10_19`).
     assert "Stings" not in _face("proto_kk_breakwater")
-    assert "Stings" not in _face("proto_kk_battle_formation")
     bw = loader.get_card("proto_kk_breakwater").effects[0]
     assert bw["amount_formula"]["count"] == "plans_held"
 
@@ -163,15 +164,17 @@ def test_turning_tide_skips_a_ward_and_the_turn_roll_clears():
     assert st.kk_chain_plans_this_turn == 0
 
 
-def test_battle_formation_still_counts_every_carry_out():
+def test_battle_formation_no_longer_counts_a_sting_or_ward():
+    # The Kokomi finish pass (2026-10-19): "Stings and Wards don't count."
     st = kokomi_state()
     st.player.powers[kokomi_plan.BATTLE_FORMATION] = 1
     _plan_jellyfish(st)
     st.player.energy = 0
     kokomi_plan.resolve_all(st)
+    kokomi_plan.battle_formation(st)
     assert st.kk_plans_carried_out_this_turn == 2
     assert st.kk_chain_plans_this_turn == 0
-    assert st.player.energy == 1
+    assert st.player.energy == 0
 
 
 # --- 2. Unbroken Tide ----------------------------------------------------------

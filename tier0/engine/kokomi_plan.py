@@ -419,10 +419,13 @@ ENDLESS_SHOAL = "kk_endless_shoal"               # a Plan carried out: N Stings
 DAWN_TIDE = "kk_dawn_tide"                       # turn start: Hydro to ALL
 #: THE POOL OVERHAUL (2026-10-13, sec.4). Jellyfish Current: "Whenever a Sting
 #: triggers an Elemental Reaction, add a Sting to your Hand." Battle
-#: Formation: "Whenever 2 or more Plans are carried out in one turn, gain 1
-#: Energy and draw 1 card." `JellyfishCurrentPower`, `BattleFormationPower`.
+#: Formation (the Kokomi finish pass, 2026-10-19): "At the start of your turn,
+#: if 2 or more of your Plans were carried out, gain 1 Energy [and draw 1
+#: card]. Stings and Wards don't count." `JellyfishCurrentPower`,
+#: `BattleFormationPower` (one class for both keys, `UpgradeTwinPower`).
 JELLYFISH_CURRENT = "kk_jellyfish_current"       # a Sting's reaction: N Stings
-BATTLE_FORMATION = "kk_battle_formation"         # second Plan a turn: N Energy, 1 card
+BATTLE_FORMATION = "kk_battle_formation"         # morning's 2 Plans: N Energy
+BATTLE_FORMATION_PLUS = "kk_battle_formation_plus"  # ... and N cards
 #: KOKOMI REVIEW R6 (2026-10-14, pick 2 (b)): two Hydro sources, each one hit
 #: by the Bake-Kurage at the front enemy. `KurageVanguardPower`,
 #: `FollowingCurrentPower`.
@@ -1562,9 +1565,8 @@ def _note_plan_resolved(state: CombatState,
             added = add_jellyfish(state, WARD_ID, canopy, upgraded=upgraded)
             state.emit("plan_kurage_canopy", amount=added,
                        upgraded=upgraded)
-    # THE POOL OVERHAUL (2026-10-13): Battle Formation, when the third Plan of
-    # the turn finishes.
-    battle_formation(state)
+    # (Battle Formation left this bus in the Kokomi finish pass, 2026-10-19:
+    # it reads the morning's count once, after `resolve_all`.)
 
 
 def _resolve_clause(state: CombatState, entry: PlanEntry,
@@ -2722,7 +2724,9 @@ def write_as_itself(state: CombatState, card: Card) -> bool:
 
 def grand_design(state: CombatState, card: Card, amount: int) -> int:
     """GRAND DESIGN (the re-founding's card under the old name): "Plan up to
-    3 cards from your Hand, Basic cards included. They cost 0." The pilot
+    3 [4] cards from your Hand. They cost 0. Draw 1 card for each. Exhaust."
+    (the Kokomi finish pass, 2026-10-19: 1 card per card actually planned,
+    drawn after all are written; Basics still plan as themselves). The pilot
     writes the writable cards in hand, most expensive first, then fills the
     rest with Basics (2026-10-18), up to `amount` (an INSTRUMENT SURFACE: the
     player chooses in the mod). `KokomiCards.GrandDesign` is the twin."""
@@ -2740,6 +2744,8 @@ def grand_design(state: CombatState, card: Card, amount: int) -> int:
         if (write_free(state, pick) if can_be_written(pick)
                 else write_as_itself(state, pick)):
             written += 1
+    if written:
+        state.draw(written)
     state.emit("kk_grand_design", written=written)
     return written
 
@@ -2985,26 +2991,28 @@ def attacked_since(state: CombatState, entry: Optional[PlanEntry]) -> bool:
 
 
 def battle_formation(state: CombatState) -> None:
-    """BATTLE FORMATION (the pool overhaul, 2026-10-13; kokomi-review-r5-2026-10-14
-    numbers pass; worded once a turn by the Kokomi wording pass, 2026-10-14):
-    "The first time each turn 2 or more Plans are carried out, gain 1 Energy
-    and draw 1 card." Once a turn, when the second carry-out of the turn finishes (the tail of
-    `_resolve_entry`, through `_note_plan_resolved`). The stack is the
-    Energy (a second copy adds 1); the draw is 1 however many.
-    `BattleFormationPower` is the twin."""
+    """BATTLE FORMATION (the pool overhaul, 2026-10-13; the Kokomi finish
+    pass, 2026-10-19, review/active/kokomi-cards-2026-10-18.md sec.7 change 1,
+    ruled (a)): "At the start of your turn, if 2 or more of your Plans were
+    carried out, gain 1 Energy [and draw 1 card]. Stings and Wards don't
+    count." Read once, at the start of her turn, right after `resolve_all`
+    (`combat`'s turn start), off `kk_chain_plans_this_turn` -- the morning's
+    carry-outs less the Sting and Ward Plans. Every copy adds 1 Energy; each
+    upgraded copy (`kk_battle_formation_plus`) also 1 card.
+    `BattleFormationPower.Signal` is the twin."""
     if not live(state):
         return
-    n = int(state.player.powers.get(BATTLE_FORMATION, 0))
-    if n <= 0 or (state.kk_plans_carried_out_this_turn
-                  < C.KOKOMI_BATTLE_FORMATION_THRESHOLD):
+    plain = int(state.player.powers.get(BATTLE_FORMATION, 0))
+    plus = int(state.player.powers.get(BATTLE_FORMATION_PLUS, 0))
+    if plain + plus <= 0 or (state.kk_chain_plans_this_turn
+                             < C.KOKOMI_BATTLE_FORMATION_THRESHOLD):
         return
-    if not claim_once_per_turn(state, BATTLE_FORMATION):
-        return
-    energy = n
-    cards = C.KOKOMI_BATTLE_FORMATION_DRAW
+    energy = plain + plus
+    cards = plus * C.KOKOMI_BATTLE_FORMATION_DRAW
     state.player.energy += energy
     state.emit("energy", amount=energy)
-    state.draw(cards)
+    if cards:
+        state.draw(cards)
     state.emit("plan_battle_formation", energy=energy, cards=cards)
 
 
