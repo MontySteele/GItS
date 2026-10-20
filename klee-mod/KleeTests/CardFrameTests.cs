@@ -4,10 +4,14 @@ using System.Linq;
 using System.Reflection;
 using BaseLib.Abstracts;
 using BaseLib.Utils.Attributes;
+using HarmonyLib;
 using KleeMod.Cards;
 using KleeMod.Vfx;
+using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.Helpers;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.CardPools;
+using MegaCrit.Sts2.Core.Models.Cards;
 using Xunit;
 
 namespace KleeMod.Tests;
@@ -129,6 +133,79 @@ public class CardFrameTests
         Assert.NotNull(type.GetMethod("GenerateAllCards", own));
         Assert.NotNull(type.GetMethod("FilterThroughEpochs", own));
         Assert.Equal(typeof(KitCardPool), type.BaseType);
+    }
+
+    // ---- borrowed basics wear the kit's frame (2026-10-20) -----------------
+    // [USER]: "All of the Strikes and Defends in Kokomi's deck still have the
+    // Silent's green border."
+
+    /// <summary>The patch target resolves on the real CardModel, the base
+    /// getter the frame, tiny card and orb read, and the patch class names it.</summary>
+    [Fact]
+    public void The_kit_basics_patch_targets_the_base_VisualCardPool_getter()
+    {
+        var getter = AccessTools.PropertyGetter(typeof(CardModel), "VisualCardPool");
+        Assert.NotNull(getter);
+        Assert.Equal(typeof(CardModel), getter!.DeclaringType);
+        Assert.Equal(typeof(CardPoolModel), getter.ReturnType);
+        Assert.True(getter.IsVirtual);
+
+        var patch = typeof(KitCardPool).Assembly.GetType(
+            "KleeMod.CardModel_VisualCardPool_KitBasics_Patch");
+        Assert.NotNull(patch);
+        var info = patch!.GetCustomAttribute<HarmonyPatch>()!.info;
+        Assert.Equal(typeof(CardModel), info.declaringType);
+        Assert.Equal("get_VisualCardPool", info.methodName);
+        Assert.NotNull(patch.GetMethod("Postfix",
+            BindingFlags.Static | BindingFlags.NonPublic));
+    }
+
+    /// <summary>The base Strike and Defend the kits start on do not override
+    /// VisualCardPool, so the patched base body is the one they run.</summary>
+    [Theory]
+    [InlineData(typeof(StrikeSilent))]
+    [InlineData(typeof(DefendSilent))]
+    [InlineData(typeof(StrikeIronclad))]
+    [InlineData(typeof(DefendIronclad))]
+    [InlineData(typeof(StrikeDefect))]
+    [InlineData(typeof(DefendDefect))]
+    public void The_borrowed_starters_run_the_base_getter(Type card)
+    {
+        var getter = card.GetProperty("VisualCardPool")!.GetGetMethod()!;
+        Assert.Equal(typeof(CardModel), getter.GetBaseDefinition().DeclaringType);
+        Assert.Equal(typeof(CardModel), getter.DeclaringType);
+    }
+
+    [Theory]
+    [MemberData(nameof(Kits))]
+    public void A_borrowed_basic_takes_its_owners_kit_pool(Type type, string kit)
+    {
+        _ = kit;
+        var basePool = Pool(typeof(SilentCardPool));
+        var kitPool = Pool(type);
+        Assert.Same(kitPool, BorrowedBasicFrame.PoolFor(CardRarity.Basic, basePool, kitPool));
+    }
+
+    [Fact]
+    public void Everything_else_keeps_its_own_frame()
+    {
+        var silent = Pool(typeof(SilentCardPool));
+        var ironclad = Pool(typeof(IroncladCardPool));
+        var kokomi = Pool(typeof(KokomiCardPool));
+        var klee = Pool(typeof(KleeCardPool));
+
+        // Not Basic: a drafted base card keeps its colour.
+        foreach (var rarity in Enum.GetValues<CardRarity>().Where(r => r != CardRarity.Basic))
+        {
+            Assert.Same(silent, BorrowedBasicFrame.PoolFor(rarity, silent, kokomi));
+        }
+        // No owner (library, compendium): base colour.
+        Assert.Same(silent, BorrowedBasicFrame.PoolFor(CardRarity.Basic, silent, null));
+        // Owner plays a base character: base colour (a Silent's own Strike).
+        Assert.Same(silent, BorrowedBasicFrame.PoolFor(CardRarity.Basic, silent, silent));
+        Assert.Same(silent, BorrowedBasicFrame.PoolFor(CardRarity.Basic, silent, ironclad));
+        // A kit's own Basic already wears its kit pool, even in another kit's deck.
+        Assert.Same(klee, BorrowedBasicFrame.PoolFor(CardRarity.Basic, klee, kokomi));
     }
 
     // ---- the nation pip ---------------------------------------------------

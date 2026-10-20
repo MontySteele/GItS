@@ -1,5 +1,8 @@
 using BaseLib.Abstracts;
 using Godot;
+using HarmonyLib;
+using MegaCrit.Sts2.Core.Entities.Cards;
+using MegaCrit.Sts2.Core.Models;
 
 namespace KleeMod;
 
@@ -115,4 +118,69 @@ public abstract class KitCardPool : CustomCardPoolModel
     public sealed override bool IsShared => false;
 
     public sealed override bool IsColorless => false;
+}
+
+/// <summary>
+/// BORROWED BASICS WEAR THE KIT'S FRAME (2026-10-20).
+///
+/// [USER], 2026-10-20: "All of the Strikes and Defends in Kokomi's deck still
+/// have the Silent's green border. Can we make those mirror the color of the
+/// cards in her deck, and do the same for other characters?"
+///
+/// Every kit starts on the BASE game's Strike and Defend (StrikeSilent for
+/// Furina, Kokomi and Varka, StrikeIronclad for Klee, StrikeDefect for Yae),
+/// and those stay the exact base cards. Their <c>Pool</c> is the base
+/// character's, and the frame, the tiny-card back and the orb all read
+/// <c>CardModel.VisualCardPool</c> (base body: <c>=&gt; Pool</c>). This postfix
+/// answers the owner's kit pool instead, for a Basic card whose own pool is
+/// not a kit pool and whose owner plays a kit. Nothing else moves:
+/// <list type="bullet">
+/// <item>A canonical card (library, compendium) has no owner, so it keeps the
+/// base colour. Ownership is read the way the base game's own
+/// <c>EnergyIconHelper.GetPool</c> reads it: <c>IsMutable</c> first, since
+/// <c>Owner</c> asserts mutability.</item>
+/// <item>A kit's own Basic cards already sit in their kit pool and are
+/// skipped; a card whose class overrides VisualCardPool (Clash, Caltrops, ...)
+/// never runs this body.</item>
+/// <item>Gameplay: the only game read that is not paint is Heirloom Hammer's
+/// <c>VisualCardPool.IsColorless</c>, false on a kit pool as on a base
+/// character pool. The orb is <c>EnergyColorName</c>, which each kit pool
+/// borrows from the same base character as its starter pair, so it is the
+/// same texture.</item>
+/// <item>Co-op: the tint follows the card's owner, so each player's basics
+/// wear that player's kit.</item>
+/// </list>
+/// </summary>
+[HarmonyPatch(typeof(CardModel), "get_VisualCardPool")]
+internal static class CardModel_VisualCardPool_KitBasics_Patch
+{
+    private static void Postfix(CardModel __instance, ref CardPoolModel __result)
+    {
+        try
+        {
+            var ownerPool = __instance.IsMutable
+                ? __instance.Owner?.Character?.CardPool
+                : null;
+            __result = BorrowedBasicFrame.PoolFor(__instance.Rarity, __result, ownerPool);
+        }
+        catch
+        {
+            // A mid-teardown owner or a card with no pool: the base answer stands.
+        }
+    }
+}
+
+/// <summary>The decision <see cref="CardModel_VisualCardPool_KitBasics_Patch"/>
+/// makes, apart from the card so it can be tested without a run.</summary>
+public static class BorrowedBasicFrame
+{
+    /// <summary>The pool a card is drawn with: the owner's kit pool for a
+    /// borrowed Basic, otherwise <paramref name="visual"/> unchanged.</summary>
+    public static CardPoolModel PoolFor(
+        CardRarity rarity, CardPoolModel visual, CardPoolModel? ownerPool) =>
+        rarity == CardRarity.Basic
+        && visual is not KitCardPool
+        && ownerPool is KitCardPool kit
+            ? kit
+            : visual;
 }
