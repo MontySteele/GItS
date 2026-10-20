@@ -15,14 +15,17 @@ using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Hooks;
 using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization;
+using MegaCrit.Sts2.Core.Map;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.PotionPools;
 using MegaCrit.Sts2.Core.Nodes.CommonUi;
 using MegaCrit.Sts2.Core.Rewards;
+using MegaCrit.Sts2.Core.Rooms;
 using MegaCrit.Sts2.Core.Runs;
 using MegaCrit.Sts2.Core.Runs.History;
 using MegaCrit.Sts2.Core.ValueProps;
+using KleeMod.Diagnostics;
 
 namespace KleeMod.Story;
 
@@ -248,14 +251,66 @@ public abstract class StoryEventModel : EventModel
         return tips;
     }
 
+    /// <summary>The choice being taken, for the play telemetry; null when
+    /// it could not be read.</summary>
+    private StoryChoiceRecord? _choice;
+
     private async Task Choose(StoryOption option)
     {
+        _choice = BeginChoice(option);
         foreach (var effect in option.Effects)
         {
             await Apply(option, effect);
         }
+        if (_choice != null) PlayTelemetry.StoryChoice(_choice);
+        _choice = null;
         SetEventFinished(L10NLookup(ResultKey(LocEntry, option)));
     }
+
+    /// <summary>
+    /// THE STORY CHOICE TELEMETRY (ruled 2026-10-19): the owner's state as
+    /// the option is taken, before its effects. A read only; null, and the
+    /// option still runs, if anything cannot be read.
+    /// </summary>
+    private StoryChoiceRecord? BeginChoice(StoryOption option)
+    {
+        try
+        {
+            var owner = Owner!;
+            var run = owner.RunState;
+            var players = run.Players;
+            var seat = 0;
+            for (var i = 0; i < players.Count; i++)
+            {
+                if (ReferenceEquals(players[i], owner)) seat = i;
+            }
+            return new StoryChoiceRecord
+            {
+                Event = LocEntry,
+                Option = option.Key,
+                Character = owner.Character.Title.GetFormattedText(),
+                CharacterId = owner.Character.Id.Entry,
+                Act = run.CurrentActIndex + 1,
+                Floor = run.TotalFloor,
+                Seats = players.Count,
+                SeatIndex = seat,
+                HpBefore = (int)owner.Creature.CurrentHp,
+                MaxHpBefore = (int)owner.Creature.MaxHp,
+                GoldBefore = owner.Gold,
+                DeckBefore = owner.Deck.Cards.Count,
+                // Inside the room the map history holds it: its own number.
+                EventRoom = StoryHistory.EventRoomsThisAct(run),
+            };
+        }
+        catch (Exception e)
+        {
+            Log.Warn($"[{KleeMod.ModId}] story: choice telemetry skipped ({e.GetType().Name}: {e.Message})");
+            return null;
+        }
+    }
+
+    private static (string Id, bool Upgraded) CardRow(CardModel card) =>
+        (card.Id.ToString(), card.IsUpgraded);
 
     private async Task Apply(StoryOption option, StoryEffect effect)
     {
@@ -264,13 +319,13 @@ public abstract class StoryEventModel : EventModel
         {
             case StoryEffectKind.GainGoldAddCard:
                 await PlayerCmd.GainGold(effect.Amount, owner);
-                await AddToDeck(owner, effect.Card!, upgraded: false);
+                NoteAdded(await AddToDeck(owner, effect.Card!, upgraded: false));
                 break;
             case StoryEffectKind.AddCard:
-                await AddToDeck(owner, effect.Card!, upgraded: false);
+                NoteAdded(await AddToDeck(owner, effect.Card!, upgraded: false));
                 break;
             case StoryEffectKind.AddUpgradedCard:
-                await AddToDeck(owner, effect.Card!, upgraded: true);
+                NoteAdded(await AddToDeck(owner, effect.Card!, upgraded: true));
                 break;
             case StoryEffectKind.RemoveCard:
                 await RemoveChosen(owner, null);
@@ -322,14 +377,18 @@ public abstract class StoryEventModel : EventModel
                 await PlayerCmd.LoseGold(effect.Amount, owner);
                 break;
             case StoryEffectKind.GainRandomRelic:
-                await RelicCmd.Obtain(RelicFactory.PullNextRelicFromFront(owner).ToMutable(), owner);
+                var relic = RelicFactory.PullNextRelicFromFront(owner).ToMutable();
+                _choice?.RelicsGained.Add(relic.Id.ToString());
+                await RelicCmd.Obtain(relic, owner);
                 break;
             case StoryEffectKind.GainRandomRareRelic:
-                await RelicCmd.Obtain(
-                    RelicFactory.PullNextRelicFromFront(owner, RelicRarity.Rare).ToMutable(), owner);
+                var rare = RelicFactory.PullNextRelicFromFront(owner, RelicRarity.Rare).ToMutable();
+                _choice?.RelicsGained.Add(rare.Id.ToString());
+                await RelicCmd.Obtain(rare, owner);
                 break;
             case StoryEffectKind.GainRandomPotions:
-                await OfferRandomPotions(owner, effect.Amount);
+                var potions = await OfferRandomPotions(owner, effect.Amount);
+                _choice?.PotionsOffered.AddRange(potions);
                 break;
             case StoryEffectKind.TransformCards:
                 await TransformChosen(owner, effect.Amount);
@@ -360,18 +419,23 @@ public abstract class StoryEventModel : EventModel
     }
 
     /// <summary>"Gain N random potions": N potions from the character's and
-    /// the shared pools, offered as rewards (Suspicious Condiment's draw).</summary>
-    private static async Task OfferRandomPotions(Player owner, int count)
+    /// the shared pools, offered as rewards (Suspicious Condiment's draw).
+    /// The ids of the potions offered, for the telemetry.</summary>
+    private static async Task<List<string>> OfferRandomPotions(Player owner, int count)
     {
         var rewards = new List<Reward>();
+        var ids = new List<string>();
         for (var i = 0; i < count; i++)
         {
             var pool = owner.Character.PotionPool.GetUnlockedPotions(owner.UnlockState)
                 .Concat(ModelDb.PotionPool<SharedPotionPool>().GetUnlockedPotions(owner.UnlockState));
             var potion = owner.PlayerRng.Rewards.NextItem(pool);
-            if (potion != null) rewards.Add(new PotionReward(potion.ToMutable(), owner));
+            if (potion == null) continue;
+            rewards.Add(new PotionReward(potion.ToMutable(), owner));
+            ids.Add(potion.Id.ToString());
         }
         if (rewards.Count > 0) await RewardsCmd.OfferCustom(owner, rewards);
+        return ids;
     }
 
     /// <summary>"Transform N cards": the player picks (Morphic Grove); with
@@ -418,13 +482,21 @@ public abstract class StoryEventModel : EventModel
             .Select(c => new CardCreationResult(owner.RunState.CreateCard(c, owner)))
             .ToList();
         if (offered.Count == 0) return;
+        _choice?.CardsOffered.AddRange(offered.Select(c => CardRow(c.Card)));
         var prefs = new CardSelectorPrefs(
             new LocString(Table, OptionDescriptionKey(LocEntry, option)), 1)
         {
             Cancelable = false,
         };
         await SelectCardsToAddToDeckFromGrid(offered, prefs);
+        // The grid adds the picked card to the deck: the offered card that
+        // is in it now.
+        _choice?.CardsPicked.AddRange(offered
+            .Where(c => owner.Deck.Cards.Contains(c.Card))
+            .Select(c => CardRow(c.Card)));
     }
+
+    private void NoteAdded(CardModel card) => _choice?.CardsAdded.Add(CardRow(card));
 
     /// <summary>"Choose 1 of 3 random Rare cards": the Rare cards of her
     /// offer, the set her card rewards roll from
@@ -438,12 +510,13 @@ public abstract class StoryEventModel : EventModel
     public static bool IsRemovableCurse(CardModel card) =>
         card.Type == CardType.Curse && card.IsRemovable;
 
-    private static async Task AddToDeck(Player owner, Type cardType, bool upgraded)
+    private static async Task<CardModel> AddToDeck(Player owner, Type cardType, bool upgraded)
     {
         var canonical = ModelDb.GetById<CardModel>(ModelDb.GetId(cardType));
         var card = owner.RunState.CreateCard(canonical, owner);
         if (upgraded) CardCmd.Upgrade(card);
         CardCmd.PreviewCardPileAdd(await CardPileCmd.Add(card, PileType.Deck), 2f);
+        return card;
     }
 
     private static async Task RemoveChosen(Player owner, Func<CardModel, bool>? filter)
@@ -472,6 +545,22 @@ public static class StoryHistory
             ChoiceKeys(run.MapPointHistory, player.NetId), StoryRegistry.EntryOf);
     }
 
+    /// <summary>The act's event rooms in the run's map history
+    /// (<see cref="StoryRules.EventRoomsIn"/>). The map history is shared, so
+    /// every client at a co-op table counts the same.</summary>
+    public static int EventRoomsThisAct(IRunState run)
+    {
+        var act = run.CurrentActIndex;
+        var history = run.MapPointHistory;
+        return act < 0 || act >= history.Count ? 0 : EventRooms(history[act]);
+    }
+
+    /// <summary>One act's map history, counted.</summary>
+    public static int EventRooms(IEnumerable<MapPointHistoryEntry> act) =>
+        StoryRules.EventRoomsIn(act.Select(point => (
+            point.MapPointType == MapPointType.Ancient,
+            point.Rooms is { Count: > 0 } rooms && rooms[0].RoomType == RoomType.Event)));
+
     /// <summary>The loc keys of every event option this player chose, in run
     /// order, from the run history.</summary>
     public static IEnumerable<string?> ChoiceKeys(
@@ -490,9 +579,16 @@ public static class StoryHistory
 /// per event room and BEFORE the pulled event is recorded as visited -- so
 /// the run's visited list holds the story event and it is offered once.
 ///
+/// WHICH EVENT ROOM (ruled 2026-10-19): the act's 1st, 2nd or 3rd, each
+/// with chance 1/3, from one roll on the run's seed and the act
+/// (<see cref="StoryRules.StoryRoomDue"/>) against the act's event rooms
+/// already in the map history (<see cref="StoryHistory.EventRoomsThisAct"/>;
+/// the room being pulled is not in it yet). A reload at the same room counts
+/// the same rooms and reads the same roll.
+///
 /// A GAME SUBSTITUTION WINS. If something in the run already swapped the
-/// event (Lantern Key's act-3 quest), the story event waits for the act's
-/// next event room.
+/// event (Lantern Key's act-3 quest), the room still counts as an event room
+/// and the story event waits for the act's next one.
 ///
 /// SOLO draws her event type; CO-OP draws the one story room
 /// (<see cref="StoryRules.RoomEventFor"/>). Both clients run this on the same
@@ -508,10 +604,11 @@ internal static class Hook_ModifyNextEvent_Story_Patch
         try
         {
             if (runState is not RunState run || !ReferenceEquals(__result, currentEvent)) return;
-            var room = StoryRules.RoomEventFor(
+            var room = StoryRules.StoryRoomEventFor(
                 run.Players.Select(p => (p.Character.GetType(), StoryHistory.RecordsFor(run, p))).ToList(),
                 run.CurrentActIndex,
-                (ulong)run.Rng.Seed);
+                (ulong)run.Rng.Seed,
+                StoryHistory.EventRoomsThisAct(run));
             if (room == null) return;
             __result = ModelDb.GetById<EventModel>(ModelDb.GetId(room));
         }

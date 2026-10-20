@@ -267,7 +267,7 @@ public class CoopStoryRoomTests
         // The co-op hook asks the room rule.
         var patch = typeof(StoryEventModel).Assembly.GetTypes()
             .Single(t => t.Name == "Hook_ModifyNextEvent_Story_Patch");
-        Assert.Contains("StoryRules.RoomEventFor", Il.Calls(patch.GetMethod("Postfix", HeadlessGame.All)!));
+        Assert.Contains("StoryRules.StoryRoomEventFor", Il.Calls(patch.GetMethod("Postfix", HeadlessGame.All)!));
         // Its title follows the routed event.
         Assert.Contains(typeof(StoryEventModel).Assembly.GetTypes(), t => t.Name == "EventModel_Title_Story_Patch");
     }

@@ -13,6 +13,8 @@
         --character Furina --character base5
     python tools/telemetry_report.py --coop --reactions
     python tools/telemetry_report.py --offers --character Varka --element pyro
+    python tools/telemetry_report.py --story
+    python tools/telemetry_report.py --story --character Klee --feed human
     python tools/telemetry_report.py --character Klee --character base5 \\
         --run-instance 20261007-2357 --baseline-run-instance 20261005-1055 \\
         --baseline-run-instance 20261005-113940
@@ -117,6 +119,14 @@ WHAT IT PRINTS (the Balance bar, `docs/current/operations/stage-gate.md`):
      (`oath_peak`), and Furina's Full House triggers (`full_house_triggers`,
      total and fights).
 
+  8. With `--story` (instead of the fight blocks; ruled 2026-10-19, the story
+     rewards paper, item 4): the story choices (`record: "story"`, one row
+     per choice). Per event, how often each option was taken, with the mean
+     HP as % of max, Gold and deck size at the time, and the mean event-room
+     number the story fired at (`event_room`, 1 to 3). `--character`,
+     `--feed`, `--since/--until`, `--run-id` and `--run-instance` filter it;
+     solo and co-op rows both count, one per seat.
+
 CO-OP (`--coop`). Keeps only two-seat fights (`seats == 2`) instead of solo
 ones. Every co-op lane writes a row for BOTH seats of the same fight, so rows
 are de-duplicated on (run_id, run_instance, act, floor, fight_index,
@@ -174,6 +184,12 @@ def load_fights(dirs: Iterable[Path], dedupe: bool = True) -> list[dict]:
     """Every `record: "fight"` row under the dirs. A bad line is skipped.
     With `dedupe` (the default) a two-seat row already read from another
     lane is dropped (`drop_lane_copies`)."""
+    rows = load_records(dirs, "fight")
+    return drop_lane_copies(rows) if dedupe else rows
+
+
+def load_records(dirs: Iterable[Path], record: str) -> list[dict]:
+    """Every row of this `record` kind under the dirs. A bad line is skipped."""
     rows: list[dict] = []
     for d in dirs:
         for path in sorted(Path(d).glob("*.jsonl")):
@@ -189,9 +205,110 @@ def load_fights(dirs: Iterable[Path], dedupe: bool = True) -> list[dict]:
                     row = json.loads(line)
                 except ValueError:
                     continue
-                if isinstance(row, dict) and row.get("record") == "fight":
+                if isinstance(row, dict) and row.get("record") == record:
                     rows.append(row)
-    return drop_lane_copies(rows) if dedupe else rows
+    return rows
+
+
+# ----------------------------------------------------------------- story ---
+
+def load_stories(dirs: Iterable[Path]) -> list[dict]:
+    """Every `record: "story"` row. A co-op choice written by both lanes (each
+    client logs every seat's choice) is kept once, on (run_id, seat,
+    event, option, floor): each lane's run_instance has its own stamp."""
+    seen: set[tuple] = set()
+    out = []
+    for r in load_records(dirs, "story"):
+        if r.get("seats", 1) >= 2:
+            k = (r.get("run_id"), r.get("seat_index"), r.get("event"),
+                 r.get("option"), r.get("floor"))
+            if k in seen:
+                continue
+            seen.add(k)
+        out.append(r)
+    return out
+
+
+def _mean(values: list[float]) -> float | None:
+    return sum(values) / len(values) if values else None
+
+
+def story_summary(rows: list[dict]) -> list[dict]:
+    """Per event: choices, and per option how often it was taken, with the
+    mean HP % of max, Gold and deck size before it and the mean event room."""
+    events: dict[str, dict[str, list[dict]]] = {}
+    for r in rows:
+        events.setdefault(str(r.get("event", "?")), {}).setdefault(
+            str(r.get("option", "?")), []).append(r)
+    out = []
+    for event in sorted(events):
+        options = events[event]
+        total = sum(len(v) for v in options.values())
+        opts = []
+        for option in sorted(options, key=lambda o: (-len(options[o]), o)):
+            taken = options[option]
+            hp = [100.0 * r["hp_before"] / r["max_hp_before"] for r in taken
+                  if isinstance(r.get("hp_before"), (int, float))
+                  and r.get("max_hp_before")]
+            opts.append({
+                "option": option,
+                "taken": len(taken),
+                "share": len(taken) / total if total else 0.0,
+                "hp_pct": _mean(hp),
+                "gold": _mean([float(r["gold_before"]) for r in taken
+                               if isinstance(r.get("gold_before"), (int, float))]),
+                "deck": _mean([float(r["deck_before"]) for r in taken
+                               if isinstance(r.get("deck_before"), (int, float))]),
+                "event_room": _mean([float(r["event_room"]) for r in taken
+                                     if isinstance(r.get("event_room"), (int, float))
+                                     and r["event_room"] > 0]),
+            })
+        acts = sorted({r.get("act") for v in options.values() for r in v
+                       if r.get("act") is not None})
+        out.append({"event": event, "choices": total, "acts": acts,
+                    "options": opts})
+    return out
+
+
+def render_story(summary: list[dict], header: str) -> str:
+    lines = [header]
+    if not summary:
+        lines.append("(no story choices)")
+    for e in summary:
+        acts = ",".join(str(a) for a in e["acts"]) or "-"
+        lines.append(f"{e['event']}  (act {acts}, {e['choices']} choices)")
+        lines.append(f"  {'option':<28} {'taken':>5} {'share':>6} "
+                     f"{'hp%':>6} {'gold':>6} {'deck':>5} {'room':>5}")
+        for o in e["options"]:
+            lines.append(f"  {o['option']:<28} {o['taken']:>5} "
+                         f"{100 * o['share']:>5.0f}% {_f(o['hp_pct']):>6} "
+                         f"{_f(o['gold'], 0):>6} {_f(o['deck']):>5} "
+                         f"{_f(o['event_room']):>5}")
+    return "\n".join(lines)
+
+
+def story_main(args: argparse.Namespace) -> int:
+    dirs = args.dir or default_dirs()
+    rows = load_stories(dirs)
+    filt = Filters(parse_when(args.since), parse_when(args.until),
+                   tuple(args.run_id or ()), solo=False, feed=args.feed,
+                   coop=False, run_instances=tuple(args.run_instance or ()))
+    kept = [r for r in rows if filt.keep(r)]
+    if args.character:
+        seen = sorted({str(r.get("character", "")) for r in kept})
+        wanted = {canonical(c, seen) for c in args.character}
+        kept = [r for r in kept if r.get("character") in wanted]
+    summary = story_summary(kept)
+    if args.json:
+        print(json.dumps({"records_read": len(rows),
+                          "records_kept": len(kept),
+                          "dirs": [str(d) for d in dirs],
+                          "story": summary}, indent=1))
+        return 0
+    print(render_story(summary, f"telemetry_report --story: {len(kept)} of "
+                                f"{len(rows)} story choices kept from "
+                                f"{len(dirs)} dir(s); feed={args.feed}"))
+    return 0
 
 
 def drop_lane_copies(rows: list[dict]) -> list[dict]:
@@ -1169,6 +1286,10 @@ def main(argv: list[str] | None = None) -> int:
                     help="add the tempo section: cards drawn and Energy a "
                     "turn, Swirl damage by card, Varka's Oath peaks and "
                     "Furina's Full House triggers (keys since 2026-10-12)")
+    ap.add_argument("--story", action="store_true",
+                    help="the story-choice section instead: per story event, "
+                    "how often each option was taken, with the mean HP%%, "
+                    "Gold and deck size at the time (keys since 2026-10-19)")
     ap.add_argument("--feed", choices=("bot", "human", "all"), default="all")
     ap.add_argument("--cards-for", help="the group whose cards are listed "
                     "(default: the first non-base5 group)")
@@ -1189,6 +1310,8 @@ def main(argv: list[str] | None = None) -> int:
         sys.stdout.reconfigure(errors="replace")
     except (AttributeError, ValueError):
         pass
+    if args.story:
+        return story_main(args)
     dirs = args.dir or default_dirs()
     rows = load_fights(dirs)
     out = build(args, rows)

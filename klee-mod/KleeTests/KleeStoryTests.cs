@@ -315,7 +315,10 @@ public class KleeStoryTests
         var patch = typeof(StoryEventModel).Assembly.GetTypes()
             .Single(t => t.Name == "Hook_ModifyNextEvent_Story_Patch");
         var calls = Il.Calls(patch.GetMethod("Postfix", HeadlessGame.All)!);
-        Assert.Contains("StoryRules.RoomEventFor", calls);
+        Assert.Contains("StoryRules.StoryRoomEventFor", calls);
+        Assert.Contains("StoryHistory.EventRoomsThisAct", calls);
+        Assert.Contains("StoryRules.RoomEventFor",
+            Il.Calls(typeof(StoryRules).GetMethod(nameof(StoryRules.StoryRoomEventFor))!));
         Assert.Contains("StoryRules.EventFor",
             Il.Calls(typeof(StoryRules).GetMethod(nameof(StoryRules.RoomEventFor))!));
         // No act class in the mod names a story event.
