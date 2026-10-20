@@ -43,14 +43,38 @@ yet), Inazuma 9A5FD9 "I", Fontaine 3A86D9 "F".
 
 ## What does not change yet
 
-- **Energy orbs.** An orb is a base texture picked by name, not a hue, so every
-  kit keeps the one it borrows (Klee Ironclad, Furina/Kokomi/Varka Silent, Yae
-  Defect). The number outline on the orb does follow the kit's hue.
+- **Energy orbs.** (Superseded by stage 2 below: every kit now has its own.)
 - **Starter Strike and Defend** keep their base character's frame, so a kit
   hand now shows two frame colours. Starter basics are never changed.
+  (Superseded 2026-10-20: the borrowed pair now draws in its owner's kit pool.)
 - `NTinyCard` (deck-list chips) gets the tint and chip colour but no pip.
 
-## Stage 2 (next, an art job for [USER])
+## Stage 2 (2026-10-20), ruled
+
+[USER], 2026-10-20: "Agreed on all of the card / orb / energy mockup picks,
+including Kokomi's (b) - great work on that!"
+
+1. **Companion frames split, soft blend.** A shared companion's frame is
+   Colorless on the left 40%, blends over 20%, and wears its nation's tint on
+   the right 40%. The nation pip stays. Kit-own companions keep their kit's
+   frame; the deck-list chip stays plain Colorless (its back is neutral grey,
+   which the hsv shader cannot colour).
+2. **Nation tints M-A, I-A, F-A.** Mondstadt pale sky-aqua 0.52/0.45/1.45,
+   Inazuma Electro violet 0.77/1.0/1.15, Fontaine pale steel blue
+   0.66/0.40/1.45, in `CardFrameColors.cs` and held apart from every base and
+   kit frame by `CardFrameTests.No_two_frames_share_a_look`.
+3. **Procedural combat orbs in Furina's style.** Klee Pyro with a scalloped
+   ring, Varka Anemo teal with a three-lobe swirl, Yae Electro violet with a
+   pink rim and five petals, from `tools/gen_energy_orb_layers.py` (`KIT_SETS`),
+   each in its own `<kit>/ui/energy_counter.tscn`.
+4. **Kokomi option B.** Pearl-coral body, sea-blue swirls.
+5. **Tinted cost orbs.** Each kit's card cost orb and inline text orb is the
+   base Ironclad one recoloured through the kit's frame numbers
+   (`tools/gen_kit_energy_icons.py`), served through BaseLib's custom
+   energy-icon hook; the kit's relic and potion pools use the same orb, and a
+   borrowed Strike or Defend outlines its cost number in the kit's colour.
+
+## Stage 2 options not taken
 
 Give each kit its own frame textures (attack / skill / power, 598x844 like the
 base `card_frame_*_s`) through BaseLib's pool-level `CustomFrame(card)` hook.
@@ -73,3 +97,8 @@ same slot.
 5. Card library tabs: BaseLib keys its custom filter tabs on
    `CustomCharacterModel`, not on the pool type, so no tab should change;
    not checked.
+6. Stage 2, not seen in game: the split-frame shader compiling and reading
+   atlas UVs as computed; the five kit counters instancing (same scene shape
+   as Furina's, which works); the kit cost and text orbs appearing on cards,
+   in energy hover tips and in relic, potion and card text; the cost-number
+   outline on borrowed Strikes and Defends.

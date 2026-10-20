@@ -17,9 +17,6 @@ public sealed class FurinaCardPool : KitCardPool
 {
     public override string Title => "furina";
 
-    // The Silent's orb, borrowed while the Furina art pass is outstanding.
-    public override string EnergyColorName => "silent";
-
     /// <summary>Frame tint, chip and orb-number outline:
     /// <see cref="CardFrameColors.Furina"/>.</summary>
     public override CardFrameColors.Tint Tint => CardFrameColors.Furina;

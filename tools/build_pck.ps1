@@ -786,9 +786,20 @@ foreach ($character in 'furina', 'kokomi', 'varka', 'yae', 'abyss') {
 # are absent the scene still exports, with five ExtResource misses that
 # Assert-GodotLogClean turns into a failed build rather than a silent
 # textureless orb.
-$orbSrc = Join-Path $src 'furina\ui\energy_orb'
-if (-not (Test-Path $orbSrc)) { Note-Skip 'furina\ui\energy_orb' $orbSrc } else {
-    $to = Join-Path $work 'furina\ui\energy_orb'
+#
+# Card frames stage 2 (2026-10-20): every kit has its own set now, each
+# placed by gen_energy_orb_layers.py --apply <slug> for its own
+# <kit>\ui\energy_counter.tscn. Klee's surfaces predate the per-character
+# layout, so hers come from ImageGen\images\ui\energy_orb.
+foreach ($orb in @(
+        @{ From = 'furina\ui\energy_orb'; To = 'furina\ui\energy_orb' },
+        @{ From = 'ui\energy_orb';        To = 'klee\ui\energy_orb' },
+        @{ From = 'kokomi\ui\energy_orb'; To = 'kokomi\ui\energy_orb' },
+        @{ From = 'varka\ui\energy_orb';  To = 'varka\ui\energy_orb' },
+        @{ From = 'yae\ui\energy_orb';    To = 'yae\ui\energy_orb' })) {
+    $orbSrc = Join-Path $src $orb.From
+    if (-not (Test-Path $orbSrc)) { Note-Skip $orb.To $orbSrc; continue }
+    $to = Join-Path $work $orb.To
     New-Item -ItemType Directory -Force -Path $to | Out-Null
     $files = Get-ChildItem $orbSrc -Filter *.png -ErrorAction SilentlyContinue
     if ($files) { Copy-Item $files.FullName -Destination $to }

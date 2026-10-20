@@ -42,6 +42,12 @@ internal static class KleeSceneTelemetry
         // base game's ironclad counter, so a miss here is Furina-only and
         // otherwise silent -- she just keeps wearing the red orb.
         "furina/ui/energy_counter.tscn",
+        // Card frames stage 2 (2026-10-20): every other kit's own orb, the
+        // same scene shape; a miss falls back to the ironclad counter.
+        "klee/ui/energy_counter.tscn",
+        "kokomi/ui/energy_counter.tscn",
+        "varka/ui/energy_counter.tscn",
+        "yae/ui/energy_counter.tscn",
         // Kokomi: her layer-cut rig (combat.tscn) since 2026-10-02.
         "kokomi/model/combat.tscn",
         "kokomi/model/combat_visuals.tscn",
@@ -126,6 +132,26 @@ internal static class KleeSceneTelemetry
         ("furina/ui/energy_counter.tscn", "RotationLayers"),
         ("furina/ui/energy_counter.tscn", "EnergyVfxBack"),
         ("furina/ui/energy_counter.tscn", "EnergyVfxFront"),
+        ("klee/ui/energy_counter.tscn", "Label"),
+        ("klee/ui/energy_counter.tscn", "Layers"),
+        ("klee/ui/energy_counter.tscn", "RotationLayers"),
+        ("klee/ui/energy_counter.tscn", "EnergyVfxBack"),
+        ("klee/ui/energy_counter.tscn", "EnergyVfxFront"),
+        ("kokomi/ui/energy_counter.tscn", "Label"),
+        ("kokomi/ui/energy_counter.tscn", "Layers"),
+        ("kokomi/ui/energy_counter.tscn", "RotationLayers"),
+        ("kokomi/ui/energy_counter.tscn", "EnergyVfxBack"),
+        ("kokomi/ui/energy_counter.tscn", "EnergyVfxFront"),
+        ("varka/ui/energy_counter.tscn", "Label"),
+        ("varka/ui/energy_counter.tscn", "Layers"),
+        ("varka/ui/energy_counter.tscn", "RotationLayers"),
+        ("varka/ui/energy_counter.tscn", "EnergyVfxBack"),
+        ("varka/ui/energy_counter.tscn", "EnergyVfxFront"),
+        ("yae/ui/energy_counter.tscn", "Label"),
+        ("yae/ui/energy_counter.tscn", "Layers"),
+        ("yae/ui/energy_counter.tscn", "RotationLayers"),
+        ("yae/ui/energy_counter.tscn", "EnergyVfxBack"),
+        ("yae/ui/energy_counter.tscn", "EnergyVfxFront"),
     };
 
     public static void LogStatus()

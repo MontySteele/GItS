@@ -25,11 +25,6 @@ public sealed class KokomiCardPool : KitCardPool
 {
     public override string Title => "kokomi";
 
-    // The Silent's orb, borrowed while her art pass is outstanding, same
-    // standing arrangement Furina shipped under. "silent" is the closest
-    // energy colour to hydro in the base set.
-    public override string EnergyColorName => "silent";
-
     /// <summary>Frame tint, chip and orb-number outline:
     /// <see cref="CardFrameColors.Kokomi"/>.</summary>
     public override CardFrameColors.Tint Tint => CardFrameColors.Kokomi;

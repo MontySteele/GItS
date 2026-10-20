@@ -183,11 +183,16 @@ public sealed class Klee : CustomCharacterModel, Powers.IKleeCharacter
     public override string? CustomIconPath =>
         KleePck.Path("klee/ui/character_icon.tscn");
 
-    // Temporary shared base-game surfaces. They are real N* scenes, so unlike
-    // an id-derived missing path they are safe to preload and instantiate.
+    // Her own energy orb (card frames stage 2, 2026-10-20): a Pyro orb with
+    // a scalloped ring, tools/gen_energy_orb_layers.py set "klee", in Furina's scene shape
+    // (see Furina.CustomEnergyCounterPath for the five nodes and why the
+    // base counter is the fallback for a stale pck).
     public override string? CustomEnergyCounterPath =>
-        "res://scenes/combat/energy_counters/ironclad_energy_counter.tscn";
+        KleePck.Path("klee/ui/energy_counter.tscn")
+        ?? "res://scenes/combat/energy_counters/ironclad_energy_counter.tscn";
 
+    // Temporary shared base-game surface. It is a real N* scene, so unlike
+    // an id-derived missing path it is safe to preload and instantiate.
     public override string? CustomTrailPath =>
         "res://scenes/vfx/card_trail_ironclad.tscn";
 

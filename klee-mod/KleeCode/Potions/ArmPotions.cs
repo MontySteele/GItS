@@ -200,7 +200,9 @@ public sealed class BottledApplause : ArmPotion
 /// borrowed. <c>Klee.PotionPool</c> answers it.</summary>
 public sealed class KleePotionPool : PotionPoolModel
 {
-    public override string EnergyColorName => "ironclad";
+    // Her own orb (card frames stage 2): the kit card pool's energy name, so
+    // BaseLib's icon hook draws the same orb on this pool's tooltips.
+    public override string EnergyColorName => KitEnergyIcon.NameOf<KleeCardPool>();
 
     public override Color LabOutlineColor => new("E85A4F");
 
@@ -218,7 +220,9 @@ public sealed class KleePotionPool : PotionPoolModel
 /// left with Rehearsal and the performers).</summary>
 public sealed class FurinaPotionPool : PotionPoolModel
 {
-    public override string EnergyColorName => "silent";
+    // Her own orb (card frames stage 2): the kit card pool's energy name, so
+    // BaseLib's icon hook draws the same orb on this pool's tooltips.
+    public override string EnergyColorName => KitEnergyIcon.NameOf<FurinaCardPool>();
 
     public override Color LabOutlineColor => new("4AA6C8");
 

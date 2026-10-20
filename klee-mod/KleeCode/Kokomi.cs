@@ -129,8 +129,13 @@ public sealed class Kokomi : CustomCharacterModel, IKokomiCharacter
         KleePck.Path("kokomi/model/combat_visuals.tscn");
     public override string? CustomIconPath =>
         KleePck.Path("kokomi/ui/character_icon.tscn");
+    // Her own energy orb (card frames stage 2, 2026-10-20): a pearl-coral body with sea-blue swirls (mock-up option B),
+    // tools/gen_energy_orb_layers.py set "kokomi", in Furina's scene shape
+    // (see Furina.CustomEnergyCounterPath for the five nodes and why the
+    // base counter is the fallback for a stale pck).
     public override string? CustomEnergyCounterPath =>
-        "res://scenes/combat/energy_counters/ironclad_energy_counter.tscn";
+        KleePck.Path("kokomi/ui/energy_counter.tscn")
+        ?? "res://scenes/combat/energy_counters/ironclad_energy_counter.tscn";
     // The flying-card trail: the Defect's cyan, the base trail nearest Hydro
     // (Varka moved off the Ironclad's orange on 2026-10-16).
     public override string? CustomTrailPath =>
