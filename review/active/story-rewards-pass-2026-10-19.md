@@ -115,6 +115,8 @@ reward smaller, which is why prices stay on the paid ones.
 
 ## Picks
 
+Ruled 2026-10-19, all (a): [USER], "I like the new draft - agreed all around!"
+
 1. **The table as written.**
    - **(a, default)** Build it.
    - (b) Build it, but keep one named card per character as a signature
