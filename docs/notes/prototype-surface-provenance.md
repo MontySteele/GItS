@@ -9877,3 +9877,24 @@ weak-card and upgrade pass" ("This table looks good. Ship it").
   both lines (+3 damage, +3 Plan Block).
 - Tide Wall and Flank: "when this is carried out" (finish round items 3-4).
 
+
+## Kokomi Treatise and Shoal of Spears, 2026-10-20
+
+- **`proto_kk_treatise`**: cost 0 -> 1, the upgrade stays Innate, the text is
+  unchanged. [USER]: "Is there any precedent for that in the base game? It
+  seems too good." The base game's only 0-cost Powers are Panache (Colorless
+  Uncommon, a slow trigger) and Neurosurge (Necrobinder Rare, self-Doom); the
+  nearest card, the Defect's Machine Learning, is a 1-cost Rare drawing 1 each
+  turn with an Innate upgrade, so a 0-cost Uncommon with a near-free condition
+  was beyond it. The sheet's earlier block, verbatim: "Cost 0 (2026-10-11);
+  Companions count (round 2); face reworded again in the Kokomi review
+  2026-10-13. Provenance note."
+- **`proto_kk_shoal_of_spears`**: the "not Stings or Wards" clause is dropped;
+  it counts every Plan waiting again (`times: plans_held_plus_one`, was
+  `chain_plans_held_plus_one`, which left HEAD with it). [USER]: "I'm
+  wondering if we can drop the 'not stings or wards' condition from Shoal of
+  Spears. It's already a Rare." Tideturn, Feint and Turning Tide keep the
+  2026-10-18 rule (`review/active/kokomi-cards-2026-10-18.md` sec.6). The
+  sheet's earlier block, verbatim: "The re-founding (2026-10-12): one hit per
+  Plan waiting (was per Plan written this turn). Kokomi level pass
+  (2026-10-12, sec.2): always hits at least once."

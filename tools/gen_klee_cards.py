@@ -5673,12 +5673,9 @@ RUNTIME_TIMES = {
     # waiting (`effects._amount`'s token of the same name).
     "plans_held": "KokomiPlan.PlansHeld(Owner.Creature)",
     # The Kokomi level pass (2026-10-12), Shoal of Spears: "plus once more for
-    # each Plan waiting" -- always at least one hit.
+    # each Plan waiting" -- always at least one hit. Stings and Wards count:
+    # Shoal was exempted from the v3 rule on 2026-10-20.
     "plans_held_plus_one": "KokomiPlan.PlansHeld(Owner.Creature) + 1",
-    # Kokomi v3 (2026-10-18, card paper sec.6), Shoal of Spears: the same,
-    # Stings and Wards left out (`KokomiPlan.ChainPlansHeld`).
-    "chain_plans_held_plus_one":
-        "KokomiPlan.ChainPlansHeld(Owner.Creature) + 1",
 }
 
 # The clause each runtime count renders on the face. Separate from the C#
@@ -5689,8 +5686,6 @@ RUNTIME_TIMES_TEXT = {
     "sparks_spent": " for each [gold]Spark[/gold] spent",
     "plans_held": " once for each [gold]Plan[/gold] waiting",
     "plans_held_plus_one": ", plus once more for each [gold]Plan[/gold] waiting",
-    "chain_plans_held_plus_one": (", plus once more for each [gold]Plan[/gold]"
-                                  " waiting, not Stings or Wards"),
 }
 
 
@@ -8627,9 +8622,6 @@ def calculated_block_var_type(card: dict) -> str:
 PREVIEW_HIT_COUNTS = {
     "sparks_spent": "SparkPower.SparksAtPlay(card.Owner!.Creature!)",
     "plans_held_plus_one": "KokomiPlan.PlansHeld(card.Owner!.Creature!) + 1",
-    # Kokomi v3 (2026-10-18): Shoal of Spears, Stings and Wards left out.
-    "chain_plans_held_plus_one":
-        "KokomiPlan.ChainPlansHeld(card.Owner!.Creature!) + 1",
     "stage_spent_threes": ("FurinaStage.SpentOrFanfare(card) / "
                            "FurinaStageLaw.BravuraSpentPer"),
 }

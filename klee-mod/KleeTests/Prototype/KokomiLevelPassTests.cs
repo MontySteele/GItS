@@ -65,12 +65,12 @@ public class KokomiLevelPassTests
     [Fact]
     public void Shoal_of_spears_hits_once_more_than_the_plans_waiting()
     {
-        Assert.Contains("plus once more for each [gold]Plan[/gold] waiting, "
-                      + "not Stings or Wards.",
+        Assert.Contains("plus once more for each [gold]Plan[/gold] waiting.",
                         Face(new ProtoKkShoalOfSpears()));
-        // Kokomi v3 (2026-10-18): not Stings or Wards.
+        // Kokomi v3 (2026-10-18) left Stings and Wards out; Shoal was
+        // exempted on 2026-10-20 and counts every Plan waiting again.
         Assert.Contains(Il.Calls(Il.Method("ProtoKkShoalOfSpears", "OnPlay")),
-                        c => c.Contains("KokomiPlan.ChainPlansHeld"));
+                        c => c.Contains("KokomiPlan.PlansHeld"));
     }
 
     [Fact]

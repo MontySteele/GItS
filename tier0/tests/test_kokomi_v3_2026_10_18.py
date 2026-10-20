@@ -3,9 +3,10 @@
 Card paper `review/active/kokomi-cards-2026-10-18.md` sec.6; [USER]: "Makes
 sense! ... let's do both."
 
-  1. Tideturn, Feint, Turning Tide and Shoal of Spears stop counting Plans
-     that are Stings or Wards ("..., not Stings or Wards."). Breakwater
-     and Battle Formation keep counting every Plan.
+  1. Tideturn, Feint and Turning Tide stop counting Plans that are Stings
+     or Wards ("..., not Stings or Wards."). Breakwater keeps counting every
+     Plan. Shoal of Spears was in this list until 2026-10-20, when it was
+     exempted ([USER]: "It's already a Rare.") and counts every Plan again.
   2. Unbroken Tide, Uncommon Skill, 1: "Gain 8 [11] Block. Plan: If you lost
      no HP since you planned this, deal 12 [16] Hydro damage to ALL enemies."
 
@@ -59,7 +60,7 @@ def _plan_jellyfish(st):
 
 # --- 1. the four texts, word for word ----------------------------------------
 
-def test_the_four_faces_say_stings_and_wards_dont_count():
+def test_the_three_faces_say_stings_and_wards_dont_count():
     assert _face("proto_kk_tideturn") == (
         "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus "
         "{ExtraDamage:diff()} for each [gold]Plan[/gold] waiting" + STING_TAIL
@@ -72,10 +73,17 @@ def test_the_four_faces_say_stings_and_wards_dont_count():
         "Deal 9 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 5 "
         "[gold]Hydro[/gold] damage to ALL enemies per [gold]Plan[/gold] "
         "carried out this turn" + STING_TAIL)
+
+
+def test_shoal_of_spears_is_exempt_and_counts_every_plan():
+    # 2026-10-20, [USER]: "I'm wondering if we can drop the 'not stings or
+    # wards' condition from Shoal of Spears. It's already a Rare."
     assert _face("proto_kk_shoal_of_spears") == (
         "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies, plus "
-        "once more for each [gold]Plan[/gold] waiting" + STING_TAIL
-        + "{InCombat:\n(Deals {TotalDamage:diff()} damage)|}")
+        "once more for each [gold]Plan[/gold] waiting."
+        "{InCombat:\n(Deals {TotalDamage:diff()} damage)|}")
+    shoal = loader.get_card("proto_kk_shoal_of_spears").effects[0]
+    assert shoal["times"] == "plans_held_plus_one"
 
 
 def test_breakwater_is_unchanged():
@@ -107,16 +115,16 @@ def test_tideturn_with_only_stings_and_wards_waiting_is_its_floor():
     assert hp - st.enemies[0].hp == 8
 
 
-def test_shoal_of_spears_hits_once_more_per_real_plan_only():
+def test_shoal_of_spears_hits_once_more_per_plan_stings_and_wards_too():
     st = kokomi_state(n_enemies=2)
     _plan_jellyfish(st)
     kokomi_plan.schedule(st, _draw_plan(0))
     kokomi_plan.schedule(st, _draw_plan(1))
     before = [e.hp for e in st.enemies]
     _play(st, card("proto_kk_shoal_of_spears"))
-    # One hit, plus one for each of the two real Plans; the Sting and the
-    # Ward add none.
-    assert [b - e.hp for b, e in zip(before, st.enemies)] == [21, 21]
+    # One hit, plus one for each of the four Plans waiting: the two real
+    # Plans, the Sting and the Ward (the 2026-10-20 exemption).
+    assert [b - e.hp for b, e in zip(before, st.enemies)] == [35, 35]
 
 
 def test_feint_counts_itself_and_real_plans_not_stings_or_wards():

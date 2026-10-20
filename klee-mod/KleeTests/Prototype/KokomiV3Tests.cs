@@ -12,9 +12,10 @@ namespace KleeMod.Tests.Prototype;
 
 /// <summary>
 /// KOKOMI V3 (2026-10-18, <c>review/active/kokomi-cards-2026-10-18.md</c>
-/// sec.6; [USER]: "Makes sense! ... let's do both."). Tideturn, Feint, Turning
-/// Tide and Shoal of Spears stop counting Plans that are Stings or Wards;
-/// Breakwater and Battle Formation keep counting every Plan. And Unbroken
+/// sec.6; [USER]: "Makes sense! ... let's do both."). Tideturn, Feint and
+/// Turning Tide stop counting Plans that are Stings or Wards; Breakwater keeps
+/// counting every Plan, and Shoal of Spears does again since its exemption
+/// (2026-10-20, [USER]: "It's already a Rare."). And Unbroken
 /// Tide: "Gain 8 [11] Block. Plan: If you lost no HP since you planned this,
 /// deal 12 [16] Hydro damage to ALL enemies." Structural and pure pins (the
 /// headless boundary); sim twin <c>tier0/tests/test_kokomi_v3_2026_10_18.py</c>.
@@ -40,10 +41,10 @@ public class KokomiV3Tests
     private static KokomiPlan.Entry Plan(CardModel? source) =>
         new(source, Array.Empty<KokomiPlan.Planned>());
 
-    // ---- 1. the four faces, word for word -----------------------------------------
+    // ---- 1. the three faces, word for word ----------------------------------------
 
     [Fact]
-    public void The_four_faces_say_stings_and_wards_dont_count()
+    public void The_three_faces_say_stings_and_wards_dont_count()
     {
         Assert.Equal(
             "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus "
@@ -61,9 +62,10 @@ public class KokomiV3Tests
           + "damage to ALL enemies per [gold]Plan[/gold] carried out "
           + "this turn" + Tail,
             Face(new ProtoKkTurningTideChain()));
+        // Shoal of Spears is exempt (2026-10-20): every Plan waiting.
         Assert.Equal(
             "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies, "
-          + "plus once more for each [gold]Plan[/gold] waiting" + Tail
+          + "plus once more for each [gold]Plan[/gold] waiting."
           + "{InCombat:\n(Deals {TotalDamage:diff()} damage)|}",
             Face(new ProtoKkShoalOfSpears()));
         Assert.DoesNotContain("Stings", Face(new ProtoKkBreakwater()));
@@ -74,14 +76,14 @@ public class KokomiV3Tests
     // ---- 1. the counts --------------------------------------------------------------
 
     [Fact]
-    public void Tideturn_and_the_shoal_read_the_count_without_stings_or_wards()
+    public void Tideturn_reads_the_count_without_stings_or_wards_and_the_shoal_reads_all()
     {
-        // The play and the preview read the same count.
+        // Shoal of Spears, exempt since 2026-10-20: every Plan waiting.
         Assert.Contains(Il.Calls(Il.Method("ProtoKkShoalOfSpears", "OnPlay")),
-                        c => c.Contains("KokomiPlan.ChainPlansHeld"));
+                        c => c.Contains("KokomiPlan.PlansHeld"));
         Assert.DoesNotContain(
             Il.Calls(Il.Method("ProtoKkShoalOfSpears", "OnPlay")),
-            c => c.Contains("KokomiPlan.PlansHeld"));
+            c => c.Contains("KokomiPlan.ChainPlansHeld"));
         Assert.Contains(Il.Calls(Il.Method("KokomiPlan", "ChainPlansHeld")),
                         c => c.Contains("KokomiRefounding.IsJellyfish"));
         // Breakwater keeps every Plan.

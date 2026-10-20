@@ -624,7 +624,7 @@
     "KLEEMOD-PROTO_KK_SECOND_WAVE.title": "Second Wave",
     "KLEEMOD-PROTO_KK_SHOAL_CALL.description": "Add {KkAmount:diff()} [gold]Stings[/gold] to your [gold]Hand[/gold].",
     "KLEEMOD-PROTO_KK_SHOAL_CALL.title": "Shoal Call",
-    "KLEEMOD-PROTO_KK_SHOAL_OF_SPEARS.description": "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies, plus once more for each [gold]Plan[/gold] waiting, not Stings or Wards.{InCombat:\n(Deals {TotalDamage:diff()} damage)|}",
+    "KLEEMOD-PROTO_KK_SHOAL_OF_SPEARS.description": "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies, plus once more for each [gold]Plan[/gold] waiting.{InCombat:\n(Deals {TotalDamage:diff()} damage)|}",
     "KLEEMOD-PROTO_KK_SHOAL_OF_SPEARS.title": "Shoal of Spears",
     "KLEEMOD-PROTO_KK_SLACK_WATER.description": "Deal {Damage:diff()} [gold]Hydro[/gold] damage. Apply 1 [gold]Weak[/gold].\nOr [gold]plan[/gold]: Apply {PlanPowerAmount:diff()} [gold]Weak[/gold] to ALL enemies.",
     "KLEEMOD-PROTO_KK_SLACK_WATER.title": "Slack Water",
