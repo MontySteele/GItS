@@ -162,8 +162,13 @@ def test_the_shipped_prototype_tree_is_green() -> None:
     # clears its own statics (the seat, the hovered and held card); the row
     # dies with her creature node, and the scope is at `Refresh`, through
     # `YaeShrine.Live` and `LocalContext.IsMe`.
-    # A SIXTEENTH appearing here is the next review question.
-    assert len(markers) == 15, markers
+    # IT WENT FIFTEEN -> SIXTEEN ON 2026-10-19 (Plot Twist's Personal Hive
+    # crash): the `PersonalHivePower.AfterDamageReceived` prefix in
+    # `Powers/Prototype/FurinaSweepPowers.cs` skips the Hive only when the
+    # hit's dealer has neither a player nor a pet owner, which only a Plot
+    # Twisted enemy hitting itself makes; it resolves no seat.
+    # A SEVENTEENTH appearing here is the next review question.
+    assert len(markers) == 16, markers
 
 
 def test_registered_in_the_ci_lane() -> None:

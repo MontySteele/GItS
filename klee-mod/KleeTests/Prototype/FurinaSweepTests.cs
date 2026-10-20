@@ -230,5 +230,14 @@ public class FurinaSweepTests
         Assert.Equal(nameof(AttackCommand.FromMonster),
                      twist.GetCustomAttributes(typeof(HarmonyPatch), false)
                          .Cast<HarmonyPatch>().Single().info.methodName);
+        // A Plot Twisted Entomancer hitting itself: Personal Hive has no
+        // player to give Dazed to, and is skipped instead of throwing.
+        var hive = types.Single(
+            t => t.Name == "PersonalHivePower_AfterDamageReceived_PlotTwist_Patch");
+        var hiveInfo = hive.GetCustomAttributes(typeof(HarmonyPatch), false)
+            .Cast<HarmonyPatch>().Single().info;
+        Assert.Equal(typeof(MegaCrit.Sts2.Core.Models.Powers.PersonalHivePower),
+                     hiveInfo.declaringType);
+        Assert.Equal("AfterDamageReceived", hiveInfo.methodName);
     }
 }
