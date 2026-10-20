@@ -17,6 +17,7 @@ using MegaCrit.Sts2.Core.GameActions.Multiplayer;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
+using MegaCrit.Sts2.Core.Models.Powers;
 using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Powers;
@@ -563,5 +564,28 @@ internal static class AttackCommand_FromMonster_PlotTwist_Patch
         {
             Log.Error($"[{KleeMod.ModId}] Plot Twist redirect failed: {e}");
         }
+    }
+}
+
+/// <summary>Plot Twist's one crash (a friend's run, 2026-10-19): the
+/// Entomancer's Personal Hive gives Dazed to whoever hit it, read off
+/// <c>dealer.Player</c>. A Plot Twisted Entomancer hits itself, an enemy has
+/// no player, and the null killed the enemy turn loop, so the combat hung.
+/// With no player behind the hit, the Hive has no deck to shuffle into and
+/// does nothing. Osty's hits still pay (the base method resolves him to his
+/// owner).</summary>
+// lint: no-seat: scoped to a hit whose dealer is a creature with neither a
+// player nor a pet owner, which only a Plot Twisted enemy attacking itself
+// makes; every other Personal Hive trigger runs the base method untouched.
+[HarmonyPatch(typeof(PersonalHivePower), nameof(PersonalHivePower.AfterDamageReceived))]
+internal static class PersonalHivePower_AfterDamageReceived_PlotTwist_Patch
+{
+    [HarmonyPrefix]
+    private static bool Prefix(Creature? dealer, ref Task __result)
+    {
+        if (dealer == null || dealer.Player != null || dealer.PetOwner != null)
+            return true;
+        __result = Task.CompletedTask;
+        return false;
     }
 }
