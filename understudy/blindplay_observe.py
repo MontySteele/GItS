@@ -37,7 +37,8 @@ from understudy.blindplay_faces import (SEAT_FACE_ID, _card_face,
                                         _reward_option, _shop_items,
                                         _shop_options,
                                         deck_elements, relic_faces,
-                                        remember_deck, run_change, stage_arm)
+                                        remember_deck, remembered_deck,
+                                        run_change, stage_arm)
 from understudy.blindplay_notes import (MODE_CHOOSER_PROMPT,
                                         STAGE_SEAT_CHOOSER_PROMPT,
                                         REWARD_ALTERNATIVE_RELICS,
@@ -1044,4 +1045,18 @@ def _run_summary(state: dict[str, Any]) -> list[str]:
     potions = [_text(q.get("name")) for q in _potions(state) if _text(q.get("name"))]
     if potions:
         out.append("- Potions: " + ", ".join(potions))
+    # Newcomer round 1 (2026-10-19): the run-over page printed no deck. The
+    # game's own run summary shows it; the run's deck is the master deck the
+    # bridge sends, else the last one this page read.
+    titles = [_text(c.get("name")) for c in _player(state).get("master_deck")
+              or [] if isinstance(c, dict) and _text(c.get("name"))]
+    if not titles:
+        titles = [c["title"] for c in remembered_deck(state).get("cards") or []
+                  if c.get("title")]
+    if titles:
+        counts: dict[str, int] = {}
+        for t in titles:
+            counts[t] = counts.get(t, 0) + 1
+        out.append(f"- Deck ({len(titles)} cards): " + ", ".join(
+            t + (f" x{n}" if n > 1 else "") for t, n in counts.items()))
     return out

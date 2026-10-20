@@ -74,22 +74,6 @@ public class Round21Tests
     // `The_dry_cut_has_one_site_and_both_acts_read_it` directly above.
 
     // ==================================================================
-    // `EB-591` -- Courtroom Drama's clause order is on its face
-    // ==================================================================
-    //
-    // THE FIND (Furina r15 lane 2 (c) 3). "Courtroom Drama's Vulnerable boosts
-    // the hit that triggered it. 50 -> 19 from one 1-cost card. Nothing
-    // printed suggests the debuff lands early enough to amplify its own
-    // trigger."
-    //
-    // THE ENGINE IS NOT WHAT MOVED. That phase is RULED and pinned in BOTH
-    // engines -- `tier0/tests/test_reaction_phase_parity.py`'s
-    // "courtroom-drama-vulnerable-is-multiplicative" row, EB-19/M1 -- and the
-    // pin exists because the mod once landed it a hook LATE and paid two
-    // different numbers for one reaction depending on whether a bomb or a card
-    // caused it. So the face moved to the engines, not the reverse.
-
-    // ==================================================================
     // `EB-592` -- a card hit is still a hit
     // ==================================================================
     //

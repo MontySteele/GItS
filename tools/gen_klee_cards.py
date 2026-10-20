@@ -4702,29 +4702,9 @@ APPLY_POWERS = {
     "salon_bow_encore": ("SalonBowEncorePower", None,
         "Whenever a [gold]Salon Member[/gold] takes its final bow, gain "
         "{X} [gold]Encore[/gold]."),
-    "cross_examination": ("CrossExaminationPower", None,
-        # `EB-591`. THE ORDER IS ON THE FACE NOW. The r15 lane-2 seat
-        # watched one 1-cost card take a body from 50 to 19 and could not
-        # find the reason: the debuff lands INSIDE the reaction, one hook
-        # before the triggering hit's number is final, so the hit that
-        # applied the Vulnerable is itself moved by it. That is the ruled
-        # phase in both engines (`test_reaction_phase_parity`'s
-        # "courtroom-drama-vulnerable-is-multiplicative", EB-19/M1), and
-        # nothing printed said so. The opening clause tightened to "Your
-        # first ... each turn" to pay for the sentence under the 120-char
-        # card ceiling; it is the same per-dealer window it always was.
-        "Your first [gold]Elemental Reaction[/gold] each turn applies "
-        "{X} [gold]Vulnerable[/gold] and {X} [gold]Weak[/gold] to its "
-        # Text pass 2026-09-25: "The Vulnerable moves that hit" said the
-        # ruled order in a sentence seats could not parse; "before the hit
-        # lands" says the same order in the Superconduct preview's plainer
-        # shape. No rule moved.
-        "target before the hit lands."),
     "encore_spend_draw": ("EncoreSpendDrawPower", None,
         "The first time you spend [gold]Encore[/gold] each turn, draw "
         "{X} card{XS}."),
-    "first_attack_draw": ("FirstAttackDrawPower", None,
-        "The first Attack you play each turn draws {X} card{XS}."),
 }
 
 # Powers applied to ENEMIES (native debuffs, plus the two quarantined

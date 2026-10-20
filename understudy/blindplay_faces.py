@@ -205,8 +205,11 @@ def _follow_the_override(keywords: list[dict[str, str]]
     saying what an element DOES -- "Another aura: consumed, and an Elemental
     Reaction triggers" -- and a face that applies an aura with no such
     sentence is a worse page than one that names the wrong aura. What moves
-    is the NAME, onto the element the override says will land; the body is
-    the same rule whichever aura it is about.
+    is the NAME, onto the element the override says will land, and the
+    element word in the BODY with it: the tip's text names its element too
+    ("Applies Hydro for 2 turns"), and a renamed row that kept it printed
+    "Applies Electro -- Applies Hydro for 2 turns" under Sara's Electro rider
+    (newcomer round 1, lane 4, 2026-10-19).
 
     NOTHING MOVES WITHOUT AN OVERRIDE ROW, which is every card on every board
     with no Lightning Fang on it: `_element` returns the printed element, this
@@ -226,7 +229,12 @@ def _follow_the_override(keywords: list[dict[str, str]]
     for k in keywords:
         printed = _ELEMENT_KEYWORD.match(k["name"])
         if printed and printed.group(1) != landed:
-            out.append({**k, "name": f"Applies {landed}"})
+            word = re.compile(rf"\b{printed.group(1)}\b")
+            row = {**k, "name": f"Applies {landed}"}
+            for key in ("text", "description"):
+                if isinstance(row.get(key), str):
+                    row[key] = word.sub(landed, row[key])
+            out.append(row)
         else:
             out.append(k)
     return out

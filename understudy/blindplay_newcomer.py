@@ -264,6 +264,7 @@ def combat_page(state: dict[str, Any], obs: dict[str, Any]) -> str:
         for intent in intents:
             if isinstance(intent, dict):
                 out.append(_intent_line(intent))
+    out += _down_enemy_lines(state, c)
     out += ["", "## What you can say", ""]
     out += [f"- `{cmd}`" for cmd in obs.get("commands") or []]
     out += ["", obs["guardrail"]]
@@ -272,9 +273,34 @@ def combat_page(state: dict[str, Any], obs: dict[str, Any]) -> str:
     return text
 
 
+#: Newcomer round 1, lane 5 (2026-10-19): an enemy that is down but still on
+#: the board (Test Subject between forms, a Decimillipede segment waiting to
+#: Reattach). A human sees its body; the page printed an empty enemy list.
+DOWN_ENEMY_LINE = "- **{name}** — HP 0{max_hp}, down but still on the board"
+
+
+def _down_enemy_lines(state: dict[str, Any], c: dict[str, Any]) -> list[str]:
+    """The dead enemies the wire says are still in the fight, else, on a
+    board with no living enemy, the bodies this fight named."""
+    raws = [r for r in (state.get("battle") or {}).get("reviving") or []
+            if isinstance(r, dict)]
+    rows = c.get("reviving") or []
+    out = []
+    for raw, row in zip(raws, rows):
+        top = _int(raw.get("max_hp"))
+        out.append(DOWN_ENEMY_LINE.format(
+            name=row["name"], max_hp=f"/{top}" if top > 0 else ""))
+    if not out:
+        for name in c.get("no_living_enemy") or []:
+            out.append(DOWN_ENEMY_LINE.format(name=name, max_hp=""))
+    return out
+
+
 # ------------------------------------------------------- every other page --
 
 #: Sections of the ordinary page a player's screen has no counterpart for.
+#: (Newcomer round 1, lane 5: the last fight's plays printed under an
+#: event's card reward, which read as a stale reward screen.)
 CUT_SECTIONS = (
     "## Since the screen before this one",
     "## Between the last screen and this one",
@@ -282,7 +308,15 @@ CUT_SECTIONS = (
     "## Not on this list, and why",
     "## What these enemies do",
     "## The fight behind this chooser",
+    "## Your plays on the fight's last turn",
 )
+#: The reward screen's title. An event's card reward opens the same screen
+#: as a fight's, and the game titles neither, so the page names neither.
+_REWARD_TITLE = ("# What the fight left behind", "# Rewards")
+#: The top bar a human always sees: HP and gold (newcomer round 1, lane 5:
+#: the Ancient's full heal was printed on no page).
+TOP_BAR = "- HP {hp}/{max_hp}, {gold} gold"
+_HAS_HP = re.compile(r"^(?:- )?HP \d+/\d+")
 _CUT_HEADING = re.compile(r"^## .*'s last carry-out")
 #: A page note: an italic line at the margin (a hover tip is indented).
 _NOTE = re.compile(r"^\*.*\*\s*$")
@@ -290,11 +324,30 @@ _NOTE = re.compile(r"^\*.*\*\s*$")
 _REST_ROOM = re.compile(r" \(healing stops at max HP: at most \d+ more\)")
 
 
-def trim_page(text: str) -> str:
-    """The ordinary page minus what only a seat is shown."""
+def top_bar(state: dict[str, Any] | None) -> str:
+    """The HP and gold line off the player blob, or `""` without one."""
+    p = _player(state or {})
+    if p.get("hp") is None or p.get("max_hp") is None:
+        return ""
+    return TOP_BAR.format(hp=_int(p.get("hp")), max_hp=_int(p.get("max_hp")),
+                          gold=_int(p.get("gold")))
+
+
+def trim_page(text: str, state: dict[str, Any] | None = None) -> str:
+    """The ordinary page minus what only a seat is shown, plus the top bar
+    (HP and gold) where the page prints no HP and `state` carries it."""
+    bar = top_bar(state)
+    if bar and any(_HAS_HP.match(line) for line in text.split("\n")):
+        bar = ""
     out: list[str] = []
     cutting = False
     for line in text.split("\n"):
+        if line == _REWARD_TITLE[0]:
+            line = _REWARD_TITLE[1]
+        if bar and line.startswith("# "):
+            out += [line, "", bar]
+            bar = ""
+            continue
         if line.startswith("## "):
             cutting = (line.startswith(CUT_SECTIONS)
                        or bool(_CUT_HEADING.match(line)))

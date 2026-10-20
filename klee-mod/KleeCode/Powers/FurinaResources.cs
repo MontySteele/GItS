@@ -45,8 +45,7 @@ public static class FurinaResources
 }
 
 /// <summary>
-/// Furina's combat hooks: the Curtain Call windows (Quick Change's first
-/// Attack, the per-turn HP lost). The Stage's own hooks are
+/// Furina's combat hooks: the Curtain Call window (the per-turn HP lost). The Stage's own hooks are
 /// <c>FurinaStageHooks</c>'s; since the re-founding no hit touches the stage.
 /// </summary>
 public sealed class FurinaResourceHooks : AbstractModel
@@ -60,13 +59,6 @@ public sealed class FurinaResourceHooks : AbstractModel
         _instance ??= ModelDb.GetById<FurinaResourceHooks>(
             ModelDb.GetId<FurinaResourceHooks>());
         yield return _instance;
-    }
-
-    /// <summary>Quick Change's first-Attack draw, for every seat.</summary>
-    public override async Task AfterCardPlayed(
-        PlayerChoiceContext choiceContext, CardPlay cardPlay)
-    {
-        await CurtainCallHooks.NoteCardPlayed(choiceContext, cardPlay);
     }
 
     /// <summary>Her per-turn windows open at the top of her turn.</summary>

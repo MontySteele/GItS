@@ -736,16 +736,8 @@ internal static class KleePowerIcons
         // first: every path below has a file, cut from Furina's own talent and
         // constellation sigils. See docs/archive/icon-gap-2026-07-24.md.
 
-        // Curtain Call's activity-triggered set (R85), shipped by the "Take a
-        // Bow" consolidation sprint. Paths are wired AHEAD of the art, which
-        // is this file's established policy (see the companion-summon block
-        // above): KleePck.Path returns null while a file is absent, so each of
-        // these behaves exactly like today's placeholder until its PNG lands,
-        // and the miss is logged ONCE by name instead of being invisible.
-        // Named individually rather than grouped -- the two Stagehands halves
-        // are separate powers and a shared icon would read as intentional.
-        CrossExaminationPower => KleePck.Path("furina/powers/courtroom_drama.png"),
-        FirstAttackDrawPower => KleePck.Path("furina/powers/quick_change.png"),
+        // (Curtain Call's Courtroom Drama and Quick Change left with their
+        // powers, 2026-10-19.)
 
         // A7 (2026-07-29), the last sheet card to reach C#. Same path-ahead-of-
         // art policy as the block above: null until the PNG lands, and R13

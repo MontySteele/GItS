@@ -264,15 +264,6 @@ def _react(state: CombatState, enemy: Enemy, trigger: str, aura: str,
         # At Water's Edge left this site in the Kokomi card pass (2026-10-11):
         # it reads her first Hydro damage each turn
         # (`kokomi_plan.note_hydro_damage`, from `deal_damage_to_enemy`).
-        # Courtroom Drama (Curtain Call B, R85): the FIRST reaction each
-        # turn puts its target on the stand -- Vulnerable + Weak per stack.
-        # Gated on the existing reactions_this_turn counter (== 1 is the
-        # first), so a silent turn pays nothing and a reaction storm pays
-        # once: activity-triggered, never per-turn, per the sheet header.
-        n = p.powers.get("cross_examination", 0)
-        if n and state.reactions_this_turn == 1:
-            powers.apply_power(state, enemy, "vulnerable", n)
-            powers.apply_power(state, enemy, "weak", n)
         # Catalytic Converter (R120 rename; id catalytic_conversion unchanged):
         # reactions grant bonus sparks.
         bonus = p.powers.get("reaction_bonus_spark_energy", 0)

@@ -48,7 +48,7 @@ public readonly record struct ReactionEvent(
 ///
 /// Raised from <c>ReactionEffects.Resolve</c>, the single site every reaction
 /// in the mod passes, once per named reaction. The listeners that predate it
-/// (<see cref="ReactionLog"/>, the Courtroom Drama gate, the companion
+/// (<see cref="ReactionLog"/>, the companion
 /// overhaul's readers, the Stage's Tide of Applause, the Burst credit) keep
 /// their direct calls; a new listener subscribes to <see cref="Reacted"/>.
 ///
