@@ -20,7 +20,9 @@ namespace KleeMod;
 /// </summary>
 public sealed class YaeRelicPool : RelicPoolModel
 {
-    public override string EnergyColorName => "defect";
+    // Her own orb (card frames stage 2): the kit card pool's energy name, so
+    // BaseLib's icon hook draws the same orb on this pool's tooltips.
+    public override string EnergyColorName => KitEnergyIcon.NameOf<YaeCardPool>();
 
     public override Color LabOutlineColor => new("B07FE0");
 

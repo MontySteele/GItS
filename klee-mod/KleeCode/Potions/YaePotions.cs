@@ -136,7 +136,9 @@ public sealed class NarukamiSake : ArmPotion
 /// borrow went with her own set, as Kokomi's Silent borrow did).</summary>
 public sealed class YaePotionPool : PotionPoolModel
 {
-    public override string EnergyColorName => "defect";
+    // Her own orb (card frames stage 2): the kit card pool's energy name, so
+    // BaseLib's icon hook draws the same orb on this pool's tooltips.
+    public override string EnergyColorName => KitEnergyIcon.NameOf<YaeCardPool>();
 
     public override Color LabOutlineColor => new("B07FE0");
 

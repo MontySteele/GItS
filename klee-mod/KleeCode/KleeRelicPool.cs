@@ -29,8 +29,9 @@ namespace KleeMod;
 /// </summary>
 public sealed class KleeRelicPool : RelicPoolModel
 {
-    // Same borrowed-red C1 stubs as KleeCardPool.
-    public override string EnergyColorName => "ironclad";
+    // Her own orb (card frames stage 2): the kit card pool's energy name, so
+    // BaseLib's icon hook draws the same orb on this pool's tooltips.
+    public override string EnergyColorName => KitEnergyIcon.NameOf<KleeCardPool>();
 
     public override Color LabOutlineColor => new Color("E85A4F");
 

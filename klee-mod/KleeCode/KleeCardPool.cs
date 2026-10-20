@@ -12,16 +12,13 @@ namespace KleeMod;
 /// (31 cards + companions, spec C2) lands via codegen from the YAML sheet.
 ///
 /// The frame is her own tint of the base frame (card frames stage 1,
-/// <see cref="CardFrameColors"/>); the energy orb is still the Ironclad's.
-/// Custom frame + energy art is stage 2, an art-pass item.
+/// <see cref="CardFrameColors"/>), and the energy orb her own recolour of the
+/// base one (stage 2, through <see cref="KitCardPool"/>).
 /// </summary>
 [CustomID("KLEE_CARD_POOL")]
 public sealed class KleeCardPool : KitCardPool
 {
     public override string Title => "klee";
-
-    // The Ironclad's orb, borrowed until stage 2 gives her her own.
-    public override string EnergyColorName => "ironclad";
 
     /// <summary>Frame tint, chip and orb-number outline:
     /// <see cref="CardFrameColors.Klee"/>.</summary>

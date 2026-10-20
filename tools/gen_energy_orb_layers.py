@@ -59,6 +59,18 @@ at `EB-40` can resize without a re-render.
 Usage:
   python tools/gen_energy_orb_layers.py                    # candidates + sheet
   python tools/gen_energy_orb_layers.py --apply set_a_fontaine   # place a set
+  python tools/gen_energy_orb_layers.py --apply klee_pyro [--art-root <checkout>]
+  python tools/gen_energy_orb_layers.py --check [--art-root <checkout>]   # every placed set
+
+CARD FRAMES STAGE 2 (2026-10-20) -- [USER]: "Agreed on all of the card / orb /
+energy mockup picks, including Kokomi's (b)". The other four kits get their own
+orbs from these same layer functions, as named sets in `KIT_SETS` (Klee Pyro
+with a scalloped ring, Kokomi's option B pearl-coral body with sea-blue swirls,
+Varka Anemo teal with a three-lobe swirl, Yae Electro violet with a pink rim
+and five petals). They are not candidates: the bare run does not draw them,
+and `--apply <slug>` places each in its kit's `ui/energy_orb/` (Klee's is the
+historical `ImageGen/images/ui/`, which build_pck maps to `res://klee/ui/`).
+The palettes are the mock-up's (scratch `sheet2.py`, 2026-10-20), verbatim.
 
 RULED 2026-08-30 -- R231 answered QUEUE `M19` with **set A, Fontaine Hydro**,
 which was the register's own default. `--apply` writes that set's five layers to
@@ -341,6 +353,33 @@ appears on empty turns only.</p>
 
 SHAPES = {"set_a_fontaine": (6, 0), "set_b_opera": (5, 8), "set_c_tidal": (9, 16)}
 
+# Stage 2's four kit sets: slug -> (kit, palette, (lobes, petals)). Ruled, not
+# candidates, so they are kept apart from SETS and the bare run never draws them.
+KIT_SETS = {
+    "klee_pyro": ("klee", dict(glow=(240, 96, 15), body_outer=(110, 26, 6),
+                               body_inner=(255, 146, 48), rim=(255, 206, 120),
+                               gloss=(255, 244, 220)), (7, 12)),
+    "kokomi_pearl": ("kokomi", dict(glow=(110, 190, 210), body_outer=(150, 84, 80),
+                                    body_inner=(250, 214, 200), rim=(150, 225, 235),
+                                    gloss=(255, 255, 255)), (8, 8)),
+    "varka_anemo": ("varka", dict(glow=(31, 181, 133), body_outer=(6, 66, 54),
+                                  body_inner=(96, 222, 184), rim=(200, 255, 232),
+                                  gloss=(240, 255, 250)), (3, 0)),
+    "yae_electro": ("yae", dict(glow=(214, 60, 200), body_outer=(58, 14, 82),
+                                body_inner=(196, 112, 236), rim=(255, 176, 232),
+                                gloss=(255, 240, 252)), (5, 5)),
+}
+
+# Where each placed set lands, relative to the art root. Klee's surfaces predate
+# the per-character layout and live at ImageGen/images/<surface>.
+APPLY_DIRS = {
+    "set_a_fontaine": "ImageGen/images/furina/ui/energy_orb",
+    "klee_pyro": "ImageGen/images/ui/energy_orb",
+    "kokomi_pearl": "ImageGen/images/kokomi/ui/energy_orb",
+    "varka_anemo": "ImageGen/images/varka/ui/energy_orb",
+    "yae_electro": "ImageGen/images/yae/ui/energy_orb",
+}
+
 # --apply's destination. A DIRECTORY of its own under Furina's ui/ namespace,
 # not five loose files beside select_portrait.png, because these five are one
 # indivisible set: the scene stacks them and any one of them alone is not an
@@ -348,7 +387,7 @@ SHAPES = {"set_a_fontaine": (6, 0), "set_b_opera": (5, 8), "set_c_tidal": (9, 16
 # -- it globs each expected surface's own directory and does not recurse -- and
 # that silence is correct rather than lucky: no C# asks for these paths yet, so
 # there is no expected surface to claim them until EB-40 authors the scene.
-APPLY_DIR = ROOT / "ImageGen" / "images" / "furina" / "ui" / "energy_orb"
+APPLY_DIR = ROOT / "ImageGen" / "images" / "furina" / "ui" / "energy_orb"  # set A's; see APPLY_DIRS
 
 # The five filenames this script owns at the out-path. Spelled out rather than
 # derived from LAYERS so art_lint's L11 rot check -- which greps this file for
@@ -362,7 +401,20 @@ APPLIED_FILES = (
 )
 
 
-def apply_set(slug):
+def placed_layers(slug):
+    """The five layers `--apply <slug>` writes, as images."""
+    if slug in KIT_SETS:
+        _kit, pal, (lobes, petals) = KIT_SETS[slug]
+        return build_set(slug, pal, lobes, petals)
+    match = [s for s in SETS if s[0] == slug]
+    if not match or slug not in APPLY_DIRS:
+        raise SystemExit(
+            f"--apply: unknown set '{slug}'. Known: " + ", ".join(sorted(APPLY_DIRS)))
+    lobes, petals = SHAPES[slug]
+    return build_set(slug, match[0][2], lobes, petals)
+
+
+def apply_set(slug, art_root=ROOT):
     """Write ONE set's five layers to the shipping tree. M19's execution.
 
     Separate from the candidate run and explicitly argued: everything else here
@@ -377,33 +429,57 @@ def apply_set(slug):
     and is a separate act by a different hand; nothing here touches C# or a
     .tscn, and until that work lands these files change nothing in-game.
     """
-    match = [s for s in SETS if s[0] == slug]
-    if not match:
-        raise SystemExit(
-            f"--apply: unknown set '{slug}'. Known: "
-            + ", ".join(s[0] for s in SETS))
-    _slug, name, pal, _note = match[0]
-    lobes, petals = SHAPES[slug]
-    layers = build_set(slug, pal, lobes, petals)
-    APPLY_DIR.mkdir(parents=True, exist_ok=True)
+    layers = placed_layers(slug)
+    out_dir = Path(art_root) / APPLY_DIRS[slug]
+    out_dir.mkdir(parents=True, exist_ok=True)
     for _, layer, _, _ in LAYERS:
-        dest = APPLY_DIR / f"{layer}.png"
+        dest = out_dir / f"{layer}.png"
         layers[layer].save(dest)
-        print(f"applied: {dest.relative_to(ROOT).as_posix()}")
-    print(f"{len(LAYERS)} layers of '{name}' placed under "
-          f"{APPLY_DIR.relative_to(ROOT).as_posix()}")
+        print(f"applied: {APPLY_DIRS[slug]}/{layer}.png")
+    print(f"{len(LAYERS)} layers of '{slug}' placed under {APPLY_DIRS[slug]}")
+
+
+def check_placed(art_root=ROOT):
+    """Every placed set's five files exist and equal a fresh derivation."""
+    stale = []
+    for slug, rel in sorted(APPLY_DIRS.items()):
+        layers = placed_layers(slug)
+        for _, layer, _, _ in LAYERS:
+            path = Path(art_root) / rel / f"{layer}.png"
+            if not path.is_file():
+                stale.append(f"{rel}/{layer}.png does not exist")
+                continue
+            have = Image.open(path).convert("RGBA")
+            if have.size != layers[layer].size or have.tobytes() != layers[layer].tobytes():
+                stale.append(f"{rel}/{layer}.png differs from a fresh derivation")
+    for line in stale:
+        print(f"STALE: {line}")
+    if stale:
+        print("rerun: gen_energy_orb_layers.py --apply <slug> for each set above")
+        return 1
+    print(f"OK: {len(APPLY_DIRS)} placed orb sets match their derivations")
+    return 0
 
 
 def main():
     argv = sys.argv[1:]
+    art_root = ROOT
+    if "--art-root" in argv:
+        i = argv.index("--art-root")
+        if i + 1 >= len(argv):
+            raise SystemExit("--art-root needs a directory")
+        art_root = Path(argv[i + 1]).resolve()
+        del argv[i:i + 2]
     if argv and argv[0] == "--apply":
         if len(argv) != 2:
-            raise SystemExit("usage: gen_energy_orb_layers.py --apply <set-slug>")
-        apply_set(argv[1])
+            raise SystemExit("usage: gen_energy_orb_layers.py --apply <set-slug> [--art-root <dir>]")
+        apply_set(argv[1], art_root)
         return
+    if argv == ["--check"]:
+        raise SystemExit(check_placed(art_root))
     if argv:
         raise SystemExit(
-            "usage: gen_energy_orb_layers.py [--apply <set-slug>]")
+            "usage: gen_energy_orb_layers.py [--apply <set-slug> | --check] [--art-root <dir>]")
     OUT.mkdir(parents=True, exist_ok=True)
     shapes = SHAPES
     for slug, _name, pal, _note in SETS:

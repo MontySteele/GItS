@@ -96,8 +96,13 @@ public sealed class Varka : CustomCharacterModel, IVarkaCharacter
         KleePck.Path("varka/model/combat_visuals.tscn");
     public override string? CustomIconPath =>
         KleePck.Path("varka/ui/character_icon.tscn");
+    // His own energy orb (card frames stage 2, 2026-10-20): Anemo teal with a three-lobe swirl,
+    // tools/gen_energy_orb_layers.py set "varka", in Furina's scene shape
+    // (see Furina.CustomEnergyCounterPath for the five nodes and why the
+    // base counter is the fallback for a stale pck).
     public override string? CustomEnergyCounterPath =>
-        "res://scenes/combat/energy_counters/ironclad_energy_counter.tscn";
+        KleePck.Path("varka/ui/energy_counter.tscn")
+        ?? "res://scenes/combat/energy_counters/ironclad_energy_counter.tscn";
     // The flying-card trail (a Power card flies into him on it). Ironclad's is
     // orange fire, which read as "an orange streak" on Absolute Zero (in-game
     // check, 2026-10-16); the Defect's cyan is the base trail nearest his

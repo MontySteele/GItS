@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using BaseLib.Abstracts;
 using BaseLib.Utils.Attributes;
+using Godot;
 using HarmonyLib;
 using KleeMod.Cards;
 using KleeMod.Vfx;
@@ -76,16 +77,22 @@ public class CardFrameTests
     };
 
     /// <summary>The point of the change: no kit wears a base character's
-    /// frame or another kit's. Two frames read apart when their hue rotations
-    /// differ by 0.03 of a turn or their saturations by 0.3 (Kokomi's pearl
-    /// sits on the Ironclad's hue at less than half its saturation).</summary>
+    /// frame or another kit's, and (stage 2) no companion nation's tint side
+    /// wears either of those or another nation's. Two frames read apart when
+    /// their hue rotations differ by 0.03 of a turn or their saturations by
+    /// 0.3 (Kokomi's pearl sits on the Ironclad's hue at less than half its
+    /// saturation; Fontaine's steel blue sits in Furina's hue family at a third
+    /// of her chroma). The 1e-4 slack is float spelling, not tolerance: 0.66f
+    /// minus 0.63f is 0.0299999 in single precision.</summary>
     [Fact]
     public void No_two_frames_share_a_look()
     {
         var all = BaseFrames
             .Concat(CardFrameColors.All.Select(t => (Name: t.Kit, t.H, t.S, t.V)))
+            .Concat(CardFrameColors.Nations.Select(n => (Name: n.Nation, n.H, n.S, n.V)))
             .ToArray();
         Assert.Equal(5, CardFrameColors.All.Length);
+        Assert.Equal(3, CardFrameColors.Nations.Length);
         for (var i = 0; i < all.Length; i++)
         {
             for (var j = i + 1; j < all.Length; j++)
@@ -95,7 +102,7 @@ public class CardFrameTests
                 var dh = Math.Abs(a.H - b.H) % 1f;
                 dh = Math.Min(dh, 1f - dh);
                 var ds = Math.Abs(a.S - b.S);
-                Assert.True(dh >= 0.03f || ds >= 0.3f,
+                Assert.True(dh >= 0.03f - 1e-4f || ds >= 0.3f - 1e-4f,
                     $"{a.Name} and {b.Name} frames are too close (dh {dh}, ds {ds})");
             }
         }
@@ -265,5 +272,148 @@ public class CardFrameTests
         var card = (CardModel)System.Runtime.CompilerServices.RuntimeHelpers
             .GetUninitializedObject(type);
         Assert.Equal(nation, NationEmblem.NationOf(card));
+    }
+
+    // ---- stage 2 (2026-10-20): split companion frames, kit orbs -----------
+    // [USER]: "Agreed on all of the card / orb / energy mockup picks,
+    // including Kokomi's (b)".
+
+    [Theory]
+    [InlineData("mondstadt", 0.52f, 0.45f, 1.45f)]
+    [InlineData("inazuma", 0.77f, 1.0f, 1.15f)]
+    [InlineData("fontaine", 0.66f, 0.40f, 1.45f)]
+    public void Each_companion_nation_has_its_ruled_tint(string nation, float h, float s, float v)
+    {
+        var tint = CardFrameColors.NationFor(nation);
+        Assert.NotNull(tint);
+        Assert.Equal((h, s, v), (tint!.Value.H, tint.Value.S, tint.Value.V));
+    }
+
+    [Fact]
+    public void Every_shared_companion_nation_splits_and_no_other_does()
+    {
+        // Every nation a companion declares has a pip; the three with shared
+        // companions also have a split tint. Liyue (no companion yet) and
+        // unknown nations keep plain Colorless.
+        foreach (var n in new[] { "mondstadt", "inazuma", "fontaine" })
+        {
+            Assert.NotNull(CardFrameColors.NationFor(n));
+        }
+        Assert.Null(CardFrameColors.NationFor("liyue"));
+        Assert.Null(CardFrameColors.NationFor(null));
+        Assert.Equal((1.0f, 0.0f, 1.2f),
+            (CardFrameColors.ColorlessH, CardFrameColors.ColorlessS, CardFrameColors.ColorlessV));
+        Assert.Equal((0.40f, 0.20f), (CardFrameColors.SplitStart, CardFrameColors.SplitWidth));
+    }
+
+    [Fact]
+    public void Only_a_companion_drawn_in_the_companion_pool_splits()
+    {
+        var amber = (CardModel)System.Runtime.CompilerServices.RuntimeHelpers
+            .GetUninitializedObject(typeof(ICompanionCard).Assembly.GetTypes()
+                .Single(t => t.Name == "ProtoMcAmberFieryRain"));
+        var companion = Pool(typeof(CompanionCardPool));
+        var klee = Pool(typeof(KleeCardPool));
+        Assert.Equal(CardFrameColors.Mondstadt, CompanionSplitFrame.TintFor(amber, companion));
+        // Kit-own companions wear their kit's frame.
+        Assert.Null(CompanionSplitFrame.TintFor(amber, klee));
+        // A non-companion in the companion pool (none today) would not split.
+        Assert.Null(CompanionSplitFrame.TintFor(new StrikeSilent(), companion));
+        Assert.Null(CompanionSplitFrame.TintFor(null, companion));
+    }
+
+    /// <summary>The frame is an atlas region: the attack frame is
+    /// Rect2(1320, 83, 598, 844) of ui_atlas_0 (read from the pck), so the
+    /// shader's x has to be re-based on that span, not on 0..1.</summary>
+    [Fact]
+    public void The_split_is_measured_across_the_frames_atlas_region()
+    {
+        var uv = CompanionSplitFrame.UvRect(new Rect2(1320, 83, 598, 844), new Vector2(4096, 4096));
+        Assert.Equal(1320f / 4096f, uv.X, 6);
+        Assert.Equal(83f / 4096f, uv.Y, 6);
+        Assert.Equal(598f / 4096f, uv.Z, 6);
+        Assert.Equal(844f / 4096f, uv.W, 6);
+        // A plain texture (the tiny card's back) is the whole rect, and a
+        // degenerate atlas falls back to it rather than dividing by zero.
+        Assert.Equal(CompanionSplitFrame.Whole, CompanionSplitFrame.UvRectOf(null));
+        Assert.Equal(CompanionSplitFrame.Whole,
+            CompanionSplitFrame.UvRect(new Rect2(0, 0, 10, 10), Vector2.Zero));
+    }
+
+    [Fact]
+    public void The_split_patches_target_the_base_getters()
+    {
+        var getter = AccessTools.PropertyGetter(typeof(CardModel), "FrameMaterial");
+        Assert.NotNull(getter);
+        Assert.False(getter!.IsVirtual);
+        var patch = typeof(KitCardPool).Assembly.GetType(
+            "KleeMod.Vfx.CardModel_FrameMaterial_CompanionSplit_Patch");
+        Assert.NotNull(patch);
+        var info = patch!.GetCustomAttribute<HarmonyPatch>()!.info;
+        Assert.Equal(typeof(CardModel), info.declaringType);
+        Assert.Equal("get_FrameMaterial", info.methodName);
+        Assert.NotNull(AccessTools.Field(typeof(MegaCrit.Sts2.Core.Nodes.Cards.NTinyCard), "_cardBack"));
+        Assert.NotNull(AccessTools.Method(typeof(MegaCrit.Sts2.Core.Nodes.Cards.NTinyCard), "SetCard"));
+        Assert.NotNull(AccessTools.Method(typeof(MegaCrit.Sts2.Core.Nodes.Cards.NTinyCard), "Set",
+            new[] { typeof(CardPoolModel), typeof(CardType), typeof(CardRarity) }));
+        // Harmony resolves every patch the way it will at boot.
+        foreach (var t in new[] { "KleeMod.Vfx.NTinyCard_CompanionSplit_Patch",
+                                  "KleeMod.NCard_EnergyOutline_VisualPool_Patch",
+                                  "KleeMod.Vfx.CardModel_FrameMaterial_CompanionSplit_Patch" })
+        {
+            var patchType = typeof(KitCardPool).Assembly.GetType(t)!;
+            var classInfo = patchType.GetCustomAttributes<HarmonyPatch>().Select(h => h.info).FirstOrDefault();
+            var patchMethods = patchType.GetMethods(BindingFlags.Static | BindingFlags.NonPublic)
+                .Where(m => m.Name is "Postfix" || m.GetCustomAttributes<HarmonyPatch>().Any())
+                .ToArray();
+            Assert.NotEmpty(patchMethods);
+            foreach (var m in patchMethods)
+            {
+                var own = m.GetCustomAttributes<HarmonyPatch>().Select(h => h.info).FirstOrDefault();
+                var declaring = own?.declaringType ?? classInfo!.declaringType;
+                var name = own?.methodName ?? classInfo!.methodName;
+                var args = own?.argumentTypes ?? classInfo?.argumentTypes;
+                // AccessTools.Method throws on an ambiguous name, as Harmony
+                // does at boot (NTinyCard.Set vs GodotObject.Set).
+                Assert.NotNull(AccessTools.Method(declaring, name, args));
+            }
+        }
+    }
+
+    [Theory]
+    [MemberData(nameof(Kits))]
+    public void Each_kit_pool_serves_its_own_orbs_through_the_BaseLib_hook(Type type, string kit)
+    {
+        // No kit pool re-declares the energy name: a base name ("ironclad")
+        // would bypass BaseLib's ICustomEnergyIconPool lookup entirely.
+        var name = type.GetProperty(nameof(CardPoolModel.EnergyColorName))!.GetGetMethod()!;
+        Assert.Equal(typeof(KitCardPool), name.DeclaringType);
+        Assert.True(name.IsFinal);
+        Assert.IsAssignableFrom<ICustomEnergyIconPool>(Pool(type));
+
+        var tint = CardFrameColors.All.Single(t => t.Kit == kit);
+        Assert.Equal($"{kit}/ui/energy_cost.png", tint.CostOrbPath);
+        Assert.Equal($"{kit}/ui/energy_text_icon.png", tint.TextIconPath);
+        Assert.Equal($"{kit}/ui/energy_counter.tscn", tint.EnergyCounterPath);
+        Assert.Equal($"res://images/atlases/ui_atlas.sprites/card/energy_{tint.BorrowedEnergy}.tres",
+            KitEnergyIcon.BaseCostOrb(tint.BorrowedEnergy));
+        Assert.Equal($"res://images/packed/sprite_fonts/{tint.BorrowedEnergy}_energy_icon.png",
+            KitEnergyIcon.BaseTextIcon(tint.BorrowedEnergy));
+    }
+
+    [Fact]
+    public void The_cost_outline_follows_the_drawn_pool_only_when_it_is_the_default()
+    {
+        var silent = new Godot.Color("1A6625");
+        var kokomi = CardFrameColors.Kokomi.EnergyOutline;
+        var green = new Godot.Color("00FF00");
+        var outlineFor = typeof(KitCardPool).Assembly
+            .GetType("KleeMod.NCard_EnergyOutline_VisualPool_Patch")!
+            .GetMethod("OutlineFor", BindingFlags.Static | BindingFlags.NonPublic)!;
+        Godot.Color? Call(Godot.Color cur, Godot.Color own, Godot.Color vis) =>
+            (Godot.Color?)outlineFor.Invoke(null, new object[] { cur, own, vis });
+        Assert.Equal(kokomi, Call(silent, silent, kokomi));
+        Assert.Null(Call(green, silent, kokomi));      // an upgrade or a cost change
+        Assert.Null(Call(silent, silent, silent));     // pools agree
     }
 }

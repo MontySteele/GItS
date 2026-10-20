@@ -98,8 +98,13 @@ public sealed class Yae : CustomCharacterModel, IYaeCharacter
         KleePck.Path("yae/model/combat_visuals.tscn");
     public override string? CustomIconPath =>
         KleePck.Path("yae/ui/character_icon.tscn");
+    // Her own energy orb (card frames stage 2, 2026-10-20): an Electro violet body, pink rim and five petals,
+    // tools/gen_energy_orb_layers.py set "yae", in Furina's scene shape
+    // (see Furina.CustomEnergyCounterPath for the five nodes and why the
+    // base counter is the fallback for a stale pck).
     public override string? CustomEnergyCounterPath =>
-        "res://scenes/combat/energy_counters/ironclad_energy_counter.tscn";
+        KleePck.Path("yae/ui/energy_counter.tscn")
+        ?? "res://scenes/combat/energy_counters/ironclad_energy_counter.tscn";
     public override string? CustomTrailPath =>
         "res://scenes/vfx/card_trail_ironclad.tscn";
     public override string? CustomMapMarkerPath =>

@@ -149,8 +149,13 @@ public class BaseBasicsTests
         // 2026-10-19, [USER]: "we need a quick way of distinguishing the
         // character cards"): each kit pool now tints its own frame
         // (`CardFrameColors`), while the base Strike and Defend keep their base
-        // character's frame. Starter basics are never changed, so that seam
-        // stays until stage 2 decides it.
+        // character's frame. Starter basics are never changed; the borrowed
+        // pair now DRAWS in its owner's kit pool (VisualCardPool, 2026-10-20).
+        //
+        // THE ORB IS THE KIT'S OWN SINCE STAGE 2 (2026-10-20): each kit pool
+        // answers BaseLib's custom energy icon, so what this pins now is the
+        // base orb each kit falls back to on a stale pck (Tint.BorrowedEnergy)
+        // -- still the one its starter pair's character wears.
         // ALLOCATED, NOT RESOLVED THROUGH ModelDb: the base pools are
         // registered by the game's own boot, which this harness does not run
         // (README, "The headless boundary"). Both properties are literal
@@ -160,12 +165,12 @@ public class BaseBasicsTests
                 .GetUninitializedObject(typeof(T));
 
         Assert.Equal(Pool<IroncladCardPool>().EnergyColorName,
-                     Pool<KleeCardPool>().EnergyColorName);
+                     CardFrameColors.Klee.BorrowedEnergy);
         Assert.Equal(Pool<SilentCardPool>().EnergyColorName,
-                     Pool<KokomiCardPool>().EnergyColorName);
+                     CardFrameColors.Kokomi.BorrowedEnergy);
         // The Stage (2026-09-28) deals Silent's pair for the same reason.
         Assert.Equal(Pool<SilentCardPool>().EnergyColorName,
-                     Pool<FurinaCardPool>().EnergyColorName);
+                     CardFrameColors.Furina.BorrowedEnergy);
     }
 
     // ---- the two cards of her own -----------------------------------------

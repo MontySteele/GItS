@@ -870,6 +870,20 @@ UNMIRRORED: dict[str, str] = {
     "ElementBadge.Gap":
         "presentation: pixels between the gem's right edge and the type "
         "plaque's left, so the pair reads as one row.",
+    # The companion split frame (card frames stage 2, 2026-10-20): paint
+    # numbers for a shader; the sim has no card face.
+    "CardFrameColors.ColorlessH":
+        "presentation: the base Colorless frame material's hue, the split "
+        "frame's left side.",
+    "CardFrameColors.ColorlessS":
+        "presentation: the base Colorless frame material's saturation.",
+    "CardFrameColors.ColorlessV":
+        "presentation: the base Colorless frame material's brightness.",
+    "CardFrameColors.SplitStart":
+        "presentation: where the companion frame's blend starts, as a "
+        "fraction of its width.",
+    "CardFrameColors.SplitWidth":
+        "presentation: how wide the companion frame's blend runs.",
     # The companion nation pip (card frames stage 1, 2026-10-19), the gem's
     # mirror on the plaque's right; the sim has no card face.
     "NationEmblem.Side":

@@ -22,7 +22,9 @@ namespace KleeMod;
 /// </summary>
 public sealed class VarkaRelicPool : RelicPoolModel
 {
-    public override string EnergyColorName => "silent";
+    // Her own orb (card frames stage 2): the kit card pool's energy name, so
+    // BaseLib's icon hook draws the same orb on this pool's tooltips.
+    public override string EnergyColorName => KitEnergyIcon.NameOf<VarkaCardPool>();
 
     public override Color LabOutlineColor => new("4CC2A8");
 

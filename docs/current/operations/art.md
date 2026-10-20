@@ -17,6 +17,8 @@ python3 tools/art_hunt.py Furina ; python3 tools/art_contact_sheet.py --list
 .venv/Scripts/python tools/gen_char_icon_outlines.py [--check]   # every outline halo, after gen_char_icons
 .venv/Scripts/python tools/gen_mod_image.py [--check]      # Mods-screen badge, EB-161
 .venv/Scripts/python tools/gen_multiplayer_hands.py [--check] [--art-root <checkout>] [--chars yae,varka]   # co-op treasure hands, from the game pck
+.venv/Scripts/python tools/gen_energy_orb_layers.py --apply <slug> | --check [--art-root <checkout>]   # combat energy orbs: set_a_fontaine, klee_pyro, kokomi_pearl, varka_anemo, yae_electro
+.venv/Scripts/python tools/gen_kit_energy_icons.py [--check] [--art-root <checkout>]   # each kit's card cost orb + inline text orb, base Ironclad through the kit's frame hsv (game pck)
 ```
 
 Rules that hold across the pipeline:

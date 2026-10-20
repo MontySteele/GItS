@@ -20,10 +20,6 @@ public sealed class VarkaCardPool : KitCardPool
 {
     public override string Title => VarkaPrototype.CharacterId;
 
-    // The Silent's energy orb, the borrow Kokomi's and Furina's pools make;
-    // his base Strike and Defend are hers for the same reason.
-    public override string EnergyColorName => "silent";
-
     /// <summary>Frame tint, chip and orb-number outline:
     /// <see cref="CardFrameColors.Varka"/>.</summary>
     public override CardFrameColors.Tint Tint => CardFrameColors.Varka;

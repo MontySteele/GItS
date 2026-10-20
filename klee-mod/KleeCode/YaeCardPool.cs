@@ -19,10 +19,6 @@ public sealed class YaeCardPool : KitCardPool
 {
     public override string Title => YaePrototype.CharacterId;
 
-    // The Defect's energy orb (Electro's nearest base colour); her base
-    // Strike and Defend are his for the same reason.
-    public override string EnergyColorName => "defect";
-
     /// <summary>Frame tint, chip and orb-number outline:
     /// <see cref="CardFrameColors.Yae"/>.</summary>
     public override CardFrameColors.Tint Tint => CardFrameColors.Yae;

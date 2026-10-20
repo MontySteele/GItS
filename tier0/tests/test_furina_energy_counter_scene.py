@@ -1,5 +1,9 @@
 """EB-40: Furina's energy counter, the half that can be checked without a game.
 
+CARD FRAMES STAGE 2 (2026-10-20, [USER]: "Agreed on all of the card / orb /
+energy mockup picks"): Klee, Kokomi, Varka and Yae now ship the same scene
+shape with their own layer sets, so every check below runs per kit.
+
 The acceptance criterion on the backlog row is "all five `GetNode`s resolve",
 and resolving is something only a running `NEnergyCounter._Ready` can do. What
 IS checkable on a clean checkout is everything that determines the answer:
@@ -42,7 +46,26 @@ if str(ROOT) not in sys.path:
 from tools.art_lint import GENERATOR_OWNED                  # noqa: E402
 from tools.visual_qa import godot_scene                     # noqa: E402
 
-SCENE_PATH = ROOT / "klee-mod" / "pck-src" / "furina" / "ui" / "energy_counter.tscn"
+import pytest                                               # noqa: E402
+
+#: Every kit with its own counter, and where its layers live under ImageGen
+#: (Klee's surfaces predate the per-character layout).
+KITS = {
+    "furina": "images/furina/ui/energy_orb/",
+    "klee": "images/ui/energy_orb/",
+    "kokomi": "images/kokomi/ui/energy_orb/",
+    "varka": "images/varka/ui/energy_orb/",
+    "yae": "images/yae/ui/energy_orb/",
+}
+CLASS_FILE = {"furina": "Furina", "klee": "Klee", "kokomi": "Kokomi",
+              "varka": "Varka", "yae": "Yae"}
+
+
+def scene_path(kit):
+    return ROOT / "klee-mod" / "pck-src" / kit / "ui" / "energy_counter.tscn"
+
+
+SCENE_PATH = scene_path("furina")
 FURINA = (ROOT / "klee-mod" / "KleeCode" / "Furina.cs").read_text(encoding="utf-8")
 BUILDER = (ROOT / "tools" / "build_pck.ps1").read_text(encoding="utf-8")
 TELEMETRY = (ROOT / "klee-mod" / "KleeCode" / "Diagnostics"
@@ -71,17 +94,21 @@ STACKS = {
 }
 
 
-def scene():
-    return godot_scene.parse(SCENE_PATH)
+def scene(kit="furina"):
+    return godot_scene.parse(scene_path(kit))
+
+
+kits = pytest.mark.parametrize("kit", sorted(KITS))
 
 
 def _nodes_by_path(parsed):
     return {n.path: n for n in parsed.nodes}
 
 
-def test_the_scene_exists_and_has_a_single_root():
-    assert SCENE_PATH.is_file(), f"no energy counter scene at {SCENE_PATH}"
-    parsed = scene()
+@kits
+def test_the_scene_exists_and_has_a_single_root(kit):
+    assert scene_path(kit).is_file(), f"no energy counter scene at {scene_path(kit)}"
+    parsed = scene(kit)
     roots = [n for n in parsed.nodes if n.parent is None]
     assert len(roots) == 1, f"expected one root, got {[n.name for n in roots]}"
     assert roots[0].type == "Control", (
@@ -90,22 +117,24 @@ def test_the_scene_exists_and_has_a_single_root():
         "(NCombatUi._Ready iterates GetChildren().OfType<Control>())")
 
 
-def test_the_root_carries_no_script_resource():
+@kits
+def test_the_root_carries_no_script_resource(kit):
     """The hard cast is satisfied by conversion, not by an ext_resource.
 
     Asserted rather than assumed, because 'the root must carry that script'
     (the row's words) reads like an instruction to ship one, and shipping one
     would fail the export on a project that has no game code in it.
     """
-    parsed = scene()
-    assert 'type="Script"' not in SCENE_PATH.read_text(encoding="utf-8")
+    parsed = scene(kit)
+    assert 'type="Script"' not in scene_path(kit).read_text(encoding="utf-8")
     for node in parsed.nodes:
         assert "script" not in node.props, f"{node.path} carries a script"
 
 
-def test_every_node_ready_resolves_is_present_and_spelled_exactly():
+@kits
+def test_every_node_ready_resolves_is_present_and_spelled_exactly(kit):
     """(b) of the acceptance: the five GetNodes have something to find."""
-    by_path = _nodes_by_path(scene())
+    by_path = _nodes_by_path(scene(kit))
     for name, unique in READY_NODES:
         assert name in by_path, (
             f"NEnergyCounter._Ready GetNodes '{name}' and the scene has no "
@@ -118,8 +147,9 @@ def test_every_node_ready_resolves_is_present_and_spelled_exactly():
                 "unique_name_in_owner = true in the scene text")
 
 
-def test_the_two_stacks_carry_the_five_layers_in_their_inferred_roles():
-    parsed = scene()
+@kits
+def test_the_two_stacks_carry_the_five_layers_in_their_inferred_roles(kit):
+    parsed = scene(kit)
     ext = {rid: sec.attrs.get("path", "") for rid, sec in parsed.ext_resources.items()}
     for stack, expected in STACKS.items():
         children = [n for n in parsed.nodes if n.parent == stack]
@@ -133,7 +163,8 @@ def test_the_two_stacks_carry_the_five_layers_in_their_inferred_roles():
             f"NEnergyCounter contract are {list(expected)}")
 
 
-def test_the_layer_paths_are_the_ones_the_generator_declares():
+@kits
+def test_the_layer_paths_are_the_ones_the_generator_declares(kit):
     """(c): the scene's res:// paths and art_lint's out-paths are one set.
 
     GENERATOR_OWNED is where R231's five layers are registered so no plan row
@@ -141,13 +172,13 @@ def test_the_layer_paths_are_the_ones_the_generator_declares():
     with a missing texture and the orb goes blank.
     """
     declared = {
-        "res://furina/ui/" + key.split("images/furina/ui/", 1)[1]
+        f"res://{kit}/ui/energy_orb/" + key.split(KITS[kit], 1)[1]
         for key in GENERATOR_OWNED
-        if "images/furina/ui/energy_orb/" in key
+        if key.startswith("ImageGen/" + KITS[kit])
     }
     assert len(declared) == 5, f"expected five declared orb layers, got {declared}"
 
-    parsed = scene()
+    parsed = scene(kit)
     used = {sec.attrs.get("path") for sec in parsed.ext_resources.values()}
     assert used == declared, (
         f"scene textures {sorted(used)} != declared out-paths {sorted(declared)}")
@@ -161,40 +192,44 @@ def test_furina_points_at_the_scene_and_keeps_the_base_counter_as_fallback():
         "that does not exist -- the R9 preload crash")
 
 
-def test_klee_and_kokomi_still_return_the_base_counter():
-    """The change is Furina-only; nobody else's orb moves under them."""
-    for name in ("Klee", "Kokomi"):
-        source = (ROOT / "klee-mod" / "KleeCode" / f"{name}.cs").read_text(
-            encoding="utf-8")
-        body = source.split("CustomEnergyCounterPath", 1)[1].split(";", 1)[0]
-        assert body.strip().strip("=> \n\"") == BASE_COUNTER, (
-            f"{name}'s energy counter moved; EB-40 is Furina's row alone")
+@kits
+def test_every_kit_points_at_its_own_scene_and_keeps_the_base_fallback(kit):
+    """Stage 2 (2026-10-20): every kit wears its own orb, each with the base
+    counter as the stale-pck fallback Furina's EB-40 row set."""
+    source = (ROOT / "klee-mod" / "KleeCode" / f"{CLASS_FILE[kit]}.cs").read_text(
+        encoding="utf-8")
+    body = source.split("CustomEnergyCounterPath", 1)[1].split(";", 1)[0]
+    assert f'KleePck.Path("{kit}/ui/energy_counter.tscn")' in body
+    assert BASE_COUNTER in body
 
 
-def test_the_builder_ships_the_layer_directory():
+@kits
+def test_the_builder_ships_the_layer_directory(kit):
     """The ui\\ copy loop is non-recursive, so the subdirectory needs its own
     block -- without it the scene exports with five missing textures."""
-    assert "furina\\ui\\energy_orb" in BUILDER, (
+    assert f"'{kit}\\ui\\energy_orb'" in BUILDER, (
         "build_pck.ps1 has no copy block for the orb layer directory; the "
         "per-surface Get-ChildItem does not recurse into it")
 
 
-def test_boot_telemetry_names_the_scene_and_all_five_nodes():
-    assert '"furina/ui/energy_counter.tscn"' in TELEMETRY
+@kits
+def test_boot_telemetry_names_the_scene_and_all_five_nodes(kit):
+    assert f'"{kit}/ui/energy_counter.tscn"' in TELEMETRY
     for name, _ in READY_NODES:
-        assert f'("furina/ui/energy_counter.tscn", "{name}")' in TELEMETRY, (
+        assert f'("{kit}/ui/energy_counter.tscn", "{name}")' in TELEMETRY, (
             f"{name} is not in KleeSceneTelemetry's RequiredNodes; these five "
             "throw rather than no-op, so a miss must be loud at boot")
 
 
-def test_the_orb_draws_inside_the_counters_own_rect():
+@kits
+def test_the_orb_draws_inside_the_counters_own_rect(kit):
     """2026-10-14 check lane: every layer stack sat at -64..64, centred on the
     root's top-left corner, so her orb drew 64 px up-left of where the base
     (Ironclad) orb draws for Klee, Kokomi, Varka and Yae -- inside the column
     `SparkCounter.Place` keeps 12 px above the energy panel, under the Fanfare
     badge -- and the root's 0..128 hover rect missed half of it. The orb is
     the root's rect: every drawn child stays within 0..128."""
-    parsed = scene()
+    parsed = scene(kit)
     root = next(n for n in parsed.nodes if n.parent is None)
     side = float(root.props["offset_right"])
     assert side == float(root.props["offset_bottom"]) == 128.0
