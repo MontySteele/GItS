@@ -1293,9 +1293,9 @@ if (-not (Test-Path $keywordSrc)) {
   "THE_ARCHITECT.talk.KLEEMOD-KOKOMI.0-0r.ancient": "Priestess. You could have stayed on your island. Why climb so far from the people who need you?",
   "THE_ARCHITECT.talk.KLEEMOD-KOKOMI.0-0r.next": "Respond",
   "THE_ARCHITECT.talk.KLEEMOD-KOKOMI.0-1r.char": "Because I couldn't be sure this place would never reach them. I'd rather find out myself than wait at home.",
-  "THE_ARCHITECT.talk.KLEEMOD-VARKA.0-0r.ancient": "Grand Master. You have brought your people far. Will you turn back now?",
+  "THE_ARCHITECT.talk.KLEEMOD-VARKA.0-0r.ancient": "Grand Master. Five years on the road, and still you climb. What did you expect to find at the top?",
   "THE_ARCHITECT.talk.KLEEMOD-VARKA.0-0r.next": "Respond",
-  "THE_ARCHITECT.talk.KLEEMOD-VARKA.0-1r.char": "After all those stairs? Come on, let's finish this. My people are waiting.",
+  "THE_ARCHITECT.talk.KLEEMOD-VARKA.0-1r.char": "A good fight, then the road home. Mondstadt has waited long enough.",
   "THE_ARCHITECT.talk.KLEEMOD-YAE.0-0r.ancient": "Guuji. You climbed my Spire as if you were reading it. How does it end?",
   "THE_ARCHITECT.talk.KLEEMOD-YAE.0-0r.next": "Respond",
   "THE_ARCHITECT.talk.KLEEMOD-YAE.0-1r.char": "With a twist, naturally. Do keep up. I would hate to edit you out."
