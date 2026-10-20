@@ -3242,6 +3242,11 @@ ASCENSION_RELICS = ("Wolf's Gravestone",)
 #: spread, so an Anemo card does not get the line.
 WILDFIRE_TITLE = "Wildfire Oath"
 WILDFIRE_NOTE = "    - Wildfire: +{n} a hit."
+#: Wildfire Oath's upgraded copies' "plus 3" (`WildfireOathPower.DamageFor`),
+#: and the badge text that counts them.
+WILDFIRE_PLUS_BONUS = 3
+_WILDFIRE_UPGRADED = re.compile(
+    r"plus 3 x (?:\[blue\])?(\d+)")
 
 
 def _wildfire_hit(you: dict[str, Any], oath: dict[str, Any] | None)         -> int | None:
@@ -3249,12 +3254,19 @@ def _wildfire_hit(you: dict[str, Any], oath: dict[str, Any] | None)         -> i
     power down (or no Oath block to read his Pyro Oath off)."""
     if not oath:
         return None
+    total = None
+    pyro = int(oath["counts"].get("Pyro") or 0)
     for power in you.get("powers") or []:
         if _fold(power.get("name")) == _fold(WILDFIRE_TITLE):
             stacks = power.get("stacks")
             stacks = stacks if isinstance(stacks, int) and stacks > 0 else 1
-            return max(0, stacks * int(oath["counts"].get("Pyro") or 0))
-    return None
+            # The power upgrade pass (2026-10-19): one badge for both
+            # versions; its text says "plus 3 x N" (N upgraded copies).
+            found = _WILDFIRE_UPGRADED.search(str(power.get("text") or ""))
+            upgraded = int(found.group(1)) if found else 0
+            total = (total or 0) + max(
+                0, stacks * pyro + WILDFIRE_PLUS_BONUS * upgraded)
+    return total
 
 
 def _applies_pyro(card: dict[str, Any]) -> bool:

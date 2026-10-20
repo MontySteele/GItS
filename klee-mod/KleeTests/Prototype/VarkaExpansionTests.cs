@@ -411,7 +411,9 @@ public class VarkaExpansionTests : IDisposable
         Assert.Equal(2, new ProtoVkTheOrderAnswers().EnergyCost.Canonical);
         Assert.Equal(1, Upgraded<ProtoVkTheOrderAnswers>().EnergyCost
             .GetWithModifiers(CostModifiers.None));
-        Assert.Contains(CardKeyword.Innate, Upgraded<ProtoVkWildfireOath>().Keywords);
+        // The power upgrade pass (2026-10-19): Wildfire Oath+ is "plus 3",
+        // was Innate (VarkaPowerUpgradeTests).
+        Assert.DoesNotContain(CardKeyword.Innate, Upgraded<ProtoVkWildfireOath>().Keywords);
         // The forced-Amber round (2026-10-10): Oath Unto Death costs 2, was 3;
         // its upgrade stays Innate.
         Assert.Equal(2, new ProtoVkOathUntoDeath().EnergyCost.Canonical);

@@ -582,8 +582,17 @@ public sealed class StaticFieldPower : PowerModel, ILocalizationProvider
 /// Change of Guard and Weathervane, which no longer pass it: a card's blocked
 /// switch pays 1 Oath of the current element once per play
 /// (<see cref="VarkaOath.BannerHolds"/>); Weathervane is not a card and pays
-/// nothing. Sim twin: <c>varka_oath.banner_holds</c>.</summary>
-public sealed class UnwaveringBannerPower : PowerModel, ILocalizationProvider
+/// nothing. Sim twin: <c>varka_oath.banner_holds</c>.
+///
+/// THE POWER UPGRADE PASS (2026-10-19, [USER]: "You do have a habit of making
+/// too many powers just decrease their cost by 1 on upgrade though"): was
+/// Innate. ONE power for both versions (<see cref="UpgradeTwinPower"/>, the
+/// icon declutter's shape): Amount is every copy installed,
+/// <see cref="UpgradeTwinPower.UpgradedCopies"/> the copies an upgraded card
+/// installed. Each copy adds its own: a held switch pays 1 per plain
+/// copy and 2 per upgraded copy (<see cref="OathPaid"/>), once per play.
+/// </summary>
+public sealed class UnwaveringBannerPower : UpgradeTwinPower, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
@@ -593,11 +602,21 @@ public sealed class UnwaveringBannerPower : PowerModel, ILocalizationProvider
           + "element[/gold]. Whenever another card would, gain 1 "
           + "[gold]Oath[/gold] of your [gold]current "
           + "element[/gold] instead."),
+        ("smartDescription",
+            "Only [gold]Knights[/gold] can change your [gold]current "
+          + "element[/gold]. When another card would, gain "
+          + "[blue]{Amount}[/blue]{Upgraded:cond:>0? plus [blue]{}[/blue]|} "
+          + "[gold]Oath[/gold] of it."),
     };
 
-    public override PowerType Type => PowerType.Buff;
+    /// <summary>The Oath a held switch pays: 1 per plain copy, 2 per
+    /// upgraded copy, at least 1.</summary>
+    public int OathPaid => OathFor(PlainCopies, UpgradedCopies);
 
-    public override PowerStackType StackType => PowerStackType.Single;
+    /// <summary>PURE: 1 per plain copy, 2 per upgraded copy, at least 1.
+    /// </summary>
+    public static int OathFor(int plain, int upgraded) =>
+        System.Math.Max(1, plain + 2 * upgraded);
 
     /// <summary>The badge flashes when the Banner holds a switch.</summary>
     internal void Pulse() => Flash();
@@ -734,8 +753,16 @@ public sealed class AssemblyAtTheCathedralPower : PowerModel, ILocalizationProvi
 /// your Pyro Oath to it." Pyro's <see cref="AbsoluteZeroPower"/>: paid from
 /// <see cref="VarkaOath.NoteApplication"/> once that application's own Oath
 /// credit is in, element-less and unpowered, per stack. Sim twin:
-/// <c>varka_oath._wildfire</c>, from <c>varka_oath.note_hit</c>.</summary>
-public sealed class WildfireOathPower : PowerModel, ILocalizationProvider
+/// <c>varka_oath._wildfire</c>, from <c>varka_oath.note_hit</c>.
+///
+/// THE POWER UPGRADE PASS (2026-10-19, [USER]: "You do have a habit of making
+/// too many powers just decrease their cost by 1 on upgrade though"): was
+/// Innate. ONE power for both versions (<see cref="UpgradeTwinPower"/>, the
+/// icon declutter's shape): Amount is every copy installed,
+/// <see cref="UpgradeTwinPower.UpgradedCopies"/> the copies an upgraded card
+/// installed. One hit per application, as before: the Pyro Oath per
+/// copy, plus 3 per upgraded copy.</summary>
+public sealed class WildfireOathPower : UpgradeTwinPower, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
@@ -743,23 +770,24 @@ public sealed class WildfireOathPower : PowerModel, ILocalizationProvider
         ("description",
             "Whenever you apply [gold]Pyro[/gold] to an enemy, deal damage "
           + "equal to your [gold]Pyro[/gold] [gold]Oath[/gold] to it."),
+        ("smartDescription",
+            "Whenever you apply [gold]Pyro[/gold] to an enemy, deal damage "
+          + "equal to your [gold]Pyro[/gold] [gold]Oath[/gold]"
+          + "{Upgraded:cond:>0? plus 3 x [blue]{}[/blue]|} to it."),
     };
 
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-
-    /// <summary>One application's damage: the Pyro Oath per stack. PURE.
-    /// </summary>
-    public static int DamageFor(int pyroOath, int stacks) =>
-        System.Math.Max(0, pyroOath * stacks);
+    /// <summary>One application's damage: the Pyro Oath per stack, plus 3
+    /// per upgraded stack. PURE.</summary>
+    public static int DamageFor(int pyroOath, int stacks, int upgraded = 0) =>
+        System.Math.Max(0, pyroOath * stacks
+                           + 3 * upgraded);   // "plus 3", per upgraded copy
 
     internal async Task OnPyroApplied(
         PlayerChoiceContext choiceContext, Creature target)
     {
         if (!VarkaOath.Live(Owner) || !target.IsAlive) return;
         var damage = DamageFor(VarkaOath.Count(Owner, Element.Pyro),
-                               (int)Amount);
+                               (int)Amount, UpgradedCopies);
         if (damage <= 0) return;
         Flash();
         await ElementalHit.DealUnelemented(choiceContext, target, damage,
@@ -818,8 +846,16 @@ public sealed class RetaliatingTidePower : PowerModel, ILocalizationProvider
 /// Reproach's test (a positive application he made, once per enemy it lands
 /// on), element-less and unpowered, per stack. Sim twin:
 /// <c>varka_oath.on_debuff_applied</c>, from <c>refpowers.on_power_applied</c>.
+///
+/// THE POWER UPGRADE PASS (2026-10-19, [USER]: "You do have a habit of making
+/// too many powers just decrease their cost by 1 on upgrade though"): was
+/// Innate. ONE power for both versions (<see cref="UpgradeTwinPower"/>, the
+/// icon declutter's shape): Amount is every copy installed,
+/// <see cref="UpgradeTwinPower.UpgradedCopies"/> the copies an upgraded card
+/// installed. One hit per application, as before: the Cryo Oath per
+/// copy, plus 3 per upgraded copy.
 /// </summary>
-public sealed class AbsoluteZeroPower : PowerModel, ILocalizationProvider
+public sealed class AbsoluteZeroPower : UpgradeTwinPower, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
@@ -828,16 +864,17 @@ public sealed class AbsoluteZeroPower : PowerModel, ILocalizationProvider
             "Whenever you apply [gold]Weak[/gold] or [gold]Vulnerable[/gold] "
           + "to an enemy, deal damage equal to your [gold]Cryo[/gold] [gold]Oath[/gold] "
           + "to it."),
+        ("smartDescription",
+            "Whenever you apply [gold]Weak[/gold] or [gold]Vulnerable[/gold] "
+          + "to an enemy, deal damage equal to your [gold]Cryo[/gold] [gold]Oath[/gold]"
+          + "{Upgraded:cond:>0? plus 3 x [blue]{}[/blue]|} to it."),
     };
 
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-
-    /// <summary>One application's damage: the Cryo Oath per stack. PURE.
-    /// </summary>
-    public static int DamageFor(int cryoOath, int stacks) =>
-        System.Math.Max(0, cryoOath * stacks);
+    /// <summary>One application's damage: the Cryo Oath per stack, plus 3
+    /// per upgraded stack. PURE.</summary>
+    public static int DamageFor(int cryoOath, int stacks, int upgraded = 0) =>
+        System.Math.Max(0, cryoOath * stacks
+                           + 3 * upgraded);   // "plus 3", per upgraded copy
 
     public override async Task AfterPowerAmountChanged(
         PlayerChoiceContext choiceContext, PowerModel power, decimal amount,
@@ -846,7 +883,7 @@ public sealed class AbsoluteZeroPower : PowerModel, ILocalizationProvider
         if (!SeasReproachPower.Pays(power, amount, applier, Owner)) return;
         if (!VarkaOath.Live(Owner)) return;
         var damage = DamageFor(VarkaOath.Count(Owner, Element.Cryo),
-                               (int)Amount);
+                               (int)Amount, UpgradedCopies);
         if (damage <= 0) return;
         Flash();
         await ElementalHit.DealUnelemented(choiceContext, power.Owner!, damage,
@@ -877,8 +914,16 @@ public sealed class OathUntoDeathPower : PowerModel, ILocalizationProvider
 /// copy Exhausts." Paid by <see cref="VarkaOath.EndPlay"/>, one copy per
 /// stack, upgraded when the played one was, at a random depth of the draw
 /// pile. A copy played fires it again, so one real card and one copy
-/// circulate. Sim twin: <c>varka_oath.end_play</c>.</summary>
-public sealed class WolfpackPower : PowerModel, ILocalizationProvider
+/// circulate. Sim twin: <c>varka_oath.end_play</c>.
+///
+/// THE POWER UPGRADE PASS (2026-10-19, [USER]: "You do have a habit of making
+/// too many powers just decrease their cost by 1 on upgrade though"): was
+/// Innate. ONE power for both versions (<see cref="UpgradeTwinPower"/>, the
+/// icon declutter's shape): Amount is every copy installed,
+/// <see cref="UpgradeTwinPower.UpgradedCopies"/> the copies an upgraded card
+/// installed. An upgraded copy's shuffled copy is always upgraded;
+/// a plain copy's follows the played card.</summary>
+public sealed class WolfpackPower : UpgradeTwinPower, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
@@ -889,29 +934,29 @@ public sealed class WolfpackPower : PowerModel, ILocalizationProvider
           + "[gold]Exhausts[/gold]."),
     };
 
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Counter;
-
     internal async Task OnAscensionPlayed(CardModel played)
     {
         var combat = Owner.CombatState;
         if (combat == null || Owner.Player is not { } player) return;
         Flash();
         var made = 0;
-        for (var i = 0; i < Amount; i++)
+        foreach (var (count, upgraded) in Batches())
         {
-            var copy = combat.CreateCard(
-                ModelDb.GetById<CardModel>(played.Id), player);
-            if (copy == null) continue;
-            if (played.IsUpgraded && copy.IsUpgradable && !copy.IsUpgraded)
+            for (var i = 0; i < count; i++)
             {
-                copy.UpgradeInternal();
+                var copy = combat.CreateCard(
+                    ModelDb.GetById<CardModel>(played.Id), player);
+                if (copy == null) continue;
+                if ((played.IsUpgraded || upgraded) && copy.IsUpgradable
+                    && !copy.IsUpgraded)
+                {
+                    copy.UpgradeInternal();
+                }
+                copy.AddKeyword(CardKeyword.Exhaust);
+                await CardPileCmd.AddGeneratedCardToCombat(
+                    copy, PileType.Draw, player, CardPilePosition.Random);
+                made++;
             }
-            copy.AddKeyword(CardKeyword.Exhaust);
-            await CardPileCmd.AddGeneratedCardToCombat(
-                copy, PileType.Draw, player, CardPilePosition.Random);
-            made++;
         }
         // The seat page's line (the payoff round's record): what fired, and
         // how many copies went in. On the Ascension's own play line
@@ -991,8 +1036,16 @@ public sealed class OathboundAegisPower : PowerModel, ILocalizationProvider
 
 /// <summary>Weathervane: "At the start of your turn, you may choose an
 /// element you have Oath in; it becomes your current element." Paid first
-/// in <see cref="VarkaOath.TurnStart"/>, on a cancelable grid.</summary>
-public sealed class WeathervanePower : PowerModel, ILocalizationProvider
+/// in <see cref="VarkaOath.TurnStart"/>, on a cancelable grid.
+///
+/// THE POWER UPGRADE PASS (2026-10-19, [USER]: "You do have a habit of making
+/// too many powers just decrease their cost by 1 on upgrade though"): was
+/// Innate. ONE power for both versions (<see cref="UpgradeTwinPower"/>, the
+/// icon declutter's shape): Amount is every copy installed,
+/// <see cref="UpgradeTwinPower.UpgradedCopies"/> the copies an upgraded card
+/// installed. One choice a turn however many copies; a chosen element
+/// (not a cancel) gains 1 Oath per upgraded copy.</summary>
+public sealed class WeathervanePower : UpgradeTwinPower, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
@@ -1002,9 +1055,9 @@ public sealed class WeathervanePower : PowerModel, ILocalizationProvider
           + "[gold]Oath[/gold] in. It becomes your [gold]current element[/gold]."),
     };
 
-    public override PowerType Type => PowerType.Buff;
-
-    public override PowerStackType StackType => PowerStackType.Single;
+    /// <summary>The Oath a chosen element gains: 1 per upgraded copy.
+    /// </summary>
+    public int OathGained => UpgradedCopies;
 }
 
 /// <summary>Twin Gales: "Your Swirls also pay the element they Swirl. If
@@ -1028,8 +1081,16 @@ public sealed class TwinGalesPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>Eye of Stormterror: "The first 3 times you Swirl each turn,
-/// draw 1 card." Paid by <see cref="VarkaOath.OnSwirl"/>.</summary>
-public sealed class EyeOfStormterrorPower : PowerModel, ILocalizationProvider
+/// draw 1 card." Paid by <see cref="VarkaOath.OnSwirl"/>.
+///
+/// THE POWER UPGRADE PASS (2026-10-19, [USER]: "You do have a habit of making
+/// too many powers just decrease their cost by 1 on upgrade though"): was
+/// Innate. ONE power for both versions (<see cref="UpgradeTwinPower"/>, the
+/// icon declutter's shape): Amount is every copy installed,
+/// <see cref="UpgradeTwinPower.UpgradedCopies"/> the copies an upgraded card
+/// installed. Each copy draws 1 on each of its first 3 [4] Swirls a
+/// turn (<see cref="DrawsFor"/>).</summary>
+public sealed class EyeOfStormterrorPower : UpgradeTwinPower, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
@@ -1038,17 +1099,27 @@ public sealed class EyeOfStormterrorPower : PowerModel, ILocalizationProvider
             "The first " + VarkaLaw.EyeOfStormterrorSwirls + " times you "
           + "[gold]Swirl[/gold] each turn, draw [blue]{Amount}[/blue] "
           + "card{Amount:plural:|s}."),
+        ("smartDescription",
+            "The first " + VarkaLaw.EyeOfStormterrorSwirls + " times you "
+          + "[gold]Swirl[/gold] each turn, draw [blue]{Amount}[/blue] "
+          + "card{Amount:plural:|s}.{Upgraded:cond:>0? Upgraded copies "
+          + "also draw on the " + VarkaLaw.EyeOfStormterrorSwirlsUpgraded
+          + "th.|}"),
     };
 
-    public override PowerType Type => PowerType.Buff;
+    /// <summary>The cards the <paramref name="swirl"/>th Swirl of the turn
+    /// draws: every copy through the 3rd, the upgraded copies on the 4th.
+    /// PURE.</summary>
+    public static int DrawsFor(int swirl, int copies, int upgraded) =>
+        swirl <= VarkaLaw.EyeOfStormterrorSwirls ? copies
+        : swirl <= VarkaLaw.EyeOfStormterrorSwirlsUpgraded ? upgraded : 0;
 
-    public override PowerStackType StackType => PowerStackType.Counter;
-
-    internal async Task Draw(PlayerChoiceContext choiceContext)
+    internal async Task Draw(PlayerChoiceContext choiceContext, int swirl)
     {
-        if (Owner.Player is not { } player || Amount <= 0) return;
+        var n = DrawsFor(swirl, (int)Amount, UpgradedCopies);
+        if (Owner.Player is not { } player || n <= 0) return;
         Flash();
-        await CardPileCmd.Draw(choiceContext, Amount, player);
+        await CardPileCmd.Draw(choiceContext, n, player);
     }
 }
 

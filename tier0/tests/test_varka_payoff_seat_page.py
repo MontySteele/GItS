@@ -151,7 +151,7 @@ def test_wolfpack_and_twin_gales_are_said_since_last_page():
                 power="Lupical", amount=1)]),
         _row("Storm Surge", hits=True, events=[
             _ev("paid", 9002, card="Cryo", target="Hilichurl 1",
-                power="Pyro (3 damage) and Cryo (1 Vulnerable)")]),
+                power="Pyro (5 damage) and Cryo (1 Vulnerable)")]),
     ]
     page = blindplay.observe(state)
     line = next(ln for ln in page.splitlines()
@@ -160,7 +160,7 @@ def test_wolfpack_and_twin_gales_are_said_since_last_page():
     # to its play line (below), so the since-last-page line no longer
     # repeats it.
     assert "Lupical" not in line
-    assert ("Twin Gales: the Swirl of Cryo on Hilichurl 1 paid Pyro (3 "
+    assert ("Twin Gales: the Swirl of Cryo on Hilichurl 1 paid Pyro (5 "
             "damage) and Cryo (1 Vulnerable)") in line
 
 

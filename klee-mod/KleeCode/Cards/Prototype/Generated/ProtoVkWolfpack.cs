@@ -41,7 +41,7 @@ public sealed class ProtoVkWolfpack : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Lupical"),
-        ("description", "Whenever you play [gold]Four Winds' Ascension[/gold], shuffle a copy of it into your [gold]Draw Pile[/gold]. The copy [gold]Exhausts[/gold]."),
+        ("description", "Whenever you play [gold]Four Winds' Ascension[/gold], shuffle {IfUpgraded:show:an upgraded|a} copy of it into your [gold]Draw Pile[/gold]. The copy [gold]Exhausts[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -59,11 +59,11 @@ public sealed class ProtoVkWolfpack : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<WolfpackPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        await UpgradeTwinPower.Install<WolfpackPower>(choiceContext, Owner.Creature, 1, IsUpgraded, Owner.Creature, this);
     }
 
     protected override void OnUpgrade()
     {
-        AddKeyword(CardKeyword.Innate);
+        // upgraded_power: the upgraded card's copy of WolfpackPower counts as upgraded, read off IsUpgraded when the card is played.
     }
 }

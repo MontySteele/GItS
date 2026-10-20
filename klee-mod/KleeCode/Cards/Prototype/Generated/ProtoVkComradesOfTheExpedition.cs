@@ -50,13 +50,13 @@ public sealed class ProtoVkComradesOfTheExpedition : CustomCardModel, ICharacter
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Comrades of the Expedition"),
-        ("description", "Whenever another player plays an Attack, gain 1 [gold]Oath[/gold] of your [gold]current element[/gold]."),
+        ("description", "Whenever another player plays an Attack, gain {PowerAmount:diff()} [gold]Oath[/gold] of your [gold]current element[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-
+            new DynamicVar("PowerAmount", 1m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -68,11 +68,11 @@ public sealed class ProtoVkComradesOfTheExpedition : CustomCardModel, ICharacter
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<ComradesOfTheExpeditionPower>(choiceContext, Owner.Creature, 1, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<ComradesOfTheExpeditionPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()
     {
-        EnergyCost.UpgradeBy(-1);
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

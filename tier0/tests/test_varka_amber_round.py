@@ -100,6 +100,19 @@ def test_wildfire_reads_the_stack_and_the_current_pyro_oath():
     assert "    - Wildfire: +38 a hit." in _rows_after(page, "Stoke")
 
 
+def test_wildfire_adds_three_per_upgraded_copy():
+    """The power upgrade pass (2026-10-19): one badge for both versions; its
+    text counts the upgraded copies, each adding 3."""
+    state = varka_state()                                # Pyro Oath 2
+    _hand(state, _card(state, "Kindled Edge", "Deal 6 Pyro damage.", "Pyro"))
+    state["player"]["status"].append(_status(
+        "Wildfire Oath", WILDFIRE_TEXT.replace(
+            " to it.", " plus 3 x [blue]1[/blue] to it."),
+        2, "Counter"))
+    page = blindplay.observe(state)
+    assert "    - Wildfire: +7 a hit." in _rows_after(page, "Kindled Edge")
+
+
 def test_no_wildfire_line_without_the_power():
     state = varka_state()
     _hand(state, _card(state, "Kindled Edge", "Deal 6 Pyro damage.", "Pyro"))
