@@ -1685,8 +1685,9 @@ def _summon_row(hay: str) -> str:
 #: (The Ancient audit, 2026-10-12, dropped the second sentence the Kokomi
 #: pre-run fixes added, "A Plan's own Block comes at the start of your next
 #: turn.") Ward and Casket (2026-10-18): Block per Plan card or Companion
-#: played, not at the start of the turn.
-CASKET_ROW = (f"Whenever you play a Plan card or a Companion, gain "
+#: played, not at the start of the turn; since 2026-10-20 only for a card
+#: Planned or a Companion played.
+CASKET_ROW = (f"Whenever you Plan a card or play a Companion, gain "
               f"{CASKET_BLOCK} Block.")
 
 ARM_KEYWORDS: dict[str, str] = {

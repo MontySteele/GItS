@@ -40,32 +40,54 @@ public class KokomiRefoundingTests
         Assert.Equal(1, new TamakushiCasket().Block);
         Assert.Equal(2, new WatatsumiCasket().Block);
         Assert.Equal(2, WatatsumiCasket.WatatsumiBlock);
+        // 2026-10-20: it pays for planning, not for any Plan card.
         Assert.Equal(
-            "Whenever you play a [gold]Plan[/gold] card or a Companion, gain "
+            "Whenever you [gold]Plan[/gold] a card or play a Companion, gain "
             + "[blue]1[/blue] [gold]Block[/gold].",
             new TamakushiCasket().Localization!
                 .First(r => r.Item1 == "description").Item2);
         Assert.Equal(
-            "Whenever you play a [gold]Plan[/gold] card or a Companion, gain "
+            "Whenever you [gold]Plan[/gold] a card or play a Companion, gain "
             + "[blue]2[/blue] [gold]Block[/gold].",
             new WatatsumiCasket().Localization!
                 .First(r => r.Item1 == "description").Item2);
     }
 
     [Fact]
-    public void The_casket_pays_for_a_plan_card_a_companion_a_sting_and_a_ward()
+    public void The_casket_pays_for_a_planned_card_or_a_companion()
     {
+        // 2026-10-20, [USER]: "2 was definitely the intent, and we should
+        // figure out a different Block solution if needed." Option 2: "Pay
+        // only when a card is Planned or a Companion is played."
         var kokomi = Seat.Kokomi();
-        // A Plan card, a Companion with no Plan line, a Plan-line Companion
+        var pet = Kurage();
+        // Planned onto the Bake-Kurage: a Plan card, a Plan-line Companion
         // (one bool, so it pays once), a Sting and a Ward.
         foreach (var card in new CardModel[] {
-                     new ProtoKkSteadyTide(), new ProtoMiShinobuThundergrust(),
-                     new ProtoMiGorouInuzaka(), new ProtoKkSting(),
-                     new ProtoKkWard() })
+                     new ProtoKkSteadyTide(), new ProtoMiGorouInuzaka(),
+                     new ProtoKkSting(), new ProtoKkWard() })
+        {
+            Assert.True(TamakushiCasket.Counts(
+                            Play(Owned(card, kokomi), kokomi, pet),
+                            kokomi.Creature),
+                        card.GetType().Name);
+        }
+        // Face-up: a Companion pays, with or without a Plan line.
+        foreach (var card in new CardModel[] {
+                     new ProtoMiShinobuThundergrust(), new ProtoMiGorouInuzaka() })
         {
             Assert.True(TamakushiCasket.Counts(Play(Owned(card, kokomi), kokomi),
                                                kokomi.Creature),
                         card.GetType().Name);
+        }
+        // Face-up: a Plan card, a Sting and a Ward pay nothing.
+        foreach (var card in new CardModel[] {
+                     new ProtoKkSteadyTide(), new ProtoKkSting(),
+                     new ProtoKkWard() })
+        {
+            Assert.False(TamakushiCasket.Counts(Play(Owned(card, kokomi), kokomi),
+                                                kokomi.Creature),
+                         card.GetType().Name);
         }
         // Not her Strike or Defend, and not on anyone else.
         Assert.False(TamakushiCasket.Counts(Play(Owned(
@@ -76,7 +98,7 @@ public class KokomiRefoundingTests
             kokomi.Creature));
         var klee = Seat.Klee();
         Assert.False(TamakushiCasket.Counts(Play(Owned(
-            new ProtoKkSteadyTide(), klee), klee), klee.Creature));
+            new ProtoKkSteadyTide(), klee), klee, pet), klee.Creature));
     }
 
     [Fact]
@@ -86,7 +108,7 @@ public class KokomiRefoundingTests
         var carrying = (HashSet<MegaCrit.Sts2.Core.Entities.Players.Player>)
             typeof(KokomiPlan).GetField("_carrying", HeadlessGame.All)!
                 .GetValue(null)!;
-        var play = Play(Owned(new ProtoKkSteadyTide(), kokomi), kokomi);
+        var play = Play(Owned(new ProtoKkSteadyTide(), kokomi), kokomi, Kurage());
         Assert.True(TamakushiCasket.Counts(play, kokomi.Creature));
         carrying.Add(kokomi.Player);
         try
@@ -100,18 +122,17 @@ public class KokomiRefoundingTests
     }
 
     [Fact]
-    public void The_casket_pays_raw_block_on_a_play_face_up_or_planned()
+    public void The_casket_pays_raw_block_when_the_play_counts()
     {
-        // Planning is playing it: the hook never asks whether the play went
-        // onto the Bake-Kurage, only whether it is a carry-out.
+        // 2026-10-20: the test asks whether the play went onto the
+        // Bake-Kurage, and whether it is a carry-out.
         var hook = Seq(nameof(TamakushiCasket), "AfterCardPlayed");
         var counts = hook.IndexOf("TamakushiCasket.Counts");
         var block = hook.IndexOf("CreatureCmd.GainBlock");
         Assert.True(counts >= 0 && block > counts, string.Join(" ", hook));
-        Assert.DoesNotContain("KokomiPlan.PlayedOnPet", hook);
         var test = Seq(nameof(TamakushiCasket), "Counts");
         Assert.Contains("KokomiPlan.IsCarryingOut", test);
-        Assert.DoesNotContain("KokomiPlan.PlayedOnPet", test);
+        Assert.Contains("KokomiPlan.PlayedOnPet", test);
         // The start-of-turn Block is gone.
         Assert.Null(typeof(TamakushiCasket).GetMethod("AfterBlockCleared",
             System.Reflection.BindingFlags.Public
@@ -126,12 +147,29 @@ public class KokomiRefoundingTests
         return card;
     }
 
+    /// <summary>A bare Bake-Kurage, enough for <c>BakeKuragePet.Is</c>.</summary>
+    private static MegaCrit.Sts2.Core.Entities.Creatures.Creature Kurage()
+    {
+        var ctor = typeof(MegaCrit.Sts2.Core.Entities.Creatures.Creature)
+            .GetConstructors(HeadlessGame.All)
+            .First(c => c.GetParameters().Length == 3
+                        && c.GetParameters()[0].ParameterType
+                           == typeof(MegaCrit.Sts2.Core.Entities.Players.Player));
+        var pet = (MegaCrit.Sts2.Core.Entities.Creatures.Creature)
+            ctor.Invoke(new object?[] { null, 10, 10 });
+        Seat.Force(pet, "Monster",
+            System.Runtime.CompilerServices.RuntimeHelpers
+                .GetUninitializedObject(typeof(BakeKurageMonster)));
+        return pet;
+    }
+
     private static MegaCrit.Sts2.Core.Entities.Cards.CardPlay Play(
-        CardModel card, Seat by) => new()
+        CardModel card, Seat by,
+        MegaCrit.Sts2.Core.Entities.Creatures.Creature? target = null) => new()
     {
         Card = card,
         Player = by.Player,
-        Target = null,
+        Target = target,
         ResultPile = PileType.Discard,
         Resources = default,
         IsAutoPlay = false,

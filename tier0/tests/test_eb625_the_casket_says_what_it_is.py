@@ -49,7 +49,7 @@ def test_the_relic_face_is_one_sentence_off_the_shared_number():
     `lint_constant_parity`."""
     relic = RELIC_CS.read_text(encoding="utf-8")
     assert "Face(KokomiOverhaulLaw.CasketBlock)" in relic
-    assert ('"Whenever you play a [gold]Plan[/gold] card or a Companion, '
+    assert ('"Whenever you [gold]Plan[/gold] a card or play a Companion, '
             'gain "') in relic
     assert "Open the Casket" not in relic[relic.index('("description",'):]
     assert C.KOKOMI_OVERHAUL_CASKET_BLOCK == 1   # 2026-10-18
@@ -62,7 +62,7 @@ def test_the_debuff_answer_clause_is_silent_on_the_relic():
     from understudy import blindplay_render
 
     rx = blindplay_render._DEBUFF_ANSWERING_HIT
-    now = (f"Whenever you play a [gold]Plan[/gold] card or a Companion, "
+    now = (f"Whenever you [gold]Plan[/gold] a card or play a Companion, "
            f"gain [blue]{C.KOKOMI_OVERHAUL_CASKET_BLOCK}[/blue] "
            f"[gold]Block[/gold].")
     before = ("Start each combat with the [gold]Bake-Kurage[/gold]. Each debuff "

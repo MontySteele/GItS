@@ -3105,20 +3105,23 @@ def turn_start_generators(state: CombatState) -> None:
         add_companions(state, orders_plus, upgraded=True, free=True)
 
 
-def casket_counts(card: Optional[Card]) -> bool:
-    """Does the Tamakushi Casket pay for this card? A Plan card (Stings and
-    Wards included) or a Companion. `TamakushiCasket.Counts` is the twin.
+def casket_counts(card: Optional[Card], planned: bool) -> bool:
+    """Does the Tamakushi Casket pay for this play? A Companion always; a
+    Plan card (Stings and Wards included) only when `planned`, written onto
+    the Bake-Kurage this play. `TamakushiCasket.CountsCard` is the twin.
     PURE."""
-    return card is not None and (can_be_written(card)
-                                 or bool(card.is_companion))
+    if card is None:
+        return False
+    return bool(card.is_companion) or (planned and can_be_written(card))
 
 
-def casket_block(state: CombatState, card: Card) -> None:
-    """THE TAMAKUSHI CASKET (Ward and Casket, 2026-10-18, [USER]: "Modify the
-    starting relic... 'gain 2 block for each Plan or Companion Card
-    played.'", then down to 1 with Stings and Wards counting): "Whenever you
-    play a Plan card or a Companion, gain 1 Block." Called by `effects.resolve_card` after each play,
-    face-up or written on the Bake-Kurage (planning is playing it). A
+def casket_block(state: CombatState, card: Card, planned: bool = False) -> None:
+    """THE TAMAKUSHI CASKET (Ward and Casket, 2026-10-18; 2026-10-20, [USER]:
+    "2 was definitely the intent, and we should figure out a different Block
+    solution if needed"): "Whenever you Plan a card or play a Companion, gain
+    1 Block." Called by `effects.resolve_card` after each play, with
+    `planned` true when that play wrote the card onto the Bake-Kurage
+    (`state.kk_planned_card`). A Plan card played face-up pays nothing. A
     carry-out is not her play (`kk_carrying_out`). Raw relic Block
     (`ValueProp.Unpowered`). `TamakushiCasket.AfterCardPlayed` is the twin."""
     from tier0.content import loader                # late import: cycle
@@ -3126,7 +3129,7 @@ def casket_block(state: CombatState, card: Card) -> None:
         return
     if loader.OVERHAUL_CASKET_HOOK not in state.player.relic_hooks:
         return
-    if state.kk_carrying_out or not casket_counts(card):
+    if state.kk_carrying_out or not casket_counts(card, planned):
         return
     n = int(C.KOKOMI_OVERHAUL_CASKET_BLOCK)
     state.player.block += n

@@ -128,8 +128,8 @@ public class WolfsGravestoneTests : IDisposable
 
 
 /// <summary>Ward and Casket (2026-10-18): the Tamakushi Casket is
-/// "Whenever you play a Plan card or a Companion, gain 1 Block."; the
-/// Watatsumi Casket the same with 2.</summary>
+/// "Whenever you Plan a card or play a Companion, gain 1 Block." (worded
+/// 2026-10-20); the Watatsumi Casket the same with 2.</summary>
 public class WatatsumiCasketTests
 {
     private static T Bare<T>() where T : class =>
@@ -144,11 +144,11 @@ public class WatatsumiCasketTests
         Assert.Equal(1, Bare<TamakushiCasket>().Block);
         Assert.Equal(2, Bare<WatatsumiCasket>().Block);
         Assert.Equal(
-            "Whenever you play a [gold]Plan[/gold] card or a Companion, gain "
+            "Whenever you [gold]Plan[/gold] a card or play a Companion, gain "
           + "[blue]1[/blue] [gold]Block[/gold].",
             Face(Bare<TamakushiCasket>()));
         Assert.Equal(
-            "Whenever you play a [gold]Plan[/gold] card or a Companion, gain "
+            "Whenever you [gold]Plan[/gold] a card or play a Companion, gain "
           + "[blue]2[/blue] [gold]Block[/gold].",
             Face(Bare<WatatsumiCasket>()));
     }

@@ -11,7 +11,9 @@ drafting.
 
 **Check and fix the eight screen and bug items in the record**, each
 verified in code first:
-- Tamakushi Casket's text against Stings;
+- Tamakushi Casket's text against Stings; ruled 2026-10-20: it pays only
+  when a card is Planned or a Companion is played ("2 was definitely the
+  intent, and we should figure out a different Block solution if needed");
 - Tide Wall and Flank naming when they read intent ("when carried out");
 - At Water's Edge showing it is spent;
 - Ripple Basin's Block when an Attack is planned;
