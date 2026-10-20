@@ -336,6 +336,52 @@ ALLOWED: dict[tuple[str, str, str], str] = {
     ("klee-mod/KleeCode/Story/VarkaStory.cs",
      "FurinaStageLaw.NeuvilletteHydroBonusUpgraded", "3"):
         "the story event's upgrade count, not a Furina guest number",
+    # THE STORY REWARDS PASS (2026-10-19, review/active/story-rewards-pass-
+    # 2026-10-19.md): "Choose 1 of 3 random upgraded ... cards" and its
+    # HP price are the offer's own numbers (the base templates' wording),
+    # not Furina guest numbers; the word "upgraded" is what matched.
+    ("klee-mod/KleeCode/Story/FurinaStory.cs",
+     "FurinaStageLaw.ChevreuseLineWeakUpgraded", "1"):
+        "the offer's own \"Choose 1 of 3\", not Chevreuse's Weak",
+    ("klee-mod/KleeCode/Story/FurinaStory.cs",
+     "FurinaStageLaw.EscoffierActDamageUpgraded", "6"):
+        "the story event's HP price, not Escoffier's act damage",
+    ("klee-mod/KleeCode/Story/FurinaStory.cs",
+     "FurinaStageLaw.EscoffierLineBonusUpgraded", "3"):
+        "the offer's own \"Choose 1 of 3\", not a Furina guest number",
+    ("klee-mod/KleeCode/Story/FurinaStory.cs",
+     "FurinaStageLaw.HighStakesEveryUpgraded", "3"):
+        "the offer's own \"Choose 1 of 3\", not a Furina guest number",
+    ("klee-mod/KleeCode/Story/FurinaStory.cs",
+     "FurinaStageLaw.NaviaLineDiscountUpgraded", "3"):
+        "the offer's own \"Choose 1 of 3\", not a Furina guest number",
+    ("klee-mod/KleeCode/Story/FurinaStory.cs",
+     "FurinaStageLaw.NeuvilletteHydroBonusUpgraded", "3"):
+        "the offer's own \"Choose 1 of 3\", not a Furina guest number",
+    ("klee-mod/KleeCode/Story/KleeStory.cs",
+     "FurinaStageLaw.ChevreuseLineWeakUpgraded", "1"):
+        "the offer's own \"Choose 1 of 3\", not Chevreuse's Weak",
+    ("klee-mod/KleeCode/Story/KleeStory.cs",
+     "FurinaStageLaw.EscoffierActDamageUpgraded", "6"):
+        "the story event's HP price, not Escoffier's act damage",
+    ("klee-mod/KleeCode/Story/KokomiStory.cs",
+     "FurinaStageLaw.ChevreuseLineWeakUpgraded", "1"):
+        "the offer's own \"Choose 1 of 3\", not Chevreuse's Weak",
+    ("klee-mod/KleeCode/Story/KokomiStory.cs",
+     "FurinaStageLaw.EscoffierLineBonusUpgraded", "3"):
+        "the offer's own \"Choose 1 of 3\", not a Furina guest number",
+    ("klee-mod/KleeCode/Story/KokomiStory.cs",
+     "FurinaStageLaw.HighStakesEveryUpgraded", "3"):
+        "the offer's own \"Choose 1 of 3\", not a Furina guest number",
+    ("klee-mod/KleeCode/Story/KokomiStory.cs",
+     "FurinaStageLaw.NaviaLineDiscountUpgraded", "3"):
+        "the offer's own \"Choose 1 of 3\", not a Furina guest number",
+    ("klee-mod/KleeCode/Story/KokomiStory.cs",
+     "FurinaStageLaw.NeuvilletteHydroBonusUpgraded", "3"):
+        "the offer's own \"Choose 1 of 3\", not a Furina guest number",
+    ("klee-mod/KleeCode/Story/VarkaStory.cs",
+     "FurinaStageLaw.ChevreuseLineWeakUpgraded", "1"):
+        "the offer's own \"Choose 1 of 3\", not Chevreuse's Weak",
     # THE SPIRAL ABYSS MODE (2026-10-12): Resonance's "draw 1 card" is a run
     # modifier's number; these cards print their own draw, not Resonance's.
     ("klee-mod/KleeCode/Cards/Prototype/Generated/ProtoFsFinalBow.cs",

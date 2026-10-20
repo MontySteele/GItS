@@ -1,5 +1,7 @@
 # Varka's story in the run (2026-10-13)
 
+*Rewards repriced 2026-10-19 by the story rewards pass (`story-rewards-pass-2026-10-19.md`, ruled all (a)); the rows below carry the new effects.*
+
 **Why.** [USER]: "let's do a similar dialogue touchup pass for Varka that Klee
 got". Same shape and rules as Klee's two batches
 (`review/ruled/klee-story-batch-1-2026-10-12.md`,
@@ -45,7 +47,7 @@ plot beats).
 |---|---|---|
 | **Stop to sign every one of them.** | Upgrade 2 random cards. | Jean won't believe it. |
 | **Sign them later.** | Gain 75 Gold. Add **Overdue Reports** to your deck. | The courier carries his travel pay too. The reports follow him anyway. |
-| **Request reinforcements for the expedition.** | Choose 1 of 3 random Knights to add to your deck. | The Knights answer their Grand Master. |
+| **Request reinforcements for the expedition.** | Choose 1 of 3 random Uncommon Companions to add to your deck. | The Knights answer their Grand Master. |
 
 **Overdue Reports** is a Varka-only curse built like Klee's Confinement: "Unplayable. After 3 combats, remove this from your deck." Jean always catches up with him eventually.
 
@@ -59,7 +61,7 @@ plot beats).
 |---|---|---|
 | **Spar with him.** | Lose 12 HP. Upgrade 3 random cards. | Boreas never goes easy. Neither did Varka, with Eula. |
 | **Rest at his side.** | Heal 20 HP. | Even a Grand Master can take a breather. |
-| **Ask after the pack.** | Add an upgraded **Razor: Awakening** to your deck. | "The boy is eating well?" The wolves raised him; Varka taught him to fight. |
+| **Ask after the pack.** | Choose 1 of 3 random Uncommon Attacks to add to your deck. | "The boy is eating well?" The wolves raised him; Varka taught him to fight. |
 
 ## 5. Act 3: The Long Way Home
 
@@ -67,12 +69,12 @@ plot beats).
 
 | Option | Effect | Their line |
 |---|---|---|
-| **Eula** | Add an upgraded **Eula: Icetide Vortex** to your deck. | "You still owe me a rematch. Don't you dare go easy." |
-| **Noelle** | Add an upgraded **Noelle: Steadfast Maid** to your deck. | "Welcome back, Grand Master! Please, let me take the front line." |
-| **Diluc** | Add an upgraded **Diluc: Searing Onslaught** to your deck. | "There's a bottle at Angel's Share with your name on it. You're paying." |
+| **Eula** | Choose 1 of 3 random upgraded Uncommon Attacks to add to your deck. | "You still owe me a rematch. Don't you dare go easy." |
+| **Noelle** | Choose 1 of 3 random upgraded Uncommon Skills to add to your deck. | "Welcome back, Grand Master! Please, let me take the front line." |
+| **Diluc** | Choose 1 of 3 random upgraded Uncommon Powers to add to your deck. | "There's a bottle at Angel's Share with your name on it. You're paying." |
 | **Wave them back to the column.** | Nothing. | "Stay with the others. I'll meet you all at the foot of the stairs." |
 
-All three cards are his Uncommons (`proto_vk_eula_icetide_vortex`, `proto_vk_noelle_steadfast_maid`, `proto_vk_diluc_searing_onslaught`). Diluc left the Knights and never liked Varka's ways, but he still keeps a table for him at his tavern. When one steps out, Varka answers: "Ha, good to have you here! Come on, we're nearly there."
+Each knight offers an Uncommon of his pool by type (Eula Attacks, Noelle Skills, Diluc Powers; until the story rewards pass, the three named cards `proto_vk_eula_icetide_vortex`, `proto_vk_noelle_steadfast_maid`, `proto_vk_diluc_searing_onslaught`). Diluc left the Knights and never liked Varka's ways, but he still keeps a table for him at his tavern. When one steps out, Varka answers: "Ha, good to have you here! Come on, we're nearly there."
 
 ## 6. Lines in combat (speech bubbles)
 

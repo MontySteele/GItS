@@ -1,4 +1,6 @@
 using KleeMod.Cards;
+using CardRarity = MegaCrit.Sts2.Core.Entities.Cards.CardRarity;
+using CardType = MegaCrit.Sts2.Core.Entities.Cards.CardType;
 using KleeMod.Cards.Prototype.Generated;
 using KleeMod.Powers;
 
@@ -110,8 +112,8 @@ public static class VarkaStory
                         new StoryEffect(StoryEffectKind.GainGoldAddCard, 75, typeof(OverdueReports)),
                         "\"Tell her they're in good hands.\" He tucks the satchel under his cloak."),
                     new StoryOption("REQUEST_REINFORCEMENTS", "Request reinforcements for the expedition.",
-                        "Choose 1 of 3 random Knights to add to your deck.",
-                        new StoryEffect(StoryEffectKind.ChooseFromPoolToDeck, 3),
+                        "Choose 1 of 3 random Uncommon Companions to add to your deck.",
+                        StoryEffect.ChooseCompanion(CardRarity.Uncommon),
                         "\"And not the new recruits. Send the ones who complain. They're usually right.\""),
                 },
                 Portrait: () => KleeArt.CardPortrait("event_varka_dispatch_from_mondstadt"),
@@ -137,8 +139,8 @@ public static class VarkaStory
                         new StoryEffect(StoryEffectKind.Heal, 20),
                         "He sleeps with his back against the wolf's flank, the way he did on the northern watch."),
                     new StoryOption("ASK_AFTER_THE_PACK", "Ask after the pack.",
-                        "Add an upgraded [gold]Razor: Awakening[/gold] to your deck.",
-                        new StoryEffect(StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoVkRazorClawAndThunder)),
+                        "Choose 1 of 3 random Uncommon Attacks to add to your deck.",
+                        StoryEffect.Choose(CardRarity.Uncommon, CardType.Attack),
                         "Boreas shows him Razor running with the wolves, fast and grinning. Varka watches "
                       + "until it fades."),
                 },
@@ -161,16 +163,16 @@ public static class VarkaStory
                 Options: new[]
                 {
                     new StoryOption("EULA", "Eula",
-                        "Add an upgraded [gold]Eula: Icetide Vortex[/gold] to your deck.",
-                        new StoryEffect(StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoVkEulaIcetideVortex)),
+                        "Choose 1 of 3 random upgraded Uncommon Attacks to add to your deck.",
+                        StoryEffect.Choose(CardRarity.Uncommon, CardType.Attack, upgraded: true),
                         HomeResult("Eula", "You still owe me a rematch. Don't you dare go easy.", EulaAnswer)),
                     new StoryOption("NOELLE", "Noelle",
-                        "Add an upgraded [gold]Noelle: Steadfast Maid[/gold] to your deck.",
-                        new StoryEffect(StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoVkNoelleSteadfastMaid)),
+                        "Choose 1 of 3 random upgraded Uncommon Skills to add to your deck.",
+                        StoryEffect.Choose(CardRarity.Uncommon, CardType.Skill, upgraded: true),
                         HomeResult("Noelle", "Welcome back, Grand Master! Please, let me take the front line.", NoelleAnswer)),
                     new StoryOption("DILUC", "Diluc",
-                        "Add an upgraded [gold]Diluc: Searing Onslaught[/gold] to your deck.",
-                        new StoryEffect(StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoVkDilucSearingOnslaught)),
+                        "Choose 1 of 3 random upgraded Uncommon Powers to add to your deck.",
+                        StoryEffect.Choose(CardRarity.Uncommon, CardType.Power, upgraded: true),
                         HomeResult("Diluc", "There's a bottle at Angel's Share with your name on it. You're paying.", DilucAnswer)),
                     new StoryOption("WAVE_THEM_BACK", "Wave them back to the column.",
                         "Nothing.",
@@ -264,12 +266,15 @@ public static class VarkaStory
                 Options: new[]
                 {
                     new StoryOption("LET_HER_LEAD", "Let her lead the last stretch.",
-                        "Add an upgraded [gold]Jean — Dandelion Breeze[/gold].",
-                        new StoryEffect(StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoMcJeanDandelionBreeze)),
-                        "\"Lead on, Acting Grand Master.\" \"Then keep up, Grand Master.\""),
+                        "Lose 10 HP. Choose 1 of 3 random upgraded Rare Companions to add to your deck.",
+                        new StoryEffect(StoryEffectKind.LoseHp, 10),
+                        "\"Lead on, Acting Grand Master.\" \"Then keep up, Grand Master.\"")
+                    {
+                        Then = new[] { StoryEffect.ChooseCompanion(CardRarity.Rare, upgraded: true) },
+                    },
                     new StoryOption("PROMISE_A_FULL_REPORT", "Promise a full report at Angel's Share.",
-                        "Remove every Curse. Lose 25 Gold for each.",
-                        new StoryEffect(StoryEffectKind.RemoveEveryCurseLoseGoldEach, 25),
+                        "Remove every Curse. Lose 50 Gold for each.",
+                        new StoryEffect(StoryEffectKind.RemoveEveryCurseLoseGoldEach, 50),
                         "\"Every word. I'm buying.\""),
                     new StoryOption("CARRY_HER_LEDGER", "Carry her ledger the rest of the way.",
                         "Upgrade 3 random cards. Add [gold]Overdue Reports[/gold].",
@@ -296,11 +301,11 @@ public static class VarkaStory
                 Options: new[]
                 {
                     new StoryOption("TAKE_THE_REAR", "Take the rear yourself.",
-                        "Lose 10 HP. Choose 1 of 3 random Knights.",
+                        "Lose 10 HP. Choose 1 of 3 random Rare cards to add to your deck.",
                         new StoryEffect(StoryEffectKind.LoseHp, 10),
                         "\"You lot walk in front. I'll keep the stairs behind us.\"")
                     {
-                        Then = new[] { new StoryEffect(StoryEffectKind.ChooseFromPoolToDeck, 3) },
+                        Then = new[] { StoryEffect.Choose(CardRarity.Rare) },
                     },
                     new StoryOption("LEAVE_SUPPLIES", "Leave them your supplies.",
                         "Lose 75 Gold. Remove a card.",
@@ -388,7 +393,6 @@ public static class VarkaStory
             typeof(ProtoVkFourWindsAscension),
             typeof(global::KleeMod.Cards.Varka.DandelionGale),
         },
-        ChoicePool = VarkaRules.PoolKnights,
     };
 }
 

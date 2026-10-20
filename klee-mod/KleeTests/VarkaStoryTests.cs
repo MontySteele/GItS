@@ -198,13 +198,8 @@ public class VarkaStoryTests
         Assert.Equal("Eula: Icetide Vortex", Title(new ProtoVkEulaIcetideVortex()));
         Assert.Equal("Noelle: Steadfast Maid", Title(new ProtoVkNoelleSteadfastMaid()));
         Assert.Equal("Diluc: Searing Onslaught", Title(new ProtoVkDilucSearingOnslaught()));
-        // The paper's own card ids for act 3, and his Uncommons all three.
-        var paper = Paper();
-        foreach (var id in new[] { "proto_vk_eula_icetide_vortex", "proto_vk_noelle_steadfast_maid",
-                                   "proto_vk_diluc_searing_onslaught" })
-        {
-            Assert.Contains($"`{id}`", paper);
-        }
+        // Act 3's knights offer Uncommons of his pool (the story rewards
+        // pass); the three cards they named before are Uncommons of it.
         foreach (var card in new CardModel[] { new ProtoVkEulaIcetideVortex(), new ProtoVkNoelleSteadfastMaid(),
                                                new ProtoVkDilucSearingOnslaught() })
         {
@@ -219,13 +214,13 @@ public class VarkaStoryTests
     {
         Effect(0, 0, StoryEffectKind.UpgradeRandomCards, 2, null);
         Effect(0, 1, StoryEffectKind.GainGoldAddCard, 75, typeof(OverdueReports));
-        Effect(0, 2, StoryEffectKind.ChooseFromPoolToDeck, 3, null);
+        Effect(0, 2, StoryEffectKind.ChooseOfferToDeck, 3, null);
         Effect(1, 0, StoryEffectKind.LoseHpUpgradeRandomCards, 3, null, hpLoss: 12);
         Effect(1, 1, StoryEffectKind.Heal, 20, null);
-        Effect(1, 2, StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoVkRazorClawAndThunder));
-        Effect(2, 0, StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoVkEulaIcetideVortex));
-        Effect(2, 1, StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoVkNoelleSteadfastMaid));
-        Effect(2, 2, StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoVkDilucSearingOnslaught));
+        Effect(1, 2, StoryEffectKind.ChooseOfferToDeck, 3, null);
+        Effect(2, 0, StoryEffectKind.ChooseOfferToDeck, 3, null);
+        Effect(2, 1, StoryEffectKind.ChooseOfferToDeck, 3, null);
+        Effect(2, 2, StoryEffectKind.ChooseOfferToDeck, 3, null);
         Effect(2, 3, StoryEffectKind.Nothing, 0, null);
     }
 
@@ -250,13 +245,12 @@ public class VarkaStoryTests
         var upgrade = Il.Calls(Il.Method(nameof(StoryEventModel), "UpgradeRandom"));
         Assert.Contains("StoryRules.PickRandom", upgrade);
         Assert.Contains("CardCmd.Upgrade", upgrade);
-        // Knights' Roll Call's pool, three distinct, on the game's add-to-deck grid.
+        // Three distinct, Knights' Roll Call's draw, on the game's add-to-deck grid.
         var choose = Il.Calls(Il.Method(nameof(StoryEventModel), "ChooseFromPool"));
         Assert.Contains("StoryRules.PickRandom", choose);
         Assert.Contains("EventModel.SelectCardsToAddToDeckFromGrid", choose);
-        Assert.NotNull(V.ChoicePool);
-        Assert.Equal(typeof(VarkaRules), V.ChoicePool!.Method.DeclaringType);
-        Assert.Equal(nameof(VarkaRules.PoolKnights), V.ChoicePool.Method.Name);
+        // His offers are rarity offers (the story rewards pass): no named pool.
+        Assert.Null(V.ChoicePool);
         Assert.Equal(3, VarkaRules.OrderAnswersOptions);
     }
 

@@ -113,7 +113,12 @@ public class KleeStoryTests
         Assert.Equal(3, e.Options.Count);
         foreach (var o in e.Options)
         {
-            Assert.Contains($"| **{o.Title}** | {ToPaper(o.Description)} |", paper);
+            // "Just one little bomb" was repriced by the story rewards pass
+            // (2026-10-19): its effect is the chains paper's now.
+            if (o.Key == "JUST_ONE_LITTLE_BOMB")
+                Assert.Contains($"| {o.Title} | {ToPaper(o.Description)} |", chains);
+            else
+                Assert.Contains($"| **{o.Title}** | {ToPaper(o.Description)} |", paper);
             Assert.Contains($"| {o.Title} | ", chains);
             Assert.Contains($" | {o.Result} |", chains);
         }
@@ -185,14 +190,15 @@ public class KleeStoryTests
     public void The_options_do_what_the_tables_say()
     {
         Effect(0, 0, StoryEffectKind.GainGoldAddCard, 75, typeof(Confinement));
-        Effect(0, 1, StoryEffectKind.AddCard, 0, typeof(ProtoKoFishBlasting));
+        Effect(0, 1, StoryEffectKind.ChooseOfferToDeck, 3, null);
         Effect(0, 2, StoryEffectKind.RemoveCard, 0, null);
         Effect(1, 0, StoryEffectKind.Heal, 15, null);
         Effect(1, 1, StoryEffectKind.RemoveCurseElseGold, 50, null);
         Effect(1, 2, StoryEffectKind.UpgradeRandomBombCards, 2, null);
-        Effect(2, 0, StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoMcKaeyaGlacialWaltz));
-        Effect(2, 1, StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoMcNoelleBreastplate));
-        Effect(2, 2, StoryEffectKind.AddUpgradedCard, 0, typeof(ProtoMcAlbedoSolarIsotoma));
+        // The story rewards pass: each knight's scene offers Companions.
+        Effect(2, 0, StoryEffectKind.LoseHp, 6, null);
+        Effect(2, 1, StoryEffectKind.ChooseOfferToDeck, 3, null);
+        Effect(2, 2, StoryEffectKind.LoseHp, 12, null);
     }
 
     private static void Effect(int evt, int option, StoryEffectKind kind, int amount, Type? card)

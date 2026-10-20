@@ -1,5 +1,7 @@
 # Kokomi: her story events (2026-10-16)
 
+*Rewards repriced 2026-10-19 by the story rewards pass (`story-rewards-pass-2026-10-19.md`, ruled all (a)); the rows below carry the new effects.*
+
 **Why.** Kokomi is the one character with no events of her own. In co-op she
 gets the "A Quiet Landing" placeholder every act (co-op record, 2026-10-16).
 This follows the ruled chains standard
@@ -88,7 +90,7 @@ first time since the Spire began, nobody needs her to decide anything.*
 | Option | Effect | Result |
 |---|---|---|
 | Take an hour to herself. | Heal 15 HP. | She does nothing at all, carefully, for a whole hour. |
-| Read the top book. | Add an upgraded **Treatise**. | A treatise on naval supply. On page forty the author is wrong about tides, and she fills three margins explaining why. |
+| Read the top book. | Choose 1 of 3 random Uncommon Powers to add to your deck. | A treatise on naval supply. On page forty the author is wrong about tides, and she fills three margins explaining why. |
 | Plan a holiday. | Gain a random potion. | Three days off, two fallbacks, one beach. She files it under *urgent*. |
 
 **Act 2. The Other Commander** (follows The Sand Table; a price, with a
@@ -119,7 +121,7 @@ to the surface and later died fighting the Shogun. His remains have poisoned peo
 
 | Option | Effect | Result |
 |---|---|---|
-| Lay a hand on it, through her sleeve. | Lose 4 Max HP. Gain a random Rare relic. | She wraps her hand first and keeps the touch short; she knows what his remains did to Inazuma. For a moment she can feel the island he gave her people. The cold stays in her fingers. |
+| Lay a hand on it, through her sleeve. | Lose 8 Max HP. Gain a random relic. | She wraps her hand first and keeps the touch short; she knows what his remains did to Inazuma. For a moment she can feel the island he gave her people. The cold stays in her fingers. |
 | Gather the offerings at its foot. | Gain 100 Gold. Add **Doubt**. | Someone has been leaving Mora here for a very long time. She takes it home for the shrine's poor box. The bone whispers to her all the way up. |
 | Promise him a rite at home. | Remove a card. Add **Public Address**. | A proper one, on Watatsumi, with the whole shrine there. She means every word, and she is already dreading the speech. |
 
@@ -135,7 +137,7 @@ reinforcements. —Gorou. P.S. Please eat properly."*
 
 | Option | Effect | Result |
 |---|---|---|
-| Send for reinforcements. | Choose 1 of 3 Gorou cards. | The scout runs down the stairs with her orders. An hour later there are paw prints on the landing and a familiar voice calling drill. |
+| Send for reinforcements. | Choose 1 of 3 random Uncommon Companions to add to your deck. | The scout runs down the stairs with her orders. An hour later there are paw prints on the landing and a familiar voice calling drill. |
 | Write back with new orders. | Upgrade 2 random cards. | Three pages of orders, and a fourth telling him to rest too. The scout salutes and goes. |
 | Eat the sushi while it is fresh. | Heal 20 HP. | Bird egg sushi, her favourite. Gorou remembered. She eats every piece and sends the box back with a thank-you. |
 
@@ -151,8 +153,8 @@ middle, like the fold in a game board.*
 
 | Option | Effect | Result |
 |---|---|---|
-| Offer it her last piece. | Lose 15 HP. Gain a random Rare relic. | She sets her piece on the split step. It takes the piece, as it always does, and the stair folds shut over it like a closing board. The jolt throws her hard against the wall. |
-| Pay its stake and trade pieces. | Lose 50 Gold. Transform 2 cards. Locked under 50 Gold. | It will not trade for nothing. She counts out its stake in Mora, and they trade their last pieces. |
+| Offer it her last piece. | Lose 18 HP. Gain a random Rare relic. | She sets her piece on the split step. It takes the piece, as it always does, and the stair folds shut over it like a closing board. The jolt throws her hard against the wall. |
+| Pay its stake and trade pieces. | Lose 100 Gold. Transform 2 cards. Locked under 100 Gold. | It will not trade for nothing. She counts out its stake in Mora, and they trade their last pieces. |
 | Bow and walk past. | Nothing. | A commander's bow, one to another. She takes the stairs, and it does not follow. |
 
 **Act 3. The Tide Comes In** (the finale of the other two threads; a price,
@@ -166,7 +168,7 @@ same pull she uses to shape her Bake-Kurage, and the water answers her.*
 
 | Option | Effect | Result |
 |---|---|---|
-| Shape a whole shoal. | Lose 6 HP. Add an upgraded **Kurage Canopy**. | A dozen Bake-Kurage, more than she has ever held at once. The whole stairwell turns blue with their light. |
+| Shape a whole shoal. | Lose 6 HP. Choose 1 of 3 random upgraded Uncommon Powers to add to your deck. | A dozen Bake-Kurage, more than she has ever held at once. The whole stairwell turns blue with their light. |
 | Ride the tide up. | Heal 20 HP. | She lets the water carry her a floor and a half, eyes closed, like floating off the reef at home. |
 | Send the water home to the sea. | Remove a card. | She sends it down towards the sea, with a message folded into the current for whoever on Watatsumi is listening. |
 

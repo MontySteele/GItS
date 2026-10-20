@@ -1,5 +1,7 @@
 # Klee and Varka: story chains, 2026-10-14
 
+*Rewards repriced 2026-10-19 by the story rewards pass (`story-rewards-pass-2026-10-19.md`, ruled all (a)); the rows below carry the new effects.*
+
 **Why.** [USER], 2026-10-14: "as our characters hit release-readiness
 (currently meaning Klee and Varka), we should try to give multiple unique events
 ... that expand on their lore and characterization in a direct way." And:
@@ -70,7 +72,7 @@ price; Doubt and Max HP are heavy ones and are used sparingly.
 | Option | Effect | Result |
 |---|---|---|
 | Blast the pond! | Gain 75 Gold. Add **Confinement**. | KABOOM! Fish everywhere. Klee hopes the Spire doesn't tell Jean. |
-| Just one little bomb. | Add **Fish Blasting**. | Just a little one. Klee keeps the biggest fish for Dodoco. |
+| Just one little bomb. | Choose 1 of 3 random Common Attacks to add to your deck. | Just a little one. Klee keeps the biggest fish for Dodoco. |
 | Leave them be. | Remove a card. | Klee puts the fuse away and watches the fish swim past. |
 
 **Dodoco Goes Missing** (act 1, every option priced). Dodoco is a stuffed
@@ -93,8 +95,8 @@ Opening line by act-1 choice: *chased* "Klee knows this trail. She ran most of i
 
 | Option | Effect | Result |
 |---|---|---|
-| Ask nicely for Dodoco back. | Add an upgraded **Dodoco Tag**. Remove every **Doubt**. | Klee trades it her last snack. Dodoco is a little sticky, but fine. |
-| Grab Dodoco and some treasure, and run! | Lose 8 HP. Gain a random relic. Remove every **Doubt**. | It bites. Klee doesn't let go of either. |
+| Ask nicely for Dodoco back. | Choose 1 of 3 random Uncommon Attacks to add to your deck. Remove every **Doubt**. | Klee trades it her last snack. Dodoco is a little sticky, but fine. |
+| Grab Dodoco and some treasure, and run! | Lose 11 HP. Gain a random relic. Remove every **Doubt**. | It bites. Klee doesn't let go of either. |
 | Swap her best bomb for Dodoco. | Transform a card. Remove every **Doubt**. | It gives her a rock in return. Klee keeps the rock. |
 
 **The Knights Come Looking** keeps its options and effects. On the Dodoco
@@ -117,7 +119,7 @@ relayed by [USER]):
 | Option | Effect | Result |
 |---|---|---|
 | Follow Mom's marks. | Gain 75 Gold. | The marks lead to a little pouch of Mora. Mom always leaves snack money. |
-| Try the recipe right now. | Lose 10 HP. Add **Alice's Recipe** (a Rare). | It works! Klee's eyebrows will grow back. |
+| Try the recipe right now. | Lose 10 HP. Choose 1 of 3 random Rare cards to add to your deck. | It works! Klee's eyebrows will grow back. |
 | Add a mark of her own. | Upgrade 2 random cards. | A bomb, a star, and "Klee was here too!" |
 
 **Alice's Cache** (act 2, a price with a free way out, the strongest reward
@@ -127,9 +129,9 @@ in the chain):
 
 | Option | Effect | Result |
 |---|---|---|
-| It's an emergency! Open it! | Lose 15 HP. Gain a random Rare relic. | KABOOM. Mom wasn't joking about lively. Inside, wrapped in fireproof cloth, is something wonderful. |
-| Save it for a real emergency. | Lose 5 HP. Gain a random potion. | The chest sputters at her the whole way up. Klee carries it very, very carefully. |
-| Leave it for the next adventurer. | Lose 50 Gold. Transform 2 cards. Locked with less than 50 Gold. | Klee swaps in two of her own bombs, and some Mora for luck. Fair's fair. |
+| It's an emergency! Open it! | Lose 12 HP. Gain a random relic. | KABOOM. Mom wasn't joking about lively. Inside, wrapped in fireproof cloth, is something wonderful. |
+| Save it for a real emergency. | Lose 5 HP. Gain a random potion. Mom's chest will still be there. | The chest sputters at her the whole way up. Klee carries it very, very carefully. |
+| Leave it for the next adventurer. | Lose 100 Gold. Transform 2 cards. Locked with less than 100 Gold. | Klee swaps in two of her own bombs, and some Mora for luck. Fair's fair. |
 
 | Back away from the ticking. | Nothing. | Klee tiptoes backwards all the way to the stairs. Dodoco keeps watch. |
 
@@ -151,7 +153,7 @@ Opening line by act-2 choice: *opened* "You opened it, didn't you? Of course you
 | Option | Effect | Result |
 |---|---|---|
 | Read it out loud to Dodoco. | Heal 20 HP. | "...and I'll see you in Mondstadt. Love, Mom." Klee reads it twice. |
-| Try the trick on the back. | Lose 10 HP. Add an upgraded **Alice's Introduction Magic** (a Rare). | On the fifth try, it works. "I did it, Dodoco! Let's do it again!" |
+| Try the trick on the back. | Lose 10 HP. Choose 1 of 3 random upgraded Rare cards to add to your deck. | On the fifth try, it works. "I did it, Dodoco! Let's do it again!" |
 | *Saved the cache:* Open the chest at last. | Gain a random Rare relic. | Klee sets the chest down and opens it at arm's length, just like Mom said. |
 | *Otherwise:* Fold the note into a fuse. | Upgrade 3 random cards that place a Bomb. | The ink burns blue. Klee saves a scrap for later. |
 
@@ -205,8 +207,8 @@ reason to be here, unlike Alice: she came to collect her late Grand Master.
 
 | Option | Effect | Result |
 |---|---|---|
-| Let her lead the last stretch. | Add an upgraded **Jean: Dandelion Breeze**. *(a jackpot)* | "Lead on, Acting Grand Master." "Then keep up, Grand Master." |
-| Promise a full report at Angel's Share. | Remove every Curse. Lose 25 Gold for each. Locked with no Curse. | "Every word. I'm buying." |
+| Let her lead the last stretch. | Lose 10 HP. Choose 1 of 3 random upgraded Rare Companions to add to your deck. | "Lead on, Acting Grand Master." "Then keep up, Grand Master." |
+| Promise a full report at Angel's Share. | Remove every Curse. Lose 50 Gold for each. Locked with no Curse, or with less Gold than the price. | "Every word. I'm buying." |
 | Carry her ledger the rest of the way. | Upgrade 3 random cards. Add **Overdue Reports**. | He reads it on the way. It's mostly complaints about him. |
 
 **The Rearguard** (act 1, every option priced):
@@ -215,7 +217,7 @@ reason to be here, unlike Alice: she came to collect her late Grand Master.
 
 | Option | Effect | Result |
 |---|---|---|
-| Take the rear yourself. | Lose 10 HP. Choose 1 of 3 random Knights. | "You lot walk in front. I'll keep the stairs behind us." |
+| Take the rear yourself. | Lose 10 HP. Choose 1 of 3 random Rare cards to add to your deck. | "You lot walk in front. I'll keep the stairs behind us." |
 | Leave them your supplies. | Lose 75 Gold. Remove a card. | He leaves his own pack and travels light. "Eat. That's an order." |
 | Send them down with a message. | Gain 2 random potions. Add **Overdue Reports**. | "Tell Jean we're fine." They press their potions on him, and their paperwork. |
 
