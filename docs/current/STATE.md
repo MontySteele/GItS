@@ -117,9 +117,15 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
 - **Latest:** Ward draws, the Casket pays per Plan or Companion card
   (`review/records/kokomi-yae-round-2026-10-19.md`); [USER]'s co-op runs
   2026-10-18.
-- **Next:** the finish pass, `review/active/kokomi-cards-2026-10-18.md` sec.7
-  (Battle Formation, Grand Design, the Plan tip; picks open), then a
-  five-seat round on the suite seeds that also decides her defence.
+- **Finish pass built** (`review/active/kokomi-cards-2026-10-18.md` sec.7,
+  ruled all (a)): Battle Formation (Rare Power, 2): "At the start of your
+  turn, if 2 or more of your Plans were carried out, gain [E] [and draw 1
+  card]. Stings and Wards don't count." Grand Design (Rare Skill, 1): "Plan
+  up to 3 [4] cards from your Hand. They cost 0. Draw 1 card for each.
+  Exhaust." The Plan tip's new sentence is not built: at 134 characters it
+  does not fit the tip ceilings (player box 100, seat tip 135).
+- **Next:** a five-seat round on the suite seeds that also decides her
+  defence.
 
 **Furina: Balance** (2026-10-15).
 - **Rules** (`review/active/furina-research-proposal-2026-10-05.md` sec.2):

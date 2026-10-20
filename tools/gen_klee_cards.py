@@ -4204,9 +4204,16 @@ APPLY_POWERS = {
     "kk_grand_strategist": ("GrandStrategistPower", None,
         "Whenever you trigger an [gold]Elemental Reaction[/gold], deal {X} "
         "damage to ALL enemies."),
+    # Kokomi finish pass (2026-10-19, sec.7 change 1): read at the start of
+    # the turn; the upgraded card's copy also draws (`upgraded_power`), one
+    # class for both versions (`UpgradeTwinPower`).
     "kk_battle_formation": ("BattleFormationPower", None,
-        "Whenever 3 or more [gold]Plans[/gold] are carried out in one turn, "
-        "gain 1 Energy and draw 2 cards."),
+        "At the start of your turn, if 2 or more of your [gold]Plans[/gold] "
+        "were carried out, gain 1 Energy. Stings and Wards don't count."),
+    "kk_battle_formation_plus": ("BattleFormationPower", None,
+        "At the start of your turn, if 2 or more of your [gold]Plans[/gold] "
+        "were carried out, gain 1 Energy and draw 1 card. Stings and Wards "
+        "don't count."),
     "kk_endless_shoal": ("EndlessShoalPower", None,
         "Whenever the [gold]Bake-Kurage[/gold] carries out a "
         "[gold]Plan[/gold] that is not a [gold]Sting[/gold] or "

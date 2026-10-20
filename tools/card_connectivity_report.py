@@ -944,8 +944,10 @@ POWER_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # third Plan a turn pays Energy and cards.
     "kk_jellyfish_current": [_hook("shared", "aura_reaction", "read"),
                              _hook("shared", "hand_contents", "write")],
-    "kk_battle_formation": [_hook("private", "kurage", "read"),
-                            _hook("shared", "hand_contents", "write")],
+    "kk_battle_formation": [_hook("private", "kurage", "read")],
+    "kk_battle_formation_plus": [_hook("private", "kurage", "read"),
+                                 _hook("shared", "draw_pile", "use"),
+                                 _hook("shared", "hand_contents", "write")],
     "kk_dawn_tide": [_hook("private", "kurage", "read"),
                      _hook("shared", "aura_reaction", "write"),
                      _hook("shared", "enemy_count", "read")],

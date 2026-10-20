@@ -132,12 +132,14 @@ public class KokomiPoolOverhaulTests
 
         // Jellyfish Current and Coordinated Tide left with the Kokomi
         // review r6 (2026-10-14, pick 2 (b)).
+        // The Kokomi finish pass (2026-10-19): cost 2, and the upgrade adds
+        // the draw, not Innate (`KokomiFinishPassTests`).
         var formation = new ProtoKkBattleFormation();
-        Assert.Equal((CardType.Power, 1),
+        Assert.Equal((CardType.Power, 2),
                      (formation.Type, formation.EnergyCost.Canonical));
         Assert.Equal(CardRarity.Rare, formation.Rarity);
-        Assert.Contains(CardKeyword.Innate,
-                        Upgraded<ProtoKkBattleFormation>().Keywords);
+        Assert.DoesNotContain(CardKeyword.Innate,
+                              Upgraded<ProtoKkBattleFormation>().Keywords);
     }
 
     [Fact]
@@ -245,18 +247,16 @@ public class KokomiPoolOverhaulTests
     // ---- BATTLE FORMATION -----------------------------------------------------------
 
     [Fact]
-    public void Battle_formation_pays_once_at_the_second_plan()
+    public void Battle_formation_pays_at_the_second_plan()
     {
+        // The Kokomi finish pass (2026-10-19): read once at the start of the
+        // turn (`KokomiFinishPassTests`), no longer from a carry-out.
         Assert.False(BattleFormationPower.Pays(1));
         Assert.True(BattleFormationPower.Pays(2));
         Assert.True(BattleFormationPower.Pays(3));
         Assert.Equal(1, BattleFormationPower.Draw);
-        var ledger = Ledger();
-        ledger.RollTo(1);
-        Assert.True(ledger.Claim(BattleFormationPower.ClaimKey));
-        Assert.False(ledger.Claim(BattleFormationPower.ClaimKey));
-        Assert.Contains(Seq("KokomiRefounding", "OnCarriedOut"),
-                        c => c.Contains("BattleFormationPower.OnCarriedOut"));
+        Assert.DoesNotContain(Seq("KokomiRefounding", "OnCarriedOut"),
+                              c => c.Contains("BattleFormationPower"));
         Assert.Contains("{Amount:energyIcons()}",
                         PowerFace(new BattleFormationPower()));
     }

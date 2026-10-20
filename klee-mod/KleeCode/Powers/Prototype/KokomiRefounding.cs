@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -264,7 +265,10 @@ public static partial class KokomiCards
     /// Energy (<see cref="KokomiRefounding.WriteFree"/>). Offered: a card with
     /// a Plan line, and since 2026-10-18 a Basic card without one ("Basic
     /// cards included"), which is planned to be played as itself
-    /// (<see cref="KokomiRefounding.WriteAsItself"/>).
+    /// (<see cref="KokomiRefounding.WriteAsItself"/>). The Kokomi finish pass
+    /// (2026-10-19, sec.7 change 2): "Plan up to 3 [4] cards from your Hand.
+    /// They cost 0. Draw 1 card for each. Exhaust." -- 1 card per card
+    /// actually planned, drawn after all of them are written.
     /// </summary>
     public static async Task GrandDesign(
         PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay)
@@ -277,13 +281,16 @@ public static partial class KokomiCards
                 new LocString("cards", KokomiRefounding.GrandDesignPromptKey),
                 0, Amount(card)),
             KokomiRefounding.GrandDesignTakes, card)).ToList();
+        var planned = 0;
         foreach (var chosen in picked)
         {
-            if (KokomiRefounding.CanBeWritten(chosen))
-                await KokomiRefounding.WriteFree(choiceContext, chosen);
-            else
-                await KokomiRefounding.WriteAsItself(choiceContext, chosen);
+            var wrote = KokomiRefounding.CanBeWritten(chosen)
+                ? await KokomiRefounding.WriteFree(choiceContext, chosen)
+                : await KokomiRefounding.WriteAsItself(choiceContext, chosen);
+            if (wrote) planned++;
         }
+        if (planned > 0)
+            await CardPileCmd.Draw(choiceContext, planned, owner);
     }
 
     /// <summary>Evening Watch (Dusk retired, 2026-10-12): "Gain 4 Block for
@@ -393,7 +400,7 @@ public static class KokomiRefounding
         "KLEEMOD-KOKOMI_GRAND_DESIGN.selectionScreenPrompt";
 
     public const string GrandDesignPromptText =
-        "Choose up to 3 cards to write as Plans.";
+        "Choose up to {Amount} cards to plan.";
 
     /// <summary>How many enemies are telegraphing an attack right now, by
     /// the arm's one definition (<c>CurtainCallHooks.IntendsAttack</c>).</summary>
@@ -609,13 +616,13 @@ public static class KokomiRefounding
     /// goes, and its own Plan branch writes it -- the same path a drag onto
     /// the jellyfish takes. No jellyfish, nothing.
     /// </summary>
-    public static async Task WriteFree(PlayerChoiceContext choiceContext,
-                                       CardModel card)
+    public static async Task<bool> WriteFree(PlayerChoiceContext choiceContext,
+                                             CardModel card)
     {
         var kokomi = card.Owner?.Creature;
-        if (!KokomiOverhaul.LiveFor(kokomi)) return;
+        if (!KokomiOverhaul.LiveFor(kokomi)) return false;
         var pet = BakeKuragePet.Of(kokomi);
-        if (pet == null) return;
+        if (pet == null) return false;
         _freeWrites.Add(card);
         try
         {
@@ -625,6 +632,7 @@ public static class KokomiRefounding
         {
             _freeWrites.Remove(card);
         }
+        return true;
     }
 
     /// <summary>
@@ -638,13 +646,13 @@ public static class KokomiRefounding
     /// jellyfish, nothing (<see cref="WriteFree"/>'s rule). Sim twin:
     /// <c>kokomi_plan.write_as_itself</c>.
     /// </summary>
-    public static async Task WriteAsItself(PlayerChoiceContext choiceContext,
-                                           CardModel card)
+    public static async Task<bool> WriteAsItself(PlayerChoiceContext choiceContext,
+                                                 CardModel card)
     {
         var kokomi = card.Owner?.Creature;
-        if (!KokomiOverhaul.LiveFor(kokomi)) return;
-        if (BakeKuragePet.Of(kokomi) == null) return;
-        if (!PlansAsItself(card)) return;
+        if (!KokomiOverhaul.LiveFor(kokomi)) return false;
+        if (BakeKuragePet.Of(kokomi) == null) return false;
+        if (!PlansAsItself(card)) return false;
         await CardPileCmd.Add(card, PileType.Discard, CardPilePosition.Top);
         await KokomiPlan.Schedule(choiceContext, kokomi, card,
             new[]
@@ -652,6 +660,7 @@ public static class KokomiRefounding
                 new KokomiPlan.Planned(KokomiPlan.Kind.PlayAsItself, 1,
                                        KokomiPlan.Aim.FrontEnemy, card),
             });
+        return true;
     }
 
     /// <summary>
@@ -680,9 +689,9 @@ public static class KokomiRefounding
             await KokomiCards.AddJellyfish(kokomi.Player,
                 KokomiCards.Jellyfish.Sting, stings, upgraded: false);
         }
-        // THE POOL OVERHAUL (2026-10-13): Battle Formation, when the third
-        // Plan of the turn finishes.
-        await BattleFormationPower.OnCarriedOut(choiceContext, kokomi);
+        // (Battle Formation left this tail in the Kokomi finish pass,
+        // 2026-10-19: it reads the morning's count once, at the start of
+        // her turn, `BattleFormationPower.Signal`.)
         // KOKOMI REVIEW R6 (2026-10-14, pick 2 (b)): Following Current's hit.
         await FollowingCurrentPower.OnCarriedOut(choiceContext, kokomi);
     }
@@ -939,55 +948,63 @@ public sealed class GrandStrategistPower : PowerModel, ILocalizationProvider
 }
 
 /// <summary>
-/// Battle Formation (the pool overhaul, 2026-10-13): "Whenever 3 or more
-/// Plans are carried out in one turn, gain 1 Energy and draw 2 cards." Fires
-/// ONCE a turn, when the second carry-out of the turn finishes
-/// (<see cref="KokomiRefounding.OnCarriedOut"/>, the tail of
-/// <c>KokomiPlan.ResolveEntry</c>), on the ledger's once-per-turn latch.
-/// The stack is the Energy (a second copy adds 1, the face's
-/// <c>{Amount:energyIcons()}</c>); the draw is 1 however many
-/// (kokomi-review-r5-2026-10-14 numbers pass: 3 -> 2 Plans, draw 2 -> 1). Sim twin:
-/// <c>kokomi_plan.battle_formation</c>.
+/// Battle Formation (the pool overhaul, 2026-10-13; the Kokomi finish pass,
+/// 2026-10-19, review/active/kokomi-cards-2026-10-18.md sec.7 change 1, ruled
+/// (a)): "At the start of your turn, if 2 or more of your Plans were carried
+/// out, gain 1 Energy [and draw 1 card]. Stings and Wards don't count."
+/// Read ONCE, at the start of her turn, right after the morning's Plans
+/// (<see cref="Signal"/>, from <c>ProtoBakeKuragePower.AfterPlayerTurnStart</c>
+/// after <c>KokomiPlan.ResolveAll</c>), off the ledger's
+/// <see cref="KokomiOverhaulLedger.ChainPlansThisTurn"/> -- the morning's
+/// carry-outs less the Sting and Ward Plans; a doubled carry-out counts
+/// twice. One power for both versions (<see cref="UpgradeTwinPower"/>): every
+/// copy adds 1 Energy, each copy an upgraded card installed adds
+/// <see cref="Draw"/> card. Sim twin: <c>kokomi_plan.battle_formation</c>.
 /// </summary>
-public sealed class BattleFormationPower : PowerModel, ILocalizationProvider
+public sealed class BattleFormationPower : UpgradeTwinPower, ILocalizationProvider
 {
-    public const string ClaimKey = "kk_battle_formation";
-
-    /// <summary>The cards drawn per copy.</summary>
+    /// <summary>The cards each upgraded copy draws.</summary>
     public const int Draw = 1;
 
-    /// <summary>The Plans carried out in one turn it waits for.</summary>
+    /// <summary>The Plans, not Stings or Wards, it waits for.</summary>
     public const int Threshold = 2;
 
+    /// <summary>The badge prints the plain card's sentence only. A face that
+    /// also counts the upgraded copies' cards (Prima Donna's
+    /// <c>{Upgraded:cond:...}</c>) runs past the 125 power ceiling
+    /// (<c>tools/lint_text_conventions.py</c>), so the draw is on the card.
+    /// </summary>
     public List<(string, string)>? Localization => new()
     {
         ("title", "Battle Formation"),
         ("description",
-            $"The first time each turn {Threshold} or more "
-          + "[gold]Plans[/gold] are carried out, gain "
-          + "{Amount:energyIcons()} and draw "
-          + $"{Draw} card{(Draw == 1 ? "" : "s")}."),
+            $"At the start of your turn, if {Threshold} or more of your "
+          + "[gold]Plans[/gold] were carried out, gain "
+          + "{Amount:energyIcons()}. Stings and Wards don't count."),
     };
 
-    public override PowerType Type => PowerType.Buff;
+    /// <summary>Does this morning's count pay? PURE over its inputs.</summary>
+    public static bool Pays(int plansCarriedOut) =>
+        plansCarriedOut >= Threshold;
 
-    public override PowerStackType StackType => PowerStackType.Counter;
+    /// <summary>What the copies pay when the count pays: (Energy, cards).
+    /// PURE.</summary>
+    public static (int Energy, int Cards) Payout(int copies, int upgradedCopies) =>
+        (Math.Max(0, copies), Math.Max(0, upgradedCopies) * Draw);
 
-    /// <summary>Does this turn's count pay? PURE over its inputs.</summary>
-    public static bool Pays(int carriedOutThisTurn) =>
-        carriedOutThisTurn >= Threshold;
-
-    public static async Task OnCarriedOut(PlayerChoiceContext choiceContext,
-                                          Creature kokomi)
+    public static async Task Signal(PlayerChoiceContext choiceContext,
+                                    Creature? kokomi)
     {
-        var copies = (int)kokomi.Powers.OfType<BattleFormationPower>()
-            .Sum(p => p.Amount);
-        if (copies <= 0 || kokomi.Player is not { } player) return;
+        if (!KokomiOverhaul.LiveFor(kokomi)) return;
+        if (kokomi!.Player is not { } player) return;
+        var powers = kokomi.Powers.OfType<BattleFormationPower>().ToList();
+        var copies = (int)powers.Sum(p => p.Amount);
+        if (copies <= 0) return;
         var ledger = KokomiOverhaulLedger.For(kokomi);
-        if (!Pays(ledger.PlansCarriedOutThisTurn)) return;
-        if (!ledger.Claim(ClaimKey)) return;
-        await PlayerCmd.GainEnergy(copies, player);
-        await CardPileCmd.Draw(choiceContext, Draw, player);
+        if (!Pays(ledger.ChainPlansThisTurn)) return;
+        var (energy, cards) = Payout(copies, powers.Sum(p => p.UpgradedCopies));
+        if (energy > 0) await PlayerCmd.GainEnergy(energy, player);
+        if (cards > 0) await CardPileCmd.Draw(choiceContext, cards, player);
     }
 }
 

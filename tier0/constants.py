@@ -853,10 +853,11 @@ KOKOMI_OVERHAUL_CASKET_BLOCK = 1
 # paper's Rare): how many are offered. Mirrored BY VALUE against
 # `KokomiCompanionPlan.GeneralsOffered`.
 KOKOMI_GENERALS_OFFERED = 3
-# THE KOKOMI POOL OVERHAUL (2026-10-13): Battle Formation's "Whenever 2 or
-# more Plans are carried out in one turn, gain 1 Energy and draw 1 card"
-# (kokomi-review-r5-2026-10-14 numbers pass: 3 -> 2, draw 2 -> 1).
-# The Power's stack is the Energy. `BattleFormationPower.Threshold` / `.Draw`.
+# THE KOKOMI POOL OVERHAUL (2026-10-13): Battle Formation. Since the Kokomi
+# finish pass (2026-10-19): "At the start of your turn, if 2 or more of your
+# Plans were carried out, gain 1 Energy [and draw 1 card]. Stings and Wards
+# don't count." Every copy is 1 Energy; DRAW is per upgraded copy.
+# `BattleFormationPower.Threshold` / `.Draw`.
 KOKOMI_BATTLE_FORMATION_THRESHOLD = 2
 KOKOMI_BATTLE_FORMATION_DRAW = 1
 

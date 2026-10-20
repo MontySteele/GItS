@@ -44,14 +44,18 @@ public class KokomiWordingPassTests
     // ---- 2. BATTLE FORMATION ---------------------------------------------
 
     [Fact]
-    public void Battle_formation_says_once_a_turn_on_card_and_power()
+    public void Battle_formation_says_when_on_card_and_power()
     {
+        // The Kokomi finish pass (2026-10-19): the base start-of-turn
+        // template replaced "The first time each turn".
         Assert.StartsWith(
-            "The first time each turn 2 or more [gold]Plans[/gold] are "
-          + "carried out, gain ", Face(new ProtoKkBattleFormation()));
+            "At the start of your turn, if 2 or more of your "
+          + "[gold]Plans[/gold] were carried out, gain ",
+            Face(new ProtoKkBattleFormation()));
         Assert.StartsWith(
-            "The first time each turn 2 or more [gold]Plans[/gold] are "
-          + "carried out, gain ", PowerFace(new BattleFormationPower()));
+            "At the start of your turn, if 2 or more of your "
+          + "[gold]Plans[/gold] were carried out, gain ",
+            PowerFace(new BattleFormationPower()));
     }
 
     // ---- 3. JUUGA ----------------------------------------------------------

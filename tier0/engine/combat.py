@@ -868,6 +868,10 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # reason: a planned hit can drop a phased boss, and Mend cannot kill her
     # but a reaction the hit causes can move the board under the loop.
     kokomi_plan.resolve_all(state)
+    # THE KOKOMI FINISH PASS (2026-10-19): Battle Formation reads the morning's
+    # Plans, not Stings or Wards, once they are all carried out
+    # (`BattleFormationPower.Signal`, after `ResolveAll`).
+    kokomi_plan.battle_formation(state)
     # THE RE-FOUNDING (2026-10-12): Dawn Tide's Hydro, AFTER the morning's
     # Plans (`DawnTidePower.Signal`, after `ResolveAll`), then the turn-start
     # generators (Kurage Bloom, Sangonomiya's Orders; their own

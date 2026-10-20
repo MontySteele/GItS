@@ -1473,7 +1473,7 @@
       "cost": -1
     },
     "proto_kk_battle_formation": {
-      "innate": true
+      "upgraded_power": "kk_battle_formation_plus"
     },
     "proto_kk_breakwater": {
       "formula_base": 2
@@ -1533,7 +1533,7 @@
       "power_amount": 1
     },
     "proto_kk_grand_design": {
-      "retain": true
+      "kokomi_amount": 1
     },
     "proto_kk_grand_strategist": {
       "power_amount": 2

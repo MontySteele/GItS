@@ -44,7 +44,7 @@ public sealed class ProtoKkGrandDesign : CustomCardModel, ICharacterCard, IUnpla
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Grand Design"),
-        ("description", "Plan up to {KkAmount:diff()} cards from your [gold]Hand[/gold], Basic cards included. They cost 0."),
+        ("description", "Plan up to {KkAmount:diff()} cards from your [gold]Hand[/gold]. They cost 0. Draw 1 card for each."),
     };
 
     // The Kokomi review (2026-10-13): unplayable while no other
@@ -78,6 +78,6 @@ public sealed class ProtoKkGrandDesign : CustomCardModel, ICharacterCard, IUnpla
 
     protected override void OnUpgrade()
     {
-        AddKeyword(CardKeyword.Retain);
+        DynamicVars["KkAmount"].UpgradeValueBy(1m);
     }
 }

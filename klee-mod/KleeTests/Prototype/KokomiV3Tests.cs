@@ -67,7 +67,8 @@ public class KokomiV3Tests
           + "{InCombat:\n(Deals {TotalDamage:diff()} damage)|}",
             Face(new ProtoKkShoalOfSpears()));
         Assert.DoesNotContain("Stings", Face(new ProtoKkBreakwater()));
-        Assert.DoesNotContain("Stings", Face(new ProtoKkBattleFormation()));
+        // Battle Formation stopped counting them in the Kokomi finish pass
+        // (2026-10-19, `KokomiFinishPassTests`).
     }
 
     // ---- 1. the counts --------------------------------------------------------------
@@ -121,8 +122,8 @@ public class KokomiV3Tests
         ledger.NotePlanCarryingOut(jellyfish: true);
         ledger.NotePlanCarryingOut(jellyfish: true);
         ledger.NotePlanCarryingOut();
-        // Battle Formation reads every carry-out; Feint and Turning Tide
-        // read the real ones.
+        // Breakwater reads every carry-out; Feint, Turning Tide and (since
+        // the Kokomi finish pass, 2026-10-19) Battle Formation the real ones.
         Assert.Equal(3, ledger.PlansCarriedOutThisTurn);
         Assert.Equal(1, ledger.ChainPlansThisTurn);
         ledger.RollTo(4);
