@@ -43,6 +43,8 @@ He keeps the drinking-song joke, the unsigned reports, his short Furina reply, a
 | "Then you'll want my desk. I left it to Jean." | "Found a whetstone, by any chance? Mine's about worn through." |
 | "All four. A knight never rides alone, and Mondstadt's wind was never mine to keep." | "After all those stairs? Come on, let's finish this. My people are waiting." |
 
+2026-10-19, the writing pass on his Architect finale (`tools/build_pck.ps1`): the Architect asks "Grand Master. Five years on the road, and still you climb. What did you expect to find at the top?" and Varka answers "A good fight, then the road home. Mondstadt has waited long enough."
+
 ## Lore limits and review
 
 This is an original crossover story. Alice's treasure advice, visits to the Spire, the courier and pigeon, and the reunions are inventions, not claims about Genshin quests. The five-year expedition and Boreas-as-partner details retain the user's explicit corrections in the Varka story paper. Indexed [Lonely Warrior quest dialogue](https://www.hoyodex.com/wiki/genshin-impact/lonely-warrior) supports the distinction between Andrius returning to the Ley Lines and Varka retaining a vessel for the soul; it does not establish this invented sparring scene.
