@@ -258,9 +258,10 @@ Kokomi and Yae round (`kokomi-yae-round-2026-10-19.md`) and the newcomer round
    bump"). The draw fixes the empty hand the seats saw, and Exhaust makes it the
    one setup turn of a fight, not a repeat.
 3. **The Plan tip says who hits** (text only): "The Bake-Kurage carries it out
-   at the start of your next turn. Its hits are not Attacks, and your Strength
-   does not add to them." Whether the enemy's Vulnerable counts is checked live
-   before the tip says so either way.
+   at the start of your next turn. Its hits are not Attacks, so Strength and
+   Vulnerable don't change them." Vulnerable checked against the game's code:
+   it multiplies powered attacks only, and a Plan hit is unpowered
+   (`KokomiPlan.cs`, `ElementalHit`).
 
 **Held.**
 - **Nereid's Ascension** stays as written ([USER] flagged it as a possible
@@ -285,6 +286,9 @@ same seeds, Ward's Plan line gains "Gain 3 Block". That reopens [USER]'s
 pick with the numbers, not a build.
 
 ### Picks
+
+Ruled 2026-10-19, all (a). Pick 1: [USER], "I like this all around." Picks 2
+and 3: [USER], "run ... the Kokomi seats" (the defaults).
 
 1. **The two card changes.**
    - **(a, default)** Build both as written above (Battle Formation at 2, the draw on
