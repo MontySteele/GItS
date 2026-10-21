@@ -33,6 +33,8 @@ cut to about 350 characters is `git show 3ce4f8c35:docs/current/BACKLOG.md`.
 
 - Kokomi: Grand Design's chooser closed after one pick on some turns (`review/records/kokomi-balance-suite-2026-10-21.md`, lane 5); reproduce in a scenario.
 - Kokomi: lane 1 of the same suite read Tidal Surge as Ethereal and saw Bubble Ward twice in a few turns with one copy; check the lane's transcript before calling it a bug.
+- Kokomi (`review/records/kokomi-balance-suite-3-2026-10-21.md`): Press the Advantage's reaction preview printed "deals no damage" and it dealt damage (lane 1); check the preview path and whether its number includes Vulnerable.
+- Kokomi (same record): a Plan carried out into Intangible hit for 1 while the Plan page said 13 (lane 1); the page could warn. A Grand Design plan gave no Casket Block (lane 5): check whether that is the rule or a miss.
 
 ## Harness, bridge, tools and sim
 
