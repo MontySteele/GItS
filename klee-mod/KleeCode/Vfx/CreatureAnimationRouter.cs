@@ -82,8 +82,9 @@ internal static class CreatureAnimationRouter
         ["Jumpy"] = new[] { "jumpy", "attack" },
         // Varka's Four Winds' Ascension: he jumps and drives one blade into
         // the ground, and the ground burst plays at its point and under the
-        // target (2026-10-13). Sent by CardPlayMotion for that card; a scene
-        // without the state lunges as for an attack.
+        // target (2026-10-13). Kokomi's Nereid's Ascension is her own
+        // `ascension` clip (2026-10-21). Sent by CardPlayMotion for those
+        // cards; a scene without the state lunges as for an attack.
         ["Ascension"] = new[] { "ascension", "attack" },
         // Furina's Let the People Rejoice: a spin, then the flourish, up on
         // one toe with both arms flung wide (2026-10-13). Sent by

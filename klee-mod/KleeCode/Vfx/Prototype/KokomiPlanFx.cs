@@ -97,6 +97,28 @@ internal static class KokomiPlanFx
     // ---- the carry-out -----------------------------------------------------
 
     /// <summary>
+    /// KURAGE'S OATH CARRIED OUT AS A PLAN plays her Nereid's Ascension clip
+    /// (art polish, 2026-10-21, pick 5 (a): "It also plays for Kurage's Oath
+    /// carried out"): she raises her arms as the Bake-Kurage carries the
+    /// Oath out. Display only, never awaited: the trigger goes to her own
+    /// creature node, which <c>CreatureAnimationRouter</c> routes to her
+    /// <c>ascension</c> state (a scene without it lunges, as for an attack).
+    /// Inert headless (no creature node) and for every other Plan.
+    /// </summary>
+    public static void OathCall(Creature kokomi, CardModel? source)
+    {
+        if (!CardPlayMotion.IsAscensionCarryOut(source)) return;
+        try
+        {
+            kokomi.GetCreatureNode()?.SetAnimationTrigger(CardPlayMotion.AscensionTrigger);
+        }
+        catch (Exception e)
+        {
+            Log.Warn($"[{KleeMod.ModId}] Kurage's Oath clip skipped: {e.Message}");
+        }
+    }
+
+    /// <summary>
     /// One Plan carried out: called just before the lunge, never awaited.
     /// <paramref name="targets"/> are the bodies its damage will land on,
     /// read off the board now (<c>KokomiPlan.BeatShape</c>).
@@ -423,16 +445,17 @@ internal static class KokomiPlanFx
     // ---- her own body ------------------------------------------------------
 
     /// <summary>
-    /// THE HYDRO SIGIL, under Kokomi's feet as her cast or power clip starts:
-    /// a flat ring with a six-point star inside it, turning a little as it
-    /// opens and fades (0.55 s). Called from <c>CreatureAnimationRouter</c>
-    /// on every state change; inert for anyone but Kokomi herself and for a
-    /// state that is not her cast or power clip.
+    /// THE HYDRO SIGIL, under Kokomi's feet as her cast, power or Nereid's
+    /// Ascension clip starts: a flat ring with a six-point star inside it,
+    /// turning a little as it opens and fades (0.55 s). Called from
+    /// <c>CreatureAnimationRouter</c> on every state change; inert for anyone
+    /// but Kokomi herself and for any other state.
     /// </summary>
     public static void OnTravel(NCreature creature, string? current, string target)
     {
         if (target is not (CreatureAnimationRouter.CastState
-                           or CreatureAnimationRouter.PowerState)) return;
+                           or CreatureAnimationRouter.PowerState
+                           or CreatureAnimationRouter.AscensionState)) return;
         if (current == target) return;
         if (!KokomiResources.IsKokomi(creature.Entity)) return;
         if (Speed() is not { } k) return;

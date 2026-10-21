@@ -58,11 +58,23 @@ internal static class CardPlayMotion
     /// mirrored, under the target ([USER], 2026-10-13: "let's drop the twirl
     /// and instead show him jumping up and then driving one blade into the
     /// ground, with a mirrored ground particle effect on him and the target
-    /// enemy"). Only that card: the visual paper names no other. A scene
-    /// without an `ascension` state lunges as for an attack.
+    /// enemy"). Kokomi's Nereid's Ascension sends the same trigger to her
+    /// own `ascension` clip (below). A scene without an `ascension` state
+    /// lunges as for an attack.
     /// </summary>
     internal static bool IsAscensionPlay(CardModel card)
-        => card is ProtoVkFourWindsAscension;
+        => card is ProtoVkFourWindsAscension or ProtoKkNereidsAscension;
+
+    /// <summary>
+    /// Kokomi's Nereid's Ascension shares the trigger and the state name: her
+    /// scene's <c>ascension</c> is the signature clip (she raises her arms
+    /// and a ring of water and jellyfish lights rises round her; art polish,
+    /// 2026-10-21, "Agreed on all 5 defaults"). It also plays when her
+    /// starter, Kurage's Oath, is carried out as a Plan
+    /// (<see cref="KokomiPlanFx.OathCall"/>). Pure.
+    /// </summary>
+    internal static bool IsAscensionCarryOut(CardModel? source)
+        => source is ProtoKkKuragesOath;
 
     /// <summary>
     /// The wait after the Ascension trigger before the card's own play goes

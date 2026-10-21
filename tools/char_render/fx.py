@@ -164,11 +164,15 @@ def burst_heat(meta, t, shape, shift, s):
     k = SUPER
     rng_base = 7
     for n, b in enumerate(meta.get("bursts", [])):
-        u = (t - b["t"]) / BURST_LEN
+        u = (t - b["t"]) / b.get("len", BURST_LEN)
         if not (0 <= u <= 1):
             continue
         sc = b.get("scale", 1.0) * s * k
         rng = np.random.default_rng(rng_base + n)
+        if b["kind"] == "tide":
+            c = ((meta["origin_px"][0] + shift[0]) * k, (meta["origin_px"][1] + shift[1]) * k)
+            np.maximum(buf, tide_heat(u, shape, c, sc, rng), out=buf)
+            continue
         if b["kind"] == "thrust":
             # a rapier's thrust: a long thin streak along the blade, from the
             # hand out past the point, flashing at the point and fading
@@ -226,6 +230,89 @@ def burst_heat(meta, t, shape, shift, s):
     return buf
 
 
+#: Nereid's Ascension's "tide" (Kokomi, art polish 2026-10-21): a ring of water
+#: rising round her feet and soft jellyfish lights drifting up out of it. Every
+#: length in px at REF_PPU; the ring's back half shows only at her sides, so
+#: the layer (drawn over her body) never veils her. A burst may set its own
+#: `len` (seconds) where the slash bursts take BURST_LEN.
+TIDE_R = 215             # the ring's settled radius
+TIDE_FLAT = 0.26         # the ground plane's squash under the camera
+TIDE_STREAKS = 16        # the water rising off the ring
+TIDE_LIGHTS = 8          # the jellyfish lights
+
+
+def _bell(buf, c, r, val, sway):
+    """A jellyfish light: a dome, hot at its crown, and three short trailing
+    tentacles that sway (supersampled px)."""
+    cx, cy = c
+    H, W = buf.shape
+    x0, x1 = max(0, int(cx - r * 1.2)), min(W, int(cx + r * 1.2) + 1)
+    y0, y1 = max(0, int(cy - r * 1.1)), min(H, int(cy + r * 0.4) + 1)
+    if x0 < x1 and y0 < y1:
+        ys, xs = np.mgrid[y0:y1, x0:x1].astype(np.float32)
+        dx, dy = (xs - cx) / r, (ys - cy) / r
+        dome = np.where(dy <= 0.15, np.clip(1 - np.hypot(dx, dy / 0.85), 0, 1) ** 0.6, 0)
+        crown = np.clip(1 - np.hypot(dx, (dy + 0.35) / 0.6) / 0.55, 0, 1)
+        sub = buf[y0:y1, x0:x1]
+        np.maximum(sub, val * np.clip(0.62 * dome + 0.5 * crown, 0, 1), out=sub)
+    for j in (-0.5, 0.0, 0.5):
+        a = (cx + j * r, cy + 0.1 * r)
+        e = (cx + j * r * 0.8 + sway * r, cy + r * (1.5 - 0.3 * abs(j)))
+        stroke(buf, a, e, r * 0.28, val * 0.55)
+
+
+def tide_heat(u, shape, c, sc, rng):
+    """The tide at phase u (0..1) round the feet point c (supersampled px):
+    the ring opens fast and holds, water lifts off it, the lights rise; all of
+    it fades over the last third."""
+    buf = np.zeros(shape, np.float32)
+    cx, cy = c
+    fade = 1.0 if u < 0.68 else max(0.0, 1 - (u - 0.68) / 0.32) ** 1.2
+    grow = 1 - (1 - min(1.0, u / 0.3)) ** 3
+    R = (60 + (TIDE_R - 60) * grow) * sc
+    ys, xs = np.mgrid[0:shape[0], 0:shape[1]].astype(np.float32)
+    ex, ey = (xs - cx) / R, (ys - cy) / (R * TIDE_FLAT)
+    rr = np.hypot(ex, ey)
+    # the back half of the ring hides behind her: it shows only past her sides
+    side = np.clip((np.abs(ex) - 0.45) / 0.3, 0, 1)
+    vis = np.where(ey >= 0, 1.0, side)
+    wdt = (9 + 10 * (1 - grow)) * sc / R
+    ring = np.clip(1 - np.abs(rr - 1) / wdt, 0, 1) * vis * fade
+    np.maximum(buf, 0.92 * ring, out=buf)
+    # a pale sheen of water inside the front of the ring
+    sheen = np.where((rr < 1) & (ey > 0), 0.22 * np.clip(ey, 0, 1), 0) * fade
+    np.maximum(buf, sheen, out=buf)
+    # the water lifting off the ring: wavering streaks, front and sides only
+    lift = min(1.0, max(0.0, (u - 0.08) / 0.4))
+    for i in range(TIDE_STREAKS):
+        a = 2 * math.pi * (i + rng.uniform(-0.3, 0.3)) / TIDE_STREAKS
+        ca, sa = math.cos(a), math.sin(a)
+        if sa < 0 and abs(ca) < 0.75:
+            continue
+        x, y = cx + ca * R, cy + sa * R * TIDE_FLAT
+        h = rng.uniform(90, 230) * sc * lift * (0.6 if sa > 0 else 1.0)
+        wob = rng.uniform(-14, 14) * sc
+        if h > 1:
+            stroke(buf, (x, y), (x + wob, y - h), rng.uniform(9, 15) * sc, 0.62 * fade)
+    # the jellyfish lights: out of the ring at her sides, up past her hands
+    for i in range(TIDE_LIGHTS):
+        side_ = -1 if i % 2 else 1
+        born = 0.06 + 0.05 * i + rng.uniform(0, 0.04)
+        dx = side_ * rng.uniform(150, 235)
+        top = rng.uniform(330, 560)
+        r = rng.uniform(13, 19)
+        bob = rng.uniform(0, 2 * math.pi)
+        v = (u - born) / (1 - born)
+        if v <= 0:
+            continue
+        up = 1 - (1 - min(1.0, v)) ** 1.6
+        x = cx + (dx - side_ * 40 * up + 10 * math.sin(bob + 7 * v)) * sc
+        y = cy - (10 + top * up) * sc
+        glow = min(1.0, v / 0.2) * fade
+        _bell(buf, (x, y), r * sc, 0.95 * glow, 0.25 * math.sin(bob + 9 * v))
+    return buf
+
+
 def frame_layer(meta, t, s, pad):
     """One frame's neutral RGBA layer on the padded canvas."""
     w, h = meta["canvas"]
@@ -257,7 +344,7 @@ def clip_fx(meta):
     for i, t in enumerate(meta["times"]):
         # a window's first instant has one sample and no sweep yet
         on = any(w["from"] + 1e-6 < t <= w["to"] + TRAIL_FADE for w in meta.get("trails", [])) or \
-            any(0 <= (t - b["t"]) / BURST_LEN <= 1 for b in meta.get("bursts", []))
+            any(0 <= (t - b["t"]) / b.get("len", BURST_LEN) <= 1 for b in meta.get("bursts", []))
         if on:
             live.append(i)
     if not live:

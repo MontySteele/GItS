@@ -6,11 +6,11 @@ language is tools/klee_render/clips.py's (+X screen right, toward the enemy;
 so her right side, .R, is nearest the camera and her left arm, .L, is the far
 arm, the one toward the enemy).
 
-PHASE A (2026-10-14): the surfaces every kit needs and nothing card-specific
--- combat idle, low-HP idle, attack, cast, hurt, death (the router's seven
-states need it), the shop loop, the rest seat, the select close-up, the
-roster tile and the ground shadow. Card-specific clips wait until her build
-is final. The look is Klee's, Varka's and Furina's (style H1 + H3 lite, on the
+PHASE A (2026-10-14): the surfaces every kit needs -- combat idle, low-HP
+idle, attack, cast, hurt, death (the router's seven states need it), the shop
+loop, the rest seat, the select close-up, the roster tile and the ground
+shadow. Her signature clip, `ascension` (Nereid's Ascension), came with the
+art polish (2026-10-21). The look is Klee's, Varka's and Furina's (style H1 + H3 lite, on the
 left of the field facing right, a little tilted).
 
 Her official pack carries no catalyst (scratch models/kokomi/unpacked: the
@@ -257,6 +257,64 @@ CAST = {
     ],
 }
 
+# ------------------------------------------------------------------ ascension
+# Nereid's Ascension, her signature (art polish pick 5 (a), ruled 2026-10-21:
+# "Agreed on all 5 defaults"): she gathers her hands low before her, eyes
+# closed, then raises both arms and calls the Bake-Kurage up; a ring of water
+# rises round her feet with soft jellyfish lights drifting up out of it
+# (fx.py's "tide" burst, the clip's own element layer, which the game tints
+# Hydro). Up on her toes at the top, a held breath, then the arms come down
+# to stance A. 26 frames, as long as Varka's ascension. The game also plays it
+# when Kurage's Oath is carried out as a Plan (KokomiPlan.ResolveEntry).
+
+
+def rise(far, near, drop=A_DROP, lean=A_LEAN, twist=A_TWIST, head_nod=2.0, head_tilt=-3.0, back_lift=0.0,
+         far_pole=(1.0, 0.3, -0.4), near_pole=(-1.0, 0.3, -0.4), curl=(10, 2), swing=0.0, sleeve=0.0,
+         morphs=None):
+    return pose(stance(drop=drop, lean=lean, twist=twist, head_nod=head_nod, head_tilt=head_tilt,
+                       back_lift=back_lift)
+                + hands(far=far, near=near, far_pole=far_pole, near_pole=near_pole, far_curl=curl,
+                        near_curl=curl)
+                + cloth(swing, sleeve),
+                morphs or {"にこり": 0.6})
+
+
+#: both arms raised in a wide V, palms open to the sky
+CALL_FAR = (0.36, -0.10, 0.40)
+CALL_NEAR = (-0.28, -0.08, 0.38)
+CALL = dict(lean=A_LEAN - 6, twist=A_TWIST - 2, head_nod=-12, head_tilt=-2, back_lift=0.035, curl=(6, 0))
+CALL_FACE = {"笑い": 0.6, "にこり": 0.5, "あ": 0.3}
+#: the ring of water at her feet and its jellyfish lights (fx.py "tide")
+TIDE_T, TIDE_LEN = 0.34, 0.92
+
+ASCENSION = {
+    "length": 1.3, "fps": 20, "loop": False,
+    "keys": [
+        (0.0, idle_pose(0.5), "io"),
+        # gather: the hands drawn together low before her, eyes closed, a dip
+        (0.22, rise((0.08, -0.21, -0.12), (0.03, -0.21, -0.14), drop=A_DROP + 0.04, lean=A_LEAN + 4,
+                    head_nod=12, far_pole=(0.6, 0.3, -0.8), near_pole=(-0.6, 0.3, -0.8), curl=(20, 8),
+                    swing=-1.5, morphs={"まばたき": 0.9, "にこり": 0.4}), "io"),
+        # the call: the arms sweep out and up
+        (0.40, rise((0.30, -0.16, 0.18), (-0.20, -0.14, 0.16), drop=A_DROP - 0.01, lean=A_LEAN - 3,
+                    head_nod=-4, swing=1.5, sleeve=3, morphs={"にこり": 0.6, "笑い": 0.3}), "out"),
+        # the top: both arms up, up on her toes, the Bake-Kurage called
+        (0.56, rise(CALL_FAR, CALL_NEAR, swing=2.5, sleeve=5, morphs=CALL_FACE, **CALL), "out"),
+        # held, floating up a hair on the breath
+        (0.96, rise(add(CALL_FAR, (0.01, 0, 0.02)), add(CALL_NEAR, (-0.01, 0, 0.02)), swing=-1.5, sleeve=2,
+                    morphs=CALL_FACE, **CALL), "io"),
+        # the arms come down and she settles back into stance A
+        (1.14, rise((0.24, -0.18, 0.04), (-0.06, -0.15, -0.16), drop=A_DROP, lean=A_LEAN - 1, head_nod=1,
+                    far_pole=FAR_POLE, near_pole=NEAR_POLE, swing=-0.5), "io"),
+        (1.3, idle_pose(0.5), "io"),
+    ],
+    "events": {"main": TIDE_T},
+    "trails": [],
+    # the clip's element layer: the ring of water and its lights, centred on
+    # her feet (render.py passes the burst through; fx.py draws it)
+    "bursts": [{"t": TIDE_T, "kind": "tide", "len": TIDE_LEN, "scale": 1.0}],
+}
+
 # ------------------------------------------------------------------ hurt
 
 
@@ -450,10 +508,11 @@ CLIPS = {
     "cast": CAST,
     "hurt": HURT,
     "death": DEATH,
+    "ascension": ASCENSION,
     "merchant": MERCHANT,
 }
 #: the clips that start and end in stance A (feet where idle plants them)
-FROM_IDLE = ("attack", "cast", "hurt")
+FROM_IDLE = ("attack", "cast", "hurt", "ascension")
 
 STILLS = {"stance_a": IDLE["keys"][0][1], "stand": STAND, "rest": REST, "select": SELECT,
           "portrait": PORTRAIT, "stance_b": MERCHANT["keys"][0][1]}

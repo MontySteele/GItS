@@ -46,7 +46,7 @@ SELECT_PPU = {"varka": 1100.0, "furina": 1300.0, "kokomi": 1300.0, "yae": 1200.0
 #: each kit's combat clips (pack.py packs the same set) and its extra job
 COMBAT_CLIPS = {"varka": "idle,idle_low,attack,cast,hurt,death,ascension",
                 "furina": "idle,idle_low,attack,cast,hurt,death,rejoice",
-                "kokomi": "idle,idle_low,attack,cast,hurt,death",
+                "kokomi": "idle,idle_low,attack,cast,hurt,death,ascension",
                 "yae": "idle,idle_low,attack,cast,hurt,death"}
 SELECT_OUTLINE = 7.0
 

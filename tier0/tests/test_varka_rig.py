@@ -118,9 +118,11 @@ def test_the_ascension_is_triggered_by_four_winds_ascension_and_absorbs_its_lung
     assert '["Ascension"] = new[] { "ascension", "attack" },' in router
     assert "currentState is SetOffState or JumpyState or AscensionState" in router
     motion = (CS / "Vfx" / "CardPlayMotion.cs").read_text(encoding="utf-8")
-    assert "=> card is ProtoVkFourWindsAscension;" in motion
+    # his card, and Kokomi's Nereid's Ascension for her own `ascension` clip
+    # (art polish, 2026-10-21)
+    assert "=> card is ProtoVkFourWindsAscension or ProtoKkNereidsAscension;" in motion
     assert "IsAscensionPlay(card) ? AscensionTrigger" in motion
-    # only that card: the visual paper names no other move for the clip
+    # only that card of his: the visual paper names no other move for the clip
     paper = (ROOT / "review" / "active" / "varka-visual-paper-2026-10-13.md").read_text(encoding="utf-8")
     assert "Northwind" not in paper
 

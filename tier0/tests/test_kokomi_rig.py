@@ -75,15 +75,19 @@ def synthetic_frames() -> dict:
         ev = clip.get("events")
         if ev:
             rec["events"] = ev
-            rec["impact_frames"] = [round(t * clip["fps"]) for t in ev["impact"]]
+            rec["impact_frames"] = [round(t * clip["fps"]) for t in ev.get("impact", [])]
             rec["main_frame"] = round(ev["main"] * clip["fps"])
         sheets[name] = rec
     atk = KC.CLIPS["attack"]
     first = round(atk["trails"][0]["from"] * atk["fps"]) + 1
     fx = _sheet("kokomi_attack_fx.png", 9, cell=(500, 600), origin=(200, 520))
     fx.update({"first_frame": first, "fps": atk["fps"], "heat": "R=G=B heat"})
+    asc = KC.CLIPS["ascension"]
+    a_first = round(asc["bursts"][0]["t"] * asc["fps"])
+    afx = _sheet("kokomi_ascension_fx.png", len(_times(asc)) - a_first, cell=(500, 650), origin=(250, 580))
+    afx.update({"first_frame": a_first, "fps": asc["fps"], "heat": "R=G=B heat"})
     return {"char": "kokomi", "combat_scale": 0.5, "merchant_scale": 0.85, "texture_import": "vram_compressed",
-            "sheets": sheets, "fx": {"attack": fx}, "effects": {},
+            "sheets": sheets, "fx": {"attack": fx, "ascension": afx}, "effects": {},
             "shadow": {"file": "kokomi_shadow.png", "texture": [256, 64],
                        "combat": {"center": [0.0, -1.0], "size": [120.0, 22.0]},
                        "merchant": {"center": [0.0, -2.0], "size": [200.0, 36.0]}}}
@@ -111,12 +115,13 @@ def test_the_generator_is_deterministic(frames, scene_text):
 def test_the_router_contract(scene_text):
     for node in ("Visuals", "Facing", "Bounds", "CenterPos", "IntentPos", "AnimationPlayer", "AnimationTree"):
         assert re.search(rf'\[node name="{node}" [^\]]*\]\nunique_name_in_owner = true', scene_text), node
-    for st in ("idle", "attack", "hurt", "death", "cast", "power", "idle_low"):
+    for st in ("idle", "attack", "hurt", "death", "cast", "power", "idle_low", "ascension"):
         assert f'animation = &"{st}"' in scene_text, st
     assert 'advance_condition = &"low_hp"' in scene_text and 'advance_condition = &"healthy"' in scene_text
     assert "metadata/idle_desync = true" in scene_text
-    # phase A: no signature clip yet
-    assert "rejoice" not in scene_text and "ascension" not in scene_text
+    # her signature clip is Nereid's Ascension, on the state Varka's card
+    # already sends (2026-10-21); no other kit's signature
+    assert "rejoice" not in scene_text and "setoff" not in scene_text
     # the old rig's box, kept
     assert "offset_left = -120.0" in scene_text and "position = Vector2(0, -350)" in scene_text
 
@@ -137,7 +142,8 @@ def test_every_frame_is_an_atlas_texture_that_restores_its_cell(scene_text, fram
 
 def test_each_state_steps_its_own_sheet_at_the_rendered_times(scene_text, frames):
     for state, sheet in (("idle", "idle"), ("attack", "attack"), ("hurt", "hurt"), ("death", "death"),
-                         ("cast", "cast"), ("power", "cast"), ("idle_low", "idle_low")):
+                         ("cast", "cast"), ("power", "cast"), ("idle_low", "idle_low"),
+                         ("ascension", "ascension")):
         block = _anim(scene_text, state)
         node = rig.SHEET_NODE[sheet]
         assert f'NodePath("Visuals/Facing/Model/{node}:texture")' in block, state
@@ -156,6 +162,19 @@ def test_the_water_jet_draws_over_the_attack_from_the_manifests_frame_and_rests_
     assert re.search(r'"times": PackedFloat32Array\(0, ' + re.escape(f"{t0:g}"), block), "shown from its first frame"
     for st in ("idle", "hurt", "cast"):
         assert 'NodePath("Visuals/Facing/Model/AttackFx:self_modulate")' in _anim(scene_text, st)
+
+
+def test_the_tide_draws_over_the_ascension_and_rests_at_hydro(scene_text, frames):
+    node = scene_text.split('[node name="AscensionFx" type="Sprite2D" parent="Visuals/Facing/Model"]', 1)[1]
+    node = node.split("\n\n", 1)[0]
+    assert "unique_name_in_owner = true" in node and 'metadata/rest_element = "hydro"' in node
+    assert 'material = SubResource("ShaderMaterial_element")' in node
+    block = _anim(scene_text, "ascension")
+    first = frames["fx"]["ascension"]["first_frame"]
+    t0 = frames["sheets"]["ascension"]["times"][first]
+    assert re.search(r'"times": PackedFloat32Array\(0, ' + re.escape(f"{t0:g}"), block), "shown from its first frame"
+    for st in ("idle", "attack", "cast"):
+        assert 'NodePath("Visuals/Facing/Model/AscensionFx:self_modulate")' in _anim(scene_text, st)
 
 
 def test_the_merchant_loops_stance_b_and_both_scenes_carry_the_shadow(scene_text, frames):

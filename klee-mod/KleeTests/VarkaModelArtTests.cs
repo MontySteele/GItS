@@ -71,18 +71,27 @@ public class VarkaModelArtTests
     }
 
     [Fact]
-    public void Only_four_winds_ascension_plays_the_ascension_clip()
+    public void Only_the_two_ascensions_play_the_ascension_clip()
     {
-        bool IsAscension(string typeName)
+        object Card(string typeName)
         {
             var type = Motion().Assembly.GetTypes().Single(t => t.FullName == typeName);
-            var card = System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(type);
-            return (bool)Motion().GetMethod("IsAscensionPlay", All)!.Invoke(null, new[] { card })!;
+            return System.Runtime.CompilerServices.RuntimeHelpers.GetUninitializedObject(type);
         }
+        bool IsAscension(string typeName)
+            => (bool)Motion().GetMethod("IsAscensionPlay", All)!.Invoke(null, new[] { Card(typeName) })!;
+        bool IsCarryOut(string typeName)
+            => (bool)Motion().GetMethod("IsAscensionCarryOut", All)!.Invoke(null, new[] { Card(typeName) })!;
 
         Assert.True(IsAscension("KleeMod.Cards.Prototype.Generated.ProtoVkFourWindsAscension"));
+        // Kokomi's signature clip (art polish, 2026-10-21)
+        Assert.True(IsAscension("KleeMod.Cards.Prototype.Generated.ProtoKkNereidsAscension"));
         Assert.False(IsAscension("KleeMod.Cards.Prototype.Generated.ProtoVkTempestOfTheFourWinds"));
         Assert.False(IsAscension("KleeMod.Cards.Prototype.Generated.ProtoKoJumpyDumpty"));
+        Assert.False(IsAscension("KleeMod.Cards.Prototype.Generated.ProtoKkKuragesOath"));
+        // ... and Kurage's Oath plays it when carried out as a Plan, nothing else
+        Assert.True(IsCarryOut("KleeMod.Cards.Prototype.Generated.ProtoKkKuragesOath"));
+        Assert.False(IsCarryOut("KleeMod.Cards.Prototype.Generated.ProtoKkNereidsAscension"));
     }
 
     [Theory]

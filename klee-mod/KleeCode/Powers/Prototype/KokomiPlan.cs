@@ -1968,6 +1968,9 @@ public static class KokomiPlan
         // flash or jellyfish dart goes out -- started here and never awaited,
         // timed to land inside the lunge's own hold below.
         PlayBeat(kokomi, entry);
+        // ART POLISH (2026-10-21): Kurage's Oath carried out plays her
+        // Nereid's Ascension clip on her own body; display only.
+        Vfx.KokomiPlanFx.OathCall(kokomi, entry.Source);
         await Vfx.KurageBeat.Act(BakeKuragePet.Of(kokomi));
 
         // `EB-329`: THE BOARD BEFORE. Read here rather than inside the clause

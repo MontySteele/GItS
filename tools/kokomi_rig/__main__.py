@@ -1,10 +1,11 @@
-"""Kokomi's combat, merchant and select scenes: generate or check.
+"""Kokomi's combat, merchant and select scenes and her Bake-Kurage's: generate or check.
 
-    python -m tools.kokomi_rig gen            # write the three scenes
+    python -m tools.kokomi_rig gen            # write the four scenes
     python -m tools.kokomi_rig gen --check    # exit 1 if any scene is stale
 
 Needs no art and no engine: the scenes are text from kokomi.yaml and the
-committed manifests tools/char_render/kokomi_frames.json and tools/select_loop.json. Until her first
+committed manifests tools/char_render/kokomi_frames.json, tools/select_loop.json and
+tools/kurage_render/kurage_frames.json (the Bake-Kurage, `kurage.py`). Until her first
 render writes that manifest there is nothing to generate: `gen` says so and
 exits 2, `gen --check` says so and passes (her layer-cut rig still ships).
 """
@@ -13,12 +14,12 @@ from __future__ import annotations
 import argparse
 import sys
 
-from . import rig
+from . import kurage, rig
 
 
 def scenes() -> list[tuple]:
     return [(rig.SCENE, rig.render_scene()), (rig.MERCHANT_SCENE, rig.render_merchant_scene()),
-            (rig.SELECT_SCENE, rig.render_select_scene())]
+            (rig.SELECT_SCENE, rig.render_select_scene()), (kurage.SCENE, kurage.render_scene())]
 
 
 def main(argv: list[str] | None = None) -> int:

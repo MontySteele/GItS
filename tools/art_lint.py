@@ -759,9 +759,14 @@ GENERATOR_OWNED = {
     "ImageGen/images/kokomi/model/frames/kokomi_cast.png": "char_render/pack.py",
     "ImageGen/images/kokomi/model/frames/kokomi_hurt.png": "char_render/pack.py",
     "ImageGen/images/kokomi/model/frames/kokomi_death.png": "char_render/pack.py",
+    "ImageGen/images/kokomi/model/frames/kokomi_ascension.png": "char_render/pack.py",
     "ImageGen/images/kokomi/model/frames/kokomi_merchant.png": "char_render/pack.py",
     "ImageGen/images/kokomi/model/frames/kokomi_attack_fx.png": "char_render/pack.py",
+    "ImageGen/images/kokomi/model/frames/kokomi_ascension_fx.png": "char_render/pack.py",
     "ImageGen/images/kokomi/model/frames/kokomi_shadow.png": "char_render/pack.py",
+    # the Bake-Kurage's frame sheet (art polish, 2026-10-21): a jellyfish
+    # built in Blender from primitives, no model; tools/kurage_render
+    "ImageGen/images/kokomi/model/frames/kokomi_kurage.png": "kurage_render/pack.py",
     "ImageGen/images/kokomi/model/kokomi_rest.png":         "char_render/pack.py",
     "ImageGen/images/kokomi/ui/select_closeup.png":         "char_render/pack.py",
     "ImageGen/images/kokomi/ui/select_loop.png": "select_loop.py",

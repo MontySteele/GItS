@@ -1,4 +1,4 @@
-[gd_scene load_steps=215 format=3]
+[gd_scene load_steps=276 format=3]
 
 [ext_resource type="Texture2D" path="res://kokomi/model/frames/kokomi_shadow.png" id="0_shadow"]
 [ext_resource type="Texture2D" path="res://kokomi/model/frames/kokomi_idle.png" id="1_idle"]
@@ -7,7 +7,9 @@
 [ext_resource type="Texture2D" path="res://kokomi/model/frames/kokomi_hurt.png" id="4_hurt"]
 [ext_resource type="Texture2D" path="res://kokomi/model/frames/kokomi_death.png" id="5_death"]
 [ext_resource type="Texture2D" path="res://kokomi/model/frames/kokomi_cast.png" id="6_cast"]
-[ext_resource type="Texture2D" path="res://kokomi/model/frames/kokomi_attack_fx.png" id="7_fx_attack"]
+[ext_resource type="Texture2D" path="res://kokomi/model/frames/kokomi_ascension.png" id="7_ascension"]
+[ext_resource type="Texture2D" path="res://kokomi/model/frames/kokomi_attack_fx.png" id="8_fx_attack"]
+[ext_resource type="Texture2D" path="res://kokomi/model/frames/kokomi_ascension_fx.png" id="9_fx_ascension"]
 
 [sub_resource type="AtlasTexture" id="Atlas_idle_0"]
 atlas = ExtResource("1_idle")
@@ -879,52 +881,322 @@ region = Rect2(275, 1340, 270, 439)
 margin = Rect2(0, 9, 14, 9)
 filter_clip = true
 
+[sub_resource type="AtlasTexture" id="Atlas_ascension_0"]
+atlas = ExtResource("7_ascension")
+region = Rect2(0, 0, 266, 439)
+margin = Rect2(11, 6, 32, 6)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_ascension_1"]
+atlas = ExtResource("7_ascension")
+region = Rect2(266, 0, 263, 437)
+margin = Rect2(12, 8, 35, 8)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_ascension_2"]
+atlas = ExtResource("7_ascension")
+region = Rect2(529, 0, 263, 434)
+margin = Rect2(13, 11, 35, 11)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_ascension_3"]
+atlas = ExtResource("7_ascension")
+region = Rect2(792, 0, 263, 430)
+margin = Rect2(15, 15, 35, 15)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_ascension_4"]
+atlas = ExtResource("7_ascension")
+region = Rect2(1055, 0, 263, 428)
+margin = Rect2(16, 17, 35, 17)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_ascension_5"]
+atlas = ExtResource("7_ascension")
+region = Rect2(1318, 0, 264, 432)
+margin = Rect2(12, 13, 34, 13)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_ascension_6"]
+atlas = ExtResource("7_ascension")
+region = Rect2(1582, 0, 266, 439)
+margin = Rect2(8, 6, 32, 6)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_ascension_7"]
+atlas = ExtResource("7_ascension")
+region = Rect2(0, 439, 280, 443)
+margin = Rect2(5, 2, 18, 2)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_ascension_8"]
+atlas = ExtResource("7_ascension")
+region = Rect2(280, 439, 283, 445)
+margin = Rect2(4, 0, 15, 0)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_ascension_9"]
+atlas = ExtResource("7_ascension")
+region = Rect2(563, 439, 296, 442)
+margin = Rect2(2, 1, 2, 3)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_ascension_10"]
+atlas = ExtResource("7_ascension")
+region = Rect2(859, 439, 292, 441)
+margin = Rect2(1, 2, 6, 4)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_ascension_11"]
+atlas = ExtResource("7_ascension")
+region = Rect2(1151, 439, 291, 441)
+margin = Rect2(0, 2, 7, 4)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_ascension_12"]
+atlas = ExtResource("7_ascension")
+region = Rect2(1442, 439, 290, 441)
+margin = Rect2(1, 2, 8, 4)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_ascension_13"]
+atlas = ExtResource("7_ascension")
+region = Rect2(0, 884, 289, 441)
+margin = Rect2(2, 2, 9, 4)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_ascension_14"]
+atlas = ExtResource("7_ascension")
+region = Rect2(289, 884, 286, 441)
+margin = Rect2(5, 2, 12, 4)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_ascension_15"]
+atlas = ExtResource("7_ascension")
+region = Rect2(575, 884, 284, 441)
+margin = Rect2(7, 2, 14, 4)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_ascension_16"]
+atlas = ExtResource("7_ascension")
+region = Rect2(859, 884, 281, 441)
+margin = Rect2(10, 2, 17, 4)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_ascension_17"]
+atlas = ExtResource("7_ascension")
+region = Rect2(1140, 884, 278, 441)
+margin = Rect2(13, 2, 20, 4)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_ascension_18"]
+atlas = ExtResource("7_ascension")
+region = Rect2(1418, 884, 275, 441)
+margin = Rect2(15, 2, 23, 4)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_ascension_19"]
+atlas = ExtResource("7_ascension")
+region = Rect2(0, 1325, 274, 441)
+margin = Rect2(16, 2, 24, 4)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_ascension_20"]
+atlas = ExtResource("7_ascension")
+region = Rect2(274, 1325, 282, 441)
+margin = Rect2(16, 2, 16, 4)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_ascension_21"]
+atlas = ExtResource("7_ascension")
+region = Rect2(556, 1325, 281, 440)
+margin = Rect2(14, 3, 17, 5)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_ascension_22"]
+atlas = ExtResource("7_ascension")
+region = Rect2(837, 1325, 263, 440)
+margin = Rect2(13, 4, 35, 5)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_ascension_23"]
+atlas = ExtResource("7_ascension")
+region = Rect2(1100, 1325, 263, 440)
+margin = Rect2(12, 5, 35, 5)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_ascension_24"]
+atlas = ExtResource("7_ascension")
+region = Rect2(1363, 1325, 263, 440)
+margin = Rect2(12, 5, 35, 5)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_ascension_25"]
+atlas = ExtResource("7_ascension")
+region = Rect2(1626, 1325, 264, 439)
+margin = Rect2(11, 6, 34, 6)
+filter_clip = true
+
 [sub_resource type="AtlasTexture" id="Atlas_fx_attack_0"]
-atlas = ExtResource("7_fx_attack")
+atlas = ExtResource("8_fx_attack")
 region = Rect2(0, 0, 108, 37)
 margin = Rect2(0, 61, 119, 61)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_fx_attack_1"]
-atlas = ExtResource("7_fx_attack")
+atlas = ExtResource("8_fx_attack")
 region = Rect2(108, 0, 113, 86)
 margin = Rect2(15, 10, 114, 12)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_fx_attack_2"]
-atlas = ExtResource("7_fx_attack")
+atlas = ExtResource("8_fx_attack")
 region = Rect2(0, 86, 183, 88)
 margin = Rect2(42, 0, 44, 10)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_fx_attack_3"]
-atlas = ExtResource("7_fx_attack")
+atlas = ExtResource("8_fx_attack")
 region = Rect2(0, 174, 177, 83)
 margin = Rect2(45, 2, 50, 15)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_fx_attack_4"]
-atlas = ExtResource("7_fx_attack")
+atlas = ExtResource("8_fx_attack")
 region = Rect2(0, 257, 181, 71)
 margin = Rect2(46, 6, 46, 27)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_fx_attack_5"]
-atlas = ExtResource("7_fx_attack")
+atlas = ExtResource("8_fx_attack")
 region = Rect2(0, 328, 163, 40)
 margin = Rect2(64, 29, 64, 58)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_fx_attack_6"]
-atlas = ExtResource("7_fx_attack")
+atlas = ExtResource("8_fx_attack")
 region = Rect2(0, 368, 163, 33)
 margin = Rect2(64, 32, 64, 65)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_fx_attack_7"]
-atlas = ExtResource("7_fx_attack")
+atlas = ExtResource("8_fx_attack")
 region = Rect2(0, 401, 142, 22)
 margin = Rect2(77, 40, 85, 76)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_fx_ascension_0"]
+atlas = ExtResource("9_fx_ascension")
+region = Rect2(0, 0, 210, 73)
+margin = Rect2(149, 545, 285, 579)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_fx_ascension_1"]
+atlas = ExtResource("9_fx_ascension")
+region = Rect2(210, 0, 335, 102)
+margin = Rect2(87, 532, 160, 550)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_fx_ascension_2"]
+atlas = ExtResource("9_fx_ascension")
+region = Rect2(545, 0, 415, 120)
+margin = Rect2(47, 524, 80, 532)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_fx_ascension_3"]
+atlas = ExtResource("9_fx_ascension")
+region = Rect2(960, 0, 458, 166)
+margin = Rect2(26, 483, 37, 486)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_fx_ascension_4"]
+atlas = ExtResource("9_fx_ascension")
+region = Rect2(1418, 0, 476, 214)
+margin = Rect2(17, 438, 19, 438)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_fx_ascension_5"]
+atlas = ExtResource("9_fx_ascension")
+region = Rect2(0, 214, 480, 255)
+margin = Rect2(15, 397, 15, 397)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_fx_ascension_6"]
+atlas = ExtResource("9_fx_ascension")
+region = Rect2(480, 214, 491, 299)
+margin = Rect2(4, 353, 4, 353)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_fx_ascension_7"]
+atlas = ExtResource("9_fx_ascension")
+region = Rect2(971, 214, 495, 342)
+margin = Rect2(0, 310, 0, 310)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_fx_ascension_8"]
+atlas = ExtResource("9_fx_ascension")
+region = Rect2(1466, 214, 493, 383)
+margin = Rect2(2, 269, 2, 269)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_fx_ascension_9"]
+atlas = ExtResource("9_fx_ascension")
+region = Rect2(0, 597, 486, 421)
+margin = Rect2(9, 231, 9, 231)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_fx_ascension_10"]
+atlas = ExtResource("9_fx_ascension")
+region = Rect2(486, 597, 481, 457)
+margin = Rect2(14, 195, 14, 195)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_fx_ascension_11"]
+atlas = ExtResource("9_fx_ascension")
+region = Rect2(967, 597, 481, 491)
+margin = Rect2(14, 161, 14, 161)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_fx_ascension_12"]
+atlas = ExtResource("9_fx_ascension")
+region = Rect2(1448, 597, 481, 522)
+margin = Rect2(14, 130, 14, 130)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_fx_ascension_13"]
+atlas = ExtResource("9_fx_ascension")
+region = Rect2(0, 1119, 479, 549)
+margin = Rect2(15, 103, 16, 103)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_fx_ascension_14"]
+atlas = ExtResource("9_fx_ascension")
+region = Rect2(479, 1119, 478, 572)
+margin = Rect2(16, 79, 17, 80)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_fx_ascension_15"]
+atlas = ExtResource("9_fx_ascension")
+region = Rect2(957, 1119, 475, 601)
+margin = Rect2(17, 49, 20, 51)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_fx_ascension_16"]
+atlas = ExtResource("9_fx_ascension")
+region = Rect2(1432, 1119, 473, 626)
+margin = Rect2(18, 22, 22, 26)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_fx_ascension_17"]
+atlas = ExtResource("9_fx_ascension")
+region = Rect2(0, 1745, 466, 641)
+margin = Rect2(22, 4, 29, 11)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_fx_ascension_18"]
+atlas = ExtResource("9_fx_ascension")
+region = Rect2(466, 1745, 450, 638)
+margin = Rect2(30, 0, 45, 14)
 filter_clip = true
 
 [sub_resource type="Shader" id="Shader_element"]
@@ -976,7 +1248,7 @@ tracks/1/keys = {
 tracks/2/type = "value"
 tracks/2/imported = false
 tracks/2/enabled = true
-tracks/2/path = NodePath("Visuals/Facing/Model/Attack:self_modulate")
+tracks/2/path = NodePath("Visuals/Facing/Model/Ascension:self_modulate")
 tracks/2/interp = 1
 tracks/2/loop_wrap = true
 tracks/2/keys = {
@@ -988,7 +1260,7 @@ tracks/2/keys = {
 tracks/3/type = "value"
 tracks/3/imported = false
 tracks/3/enabled = true
-tracks/3/path = NodePath("Visuals/Facing/Model/AttackFx:self_modulate")
+tracks/3/path = NodePath("Visuals/Facing/Model/AscensionFx:self_modulate")
 tracks/3/interp = 1
 tracks/3/loop_wrap = true
 tracks/3/keys = {
@@ -1000,7 +1272,7 @@ tracks/3/keys = {
 tracks/4/type = "value"
 tracks/4/imported = false
 tracks/4/enabled = true
-tracks/4/path = NodePath("Visuals/Facing/Model/Cast:self_modulate")
+tracks/4/path = NodePath("Visuals/Facing/Model/Attack:self_modulate")
 tracks/4/interp = 1
 tracks/4/loop_wrap = true
 tracks/4/keys = {
@@ -1012,7 +1284,7 @@ tracks/4/keys = {
 tracks/5/type = "value"
 tracks/5/imported = false
 tracks/5/enabled = true
-tracks/5/path = NodePath("Visuals/Facing/Model/Death:self_modulate")
+tracks/5/path = NodePath("Visuals/Facing/Model/AttackFx:self_modulate")
 tracks/5/interp = 1
 tracks/5/loop_wrap = true
 tracks/5/keys = {
@@ -1024,7 +1296,7 @@ tracks/5/keys = {
 tracks/6/type = "value"
 tracks/6/imported = false
 tracks/6/enabled = true
-tracks/6/path = NodePath("Visuals/Facing/Model/Hurt:self_modulate")
+tracks/6/path = NodePath("Visuals/Facing/Model/Cast:self_modulate")
 tracks/6/interp = 1
 tracks/6/loop_wrap = true
 tracks/6/keys = {
@@ -1036,19 +1308,19 @@ tracks/6/keys = {
 tracks/7/type = "value"
 tracks/7/imported = false
 tracks/7/enabled = true
-tracks/7/path = NodePath("Visuals/Facing/Model/Idle:self_modulate")
+tracks/7/path = NodePath("Visuals/Facing/Model/Death:self_modulate")
 tracks/7/interp = 1
 tracks/7/loop_wrap = true
 tracks/7/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Color(1, 1, 1, 1)]
+"values": [Color(1, 1, 1, 0)]
 }
 tracks/8/type = "value"
 tracks/8/imported = false
 tracks/8/enabled = true
-tracks/8/path = NodePath("Visuals/Facing/Model/IdleLow:self_modulate")
+tracks/8/path = NodePath("Visuals/Facing/Model/Hurt:self_modulate")
 tracks/8/interp = 1
 tracks/8/loop_wrap = true
 tracks/8/keys = {
@@ -1060,82 +1332,130 @@ tracks/8/keys = {
 tracks/9/type = "value"
 tracks/9/imported = false
 tracks/9/enabled = true
-tracks/9/path = NodePath("Visuals/Facing/Model/Attack:texture")
-tracks/9/interp = 0
+tracks/9/path = NodePath("Visuals/Facing/Model/Idle:self_modulate")
+tracks/9/interp = 1
 tracks/9/loop_wrap = true
 tracks/9/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [SubResource("Atlas_attack_0")]
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
 }
 tracks/10/type = "value"
 tracks/10/imported = false
 tracks/10/enabled = true
-tracks/10/path = NodePath("Visuals/Facing/Model/AttackFx:texture")
-tracks/10/interp = 0
+tracks/10/path = NodePath("Visuals/Facing/Model/IdleLow:self_modulate")
+tracks/10/interp = 1
 tracks/10/loop_wrap = true
 tracks/10/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [SubResource("Atlas_fx_attack_0")]
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
 }
 tracks/11/type = "value"
 tracks/11/imported = false
 tracks/11/enabled = true
-tracks/11/path = NodePath("Visuals/Facing/Model/Cast:texture")
+tracks/11/path = NodePath("Visuals/Facing/Model/Ascension:texture")
 tracks/11/interp = 0
 tracks/11/loop_wrap = true
 tracks/11/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 1,
-"values": [SubResource("Atlas_cast_0")]
+"values": [SubResource("Atlas_ascension_0")]
 }
 tracks/12/type = "value"
 tracks/12/imported = false
 tracks/12/enabled = true
-tracks/12/path = NodePath("Visuals/Facing/Model/Death:texture")
+tracks/12/path = NodePath("Visuals/Facing/Model/AscensionFx:texture")
 tracks/12/interp = 0
 tracks/12/loop_wrap = true
 tracks/12/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 1,
-"values": [SubResource("Atlas_death_0")]
+"values": [SubResource("Atlas_fx_ascension_0")]
 }
 tracks/13/type = "value"
 tracks/13/imported = false
 tracks/13/enabled = true
-tracks/13/path = NodePath("Visuals/Facing/Model/Hurt:texture")
+tracks/13/path = NodePath("Visuals/Facing/Model/Attack:texture")
 tracks/13/interp = 0
 tracks/13/loop_wrap = true
 tracks/13/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 1,
-"values": [SubResource("Atlas_hurt_0")]
+"values": [SubResource("Atlas_attack_0")]
 }
 tracks/14/type = "value"
 tracks/14/imported = false
 tracks/14/enabled = true
-tracks/14/path = NodePath("Visuals/Facing/Model/Idle:texture")
+tracks/14/path = NodePath("Visuals/Facing/Model/AttackFx:texture")
 tracks/14/interp = 0
 tracks/14/loop_wrap = true
 tracks/14/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 1,
-"values": [SubResource("Atlas_idle_0")]
+"values": [SubResource("Atlas_fx_attack_0")]
 }
 tracks/15/type = "value"
 tracks/15/imported = false
 tracks/15/enabled = true
-tracks/15/path = NodePath("Visuals/Facing/Model/IdleLow:texture")
+tracks/15/path = NodePath("Visuals/Facing/Model/Cast:texture")
 tracks/15/interp = 0
 tracks/15/loop_wrap = true
 tracks/15/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [SubResource("Atlas_cast_0")]
+}
+tracks/16/type = "value"
+tracks/16/imported = false
+tracks/16/enabled = true
+tracks/16/path = NodePath("Visuals/Facing/Model/Death:texture")
+tracks/16/interp = 0
+tracks/16/loop_wrap = true
+tracks/16/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [SubResource("Atlas_death_0")]
+}
+tracks/17/type = "value"
+tracks/17/imported = false
+tracks/17/enabled = true
+tracks/17/path = NodePath("Visuals/Facing/Model/Hurt:texture")
+tracks/17/interp = 0
+tracks/17/loop_wrap = true
+tracks/17/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [SubResource("Atlas_hurt_0")]
+}
+tracks/18/type = "value"
+tracks/18/imported = false
+tracks/18/enabled = true
+tracks/18/path = NodePath("Visuals/Facing/Model/Idle:texture")
+tracks/18/interp = 0
+tracks/18/loop_wrap = true
+tracks/18/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [SubResource("Atlas_idle_0")]
+}
+tracks/19/type = "value"
+tracks/19/imported = false
+tracks/19/enabled = true
+tracks/19/path = NodePath("Visuals/Facing/Model/IdleLow:texture")
+tracks/19/interp = 0
+tracks/19/loop_wrap = true
+tracks/19/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 1,
@@ -1221,22 +1541,46 @@ tracks/5/keys = {
 tracks/6/type = "value"
 tracks/6/imported = false
 tracks/6/enabled = true
-tracks/6/path = NodePath("Visuals/Facing/Model/Idle:texture")
-tracks/6/interp = 0
+tracks/6/path = NodePath("Visuals/Facing/Model/Ascension:self_modulate")
+tracks/6/interp = 1
 tracks/6/loop_wrap = true
 tracks/6/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/7/type = "value"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("Visuals/Facing/Model/Idle:texture")
+tracks/7/interp = 0
+tracks/7/loop_wrap = true
+tracks/7/keys = {
 "times": PackedFloat32Array(0, 0.0833, 0.1667, 0.25, 0.3333, 0.4167, 0.5, 0.5833, 0.6667, 0.75, 0.8333, 0.9167, 1, 1.0833, 1.1667, 1.25, 1.3333, 1.4167, 1.5, 1.5833, 1.6667, 1.75, 1.8333, 1.9167, 2, 2.0833, 2.1667, 2.25, 2.3333, 2.4167, 2.5, 2.5833, 2.6667, 2.75),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
 "update": 1,
 "values": [SubResource("Atlas_idle_0"), SubResource("Atlas_idle_1"), SubResource("Atlas_idle_2"), SubResource("Atlas_idle_3"), SubResource("Atlas_idle_4"), SubResource("Atlas_idle_5"), SubResource("Atlas_idle_6"), SubResource("Atlas_idle_7"), SubResource("Atlas_idle_8"), SubResource("Atlas_idle_9"), SubResource("Atlas_idle_10"), SubResource("Atlas_idle_11"), SubResource("Atlas_idle_12"), SubResource("Atlas_idle_13"), SubResource("Atlas_idle_14"), SubResource("Atlas_idle_15"), SubResource("Atlas_idle_16"), SubResource("Atlas_idle_17"), SubResource("Atlas_idle_18"), SubResource("Atlas_idle_19"), SubResource("Atlas_idle_20"), SubResource("Atlas_idle_21"), SubResource("Atlas_idle_22"), SubResource("Atlas_idle_23"), SubResource("Atlas_idle_24"), SubResource("Atlas_idle_25"), SubResource("Atlas_idle_26"), SubResource("Atlas_idle_27"), SubResource("Atlas_idle_28"), SubResource("Atlas_idle_29"), SubResource("Atlas_idle_30"), SubResource("Atlas_idle_31"), SubResource("Atlas_idle_32"), SubResource("Atlas_idle_33")]
 }
-tracks/7/type = "value"
-tracks/7/imported = false
-tracks/7/enabled = true
-tracks/7/path = NodePath("Visuals/Facing/Model/AttackFx:self_modulate")
-tracks/7/interp = 1
-tracks/7/loop_wrap = true
-tracks/7/keys = {
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("Visuals/Facing/Model/AttackFx:self_modulate")
+tracks/8/interp = 1
+tracks/8/loop_wrap = true
+tracks/8/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/9/type = "value"
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/path = NodePath("Visuals/Facing/Model/AscensionFx:self_modulate")
+tracks/9/interp = 1
+tracks/9/loop_wrap = true
+tracks/9/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
@@ -1321,38 +1665,62 @@ tracks/5/keys = {
 tracks/6/type = "value"
 tracks/6/imported = false
 tracks/6/enabled = true
-tracks/6/path = NodePath("Visuals/Facing/Model/Attack:texture")
-tracks/6/interp = 0
+tracks/6/path = NodePath("Visuals/Facing/Model/Ascension:self_modulate")
+tracks/6/interp = 1
 tracks/6/loop_wrap = true
 tracks/6/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/7/type = "value"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("Visuals/Facing/Model/Attack:texture")
+tracks/7/interp = 0
+tracks/7/loop_wrap = true
+tracks/7/keys = {
 "times": PackedFloat32Array(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
 "update": 1,
 "values": [SubResource("Atlas_attack_0"), SubResource("Atlas_attack_1"), SubResource("Atlas_attack_2"), SubResource("Atlas_attack_3"), SubResource("Atlas_attack_4"), SubResource("Atlas_attack_5"), SubResource("Atlas_attack_6"), SubResource("Atlas_attack_7"), SubResource("Atlas_attack_8"), SubResource("Atlas_attack_9"), SubResource("Atlas_attack_10"), SubResource("Atlas_attack_11"), SubResource("Atlas_attack_12"), SubResource("Atlas_attack_13"), SubResource("Atlas_attack_14"), SubResource("Atlas_attack_15"), SubResource("Atlas_attack_16"), SubResource("Atlas_attack_17"), SubResource("Atlas_attack_18"), SubResource("Atlas_attack_19")]
 }
-tracks/7/type = "value"
-tracks/7/imported = false
-tracks/7/enabled = true
-tracks/7/path = NodePath("Visuals/Facing/Model/AttackFx:self_modulate")
-tracks/7/interp = 0
-tracks/7/loop_wrap = true
-tracks/7/keys = {
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("Visuals/Facing/Model/AttackFx:self_modulate")
+tracks/8/interp = 0
+tracks/8/loop_wrap = true
+tracks/8/keys = {
 "times": PackedFloat32Array(0, 0.3, 0.7),
 "transitions": PackedFloat32Array(1, 1, 1),
 "update": 1,
 "values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
 }
-tracks/8/type = "value"
-tracks/8/imported = false
-tracks/8/enabled = true
-tracks/8/path = NodePath("Visuals/Facing/Model/AttackFx:texture")
-tracks/8/interp = 0
-tracks/8/loop_wrap = true
-tracks/8/keys = {
+tracks/9/type = "value"
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/path = NodePath("Visuals/Facing/Model/AttackFx:texture")
+tracks/9/interp = 0
+tracks/9/loop_wrap = true
+tracks/9/keys = {
 "times": PackedFloat32Array(0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
 "update": 1,
 "values": [SubResource("Atlas_fx_attack_0"), SubResource("Atlas_fx_attack_1"), SubResource("Atlas_fx_attack_2"), SubResource("Atlas_fx_attack_3"), SubResource("Atlas_fx_attack_4"), SubResource("Atlas_fx_attack_5"), SubResource("Atlas_fx_attack_6"), SubResource("Atlas_fx_attack_7")]
+}
+tracks/10/type = "value"
+tracks/10/imported = false
+tracks/10/enabled = true
+tracks/10/path = NodePath("Visuals/Facing/Model/AscensionFx:self_modulate")
+tracks/10/interp = 1
+tracks/10/loop_wrap = true
+tracks/10/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
 }
 
 [sub_resource type="Animation" id="Animation_hurt"]
@@ -1445,22 +1813,46 @@ tracks/6/keys = {
 tracks/7/type = "value"
 tracks/7/imported = false
 tracks/7/enabled = true
-tracks/7/path = NodePath("Visuals/Facing/Model/Hurt:texture")
-tracks/7/interp = 0
+tracks/7/path = NodePath("Visuals/Facing/Model/Ascension:self_modulate")
+tracks/7/interp = 1
 tracks/7/loop_wrap = true
 tracks/7/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("Visuals/Facing/Model/Hurt:texture")
+tracks/8/interp = 0
+tracks/8/loop_wrap = true
+tracks/8/keys = {
 "times": PackedFloat32Array(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
 "update": 1,
 "values": [SubResource("Atlas_hurt_0"), SubResource("Atlas_hurt_1"), SubResource("Atlas_hurt_2"), SubResource("Atlas_hurt_3"), SubResource("Atlas_hurt_4"), SubResource("Atlas_hurt_5"), SubResource("Atlas_hurt_6"), SubResource("Atlas_hurt_7"), SubResource("Atlas_hurt_8"), SubResource("Atlas_hurt_9"), SubResource("Atlas_hurt_10"), SubResource("Atlas_hurt_11"), SubResource("Atlas_hurt_12"), SubResource("Atlas_hurt_13"), SubResource("Atlas_hurt_14"), SubResource("Atlas_hurt_15")]
 }
-tracks/8/type = "value"
-tracks/8/imported = false
-tracks/8/enabled = true
-tracks/8/path = NodePath("Visuals/Facing/Model/AttackFx:self_modulate")
-tracks/8/interp = 1
-tracks/8/loop_wrap = true
-tracks/8/keys = {
+tracks/9/type = "value"
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/path = NodePath("Visuals/Facing/Model/AttackFx:self_modulate")
+tracks/9/interp = 1
+tracks/9/loop_wrap = true
+tracks/9/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/10/type = "value"
+tracks/10/imported = false
+tracks/10/enabled = true
+tracks/10/path = NodePath("Visuals/Facing/Model/AscensionFx:self_modulate")
+tracks/10/interp = 1
+tracks/10/loop_wrap = true
+tracks/10/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
@@ -1569,22 +1961,46 @@ tracks/7/keys = {
 tracks/8/type = "value"
 tracks/8/imported = false
 tracks/8/enabled = true
-tracks/8/path = NodePath("Visuals/Facing/Model/Death:texture")
-tracks/8/interp = 0
+tracks/8/path = NodePath("Visuals/Facing/Model/Ascension:self_modulate")
+tracks/8/interp = 1
 tracks/8/loop_wrap = true
 tracks/8/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/9/type = "value"
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/path = NodePath("Visuals/Facing/Model/Death:texture")
+tracks/9/interp = 0
+tracks/9/loop_wrap = true
+tracks/9/keys = {
 "times": PackedFloat32Array(0, 0.0667, 0.1333, 0.2, 0.2667, 0.3333, 0.4, 0.4667, 0.5333, 0.6, 0.6667, 0.7333, 0.8, 0.8667, 0.9333, 1, 1.0667, 1.1333, 1.2, 1.2667, 1.3333, 1.4, 1.4667, 1.5333, 1.6),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
 "update": 1,
 "values": [SubResource("Atlas_death_0"), SubResource("Atlas_death_1"), SubResource("Atlas_death_2"), SubResource("Atlas_death_3"), SubResource("Atlas_death_4"), SubResource("Atlas_death_5"), SubResource("Atlas_death_6"), SubResource("Atlas_death_7"), SubResource("Atlas_death_8"), SubResource("Atlas_death_9"), SubResource("Atlas_death_10"), SubResource("Atlas_death_11"), SubResource("Atlas_death_12"), SubResource("Atlas_death_13"), SubResource("Atlas_death_14"), SubResource("Atlas_death_15"), SubResource("Atlas_death_16"), SubResource("Atlas_death_17"), SubResource("Atlas_death_18"), SubResource("Atlas_death_19"), SubResource("Atlas_death_20"), SubResource("Atlas_death_21"), SubResource("Atlas_death_22"), SubResource("Atlas_death_23"), SubResource("Atlas_death_24")]
 }
-tracks/9/type = "value"
-tracks/9/imported = false
-tracks/9/enabled = true
-tracks/9/path = NodePath("Visuals/Facing/Model/AttackFx:self_modulate")
-tracks/9/interp = 1
-tracks/9/loop_wrap = true
-tracks/9/keys = {
+tracks/10/type = "value"
+tracks/10/imported = false
+tracks/10/enabled = true
+tracks/10/path = NodePath("Visuals/Facing/Model/AttackFx:self_modulate")
+tracks/10/interp = 1
+tracks/10/loop_wrap = true
+tracks/10/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/11/type = "value"
+tracks/11/imported = false
+tracks/11/enabled = true
+tracks/11/path = NodePath("Visuals/Facing/Model/AscensionFx:self_modulate")
+tracks/11/interp = 1
+tracks/11/loop_wrap = true
+tracks/11/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
@@ -1669,22 +2085,46 @@ tracks/5/keys = {
 tracks/6/type = "value"
 tracks/6/imported = false
 tracks/6/enabled = true
-tracks/6/path = NodePath("Visuals/Facing/Model/Cast:texture")
-tracks/6/interp = 0
+tracks/6/path = NodePath("Visuals/Facing/Model/Ascension:self_modulate")
+tracks/6/interp = 1
 tracks/6/loop_wrap = true
 tracks/6/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/7/type = "value"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("Visuals/Facing/Model/Cast:texture")
+tracks/7/interp = 0
+tracks/7/loop_wrap = true
+tracks/7/keys = {
 "times": PackedFloat32Array(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
 "update": 1,
 "values": [SubResource("Atlas_cast_0"), SubResource("Atlas_cast_1"), SubResource("Atlas_cast_2"), SubResource("Atlas_cast_3"), SubResource("Atlas_cast_4"), SubResource("Atlas_cast_5"), SubResource("Atlas_cast_6"), SubResource("Atlas_cast_7"), SubResource("Atlas_cast_8"), SubResource("Atlas_cast_9"), SubResource("Atlas_cast_10"), SubResource("Atlas_cast_11"), SubResource("Atlas_cast_12"), SubResource("Atlas_cast_13"), SubResource("Atlas_cast_14"), SubResource("Atlas_cast_15"), SubResource("Atlas_cast_16"), SubResource("Atlas_cast_17"), SubResource("Atlas_cast_18"), SubResource("Atlas_cast_19")]
 }
-tracks/7/type = "value"
-tracks/7/imported = false
-tracks/7/enabled = true
-tracks/7/path = NodePath("Visuals/Facing/Model/AttackFx:self_modulate")
-tracks/7/interp = 1
-tracks/7/loop_wrap = true
-tracks/7/keys = {
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("Visuals/Facing/Model/AttackFx:self_modulate")
+tracks/8/interp = 1
+tracks/8/loop_wrap = true
+tracks/8/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/9/type = "value"
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/path = NodePath("Visuals/Facing/Model/AscensionFx:self_modulate")
+tracks/9/interp = 1
+tracks/9/loop_wrap = true
+tracks/9/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
@@ -1781,22 +2221,46 @@ tracks/6/keys = {
 tracks/7/type = "value"
 tracks/7/imported = false
 tracks/7/enabled = true
-tracks/7/path = NodePath("Visuals/Facing/Model/Cast:texture")
-tracks/7/interp = 0
+tracks/7/path = NodePath("Visuals/Facing/Model/Ascension:self_modulate")
+tracks/7/interp = 1
 tracks/7/loop_wrap = true
 tracks/7/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("Visuals/Facing/Model/Cast:texture")
+tracks/8/interp = 0
+tracks/8/loop_wrap = true
+tracks/8/keys = {
 "times": PackedFloat32Array(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
 "update": 1,
 "values": [SubResource("Atlas_cast_0"), SubResource("Atlas_cast_1"), SubResource("Atlas_cast_2"), SubResource("Atlas_cast_3"), SubResource("Atlas_cast_4"), SubResource("Atlas_cast_5"), SubResource("Atlas_cast_6"), SubResource("Atlas_cast_7"), SubResource("Atlas_cast_8"), SubResource("Atlas_cast_9"), SubResource("Atlas_cast_10"), SubResource("Atlas_cast_11"), SubResource("Atlas_cast_12"), SubResource("Atlas_cast_13"), SubResource("Atlas_cast_14"), SubResource("Atlas_cast_15"), SubResource("Atlas_cast_16"), SubResource("Atlas_cast_17"), SubResource("Atlas_cast_18"), SubResource("Atlas_cast_19")]
 }
-tracks/8/type = "value"
-tracks/8/imported = false
-tracks/8/enabled = true
-tracks/8/path = NodePath("Visuals/Facing/Model/AttackFx:self_modulate")
-tracks/8/interp = 1
-tracks/8/loop_wrap = true
-tracks/8/keys = {
+tracks/9/type = "value"
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/path = NodePath("Visuals/Facing/Model/AttackFx:self_modulate")
+tracks/9/interp = 1
+tracks/9/loop_wrap = true
+tracks/9/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/10/type = "value"
+tracks/10/imported = false
+tracks/10/enabled = true
+tracks/10/path = NodePath("Visuals/Facing/Model/AscensionFx:self_modulate")
+tracks/10/interp = 1
+tracks/10/loop_wrap = true
+tracks/10/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
@@ -1894,14 +2358,150 @@ tracks/6/keys = {
 tracks/7/type = "value"
 tracks/7/imported = false
 tracks/7/enabled = true
-tracks/7/path = NodePath("Visuals/Facing/Model/IdleLow:texture")
-tracks/7/interp = 0
+tracks/7/path = NodePath("Visuals/Facing/Model/Ascension:self_modulate")
+tracks/7/interp = 1
 tracks/7/loop_wrap = true
 tracks/7/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("Visuals/Facing/Model/IdleLow:texture")
+tracks/8/interp = 0
+tracks/8/loop_wrap = true
+tracks/8/keys = {
 "times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
 "update": 1,
 "values": [SubResource("Atlas_idle_low_0"), SubResource("Atlas_idle_low_1"), SubResource("Atlas_idle_low_2"), SubResource("Atlas_idle_low_3"), SubResource("Atlas_idle_low_4"), SubResource("Atlas_idle_low_5"), SubResource("Atlas_idle_low_6"), SubResource("Atlas_idle_low_7"), SubResource("Atlas_idle_low_8"), SubResource("Atlas_idle_low_9"), SubResource("Atlas_idle_low_10"), SubResource("Atlas_idle_low_11"), SubResource("Atlas_idle_low_12"), SubResource("Atlas_idle_low_13"), SubResource("Atlas_idle_low_14"), SubResource("Atlas_idle_low_15"), SubResource("Atlas_idle_low_16"), SubResource("Atlas_idle_low_17"), SubResource("Atlas_idle_low_18"), SubResource("Atlas_idle_low_19"), SubResource("Atlas_idle_low_20"), SubResource("Atlas_idle_low_21"), SubResource("Atlas_idle_low_22"), SubResource("Atlas_idle_low_23"), SubResource("Atlas_idle_low_24"), SubResource("Atlas_idle_low_25"), SubResource("Atlas_idle_low_26"), SubResource("Atlas_idle_low_27"), SubResource("Atlas_idle_low_28"), SubResource("Atlas_idle_low_29")]
+}
+tracks/9/type = "value"
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/path = NodePath("Visuals/Facing/Model/AttackFx:self_modulate")
+tracks/9/interp = 1
+tracks/9/loop_wrap = true
+tracks/9/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/10/type = "value"
+tracks/10/imported = false
+tracks/10/enabled = true
+tracks/10/path = NodePath("Visuals/Facing/Model/AscensionFx:self_modulate")
+tracks/10/interp = 1
+tracks/10/loop_wrap = true
+tracks/10/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+
+[sub_resource type="Animation" id="Animation_ascension"]
+resource_name = "ascension"
+length = 1.3
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Visuals/Facing/Model/Idle:self_modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Visuals/Facing/Model/IdleLow:self_modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Visuals/Facing/Model/Attack:self_modulate")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Visuals/Facing/Model/Hurt:self_modulate")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("Visuals/Facing/Model/Death:self_modulate")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("Visuals/Facing/Model/Cast:self_modulate")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 0)]
+}
+tracks/6/type = "value"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("Visuals/Facing/Model/Ascension:self_modulate")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [Color(1, 1, 1, 1)]
+}
+tracks/7/type = "value"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("Visuals/Facing/Model/Ascension:texture")
+tracks/7/interp = 0
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"times": PackedFloat32Array(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.05, 1.1, 1.15, 1.2, 1.25),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [SubResource("Atlas_ascension_0"), SubResource("Atlas_ascension_1"), SubResource("Atlas_ascension_2"), SubResource("Atlas_ascension_3"), SubResource("Atlas_ascension_4"), SubResource("Atlas_ascension_5"), SubResource("Atlas_ascension_6"), SubResource("Atlas_ascension_7"), SubResource("Atlas_ascension_8"), SubResource("Atlas_ascension_9"), SubResource("Atlas_ascension_10"), SubResource("Atlas_ascension_11"), SubResource("Atlas_ascension_12"), SubResource("Atlas_ascension_13"), SubResource("Atlas_ascension_14"), SubResource("Atlas_ascension_15"), SubResource("Atlas_ascension_16"), SubResource("Atlas_ascension_17"), SubResource("Atlas_ascension_18"), SubResource("Atlas_ascension_19"), SubResource("Atlas_ascension_20"), SubResource("Atlas_ascension_21"), SubResource("Atlas_ascension_22"), SubResource("Atlas_ascension_23"), SubResource("Atlas_ascension_24"), SubResource("Atlas_ascension_25")]
 }
 tracks/8/type = "value"
 tracks/8/imported = false
@@ -1915,10 +2515,35 @@ tracks/8/keys = {
 "update": 0,
 "values": [Color(1, 1, 1, 0)]
 }
+tracks/9/type = "value"
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/path = NodePath("Visuals/Facing/Model/AscensionFx:self_modulate")
+tracks/9/interp = 0
+tracks/9/loop_wrap = true
+tracks/9/keys = {
+"times": PackedFloat32Array(0, 0.35, 1.3),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
+tracks/10/type = "value"
+tracks/10/imported = false
+tracks/10/enabled = true
+tracks/10/path = NodePath("Visuals/Facing/Model/AscensionFx:texture")
+tracks/10/interp = 0
+tracks/10/loop_wrap = true
+tracks/10/keys = {
+"times": PackedFloat32Array(0.35, 0.4, 0.45, 0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95, 1, 1.05, 1.1, 1.15, 1.2, 1.25),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [SubResource("Atlas_fx_ascension_0"), SubResource("Atlas_fx_ascension_1"), SubResource("Atlas_fx_ascension_2"), SubResource("Atlas_fx_ascension_3"), SubResource("Atlas_fx_ascension_4"), SubResource("Atlas_fx_ascension_5"), SubResource("Atlas_fx_ascension_6"), SubResource("Atlas_fx_ascension_7"), SubResource("Atlas_fx_ascension_8"), SubResource("Atlas_fx_ascension_9"), SubResource("Atlas_fx_ascension_10"), SubResource("Atlas_fx_ascension_11"), SubResource("Atlas_fx_ascension_12"), SubResource("Atlas_fx_ascension_13"), SubResource("Atlas_fx_ascension_14"), SubResource("Atlas_fx_ascension_15"), SubResource("Atlas_fx_ascension_16"), SubResource("Atlas_fx_ascension_17"), SubResource("Atlas_fx_ascension_18")]
+}
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_kokomi"]
 _data = {
 &"RESET": SubResource("Animation_reset"),
+&"ascension": SubResource("Animation_ascension"),
 &"attack": SubResource("Animation_attack"),
 &"cast": SubResource("Animation_cast"),
 &"death": SubResource("Animation_death"),
@@ -1949,6 +2574,9 @@ animation = &"power"
 [sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_idle_low"]
 animation = &"idle_low"
 
+[sub_resource type="AnimationNodeAnimation" id="AnimationNodeAnimation_ascension"]
+animation = &"ascension"
+
 [sub_resource type="AnimationNodeStateMachineTransition" id="Transition_start_idle"]
 advance_mode = 2
 
@@ -1972,6 +2600,10 @@ advance_mode = 1
 xfade_time = 0.05
 advance_mode = 1
 
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_idle_ascension"]
+xfade_time = 0.1
+advance_mode = 1
+
 [sub_resource type="AnimationNodeStateMachineTransition" id="Transition_idle_low_attack"]
 xfade_time = 0.1
 advance_mode = 1
@@ -1992,6 +2624,10 @@ advance_mode = 1
 xfade_time = 0.05
 advance_mode = 1
 
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_idle_low_ascension"]
+xfade_time = 0.1
+advance_mode = 1
+
 [sub_resource type="AnimationNodeStateMachineTransition" id="Transition_attack_hurt"]
 xfade_time = 0.03
 advance_mode = 1
@@ -2008,6 +2644,10 @@ advance_mode = 1
 xfade_time = 0.05
 advance_mode = 1
 
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_attack_ascension"]
+xfade_time = 0.05
+advance_mode = 1
+
 [sub_resource type="AnimationNodeStateMachineTransition" id="Transition_hurt_attack"]
 xfade_time = 0.05
 advance_mode = 1
@@ -2020,6 +2660,10 @@ xfade_time = 0.05
 advance_mode = 1
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="Transition_hurt_power"]
+xfade_time = 0.05
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_hurt_ascension"]
 xfade_time = 0.05
 advance_mode = 1
 
@@ -2039,6 +2683,10 @@ advance_mode = 1
 xfade_time = 0.05
 advance_mode = 1
 
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_cast_ascension"]
+xfade_time = 0.05
+advance_mode = 1
+
 [sub_resource type="AnimationNodeStateMachineTransition" id="Transition_power_attack"]
 xfade_time = 0.05
 advance_mode = 1
@@ -2052,6 +2700,30 @@ xfade_time = 0.05
 advance_mode = 1
 
 [sub_resource type="AnimationNodeStateMachineTransition" id="Transition_power_cast"]
+xfade_time = 0.05
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_power_ascension"]
+xfade_time = 0.05
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_ascension_attack"]
+xfade_time = 0.05
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_ascension_hurt"]
+xfade_time = 0.03
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_ascension_death"]
+xfade_time = 0.05
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_ascension_cast"]
+xfade_time = 0.05
+advance_mode = 1
+
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_ascension_power"]
 xfade_time = 0.05
 advance_mode = 1
 
@@ -2075,6 +2747,11 @@ xfade_time = 0.05
 switch_mode = 2
 advance_mode = 2
 
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_ascension_idle"]
+xfade_time = 0.05
+switch_mode = 2
+advance_mode = 2
+
 [sub_resource type="AnimationNodeStateMachineTransition" id="Transition_idle_idle_low"]
 xfade_time = 0.4
 advance_mode = 2
@@ -2092,6 +2769,8 @@ advance_mode = 0
 [sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_kokomi"]
 states/End/position = Vector2(628, 153)
 states/Start/position = Vector2(186, 153)
+states/ascension/node = SubResource("AnimationNodeAnimation_ascension")
+states/ascension/position = Vector2(470, 278)
 states/attack/node = SubResource("AnimationNodeAnimation_attack")
 states/attack/position = Vector2(327, 64)
 states/cast/node = SubResource("AnimationNodeAnimation_cast")
@@ -2106,7 +2785,7 @@ states/idle_low/node = SubResource("AnimationNodeAnimation_idle_low")
 states/idle_low/position = Vector2(327, 365)
 states/power/node = SubResource("AnimationNodeAnimation_power")
 states/power/position = Vector2(470, 64)
-transitions = ["Start", "idle", SubResource("Transition_start_idle"), "idle", "attack", SubResource("Transition_idle_attack"), "idle", "hurt", SubResource("Transition_idle_hurt"), "idle", "death", SubResource("Transition_idle_death"), "idle", "cast", SubResource("Transition_idle_cast"), "idle", "power", SubResource("Transition_idle_power"), "idle_low", "attack", SubResource("Transition_idle_low_attack"), "idle_low", "hurt", SubResource("Transition_idle_low_hurt"), "idle_low", "death", SubResource("Transition_idle_low_death"), "idle_low", "cast", SubResource("Transition_idle_low_cast"), "idle_low", "power", SubResource("Transition_idle_low_power"), "attack", "hurt", SubResource("Transition_attack_hurt"), "attack", "death", SubResource("Transition_attack_death"), "attack", "cast", SubResource("Transition_attack_cast"), "attack", "power", SubResource("Transition_attack_power"), "hurt", "attack", SubResource("Transition_hurt_attack"), "hurt", "death", SubResource("Transition_hurt_death"), "hurt", "cast", SubResource("Transition_hurt_cast"), "hurt", "power", SubResource("Transition_hurt_power"), "cast", "attack", SubResource("Transition_cast_attack"), "cast", "hurt", SubResource("Transition_cast_hurt"), "cast", "death", SubResource("Transition_cast_death"), "cast", "power", SubResource("Transition_cast_power"), "power", "attack", SubResource("Transition_power_attack"), "power", "hurt", SubResource("Transition_power_hurt"), "power", "death", SubResource("Transition_power_death"), "power", "cast", SubResource("Transition_power_cast"), "attack", "idle", SubResource("Transition_attack_idle"), "hurt", "idle", SubResource("Transition_hurt_idle"), "cast", "idle", SubResource("Transition_cast_idle"), "power", "idle", SubResource("Transition_power_idle"), "idle", "idle_low", SubResource("Transition_idle_idle_low"), "idle_low", "idle", SubResource("Transition_idle_low_idle"), "death", "End", SubResource("Transition_death_end")]
+transitions = ["Start", "idle", SubResource("Transition_start_idle"), "idle", "attack", SubResource("Transition_idle_attack"), "idle", "hurt", SubResource("Transition_idle_hurt"), "idle", "death", SubResource("Transition_idle_death"), "idle", "cast", SubResource("Transition_idle_cast"), "idle", "power", SubResource("Transition_idle_power"), "idle", "ascension", SubResource("Transition_idle_ascension"), "idle_low", "attack", SubResource("Transition_idle_low_attack"), "idle_low", "hurt", SubResource("Transition_idle_low_hurt"), "idle_low", "death", SubResource("Transition_idle_low_death"), "idle_low", "cast", SubResource("Transition_idle_low_cast"), "idle_low", "power", SubResource("Transition_idle_low_power"), "idle_low", "ascension", SubResource("Transition_idle_low_ascension"), "attack", "hurt", SubResource("Transition_attack_hurt"), "attack", "death", SubResource("Transition_attack_death"), "attack", "cast", SubResource("Transition_attack_cast"), "attack", "power", SubResource("Transition_attack_power"), "attack", "ascension", SubResource("Transition_attack_ascension"), "hurt", "attack", SubResource("Transition_hurt_attack"), "hurt", "death", SubResource("Transition_hurt_death"), "hurt", "cast", SubResource("Transition_hurt_cast"), "hurt", "power", SubResource("Transition_hurt_power"), "hurt", "ascension", SubResource("Transition_hurt_ascension"), "cast", "attack", SubResource("Transition_cast_attack"), "cast", "hurt", SubResource("Transition_cast_hurt"), "cast", "death", SubResource("Transition_cast_death"), "cast", "power", SubResource("Transition_cast_power"), "cast", "ascension", SubResource("Transition_cast_ascension"), "power", "attack", SubResource("Transition_power_attack"), "power", "hurt", SubResource("Transition_power_hurt"), "power", "death", SubResource("Transition_power_death"), "power", "cast", SubResource("Transition_power_cast"), "power", "ascension", SubResource("Transition_power_ascension"), "ascension", "attack", SubResource("Transition_ascension_attack"), "ascension", "hurt", SubResource("Transition_ascension_hurt"), "ascension", "death", SubResource("Transition_ascension_death"), "ascension", "cast", SubResource("Transition_ascension_cast"), "ascension", "power", SubResource("Transition_ascension_power"), "attack", "idle", SubResource("Transition_attack_idle"), "hurt", "idle", SubResource("Transition_hurt_idle"), "cast", "idle", SubResource("Transition_cast_idle"), "power", "idle", SubResource("Transition_power_idle"), "ascension", "idle", SubResource("Transition_ascension_idle"), "idle", "idle_low", SubResource("Transition_idle_idle_low"), "idle_low", "idle", SubResource("Transition_idle_low_idle"), "death", "End", SubResource("Transition_death_end")]
 
 [node name="KokomiCombat" type="Node2D"]
 
@@ -2164,6 +2843,13 @@ centered = false
 offset = Vector2(-159, -440)
 scale = Vector2(0.5, 0.5)
 
+[node name="Ascension" type="Sprite2D" parent="Visuals/Facing/Model"]
+self_modulate = Color(1, 1, 1, 0)
+texture = SubResource("Atlas_ascension_0")
+centered = false
+offset = Vector2(-170, -436)
+scale = Vector2(0.5, 0.5)
+
 [node name="AttackFx" type="Sprite2D" parent="Visuals/Facing/Model"]
 unique_name_in_owner = true
 self_modulate = Color(1, 1, 1, 0)
@@ -2171,6 +2857,16 @@ material = SubResource("ShaderMaterial_element")
 texture = SubResource("Atlas_fx_attack_0")
 centered = false
 offset = Vector2(89, -370)
+scale = Vector2(0.5, 0.5)
+metadata/rest_element = "hydro"
+
+[node name="AscensionFx" type="Sprite2D" parent="Visuals/Facing/Model"]
+unique_name_in_owner = true
+self_modulate = Color(1, 1, 1, 0)
+material = SubResource("ShaderMaterial_element")
+texture = SubResource("Atlas_fx_ascension_0")
+centered = false
+offset = Vector2(-254, -578)
 scale = Vector2(0.5, 0.5)
 metadata/rest_element = "hydro"
 

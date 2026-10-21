@@ -7,15 +7,17 @@ text comes out. Furina's generator (tools/furina_rig/rig.py) is the template,
 on Varka's primitives (the paged, trimmed AtlasTextures, the tracks, the
 animation blocks); what differs is what her manifest differs in:
 
-  * PHASE A HAS NO SIGNATURE CLIP: the router's seven states and nothing
-    more (Furina has `rejoice`, Varka `ascension`). A card clip, when her
-    build is final, adds a state here as theirs did.
-  * THE ELEMENT LAYER is the attack's alone: the water jet off her open hand
-    (`fx.attack`), coloured by one scene-local ShaderMaterial that
+  * THE SIGNATURE CLIP is `ascension` (Nereid's Ascension, art polish
+    2026-10-21), the state name Varka's Four Winds' Ascension already sends
+    (CardPlayMotion.AscensionTrigger), so the router needs no new row.
+  * THE ELEMENT LAYERS are the attack's water jet off her open hand
+    (`fx.attack`) and the ascension's tide, a ring of water and jellyfish
+    lights round her feet (`fx.ascension`), coloured by one scene-local
+    ShaderMaterial that
     KleeMod.Vfx.ElementTrail sets from the played card's element. It rests at
     Hydro, hers, and a card with no element keeps it there (the node's
     `rest_element`). ElementTrail needs no change: it finds %AttackFx in any
-    scene that has one.
+    scene that has one, and %AscensionFx likewise.
   * NO STAGE EFFECTS: her Plans and the Bake-Kurage draw elsewhere
     (bake_kurage.tscn, untouched).
 
@@ -44,18 +46,19 @@ MERCHANT_SCENE = MODEL_DIR / "merchant_character.tscn"
 FACING = "Visuals/Facing"
 FRAME_DIR = "res://kokomi/model/frames"
 
-#: The router contract (CreatureAnimationRouter.cs).
-ANIMATION_ORDER = ("idle", "attack", "hurt", "death", "cast", "power", "idle_low")
+#: The router contract (CreatureAnimationRouter.cs) plus `ascension`.
+ANIMATION_ORDER = ("idle", "attack", "hurt", "death", "cast", "power", "idle_low", "ascension")
 #: The one-shots, at the lengths the clips are rendered to
 #: (tools/char_render/kokomi_clips.py); the death seam measures the clip, so
 #: ModdedPlayerDeathSeam follows the death's 2.2 s on its own.
-ONE_SHOT_LENGTHS = {"attack": 1.0, "hurt": 0.8, "death": 2.2, "cast": 1.0, "power": 1.0}
+ONE_SHOT_LENGTHS = {"attack": 1.0, "hurt": 0.8, "death": 2.2, "cast": 1.0, "power": 1.0, "ascension": 1.3}
 #: Sheet name (manifest key) -> its Sprite2D under Model.
 SHEET_NODE = {"idle": "Idle", "idle_low": "IdleLow", "attack": "Attack", "hurt": "Hurt",
-              "death": "Death", "cast": "Cast"}
-#: Clip -> the Sprite2D under Model that draws its element layer. A unique
-#: name: KleeMod.Vfx.ElementTrail finds it as %AttackFx, as on Varka and Furina.
-FX_NODE = {"attack": "AttackFx"}
+              "death": "Death", "cast": "Cast", "ascension": "Ascension"}
+#: Clip -> the Sprite2D under Model that draws its element layer. Unique
+#: names: KleeMod.Vfx.ElementTrail finds them as %AttackFx and %AscensionFx,
+#: as on Varka.
+FX_NODE = {"attack": "AttackFx", "ascension": "AscensionFx"}
 #: Her element, which the attack layer rests at and a card with no element
 #: keeps (ElementTrail reads the node's `rest_element`).
 REST_ELEMENT = "hydro"
@@ -181,13 +184,13 @@ def reset_tracks(anims, clips: dict[str, Clip]) -> list[Track]:
 
 
 # ---------------------------------------------------------------------------
-# the state machine (Furina's graph without a signature state)
+# the state machine (Varka's graph, `ascension` included)
 # ---------------------------------------------------------------------------
 SM_STATES = {"idle": (327, 153), "attack": (327, 64), "hurt": (327, 278), "death": (470, 153),
-             "cast": (186, 64), "power": (470, 64), "idle_low": (327, 365)}
-SM_ONE_SHOTS = ("attack", "hurt", "cast", "power")
-SM_SOURCES = ("idle", "idle_low", "attack", "hurt", "cast", "power")
-SM_TARGETS = ("attack", "hurt", "death", "cast", "power")
+             "cast": (186, 64), "power": (470, 64), "idle_low": (327, 365), "ascension": (470, 278)}
+SM_ONE_SHOTS = ("attack", "hurt", "cast", "power", "ascension")
+SM_SOURCES = ("idle", "idle_low", "attack", "hurt", "cast", "power", "ascension")
+SM_TARGETS = ("attack", "hurt", "death", "cast", "power", "ascension")
 
 
 def xfade(src: str, dst: str) -> float:
@@ -198,7 +201,7 @@ def xfade(src: str, dst: str) -> float:
         return 0.0
     if dst == "hurt":
         return 0.03
-    if dst == "attack" and src in ("idle", "idle_low"):
+    if dst in ("attack", "ascension") and src in ("idle", "idle_low"):
         return 0.1
     if src == "hurt" and dst == "idle":
         return 0.1
