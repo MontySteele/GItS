@@ -77,15 +77,18 @@ def test_her_pool_is_seventy_eight(overhaul):
         "rare", "rare", "uncommon", "uncommon", "uncommon"]
 
 
-def test_coral_crash_is_body_slam_and_tidal_rebuke_keeps_no_exhaust(overhaul):
+def test_coral_crash_reads_intent_and_tidal_rebuke_keeps_no_exhaust(
+        overhaul):
     crash = _row("proto_kk_coral_crash")
-    # The Kokomi level pass (2026-10-12): Body Slam's price, 1 [0], and the
-    # "+4" upgrade went.
+    # The Kokomi taste audit (2026-10-21): a Read the Tide attack, 8 [11]
+    # and Plan 8 [11] to each enemy that intends to attack (was Body Slam).
     assert (crash.rarity, crash.cost, _up("proto_kk_coral_crash").cost) == (
-        "common", 1, 0)
-    assert crash.effects[0]["amount_formula"]["base"] == 0
-    assert _up("proto_kk_coral_crash").effects[0]["amount_formula"] == {
-        "base": 0, "per": 1, "count": "player_block"}
+        "common", 1, 1)
+    assert crash.effects == [{"op": "damage", "amount": 8, "target": "enemy"}]
+    assert crash.plan == [{"op": "damage", "amount": 8,
+                           "target": "enemies_intending_attack"}]
+    up = _up("proto_kk_coral_crash")
+    assert (up.effects[0]["amount"], up.plan[0]["amount"]) == (11, 11)
     rebuke = _row("proto_kk_tidal_rebuke")
     # The Kokomi level pass (2026-10-12): 2 [1], and Retain.
     assert (rebuke.rarity, rebuke.cost, _up("proto_kk_tidal_rebuke").cost) == (
@@ -141,25 +144,22 @@ def test_spring_tide_is_cut_and_its_kind_with_it(overhaul):
     assert not hasattr(kokomi_plan, "resolve_all_now")
 
 
-def test_seas_reproach_answers_her_weak_and_vulnerable(overhaul):
+def test_seas_reproach_no_longer_answers_her_weak_and_vulnerable(overhaul):
+    """The Kokomi taste audit (2026-10-21): Sea's Reproach reads intent at
+    the start of her turn (`test_kokomi_taste_audit_2026_10_21.py`); an
+    application of hers deals nothing now. Cost 1 both faces."""
     st = kokomi_state(enemies=[make_enemy(hp=300, intents=QUIET)])
     enemy = st.enemies[0]
     st.player.powers[kokomi_plan.SEAS_REPROACH] = 3
     powers.apply_power(st, enemy, "weak", 1, applier=st.player)
     powers.apply_power(st, enemy, "vulnerable", 2, applier=st.player)
-    assert len(_events(st, "plan_seas_reproach")) == 2
-    assert enemy.hp < 300
-    hp = enemy.hp
-    # Not an enemy's application, not one on her, not another power.
-    powers.apply_power(st, enemy, "weak", 1, applier=enemy)
-    powers.apply_power(st, st.player, "weak", 1, applier=st.player)
-    powers.apply_power(st, enemy, "poison", 1, applier=st.player)
-    assert enemy.hp == hp
-    # The Kokomi level pass (2026-10-12): 5 [7] damage, cost 1 both faces.
+    assert _events(st, "plan_seas_reproach") == []
+    assert enemy.hp == 300
     assert (_row("proto_kk_seas_reproach").cost,
             _up("proto_kk_seas_reproach").cost) == (1, 1)
-    assert _row("proto_kk_seas_reproach").effects[0]["amount"] == 5
-    assert _up("proto_kk_seas_reproach").effects[0]["amount"] == 7
+    assert _row("proto_kk_seas_reproach").effects[0]["amount"] == 1
+    assert (_up("proto_kk_seas_reproach").effects[0]["power"]
+            == kokomi_plan.SEAS_REPROACH_PLUS)
 
 
 def test_tactical_relay_plans_energy_for_each_player(overhaul):

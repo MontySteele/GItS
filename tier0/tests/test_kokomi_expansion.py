@@ -227,15 +227,19 @@ def test_ceremonial_garment_adds_per_weak_and_vulnerable_stack(overhaul):
         st, _row("proto_kk_coral_bulwark"), enemy) == 0
 
 
-def test_suffocating_deep_doubles_weak_and_vulnerable(overhaul):
-    enemy = make_enemy(hp=300)
-    st = kokomi_state(enemies=[enemy])
-    powers.apply_power(st, enemy, "weak", 2, applier=st.player)
-    powers.apply_power(st, enemy, "vulnerable", 3, applier=st.player)
+def test_suffocating_deep_debuffs_only_the_enemies_that_intend_to_attack(
+        overhaul):
+    """The Kokomi taste audit (2026-10-21): "Apply 2 Weak and 2 Vulnerable to
+    each enemy that intends to attack." (was 1 of each on every enemy, then
+    doubled)."""
+    attacker = make_enemy(hp=300)
+    idle = make_enemy(hp=300, intents=QUIET)
+    st = kokomi_state(enemies=[attacker, idle])
+    powers.apply_power(st, attacker, "weak", 2, applier=st.player)
     _write(st, "proto_kk_suffocating_deep")
-    # The Rare pass (2026-10-04): 1 of each first, then the doubling.
-    assert enemy.powers.get("weak") == 6
-    assert enemy.powers.get("vulnerable") == 8
+    assert attacker.powers.get("weak") == 4
+    assert attacker.powers.get("vulnerable") == 2
+    assert not idle.powers.get("weak") and not idle.powers.get("vulnerable")
 
 
 def test_suffocating_deep_never_doubles_nothing(overhaul):
@@ -250,13 +254,16 @@ def test_suffocating_deep_never_doubles_nothing(overhaul):
 
 # --- Guard (Dusk retired 2026-10-12) ---------------------------------------------------------------------
 
-def test_coral_crash_deals_her_block(overhaul):
+def test_coral_crash_deals_eight_now(overhaul):
+    """The Kokomi taste audit (2026-10-21): "Deal 8 [11] Hydro damage." (was
+    Body Slam). Played face-up into an attacker; its Plan line is pinned in
+    `test_kokomi_taste_audit_2026_10_21.py`."""
     enemy = make_enemy(hp=300)
     st = kokomi_state(enemies=[enemy])
     st.player.block = 17
     before = enemy.hp
     _write(st, "proto_kk_coral_crash")
-    assert before - enemy.hp == 17
+    assert before - enemy.hp == 8
 
 
 def test_evening_watch_blocks_per_enemy_intending_to_attack(overhaul):
@@ -282,35 +289,6 @@ def test_brace_for_the_tide_doubles_block_now(overhaul):
     assert st.player.block == 26
 
 
-def test_watatsumis_grace_keeps_up_to_the_cap(overhaul):
-    st = kokomi_state()
-    assert kokomi_plan.grace_keeps(st) is None
-    st.player.powers[kokomi_plan.WATATSUMIS_GRACE] = 10
-    st.player.block = 25
-    assert kokomi_plan.grace_keeps(st) == 10
-    st.player.block = 6
-    assert kokomi_plan.grace_keeps(st) == 6
-
-
-def test_grace_through_a_real_turn_boundary(overhaul):
-    """The whole fight loop: Block above the cap is lost at the clear."""
-    seen = []
-
-    def pilot(state):
-        if state.turn == 1:
-            state.player.powers[kokomi_plan.WATATSUMIS_GRACE] = 10
-            state.player.block = 40
-        elif state.turn == 2 and not seen:
-            seen.append(state.player.block)
-        return None
-
-    enemy = make_enemy(hp=500, intents=QUIET)
-    player = kokomi_state().player
-    player.hp = player.max_hp = 80
-    combat.run_fight(player, [enemy], pilot, seed=1)
-    assert seen and seen[0] == 10
-
-
 def test_tidal_riposte_stores_its_bonus_per_fully_blocked_attack(overhaul):
     """Kokomi card paper v2 (2026-10-18): no damage back; a fully Blocked
     attack (all its hits) stores the bonus, and attacks stack it."""
@@ -329,17 +307,17 @@ def test_tidal_riposte_stores_its_bonus_per_fully_blocked_attack(overhaul):
 
 # --- Plan volume ------------------------------------------------------------------------
 
-def test_shoal_call_is_blade_dance(overhaul):
-    """The jellyfish build (2026-10-12): the base game's Blade Dance. Cost 1,
-    Exhaust, "Add 3 [4] Stings to your hand." -- plain Stings on both faces;
-    the upgrade adds a fourth. Common since the Kokomi review (2026-10-13),
-    as Blade Dance is."""
+def test_shoal_call_plans_its_stings(overhaul):
+    """The Kokomi taste audit (2026-10-21): "Plan 3 [4] Stings." Cost 1,
+    Exhaust, Common, as before; the Stings go into the Plans queue, not her
+    Hand."""
     row = _row("proto_kk_shoal_call")
     assert row.cost == 1 and row.exhaust and row.rarity == "common"
     st = kokomi_state()
     _write(st, "proto_kk_shoal_call")
-    assert [c.id for c in st.player.hand] == [kokomi_plan.STING_ID] * 3
+    assert st.player.hand == []
+    assert [e.card_id for e in st.kk_plan_queue] == [kokomi_plan.STING_ID] * 3
     st = kokomi_state()
     _write(st, _up("proto_kk_shoal_call"))
-    assert [c.id for c in st.player.hand] == [kokomi_plan.STING_ID] * 4
+    assert [e.card_id for e in st.kk_plan_queue] == [kokomi_plan.STING_ID] * 4
 

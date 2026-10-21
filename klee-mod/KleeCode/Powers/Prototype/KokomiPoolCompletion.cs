@@ -53,44 +53,72 @@ public static class KokomiPoolCompletion
 }
 
 /// <summary>
-/// Sea's Reproach (pool completion): "Whenever you apply Weak or Vulnerable to
-/// an enemy, deal 3 damage to it." Silent's Sadistic Nature at her pace: a
-/// POSITIVE application she made (<c>applier == Owner</c>), once per enemy it
-/// lands on, Hydro and unpowered (Tidal Riposte's hit). The hook fans to every
-/// model, so the power asks whose application it was. Sim twin:
-/// <c>kokomi_plan.seas_reproach</c>, from <c>refpowers.on_power_applied</c>.
+/// Sea's Reproach. THE KOKOMI TASTE AUDIT (2026-10-21, review/active/kokomi-
+/// taste-audit-2026-10-21.md, pick 3 (a)): "At the start of your turn, apply
+/// 1 Weak to each enemy that intends to attack [and deal 5 damage to it]."
+/// A Read the Tide power (was "Whenever you apply Weak or Vulnerable to an
+/// enemy, deal 5 [7] damage to it", Sadistic Nature). Read ONCE, at the
+/// start of her turn AFTER that turn's Plans are carried out
+/// (<see cref="Signal"/>, from <c>ProtoBakeKuragePower.AfterPlayerTurnStart</c>
+/// after Dawn Tide), so the intents are the coming enemy turn's. One power
+/// for both versions (<see cref="UpgradeTwinPower"/>): every copy applies
+/// <see cref="Weak"/>, each upgraded copy also deals <see cref="Damage"/>,
+/// unelemented and unpowered (Grand Strategist's hit). Sim twin:
+/// <c>kokomi_plan.seas_reproach</c>.
 /// </summary>
-public sealed class SeasReproachPower : PowerModel, ILocalizationProvider
+public sealed class SeasReproachPower : UpgradeTwinPower, ILocalizationProvider
 {
+    /// <summary>Weak per copy. Mirrors <c>C.KOKOMI_SEAS_REPROACH_WEAK</c>.</summary>
+    public const int Weak = 1;
+
+    /// <summary>Damage per upgraded copy. Mirrors
+    /// <c>C.KOKOMI_SEAS_REPROACH_DAMAGE</c>.</summary>
+    public const int Damage = 5;
+
+    /// <summary>The badge prints the plain card's sentence; the damage is on
+    /// the upgraded card (Battle Formation's reason).</summary>
     public List<(string, string)>? Localization => new()
     {
         ("title", "Sea's Reproach"),
         ("description",
-            "Whenever you apply [gold]Weak[/gold] or [gold]Vulnerable[/gold] "
-          + "to an enemy, deal [blue]{Amount}[/blue] damage to it."),
+            "At the start of your turn, apply [blue]{Amount}[/blue] "
+          + "[gold]Weak[/gold] to each enemy that intends to attack."),
     };
 
-    public override PowerType Type => PowerType.Buff;
+    /// <summary>What the copies apply and deal to each attacker: (Weak,
+    /// damage). PURE.</summary>
+    public static (int Weak, int Damage) Payout(int copies, int upgradedCopies) =>
+        (System.Math.Max(0, copies) * Weak,
+         System.Math.Max(0, upgradedCopies) * Damage);
 
-    public override PowerStackType StackType => PowerStackType.Counter;
-
-    /// <summary>Does this change pay? Weak or Vulnerable, gained, on a living
-    /// enemy, put there by <paramref name="owner"/>.</summary>
-    public static bool Pays(PowerModel? power, decimal amount,
-                            Creature? applier, Creature? owner) =>
-        power is WeakPower or VulnerablePower
-        && amount > 0m
-        && owner != null && applier == owner
-        && power.Owner is { IsEnemy: true, IsDead: false };
-
-    public override async Task AfterPowerAmountChanged(
-        PlayerChoiceContext choiceContext, PowerModel power, decimal amount,
-        Creature? applier, CardModel? cardSource)
+    public static async Task Signal(PlayerChoiceContext choiceContext,
+                                    Creature? kokomi)
     {
-        if (!Pays(power, amount, applier, Owner) || Amount <= 0) return;
-        if (!KokomiOverhaul.LiveFor(Owner)) return;
-        await ElementalHit.Deal(choiceContext, power.Owner!, Element.Hydro,
-                                (int)Amount, Owner!, powered: false);
+        if (!KokomiOverhaul.LiveFor(kokomi)) return;
+        var powers = kokomi!.Powers.OfType<SeasReproachPower>().ToList();
+        var copies = (int)powers.Sum(p => p.Amount);
+        if (copies <= 0 || kokomi.CombatState is not { } combat) return;
+        var (weak, damage) = Payout(copies, powers.Sum(p => p.UpgradedCopies));
+        var attackers = combat.HittableEnemies
+            .Where(e => !e.IsDead)
+            .Where(CurtainCallHooks.IntendsAttack)
+            .ToList();
+        foreach (var enemy in attackers)
+        {
+            if (enemy.IsDead) continue;
+            if (weak > 0)
+            {
+                await PowerCmd.Apply<WeakPower>(choiceContext, enemy, weak,
+                                                applier: kokomi,
+                                                cardSource: null);
+            }
+            if (damage > 0 && !enemy.IsDead)
+            {
+                await ElementalHit.DealUnelemented(choiceContext, enemy,
+                                                   damage, kokomi,
+                                                   powered: false);
+            }
+        }
     }
 }
 

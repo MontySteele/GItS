@@ -880,6 +880,10 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # and before Dawn Tide (`KurageVanguardPower.Signal`).
     kokomi_plan.kurage_vanguard(state)
     kokomi_plan.dawn_tide(state)
+    # KOKOMI TASTE AUDIT (2026-10-21): Sea's Reproach reads the intents once
+    # the morning's Plans are carried out (`SeasReproachPower.Signal`, after
+    # Dawn Tide).
+    kokomi_plan.seas_reproach(state)
     kokomi_plan.turn_start_generators(state)
     _settle_phases(state)
     _revive_player_if_needed(state)
@@ -943,6 +947,12 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     refpowers.before_side_turn_end_early(state)
     # (Sit Tight's end-of-turn Block paid here, ahead of the shipped
     # triggers, until its dead power left: Klee text-only fixes, 2026-10-13.)
+    # KOKOMI TASTE AUDIT (2026-10-21): her end of turn, Kurage Bloom's
+    # planned Sting then Watatsumi's Grace's Block per Plan waiting
+    # (`ProtoBakeKuragePower.BeforeSideTurnEnd`, the same order). AHEAD of
+    # the shipped triggers, as a power tenant of that broadcast runs ahead of
+    # the model-driven `TurnEndSequencer` (the Bond of Life pays after it).
+    kokomi_plan.turn_end(state)
     effects.player_turn_end_triggers(state)      # Oz, Sparks 'n' Splash, ...
     # (C.KLEE_OVERHAUL). The overhaul's end of turn: Alice's
     # window closes, Patience, Klee! grows and the one-turn windows close.

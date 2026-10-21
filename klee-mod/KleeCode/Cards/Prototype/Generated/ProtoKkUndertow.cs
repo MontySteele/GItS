@@ -51,7 +51,7 @@ public sealed class ProtoKkUndertow : CustomCardModel, IElementalCard, ICharacte
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Undertow"),
-        ("description", "Deal {PlainDamage:diff()} [gold]Hydro[/gold] damage. If the enemy has a debuff, deal {DebuffDamage:diff()} instead."),
+        ("description", "Deal {PlainDamage:diff()} [gold]Hydro[/gold] damage. If the enemy intends to attack, deal {AttackerDamage:diff()} instead."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -59,9 +59,9 @@ public sealed class ProtoKkUndertow : CustomCardModel, IElementalCard, ICharacte
         {
             new CalculationBaseVar(7m),
             new ExtraDamageVar(3m),
-            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (_, target) => target != null && KokomiOverhaulKit.HasDebuff(target) ? 1 : 0),
+            new FrontFoldedDamageVar(ValueProp.Move).WithMultiplier(static (_, target) => target != null && CurtainCallHooks.IntendsAttack(target) ? 1 : 0),
             new FoldedDamageVar("PlainDamage", 7m, ValueProp.Move),
-            new FoldedDamageVar("DebuffDamage", 10m, ValueProp.Move)
+            new FoldedDamageVar("AttackerDamage", 10m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -85,6 +85,6 @@ public sealed class ProtoKkUndertow : CustomCardModel, IElementalCard, ICharacte
     {
         DynamicVars.CalculationBase.UpgradeValueBy(3m);
         DynamicVars["PlainDamage"].UpgradeValueBy(3m);
-        DynamicVars["DebuffDamage"].UpgradeValueBy(3m);
+        DynamicVars["AttackerDamage"].UpgradeValueBy(3m);
     }
 }

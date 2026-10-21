@@ -1,5 +1,11 @@
 """`EB-624`: Undertow's face is the base game's conditional again.
 
+THE KOKOMI TASTE AUDIT (2026-10-21, review/active/kokomi-taste-audit-
+2026-10-21.md, pick 3 (a)) moved the rider from "If the enemy has a debuff"
+to "If the enemy intends to attack" (`bonus_vs_attacker`, second printed
+number `AttackerDamage`). Everything below about two folded numbers and one
+hit holds as written; the debuff words are history.
+
 [USER]'s Kokomi act-1 run of 2026-09-07 read `EB-598`'s one-number face --
 "Deal 10 damage, already including 3 if the enemy has a debuff" -- as a
 sentence arguing with itself. It was not wrong; it was `EB-441` working, the
@@ -54,7 +60,7 @@ def _undertow():
                 if c.id == "proto_kk_undertow")
 
 
-def _delivered(debuffed: bool, weak: bool, vulnerable: bool) -> int:
+def _delivered(attacking: bool, weak: bool, vulnerable: bool) -> int:
     from tier0.tests.conftest import make_state
 
     state = make_state()
@@ -62,10 +68,10 @@ def _delivered(debuffed: bool, weak: bool, vulnerable: bool) -> int:
     if weak:
         state.player.powers["weak"] = 1
     enemy = state.enemies[0]
+    enemy.intents = ([{"kind": "attack", "amount": 5}] if attacking
+                     else [{"kind": "block", "amount": 5}])
     if vulnerable:
         enemy.powers["vulnerable"] = 2
-    elif debuffed:
-        enemy.powers["poison"] = 3
     hp = enemy.hp
     effects.resolve_card(state, _undertow())
     return hp - enemy.hp
@@ -73,8 +79,8 @@ def _delivered(debuffed: bool, weak: bool, vulnerable: bool) -> int:
 
 def test_the_two_printed_numbers_are_the_two_the_card_delivers(overhaul):
     """The bare board: the face's 7 and 10 are the hit's 7 and 10."""
-    assert _delivered(debuffed=False, weak=False, vulnerable=False) == 7
-    assert _delivered(debuffed=True, weak=False, vulnerable=False) == 10
+    assert _delivered(attacking=False, weak=False, vulnerable=False) == 7
+    assert _delivered(attacking=True, weak=False, vulnerable=False) == 10
 
 
 def test_both_halves_fold_a_weak_kokomi_and_a_vulnerable_target(overhaul):
@@ -88,12 +94,11 @@ def test_both_halves_fold_a_weak_kokomi_and_a_vulnerable_target(overhaul):
     C#'s -- `SimDamagePipeline.TargetMods` is named for it -- and this is the
     arithmetic both are held to."""
     # Weak 1 on Kokomi, Vulnerable 2 on the body. Weak cuts the dealer's side,
-    # Vulnerable raises the target's, and the debuff is bought by the same
-    # Vulnerable.
-    with_rider = _delivered(debuffed=True, weak=True, vulnerable=True)
-    # The same fold with nothing on the body: the rider is unbought and no
-    # target term applies.
-    without_rider = _delivered(debuffed=False, weak=True, vulnerable=False)
+    # Vulnerable raises the target's, and the rider is bought by its intent.
+    with_rider = _delivered(attacking=True, weak=True, vulnerable=True)
+    # The same fold on a body that does not intend to attack: the rider is
+    # unbought.
+    without_rider = _delivered(attacking=False, weak=True, vulnerable=True)
 
     # One hit either way -- two would be two aura applications and two
     # reaction rolls, which is `EB-441`'s standing reason for the rider shape.
@@ -115,20 +120,20 @@ def test_the_face_is_the_base_games_conditional(overhaul):
     rows = sheet["cards"] if isinstance(sheet, dict) else sheet
     row = next(r for r in rows if r["id"] == "proto_kk_undertow")
     face = row["description"]
-    assert face == ("Deal {PlainDamage:diff()} [gold]Hydro[/gold] damage. If the enemy has a "
-                    "debuff, deal {DebuffDamage:diff()} instead.")
+    assert face == ("Deal {PlainDamage:diff()} [gold]Hydro[/gold] damage. If the enemy "
+                    "intends to attack, deal {AttackerDamage:diff()} instead.")
     assert "already including" not in face
 
     src = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
            / "Generated" / "ProtoKkUndertow.cs").read_text(encoding="utf-8")
     assert face in src
     assert 'new FoldedDamageVar("PlainDamage", 7m, ValueProp.Move)' in src
-    assert 'new FoldedDamageVar("DebuffDamage", 10m, ValueProp.Move)' in src
+    assert 'new FoldedDamageVar("AttackerDamage", 10m, ValueProp.Move)' in src
     # The RULE is untouched: one hit, through the calculated var the rider's
     # multiplier decides.
     assert src.count("DamageCmd.Attack") == 1
     assert "DamageCmd.Attack(DynamicVars.CalculatedDamage)" in src
-    assert "KokomiOverhaulKit.HasDebuff(target) ? 1 : 0" in src
+    assert "CurtainCallHooks.IntendsAttack(target) ? 1 : 0" in src
 
 
 def test_the_upgrade_moves_every_number_the_row_carries(overhaul):
@@ -139,6 +144,6 @@ def test_the_upgrade_moves_every_number_the_row_carries(overhaul):
            / "Generated" / "ProtoKkUndertow.cs").read_text(encoding="utf-8")
     assert "DynamicVars.CalculationBase.UpgradeValueBy(3m);" in src
     assert 'DynamicVars["PlainDamage"].UpgradeValueBy(3m);' in src
-    assert 'DynamicVars["DebuffDamage"].UpgradeValueBy(3m);' in src
+    assert 'DynamicVars["AttackerDamage"].UpgradeValueBy(3m);' in src
 
 

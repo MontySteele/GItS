@@ -101,16 +101,17 @@ def test_the_generators_are_at_the_silents_rates(cid, base, up):
         base, up)
 
 
-def test_shoal_call_is_blade_dance_with_plain_stings():
+def test_shoal_call_plans_plain_stings():
     row = loader.get_card("proto_kk_shoal_call")
-    # Common since the Kokomi review (2026-10-13).
+    # Common since the Kokomi review (2026-10-13). The Kokomi taste audit
+    # (2026-10-21): it Plans its Stings (was Blade Dance).
     assert row.cost == 1 and row.exhaust and row.rarity == "common"
-    assert row.effects == [{"op": "kokomi", "kind": "shoal_call",
+    assert row.effects == [{"op": "kokomi", "kind": "plan_stings",
                             "amount": 3}]
     assert _up("proto_kk_shoal_call").effects[0]["amount"] == 4
     st = kokomi_state()
     _play(st, card("proto_kk_shoal_call"))
-    assert [c.id for c in st.player.hand] == [kokomi_plan.STING_ID] * 3
+    assert [e.card_id for e in st.kk_plan_queue] == [kokomi_plan.STING_ID] * 3
 
 
 # --- Endless Shoal --------------------------------------------------------------

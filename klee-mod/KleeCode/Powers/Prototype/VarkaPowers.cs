@@ -870,6 +870,17 @@ public sealed class AbsoluteZeroPower : UpgradeTwinPower, ILocalizationProvider
           + "{Upgraded:cond:>0? plus 3 x [blue]{}[/blue]|} to it."),
     };
 
+    /// <summary>Does this change pay? Weak or Vulnerable, gained, on a living
+    /// enemy, put there by <paramref name="owner"/>. (Sea's Reproach's test
+    /// until the Kokomi taste audit, 2026-10-21, moved it to intent.)
+    /// </summary>
+    public static bool Pays(PowerModel? power, decimal amount,
+                            Creature? applier, Creature? owner) =>
+        power is WeakPower or VulnerablePower
+        && amount > 0m
+        && owner != null && applier == owner
+        && power.Owner is { IsEnemy: true, IsDead: false };
+
     /// <summary>One application's damage: the Cryo Oath per stack, plus 3
     /// per upgraded stack. PURE.</summary>
     public static int DamageFor(int cryoOath, int stacks, int upgraded = 0) =>
@@ -880,7 +891,7 @@ public sealed class AbsoluteZeroPower : UpgradeTwinPower, ILocalizationProvider
         PlayerChoiceContext choiceContext, PowerModel power, decimal amount,
         Creature? applier, CardModel? cardSource)
     {
-        if (!SeasReproachPower.Pays(power, amount, applier, Owner)) return;
+        if (!Pays(power, amount, applier, Owner)) return;
         if (!VarkaOath.Live(Owner)) return;
         var damage = DamageFor(VarkaOath.Count(Owner, Element.Cryo),
                                (int)Amount, UpgradedCopies);

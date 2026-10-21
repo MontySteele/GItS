@@ -237,6 +237,9 @@ MIRRORED: dict[str, object] = {
     # THE POOL OVERHAUL (2026-10-13): Battle Formation's three numbers.
     "BattleFormationPower.Threshold": C.KOKOMI_BATTLE_FORMATION_THRESHOLD,
     "BattleFormationPower.Draw": C.KOKOMI_BATTLE_FORMATION_DRAW,
+    # Kokomi taste audit (2026-10-21): Sea's Reproach's Weak and damage.
+    "SeasReproachPower.Weak": C.KOKOMI_SEAS_REPROACH_WEAK,
+    "SeasReproachPower.Damage": C.KOKOMI_SEAS_REPROACH_DAMAGE,
     # THE FURINA STAGE (`furina_stage.FURINA_STAGE`; `EB-723` /
     # `EB-724` / `EB-725`, R269). Same terms as every arm above and for the
     # same reason -- quarantined is not exempt. These NINE numbers ARE the

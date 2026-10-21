@@ -174,16 +174,6 @@ def test_kelp_wall_says_attack_damage():
         _row("proto_kk_kelp_wall")["description"])
 
 
-def test_seas_reproach_fires_on_weak_a_plan_applies():
-    st = kokomi_state()
-    st.player.powers[kokomi_plan.SEAS_REPROACH] = 5
-    hp = st.enemies[0].hp
-    write(st, card("proto_kk_slack_water"))
-    carry_out(st)
-    assert st.enemies[0].powers.get("weak", 0) > 0
-    assert st.enemies[0].hp < hp
-
-
 def test_heizou_counts_the_attacks_before_his_own_hit():
     """His count is read when the hit is computed, so his own play does not
     raise it. Since the Inazuma pool rework (2026-10-18) it counts the other
@@ -285,12 +275,3 @@ def test_a_bare_name_takes_any_copy_whose_live_number_differs():
     assert res["post"]["card_index"] == 3
 
 
-def test_seas_reproach_reads_the_applier_as_her():
-    """The C# `SeasReproachPower.Pays` asks the applier be her; a Plan's
-    debuff is applied BY HER (`kokomi_plan._debuff`, `applier=state.player`).
-    """
-    st = kokomi_state()
-    st.player.powers[kokomi_plan.SEAS_REPROACH] = 5
-    hp = st.enemies[0].hp
-    powers.apply_power(st, st.enemies[0], "weak", 1, applier=st.player)
-    assert st.enemies[0].hp == hp - 5

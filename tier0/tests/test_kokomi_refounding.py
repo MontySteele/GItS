@@ -247,13 +247,15 @@ def test_dawn_tide_soaks_every_enemy_after_the_morning_plans():
     assert [e.aura for e in st.enemies] == ["hydro"] * 3
 
 
-def test_kurage_bloom_and_sangonomiyas_orders_add_cards_at_turn_start():
+def test_sangonomiyas_orders_adds_a_companion_at_turn_start():
+    """(Kurage Bloom left this generator in the Kokomi taste audit,
+    2026-10-21: it Plans its Sting at the end of her turn.)"""
     st = kokomi_state()
     st.player.powers[kokomi_plan.KURAGE_BLOOM] = 1
     st.player.powers[kokomi_plan.SANGONOMIYAS_ORDERS] = 1
     kokomi_plan.turn_start_generators(st)
     ids = [c.id for c in st.player.hand]
-    assert ids.count(kokomi_plan.STING_ID) == 1
+    assert ids.count(kokomi_plan.STING_ID) == 0
     companions = [c for c in st.player.hand if c.is_companion]
     assert len(companions) == 1
     assert companions[0].rarity == "common" and companions[0].is_ethereal

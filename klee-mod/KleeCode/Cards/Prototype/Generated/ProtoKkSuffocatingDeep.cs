@@ -51,13 +51,14 @@ public sealed class ProtoKkSuffocatingDeep : CustomCardModel, IElementalCard, IC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Suffocating Deep"),
-        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies. Apply 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold] to each, then double them."),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies. Apply {KkAmount:diff()} [gold]Weak[/gold] and {KkAmount:diff()} [gold]Vulnerable[/gold] to each enemy that intends to attack."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(10m, ValueProp.Move)
+            new DamageVar(10m, ValueProp.Move),
+            new DynamicVar("KkAmount", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -75,15 +76,7 @@ public sealed class ProtoKkSuffocatingDeep : CustomCardModel, IElementalCard, IC
             .WithElementHitFx(this)
             .SpawningHitVfxOnEachCreature()
             .Execute(choiceContext);
-        foreach (var debuffTarget in CombatState!.HittableEnemies.ToList())
-        {
-            await PowerCmd.Apply<WeakPower>(choiceContext, debuffTarget, 1, applier: Owner.Creature, cardSource: this);
-        }
-        foreach (var debuffTarget in CombatState!.HittableEnemies.ToList())
-        {
-            await PowerCmd.Apply<VulnerablePower>(choiceContext, debuffTarget, 1, applier: Owner.Creature, cardSource: this);
-        }
-        await KokomiCards.DoubleWeakVulnerable(choiceContext, this, cardPlay);
+        await KokomiCards.WeakVulnAttackers(choiceContext, this, cardPlay);
     }
 
     protected override void OnUpgrade()

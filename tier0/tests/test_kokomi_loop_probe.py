@@ -30,13 +30,13 @@ def test_no_named_combination_runs_away_grows_or_feeds_itself(name):
     assert _verdict(P.named_report(name)) == (False, False, False), name
 
 
-def test_the_shape_of_water_burst_is_one_turn_and_spends_its_calls():
-    """Review r3's known entry: the Calls exhaust, so the turn after the
-    burst has no Stings left to make."""
+def test_the_shape_of_water_burst_is_gone():
+    """Review r3's known entry was a one-turn burst: two Shoal Calls handed
+    over eight Stings for The Shape of Water to count. The Kokomi taste audit
+    (2026-10-21) has Shoal Call Plan its Stings, so no Sting reaches her Hand
+    and the burst is closed."""
     w = P.named_report("shoal_shape_of_water")["worst"]
-    assert w["tokens"][0] >= 6
-    assert sum(w["tokens"][1:]) == 0
-    assert w["dealt"][0] > 4 * max(w["dealt"][1:])
+    assert sum(w["tokens"]) == 0
 
 
 @pytest.mark.parametrize("name", ["canopy_ward", "endless_shoal_sting"])

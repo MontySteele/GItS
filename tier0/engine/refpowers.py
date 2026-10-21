@@ -1359,19 +1359,12 @@ def on_power_applied(state: CombatState, target: Fighter, name: str,
         state.draw(n)
         state.emit("extra_draw", amount=n)
 
-    # POOL COMPLETION (2026-10-01), SEA'S REPROACH: "Whenever you apply Weak or
-    # Vulnerable to an enemy, deal 3 damage to it." Vicious's shape -- a
-    # positive application, by her, once per creature it lands on -- and a
-    # no-op without the Power or with the Kokomi arm off.
-    # `SeasReproachPower.AfterPowerAmountChanged` is the twin.
-    if (name in ("weak", "vulnerable") and stacks > 0
-            and applier is state.player and target is not state.player
-            and state.player.powers.get("kk_seas_reproach", 0)):
-        from tier0.engine import kokomi_plan        # late import: cycle
-        kokomi_plan.seas_reproach(state, target, name, stacks)
+    # (Sea's Reproach left this hook in the Kokomi taste audit, 2026-10-21:
+    # it reads intent at the start of her turn, `kokomi_plan.seas_reproach`.)
     # VARKA, THE REBALANCE (2026-10-03), ABSOLUTE ZERO: "Whenever you apply
     # Weak or Vulnerable to an enemy, deal damage equal to your Cryo Oath to
-    # it." Sea's Reproach's test; `varka_oath` is a no-op for anyone else.
+    # it." A positive application, by him, once per creature it lands on;
+    # `varka_oath` is a no-op for anyone else.
     if (name in ("weak", "vulnerable") and stacks > 0
             and applier is state.player and target is not state.player
             and (state.player.powers.get("vk_absolute_zero", 0)

@@ -245,40 +245,32 @@ public sealed class AtWatersEdgePower : PowerModel, ILocalizationProvider
     }
 }
 
-/// <summary>Watatsumi's Grace: "At the end of your turn, keep up to 10 of your
-/// Block." The base game's Sturdy Clamp shape: the Block clear is prevented,
-/// then everything above the cap is lost -- so a wall cannot grow without end
-/// (paper sec.4 guard 1). Barricade, if also worn, keeps all (the first
-/// preventer wins, as in the base game). Sim twin:
-/// <c>kokomi_plan.grace_keeps</c>.</summary>
+/// <summary>Watatsumi's Grace. THE KOKOMI TASTE AUDIT (2026-10-21,
+/// review/active/kokomi-taste-audit-2026-10-21.md, pick 2 (a)): "At the end
+/// of your turn, gain 3 [4] Block for each Plan waiting." It protects the
+/// preparation (was "keep up to 10 [15] of your Block", the Sturdy Clamp
+/// shape Thoma's Crimson Ooyoroi shares). Amount is the rate, so copies add.
+/// Raw power Block (NC-11). Paid from <see cref="KokomiTasteAudit.TurnEnd"/>,
+/// after Kurage Bloom's Sting, off <see cref="KokomiPlan.PlansHeld"/>. Sim
+/// twin: <c>kokomi_plan.turn_end</c>.</summary>
 public sealed class WatatsumisGracePower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
         ("title", "Watatsumi's Grace"),
         ("description",
-            "At the end of your turn, keep up to [blue]{Amount}[/blue] of your "
-          + "[gold]Block[/gold]."),
+            "At the end of your turn, gain [blue]{Amount}[/blue] "
+          + "[gold]Block[/gold] for each [gold]Plan[/gold] waiting."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    public override bool ShouldClearBlock(Creature creature) =>
-        creature != Owner;
-
-    public override async Task AfterPreventingBlockClear(
-        AbstractModel preventer, Creature creature)
-    {
-        if (this != preventer || creature != Owner) return;
-        var over = (int)creature.Block - (int)Amount;
-        if (over > 0)
-        {
-            await CreatureCmd.LoseBlock(new BlockingPlayerChoiceContext(),
-                                        creature, over, null);
-        }
-    }
+    /// <summary>The Block for <paramref name="plansWaiting"/> at
+    /// <paramref name="rate"/> a Plan. PURE.</summary>
+    public static int BlockFor(int rate, int plansWaiting) =>
+        System.Math.Max(0, rate) * System.Math.Max(0, plansWaiting);
 }
 
 /// <summary>

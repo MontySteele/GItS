@@ -154,6 +154,14 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   try that"), after suite 2 (36.0 mean; boss damage a turn at hallway
   level): Kurage Vanguard deals 2 more each turn; the Casket pays 2 Block a
   counted play (Watatsumi 3).
+- **Taste audit built** (`review/active/kokomi-taste-audit-2026-10-21.md`,
+  2026-10-21, "Agreed on all 5 defaults"): ten cards that were someone else's
+  now speak her verbs. Shoal Call and Kurage Bloom Plan their Stings (the
+  Casket pays per Sting); Resolve of Watatsumi adds 2 [3] to each carried-out
+  Plan's hits and Block; Coral Crash, Undertow, Suffocating Deep and Sea's
+  Reproach read intent; Watatsumi's Grace gains 3 [4] Block per Plan waiting;
+  Flotsam Surge has a Plan line; Riptide Ruin hits once more per Plan carried
+  out. Unseen in game.
 - **Next:** the Balance suite again on the same seeds; promote if every act
   is within 15% of base.
 

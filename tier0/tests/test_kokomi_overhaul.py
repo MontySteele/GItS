@@ -590,13 +590,14 @@ def test_undertow_is_one_hit_with_a_rider_and_not_two_branches(overhaul):
     card = next(c for c in loader.prototype_cards()
                 if c.id == "proto_kk_undertow")
     assert [e["op"] for e in card.effects] == ["damage"]
-    assert card.effects[0]["bonus_vs_debuff"] == 3
+    # The Kokomi taste audit (2026-10-21): the rider reads intent.
+    assert card.effects[0]["bonus_vs_attacker"] == 3
 
-    # Aimed at the default target both ways, which is how `target_has_debuff`
-    # read "the enemy" when this was a branch (R210's bound aim).
+    # Aimed at the default target both ways (R210's bound aim).
     state = make_state()
     state.player = loader.build_player("kokomi")
     enemy = state.enemies[0]
+    enemy.intents = [{"kind": "block", "amount": 5}]
     hp = enemy.hp
     effects.resolve_card(state, card)
     assert hp - enemy.hp == 7
@@ -604,7 +605,7 @@ def test_undertow_is_one_hit_with_a_rider_and_not_two_branches(overhaul):
     state = make_state()
     state.player = loader.build_player("kokomi")
     enemy = state.enemies[0]
-    enemy.powers["poison"] = 3
+    enemy.intents = [{"kind": "attack", "amount": 5}]
     hp = enemy.hp
     effects.resolve_card(state, card)
     assert hp - enemy.hp == 10
@@ -628,11 +629,12 @@ def test_undertows_face_prints_two_folded_numbers(overhaul):
     src = (repo / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
            / "Generated" / "ProtoKkUndertow.cs").read_text(encoding="utf-8")
 
-    assert ("Deal {PlainDamage:diff()} [gold]Hydro[/gold] damage. If the enemy has a debuff, "
-            "deal {DebuffDamage:diff()} instead." in src)
+    # The Kokomi taste audit (2026-10-21): the rider reads intent.
+    assert ("Deal {PlainDamage:diff()} [gold]Hydro[/gold] damage. If the enemy intends to "
+            "attack, deal {AttackerDamage:diff()} instead." in src)
     assert "already including" not in src
     assert "IfUpgraded:show:10|7" not in src
-    assert "KokomiOverhaulKit.HasDebuff(target) ? 1 : 0" in src
+    assert "CurtainCallHooks.IntendsAttack(target) ? 1 : 0" in src
     # ONE hit, the sim's shape: the branch is gone from the play as well as
     # from the face.
     assert src.count("DamageCmd.Attack") == 1

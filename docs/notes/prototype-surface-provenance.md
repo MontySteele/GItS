@@ -9973,3 +9973,83 @@ verbatim:
   CURRENT IS CUT (Kokomi review r6, 2026-10-14, pick 2 (b)): Kurage Vanguard
   takes its slot; its power stays registered. Provenance note, "Kokomi review
   r6, 2026-10-14"."
+
+
+## Kokomi taste audit, 2026-10-21
+
+[USER], 2026-10-21: "That's a lot of card changes, but we can do that and
+rerun the balance suite to see how it feels." Then: "Agreed on all 5
+defaults." (`review/active/kokomi-taste-audit-2026-10-21.md`, "Ruled
+2026-10-21: all five (a)"). Ten rows; id, name, cost, type and rarity kept.
+Numbers are first guesses for the Balance suite.
+
+- **`proto_kk_shoal_call`**: "Plan 3 [4] Stings." (was "Add 3 [4] Stings to
+  your Hand", Blade Dance). Each Sting is written through the Plan path as one
+  she Planned would be and pays the Tamakushi Casket (`plan_stings`;
+  `KokomiCards.PlanJellyfish`). Brine Spray keeps the `shoal_call` kind. The
+  sheet's earlier block, verbatim: "The jellyfish build (2026-10-12): the base
+  game's Blade Dance, 3 [4] plain Stings. Common since the Kokomi review
+  2026-10-13, as Blade Dance is, swapped with Brine Sting. Provenance note."
+- **`proto_kk_kurage_bloom`**: "At the end of your turn, Plan a Sting." (was
+  "At the start of your turn, add a Sting to your Hand", Infinite Blades).
+  Paid at the end of her turn before Watatsumi's Grace counts the Plans
+  waiting (`KokomiTasteAudit.TurnEnd`, sim `kokomi_plan.turn_end`).
+- **`proto_kk_resolve_of_watatsumi`**: "When a Plan is carried out, it deals
+  2 [3] additional damage and gains 2 [3] additional Block." Per damage hit
+  and per Block clause (Block, Tide Wall's, Kelp Wall's) of a carried-out
+  Plan, Stings and Wards included, before Opening Gambit's doubling (was "Gain
+  2 [3] Strength", Inflame). The sheet's earlier comments, verbatim: "Inflame's
+  rate (an Uncommon, 1 Energy, 2 Strength)." and "3 Strength."
+- **`proto_kk_coral_crash`**: "Deal 8 [11] Hydro damage. Plan: Deal 8 [11]
+  Hydro damage to each enemy that intends to attack." The Plan's intent is
+  read when it is carried out, Flank's aim (was "Deal Hydro damage equal to
+  your Block", Body Slam, 1 [0]). The sheet's earlier comment, verbatim:
+  "Kokomi level pass (2026-10-12): Body Slam's price, 1 [0]; the "+4" upgrade
+  goes. Provenance note."
+- **`proto_kk_watatsumis_grace`**: "At the end of your turn, gain 3 [4] Block
+  for each Plan waiting." Raw power Block off the queue as it stands (was
+  "keep up to 10 [15] of your Block", the Sturdy Clamp shape Thoma's Crimson
+  Ooyoroi shares; the sim's block-clear reader keeps Ooyoroi alone). The
+  sheet's earlier comments, verbatim: "Replaces The Clouds Like Waves Rippling
+  (paper pick 3). The base game's Sturdy Clamp shape: Block above the cap is
+  lost, up to the cap is kept." and "keep 15."
+- **`proto_kk_seas_reproach`**: "At the start of your turn, apply 1 Weak to
+  each enemy that intends to attack [and deal 5 damage]." Read after that
+  turn's Plans are carried out (after Dawn Tide), one power for both versions
+  (`UpgradeTwinPower`, `kk_seas_reproach_plus`), the damage unelemented and
+  unpowered. The ruled upgrade clause "and deal 5 damage to it" is 23
+  characters against the 20 upgrade-clause ceiling
+  (`tools/lint_text_conventions.py`), so the face prints "and deal 5 damage".
+  Was "Whenever you apply Weak or Vulnerable to an enemy, deal 5 [7] damage to
+  it" (Sadistic Nature); its application test moved to Varka's Absolute Zero
+  (`AbsoluteZeroPower.Pays`). The sheet's earlier comment, verbatim: "Per Weak
+  or Vulnerable she applies, once per enemy; unpowered. Kokomi level pass
+  (2026-10-12): 3 -> 5 [7], the cost stays 1. Provenance note."
+- **`proto_kk_suffocating_deep`**: "Deal 10 [13] Hydro damage to ALL enemies.
+  Apply 2 Weak and 2 Vulnerable to each enemy that intends to attack." (was 1
+  of each on every enemy, then doubled, Varka's Deep Freeze move). The
+  `double_weak_vulnerable` kind stays registered with no row spelling it. The
+  sheet's earlier comment, verbatim: "THE RARE PASS (2026-10-04): applies 1 of
+  each first, so it never doubles nothing (the floor is Weak 2 and Vulnerable
+  2 on every enemy)."
+- **`proto_kk_undertow`**: "If the enemy intends to attack, deal 10 [13]
+  instead." (was "If the enemy has a debuff"). A new aimed rider,
+  `bonus_vs_attacker`, on `EB-441`'s shape: one hit, two printed numbers
+  (`PlainDamage`, `AttackerDamage`). The sheet's earlier comments, verbatim:
+  "`EB-441`: one damage op with a rider, not two literal branches." and
+  "`EB-624`: two printed numbers, both live -- provenance sec. this row."
+- **`proto_kk_flotsam_surge`**: "Deal 9 [12] Hydro damage to ALL enemies.
+  Plan: Deal 9 [12] Hydro damage to ALL enemies and Plan a Sting." No Dazed.
+  The Plan's Sting is written when the Plan is carried out, so it waits for
+  the next morning, and the Casket pays for it (was 10 [13] to ALL and 2 Dazed
+  into the Discard Pile, Klee's Fish Blasting). The sheet's earlier comments,
+  verbatim: "The self-status engine, paid in Dazed to the discard pile. Kokomi
+  level pass (2026-10-12): 13 [17] -> 10 [13]. Provenance note." and "13 to
+  ALL."
+- **`proto_kk_riptide_ruin`**: "Deal 9 [12] Hydro damage to ALL enemies, once
+  more for each Plan carried out this turn. Stings and Wards don't count."
+  Battle Formation's count (`ChainPlansThisTurn`, the times token
+  `chain_plans_this_turn_plus_one`) (was 11 [14] to ALL twice, Astral Pulse
+  with bigger numbers). The sheet's earlier comments, verbatim: "Card text
+  pass / Kokomi level pass (2026-10-12): the Dazed goes, with 2 more damage a
+  hit. Provenance note." and "14 to ALL, twice."

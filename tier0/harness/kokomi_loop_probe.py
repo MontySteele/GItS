@@ -385,6 +385,7 @@ NAMED: dict[str, tuple[tuple[tuple[str, int], ...], tuple[str, ...],
     # The BACKLOG's known set, review r3 (`kokomi-review-r3-2026-10-13.md`
     # sec.3): eight Stings at 8 plus 16 from the Shape for 3 Energy, a
     # one-turn 80 that exhausts both Calls. A burst, not a loop; kept, listed.
+    # Closed by the Kokomi taste audit (2026-10-21): Shoal Call Plans them.
     "shoal_shape_of_water": (
         (("proto_kk_shoal_call", 2), ("proto_kk_the_shape_of_water", 1)),
         ("proto_kk_watchful_shoal",), ("face",)),

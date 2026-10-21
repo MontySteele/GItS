@@ -268,7 +268,9 @@ public class VarkaRebalanceTests : IDisposable
         Assert.Equal(8, AbsoluteZeroPower.DamageFor(4, 2));
         Assert.Equal(0, AbsoluteZeroPower.DamageFor(0, 1));
         var hook = Calls("AbsoluteZeroPower", "AfterPowerAmountChanged");
-        Assert.Contains("SeasReproachPower.Pays", hook);
+        // Sea's Reproach's old test, his own since the Kokomi taste audit
+        // (2026-10-21).
+        Assert.Contains("AbsoluteZeroPower.Pays", hook);
         Assert.Contains("ElementalHit.DealUnelemented", hook);
         // The Swirl no longer widens.
         Assert.DoesNotContain("Creature.HasPower", Calls("VarkaOath", "Pay"));

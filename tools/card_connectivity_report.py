@@ -625,6 +625,9 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # Kokomi level pass) and a Block
     # clock -- each on the queue that carries it out.
     "add_stings": [_hook("shared", "hand_contents", "write")],
+    # The Kokomi taste audit (2026-10-21): Flotsam Surge's planned Sting.
+    "plan_stings": [_hook("private", "kurage", "write"),
+                    _hook("shared", "block_held", "write")],
     "gain_strength": [_hook("private", "kurage", "use")],
     "juuga_guard": [_hook("shared", "block_held", "write")],
     # THE KOKOMI POOL OVERHAUL (2026-10-13). Chain reads the carry-outs this
@@ -914,7 +917,8 @@ POWER_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "kk_nereids_ascension": [_hook("private", "kurage", "write")],
     "kk_at_waters_edge": [_hook("shared", "aura_reaction", "read")],
     "kk_ceremonial_garment": [_hook("shared", "card_identity", "write")],
-    "kk_watatsumis_grace": [_hook("shared", "block_held", "read"),
+    # The Kokomi taste audit (2026-10-21): Block per Plan waiting.
+    "kk_watatsumis_grace": [_hook("private", "kurage", "read"),
                             _hook("shared", "block_held", "write")],
     "kk_tidal_riposte": [_hook("shared", "block_held", "read"),
                          _hook("shared", "enemy_intent", "read")],
@@ -923,15 +927,21 @@ POWER_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "kk_draft_the_orders": [_hook("private", "kurage", "read")],
     "kk_kurage_canopy": [_hook("private", "kurage", "read"),
                          _hook("shared", "hand_contents", "write")],
-    # Weak and Vulnerable carry no vocabulary hook (the `weak` row), so the
-    # trigger reads nothing here: EMPTY and disclosed.
-    "kk_seas_reproach": [],
+    # The Kokomi taste audit (2026-10-21): reads intent at the start of her
+    # turn. Weak carries no vocabulary hook (the `weak` row).
+    "kk_seas_reproach": [_hook("shared", "enemy_intent", "read")],
+    "kk_seas_reproach_plus": [_hook("shared", "enemy_intent", "read")],
+    # The Kokomi taste audit (2026-10-21): a bonus on each carried-out Plan.
+    "kk_resolve_of_watatsumi": [_hook("private", "kurage", "read"),
+                                _hook("shared", "block_held", "write")],
     "kk_watatsumi_resistance": [_hook("private", "kurage", "read"),
                                 _hook("shared", "card_identity", "read"),
                                 _hook("shared", "hand_contents", "write")],
     "kk_sangonomiyas_orders": [_hook("shared", "hand_contents", "write"),
                                _hook("shared", "ethereal", "write")],
-    "kk_kurage_bloom": [_hook("shared", "hand_contents", "write")],
+    # The Kokomi taste audit (2026-10-21): Plans a Sting at the end of turn.
+    "kk_kurage_bloom": [_hook("private", "kurage", "write"),
+                        _hook("shared", "block_held", "write")],
     "kk_watchful_shoal": [_hook("shared", "card_identity", "write")],
     "kk_coordinated_tide": [_hook("shared", "aura_reaction", "read"),
                             _hook("shared", "hand_contents", "write")],
@@ -1085,6 +1095,8 @@ COUNT_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "sparks_spent": [_hook("private", "sparks", "read")],
     "plans_held": [_hook("private", "kurage", "read")],
     "plans_held_plus_one": [_hook("private", "kurage", "read")],
+    # The Kokomi taste audit (2026-10-21): Riptide Ruin's hit count.
+    "chain_plans_this_turn_plus_one": [_hook("private", "kurage", "read")],
     "chain_plans_held": [_hook("private", "kurage", "read")],
     "plans_carried_out_this_combat": [_hook("private", "kurage", "read")],
     "stings_played_this_turn": [_hook("shared", "plays_this_turn", "read"),

@@ -74,14 +74,15 @@ public class Eb328FaceOrderTests
         // two halves cannot fold under two conventions again.
         var vars = new ProtoKkUndertow().DynamicVars;
         Assert.IsType<FoldedDamageVar>((object)vars["PlainDamage"]);
-        Assert.IsType<FoldedDamageVar>((object)vars["DebuffDamage"]);
+        // The Kokomi taste audit (2026-10-21): the second half reads intent.
+        Assert.IsType<FoldedDamageVar>((object)vars["AttackerDamage"]);
         Assert.IsType<FrontFoldedDamageVar>((object)vars.CalculatedDamage);
 
         // One implementation between them: `FoldedDamageVar` is one type and
         // both tokens are instances of it, which is what makes "one rule per
         // screen" a fact about the class rather than about this card.
         Assert.Same(
-            vars["PlainDamage"].GetType(), vars["DebuffDamage"].GetType());
+            vars["PlainDamage"].GetType(), vars["AttackerDamage"].GetType());
     }
 
     [Fact]
