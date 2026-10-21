@@ -26,7 +26,7 @@ it is safe while the game runs.
 `--version` is required and plain (`0.3.0`), never the dev `0.2.N+dirty`.
 `--visibility` (private, public, unlisted, friends_only; default
 friends_only), `--change-note`, `--image` (preview png, under 1 MB),
-`--skip-build`, `--pck`, `--images-root`, `--out` and (beta only)
+`--skip-build`, `--pck`, `--images-root`, `--out` and
 `--telemetry-endpoint` are the options.
 
 **What it writes**, under `.workshop/<variant>/` (gitignored):
@@ -53,15 +53,19 @@ ids still load. Universal Companions stay. `klee-mod/KleeCode/ReleaseVariant.cs`
 and `Patches/ReleaseKitsPatch.cs` are the code; `KleeTests/ReleaseVariantTests.cs`
 and `tier0/tests/test_package_workshop.py` the pins.
 
-**Run stats (beta only, 2026-10-16; default on 2026-10-18).** [USER]: "go ahead and try to
+**Run stats (beta 2026-10-16; default on 2026-10-18; public too 2026-10-21).** [USER]: "go ahead and try to
 build the opt-in upload now in the beta release so we can test drive the
-telemetry before we spread it further." Add the deployed Worker's URL
+telemetry before we spread it further." On 2026-10-21 he ruled the public
+variant in: "Include the telemetry as opt-out." Both variants take the same
+option and ship the same tickbox, on by default. Add the deployed Worker's URL
 (`telemetry-worker/README.md`, Deploy; today
 `https://gits-telemetry.gits-telemetry-worker.workers.dev`). It stays an
 option, never a constant in the code:
 
 ```sh
 .venv/Scripts/python.exe tools/package_workshop.py --variant beta --version 0.3.0 \
+    --telemetry-endpoint https://gits-telemetry.gits-telemetry-worker.workers.dev
+.venv/Scripts/python.exe tools/package_workshop.py --variant public --version 0.3.0 \
     --telemetry-endpoint https://gits-telemetry.gits-telemetry-worker.workers.dev
 ```
 
@@ -72,9 +76,9 @@ failure, is logged and dropped.
 
 That builds with `-p:GitsTelemetryEndpoint=<URL>/v1/run` (the route is
 appended if absent), which compiles `klee-mod/KleeCode/RunStats/`, and adds
-the privacy paragraph to the description. Without the option the beta has
-no uploader; `--variant public` refuses it, and dev, seat and test builds
-never name the property, so they compile no RunStats file at all. The dll
+the privacy paragraph to the description. Without the option a package has
+no uploader, and dev, seat and test builds never name the property, so
+they compile no RunStats file at all. The dll
 check fails a `--skip-build` whose dll does not match (endpoint missing, or
 present when not asked for). Every build now also carries
 `-p:GitsVariant=<variant>`, read back as `WorkshopRelease.Variant`.
@@ -94,8 +98,9 @@ is read once more as a second belt. The record is schema v1, trimmed on the
 game thread and posted on a pool thread: one try, 10 s timeout, failures
 logged (`run stats:` in godot.log) and dropped, no retry queue.
 `KleeTests/RunStatsTests.cs` and `tier0/tests/test_run_stats_record.py` are
-the pins; `tools/telemetry_remote.py` reads what arrived. The public variant
-still compiles no uploader, and what is sent is unchanged.
+the pins; `tools/telemetry_remote.py` reads what arrived. A record names its
+variant (`beta` or `public`, `schema/run-v1.json`), so the two can be read
+apart.
 
 Existing beta installs keep their saved choice ([USER]: "2) is fine on the
 telemetry flip - we currently only have 2 people testing it."). BaseLib keeps
@@ -107,7 +112,8 @@ Defaults now restores on.
 
 The page's run-data paragraph (default on), as `PRIVACY_PARAGRAPH` in
 `tools/package_workshop.py` writes it (paste it over the old "Run data
-(optional)" paragraph in the saved description):
+(optional)" paragraph in the saved description). The public page gets the
+same text with "This mod sends" for "This beta sends" (`privacy_paragraph`):
 
 > Run data. This beta sends a short summary of each finished run to the Teyvat Spire developers: your character, ascension, result, the cards and relics you ended with, which cards you were offered and took, and your HP floor by floor. It holds no Steam id, name, chat or other personal details, and your IP address is not stored. Runs are tied only to a random id made by the mod on your machine. Data is used to balance the mod and deleted after a year. It is on by default; turn it off any time with "Share anonymous run stats with the Teyvat Spire developers" under Settings, Mod Configuration (BaseLib), Open Config, Teyvat Spire Roster. It only sends when the game's own "Upload data" setting is on.
 

@@ -97,9 +97,10 @@
 
            -p:GitsTelemetryEndpoint=https://.../v1/run
 
-       tools/package_workshop.py passes it for a beta package given a
-       telemetry endpoint, and for nothing else. Every other build
-       (dev, seat, dotnet test, the public package) compiles no RunStats file
+       tools/package_workshop.py passes it for a beta or public package
+       given a telemetry endpoint (public since 2026-10-21), and for nothing
+       else. Every other build (dev, seat, dotnet test, a package made
+       without the option) compiles no RunStats file
        at all: no uploader, no setting, no install id. -->
   <PropertyGroup Condition="'$(GitsTelemetryEndpoint)' != ''">
     <DefineConstants>$(DefineConstants);GITS_RUN_STATS</DefineConstants>

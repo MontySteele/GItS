@@ -60,13 +60,14 @@ THE VERSION is the plain `--version` (`0.3.0`), required, never the dev
 build's `0.2.NNNN+dirty`. Co-op peers need the same version AND the same
 variant.
 
-OPT-IN RUN STATS (2026-10-16). `--telemetry-endpoint URL` (the deployed
-Worker, `telemetry-worker/README.md`) compiles the uploader into a BETA
-build: `-p:GitsTelemetryEndpoint=<URL>/v1/run`, which compiles
+OPT-IN RUN STATS (2026-10-16; public too since 2026-10-21, [USER]: "Include
+the telemetry as opt-out."). `--telemetry-endpoint URL` (the deployed
+Worker, `telemetry-worker/README.md`) compiles the uploader into either
+variant: `-p:GitsTelemetryEndpoint=<URL>/v1/run`, which compiles
 `klee-mod/KleeCode/RunStats/` and adds the privacy paragraph to the
-description. Without it the beta has no uploader; the public variant
-refuses the option, so a public build never has one. The dll check
-confirms the endpoint is in the dll when asked for and absent when not.
+description ("This beta" or "This mod"). Without it a build has no
+uploader. The dll check confirms the endpoint is in the dll when asked for
+and absent when not.
 """
 from __future__ import annotations
 
@@ -141,12 +142,24 @@ BETA_NOTE = """
 
 BETA: every kit, including Yae Miko (in progress). Enable this or the main release, not both."""
 
-# The Workshop privacy paragraph (telemetry-worker/README.md), in the beta's
+# The Workshop privacy paragraph (telemetry-worker/README.md), in the
 # description only when the build carries the uploader. Default on since
-# 2026-10-18 ([USER]: "Let's go default on.").
+# 2026-10-18 ([USER]: "Let's go default on."); the public page since
+# 2026-10-21 ([USER]: "Include the telemetry as opt-out."), worded through
+# privacy_paragraph().
 PRIVACY_PARAGRAPH = """
 
 Run data. This beta sends a short summary of each finished run to the Teyvat Spire developers: your character, ascension, result, the cards and relics you ended with, which cards you were offered and took, and your HP floor by floor. It holds no Steam id, name, chat or other personal details, and your IP address is not stored. Runs are tied only to a random id made by the mod on your machine. Data is used to balance the mod and deleted after a year. It is on by default; turn it off any time with "Share anonymous run stats with the Teyvat Spire developers" under Settings, Mod Configuration (BaseLib), Open Config, Teyvat Spire Roster. It only sends when the game's own "Upload data" setting is on."""
+
+
+
+def privacy_paragraph(variant: Variant) -> str:
+    """The run-data paragraph for a variant's page: the beta's text as is,
+    the public page's naming the mod instead of the beta."""
+    if variant.name == "beta":
+        return PRIVACY_PARAGRAPH
+    return PRIVACY_PARAGRAPH.replace("This beta sends", "This mod sends", 1)
+
 
 TELEMETRY_ROUTE = "/v1/run"
 ENDPOINT_RE = re.compile(r"^https://[A-Za-z0-9.-]+(:\d+)?(/[A-Za-z0-9._~/-]*)?$")
@@ -163,13 +176,10 @@ def check_version(version: str) -> str:
 
 
 def telemetry_endpoint(variant: Variant, url: str | None) -> str | None:
-    """The upload URL a build compiles in, or None for no uploader. Beta
-    only, https only; the Worker's route is appended when not given."""
+    """The upload URL a build compiles in, or None for no uploader. Either
+    variant, https only; the Worker's route is appended when not given."""
     if not url:
         return None
-    if variant.name != "beta":
-        raise SystemExit("--telemetry-endpoint is for --variant beta only: "
-                         "a public build compiles no uploader")
     url = url.strip().rstrip("/")
     if not url.endswith(TELEMETRY_ROUTE):
         url += TELEMETRY_ROUTE
@@ -214,7 +224,7 @@ def workshop_json(variant: Variant, version: str, visibility: str,
     if visibility not in VISIBILITIES:
         raise SystemExit(f"--visibility must be one of {', '.join(VISIBILITIES)}")
     description = (DESCRIPTION_DRAFT + (BETA_NOTE if variant.name == "beta" else "")
-                   + (PRIVACY_PARAGRAPH if endpoint else ""))
+                   + (privacy_paragraph(variant) if endpoint else ""))
     return {
         "title": variant.title,
         "description": description,
@@ -480,7 +490,7 @@ def main(argv=None) -> int:
                     help="preview png (< 1 MB); a placeholder if absent")
     ap.add_argument("--out", type=Path, default=OUT)
     ap.add_argument("--telemetry-endpoint", metavar="URL",
-                    help="beta only: compile the opt-in run-stats uploader, posting "
+                    help="compile the run-stats uploader (on by default, switchable off), posting "
                          "to URL (the Worker; /v1/run is appended if absent)")
     args = ap.parse_args(argv)
 

@@ -20,6 +20,11 @@ all five newcomers found and named their kit's central loop and would play
 again. The gaps were Furina's refund amount, Yae's planting rule and Dawn Prayer
 order, and Swirl's contribution (Klee, Varka). Round 2 runs on the same seed
 after Furina's refund display and the Yae check.
+Go-live pins to Steam's default `public` branch, not `public-beta`: on
+2026-10-21 `public` is buildid 23811903 (2026-06-18) and `public-beta`
+24724944 (2026-08-13), which the mod is built against. A compatibility check
+against `public` is next ([USER]: "we should do a check against the public
+version rather than the beta, and pin against that for the go-live").
 
 ## Mod build environment (pinned)
 
@@ -63,7 +68,8 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
 - **Card frames, stage 1 built** (`review/active/card-frames-2026-10-19.md`,
   `KleeCode/CardFrameColors.cs`): each kit tints its frame (Klee red-orange,
   Furina deep blue, Kokomi pearl coral, Varka teal, Yae magenta) and every
-  Companion shows a nation pip; unseen in game. Stage 2 (frame art per kit)
+  Companion shows a nation pip; [USER] reviewed the tints in game
+  (2026-10-21). Stage 2 (frame art per kit)
   is an art job for [USER].
 - **Inazuma Companions** (`review/active/inazuma-companions-2026-10-18.md`,
   `review/active/pool-sweep-2026-10-18.md` sec.3): 34 cards (8 / 15 / 11);
@@ -261,7 +267,7 @@ Stellar-Conduct nod is parked). Code: `proto_ym_` rows,
   (`Elements/TriggerRules.cs`, sim `C.SWIRL_PAYS`).
 - **Next:** phase two, Burning and Dendro (`BACKLOG.md`).
 
-## The Spiral Abyss mode: built, seat-played, not yet played by [USER]
+## The Spiral Abyss mode: built and played by [USER] (2026-10-21)
 
 A fourth main-menu mode (`klee-mod/KleeCode/Abyss/`); its button opens the
 normal character select and runs count for ascension. Before each act's
@@ -272,8 +278,8 @@ This act. Pools: 14 Blessings, 12 Shadows
 `review/ruled/abyss-pools-2-2026-10-12.md`). Blessings show as relics,
 Shadows as an "Abyss Shadows" relic and enemy badges. Seat records:
 `review/records/spiral-abyss-round-*`.
-- **Next:** [USER]'s live checks of the screen and the act change. The old
-  Teyvat frame stays off behind `TeyvatFrame` (`operations/teyvat-frame.md`).
+Nothing pending. The old Teyvat frame stays off behind `TeyvatFrame`
+(`operations/teyvat-frame.md`).
 
 ## Live cell
 
