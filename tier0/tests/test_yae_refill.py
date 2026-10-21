@@ -261,10 +261,12 @@ def test_kitsune_barrage_hits_twice_or_three_times_with_3_sakura():
 
 # --- Hide Behind the Shrine --------------------------------------------------------------
 
-def test_hide_behind_the_shrine_withers_the_newest_for_5_more():
+def test_hide_behind_the_shrine_withers_the_fewest_turns_left_for_5_more():
+    # The user's ruling, 2026-10-20 (turns-left targeting): was the newest.
     st = _state()
-    Y.plant(st, 1)
     Y.plant(st, 1, kind=Y.KITSUNE)
+    Y.plant(st, 1)
+    _led(st).sakura[1].turns_left += 2          # the Thunder has the most
     _play(st, "hide_behind_the_shrine")
     # 7, the Kitsune's Last Bloom (2 + 1 Block), then 5 more.
     assert st.player.block == 7 + 3 + 5
@@ -318,18 +320,20 @@ def test_dawn_prayer_levels_the_newest():
     assert not _led(st).sakura
 
 
-def test_kitsunes_blessing_picks_the_highest_the_oldest_on_a_tie():
+def test_kitsunes_blessing_picks_the_highest_the_most_turns_left_on_a_tie():
+    # The user's ruling, 2026-10-20 (turns-left targeting): a tie went to the
+    # oldest; now the most turns left, the newest on an equal timer.
     st = _state()
     Y.plant(st, 1, level=2)
     Y.plant(st, 1, level=2, kind=Y.KITSUNE)
     Y.plant(st, 1)
     _play(st, "kitsunes_blessing")
     a, b, c = _led(st).sakura
-    assert (a.level, a.turns_left) == (5, Y.SAKURA_TURNS + 2)   # the oldest
-    assert (b.level, b.turns_left) == (2, Y.SAKURA_TURNS)
+    assert (b.level, b.turns_left) == (5, Y.SAKURA_TURNS + 2)   # the newer 2
+    assert (a.level, a.turns_left) == (2, Y.SAKURA_TURNS)
     assert c.level == 1
-    _play(st, "kitsunes_blessing+")              # now a is highest alone
-    assert _led(st).sakura[0].level == 9
+    _play(st, "kitsunes_blessing+")              # now b is highest alone
+    assert _led(st).sakura[1].level == 9
 
 
 # --- Fox's Shade -----------------------------------------------------------------------------

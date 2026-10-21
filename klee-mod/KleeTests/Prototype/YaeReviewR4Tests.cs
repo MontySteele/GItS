@@ -61,7 +61,7 @@ public class YaeReviewR4Tests : IDisposable
         ledger.Plant(YaeLaw.PlantLevel, null, YaeAnnotation.RedInk);
         var s = ledger.Standing[0];
         var before = YaeShrineLedger.ActSize(s.Kind, s.Level, s.Annotations);
-        Assert.Equal(1, ledger.EditSakura(YaeSakuraEnd.Oldest, 1,
+        Assert.Equal(1, ledger.EditSakura(YaeSakuraEnd.FewestTurnsLeft, 1,
                                           YaeAnnotation.DeadlineExtension));
         Assert.Equal(new[] { YaeAnnotation.RedInk, YaeAnnotation.DeadlineExtension },
                      s.Annotations);
@@ -77,7 +77,7 @@ public class YaeReviewR4Tests : IDisposable
                         c => c.Contains(nameof(YaeEditing.SayNothing)));
         Assert.Contains(Il.CallSequence(typeof(YaeEditing).GetMethod(nameof(YaeEditing.EditAll))!),
                         c => c.Contains(nameof(YaeEditing.SayNothing)));
-        Assert.Equal(0, Fresh().EditSakura(YaeSakuraEnd.Oldest, 1, YaeAnnotation.RedInk));
+        Assert.Equal(0, Fresh().EditSakura(YaeSakuraEnd.FewestTurnsLeft, 1, YaeAnnotation.RedInk));
     }
 
     [Fact]

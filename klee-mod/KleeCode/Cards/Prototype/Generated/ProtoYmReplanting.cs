@@ -45,7 +45,7 @@ public sealed class ProtoYmReplanting : CustomCardModel, ICharacterCard, ISakura
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Replanting"),
-        ("description", "Your oldest [gold]Sakura[/gold] withers. Plant one of its kind, {IfUpgraded:show:2 Levels|1 Level} higher."),
+        ("description", "Your [gold]Sakura[/gold] with the fewest turns left withers. Plant one of its kind, {IfUpgraded:show:2 Levels|1 Level} higher."),
     };
 
     /// <summary>How this card plants (the Sakura display's preview).</summary>

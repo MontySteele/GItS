@@ -31,9 +31,9 @@ THE RULES AS MODELLED (review r3, ruled 2026-10-14,
     apply), source "card"; the Lure aims a Thunder strike.
   * FULL SHRINE (amended after GPT's review; 2026-10-17 the target is the
     Sakura closest to withering, `next_to_wither`, not the oldest): a plant
-    into a full shrine makes it act first. Same kind as the new one: the oldest
+    into a full shrine makes it act first. Same kind as the new one: it
     refreshes to at least 3 and gains a Level, and none is added. A
-    different kind: the oldest withers and the new Sakura takes its place
+    different kind: it withers and the new Sakura takes its place
     (as the newest) at its printed Level. Under `SCALING == "count"` (pick 1
     (b) of the card paper, kept as a knob) a full plant replaces the oldest.
   * TENKO (review r3): one plain rule again, "Every Sakura acts now.
@@ -65,9 +65,18 @@ THE RULES AS MODELLED (review r3, ruled 2026-10-14,
     its layers: LAW, no energy-positive copy loop), Serial Novel (at the
     start of her turn, a random Annotated card from the Discard Pile to
     hand, per stack).
-  * FALLEN PETALS (review r3, sec.4): an active Skill. "Your oldest Sakura
-    withers (it acts once, its Last Bloom). If one did, gain 1 Energy [and
-    draw 1 card]."
+  * FALLEN PETALS (review r3, sec.4): an active Skill. "Your Sakura with
+    the fewest turns left withers (it acts once, its Last Bloom). If one
+    did, gain 1 Energy [and draw 1 card]."
+  * TURNS-LEFT TARGETING (the user's ruling, 2026-10-20): "For cards
+    designed to benefit you, they should target the one with the most turns
+    left. For cards designed to cost something, they should target the one
+    with the fewest turns left. This might not be the same as the planting
+    order." A cost (Fallen Petals, Replanting, Hide Behind the Shrine)
+    reaches `next_to_wither`; a benefit (Evergreen Charm, Falling Blossom,
+    Dawn Prayer, Fox Fire Draft, a Level tie) reaches `last_to_wither`, its
+    mirror. Evergreen Charm skips a Deadline Extension Sakura. The
+    end-of-turn acts and the badges keep planting order.
   * POWERS (self, by name): Sakura Grove (at her turn start, after Yakan
     Offering, each Sakura gains n Levels), Edict of Cleansing (+n on a
     damage action at an enemy that is Weak or wears Pyro, Hydro or Cryo;
@@ -79,7 +88,8 @@ THE RULES AS MODELLED (review r3, ruled 2026-10-14,
   * SAKURA ANNOTATIONS: a Sakura may carry Red Ink (its action is 3
     bigger: damage, each enemy's damage, or Block), Fox Fire (4 Electro to a
     random enemy whenever it acts) and Deadline Extension (its timer never
-    ticks), written by "Edit your newest / oldest / every Sakura"
+    ticks), written by "Edit your Sakura with the most / fewest turns
+    left" or "Edit every Sakura"
     (`edit_sakura`). THE POOL TO 78, pick 2 (a) (ruled 2026-10-15,
     `review/active/yae-pool-to-78-2026-10-15.md`): distinct Annotations
     COEXIST on a Sakura; a second copy of one it has does nothing; an Edit
@@ -103,7 +113,8 @@ THE RULES AS MODELLED (review r3, ruled 2026-10-14,
     lives; the Lure and an aimed strike come first, and a Foxfire Sakura's
     own act still hits ALL. Publisher's Deadline reads the Edits made this
     turn (`YaeLedger.edits_this_turn`). Kitsune's Blessing blesses the
-    highest-Level Sakura, the oldest on a tie (`highest`).
+    highest-Level Sakura, the one with the most turns left on a tie
+    (`highest`; the user's ruling, 2026-10-20).
   * RED INK ON A PLANTING CARD: Red Ink on a card that plants passes to
     every Sakura that play plants (`inherits`), once (+3) however many Red
     Ink layers the card has; a full-shrine plant that only levels plants
@@ -122,8 +133,9 @@ READINGS TAKEN WHERE THE PAPER LEAVES ROOM (each in the builder's report):
     Kitsune Pounce's "a Sakura strikes it" is the highest-Level DAMAGE
     Sakura (Thunder or Foxfire), aimed at it. A full-shrine replacement
     puts the new Sakura in the newest place. Fallen Petals and a
-    different-kind full-shrine plant wither the oldest even under Deadline
-    Extension (an active wither, not a timer). A Sakura inherits Red Ink
+    different-kind full-shrine plant wither the Sakura closest to withering
+    even under Deadline Extension (an active wither, not a timer), a
+    Deadline Extension one only when every one carries it. A Sakura inherits Red Ink
     once (+3), however many Red Ink layers its planting card carries.
 """
 
@@ -217,7 +229,10 @@ PUBLISH_ROOMS = ("elite", "boss")
 
 #: The Annotations a Sakura can carry (`edit_sakura`).
 SAKURA_ANNOTATIONS = (RED_INK, FOX_FIRE, DEADLINE)
-SAKURA_EDIT_ENDS = ("newest", "oldest", "every")
+#: The user's ruling, 2026-10-20 (turns-left targeting): the ends count by
+#: turns left (`wither_order`), were `newest` / `oldest`. C# twin:
+#: `YaeSakuraEnd`.
+SAKURA_EDIT_ENDS = ("most_turns_left", "fewest_turns_left", "every")
 
 ID_PREFIX = "proto_ym_"
 #: Author's Copy never copies an Author's Copy (review r3: LAW, "copy
@@ -269,23 +284,25 @@ KIND_FIELDS = {
     # The refill (ruled 2026-10-16).
     "barrage": ("amount",),
     "level_strike": ("base", "amount"),
-    "wither_newest_block": ("amount",),
+    "wither_fewest_turns_left_block": ("amount",),
     "rewrite": ("amount",),
-    "level_newest": ("amount",),
+    "level_most_turns_left": ("amount",),
     "bless_highest": ("amount",),
-    # The Yae pass (2026-10-16): Evergreen Charm's "Your oldest Sakura
-    # lasts 2 more turns" (Kitsune's Blessing's "lasts N more turns").
-    "extend_oldest": ("amount",),
+    # The Yae pass (2026-10-16): Evergreen Charm's "Your Sakura with the most
+    # turns left lasts 2 more turns" (Kitsune's Blessing's "lasts N more
+    # turns"; the user's ruling, 2026-10-20, was `extend_oldest`).
+    "extend_most_turns_left": ("amount",),
     # Yae flat-value pass, 2026-10-17 (review/active/yae-flat-value-
     # 2026-10-17.md sec.3): Thunder Petal's "It strikes this enemy." and
     # Foxfire Sweep's "It strikes now." C# twin: `YaeCards.StrikePlanted`.
     "strike_planted": (),
     # Yae draft pass, 2026-10-17 (review/active/yae-draft-pass-2026-10-17.md
-    # sec.3): Falling Blossom's "Your oldest Sakura strikes this enemy." (was
-    # `wither_oldest_at`) and Dawn Prayer's "It strikes now." C# twins:
-    # `YaeCards.StrikeOldestAt`, `YaeCards.StrikeNewest`.
-    "strike_oldest_at": (),
-    "strike_newest": (),
+    # sec.3): Falling Blossom's "Your Sakura with the most turns left strikes
+    # this enemy." (was `wither_oldest_at`, then `strike_oldest_at`) and
+    # Dawn Prayer's "It strikes now." (was `strike_newest`). C# twins:
+    # `YaeCards.StrikeMostTurnsLeftAt`, `YaeCards.StrikeMostTurnsLeft`.
+    "strike_most_turns_left_at": (),
+    "strike_most_turns_left": (),
 }
 KINDS = frozenset(KIND_FIELDS)
 KIND_TARGETS = {
@@ -298,7 +315,7 @@ KIND_TARGETS = {
     # The refill.
     "barrage": "enemy", "level_strike": "enemy",
     # The draft pass.
-    "strike_oldest_at": "enemy",
+    "strike_most_turns_left_at": "enemy",
 }
 #: Kinds that take an `annotation:` name.
 ANNOTATION_KINDS = frozenset({"edit", "edit_all", "edit_sakura",
@@ -468,23 +485,34 @@ def _plant_level(player) -> int:
     return PLANT_LEVEL + _power(player, MOONCALL)
 
 
+def wither_order(led) -> list:
+    """Every Sakura standing, the next to wither first: one without
+    Deadline Extension before one with it, then the fewer turns left, then
+    the older. Read backwards it is the most-turns-left order. Not the
+    planting order (`led.sakura`), which the end-of-turn acts keep. C#
+    twin: `YaeShrineLedger.WitherOrder`."""
+    return sorted(led.sakura,
+                  key=lambda s: (s.has(DEADLINE), s.turns_left, s.seq))
+
+
 def next_to_wither(led) -> Optional["Sakura"]:
     """The full-shrine plant's target: the Sakura closest to withering, the
     fewest turns left, the oldest on a tie; a Deadline Extension Sakura
     (it never withers) only when every one carries it. None on an empty
-    shrine. C# twin: `YaeShrineLedger.NextToWither`."""
-    best = None
-    for s in led.sakura:
-        if best is None:
-            best = s
-            continue
-        se, be = s.has(DEADLINE), best.has(DEADLINE)
-        if se != be:
-            if not se:
-                best = s
-        elif s.turns_left < best.turns_left:
-            best = s
-    return best
+    shrine. The user's ruling, 2026-10-20 (turns-left targeting): every
+    card that costs a Sakura reaches it too. C# twin:
+    `YaeShrineLedger.NextToWither`."""
+    order = wither_order(led)
+    return order[0] if order else None
+
+
+def last_to_wither(led) -> Optional["Sakura"]:
+    """The mirror of `next_to_wither`: a Deadline Extension Sakura first,
+    then the most turns left, the newest on a tie. Every card that benefits
+    a Sakura reaches it (the user's ruling, 2026-10-20). None on an empty
+    shrine. C# twin: `YaeShrineLedger.LastToWither`."""
+    order = wither_order(led)
+    return order[-1] if order else None
 
 
 def plant(state, n: int = 1, reason: str = "plant",
@@ -512,26 +540,26 @@ def plant(state, n: int = 1, reason: str = "plant",
         if len(led.sakura) >= cap and led.sakura:
             # 2026-10-17 (the user: "closest to the expectation"): the
             # Sakura closest to withering, not the first planted.
-            oldest = next_to_wither(led)
+            target = next_to_wither(led)
             if SCALING == "level":
-                act(state, oldest, "full_shrine")
-                if oldest.kind == kind:
-                    oldest.turns_left = max(oldest.turns_left, SAKURA_TURNS)
-                    oldest.level += 1
+                act(state, target, "full_shrine")
+                if target.kind == kind:
+                    target.turns_left = max(target.turns_left, SAKURA_TURNS)
+                    target.level += 1
                     # Yae review r4, item 2: the planting card's Red Ink
                     # goes to the refreshed Sakura, as to a new one (beside
                     # what it carries, the pool to 78, pick 2 (a)).
-                    oldest.add(annotation)
-                    led.last_planted = oldest
+                    target.add(annotation)
+                    led.last_planted = target
                     state.emit("yae_level", reason=reason,
                                levels=[s.level for s in led.sakura])
                     continue
                 # A different kind: it withers, the new one takes its place
                 # and its Levels (the Sakura Levels paper: "let levels carry
                 # over so that mixing types doesn't brick you").
-                if oldest in led.sakura:
-                    led.sakura.remove(oldest)
-                carried = oldest.level
+                if target in led.sakura:
+                    led.sakura.remove(target)
+                carried = target.level
                 state.emit("yae_wither", count=1, standing=len(led.sakura),
                            reason="replaced")
                 _withered(state, 1)
@@ -739,7 +767,8 @@ def act_all(state, reason: str) -> None:
 
 def edit_sakura(state, which: str, n: int, annotation: str,
                 quiet: bool = False) -> int:
-    """"Edit your newest / oldest Sakura" (`n` from that end), "Edit every
+    """"Edit your Sakura with the most / fewest turns left" (`n` from that
+    end of `wither_order`, the user's ruling 2026-10-20), "Edit every
     Sakura" (`which` every). The pool to 78, pick 2 (a): the Annotation
     joins what the Sakura carries; on one that already has it, it changes
     nothing, and an Edit that changes nothing is not an Edit. Returns how
@@ -748,7 +777,8 @@ def edit_sakura(state, which: str, n: int, annotation: str,
     if annotation not in SAKURA_ANNOTATIONS:
         raise ValueError(f"no Sakura reading for {annotation!r}")
     led = ledger(state.player)
-    ordered = led.sakura if which == "oldest" else list(reversed(led.sakura))
+    order = wither_order(led)
+    ordered = order if which == "fewest_turns_left" else order[::-1]
     if which == "every":
         n = len(ordered)
     if not ordered and not quiet:
@@ -763,12 +793,15 @@ def edit_sakura(state, which: str, n: int, annotation: str,
 
 
 def highest(led, kinds=SAKURA_KINDS):
-    """The highest-Level Sakura of `kinds`, the oldest on a tie (Editor-in-
-    Chief any kind; Kitsune Pounce a damage kind)."""
+    """The highest-Level Sakura of `kinds` (Editor-in-Chief any kind;
+    Kitsune Pounce a damage kind); on a tie, `last_to_wither`'s order:
+    Deadline Extension first, then the most turns left, then the newest
+    (the user's ruling, 2026-10-20). C# twin: `YaeShrineLedger.Highest`."""
     cands = [s for s in led.sakura if s.kind in kinds]
     if not cands:
         return None
-    return max(cands, key=lambda s: (s.level, -s.seq))
+    return max(cands, key=lambda s: (s.level, s.has(DEADLINE),
+                                     s.turns_left, s.seq))
 
 
 def tenko(state) -> None:
@@ -791,6 +824,18 @@ def extend(state, n: int) -> None:
         s.turns_left += n
 
 
+def extend_most_turns_left(led, n: int) -> bool:
+    """Evergreen Charm: +n on the timer of the Sakura with the most turns
+    left, skipping any Deadline Extension Sakura (its timer never ticks);
+    with every one carrying it, none. Whether one was extended (the user's
+    ruling, 2026-10-20). C# twin: `YaeShrineLedger.ExtendMostTurnsLeft`."""
+    rest = [s for s in wither_order(led) if not s.has(DEADLINE)]
+    if not rest:
+        return False
+    rest[-1].turns_left += max(0, n)
+    return True
+
+
 def level_up(state, n: int, kind: Optional[str] = None) -> None:
     """"Each Sakura gains a Level" (n Levels), no cap; with `kind`, that
     kind only (Kitsune Veil)."""
@@ -810,36 +855,51 @@ def grove(state, n: int) -> None:
                    levels=[s.level for s in led.sakura])
 
 
-def wither_oldest(state, reason: str = "fallen_petals") -> bool:
-    """Fallen Petals (review r3): the oldest Sakura acts once (its Last
-    Bloom) and withers, Deadline Extension or not. Whether one did."""
-    return _wither_end(state, oldest=True, reason=reason)
-
-
-def strike_oldest_at(state, aim) -> bool:
-    """Yae draft pass, 2026-10-17 (review/active/yae-draft-pass-2026-10-17.md
-    sec.3): Falling Blossom's "Your oldest Sakura strikes this enemy." The
-    oldest acts once at `aim`, one hit whatever its kind (a Foxfire's
-    included; a Kitsune's is its Block), as every aimed strike is. No wither,
-    no Last Bloom; none of its turns; not a Tenko. Whether one acted. C#
-    twin: `YaeShrine.StrikeOldestAt`."""
+def wither_next(state, reason: str = "fallen_petals") -> bool:
+    """Fallen Petals (review r3), Replanting, Hide Behind the Shrine: the
+    Sakura with the fewest turns left (`next_to_wither`; the user's ruling,
+    2026-10-20, was the oldest or the newest) acts once (its Last Bloom)
+    and withers, Deadline Extension or not. Whether one did. C# twin:
+    `YaeShrine.WitherFewestTurnsLeft`."""
     led = ledger(state.player)
     if led is None or not led.sakura:
         return False
-    act(state, led.sakura[0], "falling_blossom", aim=aim)
+    s = next_to_wither(led)
+    act(state, s, "bloom")
+    if s in led.sakura:
+        led.sakura.remove(s)
+    state.emit("yae_wither", count=1, standing=len(led.sakura),
+               reason=reason)
+    _withered(state, 1)
     return True
 
 
-def strike_newest(state) -> bool:
-    """Yae draft pass, 2026-10-17 (sec.3): Dawn Prayer's "It strikes now.",
-    after its Levels. The newest Sakura acts once as its kind, unaimed (a
-    Sakura on the Lure's, Hunting Gaze's or a random enemy; a Foxfire on
-    ALL), none of its turns, not a Tenko. Whether one acted. C# twin:
-    `YaeShrine.StrikeNewest`."""
+def strike_most_turns_left_at(state, aim) -> bool:
+    """Yae draft pass, 2026-10-17 (review/active/yae-draft-pass-2026-10-17.md
+    sec.3): Falling Blossom's "Your Sakura with the most turns left strikes
+    this enemy." (`last_to_wither`; the user's ruling, 2026-10-20, was the
+    oldest). It acts once at `aim`, one hit whatever its kind (a Foxfire's
+    included; a Kitsune's is its Block), as every aimed strike is. No
+    wither, no Last Bloom; none of its turns; not a Tenko. Whether one
+    acted. C# twin: `YaeShrine.StrikeMostTurnsLeftAt`."""
     led = ledger(state.player)
     if led is None or not led.sakura:
         return False
-    act(state, led.sakura[-1], "dawn_prayer")
+    act(state, last_to_wither(led), "falling_blossom", aim=aim)
+    return True
+
+
+def strike_most_turns_left(state) -> bool:
+    """Yae draft pass, 2026-10-17 (sec.3): Dawn Prayer's "It strikes now.",
+    after its Levels. The Sakura with the most turns left (`last_to_wither`,
+    the one its Levels went to; the user's ruling, 2026-10-20, was the
+    newest) acts once as its kind, unaimed (a Sakura on the Lure's, Hunting
+    Gaze's or a random enemy; a Foxfire on ALL), none of its turns, not a
+    Tenko. Whether one acted. C# twin: `YaeShrine.StrikeMostTurnsLeft`."""
+    led = ledger(state.player)
+    if led is None or not led.sakura:
+        return False
+    act(state, last_to_wither(led), "dawn_prayer")
     return True
 
 
@@ -867,26 +927,6 @@ def strike_planted(state, card=None) -> bool:
         targets = effects._pick_targets(state, "enemy")
         aim = targets[0] if targets else None
     act(state, s, "strike_planted", aim=aim)
-    return True
-
-
-def wither_newest(state, reason: str = "hide_behind_the_shrine") -> bool:
-    """Hide Behind the Shrine (the refill): the newest Sakura acts once
-    (its Last Bloom) and withers. Whether one did."""
-    return _wither_end(state, oldest=False, reason=reason)
-
-
-def _wither_end(state, oldest: bool, reason: str) -> bool:
-    led = ledger(state.player)
-    if led is None or not led.sakura:
-        return False
-    s = led.sakura[0] if oldest else led.sakura[-1]
-    act(state, s, "bloom")
-    if s in led.sakura:
-        led.sakura.remove(s)
-    state.emit("yae_wither", count=1, standing=len(led.sakura),
-               reason=reason)
-    _withered(state, 1)
     return True
 
 
@@ -950,14 +990,15 @@ def wither_all(state) -> int:
 
 
 def replant(state, higher: int, annotation: Optional[str] = None) -> None:
-    """Replanting: the oldest withers (its Last Bloom); one of its kind is
-    planted at its Level plus `higher` (Fox's Mooncall still adds)."""
+    """Replanting: the Sakura with the fewest turns left withers (its Last
+    Bloom; the user's ruling, 2026-10-20, was the oldest); one of its kind
+    is planted at its Level plus `higher` (Fox's Mooncall still adds)."""
     led = ledger(state.player)
     if led is None or not led.sakura:
         return
-    oldest = led.sakura[0]
-    kind, lvl = oldest.kind, oldest.level
-    if wither_oldest(state, "replanting"):
+    target = next_to_wither(led)
+    kind, lvl = target.kind, target.level
+    if wither_next(state, "replanting"):
         plant(state, 1, "replanting", level=lvl + higher,
               annotation=annotation, kind=kind)
 
@@ -1253,7 +1294,7 @@ BLOCK_KINDS = frozenset({"block_per_sakura", "block_per_edit"})
 def gives_block(card) -> bool:
     """Nimble's door (the game's `GainsBlock`), or a `yae` kind that gives
     the card's own Block, which Red Ink rides too (Hide Behind the Shrine's
-    `wither_newest_block`, the refill; block_per_edit no row since Print Run
+    `wither_fewest_turns_left_block`, the refill; block_per_edit no row since Print Run
     took the calculated rail, 2026-10-15)."""
     from tier0.content import enchantments          # late: cycle
     return enchantments._gains_block(card) or any(
@@ -1490,7 +1531,7 @@ def publish_after_fight(room: str, drafts: dict, published: dict,
 def after_play(state, card) -> None:
     """`effects.resolve_card`, after the card's own effects, for an
     Annotated card: Editor-in-Chief, "a Sakura strikes" (the
-    highest-Level Sakura acts as its kind, the oldest on a tie)."""
+    highest-Level Sakura acts as its kind, the most turns left on a tie)."""
     led = ledger(state.player)
     if led is None or not is_annotated(card):
         return
@@ -1638,8 +1679,8 @@ def validate_op(card_id: str, fx: dict) -> None:
                          f"{'needs' if kind == 'edit_sakura' else 'takes no'}"
                          " `which:`")
     if "which" in fx and fx["which"] not in SAKURA_EDIT_ENDS:
-        raise ValueError(f"card {card_id!r}: `which:` is newest, oldest or "
-                         "every, "
+        raise ValueError(f"card {card_id!r}: `which:` is most_turns_left, "
+                         "fewest_turns_left or every, "
                          f"got {fx['which']!r}")
     if "lasts" in fx and (kind not in LASTS_KINDS
                           or not isinstance(fx["lasts"], int)
@@ -1745,7 +1786,7 @@ def op_yae(state, fx: dict, card) -> None:
             if s is not None:
                 act(state, s, "pounce", aim=target)
     elif kind == "fallen_petals":
-        if wither_oldest(state):
+        if wither_next(state):
             state.player.energy += 1
             state.emit("energy", amount=1)
             state.draw(2 if fx.get("upgraded") else 1)
@@ -1824,11 +1865,11 @@ def op_yae(state, fx: dict, card) -> None:
         high = any(effective_level(state, s) >= FANG_LEVEL
                    for s in led.sakura)
         _card_hit(state, card, fx["base"] + (fx["amount"] if high else 0))
-    elif kind == "strike_oldest_at":
+    elif kind == "strike_most_turns_left_at":
         targets = effects._pick_targets(state, "enemy")
-        strike_oldest_at(state, targets[0] if targets else None)
-    elif kind == "wither_newest_block":
-        if wither_newest(state):
+        strike_most_turns_left_at(state, targets[0] if targets else None)
+    elif kind == "wither_fewest_turns_left_block":
+        if wither_next(state, "hide_behind_the_shrine"):
             _card_block(state, card, fx["amount"])
     elif kind == "rewrite":
         # "Discard up to N cards, then draw that many": the pilot's chosen
@@ -1840,20 +1881,23 @@ def op_yae(state, fx: dict, card) -> None:
         if n > 0:
             state.draw(n)
         edit(state, card, fx["annotation"], 1)
-    elif kind == "level_newest":
+    elif kind == "level_most_turns_left":
+        # The user's ruling, 2026-10-20: the Sakura with the most turns left
+        # (was the newest). C# twin: `YaeShrineLedger.LevelMostTurnsLeft`.
         if led.sakura:
-            led.sakura[-1].level += fx["amount"]
+            last_to_wither(led).level += fx["amount"]
             state.emit("yae_level", reason="dawn_prayer",
                        levels=[s.level for s in led.sakura])
-    elif kind == "extend_oldest":
-        # The Yae pass (2026-10-16): "Your oldest Sakura lasts 2 more turns."
-        # C# twin: `YaeShrineLedger.ExtendOldest`.
-        if led.sakura:
-            led.sakura[0].turns_left += fx["amount"]
+    elif kind == "extend_most_turns_left":
+        # The Yae pass (2026-10-16): "Your Sakura with the most turns left
+        # lasts 2 more turns." (the user's ruling, 2026-10-20, was the
+        # oldest); a Deadline Extension Sakura is skipped, and with every one
+        # carrying it none is. C# twin: `YaeShrineLedger.ExtendMostTurnsLeft`.
+        extend_most_turns_left(led, fx["amount"])
     elif kind == "strike_planted":
         strike_planted(state, card)
-    elif kind == "strike_newest":
-        strike_newest(state)
+    elif kind == "strike_most_turns_left":
+        strike_most_turns_left(state)
     elif kind == "bless_highest":
         s = highest(led)
         if s is not None:

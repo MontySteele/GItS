@@ -4965,11 +4965,10 @@
 - {id: proto_ym_fox_fire_draft, name: "Fox Fire Draft", character: yae,
    authored_by: [claude],
    cost: 0, type: skill, rarity: common, exhaust: true,
-   # Design axes, Ruled 2026-10-14: it writes on Sakura now. Yae pass
-   # 2026-10-16 (review/active/yae-ancients-relics-2026-10-16.md sec.1): the
-   # upgrade is the 2 newest (was every Sakura, up to 36 for 0 at Common).
-   description: "[gold]Edit[/gold] {IfUpgraded:show:your 2 newest|your newest} [gold]Sakura[/gold]: [gold]Fox Fire[/gold].",
-   effects: [{op: yae, kind: edit_sakura, which: newest, annotation: fox_fire, amount: 1}],
+   # User ruling 2026-10-20 (turns-left targeting): the 1 [2] with the most
+   # turns left (was the newest). Provenance note.
+   description: "[gold]Edit[/gold] {IfUpgraded:show:your 2 [gold]Sakura[/gold] with the most turns left|your [gold]Sakura[/gold] with the most turns left}: [gold]Fox Fire[/gold].",
+   effects: [{op: yae, kind: edit_sakura, which: most_turns_left, annotation: fox_fire, amount: 1}],
    upgrade: {yae_amount: 1}}
 
 - {id: proto_ym_sly_strike, name: "Sly Strike", character: yae,
@@ -5040,12 +5039,11 @@
 - {id: proto_ym_evergreen_charm, name: "Evergreen Charm", character: yae,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   # Yae review r4 item 4: 7 [10]. Yae pass 2026-10-16 (sec.1): "Your oldest
-   # Sakura lasts 2 more turns" (Kitsune's Blessing's reading), was Edit your
-   # oldest Sakura: Deadline Extension, Eternity for one Sakura at Common.
-   description: "Gain 7 [gold]Block[/gold]. Your oldest [gold]Sakura[/gold] lasts {YmAmount:diff()} more turns.",
+   # User ruling 2026-10-20 (turns-left targeting): the most turns left (was
+   # the oldest), skipping a Deadline Extension Sakura. Provenance note.
+   description: "Gain 7 [gold]Block[/gold]. Your [gold]Sakura[/gold] with the most turns left lasts {YmAmount:diff()} more turns.",
    effects: [{op: block, amount: 7},
-             {op: yae, kind: extend_oldest, amount: 2}],
+             {op: yae, kind: extend_most_turns_left, amount: 2}],
    upgrade: {block: 3}}
 
 # The pool to 78 (review/active/yae-pool-to-78-2026-10-15.md, ruled 2026-10-15,
@@ -5099,12 +5097,11 @@
 - {id: proto_ym_falling_blossom, name: "Falling Blossom", character: yae,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   # Yae draft pass, 2026-10-17 (sec.3): no wither, no Last Bloom (was "withers;
-   # its Last Bloom strikes this enemy"). One aimed act, none of its turns, not
-   # a Tenko; a Foxfire's is one hit, a Kitsune's is its Block.
-   description: "Deal 7 [gold]Electro[/gold] damage. Your oldest [gold]Sakura[/gold] strikes this enemy.",
+   # User ruling 2026-10-20 (turns-left targeting): the most turns left (was
+   # the oldest). One aimed act, none of its turns. Provenance note.
+   description: "Deal 7 [gold]Electro[/gold] damage. Your [gold]Sakura[/gold] with the most turns left strikes this enemy.",
    effects: [{op: damage, amount: 7, target: enemy},
-             {op: yae, kind: strike_oldest_at, target: enemy}],
+             {op: yae, kind: strike_most_turns_left_at, target: enemy}],
    upgrade: {damage: 3}}
 
 - {id: proto_ym_publishers_deadline, name: "Publisher's Deadline", character: yae,
@@ -5131,11 +5128,12 @@
 - {id: proto_ym_hide_behind_the_shrine, name: "Hide Behind the Shrine", character: yae,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   # The newest withers as every Sakura does (its Last Bloom still acts);
+   # It withers as every Sakura does (its Last Bloom still acts);
    # the 5 more is the card's own Block.
-   description: "Gain 7 [gold]Block[/gold]. Your newest [gold]Sakura[/gold] withers; if one did, gain {YmAmount:diff()} more.",
+   # User ruling 2026-10-20 (turns-left targeting).
+   description: "Gain 7 [gold]Block[/gold]. Your [gold]Sakura[/gold] with the fewest turns left withers; if one did, gain {YmAmount:diff()} more.",
    effects: [{op: block, amount: 7},
-             {op: yae, kind: wither_newest_block, amount: 5}],
+             {op: yae, kind: wither_fewest_turns_left_block, amount: 5}],
    upgrade: {block: 2}}
 
 - {id: proto_ym_rewrite, name: "Rewrite", character: yae,
@@ -5155,9 +5153,10 @@
    cost: 0, type: skill, rarity: common,
    # Yae draft pass, 2026-10-17 (sec.3): "It strikes now.", after the Levels:
    # one act (random, or Hunting Gaze's), none of its turns, not a Tenko.
-   description: "Your newest [gold]Sakura[/gold] gains {YmAmount:diff()} Levels. It strikes now.",
-   effects: [{op: yae, kind: level_newest, amount: 2},
-             {op: yae, kind: strike_newest}],
+   # User ruling 2026-10-20 (turns-left targeting).
+   description: "Your [gold]Sakura[/gold] with the most turns left gains {YmAmount:diff()} Levels. It strikes now.",
+   effects: [{op: yae, kind: level_most_turns_left, amount: 2},
+             {op: yae, kind: strike_most_turns_left}],
    upgrade: {yae_amount: 1}}
 
 # --- Uncommon (38) ---
@@ -5268,7 +5267,8 @@
    # Review r3, sec.4 (ruled 2026-10-14): an active evoke (was a Power, the
    # "never again" card in four records). Provenance, "Yae review r3".
    cost: 0, type: skill, rarity: uncommon,
-   description: "Your oldest [gold]Sakura[/gold] withers (it acts once, its Last Bloom). If one did, gain {energyPrefix:energyIcons(1)} and draw {IfUpgraded:show:2 cards|1 card}.",
+   # User ruling 2026-10-20 (turns-left targeting).
+   description: "Your [gold]Sakura[/gold] with the fewest turns left withers (it acts once, its Last Bloom). If one did, gain {energyPrefix:energyIcons(1)} and draw {IfUpgraded:show:2 cards|1 card}.",
    effects: [{op: yae, kind: fallen_petals}],
    upgrade: {yae_upgraded: true}}
 
@@ -5452,7 +5452,8 @@
    cost: 1, type: skill, rarity: uncommon,
    # It withers as every Sakura does (its Last Bloom), and the new one is
    # planted at that Sakura's Level plus 1 [2] (Fox's Mooncall still adds).
-   description: "Your oldest [gold]Sakura[/gold] withers. Plant one of its kind, {IfUpgraded:show:2 Levels|1 Level} higher.",
+   # User ruling 2026-10-20 (turns-left targeting).
+   description: "Your [gold]Sakura[/gold] with the fewest turns left withers. Plant one of its kind, {IfUpgraded:show:2 Levels|1 Level} higher.",
    effects: [{op: yae, kind: replant, amount: 1}],
    upgrade: {yae_amount: 1}}
 
@@ -5526,10 +5527,9 @@
 - {id: proto_ym_kitsunes_blessing, name: "Kitsune's Blessing", character: yae,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   # The highest-Level Sakura of any kind; on a tie, the oldest (Editor-in-
-   # Chief's reading). Yae round 11 (2026-10-18): the face says so, after a
-   # seat lost Thunder Levels to a Kitsune Sakura on a tie.
-   description: "Your highest-Level [gold]Sakura[/gold] gains {YmAmount:diff()} Levels and lasts 2 more turns. Ties go to the oldest.",
+   # User ruling 2026-10-20 (turns-left targeting): a Level tie goes to the
+   # most turns left (was the oldest). Provenance note.
+   description: "Your highest-Level [gold]Sakura[/gold] gains {YmAmount:diff()} Levels and lasts 2 more turns. Ties go to the one with the most turns left.",
    effects: [{op: yae, kind: bless_highest, amount: 3, lasts: 2}],
    upgrade: {yae_amount: 1}}
 

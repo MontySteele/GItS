@@ -9898,3 +9898,48 @@ weak-card and upgrade pass" ("This table looks good. Ship it").
   sheet's earlier block, verbatim: "The re-founding (2026-10-12): one hit per
   Plan waiting (was per Plan written this turn). Kokomi level pass
   (2026-10-12, sec.2): always hits at least once."
+
+
+## Yae turns-left targeting, 2026-10-20
+
+A friend's report: "The wither your oldest and replace with a level up'd
+minion card eliminates the usefulness of the common block card that lets your
+oldest Sakura live for 2 more rounds. A couple of times I had a Sakura with 7+
+turns left on it and the kill oldest card replaced it with one only had 3
+turns." [USER]: "I think we need to clean up references to 'oldest' and
+'youngest.' For cards designed to benefit you, they should target the one
+with the most turns left. For cards designed to cost something, they should
+target the one with the fewest turns left. This might not be the same as the
+planting order."
+
+A cost reaches `YaeShrineLedger.NextToWither` (fewest turns left; a Deadline
+Extension Sakura last; the oldest on a tie); a benefit reaches its mirror
+`LastToWither` (a Deadline Extension Sakura first; the most turns left; the
+newest on a tie). Kinds renamed with the faces: `extend_oldest` ->
+`extend_most_turns_left`, `strike_oldest_at` -> `strike_most_turns_left_at`,
+`level_newest` -> `level_most_turns_left`, `strike_newest` ->
+`strike_most_turns_left`, `wither_newest_block` ->
+`wither_fewest_turns_left_block`; `edit_sakura which:` `newest` / `oldest` ->
+`most_turns_left` / `fewest_turns_left`. Fallen Petals and Replanting keep
+their kinds; their faces and targets moved. The sheet's earlier blocks,
+verbatim:
+
+- **`proto_ym_fox_fire_draft`**: "Design axes, Ruled 2026-10-14: it writes on
+  Sakura now. Yae pass 2026-10-16
+  (review/active/yae-ancients-relics-2026-10-16.md sec.1): the upgrade is the
+  2 newest (was every Sakura, up to 36 for 0 at Common)."
+- **`proto_ym_evergreen_charm`**: "Yae review r4 item 4: 7 [10]. Yae pass
+  2026-10-16 (sec.1): "Your oldest Sakura lasts 2 more turns" (Kitsune's
+  Blessing's reading), was Edit your oldest Sakura: Deadline Extension,
+  Eternity for one Sakura at Common." Evergreen skips a Deadline Extension
+  Sakura (its timer never ticks); with every one carrying it, none is
+  extended.
+- **`proto_ym_falling_blossom`**: "Yae draft pass, 2026-10-17 (sec.3): no
+  wither, no Last Bloom (was "withers; its Last Bloom strikes this enemy").
+  One aimed act, none of its turns, not a Tenko; a Foxfire's is one hit, a
+  Kitsune's is its Block."
+- **`proto_ym_kitsunes_blessing`**: "The highest-Level Sakura of any kind; on
+  a tie, the oldest (Editor-in-Chief's reading). Yae round 11 (2026-10-18):
+  the face says so, after a seat lost Thunder Levels to a Kitsune Sakura on a
+  tie." The same tie-break serves Editor-in-Chief and Kitsune Pounce
+  (`YaeShrineLedger.Highest`).

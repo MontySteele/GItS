@@ -36,15 +36,15 @@ public class YaePoolTo78Tests : IDisposable
         var ledger = Fresh();
         ledger.Plant(YaeLaw.PlantLevel);
         var s = ledger.Standing[0];
-        Assert.Equal(1, ledger.EditSakura(YaeSakuraEnd.Oldest, 1, YaeAnnotation.RedInk));
-        Assert.Equal(1, ledger.EditSakura(YaeSakuraEnd.Oldest, 1, YaeAnnotation.FoxFire));
-        Assert.Equal(1, ledger.EditSakura(YaeSakuraEnd.Oldest, 1, YaeAnnotation.DeadlineExtension));
+        Assert.Equal(1, ledger.EditSakura(YaeSakuraEnd.FewestTurnsLeft, 1, YaeAnnotation.RedInk));
+        Assert.Equal(1, ledger.EditSakura(YaeSakuraEnd.FewestTurnsLeft, 1, YaeAnnotation.FoxFire));
+        Assert.Equal(1, ledger.EditSakura(YaeSakuraEnd.FewestTurnsLeft, 1, YaeAnnotation.DeadlineExtension));
         Assert.Equal(new[] { YaeAnnotation.RedInk, YaeAnnotation.FoxFire,
                              YaeAnnotation.DeadlineExtension }, s.Annotations);
         var size = YaeShrineLedger.ActSize(s.Kind, s.Level, s.Annotations);
         Assert.Equal(YaeLaw.SakuraBase + YaeLaw.SakuraPerLevel * s.Level + YaeLaw.RedInkAmount, size);
         // A second Red Ink changes nothing: no second +3.
-        Assert.Equal(0, ledger.EditSakura(YaeSakuraEnd.Oldest, 1, YaeAnnotation.RedInk));
+        Assert.Equal(0, ledger.EditSakura(YaeSakuraEnd.FewestTurnsLeft, 1, YaeAnnotation.RedInk));
         Assert.Equal(size, YaeShrineLedger.ActSize(s.Kind, s.Level, s.Annotations));
     }
 
@@ -53,9 +53,11 @@ public class YaePoolTo78Tests : IDisposable
     {
         var ledger = Fresh();
         for (var i = 0; i < 2; i++) ledger.Plant(YaeLaw.PlantLevel);
-        ledger.EditSakura(YaeSakuraEnd.Oldest, 1, YaeAnnotation.FoxFire);
-        ledger.EditSakura(YaeSakuraEnd.Oldest, 1, YaeAnnotation.DeadlineExtension);
-        ledger.EditSakura(YaeSakuraEnd.Oldest, 1, YaeAnnotation.RedInk);
+        // One Sakura Edited three times ("Edit it"): since 2026-10-20 the
+        // fewest-turns-left end moves off a Deadline Extension one.
+        ledger.EditOne(ledger.Standing[0], YaeAnnotation.FoxFire);
+        ledger.EditOne(ledger.Standing[0], YaeAnnotation.DeadlineExtension);
+        ledger.EditOne(ledger.Standing[0], YaeAnnotation.RedInk);
         var rows = ledger.SakuraRows()
             .Cast<System.Collections.Generic.Dictionary<string, object?>>().ToList();
         Assert.Equal(2, rows.Count);
@@ -71,7 +73,7 @@ public class YaePoolTo78Tests : IDisposable
     {
         var ledger = Fresh();
         for (var i = 0; i < 2; i++) ledger.Plant(YaeLaw.PlantLevel);
-        ledger.EditSakura(YaeSakuraEnd.Newest, 1, YaeAnnotation.FoxFire);
+        ledger.EditSakura(YaeSakuraEnd.MostTurnsLeft, 1, YaeAnnotation.FoxFire);
         var edits = ledger.Edits;
         // Every Sakura: the newest already has it, so one Edit, not two.
         Assert.Equal(1, ledger.EditSakura(YaeSakuraEnd.Every, 1, YaeAnnotation.FoxFire));
@@ -86,7 +88,7 @@ public class YaePoolTo78Tests : IDisposable
         var ledger = Fresh();
         for (var i = 0; i < 3; i++) ledger.Plant(YaeLaw.PlantLevel);
         var oldest = ledger.Standing[0];
-        ledger.EditSakura(YaeSakuraEnd.Oldest, 1, YaeAnnotation.FoxFire);
+        ledger.EditSakura(YaeSakuraEnd.FewestTurnsLeft, 1, YaeAnnotation.FoxFire);
         ledger.Refresh();                                    // Tenko's refresh
         Assert.True(oldest.Has(YaeAnnotation.FoxFire));
         Assert.False(ledger.Plant(YaeLaw.PlantLevel, null, YaeAnnotation.RedInk));
@@ -166,7 +168,7 @@ public class YaePoolTo78Tests : IDisposable
     [Fact]
     public void The_withers_pay_enlightened_blessing()
     {
-        foreach (var name in new[] { nameof(YaeShrine.TickAndBloom), nameof(YaeShrine.WitherOldest),
+        foreach (var name in new[] { nameof(YaeShrine.TickAndBloom), nameof(YaeShrine.WitherFewestTurnsLeft),
                                      nameof(YaeShrine.WitherAll), nameof(YaeShrine.Plant) })
         {
             Assert.Contains(Il.CallSequence(typeof(YaeShrine).GetMethod(name)!),

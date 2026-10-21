@@ -109,31 +109,37 @@ public class YaeAncientsRelicsTests : IDisposable
     }
 
     [Fact]
-    public void Evergreen_charm_makes_the_oldest_last_2_more_turns()
+    public void Evergreen_charm_makes_the_most_turns_left_last_2_more_turns()
     {
+        // The user's ruling, 2026-10-20 (turns-left targeting): was the oldest.
         var card = new ProtoYmEvergreenCharm();
-        Assert.Equal("Gain {Block:diff()} [gold]Block[/gold]. Your oldest [gold]Sakura[/gold] "
-                   + "lasts {YmAmount:diff()} more turns.", Face(card));
+        Assert.Equal("Gain {Block:diff()} [gold]Block[/gold]. Your [gold]Sakura[/gold] with the "
+                   + "most turns left lasts {YmAmount:diff()} more turns.", Face(card));
         Assert.Equal(2, Var(card, "YmAmount"));
-        Assert.Contains(OnPlay<ProtoYmEvergreenCharm>(), c => c.Contains("YaeCards.ExtendOldest"));
+        Assert.Contains(OnPlay<ProtoYmEvergreenCharm>(), c => c.Contains("YaeCards.ExtendMostTurnsLeft"));
         Assert.DoesNotContain(OnPlay<ProtoYmEvergreenCharm>(), c => c.Contains("EditSakura"));
 
         var ledger = new YaeShrineLedger();
-        Assert.False(ledger.ExtendOldest(2));
+        Assert.False(ledger.ExtendMostTurnsLeft(2));
         ledger.Plant(1);
         ledger.Plant(1);
-        Assert.True(ledger.ExtendOldest(2));
-        Assert.Equal(YaeLaw.SakuraTurns + 2, ledger.Standing[0].TurnsLeft);
-        Assert.Equal(YaeLaw.SakuraTurns, ledger.Standing[1].TurnsLeft);
-        Assert.False(ledger.Standing[0].Has(YaeAnnotation.DeadlineExtension));
+        // A tie goes to the newest; then it has the most and keeps growing.
+        Assert.True(ledger.ExtendMostTurnsLeft(2));
+        Assert.Equal(YaeLaw.SakuraTurns, ledger.Standing[0].TurnsLeft);
+        Assert.Equal(YaeLaw.SakuraTurns + 2, ledger.Standing[1].TurnsLeft);
+        Assert.True(ledger.ExtendMostTurnsLeft(2));
+        Assert.Equal(YaeLaw.SakuraTurns + 4, ledger.Standing[1].TurnsLeft);
+        Assert.False(ledger.Standing[1].Has(YaeAnnotation.DeadlineExtension));
     }
 
     [Fact]
     public void The_upgrades_the_pass_moved()
     {
-        // Fox Fire Draft+: the 2 newest (was every Sakura).
+        // Fox Fire Draft+: the 2 with the most turns left (was every Sakura;
+        // the 2 newest until the user's ruling of 2026-10-20).
         Assert.Equal(2, Var(Upgraded<ProtoYmFoxFireDraft>(), "YmAmount"));
-        Assert.Contains("your 2 newest", Face(new ProtoYmFoxFireDraft()));
+        Assert.Contains("your 2 [gold]Sakura[/gold] with the most turns left",
+                        Face(new ProtoYmFoxFireDraft()));
         // Thunderbolt Tithe+: 4, plus 5 each.
         Assert.Equal(4, Var(Upgraded<ProtoYmThunderboltTithe>(), "YmBase"));
         Assert.Equal(5, Var(Upgraded<ProtoYmThunderboltTithe>(), "YmPer"));

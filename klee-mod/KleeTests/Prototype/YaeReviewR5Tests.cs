@@ -179,7 +179,7 @@ public class YaeReviewR5Pick1Tests : IDisposable
         // Inked Branches: "Edit every Sakura: Red Ink" counts each Sakura.
         Assert.Equal(3, ledger.EditSakura(YaeSakuraEnd.Every, 1, YaeAnnotation.RedInk));
         Assert.Equal(3, ledger.Edits);
-        Assert.Equal(1, ledger.EditSakura(YaeSakuraEnd.Newest, 1, YaeAnnotation.FoxFire));
+        Assert.Equal(1, ledger.EditSakura(YaeSakuraEnd.MostTurnsLeft, 1, YaeAnnotation.FoxFire));
         Assert.Equal(4, ledger.Edits);
         // An Annotation with no Sakura reading Edits none and counts none.
         Assert.Equal(0, ledger.EditSakura(YaeSakuraEnd.Every, 1, YaeAnnotation.Footnote));

@@ -37,7 +37,7 @@ public static class YaePotions
 }
 
 /// <summary>Common. "Plant 2 Sakura." Twin Sakura's plant, one at a time
-/// (each into a full shrine makes the oldest act first).</summary>
+/// (each into a full shrine makes the Sakura closest to withering act first).</summary>
 public sealed class BottledSakura : ArmPotion
 {
     public const int Sakura = 2;

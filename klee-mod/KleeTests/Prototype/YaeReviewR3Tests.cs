@@ -350,20 +350,21 @@ public class YaeReviewR3Tests : IDisposable
     // ==== 4. Fallen Petals ==================================================
 
     [Fact]
-    public void Fallen_petals_withers_the_oldest_then_pays_energy_and_its_upgrade_draws()
+    public void Fallen_petals_withers_the_fewest_turns_left_then_pays_energy_and_its_upgrade_draws()
     {
+        // The user's ruling, 2026-10-20 (turns-left targeting): was the oldest.
         var petals = new ProtoYmFallenPetals();
         Assert.Equal((0, CardType.Skill), (petals.EnergyCost.Canonical, petals.Type));
-        Assert.Equal("Your oldest [gold]Sakura[/gold] withers (it acts once, its Last Bloom). "
+        Assert.Equal("Your [gold]Sakura[/gold] with the fewest turns left withers (it acts once, its Last Bloom). "
                      + "If one did, gain {energyPrefix:energyIcons(1)} and draw {IfUpgraded:show:2 cards|1 card}.",
                      Face(petals));
         var calls = Il.CallSequence(typeof(YaeCards).GetMethod(nameof(YaeCards.FallenPetals))!).ToList();
-        var wither = calls.FindIndex(c => c.Contains(nameof(YaeShrine.WitherOldest)));
+        var wither = calls.FindIndex(c => c.Contains(nameof(YaeShrine.WitherFewestTurnsLeft)));
         var energy = calls.FindIndex(c => c.Contains("PlayerCmd.GainEnergy"));
         var draw = calls.FindIndex(c => c.Contains("CardPileCmd.Draw"));
         Assert.True(wither >= 0 && energy > wither && draw > energy, string.Join(", ", calls));
         Assert.Contains(calls, c => c.Contains("get_IsUpgraded"));
-        var oldest = Il.CallSequence(typeof(YaeShrine).GetMethod(nameof(YaeShrine.WitherOldest))!).ToList();
+        var oldest = Il.CallSequence(typeof(YaeShrine).GetMethod(nameof(YaeShrine.WitherFewestTurnsLeft))!).ToList();
         var act = oldest.FindIndex(c => c.Contains("YaeShrine.Act"));
         var gone = oldest.FindIndex(c => c == "YaeShrineLedger.Wither");
         Assert.True(act >= 0 && gone > act, string.Join(", ", oldest));

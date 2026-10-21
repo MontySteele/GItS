@@ -3147,13 +3147,14 @@ YAE_KINDS = {
     # The refill (review/active/yae-refill-2026-10-16.md, ruled 2026-10-16).
     "barrage": "Barrage",
     "level_strike": "LevelStrike",
-    "wither_newest_block": "WitherNewestBlock",
+    "wither_fewest_turns_left_block": "WitherFewestTurnsLeftBlock",
     "rewrite": "Rewrite",
-    "level_newest": "LevelNewest",
+    "level_most_turns_left": "LevelMostTurnsLeft",
     "bless_highest": "BlessHighest",
-    # The Yae pass (2026-10-16): Evergreen Charm's "Your oldest Sakura lasts
-    # 2 more turns".
-    "extend_oldest": "ExtendOldest",
+    # The Yae pass (2026-10-16): Evergreen Charm's "Your Sakura with the
+    # most turns left lasts 2 more turns" (the user's ruling, 2026-10-20,
+    # turns-left targeting: was `extend_oldest`).
+    "extend_most_turns_left": "ExtendMostTurnsLeft",
     # Yae flat-value pass, 2026-10-17 (review/active/yae-flat-value-
     # 2026-10-17.md sec.3): Thunder Petal's "It strikes this enemy." and
     # Foxfire Sweep's "It strikes now." The planted Sakura acts once; a
@@ -3161,10 +3162,12 @@ YAE_KINDS = {
     # damage op already aims), a Foxfire on ALL.
     "strike_planted": "StrikePlanted",
     # Yae draft pass, 2026-10-17 (review/active/yae-draft-pass-2026-10-17.md
-    # sec.3): Falling Blossom's "Your oldest Sakura strikes this enemy." (no
-    # wither, was `wither_oldest_at`) and Dawn Prayer's "It strikes now."
-    "strike_oldest_at": "StrikeOldestAt",
-    "strike_newest": "StrikeNewest",
+    # sec.3): Falling Blossom's "Your Sakura with the most turns left strikes
+    # this enemy." (no wither, was `wither_oldest_at`, then
+    # `strike_oldest_at` until the user's ruling of 2026-10-20) and Dawn
+    # Prayer's "It strikes now." (was `strike_newest`).
+    "strike_most_turns_left_at": "StrikeMostTurnsLeftAt",
+    "strike_most_turns_left": "StrikeMostTurnsLeft",
 }
 YAE_KIND_FIELDS = {
     "plant": ("amount",),
@@ -3201,14 +3204,14 @@ YAE_KIND_FIELDS = {
     "verdict": (),
     "barrage": ("amount",),
     "level_strike": ("base", "amount"),
-    "wither_newest_block": ("amount",),
+    "wither_fewest_turns_left_block": ("amount",),
     "rewrite": ("amount",),
-    "level_newest": ("amount",),
+    "level_most_turns_left": ("amount",),
     "bless_highest": ("amount",),
-    "extend_oldest": ("amount",),
+    "extend_most_turns_left": ("amount",),
     "strike_planted": (),
-    "strike_oldest_at": (),
-    "strike_newest": (),
+    "strike_most_turns_left_at": (),
+    "strike_most_turns_left": (),
 }
 #: The kinds that aim at the enemy the player picks (`target: enemy`).
 YAE_AIMED_KINDS = {"lure", "damage_per_sakura", "damage_per_edit",
@@ -3217,8 +3220,8 @@ YAE_AIMED_KINDS = {"lure", "damage_per_sakura", "damage_per_edit",
                    # Sakura strikes it".
                    "strike_target", "strike_all_at",
                    # The refill: Kitsune Barrage, Sesshou Fang; the draft
-                   # pass: Falling Blossom's oldest Sakura at "this enemy".
-                   "barrage", "level_strike", "strike_oldest_at"}
+                   # pass: Falling Blossom's Sakura at "this enemy".
+                   "barrage", "level_strike", "strike_most_turns_left_at"}
 #: The kinds that reach ALL enemies (`target: all_enemies`, the card's
 #: TargetType AllEnemies): Forbidden Art: Daisesshou.
 YAE_ALL_KINDS = {"daisesshou"}
@@ -3249,7 +3252,12 @@ YAE_PLANT_AS_KINDS = {"plant", "plant_level"}
 #: (`hand_if_upgraded: true` on its `edit_sakura`).
 YAE_UPGRADED_KINDS = {"fallen_petals", "second_printing", "edit_sakura"}
 YAE_SAKURA_ANNOTATIONS = {"red_ink", "fox_fire", "deadline"}
-YAE_SAKURA_ENDS = {"newest": "Newest", "oldest": "Oldest", "every": "Every"}
+#: The user's ruling, 2026-10-20 (turns-left targeting): the ends count by
+#: turns left (`YaeShrineLedger.WitherOrder`), not planting order; were
+#: `newest` / `oldest`.
+YAE_SAKURA_ENDS = {"most_turns_left": "MostTurnsLeft",
+                   "fewest_turns_left": "FewestTurnsLeft",
+                   "every": "Every"}
 #: The printed name of each `YaeAnnotation` member (`YaeAnnotationText.Name`).
 YAE_ANNOTATION_NAMES = {
     "RedInk": "Red Ink",
@@ -3347,7 +3355,7 @@ def yae_plants_sakura(card: dict) -> bool:
 YAE_BLOCK_KINDS = frozenset({"block_per_sakura", "block_per_edit",
                              # The refill: Hide Behind the Shrine's "gain 5
                              # more", the card's own Block.
-                             "wither_newest_block"})
+                             "wither_fewest_turns_left_block"})
 
 
 def yae_gives_block(card: dict) -> bool:

@@ -45,7 +45,7 @@ public sealed class ProtoYmDawnPrayer : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Dawn Prayer"),
-        ("description", "Your newest [gold]Sakura[/gold] gains {YmAmount:diff()} Levels. It strikes now."),
+        ("description", "Your [gold]Sakura[/gold] with the most turns left gains {YmAmount:diff()} Levels. It strikes now."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -63,8 +63,8 @@ public sealed class ProtoYmDawnPrayer : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await YaeCards.LevelNewest(choiceContext, this, cardPlay);
-        await YaeCards.StrikeNewest(choiceContext, this, cardPlay);
+        await YaeCards.LevelMostTurnsLeft(choiceContext, this, cardPlay);
+        await YaeCards.StrikeMostTurnsLeft(choiceContext, this, cardPlay);
     }
 
     protected override void OnUpgrade()

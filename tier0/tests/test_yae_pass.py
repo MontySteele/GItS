@@ -71,20 +71,22 @@ def test_the_pool_stays_78_with_the_two_rarities_swapped():
     assert _card("mischievous_teasing").rarity == "uncommon"
 
 
-def test_evergreen_charm_makes_the_oldest_last_2_more_turns():
+def test_evergreen_charm_makes_the_most_turns_left_last_2_more_turns():
+    # The user's ruling, 2026-10-20 (turns-left targeting): was the oldest;
+    # on an equal timer the newest.
     st = _state()
     Y.plant(st, 2)
     first, second = _led(st).sakura
     _play(st, "evergreen_charm")
     assert st.player.block == 7
-    assert first.turns_left == Y.SAKURA_TURNS + 2
-    assert second.turns_left == Y.SAKURA_TURNS
-    assert first.annotations == []
+    assert second.turns_left == Y.SAKURA_TURNS + 2
+    assert first.turns_left == Y.SAKURA_TURNS
+    assert second.annotations == []
     # It ticks as every Sakura does: it withers two turns later.
     for _ in range(Y.SAKURA_TURNS):
         Y.turn_end(st)
         Y.turn_start(st)
-    assert _led(st).sakura == [first]
+    assert _led(st).sakura == [second]
     for _ in range(2):
         Y.turn_end(st)
         Y.turn_start(st)
@@ -95,7 +97,7 @@ def test_evergreen_charm_with_no_sakura_is_its_block():
     st = _state()
     _play(st, "evergreen_charm+")
     assert st.player.block == 10
-    Y.validate_op("x", {"op": "yae", "kind": "extend_oldest", "amount": 2})
+    Y.validate_op("x", {"op": "yae", "kind": "extend_most_turns_left", "amount": 2})
 
 
 def test_fox_fire_draft_upgraded_is_the_2_newest():

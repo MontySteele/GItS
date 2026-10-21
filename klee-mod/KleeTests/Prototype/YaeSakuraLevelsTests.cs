@@ -68,9 +68,11 @@ public class YaeSakuraLevelsTests
     [Fact]
     public void The_level_comes_from_the_one_closest_to_withering()
     {
-        var ledger = FullShrine(1, 6, 1);
-        ledger.Tick();                       // 2, 2, 2
-        ledger.ExtendOldest(2);              // 4, 2, 2: the Level 6 is next
+        var ledger = YaeShrineLedger.For(Seat.Yae().Creature);
+        ledger.Plant(YaeLaw.PlantLevel, null, extraTurns: 2);
+        ledger.Plant(6, null);
+        ledger.Plant(YaeLaw.PlantLevel, null);
+        ledger.Tick();                       // 4, 2, 2: the Level 6 is next
         Assert.True(ledger.Plant(YaeLaw.PlantLevel, null, kind: YaeSakuraKind.Foxfire));
         Assert.Equal(YaeSakuraKind.Foxfire, ledger.Standing[^1].Kind);
         Assert.Equal(6, ledger.Standing[^1].Level);

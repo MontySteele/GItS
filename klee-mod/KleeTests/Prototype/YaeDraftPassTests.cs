@@ -65,9 +65,13 @@ public class YaeDraftPassTests : IDisposable
         Assert.DoesNotContain(door, c => c.Contains("Tenko"));
         Assert.DoesNotContain(door, c => c.Contains("KaguraBell"));
         Assert.DoesNotContain(door, c => c.Contains("Refresh"));
-        Assert.DoesNotContain(door, c => c.Contains("TurnsLeft"));
+        // No timer is written; the doors' own names say "MostTurnsLeft"
+        // since the user's ruling of 2026-10-20.
+        Assert.DoesNotContain(door, c => c.Contains("set_TurnsLeft"));
         Assert.DoesNotContain(door, c => c.Contains("Tick"));
-        Assert.DoesNotContain(door, c => c.Contains("Wither"));
+        // Reading which Sakura is LAST to wither (the user's ruling,
+        // 2026-10-20, turns-left targeting) is not a wither.
+        Assert.DoesNotContain(door, c => c.Contains("Wither") && !c.Contains("LastToWither"));
     }
 
     // ---- sec.1: Yakan Evocation ---------------------------------------------------------
@@ -104,57 +108,60 @@ public class YaeDraftPassTests : IDisposable
     // ---- sec.3: Falling Blossom ----------------------------------------------------------
 
     [Fact]
-    public void Falling_blossoms_oldest_strikes_this_enemy_and_does_not_wither()
+    public void Falling_blossoms_most_turns_left_strikes_this_enemy_and_does_not_wither()
     {
+        // The user's ruling, 2026-10-20 (turns-left targeting): was the oldest.
         Assert.Equal("Deal {Damage:diff()} [gold]Electro[/gold] damage. "
-                     + "Your oldest [gold]Sakura[/gold] strikes this enemy.",
+                     + "Your [gold]Sakura[/gold] with the most turns left strikes this enemy.",
                      Face(new ProtoYmFallingBlossom()));
         Assert.Equal((7, 10), (Var(new ProtoYmFallingBlossom(), "Damage"),
                                Var(Upgraded<ProtoYmFallingBlossom>(), "Damage")));
-        var door = Door(nameof(YaeShrine.StrikeOldestAt));
+        var door = Door(nameof(YaeShrine.StrikeMostTurnsLeftAt));
         Assert.Contains(door, c => c.Contains("YaeShrine.Act"));
         Assert.DoesNotContain(door, c => c.Contains("Withered"));
         NotATenko(door);
-        Assert.Equal("aim", typeof(YaeShrine).GetMethod(nameof(YaeShrine.StrikeOldestAt))!
+        Assert.Equal("aim", typeof(YaeShrine).GetMethod(nameof(YaeShrine.StrikeMostTurnsLeftAt))!
             .GetParameters().Last().Name);
 
         var yae = Seat.Yae().Creature;
         var ledger = YaeShrineLedger.For(yae);
-        Assert.False(YaeShrine.StrikeOldestAt(null!, yae, null).GetAwaiter().GetResult());
+        Assert.False(YaeShrine.StrikeMostTurnsLeftAt(null!, yae, null).GetAwaiter().GetResult());
         ledger.Plant(YaeLaw.PlantLevel);
         ledger.Plant(YaeLaw.PlantLevel);
-        var oldest = ledger.Standing[0];
-        Assert.True(YaeShrine.StrikeOldestAt(null!, yae, null).GetAwaiter().GetResult());
+        var target = ledger.LastToWither()!;
+        Assert.Same(ledger.Standing[1], target);             // a tie: the newest
+        Assert.True(YaeShrine.StrikeMostTurnsLeftAt(null!, yae, null).GetAwaiter().GetResult());
         Assert.Equal(2, ledger.Count);
-        Assert.Same(oldest, ledger.Standing[0]);
-        Assert.Equal(YaeLaw.SakuraTurns, oldest.TurnsLeft);
+        Assert.Same(target, ledger.Standing[1]);
+        Assert.Equal(YaeLaw.SakuraTurns, target.TurnsLeft);
     }
 
     // ---- sec.3: Dawn Prayer ---------------------------------------------------------------
 
     [Fact]
-    public void Dawn_prayer_levels_the_newest_then_it_strikes_now()
+    public void Dawn_prayer_levels_the_most_turns_left_then_it_strikes_now()
     {
-        Assert.Equal("Your newest [gold]Sakura[/gold] gains {YmAmount:diff()} Levels. It strikes now.",
+        // The user's ruling, 2026-10-20 (turns-left targeting): was the newest.
+        Assert.Equal("Your [gold]Sakura[/gold] with the most turns left gains {YmAmount:diff()} Levels. It strikes now.",
                      Face(new ProtoYmDawnPrayer()));
         Assert.Equal((2, 3), (Var(new ProtoYmDawnPrayer(), "YmAmount"),
                               Var(Upgraded<ProtoYmDawnPrayer>(), "YmAmount")));
         var calls = OnPlay<ProtoYmDawnPrayer>();
-        var level = calls.FindIndex(c => c.Contains(nameof(YaeCards.LevelNewest)));
-        var strike = calls.FindIndex(c => c.Contains(nameof(YaeCards.StrikeNewest)));
+        var level = calls.FindIndex(c => c.Contains(nameof(YaeCards.LevelMostTurnsLeft)));
+        var strike = calls.FindIndex(c => c.Contains(nameof(YaeCards.StrikeMostTurnsLeft)));
         Assert.True(level >= 0 && strike > level, string.Join(", ", calls));
         Assert.Equal(TargetType.Self, new ProtoYmDawnPrayer().TargetType);
-        var door = Door(nameof(YaeShrine.StrikeNewest));
+        var door = Door(nameof(YaeShrine.StrikeMostTurnsLeft));
         Assert.Contains(door, c => c.Contains("YaeShrine.Act"));
         NotATenko(door);
 
         var yae = Seat.Yae().Creature;
         var ledger = YaeShrineLedger.For(yae);
-        Assert.False(YaeShrine.StrikeNewest(null!, yae).GetAwaiter().GetResult());
+        Assert.False(YaeShrine.StrikeMostTurnsLeft(null!, yae).GetAwaiter().GetResult());
         ledger.Plant(YaeLaw.PlantLevel);
         ledger.Plant(YaeLaw.PlantLevel);
-        Assert.True(ledger.LevelNewest(2));
-        Assert.True(YaeShrine.StrikeNewest(null!, yae).GetAwaiter().GetResult());
+        Assert.True(ledger.LevelMostTurnsLeft(2));
+        Assert.True(YaeShrine.StrikeMostTurnsLeft(null!, yae).GetAwaiter().GetResult());
         Assert.Equal(new[] { 1, 3 }, ledger.Standing.Select(s => s.Level));
         Assert.All(ledger.Standing, s => Assert.Equal(YaeLaw.SakuraTurns, s.TurnsLeft));
     }

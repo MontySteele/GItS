@@ -113,8 +113,9 @@ def test_evergreen_charm_on_a_plain_sakura_extends_it_alone():
     Y.plant(st, 2)
     first, second = Y.ledger(st.player).sakura
     _play(st, _card("evergreen_charm"))
-    assert first.annotations == [] and first.turns_left == Y.SAKURA_TURNS + 2
-    assert second.turns_left == Y.SAKURA_TURNS
+    # The most turns left, the newest on a tie (the user's ruling, 2026-10-20).
+    assert second.annotations == [] and second.turns_left == Y.SAKURA_TURNS + 2
+    assert first.turns_left == Y.SAKURA_TURNS
 
 
 # 5. The Seven Glamours ------------------------------------------------------

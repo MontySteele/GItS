@@ -27,7 +27,7 @@ public enum YaePlantShape
     /// <summary>"Plant a Sakura ... at Level N": one (YmAmount is the Level).</summary>
     PlantLevel = 1,
 
-    /// <summary>Replanting: the oldest withers, one of its kind is planted.</summary>
+    /// <summary>Replanting: the Sakura with the fewest turns left withers, one of its kind is planted.</summary>
     Replant = 2,
 
     /// <summary>Genre Shift: one of each kind not standing.</summary>
@@ -66,7 +66,7 @@ public interface ISakuraPlantMixCard
 
 /// <summary>
 /// A card whose `yae` kind gives its own Block (block_per_sakura,
-/// block_per_edit, and the refill's wither_newest_block, Hide Behind the
+/// block_per_edit, and the refill's wither_fewest_turns_left_block, Hide Behind the
 /// Shrine; block_per_edit has no row since Print Run took the calculated rail,
 /// 2026-10-15). It declares no BlockVar, so the game's
 /// <c>GainsBlock</c> is false (Nimble is unchanged), but Red Ink rides that
