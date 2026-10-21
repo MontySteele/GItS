@@ -137,6 +137,10 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   Brine Sting counts for The Shape of Water. Tide Wall and Flank say they
   read intent when carried out; At Water's Edge's badge shows when it is
   spent.
+- **Balance audit built** (`kokomi-next-2026-10-19.md`, 2026-10-21, "Agreed
+  all around"): Princess of Watatsumi's Plan is 5 [8] to ALL three times;
+  War Banner's upgrade adds Block only; Sea Glass Harvest transforms the
+  Hand only.
 - **Next:** [USER]'s play at her finish line (`kokomi-next-2026-10-19.md`
   pick 2 (b) ruled the weak-card review first; it is built).
 

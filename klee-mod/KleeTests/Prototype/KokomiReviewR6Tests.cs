@@ -67,14 +67,17 @@ public class KokomiReviewR6Tests
     // ---- item 6 ------------------------------------------------------------------
 
     [Fact]
-    public void Sea_glass_harvest_reads_hand_draw_and_discard()
+    public void Sea_glass_harvest_reads_the_hand_only()
     {
+        // Item 6 had it read the hand, draw pile and discard pile; the Kokomi
+        // balance audit (ruled 2026-10-21) cut it back to the hand: one read.
         var reads = Il.CallSequence(
                 Il.Method("KokomiStatusBatch", "TransformStatuses"))
             .Count(c => c.Contains("KokomiStatusBatch.PileStatuses"));
-        Assert.Equal(3, reads);
-        Assert.Contains("Transform every Status and Curse you have",
-                        Face(new ProtoKkSeaGlassHarvest()));
+        Assert.Equal(1, reads);
+        Assert.Contains(
+            "Transform every Status and Curse in your [gold]Hand[/gold]",
+            Face(new ProtoKkSeaGlassHarvest()));
     }
 
     // ---- pick 1 (a) ----------------------------------------------------------------

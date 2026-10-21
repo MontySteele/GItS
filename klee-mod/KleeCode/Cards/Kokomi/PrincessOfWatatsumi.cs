@@ -17,7 +17,9 @@ namespace KleeMod.Cards.Kokomi;
 /// Kokomi's Archaic Tooth Ancient (the Ancient audit,
 /// review/ruled/ancient-audit-2026-10-12.md, ruled 2026-10-12: "Princess of
 /// Watatsumi needs to do more as an Ancient. Perhaps "Gain 9 [12] Block. Draw
-/// 2 cards. Or plan: Deal 3 [5] Hydro damage to ALL enemies five times.""):
+/// 2 cards. Or plan: Deal 3 [5] Hydro damage to ALL enemies five times.""),
+/// its Plan made 5 [8] three times by the Kokomi balance audit, ruled
+/// 2026-10-21 ("Agreed all around"; review/active/kokomi-next-2026-10-19.md):
 /// Orobas's Archaic Tooth turns her starter Kurage's Oath into it, as it
 /// turns Bash into Break. A bigger Oath, built the way Kurage's Oath is: a
 /// two-line Plan card whose now-line is the Block and the draw, and whose Plan
@@ -54,7 +56,7 @@ public sealed class PrincessOfWatatsumi
         ("description",
             "Gain {Block:diff()} [gold]Block[/gold]. Draw 2 cards.\n"
           + "Or [gold]plan[/gold]: Deal {PlanDamage:diff()} [gold]Hydro[/gold] "
-          + "damage to ALL enemies 5 times."),
+          + "damage to ALL enemies 3 times."),
     };
 
     // Kurage's Oath's tips: the Plan word and the Plan line's element.
@@ -62,15 +64,15 @@ public sealed class PrincessOfWatatsumi
         ArmKeywordTips.ForPlan(
             ArmKeywordTips.ForPlanElement(base.ExtraHoverTips, this), this);
 
-    /// <summary>The card's printed Plan line: 3 [5] Hydro to ALL enemies,
-    /// five times. Carried out by the Bake-Kurage at the start of her next
+    /// <summary>The card's printed Plan line: 5 [8] Hydro to ALL enemies,
+    /// three times. Carried out by the Bake-Kurage at the start of her next
     /// turn (<see cref="KokomiPlan.ResolveAll"/>).</summary>
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
             new KokomiPlan.Planned(
                 KokomiPlan.Kind.Damage, DynamicVars["PlanDamage"].IntValue,
-                KokomiPlan.Aim.AllEnemies, Times: 5),
+                KokomiPlan.Aim.AllEnemies, Times: 3),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -78,7 +80,7 @@ public sealed class PrincessOfWatatsumi
         {
             new BlockVar(9m, ValueProp.Move),
             new CardsVar(2),
-            new KokomiPlan.PlanDamageVar(3m),
+            new KokomiPlan.PlanDamageVar(5m),
         };
 
     // autoAdd: false -- RosterAncientCards.Kokomi owns membership, concatted
@@ -119,6 +121,6 @@ public sealed class PrincessOfWatatsumi
     protected override void OnUpgrade()
     {
         DynamicVars.Block.UpgradeValueBy(3m);
-        DynamicVars["PlanDamage"].UpgradeValueBy(2m);
+        DynamicVars["PlanDamage"].UpgradeValueBy(3m);
     }
 }

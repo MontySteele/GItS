@@ -210,7 +210,8 @@ public class InazumaCompanionOverhaulTests
     {
         // The Kokomi level pass (2026-10-12): "Gain 7 [10] Block. Or plan:
         // Gain 1 [2] Strength." Its Dexterity clock (`WarBannerPower`) left
-        // with the old face.
+        // with the old face. The Kokomi balance audit (ruled 2026-10-21):
+        // the upgrade adds Block only, so the Plan is 1 Strength upgraded too.
         var play = typeof(ProtoMiGorouWarBanner).GetMethod("PlayNowLine", All)!;
         var calls = Il.CallSequence(play);
         Assert.DoesNotContain(calls, c => c.StartsWith("PowerCmd.Apply"));
@@ -220,6 +221,12 @@ public class InazumaCompanionOverhaulTests
         var clause = Assert.Single(new ProtoMiGorouWarBanner().PlanClauses);
         Assert.Equal(KokomiPlan.Kind.GainStrength, clause.Kind);
         Assert.Equal(1, clause.Amount);
+        var up = new ProtoMiGorouWarBanner();
+        Seat.Set(up, "IsMutable", true);
+        typeof(MegaCrit.Sts2.Core.Models.CardModel)
+            .GetMethod("UpgradeInternal", HeadlessGame.All)!
+            .Invoke(up, Array.Empty<object?>());
+        Assert.Equal(1, Assert.Single(up.PlanClauses).Amount);
     }
 
     [Fact]

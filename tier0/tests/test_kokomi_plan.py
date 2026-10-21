@@ -2388,7 +2388,8 @@ def test_a_no_element_mod_damage_card_played_by_kokomi_applies_nothing(
 def test_princess_of_watatsumi_is_a_bigger_oath(overhaul):
     """The Ancient audit (ruled 2026-10-12): her Archaic Tooth card, "Gain 9
     [12] Block. Draw 2 cards. Or plan: Deal 3 [5] Hydro damage to ALL enemies
-    five times." The sim row is its now-line (a Plan line is prototype
+    five times." (Plan 5 [8] three times since the Kokomi balance audit,
+    ruled 2026-10-21.) The sim row is its now-line (a Plan line is prototype
     surface only); its Plan-bus Power left."""
     st = kokomi_state()
     st.player.draw_pile = [loader.get_card("defend") for _ in range(5)]

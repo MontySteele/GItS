@@ -589,17 +589,17 @@ ANCIENT_WITNESS: dict[str, dict] = {
     "PrincessOfWatatsumi": {
         "why": "Kokomi's Archaic Tooth Ancient, Kurage's Oath's "
                "replacement: a two-line Plan Skill, 1 Energy. Gain 9 Block "
-               "(+3) and draw 2 (the CardsVar); or Plan 3 Hydro (+2) to ALL "
-               "enemies five times. The Plan damage is a namespaced "
+               "(+3) and draw 2 (the CardsVar); or Plan 5 Hydro (+3) to ALL "
+               "enemies three times (Kokomi balance audit, 2026-10-21). The Plan damage is a namespaced "
                "`KokomiPlan.PlanDamageVar`, which the var regex does not "
                "read; its upgrade delta it does.",
         "cost": [1],
         "vars": [9, 2],
         "hits": [],
-        "upgrade_vars": [3, 2],
-        # The Plan line's +2: `plan:` is prototype surface only, so the sim
+        "upgrade_vars": [3, 3],
+        # The Plan line's +3: `plan:` is prototype surface only, so the sim
         # row models the now-line and `test_eb30m_ancients` sets this aside.
-        "arm_only_upgrade_vars": [2],
+        "arm_only_upgrade_vars": [3],
         "upgrade_cost": [],
         "encore": [],
     },

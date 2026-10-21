@@ -315,7 +315,8 @@ def test_endless_shoal_adds_a_sting_for_any_carried_out_plan():
 
 def test_war_banners_plan_line_is_permanent_strength():
     """The Kokomi level pass (2026-10-12): "Plan: Gain 1 [2] Strength", for
-    good -- no temporary Strength left to take back."""
+    good -- no temporary Strength left to take back. (1 upgraded too since
+    the Kokomi balance audit, ruled 2026-10-21.)"""
     st = kokomi_state()
     write(st, card("proto_mi_gorou_war_banner"))
     before = st.player.powers.get("strength", 0)

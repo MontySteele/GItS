@@ -181,24 +181,24 @@ def test_tidecleanse_draws_per_status_in_the_kind_not_a_row_op(overhaul):
 
 # --- Sea Glass Harvest ---------------------------------------------------------------
 
-def test_sea_glass_harvest_transforms_the_hand_and_draw_piles_statuses(
-        overhaul):
-    """Kokomi round-1 fixes (2026-10-12): the DRAW PILE, in place; and the
-    HAND too since the round-5 review (2026-10-14, A8), so a Status drawn
-    that morning becomes Sea Glass the same turn."""
+def test_sea_glass_harvest_transforms_the_hands_statuses_only(overhaul):
+    """The HAND, in place, curses included; the draw pile is left alone since
+    the Kokomi balance audit (ruled 2026-10-21; it had read the draw pile
+    since the round-1 fixes, 2026-10-12)."""
     st = _quiet_state()
     curse = plan_card([], cid="proto_kk_curse_probe")
     curse.type, curse.rarity = "curse", "curse"
     keep = _filler(1)[0]
     held = statuses.make_status("wound")
-    st.player.hand = [held]
-    st.player.draw_pile = [statuses.make_status("dazed"), keep, curse]
+    dazed = statuses.make_status("dazed")
+    st.player.hand = [held, keep, curse]
+    st.player.draw_pile = [dazed]
     _carry_out(st, _row("proto_kk_sea_glass_harvest"))
-    ids = [c.id for c in st.player.draw_pile]
+    assert st.player.draw_pile == [dazed]
+    ids = [c.id for c in st.player.hand]
     assert ids == [kokomi_plan.SEA_GLASS, keep.id, kokomi_plan.SEA_GLASS]
-    assert [c.id for c in st.player.hand] == [kokomi_plan.SEA_GLASS]
     assert held not in st.player.hand
-    glass = st.player.draw_pile[0]
+    glass = st.player.hand[0]
     assert glass.cost == 0 and glass.exhaust
     assert glass.effects == [{"op": "energy", "amount": 1}]
 
@@ -208,9 +208,9 @@ def test_sea_glass_harvest_upgraded_makes_sea_glass_plus(overhaul):
     assert up.plan == [{"op": "transform_statuses_you_have",
                         "upgraded": True}]
     st = _quiet_state()
-    st.player.draw_pile = [statuses.make_status("wound")]
+    st.player.hand = [statuses.make_status("wound")]
     _carry_out(st, up)
-    assert st.player.draw_pile[0].effects == [{"op": "energy", "amount": 2}]
+    assert st.player.hand[0].effects == [{"op": "energy", "amount": 2}]
 
 
 # --- Flotsam Surge ------------------------------------------------------------------------

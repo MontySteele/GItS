@@ -78,6 +78,24 @@ what Fuel does".
   Plan-only cards.
 - **The Shape of Water** counts Brine Sting (pick 1 (a)).
 
+## Kokomi balance audit, 2026-10-21 (ruled, built)
+
+From her run's telemetry: Princess of Watatsumi dealt 17% of the run's
+damage with Strength 8 (War Banner+ and Nicole), and Sea Glass Harvest
+reached Statuses in the draw pile. [USER], 2026-10-21: "Agreed all around".
+
+- **Princess of Watatsumi:** Plan: Deal 5 [8] Hydro damage to ALL enemies 3
+  times (was 3 [5] five times). The now-line is unchanged. Expected in the
+  Balance suite: her damage share falls, since Strength now counts 3 times,
+  not 5.
+- **Gorou — General's War Banner:** the upgrade adds Block only: "Gain 10
+  Block. Plan: Gain 1 Strength." (was 2). Expected: Strength per play halves
+  when upgraded.
+- **Sea Glass Harvest:** Plan: Transform every Status and Curse in your Hand
+  into Sea Glass [+] (was the hand, draw pile and discard pile). Tidecleanse
+  is unchanged. Expected: its Energy from Statuses falls in Status-heavy
+  fights.
+
 ## Picks (as offered)
 
 1. **The Shape of Water and Brine Sting.** The card says "for each Sting you

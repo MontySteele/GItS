@@ -72,7 +72,8 @@ def test_war_banner_blocks_now_and_plans_permanent_strength():
     assert banner.effects == [{"op": "block", "amount": 7}]
     assert banner.plan == [{"op": "gain_strength", "amount": 1}]
     up = _up("proto_mi_gorou_war_banner")
-    assert (up.effects[0]["amount"], up.plan[0]["amount"]) == (10, 2)
+    # Kokomi balance audit, ruled 2026-10-21: the upgrade adds Block only.
+    assert (up.effects[0]["amount"], up.plan[0]["amount"]) == (10, 1)
 
 
 def test_orders_from_the_shrine_offers_three_and_keeps_one():

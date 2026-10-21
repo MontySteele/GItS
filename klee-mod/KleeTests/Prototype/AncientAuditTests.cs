@@ -139,7 +139,7 @@ public class AncientAuditTests
         Assert.Equal(
             "Gain {Block:diff()} [gold]Block[/gold]. Draw 2 cards.\n"
           + "Or [gold]plan[/gold]: Deal {PlanDamage:diff()} [gold]Hydro[/gold] "
-          + "damage to ALL enemies 5 times.",
+          + "damage to ALL enemies 3 times.",
             Face(card));
 
         Assert.Equal(9m, card.DynamicVars.Block.BaseValue);
@@ -147,12 +147,12 @@ public class AncientAuditTests
         var clause = Assert.Single(card.PlanClauses);
         Assert.Equal(KokomiPlan.Kind.Damage, clause.Kind);
         Assert.Equal(KokomiPlan.Aim.AllEnemies, clause.Aim);
-        Assert.Equal(3, clause.Amount);
-        Assert.Equal(5, clause.Times);
+        Assert.Equal(5, clause.Amount);
+        Assert.Equal(3, clause.Times);
 
         var up = Upgraded<PrincessOfWatatsumi>();
         Assert.Equal(12m, up.DynamicVars.Block.BaseValue);
-        Assert.Equal(5, Assert.Single(up.PlanClauses).Amount);
+        Assert.Equal(8, Assert.Single(up.PlanClauses).Amount);
     }
 
     [Fact]

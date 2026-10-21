@@ -9943,3 +9943,18 @@ verbatim:
   the face says so, after a seat lost Thunder Levels to a Kitsune Sakura on a
   tie." The same tie-break serves Editor-in-Chief and Kitsune Pounce
   (`YaeShrineLedger.Highest`).
+
+
+## Kokomi balance audit, 2026-10-21
+
+[USER], 2026-10-21: "Agreed all around" (`review/active/kokomi-next-2026-10-19.md`,
+"Kokomi balance audit, 2026-10-21").
+
+- **`proto_kk_sea_glass_harvest`**: the Plan transforms the Hand only (was the
+  hand, draw pile and discard pile). The sheet's earlier block, verbatim:
+  "Compact on every pile she holds, curses included (provenance notes,
+  2026-10-12, r5 A-list and r6 item 6, 2026-10-14: the Discard Pile joins).
+  Sea Glass is a token in no pool: 0, "Gain 1 [2] Energy. Exhaust.""
+- **`proto_mi_gorou_war_banner`**: the upgrade adds Block only
+  (`plan_strength: 1` dropped). The sheet's earlier comment, verbatim: "10
+  Block; Plan 2 Strength."

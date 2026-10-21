@@ -2553,8 +2553,8 @@ public static class KokomiPlan
                 return null;
 
             // THE STATUS BATCH (2026-10-01). Kelp Wall pays the count it was
-            // written with; Sea Glass Harvest reads the draw pile now
-            // (Kokomi round-1 fixes, 2026-10-12).
+            // written with; Sea Glass Harvest reads the hand only (Kokomi
+            // balance audit, ruled 2026-10-21).
             case Kind.BlockPerStatusInHand:
                 return await KokomiStatusBatch.BlockPerStatus(
                     kokomi, plan.Amount, plan.WrittenCount);
