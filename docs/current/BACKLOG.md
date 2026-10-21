@@ -31,6 +31,9 @@ cut to about 350 characters is `git show 3ce4f8c35:docs/current/BACKLOG.md`.
 - Upgrades that only cut cost or add Innate: at Furina's and Yae's next card passes, count their cost-only and Innate-only upgrades against the base five and replace the excess with a real upgrade, as Kokomi's finish pass (`review/active/kokomi-cards-2026-10-18.md` sec. 7, upgrade census) and Varka's powers pass (`varka-fang-next`) did ([USER], 2026-10-19: "You do have a habit of making too many powers just decrease their cost by 1 on upgrade").
 - Durin's start-of-turn tick skipped one fight (Fogmog, trace); `RandomEnemy` may pick the Eye With Teeth illusion (`CompanionOverhaulPowers.cs:51`). Live look. (Chained Reactions is QUEUE, backlog wrap-up pick 3.)
 
+- Kokomi: Grand Design's chooser closed after one pick on some turns (`review/records/kokomi-balance-suite-2026-10-21.md`, lane 5); reproduce in a scenario.
+- Kokomi: lane 1 of the same suite read Tidal Surge as Ethereal and saw Bubble Ward twice in a few turns with one copy; check the lane's transcript before calling it a bug.
+
 ## Harness, bridge, tools and sim
 
 - Co-op dev grant: `give_card` is refused in multiplayer because the pile add bypasses the action-queue synchronizer; a synced grant would let a co-op seat round be dressed with named co-op cards.
