@@ -3511,6 +3511,8 @@ power_kokomi_kurage_bloom	ImageGen/images/kokomi/powers/kurage_bloom.png	256	256
 power_kokomi_endless_shoal	ImageGen/images/kokomi/powers/endless_shoal.png	256	256	contain	center	shortlist	1	png	Talent Song of Pearls.png		icon	
 # power_kokomi_watchful_shoal <- Inazuma sea-glow: sharper Stings
 power_kokomi_watchful_shoal	ImageGen/images/kokomi/powers/watchful_shoal.png	256	256	contain	center	shortlist	1	png	Item Fluorescent Fungus.png		icon	
+# power_kokomi_resolve_of_watatsumi <- the Crown of Watatsumi, as its card (taste audit 2026-10-21)
+power_kokomi_resolve_of_watatsumi	ImageGen/images/kokomi/powers/resolve_of_watatsumi.png	256	256	contain	center	shortlist	1	png	Item Crown of Watatsumi.png		icon	
 # power_kokomi_jellyfish_current <- a jellyfish
 # power_kokomi_coordinated_tide <- Inazuma crystal
 # power_kokomi_watatsumis_grace <- Kokomi passive
