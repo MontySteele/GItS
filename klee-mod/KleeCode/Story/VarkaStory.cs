@@ -41,7 +41,7 @@ public static class VarkaStory
 
         IntroTitle = "The Grand Master of the Knights of Favonius.",
         IntroLine =
-            "He led the Knights north against the Abyss, leaving Mondstadt in Jean's care. The Abyss's trail runs up the Spire, so up he goes. Then he's getting his people home.",
+            "He led the Knights north against the Abyss, leaving Mondstadt in Jean's care. The Abyss's trail runs up the Spire, so up he goes.",
 
         Ancients = new[]
         {
