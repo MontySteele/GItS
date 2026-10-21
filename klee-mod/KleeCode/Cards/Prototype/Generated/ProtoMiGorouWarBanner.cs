@@ -53,7 +53,7 @@ public sealed class ProtoMiGorouWarBanner : CustomCardModel, ICompanionCard, IPl
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Gorou — General's War Banner"),
-        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold].\nOr [gold]plan[/gold]: Gain {PlanStrength:diff()} [gold]Strength[/gold]."),
+        ("description", "Gain {CalculatedBlock:diff()} [gold]Block[/gold].\nOr [gold]plan[/gold]: Gain 1 [gold]Strength[/gold]."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -62,7 +62,7 @@ public sealed class ProtoMiGorouWarBanner : CustomCardModel, ICompanionCard, IPl
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.GainStrength, DynamicVars["PlanStrength"].IntValue, KokomiPlan.Aim.Self),
+            new KokomiPlan.Planned(KokomiPlan.Kind.GainStrength, 1, KokomiPlan.Aim.Self),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -70,8 +70,7 @@ public sealed class ProtoMiGorouWarBanner : CustomCardModel, ICompanionCard, IPl
         {
             new CalculationBaseVar(7m),
             new CalculationExtraVar(1m),
-            new FoldedCalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card)),
-            new DynamicVar("PlanStrength", 1m)
+            new FoldedCalculatedBlockVar(ValueProp.Move).WithMultiplier(static (card, _) => SpotlightSystem.PrintedBlockDelta(card))
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -107,6 +106,5 @@ public sealed class ProtoMiGorouWarBanner : CustomCardModel, ICompanionCard, IPl
     protected override void OnUpgrade()
     {
         DynamicVars.CalculationBase.UpgradeValueBy(3m);
-        DynamicVars["PlanStrength"].UpgradeValueBy(1m);
     }
 }

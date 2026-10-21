@@ -1810,15 +1810,13 @@ def sea_glass_card(upgraded: bool = False) -> Card:
 
 
 def transform_statuses(state: CombatState, upgraded: bool) -> int:
-    """SEA GLASS HARVEST: "Transform every Status and Curse you have into Sea
-    Glass [Sea Glass+]." The DRAW PILE since the Kokomi round-1 fixes
-    (2026-10-12), the HAND as well since the round-5 review (2026-10-14, A8)
-    and the DISCARD PILE since the round-6 review (2026-10-14, item 6). In
-    place, as `CardCmd.Transform` swaps a card where it stands; hand, draw
-    pile, then discard pile (`KokomiStatusBatch.TransformStatuses`)."""
+    """SEA GLASS HARVEST: "Transform every Status and Curse in your Hand into
+    Sea Glass [Sea Glass+]." The HAND ONLY since the Kokomi balance audit,
+    ruled 2026-10-21 (it had read the draw and discard piles too). In place,
+    as `CardCmd.Transform` swaps a card where it stands
+    (`KokomiStatusBatch.TransformStatuses`)."""
     n = 0
-    for pile in (state.player.hand, state.player.draw_pile,
-                 state.player.discard_pile):
+    for pile in (state.player.hand,):
         for i, card in enumerate(list(pile)):
             if is_status_or_curse(card):
                 pile[i] = sea_glass_card(upgraded)

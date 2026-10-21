@@ -2289,8 +2289,7 @@
       "plan_power_amount": 1
     },
     "proto_mi_gorou_war_banner": {
-      "block": 3,
-      "plan_strength": 1
+      "block": 3
     },
     "proto_mi_heizou_heartstopper": {
       "formula_per": 2

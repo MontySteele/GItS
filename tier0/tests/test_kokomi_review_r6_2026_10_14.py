@@ -45,9 +45,10 @@ def test_the_numbers_pass():
     assert _amounts("proto_kk_tidal_riposte") == (8, 11)
 
 
-# ---- item 6: Sea Glass Harvest reaches the Discard Pile -------------------
+# ---- item 6: Sea Glass Harvest reached the Discard Pile; the Kokomi --------
+# ---- balance audit (ruled 2026-10-21) made it the Hand only ----------------
 
-def test_sea_glass_harvest_transforms_every_pile_she_holds():
+def test_sea_glass_harvest_transforms_the_hand_only():
     st = kokomi_state()
     dazed = Card(id="status_dazed", name="Dazed", cost=-1, type="status",
                  effects=[])
@@ -57,9 +58,10 @@ def test_sea_glass_harvest_transforms_every_pile_she_holds():
     st.player.discard_pile.append(Card(id="status_dazed", name="Dazed",
                                        cost=-1, type="status", effects=[]))
     n = kokomi_plan.transform_statuses(st, upgraded=False)
-    assert n == 3
-    for pile in (st.player.hand, st.player.draw_pile, st.player.discard_pile):
-        assert not any(c.id == "status_dazed" for c in pile)
+    assert n == 1
+    assert not any(c.id == "status_dazed" for c in st.player.hand)
+    for pile in (st.player.draw_pile, st.player.discard_pile):
+        assert [c.id for c in pile] == ["status_dazed"]
     face = loader.get_card("proto_kk_sea_glass_harvest")
     assert face.plan == [{"op": "transform_statuses_you_have"}]
 

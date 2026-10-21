@@ -84,8 +84,8 @@
   rarity: ancient
   # The Ancient audit (2026-10-12): the Archaic Tooth card for her starter
   # Kurage's Oath, a bigger Oath: "Gain 9 [12] Block. Draw 2 cards. Or plan:
-  # Deal 3 [5] Hydro damage to ALL enemies five times." Only the now-line is
-  # here: `plan:` is prototype surface only (`loader._validate_plan_shape`),
+  # Deal 3 [5] Hydro damage to ALL enemies five times." Kokomi balance audit,
+  # ruled 2026-10-21: its Plan is 5 [8] three times. Only the now-line is here: `plan:` is prototype surface only (`loader._validate_plan_shape`),
   # so the Plan line is game-side (witnessed as `arm_only_upgrade_vars`).
   effects:
     - {op: block, amount: 9}

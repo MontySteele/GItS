@@ -1960,10 +1960,9 @@
 - {id: proto_kk_sea_glass_harvest, name: "Sea Glass Harvest", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   # Compact on every pile she holds, curses included (provenance notes,
-   # 2026-10-12, r5 A-list and r6 item 6, 2026-10-14: the Discard Pile
-   # joins). Sea Glass is a token in no pool: 0, "Gain 1 [2] Energy. Exhaust."
-   description: "Gain 8 [gold]Block[/gold]. [gold]Plan[/gold]: Transform every Status and Curse you have into [gold]Sea Glass[/gold]{IfUpgraded:show:+|}.",
+   # Kokomi balance audit, ruled 2026-10-21: the Hand only (was every pile).
+   # Sea Glass is a token in no pool: 0, "Gain 1 [2] Energy. Exhaust."
+   description: "Gain 8 [gold]Block[/gold]. [gold]Plan[/gold]: Transform every Status and Curse in your [gold]Hand[/gold] into [gold]Sea Glass[/gold]{IfUpgraded:show:+|}.",
    effects: [{op: block, amount: 8}],
    plan: [{op: transform_statuses_you_have}],
    # 2026-10-11 Kokomi card pass: 8 [11] -> 10 [13]. Kokomi upgrade pass
@@ -2320,8 +2319,8 @@
    description: "Gain 7 [gold]Block[/gold]. [gold]Plan[/gold]: Gain 1 [gold]Strength[/gold].",
    effects: [{op: block, amount: 7}],
    plan: [{op: gain_strength, amount: 1}],
-   # 10 Block; Plan 2 Strength.
-   upgrade: {block: 3, plan_strength: 1}}
+   # Kokomi balance audit, ruled 2026-10-21: 10 Block; the Plan stays 1.
+   upgrade: {block: 3}}
 
 # 2026-10-11 Companion pass (review/ruled/companion-upper-pass-2026-10-11.md).
 - {id: proto_mi_gorou_juuga, name: "Gorou — Juuga: Forward Unto Victory", character: kokomi,
