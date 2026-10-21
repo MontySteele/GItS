@@ -1,6 +1,420 @@
-[gd_scene load_steps=22 format=3]
+[gd_scene load_steps=92 format=3]
 
-[ext_resource type="Texture2D" path="res://kokomi/summon/bake_kurage.png" id="1_kurage"]
+[ext_resource type="Texture2D" path="res://kokomi/model/frames/kokomi_kurage.png" id="1_kurage"]
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_0"]
+atlas = ExtResource("1_kurage")
+region = Rect2(0, 0, 140, 255)
+margin = Rect2(32, 9, 80, 19)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_1"]
+atlas = ExtResource("1_kurage")
+region = Rect2(140, 0, 134, 256)
+margin = Rect2(35, 9, 86, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_2"]
+atlas = ExtResource("1_kurage")
+region = Rect2(274, 0, 124, 257)
+margin = Rect2(40, 8, 96, 17)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_3"]
+atlas = ExtResource("1_kurage")
+region = Rect2(398, 0, 120, 259)
+margin = Rect2(42, 7, 100, 15)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_4"]
+atlas = ExtResource("1_kurage")
+region = Rect2(518, 0, 122, 257)
+margin = Rect2(41, 8, 98, 17)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_5"]
+atlas = ExtResource("1_kurage")
+region = Rect2(640, 0, 132, 256)
+margin = Rect2(36, 9, 88, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_6"]
+atlas = ExtResource("1_kurage")
+region = Rect2(772, 0, 139, 255)
+margin = Rect2(33, 9, 81, 19)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_7"]
+atlas = ExtResource("1_kurage")
+region = Rect2(911, 0, 140, 255)
+margin = Rect2(32, 9, 80, 19)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_8"]
+atlas = ExtResource("1_kurage")
+region = Rect2(1051, 0, 140, 255)
+margin = Rect2(32, 9, 80, 19)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_9"]
+atlas = ExtResource("1_kurage")
+region = Rect2(1191, 0, 140, 255)
+margin = Rect2(32, 9, 80, 19)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_10"]
+atlas = ExtResource("1_kurage")
+region = Rect2(1331, 0, 140, 255)
+margin = Rect2(32, 9, 80, 19)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_11"]
+atlas = ExtResource("1_kurage")
+region = Rect2(1471, 0, 140, 255)
+margin = Rect2(32, 9, 80, 19)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_12"]
+atlas = ExtResource("1_kurage")
+region = Rect2(0, 259, 140, 255)
+margin = Rect2(32, 9, 80, 19)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_13"]
+atlas = ExtResource("1_kurage")
+region = Rect2(140, 259, 140, 255)
+margin = Rect2(32, 9, 80, 19)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_14"]
+atlas = ExtResource("1_kurage")
+region = Rect2(280, 259, 140, 255)
+margin = Rect2(32, 9, 80, 19)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_15"]
+atlas = ExtResource("1_kurage")
+region = Rect2(420, 259, 140, 255)
+margin = Rect2(32, 9, 80, 19)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_16"]
+atlas = ExtResource("1_kurage")
+region = Rect2(560, 259, 140, 255)
+margin = Rect2(32, 9, 80, 19)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_17"]
+atlas = ExtResource("1_kurage")
+region = Rect2(700, 259, 140, 255)
+margin = Rect2(32, 9, 80, 19)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_18"]
+atlas = ExtResource("1_kurage")
+region = Rect2(840, 259, 140, 255)
+margin = Rect2(32, 9, 80, 19)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_19"]
+atlas = ExtResource("1_kurage")
+region = Rect2(980, 259, 134, 256)
+margin = Rect2(35, 9, 86, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_20"]
+atlas = ExtResource("1_kurage")
+region = Rect2(1114, 259, 124, 257)
+margin = Rect2(40, 8, 96, 17)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_21"]
+atlas = ExtResource("1_kurage")
+region = Rect2(1238, 259, 120, 259)
+margin = Rect2(42, 7, 100, 15)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_22"]
+atlas = ExtResource("1_kurage")
+region = Rect2(1358, 259, 122, 257)
+margin = Rect2(41, 8, 98, 17)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_23"]
+atlas = ExtResource("1_kurage")
+region = Rect2(1480, 259, 132, 256)
+margin = Rect2(36, 9, 88, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_24"]
+atlas = ExtResource("1_kurage")
+region = Rect2(0, 518, 139, 255)
+margin = Rect2(33, 9, 81, 19)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_25"]
+atlas = ExtResource("1_kurage")
+region = Rect2(139, 518, 140, 255)
+margin = Rect2(32, 9, 80, 19)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_26"]
+atlas = ExtResource("1_kurage")
+region = Rect2(279, 518, 140, 255)
+margin = Rect2(32, 9, 80, 19)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_27"]
+atlas = ExtResource("1_kurage")
+region = Rect2(419, 518, 140, 255)
+margin = Rect2(32, 9, 80, 19)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_28"]
+atlas = ExtResource("1_kurage")
+region = Rect2(559, 518, 140, 255)
+margin = Rect2(32, 9, 80, 19)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_29"]
+atlas = ExtResource("1_kurage")
+region = Rect2(699, 518, 140, 255)
+margin = Rect2(32, 9, 80, 19)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_30"]
+atlas = ExtResource("1_kurage")
+region = Rect2(839, 518, 140, 255)
+margin = Rect2(32, 9, 80, 19)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_31"]
+atlas = ExtResource("1_kurage")
+region = Rect2(979, 518, 140, 255)
+margin = Rect2(32, 9, 80, 19)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_32"]
+atlas = ExtResource("1_kurage")
+region = Rect2(1119, 518, 140, 255)
+margin = Rect2(32, 9, 80, 19)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_33"]
+atlas = ExtResource("1_kurage")
+region = Rect2(1259, 518, 140, 255)
+margin = Rect2(32, 9, 80, 19)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_34"]
+atlas = ExtResource("1_kurage")
+region = Rect2(1399, 518, 140, 255)
+margin = Rect2(32, 9, 80, 19)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_35"]
+atlas = ExtResource("1_kurage")
+region = Rect2(1539, 518, 140, 255)
+margin = Rect2(32, 9, 80, 19)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_36"]
+atlas = ExtResource("1_kurage")
+region = Rect2(0, 773, 140, 255)
+margin = Rect2(32, 9, 80, 19)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_37"]
+atlas = ExtResource("1_kurage")
+region = Rect2(140, 773, 154, 245)
+margin = Rect2(26, 14, 66, 29)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_38"]
+atlas = ExtResource("1_kurage")
+region = Rect2(294, 773, 156, 241)
+margin = Rect2(25, 15, 64, 33)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_39"]
+atlas = ExtResource("1_kurage")
+region = Rect2(450, 773, 123, 251)
+margin = Rect2(35, 7, 97, 23)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_40"]
+atlas = ExtResource("1_kurage")
+region = Rect2(573, 773, 145, 242)
+margin = Rect2(0, 0, 75, 32)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_41"]
+atlas = ExtResource("1_kurage")
+region = Rect2(718, 773, 143, 242)
+margin = Rect2(3, 0, 77, 32)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_42"]
+atlas = ExtResource("1_kurage")
+region = Rect2(861, 773, 130, 244)
+margin = Rect2(23, 5, 90, 30)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_43"]
+atlas = ExtResource("1_kurage")
+region = Rect2(991, 773, 125, 243)
+margin = Rect2(38, 10, 95, 31)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_44"]
+atlas = ExtResource("1_kurage")
+region = Rect2(1116, 773, 131, 245)
+margin = Rect2(35, 10, 89, 29)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_45"]
+atlas = ExtResource("1_kurage")
+region = Rect2(1247, 773, 137, 251)
+margin = Rect2(33, 10, 83, 23)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_46"]
+atlas = ExtResource("1_kurage")
+region = Rect2(1384, 773, 140, 255)
+margin = Rect2(32, 9, 80, 19)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_47"]
+atlas = ExtResource("1_kurage")
+region = Rect2(0, 1028, 191, 229)
+margin = Rect2(29, 14, 29, 45)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_48"]
+atlas = ExtResource("1_kurage")
+region = Rect2(191, 1028, 165, 237)
+margin = Rect2(32, 13, 55, 37)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_49"]
+atlas = ExtResource("1_kurage")
+region = Rect2(356, 1028, 128, 255)
+margin = Rect2(38, 8, 92, 19)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_50"]
+atlas = ExtResource("1_kurage")
+region = Rect2(484, 1028, 121, 254)
+margin = Rect2(36, 5, 99, 20)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_51"]
+atlas = ExtResource("1_kurage")
+region = Rect2(605, 1028, 114, 256)
+margin = Rect2(43, 5, 106, 18)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_52"]
+atlas = ExtResource("1_kurage")
+region = Rect2(719, 1028, 117, 257)
+margin = Rect2(42, 6, 103, 17)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_53"]
+atlas = ExtResource("1_kurage")
+region = Rect2(836, 1028, 123, 258)
+margin = Rect2(40, 7, 97, 16)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_54"]
+atlas = ExtResource("1_kurage")
+region = Rect2(959, 1028, 140, 255)
+margin = Rect2(32, 9, 80, 19)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_55"]
+atlas = ExtResource("1_kurage")
+region = Rect2(1099, 1028, 164, 239)
+margin = Rect2(29, 13, 56, 35)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_56"]
+atlas = ExtResource("1_kurage")
+region = Rect2(1263, 1028, 166, 233)
+margin = Rect2(32, 14, 54, 41)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_57"]
+atlas = ExtResource("1_kurage")
+region = Rect2(1429, 1028, 148, 234)
+margin = Rect2(34, 15, 72, 40)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_58"]
+atlas = ExtResource("1_kurage")
+region = Rect2(0, 1286, 142, 233)
+margin = Rect2(32, 18, 78, 41)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_59"]
+atlas = ExtResource("1_kurage")
+region = Rect2(142, 1286, 152, 231)
+margin = Rect2(25, 22, 68, 43)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_60"]
+atlas = ExtResource("1_kurage")
+region = Rect2(294, 1286, 166, 234)
+margin = Rect2(16, 25, 54, 40)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_61"]
+atlas = ExtResource("1_kurage")
+region = Rect2(460, 1286, 176, 237)
+margin = Rect2(10, 26, 44, 37)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_62"]
+atlas = ExtResource("1_kurage")
+region = Rect2(636, 1286, 180, 237)
+margin = Rect2(8, 27, 40, 37)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_63"]
+atlas = ExtResource("1_kurage")
+region = Rect2(816, 1286, 181, 237)
+margin = Rect2(7, 28, 39, 37)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_64"]
+atlas = ExtResource("1_kurage")
+region = Rect2(997, 1286, 184, 237)
+margin = Rect2(5, 30, 36, 37)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_65"]
+atlas = ExtResource("1_kurage")
+region = Rect2(1181, 1286, 186, 236)
+margin = Rect2(4, 33, 34, 38)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_66"]
+atlas = ExtResource("1_kurage")
+region = Rect2(1367, 1286, 188, 236)
+margin = Rect2(3, 35, 32, 38)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_67"]
+atlas = ExtResource("1_kurage")
+region = Rect2(0, 1523, 189, 236)
+margin = Rect2(2, 37, 31, 38)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="Atlas_kurage_68"]
+atlas = ExtResource("1_kurage")
+region = Rect2(189, 1523, 191, 236)
+margin = Rect2(1, 38, 29, 38)
+filter_clip = true
 
 [sub_resource type="Animation" id="Animation_reset"]
 length = 0.001
@@ -40,6 +454,18 @@ tracks/2/keys = {
 "update": 0,
 "values": [Color(1, 1, 1, 1)]
 }
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Visuals/Rig/Body:texture")
+tracks/3/interp = 0
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [SubResource("Atlas_kurage_0")]
+}
 
 [sub_resource type="Animation" id="Animation_idle"]
 resource_name = "idle"
@@ -69,6 +495,18 @@ tracks/1/keys = {
 "update": 0,
 "values": [0.0, 0.035, 0.0, -0.035, 0.0]
 }
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Visuals/Rig/Body:texture")
+tracks/2/interp = 0
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.0833, 0.1667, 0.25, 0.3333, 0.4167, 0.5, 0.5833, 0.6667, 0.75, 0.8333, 0.9167, 1, 1.0833, 1.1667, 1.25, 1.3333, 1.4167, 1.5, 1.5833, 1.6667, 1.75, 1.8333, 1.9167, 2, 2.0833, 2.1667, 2.25, 2.3333, 2.4167, 2.5, 2.5833, 2.6667, 2.75, 2.8333, 2.9167),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [SubResource("Atlas_kurage_0"), SubResource("Atlas_kurage_1"), SubResource("Atlas_kurage_2"), SubResource("Atlas_kurage_3"), SubResource("Atlas_kurage_4"), SubResource("Atlas_kurage_5"), SubResource("Atlas_kurage_6"), SubResource("Atlas_kurage_7"), SubResource("Atlas_kurage_8"), SubResource("Atlas_kurage_9"), SubResource("Atlas_kurage_10"), SubResource("Atlas_kurage_11"), SubResource("Atlas_kurage_12"), SubResource("Atlas_kurage_13"), SubResource("Atlas_kurage_14"), SubResource("Atlas_kurage_15"), SubResource("Atlas_kurage_16"), SubResource("Atlas_kurage_17"), SubResource("Atlas_kurage_18"), SubResource("Atlas_kurage_19"), SubResource("Atlas_kurage_20"), SubResource("Atlas_kurage_21"), SubResource("Atlas_kurage_22"), SubResource("Atlas_kurage_23"), SubResource("Atlas_kurage_24"), SubResource("Atlas_kurage_25"), SubResource("Atlas_kurage_26"), SubResource("Atlas_kurage_27"), SubResource("Atlas_kurage_28"), SubResource("Atlas_kurage_29"), SubResource("Atlas_kurage_30"), SubResource("Atlas_kurage_31"), SubResource("Atlas_kurage_32"), SubResource("Atlas_kurage_33"), SubResource("Atlas_kurage_34"), SubResource("Atlas_kurage_35")]
+}
 
 [sub_resource type="Animation" id="Animation_attack"]
 resource_name = "attack"
@@ -84,6 +522,18 @@ tracks/0/keys = {
 "transitions": PackedFloat32Array(0.5, 1.6, 1, 1),
 "update": 0,
 "values": [Vector2(0, -80), Vector2(30, -80), Vector2(-4, -80), Vector2(0, -80)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Visuals/Rig/Body:texture")
+tracks/1/interp = 0
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [SubResource("Atlas_kurage_36"), SubResource("Atlas_kurage_37"), SubResource("Atlas_kurage_38"), SubResource("Atlas_kurage_39"), SubResource("Atlas_kurage_40"), SubResource("Atlas_kurage_41"), SubResource("Atlas_kurage_42"), SubResource("Atlas_kurage_43"), SubResource("Atlas_kurage_44"), SubResource("Atlas_kurage_45")]
 }
 
 [sub_resource type="Animation" id="Animation_hurt"]
@@ -113,6 +563,18 @@ tracks/1/keys = {
 "update": 0,
 "values": [Color(1, 1, 1, 1), Color(1, 0.45, 0.4, 1), Color(1, 1, 1, 1)]
 }
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Visuals/Rig/Body:texture")
+tracks/2/interp = 0
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [SubResource("Atlas_kurage_46"), SubResource("Atlas_kurage_47"), SubResource("Atlas_kurage_48"), SubResource("Atlas_kurage_49"), SubResource("Atlas_kurage_50"), SubResource("Atlas_kurage_51"), SubResource("Atlas_kurage_52"), SubResource("Atlas_kurage_53")]
+}
 
 [sub_resource type="Animation" id="Animation_death"]
 resource_name = "death"
@@ -132,26 +594,26 @@ tracks/0/keys = {
 tracks/1/type = "value"
 tracks/1/imported = false
 tracks/1/enabled = true
-tracks/1/path = NodePath("Visuals/Rig:rotation")
+tracks/1/path = NodePath("Visuals/Rig:position")
 tracks/1/interp = 1
 tracks/1/loop_wrap = true
 tracks/1/keys = {
 "times": PackedFloat32Array(0, 1),
 "transitions": PackedFloat32Array(1, 1),
 "update": 0,
-"values": [0.0, 0.12]
+"values": [Vector2(0, -80), Vector2(0, -64)]
 }
 tracks/2/type = "value"
 tracks/2/imported = false
 tracks/2/enabled = true
-tracks/2/path = NodePath("Visuals/Rig:position")
-tracks/2/interp = 1
+tracks/2/path = NodePath("Visuals/Rig/Body:texture")
+tracks/2/interp = 0
 tracks/2/loop_wrap = true
 tracks/2/keys = {
-"times": PackedFloat32Array(0, 1),
-"transitions": PackedFloat32Array(1, 1),
-"update": 0,
-"values": [Vector2(0, -80), Vector2(0, -64)]
+"times": PackedFloat32Array(0, 0.0667, 0.1333, 0.2, 0.2667, 0.3333, 0.4, 0.4667, 0.5333, 0.6, 0.6667, 0.7333, 0.8, 0.8667, 0.9333),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [SubResource("Atlas_kurage_54"), SubResource("Atlas_kurage_55"), SubResource("Atlas_kurage_56"), SubResource("Atlas_kurage_57"), SubResource("Atlas_kurage_58"), SubResource("Atlas_kurage_59"), SubResource("Atlas_kurage_60"), SubResource("Atlas_kurage_61"), SubResource("Atlas_kurage_62"), SubResource("Atlas_kurage_63"), SubResource("Atlas_kurage_64"), SubResource("Atlas_kurage_65"), SubResource("Atlas_kurage_66"), SubResource("Atlas_kurage_67"), SubResource("Atlas_kurage_68")]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_kurage"]
@@ -205,6 +667,9 @@ advance_mode = 2
 [sub_resource type="AnimationNodeStateMachineTransition" id="Transition_attack_death"]
 advance_mode = 0
 
+[sub_resource type="AnimationNodeStateMachineTransition" id="Transition_attack_hurt"]
+advance_mode = 0
+
 [sub_resource type="AnimationNodeStateMachine" id="AnimationNodeStateMachine_kurage"]
 states/End/position = Vector2(628, 153)
 states/Start/position = Vector2(186, 153)
@@ -216,7 +681,7 @@ states/hurt/node = SubResource("AnimationNodeAnimation_hurt")
 states/hurt/position = Vector2(327, 278)
 states/idle/node = SubResource("AnimationNodeAnimation_idle")
 states/idle/position = Vector2(327, 153)
-transitions = ["Start", "idle", SubResource("Transition_start_idle"), "idle", "death", SubResource("Transition_idle_death"), "idle", "hurt", SubResource("Transition_idle_hurt"), "hurt", "idle", SubResource("Transition_hurt_idle"), "death", "End", SubResource("Transition_death_end"), "hurt", "death", SubResource("Transition_hurt_death"), "idle", "attack", SubResource("Transition_idle_attack"), "attack", "idle", SubResource("Transition_attack_idle"), "attack", "death", SubResource("Transition_attack_death")]
+transitions = ["Start", "idle", SubResource("Transition_start_idle"), "idle", "death", SubResource("Transition_idle_death"), "idle", "hurt", SubResource("Transition_idle_hurt"), "hurt", "idle", SubResource("Transition_hurt_idle"), "death", "End", SubResource("Transition_death_end"), "hurt", "death", SubResource("Transition_hurt_death"), "idle", "attack", SubResource("Transition_idle_attack"), "attack", "idle", SubResource("Transition_attack_idle"), "attack", "death", SubResource("Transition_attack_death"), "attack", "hurt", SubResource("Transition_attack_hurt")]
 
 [node name="BakeKurageVisuals" type="Node2D"]
 
@@ -227,7 +692,10 @@ unique_name_in_owner = true
 position = Vector2(0, -80)
 
 [node name="Body" type="Sprite2D" parent="Visuals/Rig"]
-texture = ExtResource("1_kurage")
+texture = SubResource("Atlas_kurage_0")
+centered = false
+offset = Vector2(-102, -141)
+scale = Vector2(0.5, 0.5)
 
 [node name="Bounds" type="Control" parent="."]
 unique_name_in_owner = true

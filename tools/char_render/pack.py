@@ -80,7 +80,7 @@ KP = _load(ROOT / "tools" / "klee_render" / "pack.py", "klee_render_pack")
 #: each kit's combat clips; COMBAT is Varka's (the first kit), kept by name
 COMBAT_CLIPS = {"varka": ("idle", "idle_low", "attack", "cast", "hurt", "death", "ascension"),
                 "furina": ("idle", "idle_low", "attack", "cast", "hurt", "death", "rejoice"),
-                "kokomi": ("idle", "idle_low", "attack", "cast", "hurt", "death"),
+                "kokomi": ("idle", "idle_low", "attack", "cast", "hurt", "death", "ascension"),
                 "yae": ("idle", "idle_low", "attack", "cast", "hurt", "death")}
 COMBAT = COMBAT_CLIPS["varka"]
 COMBAT_SCALE = CH.COMBAT_SCALE
@@ -101,13 +101,14 @@ SHEET_FILES = {"varka": {"idle": "varka_idle.png", "idle_low": "varka_idle_low.p
                           "merchant": "furina_merchant.png"},
                "kokomi": {"idle": "kokomi_idle.png", "idle_low": "kokomi_idle_low.png",
                           "attack": "kokomi_attack.png", "cast": "kokomi_cast.png", "hurt": "kokomi_hurt.png",
-                          "death": "kokomi_death.png", "merchant": "kokomi_merchant.png"},
+                          "death": "kokomi_death.png", "ascension": "kokomi_ascension.png",
+                          "merchant": "kokomi_merchant.png"},
                "yae": {"idle": "yae_idle.png", "idle_low": "yae_idle_low.png",
                        "attack": "yae_attack.png", "cast": "yae_cast.png", "hurt": "yae_hurt.png",
                        "death": "yae_death.png", "merchant": "yae_merchant.png"}}
 FX_FILES = {"varka": {"attack": "varka_attack_fx.png", "ascension": "varka_ascension_fx.png"},
             "furina": {"attack": "furina_attack_fx.png"},
-            "kokomi": {"attack": "kokomi_attack_fx.png"},
+            "kokomi": {"attack": "kokomi_attack_fx.png", "ascension": "kokomi_ascension_fx.png"},
             "yae": {"attack": "yae_attack_fx.png"}}
 #: effect sprite clips a combat clip places (its spec's `effects`)
 EFFECT_FILES = {"varka": {"ground_burst": "varka_ground_burst.png"}}

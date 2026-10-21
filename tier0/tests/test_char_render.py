@@ -793,6 +793,26 @@ def test_kokomi_starts_and_ends_her_clips_in_stance_a_with_her_feet_planted():
                 assert got[:2] == want[:2], (name, _t, bone)
 
 
+def test_nereids_ascension_raises_both_arms_and_a_tide_rises_round_her():
+    # her signature clip (art polish, 2026-10-21): 26 frames, as Varka's
+    clip = kc.CLIPS["ascension"]
+    assert round(clip["length"] * clip["fps"]) == 26
+    top = next(p for t, p, _e in clip["keys"] if t == 0.56)
+    for side in ("L", "R"):
+        hand = next(op for op in top["ops"] if op[0] == "hand" and op[1] == side)
+        assert hand[3][2] > 0.3, f"{side}: both arms raised over her head"
+    (tide,) = clip["bursts"]
+    assert tide["kind"] == "tide" and 0 < tide["t"] and tide["t"] + tide["len"] <= clip["length"] + 0.01
+    # the layer draws, and the same meta draws the same pixels
+    meta = {"canvas": [360, 480], "origin_px": [180.0, 456.0], "ppu": 267.78, "fps": 20,
+            "times": [round(i / 20, 6) for i in range(26)], "trails": [], "bursts": clip["bursts"], "blades": []}
+    frames, first, pad = fx.clip_fx(meta)
+    assert first == round(tide["t"] * 20) and frames
+    again, _f, _p = fx.clip_fx(meta)
+    assert all(a.tobytes() == b.tobytes() for a, b in zip(frames, again))
+    assert max(im.getchannel("A").getextrema()[1] for im in frames) > 200
+
+
 def test_her_pack_has_no_catalyst_so_her_water_jet_is_a_phantom():
     cfg = chars.CHARS["kokomi"]
     assert cfg["clips"] == "kokomi_clips" and cfg["blades"] == {} and cfg["prop"] is None
@@ -847,7 +867,7 @@ def test_kokomis_jobs_and_sheets():
     assert {"stance_a", "stand"} <= set(job[0]["stills"].split(","))
     assert [j["clips"] or j["stills"] for j in job[1:]] == ["merchant", "rest", "select,portrait"]
     assert set(pack.SHEET_FILES["kokomi"]) == {*pack.COMBAT_CLIPS["kokomi"], "merchant"}
-    assert set(pack.FX_FILES["kokomi"]) == {"attack"}
+    assert set(pack.FX_FILES["kokomi"]) == {"attack", "ascension"}
     assert "kokomi" not in pack.STAGE_FILES and "kokomi" not in pack.EFFECT_FILES
     # her rest height was read off the PMX (no hat): 63 in over a 68 in adult
     # at 235 px is ~217.7 px, the same body px as Furina at the same height

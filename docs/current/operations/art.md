@@ -112,6 +112,22 @@ Visual papers: `review/active/varka-visual-paper-2026-10-13.md`,
   idle frame). Every Yae shell surface is now her own (2026-10-19); build_pck's
   Copy-YaeFallback only fills a checkout without her art.
 
+### The Bake-Kurage (`tools/kurage_render/`)
+
+Kokomi's jellyfish has no model in the art sources, so `render.py` builds a
+stylised one in Blender from primitives (no licensed asset) and renders its
+four clips; `pack.py` outlines them in 2D and packs one sheet,
+`kokomi/model/frames/kokomi_kurage.png`, and the manifest
+`tools/kurage_render/kurage_frames.json`. `tools.kokomi_rig gen` writes
+`bake_kurage.tscn` from it. The docket icon (`kokomi/summon/bake_kurage.png`)
+is still `cut_kurage_summon.py`'s.
+
+```sh
+.venv/Scripts/python tools/kurage_render/build.py --work <scratch dir> --art-root <scratch art root>
+.venv/Scripts/python tools/kurage_render/pack.py --renders <scratch dir> --check
+.venv/Scripts/python -m tools.kokomi_rig gen [--check]
+```
+
 ### Character-select idle loops (`tools/select_loop.py`)
 
 Klee, Varka, Furina, Kokomi and Yae play a rendered loop of the close-up; manifest
