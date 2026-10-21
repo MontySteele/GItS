@@ -29,6 +29,11 @@ namespace KleeMod.Relics;
 /// card or play a Companion, gain 1 Block." It replaces the start-of-turn Block for a waiting Plan (the
 /// re-founding's, 2026-10-12; git keeps its reasoning).
 ///
+/// KOKOMI BOSS RAMP (2026-10-21, [USER]: "Got it, let's try that"): 2 Block
+/// a counted play (was 1), the Watatsumi Casket 3 (was 2). Balance suite 2
+/// had her act 1 HP loss at 1.88x base once face-up Plan cards stopped
+/// paying. What counts is unchanged.
+///
 /// WHAT COUNTS (2026-10-20, [USER] on paying for planning, not for any Plan
 /// card: "2 was definitely the intent, and we should figure out a different
 /// Block solution if needed"): a card PLANNED this play, written onto the
@@ -109,7 +114,7 @@ public class TamakushiCasket : CustomRelicModel
         && CountsCard(cardPlay.Card, KokomiPlan.PlayedOnPet(cardPlay))
         && !KokomiPlan.IsCarryingOut(kokomi.Player);
 
-    /// <summary>"Whenever you Plan a card or play a Companion, gain 1
+    /// <summary>"Whenever you Plan a card or play a Companion, gain 2
     /// Block." Once a play, however many of the two the card is.</summary>
     public override async Task AfterCardPlayed(
         PlayerChoiceContext choiceContext, CardPlay cardPlay)
@@ -127,7 +132,7 @@ public class TamakushiCasket : CustomRelicModel
                                     fast: true);
     }
 
-    /// <summary>The page's words for one payout: "gained 1 Block". PURE.
+    /// <summary>The page's words for one payout: "gained 2 Block". PURE.
     /// </summary>
     public static string BlockNote(int block) => $"gained {block} Block";
 
@@ -180,7 +185,8 @@ public class TamakushiCasket : CustomRelicModel
 /// hand-over (main-session design, 2026-09-30, from [USER]'s co-op playtest:
 /// "Varka and Kokomi need Ancient relics for Orobas"). Since Ward and Casket
 /// (2026-10-18), worded since 2026-10-20: "Whenever you Plan a card or play
-/// a Companion, gain 2 Block." It IS a Tamakushi Casket (see its header), so the
+/// a Companion, gain 2 Block." (3 since the Kokomi boss ramp, 2026-10-21.)
+/// It IS a Tamakushi Casket (see its header), so the
 /// hook and the companion reward slot are the base's, and the only
 /// difference is <see cref="Block"/>.
 ///
@@ -199,7 +205,7 @@ public sealed class WatatsumiCasket : TamakushiCasket
     };
 
     /// <summary>The Block each counted play pays.</summary>
-    public const int WatatsumiBlock = 2;
+    public const int WatatsumiBlock = 3;
 
     public override int Block => WatatsumiBlock;
 

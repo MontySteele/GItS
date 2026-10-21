@@ -142,5 +142,5 @@ public static class KokomiOverhaulLaw
 {
     /// <summary>The Tamakushi Casket's Block for each Plan card or Companion
     /// she plays. Mirrors <c>C.KOKOMI_OVERHAUL_CASKET_BLOCK</c>.</summary>
-    public const int CasketBlock = 1;
+    public const int CasketBlock = 2;
 }

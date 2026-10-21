@@ -120,6 +120,33 @@ public class KokomiReviewR6Tests
         Assert.Equal((4, 5), Vars<ProtoKkFollowingCurrent>("PowerAmount"));
     }
 
+    /// <summary>The Kokomi boss ramp (2026-10-21, [USER]: "Got it, let's
+    /// try that"): "It deals 2 more each turn." The power's Amount is the
+    /// next hit and grows by 2 after each trigger.</summary>
+    [Fact]
+    public void Kurage_vanguard_ramps_2_a_turn()
+    {
+        Assert.Equal(2, KurageVanguardPower.Growth);
+        Assert.Equal(new[] { 4, 6, 8 },
+            Enumerable.Range(0, 3).Select(t => KurageVanguardPower.HitAfter(4, t)));
+        Assert.Equal(new[] { 6, 8, 10 },
+            Enumerable.Range(0, 3).Select(t => KurageVanguardPower.HitAfter(6, t)));
+        Assert.Equal((4, 6), Vars<ProtoKkKurageVanguard>("PowerAmount"));
+        Assert.EndsWith("It deals 2 more each turn.",
+                        Face(new ProtoKkKurageVanguard()));
+        var power = new KurageVanguardPower().Localization!
+            .First(r => r.Item1 == "description").Item2;
+        Assert.Equal(
+            "At the start of your turn, the [gold]Bake-Kurage[/gold] deals "
+          + "[blue]{Amount}[/blue] [gold]Hydro[/gold] damage. It deals 2 "
+          + "more each turn.", power);
+        var signal = Il.CallSequence(
+            Il.Method("KurageVanguardPower", "Signal")).ToList();
+        var hit = signal.FindIndex(c => c.Contains("KurageHydroSources.Hit"));
+        var grow = signal.FindIndex(c => c.Contains("PowerCmd.ModifyAmount"));
+        Assert.True(hit >= 0 && hit < grow);
+    }
+
     [Fact]
     public void The_sources_hit_the_front_enemy_for_hydro_at_their_moments()
     {

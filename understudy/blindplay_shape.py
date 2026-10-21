@@ -48,7 +48,7 @@ SHATTER_DAMAGE = 6
 #: `BOMB_GROWTH`'s reason (this module may not reach `tier0`) and held in step
 #: from the test side against both, so a retune cannot leave the page's Casket
 #: glossary quoting a retired number while the relic's face moves.
-CASKET_BLOCK = 1
+CASKET_BLOCK = 2
 
 #: `EB-560`. THE SPARK A KLEE COMBAT OPENS WITH, `KleeOverhaulLaw.OpeningSpark`
 #: in the mod and `C.KLEE_OVERHAUL_OPENING_SPARK` in the sim, mirrored here for

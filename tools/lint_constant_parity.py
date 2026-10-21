@@ -228,6 +228,8 @@ MIRRORED: dict[str, object] = {
     # (2026-10-12) retired the count: the relic's one number is its Block at
     # the start of her turn while a Plan is waiting.
     "KokomiOverhaulLaw.CasketBlock": C.KOKOMI_OVERHAUL_CASKET_BLOCK,
+    # Kokomi boss ramp (2026-10-21): Kurage Vanguard's growth a turn.
+    "KurageVanguardPower.Growth": C.KOKOMI_KURAGE_VANGUARD_GROWTH,
     # THE RE-FOUNDING: Gorou's Juuga, its Plan line's Block per turn, and
     # Call the Generals' "1 of 3".
     "CompanionOverhaulLaw.JuugaGuardBlock": C.MI_JUUGA_GUARD_BLOCK,

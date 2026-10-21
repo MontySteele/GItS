@@ -4245,7 +4245,7 @@ APPLY_POWERS = {
     # in KokomiRefounding.cs.
     "kk_kurage_vanguard": ("KurageVanguardPower", None,
         "At the start of your turn, the [gold]Bake-Kurage[/gold] deals {X} "
-        "[gold]Hydro[/gold] damage."),
+        "[gold]Hydro[/gold] damage. It deals 2 more each turn."),
     "kk_following_current": ("FollowingCurrentPower", None,
         "Whenever a [gold]Plan[/gold] is carried out, the "
         "[gold]Bake-Kurage[/gold] deals {X} [gold]Hydro[/gold] damage."),

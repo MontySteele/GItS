@@ -9961,3 +9961,15 @@ verbatim:
 - **`proto_kk_watchful_shoal`** (Kokomi act-3 tempo, 2026-10-21): 5 [7]. The
   sheet's earlier comments, verbatim: "Kokomi review r6 (2026-10-14, item 3):
   4 [6] (was 3 [5]), Accuracy's." and "6 and 6."
+
+
+## Kokomi boss ramp, 2026-10-21
+
+[USER], 2026-10-21: "Got it, let's try that" (`review/active/kokomi-next-2026-10-19.md`,
+"Boss ramp and Casket, 2026-10-21 (ruled, built)").
+
+- **`proto_kk_kurage_vanguard`**: a ramp, "It deals 2 more each turn." The
+  sheet's earlier block (a column-0 note above the row), verbatim: "JELLYFISH
+  CURRENT IS CUT (Kokomi review r6, 2026-10-14, pick 2 (b)): Kurage Vanguard
+  takes its slot; its power stays registered. Provenance note, "Kokomi review
+  r6, 2026-10-14"."

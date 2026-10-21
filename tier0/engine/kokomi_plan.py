@@ -441,6 +441,9 @@ BATTLE_FORMATION_PLUS = "kk_battle_formation_plus"  # ... and N cards
 #: by the Bake-Kurage at the front enemy. `KurageVanguardPower`,
 #: `FollowingCurrentPower`.
 KURAGE_VANGUARD = "kk_kurage_vanguard"           # turn start: N Hydro at the front
+#: Kokomi boss ramp (2026-10-21): "It deals 2 more each turn."
+#: `KurageVanguardPower.Growth` is the twin.
+KURAGE_VANGUARD_GROWTH = C.KOKOMI_KURAGE_VANGUARD_GROWTH
 FOLLOWING_CURRENT = "kk_following_current"       # a Plan carried out: N Hydro at the front
 #: Nereid's Ascension (`EB-492`). A MARKER AND NOT A WINDOW: the Rare is a
 #: Power costing 2 that lasts the fight, so there is no duration to tick and
@@ -2850,13 +2853,19 @@ def kurage_hit(state: CombatState, amount: int, cause: str) -> None:
 
 def kurage_vanguard(state: CombatState) -> None:
     """KURAGE VANGUARD: "At the start of your turn, the Bake-Kurage deals 4
-    Hydro damage to the front enemy." After the morning's Plans and before
-    Dawn Tide; copies stack into one hit. `KurageVanguardPower.Signal` is the
-    twin."""
+    Hydro damage to the front enemy. It deals 2 more each turn." After the
+    morning's Plans and before Dawn Tide; copies stack into one hit. The
+    Kokomi boss ramp (2026-10-21, [USER]: "Got it, let's try that"): the
+    power's amount is the next hit and grows by `KURAGE_VANGUARD_GROWTH`
+    after each trigger, once whatever the copies (a second copy adds its
+    base). `KurageVanguardPower.Signal` is the twin."""
     if not live(state):
         return
-    kurage_hit(state, int(state.player.powers.get(KURAGE_VANGUARD, 0)),
-               "kurage_vanguard")
+    n = int(state.player.powers.get(KURAGE_VANGUARD, 0))
+    if n <= 0:
+        return
+    kurage_hit(state, n, "kurage_vanguard")
+    state.player.powers[KURAGE_VANGUARD] = n + KURAGE_VANGUARD_GROWTH
 
 
 def following_current(state: CombatState) -> None:
@@ -3117,7 +3126,7 @@ def casket_block(state: CombatState, card: Card, planned: bool = False) -> None:
     """THE TAMAKUSHI CASKET (Ward and Casket, 2026-10-18; 2026-10-20, [USER]:
     "2 was definitely the intent, and we should figure out a different Block
     solution if needed"): "Whenever you Plan a card or play a Companion, gain
-    1 Block." Called by `effects.resolve_card` after each play, with
+    2 Block." (2 since the Kokomi boss ramp, 2026-10-21; was 1.) Called by `effects.resolve_card` after each play, with
     `planned` true when that play wrote the card onto the Bake-Kurage
     (`state.kk_planned_card`). A Plan card played face-up pays nothing. A
     carry-out is not her play (`kk_carrying_out`). Raw relic Block

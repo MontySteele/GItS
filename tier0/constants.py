@@ -847,8 +847,8 @@ CVN_HERALD_APPLICATIONS = 2     # Qiqi: "apply Cryo twice"
 # THE RE-FOUNDING (2026-10-12, review/ruled/kokomi-design-pass-2026-10-11.md
 # pick 3, ruled): the Casket's count and Open the Casket are gone. Ward and
 # Casket (2026-10-18): the relic reads "Whenever you play a Plan card or a
-# Companion, gain 1 Block."
-KOKOMI_OVERHAUL_CASKET_BLOCK = 1
+# Companion, gain 1 Block." Kokomi boss ramp (2026-10-21): 2.
+KOKOMI_OVERHAUL_CASKET_BLOCK = 2
 # Call the Generals' "Choose 1 of 3 random Rare Inazuma Companions" (the card
 # paper's Rare): how many are offered. Mirrored BY VALUE against
 # `KokomiCompanionPlan.GeneralsOffered`.
@@ -859,6 +859,10 @@ KOKOMI_GENERALS_OFFERED = 3
 # don't count." Every copy is 1 Energy; DRAW is per upgraded copy.
 # `BattleFormationPower.Threshold` / `.Draw`.
 KOKOMI_BATTLE_FORMATION_THRESHOLD = 2
+# Kokomi boss ramp (2026-10-21, [USER]: "Got it, let's try that"): Kurage
+# Vanguard's "It deals 2 more each turn." Mirrored BY VALUE against
+# `KurageVanguardPower.Growth`.
+KOKOMI_KURAGE_VANGUARD_GROWTH = 2
 KOKOMI_BATTLE_FORMATION_DRAW = 1
 
 # THE STARTER, WHOLE (brief draft 6 sec.4; slice draft 6 sec.3). Ten cards, in

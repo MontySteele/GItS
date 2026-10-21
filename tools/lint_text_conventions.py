@@ -306,7 +306,10 @@ MORE_COUNTERS = {"proto_kk_kurage_swarm", "KurageSwarmPower.description",
                  "proto_fs_crescendo", "CrescendoPower.description",
                  # Extended Run (furina-next paper 2, 2026-10-16): "can Spend
                  # 8 more", a Spend cap growing.
-                 "proto_fs_bis", "ExtendedRunPower.description"}
+                 "proto_fs_bis", "ExtendedRunPower.description",
+                 # Kurage Vanguard (Kokomi boss ramp, 2026-10-21): "It deals
+                 # 2 more each turn", its hit growing, Crescendo's shape.
+                 "proto_kk_kurage_vanguard", "KurageVanguardPower.description"}
 
 #: Card faces only: "your largest Bomb" says WHICH enemy's (the Klee round,
 #: 2026-10-11: Stoke the Fuse grew Torch Head's Bomb 16 by 49 when the seat
