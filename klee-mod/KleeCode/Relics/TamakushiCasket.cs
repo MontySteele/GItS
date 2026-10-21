@@ -125,6 +125,8 @@ public class TamakushiCasket : CustomRelicModel
         var block = Block;
         if (block <= 0) return;
         Flash();
+        // Art polish (2026-10-21): a pearl flash on her as the Block lands.
+        Vfx.KokomiPlanFx.CasketPearl(kokomi);
         // Seat page backlog (2026-10-19): "could not tell from the screen
         // whether it fired". The page prints it under "Since last page".
         ResolutionLedger.NoteRelic(RelicName, BlockNote(block));

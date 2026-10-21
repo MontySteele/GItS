@@ -222,6 +222,9 @@ internal static class CreatureAnimationRouter
             // colour, and the Ascension's ground burst goes under its target;
             // inert for every scene without the layer.
             ElementTrail.OnTravel(creature, current, target);
+            // Kokomi's Hydro sigil under her feet on her cast and power clips
+            // (art polish, 2026-10-21); inert for every other body.
+            KokomiPlanFx.OnTravel(creature, current, target);
         }
     }
 

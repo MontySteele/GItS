@@ -145,7 +145,10 @@ public class KurageBeatTests
     {
         var calls = Il.Calls(Il.Method("KokomiPlan", "Announce"));
         Assert.Contains("KurageBeat.Line", calls);
-        Assert.Contains("KurageBeat.Say", calls);
+        // Art polish (2026-10-21): a caption over the pet replaces the
+        // speech bubble; the line still rides the wire (`Record`).
+        Assert.Contains("KokomiPlanFx.Caption", calls);
+        Assert.DoesNotContain("KurageBeat.Say", calls);
     }
 
     [Fact]
