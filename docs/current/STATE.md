@@ -140,9 +140,12 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
 - **Balance audit built** (`kokomi-next-2026-10-19.md`, 2026-10-21, "Agreed
   all around"): Princess of Watatsumi's Plan is 5 [8] to ALL three times;
   War Banner's upgrade adds Block only; Sea Glass Harvest transforms the
-  Hand only.
-- **Next:** [USER]'s play at her finish line (`kokomi-next-2026-10-19.md`
-  pick 2 (b) ruled the weak-card review first; it is built).
+  Hand only. Its suite (`review/records/kokomi-balance-suite-2026-10-21.md`):
+  36.4 mean, under base on damage in every act (0.76 in act 3).
+- **Act-3 tempo built** (same paper, 2026-10-21): Watchful Shoal 5 [7],
+  Following Current 4 [5].
+- **Next:** the Balance suite again on the same seeds; promote if every act
+  is within 15% of base.
 
 **Furina: Balance** (2026-10-15).
 - **Rules** (`review/active/furina-research-proposal-2026-10-05.md` sec.2):

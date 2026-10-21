@@ -96,6 +96,22 @@ reached Statuses in the draw pile. [USER], 2026-10-21: "Agreed all around".
   is unchanged. Expected: its Energy from Statuses falls in Status-heavy
   fights.
 
+## Act-3 tempo, 2026-10-21 (ruled, built)
+
+The suite after the audit (`review/records/kokomi-balance-suite-2026-10-21.md`)
+was under base on damage in every act, 0.76 in act 3 (0.68 the round before).
+The seats' HP gap was read as drafting: they skipped every planned-Block card
+offered and planned Kurage's Oath for damage 71 times of 81. [USER]: "Let's go
+with your proposed defaults and see how we land." Built:
+
+- **Watchful Shoal:** Stings deal 5 [7] more (was 4 [6]). The paper offered
+  "+3 [5]" from a misread of the sheet; +1 on both sides was the intent.
+- **Following Current:** 4 [5] per Plan carried out (was 3 [4]).
+- Tide Wall stays Uncommon; no Block change.
+
+Expected effect, graded by the next suite: act 3 damage a turn up about 3 to 5
+in decks holding either power; acts 1 and 2 barely move.
+
 ## Picks (as offered)
 
 1. **The Shape of Water and Brine Sting.** The card says "for each Sting you

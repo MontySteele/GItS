@@ -94,7 +94,7 @@ def test_kelp_wall_now_line_blocks_and_draws():
 def test_watchful_shoal_numbers_and_face():
     row = loader.get_card("proto_kk_watchful_shoal")
     up = upgrades.apply_upgrade(loader.get_card("proto_kk_watchful_shoal"))
-    assert (row.effects[0]["amount"], up.effects[0]["amount"]) == (4, 6)   # Kokomi review r6 item 3
+    assert (row.effects[0]["amount"], up.effects[0]["amount"]) == (5, 7)   # act-3 tempo 2026-10-21
     assert _rows()["proto_kk_watchful_shoal"]["description"] == (
         "Your [gold]Stings[/gold] deal {PowerAmount:diff()} additional "
         "damage.")   # its Ward half left with the Ward's Block, 2026-10-18

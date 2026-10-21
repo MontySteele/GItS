@@ -130,7 +130,7 @@ public class KokomiRound3ChangesTests
     public void Watchful_shoal_numbers_and_face()
     {
         // Kokomi review r6 (2026-10-14, item 3): 4 [6].
-        Assert.Equal((4, 6), (Var<ProtoKkWatchfulShoal>("PowerAmount"),
+        Assert.Equal((5, 7), (Var<ProtoKkWatchfulShoal>("PowerAmount"),
                               Var<ProtoKkWatchfulShoal>("PowerAmount", true)));
         Assert.Equal(
             "Your [gold]Stings[/gold] deal {PowerAmount:diff()} additional "

@@ -40,7 +40,7 @@ def test_the_numbers_pass():
     assert _amounts("proto_kk_watatsumi_drill") == (8, 11)   # pool sweep
     wake = loader.get_card("proto_kk_kurages_wake")
     assert (wake.effects[0]["amount"], wake.effects[0]["times"]) == (5, 2)
-    assert _amounts("proto_kk_watchful_shoal") == (4, 6)
+    assert _amounts("proto_kk_watchful_shoal") == (5, 7)   # act-3 tempo 2026-10-21
     assert _amounts("proto_kk_grand_strategist") == (6, 8)
     assert _amounts("proto_kk_tidal_riposte") == (8, 11)
 
@@ -75,7 +75,7 @@ def test_the_reaction_powers_are_cut_and_two_hydro_sources_take_their_slots():
         assert cid not in ids and cid not in rows, cid
     for cid, power, amounts in (
             ("proto_kk_kurage_vanguard", "kk_kurage_vanguard", (4, 6)),
-            ("proto_kk_following_current", "kk_following_current", (3, 4))):
+            ("proto_kk_following_current", "kk_following_current", (4, 5))):
         assert cid in ids and cid in rows, cid
         row = loader.get_card(cid)
         assert (row.rarity, row.type, row.cost) == ("uncommon", "power", 1)

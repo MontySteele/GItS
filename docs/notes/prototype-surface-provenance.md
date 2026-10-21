@@ -9958,3 +9958,6 @@ verbatim:
 - **`proto_mi_gorou_war_banner`**: the upgrade adds Block only
   (`plan_strength: 1` dropped). The sheet's earlier comment, verbatim: "10
   Block; Plan 2 Strength."
+- **`proto_kk_watchful_shoal`** (Kokomi act-3 tempo, 2026-10-21): 5 [7]. The
+  sheet's earlier comments, verbatim: "Kokomi review r6 (2026-10-14, item 3):
+  4 [6] (was 3 [5]), Accuracy's." and "6 and 6."
