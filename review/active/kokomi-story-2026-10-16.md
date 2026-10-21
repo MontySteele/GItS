@@ -191,10 +191,11 @@ The voice follows the events above:
 The three co-op exchanges (Klee, Varka, Furina) stay as they are.
 
 **Select.** The title is *The Pearl of Wisdom.* (her canon epithet). The
-line: *"Watatsumi's priestess and its strategist. She would rather solve a
-hard problem quietly than give a speech, and the Spire is the hardest problem
-she has seen."* The character description keeps its first sentence and gains
-the second.
+line: *"Watatsumi's priestess and strategist. She would rather solve a
+hard problem quietly than give a speech, and the Spire is the hardest one
+yet."* The character description keeps its first sentence and gains
+the second. (Trimmed 2026-10-20 to fit the character-select box; [USER]
+approved.)
 
 **Combat.** Her signature card is Nereid's Ascension.
 
