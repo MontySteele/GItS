@@ -40,7 +40,7 @@ public static class KokomiStory
 
         IntroTitle = "The Pearl of Wisdom.",
         IntroLine =
-            "Watatsumi's priestess and its strategist. She would rather solve a hard problem quietly than give a speech, and the Spire is the hardest problem she has seen.",
+            "Watatsumi's priestess and strategist. She would rather solve a hard problem quietly than give a speech, and the Spire is the hardest one yet.",
 
         Ancients = new[]
         {
