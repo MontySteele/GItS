@@ -332,11 +332,12 @@ def test_no_endpoint_means_no_uploader_in_the_build(name, tmp_path):
     assert pw.telemetry_endpoint(v, None) is None
 
 
-def test_a_beta_endpoint_is_normalised_and_compiled_in(tmp_path):
-    beta = pw.VARIANTS["beta"]
+@pytest.mark.parametrize("name", ["public", "beta"])
+def test_an_endpoint_is_normalised_and_compiled_in(name, tmp_path):
+    v = pw.VARIANTS[name]
     for given in (URL, URL + "/", ROUTE):
-        assert pw.telemetry_endpoint(beta, given) == ROUTE
-    args = pw.build_args(beta, "0.3.0", tmp_path, ROUTE)
+        assert pw.telemetry_endpoint(v, given) == ROUTE
+    args = pw.build_args(v, "0.3.0", tmp_path, ROUTE)
     assert f"-p:GitsTelemetryEndpoint={ROUTE}" in args
 
 
@@ -347,12 +348,16 @@ def test_an_endpoint_must_be_plain_https(bad):
         pw.telemetry_endpoint(pw.VARIANTS["beta"], bad)
 
 
-def test_the_public_variant_refuses_an_endpoint():
-    with pytest.raises(SystemExit):
-        pw.telemetry_endpoint(pw.VARIANTS["public"], URL)
-    with pytest.raises(SystemExit):
-        pw.main(["--variant", "public", "--version", "0.3.0", "--dry-run",
-                 "--telemetry-endpoint", URL])
+def test_the_public_variant_takes_an_endpoint_and_names_the_mod():
+    # [USER], 2026-10-21: "Include the telemetry as opt-out."
+    public = pw.VARIANTS["public"]
+    assert pw.telemetry_endpoint(public, URL) == ROUTE
+    without = pw.workshop_json(public, "0.3.0", "public", None)["description"]
+    with_ = pw.workshop_json(public, "0.3.0", "public", None, ROUTE)["description"]
+    assert "Run data." not in without
+    assert with_ == without + pw.privacy_paragraph(public)
+    assert "This mod sends" in with_ and "This beta" not in with_
+    assert pw.privacy_paragraph(public).replace("This mod sends", "This beta sends")         == pw.PRIVACY_PARAGRAPH
 
 
 def test_the_privacy_paragraph_rides_only_with_the_uploader():
@@ -361,6 +366,7 @@ def test_the_privacy_paragraph_rides_only_with_the_uploader():
     with_ = pw.workshop_json(beta, "0.3.0", "friends_only", None, ROUTE)["description"]
     assert "Run data." not in without
     assert "Run data." in with_ and with_.startswith(without)
+    assert "This beta sends" in with_ and pw.privacy_paragraph(beta) == pw.PRIVACY_PARAGRAPH
     for words in ("Upload data", "no Steam id", "IP address is not stored",
                   "deleted after a year", "random id", "on by default",
                   "Settings, Mod Configuration (BaseLib), Open Config, Teyvat Spire Roster"):
