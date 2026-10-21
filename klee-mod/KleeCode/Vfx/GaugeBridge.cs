@@ -29,6 +29,7 @@ internal static class NCombatUi_Activate_GaugeSetup
         }
 
         KokomiPlanStrip.Setup(state);
+        KokomiSwarm.SetupAll(state);
         SparkCounter.Setup(state);
         FanfareCounter.Setup(state);
         DrainedCounter.Setup(state);

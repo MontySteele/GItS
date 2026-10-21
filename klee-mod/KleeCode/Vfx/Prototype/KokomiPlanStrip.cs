@@ -166,6 +166,10 @@ internal static class KokomiPlanStrip
     /// reason: no polling anywhere.</summary>
     public static void Refresh(Creature? creature)
     {
+        // THE VISIBLE SWARM (2026-10-21) rides this funnel for EVERY seat --
+        // a partner's jellyfish are on the field for everyone -- so it is
+        // redrawn before the local-seat gate below.
+        KokomiSwarm.Refresh(creature);
         var player = creature?.Player;
         if (player == null || !LocalContext.IsMe(player)) return;
         if (!Live(creature)) return;
@@ -705,6 +709,28 @@ internal static class KokomiPlanStrip
     /// runtime `ImageTexture` handed over as
     /// <c>CustomCardModel.CustomPortrait</c>.
     /// </summary>
+    /// <summary>
+    /// THE FRONT PICTURE, for the carry-out's thumbnail flight
+    /// (<c>KokomiPlanFx</c>, 2026-10-21): the texture of
+    /// <paramref name="source"/>, the global rectangle of the strip's top
+    /// slot, and the node the strip hangs from. Null for a seat with no strip
+    /// on screen (another player's, or none built), so only the local seat
+    /// sees its Plans fly.
+    /// </summary>
+    internal static (Texture2D Texture, Rect2 Rect, Node Layer)? FrontThumb(
+        Creature? creature, CardModel? source)
+    {
+        var player = creature?.Player;
+        if (player == null || !LocalContext.IsMe(player)) return null;
+        var root = Displays.Get(player);
+        if (root == null || !GodotObject.IsInstanceValid(root) || !root.Visible) return null;
+        var layer = root.GetParent();
+        var slot = root.GetNodeOrNull<TextureRect>("Plan0");
+        var texture = Portrait(source);
+        if (layer == null || slot == null || texture == null) return null;
+        return (texture, new Rect2(slot.GlobalPosition, slot.Size), layer);
+    }
+
     private static Texture2D? Portrait(CardModel? card)
     {
         if (card == null) return null;

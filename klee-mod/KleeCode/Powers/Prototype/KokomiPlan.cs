@@ -1955,6 +1955,11 @@ public static class KokomiPlan
         // PLAN LANDS. Awaited, so the clause's damage number arrives after the
         // lunge rather than inside it -- the same argument the casket's strike
         // makes one file over.
+        // ART POLISH (2026-10-21): the carry-out's picture -- the thumbnail
+        // flies into the Bake-Kurage, it pulses, and a bolt, ripple, pearl
+        // flash or jellyfish dart goes out -- started here and never awaited,
+        // timed to land inside the lunge's own hold below.
+        PlayBeat(kokomi, entry);
         await Vfx.KurageBeat.Act(BakeKuragePet.Of(kokomi));
 
         // `EB-329`: THE BOARD BEFORE. Read here rather than inside the clause
@@ -2093,13 +2098,69 @@ public static class KokomiPlan
     }
 
     /// <summary>
+    /// THE CARRY-OUT'S PICTURE (art polish, 2026-10-21): what the Plan will
+    /// hit and whether it blocks, read off the board just before the lunge
+    /// (<see cref="BeatShape"/>), handed to <c>Vfx.KokomiPlanFx</c>. Display
+    /// only: it reads, moves nothing, and a throw here never reaches the
+    /// rules.
+    /// </summary>
+    private static void PlayBeat(Creature kokomi, Entry entry)
+    {
+        try
+        {
+            var pet = BakeKuragePet.Of(kokomi);
+            if (pet == null) return;
+            var (hit, all, blocks) = BeatShape(kokomi, entry);
+            Vfx.KokomiPlanFx.CarryOut(kokomi, pet, entry.Source, hit, all, blocks);
+        }
+        catch (System.Exception e)
+        {
+            MegaCrit.Sts2.Core.Logging.Log.Warn(
+                $"[{KleeMod.ModId}] Kokomi carry-out picture skipped: {e.Message}");
+        }
+    }
+
+    /// <summary>
+    /// WHAT A PLAN WILL LOOK LIKE WHEN IT IS CARRIED OUT: the bodies its
+    /// damage clauses aim at right now (<see cref="Aimed"/>, the read the
+    /// clauses themselves make), whether any aims at ALL, and whether any
+    /// clause is Block. A flipped two-line Plan carries out its now-line,
+    /// which this does not read, so it shows the pulse alone. Read-only.
+    /// </summary>
+    internal static (IReadOnlyList<Creature> Hit, bool All, bool Blocks)
+        BeatShape(Creature kokomi, Entry entry)
+    {
+        var hit = new List<Creature>();
+        var all = false;
+        var blocks = false;
+        if (entry.Now && entry.TwoLine) return (hit, all, blocks);
+        foreach (var clause in entry.Clauses)
+        {
+            var kind = NumberKind(clause.Kind);
+            if (kind == "Block") blocks = true;
+            var damages = kind == "damage"
+                || (clause.Kind == Kind.PlayAsItself
+                    && clause.Card?.TargetType == TargetType.AnyEnemy
+                    && clause.Card.DynamicVars.ContainsKey("Damage"));
+            if (!damages) continue;
+            if (clause.Aim == Aim.AllEnemies) all = true;
+            foreach (var body in Aimed(kokomi, clause, entry))
+            {
+                if (!hit.Contains(body)) hit.Add(body);
+            }
+        }
+        return (hit, all, blocks);
+    }
+
+    /// <summary>
     /// `EB-317`'s second half: SAY WHAT JUST HAPPENED, AND RECORD IT.
     ///
     /// ONE STRING, TWO SURFACES. <c>Vfx.KurageBeat.Line</c> builds the ruled
-    /// format once; the bubble over the jellyfish shows it and the wire
-    /// carries the same characters to the blind page. The pet says it when
-    /// there is a pet -- and Kokomi says it when there is not, the same honest
-    /// degradation the casket's dealer takes.
+    /// format once and the wire carries it to the blind page. On screen
+    /// (since the art polish, 2026-10-21) a caption over the jellyfish shows
+    /// the same card and number, in place of the speech bubble. The caption
+    /// sits on the pet when there is a pet -- and on Kokomi when there is
+    /// not, the same honest degradation the casket's dealer takes.
     ///
     /// NOT ON THE LEDGER, and that is `R101b` rather than an oversight: the
     /// meter ledger stays off the page, so what a seat is shown here is the
@@ -2115,7 +2176,10 @@ public static class KokomiPlan
                                  IReadOnlyList<string>? discarded = null)
     {
         var line = Vfx.KurageBeat.Line(card, number);
-        Vfx.KurageBeat.Say(BakeKuragePet.Of(kokomi) ?? kokomi, line);
+        // ART POLISH (2026-10-21): a small caption over the pet in place of
+        // the speech bubble, the same card and number. The page reads `line`
+        // off the wire below, never the bubble, so it is unchanged.
+        Vfx.KokomiPlanFx.Caption(BakeKuragePet.Of(kokomi) ?? kokomi, card, number);
         Record(kokomi, new CarriedOutPlan(card, number, line, moved, onPlay,
                                           kind, asked, riders,
                                           NoTarget: noTarget,

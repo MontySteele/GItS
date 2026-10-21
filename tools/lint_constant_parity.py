@@ -925,6 +925,53 @@ UNMIRRORED: dict[str, str] = {
         "presentation: the thrown bomb's spin over its flight.",
     "ThrownProjectile.PopScale":
         "presentation: scale of the base fire burst on the bomb's arrival.",
+    # Kokomi's art polish (2026-10-21): the Plan carry-out effect, the
+    # visible swarm, the Hydro sigil and the Casket pearl. Seconds and pixels
+    # for effects nothing waits on; the sim draws nothing.
+    "KokomiFxMath.BoltAt":
+        "presentation: when the carry-out's water bolt leaves, in seconds after the lunge starts.",
+    "KokomiFxMath.BoltFlight":
+        "presentation: the water bolt's flight to the target, in seconds.",
+    "KokomiFxMath.CaptionLength":
+        "presentation: how long a carry-out caption stays up, in seconds.",
+    "KokomiFxMath.CaptionStep":
+        "presentation: pixels an older caption steps up when a new one arrives.",
+    "KokomiFxMath.CasketPearlLength":
+        "presentation: the Casket's pearl flash length, in seconds.",
+    "KokomiFxMath.DartAt":
+        "presentation: when a Sting's or Ward's jellyfish leaves the orbit, in seconds.",
+    "KokomiFxMath.DartFlight":
+        "presentation: the jellyfish's dart to its target, in seconds.",
+    "KokomiFxMath.LongestEffect":
+        "presentation: the ceiling every carry-out effect ends by, in seconds.",
+    "KokomiFxMath.PearlAt":
+        "presentation: when a Block Plan's pearl flash starts, in seconds.",
+    "KokomiFxMath.PearlLength":
+        "presentation: a Block Plan's pearl flash length, in seconds.",
+    "KokomiFxMath.PulseAt":
+        "presentation: when the Bake-Kurage's pulse starts, in seconds.",
+    "KokomiFxMath.PulseLength":
+        "presentation: the Bake-Kurage's pulse length, in seconds.",
+    "KokomiFxMath.RippleAt":
+        "presentation: when an AoE Plan's ripple starts, in seconds.",
+    "KokomiFxMath.RippleLength":
+        "presentation: one enemy's ripple length, in seconds.",
+    "KokomiFxMath.RippleStagger":
+        "presentation: the gap between enemies' ripples, in seconds.",
+    "KokomiFxMath.SigilLength":
+        "presentation: the Hydro sigil under Kokomi's cast clip, in seconds.",
+    "KokomiFxMath.SplashLength":
+        "presentation: a bolt's or dart's impact splash, in seconds.",
+    "KokomiFxMath.SwarmCap":
+        "presentation: how many jellyfish are drawn round the Bake-Kurage before a '+N'. A drawing cap; every Plan still carries out.",
+    "KokomiFxMath.ThumbFlight":
+        "presentation: the Plan thumbnail's flight from the strip, in seconds.",
+    "KokomiSwarm.Period":
+        "presentation: one turn of the swarm's orbit, in seconds.",
+    "KokomiSwarm.RadiusX":
+        "presentation: the swarm orbit's width in pixels.",
+    "KokomiSwarm.RadiusY":
+        "presentation: the swarm orbit's height in pixels.",
     "KleeCombatVfx.MaxConcurrentPops":
         "presentation: how many pop effects may overlap before they are "
         "dropped. A frame-rate guard, not a rule -- the sim resolves every "
