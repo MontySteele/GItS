@@ -92,9 +92,10 @@ public static partial class KokomiCards
         return made;
     }
 
-    /// <summary>Shoal Call (the jellyfish build, 2026-10-12, the base game's
-    /// Blade Dance): "Add 3 [4] Stings to your hand." Plain Stings on both
-    /// faces; the upgrade adds one.</summary>
+    /// <summary>The `shoal_call` kind: "Add N Stings to your hand." Plain
+    /// Stings. Shoal Call's verb until the Kokomi taste audit (2026-10-21),
+    /// which has it Plan them (<see cref="PlanStings"/>); Brine Spray's
+    /// branch keeps this one.</summary>
     public static Task ShoalCall(
         PlayerChoiceContext choiceContext, CardModel card, CardPlay cardPlay) =>
         AddJellyfish(card.Owner, Jellyfish.Sting, Amount(card), false);
@@ -863,34 +864,30 @@ public sealed class SangonomiyasOrdersPower : UpgradeTwinPower, ILocalizationPro
     }
 }
 
-/// <summary>Kurage Bloom: "At the start of your turn, add a Sting to your
-/// hand." Copies add one each. Sim twin:
-/// <c>kokomi_plan.turn_start_generators</c>.</summary>
+/// <summary>Kurage Bloom. THE KOKOMI TASTE AUDIT (2026-10-21, review/active/
+/// kokomi-taste-audit-2026-10-21.md, pick 1 (a)): "At the end of your turn,
+/// Plan a Sting." (was "At the start of your turn, add a Sting to your
+/// Hand", Infinite Blades). Copies Plan one each, so the Sting is carried
+/// out the next morning. Paid from <see cref="KokomiTasteAudit.TurnEnd"/>,
+/// before Watatsumi's Grace counts the Plans waiting. Sim twin:
+/// <c>kokomi_plan.turn_end</c>.</summary>
 public sealed class KurageBloomPower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
     {
         ("title", "Kurage Bloom"),
         ("description",
-            "At the start of your turn, add [blue]{Amount}[/blue] "
-          + "{Amount:plural:[gold]Sting[/gold]|[gold]Stings[/gold]} to your "
-          + "[gold]Hand[/gold]."),
+            "At the end of your turn, [gold]Plan[/gold] [blue]{Amount}[/blue] "
+          + "{Amount:plural:[gold]Sting[/gold]|[gold]Stings[/gold]}."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
-    // STAGED into the start-of-turn tail (AfterPlayerTurnStartLate), so the
-    // card lands after the Bake-Kurage's morning Plans in every order -- the
-    // sim's `kokomi_plan.turn_start_generators`, after `resolve_all`.
-    public override async Task AfterPlayerTurnStartLate(
-        PlayerChoiceContext choiceContext, Player player)
-    {
-        if (Owner == null || player.Creature != Owner || Amount <= 0) return;
-        await KokomiCards.AddJellyfish(player, KokomiCards.Jellyfish.Sting,
-                                       (int)Amount, upgraded: false);
-    }
+    /// <summary>A badge that names a Sting previews one.</summary>
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        KokomiCards.WithStingPreview(System.Array.Empty<IHoverTip>());
 }
 
 /// <summary>

@@ -250,12 +250,14 @@ def test_undertow_is_priced_at_the_mean_of_its_branches():
     op with a `bonus_vs_debuff` rider now -- so the face can be folded by the
     engine, which a branch literal could not be -- and the number this table
     reaches is unchanged: base + bonus/2 IS the mean of the branches, half
-    being the share the table already gives a live predicate."""
+    being the share the table already gives a live predicate. (The Kokomi
+    taste audit, 2026-10-21, moved the rider to intent, `bonus_vs_attacker`,
+    priced the same way.)"""
     card = _proto("proto_kk_undertow")
     hit = card.effects[0]
     assert hit["op"] == "damage"
     lo = hit["amount"]
-    hi = lo + hit["bonus_vs_debuff"]
+    hi = lo + hit["bonus_vs_attacker"]
     assert draft._static_power(card) == (hi + lo) / 2 / card.cost
 
 

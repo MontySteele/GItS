@@ -23,23 +23,17 @@ def _up(cid):
 # --- section 1: the trims ----------------------------------------------------
 
 def test_the_trims_print_the_papers_numbers():
-    crash, rebuke = card("proto_kk_coral_crash"), card("proto_kk_tidal_rebuke")
-    assert (crash.cost, _up("proto_kk_coral_crash").cost) == (1, 0)
+    # (Coral Crash and Flotsam Surge left this pass's numbers in the Kokomi
+    # taste audit, 2026-10-21: `test_kokomi_taste_audit_2026_10_21.py`.)
+    rebuke = card("proto_kk_tidal_rebuke")
     assert (rebuke.cost, _up("proto_kk_tidal_rebuke").cost) == (2, 1)
     assert rebuke.retain
-    flotsam = card("proto_kk_flotsam_surge")
-    assert (flotsam.effects[0]["amount"],
-            _up("proto_kk_flotsam_surge").effects[0]["amount"]) == (10, 13)
     tide = card("proto_kk_steady_tide")
     assert (tide.effects[0]["amount"],
             _up("proto_kk_steady_tide").effects[0]["amount"]) == (9, 12)
     assert tide.ethereal and tide.plan == [{"op": "draw", "amount": 3}]
     # The Kokomi upgrade pass (2026-10-19): Plan draw 3 [4].
     assert _up("proto_kk_steady_tide").plan == [{"op": "draw", "amount": 4}]
-    ruin = card("proto_kk_riptide_ruin")
-    assert ruin.effects == [{"op": "damage", "amount": 11,
-                             "target": "all_enemies", "times": 2}]
-    assert _up("proto_kk_riptide_ruin").effects[0]["amount"] == 14
 
 
 def test_change_of_plans_is_uncommon_and_the_split_is_20_38_20():

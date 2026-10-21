@@ -56,8 +56,10 @@ public class KokomiOpenPlanTests : IDisposable
         // pool overhaul (2026-10-13): Turning Tide and Prepared Retreat in,
         // Riptide Guard out (Turnabout is Plan-only); thirty-one since Kokomi
         // review r8 (2026-10-14): Surging Shoal has no Plan line;
-        // thirty-two with Kokomi v3 (2026-10-18): Unbroken Tide.
-        Assert.Equal(32, types.Count(t =>
+        // thirty-two with Kokomi v3 (2026-10-18): Unbroken Tide; thirty-four
+        // with the Kokomi taste audit (2026-10-21): Coral Crash and Flotsam
+        // Surge.
+        Assert.Equal(34, types.Count(t =>
             typeof(INowLineCard).IsAssignableFrom(t)));
     }
 

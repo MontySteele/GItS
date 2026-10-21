@@ -38,14 +38,14 @@ public sealed class ProtoKkResolveOfWatatsumi : CustomCardModel, ICharacterCard
     public string CharacterId => "kokomi";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForStrength(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForPlanNoLine(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_resolve_of_watatsumi");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Resolve of Watatsumi"),
-        ("description", "Gain {PowerAmount:diff()} [gold]Strength[/gold]."),
+        ("description", "When a [gold]Plan[/gold] is carried out, it deals {PowerAmount:diff()} additional damage and gains {PowerAmount:diff()} additional [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -63,7 +63,7 @@ public sealed class ProtoKkResolveOfWatatsumi : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<StrengthPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
+        await PowerCmd.Apply<ResolveOfWatatsumiPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
     }
 
     protected override void OnUpgrade()

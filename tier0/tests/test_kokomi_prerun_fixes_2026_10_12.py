@@ -156,8 +156,9 @@ def test_treatise_draws_on_brine_sting_oath_and_a_generated_sting():
     assert _play(st, card("proto_kk_kurages_oath")) == 1
     kokomi_plan.roll_turn(st)
     st.player.energy = 10
-    st.player.hand.append(card("proto_kk_shoal_call"))
-    combat.play_card(st, st.player.hand[-1])
+    # A generated Sting (Shoal Call Plans its Stings since the Kokomi taste
+    # audit, 2026-10-21; Kurage Barrage still hands one over).
+    kokomi_plan.add_jellyfish(st, kokomi_plan.STING_ID, 1)
     sting = next(c for c in st.player.hand if c.id == "proto_kk_sting")
     st.player.hand.remove(sting)
     assert _play(st, sting) == 1

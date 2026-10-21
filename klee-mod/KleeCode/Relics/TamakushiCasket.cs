@@ -132,6 +132,29 @@ public class TamakushiCasket : CustomRelicModel
                                     fast: true);
     }
 
+    /// <summary>
+    /// THE KOKOMI TASTE AUDIT (2026-10-21): a generated Sting Planned by a
+    /// card or a Power ("Plan a Sting": Shoal Call, Kurage Bloom, Flotsam
+    /// Surge's Plan) pays as a Sting she Planned herself does, once per
+    /// Sting, through the relic she holds -- inside a carry-out too, where the
+    /// carried-out card itself pays nothing. No relic, nothing. Sim twin:
+    /// <c>kokomi_plan.casket_block_planned</c>.
+    /// </summary>
+    public static async Task PayForPlanned(Creature? kokomi, CardModel? card)
+    {
+        if (kokomi?.Player is not { } player) return;
+        if (!KokomiOverhaul.IsHers(kokomi)) return;
+        if (!CountsCard(card, planned: true)) return;
+        var relic = player.Relics.OfType<TamakushiCasket>().FirstOrDefault();
+        if (relic == null) return;
+        var block = relic.Block;
+        if (block <= 0) return;
+        relic.Flash();
+        ResolutionLedger.NoteRelic(relic.RelicName, BlockNote(block));
+        await CreatureCmd.GainBlock(kokomi, block, ValueProp.Unpowered, null,
+                                    fast: true);
+    }
+
     /// <summary>The page's words for one payout: "gained 2 Block". PURE.
     /// </summary>
     public static string BlockNote(int block) => $"gained {block} Block";

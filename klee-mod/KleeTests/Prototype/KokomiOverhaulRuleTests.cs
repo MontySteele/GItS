@@ -311,6 +311,9 @@ public class KokomiOverhaulRuleTests
         //
         // KOKOMI REVIEW R9 PICK 1 (a) (2026-10-15) removed `PlayCompanion`:
         // only a Companion that prints a Plan line can be planned.
+        //
+        // THE KOKOMI TASTE AUDIT (2026-10-21) appended `PlanStings`, Flotsam
+        // Surge's "and Plan a Sting".
         Assert.Equal(
             new[] { "Draw", "Energy", "Block", "Mend", "Damage",
                     "DamageQuarterMaxHp",
@@ -337,7 +340,7 @@ public class KokomiOverhaulRuleTests
                     // THE INAZUMA POOL REWORK (2026-10-18): Kyouka Fuushi.
                     "DamageTimesPlusEarlierPlans",
                     // GRAND DESIGN TAKES BASICS (2026-10-18).
-                    "PlayAsItself" },
+                    "PlayAsItself", "PlanStings" },
             System.Enum.GetNames(typeof(KokomiPlan.Kind)));
     }
 

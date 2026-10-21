@@ -126,6 +126,25 @@ public sealed class ProtoBakeKuragePower : PowerModel, ILocalizationProvider
         // first, so it can react with an aura standing from her last turn.
         await KurageVanguardPower.Signal(choiceContext, Owner);
         await DawnTidePower.Signal(choiceContext, Owner);
+        // THE KOKOMI TASTE AUDIT (2026-10-21): Sea's Reproach reads the
+        // intents once the morning's Plans are carried out. Sim twin:
+        // `kokomi_plan.seas_reproach`, after `dawn_tide`.
+        await SeasReproachPower.Signal(choiceContext, Owner);
+    }
+
+    /// <summary>
+    /// THE KOKOMI TASTE AUDIT (2026-10-21): her end of turn -- Kurage Bloom's
+    /// planned Sting, then Watatsumi's Grace's Block per Plan waiting
+    /// (<see cref="KokomiTasteAudit.TurnEnd"/>). On the marker every board
+    /// has, so the order between the two is fixed here and not by power
+    /// order. Sim twin: <c>kokomi_plan.turn_end</c>, after the pilot's flips.
+    /// </summary>
+    public override async Task BeforeSideTurnEnd(
+        PlayerChoiceContext choiceContext, CombatSide side,
+        IEnumerable<Creature> participants)
+    {
+        if (side != CombatSide.Player || Owner == null || Owner.IsDead) return;
+        await KokomiTasteAudit.TurnEnd(choiceContext, Owner);
     }
 
     /// <summary>

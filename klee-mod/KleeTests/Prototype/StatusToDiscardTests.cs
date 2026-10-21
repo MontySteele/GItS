@@ -30,8 +30,8 @@ public class StatusToDiscardTests
         { "ProtoKoRedKnight", "Add 2 [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold]." },
         { "ProtoKoUpInSmoke", "Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold]." },
         { "ProtoKoBehindJeansDesk", "Add a [gold]Confiscated[/gold] into your [gold]Discard Pile[/gold]." },
-        { "ProtoKkFlotsamSurge", "Add 2 [gold]Dazed[/gold] into your [gold]Discard Pile[/gold]." },
-        // Riptide Ruin's Dazed went with the Kokomi level pass (2026-10-12).
+        // Riptide Ruin's Dazed went with the Kokomi level pass (2026-10-12),
+        // Flotsam Surge's with the Kokomi taste audit (2026-10-21).
     };
 
     [Theory]

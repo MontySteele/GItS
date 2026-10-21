@@ -24,6 +24,7 @@ using MegaCrit.Sts2.Core.CardSelection;
 using MegaCrit.Sts2.Core.Commands;
 using MegaCrit.Sts2.Core.Entities.Cards;
 using MegaCrit.Sts2.Core.GameActions.Multiplayer;
+using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Models.Powers;
@@ -36,18 +37,21 @@ public sealed class ProtoKkWatatsumisGrace : CustomCardModel, ICharacterCard
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "kokomi";
 
+    protected override IEnumerable<IHoverTip> ExtraHoverTips =>
+        ArmKeywordTips.ForPlanNoLine(base.ExtraHoverTips, this);
+
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_watatsumis_grace");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Watatsumi's Grace"),
-        ("description", "At the end of your turn, keep up to {PowerAmount:diff()} of your [gold]Block[/gold]."),
+        ("description", "At the end of your turn, gain {PowerAmount:diff()} [gold]Block[/gold] for each [gold]Plan[/gold] waiting."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 10m)
+            new DynamicVar("PowerAmount", 3m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -64,6 +68,6 @@ public sealed class ProtoKkWatatsumisGrace : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PowerAmount"].UpgradeValueBy(5m);
+        DynamicVars["PowerAmount"].UpgradeValueBy(1m);
     }
 }

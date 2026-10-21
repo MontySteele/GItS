@@ -41,14 +41,14 @@ public sealed class ProtoKkShoalCall : CustomCardModel, ICharacterCard
         new[] { CardKeyword.Exhaust };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KokomiCards.WithStingPreview(base.ExtraHoverTips);
+        KokomiCards.WithStingPreview(ArmKeywordTips.ForPlanNoLine(base.ExtraHoverTips, this));
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_shoal_call");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Shoal Call"),
-        ("description", "Add {KkAmount:diff()} [gold]Stings[/gold] to your [gold]Hand[/gold]."),
+        ("description", "[gold]Plan[/gold] {KkAmount:diff()} [gold]Stings[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -66,7 +66,7 @@ public sealed class ProtoKkShoalCall : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await KokomiCards.ShoalCall(choiceContext, this, cardPlay);
+        await KokomiCards.PlanStings(choiceContext, this, cardPlay);
     }
 
     protected override void OnUpgrade()

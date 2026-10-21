@@ -92,6 +92,9 @@ PLAN_KINDS = frozenset((
     # THE INAZUMA POOL REWORK (2026-10-18): Kyouka Fuushi. See
     # `DAMAGE_TIMES_PLUS_EARLIER_PLANS`.
     "damage_times_plus_earlier_plans",
+    # KOKOMI TASTE AUDIT (2026-10-21): Flotsam Surge's "Plan a Sting". See
+    # `PLAN_STINGS`.
+    "plan_stings",
 ))
 
 #: The clauses that carry NO `amount`. Each is a whole rule rather than a
@@ -223,7 +226,11 @@ PLAN_ONLY_OPS = frozenset((
                            "damage_if_no_hp_lost_since",
                            # The Inazuma pool rework (2026-10-18): Kyouka
                            # Fuushi reads the Plans carried out before it.
-                           "damage_times_plus_earlier_plans"))
+                           "damage_times_plus_earlier_plans",
+                           # KOKOMI TASTE AUDIT (2026-10-21): Flotsam Surge's
+                           # Sting is planned when its Plan is carried out;
+                           # the now-line spelling is the `plan_stings` kind.
+                           "plan_stings"))
 
 #: THE POOL OVERHAUL (2026-10-13, review/active/kokomi-pool-overhaul-
 #: 2026-10-13.md, picks 1 (a) and 2 (a); [USER]: "On Kokomi, I'm good with
@@ -314,6 +321,13 @@ EACH_PLAYER_DRAW = "each_player_draw"
 #: "let's get rid of Companions as Plans unless we make a card that
 #: specifically has a Plan line.")
 ADD_STINGS = "add_stings"
+#: KOKOMI TASTE AUDIT (2026-10-21, review/active/kokomi-taste-audit-
+#: 2026-10-21.md, pick 1 (a)): "Plan a Sting". A generated Sting goes into the
+#: Plans queue exactly as one she Planned would, and the Tamakushi Casket pays
+#: for it as for a Sting she Planned (`plan_jellyfish`). Flotsam Surge's Plan
+#: clause; Shoal Call's and Kurage Bloom's now-line spellings are the
+#: `plan_stings` kind and `turn_end`. `KokomiPlan.Kind.PlanStings` is the twin.
+PLAN_STINGS = "plan_stings"
 GAIN_STRENGTH = "gain_strength"
 JUUGA_GUARD = "juuga_guard"
 #: Juuga's Plan line's power on her: stacks are TURNS REMAINING.
@@ -390,7 +404,7 @@ TREATISE = "kk_treatise"
 #: Kurage Swarm -- left with the re-founding, 2026-10-12.)
 AT_WATERS_EDGE = "kk_at_waters_edge"      # first Hydro hit a turn: Weak N + Vuln N
 CEREMONIAL_GARMENT = "kk_ceremonial_garment"  # +N per Weak/Vuln stack, Attacks
-WATATSUMIS_GRACE = "kk_watatsumis_grace"  # keep up to N Block at turn end
+WATATSUMIS_GRACE = "kk_watatsumis_grace"  # turn end: N Block per Plan waiting
 TIDAL_RIPOSTE = "kk_tidal_riposte"        # an attack fully Blocked: store N
 #: THE KOKOMI CARD PAPER V2 (2026-10-18, review/active/kokomi-cards-2026-10-18.md
 #: sec.2 change 4): Tidal Riposte's STORED bonus, Vigor's shape one card wide
@@ -417,12 +431,20 @@ KURAGE_CANOPY_PLUS = "kk_kurage_canopy_plus"
 #: a Plan, add a Sting to your hand." `SeasReproachPower`,
 #: `WatatsumiResistancePower`.
 SEAS_REPROACH = "kk_seas_reproach"
+#: KOKOMI TASTE AUDIT (2026-10-21): Sea's Reproach reads intent at the start
+#: of her turn; the upgraded card's copy also deals the damage. One class for
+#: both keys (`UpgradeTwinPower`).
+SEAS_REPROACH_PLUS = "kk_seas_reproach_plus"
+#: KOKOMI TASTE AUDIT (2026-10-21): Resolve of Watatsumi, "When a Plan is
+#: carried out, it deals N additional damage and gains N additional Block."
+#: `ResolveOfWatatsumiPower` is the twin.
+RESOLVE_OF_WATATSUMI = "kk_resolve_of_watatsumi"
 WATATSUMI_RESISTANCE = "kk_watatsumi_resistance"
 #: THE RE-FOUNDING (2026-10-12): seven Powers. Twins in
 #: `Powers/Prototype/KokomiRefounding.cs`.
 SANGONOMIYAS_ORDERS = "kk_sangonomiyas_orders"   # turn start: N Companions
 SANGONOMIYAS_ORDERS_PLUS = "kk_sangonomiyas_orders_plus"  # ... upgraded
-KURAGE_BLOOM = "kk_kurage_bloom"                 # turn start: N Stings
+KURAGE_BLOOM = "kk_kurage_bloom"                 # turn end: Plan N Stings
 WATCHFUL_SHOAL = "kk_watchful_shoal"             # Stings +N dmg
 COORDINATED_TIDE = "kk_coordinated_tide"         # a Companion's reaction: N Stings
 GRAND_STRATEGIST = "kk_grand_strategist"         # her reaction: N to ALL
@@ -1630,7 +1652,7 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
             # THE FEED PASS: an unprinted 0 clause (Current Read, unupgraded)
             # is nothing, not a Dexterity-sized Block. `PLAN_ZERO_AMOUNT_OPS`.
             return
-        gained = powers.modify_block_gained(p, amount)
+        gained = powers.modify_block_gained(p, amount + resolve_bonus(state))
         p.block += gained
         state.emit("block", amount=gained)
     elif op == NEXT_PLAN_DOUBLE_DAMAGE:
@@ -1655,6 +1677,11 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
     elif op == ADD_STINGS:
         # THE RE-FOUNDING, KURAGE'S WAKE: "Add 2 Stings to your hand."
         add_jellyfish(state, STING_ID, amount, upgraded=False)
+    elif op == PLAN_STINGS:
+        # KOKOMI TASTE AUDIT, FLOTSAM SURGE: "and Plan a Sting". Written now,
+        # inside the drain, so it waits for the next morning (`resolve_all`
+        # takes the queue before the first clause runs).
+        plan_jellyfish(state, STING_ID, amount)
     elif op == GAIN_STRENGTH:
         # GOROU'S WAR BANNER: "Gain 1 Strength." Permanent since the Kokomi
         # level pass (2026-10-12): her own slow Strength line.
@@ -1723,7 +1750,8 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
         # a multi-hit intent counts every hit and a non-attack intent is 0.
         # POWERED, the flat planned Block's funnel.
         intended = max_intent_damage(state)
-        gained = powers.modify_block_gained(p, intended + amount)
+        gained = powers.modify_block_gained(
+            p, intended + amount + resolve_bonus(state))
         if gained:
             p.block += gained
             state.emit("block", amount=gained)
@@ -1744,7 +1772,8 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
     elif op == PLAY_AS_ITSELF:
         _play_as_itself(state, entry.card)
     elif op == BLOCK_PER_STATUS_IN_HAND:
-        block_per_status(state, amount, clause.get("written_count"))
+        block_per_status(state, amount, clause.get("written_count"),
+                         bonus=resolve_bonus(state))
     elif op == TRANSFORM_STATUSES_YOU_HAVE:
         transform_statuses(state, bool(clause.get("upgraded")))
     else:                                   # unreachable: shape-checked at load
@@ -1768,18 +1797,21 @@ def statuses_in_hand(state: CombatState) -> list[Card]:
 
 
 def block_per_status(state: CombatState, rate: int,
-                     written_count: Optional[int] = None) -> int:
+                     written_count: Optional[int] = None,
+                     bonus: int = 0) -> int:
     """KELP WALL: "plus 3 for each status or curse in your hand when
     written". Powered, the flat planned Block's funnel. `written_count` is
     the count `schedule` stamped when the Plan was written (Kokomi round-1
-    fixes, 2026-10-12); None (a clause no writer stamped) reads the hand."""
+    fixes, 2026-10-12); None (a clause no writer stamped) reads the hand.
+    `bonus` is Resolve of Watatsumi's, added to a Block that lands (Kokomi
+    taste audit, 2026-10-21)."""
     n = (len(statuses_in_hand(state)) if written_count is None
          else int(written_count))
     if n <= 0 or rate <= 0:
         state.emit("plan_kelp_wall", statuses=n, amount=0)
         return 0
     p = state.player
-    gained = powers.modify_block_gained(p, rate * n)
+    gained = powers.modify_block_gained(p, rate * n + max(0, bonus))
     if gained:
         p.block += gained
         state.emit("block", amount=gained)
@@ -1902,6 +1934,10 @@ def _hit(state: CombatState, clause: dict, amount: int,
 
     if amount <= 0:
         return
+    # KOKOMI TASTE AUDIT (2026-10-21): Resolve of Watatsumi's "it deals N
+    # additional damage", on each hit of a Plan carried out, before Opening
+    # Gambit's doubling. `KokomiPlan.Hit` is the twin.
+    amount += resolve_bonus(state)
     if double:
         amount *= 2
     times = max(1, int(clause.get("times", 1)))
@@ -2108,23 +2144,49 @@ def watatsumi_resistance(state: CombatState) -> int:
     return added
 
 
-def seas_reproach(state: CombatState, enemy, name: str, stacks: int) -> None:
-    """SEA'S REPROACH (pool completion): "Whenever you apply Weak or
-    Vulnerable to an enemy, deal 3 damage to it." Called from
-    `refpowers.on_power_applied` (the twin of `AfterPowerAmountChanged`) for
-    a POSITIVE application she made; once per enemy it lands on. Hydro and
-    unpowered, Tidal Riposte's hit. `SeasReproachPower` is the twin."""
-    if not live(state) or stacks <= 0 or name not in ("weak", "vulnerable"):
+def seas_reproach(state: CombatState) -> None:
+    """SEA'S REPROACH (Kokomi taste audit, 2026-10-21, review/active/kokomi-
+    taste-audit-2026-10-21.md, pick 3 (a)): "At the start of your turn, apply
+    1 Weak to each enemy that intends to attack [and deal 5 damage to it]."
+    Read once at the start of her turn AFTER that turn's Plans are carried
+    out (`combat`'s turn start, after `resolve_all`), so the intents are the
+    coming enemy turn's. Each copy applies `C.KOKOMI_SEAS_REPROACH_WEAK`; each
+    upgraded copy (`kk_seas_reproach_plus`) also deals
+    `C.KOKOMI_SEAS_REPROACH_DAMAGE`, unelemented and unpowered. (It was
+    "Whenever you apply Weak or Vulnerable to an enemy, deal 5 damage to
+    it", Sadistic Nature.) `SeasReproachPower.Signal` is the twin."""
+    if not live(state):
         return
-    n = int(state.player.powers.get(SEAS_REPROACH, 0))
-    if n <= 0 or enemy is None or enemy is state.player:
+    plain = int(state.player.powers.get(SEAS_REPROACH, 0))
+    plus = int(state.player.powers.get(SEAS_REPROACH_PLUS, 0))
+    if plain + plus <= 0:
         return
-    if not getattr(enemy, "alive", False):
-        return
+    weak = (plain + plus) * int(C.KOKOMI_SEAS_REPROACH_WEAK)
+    damage = plus * int(C.KOKOMI_SEAS_REPROACH_DAMAGE)
     from tier0.engine import effects                # late import: cycle
-    state.emit("plan_seas_reproach", target=enemy.name, amount=n, power=name)
-    effects.deal_damage_to_enemy(state, enemy, n, element="hydro",
-                                 source="plan", powered=False)
+    attackers = [e for e in list(state.living_enemies)
+                 if _intends_to_attack(e)]
+    for enemy in attackers:
+        if not enemy.alive:
+            continue
+        powers.apply_power(state, enemy, "weak", weak, applier=state.player)
+        if damage > 0:
+            effects.deal_damage_to_enemy(state, enemy, damage, element=None,
+                                         source="plan", powered=False)
+    state.emit("plan_seas_reproach", enemies=len(attackers), weak=weak,
+               damage=damage)
+
+
+def resolve_bonus(state: CombatState) -> int:
+    """RESOLVE OF WATATSUMI (Kokomi taste audit, 2026-10-21, pick 2 (a)):
+    "When a Plan is carried out, it deals N additional damage and gains N
+    additional Block." The stack, added to each damage hit (`_hit`) and each
+    Block clause (`block`, `block_max_intent`, `block_per_status_in_hand`) of
+    a Plan carried out, Stings and Wards included. 0 without the Power.
+    `ResolveOfWatatsumiPower.Bonus` is the twin."""
+    if not live(state):
+        return 0
+    return max(0, int(state.player.powers.get(RESOLVE_OF_WATATSUMI, 0)))
 
 
 # ---------------------------------------------------------------------------
@@ -2371,21 +2433,6 @@ def garment_bonus(state: CombatState, card: Card, enemy: Enemy) -> int:
     return n * weak_vuln_stacks(enemy)
 
 
-def grace_keeps(state: CombatState) -> Optional[int]:
-    """WATATSUMI'S GRACE: "At the end of your turn, keep up to N of your
-    Block." The Block the clear leaves standing, or None when the Power is
-    not on her. Read at the block clear, where Barricade and Blur are read
-    (`refpowers.should_clear_block`), which is the base game's Sturdy Clamp
-    shape: Block above the cap is lost, up to the cap is kept.
-    `WatatsumisGracePower` is the twin."""
-    if not live(state):
-        return None
-    n = int(state.player.powers.get(WATATSUMIS_GRACE, 0))
-    if n <= 0:
-        return None
-    return min(int(state.player.block), n)
-
-
 def fully_blocked(hits: Sequence[tuple[int, int]]) -> bool:
     """One enemy attack's hits on her, as (blocked, unblocked): Block took
     something and nothing got through. `TidalRipostePower.FullyBlocked` is
@@ -2469,7 +2516,18 @@ def kind(state: CombatState, fx: dict, card: Card, target) -> None:
     k = fx.get("kind")
     p = state.player
     amount = int(fx.get("amount", 0))
-    if k == "double_weak_vulnerable":
+    if k == "plan_stings":
+        # SHOAL CALL (Kokomi taste audit, 2026-10-21): "Plan 3 [4] Stings."
+        plan_jellyfish(state, STING_ID, amount)
+    elif k == "weak_vuln_attackers":
+        # SUFFOCATING DEEP (Kokomi taste audit, 2026-10-21): "Apply 2 Weak
+        # and 2 Vulnerable to each enemy that intends to attack." Read when
+        # it is played.
+        for e in list(state.living_enemies):
+            if _intends_to_attack(e):
+                for name in ("weak", "vulnerable"):
+                    powers.apply_power(state, e, name, amount, applier=p)
+    elif k == "double_weak_vulnerable":
         # SUFFOCATING DEEP: "Double each enemy's Weak and Vulnerable."
         for e in list(state.living_enemies):
             for name in ("weak", "vulnerable"):
@@ -2480,8 +2538,8 @@ def kind(state: CombatState, fx: dict, card: Card, target) -> None:
         # KURAGE'S MERCY (pool completion, multiplayer): each player Mends.
         kurages_mercy(state, amount)
     elif k == "shoal_call":
-        # SHOAL CALL (the jellyfish build, 2026-10-12): Blade Dance, "Add 3
-        # [4] Stings to your hand." Plain Stings on both faces.
+        # "Add N Stings to your hand." Plain Stings. Shoal Call's verb until
+        # the Kokomi taste audit (2026-10-21); Brine Spray's branch keeps it.
         add_jellyfish(state, STING_ID, amount, upgraded=False)
     elif k == "add_sting":
         # Jellyfish Drift, Kurage Barrage: "Add a Sting to your hand."
@@ -2546,7 +2604,9 @@ KINDS = {"double_weak_vulnerable": (),
          "grand_design": ("amount",), "block_per_attacker": ("amount",),
          "double_block": (), "exhaust_statuses": ("amount",),
          # THE KOKOMI CARD PAPER V2 (2026-10-18).
-         "lose_all_block": ()}
+         "lose_all_block": (),
+         # THE KOKOMI TASTE AUDIT (2026-10-21).
+         "plan_stings": ("amount",), "weak_vuln_attackers": ("amount",)}
 
 
 def validate_op(card_id: str, fx: dict) -> None:
@@ -3091,17 +3151,14 @@ def dawn_tide(state: CombatState) -> None:
 
 
 def turn_start_generators(state: CombatState) -> None:
-    """KURAGE BLOOM ("At the start of your turn, add a Sting to your hand")
-    and SANGONOMIYA'S ORDERS ("... add a random Common Inazuma Companion card
+    """SANGONOMIYA'S ORDERS ("... add a random Common Inazuma Companion card
     to your hand. It is Ethereal."), copies adding one each, after the
-    morning's Plans. `KurageBloomPower` and `SangonomiyasOrdersPower` are the
-    twins."""
+    morning's Plans. (Kurage Bloom left this site in the Kokomi taste audit,
+    2026-10-21: it Plans its Sting at the end of her turn, `turn_end`.)
+    `SangonomiyasOrdersPower` is the twin."""
     if not live(state):
         return
     p = state.player
-    bloom = int(p.powers.get(KURAGE_BLOOM, 0))
-    if bloom:
-        add_jellyfish(state, STING_ID, bloom, upgraded=False)
     orders = int(p.powers.get(SANGONOMIYAS_ORDERS, 0))
     if orders:
         add_companions(state, orders, upgraded=False, free=True)
@@ -3142,3 +3199,69 @@ def casket_block(state: CombatState, card: Card, planned: bool = False) -> None:
     state.player.block += n
     state.emit("block", amount=n)
     state.emit("casket_block", amount=n, card=card.id)
+
+
+def casket_block_planned(state: CombatState, card: Card) -> None:
+    """THE TAMAKUSHI CASKET for a generated Sting Planned by a card or a
+    Power (Kokomi taste audit, 2026-10-21): "Whenever you Plan a card ...,
+    gain 2 Block", paid as for a Sting she Planned herself -- also inside a
+    carry-out (Flotsam Surge's Plan), where the carried-out card itself pays
+    nothing. `TamakushiCasket.PayForPlanned` is the twin."""
+    from tier0.content import loader                # late import: cycle
+    if not live(state):
+        return
+    if loader.OVERHAUL_CASKET_HOOK not in state.player.relic_hooks:
+        return
+    if not casket_counts(card, planned=True):
+        return
+    n = int(C.KOKOMI_OVERHAUL_CASKET_BLOCK)
+    state.player.block += n
+    state.emit("block", amount=n)
+    state.emit("casket_block", amount=n, card=card.id)
+
+
+def plan_jellyfish(state: CombatState, card_id: str, amount: int) -> int:
+    """"PLAN A STING" (Kokomi taste audit, 2026-10-21, review/active/kokomi-
+    taste-audit-2026-10-21.md, pick 1 (a)): `amount` generated Stings, each
+    written onto the Bake-Kurage exactly as a Sting she Planned would be --
+    its own Plan line through `schedule` (Watchful Shoal and her Strength
+    folded at writing, the write payoffs, the telemetry) -- and each paying
+    the Tamakushi Casket (`casket_block_planned`). The card is in no pile, as
+    a played Sting's is spent; it is the Plan's display and its now-line.
+    A Plan, not a card play: no card-played hook sees it. Returns how many
+    were written. `KokomiCards.PlanJellyfish` is the twin."""
+    if not live(state) or amount <= 0:
+        return 0
+    from tier0.content import loader                # late import: cycle
+    written = 0
+    for _ in range(int(amount)):
+        card = loader.get_card(card_id)
+        schedule(state, card)
+        casket_block_planned(state, card)
+        written += 1
+    state.emit("kk_jellyfish_planned", card=card_id, amount=written)
+    return written
+
+
+def turn_end(state: CombatState) -> None:
+    """HER END OF TURN (Kokomi taste audit, 2026-10-21), in this order:
+      * KURAGE BLOOM, "At the end of your turn, Plan a Sting." Copies Plan
+        one each; carried out the next morning.
+      * WATATSUMI'S GRACE, "At the end of your turn, gain 3 [4] Block for
+        each Plan waiting." The queue as it stands, Kurage Bloom's Sting
+        included; raw power Block (NC-11). Copies add their rates.
+    Called by `combat` after the pilot's flips. `ProtoBakeKuragePower.
+    BeforeSideTurnEnd` is the twin, in the same order."""
+    if not live(state):
+        return
+    p = state.player
+    bloom = int(p.powers.get(KURAGE_BLOOM, 0))
+    if bloom > 0:
+        plan_jellyfish(state, STING_ID, bloom)
+    rate = int(p.powers.get(WATATSUMIS_GRACE, 0))
+    held = len(state.kk_plan_queue)
+    if rate > 0 and held > 0:
+        gained = rate * held
+        p.block += gained
+        state.emit("block", amount=gained)
+        state.emit("plan_watatsumis_grace", amount=gained, plans=held)

@@ -246,16 +246,17 @@ public class KokomiStatusBatchTests : IDisposable
     // ---- Flotsam Surge ------------------------------------------------------------------------------
 
     [Fact]
-    public void Flotsam_surge_hits_all_for_ten_and_discards_two_dazed()
+    public void Flotsam_surge_hits_all_for_nine_and_adds_no_dazed()
     {
-        // The Kokomi level pass (2026-10-12): 13 [17] -> 10 [13].
+        // The Kokomi taste audit (2026-10-21): 9 [12] to ALL, Plan 9 [12] to
+        // ALL and a Sting planned (was 10 [13] and 2 Dazed into the Discard
+        // Pile). The Plan line: `KokomiTasteAuditTests`.
         var card = new ProtoKkFlotsamSurge();
-        Assert.Equal(10m, card.DynamicVars.Damage.BaseValue);
-        Assert.Equal(13m, Upgraded<ProtoKkFlotsamSurge>().DynamicVars.Damage.BaseValue);
-        var play = Seq("ProtoKkFlotsamSurge", "OnPlay");
-        Assert.Contains(play, c => c.Contains("CreateCard<Dazed>")
-                                 || c.Contains("Dazed"));
-        Assert.Contains(play, c => c.Contains("CardPileCmd.AddGeneratedCardToCombat"));
+        Assert.Equal(9m, card.DynamicVars.Damage.BaseValue);
+        Assert.Equal(12m, Upgraded<ProtoKkFlotsamSurge>().DynamicVars.Damage.BaseValue);
+        var play = Seq("ProtoKkFlotsamSurge", "PlayNowLine");
+        Assert.DoesNotContain(play, c => c.Contains("Dazed"));
+        Assert.DoesNotContain(play, c => c.Contains("CardPileCmd.AddGeneratedCardToCombat"));
         Assert.Equal(Element.Hydro,
                      Assert.IsAssignableFrom<IElementalCard>(card).Element);
     }
@@ -263,19 +264,23 @@ public class KokomiStatusBatchTests : IDisposable
     // ---- Riptide Ruin ------------------------------------------------------------------------------
 
     [Fact]
-    public void Riptide_ruin_hits_all_twice_for_eleven_and_adds_no_dazed()
+    public void Riptide_ruin_hits_all_once_more_per_plan_carried_out()
     {
-        // The card text pass / Kokomi level pass (2026-10-12): 11 [14], the
-        // Dazed went.
+        // The Kokomi taste audit (2026-10-21): 9 [12] to ALL, once more for
+        // each Plan carried out this turn, not Stings or Wards (was 11 [14]
+        // twice).
         var card = new ProtoKkRiptideRuin();
-        Assert.Equal(11m, card.DynamicVars.Damage.BaseValue);
-        Assert.Equal(14m, Upgraded<ProtoKkRiptideRuin>().DynamicVars.Damage.BaseValue);
+        Assert.Equal(9m, card.DynamicVars.Damage.BaseValue);
+        Assert.Equal(12m, Upgraded<ProtoKkRiptideRuin>().DynamicVars.Damage.BaseValue);
         Assert.Equal(TargetType.AllEnemies, card.TargetType);
         var play = Seq("ProtoKkRiptideRuin", "OnPlay");
         Assert.Contains(play, c => c.Contains("WithHitCount"));
         Assert.DoesNotContain(play, c => c.Contains("Dazed"));
         Assert.DoesNotContain(play, c => c.Contains("CardPileCmd.AddGeneratedCardToCombat"));
-        Assert.Equal("Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies twice.",
+        Assert.Contains(play, c => c.Contains("ChainPlansThisTurn"));
+        Assert.Equal("Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies, once more "
+                   + "for each [gold]Plan[/gold] carried out this turn. Stings and Wards don't "
+                   + "count.{InCombat:\n(Deals {TotalDamage:diff()} damage)|}",
                      Face(card));
         Assert.Equal(Element.Hydro,
                      Assert.IsAssignableFrom<IElementalCard>(card).Element);

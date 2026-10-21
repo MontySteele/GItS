@@ -166,24 +166,25 @@ public class KokomiExpansionTests : IDisposable
                             .Single().Amount);
         // The re-founding (2026-10-12): Undercurrent Snare costs 1.
         Assert.Equal(1, new ProtoKkUndercurrentSnare().EnergyCost.Canonical);
+        // The Kokomi taste audit (2026-10-21): Suffocating Deep reads intent.
         Assert.Contains(Il.Calls(Il.Method("ProtoKkSuffocatingDeep", "OnPlay")),
-                        c => c.Contains("KokomiCards.DoubleWeakVulnerable"));
+                        c => c.Contains("KokomiCards.WeakVulnAttackers"));
     }
 
     // ---- Dusk Guard ----------------------------------------------------------------
 
     [Fact]
-    public void Watatsumis_grace_keeps_up_to_its_cap_the_sturdy_clamp_way()
+    public void Watatsumis_grace_gains_block_per_plan_waiting()
     {
-        var seat = Seat.Kokomi().WithPower<WatatsumisGracePower>(10);
+        // The Kokomi taste audit (2026-10-21): "At the end of your turn, gain
+        // 3 [4] Block for each Plan waiting." (was the Sturdy Clamp shape).
+        var seat = Seat.Kokomi().WithPower<WatatsumisGracePower>(3);
         var grace = seat.Creature.Powers.OfType<WatatsumisGracePower>().Single();
-        Assert.False(grace.ShouldClearBlock(seat.Creature));
-        Assert.True(grace.ShouldClearBlock(Seat.Kokomi().Creature));
-        Assert.Contains(Il.Calls(Il.Method("WatatsumisGracePower",
-                                           "AfterPreventingBlockClear")),
-                        c => c.Contains("CreatureCmd.LoseBlock"));
-        Assert.Equal(15m, Upgraded<ProtoKkWatatsumisGrace>()
-                              .DynamicVars["PowerAmount"].BaseValue);
+        Assert.True(grace.ShouldClearBlock(seat.Creature));
+        Assert.Equal(6, WatatsumisGracePower.BlockFor(3, 2));
+        Assert.Equal(0, WatatsumisGracePower.BlockFor(3, 0));
+        Assert.Equal(4m, Upgraded<ProtoKkWatatsumisGrace>()
+                             .DynamicVars["PowerAmount"].BaseValue);
     }
 
     [Fact]
@@ -203,26 +204,36 @@ public class KokomiExpansionTests : IDisposable
     }
 
     [Fact]
-    public void Coral_crash_deals_her_block()
+    public void Coral_crash_reads_intent_on_its_plan()
     {
+        // The Kokomi taste audit (2026-10-21): "Deal 8 [11] Hydro damage.
+        // Plan: Deal 8 [11] Hydro damage to each enemy that intends to
+        // attack." (was Body Slam). Common, 1.
         var card = new ProtoKkCoralCrash();
-        // Pool completion (2026-10-01, paper sec.6): Common, 1 [0].
         Assert.Equal((CardType.Attack, CardRarity.Common),
                      (card.Type, card.Rarity));
-        Assert.Contains("Block", Face(card));
+        var clause = Assert.Single(card.PlanClauses);
+        Assert.Equal((KokomiPlan.Kind.Damage, 8,
+                      KokomiPlan.Aim.EnemiesIntendingAttack),
+                     (clause.Kind, clause.Amount, clause.Aim));
+        Assert.Equal(11, Upgraded<ProtoKkCoralCrash>().PlanClauses
+                             .Single().Amount);
+        Assert.Equal(11m, Upgraded<ProtoKkCoralCrash>().DynamicVars.Damage.BaseValue);
     }
 
     // ---- Plan volume -----------------------------------------------------------------
 
     [Fact]
-    public void Shoal_call_is_blade_dance_with_plain_stings()
+    public void Shoal_call_plans_plain_stings()
     {
-        // The jellyfish build (2026-10-12): "Add 3 [4] Stings to your hand."
-        // Plain Stings on both faces; the upgrade adds one.
-        var calls = Seq("KokomiCards", "ShoalCall");
-        Assert.Contains(calls, c => c.Contains("KokomiCards.AddJellyfish"));
+        // The Kokomi taste audit (2026-10-21): "Plan 3 [4] Stings." (was
+        // Blade Dance; Brine Spray keeps `ShoalCall`, which adds them).
+        var calls = Seq("KokomiCards", "PlanStings");
+        Assert.Contains(calls, c => c.Contains("KokomiCards.PlanJellyfish"));
         Assert.DoesNotContain(calls, c => c.Contains("get_IsUpgraded"));
-        Assert.Equal("Add {KkAmount:diff()} [gold]Stings[/gold] to your [gold]Hand[/gold].",
+        Assert.Contains(Seq("ProtoKkShoalCall", "OnPlay"),
+                        c => c.Contains("KokomiCards.PlanStings"));
+        Assert.Equal("[gold]Plan[/gold] {KkAmount:diff()} [gold]Stings[/gold].",
                      Face(new ProtoKkShoalCall()));
     }
 }

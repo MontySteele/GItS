@@ -215,26 +215,30 @@ def test_sea_glass_harvest_upgraded_makes_sea_glass_plus(overhaul):
 
 # --- Flotsam Surge ------------------------------------------------------------------------
 
-def test_flotsam_surge_hits_all_and_discards_two_dazed(overhaul):
+def test_flotsam_surge_hits_all_and_adds_no_dazed(overhaul):
+    """The Kokomi taste audit (2026-10-21): 9 [12] to ALL, no Dazed (was 10
+    [13] and 2 Dazed into the Discard Pile). Its Plan line is pinned in
+    `test_kokomi_taste_audit_2026_10_21.py`."""
     st = kokomi_state(enemies=[make_enemy(hp=100), make_enemy(hp=100)])
     st.player.draw_pile = _filler(4)
     card = _row("proto_kk_flotsam_surge")
     st.player.energy = 3
     st.player.hand.append(card)
     combat.play_card(st, card)
-    # The Kokomi level pass (2026-10-12): 10 [13] (was 13 [17]).
-    assert all(e.hp == 100 - 10 for e in st.enemies)
+    assert all(e.hp == 100 - 9 for e in st.enemies)
     dazed = [c for c in st.player.discard_pile if c.id == "status_dazed"]
-    assert len(dazed) == 2
-    assert _up("proto_kk_flotsam_surge").effects[0]["amount"] == 13
+    assert dazed == []
+    assert _up("proto_kk_flotsam_surge").effects[0]["amount"] == 12
 
 
 # --- Riptide Ruin ------------------------------------------------------------------------
 
-def test_riptide_ruin_hits_all_twice_and_adds_no_dazed(overhaul):
-    """The Rare in Coral Sanctuary's place (ruled 2026-10-01). Since the card
-    text pass and the Kokomi level pass (2026-10-12): "Deal 11 [14] Hydro
-    damage to ALL enemies twice." The Dazed went."""
+def test_riptide_ruin_hits_all_once_with_no_plan_carried_out(overhaul):
+    """The Rare in Coral Sanctuary's place (ruled 2026-10-01). The Kokomi
+    taste audit (2026-10-21): "Deal 9 [12] Hydro damage to ALL enemies, once
+    more for each Plan carried out this turn. Stings and Wards don't count."
+    With none carried out it is one hit; the count is pinned in
+    `test_kokomi_taste_audit_2026_10_21.py`."""
     st = kokomi_state(enemies=[make_enemy(hp=100), make_enemy(hp=100)])
     st.player.draw_pile = _filler(4)
     card = _row("proto_kk_riptide_ruin")
@@ -242,11 +246,10 @@ def test_riptide_ruin_hits_all_twice_and_adds_no_dazed(overhaul):
     st.player.energy = 3
     st.player.hand.append(card)
     combat.play_card(st, card)
-    assert all(e.hp == 100 - 11 * 2 for e in st.enemies)
-    dazed = [c for c in st.player.discard_pile if c.id == "status_dazed"]
-    assert dazed == []
+    assert all(e.hp == 100 - 9 for e in st.enemies)
     up = _up("proto_kk_riptide_ruin").effects[0]
-    assert (up["amount"], up["times"]) == (14, 2)
+    assert (up["amount"], up["times"]) == (
+        12, "chain_plans_this_turn_plus_one")
 
 
 # --- the shape check -------------------------------------------------------------------------

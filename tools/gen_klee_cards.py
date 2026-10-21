@@ -3421,8 +3421,14 @@ KOKOMI_KINDS = {
     # "Lose all your Block", remembered for the damage that follows it
     # (`block_lost_this_card`).
     "lose_all_block": "LoseAllBlock",
+    # THE KOKOMI TASTE AUDIT (2026-10-21, review/active/kokomi-taste-audit-
+    # 2026-10-21.md): Shoal Call's "Plan 3 [4] Stings" (each written as a
+    # Sting she Planned, the Casket paying for each) and Suffocating Deep's
+    # Weak and Vulnerable on each enemy that intends to attack.
+    "plan_stings": "PlanStings",
+    "weak_vuln_attackers": "WeakVulnAttackers",
 }
-KOKOMI_KIND_AMOUNT = {"shoal_call",
+KOKOMI_KIND_AMOUNT = {"shoal_call", "plan_stings", "weak_vuln_attackers",
                       "add_companions", "grand_design",
                       "block_per_attacker", "exhaust_statuses",
                       "kurages_mercy"}
@@ -3570,6 +3576,10 @@ PLAN_CLAUSE_KINDS = {
     "add_stings": "AddStings",
     "gain_strength": "GainStrength",
     "juuga_guard": "JuugaGuard",
+    # THE KOKOMI TASTE AUDIT (2026-10-21): Flotsam Surge's "and Plan a
+    # Sting", written when the Plan is carried out (it waits for the next
+    # morning).
+    "plan_stings": "PlanStings",
     # THE POOL OVERHAUL (2026-10-13, review/active/kokomi-pool-overhaul-
     # 2026-10-13.md sec.2-4). Chain: Feint's and Turning Tide's "for each Plan
     # carried out this turn". Counter: Kelp Wall's "the damage you blocked",
@@ -3686,7 +3696,10 @@ PLAN_ONLY_OPS = {
                  "damage_if_no_hp_lost_since",
                  # The Inazuma pool rework (2026-10-18): Kyouka Fuushi
                  # reads the Plans carried out before it this turn.
-                 "damage_times_plus_earlier_plans"}
+                 "damage_times_plus_earlier_plans",
+                 # THE KOKOMI TASTE AUDIT (2026-10-21): Flotsam Surge's
+                 # planned Sting; the now-line spelling is the kind.
+                 "plan_stings"}
 
 #: R276. The clauses whose `amount` may be ZERO: Tide Wall's is a flat bonus
 #: on top of a number read off the board, and the base card prints none.
@@ -4172,8 +4185,10 @@ APPLY_POWERS = {
         "The first time each turn you deal [gold]Hydro[/gold] damage, apply "
         "{X} Weak and {X} Vulnerable to the enemy hit. [gold]Plans[/gold] "
         "count."),
+    # THE KOKOMI TASTE AUDIT (2026-10-21): Block per Plan waiting.
     "kk_watatsumis_grace": ("WatatsumisGracePower", None,
-        "At the end of your turn, keep up to {X} of your Block."),
+        "At the end of your turn, gain {X} [gold]Block[/gold] for each "
+        "[gold]Plan[/gold] waiting."),
     # Kokomi card paper v2 (2026-10-18, sec.2 change 4): the bonus is stored
     # (`TidalRiposteChargePower`, Vigor's shape) until her next Attack card.
     "kk_tidal_riposte": ("TidalRipostePower", None,
@@ -4199,9 +4214,20 @@ APPLY_POWERS = {
         "[gold]Ward[/gold], add an upgraded [gold]Ward[/gold] to your "
         "hand."),
     # POOL COMPLETION (2026-10-01). Classes in KokomiPoolCompletion.cs.
+    # THE KOKOMI TASTE AUDIT (2026-10-21): reads intent at the start of her
+    # turn; the upgraded card's copy also deals 5 (`upgraded_power`), one
+    # class for both versions (`UpgradeTwinPower`).
     "kk_seas_reproach": ("SeasReproachPower", None,
-        "Whenever you apply [gold]Weak[/gold] or [gold]Vulnerable[/gold] to "
-        "an enemy, deal {X} damage to it."),
+        "At the start of your turn, apply 1 [gold]Weak[/gold] to each enemy "
+        "that intends to attack."),
+    "kk_seas_reproach_plus": ("SeasReproachPower", None,
+        "At the start of your turn, apply 1 [gold]Weak[/gold] to each enemy "
+        "that intends to attack and deal 5 damage."),
+    # THE KOKOMI TASTE AUDIT (2026-10-21): Resolve of Watatsumi. Class in
+    # KokomiTasteAudit.cs.
+    "kk_resolve_of_watatsumi": ("ResolveOfWatatsumiPower", None,
+        "When a [gold]Plan[/gold] is carried out, it deals {X} additional "
+        "damage and gains {X} additional [gold]Block[/gold]."),
     # THE RE-FOUNDING (2026-10-12, review/ruled/kokomi-card-paper-2026-10-12.md
     # sec.2). Every class lives in Powers/Prototype/KokomiRefounding.cs.
     "kk_sangonomiyas_orders": ("SangonomiyasOrdersPower", None,
@@ -4214,8 +4240,10 @@ APPLY_POWERS = {
         "At the start of your turn, add a random upgraded Common Inazuma "
         "[gold]Companion[/gold] card to your hand. It costs 0 and is "
         "[gold]Ethereal[/gold]."),
+    # THE KOKOMI TASTE AUDIT (2026-10-21): at the end of her turn, a Sting
+    # onto the Bake-Kurage.
     "kk_kurage_bloom": ("KurageBloomPower", None,
-        "At the start of your turn, add a [gold]Sting[/gold] to your hand."),
+        "At the end of your turn, [gold]Plan[/gold] a [gold]Sting[/gold]."),
     "kk_watchful_shoal": ("WatchfulShoalPower", None,
         "Your [gold]Stings[/gold] deal {X} additional damage."),
     # THE POOL OVERHAUL (2026-10-13): Coordinated Tide reads a Companion's
@@ -5684,6 +5712,10 @@ RUNTIME_TIMES = {
     # each Plan waiting" -- always at least one hit. Stings and Wards count:
     # Shoal was exempted from the v3 rule on 2026-10-20.
     "plans_held_plus_one": "KokomiPlan.PlansHeld(Owner.Creature) + 1",
+    # THE KOKOMI TASTE AUDIT (2026-10-21), Riptide Ruin: "once more for each
+    # Plan carried out this turn. Stings and Wards don't count."
+    "chain_plans_this_turn_plus_one":
+        "KokomiOverhaulLedger.For(Owner.Creature).ChainPlansThisTurn + 1",
 }
 
 # The clause each runtime count renders on the face. Separate from the C#
@@ -5694,6 +5726,9 @@ RUNTIME_TIMES_TEXT = {
     "sparks_spent": " for each [gold]Spark[/gold] spent",
     "plans_held": " once for each [gold]Plan[/gold] waiting",
     "plans_held_plus_one": ", plus once more for each [gold]Plan[/gold] waiting",
+    "chain_plans_this_turn_plus_one":
+        (", once more for each [gold]Plan[/gold] carried out this turn. "
+         "Stings and Wards don't count."),
 }
 
 
@@ -5949,6 +5984,7 @@ def blocked_reason(
                         or calc_rider(card, eff) is not None
                         or any(k in eff for k in (
                             "bonus_vs_aura", "bonus_vs_debuff",
+                            "bonus_vs_attacker",
                             "bonus_formula", "amount_formula"))):
                     return "damage bonus_if rides a plain printed hit only"
             if (eff.get("times_formula", "2_plus_sparks") != "2_plus_sparks"
@@ -6039,6 +6075,16 @@ def blocked_reason(
                 if eff.get("target") not in {"enemy", "all_enemies"}                         or not isinstance(eff["bonus_vs_debuff"], int):
                     return ("bonus_vs_debuff requires enemy or all-enemies "
                             "damage and a literal int")
+            if "bonus_vs_attacker" in eff:
+                # THE KOKOMI TASTE AUDIT (2026-10-21), Undertow: "If the enemy
+                # intends to attack, deal 10 instead." The AIMED debuff
+                # rider's shape on the target's intent (`debuff_calc_rider`),
+                # and the aimed shape only: no AoE form is written.
+                if (eff.get("target") != "enemy"
+                        or not isinstance(eff["bonus_vs_attacker"], int)
+                        or "bonus_vs_debuff" in eff):
+                    return ("bonus_vs_attacker requires single-enemy damage, "
+                            "a literal int and no debuff rider")
             # `times` is checked by _times_reason at the top of this loop
             # (EB-132) -- it is not a damage-only field.
         if op == "place_bomb":
@@ -8447,9 +8493,37 @@ def debuff_calc_rider(card: dict, eff: dict) -> tuple[int, int] | None:
     """
     if eff.get("op") != "damage" or eff.get("target") != "enemy":
         return None
-    if "bonus_vs_debuff" not in eff:
+    # THE KOKOMI TASTE AUDIT (2026-10-21): Undertow's intent rider is this
+    # shape on the target's intent (`conditional_rider_key`).
+    key = conditional_rider_key(eff)
+    if key is None:
         return None
-    return int(eff["amount"]), int(eff["bonus_vs_debuff"])
+    return int(eff["amount"]), int(eff[key])
+
+
+#: The aimed two-number riders (`debuff_calc_rider`): the key, the name of the
+#: var its face prints for the bonus hit, and the multiplier read off the
+#: hovered target. Undertow's debuff rider (`EB-441`) became an intent rider
+#: in the Kokomi taste audit (2026-10-21); the debuff one stays registered.
+CONDITIONAL_RIDERS = {
+    "bonus_vs_debuff": ("DebuffDamage", "KokomiOverhaulKit.HasDebuff(target)"),
+    "bonus_vs_attacker": ("AttackerDamage",
+                          "CurtainCallHooks.IntendsAttack(target)"),
+}
+
+
+def conditional_rider_key(eff: dict) -> str | None:
+    """Which aimed two-number rider this damage op carries, or None."""
+    for key in CONDITIONAL_RIDERS:
+        if key in eff:
+            return key
+    return None
+
+
+def conditional_rider_names(eff: dict) -> tuple[str, str]:
+    """The two PRINTED var names of an aimed rider: (plain, bonus)."""
+    key = conditional_rider_key(eff) or "bonus_vs_debuff"
+    return "PlainDamage", CONDITIONAL_RIDERS[key][0]
 
 
 def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
@@ -8529,9 +8603,10 @@ def calc_rider(card: dict, eff: dict) -> tuple[int, int, str] | None:
         base, bonus = debuff
         # Guard the null for `aura_calc_rider`'s reason: preview calls
         # `Calculate(null)` whenever nothing is hovered.
+        test = CONDITIONAL_RIDERS[conditional_rider_key(eff)][1]
         return base, bonus, (
             "static (_, target) => "
-            "target != null && KokomiOverhaulKit.HasDebuff(target) ? 1 : 0")
+            f"target != null && {test} ? 1 : 0")
     aura = aura_calc_rider(card, eff)
     if aura is not None:
         base, bonus = aura
@@ -8630,6 +8705,10 @@ def calculated_block_var_type(card: dict) -> str:
 PREVIEW_HIT_COUNTS = {
     "sparks_spent": "SparkPower.SparksAtPlay(card.Owner!.Creature!)",
     "plans_held_plus_one": "KokomiPlan.PlansHeld(card.Owner!.Creature!) + 1",
+    # THE KOKOMI TASTE AUDIT (2026-10-21): Riptide Ruin's hit count. The
+    # ledger's Peek, so a hover outside a fight reads 0.
+    "chain_plans_this_turn_plus_one":
+        "(KokomiOverhaulLedger.Peek(card.Owner!.Creature!)?.ChainPlansThisTurn ?? 0) + 1",
     "stage_spent_threes": ("FurinaStage.SpentOrFanfare(card) / "
                            "FurinaStageLaw.BravuraSpentPer"),
 }
@@ -8757,11 +8836,12 @@ def build_vars(card: dict) -> list[str]:
                 # beside the one it DEALS. `FoldedDamageVar` says why they
                 # are named `DamageVar`s and not a second calculated var.
                 if debuff_calc_rider(card, eff) is not None:
+                    plain_name, bonus_name = conditional_rider_names(eff)
                     out.append(
-                        f'new FoldedDamageVar("PlainDamage", {base}m, '
+                        f'new FoldedDamageVar("{plain_name}", {base}m, '
                         'ValueProp.Move)')
                     out.append(
-                        'new FoldedDamageVar("DebuffDamage", '
+                        f'new FoldedDamageVar("{bonus_name}", '
                         f'{base + extra}m, ValueProp.Move)')
             elif eff is not damage_var_effect(card):
                 pass          # literal; only the upgraded hit declares a var
@@ -16543,7 +16623,7 @@ def build_upgrade(card: dict) -> list[str]:
         # own base values, so a damage delta moves all three or the face
         # stops agreeing with the hit the first time the card is upgraded.
         if key == "damage" and debuff_calc_rider(card, eff) is not None:
-            for name in ("PlainDamage", "DebuffDamage"):
+            for name in conditional_rider_names(eff):
                 lines.append(
                     f'DynamicVars["{name}"]'
                     f".UpgradeValueBy({int(deltas[key])}m);")

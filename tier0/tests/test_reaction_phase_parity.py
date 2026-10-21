@@ -1106,6 +1106,19 @@ CO_TENANCY_LEDGER = {
             "is enemy HP, element-less and unpowered; a power tenant runs "
             "ahead of the model-driven sequencer, whose volleys are other "
             "kits' and re-read the living enemies per hit",
+        ("Powers/Prototype/ProtoBakeKuragePower.cs", "ProtoBakeKuragePower"):
+            "(the Kokomi taste audit, 2026-10-21). Her end of turn, "
+            "`KokomiTasteAudit.TurnEnd`: Kurage Bloom Plans a Sting, then "
+            "Watatsumi's Grace gains Block per Plan waiting -- one tenant, so "
+            "the two are ordered inside it. THE ORDERING QUESTION, answered: "
+            "what it READS is her Plan queue, which no co-tenant reads or "
+            "writes. What it WRITES is her Block (the Casket's per Sting, "
+            "Grace's), and the co-tenant that spends Block is the "
+            "`TurnEndSequencer`'s Bond of Life; a power tenant runs ahead of "
+            "the model-driven sequencer, so the Bond pays from this Block, "
+            "and the sim calls `kokomi_plan.turn_end` ahead of "
+            "`effects.player_turn_end_triggers` for the same order. The Furina "
+            "stage and Varka's Tide belong to other characters",
         ("Powers/ElementalApplication.cs", "KleeElementalHooks"):
             "kit-grant check, turn-end site; its body documents the "
             "models-after-powers broadcast order it leans on",

@@ -182,6 +182,12 @@ internal static class KleePowerIcons
             "kokomi/powers/princess_of_watatsumi.png"),
         KurageBloomPower => KleePck.Path("kokomi/powers/kurage_bloom.png")
             ?? KleePck.Path("kokomi/powers/bake_kurage.png"),
+        // THE KOKOMI TASTE AUDIT (2026-10-21): Resolve of Watatsumi pays on a
+        // carry-out, so it borrows Battle Formation's shape, the block
+        // above's rule.
+        ResolveOfWatatsumiPower =>
+            KleePck.Path("kokomi/powers/resolve_of_watatsumi.png")
+            ?? KleePck.Path("kokomi/powers/before_sun_and_moon.png"),
         WatchfulShoalPower => KleePck.Path("kokomi/powers/watchful_shoal.png")
             ?? KleePck.Path(
             "kokomi/powers/vigil_of_the_deep.png"),

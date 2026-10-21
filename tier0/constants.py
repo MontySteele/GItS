@@ -864,6 +864,12 @@ KOKOMI_BATTLE_FORMATION_THRESHOLD = 2
 # `KurageVanguardPower.Growth`.
 KOKOMI_KURAGE_VANGUARD_GROWTH = 2
 KOKOMI_BATTLE_FORMATION_DRAW = 1
+# Kokomi taste audit (2026-10-21, review/active/kokomi-taste-audit-2026-10-21.md):
+# Sea's Reproach, "At the start of your turn, apply 1 Weak to each enemy that
+# intends to attack [and deal 5 damage to it]". Weak per copy; damage per
+# upgraded copy. Mirrored BY VALUE against `SeasReproachPower.Weak` / `.Damage`.
+KOKOMI_SEAS_REPROACH_WEAK = 1
+KOKOMI_SEAS_REPROACH_DAMAGE = 5
 
 # THE STARTER, WHOLE (brief draft 6 sec.4; slice draft 6 sec.3). Ten cards, in
 # the printed order. A REPLACEMENT and not a substitution list because every one

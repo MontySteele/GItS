@@ -128,6 +128,19 @@ for face-up Plan cards. [USER]: "Got it, let's try that." Built:
   Companion (was 1); the **Watatsumi Casket** 3 (was 2). What counts is
   unchanged. Expected: act 1 HP lost back toward base.
 
+## Taste audit, 2026-10-21 (ruled, built)
+
+A census of her pool against the base five and the other kits found cards
+that were someone else's (`review/active/kokomi-taste-audit-2026-10-21.md`).
+[USER]: "That's a lot of card changes, but we can do that and rerun the
+balance suite to see how it feels." Then: "Agreed on all 5 defaults." Built:
+Shoal Call and Kurage Bloom Plan their Stings; Resolve of Watatsumi adds to
+each carried-out Plan's hits and Block; Coral Crash, Undertow, Suffocating
+Deep and Sea's Reproach read intent; Watatsumi's Grace gains Block per Plan
+waiting; Flotsam Surge has a Plan line; Riptide Ruin hits once more per Plan
+carried out. The card texts are in that paper's ruled section. Next: the
+Balance suite again on the same seeds.
+
 ## Picks (as offered)
 
 1. **The Shape of Water and Brine Sting.** The card says "for each Sting you

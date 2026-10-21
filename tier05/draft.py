@@ -707,6 +707,9 @@ KOKOMI_OVERHAUL_OPS = frozenset((
     # (A written Companion's `play_companion` left with Kokomi review r9
     # pick 1 (a), 2026-10-15; it was on no sheet row, so no price moves.)
     "add_stings", "gain_strength", "juuga_guard",
+    # THE KOKOMI TASTE AUDIT (2026-10-21): Flotsam Surge's planned Sting,
+    # priced with `add_stings` in `_op_price`.
+    "plan_stings",
     # THE POOL OVERHAUL (2026-10-13): the Chain, Counter and Intent clauses
     # and Read the Field's fetch, each with its own branch in `_op_price` on
     # this set's terms.
@@ -931,7 +934,7 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # one replay at STATIC_CARD_COPY_VALUE.
         return STATIC_CARD_COPY_VALUE
     # THE RE-FOUNDING (2026-10-12).
-    if op == "add_stings":
+    if op in ("add_stings", "plan_stings"):
         # Kurage's Wake: N jellyfish cards to play or write next turn -- N
         # neutral cards, `STATIC_AUTOPLAY_VALUE` each, the price this file
         # puts on a card resolved without being drafted.
@@ -1272,6 +1275,11 @@ def _static_power(card: Card, deck: Optional[list[Card]] = None) -> float:
                 debuff_bonus = fx.get("bonus_vs_debuff")
                 if isinstance(debuff_bonus, (int, float)):
                     amt += debuff_bonus / 2
+                # The Kokomi taste audit (2026-10-21): Undertow's intent
+                # rider, the same half share.
+                attacker_bonus = fx.get("bonus_vs_attacker")
+                if isinstance(attacker_bonus, (int, float)):
+                    amt += attacker_bonus / 2
                 if isinstance(amt, (int, float)):
                     times = (fx.get("times", 1)
                              if isinstance(fx.get("times", 1), int) else 1)
@@ -2199,6 +2207,9 @@ STATIC_OP_PRICING: dict[str, str] = {
     # --- the Kokomi re-founding (2026-10-12) ---
     "add_stings": "STATIC_AUTOPLAY_VALUE per jellyfish card handed over -- "
                   "one neutral card resolved without being drafted, each",
+    # --- the Kokomi taste audit (2026-10-21) ---
+    "plan_stings": "`add_stings`' price: STATIC_AUTOPLAY_VALUE per Sting "
+                   "planned, one neutral card resolved without being drafted",
     "gain_strength": "STATIC_STRENGTH_VALUE per Strength, the now-line "
                      "apply_power strength price (permanent Strength)",
     "juuga_guard": "its turns at C.MI_JUUGA_GUARD_BLOCK each, at face",

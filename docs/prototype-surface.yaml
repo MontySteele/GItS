@@ -1406,10 +1406,11 @@
 - {id: proto_kk_undertow, name: "Undertow", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   # `EB-441`: one damage op with a rider, not two literal branches.
-   # `EB-624`: two printed numbers, both live -- provenance sec. this row.
-   description: "Deal {PlainDamage:diff()} [gold]Hydro[/gold] damage. If the enemy has a debuff, deal {DebuffDamage:diff()} instead.",
-   effects: [{op: damage, amount: 7, target: enemy, bonus_vs_debuff: 3}],
+   # Kokomi taste audit (2026-10-21, review/active/kokomi-taste-audit-2026-10-21.md):
+   # reads intent (was "If the enemy has a debuff"). `EB-441` / `EB-624`'s
+   # one hit with two printed numbers stays. Provenance note.
+   description: "Deal {PlainDamage:diff()} [gold]Hydro[/gold] damage. If the enemy intends to attack, deal {AttackerDamage:diff()} instead.",
+   effects: [{op: damage, amount: 7, target: enemy, bonus_vs_attacker: 3}],
    # card audit 2026-09-02: review/active/kokomi-card-audit-2026-09-02.md
    upgrade: {damage: +3}}
 
@@ -1763,13 +1764,12 @@
 - {id: proto_kk_suffocating_deep, name: "Suffocating Deep", character: kokomi,
    authored_by: [claude],
    cost: 2, type: attack, rarity: rare, exhaust: true,
-   # THE RARE PASS (2026-10-04): applies 1 of each first, so it never
-   # doubles nothing (the floor is Weak 2 and Vulnerable 2 on every enemy).
-   description: "Deal 10 [gold]Hydro[/gold] damage to ALL enemies. Apply 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold] to each, then double them.",
+   # Kokomi taste audit (2026-10-21, review/active/kokomi-taste-audit-2026-10-21.md):
+   # reads intent (was 1 Weak and 1 Vulnerable on every enemy, then doubled).
+   # `double_weak_vulnerable` stays registered with no row. Provenance note.
+   description: "Deal 10 [gold]Hydro[/gold] damage to ALL enemies. Apply {KkAmount:diff()} [gold]Weak[/gold] and {KkAmount:diff()} [gold]Vulnerable[/gold] to each enemy that intends to attack.",
    effects: [{op: damage, amount: 10, target: all_enemies},
-             {op: apply_power, power: weak, amount: 1, target: all_enemies},
-             {op: apply_power, power: vulnerable, amount: 1, target: all_enemies},
-             {op: kokomi, kind: double_weak_vulnerable}],
+             {op: kokomi, kind: weak_vuln_attackers, amount: 2}],
    # 13 to ALL. 2026-10-11 Kokomi card pass: 6 [9] -> 10 [13].
    upgrade: {damage: 3}}
 
@@ -1777,13 +1777,15 @@
 
 - {id: proto_kk_coral_crash, name: "Coral Crash", character: kokomi,
    authored_by: [claude],
-   # Kokomi level pass (2026-10-12): Body Slam's price, 1 [0]; the "+4"
-   # upgrade goes. Provenance note.
+   # Kokomi taste audit (2026-10-21, review/active/kokomi-taste-audit-2026-10-21.md):
+   # a Read the Tide attack, intent read at carry-out (was Body Slam, damage
+   # equal to your Block, 1 [0]). Provenance note.
    cost: 1, type: attack, rarity: common,
-   description: "Deal [gold]Hydro[/gold] damage equal to your [gold]Block[/gold].{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
-   effects: [{op: damage, target: enemy,
-              amount_formula: {base: 0, per: 1, count: player_block}}],
-   upgrade: {cost: -1}}
+   description: "Deal 8 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 8 [gold]Hydro[/gold] damage to each enemy that intends to attack.",
+   effects: [{op: damage, amount: 8, target: enemy}],
+   plan: [{op: damage, amount: 8, target: enemies_intending_attack}],
+   # 11; Plan 11.
+   upgrade: {damage: 3, plan_damage: 3}}
 
 - {id: proto_kk_evening_watch, name: "Evening Watch", character: kokomi,
    authored_by: [claude],
@@ -1814,12 +1816,13 @@
    authored_by: [claude],
    # 2026-10-11 Kokomi card pass: cost 2 -> 1.
    cost: 1, type: power, rarity: rare,
-   # Replaces The Clouds Like Waves Rippling (paper pick 3). The base game's
-   # Sturdy Clamp shape: Block above the cap is lost, up to the cap is kept.
-   description: "At the end of your turn, keep up to {PowerAmount:diff()} of your [gold]Block[/gold].",
-   effects: [{op: apply_power, power: kk_watatsumis_grace, amount: 10, target: self}],
-   # keep 15.
-   upgrade: {power_amount: 5}}
+   # Kokomi taste audit (2026-10-21, review/active/kokomi-taste-audit-2026-10-21.md):
+   # Block per Plan waiting (was "keep up to 10 [15] of your Block", Thoma's
+   # Crimson Ooyoroi's shape). Provenance note.
+   description: "At the end of your turn, gain {PowerAmount:diff()} [gold]Block[/gold] for each [gold]Plan[/gold] waiting.",
+   effects: [{op: apply_power, power: kk_watatsumis_grace, amount: 3, target: self}],
+   # 4 a Plan.
+   upgrade: {power_amount: 1}}
 
 - {id: proto_kk_tidal_riposte, name: "Tidal Riposte", character: kokomi,
    authored_by: [claude],
@@ -1836,12 +1839,12 @@
 
 - {id: proto_kk_shoal_call, name: "Shoal Call", character: kokomi,
    authored_by: [claude],
-   # The jellyfish build (2026-10-12): the base game's Blade Dance, 3 [4]
-   # plain Stings. Common since the Kokomi review 2026-10-13, as Blade Dance
-   # is, swapped with Brine Sting. Provenance note.
+   # Kokomi taste audit (2026-10-21, review/active/kokomi-taste-audit-2026-10-21.md):
+   # Plans its Stings, each paying the Casket (was "Add 3 [4] Stings to your
+   # Hand", Blade Dance). Brine Spray keeps `shoal_call`. Provenance note.
    cost: 1, type: skill, rarity: common, exhaust: true,
-   description: "Add {KkAmount:diff()} [gold]Stings[/gold] to your [gold]Hand[/gold].",
-   effects: [{op: kokomi, kind: shoal_call, amount: 3}],
+   description: "[gold]Plan[/gold] {KkAmount:diff()} [gold]Stings[/gold].",
+   effects: [{op: kokomi, kind: plan_stings, amount: 3}],
    upgrade: {kokomi_amount: 1}}
 
 # --- THE PAYOFF PASS (2026-10-01, ruled): Second Thoughts is cut; two
@@ -1891,11 +1894,12 @@
    authored_by: [claude],
    # 2026-10-11 Kokomi card pass: cost 2 [1] -> 1 [0].
    cost: 1, type: power, rarity: rare,
-   # Per Weak or Vulnerable she applies, once per enemy; unpowered. Kokomi
-   # level pass (2026-10-12): 3 -> 5 [7], the cost stays 1. Provenance note.
-   description: "Whenever you apply [gold]Weak[/gold] or [gold]Vulnerable[/gold] to an enemy, deal 5 damage to it.",
-   effects: [{op: apply_power, power: kk_seas_reproach, amount: 5, target: self}],
-   upgrade: {power_amount: 2}}
+   # Kokomi taste audit (2026-10-21, review/active/kokomi-taste-audit-2026-10-21.md):
+   # reads intent after the morning's Plans (was "Whenever you apply Weak or
+   # Vulnerable to an enemy, deal 5 [7] damage to it"). Provenance note.
+   description: "At the start of your turn, apply 1 [gold]Weak[/gold] to each enemy that intends to attack{IfUpgraded:show: and deal 5 damage|}.",
+   effects: [{op: apply_power, power: kk_seas_reproach, amount: 1, target: self}],
+   upgrade: {upgraded_power: kk_seas_reproach_plus}}
 
 - {id: proto_kk_tidal_rebuke, name: "Tidal Rebuke", character: kokomi,
    authored_by: [claude],
@@ -1971,22 +1975,26 @@
 - {id: proto_kk_flotsam_surge, name: "Flotsam Surge", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   # The self-status engine, paid in Dazed to the discard pile. Kokomi level
-   # pass (2026-10-12): 13 [17] -> 10 [13]. Provenance note.
-   description: "Deal 10 [gold]Hydro[/gold] damage to ALL enemies. Add 2 [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].",
-   effects: [{op: damage, amount: 10, target: all_enemies},
-             {op: add_card, card: status_dazed, zone: discard, amount: 2}],
-   # 13 to ALL.
-   upgrade: {damage: 3}}
+   # Kokomi taste audit (2026-10-21, review/active/kokomi-taste-audit-2026-10-21.md):
+   # an AoE with a Plan line (was 10 [13] to ALL and 2 Dazed into the Discard
+   # Pile). The Plan's Sting waits for the next morning. Provenance note.
+   description: "Deal 9 [gold]Hydro[/gold] damage to ALL enemies. [gold]Plan[/gold]: Deal 9 [gold]Hydro[/gold] damage to ALL enemies and [gold]Plan[/gold] a [gold]Sting[/gold].",
+   effects: [{op: damage, amount: 9, target: all_enemies}],
+   plan: [{op: damage, amount: 9, target: all_enemies},
+          {op: plan_stings, amount: 1}],
+   # 12 to ALL; Plan 12 to ALL.
+   upgrade: {damage: 3, plan_damage: 3}}
 
 - {id: proto_kk_riptide_ruin, name: "Riptide Ruin", character: kokomi,
    authored_by: [claude],
    cost: 2, type: attack, rarity: rare,
-   # Card text pass / Kokomi level pass (2026-10-12): the Dazed goes, with 2
-   # more damage a hit. Provenance note.
-   description: "Deal 11 [gold]Hydro[/gold] damage to ALL enemies twice.",
-   effects: [{op: damage, amount: 11, target: all_enemies, times: 2}],
-   # 14 to ALL, twice.
+   # Kokomi taste audit (2026-10-21, review/active/kokomi-taste-audit-2026-10-21.md):
+   # one hit plus one per Plan carried out this turn, Battle Formation's
+   # count (was 11 [14] to ALL twice). Provenance note.
+   description: "Deal 9 [gold]Hydro[/gold] damage to ALL enemies, once more for each [gold]Plan[/gold] carried out this turn. Stings and Wards don't count.{InCombat:\n(Deals {TotalDamage:diff()} damage)|}",
+   effects: [{op: damage, amount: 9, target: all_enemies,
+              times: chain_plans_this_turn_plus_one}],
+   # 12 a hit.
    upgrade: {damage: 3}}
 
 # THE RE-FOUNDING CUT 24 ROWS (2026-10-12, review/active/kokomi-card-paper-
@@ -2090,7 +2098,10 @@
 - {id: proto_kk_kurage_bloom, name: "Kurage Bloom", character: kokomi,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "At the start of your turn, add a [gold]Sting[/gold] to your [gold]Hand[/gold].",
+   # Kokomi taste audit (2026-10-21, review/active/kokomi-taste-audit-2026-10-21.md):
+   # Plans its Sting at the end of her turn (was "At the start of your turn,
+   # add a Sting to your Hand", Infinite Blades). Provenance note.
+   description: "At the end of your turn, [gold]Plan[/gold] a [gold]Sting[/gold].",
    effects: [{op: apply_power, power: kk_kurage_bloom, amount: 1, target: self}],
    upgrade: {innate: true}}
 
@@ -2167,11 +2178,13 @@
 
 - {id: proto_kk_resolve_of_watatsumi, name: "Resolve of Watatsumi", character: kokomi,
    authored_by: [claude],
-   # Inflame's rate (an Uncommon, 1 Energy, 2 Strength).
+   # Kokomi taste audit (2026-10-21, review/active/kokomi-taste-audit-2026-10-21.md):
+   # per hit and per Block clause of a Plan carried out, Stings and Wards
+   # included (was "Gain 2 [3] Strength", Inflame). Provenance note.
    cost: 1, type: power, rarity: uncommon,
-   description: "Gain 2 [gold]Strength[/gold].",
-   effects: [{op: apply_power, power: strength, amount: 2, target: self}],
-   # 3 Strength.
+   description: "When a [gold]Plan[/gold] is carried out, it deals {PowerAmount:diff()} additional damage and gains {PowerAmount:diff()} additional [gold]Block[/gold].",
+   effects: [{op: apply_power, power: kk_resolve_of_watatsumi, amount: 2, target: self}],
+   # 3 each.
    upgrade: {power_amount: 1}}
 
 - {id: proto_kk_grand_strategist, name: "Grand Strategist", character: kokomi,

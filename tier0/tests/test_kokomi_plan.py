@@ -146,7 +146,9 @@ def test_every_shipped_plan_line_passes_the_shape_check():
     # FORTY-TWO with the Inazuma pool rework (2026-10-18): Naptime, Daruma
     # and Kirara, the first Plan lines on Universal companion rows.
     # FORTY-THREE with Kyouka Fuushi, the same rework's Plan Rare.
-    assert len(planned) == 43
+    # FORTY-FIVE with the Kokomi taste audit (2026-10-21): Coral Crash and
+    # Flotsam Surge.
+    assert len(planned) == 45
     for card in planned:
         assert kokomi_plan.plan_shape_reason(card.plan) is None, card.id
 

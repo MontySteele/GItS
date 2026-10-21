@@ -105,12 +105,12 @@ public class PoolCompletionTests : IDisposable
         // hit per Plan waiting. Kokomi round 2 (2026-10-12): 5 [6].
         Assert.Equal(7, new ProtoKkShoalOfSpears().DynamicVars["Damage"].IntValue);   // the pool sweep, 2026-10-18
         Assert.Equal(9, Upgraded<ProtoKkShoalOfSpears>().DynamicVars["Damage"].IntValue);
-        // The Kokomi level pass (2026-10-12): Sea's Reproach 5 [7] at 1
-        // Energy on both faces.
+        // Sea's Reproach at 1 Energy on both faces; since the Kokomi taste
+        // audit (2026-10-21) it reads intent, one power for both versions.
         Assert.Equal(1, new ProtoKkSeasReproach().EnergyCost.Canonical);
         Assert.Equal(1, UpCost<ProtoKkSeasReproach>());
-        Assert.Equal(5, new ProtoKkSeasReproach().DynamicVars["PowerAmount"].IntValue);
-        Assert.Equal(7, Upgraded<ProtoKkSeasReproach>().DynamicVars["PowerAmount"].IntValue);
+        Assert.Contains("UpgradeTwinPower.Install",
+                        string.Join(" ", Seq("ProtoKkSeasReproach", "OnPlay")));
         // (Watatsumi Resistance left with the Kokomi pool overhaul,
         // 2026-10-13.)
         Assert.Equal(8, new ProtoKkKuragesMercy().DynamicVars["KkAmount"].IntValue);
@@ -123,14 +123,11 @@ public class PoolCompletionTests : IDisposable
     public void Body_slam_is_priced_once()
     {
         // Paper sec.6: Tidal Rebuke keeps no Exhaust, Noelle's Sweeping Time
-        // upgrades to cost 1. The Kokomi level pass (2026-10-12): Coral Crash
-        // is Body Slam's price, 1 [0], and the "+4" upgrade went.
+        // upgrades to cost 1. (Coral Crash was Body Slam until the Kokomi
+        // taste audit, 2026-10-21: `KokomiTasteAuditTests`.)
         var crash = new ProtoKkCoralCrash();
         Assert.Equal((CardRarity.Common, 1), (crash.Rarity, crash.EnergyCost.Canonical));
-        Assert.Equal(0, UpCost<ProtoKkCoralCrash>());
-        Assert.Equal(0m, crash.DynamicVars.CalculationBase.BaseValue);
-        Assert.Equal(0m, Upgraded<ProtoKkCoralCrash>()
-                             .DynamicVars.CalculationBase.BaseValue);
+        Assert.Equal(1, UpCost<ProtoKkCoralCrash>());
         var rebuke = new ProtoKkTidalRebuke();
         // The Kokomi level pass (2026-10-12): 2 [1], Noelle's price, and Retain.
         Assert.Equal((CardRarity.Rare, 2), (rebuke.Rarity, rebuke.EnergyCost.Canonical));
@@ -171,13 +168,15 @@ public class PoolCompletionTests : IDisposable
     }
 
     [Fact]
-    public void Seas_reproach_pays_on_her_weak_and_vulnerable_with_hydro()
+    public void Seas_reproach_no_longer_answers_an_application()
     {
-        Assert.False(SeasReproachPower.Pays(null, 1m, null, null));
-        var calls = Seq("SeasReproachPower", "AfterPowerAmountChanged");
-        var pays = calls.FindIndex(c => c.Contains("SeasReproachPower.Pays"));
-        var hit = calls.FindIndex(c => c.Contains("ElementalHit.Deal"));
-        Assert.True(pays >= 0 && hit > pays);
+        // The Kokomi taste audit (2026-10-21): it reads intent at the start
+        // of her turn (`KokomiTasteAuditTests`); no application hook is left.
+        Assert.Null(typeof(SeasReproachPower).GetMethod(
+            "AfterPowerAmountChanged",
+            System.Reflection.BindingFlags.Public
+            | System.Reflection.BindingFlags.Instance
+            | System.Reflection.BindingFlags.DeclaredOnly));
     }
 
     [Fact]

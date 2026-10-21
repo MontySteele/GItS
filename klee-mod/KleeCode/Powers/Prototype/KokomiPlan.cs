@@ -221,6 +221,14 @@ public static class KokomiPlan
         // it; Grand Design mints it (<c>KokomiRefounding.WriteAsItself</c>).
         // Sim twin `kokomi_plan.PLAY_AS_ITSELF`.
         PlayAsItself,
+        // THE KOKOMI TASTE AUDIT (2026-10-21, review/active/kokomi-taste-
+        // audit-2026-10-21.md, pick 4 (a)): Flotsam Surge's "and Plan a
+        // Sting". Written when this Plan is carried out, so the Sting waits
+        // for the next morning (<see cref="ResolveAll"/> takes the queue
+        // before the first clause runs); the Casket pays for it as for a
+        // Sting she Planned (<see cref="KokomiCards.PlanJellyfish"/>). Sim
+        // twin `kokomi_plan.PLAN_STINGS`.
+        PlanStings,
     }
 
     /// <summary>
@@ -2386,6 +2394,12 @@ public static class KokomiPlan
                     choiceContext, kokomi, plan.Amount);
                 return plan.Amount;
 
+            // THE KOKOMI TASTE AUDIT (2026-10-21): Flotsam Surge's Sting.
+            case Kind.PlanStings:
+                return await KokomiCards.PlanJellyfish(
+                    choiceContext, kokomi.Player, KokomiCards.Jellyfish.Sting,
+                    plan.Amount);
+
             case Kind.JuugaGuard:
                 await PowerCmd.Apply<JuugaGuardPower>(
                     choiceContext, kokomi, plan.Amount, applier: kokomi,
@@ -2433,10 +2447,13 @@ public static class KokomiPlan
                 // enemy turn's intents are up. Kokomi round-3 changes
                 // (2026-10-12): the LARGEST intent on the board, not the
                 // front body's, which read 0 against the Queen.
+                // The Kokomi taste audit (2026-10-21): Resolve of
+                // Watatsumi's bonus on a Plan's Block.
                 return (int)await CreatureCmd.GainBlock(
                     kokomi,
                     KokomiOverhaulKit.MostIntendedDamage(kokomi)
-                        + plan.Amount,
+                        + plan.Amount
+                        + ResolveOfWatatsumiPower.Bonus(kokomi),
                     ValueProp.Move, null);
 
             case Kind.Draw:
@@ -2499,8 +2516,12 @@ public static class KokomiPlan
                 {
                     return 0;
                 }
+                // The Kokomi taste audit (2026-10-21): Resolve of
+                // Watatsumi's bonus on a Plan's Block.
                 return (int)await CreatureCmd.GainBlock(
-                    kokomi, plan.Amount, ValueProp.Move, null);
+                    kokomi,
+                    plan.Amount + ResolveOfWatatsumiPower.Bonus(kokomi),
+                    ValueProp.Move, null);
 
             case Kind.Mend:
                 // Mend returns the HP that actually landed, which is the
@@ -2557,7 +2578,8 @@ public static class KokomiPlan
             // balance audit, ruled 2026-10-21).
             case Kind.BlockPerStatusInHand:
                 return await KokomiStatusBatch.BlockPerStatus(
-                    kokomi, plan.Amount, plan.WrittenCount);
+                    kokomi, plan.Amount, plan.WrittenCount,
+                    ResolveOfWatatsumiPower.Bonus(kokomi));
             case Kind.TransformStatusesYouHave:
                 return await KokomiStatusBatch.TransformStatuses(
                     player, entry?.Source?.IsUpgraded ?? false);
@@ -2674,6 +2696,8 @@ public static class KokomiPlan
         // THE RE-FOUNDING (2026-10-12).
         Kind.AddStings => "cards added",
         Kind.GainStrength => "Strength",
+        // THE KOKOMI TASTE AUDIT (2026-10-21).
+        Kind.PlanStings => "Stings planned",
         // THE POOL OVERHAUL (2026-10-13).
         Kind.DamagePerPlanThisTurn or Kind.DamageBlockedSince
             or Kind.DamageTakenSince or Kind.DamageIfNoHpLostSince
@@ -2897,6 +2921,10 @@ public static class KokomiPlan
         int amount, Entry? entry = null, bool doubleDamage = false)
     {
         if (amount <= 0) return null;
+        // THE KOKOMI TASTE AUDIT (2026-10-21): Resolve of Watatsumi's "it
+        // deals N additional damage", on each hit of a Plan carried out,
+        // before Opening Gambit's doubling. Sim twin: `kokomi_plan._hit`.
+        amount += ResolveOfWatatsumiPower.Bonus(kokomi);
         if (doubleDamage) amount *= 2;
         // TELEMETRY ONLY: a Plan's hit is the Bake-Kurage's (`EB-334`), so it
         // is Kokomi's pet damage. The applier the engine reads is unchanged.

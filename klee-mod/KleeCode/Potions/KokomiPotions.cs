@@ -30,8 +30,9 @@ public static class KokomiPotions
     };
 }
 
-/// <summary>Common. "Add 3 Stings to your Hand." Shoal Call's door
-/// (<see cref="KokomiCards.AddJellyfish"/>), so Kurage Lantern reads them
+/// <summary>Common. "Add 3 Stings to your Hand." The door Brine Spray and
+/// Kurage Barrage use (<see cref="KokomiCards.AddJellyfish"/>; Shoal Call Plans
+/// its Stings since the Kokomi taste audit, 2026-10-21), so Kurage Lantern reads them
 /// and a full hand sends the rest to the Discard Pile.</summary>
 public sealed class BottledShoal : ArmPotion
 {

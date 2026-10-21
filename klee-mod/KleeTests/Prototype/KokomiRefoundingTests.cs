@@ -301,10 +301,12 @@ public class KokomiRefoundingTests
         Assert.DoesNotContain("OpenTheCasket", types);
         Assert.DoesNotContain("FirstCardFreePower", types);
         Assert.DoesNotContain("ProtoKkFloodTide", types);
-        Assert.Null(typeof(ProtoBakeKuragePower).GetMethod(
-            "BeforeSideTurnEnd",
-            System.Reflection.BindingFlags.DeclaredOnly
-            | System.Reflection.BindingFlags.Public
-            | System.Reflection.BindingFlags.Instance));
+        // The Kokomi taste audit (2026-10-21) gave the marker a turn-end hook
+        // again, for Kurage Bloom and Watatsumi's Grace; it carries no Plan
+        // out (Dusk stays gone).
+        var turnEnd = Seq(nameof(ProtoBakeKuragePower), "BeforeSideTurnEnd");
+        Assert.Contains("KokomiTasteAudit.TurnEnd", turnEnd);
+        Assert.DoesNotContain(turnEnd, c => c.StartsWith("KokomiPlan.Resolve",
+                                                          System.StringComparison.Ordinal));
     }
 }

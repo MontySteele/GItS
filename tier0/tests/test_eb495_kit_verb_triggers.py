@@ -315,9 +315,10 @@ SIM_CALL_SITES = {
     # Damage Report's hit per status drawn left at the AoE trim (2026-10-03):
     # it gains Block now.
     ('kokomi_plan.py', 1): ("'plan'", 'False', "'hydro'"),
-    # POOL COMPLETION (2026-10-01): Sea's Reproach's answer to a Weak or a
-    # Vulnerable, dealt as Tidal Riposte's is.
-    ('kokomi_plan.py', 2): ("'plan'", 'False', "'hydro'"),
+    # Sea's Reproach's upgraded hit on each enemy that intends to attack
+    # (the Kokomi taste audit, 2026-10-21; was its Hydro answer to a Weak or
+    # a Vulnerable), unelemented and unpowered, Grand Strategist's terms.
+    ('kokomi_plan.py', 2): ("'plan'", 'False', 'None'),
     # (Tidal Riposte's answer left this list with the Kokomi card paper v2,
     # 2026-10-18: it stores a bonus for her next Attack now.)
     # Kokomi review r6 (2026-10-14): Kurage Vanguard's and Following

@@ -356,6 +356,13 @@ def _runtime_count(state: CombatState, token: str,
         # "not Stings or Wards" rule on 2026-10-20 (it held
         # `chain_plans_held_plus_one`, now gone).
         return len(state.kk_plan_queue) + 1
+    if token == "chain_plans_this_turn_plus_one":
+        # THE KOKOMI TASTE AUDIT (2026-10-21) -- Riptide Ruin, "once more for
+        # each Plan carried out this turn. Stings and Wards don't count.":
+        # one hit, plus one per Plan carried out this turn less the Sting and
+        # Ward Plans (Battle Formation's count). C# twin:
+        # `KokomiOverhaulLedger.ChainPlansThisTurn + 1`.
+        return state.kk_chain_plans_this_turn + 1
     if token == "chain_plans_held":
         # KOKOMI V3 (2026-10-18, review/active/kokomi-cards-2026-10-18.md
         # sec.6) -- Tideturn, "for each Plan waiting. Stings and Wards don't
@@ -1580,6 +1587,13 @@ def _op_damage(state: CombatState, fx: dict, card: Card) -> None:
             # as a branch.
             if fx.get("bonus_vs_debuff") and kokomi_plan.has_debuff(enemy):
                 hit += fx["bonus_vs_debuff"]
+            # THE KOKOMI TASTE AUDIT (2026-10-21), Undertow: "If the enemy
+            # intends to attack, deal 10 instead." The debuff rider's shape
+            # on THIS body's intent, read at the hit. C# twin: the
+            # `bonus_vs_attacker` calc rider, `CurtainCallHooks.IntendsAttack`.
+            if (fx.get("bonus_vs_attacker")
+                    and kokomi_plan._intends_to_attack(enemy)):
+                hit += fx["bonus_vs_attacker"]
             # THE KOKOMI EXPANSION's Ceremonial Garment: N more per debuff on
             # THIS body, her Attacks only. 0 without the Power or the arm.
             hit += kokomi_plan.garment_bonus(state, card, enemy)
@@ -3244,6 +3258,10 @@ RUNTIME_COUNT_NAMES = frozenset({
     # (Shoal of Spears was exempted 2026-10-20 and reads `plans_held_plus_one`
     # again). Same registry reason.
     "chain_plans_held",
+    # THE KOKOMI TASTE AUDIT (2026-10-21): Riptide Ruin's hit count, one more
+    # than the Plans carried out this turn, not Stings or Wards. Same
+    # registry reason.
+    "chain_plans_this_turn_plus_one",
     # CURRENT-KIT USE ONLY (`EB-492`) -- Well Laid's "for each Plan the
     # Bake-Kurage carried out this morning". Registered here as well as
     # resolved in `_runtime_count` for this registry's own reason: the loader
@@ -5031,6 +5049,8 @@ OPS = {
     # THE KOKOMI RE-FOUNDING (2026-10-12): Kurage's Wake's Stings and
     # Gorou's two Plan lines.
     "add_stings": _op_kokomi_plan_only,
+    # THE KOKOMI TASTE AUDIT (2026-10-21): Flotsam Surge's "Plan a Sting".
+    "plan_stings": _op_kokomi_plan_only,
     "gain_strength": _op_kokomi_plan_only,
     "juuga_guard": _op_kokomi_plan_only,
     # THE KOKOMI POOL OVERHAUL (2026-10-13): the Chain, Counter and Intent
@@ -6482,7 +6502,7 @@ def companion_overhaul_card_played(state: CombatState, card: Card) -> None:
 def ooyoroi_keeps(state: CombatState) -> Optional[int]:
     """Thoma, Crimson Ooyoroi: "At the start of your turn, keep up to 6 of
     your Block." The Block the clear leaves standing, or None without the
-    Power. Read at the block clear beside `kokomi_plan.grace_keeps`, the same
+    Power. Read at the block clear (`block_clear_keeps`), the base game's
     Sturdy Clamp shape; the stack IS the cap. `CrimsonOoyoroiPower` is the
     twin."""
     n = int(state.player.powers.get("mi_crimson_ooyoroi", 0))
@@ -6492,16 +6512,12 @@ def ooyoroi_keeps(state: CombatState) -> Optional[int]:
 
 
 def block_clear_keeps(state: CombatState) -> Optional[int]:
-    """The two block-clear preventers, Watatsumi's Grace and Crimson
-    Ooyoroi: the FIRST one worn wins, as the base game's `ShouldClearBlock`
-    names one preventer (power order is application order on both sides)."""
-    from tier0.engine import kokomi_plan        # late import: cycle
+    """The block-clear preventer Crimson Ooyoroi (Watatsumi's Grace left in
+    the Kokomi taste audit, 2026-10-21: it gains Block per Plan waiting). The
+    FIRST one worn wins, as the base game's `ShouldClearBlock` names one
+    preventer (power order is application order on both sides)."""
     for name in state.player.powers:
-        if name == kokomi_plan.WATATSUMIS_GRACE:
-            kept = kokomi_plan.grace_keeps(state)
-            if kept is not None:
-                return kept
-        elif name == "mi_crimson_ooyoroi":
+        if name == "mi_crimson_ooyoroi":
             kept = ooyoroi_keeps(state)
             if kept is not None:
                 return kept

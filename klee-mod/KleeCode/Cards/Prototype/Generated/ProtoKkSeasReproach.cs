@@ -38,20 +38,20 @@ public sealed class ProtoKkSeasReproach : CustomCardModel, ICharacterCard
     public string CharacterId => "kokomi";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        BaseKeywordTips.ForWeak(BaseKeywordTips.ForVulnerable(base.ExtraHoverTips, this), this);
+        BaseKeywordTips.ForWeak(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_seas_reproach");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sea's Reproach"),
-        ("description", "Whenever you apply [gold]Weak[/gold] or [gold]Vulnerable[/gold] to an enemy, deal {PowerAmount:diff()} damage to it."),
+        ("description", "At the start of your turn, apply 1 [gold]Weak[/gold] to each enemy that intends to attack{IfUpgraded:show: and deal 5 damage|}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DynamicVar("PowerAmount", 5m)
+
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -63,11 +63,11 @@ public sealed class ProtoKkSeasReproach : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await PowerCmd.Apply<SeasReproachPower>(choiceContext, Owner.Creature, DynamicVars["PowerAmount"].IntValue, applier: Owner.Creature, cardSource: this);
+        await UpgradeTwinPower.Install<SeasReproachPower>(choiceContext, Owner.Creature, 1, IsUpgraded, Owner.Creature, this);
     }
 
     protected override void OnUpgrade()
     {
-        DynamicVars["PowerAmount"].UpgradeValueBy(2m);
+        // upgraded_power: the upgraded card's copy of SeasReproachPower counts as upgraded, read off IsUpgraded when the card is played.
     }
 }

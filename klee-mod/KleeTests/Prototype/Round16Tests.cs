@@ -281,16 +281,17 @@ public class Round16Tests
         // number.
         var undertow = Source(
             "Cards/Prototype/Generated/ProtoKkUndertow.cs");
+        // The Kokomi taste audit (2026-10-21): the rider reads intent.
         Assert.Contains(
-            "\"Deal {PlainDamage:diff()} [gold]Hydro[/gold] damage. If the enemy has a debuff, "
-          + "deal {DebuffDamage:diff()} instead.\"", undertow);
+            "\"Deal {PlainDamage:diff()} [gold]Hydro[/gold] damage. If the enemy intends to "
+          + "attack, deal {AttackerDamage:diff()} instead.\"", undertow);
         Assert.Contains("new CalculationBaseVar(7m)", undertow);
         Assert.Contains("new ExtraDamageVar(3m)", undertow);
         Assert.Contains(
             "new FoldedDamageVar(\"PlainDamage\", 7m, ValueProp.Move)",
             undertow);
         Assert.Contains(
-            "new FoldedDamageVar(\"DebuffDamage\", 10m, ValueProp.Move)",
+            "new FoldedDamageVar(\"AttackerDamage\", 10m, ValueProp.Move)",
             undertow);
         // The number the card DEALS is untouched: still the calculated var
         // whose multiplier is the rider.
@@ -303,7 +304,7 @@ public class Round16Tests
         Assert.Contains(
             "DynamicVars[\"PlainDamage\"].UpgradeValueBy(3m);", undertow);
         Assert.Contains(
-            "DynamicVars[\"DebuffDamage\"].UpgradeValueBy(3m);", undertow);
+            "DynamicVars[\"AttackerDamage\"].UpgradeValueBy(3m);", undertow);
     }
 
     /// <summary>One ratified sheet, read whole, off the same walk.</summary>

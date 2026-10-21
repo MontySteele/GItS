@@ -205,9 +205,9 @@ def test_shoal_call_common_and_brine_sting_uncommon():
         "Deal 10 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 10 "
         "[gold]Hydro[/gold] damage to each enemy that attacked you since "
         "you planned this.")
+    # The Kokomi taste audit (2026-10-21): it Plans its Stings.
     assert _face("proto_kk_shoal_call") == (
-        "Add {KkAmount:diff()} [gold]Stings[/gold] to your "
-        "[gold]Hand[/gold].")
+        "[gold]Plan[/gold] {KkAmount:diff()} [gold]Stings[/gold].")
 
 
 def test_the_pool_stays_20_38_20():

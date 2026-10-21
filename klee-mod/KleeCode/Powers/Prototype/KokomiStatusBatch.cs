@@ -70,12 +70,16 @@ public static class KokomiStatusBatch
     /// written; null (no writer stamped it) reads the hand. None pays
     /// nothing.</summary>
     public static async Task<int?> BlockPerStatus(Creature kokomi, int rate,
-                                                  int? writtenCount = null)
+                                                  int? writtenCount = null,
+                                                  int bonus = 0)
     {
         var n = writtenCount ?? StatusesInHand(kokomi.Player);
         if (n <= 0 || rate <= 0) return 0;
+        // The Kokomi taste audit (2026-10-21): Resolve of Watatsumi's bonus
+        // on a Block that lands. Sim twin: `block_per_status`'s `bonus`.
         return (int)await CreatureCmd.GainBlock(
-            kokomi, rate * n, ValueProp.Move, null);
+            kokomi, rate * n + System.Math.Max(0, bonus), ValueProp.Move,
+            null);
     }
 
     /// <summary>Tidecleanse: "Exhaust up to 2 [3] statuses or curses in

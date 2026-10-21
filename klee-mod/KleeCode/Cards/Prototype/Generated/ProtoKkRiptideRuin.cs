@@ -44,20 +44,21 @@ public sealed class ProtoKkRiptideRuin : CustomCardModel, IElementalCard, IChara
         new[] { KleeKeywords.AppliesHydro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro);
+        ArmKeywordTips.ForPlanNoLine(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Hydro), this);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_riptide_ruin");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Riptide Ruin"),
-        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies twice."),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies, once more for each [gold]Plan[/gold] carried out this turn. Stings and Wards don't count.{InCombat:\n(Deals {TotalDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
-            new DamageVar(11m, ValueProp.Move)
+            new DamageVar(9m, ValueProp.Move),
+            new HitsTotalDamageVar(static card => (KokomiOverhaulLedger.Peek(card.Owner!.Creature!)?.ChainPlansThisTurn ?? 0) + 1)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -69,13 +70,16 @@ public sealed class ProtoKkRiptideRuin : CustomCardModel, IElementalCard, IChara
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
-            .WithHitCount(2)
-            .FromCard(this, cardPlay)
-            .TargetingAllOpponents(CombatState!)
-            .WithElementHitFx(this)
-            .SpawningHitVfxOnEachCreature()
-            .Execute(choiceContext);
+        if (KokomiOverhaulLedger.For(Owner.Creature).ChainPlansThisTurn + 1 > 0)
+        {
+            await DamageCmd.Attack(DynamicVars.Damage.BaseValue)
+                .WithHitCount(KokomiOverhaulLedger.For(Owner.Creature).ChainPlansThisTurn + 1)
+                .FromCard(this, cardPlay)
+                .TargetingAllOpponents(CombatState!)
+                .WithElementHitFx(this)
+                .SpawningHitVfxOnEachCreature()
+                .Execute(choiceContext);
+        }
     }
 
     protected override void OnUpgrade()

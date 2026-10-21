@@ -1503,7 +1503,8 @@
       "block": 3
     },
     "proto_kk_coral_crash": {
-      "cost": -1
+      "damage": 3,
+      "plan_damage": 3
     },
     "proto_kk_dawn_tide": {
       "cost": -1
@@ -1529,7 +1530,8 @@
       "plan_damage": 3
     },
     "proto_kk_flotsam_surge": {
-      "damage": 3
+      "damage": 3,
+      "plan_damage": 3
     },
     "proto_kk_following_current": {
       "power_amount": 1
@@ -1633,7 +1635,7 @@
       "upgraded_grant": true
     },
     "proto_kk_seas_reproach": {
-      "power_amount": 2
+      "upgraded_power": "kk_seas_reproach_plus"
     },
     "proto_kk_second_wave": {
       "damage": 2,
@@ -1747,7 +1749,7 @@
       "upgraded_grant": true
     },
     "proto_kk_watatsumis_grace": {
-      "power_amount": 5
+      "power_amount": 1
     },
     "proto_kk_watchful_shoal": {
       "power_amount": 2

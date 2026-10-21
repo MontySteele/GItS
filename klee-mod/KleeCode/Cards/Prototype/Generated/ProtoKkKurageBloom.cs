@@ -38,14 +38,14 @@ public sealed class ProtoKkKurageBloom : CustomCardModel, ICharacterCard
     public string CharacterId => "kokomi";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KokomiCards.WithStingPreview(base.ExtraHoverTips);
+        KokomiCards.WithStingPreview(ArmKeywordTips.ForPlanNoLine(base.ExtraHoverTips, this));
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_kurage_bloom");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kurage Bloom"),
-        ("description", "At the start of your turn, add a [gold]Sting[/gold] to your [gold]Hand[/gold]."),
+        ("description", "At the end of your turn, [gold]Plan[/gold] a [gold]Sting[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
