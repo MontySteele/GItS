@@ -35,6 +35,9 @@ cut to about 350 characters is `git show 3ce4f8c35:docs/current/BACKLOG.md`.
 - Kokomi: lane 1 of the same suite read Tidal Surge as Ethereal and saw Bubble Ward twice in a few turns with one copy; check the lane's transcript before calling it a bug.
 - Kokomi (`review/records/kokomi-balance-suite-3-2026-10-21.md`): Press the Advantage's reaction preview printed "deals no damage" and it dealt damage (lane 1); check the preview path and whether its number includes Vulnerable.
 - Kokomi (same record): a Plan carried out into Intangible hit for 1 while the Plan page said 13 (lane 1); the page could warn. A Grand Design plan gave no Casket Block (lane 5): check whether that is the rule or a miss.
+- Kokomi (`review/records/kokomi-balance-suite-4-2026-10-21.md`): Crystal Collapse refused with "no Companion has been played" though its text plays a random Common one when none was.
+- Kokomi (same record): Opening Gambit's doubling did not reach a Plan flipped to its now-line (15, expected 30); Resolve of Watatsumi's bonus is in no preview; the bridge's hint offers Shoal Call on the Bake-Kurage.
+- `tools/art_process.py --help` still runs a full pass (rewrote ~285 plates 2026-10-21; restored with `--apply-picks art/picks.tsv`); make it print usage and refuse unknown flags, as #1314 did for art_fetch.
 
 ## Harness, bridge, tools and sim
 
