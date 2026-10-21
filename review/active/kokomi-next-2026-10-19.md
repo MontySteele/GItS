@@ -112,6 +112,22 @@ with your proposed defaults and see how we land." Built:
 Expected effect, graded by the next suite: act 3 damage a turn up about 3 to 5
 in decks holding either power; acts 1 and 2 barely move.
 
+## Boss ramp and Casket, 2026-10-21 (ruled, built)
+
+Balance suite 2 (`review/records/kokomi-balance-suite-2-2026-10-21.md`): her
+damage a turn in act 2 boss fights equals her hallway damage (28.5 against
+base 58.4), and act 1 HP lost is 1.88x base since the Casket stopped paying
+for face-up Plan cards. [USER]: "Got it, let's try that." Built:
+
+- **Kurage Vanguard** ramps: "At the start of your turn, the Bake-Kurage
+  deals 4 [6] Hydro damage. It deals 2 more each turn." Hits 4, 6, 8 ...
+  [6, 8, 10 ...]. A second copy adds its base to the next hit; the growth
+  stays 2 a turn. Expected: about 6 damage a turn in a 3-turn fight, about
+  12 in a 9-turn boss fight.
+- **Tamakushi Casket** gains 2 Block whenever she Plans a card or plays a
+  Companion (was 1); the **Watatsumi Casket** 3 (was 2). What counts is
+  unchanged. Expected: act 1 HP lost back toward base.
+
 ## Picks (as offered)
 
 1. **The Shape of Water and Brine Sting.** The card says "for each Sting you

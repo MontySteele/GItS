@@ -1157,29 +1157,51 @@ public static class KurageHydroSources
 /// your turn, the Bake-Kurage deals 4 [6] Hydro damage to the front enemy."
 /// Called from <c>ProtoBakeKuragePower.AfterPlayerTurnStart</c> after the
 /// morning's Plans and before Dawn Tide; copies stack into one hit. Sim
-/// twin: <c>kokomi_plan.kurage_vanguard</c>.</summary>
+/// twin: <c>kokomi_plan.kurage_vanguard</c>.
+///
+/// KOKOMI BOSS RAMP (2026-10-21, [USER]: "Got it, let's try that"): a ramp,
+/// "It deals 2 more each turn." The Amount IS the next hit, so the badge
+/// shows it: 4, 6, 8 ... [6, 8, 10 ...]. After each trigger the power grows
+/// by <see cref="Growth"/>. A second copy adds its base to the next hit; the
+/// growth stays 2 a turn whatever the copies.</summary>
 public sealed class KurageVanguardPower : PowerModel, ILocalizationProvider
 {
+    /// <summary>"It deals 2 more each turn." Sim twin:
+    /// <c>C.KOKOMI_KURAGE_VANGUARD_GROWTH</c>.</summary>
+    public const int Growth = 2;
+
     public List<(string, string)>? Localization => new()
     {
         ("title", "Kurage Vanguard"),
         ("description",
             "At the start of your turn, the [gold]Bake-Kurage[/gold] deals "
-          + "[blue]{Amount}[/blue] [gold]Hydro[/gold] damage."),
+          + "[blue]{Amount}[/blue] [gold]Hydro[/gold] damage. It deals 2 "
+          + "more each turn."),
     };
 
     public override PowerType Type => PowerType.Buff;
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
+    /// <summary>The hit after <paramref name="triggers"/> earlier triggers of
+    /// a power that started at <paramref name="baseAmount"/>. PURE.</summary>
+    public static int HitAfter(int baseAmount, int triggers) =>
+        baseAmount + Growth * triggers;
+
     public static async Task Signal(PlayerChoiceContext choiceContext,
                                     Creature? kokomi)
     {
         if (!KokomiOverhaul.LiveFor(kokomi)) return;
-        var amount = (int)kokomi!.Powers.OfType<KurageVanguardPower>()
-            .Sum(p => p.Amount);
+        var powers = kokomi!.Powers.OfType<KurageVanguardPower>().ToList();
+        if (powers.Count == 0) return;
+        var amount = (int)powers.Sum(p => p.Amount);
         await KurageHydroSources.Hit(choiceContext, kokomi, amount,
                                      "Kurage Vanguard", morning: true);
+        // The ramp: the next hit is 2 more. One host grows, so copies that
+        // stacked into one instance (Counter) grow once.
+        await PowerCmd.ModifyAmount(choiceContext, powers[0], Growth,
+                                    applier: kokomi, cardSource: null,
+                                    silent: true);
     }
 }
 

@@ -41,7 +41,7 @@ public sealed class ProtoKkKurageVanguard : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kurage Vanguard"),
-        ("description", "At the start of your turn, the [gold]Bake-Kurage[/gold] deals {PowerAmount:diff()} [gold]Hydro[/gold] damage."),
+        ("description", "At the start of your turn, the [gold]Bake-Kurage[/gold] deals {PowerAmount:diff()} [gold]Hydro[/gold] damage. It deals 2 more each turn."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

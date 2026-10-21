@@ -144,6 +144,10 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   36.4 mean, under base on damage in every act (0.76 in act 3).
 - **Act-3 tempo built** (same paper, 2026-10-21): Watchful Shoal 5 [7],
   Following Current 4 [5].
+- **Boss ramp and Casket built** (same paper, 2026-10-21, "Got it, let's
+  try that"), after suite 2 (36.0 mean; boss damage a turn at hallway
+  level): Kurage Vanguard deals 2 more each turn; the Casket pays 2 Block a
+  counted play (Watatsumi 3).
 - **Next:** the Balance suite again on the same seeds; promote if every act
   is within 15% of base.
 

@@ -1801,13 +1801,11 @@
 # Current takes its Uncommon slot. Its `double_block` kind stays registered
 # with no row spelling it. Provenance note, "Kokomi pool overhaul, 2026-10-13".
 
-# JELLYFISH CURRENT IS CUT (Kokomi review r6, 2026-10-14, pick 2 (b)):
-# Kurage Vanguard takes its slot; its power stays registered. Provenance
-# note, "Kokomi review r6, 2026-10-14".
+# Kokomi boss ramp, ruled 2026-10-21.
 - {id: proto_kk_kurage_vanguard, name: "Kurage Vanguard", character: kokomi,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "At the start of your turn, the [gold]Bake-Kurage[/gold] deals 4 [gold]Hydro[/gold] damage.",
+   description: "At the start of your turn, the [gold]Bake-Kurage[/gold] deals 4 [gold]Hydro[/gold] damage. It deals 2 more each turn.",
    effects: [{op: apply_power, power: kk_kurage_vanguard, amount: 4, target: self}],
    # 6 damage.
    upgrade: {power_amount: 2}}

@@ -128,8 +128,9 @@ public class WolfsGravestoneTests : IDisposable
 
 
 /// <summary>Ward and Casket (2026-10-18): the Tamakushi Casket is
-/// "Whenever you Plan a card or play a Companion, gain 1 Block." (worded
-/// 2026-10-20); the Watatsumi Casket the same with 2.</summary>
+/// "Whenever you Plan a card or play a Companion, gain 2 Block." (worded
+/// 2026-10-20; 2 since the Kokomi boss ramp, 2026-10-21); the Watatsumi
+/// Casket the same with 3.</summary>
 public class WatatsumiCasketTests
 {
     private static T Bare<T>() where T : class =>
@@ -139,17 +140,17 @@ public class WatatsumiCasketTests
         relic.Localization!.First(r => r.Item1 == "description").Item2;
 
     [Fact]
-    public void The_casket_pays_1_block_a_play_and_the_watatsumi_casket_2()
+    public void The_casket_pays_2_block_a_play_and_the_watatsumi_casket_3()
     {
-        Assert.Equal(1, Bare<TamakushiCasket>().Block);
-        Assert.Equal(2, Bare<WatatsumiCasket>().Block);
-        Assert.Equal(
-            "Whenever you [gold]Plan[/gold] a card or play a Companion, gain "
-          + "[blue]1[/blue] [gold]Block[/gold].",
-            Face(Bare<TamakushiCasket>()));
+        Assert.Equal(2, Bare<TamakushiCasket>().Block);
+        Assert.Equal(3, Bare<WatatsumiCasket>().Block);
         Assert.Equal(
             "Whenever you [gold]Plan[/gold] a card or play a Companion, gain "
           + "[blue]2[/blue] [gold]Block[/gold].",
+            Face(Bare<TamakushiCasket>()));
+        Assert.Equal(
+            "Whenever you [gold]Plan[/gold] a card or play a Companion, gain "
+          + "[blue]3[/blue] [gold]Block[/gold].",
             Face(Bare<WatatsumiCasket>()));
     }
 

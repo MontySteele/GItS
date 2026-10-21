@@ -96,6 +96,44 @@ def test_kurage_vanguard_hits_the_front_enemy_for_hydro_each_turn():
     assert front.aura == "hydro"
 
 
+def _vanguard_hits(base, turns=3):
+    st = kokomi_state()
+    front = st.enemies[0]
+    front.hp = front.max_hp = 999
+    st.player.powers[kokomi_plan.KURAGE_VANGUARD] = base
+    hits = []
+    for _ in range(turns):
+        hp = front.hp
+        kokomi_plan.kurage_vanguard(st)
+        hits.append(hp - front.hp)
+    return hits
+
+
+def test_kurage_vanguard_ramps_2_a_turn():
+    """The Kokomi boss ramp (2026-10-21, [USER]: "Got it, let's try that"):
+    "It deals 2 more each turn." 4, 6, 8 and upgraded 6, 8, 10."""
+    base, upgraded = _amounts("proto_kk_kurage_vanguard")
+    assert (base, upgraded) == (4, 6)
+    assert _vanguard_hits(base) == [4, 6, 8]
+    assert _vanguard_hits(upgraded) == [6, 8, 10]
+    assert kokomi_plan.KURAGE_VANGUARD_GROWTH == 2
+    assert _row("proto_kk_kurage_vanguard")["description"].endswith(
+        "It deals 2 more each turn.")
+
+
+def test_a_second_kurage_vanguard_adds_its_base_and_the_growth_stays_2():
+    st = kokomi_state()
+    front = st.enemies[0]
+    front.hp = front.max_hp = 999
+    st.player.powers[kokomi_plan.KURAGE_VANGUARD] = 4
+    kokomi_plan.kurage_vanguard(st)                   # 4; next 6
+    st.player.powers[kokomi_plan.KURAGE_VANGUARD] += 4   # a second copy
+    hp = front.hp
+    kokomi_plan.kurage_vanguard(st)
+    assert hp - front.hp == 10
+    assert st.player.powers[kokomi_plan.KURAGE_VANGUARD] == 12
+
+
 def test_following_current_hits_once_per_carry_out():
     st = kokomi_state()
     st.player.powers[kokomi_plan.FOLLOWING_CURRENT] = 3
