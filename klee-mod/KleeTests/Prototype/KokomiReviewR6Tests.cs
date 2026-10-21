@@ -59,7 +59,7 @@ public class KokomiReviewR6Tests
     {
         Assert.Equal((8, 11), Vars<ProtoKkWatatsumiDrill>("Damage"));   // the pool sweep, 2026-10-18
         Assert.Equal((5, 6), Vars<ProtoKkKuragesWake>("Damage"));
-        Assert.Equal((4, 6), Vars<ProtoKkWatchfulShoal>("PowerAmount"));
+        Assert.Equal((5, 7), Vars<ProtoKkWatchfulShoal>("PowerAmount"));
         Assert.Equal((6, 8), Vars<ProtoKkGrandStrategist>("PowerAmount"));
         Assert.Equal((8, 11), Vars<ProtoKkTidalRiposte>("PowerAmount"));
     }
@@ -117,7 +117,7 @@ public class KokomiReviewR6Tests
                          (card.Type, card.Rarity, card.EnergyCost.Canonical));
         }
         Assert.Equal((4, 6), Vars<ProtoKkKurageVanguard>("PowerAmount"));
-        Assert.Equal((3, 4), Vars<ProtoKkFollowingCurrent>("PowerAmount"));
+        Assert.Equal((4, 5), Vars<ProtoKkFollowingCurrent>("PowerAmount"));
     }
 
     [Fact]

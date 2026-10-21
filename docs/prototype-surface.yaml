@@ -2113,9 +2113,9 @@
    cost: 1, type: power, rarity: uncommon,
    # Ward and Casket (2026-10-18): the Ward half is gone with the Ward's Block.
    description: "Your [gold]Stings[/gold] deal {PowerAmount:diff()} additional damage.",
-   # Kokomi review r6 (2026-10-14, item 3): 4 [6] (was 3 [5]), Accuracy's.
-   effects: [{op: apply_power, power: kk_watchful_shoal, amount: 4, target: self}],
-   # 6 and 6.
+   # Kokomi act-3 tempo, ruled 2026-10-21: 5 [7] (was 4 [6]).
+   effects: [{op: apply_power, power: kk_watchful_shoal, amount: 5, target: self}],
+   # 7.
    upgrade: {power_amount: 2}}
 
 # COORDINATED TIDE IS CUT (Kokomi review r6, 2026-10-14, pick 2 (b)):
@@ -2124,9 +2124,10 @@
 - {id: proto_kk_following_current, name: "Following Current", character: kokomi,
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
-   description: "Whenever a [gold]Plan[/gold] is carried out, the [gold]Bake-Kurage[/gold] deals 3 [gold]Hydro[/gold] damage.",
-   effects: [{op: apply_power, power: kk_following_current, amount: 3, target: self}],
-   # 4 damage.
+   description: "Whenever a [gold]Plan[/gold] is carried out, the [gold]Bake-Kurage[/gold] deals 4 [gold]Hydro[/gold] damage.",
+   # Kokomi act-3 tempo, ruled 2026-10-21: 4 [5] (was 3 [4]).
+   effects: [{op: apply_power, power: kk_following_current, amount: 4, target: self}],
+   # 5 damage.
    upgrade: {power_amount: 1}}
 
 # RESERVES IS CUT (the pool overhaul, 2026-10-13, sec.4): Brine Spray takes
