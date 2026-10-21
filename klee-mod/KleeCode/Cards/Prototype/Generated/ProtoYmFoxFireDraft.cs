@@ -48,7 +48,7 @@ public sealed class ProtoYmFoxFireDraft : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Fox Fire Draft"),
-        ("description", "[gold]Edit[/gold] {IfUpgraded:show:your 2 newest|your newest} [gold]Sakura[/gold]: [gold]Fox Fire[/gold]."),
+        ("description", "[gold]Edit[/gold] {IfUpgraded:show:your 2 [gold]Sakura[/gold] with the most turns left|your [gold]Sakura[/gold] with the most turns left}: [gold]Fox Fire[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -66,7 +66,7 @@ public sealed class ProtoYmFoxFireDraft : CustomCardModel, ICharacterCard
 
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
-        await YaeCards.EditSakura(choiceContext, this, cardPlay, YaeSakuraEnd.Newest, YaeAnnotation.FoxFire);
+        await YaeCards.EditSakura(choiceContext, this, cardPlay, YaeSakuraEnd.MostTurnsLeft, YaeAnnotation.FoxFire);
     }
 
     protected override void OnUpgrade()

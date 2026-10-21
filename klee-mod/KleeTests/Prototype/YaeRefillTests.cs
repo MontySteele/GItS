@@ -97,11 +97,11 @@ public class YaeRefillTests : IDisposable
         Assert.Equal(10, Var(card, "Damage"));
         var calls = OnPlay<ProtoYmFallingBlossom>();
         var hit = calls.FindIndex(c => c.Contains("DamageCmd.Attack"));
-        var strike = calls.FindIndex(c => c.Contains(nameof(YaeCards.StrikeOldestAt)));
+        var strike = calls.FindIndex(c => c.Contains(nameof(YaeCards.StrikeMostTurnsLeftAt)));
         Assert.True(hit >= 0 && strike > hit, string.Join(", ", calls));
-        var at = Il.CallSequence(typeof(YaeCards).GetMethod(nameof(YaeCards.StrikeOldestAt))!).ToList();
+        var at = Il.CallSequence(typeof(YaeCards).GetMethod(nameof(YaeCards.StrikeMostTurnsLeftAt))!).ToList();
         Assert.Contains(at, c => c.Contains("get_Target"));
-        Assert.Contains(at, c => c.Contains(nameof(YaeShrine.StrikeOldestAt)));
+        Assert.Contains(at, c => c.Contains(nameof(YaeShrine.StrikeMostTurnsLeftAt)));
     }
 
     // ---- Hunting Gaze -------------------------------------------------------------------
@@ -179,7 +179,7 @@ public class YaeRefillTests : IDisposable
                         c => c.Contains("set_EditsThisTurn"));
         // A Sakura Edit counts too.
         ledger.Plant(YaeLaw.PlantLevel);
-        ledger.EditSakura(YaeSakuraEnd.Oldest, 1, YaeAnnotation.RedInk);
+        ledger.EditSakura(YaeSakuraEnd.FewestTurnsLeft, 1, YaeAnnotation.RedInk);
         Assert.Equal(2, ledger.EditsThisTurn);
     }
 
@@ -222,22 +222,24 @@ public class YaeRefillTests : IDisposable
     // ---- Hide Behind the Shrine ---------------------------------------------------------------
 
     [Fact]
-    public void Hide_behind_the_shrine_withers_the_newest_and_pays_only_if_one_did()
+    public void Hide_behind_the_shrine_withers_the_fewest_turns_left_and_pays_only_if_one_did()
     {
+        // The user's ruling, 2026-10-20 (turns-left targeting): was the newest.
         var yae = Seat.Yae().Creature;
         var ledger = YaeShrineLedger.For(yae);
         // No Sakura: nothing withers (and the 5 more is not paid).
-        Assert.False(YaeShrine.WitherNewest(null!, yae).GetAwaiter().GetResult());
+        Assert.False(YaeShrine.WitherFewestTurnsLeft(null!, yae).GetAwaiter().GetResult());
         ledger.Plant(YaeLaw.PlantLevel);
         ledger.Plant(YaeLaw.PlantLevel, null, kind: YaeSakuraKind.Kitsune);
-        var oldest = ledger.Standing[0];
-        Assert.True(YaeShrine.WitherNewest(null!, yae).GetAwaiter().GetResult());
-        Assert.Same(oldest, Assert.Single(ledger.Standing));
-        var calls = Il.CallSequence(typeof(YaeCards).GetMethod(nameof(YaeCards.WitherNewestBlock))!).ToList();
-        var wither = calls.FindIndex(c => c.Contains(nameof(YaeShrine.WitherNewest)));
+        var newest = ledger.Standing[1];
+        // A tie on turns left: the oldest withers, the newest stands.
+        Assert.True(YaeShrine.WitherFewestTurnsLeft(null!, yae).GetAwaiter().GetResult());
+        Assert.Same(newest, Assert.Single(ledger.Standing));
+        var calls = Il.CallSequence(typeof(YaeCards).GetMethod(nameof(YaeCards.WitherFewestTurnsLeftBlock))!).ToList();
+        var wither = calls.FindIndex(c => c.Contains(nameof(YaeShrine.WitherFewestTurnsLeft)));
         var block = calls.FindIndex(c => c.Contains("CardBlock"));
         Assert.True(wither >= 0 && block > wither, string.Join(", ", calls));
-        Assert.Contains(Il.CallSequence(typeof(YaeShrine).GetMethod(nameof(YaeShrine.WitherNewest))!),
+        Assert.Contains(Il.CallSequence(typeof(YaeShrine).GetMethod(nameof(YaeShrine.WitherFewestTurnsLeft))!),
                         c => c.Contains("YaeShrine.Act"));
         var card = new ProtoYmHideBehindTheShrine();
         Assert.True(card is IYaeBlockCard);
@@ -267,10 +269,10 @@ public class YaeRefillTests : IDisposable
     public void Dawn_prayer_levels_the_newest()
     {
         var ledger = YaeShrineLedger.For(Seat.Yae().Creature);
-        Assert.False(ledger.LevelNewest(2));
+        Assert.False(ledger.LevelMostTurnsLeft(2));
         ledger.Plant(YaeLaw.PlantLevel);
         ledger.Plant(YaeLaw.PlantLevel);
-        Assert.True(ledger.LevelNewest(2));
+        Assert.True(ledger.LevelMostTurnsLeft(2));
         Assert.Equal(new[] { 1, 3 }, ledger.Standing.Select(s => s.Level));
         var card = new ProtoYmDawnPrayer();
         Assert.Equal((0, 2), (card.EnergyCost.Canonical, Var(card, "YmAmount")));
@@ -279,17 +281,19 @@ public class YaeRefillTests : IDisposable
     }
 
     [Fact]
-    public void Kitsunes_blessing_picks_the_highest_level_the_oldest_on_a_tie()
+    public void Kitsunes_blessing_picks_the_highest_level_the_most_turns_left_on_a_tie()
     {
+        // The user's ruling, 2026-10-20 (turns-left targeting): a tie went to
+        // the oldest; now the most turns left, the newest on an equal timer.
         var ledger = YaeShrineLedger.For(Seat.Yae().Creature);
         Assert.Null(ledger.Bless(3, 2));
         ledger.Plant(YaeLaw.PlantLevel, 2);
         ledger.Plant(YaeLaw.PlantLevel, 2, kind: YaeSakuraKind.Kitsune);
         ledger.Plant(YaeLaw.PlantLevel);
         var blessed = ledger.Bless(3, 2);
-        Assert.Same(ledger.Standing[0], blessed);            // the oldest of the two 2s
+        Assert.Same(ledger.Standing[1], blessed);            // the newer of the two 2s
         Assert.Equal((5, YaeLaw.SakuraTurns + 2), (blessed!.Level, blessed.TurnsLeft));
-        Assert.Equal((2, YaeLaw.SakuraTurns), (ledger.Standing[1].Level, ledger.Standing[1].TurnsLeft));
+        Assert.Equal((2, YaeLaw.SakuraTurns), (ledger.Standing[0].Level, ledger.Standing[0].TurnsLeft));
         var card = new ProtoYmKitsunesBlessing();
         Assert.Equal(3, Var(card, "YmAmount"));
         Upgrade(card);

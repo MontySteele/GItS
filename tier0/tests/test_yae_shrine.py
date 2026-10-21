@@ -367,13 +367,16 @@ def test_newest_oldest_and_every(yae):
         _play(st, _ym("yakan_evocation"))
     _play(st, _ym("fox_fire_draft"))
     assert [s.annotations for s in _led(st).sakura] == [[], [], [Y.FOX_FIRE]]
-    Y.edit_sakura(st, "oldest", 1, Y.DEADLINE)
+    Y.edit_sakura(st, "fewest_turns_left", 1, Y.DEADLINE)
     assert [s.annotations for s in _led(st).sakura] == [
         [Y.DEADLINE], [], [Y.FOX_FIRE]]
     up = loader.get_card(_ym("fox_fire_draft") + "+")
-    _play(st, up)                                # upgraded: the 2 newest
+    # Upgraded: the 2 with the most turns left (the user's ruling,
+    # 2026-10-20): the Deadline Extension one first, then the newest of the
+    # 3-turn ones, which already has it.
+    _play(st, up)
     assert [s.annotations for s in _led(st).sakura] == [
-        [Y.DEADLINE], [Y.FOX_FIRE], [Y.FOX_FIRE]]
+        [Y.DEADLINE, Y.FOX_FIRE], [], [Y.FOX_FIRE]]
     Y.edit_sakura(st, "every", 1, Y.FOX_FIRE)
     assert [s.annotations for s in _led(st).sakura] == [
         [Y.DEADLINE, Y.FOX_FIRE], [Y.FOX_FIRE], [Y.FOX_FIRE]]
@@ -382,7 +385,7 @@ def test_newest_oldest_and_every(yae):
 def test_deadline_extension_never_withers(yae):
     st = _state()
     _play(st, _ym("yakan_evocation"))
-    Y.edit_sakura(st, "oldest", 1, Y.DEADLINE)   # Evergreen Charm's, until the Yae pass
+    Y.edit_sakura(st, "fewest_turns_left", 1, Y.DEADLINE)   # Evergreen Charm's, until the Yae pass
     for _ in range(6):
         Y.turn_end(st)
         Y.turn_start(st)
@@ -392,7 +395,7 @@ def test_deadline_extension_never_withers(yae):
 
 def test_a_sakura_edit_needs_a_sakura_reading(yae):
     with pytest.raises(ValueError):
-        Y.validate_op("x", {"op": "yae", "kind": "edit_sakura", "which": "newest",
+        Y.validate_op("x", {"op": "yae", "kind": "edit_sakura", "which": "most_turns_left",
                             "annotation": "footnote", "amount": 1})
     # Review r3: no typed Tenko; `as:` names a plant's kind only.
     with pytest.raises(ValueError):

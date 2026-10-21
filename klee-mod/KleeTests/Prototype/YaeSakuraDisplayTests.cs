@@ -70,7 +70,7 @@ public class YaeSakuraDisplayTests : IDisposable
         var ledger = Fresh();
         Plant(ledger, YaeSakuraKind.Kitsune);
         Plant(ledger, YaeSakuraKind.Foxfire);
-        ledger.LevelNewest(2);
+        ledger.LevelMostTurnsLeft(2);
         var slots = YaeSakuraSlots.Slots(ledger.Standing, YaeLaw.SakuraCap, false);
         Assert.Equal(YaeSakuraKind.Kitsune, slots[0].Kind);
         Assert.Equal(1, slots[0].Level);
@@ -152,7 +152,7 @@ public class YaeSakuraDisplayTests : IDisposable
         Plant(ledger, YaeSakuraKind.Thunder);
         Plant(ledger, YaeSakuraKind.Thunder);
         Plant(ledger, YaeSakuraKind.Thunder);
-        ledger.ExtendOldest(2);   // the oldest now lasts longest: slot 2 is next to wither
+        ledger.ExtendMostTurnsLeft(2);   // the oldest now lasts longest: slot 2 is next to wither
         var target = ledger.NextToWither();
         var preview = YaeSakuraSlots.Preview(ledger.Standing, 3, YaePlantShape.Plant,
                                              new[] { YaeSakuraKind.Thunder });

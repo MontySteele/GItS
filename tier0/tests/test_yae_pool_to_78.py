@@ -103,12 +103,12 @@ def test_distinct_annotations_coexist_and_a_duplicate_does_nothing():
     st = _state()
     Y.plant(st, 1)
     s = _led(st).sakura[0]
-    assert Y.edit_sakura(st, "oldest", 1, Y.RED_INK) == 1
-    assert Y.edit_sakura(st, "oldest", 1, Y.FOX_FIRE) == 1
-    assert Y.edit_sakura(st, "oldest", 1, Y.DEADLINE) == 1
+    assert Y.edit_sakura(st, "fewest_turns_left", 1, Y.RED_INK) == 1
+    assert Y.edit_sakura(st, "fewest_turns_left", 1, Y.FOX_FIRE) == 1
+    assert Y.edit_sakura(st, "fewest_turns_left", 1, Y.DEADLINE) == 1
     assert s.annotations == [Y.RED_INK, Y.FOX_FIRE, Y.DEADLINE]
     size = Y.act_size(st, s)
-    assert Y.edit_sakura(st, "oldest", 1, Y.RED_INK) == 0
+    assert Y.edit_sakura(st, "fewest_turns_left", 1, Y.RED_INK) == 0
     assert Y.act_size(st, s) == size             # no second +3
 
 
@@ -116,9 +116,9 @@ def test_a_no_change_edit_pays_nothing():
     st = _state()
     st.player.powers[Y.SERIALIZATION] = 3
     Y.plant(st, 1)
-    Y.edit_sakura(st, "oldest", 1, Y.FOX_FIRE)
+    Y.edit_sakura(st, "fewest_turns_left", 1, Y.FOX_FIRE)
     edits, block = _led(st).edits, st.player.block
-    assert Y.edit_sakura(st, "oldest", 1, Y.FOX_FIRE) == 0
+    assert Y.edit_sakura(st, "fewest_turns_left", 1, Y.FOX_FIRE) == 0
     assert _led(st).edits == edits and st.player.block == block
 
 
@@ -126,7 +126,7 @@ def test_annotations_survive_refreshes_and_go_with_the_sakura():
     st = _state()
     Y.plant(st, 3)
     Y.edit_sakura(st, "every", 3, Y.RED_INK)
-    Y.edit_sakura(st, "oldest", 1, Y.FOX_FIRE)
+    Y.edit_sakura(st, "fewest_turns_left", 1, Y.FOX_FIRE)
     oldest = _led(st).sakura[0]
     Y.tenko(st)                                  # Tenko refresh
     assert oldest.annotations == [Y.RED_INK, Y.FOX_FIRE]
@@ -163,14 +163,22 @@ def test_foxs_verdict_one_hit_per_weak_enemy_per_striking_sakura():
 
 def test_a_sakura_strikes_it_and_narukami_judgment():
     # "A Sakura strikes it" (Saiguu's Lesson, Kitsune Pounce; Sacred Spark's
-    # until the dedupe cut it, 2026-10-16): the highest, the oldest on a tie.
+    # until the dedupe cut it, 2026-10-16): the highest; on a tie the most
+    # turns left, the newest on an equal timer (the user's ruling, 2026-10-20;
+    # was the oldest).
     st = _state()
     Y.plant(st, 1)
     Y.plant(st, 1, kind=Y.FOXFIRE)
     Y.level_up(st, 1)
     Y.strike_target(st, st.enemies[0])
+    foxfire = _led(st).sakura[1]
+    assert _hp(st) == [100 - Y.act_size(st, foxfire)]  # highest, newest
+    st = _state()
+    Y.plant(st, 1, lasts=1)                       # the Thunder lasts longer
+    Y.plant(st, 1, kind=Y.FOXFIRE)
+    Y.strike_target(st, st.enemies[0])
     thunder = _led(st).sakura[0]
-    assert _hp(st) == [100 - Y.act_size(st, thunder)]  # highest, oldest
+    assert _hp(st) == [100 - Y.act_size(st, thunder)]  # highest, most turns
     st = _state()
     Y.plant(st, 1)
     Y.plant(st, 1, kind=Y.FOXFIRE)
@@ -313,7 +321,7 @@ def test_enlightened_blessing_draws_per_wither():
     st.player.powers[Y.ENLIGHTENED_BLESSING] = 1
     Y.plant(st, 2)
     hand = len(st.player.hand)
-    Y.wither_oldest(st)
+    Y.wither_next(st)
     assert len(st.player.hand) == hand + 1
 
 

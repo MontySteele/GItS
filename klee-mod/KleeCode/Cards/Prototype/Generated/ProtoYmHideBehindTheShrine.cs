@@ -45,7 +45,7 @@ public sealed class ProtoYmHideBehindTheShrine : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Hide Behind the Shrine"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Your newest [gold]Sakura[/gold] withers; if one did, gain {YmAmount:diff()} more."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Your [gold]Sakura[/gold] with the fewest turns left withers; if one did, gain {YmAmount:diff()} more."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -65,7 +65,7 @@ public sealed class ProtoYmHideBehindTheShrine : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
-        await YaeCards.WitherNewestBlock(choiceContext, this, cardPlay);
+        await YaeCards.WitherFewestTurnsLeftBlock(choiceContext, this, cardPlay);
     }
 
     protected override void OnUpgrade()

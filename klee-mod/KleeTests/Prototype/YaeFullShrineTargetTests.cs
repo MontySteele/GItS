@@ -22,12 +22,22 @@ public class YaeFullShrineTargetTests
         return ledger;
     }
 
+    /// <summary>A full shrine whose FIRST Sakura lasts 2 more turns (it was
+    /// Evergreen Charm's, which reaches the most turns left since the user's
+    /// ruling of 2026-10-20, so a tie no longer lands on the first).</summary>
+    private static YaeShrineLedger FirstLasts2More()
+    {
+        var ledger = YaeShrineLedger.For(Seat.Yae().Creature);
+        ledger.Plant(YaeLaw.PlantLevel, null, extraTurns: 2);
+        for (var i = 1; i < YaeLaw.SakuraCap; i++) ledger.Plant(YaeLaw.PlantLevel, null);
+        return ledger;
+    }
+
     [Fact]
     public void Same_kind_refreshes_and_levels_the_one_closest_to_withering()
     {
-        var ledger = FullShrine();
-        ledger.Tick();                       // 2, 2, 2
-        ledger.ExtendOldest(2);              // 4, 2, 2
+        var ledger = FirstLasts2More();
+        ledger.Tick();                       // 4, 2, 2
         var second = ledger.Standing[1];
         Assert.Same(second, ledger.NextToWither());
         Assert.False(ledger.Plant(YaeLaw.PlantLevel, null));
@@ -40,9 +50,8 @@ public class YaeFullShrineTargetTests
     [Fact]
     public void Another_kind_replaces_the_one_closest_to_withering()
     {
-        var ledger = FullShrine();
-        ledger.Tick();
-        ledger.ExtendOldest(2);
+        var ledger = FirstLasts2More();
+        ledger.Tick();                       // 4, 2, 2
         var first = ledger.Standing[0];
         var third = ledger.Standing[2];
         Assert.True(ledger.WouldReplace(YaeLaw.SakuraCap, YaeSakuraKind.Foxfire));

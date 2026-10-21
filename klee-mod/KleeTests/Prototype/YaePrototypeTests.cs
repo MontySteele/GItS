@@ -301,10 +301,10 @@ public class YaePrototypeTests : IDisposable
         // The pool to 78, pick 2 (a): an Edit joins what a Sakura carries.
         var ledger = Fresh();
         PlantN(ledger, 3);
-        Assert.Equal(1, ledger.EditSakura(YaeSakuraEnd.Newest, 1, YaeAnnotation.FoxFire));
+        Assert.Equal(1, ledger.EditSakura(YaeSakuraEnd.MostTurnsLeft, 1, YaeAnnotation.FoxFire));
         Assert.Equal(new[] { 0, 0, 1 }, ledger.Standing.Select(s => s.Annotations.Count));
         Assert.True(ledger.Standing[2].Has(YaeAnnotation.FoxFire));
-        ledger.EditSakura(YaeSakuraEnd.Oldest, 1, YaeAnnotation.DeadlineExtension);
+        ledger.EditSakura(YaeSakuraEnd.FewestTurnsLeft, 1, YaeAnnotation.DeadlineExtension);
         Assert.Equal(new[] { YaeAnnotation.DeadlineExtension }, ledger.Standing[0].Annotations);
         Assert.Equal(3, ledger.EditSakura(YaeSakuraEnd.Every, 1, YaeAnnotation.RedInk));
         Assert.All(ledger.Standing, s => Assert.True(s.Has(YaeAnnotation.RedInk)));
@@ -320,7 +320,7 @@ public class YaePrototypeTests : IDisposable
     {
         var ledger = Fresh();
         PlantN(ledger, 2);
-        ledger.EditSakura(YaeSakuraEnd.Oldest, 1, YaeAnnotation.DeadlineExtension);
+        ledger.EditSakura(YaeSakuraEnd.FewestTurnsLeft, 1, YaeAnnotation.DeadlineExtension);
         for (var i = 0; i < 10; i++) ledger.TickAndWither();
         var kept = Assert.Single(ledger.Standing);
         Assert.Equal(new[] { YaeAnnotation.DeadlineExtension }, kept.Annotations);

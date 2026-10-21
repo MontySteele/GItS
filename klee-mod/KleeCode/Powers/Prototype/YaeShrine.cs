@@ -33,12 +33,17 @@ public enum YaeSakuraKind
     Kitsune = 2,
 }
 
-/// <summary>The end an "Edit your newest / oldest Sakura" counts from, or
-/// "Edit every Sakura".</summary>
+/// <summary>The end an "Edit your Sakura with the most / fewest turns left"
+/// counts from, or "Edit every Sakura". The user's ruling, 2026-10-20
+/// (turns-left targeting): "For cards designed to benefit you, they should
+/// target the one with the most turns left. For cards designed to cost
+/// something, they should target the one with the fewest turns left. This
+/// might not be the same as the planting order." The order is
+/// <see cref="YaeShrineLedger.WitherOrder"/>'s, not planting order.</summary>
 public enum YaeSakuraEnd
 {
-    Newest = 0,
-    Oldest = 1,
+    MostTurnsLeft = 0,
+    FewestTurnsLeft = 1,
     Every = 2,
 }
 
@@ -288,20 +293,32 @@ public sealed class YaeShrineLedger
     /// withering, the fewest turns left, the oldest on a tie. A Deadline
     /// Extension Sakura never withers, so it is chosen only when every one
     /// carries it. Null on an empty shrine. PURE. Sim twin:
-    /// <c>yae_shrine.next_to_wither</c>.</summary>
-    public YaeSakura? NextToWither()
-    {
-        YaeSakura? best = null;
-        foreach (var s in _sakura)
-        {
-            if (best == null || Sooner(s, best)) best = s;
-        }
-        return best;
+    /// <c>yae_shrine.next_to_wither</c>.
+    /// The user's ruling, 2026-10-20 (turns-left targeting): every card that
+    /// COSTS a Sakura (Fallen Petals, Replanting, Hide Behind the Shrine)
+    /// reaches this one too, "the one with the fewest turns left".</summary>
+    public YaeSakura? NextToWither() => WitherOrder().FirstOrDefault();
 
-        static bool Sooner(YaeSakura a, YaeSakura b) =>
-            WithersSooner(a.Has(YaeAnnotation.DeadlineExtension), a.TurnsLeft,
-                          b.Has(YaeAnnotation.DeadlineExtension), b.TurnsLeft);
-    }
+    /// <summary>The mirror of <see cref="NextToWither"/>: a Deadline Extension
+    /// Sakura first, then the most turns left, the NEWEST on a tie. Every
+    /// card that BENEFITS a Sakura reaches this one (Falling Blossom, Dawn
+    /// Prayer, Fox Fire Draft; the user's ruling, 2026-10-20: "the one with
+    /// the most turns left"). Null on an empty shrine. PURE. Sim twin:
+    /// <c>yae_shrine.last_to_wither</c>.</summary>
+    public YaeSakura? LastToWither() => WitherOrder().LastOrDefault();
+
+    /// <summary>Every Sakura standing, the next to wither first
+    /// (<see cref="WithersSooner"/>: no Deadline Extension before it, then
+    /// the fewer turns left, then the older). Read backwards it is the
+    /// most-turns-left order, "N from that end" taking the first N. Not the
+    /// planting order (<see cref="Standing"/>), which the end-of-turn acts
+    /// and the badges keep. PURE. Sim twin: <c>yae_shrine.wither_order</c>.
+    /// </summary>
+    public IReadOnlyList<YaeSakura> WitherOrder() =>
+        _sakura.OrderBy(s => s.Has(YaeAnnotation.DeadlineExtension) ? 1 : 0)
+            .ThenBy(s => s.TurnsLeft)
+            .ThenBy(s => s.Seq)
+            .ToList();
 
     /// <summary><see cref="NextToWither"/>'s order, on the two facts it
     /// reads, so the Sakura display's plant preview walks the same rule:
@@ -333,14 +350,19 @@ public sealed class YaeShrineLedger
         foreach (var s in _sakura) s.TurnsLeft += n;
     }
 
-    /// <summary>EVERGREEN CHARM (the Yae pass, 2026-10-16): "Your oldest
-    /// Sakura lasts 2 more turns" (Kitsune's Blessing's reading), +n on the
-    /// oldest's timer. Whether one stood. Sim twin: the `extend_oldest`
-    /// kind.</summary>
-    public bool ExtendOldest(int n)
+    /// <summary>EVERGREEN CHARM (the Yae pass, 2026-10-16; the user's
+    /// ruling, 2026-10-20, turns-left targeting): "Your Sakura with the most
+    /// turns left lasts 2 more turns", +n on its timer. A Deadline Extension
+    /// Sakura's timer never ticks, so it is skipped: the one reached is the
+    /// most turns left among the rest, and with every one carrying it none
+    /// is. Whether one was extended. Sim twin: the
+    /// `extend_most_turns_left` kind.</summary>
+    public bool ExtendMostTurnsLeft(int n)
     {
-        if (_sakura.Count == 0) return false;
-        _sakura[0].TurnsLeft += Math.Max(0, n);
+        var target = WitherOrder().LastOrDefault(
+            s => !s.Has(YaeAnnotation.DeadlineExtension));
+        if (target == null) return false;
+        target.TurnsLeft += Math.Max(0, n);
         return true;
     }
 
@@ -380,8 +402,9 @@ public sealed class YaeShrineLedger
         return withered.Count;
     }
 
-    /// <summary>"Edit your newest / oldest Sakura" (<paramref name="n"/>
-    /// from that end) or "Edit every Sakura". THE POOL TO 78, pick 2 (a): the
+    /// <summary>"Edit your Sakura with the most / fewest turns left"
+    /// (<paramref name="n"/> from that end of <see cref="WitherOrder"/>, the
+    /// user's ruling 2026-10-20) or "Edit every Sakura". THE POOL TO 78, pick 2 (a): the
     /// Annotation joins what each carries; on one that already carries it,
     /// it changes nothing, and AN EDIT THAT CHANGES NOTHING IS NOT AN EDIT
     /// (Bestseller and Serialization never see it). Returns how
@@ -389,9 +412,9 @@ public sealed class YaeShrineLedger
     public int EditSakura(YaeSakuraEnd end, int n, YaeAnnotation annotation)
     {
         if (!HasSakuraReading(annotation)) return 0;
-        var ordered = end == YaeSakuraEnd.Oldest
-            ? _sakura.ToList()
-            : Enumerable.Reverse(_sakura).ToList();
+        var ordered = end == YaeSakuraEnd.FewestTurnsLeft
+            ? WitherOrder().ToList()
+            : WitherOrder().Reverse().ToList();
         var edited = 0;
         if (end == YaeSakuraEnd.Every) n = ordered.Count;
         foreach (var s in ordered.Take(Math.Max(0, n)))
@@ -408,12 +431,19 @@ public sealed class YaeShrineLedger
         annotation is YaeAnnotation.RedInk or YaeAnnotation.FoxFire
             or YaeAnnotation.DeadlineExtension;
 
-    /// <summary>The highest-Level Sakura, the oldest on a tie; with
+    /// <summary>The highest-Level Sakura; on a tie, the one with the most
+    /// turns left (<see cref="LastToWither"/>'s order: Deadline Extension
+    /// first, then the most turns left, then the newest; the user's ruling,
+    /// 2026-10-20, turns-left targeting); with
     /// <paramref name="damageOnly"/>, a Sakura or Foxfire Sakura only
     /// (Kitsune Pounce's "strikes it"). Null with none.</summary>
     public YaeSakura? Highest(bool damageOnly = false) =>
         _sakura.Where(s => !damageOnly || DealsDamage(s.Kind))
-            .OrderByDescending(s => s.Level).ThenBy(s => s.Seq).FirstOrDefault();
+            .OrderByDescending(s => s.Level)
+            .ThenByDescending(s => s.Has(YaeAnnotation.DeadlineExtension) ? 1 : 0)
+            .ThenByDescending(s => s.TurnsLeft)
+            .ThenByDescending(s => s.Seq)
+            .FirstOrDefault();
 
     internal void NoteStrike() => Strikes++;
 
@@ -423,18 +453,21 @@ public sealed class YaeShrineLedger
         EditsThisTurn++;
     }
 
-    /// <summary>Dawn Prayer (the refill): "Your newest Sakura gains 2 [3]
-    /// Levels." Whether one stood.</summary>
-    public bool LevelNewest(int n)
+    /// <summary>Dawn Prayer (the refill; the user's ruling, 2026-10-20):
+    /// "Your Sakura with the most turns left gains 2 [3] Levels"
+    /// (<see cref="LastToWither"/>). A Level moves no timer, so its "It
+    /// strikes now." reaches the same one. Whether one stood.</summary>
+    public bool LevelMostTurnsLeft(int n)
     {
-        if (_sakura.Count == 0) return false;
-        _sakura[_sakura.Count - 1].Level += n;
+        if (LastToWither() is not { } s) return false;
+        s.Level += n;
         return true;
     }
 
     /// <summary>Kitsune's Blessing (the refill): "Your highest-Level Sakura
     /// gains 3 [4] Levels and lasts 2 more turns." Any kind; on a tie, the
-    /// OLDEST (<see cref="Highest"/>, Editor-in-Chief's reading). The Sakura
+    /// one with the most turns left (<see cref="Highest"/>, Editor-in-Chief's
+    /// reading; the user's ruling, 2026-10-20). The Sakura
     /// blessed, or null with none.</summary>
     public YaeSakura? Bless(int n, int lasts)
     {
@@ -635,7 +668,7 @@ public static class YaeShrine
             }
             var replaced = ledger.WouldReplace(cap, kind);
             ledger.Plant(PlantLevel(yae), startLevel, inherited, cap, kind, lasts);
-            // A replaced oldest withered (the pool to 78: Scattered
+            // A replaced Sakura withered (the pool to 78: Scattered
             // Blossoms reads every wither).
             if (replaced) await Withered(choiceContext, yae, 1);
         }
@@ -645,8 +678,8 @@ public static class YaeShrine
     /// <summary>
     /// SCATTERED BLOSSOMS (the pool to 78): "Whenever a Sakura withers,
     /// draw 2 cards" (1 until the pool sweep, 2026-10-18). Paid once per Sakura that withered, per stack: a timer
-    /// run out, Fallen Petals, Replanting, Daisesshou, a full-shrine plant
-    /// that replaced the oldest. Sim twin: <c>yae_shrine._withered</c>.
+    /// run out, Fallen Petals, Replanting, Hide Behind the Shrine,
+    /// Daisesshou, a full-shrine plant that replaced one. Sim twin: <c>yae_shrine._withered</c>.
     /// </summary>
     public static async Task Withered(PlayerChoiceContext choiceContext, Creature yae, int n)
     {
@@ -823,19 +856,24 @@ public static class YaeShrine
     }
 
     /// <summary>
-    /// FALLEN PETALS (review r3, sec.4): "Your oldest Sakura withers (it acts
-    /// once, its Last Bloom)." Deadline Extension does not stop it (an
-    /// active wither, not a timer). Whether one did.
+    /// FALLEN PETALS (review r3, sec.4), REPLANTING and HIDE BEHIND THE
+    /// SHRINE: "Your Sakura with the fewest turns left withers (it acts once,
+    /// its Last Bloom)." The user's ruling, 2026-10-20 (turns-left
+    /// targeting): a card that costs a Sakura reaches
+    /// <see cref="YaeShrineLedger.NextToWither"/> (a Deadline Extension one
+    /// only when every one carries it), not the first planted; Fallen
+    /// Petals' "oldest" and Hide Behind the Shrine's "newest" were one rule
+    /// apart. Deadline Extension does not stop it (an active wither, not a
+    /// timer). Whether one did. Sim twin: <c>yae_shrine.wither_next</c>.
     /// </summary>
-    public static async Task<bool> WitherOldest(PlayerChoiceContext choiceContext,
-                                                Creature? yae)
+    public static async Task<bool> WitherFewestTurnsLeft(PlayerChoiceContext choiceContext,
+                                                         Creature? yae)
     {
         if (yae == null || !Live(yae)) return false;
         var ledger = YaeShrineLedger.For(yae);
-        if (ledger.Count == 0) return false;
-        var oldest = ledger.Standing[0];
-        await Act(choiceContext, yae, oldest);
-        var withered = ledger.Wither(oldest);
+        if (ledger.NextToWither() is not { } target) return false;
+        await Act(choiceContext, yae, target);
+        var withered = ledger.Wither(target);
         if (withered) await Withered(choiceContext, yae, 1);
         await SakuraBadge.Sync(choiceContext, yae);
         return withered;
@@ -865,55 +903,45 @@ public static class YaeShrine
 
     /// <summary>
     /// YAE DRAFT PASS, 2026-10-17 (review/active/yae-draft-pass-2026-10-17.md
-    /// sec.3): Falling Blossom's "Your oldest Sakura strikes this enemy." The
-    /// oldest acts once at <paramref name="aim"/>, one hit whatever its kind
-    /// (a Foxfire's included; a Kitsune's is its Block), as every aimed strike
-    /// is; a dead aim falls back to the plain act. No wither and no Last
-    /// Bloom; none of its turns; not a Tenko. Whether one acted. Sim twin:
-    /// <c>yae_shrine.strike_oldest_at</c>.
+    /// sec.3): Falling Blossom's "Your Sakura with the most turns left
+    /// strikes this enemy." (the user's ruling, 2026-10-20, turns-left
+    /// targeting: <see cref="YaeShrineLedger.LastToWither"/>, was the
+    /// oldest). It acts once at <paramref name="aim"/>, one hit whatever its
+    /// kind (a Foxfire's included; a Kitsune's is its Block), as every aimed
+    /// strike is; a dead aim falls back to the plain act. No wither and no
+    /// Last Bloom; none of its turns; not a Tenko. Whether one acted. Sim
+    /// twin: <c>yae_shrine.strike_most_turns_left_at</c>.
     /// </summary>
-    public static async Task<bool> StrikeOldestAt(PlayerChoiceContext choiceContext,
-                                                  Creature? yae, Creature? aim)
+    public static async Task<bool> StrikeMostTurnsLeftAt(PlayerChoiceContext choiceContext,
+                                                         Creature? yae, Creature? aim)
     {
         if (yae == null || !Live(yae)) return false;
         var ledger = YaeShrineLedger.For(yae);
-        if (ledger.Count == 0) return false;
-        await Act(choiceContext, yae, ledger.Standing[0], aim);
+        if (ledger.LastToWither() is not { } sakura) return false;
+        await Act(choiceContext, yae, sakura, aim);
         await SakuraBadge.Sync(choiceContext, yae);
         return true;
     }
 
     /// <summary>
     /// YAE DRAFT PASS, 2026-10-17 (sec.3): Dawn Prayer's "It strikes now.",
-    /// after its Levels. The newest Sakura acts once as its kind, unaimed (a
-    /// Sakura on the Lure's, Hunting Gaze's or a random enemy; a Foxfire on
-    /// ALL; a Kitsune's Block), none of its turns, not a Tenko. Whether one
-    /// acted. Sim twin: <c>yae_shrine.strike_newest</c>.
+    /// after its Levels. The Sakura with the most turns left
+    /// (<see cref="YaeShrineLedger.LastToWither"/>, the one its Levels went
+    /// to; the user's ruling, 2026-10-20, was the newest) acts once as its
+    /// kind, unaimed (a Sakura on the Lure's, Hunting Gaze's or a random
+    /// enemy; a Foxfire on ALL; a Kitsune's Block), none of its turns, not a
+    /// Tenko. Whether one acted. Sim twin:
+    /// <c>yae_shrine.strike_most_turns_left</c>.
     /// </summary>
-    public static async Task<bool> StrikeNewest(PlayerChoiceContext choiceContext, Creature? yae)
+    public static async Task<bool> StrikeMostTurnsLeft(PlayerChoiceContext choiceContext,
+                                                       Creature? yae)
     {
         if (yae == null || !Live(yae)) return false;
         var ledger = YaeShrineLedger.For(yae);
-        if (ledger.Count == 0) return false;
-        await Act(choiceContext, yae, ledger.Standing[ledger.Count - 1]);
+        if (ledger.LastToWither() is not { } sakura) return false;
+        await Act(choiceContext, yae, sakura);
         await SakuraBadge.Sync(choiceContext, yae);
         return true;
-    }
-
-    /// <summary>HIDE BEHIND THE SHRINE (the refill): "Your newest Sakura
-    /// withers", its Last Bloom as every wither's (it acts as its kind:
-    /// a Kitsune's Block, a Foxfire's hit on ALL). Whether one did.</summary>
-    public static async Task<bool> WitherNewest(PlayerChoiceContext choiceContext, Creature? yae)
-    {
-        if (yae == null || !Live(yae)) return false;
-        var ledger = YaeShrineLedger.For(yae);
-        if (ledger.Count == 0) return false;
-        var newest = ledger.Standing[ledger.Count - 1];
-        await Act(choiceContext, yae, newest);
-        var withered = ledger.Wither(newest);
-        if (withered) await Withered(choiceContext, yae, 1);
-        await SakuraBadge.Sync(choiceContext, yae);
-        return withered;
     }
 
     /// <summary>
@@ -946,22 +974,25 @@ public static class YaeShrine
     }
 
     /// <summary>
-    /// REPLANTING (the pool to 78): "Your oldest Sakura withers. Plant one of
-    /// its kind, 1 [2] Level higher." The oldest withers as Fallen Petals'
-    /// does (its Last Bloom, its Annotations go); the new one of its kind
-    /// starts at its Level plus <paramref name="higher"/>, and Fox's
-    /// Mooncall still adds, as on every plant. Nothing standing: nothing.
+    /// REPLANTING (the pool to 78): "Your Sakura with the fewest turns left
+    /// withers. Plant one of its kind, 1 [2] Level higher." The user's
+    /// ruling, 2026-10-20 (turns-left targeting; a friend's report: Replanting
+    /// withered a Sakura Evergreen Charm had stretched to 7 turns and left a
+    /// 3-turn one standing): <see cref="YaeShrineLedger.NextToWither"/>, was
+    /// the oldest. It withers as Fallen Petals' does (its Last Bloom, its
+    /// Annotations go); the new one of its kind starts at its Level plus
+    /// <paramref name="higher"/>, and Fox's Mooncall still adds, as on every
+    /// plant. Nothing standing: nothing.
     /// </summary>
     public static async Task Replant(PlayerChoiceContext choiceContext, Creature? yae,
                                      int higher, YaeAnnotation inherited = YaeAnnotation.None)
     {
         if (yae == null || !Live(yae)) return;
         var ledger = YaeShrineLedger.For(yae);
-        if (ledger.Count == 0) return;
-        var oldest = ledger.Standing[0];
-        var kind = oldest.Kind;
-        var level = oldest.Level;
-        if (!await WitherOldest(choiceContext, yae)) return;
+        if (ledger.NextToWither() is not { } target) return;
+        var kind = target.Kind;
+        var level = target.Level;
+        if (!await WitherFewestTurnsLeft(choiceContext, yae)) return;
         await Plant(choiceContext, yae, 1, level + higher, inherited, kind);
     }
 
@@ -1317,14 +1348,16 @@ public static class YaeCards
         await SakuraBadge.Sync(choiceContext, yae);
     }
 
-    /// <summary>Evergreen Charm (the Yae pass, 2026-10-16): "Your oldest
-    /// Sakura lasts 2 more turns" (YmAmount).</summary>
-    public static async Task ExtendOldest(PlayerChoiceContext choiceContext,
-                                          CardModel card, CardPlay cardPlay)
+    /// <summary>Evergreen Charm (the Yae pass, 2026-10-16): "Your Sakura with
+    /// the most turns left lasts 2 more turns" (YmAmount; the user's ruling,
+    /// 2026-10-20, turns-left targeting: a Deadline Extension Sakura is
+    /// skipped, <see cref="YaeShrineLedger.ExtendMostTurnsLeft"/>).</summary>
+    public static async Task ExtendMostTurnsLeft(PlayerChoiceContext choiceContext,
+                                                 CardModel card, CardPlay cardPlay)
     {
         var yae = card.Owner?.Creature;
         if (yae == null || !YaeShrine.Live(yae)) return;
-        if (YaeShrineLedger.For(yae).ExtendOldest(Var(card, "YmAmount")))
+        if (YaeShrineLedger.For(yae).ExtendMostTurnsLeft(Var(card, "YmAmount")))
             await SakuraBadge.Sync(choiceContext, yae);
     }
 
@@ -1332,7 +1365,7 @@ public static class YaeCards
     /// YAKAN EVOCATION: SESSHOU SAKURA (the Yae pass, 2026-10-16, the
     /// Archaic Tooth's): "Plant a Foxfire Sakura at Level 3 (YmAmount). Edit
     /// it: Deadline Extension." The plant is every plant: into a full shrine
-    /// whose oldest is a Foxfire Sakura it refreshes and Levels that one, and
+    /// whose next to wither is a Foxfire Sakura it refreshes and Levels that one, and
     /// "it" is the Sakura refreshed. The Edit counts only when it changes
     /// something (a second Deadline Extension does not).
     /// </summary>
@@ -1439,7 +1472,8 @@ public static class YaeCards
                 Var(card, "YmBase")
                 + (YaeEditing.IsAnnotated(card) ? Var(card, "YmAmount") : 0));
 
-    /// <summary>"Edit your newest / oldest Sakura: X", "Edit every Sakura:
+    /// <summary>"Edit your Sakura with the most / fewest turns left: X"
+    /// (the user's ruling, 2026-10-20), "Edit every Sakura:
     /// X". <paramref name="handIfUpgraded"/> (Inked Branches+, Yae review
     /// r4, pick 1 (a)): the upgraded card also Edits a card in your hand
     /// with it, read off <c>IsUpgraded</c> (`yae_upgraded`).</summary>
@@ -1522,7 +1556,7 @@ public static class YaeCards
         if (n > 0) await CardPileCmd.Draw(choiceContext, n, owner);
     }
 
-    /// <summary>Replanting: "Your oldest Sakura withers. Plant one of its
+    /// <summary>Replanting: "Your Sakura with the fewest turns left withers. Plant one of its
     /// kind, 1 [2] Level higher." (YmAmount).</summary>
     public static Task Replant(PlayerChoiceContext choiceContext, CardModel card,
                                CardPlay cardPlay) =>
@@ -1588,8 +1622,9 @@ public static class YaeCards
         YaeShrine.FoxFire(choiceContext, card.Owner?.Creature);
 
     /// <summary>
-    /// FALLEN PETALS (review r3, sec.4): "Your oldest Sakura withers (it acts
-    /// once, its Last Bloom). If one did, gain 1 Energy and draw 1 [2]
+    /// FALLEN PETALS (review r3, sec.4): "Your Sakura with the fewest turns
+    /// left withers (it acts once, its Last Bloom)." (the user's ruling,
+    /// 2026-10-20, turns-left targeting; was the oldest). If one did, gain 1 Energy and draw 1 [2]
     /// cards." (the pool sweep, 2026-10-18: the base draws too). The
     /// upgrade's second card is read off <c>IsUpgraded</c> (`yae_upgraded`).
     /// </summary>
@@ -1600,7 +1635,7 @@ public static class YaeCards
     {
         var owner = card.Owner;
         if (owner?.Creature == null) return;
-        if (!await YaeShrine.WitherOldest(choiceContext, owner.Creature)) return;
+        if (!await YaeShrine.WitherFewestTurnsLeft(choiceContext, owner.Creature)) return;
         await PlayerCmd.GainEnergy(1, owner);
         await CardPileCmd.Draw(choiceContext, FallenPetalsDraw(card.IsUpgraded), owner);
     }
@@ -1643,17 +1678,19 @@ public static class YaeCards
                        Var(card, "YmBase") + (high ? Var(card, "YmAmount") : 0));
     }
 
-    /// <summary>Falling Blossom: "Your oldest Sakura strikes this enemy."
-    /// (Yae draft pass, 2026-10-17; was a wither and its Last Bloom.)</summary>
-    public static async Task StrikeOldestAt(PlayerChoiceContext choiceContext, CardModel card,
-                                            CardPlay cardPlay) =>
-        await YaeShrine.StrikeOldestAt(choiceContext, card.Owner?.Creature, cardPlay.Target);
+    /// <summary>Falling Blossom: "Your Sakura with the most turns left
+    /// strikes this enemy." (Yae draft pass, 2026-10-17; was a wither and its
+    /// Last Bloom; the user's ruling, 2026-10-20, was the oldest.)</summary>
+    public static async Task StrikeMostTurnsLeftAt(PlayerChoiceContext choiceContext,
+                                                   CardModel card, CardPlay cardPlay) =>
+        await YaeShrine.StrikeMostTurnsLeftAt(choiceContext, card.Owner?.Creature,
+                                              cardPlay.Target);
 
     /// <summary>Dawn Prayer's "It strikes now.", after its Levels (Yae draft
-    /// pass, 2026-10-17).</summary>
-    public static async Task StrikeNewest(PlayerChoiceContext choiceContext, CardModel card,
-                                          CardPlay cardPlay) =>
-        await YaeShrine.StrikeNewest(choiceContext, card.Owner?.Creature);
+    /// pass, 2026-10-17): the Sakura with the most turns left.</summary>
+    public static async Task StrikeMostTurnsLeft(PlayerChoiceContext choiceContext,
+                                                 CardModel card, CardPlay cardPlay) =>
+        await YaeShrine.StrikeMostTurnsLeft(choiceContext, card.Owner?.Creature);
 
     /// <summary>Thunder Petal's "It strikes this enemy." and Foxfire Sweep's
     /// "It strikes now." (Yae flat-value pass, 2026-10-17); Yakan Evocation's
@@ -1664,12 +1701,13 @@ public static class YaeCards
                                            CardPlay cardPlay) =>
         await YaeShrine.StrikePlanted(choiceContext, card.Owner?.Creature, cardPlay.Target);
 
-    /// <summary>Hide Behind the Shrine: "Your newest Sakura withers; if one
-    /// did, gain 5 more [Block]", the card's own Block (YmAmount).</summary>
-    public static async Task WitherNewestBlock(PlayerChoiceContext choiceContext, CardModel card,
-                                               CardPlay cardPlay)
+    /// <summary>Hide Behind the Shrine: "Your Sakura with the fewest turns
+    /// left withers; if one did, gain 5 more [Block]", the card's own Block
+    /// (YmAmount; the user's ruling, 2026-10-20, was the newest).</summary>
+    public static async Task WitherFewestTurnsLeftBlock(PlayerChoiceContext choiceContext,
+                                                        CardModel card, CardPlay cardPlay)
     {
-        if (!await YaeShrine.WitherNewest(choiceContext, card.Owner?.Creature)) return;
+        if (!await YaeShrine.WitherFewestTurnsLeft(choiceContext, card.Owner?.Creature)) return;
         await CardBlock(card, cardPlay, Var(card, "YmAmount"));
     }
 
@@ -1707,14 +1745,15 @@ public static class YaeCards
         await YaeEditing.Edit(choiceContext, card, annotation, 1);
     }
 
-    /// <summary>Dawn Prayer: "Your newest Sakura gains 2 [3] Levels."
+    /// <summary>Dawn Prayer: "Your Sakura with the most turns left gains 2
+    /// [3] Levels." (the user's ruling, 2026-10-20, was the newest).
     /// </summary>
-    public static async Task LevelNewest(PlayerChoiceContext choiceContext, CardModel card,
-                                         CardPlay cardPlay)
+    public static async Task LevelMostTurnsLeft(PlayerChoiceContext choiceContext,
+                                                CardModel card, CardPlay cardPlay)
     {
         var yae = card.Owner?.Creature;
         if (yae == null || !YaeShrine.Live(yae)) return;
-        if (YaeShrineLedger.For(yae).LevelNewest(Var(card, "YmAmount")))
+        if (YaeShrineLedger.For(yae).LevelMostTurnsLeft(Var(card, "YmAmount")))
             await SakuraBadge.Sync(choiceContext, yae);
     }
 

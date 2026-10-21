@@ -45,7 +45,7 @@ public sealed class ProtoYmKitsunesBlessing : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kitsune's Blessing"),
-        ("description", "Your highest-Level [gold]Sakura[/gold] gains {YmAmount:diff()} Levels and lasts 2 more turns. Ties go to the oldest."),
+        ("description", "Your highest-Level [gold]Sakura[/gold] gains {YmAmount:diff()} Levels and lasts 2 more turns. Ties go to the one with the most turns left."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

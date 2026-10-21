@@ -20,7 +20,7 @@ namespace KleeMod.Cards.Yae;
 /// Extension." A totem that hits ALL enemies for 4 at every turn end and
 /// never withers, built only from parts she already has
 /// (<see cref="YaeCards.SesshouSakura"/>). A second play is a plant of its
-/// kind: into a full shrine whose oldest is a Foxfire Sakura it Levels that
+/// kind: into a full shrine whose next to wither is a Foxfire Sakura it Levels that
 /// one, else the new one stands beside it.
 ///
 /// THE DOOR: Yakan Evocation's generated class implements BaseLib's

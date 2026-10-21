@@ -45,7 +45,7 @@ public sealed class ProtoYmEvergreenCharm : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Evergreen Charm"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Your oldest [gold]Sakura[/gold] lasts {YmAmount:diff()} more turns."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Your [gold]Sakura[/gold] with the most turns left lasts {YmAmount:diff()} more turns."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
@@ -65,7 +65,7 @@ public sealed class ProtoYmEvergreenCharm : CustomCardModel, ICharacterCard
     protected override async Task OnPlay(PlayerChoiceContext choiceContext, CardPlay cardPlay)
     {
         await CreatureCmd.GainBlock(Owner.Creature, DynamicVars.Block, cardPlay);
-        await YaeCards.ExtendOldest(choiceContext, this, cardPlay);
+        await YaeCards.ExtendMostTurnsLeft(choiceContext, this, cardPlay);
     }
 
     protected override void OnUpgrade()
