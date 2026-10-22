@@ -847,8 +847,9 @@ CVN_HERALD_APPLICATIONS = 2     # Qiqi: "apply Cryo twice"
 # THE RE-FOUNDING (2026-10-12, review/ruled/kokomi-design-pass-2026-10-11.md
 # pick 3, ruled): the Casket's count and Open the Casket are gone. Ward and
 # Casket (2026-10-18): the relic reads "Whenever you play a Plan card or a
-# Companion, gain 1 Block." Kokomi boss ramp (2026-10-21): 2.
-KOKOMI_OVERHAUL_CASKET_BLOCK = 2
+# Companion, gain 1 Block." Kokomi boss ramp (2026-10-21): 2. Kokomi defence
+# pass (2026-10-22, [USER]: "...reducing the Casket to 1 again"): 1.
+KOKOMI_OVERHAUL_CASKET_BLOCK = 1
 # Call the Generals' "Choose 1 of 3 random Rare Inazuma Companions" (the card
 # paper's Rare): how many are offered. Mirrored BY VALUE against
 # `KokomiCompanionPlan.GeneralsOffered`.

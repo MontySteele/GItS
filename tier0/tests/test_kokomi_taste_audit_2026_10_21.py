@@ -145,21 +145,25 @@ def test_watatsumis_grace_gains_block_for_each_plan_waiting():
     kokomi_plan.turn_end(st)
     assert st.player.block == 0
     write(st, card(kokomi_plan.STING_ID))
+    write(st, card(kokomi_plan.WARD_ID))
     write(st, card("proto_kk_coral_crash"))
     kokomi_plan.turn_end(st)
-    assert st.player.block == 2 * 3
+    # Kokomi defence pass (2026-10-22): "Stings and Wards don't count."
+    assert len(st.kk_plan_queue) == 3
+    assert st.player.block == 1 * 3
     # It keeps nothing at the clear (was the Sturdy Clamp shape).
     assert effects.block_clear_keeps(st) is None
     assert _up("proto_kk_watatsumis_grace").effects[0]["amount"] == 4
 
 
-def test_grace_counts_kurage_blooms_sting():
+def test_grace_does_not_count_kurage_blooms_sting():
+    """Kokomi defence pass (2026-10-22): Bloom's Sting is a Sting."""
     st = kokomi_state()
     st.player.powers[kokomi_plan.WATATSUMIS_GRACE] = 3
     st.player.powers[kokomi_plan.KURAGE_BLOOM] = 1
     kokomi_plan.turn_end(st)
     assert len(st.kk_plan_queue) == 1
-    assert st.player.block == 3
+    assert st.player.block == 0
 
 
 # --- 6. Sea's Reproach --------------------------------------------------------

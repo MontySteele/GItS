@@ -6,9 +6,10 @@ undo is a dead draw") alongside a Plan-volume payoff that is not damage, and
 `KleeTests/Prototype/KokomiPayoffPassTests.cs`. NOTHING MEASURED HERE IS
 QUOTABLE (R215 B).
 
-  * Kurage Canopy: "Whenever the Bake-Kurage carries out a Plan, add a Ward
-    to your Hand." (Kokomi round 3 A-list, 2026-10-13; was Block.) Per
-    carry-out, so a Plan carried out twice pays twice; upgraded, Ward+.
+  * Kurage Canopy: "At the start of your turn, if 2 or more of your Plans
+    were carried out, add a Ward to your Hand. Stings and Wards don't count."
+    (Kokomi defence pass, 2026-10-22; was a Ward per carry-out since the
+    round 3 A-list, 2026-10-13.) Upgraded, Ward+.
   * Coral Tithe: cut with the Casket count (the re-founding, 2026-10-12);
     its tests left with it.
 """
@@ -65,33 +66,38 @@ def _wards(st, upgraded=False):
     return sum(1 for c in st.player.hand if c.id == want)
 
 
-def test_kurage_canopy_adds_a_ward_per_carry_out(overhaul):
+def _morning(st):
+    """The turn start's Kokomi steps, in `combat._player_turn`'s order."""
+    kokomi_plan.resolve_all(st)
+    kokomi_plan.battle_formation(st)
+    kokomi_plan.kurage_canopy(st)
+
+
+def test_kurage_canopy_adds_one_ward_after_two_plans(overhaul):
+    """Kokomi defence pass (2026-10-22): "At the start of your turn, if 2 or
+    more of your Plans were carried out, add a Ward to your Hand. Stings and
+    Wards don't count." Once a morning, not per carry-out."""
     st = kokomi_state(enemies=[make_enemy(hp=300, intents=QUIET)])
     _write(st, "proto_kk_kurage_canopy")
-    # Kokomi round 3 A-list (2026-10-13): a Ward a carry-out (was Block).
     assert st.player.powers[kokomi_plan.KURAGE_CANOPY] == 1
     st.player.hand.clear()
     st.player.block = 0
-    for i in range(2):
+    for i in range(3):
         kokomi_plan.schedule(st, plan_card(
             [{"op": "energy", "amount": 1}], cid=f"proto_kk_p{i}"))
-    kokomi_plan.resolve_all(st)
-    assert _wards(st) == 2
+    _morning(st)
+    assert _wards(st) == 1
     assert st.player.block == 0
 
 
-def test_kurage_canopy_pays_a_doubled_carry_out_twice(overhaul):
-    """Second Wave's rider: the Plan after it is carried out twice, so three
-    carry-outs in all (the rider's own entry, then the next one twice)."""
+def test_kurage_canopy_one_plan_pays_nothing(overhaul):
     st = kokomi_state(enemies=[make_enemy(hp=300, intents=QUIET)])
     st.player.powers[kokomi_plan.KURAGE_CANOPY] = 1
+    st.player.hand.clear()
     kokomi_plan.schedule(st, plan_card(
-        [{"op": "next_plan_extra_carry_out"}], cid="proto_kk_rider"))
-    kokomi_plan.schedule(st, plan_card(
-        [{"op": "energy", "amount": 1}], cid="proto_kk_next"))
-    kokomi_plan.resolve_all(st)
-    assert st.kk_plans_carried_out_this_combat == 3
-    assert _wards(st) == 3
+        [{"op": "energy", "amount": 1}], cid="proto_kk_p"))
+    _morning(st)
+    assert _wards(st) == 0
 
 
 def test_kurage_canopy_upgraded_adds_an_upgraded_ward(overhaul):
@@ -101,8 +107,9 @@ def test_kurage_canopy_upgraded_adds_an_upgraded_ward(overhaul):
     assert kokomi_plan.KURAGE_CANOPY not in st.player.powers
     assert _up("proto_kk_kurage_canopy").cost == 1
     st.player.hand.clear()
-    kokomi_plan.schedule(st, plan_card(
-        [{"op": "energy", "amount": 1}], cid="proto_kk_p"))
-    kokomi_plan.resolve_all(st)
+    for i in range(2):
+        kokomi_plan.schedule(st, plan_card(
+            [{"op": "energy", "amount": 1}], cid=f"proto_kk_p{i}"))
+    _morning(st)
     assert _wards(st, upgraded=True) == 1
     assert _wards(st) == 0

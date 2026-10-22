@@ -101,7 +101,8 @@ public class KokomiTasteAuditTests
         // The marker's turn end runs it, then Watatsumi's Grace.
         var end = Seq("KokomiTasteAudit", "TurnEnd");
         var bloom = end.FindIndex(c => c.Contains("KokomiCards.PlanJellyfish"));
-        var held = end.FindIndex(c => c.Contains("KokomiPlan.PlansHeld"));
+        // Kokomi defence pass (2026-10-22): Stings and Wards don't count.
+        var held = end.FindIndex(c => c.Contains("KokomiPlan.ChainPlansHeld"));
         Assert.True(bloom >= 0 && held > bloom, string.Join(" ", end));
         Assert.Contains("KokomiTasteAudit.TurnEnd",
                         Seq(nameof(ProtoBakeKuragePower), "BeforeSideTurnEnd"));
@@ -139,7 +140,8 @@ public class KokomiTasteAuditTests
         var card = new ProtoKkWatatsumisGrace();
         Assert.Equal((CardRarity.Rare, 1), (card.Rarity, card.EnergyCost.Canonical));
         Assert.Equal("At the end of your turn, gain {PowerAmount:diff()} [gold]Block[/gold] "
-                   + "for each [gold]Plan[/gold] waiting.", Face(card));
+                   + "for each [gold]Plan[/gold] waiting. Stings and Wards don't count.",
+                     Face(card));
         Assert.Null(typeof(WatatsumisGracePower).GetMethod(
             "AfterPreventingBlockClear",
             System.Reflection.BindingFlags.Public

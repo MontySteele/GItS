@@ -237,6 +237,8 @@ MIRRORED: dict[str, object] = {
     # THE POOL OVERHAUL (2026-10-13): Battle Formation's three numbers.
     "BattleFormationPower.Threshold": C.KOKOMI_BATTLE_FORMATION_THRESHOLD,
     "BattleFormationPower.Draw": C.KOKOMI_BATTLE_FORMATION_DRAW,
+    # Kokomi defence pass (2026-10-22): Kurage Canopy reads Battle Formation's.
+    "KurageCanopyPower.Threshold": C.KOKOMI_BATTLE_FORMATION_THRESHOLD,
     # Kokomi taste audit (2026-10-21): Sea's Reproach's Weak and damage.
     "SeasReproachPower.Weak": C.KOKOMI_SEAS_REPROACH_WEAK,
     "SeasReproachPower.Damage": C.KOKOMI_SEAS_REPROACH_DAMAGE,

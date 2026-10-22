@@ -394,7 +394,9 @@ NAMED: dict[str, tuple[tuple[tuple[str, int], ...], tuple[str, ...],
     # Ward the next morning, with 1 Weak on the front enemy and the Casket's
     # 3 Block: "a steady 0-cost Weak and 3 Block a turn". The Kokomi card
     # paper v2 (sec.2 change 5) took a Sting's or Ward's carry-out off Canopy
-    # and Endless Shoal, which closes it; `--pre-fix` puts it back.
+    # and Endless Shoal, which closes it; since the Kokomi defence pass
+    # (2026-10-22) Canopy waits for 2 Plans, so `--pre-fix` no longer
+    # reopens it.
     "canopy_ward": (
         (("proto_kk_ward", 1),), ("proto_kk_kurage_canopy",), ("plan",)),
     # The same cycle on Endless Shoal's Sting (review r4, the same section:

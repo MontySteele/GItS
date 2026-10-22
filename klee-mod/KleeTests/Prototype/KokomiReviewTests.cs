@@ -119,7 +119,7 @@ public class KokomiReviewTests
         // Confirmed, not changed: the carry-out asks the board when it runs.
         Assert.Contains(Il.Calls(Il.Method("KokomiPlan", "ResolveOne")),
                         c => c.Contains("KokomiOverhaulKit.MostIntendedDamage"));
-        Assert.Equal((KokomiPlan.Kind.BlockMaxIntent, 6),
+        Assert.Equal((KokomiPlan.Kind.BlockMaxIntent, 4),  // defence pass
             new ProtoKkTideWall().PlanClauses
                 .Select(c => (c.Kind, c.Amount)).Single());
     }
@@ -274,7 +274,7 @@ public class KokomiReviewTests
         var block = Assert.IsType<UnsourcedBlockVar>(
             new ProtoKkTideWall().DynamicVars["PlanBlock"]);
         Assert.Equal(ValueProp.Move, block.Props);
-        Assert.Equal(6, block.IntValue);
+        Assert.Equal(4, block.IntValue);   // Kokomi defence pass, 2026-10-22
     }
 
     [Fact]

@@ -45,7 +45,7 @@ public sealed class ProtoKkWatatsumisGrace : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Watatsumi's Grace"),
-        ("description", "At the end of your turn, gain {PowerAmount:diff()} [gold]Block[/gold] for each [gold]Plan[/gold] waiting."),
+        ("description", "At the end of your turn, gain {PowerAmount:diff()} [gold]Block[/gold] for each [gold]Plan[/gold] waiting. Stings and Wards don't count."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

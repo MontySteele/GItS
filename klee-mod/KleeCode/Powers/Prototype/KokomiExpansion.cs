@@ -109,32 +109,35 @@ public static class KokomiExpansion
 }
 
 /// <summary>Kurage Canopy (the payoff pass, 2026-10-01; Kokomi round 3
-/// A-list, 2026-10-13): "Whenever the Bake-Kurage carries out a Plan that is
-/// not a Sting or Ward, add a Ward to your Hand." Endless Shoal's Ward twin;
-/// the Sting-or-Ward clause is the Kokomi card paper v2 (2026-10-18, sec.2
-/// change 5). On the plan bus
-/// (<see cref="IKokomiPlanListener"/>), which <c>KokomiPlan.ResolveEntry</c>
-/// calls once per CARRY-OUT, so a Plan carried out twice (Second Wave,
-/// Nereid's Ascension, All Streams) pays twice; copies add one each. A full
-/// hand sends the Ward to the discard pile
-/// (<see cref="KokomiCards.AddJellyfish"/>). A copy the upgraded card
-/// installed adds an upgraded Ward. ONE BADGE for both versions since the
-/// icon declutter (2026-10-19); it was a "+" twin, and the two batches still
-/// arrive in the order the two powers would have acted
-/// (<see cref="UpgradeTwinPower.Batches()"/>). Sim twin:
-/// <c>kokomi_plan._note_plan_resolved</c>.</summary>
+/// A-list, 2026-10-13). KOKOMI DEFENCE PASS (2026-10-22, [USER]: "Let's try
+/// 1a, 3a, and reducing the Casket to 1 again"): "At the start of your turn,
+/// if 2 or more of your Plans were carried out, add a Ward. Stings and Wards
+/// don't count." (The ruled "to your Hand" is cut: 126 of the card ceiling's
+/// 120. The Ward still goes to the Hand.) Battle Formation's condition, timing and
+/// wording (<see cref="BattleFormationPower"/>): read ONCE, at the start of
+/// her turn, right after the morning's Plans (<see cref="Signal"/>, from
+/// <c>ProtoBakeKuragePower.AfterPlayerTurnStart</c> after Battle Formation),
+/// off <see cref="KokomiOverhaulLedger.ChainPlansThisTurn"/>. It replaces the
+/// per-carry-out Ward (it was on the plan bus). Copies add one Ward each; a
+/// copy the upgraded card installed adds an upgraded Ward. A full hand sends
+/// the Ward to the discard pile (<see cref="KokomiCards.AddJellyfish"/>). ONE
+/// BADGE for both versions (<see cref="UpgradeTwinPower.Batches()"/>). Sim
+/// twin: <c>kokomi_plan.kurage_canopy</c>.</summary>
 public sealed class KurageCanopyPower
-    : UpgradeTwinPower, ILocalizationProvider, IKokomiPlanListener
+    : UpgradeTwinPower, ILocalizationProvider
 {
+    /// <summary>The Plans, not Stings or Wards, it waits for: Battle
+    /// Formation's.</summary>
+    public const int Threshold = 2;
+
     public List<(string, string)>? Localization => new()
     {
         ("title", "Kurage Canopy"),
         ("description",
-            "Whenever the [gold]Bake-Kurage[/gold] carries out a "
-          + "[gold]Plan[/gold] that is not a [gold]Sting[/gold] or "
-          + "[gold]Ward[/gold], add [blue]{Amount}[/blue] "
-          + "{Amount:plural:[gold]Ward[/gold]|[gold]Wards[/gold]} to your "
-          + "[gold]Hand[/gold]."),
+            $"At the start of your turn, if {Threshold} or more of your "
+          + "[gold]Plans[/gold] were carried out, add [blue]{Amount}[/blue] "
+          + "{Amount:plural:[gold]Ward[/gold]|[gold]Wards[/gold]}. "
+          + "Stings and Wards don't count."),
     };
 
     /// <summary>The badge previews the Ward it adds: the plain one, and the
@@ -158,17 +161,25 @@ public sealed class KurageCanopyPower
         }
     }
 
-    public async Task OnPlanResolved(
-        PlayerChoiceContext choiceContext, Creature kokomi, CardModel? line)
+    /// <summary>Does this morning's count pay? PURE over its inputs.</summary>
+    public static bool Pays(int plansCarriedOut) =>
+        plansCarriedOut >= Threshold;
+
+    public static async Task Signal(PlayerChoiceContext choiceContext,
+                                    Creature? kokomi)
     {
-        if (kokomi != Owner) return;                 // co-op: your plans only
-        if (Owner == null || Amount <= 0) return;
-        if (KokomiRefounding.IsJellyfish(line)) return;  // a Sting or Ward
-        if (!KokomiOverhaul.LiveFor(Owner)) return;
-        foreach (var (count, upgraded) in Batches())
+        if (!KokomiOverhaul.LiveFor(kokomi)) return;
+        if (kokomi!.Player is not { } player) return;
+        var powers = kokomi.Powers.OfType<KurageCanopyPower>().ToList();
+        if (powers.Sum(p => (int)p.Amount) <= 0) return;
+        if (!Pays(KokomiOverhaulLedger.For(kokomi).ChainPlansThisTurn)) return;
+        foreach (var power in powers)
         {
-            await KokomiCards.AddJellyfish(Owner.Player,
-                KokomiCards.Jellyfish.Ward, count, upgraded);
+            foreach (var (count, upgraded) in power.Batches())
+            {
+                await KokomiCards.AddJellyfish(player,
+                    KokomiCards.Jellyfish.Ward, count, upgraded);
+            }
         }
     }
 }
@@ -251,8 +262,10 @@ public sealed class AtWatersEdgePower : PowerModel, ILocalizationProvider
 /// preparation (was "keep up to 10 [15] of your Block", the Sturdy Clamp
 /// shape Thoma's Crimson Ooyoroi shares). Amount is the rate, so copies add.
 /// Raw power Block (NC-11). Paid from <see cref="KokomiTasteAudit.TurnEnd"/>,
-/// after Kurage Bloom's Sting, off <see cref="KokomiPlan.PlansHeld"/>. Sim
-/// twin: <c>kokomi_plan.turn_end</c>.</summary>
+/// after Kurage Bloom's Sting. KOKOMI DEFENCE PASS (2026-10-22, [USER]:
+/// "Otherwise agreed"): "Stings and Wards don't count", so it reads
+/// <see cref="KokomiPlan.ChainPlansHeld"/> (Tideturn's count), not
+/// <see cref="KokomiPlan.PlansHeld"/>. Sim twin: <c>kokomi_plan.turn_end</c>.</summary>
 public sealed class WatatsumisGracePower : PowerModel, ILocalizationProvider
 {
     public List<(string, string)>? Localization => new()
@@ -260,7 +273,8 @@ public sealed class WatatsumisGracePower : PowerModel, ILocalizationProvider
         ("title", "Watatsumi's Grace"),
         ("description",
             "At the end of your turn, gain [blue]{Amount}[/blue] "
-          + "[gold]Block[/gold] for each [gold]Plan[/gold] waiting."),
+          + "[gold]Block[/gold] for each [gold]Plan[/gold] waiting. "
+          + "Stings and Wards don't count."),
     };
 
     public override PowerType Type => PowerType.Buff;

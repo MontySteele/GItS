@@ -63,10 +63,11 @@ public class KokomiPayoffPassTests : IDisposable
         Assert.False(card.DynamicVars.ContainsKey("PowerAmount"));
         var up = Upgraded<ProtoKkKurageCanopy>();
         Assert.Equal(1, up.EnergyCost.Canonical);
-        Assert.Equal("Whenever the [gold]Bake-Kurage[/gold] carries out a "
-                   + "[gold]Plan[/gold] that is not a [gold]Sting[/gold] or "
-                   + "[gold]Ward[/gold], add {IfUpgraded:show:an upgraded|a} "
-                   + "[gold]Ward[/gold] to your [gold]Hand[/gold].",
+        // Kokomi defence pass (2026-10-22): Battle Formation's read.
+        Assert.Equal("At the start of your turn, if 2 or more of your "
+                   + "[gold]Plans[/gold] were carried out, add "
+                   + "{IfUpgraded:show:an upgraded|a} [gold]Ward[/gold]. "
+                   + "Stings and Wards don't count.",
                      Face(card));
         var play = Seq("ProtoKkKurageCanopy", "OnPlay");
         Assert.Contains(play, c => c.Contains("UpgradeTwinPower.Install"));
@@ -74,28 +75,17 @@ public class KokomiPayoffPassTests : IDisposable
     }
 
     [Fact]
-    public void Kurage_canopy_rides_the_plan_bus_once_per_carry_out()
+    public void Kurage_canopy_reads_the_morning_once_not_the_plan_bus()
     {
-        // The bus rings from ResolveEntry, which is ONE carry-out; the drain
-        // calls it `times` times (Second Wave, Nereid's Ascension, All
-        // Streams' gift), so a doubled carry-out pays twice.
-        Assert.True(typeof(IKokomiPlanListener)
+        // Kokomi defence pass (2026-10-22): it left the plan bus (was a Ward
+        // per carry-out) and reads Battle Formation's count once a morning.
+        Assert.False(typeof(IKokomiPlanListener)
             .IsAssignableFrom(typeof(KurageCanopyPower)));
-        // A Ward per carry-out through the one jellyfish maker, whose full
-        // hand sends it to the discard pile (Endless Shoal's rule).
-        var hook = Seq("KurageCanopyPower", "OnPlanResolved");
+        // A Ward through the one jellyfish maker, whose full hand sends it to
+        // the discard pile (Endless Shoal's rule).
+        var hook = Seq("KurageCanopyPower", "Signal");
         Assert.Contains(hook, c => c.Contains("KokomiCards.AddJellyfish"));
         Assert.DoesNotContain(hook, c => c.Contains("CreatureCmd.GainBlock"));
-        Assert.DoesNotContain(hook,
-            c => c.Contains("KokomiOverhaulLedger.ClaimOncePerTurn"));
-        Assert.Contains("IKokomiPlanListener.OnPlanResolved",
-                        Seq("KokomiPlan", "ResolveEntry"));
-        var drain = Seq("KokomiPlan", "Drain");
-        var times = drain.FindIndex(c => c.Contains("KokomiPlan.CarryOutTimes"));
-        var resolve = drain.FindIndex(c => c.Contains("KokomiPlan.ResolveEntry"));
-        Assert.True(times >= 0 && resolve > times,
-                    "the drain must carry an entry out `times` times");
-        Assert.Contains(drain, c => c.Contains("Entry.get_Extra"));
     }
 
     // ---- Coral Tithe ---------------------------------------------------------

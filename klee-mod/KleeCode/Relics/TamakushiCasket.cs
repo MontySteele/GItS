@@ -34,6 +34,12 @@ namespace KleeMod.Relics;
 /// had her act 1 HP loss at 1.88x base once face-up Plan cards stopped
 /// paying. What counts is unchanged.
 ///
+/// KOKOMI DEFENCE PASS (2026-10-22, [USER]: "I think it's fine for the
+/// Casket to pay on 0-cost cards as an intended loop, but I think 2 block per
+/// plan is making them too strong. Let's try 1a, 3a, and reducing the Casket
+/// to 1 again"): 1 Block a counted play again, the Watatsumi Casket 2.
+/// Stings, Wards and Companions still count.
+///
 /// WHAT COUNTS (2026-10-20, [USER] on paying for planning, not for any Plan
 /// card: "2 was definitely the intent, and we should figure out a different
 /// Block solution if needed"): a card PLANNED this play, written onto the
@@ -229,7 +235,8 @@ public class TamakushiCasket : CustomRelicModel
 /// hand-over (main-session design, 2026-09-30, from [USER]'s co-op playtest:
 /// "Varka and Kokomi need Ancient relics for Orobas"). Since Ward and Casket
 /// (2026-10-18), worded since 2026-10-20: "Whenever you Plan a card or play
-/// a Companion, gain 2 Block." (3 since the Kokomi boss ramp, 2026-10-21.)
+/// a Companion, gain 2 Block." (3 from the Kokomi boss ramp, 2026-10-21, to
+/// the defence pass, 2026-10-22; 2 again since.)
 /// It IS a Tamakushi Casket (see its header), so the
 /// hook and the companion reward slot are the base's, and the only
 /// difference is <see cref="Block"/>.
@@ -249,7 +256,8 @@ public sealed class WatatsumiCasket : TamakushiCasket
     };
 
     /// <summary>The Block each counted play pays.</summary>
-    public const int WatatsumiBlock = 3;
+    /// Kokomi defence pass (2026-10-22): 2 (3 since the boss ramp).
+    public const int WatatsumiBlock = 2;
 
     public override int Block => WatatsumiBlock;
 

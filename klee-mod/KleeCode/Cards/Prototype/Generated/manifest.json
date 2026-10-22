@@ -1701,7 +1701,7 @@
     },
     "proto_kk_tide_wall": {
       "block": 2,
-      "plan_block": 3
+      "plan_block": 2
     },
     "proto_kk_tidecleanse": {
       "kokomi_amount": 1

@@ -276,7 +276,7 @@ def test_the_arm_carries_exactly_one_rule_number():
     count; Rally's discount, Battle Plan's bonus and Moon Signal's threshold
     left with their cards in legacy cleanup stage 5.) It is named so
     `lint_constant_parity` can compare the C# mirror BY VALUE."""
-    assert C.KOKOMI_OVERHAUL_CASKET_BLOCK == 2   # Kokomi boss ramp, 2026-10-21
+    assert C.KOKOMI_OVERHAUL_CASKET_BLOCK == 1   # Kokomi defence pass, 2026-10-22
     for gone in ("KOKOMI_OVERHAUL_CASKET_STRIKE",
                  "KOKOMI_OVERHAUL_CASKET_PER_PLAN",
                  "KOKOMI_OVERHAUL_CASKET_STRENGTH_PER_POINT"):

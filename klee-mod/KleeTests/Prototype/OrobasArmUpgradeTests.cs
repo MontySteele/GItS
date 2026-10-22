@@ -140,17 +140,18 @@ public class WatatsumiCasketTests
         relic.Localization!.First(r => r.Item1 == "description").Item2;
 
     [Fact]
-    public void The_casket_pays_2_block_a_play_and_the_watatsumi_casket_3()
+    public void The_casket_pays_1_block_a_play_and_the_watatsumi_casket_2()
     {
-        Assert.Equal(2, Bare<TamakushiCasket>().Block);
-        Assert.Equal(3, Bare<WatatsumiCasket>().Block);
+        // Kokomi defence pass (2026-10-22): 1 and 2 (the boss ramp's 2 and 3).
+        Assert.Equal(1, Bare<TamakushiCasket>().Block);
+        Assert.Equal(2, Bare<WatatsumiCasket>().Block);
         Assert.Equal(
             "Whenever you [gold]Plan[/gold] a card or play a Companion, gain "
-          + "[blue]2[/blue] [gold]Block[/gold].",
+          + "[blue]1[/blue] [gold]Block[/gold].",
             Face(Bare<TamakushiCasket>()));
         Assert.Equal(
             "Whenever you [gold]Plan[/gold] a card or play a Companion, gain "
-          + "[blue]3[/blue] [gold]Block[/gold].",
+          + "[blue]2[/blue] [gold]Block[/gold].",
             Face(Bare<WatatsumiCasket>()));
     }
 

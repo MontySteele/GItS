@@ -141,6 +141,32 @@ waiting; Flotsam Surge has a Plan line; Riptide Ruin hits once more per Plan
 carried out. The card texts are in that paper's ruled section. Next: the
 Balance suite again on the same seeds.
 
+## Defence pass, 2026-10-22 (ruled, built)
+
+[USER]'s Kokomi run put her defence far above his other kits. HP lost in a
+normal fight, by act: Kokomi 1.2 / 0.0 / 1.1 %, Klee 2.9 / 7.9 / 16.5 %,
+Furina 6.1 / 10.3 / 18.2 %; her damage was normal. Kurage Canopy, Wards and
+the per-Plan Block payoffs looped. [USER]: "I think it's fine for the Casket
+to pay on 0-cost cards as an intended loop, but I think 2 block per plan is
+making them too strong. Let's try 1a, 3a, and reducing the Casket to 1
+again." On Watatsumi's Grace: "Otherwise agreed." Built:
+
+- **Tamakushi Casket** gains 1 Block whenever she Plans a card or plays a
+  Companion (was 2); the **Watatsumi Casket** 2 (was 3). Stings, Wards and
+  Companions still count.
+- **Watatsumi's Grace**: "At the end of your turn, gain 3 [4] Block for each
+  Plan waiting. Stings and Wards don't count."
+- **Kurage Canopy** (Uncommon Power, 1): "At the start of your turn, if 2 or
+  more of your Plans were carried out, add a Ward [an upgraded Ward].
+  Stings and Wards don't count." Battle Formation's condition and timing;
+  it replaces the Ward per carry-out. The ruled "to your Hand" is cut: the
+  face ran 126 characters against the card limit of 120. The Ward still
+  goes to the Hand.
+- **Tide Wall**: "Gain 4 [6] Block. Plan: Gain 4 [6] Block, plus the biggest
+  attack an enemy intends when this is carried out." (The Plan was 6 [9].)
+
+Next: [USER]'s run on the defence pass; promote to Balance if it passes.
+
 ## Picks (as offered)
 
 1. **The Shape of Water and Brine Sting.** The card says "for each Sting you

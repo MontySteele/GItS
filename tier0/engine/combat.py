@@ -872,6 +872,9 @@ def _player_turn(state: CombatState, pilot: Pilot) -> None:
     # Plans, not Stings or Wards, once they are all carried out
     # (`BattleFormationPower.Signal`, after `ResolveAll`).
     kokomi_plan.battle_formation(state)
+    # KOKOMI DEFENCE PASS (2026-10-22): Kurage Canopy reads the same count,
+    # right after (`KurageCanopyPower.Signal`).
+    kokomi_plan.kurage_canopy(state)
     # THE RE-FOUNDING (2026-10-12): Dawn Tide's Hydro, AFTER the morning's
     # Plans (`DawnTidePower.Signal`, after `ResolveAll`), then the turn-start
     # generators (Kurage Bloom, Sangonomiya's Orders; their own

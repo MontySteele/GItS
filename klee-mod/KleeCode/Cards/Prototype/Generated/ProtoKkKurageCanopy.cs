@@ -38,14 +38,14 @@ public sealed class ProtoKkKurageCanopy : CustomCardModel, ICharacterCard
     public string CharacterId => "kokomi";
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        KokomiCards.WithWardPreview(KokomiCards.WithStingPreview(ArmKeywordTips.ForPlanNoLine(base.ExtraHoverTips, this)), IsUpgraded);
+        KokomiCards.WithWardPreview(ArmKeywordTips.ForPlanNoLine(base.ExtraHoverTips, this), IsUpgraded);
 
     public override Texture2D? CustomPortrait => RosterArt.CardPortrait("proto_kk_kurage_canopy");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kurage Canopy"),
-        ("description", "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold] that is not a [gold]Sting[/gold] or [gold]Ward[/gold], add {IfUpgraded:show:an upgraded|a} [gold]Ward[/gold] to your [gold]Hand[/gold]."),
+        ("description", "At the start of your turn, if 2 or more of your [gold]Plans[/gold] were carried out, add {IfUpgraded:show:an upgraded|a} [gold]Ward[/gold]. Stings and Wards don't count."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

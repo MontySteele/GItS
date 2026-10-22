@@ -61,7 +61,7 @@ public sealed class ProtoKkTideWall : CustomCardModel, ICharacterCard, IPlannedC
         new List<DynamicVar>
         {
             new BlockVar(4m, ValueProp.Move),
-            new UnsourcedBlockVar("PlanBlock", 6m, ValueProp.Move)
+            new UnsourcedBlockVar("PlanBlock", 4m, ValueProp.Move)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.
@@ -97,6 +97,6 @@ public sealed class ProtoKkTideWall : CustomCardModel, ICharacterCard, IPlannedC
     protected override void OnUpgrade()
     {
         DynamicVars.Block.UpgradeValueBy(2m);
-        DynamicVars["PlanBlock"].UpgradeValueBy(3m);
+        DynamicVars["PlanBlock"].UpgradeValueBy(2m);
     }
 }

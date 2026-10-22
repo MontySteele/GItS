@@ -418,11 +418,12 @@ TIDAL_RIPOSTE_CHARGE = "kk_tidal_riposte_charge"
 #: (`spend_draft_the_orders`), dropped at her turn's end.
 #: `DraftTheOrdersPower` is the twin.
 DRAFT_THE_ORDERS = "kk_draft_the_orders"
-#: THE PAYOFF PASS (2026-10-01): Kurage Canopy. Kokomi round 3 A-list
-#: (2026-10-13): "Whenever the Bake-Kurage carries out a Plan, add a Ward to
-#: your Hand." Per carry-out, on the plan bus; the upgraded card installs the
-#: Plus power, whose Ward is upgraded. `KurageCanopyPower` /
-#: `KurageCanopyPlusPower` are the twins.
+#: THE PAYOFF PASS (2026-10-01): Kurage Canopy. Kokomi defence pass
+#: (2026-10-22): "At the start of your turn, if 2 or more of your Plans were
+#: carried out, add a Ward to your Hand. Stings and Wards don't count."
+#: Battle Formation's read (`kurage_canopy`); the upgraded card installs the
+#: Plus key, whose Ward is upgraded. `KurageCanopyPower` (one class for both
+#: keys) is the twin.
 KURAGE_CANOPY = "kk_kurage_canopy"
 KURAGE_CANOPY_PLUS = "kk_kurage_canopy_plus"
 #: POOL COMPLETION (2026-10-01, paper sec.4). Sea's Reproach: "Whenever you
@@ -1572,27 +1573,15 @@ def _note_plan_resolved(state: CombatState,
     one Plan. That is true because of WHERE this is called (the tail of
     `_resolve_entry`) rather than because of anything here.
     """
-    p = state.player
     # Sango Isshin's condition, written here because this is the one place a
     # Plan is carried out -- dawn, Change of Plans and Moon all reach it.
     state.kk_plan_carried_out_this_turn = True
     # Sango Isshin's per-fight count ([USER]'s run, 2026-10-11), once per
     # CARRY-OUT, so a doubled one counts twice.
     state.kk_plans_carried_out_this_combat += 1
-    # THE PAYOFF PASS, KURAGE CANOPY (Kokomi round 3 A-list, 2026-10-13):
-    # "Whenever the Bake-Kurage carries out a Plan, add a Ward to your Hand."
-    # Per carry-out, so a doubled one pays twice; Canopy+ makes Ward+.
-    # `KurageCanopyBasePower` is the twin.
-    # Kokomi card paper v2 (2026-10-18): not for a Sting's or Ward's Plan.
-    for power_id, upgraded in ((KURAGE_CANOPY, False),
-                               (KURAGE_CANOPY_PLUS, True)):
-        canopy = int(p.powers.get(power_id, 0))
-        if canopy and not jellyfish_line(entry):
-            added = add_jellyfish(state, WARD_ID, canopy, upgraded=upgraded)
-            state.emit("plan_kurage_canopy", amount=added,
-                       upgraded=upgraded)
-    # (Battle Formation left this bus in the Kokomi finish pass, 2026-10-19:
-    # it reads the morning's count once, after `resolve_all`.)
+    # (Battle Formation left this bus in the Kokomi finish pass, 2026-10-19,
+    # and Kurage Canopy in the Kokomi defence pass, 2026-10-22: each reads the
+    # morning's count once, after `resolve_all`.)
 
 
 def _resolve_clause(state: CombatState, entry: PlanEntry,
@@ -3110,6 +3099,29 @@ def battle_formation(state: CombatState) -> None:
     state.emit("plan_battle_formation", energy=energy, cards=cards)
 
 
+def kurage_canopy(state: CombatState) -> None:
+    """KURAGE CANOPY (Kokomi defence pass, 2026-10-22, [USER]: "Let's try 1a,
+    3a, and reducing the Casket to 1 again"): "At the start of your turn, if
+    2 or more of your Plans were carried out, add a Ward to your Hand. Stings
+    and Wards don't count." Battle Formation's condition and timing: read
+    once, right after `battle_formation`, off `kk_chain_plans_this_turn`.
+    Every copy adds one Ward; an upgraded copy (`kk_kurage_canopy_plus`) an
+    upgraded one. `KurageCanopyPower.Signal` is the twin."""
+    if not live(state):
+        return
+    p = state.player
+    plain = int(p.powers.get(KURAGE_CANOPY, 0))
+    plus = int(p.powers.get(KURAGE_CANOPY_PLUS, 0))
+    if plain + plus <= 0 or (state.kk_chain_plans_this_turn
+                             < C.KOKOMI_BATTLE_FORMATION_THRESHOLD):
+        return
+    for count, upgraded in ((plain, False), (plus, True)):
+        if count:
+            added = add_jellyfish(state, WARD_ID, count, upgraded=upgraded)
+            state.emit("plan_kurage_canopy", amount=added,
+                       upgraded=upgraded)
+
+
 def draw_pile_to_hand(state: CombatState) -> Optional[Card]:
     """READ THE FIELD's Plan line (the pool overhaul, 2026-10-13): "Put a card
     from your Draw Pile into your Hand. It costs 0 this turn." (the cost since
@@ -3187,7 +3199,8 @@ def casket_block(state: CombatState, card: Card, planned: bool = False) -> None:
     """THE TAMAKUSHI CASKET (Ward and Casket, 2026-10-18; 2026-10-20, [USER]:
     "2 was definitely the intent, and we should figure out a different Block
     solution if needed"): "Whenever you Plan a card or play a Companion, gain
-    2 Block." (2 since the Kokomi boss ramp, 2026-10-21; was 1.) Called by `effects.resolve_card` after each play, with
+    1 Block." (2 from the Kokomi boss ramp, 2026-10-21; 1 again since the
+    Kokomi defence pass, 2026-10-22.) Called by `effects.resolve_card` after each play, with
     `planned` true when that play wrote the card onto the Bake-Kurage
     (`state.kk_planned_card`). A Plan card played face-up pays nothing. A
     carry-out is not her play (`kk_carrying_out`). Raw relic Block
@@ -3212,7 +3225,7 @@ def casket_block(state: CombatState, card: Card, planned: bool = False) -> None:
 def casket_block_planned(state: CombatState, card: Card) -> None:
     """THE TAMAKUSHI CASKET for a generated Sting Planned by a card or a
     Power (Kokomi taste audit, 2026-10-21): "Whenever you Plan a card ...,
-    gain 2 Block", paid as for a Sting she Planned herself -- also inside a
+    gain 1 Block", paid as for a Sting she Planned herself -- also inside a
     carry-out (Flotsam Surge's Plan), where the carried-out card itself pays
     nothing. `TamakushiCasket.PayForPlanned` is the twin."""
     from tier0.content import loader                # late import: cycle
@@ -3256,8 +3269,9 @@ def turn_end(state: CombatState) -> None:
       * KURAGE BLOOM, "At the end of your turn, Plan a Sting." Copies Plan
         one each; carried out the next morning.
       * WATATSUMI'S GRACE, "At the end of your turn, gain 3 [4] Block for
-        each Plan waiting." The queue as it stands, Kurage Bloom's Sting
-        included; raw power Block (NC-11). Copies add their rates.
+        each Plan waiting. Stings and Wards don't count." The queue as it
+        stands less its Sting and Ward Plans (Kokomi defence pass,
+        2026-10-22); raw power Block (NC-11). Copies add their rates.
     Called by `combat` after the pilot's flips. `ProtoBakeKuragePower.
     BeforeSideTurnEnd` is the twin, in the same order."""
     if not live(state):
@@ -3267,7 +3281,8 @@ def turn_end(state: CombatState) -> None:
     if bloom > 0:
         plan_jellyfish(state, STING_ID, bloom)
     rate = int(p.powers.get(WATATSUMIS_GRACE, 0))
-    held = len(state.kk_plan_queue)
+    # Kokomi defence pass (2026-10-22): "Stings and Wards don't count".
+    held = chain_plans_held(state)
     if rate > 0 and held > 0:
         gained = rate * held
         p.block += gained
