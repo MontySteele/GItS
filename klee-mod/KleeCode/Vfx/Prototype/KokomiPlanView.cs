@@ -17,6 +17,7 @@ using MegaCrit.Sts2.Core.Localization;
 using MegaCrit.Sts2.Core.Logging;
 using MegaCrit.Sts2.Core.Models;
 using MegaCrit.Sts2.Core.Nodes.Cards;
+using MegaCrit.Sts2.Core.Nodes.Cards.Holders;
 using MegaCrit.Sts2.Core.Nodes.Combat;
 using MegaCrit.Sts2.Core.Nodes.CommonUi;
 using MegaCrit.Sts2.Core.Nodes.Rooms;
@@ -142,6 +143,13 @@ internal static class KokomiPlanView
 
     /// <summary>The cards the view shows, in queue order.</summary>
     private static readonly List<CardModel> Shown = new();
+
+    /// <summary>Every caption this view put on a grid holder, so closing the
+    /// view takes them all off. The game POOLS grid holders
+    /// (<c>NGridCardHolder : IPoolable</c>): a caption left on one rode it
+    /// into the next card grid that drew it -- "3. Plan line" under a story
+    /// event's Rare pick (contact sheet, 2026-10-22).</summary>
+    private static readonly List<Label> Captions = new();
 
     /// <summary>B's binding while the view is open (one instance, so it is
     /// the one removed).</summary>
@@ -423,6 +431,7 @@ internal static class KokomiPlanView
                 var holder = grid.GetCardHolder(card);
                 if (holder == null) continue;
                 var caption = holder.GetNodeOrNull<Label>(CaptionName);
+                if (caption != null && caption.IsQueuedForDeletion()) caption = null;
                 if (caption != null && !repaint) continue;
                 caption ??= AddCaption(holder);
                 var index = KokomiPlanViewRows.QueueIndex(queue, card);
@@ -471,7 +480,37 @@ internal static class KokomiPlanView
             CornerRadiusBottomRight = 8,
         });
         holder.AddChildSafely(label);
+        Captions.Add(label);
         return label;
+    }
+
+    /// <summary>
+    /// Take one caption off its holder: hidden at once, renamed so a lookup
+    /// by name cannot find it, freed at the end of the frame. Never a
+    /// RemoveChild, which Godot refuses while the screen is mid-exit.
+    /// </summary>
+    internal static void DropCaption(Label? label)
+    {
+        if (label == null || !GodotObject.IsInstanceValid(label)) return;
+        label.Visible = false;
+        label.Name = CaptionName + "Dropped";
+        label.QueueFreeSafely();
+    }
+
+    /// <summary>A pooled holder handed to any grid sheds a caption this view
+    /// left on it (the backstop to <see cref="Forget"/>; the patch at the
+    /// foot of this file).</summary>
+    internal static void OnHolderReused(Node? holder)
+    {
+        try
+        {
+            if (holder == null || !GodotObject.IsInstanceValid(holder)) return;
+            DropCaption(holder.GetNodeOrNull<Label>(CaptionName));
+        }
+        catch (Exception e)
+        {
+            Log.Warn($"[{KleeMod.ModId}] plans view: pooled caption skipped: {e}");
+        }
     }
 
     /// <summary>B: close the view. Confirm closes it through the screen's own
@@ -512,6 +551,20 @@ internal static class KokomiPlanView
         _screen = null;
         _owner = null;
         Shown.Clear();
+        // The captions come off with the view: the holders they sit on go
+        // back to the game's pool and are drawn again by other grids.
+        foreach (var label in Captions)
+        {
+            try
+            {
+                DropCaption(label);
+            }
+            catch (Exception e)
+            {
+                Log.Warn($"[{KleeMod.ModId}] plans view: caption drop skipped: {e}");
+            }
+        }
+        Captions.Clear();
     }
 }
 
@@ -729,4 +782,22 @@ internal static class ActionQueueSet_PauseActionForPlayerChoice_KokomiPlanView_P
     [HarmonyPostfix]
     public static void Postfix(GameAction action) =>
         KokomiPlanView.OnChoiceBegun(action);
+}
+
+/// <summary>
+/// The game pools its grid card holders; a holder taken from the pool for
+/// any grid sheds a Plans-view caption still on it, so the captions live only
+/// inside the Plans view (contact sheet, 2026-10-22: "3. Plan line" under a
+/// story event's Rare pick after the view had been opened earlier).
+/// </summary>
+// Character scope: `OnHolderReused` touches only a child named by this
+// mod's Plans view caption; a holder without one is left exactly as the game
+// built it.
+[HarmonyPatch(typeof(NGridCardHolder), nameof(NGridCardHolder.OnReturnedFromPool))]
+internal static class NGridCardHolder_OnReturnedFromPool_KokomiPlanView_Patch
+{
+    // lint: no-seat: touches only the Plans view's own caption node on a pooled grid holder, which any seat's next grid may draw
+    [HarmonyPostfix]
+    public static void Postfix(NGridCardHolder __instance) =>
+        KokomiPlanView.OnHolderReused(__instance);
 }

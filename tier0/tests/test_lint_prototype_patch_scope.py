@@ -167,8 +167,16 @@ def test_the_shipped_prototype_tree_is_green() -> None:
     # `Powers/Prototype/FurinaSweepPowers.cs` skips the Hive only when the
     # hit's dealer has neither a player nor a pet owner, which only a Plot
     # Twisted enemy hitting itself makes; it resolves no seat.
-    # A SEVENTEENTH appearing here is the next review question.
-    assert len(markers) == 16, markers
+    # IT WENT SIXTEEN -> SEVENTEEN ON 2026-10-22 (the contact sheet's leaked
+    # "3. Plan line"): the `NGridCardHolder.OnReturnedFromPool` postfix in
+    # `Vfx/Prototype/KokomiPlanView.cs`. The game pools grid holders, so a
+    # holder the Plans view captioned is drawn again by ANY seat's next grid
+    # (a story event's Rare pick); the postfix drops, by node name, only the
+    # caption the view added. It reads no run state and resolves no seat; the
+    # scope is at the only door that BUILDS the caption (`TryOpen`, through
+    # `KokomiOverhaul.LiveFor`).
+    # An EIGHTEENTH appearing here is the next review question.
+    assert len(markers) == 17, markers
 
 
 def test_registered_in_the_ci_lane() -> None:

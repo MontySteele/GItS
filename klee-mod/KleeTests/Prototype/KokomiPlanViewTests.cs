@@ -201,6 +201,23 @@ public class KokomiPlanViewTests
     }
 
     [Fact]
+    public void Captions_leave_with_the_view_and_never_ride_a_pooled_holder()
+    {
+        // Contact sheet 2026-10-22: "3. Plan line" under a story event's Rare
+        // pick. The game pools grid holders, so a caption left on one showed
+        // in the next grid. Closing drops every caption; a holder taken from
+        // the pool sheds one the close missed.
+        Assert.Contains("Captions",
+            Il.StaticFieldsRead(Il.Method("KokomiPlanView", "AddCaption")));
+        Assert.Contains("KokomiPlanView.DropCaption",
+                        Il.Calls(Il.Method("KokomiPlanView", "Forget")));
+        Assert.Contains("KokomiPlanView.DropCaption",
+                        Il.Calls(Il.Method("KokomiPlanView", "OnHolderReused")));
+        Assert.Contains("KokomiPlanView.OnHolderReused", Il.Calls(Il.Method(
+            "NGridCardHolder_OnReturnedFromPool_KokomiPlanView_Patch", "Postfix")));
+    }
+
+    [Fact]
     public void The_frame_hook_comes_off_the_tree_it_went_on_once()
     {
         // The old Forget fell back to the main loop when the screen was gone
