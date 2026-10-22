@@ -54,9 +54,10 @@ public sealed class RunStatsConfig : SimpleModConfig
 /// <summary>
 /// OPT-IN RUN STATS, THE GAME SIDE (2026-10-16, [USER]: "go ahead and try
 /// to build the opt-in upload now in the beta release"). Compiled only into a
-/// build with <c>-p:GitsTelemetryEndpoint</c> (the beta package made with
-/// <c>--telemetry-endpoint</c>); every other build has no file of this
-/// folder. The Worker is <c>telemetry-worker/</c>; what is sent is its
+/// build with <c>-p:GitsTelemetryEndpoint</c> (a beta or public package made
+/// with <c>--telemetry-endpoint</c>; the public one since 2026-10-21, [USER]:
+/// "Include the telemetry as opt-out."); every other build has no file of
+/// this folder. The Worker is <c>telemetry-worker/</c>; what is sent is its
 /// schema, <c>schema/run-v1.json</c>.
 ///
 /// It subscribes to <c>ModManager.OnMetricsUpload</c>, the game's own
