@@ -380,7 +380,7 @@ def test_the_privacy_paragraph_rides_only_with_the_uploader():
     assert "This beta sends" in with_ and pw.privacy_paragraph(beta) == pw.PRIVACY_PARAGRAPH
     for words in ("Upload data", "no Steam id", "IP address is not stored",
                   "deleted after a year", "random id", "on by default",
-                  "Settings, Mod Configuration (BaseLib), Open Config, Teyvat Spire Roster"):
+                  "Settings, Mod Configuration (BaseLib), Open Config, Teyvat Spire"):
         assert words in with_, words
     # The paragraph names the setting by the label the mod actually shows.
     hook = (ROOT / "klee-mod" / "KleeCode" / "RunStats" / "RunStatsHook.cs").read_text(encoding="utf-8")

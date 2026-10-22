@@ -19,7 +19,7 @@ namespace KleeMod.RunStats;
 /// THE MOD'S OWN SWITCH AND THE INSTALL ID, in BaseLib's mod config
 /// (<c>%APPDATA%/SlayTheSpire2/mod_configs/KleeMod.cfg</c>). The player sees
 /// one tickbox under Settings, Mod Configuration (BaseLib), Open Config,
-/// Teyvat Spire Roster:
+/// Teyvat Spire:
 /// "Share anonymous run stats with the Teyvat Spire developers", on by
 /// default since 2026-10-18 ([USER]: "Let's go default on."), and the player
 /// can untick it there. The install id is hidden, survives Restore Defaults,
@@ -104,7 +104,7 @@ internal static class RunStatsHook
             var prefix = "KLEEMOD-" + StringHelper.Slugify(nameof(RunStatsConfig.ShareAnonymousRunStats));
             EnglishLoc.Table("settings_ui").MergeWith(new Dictionary<string, string>
             {
-                ["KLEEMOD.mod_title"] = "Teyvat Spire Roster",
+                ["KLEEMOD.mod_title"] = "Teyvat Spire",
                 [prefix + ".title"] = "Share anonymous run stats with the Teyvat Spire developers",
                 [prefix + ".hover.title"] = "Anonymous run stats",
                 [prefix + ".hover.desc"] =

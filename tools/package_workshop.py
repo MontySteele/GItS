@@ -116,9 +116,9 @@ class Variant:
 
 VARIANTS = {
     "public": Variant("public", "klee", ("klee", "kokomi", "furina", "varka"),
-                      "Teyvat Spire Roster"),
+                      "Teyvat Spire: Genshin Impact Characters"),
     "beta": Variant("beta", "klee-beta", ALL_KITS,
-                    "Teyvat Spire Roster (Beta)"),
+                    "Teyvat Spire (Beta)"),
 }
 
 # DRAFT for [USER] to edit (the first line says so, so it cannot go up by
@@ -149,7 +149,7 @@ BETA: every kit, including Yae Miko (in progress). Enable this or the main relea
 # privacy_paragraph().
 PRIVACY_PARAGRAPH = """
 
-Run data. This beta sends a short summary of each finished run to the Teyvat Spire developers: your character, ascension, result, the cards and relics you ended with, which cards you were offered and took, and your HP floor by floor. It holds no Steam id, name, chat or other personal details, and your IP address is not stored. Runs are tied only to a random id made by the mod on your machine. Data is used to balance the mod and deleted after a year. It is on by default; turn it off any time with "Share anonymous run stats with the Teyvat Spire developers" under Settings, Mod Configuration (BaseLib), Open Config, Teyvat Spire Roster. It only sends when the game's own "Upload data" setting is on."""
+Run data. This beta sends a short summary of each finished run to the Teyvat Spire developers: your character, ascension, result, the cards and relics you ended with, which cards you were offered and took, and your HP floor by floor. It holds no Steam id, name, chat or other personal details, and your IP address is not stored. Runs are tied only to a random id made by the mod on your machine. Data is used to balance the mod and deleted after a year. It is on by default; turn it off any time with "Share anonymous run stats with the Teyvat Spire developers" under Settings, Mod Configuration (BaseLib), Open Config, Teyvat Spire. It only sends when the game's own "Upload data" setting is on."""
 
 
 
@@ -213,7 +213,7 @@ def manifest_for(variant: Variant, version: str, source: dict) -> dict:
     m["id"] = variant.mod_id
     m["version"] = version
     if variant.name == "beta":
-        m["name"] = f"{source.get('name', 'Teyvat Spire Roster')} (Beta)"
+        m["name"] = f"{source.get('name', 'Teyvat Spire')} (Beta)"
         m["description"] = (source.get("description", "")
                             + " Beta: every kit, Yae Miko included (in progress).")
     return m
