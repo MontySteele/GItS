@@ -189,6 +189,16 @@ public sealed class EnlightenedBlessing : MeditationsOfAYako
 
     /// <summary>Already the upgrade.</summary>
     public override RelicModel? GetUpgradeReplacement() => null;
+
+    /// <summary>Its own icon since 2026-10-22 (art/plan.tsv
+    /// relic_enlightened_blessing): the golden magatama of Narukami's Valor,
+    /// gold Inazuma Electro against the base's silver Vision. The base's
+    /// chain is the fallback.</summary>
+    public override string PackedIconPath =>
+        KleePck.Path("yae/relics/enlightened_blessing.png") ?? base.PackedIconPath;
+
+    protected override string BigIconPath =>
+        KleePck.Path("yae/relics/enlightened_blessing.png") ?? base.BigIconPath;
 }
 
 /// <summary>

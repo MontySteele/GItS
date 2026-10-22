@@ -3615,3 +3615,11 @@ power_varka_absolute_zero	ImageGen/images/varka/powers/absolute_zero.png	256	256
 power_varka_static_field	ImageGen/images/varka/powers/static_field.png	256	256	contain	center	shortlist	1	png	Talent Static Electricity Field.png		icon	
 # power_yae_serial_novel <- Inazuma Light book
 power_yae_serial_novel	ImageGen/images/yae/powers/serial_novel.png	256	256	contain	center	shortlist	1	png	Item Philosophies of Light.png		icon	
+# power_kokomi_seas_reproach <- Deep Palace's Plume, the Ocean-Hued Clam's coral barb from Watatsumi's undersea palace: the sea stinging back (own icon 2026-10-22; was Vigil of the Deep's)
+power_kokomi_seas_reproach	ImageGen/images/kokomi/powers/seas_reproach.png	256	256	contain	center	shortlist	1	png	Item Deep Palace's Plume.png		icon	
+# relic_watatsumi_casket <- Cowry of Parting, a pearl-studded shell casket: the Tamakushi Casket's pearl, enshrined (own icon 2026-10-22; was the base relic's Sango Pearl)
+relic_watatsumi_casket	ImageGen/images/kokomi/relics/watatsumi_casket.png	256	256	contain	center	shortlist	1	png	Item Cowry of Parting.png		icon	
+# relic_pounding_surprise_ii <- Pounding Surprise's own golden explosive spark, glowing (own icon 2026-10-22; was the base relic's card crop)
+relic_pounding_surprise_ii	ImageGen/images/relics/pounding_surprise_ii.png	256	256	cover	center@1.4	shortlist	1	png	Pounding Surprise Explosive Spark Effect.png		icon	
+# relic_enlightened_blessing <- Narukami's Valor, the Grand Narukami Shrine's golden electro magatama: gold Inazuma Electro against the base's silver Vision (own icon 2026-10-22; was the base relic's). Yae Miko Vision (her gold-set Vision, x0.36,y0.42@1.6) was the closer variant but has no transparency
+relic_enlightened_blessing	ImageGen/images/yae/relics/enlightened_blessing.png	256	256	contain	center	shortlist	1	png	Item Narukami's Valor.png		icon	
