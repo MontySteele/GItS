@@ -19,6 +19,7 @@ separate file and is not touched.
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 
 import numpy as np
@@ -31,13 +32,17 @@ W, H = 1280, 720
 BASE = 600          # an adult's height in pixels
 FLOOR = H - 40
 
-# (sheet, height as a share of an adult, centre x), drawn outside-in
+# (sheet, height as a share of an adult, centre x, frame), drawn outside-in.
+# `frame` None is the sheet's first cell; ("sheet", i) is frame i of that
+# sheet in `tools/char_render/<char>_frames.json`, picked so the five stand in
+# five different poses (user, 2026-10-22: Varka's second sword floated behind
+# him, and Furina, Kokomi and Yae all stood hand on hip, palm up).
 CAST = [
-    ("varka/model/frames/varka_idle.png", 1.00, 230),
-    ("yae/model/frames/yae_idle.png", 0.95, 1050),
-    ("furina/model/frames/furina_idle.png", 0.90, 450),
-    ("kokomi/model/frames/kokomi_preview.png", 0.90, 812),
-    ("model/frames/klee_idle.png", 0.72, 625),
+    ("varka/model/frames/varka_merchant.png", 1.00, 252, None),
+    ("yae/model/frames/yae_cast.png", 0.95, 1115, ("cast", 10)),
+    ("furina/model/frames/furina_rejoice.png", 0.90, 545, ("rejoice", 15)),
+    ("kokomi/model/frames/kokomi_preview.png", 0.90, 890, None),
+    ("model/frames/klee_idle.png", 0.72, 705, None),
 ]
 
 
@@ -63,6 +68,18 @@ def first_frame(sheet: Path) -> Image.Image:
     return cell.crop(cell.getchannel("A").point(lambda a: 255 if a > 8 else 0).getbbox())
 
 
+def sheet_frame(rel: str, sheet: str, index: int) -> Image.Image:
+    """Frame `index` of `sheet`, cut by its packed rect."""
+    char = rel.split("/")[0]
+    meta = json.loads((ROOT / "tools" / "char_render" / f"{char}_frames.json")
+                      .read_text(encoding="utf-8"))["sheets"][sheet]
+    f = meta["frames"][index]
+    x, y, w, h = f["rect"][:4]
+    page = IMAGES / char / "model" / "frames" / meta["pages"][f["page"]]["file"]
+    cell = Image.open(page).convert("RGBA").crop((x, y, x + w, y + h))
+    return cell.crop(cell.getchannel("A").point(lambda a: 255 if a > 8 else 0).getbbox())
+
+
 def background() -> Image.Image:
     y, x = np.mgrid[0:H, 0:W]
     d = np.sqrt(((x - W / 2) / W) ** 2 + ((y - H * 0.55) / H) ** 2)
@@ -73,8 +90,8 @@ def background() -> Image.Image:
 
 def compose() -> Image.Image:
     canvas = background()
-    for rel, share, cx in CAST:
-        frame = first_frame(IMAGES / rel)
+    for rel, share, cx, pick in CAST:
+        frame = first_frame(IMAGES / rel) if pick is None else sheet_frame(rel, *pick)
         h = int(BASE * share)
         frame = frame.resize((int(frame.width * h / frame.height), h), Image.LANCZOS)
         shadow = Image.new("RGBA", (int(frame.width * 0.9), 40), (0, 0, 0, 0))
