@@ -116,7 +116,7 @@ Visual papers: `review/active/varka-visual-paper-2026-10-13.md`,
 
 Kokomi's jellyfish has no model in the art sources, so `render.py` builds a
 stylised one in Blender from primitives (no licensed asset) and renders its
-four clips; `pack.py` outlines them in 2D and packs one sheet,
+four clips; `pack.py` adds a soft glow in 2D and packs one sheet,
 `kokomi/model/frames/kokomi_kurage.png`, and the manifest
 `tools/kurage_render/kurage_frames.json`. `tools.kokomi_rig gen` writes
 `bake_kurage.tscn` from it. The docket icon (`kokomi/summon/bake_kurage.png`)

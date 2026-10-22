@@ -8,15 +8,17 @@ so nothing licensed enters the render. Per clip it writes
 canvas and the anchor's pixel); tools/kurage_render/pack.py outlines and
 packs them. No .blend is saved.
 
-THE LOOK. Unlit and translucent, so it reads as water beside the toon-shaded
-kits without a light rig: every surface is an emission blended over
-transparency. The bell is pale at its centre and deep Hydro blue at its
-silhouette (a facing ramp), with its back faces drawn so the inside of the
-bell shows through the front; the coral-pink band runs round the rim; a
-pearly core sits inside it, a glint on its shoulder. The tentacles are
-camera-facing ribbons whose alpha fades toward the tip. The outline is drawn
-in 2D by pack.py, round the silhouette only (an inverted hull would show
-through a translucent bell).
+THE LOOK (reworked 2026-10-22 against the user's in-game reference: "too
+solid, too pink"). Light and water, not a solid toy. Unlit and translucent:
+every surface is an emission blended over transparency. The bell is thin and
+blue where it faces the camera and brighter, near white-cyan, at its
+silhouette (a facing ramp), with faint ribs running down it and its back
+faces drawn so the inside shows through; a bright cyan band runs round the
+rim; a white-blue core glows at the crown inside a soft aura, a glint on its
+shoulder. The tentacles, finer threads and oral arms are pale camera-facing
+ribbons whose alpha fades toward the tip. A few bubbles rise beside it and a
+few sparkles twinkle, on the idle loop's period. No outline: pack.py draws a
+soft glow halo round it in 2D instead.
 
 Every mesh keeps one topology; each frame only moves vertices, from the
 clip's eased bell state (clips.at) plus the breathing pulse and the
@@ -47,7 +49,8 @@ args = ap.parse_args(argv)
 NA = 40                  # bell: segments round
 NS = 16                  # bell: rings from the crown to the rim
 NSEG = 20                # ribbon segments
-RIM_FROM = 0.84          # the bell rings past this fraction are the pink band
+RIM_FROM = 0.84          # the bell rings past this fraction are the bright band
+RIBS = 8                 # faint ribs round the bell
 
 
 def lin(c):
@@ -92,9 +95,11 @@ def math_node(nt, op, a, b=None, clamp=True):
     return n.outputs[0]
 
 
-def facing_material(name, inner, outer, a_inner, a_outer, blend=0.35, power=1.0):
+def facing_material(name, inner, outer, a_inner, a_outer, blend=0.35, power=1.0, rib=None, rib_alpha=0.0):
     """Colour and alpha ramped from where the surface faces the camera
-    (inner) to its silhouette (outer)."""
+    (inner) to its silhouette (outer). With `rib` (a colour), the mesh's
+    `rib` attribute brightens it toward that colour and adds rib_alpha. A
+    Value node named "fade" scales the alpha (1 unless set_fade moves it)."""
     mat, nt, mix, em = _nodes(name)
     lw = nt.nodes.new("ShaderNodeLayerWeight")
     lw.inputs["Blend"].default_value = blend
@@ -104,10 +109,24 @@ def facing_material(name, inner, outer, a_inner, a_outer, blend=0.35, power=1.0)
     nt.links.new(f, col.inputs["Factor"])
     col.inputs[6].default_value = lin(inner)
     col.inputs[7].default_value = lin(outer)
-    nt.links.new(col.outputs[2], em.inputs["Color"])
     a = math_node(nt, "MULTIPLY_ADD", f, a_outer - a_inner)
     a.node.inputs[2].default_value = a_inner
-    nt.links.new(a, mix.inputs[0])
+    out_col = col.outputs[2]
+    if rib is not None:
+        at = nt.nodes.new("ShaderNodeAttribute")
+        at.attribute_name = "rib"
+        rc = nt.nodes.new("ShaderNodeMix")
+        rc.data_type = "RGBA"
+        nt.links.new(at.outputs["Fac"], rc.inputs["Factor"])
+        nt.links.new(out_col, rc.inputs[6])
+        rc.inputs[7].default_value = lin(rib)
+        out_col = rc.outputs[2]
+        a = math_node(nt, "ADD", math_node(nt, "MULTIPLY", at.outputs["Fac"], rib_alpha), a)
+    nt.links.new(out_col, em.inputs["Color"])
+    fade = nt.nodes.new("ShaderNodeValue")
+    fade.name = "fade"
+    fade.outputs[0].default_value = 1.0
+    nt.links.new(math_node(nt, "MULTIPLY", a, fade.outputs[0]), mix.inputs[0])
     return mat
 
 
@@ -128,15 +147,26 @@ def flat_material(name, color, alpha):
     return mat
 
 
+def set_fade(mat, v, alpha=1.0):
+    """Scale a material's alpha for this frame: a facing material's "fade"
+    node, or a flat material's mix factor (its full alpha times v)."""
+    node = mat.node_tree.nodes.get("fade")
+    if node is not None:
+        node.outputs[0].default_value = v
+    else:
+        next(n for n in mat.node_tree.nodes if n.type == "MIX_SHADER").inputs[0].default_value = alpha * v
+
+
 # ----------------------------------------------------------------- meshes
-def new_object(name, verts, faces, mats, fade=None):
+def new_object(name, verts, faces, mats, fade=None, rib=None):
     me = bpy.data.meshes.new(name)
     me.from_pydata(verts, [], faces)
     for m in mats:
         me.materials.append(m)
-    if fade is not None:
-        at = me.attributes.new("fade", "FLOAT", "POINT")
-        at.data.foreach_set("value", fade)
+    for attr, vals in (("fade", fade), ("rib", rib)):
+        if vals is not None:
+            at = me.attributes.new(attr, "FLOAT", "POINT")
+            at.data.foreach_set("value", vals)
     ob = bpy.data.objects.new(name, me)
     bpy.context.scene.collection.objects.link(ob)
     return ob
@@ -159,6 +189,21 @@ def bell_rest():
             faces.append((a, a + NA, b + NA, b))
             mats.append(1 if i / NS >= RIM_FROM else 0)
     return params, faces, mats
+
+
+def rib_weight(s, th):
+    """The faint ribs: narrow bright lines down the bell, gone at the crown
+    (where the core glows) and at the rim band."""
+    line = (0.5 + 0.5 * math.cos(RIBS * th)) ** 4
+    return line * math.sin(math.pi * min(1.0, s / RIM_FROM)) ** 0.7
+
+
+def star(name, mat):
+    """A four-point sparkle, flat in the camera's plane, unit size."""
+    verts = [(0, 0, 0), (1, 0, 0), (0.16, 0, 0.16), (0, 0, 1), (-0.16, 0, 0.16),
+             (-1, 0, 0), (-0.16, 0, -0.16), (0, 0, -1), (0.16, 0, -0.16)]
+    faces = [(0, i, i % 8 + 1) for i in range(1, 9)]
+    return new_object(name, verts, faces, [mat])
 
 
 def sphere(name, rings, segs, mat):
@@ -229,13 +274,34 @@ def set_verts(ob, pts):
     ob.data.update()
 
 
+#: bubbles (x, start z, rise, radius, phase) and sparkles (x, z, size, phase,
+#: twinkles per loop): beside the bell, inside the frames' old box, on the
+#: idle loop's period so the loop has no seam
+BUBBLES = ((-0.74, 0.55, 0.85, 0.045, 0.0), (0.80, 0.45, 0.90, 0.035, 0.45),
+           (-0.58, 0.80, 0.55, 0.028, 0.7), (0.66, 0.95, 0.40, 0.05, 0.2))
+SPARKLES = ((-0.82, 1.18, 0.075, 0.1, 2), (0.86, 0.80, 0.06, 0.55, 2), (0.56, 1.24, 0.05, 0.3, 3))
+
+
 def pose_frame(objs, clip, t):
     st = C.at(clip, t)
     xf, down, right, pinch = body_xf(st, t)
-    bell, pearl, glint, tents, orals = objs
+    bell, (pearl, aura), glint, tents, orals, bubbles, sparkles = objs
     set_verts(bell, [xf(*bell_point(s, th, pinch, st["droop"])) for s, th in BELL_PARAMS])
-    # the pearly core and the glint ride the bell
-    for ob, at, rad in ((pearl, (0.0, 0.02, 1.0), (0.19, 0.19, 0.17)), (glint, (-0.27, -0.42, 1.12), (0.07, 0.03, 0.045))):
+    alive = 1.0 - st["droop"]
+    # the bubbles rise and fade in and out; the sparkles twinkle
+    for ob, (x, z0, rise, r, ph) in zip(bubbles, BUBBLES):
+        u = (t / C.LOOP + ph) % 1.0
+        wob = 0.03 * math.sin(2 * math.pi * (2 * u + ph))
+        ob.matrix_world = Matrix.Translation((x + wob, -0.6, z0 + rise * u + st["lift"])) @ Matrix.Diagonal((r, r, r, 1))
+        set_fade(ob.data.materials[0], alive * math.sin(math.pi * u) ** 0.6)
+    for ob, (x, z, size, ph, n) in zip(sparkles, SPARKLES):
+        tw = math.sin(math.pi * ((n * t / C.LOOP + ph) % 1.0)) ** 3
+        k = size * (0.35 + 0.65 * tw)
+        ob.matrix_world = Matrix.Translation((x, -0.6, z + st["lift"])) @ Matrix.Diagonal((k, k, k, 1))
+        set_fade(ob.data.materials[0], alive * tw)
+    # the core, its aura and the glint ride the bell
+    for ob, at, rad in ((pearl, (0.0, 0.02, 1.10), (0.15, 0.15, 0.13)), (aura, (0.0, 0.03, 1.05), (0.31, 0.31, 0.20)),
+                        (glint, (-0.27, -0.42, 1.12), (0.045, 0.02, 0.03))):
         cx, cy, cz = xf(*at)
         k = (st["sx"], st["sx"], st["sz"])
         ob.matrix_world = Matrix.Translation((cx, cy, cz)) @ Matrix.Diagonal((rad[0] * k[0], rad[1] * k[1], rad[2] * k[2], 1))
@@ -311,30 +377,45 @@ def to_px(cam_ob, w, h, v):
 
 def build():
     col = C.COLORS
-    bell_mat = facing_material("bell", col["bell_core"], col["bell_edge"], 0.46, 0.94, blend=0.4, power=1.3)
-    rim_mat = flat_material("rim", col["rim"], 0.94)
-    pearl_mat = facing_material("pearl", col["pearl"], (0.55, 0.82, 1.0), 0.92, 0.85, blend=0.5)
-    glint_mat = flat_material("glint", col["glint"], 0.9)
-    tent_mat = ribbon_material("tentacle", col["tentacle"], 0.9)
-    oral_mat = ribbon_material("oral", col["oral"], 0.92)
+    bell_mat = facing_material("bell", col["bell_core"], col["bell_edge"], 0.12, 0.86, blend=0.35, power=2.4,
+                               rib=col["rib"], rib_alpha=0.30)
+    rim_mat = facing_material("rim", col["tentacle"], col["rim"], 0.36, 0.86, blend=0.4, power=1.6)
+    pearl_mat = facing_material("pearl", col["pearl"], col["aura"], 1.0, 0.0, blend=0.55, power=1.4)
+    aura_mat = facing_material("aura", col["pearl"], col["aura"], 0.42, 0.0, blend=0.6, power=0.9)
+    glint_mat = flat_material("glint", col["glint"], 0.6)
+    tent_mat = ribbon_material("tentacle", col["tentacle"], 0.62)
+    thread_mat = ribbon_material("thread", col["thread"], 0.42)
+    oral_mat = ribbon_material("oral", col["oral"], 0.48)
     params, faces, mats = bell_rest()
-    bell = new_object("bell", [(0, 0, 0)] * len(params), faces, [bell_mat, rim_mat])
+    bell = new_object("bell", [(0, 0, 0)] * len(params), faces, [bell_mat, rim_mat],
+                      rib=[rib_weight(s, th) for s, th in params])
     bell.data.polygons.foreach_set("material_index", mats)
     pearl = sphere("pearl", 10, 20, pearl_mat)
+    aura = sphere("aura", 10, 20, aura_mat)
     glint = sphere("glint", 6, 12, glint_mat)
+    bubbles = [sphere(f"bubble_{j}", 8, 16, facing_material(f"bubble_{j}", col["bubble"], col["bubble"], 0.06, 0.85,
+                                                              blend=0.25, power=2.0))
+               for j in range(len(BUBBLES))]
+    sparkles = [star(f"sparkle_{j}", flat_material(f"sparkle_{j}", col["sparkle"], 1.0)) for j in range(len(SPARKLES))]
     tents = []
     lo, hi = C.TENTACLE_LEN
     for j in range(C.TENTACLES):
         th = 2 * math.pi * (j + 0.5) / C.TENTACLES
         length = lo + (hi - lo) * ((j * 3) % C.TENTACLES) / (C.TENTACLES - 1)
-        ob = ribbon(f"tentacle_{j}", tent_mat, lambda s: 1 - 0.85 * s ** 1.6)
-        tents.append((ob, length, th, 1.1 * j, 0.085, False))
+        ob = ribbon(f"tentacle_{j}", tent_mat, lambda s: 1 - 0.9 * s ** 1.4)
+        tents.append((ob, length, th, 1.1 * j, 0.06, False))
+    for j in range(C.TENTACLES):
+        # finer threads between the tentacles, a little shorter
+        th = 2 * math.pi * j / C.TENTACLES
+        length = 0.88 * (lo + (hi - lo) * ((j * 5 + 2) % C.TENTACLES) / (C.TENTACLES - 1))
+        ob = ribbon(f"thread_{j}", thread_mat, lambda s: 1 - 0.95 * s ** 1.2)
+        tents.append((ob, length, th, 0.7 + 1.3 * j, 0.028, False))
     orals = []
     for j in range(C.ORAL_ARMS):
         th = 2 * math.pi * j / C.ORAL_ARMS + 0.3
-        ob = ribbon(f"oral_{j}", oral_mat, lambda s: 1 - 0.7 * s ** 2)
-        orals.append((ob, C.ORAL_LEN * (0.9 + 0.1 * j), th, 2.0 + 1.7 * j, 0.15, True))
-    return params, (bell, pearl, glint, tents, orals)
+        ob = ribbon(f"oral_{j}", oral_mat, lambda s: 1 - 0.8 * s ** 1.6)
+        orals.append((ob, C.ORAL_LEN * (0.9 + 0.1 * j), th, 2.0 + 1.7 * j, 0.13, True))
+    return params, (bell, (pearl, aura), glint, tents, orals, bubbles, sparkles)
 
 
 cam_ob, W, H = setup()

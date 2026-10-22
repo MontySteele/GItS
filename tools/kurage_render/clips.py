@@ -6,9 +6,12 @@ from the summon art (tools/cut_kurage_summon.py, which still makes the
 docket icon) with a frame sheet. No 3D model of the Bake-Kurage exists in
 the art sources (the 观海 Kokomi pack is the body PMX alone, scratch
 models/SOURCES.md), so tools/kurage_render/render.py builds a stylised one
-in Blender from primitives: a translucent bell with a pearly core and a
-coral-pink rim, six cyan ribbon tentacles and three pink frilled oral arms,
-in the Hydro palette of the old sprite and of KokomiSwarm's jellyfish.
+in Blender from primitives: a glowing, translucent bell in cyan to
+electric blue with a white-blue core at its crown, faint ribs and a bright
+rim, six wispy tentacles and six finer threads, three pale frilled oral arms,
+a few bubbles and sparkles, all in the Hydro palette of the old sprite and of
+KokomiSwarm's jellyfish. No pink: the user's reference (2026-10-22, "too
+solid, too pink") is light and water, not a solid toy.
 
 A clip is keyed BELL STATES, eased between as the character clips are
 (toon.EASE: io, out, in, lin):
@@ -55,16 +58,22 @@ ORAL_LEN = 0.95
 
 #: sRGB colours (render.py linearises them)
 COLORS = {
-    "bell_core": (0.78, 0.96, 1.00),      # the pale centre of the bell
-    "bell_edge": (0.20, 0.55, 0.98),      # its deep Hydro rim of the silhouette
-    "rim": (1.00, 0.56, 0.62),            # the coral-pink band round the rim
-    "pearl": (0.92, 0.99, 1.00),          # the pearly core inside the bell
-    "tentacle": (0.42, 0.86, 1.00),       # cyan ribbons
-    "oral": (1.00, 0.62, 0.72),           # pink frilled oral arms
+    "bell_core": (0.16, 0.56, 1.00),      # the bell's body where it faces the camera: thin and blue
+    "bell_edge": (0.72, 0.97, 1.00),      # its silhouette, brighter than the body
+    "rib": (0.70, 0.95, 1.00),            # the faint ribs inside the bell
+    "rim": (0.80, 0.99, 1.00),            # the bright band round the rim
+    "pearl": (0.97, 1.00, 1.00),          # the white-blue core at the crown
+    "aura": (0.42, 0.80, 1.00),           # the core's soft glow
+    "tentacle": (0.60, 0.90, 1.00),       # pale-blue wisps
+    "thread": (0.78, 0.96, 1.00),         # the finer threads between them
+    "oral": (0.70, 0.94, 1.00),           # pale frilled oral arms
+    "bubble": (0.82, 0.98, 1.00),
+    "sparkle": (0.92, 1.00, 1.00),
     "glint": (1.00, 1.00, 1.00),
-    "line": (0.07, 0.16, 0.36),           # the outline pack.py draws round the silhouette
+    "glow": (0.38, 0.80, 1.00),           # the halo pack.py draws round the silhouette
 }
-OUTLINE_PX = 2.2         # texture px, as the kits' (chars.OUTLINE_PX)
+OUTLINE_PX = 2.2         # texture px: the old outline's reach, which bounds the glow (pack.py)
+GLOW_PX = 7.0            # texture px: the halo's blur radius
 
 REST = {"sx": 1.0, "sz": 1.0, "pinch": 0.0, "tilt": 0.0, "trail": 0.0, "sway": 1.0, "droop": 0.0, "lift": 0.0}
 LOOP = 3.0               # every periodic term closes over this
