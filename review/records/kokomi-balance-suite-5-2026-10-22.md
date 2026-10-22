@@ -39,10 +39,9 @@ fights).
 
 No seat drafted Kurage Canopy or Watatsumi's Grace; one (lane 1) took Tide
 Wall+. The Casket is the only change every run met, at 1 Block a Plan
-instead of 2. The damage drop is mostly the draft: suite 4's two winners
-leaned on Shoal Call and Riptide-style AoE; this round's decks were
-Breakwater and Companion piles (Breakwater in all five, two or more copies
-in three). Seats do not plan Block the way [USER] does (suite 4 record,
+instead of 2, so most of the damage drop is likely the draft and seed
+variance rather than the pass. Every deck held Breakwater; Shoal Call was in
+one (suite 4's most-played new card). Seats do not plan Block the way [USER] does (suite 4 record,
 and his run on 0.2.6135), so this suite cannot say whether the pass fixed
 the defence he saw; it says the seats got weaker, mostly at act 3 Frog
 Knight and the bosses.
