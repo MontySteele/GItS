@@ -68,12 +68,22 @@ CALM = {"にこり": 0.6, "なごみ": 0.3}
 #: "salute" lesson, 2026-10-13, applies to every kit).
 FAR = (0.22, -0.20, 0.0)
 FAR_POLE = (0.2, 0.6, -1.0)
-#: the wrist turned palm up (aimw: the hand along this world direction,
-#: rolled -90 degrees about it)
-FAR_AIM = ((0.8, -0.2, 0.0), -90.0)
-#: the near hand low in front of her waist, relaxed
-NEAR = (0.02, -0.17, -0.22)
-NEAR_POLE = (-1.0, 0.2, -0.3)
+#: the wrist turned palm up and a little toward the viewer (aimw: the hand
+#: along this world direction, rolled about it). Rolled the full -90 the palm
+#: was edge-on to the camera and the splayed thumb and fingers read as a dark
+#: spiky tangle at game size (user, 2026-10-22); at -50 the open palm shows,
+#: as in the select pose.
+FAR_AIM = ((0.8, -0.3, -0.1), -50.0)
+#: the far hand's finger curl (fingers, thumb): straight and together, the
+#: thumb not cocked away from the palm
+FAR_CURL = (12, 0)
+#: the near hand relaxed beside her hip, a little in front, the elbow out to
+#: her side. Until 2026-10-22 it sat low before her waist at
+#: (0.02, -0.17, -0.22), where the hand sank into the front of the dress and
+#: the forearm read as a thin sliver (the select pose's fault, user
+#: 2026-10-20; "we do need to fix her arm in-combat still", 2026-10-22).
+NEAR = (-0.12, -0.15, -0.18)
+NEAR_POLE = (-1.0, 0.3, -0.2)
 
 
 def add(v, dv):
@@ -136,7 +146,7 @@ def idle_pose(breath=0.0, swing=0.0, blink=0.0):
     return pose(stance(drop=A_DROP + 0.006 * (1 - b), lean=A_LEAN - 1.0 * b, head_nod=2 - 1.5 * b,
                        head_tilt=-3 - 1.0 * b, sway=0.006 * b)
                 + hands(far=add(FAR, (0.004 * b, 0.0, 0.018 * b)), near=add(NEAR, (0, 0, 0.006 * b)),
-                        far_curl=(14 - 4 * b, 4), far_aim=FAR_AIM)
+                        far_curl=(FAR_CURL[0] + 2 - 4 * b, FAR_CURL[1]), far_aim=FAR_AIM)
                 + cloth(swing),
                 m)
 
@@ -209,18 +219,18 @@ ATTACK = {
     "keys": [
         (0.0, idle_pose(0.5), "io"),
         # gather: the far hand drawn in to her chest, palm up, weight back
-        (0.18, atk((0.10, -0.18, 0.06), (-0.06, -0.12, -0.20), far_pole=(0.4, 0.4, -1.0), drop=0.04, lean=-3,
-                   twist=-20, swing=-1.5, far_aim=FAR_AIM, far_curl=(20, 6), yaw=18,
+        (0.18, atk((0.10, -0.18, 0.06), (-0.14, -0.12, -0.18), far_pole=(0.4, 0.4, -1.0), drop=0.04, lean=-3,
+                   twist=-20, swing=-1.5, far_aim=FAR_AIM, far_curl=(20, 0), yaw=18,
                    morphs={"真面目": 0.5, "まばたき": 0.3}), "out"),
-        (0.28, atk((0.16, -0.18, 0.08), (-0.10, -0.10, -0.18), far_pole=(0.4, 0.4, -1.0), drop=0.04, lean=-2,
-                   twist=-18, swing=-1.0, far_aim=FAR_AIM, far_curl=(14, 4), yaw=20), "io"),
+        (0.28, atk((0.16, -0.18, 0.08), (-0.15, -0.09, -0.16), far_pole=(0.4, 0.4, -1.0), drop=0.04, lean=-2,
+                   twist=-18, swing=-1.0, far_aim=FAR_AIM, far_curl=FAR_CURL, yaw=20), "io"),
         # the push (impact, frame 8)
         (0.40, atk(PUSH, (-0.18, -0.04, -0.12), far_pole=(0.0, 0.5, -1.0), swing=3, sleeve=6, far_aim=PUSH_AIM,
                    **LEAN_IN), "in"),
         (0.52, atk(add(PUSH, (0.01, 0.0, 0.01)), (-0.18, -0.04, -0.10), far_pole=(0.0, 0.5, -1.0), swing=2,
                    sleeve=4, far_aim=PUSH_AIM, **{**LEAN_IN, "drop": 0.055}), "out"),
         # recover: the hand sinks back to the stance's low open palm
-        (0.72, atk((0.30, -0.18, 0.02), (-0.04, -0.14, -0.22), far_pole=FAR_POLE, drop=0.035, lean=2, twist=-14,
+        (0.72, atk((0.30, -0.18, 0.02), (-0.12, -0.15, -0.19), far_pole=FAR_POLE, drop=0.035, lean=2, twist=-14,
                    swing=-1, far_aim=FAR_AIM, yaw=18), "io"),
         (0.88, idle_pose(0.5), "out"),
         (1.0, idle_pose(0.5), "io"),
@@ -304,7 +314,7 @@ ASCENSION = {
         (0.96, rise(add(CALL_FAR, (0.01, 0, 0.02)), add(CALL_NEAR, (-0.01, 0, 0.02)), swing=-1.5, sleeve=2,
                     morphs=CALL_FACE, **CALL), "io"),
         # the arms come down and she settles back into stance A
-        (1.14, rise((0.24, -0.18, 0.04), (-0.06, -0.15, -0.16), drop=A_DROP, lean=A_LEAN - 1, head_nod=1,
+        (1.14, rise((0.24, -0.18, 0.04), (-0.12, -0.15, -0.17), drop=A_DROP, lean=A_LEAN - 1, head_nod=1,
                     far_pole=FAR_POLE, near_pole=NEAR_POLE, swing=-0.5), "io"),
         (1.3, idle_pose(0.5), "io"),
     ],
@@ -441,9 +451,10 @@ REST = pose(
 # open and low before her, palm up, and the near hand relaxed at her hip.
 # The near hand was at her chest until 2026-10-19; there its fingers sank
 # into the bow and its forearm read as a flat band across the dress, so it
-# came down to stance A's NEAR (the brooch now shows). Under this pose's
+# came down to stance A's old NEAR (the brooch now shows). Under this pose's
 # twist that put the forearm as a thin sliver sunk into the dress (user,
-# 2026-10-20), so the hand moved out beside her hip: SELECT_NEAR.
+# 2026-10-20), so the hand moved out beside her hip: SELECT_NEAR. Stance A's
+# NEAR followed it on 2026-10-22.
 
 #: the near hand beside her hip, a little in front, the elbow out to her side
 SELECT_NEAR = (-0.10, -0.15, -0.18)
