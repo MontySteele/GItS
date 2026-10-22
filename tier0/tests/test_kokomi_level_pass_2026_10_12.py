@@ -31,9 +31,12 @@ def test_the_trims_print_the_papers_numbers():
     tide = card("proto_kk_steady_tide")
     assert (tide.effects[0]["amount"],
             _up("proto_kk_steady_tide").effects[0]["amount"]) == (9, 12)
-    assert tide.ethereal and tide.plan == [{"op": "draw", "amount": 3}]
-    # The Kokomi upgrade pass (2026-10-19): Plan draw 3 [4].
-    assert _up("proto_kk_steady_tide").plan == [{"op": "draw", "amount": 4}]
+    # Kokomi to-do pass (2026-10-22): the Plan puts up to 2 [3] cards from
+    # the Discard Pile into the Hand (was draw 3 [4]).
+    assert tide.ethereal and tide.plan == [
+        {"op": "discard_pile_to_hand", "amount": 2}]
+    assert _up("proto_kk_steady_tide").plan == [
+        {"op": "discard_pile_to_hand", "amount": 3}]
 
 
 def test_change_of_plans_is_uncommon_and_the_split_is_20_38_20():
@@ -47,8 +50,10 @@ def test_change_of_plans_is_uncommon_and_the_split_is_20_38_20():
 # --- section 2: the floors ---------------------------------------------------
 
 def test_flank_reads_the_intents_when_carried_out():
-    """Written over a board of Defends, carried out over attackers: it hits
-    the attackers, as Tide Wall reads its intent."""
+    """Written over a board of Defends, carried out with one enemy now
+    attacking: it hits only the enemy that does not intend to attack, read
+    when it lands (Kokomi to-do pass, 2026-10-22: the complement of the
+    attacker read)."""
     st = kokomi_state(n_enemies=2)
     for e in st.enemies:
         e.intents = [{"kind": "defend", "amount": 5}]
@@ -56,8 +61,8 @@ def test_flank_reads_the_intents_when_carried_out():
     st.enemies[1].intents = [{"kind": "attack", "amount": 6}]
     hp = [e.hp for e in st.enemies]
     carry_out(st)
-    assert st.enemies[0].hp == hp[0]
-    assert st.enemies[1].hp < hp[1]
+    assert st.enemies[0].hp < hp[0]
+    assert st.enemies[1].hp == hp[1]
     assert _up("proto_kk_flank").plan[0]["amount"] == 14
 
 

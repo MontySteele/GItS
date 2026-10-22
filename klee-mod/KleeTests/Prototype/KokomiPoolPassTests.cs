@@ -55,7 +55,10 @@ public class KokomiPoolPassTests
         // `EnemiesAttackedSince`, read off the Plan's own window.
         Assert.Equal(new[] { "Self", "FrontEnemy", "AllEnemies",
                              "EnemiesIntendingAttack",
-                             "EnemiesAttackedSince" },
+                             "EnemiesAttackedSince",
+                             // Kokomi to-do pass (2026-10-22): Flank's
+                             // complement.
+                             "EnemiesNotIntendingAttack" },
                      System.Enum.GetNames(typeof(KokomiPlan.Aim)));
     }
 
@@ -183,15 +186,17 @@ public class KokomiPoolPassTests
     // ======================================================================
 
     [Fact]
-    public void Flank_plans_at_the_enemies_that_intend_to_attack()
+    public void Flank_plans_at_the_enemies_that_do_not_intend_to_attack()
     {
+        // Kokomi to-do pass (2026-10-22): the complement, since Coral Crash
+        // (Common) prints the attacker version.
         var card = new ProtoKkFlank();
         Assert.Equal(1, card.EnergyCost.Canonical);
         Assert.Equal(CardRarity.Uncommon, card.Rarity);
 
         var clause = Assert.Single(card.PlanClauses);
         Assert.Equal(KokomiPlan.Kind.Damage, clause.Kind);
-        Assert.Equal(KokomiPlan.Aim.EnemiesIntendingAttack, clause.Aim);
+        Assert.Equal(KokomiPlan.Aim.EnemiesNotIntendingAttack, clause.Aim);
         // Nothing is captured: the set is the board's at carry-out.
         Assert.Null(clause.Targets);
     }
@@ -209,6 +214,32 @@ public class KokomiPoolPassTests
         var aimed = typeof(KokomiPlan).GetMethod("Aimed", All)!;
         Assert.Contains(Il.Calls(aimed),
                         c => c.Contains("KokomiPlan.IntendingAttack"));
+    }
+
+    [Fact]
+    public void Flanks_complement_skips_an_enemy_that_intends_to_attack()
+    {
+        // Kokomi to-do pass (2026-10-22): "each enemy that does not intend to
+        // attack" negates the arm's one intent test over the same living,
+        // hittable list, read at carry-out and captured at no writing. Twin:
+        // `test_the_negated_aim_skips_attackers_read_at_carry_out`.
+        var schedule = typeof(KokomiPlan).GetMethod("Schedule", All)!;
+        Assert.DoesNotContain(Il.Calls(schedule),
+                              c => c.Contains("KokomiPlan.NotIntendingAttack"));
+        var aimed = typeof(KokomiPlan).GetMethod("Aimed", All)!;
+        Assert.Contains(Il.Calls(aimed),
+                        c => c.Contains("KokomiPlan.NotIntendingAttack"));
+        var not = typeof(KokomiPlan).GetMethod("NotIntendingAttack", All)!;
+        var notCalls = Il.Calls(not).ToList();
+        // The negated predicate is a lambda, compiled onto a nested class.
+        foreach (var lambda in typeof(KokomiPlan).GetNestedTypes(All)
+                     .SelectMany(t => t.GetMethods(All))
+                     .Where(m => m.Name.Contains("NotIntendingAttack")))
+        {
+            notCalls.AddRange(Il.Calls(lambda));
+        }
+        Assert.Contains(notCalls, c => c.Contains("CurtainCallHooks.IntendsAttack"));
+        Assert.Contains(notCalls, c => c.Contains("HittableEnemies"));
     }
 
     [Fact]

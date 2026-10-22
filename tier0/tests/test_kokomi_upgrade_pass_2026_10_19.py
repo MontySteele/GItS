@@ -40,8 +40,10 @@ def _row(cid):
      [{"op": "block", "amount": 11}],
      [{"op": "transform_statuses_you_have", "upgraded": True}]),
     ("proto_kk_steady_tide", [{"op": "block", "amount": 9}],
-     [{"op": "draw", "amount": 3}],
-     [{"op": "block", "amount": 12}], [{"op": "draw", "amount": 4}]),
+     # Kokomi to-do pass (2026-10-22): the Plan is a Discard Pile fetch.
+     [{"op": "discard_pile_to_hand", "amount": 2}],
+     [{"op": "block", "amount": 12}],
+     [{"op": "discard_pile_to_hand", "amount": 3}]),
 ])
 def test_rows_and_upgrades(cid, now, plan, up_now, up_plan):
     row, up = _row(cid), _up(cid)

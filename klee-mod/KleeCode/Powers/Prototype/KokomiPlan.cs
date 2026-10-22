@@ -230,6 +230,11 @@ public static class KokomiPlan
         // Sting she Planned (<see cref="KokomiCards.PlanJellyfish"/>). Sim
         // twin `kokomi_plan.PLAN_STINGS`.
         PlanStings,
+        // Kokomi to-do pass (2026-10-22), Steady Tide: "Put up to N cards
+        // from your Discard Pile into your Hand." Her choice, zero to N, on
+        // the base game's grid; an empty pile is a no-op. Sim twin
+        // `kokomi_plan.DISCARD_PILE_TO_HAND`.
+        DiscardPileToHand,
     }
 
     /// <summary>
@@ -260,6 +265,11 @@ public static class KokomiPlan
         // Attack hit her since the Plan was written, read off the entry's
         // window at carry-out.
         EnemiesAttackedSince,
+        // Kokomi to-do pass (2026-10-22), Flank: each enemy that does NOT
+        // intend to attack, read at carry-out -- the complement of
+        // <see cref="EnemiesIntendingAttack"/> over the same living,
+        // hittable list and the same intent predicate.
+        EnemiesNotIntendingAttack,
     }
 
     /// <summary>
@@ -1256,6 +1266,15 @@ public static class KokomiPlan
         kokomi?.CombatState?.HittableEnemies
             .Where(IsAlive)
             .Where(CurtainCallHooks.IntendsAttack)
+            .ToList() ?? new List<Creature>();
+
+    /// <summary>Kokomi to-do pass (2026-10-22), Flank: the living, hittable
+    /// enemies NOT telegraphing an attack -- <see cref="IntendingAttack"/>'s
+    /// complement, the same predicate negated.</summary>
+    private static List<Creature> NotIntendingAttack(Creature? kokomi) =>
+        kokomi?.CombatState?.HittableEnemies
+            .Where(IsAlive)
+            .Where(e => !CurtainCallHooks.IntendsAttack(e))
             .ToList() ?? new List<Creature>();
 
     /// <summary>Keyed on the VERB, the way Rally's search screen was: one
@@ -2707,6 +2726,10 @@ public static class KokomiPlan
 
             case Kind.DrawPileToHand:
                 return await DrawPileToHand(choiceContext, player);
+
+            case Kind.DiscardPileToHand:
+                return await DiscardPileToHand(choiceContext, player,
+                                               plan.Amount);
         }
         return null;
     }
@@ -2736,6 +2759,43 @@ public static class KokomiPlan
         // Kokomi review r6 pick 3 (a) (2026-10-14): "It costs 0 this turn."
         pick.EnergyCost.SetThisTurn(0);
         return 1;
+    }
+
+    /// <summary>Steady Tide's Plan line (Kokomi to-do pass, 2026-10-22):
+    /// "Put up to N cards from your Discard Pile into your Hand." The base
+    /// game's grid over the whole Discard Pile, zero to N picks confirmed by
+    /// hand (Hologram's pick, up to N); an empty pile is a no-op. Returns how
+    /// many cards moved. Sim twin: `kokomi_plan.discard_pile_to_hand`.</summary>
+    public const string DiscardPilePromptKey =
+        "KLEEMOD-KOKOMI_DISCARD_PILE_TO_HAND.selectionScreenPrompt";
+
+    public const string DiscardPilePromptText =
+        "Choose cards to put into your [gold]Hand[/gold].";
+
+    /// <summary>How many the chooser may take: the clause's number, or the
+    /// whole pile when it is smaller. PURE.</summary>
+    public static int DiscardPileTake(int amount, int pile) =>
+        System.Math.Max(0, System.Math.Min(amount, pile));
+
+    private static async Task<int?> DiscardPileToHand(
+        PlayerChoiceContext choiceContext, Player player, int amount)
+    {
+        var pile = CardPile.Get(PileType.Discard, player);
+        if (pile == null) return 0;
+        var take = DiscardPileTake(amount, pile.Cards.Count);
+        if (take == 0) return 0;
+        var prompt = new LocString("cards", DiscardPilePromptKey);
+        var picks = (await CardSelectCmd.FromSimpleGrid(
+            choiceContext, pile.Cards.ToList(), player,
+            new CardSelectorPrefs(prompt, 0, take)
+            {
+                RequireManualConfirmation = true,
+            })).Take(take).ToList();
+        foreach (var pick in picks)
+        {
+            await CardPileCmd.Add(pick, PileType.Hand, CardPilePosition.Top);
+        }
+        return picks.Count;
     }
 
     /// <summary>
@@ -2788,6 +2848,7 @@ public static class KokomiPlan
         Kind.EnergyIfAttackedSince => "Energy",
         Kind.LoseStrengthThisTurn => "Strength lost",
         Kind.DrawPileToHand => "cards added",
+        Kind.DiscardPileToHand => "cards added",
         _ => null,
     };
 
@@ -2889,6 +2950,17 @@ public static class KokomiPlan
             // The Kokomi level pass (2026-10-12): the intents on the board at
             // carry-out, Tide Wall's read.
             foreach (var enemy in IntendingAttack(kokomi))
+            {
+                yield return enemy;
+            }
+            yield break;
+        }
+        if (plan.Aim == Aim.EnemiesNotIntendingAttack)
+        {
+            // Kokomi to-do pass (2026-10-22), Flank: the complement of the
+            // read above, at carry-out. An enemy that intends to attack is
+            // skipped.
+            foreach (var enemy in NotIntendingAttack(kokomi))
             {
                 yield return enemy;
             }

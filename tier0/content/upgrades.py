@@ -276,7 +276,10 @@ PLAN_DELTA_OPS: dict[str, tuple[str, ...]] = {
                   "each_player_draw",
                   # The Kokomi upgrade pass (2026-10-19): a card count --
                   # Kurage's Wake's Stings, Joint Orders' ally draw.
-                  "add_stings", "ally_draw"),
+                  "add_stings", "ally_draw",
+                  # Kokomi to-do pass (2026-10-22): Steady Tide's "put up
+                  # to N cards from your Discard Pile into your Hand".
+                  "discard_pile_to_hand"),
     # R276, Battle Plan: "your Attacks deal N more damage" this turn. The
     # Kokomi upgrade pass (2026-10-19): Coordinated Strike's.
     "plan_attack_bonus": ("others_attack_damage_this_turn",),

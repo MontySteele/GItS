@@ -41,10 +41,11 @@ public class KokomiLevelPassTests
     [Fact]
     public void Steady_tide_is_eleven_fourteen_and_change_of_plans_is_uncommon()
     {
-        // The Kokomi upgrade pass (2026-10-19): 9 [12]; Plan draw 3 [4].
+        // The Kokomi upgrade pass (2026-10-19): 9 [12]. Kokomi to-do pass
+        // (2026-10-22): the Plan puts up to 2 [3] from the Discard Pile.
         Assert.Equal(9, new ProtoKkSteadyTide().DynamicVars.Block.IntValue);
         Assert.Equal(12, Upgraded<ProtoKkSteadyTide>().DynamicVars.Block.IntValue);
-        Assert.Equal(4, Upgraded<ProtoKkSteadyTide>().PlanClauses.Single().Amount);
+        Assert.Equal(3, Upgraded<ProtoKkSteadyTide>().PlanClauses.Single().Amount);
         Assert.Equal(CardRarity.Uncommon, new ProtoKkChangeOfPlans().Rarity);
     }
 
@@ -88,15 +89,16 @@ public class KokomiLevelPassTests
     }
 
     [Fact]
-    public void Flank_plans_eleven_fourteen_at_whoever_intends_to_attack()
+    public void Flank_plans_eleven_fourteen_at_whoever_does_not_intend_to_attack()
     {
         var clause = Assert.Single(new ProtoKkFlank().PlanClauses);
-        Assert.Equal(KokomiPlan.Aim.EnemiesIntendingAttack, clause.Aim);
+        // Kokomi to-do pass (2026-10-22): the complement.
+        Assert.Equal(KokomiPlan.Aim.EnemiesNotIntendingAttack, clause.Aim);
         Assert.Equal(11, clause.Amount);
         Assert.Equal(14, Assert.Single(Upgraded<ProtoKkFlank>().PlanClauses).Amount);
         // Kokomi text audit (2026-10-22, item 8): every Plan line is read
         // when it is carried out, so the face no longer says so.
-        Assert.EndsWith("each enemy that intends to attack.",
+        Assert.EndsWith("each enemy that does not intend to attack.",
                         Face(new ProtoKkFlank()));
     }
 

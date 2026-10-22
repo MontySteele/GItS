@@ -5066,6 +5066,8 @@ OPS = {
     "damage_times_plus_earlier_plans": _op_kokomi_plan_only,
     "lose_strength_this_turn": _op_kokomi_plan_only,
     "draw_pile_to_hand": _op_kokomi_plan_only,
+    # Kokomi to-do pass (2026-10-22): Steady Tide's Plan line.
+    "discard_pile_to_hand": _op_kokomi_plan_only,
     # --- base-game parity ops (the real Ironclad pool) ---
     "upgrade_in_hand": _op_upgrade_in_hand,
     "gain_max_hp": _op_gain_max_hp,

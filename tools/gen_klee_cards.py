@@ -3587,6 +3587,9 @@ PLAN_CLAUSE_KINDS = {
     "damage_times_plus_earlier_plans": "DamageTimesPlusEarlierPlans",
     "lose_strength_this_turn": "LoseStrengthThisTurn",
     "draw_pile_to_hand": "DrawPileToHand",
+    # Kokomi to-do pass (2026-10-22), Steady Tide: "Put up to N cards from
+    # your Discard Pile into your Hand."
+    "discard_pile_to_hand": "DiscardPileToHand",
     "apply_power": None,
 }
 
@@ -3627,6 +3630,9 @@ PLAN_AIM_CS = {
     # `KokomiPlan.Schedule` captured off the intents on screen, and the
     # carry-out lands on those of them still alive.
     "enemies_intending_attack": "KokomiPlan.Aim.EnemiesIntendingAttack",
+    # Kokomi to-do pass (2026-10-22), Flank: "each enemy that does not
+    # intend to attack", the complement, read at carry-out.
+    "enemies_not_intending_attack": "KokomiPlan.Aim.EnemiesNotIntendingAttack",
     # THE POOL OVERHAUL (2026-10-13), Brine Sting: "each enemy that attacked
     # you since you planned this", read off the Plan's own window at
     # carry-out (`KokomiPlan.Entry.Since`).
@@ -3678,6 +3684,8 @@ PLAN_ONLY_OPS = {
                  "damage_per_plan_this_turn", "damage_blocked_since",
                  "damage_taken_since", "energy_if_attacked_since",
                  "lose_strength_this_turn", "draw_pile_to_hand",
+                 # Kokomi to-do pass (2026-10-22): Steady Tide's fetch.
+                 "discard_pile_to_hand",
                  # KOKOMI V3 (2026-10-18): Unbroken Tide.
                  "damage_if_no_hp_lost_since",
                  # The Inazuma pool rework (2026-10-18): Kyouka Fuushi

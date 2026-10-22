@@ -382,11 +382,54 @@ def two_faces(s: str) -> list[str] | None:
     return [pneuma + tail, ousia + tail]
 
 
-def render(s: str) -> str:
-    """Tags gone, every hole one numeral, the base game's measuring rule."""
+_SHOW_HEAD = re.compile(r"\{[A-Za-z_]+:show:")
+
+
+def pick_show(s: str, upgraded: bool = False) -> str:
+    """Each `{Name:show:X|Y}` resolved to ONE branch, braces counted.
+
+    Kokomi to-do pass (2026-10-22). The measured face is the UNUPGRADED one,
+    which prints the else-branch `Y`: for an add clause (`{IfUpgraded:show:
+    X|}`) that is empty, and for a replacement selector (Kurage Canopy's
+    `{IfUpgraded:show:an upgraded|a}`) it is the base word. Until this pass
+    BOTH branches were dropped, so a replacement selector was measured a word
+    short. `upgraded=True` keeps `X` instead: the face after the smith.
+    """
+    out, i = "", 0
+    while True:
+        m = _SHOW_HEAD.search(s, i)
+        if m is None:
+            return out + s[i:]
+        out += s[i:m.start()]
+        depth, bar, end = 0, -1, -1
+        for j in range(m.end(), len(s)):
+            c = s[j]
+            if c == "{":
+                depth += 1
+            elif c == "}":
+                if depth == 0:
+                    end = j
+                    break
+                depth -= 1
+            elif c == "|" and depth == 0 and bar < 0:
+                bar = j
+        if end < 0:
+            # Unbalanced: leave the rest as it stands.
+            return out + s[m.start():]
+        if bar < 0:
+            then, other = s[m.end():end], ""
+        else:
+            then, other = s[m.end():bar], s[bar + 1:end]
+        out += pick_show(then if upgraded else other, upgraded)
+        i = end + 1
+
+
+def render(s: str, upgraded: bool = False) -> str:
+    """Tags gone, every hole one numeral, the base game's measuring rule.
+    `upgraded` measures the face after the smith (`pick_show`)."""
     faces = two_faces(s)
     if faces is not None:
-        return max((render(face) for face in faces),
+        return max((render(face, upgraded) for face in faces),
                    key=lambda r: (sentences(r), len(r)))
     s = s.replace("\\n", " ").replace("\n", " ")
     # `{InCombat:<live line>|<off-board>}` is the base game's own Body Slam
@@ -397,7 +440,7 @@ def render(s: str) -> str:
     s = TAG.sub("", s)
     s = re.sub(r"\{[^{}]*energyIcons[^{}]*\}", "E", s)
     s = re.sub(r"\{[A-Za-z]+:plural:([^|}]*)\|([^}]*)\}", r"\2", s)
-    s = re.sub(r"\{[A-Za-z_]+:show:([^|}]*)\|[^}]*\}", "", s)
+    s = pick_show(s, upgraded)
     s = re.sub(r"\{[^{}]*\}", "6", s)
     return re.sub(r"\s+", " ", s).strip()
 
@@ -984,6 +1027,16 @@ def findings_for(rows: list[Row], exceptions: dict[str, str], gate: bool = True,
         for clause in add_clauses(row.raw):
             if len(clause) > ADD_CLAUSE_CEILING:
                 out.append(f"{tag}: upgrade clause {len(clause)} > {ADD_CLAUSE_CEILING}: {clause}")
+        # Kokomi to-do pass (2026-10-22): the UPGRADED face, the base game's
+        # own measure -- a base face plus at most one add clause. A row carried
+        # in `exceptions` is over its ceiling for the reason given there, on
+        # both faces.
+        if "show:" in row.raw and row.ident not in exceptions:
+            up = render(row.raw, upgraded=True)
+            if len(up) > ceiling + ADD_CLAUSE_CEILING:
+                out.append(f"{tag}: upgraded face {len(up)} > "
+                           f"{ceiling + ADD_CLAUSE_CEILING} ({row.surface} "
+                           f"ceiling + upgrade clause): {up}")
         base = row.ident.split("#")[0]
         for name, rx, instead in SPELLINGS:
             if name in skip_spellings:
