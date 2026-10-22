@@ -86,7 +86,8 @@ public class KokomiUpgradePassTests
         Assert.Equal(3, Upgraded<ProtoKkSpearhead>().PlanClauses[0].Amount);
         Assert.Equal(3, Upgraded<ProtoKkJointOrders>().PlanClauses[0].Amount);
         Assert.Equal(4, Upgraded<ProtoKkCoordinatedStrike>().PlanClauses[0].Amount);
-        Assert.Equal(4, Upgraded<ProtoKkSteadyTide>().PlanClauses[0].Amount);
+        // Kokomi to-do pass (2026-10-22): up to 2 [3] from the Discard Pile.
+        Assert.Equal(3, Upgraded<ProtoKkSteadyTide>().PlanClauses[0].Amount);
         Assert.Equal(12, Upgraded<ProtoKkSteadyTide>().DynamicVars.Block.IntValue);
         Assert.Equal(9, new ProtoKkSteadyTide().DynamicVars.Block.IntValue);
     }

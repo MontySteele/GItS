@@ -340,7 +340,9 @@ public class KokomiOverhaulRuleTests
                     // THE INAZUMA POOL REWORK (2026-10-18): Kyouka Fuushi.
                     "DamageTimesPlusEarlierPlans",
                     // GRAND DESIGN TAKES BASICS (2026-10-18).
-                    "PlayAsItself", "PlanStings" },
+                    "PlayAsItself", "PlanStings",
+                    // Kokomi to-do pass (2026-10-22): Steady Tide's fetch.
+                    "DiscardPileToHand" },
             System.Enum.GetNames(typeof(KokomiPlan.Kind)));
     }
 
@@ -360,7 +362,10 @@ public class KokomiOverhaulRuleTests
         // `EnemiesAttackedSince`, read off the Plan's own window.
         Assert.Equal(new[] { "Self", "FrontEnemy", "AllEnemies",
                              "EnemiesIntendingAttack",
-                             "EnemiesAttackedSince" },
+                             "EnemiesAttackedSince",
+                             // Kokomi to-do pass (2026-10-22): Flank's
+                             // complement, read at carry-out.
+                             "EnemiesNotIntendingAttack" },
                      System.Enum.GetNames(typeof(KokomiPlan.Aim)));
 
         var planned = typeof(KokomiPlan.Planned);

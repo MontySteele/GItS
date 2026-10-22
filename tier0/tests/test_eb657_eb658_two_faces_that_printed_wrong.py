@@ -126,9 +126,10 @@ def test_flanks_face_names_the_moment_the_intents_are_read():
     row = _sheet_row("proto_kk_flank")
     assert row["description"] == (
         "Deal 8 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 11 "
-        "[gold]Hydro[/gold] damage to each enemy that intends to attack.")
+        "[gold]Hydro[/gold] damage to each enemy that does not intend to "
+        "attack.")
     src = (GENERATED / "ProtoKkFlank.cs").read_text(encoding="utf-8")
-    assert "each enemy that intends to attack.\"" in src
+    assert "each enemy that does not intend to attack.\"" in src
     assert "when this is carried out" not in src
     assert "when you wrote this" not in src
 
@@ -137,8 +138,10 @@ def test_flanks_rule_reads_at_carry_out():
     """The Kokomi level pass: the aim is the same aim, read when the Plan is
     carried out, as Tide Wall reads its intent."""
     row = _sheet_row("proto_kk_flank")
+    # Kokomi to-do pass (2026-10-22): the complement, each enemy that does
+    # not intend to attack.
     assert row["plan"] == [{"op": "damage", "amount": 11,
-                            "target": "enemies_intending_attack"}]
+                            "target": "enemies_not_intending_attack"}]
 
     sim = (REPO / "tier0" / "engine" / "kokomi_plan.py").read_text(
         encoding="utf-8")

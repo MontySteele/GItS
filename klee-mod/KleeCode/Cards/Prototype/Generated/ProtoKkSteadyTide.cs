@@ -48,7 +48,7 @@ public sealed class ProtoKkSteadyTide : CustomCardModel, ICharacterCard, IPlanne
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Steady Tide"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold].\nOr [gold]plan[/gold]: Draw {PlanCards:diff()} card{PlanCards:plural:|s}."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold].\nOr [gold]plan[/gold]: Put up to {PlanCards:diff()} card{PlanCards:plural:|s} from your [gold]Discard Pile[/gold] into your [gold]Hand[/gold]."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
@@ -57,14 +57,14 @@ public sealed class ProtoKkSteadyTide : CustomCardModel, ICharacterCard, IPlanne
     public IReadOnlyList<KokomiPlan.Planned> PlanClauses =>
         new[]
         {
-            new KokomiPlan.Planned(KokomiPlan.Kind.Draw, DynamicVars["PlanCards"].IntValue, KokomiPlan.Aim.Self),
+            new KokomiPlan.Planned(KokomiPlan.Kind.DiscardPileToHand, DynamicVars["PlanCards"].IntValue, KokomiPlan.Aim.Self),
         };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>
         {
             new BlockVar(9m, ValueProp.Move),
-            new DynamicVar("PlanCards", 3m)
+            new DynamicVar("PlanCards", 2m)
         };
 
     // autoAdd: false -- the character-aware roster pool owns membership.

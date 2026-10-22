@@ -720,7 +720,10 @@ KOKOMI_OVERHAUL_OPS = frozenset((
     "damage_if_no_hp_lost_since",
     # The Inazuma pool rework (2026-10-18): Kyouka Fuushi, priced at its
     # printed hits in `_op_price`.
-    "damage_times_plus_earlier_plans"))
+    "damage_times_plus_earlier_plans",
+    # Kokomi to-do pass (2026-10-22): Steady Tide's fetch from the Discard
+    # Pile, priced with Read the Field's in `_op_price`.
+    "discard_pile_to_hand"))
 
 #: A HIT FOR A FRACTION OF HER MAX HP -- BOTH SPELLINGS. `damage_quarter_max_hp`
 #: is what the sheet writes today (Sango Isshin, now-line and planned half);
@@ -965,6 +968,10 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
     if op == "draw_pile_to_hand":
         # Read the Field: one card of her choice, a generated card's price.
         return STATIC_GENERATED_CARD_VALUE
+    if op == "discard_pile_to_hand":
+        # Steady Tide (Kokomi to-do pass, 2026-10-22): up to N cards of her
+        # choice, Read the Field's price per card.
+        return _neutral_amount(fx, 0) * STATIC_GENERATED_CARD_VALUE
     if op in ("ally_draw", "others_attack_damage_this_turn",
               "each_player_energy", "each_player_draw"):
         # THE CO-OP SET: paid to ANOTHER player, and tier 0.5 seats one. A
@@ -2230,6 +2237,9 @@ STATIC_OP_PRICING: dict[str, str] = {
                                "to attack when it lands, a board fact",
     "draw_pile_to_hand": "STATIC_GENERATED_CARD_VALUE: one card of her "
                          "choice into the hand",
+    # --- the Kokomi to-do pass (2026-10-22) ---
+    "discard_pile_to_hand": "STATIC_GENERATED_CARD_VALUE per card: up to N "
+                            "of her choice from the Discard Pile",
     # --- the Kokomi status batch (2026-10-01) ---
     "block_per_status_in_hand": "ZERO: a rate per status or curse in the "
                                 "hand a Plan sees, a fight fact an offer "

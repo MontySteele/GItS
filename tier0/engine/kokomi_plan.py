@@ -86,6 +86,9 @@ PLAN_KINDS = frozenset((
     "damage_per_plan_this_turn", "damage_blocked_since",
     "damage_taken_since", "energy_if_attacked_since",
     "lose_strength_this_turn", "draw_pile_to_hand",
+    # Kokomi to-do pass (2026-10-22): Steady Tide's fetch. See
+    # `DISCARD_PILE_TO_HAND`.
+    "discard_pile_to_hand",
     # KOKOMI V3 (2026-10-18, card paper sec.6): Unbroken Tide. See
     # `DAMAGE_IF_NO_HP_LOST_SINCE`.
     "damage_if_no_hp_lost_since",
@@ -133,6 +136,9 @@ PLAN_APPLY_POWERS = frozenset(("weak", "vulnerable"))
 #: (2026-10-12), Tide Wall's read (`_aimed`).
 PLAN_AIMS = frozenset(("front_enemy", "all_enemies",
                        "enemies_intending_attack",
+                       # Kokomi to-do pass (2026-10-22), Flank: the
+                       # complement, each enemy NOT intending to attack.
+                       "enemies_not_intending_attack",
                        # THE POOL OVERHAUL (2026-10-13), Brine Sting: each
                        # enemy that attacked her since the Plan was written.
                        "enemies_attacked_since"))
@@ -221,6 +227,9 @@ PLAN_ONLY_OPS = frozenset((
                            "damage_blocked_since", "damage_taken_since",
                            "energy_if_attacked_since",
                            "lose_strength_this_turn", "draw_pile_to_hand",
+                           # Kokomi to-do pass (2026-10-22): Steady Tide's
+                           # fetch names the carry-out turn's Discard Pile.
+                           "discard_pile_to_hand",
                            # KOKOMI V3 (2026-10-18): Unbroken Tide reads the
                            # turns it sat through.
                            "damage_if_no_hp_lost_since",
@@ -270,6 +279,11 @@ DAMAGE_TAKEN_SINCE = "damage_taken_since"
 ENERGY_IF_ATTACKED_SINCE = "energy_if_attacked_since"
 LOSE_STRENGTH_THIS_TURN = "lose_strength_this_turn"
 DRAW_PILE_TO_HAND = "draw_pile_to_hand"
+#: Kokomi to-do pass (2026-10-22). Steady Tide: "Put up to N cards from your
+#: Discard Pile into your Hand." The player chooses in the mod; the pilot takes
+#: `effects._best_card` N times, an INSTRUMENT SURFACE.
+#: `KokomiPlan.Kind.DiscardPileToHand` is the twin.
+DISCARD_PILE_TO_HAND = "discard_pile_to_hand"
 #: KOKOMI V3 (2026-10-18, review/active/kokomi-cards-2026-10-18.md sec.6;
 #: [USER]: "Makes sense! ... let's do both."). Unbroken Tide: "If you lost no
 #: HP since you planned this, deal 12 Hydro damage to ALL enemies." A Counter
@@ -640,6 +654,10 @@ def _aimed(state: CombatState, clause: dict,
         # The Kokomi level pass (2026-10-12): the intents on the board at
         # carry-out, as Tide Wall reads them. `KokomiPlan.Aimed`'s twin.
         return [e for e in state.living_enemies if _intends_to_attack(e)]
+    if aim == "enemies_not_intending_attack":
+        # Kokomi to-do pass (2026-10-22), Flank: the complement, read at
+        # carry-out. `KokomiPlan.NotIntendingAttack`'s twin.
+        return [e for e in state.living_enemies if not _intends_to_attack(e)]
     if aim == ENEMIES_ATTACKED_SINCE:
         # THE POOL OVERHAUL (2026-10-13), Brine Sting: each living enemy
         # whose Attack hit her since this Plan was written, once each, in
@@ -1712,6 +1730,9 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
     elif op == DRAW_PILE_TO_HAND:
         # Read the Field: one card of her choice from the Draw Pile.
         draw_pile_to_hand(state)
+    elif op == DISCARD_PILE_TO_HAND:
+        # Steady Tide: up to N cards of her choice from the Discard Pile.
+        discard_pile_to_hand(state, amount)
     elif op in coop.PLAN_OPS:
         # THE CO-OP SET: Joint Orders' ally draws, Coordinated Strike's other
         # players hit harder. Nobody else is at a one-seat table, so the
@@ -3142,6 +3163,27 @@ def draw_pile_to_hand(state: CombatState) -> Optional[Card]:
     state.player.hand.append(pick)
     state.emit("plan_draw_pile_to_hand", card=pick.id)
     return pick
+
+
+def discard_pile_to_hand(state: CombatState, amount: int) -> list[Card]:
+    """STEADY TIDE's Plan line (Kokomi to-do pass, 2026-10-22): "Put up to N
+    cards from your Discard Pile into your Hand." The player chooses zero to N
+    in the mod; the pilot takes `effects._best_card` until N are taken, the
+    pile is empty or the hand is full, an INSTRUMENT SURFACE. An empty pile is
+    a no-op. `KokomiPlan.DiscardPileToHand` is the twin."""
+    from tier0.engine import effects                # late import: cycle
+    from tier0.engine.state import remove_instance
+    taken: list[Card] = []
+    for _ in range(max(0, amount)):
+        pile = list(state.player.discard_pile)
+        if not pile or len(state.player.hand) >= C.MAX_HAND_SIZE:
+            break
+        pick = effects._best_card(pile)
+        remove_instance(state.player.discard_pile, pick)
+        state.player.hand.append(pick)
+        taken.append(pick)
+    state.emit("plan_discard_pile_to_hand", cards=[c.id for c in taken])
+    return taken
 
 
 def dawn_tide(state: CombatState) -> None:

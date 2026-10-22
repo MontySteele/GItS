@@ -1474,13 +1474,13 @@
 - {id: proto_kk_flank, name: "Flank", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   # Kokomi level pass (2026-10-12, sec.2): the Plan reads intents WHEN IT IS
-   # CARRIED OUT, as Tide Wall does; 11 [14]. The face says so since the
-   # Kokomi upgrade pass (2026-10-19).
-   description: "Deal 8 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 11 [gold]Hydro[/gold] damage to each enemy that intends to attack.",
+   # Kokomi level pass (2026-10-12): intents read at carry-out; 11 [14].
+   # Kokomi to-do pass (2026-10-22): the Plan hits each enemy that does not
+   # intend to attack (was: that intends to). Provenance note.
+   description: "Deal 8 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 11 [gold]Hydro[/gold] damage to each enemy that does not intend to attack.",
    effects: [{op: damage, amount: 8, target: enemy}],
-   # `EB-492`, the intent-keyed aim, read at carry-out.
-   plan: [{op: damage, amount: 11, target: enemies_intending_attack}],
+   # The intent-keyed aim, negated, read at carry-out.
+   plan: [{op: damage, amount: 11, target: enemies_not_intending_attack}],
    upgrade: {damage: 3, plan_damage: 3}}
 
 # FEIGNED RETREAT IS CUT (the status batch, 2026-10-01,
@@ -2170,12 +2170,13 @@
 - {id: proto_kk_steady_tide, name: "Steady Tide", character: kokomi,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon, ethereal: true,
-   # Kokomi level pass (2026-10-12, sec.1): 13 [16] -> 11 [14].
-   # Kokomi upgrade pass (2026-10-19): 11 [14] -> 9 [12]; Plan draw 3 [4].
-   description: "Gain 9 [gold]Block[/gold]. [gold]Plan[/gold]: Draw 3 cards.",
+   # Block 13 [16] -> 11 [14] (2026-10-12) -> 9 [12] (2026-10-19).
+   # Kokomi to-do pass (2026-10-22): the Plan fetches up to 2 [3] from the
+   # Discard Pile (was: draw 3 [4]). Provenance note.
+   description: "Gain 9 [gold]Block[/gold]. [gold]Plan[/gold]: Put up to 2 cards from your [gold]Discard Pile[/gold] into your [gold]Hand[/gold].",
    effects: [{op: block, amount: 9}],
-   plan: [{op: draw, amount: 3}],
-   # 12 Block; Plan draw 4.
+   plan: [{op: discard_pile_to_hand, amount: 2}],
+   # 12 Block; Plan up to 3.
    upgrade: {block: 3, plan_draw: 1}}
 
 - {id: proto_kk_resolve_of_watatsumi, name: "Resolve of Watatsumi", character: kokomi,

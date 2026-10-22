@@ -237,6 +237,10 @@ public static class KleeMod
                 // Plan line, a pick from the Draw Pile, on the same terms.
                 [Powers.KokomiPlan.DrawPilePromptKey] =
                     Powers.KokomiPlan.DrawPilePromptText,
+                // Kokomi to-do pass (2026-10-22): Steady Tide's Plan line,
+                // a pick of up to N from the Discard Pile.
+                [Powers.KokomiPlan.DiscardPilePromptKey] =
+                    Powers.KokomiPlan.DiscardPilePromptText,
                 // THE PLANS VIEW (2026-10-14): the controller's grid of
                 // waiting Plans, on the same terms.
                 [Vfx.KokomiPlanView.PromptKey] =

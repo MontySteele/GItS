@@ -644,6 +644,9 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     "lose_strength_this_turn": [],
     "draw_pile_to_hand": [_hook("shared", "draw_pile", "read"),
                           _hook("shared", "hand_contents", "write")],
+    # Kokomi to-do pass (2026-10-22): Steady Tide's fetch, Hologram's.
+    "discard_pile_to_hand": [_hook("shared", "discard_pile", "use"),
+                             _hook("shared", "hand_contents", "write")],
     # FURINA, THE POOL TO 75 (2026-10-09): the `furina` op's guest verbs
     # (Encore!, Tutti!, Final Bow, Casting Call, Gentle Current) act on, or
     # fetch for, her guest stage, filed on the stage channel the

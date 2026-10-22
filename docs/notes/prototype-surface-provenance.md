@@ -10086,3 +10086,19 @@ again", and on Watatsumi's Grace, "Otherwise agreed"
   not a Sting or Ward). The sheet's earlier comment, verbatim: "Kokomi card
   paper v2 (2026-10-18, sec.2 change 5): not for a Sting's or Ward's Plan.
   Provenance note."
+
+## Kokomi to-do pass: Flank and Steady Tide (2026-10-22)
+
+[USER]: "Do you want to go ahead and take those to-do items now?"
+(`review/active/kokomi-text-audit-2026-10-22.md` sec. 4, pick 3 (a)).
+
+- `proto_kk_flank`: Coral Crash (Common) already prints "Plan: Deal 8 Hydro
+  damage to each enemy that intends to attack." Flank's Plan now hits each
+  enemy that does NOT intend to attack (aim `enemies_not_intending_attack`,
+  the same intent test negated, read at carry-out). 8 [11], Plan 11 [14],
+  unchanged.
+- `proto_kk_steady_tide`: Tidal Screen (Common) already prints Block plus a
+  planned draw. Steady Tide's Plan now puts up to 2 [3] cards from the
+  Discard Pile into the Hand (op `discard_pile_to_hand`, the player's pick on
+  the base game's grid, Hologram's verb up to N); was draw 3 [4]. Block
+  9 [12] unchanged.
