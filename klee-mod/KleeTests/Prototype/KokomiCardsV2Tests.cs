@@ -187,7 +187,8 @@ public class KokomiCardsV2Tests
                         Seq("KokomiPlan", "ResolveEntry"));
         Assert.EndsWith(" Stings and Wards don't count.",
                         Face(new ProtoKkKurageCanopy()));
-        Assert.Contains(" that is not a [gold]Sting[/gold] or [gold]Ward[/gold],",
+        // Kokomi text audit (2026-10-22, pick 2 (a)): one spelling.
+        Assert.EndsWith(" Stings and Wards don't count.",
                         PowerText(new EndlessShoalPower()));
     }
 }

@@ -4169,8 +4169,7 @@ APPLY_POWERS = {
     # Casket and the cards, the re-founding, 2026-10-12.)
     "kk_at_waters_edge": ("AtWatersEdgePower", None,
         "The first time each turn you deal [gold]Hydro[/gold] damage, apply "
-        "{X} Weak and {X} Vulnerable to the enemy hit. [gold]Plans[/gold] "
-        "count."),
+        "{X} Weak and {X} Vulnerable to the enemy hit."),
     # THE KOKOMI TASTE AUDIT (2026-10-21): Block per Plan waiting.
     "kk_watatsumis_grace": ("WatatsumisGracePower", None,
         "At the end of your turn, gain {X} [gold]Block[/gold] for each "
@@ -4191,14 +4190,13 @@ APPLY_POWERS = {
     # declutter (2026-10-19) both versions are ONE power class
     # (`UpgradeTwinPower`), so the Plus key names the same class.
     "kk_kurage_canopy": ("KurageCanopyPower", None,
-        "Whenever the [gold]Bake-Kurage[/gold] carries out a "
-        "[gold]Plan[/gold] that is not a [gold]Sting[/gold] or "
-        "[gold]Ward[/gold], add a [gold]Ward[/gold] to your hand."),
+        "At the start of your turn, if 2 or more [gold]Plans[/gold] were "
+        "carried out, add a [gold]Ward[/gold] to your hand. Stings and "
+        "Wards don't count."),
     "kk_kurage_canopy_plus": ("KurageCanopyPower", None,
-        "Whenever the [gold]Bake-Kurage[/gold] carries out a "
-        "[gold]Plan[/gold] that is not a [gold]Sting[/gold] or "
-        "[gold]Ward[/gold], add an upgraded [gold]Ward[/gold] to your "
-        "hand."),
+        "At the start of your turn, if 2 or more [gold]Plans[/gold] were "
+        "carried out, add an upgraded [gold]Ward[/gold] to your hand. "
+        "Stings and Wards don't count."),
     # POOL COMPLETION (2026-10-01). Classes in KokomiPoolCompletion.cs.
     # THE KOKOMI TASTE AUDIT (2026-10-21): reads intent at the start of her
     # turn; the upgraded card's copy also deals 5 (`upgraded_power`), one
@@ -4212,7 +4210,7 @@ APPLY_POWERS = {
     # THE KOKOMI TASTE AUDIT (2026-10-21): Resolve of Watatsumi. Class in
     # KokomiTasteAudit.cs.
     "kk_resolve_of_watatsumi": ("ResolveOfWatatsumiPower", None,
-        "When a [gold]Plan[/gold] is carried out, it deals {X} additional "
+        "Whenever a [gold]Plan[/gold] is carried out, it deals {X} additional "
         "damage and gains {X} additional [gold]Block[/gold]."),
     # THE RE-FOUNDING (2026-10-12, review/ruled/kokomi-card-paper-2026-10-12.md
     # sec.2). Every class lives in Powers/Prototype/KokomiRefounding.cs.
@@ -4242,16 +4240,16 @@ APPLY_POWERS = {
     # the turn; the upgraded card's copy also draws (`upgraded_power`), one
     # class for both versions (`UpgradeTwinPower`).
     "kk_battle_formation": ("BattleFormationPower", None,
-        "At the start of your turn, if 2 or more of your [gold]Plans[/gold] "
+        "At the start of your turn, if 2 or more [gold]Plans[/gold] "
         "were carried out, gain 1 Energy. Stings and Wards don't count."),
     "kk_battle_formation_plus": ("BattleFormationPower", None,
-        "At the start of your turn, if 2 or more of your [gold]Plans[/gold] "
+        "At the start of your turn, if 2 or more [gold]Plans[/gold] "
         "were carried out, gain 1 Energy and draw 1 card. Stings and Wards "
         "don't count."),
     "kk_endless_shoal": ("EndlessShoalPower", None,
         "Whenever the [gold]Bake-Kurage[/gold] carries out a "
-        "[gold]Plan[/gold] that is not a [gold]Sting[/gold] or "
-        "[gold]Ward[/gold], add a [gold]Sting[/gold] to your hand."),
+        "[gold]Plan[/gold], add a [gold]Sting[/gold] to your hand. Stings "
+        "and Wards don't count."),
     "kk_dawn_tide": ("DawnTidePower", None,
         "At the start of your turn, the [gold]Bake-Kurage[/gold] applies "
         "[gold]Hydro[/gold] to ALL enemies."),

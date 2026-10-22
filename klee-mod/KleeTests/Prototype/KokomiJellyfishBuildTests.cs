@@ -139,10 +139,11 @@ public class KokomiJellyfishBuildTests
         var card = new ProtoKkEndlessShoal();
         Assert.Equal((CardType.Power, CardRarity.Uncommon, 1),
                      (card.Type, card.Rarity, card.EnergyCost.Canonical));
+        // Kokomi text audit (2026-10-22, pick 2 (a)): one spelling.
         Assert.Equal("Whenever the [gold]Bake-Kurage[/gold] carries out a "
-                   + "[gold]Plan[/gold] that is not a [gold]Sting[/gold] or "
-                   + "[gold]Ward[/gold], add a [gold]Sting[/gold] to your "
-                   + "[gold]Hand[/gold].", Face(card));
+                   + "[gold]Plan[/gold], add a [gold]Sting[/gold] to your "
+                   + "[gold]Hand[/gold]. Stings and Wards don't count.",
+                     Face(card));
         var up = Upgraded<ProtoKkEndlessShoal>();
         Assert.Equal(1, up.EnergyCost.Canonical);
         Assert.Contains(CardKeyword.Innate, up.Keywords);

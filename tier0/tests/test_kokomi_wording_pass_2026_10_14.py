@@ -30,7 +30,8 @@ def _row(cid):
 
 def test_pincer_reads_that_turn_not_next_turn():
     desc = _row("proto_kk_pincer")["description"]
-    assert "[gold]Plan[/gold]: Your first Attack that turn is played twice." \
+    # Kokomi text audit (2026-10-22, item 7): a Plan line says "this turn".
+    assert "[gold]Plan[/gold]: Your first Attack this turn is played twice." \
         in desc
     assert "Next turn" not in desc
 
@@ -60,11 +61,11 @@ def test_battle_formation_says_when():
     # The Kokomi finish pass (2026-10-19): the base start-of-turn template.
     desc = _row("proto_kk_battle_formation")["description"]
     assert desc.startswith(
-        "At the start of your turn, if 2 or more of your [gold]Plans[/gold] "
-        "were carried out, gain ")
+        "At the start of your turn, if 2 or more [gold]Plans[/gold] "
+        "were carried out, gain ")  # Kokomi text audit (2026-10-22, item 11)
     src = (REPO / "klee-mod" / "KleeCode" / "Powers" / "Prototype"
            / "KokomiRefounding.cs").read_text(encoding="utf-8")
-    assert '$"At the start of your turn, if {Threshold} or more of your "' in src
+    assert '$"At the start of your turn, if {Threshold} or more "' in src
 
 
 # --- 3. Juuga: the Plan line says its three turns -----------------------------

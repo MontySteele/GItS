@@ -44,7 +44,7 @@ def test_tide_wall_face_names_the_turn_it_lands():
     assert _face("proto_kk_tide_wall") == (
         "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Gain "
         "{PlanBlock:diff()} [gold]Block[/gold], plus the biggest attack an "
-        "enemy intends when this is carried out.")
+        "enemy intends.")  # Kokomi text audit (2026-10-22, item 8)
     # The behaviour is unchanged: the read happens at carry-out.
     assert _rows()["proto_kk_tide_wall"].plan == [
         {"op": "block_max_intent", "amount": 4}]  # defence pass, 2026-10-22

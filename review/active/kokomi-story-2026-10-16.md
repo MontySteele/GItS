@@ -71,7 +71,7 @@ jellyfish. It is standing exactly where Kokomi is standing.*
 | Pocket the enemy's general. | Gain a random potion. | It is a very small piece, and nobody said she couldn't. |
 
 **Act 1. Coral Light** (a memory; a price, with a free way out).
-*Pale coral glows in a crack in the stone, the colour of the reefs off
+*Pale coral glows in a crack in the stone, the color of the reefs off
 Watatsumi. On afternoons the shrine let her keep for herself, she used to
 swim out to coral like this and stay until someone came looking.*
 
@@ -139,7 +139,7 @@ reinforcements. —Gorou. P.S. Please eat properly."*
 |---|---|---|
 | Send for reinforcements. | Choose 1 of 3 random Uncommon Companions to add to your deck. | The scout runs down the stairs with her orders. An hour later there are paw prints on the landing and a familiar voice calling drill. |
 | Write back with new orders. | Upgrade 2 random cards. | Three pages of orders, and a fourth telling him to rest too. The scout salutes and goes. |
-| Eat the sushi while it is fresh. | Heal 20 HP. | Bird egg sushi, her favourite. Gorou remembered. She eats every piece and sends the box back with a thank-you. |
+| Eat the sushi while it is fresh. | Heal 20 HP. | Bird egg sushi, her favorite. Gorou remembered. She eats every piece and sends the box back with a thank-you. |
 
 **Act 3. Endgame** (follows The Other Commander; a price, with a free way
 out). It opens with a line from her act 2 choice:
@@ -170,7 +170,7 @@ same pull she uses to shape her Bake-Kurage, and the water answers her.*
 |---|---|---|
 | Shape a whole shoal. | Lose 6 HP. Choose 1 of 3 random upgraded Uncommon Powers to add to your deck. | A dozen Bake-Kurage, more than she has ever held at once. The whole stairwell turns blue with their light. |
 | Ride the tide up. | Heal 20 HP. | She lets the water carry her a floor and a half, eyes closed, like floating off the reef at home. |
-| Send the water home to the sea. | Remove a card. | She sends it down towards the sea, with a message folded into the current for whoever on Watatsumi is listening. |
+| Send the water home to the sea. | Remove a card. | She sends it down toward the sea, with a message folded into the current for whoever on Watatsumi is listening. |
 
 ## Her lines (every other surface)
 

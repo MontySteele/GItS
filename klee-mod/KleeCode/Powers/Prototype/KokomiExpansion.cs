@@ -134,10 +134,10 @@ public sealed class KurageCanopyPower
     {
         ("title", "Kurage Canopy"),
         ("description",
-            $"At the start of your turn, if {Threshold} or more of your "
+            $"At the start of your turn, if {Threshold} or more "
           + "[gold]Plans[/gold] were carried out, add [blue]{Amount}[/blue] "
-          + "{Amount:plural:[gold]Ward[/gold]|[gold]Wards[/gold]}. "
-          + "Stings and Wards don't count."),
+          + "{Amount:plural:[gold]Ward[/gold]|[gold]Wards[/gold]} to your "
+          + "[gold]Hand[/gold]. Stings and Wards don't count."),
     };
 
     /// <summary>The badge previews the Ward it adds: the plain one, and the
@@ -201,13 +201,15 @@ public sealed class AtWatersEdgePower : PowerModel, ILocalizationProvider
           + "[blue]{Amount}[/blue] [gold]Weak[/gold] and [blue]{Amount}[/blue] "
           // Kokomi review r6 (2026-10-14, item 8): a Plan's hit counts.
           // 2026-10-18 wording: "to the enemy hit" (once per turn in all).
-          + "[gold]Vulnerable[/gold] to the enemy hit. [gold]Plans[/gold] count."),
+          // Kokomi text audit (2026-10-22, item 9): "Plans count." goes; a
+          // Plan hit is Hydro damage you deal, and the Plan tip says so.
+          + "[gold]Vulnerable[/gold] to the enemy hit."),
         // The Kokomi upgrade pass (2026-10-19, finish round item 5): in
         // combat the badge says when this turn's trigger is spent.
         ("smartDescription",
             "The first time each turn you deal [gold]Hydro[/gold] damage, apply "
           + "[blue]{Amount}[/blue] [gold]Weak[/gold] and [blue]{Amount}[/blue] "
-          + "[gold]Vulnerable[/gold] to the enemy hit. [gold]Plans[/gold] count."
+          + "[gold]Vulnerable[/gold] to the enemy hit."
           + "{Spent:cond:>0? (Used this turn.)|}"),
     };
 

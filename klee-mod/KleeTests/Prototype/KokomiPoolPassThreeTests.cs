@@ -95,7 +95,7 @@ public class KokomiPoolPassThreeTests
         // `EB-660`: AND THE FACE SAYS SO, live off the Plan's own var.
         Assert.Contains("Or [gold]plan[/gold]: Deal {PlanDamage:diff()} "
                       + "[gold]Hydro[/gold] damage for each [gold]Plan[/gold] "
-                      + "carried out this turn, not Stings or Wards.",
+                      + "carried out this turn. Stings and Wards don't count.",
                         Face(new ProtoKkFeint()));
     }
 

@@ -973,7 +973,7 @@ public sealed class BattleFormationPower : UpgradeTwinPower, ILocalizationProvid
     {
         ("title", "Battle Formation"),
         ("description",
-            $"At the start of your turn, if {Threshold} or more of your "
+            $"At the start of your turn, if {Threshold} or more "
           + "[gold]Plans[/gold] were carried out, gain "
           + "{Amount:energyIcons()}. Stings and Wards don't count."),
     };
@@ -1035,10 +1035,9 @@ public sealed class EndlessShoalPower : PowerModel, ILocalizationProvider
         ("title", "Endless Shoal"),
         ("description",
             "Whenever the [gold]Bake-Kurage[/gold] carries out a "
-          + "[gold]Plan[/gold] that is not a [gold]Sting[/gold] or "
-          + "[gold]Ward[/gold], add [blue]{Amount}[/blue] "
+          + "[gold]Plan[/gold], add [blue]{Amount}[/blue] "
           + "{Amount:plural:[gold]Sting[/gold]|[gold]Stings[/gold]} to your "
-          + "[gold]Hand[/gold]."),
+          + "[gold]Hand[/gold]. Stings and Wards don't count."),
     };
 
     public override PowerType Type => PowerType.Buff;

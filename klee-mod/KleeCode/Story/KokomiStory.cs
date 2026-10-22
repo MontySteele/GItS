@@ -122,7 +122,7 @@ public static class KokomiStory
                 EventType: typeof(KokomiCoralLight),
                 Title: "Coral Light",
                 Body:
-                    "Pale coral glows in a crack in the stone, the colour of the reefs off Watatsumi. On "
+                    "Pale coral glows in a crack in the stone, the color of the reefs off Watatsumi. On "
                   + "afternoons the shrine let her keep for herself, she used to swim out to coral like "
                   + "this and stay until someone came looking.",
                 Options: new[]
@@ -316,7 +316,7 @@ public static class KokomiStory
                     new StoryOption("EAT_THE_SUSHI", "Eat the sushi while it is fresh.",
                         "Heal 20 HP.",
                         new StoryEffect(StoryEffectKind.Heal, 20),
-                        "Bird egg sushi, her favourite. Gorou remembered. She eats every piece and sends "
+                        "Bird egg sushi, her favorite. Gorou remembered. She eats every piece and sends "
                       + "the box back with a thank-you."),
                 },
                 Portrait: () => KleeArt.CardPortrait("event_kokomi_report_from_gorou"),
@@ -413,7 +413,7 @@ public static class KokomiStory
                     new StoryOption("SEND_THE_WATER_HOME", "Send the water home to the sea.",
                         "Remove a card.",
                         new StoryEffect(StoryEffectKind.RemoveCard),
-                        "She sends it down towards the sea, with a message folded into the current for "
+                        "She sends it down toward the sea, with a message folded into the current for "
                       + "whoever on Watatsumi is listening."),
                 },
                 Portrait: () => KleeArt.CardPortrait("event_kokomi_tide_comes_in"),

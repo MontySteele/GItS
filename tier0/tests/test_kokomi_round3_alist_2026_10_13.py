@@ -45,8 +45,9 @@ def _probe_plan(i: int = 0) -> Card:
 
 def test_second_wave_names_the_plan_written_after_it_this_turn():
     assert _face("proto_kk_second_wave") == (
-        "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: The "
-        "[gold]Plan[/gold] written after it this turn is carried out twice."
+        # Kokomi text audit (2026-10-22, item 1): plan is the one verb.
+        "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: The next card "
+        "you [gold]plan[/gold] this turn is carried out twice."
         "{IfUpgraded:show: Draw 1 card.|}")
     assert _card("proto_kk_second_wave").effects[0]["amount"] == 7
     assert _up("proto_kk_second_wave").effects[0]["amount"] == 9
@@ -78,10 +79,11 @@ def test_jean_swirls_an_enemy_with_an_aura():
 
 def test_kurage_canopy_face():
     assert _face("proto_kk_kurage_canopy") == (
-        # Kokomi defence pass (2026-10-22): Battle Formation's read.
-        "At the start of your turn, if 2 or more of your [gold]Plans[/gold] "
-        "were carried out, add {IfUpgraded:show:an upgraded|a} "
-        "[gold]Ward[/gold]. Stings and Wards don't count.")
+        # Kokomi defence pass (2026-10-22): Battle Formation's read. Kokomi
+        # text audit (2026-10-22, item 11): "to your Hand" is back.
+        "At the start of your turn, if 2 or more [gold]Plans[/gold] were "
+        "carried out, add {IfUpgraded:show:an upgraded|a} [gold]Ward[/gold] "
+        "to your [gold]Hand[/gold]. Stings and Wards don't count.")
 
 
 def test_kurage_canopy_stops_at_a_full_hand_in_the_sim(caches):

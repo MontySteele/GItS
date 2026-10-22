@@ -51,7 +51,7 @@ public sealed class ProtoKkOpeningGambit : CustomCardModel, IElementalCard, ICha
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Opening Gambit"),
-        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage.\nOr [gold]plan[/gold]: Apply {PlanPowerAmount:diff()} [gold]Vulnerable[/gold] to ALL enemies. The next [gold]Plan[/gold] written this turn deals double damage."),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage.\nOr [gold]plan[/gold]: Apply {PlanPowerAmount:diff()} [gold]Vulnerable[/gold] to ALL enemies. The next card you [gold]plan[/gold] this turn deals double damage."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it
