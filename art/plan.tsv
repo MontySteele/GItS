@@ -3248,39 +3248,39 @@ potion_bottled_encore	ImageGen/images/furina/potions/bottled_encore.png	256	256	
 potion_water_of_lucine	ImageGen/images/furina/potions/water_of_lucine.png	256	256	contain	center	shortlist	1	png	Item Desiccant Potion.png		icon	
 # ---------- Art gaps pass (2026-10-18): story events, story curses, badges, Abyss round two, Durin/Kaeya picks ----------
 # Story events each get their own picture: the event's place or scene, the kit's own nation, no Companion faces.
-event_klee_starsnatch_cliff	ImageGen/images/cards/klee/event_klee_starsnatch_cliff.png	500	380	cover	x0.4,y0.5@1.1	shortlist	1	png	Starsnatch Cliff.png		splash	
-event_klee_letter_from_jean	ImageGen/images/cards/klee/event_klee_letter_from_jean.png	500	380	cover	x0.5,y0.45	shortlist	1	png	Wildlife White Pigeon Archive.png		splash	
-event_klee_knights_come_looking	ImageGen/images/cards/klee/event_klee_knights_come_looking.png	500	380	cover	x0.45,y0.5@1.1	shortlist	1	png	Knights of Favonius Headquarters Main Hall.png		splash	
-event_klee_dodoco_goes_missing	ImageGen/images/cards/klee/event_klee_dodoco_goes_missing.png	500	380	cover	x0.5,y0.45	shortlist	1	png	Starlight Reverie Avatar Klee.png		sticker	
-event_klee_found_you	ImageGen/images/cards/klee/event_klee_found_you.png	500	380	cover	x0.5,y0.5	shortlist	1	png	Dodoco's Bomb-Tastic Adventure Stage 6 Complete.png		sticker	
-event_klee_moms_marks	ImageGen/images/cards/klee/event_klee_moms_marks.png	500	380	cover	x0.33,y0.58@1.2	shortlist	1	png	Weibo 8M Followers.jpg		splash	
-event_klee_alices_cache	ImageGen/images/cards/klee/event_klee_alices_cache.png	500	380	cover	x0.5,y0.55@1.25	shortlist	1	png	Exquisite Chest.png		splash	
-event_klee_moms_last_note	ImageGen/images/cards/klee/event_klee_moms_last_note.png	500	380	cover	x0.45,y0.55@1.3	shortlist	1	png	Klee Birthday 2025 - Shorts.png		splash	
-event_varka_dispatch_from_mondstadt	ImageGen/images/cards/varka/event_varka_dispatch_from_mondstadt.png	500	380	cover	x0.45,y0.5@1.1	shortlist	1	png	Mondstadt Entrance - Windblume.png		splash	
-event_varka_wolf_of_the_north	ImageGen/images/cards/varka/event_varka_wolf_of_the_north.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Enemy Andrius Full Artwork.png		splash	
-event_varka_long_way_home	ImageGen/images/cards/varka/event_varka_long_way_home.png	500	380	cover	x0.42,y0.5@1.1	shortlist	1	png	Favonius Keep.png		splash	
-event_varka_second_satchel	ImageGen/images/cards/varka/event_varka_second_satchel.png	500	380	cover	x0.45,y0.5@1.1	shortlist	1	png	Knights of Favonius Headquarters Library 1.png		splash	
-event_varka_acting_grand_master	ImageGen/images/cards/varka/event_varka_acting_grand_master.png	500	380	cover	x0.45,y0.5@1.1	shortlist	1	png	Knights of Favonius Headquarters Grandmaster's Office.png		splash	
-event_varka_rearguard	ImageGen/images/cards/varka/event_varka_rearguard.png	500	380	cover	x0.45,y0.5@1.1	shortlist	1	png	Knights of Favonius Base.png		splash	
-event_varka_song_on_the_wind	ImageGen/images/cards/varka/event_varka_song_on_the_wind.png	500	380	cover	x0.42,y0.5@1.1	shortlist	1	png	Angel's Share Interior 2F.png		splash	
-event_varka_first_exam	ImageGen/images/cards/varka/event_varka_first_exam.png	500	380	cover	x0.5,y0.45@1.2	shortlist	1	png	Ellin With The Training Dummy From Salvaged Materials.png		splash	
-event_furina_empty_house	ImageGen/images/cards/furina/event_furina_empty_house.png	500	380	cover	x0.45,y0.5@1.1	shortlist	1	png	Story Quest This Life, Just Like a Light Trickle of Song.png		splash	
-event_furina_rising_water	ImageGen/images/cards/furina/event_furina_rising_water.png	500	380	cover	x0.45,y0.5@1.1	shortlist	1	png	Archon Quest The Truth Lost With the Rain.png		splash	
-event_furina_steambird_clipping	ImageGen/images/cards/furina/event_furina_steambird_clipping.png	500	380	cover	x0.62,y0.5	shortlist	1	png	Namecard Background Fontaine Big News.png		splash	
-event_furina_understudy	ImageGen/images/cards/furina/event_furina_understudy.png	500	380	cover	x0.3,y0.5	shortlist	1	png	This Life, Just Like a Light Trickle of Song Still 3 Lumine.png		splash	
-event_furina_oratrices_echo	ImageGen/images/cards/furina/event_furina_oratrices_echo.png	500	380	cover	x0.5,y0.5	shortlist	1	png	The Opera of Noirceur and Blancheur Still 1.png		splash	
-event_furina_letter_from_the_court	ImageGen/images/cards/furina/event_furina_letter_from_the_court.png	500	380	cover	x0.45,y0.45@1.1	shortlist	1	png	Melusine.png		splash	
-event_furina_curtain_call	ImageGen/images/cards/furina/event_furina_curtain_call.png	500	380	cover	x0.35,y0.45	shortlist	1	png	App Store Event Character Wallpaper Furina Version Luna II.png		splash	
-event_furina_empty_throne	ImageGen/images/cards/furina/event_furina_empty_throne.png	500	380	cover	x0.5,y0.5	shortlist	1	png	Prophecy Slate 1.png		splash	
+event_klee_starsnatch_cliff	ImageGen/images/cards/klee/event_klee_starsnatch_cliff.png	1920	900	cover	x0.5,y0.45	shortlist	1	png	Starsnatch Cliff.png		splash	
+event_klee_letter_from_jean	ImageGen/images/cards/klee/event_klee_letter_from_jean.png	1920	900	cover	x0.5,y0.3	shortlist	1	png	Wildlife White Pigeon Archive.png		splash	
+event_klee_knights_come_looking	ImageGen/images/cards/klee/event_klee_knights_come_looking.png	1920	900	cover	x0.5,y0.45	shortlist	1	png	Knights of Favonius Headquarters Main Hall.png		splash	
+event_klee_dodoco_goes_missing	ImageGen/images/cards/klee/event_klee_dodoco_goes_missing.png	1216	570	cover	x0.5,y0.66	shortlist	1	png	Starlight Reverie Avatar Klee.png		sticker	
+event_klee_found_you	ImageGen/images/cards/klee/event_klee_found_you.png	1728	810	cover	x0.5,y0.55	shortlist	1	png	Klee Best Cutie.png		sticker	
+event_klee_moms_marks	ImageGen/images/cards/klee/event_klee_moms_marks.png	1920	900	cover	x0.5,y0.5	shortlist	1	png	Weibo 8M Followers.jpg		splash	
+event_klee_alices_cache	ImageGen/images/cards/klee/event_klee_alices_cache.png	1920	900	cover	x0.6,y0.55@1.25	shortlist	1	png	Exquisite Chest.png		splash	
+event_klee_moms_last_note	ImageGen/images/cards/klee/event_klee_moms_last_note.png	1920	900	cover	x0.62,y0.5@1.3	shortlist	1	png	Klee Birthday 2025 - Shorts.png		splash	
+event_varka_dispatch_from_mondstadt	ImageGen/images/cards/varka/event_varka_dispatch_from_mondstadt.png	1920	900	cover	x0.5,y0.45	shortlist	1	png	Mondstadt Entrance - Windblume.png		splash	
+event_varka_wolf_of_the_north	ImageGen/images/cards/varka/event_varka_wolf_of_the_north.png	1920	900	cover	x0.5,y0.6	shortlist	1	png	Enemy Boreas.png		splash	
+event_varka_long_way_home	ImageGen/images/cards/varka/event_varka_long_way_home.png	1920	900	cover	x0.5,y0.45	shortlist	1	png	Favonius Keep.png		splash	
+event_varka_second_satchel	ImageGen/images/cards/varka/event_varka_second_satchel.png	1920	900	cover	x0.5,y0.45	shortlist	1	png	Knights of Favonius Headquarters Library 1.png		splash	
+event_varka_acting_grand_master	ImageGen/images/cards/varka/event_varka_acting_grand_master.png	1920	900	cover	x0.5,y0.45	shortlist	1	png	Knights of Favonius Headquarters Grandmaster's Office.png		splash	
+event_varka_rearguard	ImageGen/images/cards/varka/event_varka_rearguard.png	1920	900	cover	x0.5,y0.45	shortlist	1	png	Knights of Favonius Base.png		splash	
+event_varka_song_on_the_wind	ImageGen/images/cards/varka/event_varka_song_on_the_wind.png	1920	900	cover	x0.5,y0.45	shortlist	1	png	Angel's Share Interior 2F.png		splash	
+event_varka_first_exam	ImageGen/images/cards/varka/event_varka_first_exam.png	1920	900	cover	x0.5,y0.45	shortlist	1	png	Ellin With The Training Dummy From Salvaged Materials.png		splash	
+event_furina_empty_house	ImageGen/images/cards/furina/event_furina_empty_house.png	1920	900	cover	x0.5,y0.45	shortlist	1	png	Story Quest This Life, Just Like a Light Trickle of Song.png		splash	
+event_furina_rising_water	ImageGen/images/cards/furina/event_furina_rising_water.png	1920	900	cover	x0.5,y0.45	shortlist	1	png	Archon Quest The Truth Lost With the Rain.png		splash	
+event_furina_steambird_clipping	ImageGen/images/cards/furina/event_furina_steambird_clipping.png	832	390	cover	x0.5,y0.5	shortlist	1	png	Namecard Background Fontaine Big News.png		splash	
+event_furina_understudy	ImageGen/images/cards/furina/event_furina_understudy.png	1920	900	cover	x0.4,y0.5	shortlist	1	png	This Life, Just Like a Light Trickle of Song Still 3 Lumine.png		splash	
+event_furina_oratrices_echo	ImageGen/images/cards/furina/event_furina_oratrices_echo.png	1920	900	cover	x0.6,y0.5	shortlist	1	png	The Opera of Noirceur and Blancheur Still 1.png		splash	
+event_furina_letter_from_the_court	ImageGen/images/cards/furina/event_furina_letter_from_the_court.png	1920	900	cover	x0.5,y0.45	shortlist	1	png	Melusine.png		splash	
+event_furina_curtain_call	ImageGen/images/cards/furina/event_furina_curtain_call.png	1920	900	cover	x0.65,y0.4@1.5	shortlist	1	png	App Store Event Character Wallpaper Furina Version Luna II.png		splash	
+event_furina_empty_throne	ImageGen/images/cards/furina/event_furina_empty_throne.png	1344	630	cover	x0.5,y0.5	shortlist	1	png	Prophecy Slate 1.png		splash	
 curse_stage_fright	ImageGen/images/cards/furina/curse_stage_fright.png	500	380	cover	x0.45,y0.5@1.1	shortlist	1	png	Story Quest Show Canceled.png		splash	
-event_kokomi_sand_table	ImageGen/images/cards/kokomi/event_kokomi_sand_table.png	500	380	cover	x0.4,y0.5@1.1	shortlist	1	png	Fort Fujitou.png		splash	
-event_kokomi_coral_light	ImageGen/images/cards/kokomi/event_kokomi_coral_light.png	500	380	cover	x0.5,y0.38@1.3	shortlist	1	png	Wildlife Coral Butterfly Archive.png		splash	
-event_kokomi_room_with_no_one	ImageGen/images/cards/kokomi/event_kokomi_room_with_no_one.png	500	380	cover	x0.5,y0.5	shortlist	1	png	Paimon's Paintings Set Migration to the Coral Sea 12.png		sticker	
-event_kokomi_other_commander	ImageGen/images/cards/kokomi/event_kokomi_other_commander.png	500	380	cover	x0.5,y0.5	shortlist	1	png	Tenshukaku Concept Art.png		splash	
-event_kokomi_serpents_bones	ImageGen/images/cards/kokomi/event_kokomi_serpents_bones.png	500	380	cover	x0.45,y0.5@1.1	shortlist	1	png	The Serpent's Bowels.png		splash	
-event_kokomi_report_from_gorou	ImageGen/images/cards/kokomi/event_kokomi_report_from_gorou.png	500	380	cover	x0.45,y0.5@1.1	shortlist	1	png	Bourou Village.png		splash	
-event_kokomi_endgame	ImageGen/images/cards/kokomi/event_kokomi_endgame.png	500	380	cover	x0.5,y0.5@1.1	shortlist	1	png	World Quest Orobashi's Legacy Part I.png		splash	
-event_kokomi_tide_comes_in	ImageGen/images/cards/kokomi/event_kokomi_tide_comes_in.png	500	380	cover	x0.68,y0.42@1.2	shortlist	1	png	World Quest Tail of Watatsumi.png		splash	
+event_kokomi_sand_table	ImageGen/images/cards/kokomi/event_kokomi_sand_table.png	1920	900	cover	x0.5,y0.45	shortlist	1	png	Fort Fujitou.png		splash	
+event_kokomi_coral_light	ImageGen/images/cards/kokomi/event_kokomi_coral_light.png	1920	900	cover	x0.5,y0.3	shortlist	1	png	Wildlife Coral Butterfly Archive.png		splash	
+event_kokomi_room_with_no_one	ImageGen/images/cards/kokomi/event_kokomi_room_with_no_one.png	1920	900	cover	x0.5,y0.55	shortlist	1	png	Paimon's Paintings Set Migration to the Coral Sea 12.png		sticker	
+event_kokomi_other_commander	ImageGen/images/cards/kokomi/event_kokomi_other_commander.png	1920	900	cover	x0.5,y0.45	shortlist	1	png	Tenshukaku Concept Art.png		splash	
+event_kokomi_serpents_bones	ImageGen/images/cards/kokomi/event_kokomi_serpents_bones.png	1920	900	cover	x0.5,y0.45	shortlist	1	png	The Serpent's Bowels.png		splash	
+event_kokomi_report_from_gorou	ImageGen/images/cards/kokomi/event_kokomi_report_from_gorou.png	1920	900	cover	x0.5,y0.45	shortlist	1	png	Bourou Village.png		splash	
+event_kokomi_endgame	ImageGen/images/cards/kokomi/event_kokomi_endgame.png	1920	900	cover	x0.5,y0.45	shortlist	1	png	World Quest Orobashi's Legacy Part I.png		splash	
+event_kokomi_tide_comes_in	ImageGen/images/cards/kokomi/event_kokomi_tide_comes_in.png	1920	900	cover	x0.6,y0.42@1.2	shortlist	1	png	World Quest Tail of Watatsumi.png		splash	
 curse_public_address	ImageGen/images/cards/kokomi/curse_public_address.png	500	380	cover	x0.5,y0.5	shortlist	1	png	Paimon's Paintings Set Migration to the Coral Sea 5.png		sticker	
 # Durin -- Principle of Purity: his own splash (was art_of Binary Form).
 proto_mc_durin_principle_of_purity	ImageGen/images/cards/companions/proto_mc_durin_principle_of_purity.png	500	380	cover_autocrop	cover@0.06	shortlist	1	png	Character Durin Full Wish.png		splash	durin
