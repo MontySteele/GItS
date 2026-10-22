@@ -34,6 +34,9 @@ cut to about 350 characters is `git show 3ce4f8c35:docs/current/BACKLOG.md`.
 - Kokomi: Grand Design's chooser closed after one pick on some turns (`review/records/kokomi-balance-suite-2026-10-21.md`, lane 5); reproduce in a scenario.
 - Kokomi: lane 1 of the same suite read Tidal Surge as Ethereal and saw Bubble Ward twice in a few turns with one copy; check the lane's transcript before calling it a bug.
 - Kokomi (`review/records/kokomi-balance-suite-3-2026-10-21.md`): a Plan carried out into Intangible hit for 1 while the Plan page said 13 (lane 1); the page could warn.
+- Kokomi (`review/records/kokomi-balance-suite-5-2026-10-22.md`): Kelp Wall+'s Plan preview said "deals 0" against an enemy not attacking, then dealt 4 (lane 5); check the preview's intent read.
+- Kokomi (same record): Plan previews leave out Following Current once Resolve of Watatsumi+ stacks with it (lane 1); Grand Design+'s picker seemed to list too few cards (lane 2).
+- Mend (same record): "(0 will land)" with no reason given while HP is at or below combat-start HP; two seats were lost. The tip could say the cap.
 
 ## Harness, bridge, tools and sim
 
