@@ -92,13 +92,14 @@ def test_the_six_new_cards(cid, rarity, ctype, cost):
 
 def test_the_new_cards_numbers_and_upgrades():
     tide = loader.get_card("proto_kk_turning_tide_chain")
-    # Numbers pass (kokomi-review-r5-2026-10-14): 9 [12] / Plan 5 [6];
-    # Retreat 8 [11]; Brine Spray 8 [10].
+    # Numbers pass (kokomi-review-r5-2026-10-14): 9 [12]; Retreat 8 [11];
+    # Brine Spray 8 [10]. Tide's Plan 4 [5] per Plan, every Plan counted
+    # (the count-all ruling, 2026-10-22).
     assert tide.effects == [{"op": "damage", "amount": 9, "target": "enemy"}]
-    assert tide.plan == [{"op": "damage_per_plan_this_turn", "amount": 5,
-                          "target": "all_enemies"}]
+    assert tide.plan == [{"op": "damage_per_every_plan_this_turn",
+                          "amount": 4, "target": "all_enemies"}]
     up = _up("proto_kk_turning_tide_chain")
-    assert (up.effects[0]["amount"], up.plan[0]["amount"]) == (12, 6)
+    assert (up.effects[0]["amount"], up.plan[0]["amount"]) == (12, 5)
     retreat = loader.get_card("proto_kk_prepared_retreat")
     assert retreat.effects == [{"op": "block", "amount": 8}]
     assert retreat.plan == [{"op": "energy_if_attacked_since", "amount": 2}]
@@ -178,7 +179,7 @@ def test_turning_tide_hits_all_per_plan_and_the_turn_roll_clears():
     st.player.draw_pile = [card("proto_kk_coral_bulwark")]
     before = [e.hp for e in st.enemies]
     carry_out(st)
-    assert [b - e.hp for b, e in zip(before, st.enemies)] == [10, 10]
+    assert [b - e.hp for b, e in zip(before, st.enemies)] == [8, 8]
     kokomi_plan.roll_turn(st)
     assert st.kk_plans_carried_out_this_turn == 0
 

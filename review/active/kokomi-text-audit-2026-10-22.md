@@ -131,3 +131,14 @@ with the ruled clause: Turning Tide (131) and Ayato's Kyouka Fuushi (124)
 keep ", not Stings or Wards" until Kokomi's next card pass re-words them
 (BACKLOG). The lint also misses upgraded Kurage Canopy's face (about 127;
 it skips `{IfUpgraded}` text); that is on BACKLOG too.
+
+## The two over-ceiling carriers, ruled 2026-10-22
+
+[USER]: "Ok yeah, I agreed with your suggestion on option 1. That looks
+reasonably to me."
+
+Option 1: Turning Tide and Ayato's Kyouka Fuushi count every Plan, Stings
+and Wards included, and drop the clause. Turning Tide's Plan pays 4 [5] per
+Plan (was 5 [6] per real Plan); Kyouka Fuushi's numbers are unchanged.
+Feint, Riptide Ruin and the other carriers keep "Stings and Wards don't
+count."

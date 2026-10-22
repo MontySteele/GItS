@@ -86,6 +86,9 @@ PLAN_KINDS = frozenset((
     "damage_per_plan_this_turn", "damage_blocked_since",
     "damage_taken_since", "energy_if_attacked_since",
     "lose_strength_this_turn", "draw_pile_to_hand",
+    # Kokomi count-all ruling (2026-10-22): Turning Tide. See
+    # `DAMAGE_PER_EVERY_PLAN_THIS_TURN`.
+    "damage_per_every_plan_this_turn",
     # Kokomi to-do pass (2026-10-22): Steady Tide's fetch. See
     # `DISCARD_PILE_TO_HAND`.
     "discard_pile_to_hand",
@@ -150,6 +153,7 @@ PLAN_AIMED_OPS = frozenset((
     # THE POOL OVERHAUL (2026-10-13).
     "damage_per_plan_this_turn", "damage_blocked_since",
     "damage_taken_since", "lose_strength_this_turn",
+    "damage_per_every_plan_this_turn",
     # KOKOMI V3 (2026-10-18): Unbroken Tide.
     "damage_if_no_hp_lost_since",
     # The Inazuma pool rework (2026-10-18): Kyouka Fuushi.
@@ -224,6 +228,7 @@ PLAN_ONLY_OPS = frozenset((
                            # turn it lands on or the enemy turn it sat
                            # through, which only a Plan has.
                            "damage_per_plan_this_turn",
+                           "damage_per_every_plan_this_turn",
                            "damage_blocked_since", "damage_taken_since",
                            "energy_if_attacked_since",
                            "lose_strength_this_turn", "draw_pile_to_hand",
@@ -274,6 +279,13 @@ PLAN_ONLY_OPS = frozenset((
 #: `KokomiPlan.Kind.DamagePerPlanThisTurn` and the five beside it are the
 #: twins.
 DAMAGE_PER_PLAN_THIS_TURN = "damage_per_plan_this_turn"
+#: Kokomi count-all ruling (2026-10-22; [USER]: "Ok yeah, I agreed with your
+#: suggestion on option 1."). Turning Tide: "Deal 4 Hydro damage to ALL
+#: enemies for each Plan carried out this turn." Feint's Chain line with
+#: every Plan counted, Stings and Wards included
+#: (`kk_plans_carried_out_this_turn`). `KokomiPlan.Kind
+#: .DamagePerEveryPlanThisTurn` is the twin.
+DAMAGE_PER_EVERY_PLAN_THIS_TURN = "damage_per_every_plan_this_turn"
 DAMAGE_BLOCKED_SINCE = "damage_blocked_since"
 DAMAGE_TAKEN_SINCE = "damage_taken_since"
 ENERGY_IF_ATTACKED_SINCE = "energy_if_attacked_since"
@@ -293,9 +305,10 @@ DISCARD_PILE_TO_HAND = "discard_pile_to_hand"
 DAMAGE_IF_NO_HP_LOST_SINCE = "damage_if_no_hp_lost_since"
 #: THE INAZUMA POOL REWORK (2026-10-18, review/active/inazuma-companions-
 #: 2026-10-18.md). Kamisato Ayato, Kyouka Fuushi: "Plan: Deal 7 Hydro damage
-#: 3 times, plus once per earlier Plan, not Stings or Wards." `times` hits,
-#: plus one for each Plan carried out before it this turn, counted as Feint
-#: counts (`kk_chain_plans_this_turn`, which has already counted this one).
+#: 3 times, plus once for each earlier Plan." `times` hits, plus one for each
+#: Plan carried out before it this turn, Stings and Wards included since the
+#: count-all ruling of 2026-10-22 (`kk_plans_carried_out_this_turn`, which
+#: has already counted this one).
 #: `KokomiPlan.Kind.DamageTimesPlusEarlierPlans` is the twin.
 DAMAGE_TIMES_PLUS_EARLIER_PLANS = "damage_times_plus_earlier_plans"
 #: Brine Sting's aim.
@@ -1523,7 +1536,7 @@ def _resolve_entry(state: CombatState, entry: PlanEntry, why: str,
     # the count rises before its clauses run. `KokomiOverhaulLedger
     # .NotePlanCarryingOut` is the twin.
     state.kk_plans_carried_out_this_turn += 1
-    # KOKOMI V3 (2026-10-18, card paper sec.6): Feint's and Turning Tide's
+    # KOKOMI V3 (2026-10-18, card paper sec.6): Feint's (and Riptide Ruin's)
     # count skips a Sting's or Ward's Plan. `NotePlanCarryingOut`'s twin.
     if not jellyfish_line(entry):
         state.kk_chain_plans_this_turn += 1
@@ -1693,9 +1706,15 @@ def _resolve_clause(state: CombatState, entry: PlanEntry,
         # don't count.
         _hit(state, clause, amount * state.kk_chain_plans_this_turn,
              entry=entry, double=double_damage)
+    elif op == DAMAGE_PER_EVERY_PLAN_THIS_TURN:
+        # Turning Tide (the count-all ruling, 2026-10-22): the rate times
+        # every Plan carried out this turn, Stings and Wards included.
+        _hit(state, clause, amount * state.kk_plans_carried_out_this_turn,
+             entry=entry, double=double_damage)
     elif op == DAMAGE_TIMES_PLUS_EARLIER_PLANS:
         # Kyouka Fuushi (the Inazuma pool rework, 2026-10-18): one more hit
-        # per Plan carried out before it this turn, not Stings or Wards.
+        # per Plan carried out before it this turn, Stings and Wards
+        # included (the count-all ruling, 2026-10-22).
         _hit(state, {**clause, "times": earlier_plan_hits(state, clause)},
              amount, entry=entry, double=double_damage)
     elif op == DAMAGE_BLOCKED_SINCE:
@@ -3074,10 +3093,11 @@ def hp_lost_since(state: CombatState, entry: Optional[PlanEntry]) -> bool:
 
 def earlier_plan_hits(state: CombatState, clause: dict) -> int:
     """Kyouka Fuushi (the Inazuma pool rework, 2026-10-18): its printed hits
-    plus one per Plan carried out before it this turn, not Stings or Wards.
-    `kk_chain_plans_this_turn` has counted this Plan already, so the earlier
-    ones are one fewer. `KokomiPlan.EarlierPlanHits` is the twin."""
-    earlier = max(0, state.kk_chain_plans_this_turn - 1)
+    plus one per Plan carried out before it this turn, Stings and Wards
+    included (the count-all ruling, 2026-10-22).
+    `kk_plans_carried_out_this_turn` has counted this Plan already, so the
+    earlier ones are one fewer. `KokomiPlan.EarlierPlanHits` is the twin."""
+    earlier = max(0, state.kk_plans_carried_out_this_turn - 1)
     return max(1, int(clause.get("times", 1))) + earlier
 
 

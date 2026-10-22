@@ -23,11 +23,9 @@ namespace KleeMod.Tests.Prototype;
 [Collection(KleeOverhaulArm.Name)]
 public class KokomiV3Tests
 {
-    private const string Tail = ", not Stings or Wards.";
-
     /// <summary>The Kokomi text audit (2026-10-22, pick 2 (a)): the ruled
-    /// spelling, its own sentence. Turning Tide keeps <see cref="Tail"/>:
-    /// the sentence would take it past the 120 ceiling.</summary>
+    /// spelling, its own sentence. Turning Tide counts every Plan since the
+    /// count-all ruling (2026-10-22) and prints no clause.</summary>
     private const string DontCount = ". Stings and Wards don't count.";
 
     private static T Upgraded<T>() where T : CardModel, new()
@@ -64,8 +62,8 @@ public class KokomiV3Tests
         Assert.Equal(
             "Deal {Damage:diff()} [gold]Hydro[/gold] damage.\nOr "
           + "[gold]plan[/gold]: Deal {PlanDamage:diff()} [gold]Hydro[/gold] "
-          + "damage to ALL enemies per [gold]Plan[/gold] carried out "
-          + "this turn" + Tail,
+          + "damage to ALL enemies for each [gold]Plan[/gold] carried out "
+          + "this turn.",
             Face(new ProtoKkTurningTideChain()));
         // Shoal of Spears is exempt (2026-10-20): every Plan waiting.
         Assert.Equal(
@@ -119,6 +117,38 @@ public class KokomiV3Tests
         };
         Assert.Equal(3, KokomiPlan.ChainPlace(realFirst, 2, twice: true));
         Assert.Equal(1, KokomiPlan.ChainPlace(realFirst, 0, twice: true));
+    }
+
+    // ---- the count-all ruling (2026-10-22) --------------------------------------
+    // [USER]: "Ok yeah, I agreed with your suggestion on option 1. That looks
+    // reasonably to me." Turning Tide and Kyouka Fuushi count every Plan.
+
+    [Fact]
+    public void Turning_tide_counts_every_plan_stings_and_wards_included()
+    {
+        var tide = Assert.Single(new ProtoKkTurningTideChain().PlanClauses);
+        Assert.Equal((KokomiPlan.Kind.DamagePerEveryPlanThisTurn, 4),
+                     (tide.Kind, tide.Amount));
+        Assert.Equal(5, Assert.Single(
+            Upgraded<ProtoKkTurningTideChain>().PlanClauses).Amount);
+        // Feint keeps the real-Plan count.
+        Assert.Equal(KokomiPlan.Kind.DamagePerPlanThisTurn,
+                     Assert.Single(new ProtoKkFeint().PlanClauses).Kind);
+        // The carry-out reads the all-Plans count for it.
+        Assert.Contains(Il.Calls(Il.Method("KokomiPlan", "AskedFor")),
+                        c => c.Contains("get_PlansCarriedOutThisTurn"));
+        // Its waiting caption: a Sting, an Ambush, a Ward, then Turning
+        // Tide counts four; the doubled first Plan adds one more.
+        var queue = new[]
+        {
+            Plan(new ProtoKkSting()), Plan(new ProtoKkAmbush()),
+            Plan(new ProtoKkWard()), Plan(new ProtoKkTurningTideChain()),
+        };
+        Assert.Equal(4, KokomiPlan.ChainPlace(queue, 3, twice: false,
+                                              every: true));
+        Assert.Equal(5, KokomiPlan.ChainPlace(queue, 3, twice: true,
+                                              every: true));
+        Assert.Equal(2, KokomiPlan.ChainPlace(queue, 3, twice: false));
     }
 
     [Fact]

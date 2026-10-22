@@ -195,6 +195,13 @@ public static class KokomiPlan
         // And Read the Field's "Put a card from your Draw Pile into your
         // Hand". Sim twins: `kokomi_plan`, the same names.
         DamagePerPlanThisTurn,
+        // KOKOMI COUNT-ALL RULING (2026-10-22; [USER]: "Ok yeah, I agreed
+        // with your suggestion on option 1."): Turning Tide's "for each Plan
+        // carried out this turn" counts EVERY Plan, Stings and Wards
+        // included (<see cref="KokomiOverhaulLedger.PlansCarriedOutThisTurn"/>).
+        // Feint keeps <see cref="DamagePerPlanThisTurn"/>. Sim twin
+        // `kokomi_plan.DAMAGE_PER_EVERY_PLAN_THIS_TURN`.
+        DamagePerEveryPlanThisTurn,
         DamageBlockedSince,
         DamageTakenSince,
         EnergyIfAttackedSince,
@@ -208,9 +215,10 @@ public static class KokomiPlan
         DamageIfNoHpLostSince,
         // THE INAZUMA POOL REWORK (2026-10-18, review/active/inazuma-
         // companions-2026-10-18.md): Ayato's Kyouka Fuushi, "Plan: Deal 7
-        // Hydro damage 3 times, plus once per earlier Plan, not Stings or
-        // Wards." <see cref="Planned.Times"/> hits, plus one per Plan carried
-        // out before it this turn (<see cref="EarlierPlanHits"/>). Sim twin
+        // Hydro damage 3 times, plus once for each earlier Plan."
+        // <see cref="Planned.Times"/> hits, plus one per Plan carried out
+        // before it this turn, Stings and Wards included since the count-all
+        // ruling of 2026-10-22 (<see cref="EarlierPlanHits"/>). Sim twin
         // `kokomi_plan.DAMAGE_TIMES_PLUS_EARLIER_PLANS`.
         DamageTimesPlusEarlierPlans,
         // GRAND DESIGN TAKES BASICS (2026-10-18, review/active/open-design-
@@ -2688,6 +2696,7 @@ public static class KokomiPlan
             // THE POOL OVERHAUL (2026-10-13): the Chain, Counter and Intent
             // lines, and Read the Field's fetch.
             case Kind.DamagePerPlanThisTurn:
+            case Kind.DamagePerEveryPlanThisTurn:
             case Kind.DamageBlockedSince:
             case Kind.DamageTakenSince:
                 return await Hit(choiceContext, kokomi, plan,
@@ -2841,7 +2850,8 @@ public static class KokomiPlan
         // THE KOKOMI TASTE AUDIT (2026-10-21).
         Kind.PlanStings => "Stings planned",
         // THE POOL OVERHAUL (2026-10-13).
-        Kind.DamagePerPlanThisTurn or Kind.DamageBlockedSince
+        Kind.DamagePerPlanThisTurn or Kind.DamagePerEveryPlanThisTurn
+            or Kind.DamageBlockedSince
             or Kind.DamageTakenSince or Kind.DamageIfNoHpLostSince
             or Kind.DamageTimesPlusEarlierPlans
             => "damage",
@@ -2879,6 +2889,10 @@ public static class KokomiPlan
         Kind.DamagePerPlanThisTurn =>
             plan.Amount
             * KokomiOverhaulLedger.For(kokomi).ChainPlansThisTurn,
+        // The count-all ruling (2026-10-22): Turning Tide counts every Plan.
+        Kind.DamagePerEveryPlanThisTurn =>
+            plan.Amount
+            * KokomiOverhaulLedger.For(kokomi).PlansCarriedOutThisTurn,
         // The Kokomi upgrade pass (2026-10-19): plus the flat bonus the
         // upgrade writes (Kelp Wall +4, Turnabout +5; 0 on the base card).
         Kind.DamageBlockedSince =>
@@ -3809,13 +3823,21 @@ public static class KokomiPlan
                             * ChainPlace(Showing(kokomi.Player), index,
                                 kokomi.Powers.OfType<NereidsAscensionPower>()
                                     .Any())));
+                    // The count-all ruling (2026-10-22): Turning Tide's
+                    // place counts every Plan, Stings and Wards included.
+                    case Kind.DamagePerEveryPlanThisTurn:
+                        return LiveDeals(WithResolve(kokomi, clause.Amount
+                            * ChainPlace(Showing(kokomi.Player), index,
+                                kokomi.Powers.OfType<NereidsAscensionPower>()
+                                    .Any(), every: true)));
                     // THE INAZUMA POOL REWORK (2026-10-18): Kyouka
-                    // Fuushi's hits if the queue lands as it stands.
+                    // Fuushi's hits if the queue lands as it stands, every
+                    // earlier Plan counted (the count-all ruling, 2026-10-22).
                     case Kind.DamageTimesPlusEarlierPlans:
                         return LiveHits(System.Math.Max(1, clause.Times)
                             + ChainPlace(Showing(kokomi.Player), index,
                                 kokomi.Powers.OfType<NereidsAscensionPower>()
-                                    .Any()) - 1);
+                                    .Any(), every: true) - 1);
                     // KOKOMI V3 (2026-10-18): Unbroken Tide.
                     case Kind.DamageIfNoHpLostSince:
                         return ledger.HpLostSince(entry.Window)
@@ -3882,15 +3904,18 @@ public static class KokomiPlan
     /// <summary>
     /// THE INAZUMA POOL REWORK (2026-10-18): Kyouka Fuushi's hits at
     /// carry-out, its printed <see cref="Planned.Times"/> plus one per Plan
-    /// carried out before it this turn, not Stings or Wards. The ledger's
-    /// <see cref="KokomiOverhaulLedger.ChainPlansThisTurn"/> has counted this
-    /// carry-out already (it rises before the clauses run), so the earlier
-    /// Plans are one fewer. Sim twin: <c>kokomi_plan.earlier_plan_hits</c>.
+    /// carried out before it this turn, Stings and Wards included since the
+    /// count-all ruling (2026-10-22; [USER]: "Ok yeah, I agreed with your
+    /// suggestion on option 1."). The ledger's
+    /// <see cref="KokomiOverhaulLedger.PlansCarriedOutThisTurn"/> has counted
+    /// this carry-out already (it rises before the clauses run), so the
+    /// earlier Plans are one fewer. Sim twin:
+    /// <c>kokomi_plan.earlier_plan_hits</c>.
     /// </summary>
     public static int EarlierPlanHits(Creature kokomi, Planned plan) =>
         System.Math.Max(1, plan.Times)
         + System.Math.Max(0,
-            KokomiOverhaulLedger.For(kokomi).ChainPlansThisTurn - 1);
+            KokomiOverhaulLedger.For(kokomi).PlansCarriedOutThisTurn - 1);
 
     /// <summary>Unbroken Tide's caption once she has lost HP in its window
     /// (Kokomi v3, 2026-10-18). Display only.</summary>
@@ -3902,17 +3927,22 @@ public static class KokomiPlan
     /// including <paramref name="index"/>, one more when Nereid's Ascension
     /// doubles a real first Plan ahead of it. PURE over its inputs. Display
     /// only; the carry-out reads <see cref="KokomiOverhaulLedger.ChainPlansThisTurn"/>.
+    /// <paramref name="every"/> (the count-all ruling, 2026-10-22): count
+    /// every Plan, Stings and Wards included -- Turning Tide and Kyouka
+    /// Fuushi, whose carry-out reads
+    /// <see cref="KokomiOverhaulLedger.PlansCarriedOutThisTurn"/>.
     /// </summary>
     public static int ChainPlace(IReadOnlyList<Entry> queue, int index,
-                                 bool twice)
+                                 bool twice, bool every = false)
     {
         var count = 0;
         for (var i = 0; i <= index && i < queue.Count; i++)
         {
-            if (!KokomiRefounding.IsJellyfish(queue[i].Source)) count++;
+            if (every || !KokomiRefounding.IsJellyfish(queue[i].Source))
+                count++;
         }
         if (twice && index > 0 && queue.Count > 0
-            && !KokomiRefounding.IsJellyfish(queue[0].Source))
+            && (every || !KokomiRefounding.IsJellyfish(queue[0].Source)))
         {
             count++;
         }

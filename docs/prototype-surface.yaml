@@ -2034,12 +2034,12 @@
 - {id: proto_kk_turning_tide_chain, name: "Turning Tide", character: kokomi,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   # kokomi-review-r5-2026-10-14 numbers pass: 7 -> 9, Plan 4 -> 5 per Plan.
-   # Kokomi v3, 2026-10-18, card paper sec.6: not Stings or Wards.
-   description: "Deal 9 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 5 [gold]Hydro[/gold] damage to ALL enemies per [gold]Plan[/gold] carried out this turn, not Stings or Wards.",
+   # Count-all ruling 2026-10-22: every Plan counts, Plan 5 -> 4. History:
+   # provenance note, "Kokomi count-all ruling, 2026-10-22".
+   description: "Deal 9 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 4 [gold]Hydro[/gold] damage to ALL enemies for each [gold]Plan[/gold] carried out this turn.",
    effects: [{op: damage, amount: 9, target: enemy}],
-   plan: [{op: damage_per_plan_this_turn, amount: 5, target: all_enemies}],
-   # 12 / Plan 6 per Plan.
+   plan: [{op: damage_per_every_plan_this_turn, amount: 4, target: all_enemies}],
+   # 12 / Plan 5 per Plan.
    upgrade: {damage: 3, plan_damage: 1}}
 
 - {id: proto_kk_watatsumi_drill, name: "Watatsumi Drill", character: kokomi,
@@ -2634,14 +2634,14 @@
    effects: [{op: apply_power, power: mi_hanega, amount: 1, target: self}],
    upgrade: {cost: -1}}
 
-# The paper's Plan Rare (2026-10-18). "Earlier Plan" is a Plan carried out
-# before it this turn, counted as Feint and Turning Tide count, not Stings or
-# Wards (`KokomiOverhaulLedger.ChainPlansThisTurn`, less itself).
+# The paper's Plan Rare (2026-10-18). "Earlier Plan" is any Plan carried out
+# before it this turn, Stings and Wards included since the count-all ruling,
+# 2026-10-22 (`KokomiOverhaulLedger.PlansCarriedOutThisTurn`, less itself).
 - {id: proto_mi_ayato_kyouka_fuushi, name: "Kamisato Ayato — Kyouka Fuushi", character: klee,
    authored_by: [claude],
    nation: inazuma, star: 5, rarity: rare, role_c: applier, element: hydro,
    cost: 2, type: attack,
-   description: "Deal 7 [gold]Hydro[/gold] damage 3 times. [gold]Plan[/gold]: Deal 7 [gold]Hydro[/gold] damage 3 times, plus once per earlier [gold]Plan[/gold], not Stings or Wards.",
+   description: "Deal 7 [gold]Hydro[/gold] damage 3 times. [gold]Plan[/gold]: Deal 7 [gold]Hydro[/gold] damage 3 times, plus once for each earlier [gold]Plan[/gold].",
    effects: [{op: damage, amount: 7, times: 3, target: enemy, applies_element: true}],
    plan: [{op: damage_times_plus_earlier_plans, amount: 7, times: 3, target: front_enemy}],
    upgrade: {damage: 2, plan_damage: 2}}

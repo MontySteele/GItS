@@ -25,10 +25,9 @@ from tier0.tests.test_kokomi_refounding import (  # noqa: F401
     caches, card, carry_out, kokomi_state, write)
 
 ATTACK = [{"kind": "attack", "amount": 6}]
-STING_TAIL = ", not Stings or Wards."
 # Kokomi text audit (2026-10-22, pick 2 (a)): the ruled spelling, its own
-# sentence. Turning Tide keeps the short tail: the sentence would take it
-# past the 120 ceiling.
+# sentence. Turning Tide counts every Plan since the count-all ruling
+# (2026-10-22) and prints no clause.
 DONT_COUNT = ". Stings and Wards don't count."
 
 
@@ -74,9 +73,9 @@ def test_the_three_faces_say_stings_and_wards_dont_count():
         "[gold]Hydro[/gold] damage for each [gold]Plan[/gold] carried out "
         "this turn" + DONT_COUNT)
     assert _face("proto_kk_turning_tide_chain") == (
-        "Deal 9 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 5 "
-        "[gold]Hydro[/gold] damage to ALL enemies per [gold]Plan[/gold] "
-        "carried out this turn" + STING_TAIL)
+        "Deal 9 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 4 "
+        "[gold]Hydro[/gold] damage to ALL enemies for each [gold]Plan[/gold] "
+        "carried out this turn.")
 
 
 def test_shoal_of_spears_is_exempt_and_counts_every_plan():
@@ -163,7 +162,9 @@ def test_feint_alone_behind_stings_deals_one_rate():
     assert st.kk_plans_carried_out_this_turn == 3
 
 
-def test_turning_tide_skips_a_ward_and_the_turn_roll_clears():
+def test_turning_tide_counts_a_ward_and_the_turn_roll_clears():
+    # The count-all ruling (2026-10-22; [USER]: "Ok yeah, I agreed with your
+    # suggestion on option 1."): the Ward, the draw Plan and itself, 4 each.
     st = kokomi_state(n_enemies=2)
     kokomi_plan.schedule(st, card(kokomi_plan.WARD_ID))
     kokomi_plan.schedule(st, _draw_plan(0))
@@ -171,9 +172,9 @@ def test_turning_tide_skips_a_ward_and_the_turn_roll_clears():
     st.player.draw_pile = [card("proto_kk_coral_bulwark")]
     before = [e.hp for e in st.enemies]
     carry_out(st)
-    assert [b - e.hp for b, e in zip(before, st.enemies)] == [10, 10]
+    assert [b - e.hp for b, e in zip(before, st.enemies)] == [12, 12]
     kokomi_plan.roll_turn(st)
-    assert st.kk_chain_plans_this_turn == 0
+    assert st.kk_plans_carried_out_this_turn == 0
 
 
 def test_battle_formation_no_longer_counts_a_sting_or_ward():

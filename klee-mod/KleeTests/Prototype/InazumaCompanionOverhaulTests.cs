@@ -706,7 +706,7 @@ public class InazumaCompanionOverhaulTests
     // ==================================================================
 
     [Fact]
-    public void Kyouka_fuushi_counts_the_plans_before_it_and_not_itself()
+    public void Kyouka_fuushi_counts_every_plan_before_it_and_not_itself()
     {
         KokomiOverhaulLedger.ResetAll();
         try
@@ -716,11 +716,14 @@ public class InazumaCompanionOverhaulTests
             var ledger = KokomiOverhaulLedger.For(seat.Creature);
             ledger.NotePlanCarryingOut();                    // itself
             Assert.Equal(3, KokomiPlan.EarlierPlanHits(seat.Creature, clause));
-            ledger.NotePlanCarryingOut(jellyfish: true);     // a Sting: no
-            Assert.Equal(3, KokomiPlan.EarlierPlanHits(seat.Creature, clause));
+            // The count-all ruling (2026-10-22): a Sting or Ward counts.
+            ledger.NotePlanCarryingOut(jellyfish: true);     // a Sting
+            Assert.Equal(4, KokomiPlan.EarlierPlanHits(seat.Creature, clause));
+            ledger.NotePlanCarryingOut(jellyfish: true);     // a Ward
             ledger.NotePlanCarryingOut();
-            ledger.NotePlanCarryingOut();
-            Assert.Equal(5, KokomiPlan.EarlierPlanHits(seat.Creature, clause));
+            Assert.Equal(6, KokomiPlan.EarlierPlanHits(seat.Creature, clause));
+            Assert.Contains(Il.Calls(Il.Method("KokomiPlan", "EarlierPlanHits")),
+                            c => c.Contains("get_PlansCarriedOutThisTurn"));
             // The carry-out hands Hit the grown count.
             var resolve = string.Join(" ", Il.CallSequence(
                 Il.Method("KokomiPlan", "ResolveOne")));
@@ -737,7 +740,7 @@ public class InazumaCompanionOverhaulTests
     {
         string Face(CardModel card) => ((CustomCardModel)card).Localization!
             .First(r => r.Item1 == "description").Item2;
-        Assert.Contains("plus once per earlier [gold]Plan[/gold], not Stings or Wards.",
+        Assert.Contains("plus once for each earlier [gold]Plan[/gold].",
                         Face(new ProtoMiAyatoKyoukaFuushi()));
         Assert.Contains("If you have [gold]Block[/gold], deal {BranchDamage:diff()} additional damage.",
                         Face(new ProtoMiKiraraMeowteorKick()));

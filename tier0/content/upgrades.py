@@ -237,8 +237,10 @@ def _proto_power(effects: list[dict]) -> dict | None:
 PLAN_DELTA_OPS: dict[str, tuple[str, ...]] = {
     "plan_damage": ("damage",
                     # The Kokomi pool overhaul (2026-10-13): Feint's and
-                    # Turning Tide's per-Plan rate.
+                    # Turning Tide's per-Plan rate (Turning Tide's op since
+                    # the count-all ruling, 2026-10-22).
                     "damage_per_plan_this_turn",
+                    "damage_per_every_plan_this_turn",
                     # Kokomi v3 (2026-10-18): Unbroken Tide's hit.
                     "damage_if_no_hp_lost_since",
                     # The Inazuma pool rework (2026-10-18): Kyouka

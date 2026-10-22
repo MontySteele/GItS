@@ -635,6 +635,7 @@ OP_HOOKS: dict[str, list[tuple[str, str, str]]] = {
     # damage taken, who attacked); Intent reads the intents and takes
     # Strength; Read the Field's fetch moves a card from the draw pile.
     "damage_per_plan_this_turn": [_hook("private", "kurage", "read")],
+    "damage_per_every_plan_this_turn": [_hook("private", "kurage", "read")],
     "damage_blocked_since": [_hook("private", "kurage", "read"),
                              _hook("shared", "block_held", "read")],
     "damage_taken_since": [_hook("private", "kurage", "read")],

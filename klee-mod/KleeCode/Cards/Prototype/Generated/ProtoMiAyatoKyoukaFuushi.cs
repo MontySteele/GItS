@@ -59,7 +59,7 @@ public sealed class ProtoMiAyatoKyoukaFuushi : CustomCardModel, IElementalCard, 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kamisato Ayato — Kyouka Fuushi"),
-        ("description", "Deal {CalculatedDamage:diff()} [gold]Hydro[/gold] damage 3 times.\nOr [gold]plan[/gold]: Deal {PlanDamage:diff()} [gold]Hydro[/gold] damage 3 times, plus once per earlier [gold]Plan[/gold], not Stings or Wards.{InCombat:{VarkaSwitch}|}"),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Hydro[/gold] damage 3 times.\nOr [gold]plan[/gold]: Deal {PlanDamage:diff()} [gold]Hydro[/gold] damage 3 times, plus once for each earlier [gold]Plan[/gold].{InCombat:{VarkaSwitch}|}"),
     };
 
     /// <summary>The element this card makes current, on its in-combat line
