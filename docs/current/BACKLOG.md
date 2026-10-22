@@ -16,7 +16,6 @@ cut to about 350 characters is `git show 3ce4f8c35:docs/current/BACKLOG.md`.
 
 ## Kits and display (the mod)
 
-- Story event art is drawn at card size (500x380, `art/plan.tsv` `event_*` rows) into the event page's 2560x1200 keep-aspect portrait (`default_event_layout.tscn`; base event art is 3440x1613, 32:15), so it shows black side bars and reads soft (contact sheet 2026-10-22). Re-render the 32 rows at 32:15 (1920x900 fits the 1920x1080 sources without upscaling) with new crops, eyes on the crops, and check the package size.
 - Power badges: check the three Reaction-icon badges (Aftershock, Grand Strategist, All Four Winds) read at game size; they are wide and render small.
 - Icon declutter leftovers (2026-10-19): Courtroom Drama and Quick Change are gone from both engines. Study Buddy (`ReplayNextCompanionPower`) stays: the generator's `replay_next_companion` op emits it, and that op is live in the sim, the pilot and the tier05 draft model, so retiring it is a sim change, not a repoint. The sim also keeps twins of the powers deleted on 2026-10-19 (`furina_stage.py`, `kokomi_plan.py`, `klee_overhaul.py`, `varka_oath.py`), and nothing applies them; left while the Furina and Kokomi passes are open.
 - Kokomi's three potions and Furina's two potions (#1324, #1325) were not met in a seat; check them with `understudy.embark --relic` or in a play (the relics are seen).
