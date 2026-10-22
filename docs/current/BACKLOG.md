@@ -32,6 +32,7 @@ cut to about 350 characters is `git show 3ce4f8c35:docs/current/BACKLOG.md`.
 - Durin's start-of-turn tick skipped one fight (Fogmog, trace); `RandomEnemy` may pick the Eye With Teeth illusion (`CompanionOverhaulPowers.cs:51`). Live look. (Chained Reactions is QUEUE, backlog wrap-up pick 3.)
 
 - Kokomi's next card pass: rework Flank and Steady Tide into something Coral Crash and Tidal Screen don't already print (`review/active/kokomi-text-audit-2026-10-22.md` sec. 4, pick 3 (a)).
+- Kokomi's next card pass: Turning Tide (122 with "for each", 131 with "Stings and Wards don't count.") and Ayato's Kyouka Fuushi (124) still print ", not Stings or Wards"; re-word them with the card. Upgraded Kurage Canopy renders about 127, because `lint_text_conventions.py` measures with `{IfUpgraded}` text dropped; make the lint measure the upgraded face too (`review/active/kokomi-text-audit-2026-10-22.md`, pick 2).
 - Kokomi: Grand Design's chooser closed after one pick on some turns (`review/records/kokomi-balance-suite-2026-10-21.md`, lane 5); reproduce in a scenario.
 - Kokomi: lane 1 of the same suite read Tidal Surge as Ethereal and saw Bubble Ward twice in a few turns with one copy; check the lane's transcript before calling it a bug.
 - Kokomi (`review/records/kokomi-balance-suite-3-2026-10-21.md`): a Plan carried out into Intangible hit for 1 while the Plan page said 13 (lane 1); the page could warn.

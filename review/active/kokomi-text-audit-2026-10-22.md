@@ -125,3 +125,9 @@ Strike and its upgrades are.
 2. (a) One spelling, "Stings and Wards don't count." as its own sentence,
    on every carrier; Endless Shoal reads as written in pick 2.
 3. (a) Flank and Steady Tide go to BACKLOG for the next Kokomi card pass.
+
+Built in `1f0c968a1`, except two cards that would pass the 120 ceiling
+with the ruled clause: Turning Tide (131) and Ayato's Kyouka Fuushi (124)
+keep ", not Stings or Wards" until Kokomi's next card pass re-words them
+(BACKLOG). The lint also misses upgraded Kurage Canopy's face (about 127;
+it skips `{IfUpgraded}` text); that is on BACKLOG too.
