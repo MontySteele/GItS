@@ -3244,8 +3244,8 @@ relic_bouquet_of_roses	ImageGen/images/furina/relics/bouquet_of_roses.png	256	25
 relic_epiclese_season_pass	ImageGen/images/furina/relics/epiclese_season_pass.png	256	256	contain	center	shortlist	1	png	Item Festive Tour Ticket.png		icon	
 # potion_bottled_encore <- NEW: a golden oil, every guest again
 potion_bottled_encore	ImageGen/images/furina/potions/bottled_encore.png	256	256	contain	center	shortlist	1	png	Item Golden House Maiden Essential Oil.png		icon	
-# potion_water_of_lucine <- NEW: the Lucine fountain itself
-potion_water_of_lucine	ImageGen/images/furina/potions/water_of_lucine.png	256	256	contain	center	shortlist	1	png	Item Fontaine Lucine.png		icon	
+# potion_water_of_lucine <- a Hydro potion bottle (was the Lucine fountain, a landscape that read as no potion in the belt; contact sheet 2026-10-22)
+potion_water_of_lucine	ImageGen/images/furina/potions/water_of_lucine.png	256	256	contain	center	shortlist	1	png	Item Desiccant Potion.png		icon	
 # ---------- Art gaps pass (2026-10-18): story events, story curses, badges, Abyss round two, Durin/Kaeya picks ----------
 # Story events each get their own picture: the event's place or scene, the kit's own nation, no Companion faces.
 event_klee_starsnatch_cliff	ImageGen/images/cards/klee/event_klee_starsnatch_cliff.png	500	380	cover	x0.4,y0.5@1.1	shortlist	1	png	Starsnatch Cliff.png		splash	
