@@ -1379,6 +1379,12 @@ PLAN_LANDS_VULNERABLE_FRONT = " ({n} after Vulnerable from {plan})"
 #: Crystal Collapse) plays it through the game's own auto-play, which Ringing
 #: counts as the turn's one card, as it counts any card played for you.
 PLAN_RINGING_WARNING = "     - Ringing: a carried-out Plan uses your one card."
+#: Kokomi Balance suite 4 (2026-10-21): a seat flipped the Plan behind Opening
+#: Gambit to its now-line and read 15 where it expected 30. A now-line lands
+#: at printed size (Kokomi review r9, item 4), so the double is lost.
+PLAN_DOUBLE_LOST_WARNING = ("     - Flipped to its now-line, so Opening "
+                            "Gambit's double damage does not reach it. Flip "
+                            "it back to its Plan line to keep the double.")
 RINGING_USED_NOTE = ("- Ringing: {cards} {verb} played for you, which used "
                      "your one card this turn.")
 #: Item 9 and pick 1 (a): a receipt names what moved its number, the way the

@@ -688,18 +688,6 @@ def needs_an_exhausted_card(card: Card) -> bool:
     return any(fx.get("op") == "plan_from_exhaust" for fx in card.effects)
 
 
-def needs_a_played_companion(card: Card) -> bool:
-    """Is this row unplayable while no Companion has been played this combat?
-    (Kokomi wording pass, 2026-10-14: Crystal Collapse, whose Plan with none
-    played was written and carried out as nothing.) A PLAN-ONLY row with a
-    `play_copy_of_companion` clause; a now-line would gate only its Plan.
-    `gen_klee_cards.card_needs_a_played_companion`'s twin."""
-    if card.effects:
-        return False
-    return any(clause.get("op") == PLAY_COPY_OF_COMPANION
-               for clause in (card.plan or []))
-
-
 def refuses_for_no_plan(state: CombatState, card: Card) -> bool:
     """`card_playable`'s Plan clause (`EB-455`, the Kokomi review 2026-10-13):
     a card with a carry-out is unplayable while the Bake-Kurage holds no Plan,
@@ -726,10 +714,9 @@ def refuses_for_no_plan(state: CombatState, card: Card) -> bool:
     # is empty ("your Exhaust Pile is empty").
     if needs_an_exhausted_card(card):
         return not any(c is not card for c in state.player.exhaust_pile)
-    # Kokomi wording pass (2026-10-14): Crystal Collapse, until a Companion
-    # has been played this combat (`KokomiRefounding.AnyCompanionPlayed`).
-    if needs_a_played_companion(card):
-        return last_other_companion(state, card) is None
+    # (Crystal Collapse's "no Companion has been played" refusal, 2026-10-14,
+    # went with its "If none, play a random Common one." line, the Kokomi
+    # upgrade pass of 2026-10-19; Kokomi Balance suite 4, 2026-10-21.)
     return False
 
 
@@ -2786,11 +2773,17 @@ def write_free(state: CombatState, card: Card) -> bool:
     if not remove_instance(state.player.hand, card):
         return False
     was = state.kk_free_write
+    held = len(state.kk_plan_queue)
     state.kk_free_write = card
     try:
         combat.resolve_free_play(state, card)
     finally:
         state.kk_free_write = was
+    # The Tamakushi Casket pays for the card planned, once, here and not off
+    # the free play (`casket_block` skips a free write) -- Kokomi Balance
+    # suite 4, 2026-10-21 -- and only when a Plan was written.
+    if len(state.kk_plan_queue) > held:
+        casket_block_planned(state, card)
     return True
 
 
@@ -2807,6 +2800,9 @@ def write_as_itself(state: CombatState, card: Card) -> bool:
         return False
     state.player.discard_pile.append(card)
     schedule(state, card, clauses=[{"op": PLAY_AS_ITSELF}], replay=card)
+    # The Tamakushi Casket: a card she Planned (Kokomi Balance suite 4,
+    # 2026-10-21). Moved, not played, so no card-played hook pays it.
+    casket_block_planned(state, card)
     return True
 
 
@@ -3179,6 +3175,14 @@ def casket_counts(card: Optional[Card], planned: bool) -> bool:
     return bool(card.is_companion) or (planned and can_be_written(card))
 
 
+def casket_counts_planned(card: Optional[Card]) -> bool:
+    """Does a card Planned by a card or a Power pay the Casket? A Plan card
+    (Stings and Wards included), a Companion, and a Basic Grand Design plans
+    as itself (Kokomi Balance suite 4, 2026-10-21).
+    `TamakushiCasket.CountsPlanned` is the twin. PURE."""
+    return casket_counts(card, planned=True) or plans_as_itself(card)
+
+
 def casket_block(state: CombatState, card: Card, planned: bool = False) -> None:
     """THE TAMAKUSHI CASKET (Ward and Casket, 2026-10-18; 2026-10-20, [USER]:
     "2 was definitely the intent, and we should figure out a different Block
@@ -3194,6 +3198,10 @@ def casket_block(state: CombatState, card: Card, planned: bool = False) -> None:
     if loader.OVERHAUL_CASKET_HOOK not in state.player.relic_hooks:
         return
     if state.kk_carrying_out or not casket_counts(card, planned):
+        return
+    # Grand Design's free write pays through `casket_block_planned`, from
+    # `write_free` (Kokomi Balance suite 4, 2026-10-21).
+    if state.kk_free_write is card:
         return
     n = int(C.KOKOMI_OVERHAUL_CASKET_BLOCK)
     state.player.block += n
@@ -3212,7 +3220,7 @@ def casket_block_planned(state: CombatState, card: Card) -> None:
         return
     if loader.OVERHAUL_CASKET_HOOK not in state.player.relic_hooks:
         return
-    if not casket_counts(card, planned=True):
+    if not casket_counts_planned(card):
         return
     n = int(C.KOKOMI_OVERHAUL_CASKET_BLOCK)
     state.player.block += n

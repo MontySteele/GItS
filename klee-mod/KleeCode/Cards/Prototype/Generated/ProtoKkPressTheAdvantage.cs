@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoKkPressTheAdvantage : CustomCardModel, IElementalCard, ICharacterCard
+public sealed class ProtoKkPressTheAdvantage : CustomCardModel, IElementalCard, ICharacterCard, IBranchDamageFace
 {
     /// <summary>Sheet: all Kokomi attacks apply Hydro (catalyst-grade cadence).</summary>
     public Element Element => Element.Hydro;
@@ -53,6 +53,12 @@ public sealed class ProtoKkPressTheAdvantage : CustomCardModel, IElementalCard, 
         ("title", "Press the Advantage"),
         ("description", "Deal {PlainDamage:diff()} [gold]Hydro[/gold] damage. If a [gold]Plan[/gold] is waiting, deal {BranchDamage:diff()} instead."),
     };
+
+    /// <summary>Which printed number lands if this card is played now:
+    /// <c>BranchDamage</c> when true, <c>PlainDamage</c> otherwise. Read by
+    /// the reaction preview (<c>KleeCardTooltips.PrintedDamage</c>).</summary>
+    public bool BranchDamageLive =>
+        KokomiPlan.PlansHeld(Owner.Creature) > 0;
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

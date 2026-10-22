@@ -32,7 +32,7 @@ using MegaCrit.Sts2.Core.ValueProps;
 
 namespace KleeMod.Cards.Prototype.Generated;
 
-public sealed class ProtoFsAgainstTheTide : CustomCardModel, ICharacterCard
+public sealed class ProtoFsAgainstTheTide : CustomCardModel, ICharacterCard, IBranchDamageFace
 {
     /// <summary>Roster identity used by character-aware mechanics such as Spotlight.</summary>
     public string CharacterId => "furina";
@@ -47,6 +47,12 @@ public sealed class ProtoFsAgainstTheTide : CustomCardModel, ICharacterCard
         ("title", "Against All Odds"),
         ("description", "Deal {PlainDamage:diff()} damage. If you [gold]Drained[/gold] this turn, deal {BranchDamage:diff()} instead."),
     };
+
+    /// <summary>Which printed number lands if this card is played now:
+    /// <c>BranchDamage</c> when true, <c>PlainDamage</c> otherwise. Read by
+    /// the reaction preview (<c>KleeCardTooltips.PrintedDamage</c>).</summary>
+    public bool BranchDamageLive =>
+        FurinaStage.DrainedThisTurn(Owner.Creature);
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

@@ -117,6 +117,15 @@ public static partial class McpMod
     ///
     /// FALSE IS THE ANSWER FOR EVERY BOARD WITHOUT A PET, which is almost all
     /// of them, so the field is a cheap constant on a normal run.
+    ///
+    /// AND FALSE FOR A CARD WITH NO PLAN LINE (Kokomi Balance suite 4,
+    /// 2026-10-21). The game's gate answers true for a `Self` card over the
+    /// pet -- the pet stands on her side -- so Shoal Call ("Plan 3 Stings.",
+    /// a now-effect that plans generated Stings) came back plannable, the
+    /// refusal's hint offered `play "Shoal Call" on "Bake-Kurage"`, and two
+    /// seats played it there. A card is written on the Bake-Kurage only
+    /// through the Plan line it prints, the mod's `IPlannedCard.PlanClauses`,
+    /// read here by name (`GitsPrintsPlanLine`).
     /// </summary>
     private static bool GitsCanTargetPet(CardModel card)
     {
@@ -125,6 +134,7 @@ public static partial class McpMod
             var owner = card.Owner;
             var pets = owner?.PlayerCombatState?.Pets;
             if (pets == null || pets.Count == 0) return false;
+            if (!GitsPrintsPlanLine(card)) return false;
             foreach (var pet in pets)
             {
                 if (pet.IsAlive && card.IsValidTarget(pet)) return true;
@@ -135,6 +145,27 @@ public static partial class McpMod
         {
             // A state read must never throw. A card with no owner, or a
             // combat mid-teardown, is simply "no".
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Does this card print a Plan line? The klee mod's
+    /// `IPlannedCard.PlanClauses` (a non-empty list), read by name because the
+    /// bridge holds no reference to the mod (the header's rule). A card
+    /// without the member, or any throw, is "no".
+    /// </summary>
+    internal static bool GitsPrintsPlanLine(CardModel card)
+    {
+        try
+        {
+            var member = card.GetType().GetProperty(
+                "PlanClauses", BindingFlags.Public | BindingFlags.Instance);
+            return member?.GetValue(card) is System.Collections.ICollection
+                   { Count: > 0 };
+        }
+        catch
+        {
             return false;
         }
     }

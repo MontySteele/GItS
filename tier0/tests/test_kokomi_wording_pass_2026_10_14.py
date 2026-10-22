@@ -3,20 +3,19 @@
 [USER], 2026-10-14: "Yep, please proceed". Four fixes, no number changes:
 Pincer's Plan line names the turn it is carried out, Battle Formation says
 once a turn, Juuga's Plan line says its three turns, and Crystal Collapse is
-unplayable until a Companion has been played this combat. The C# twin is
+unplayable until a Companion has been played this combat (that gate is gone
+since 2026-10-21: the card's face plays a random Common one with none). The C# twin is
 `klee-mod/KleeTests/Prototype/KokomiWordingPassTests.cs`. NOTHING MEASURED
 HERE IS QUOTABLE (R215 B): shape assertions about an engine.
 """
 
 from pathlib import Path
 
-from tier0.content import loader
 from tier0.engine import combat, kokomi_plan
 from tier0.engine.state import Card, PlanEntry
 from tier0.tests.test_arm_keyword_tips import proto
 from tier0.tests.test_kokomi_refounding import (  # noqa: F401
     caches, card, carry_out, kokomi_state)
-from tools import gen_klee_cards
 
 REPO = Path(__file__).resolve().parents[2]
 GEN = REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype" / "Generated"
@@ -89,23 +88,19 @@ def test_juuga_plan_grants_block_at_three_turn_ends(caches):
     assert st.player.powers[kokomi_plan.MI_JUUGA_GUARD] == 3
 
 
-# --- 4. Crystal Collapse: unplayable until a Companion has been played --------
+# --- 4. Crystal Collapse: playable with no Companion played -----------------
+# The wording pass made it unplayable until a Companion had been played; the
+# Kokomi upgrade pass (2026-10-19) gave it "If none, play a random Common
+# one.", and the gate stayed behind -- refused with "no Companion has been
+# played" in three lanes of the Kokomi Balance suite 4 (2026-10-21). Gone.
 
-def test_crystal_collapse_is_unplayable_until_a_companion_is_played(caches):
+def test_crystal_collapse_is_playable_with_no_companion_played(caches):
     st = kokomi_state()
     collapse = card("proto_mi_gorou_crystal_collapse")
     st.player.hand.append(collapse)
-    assert kokomi_plan.needs_a_played_companion(collapse)
-    assert combat.card_playable(st, collapse) is False
-    # Another Crystal Collapse played earlier is never "the last Companion".
-    kokomi_plan.note_companion_played(
-        st, card("proto_mi_gorou_crystal_collapse"))
-    assert combat.card_playable(st, collapse) is False
-    kokomi_plan.note_companion_played(st, card("proto_mi_gorou_juuga"))
+    assert kokomi_plan.last_other_companion(st, collapse) is None
     assert combat.card_playable(st, collapse) is True
-    # Combat-wide: a turn boundary keeps it playable.
-    kokomi_plan.roll_turn(st)
-    assert combat.card_playable(st, collapse) is True
+    assert not kokomi_plan.refuses_for_no_plan(st, collapse)
 
 
 def test_crystal_collapse_written_names_the_companion(caches):
@@ -117,22 +112,9 @@ def test_crystal_collapse_written_names_the_companion(caches):
         "Crystal Collapse: Gorou — Juuga: Forward Unto Victory"
 
 
-def test_only_crystal_collapse_takes_the_companion_gate():
-    hits = [c.id for c in loader.prototype_cards()
-            if kokomi_plan.needs_a_played_companion(c)]
-    assert hits == ["proto_mi_gorou_crystal_collapse"]
-
-
-def test_the_gate_agrees_with_the_emitter_over_every_row():
-    for c in loader.prototype_cards():
-        row = {"effects": c.effects, "plan": c.plan}
-        assert kokomi_plan.needs_a_played_companion(c) == \
-            gen_klee_cards.card_needs_a_played_companion(row), c.id
-
-
-def test_the_generated_card_carries_the_gate_reason_and_preview():
+def test_the_generated_card_carries_no_gate_and_keeps_its_preview():
     src = (GEN / "ProtoMiGorouCrystalCollapse.cs").read_text(encoding="utf-8")
-    assert "IUnplayableReasonCard" in src
-    assert "KokomiRefounding.AnyCompanionPlayed(this)" in src
-    assert '"no Companion has been played this combat"' in src
+    assert "IUnplayableReasonCard" not in src
+    assert "IsPlayable" not in src
+    assert "no Companion has been played" not in src
     assert "KokomiCards.WithCopiedCompanionPreview(" in src

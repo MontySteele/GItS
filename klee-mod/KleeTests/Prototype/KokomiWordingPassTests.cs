@@ -76,35 +76,35 @@ public class KokomiWordingPassTests
 
     // ---- 4. CRYSTAL COLLAPSE ----------------------------------------------
 
+    // The wording pass's gate (unplayable until a Companion was played) is
+    // gone: since the Kokomi upgrade pass (2026-10-19) the face plays a
+    // random Common one with none, and the gate refused it anyway (Kokomi
+    // Balance suite 4, 2026-10-21, lanes 1, 1b and 5).
+
     [Fact]
-    public void Crystal_collapse_waits_for_a_companion_played_this_combat()
+    public void Crystal_collapse_remembers_the_last_other_companion()
     {
-        Assert.False(KokomiRefounding.CompanionPlayed(null));
         var ledger = new KokomiOverhaulLedger();
         ledger.RollTo(1);
-        Assert.False(KokomiRefounding.CompanionPlayed(ledger));
+        Assert.Null(ledger.LastCompanionPlayed);
         // Crystal Collapse never counts as its own last Companion.
         ledger.NoteCompanionCard(new ProtoMiGorouCrystalCollapse());
-        Assert.False(KokomiRefounding.CompanionPlayed(ledger));
+        Assert.Null(ledger.LastCompanionPlayed);
         ledger.NoteCompanionCard(new ProtoMiGorouJuuga());
-        Assert.True(KokomiRefounding.CompanionPlayed(ledger));
+        Assert.IsType<ProtoMiGorouJuuga>(ledger.LastCompanionPlayed);
         ledger.RollTo(2);
-        Assert.True(KokomiRefounding.CompanionPlayed(ledger));
-        // A canonical copy (a reward, a compendium page) fails open.
-        Assert.True(KokomiRefounding.AnyCompanionPlayed(
-            new ProtoMiGorouCrystalCollapse()));
+        Assert.IsType<ProtoMiGorouJuuga>(ledger.LastCompanionPlayed);
     }
 
     [Fact]
-    public void Crystal_collapse_gates_its_play_and_says_why()
+    public void Crystal_collapse_is_playable_with_no_companion_played()
     {
         var card = new ProtoMiGorouCrystalCollapse();
-        Assert.IsAssignableFrom<IUnplayableReasonCard>(card);
-        Assert.Contains(
-            Il.Calls(Il.Method("ProtoMiGorouCrystalCollapse",
-                               "get_IsPlayable")),
-            c => c.Contains("KokomiRefounding.AnyCompanionPlayed"));
-        Assert.Null(((IUnplayableReasonCard)card).UnplayableReason);
+        Assert.False(card is IUnplayableReasonCard);
+        Assert.Null(typeof(ProtoMiGorouCrystalCollapse).GetProperty(
+            "IsPlayable", HeadlessGame.All | System.Reflection.BindingFlags.DeclaredOnly));
+        // The fallback its face prints is the carry-out's own.
+        Assert.Equal("Random Companion", KokomiPlan.CopiesCaption(null));
     }
 
     [Fact]

@@ -509,35 +509,6 @@ public static class KokomiRefounding
         }
     }
 
-    /// <summary>Crystal Collapse's gate (Kokomi wording pass, 2026-10-14,
-    /// [USER]: "Yep, please proceed"): has a Companion been played this
-    /// combat? With none, its Plan was written and carried out as nothing,
-    /// so the card is unplayable until one has. A canonical copy, a card
-    /// with no owner and a throw all answer true (fails open,
-    /// <see cref="AnyToPlan"/>'s rule). Sim twin:
-    /// <c>kokomi_plan.refuses_for_no_plan</c>.</summary>
-    public static bool AnyCompanionPlayed(CardModel card)
-    {
-        try
-        {
-            if (!card.IsMutable) return true;
-            var kokomi = card.Owner?.Creature;
-            if (kokomi?.CombatState == null) return true;
-            return CompanionPlayed(KokomiOverhaulLedger.Peek(kokomi));
-        }
-        catch (System.Exception e)
-        {
-            WarnOnce(ref _warnedCompanion,
-                     $"Crystal Collapse read of the ledger threw: {e}");
-            return true;
-        }
-    }
-
-    /// <summary><see cref="AnyCompanionPlayed"/>'s read, PURE: a ledger
-    /// that holds a last Companion. No ledger yet is none played.</summary>
-    public static bool CompanionPlayed(KokomiOverhaulLedger? ledger) =>
-        ledger?.LastCompanionPlayed != null;
-
     /// <summary>The Companion Crystal Collapse copies, for its hover: the
     /// card a waiting Plan of THIS card caught when it was written, else the
     /// last Companion played this combat (what writing it now would catch).
@@ -566,7 +537,6 @@ public static class KokomiRefounding
         }
     }
 
-    private static bool _warnedCompanion;
     private static bool _warnedHand;
     private static bool _warnedCard;
     private static bool _warnedExhaust;
@@ -636,6 +606,7 @@ public static class KokomiRefounding
         if (!KokomiOverhaul.LiveFor(kokomi)) return false;
         var pet = BakeKuragePet.Of(kokomi);
         if (pet == null) return false;
+        var held = KokomiPlan.PlansHeld(kokomi);
         _freeWrites.Add(card);
         try
         {
@@ -645,6 +616,11 @@ public static class KokomiRefounding
         {
             _freeWrites.Remove(card);
         }
+        // The Tamakushi Casket pays for the card planned, once, here rather
+        // than off the auto-play's card-played hook (Kokomi Balance suite 4,
+        // 2026-10-21), and only when a Plan was written.
+        if (KokomiPlan.PlansHeld(kokomi) > held)
+            await Relics.TamakushiCasket.PayForPlanned(kokomi, card);
         return true;
     }
 
@@ -673,6 +649,9 @@ public static class KokomiRefounding
                 new KokomiPlan.Planned(KokomiPlan.Kind.PlayAsItself, 1,
                                        KokomiPlan.Aim.FrontEnemy, card),
             });
+        // The Tamakushi Casket: a card she Planned (Kokomi Balance suite 4,
+        // 2026-10-21). Moved, not played, so no card-played hook pays it.
+        await Relics.TamakushiCasket.PayForPlanned(kokomi, card);
         return true;
     }
 

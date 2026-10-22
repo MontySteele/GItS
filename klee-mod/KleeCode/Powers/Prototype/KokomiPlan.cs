@@ -801,6 +801,20 @@ public static class KokomiPlan
     public static bool DoubledBy(Entry? previous, Entry entry) =>
         WritesDoubleRider(previous) && !(entry.Now && entry.TwoLine);
 
+    /// <summary>Kokomi Balance suite 4 (2026-10-21): is this the Plan
+    /// Opening Gambit's rider would double, flipped to its now-line, so the
+    /// double is lost (the r9 rule above: a now-line lands at printed size)?
+    /// The strip, the Plans view and the seat page say so; a seat flipped
+    /// one and read 15 where it expected 30. PURE.</summary>
+    public static bool LosesDouble(Entry? previous, Entry entry) =>
+        WritesDoubleRider(previous) && entry.Now && entry.TwoLine;
+
+    /// <summary><see cref="LosesDouble"/> for the entry at
+    /// <paramref name="index"/> of <paramref name="queue"/>. PURE.</summary>
+    public static bool LosesDoubleAt(IReadOnlyList<Entry> queue, int index) =>
+        index > 0 && index < queue.Count
+        && LosesDouble(queue[index - 1], queue[index]);
+
     /// <summary>This seat's queue, front first. Never null.</summary>
     public static IReadOnlyList<Entry> Pending(Player? player) =>
         player != null && _queues.TryGetValue(player, out var q)
@@ -3348,7 +3362,10 @@ public static class KokomiPlan
     {
         // Grand Design's forecast (2026-10-18): a planned Basic Attack's own
         // hit is a planned hit at the front, folded the same way.
-        var written = WrittenFrontDamage(entry) + AsItselfDamage(entry, kokomi);
+        var written = WrittenFrontDamage(entry) + AsItselfDamage(entry, kokomi)
+            // Kokomi Balance suite 4 (2026-10-21): Resolve of Watatsumi's
+            // bonus on each hit, added at the carry-out (`Hit`).
+            + ResolveFrontBonus(entry, kokomi);
         // Kokomi review r9 (2026-10-15, item 4): Opening Gambit's rider
         // doubles the written number BEFORE the board, as `Hit` does.
         if (doubled) written *= 2;
@@ -3373,8 +3390,13 @@ public static class KokomiPlan
         if (!entry.Source.DynamicVars.TryGetValue(PlanDamageVar.VarName,
                                                   out var v)
             || v is not PlanDamageVar planVar) return;
+        // Kokomi Balance suite 4 (2026-10-21): with Resolve of Watatsumi's
+        // bonus, added before the double as `Hit` adds it.
+        var hit = front[0].Amount > 0
+            ? front[0].Amount + ResolveOfWatatsumiPower.Bonus(kokomi)
+            : front[0].Amount;
         planVar.ShowQueued(PlannedDamage(FrontEnemy(kokomi),
-            doubled ? front[0].Amount * 2 : front[0].Amount));
+            doubled ? hit * 2 : hit));
     }
 
     /// <summary>
@@ -3443,7 +3465,8 @@ public static class KokomiPlan
         snapshot["queue"] = pending
             .Select((entry, index) => (object?)QueueRow(
                 entry, creature, index,
-                index > 0 && DoubledBy(pending[index - 1], entry)))
+                index > 0 && DoubledBy(pending[index - 1], entry),
+                LosesDoubleAt(pending, index)))
             .ToList();
         // `EB-317`. WHAT THE JELLYFISH HAS ALREADY DONE THIS TURN, in the
         // order it did it, and in the WORDS IT SAID: `line` is the very string
@@ -3474,7 +3497,8 @@ public static class KokomiPlan
     /// <see cref="CarriedOutRow"/>'s reason: the key names are the contract
     /// with `understudy/blindplay_board.kokomi_plans`.</summary>
     private static Dictionary<string, object?> QueueRow(
-        Entry entry, Creature? kokomi, int index = 0, bool doubled = false)
+        Entry entry, Creature? kokomi, int index = 0, bool doubled = false,
+        bool doubleLost = false)
     {
         // A PLAN STAYS OPEN (2026-10-01): a two-line Plan carries both lines
         // while it waits, so the choice is readable a turn early (sec.3).
@@ -3521,6 +3545,10 @@ public static class KokomiPlan
                     ? 0 : ForecastFrontDamage(entry, kokomi, doubled),
                 // Item 4: the number above already carries the rider.
                 ["doubled"] = doubled && !(entry.Now && entry.TwoLine),
+                // Kokomi Balance suite 4 (2026-10-21): flipped to its
+                // now-line, the Plan Opening Gambit would double loses the
+                // double (`LosesDouble`); the page says so.
+                ["double_lost"] = doubleLost,
                 ["aim"] = entry.Now && entry.TwoLine ? "" : WrittenAim(entry),
                 // Kokomi whole-run round 2 (2026-10-10): the printed Plan
                 // line folds the front body's Vulnerable (`PlanDamageVar`),
@@ -3543,9 +3571,13 @@ public static class KokomiPlan
                 // per body, every flat hit summed whatever its aim, and her
                 // Strength when it was written. Zero and null on a Plan with
                 // no flat hit, and on a flipped one.
+                // Kokomi Balance suite 4 (2026-10-21): and Resolve of
+                // Watatsumi's bonus on each hit.
                 ["written"] = entry.Now && entry.TwoLine
                     ? 0 : (WrittenDamage(entry)
-                           + AsItselfDamage(entry, kokomi)) * (doubled ? 2 : 1),
+                           + AsItselfDamage(entry, kokomi)
+                           + ResolveHitsBonus(entry, kokomi))
+                          * (doubled ? 2 : 1),
                 ["written_strength"] = entry.Now && entry.TwoLine
                     ? null : entry.WrittenStrength,
                 // KOKOMI REVIEW R6 (2026-10-14, item 7): a Counter Plan that
@@ -3633,6 +3665,40 @@ public static class KokomiPlan
             .Sum(clause => clause.Amount * System.Math.Max(1, clause.Times));
 
     /// <summary>
+    /// KOKOMI BALANCE SUITE 4 (2026-10-21): Resolve of Watatsumi's "it deals
+    /// N additional damage" was in no preview. <see cref="Hit"/> adds it to
+    /// each hit of a Plan at the carry-out, before Opening Gambit's double,
+    /// so the previews add it the same way: <see cref="ResolveHitsBonus"/>
+    /// over every flat hit (<see cref="WrittenDamage"/>'s), and
+    /// <see cref="ResolveFrontBonus"/> over the front ones. Read from the
+    /// stack she holds now, as the carry-out reads it then. Display only.
+    /// </summary>
+    public static int ResolveHitsBonus(Entry entry, Creature? kokomi) =>
+        ResolveBonusOver(entry, kokomi, clause => clause.Kind == Kind.Damage);
+
+    /// <summary>The front-aimed half of <see cref="ResolveHitsBonus"/>, for
+    /// <see cref="ForecastFrontDamage"/>.</summary>
+    public static int ResolveFrontBonus(Entry entry, Creature? kokomi) =>
+        ResolveBonusOver(entry, kokomi, clause => clause.Kind == Kind.Damage
+                                                  && clause.Aim == Aim.FrontEnemy);
+
+    private static int ResolveBonusOver(Entry entry, Creature? kokomi,
+                                        System.Func<Planned, bool> which)
+    {
+        var bonus = ResolveOfWatatsumiPower.Bonus(kokomi);
+        if (bonus <= 0) return 0;
+        return bonus * entry.Clauses
+            .Where(clause => which(clause) && clause.Amount > 0)
+            .Sum(clause => System.Math.Max(1, clause.Times));
+    }
+
+    /// <summary>A Chain or Unbroken Tide caption's number with Resolve of
+    /// Watatsumi's bonus, which <see cref="Hit"/> adds to any hit above 0.
+    /// </summary>
+    private static int WithResolve(Creature? kokomi, int amount) =>
+        amount > 0 ? amount + ResolveOfWatatsumiPower.Bonus(kokomi) : amount;
+
+    /// <summary>
     /// THE POOL OVERHAUL (2026-10-13): a waiting Counter or Chain Plan's
     /// number as it stands, in the strip's words, or null for any other
     /// entry, a flipped one, or no combat. Display only.
@@ -3666,10 +3732,10 @@ public static class KokomiPlan
                     case Kind.DamagePerPlanThisTurn:
                         // Kokomi v3 (2026-10-18): Stings and Wards don't
                         // count, so the place is counted in real Plans.
-                        return LiveDeals(clause.Amount
+                        return LiveDeals(WithResolve(kokomi, clause.Amount
                             * ChainPlace(Showing(kokomi.Player), index,
                                 kokomi.Powers.OfType<NereidsAscensionPower>()
-                                    .Any()));
+                                    .Any())));
                     // THE INAZUMA POOL REWORK (2026-10-18): Kyouka
                     // Fuushi's hits if the queue lands as it stands.
                     case Kind.DamageTimesPlusEarlierPlans:
@@ -3680,7 +3746,8 @@ public static class KokomiPlan
                     // KOKOMI V3 (2026-10-18): Unbroken Tide.
                     case Kind.DamageIfNoHpLostSince:
                         return ledger.HpLostSince(entry.Window)
-                            ? HpLostCaption : LiveDeals(clause.Amount);
+                            ? HpLostCaption
+                            : LiveDeals(WithResolve(kokomi, clause.Amount));
                     // KOKOMI REVIEW R5 (2026-10-14, A3): a Counter's running
                     // count in its own words ("7 blocked so far"); the hit
                     // is that count.
@@ -3815,7 +3882,16 @@ public static class KokomiPlan
     {
         if (kokomi?.CombatState is not { } combat) return null;
         if (entry.Now && entry.TwoLine) return null;
-        if (!entry.Clauses.Any(c => c.Kind == Kind.BlockMaxIntent)) return null;
+        // Kokomi Balance suite 4 (2026-10-21): under Resolve of Watatsumi a
+        // flat Block Plan reads the board too -- its face does not carry
+        // the bonus -- so it prints its total like Tide Wall.
+        var resolve = ResolveOfWatatsumiPower.Bonus(kokomi);
+        if (!entry.Clauses.Any(c => c.Kind == Kind.BlockMaxIntent
+                || (resolve > 0 && c.Amount > 0
+                    && c.Kind is Kind.Block or Kind.BlockPerStatusInHand)))
+        {
+            return null;
+        }
         try
         {
             var total = 0m;
@@ -3827,8 +3903,17 @@ public static class KokomiPlan
                     continue;
                 }
                 var asked = AskedFor(kokomi, clause) ?? 0;
-                if (asked <= 0) continue;
-                total += FoldUnsourcedBlock(combat, kokomi, asked);
+                // Under Resolve, Tide Wall's Block lands the bonus whatever
+                // the intents read; a flat or per-status Block of 0 lands
+                // nothing.
+                if (asked <= 0
+                    && !(clause.Kind == Kind.BlockMaxIntent && resolve > 0))
+                {
+                    continue;
+                }
+                // Resolve of Watatsumi's bonus on a Block that lands, as
+                // the carry-out adds it.
+                total += FoldUnsourcedBlock(combat, kokomi, asked + resolve);
             }
             return (int)total;
         }
@@ -3928,12 +4013,18 @@ public static class KokomiPlan
     /// ("Block 29"). An Attack Plan says what Block it will land in ("into 8
     /// Block", or "into Block" where the body defends and the size is not
     /// known). A two-line Plan otherwise says "Plan line".
+    /// A flipped Plan that Opening Gambit's double would have reached says
+    /// it is not doubled (<see cref="LosesDouble"/>, Kokomi Balance suite 4,
+    /// 2026-10-21).
     /// </summary>
     public static string? StripCaption(bool twoLine, bool flipped,
                                        int? blockNow, int keptBlock,
-                                       bool defends, string? live = null)
+                                       bool defends, string? live = null,
+                                       bool doubleLost = false)
     {
-        if (twoLine && flipped) return Vfx.KokomiPlanStrip.NowLineCaption;
+        if (twoLine && flipped)
+            return doubleLost ? Vfx.KokomiPlanStrip.NowLineNotDoubledCaption
+                              : Vfx.KokomiPlanStrip.NowLineCaption;
         if (blockNow is { } block) return $"Block {block}";
         // THE POOL OVERHAUL (2026-10-13): a Counter or Chain Plan's number
         // as it stands (<see cref="LiveLine"/>).
@@ -4264,6 +4355,11 @@ public static class KokomiPlan
             // folded at WRITING time -- `Schedule` puts `Hers` onto the queued
             // clause -- so the face previews the same call the queue holds.
             PreviewValue = Hers(kokomi, card, (int)BaseValue, _strengthTimes);
+            // Kokomi Balance suite 4 (2026-10-21): Resolve of Watatsumi's
+            // bonus, which the carry-out adds to each hit (`Hit`), before
+            // the double below.
+            if (PreviewValue > 0)
+                PreviewValue += ResolveOfWatatsumiPower.Bonus(kokomi);
             // Kokomi review r9 (2026-10-15, item 4): the Plan written now
             // goes behind the queue's last entry, and when that one is
             // Opening Gambit's the rider reaches this one. The face prints

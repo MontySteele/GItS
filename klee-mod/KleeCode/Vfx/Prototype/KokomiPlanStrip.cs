@@ -116,6 +116,10 @@ internal static class KokomiPlanStrip
     internal const string PlanLineCaption = "Plan line";
     internal const string NowLineCaption = "Now-line";
 
+    /// <summary>A flipped Plan Opening Gambit's double would have reached
+    /// (Kokomi Balance suite 4, 2026-10-21).</summary>
+    internal const string NowLineNotDoubledCaption = "Now, not doubled";
+
     /// <summary>The mark on the top picture: the Plan carried out first
     /// (Kokomi review 2026-10-13).</summary>
     internal const string FirstCaption = "First";
@@ -432,7 +436,10 @@ internal static class KokomiPlanStrip
                     KokomiPlan.DefendsAhead(entry, kokomi),
                     // THE POOL OVERHAUL (2026-10-13): a Counter or Chain
                     // Plan's number as it stands.
-                    KokomiPlan.LiveLine(entry, kokomi, i));
+                    KokomiPlan.LiveLine(entry, kokomi, i),
+                    // Kokomi Balance suite 4 (2026-10-21): a flip that
+                    // loses Opening Gambit's double says so.
+                    KokomiPlan.LosesDoubleAt(pending, i));
                 line.Visible = caption != null;
                 line.Text = caption ?? string.Empty;
             }
