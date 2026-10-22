@@ -259,7 +259,7 @@ STEAM_APP_ID = "2868840"
 #: The beta Workshop item's manifest id (`tools/package_workshop.py`'s beta
 #: package) and the name the in-game mod settings list it under.
 BETA_MOD_ID = "klee-beta"
-BETA_MOD_NAME = "Teyvat Spire Roster (Beta)"
+BETA_MOD_NAME = "Teyvat Spire (Beta)"
 DEFAULT_STEAMAPPS = Path(r"C:\Program Files (x86)\Steam\steamapps")
 
 

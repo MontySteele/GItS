@@ -5,6 +5,17 @@ Ruled 2026-10-14 (`review/active/workshop-readiness-2026-10-14.md`, all (a)):
 held back from the first upload. Claude prepares the workspace; nothing in
 the repo uploads.
 
+**The name (2026-10-22).** In game (mod list, config page, manifest name) the
+mod is "Teyvat Spire". The Workshop titles are "Teyvat Spire: Genshin Impact
+Characters" (public, so search finds "Genshin") and "Teyvat Spire (Beta)".
+[USER]: "let's do 1) as a quick cleanup for "Teyvat Spire" and then leave
+the others alone", then, on putting Genshin in the public title: "Let's do
+that". A bare "Genshin Spire" was passed over: it reads as official and sits
+next to an existing mod, GenshinSpire2. The mod ids (`klee`, `klee-beta`),
+the `KLEEMOD-` keys and the repo name GItS stay, because saves, run history,
+co-op matching and run stats hold them. The titles may change again after
+the beta testers weigh in ("I'll ask the beta testers for their opinions").
+
 **Two variants.** `public`: mod id `klee`, Klee, Kokomi, Furina and Varka.
 `beta`: mod id `klee-beta`, every kit (Yae included), title "(Beta)". Both
 register the same card and character ids, so a player enables one. With both
@@ -135,7 +146,7 @@ What the player sees: one tickbox, "Share anonymous run stats with the
 Teyvat Spire developers", **on by default** since 2026-10-18 ([USER], asked
 whether the page's disclaimer was enough instead of opt-in: "Let's go default
 on."), switchable off in the same place, under Settings, Mod Configuration
-(BaseLib), Open Config, Teyvat Spire Roster (BaseLib's config screen; it is
+(BaseLib), Open Config, Teyvat Spire (BaseLib's config screen; it is
 also on the main menu when BaseLib's own setting shows it there). It is
 stored in `%APPDATA%/SlayTheSpire2/mod_configs/KleeMod.cfg` with the install
 id, a random UUID v4 made the first time a run is sent and kept through
@@ -163,7 +174,7 @@ The page's run-data paragraph (default on), as `PRIVACY_PARAGRAPH` in
 (optional)" paragraph in the saved description). The public page gets the
 same text with "This mod sends" for "This beta sends" (`privacy_paragraph`):
 
-> Run data. This beta sends a short summary of each finished run to the Teyvat Spire developers: your character, ascension, result, the cards and relics you ended with, which cards you were offered and took, and your HP floor by floor. It holds no Steam id, name, chat or other personal details, and your IP address is not stored. Runs are tied only to a random id made by the mod on your machine. Data is used to balance the mod and deleted after a year. It is on by default; turn it off any time with "Share anonymous run stats with the Teyvat Spire developers" under Settings, Mod Configuration (BaseLib), Open Config, Teyvat Spire Roster. It only sends when the game's own "Upload data" setting is on.
+> Run data. This beta sends a short summary of each finished run to the Teyvat Spire developers: your character, ascension, result, the cards and relics you ended with, which cards you were offered and took, and your HP floor by floor. It holds no Steam id, name, chat or other personal details, and your IP address is not stored. Runs are tied only to a random id made by the mod on your machine. Data is used to balance the mod and deleted after a year. It is on by default; turn it off any time with "Share anonymous run stats with the Teyvat Spire developers" under Settings, Mod Configuration (BaseLib), Open Config, Teyvat Spire. It only sends when the game's own "Upload data" setting is on.
 
 **What [USER] runs**, after editing the description in `workshop.json`
 (delete its DRAFT line) and checking `image.png`:

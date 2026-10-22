@@ -76,7 +76,7 @@ def test_an_enabled_beta_warns_loudly_and_names_the_fix(tmp_path):
     assert line.startswith("workshop beta:") and "SHADOWS" in line
     assert warning.startswith("WARNING")
     assert "WILL NOT LOAD" in warning
-    assert "Teyvat Spire Roster (Beta)" in warning
+    assert "Teyvat Spire (Beta)" in warning
 
 
 def test_a_disabled_beta_is_a_quiet_line(tmp_path):

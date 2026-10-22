@@ -20,7 +20,7 @@ and opened with Pillow, 2026-09-02) -- six for six, so treated as the shipped
 convention rather than one mod's private choice.
 
 WHY A COMPOSITE, AND WHY select_portrait AND NOT selection_splash.
-"Teyvat Spire Roster" (Klee/manifest.json name) bundles three characters, so
+"Teyvat Spire" (Klee/manifest.json name) bundles three characters, so
 a single badge naming only one of them undersells what installing this mod
 gets you -- unlike Downfall's badges, which are one submod each. The three
 existing `<character>/ui/select_portrait.png` files (already GENERATOR_OWNED
