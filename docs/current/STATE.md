@@ -25,6 +25,9 @@ Go-live pins to Steam's default `public` branch, not `public-beta`: on
 24724944 (2026-08-13), which the mod is built against. A compatibility check
 against `public` is next ([USER]: "we should do a check against the public
 version rather than the beta, and pin against that for the go-live").
+Go-live save safety is built (2026-10-22, `operations/workshop.md`, "Save
+safety"): the beta keeps its own save folder, and a Teyvat run hidden by
+turning the mod off comes back once the mod is on and no run is open.
 
 ## Mod build environment (pinned)
 

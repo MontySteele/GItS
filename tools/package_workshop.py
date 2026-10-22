@@ -140,7 +140,7 @@ Co-op: both players need the same version of this mod and the same variant (this
 
 BETA_NOTE = """
 
-BETA: every kit, including Yae Miko (in progress). Enable this or the main release, not both."""
+BETA: every kit, including Yae Miko (in progress). Enable this or the main release, never both: with both on, the second fails to load and you may be playing the wrong version. This beta keeps its own save folder, so its runs and progress stay apart from the main release (your modded progress is copied in the first time you start it)."""
 
 # The Workshop privacy paragraph (telemetry-worker/README.md), in the
 # description only when the build carries the uploader. Default on since

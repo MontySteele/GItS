@@ -108,6 +108,17 @@ def test_workshop_json_has_the_uploader_fields(name):
     assert ("Yae" in d) == (name == "beta")
 
 
+def test_only_the_beta_page_carries_the_save_reminders():
+    """Go-live save safety (2026-10-22), [USER]: "Beta testers need to just
+    be careful about this and we can put a reminder on the beta page; public
+    users shouldn't need a warning." """
+    beta = pw.workshop_json(pw.VARIANTS["beta"], "0.3.0", "friends_only", None)["description"]
+    public = pw.workshop_json(pw.VARIANTS["public"], "0.3.0", "friends_only", None)["description"]
+    for words in ("never both", "own save folder"):
+        assert words in beta, words
+        assert words not in public, words
+
+
 def test_the_default_visibility_is_friends_only():
     with pytest.raises(SystemExit):
         pw.workshop_json(pw.VARIANTS["public"], "0.3.0", "everyone", None)

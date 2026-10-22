@@ -33,32 +33,6 @@ public launch; Yae's card-trail colour (she borrows the Ironclad's orange);
 "Witch's Homework" and "Witch's Homework II" read alike; listen for the
 modded death sound (`set_hp player 1`); the shop portrait idles.
 
-## Go-live save safety (2026-10-22)
-
-Lane tests of saves and mismatched versions (lane profiles only, all
-restored). Same-build quit and continue works; retired card, relic and potion
-ids become the base game's "Deprecated" stand-ins; co-op with different
-versions is refused with a clear popup. Two findings need a call:
-
-1. **Turning the mod off with a run open.** With BaseLib still on, the
-   Teyvat run vanishes from the menu with no message; the next new run
-   overwrites it and deletes the mod characters' rows in ancient, encounter
-   and enemy stats (card stats and discoveries survive). (a, default) a
-   Workshop page line: "Finish or abandon your run before disabling or
-   unsubscribing; while the mod is off a Teyvat run is hidden, and starting a
-   new run replaces it." (b) (a) plus the mod backs up the run save whenever it
-   holds a Teyvat character.
-2. **A character missing from a package.** The public package leaves Yae
-   unregistered, so a beta player's Yae run is lost the same way on
-   switching to public. (a, default) never unregister a shipped character id:
-   the public package registers Yae hidden from character select. (b) leave
-   it and say so on the page.
-3. **Both variants enabled** (beta and public, or beta and dev): the second
-   fails "already loaded" and the menu shows red "Loaded 3 mods WITH
-   ERRORS!"; the player may be on the wrong version. (a, default) the public
-   page says "enable one, not both", as the beta page does. (b) (a) plus an
-   in-game notice naming the active variant.
-
 ## Eyes-on looks (materials ready; no build waits on them)
 
 - **Models and screens in motion** (from the backlog, 2026-10-19): Klee,
