@@ -1012,9 +1012,12 @@ def test_kyouka_fuushi_counts_earlier_plans_not_itself():
     st = make_state()
     clause = {"op": "damage_times_plus_earlier_plans", "amount": 7,
               "times": 3}
-    st.kk_chain_plans_this_turn = 1          # itself only
+    # The count-all ruling (2026-10-22): every Plan, Stings and Wards too.
+    st.kk_plans_carried_out_this_turn = 1    # itself only
+    st.kk_chain_plans_this_turn = 1
     assert kokomi_plan.earlier_plan_hits(st, clause) == 3
-    st.kk_chain_plans_this_turn = 3          # two real Plans before it
+    st.kk_plans_carried_out_this_turn = 3    # two Plans before it
+    st.kk_chain_plans_this_turn = 1          # both Stings or Wards
     assert kokomi_plan.earlier_plan_hits(st, clause) == 5
 
 
@@ -1031,7 +1034,8 @@ def test_kyouka_fuushi_carried_out_after_two_plans_hits_five_times(overhaul):
     assert hp - st.enemies[0].hp == 7 * 5
 
 
-def test_kyouka_fuushi_behind_stings_and_wards_hits_three_times(overhaul):
+def test_kyouka_fuushi_behind_two_wards_hits_five_times(overhaul):
+    # The count-all ruling (2026-10-22): the Wards count.
     st = _kk_state()
     kokomi_plan.schedule(st, _kk_card(kokomi_plan.WARD_ID))
     kokomi_plan.schedule(st, _kk_card(kokomi_plan.WARD_ID))
@@ -1040,7 +1044,7 @@ def test_kyouka_fuushi_behind_stings_and_wards_hits_three_times(overhaul):
                            for _ in range(4)]
     hp = st.enemies[0].hp
     kokomi_plan.resolve_all(st)
-    assert hp - st.enemies[0].hp == 7 * 3
+    assert hp - st.enemies[0].hp == 7 * 5
 
 
 def test_hyouka_is_uncommon_now(overhaul):

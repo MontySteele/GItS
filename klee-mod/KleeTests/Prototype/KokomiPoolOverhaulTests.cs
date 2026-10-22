@@ -84,15 +84,16 @@ public class KokomiPoolOverhaulTests
         var tide = new ProtoKkTurningTideChain();
         Assert.Equal((CardType.Attack, CardRarity.Common, 1),
                      (tide.Type, tide.Rarity, tide.EnergyCost.Canonical));
-        // The numbers pass (kokomi-review-r5-2026-10-14): Tide 9 [12] / Plan 5 [6],
-        // Spray 8 [10], Retreat 8 [11], Snare Plan 4.
+        // The numbers pass (kokomi-review-r5-2026-10-14): Tide 9 [12],
+        // Spray 8 [10], Retreat 8 [11], Snare Plan 4. Tide's Plan 4 [5] per
+        // Plan, every Plan counted (the count-all ruling, 2026-10-22).
         Assert.Equal((9, 12), (Var<ProtoKkTurningTideChain>("Damage"),
                                Var<ProtoKkTurningTideChain>("Damage", true)));
         var chain = Assert.Single(tide.PlanClauses);
-        Assert.Equal((KokomiPlan.Kind.DamagePerPlanThisTurn, 5,
+        Assert.Equal((KokomiPlan.Kind.DamagePerEveryPlanThisTurn, 4,
                       KokomiPlan.Aim.AllEnemies),
                      (chain.Kind, chain.Amount, chain.Aim));
-        Assert.Equal(6, Assert.Single(
+        Assert.Equal(5, Assert.Single(
             Upgraded<ProtoKkTurningTideChain>().PlanClauses).Amount);
 
         var spray = new ProtoKkBrineSpray();

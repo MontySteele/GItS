@@ -5057,6 +5057,8 @@ OPS = {
     # lines and Read the Field's fetch, each naming the carry-out turn or the
     # enemy turn the Plan sat through.
     "damage_per_plan_this_turn": _op_kokomi_plan_only,
+    # The count-all ruling (2026-10-22): Turning Tide's Chain line.
+    "damage_per_every_plan_this_turn": _op_kokomi_plan_only,
     "damage_blocked_since": _op_kokomi_plan_only,
     "damage_taken_since": _op_kokomi_plan_only,
     "energy_if_attacked_since": _op_kokomi_plan_only,

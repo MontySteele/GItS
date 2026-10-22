@@ -10102,3 +10102,22 @@ again", and on Watatsumi's Grace, "Otherwise agreed"
   Discard Pile into the Hand (op `discard_pile_to_hand`, the player's pick on
   the base game's grid, Hologram's verb up to N); was draw 3 [4]. Block
   9 [12] unchanged.
+
+## Kokomi count-all ruling, 2026-10-22
+
+[USER]: "Ok yeah, I agreed with your suggestion on option 1. That looks
+reasonably to me." (`review/active/kokomi-text-audit-2026-10-22.md`, the two
+over-ceiling carriers.)
+
+- `proto_kk_turning_tide_chain`: its Plan counts every Plan carried out this
+  turn, Stings and Wards included (new op `damage_per_every_plan_this_turn`,
+  `KokomiPlan.Kind.DamagePerEveryPlanThisTurn`, reading
+  `PlansCarriedOutThisTurn` / `kk_plans_carried_out_this_turn`). Plan 5 [6]
+  -> 4 [5] per Plan; 9 [12] unchanged. The sheet's earlier comment,
+  verbatim: "kokomi-review-r5-2026-10-14 numbers pass: 7 -> 9, Plan 4 -> 5
+  per Plan. Kokomi v3, 2026-10-18, card paper sec.6: not Stings or Wards."
+- `proto_mi_ayato_kyouka_fuushi`: "earlier Plan" counts every Plan carried out
+  before it this turn, Stings and Wards included (`EarlierPlanHits` /
+  `earlier_plan_hits` read the all-Plans count). Numbers unchanged.
+- Both drop ", not Stings or Wards"; Feint, Riptide Ruin and the other
+  carriers keep their exclusion.

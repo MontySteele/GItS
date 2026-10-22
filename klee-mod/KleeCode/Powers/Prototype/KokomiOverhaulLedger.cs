@@ -296,8 +296,9 @@ public sealed class KokomiOverhaulLedger
 
     /// <summary>
     /// CHAIN: the Plans carried out THIS TURN, the one being carried out
-    /// included -- Feint's and Turning Tide's "for each Plan carried out this
-    /// turn" and Battle Formation's third. Raised by
+    /// included -- Turning Tide's "for each Plan carried out this turn" and
+    /// Kyouka Fuushi's "earlier Plan" (both Stings and Wards included since
+    /// the count-all ruling, 2026-10-22). Raised by
     /// <see cref="NotePlanCarryingOut"/> at the top of each carry-out, before
     /// its clauses run, so each Chain line counts itself; a doubled carry-out
     /// counts twice. Rolled with the turn. Sim twin:
@@ -308,8 +309,10 @@ public sealed class KokomiOverhaulLedger
     /// <summary>
     /// KOKOMI V3 (2026-10-18, review/active/kokomi-cards-2026-10-18.md sec.6;
     /// [USER]: "Makes sense! ... let's do both."): the same count less the
-    /// Sting and Ward Plans -- Feint's and Turning Tide's "Stings and Wards
-    /// don't count". Battle Formation keeps <see cref="PlansCarriedOutThisTurn"/>.
+    /// Sting and Ward Plans -- Feint's, Riptide Ruin's and Battle
+    /// Formation's "Stings and Wards don't count". Turning Tide and Kyouka
+    /// Fuushi read <see cref="PlansCarriedOutThisTurn"/> (count-all ruling,
+    /// 2026-10-22).
     /// Rolled with the turn. Sim twin:
     /// <c>CombatState.kk_chain_plans_this_turn</c>.
     /// </summary>

@@ -3574,6 +3574,9 @@ PLAN_CLAUSE_KINDS = {
     # Undercurrent Snare's Strength loss this turn. And Read the Field's
     # fetch from the Draw Pile. Sim twins: `kokomi_plan`, the same names.
     "damage_per_plan_this_turn": "DamagePerPlanThisTurn",
+    # Kokomi count-all ruling (2026-10-22), Turning Tide: "for each Plan
+    # carried out this turn", Stings and Wards included.
+    "damage_per_every_plan_this_turn": "DamagePerEveryPlanThisTurn",
     "damage_blocked_since": "DamageBlockedSince",
     "damage_taken_since": "DamageTakenSince",
     "energy_if_attacked_since": "EnergyIfAttackedSince",
@@ -3581,9 +3584,9 @@ PLAN_CLAUSE_KINDS = {
     # Unbroken Tide's "if you lost no HP since you planned this".
     "damage_if_no_hp_lost_since": "DamageIfNoHpLostSince",
     # THE INAZUMA POOL REWORK (2026-10-18), Ayato's Kyouka Fuushi: "Deal 7
-    # Hydro damage 3 times, plus once per earlier Plan, not Stings or Wards."
-    # `times` hits, plus one per Plan carried out before it this turn
-    # (`ChainPlansThisTurn` less itself).
+    # Hydro damage 3 times, plus once for each earlier Plan." `times` hits,
+    # plus one per Plan carried out before it this turn, Stings and Wards
+    # included since 2026-10-22 (`PlansCarriedOutThisTurn` less itself).
     "damage_times_plus_earlier_plans": "DamageTimesPlusEarlierPlans",
     "lose_strength_this_turn": "LoseStrengthThisTurn",
     "draw_pile_to_hand": "DrawPileToHand",
@@ -3643,6 +3646,7 @@ PLAN_AIMED_OPS = {"damage", "damage_quarter_max_hp",
                   # THE POOL OVERHAUL (2026-10-13).
                   "damage_per_plan_this_turn", "damage_blocked_since",
                   "damage_taken_since", "lose_strength_this_turn",
+                  "damage_per_every_plan_this_turn",
                   # KOKOMI V3 (2026-10-18): Unbroken Tide.
                   "damage_if_no_hp_lost_since",
                   # The Inazuma pool rework (2026-10-18): Kyouka Fuushi.
@@ -3683,6 +3687,7 @@ PLAN_ONLY_OPS = {
                  # lands on or the enemy turn it sat through.
                  "damage_per_plan_this_turn", "damage_blocked_since",
                  "damage_taken_since", "energy_if_attacked_since",
+                 "damage_per_every_plan_this_turn",
                  "lose_strength_this_turn", "draw_pile_to_hand",
                  # Kokomi to-do pass (2026-10-22): Steady Tide's fetch.
                  "discard_pile_to_hand",

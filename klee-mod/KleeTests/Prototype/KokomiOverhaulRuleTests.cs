@@ -332,7 +332,8 @@ public class KokomiOverhaulRuleTests
                     "AddStings", "GainStrength", "JuugaGuard",
                     // THE POOL OVERHAUL (2026-10-13): Chain, Counter and
                     // Intent, and Read the Field's fetch.
-                    "DamagePerPlanThisTurn", "DamageBlockedSince",
+                    "DamagePerPlanThisTurn", "DamagePerEveryPlanThisTurn",
+                    "DamageBlockedSince",
                     "DamageTakenSince", "EnergyIfAttackedSince",
                     "LoseStrengthThisTurn", "DrawPileToHand",
                     // KOKOMI V3 (2026-10-18): Unbroken Tide.

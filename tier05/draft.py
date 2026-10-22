@@ -716,6 +716,8 @@ KOKOMI_OVERHAUL_OPS = frozenset((
     "damage_per_plan_this_turn", "damage_blocked_since",
     "damage_taken_since", "energy_if_attacked_since",
     "lose_strength_this_turn", "draw_pile_to_hand",
+    # The count-all ruling (2026-10-22): Turning Tide, priced as Feint.
+    "damage_per_every_plan_this_turn",
     # KOKOMI V3 (2026-10-18): Unbroken Tide, priced with the Counter set.
     "damage_if_no_hp_lost_since",
     # The Inazuma pool rework (2026-10-18): Kyouka Fuushi, priced at its
@@ -950,7 +952,8 @@ def _op_price(fx: dict, *, prints_damage: Optional[bool] = None) -> float:
         # Gorou's Juuga: N turns of the rule's Block, at face.
         return _neutral_amount(fx, 0) * C.MI_JUUGA_GUARD_BLOCK
     # THE KOKOMI POOL OVERHAUL (2026-10-13).
-    if op == "damage_per_plan_this_turn":
+    if op in ("damage_per_plan_this_turn",
+              "damage_per_every_plan_this_turn"):
         # Feint, Turning Tide: the rate once -- the line counts itself, so
         # one Plan carried out is the floor; more is a queue fact.
         return _neutral_amount(fx, 0)
@@ -2223,6 +2226,8 @@ STATIC_OP_PRICING: dict[str, str] = {
     # --- the Kokomi pool overhaul (2026-10-13) ---
     "damage_per_plan_this_turn": "the per-Plan rate once: the line counts "
                                  "itself, so one carry-out is the floor",
+    "damage_per_every_plan_this_turn": "the per-Plan rate once, as "
+                                       "damage_per_plan_this_turn",
     "damage_blocked_since": "ZERO: the damage she blocked while it waited, "
                             "a fight fact an offer screen cannot read",
     "damage_taken_since": "ZERO: the damage enemies dealt her while it "
