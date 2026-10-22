@@ -132,8 +132,9 @@ public static class KokomiPlan
         //     Plan was written for, captured by <see cref="Schedule"/> onto
         //     <see cref="Planned.Targets"/> as a CombatId and found again at
         //     carry-out; a player who is dead by then draws nothing.
-        //   Coordinated Strike: "Plan: Next turn, each other player's Attacks
-        //     deal 3 additional damage." Battle Plan's
+        //   Coordinated Strike: "Plan: Each other player's Attacks deal 3
+        //     additional damage this turn." (the Kokomi text audit,
+        //     2026-10-22, item 7; it read "Next turn"). Battle Plan's
         //     <see cref="AttackDamageThisTurn"/> mirrored onto every OTHER
         //     living player: the shipped <c>AttackUpThisTurnPower</c> on
         //     each, removed at the end of the player turn it was carried out

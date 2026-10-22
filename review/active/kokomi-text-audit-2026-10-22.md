@@ -116,3 +116,12 @@ Strike and its upgrades are.
 3. **The duplicates.** (a, default) a BACKLOG line for the next Kokomi card
    pass: rework Flank and Steady Tide into something Coral Crash and Tidal
    Screen don't already print. (b) rework them now.
+
+## Ruling, 2026-10-22
+
+[USER]: "Agreed on all defaults for 1534!"
+
+1. (a) Section 3's twelve fixes are built.
+2. (a) One spelling, "Stings and Wards don't count." as its own sentence,
+   on every carrier; Endless Shoal reads as written in pick 2.
+3. (a) Flank and Steady Tide go to BACKLOG for the next Kokomi card pass.

@@ -32,7 +32,8 @@ public class KokomiRound3AListTests
     [Fact]
     public void Second_wave_names_the_plan_written_after_it_this_turn()
     {
-        Assert.EndsWith("The [gold]Plan[/gold] written after it this turn is "
+        // Kokomi text audit (2026-10-22, item 1): plan is the one verb.
+        Assert.EndsWith("The next card you [gold]plan[/gold] this turn is "
                       + "carried out twice.{IfUpgraded:show: Draw 1 card.|}",
                         Face(new ProtoKkSecondWave()));
     }

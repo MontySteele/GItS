@@ -33,7 +33,8 @@ public class KokomiWordingPassTests
     public void Pincer_names_the_turn_it_is_carried_out()
     {
         var face = Face(new ProtoKkPincer());
-        Assert.Contains("Your first Attack that turn is played twice.", face);
+        // Kokomi text audit (2026-10-22, item 7): a Plan line says "this turn".
+        Assert.Contains("Your first Attack this turn is played twice.", face);
         Assert.DoesNotContain("Next turn", face);
         // The switch the carry-out applies says "this turn": it is spent on
         // the morning the Plan lands, never a turn later.
@@ -49,11 +50,11 @@ public class KokomiWordingPassTests
         // The Kokomi finish pass (2026-10-19): the base start-of-turn
         // template replaced "The first time each turn".
         Assert.StartsWith(
-            "At the start of your turn, if 2 or more of your "
+            "At the start of your turn, if 2 or more "
           + "[gold]Plans[/gold] were carried out, gain ",
             Face(new ProtoKkBattleFormation()));
         Assert.StartsWith(
-            "At the start of your turn, if 2 or more of your "
+            "At the start of your turn, if 2 or more "
           + "[gold]Plans[/gold] were carried out, gain ",
             PowerFace(new BattleFormationPower()));
     }

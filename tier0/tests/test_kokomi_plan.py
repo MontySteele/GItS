@@ -1691,9 +1691,10 @@ def test_a_damageless_follower_is_unchanged_and_the_face_says_so(overhaul):
     kokomi_plan.resolve_all(st)
     assert st.player.block == 8
     # THE 2026-09-25 TEXT PASS: the clause still names what it doubles. The
-    # card text pass (2026-10-12) words it "Your next Plan".
+    # card text pass (2026-10-12) words it "Your next Plan"; the Kokomi text
+    # audit (2026-10-22, item 1) retires "written" for the one verb, plan.
     assert _faces()["proto_kk_opening_gambit"].endswith(
-        "The next [gold]Plan[/gold] written this turn deals double damage.")
+        "The next card you [gold]plan[/gold] this turn deals double damage.")
 
 
 def test_a_rider_with_no_follower_says_so(overhaul):
@@ -1959,13 +1960,15 @@ def test_the_three_rider_faces_print_the_window_the_rider_lives_in(overhaul):
     # Plan"; the drain's own line still says which entry took the rider.
     # Kokomi round 3 A-list (2026-10-13): Second Wave names the window --
     # the Plan written after it this turn, never the next morning's.
-    # Opening Gambit names the same window ("written this turn").
+    # Opening Gambit names the same window ("written this turn"). The Kokomi
+    # text audit (2026-10-22, item 1): both say "the next card you plan this
+    # turn", plan being the one verb.
     assert faces["proto_kk_second_wave"] == (
-        "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: The "
-        "[gold]Plan[/gold] written after it this turn is carried out twice."
+        "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: The next card "
+        "you [gold]plan[/gold] this turn is carried out twice."
         "{IfUpgraded:show: Draw 1 card.|}")
     assert faces["proto_kk_opening_gambit"].endswith(
-        "The next [gold]Plan[/gold] written this turn deals double damage.")
+        "The next card you [gold]plan[/gold] this turn deals double damage.")
     # Scout Ahead, the third, was cut in the cleanup pass (2026-09-29).
     for face in faces.values():
         assert "carried out with this one" not in face
@@ -2096,7 +2099,8 @@ def test_feints_face_prints_the_plan_line_it_can_write(overhaul):
     (2026-10-13) the line is a Chain: it pays for the Plans landed with it."""
     faces = _faces()
     assert ("[gold]Plan[/gold]: Deal 6 [gold]Hydro[/gold] damage for each "
-            "[gold]Plan[/gold] carried out this turn, not Stings or Wards.") in \
+            "[gold]Plan[/gold] carried out this turn. Stings and Wards don't "
+            "count.") in \
         faces["proto_kk_feint"]
 
 

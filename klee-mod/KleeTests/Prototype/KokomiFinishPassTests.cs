@@ -50,7 +50,7 @@ public class KokomiFinishPassTests
         var plain = new ProtoKkBattleFormation();
         Assert.Equal(2, plain.EnergyCost.Canonical);
         Assert.Equal(
-            "At the start of your turn, if 2 or more of your [gold]Plans[/gold] "
+            "At the start of your turn, if 2 or more [gold]Plans[/gold] "
           + "were carried out, gain {energyPrefix:energyIcons(1)}"
           + "{IfUpgraded:show: and draw 1 card|}. Stings and Wards don't count.",
             Face(plain));
@@ -67,7 +67,7 @@ public class KokomiFinishPassTests
         Assert.Contains(Il.Calls(Il.Method(nameof(ProtoKkBattleFormation), "OnPlay")),
                         c => c.Contains("UpgradeTwinPower.Install"));
         Assert.Equal(
-            "At the start of your turn, if 2 or more of your [gold]Plans[/gold] "
+            "At the start of your turn, if 2 or more [gold]Plans[/gold] "
           + "were carried out, gain {Amount:energyIcons()}. Stings and Wards "
           + "don't count.",
             PowerText(new BattleFormationPower(), "description"));

@@ -122,8 +122,9 @@ def test_the_five_faces_print_the_ruled_text():
         "Gain {Block:diff()} [gold]Block[/gold]. The next card you "
         "[gold]plan[/gold] this turn costs 1 less.")
     assert _sheet_row("proto_kk_evening_watch")["description"] == (
-        "Gain {KkAmount:diff()} [gold]Block[/gold] for each enemy intending "
-        "to attack. Draw 1 card.")
+        # Kokomi text audit (2026-10-22, item 6): one spelling.
+        "Gain {KkAmount:diff()} [gold]Block[/gold] for each enemy that "
+        "intends to attack. Draw 1 card.")
     assert _sheet_row("proto_kk_undercurrent_snare")["description"].startswith(
         "Gain 8 [gold]Block[/gold]. [gold]Plan[/gold]: ")
     assert _sheet_row("proto_kk_surging_shoal")["description"] == (

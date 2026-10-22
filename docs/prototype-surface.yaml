@@ -1246,7 +1246,7 @@
    # Pool overhaul (2026-10-13): a Chain Plan. Review r5: Plan 5 -> 6.
    # Kokomi review r8 (2026-10-14) item 5: the now-line is a flat 8 (was
    # 8, plus 3 per Plan waiting). Provenance notes.
-   description: "Deal 8 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 6 [gold]Hydro[/gold] damage for each [gold]Plan[/gold] carried out this turn, not Stings or Wards.",
+   description: "Deal 8 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 6 [gold]Hydro[/gold] damage for each [gold]Plan[/gold] carried out this turn. Stings and Wards don't count.",
    effects: [{op: damage, amount: 8, target: enemy}],
    plan: [{op: damage_per_plan_this_turn, amount: 6, target: front_enemy}],
    # 10 / Plan 8 per Plan.
@@ -1340,7 +1340,7 @@
    # R276 pick 1: the intent, read at carry-out, a flat 6 under it; the
    # largest intent on the board (2026-10-12). Face: the Kokomi upgrade pass
    # (2026-10-19). Provenance notes.
-   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus the biggest attack an enemy intends when this is carried out.",
+   description: "Gain 4 [gold]Block[/gold]. [gold]Plan[/gold]: Gain {PlanBlock:diff()} [gold]Block[/gold], plus the biggest attack an enemy intends.",
    effects: [{op: block, amount: 4}],
    # Kokomi defence pass (2026-10-22): the Plan's flat Block is the
    # face-up number, 4 [6] (was 6 [9]); the intent bonus stays.
@@ -1449,7 +1449,7 @@
    cost: 2, type: attack, rarity: uncommon,
    # The re-founding (2026-10-12): the Plan is "Draw 3 cards" (was 2 Energy
    # and a draw); the upgrade still adds 1 to the Plan's draw.
-   description: "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies. Debuffed enemies take {ExtraDamage:diff()} additional. [gold]Plan[/gold]: Draw {PlanCards:diff()} cards.",
+   description: "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies. Deals {ExtraDamage:diff()} additional damage to debuffed enemies. [gold]Plan[/gold]: Draw {PlanCards:diff()} cards.",
    effects: [{op: damage, amount: 11, target: all_enemies, bonus_vs_debuff: 3}],
    plan: [{op: draw, amount: 3}],
    # 14 / 4 more, and the Plan's draw 3 -> 4.
@@ -1463,7 +1463,7 @@
    # R276 pick 1 (the halves rewrite): the now-line answers this turn; the
    # Plan line buys what only a head start can buy.
    # Wording pass 2026-10-14: "Next turn" read as a second turn of delay.
-   description: "Deal 5 [gold]Hydro[/gold] damage twice. [gold]Plan[/gold]: Your first Attack that turn is played twice.{IfUpgraded:show: Draw 1 card.|}",
+   description: "Deal 5 [gold]Hydro[/gold] damage twice. [gold]Plan[/gold]: Your first Attack this turn is played twice.{IfUpgraded:show: Draw 1 card.|}",
    effects: [{op: damage, amount: 5, target: enemy, times: 2}],
    plan: [{op: first_attack_twice}, {op: draw, amount: 0}],
    # 2026-10-11 Kokomi card pass (review/ruled/kokomi-card-pass-2026-10-11.md):
@@ -1477,7 +1477,7 @@
    # Kokomi level pass (2026-10-12, sec.2): the Plan reads intents WHEN IT IS
    # CARRIED OUT, as Tide Wall does; 11 [14]. The face says so since the
    # Kokomi upgrade pass (2026-10-19).
-   description: "Deal 8 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 11 [gold]Hydro[/gold] damage to each enemy that intends to attack when this is carried out.",
+   description: "Deal 8 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 11 [gold]Hydro[/gold] damage to each enemy that intends to attack.",
    effects: [{op: damage, amount: 8, target: enemy}],
    # `EB-492`, the intent-keyed aim, read at carry-out.
    plan: [{op: damage, amount: 11, target: enemies_intending_attack}],
@@ -1496,7 +1496,7 @@
    cost: 1, type: skill, rarity: uncommon,
    # `EB-687`: THE CLAUSE NAMES WHAT IT DOUBLES, so a Plan that deals none is
    # visibly unchanged. The finding and the ceiling: the provenance note.
-   description: "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold] to ALL enemies. The next [gold]Plan[/gold] written this turn deals double damage.",
+   description: "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Apply 1 [gold]Vulnerable[/gold] to ALL enemies. The next card you [gold]plan[/gold] this turn deals double damage.",
    # THE CASKET PASS (2026-09-28): 5 -> 7 now. `applies_element: true`
    # (2026-10-05): the face prints Hydro, so the row declares it -- the element
    # lives on the card, not on who plays it ([USER]'s ruling).
@@ -1515,7 +1515,7 @@
    cost: 1, type: skill, rarity: uncommon,
    # Kokomi core pass (review/active/kokomi-core-pass-2026-09-27.md): the
    # now-half does something on a quiet turn.
-   description: "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: The [gold]Plan[/gold] written after it this turn is carried out twice.{IfUpgraded:show: Draw 1 card.|}",
+   description: "Deal 7 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: The next card you [gold]plan[/gold] this turn is carried out twice.{IfUpgraded:show: Draw 1 card.|}",
    # `applies_element: true` (2026-10-05): the face prints Hydro, so the row
    # declares it rather than leaning on Kokomi's retired every-card cadence.
    effects: [{op: damage, amount: 7, target: enemy, applies_element: true}],
@@ -1602,7 +1602,7 @@
    # Kokomi level pass (2026-10-12, sec.2): a floor of 8 [10] with none
    # waiting (was 0), Feint's shape.
    # Kokomi v3, 2026-10-18, card paper sec.6: not Stings or Wards.
-   description: "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus {ExtraDamage:diff()} for each [gold]Plan[/gold] waiting, not Stings or Wards.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+   description: "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus {ExtraDamage:diff()} for each [gold]Plan[/gold] waiting. Stings and Wards don't count.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: enemy,
               amount_formula: {base: 8, per: 8, count: chain_plans_held}}],
    # 10, plus 10 each. 2026-10-11 Kokomi card pass: 4 [5] -> 6 [8]. Kokomi round 2 (2026-10-12): 8 [10].
@@ -1671,7 +1671,7 @@
    cost: 2, type: attack, rarity: uncommon,
    # The re-founding (2026-10-12): the Plan is a flat 22 to the front enemy
    # (the "carried out alone" doubling is gone).
-   description: "Deal 13 [gold]Hydro[/gold] damage to ALL enemies. [gold]Plan[/gold]: Deal 22 [gold]Hydro[/gold] damage to the front enemy.",
+   description: "Deal 13 [gold]Hydro[/gold] damage to ALL enemies. [gold]Plan[/gold]: Deal 22 [gold]Hydro[/gold] damage.",
    effects: [{op: damage, amount: 13, target: all_enemies}],
    plan: [{op: damage, amount: 22, target: front_enemy}],
    # 16 to ALL / Plan 26.
@@ -1743,7 +1743,7 @@
    # 2026-10-11 Kokomi card pass: once per turn, off her first Hydro damage
    # to an enemy (was any Elemental Reaction); Kokomi review r6 item 8
    # (2026-10-14): "Plans count."; 2026-10-18: "to the enemy hit". Provenance notes.
-   description: "The first time each turn you deal [gold]Hydro[/gold] damage, apply 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold] to the enemy hit. [gold]Plans[/gold] count.",
+   description: "The first time each turn you deal [gold]Hydro[/gold] damage, apply 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold] to the enemy hit.",
    effects: [{op: apply_power, power: kk_at_waters_edge, amount: 1, target: self}],
    upgrade: {cost: -1}}
 
@@ -1759,7 +1759,7 @@
    # Kokomi finish pass (2026-10-19): read after the morning's Plans; one
    # power for both versions, every copy Energy, each upgraded copy a card.
    # Provenance note.
-   description: "At the start of your turn, if 2 or more of your [gold]Plans[/gold] were carried out, gain {energyPrefix:energyIcons(1)}{IfUpgraded:show: and draw 1 card|}. Stings and Wards don't count.",
+   description: "At the start of your turn, if 2 or more [gold]Plans[/gold] were carried out, gain {energyPrefix:energyIcons(1)}{IfUpgraded:show: and draw 1 card|}. Stings and Wards don't count.",
    effects: [{op: apply_power, power: kk_battle_formation, amount: 1, target: self}],
    upgrade: {upgraded_power: kk_battle_formation_plus}}
 
@@ -1794,7 +1794,7 @@
    cost: 1, type: skill, rarity: uncommon,
    # The re-founding (2026-10-12): Dusk is retired; the Block per attacker is
    # the now-line, counted when it is played.
-   description: "Gain {KkAmount:diff()} [gold]Block[/gold] for each enemy intending to attack. Draw 1 card.",
+   description: "Gain {KkAmount:diff()} [gold]Block[/gold] for each enemy that intends to attack. Draw 1 card.",
    # Kokomi review r8 (2026-10-14) item 2: 4 [6] -> 6 [8] per attacker.
    effects: [{op: kokomi, kind: block_per_attacker, amount: 6},
              {op: draw, amount: 1}],
@@ -1858,7 +1858,7 @@
    cost: 1, type: power, rarity: uncommon,
    # Kokomi defence pass (2026-10-22): Battle Formation's morning read of 2
    # or more Plans, once a turn (was a Ward per carry-out). Provenance note.
-   description: "At the start of your turn, if 2 or more of your [gold]Plans[/gold] were carried out, add {IfUpgraded:show:an upgraded|a} [gold]Ward[/gold]. Stings and Wards don't count.",
+   description: "At the start of your turn, if 2 or more [gold]Plans[/gold] were carried out, add {IfUpgraded:show:an upgraded|a} [gold]Ward[/gold] to your [gold]Hand[/gold]. Stings and Wards don't count.",
    effects: [{op: apply_power, power: kk_kurage_canopy, amount: 1, target: self}],
    upgrade: {upgraded_power: kk_kurage_canopy_plus}}
 
@@ -2184,7 +2184,7 @@
    # per hit and per Block clause of a Plan carried out, Stings and Wards
    # included (was "Gain 2 [3] Strength", Inflame). Provenance note.
    cost: 1, type: power, rarity: uncommon,
-   description: "When a [gold]Plan[/gold] is carried out, it deals {PowerAmount:diff()} additional damage and gains {PowerAmount:diff()} additional [gold]Block[/gold].",
+   description: "Whenever a [gold]Plan[/gold] is carried out, it deals {PowerAmount:diff()} additional damage and gains {PowerAmount:diff()} additional [gold]Block[/gold].",
    effects: [{op: apply_power, power: kk_resolve_of_watatsumi, amount: 2, target: self}],
    # 3 each.
    upgrade: {power_amount: 1}}
@@ -2215,7 +2215,7 @@
    # Kokomi card paper v2 (2026-10-18, sec.2 change 5): a planned Sting no
    # longer replaces itself. Provenance note.
    cost: 1, type: power, rarity: uncommon,
-   description: "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold] that is not a [gold]Sting[/gold] or [gold]Ward[/gold], add a [gold]Sting[/gold] to your [gold]Hand[/gold].",
+   description: "Whenever the [gold]Bake-Kurage[/gold] carries out a [gold]Plan[/gold], add a [gold]Sting[/gold] to your [gold]Hand[/gold]. Stings and Wards don't count.",
    effects: [{op: apply_power, power: kk_endless_shoal, amount: 1, target: self}],
    upgrade: {innate: true}}
 
@@ -3994,7 +3994,7 @@
 - {id: proto_kk_coordinated_strike, name: "Coordinated Strike", character: kokomi,
    authored_by: [claude], multiplayer: true,
    cost: 1, type: attack, rarity: uncommon, tags: [strike],
-   description: "Deal 6 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Next turn, each other player's Attacks deal 3 additional damage.",
+   description: "Deal 6 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Each other player's Attacks deal 3 additional damage this turn.",
    # Kokomi upgrade pass (2026-10-19): Plan +4.
    upgrade: {damage: 3, plan_attack_bonus: 1},
    effects: [{op: damage, amount: 6, target: enemy}],

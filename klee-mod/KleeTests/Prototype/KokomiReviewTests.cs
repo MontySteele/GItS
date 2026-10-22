@@ -109,7 +109,7 @@ public class KokomiReviewTests
         Assert.Equal(
             "Gain {Block:diff()} [gold]Block[/gold].\nOr [gold]plan[/gold]: "
           + "Gain {PlanBlock:diff()} [gold]Block[/gold], plus the biggest "
-          + "attack an enemy intends when this is carried out.",
+          + "attack an enemy intends.",
             Face(new ProtoKkTideWall()));
     }
 

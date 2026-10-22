@@ -63,11 +63,12 @@ public class KokomiPayoffPassTests : IDisposable
         Assert.False(card.DynamicVars.ContainsKey("PowerAmount"));
         var up = Upgraded<ProtoKkKurageCanopy>();
         Assert.Equal(1, up.EnergyCost.Canonical);
-        // Kokomi defence pass (2026-10-22): Battle Formation's read.
-        Assert.Equal("At the start of your turn, if 2 or more of your "
+        // Kokomi defence pass (2026-10-22): Battle Formation's read; the
+        // text audit the same day put "to your Hand" back.
+        Assert.Equal("At the start of your turn, if 2 or more "
                    + "[gold]Plans[/gold] were carried out, add "
-                   + "{IfUpgraded:show:an upgraded|a} [gold]Ward[/gold]. "
-                   + "Stings and Wards don't count.",
+                   + "{IfUpgraded:show:an upgraded|a} [gold]Ward[/gold] to your "
+                   + "[gold]Hand[/gold]. Stings and Wards don't count.",
                      Face(card));
         var play = Seq("ProtoKkKurageCanopy", "OnPlay");
         Assert.Contains(play, c => c.Contains("UpgradeTwinPower.Install"));

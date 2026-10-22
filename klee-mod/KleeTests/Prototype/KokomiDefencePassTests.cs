@@ -114,12 +114,13 @@ public class KokomiDefencePassTests
     [Fact]
     public void Canopy_face_mirrors_battle_formation()
     {
-        Assert.Equal("At the start of your turn, if 2 or more of your "
+        // Kokomi text audit (2026-10-22, item 11): "to your Hand" is back.
+        Assert.Equal("At the start of your turn, if 2 or more "
                    + "[gold]Plans[/gold] were carried out, add "
-                   + "{IfUpgraded:show:an upgraded|a} [gold]Ward[/gold]. "
-                   + "Stings and Wards don't count.",
+                   + "{IfUpgraded:show:an upgraded|a} [gold]Ward[/gold] to your "
+                   + "[gold]Hand[/gold]. Stings and Wards don't count.",
                      Face(new ProtoKkKurageCanopy()));
-        Assert.StartsWith("At the start of your turn, if 2 or more of your "
+        Assert.StartsWith("At the start of your turn, if 2 or more "
                         + "[gold]Plans[/gold] were carried out, ",
                           PowerText(new KurageCanopyPower()));
     }

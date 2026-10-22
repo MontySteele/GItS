@@ -41,7 +41,7 @@ public sealed class ProtoKkEveningWatch : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Evening Watch"),
-        ("description", "Gain {KkAmount:diff()} [gold]Block[/gold] for each enemy intending to attack. Draw 1 card."),
+        ("description", "Gain {KkAmount:diff()} [gold]Block[/gold] for each enemy that intends to attack. Draw 1 card."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

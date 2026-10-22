@@ -117,7 +117,7 @@ public sealed class ResolveOfWatatsumiPower : PowerModel, ILocalizationProvider
     {
         ("title", "Resolve of Watatsumi"),
         ("description",
-            "When a [gold]Plan[/gold] is carried out, it deals "
+            "Whenever a [gold]Plan[/gold] is carried out, it deals "
           + "[blue]{Amount}[/blue] additional damage and gains "
           + "[blue]{Amount}[/blue] additional [gold]Block[/gold]."),
     };

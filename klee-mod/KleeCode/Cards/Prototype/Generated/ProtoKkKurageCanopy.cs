@@ -45,7 +45,7 @@ public sealed class ProtoKkKurageCanopy : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kurage Canopy"),
-        ("description", "At the start of your turn, if 2 or more of your [gold]Plans[/gold] were carried out, add {IfUpgraded:show:an upgraded|a} [gold]Ward[/gold]. Stings and Wards don't count."),
+        ("description", "At the start of your turn, if 2 or more [gold]Plans[/gold] were carried out, add {IfUpgraded:show:an upgraded|a} [gold]Ward[/gold] to your [gold]Hand[/gold]. Stings and Wards don't count."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

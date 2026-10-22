@@ -94,8 +94,10 @@ public class KokomiLevelPassTests
         Assert.Equal(KokomiPlan.Aim.EnemiesIntendingAttack, clause.Aim);
         Assert.Equal(11, clause.Amount);
         Assert.Equal(14, Assert.Single(Upgraded<ProtoKkFlank>().PlanClauses).Amount);
-        Assert.EndsWith("each enemy that intends to attack when this is "
-                        + "carried out.", Face(new ProtoKkFlank()));
+        // Kokomi text audit (2026-10-22, item 8): every Plan line is read
+        // when it is carried out, so the face no longer says so.
+        Assert.EndsWith("each enemy that intends to attack.",
+                        Face(new ProtoKkFlank()));
     }
 
     [Fact]

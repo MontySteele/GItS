@@ -51,7 +51,7 @@ public sealed class ProtoKkUndertideLance : CustomCardModel, IElementalCard, ICh
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Undertide Lance"),
-        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies.\nOr [gold]plan[/gold]: Deal {PlanDamage:diff()} [gold]Hydro[/gold] damage to the front enemy."),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage to ALL enemies.\nOr [gold]plan[/gold]: Deal {PlanDamage:diff()} [gold]Hydro[/gold] damage."),
     };
 
     /// <summary>The card's printed [gold]Plan[/gold] line, in the order it

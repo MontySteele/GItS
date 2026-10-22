@@ -46,9 +46,11 @@ def test_tide_wall_reads_the_biggest_intent_not_the_front_one():
     carry_out(st)
     assert st.player.block == 4 + 18   # Kokomi defence pass, 2026-10-22
     # Reworded in the Kokomi review (2026-10-13) and the Kokomi upgrade
-    # pass (2026-10-19, finish round item 3).
+    # pass (2026-10-19, finish round item 3); the Kokomi text audit
+    # (2026-10-22, item 8) drops "when this is carried out" (every Plan
+    # line is read then).
     assert _rows()["proto_kk_tide_wall"]["description"].endswith(
-        "plus the biggest attack an enemy intends when this is carried out.")
+        "plus the biggest attack an enemy intends.")
 
 
 def test_no_enemies_intend_nothing():

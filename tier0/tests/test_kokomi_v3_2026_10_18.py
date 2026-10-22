@@ -26,6 +26,10 @@ from tier0.tests.test_kokomi_refounding import (  # noqa: F401
 
 ATTACK = [{"kind": "attack", "amount": 6}]
 STING_TAIL = ", not Stings or Wards."
+# Kokomi text audit (2026-10-22, pick 2 (a)): the ruled spelling, its own
+# sentence. Turning Tide keeps the short tail: the sentence would take it
+# past the 120 ceiling.
+DONT_COUNT = ". Stings and Wards don't count."
 
 
 def _face(cid):
@@ -63,12 +67,12 @@ def _plan_jellyfish(st):
 def test_the_three_faces_say_stings_and_wards_dont_count():
     assert _face("proto_kk_tideturn") == (
         "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus "
-        "{ExtraDamage:diff()} for each [gold]Plan[/gold] waiting" + STING_TAIL
+        "{ExtraDamage:diff()} for each [gold]Plan[/gold] waiting" + DONT_COUNT
         + "{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}")
     assert _face("proto_kk_feint") == (
         "Deal 8 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 6 "
         "[gold]Hydro[/gold] damage for each [gold]Plan[/gold] carried out "
-        "this turn" + STING_TAIL)
+        "this turn" + DONT_COUNT)
     assert _face("proto_kk_turning_tide_chain") == (
         "Deal 9 [gold]Hydro[/gold] damage. [gold]Plan[/gold]: Deal 5 "
         "[gold]Hydro[/gold] damage to ALL enemies per [gold]Plan[/gold] "

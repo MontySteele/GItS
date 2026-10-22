@@ -76,9 +76,11 @@ public class KokomiPreRunFixesTests
     [Fact]
     public void Tide_wall_says_when_the_intent_is_read()
     {
-        // Reworded in the Kokomi review (2026-10-13).
-        Assert.EndsWith("plus the biggest attack an enemy intends when this "
-                      + "is carried out.", Face(new ProtoKkTideWall()));
+        // Reworded in the Kokomi review (2026-10-13). The Kokomi text audit
+        // (2026-10-22, item 8): every Plan line is read when it is carried
+        // out, so the face no longer says so.
+        Assert.EndsWith("plus the biggest attack an enemy intends.",
+                        Face(new ProtoKkTideWall()));
     }
 
     [Fact]

@@ -25,6 +25,11 @@ public class KokomiV3Tests
 {
     private const string Tail = ", not Stings or Wards.";
 
+    /// <summary>The Kokomi text audit (2026-10-22, pick 2 (a)): the ruled
+    /// spelling, its own sentence. Turning Tide keeps <see cref="Tail"/>:
+    /// the sentence would take it past the 120 ceiling.</summary>
+    private const string DontCount = ". Stings and Wards don't count.";
+
     private static T Upgraded<T>() where T : CardModel, new()
     {
         var card = new T();
@@ -48,13 +53,13 @@ public class KokomiV3Tests
     {
         Assert.Equal(
             "Deal {CalculationBase:diff()} [gold]Hydro[/gold] damage, plus "
-          + "{ExtraDamage:diff()} for each [gold]Plan[/gold] waiting" + Tail
+          + "{ExtraDamage:diff()} for each [gold]Plan[/gold] waiting" + DontCount
           + "{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
             Face(new ProtoKkTideturn()));
         Assert.Equal(
             "Deal {Damage:diff()} [gold]Hydro[/gold] damage.\nOr "
           + "[gold]plan[/gold]: Deal {PlanDamage:diff()} [gold]Hydro[/gold] "
-          + "damage for each [gold]Plan[/gold] carried out this turn" + Tail,
+          + "damage for each [gold]Plan[/gold] carried out this turn" + DontCount,
             Face(new ProtoKkFeint()));
         Assert.Equal(
             "Deal {Damage:diff()} [gold]Hydro[/gold] damage.\nOr "

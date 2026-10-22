@@ -45,7 +45,7 @@ public sealed class ProtoKkResolveOfWatatsumi : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Resolve of Watatsumi"),
-        ("description", "When a [gold]Plan[/gold] is carried out, it deals {PowerAmount:diff()} additional damage and gains {PowerAmount:diff()} additional [gold]Block[/gold]."),
+        ("description", "Whenever a [gold]Plan[/gold] is carried out, it deals {PowerAmount:diff()} additional damage and gains {PowerAmount:diff()} additional [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -110,8 +110,9 @@ public class KokomiPoolPassTwoTests
         // where "your next Plan" would have read as the next one WRITTEN.
         // The card text pass (2026-10-12, the Kokomi table, ruled by [USER])
         // words it "Your next Plan".
+        // The Kokomi text audit (2026-10-22, item 1): plan is the one verb.
         var face = Face(new ProtoKkOpeningGambit());
-        Assert.EndsWith("The next [gold]Plan[/gold] written this turn deals double damage.", face);
+        Assert.EndsWith("The next card you [gold]plan[/gold] this turn deals double damage.", face);
         Assert.DoesNotContain("after this one", face);
         Assert.DoesNotContain("carried out with this one", face);
     }
@@ -429,10 +430,10 @@ public class KokomiPoolPassTwoTests
         // round 3 A-list (2026-10-13): Second Wave names the window.
         Assert.Equal(
             "Deal {Damage:diff()} [gold]Hydro[/gold] damage.\nOr [gold]plan[/gold]: The "
-          + "[gold]Plan[/gold] written after it this turn is carried out twice."
+          + "next card you [gold]plan[/gold] this turn is carried out twice."
           + "{IfUpgraded:show: Draw 1 card.|}",
             Face(new ProtoKkSecondWave()));
-        Assert.EndsWith("The next [gold]Plan[/gold] written this turn deals double damage.",
+        Assert.EndsWith("The next card you [gold]plan[/gold] this turn deals double damage.",
                         Face(new ProtoKkOpeningGambit()));
         // Scout Ahead, the third, was cut in the cleanup pass (2026-09-29).
     }
