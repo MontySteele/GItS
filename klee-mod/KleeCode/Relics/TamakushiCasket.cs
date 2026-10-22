@@ -234,8 +234,10 @@ public class TamakushiCasket : CustomRelicModel
 /// hook and the companion reward slot are the base's, and the only
 /// difference is <see cref="Block"/>.
 ///
-/// ANCIENT, NEVER STARTER (see <c>ExplosiveFrags</c>). ICON: the Tamakushi
-/// Casket's own fallback chain, as Pearl of Insight reuses the Pearl's.
+/// ANCIENT, NEVER STARTER (see <c>ExplosiveFrags</c>). ICON: its own since
+/// 2026-10-22 (art/plan.tsv relic_watatsumi_casket, the Cowry of Parting), so
+/// the upgrade reads apart from the base's Sango Pearl; the base's chain is
+/// the fallback for a pck built before the art.
 /// NOT IN THE SIM: tier05 has no Orobas row for the prototype arm.
 /// </summary>
 public sealed class WatatsumiCasket : TamakushiCasket
@@ -258,4 +260,10 @@ public sealed class WatatsumiCasket : TamakushiCasket
 
     /// <summary>Already the upgrade: nothing further for Orobas.</summary>
     public override RelicModel? GetUpgradeReplacement() => null;
+
+    public override string PackedIconPath =>
+        KleePck.Path("kokomi/relics/watatsumi_casket.png") ?? base.PackedIconPath;
+
+    protected override string BigIconPath =>
+        KleePck.Path("kokomi/relics/watatsumi_casket.png") ?? base.BigIconPath;
 }

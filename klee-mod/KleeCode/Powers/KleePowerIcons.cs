@@ -165,8 +165,10 @@ internal static class KleePowerIcons
             "kokomi/powers/princess_of_watatsumi.png"),
         // POOL COMPLETION (2026-10-01): the six new Powers and three Ancient
         // Powers borrow the nearest shipped shape, the block above's rule.
-        SeasReproachPower => KleePck.Path(
-            "kokomi/powers/vigil_of_the_deep.png"),
+        // Sea's Reproach has its own icon since 2026-10-22 (Deep Palace's
+        // Plume); Vigil of the Deep's stays the fallback for an older pck.
+        SeasReproachPower => KleePck.Path("kokomi/powers/seas_reproach.png")
+            ?? KleePck.Path("kokomi/powers/vigil_of_the_deep.png"),
         DivineStrategyPower => KleePck.Path(
             "kokomi/powers/before_sun_and_moon.png"),
         AlicesMasterpiecePower => KleePck.Path("klee/powers/alices_masterpiece.png")

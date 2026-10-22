@@ -70,11 +70,16 @@ public sealed class PoundingSurpriseNext : CustomRelicModel,
 
     protected override string IconBaseName => "burning_blood";
 
+    // Its own icon since 2026-10-22 (art/plan.tsv relic_pounding_surprise_ii,
+    // the golden explosive spark), so it reads apart from the relic it
+    // replaces; Pounding Surprise's is the fallback for an older pck.
     public override string PackedIconPath =>
-        KleePck.Path("klee/relics/pounding_surprise.png") ?? base.PackedIconPath;
+        KleePck.Path("klee/relics/pounding_surprise_ii.png")
+        ?? KleePck.Path("klee/relics/pounding_surprise.png") ?? base.PackedIconPath;
 
     protected override string BigIconPath =>
-        KleePck.Path("klee/relics/pounding_surprise.png") ?? base.BigIconPath;
+        KleePck.Path("klee/relics/pounding_surprise_ii.png")
+        ?? KleePck.Path("klee/relics/pounding_surprise.png") ?? base.BigIconPath;
 
     /// <summary>Granted: the original leaves, so this one REPLACES it.</summary>
     public override async Task AfterObtained()
