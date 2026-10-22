@@ -5,7 +5,11 @@
     python tools/make_workshop_preview.py --out x.png
 
 Each idle frame sheet (`ImageGen/images/**/model/frames/<id>_idle.png`) is a
-grid of frames; the first frame is cut out by its alpha and scaled by canon
+grid of frames, except Kokomi's: her idle's far hand reads as a dark tangle at
+this size, so she stands in her character-select pose from a single still,
+`kokomi/model/frames/kokomi_preview.png` (char_render/render.py
+`--stills select` at the combat ppu and outline, painted by post.py). The
+first frame is cut out by its alpha and scaled by canon
 height (Klee 0.72 of an adult, memory "scale by real heights"), then the five
 stand on one floor over a dark radial gradient, Klee in front. 1280x720,
 well under the Workshop's 1 MB limit. `tools/package_workshop.py` uses the
@@ -32,7 +36,7 @@ CAST = [
     ("varka/model/frames/varka_idle.png", 1.00, 230),
     ("yae/model/frames/yae_idle.png", 0.95, 1050),
     ("furina/model/frames/furina_idle.png", 0.90, 450),
-    ("kokomi/model/frames/kokomi_idle.png", 0.90, 830),
+    ("kokomi/model/frames/kokomi_preview.png", 0.90, 812),
     ("model/frames/klee_idle.png", 0.72, 625),
 ]
 
