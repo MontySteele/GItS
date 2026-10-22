@@ -178,11 +178,14 @@ public class KokomiCardsV2Tests
     {
         Assert.Contains(Calls("KokomiRefounding", "OnCarriedOut"),
                         c => c.Contains("KokomiRefounding.IsJellyfish"));
-        Assert.Contains(Calls("KurageCanopyPower", "OnPlanResolved"),
-                        c => c.Contains("KokomiRefounding.IsJellyfish"));
+        // Kurage Canopy reads Battle Formation's count since the Kokomi
+        // defence pass (2026-10-22): the ledger's chain count, which skips
+        // a Sting's or Ward's Plan.
+        Assert.Contains(Calls("KurageCanopyPower", "Signal"),
+                        c => c.Contains("ChainPlansThisTurn"));
         Assert.Contains("KokomiRefounding.OnCarriedOut",
                         Seq("KokomiPlan", "ResolveEntry"));
-        Assert.Contains(" that is not a [gold]Sting[/gold] or [gold]Ward[/gold],",
+        Assert.EndsWith(" Stings and Wards don't count.",
                         Face(new ProtoKkKurageCanopy()));
         Assert.Contains(" that is not a [gold]Sting[/gold] or [gold]Ward[/gold],",
                         PowerText(new EndlessShoalPower()));

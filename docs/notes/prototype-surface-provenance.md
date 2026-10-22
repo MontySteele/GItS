@@ -10053,3 +10053,36 @@ Numbers are first guesses for the Balance suite.
   with bigger numbers). The sheet's earlier comments, verbatim: "Card text
   pass / Kokomi level pass (2026-10-12): the Dazed goes, with 2 more damage a
   hit. Provenance note." and "14 to ALL, twice."
+
+
+## Kokomi defence pass, 2026-10-22
+
+[USER], 2026-10-22, after his Kokomi run: "I think it's fine for the Casket
+to pay on 0-cost cards as an intended loop, but I think 2 block per plan is
+making them too strong. Let's try 1a, 3a, and reducing the Casket to 1
+again", and on Watatsumi's Grace, "Otherwise agreed"
+(`review/active/kokomi-next-2026-10-19.md`, "Defence pass, 2026-10-22
+(ruled, built)"). The Tamakushi Casket pays 1 Block a counted play again
+(Watatsumi Casket 2); that is a relic constant, not a row.
+
+- **`proto_kk_tide_wall`**: Plan "Gain 4 [6] Block, plus the biggest attack
+  an enemy intends when this is carried out." (was 6 [9] plus the intent);
+  the face-up 4 [6] is unchanged. The sheet's earlier comment, verbatim:
+  "now 6; Plan 9 plus the intent."
+- **`proto_kk_watatsumis_grace`**: "... for each Plan waiting. Stings and
+  Wards don't count." It reads `KokomiPlan.ChainPlansHeld` (sim
+  `chain_plans_held`), Tideturn's count, so Kurage Bloom's Sting no longer
+  pays it. The sheet's earlier comment, verbatim: "Kokomi taste audit
+  (2026-10-21, review/active/kokomi-taste-audit-2026-10-21.md): Block per
+  Plan waiting (was "keep up to 10 [15] of your Block", Thoma's Crimson
+  Ooyoroi's shape). Provenance note."
+- **`proto_kk_kurage_canopy`**: "At the start of your turn, if 2 or more of
+  your Plans were carried out, add a Ward [an upgraded Ward]. Stings and
+  Wards don't count." The ruled text ended "add a Ward to your Hand"; at 126
+  characters it is over the card ceiling (120), so "to your Hand" is cut
+  (the Ward still goes to the Hand). Battle Formation's condition and timing
+  (`KurageCanopyPower.Signal`, sim `kokomi_plan.kurage_canopy`, right after
+  Battle Formation); it left the plan bus (was a Ward per carry-out that was
+  not a Sting or Ward). The sheet's earlier comment, verbatim: "Kokomi card
+  paper v2 (2026-10-18, sec.2 change 5): not for a Sting's or Ward's Plan.
+  Provenance note."

@@ -142,5 +142,7 @@ public static class KokomiOverhaulLaw
 {
     /// <summary>The Tamakushi Casket's Block for each Plan card or Companion
     /// she plays. Mirrors <c>C.KOKOMI_OVERHAUL_CASKET_BLOCK</c>.</summary>
-    public const int CasketBlock = 2;
+    /// Kokomi defence pass (2026-10-22, [USER]: "...reducing the Casket to 1
+    /// again"): 1 (2 since the boss ramp, 2026-10-21).
+    public const int CasketBlock = 1;
 }

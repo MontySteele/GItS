@@ -44,7 +44,7 @@ def test_tide_wall_reads_the_biggest_intent_not_the_front_one():
     assert kokomi_plan.max_intent_damage(st) == 18
     st.player.block = 0
     carry_out(st)
-    assert st.player.block == 6 + 18
+    assert st.player.block == 4 + 18   # Kokomi defence pass, 2026-10-22
     # Reworded in the Kokomi review (2026-10-13) and the Kokomi upgrade
     # pass (2026-10-19, finish round item 3).
     assert _rows()["proto_kk_tide_wall"]["description"].endswith(
@@ -170,16 +170,15 @@ def test_a_flipped_ward_carries_out_its_now_line_and_gains_no_block():
 def test_coordinated_tide_lands_before_the_plan_bus():
     """The pool overhaul (2026-10-13): Coordinated Tide no longer hits on a
     carry-out (it adds a Sting when a Companion's own hit reacts), so a
-    written Plan carried out pays it nothing; the plan bus still pays (on a
-    Plan that is not a Sting or Ward since the Kokomi card paper v2)."""
+    written Plan carried out pays it nothing. (Kurage Canopy, its old
+    witness here, left the plan bus in the Kokomi defence pass, 2026-10-22.)"""
     st = kokomi_state()
     st.player.powers[kokomi_plan.COORDINATED_TIDE] = 1
-    st.player.powers[kokomi_plan.KURAGE_CANOPY] = 3
     write(st, card("proto_kk_brine_sting"))
     carry_out(st)
     events = [e["event"] for e in st.log]
     assert "plan_coordinated_tide" not in events
-    assert "plan_kurage_canopy" in events
+    assert st.kk_chain_plans_this_turn == 1
 
 
 def test_the_page_prints_the_tide_rider_the_bridge_now_sends():

@@ -52,7 +52,7 @@ def test_the_relic_face_is_one_sentence_off_the_shared_number():
     assert ('"Whenever you [gold]Plan[/gold] a card or play a Companion, '
             'gain "') in relic
     assert "Open the Casket" not in relic[relic.index('("description",'):]
-    assert C.KOKOMI_OVERHAUL_CASKET_BLOCK == 2   # 2026-10-21
+    assert C.KOKOMI_OVERHAUL_CASKET_BLOCK == 1   # defence pass, 2026-10-22
 
 
 def test_the_debuff_answer_clause_is_silent_on_the_relic():

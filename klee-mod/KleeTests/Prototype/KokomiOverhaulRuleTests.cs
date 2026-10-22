@@ -1110,8 +1110,9 @@ public class KokomiOverhaulRuleTests
     [Theory]
     // The Kokomi pool overhaul (2026-10-13) moved Read the Field's and Kelp
     // Wall's Plan lines off Block; Steady Tide's "Plan: Gain 11 Block" is not
-    // an upgraded clause, so Tide Wall's flat 6 is the printed Plan Block.
-    [InlineData("ProtoKkTideWall", 6)]
+    // an upgraded clause, so Tide Wall's flat 4 is the printed Plan Block
+    // (6 until the Kokomi defence pass, 2026-10-22).
+    [InlineData("ProtoKkTideWall", 4)]
     public void A_planned_blocks_printed_number_is_a_block_var(
         string card, int printed)
     {

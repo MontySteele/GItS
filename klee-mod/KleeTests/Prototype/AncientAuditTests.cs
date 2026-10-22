@@ -179,11 +179,12 @@ public class AncientAuditTests
     public void The_watatsumi_casket_pays_more_from_the_same_hook()
     {
         // Ward and Casket (2026-10-18); the Kokomi boss ramp (2026-10-21):
-        // 3 Block a play, the starter's 2.
+        // 3 Block a play, the starter's 2. Kokomi defence pass (2026-10-22):
+        // 2, the starter's 1.
         Assert.Contains("TamakushiCasket.get_Block",
             Il.Calls(Il.Method("TamakushiCasket", "AfterCardPlayed")));
-        Assert.Equal(3, new WatatsumiCasket().Block);
-        Assert.Equal(2, new TamakushiCasket().Block);
+        Assert.Equal(2, new WatatsumiCasket().Block);
+        Assert.Equal(1, new TamakushiCasket().Block);
     }
 
     // ==== Furina ==============================================================

@@ -31,26 +31,27 @@ public class KokomiRefoundingTests
     // ---- the relic ---------------------------------------------------------
 
     [Fact]
-    public void The_casket_is_2_block_a_play_and_the_upgrade_3()
+    public void The_casket_is_1_block_a_play_and_the_upgrade_2()
     {
         // Ward and Casket (2026-10-18, [USER]: "if we allow for Sting and
         // Ward to count, is that a real problem? ... (possibly bringing it
         // down to 1 per card played)").
         // Kokomi boss ramp (2026-10-21, [USER]: "Got it, let's try that"):
-        // 2 and 3, was 1 and 2.
-        Assert.Equal(2, KokomiOverhaulLaw.CasketBlock);
-        Assert.Equal(2, new TamakushiCasket().Block);
-        Assert.Equal(3, new WatatsumiCasket().Block);
-        Assert.Equal(3, WatatsumiCasket.WatatsumiBlock);
+        // 2 and 3, was 1 and 2. Kokomi defence pass (2026-10-22, [USER]:
+        // "...reducing the Casket to 1 again"): 1 and 2.
+        Assert.Equal(1, KokomiOverhaulLaw.CasketBlock);
+        Assert.Equal(1, new TamakushiCasket().Block);
+        Assert.Equal(2, new WatatsumiCasket().Block);
+        Assert.Equal(2, WatatsumiCasket.WatatsumiBlock);
         // 2026-10-20: it pays for planning, not for any Plan card.
         Assert.Equal(
             "Whenever you [gold]Plan[/gold] a card or play a Companion, gain "
-            + "[blue]2[/blue] [gold]Block[/gold].",
+            + "[blue]1[/blue] [gold]Block[/gold].",
             new TamakushiCasket().Localization!
                 .First(r => r.Item1 == "description").Item2);
         Assert.Equal(
             "Whenever you [gold]Plan[/gold] a card or play a Companion, gain "
-            + "[blue]3[/blue] [gold]Block[/gold].",
+            + "[blue]2[/blue] [gold]Block[/gold].",
             new WatatsumiCasket().Localization!
                 .First(r => r.Item1 == "description").Item2);
     }

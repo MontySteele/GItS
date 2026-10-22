@@ -47,7 +47,7 @@ def test_tide_wall_face_names_the_turn_it_lands():
         "enemy intends when this is carried out.")
     # The behaviour is unchanged: the read happens at carry-out.
     assert _rows()["proto_kk_tide_wall"].plan == [
-        {"op": "block_max_intent", "amount": 6}]
+        {"op": "block_max_intent", "amount": 4}]  # defence pass, 2026-10-22
 
 
 # --- 1 and 6. the seat page: the live total and the first Plan --------------

@@ -173,18 +173,19 @@ public class KokomiCasketPassTests : IDisposable
     }
 
     [Fact]
-    public void Tide_wall_plans_a_flat_six_plus_the_intent()
+    public void Tide_wall_plans_a_flat_four_plus_the_intent()
     {
         // The cleanup pass (2026-09-29): the Plan read 0 on buff turns ("it
         // gave 0 Block twice on Empower turns"), so it gains a flat 6 (9
         // upgraded) on top of the intent, still read at carry-out. Sim twin:
-        // `test_r276_tide_wall_blocks_the_largest_intent`.
+        // `test_r276_tide_wall_blocks_the_largest_intent`. Kokomi defence
+        // pass (2026-10-22): the flat part is the face-up 4 [6].
         var card = new ProtoKkTideWall();
         Assert.Equal(CardRarity.Uncommon, card.Rarity);
         var clause = Assert.Single(card.PlanClauses);
-        Assert.Equal((KokomiPlan.Kind.BlockMaxIntent, 6),
+        Assert.Equal((KokomiPlan.Kind.BlockMaxIntent, 4),
                      (clause.Kind, clause.Amount));
-        Assert.Equal(9, Upgraded<ProtoKkTideWall>().PlanClauses.Single().Amount);
+        Assert.Equal(6, Upgraded<ProtoKkTideWall>().PlanClauses.Single().Amount);
         Assert.Equal(4m, card.DynamicVars.Block.BaseValue);
         Assert.Equal("Gain {Block:diff()} [gold]Block[/gold].\nOr [gold]plan[/gold]: "
                    + "Gain {PlanBlock:diff()} [gold]Block[/gold], plus the "

@@ -188,12 +188,13 @@ def test_endless_shoal_skips_a_sting_or_ward_plan():
 
 
 def test_kurage_canopy_skips_a_sting_or_ward_plan():
+    """Kokomi defence pass (2026-10-22): Battle Formation's count, so a Sting
+    or Ward Plan is not one of the 2."""
     st = kokomi_state()
     st.player.powers[kokomi_plan.KURAGE_CANOPY] = 1
     write(st, card(kokomi_plan.STING_ID))
+    write(st, card("proto_kk_brine_sting"))
     st.player.hand.clear()
     carry_out(st)
+    kokomi_plan.kurage_canopy(st)
     assert st.player.hand == []
-    write(st, card("proto_kk_brine_sting"))
-    carry_out(st)
-    assert [c.id for c in st.player.hand] == [kokomi_plan.WARD_ID]

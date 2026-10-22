@@ -39,7 +39,10 @@ def test_the_shape_of_water_burst_is_gone():
     assert sum(w["tokens"]) == 0
 
 
-@pytest.mark.parametrize("name", ["canopy_ward", "endless_shoal_sting"])
+# Kurage Canopy left the plan bus in the Kokomi defence pass (2026-10-22):
+# it reads Battle Formation's count of 2 or more, so `pre_fix` no longer puts
+# its old cycle back; `canopy_ward` stays a named row, checked bounded above.
+@pytest.mark.parametrize("name", ["endless_shoal_sting"])
 def test_v2_closed_the_jellyfish_that_returned_itself(name):
     """Review r4's known entry. Before v2 a planned Ward came back every
     morning under Kurage Canopy (a Sting under Endless Shoal); the probe

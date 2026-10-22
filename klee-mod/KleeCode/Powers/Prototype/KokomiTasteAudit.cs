@@ -142,8 +142,9 @@ public sealed class ResolveOfWatatsumiPower : PowerModel, ILocalizationProvider
 ///   * Kurage Bloom, "At the end of your turn, Plan a Sting." Copies Plan one
 ///     each; carried out the next morning.
 ///   * Watatsumi's Grace, "At the end of your turn, gain 3 [4] Block for each
-///     Plan waiting." The queue as it stands, Kurage Bloom's Sting included;
-///     raw power Block (NC-11).
+///     Plan waiting. Stings and Wards don't count." The queue as it stands,
+///     less its Sting and Ward Plans (Kokomi defence pass, 2026-10-22), so
+///     Kurage Bloom's Sting adds nothing; raw power Block (NC-11).
 /// Sim twin: <c>kokomi_plan.turn_end</c>, the same order.
 /// </summary>
 public static class KokomiTasteAudit
@@ -163,7 +164,7 @@ public static class KokomiTasteAudit
         var rate = (int)kokomi.Powers.OfType<WatatsumisGracePower>()
             .Sum(p => p.Amount);
         var block = WatatsumisGracePower.BlockFor(
-            rate, KokomiPlan.PlansHeld(kokomi));
+            rate, KokomiPlan.ChainPlansHeld(kokomi));
         if (block > 0)
         {
             await CreatureCmd.GainBlock(kokomi, block, ValueProp.Unpowered,

@@ -78,10 +78,10 @@ def test_jean_swirls_an_enemy_with_an_aura():
 
 def test_kurage_canopy_face():
     assert _face("proto_kk_kurage_canopy") == (
-        "Whenever the [gold]Bake-Kurage[/gold] carries out a "
-        "[gold]Plan[/gold] that is not a [gold]Sting[/gold] or "
-        "[gold]Ward[/gold], add {IfUpgraded:show:an upgraded|a} "
-        "[gold]Ward[/gold] to your [gold]Hand[/gold].")
+        # Kokomi defence pass (2026-10-22): Battle Formation's read.
+        "At the start of your turn, if 2 or more of your [gold]Plans[/gold] "
+        "were carried out, add {IfUpgraded:show:an upgraded|a} "
+        "[gold]Ward[/gold]. Stings and Wards don't count.")
 
 
 def test_kurage_canopy_stops_at_a_full_hand_in_the_sim(caches):

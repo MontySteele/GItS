@@ -510,18 +510,19 @@ def test_skittish_does_not_fire_on_a_carry_out(overhaul):
 # --- `EB-335`: the kit's own defence in act 2 (R246 pick 2) ---------------
 
 def test_tide_wall_loads_and_smiths(overhaul):
-    """Tide Wall since the cleanup pass (2026-09-29): 4 Block now, Plan 6
-    Block plus the intent, upgrading to 6 and 9 plus the intent. (Shell Guard
+    """Tide Wall since the cleanup pass (2026-09-29): 4 Block now, Plan 4
+    Block plus the intent (6 until the Kokomi defence pass, 2026-10-22),
+    upgrading to 6 and 6 plus the intent. (Shell Guard
     left with the Casket count, the re-founding, 2026-10-12.)"""
     from tier0.content import upgrades
 
     wall = loader.get_card("proto_kk_tide_wall")
     assert wall.rarity == "uncommon" and wall.cost == 1
     assert wall.effects == [{"op": "block", "amount": 4}]
-    assert wall.plan == [{"op": "block_max_intent", "amount": 6}]
+    assert wall.plan == [{"op": "block_max_intent", "amount": 4}]
     up = upgrades.apply_upgrade(wall)
     assert up.effects[0]["amount"] == 6
-    assert up.plan[0]["amount"] == 9
+    assert up.plan[0]["amount"] == 6
 
 
 
@@ -2468,7 +2469,8 @@ def test_pincer_is_spent_by_an_attack_a_plan_plays(overhaul):
 
 
 def test_r276_tide_wall_blocks_the_largest_intent(overhaul):
-    """Tide Wall's Plan: 6 Block (9 upgraded) plus the most damage any one
+    """Tide Wall's Plan: 4 Block (6 upgraded; 6 [9] until the Kokomi defence
+    pass, 2026-10-22) plus the most damage any one
     enemy intends to deal -- every hit of a multi-hit intent (Kokomi round-3
     changes, 2026-10-12: the largest, no longer the front enemy's). A
     non-attack intent adds 0, so an Empower turn still pays the flat 6 (the
@@ -2481,19 +2483,19 @@ def test_r276_tide_wall_blocks_the_largest_intent(overhaul):
     assert kokomi_plan.intent_damage(st, front) == 12
     assert kokomi_plan.max_intent_damage(st) == 20
     carry_out(st, _arm_card("proto_kk_tide_wall").plan)
-    assert st.player.block == 6 + 20
+    assert st.player.block == 4 + 20
 
     st = kokomi_state(enemies=[make_enemy(hp=40, intents=BLOCKER)])
     st.player.block = 0
     carry_out(st, _arm_card("proto_kk_tide_wall").plan)
-    assert st.player.block == 6, "a non-attack intent reads 0, plus 6"
+    assert st.player.block == 4, "a non-attack intent reads 0, plus 4"
 
     from tier0.content import upgrades
     up = upgrades.apply_upgrade(_arm_card("proto_kk_tide_wall"))
     st = kokomi_state(enemies=[make_enemy(hp=40, intents=BLOCKER)])
     st.player.block = 0
     carry_out(st, up.plan)
-    assert st.player.block == 9, "a non-attack intent reads 0, plus 9"
+    assert st.player.block == 6, "a non-attack intent reads 0, plus 6"
 
 
 def test_tide_wall_reads_the_intent_shown_at_carry_out(overhaul):
@@ -2501,7 +2503,7 @@ def test_tide_wall_reads_the_intent_shown_at_carry_out(overhaul):
     one ON SCREEN WHEN THE PLAN IS
     CARRIED OUT -- the attack that enemy makes that turn -- not the one shown
     when it was written. Written over a 5; the intent moves on to a 14; the
-    Plan pays 6 + 14."""
+    Plan pays 4 + 14 (the flat 4 since the Kokomi defence pass)."""
     front = make_enemy(hp=40, intents=[{"kind": "attack", "amount": 5},
                                        {"kind": "attack", "amount": 14}])
     st = kokomi_state(enemies=[front])
@@ -2510,7 +2512,7 @@ def test_tide_wall_reads_the_intent_shown_at_carry_out(overhaul):
     kokomi_plan.schedule(st, _arm_card("proto_kk_tide_wall"))
     front.intent_index += 1
     kokomi_plan.resolve_all(st)
-    assert st.player.block == 6 + 14
+    assert st.player.block == 4 + 14
 
 
 # --- the Kokomi core pass (review/active/kokomi-core-pass-2026-09-27.md) ---

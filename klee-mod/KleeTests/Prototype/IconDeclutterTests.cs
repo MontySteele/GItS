@@ -200,7 +200,8 @@ public class IconDeclutterTests
     [Fact]
     public void Canopy_and_detonator_add_each_batch_through_their_old_doors()
     {
-        var canopy = Il.Calls(Il.Method("KurageCanopyPower", "OnPlanResolved"));
+        // Kokomi defence pass (2026-10-22): the morning Signal, not the bus.
+        var canopy = Il.Calls(Il.Method("KurageCanopyPower", "Signal"));
         Assert.Contains(canopy, c => c.Contains("UpgradeTwinPower.Batches"));
         Assert.Contains(canopy, c => c.Contains("KokomiCards.AddJellyfish"));
         var mines = Il.Calls(Il.Method("AlicesDetonatorPower", "BeforeHandDraw"));

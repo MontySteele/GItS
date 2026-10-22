@@ -170,12 +170,13 @@ def _face_up(cid):
     "proto_mi_shinobu_thundergrust",     # a Companion with no Plan line
     "proto_mi_gorou_inuzaka",            # both: pays once
 ])
-def test_the_casket_pays_2_for_a_companion_played_face_up(cid):
+def test_the_casket_pays_1_for_a_companion_played_face_up(cid):
     """2026-10-20, [USER]: "2 was definitely the intent, and we should
     figure out a different Block solution if needed": "Whenever you Plan a
     card or play a Companion, gain 1 Block." A Companion pays face-up.
-    2 since the Kokomi boss ramp (2026-10-21)."""
-    assert _face_up(cid) == C.KOKOMI_OVERHAUL_CASKET_BLOCK == 2
+    2 from the Kokomi boss ramp (2026-10-21); 1 again since the Kokomi
+    defence pass (2026-10-22)."""
+    assert _face_up(cid) == C.KOKOMI_OVERHAUL_CASKET_BLOCK == 1
 
 
 @pytest.mark.parametrize("cid", [
@@ -192,7 +193,8 @@ def test_the_casket_pays_for_a_card_planned_and_not_for_its_carry_out(cid):
     st = kokomi_state()
     _casket(st)
     write(st, card(cid))
-    assert st.player.block == 2
+    # 1 a card Planned, a Sting or Ward too (Kokomi defence pass, 2026-10-22).
+    assert st.player.block == 1
     st.player.block = 0
     st.log.clear()
     carry_out(st)

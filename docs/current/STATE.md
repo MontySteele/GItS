@@ -105,7 +105,8 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   (`Vfx/Prototype/KokomiPlanView.cs`, the peek button) is unseen in game.
 - **Starter relic:** the Tamakushi Casket gains 1 Block whenever she Plans
   a card (Stings and Wards included) or plays a Companion (face-up or
-  planned), never on a carry-out; the Watatsumi Casket gains 2. A Plan card
+  planned), never on a carry-out; the Watatsumi Casket gains 2 (both since
+  the defence pass, 2026-10-22; the boss ramp had them at 2 and 3). A Plan card
   played face-up pays nothing (2026-10-20, [USER]: "2 was definitely the
   intent, and we should figure out a different Block solution if needed").
 - **Jellyfish:** Stings and Wards are generated, cost 0, Ethereal and
@@ -152,8 +153,8 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   Following Current 4 [5].
 - **Boss ramp and Casket built** (same paper, 2026-10-21, "Got it, let's
   try that"), after suite 2 (36.0 mean; boss damage a turn at hallway
-  level): Kurage Vanguard deals 2 more each turn; the Casket pays 2 Block a
-  counted play (Watatsumi 3).
+  level): Kurage Vanguard deals 2 more each turn; the Casket paid 2 Block a
+  counted play (Watatsumi 3) until the defence pass.
 - **Taste audit built** (`review/active/kokomi-taste-audit-2026-10-21.md`,
   2026-10-21, "Agreed on all 5 defaults"): ten cards that were someone else's
   now speak her verbs. Shoal Call and Kurage Bloom Plan their Stings (the
@@ -162,8 +163,19 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   Reproach read intent; Watatsumi's Grace gains 3 [4] Block per Plan waiting;
   Flotsam Surge has a Plan line; Riptide Ruin hits once more per Plan carried
   out. Unseen in game.
-- **Next:** the Balance suite again on the same seeds; promote if every act
-  is within 15% of base.
+- **Defence pass built** (`kokomi-next-2026-10-19.md`, 2026-10-22), after
+  [USER]'s run (HP lost a normal fight 1.2 / 0.0 / 1.1 % by act, against
+  Klee 2.9 / 7.9 / 16.5 and Furina 6.1 / 10.3 / 18.2; damage normal).
+  [USER]: "I think it's fine for the Casket to pay on 0-cost cards as an
+  intended loop, but I think 2 block per plan is making them too strong.
+  Let's try 1a, 3a, and reducing the Casket to 1 again." The Casket is 1
+  Block a counted play again (Watatsumi 2); Watatsumi's Grace and Kurage
+  Canopy say "Stings and Wards don't count", and Canopy adds its Ward at
+  the start of her turn if 2 or more Plans were carried out (Battle
+  Formation's read); Tide Wall's Plan is 4 [6] Block plus the intent.
+  Unseen in game.
+- **Next:** [USER]'s run on the defence pass; promote to Balance if it
+  passes.
 
 **Furina: Balance** (2026-10-15).
 - **Rules** (`review/active/furina-research-proposal-2026-10-05.md` sec.2):
