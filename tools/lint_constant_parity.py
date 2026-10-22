@@ -423,6 +423,7 @@ _ABYSS_SCREEN_REASON = (
     "no game rule reads it, so no sim twin exists.")
 
 UNMIRRORED: dict[str, str] = {
+    "SaveSafety.ProfileCount": "save-file plumbing (Saves/SaveSafety.cs): the game's three profile slots, not a combat rule",
     "AbyssOverlayFlow.ResultSeconds": _ABYSS_SCREEN_REASON,
     "AbyssOverlayFlow.FadeSeconds": _ABYSS_SCREEN_REASON,
     "AbyssOverlayView.CardWidth": _ABYSS_SCREEN_REASON,

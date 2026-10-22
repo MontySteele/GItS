@@ -9,9 +9,57 @@ the repo uploads.
 `beta`: mod id `klee-beta`, every kit (Yae included), title "(Beta)". Both
 register the same card and character ids, so a player enables one. With both
 enabled the loader fails the second one at its dll load (same assembly name)
-and the first plays; that is read off the decompile, not yet seen live.
+and the first plays (seen on lane 1, 2026-10-22: the beta loads first, the
+dev `klee` fails "already loaded", and the menu shows red "Loaded 3 mods
+WITH ERRORS!").
 The beta's pck keeps `res://klee/`: the mod adds its own loc table, and its
 Mods-screen badge shows blank.
+
+**Save safety (ruled 2026-10-22).** Lane tests found two ways to lose a
+run: turning the mod off with a run open (BaseLib hides it and the next new
+run overwrites it), and a package that does not register a character (a beta
+Yae run under the public package). [USER]: "1) I think it's the user's
+responsibility to know you can't turn a mod off and still play the game. If
+we can back up the run save, that would be ideal (the same way the public vs
+beta branches of the game would do it). 2) As above, can we separate the save
+files somehow? 3) Beta testers need to just be careful about this and we can
+put a reminder on the beta page; public users shouldn't need a warning."
+Built (`klee-mod/KleeCode/Saves/`, pinned by `KleeTests/SaveSafetyTests.cs`):
+
+- **The beta's own save folder.** The game keeps modded play in
+  `steam/<id>/modded/` (vanilla at the account root). The beta package
+  renames that one folder to `modded-teyvat-beta/` (a postfix on
+  `UserDataPathProvider.GetAccountDir`, which every save path and every Steam
+  cloud path goes through). Public, dev and seat builds keep `modded/`. On the
+  first beta boot, after the cloud sync and before profile.save is read, the
+  mod copies profile.save, progress, prefs, run saves and run history across
+  once; the `modded/` folder is never written. With cloud sync on, the copy
+  goes through the game's own store (local and cloud, history under the
+  game's 5 MB / 100-file quota), because the next sync deletes any local
+  save file the cloud lacks. Turning the beta off simply puts the game back
+  on `modded/`.
+- **The Teyvat run backup.** Each run save that holds one of our characters
+  is copied, local only, to `current_run.teyvat.save` (or
+  `current_run_mp.teyvat.save`) beside it. With the mod on again and no run
+  open, the backup goes back as the run save, unless the run is in the run
+  history or this build does not register one of its characters. It never
+  writes over an open run. When the game deletes a run save (run ended or
+  abandoned, history already written), the backup goes with it if it is the
+  same run (start time); if it was another run, the backup is restored then.
+  Limit: the mod-off run still rewrites progress.save and drops our
+  characters' rows in ancient, encounter and enemy stats; those do not come
+  back.
+- **The beta page** says to enable it or the main release, never both, and
+  that it keeps its own save folder. The public page carries no save warning.
+
+Seen on lane 1 (2026-10-22): a Furina run backed up on Continue; with `klee`
+off, a new Ironclad run overwrote and then abandoned the run save; with
+`klee` on, the log read "restored the Teyvat run" and Continue loaded the
+Furina run at act 2 floor 8. Abandoning it with the mod on removed the
+backup. A beta-variant dll copied 265 files into `modded-teyvat-beta/`, the
+profile path read `modded-teyvat-beta/profile1`, the next save landed there
+and `modded/` was byte-identical. Not seen: the cloud-on copy (lanes run with
+Steam cloud off for the app) and a co-op host's restore.
 
 **Make them.** On the main checkout (it has the pck and the card art), after
 `tools/build_pck.ps1` if the pck is stale. It builds; it does not deploy, so
