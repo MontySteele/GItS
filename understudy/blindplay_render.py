@@ -140,6 +140,7 @@ from understudy.blindplay_notes import (_AURA_NAME_RE, _aura_on_board,
                                         PLAN_LANDS_VULNERABLE,
                                         PLAN_LANDS_VULNERABLE_FROM,
                                         PLAN_LANDS_VULNERABLE_FRONT,
+                                        PLAN_DOUBLE_LOST_WARNING,
                                         PLAN_RINGING_WARNING,
                                         RINGING_USED_NOTE,
                                         RECEIPT_BONUS, RECEIPT_MEND,
@@ -5021,6 +5022,10 @@ def render(obs: dict[str, Any]) -> str:
                     # Block in its way.
                     out += _plan_lands_lines(e, c.get("enemies") or [],
                                              pl["queue"][:i - 1])
+                    # Kokomi Balance suite 4 (2026-10-21): the flip lost
+                    # Opening Gambit's double.
+                    if e.get("double_lost"):
+                        out.append(PLAN_DOUBLE_LOST_WARNING)
                     # Kokomi round 7 (2026-10-14): a Plan that plays a card
                     # spends Ringing's one card.
                     if e.get("plays_card") and ringing:

@@ -347,9 +347,11 @@ internal static class KokomiPlanView
             // Read BEFORE the request: a flip that resolves at once must not
             // turn the message round.
             var before = queue[index];
+            var behindGambit = index > 0
+                && KokomiPlan.WritesDoubleRider(queue[index - 1]);
             var why = KokomiPlan.RequestFlip(me, index);
             SetPrompt(why == null
-                ? KokomiPlanViewRows.FlipSent(before)
+                ? KokomiPlanViewRows.FlipSent(before, behindGambit)
                 : Capitalise(why) + ".");
         }
         catch (Exception e)
@@ -427,7 +429,8 @@ internal static class KokomiPlanView
                 var flipped = index >= 0 && queue[index].TwoLine && queue[index].Now;
                 caption.Text = index < 0
                     ? string.Empty
-                    : KokomiPlanViewRows.Caption(index, queue[index]);
+                    : KokomiPlanViewRows.Caption(index, queue[index],
+                        KokomiPlan.LosesDoubleAt(queue, index));
                 caption.AddThemeColorOverride(ThemeConstants.Label.FontColor,
                     flipped ? FlippedTint : CaptionColor);
                 if (holder.CardNode is { } node)
@@ -613,22 +616,39 @@ public static class KokomiPlanViewRows
     /// <summary>Can a press flip this Plan? Only a two-line one.</summary>
     public static bool Flippable(KokomiPlan.Entry entry) => entry.TwoLine;
 
-    /// <summary>The line a Plan will be carried out as.</summary>
-    public static string LineCaption(KokomiPlan.Entry entry) =>
+    /// <summary>The line a Plan will be carried out as. A flipped Plan that
+    /// loses Opening Gambit's double says so
+    /// (<see cref="KokomiPlan.LosesDouble"/>, 2026-10-21).</summary>
+    public static string LineCaption(KokomiPlan.Entry entry,
+                                     bool doubleLost = false) =>
         !entry.TwoLine ? PlanOnlyCaption
-        : entry.Now ? KokomiPlanStrip.NowLineCaption
+        : entry.Now ? (doubleLost ? KokomiPlanStrip.NowLineNotDoubledCaption
+                                  : KokomiPlanStrip.NowLineCaption)
         : KokomiPlanStrip.PlanLineCaption;
 
     /// <summary>The caption under a card in the view: its place and its
     /// line, "1. Plan line".</summary>
-    public static string Caption(int index, KokomiPlan.Entry entry) =>
-        $"{index + 1}. {LineCaption(entry)}";
+    public static string Caption(int index, KokomiPlan.Entry entry,
+                                 bool doubleLost = false) =>
+        $"{index + 1}. {LineCaption(entry, doubleLost)}";
 
     /// <summary>The prompt after a flip was sent: the line it is flipping
-    /// to (the caption repaints when it lands).</summary>
-    public static string FlipSent(KokomiPlan.Entry before) =>
+    /// to (the caption repaints when it lands). Flipping the Plan behind
+    /// Opening Gambit to its now-line says the double is lost
+    /// (<paramref name="behindGambit"/>, Kokomi Balance suite 4,
+    /// 2026-10-21).</summary>
+    public static string FlipSent(KokomiPlan.Entry before,
+                                  bool behindGambit = false) =>
         $"{before.Title}: flipping to its "
-        + (before.Now ? "Plan line." : "now-line.");
+        + (before.Now ? "Plan line."
+           : behindGambit && before.TwoLine
+               ? "now-line. " + NowLineLosesDouble
+               : "now-line.");
+
+    /// <summary>The words a flip to the now-line adds behind Opening
+    /// Gambit.</summary>
+    public const string NowLineLosesDouble =
+        "Opening Gambit's double damage does not reach a now-line.";
 
     /// <summary>
     /// The words of the strip's button hint, or null for none. A controller

@@ -1128,9 +1128,25 @@ def _take(argv, flag):
     return value
 
 
+def _usage_error(message):
+    """Exit 2 with `message` and the one-line usage, as argparse would.
+    An unknown flag is refused BEFORE any pixels move (2026-10-21: `--help`
+    was ignored and ran a full pass, rewriting ~285 plates)."""
+    sys.stderr.write(
+        f"art_process: {message}\n"
+        "usage: art_process.py [--art-root PATH] [--assets a,b,c] "
+        "[--apply-picks PICKS.tsv]   (-h for the full docstring)\n")
+    sys.exit(2)
+
+
 def main():
     global RAW, CAND, MANIFEST, ART_OUT
     argv = sys.argv[1:]
+    if "-h" in argv or "--help" in argv:
+        # A bare run rewrites every plate under ImageGen, so asking for help
+        # must never fall through to it (art_fetch's #1314 fix, here too).
+        sys.stdout.buffer.write((__doc__ or "").encode("utf-8"))
+        return
 
     # --art-root: read the pixels from ANOTHER checkout. `art/raw/` and
     # `art/candidates/` are gitignored Tier F and exist only on the art-bearing
@@ -1156,6 +1172,17 @@ def main():
     only = _take(argv, "--assets")
     only = {a.strip() for a in only.split(",") if a.strip()} if only else None
 
+    # What is left must be nothing, or `--apply-picks PATH` exactly. An
+    # unknown flag or a stray word is an error, never a full pass.
+    picks = None
+    if argv[:1] == ["--apply-picks"]:
+        if len(argv) < 2 or argv[1].startswith("-"):
+            _usage_error("--apply-picks needs a picks file")
+        picks = argv[1]
+        argv = argv[2:]
+    if argv:
+        _usage_error("unrecognized argument(s): " + " ".join(argv))
+
     rows = read_plan()
     # Taste-pass directive 3: the plan must lint clean before any pixels move.
     from art_lint import lint
@@ -1164,8 +1191,8 @@ def main():
         for p in problems:
             print("LINT: " + p, file=sys.stderr)
         sys.exit(1)
-    if len(argv) > 1 and argv[0] == "--apply-picks":
-        apply_picks(rows, argv[1])
+    if picks is not None:
+        apply_picks(rows, picks)
         return
 
     if only is not None:

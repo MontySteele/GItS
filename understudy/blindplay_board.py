@@ -2232,7 +2232,12 @@ def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
               # "front"), which a later Plan's hit meets. Absent on an older
               # bridge: False and "", and nothing is said.
               "plays_card": row.get("plays_card") is True,
-              "vulnerable_aim": _text(row.get("vulnerable_aim"))}
+              "vulnerable_aim": _text(row.get("vulnerable_aim")),
+              # Kokomi Balance suite 4 (2026-10-21): flipped to its
+              # now-line, the Plan Opening Gambit would double loses the
+              # double (`KokomiPlan.LosesDouble`). Absent on an older
+              # bridge: False, and nothing is said.
+              "double_lost": row.get("double_lost") is True}
              for row in (raw.get("queue") or []) if isinstance(row, dict)]
     pet_id = raw.get("pet_entity_id")
     pet_name = _text(raw.get("pet_name")) or "Bake-Kurage"

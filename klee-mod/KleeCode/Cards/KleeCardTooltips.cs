@@ -6,6 +6,7 @@ using KleeMod.Powers;
 using MegaCrit.Sts2.Core.Entities.Creatures;
 using MegaCrit.Sts2.Core.HoverTips;
 using MegaCrit.Sts2.Core.Localization;
+using MegaCrit.Sts2.Core.Localization.DynamicVars;
 using MegaCrit.Sts2.Core.Models;
 // `EB-752`: `TheBoot`, the relic whose rule runs after Block.
 using MegaCrit.Sts2.Core.Models.Relics;
@@ -546,16 +547,54 @@ public static class KleeCardTooltips
     /// </summary>
     private static int PrintedDamage(CardModel card)
     {
+        var dynamicVar = PrintedVar(card);
+        if (dynamicVar == null) return 0;
+        var preview = (int)dynamicVar.PreviewValue;
+        return preview > 0 ? preview : dynamicVar.IntValue;
+    }
+
+    /// <summary>
+    /// The var <see cref="PrintedDamage"/> reads: <c>CalculatedDamage</c>,
+    /// else <c>Damage</c>, else -- Kokomi Balance suite 4 (2026-10-21) -- the
+    /// live arm of a two-armed face whose only hit is the
+    /// <c>PlainDamage</c> / <c>BranchDamage</c> pair. Press the Advantage
+    /// ("Deal 8. If a Plan is waiting, deal 13 instead.") has no other damage
+    /// var, so this tip printed "This card deals no damage" over a card that
+    /// dealt 13. The card says which arm is live
+    /// (<see cref="IBranchDamageFace"/>); without it, the plain arm.
+    /// Null for a card with no hit.
+    /// </summary>
+    public static DynamicVar? PrintedVar(CardModel card)
+    {
         foreach (var name in new[] { "CalculatedDamage", "Damage" })
         {
             if (card.DynamicVars.TryGetValue(name, out var dynamicVar))
             {
-                var preview = (int)dynamicVar.PreviewValue;
-                return preview > 0 ? preview : dynamicVar.IntValue;
+                return dynamicVar;
             }
         }
+        if (BranchLive(card)
+            && card.DynamicVars.TryGetValue("BranchDamage", out var branch))
+        {
+            return branch;
+        }
+        return card.DynamicVars.TryGetValue("PlainDamage", out var plain)
+            ? plain : null;
+    }
 
-        return 0;
+    /// <summary><see cref="IBranchDamageFace.BranchDamageLive"/>, false for
+    /// any other card and on a throw (a card with no owner). Display only.
+    /// </summary>
+    private static bool BranchLive(CardModel card)
+    {
+        try
+        {
+            return card is IBranchDamageFace { BranchDamageLive: true };
+        }
+        catch (System.Exception)
+        {
+            return false;
+        }
     }
 
     /// <summary>
@@ -570,10 +609,16 @@ public static class KleeCardTooltips
     ///
     /// BY NAME AND NOT BY TYPE, a leftover from when that class (under
     /// <c>Powers/Prototype/</c>) was not compiled in every build.
+    ///
+    /// Kokomi Balance suite 4 (2026-10-21): and the pair's own
+    /// <c>FoldedDamageVar</c> (and its <c>PlanCarriedDamageVar</c> headline),
+    /// which fold the same body the same way (<c>FoldedPreview.Body</c>), so
+    /// Press the Advantage's 13 into a Vulnerable body is not multiplied by
+    /// the Vulnerable twice.
     /// </summary>
     private static bool TargetAlreadyFolded(CardModel card) =>
-        card.DynamicVars.TryGetValue("CalculatedDamage", out var calculated)
-        && calculated.GetType().Name == "FrontFoldedDamageVar";
+        PrintedVar(card)?.GetType().Name is "FrontFoldedDamageVar"
+            or "FoldedDamageVar" or "PlanCarriedDamageVar";
 
     /// <summary>
     /// `EB-602`. <see cref="SimDamagePipeline.ResolveOnTarget"/>'s last step
@@ -744,4 +789,21 @@ public static class KleeCardTooltips
 /// </summary>
 public interface ISetsOffFirstCard
 {
+}
+
+/// <summary>
+/// Kokomi Balance suite 4 (2026-10-21). A card whose one printed hit is a
+/// two-armed pair -- "Deal {PlainDamage}. If ..., deal {BranchDamage}
+/// instead." -- says which arm lands if it is played now, so the reaction
+/// preview (<see cref="KleeCardTooltips"/>) folds that number rather than
+/// finding none. Emitted by <c>tools/gen_klee_cards.py</c>
+/// (<c>branch_damage_face</c>) only where the condition is a board fact a
+/// preview can read before the play; declared here because the tooltip
+/// reading it ships in every build.
+/// </summary>
+public interface IBranchDamageFace
+{
+    /// <summary><c>BranchDamage</c> lands when true, <c>PlainDamage</c>
+    /// otherwise.</summary>
+    bool BranchDamageLive { get; }
 }

@@ -61,7 +61,10 @@ public class KokomiTasteAuditTests
         // own Block, raw.
         Assert.True(TamakushiCasket.CountsCard(new ProtoKkSting(), planned: true));
         var pay = Seq("TamakushiCasket", "PayForPlanned");
-        Assert.Contains(pay, c => c.Contains("TamakushiCasket.CountsCard"));
+        // Through `CountsPlanned`, which is `CountsCard(planned: true)` plus
+        // a Basic Grand Design plans as itself (Kokomi Balance suite 4).
+        Assert.Contains(pay, c => c.Contains("TamakushiCasket.CountsPlanned"));
+        Assert.True(TamakushiCasket.CountsPlanned(new ProtoKkSting()));
         Assert.Contains(pay, c => c.Contains("CreatureCmd.GainBlock"));
         // Not gated on a carry-out: Flotsam Surge's Plan writes one inside it.
         Assert.DoesNotContain(pay, c => c.Contains("KokomiPlan.IsCarryingOut"));

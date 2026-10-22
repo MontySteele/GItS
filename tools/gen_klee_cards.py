@@ -1784,20 +1784,6 @@ def card_needs_an_exhausted_card(card: dict) -> bool:
                for eff in card.get("effects", []))
 
 
-def card_needs_a_played_companion(card: dict) -> bool:
-    """Is this row unplayable while no Companion has been played this combat?
-    (Kokomi wording pass, 2026-10-14, [USER]: "Yep, please proceed".) Crystal
-    Collapse copies the last Companion played, captured when the Plan is
-    written; with none it was written and carried out as nothing. Derived
-    from a PLAN-ONLY row's `play_copy_of_companion` clause, so a row with a
-    now-line of its own would gate only its Plan (none exists). Twin:
-    `kokomi_plan.needs_a_played_companion`."""
-    if card.get("effects"):
-        return False
-    return any(clause.get("op") == "play_copy_of_companion"
-               for clause in (card.get("plan") or []))
-
-
 def card_needs_a_plannable_card(card: dict) -> bool:
     """Is this row unplayable while no OTHER card in hand can be planned?
     (Kokomi review 2026-10-13.) Grand Design: "Plan up to 3 cards from your
@@ -10423,6 +10409,43 @@ def branch_follows_own_hit(card: dict, eff: dict) -> bool:
     return False
 
 
+#: Words in a predicate's C# that mark a play-time SNAPSHOT (a local the
+#: emitted `OnPlay` takes at its top, or the play's own target), which a
+#: preview read before the play cannot evaluate honestly.
+_PLAY_TIME_ONLY = ("AtStart", "targetHad", "cardPlay", "Target")
+
+
+def branch_damage_face(card: dict) -> str | None:
+    """THE CONDITION A REACTION PREVIEW READS to pick which of a two-armed
+    face's numbers lands (Kokomi Balance suite 4, 2026-10-21), or None.
+
+    Press the Advantage ("Deal 8. If a Plan is waiting, deal 13 instead.")
+    prints its hit only as the `PlainDamage` / `BranchDamage` pair, so the
+    reaction preview, which read `CalculatedDamage` or `Damage`, found no
+    number and printed "This card deals no damage" over a card that dealt
+    13 (`KleeCardTooltips.PrintedDamage`). The card now says which arm is
+    live, through `IBranchDamageFace`.
+
+    Only for a row whose ONE printed hit is that pair (no top-level `damage`
+    clause, whose number the preview already reads) and whose condition is a
+    board fact the preview can read before the play -- the expression the
+    emitted `OnPlay` asks, minus any play-time snapshot (`_PLAY_TIME_ONLY`).
+    Returns that C# expression."""
+    effects = card.get("effects") or []
+    if any(eff.get("op") == "damage" for eff in effects):
+        return None
+    pairs = [eff for eff in effects
+             if eff.get("op") == "conditional"
+             and [name for name, *_ in folded_branch_damage(card, eff)]
+             == ["PlainDamage", "BranchDamage"]]
+    if len(pairs) != 1:
+        return None
+    expr = predicate_cs(str(pairs[0].get("if") or ""))
+    if not expr or any(word in expr for word in _PLAY_TIME_ONLY):
+        return None
+    return expr
+
+
 def folded_branch_damage(card: dict, eff: dict) -> list[tuple[str, int, int,
                                                               str]]:
     """`EB-657`. The two PRINTED numbers of a two-armed conditional clause:
@@ -18178,7 +18201,6 @@ def emit(
     if (card_is_set_off_only(card) or card_needs_a_waiting_plan(card)
             or card_needs_a_plannable_card(card)
             or card_needs_an_exhausted_card(card)
-            or card_needs_a_played_companion(card)
             or stage_fixed_price(card) is not None
             or card.get("playable_if")):
         interfaces += ", IUnplayableReasonCard"
@@ -18191,6 +18213,21 @@ def emit(
     aims = mode_aims(card)
     if aims is not None:
         interfaces += ", IModalCard"
+
+    # Kokomi Balance suite 4 (2026-10-21): a face whose one hit is a
+    # conditional pair says which arm is live, for the reaction preview
+    # (`branch_damage_face`).
+    branch_face = branch_damage_face(card)
+    branch_face_member = ""
+    if branch_face:
+        interfaces += ", IBranchDamageFace"
+        branch_face_member = (
+            "\n\n    /// <summary>Which printed number lands if this card is "
+            "played now:\n    /// <c>BranchDamage</c> when true, "
+            "<c>PlainDamage</c> otherwise. Read by\n    /// the reaction "
+            "preview (<c>KleeCardTooltips.PrintedDamage</c>).</summary>\n"
+            "    public bool BranchDamageLive =>\n"
+            f"        {branch_face};")
 
     # THE PLAN LINE, AS DATA ON THE CARD (draft 6). The queue is
     # TYPED and not a closure -- `KokomiPlan`'s own header says why -- so the
@@ -19331,16 +19368,12 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
     # while the Exhaust Pile is empty.
     plan_gated = (card_needs_a_waiting_plan(card)
                   or card_needs_a_plannable_card(card)
-                  or card_needs_an_exhausted_card(card)
-                  or card_needs_a_played_companion(card))
-    if card_needs_a_played_companion(card):
-        plan_gate_expr = "KokomiRefounding.AnyCompanionPlayed(this)"
-        plan_gate_why = "no Companion has been played this combat"
-        plan_gate_note = (
-            "    // Kokomi wording pass (2026-10-14): unplayable until a\n"
-            "    // Companion has been played this combat, rather than\n"
-            "    // writing a Plan that copies nothing.\n")
-    elif card_needs_an_exhausted_card(card):
+                  or card_needs_an_exhausted_card(card))
+    # (Crystal Collapse's "no Companion has been played" gate, the wording
+    # pass of 2026-10-14, is gone: since the Kokomi upgrade pass (2026-10-19)
+    # its face says "If none, play a random Common one", so with none played
+    # it is playable, as printed. Kokomi Balance suite 4, 2026-10-21.)
+    if card_needs_an_exhausted_card(card):
         plan_gate_expr = "KokomiRefounding.AnyExhausted(this)"
         plan_gate_why = "your Exhaust Pile is empty"
         plan_gate_note = (
@@ -19668,7 +19701,7 @@ public sealed class {cls} : {interfaces}
     {{
         ("title", "{title_cs}"),
         ("description", {desc_expr}),
-    }};{tags_member}{wide_target_member}{flip_member}{discard_discount_member}{stage_bow_member}{transcendence_member}{varka_switch_member}{yae_shape_member}{return_to_hand_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{plan_gate_member}{plan_reason_member}{stage_gate_member}{stage_reason_member}{playable_gate_member}{playable_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}{homework_member}
+    }};{tags_member}{wide_target_member}{flip_member}{discard_discount_member}{stage_bow_member}{transcendence_member}{varka_switch_member}{yae_shape_member}{return_to_hand_member}{spark_gate_member}{bomb_gate_member}{bomb_reason_member}{plan_gate_member}{plan_reason_member}{stage_gate_member}{stage_reason_member}{playable_gate_member}{playable_reason_member}{charge_gate_member}{modal_aim_member}{modal_prices_member}{modal_gate_member}{plan_member}{branch_face_member}{homework_member}
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
         new List<DynamicVar>

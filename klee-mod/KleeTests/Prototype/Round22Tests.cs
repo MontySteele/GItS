@@ -196,8 +196,11 @@ public class Round22Tests
         // `PreviewValue`, so the branch that reads that preview must not ask
         // `ResolveOnTarget` for them again. Asked BY NAME, as the source does.
         var source = Source("Cards/KleeCardTooltips.cs").Replace("\r\n", "\n");
+        // Kokomi Balance suite 4 (2026-10-21): the var read is the one
+        // `PrintedVar` returns, the pair's folded vars included.
         Assert.Contains(
-            "calculated.GetType().Name == \"FrontFoldedDamageVar\"", source);
+            "PrintedVar(card)?.GetType().Name is \"FrontFoldedDamageVar\"",
+            source);
 
         var amplified = typeof(KleeCardTooltips)
             .GetMethod("AmplifiedBody", All)!;

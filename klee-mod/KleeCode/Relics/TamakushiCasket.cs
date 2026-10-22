@@ -106,12 +106,16 @@ public class TamakushiCasket : CustomRelicModel
 
     /// <summary>Does this play pay? Hers, a card planned this play
     /// (<see cref="KokomiPlan.PlayedOnPet"/>) or a Companion, and not a
-    /// carry-out. PURE on the play.</summary>
+    /// carry-out. PURE on the play. Grand Design's free write is not counted
+    /// here: it pays once, through <see cref="PayForPlanned"/>, from
+    /// <c>KokomiRefounding.WriteFree</c> (Kokomi Balance suite 4,
+    /// 2026-10-21).</summary>
     public static bool Counts(CardPlay cardPlay, Creature? kokomi) =>
         kokomi != null
         && KokomiOverhaul.IsHers(kokomi)
         && cardPlay.Card.Owner?.Creature == kokomi
         && CountsCard(cardPlay.Card, KokomiPlan.PlayedOnPet(cardPlay))
+        && !KokomiRefounding.IsFreeWrite(cardPlay.Card)
         && !KokomiPlan.IsCarryingOut(kokomi.Player);
 
     /// <summary>"Whenever you Plan a card or play a Companion, gain 2
@@ -141,12 +145,20 @@ public class TamakushiCasket : CustomRelicModel
     /// Sting, through the relic she holds -- inside a carry-out too, where the
     /// carried-out card itself pays nothing. No relic, nothing. Sim twin:
     /// <c>kokomi_plan.casket_block_planned</c>.
+    ///
+    /// GRAND DESIGN'S PLANS PAY HERE TOO (Kokomi Balance suite 4,
+    /// 2026-10-21: "Grand Design's planned cards gave no Casket Block", two
+    /// seats). "Plan up to 3 cards from your Hand" is planning them, so each
+    /// card it writes pays once: a Plan card's free write
+    /// (<c>KokomiRefounding.WriteFree</c>) and a Basic planned as itself
+    /// (<c>KokomiRefounding.WriteAsItself</c>), which is no card play at all
+    /// and so never reached <see cref="AfterCardPlayed"/>.
     /// </summary>
     public static async Task PayForPlanned(Creature? kokomi, CardModel? card)
     {
         if (kokomi?.Player is not { } player) return;
         if (!KokomiOverhaul.IsHers(kokomi)) return;
-        if (!CountsCard(card, planned: true)) return;
+        if (!CountsPlanned(card)) return;
         var relic = player.Relics.OfType<TamakushiCasket>().FirstOrDefault();
         if (relic == null) return;
         var block = relic.Block;
@@ -156,6 +168,13 @@ public class TamakushiCasket : CustomRelicModel
         await CreatureCmd.GainBlock(kokomi, block, ValueProp.Unpowered, null,
                                     fast: true);
     }
+
+    /// <summary>Does a card Planned by a card or a Power pay? A Plan card
+    /// (Stings and Wards included), a Companion, and a Basic Grand Design
+    /// plans as itself. PURE.</summary>
+    public static bool CountsPlanned(CardModel? card) =>
+        CountsCard(card, planned: true)
+        || KokomiRefounding.PlansAsItself(card);
 
     /// <summary>The page's words for one payout: "gained 2 Block". PURE.
     /// </summary>
