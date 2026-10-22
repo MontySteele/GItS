@@ -70,3 +70,14 @@ def test_the_debuff_answer_clause_is_silent_on_the_relic():
               "that enemy.")
     assert not rx.search(now)
     assert rx.search(before)
+
+
+def test_the_seat_glossary_quotes_the_live_casket_number():
+    """Suite 5 (2026-10-22): the seat page's Casket row still said 2 Block
+    after the defence pass moved the relic to 1. The mirror in
+    `blindplay_shape` is held to the sim's number here."""
+    from understudy import blindplay_shape, blindplay_notes
+
+    assert blindplay_shape.CASKET_BLOCK == C.KOKOMI_OVERHAUL_CASKET_BLOCK
+    assert (f"gain {C.KOKOMI_OVERHAUL_CASKET_BLOCK} Block."
+            in blindplay_notes.CASKET_ROW)
