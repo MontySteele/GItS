@@ -65,16 +65,20 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   own; basics change only on [USER]'s pick. No kit starts with a shared
   Companion; Varka's Knights are his own Companions and count as Companions
   for every synergy.
-- **Card frames, stage 1 built** (`review/active/card-frames-2026-10-19.md`,
+- **Card frames, stages 1 and 2 built** (`review/active/card-frames-2026-10-19.md`,
   `KleeCode/CardFrameColors.cs`): each kit tints its frame (Klee red-orange,
   Furina deep blue, Kokomi pearl coral, Varka teal, Yae magenta) and every
   Companion shows a nation pip; [USER] reviewed the tints in game
-  (2026-10-21). Stage 2 (frame art per kit)
-  is an art job for [USER].
+  (2026-10-21). Stage 2 (frame art and an Energy orb per kit, PR #1509)
+  was reviewed and approved by [USER] in game.
 - **Inazuma Companions** (`review/active/inazuma-companions-2026-10-18.md`,
   `review/active/pool-sweep-2026-10-18.md` sec.3): 34 cards (8 / 15 / 11);
   Musou no Hitotachi is a 3-cost Rare in place of Baleful Omen, Euthymia's
   upgrade is Innate. Unseen in game.
+- **Next character shortlist** ([USER], 2026-10-21): "Zhongli > Nahida >
+  Mavuika > Columbina", which covers every element save Cryo and every
+  nation but Snezhnaya. Kokomi ships first; then a Zhongli paper alongside
+  a Yae taste audit.
 
 ## The kits
 
