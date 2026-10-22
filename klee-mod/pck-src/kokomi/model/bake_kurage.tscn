@@ -4,416 +4,416 @@
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_0"]
 atlas = ExtResource("1_kurage")
-region = Rect2(0, 0, 140, 255)
-margin = Rect2(32, 9, 80, 19)
+region = Rect2(0, 0, 186, 261)
+margin = Rect2(19, 1, 35, 11)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_1"]
 atlas = ExtResource("1_kurage")
-region = Rect2(140, 0, 134, 256)
-margin = Rect2(35, 9, 86, 18)
+region = Rect2(186, 0, 187, 261)
+margin = Rect2(17, 1, 34, 11)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_2"]
 atlas = ExtResource("1_kurage")
-region = Rect2(274, 0, 124, 257)
-margin = Rect2(40, 8, 96, 17)
+region = Rect2(373, 0, 185, 262)
+margin = Rect2(16, 1, 36, 10)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_3"]
 atlas = ExtResource("1_kurage")
-region = Rect2(398, 0, 120, 259)
-margin = Rect2(42, 7, 100, 15)
+region = Rect2(558, 0, 182, 262)
+margin = Rect2(15, 1, 39, 10)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_4"]
 atlas = ExtResource("1_kurage")
-region = Rect2(518, 0, 122, 257)
-margin = Rect2(41, 8, 98, 17)
+region = Rect2(740, 0, 186, 262)
+margin = Rect2(10, 1, 35, 10)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_5"]
 atlas = ExtResource("1_kurage")
-region = Rect2(640, 0, 132, 256)
-margin = Rect2(36, 9, 88, 18)
+region = Rect2(926, 0, 186, 262)
+margin = Rect2(8, 1, 35, 10)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_6"]
 atlas = ExtResource("1_kurage")
-region = Rect2(772, 0, 139, 255)
-margin = Rect2(33, 9, 81, 19)
+region = Rect2(1112, 0, 186, 261)
+margin = Rect2(7, 1, 35, 11)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_7"]
 atlas = ExtResource("1_kurage")
-region = Rect2(911, 0, 140, 255)
-margin = Rect2(32, 9, 80, 19)
+region = Rect2(1298, 0, 183, 261)
+margin = Rect2(7, 1, 38, 11)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_8"]
 atlas = ExtResource("1_kurage")
-region = Rect2(1051, 0, 140, 255)
-margin = Rect2(32, 9, 80, 19)
+region = Rect2(1481, 0, 184, 261)
+margin = Rect2(7, 1, 37, 11)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_9"]
 atlas = ExtResource("1_kurage")
-region = Rect2(1191, 0, 140, 255)
-margin = Rect2(32, 9, 80, 19)
+region = Rect2(1665, 0, 185, 261)
+margin = Rect2(7, 1, 36, 11)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_10"]
 atlas = ExtResource("1_kurage")
-region = Rect2(1331, 0, 140, 255)
-margin = Rect2(32, 9, 80, 19)
+region = Rect2(0, 262, 185, 261)
+margin = Rect2(8, 1, 36, 11)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_11"]
 atlas = ExtResource("1_kurage")
-region = Rect2(1471, 0, 140, 255)
-margin = Rect2(32, 9, 80, 19)
+region = Rect2(185, 262, 182, 261)
+margin = Rect2(12, 1, 39, 11)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_12"]
 atlas = ExtResource("1_kurage")
-region = Rect2(0, 259, 140, 255)
-margin = Rect2(32, 9, 80, 19)
+region = Rect2(367, 262, 180, 261)
+margin = Rect2(15, 1, 41, 11)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_13"]
 atlas = ExtResource("1_kurage")
-region = Rect2(140, 259, 140, 255)
-margin = Rect2(32, 9, 80, 19)
+region = Rect2(547, 262, 182, 261)
+margin = Rect2(14, 1, 39, 11)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_14"]
 atlas = ExtResource("1_kurage")
-region = Rect2(280, 259, 140, 255)
-margin = Rect2(32, 9, 80, 19)
+region = Rect2(729, 262, 186, 261)
+margin = Rect2(14, 1, 35, 11)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_15"]
 atlas = ExtResource("1_kurage")
-region = Rect2(420, 259, 140, 255)
-margin = Rect2(32, 9, 80, 19)
+region = Rect2(915, 262, 188, 261)
+margin = Rect2(15, 1, 33, 11)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_16"]
 atlas = ExtResource("1_kurage")
-region = Rect2(560, 259, 140, 255)
-margin = Rect2(32, 9, 80, 19)
+region = Rect2(1103, 262, 190, 261)
+margin = Rect2(15, 1, 31, 11)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_17"]
 atlas = ExtResource("1_kurage")
-region = Rect2(700, 259, 140, 255)
-margin = Rect2(32, 9, 80, 19)
+region = Rect2(1293, 262, 189, 261)
+margin = Rect2(16, 1, 32, 11)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_18"]
 atlas = ExtResource("1_kurage")
-region = Rect2(840, 259, 140, 255)
-margin = Rect2(32, 9, 80, 19)
+region = Rect2(1482, 262, 188, 261)
+margin = Rect2(17, 1, 33, 11)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_19"]
 atlas = ExtResource("1_kurage")
-region = Rect2(980, 259, 134, 256)
-margin = Rect2(35, 9, 86, 18)
+region = Rect2(1670, 262, 187, 261)
+margin = Rect2(17, 1, 34, 11)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_20"]
 atlas = ExtResource("1_kurage")
-region = Rect2(1114, 259, 124, 257)
-margin = Rect2(40, 8, 96, 17)
+region = Rect2(0, 523, 185, 262)
+margin = Rect2(16, 1, 36, 10)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_21"]
 atlas = ExtResource("1_kurage")
-region = Rect2(1238, 259, 120, 259)
-margin = Rect2(42, 7, 100, 15)
+region = Rect2(185, 523, 181, 262)
+margin = Rect2(15, 1, 40, 10)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_22"]
 atlas = ExtResource("1_kurage")
-region = Rect2(1358, 259, 122, 257)
-margin = Rect2(41, 8, 98, 17)
+region = Rect2(366, 523, 185, 262)
+margin = Rect2(10, 1, 36, 10)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_23"]
 atlas = ExtResource("1_kurage")
-region = Rect2(1480, 259, 132, 256)
-margin = Rect2(36, 9, 88, 18)
+region = Rect2(551, 523, 186, 262)
+margin = Rect2(8, 1, 35, 10)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_24"]
 atlas = ExtResource("1_kurage")
-region = Rect2(0, 518, 139, 255)
-margin = Rect2(33, 9, 81, 19)
+region = Rect2(737, 523, 186, 261)
+margin = Rect2(7, 1, 35, 11)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_25"]
 atlas = ExtResource("1_kurage")
-region = Rect2(139, 518, 140, 255)
-margin = Rect2(32, 9, 80, 19)
+region = Rect2(923, 523, 181, 261)
+margin = Rect2(7, 1, 40, 11)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_26"]
 atlas = ExtResource("1_kurage")
-region = Rect2(279, 518, 140, 255)
-margin = Rect2(32, 9, 80, 19)
+region = Rect2(1104, 523, 181, 261)
+margin = Rect2(7, 1, 40, 11)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_27"]
 atlas = ExtResource("1_kurage")
-region = Rect2(419, 518, 140, 255)
-margin = Rect2(32, 9, 80, 19)
+region = Rect2(1285, 523, 181, 261)
+margin = Rect2(7, 1, 40, 11)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_28"]
 atlas = ExtResource("1_kurage")
-region = Rect2(559, 518, 140, 255)
-margin = Rect2(32, 9, 80, 19)
+region = Rect2(1466, 523, 185, 261)
+margin = Rect2(8, 1, 36, 11)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_29"]
 atlas = ExtResource("1_kurage")
-region = Rect2(699, 518, 140, 255)
-margin = Rect2(32, 9, 80, 19)
+region = Rect2(1651, 523, 183, 261)
+margin = Rect2(11, 1, 38, 11)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_30"]
 atlas = ExtResource("1_kurage")
-region = Rect2(839, 518, 140, 255)
-margin = Rect2(32, 9, 80, 19)
+region = Rect2(0, 785, 181, 261)
+margin = Rect2(14, 1, 40, 11)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_31"]
 atlas = ExtResource("1_kurage")
-region = Rect2(979, 518, 140, 255)
-margin = Rect2(32, 9, 80, 19)
+region = Rect2(181, 785, 181, 261)
+margin = Rect2(17, 1, 40, 11)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_32"]
 atlas = ExtResource("1_kurage")
-region = Rect2(1119, 518, 140, 255)
-margin = Rect2(32, 9, 80, 19)
+region = Rect2(362, 785, 184, 261)
+margin = Rect2(18, 1, 37, 11)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_33"]
 atlas = ExtResource("1_kurage")
-region = Rect2(1259, 518, 140, 255)
-margin = Rect2(32, 9, 80, 19)
+region = Rect2(546, 785, 184, 261)
+margin = Rect2(20, 1, 37, 11)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_34"]
 atlas = ExtResource("1_kurage")
-region = Rect2(1399, 518, 140, 255)
-margin = Rect2(32, 9, 80, 19)
+region = Rect2(730, 785, 184, 261)
+margin = Rect2(21, 1, 37, 11)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_35"]
 atlas = ExtResource("1_kurage")
-region = Rect2(1539, 518, 140, 255)
-margin = Rect2(32, 9, 80, 19)
+region = Rect2(914, 785, 184, 261)
+margin = Rect2(22, 1, 37, 11)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_36"]
 atlas = ExtResource("1_kurage")
-region = Rect2(0, 773, 140, 255)
-margin = Rect2(32, 9, 80, 19)
+region = Rect2(1098, 785, 186, 261)
+margin = Rect2(19, 1, 35, 11)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_37"]
 atlas = ExtResource("1_kurage")
-region = Rect2(140, 773, 154, 245)
-margin = Rect2(26, 14, 66, 29)
+region = Rect2(1284, 785, 187, 254)
+margin = Rect2(18, 3, 34, 18)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_38"]
 atlas = ExtResource("1_kurage")
-region = Rect2(294, 773, 156, 241)
-margin = Rect2(25, 15, 64, 33)
+region = Rect2(1471, 785, 187, 250)
+margin = Rect2(17, 4, 34, 22)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_39"]
 atlas = ExtResource("1_kurage")
-region = Rect2(450, 773, 123, 251)
-margin = Rect2(35, 7, 97, 23)
+region = Rect2(1658, 785, 185, 255)
+margin = Rect2(17, 1, 36, 17)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_40"]
 atlas = ExtResource("1_kurage")
-region = Rect2(573, 773, 145, 242)
-margin = Rect2(0, 0, 75, 32)
+region = Rect2(0, 1046, 200, 240)
+margin = Rect2(0, 0, 21, 32)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_41"]
 atlas = ExtResource("1_kurage")
-region = Rect2(718, 773, 143, 242)
-margin = Rect2(3, 0, 77, 32)
+region = Rect2(200, 1046, 196, 240)
+margin = Rect2(1, 0, 25, 32)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_42"]
 atlas = ExtResource("1_kurage")
-region = Rect2(861, 773, 130, 244)
-margin = Rect2(23, 5, 90, 30)
+region = Rect2(396, 1046, 185, 247)
+margin = Rect2(11, 0, 36, 25)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_43"]
 atlas = ExtResource("1_kurage")
-region = Rect2(991, 773, 125, 243)
-margin = Rect2(38, 10, 95, 31)
+region = Rect2(581, 1046, 186, 249)
+margin = Rect2(9, 1, 35, 23)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_44"]
 atlas = ExtResource("1_kurage")
-region = Rect2(1116, 773, 131, 245)
-margin = Rect2(35, 10, 89, 29)
+region = Rect2(767, 1046, 186, 251)
+margin = Rect2(8, 2, 35, 21)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_45"]
 atlas = ExtResource("1_kurage")
-region = Rect2(1247, 773, 137, 251)
-margin = Rect2(33, 10, 83, 23)
+region = Rect2(953, 1046, 187, 258)
+margin = Rect2(7, 1, 34, 14)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_46"]
 atlas = ExtResource("1_kurage")
-region = Rect2(1384, 773, 140, 255)
-margin = Rect2(32, 9, 80, 19)
+region = Rect2(1140, 1046, 186, 261)
+margin = Rect2(19, 1, 35, 11)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_47"]
 atlas = ExtResource("1_kurage")
-region = Rect2(0, 1028, 191, 229)
-margin = Rect2(29, 14, 29, 45)
+region = Rect2(1326, 1046, 203, 238)
+margin = Rect2(18, 3, 18, 34)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_48"]
 atlas = ExtResource("1_kurage")
-region = Rect2(191, 1028, 165, 237)
-margin = Rect2(32, 13, 55, 37)
+region = Rect2(1529, 1046, 187, 245)
+margin = Rect2(17, 3, 34, 27)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_49"]
 atlas = ExtResource("1_kurage")
-region = Rect2(356, 1028, 128, 255)
-margin = Rect2(38, 8, 92, 19)
+region = Rect2(1716, 1046, 185, 260)
+margin = Rect2(17, 1, 36, 12)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_50"]
 atlas = ExtResource("1_kurage")
-region = Rect2(484, 1028, 121, 254)
-margin = Rect2(36, 5, 99, 20)
+region = Rect2(0, 1307, 185, 257)
+margin = Rect2(15, 0, 36, 15)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_51"]
 atlas = ExtResource("1_kurage")
-region = Rect2(605, 1028, 114, 256)
-margin = Rect2(43, 5, 106, 18)
+region = Rect2(185, 1307, 182, 258)
+margin = Rect2(15, 0, 39, 14)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_52"]
 atlas = ExtResource("1_kurage")
-region = Rect2(719, 1028, 117, 257)
-margin = Rect2(42, 6, 103, 17)
+region = Rect2(367, 1307, 185, 260)
+margin = Rect2(11, 1, 36, 12)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_53"]
 atlas = ExtResource("1_kurage")
-region = Rect2(836, 1028, 123, 258)
-margin = Rect2(40, 7, 97, 16)
+region = Rect2(552, 1307, 186, 261)
+margin = Rect2(9, 1, 35, 11)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_54"]
 atlas = ExtResource("1_kurage")
-region = Rect2(959, 1028, 140, 255)
-margin = Rect2(32, 9, 80, 19)
+region = Rect2(738, 1307, 186, 261)
+margin = Rect2(19, 1, 35, 11)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_55"]
 atlas = ExtResource("1_kurage")
-region = Rect2(1099, 1028, 164, 239)
-margin = Rect2(29, 13, 56, 35)
+region = Rect2(924, 1307, 186, 247)
+margin = Rect2(18, 3, 35, 25)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_56"]
 atlas = ExtResource("1_kurage")
-region = Rect2(1263, 1028, 166, 233)
-margin = Rect2(32, 14, 54, 41)
+region = Rect2(1110, 1307, 186, 242)
+margin = Rect2(17, 3, 35, 30)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_57"]
 atlas = ExtResource("1_kurage")
-region = Rect2(1429, 1028, 148, 234)
-margin = Rect2(34, 15, 72, 40)
+region = Rect2(1296, 1307, 183, 243)
+margin = Rect2(16, 4, 38, 29)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_58"]
 atlas = ExtResource("1_kurage")
-region = Rect2(0, 1286, 142, 233)
-margin = Rect2(32, 18, 78, 41)
+region = Rect2(1479, 1307, 181, 243)
+margin = Rect2(15, 6, 40, 29)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_59"]
 atlas = ExtResource("1_kurage")
-region = Rect2(142, 1286, 152, 231)
-margin = Rect2(25, 22, 68, 43)
+region = Rect2(1660, 1307, 182, 242)
+margin = Rect2(13, 9, 39, 30)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_60"]
 atlas = ExtResource("1_kurage")
-region = Rect2(294, 1286, 166, 234)
-margin = Rect2(16, 25, 54, 40)
+region = Rect2(0, 1568, 185, 245)
+margin = Rect2(9, 12, 36, 27)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_61"]
 atlas = ExtResource("1_kurage")
-region = Rect2(460, 1286, 176, 237)
-margin = Rect2(10, 26, 44, 37)
+region = Rect2(185, 1568, 192, 248)
+margin = Rect2(5, 13, 29, 24)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_62"]
 atlas = ExtResource("1_kurage")
-region = Rect2(636, 1286, 180, 237)
-margin = Rect2(8, 27, 40, 37)
+region = Rect2(377, 1568, 195, 248)
+margin = Rect2(4, 14, 26, 24)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_63"]
 atlas = ExtResource("1_kurage")
-region = Rect2(816, 1286, 181, 237)
-margin = Rect2(7, 28, 39, 37)
+region = Rect2(572, 1568, 195, 248)
+margin = Rect2(4, 15, 26, 24)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_64"]
 atlas = ExtResource("1_kurage")
-region = Rect2(997, 1286, 184, 237)
-margin = Rect2(5, 30, 36, 37)
+region = Rect2(767, 1568, 197, 248)
+margin = Rect2(3, 17, 24, 24)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_65"]
 atlas = ExtResource("1_kurage")
-region = Rect2(1181, 1286, 186, 236)
-margin = Rect2(4, 33, 34, 38)
+region = Rect2(964, 1568, 198, 248)
+margin = Rect2(3, 19, 23, 24)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_66"]
 atlas = ExtResource("1_kurage")
-region = Rect2(1367, 1286, 188, 236)
-margin = Rect2(3, 35, 32, 38)
+region = Rect2(1162, 1568, 199, 248)
+margin = Rect2(2, 21, 22, 24)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_67"]
 atlas = ExtResource("1_kurage")
-region = Rect2(0, 1523, 189, 236)
-margin = Rect2(2, 37, 31, 38)
+region = Rect2(1361, 1568, 200, 248)
+margin = Rect2(2, 23, 21, 24)
 filter_clip = true
 
 [sub_resource type="AtlasTexture" id="Atlas_kurage_68"]
 atlas = ExtResource("1_kurage")
-region = Rect2(189, 1523, 191, 236)
-margin = Rect2(1, 38, 29, 38)
+region = Rect2(1561, 1568, 201, 247)
+margin = Rect2(2, 25, 20, 25)
 filter_clip = true
 
 [sub_resource type="Animation" id="Animation_reset"]
@@ -694,7 +694,7 @@ position = Vector2(0, -80)
 [node name="Body" type="Sprite2D" parent="Visuals/Rig"]
 texture = SubResource("Atlas_kurage_0")
 centered = false
-offset = Vector2(-102, -141)
+offset = Vector2(-104, -139)
 scale = Vector2(0.5, 0.5)
 
 [node name="Bounds" type="Control" parent="."]
