@@ -398,7 +398,9 @@ DEATH = {
 # Where she is not fighting (the shop, character select): the Divine Priestess
 # receiving a visitor -- upright, hands folded before her at the waist, a
 # gentle smile. The elbows bend out to her sides (poles straight out) and
-# the forearms angle in to the hands at her waist, just under the bow: the
+# the forearms angle in to the hands low at her waist, at the top of her
+# thighs (lowered from just under the bow: "a bit too high", user,
+# 2026-10-22; the hands sit close to her so the elbows stay bent): the
 # near hand rests flat over the far one, a little higher and in front, so the
 # two read as two hands. Until 2026-10-22 they hung at full arm's length low
 # before her ("arms are too straight", user); a first fix raised them but
@@ -417,7 +419,7 @@ def demure(breath=0.0, swing=0.0, head_turn=28.0):
                  ("rotw", "頭", Z, head_turn * 0.6),
                  ("rot", "頭", X, 3 + 1.5 * (1 - b)),
                  ("rotw", "頭", Y, -7)]
-                + hands(far=(0.08, -0.21, -0.08 + 0.006 * b), near=(0.00, -0.25, -0.05 + 0.006 * b),
+                + hands(far=(0.08, -0.18, -0.16 + 0.006 * b), near=(0.00, -0.22, -0.13 + 0.006 * b),
                         far_pole=(1.0, -0.2, 0.0), near_pole=(-1.0, -0.2, 0.0), far_curl=(30, 10),
                         near_curl=(15, 5))
                 + cloth(swing),
