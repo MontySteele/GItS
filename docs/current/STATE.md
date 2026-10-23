@@ -54,7 +54,7 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
 | id | display | HP | nation | element | stage | draftable pool |
 |---|---|---|---|---|---|---|
 | `klee` | Klee | 70 | Mondstadt | Pyro | Balance | 78 |
-| `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Prototype | 78 |
+| `kokomi` | Sangonomiya Kokomi | 80 | Inazuma | Hydro | Balance | 78 |
 | `furina` | Furina | 78 | Fontaine | Hydro | Balance | 78 |
 | `varka` | Varka | 80 | Mondstadt | Anemo | Balance | 78 |
 | `yae` | Yae Miko | 72 | Inazuma | Electro | Prototype | 78 |
@@ -80,8 +80,8 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   upgrade is Innate. Unseen in game.
 - **Next character shortlist** ([USER], 2026-10-21): "Zhongli > Nahida >
   Mavuika > Columbina", which covers every element save Cryo and every
-  nation but Snezhnaya. Kokomi ships first; then a Zhongli paper alongside
-  a Yae taste audit.
+  nation but Snezhnaya. Kokomi reached Balance on 2026-10-23; next, a
+  Zhongli paper alongside a Yae taste audit.
 
 ## The kits
 
@@ -104,7 +104,8 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
 - **Next:** [USER]'s A3 to A5 runs; the deck is left alone until outside
   feedback.
 
-**Kokomi: Prototype.**
+**Kokomi: Balance** (2026-10-23). [USER], after his run on the defence
+pass: "Kokomi passed the vibe check - she's approved for Balance."
 - **Rules** (`review/active/kokomi-brief-2026-09-01.md` sec.2): a card with a
   Plan line can be played on the Bake-Kurage instead (a Companion only if it
   prints one); it is carried out at the start of her next turn, after the
@@ -181,8 +182,10 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
   the start of her turn if 2 or more Plans were carried out (Battle
   Formation's read); Tide Wall's Plan is 4 [6] Block plus the intent.
   Unseen in game.
-- **Next:** [USER]'s run on the defence pass; promote to Balance if it
-  passes.
+- **Process:** frozen on `main`; card and rule changes go on `kokomi-next`
+  with a suite record; text-only fixes land on `main`.
+- **Next:** outside feedback (Workshop comments, telemetry); the deck is
+  left alone until then.
 
 **Furina: Balance** (2026-10-15).
 - **Rules** (`review/active/furina-research-proposal-2026-10-05.md` sec.2):
