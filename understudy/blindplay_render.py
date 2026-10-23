@@ -3440,8 +3440,11 @@ def _edit_receipt_lines(edits: list[dict[str, Any]]) -> list[str]:
 HAND_PICKED_HEADING = "## What you have picked"
 HAND_PICKED_NOTE = ("*A picked card leaves the list above and waits here. "
                     "`confirm` takes it.*")
-SHRINE_COUNT_LINE = ("- Sakura: {n} of {cap}. At the end of your turn each "
-                     "acts, oldest first.")
+#: 2026-10-23: the rows print as her display draws them, most turns left
+#: first; the line keeps the acting order, which is still the oldest first.
+SHRINE_COUNT_LINE = ("- Sakura: {n} of {cap}. Listed below (most turns left "
+                     "first). At the end of your turn each acts, oldest "
+                     "first (Sakura 1 is the oldest).")
 SHRINE_NONE_LINE = "- Sakura: none. Plant one to start your shrine."
 #: Review r3 (ruled 2026-10-14): a plant into a full shrine makes the oldest
 #: act as its Last Bloom would; the same kind then refreshes and gains a
@@ -3484,17 +3487,10 @@ def next_to_wither(rows: list[dict[str, Any]]) -> dict[str, Any] | None:
     first. None where a row does not say its turns left (an older badge)."""
     if not rows or any(row.get("turns") is None for row in rows):
         return None
-
-    def deadline(row: dict[str, Any]) -> bool:
-        anns = row.get("annotations")
-        if anns is None:
-            anns = [row.get("annotation")]
-        return "Deadline Extension" in anns
-
     best = rows[0]
     for row in rows[1:]:
-        if deadline(row) != deadline(best):
-            if deadline(best):
+        if _deadline(row) != _deadline(best):
+            if _deadline(best):
                 best = row
             continue
         if int(row["turns"]) < int(best["turns"]):
@@ -3502,16 +3498,38 @@ def next_to_wither(rows: list[dict[str, Any]]) -> dict[str, Any] | None:
     return best
 
 
+def _deadline(row: dict[str, Any]) -> bool:
+    anns = row.get("annotations")
+    if anns is None:
+        anns = [row.get("annotation")]
+    return "Deadline Extension" in anns
+
+
+def most_turns_left_first(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """The rows in the order her Sakura display draws them (the user,
+    2026-10-23: "the one closest to expiry is at the end"): the wither order
+    read backwards (`YaeSakuraSlots.DisplayOrder`), Deadline Extension first,
+    then the most turns left, the newest on a tie, so the Sakura Dawn Prayer
+    reaches leads and the one a full-shrine plant reaches is last. Rows come
+    in oldest first; they stay so where a row does not say its turns left
+    (an older badge)."""
+    if any(row.get("turns") is None for row in rows):
+        return list(rows)
+    return sorted(rows, key=lambda r: (_deadline(r), int(r["turns"]),
+                                       r["slot"]), reverse=True)
+
+
 def _render_shrine(shrine: dict[str, Any]) -> list[str]:
     """Her block: each Sakura's Level, strike and strikes left, the Lure's
     enemy, the Annotated count, the cards Edited this combat, one fact a
-    line."""
+    line. The rows print most turns left first, as her display draws them;
+    the number on each is its badge's, 1 for the oldest."""
     rows = shrine["sakura"]
     # Sakura Channeling (2026-10-14) raises the cap: 3, plus 2 per copy.
     cap = shrine.get("cap", 3)
     out = [SHRINE_COUNT_LINE.format(n=len(rows), cap=cap) if rows
            else SHRINE_NONE_LINE]
-    for row in rows:
+    for row in most_turns_left_first(rows):
         turns = row.get("turns")
         tail = ("" if turns is None else
                 f", {turns} turn{'s' if turns != 1 else ''} left")

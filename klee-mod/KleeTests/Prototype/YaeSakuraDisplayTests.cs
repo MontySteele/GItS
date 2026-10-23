@@ -52,6 +52,7 @@ public class YaeSakuraDisplayTests : IDisposable
         Assert.True(slots[1].Empty);
         Assert.True(slots[2].Empty);
         Assert.Equal(new[] { 0, 1, 2 }, slots.Select(s => s.Slot));
+        Assert.Equal(new[] { 0, -1, -1 }, slots.Select(s => s.Index));
     }
 
     [Fact]
@@ -72,14 +73,85 @@ public class YaeSakuraDisplayTests : IDisposable
         Plant(ledger, YaeSakuraKind.Foxfire);
         ledger.LevelMostTurnsLeft(2);
         var slots = YaeSakuraSlots.Slots(ledger.Standing, YaeLaw.SakuraCap, false);
-        Assert.Equal(YaeSakuraKind.Kitsune, slots[0].Kind);
-        Assert.Equal(1, slots[0].Level);
-        Assert.Equal(YaeSakuraKind.Foxfire, slots[1].Kind);
-        Assert.Equal(3, slots[1].Level);
-        Assert.Equal(new[] { true, false, false }, slots.Select(s => s.Oldest));
+        // Most turns left first, the newest on the tie: the Foxfire.
+        Assert.Equal(YaeSakuraKind.Foxfire, slots[0].Kind);
+        Assert.Equal(3, slots[0].Level);
+        Assert.Equal(YaeSakuraKind.Kitsune, slots[1].Kind);
+        Assert.Equal(1, slots[1].Level);
+        // The outline follows the oldest, which acts first, wherever it stands.
+        Assert.Equal(new[] { false, true, false }, slots.Select(s => s.Oldest));
         // An empty shrine outlines nothing.
         Assert.DoesNotContain(YaeSakuraSlots.Slots(Array.Empty<YaeSakura>(), 3, false),
                               s => s.Oldest);
+    }
+
+    // ---- the order (the user, 2026-10-23) ---------------------------------
+
+    [Fact]
+    public void The_row_puts_the_most_turns_left_first_and_the_closest_to_withering_last()
+    {
+        var ledger = Fresh();
+        Plant(ledger, YaeSakuraKind.Thunder);   // A, oldest
+        Plant(ledger, YaeSakuraKind.Foxfire);   // B
+        Plant(ledger, YaeSakuraKind.Kitsune);   // C, newest
+        var a = ledger.Standing[0];
+        var b = ledger.Standing[1];
+        var c = ledger.Standing[2];
+        Assert.True(ledger.EditOne(a, YaeAnnotation.DeadlineExtension));
+
+        // The wither order read backwards: A (never withers), then C and B
+        // tied on turns, the newest first.
+        Assert.Equal(new[] { 0, 2, 1 }, YaeSakuraSlots.DisplayOrder(ledger.Standing));
+        var slots = YaeSakuraSlots.Slots(ledger.Standing, 3, false);
+        Assert.Equal(new[] { 0, 2, 1 }, slots.Select(s => s.Index));
+        Assert.Equal(new[] { YaeSakuraKind.Thunder, YaeSakuraKind.Kitsune, YaeSakuraKind.Foxfire },
+                     slots.Select(s => s.Kind));
+        Assert.Same(a, ledger.LastToWither());
+        Assert.Same(b, ledger.NextToWither());
+        Assert.Equal(ledger.WitherOrder().Reverse().Select(s => ledger.Standing.ToList().IndexOf(s)),
+                     slots.Select(s => s.Index));
+        // Display only: the planting order (the order they act) is untouched.
+        Assert.Equal(new[] { a, b, c }, ledger.Standing);
+    }
+
+    [Fact]
+    public void Dawn_prayers_sakura_is_always_the_first_slot_twin_sakuras_kitsune_on_the_tie()
+    {
+        // Twin Sakura plants a Sakura then a Kitsune Sakura, both 3 turns:
+        // the "newest" on the tie is the Kitsune, and the row now shows it.
+        var ledger = Fresh();
+        Plant(ledger, YaeSakuraKind.Thunder);
+        Plant(ledger, YaeSakuraKind.Kitsune);
+        var slots = YaeSakuraSlots.Slots(ledger.Standing, 3, false);
+        Assert.Equal(YaeSakuraKind.Kitsune, slots[0].Kind);
+        Assert.Same(ledger.LastToWither(), ledger.Standing[slots[0].Index]);
+        Assert.Equal(YaeSakuraKind.Thunder, slots[1].Kind);
+        Assert.True(slots[1].Oldest);
+
+        // A fresh plant has the most turns left: it takes the first slot.
+        ledger.Tick();
+        Plant(ledger, YaeSakuraKind.Foxfire);
+        Assert.Equal(new[] { 2, 1, 0 }, YaeSakuraSlots.DisplayOrder(ledger.Standing));
+    }
+
+    [Fact]
+    public void A_preview_lands_on_the_slot_that_draws_its_sakura()
+    {
+        var ledger = Fresh();
+        Plant(ledger, YaeSakuraKind.Thunder);   // A
+        Plant(ledger, YaeSakuraKind.Thunder);   // B
+        Plant(ledger, YaeSakuraKind.Thunder);   // C
+        Assert.True(ledger.EditOne(ledger.Standing[0], YaeAnnotation.DeadlineExtension));
+        // A Kitsune into the full shrine replaces B: no Deadline Extension,
+        // the fewest turns, the older on the tie.
+        var preview = YaeSakuraSlots.Preview(ledger.Standing, 3, YaePlantShape.Plant,
+                                             new[] { YaeSakuraKind.Kitsune });
+        Assert.Equal(YaeSlotPreview.Replaces, preview[1]);
+        var slots = YaeSakuraSlots.Slots(ledger.Standing, 3, false, preview);
+        var shown = Assert.Single(slots, s => s.Preview == YaeSlotPreview.Replaces);
+        Assert.Equal(1, shown.Index);
+        Assert.Equal(2, shown.Slot);   // the end of the row: closest to withering
+        Assert.Same(ledger.NextToWither(), ledger.Standing[shown.Index]);
     }
 
     // ---- turns ------------------------------------------------------------
@@ -105,9 +177,11 @@ public class YaeSakuraDisplayTests : IDisposable
         Assert.True(ledger.EditOne(ledger.Standing[1], YaeAnnotation.DeadlineExtension));
 
         var plain = YaeSakuraSlots.Slots(ledger.Standing, 3, eternal: false);
-        Assert.Equal("5", plain[0].TurnsText);
-        Assert.Equal(0, plain[0].Pips);
-        Assert.True(plain[1].Infinite);
+        // Deadline Extension never withers: it leads the row.
+        Assert.True(plain[0].Infinite);
+        Assert.Equal(1, plain[0].Index);
+        Assert.Equal("5", plain[1].TurnsText);
+        Assert.Equal(0, plain[1].Pips);
 
         var eternal = YaeSakuraSlots.Slots(ledger.Standing, 3, eternal: true);
         Assert.All(eternal.Take(2), s => Assert.Equal(YaeSakuraSlots.InfinityMark, s.TurnsText));
@@ -236,7 +310,10 @@ public class YaeSakuraDisplayTests : IDisposable
         var preview = YaeSakuraSlots.PreviewFor(guardian, yae);
         Assert.NotNull(preview);
         var slots = YaeSakuraSlots.Slots(ledger.Standing, 3, false, preview);
-        Assert.Equal(YaeSlotPreview.Replaces, slots[0].Preview);
+        // The oldest, closest to withering on the tie, is the row's last slot.
+        Assert.Equal(YaeSlotPreview.Replaces, slots[2].Preview);
+        Assert.True(slots[2].Oldest);
+        Assert.Equal(1, slots.Count(s => s.Preview == YaeSlotPreview.Replaces));
 
         Assert.Null(YaeSakuraSlots.PreviewFor(new ProtoYmSakuraChanneling(), yae));
     }
