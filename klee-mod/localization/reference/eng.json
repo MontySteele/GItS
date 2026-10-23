@@ -354,7 +354,7 @@
     "KLEEMOD-PROTO_FS_BIS.title": "Extended Run",
     "KLEEMOD-PROTO_FS_BRAVURA.description": "[gold]Spend[/gold] up to 18, all you can. Deal {Damage:diff()} [gold]Hydro[/gold] damage for every 3 spent.{InCombat:\n(Deals {TotalDamage:diff()} damage)|}",
     "KLEEMOD-PROTO_FS_BRAVURA.title": "Bravura",
-    "KLEEMOD-PROTO_FS_BRING_THE_HOUSE_DOWN.description": "[gold]Spend[/gold] up to 10 for each guest on stage, all you can. Deal that much damage. Each guest acts.{InCombat:\n(Deals {CalculatedDamage:diff()} damage)|}",
+    "KLEEMOD-PROTO_FS_BRING_THE_HOUSE_DOWN.description": "Deal {Damage:diff()} damage. [gold]Spend[/gold] 5 for each guest on stage: each guest acts twice.",
     "KLEEMOD-PROTO_FS_BRING_THE_HOUSE_DOWN.title": "Bring the House Down",
     "KLEEMOD-PROTO_FS_BUBBLE_ARIA.description": "Gain {IfUpgraded:show:8|6} [gold]Block[/gold]. [gold]Spend[/gold] 3: also draw 2 cards.{InCombat:{StageSpendShort}|}",
     "KLEEMOD-PROTO_FS_BUBBLE_ARIA.title": "Bubble Aria",

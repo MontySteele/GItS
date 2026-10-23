@@ -46,20 +46,14 @@ def test_extended_run_is_8_and_12_upgraded_and_copies_add():
     assert T.card_up_to_cap(st, 18) == 38
 
 
-def test_bring_the_house_down_three_guests_one_copy_spends_38_once():
+def test_bring_the_house_down_is_a_fixed_spend_extended_run_leaves_alone():
+    # The upgrade census (2026-10-23): "Spend 5 for each guest on stage" is a
+    # Spend N, not a "Spend up to", so Extended Run does not raise it.
     st = _furina(200, stage=["charlotte", "wriothesley", "clorinde"])
     st.player.powers[FS.EXTENDED_RUN] = 8
-    hp = st.enemies[0].hp
     _play(st, _card("proto_fs_bring_the_house_down"))
-    assert st.player.ftd.fanfare == 200 - 38
+    assert st.player.ftd.fanfare == 200 - 15
     assert st.player.ftd.ledger["spends"] == 1
-    assert hp - st.enemies[0].hp >= 38
-
-
-def test_bring_the_house_down_caps_at_10_a_guest():
-    st = _furina(200, stage=["wriothesley", "clorinde"])
-    _play(st, _card("proto_fs_bring_the_house_down"))
-    assert st.player.ftd.fanfare == 200 - 20
 
 
 def test_bravura_two_upgraded_copies_spend_42_for_14_hits():

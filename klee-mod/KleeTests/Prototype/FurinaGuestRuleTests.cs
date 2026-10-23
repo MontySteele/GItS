@@ -471,7 +471,9 @@ public class FurinaGuestRuleTests
             Il.Calls(typeof(ProtoFsEncore).GetMethod("OnPlay", All)!));
         Assert.Contains("FurinaCards.ActAll",
             Il.Calls(typeof(ProtoFsTutti).GetMethod("OnPlay", All)!));
-        Assert.Contains("FurinaCards.ActAll",
+        // Bring the House Down (the upgrade census, 2026-10-23): its own
+        // conditional Spend, then each guest acts twice.
+        Assert.Contains("FurinaCards.HouseDown",
             Il.Calls(typeof(ProtoFsBringTheHouseDown).GetMethod("OnPlay", All)!));
         Assert.Contains("FurinaCards.FinalBow",
             Il.Calls(typeof(ProtoFsFinalBow).GetMethod("OnPlay", All)!));

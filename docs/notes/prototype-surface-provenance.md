@@ -10121,3 +10121,31 @@ over-ceiling carriers.)
   `earlier_plan_hits` read the all-Plans count). Numbers unchanged.
 - Both drop ", not Stings or Wards"; Feint, Riptide Ruin and the other
   carriers keep their exclusion.
+
+## Furina's upgrade census, 2026-10-23
+
+[USER], on the census (17 cost-only upgrades against base Ironclad 6 and
+Silent 9): "Otherwise I agreed on all the cards!" The record and the
+predictions are in `review/active/furina-next-3-2026-10-16.md`, "Upgrade
+census (2026-10-23)". Built on `furina-next`.
+
+- Eight rows keep their cost and get a real upgrade: Let the People Rejoice
+  2 [3] a point, The Show Must Go On [Retain], Tutti! draws 1 [2], Rainfall
+  Overture [draws 1], The Masquerade [plus 2], Critics' Darling [plus 1],
+  Showstopper Spend 5 [3], Ensemble Cast [2 random guests]. The three Powers
+  are one class for both versions (`UpgradeTwinPower`, Prima Donna's shape);
+  Showstopper pays its cheaper rounds first.
+- `proto_fs_bring_the_house_down` is reflavoured in a separate commit, which
+  [USER] may still change, so it no longer repeats Let the People Rejoice's
+  spend-for-damage. Was "Spend up to 10 for each guest on stage, all you can.
+  Deal that much damage. Each guest acts." [cost -1]. Now "Deal 8 [11]
+  damage. Spend 5 for each guest on stage: each guest acts twice." The hit
+  lands first; then, with a guest on stage and 5 a guest in the bank, one
+  Spend and each guest acts twice, front to back (Bottled Encore's order).
+  With no guest, or a short bank, nothing more happens, as Showstopper's
+  "Spend 5: ...". A card's Spend N, so Center of Attention's free Spend pays
+  it; it is no longer a "Spend up to", so Extended Run does not raise it.
+  The sheet comment before this ruling, verbatim: "Bring the House Down:
+  Spend up to 10 for each guest on stage, in one Spend (furina-next paper 2,
+  review/active/furina-next-2-2026-10-16.md sec.2, ruled 2026-10-16; was
+  Spend all)."

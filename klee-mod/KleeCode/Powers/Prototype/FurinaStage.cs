@@ -517,7 +517,7 @@ public static class FurinaStage
         await Done(owner);
     }
 
-    /// <summary>Tutti! and Bring the House Down: "Each guest acts."</summary>
+    /// <summary>Tutti!: "Each guest acts."</summary>
     public static async Task ActAll(PlayerChoiceContext choiceContext,
                                     Creature? owner)
     {
@@ -525,6 +525,38 @@ public static class FurinaStage
         await Director(choiceContext, owner!).ActAll();
         await Done(owner);
     }
+
+    /// <summary>Bring the House Down (the upgrade census, 2026-10-23):
+    /// "Spend 5 for each guest on stage: each guest acts twice." With no
+    /// guest on stage, or a bank short of the price, nothing happens
+    /// (Showstopper's "Spend 5: ..."). A card's Spend N, so Center of
+    /// Attention's free Spend pays it. Sim twin:
+    /// <c>furina_tide.house_down</c>.</summary>
+    public static async Task HouseDown(PlayerChoiceContext choiceContext,
+                                       Creature? owner)
+    {
+        if (!Ensure(owner)) return;
+        var ledger = FurinaStageLedger.For(owner!);
+        if (ledger.IsEmpty) return;
+        var price = HouseDownPrice(ledger.Seats.Count);
+        var director = Director(choiceContext, owner!);
+        if (CenterOfAttentionPower.TryClaim(owner!))
+        {
+            RefreshBadges(owner);
+        }
+        else
+        {
+            if (!ledger.CanSpend(price)) return;
+            if (await director.Spend(price) <= 0) return;
+        }
+        await director.ActEachTwice();
+        await Done(owner);
+    }
+
+    /// <summary>Bring the House Down's price: 5 for each guest on stage.
+    /// PURE.</summary>
+    public static int HouseDownPrice(int guests) =>
+        System.Math.Max(0, guests) * FurinaStageLaw.HouseDownSpendPerGuest;
 
     /// <summary>Final Bow: "Choose a guest. It acts twice, then leaves."
     /// [3 times]. One guest is taken without a screen; with more, the player

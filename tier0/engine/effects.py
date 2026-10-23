@@ -4824,8 +4824,9 @@ def _op_stage_spend_up_to(state: CombatState, fx: dict, card: Card) -> None:
     """"Spend up to X" (the Spend paper, 2026-10-10): X or all she holds,
     never fails. What it counted is this play's `stage_spent`."""
     cap = _amount(state, fx.get("amount", 1))
-    # furina-next paper 2 (2026-10-16): Bring the House Down's "Spend up to
-    # 10 for each guest on stage" (the C# `10 * FurinaStage.Of(..).Count`).
+    # furina-next paper 2 (2026-10-16): "Spend up to 10 for each guest on
+    # stage" (the C# `10 * FurinaStage.Of(..).Count`). Bring the House Down
+    # printed it until the upgrade census (2026-10-23); no row does now.
     if fx.get("per") == "stage_guests":
         cap *= len(furina_stage.stage(state.player))
     elif fx.get("per") is not None:

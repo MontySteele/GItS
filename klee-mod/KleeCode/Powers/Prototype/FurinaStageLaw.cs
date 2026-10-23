@@ -180,6 +180,10 @@ public static class FurinaStageLaw
     /// act again."</summary>
     public const int ShowstopperSpend = 5;
 
+    /// <summary>Bring the House Down (the upgrade census, 2026-10-23):
+    /// "Spend 5 for each guest on stage: each guest acts twice."</summary>
+    public const int HouseDownSpendPerGuest = 5;
+
     /// <summary>Showstopper upgraded (the upgrade census, 2026-10-23):
     /// "Spend 3".</summary>
     public const int ShowstopperPlusPrice = 3;

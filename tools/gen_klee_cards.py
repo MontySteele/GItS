@@ -3450,7 +3450,14 @@ FURINA_KINDS = {
     "facade": "Facade",
     "encore_performance": "EncorePerformance",
     "verdict": "Verdict",
+    # The upgrade census (2026-10-23): Bring the House Down's "Spend 5 for
+    # each guest on stage: each guest acts twice", Showstopper's conditional
+    # Spend (`FurinaStage.HouseDown`).
+    "house_down": "HouseDown",
 }
+#: The kinds whose own play pays Fanfare, so the row is a Spend card
+#: (`stage_spend_card`).
+FURINA_SPEND_KINDS = frozenset({"house_down"})
 FURINA_KIND_AMOUNT = {"final_bow", "gain_fanfare", "tutor_guest", "facade",
                       # Upgrade census (2026-10-23): Ensemble Cast summons
                       # 1 [2].
@@ -7686,8 +7693,11 @@ STAGE_SPEND_OPS = frozenset({"stage_spend", "stage_spend_all",
 
 
 def stage_spend_card(card: dict) -> bool:
-    """True when the row's own play pays Fanfare (a Spend card)."""
+    """True when the row's own play pays Fanfare (a Spend card): a stage
+    Spend op, or a `furina` kind that Spends (Bring the House Down)."""
     return any(fx.get("op") in STAGE_SPEND_OPS
+               or (fx.get("op") == "furina"
+                   and fx.get("kind") in FURINA_SPEND_KINDS)
                for fx in iter_card_effects(card))
 
 #: The stage op whose `amount` an upgrade moves through a var named for what

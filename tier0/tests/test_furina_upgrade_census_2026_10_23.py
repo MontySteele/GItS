@@ -111,3 +111,46 @@ def test_ensemble_cast_upgraded_summons_2():
     st = _furina()
     _play(st, _card("proto_fs_ensemble_cast+"))
     assert len(T._f(st).stage) == 2
+
+
+# ---- Bring the House Down, reflavoured (a separate commit) ------------------
+
+def _staged(fanfare, guests):
+    st = _furina()
+    for g in guests:
+        FS.guest_star(st, g)
+    T._f(st).fanfare = fanfare
+    return st
+
+
+def test_bring_the_house_down_hits_then_each_guest_acts_twice():
+    st = _staged(10, ("charlotte", "clorinde"))
+    hp = st.enemies[0].hp
+    _play(st, _card("proto_fs_bring_the_house_down"))
+    f = T._f(st)
+    assert f.fanfare == 0
+    assert f.ledger["guest_acts"]["charlotte"] == 2
+    assert f.ledger["guest_acts"]["clorinde"] == 2
+    assert hp - st.enemies[0].hp >= 8
+
+
+def test_bring_the_house_down_short_bank_or_empty_stage_only_hits():
+    st = _staged(9, ("charlotte", "clorinde"))
+    hp = st.enemies[0].hp
+    _play(st, _card("proto_fs_bring_the_house_down"))
+    f = T._f(st)
+    assert f.fanfare == 9
+    assert sum(f.ledger["guest_acts"].values()) == 0
+    assert hp - st.enemies[0].hp == 8
+    st = _staged(20, ())
+    hp = st.enemies[0].hp
+    _play(st, _card("proto_fs_bring_the_house_down+"))
+    assert T._f(st).fanfare == 20
+    assert hp - st.enemies[0].hp == 11
+
+
+def test_bring_the_house_down_upgrades_its_damage_not_its_cost():
+    base = loader.get_card("proto_fs_bring_the_house_down")
+    up = loader.get_card("proto_fs_bring_the_house_down+")
+    assert (base.cost, up.cost) == (2, 2)
+    assert T.house_down_price(3) == 15

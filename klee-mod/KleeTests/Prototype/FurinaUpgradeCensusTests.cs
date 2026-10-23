@@ -130,4 +130,23 @@ public class FurinaUpgradeCensusTests : IDisposable
         Run(poor.Director.EndOfTurn(0));
         Assert.Equal(2, poor.Stage.Fanfare);
     }
+
+    // ---- Bring the House Down, reflavoured (a separate commit) ---------------
+
+    [Fact]
+    public void Bring_the_house_down_hits_then_spends_5_a_guest_for_two_acts_each()
+    {
+        Assert.Equal(15, FurinaStage.HouseDownPrice(3));
+        Assert.Equal(0, FurinaStage.HouseDownPrice(0));
+        var card = new ProtoFsBringTheHouseDown();
+        Assert.Equal(8m, card.DynamicVars.Damage.BaseValue);
+        Assert.Equal(11m, Upgraded(new ProtoFsBringTheHouseDown()).DynamicVars.Damage.BaseValue);
+        Assert.Equal(2, Cost(Upgraded(new ProtoFsBringTheHouseDown())));
+        Assert.IsAssignableFrom<IStageSpendCard>(card);
+        var src = Generated("ProtoFsBringTheHouseDown");
+        Assert.True(src.IndexOf("DamageCmd.Attack", StringComparison.Ordinal)
+                    < src.IndexOf("FurinaCards.HouseDown", StringComparison.Ordinal));
+        Assert.Contains("StageDirector.ActEachTwice",
+            Il.Calls(Il.Method("FurinaStage", "HouseDown")));
+    }
 }

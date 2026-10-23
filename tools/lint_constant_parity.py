@@ -307,7 +307,9 @@ MIRRORED: dict[str, object] = {
     "FurinaStageLaw.EscoffierLineBonusUpgraded": _stage("ESCOFFIER_LINE_BONUS_UPGRADED"),
     "FurinaStageLaw.EnsembleSeats": _stage("ENSEMBLE_SEATS"),
     "FurinaStageLaw.ShowstopperSpend": _stage("SHOWSTOPPER_SPEND"),
-    # The upgrade census (2026-10-23): the upgraded powers' numbers.
+    # The upgrade census (2026-10-23): the upgraded powers' numbers and
+    # Bring the House Down's price a guest.
+    "FurinaStageLaw.HouseDownSpendPerGuest": _stage("HOUSE_DOWN_SPEND_PER_GUEST"),
     "FurinaStageLaw.ShowstopperPlusPrice": _stage("SHOWSTOPPER_PLUS_PRICE"),
     "FurinaStageLaw.MasqueradePlusBlock": _stage("MASQUERADE_PLUS_BLOCK"),
     "FurinaStageLaw.CriticsDarlingRaise": _stage("CRITICS_DARLING_RAISE"),

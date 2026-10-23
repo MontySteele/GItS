@@ -51,7 +51,7 @@ public static class FurinaCards
                                  CardModel card, CardPlay cardPlay) =>
         FurinaStage.ActOldest(choiceContext, card.Owner?.Creature);
 
-    /// <summary>Tutti! and Bring the House Down: "Each guest acts."</summary>
+    /// <summary>Tutti!: "Each guest acts."</summary>
     public static Task ActAll(PlayerChoiceContext choiceContext,
                               CardModel card, CardPlay cardPlay) =>
         FurinaStage.ActAll(choiceContext, card.Owner?.Creature);
@@ -75,6 +75,14 @@ public static class FurinaCards
             await FurinaStage.SummonRandom(choiceContext, card.Owner?.Creature);
         }
     }
+
+    /// <summary>Bring the House Down (the upgrade census, 2026-10-23):
+    /// "Spend 5 for each guest on stage: each guest acts twice." After the
+    /// card's hit; Showstopper's conditional Spend, so with no guest or a
+    /// short bank nothing more happens.</summary>
+    public static Task HouseDown(PlayerChoiceContext choiceContext,
+                                 CardModel card, CardPlay cardPlay) =>
+        FurinaStage.HouseDown(choiceContext, card.Owner?.Creature);
 
     /// <summary>The ledger source a card's own Fanfare gain is filed
     /// under.</summary>

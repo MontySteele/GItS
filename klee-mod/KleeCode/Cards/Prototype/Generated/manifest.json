@@ -1223,7 +1223,7 @@
       "damage": 2
     },
     "proto_fs_bring_the_house_down": {
-      "cost": -1
+      "damage": 3
     },
     "proto_fs_bubble_aria": {
       "conditional_block": 2

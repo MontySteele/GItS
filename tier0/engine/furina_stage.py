@@ -94,6 +94,7 @@ ESCOFFIER_LINE_BONUS = T.ESCOFFIER_LINE_BONUS
 ESCOFFIER_LINE_BONUS_UPGRADED = T.ESCOFFIER_LINE_BONUS_UPGRADED
 ENSEMBLE_SEATS = T.ENSEMBLE_SEATS
 SHOWSTOPPER_SPEND = T.SHOWSTOPPER_SPEND
+HOUSE_DOWN_SPEND_PER_GUEST = T.HOUSE_DOWN_SPEND_PER_GUEST
 SHOWSTOPPER_PLUS_PRICE = T.SHOWSTOPPER_PLUS_PRICE
 MASQUERADE_PLUS_BLOCK = T.MASQUERADE_PLUS_BLOCK
 CRITICS_DARLING_RAISE = T.CRITICS_DARLING_RAISE
@@ -605,7 +606,10 @@ KINDS = ("act_oldest", "act_all", "final_bow", "tutor_guest",
          # The sweep, second set (review/active/furina-sweep-2026-10-14.md
          # sec.3; `SWEEP_KINDS`), the C# `FurinaCards` twins.
          "flip", "stage_directions", "facade", "encore_performance",
-         "verdict")
+         "verdict",
+         # The upgrade census (2026-10-23): Bring the House Down's "Spend 5
+         # for each guest on stage: each guest acts twice".
+         "house_down")
 #: Casting Call's `tutor_guest` carries its floor's draw ("If you can't,
 #: draw 2 cards"; the diversity pass, 2026-10-11). Facade carries its cap.
 KIND_AMOUNT = ("final_bow", "gain_fanfare", "tutor_guest", "facade",
@@ -668,6 +672,8 @@ def kind(state, fx: dict, card) -> None:
     elif k == "gain_fanfare":
         # The ledger's gain, the path Universal Revelry's gain takes.
         T.gain(state, int(fx["amount"]), "card")
+    elif k == "house_down":
+        T.house_down(state)
     else:                                            # pragma: no cover
         raise ValueError(f"unknown furina kind {k!r}")
 

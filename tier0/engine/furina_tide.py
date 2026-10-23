@@ -174,6 +174,9 @@ ESCOFFIER_LINE_BONUS = 2           # line: your guests' acts deal 2 [3] more dam
 ESCOFFIER_LINE_BONUS_UPGRADED = 3
 ENSEMBLE_SEATS = 4                 # Ensemble Cast: 4 guest seats
 SHOWSTOPPER_SPEND = 5              # Showstopper: end of turn, Spend 5
+# Bring the House Down (the upgrade census, 2026-10-23): "Spend 5 for each
+# guest on stage: each guest acts twice."
+HOUSE_DOWN_SPEND_PER_GUEST = 5
 # The upgrade census (2026-10-23): what an upgraded card's copy changes.
 SHOWSTOPPER_PLUS_PRICE = 3     # Showstopper+: Spend 3
 MASQUERADE_PLUS_BLOCK = 2      # The Masquerade+: that much Block plus 2
@@ -533,8 +536,12 @@ CARDS: dict[str, Spec] = {
                                    "power", (1,), "standing_room_only"),
     # Spend up to 10 for each guest on stage (furina-next paper 2): damage
     # per point, then the cap per guest.
+    # Bring the House Down (Attack, 2, Rare; the upgrade census,
+    # 2026-10-23): Deal 8 damage. Spend 5 for each guest on stage: each
+    # guest acts twice.
     "ftd_bring_the_house_down": Spec("Bring the House Down", 2, "attack",
-                                     "rare", "house_down", (1, 10)),
+                                     "rare", "house_down",
+                                     (8, HOUSE_DOWN_SPEND_PER_GUEST)),
     # Ousia, Drain (10).
     "ftd_undercurrent": Spec("Unheard Confession", 1, "attack", "common",
                              "undercurrent", (2, 5, 1)),
@@ -1555,6 +1562,42 @@ def act_all(state) -> int:
     return acts
 
 
+def act_each_twice(state) -> int:
+    """Bottled Encore and Bring the House Down: "Each guest acts twice."
+    Front to back, each guest's two acts together (the C#
+    `StageDirector.ActEachTwice`). Returns the acts made."""
+    f = _f(state)
+    acts = 0
+    for member in list(f.stage):
+        for _ in range(2):
+            if (state.over or not state.player.alive
+                    or not state.living_enemies or member not in f.stage):
+                break
+            act(state, member)
+            acts += 1
+    return acts
+
+
+def house_down_price(guests: int) -> int:
+    """Bring the House Down's price: 5 for each guest on stage."""
+    return max(0, int(guests)) * HOUSE_DOWN_SPEND_PER_GUEST
+
+
+def house_down(state) -> bool:
+    """Bring the House Down (the upgrade census, 2026-10-23): "Spend 5 for
+    each guest on stage: each guest acts twice." Showstopper's conditional
+    Spend: no guest, or a bank short of the price, and nothing happens (the
+    C# `FurinaStage.HouseDown`). Returns whether the guests acted."""
+    f = _f(state)
+    if state.over or not state.player.alive or not f.stage:
+        return False
+    price = house_down_price(len(f.stage))
+    if f.fanfare < price_of(f, price) or not spend(state, price):
+        return False
+    act_each_twice(state)
+    return True
+
+
 def act_oldest(state) -> bool:
     """Encore!: "Your oldest guest acts." """
     f = _f(state)
@@ -1872,10 +1915,10 @@ def resolve_card(state, card) -> None:
     elif k == "star_turn":
         _card_damage(state, card, n[0])
     elif k == "house_down":
-        # furina-next paper 2: Spend up to 10 for each guest on stage.
-        held = spend_up_to_card(state, n[1] * len(f.stage))
-        _card_damage(state, card, n[0] * held)
-        act_all(state)
+        # The upgrade census (2026-10-23): the hit, then Spend 5 for each
+        # guest on stage: each guest acts twice.
+        _card_damage(state, card, n[0])
+        house_down(state)
     elif k == "undercurrent":
         if drain(state, n[0]):
             f.ledger["fixed_drains"] += 1

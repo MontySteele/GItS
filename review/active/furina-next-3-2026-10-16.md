@@ -153,6 +153,17 @@ Kept as cost cuts: Singer of Many Waters, Universal Revelry, A Five-Century
 Act, Regina of All Waters, Grand Absolution, Encore Performance, Verdict of
 the Oratrice, Plot Twist.
 
+**Bring the House Down, reflavoured (its own commit; [USER] may still change
+it).** It no longer repeats Let the People Rejoice's spend-for-damage.
+
+| Card | Was | Now | Expected effect, graded by the next suite |
+|---|---|---|---|
+| Bring the House Down (Rare Attack, 2) | Spend up to 10 for each guest on stage, all you can. Deal that much damage. Each guest acts. [cost -1] | Deal 8 [11] damage. Spend 5 for each guest on stage: each guest acts twice. | Less burst (8, not up to 30 with three guests) and more guest acts; played later in a fight, with a full stage and 10 to 15 banked. Take rate may fall. |
+
+With no guest on stage, or a bank short of 5 a guest, it is only the hit, as
+Showstopper's "Spend 5: ..." does nothing when she cannot pay. It is no
+longer a "Spend up to", so Extended Run does not raise it.
+
 **How it is built.** The three Powers keep one badge for both versions, as
 Prima Donna does (`UpgradeTwinPower`): the copy an upgraded card installs
 adds its 2 Block, its 1 damage or its cheaper Spend, and Showstopper pays its
