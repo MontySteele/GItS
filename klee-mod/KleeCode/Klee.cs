@@ -191,10 +191,13 @@ public sealed class Klee : CustomCharacterModel, Powers.IKleeCharacter
         KleePck.Path("klee/ui/energy_counter.tscn")
         ?? "res://scenes/combat/energy_counters/ironclad_energy_counter.tscn";
 
-    // Temporary shared base-game surface. It is a real N* scene, so unlike
-    // an id-derived missing path it is safe to preload and instantiate.
+    // The flying-card trail: her own scene since 2026-10-23 ([USER]: "Card
+    // trail - can we make our own trails?"), the base trail recoloured to her
+    // card orange (#F0600F) by tools/gen_card_trails.py. The base ironclad
+    // trail, which she wore before, is the fallback for a pck without it.
     public override string? CustomTrailPath =>
-        "res://scenes/vfx/card_trail_ironclad.tscn";
+        KleePck.Path("klee/vfx/card_trail.tscn")
+        ?? "res://scenes/vfx/card_trail_ironclad.tscn";
 
     public override string? CustomMapMarkerPath =>
         KleePck.Path("klee/ui/map_marker.png");
