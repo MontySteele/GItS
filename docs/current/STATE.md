@@ -104,8 +104,10 @@ contract `roster-pck-v3`, package `klee` **v0.2**, deploy stamp
 - **Next:** [USER]'s A3 to A5 runs; the deck is left alone until outside
   feedback.
 
-**Kokomi: Balance** (2026-10-23). [USER], after his run on the defence
-pass: "Kokomi passed the vibe check - she's approved for Balance."
+**Kokomi: Balance** (2026-10-23). Her test drive was a newcomer's: a big
+Kokomi fan who does not usually play Slay the Spire played her on beta
+0.3.12 and had fun. [USER]: "Kokomi passed the vibe check - she's approved
+for Balance." That run sent no data (0.3.12 shipped without the uploader).
 - **Rules** (`review/active/kokomi-brief-2026-09-01.md` sec.2): a card with a
   Plan line can be played on the Bake-Kurage instead (a Companion only if it
   prints one); it is carried out at the start of her next turn, after the
