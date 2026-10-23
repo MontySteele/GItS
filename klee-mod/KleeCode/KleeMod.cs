@@ -773,12 +773,12 @@ public static class KleeMod
                     // Unpowered on both engines -- is not one.
                     ["THORNS_POWER.description"] =
                         "When hit by an attack, deal your [gold]Thorns[/gold] "
-                      + "damage back. Every card hit is one, a Skill's too; a "
-                      + "potion's is not.",
+                      + "damage back. Card hits count, Skills included, but "
+                      + "not potions.",
                     ["THORNS_POWER.smartDescription"] =
                         "When hit by an attack, deal [blue]{Amount}[/blue] "
-                      + "damage back. Every card hit is one, a Skill's too; a "
-                      + "potion's is not.",
+                      + "damage back. Card hits count, Skills included, but "
+                      + "not potions.",
 
                     // `EB-597`, AND IT IS THE SAME FINDING A FOURTH TIME.
                     //
