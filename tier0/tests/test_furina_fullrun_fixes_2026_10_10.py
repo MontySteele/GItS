@@ -83,4 +83,4 @@ def test_the_enemy_block_prints_a_doubled_power_once():
 
 def test_the_strength_tip_says_how_long_it_lasts():
     assert blindplay.BASE_KEYWORDS["Strength"].endswith(
-        "It does not decay; it lasts for the rest of this fight.")
+        "It lasts for the rest of this combat.")

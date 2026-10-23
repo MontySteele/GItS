@@ -86,3 +86,30 @@ not the card.
    the badge. (b) keep it on the face.
 3. **The Shadow named Riptide.** (a, default) renamed "Undertow". (b) keep
    the name.
+
+## Ruling, 2026-10-23
+
+[USER]: "Agreed on all Varka, Furina, Yae and Shared fixes - these makes sense
+to me!"
+
+1. (a) Built: section 1's eleven fixes, faces, badges, prompts, tips and the
+   Abyss texts, with the seat glossary (`understudy/blindplay_notes.py`) and
+   the English reference in step. The chart footnote in
+   `Elements/ReactionGuide.cs` prints the boss Frozen sentence too and took
+   the same "cannot".
+2. (a) Built: "Electro from Sara wins." left Passion Overload's face; the
+   Passion Overload badge keeps it.
+3. (a) Held, not built. "Undertow" is already a shipped Kokomi Common Attack
+   (`proto_kk_undertow`, `KLEEMOD-PROTO_KK_UNDERTOW.title`), so the rename
+   would move the clash rather than end it. The Shadow keeps "Riptide" until
+   another name is picked.
+
+The Abyss Shield finding: a player never sees "a None hit". Only the four
+concrete shields exist (`AbyssShieldPower.cs`: Hydro, Pyro, Electro, Cryo),
+`AbyssShieldPower.Apply` makes no other, and each has a counter element
+(`AbyssElements.CounterOf`: Cryo, Hydro, Cryo, Pyro), so the four shipped
+badges read "A reaction or a Cryo/Hydro/Cryo/Pyro hit removes 3."
+The census
+most likely read the abstract base class, whose element it cannot resolve. The Mage
+Shield Shadow's own text prints "a counter-element hit" when no act is known.
+No text change was needed.

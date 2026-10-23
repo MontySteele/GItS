@@ -310,7 +310,7 @@ public class Round19Tests
         var face = power.Localization!
             .First(r => r.Item1 == "description").Item2;
 
-        Assert.StartsWith("Your next Attack card this turn deals ", face);
+        Assert.StartsWith("Your next Attack this turn deals ", face);
         Assert.Contains(
             $"is [gold]{element}[/gold], not its own element.", face);
         Assert.Equal(namesSara,

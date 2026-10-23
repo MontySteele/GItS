@@ -57,7 +57,15 @@ public class SpiralAbyssTests
         // ([USER]: "For the Spiral Abyss Blessing 'The Ley Line' - what's
         // this act's element?"); the papers' words are those texts with the
         // element unnamed.
+        // The shared text audit (2026-10-23,
+        // review/active/shared-text-audit-2026-10-23.md, section 1 fix 11)
+        // reworded four Shadows after the papers; the papers' words are those
+        // texts with the audit's words put back.
         static string Unnamed(string text) => text
+            .Replace("add a Burn into your Discard Pile.", "add a Burn to your discard pile.")
+            .Replace("Whenever an enemy dies,", "When an enemy dies,")
+            .Replace(" Plated Armor, more in co-op.", " Plated Armor (more in co-op).")
+            .Replace("times each combat.", "times per combat.")
             .Replace("takes [gold]Hydro[/gold].", "takes this act's element.")
             .Replace("a shield of [gold]Hydro[/gold],", "a shield of this act's element,")
             .Replace("a [gold]Cryo[/gold] hit", "a counter-element hit");
@@ -67,7 +75,7 @@ public class SpiralAbyssTests
         }
         foreach (var s in AbyssDraft.AllShadows.Except(rewritten))
         {
-            Assert.Contains($"**{AbyssText.Name(s)}** | {AbyssText.Text(s, 0)} |", papers);
+            Assert.Contains($"**{AbyssText.Name(s)}** | {Unnamed(AbyssText.Text(s, 0))} |", papers);
         }
         foreach (var s in rewritten)
         {
