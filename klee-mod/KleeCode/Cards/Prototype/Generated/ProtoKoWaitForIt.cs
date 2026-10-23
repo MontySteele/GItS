@@ -38,7 +38,7 @@ public sealed class ProtoKoWaitForIt : CustomCardModel
         new[] { CardKeyword.Retain };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBomb(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForElementalReaction(ArmKeywordTips.ForBomb(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_wait_for_it");
 

@@ -35,7 +35,7 @@ namespace KleeMod.Cards.Prototype.Generated;
 public sealed class ProtoKoAlicesRecipe : CustomCardModel
 {
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForBomb(base.ExtraHoverTips, this);
+        ArmKeywordTips.ForMine(ArmKeywordTips.ForBomb(base.ExtraHoverTips, this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_alices_recipe");
 

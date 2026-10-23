@@ -4566,7 +4566,7 @@
     "ICY_PAWS_POWER.description": "Marks your [gold]Block[/gold]. Whenever it absorbs damage, apply [gold]Cryo[/gold] to the attacker.",
     "ICY_PAWS_POWER.smartDescription": "[blue]{Left}[/blue] [gold]Block[/gold] left. Whenever it absorbs damage, apply [gold]Cryo[/gold] to the attacker.",
     "ICY_PAWS_POWER.title": "Icy Paws",
-    "INTRODUCTION_MAGIC_POWER.description": "The cards that were in your [gold]Hand[/gold] count as [gold]Companion[/gold] cards this turn.",
+    "INTRODUCTION_MAGIC_POWER.description": "The cards that were in your [gold]Hand[/gold] count as [gold]Companions[/gold] this turn.",
     "INTRODUCTION_MAGIC_POWER.title": "Introduction Magic",
     "JUUGA_GUARD_POWER.description": "At the end of your turn, gain [blue]6[/blue] [gold]Block[/gold]. Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}.",
     "JUUGA_GUARD_POWER.title": "Juuga Guard",

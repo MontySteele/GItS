@@ -384,8 +384,8 @@ public sealed class IntroductionMagicPower : PowerModel, ILocalizationProvider
     {
         ("title", "Introduction Magic"),
         ("description",
-            "The cards that were in your [gold]Hand[/gold] count as [gold]Companion[/gold] "
-          + "cards this turn."),
+            "The cards that were in your [gold]Hand[/gold] count as "
+          + "[gold]Companions[/gold] this turn."),
     };
 
     public override PowerType Type => PowerType.Buff;

@@ -1410,8 +1410,30 @@ def arm_keywords_printed(description: str) -> list[ArmKeyword]:
             if printed.intersection(keyword.tokens)]
 
 
+#: THE KLEE TEXT AUDIT (2026-10-23; [USER]: "On Klee - agree on the
+#: defaults"). Pick 2 took "triggered an [gold]Elemental Reaction[/gold]" off
+#: five Bomb faces for the plain verb ("If a Bomb reacted this turn"), and the
+#: verb is never golded, so the noun's tip would have left with the noun. A
+#: face that golds a Bomb and says one "reacts" owes the Elemental Reaction tip.
+REACT_VERB = re.compile(r"\breact(?:s|ed)?\b")
+#: Pick 5 says "Bomb" alone where the code counts Mines as Bombs. A row whose
+#: op grows Mines with Bombs still owes the Mine tip, off the op rather than
+#: the word: `grow_bombs` (`ProtoBombPower.GrowOn`, Chain Fuse and Quick Fuse)
+#: and Alice's Recipe's power (`AlicesRecipePower.GrowBeforePlacement`).
+MINE_COUNTING_POWERS = frozenset({"ko_alices_recipe"})
+
+
+def counts_mines_as_bombs(card: dict) -> bool:
+    """Does this row's own play grow Mines along with Bombs?"""
+    return any(e.get("op") == "grow_bombs"
+               or (e.get("op") == "apply_power"
+                   and e.get("power") in MINE_COUNTING_POWERS)
+               for e in card.get("effects") or [])
+
+
 def arm_keyword_tip_calls(description: str,
-                          spark_priced: bool = False) -> list[str]:
+                          spark_priced: bool = False,
+                          counts_mines: bool = False) -> list[str]:
     """The tip calls this face owes, in table order.
 
     The ONE EXCLUSION this used to carry, `includes_bomb_rules`, left with the
@@ -1431,10 +1453,18 @@ def arm_keyword_tip_calls(description: str,
     playability gate read.
     """
     printed = arm_keywords_printed(description)
-    if spark_priced and not any(k.word == "Spark" for k in printed):
-        printed = sorted(
-            printed + [k for k in ARM_KEYWORDS if k.word == "Spark"],
-            key=ARM_KEYWORDS.index)
+    owed = set()
+    if spark_priced:
+        owed.add("Spark")
+    if any(k.word == "Bomb" for k in printed):
+        if REACT_VERB.search(GOLD_SPAN.sub("", description)):
+            owed.add("Elemental Reaction")
+        if counts_mines:
+            owed.add("Mine")
+    words = {k.word for k in printed}
+    extra = [k for k in ARM_KEYWORDS if k.word in owed - words]
+    if extra:
+        printed = sorted(printed + extra, key=ARM_KEYWORDS.index)
     return [keyword.attach for keyword in printed]
 
 
@@ -18901,7 +18931,8 @@ public sealed class {modal_option_class(card, i)} : ModalOptionCard{face_interfa
                 f"{ELEMENT_CS[switch_element]})")
         spark_priced = any(eff.get("op") == "spend_spark"
                            for eff in card["effects"])
-        for attach in arm_keyword_tip_calls(desc, spark_priced):
+        for attach in arm_keyword_tip_calls(
+                desc, spark_priced, counts_mines_as_bombs(card)):
             # The text pass of 2026-10-08: a PLAN-ONLY row has no line above
             # its Plan and nothing to flip, so it carries the Plan tip that
             # says so (`_plan_only_line`'s test, the one its target follows).
