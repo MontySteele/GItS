@@ -117,3 +117,28 @@ can take the two-word cards to mean the one-word cards skip Mines.
 5. **"Bomb and Mine".** (a, default) "Bomb" alone wherever the code already
    counts Mines as Bombs, checked card by card at build; a card whose code
    does not keeps both words. (b) keep both words everywhere.
+
+## Ruling, 2026-10-23
+
+[USER]: "On Klee - agree on the defaults".
+
+1. (a) Built: all eleven fixes. Coven Errand now prints "Place a Bomb 10
+   [12]. If you played a Companion this turn, it is 4 larger." and still
+   places 10 + 4, upgraded 12 + 4 = 16 (`bonus_if` unchanged).
+2. (a) Built: "reacted" on Flash Point, Sizzle and Perfect Timing, "reacts"
+   on Aftershock and Wait For It... and on their two power badges. The five
+   faces no longer print the Elemental Reaction noun, so its tip leaves them;
+   the Bomb tip stays.
+3. (a) Built: ", on any enemy," is gone from all eight carriers and the
+   Sparks 'n' Splash badge; Hide Here! reads "equal to the size of your
+   largest Bomb, up to 12 [16]". Stoke the Fuse and Pocket Match keep "on the
+   enemy". The lint that required the clause now refuses it.
+4. (a) Built: "Companion" on the eight faces and the Little Hexenzirkel
+   badge.
+5. (a) Built on all three cards, because the code counts Mines as Bombs on
+   each: Chain Fuse's `grow_bombs` (`ProtoBombPower.GrowOn`) grows every
+   charge on the pile, Mines included; Alice's Recipe grows in
+   `ProtoBombPower.Place`, which every placement passes through Mine or not,
+   and `GrowOn` grows Mines; Alice's Masterpiece leaves its half in
+   `ProtoBombPower.Explode`, which a Set off and a Mine answering an attack
+   both reach (the half of a Mine stays a Mine). No card kept both words.

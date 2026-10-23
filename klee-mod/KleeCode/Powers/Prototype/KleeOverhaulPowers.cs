@@ -39,9 +39,8 @@ public sealed class AlicesRecipePower : PowerModel, ILocalizationProvider
     {
         ("title", "Alice's Recipe"),
         ("description",
-            "Whenever you place a [gold]Bomb[/gold] or [gold]Mine[/gold], your "
-          + "other [gold]Bombs[/gold] and [gold]Mines[/gold] grow by "
-          + "[blue]{Amount}[/blue]."),
+            "Whenever you place a [gold]Bomb[/gold], your other "
+          + "[gold]Bombs[/gold] grow by [blue]{Amount}[/blue]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -92,7 +91,7 @@ public sealed class ChainedReactionsPower
         ("title", "Chained Reactions"),
         ("description",
             "Whenever one of your [gold]Bombs[/gold] goes off, your "
-          + "[gold]Bombs[/gold] still waiting grow [blue]{Amount}[/blue]."),
+          + "[gold]Bombs[/gold] still waiting grow by [blue]{Amount}[/blue]."),
     };
 
     public override PowerType Type => PowerType.Buff;
@@ -145,7 +144,7 @@ public sealed class WitchesCirclePower : PowerModel, ILocalizationProvider
     {
         ("title", "Little Hexenzirkel"),
         ("description",
-            "Whenever you play a [gold]Companion[/gold] card, place a "
+            "Whenever you play a [gold]Companion[/gold], place a "
           + "[gold]Bomb[/gold] [blue]{Amount}[/blue] on a random enemy."),
     };
 
@@ -261,8 +260,8 @@ public sealed class BombEchoPower : PowerModel, ILocalizationProvider
     {
         ("title", "Sparks 'n' Splash"),
         ("description",
-            "At the start of your turn, your largest [gold]Bomb[/gold], on any "
-          + "enemy, deals its size in [gold]Pyro[/gold] damage without going off."),
+            "At the start of your turn, your largest [gold]Bomb[/gold] deals its "
+          + "size in [gold]Pyro[/gold] damage without going off."),
     };
 
     public override PowerType Type => PowerType.Buff;

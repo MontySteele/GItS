@@ -35,14 +35,14 @@ namespace KleeMod.Cards.Prototype.Generated;
 public sealed class ProtoKoAlicesRecipe : CustomCardModel
 {
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForMine(ArmKeywordTips.ForBomb(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForBomb(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_alices_recipe");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Alice's Recipe"),
-        ("description", "Whenever you place a [gold]Bomb[/gold] or [gold]Mine[/gold], your other [gold]Bombs[/gold] and [gold]Mines[/gold] grow by {PowerAmount:diff()}."),
+        ("description", "Whenever you place a [gold]Bomb[/gold], your other [gold]Bombs[/gold] grow by {PowerAmount:diff()}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -311,18 +311,14 @@ MORE_COUNTERS = {"proto_kk_kurage_swarm", "KurageSwarmPower.description",
                  # 2 more each turn", its hit growing, Crescendo's shape.
                  "proto_kk_kurage_vanguard", "KurageVanguardPower.description"}
 
-#: Card faces only: "your largest Bomb" says WHICH enemy's (the Klee round,
-#: 2026-10-11: Stoke the Fuse grew Torch Head's Bomb 16 by 49 when the seat
-#: meant the boss's). Every reading but Pocket Match's is board-wide, so a
-#: face says "on any enemy" or "on the enemy", or is listed here with why.
+#: Card faces only: "your largest Bomb" alone is board-wide, and the faces that
+#: read one enemy say "on the enemy" (Stoke the Fuse, Pocket Match). The Klee
+#: text audit (2026-10-23, pick 3; [USER]: "On Klee - agree on the defaults")
+#: retired ", on any enemy," from the eight carriers, so the lint now refuses
+#: the clause instead of requiring it (it required it from the Klee round of
+#: 2026-10-11, when Stoke the Fuse grew Torch Head's Bomb by 49).
 LARGEST_BOMB = re.compile(r"\blargest Bomb")
-LARGEST_BOMB_SAYS_WHERE = re.compile(r"\bon (?:the|any) enemy\b")
-LARGEST_BOMB_ALLOWED = {
-    "proto_ko_all_of_my_treasures": (
-        "it has no target and places on ALL enemies, so no enemy is "
-        "singled out to misread; a second 'enemy' clause in one sentence "
-        "reads worse than the gap it closes"),
-}
+LARGEST_BOMB_ANY_ENEMY = re.compile(r"\bon any enemy\b")
 
 TAG = re.compile(r"\[/?[a-z_]+\]")
 LIT = re.compile(r'"((?:[^"\\]|\\.)*)"')
@@ -1071,10 +1067,9 @@ def findings_for(rows: list[Row], exceptions: dict[str, str], gate: bool = True,
             out.append(f"{tag}: front-enemy: a Plan line names no target; "
                        f"the tip carries the rule: {text}")
         if (row.surface in ("card", "mode") and LARGEST_BOMB.search(text)
-                and not LARGEST_BOMB_SAYS_WHERE.search(text)
-                and base not in LARGEST_BOMB_ALLOWED):
-            out.append(f"{tag}: largest-bomb-where: say 'on any enemy' or "
-                       f"'on the enemy': {text}")
+                and LARGEST_BOMB_ANY_ENEMY.search(text)):
+            out.append(f"{tag}: largest-bomb-any: 'your largest Bomb' is "
+                       f"already any enemy's; drop 'on any enemy': {text}")
     if gate:
         known = {r.ident for r in rows}
         for ident, reason in exceptions.items():
@@ -1162,7 +1157,7 @@ def self_test() -> list[str]:
         Row("power", "fx_dash", "Draw {Amount} cards -- unless you play an Attack.", "fixture"),
         Row("card", "fx_upgrade", "Deal 6 damage.{IfUpgraded:show: Then draw 2 cards and gain 3 Block.|}", "fixture"),
         Row("tip", "fx_tip", "A " + "very " * 30 + "long tip.", "fixture"),
-        Row("card", "fx_largest", "Your largest [gold]Bomb[/gold] grows by 3.", "fixture"),
+        Row("card", "fx_largest", "Your largest [gold]Bomb[/gold], on any enemy, grows by 3.", "fixture"),
         Row("card", "fx_hand", "Add a [gold]Sting[/gold] to your hand.", "fixture"),
         Row("card", "fx_bare_hand", "Add a [gold]Sting[/gold] to your Hand.", "fixture"),
         Row("card", "fx_status", "Whenever you draw a status, draw 1 card.", "fixture"),
@@ -1182,7 +1177,7 @@ def self_test() -> list[str]:
                 "fx_bare": ("bare-keyword",), "fx_gold_type": ("gold-cardtype",),
                 "fx_plan_front": ("front-enemy",), "fx_lasts": ("lasts-more",),
                 "fx_dash": ("dash",), "fx_upgrade": ("upgrade clause",),
-                "fx_tip": ("> 135",), "fx_largest": ("largest-bomb-where",),
+                "fx_tip": ("> 135",), "fx_largest": ("largest-bomb-any",),
                 "fx_hand": ("hand-plain",), "fx_bare_hand": ("bare-hand",),
                 "fx_status": ("status-lowercase",), "fx_once": ("first-time-order",),
                 "fx_first": ("first-time-order",), "fx_cause": ("reaction-verb",),
@@ -1201,7 +1196,7 @@ def self_test() -> list[str]:
         Row("card", "ok_b", "Play on the [gold]Bake-Kurage[/gold]. [gold]Plan[/gold]: Deal 5 damage to ALL enemies.", "fixture"),
         Row("power", "ok_c", "At the end of your turn, deal [blue]6[/blue] [gold]Cryo[/gold] damage to a random enemy. Lasts for [blue]{Amount}[/blue] {Amount:plural:turn|turns}.", "fixture"),
         Row("card", "ok_d", "Gain 4 [gold]Block[/gold]. Next turn, draw 2 cards if you play no Attacks this turn.", "fixture"),
-        Row("card", "ok_e", "Your largest [gold]Bomb[/gold], on any enemy, grows by 3.", "fixture"),
+        Row("card", "ok_e", "Your largest [gold]Bomb[/gold] grows by 3.", "fixture"),
         Row("card", "ok_f", "Next turn, gain {energyPrefix:energyIcons(1)}. Add a [gold]Sting[/gold] to your [gold]Hand[/gold].", "fixture"),
         Row("card", "ok_g", "The first time each turn you play a Status, [gold]Set off[/gold] the enemy.", "fixture"),
         Row("tip", "ok_h", "Some cards cost [gold]Sparks[/gold] instead of Energy. Plans happen next turn.", "fixture"),

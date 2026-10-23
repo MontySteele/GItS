@@ -155,8 +155,12 @@ public class HexereiReaderTests
         Assert.Contains("KleeOverhaulLedger.get_CompanionPlayedThisTurn", calls);
         Assert.DoesNotContain("ProtoBombPower.PlaceOnAll", calls);
         Assert.Contains("ProtoBombPower.Place", calls);
-        // 10 / 14 since the Klee design review (2026-10-08).
-        Assert.Contains("{IfUpgraded:show:16|14}", Face(new ProtoKoCovenErrand()));
+        // The Klee text audit (2026-10-23, pick 1): the bonus is printed as
+        // the fixed 4 the op adds, so the upgraded face (12, "4 larger")
+        // and the upgraded placement (12 + 4 = 16) cannot disagree.
+        Assert.Contains("If you played a [gold]Companion[/gold] this turn, it is 4 larger.",
+                        Face(new ProtoKoCovenErrand()));
+        Assert.DoesNotContain("IfUpgraded", Face(new ProtoKoCovenErrand()));
         Assert.Contains("DynamicVarSet.get_Item", calls);
         // It PLACES; it does not detonate (rule 7).
         Assert.DoesNotContain("ProtoBombPower.SetOffAimed", calls);
@@ -210,7 +214,7 @@ public class HexereiReaderTests
         var card = new ProtoKoAlicesIntroductionMagic();
         Assert.IsNotAssignableFrom<ICompanionCard>(card);
         Assert.DoesNotContain(CardKeyword.Retain, card.Keywords);
-        Assert.Contains("[gold]Companion[/gold]", Face(card));
+        Assert.Contains("[gold]Companions[/gold]", Face(card));
 
         var upgraded = Upgraded<ProtoKoAlicesIntroductionMagic>();
         Assert.Contains(CardKeyword.Retain, upgraded.Keywords);

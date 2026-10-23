@@ -1713,7 +1713,7 @@ ARM_KEYWORDS: dict[str, str] = {
     # long history of both rows is in git.
     # 2026-10-18: Vulnerable raises it (suite 6 lane 5), and the jump short.
     "Bomb": ("Deals its size in Pyro damage when Set off. Vulnerable raises "
-             "it. Grows {growth} at the start of your turn. If its enemy "
+             "it. Grows by {growth} at the start of your turn. If its enemy "
              "dies, it jumps."),
     # 2026-10-13 (text-only fix): the other enemies' Bombs stay.
     "Set off": ("Every Bomb on the enemy goes off, oldest first. Bombs on "
@@ -1727,9 +1727,10 @@ ARM_KEYWORDS: dict[str, str] = {
     # it waits on a turn its enemy does not attack.
     # 2026-10-13 (text-only fix): an attack leaves the plain Bombs.
     # 2026-10-23 ("On Klee - agreed on all."): it uses up the aura.
-    "Mine": ("A Bomb that also goes off when its enemy attacks you, and "
-             "uses up the enemy's aura. Its plain Bombs stay. Any Set off "
-             "spends it too."),
+    # 2026-10-23, the Klee text audit ("On Klee - agree on the defaults"):
+    # "by itself", and the Set off sentence left (a Mine is a Bomb).
+    "Mine": ("A Bomb that also goes off by itself when its enemy attacks "
+             "you, using up the enemy's aura. The enemy's other Bombs stay."),
     # THE 2026-09-25 TEXT PASS rewrote the word to two short sentences, in
     # step with `ArmKeywordTips.ForPlan` word for word: the old row carried
     # six seats' edge cases (the aim and its Minion exception, Strength
@@ -3008,7 +3009,7 @@ BOSS_ROOM = "boss"
 # what this build prints rather than what tier0 believes. The pattern follows
 # the tip's wording, capital G and all: a card face says "grows by N".
 _BOMB_GROWTH_RE = re.compile(
-    r"\bGrows (\d+) at the start of your turn\b")
+    r"\bGrows (?:by )?(\d+) at the start of your turn\b")
 
 
 def _every_string(blob: Any):

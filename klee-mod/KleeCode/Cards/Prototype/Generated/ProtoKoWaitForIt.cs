@@ -38,14 +38,14 @@ public sealed class ProtoKoWaitForIt : CustomCardModel
         new[] { CardKeyword.Retain };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        ArmKeywordTips.ForElementalReaction(ArmKeywordTips.ForBomb(base.ExtraHoverTips, this), this);
+        ArmKeywordTips.ForBomb(base.ExtraHoverTips, this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_wait_for_it");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Wait For It..."),
-        ("description", "The next time a [gold]Bomb[/gold] triggers an [gold]Elemental Reaction[/gold] this turn, draw {PowerAmount:diff()} cards and gain {energyPrefix:energyIcons(1)}."),
+        ("description", "The next time a [gold]Bomb[/gold] reacts this turn, draw {PowerAmount:diff()} cards and gain {energyPrefix:energyIcons(1)}."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

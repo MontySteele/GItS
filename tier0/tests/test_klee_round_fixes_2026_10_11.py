@@ -68,15 +68,16 @@ def test_an_older_mod_with_no_seq_keeps_hits_then_puts():
 
 # 2026-10-13 (text-only fix): the plain Bombs stay. 2026-10-23 ("On Klee -
 # agreed on all."): it uses up the aura; "Otherwise, it waits" left to fit.
-MINE = ("A Bomb that also goes off when its enemy attacks you, and uses up "
-        "the enemy's aura. Its plain Bombs stay. Any Set off spends it too.")
+# 2026-10-23, the Klee text audit: "by itself"; the Set off sentence left.
+MINE = ("A Bomb that also goes off by itself when its enemy attacks you, "
+        "using up the enemy's aura. The enemy's other Bombs stay.")
 
 
 def test_the_mine_tip_says_it_uses_up_the_aura():
     assert ARM_KEYWORDS["Mine"] == MINE
     src = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
            / "ArmKeywordTips.cs").read_text(encoding="utf-8")
-    assert "and uses up the enemy's aura." in src.replace(
+    assert "using up the enemy's aura." in src.replace(
         '"\n          + "', "")
     assert len(MINE) <= 135
 
@@ -87,31 +88,40 @@ def test_the_mine_tip_says_it_uses_up_the_aura():
     "ProtoKoSparksNSplash", "ProtoKoOneMoreCharge",
     "ProtoKoTreasureMap", "ProtoKoHalfAMountain", "ProtoKoFavoniusEscort",
     "ProtoKoHideHere", "ProtoMcAlbedoDustOfPurification"])
-def test_a_board_wide_largest_bomb_says_on_any_enemy(cls):
+def test_a_board_wide_largest_bomb_names_no_enemy(cls):
+    # The Klee text audit (2026-10-23, pick 3; [USER]: "On Klee - agree on
+    # the defaults"): "your largest Bomb" alone is any enemy's, so ", on any
+    # enemy," left; only a face that reads one enemy says "on the enemy".
     src = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
            / "Generated" / f"{cls}.cs").read_text(encoding="utf-8")
-    assert "on any enemy" in src
+    assert "on any enemy" not in src
+    assert "largest [gold]Bomb[/gold]" in src
 
 
 def test_stoke_the_fuse_keeps_its_number_and_its_spend():
     src = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
            / "Generated" / "ProtoKoStokeTheFuse.cs").read_text(encoding="utf-8")
     # Klee pass round, pick 3 (b): it aims now, so "on the enemy".
-    assert ('"Spend all your remaining [gold]Sparks[/gold]. Your largest '
-            '[gold]Bomb[/gold] on the enemy grows by {Grow:diff()} per '
+    assert ('"Spend all your [gold]Sparks[/gold]. Your largest '
+            '[gold]Bomb[/gold] on the enemy grows by {Grow:diff()} for each '
             '[gold]Spark[/gold] spent."') in src
     assert "TargetType.AnyEnemy" in src
 
 
-def test_the_largest_bomb_lint_fires_on_a_face_that_does_not_say_where():
+def test_the_largest_bomb_lint_fires_on_the_retired_on_any_enemy():
+    # The Klee text audit (2026-10-23, pick 3): the lint now refuses the
+    # clause it used to require; "on the enemy" and the bare form both pass.
     from tools import lint_text_conventions as lint
-    bad = lint.Row("card", "fx", "Your largest [gold]Bomb[/gold] grows by 3.",
-                   "fixture")
+    bad = lint.Row("card", "fx", "Your largest [gold]Bomb[/gold], on any "
+                   "enemy, grows by 3.", "fixture")
     ok = lint.Row("card", "fx_ok", "[gold]Set off[/gold] only your largest "
                   "[gold]Bomb[/gold] on the enemy.", "fixture")
-    found = lint.findings_for([bad, ok], {}, gate=False)
-    assert any("largest-bomb-where" in f and "[fx]" in f for f in found)
+    bare = lint.Row("card", "fx_bare", "Your largest [gold]Bomb[/gold] "
+                    "grows by 3.", "fixture")
+    found = lint.findings_for([bad, ok, bare], {}, gate=False)
+    assert any("largest-bomb-any" in f and "[fx]" in f for f in found)
     assert not any("[fx_ok]" in f for f in found)
+    assert not any("[fx_bare]" in f for f in found)
 
 
 # ---- 5. the Written note names the power ------------------------------------

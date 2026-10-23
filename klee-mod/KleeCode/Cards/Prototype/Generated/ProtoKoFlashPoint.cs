@@ -42,7 +42,7 @@ public sealed class ProtoKoFlashPoint : CustomCardModel, IElementalCard, ISetOff
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
         TipAudience.Seat
-            ? ArmKeywordTips.ForElementalReaction(ArmKeywordTips.ForSpark(ArmKeywordTips.ForSetOff(ArmKeywordTips.ForBomb(ArmKeywordTips.ForEmptyField(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro), this, true), this), this), this), this)
+            ? ArmKeywordTips.ForSpark(ArmKeywordTips.ForSetOff(ArmKeywordTips.ForBomb(ArmKeywordTips.ForEmptyField(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro), this, true), this), this), this)
             : ArmKeywordTips.ForSetOff(ArmKeywordTips.ForBomb(ArmKeywordTips.ForEmptyField(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro), this, true), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_flash_point");
@@ -50,7 +50,7 @@ public sealed class ProtoKoFlashPoint : CustomCardModel, IElementalCard, ISetOff
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Flash Point"),
-        ("description", "[gold]Set off[/gold] the enemy. Deal {Damage:diff()} [gold]Pyro[/gold] damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, gain 1 [gold]Spark[/gold], draw 1 card."),
+        ("description", "[gold]Set off[/gold] the enemy. Deal {Damage:diff()} [gold]Pyro[/gold] damage. If a [gold]Bomb[/gold] reacted this turn, gain 1 [gold]Spark[/gold] and draw 1 card."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

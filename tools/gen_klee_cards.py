@@ -2053,10 +2053,9 @@ PREDICATE_TEXT = {
     "no_block": "If you have no [gold]Block[/gold]",
     "bomb_went_off_this_turn": "If a [gold]Bomb[/gold] went off this turn",
     "bomb_reacted_this_turn":
-        "If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] "
-        "this turn",
+        "If a [gold]Bomb[/gold] reacted this turn",
     "companion_played_this_turn":
-        "If you played a [gold]Companion[/gold] card this turn",
+        "If you played a [gold]Companion[/gold] this turn",
     "no_bomb_went_off_this_turn": "If no [gold]Bomb[/gold] went off this turn",
     "target_has_aura": "If the enemy holds an elemental aura",
     "target_has_debuff": "If the enemy has a debuff",
@@ -3935,20 +3934,20 @@ APPLY_POWERS = {
     # are here for form; every slice row carries its own `description:`, which is
     # the surface's own face channel (EB-215).
     "ko_alices_recipe": ("AlicesRecipePower", None,
-        "Whenever you place a [gold]Bomb[/gold] or [gold]Mine[/gold], your "
-        "other [gold]Bombs[/gold] and [gold]Mines[/gold] grow by {X}."),
+        "Whenever you place a [gold]Bomb[/gold], your other "
+        "[gold]Bombs[/gold] grow by {X}."),
     "ko_chained_reactions": ("ChainedReactionsPower", None,
         "Whenever one of your [gold]Bombs[/gold] goes off, place a {X} "
         "[gold]Bomb[/gold] on a random enemy."),
     "ko_bomb_echo": ("BombEchoPower", None,
-        "At the start of your turn, your largest [gold]Bomb[/gold], on any "
-        "enemy, deals its size in [gold]Pyro[/gold] damage without going off."),
+        "At the start of your turn, your largest [gold]Bomb[/gold] deals its "
+        "size in [gold]Pyro[/gold] damage without going off."),
     # R244's coven reader. Chained Reactions' grammar one trigger over, and
     # DEAD ALONE by the ruling's own pick 2 -- a deck with no witch in it never
     # sets this off, which is what makes it the bridge card rather than a
     # fourth loop.
     "ko_witches_circle": ("WitchesCirclePower", None,
-        "Whenever you play a [gold]Companion[/gold] card, place a {X} "
+        "Whenever you play a [gold]Companion[/gold], place a {X} "
         "[gold]Bomb[/gold] on a random enemy."),
     # R276's Mine signpost (Explosive Frags). The stack IS the Vulnerable, so
     # the upgrade moves it; read at the one site a charge goes off
@@ -3983,9 +3982,8 @@ APPLY_POWERS = {
     "ko_boom_badge": ("BoomBadgePower", None,
         "Your next [gold]Set off[/gold] card this turn is played twice."),
     "ko_wait_for_it": ("WaitForItPower", None,
-        "This turn, the next time one of your [gold]Bombs[/gold] triggers an "
-        "[gold]Elemental Reaction[/gold], draw 2 cards and gain 1 "
-        "[gold]Energy[/gold]."),
+        "The next time a [gold]Bomb[/gold] reacts this turn, draw 2 cards "
+        "and gain 1 [gold]Energy[/gold]."),
     "ko_party_poppers": ("PartyPoppersPower", None,
         "Whenever you play a card that costs [gold]Sparks[/gold], place a "
         "[gold]Bomb[/gold] {X} on a random enemy."),
@@ -4006,9 +4004,8 @@ APPLY_POWERS = {
         "At the start of your turn, place a [gold]Mine[/gold] {X} on a "
         "random enemy."),
     "ko_aftershock": ("AftershockPower", None,
-        "The first time each turn a [gold]Bomb[/gold] of yours triggers an "
-        "[gold]Elemental Reaction[/gold], place a [gold]Bomb[/gold] that "
-        "size on a random enemy."),
+        "The first time each turn one of your [gold]Bombs[/gold] reacts, "
+        "place a [gold]Bomb[/gold] that size on a random enemy."),
     "ko_spark_knight": ("SparkKnightPower", None,
         "Whenever you gain a [gold]Spark[/gold], deal {X} damage to a random "
         "enemy."),

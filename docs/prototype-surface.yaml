@@ -48,7 +48,7 @@
 - {id: proto_ko_chain_fuse, name: "Chain Fuse", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Each [gold]Bomb[/gold] and [gold]Mine[/gold] on the enemy grows by 9.",
+   description: "Each [gold]Bomb[/gold] on the enemy grows by 9.",
    upgrade: {grow: +3},
    effects: [{op: grow_bombs, target: enemy, amount: 9}]}
 
@@ -82,7 +82,7 @@
    authored_by: [claude],
    cost: 3, type: power, rarity: rare,
    upgrade: {power_amount: +1},
-   description: "Whenever you place a [gold]Bomb[/gold] or [gold]Mine[/gold], your other [gold]Bombs[/gold] and [gold]Mines[/gold] grow by 2.",
+   description: "Whenever you place a [gold]Bomb[/gold], your other [gold]Bombs[/gold] grow by 2.",
    effects: [{op: apply_power, power: ko_alices_recipe, amount: 2, target: self}]}
 
 # --- Spray, everything explodes now (packet sec.4) ---
@@ -101,7 +101,7 @@
    cost: 1, type: skill, rarity: common,
    # AoE trim, 2026-10-03 (review/active/aoe-trim-2026-10-03.md sec.2):
    # single target, was a Mine 4 on ALL enemies.
-   description: "Place a [gold]Mine[/gold] 11 on an enemy.",
+   description: "Place a [gold]Mine[/gold] 11.",
    upgrade: {bomb_size: +3},
    effects: [{op: plant_bomb, target: enemy, size: 11, mine: true}]}
 
@@ -147,13 +147,13 @@
 - {id: proto_ko_chained_reactions, name: "Chained Reactions", character: klee,
    authored_by: [claude],
    cost: 1, type: power, rarity: rare,
-   description: "Whenever one of your [gold]Bombs[/gold] goes off, your [gold]Bombs[/gold] still waiting grow 3.",
+   description: "Whenever one of your [gold]Bombs[/gold] goes off, your [gold]Bombs[/gold] still waiting grow by 3.",
    effects: [{op: apply_power, power: ko_chained_reactions, amount: 3, target: self}]}
 
 - {id: proto_ko_sparks_n_splash, name: "Sparks 'n' Splash", character: klee,
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
-   description: "At the start of your turn, your largest [gold]Bomb[/gold], on any enemy, deals its size in [gold]Pyro[/gold] damage without going off.",
+   description: "At the start of your turn, your largest [gold]Bomb[/gold] deals its size in [gold]Pyro[/gold] damage without going off.",
    upgrade: {innate: true},
    effects: [{op: apply_power, power: ko_bomb_echo, amount: 1, target: self}]}
 
@@ -162,7 +162,7 @@
 - {id: proto_ko_sizzle, name: "Sizzle", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "[gold]Set off[/gold] the enemy. Deal 8 [gold]Pyro[/gold] damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, deal {BranchDamage:diff()} additional damage.",
+   description: "[gold]Set off[/gold] the enemy. Deal 8 [gold]Pyro[/gold] damage. If a [gold]Bomb[/gold] reacted this turn, deal {BranchDamage:diff()} additional damage.",
    upgrade: {damage: +3},
    effects: [{op: set_off, target: enemy, damage: 8},
              {op: conditional, if: bomb_reacted_this_turn,
@@ -171,7 +171,7 @@
 - {id: proto_ko_perfect_timing, name: "Perfect Timing", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "[gold]Set off[/gold] the enemy. Deal 8 [gold]Pyro[/gold] damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, play this again.",
+   description: "[gold]Set off[/gold] the enemy. Deal 8 [gold]Pyro[/gold] damage. If a [gold]Bomb[/gold] reacted this turn, play this again.",
    effects: [{op: set_off, target: enemy, damage: 8},
              {op: conditional, if: bomb_reacted_this_turn,
               then: [{op: repeat_this, times: 1}]}]}
@@ -252,7 +252,7 @@
    upgrade: {bomb_size: +2},
    # AoE trim, 2026-10-03 (sec.2): one Bomb that grows by 3 after a
    # Companion, where it went to ALL enemies. `bonus_if:` is the rider.
-   description: "Place a [gold]Bomb[/gold] 10 on an enemy, 14 if you played a [gold]Companion[/gold] card this turn.",
+   description: "Place a [gold]Bomb[/gold] 10. If you played a [gold]Companion[/gold] this turn, it is 4 larger.",
    effects: [{op: plant_bomb, target: enemy, size: 10,
               bonus_if: {if: companion_played_this_turn, amount: 4}}]}
 
@@ -260,7 +260,7 @@
    authored_by: [claude],
    cost: 1, type: power, rarity: uncommon,
    upgrade: {power_amount: +2},
-   description: "Whenever you play a [gold]Companion[/gold] card, place a [gold]Bomb[/gold] 5 on a random enemy.",
+   description: "Whenever you play a [gold]Companion[/gold], place a [gold]Bomb[/gold] 5 on a random enemy.",
    effects: [{op: apply_power, power: ko_witches_circle, amount: 5, target: self}]}
 
 # 2026-10-03, Klee pre-Balance sweep: draws 2 after the mark.
@@ -268,7 +268,7 @@
    authored_by: [claude],
    cost: 1, type: skill, rarity: rare,
    upgrade: {retain: true},
-   description: "All cards in your [gold]Hand[/gold] count as [gold]Companion[/gold] cards this turn. Draw {Cards:diff()} card{Cards:plural:|s}.",
+   description: "All cards in your [gold]Hand[/gold] count as [gold]Companions[/gold] this turn. Draw {Cards:diff()} card{Cards:plural:|s}.",
    effects: [{op: companion_mark_hand},
              {op: draw, amount: 2}]}
 
@@ -294,7 +294,7 @@
 - {id: proto_ko_stoke_the_fuse, name: "Stoke the Fuse", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon,
-   description: "Spend all your remaining [gold]Sparks[/gold]. Your largest [gold]Bomb[/gold] on the enemy grows by 5 per [gold]Spark[/gold] spent.",
+   description: "Spend all your [gold]Sparks[/gold]. Your largest [gold]Bomb[/gold] on the enemy grows by 5 for each [gold]Spark[/gold] spent.",
    upgrade: {grow: +2},
    effects: [{op: spend_spark, amount: all},
              {op: grow_largest_bomb, per_spark: 5, target: enemy}]}
@@ -336,7 +336,7 @@
    # AoE trim, 2026-10-03 (sec.2): a Skill now, Block keyed to the Bombs on
    # the board (the count is read after this Bomb lands).
    cost: 1, type: skill, rarity: common,
-   description: "Place a [gold]Bomb[/gold] 6 on an enemy. Gain 4 [gold]Block[/gold], plus 2 for each enemy with a [gold]Bomb[/gold].",
+   description: "Place a [gold]Bomb[/gold] 6. Gain 4 [gold]Block[/gold], plus 2 for each enemy with a [gold]Bomb[/gold].",
    upgrade: {bomb_size: +2},
    effects: [{op: plant_bomb, target: enemy, size: 6},
              {op: block, amount_formula: {base: 4, per: 2, count: enemies_with_bomb}}]}
@@ -347,7 +347,7 @@
 - {id: proto_ko_flash_point, name: "Flash Point", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: uncommon,
-   description: "[gold]Set off[/gold] the enemy. Deal 9 [gold]Pyro[/gold] damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, gain 1 [gold]Spark[/gold], draw 1 card.",
+   description: "[gold]Set off[/gold] the enemy. Deal 9 [gold]Pyro[/gold] damage. If a [gold]Bomb[/gold] reacted this turn, gain 1 [gold]Spark[/gold] and draw 1 card.",
    upgrade: {damage: +3},
    effects: [{op: set_off, target: enemy, damage: 9},
              {op: conditional, if: bomb_reacted_this_turn,
@@ -404,7 +404,7 @@
 - {id: proto_ko_sparkling_burst, name: "Sparkling Burst", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon,
-   description: "Gain {Energy:energyIcons()}. If a [gold]Bomb[/gold] went off this turn, gain an additional {energyPrefix:energyIcons(1)}.",
+   description: "Gain {Energy:energyIcons()}. If a [gold]Bomb[/gold] went off this turn, gain 1 additional {energyPrefix:energyIcons(1)}.",
    upgrade: {energy: +1},
    effects: [{op: spend_spark, amount: 1},
              {op: energy, amount: 1},
@@ -501,7 +501,7 @@
    cost: 1, type: attack, rarity: uncommon,
    # AoE trim, 2026-10-03 (sec.2): the Companion pays 6 more damage on the
    # aimed enemy instead of widening the Set off to ALL.
-   description: "[gold]Set off[/gold] the enemy. Deal 6 [gold]Pyro[/gold] damage, 6 additional damage if you played a [gold]Companion[/gold] card this turn.{InCombat:\n(Deals {BonusHit:diff()} damage)|}",
+   description: "[gold]Set off[/gold] the enemy. Deal 6 [gold]Pyro[/gold] damage. If you played a [gold]Companion[/gold] this turn, deal 6 additional damage.{InCombat:\n(Deals {BonusHit:diff()} damage)|}",
    upgrade: {damage: +3},
    effects: [{op: set_off, target: enemy},
              {op: damage, amount: 6, target: enemy,
@@ -514,7 +514,7 @@
 - {id: proto_ko_one_more_charge, name: "Witch's Homework", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon,
-   description: "Your largest [gold]Bomb[/gold], on any enemy, grows by 12. If it is now 20 or more, draw 1 card.",
+   description: "Your largest [gold]Bomb[/gold] grows by 12. If it is now 20 or more, draw 1 card.",
    upgrade: {grow: +3},
    effects: [{op: grow_largest, amount: 12, draw_if_at_least: 20, draw: 1}]}
 
@@ -535,7 +535,7 @@
 - {id: proto_ko_treasure_map, name: "Treasure Map", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon,
-   description: "Put a [gold]Set off[/gold] card from your [gold]Discard Pile[/gold] into your [gold]Hand[/gold]. Your largest [gold]Bomb[/gold], on any enemy, grows by 3.",
+   description: "Put a [gold]Set off[/gold] card from your [gold]Discard Pile[/gold] into your [gold]Hand[/gold]. Your largest [gold]Bomb[/gold] grows by 3.",
    upgrade: {grow: +3},
    effects: [{op: fetch_from_discard, filter: set_off},
              {op: grow_largest, amount: 3}]}
@@ -543,14 +543,14 @@
 - {id: proto_ko_tag_along, name: "Tag Along", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "Choose 1 of 3 [gold]Companion[/gold] cards to add to your [gold]Hand[/gold]. It costs 0 this turn.",
+   description: "Choose 1 of 3 [gold]Companions[/gold] to add to your [gold]Hand[/gold]. It costs 0 this turn.",
    upgrade: {remove: exhaust},
    effects: [{op: choose_companion, amount: 1, options: 3}]}
 
 - {id: proto_ko_come_back_and_play, name: "Come Back and Play!", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon,
-   description: "Put a [gold]Companion[/gold] card from your [gold]Discard Pile[/gold] into your [gold]Hand[/gold].",
+   description: "Put a [gold]Companion[/gold] from your [gold]Discard Pile[/gold] into your [gold]Hand[/gold].",
    upgrade: {add: {op: draw, amount: 1}},
    effects: [{op: fetch_from_discard, filter: companion}]}
 
@@ -568,7 +568,7 @@
 - {id: proto_ko_wait_for_it, name: "Wait For It...", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: uncommon, retain: true,
-   description: "The next time a [gold]Bomb[/gold] triggers an [gold]Elemental Reaction[/gold] this turn, draw 2 cards and gain {energyPrefix:energyIcons(1)}.",
+   description: "The next time a [gold]Bomb[/gold] reacts this turn, draw 2 cards and gain {energyPrefix:energyIcons(1)}.",
    upgrade: {power_amount: +1},
    effects: [{op: apply_power, power: ko_wait_for_it, amount: 2, target: self}]}
 
@@ -617,28 +617,28 @@
    # doubled again, and with The Big One and Boom Badge a Bomb 30 went off for
    # 480. One doubling per copy per combat.
    cost: 1, type: skill, rarity: rare, exhaust: true,
-   description: "Your largest [gold]Bomb[/gold], on any enemy, doubles in size.",
+   description: "Your largest [gold]Bomb[/gold] doubles in size.",
    upgrade: {retain: true},
    effects: [{op: multiply_largest_bomb, factor: 2}]}
 
 - {id: proto_ko_favonius_escort, name: "Favonius Escort", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: rare,
-   description: "Remove your largest [gold]Bomb[/gold], on any enemy. Gain [gold]Block[/gold] equal to twice its size.",
+   description: "Remove your largest [gold]Bomb[/gold]. Gain [gold]Block[/gold] equal to twice its size.",
    upgrade: {retain: true},
    effects: [{op: remove_bomb_for_block, multiplier: 2}]}
 
 - {id: proto_ko_adventure_club, name: "Adventure Club", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: rare, exhaust: true,
-   description: "Choose 2 of 4 [gold]Companion[/gold] cards to add to your [gold]Hand[/gold]. They cost 0 this turn.",
+   description: "Choose 2 of 4 [gold]Companions[/gold] to add to your [gold]Hand[/gold]. They cost 0 this turn.",
    upgrade: {cost: -1},
    effects: [{op: choose_companion, amount: 2, options: 4}]}
 
 - {id: proto_ko_windblume_fireworks, name: "Windblume Fireworks", character: klee,
    authored_by: [claude],
    cost: 2, type: attack, rarity: rare,
-   description: "[gold]Set off[/gold] ALL enemies, deal 10 [gold]Pyro[/gold] damage to them, and place a [gold]Bomb[/gold] 8 on each.",
+   description: "[gold]Set off[/gold] ALL enemies. Deal 10 [gold]Pyro[/gold] damage and place a [gold]Bomb[/gold] 8 on ALL enemies.",
    upgrade: {damage: +4, bomb_size: +2},
    effects: [{op: set_off, target: all_enemies},
              {op: damage, amount: 10, target: all_enemies},
@@ -662,7 +662,7 @@
 - {id: proto_ko_aftershock, name: "Aftershock", character: klee,
    authored_by: [claude],
    cost: 2, type: power, rarity: rare,
-   description: "The first time each turn a [gold]Bomb[/gold] of yours triggers an [gold]Elemental Reaction[/gold], place a [gold]Bomb[/gold] that size on a random enemy.",
+   description: "The first time each turn one of your [gold]Bombs[/gold] reacts, place a [gold]Bomb[/gold] that size on a random enemy.",
    upgrade: {cost: -1},
    effects: [{op: apply_power, power: ko_aftershock, amount: 1, target: self}]}
 
@@ -689,7 +689,7 @@
 - {id: proto_ko_alices_mine, name: "Alice's Mine", character: klee,
    authored_by: [claude],
    cost: 0, type: skill, rarity: token, ethereal: true, exhaust: true,
-   description: "Place a [gold]Mine[/gold] 10 on an enemy.",
+   description: "Place a [gold]Mine[/gold] 10.",
    upgrade: {bomb_size: +5},
    effects: [{op: plant_bomb, target: enemy, size: 10, mine: true}]}
 
@@ -791,7 +791,7 @@
 - {id: proto_ko_kitchen_alchemy, name: "Kitchen Alchemy", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "ALL enemies lose 1 [gold]Strength[/gold]. Exhaust every Status in your [gold]Hand[/gold]; they lose 1 more for each.",
+   description: "Exhaust every Status in your [gold]Hand[/gold]. ALL enemies lose 1 [gold]Strength[/gold], plus 1 for each Status Exhausted.",
    upgrade: {retain: true},
    effects: [{op: lose_strength, amount: 1, target: all_enemies, per_status: 1}]}
 
@@ -802,7 +802,7 @@
 - {id: proto_ko_simmer, name: "Simmer", character: klee,
    authored_by: [claude],
    cost: 1, type: attack, rarity: common,
-   description: "Deal 6 [gold]Pyro[/gold] damage plus your largest [gold]Bomb[/gold]'s size, on any enemy, not setting it off. Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].{InCombat:\n(Deals {BombHit:diff()} damage)|}",
+   description: "Deal 6 [gold]Pyro[/gold] damage plus the size of your largest [gold]Bomb[/gold]. It does not go off. Add a [gold]Dazed[/gold] into your [gold]Discard Pile[/gold].{InCombat:\n(Deals {BombHit:diff()} damage)|}",
    upgrade: {damage: +3},
    effects: [{op: damage_from_bombs, read: largest, amount: 6, target: enemy},
              {op: add_card, card: status_dazed, zone: discard, amount: 1}]}
@@ -810,7 +810,7 @@
 - {id: proto_ko_taste_test, name: "Taste Test", character: klee,
    authored_by: [claude],
    cost: 2, type: attack, rarity: uncommon, exhaust: true,
-   description: "Deal [gold]Pyro[/gold] damage equal to twice your [gold]Bombs[/gold] on the enemy. They do not go off.{InCombat:\n(Deals {BombHit:diff()} damage)|}",
+   description: "Deal [gold]Pyro[/gold] damage equal to twice the total size of your [gold]Bombs[/gold] on the enemy. They do not go off.{InCombat:\n(Deals {BombHit:diff()} damage)|}",
    upgrade: {cost: -1},
    effects: [{op: damage_from_bombs, read: target_total_double, target: enemy}]}
 
@@ -3043,7 +3043,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: geo,
    cost: 1, type: skill,
-   description: "[gold]Exhaust[/gold] every Status in your [gold]Hand[/gold]. For each, draw 1 card and your largest [gold]Bomb[/gold], on any enemy, grows by 6.",
+   description: "[gold]Exhaust[/gold] every Status in your [gold]Hand[/gold]. For each, draw 1 card and your largest [gold]Bomb[/gold] grows by 6.",
    upgrade: {grow: +2},
    effects: [{op: exhaust_statuses_grow_largest, amount: 6, draw_each: 1}]}
 
@@ -3948,7 +3948,7 @@
 - {id: proto_ko_hide_here, name: "Hide Here!", character: klee,
    authored_by: [claude], multiplayer: true,
    cost: 1, type: skill, rarity: uncommon,
-   description: "Another player gains [gold]Block[/gold] equal to your largest [gold]Bomb[/gold] on any enemy, up to 12.",
+   description: "Another player gains [gold]Block[/gold] equal to the size of your largest [gold]Bomb[/gold], up to 12.",
    upgrade: {cap: 4},
    effects: [{op: block_largest_bomb, cap: 12, target: ally}]}
 

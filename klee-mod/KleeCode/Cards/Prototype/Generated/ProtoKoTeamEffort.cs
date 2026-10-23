@@ -48,7 +48,7 @@ public sealed class ProtoKoTeamEffort : CustomCardModel, IElementalCard, ISetOff
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Team Effort"),
-        ("description", "[gold]Set off[/gold] the enemy. Deal {Damage:diff()} [gold]Pyro[/gold] damage, 6 additional damage if you played a [gold]Companion[/gold] card this turn.{InCombat:\n(Deals {BonusHit:diff()} damage)|}"),
+        ("description", "[gold]Set off[/gold] the enemy. Deal {Damage:diff()} [gold]Pyro[/gold] damage. If you played a [gold]Companion[/gold] this turn, deal 6 additional damage.{InCombat:\n(Deals {BonusHit:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

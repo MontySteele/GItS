@@ -41,16 +41,14 @@ public sealed class ProtoKoPerfectTiming : CustomCardModel, IElementalCard, ISet
         new[] { KleeKeywords.AppliesPyro };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>
-        TipAudience.Seat
-            ? ArmKeywordTips.ForElementalReaction(ArmKeywordTips.ForSetOff(ArmKeywordTips.ForBomb(ArmKeywordTips.ForEmptyField(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro), this, true), this), this), this)
-            : ArmKeywordTips.ForSetOff(ArmKeywordTips.ForBomb(ArmKeywordTips.ForEmptyField(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro), this, true), this), this);
+        ArmKeywordTips.ForSetOff(ArmKeywordTips.ForBomb(ArmKeywordTips.ForEmptyField(KleeCardTooltips.ForCard(base.ExtraHoverTips, this, Element.Pyro), this, true), this), this);
 
     public override Texture2D? CustomPortrait => KleeArt.CardPortrait("proto_ko_perfect_timing");
 
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Perfect Timing"),
-        ("description", "[gold]Set off[/gold] the enemy. Deal {Damage:diff()} [gold]Pyro[/gold] damage. If a [gold]Bomb[/gold] triggered an [gold]Elemental Reaction[/gold] this turn, play this again."),
+        ("description", "[gold]Set off[/gold] the enemy. Deal {Damage:diff()} [gold]Pyro[/gold] damage. If a [gold]Bomb[/gold] reacted this turn, play this again."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -42,7 +42,7 @@ public sealed class ProtoKoSparklingBurst : CustomCardModel, ISparkPricedCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sparkling Burst"),
-        ("description", "Gain {Energy:energyIcons()}. If a [gold]Bomb[/gold] went off this turn, gain an additional {energyPrefix:energyIcons(1)}."),
+        ("description", "Gain {Energy:energyIcons()}. If a [gold]Bomb[/gold] went off this turn, gain 1 additional {energyPrefix:energyIcons(1)}."),
     };
 
     // The Spark cost line (EB-118): unplayable below the price,

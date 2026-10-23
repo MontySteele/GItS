@@ -124,7 +124,8 @@ def test_no_face_prints_a_family_mark():
                 "ProtoKoAlicesIntroductionMagic"):
         face, = _descriptions(
             (PROTOTYPE_DIR / f"{cls}.cs").read_text(encoding="utf-8"))[:1]
-        assert "[gold]Companion[/gold]" in face, cls
+        assert ("[gold]Companion[/gold]" in face
+                or "[gold]Companions[/gold]" in face), cls
 
 
 def test_no_shipped_generated_card_reaches_the_arm_tips():
@@ -430,18 +431,18 @@ def test_the_klee_tips_and_the_page_say_the_same_three_rules():
     growth = ltc.render("{BombGrowth}")
     assert tips["BombKey"] == (
         "Deals its size in Pyro damage when Set off. Vulnerable raises "
-        "it. Grows " + growth
+        "it. Grows by " + growth
         + " at the start of your turn. If its enemy dies, it jumps.")
     assert page["Bomb"] == tips["BombKey"].replace(
-        "Grows " + growth, "Grows {growth}")
+        "Grows by " + growth, "Grows by {growth}")
     assert tips["SetOffKey"] == ("Every Bomb on the enemy goes off, oldest "
                                  "first. Bombs on other enemies stay. A "
                                  "random Set off picks an enemy with Bombs.")
     assert page["Set off"] == tips["SetOffKey"]
-    assert tips["MineKey"] == ("A Bomb that also goes off when its enemy "
-                               "attacks you, and uses up the enemy's "
-                               "aura. Its plain Bombs stay. Any Set off "
-                               "spends it too.")
+    assert tips["MineKey"] == ("A Bomb that also goes off by itself when "
+                               "its enemy attacks you, using up the "
+                               "enemy's aura. The enemy's other Bombs "
+                               "stay.")
     assert page["Mine"] == tips["MineKey"]
     for gone in ("stacks beside the first", "Block stops it",
                  "the HP cap move it", "unless the Mine kills",
@@ -487,16 +488,15 @@ def test_the_ruled_sentences_are_the_ones_that_ship():
             # TEXT PASS 2026-09-25: the three Klee words, rewritten short.
             # The growth is still interpolated (`EB-89`).
             "Deals its size in [gold]Pyro[/gold] damage when ",
-            "[gold]Set off[/gold]. [gold]Vulnerable[/gold] raises it. Grows ",
+            "[gold]Set off[/gold]. [gold]Vulnerable[/gold] raises it. Grows by ",
             " at the start of your turn. If its enemy dies, it jumps.",
             "Every [gold]Bomb[/gold] on the enemy goes off, oldest first. ",
             "A random Set off picks an enemy with Bombs.",
             "Some cards cost [gold]Sparks[/gold] instead of Energy, with no cap. ",
             "Start each combat with ",
             "Gone after combat.",
-            "A [gold]Bomb[/gold] that also goes off when its enemy attacks ",
-            "you, and uses up the enemy's aura. Its plain Bombs stay. Any ",
-            " spends it too.",
+            "A [gold]Bomb[/gold] that also goes off by itself when its enemy ",
+            "attacks you, using up the enemy's aura. The enemy's other Bombs ",
             # Kokomi, kokomi-overhaul-slice-1-2026-09-01.md DRAFT 6 sec.2.
             # Two keywords, not six: draft 6 cut Tide, Surge, Exert and the
             # Garment, and their four sentences left with them.

@@ -18,13 +18,15 @@ def _row(card_id: str) -> str:
     return row[:row.index("\n\n")]
 
 
-def test_chain_fuse_names_mines_and_hovers_the_mine_tip():
+def test_chain_fuse_says_bomb_and_the_code_grows_mines():
     # Klee suite 6 lane 2: Chain Fuse grows Mines too (a Mine is a Bomb,
-    # `ProtoBombPower.GrowOn`), and the face did not say so.
-    assert ("Each [gold]Bomb[/gold] and [gold]Mine[/gold] on the enemy"
+    # `ProtoBombPower.GrowOn`). The Klee text audit (2026-10-23, pick 5;
+    # [USER]: "On Klee - agree on the defaults"): the code counts Mines as
+    # Bombs, so the face says "Each Bomb", as Quick Fuse's does.
+    assert ("Each [gold]Bomb[/gold] on the enemy grows by"
             in _row("proto_ko_chain_fuse"))
     face = (GENERATED / "ProtoKoChainFuse.cs").read_text(encoding="utf-8")
-    assert "ArmKeywordTips.ForMine(" in face
+    assert "ProtoBombPower.GrowOn(" in face
 
 
 def test_mikas_discount_is_printed_as_energy():

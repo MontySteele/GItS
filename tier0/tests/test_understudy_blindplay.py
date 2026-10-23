@@ -6504,8 +6504,8 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # `EB-436`: the hit is in the sentence now. Trimmed 2026-09-08 with
         # the Bomb row, and its last two sentences are the Bomb's word for
         # word, so the anchors above hold them for both.
-        "Mine": [" that also goes off when its enemy attacks ",
-                 "you, and uses up the enemy's aura. Its plain Bombs stay. Any "],
+        "Mine": [" that also goes off by itself when its enemy ",
+                 "attacks you, using up the enemy's aura. The enemy's other Bombs "],
         # The anchors are clauses INSIDE one C# literal apiece, the same
         # fold-out the Evoke row below makes around its interpolated numerals:
         # the tip's [gold] spans split it across concatenated literals, so a
@@ -7730,14 +7730,14 @@ def test_the_bomb_glossary_carries_the_growth_number_and_says_each():
                                                 "Klee"))
     assert (f"- **Bomb** — Deals its size in Pyro damage when Set off. "
             f"Vulnerable raises it. "
-            f"Grows {blindplay.BOMB_GROWTH} at the start of your turn.") in page
+            f"Grows by {blindplay.BOMB_GROWTH} at the start of your turn.") in page
     # LIVE FIRST: where the screen's own tip carries the number, that number is
     # what the glossary prints -- the fallback is for a screen that prints the
     # WORD with no tip on it, which is an enemy's badge and a reward row.
     live_tip = blindplay.observe(elemental_hand_state(
-        bomb_tip="Deals its size in Pyro damage when Set off. Grows 9 at "
+        bomb_tip="Deals its size in Pyro damage when Set off. Grows by 9 at "
                  "the start of your turn.", character="Klee"))
-    assert "Grows 9 at the start of your turn" in live_tip
+    assert "Grows by 9 at the start of your turn" in live_tip
 
 
 def _shattering_pressure_reward_state() -> dict:
