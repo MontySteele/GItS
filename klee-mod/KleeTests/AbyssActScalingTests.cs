@@ -76,9 +76,9 @@ public class AbyssActScalingTests
     [InlineData(AbyssShadow.ElementalMark, 0, "The first time each turn an enemy attack deals you unblocked damage, add a Burn to your discard pile.")]
     [InlineData(AbyssShadow.ElementalMark, 1, "The first time each turn an enemy attack deals you unblocked damage, add a Burn to your discard pile.")]
     [InlineData(AbyssShadow.ElementalMark, 2, "The first time each turn an enemy attack deals you unblocked damage, add a Burn to your discard pile.")]
-    [InlineData(AbyssShadow.MageShield, 0, "Elites enter combat with a shield of this act's element, 6 hits deep, that stops all damage. A hit removes 1. A reaction or a counter-element hit removes 3.")]
-    [InlineData(AbyssShadow.MageShield, 1, "Elites enter combat with a shield of this act's element, 6 hits deep, that stops all damage. A hit removes 1. A reaction or a counter-element hit removes 3.")]
-    [InlineData(AbyssShadow.MageShield, 2, "Elites enter combat with a shield of this act's element, 6 hits deep, that stops all damage. A hit removes 1. A reaction or a counter-element hit removes 3.")]
+    [InlineData(AbyssShadow.MageShield, 0, "Elites enter combat with a shield of [gold]Hydro[/gold], 6 hits deep, that stops all damage. A hit removes 1. A reaction or a [gold]Cryo[/gold] hit removes 3.")]
+    [InlineData(AbyssShadow.MageShield, 1, "Elites enter combat with a shield of [gold]Pyro[/gold], 6 hits deep, that stops all damage. A hit removes 1. A reaction or a [gold]Hydro[/gold] hit removes 3.")]
+    [InlineData(AbyssShadow.MageShield, 2, "Elites enter combat with a shield of [gold]Electro[/gold], 6 hits deep, that stops all damage. A hit removes 1. A reaction or a [gold]Cryo[/gold] hit removes 3.")]
     [InlineData(AbyssShadow.Clock, 0, "From turn 5, every enemy gains 2 Strength at the start of its turn.")]
     [InlineData(AbyssShadow.Clock, 1, "From turn 5, every enemy gains 2 Strength at the start of its turn.")]
     [InlineData(AbyssShadow.Clock, 2, "From turn 5, every enemy gains 3 Strength at the start of its turn.")]
@@ -97,7 +97,6 @@ public class AbyssActScalingTests
     /// <summary>The entries with no number by act read the same in every act,
     /// word for word what they were.</summary>
     [Theory]
-    [InlineData(AbyssBlessing.LeyLine, "Each enemy turn, every enemy without an aura takes this act's element. An enemy wearing an aura deals 1 less damage.")]
     [InlineData(AbyssBlessing.FirstStrike, "Your first Attack each combat is played twice.")]
     [InlineData(AbyssBlessing.Resonance, "On turn 1 of each combat, gain 1 Energy and draw 1 card.")]
     [InlineData(AbyssBlessing.Overflow, "This act, Elemental Reactions deal double damage.")]

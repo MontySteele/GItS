@@ -231,7 +231,7 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
         // Display only: each player's Abyss relics print the numbers of the
         // act each entry was taken in. A reloaded relic comes back with the
         // act 1 text, so every room puts the right one back.
-        foreach (var player in RunState.Players) AbyssDisplay.RefreshTexts(player, Record);
+        foreach (var player in RunState.Players) AbyssDisplay.RefreshTexts(player, Record, CurrentAct);
 
         if (room is not CombatRoom combatRoom) return;
         var enemies = combatRoom.CombatState.Enemies.Where(e => e.IsAlive).ToList();
@@ -243,12 +243,12 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
         // earlier act is not in force, so it wears no badge; an elite-only or
         // elite-and-boss Shadow wears none outside its rooms (BadgesFor).
         var inForce = AbyssRules.BadgesFor(ShadowsNow, isElite, isBoss);
-        foreach (var enemy in enemies) AbyssDisplay.ShowShadows(enemy, inForce, Record);
+        foreach (var enemy in enemies) AbyssDisplay.ShowShadows(enemy, inForce, Record, CurrentAct);
         // The player-side Shadows (Withering, Sheer Cold) badge each player
         // instead, where base powers show; ShadowsToShow picks the side.
         foreach (var player in RunState.Players)
         {
-            if (player.Creature is { IsDead: false } body) AbyssDisplay.ShowShadows(body, inForce, Record);
+            if (player.Creature is { IsDead: false } body) AbyssDisplay.ShowShadows(body, inForce, Record, CurrentAct);
         }
 
         // The combat-start powers, where the base game's Oddly Smooth Stone
@@ -315,7 +315,7 @@ public sealed class SpiralAbyss : CustomModifierModel, ILocalizationProvider
         // A summoned enemy wears the badges too (display only). The
         // combat-start Shadows (Frenzy, Thorny Ground, Bulwark) are about
         // starting the combat, so a summon does not take them.
-        AbyssDisplay.ShowShadows(creature, AbyssRules.BadgesFor(ShadowsNow, isElite: false, isBoss: false), Record);
+        AbyssDisplay.ShowShadows(creature, AbyssRules.BadgesFor(ShadowsNow, isElite: false, isBoss: false), Record, CurrentAct);
         if (Has(AbyssShadow.Herald)) await HeraldBuff(creature);
     }
 

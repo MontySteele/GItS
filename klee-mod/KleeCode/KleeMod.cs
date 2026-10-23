@@ -528,6 +528,18 @@ public static class KleeMod
                     // goes with the buff.
                     [Cards.KleeCardTooltips.OverriddenElementKey + ".title"] =
                         "Element overridden",
+                    // 2026-10-22 ([USER]: "it would help to have some way to
+                    // find them all in-game"). One tip per element, what it
+                    // reacts with; the bodies are generated in C#
+                    // (`Elements.ReactionGuide.TipBody`), so only the titles
+                    // live here, and the chart button's title with them.
+                    [Cards.ReactionTips.PyroKey + ".title"] = "Pyro Reactions",
+                    [Cards.ReactionTips.HydroKey + ".title"] = "Hydro Reactions",
+                    [Cards.ReactionTips.ElectroKey + ".title"] = "Electro Reactions",
+                    [Cards.ReactionTips.CryoKey + ".title"] = "Cryo Reactions",
+                    [Cards.ReactionTips.AnemoKey + ".title"] = "Anemo Reactions",
+                    [Cards.ReactionTips.GeoKey + ".title"] = "Geo Reactions",
+                    [Vfx.ReactionChart.TitleKey + ".title"] = "Elemental Reactions",
                     [Cards.ArmKeywordTips.SwirlKey + ".title"] = "Swirl",
                     // 2026-09-25: the word Klee's readers and the other arms'
                     // Companion cards print. Same raw-key hazard as every row

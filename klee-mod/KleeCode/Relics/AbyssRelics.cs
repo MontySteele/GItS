@@ -81,16 +81,18 @@ public abstract class AbyssBlessingRelic : AbyssDisplayRelic
 
     protected override IEnumerable<DynamicVar> CanonicalVars => new DynamicVar[]
     {
-        new StringVar(TextVar, AbyssText.Text(Blessing, 0)),
+        new StringVar(TextVar, AbyssText.Text(Blessing, AbyssText.NoAct)),
     };
 
     /// <summary>The text this relic prints now.</summary>
     public string ShownText => DynamicVars[TextVar] is StringVar text ? text.StringValue : "";
 
-    /// <summary>Print the text for act <paramref name="act"/>. Display only.</summary>
-    public void ShowAct(int act)
+    /// <summary>Print the text for act <paramref name="act"/>. Display only.
+    /// <paramref name="elementAct"/> is the act being played, whose element
+    /// The Ley Line names.</summary>
+    public void ShowAct(int act, int? elementAct = null)
     {
-        if (DynamicVars[TextVar] is StringVar text) text.StringValue = AbyssText.Text(Blessing, act);
+        if (DynamicVars[TextVar] is StringVar text) text.StringValue = AbyssText.Text(Blessing, act, elementAct);
     }
 }
 
@@ -242,14 +244,19 @@ public sealed class AbyssShadowsRelic : AbyssDisplayRelic
     /// sets them again after a reload. A Shadow with no act here prints act 1's.</summary>
     private Dictionary<AbyssShadow, int>? _acts;
 
+    /// <summary>The act being played, whose element Abyss Mage Shield names;
+    /// null until a run sets it, which reads all three.</summary>
+    private int? _elementAct;
+
     public void SetShadows(IEnumerable<AbyssShadow> shadows) =>
         SpiralAbyssShadowsShown = shadows.Where(s => s != AbyssShadow.None).Select(s => (int)s).ToArray();
 
     /// <summary>Set the listed Shadows and the act each was taken in.</summary>
-    public void SetShadows(IEnumerable<AbyssShadow> shadows, AbyssRecord record)
+    public void SetShadows(IEnumerable<AbyssShadow> shadows, AbyssRecord record, int? elementAct = null)
     {
         var list = shadows.Where(s => s != AbyssShadow.None).ToList();
         _acts = list.Distinct().ToDictionary(s => s, record.ActTaken);
+        _elementAct = elementAct;
         SetShadows(list);
     }
 
@@ -261,7 +268,8 @@ public sealed class AbyssShadowsRelic : AbyssDisplayRelic
         if (DynamicVars[ShadowsVar] is StringVar text)
         {
             text.StringValue = AbyssDisplay.ShadowsText(
-                Shadows.Select(s => (s, _acts != null && _acts.TryGetValue(s, out var act) ? act : 0)));
+                Shadows.Select(s => (s, _acts != null && _acts.TryGetValue(s, out var act) ? act : 0)),
+                _elementAct);
         }
     }
 }

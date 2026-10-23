@@ -36,23 +36,24 @@ public abstract class AbyssShadowPower : PowerModel, ILocalizationProvider
     public List<(string, string)>? Localization => new()
     {
         ("title", AbyssText.Name(Shadow)),
-        ("description", AbyssText.Text(Shadow, 0)),
+        ("description", AbyssText.Text(Shadow, AbyssText.NoAct)),
         ("smartDescription", "{" + TextVar + "}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars => new DynamicVar[]
     {
-        new StringVar(TextVar, AbyssText.Text(Shadow, 0)),
+        new StringVar(TextVar, AbyssText.Text(Shadow, AbyssText.NoAct)),
     };
 
     /// <summary>The text this badge prints now.</summary>
     public string ShownText => DynamicVars[TextVar] is StringVar text ? text.StringValue : "";
 
     /// <summary>Print the text for act <paramref name="act"/>, the act the
-    /// Shadow was taken in. Display only.</summary>
-    public void ShowAct(int act)
+    /// Shadow was taken in. Display only. <paramref name="elementAct"/> is
+    /// the act being played, whose element Abyss Mage Shield names.</summary>
+    public void ShowAct(int act, int? elementAct = null)
     {
-        if (DynamicVars[TextVar] is StringVar text) text.StringValue = AbyssText.Text(Shadow, act);
+        if (DynamicVars[TextVar] is StringVar text) text.StringValue = AbyssText.Text(Shadow, act, elementAct);
     }
 
     public override PowerType Type => PowerType.Buff;

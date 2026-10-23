@@ -105,12 +105,12 @@ public sealed class AbyssOverlayContent
             AbyssDurations.Tag(AbyssDurations.Of(o.Shadow)))).ToList();
         var blessings = record.BlessingsInForce(offer.ActIndex)
             .Select(b => new AbyssOverlayStripEntry(
-                AbyssText.Name(b), AbyssText.Text(b, record.ActTaken(b)), BlessingIconFile(b),
+                AbyssText.Name(b), AbyssText.Text(b, record.ActTaken(b), act), BlessingIconFile(b),
                 AbyssDurations.Tag(AbyssDurations.Of(b))))
             .ToList();
         var shadows = record.ShadowsInForce(offer.ActIndex)
             .Select(s => new AbyssOverlayStripEntry(
-                AbyssText.Name(s), AbyssText.Text(s, record.ActTaken(s)), ShadowIconFile(s),
+                AbyssText.Name(s), AbyssText.Text(s, record.ActTaken(s), act), ShadowIconFile(s),
                 AbyssDurations.Tag(AbyssDurations.Of(s))))
             .ToList();
         return new AbyssOverlayContent(TitleFor(offer.ActIndex), cards, blessings, shadows);

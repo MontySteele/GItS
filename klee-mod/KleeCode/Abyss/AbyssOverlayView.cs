@@ -688,6 +688,7 @@ public sealed class AbyssOverlayView
     /// <summary>A text that grows to fit (never shrinks its font).</summary>
     private static RichTextLabel MakeText(string text, AbyssOverlayFonts fonts, int size, Color colour, bool centered)
     {
+        text = GoldTags(text, colour);
         var label = new RichTextLabel
         {
             BbcodeEnabled = true,
@@ -706,6 +707,13 @@ public sealed class AbyssOverlayView
         label.AddThemeConstantOverride("line_separation", -2);
         return label;
     }
+
+    /// <summary>The game's [gold] tag (The Ley Line names its element in
+    /// gold, 2026-10-22) is not Godot's: a plain RichTextLabel would print it
+    /// as text. A darker gold on the cream half, the game's gold on the dark.</summary>
+    internal static string GoldTags(string text, Color ink) =>
+        text.Replace("[gold]", ink.Luminance < 0.5f ? "[color=#8a5a00]" : "[color=#efc851]")
+            .Replace("[/gold]", "[/color]");
 
     private static StyleBoxFlat Box(
         Color bg, Color border, int left, int top, int right, int bottom,
