@@ -10,16 +10,8 @@ line leaves this file. Closed picks are in git
 
 ## Backlog wrap-up (2026-10-19)
 
-Found while clearing `BACKLOG.md`; each is a rule or text call on a kit.
-
-1. **Role-tempo floors:** regenerating with the fixed card reader moves 25 of
-   110 package floors (Klee's spark `velocity|early` 5.6 to 19.4).
-   (a, default) take the new floors. (b) keep the old ones.
-
 Moved here from the backlog, yours by nature: the writing review before the
-public launch; "Witch's Homework" and "Witch's Homework II" read alike;
-listen for the modded death sound (`set_hp player 1`); the shop portrait
-idles.
+public launch; listen for the modded death sound (`set_hp player 1`).
 
 ## Eyes-on looks (materials ready; no build waits on them)
 
@@ -30,11 +22,6 @@ idles.
   non-Kokomi character; Kokomi's Plans grid with a controller (open, flip,
   captions, focus return) and the pet by D-pad; Varka's element-switch hover;
   the drag-aimed reaction preview. Polish only what bothers you.
-
-- **End-of-turn docket:** does the end of turn read legibly, is the per-seat
-  position doing the attribution work, is the chip's prominence right. Frames
-  in `art/eb52_captures/` and `understudy/logs/frames/`; no frame isolates the
-  electro (Oz) leg, so that order falls to this look (`BACKLOG.md` `EB-53`).
 
 - **Klee in motion** (next build): H1 + H3 lite shading, the new battle
   stance and her ground shadow are ruled and built

@@ -205,6 +205,11 @@ public class AncientAuditTests
             Face(card));
         Assert.Equal(8m, card.DynamicVars.Block.BaseValue);
         Assert.Equal(11m, Upgraded<AllTheWorldsAStage>().DynamicVars.Block.BaseValue);
+        // Retain on upgrade only, as Rising Applause (2026-10-19 ruling).
+        Assert.DoesNotContain(CardKeyword.Retain, card.Keywords);
+        Assert.Contains(CardKeyword.Retain, Upgraded<AllTheWorldsAStage>().Keywords);
+        Assert.Contains(CardKeyword.Retain,
+            Upgraded<ProtoFsStandingOvation>().Keywords);
 
         // Rising Applause's spend-all, then two hits of what it spent.
         var play = Il.CallSequence(Il.Method("AllTheWorldsAStage", "OnPlay")).ToList();
