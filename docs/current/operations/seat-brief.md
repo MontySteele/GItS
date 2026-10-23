@@ -46,6 +46,8 @@ upgrade     remove             use potion "<title>"    confirm    proceed
 
 Kokomi: during your turn, `flip <n>` (or `flip "<card>"`) switches Plan n in your Plan list between its Plan line and its now-line; again switches it back. A Plan nobody flips is carried out as its Plan line.
 
+Observe a chooser before you choose on it.
+
 Two things on one screen printing the same name are NUMBERED in printed order —
 `Water's Edge (1)` / `Water's Edge (2)` — and an upgraded copy is separated by
 `(upgraded)` / `(not upgraded)`. A bare name that is ambiguous is refused with

@@ -1165,6 +1165,11 @@ def _card_taken(entries: list[dict[str, Any]], idx: int,
     return printed
 
 
+#: Kokomi seat triage (2026-10-23): `choose` of a hand card a hand chooser
+#: does not list.
+NOT_OFFERED_ON_CHOOSER = "{name!r} is not offered on this chooser."
+
+
 def _choose(state: dict[str, Any], cmd: Command) -> Resolution:
     """`choose` on whichever screen is up. One verb, six wire actions.
 
@@ -1206,6 +1211,14 @@ def _choose(state: dict[str, Any], cmd: Command) -> Resolution:
                           face=_card_face_key, ordinal=cmd.ordinal,
                           labelled=True)
         if idx < 0:
+            # Kokomi seat triage (2026-10-23): a hand chooser offers some
+            # of the hand (Grand Design: Plan cards and Basics), so a card
+            # in hand and not listed is said to be not offered here.
+            if (st == "hand_select" and not cmd.ordinal
+                    and (not shown or why.startswith("nothing here"))):
+                why = NOT_OFFERED_ON_CHOOSER.format(name=cmd.name) + (
+                    why[why.index(" What is on the screen"):]
+                    if " What is on the screen" in why else "")
             return _refuse(why)
         idx = order[idx]
         verb = "select_card" if st == "card_select" else "combat_select_card"

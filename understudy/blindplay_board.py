@@ -13,6 +13,7 @@ from typing import Any, Callable
 
 from understudy import qa_packet
 from understudy.blindplay_faces import (_card_face, _card_title,
+                                        mend_zero_reason,
                                         _enemy_handles, _enemy_names,
                                         _hook_note, _intents, _meter_max,
                                         _named_option, _powers,
@@ -2187,8 +2188,8 @@ def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
               "damage": _int(row.get("damage")),
               "aim": _text(row.get("aim")),
               "two_line": row.get("two_line") is True,
-              "now_line": _text(row.get("now_line")),
-              "plan_line": _text(row.get("plan_line")),
+              "now_line": mend_zero_reason(_text(row.get("now_line"))),
+              "plan_line": mend_zero_reason(_text(row.get("plan_line"))),
               # PICK 5 (a) (2026-10-01): the line it will be carried out
               # as, "now" once flipped. An absent key is a bridge older
               # than the flip, and reads as the Plan line.
@@ -2225,6 +2226,14 @@ def kokomi_plans(player: dict[str, Any]) -> dict[str, Any] | None:
               # "energy"); item 11: the card written is an Attack. Absent on
               # an older bridge: None and False, and nothing is said.
               "needs_attack": _text(row.get("needs_attack")) or None,
+              # Kokomi seat triage (2026-10-23): what a Counter Plan (Kelp
+              # Wall, Turnabout) deals as things stand, its flat bonus
+              # included. Absent on an older bridge: None, read as 0.
+              "counter_deals": (row.get("counter_deals")
+                                if isinstance(row.get("counter_deals"), int)
+                                and not isinstance(row.get("counter_deals"),
+                                                   bool)
+                                else None),
               "attack": row.get("attack") is True,
               # Kokomi round 7 (2026-10-14): the Plan plays a card (a
               # Companion, Moon's Reflection, Crystal Collapse), which
@@ -2816,9 +2825,11 @@ def _screen_cards(state: dict[str, Any]) -> list[dict[str, Any]]:
     if st == "card_reward":
         entries = _listing(state, "card_reward.cards", "cards")
     elif st in SELECT_SCREENS:
+        # Kokomi seat triage (2026-10-23): a hand chooser offers only the
+        # cards it lists (Grand Design lists Plan cards and Basics). The
+        # whole hand used to stand in for an empty list, so `choose` of an
+        # unoffered card posted another card's index.
         entries = _listing(state, f"{st}.cards")
-        if not entries and st == "hand_select":
-            entries = _hand(state)
     elif st == "bundle_select":
         entries = _listing(state, "bundle_select.bundles",
                            "bundle_select.cards", "bundles")

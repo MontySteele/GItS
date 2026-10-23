@@ -252,6 +252,19 @@ _MODE_FACE_ID = re.compile(r"_MODE_[A-Z]$", re.I)
 SEAT_FACE_ID = re.compile(r"_SEAT_OPTION$", re.I)
 
 
+#: Kokomi seat triage (2026-10-23): a Mend face reads "(0 will land)" at or
+#: above the HP she started the combat with, and two seats lost their Mend
+#: without knowing why. The page gives the reason beside the 0.
+MEND_ZERO = "(0 will land)"
+MEND_ZERO_REASON = ("(0 will land: you are at or above the HP you started "
+                    "this combat with)")
+
+
+def mend_zero_reason(text: str) -> str:
+    """`text` with each "(0 will land)" given its reason."""
+    return text.replace(MEND_ZERO, MEND_ZERO_REASON) if text else text
+
+
 def _card_face(entry: dict[str, Any]) -> dict[str, Any]:
     """One card as the game prints it. Field by field, never spread.
 
@@ -276,7 +289,7 @@ def _card_face(entry: dict[str, Any]) -> dict[str, Any]:
     return {
         "title": _text(entry.get("name")),
         "printed_element": printed,
-        "text": _text(entry.get("description")),
+        "text": mend_zero_reason(_text(entry.get("description"))),
         "cost": _text(entry.get("cost")),
         # `EB-186`, and the same number for the same reason as on the staged
         # page: at a full Spark bank the game draws EVERY Attack at 0 while
