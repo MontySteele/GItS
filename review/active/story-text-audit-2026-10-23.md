@@ -2,9 +2,9 @@
 
 The writing review's story pass, first part. It covers the 32 character
 story events (Klee, Kokomi, Furina, Varka: eight each, about 6,200 words,
-`klee-mod/localization/reference/eng.json`, `events` table). The 123
-nation events (23,500 words) and the Spiral Abyss (18,000 words) come in
-separate papers. Yae has no chain yet (see pick 3).
+`klee-mod/localization/reference/eng.json`, `events` table), then the rest of the story text: the Ancients' lines, the
+run lines, the Spiral Abyss and the nation events (last section). Yae has no
+chain yet (see pick 3).
 
 **The verdict: the prose is good and stays.** Every chain has a voice of its
 own, and the callbacks work: Klee's Mom's notes answer what she did with the
@@ -27,8 +27,6 @@ reward line, the mechanical text under each choice.
      Rare cards." → "...Rare cards to add to your deck."
    - Furina, A Steambird Clipping, *Cast the sequel*: "Choose 1 of 3 random
      Guest Stars." → "...Guest Stars to add to your deck."
-   - Two nation events have the same gap (Hitogata Storehouse and Totem
-     Shelf, *Examine*). They go into the nation paper.
 2. **"Remove every Overdue Reports"** (Varka, The Second Satchel, *Sign
    them by lamplight*) reads wrong because the card's name is plural. →
    "Remove all [Overdue Reports]."
@@ -61,10 +59,43 @@ reward line, the mechanical text under each choice.
    (b) Leave all five as they are.
    **Default (a).**
 
-3. **Yae's story chain.** Yae is in Prototype and has no story events, so a
-   Yae run draws only nation events. (a) Write her chain when she reaches
-   Balance, the way her translation waits for it, so it is not written twice
-   if her kit moves. (b) Write it now.
+3. **Yae's story writing.** Yae is in Prototype and has no story events,
+   no run lines (boss entry, low HP, run won or lost) and no lines for the
+   Ancients (Neow, Pael and the rest), so the game falls back to its own.
+   (a) Write all of it when she reaches Balance, the way her translation
+   waits for it, so it is not written twice if her kit moves. (b) Write it
+   now.
    **Default (a).**
 
-The nation paper and the Abyss paper follow, in that order.
+4. **Yae's character-select text** is the only one that explains mechanics.
+   The other four give a title line, then two sentences of who they are and
+   why they climb: "The Pearl of Wisdom. / Watatsumi's priestess and
+   strategist..." Yae's reads: "Guuji of the Grand Narukami Shrine and
+   editor-in-chief of the Yae Publishing House. Her Sakura strike at the end
+   of every turn, and her edits make good cards better."
+   (a) Match the others: "The Guuji of the Grand Narukami Shrine. / She runs
+   the shrine, a publishing house and most of Inazuma's gossip. A tower full
+   of strangers sounded like an excellent story." (b) Keep it.
+   **Default (a).**
+
+## What the rest of the story text turned out to be
+
+- **The 123 nation events (23,500 words) are not in the release build.**
+  They belong to the Teyvat run frame, which is switched off
+  (`TeyvatFrame.Enabled`, `docs/current/operations/teyvat-frame.md`). With it
+  off, not one of their rows is merged, and the same goes for the
+  nation-named Ancients (Alice, Apep, Dvalin and the rest). Their reward lines
+  are rough: some still name the base event they copy, as in "Obtain Bulging
+  Cap (Big Mushroom, relic)", and one prints a pipeline note to the player.
+  They need a full pass before the frame is ever switched on, not before
+  launch. The English reference lists them because its test turns the frame
+  on, so **the translation leaves them out.** That takes more than a third of the
+  words off the job.
+- **The Spiral Abyss (18,000 words) is about 50 distinct sentences.** Each
+  Blessing is listed once for every Shadow and act it can pair with. The
+  shared text audit already went over those sentences. One small fix taken
+  here: Elemental Mark says "an enemy attack" where Blood in the Water says
+  "an enemy's attack". Both now say "an enemy's attack".
+- **The Ancients' lines and the run lines for the four Balance kits** (Neow,
+  Pael, Tanx, Orobas, Vakuu, Darv, Nonupeipe, Tezcatara; boss entry, low HP,
+  the pair exchanges, run won or lost) read in character and need nothing.

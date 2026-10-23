@@ -17,7 +17,8 @@ public launch; listen for the modded death sound (`set_hp player 1`).
 
 - **Story text audit, character chains** (`review/active/story-text-audit-2026-10-23.md`):
   (1) "Add [X] to your deck." everywhere; (2) vary three "reads it twice"
-  lines; (3) Yae's chain waits for her Balance. All defaults.
+  lines; (3) Yae's story writing waits for her Balance; (4) Yae's
+  character-select text matches the other four. All defaults.
 
 ## Eyes-on looks (materials ready; no build waits on them)
 
