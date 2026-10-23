@@ -125,7 +125,7 @@ public class SlyGrantTests
         // replaces was DiscardSelectionPrompt, which named the wrong pile
         // entirely -- this screen reads the HAND.
         Assert.Equal(
-            "Choose a Skill in your hand. It gains [gold]Sly[/gold] this turn.",
+            "Choose a Skill in your [gold]Hand[/gold]. It gains [gold]Sly[/gold] this turn.",
             SlyGrant.PromptText);
         Assert.NotEqual(CardSelectorPrefs.DiscardSelectionPrompt.LocEntryKey,
                         SlyGrant.Prompt.LocEntryKey);

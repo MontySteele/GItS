@@ -53,7 +53,7 @@ public sealed class ProtoMcNicoleLadderOfAscent : CustomCardModel, ICompanionCar
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Nicole — Ladder of Divine Ascent"),
-        ("description", "Whenever you play a [gold]Companion[/gold] card, deal {PowerAmount:diff()} damage of that card's element to a random enemy."),
+        ("description", "Whenever you play a [gold]Companion[/gold], deal {PowerAmount:diff()} damage of that card's element to a random enemy."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -4186,7 +4186,7 @@ APPLY_POWERS = {
         "This turn, [gold]Elemental Reactions[/gold] deal {X} additional "
         "damage."),
     "mc_ladder_of_ascent": ("LadderOfAscentPower", None,
-        "Whenever you play a [gold]Companion[/gold] card, deal {X} damage of "
+        "Whenever you play a [gold]Companion[/gold], deal {X} damage of "
         "that card's element to a random enemy."),
     # THE KOKOMI OVERHAUL, DRAFT 6 (R213 B). Every class below
     # lives in klee-mod/KleeCode/Powers/Prototype and is Compile Remove'd out
@@ -4706,7 +4706,7 @@ APPLY_POWERS = {
     "draw_cards_next_turn": ("DrawCardsNextTurnPower", None,
         "Next turn, draw {X} card{XS}."),
     "night_vigil": ("NightVigilPower", None,
-        "Your Attacks against enemies holding an aura deal {X} additional "
+        "Your Attacks against enemies with an aura deal {X} additional "
         "damage."),
     # Co-op notes pick 4 (2026-10-02): plus a Hydro aura each turn.
     "ancient_sea_authority": ("AncientSeaAuthorityPower", None,

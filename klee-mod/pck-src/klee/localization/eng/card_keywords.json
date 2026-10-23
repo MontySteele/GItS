@@ -26,7 +26,7 @@
   "KLEEMOD-FROZEN_PREVIEW.title": "Reaction preview: Frozen",
   "KLEEMOD-FROZEN_PREVIEW.description": "[gold]Hydro[/gold] meets [gold]Cryo[/gold]: its next action deals 50% less damage. Attacking it ends the freeze and deals [blue]6[/blue] unblockable damage.",
   "KLEEMOD-FROZEN_BOSS_PREVIEW.title": "Reaction preview: Vulnerable (Boss)",
-  "KLEEMOD-FROZEN_BOSS_PREVIEW.description": "[gold]Hydro[/gold] meets [gold]Cryo[/gold]: in a boss fight a non-minion can't be Frozen; it gains [blue]2[/blue] [gold]Vulnerable[/gold] instead.",
+  "KLEEMOD-FROZEN_BOSS_PREVIEW.description": "[gold]Hydro[/gold] meets [gold]Cryo[/gold]: in a boss fight a non-minion cannot be Frozen; it gains [blue]2[/blue] [gold]Vulnerable[/gold] instead.",
   "KLEEMOD-SWIRL_PREVIEW.title": "Reaction preview: Swirl",
   "KLEEMOD-SWIRL_PREVIEW.description": "[gold]Anemo[/gold] meets an aura: remove it, deal [blue]2[/blue] unblockable damage to ALL enemies, and apply that element to the others.",
   "KLEEMOD-CRYSTALLIZE_PREVIEW.title": "Reaction preview: Crystallize",

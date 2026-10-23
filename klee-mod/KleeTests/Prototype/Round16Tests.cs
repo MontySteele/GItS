@@ -100,8 +100,8 @@ public class Round16Tests
         // seat wore `Vulnerable 99` in front of a 24-damage intent and could
         // not price it.
         Assert.Equal(
-            "An attack or card hit on it deals 50% more, a Skill's too. A "
-          + "potion's does not. Loses 1 stack at the end of its turn.", body);
+            "Takes 50% more damage from cards, Skills included, but not from "
+          + "potions. Loses 1 stack at the end of its turn.", body);
         // The tip a player hovers is inside the in-game box either way.
         //
         // NO LONGER ITS TWIN'S LENGTH, and that assertion is gone rather than

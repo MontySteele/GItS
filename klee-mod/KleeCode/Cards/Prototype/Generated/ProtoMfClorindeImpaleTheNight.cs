@@ -59,7 +59,7 @@ public sealed class ProtoMfClorindeImpaleTheNight : CustomCardModel, IElementalC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Clorinde — Impale the Night"),
-        ("description", "Deal {CalculatedDamage:diff()} [gold]Electro[/gold] damage. Your later Attacks against enemies holding an aura deal 6 additional damage.{InCombat:{VarkaSwitch}|}"),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Electro[/gold] damage. This combat, your Attacks against enemies with an aura deal 6 additional damage.{InCombat:{VarkaSwitch}|}"),
     };
 
     /// <summary>The element this card makes current, on its in-combat line
