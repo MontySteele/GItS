@@ -781,11 +781,13 @@ public static class VarkaOath
 
     /// <summary>One gain, as said over his head: "+1 Pyro Oath (Swirl)".
     /// PURE.</summary>
-    public static string GainClause(Element element, int n, OathSource source)
-    {
-        var word = SourceWord(source);
-        return $"+{n} {element} Oath" + (word.Length > 0 ? $" ({word})" : "");
-    }
+    public static string GainClause(Element element, int n, OathSource source) =>
+        CodeText.Format(source switch
+        {
+            OathSource.Applied => GainAppliedRow,
+            OathSource.Swirl => GainSwirlRow,
+            _ => GainRow,
+        }, CodeText.Vars(("N", n), ("Element", ElementWords.Name(element))));
 
     /// <summary>A play's gains in one line: "Amber: Precise Shot — +1 Pyro
     /// Oath (applied)", and the card <paramref name="fang"/> (the relic held:
@@ -795,11 +797,82 @@ public static class VarkaOath
                                   string? fang)
     {
         if (clauses.Count == 0) return string.Empty;
-        var line = string.Join(", ", clauses);
-        if (!string.IsNullOrEmpty(card)) line = $"{card} — {line}";
-        if (!string.IsNullOrEmpty(fang)) line += $". {fang}: Four Winds' Ascension";
+        var line = clauses[0];
+        for (var i = 1; i < clauses.Count; i++)
+        {
+            line = CodeText.Format(GainJoinRow, CodeText.Vars(("Line", line), ("Clause", clauses[i])));
+        }
+        if (!string.IsNullOrEmpty(card))
+        {
+            line = CodeText.Format(GainCardRow, CodeText.Vars(("Card", card), ("Line", line)));
+        }
+        if (!string.IsNullOrEmpty(fang))
+        {
+            line = CodeText.Format(GainFangRow, CodeText.Vars(("Line", line), ("Fang", fang)));
+        }
         return line;
     }
+
+    // ---- THE PLAYER'S WORDS, KEYED (the localization census, 2026-10-23,
+    // step 2). Each line this class hands a player -- the gains said over his
+    // head, the card face's switch, Swirl and Wildfire lines, what a Swirl
+    // pays -- is a row in `card_keywords`, read through `CodeText`: the
+    // numbers are vars off `VarkaLaw`, an element's name its own row
+    // (`ElementWords`), and where two clauses join the join is a row. The
+    // seat's words (`SourceWord`, `PayoutWords`, `TwinGalesPaid`) stay
+    // English. The badge's `PayoutSentence` is its model row's, keyed there.
+    private const string Table = "card_keywords";
+
+    internal static readonly CodeRow GainRow =
+        new(Table, "KLEEMOD-VARKA_OATH_GAIN.other", "+{N} {Element} Oath");
+    internal static readonly CodeRow GainAppliedRow =
+        new(Table, "KLEEMOD-VARKA_OATH_GAIN.applied", "+{N} {Element} Oath (applied)");
+    internal static readonly CodeRow GainSwirlRow =
+        new(Table, "KLEEMOD-VARKA_OATH_GAIN.swirl", "+{N} {Element} Oath (Swirl)");
+    /// <summary>One more gain of the same play, in its list.</summary>
+    internal static readonly CodeRow GainJoinRow =
+        new(Table, "KLEEMOD-VARKA_OATH_GAIN.join", "{Line}, {Clause}");
+    /// <summary>The play's gains, naming the card.</summary>
+    internal static readonly CodeRow GainCardRow =
+        new(Table, "KLEEMOD-VARKA_OATH_GAIN.card", "{Card} — {Line}");
+    /// <summary>The gains, and the Ascension the relic added.</summary>
+    internal static readonly CodeRow GainFangRow =
+        new(Table, "KLEEMOD-VARKA_OATH_GAIN.fang", "{Line}. {Fang}: Four Winds' Ascension");
+
+    internal static readonly CodeRow SwitchRow =
+        new(Table, "KLEEMOD-FACE_VARKA_SWITCH.description", "\n(Makes {Element} current: {Oath} Oath)");
+    internal static readonly CodeRow NoAuraRow =
+        new(Table, "KLEEMOD-FACE_VARKA_SWIRL.no_aura", "\n(no aura: no Swirl)");
+    internal static readonly CodeRow SwirlPaysLineRow =
+        new(Table, "KLEEMOD-FACE_VARKA_SWIRL.pays", "\n({Pays})");
+    internal static readonly CodeRow WildfireRow =
+        new(Table, "KLEEMOD-FACE_VARKA_WILDFIRE.description", "\n(Wildfire Oath deals {Damage})");
+
+    /// <summary>What his Swirl pays in each element (<see cref="SwirlPays"/>).</summary>
+    internal static CodeRow? PaysRow(Element element) => element switch
+    {
+        Element.Pyro => new(Table, "KLEEMOD-VARKA_SWIRL_PAYS.PYRO", "Swirl pays {Element}: {Damage} damage"),
+        Element.Hydro => new(Table, "KLEEMOD-VARKA_SWIRL_PAYS.HYDRO", "Swirl pays {Element}: {Block} Block"),
+        Element.Cryo => new(Table, "KLEEMOD-VARKA_SWIRL_PAYS.CRYO",
+                            "Swirl pays {Element}: {Vulnerable} Vulnerable"),
+        Element.Electro => new(Table, "KLEEMOD-VARKA_SWIRL_PAYS.ELECTRO",
+                               "Swirl pays {Element}: {Damage} damage to ALL"),
+        _ => null,
+    };
+
+    /// <summary>A Swirl that pays over: twice, or N times.</summary>
+    internal static readonly CodeRow PaysTwiceRow =
+        new(Table, "KLEEMOD-VARKA_SWIRL_PAYS.twice", "{Pays}, twice");
+    internal static readonly CodeRow PaysTimesRow =
+        new(Table, "KLEEMOD-VARKA_SWIRL_PAYS.times", "{Pays}, {Times} times");
+
+    /// <summary>Every row of his (<see cref="CodeText.Sources"/>).</summary>
+    public static IEnumerable<CodeRow> TextRows() =>
+        new[]
+        {
+            GainRow, GainAppliedRow, GainSwirlRow, GainJoinRow, GainCardRow, GainFangRow,
+            SwitchRow, NoAuraRow, SwirlPaysLineRow, WildfireRow, PaysTwiceRow, PaysTimesRow,
+        }.Concat(VarkaOathLedger.Elements.Select(e => PaysRow(e)!));
 
     private static string Safe(Func<string?> read)
     {
@@ -1014,15 +1087,19 @@ public static class VarkaOath
     /// </summary>
     public static string SwirlPays(Element current, int times)
     {
-        var effect = PayoutEffect(current);
-        if (effect.Length == 0 || times <= 0) return string.Empty;
-        var over = times switch
+        if (PaysRow(current) is not { } row || times <= 0) return string.Empty;
+        var pays = CodeText.Format(row, CodeText.Vars(
+            ("Element", ElementWords.Name(current)),
+            ("Damage", current == Element.Electro ? VarkaLaw.SwirlElectroDamageAll
+                                                  : VarkaLaw.SwirlPyroDamage),
+            ("Block", VarkaLaw.SwirlHydroBlock),
+            ("Vulnerable", VarkaLaw.SwirlCryoVulnerable)));
+        return times switch
         {
-            1 => "",
-            2 => ", twice",
-            _ => $", {times} times",
+            1 => pays,
+            2 => CodeText.Format(PaysTwiceRow, CodeText.Vars(("Pays", pays))),
+            _ => CodeText.Format(PaysTimesRow, CodeText.Vars(("Pays", pays), ("Times", times))),
         };
-        return $"Swirl pays {current}: {effect}{over}";
     }
 
     /// <summary>
@@ -1221,7 +1298,8 @@ public static class VarkaOath
     /// <summary>The line itself, a line break then "(Makes Pyro current:
     /// 3 Oath)". PURE.</summary>
     public static string SwitchWords(Element element, int oath) =>
-        $"\n(Makes {element} current: {oath} Oath)";
+        CodeText.Format(SwitchRow, CodeText.Vars(
+            ("Element", ElementWords.Name(element)), ("Oath", oath)));
 
     /// <summary>
     /// THE SWIRL LINE (Varka round 5, 2026-10-13, "What to change" 1: "Swirl
@@ -1266,10 +1344,12 @@ public static class VarkaOath
     /// Swirl)" as before. Empty with an aura and nothing paid. PURE.
     /// </summary>
     public static string SwirlWords(bool aura, string pays) =>
-        !aura ? NoAuraToSwirl : pays.Length > 0 ? $"\n({pays})" : "";
+        !aura ? NoAuraToSwirl
+        : pays.Length > 0 ? CodeText.Format(SwirlPaysLineRow, CodeText.Vars(("Pays", pays)))
+        : "";
 
     /// <summary><see cref="SwirlWords"/>' line.</summary>
-    public const string NoAuraToSwirl = "\n(no aura: no Swirl)";
+    public static string NoAuraToSwirl => CodeText.Format(NoAuraRow);
 
     /// <summary>
     /// WILDFIRE OATH'S PREVIEW (BACKLOG: "Wildfire Oath's damage has no
@@ -1312,7 +1392,7 @@ public static class VarkaOath
     /// <summary>The line itself, "(Wildfire Oath deals 5)", or empty for 0.
     /// PURE.</summary>
     public static string WildfireWords(int damage) =>
-        damage > 0 ? $"\n(Wildfire Oath deals {damage})" : "";
+        damage > 0 ? CodeText.Format(WildfireRow, CodeText.Vars(("Damage", damage))) : "";
 
     /// <summary>The payout sentence for <paramref name="element"/>, the one
     /// the badge and the current-element tip print. PURE.</summary>

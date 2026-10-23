@@ -227,6 +227,67 @@ public class CodeTextTests
         Assert.Equal(before["chart:button"], Label("ButtonTipRow"));
     }
 
+    // ---- step 2: Varka and Furina, and the reaction riders --------------------
+
+    [Fact]
+    public void Every_step_2_line_renders_the_same_from_its_rows()
+    {
+        // The face lines, Oath gains, Stage lines, counters, forecast and
+        // reaction riders, each over the inputs that reach its branches
+        // (`CodeTextStep2Cases`), against the English dumped off main
+        // 2b5f235b1.
+        var before = Before();
+        var cases = CodeTextStep2Cases.All(KleeCardTooltips.SetOffFirstBody, KleeCardTooltips.FoldedHereBody,
+                                           KleeCardTooltips.FoldedElsewhereBody, KleeCardTooltips.WithBoot)
+            .ToList();
+        Assert.Equal(before.Keys.Count(k => k.StartsWith("s2:")), cases.Count);
+        foreach (var (key, render) in cases)
+        {
+            Assert.True(before.ContainsKey(key), key);
+            Assert.Equal(before[key], render());
+        }
+    }
+
+    [Fact]
+    public void A_step_2_surface_builds_no_english_of_its_own()
+    {
+        // The methods the rows replaced print no English literal any more:
+        // every sentence they hand a player is a row. A one-word literal is a
+        // var's name or an identifier the cards pass (the Repay floor's
+        // `PayBlock`, a cue target `random_aura`), never printed; a line
+        // break between list lines is layout.
+        var surfaces = new (Type Type, string[] Methods)[]
+        {
+            (typeof(VarkaOath), new[] { "SwitchWords", "SwirlWords", "WildfireWords", "SwirlPays",
+                                        "GainClause", "GainLine" }),
+            (typeof(FurinaStageBowPreview), new[] { "Line" }),
+            (typeof(FurinaStageFacePreview), new[] { "DrainTag", "SplitTag", "DrainBlock", "BlockFrom",
+                                                     "LostThisCombatWords", "SpendUpToHitsWords", "Line" }),
+            (typeof(Vfx.DrainedCounter), new[] { "BufferSentence", "DrainedPhrase", "HoverBody",
+                                                 "ReturnsLine", "ComingLines" }),
+            (typeof(Vfx.FanfareCounter), new[] { "HoverBody" }),
+            (typeof(Vfx.FurinaStageCues), new[] { "ForecastLine" }),
+            (typeof(HalfHpFace), new[] { "Words" }),
+            (typeof(SwirlAuraFace), new[] { "Words" }),
+            (typeof(KleeCardTooltips), new[] { "OverriddenElementBody", "AmplifiedBody", "FrozenArtifactBody",
+                                               "DebuffArtifactSentence", "NoHitBody", "SwirlPreviewBody",
+                                               "SpendOnly" }),
+        };
+        var checkedMethods = 0;
+        foreach (var (type, methods) in surfaces)
+        {
+            foreach (var method in type.GetMethods(Any).Where(m => methods.Contains(m.Name)))
+            {
+                checkedMethods++;
+                var literals = Il.Strings(method)
+                    .Where(s => s != "\n" && !System.Text.RegularExpressions.Regex.IsMatch(s, "^[A-Za-z_]*$"))
+                    .ToList();
+                Assert.True(literals.Count == 0, $"{type.Name}.{method.Name}: {string.Join(" | ", literals)}");
+            }
+        }
+        Assert.True(checkedMethods >= 30, checkedMethods.ToString());
+    }
+
     // ---- the mechanism ---------------------------------------------------------
 
     [Fact]
