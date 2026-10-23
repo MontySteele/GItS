@@ -71,6 +71,6 @@ public sealed class ProtoYmRoyalties : CustomCardModel, ICharacterCard
 
     protected override void OnUpgrade()
     {
-        EnergyCost.UpgradeBy(-1);
+        DynamicVars["YmAmount"].UpgradeValueBy(1m);
     }
 }

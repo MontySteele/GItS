@@ -102,8 +102,8 @@ def test_the_eleven_are_cut_and_the_eleven_added_pool_78():
         assert "proto_ym_" + name not in ids, name
     rows = [c for c in loader.prototype_cards()
             if c.id.startswith(Y.ID_PREFIX) and c.rarity != "basic"]
-    assert Counter(c.rarity for c in rows) == {"common": 20, "uncommon": 38,
-                                               "rare": 20}
+    assert Counter(c.rarity for c in rows) == {"common": 20, "uncommon": 39,
+                                               "rare": 19}
     for name, rarity in NEW.items():
         assert _card(name).rarity == rarity, name
 

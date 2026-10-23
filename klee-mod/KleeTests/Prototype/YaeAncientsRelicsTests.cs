@@ -91,7 +91,7 @@ public class YaeAncientsRelicsTests : IDisposable
     // ==== sec.1, the rate pass ==============================================
 
     [Fact]
-    public void The_pool_stays_78_at_20_38_20_with_the_two_rarities_swapped()
+    public void The_pool_stays_78_at_20_39_19_with_the_two_rarities_swapped()
     {
         var pool = Il.CallSequence(Il.Method("YaeRoster", "Pool"))
             .Where(c => c.StartsWith("ModelDb.Card<", StringComparison.Ordinal)).ToList();
@@ -102,8 +102,9 @@ public class YaeAncientsRelicsTests : IDisposable
         var rarities = pool.Select(c => c["ModelDb.Card<".Length..^1])
             .Select(n => ((CardModel)Activator.CreateInstance(types[n])!).Rarity).ToList();
         Assert.Equal(20, rarities.Count(r => r == CardRarity.Common));
-        Assert.Equal(38, rarities.Count(r => r == CardRarity.Uncommon));
-        Assert.Equal(20, rarities.Count(r => r == CardRarity.Rare));
+        // Upgrade census (2026-10-23): Sakura Channeling went Uncommon.
+        Assert.Equal(39, rarities.Count(r => r == CardRarity.Uncommon));
+        Assert.Equal(19, rarities.Count(r => r == CardRarity.Rare));
         Assert.Equal(CardRarity.Rare, new ProtoYmEditorialPriority().Rarity);
         Assert.Equal(CardRarity.Uncommon, new ProtoYmMischievousTeasing().Rarity);
     }
