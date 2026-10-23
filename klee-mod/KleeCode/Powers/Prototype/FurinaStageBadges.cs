@@ -116,7 +116,7 @@ public abstract class StagePerformerBadge : PowerModel
         StagePerformer.Neuvillette =>
             "Your [gold]Hydro[/gold] damage deals {LineBonus} additional damage.",
         StagePerformer.Escoffier =>
-            "Your guests' acts deal {LineBonus} more damage.",
+            "Your guests' acts deal {LineBonus} additional damage.",
         _ => null,
     };
 
@@ -145,7 +145,7 @@ public abstract class StagePerformerBadge : PowerModel
             "Act: [gold]Spend[/gold] a third of your [gold]Fanfare[/gold] to "
           + "deal twice that much [gold]Geo[/gold] damage to a random enemy.",
         StagePerformer.Neuvillette =>
-            "Act: deal [gold]Hydro[/gold] damage to ALL enemies equal to HP you "
+            "Act: deal [gold]Hydro[/gold] damage to ALL enemies equal to HP "
           + "lost or [gold]Drained[/gold] since your last turn.",
         StagePerformer.Escoffier =>
             "Act: deal {Act} [gold]Cryo[/gold] damage to ALL enemies.",
