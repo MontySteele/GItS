@@ -136,10 +136,13 @@ public sealed class Kokomi : CustomCharacterModel, IKokomiCharacter
     public override string? CustomEnergyCounterPath =>
         KleePck.Path("kokomi/ui/energy_counter.tscn")
         ?? "res://scenes/combat/energy_counters/ironclad_energy_counter.tscn";
-    // The flying-card trail: the Defect's cyan, the base trail nearest Hydro
-    // (Varka moved off the Ironclad's orange on 2026-10-16).
+    // The flying-card trail: her own scene since 2026-10-23 ([USER]: "Card
+    // trail - can we make our own trails?"), the base trail recoloured to her
+    // card pearl coral (#E89A86) by tools/gen_card_trails.py. The base defect
+    // trail, which she wore before, is the fallback for a pck without it.
     public override string? CustomTrailPath =>
-        "res://scenes/vfx/card_trail_defect.tscn";
+        KleePck.Path("kokomi/vfx/card_trail.tscn")
+        ?? "res://scenes/vfx/card_trail_defect.tscn";
     public override string? CustomMapMarkerPath =>
         KleePck.Path("kokomi/ui/map_marker.png");
     public override string? CustomCharacterSelectBg =>
