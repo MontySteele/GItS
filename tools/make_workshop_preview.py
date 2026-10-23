@@ -5,8 +5,10 @@
     python tools/make_workshop_preview.py --out x.png
 
 Each idle frame sheet (`ImageGen/images/**/model/frames/<id>_idle.png`) is a
-grid of frames, except Kokomi's: her idle's far hand reads as a dark tangle at
-this size, so she stands in her character-select pose from a single still,
+grid of frames, except Kokomi's: she stands in her character-select pose
+from a single still (chosen when her idle's far hand read as a dark tangle
+at this size; kept after the 2026-10-22 idle fix, which brought the idle
+close to the select pose, so the still is no worse and needs no re-pick),
 `kokomi/model/frames/kokomi_preview.png` (char_render/render.py
 `--stills select` at the combat ppu and outline, painted by post.py). The
 first frame is cut out by its alpha and scaled by canon
