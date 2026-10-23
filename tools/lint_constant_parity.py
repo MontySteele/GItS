@@ -424,6 +424,8 @@ _ABYSS_SCREEN_REASON = (
 
 UNMIRRORED: dict[str, str] = {
     "SaveSafety.ProfileCount": "save-file plumbing (Saves/SaveSafety.cs): the game's three profile slots, not a combat rule",
+    "AbyssText.NoAct": "a display sentinel (Abyss/AbyssEntries.cs): the act index a text is read for when no act is known, so the Ley Line lists all three elements; not a combat rule",
+    "ReactionChart.CanvasLayerIndex": "UI layering (Vfx/ReactionChart.cs): the Elemental Reactions chart's canvas layer, above the run's screens; not a combat rule",
     "AbyssOverlayFlow.ResultSeconds": _ABYSS_SCREEN_REASON,
     "AbyssOverlayFlow.FadeSeconds": _ABYSS_SCREEN_REASON,
     "AbyssOverlayView.CardWidth": _ABYSS_SCREEN_REASON,

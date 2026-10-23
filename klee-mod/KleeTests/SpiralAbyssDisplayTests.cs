@@ -51,7 +51,7 @@ public class SpiralAbyssDisplayTests
             // The text is a StringVar, act 1's until the record sets the act
             // the Blessing was taken in (review/active/abyss-act-scaling-2026-10-18.md).
             Assert.Equal("{" + AbyssBlessingRelic.TextVar + "}", loc["description"]);
-            Assert.Equal(AbyssText.Text(b, 0), relic.ShownText);
+            Assert.Equal(AbyssText.Text(b, AbyssText.NoAct), relic.ShownText);
             relic.ShowAct(2);
             Assert.Equal(AbyssText.Text(b, 2), relic.ShownText);
         }
@@ -247,10 +247,10 @@ public class SpiralAbyssDisplayTests
             Assert.Equal(type, AbyssDisplay.PowerTypeFor(power.Shadow));
             var loc = power.Localization!.ToDictionary(r => r.Item1, r => r.Item2);
             Assert.Equal(AbyssText.Name(power.Shadow), loc["title"]);
-            Assert.Equal(AbyssText.Text(power.Shadow, 0), loc["description"]);
+            Assert.Equal(AbyssText.Text(power.Shadow, AbyssText.NoAct), loc["description"]);
             // The live badge's tooltip is the act the Shadow was taken in.
             Assert.Equal("{" + AbyssShadowPower.TextVar + "}", loc["smartDescription"]);
-            Assert.Equal(AbyssText.Text(power.Shadow, 0), power.ShownText);
+            Assert.Equal(AbyssText.Text(power.Shadow, AbyssText.NoAct), power.ShownText);
             power.ShowAct(1);
             Assert.Equal(AbyssText.Text(power.Shadow, 1), power.ShownText);
         }

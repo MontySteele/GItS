@@ -189,6 +189,15 @@ public abstract class AuraPower : PowerModel, ILocalizationProvider
 
     public override PowerStackType StackType => PowerStackType.Counter;
 
+    /// <summary>The aura's badge hovers what it reacts with ([USER],
+    /// 2026-10-22: "it would help to have some way to find them all
+    /// in-game"), the same tip its element's cards carry
+    /// (<see cref="Cards.ReactionTips"/>). Not on a blind seat's page.</summary>
+    protected override IEnumerable<MegaCrit.Sts2.Core.HoverTips.IHoverTip> ExtraHoverTips =>
+        !Cards.TipAudience.Seat && Cards.ReactionTips.For(Element) is { } tip
+            ? new[] { tip }
+            : System.Array.Empty<MegaCrit.Sts2.Core.HoverTips.IHoverTip>();
+
     /// <summary>
     /// Reads the element this play applies. Returns None for untagged damage,
     /// which never reacts.

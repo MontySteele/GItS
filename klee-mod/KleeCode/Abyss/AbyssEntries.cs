@@ -196,14 +196,51 @@ public static class AbyssText
         _ => throw new ArgumentOutOfRangeException(nameof(b)),
     };
 
+    /// <summary>The act index a text is read for when no act is known (the
+    /// compendium, a relic before its run sets it): the numbers take act 1's
+    /// row (<see cref="AbyssNumbers.Row"/>) and "this act's element" lists
+    /// all three.</summary>
+    public const int NoAct = -1;
+
+    /// <summary>
+    /// THE ELEMENT, NAMED ([USER], 2026-10-22: "For the Spiral Abyss Blessing
+    /// 'The Ley Line' - what's this act's element?"). The element of act
+    /// <paramref name="elementAct"/> (<see cref="AbyssElements.ForAct"/>),
+    /// golded; with no act known, the three acts' elements in one line.
+    /// </summary>
+    public static string ActElement(int elementAct) =>
+        elementAct < 0
+            ? "this act's element"
+            : $"[gold]{AbyssElements.ForAct(elementAct)}[/gold]";
+
+    /// <summary>"[gold]Hydro[/gold] in act 1, [gold]Pyro[/gold] in act 2,
+    /// [gold]Electro[/gold] in act 3." from <see cref="AbyssElements.Table"/>.</summary>
+    public static string ElementsByAct()
+    {
+        var parts = new List<string>();
+        for (var i = 0; i < AbyssElements.Table.Count; i++)
+        {
+            parts.Add($"[gold]{AbyssElements.Table[i]}[/gold] in act {i + 1}");
+        }
+        return string.Join(", ", parts) + ".";
+    }
+
     /// <summary>A Blessing's text for one act: the numbers are the ones for
     /// <paramref name="act"/>, the act it is offered or was taken in
-    /// (<see cref="AbyssNumbers"/>), so the text prints one number.</summary>
-    public static string Text(AbyssBlessing b, int act) => b switch
+    /// (<see cref="AbyssNumbers"/>), so the text prints one number.
+    /// <paramref name="elementAct"/> is the act whose element The Ley Line
+    /// names: the act being played, which for a Blessing held since an
+    /// earlier act is not the act it was taken in (its effect reads
+    /// <c>SpiralAbyss.CurrentAct</c>). Left out, it is <paramref name="act"/>;
+    /// <see cref="NoAct"/> names all three.</summary>
+    public static string Text(AbyssBlessing b, int act, int? elementAct = null) => b switch
     {
-        AbyssBlessing.LeyLine =>
-            "Each enemy turn, every enemy without an aura takes this act's element. "
-          + $"An enemy wearing an aura deals {AbyssNumbers.LeyLineDamageReduction} less damage.",
+        AbyssBlessing.LeyLine => (elementAct ?? act) < 0
+            ? "Each enemy turn, every enemy without an aura takes this act's element. "
+              + $"An enemy wearing an aura deals {AbyssNumbers.LeyLineDamageReduction} less damage. "
+              + "The element is " + ElementsByAct()
+            : $"Each enemy turn, every enemy without an aura takes {ActElement(elementAct ?? act)}. "
+              + $"An enemy wearing an aura deals {AbyssNumbers.LeyLineDamageReduction} less damage.",
         AbyssBlessing.AbyssalMoon =>
             $"Every third card you play in a turn deals {AbyssNumbers.AbyssalMoonDamage(act)} damage to ALL enemies.",
         AbyssBlessing.MoonlitRest => $"Heal {AbyssNumbers.MoonlitRestHeal(act)} HP at the end of each combat.",
@@ -248,18 +285,24 @@ public static class AbyssText
         _ => throw new ArgumentOutOfRangeException(nameof(s)),
     };
 
-    /// <summary>A Shadow's text for one act, on <see cref="Text(AbyssBlessing, int)"/>'s
-    /// terms.</summary>
-    public static string Text(AbyssShadow s, int act) => s switch
+    /// <summary>A Shadow's text for one act, on <see cref="Text(AbyssBlessing, int, int?)"/>'s
+    /// terms: <paramref name="elementAct"/> is the act whose element Abyss
+    /// Mage Shield names.</summary>
+    public static string Text(AbyssShadow s, int act, int? elementAct = null) => s switch
     {
         AbyssShadow.Clock =>
             $"From turn {AbyssNumbers.ClockFromRound}, every enemy gains {AbyssNumbers.ClockStrength(act)} Strength at the start of its turn.",
         // 2026-10-18 (review/active/abyss-act-scaling-2026-10-18.md): 6 hits,
         // and the counter element removes 3 rather than breaking it.
-        AbyssShadow.MageShield =>
-            $"Elites enter combat with a shield of this act's element, {AbyssNumbers.MageShieldHits} hits deep, "
-          + $"that stops all damage. A hit removes {AbyssNumbers.MageShieldPerHit}. "
-          + $"A reaction or a counter-element hit removes {AbyssNumbers.MageShieldPerReaction}.",
+        AbyssShadow.MageShield => (elementAct ?? act) < 0
+            ? $"Elites enter combat with a shield of this act's element, {AbyssNumbers.MageShieldHits} hits deep, "
+              + $"that stops all damage. A hit removes {AbyssNumbers.MageShieldPerHit}. "
+              + $"A reaction or a counter-element hit removes {AbyssNumbers.MageShieldPerReaction}. "
+              + "Shields are " + ElementsByAct()
+            : $"Elites enter combat with a shield of {ActElement(elementAct ?? act)}, {AbyssNumbers.MageShieldHits} hits deep, "
+              + $"that stops all damage. A hit removes {AbyssNumbers.MageShieldPerHit}. "
+              + $"A reaction or a [gold]{AbyssElements.CounterOf(AbyssElements.ForAct(elementAct ?? act))}[/gold] hit "
+              + $"removes {AbyssNumbers.MageShieldPerReaction}.",
         AbyssShadow.SheerCold => $"If you end your turn with no Block, lose {AbyssNumbers.SheerColdHpLoss(act)} HP.",
         // 2026-10-18: once per turn, so a multi-hit attack adds one Burn.
         AbyssShadow.ElementalMark =>

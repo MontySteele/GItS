@@ -116,10 +116,10 @@ public static class AbyssDisplay
 
     /// <summary>The Abyss Shadows relic's list: each Shadow with the act it
     /// was taken in, whose numbers its text prints.</summary>
-    public static string ShadowsText(IEnumerable<(AbyssShadow Shadow, int Act)> shadows)
+    public static string ShadowsText(IEnumerable<(AbyssShadow Shadow, int Act)> shadows, int? elementAct = null)
     {
         var lines = shadows.Where(e => e.Shadow != AbyssShadow.None)
-            .Select(e => $"[gold]{AbyssText.Name(e.Shadow)}[/gold]: {AbyssText.Text(e.Shadow, e.Act)}")
+            .Select(e => $"[gold]{AbyssText.Name(e.Shadow)}[/gold]: {AbyssText.Text(e.Shadow, e.Act, elementAct ?? AbyssText.NoAct)}")
             .ToList();
         return lines.Count == 0 ? "None yet." : string.Join("\n", lines);
     }
@@ -231,16 +231,16 @@ public static class AbyssDisplay
         if (NeedsShadowsRelic(record.Shadows, player.Relics))
         {
             var relic = (AbyssShadowsRelic)ModelDb.Relic<AbyssShadowsRelic>().ToMutable();
-            relic.SetShadows(shadows, record);
+            relic.SetShadows(shadows, record, act);
             await RelicCmd.Obtain(relic, player);
         }
 
         foreach (var shown in player.Relics.OfType<AbyssShadowsRelic>())
         {
-            shown.SetShadows(shadows, record);
+            shown.SetShadows(shadows, record, act);
         }
 
-        RefreshTexts(player, record);
+        RefreshTexts(player, record, act);
     }
 
     /// <summary>
@@ -251,15 +251,15 @@ public static class AbyssDisplay
     /// the run's record, not the relic), so the modifier also calls this on
     /// every room, not only after a pick.
     /// </summary>
-    public static void RefreshTexts(Player player, AbyssRecord record)
+    public static void RefreshTexts(Player player, AbyssRecord record, int? currentAct = null)
     {
         foreach (var relic in player.Relics.OfType<AbyssBlessingRelic>())
         {
-            relic.ShowAct(record.ActTaken(relic.Blessing));
+            relic.ShowAct(record.ActTaken(relic.Blessing), currentAct);
         }
         foreach (var shown in player.Relics.OfType<AbyssShadowsRelic>())
         {
-            shown.SetShadows(shown.Shadows.ToList(), record);
+            shown.SetShadows(shown.Shadows.ToList(), record, currentAct);
         }
     }
 
@@ -270,7 +270,8 @@ public static class AbyssDisplay
     /// <c>PowerModel.ApplyInternal</c> (see <see cref="AbyssShadowPower"/>),
     /// so no hook hears it.
     /// </summary>
-    public static void ShowShadows(Creature creature, IEnumerable<AbyssShadow> inForce, AbyssRecord record)
+    public static void ShowShadows(Creature creature, IEnumerable<AbyssShadow> inForce, AbyssRecord record,
+                                   int? currentAct = null)
     {
         if (!creature.IsAlive || !creature.CanReceivePowers) return;
         var missing = ShadowsToShow(creature.Side == CombatSide.Enemy, creature.IsPlayer, inForce, creature.Powers);
@@ -278,7 +279,7 @@ public static class AbyssDisplay
         {
             // The badge prints the number of the act the Shadow was taken in.
             var badge = (AbyssShadowPower)ShadowPower(shadow).ToMutable();
-            badge.ShowAct(record.ActTaken(shadow));
+            badge.ShowAct(record.ActTaken(shadow), currentAct);
             badge.ApplyInternal(creature, 1m, silent: true);
         }
     }

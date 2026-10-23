@@ -2488,7 +2488,7 @@ class Census:
                 ev = EnumVal(enum, member)
                 env = {"b": ev, "s": ev}
                 name = self._overload(ci, "Name", env)
-                vs = [clean(to_text(self._overload(ci, "Text", {**env, "act": a}))) for a in range(3)]
+                vs = [clean(to_text(self._overload(ci, "Text", {**env, "act": a, "elementAct": a}))) for a in range(3)]
                 dur = ""
                 if durations:
                     d = self._overload(durations[0], "Of", env)

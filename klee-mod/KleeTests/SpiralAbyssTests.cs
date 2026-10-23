@@ -53,9 +53,17 @@ public class SpiralAbyssTests
                 RepoRoot(), "review", "active", "abyss-act-scaling-2026-10-18.md"))
             .Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries));
         var rewritten = new[] { AbyssShadow.Riptide, AbyssShadow.ElementalMark, AbyssShadow.MageShield };
+        // The two that print the act's element name it since 2026-10-22
+        // ([USER]: "For the Spiral Abyss Blessing 'The Ley Line' - what's
+        // this act's element?"); the papers' words are those texts with the
+        // element unnamed.
+        static string Unnamed(string text) => text
+            .Replace("takes [gold]Hydro[/gold].", "takes this act's element.")
+            .Replace("a shield of [gold]Hydro[/gold],", "a shield of this act's element,")
+            .Replace("a [gold]Cryo[/gold] hit", "a counter-element hit");
         foreach (var b in AbyssDraft.AllBlessings)
         {
-            Assert.Contains($"**{AbyssText.Name(b)}** | {AbyssText.Text(b, 0)} |", papers);
+            Assert.Contains($"**{AbyssText.Name(b)}** | {Unnamed(AbyssText.Text(b, 0))} |", papers);
         }
         foreach (var s in AbyssDraft.AllShadows.Except(rewritten))
         {
@@ -63,7 +71,7 @@ public class SpiralAbyssTests
         }
         foreach (var s in rewritten)
         {
-            var text = AbyssText.Text(s, 0);
+            var text = Unnamed(AbyssText.Text(s, 0));
             if (s == AbyssShadow.Riptide)
             {
                 text = text.Replace($"up to {AbyssNumbers.RiptideCap(0)} times", "up to N times");
