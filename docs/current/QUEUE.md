@@ -29,9 +29,9 @@ Found while clearing `BACKLOG.md`; each is a rule or text call on a kit.
    (a, default) take the new floors. (b) keep the old ones.
 
 Moved here from the backlog, yours by nature: the writing review before the
-public launch; Yae's card-trail colour (she borrows the Ironclad's orange);
-"Witch's Homework" and "Witch's Homework II" read alike; listen for the
-modded death sound (`set_hp player 1`); the shop portrait idles.
+public launch; "Witch's Homework" and "Witch's Homework II" read alike;
+listen for the modded death sound (`set_hp player 1`); the shop portrait
+idles.
 
 ## Eyes-on looks (materials ready; no build waits on them)
 

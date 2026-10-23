@@ -105,8 +105,14 @@ public sealed class Yae : CustomCharacterModel, IYaeCharacter
     public override string? CustomEnergyCounterPath =>
         KleePck.Path("yae/ui/energy_counter.tscn")
         ?? "res://scenes/combat/energy_counters/ironclad_energy_counter.tscn";
+    // The flying-card trail. She borrowed the Ironclad's orange fire until
+    // 2026-10-23 ([USER]: "ideally they should match the color coding of the
+    // rest of the character kit"). No base trail is violet; the Necrobinder's
+    // hot pink (outer line 1, 0.13, 0.29, magenta-pink sparks) is the one
+    // nearest her Sakura pink and lilac (Varka and Kokomi left the orange for
+    // the Defect's cyan on 2026-10-16).
     public override string? CustomTrailPath =>
-        "res://scenes/vfx/card_trail_ironclad.tscn";
+        "res://scenes/vfx/card_trail_necrobinder.tscn";
     public override string? CustomMapMarkerPath =>
         KleePck.Path("yae/ui/map_marker.png");
     public override string? CustomCharacterSelectBg =>

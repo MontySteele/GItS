@@ -18,7 +18,7 @@ import json
 
 import pytest
 
-from understudy import blindplay, blindplay_board
+from understudy import blindplay, blindplay_board, blindplay_render
 from tier0.tests.test_varka_seat_page import RECORDED_COMBAT, _status
 
 
@@ -88,16 +88,20 @@ def _block(page: str) -> list[str]:
     return body.splitlines()
 
 
-def test_the_page_prints_every_sakura_oldest_first():
+def test_the_page_prints_every_sakura_most_turns_left_first():
+    # The user, 2026-10-23: "the one closest to expiry is at the end", as
+    # her display draws them. The badge numbers (1 the oldest) still say
+    # the order they act in.
     lines = _block(blindplay.observe(yae_state()))
-    assert lines[0] == ("- Sakura: 3 of 3. At the end of your turn each "
-                        "acts, oldest first.")
-    assert lines[1] == ("- Sakura 1: Sakura, Level 3 (planted at 3), strikes "
-                        "an enemy for 7, 1 turn left.")
+    assert lines[0] == ("- Sakura: 3 of 3. Listed below (most turns left "
+                        "first). At the end of your turn each acts, oldest "
+                        "first (Sakura 1 is the oldest).")
+    assert lines[1] == ("- Sakura 3: Sakura, Level 1 (planted at 1), strikes "
+                        "an enemy for 3, 3 turns left.")
     assert lines[2] == ("- Sakura 2: Sakura, Level 2 (planted at 2), strikes "
                         "an enemy for 5, 2 turns left.")
-    assert lines[3] == ("- Sakura 3: Sakura, Level 1 (planted at 1), strikes "
-                        "an enemy for 3, 3 turns left.")
+    assert lines[3] == ("- Sakura 1: Sakura, Level 3 (planted at 3), strikes "
+                        "an enemy for 7, 1 turn left.")
     # Review r3: full, so the next plant makes the oldest act first.
     # Yae review r5, item 5: the hover's sentences.
     # The Sakura Levels paper (2026-10-17): Levels carry over on a replace.
@@ -211,10 +215,13 @@ def test_sakura_channeling_raises_the_count_lines_cap():
     state["player"]["status"].append(_status(
         "Sakura Channeling", "You can have 2 more Sakura.", 2, "Counter"))
     lines = _block(blindplay.observe(state))
-    assert lines[0] == ("- Sakura: 4 of 5. At the end of your turn each "
-                        "acts, oldest first.")
-    assert lines[4] == ("- Sakura 4: Sakura, Level 1 (planted at 1), strikes "
+    assert lines[0] == ("- Sakura: 4 of 5. Listed below (most turns left "
+                        "first). At the end of your turn each acts, oldest "
+                        "first (Sakura 1 is the oldest).")
+    # All tied on turns: the newest first, the oldest last.
+    assert lines[1] == ("- Sakura 4: Sakura, Level 1 (planted at 1), strikes "
                         "an enemy for 3, 3 turns left.")
+    assert lines[4].startswith("- Sakura 1: ")
     assert not any(line.startswith("- Shrine full") for line in lines)
 
 
@@ -224,11 +231,11 @@ def test_each_sakura_shows_its_kind_and_where_its_levels_came_from():
     state = yae_state(badges=((1, 5, 6, 2, "", "Foxfire Sakura", 2),
                               (2, 3, 5, 3, "", "Kitsune Sakura", 1)))
     lines = _block(blindplay.observe(state))
-    assert lines[1] == ("- Sakura 1: Foxfire Sakura, Level 5 (planted at 2, "
+    assert lines[1] == ("- Sakura 2: Kitsune Sakura, Level 3 (planted at 1, "
+                        "+2 since), gives you 5 Block, 3 turns left.")
+    assert lines[2] == ("- Sakura 1: Foxfire Sakura, Level 5 (planted at 2, "
                         "+3 since), hits ALL enemies for 6 each, 2 turns "
                         "left.")
-    assert lines[2] == ("- Sakura 2: Kitsune Sakura, Level 3 (planted at 1, "
-                        "+2 since), gives you 5 Block, 3 turns left.")
 
 
 def test_a_published_card_shows_its_stack_beside_its_title():
@@ -300,3 +307,19 @@ def test_no_edits_line_when_the_wire_does_not_carry_the_count():
             state["player"]["yae_shrine"] = raw
         lines = _block(blindplay.observe(state))
         assert not any("Edited this combat" in line for line in lines)
+
+
+# ---- the display order (the user, 2026-10-23) ------------------------------
+
+def test_the_rows_follow_the_display_deadline_first_then_turns_then_newest():
+    rows = [{"slot": 1, "turns": 3, "annotations": []},
+            {"slot": 2, "turns": 3, "annotations": ["Deadline Extension"]},
+            {"slot": 3, "turns": 3, "annotations": []},
+            {"slot": 4, "turns": 1, "annotations": []}]
+    shown = blindplay_render.most_turns_left_first(rows)
+    assert [r["slot"] for r in shown] == [2, 3, 1, 4]
+    # The last row is the one a full-shrine plant reaches.
+    assert shown[-1] is blindplay_render.next_to_wither(rows)
+    # A row with no turns (an older badge) keeps the oldest-first order.
+    old = [{"slot": 1, "turns": None}, {"slot": 2, "turns": 3}]
+    assert blindplay_render.most_turns_left_first(old) == old

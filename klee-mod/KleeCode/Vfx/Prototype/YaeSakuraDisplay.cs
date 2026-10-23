@@ -40,7 +40,13 @@ public enum YaeSlotPreview
 }
 
 /// <summary>One shrine slot as the display draws it. PURE.</summary>
-/// <param name="Slot">0 for the oldest, as the badges count.</param>
+/// <param name="Slot">Its place in the row, 0 at the left. The standing
+/// Sakura come first, the most turns left first and the one closest to
+/// withering last (the user, 2026-10-23); the empty slots follow.</param>
+/// <param name="Index">Which Sakura it draws: its place in the planting
+/// order (<see cref="YaeShrineLedger.Standing"/>, 0 for the oldest), the
+/// number its badge counts (<see cref="SakuraBadgePower.Slot"/>); -1 on an
+/// empty slot.</param>
 /// <param name="Empty">No Sakura stands here.</param>
 /// <param name="Pips">Turns left drawn as pips (0 to 3); 0 when
 /// <paramref name="TurnsText"/> is drawn instead.</param>
@@ -49,7 +55,7 @@ public enum YaeSlotPreview
 /// <param name="Marks">Its Annotations, in the order written.</param>
 /// <param name="Oldest">Outlined: the oldest acts first.</param>
 public readonly record struct YaeSakuraSlotView(
-    int Slot, bool Empty, YaeSakuraKind Kind, int Level, int Pips,
+    int Slot, int Index, bool Empty, YaeSakuraKind Kind, int Level, int Pips,
     string? TurnsText, bool Infinite, IReadOnlyList<YaeAnnotation> Marks,
     bool Oldest, YaeSlotPreview Preview);
 
@@ -106,34 +112,58 @@ public static class YaeSakuraSlots
     }
 
     /// <summary>
-    /// The row: the standing Sakura oldest first, then the empty slots.
-    /// <paramref name="eternal"/>: Eternity is on her. <paramref name="preview"/>:
-    /// a planting card's per-slot preview (<see cref="Preview"/>), or null.
-    /// PURE.
+    /// The order the row draws the standing Sakura in, as planting-order
+    /// indices: <see cref="YaeShrineLedger.WitherOrderOf"/> backwards, so the
+    /// Sakura that withers last (Deadline Extension, then the most turns
+    /// left, the newest on a tie: <see cref="YaeShrineLedger.LastToWither"/>,
+    /// which Dawn Prayer and every "most turns left" card reach) is first,
+    /// and the one closest to withering (<see cref="YaeShrineLedger.NextToWither"/>,
+    /// which a full-shrine plant reaches) is at the end. The user,
+    /// 2026-10-23: "the player-facing UI should order the Sakura so the one
+    /// closest to expiry is at the end." DISPLAY ONLY: the Sakura still act
+    /// oldest first. PURE.
+    /// </summary>
+    public static IReadOnlyList<int> DisplayOrder(IReadOnlyList<YaeSakura> standing)
+    {
+        var index = new Dictionary<YaeSakura, int>(ReferenceEqualityComparer.Instance);
+        for (var i = 0; i < standing.Count; i++) index[standing[i]] = i;
+        return YaeShrineLedger.WitherOrderOf(standing).Reverse()
+            .Select(s => index[s]).ToList();
+    }
+
+    /// <summary>
+    /// The row: the standing Sakura in <see cref="DisplayOrder"/>, then the
+    /// empty slots. <paramref name="eternal"/>: Eternity is on her.
+    /// <paramref name="preview"/>: a planting card's preview (<see cref="Preview"/>,
+    /// one entry per planting-order index, the empty slots after), or null;
+    /// each slot takes its own Sakura's entry. PURE.
     /// </summary>
     public static IReadOnlyList<YaeSakuraSlotView> Slots(
         IReadOnlyList<YaeSakura> standing, int cap, bool eternal,
         IReadOnlyList<YaeSlotPreview>? preview = null)
     {
         var n = SlotCount(standing.Count, cap);
+        var order = DisplayOrder(standing);
         var slots = new List<YaeSakuraSlotView>(n);
         for (var i = 0; i < n; i++)
         {
-            var shown = preview != null && i < preview.Count
-                ? preview[i] : YaeSlotPreview.None;
+            // Planting-order index; an empty slot keeps its own place.
+            var at = i < standing.Count ? order[i] : i;
+            var shown = preview != null && at < preview.Count
+                ? preview[at] : YaeSlotPreview.None;
             if (i >= standing.Count)
             {
                 slots.Add(new YaeSakuraSlotView(
-                    i, true, YaeSakuraKind.Thunder, 0, 0, null, false,
+                    i, -1, true, YaeSakuraKind.Thunder, 0, 0, null, false,
                     Array.Empty<YaeAnnotation>(), false, shown));
                 continue;
             }
-            var s = standing[i];
+            var s = standing[at];
             var (pips, text, infinite) = Turns(
                 s.TurnsLeft, eternal || s.Has(YaeAnnotation.DeadlineExtension));
             slots.Add(new YaeSakuraSlotView(
-                i, false, s.Kind, s.Level, pips, text, infinite,
-                s.Annotations.ToList(), i == 0, shown));
+                i, at, false, s.Kind, s.Level, pips, text, infinite,
+                s.Annotations.ToList(), at == 0, shown));
         }
         return slots;
     }
@@ -167,7 +197,9 @@ public static class YaeSakuraSlots
     /// a full shrine, the Sakura closest to withering
     /// (<see cref="YaeShrineLedger.WithersSooner"/>) is refreshed by its own
     /// kind or replaced by another. Replanting replaces the oldest first.
-    /// One entry per slot (<see cref="SlotCount"/>). PURE.
+    /// One entry per planting-order index, then the empty slots
+    /// (<see cref="SlotCount"/>); <see cref="Slots"/> lays each on the slot
+    /// that draws its Sakura. PURE.
     /// </summary>
     public static IReadOnlyList<YaeSlotPreview> Preview(
         IReadOnlyList<YaeSakura> standing, int cap, YaePlantShape shape,
@@ -292,6 +324,14 @@ public static class YaeSakuraSlots
 /// Hovering a planting card previews it: 'refreshes this Sakura' or
 /// 'replaces this Sakura'. Hover on a slot gives the one-line rules."
 ///
+/// ORDER (the user, 2026-10-23): "the player-facing UI should order the
+/// Sakura so the one closest to expiry is at the end." The most turns left
+/// first (<see cref="YaeSakuraSlots.DisplayOrder"/>), so the Sakura Dawn
+/// Prayer reaches is always the first slot and its tie-break shows. Display
+/// only: they still act oldest first, and the outline still marks the
+/// oldest wherever it stands. Each slot carries the Sakura it draws
+/// (<c>SakuraMeta</c>) for its hover and its badge's tips.
+///
 /// WHERE: over her head, a child of her <c>NCreature</c>, placed off the
 /// hitbox at every paint -- the spot Furina's stage cues take over a body
 /// (<see cref="FurinaStageCueNodes"/>), and where the base game's Defect
@@ -327,6 +367,11 @@ public static class YaeSakuraDisplay
     private const float PipSide = 8f;
 
     private const string SlotMeta = "kleemod_yae_slot";
+
+    /// <summary>Which Sakura the slot draws this paint (its planting-order
+    /// index, -1 when empty): the row's places follow the turns left, so a
+    /// slot's Sakura can change from one paint to the next.</summary>
+    private const string SakuraMeta = "kleemod_yae_slot_sakura";
     private const string HoverShownMeta = "kleemod_yae_slot_hover_shown";
 
     private static readonly Color SlotFill = new(0.09f, 0.08f, 0.14f, 0.88f);
@@ -493,6 +538,7 @@ public static class YaeSakuraDisplay
             var slot = row.GetNodeOrNull<Control>("Slot" + i) ?? BuildSlot(row, i);
             slot.Visible = true;
             slot.Position = new Vector2(i * (SlotSide + SlotGap), 0f);
+            slot.SetMeta(SakuraMeta, slots[i].Index);
             PaintSlot(slot, slots[i]);
         }
         // A cap that fell (never in practice) hides the extra slots.
@@ -743,18 +789,19 @@ public static class YaeSakuraDisplay
     {
         try
         {
-            if (_seat is not { } yae || !slot.HasMeta(SlotMeta)) return;
+            if (_seat is not { } yae || !slot.HasMeta(SakuraMeta)) return;
             ClearHover(slot);
-            var index = slot.GetMeta(SlotMeta).AsInt32();
+            // The Sakura this slot draws, not its place in the row.
+            var index = slot.GetMeta(SakuraMeta).AsInt32();
             var standing = YaeShrineLedger.For(yae).Count;
             var title = new LocString(Cards.ArmKeywordTips.KeywordTable,
                                       YaeSakuraSlots.SlotTitleKey + ".title");
             var tips = new List<IHoverTip>
             {
-                new HoverTip(title, index < standing
+                new HoverTip(title, index >= 0 && index < standing
                     ? YaeSakuraSlots.RulesLine : YaeSakuraSlots.EmptyLine),
             };
-            if (index < standing
+            if (index >= 0 && index < standing
                 && yae.Powers.OfType<SakuraBadgePower>()
                     .FirstOrDefault(b => b.Slot == index) is { } badge)
             {

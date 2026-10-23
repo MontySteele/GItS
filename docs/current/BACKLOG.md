@@ -27,7 +27,6 @@ cut to about 350 characters is `git show 3ce4f8c35:docs/current/BACKLOG.md`.
 - Furina's Archaic Tooth: All the World's a Stage+ replaces Rising Applause+ and must keep its Retain ([USER], 2026-10-19: "the Ancient card should keep Retain as long as the starter does"; `furina-next`).
 - Furina's starter, Rising Applause, stays unchanged for now ([USER], 2026-10-19); the HP-legibility build adds a telemetry field (a Rising Applause Spend with another Spend card in hand) so her next round can say whether it drains banks a payoff would have used.
 - Furina: whether a guest's act ends a Frozen is not printed; needs the game (Frozen itself prints since 2026-10-19).
-- Yae: Dawn Prayer's "newest" lands on Twin Sakura's Kitsune, an order the page never shows.
 - Upgrades that only cut cost or add Innate: at Furina's and Yae's next card passes, count their cost-only and Innate-only upgrades against the base five and replace the excess with a real upgrade, as Kokomi's finish pass (`review/active/kokomi-cards-2026-10-18.md` sec. 7, upgrade census) and Varka's powers pass (`varka-fang-next`) did ([USER], 2026-10-19: "You do have a habit of making too many powers just decrease their cost by 1 on upgrade").
 - Durin's start-of-turn tick skipped one fight (Fogmog, trace); `RandomEnemy` may pick the Eye With Teeth illusion (`CompanionOverhaulPowers.cs:51`). Live look. (Chained Reactions is QUEUE, backlog wrap-up pick 3.)
 

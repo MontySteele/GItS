@@ -138,6 +138,16 @@ public class VarkaModelArtTests
         Assert.Contains("\"res://scenes/vfx/card_trail_defect.tscn\"", src);
     }
 
+    /// <summary>Yae's trail matches her kit (the user, 2026-10-23): the
+    /// Necrobinder's pink, not the Ironclad's orange.</summary>
+    [Fact]
+    public void Yaes_card_trail_is_the_necrobinders_pink()
+    {
+        var src = RepoFile("klee-mod/KleeCode/Yae.cs");
+        Assert.Contains("\"res://scenes/vfx/card_trail_necrobinder.tscn\"", src);
+        Assert.DoesNotContain("card_trail_ironclad", src);
+    }
+
     [Fact]
     public void A_fresh_entry_into_a_strike_colours_it_and_only_the_ascension_places_the_target_burst()
     {

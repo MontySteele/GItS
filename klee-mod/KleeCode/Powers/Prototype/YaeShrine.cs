@@ -312,10 +312,16 @@ public sealed class YaeShrineLedger
     /// the fewer turns left, then the older). Read backwards it is the
     /// most-turns-left order, "N from that end" taking the first N. Not the
     /// planting order (<see cref="Standing"/>), which the end-of-turn acts
-    /// and the badges keep. PURE. Sim twin: <c>yae_shrine.wither_order</c>.
+    /// and the badges keep. The Sakura display draws it backwards. PURE. Sim twin: <c>yae_shrine.wither_order</c>.
     /// </summary>
-    public IReadOnlyList<YaeSakura> WitherOrder() =>
-        _sakura.OrderBy(s => s.Has(YaeAnnotation.DeadlineExtension) ? 1 : 0)
+    public IReadOnlyList<YaeSakura> WitherOrder() => WitherOrderOf(_sakura);
+
+    /// <summary><see cref="WitherOrder"/> on any list of Sakura, so the
+    /// Sakura display reads the same order off the row it is given (it draws
+    /// it backwards: the most turns left first, the closest to withering at
+    /// the end). PURE.</summary>
+    public static IReadOnlyList<YaeSakura> WitherOrderOf(IEnumerable<YaeSakura> sakura) =>
+        sakura.OrderBy(s => s.Has(YaeAnnotation.DeadlineExtension) ? 1 : 0)
             .ThenBy(s => s.TurnsLeft)
             .ThenBy(s => s.Seq)
             .ToList();
