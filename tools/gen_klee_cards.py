@@ -4117,7 +4117,7 @@ APPLY_POWERS = {
         "The next time an enemy's attack makes you lose HP this turn, it "
         "takes twice that much."),
     "fs_trial_by_water": ("TrialByWaterPower", None,
-        "Until end of turn, whenever this enemy takes damage, its accuser "
+        "This turn, whenever this enemy takes damage, its accuser "
         "gains {X} [gold]Fanfare[/gold]."),
     "fs_rainfall_overture": ("RainfallOverturePower", None,
         "Your next Attack this turn hits ALL enemies."),
@@ -4127,8 +4127,8 @@ APPLY_POWERS = {
     "fs_plot_twist": ("PlotTwistPower", None,
         "This turn, this enemy's attack hits itself."),
     "fs_full_house": ("FullHousePower", None,
-        "Whenever a guest's act deals damage, [gold]Spend[/gold] up to {X}, "
-        "all you can: it deals that much more."),
+        "Whenever a guest's act deals damage, [gold]Spend[/gold] up to {X}: "
+        "it deals that much additional damage."),
     # THE CO-OP SET (review/records/coop-set-2026-09-25.md). Every class lives
     # in klee-mod/KleeCode/Powers/Prototype/CoopSet.cs, compiled only under
     # `-p:PrototypeCards=true`; every row states its own face (`EB-215`). The

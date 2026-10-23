@@ -50,7 +50,7 @@ public sealed class ProtoFsGuestStarLyney : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Guest Star: Lyney"),
-        ("description", "[gold]Summon[/gold] Lyney{IfUpgraded:show:+|}. Act: [gold]Drain[/gold] 2, deal {GuestAct:diff()} [gold]Pyro[/gold] damage to ALL enemies.{InCombat:{StageBow}|}"),
+        ("description", "[gold]Summon[/gold] Lyney{IfUpgraded:show:+|}. Act: [gold]Drain[/gold] 2 and deal {GuestAct:diff()} [gold]Pyro[/gold] damage to ALL enemies.{InCombat:{StageBow}|}"),
     };
 
     /// <summary>Who this card's summon will Bow, on its in-combat line

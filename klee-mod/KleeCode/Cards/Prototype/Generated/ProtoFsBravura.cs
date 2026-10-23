@@ -51,7 +51,7 @@ public sealed class ProtoFsBravura : CustomCardModel, IElementalCard, ICharacter
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Bravura"),
-        ("description", "[gold]Spend[/gold] up to 18, all you can. Deal {Damage:diff()} [gold]Hydro[/gold] damage for every 3 spent.{InCombat:\n(Deals {TotalDamage:diff()} damage)|}"),
+        ("description", "[gold]Spend[/gold] up to 18. Deal {Damage:diff()} [gold]Hydro[/gold] damage for every 3 spent.{InCombat:\n(Deals {TotalDamage:diff()} damage)|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

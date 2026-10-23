@@ -45,7 +45,7 @@ public sealed class ProtoFsTrialByWater : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Trial by Water"),
-        ("description", "Apply {PowerAmount:diff()} [gold]Vulnerable[/gold]. Until end of turn, whenever that enemy takes damage, gain 2 [gold]Fanfare[/gold]."),
+        ("description", "Apply {PowerAmount:diff()} [gold]Vulnerable[/gold]. This turn, whenever that enemy takes damage, gain 2 [gold]Fanfare[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -1078,7 +1078,7 @@ public static class ArmKeywordTips
     /// <summary>Furina's sweep (2026-10-14): Ousia / Pneuma's "Flip", one
     /// sentence in the base game's style (`FurinaFlip`).</summary>
     internal const string FlipBody =
-        "Turn this card to its other face; it starts each combat on Ousia.";
+        "Turn this card to its other face. It starts each combat on Ousia.";
 
     /// <summary>Ousia / Pneuma: what "Flip" does.</summary>
     public static IEnumerable<IHoverTip> ForFlip(
@@ -1121,7 +1121,7 @@ public static class ArmKeywordTips
     /// Repay cannot return becomes Block."
     /// </summary>
     internal const string RepayBody =
-        "Regain that much drained HP; a Repay counts the HP it returns. "
+        "Regain that much drained HP. A Repay counts only the HP it returns. "
       + "Any HP a Repay cannot return becomes [gold]Block[/gold].";
 
     public static IEnumerable<IHoverTip> ForRepay(
@@ -1168,8 +1168,8 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForOldestGuest(
         IEnumerable<IHoverTip> inherited, CardModel card) =>
         With(inherited, OldestGuestKey,
-            "The guest on stage longest: the one a fourth summon would "
-          + "remove.");
+            "The guest on stage longest: the one the next summon on a full "
+          + "stage would remove.");
 
     // A guest's own tip: its line and act, upgraded on an upgraded card (the
     // pool to 75: an upgrade raises the line or the act).

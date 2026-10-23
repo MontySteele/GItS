@@ -187,8 +187,8 @@ public sealed class FontaineTeardrop : FurinaStageRelic
     {
         ("title", "Fontaine Teardrop"),
         ("description",
-            "An unreturned [gold]Repay[/gold] gains 2 [gold]Block[/gold] for "
-          + "each HP instead of 1."),
+            "Any HP a [gold]Repay[/gold] cannot return gives 2 "
+          + "[gold]Block[/gold] instead of 1."),
     };
 
     protected override IEnumerable<IHoverTip> ExtraHoverTips =>

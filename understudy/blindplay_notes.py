@@ -1900,17 +1900,17 @@ ARM_KEYWORDS: dict[str, str] = {
     # THE POOL TO 75 (2026-10-09): a Repay counts the HP it returns; a
     # Guest Star exhausts and comes back when its guest leaves. furina-next
     # paper 3 (2026-10-16): the Block floor is the rule's one line.
-    "Repay": ("Regain that much drained HP; a Repay counts the HP it "
+    "Repay": ("Regain that much drained HP. A Repay counts only the HP it "
               "returns. Any HP a Repay cannot return becomes Block."),
     # THE SWEEP (2026-10-14): Ousia / Pneuma's word, `ArmKeywordTips.ForFlip`.
-    "Flip": "Turn this card to its other face; it starts each combat on Ousia.",
+    "Flip": "Turn this card to its other face. It starts each combat on Ousia.",
     "Summon": ("A guest joins at the back. On a full stage, the oldest guest "
                "acts once and leaves; its card goes to your Discard "
                "Pile."),
     "Guest Star": ("Exhausts. Acts at the end of your turn. When it leaves, "
                    "this card goes to your Discard Pile."),
-    "oldest guest": ("The guest on stage longest: the one a fourth summon "
-                     "would remove."),
+    "oldest guest": ("The guest on stage longest: the one the next summon "
+                     "on a full stage would remove."),
     "Charlotte": ("The first time each turn one of your cards Repays, draw 1 "
                   "card. Act: Repay 3."),
     "Wriothesley": ("Whenever you Drain, deal that much Cryo damage to a random "

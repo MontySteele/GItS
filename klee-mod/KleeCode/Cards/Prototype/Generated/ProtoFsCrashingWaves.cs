@@ -51,7 +51,7 @@ public sealed class ProtoFsCrashingWaves : CustomCardModel, IElementalCard, ICha
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Soloist's Solicitation"),
-        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage twice. [gold]Spend[/gold] up to 16, all you can: hit once more for every 4.{InCombat:{StageSpendHits}|}"),
+        ("description", "Deal {Damage:diff()} [gold]Hydro[/gold] damage twice. [gold]Spend[/gold] up to 16: hit once more for every 4.{InCombat:{StageSpendHits}|}"),
     };
 
     /// <summary>This card's in-combat Stage line

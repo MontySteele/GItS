@@ -38,7 +38,7 @@ public sealed class FanfarePower : PowerModel, ILocalizationProvider
         ("title", "Fanfare"),
         ("description",
             "Gain 1 [gold]Fanfare[/gold] for each HP you lose or "
-          + "[gold]Repay[/gold]. [gold]Spend[/gold] pays it."),
+          + "[gold]Repay[/gold]. [gold]Spend[/gold] uses it."),
         ("smartDescription",
             "You have {Fanfare} [gold]Fanfare[/gold]. Gain 1 "
           + "[gold]Fanfare[/gold] for each HP you lose or [gold]Repay[/gold]. "

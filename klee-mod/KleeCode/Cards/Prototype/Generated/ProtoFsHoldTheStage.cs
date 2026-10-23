@@ -45,7 +45,7 @@ public sealed class ProtoFsHoldTheStage : CustomCardModel, ICharacterCard, IStag
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Hold the Stage"),
-        ("description", "Gain {CalculationBase:diff()} [gold]Block[/gold]. [gold]Spend[/gold] up to 16, all you can: gain 1 more for each.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}"),
+        ("description", "Gain {CalculationBase:diff()} [gold]Block[/gold]. [gold]Spend[/gold] up to 16: gain 1 more for each.{InCombat:\n(Gains {CalculatedBlock:diff()} [gold]Block[/gold])|}"),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

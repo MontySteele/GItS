@@ -241,7 +241,7 @@ public sealed class FullHousePower : PowerModel, ILocalizationProvider
         ("title", StageDirector.FullHouseTitle),
         ("description",
             "Whenever a guest's act deals damage, [gold]Spend[/gold] up to "
-          + "[blue]{Amount}[/blue], all you can: it deals that much more."),
+          + "[blue]{Amount}[/blue]: it deals that much additional damage."),
     };
 
     public override PowerType Type => PowerType.Buff;

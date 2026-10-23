@@ -102,7 +102,7 @@ def _sheet_row(card_id: str) -> dict:
 
 def test_lyneys_face_names_the_acts_drain():
     face = _sheet_row("proto_fs_guest_star_lyney")["description"]
-    assert ("Act: [gold]Drain[/gold] 2, deal {GuestAct:diff()} "
+    assert ("Act: [gold]Drain[/gold] 2 and deal {GuestAct:diff()} "
             "[gold]Pyro[/gold] damage to ALL enemies.") in face
 
 
