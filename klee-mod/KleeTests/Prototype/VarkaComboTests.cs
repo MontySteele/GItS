@@ -269,7 +269,7 @@ public class VarkaComboTests : IDisposable
     [Fact]
     public void The_banner_holds_and_pays_once_per_play()
     {
-        Assert.Equal("Only [gold]Knights[/gold] can change your [gold]current "
+        Assert.Equal("Only [gold]Knights[/gold] change your [gold]current "
                      + "element[/gold]. Whenever another card would, gain 1 "
                      + "[gold]Oath[/gold] of your [gold]current element[/gold] "
                      + "instead.", Face(new UnwaveringBannerPower()));

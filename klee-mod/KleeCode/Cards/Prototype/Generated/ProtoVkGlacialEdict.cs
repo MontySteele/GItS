@@ -50,7 +50,7 @@ public sealed class ProtoVkGlacialEdict : CustomCardModel, ICharacterCard, IVark
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Glacial Edict"),
-        ("description", "Apply [gold]Cryo[/gold] to an enemy, and 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold], plus 1 of each for every {VkAmount:diff()} [gold]Cryo[/gold] [gold]Oath[/gold].{InCombat:{VarkaSwitch}|}"),
+        ("description", "Apply [gold]Cryo[/gold], 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold] to an enemy. Apply 1 more of each for every {VkAmount:diff()} [gold]Cryo[/gold] [gold]Oath[/gold].{InCombat:{VarkaSwitch}|}"),
     };
 
     /// <summary>The element this card makes current, on its in-combat line

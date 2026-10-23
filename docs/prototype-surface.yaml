@@ -543,7 +543,7 @@
 - {id: proto_ko_tag_along, name: "Tag Along", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "Choose 1 of 3 [gold]Companions[/gold] to add to your [gold]Hand[/gold]. It costs 0 this turn.",
+   description: "Choose 1 of 3 [gold]Companions[/gold] to add into your [gold]Hand[/gold]. It costs 0 this turn.",
    upgrade: {remove: exhaust},
    effects: [{op: choose_companion, amount: 1, options: 3}]}
 
@@ -631,7 +631,7 @@
 - {id: proto_ko_adventure_club, name: "Adventure Club", character: klee,
    authored_by: [claude],
    cost: 1, type: skill, rarity: rare, exhaust: true,
-   description: "Choose 2 of 4 [gold]Companions[/gold] to add to your [gold]Hand[/gold]. They cost 0 this turn.",
+   description: "Choose 2 of 4 [gold]Companions[/gold] to add into your [gold]Hand[/gold]. They cost 0 this turn.",
    upgrade: {cost: -1},
    effects: [{op: choose_companion, amount: 2, options: 4}]}
 
@@ -4089,7 +4089,7 @@
    # makes it. Archaic Tooth: Dandelion Gale. Provenance notes, "Varka
    # review, 2026-10-12" and "Varka starter, Fang and Tooth, 2026-10-13".
    cost: 2, type: attack, rarity: basic, retain: true,
-   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkPer:diff()} damage per [gold]Oath[/gold] of your [gold]current element[/gold], as that element.{InCombat:\n(Deals {VkHit:diff()} damage)|}",
+   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkPer:diff()} damage for each [gold]Oath[/gold] of your [gold]current element[/gold], as that element.{InCombat:\n(Deals {VkHit:diff()} damage)|}",
    effects: [{op: damage, amount: 10, target: enemy},
              {op: varka, kind: ascension_hit, per: 3}],
    upgrade: {cost: -1}}
@@ -4179,7 +4179,7 @@
    # aura 3 [4] more; one Block gain (provenance note).
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Gain {VkBase:diff()} [gold]Block[/gold]. For each enemy with an aura, apply 1 [gold]Weak[/gold] and gain {VkPer:diff()} additional [gold]Block[/gold].",
+   description: "Gain {VkBase:diff()} [gold]Block[/gold]. Apply 1 [gold]Weak[/gold] to each enemy with an aura and gain {VkPer:diff()} additional [gold]Block[/gold] for each.",
    effects: [{op: varka, kind: frost_ward, target: all_enemies, base: 5, per: 3}],
    upgrade: {varka_base: 1, varka_per: 1}}
 
@@ -4236,7 +4236,7 @@
    # The AoE trim: one enemy. 6 [8], +3 (was 5 [7], +4; user 2026-10-13:
    # "9 damage with its rider effect is fine for a common"). Provenance, "Varka Electro
    # Knights, 2026-10-03". An Attack since the combo pass (2026-10-04).
-   description: "Deal {VkBase:diff()} [gold]Electro[/gold] damage to an enemy. If it already has [gold]Electro[/gold], deal {VkAmount:diff()} additional damage.",
+   description: "Deal {VkBase:diff()} [gold]Electro[/gold] damage. If it already has [gold]Electro[/gold], deal {VkAmount:diff()} additional damage.",
    effects: [{op: varka, kind: awakening, target: enemy, base: 6, amount: 3}],
    upgrade: {varka_base: 2}}
 
@@ -4250,10 +4250,10 @@
              {op: apply_power, power: weak, amount: 2, target: enemy}],
    upgrade: {power_amount: 1}}
 
-- {id: proto_vk_jean_dandelion_breeze, name: "Jean — Wind Companion", character: varka,
+- {id: proto_vk_jean_dandelion_breeze, name: "Gale Guard", character: varka,
    authored_by: [claude],
-   # A Skill, not a Knight. The em dash, not the colon (the open-Oath
-   # round, 2026-10-01): the colon is the Knight's tell.
+   # A Skill, not a Knight: a plain name, no colon (the Knight's tell).
+   # Was "Jean — Wind Companion" until the Varka text audit, 2026-10-23.
    # Tried at 8 Block, reverted: provenance, "Varka weak cards, 2026-10-03".
    cost: 1, type: skill, rarity: common,
    description: "Gain {Block:diff()} [gold]Block[/gold]. [gold]Swirl[/gold] the enemy.",
@@ -4488,7 +4488,7 @@
    # Pick 4 (ruled): cost 2, 10 [14] and 10 [14], plus 2 per Oath.
    # Varka last pass (2026-10-12), pick 1: the second hit 8 [12].
    cost: 2, type: attack, rarity: rare,
-   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkBase:diff()}, plus {VkPer:diff()} per [gold]Oath[/gold] of your [gold]current element[/gold], as that element.{InCombat:\n(Deals {VkHit:diff()} damage)|}",
+   description: "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkBase:diff()}, plus {VkPer:diff()} for each [gold]Oath[/gold] of your [gold]current element[/gold], as that element.{InCombat:\n(Deals {VkHit:diff()} damage)|}",
    effects: [{op: damage, amount: 10, target: enemy},
              {op: varka, kind: avatar_hit, base: 8, per: 2}],
    upgrade: {damage: 4, varka_base: 4}}
@@ -4582,7 +4582,7 @@
    authored_by: [claude],
    # Varka payoff fix, 2026-10-08: every 3 [2] Cryo Oath, was 4 [3].
    cost: 1, type: skill, rarity: uncommon,
-   description: "Apply [gold]Cryo[/gold] to an enemy, and 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold], plus 1 of each for every {VkAmount:diff()} [gold]Cryo[/gold] [gold]Oath[/gold].",
+   description: "Apply [gold]Cryo[/gold], 1 [gold]Weak[/gold] and 1 [gold]Vulnerable[/gold] to an enemy. Apply 1 more of each for every {VkAmount:diff()} [gold]Cryo[/gold] [gold]Oath[/gold].",
    effects: [{op: apply_aura, element: cryo, target: enemy},
              {op: varka, kind: glacial_edict, target: enemy, amount: 3}],
    upgrade: {varka_amount: -1}}
@@ -4821,7 +4821,7 @@
    # matched element pays twice. Was "Your Swirls pay both your current
    # element and the element they Swirl." (paid once when they matched).
    cost: 1, type: power, rarity: rare,
-   description: "Your [gold]Swirls[/gold] also pay the element they [gold]Swirl[/gold]. If it's your [gold]current element[/gold], it pays twice.",
+   description: "Your [gold]Swirls[/gold] also pay the element they [gold]Swirl[/gold]. If that is your [gold]current element[/gold], it pays twice.",
    effects: [{op: apply_power, power: vk_twin_gales, amount: 1, target: self}],
    upgrade: {innate: true}}
 

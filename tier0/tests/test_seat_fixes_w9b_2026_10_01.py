@@ -128,7 +128,7 @@ def test_four_winds_prints_its_oath_hit_total_in_combat():
     row = sheet[sheet.index("id: proto_vk_four_winds_ascension"):]
     row = row[:row.index("\n\n")]
     assert "in one hit" not in row
-    assert ("damage per [gold]Oath[/gold] of your [gold]current element"
+    assert ("damage for each [gold]Oath[/gold] of your [gold]current element"
             "[/gold], as that element.{InCombat:\\n(Deals {VkHit:diff()} "
             "damage)|}") in row
     assert "per: 3" in row                      # no number moved

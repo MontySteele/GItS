@@ -102,7 +102,9 @@ to me!"
 3. (a) Held, not built. "Undertow" is already a shipped Kokomi Common Attack
    (`proto_kk_undertow`, `KLEEMOD-PROTO_KK_UNDERTOW.title`), so the rename
    would move the clash rather than end it. The Shadow keeps "Riptide" until
-   another name is picked.
+   another name is picked. Later on 2026-10-23, [USER]: "Ok, I'm good on
+   both those name defaults". Built as "Blood in the Water": the name only,
+   with the enum, power class, loc ids and art file unchanged.
 
 The Abyss Shield finding: a player never sees "a None hit". Only the four
 concrete shields exist (`AbyssShieldPower.cs`: Hydro, Pyro, Electro, Cryo),

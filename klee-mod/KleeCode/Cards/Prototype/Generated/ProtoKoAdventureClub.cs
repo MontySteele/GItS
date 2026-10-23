@@ -45,7 +45,7 @@ public sealed class ProtoKoAdventureClub : CustomCardModel
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Adventure Club"),
-        ("description", "Choose 2 of 4 [gold]Companions[/gold] to add to your [gold]Hand[/gold]. They cost 0 this turn."),
+        ("description", "Choose 2 of 4 [gold]Companions[/gold] to add into your [gold]Hand[/gold]. They cost 0 this turn."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

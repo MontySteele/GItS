@@ -781,8 +781,8 @@ public static class ArmKeywordTips
     public static IEnumerable<IHoverTip> ForAscensionReturn(
         IEnumerable<IHoverTip> inherited) =>
         With(inherited, AscensionReturnKey,
-            "Played, it goes to your [gold]Discard Pile[/gold] and returns "
-          + "after a reshuffle.");
+            "When played, it goes to your [gold]Discard Pile[/gold] and comes "
+          + "back after a reshuffle.");
 
     /// <summary>
     /// Design-session call (2026-10-13): Four Winds' Ascension's element hit

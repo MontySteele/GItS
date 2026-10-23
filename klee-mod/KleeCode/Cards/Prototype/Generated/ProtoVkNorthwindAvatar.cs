@@ -51,7 +51,7 @@ public sealed class ProtoVkNorthwindAvatar : CustomCardModel, IElementalCard, IC
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Northwind Avatar"),
-        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkBase:diff()}, plus {VkPer:diff()} per [gold]Oath[/gold] of your [gold]current element[/gold], as that element.{InCombat:\n(Deals {VkHit:diff()} damage)|}{InCombat:{VarkaSwirl}|}"),
+        ("description", "Deal {Damage:diff()} [gold]Anemo[/gold] damage. Then deal {VkBase:diff()}, plus {VkPer:diff()} for each [gold]Oath[/gold] of your [gold]current element[/gold], as that element.{InCombat:\n(Deals {VkHit:diff()} damage)|}{InCombat:{VarkaSwirl}|}"),
     };
 
     /// <summary>This card's in-combat Oath and Swirl lines

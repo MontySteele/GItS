@@ -46,8 +46,8 @@ public sealed class BottledResolve : ArmPotion
     {
         ("title", "Bottled Resolve"),
         ("description",
-            "Choose an element. It becomes your [gold]current element[/gold]; "
-          + "gain [blue]" + Oath + "[/blue] [gold]Oath[/gold] of it."),
+            "Choose an element. It becomes your [gold]current element[/gold]. "
+          + "Gain [blue]" + Oath + "[/blue] [gold]Oath[/gold] of it."),
     };
 
     protected override string ArtPath =>
@@ -112,8 +112,7 @@ public sealed class ElixirOfTheFourWinds : ArmPotion
     {
         ("title", "Elixir of the Four Winds"),
         ("description",
-            "This turn, your cards read your total [gold]Oath[/gold] across "
-          + "all four elements."),
+            "This turn, your cards read your total [gold]Oath[/gold]."),
     };
 
     protected override string ArtPath =>
