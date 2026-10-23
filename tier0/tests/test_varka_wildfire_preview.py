@@ -36,4 +36,5 @@ def test_the_generated_face_fills_the_token():
     assert ('description.Add("VarkaWildfire", '
             "VarkaOath.WildfireLine(this));") in src
     oath = OATH.read_text(encoding="utf-8")
-    assert r'$"\n(Wildfire Oath deals {damage})"' in oath
+    # The localization census (2026-10-23, step 2): a keyed row.
+    assert r'"\n(Wildfire Oath deals {Damage})"' in oath

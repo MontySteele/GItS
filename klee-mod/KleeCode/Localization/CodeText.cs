@@ -62,7 +62,16 @@ public static class CodeText
         Cards.PlayerTips.Rows()
             .Concat(Powers.StagePerformerBadge.TipRows())
             .Concat(Elements.ReactionGuide.Rows())
-            .Concat(Elements.ElementWords.Rows());
+            .Concat(Elements.ElementWords.Rows())
+            // Step 2: Varka and Furina, their face lines, captions and
+            // counters, and the card-hover reaction riders.
+            .Concat(Powers.VarkaOath.TextRows())
+            .Concat(Powers.FurinaStageBowPreview.TextRows())
+            .Concat(Vfx.DrainedCounter.TextRows())
+            .Concat(new[] { Vfx.FanfareCounter.BodyRow })
+            .Concat(Vfx.FurinaStageCues.TextRows())
+            .Concat(new[] { Cards.SwirlAuraFace.NoAuraRow, Cards.HalfHpFace.Row })
+            .Concat(Cards.KleeCardTooltips.TextRows());
 
     /// <summary>Merge every row into the ENGLISH table it names.</summary>
     internal static void Inject()

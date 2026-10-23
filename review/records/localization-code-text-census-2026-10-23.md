@@ -109,3 +109,47 @@ assembly (`KleeTests/Fixtures/code_text_before_2026_10_23.json`).
 
 Left: groups 2, 4 and 5, the four leftovers of group 6, the story offer line,
 and the Abyss strip title's key.
+
+## Step 2, closed 2026-10-23
+
+Varka and Furina, and the card-hover reaction riders. 88 rows, all in
+`card_keywords`; the English a player reads is unchanged, pinned by
+`CodeTextTests.Every_step_2_line_renders_the_same_from_its_rows` against 277
+renderings dumped off main 2b5f235b1 (the `s2:` entries in the fixture), over
+inputs that reach every branch (`klee-mod/KleeTests/CodeTextStep2Cases.cs`).
+
+- **Group 2, Varka's and Furina's face tokens: closed.** `VarkaSwitch`,
+  `VarkaSwirl` (with what a Swirl pays) and `VarkaWildfire`
+  (`VarkaOath.cs`, 16 rows with the Oath gains); `StageBow`,
+  `StageDrainLine`, `StageRepay`, `StageSpendShort`, `StageSpendHits` and
+  `StageLost` (`FurinaStageBowPreview.cs`, 19 rows), a guest's name its own
+  row (`PerformerWords.cs`, 11); `SwirlAura` and `HalfHp`, one row each. A
+  line's leading line break or space is the row's, so a translation places
+  it. The generated faces are unchanged: the token stays, and the C# that
+  fills it reads a row.
+- **Group 4, Varka's and Furina's captions: closed.** The Drained counter's
+  hover (`DrainedCounter.cs`, 11 rows, the box a join row), the Fanfare
+  gauge's (`FanfareCounter.cs`, 1), the stage cue's forecast
+  (`FurinaStageCues.cs`, 4), and the Oath gains said over Varka's head
+  (`GainClause`, `GainLine`: a row per source, and join rows for the list,
+  the card and the relic).
+- **The reaction riders: closed.** `KleeCardTooltips.cs`, 24 rows: the
+  overridden element, the three amplified bodies and The Boot's clause (a
+  join row), the Artifact sentences (each debuff a word row), "Only if you
+  Spend:", the no-hit bodies (multipliers from `ReactionConstants`), the
+  Swirl preview and Varka's clauses on it.
+- **Not keyed, on purpose.** `FurinaStageLaw.LineWhy` and
+  `FurinaStageFacePreview.LineNow` (`FurinaStageLaw.cs:274`,
+  `FurinaStageBowPreview.cs:263-266` above): no player surface prints them
+  since 2026-10-11, and the line's why goes only to the seat page.
+  `VarkaOath.PayoutSentence` (`VarkaOath.cs:1321-1328`) is the Oath badge's
+  model row, already in the English table. `SourceWord`, `PayoutWords` and
+  `TwinGalesPaid` are the seat page's.
+- **The Drained counter still shows the seat's Drain sentence**
+  (`DrainedCounter.cs:148`, above): keyed as it reads
+  (`KLEEMOD-ARM_STAGE_DRAINED.description_rule`), not swapped for the
+  player's shorter Drain row, which would change what a player reads. The
+  swap is the Furina text audit's.
+
+Left: Yae's Tenko token, Kokomi's and Yae's captions, and groups 5 and 6
+(step 3).

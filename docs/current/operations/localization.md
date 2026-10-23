@@ -51,7 +51,10 @@ SmartFormat extensions, so a test reads the text a player would.
   title already lives in: `card_keywords`, `KLEEMOD-ARM_MEND.description`; a
   variant `KLEEMOD-ARM_SPARK.description_opening_bank`; a chart's parts
   `KLEEMOD-REACTION_CHART.cells.VAPORIZE`. An element's name is
-  `KLEEMOD-ELEMENT_NAME.PYRO`.
+  `KLEEMOD-ELEMENT_NAME.PYRO`, a guest's `KLEEMOD-STAGE_PERFORMER_NAME.CLORINDE`.
+  A card face's in-combat line is keyed by its token
+  (`KLEEMOD-FACE_STAGE_REPAY.repays`), and its leading line break or space
+  is the row's, so a translation places it.
 - **Adding a row.** Add the template to the surface's rows (a tip body to
   `PlayerTips.Bodies`, or a `CodeRow` the surface lists), read it with
   `CodeText.Format`, rewrite the English reference, and pin the rendered

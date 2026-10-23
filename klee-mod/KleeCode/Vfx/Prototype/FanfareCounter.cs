@@ -105,11 +105,14 @@ public static class FanfareCounter
 
     /// <summary>The hover's body for a turn's flow counts. Pure.</summary>
     public static string HoverBody(int gained, int spent) =>
-        "This turn: gained [blue]"
-      + gained.ToString(CultureInfo.InvariantCulture)
-      + "[/blue], spent [blue]"
-      + spent.ToString(CultureInfo.InvariantCulture)
-      + "[/blue].\n" + ArmKeywordTips.FanfareBody;
+        CodeText.Format(BodyRow, CodeText.Vars(
+            ("Gained", gained), ("Spent", spent), ("Rule", ArmKeywordTips.FanfareBody)));
+
+    /// <summary>The hover's row (the localization census, 2026-10-23, step
+    /// 2): the turn's flow, then the Fanfare tip's own row.</summary>
+    internal static readonly CodeRow BodyRow = new("card_keywords",
+        ArmKeywordTips.FanfareKey + ".description_counter",
+        "This turn: gained [blue]{Gained}[/blue], spent [blue]{Spent}[/blue].\n{Rule}");
 
     /// <summary>The hover's body for her, read off the ledger now.</summary>
     public static string HoverBody(Creature? creature)
