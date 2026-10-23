@@ -157,7 +157,7 @@ public class YaeAncientsRelicsTests : IDisposable
     public void Rewrite_draws_2_discards_1_then_edits_red_ink()
     {
         Assert.Equal("Draw {Cards:diff()} cards. Discard 1 card. [gold]Edit[/gold] a card in "
-                   + "your hand: [gold]Red Ink[/gold].", Face(new ProtoYmRewrite()));
+                   + "your [gold]Hand[/gold]: [gold]Red Ink[/gold].", Face(new ProtoYmRewrite()));
         Assert.Equal(2, Var(new ProtoYmRewrite(), "Cards"));
         var calls = OnPlay<ProtoYmRewrite>();
         var draw = calls.FindIndex(c => c.Contains("CardPileCmd.Draw"));

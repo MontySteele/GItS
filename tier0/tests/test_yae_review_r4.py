@@ -147,7 +147,7 @@ def test_seven_glamours_row():
     assert next(e["amount"] for e in up.effects if e["op"] == "damage") == 16
     assert _row("proto_ym_the_seven_glamours")["description"] == (
         "Deal 12 [gold]Electro[/gold] damage. If this kills an enemy, "
-        "[gold]Publish[/gold] an [gold]Annotated[/gold] card in your hand.")
+        "[gold]Publish[/gold] an [gold]Annotated[/gold] card in your [gold]Hand[/gold].")
 
 
 def test_seven_glamours_kill_publishes_one_card():

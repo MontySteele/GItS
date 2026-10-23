@@ -1786,11 +1786,12 @@ ARM_KEYWORDS: dict[str, str] = {
     "Sakura": ("At the end of your turn, strikes an enemy for 1 + 2 per "
                "Level. Lasts 3 turns, then strikes again. "
                + SAKURA_TARGET_RULE),
-    "Tenko": "Every Sakura acts now. Refresh them to at least 3 turns.",
-    "Foxfire Sakura": ("A Sakura that hits ALL enemies for 1 + its Level "
-                       "when it acts."),
-    "Kitsune Sakura": ("A fox decoy Sakura. When it acts, you gain 2 + its "
-                       "Level Block."),
+    "Tenko": ("Every Sakura acts now and goes back to at least 3 turns "
+              "left."),
+    "Foxfire Sakura": ("A Sakura that deals damage equal to 1 plus its "
+                       "Level to ALL enemies when it acts."),
+    "Kitsune Sakura": ("A fox decoy Sakura. When it acts, you gain Block "
+                       "equal to 2 plus its Level."),
     # Yae review r5, item 5.
     # 2026-10-17: the Sakura closest to withering, not the first planted;
     # the Sakura Levels paper (pick 1 (a)): Levels carry over on a replace.
@@ -1802,7 +1803,8 @@ ARM_KEYWORDS: dict[str, str] = {
              "to 2 cards opens one chooser: pick up to 2 different cards, "
              "fewer or none."),
     # 2026-10-14: Red Ink on a planting card reaches its Sakura too.
-    "Red Ink": ("This card deals 3 more damage and gives 3 more Block. If it "
+    "Red Ink": ("This card deals 3 additional damage and gives 3 additional "
+                "Block. If it "
                 "plants, its Sakura get it too. On a Sakura: the Sakura's "
                 "action is 3 bigger."),
     "Footnote": "When this card is played, draw 1 card.",

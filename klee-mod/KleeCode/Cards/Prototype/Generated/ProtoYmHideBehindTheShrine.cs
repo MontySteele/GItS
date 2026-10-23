@@ -45,7 +45,7 @@ public sealed class ProtoYmHideBehindTheShrine : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Hide Behind the Shrine"),
-        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Your [gold]Sakura[/gold] with the fewest turns left withers; if one did, gain {YmAmount:diff()} more."),
+        ("description", "Gain {Block:diff()} [gold]Block[/gold]. Your [gold]Sakura[/gold] with the fewest turns left withers. If one did, gain {YmAmount:diff()} additional [gold]Block[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

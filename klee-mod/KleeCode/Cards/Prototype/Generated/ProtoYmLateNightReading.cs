@@ -45,7 +45,7 @@ public sealed class ProtoYmLateNightReading : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Late Night Reading"),
-        ("description", "Draw {DrawElse:diff()} cards. If you have 3 [gold]Sakura[/gold], draw 1 more."),
+        ("description", "Draw {DrawElse:diff()} cards. If you have 3 or more [gold]Sakura[/gold], draw 1 more."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

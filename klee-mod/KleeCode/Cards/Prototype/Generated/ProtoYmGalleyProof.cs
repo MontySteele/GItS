@@ -51,7 +51,7 @@ public sealed class ProtoYmGalleyProof : CustomCardModel, IElementalCard, IChara
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Galley Proof"),
-        ("description", "Deal {Damage:diff()} [gold]Electro[/gold] damage. [gold]Edit[/gold] a card in your hand: [gold]Reprint[/gold]."),
+        ("description", "Deal {Damage:diff()} [gold]Electro[/gold] damage. [gold]Edit[/gold] a card in your [gold]Hand[/gold]: [gold]Reprint[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

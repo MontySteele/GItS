@@ -90,3 +90,33 @@ stay under the 135 tip ceiling.
    keep them, since a new player reads the effect without hovering.
 3. **"+" in the Sakura tips.** (a, default) words, as above. (b) keep the
    signs, which are shorter.
+
+## Ruling, 2026-10-23
+
+[USER]: "Agreed on all Varka, Furina, Yae and Shared fixes - these makes
+sense to me!"
+
+1. **Pick 1 (a), built.** All eight fixes. Fix 1 caught an eleventh face,
+   Inked Branches' upgrade ("and a card in your [gold]Hand[/gold]"), and the
+   Recall prompt now reads "put into your Hand". The lint gap was scope, not
+   the colon: `proto_ym_*` faces were outside `IN_SCOPE`, so
+   `tools/lint_text_conventions.py` now holds them to the pile spellings and
+   the no-parentheses rule (`YAE_SPELLINGS`), with a self-test fixture for
+   "in your hand:". Fix 4 also took Edict of Cleansing's badge to "Your
+   Sakura's strikes".
+   - Fix 5: `three_sakura` is `YaeShrine.Count(Owner.Creature) >= 3` in C#
+     and `sakura_count(...) >= 3` in the sim, so Late Night Reading reads
+     "If you have 3 or more Sakura".
+   - Fix 8: the totem line is `ArmKeywordTips.ForSakura`'s branch for a
+     card that is not Yae's, and the one card it reaches is the universal
+     Inazuma Companion "Yae Miko, Sesshou Sakura" (every kit can draft it).
+     It describes that card's `SesshouSakuraPower` correctly (lasts all
+     combat, at most 3 fire each turn), not Yae's shrine, so it stays.
+2. **Pick 2 (a), built.** Footnote, Royalties and Sakura Seal print "Edit
+   up to 2 [3] cards in your Hand: <Annotation>."; each already hovered its
+   Annotation's tip, and codegen now owes Sakura Seal the Sakura tip the
+   parenthesis used to carry.
+3. **Pick 3 (a), built for Foxfire and Kitsune.** The Sakura tip keeps
+   "1 + 2 per Level": in words it is 109 characters, over the 100-character
+   player hover cap (`lint_hover_tips.py`, held for this tip by
+   `YaePrototypeTests`), so its wording is open.

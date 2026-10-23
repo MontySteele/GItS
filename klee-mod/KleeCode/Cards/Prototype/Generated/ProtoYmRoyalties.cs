@@ -48,7 +48,7 @@ public sealed class ProtoYmRoyalties : CustomCardModel, ICharacterCard
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Royalties"),
-        ("description", "[gold]Edit[/gold] up to {YmAmount:diff()} cards in your hand: [gold]Royalties[/gold] (when played, gain {energyPrefix:energyIcons(1)})."),
+        ("description", "[gold]Edit[/gold] up to {YmAmount:diff()} cards in your [gold]Hand[/gold]: [gold]Royalties[/gold]."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>

@@ -4949,7 +4949,7 @@
    # [USER] 2026-10-13, pick 3: "proofread by itself and having the upgrade
    # make the effect 0 cost, like a Defect starter."
    # 2026-10-14: Red Ink -> Reprint, "Let's bump it to 'Play it twice.'"
-   description: "[gold]Edit[/gold] a card in your hand: [gold]Reprint[/gold].",
+   description: "[gold]Edit[/gold] a card in your [gold]Hand[/gold]: [gold]Reprint[/gold].",
    effects: [{op: yae, kind: edit, annotation: reprint, amount: 1}],
    upgrade: {cost: -1}}
 
@@ -5023,7 +5023,7 @@
    cost: 1, type: attack, rarity: common,
    # Yae flat-value pass, 2026-10-17 (review/active/yae-flat-value-2026-10-17.md
    # sec.3): 7 [10] (was 5 [8]).
-   description: "Deal 7 [gold]Electro[/gold] damage. [gold]Edit[/gold] a card in your hand: [gold]Red Ink[/gold].",
+   description: "Deal 7 [gold]Electro[/gold] damage. [gold]Edit[/gold] a card in your [gold]Hand[/gold]: [gold]Red Ink[/gold].",
    effects: [{op: damage, amount: 7, target: enemy},
              {op: yae, kind: edit, annotation: red_ink, amount: 1}],
    upgrade: {damage: 3}}
@@ -5033,7 +5033,7 @@
    cost: 1, type: attack, rarity: common,
    # Yae draft pass, 2026-10-17 (sec.3): "deal 5 more" (was "a Sakura strikes
    # it"). Weak is read before the hit, as Fox's Bargain's, so a kill counts.
-   description: "Deal 8 [gold]Electro[/gold] damage. If the enemy is [gold]Weak[/gold], deal {BranchDamage:diff()} more.",
+   description: "Deal 8 [gold]Electro[/gold] damage. If the enemy is [gold]Weak[/gold], deal {BranchDamage:diff()} additional damage.",
    effects: [{op: conditional, if: target_has_power_weak,
               then: [{op: damage, amount: 5, target: enemy}]},
              {op: damage, amount: 8, target: enemy}],
@@ -5105,7 +5105,7 @@
    # One hit, read when played: any Sakura of any kind at Level 3 or higher.
    # Yae flat-value pass, 2026-10-17 (review/active/yae-flat-value-2026-10-17.md
    # sec.3): base 8 [10] (was 6 [8]); the bonus stays 6 [8].
-   description: "Deal 8 [gold]Electro[/gold] damage. If a [gold]Sakura[/gold] is Level 3 or higher, deal 6 more.",
+   description: "Deal 8 [gold]Electro[/gold] damage. If a [gold]Sakura[/gold] is Level 3 or higher, deal 6 additional damage.",
    effects: [{op: yae, kind: level_strike, base: 8, amount: 6, target: enemy}],
    upgrade: {yae_base: 2, yae_amount: 2}}
 
@@ -5134,7 +5134,7 @@
 - {id: proto_ym_foxs_shade, name: "Fox's Shade", character: yae,
    authored_by: [claude],
    cost: 1, type: skill, rarity: common,
-   description: "Gain 8 [gold]Block[/gold]. If any enemy is [gold]Weak[/gold], gain {BranchBlock:diff()} more.",
+   description: "Gain 8 [gold]Block[/gold]. If any enemy is [gold]Weak[/gold], gain {BranchBlock:diff()} additional [gold]Block[/gold].",
    effects: [{op: block, amount: 8},
              {op: conditional, if: any_enemy_weak,
               then: [{op: block, amount: 4}]}],
@@ -5146,7 +5146,7 @@
    # It withers as every Sakura does (its Last Bloom still acts);
    # the 5 more is the card's own Block.
    # User ruling 2026-10-20 (turns-left targeting).
-   description: "Gain 7 [gold]Block[/gold]. Your [gold]Sakura[/gold] with the fewest turns left withers; if one did, gain {YmAmount:diff()} more.",
+   description: "Gain 7 [gold]Block[/gold]. Your [gold]Sakura[/gold] with the fewest turns left withers. If one did, gain {YmAmount:diff()} additional [gold]Block[/gold].",
    effects: [{op: block, amount: 7},
              {op: yae, kind: wither_fewest_turns_left_block, amount: 5}],
    upgrade: {block: 2}}
@@ -5157,7 +5157,7 @@
    # Yae pass 2026-10-16 (sec.1): draw 2, discard 1, then the Edit (was
    # discard up to 2, draw that many). Upgrade draw 3 (design session,
    # 2026-10-17, after the build).
-   description: "Draw {Cards:diff()} cards. Discard 1 card. [gold]Edit[/gold] a card in your hand: [gold]Red Ink[/gold].",
+   description: "Draw {Cards:diff()} cards. Discard 1 card. [gold]Edit[/gold] a card in your [gold]Hand[/gold]: [gold]Red Ink[/gold].",
    effects: [{op: draw, amount: 2},
              {op: discard, amount: 1, select: chosen},
              {op: yae, kind: edit, annotation: red_ink, amount: 1}],
@@ -5193,7 +5193,7 @@
    # Design axes sec.4: 3 [4] plus 4 [6] per Sakura (was 4 [6] per Sakura).
    # Yae pass 2026-10-16 (sec.1): the upgrade is 4 plus 5 each (was 6 each,
    # 22 for 1 with a full shrine).
-   description: "Deal 3 [gold]Electro[/gold] damage, plus 4 for each [gold]Sakura[/gold] standing.",
+   description: "Deal 3 [gold]Electro[/gold] damage, plus 4 for each [gold]Sakura[/gold].",
    effects: [{op: yae, kind: damage_per_sakura, base: 3, per: 4, target: enemy}],
    upgrade: {yae_base: 1, yae_per: 1}}
 
@@ -5202,7 +5202,7 @@
    cost: 1, type: power, rarity: uncommon,
    # Design axes sec.4: 3 [5], and Weak counts, so it works solo. Yae pass
    # 2026-10-16 (sec.1): the upgrade is +4 (was +5, nearly triple a strike).
-   description: "Your [gold]Sakura[/gold] strikes deal 3 more to an enemy that is [gold]Weak[/gold] or has a [gold]Pyro[/gold], [gold]Hydro[/gold] or [gold]Cryo[/gold] aura.",
+   description: "Your [gold]Sakura[/gold]'s strikes deal 3 additional damage to an enemy that is [gold]Weak[/gold] or has a [gold]Pyro[/gold], [gold]Hydro[/gold] or [gold]Cryo[/gold] aura.",
    effects: [{op: apply_power, power: ym_edict_of_cleansing, amount: 3, target: self}],
    upgrade: {power_amount: 1}}
 
@@ -5223,7 +5223,7 @@
    # Yae review r4, pick 1 (a) (ruled 2026-10-15): up to 2 [3] cards (was
    # 1 [2]), one chooser of different cards. Yae review r5, item 7: the
    # Annotation says what it does, as Royalties does.
-   description: "[gold]Edit[/gold] up to 2 cards in your hand: [gold]Footnote[/gold] (when played, draw 1 card).",
+   description: "[gold]Edit[/gold] up to 2 cards in your [gold]Hand[/gold]: [gold]Footnote[/gold].",
    effects: [{op: yae, kind: edit, annotation: footnote, amount: 2}],
    upgrade: {yae_amount: 1}}
 
@@ -5233,7 +5233,7 @@
    # (ruled 2026-10-15): up to 2 [3] cards (was 1 [2]), and it Exhausts.
    # Yae review r5, item 7: the Annotation says what it does.
    cost: 0, type: skill, rarity: uncommon, exhaust: true,
-   description: "[gold]Edit[/gold] up to 2 cards in your hand: [gold]Sakura Seal[/gold] (when played, plant a [gold]Sakura[/gold]).",
+   description: "[gold]Edit[/gold] up to 2 cards in your [gold]Hand[/gold]: [gold]Sakura Seal[/gold].",
    effects: [{op: yae, kind: edit, annotation: sakura_seal, amount: 2}],
    upgrade: {yae_amount: 1}}
 
@@ -5251,7 +5251,7 @@
    cost: 1, type: skill, rarity: uncommon,
    # Yae review r6 item 2: Edit a card in your hand: Red Ink (was each
    # Sakura lasts 1 more turn, review r3).
-   description: "Draw {Cards:diff()} cards. [gold]Edit[/gold] a card in your hand: [gold]Red Ink[/gold].",
+   description: "Draw {Cards:diff()} cards. [gold]Edit[/gold] a card in your [gold]Hand[/gold]: [gold]Red Ink[/gold].",
    effects: [{op: draw, amount: 2},
              {op: yae, kind: edit, annotation: red_ink, amount: 1}],
    upgrade: {draw: 1}}
@@ -5284,7 +5284,7 @@
    # "never again" card in four records). Provenance, "Yae review r3".
    cost: 0, type: skill, rarity: uncommon,
    # User ruling 2026-10-20 (turns-left targeting).
-   description: "Your [gold]Sakura[/gold] with the fewest turns left withers (it acts once, its Last Bloom). If one did, gain {energyPrefix:energyIcons(1)} and draw {IfUpgraded:show:2 cards|1 card}.",
+   description: "Your [gold]Sakura[/gold] with the fewest turns left withers and acts once. If one did, gain {energyPrefix:energyIcons(1)} and draw {IfUpgraded:show:2 cards|1 card}.",
    effects: [{op: yae, kind: fallen_petals}],
    upgrade: {yae_upgraded: true}}
 
@@ -5305,7 +5305,7 @@
    # Yae review r4, pick 1 (a) (ruled 2026-10-15): 0 Energy (was 1 [0]),
    # Exhausts; the upgrade also Edits a card in your hand.
    cost: 0, type: skill, rarity: uncommon, exhaust: true,
-   description: "[gold]Edit[/gold] every [gold]Sakura[/gold]{IfUpgraded:show: and a card in your hand|}: [gold]Red Ink[/gold].",
+   description: "[gold]Edit[/gold] every [gold]Sakura[/gold]{IfUpgraded:show: and a card in your [gold]Hand[/gold]|}: [gold]Red Ink[/gold].",
    effects: [{op: yae, kind: edit_sakura, which: every, annotation: red_ink, amount: 1,
               hand_if_upgraded: true}],
    upgrade: {yae_upgraded: true}}
@@ -5324,7 +5324,7 @@
    # Never copies an Author's Copy: GPT found a +1 Energy loop through
    # Royalties, and LAW forbids energy-positive copy loops.
    cost: 1, type: skill, rarity: uncommon, exhaust: true,
-   description: "Add a copy of an [gold]Annotated[/gold] card in your [gold]Hand[/gold] (not an Author's Copy) to your [gold]Hand[/gold]. It keeps its Annotations.",
+   description: "Add a copy of an [gold]Annotated[/gold] card in your [gold]Hand[/gold] to your [gold]Hand[/gold], other than an Author's Copy. It keeps its Annotations.",
    effects: [{op: yae, kind: authors_copy}],
    upgrade: {cost: -1}}
 
@@ -5352,7 +5352,7 @@
    cost: 2, type: attack, rarity: uncommon,
    # Yae flat-value pass, 2026-10-17 (review/active/yae-flat-value-2026-10-17.md
    # sec.3): 14 [18] (was 11 [15]).
-   description: "Deal 14 [gold]Electro[/gold] damage. [gold]Edit[/gold] a card in your hand: [gold]Reprint[/gold].",
+   description: "Deal 14 [gold]Electro[/gold] damage. [gold]Edit[/gold] a card in your [gold]Hand[/gold]: [gold]Reprint[/gold].",
    effects: [{op: damage, amount: 14, target: enemy},
              {op: yae, kind: edit, annotation: reprint, amount: 1}],
    upgrade: {damage: 4}}
@@ -5478,7 +5478,7 @@
    cost: 1, type: skill, rarity: uncommon,
    # One draw in each arm (3 [4] with 3 Sakura, else 2 [3]): the upgrade
    # moves every draw op, so "1 more" stays 1.
-   description: "Draw {DrawElse:diff()} cards. If you have 3 [gold]Sakura[/gold], draw 1 more.",
+   description: "Draw {DrawElse:diff()} cards. If you have 3 or more [gold]Sakura[/gold], draw 1 more.",
    effects: [{op: conditional, if: three_sakura,
               then: [{op: draw, amount: 3}],
               else: [{op: draw, amount: 2}]}],
@@ -5584,7 +5584,7 @@
    # 2026-10-15 ([USER]: "it looks obviously OP"): was a 1 [0] Skill. The kill
    # is Hand of Greed's Fatal check (no Minions). Yae draft pass, 2026-10-17:
    # costs 1 (was 2). Provenance, "Yae: The Seven Glamours on a kill".
-   description: "Deal 12 [gold]Electro[/gold] damage. If this kills an enemy, [gold]Publish[/gold] an [gold]Annotated[/gold] card in your hand.",
+   description: "Deal 12 [gold]Electro[/gold] damage. If this kills an enemy, [gold]Publish[/gold] an [gold]Annotated[/gold] card in your [gold]Hand[/gold].",
    effects: [{op: damage, amount: 12, target: enemy},
              {op: conditional, if: killed_target_fatal,
               then: [{op: yae, kind: publish}]}],
@@ -5603,7 +5603,7 @@
 - {id: proto_ym_reborn_as_guuji_yae, name: "Reborn as Guuji Yae", character: yae,
    authored_by: [claude],
    cost: 1, type: skill, rarity: rare, exhaust: true,
-   description: "Choose an Annotation. [gold]Edit[/gold] every other card in your hand with it.",
+   description: "Choose an Annotation. [gold]Edit[/gold] every other card in your [gold]Hand[/gold] with it.",
    effects: [{op: yae, kind: edit_all, annotation: sakura_seal}],
    upgrade: {cost: -1}}
 
@@ -5620,7 +5620,7 @@
    authored_by: [claude],
    cost: 1, type: skill, rarity: rare, exhaust: true,
    # Yae review r4, pick 1 (a) (ruled 2026-10-15): up to 2 cards (was 1).
-   description: "[gold]Edit[/gold] up to {YmAmount:diff()} cards in your hand: [gold]Royalties[/gold] (when played, gain {energyPrefix:energyIcons(1)}).",
+   description: "[gold]Edit[/gold] up to {YmAmount:diff()} cards in your [gold]Hand[/gold]: [gold]Royalties[/gold].",
    # Upgrade census (2026-10-23, [USER]): up to 2 [3] cards (was cost -1).
    effects: [{op: yae, kind: edit, annotation: royalties, amount: 2}],
    upgrade: {yae_amount: 1}}

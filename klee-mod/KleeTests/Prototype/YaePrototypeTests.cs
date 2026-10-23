@@ -597,7 +597,7 @@ public class YaePrototypeTests : IDisposable
         Assert.Equal(new[] { "Red Ink", "Footnote", "Deadline Extension",
                              "Fox Fire", "Sakura Seal" },
                      YaeModalOptions.Order.Select(YaeAnnotationText.Name));
-        Assert.Contains("3 more damage", YaeAnnotationText.Rule(YaeAnnotation.RedInk));
+        Assert.Contains("3 additional damage", YaeAnnotationText.Rule(YaeAnnotation.RedInk));
         Assert.Contains("draw 1 card", YaeAnnotationText.Rule(YaeAnnotation.Footnote));
         Assert.Contains("Retain", YaeAnnotationText.Rule(YaeAnnotation.DeadlineExtension));
         Assert.Contains("4 [gold]Electro[/gold]", YaeAnnotationText.Rule(YaeAnnotation.FoxFire));
@@ -814,8 +814,9 @@ public class YaePrototypeTests : IDisposable
         Assert.True(ArmKeywordTips.YaeSakuraTip.Length <= 100);
         Assert.DoesNotContain("Tenko", ArmKeywordTips.YaeSakuraTip);
         // Review r3: Tenko is one plain rule, the paper's words.
-        Assert.Equal("Every [gold]Sakura[/gold] acts now. Refresh them to at "
-                     + "least 3 turns.",
+        // The Yae text audit (2026-10-23), fix 7.
+        Assert.Equal("Every [gold]Sakura[/gold] acts now and goes back to at "
+                     + "least 3 turns left.",
                      ArmKeywordTips.YaeTenkoTip);
     }
     [Fact]
@@ -859,7 +860,7 @@ public class YaePrototypeTests : IDisposable
     [Fact]
     public void An_annotation_tip_is_its_card_reading_or_its_sakura_reading()
     {
-        Assert.Equal("This card deals 3 more damage and gives 3 more "
+        Assert.Equal("This card deals 3 additional damage and gives 3 additional "
                      + "[gold]Block[/gold]. If it plants, its "
                      + "[gold]Sakura[/gold] get it too.",
                      YaeAnnotationText.TipBody(YaeAnnotation.RedInk, false));
@@ -913,8 +914,8 @@ public class YaePrototypeTests : IDisposable
     [Fact]
     public void Each_edit_prompt_names_its_annotation_and_what_it_does()
     {
-        Assert.Equal("Choose a card to Edit: Red Ink (it deals 3 more damage "
-                     + "and gives 3 more Block). " + YaeEditing.FilterNote,
+        Assert.Equal("Choose a card to Edit: Red Ink (it deals 3 additional damage "
+                     + "and gives 3 additional Block). " + YaeEditing.FilterNote,
                      YaeEditing.EditPromptTextFor(YaeAnnotation.RedInk).Replace(" " + YaeEditing.ReplacesWarning, ""));
         Assert.Equal("Choose a card to Edit: Footnote (when it is played, "
                      + "draw 1 card).",

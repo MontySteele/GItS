@@ -133,7 +133,9 @@ def test_meditations_says_the_annotation_was_made_that_fight():
     assert '"2 Annotations you made that fight."' in src
 
 
-# 7. Sakura Seal and Footnote say what their Annotation does -----------------
+# 7. Sakura Seal and Footnote said what their Annotation does; the Yae text
+# audit (2026-10-23, pick 2 (a)) took the parentheses off and left the rule to
+# the Annotation's hover, as Proofread's Reprint and Margin Note's Red Ink -----
 
 def _row(card_id):
     rows = yaml_memo.safe_load((REPO / "docs" / "prototype-surface.yaml")
@@ -142,13 +144,24 @@ def _row(card_id):
     return next(r for r in rows if r["id"] == card_id)
 
 
-def test_sakura_seal_and_footnote_name_what_their_annotation_does():
-    assert _row("proto_ym_sakura_seal")["description"] == (
-        "[gold]Edit[/gold] up to 2 cards in your hand: [gold]Sakura Seal[/gold]"
-        " (when played, plant a [gold]Sakura[/gold]).")
-    assert _row("proto_ym_footnote")["description"] == (
-        "[gold]Edit[/gold] up to 2 cards in your hand: [gold]Footnote[/gold]"
-        " (when played, draw 1 card).")
+def test_the_annotation_hover_carries_the_rule_the_face_dropped():
+    gen = REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype" / "Generated"
+    for card_id, cls, name, member in (
+            ("proto_ym_sakura_seal", "ProtoYmSakuraSeal", "Sakura Seal",
+             "SakuraSeal"),
+            ("proto_ym_footnote", "ProtoYmFootnote", "Footnote", "Footnote"),
+            ("proto_ym_royalties", "ProtoYmRoyalties", "Royalties",
+             "Royalties")):
+        face = _row(card_id)["description"]
+        assert face.endswith(
+            f"cards in your [gold]Hand[/gold]: [gold]{name}[/gold].")
+        assert "(when" not in face
+        src = (gen / f"{cls}.cs").read_text(encoding="utf-8")
+        assert "ArmKeywordTips.ForAnnotation(" in src
+        assert f"YaeAnnotation.{member}, false)" in src
+    # Sakura Seal plants a Sakura, so its face still hovers the Sakura tip.
+    assert "ArmKeywordTips.ForSakura(" in (
+        gen / "ProtoYmSakuraSeal.cs").read_text(encoding="utf-8")
 
 
 # Pick 1 (a), ruled 2026-10-15 ("For 1332 - agreed on (a)"): Bestseller

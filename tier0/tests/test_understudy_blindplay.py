@@ -6641,10 +6641,13 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                    "the last enemy your Attacks hit, else a random enemy."],
         # Review r3 (2026-10-14): plain Tenko, the two kinds, the
         # full-shrine rule, and the Edit tip's two layers.
-        "Tenko": ["Every ", " acts now. Refresh them to at least "],
-        "Foxfire Sakura": [" that hits ALL enemies for ",
-                           " + its Level when it acts."],
-        "Kitsune Sakura": ["A fox decoy ", ". When it acts, you gain "],
+        # The Yae text audit (2026-10-23): Tenko's fix 7, the kinds in
+        # words (pick 3 (a)).
+        "Tenko": ["Every ", " acts now and goes back to at least "],
+        "Foxfire Sakura": [" that deals damage equal to ",
+                           " plus its Level to ALL enemies when it acts."],
+        "Kitsune Sakura": ["A fox decoy ", ". When it acts, you gain ",
+                           "equal to "],
         # Yae review r5, item 5: the long form.
         # The Sakura Levels paper (2026-10-17): Levels carry over.
         "Full shrine": ["Planting makes the Sakura closest to withering "
@@ -6656,7 +6659,7 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
                  "its last. ", "Published ones stay and add up."],
         # 2026-10-14: each Annotation's own row, `YaeAnnotationText.Rule`
         # and `.SakuraRule` (YaeAnnotations.cs).
-        "Red Ink": ["This card deals ", " more damage and gives ",
+        "Red Ink": ["This card deals ", " additional damage and gives ",
                     "'s action is ", "bigger."],
         "Footnote": ["When this card is played, draw 1 card."],
         "Deadline Extension": ["This card has ", " does not wither."],

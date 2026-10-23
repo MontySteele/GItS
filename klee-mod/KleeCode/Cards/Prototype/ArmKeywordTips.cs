@@ -704,8 +704,8 @@ public static class ArmKeywordTips
         With(inherited, TenkoKey, YaeTenkoTip);
 
     public static readonly string YaeTenkoTip =
-        "Every [gold]Sakura[/gold] acts now. Refresh them to at least "
-      + $"{Powers.YaeLaw.SakuraTurns} turns.";
+        "Every [gold]Sakura[/gold] acts now and goes back to at least "
+      + $"{Powers.YaeLaw.SakuraTurns} turns left.";
 
     /// <summary>Review r3: a Foxfire Sakura, named on the card that plants
     /// one (Foxfire Sweep).</summary>
@@ -714,8 +714,8 @@ public static class ArmKeywordTips
         With(inherited, FoxfireSakuraKey, YaeFoxfireSakuraTip);
 
     public static readonly string YaeFoxfireSakuraTip =
-        "A [gold]Sakura[/gold] that hits ALL enemies for "
-      + $"{Powers.YaeLaw.FoxfireBase} + its Level when it acts.";
+        "A [gold]Sakura[/gold] that deals damage equal to "
+      + $"{Powers.YaeLaw.FoxfireBase} plus its Level to ALL enemies when it acts.";
 
     /// <summary>Review r3: the decoy ("Yae does not shield. A fox illusion
     /// draws the blow."), named on Shrine Maiden's Guard.</summary>
@@ -724,8 +724,8 @@ public static class ArmKeywordTips
         With(inherited, KitsuneSakuraKey, YaeKitsuneSakuraTip);
 
     public static readonly string YaeKitsuneSakuraTip =
-        "A fox decoy [gold]Sakura[/gold]. When it acts, you gain "
-      + $"{Powers.YaeLaw.KitsuneBase} + its Level [gold]Block[/gold].";
+        "A fox decoy [gold]Sakura[/gold]. When it acts, you gain [gold]Block[/gold] "
+      + $"equal to {Powers.YaeLaw.KitsuneBase} plus its Level.";
 
     /// <summary>
     /// Review r3 (amended after GPT's review): the full-shrine plant by

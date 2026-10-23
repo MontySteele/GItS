@@ -51,7 +51,7 @@ public sealed class ProtoYmSesshouFang : CustomCardModel, IElementalCard, IChara
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Sesshou Fang"),
-        ("description", "Deal {YmBase:diff()} [gold]Electro[/gold] damage. If a [gold]Sakura[/gold] is Level 3 or higher, deal {YmAmount:diff()} more."),
+        ("description", "Deal {YmBase:diff()} [gold]Electro[/gold] damage. If a [gold]Sakura[/gold] is Level 3 or higher, deal {YmAmount:diff()} additional damage."),
     };
 
     protected override IEnumerable<DynamicVar> CanonicalVars =>
