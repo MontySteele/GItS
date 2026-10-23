@@ -21,23 +21,6 @@ public launch; listen for the modded death sound (`set_hp player 1`).
   summoned Freminet, Furina's eleven guest effects); the Kokomi pet by D-pad; Varka's element-switch hover;
   the drag-aimed reaction preview. Polish only what bothers you.
 
-## Yae and Furina reads, 2026-10-23 (`review/records/yae-suite-2026-10-23.md`, "Deck commonalities"; Furina: `furina-suite-5-2026-10-23.md` on `furina-next`)
-
-1. **Yae: what to trim.** The three wins all drafted a Tenko card and the
-   losses passed theirs; the two biggest runs had Sakura Grove+ (Innate),
-   each Sakura gaining a Level every turn from turn 1 (Sakura damage 81
-   and 115 a fight against 59 without Grove). (a) **default:** Sakura
-   Grove's upgrade gives cost 0 instead of Innate. (b) Thunder Rite, the
-   Common Tenko card offered 12 times in five runs, deals 10 [14] instead
-   of 13 [17]. (c) Leave both; the next Yae round counts Grove Levels at
-   the act 3 boss.
-2. **Furina's HP bar.** The bar's "HP lost" counts the HP Furina Drains
-   herself, which comes back after the fight. With the returned Drain taken
-   out, she loses less HP than the base five in acts 1 and 2 and about the
-   same in act 3. (a) **default:** her bar reads HP lost minus the Drain
-   that returned, and the report prints that column. (b) Keep the bar as
-   it is.
-
 ## Open packets in `review/active/`
 
 - **Character five, two paper kits** (`zhongli-paper-kit-2026-09-28.md`,

@@ -542,3 +542,14 @@ def test_the_schema_names_the_story_keys():
                 "relics_gained", "potions_offered", "character_id"):
         assert f"`{key}`" in readme, key
         assert f'["{key}"]' in cs, key
+
+
+def test_hp_lost_takes_out_the_drain_that_returns():
+    """2026-10-23 ([USER]: "agreed on both defaults"): Furina's HP bar is
+    HP lost less the Drain buffer used, which the curtain call returns."""
+    row = {"hp_lost": 13, "max_hp": 100, "drain_buffer": 19,
+           "drain_buffer_left": 10}
+    assert tr.hp_lost_pct(row) == 4.0
+    row["drain_buffer_left"] = 0                 # more used than was lost
+    assert tr.hp_lost_pct(row) == 0.0
+    assert tr.hp_lost_pct({"hp_lost": 13, "max_hp": 100}) == 13.0

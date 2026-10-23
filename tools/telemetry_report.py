@@ -36,6 +36,11 @@ READ THIS BEFORE USING A FIELD.
     (every character, since 2026-10-10) is the HP once they ran; the `net%`
     column is `hp_start - hp_after_return` over max HP, and is blank on a
     record without the key (or with -1, not read).
+  * The `hp%` column and the bar take out the Drain that returns
+    (2026-10-23, [USER]: "agreed on both defaults"): `hp_lost` less the
+    Drain buffer used, `drain_buffer - drain_buffer_left`, which the
+    curtain call gives back. Only Furina's rows carry the keys, so every
+    other character reads `hp_lost` as before.
   * `run_instance` is `<session stamp>#<ordinal>`, the stamp being the
     second the game process first wrote telemetry. Two lanes started in the
     same second share it, so a run is (`run_id`, `run_instance`), never
@@ -414,13 +419,24 @@ def per_turn(row: dict, key: str) -> float | None:
     return v / turns
 
 
+def drain_returned(row: dict) -> float:
+    """The Drain the curtain call gives back: the buffer used,
+    `drain_buffer - drain_buffer_left` (Furina's rows only; 0 elsewhere)."""
+    buf, left = _num(row, "drain_buffer"), _num(row, "drain_buffer_left")
+    if buf is None or left is None:
+        return 0.0
+    return max(0.0, buf - left)
+
+
 def hp_lost_pct(row: dict) -> float | None:
+    """HP lost as % of max, less the Drain that returns (2026-10-23)."""
     lost, top = _num(row, "hp_lost"), _num(row, "max_hp")
     if lost is None:
         start, end = _num(row, "hp_start"), _num(row, "hp_end")
         lost = start - end if start is not None and end is not None else None
     if lost is None or not top or top <= 0:
         return None
+    lost = max(0.0, lost - drain_returned(row))
     return 100.0 * lost / top
 
 
