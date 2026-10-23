@@ -1886,7 +1886,7 @@ ARM_KEYWORDS: dict[str, str] = {
     # trio, Bow, Cue, Rehearsal, the front performer, Ousia, Pneuma and six
     # guests) left with it; their history is in git.
     # The Spend paper (2026-10-10): "Spend up to X" pays X or all she has.
-    "Spend": ("Pay that much Fanfare. With less, you can't play the card "
+    "Spend": ("Pay that much Fanfare. With less, you cannot play the card "
               "or its Spend mode. "
               "Spend up to X pays X, or all you have if that is less."),
     # The 2026-10-11 playtest: "the tooltips for Fanfare and Drain are
@@ -2504,8 +2504,8 @@ BASE_KEYWORDS: dict[str, str] = {
     # (`LightningOrb`, `DarkOrb`), which `IsPoweredAttack()` refuses, so the
     # page says so. Appended, so the C# twin's anchors still hold.
     "Vulnerable": (
-        f"An attack or card hit on it deals {VULNERABLE_TAKEN_PCT}% more, a "
-        f"Skill's too. A potion's does not. Loses 1 stack at the end of its "
+        f"Takes {VULNERABLE_TAKEN_PCT}% more damage from cards, Skills "
+        f"included, but not from potions. Loses 1 stack at the end of its "
         f"turn. Orb damage is not boosted."),
     # `EB-469`. THE GAME'S OWN STATUS LINE SAYS "Attacks deal 25% less damage
     # for 1 turn", and the Kokomi r15 seat read "Attacks" as the CARD TYPE --
@@ -2518,8 +2518,8 @@ BASE_KEYWORDS: dict[str, str] = {
     # says which, in the mod's own words -- this row and
     # `BaseKeywordTips.ForWeak` are one sentence, pinned to each other.
     "Weak": (
-        f"Every hit the wearer lands, a Skill's too, deals {WEAK_DEALT_PCT}% "
-        f"less. Loses 1 stack at the end of its turn."),
+        f"Deals {WEAK_DEALT_PCT}% less damage with every hit, Skills "
+        f"included. Loses 1 stack at the end of its turn."),
     "Frail": (
         f"The wearer gains {FRAIL_BLOCK_PCT}% less Block. One stack falls "
         f"off at the end of each of its turns."),
@@ -2546,7 +2546,7 @@ BASE_KEYWORDS: dict[str, str] = {
     # that cannot be read by somebody who does not know what Strength is.
     # The Furina full-run round (2026-10-10): and how long it lasts.
     "Strength": ("Adds its amount to every Attack hit the wearer lands. It "
-                 "does not decay; it lasts for the rest of this fight."),
+                 "lasts for the rest of this combat."),
     "Dexterity": ("Adds its amount to every Block the wearer gains. It does "
                   "not decay."),
     # The Repay floor (ruled 2026-10-09): Soothing Waters and Pneuma Tides

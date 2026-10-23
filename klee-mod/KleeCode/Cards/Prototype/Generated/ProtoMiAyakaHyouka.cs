@@ -59,7 +59,7 @@ public sealed class ProtoMiAyakaHyouka : CustomCardModel, IElementalCard, ICompa
     public override List<(string, string)>? Localization => new()
     {
         ("title", "Kamisato Ayaka — Kamisato Art: Hyouka"),
-        ("description", "Deal {CalculatedDamage:diff()} [gold]Cryo[/gold] damage to ALL enemies and apply 1 [gold]Weak[/gold] to each.{InCombat:{VarkaSwitch}|}"),
+        ("description", "Deal {CalculatedDamage:diff()} [gold]Cryo[/gold] damage and apply 1 [gold]Weak[/gold] to ALL enemies.{InCombat:{VarkaSwitch}|}"),
     };
 
     /// <summary>The element this card makes current, on its in-combat line

@@ -1076,7 +1076,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: common, role_c: buffer, element: pyro,
    cost: 0, type: skill,
-   description: "Your next Attack card this turn deals 4 additional damage and is [gold]Pyro[/gold], not its own element. [gold]Electro[/gold] from Sara wins.",
+   description: "Your next Attack this turn deals 4 additional damage and is [gold]Pyro[/gold], not its own element.",
    effects: [{op: apply_power, power: mc_passion_overload, amount: 4, target: self}]}
 
 - {id: proto_mc_dahlia_sacramental_shower, name: "Dahlia — Sacramental Shower", character: klee,
@@ -1155,7 +1155,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 4, rarity: uncommon, role_c: applier, element: pyro,
    cost: 1, type: skill,
-   description: "Enemy loses 3 [gold]Strength[/gold] this turn. The next time an enemy attacks you, deal 8 [gold]Pyro[/gold] damage to ALL enemies.",
+   description: "The enemy loses 3 [gold]Strength[/gold] this turn. The next time an enemy attacks you, deal 8 [gold]Pyro[/gold] damage to ALL enemies.",
    effects: [{op: lose_strength, amount: 3, target: enemy, this_turn: true},
              {op: apply_power, power: mc_baron_bunny, amount: 1, target: self,
               summon_damage: 8}]}
@@ -2346,7 +2346,7 @@
    cost: 1, type: skill, exhaust: true,
    # Plan: for 3 turns, 6 Block at the end of your turn instead of the
    # damage (wording pass 2026-10-15; provenance note).
-   description: "For 3 turns, deal 7 [gold]Geo[/gold] damage to a random enemy at the end of your turn. [gold]Plan[/gold]: Gain 6 [gold]Block[/gold] instead.",
+   description: "For 3 turns, at the end of your turn deal 7 [gold]Geo[/gold] damage to a random enemy. [gold]Plan[/gold]: Gain 6 [gold]Block[/gold] instead.",
    effects: [{op: apply_power, power: mi_juuga, amount: 3, target: self}],
    plan: [{op: juuga_guard, amount: 3}],
    # Kokomi upgrade pass (2026-10-19): 4 turns on both sides (the default
@@ -2435,7 +2435,7 @@
    authored_by: [claude],
    nation: inazuma, star: 4, rarity: common, role_c: buffer, element: electro,
    cost: 0, type: skill,
-   description: "Your next Attack card this turn deals 4 additional damage and is [gold]Electro[/gold], not its own element.",
+   description: "Your next Attack this turn deals 4 additional damage and is [gold]Electro[/gold], not its own element.",
    effects: [{op: apply_power, power: mi_crowfeather, amount: 4, target: self}]}
 
 # Inazuma rework (2026-10-18): the base game's Trip with an Electro rider.
@@ -2483,7 +2483,7 @@
    authored_by: [claude],
    nation: inazuma, star: 5, rarity: uncommon, role_c: applier, element: cryo,
    cost: 1, type: attack,
-   description: "Deal 5 [gold]Cryo[/gold] damage to ALL enemies and apply 1 [gold]Weak[/gold] to each.",
+   description: "Deal 5 [gold]Cryo[/gold] damage and apply 1 [gold]Weak[/gold] to ALL enemies.",
    effects: [{op: damage, amount: 5, target: all_enemies, applies_element: true},
              {op: apply_power, power: weak, amount: 1, target: all_enemies}],
    upgrade: {damage: 3}}
@@ -2593,7 +2593,7 @@
    authored_by: [claude],
    nation: inazuma, star: 5, rarity: rare, role_c: applier, element: electro,
    cost: 3, type: attack,
-   description: "Deal {CalculationBase:diff()} [gold]Electro[/gold] damage to ALL enemies, plus {ExtraDamage:diff()} for each card in your [gold]Hand[/gold]. ALL enemies and you lose {StrengthLoss:diff()} [gold]Strength[/gold] this turn.{InCombat:
+   description: "Deal {CalculationBase:diff()} [gold]Electro[/gold] damage to ALL enemies, plus {ExtraDamage:diff()} for each card in your [gold]Hand[/gold]. You and ALL enemies lose {StrengthLoss:diff()} [gold]Strength[/gold] this turn.{InCombat:
 (Deals {CalculatedDamage:diff()} damage)|}",
    effects: [{op: damage, target: all_enemies, applies_element: true,
               amount_formula: {base: 16, per: 2, count: other_cards_in_hand}},
@@ -2914,7 +2914,7 @@
    authored_by: [claude],
    art_of: clorinde_impale_the_night,
    nation: fontaine, star: 5, rarity: rare, role_c: applier, element: electro, cost: 2, type: attack,
-   description: "Deal 20 [gold]Electro[/gold] damage. Your later Attacks against enemies holding an aura deal 6 additional damage.",
+   description: "Deal 20 [gold]Electro[/gold] damage. This combat, your Attacks against enemies with an aura deal 6 additional damage.",
    effects: [{op: damage, amount: 20, target: enemy, applies_element: true}, {op: apply_power, power: night_vigil, amount: 6, target: self, note: "your Attacks against enemies that have an aura deal +6"}]}
 
 - {id: proto_mf_neuvillette_ancient_sea_authority, name: "Neuvillette — Heir to the Ancient Sea's Authority", character: klee,
@@ -3070,7 +3070,7 @@
    authored_by: [claude],
    nation: mondstadt, star: 5, rarity: rare, role_c: trigger, element: pyro,
    cost: 2, type: power,
-   description: "Whenever you play a [gold]Companion[/gold] card, deal 6 damage of that card's element to a random enemy.",
+   description: "Whenever you play a [gold]Companion[/gold], deal 6 damage of that card's element to a random enemy.",
    effects: [{op: apply_power, power: mc_ladder_of_ascent, amount: 6, target: self}]}
 
 # FURINA, THE SALON'S TAB (2026-10-05): furina-research-proposal sec.16 with

@@ -323,7 +323,7 @@ public sealed class LadderOfAscentPower : PowerModel, ILocalizationProvider
     {
         ("title", "Ladder of Divine Ascent"),
         ("description",
-            "Whenever you play a [gold]Companion[/gold] card, deal "
+            "Whenever you play a [gold]Companion[/gold], deal "
           + "[blue]{Amount}[/blue] damage of that card's element to a random "
           + "enemy."),
     };

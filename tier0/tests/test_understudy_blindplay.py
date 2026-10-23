@@ -6554,7 +6554,7 @@ def test_the_arm_keyword_glossary_is_the_mods_own_tooltip_text():
         # new. The anchors are the prose around the golded spans and the
         # interpolated numerals; the performers' rows are their badges'
         # sentences (`StagePerformerBadge.ActText`, in the badges file).
-        "Spend": ["Pay that much ", ". With less, you can't play ",
+        "Spend": ["Pay that much ", ". With less, you cannot play ",
                   "the card or its Spend mode. "],
         "Fanfare": ["Gain 1 for each HP you lose, ", " included, or ", ". ",
                     " uses it. Resets after each combat."],
@@ -6830,7 +6830,7 @@ def test_the_spend_row_says_she_pays_from_her_fanfare():
         "Deal 7 damage. Spend 3: deal 13 instead."], "Furina"))
     assert "- **Spend** — " in page
     row = blindplay.ARM_KEYWORDS["Spend"]
-    assert row == ("Pay that much Fanfare. With less, you can't play the "
+    assert row == ("Pay that much Fanfare. With less, you cannot play the "
                    "card or its Spend mode. "
                    "Spend up to X pays X, or all you have if that is less.")
     assert row in page
@@ -6838,7 +6838,7 @@ def test_the_spend_row_says_she_pays_from_her_fanfare():
 
     src = (REPO / "klee-mod" / "KleeCode" / "Cards" / "Prototype"
            / "ArmKeywordTips.cs").read_text(encoding="utf-8")
-    for phrase in ("Pay that much ", ". With less, you can't play ",
+    for phrase in ("Pay that much ", ". With less, you cannot play ",
                    "Spend up to X pays X, or all you have if that is less."):
         assert phrase in src, phrase
 
@@ -7492,7 +7492,7 @@ def test_the_reaction_glossary_is_the_games_own_preview_text():
     # row. The text pass of 2026-10-08 moved it off the mod's main preview
     # onto the boss preview, which the mod swaps in for any non-minion in a
     # boss room; the page has no swap, so its row keeps the sentence.
-    assert "a non-minion can't be Frozen" in src
+    assert "a non-minion cannot be Frozen" in src
     assert (blindplay.FROZEN_BOSS_CLAUSE.strip()
             in blindplay.REACTION_KEYWORDS["Frozen"])
     # The interpolated constants, read off the table the C# interpolates from.
@@ -8985,7 +8985,7 @@ def test_a_base_keyword_a_face_names_is_defined_on_the_page():
     page = blindplay.observe(keyword_hand_state(
         ["Apply 1 Vulnerable. Plan: Apply 2 Vulnerable to ALL enemies."]))
     glossary = page.split("## Words on this screen")[1]
-    assert ("- **Vulnerable** — An attack or card hit on it deals 50% more"
+    assert ("- **Vulnerable** — Takes 50% more damage from cards"
             in glossary)
     assert "Loses 1 stack at the end of its turn" in glossary
     # And the Plan tip is still there: two words, two definitions.
@@ -9042,14 +9042,14 @@ def test_the_base_keyword_glossary_is_the_mods_own_tooltip_text():
         # `EB-497` did not read: "every card hit" is complete on an enemy and
         # silent on a player, whose Vulnerable is about a monster's swing.
         # The text pass of 2026-10-08 trimmed it, enemy hits still in scope.
-        "Vulnerable": ["An attack or card hit on it deals 50% more, a Skill's "
-                       "too. A ", "potion's does not. Loses 1 stack at the end "
+        "Vulnerable": ["Takes 50% more damage from cards, Skills included, "
+                       "but not from ", "potions. Loses 1 stack at the end "
                        "of its turn."],
         # `EB-469` put the Skill case in this sentence, in the C# and here in
         # one commit, so the anchor holds the clause that resolves the game's
         # own "Attacks".
         # The text pass of 2026-10-08 trimmed it, the Skill case kept.
-        "Weak": ["Every hit the wearer lands, a Skill's too, deals 25% less. ",
+        "Weak": ["Deals 25% less damage with every hit, Skills included. ",
                  "Loses ", "1 stack at the end of its turn."],
         # The two rows whose clause straddles a `[gold]` span are anchored
         # WITH the markup and folded out on the page side, the same way the
@@ -9058,8 +9058,8 @@ def test_the_base_keyword_glossary_is_the_mods_own_tooltip_text():
                   "off at the end of each of its turns."],
         # The Furina full-run round (2026-10-10): and how long it lasts.
         "Strength": [" hit the wearer ",
-                     "lands. It does not decay; it lasts for the rest of "
-                     "this fight."],
+                     "lands. It lasts for the rest of "
+                     "this combat."],
         "Dexterity": [" the wearer gains. It ", "does not decay."],
         # The Repay floor (ruled 2026-10-09).
         "Vigor": ["Your next Attack deals additional damage."],
